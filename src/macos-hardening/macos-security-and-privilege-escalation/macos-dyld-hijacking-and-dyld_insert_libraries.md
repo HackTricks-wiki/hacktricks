@@ -77,7 +77,7 @@ compatibility version 1.0.0
 {{#endtab}}
 {{#endtabs}}
 
-以前の情報から、**読み込まれたライブラリの署名をチェックしていない**ことと、**次のライブラリを読み込もうとしている**ことがわかります：
+前の情報から、**読み込まれたライブラリの署名をチェックしていない**ことと、**次のライブラリを読み込もうとしている**ことがわかります：
 
 - `/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib`
 - `/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib`
@@ -133,11 +133,11 @@ cp lib.dylib "/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib"
 </code></pre>
 
 > [!NOTE]
-> この脆弱性を悪用してTelegramのカメラ権限を悪用する方法についての良い解説は、[https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)で見つけることができます。
+> この脆弱性を悪用してTelegramのカメラ権限を悪用する方法についての良い記事は、[https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)にあります。
 
 ## 大規模
 
-予期しないバイナリにライブラリを注入しようと計画している場合は、ライブラリがプロセス内で読み込まれるタイミングを確認するためにイベントメッセージをチェックできます（この場合、printfと`/bin/bash`の実行を削除します）。
+予期しないバイナリにライブラリを注入しようと計画している場合は、イベントメッセージを確認して、プロセス内でライブラリが読み込まれるタイミングを特定できます（この場合、printfと`/bin/bash`の実行を削除します）。
 ```bash
 sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "[+] dylib"'
 ```

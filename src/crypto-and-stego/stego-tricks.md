@@ -1,51 +1,42 @@
-# Stego Tricks
+# ステゴトリック
 
 {{#include ../banners/hacktricks-training.md}}
 
-## **Extracting Data from Files**
+## **ファイルからのデータ抽出**
 
 ### **Binwalk**
 
-A tool for searching binary files for embedded hidden files and data. It's installed via `apt` and its source is available on [GitHub](https://github.com/ReFirmLabs/binwalk).
-
+埋め込まれた隠しファイルやデータを探すためのバイナリファイル検索ツールです。`apt`を介してインストールされ、ソースは[GitHub](https://github.com/ReFirmLabs/binwalk)で入手可能です。
 ```bash
 binwalk file # Displays the embedded data
 binwalk -e file # Extracts the data
 binwalk --dd ".*" file # Extracts all data
 ```
-
 ### **Foremost**
 
-Recovers files based on their headers and footers, useful for png images. Installed via `apt` with its source on [GitHub](https://github.com/korczis/foremost).
-
+ヘッダーとフッターに基づいてファイルを回復し、png画像に便利です。`apt`を介してインストールされ、そのソースは[GitHub](https://github.com/korczis/foremost)にあります。
 ```bash
 foremost -i file # Extracts data
 ```
-
 ### **Exiftool**
 
-Helps to view file metadata, available [here](https://www.sno.phy.queensu.ca/~phil/exiftool/).
-
+ファイルメタデータを表示するのに役立ちます。利用可能なリンクは[こちら](https://www.sno.phy.queensu.ca/~phil/exiftool/)です。
 ```bash
 exiftool file # Shows the metadata
 ```
-
 ### **Exiv2**
 
-Similar to exiftool, for metadata viewing. Installable via `apt`, source on [GitHub](https://github.com/Exiv2/exiv2), and has an [official website](http://www.exiv2.org/).
-
+exiftoolと同様に、メタデータの表示に使用されます。`apt`を介してインストール可能で、ソースは[GitHub](https://github.com/Exiv2/exiv2)にあり、[公式ウェブサイト](http://www.exiv2.org/)があります。
 ```bash
 exiv2 file # Shows the metadata
 ```
+### **ファイル**
 
-### **File**
+扱っているファイルの種類を特定します。
 
-Identify the type of file you're dealing with.
+### **文字列**
 
-### **Strings**
-
-Extracts readable strings from files, using various encoding settings to filter the output.
-
+さまざまなエンコーディング設定を使用して、ファイルから読み取り可能な文字列を抽出します。
 ```bash
 strings -n 6 file # Extracts strings with a minimum length of 6
 strings -n 6 file | head -n 20 # First 20 strings
@@ -57,74 +48,65 @@ strings -e b -n 6 file # 16bit strings (big-endian)
 strings -e L -n 6 file # 32bit strings (little-endian)
 strings -e B -n 6 file # 32bit strings (big-endian)
 ```
+### **比較 (cmp)**
 
-### **Comparison (cmp)**
-
-Useful for comparing a modified file with its original version found online.
-
+オンラインで見つかった元のバージョンと修正されたファイルを比較するのに便利です。
 ```bash
 cmp original.jpg stego.jpg -b -l
 ```
+## **テキスト内の隠れたデータの抽出**
 
-## **Extracting Hidden Data in Text**
+### **スペース内の隠れたデータ**
 
-### **Hidden Data in Spaces**
+見た目には空のスペースに隠された情報があるかもしれません。このデータを抽出するには、[https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)を訪れてください。
 
-Invisible characters in seemingly empty spaces may hide information. To extract this data, visit [https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder).
+## **画像からのデータの抽出**
 
-## **Extracting Data from Images**
+### **GraphicMagickを使用した画像詳細の特定**
 
-### **Identifying Image Details with GraphicMagick**
-
-[GraphicMagick](https://imagemagick.org/script/download.php) serves to determine image file types and identify potential corruption. Execute the command below to inspect an image:
-
+[GraphicMagick](https://imagemagick.org/script/download.php)は、画像ファイルの種類を特定し、潜在的な破損を識別するために使用されます。画像を検査するには、以下のコマンドを実行してください：
 ```bash
 ./magick identify -verbose stego.jpg
 ```
-
-To attempt repair on a damaged image, adding a metadata comment might help:
-
+損傷した画像の修復を試みるために、メタデータコメントを追加することが役立つかもしれません:
 ```bash
 ./magick mogrify -set comment 'Extraneous bytes removed' stego.jpg
 ```
+### **データ隠蔽のためのSteghide**
 
-### **Steghide for Data Concealment**
+Steghideは、`JPEG, BMP, WAV, AU`ファイル内にデータを隠すことを容易にし、暗号化されたデータの埋め込みと抽出が可能です。インストールは`apt`を使用して簡単に行え、[ソースコードはGitHubで入手可能です](https://github.com/StefanoDeVuono/steghide)。
 
-Steghide facilitates hiding data within `JPEG, BMP, WAV, and AU` files, capable of embedding and extracting encrypted data. Installation is straightforward using `apt`, and its [source code is available on GitHub](https://github.com/StefanoDeVuono/steghide).
+**コマンド:**
 
-**Commands:**
+- `steghide info file`は、ファイルに隠されたデータが含まれているかどうかを明らかにします。
+- `steghide extract -sf file [--passphrase password]`は、隠されたデータを抽出します。パスワードはオプションです。
 
-- `steghide info file` reveals if a file contains hidden data.
-- `steghide extract -sf file [--passphrase password]` extracts the hidden data, password optional.
+ウェブベースの抽出については、[このウェブサイト](https://futureboy.us/stegano/decinput.html)を訪れてください。
 
-For web-based extraction, visit [this website](https://futureboy.us/stegano/decinput.html).
+**Stegcrackerによるブルートフォース攻撃:**
 
-**Bruteforce Attack with Stegcracker:**
-
-- To attempt password cracking on Steghide, use [stegcracker](https://github.com/Paradoxis/StegCracker.git) as follows:
-
+- Steghideのパスワードクラッキングを試みるには、[stegcracker](https://github.com/Paradoxis/StegCracker.git)を次のように使用します:
 ```bash
 stegcracker <file> [<wordlist>]
 ```
-
 ### **zsteg for PNG and BMP Files**
 
-zsteg specializes in uncovering hidden data in PNG and BMP files. Installation is done via `gem install zsteg`, with its [source on GitHub](https://github.com/zed-0xff/zsteg).
+zstegはPNGおよびBMPファイル内の隠れたデータを発見することに特化しています。インストールは`gem install zsteg`で行い、[GitHubのソース](https://github.com/zed-0xff/zsteg)があります。
 
 **Commands:**
 
-- `zsteg -a file` applies all detection methods on a file.
-- `zsteg -E file` specifies a payload for data extraction.
+- `zsteg -a file`はファイルに対してすべての検出方法を適用します。
+- `zsteg -E file`はデータ抽出のためのペイロードを指定します。
 
 ### **StegoVeritas and Stegsolve**
 
-**stegoVeritas** checks metadata, performs image transformations, and applies LSB brute forcing among other features. Use `stegoveritas.py -h` for a full list of options and `stegoveritas.py stego.jpg` to execute all checks.
+**stegoVeritas**はメタデータをチェックし、画像変換を行い、LSBブルートフォースなどの機能を適用します。オプションの完全なリストは`stegoveritas.py -h`を使用し、すべてのチェックを実行するには`stegoveritas.py stego.jpg`を使用します。
 
-**Stegsolve** applies various color filters to reveal hidden texts or messages within images. It's available on [GitHub](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve).
+**Stegsolve**はさまざまなカラーフィルターを適用して、画像内の隠れたテキストやメッセージを明らかにします。これは[GitHub](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve)で入手可能です。
 
 ### **FFT for Hidden Content Detection**
 
-Fast Fourier Transform (FFT) techniques can unveil concealed content in images. Useful resources include:
+高速フーリエ変換（FFT）技術は、画像内の隠されたコンテンツを明らかにすることができます。役立つリソースには以下が含まれます：
 
 - [EPFL Demo](http://bigwww.epfl.ch/demo/ip/demos/FFT/)
 - [Ejectamenta](https://www.ejectamenta.com/Fourifier-fullscreen/)
@@ -132,20 +114,18 @@ Fast Fourier Transform (FFT) techniques can unveil concealed content in images. 
 
 ### **Stegpy for Audio and Image Files**
 
-Stegpy allows embedding information into image and audio files, supporting formats like PNG, BMP, GIF, WebP, and WAV. It's available on [GitHub](https://github.com/dhsdshdhk/stegpy).
+Stegpyは、PNG、BMP、GIF、WebP、WAVなどの形式をサポートし、画像および音声ファイルに情報を埋め込むことを可能にします。これは[GitHub](https://github.com/dhsdshdhk/stegpy)で入手可能です。
 
 ### **Pngcheck for PNG File Analysis**
 
-To analyze PNG files or to validate their authenticity, use:
-
+PNGファイルを分析したり、その真正性を検証するには、次のコマンドを使用します：
 ```bash
 apt-get install pngcheck
 pngcheck stego.png
 ```
+### **画像分析のための追加ツール**
 
-### **Additional Tools for Image Analysis**
-
-For further exploration, consider visiting:
+さらなる探索のために、以下を訪れることを検討してください：
 
 - [Magic Eye Solver](http://magiceye.ecksdee.co.uk/)
 - [Image Error Level Analysis](https://29a.ch/sandbox/2012/imageerrorlevelanalysis/)
@@ -153,66 +133,60 @@ For further exploration, consider visiting:
 - [OpenStego](https://www.openstego.com/)
 - [DIIT](https://diit.sourceforge.net/)
 
-## **Extracting Data from Audios**
+## **オーディオからのデータ抽出**
 
-**Audio steganography** offers a unique method to conceal information within sound files. Different tools are utilized for embedding or retrieving hidden content.
+**オーディオステガノグラフィ**は、音声ファイル内に情報を隠す独自の方法を提供します。隠されたコンテンツを埋め込むまたは取得するために、さまざまなツールが利用されます。
 
 ### **Steghide (JPEG, BMP, WAV, AU)**
 
-Steghide is a versatile tool designed for hiding data in JPEG, BMP, WAV, and AU files. Detailed instructions are provided in the [stego tricks documentation](stego-tricks.md#steghide).
+Steghideは、JPEG、BMP、WAV、およびAUファイルにデータを隠すために設計された多目的ツールです。詳細な手順は[stego tricks documentation](stego-tricks.md#steghide)に記載されています。
 
 ### **Stegpy (PNG, BMP, GIF, WebP, WAV)**
 
-This tool is compatible with a variety of formats including PNG, BMP, GIF, WebP, and WAV. For more information, refer to [Stegpy's section](stego-tricks.md#stegpy-png-bmp-gif-webp-wav).
+このツールは、PNG、BMP、GIF、WebP、およびWAVを含むさまざまなフォーマットに対応しています。詳細については[Stegpy's section](stego-tricks.md#stegpy-png-bmp-gif-webp-wav)を参照してください。
 
 ### **ffmpeg**
 
-ffmpeg is crucial for assessing the integrity of audio files, highlighting detailed information and pinpointing any discrepancies.
-
+ffmpegは、オーディオファイルの整合性を評価するために重要であり、詳細な情報を強調し、いかなる不一致を特定します。
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
-
 ### **WavSteg (WAV)**
 
-WavSteg excels in concealing and extracting data within WAV files using the least significant bit strategy. It is accessible on [GitHub](https://github.com/ragibson/Steganography#WavSteg). Commands include:
-
+WavStegは、最下位ビット戦略を使用してWAVファイル内にデータを隠蔽および抽出するのに優れています。これは[GitHub](https://github.com/ragibson/Steganography#WavSteg)で入手可能です。コマンドには次が含まれます:
 ```bash
 python3 WavSteg.py -r -b 1 -s soundfile -o outputfile
 
 python3 WavSteg.py -r -b 2 -s soundfile -o outputfile
 ```
-
 ### **Deepsound**
 
-Deepsound allows for the encryption and detection of information within sound files using AES-256. It can be downloaded from [the official page](http://jpinsoft.net/deepsound/download.aspx).
+Deepsoundは、AES-256を使用して音声ファイル内の情報を暗号化および検出することを可能にします。 [公式ページ](http://jpinsoft.net/deepsound/download.aspx)からダウンロードできます。
 
 ### **Sonic Visualizer**
 
-An invaluable tool for visual and analytical inspection of audio files, Sonic Visualizer can unveil hidden elements undetectable by other means. Visit the [official website](https://www.sonicvisualiser.org/) for more.
+音声ファイルの視覚的および分析的検査において非常に貴重なツールであるSonic Visualizerは、他の手段では検出できない隠れた要素を明らかにすることができます。 詳細は[公式ウェブサイト](https://www.sonicvisualiser.org/)をご覧ください。
 
 ### **DTMF Tones - Dial Tones**
 
-Detecting DTMF tones in audio files can be achieved through online tools such as [this DTMF detector](https://unframework.github.io/dtmf-detect/) and [DialABC](http://dialabc.com/sound/detect/index.html).
+音声ファイル内のDTMFトーンを検出するには、[このDTMF検出器](https://unframework.github.io/dtmf-detect/)や[DialABC](http://dialabc.com/sound/detect/index.html)などのオンラインツールを使用できます。
 
 ## **Other Techniques**
 
 ### **Binary Length SQRT - QR Code**
 
-Binary data that squares to a whole number might represent a QR code. Use this snippet to check:
-
+整数に平方するバイナリデータはQRコードを表す可能性があります。これをチェックするには、このスニペットを使用してください：
 ```python
 import math
 math.sqrt(2500) #50
 ```
+バイナリから画像への変換については、[dcode](https://www.dcode.fr/binary-image)を確認してください。QRコードを読むには、[このオンラインバーコードリーダー](https://online-barcode-reader.inliteresearch.com/)を使用してください。
 
-For binary to image conversion, check [dcode](https://www.dcode.fr/binary-image). To read QR codes, use [this online barcode reader](https://online-barcode-reader.inliteresearch.com/).
+### **点字翻訳**
 
-### **Braille Translation**
+点字の翻訳には、[Branah Braille Translator](https://www.branah.com/braille-translator)が優れたリソースです。
 
-For translating Braille, the [Branah Braille Translator](https://www.branah.com/braille-translator) is an excellent resource.
-
-## **References**
+## **参考文献**
 
 - [**https://0xrick.github.io/lists/stego/**](https://0xrick.github.io/lists/stego/)
 - [**https://github.com/DominicBreuker/stego-toolkit**](https://github.com/DominicBreuker/stego-toolkit)

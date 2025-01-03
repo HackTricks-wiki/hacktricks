@@ -2,7 +2,7 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-`/proc` と `/sys` の適切な名前空間の分離なしでの露出は、攻撃面の拡大や情報漏洩を含む重大なセキュリティリスクを引き起こします。これらのディレクトリには、誤って設定されたり、無許可のユーザーによってアクセスされた場合、コンテナの脱出、ホストの変更、またはさらなる攻撃を助ける情報を提供する可能性のある機密ファイルが含まれています。たとえば、`-v /proc:/host/proc` を誤ってマウントすると、そのパスベースの性質により AppArmor の保護を回避し、`/host/proc` が保護されなくなります。
+`/proc` と `/sys` の適切な名前空間の分離なしでの露出は、攻撃面の拡大や情報漏洩を含む重大なセキュリティリスクを引き起こします。これらのディレクトリには、誤って設定されたり、無許可のユーザーによってアクセスされたりすると、コンテナの脱出、ホストの変更、またはさらなる攻撃を助ける情報を提供する可能性のある機密ファイルが含まれています。たとえば、`-v /proc:/host/proc` を誤ってマウントすると、そのパスベースの性質により AppArmor の保護を回避し、`/host/proc` が保護されない状態になります。
 
 **各潜在的脆弱性の詳細は** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**で確認できます。**
 
@@ -47,7 +47,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # modprobe へのアクセスを確認
 
 #### **`/proc/sys/fs/binfmt_misc`**
 
-- マジックナンバーに基づいて非ネイティブバイナリ形式のインタプリタを登録できます。
+- マジックナンバーに基づいて非ネイティブバイナリ形式のインタープリタを登録できます。
 - `/proc/sys/fs/binfmt_misc/register` が書き込み可能な場合、特権昇格やルートシェルアクセスにつながる可能性があります。
 - 関連するエクスプロイトと説明:
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
@@ -62,7 +62,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # modprobe へのアクセスを確認
 
 #### **`/proc/sysrq-trigger`**
 
-- Sysrq コマンドを呼び出すことができ、即座にシステムを再起動したり、他の重要なアクションを引き起こす可能性があります。
+- Sysrq コマンドを呼び出すことができ、即座にシステムを再起動したり、他の重要なアクションを引き起こしたりする可能性があります。
 - **ホストを再起動する例**:
 
 ```bash
@@ -118,7 +118,7 @@ echo b > /proc/sysrq-trigger # ホストを再起動
 
 #### **`/sys/kernel/uevent_helper`**
 
-- カーネルデバイスの `uevents` を処理するために使用されます。
+- カーネルデバイス `uevents` を処理するために使用されます。
 - `/sys/kernel/uevent_helper` への書き込みは、`uevent` トリガー時に任意のスクリプトを実行する可能性があります。
 - **悪用の例**: %%%bash
 
@@ -152,13 +152,13 @@ cat /output %%%
 
 #### **`/sys/kernel/security`**
 
-- `securityfs` インターフェースを持ち、AppArmor のような Linux セキュリティモジュールの設定を許可します。
+- `securityfs` インターフェースを保持し、AppArmor のような Linux セキュリティモジュールの設定を許可します。
 - アクセスにより、コンテナがその MAC システムを無効にする可能性があります。
 
 #### **`/sys/firmware/efi/vars` と `/sys/firmware/efi/efivars`**
 
 - NVRAM 内の EFI 変数と対話するためのインターフェースを公開します。
-- 誤設定や悪用により、ラップトップがブリックされたり、ホストマシンが起動不能になる可能性があります。
+- 誤設定や悪用により、ラップトップがブリックされたり、ホストマシンが起動不能になったりする可能性があります。
 
 #### **`/sys/kernel/debug`**
 

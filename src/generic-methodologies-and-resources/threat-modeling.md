@@ -1,111 +1,111 @@
-# Threat Modeling
+# 脅威モデリング
 
-## Threat Modeling
+## 脅威モデリング
 
-Welcome to HackTricks' comprehensive guide on Threat Modeling! Embark on an exploration of this critical aspect of cybersecurity, where we identify, understand, and strategize against potential vulnerabilities in a system. This thread serves as a step-by-step guide packed with real-world examples, helpful software, and easy-to-understand explanations. Ideal for both novices and experienced practitioners looking to fortify their cybersecurity defenses.
+HackTricksの脅威モデリングに関する包括的なガイドへようこそ！サイバーセキュリティのこの重要な側面を探求し、システム内の潜在的な脆弱性を特定、理解、戦略を立てます。このスレッドは、実世界の例、役立つソフトウェア、わかりやすい説明が詰まったステップバイステップのガイドとして機能します。初心者と経験豊富な実践者の両方にとって、サイバーセキュリティ防御を強化するのに理想的です。
 
-### Commonly Used Scenarios
+### 一般的に使用されるシナリオ
 
-1. **Software Development**: As part of the Secure Software Development Life Cycle (SSDLC), threat modeling helps in **identifying potential sources of vulnerabilities** in the early stages of development.
-2. **Penetration Testing**: The Penetration Testing Execution Standard (PTES) framework requires **threat modeling to understand the system's vulnerabilities** before carrying out the test.
+1. **ソフトウェア開発**: セキュアソフトウェア開発ライフサイクル（SSDLC）の一環として、脅威モデリングは**開発の初期段階で潜在的な脆弱性の源を特定する**のに役立ちます。
+2. **ペネトレーションテスト**: ペネトレーションテスト実行標準（PTES）フレームワークは、テストを実施する前に**システムの脆弱性を理解するための脅威モデリング**を要求します。
 
-### Threat Model in a Nutshell
+### 脅威モデルの概要
 
-A Threat Model is typically represented as a diagram, image, or some other form of visual illustration that depicts the planned architecture or existing build of an application. It bears resemblance to a **data flow diagram**, but the key distinction lies in its security-oriented design.
+脅威モデルは通常、アプリケーションの計画されたアーキテクチャまたは既存のビルドを示す図、画像、または他の形式の視覚的なイラストとして表現されます。これは**データフローダイアグラム**に似ていますが、重要な違いはそのセキュリティ指向の設計にあります。
 
-Threat models often feature elements marked in red, symbolizing potential vulnerabilities, risks, or barriers. To streamline the process of risk identification, the CIA (Confidentiality, Integrity, Availability) triad is employed, forming the basis of many threat modeling methodologies, with STRIDE being one of the most common. However, the chosen methodology can vary depending on the specific context and requirements.
+脅威モデルには、潜在的な脆弱性、リスク、または障壁を象徴する赤でマークされた要素がしばしば含まれています。リスク特定のプロセスを簡素化するために、CIA（機密性、完全性、可用性）トライアドが使用され、多くの脅威モデリング手法の基礎を形成しています。STRIDEは最も一般的なものの一つです。ただし、選択された手法は特定の文脈や要件に応じて異なる場合があります。
 
-### The CIA Triad
+### CIAトライアド
 
-The CIA Triad is a widely recognized model in the field of information security, standing for Confidentiality, Integrity, and Availability. These three pillars form the foundation upon which many security measures and policies are built, including threat modeling methodologies.
+CIAトライアドは、情報セキュリティの分野で広く認識されているモデルで、機密性、完全性、可用性を表します。この3つの柱は、多くのセキュリティ対策やポリシーが構築される基盤を形成し、脅威モデリング手法も含まれます。
 
-1. **Confidentiality**: Ensuring that the data or system is not accessed by unauthorized individuals. This is a central aspect of security, requiring appropriate access controls, encryption, and other measures to prevent data breaches.
-2. **Integrity**: The accuracy, consistency, and trustworthiness of the data over its lifecycle. This principle ensures that the data is not altered or tampered with by unauthorized parties. It often involves checksums, hashing, and other data verification methods.
-3. **Availability**: This ensures that data and services are accessible to authorized users when needed. This often involves redundancy, fault tolerance, and high-availability configurations to keep systems running even in the face of disruptions.
+1. **機密性**: データやシステムが不正な個人によってアクセスされないことを保証します。これはセキュリティの中心的な側面であり、データ侵害を防ぐために適切なアクセス制御、暗号化、その他の対策が必要です。
+2. **完全性**: データの正確性、一貫性、信頼性をそのライフサイクル全体にわたって保証します。この原則は、データが不正な当事者によって変更または改ざんされないことを確保します。通常、チェックサム、ハッシュ、その他のデータ検証方法が含まれます。
+3. **可用性**: データとサービスが必要なときに正当なユーザーにアクセス可能であることを保証します。これは、冗長性、フォールトトレランス、高可用性構成を含むことが多く、システムが中断に直面しても稼働し続けることを可能にします。
 
-### Threat Modeling Methodlogies
+### 脅威モデリング手法
 
-1. **STRIDE**: Developed by Microsoft, STRIDE is an acronym for **Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, and Elevation of Privilege**. Each category represents a type of threat, and this methodology is commonly used in the design phase of a program or system to identify potential threats.
-2. **DREAD**: This is another methodology from Microsoft used for risk assessment of identified threats. DREAD stands for **Damage potential, Reproducibility, Exploitability, Affected users, and Discoverability**. Each of these factors is scored, and the result is used to prioritize identified threats.
-3. **PASTA** (Process for Attack Simulation and Threat Analysis): This is a seven-step, **risk-centric** methodology. It includes defining and identifying security objectives, creating a technical scope, application decomposition, threat analysis, vulnerability analysis, and risk/triage assessment.
-4. **Trike**: This is a risk-based methodology that focuses on defending assets. It starts from a **risk management** perspective and looks at threats and vulnerabilities in that context.
-5. **VAST** (Visual, Agile, and Simple Threat modeling): This approach aims to be more accessible and integrates into Agile development environments. It combines elements from the other methodologies and focuses on **visual representations of threats**.
-6. **OCTAVE** (Operationally Critical Threat, Asset, and Vulnerability Evaluation): Developed by the CERT Coordination Center, this framework is geared toward **organizational risk assessment rather than specific systems or software**.
+1. **STRIDE**: Microsoftによって開発されたSTRIDEは、**なりすまし、改ざん、否認、情報開示、サービス拒否、特権昇格**の頭字語です。各カテゴリは脅威のタイプを表し、この手法はプログラムやシステムの設計段階で潜在的な脅威を特定するために一般的に使用されます。
+2. **DREAD**: これは、特定された脅威のリスク評価に使用されるMicrosoftの別の手法です。DREADは、**損害の可能性、再現性、悪用可能性、影響を受けるユーザー、発見可能性**の頭字語です。これらの要素はそれぞれスコア付けされ、その結果は特定された脅威の優先順位付けに使用されます。
+3. **PASTA**（攻撃シミュレーションと脅威分析のプロセス）: これは7ステップの**リスク中心**の手法です。セキュリティ目標の定義と特定、技術的範囲の作成、アプリケーションの分解、脅威分析、脆弱性分析、リスク/トリアージ評価が含まれます。
+4. **Trike**: これは資産を防御することに焦点を当てたリスクベースの手法です。**リスク管理**の視点から始まり、その文脈で脅威と脆弱性を見ます。
+5. **VAST**（視覚的、アジャイル、シンプルな脅威モデリング）: このアプローチは、よりアクセスしやすく、アジャイル開発環境に統合されることを目指しています。他の手法の要素を組み合わせ、**脅威の視覚的表現**に焦点を当てています。
+6. **OCTAVE**（運用上重要な脅威、資産、脆弱性評価）: CERTコーディネーションセンターによって開発されたこのフレームワークは、**特定のシステムやソフトウェアではなく、組織のリスク評価**に向けられています。
 
-## Tools
+## ツール
 
-There are several tools and software solutions available that can **assist** with the creation and management of threat models. Here are a few you might consider.
+脅威モデルの作成と管理を**支援**するためのツールやソフトウェアソリューションがいくつかあります。以下は、検討すべきいくつかのツールです。
 
 ### [SpiderSuite](https://github.com/3nock/SpiderSuite)
 
-An advance cross-platform and multi-feature GUI web spider/crawler for cyber security professionals. Spider Suite can be used for attack surface mapping and analysis.
+サイバーセキュリティ専門家向けの高度なクロスプラットフォームおよび多機能GUIウェブスパイダー/クローラーです。Spider Suiteは攻撃面のマッピングと分析に使用できます。
 
-**Usage**
+**使用法**
 
-1. Pick a URL and Crawl
+1. URLを選択し、クロール
 
 <figure><img src="../images/threatmodel_spidersuite_1.png" alt=""><figcaption></figcaption></figure>
 
-2. View Graph
+2. グラフを表示
 
 <figure><img src="../images/threatmodel_spidersuite_2.png" alt=""><figcaption></figcaption></figure>
 
 ### [OWASP Threat Dragon](https://github.com/OWASP/threat-dragon/releases)
 
-An open-source project from OWASP, Threat Dragon is both a web and desktop application that includes system diagramming as well as a rule engine to auto-generate threats/mitigations.
+OWASPのオープンソースプロジェクトであるThreat Dragonは、システムダイアグラム作成と脅威/緩和策を自動生成するルールエンジンを含むウェブおよびデスクトップアプリケーションです。
 
-**Usage**
+**使用法**
 
-1. Create New Project
+1. 新しいプロジェクトを作成
 
 <figure><img src="../images/create_new_project_1.jpg" alt=""><figcaption></figcaption></figure>
 
-Sometimes it could look like this:
+時にはこのように見えることもあります：
 
 <figure><img src="../images/1_threatmodel_create_project.jpg" alt=""><figcaption></figcaption></figure>
 
-2. Launch New Project
+2. 新しいプロジェクトを開始
 
 <figure><img src="../images/launch_new_project_2.jpg" alt=""><figcaption></figcaption></figure>
 
-3. Save The New Project
+3. 新しいプロジェクトを保存
 
 <figure><img src="../images/save_new_project.jpg" alt=""><figcaption></figcaption></figure>
 
-4. Create your model
+4. モデルを作成
 
-You can use tools like SpiderSuite Crawler to give you inspiration, a basic model would look something like this
+SpiderSuite Crawlerのようなツールを使ってインスピレーションを得ることができます。基本的なモデルは次のようになります。
 
 <figure><img src="../images/0_basic_threat_model.jpg" alt=""><figcaption></figcaption></figure>
 
-Just a little bit of explanation about the entities:
+エンティティについての簡単な説明：
 
-- Process (The entity itself such as Webserver or web functionality)
-- Actor (A Person such as a Website Visitor, User or Administrator)
-- Data Flow Line (Indicator of Interaction)
-- Trust Boundary (Different network segments or scopes.)
-- Store (Things where data are stored at such as Databases)
+- プロセス（Webサーバーやウェブ機能などのエンティティ自体）
+- アクター（ウェブサイト訪問者、ユーザー、管理者などの人）
+- データフローライン（相互作用の指標）
+- 信頼境界（異なるネットワークセグメントやスコープ）
+- ストア（データが保存される場所、例えばデータベース）
 
-5. Create a Threat (Step 1)
+5. 脅威を作成（ステップ1）
 
-First you have to pick the layer you wish to add a threat to
+脅威を追加したいレイヤーを選択する必要があります。
 
 <figure><img src="../images/3_threatmodel_chose-threat-layer.jpg" alt=""><figcaption></figcaption></figure>
 
-Now you can create the threat
+脅威を作成できます。
 
 <figure><img src="../images/4_threatmodel_create-threat.jpg" alt=""><figcaption></figcaption></figure>
 
-Keep in mind that there is a difference between Actor Threats and Process Threats. If you would add a threat to an Actor then you will only be able to choose "Spoofing" and "Repudiation. However in our example we add threat to a Process entity so we will see this in the threat creation box:
+アクター脅威とプロセス脅威の違いを考慮してください。アクターに脅威を追加する場合、「なりすまし」と「否認」しか選択できません。しかし、私たちの例ではプロセスエンティティに脅威を追加するので、脅威作成ボックスでは次のように表示されます：
 
 <figure><img src="../images/2_threatmodel_type-option.jpg" alt=""><figcaption></figcaption></figure>
 
-6. Done
+6. 完了
 
-Now your finished model should look something like this. And this is how you make a simple threat model with OWASP Threat Dragon.
+完成したモデルは次のようになります。これがOWASP Threat Dragonを使用してシンプルな脅威モデルを作成する方法です。
 
 <figure><img src="../images/threat_model_finished.jpg" alt=""><figcaption></figcaption></figure>
 
 ### [Microsoft Threat Modeling Tool](https://aka.ms/threatmodelingtool)
 
-This is a free tool from Microsoft that helps in finding threats in the design phase of software projects. It uses the STRIDE methodology and is particularly suitable for those developing on Microsoft's stack.
+これは、ソフトウェアプロジェクトの設計段階で脅威を見つけるのに役立つMicrosoftの無料ツールです。STRIDE手法を使用しており、特にMicrosoftのスタックで開発している人に適しています。

@@ -1,173 +1,143 @@
-# Checklist - Linux Privilege Escalation
+# チェックリスト - Linux特権昇格
 
 {{#include ../banners/hacktricks-training.md}}
 
-<figure><img src="../images/image (3).png" alt=""><figcaption></figcaption></figure>
+### **Linuxローカル特権昇格ベクトルを探すための最良のツール:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
 
-Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
+### [システム情報](privilege-escalation/#system-information)
 
-**Hacking Insights**\
-Engage with content that delves into the thrill and challenges of hacking
+- [ ] **OS情報**を取得
+- [ ] [**PATH**](privilege-escalation/#path)を確認し、**書き込み可能なフォルダー**はありますか？
+- [ ] [**env変数**](privilege-escalation/#env-info)を確認し、機密情報はありますか？
+- [ ] [**カーネルエクスプロイト**](privilege-escalation/#kernel-exploits)を**スクリプトを使用して**検索（DirtyCow？）
+- [ ] [**sudoバージョン**が脆弱かどうか](privilege-escalation/#sudo-version)を**確認**
+- [ ] [**Dmesg**の署名検証に失敗しました](privilege-escalation/#dmesg-signature-verification-failed)
+- [ ] さらなるシステム列挙（[日付、システム統計、CPU情報、プリンター](privilege-escalation/#more-system-enumeration)）
+- [ ] [さらなる防御を列挙](privilege-escalation/#enumerate-possible-defenses)
 
-**Real-Time Hack News**\
-Keep up-to-date with fast-paced hacking world through real-time news and insights
+### [ドライブ](privilege-escalation/#drives)
 
-**Latest Announcements**\
-Stay informed with the newest bug bounties launching and crucial platform updates
+- [ ] **マウントされた**ドライブをリスト
+- [ ] **アンマウントされたドライブはありますか？**
+- [ ] **fstabにクレデンシャルはありますか？**
 
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
+### [**インストールされたソフトウェア**](privilege-escalation/#installed-software)
 
-### **Best tool to look for Linux local privilege escalation vectors:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
+- [ ] **インストールされた**[ **便利なソフトウェア**](privilege-escalation/#useful-software)を**確認**
+- [ ] **インストールされた**[ **脆弱なソフトウェア**](privilege-escalation/#vulnerable-software-installed)を**確認**
 
-### [System Information](privilege-escalation/#system-information)
+### [プロセス](privilege-escalation/#processes)
 
-- [ ] Get **OS information**
-- [ ] Check the [**PATH**](privilege-escalation/#path), any **writable folder**?
-- [ ] Check [**env variables**](privilege-escalation/#env-info), any sensitive detail?
-- [ ] Search for [**kernel exploits**](privilege-escalation/#kernel-exploits) **using scripts** (DirtyCow?)
-- [ ] **Check** if the [**sudo version** is vulnerable](privilege-escalation/#sudo-version)
-- [ ] [**Dmesg** signature verification failed](privilege-escalation/#dmesg-signature-verification-failed)
-- [ ] More system enum ([date, system stats, cpu info, printers](privilege-escalation/#more-system-enumeration))
-- [ ] [Enumerate more defenses](privilege-escalation/#enumerate-possible-defenses)
+- [ ] **不明なソフトウェアが実行されていますか？**
+- [ ] **必要以上の特権で実行されているソフトウェアはありますか？**
+- [ ] **実行中のプロセスのエクスプロイトを検索**（特に実行中のバージョン）。
+- [ ] **実行中のプロセスのバイナリを変更**できますか？
+- [ ] **プロセスを監視**し、興味深いプロセスが頻繁に実行されているか確認します。
+- [ ] **興味深いプロセスメモリを**（パスワードが保存されている可能性がある場所）**読み取る**ことができますか？
 
-### [Drives](privilege-escalation/#drives)
+### [スケジュールされた/cronジョブ？](privilege-escalation/#scheduled-jobs)
 
-- [ ] **List mounted** drives
-- [ ] **Any unmounted drive?**
-- [ ] **Any creds in fstab?**
+- [ ] [**PATH**](privilege-escalation/#cron-path)がcronによって変更されており、**書き込み**できるか？
+- [ ] cronジョブに**ワイルドカード**はありますか？[**ワイルドカードインジェクション**](privilege-escalation/#cron-using-a-script-with-a-wildcard-wildcard-injection)
+- [ ] **変更可能なスクリプト**が**実行されている**か、**変更可能なフォルダー**内にありますか？
+- [ ] **スクリプトが非常に頻繁に実行されている**ことを検出しましたか？（毎分1回、2回、または5回）
 
-### [**Installed Software**](privilege-escalation/#installed-software)
+### [サービス](privilege-escalation/#services)
 
-- [ ] **Check for**[ **useful software**](privilege-escalation/#useful-software) **installed**
-- [ ] **Check for** [**vulnerable software**](privilege-escalation/#vulnerable-software-installed) **installed**
+- [ ] **書き込み可能な.service**ファイルはありますか？
+- [ ] **サービスによって実行される書き込み可能なバイナリ**はありますか？
+- [ ] **systemd PATH内の書き込み可能なフォルダー**はありますか？
 
-### [Processes](privilege-escalation/#processes)
+### [タイマー](privilege-escalation/#timers)
 
-- [ ] Is any **unknown software running**?
-- [ ] Is any software running with **more privileges than it should have**?
-- [ ] Search for **exploits of running processes** (especially the version running).
-- [ ] Can you **modify the binary** of any running process?
-- [ ] **Monitor processes** and check if any interesting process is running frequently.
-- [ ] Can you **read** some interesting **process memory** (where passwords could be saved)?
+- [ ] **書き込み可能なタイマー**はありますか？
 
-### [Scheduled/Cron jobs?](privilege-escalation/#scheduled-jobs)
+### [ソケット](privilege-escalation/#sockets)
 
-- [ ] Is the [**PATH** ](privilege-escalation/#cron-path)being modified by some cron and you can **write** in it?
-- [ ] Any [**wildcard** ](privilege-escalation/#cron-using-a-script-with-a-wildcard-wildcard-injection)in a cron job?
-- [ ] Some [**modifiable script** ](privilege-escalation/#cron-script-overwriting-and-symlink)is being **executed** or is inside **modifiable folder**?
-- [ ] Have you detected that some **script** could be or are being [**executed** very **frequently**](privilege-escalation/#frequent-cron-jobs)? (every 1, 2 or 5 minutes)
-
-### [Services](privilege-escalation/#services)
-
-- [ ] Any **writable .service** file?
-- [ ] Any **writable binary** executed by a **service**?
-- [ ] Any **writable folder in systemd PATH**?
-
-### [Timers](privilege-escalation/#timers)
-
-- [ ] Any **writable timer**?
-
-### [Sockets](privilege-escalation/#sockets)
-
-- [ ] Any **writable .socket** file?
-- [ ] Can you **communicate with any socket**?
-- [ ] **HTTP sockets** with interesting info?
+- [ ] **書き込み可能な.socket**ファイルはありますか？
+- [ ] **任意のソケットと通信**できますか？
+- [ ] **興味深い情報を持つHTTPソケット**はありますか？
 
 ### [D-Bus](privilege-escalation/#d-bus)
 
-- [ ] Can you **communicate with any D-Bus**?
+- [ ] **任意のD-Busと通信**できますか？
 
-### [Network](privilege-escalation/#network)
+### [ネットワーク](privilege-escalation/#network)
 
-- [ ] Enumerate the network to know where you are
-- [ ] **Open ports you couldn't access before** getting a shell inside the machine?
-- [ ] Can you **sniff traffic** using `tcpdump`?
+- [ ] ネットワークを列挙して、どこにいるかを知る
+- [ ] **シェルを取得する前にアクセスできなかったオープンポート**はありますか？
+- [ ] `tcpdump`を使用して**トラフィックをスニッフィング**できますか？
 
-### [Users](privilege-escalation/#users)
+### [ユーザー](privilege-escalation/#users)
 
-- [ ] Generic users/groups **enumeration**
-- [ ] Do you have a **very big UID**? Is the **machine** **vulnerable**?
-- [ ] Can you [**escalate privileges thanks to a group**](privilege-escalation/interesting-groups-linux-pe/) you belong to?
-- [ ] **Clipboard** data?
-- [ ] Password Policy?
-- [ ] Try to **use** every **known password** that you have discovered previously to login **with each** possible **user**. Try to login also without a password.
+- [ ] 一般的なユーザー/グループの**列挙**
+- [ ] **非常に大きなUID**を持っていますか？ **マシンは脆弱ですか？**
+- [ ] **所属するグループ**のおかげで[**特権を昇格**](privilege-escalation/interesting-groups-linux-pe/)できますか？
+- [ ] **クリップボード**データは？
+- [ ] パスワードポリシーは？
+- [ ] **以前に発見したすべての既知のパスワードを使用して、各**可能な**ユーザー**でログインを試みます。パスワードなしでのログインも試みてください。
 
-### [Writable PATH](privilege-escalation/#writable-path-abuses)
+### [書き込み可能なPATH](privilege-escalation/#writable-path-abuses)
 
-- [ ] If you have **write privileges over some folder in PATH** you may be able to escalate privileges
+- [ ] **PATH内のフォルダーに書き込み権限がある場合、特権を昇格できる可能性があります**
 
-### [SUDO and SUID commands](privilege-escalation/#sudo-and-suid)
+### [SUDOおよびSUIDコマンド](privilege-escalation/#sudo-and-suid)
 
-- [ ] Can you execute **any command with sudo**? Can you use it to READ, WRITE or EXECUTE anything as root? ([**GTFOBins**](https://gtfobins.github.io))
-- [ ] Is any **exploitable SUID binary**? ([**GTFOBins**](https://gtfobins.github.io))
-- [ ] Are [**sudo** commands **limited** by **path**? can you **bypass** the restrictions](privilege-escalation/#sudo-execution-bypassing-paths)?
-- [ ] [**Sudo/SUID binary without path indicated**](privilege-escalation/#sudo-command-suid-binary-without-command-path)?
-- [ ] [**SUID binary specifying path**](privilege-escalation/#suid-binary-with-command-path)? Bypass
-- [ ] [**LD_PRELOAD vuln**](privilege-escalation/#ld_preload)
-- [ ] [**Lack of .so library in SUID binary**](privilege-escalation/#suid-binary-so-injection) from a writable folder?
-- [ ] [**SUDO tokens available**](privilege-escalation/#reusing-sudo-tokens)? [**Can you create a SUDO token**](privilege-escalation/#var-run-sudo-ts-less-than-username-greater-than)?
-- [ ] Can you [**read or modify sudoers files**](privilege-escalation/#etc-sudoers-etc-sudoers-d)?
-- [ ] Can you [**modify /etc/ld.so.conf.d/**](privilege-escalation/#etc-ld-so-conf-d)?
-- [ ] [**OpenBSD DOAS**](privilege-escalation/#doas) command
+- [ ] **sudoで任意のコマンドを実行**できますか？ rootとして何かをREAD、WRITE、またはEXECUTEできますか？ ([**GTFOBins**](https://gtfobins.github.io))
+- [ ] **エクスプロイト可能なSUIDバイナリ**はありますか？ ([**GTFOBins**](https://gtfobins.github.io))
+- [ ] [**sudo**コマンドは**パス**によって**制限されています**か？制限を**バイパス**できますか](privilege-escalation/#sudo-execution-bypassing-paths)?
+- [ ] [**パスが指定されていないSudo/SUIDバイナリ**](privilege-escalation/#sudo-command-suid-binary-without-command-path)はありますか？
+- [ ] [**パスを指定したSUIDバイナリ**](privilege-escalation/#suid-binary-with-command-path)？ バイパス
+- [ ] [**LD_PRELOAD脆弱性**](privilege-escalation/#ld_preload)
+- [ ] **書き込み可能なフォルダーからのSUIDバイナリにおける.soライブラリの欠如**はありますか？ 
+- [ ] [**SUDOトークンが利用可能**](privilege-escalation/#reusing-sudo-tokens)ですか？ [**SUDOトークンを作成できますか**](privilege-escalation/#var-run-sudo-ts-less-than-username-greater-than)?
+- [ ] [**sudoersファイルを読み取るまたは変更する**](privilege-escalation/#etc-sudoers-etc-sudoers-d)ことができますか？
+- [ ] [**/etc/ld.so.conf.d/**を**変更**できますか](privilege-escalation/#etc-ld-so-conf-d)?
+- [ ] [**OpenBSD DOAS**](privilege-escalation/#doas)コマンド
 
-### [Capabilities](privilege-escalation/#capabilities)
+### [能力](privilege-escalation/#capabilities)
 
-- [ ] Has any binary any **unexpected capability**?
+- [ ] どのバイナリにも**予期しない能力**がありますか？
 
-### [ACLs](privilege-escalation/#acls)
+### [ACL](privilege-escalation/#acls)
 
-- [ ] Has any file any **unexpected ACL**?
+- [ ] どのファイルにも**予期しないACL**がありますか？
 
-### [Open Shell sessions](privilege-escalation/#open-shell-sessions)
+### [オープンシェルセッション](privilege-escalation/#open-shell-sessions)
 
 - [ ] **screen**
 - [ ] **tmux**
 
 ### [SSH](privilege-escalation/#ssh)
 
-- [ ] **Debian** [**OpenSSL Predictable PRNG - CVE-2008-0166**](privilege-escalation/#debian-openssl-predictable-prng-cve-2008-0166)
-- [ ] [**SSH Interesting configuration values**](privilege-escalation/#ssh-interesting-configuration-values)
+- [ ] **Debian** [**OpenSSL予測可能PRNG - CVE-2008-0166**](privilege-escalation/#debian-openssl-predictable-prng-cve-2008-0166)
+- [ ] [**SSHの興味深い設定値**](privilege-escalation/#ssh-interesting-configuration-values)
 
-### [Interesting Files](privilege-escalation/#interesting-files)
+### [興味深いファイル](privilege-escalation/#interesting-files)
 
-- [ ] **Profile files** - Read sensitive data? Write to privesc?
-- [ ] **passwd/shadow files** - Read sensitive data? Write to privesc?
-- [ ] **Check commonly interesting folders** for sensitive data
-- [ ] **Weird Location/Owned files,** you may have access to or alter executable files
-- [ ] **Modified** in last mins
-- [ ] **Sqlite DB files**
-- [ ] **Hidden files**
-- [ ] **Script/Binaries in PATH**
-- [ ] **Web files** (passwords?)
-- [ ] **Backups**?
-- [ ] **Known files that contains passwords**: Use **Linpeas** and **LaZagne**
-- [ ] **Generic search**
+- [ ] **プロファイルファイル** - 機密データを読み取る？ privescに書き込む？
+- [ ] **passwd/shadowファイル** - 機密データを読み取る？ privescに書き込む？
+- [ ] 機密データのために**一般的に興味深いフォルダー**を確認
+- [ ] **奇妙な場所/所有ファイル、**アクセスできるか、実行可能ファイルを変更できるかもしれません
+- [ ] **最後の数分で変更された**
+- [ ] **Sqlite DBファイル**
+- [ ] **隠しファイル**
+- [ ] **PATH内のスクリプト/バイナリ**
+- [ ] **Webファイル**（パスワード？）
+- [ ] **バックアップ**？
+- [ ] **パスワードを含む既知のファイル**: **Linpeas**と**LaZagne**を使用
+- [ ] **一般的な検索**
 
-### [**Writable Files**](privilege-escalation/#writable-files)
+### [**書き込み可能なファイル**](privilege-escalation/#writable-files)
 
-- [ ] **Modify python library** to execute arbitrary commands?
-- [ ] Can you **modify log files**? **Logtotten** exploit
-- [ ] Can you **modify /etc/sysconfig/network-scripts/**? Centos/Redhat exploit
-- [ ] Can you [**write in ini, int.d, systemd or rc.d files**](privilege-escalation/#init-init-d-systemd-and-rc-d)?
+- [ ] **任意のコマンドを実行するためにpythonライブラリを変更**できますか？
+- [ ] **ログファイルを変更**できますか？ **Logtotten**エクスプロイト
+- [ ] **/etc/sysconfig/network-scripts/**を**変更**できますか？ Centos/Redhatエクスプロイト
+- [ ] [**ini、int.d、systemdまたはrc.dファイルに書き込む**](privilege-escalation/#init-init-d-systemd-and-rc-d)ことができますか？
 
-### [**Other tricks**](privilege-escalation/#other-tricks)
+### [**その他のトリック**](privilege-escalation/#other-tricks)
 
-- [ ] Can you [**abuse NFS to escalate privileges**](privilege-escalation/#nfs-privilege-escalation)?
-- [ ] Do you need to [**escape from a restrictive shell**](privilege-escalation/#escaping-from-restricted-shells)?
-
-<figure><img src="../images/image (3).png" alt=""><figcaption></figcaption></figure>
-
-Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
-
-**Hacking Insights**\
-Engage with content that delves into the thrill and challenges of hacking
-
-**Real-Time Hack News**\
-Keep up-to-date with fast-paced hacking world through real-time news and insights
-
-**Latest Announcements**\
-Stay informed with the newest bug bounties launching and crucial platform updates
-
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
+- [ ] [**NFSを悪用して特権を昇格**](privilege-escalation/#nfs-privilege-escalation)できますか？
+- [ ] [**制限されたシェルから脱出する必要がありますか**](privilege-escalation/#escaping-from-restricted-shells)?
 
 {{#include ../banners/hacktricks-training.md}}

@@ -5,7 +5,10 @@
 ### MacOS 自動列挙ツール
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
-- **Metasploit**: [
+- **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
+- **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
+
+### 特定の MacOS コマンド
 ```bash
 #System info
 date
@@ -114,7 +117,7 @@ sudo killall -HUP mDNSResponder
 ```
 ### インストールされたソフトウェアとサービス
 
-インストールされたリソースに対する**疑わしい**アプリケーションと**権限**を確認します:
+インストールされた**疑わしい**アプリケーションとインストールされたリソースに対する**権限**を確認します:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework

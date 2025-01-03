@@ -1,100 +1,97 @@
-# Phishing Methodology
+# フィッシング手法
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Methodology
+## 手法
 
-1. Recon the victim
-   1. Select the **victim domain**.
-   2. Perform some basic web enumeration **searching for login portals** used by the victim and **decide** which one you will **impersonate**.
-   3. Use some **OSINT** to **find emails**.
-2. Prepare the environment
-   1. **Buy the domain** you are going to use for the phishing assessment
-   2. **Configure the email service** related records (SPF, DMARC, DKIM, rDNS)
-   3. Configure the VPS with **gophish**
-3. Prepare the campaign
-   1. Prepare the **email template**
-   2. Prepare the **web page** to steal the credentials
-4. Launch the campaign!
+1. 被害者のリコン
+1. **被害者ドメイン**を選択します。
+2. 被害者が使用している**ログインポータル**を探すために、いくつかの基本的なウェブ列挙を行い、**なりすます**ものを**決定**します。
+3. **OSINT**を使用して**メールアドレス**を**見つけます**。
+2. 環境の準備
+1. フィッシング評価に使用する**ドメインを購入**します。
+2. 関連するメールサービスのレコードを**設定**します（SPF、DMARC、DKIM、rDNS）。
+3. **gophish**でVPSを設定します。
+3. キャンペーンの準備
+1. **メールテンプレート**を準備します。
+2. 認証情報を盗むための**ウェブページ**を準備します。
+4. キャンペーンを開始します！
 
-## Generate similar domain names or buy a trusted domain
+## 類似のドメイン名を生成するか、信頼できるドメインを購入する
 
-### Domain Name Variation Techniques
+### ドメイン名のバリエーション技術
 
-- **Keyword**: The domain name **contains** an important **keyword** of the original domain (e.g., zelster.com-management.com).
-- **hypened subdomain**: Change the **dot for a hyphen** of a subdomain (e.g., www-zelster.com).
-- **New TLD**: Same domain using a **new TLD** (e.g., zelster.org)
-- **Homoglyph**: It **replaces** a letter in the domain name with **letters that look similar** (e.g., zelfser.com).
-- **Transposition:** It **swaps two letters** within the domain name (e.g., zelsetr.com).
-- **Singularization/Pluralization**: Adds or removes “s” at the end of the domain name (e.g., zeltsers.com).
-- **Omission**: It **removes one** of the letters from the domain name (e.g., zelser.com).
-- **Repetition:** It **repeats one** of the letters in the domain name (e.g., zeltsser.com).
-- **Replacement**: Like homoglyph but less stealthy. It replaces one of the letters in the domain name, perhaps with a letter in proximity of the original letter on the keyboard (e.g, zektser.com).
-- **Subdomained**: Introduce a **dot** inside the domain name (e.g., ze.lster.com).
-- **Insertion**: It **inserts a letter** into the domain name (e.g., zerltser.com).
-- **Missing dot**: Append the TLD to the domain name. (e.g., zelstercom.com)
+- **キーワード**: ドメイン名は元のドメインの重要な**キーワード**を**含みます**（例: zelster.com-management.com）。
+- **ハイフン付きサブドメイン**: サブドメインの**ドットをハイフンに変更**します（例: www-zelster.com）。
+- **新しいTLD**: 同じドメインを使用して**新しいTLD**を使用します（例: zelster.org）。
+- **ホモグリフ**: ドメイン名の文字を**似たような文字に置き換えます**（例: zelfser.com）。
+- **転置**: ドメイン名内の**2つの文字を入れ替えます**（例: zelsetr.com）。
+- **単数化/複数化**: ドメイン名の末尾に「s」を追加または削除します（例: zeltsers.com）。
+- **省略**: ドメイン名から**1つの文字を削除します**（例: zelser.com）。
+- **繰り返し**: ドメイン名の**1つの文字を繰り返します**（例: zeltsser.com）。
+- **置換**: ホモグリフのようですが、あまりステルスではありません。ドメイン名の1つの文字を、元の文字の近くにあるキーボードの文字で置き換えます（例: zektser.com）。
+- **サブドメイン化**: ドメイン名内に**ドットを挿入します**（例: ze.lster.com）。
+- **挿入**: ドメイン名に**文字を挿入します**（例: zerltser.com）。
+- **ドットの欠落**: ドメイン名にTLDを追加します（例: zelstercom.com）。
 
-**Automatic Tools**
+**自動ツール**
 
 - [**dnstwist**](https://github.com/elceef/dnstwist)
 - [**urlcrazy**](https://github.com/urbanadventurer/urlcrazy)
 
-**Websites**
+**ウェブサイト**
 
 - [https://dnstwist.it/](https://dnstwist.it)
 - [https://dnstwister.report/](https://dnstwister.report)
 - [https://www.internetmarketingninjas.com/tools/free-tools/domain-typo-generator/](https://www.internetmarketingninjas.com/tools/free-tools/domain-typo-generator/)
 
-### Bitflipping
+### ビットフリッピング
 
-There is a **possibility that one of some bits stored or in communication might get automatically flipped** due to various factors like solar flares, cosmic rays, or hardware errors.
+**保存または通信中のビットの1つが自動的に反転する可能性があります**。これは、太陽フレア、宇宙線、またはハードウェアエラーなどのさまざまな要因によるものです。
 
-When this concept is **applied to DNS requests**, it is possible that the **domain received by the DNS server** is not the same as the domain initially requested.
+この概念が**DNSリクエストに適用されると**、**DNSサーバーによって受信されたドメイン**が、最初にリクエストされたドメインと同じでない可能性があります。
 
-For example, a single bit modification in the domain "windows.com" can change it to "windnws.com."
+例えば、ドメイン「windows.com」の1ビットの変更により、「windnws.com」に変わることがあります。
 
-Attackers may **take advantage of this by registering multiple bit-flipping domains** that are similar to the victim's domain. Their intention is to redirect legitimate users to their own infrastructure.
+攻撃者は、被害者のドメインに似た**複数のビットフリッピングドメインを登録することでこれを利用する**かもしれません。彼らの意図は、正当なユーザーを自分たちのインフラにリダイレクトすることです。
 
-For more information read [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
+詳細については、[https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)をお読みください。
 
-### Buy a trusted domain
+### 信頼できるドメインを購入する
 
-You can search in [https://www.expireddomains.net/](https://www.expireddomains.net) for a expired domain that you could use.\
-In order to make sure that the expired domain that you are going to buy **has already a good SEO** you could search how is it categorized in:
+[https://www.expireddomains.net/](https://www.expireddomains.net)で使用できる期限切れのドメインを検索できます。\
+購入する期限切れのドメインが**すでに良好なSEOを持っていることを確認するために**、以下のサイトでそのカテゴリを検索できます：
 
 - [http://www.fortiguard.com/webfilter](http://www.fortiguard.com/webfilter)
 - [https://urlfiltering.paloaltonetworks.com/query/](https://urlfiltering.paloaltonetworks.com/query/)
 
-## Discovering Emails
+## メールの発見
 
-- [https://github.com/laramies/theHarvester](https://github.com/laramies/theHarvester) (100% free)
-- [https://phonebook.cz/](https://phonebook.cz) (100% free)
+- [https://github.com/laramies/theHarvester](https://github.com/laramies/theHarvester) (100%無料)
+- [https://phonebook.cz/](https://phonebook.cz) (100%無料)
 - [https://maildb.io/](https://maildb.io)
 - [https://hunter.io/](https://hunter.io)
 - [https://anymailfinder.com/](https://anymailfinder.com)
 
-In order to **discover more** valid email addresses or **verify the ones** you have already discovered you can check if you can brute-force them smtp servers of the victim. [Learn how to verify/discover email address here](../../network-services-pentesting/pentesting-smtp/#username-bruteforce-enumeration).\
-Moreover, don't forget that if the users use **any web portal to access their mails**, you can check if it's vulnerable to **username brute force**, and exploit the vulnerability if possible.
+**より多くの**有効なメールアドレスを**発見するか、すでに発見したものを**確認するために、被害者のSMTPサーバーをブルートフォースできるか確認できます。[メールアドレスの確認/発見方法についてはこちらを学んでください](../../network-services-pentesting/pentesting-smtp/#username-bruteforce-enumeration)。\
+さらに、ユーザーが**メールにアクセスするためのウェブポータルを使用している場合**、それが**ユーザーブルートフォースに対して脆弱であるかどうかを確認し、可能であればその脆弱性を悪用することを忘れないでください**。
 
-## Configuring GoPhish
+## GoPhishの設定
 
-### Installation
+### インストール
 
-You can download it from [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)
+[https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)からダウンロードできます。
 
-Download and decompress it inside `/opt/gophish` and execute `/opt/gophish/gophish`\
-You will be given a password for the admin user in port 3333 in the output. Therefore, access that port and use those credentials to change the admin password. You may need to tunnel that port to local:
-
+`/opt/gophish`内にダウンロードして解凍し、`/opt/gophish/gophish`を実行します。\
+出力にポート3333の管理者ユーザー用のパスワードが表示されます。したがって、そのポートにアクセスし、その資格情報を使用して管理者パスワードを変更します。ポートをローカルにトンネルする必要があるかもしれません。
 ```bash
 ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 ```
+### 設定
 
-### Configuration
+**TLS証明書の設定**
 
-**TLS certificate configuration**
-
-Before this step you should have **already bought the domain** you are going to use and it must be **pointing** to the **IP of the VPS** where you are configuring **gophish**.
-
+このステップの前に、使用するドメインを**すでに購入している**必要があり、**gophish**を設定している**VPSのIP**に**ポイント**している必要があります。
 ```bash
 DOMAIN="<domain>"
 wget https://dl.eff.org/certbot-auto
@@ -110,67 +107,61 @@ mkdir /opt/gophish/ssl_keys
 cp "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /opt/gophish/ssl_keys/key.pem
 cp "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" /opt/gophish/ssl_keys/key.crt​
 ```
+**メール設定**
 
-**Mail configuration**
+インストールを開始します: `apt-get install postfix`
 
-Start installing: `apt-get install postfix`
-
-Then add the domain to the following files:
+次に、ドメインを以下のファイルに追加します:
 
 - **/etc/postfix/virtual_domains**
 - **/etc/postfix/transport**
 - **/etc/postfix/virtual_regexp**
 
-**Change also the values of the following variables inside /etc/postfix/main.cf**
+**/etc/postfix/main.cf内の以下の変数の値も変更します**
 
 `myhostname = <domain>`\
 `mydestination = $myhostname, <domain>, localhost.com, localhost`
 
-Finally modify the files **`/etc/hostname`** and **`/etc/mailname`** to your domain name and **restart your VPS.**
+最後に、ファイル **`/etc/hostname`** と **`/etc/mailname`** をあなたのドメイン名に変更し、**VPSを再起動します。**
 
-Now, create a **DNS A record** of `mail.<domain>` pointing to the **ip address** of the VPS and a **DNS MX** record pointing to `mail.<domain>`
+次に、**DNS Aレコード** `mail.<domain>` をVPSの**IPアドレス**にポイントさせ、**DNS MX**レコードを `mail.<domain>` にポイントさせます。
 
-Now lets test to send an email:
-
+では、メールを送信するテストを行いましょう:
 ```bash
 apt install mailutils
 echo "This is the body of the email" | mail -s "This is the subject line" test@email.com
 ```
+**Gophishの設定**
 
-**Gophish configuration**
-
-Stop the execution of gophish and lets configure it.\
-Modify `/opt/gophish/config.json` to the following (note the use of https):
-
+gophishの実行を停止し、設定を行いましょう。\
+`/opt/gophish/config.json`を以下のように変更します（httpsの使用に注意してください）：
 ```bash
 {
-        "admin_server": {
-                "listen_url": "127.0.0.1:3333",
-                "use_tls": true,
-                "cert_path": "gophish_admin.crt",
-                "key_path": "gophish_admin.key"
-        },
-        "phish_server": {
-                "listen_url": "0.0.0.0:443",
-                "use_tls": true,
-                "cert_path": "/opt/gophish/ssl_keys/key.crt",
-                "key_path": "/opt/gophish/ssl_keys/key.pem"
-        },
-        "db_name": "sqlite3",
-        "db_path": "gophish.db",
-        "migrations_prefix": "db/db_",
-        "contact_address": "",
-        "logging": {
-                "filename": "",
-                "level": ""
-        }
+"admin_server": {
+"listen_url": "127.0.0.1:3333",
+"use_tls": true,
+"cert_path": "gophish_admin.crt",
+"key_path": "gophish_admin.key"
+},
+"phish_server": {
+"listen_url": "0.0.0.0:443",
+"use_tls": true,
+"cert_path": "/opt/gophish/ssl_keys/key.crt",
+"key_path": "/opt/gophish/ssl_keys/key.pem"
+},
+"db_name": "sqlite3",
+"db_path": "gophish.db",
+"migrations_prefix": "db/db_",
+"contact_address": "",
+"logging": {
+"filename": "",
+"level": ""
+}
 }
 ```
+**gophishサービスの設定**
 
-**Configure gophish service**
-
-In order to create the gophish service so it can be started automatically and managed a service you can create the file `/etc/init.d/gophish` with the following content:
-
+gophishサービスを自動的に開始し、サービスとして管理できるようにするために、次の内容でファイル`/etc/init.d/gophish`を作成できます:
 ```bash
 #!/bin/bash
 # /etc/init.d/gophish
@@ -191,35 +182,33 @@ logfile=/var/log/gophish/gophish.log
 errfile=/var/log/gophish/gophish.error
 
 start() {
-    echo 'Starting '${processName}'...'
-    cd ${appDirectory}
-    nohup ./$process >>$logfile 2>>$errfile &
-    sleep 1
+echo 'Starting '${processName}'...'
+cd ${appDirectory}
+nohup ./$process >>$logfile 2>>$errfile &
+sleep 1
 }
 
 stop() {
-    echo 'Stopping '${processName}'...'
-    pid=$(/bin/pidof ${process})
-    kill ${pid}
-    sleep 1
+echo 'Stopping '${processName}'...'
+pid=$(/bin/pidof ${process})
+kill ${pid}
+sleep 1
 }
 
 status() {
-    pid=$(/bin/pidof ${process})
-    if [["$pid" != ""| "$pid" != "" ]]; then
-        echo ${processName}' is running...'
-    else
-        echo ${processName}' is not running...'
-    fi
+pid=$(/bin/pidof ${process})
+if [["$pid" != ""| "$pid" != "" ]]; then
+echo ${processName}' is running...'
+else
+echo ${processName}' is not running...'
+fi
 }
 
 case $1 in
-    start|stop|status) "$1" ;;
+start|stop|status) "$1" ;;
 esac
 ```
-
-Finish configuring the service and checking it doing:
-
+サービスの設定を完了し、次の操作を行って確認します：
 ```bash
 mkdir /var/log/gophish
 chmod +x /etc/init.d/gophish
@@ -230,68 +219,60 @@ service gophish status
 ss -l | grep "3333\|443"
 service gophish stop
 ```
+## メールサーバーとドメインの設定
 
-## Configuring mail server and domain
+### 待機して正当性を保つ
 
-### Wait & be legit
+ドメインが古いほど、スパムとして捕まる可能性は低くなります。そのため、フィッシング評価の前にできるだけ長く（少なくとも1週間）待つべきです。さらに、評判の良い分野に関するページを作成すれば、得られる評判はより良くなります。
 
-The older a domain is the less probable it's going to be caught as spam. Then you should wait as much time as possible (at least 1week) before the phishing assessment. moreover, if you put a page about a reputational sector the reputation obtained will be better.
+1週間待たなければならなくても、今すぐにすべての設定を終えることができます。
 
-Note that even if you have to wait a week you can finish configuring everything now.
+### リバースDNS（rDNS）レコードの設定
 
-### Configure Reverse DNS (rDNS) record
+VPSのIPアドレスをドメイン名に解決するrDNS（PTR）レコードを設定します。
 
-Set a rDNS (PTR) record that resolves the IP address of the VPS to the domain name.
+### 送信者ポリシーフレームワーク（SPF）レコード
 
-### Sender Policy Framework (SPF) Record
+新しいドメインのために**SPFレコードを設定する必要があります**。SPFレコードが何か分からない場合は、[**このページを読んでください**](../../network-services-pentesting/pentesting-smtp/#spf)。
 
-You must **configure a SPF record for the new domain**. If you don't know what is a SPF record [**read this page**](../../network-services-pentesting/pentesting-smtp/#spf).
-
-You can use [https://www.spfwizard.net/](https://www.spfwizard.net) to generate your SPF policy (use the IP of the VPS machine)
+[https://www.spfwizard.net/](https://www.spfwizard.net)を使用して、SPFポリシーを生成できます（VPSマシンのIPを使用してください）。
 
 ![](<../../images/image (1037).png>)
 
-This is the content that must be set inside a TXT record inside the domain:
-
+これは、ドメイン内のTXTレコードに設定する必要がある内容です：
 ```bash
 v=spf1 mx a ip4:ip.ip.ip.ip ?all
 ```
+### ドメインベースのメッセージ認証、報告および適合性 (DMARC) レコード
 
-### Domain-based Message Authentication, Reporting & Conformance (DMARC) Record
+新しいドメインのために**DMARCレコードを設定する必要があります**。DMARCレコードが何か分からない場合は、[**このページを読んでください**](../../network-services-pentesting/pentesting-smtp/#dmarc)。
 
-You must **configure a DMARC record for the new domain**. If you don't know what is a DMARC record [**read this page**](../../network-services-pentesting/pentesting-smtp/#dmarc).
-
-You have to create a new DNS TXT record pointing the hostname `_dmarc.<domain>` with the following content:
-
+ホスト名 `_dmarc.<domain>` を指す新しいDNS TXTレコードを次の内容で作成する必要があります:
 ```bash
 v=DMARC1; p=none
 ```
-
 ### DomainKeys Identified Mail (DKIM)
 
-You must **configure a DKIM for the new domain**. If you don't know what is a DMARC record [**read this page**](../../network-services-pentesting/pentesting-smtp/#dkim).
+新しいドメインのために**DKIMを設定する必要があります**。DMARCレコードが何か分からない場合は、[**このページを読んでください**](../../network-services-pentesting/pentesting-smtp/#dkim)。
 
-This tutorial is based on: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
+このチュートリアルは、[https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)に基づいています。
 
 > [!NOTE]
-> You need to concatenate both B64 values that the DKIM key generates:
+> DKIMキーが生成する2つのB64値を連結する必要があります：
 >
 > ```
 > v=DKIM1; h=sha256; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0wPibdqPtzYk81njjQCrChIcHzxOp8a1wjbsoNtka2X9QXCZs+iXkvw++QsWDtdYu3q0Ofnr0Yd/TmG/Y2bBGoEgeE+YTUG2aEgw8Xx42NLJq2D1pB2lRQPW4IxefROnXu5HfKSm7dyzML1gZ1U0pR5X4IZCH0wOPhIq326QjxJZm79E1nTh3xj" "Y9N/Dt3+fVnIbMupzXE216TdFuifKM6Tl6O/axNsbswMS1TH812euno8xRpsdXJzFlB9q3VbMkVWig4P538mHolGzudEBg563vv66U8D7uuzGYxYT4WS8NVm3QBMg0QKPWZaKp+bADLkOSB9J2nUpk4Aj9KB5swIDAQAB
 > ```
 
-### Test your email configuration score
+### メール設定スコアをテストする
 
-You can do that using [https://www.mail-tester.com/](https://www.mail-tester.com)\
-Just access the page and send an email to the address they give you:
-
+[https://www.mail-tester.com/](https://www.mail-tester.com)を使用してそれを行うことができます。\
+ページにアクセスして、彼らが提供するアドレスにメールを送信してください：
 ```bash
 echo "This is the body of the email" | mail -s "This is the subject line" test-iimosa79z@srv1.mail-tester.com
 ```
-
-You can also **check your email configuration** sending an email to `check-auth@verifier.port25.com` and **reading the response** (for this you will need to **open** port **25** and see the response in the file _/var/mail/root_ if you send the email a as root).\
-Check that you pass all the tests:
-
+あなたはまた、**メール設定を確認する**ために `check-auth@verifier.port25.com` にメールを送信し、**応答を読む**ことができます（これには、ポート**25**を**開く**必要があり、メールをrootとして送信した場合はファイル _/var/mail/root_ で応答を確認します）。\
+すべてのテストに合格していることを確認してください：
 ```bash
 ==========================================================
 Summary of Results
@@ -302,48 +283,44 @@ DKIM check:         pass
 Sender-ID check:    pass
 SpamAssassin check: ham
 ```
-
-You could also send **message to a Gmail under your control**, and check the **email’s headers** in your Gmail inbox, `dkim=pass` should be present in the `Authentication-Results` header field.
-
+あなたはまた、**あなたの管理下にあるGmailにメッセージを送信**し、Gmailの受信トレイで**メールのヘッダー**を確認することができます。`dkim=pass`は`Authentication-Results`ヘッダー欄に存在する必要があります。
 ```
 Authentication-Results: mx.google.com;
-       spf=pass (google.com: domain of contact@example.com designates --- as permitted sender) smtp.mail=contact@example.com;
-       dkim=pass header.i=@example.com;
+spf=pass (google.com: domain of contact@example.com designates --- as permitted sender) smtp.mail=contact@example.com;
+dkim=pass header.i=@example.com;
 ```
+### ​Spamhouseのブラックリストからの削除
 
-### ​Removing from Spamhouse Blacklist
+ページ [www.mail-tester.com](https://www.mail-tester.com) は、あなたのドメインがspamhouseによってブロックされているかどうかを示すことができます。あなたのドメイン/IPの削除をリクエストすることができます: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
 
-The page [www.mail-tester.com](https://www.mail-tester.com) can indicate you if you your domain is being blocked by spamhouse. You can request your domain/IP to be removed at: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
+### Microsoftのブラックリストからの削除
 
-### Removing from Microsoft Blacklist
+あなたのドメイン/IPの削除をリクエストすることができます [https://sender.office.com/](https://sender.office.com).
 
-​​You can request your domain/IP to be removed at [https://sender.office.com/](https://sender.office.com).
+## GoPhishキャンペーンの作成と開始
 
-## Create & Launch GoPhish Campaign
+### 送信プロファイル
 
-### Sending Profile
-
-- Set some **name to identify** the sender profile
-- Decide from which account are you going to send the phishing emails. Suggestions: _noreply, support, servicedesk, salesforce..._
-- You can leave blank the username and password, but make sure to check the Ignore Certificate Errors
+- 送信者プロファイルを識別するための**名前を設定**します
+- フィッシングメールを送信するアカウントを決定します。提案: _noreply, support, servicedesk, salesforce..._
+- ユーザー名とパスワードは空白のままにできますが、「証明書エラーを無視」をチェックすることを確認してください
 
 ![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
 > [!NOTE]
-> It's recommended to use the "**Send Test Email**" functionality to test that everything is working.\
-> I would recommend to **send the test emails to 10min mails addresses** in order to avoid getting blacklisted making tests.
+> すべてが正常に動作していることをテストするために、"**テストメールを送信**"機能を使用することをお勧めします。\
+> テストを行う際にブラックリストに載らないように、**テストメールを10分メールアドレスに送信する**ことをお勧めします。
 
-### Email Template
+### メールテンプレート
 
-- Set some **name to identify** the template
-- Then write a **subject** (nothing estrange, just something you could expect to read in a regular email)
-- Make sure you have checked "**Add Tracking Image**"
-- Write the **email template** (you can use variables like in the following example):
-
+- テンプレートを識別するための**名前を設定**します
+- 次に、**件名**を書きます（特に奇妙なことはなく、通常のメールで読むことができる内容）
+- "**トラッキング画像を追加**"にチェックを入れていることを確認してください
+- **メールテンプレート**を書きます（以下の例のように変数を使用できます）：
 ```markup
 <html>
 <head>
-    <title></title>
+<title></title>
 </head>
 <body>
 <p class="MsoNormal"><span style="font-size:10.0pt;font-family:&quot;Verdana&quot;,sans-serif;color:black">Dear {{.FirstName}} {{.LastName}},</span></p>
@@ -358,107 +335,106 @@ WRITE HERE SOME SIGNATURE OF SOMEONE FROM THE COMPANY
 </body>
 </html>
 ```
+**メールの信頼性を高めるために**、クライアントからのメールの署名を使用することをお勧めします。提案：
 
-Note that **in order to increase the credibility of the email**, it's recommended to use some signature from an email from the client. Suggestions:
-
-- Send an email to a **non existent address** and check if the response has any signature.
-- Search for **public emails** like info@ex.com or press@ex.com or public@ex.com and send them an email and wait for the response.
-- Try to contact **some valid discovered** email and wait for the response
+- **存在しないアドレス**にメールを送信し、返信に署名が含まれているか確認します。
+- info@ex.comやpress@ex.com、public@ex.comのような**公開メール**を探し、メールを送信して返信を待ちます。
+- **有効な発見された**メールに連絡を試み、返信を待ちます。
 
 ![](<../../images/image (80).png>)
 
 > [!NOTE]
-> The Email Template also allows to **attach files to send**. If you would also like to steal NTLM challenges using some specially crafted files/documents [read this page](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md).
+> メールテンプレートでは、**送信するファイルを添付することもできます**。NTLMチャレンジを特別に作成したファイル/ドキュメントを使用して盗むことに興味がある場合は、[このページを読む](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md)。
 
-### Landing Page
+### ランディングページ
 
-- Write a **name**
-- **Write the HTML code** of the web page. Note that you can **import** web pages.
-- Mark **Capture Submitted Data** and **Capture Passwords**
-- Set a **redirection**
+- **名前**を記入
+- **ウェブページのHTMLコード**を記入します。ウェブページを**インポート**することもできます。
+- **送信されたデータをキャプチャ**と**パスワードをキャプチャ**にチェックを入れます。
+- **リダイレクト**を設定します。
 
 ![](<../../images/image (826).png>)
 
 > [!NOTE]
-> Usually you will need to modify the HTML code of the page and make some tests in local (maybe using some Apache server) **until you like the results.** Then, write that HTML code in the box.\
-> Note that if you need to **use some static resources** for the HTML (maybe some CSS and JS pages) you can save them in _**/opt/gophish/static/endpoint**_ and then access them from _**/static/\<filename>**_
+> 通常、ページのHTMLコードを修正し、ローカルでいくつかのテストを行う必要があります（おそらくApacheサーバーを使用して）**結果に満足するまで**。その後、そのHTMLコードをボックスに記入します。\
+> HTML用に**静的リソース**（おそらくCSSやJSページ）を使用する必要がある場合は、_**/opt/gophish/static/endpoint**_に保存し、_**/static/\<filename>**_からアクセスできます。
 
 > [!NOTE]
-> For the redirection you could **redirect the users to the legit main web page** of the victim, or redirect them to _/static/migration.html_ for example, put some **spinning wheel (**[**https://loading.io/**](https://loading.io)**) for 5 seconds and then indicate that the process was successful**.
+> リダイレクトでは、**ユーザーを被害者の正当なメインウェブページにリダイレクト**するか、例えば_/static/migration.html_にリダイレクトし、5秒間**スピニングホイール**（**[https://loading.io/](https://loading.io)**）を表示し、その後プロセスが成功したことを示すことができます。
 
-### Users & Groups
+### ユーザーとグループ
 
-- Set a name
-- **Import the data** (note that in order to use the template for the example you need the firstname, last name and email address of each user)
+- 名前を設定
+- **データをインポート**します（例のテンプレートを使用するには、各ユーザーの名、姓、メールアドレスが必要です）。
 
 ![](<../../images/image (163).png>)
 
-### Campaign
+### キャンペーン
 
-Finally, create a campaign selecting a name, the email template, the landing page, the URL, the sending profile and the group. Note that the URL will be the link sent to the victims
+最後に、名前、メールテンプレート、ランディングページ、URL、送信プロファイル、グループを選択してキャンペーンを作成します。URLは被害者に送信されるリンクになります。
 
-Note that the **Sending Profile allow to send a test email to see how will the final phishing email looks like**:
+**送信プロファイルでは、最終的なフィッシングメールがどのように見えるかを確認するためにテストメールを送信できます**：
 
 ![](<../../images/image (192).png>)
 
 > [!NOTE]
-> I would recommend to **send the test emails to 10min mails addresses** in order to avoid getting blacklisted making tests.
+> テストメールを**10分メールアドレス**に送信することをお勧めします。テストを行う際にブラックリストに載るのを避けるためです。
 
-Once everything is ready, just launch the campaign!
+すべてが準備できたら、キャンペーンを開始してください！
 
-## Website Cloning
+## ウェブサイトのクローン
 
-If for any reason you want to clone the website check the following page:
+何らかの理由でウェブサイトをクローンしたい場合は、次のページを確認してください：
 
 {{#ref}}
 clone-a-website.md
 {{#endref}}
 
-## Backdoored Documents & Files
+## バックドア付きドキュメントとファイル
 
-In some phishing assessments (mainly for Red Teams) you will want to also **send files containing some kind of backdoor** (maybe a C2 or maybe just something that will trigger an authentication).\
-Check out the following page for some examples:
+いくつかのフィッシング評価（主にレッドチーム向け）では、**バックドアを含むファイルを送信したい**場合があります（おそらくC2または認証をトリガーする何か）。\
+いくつかの例については、次のページを確認してください：
 
 {{#ref}}
 phishing-documents.md
 {{#endref}}
 
-## Phishing MFA
+## フィッシングMFA
 
-### Via Proxy MitM
+### プロキシMitM経由
 
-The previous attack is pretty clever as you are faking a real website and gathering the information set by the user. Unfortunately, if the user didn't put the correct password or if the application you faked is configured with 2FA, **this information won't allow you to impersonate the tricked user**.
+前述の攻撃は非常に巧妙で、実際のウェブサイトを偽装し、ユーザーによって設定された情報を収集します。残念ながら、ユーザーが正しいパスワードを入力しなかった場合や、偽装したアプリケーションが2FAで構成されている場合、**この情報では騙されたユーザーを偽装することはできません**。
 
-This is where tools like [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) and [**muraena**](https://github.com/muraenateam/muraena) are useful. This tool will allow you to generate a MitM like attack. Basically, the attacks works in the following way:
+ここで、[**evilginx2**](https://github.com/kgretzky/evilginx2)**、** [**CredSniper**](https://github.com/ustayready/CredSniper)および[**muraena**](https://github.com/muraenateam/muraena)のようなツールが役立ちます。このツールは、MitMのような攻撃を生成することを可能にします。基本的に、攻撃は次のように機能します：
 
-1. You **impersonate the login** form of the real webpage.
-2. The user **send** his **credentials** to your fake page and the tool send those to the real webpage, **checking if the credentials work**.
-3. If the account is configured with **2FA**, the MitM page will ask for it and once the **user introduces** it the tool will send it to the real web page.
-4. Once the user is authenticated you (as attacker) will have **captured the credentials, the 2FA, the cookie and any information** of every interaction your while the tool is performing a MitM.
+1. 実際のウェブページのログインフォームを**偽装**します。
+2. ユーザーは**資格情報**をあなたの偽のページに**送信**し、ツールはそれを実際のウェブページに送信し、**資格情報が機能するか確認します**。
+3. アカウントが**2FA**で構成されている場合、MitMページはそれを要求し、**ユーザーが入力**すると、ツールはそれを実際のウェブページに送信します。
+4. ユーザーが認証されると、あなた（攻撃者）は**資格情報、2FA、クッキー、およびツールがMitMを実行している間のすべてのインタラクションの情報をキャプチャ**します。
 
-### Via VNC
+### VNC経由
 
-What if instead of **sending the victim to a malicious page** with the same looks as the original one, you send him to a **VNC session with a browser connected to the real web page**? You will be able to see what he does, steal the password, the MFA used, the cookies...\
-You can do this with [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)
+もし**被害者を元のページと同じ外観の悪意のあるページに送信する代わりに、実際のウェブページに接続されたブラウザを持つVNCセッションに送信したらどうなるでしょうか**？彼が何をしているかを見ることができ、パスワード、使用されるMFA、クッキーを盗むことができます...\
+これは[**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)を使用して行うことができます。
 
-## Detecting the detection
+## 検出の検出
 
-Obviously one of the best ways to know if you have been busted is to **search your domain inside blacklists**. If it appears listed, somehow your domain was detected as suspicions.\
-One easy way to check if you domain appears in any blacklist is to use [https://malwareworld.com/](https://malwareworld.com)
+明らかに、あなたがバストされたかどうかを知る最良の方法の1つは、**ブラックリスト内であなたのドメインを検索することです**。リストに表示されている場合、何らかの形であなたのドメインが疑わしいと検出されました。\
+ドメインがブラックリストに表示されているかどうかを確認する簡単な方法は、[https://malwareworld.com/](https://malwareworld.com)を使用することです。
 
-However, there are other ways to know if the victim is **actively looking for suspicions phishing activity in the wild** as explained in:
+ただし、被害者が**野生の疑わしいフィッシング活動を積極的に探しているかどうかを知る他の方法もあります**。詳細は以下に説明されています：
 
 {{#ref}}
 detecting-phising.md
 {{#endref}}
 
-You can **buy a domain with a very similar name** to the victims domain **and/or generate a certificate** for a **subdomain** of a domain controlled by you **containing** the **keyword** of the victim's domain. If the **victim** perform any kind of **DNS or HTTP interaction** with them, you will know that **he is actively looking** for suspicious domains and you will need to be very stealth.
+被害者のドメインに非常に似た名前のドメインを**購入する**ことができます**または、あなたが制御するドメインの**サブドメイン**のために**証明書を生成する**ことができます。被害者のドメインの**キーワード**を含む。もし**被害者**がそれらと何らかの**DNSまたはHTTPインタラクション**を行った場合、あなたは**彼が積極的に探している**ことを知り、非常にステルスである必要があります。
 
-### Evaluate the phishing
+### フィッシングの評価
 
-Use [**Phishious** ](https://github.com/Rices/Phishious)to evaluate if your email is going to end in the spam folder or if it's going to be blocked or successful.
+[**Phishious**](https://github.com/Rices/Phishious)を使用して、あなたのメールがスパムフォルダに入るか、ブロックされるか、成功するかを評価します。
 
-## References
+## 参考文献
 
 - [https://zeltser.com/domain-name-variations-in-phishing/](https://zeltser.com/domain-name-variations-in-phishing/)
 - [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/)

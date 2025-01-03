@@ -9,7 +9,7 @@ Dockerソケットに**アクセス**できる場合があり、それを使用�
 ルートとして実行されているコンテナ内で**ファイルシステム**の異なる部分を**マウント**し、それに**アクセス**できます。\
 コンテナ内で特権を昇格させるために**マウントを悪用する**こともできます。
 
-- **`-v /:/host`** -> ホストのファイルシステムをコンテナにマウントし、**ホストのファイルシステムを読み取る**ことができます。
+- **`-v /:/host`** -> ホストのファイルシステムをコンテナにマウントして、**ホストのファイルシステムを読み取る**ことができます。
 - **ホストにいるように感じたい**がコンテナにいる場合、次のようなフラグを使用して他の防御メカニズムを無効にすることができます：
 - `--privileged`
 - `--cap-add=ALL`
@@ -34,10 +34,10 @@ Dockerソケットに**アクセス**できる場合があり、それを使用�
 ### コンテナからの脱出
 
 - **`--privileged`** -> このフラグを使用すると、[コンテナからのすべての隔離を削除します](docker-privileged.md#what-affects)。特権コンテナから[ルートとして脱出する技術](docker-breakout-privilege-escalation/#automatic-enumeration-and-escape)を確認してください。
-- **`--cap-add=<CAPABILITY/ALL> [--security-opt apparmor=unconfined] [--security-opt seccomp=unconfined] [-security-opt label:disable]`** -> [特権を昇格させるために能力を悪用する](../linux-capabilities.md)、**その能力をコンテナに付与し、エクスプロイトが機能するのを妨げる可能性のある他の保護方法を無効にします。**
+- **`--cap-add=<CAPABILITY/ALL> [--security-opt apparmor=unconfined] [--security-opt seccomp=unconfined] [-security-opt label:disable]`** -> [能力を悪用して昇格するために](../linux-capabilities.md)、**その能力をコンテナに付与し**、エクスプロイトが機能するのを妨げる可能性のある他の保護方法を無効にします。
 
 ### Curl
 
-このページでは、Dockerフラグを使用して特権を昇格させる方法について説明しました。**curl**コマンドを使用してこれらの方法を悪用する方法をページで見つけることができます。
+このページでは、Dockerフラグを使用して特権を昇格させる方法について説明しました。**curl**コマンドを使用してこれらの方法を悪用する方法については、次のページを参照してください：
 
 {{#include ../../../banners/hacktricks-training.md}}

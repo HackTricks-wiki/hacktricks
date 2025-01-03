@@ -2,43 +2,37 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic Information
+## 基本情報
 
-Different vulnerabilities such as [**Python Format Strings**](bypass-python-sandboxes/#python-format-string) or [**Class Pollution**](class-pollution-pythons-prototype-pollution.md) might allow you to **read python internal data but won't allow you to execute code**. Therefore, a pentester will need to make the most of these read permissions to **obtain sensitive privileges and escalate the vulnerability**.
+[**Pythonフォーマット文字列**](bypass-python-sandboxes/#python-format-string)や[**クラス汚染**](class-pollution-pythons-prototype-pollution.md)などの異なる脆弱性は、**Python内部データを読み取ることはできるが、コードを実行することはできない**かもしれません。したがって、ペンテスターはこれらの読み取り権限を最大限に活用して、**機密特権を取得し、脆弱性をエスカレートさせる**必要があります。
 
-### Flask - Read secret key
+### Flask - 秘密鍵の読み取り
 
-The main page of a Flask application will probably have the **`app`** global object where this **secret is configured**.
-
+Flaskアプリケーションのメインページには、**`app`**グローバルオブジェクトがあり、ここでこの**秘密が設定されています**。
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
+この場合、[**Pythonサンドボックスをバイパスするページ**](bypass-python-sandboxes/)から**グローバルオブジェクトにアクセス**するために、任意のガジェットを使用してこのオブジェクトにアクセスすることが可能です。
 
-In this case it's possible to access this object just using any gadget to **access global objects** from the [**Bypass Python sandboxes page**](bypass-python-sandboxes/).
+**脆弱性が異なるPythonファイルにある場合**、メインのファイルに到達するためにファイルを横断するガジェットが必要で、**グローバルオブジェクト `app.secret_key`** にアクセスしてFlaskの秘密鍵を変更し、この鍵を知って[**権限を昇格させる**](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign)ことができます。
 
-In the case where **the vulnerability is in a different python file**, you need a gadget to traverse files to get to the main one to **access the global object `app.secret_key`** to change the Flask secret key and be able to [**escalate privileges** knowing this key](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
-
-A payload like this one [from this writeup](https://ctftime.org/writeup/36082):
-
+このようなペイロードは、[この解説から](https://ctftime.org/writeup/36082):
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
+このペイロードを使用して、**`app.secret_key`**（あなたのアプリでは名前が異なる場合があります）を変更し、新しいより多くの権限を持つフラスククッキーに署名できるようにします。
 
-Use this payload to **change `app.secret_key`** (the name in your app might be different) to be able to sign new and more privileges flask cookies.
+### Werkzeug - machine_id と node uuid
 
-### Werkzeug - machine_id and node uuid
-
-[**Using these payload from this writeup**](https://vozec.fr/writeups/tweedle-dum-dee/) you will be able to access the **machine_id** and the **uuid** node, which are the **main secrets** you need to [**generate the Werkzeug pin**](../../network-services-pentesting/pentesting-web/werkzeug.md) you can use to access the python console in `/console` if the **debug mode is enabled:**
-
+[**この書き込みからのペイロードを使用することで**](https://vozec.fr/writeups/tweedle-dum-dee/)、**machine_id** と **uuid** ノードにアクセスでき、これらは **主な秘密** であり、[**Werkzeug pin を生成するために必要です**](../../network-services-pentesting/pentesting-web/werkzeug.md)。これを使用して、**デバッグモードが有効な場合**に `/console` で Python コンソールにアクセスできます。
 ```python
 {ua.__class__.__init__.__globals__[t].sys.modules[werkzeug.debug]._machine_id}
 {ua.__class__.__init__.__globals__[t].sys.modules[werkzeug.debug].uuid._node}
 ```
-
 > [!WARNING]
-> Note that you can get the **servers local path to the `app.py`** generating some **error** in the web page which will **give you the path**.
+> **app.py**の**サーバーのローカルパス**を取得するには、ウェブページでいくつかの**エラー**を生成する必要があります。これにより、**パス**が得られます。
 
-If the vulnerability is in a different python file, check the previous Flask trick to access the objects from the main python file.
+脆弱性が別のPythonファイルにある場合は、メインPythonファイルからオブジェクトにアクセスするための前のFlaskトリックを確認してください。
 
 {{#include ../../banners/hacktricks-training.md}}

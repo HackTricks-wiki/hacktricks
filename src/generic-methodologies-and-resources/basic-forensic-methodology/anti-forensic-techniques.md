@@ -1,152 +1,152 @@
-# Anti-Forensic Techniques
+# アンチフォレンジック技術
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Timestamps
+## タイムスタンプ
 
-An attacker may be interested in **changing the timestamps of files** to avoid being detected.\
-It's possible to find the timestamps inside the MFT in attributes `$STANDARD_INFORMATION` \_\_ and \_\_ `$FILE_NAME`.
+攻撃者は、**ファイルのタイムスタンプを変更すること**に興味を持つかもしれません。\
+タイムスタンプは、MFT内の属性 `$STANDARD_INFORMATION` \_\_ と \_\_ `$FILE_NAME` に見つけることができます。
 
-Both attributes have 4 timestamps: **Modification**, **access**, **creation**, and **MFT registry modification** (MACE or MACB).
+両方の属性には4つのタイムスタンプがあります: **変更**, **アクセス**, **作成**, および **MFTレジストリ変更** (MACEまたはMACB)。
 
-**Windows explorer** and other tools show the information from **`$STANDARD_INFORMATION`**.
+**Windowsエクスプローラー**や他のツールは、**`$STANDARD_INFORMATION`** からの情報を表示します。
 
-### TimeStomp - Anti-forensic Tool
+### TimeStomp - アンチフォレンジックツール
 
-This tool **modifies** the timestamp information inside **`$STANDARD_INFORMATION`** **but** **not** the information inside **`$FILE_NAME`**. Therefore, it's possible to **identify** **suspicious** **activity**.
+このツールは、**`$STANDARD_INFORMATION`** 内のタイムスタンプ情報を**変更**しますが、**`$FILE_NAME`** 内の情報は**変更しません**。したがって、**疑わしい** **活動を特定することが可能です**。
 
 ### Usnjrnl
 
-The **USN Journal** (Update Sequence Number Journal) is a feature of the NTFS (Windows NT file system) that keeps track of volume changes. The [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) tool allows for the examination of these changes.
+**USNジャーナル** (Update Sequence Number Journal) は、NTFS (Windows NTファイルシステム) の機能で、ボリュームの変更を追跡します。[**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) ツールは、これらの変更を調査することを可能にします。
 
 ![](<../../images/image (801).png>)
 
-The previous image is the **output** shown by the **tool** where it can be observed that some **changes were performed** to the file.
+前の画像は、**ツール**によって表示された**出力**で、ファイルに対して**いくつかの変更が行われた**ことが観察できます。
 
 ### $LogFile
 
-**All metadata changes to a file system are logged** in a process known as [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging). The logged metadata is kept in a file named `**$LogFile**`, located in the root directory of an NTFS file system. Tools such as [LogFileParser](https://github.com/jschicht/LogFileParser) can be used to parse this file and identify changes.
+**ファイルシステムへのすべてのメタデータ変更は**、[書き込み先行ログ](https://en.wikipedia.org/wiki/Write-ahead_logging)として知られるプロセスで記録されます。記録されたメタデータは、NTFSファイルシステムのルートディレクトリにある `**$LogFile**` という名前のファイルに保持されます。[LogFileParser](https://github.com/jschicht/LogFileParser) のようなツールを使用して、このファイルを解析し、変更を特定できます。
 
 ![](<../../images/image (137).png>)
 
-Again, in the output of the tool it's possible to see that **some changes were performed**.
+再び、ツールの出力では、**いくつかの変更が行われた**ことが確認できます。
 
-Using the same tool it's possible to identify to **which time the timestamps were modified**:
+同じツールを使用して、**タイムスタンプが変更された時刻を特定することが可能です**：
 
 ![](<../../images/image (1089).png>)
 
-- CTIME: File's creation time
-- ATIME: File's modification time
-- MTIME: File's MFT registry modification
-- RTIME: File's access time
+- CTIME: ファイルの作成時刻
+- ATIME: ファイルの変更時刻
+- MTIME: ファイルのMFTレジストリ変更
+- RTIME: ファイルのアクセス時刻
 
-### `$STANDARD_INFORMATION` and `$FILE_NAME` comparison
+### `$STANDARD_INFORMATION` と `$FILE_NAME` の比較
 
-Another way to identify suspicious modified files would be to compare the time on both attributes looking for **mismatches**.
+疑わしい変更されたファイルを特定する別の方法は、両方の属性の時間を比較して**不一致**を探すことです。
 
-### Nanoseconds
+### ナノ秒
 
-**NTFS** timestamps have a **precision** of **100 nanoseconds**. Then, finding files with timestamps like 2010-10-10 10:10:**00.000:0000 is very suspicious**.
+**NTFS** タイムスタンプは **100ナノ秒** の**精度**を持っています。したがって、2010-10-10 10:10:**00.000:0000 のようなタイムスタンプを持つファイルを見つけることは非常に疑わしいです。
 
-### SetMace - Anti-forensic Tool
+### SetMace - アンチフォレンジックツール
 
-This tool can modify both attributes `$STARNDAR_INFORMATION` and `$FILE_NAME`. However, from Windows Vista, it's necessary for a live OS to modify this information.
+このツールは、両方の属性 `$STARNDAR_INFORMATION` と `$FILE_NAME` を変更できます。ただし、Windows Vista以降は、ライブOSでこの情報を変更する必要があります。
 
-## Data Hiding
+## データ隠蔽
 
-NFTS uses a cluster and the minimum information size. That means that if a file occupies uses and cluster and a half, the **reminding half is never going to be used** until the file is deleted. Then, it's possible to **hide data in this slack space**.
+NFTSはクラスターと最小情報サイズを使用します。つまり、ファイルがクラスターと半分を占有している場合、**残りの半分はファイルが削除されるまで使用されません**。したがって、このスラックスペースに**データを隠すことが可能です**。
 
-There are tools like slacker that allow hiding data in this "hidden" space. However, an analysis of the `$logfile` and `$usnjrnl` can show that some data was added:
+slackerのようなツールを使用すると、この「隠された」スペースにデータを隠すことができます。ただし、`$logfile` と `$usnjrnl` の分析により、いくつかのデータが追加されたことが示される可能性があります：
 
 ![](<../../images/image (1060).png>)
 
-Then, it's possible to retrieve the slack space using tools like FTK Imager. Note that this kind of tool can save the content obfuscated or even encrypted.
+その後、FTK Imagerのようなツールを使用してスラックスペースを取得することが可能です。この種のツールは、内容を難読化または暗号化して保存することができます。
 
 ## UsbKill
 
-This is a tool that will **turn off the computer if any change in the USB** ports is detected.\
-A way to discover this would be to inspect the running processes and **review each python script running**.
+これは、**USB**ポートに変更が検出された場合にコンピュータを**シャットダウンする**ツールです。\
+これを発見する方法は、実行中のプロセスを検査し、**実行中の各Pythonスクリプトをレビューする**ことです。
 
-## Live Linux Distributions
+## ライブLinuxディストリビューション
 
-These distros are **executed inside the RAM** memory. The only way to detect them is **in case the NTFS file-system is mounted with write permissions**. If it's mounted just with read permissions it won't be possible to detect the intrusion.
+これらのディストリビューションは**RAM**メモリ内で**実行されます**。検出する唯一の方法は、**NTFSファイルシステムが書き込み権限でマウントされている場合**です。読み取り権限のみでマウントされている場合、侵入を検出することはできません。
 
-## Secure Deletion
+## セキュア削除
 
 [https://github.com/Claudio-C/awesome-data-sanitization](https://github.com/Claudio-C/awesome-data-sanitization)
 
-## Windows Configuration
+## Windows設定
 
-It's possible to disable several windows logging methods to make the forensics investigation much harder.
+フォレンジック調査をはるかに困難にするために、いくつかのWindowsログ記録方法を無効にすることが可能です。
 
-### Disable Timestamps - UserAssist
+### タイムスタンプの無効化 - UserAssist
 
-This is a registry key that maintains dates and hours when each executable was run by the user.
+これは、ユーザーによって各実行可能ファイルが実行された日時を保持するレジストリキーです。
 
-Disabling UserAssist requires two steps:
+UserAssistを無効にするには、2つのステップが必要です：
 
-1. Set two registry keys, `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` and `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled`, both to zero in order to signal that we want UserAssist disabled.
-2. Clear your registry subtrees that look like `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>`.
+1. 2つのレジストリキー `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` と `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled` をゼロに設定して、UserAssistを無効にしたいことを示します。
+2. `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>` のようなレジストリサブツリーをクリアします。
 
-### Disable Timestamps - Prefetch
+### タイムスタンプの無効化 - Prefetch
 
-This will save information about the applications executed with the goal of improving the performance of the Windows system. However, this can also be useful for forensics practices.
+これは、Windowsシステムのパフォーマンスを向上させる目的で実行されたアプリケーションに関する情報を保存します。ただし、これはフォレンジック実践にも役立ちます。
 
-- Execute `regedit`
-- Select the file path `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters`
-- Right-click on both `EnablePrefetcher` and `EnableSuperfetch`
-- Select Modify on each of these to change the value from 1 (or 3) to 0
-- Restart
+- `regedit` を実行
+- ファイルパス `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters` を選択
+- `EnablePrefetcher` と `EnableSuperfetch` の両方を右クリック
+- 各々の値を1（または3）から0に変更するために修正を選択
+- 再起動
 
-### Disable Timestamps - Last Access Time
+### タイムスタンプの無効化 - 最後のアクセス時間
 
-Whenever a folder is opened from an NTFS volume on a Windows NT server, the system takes the time to **update a timestamp field on each listed folder**, called the last access time. On a heavily used NTFS volume, this can affect performance.
+NTFSボリュームからフォルダーが開かれるたびに、システムは**各リストされたフォルダーのタイムスタンプフィールドを更新するための時間を取ります**。これは、重度に使用されるNTFSボリュームではパフォーマンスに影響を与える可能性があります。
 
-1. Open the Registry Editor (Regedit.exe).
-2. Browse to `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`.
-3. Look for `NtfsDisableLastAccessUpdate`. If it doesn’t exist, add this DWORD and set its value to 1, which will disable the process.
-4. Close the Registry Editor, and reboot the server.
+1. レジストリエディタ (Regedit.exe) を開きます。
+2. `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem` に移動します。
+3. `NtfsDisableLastAccessUpdate` を探します。存在しない場合は、このDWORDを追加し、その値を1に設定してプロセスを無効にします。
+4. レジストリエディタを閉じ、サーバーを再起動します。
 
-### Delete USB History
+### USB履歴の削除
 
-All the **USB Device Entries** are stored in Windows Registry Under the **USBSTOR** registry key that contains sub keys which are created whenever you plug a USB Device into your PC or Laptop. You can find this key here H`KEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Deleting this** you will delete the USB history.\
-You may also use the tool [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) to be sure you have deleted them (and to delete them).
+すべての**USBデバイスエントリ**は、USBデバイスをPCまたはラップトップに接続するたびに作成されるサブキーを含む**USBSTOR**レジストリキーの下にWindowsレジストリに保存されます。このキーはここにあります `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`。**これを削除することで**、USB履歴を削除します。\
+また、[**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) ツールを使用して、削除したことを確認することもできます（および削除するために）。
 
-Another file that saves information about the USBs is the file `setupapi.dev.log` inside `C:\Windows\INF`. This should also be deleted.
+USBに関する情報を保存する別のファイルは、`C:\Windows\INF` 内の `setupapi.dev.log` です。これも削除する必要があります。
 
-### Disable Shadow Copies
+### シャドウコピーの無効化
 
-**List** shadow copies with `vssadmin list shadowstorage`\
-**Delete** them running `vssadmin delete shadow`
+**シャドウコピーをリスト**するには `vssadmin list shadowstorage`\
+**削除**するには `vssadmin delete shadow` を実行します。
 
-You can also delete them via GUI following the steps proposed in [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
+GUIを介して削除することも可能で、[https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html) で提案された手順に従います。
 
-To disable shadow copies [steps from here](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
+シャドウコピーを無効にするには、[こちらの手順](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows)を参照してください：
 
-1. Open the Services program by typing "services" into the text search box after clicking the Windows start button.
-2. From the list, find "Volume Shadow Copy", select it, and then access Properties by right-clicking.
-3. Choose Disabled from the "Startup type" drop-down menu, and then confirm the change by clicking Apply and OK.
+1. Windowsスタートボタンをクリックした後、テキスト検索ボックスに「services」と入力してサービスプログラムを開きます。
+2. リストから「Volume Shadow Copy」を見つけて選択し、右クリックしてプロパティにアクセスします。
+3. 「スタートアップの種類」ドロップダウンメニューから「無効」を選択し、変更を適用してOKをクリックして確認します。
 
-It's also possible to modify the configuration of which files are going to be copied in the shadow copy in the registry `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
+どのファイルがシャドウコピーにコピーされるかの設定をレジストリ `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot` で変更することも可能です。
 
-### Overwrite deleted files
+### 削除されたファイルの上書き
 
-- You can use a **Windows tool**: `cipher /w:C` This will indicate cipher to remove any data from the available unused disk space inside the C drive.
-- You can also use tools like [**Eraser**](https://eraser.heidi.ie)
+- **Windowsツール**を使用できます: `cipher /w:C` これは、Cドライブ内の未使用のディスクスペースからデータを削除するようにcipherに指示します。
+- [**Eraser**](https://eraser.heidi.ie) のようなツールを使用することもできます。
 
-### Delete Windows event logs
+### Windowsイベントログの削除
 
-- Windows + R --> eventvwr.msc --> Expand "Windows Logs" --> Right click each category and select "Clear Log"
+- Windows + R --> eventvwr.msc --> 「Windowsログ」を展開 --> 各カテゴリを右クリックして「ログのクリア」を選択
 - `for /F "tokens=*" %1 in ('wevtutil.exe el') DO wevtutil.exe cl "%1"`
 - `Get-EventLog -LogName * | ForEach { Clear-EventLog $_.Log }`
 
-### Disable Windows event logs
+### Windowsイベントログの無効化
 
 - `reg add 'HKLM\SYSTEM\CurrentControlSet\Services\eventlog' /v Start /t REG_DWORD /d 4 /f`
-- Inside the services section disable the service "Windows Event Log"
-- `WEvtUtil.exec clear-log` or `WEvtUtil.exe cl`
+- サービスセクション内で「Windows Event Log」サービスを無効にします。
+- `WEvtUtil.exec clear-log` または `WEvtUtil.exe cl`
 
-### Disable $UsnJrnl
+### $UsnJrnlの無効化
 
 - `fsutil usn deletejournal /d c:`
 

@@ -1,60 +1,60 @@
-# Escaping from KIOSKs
+# KIOSKからの脱出
 
 {{#include ../banners/hacktricks-training.md}}
 
 ---
 
-## Check physical device
+## 物理デバイスの確認
 
-| Component    | Action                                                             |
+| コンポーネント    | アクション                                                             |
 | ------------ | ------------------------------------------------------------------ |
-| Power button | Turning the device off and on again may expose the start screen    |
-| Power cable  | Check whether the device reboots when the power is cut off briefly |
-| USB ports    | Connect physical keyboard with more shortcuts                      |
-| Ethernet     | Network scan or sniffing may enable further exploitation           |
+| 電源ボタン | デバイスをオフにして再度オンにすると、スタート画面が表示される場合があります    |
+| 電源ケーブル  | 電源が一時的に切れたときにデバイスが再起動するか確認します |
+| USBポート    | 物理キーボードを接続してショートカットを増やします                      |
+| Ethernet     | ネットワークスキャンやスニッフィングにより、さらなる悪用が可能になる場合があります           |
 
-## Check for possible actions inside the GUI application
+## GUIアプリケーション内での可能なアクションの確認
 
-**Common Dialogs** are those options of **saving a file**, **opening a file**, selecting a font, a color... Most of them will **offer a full Explorer functionality**. This means that you will be able to access Explorer functionalities if you can access these options:
+**一般的なダイアログ**は、**ファイルの保存**、**ファイルのオープン**、フォントや色の選択などのオプションです。これらの多くは**完全なエクスプローラー機能**を提供します。つまり、これらのオプションにアクセスできれば、エクスプローラーの機能にアクセスできるということです：
 
-- Close/Close as
-- Open/Open with
-- Print
-- Export/Import
-- Search
-- Scan
+- 閉じる/名前を付けて閉じる
+- 開く/別のアプリで開く
+- 印刷
+- エクスポート/インポート
+- 検索
+- スキャン
 
-You should check if you can:
+以下のことができるか確認してください：
 
-- Modify or create new files
-- Create symbolic links
-- Get access to restricted areas
-- Execute other apps
+- 新しいファイルを修正または作成する
+- シンボリックリンクを作成する
+- 制限された領域にアクセスする
+- 他のアプリを実行する
 
-### Command Execution
+### コマンド実行
 
-Maybe **using a `Open with`** option\*\* you can open/execute some kind of shell.
+おそらく**`Open with`**オプションを使用することで、何らかのシェルを開く/実行することができます。
 
 #### Windows
 
-For example _cmd.exe, command.com, Powershell/Powershell ISE, mmc.exe, at.exe, taskschd.msc..._ find more binaries that can be used to execute commands (and perform unexpected actions) here: [https://lolbas-project.github.io/](https://lolbas-project.github.io)
+例えば _cmd.exe、command.com、Powershell/Powershell ISE、mmc.exe、at.exe、taskschd.msc..._ コマンドを実行するために使用できるバイナリをさらに見つけるには、こちらを参照してください: [https://lolbas-project.github.io/](https://lolbas-project.github.io)
 
 #### \*NIX \_\_
 
-_bash, sh, zsh..._ More here: [https://gtfobins.github.io/](https://gtfobins.github.io)
+_bash、sh、zsh..._ さらに詳しくは: [https://gtfobins.github.io/](https://gtfobins.github.io)
 
 ## Windows
 
-### Bypassing path restrictions
+### パス制限の回避
 
-- **Environment variables**: There are a lot of environment variables that are pointing to some path
-- **Other protocols**: _about:, data:, ftp:, file:, mailto:, news:, res:, telnet:, view-source:_
-- **Symbolic links**
-- **Shortcuts**: CTRL+N (open new session), CTRL+R (Execute Commands), CTRL+SHIFT+ESC (Task Manager), Windows+E (open explorer), CTRL-B, CTRL-I (Favourites), CTRL-H (History), CTRL-L, CTRL-O (File/Open Dialog), CTRL-P (Print Dialog), CTRL-S (Save As)
-  - Hidden Administrative menu: CTRL-ALT-F8, CTRL-ESC-F9
-- **Shell URIs**: _shell:Administrative Tools, shell:DocumentsLibrary, shell:Librariesshell:UserProfiles, shell:Personal, shell:SearchHomeFolder, shell:Systemshell:NetworkPlacesFolder, shell:SendTo, shell:UsersProfiles, shell:Common Administrative Tools, shell:MyComputerFolder, shell:InternetFolder_
-- **UNC paths**: Paths to connect to shared folders. You should try to connect to the C$ of the local machine ("\\\127.0.0.1\c$\Windows\System32")
-  - **More UNC paths:**
+- **環境変数**: いくつかのパスを指している環境変数がたくさんあります
+- **他のプロトコル**: _about:, data:, ftp:, file:, mailto:, news:, res:, telnet:, view-source:_
+- **シンボリックリンク**
+- **ショートカット**: CTRL+N (新しいセッションを開く)、CTRL+R (コマンドを実行)、CTRL+SHIFT+ESC (タスクマネージャ)、Windows+E (エクスプローラーを開く)、CTRL-B、CTRL-I (お気に入り)、CTRL-H (履歴)、CTRL-L、CTRL-O (ファイル/オープンダイアログ)、CTRL-P (印刷ダイアログ)、CTRL-S (名前を付けて保存)
+- 隠し管理メニュー: CTRL-ALT-F8、CTRL-ESC-F9
+- **シェルURI**: _shell:Administrative Tools、shell:DocumentsLibrary、shell:Librariesshell:UserProfiles、shell:Personal、shell:SearchHomeFolder、shell:Systemshell:NetworkPlacesFolder、shell:SendTo、shell:UsersProfiles、shell:Common Administrative Tools、shell:MyComputerFolder、shell:InternetFolder_
+- **UNCパス**: 共有フォルダに接続するためのパス。ローカルマシンのC$に接続を試みるべきです ("\\\127.0.0.1\c$\Windows\System32")
+- **その他のUNCパス:**
 
 | UNC                       | UNC            | UNC                  |
 | ------------------------- | -------------- | -------------------- |
@@ -68,13 +68,13 @@ _bash, sh, zsh..._ More here: [https://gtfobins.github.io/](https://gtfobins.git
 | %TMP%                     | %USERDOMAIN%   | %USERNAME%           |
 | %USERPROFILE%             | %WINDIR%       |                      |
 
-### Download Your Binaries
+### バイナリをダウンロードする
 
 Console: [https://sourceforge.net/projects/console/](https://sourceforge.net/projects/console/)\
 Explorer: [https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/](https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/)\
-Registry editor: [https://sourceforge.net/projects/uberregedit/](https://sourceforge.net/projects/uberregedit/)
+レジストリエディタ: [https://sourceforge.net/projects/uberregedit/](https://sourceforge.net/projects/uberregedit/)
 
-### Accessing filesystem from the browser
+### ブラウザからファイルシステムにアクセスする
 
 | PATH                | PATH              | PATH               | PATH                |
 | ------------------- | ----------------- | ------------------ | ------------------- |
@@ -86,47 +86,47 @@ Registry editor: [https://sourceforge.net/projects/uberregedit/](https://sourcef
 | %TEMP%              | %SYSTEMDRIVE%     | %SYSTEMROOT%       | %APPDATA%           |
 | %HOMEDRIVE%         | %HOMESHARE        |                    | <p><br></p>         |
 
-### ShortCuts
+### ショートカット
 
-- Sticky Keys – Press SHIFT 5 times
-- Mouse Keys – SHIFT+ALT+NUMLOCK
-- High Contrast – SHIFT+ALT+PRINTSCN
-- Toggle Keys – Hold NUMLOCK for 5 seconds
-- Filter Keys – Hold right SHIFT for 12 seconds
-- WINDOWS+F1 – Windows Search
-- WINDOWS+D – Show Desktop
-- WINDOWS+E – Launch Windows Explorer
-- WINDOWS+R – Run
-- WINDOWS+U – Ease of Access Centre
-- WINDOWS+F – Search
-- SHIFT+F10 – Context Menu
-- CTRL+SHIFT+ESC – Task Manager
-- CTRL+ALT+DEL – Splash screen on newer Windows versions
-- F1 – Help F3 – Search
-- F6 – Address Bar
-- F11 – Toggle full screen within Internet Explorer
-- CTRL+H – Internet Explorer History
-- CTRL+T – Internet Explorer – New Tab
-- CTRL+N – Internet Explorer – New Page
-- CTRL+O – Open File
-- CTRL+S – Save CTRL+N – New RDP / Citrix
+- スティッキーキー – SHIFTを5回押す
+- マウスキー – SHIFT+ALT+NUMLOCK
+- ハイコントラスト – SHIFT+ALT+PRINTSCN
+- トグルキー – NUMLOCKを5秒間保持する
+- フィルターキー – 右SHIFTを12秒間保持する
+- WINDOWS+F1 – Windows検索
+- WINDOWS+D – デスクトップを表示
+- WINDOWS+E – Windowsエクスプローラーを起動
+- WINDOWS+R – 実行
+- WINDOWS+U – アクセシビリティセンター
+- WINDOWS+F – 検索
+- SHIFT+F10 – コンテキストメニュー
+- CTRL+SHIFT+ESC – タスクマネージャ
+- CTRL+ALT+DEL – 新しいWindowsバージョンでのスプラッシュ画面
+- F1 – ヘルプ F3 – 検索
+- F6 – アドレスバー
+- F11 – Internet Explorer内で全画面表示を切り替え
+- CTRL+H – Internet Explorerの履歴
+- CTRL+T – Internet Explorer – 新しいタブ
+- CTRL+N – Internet Explorer – 新しいページ
+- CTRL+O – ファイルを開く
+- CTRL+S – 保存 CTRL+N – 新しいRDP / Citrix
 
-### Swipes
+### スワイプ
 
-- Swipe from the left side to the right to see all open Windows, minimizing the KIOSK app and accessing the whole OS directly;
-- Swipe from the right side to the left to open Action Center, minimizing the KIOSK app and accessing the whole OS directly;
-- Swipe in from the top edge to make the title bar visible for an app opened in full screen mode;
-- Swipe up from the bottom to show the taskbar in a full screen app.
+- 左側から右にスワイプしてすべてのオープンウィンドウを表示し、KIOSKアプリを最小化してOS全体に直接アクセスします；
+- 右側から左にスワイプしてアクションセンターを開き、KIOSKアプリを最小化してOS全体に直接アクセスします；
+- 上端からスワイプしてフルスクリーンモードで開いているアプリのタイトルバーを表示します；
+- 下からスワイプしてフルスクリーンアプリでタスクバーを表示します。
 
-### Internet Explorer Tricks
+### Internet Explorerのトリック
 
-#### 'Image Toolbar'
+#### '画像ツールバー'
 
-It's a toolbar that appears on the top-left of image when it's clicked. You will be able to Save, Print, Mailto, Open "My Pictures" in Explorer. The Kiosk needs to be using Internet Explorer.
+画像をクリックすると左上に表示されるツールバーです。保存、印刷、メール送信、エクスプローラーで「マイピクチャ」を開くことができます。KioskはInternet Explorerを使用している必要があります。
 
-#### Shell Protocol
+#### シェルプロトコル
 
-Type this URLs to obtain an Explorer view:
+エクスプローラー表示を取得するには、次のURLを入力します：
 
 - `shell:Administrative Tools`
 - `shell:DocumentsLibrary`
@@ -145,131 +145,131 @@ Type this URLs to obtain an Explorer view:
 - `Shell:System`
 - `Shell:ControlPanelFolder`
 - `Shell:Windows`
-- `shell:::{21EC2020-3AEA-1069-A2DD-08002B30309D}` --> Control Panel
-- `shell:::{20D04FE0-3AEA-1069-A2D8-08002B30309D}` --> My Computer
-- `shell:::{{208D2C60-3AEA-1069-A2D7-08002B30309D}}` --> My Network Places
+- `shell:::{21EC2020-3AEA-1069-A2DD-08002B30309D}` --> コントロールパネル
+- `shell:::{20D04FE0-3AEA-1069-A2D8-08002B30309D}` --> マイコンピュータ
+- `shell:::{{208D2C60-3AEA-1069-A2D7-08002B30309D}}` --> マイネットワークプレイス
 - `shell:::{871C5380-42A0-1069-A2EA-08002B30309D}` --> Internet Explorer
 
-### Show File Extensions
+### ファイル拡張子の表示
 
-Check this page for more information: [https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)
+詳細についてはこのページを確認してください: [https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)
 
-## Browsers tricks
+## ブラウザのトリック
 
-Backup iKat versions:
+iKatのバックアップバージョン:
 
 [http://swin.es/k/](http://swin.es/k/)\
 [http://www.ikat.kronicd.net/](http://www.ikat.kronicd.net)\\
 
-Create a common dialog using JavaScript and access file explorer: `document.write('<input/type=file>')`\
-Source: https://medium.com/@Rend\_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
+JavaScriptを使用して一般的なダイアログを作成し、ファイルエクスプローラーにアクセスします: `document.write('<input/type=file>')`\
+ソース: https://medium.com/@Rend\_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
 
 ## iPad
 
-### Gestures and bottoms
+### ジェスチャーとボタン
 
-- Swipe up with four (or five) fingers / Double-tap Home button: To view the multitask view and change App
-- Swipe one way or another with four or five fingers: In order to change to the next/last App
-- Pinch the screen with five fingers / Touch Home button / Swipe up with 1 finger from the bottom of the screen in a quick motion to the up: To access Home
-- Swipe one finger from the bottom of the screen just 1-2 inches (slow): The dock will appear
-- Swipe down from the top of the display with 1 finger: To view your notifications
-- Swipe down with 1 finger the top-right corner of the screen: To see iPad Pro's control centre
-- Swipe 1 finger from the left of the screen 1-2 inches: To see Today view
-- Swipe fast 1 finger from the centre of the screen to the right or left: To change to next/last App
-- Press and hold the On/**Off**/Sleep button at the upper-right corner of the **iPad +** Move the Slide to **power off** slider all the way to the right: To power off
-- Press the On/**Off**/Sleep button at the upper-right corner of the **iPad and the Home button for a few second**: To force a hard power off
-- Press the On/**Off**/Sleep button at the upper-right corner of the **iPad and the Home button quickly**: To take a screenshot that will pop up in the lower left of the display. Press both buttons at the same time very briefly as if you hold them a few seconds a hard power off will be performed.
+- 四本（または五本）の指で上にスワイプ / ホームボタンをダブルタップ: マルチタスクビューを表示し、アプリを変更します
+- 四本または五本の指で一方向にスワイプ: 次の/前のアプリに切り替えます
+- 五本の指で画面をピンチ / ホームボタンをタッチ / 画面の下から1本の指で素早く上にスワイプ: ホームにアクセスします
+- 画面の下から1本の指で1-2インチスワイプ（遅く）: ドックが表示されます
+- 画面の上部から1本の指でスワイプダウン: 通知を表示します
+- 画面の右上隅から1本の指でスワイプダウン: iPad Proのコントロールセンターを表示します
+- 画面の左から1本の指で1-2インチスワイプ: 今日のビューを表示します
+- 画面の中央から右または左に素早く1本の指でスワイプ: 次の/前のアプリに切り替えます
+- 右上隅の**iPad +**の電源ボタン/**オフ**/スリープボタンを押し続け、**電源オフ**スライダーを右にスライドします: 電源を切ります
+- 右上隅の**iPad**の電源ボタン/**オフ**/スリープボタンとホームボタンを数秒間押し続けます: ハード電源オフを強制します
+- 右上隅の**iPad**の電源ボタン/**オフ**/スリープボタンとホームボタンを素早く押します: スクリーンショットが表示の左下にポップアップします。両方のボタンを同時に非常に短時間押すと、数秒間保持するとハード電源オフが実行されます。
 
-### Shortcuts
+### ショートカット
 
-You should have an iPad keyboard or a USB keyboard adaptor. Only shortcuts that could help escaping from the application will be shown here.
+iPadキーボードまたはUSBキーボードアダプタを持っている必要があります。アプリケーションからの脱出に役立つショートカットのみがここに表示されます。
 
-| Key | Name         |
+| キー | 名前         |
 | --- | ------------ |
-| ⌘   | Command      |
-| ⌥   | Option (Alt) |
-| ⇧   | Shift        |
-| ↩   | Return       |
-| ⇥   | Tab          |
-| ^   | Control      |
-| ←   | Left Arrow   |
-| →   | Right Arrow  |
-| ↑   | Up Arrow     |
-| ↓   | Down Arrow   |
+| ⌘   | コマンド      |
+| ⌥   | オプション (Alt) |
+| ⇧   | シフト        |
+| ↩   | リターン       |
+| ⇥   | タブ          |
+| ^   | コントロール      |
+| ←   | 左矢印   |
+| →   | 右矢印  |
+| ↑   | 上矢印     |
+| ↓   | 下矢印     |
 
-#### System shortcuts
+#### システムショートカット
 
-These shortcuts are for the visual settings and sound settings, depending on the use of the iPad.
+これらのショートカットは、iPadの使用に応じた視覚設定と音設定のためのものです。
 
-| Shortcut | Action                                                                         |
+| ショートカット | アクション                                                                         |
 | -------- | ------------------------------------------------------------------------------ |
-| F1       | Dim Sscreen                                                                    |
-| F2       | Brighten screen                                                                |
-| F7       | Back one song                                                                  |
-| F8       | Play/pause                                                                     |
-| F9       | Skip song                                                                      |
-| F10      | Mute                                                                           |
-| F11      | Decrease volume                                                                |
-| F12      | Increase volume                                                                |
-| ⌘ Space  | Display a list of available languages; to choose one, tap the space bar again. |
+| F1       | 画面を暗くする                                                                    |
+| F2       | 画面を明るくする                                                                |
+| F7       | 一曲戻る                                                                  |
+| F8       | 再生/一時停止                                                                     |
+| F9       | 曲をスキップ                                                                      |
+| F10      | ミュート                                                                           |
+| F11      | 音量を下げる                                                                |
+| F12      | 音量を上げる                                                                |
+| ⌘ Space  | 利用可能な言語のリストを表示; 一つを選択するには、スペースバーを再度タップします。 |
 
-#### iPad navigation
+#### iPadナビゲーション
 
-| Shortcut                                           | Action                                                  |
+| ショートカット                                           | アクション                                                  |
 | -------------------------------------------------- | ------------------------------------------------------- |
-| ⌘H                                                 | Go to Home                                              |
-| ⌘⇧H (Command-Shift-H)                              | Go to Home                                              |
-| ⌘ (Space)                                          | Open Spotlight                                          |
-| ⌘⇥ (Command-Tab)                                   | List last ten used apps                                 |
-| ⌘\~                                                | Go t the last App                                       |
-| ⌘⇧3 (Command-Shift-3)                              | Screenshot (hovers in bottom left to save or act on it) |
-| ⌘⇧4                                                | Screenshot and open it in the editor                    |
-| Press and hold ⌘                                   | List of shortcuts available for the App                 |
-| ⌘⌥D (Command-Option/Alt-D)                         | Brings up the dock                                      |
-| ^⌥H (Control-Option-H)                             | Home button                                             |
-| ^⌥H H (Control-Option-H-H)                         | Show multitask bar                                      |
-| ^⌥I (Control-Option-i)                             | Item chooser                                            |
-| Escape                                             | Back button                                             |
-| → (Right arrow)                                    | Next item                                               |
-| ← (Left arrow)                                     | Previous item                                           |
-| ↑↓ (Up arrow, Down arrow)                          | Simultaneously tap selected item                        |
-| ⌥ ↓ (Option-Down arrow)                            | Scroll down                                             |
-| ⌥↑ (Option-Up arrow)                               | Scroll up                                               |
-| ⌥← or ⌥→ (Option-Left arrow or Option-Right arrow) | Scroll left or right                                    |
-| ^⌥S (Control-Option-S)                             | Turn VoiceOver speech on or off                         |
-| ⌘⇧⇥ (Command-Shift-Tab)                            | Switch to the previous app                              |
-| ⌘⇥ (Command-Tab)                                   | Switch back to the original app                         |
-| ←+→, then Option + ← or Option+→                   | Navigate through Dock                                   |
+| ⌘H                                                 | ホームに移動                                              |
+| ⌘⇧H (Command-Shift-H)                              | ホームに移動                                              |
+| ⌘ (Space)                                          | スポットライトを開く                                          |
+| ⌘⇥ (Command-Tab)                                   | 最後に使用したアプリのリスト                                 |
+| ⌘\~                                                | 最後のアプリに移動                                       |
+| ⌘⇧3 (Command-Shift-3)                              | スクリーンショット (保存またはアクションを実行するために左下にホバー) |
+| ⌘⇧4                                                | スクリーンショットを撮影し、エディタで開く                    |
+| ⌘を押し続ける                                   | アプリのための利用可能なショートカットのリスト                 |
+| ⌘⌥D (Command-Option/Alt-D)                         | ドックを表示                                      |
+| ^⌥H (Control-Option-H)                             | ホームボタン                                             |
+| ^⌥H H (Control-Option-H-H)                         | マルチタスクバーを表示                                      |
+| ^⌥I (Control-Option-i)                             | アイテム選択                                            |
+| Escape                                             | 戻るボタン                                             |
+| → (右矢印)                                    | 次のアイテム                                               |
+| ← (左矢印)                                     | 前のアイテム                                           |
+| ↑↓ (上矢印、下矢印)                          | 選択したアイテムを同時にタップ                        |
+| ⌥ ↓ (Option-Down arrow)                            | 下にスクロール                                             |
+| ⌥↑ (Option-Up arrow)                               | 上にスクロール                                               |
+| ⌥← または ⌥→ (Option-Left arrow または Option-Right arrow) | 左または右にスクロール                                    |
+| ^⌥S (Control-Option-S)                             | VoiceOverの音声をオンまたはオフにする                         |
+| ⌘⇧⇥ (Command-Shift-Tab)                            | 前のアプリに切り替える                              |
+| ⌘⇥ (Command-Tab)                                   | 元のアプリに戻る                         |
+| ←+→、次に Option + ← または Option+→                   | ドックをナビゲート                                   |
 
-#### Safari shortcuts
+#### Safariショートカット
 
-| Shortcut                | Action                                           |
+| ショートカット                | アクション                                           |
 | ----------------------- | ------------------------------------------------ |
-| ⌘L (Command-L)          | Open Location                                    |
-| ⌘T                      | Open a new tab                                   |
-| ⌘W                      | Close the current tab                            |
-| ⌘R                      | Refresh the current tab                          |
-| ⌘.                      | Stop loading the current tab                     |
-| ^⇥                      | Switch to the next tab                           |
-| ^⇧⇥ (Control-Shift-Tab) | Move to the previous tab                         |
-| ⌘L                      | Select the text input/URL field to modify it     |
-| ⌘⇧T (Command-Shift-T)   | Open last closed tab (can be used several times) |
-| ⌘\[                     | Goes back one page in your browsing history      |
-| ⌘]                      | Goes forward one page in your browsing history   |
-| ⌘⇧R                     | Activate Reader Mode                             |
+| ⌘L (Command-L)          | ロケーションを開く                                    |
+| ⌘T                      | 新しいタブを開く                                   |
+| ⌘W                      | 現在のタブを閉じる                            |
+| ⌘R                      | 現在のタブを更新                          |
+| ⌘.                      | 現在のタブの読み込みを停止                     |
+| ^⇥                      | 次のタブに切り替える                           |
+| ^⇧⇥ (Control-Shift-Tab) | 前のタブに移動                         |
+| ⌘L                      | テキスト入力/URLフィールドを選択して修正する     |
+| ⌘⇧T (Command-Shift-T)   | 最後に閉じたタブを開く (何度でも使用可能) |
+| ⌘\[                     | ブラウジング履歴で1ページ戻る      |
+| ⌘]                      | ブラウジング履歴で1ページ進む   |
+| ⌘⇧R                     | リーダーモードを有効にする                             |
 
-#### Mail shortcuts
+#### メールショートカット
 
-| Shortcut                   | Action                       |
+| ショートカット                   | アクション                       |
 | -------------------------- | ---------------------------- |
-| ⌘L                         | Open Location                |
-| ⌘T                         | Open a new tab               |
-| ⌘W                         | Close the current tab        |
-| ⌘R                         | Refresh the current tab      |
-| ⌘.                         | Stop loading the current tab |
-| ⌘⌥F (Command-Option/Alt-F) | Search in your mailbox       |
+| ⌘L                         | ロケーションを開く                |
+| ⌘T                         | 新しいタブを開く               |
+| ⌘W                         | 現在のタブを閉じる        |
+| ⌘R                         | 現在のタブを更新      |
+| ⌘.                         | 現在のタブの読み込みを停止 |
+| ⌘⌥F (Command-Option/Alt-F) | メールボックス内を検索       |
 
-## References
+## 参考文献
 
 - [https://www.macworld.com/article/2975857/6-only-for-ipad-gestures-you-need-to-know.html](https://www.macworld.com/article/2975857/6-only-for-ipad-gestures-you-need-to-know.html)
 - [https://www.tomsguide.com/us/ipad-shortcuts,news-18205.html](https://www.tomsguide.com/us/ipad-shortcuts,news-18205.html)

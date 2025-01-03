@@ -52,7 +52,7 @@ self.numberOfWheels += value;
 ```
 ### **オブジェクトとメソッドの呼び出し**
 
-クラスのインスタンスを作成するために、**`alloc`** メソッドが呼び出され、各 **プロパティ** のために **メモリが割り当てられ**、その割り当てが **ゼロ** にされます。次に **`init`** が呼び出され、**プロパティ** が **必要な値** に **初期化** されます。
+クラスのインスタンスを作成するために、**`alloc`** メソッドが呼び出され、各 **プロパティ** のために **メモリを割り当て** て、その割り当てを **ゼロ** にします。次に **`init`** が呼び出され、**プロパティ** を **必要な値** に **初期化** します。
 ```objectivec
 // Something like this:
 MyVehicle *newVehicle = [[MyVehicle alloc] init];
@@ -70,7 +70,7 @@ MyVehicle *newVehicle = [MyVehicle new];
 ```objectivec
 + (id)stringWithString:(NSString *)aString;
 ```
-### Setter & Getter
+### セッターとゲッター
 
 プロパティを**設定**および**取得**するには、**ドット表記**を使用するか、**メソッドを呼び出す**ように行うことができます:
 ```objectivec
@@ -84,7 +84,7 @@ NSLog(@"Number of wheels: %i", [newVehicle numberOfWheels]);
 ```
 ### **インスタンス変数**
 
-setterおよびgetterメソッドの代わりにインスタンス変数を使用できます。これらの変数はプロパティと同じ名前ですが、先頭に「_」が付いています。
+セッターおよびゲッターメソッドの代わりに、インスタンス変数を使用できます。これらの変数はプロパティと同じ名前ですが、先頭に「_」が付いています。
 ```objectivec
 - (void)makeLongTruck {
 _numberOfWheels = +10000;
@@ -257,7 +257,7 @@ return a+b;
 };
 NSLog(@"3+4 = %d", suma(3,4));
 ```
-関数の**パラメータとして使用されるブロックタイプを定義する**ことも可能です:
+関数のパラメータとして使用するために**ブロックタイプを定義する**ことも可能です:
 ```objectivec
 // Define the block type
 typedef void (^callbackLogger)(void);

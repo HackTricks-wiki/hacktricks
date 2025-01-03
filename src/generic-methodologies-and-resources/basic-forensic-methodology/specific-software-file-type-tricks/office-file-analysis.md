@@ -2,35 +2,17 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="../../../images/image (48).png" alt=""><figcaption></figcaption></figure>
+さらなる情報は[https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/)を確認してください。これは要約です：
 
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=office-file-analysis) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Microsoftは多くのオフィス文書フォーマットを作成しており、主に**OLEフォーマット**（RTF、DOC、XLS、PPTなど）と**Office Open XML (OOXML)フォーマット**（DOCX、XLSX、PPTXなど）の2種類があります。これらのフォーマットにはマクロが含まれることがあり、フィッシングやマルウェアの標的となります。OOXMLファイルはzipコンテナとして構造化されており、解凍することでファイルとフォルダの階層やXMLファイルの内容を確認できます。
 
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=office-file-analysis" %}
+OOXMLファイル構造を探るための文書を解凍するコマンドと出力構造が示されています。これらのファイルにデータを隠す技術が文書化されており、CTFチャレンジ内でのデータ隠蔽の革新が続いていることを示しています。
 
-For further information check [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/). This is just a sumary:
+分析のために、**oletools**と**OfficeDissector**はOLEおよびOOXML文書を調査するための包括的なツールセットを提供します。これらのツールは、しばしばマルウェア配信のベクターとして機能する埋め込まれたマクロを特定し分析するのに役立ちます。VBAマクロの分析は、Libre Officeを利用することでMicrosoft Officeなしで行うことができ、ブレークポイントやウォッチ変数を使ってデバッグが可能です。
 
-Microsoft has created many office document formats, with two main types being **OLE formats** (like RTF, DOC, XLS, PPT) and **Office Open XML (OOXML) formats** (such as DOCX, XLSX, PPTX). These formats can include macros, making them targets for phishing and malware. OOXML files are structured as zip containers, allowing inspection through unzipping, revealing the file and folder hierarchy and XML file contents.
-
-To explore OOXML file structures, the command to unzip a document and the output structure are given. Techniques for hiding data in these files have been documented, indicating ongoing innovation in data concealment within CTF challenges.
-
-For analysis, **oletools** and **OfficeDissector** offer comprehensive toolsets for examining both OLE and OOXML documents. These tools help in identifying and analyzing embedded macros, which often serve as vectors for malware delivery, typically downloading and executing additional malicious payloads. Analysis of VBA macros can be conducted without Microsoft Office by utilizing Libre Office, which allows for debugging with breakpoints and watch variables.
-
-Installation and usage of **oletools** are straightforward, with commands provided for installing via pip and extracting macros from documents. Automatic execution of macros is triggered by functions like `AutoOpen`, `AutoExec`, or `Document_Open`.
-
+**oletools**のインストールと使用は簡単で、pipを介してインストールし、文書からマクロを抽出するためのコマンドが提供されています。マクロの自動実行は、`AutoOpen`、`AutoExec`、または`Document_Open`のような関数によってトリガーされます。
 ```bash
 sudo pip3 install -U oletools
 olevba -c /path/to/document #Extract macros
 ```
-
-<figure><img src="../../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=office-file-analysis) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=office-file-analysis" %}
-
 {{#include ../../../banners/hacktricks-training.md}}

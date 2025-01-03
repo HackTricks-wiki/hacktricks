@@ -130,7 +130,7 @@ cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 # Decimal IPs
 127.0.0.1 == 2130706433
 ```
-### 時間ベースのデータ抽出
+### 時間ベースのデータ流出
 ```bash
 time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 ```
@@ -145,8 +145,8 @@ echo ${PATH:0:1} #/
 
 ### ビルトイン
 
-外部関数を実行できず、**RCEを取得するための限られたビルトインのセットにのみアクセスできる**場合、これを行うための便利なトリックがあります。通常、**すべての**ビルトインを使用することはできないため、**すべてのオプションを知っておく**必要があります。アイデアは[**devploit**](https://twitter.com/devploit)から。\
-まず、すべての[**シェルビルトイン**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**を確認してください。** 次に、いくつかの**推奨事項**があります：
+外部関数を実行できず、**RCEを取得するための限られたビルトインのセットにのみアクセスできる**場合、これを行うための便利なトリックがあります。通常、**すべての**ビルトインを使用することは**できない**ので、監獄を回避するために**すべての選択肢を知っておくべき**です。アイデアは[**devploit**](https://twitter.com/devploit)から。\
+まず、すべての[**シェルビルトイン**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**を確認してください。** それから、いくつかの**推奨事項**があります：
 ```bash
 # Get list of builtins
 declare builtins
@@ -303,7 +303,7 @@ ln /f*
 ../bypass-bash-restrictions/bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-## Chroot & その他の監獄バイパス
+## Chroot & その他のジェイル バイパス
 
 {{#ref}}
 ../privilege-escalation/escaping-from-limited-bash.md

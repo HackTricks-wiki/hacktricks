@@ -1,184 +1,184 @@
-# Cryptographic/Compression Algorithms
+# 暗号化/圧縮アルゴリズム
 
-## Cryptographic/Compression Algorithms
+## 暗号化/圧縮アルゴリズム
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Identifying Algorithms
+## アルゴリズムの特定
 
-If you ends in a code **using shift rights and lefts, xors and several arithmetic operations** it's highly possible that it's the implementation of a **cryptographic algorithm**. Here it's going to be showed some ways to **identify the algorithm that it's used without needing to reverse each step**.
+コードが**右シフトと左シフト、XORおよびいくつかの算術演算**を使用している場合、それは**暗号化アルゴリズム**の実装である可能性が高いです。ここでは、**各ステップを逆にすることなく使用されているアルゴリズムを特定する方法**をいくつか示します。
 
-### API functions
+### API関数
 
 **CryptDeriveKey**
 
-If this function is used, you can find which **algorithm is being used** checking the value of the second parameter:
+この関数が使用されている場合、第二のパラメータの値を確認することで**使用されているアルゴリズム**を見つけることができます：
 
 ![](<../../images/image (156).png>)
 
-Check here the table of possible algorithms and their assigned values: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
+可能なアルゴリズムとその割り当てられた値の表はここで確認できます: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
 
 **RtlCompressBuffer/RtlDecompressBuffer**
 
-Compresses and decompresses a given buffer of data.
+指定されたデータバッファを圧縮および解凍します。
 
 **CryptAcquireContext**
 
-From [the docs](https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecontexta): The **CryptAcquireContext** function is used to acquire a handle to a particular key container within a particular cryptographic service provider (CSP). **This returned handle is used in calls to CryptoAPI** functions that use the selected CSP.
+[ドキュメントから](https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecontexta): **CryptAcquireContext**関数は、特定の暗号サービスプロバイダー（CSP）内の特定のキーコンテナへのハンドルを取得するために使用されます。**この返されたハンドルは、選択されたCSPを使用するCryptoAPI**関数への呼び出しで使用されます。
 
 **CryptCreateHash**
 
-Initiates the hashing of a stream of data. If this function is used, you can find which **algorithm is being used** checking the value of the second parameter:
+データストリームのハッシュ化を開始します。この関数が使用されている場合、第二のパラメータの値を確認することで**使用されているアルゴリズム**を見つけることができます：
 
 ![](<../../images/image (549).png>)
 
 \
-Check here the table of possible algorithms and their assigned values: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
+可能なアルゴリズムとその割り当てられた値の表はここで確認できます: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
 
-### Code constants
+### コード定数
 
-Sometimes it's really easy to identify an algorithm thanks to the fact that it needs to use a special and unique value.
+時には、特別でユニークな値を使用する必要があるため、アルゴリズムを特定するのが非常に簡単です。
 
 ![](<../../images/image (833).png>)
 
-If you search for the first constant in Google this is what you get:
+最初の定数をGoogleで検索すると、次のような結果が得られます：
 
 ![](<../../images/image (529).png>)
 
-Therefore, you can assume that the decompiled function is a **sha256 calculator.**\
-You can search any of the other constants and you will obtain (probably) the same result.
+したがって、逆コンパイルされた関数は**sha256計算機**であると推測できます。\
+他の定数を検索すれば、（おそらく）同じ結果が得られます。
 
-### data info
+### データ情報
 
-If the code doesn't have any significant constant it may be **loading information from the .data section**.\
-You can access that data, **group the first dword** and search for it in google as we have done in the section before:
+コードに重要な定数がない場合、**.dataセクションから情報を読み込んでいる可能性があります**。\
+そのデータにアクセスし、**最初のDWORDをグループ化**し、前のセクションで行ったようにGoogleで検索できます：
 
 ![](<../../images/image (531).png>)
 
-In this case, if you look for **0xA56363C6** you can find that it's related to the **tables of the AES algorithm**.
+この場合、**0xA56363C6**を検索すると、**AESアルゴリズムのテーブル**に関連していることがわかります。
 
-## RC4 **(Symmetric Crypt)**
+## RC4 **（対称暗号）**
 
-### Characteristics
+### 特徴
 
-It's composed of 3 main parts:
+3つの主要な部分で構成されています：
 
-- **Initialization stage/**: Creates a **table of values from 0x00 to 0xFF** (256bytes in total, 0x100). This table is commonly call **Substitution Box** (or SBox).
-- **Scrambling stage**: Will **loop through the table** crated before (loop of 0x100 iterations, again) creating modifying each value with **semi-random** bytes. In order to create this semi-random bytes, the RC4 **key is used**. RC4 **keys** can be **between 1 and 256 bytes in length**, however it is usually recommended that it is above 5 bytes. Commonly, RC4 keys are 16 bytes in length.
-- **XOR stage**: Finally, the plain-text or cyphertext is **XORed with the values created before**. The function to encrypt and decrypt is the same. For this, a **loop through the created 256 bytes** will be performed as many times as necessary. This is usually recognized in a decompiled code with a **%256 (mod 256)**.
+- **初期化ステージ/**: **0x00から0xFFまでの値のテーブルを作成**します（合計256バイト、0x100）。このテーブルは一般に**置換ボックス**（またはSBox）と呼ばれます。
+- **スクランブリングステージ**: 前に作成したテーブルを**ループ**し（0x100回のイテレーションのループ）、各値を**半ランダム**なバイトで修正します。この半ランダムなバイトを作成するために、RC4の**キーが使用されます**。RC4の**キー**は**1バイトから256バイトの長さ**である可能性がありますが、通常は5バイト以上が推奨されます。一般的に、RC4のキーは16バイトの長さです。
+- **XORステージ**: 最後に、平文または暗号文は**前に作成された値とXORされます**。暗号化と復号化の関数は同じです。これには、作成された256バイトを必要な回数だけループします。これは通常、逆コンパイルされたコードで**%256（mod 256）**として認識されます。
 
 > [!NOTE]
-> **In order to identify a RC4 in a disassembly/decompiled code you can check for 2 loops of size 0x100 (with the use of a key) and then a XOR of the input data with the 256 values created before in the 2 loops probably using a %256 (mod 256)**
+> **逆アセンブル/逆コンパイルされたコードでRC4を特定するには、サイズ0x100の2つのループ（キーを使用）を確認し、その後、2つのループで前に作成された256の値と入力データのXORを行うことを確認します。おそらく%256（mod 256）を使用します。**
 
-### **Initialization stage/Substitution Box:** (Note the number 256 used as counter and how a 0 is written in each place of the 256 chars)
+### **初期化ステージ/置換ボックス:**（カウンタとして使用される256の数と、256文字の各場所に0が書かれていることに注意）
 
 ![](<../../images/image (584).png>)
 
-### **Scrambling Stage:**
+### **スクランブリングステージ:**
 
 ![](<../../images/image (835).png>)
 
-### **XOR Stage:**
+### **XORステージ:**
 
 ![](<../../images/image (904).png>)
 
-## **AES (Symmetric Crypt)**
+## **AES（対称暗号）**
 
-### **Characteristics**
+### **特徴**
 
-- Use of **substitution boxes and lookup tables**
-  - It's possible to **distinguish AES thanks to the use of specific lookup table values** (constants). _Note that the **constant** can be **stored** in the binary **or created**_ _**dynamically**._
-- The **encryption key** must be **divisible** by **16** (usually 32B) and usually an **IV** of 16B is used.
+- **置換ボックスとルックアップテーブルの使用**
+- **特定のルックアップテーブル値**（定数）の使用によりAESを**区別することが可能**です。_定数は**バイナリに保存**されるか、_ _**動的に作成**される可能性があります。_
+- **暗号化キー**は**16で割り切れる**必要があります（通常32B）し、通常は16Bの**IV**が使用されます。
 
-### SBox constants
+### SBox定数
 
 ![](<../../images/image (208).png>)
 
-## Serpent **(Symmetric Crypt)**
+## Serpent **（対称暗号）**
 
-### Characteristics
+### 特徴
 
-- It's rare to find some malware using it but there are examples (Ursnif)
-- Simple to determine if an algorithm is Serpent or not based on it's length (extremely long function)
+- それを使用するマルウェアはあまり見られませんが、例（Ursnif）があります。
+- アルゴリズムがSerpentかどうかをその長さ（非常に長い関数）に基づいて簡単に判断できます。
 
-### Identifying
+### 特定
 
-In the following image notice how the constant **0x9E3779B9** is used (note that this constant is also used by other crypto algorithms like **TEA** -Tiny Encryption Algorithm).\
-Also note the **size of the loop** (**132**) and the **number of XOR operations** in the **disassembly** instructions and in the **code** example:
+次の画像では、定数**0x9E3779B9**が使用されていることに注意してください（この定数は**TEA**（Tiny Encryption Algorithm）などの他の暗号アルゴリズムでも使用されます）。\
+また、**ループのサイズ**（**132**）と**逆アセンブル**命令および**コード**例における**XOR操作の数**にも注意してください：
 
 ![](<../../images/image (547).png>)
 
-As it was mentioned before, this code can be visualized inside any decompiler as a **very long function** as there **aren't jumps** inside of it. The decompiled code can look like the following:
+前述のように、このコードは**非常に長い関数**として任意の逆コンパイラ内で視覚化できます。内部に**ジャンプ**がないためです。逆コンパイルされたコードは次のように見えることがあります：
 
 ![](<../../images/image (513).png>)
 
-Therefore, it's possible to identify this algorithm checking the **magic number** and the **initial XORs**, seeing a **very long function** and **comparing** some **instructions** of the long function **with an implementation** (like the shift left by 7 and the rotate left by 22).
+したがって、**マジックナンバー**と**初期XOR**を確認し、**非常に長い関数**を見て、**長い関数のいくつかの命令を実装と比較する**ことで、このアルゴリズムを特定することが可能です（左に7シフトし、22回左回転するなど）。
 
-## RSA **(Asymmetric Crypt)**
+## RSA **（非対称暗号）**
 
-### Characteristics
+### 特徴
 
-- More complex than symmetric algorithms
-- There are no constants! (custom implementation are difficult to determine)
-- KANAL (a crypto analyzer) fails to show hints on RSA ad it relies on constants.
+- 対称アルゴリズムよりも複雑です。
+- 定数はありません！（カスタム実装は特定が難しい）
+- KANAL（暗号アナライザー）はRSAに関するヒントを示すことができず、定数に依存しています。
 
-### Identifying by comparisons
+### 比較による特定
 
 ![](<../../images/image (1113).png>)
 
-- In line 11 (left) there is a `+7) >> 3` which is the same as in line 35 (right): `+7) / 8`
-- Line 12 (left) is checking if `modulus_len < 0x040` and in line 36 (right) it's checking if `inputLen+11 > modulusLen`
+- 行11（左）には`+7) >> 3`があり、行35（右）には`+7) / 8`があります。
+- 行12（左）は`modulus_len < 0x040`を確認しており、行36（右）は`inputLen+11 > modulusLen`を確認しています。
 
-## MD5 & SHA (hash)
+## MD5 & SHA（ハッシュ）
 
-### Characteristics
+### 特徴
 
-- 3 functions: Init, Update, Final
-- Similar initialize functions
+- 3つの関数：Init、Update、Final
+- 初期化関数が似ています。
 
-### Identify
+### 特定
 
 **Init**
 
-You can identify both of them checking the constants. Note that the sha_init has 1 constant that MD5 doesn't have:
+定数を確認することで両方を特定できます。sha_initにはMD5にはない1つの定数があります：
 
 ![](<../../images/image (406).png>)
 
 **MD5 Transform**
 
-Note the use of more constants
+より多くの定数の使用に注意してください。
 
 ![](<../../images/image (253) (1) (1).png>)
 
-## CRC (hash)
+## CRC（ハッシュ）
 
-- Smaller and more efficient as it's function is to find accidental changes in data
-- Uses lookup tables (so you can identify constants)
+- 小さく、データの偶発的な変更を見つけるために効率的です。
+- ルックアップテーブルを使用します（したがって、定数を特定できます）。
 
-### Identify
+### 特定
 
-Check **lookup table constants**:
+**ルックアップテーブル定数**を確認してください：
 
 ![](<../../images/image (508).png>)
 
-A CRC hash algorithm looks like:
+CRCハッシュアルゴリズムは次のようになります：
 
 ![](<../../images/image (391).png>)
 
-## APLib (Compression)
+## APLib（圧縮）
 
-### Characteristics
+### 特徴
 
-- Not recognizable constants
-- You can try to write the algorithm in python and search for similar things online
+- 認識可能な定数はありません。
+- アルゴリズムをPythonで書いて、オンラインで類似のものを検索してみることができます。
 
-### Identify
+### 特定
 
-The graph is quiet large:
+グラフはかなり大きいです：
 
 ![](<../../images/image (207) (2) (1).png>)
 
-Check **3 comparisons to recognise it**:
+それを認識するための**3つの比較**を確認してください：
 
 ![](<../../images/image (430).png>)
 

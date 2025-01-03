@@ -15,15 +15,15 @@ MacOS環境でのレッドチーミングには、MDMの動作についての理
 macos-mdm/
 {{#endref}}
 
-### MDMをC2として使用する
+### C2としてのMDMの使用
 
-MDMは、プロファイルのインストール、クエリまたは削除、アプリケーションのインストール、ローカル管理者アカウントの作成、ファームウェアパスワードの設定、FileVaultキーの変更を行う権限を持っています...
+MDMは、プロファイルのインストール、クエリ、削除、アプリケーションのインストール、ローカル管理者アカウントの作成、ファームウェアパスワードの設定、FileVaultキーの変更を行う権限を持っています...
 
-独自のMDMを実行するには、**ベンダーによって署名されたCSRが必要**で、[**https://mdmcert.download/**](https://mdmcert.download/)から取得を試みることができます。また、Appleデバイス用の独自のMDMを実行するには、[**MicroMDM**](https://github.com/micromdm/micromdm)を使用できます。
+独自のMDMを運営するには、**ベンダーによって署名されたCSRが必要**で、[**https://mdmcert.download/**](https://mdmcert.download/)で取得を試みることができます。また、Appleデバイス用の独自のMDMを運営するには、[**MicroMDM**](https://github.com/micromdm/micromdm)を使用できます。
 
 ただし、登録されたデバイスにアプリケーションをインストールするには、開発者アカウントによって署名されている必要があります... しかし、MDM登録時に**デバイスはMDMのSSL証明書を信頼されたCAとして追加**するため、今では何でも署名できます。
 
-デバイスをMDMに登録するには、**`mobileconfig`**ファイルをルートとしてインストールする必要があり、これは**pkg**ファイルを介して配布できます（zipで圧縮し、Safariからダウンロードすると解凍されます）。
+デバイスをMDMに登録するには、**`mobileconfig`**ファイルをルートとしてインストールする必要があり、これは**pkg**ファイルを介して配信できます（zipで圧縮し、Safariからダウンロードすると解凍されます）。
 
 **Mythic agent Orthrus**はこの技術を使用しています。
 
@@ -48,7 +48,7 @@ JAMFは**カスタムスクリプト**（システム管理者によって開発
 **`jamf`**バイナリには、キーチェーンを開くための秘密が含まれており、発見時には**誰もが共有**していました。それは：**`jk23ucnq91jfu9aj`**です。\
 さらに、jamfは**`/Library/LaunchAgents/com.jamf.management.agent.plist`**に**LaunchDaemon**として**持続**します。
 
-#### JAMFデバイスタケオーバー
+#### JAMFデバイスタ takeover
 
 **JSS**（Jamf Software Server）**URL**は、**`jamf`**が使用するもので、**`/Library/Preferences/com.jamfsoftware.jamf.plist`**にあります。\
 このファイルには基本的にURLが含まれています：
@@ -84,7 +84,7 @@ sudo jamf policy -id 0
 
 <figure><img src="../../images/image (1025).png" alt=""><figcaption><p>a</p></figcaption></figure>
 
-また、管理者がJamfを介して実行したい**カスタムスクリプト**のために、`/Library/Application Support/Jamf/tmp/`の場所を監視することもできます。これらのスクリプトは**ここに配置され、実行され、削除されます**。これらのスクリプトには**資格情報が含まれている可能性があります**。
+管理者がJamfを介して実行したい**カスタムスクリプト**を監視するために、`/Library/Application Support/Jamf/tmp/`の場所を監視することもできます。これらのスクリプトは**ここに配置され、実行され、削除されます**。これらのスクリプトには**資格情報が含まれている可能性があります**。
 
 ただし、**資格情報**はこれらのスクリプトに**パラメータ**として渡される可能性があるため、`ps aux | grep -i jamf`を監視する必要があります（ルートでなくても）。
 
@@ -133,7 +133,7 @@ echo show com.apple.opendirectoryd.ActiveDirectory | scutil
 MacOSのユーザーには3種類があります：
 
 - **ローカルユーザー** — ローカルOpenDirectoryサービスによって管理され、Active Directoryとは一切接続されていません。
-- **ネットワークユーザー** — 認証のためにDCサーバーへの接続を必要とする揮発性のActive Directoryユーザーです。
+- **ネットワークユーザー** — DCサーバーに接続して認証を受ける必要がある揮発性のActive Directoryユーザーです。
 - **モバイルユーザー** — 認証情報とファイルのローカルバックアップを持つActive Directoryユーザーです。
 
 ユーザーとグループに関するローカル情報は、フォルダー _/var/db/dslocal/nodes/Default._ に保存されています。\
@@ -182,7 +182,7 @@ bifrost --action askhash --username [name] --password [password] --domain [domai
 bifrost --action asktgt --username [user] --domain [domain.com] \
 --hash [hash] --enctype [enctype] --keytab [/path/to/keytab]
 ```
-TGTが収集されると、次のコマンドで現在のセッションに注入することが可能です：
+TGTが収集されると、次のコマンドで現在のセッションに注入することができます:
 ```bash
 bifrost --action asktgt --username test_lab_admin \
 --hash CF59D3256B62EE655F6430B0F80701EE05A0885B8B52E9C2480154AFA62E78 \

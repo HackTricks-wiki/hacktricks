@@ -1,14 +1,14 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# [**Shells - Linux**](linux.md)
+# [**シェル - Linux**](linux.md)
 
-# [**Shells - Windows**](windows.md)
+# [**シェル - Windows**](windows.md)
 
-# [**MSFVenom - CheatSheet**](msfvenom.md)
+# [**MSFVenom - チートシート**](msfvenom.md)
 
-# [**Full TTYs**](full-ttys.md)
+# [**フルTTY**](full-ttys.md)
 
-# **Auto-generated shells**
+# **自動生成されたシェル**
 
 - [**https://reverse-shell.sh/**](https://reverse-shell.sh/)
 - [**https://www.revshells.com/**](https://www.revshells.com/)

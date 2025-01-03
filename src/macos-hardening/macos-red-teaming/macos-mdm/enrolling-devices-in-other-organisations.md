@@ -13,8 +13,8 @@
 
 この研究は、macOS上のデバイス登録プログラム（DEP）およびモバイルデバイス管理（MDM）に関連するバイナリに深く掘り下げています。主要なコンポーネントは以下の通りです：
 
-- **`mdmclient`**：MDMサーバーと通信し、macOSバージョン10.13.4以前でのDEPチェックインをトリガーします。
-- **`profiles`**：構成プロファイルを管理し、macOSバージョン10.13.4以降でのDEPチェックインをトリガーします。
+- **`mdmclient`**：MDMサーバーと通信し、macOSバージョン10.13.4以前でDEPチェックインをトリガーします。
+- **`profiles`**：構成プロファイルを管理し、macOSバージョン10.13.4以降でDEPチェックインをトリガーします。
 - **`cloudconfigurationd`**：DEP API通信を管理し、デバイス登録プロファイルを取得します。
 
 DEPチェックインは、プライベート構成プロファイルフレームワークからの`CPFetchActivationRecord`および`CPGetActivationRecord`関数を利用してアクティベーションレコードを取得し、`CPFetchActivationRecord`がXPCを介して`cloudconfigurationd`と調整します。
@@ -25,14 +25,14 @@ DEPチェックインは、`cloudconfigurationd`が暗号化された署名付�
 
 ## DEPリクエストのプロキシ
 
-Charles Proxyのようなツールを使用して_iprofiles.apple.com_へのDEPリクエストを傍受し、変更しようとする試みは、ペイロードの暗号化とSSL/TLSセキュリティ対策によって妨げられました。しかし、`MCCloudConfigAcceptAnyHTTPSCertificate`構成を有効にすることで、サーバー証明書の検証をバイパスすることが可能ですが、ペイロードの暗号化された性質により、復号化キーなしでシリアル番号を変更することは依然として不可能です。
+Charles Proxyのようなツールを使用して_iprofiles.apple.com_へのDEPリクエストを傍受し、変更しようとする試みは、ペイロードの暗号化とSSL/TLSセキュリティ対策によって妨げられました。しかし、`MCCloudConfigAcceptAnyHTTPSCertificate`構成を有効にすることで、サーバー証明書の検証をバイパスすることができますが、ペイロードの暗号化された性質により、復号化キーなしでシリアル番号を変更することは依然として不可能です。
 
 ## DEPと相互作用するシステムバイナリの計測
 
 `cloudconfigurationd`のようなシステムバイナリを計測するには、macOSでシステム整合性保護（SIP）を無効にする必要があります。SIPが無効になっている場合、LLDBのようなツールを使用してシステムプロセスにアタッチし、DEP APIとの相互作用で使用されるシリアル番号を変更する可能性があります。この方法は、権限やコード署名の複雑さを回避できるため、好ましいです。
 
 **バイナリ計測の悪用：**
-`cloudconfigurationd`でJSONシリアル化の前にDEPリクエストペイロードを変更することが効果的であることが証明されました。このプロセスには以下が含まれます：
+`cloudconfigurationd`でJSONシリアル化の前にDEPリクエストペイロードを変更することが効果的であることが証明されました。このプロセスは以下を含みます：
 
 1. `cloudconfigurationd`にLLDBをアタッチします。
 2. システムシリアル番号が取得されるポイントを特定します。

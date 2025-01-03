@@ -1,9 +1,9 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-**PNG files** are highly regarded in **CTF challenges** for their **lossless compression**, making them ideal for embedding hidden data. Tools like **Wireshark** enable the analysis of PNG files by dissecting their data within network packets, revealing embedded information or anomalies.
+**PNGファイル**は、その**ロスレス圧縮**の特性から**CTFチャレンジ**で高く評価されており、隠れたデータを埋め込むのに理想的です。**Wireshark**のようなツールは、ネットワークパケット内のデータを解析することでPNGファイルを分析し、埋め込まれた情報や異常を明らかにします。
 
-For checking PNG file integrity and repairing corruption, **pngcheck** is a crucial tool, offering command-line functionality to validate and diagnose PNG files ([pngcheck](http://libpng.org/pub/png/apps/pngcheck.html)). When files are beyond simple fixes, online services like [OfficeRecovery's PixRecovery](https://online.officerecovery.com/pixrecovery/) provide a web-based solution for **repairing corrupted PNGs**, aiding in the recovery of crucial data for CTF participants.
+PNGファイルの整合性をチェックし、破損を修復するために、**pngcheck**は重要なツールであり、PNGファイルを検証し診断するためのコマンドライン機能を提供します ([pngcheck](http://libpng.org/pub/png/apps/pngcheck.html))。ファイルが単純な修正を超えている場合、[OfficeRecoveryのPixRecovery](https://online.officerecovery.com/pixrecovery/)のようなオンラインサービスは、**破損したPNGの修復**のためのウェブベースのソリューションを提供し、CTF参加者のための重要なデータの回復を支援します。
 
-These strategies underscore the importance of a comprehensive approach in CTFs, utilizing a blend of analytical tools and repair techniques to uncover and recover hidden or lost data.
+これらの戦略は、CTFにおける包括的なアプローチの重要性を強調しており、隠れたデータや失われたデータを発見し回復するために、分析ツールと修復技術の組み合わせを活用しています。
 
 {{#include ../../../banners/hacktricks-training.md}}

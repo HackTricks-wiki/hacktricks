@@ -22,16 +22,16 @@ sudo su
 ```
 ### PE - Method 2
 
-すべてのsuidバイナリを見つけ、バイナリ**Pkexec**があるかどうかを確認します:
+すべてのsuidバイナリを見つけ、バイナリ**Pkexec**があるか確認します:
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-バイナリ **pkexec が SUID バイナリ** であり、あなたが **sudo** または **admin** に属している場合、`pkexec` を使用して sudo としてバイナリを実行できる可能性があります。\
-これは通常、これらが **polkit ポリシー** 内のグループであるためです。このポリシーは基本的にどのグループが `pkexec` を使用できるかを特定します。次のコマンドで確認してください:
+もしバイナリ **pkexec が SUID バイナリ** であり、あなたが **sudo** または **admin** に属している場合、`pkexec` を使用して sudo としてバイナリを実行できる可能性があります。\
+これは通常、これらが **polkit ポリシー** 内のグループであるためです。このポリシーは基本的に、どのグループが `pkexec` を使用できるかを特定します。次のコマンドで確認してください:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
-そこでは、どのグループが**pkexec**を実行することを許可されているか、そして**デフォルトで**いくつかのLinuxディストリビューションでは、**sudo**および**admin**グループが表示されるかを見つけることができます。
+そこでは、どのグループが **pkexec** を実行することを許可されているか、そして **デフォルトで** 一部のLinuxディストリビューションでは **sudo** および **admin** グループが表示されるかを見つけることができます。
 
 **rootになるには、次のコマンドを実行できます**:
 ```bash
@@ -62,23 +62,23 @@ pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 ```
 これは、**wheelグループに属する任意のユーザーがsudoとして何でも実行できる**ことを意味します。
 
-この場合、**rootになるには、単に次を実行すればよい**:
+この場合、**rootになるには次のコマンドを実行するだけです**:
 ```
 sudo su
 ```
 ## Shadow Group
 
-**shadow** グループのユーザーは **/etc/shadow** ファイルを **読み取る** ことができます:
+**shadow** グループのユーザーは **/etc/shadow** ファイルを **読む** ことができます:
 ```
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
-なので、ファイルを読み、**ハッシュをいくつかクラック**してみてください。
+So, read the file and try to **crack some hashes**.
 
 ## スタッフグループ
 
-**staff**: ユーザーがルート権限を必要とせずにシステムにローカルな変更を加えることを許可します（`/usr/local`）。 `/usr/local/bin`内の実行可能ファイルは、すべてのユーザーのPATH変数に含まれており、同じ名前の`/bin`および`/usr/bin`内の実行可能ファイルを「上書き」する可能性があります。 監視/セキュリティに関連する「adm」グループと比較してください。 [\[source\]](https://wiki.debian.org/SystemGroups)
+**staff**: ユーザーがルート権限を必要とせずにシステムにローカル変更を加えることを許可します（`/usr/local/bin` の実行可能ファイルはすべてのユーザーのPATH変数に含まれており、同じ名前の `/bin` および `/usr/bin` の実行可能ファイルを「上書き」する可能性があります）。 監視/セキュリティに関連する「adm」グループと比較してください。 [\[source\]](https://wiki.debian.org/SystemGroups)
 
-debianディストリビューションでは、`$PATH`変数は、特権ユーザーであろうとなかろうと、`/usr/local/`が最優先で実行されることを示しています。
+debianディストリビューションでは、`$PATH` 変数は `/usr/local/` が最優先で実行されることを示しています。特権ユーザーであろうとなかろうと。
 ```bash
 $ echo $PATH
 /usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
@@ -88,7 +88,7 @@ $ echo $PATH
 ```
 `/usr/local`にあるいくつかのプログラムをハイジャックできれば、簡単にrootを取得できます。
 
-`run-parts`プログラムをハイジャックすることは、rootを取得する簡単な方法です。なぜなら、ほとんどのプログラムは`run-parts`を実行するからです（crontabやSSHログイン時など）。
+`run-parts`プログラムをハイジャックすることは、rootを取得する簡単な方法です。なぜなら、ほとんどのプログラムは`run-parts`を実行するからです（crontabやsshログイン時など）。
 ```bash
 $ cat /etc/crontab | grep run-parts
 17 *    * * *   root    cd / && run-parts --report /etc/cron.hourly
@@ -141,7 +141,7 @@ debugfs: ls
 debugfs: cat /root/.ssh/id_rsa
 debugfs: cat /etc/shadow
 ```
-debugfsを使用すると、**ファイルを書き込む**こともできることに注意してください。たとえば、`/tmp/asd1.txt`を`/tmp/asd2.txt`にコピーするには、次のようにします:
+注意として、debugfsを使用すると**ファイルを書き込む**こともできます。例えば、`/tmp/asd1.txt`を`/tmp/asd2.txt`にコピーするには、次のようにします:
 ```bash
 debugfs -w /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
@@ -158,7 +158,7 @@ moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
 **tty1**は、ユーザー**yossiが物理的に**マシンのターミナルにログインしていることを意味します。
 
-**videoグループ**は、画面出力を表示するアクセス権を持っています。基本的に、画面を観察することができます。そのためには、**画面上の現在の画像を生データで取得**し、画面が使用している解像度を取得する必要があります。画面データは`/dev/fb0`に保存でき、この画面の解像度は`/sys/class/graphics/fb0/virtual_size`で見つけることができます。
+**video group**は、画面出力を表示するアクセス権を持っています。基本的に、画面を観察することができます。そのためには、**画面上の現在の画像を**生データで取得し、画面が使用している解像度を取得する必要があります。画面データは`/dev/fb0`に保存でき、この画面の解像度は`/sys/class/graphics/fb0/virtual_size`で見つけることができます。
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
@@ -171,11 +171,11 @@ cat /sys/class/graphics/fb0/virtual_size
 
 ![](<../../../images/image (317).png>)
 
-## Root Group
+## ルートグループ
 
-デフォルトでは、**rootグループのメンバー**は、**サービス**の設定ファイルや**ライブラリ**ファイル、または特権昇格に使用できる**他の興味深いもの**を**変更**するアクセス権を持っているようです...
+デフォルトでは、**ルートグループのメンバー**は、**サービス**の設定ファイルやいくつかの**ライブラリ**ファイル、または特権昇格に使用できる**その他の興味深いもの**を**変更**するアクセス権を持っているようです...
 
-**rootメンバーが変更できるファイルを確認する**：
+**ルートメンバーが変更できるファイルを確認する**：
 ```bash
 find / -group root -perm -g=w 2>/dev/null
 ```
@@ -193,7 +193,7 @@ echo 'toor:$1$.ZcF5ts0$i4k6rQYzeegUkacRCvfxC0:0:0:root:/root:/bin/sh' >> /etc/pa
 #Ifyou just want filesystem and network access you can startthe following container:
 docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chroot /mnt bashbash
 ```
-最後に、以前の提案が気に入らない場合や、何らかの理由で機能しない場合（docker api firewall？）、ここで説明されているように、**特権コンテナを実行してそこから脱出する**ことを試みることができます：
+最後に、前の提案が気に入らない場合や、何らかの理由で機能していない場合（docker api firewall？）、ここで説明されているように、**特権コンテナを実行してそこから脱出する**ことを試すことができます：
 
 {{#ref}}
 ../docker-security/
@@ -218,7 +218,7 @@ dockerソケットに書き込み権限がある場合は、[**dockerソケッ�
 
 ## Auth グループ
 
-OpenBSD内では、**auth** グループは通常、_**/etc/skey**_ および _**/var/db/yubikey**_ フォルダーに書き込むことができます。\
-これらの権限は、以下のエクスプロイトを使用して**特権を昇格させる**ために悪用される可能性があります：[https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
+OpenBSD内では、**auth** グループは通常、使用されている場合に _**/etc/skey**_ と _**/var/db/yubikey**_ フォルダーに書き込むことができます。\
+これらの権限は、特権をrootに昇格させるために次のエクスプロイトを悪用することができます：[https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -6,7 +6,7 @@
 
 **Seccomp**（セキュアコンピューティングモードの略）は、**Linuxカーネルのシステムコールをフィルタリングするためのセキュリティ機能**です。これは、プロセスを限られたセットのシステムコール（既にオープンしているファイルディスクリプタに対する`exit()`、`sigreturn()`、`read()`、および`write()`）に制限します。プロセスが他のシステムコールを呼び出そうとすると、カーネルによってSIGKILLまたはSIGSYSで終了されます。このメカニズムはリソースを仮想化するのではなく、プロセスをそれらから隔離します。
 
-seccompを有効にする方法は2つあります：`PR_SET_SECCOMP`を使用した`prctl(2)`システムコール、またはLinuxカーネル3.17以降の場合は`seccomp(2)`システムコールです。`/proc/self/seccomp`に書き込む古い方法は、`prctl()`に取って代わられました。
+seccompを有効にする方法は2つあります：`PR_SET_SECCOMP`を使用した`prctl(2)`システムコール、またはLinuxカーネル3.17以降の`seccomp(2)`システムコールです。`/proc/self/seccomp`に書き込む古い方法は、`prctl()`に取って代わられました。
 
 拡張機能である**seccomp-bpf**は、Berkeley Packet Filter（BPF）ルールを使用してカスタマイズ可能なポリシーでシステムコールをフィルタリングする機能を追加します。この拡張は、OpenSSH、vsftpd、Chrome OSおよびLinux上のChrome/Chromiumブラウザなどのソフトウェアによって利用され、柔軟で効率的なシステムコールフィルタリングを提供し、現在はサポートされていないLinux用のsystraceの代替手段を提供します。
 
@@ -105,7 +105,7 @@ docker run --rm \
 hello-world
 ```
 コンテナが `uname` のような **syscall** を実行することを **禁止** したい場合は、[https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json) からデフォルトプロファイルをダウンロードし、リストから **`uname` 文字列を削除** するだけです。\
-**dockerコンテナ内で特定のバイナリが動作しないことを確認** したい場合は、straceを使用してバイナリが使用しているsyscallsをリストし、それらを禁止することができます。\
+**あるバイナリが Docker コンテナ内で動作しないことを確認** したい場合は、strace を使用してバイナリが使用している syscalls をリストし、それらを禁止することができます。\
 次の例では、`uname` の **syscalls** が発見されます：
 ```bash
 docker run -it --security-opt seccomp=default.json modified-ubuntu strace uname
@@ -129,7 +129,7 @@ Seccomp機能を示すために、以下のように「chmod」システムコ�
 ]
 }
 ```
-上記のプロファイルでは、デフォルトのアクションを「allow」に設定し、「chmod」を無効にするためのブラックリストを作成しました。より安全にするために、デフォルトのアクションをドロップに設定し、システムコールを選択的に有効にするためのホワイトリストを作成できます。\
+上記のプロファイルでは、デフォルトのアクションを「allow」に設定し、「chmod」を無効にするブラックリストを作成しました。より安全にするために、デフォルトのアクションをドロップに設定し、システムコールを選択的に有効にするホワイトリストを作成できます。\
 以下の出力は、「chmod」コールがseccompプロファイルで無効になっているため、エラーを返すことを示しています。
 ```bash
 $ docker run --rm -it --security-opt seccomp:/home/smakam14/seccomp/profile.json busybox chmod 400 /etc/hosts

@@ -1,56 +1,56 @@
-# Physical Attacks
+# 物理攻撃
 
 {{#include ../banners/hacktricks-training.md}}
 
-## BIOS Password Recovery and System Security
+## BIOSパスワードの回復とシステムセキュリティ
 
-**Resetting the BIOS** can be achieved in several ways. Most motherboards include a **battery** that, when removed for around **30 minutes**, will reset the BIOS settings, including the password. Alternatively, a **jumper on the motherboard** can be adjusted to reset these settings by connecting specific pins.
+**BIOSのリセット**は、いくつかの方法で実行できます。ほとんどのマザーボードには**バッテリー**が含まれており、これを約**30分**取り外すことで、パスワードを含むBIOS設定がリセットされます。あるいは、**マザーボード上のジャンパー**を調整して、特定のピンを接続することでこれらの設定をリセットすることもできます。
 
-For situations where hardware adjustments are not possible or practical, **software tools** offer a solution. Running a system from a **Live CD/USB** with distributions like **Kali Linux** provides access to tools like **_killCmos_** and **_CmosPWD_**, which can assist in BIOS password recovery.
+ハードウェアの調整が不可能または実用的でない場合、**ソフトウェアツール**が解決策を提供します。**Kali Linux**のようなディストリビューションを使用して**Live CD/USB**からシステムを実行することで、BIOSパスワードの回復を支援する**_killCmos_**や**_CmosPWD_**のようなツールにアクセスできます。
 
-In cases where the BIOS password is unknown, entering it incorrectly **three times** will typically result in an error code. This code can be used on websites like [https://bios-pw.org](https://bios-pw.org) to potentially retrieve a usable password.
+BIOSパスワードが不明な場合、誤って**3回**入力すると、通常はエラーコードが表示されます。このコードは、[https://bios-pw.org](https://bios-pw.org)のようなウェブサイトで使用して、使用可能なパスワードを取得する可能性があります。
 
-### UEFI Security
+### UEFIセキュリティ
 
-For modern systems using **UEFI** instead of traditional BIOS, the tool **chipsec** can be utilized to analyze and modify UEFI settings, including the disabling of **Secure Boot**. This can be accomplished with the following command:
+従来のBIOSの代わりに**UEFI**を使用する現代のシステムでは、ツール**chipsec**を利用してUEFI設定を分析および変更し、**Secure Boot**を無効にすることができます。これは次のコマンドで実行できます：
 
 `python chipsec_main.py -module exploits.secure.boot.pk`
 
-### RAM Analysis and Cold Boot Attacks
+### RAM分析とコールドブート攻撃
 
-RAM retains data briefly after power is cut, usually for **1 to 2 minutes**. This persistence can be extended to **10 minutes** by applying cold substances, such as liquid nitrogen. During this extended period, a **memory dump** can be created using tools like **dd.exe** and **volatility** for analysis.
+RAMは電源が切れた後、通常**1〜2分**間データを保持します。この持続性は、液体窒素のような冷却物質を適用することで**10分**に延長できます。この延長された期間中に、**dd.exe**や**volatility**のようなツールを使用して**メモリダンプ**を作成し、分析することができます。
 
-### Direct Memory Access (DMA) Attacks
+### ダイレクトメモリアクセス（DMA）攻撃
 
-**INCEPTION** is a tool designed for **physical memory manipulation** through DMA, compatible with interfaces like **FireWire** and **Thunderbolt**. It allows for bypassing login procedures by patching memory to accept any password. However, it's ineffective against **Windows 10** systems.
+**INCEPTION**は、**DMA**を通じて**物理メモリ操作**を行うために設計されたツールで、**FireWire**や**Thunderbolt**のようなインターフェースと互換性があります。これは、任意のパスワードを受け入れるようにメモリをパッチすることでログイン手続きをバイパスすることを可能にします。ただし、**Windows 10**システムには効果がありません。
 
-### Live CD/USB for System Access
+### システムアクセスのためのLive CD/USB
 
-Changing system binaries like **_sethc.exe_** or **_Utilman.exe_** with a copy of **_cmd.exe_** can provide a command prompt with system privileges. Tools such as **chntpw** can be used to edit the **SAM** file of a Windows installation, allowing password changes.
+**_sethc.exe_**や**_Utilman.exe_**のようなシステムバイナリを**_cmd.exe_**のコピーで変更することで、システム権限を持つコマンドプロンプトを提供できます。**chntpw**のようなツールを使用して、Windowsインストールの**SAM**ファイルを編集し、パスワードを変更することができます。
 
-**Kon-Boot** is a tool that facilitates logging into Windows systems without knowing the password by temporarily modifying the Windows kernel or UEFI. More information can be found at [https://www.raymond.cc](https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/).
+**Kon-Boot**は、WindowsカーネルまたはUEFIを一時的に変更することで、パスワードを知らなくてもWindowsシステムにログインできるツールです。詳細は[https://www.raymond.cc](https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/)で確認できます。
 
-### Handling Windows Security Features
+### Windowsセキュリティ機能の取り扱い
 
-#### Boot and Recovery Shortcuts
+#### ブートおよびリカバリーショートカット
 
-- **Supr**: Access BIOS settings.
-- **F8**: Enter Recovery mode.
-- Pressing **Shift** after the Windows banner can bypass autologon.
+- **Supr**: BIOS設定にアクセス。
+- **F8**: リカバリーモードに入る。
+- Windowsバナーの後に**Shift**を押すことで、自動ログインをバイパスできます。
 
-#### BAD USB Devices
+#### BAD USBデバイス
 
-Devices like **Rubber Ducky** and **Teensyduino** serve as platforms for creating **bad USB** devices, capable of executing predefined payloads when connected to a target computer.
+**Rubber Ducky**や**Teensyduino**のようなデバイスは、ターゲットコンピュータに接続されたときに事前定義されたペイロードを実行できる**bad USB**デバイスを作成するためのプラットフォームとして機能します。
 
-#### Volume Shadow Copy
+#### ボリュームシャドウコピー
 
-Administrator privileges allow for the creation of copies of sensitive files, including the **SAM** file, through PowerShell.
+管理者権限を使用すると、PowerShellを通じて**SAM**ファイルを含む機密ファイルのコピーを作成できます。
 
-### Bypassing BitLocker Encryption
+### BitLocker暗号化のバイパス
 
-BitLocker encryption can potentially be bypassed if the **recovery password** is found within a memory dump file (**MEMORY.DMP**). Tools like **Elcomsoft Forensic Disk Decryptor** or **Passware Kit Forensic** can be utilized for this purpose.
+BitLocker暗号化は、**MEMORY.DMP**ファイル内に**リカバリーパスワード**が見つかればバイパスできる可能性があります。これには、**Elcomsoft Forensic Disk Decryptor**や**Passware Kit Forensic**のようなツールを利用できます。
 
-### Social Engineering for Recovery Key Addition
+### リカバリーキー追加のためのソーシャルエンジニアリング
 
-A new BitLocker recovery key can be added through social engineering tactics, convincing a user to execute a command that adds a new recovery key composed of zeros, thereby simplifying the decryption process.
+新しいBitLockerリカバリーキーは、ユーザーに新しいリカバリーキーをゼロで構成するコマンドを実行させることで追加でき、これにより復号化プロセスが簡素化されます。
 {{#include ../banners/hacktricks-training.md}}

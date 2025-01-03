@@ -12,17 +12,17 @@
 ```
 Or using the tool [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
 
-**`/usr/libexec/lsd`** はデータベースの中枢です。これは、`.lsd.installation`、`.lsd.open`、`.lsd.openurl` などの **いくつかの XPC サービス** を提供します。しかし、これらの公開された XPC 機能を使用するためには、アプリケーションにいくつかの権限が必要です。例えば、mime タイプや URL スキームのデフォルトアプリを変更するための `.launchservices.changedefaulthandler` や `.launchservices.changeurlschemehandler` などです。
+**`/usr/libexec/lsd`** はデータベースの中枢です。これは **いくつかのXPCサービス** を提供します、例えば `.lsd.installation`、`.lsd.open`、`.lsd.openurl` などです。しかし、これらの公開されたXPC機能を使用するためには、アプリケーションにいくつかの権限が必要です。例えば、mimeタイプやURLスキームのデフォルトアプリを変更するための `.launchservices.changedefaulthandler` や `.launchservices.changeurlschemehandler` などです。
 
-**`/System/Library/CoreServices/launchservicesd`** はサービス `com.apple.coreservices.launchservicesd` を主張し、実行中のアプリケーションに関する情報を取得するためにクエリできます。これは、システムツール /**`usr/bin/lsappinfo`** または [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html) を使用してクエリできます。
+**`/System/Library/CoreServices/launchservicesd`** はサービス `com.apple.coreservices.launchservicesd` を主張し、実行中のアプリケーションに関する情報を取得するためにクエリできます。これはシステムツール /**`usr/bin/lsappinfo`** または [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html) を使ってクエリできます。
 
-## ファイル拡張子と URL スキームアプリハンドラー
+## ファイル拡張子とURLスキームアプリハンドラー
 
 次の行は、拡張子に応じてファイルを開くことができるアプリケーションを見つけるのに役立ちます:
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -dump | grep -E "path:|bindings:|name:"
 ```
-または、[**SwiftDefaultApps**](https://github.com/Lord-Kamina/SwiftDefaultApps)のようなものを使用します：
+Or use something like [**SwiftDefaultApps**](https://github.com/Lord-Kamina/SwiftDefaultApps):
 ```bash
 ./swda getSchemes #Get all the available schemes
 ./swda getApps #Get all the apps declared

@@ -1,18 +1,18 @@
-# Wide Source Code Search
+# ワイドソースコード検索
 
 {{#include ../../banners/hacktricks-training.md}}
 
-The goal of this page is to enumerate **platforms that allow to search for code** (literal or regex) in across thousands/millions of repos in one or more platforms.
+このページの目的は、**コードを検索できるプラットフォーム**（リテラルまたは正規表現）を列挙することです。これは、1つまたは複数のプラットフォームで数千または数百万のリポジトリにわたります。
 
-This helps in several occasions to **search for leaked information** or for **vulnerabilities** patterns.
+これは、**漏洩情報**や**脆弱性**パターンを検索する際に役立ちます。
 
-- [**SourceGraph**](https://sourcegraph.com/search): Search in millions of repos. There is a free version and an enterprise version (with 15 days free). It supports regexes.
-- [**Github Search**](https://github.com/search): Search across Github. It supports regexes.
-  - Maybe it's also useful to check also [**Github Code Search**](https://cs.github.com/).
-- [**Gitlab Advanced Search**](https://docs.gitlab.com/ee/user/search/advanced_search.html): Search across Gitlab projects. Support regexes.
-- [**SearchCode**](https://searchcode.com/): Search code in millions of projects.
+- [**SourceGraph**](https://sourcegraph.com/search): 数百万のリポジトリを検索します。無料版とエンタープライズ版（15日間無料）があります。正規表現をサポートしています。
+- [**Github Search**](https://github.com/search): Github全体を検索します。正規表現をサポートしています。
+- もしかしたら、[**Github Code Search**](https://cs.github.com/)も確認するのが有用かもしれません。
+- [**Gitlab Advanced Search**](https://docs.gitlab.com/ee/user/search/advanced_search.html): Gitlabプロジェクト全体を検索します。正規表現をサポートしています。
+- [**SearchCode**](https://searchcode.com/): 数百万のプロジェクトのコードを検索します。
 
 > [!WARNING]
-> When you look for leaks in a repo and run something like `git log -p` don't forget there might be **other branches with other commits** containing secrets!
+> リポジトリ内で漏洩を探していて、`git log -p`のようなコマンドを実行する際は、**秘密を含む他のコミットがある他のブランチ**が存在するかもしれないことを忘れないでください！
 
 {{#include ../../banners/hacktricks-training.md}}

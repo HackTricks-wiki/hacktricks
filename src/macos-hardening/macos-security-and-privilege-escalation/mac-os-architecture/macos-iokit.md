@@ -4,13 +4,13 @@
 
 ## 基本情報
 
-I/O Kitは、XNUカーネル内のオープンソースのオブジェクト指向**デバイスドライバーフレームワーク**であり、**動的にロードされるデバイスドライバー**を処理します。これにより、さまざまなハードウェアをサポートするために、モジュラーコードをカーネルにオンザフライで追加できます。
+I/O Kitは、XNUカーネル内のオープンソースのオブジェクト指向**デバイスドライバーフレームワーク**であり、**動的にロードされるデバイスドライバー**を処理します。これにより、さまざまなハードウェアをサポートするために、カーネルにモジュラーコードを動的に追加できます。
 
-IOKitドライバは基本的に**カーネルから関数をエクスポート**します。これらの関数パラメータの**型**は**事前定義されており**、検証されます。さらに、XPCと同様に、IOKitは**Machメッセージの上にある別のレイヤー**です。
+IOKitドライバーは基本的に**カーネルから関数をエクスポート**します。これらの関数パラメータの**型**は**事前定義**されており、検証されます。さらに、XPCと同様に、IOKitは**Machメッセージの上にある別のレイヤー**です。
 
-**IOKit XNUカーネルコード**は、Appleによってオープンソース化されており、[https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit)で入手できます。さらに、ユーザースペースのIOKitコンポーネントもオープンソースです[https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser)。
+**IOKit XNUカーネルコード**は、Appleによって[https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit)でオープンソース化されています。さらに、ユーザースペースのIOKitコンポーネントもオープンソースです[https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser)。
 
-ただし、**IOKitドライバは**オープンソースではありません。それでも、時折、ドライバのリリースにはデバッグを容易にするシンボルが付属することがあります。ファームウェアから[**ドライバ拡張を取得する方法はこちら**](./#ipsw)**を確認してください。**
+しかし、**IOKitドライバーは**オープンソースではありません。とはいえ、時折、ドライバーのリリースにはデバッグを容易にするシンボルが付属することがあります。ファームウェアから[**ドライバー拡張を取得する方法はこちら**](./#ipsw)**を確認してください。**
 
 これは**C++**で書かれています。デマングルされたC++シンボルを取得するには、次のコマンドを使用できます:
 ```bash
@@ -68,9 +68,9 @@ kextunload com.apple.iokit.IOReportFamily
 ```
 ## IORegistry
 
-**IORegistry**は、macOSおよびiOSのIOKitフレームワークの重要な部分であり、システムのハードウェア構成と状態を表すデータベースとして機能します。これは、システムにロードされたすべてのハードウェアとドライバを表す**階層的なオブジェクトのコレクション**であり、それらの相互関係を示しています。
+**IORegistry**は、macOSおよびiOSのIOKitフレームワークの重要な部分であり、システムのハードウェア構成と状態を表すデータベースとして機能します。これは、**システムにロードされたすべてのハードウェアとドライバを表すオブジェクトの階層的コレクション**であり、それらの相互関係を示しています。
 
-IORegistryは、cli **`ioreg`**を使用してコンソールから検査することができ（特にiOSに便利です）。
+IORegistryは、cli **`ioreg`**を使用してコンソールから検査することができます（特にiOSに便利です）。
 ```bash
 ioreg -l #List all
 ioreg -w 0 #Not cut lines
@@ -89,7 +89,7 @@ IORegistryExplorerでは、「プレーン」はIORegistry内の異なるオブ�
 5. **IOAudio Plane**: このプレーンは、システム内のオーディオデバイスとその関係を表すためのものです。
 6. ...
 
-## ドライバ通信コードの例
+## ドライバコミュニケーションコード例
 
 以下のコードは、IOKitサービス`"YourServiceNameHere"`に接続し、セレクタ0内の関数を呼び出します。そのために：
 
@@ -162,11 +162,11 @@ return 0;
 
 <figure><img src="../../../images/image (1169).png" alt=""><figcaption></figcaption></figure>
 
-そのひどい呼び出しのデマグルは意味します：
+そのひどい呼び出しのデマグルは次の意味です：
 ```cpp
 IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
-前の定義では**`self`**パラメータが欠けていることに注意してください。良い定義は次のようになります：
+前の定義では **`self`** パラメータが欠けていることに注意してください。良い定義は次のようになります：
 ```cpp
 IOUserClient2022::dispatchExternalMethod(self, unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
@@ -188,7 +188,7 @@ OSObject * target, void * reference)
 
 <figure><img src="../../../images/image (1170).png" alt=""><figcaption></figcaption></figure>
 
-今、`(IOExternalMethodDispatch2022 *)&sIOExternalMethodArray` に従って、多くのデータが見えます：
+次に、`(IOExternalMethodDispatch2022 *)&sIOExternalMethodArray` に従って、多くのデータが表示されます：
 
 <figure><img src="../../../images/image (1176).png" alt="" width="563"><figcaption></figcaption></figure>
 
@@ -200,7 +200,7 @@ OSObject * target, void * reference)
 
 <figure><img src="../../../images/image (1179).png" alt="" width="563"><figcaption></figcaption></figure>
 
-ここに、**7つの要素の配列**があることがわかります（最終的なデコンパイルコードを確認してください）。7つの要素の配列を作成するためにクリックします：
+ここに、**7要素の配列**があることがわかります（最終的なデコンパイルコードを確認してください）。7要素の配列を作成するためにクリックします：
 
 <figure><img src="../../../images/image (1180).png" alt="" width="563"><figcaption></figcaption></figure>
 
@@ -209,6 +209,6 @@ OSObject * target, void * reference)
 <figure><img src="../../../images/image (1181).png" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> 覚えておいてください、ユーザースペースから**エクスポートされた**関数を**呼び出す**には、関数の名前を呼び出す必要はなく、**セレクタ番号**を呼び出す必要があります。ここでは、セレクタ **0** が関数 **`initializeDecoder`**、セレクタ **1** が **`startDecoder`**、セレクタ **2** が **`initializeEncoder`** であることがわかります...
+> もし覚えていれば、ユーザースペースから**エクスポートされた**関数を**呼び出す**には、関数の名前を呼び出す必要はなく、**セレクタ番号**を呼び出す必要があります。ここでは、セレクタ **0** が関数 **`initializeDecoder`**、セレクタ **1** が **`startDecoder`**、セレクタ **2** が **`initializeEncoder`** であることがわかります...
 
 {{#include ../../../banners/hacktricks-training.md}}

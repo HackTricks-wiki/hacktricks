@@ -12,7 +12,7 @@
 
 ## PE
 
-ホストに`runc`がインストールされている場合、**ホストのルート/フォルダーをマウントしたコンテナを実行できる可能性があります**。
+ホストに`runc`がインストールされている場合、**ホストのルート/フォルダをマウントしたコンテナを実行できる可能性があります**。
 ```bash
 runc -help #Get help and see if runc is intalled
 runc spec #This will create the config.json file in your current folder

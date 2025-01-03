@@ -2,32 +2,26 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
-
-[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
-
-{% embed url="https://www.rootedcon.com/" %}
-
 > [!NOTE]
-> A note about **PCAP** vs **PCAPNG**: there are two versions of the PCAP file format; **PCAPNG is newer and not supported by all tools**. You may need to convert a file from PCAPNG to PCAP using Wireshark or another compatible tool, in order to work with it in some other tools.
+> **PCAP**と**PCAPNG**についての注意: PCAPファイル形式には2つのバージョンがあり、**PCAPNGは新しく、すべてのツールでサポートされているわけではありません**。他のツールで作業するために、Wiresharkや他の互換性のあるツールを使用してPCAPNGからPCAPにファイルを変換する必要があるかもしれません。
 
 ## Online tools for pcaps
 
-- If the header of your pcap is **broken** you should try to **fix** it using: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)
-- Extract **information** and search for **malware** inside a pcap in [**PacketTotal**](https://packettotal.com)
-- Search for **malicious activity** using [**www.virustotal.com**](https://www.virustotal.com) and [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com)
-- **Full pcap analysis from the browser in** [**https://apackets.com/**](https://apackets.com/)
+- pcapのヘッダーが**壊れている**場合は、次のリンクを使用して**修正**を試みるべきです: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)
+- [**PacketTotal**](https://packettotal.com)でpcap内の**情報**を抽出し、**マルウェア**を検索します。
+- [**www.virustotal.com**](https://www.virustotal.com)および[**www.hybrid-analysis.com**](https://www.hybrid-analysis.com)を使用して**悪意のある活動**を検索します。
+- [**https://apackets.com/**](https://apackets.com/)で**ブラウザからの完全なpcap分析**。
 
 ## Extract Information
 
-The following tools are useful to extract statistics, files, etc.
+次のツールは、統計、ファイルなどを抽出するのに役立ちます。
 
 ### Wireshark
 
 > [!NOTE]
-> **If you are going to analyze a PCAP you basically must to know how to use Wireshark**
+> **PCAPを分析する場合、基本的にWiresharkの使い方を知っておく必要があります**
 
-You can find some Wireshark tricks in:
+Wiresharkのトリックを見つけることができます:
 
 {{#ref}}
 wireshark-tricks.md
@@ -35,115 +29,97 @@ wireshark-tricks.md
 
 ### [**https://apackets.com/**](https://apackets.com/)
 
-Pcap analysis from the browser.
+ブラウザからのpcap分析。
 
 ### Xplico Framework
 
-[**Xplico** ](https://github.com/xplico/xplico)_(only linux)_ can **analyze** a **pcap** and extract information from it. For example, from a pcap file Xplico, extracts each email (POP, IMAP, and SMTP protocols), all HTTP contents, each VoIP call (SIP), FTP, TFTP, and so on.
+[**Xplico** ](https://github.com/xplico/xplico)_(Linuxのみ)_は、**pcap**を**分析**し、そこから情報を抽出できます。たとえば、pcapファイルからXplicoは、各メール（POP、IMAP、SMTPプロトコル）、すべてのHTTPコンテンツ、各VoIP通話（SIP）、FTP、TFTPなどを抽出します。
 
 **Install**
-
 ```bash
 sudo bash -c 'echo "deb http://repo.xplico.org/ $(lsb_release -s -c) main" /etc/apt/sources.list'
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 791C25CE
 sudo apt-get update
 sudo apt-get install xplico
 ```
-
-**Run**
-
+**実行**
 ```
 /etc/init.d/apache2 restart
 /etc/init.d/xplico start
 ```
+_**127.0.0.1:9876**_ に _**xplico:xplico**_ の資格情報でアクセスします。
 
-Access to _**127.0.0.1:9876**_ with credentials _**xplico:xplico**_
-
-Then create a **new case**, create a **new session** inside the case and **upload the pcap** file.
+次に、**新しいケース**を作成し、そのケース内に**新しいセッション**を作成し、**pcap**ファイルを**アップロード**します。
 
 ### NetworkMiner
 
-Like Xplico it is a tool to **analyze and extract objects from pcaps**. It has a free edition that you can **download** [**here**](https://www.netresec.com/?page=NetworkMiner). It works with **Windows**.\
-This tool is also useful to get **other information analysed** from the packets in order to be able to know what was happening in a **quicker** way.
+Xplicoと同様に、**pcaps**からオブジェクトを**分析して抽出する**ツールです。無料版があり、[**こちらからダウンロード**](https://www.netresec.com/?page=NetworkMiner)できます。**Windows**で動作します。\
+このツールは、パケットから**他の情報を分析**して、何が起こっていたのかを**より迅速に**把握するのにも役立ちます。
 
 ### NetWitness Investigator
 
-You can download [**NetWitness Investigator from here**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **(It works in Windows)**.\
-This is another useful tool that **analyses the packets** and sorts the information in a useful way to **know what is happening inside**.
+[**こちらからNetWitness Investigatorをダウンロード**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware)できます。**(Windowsで動作します)**。\
+これは、パケットを**分析**し、情報を有用な形で整理して、**内部で何が起こっているかを知る**のに役立つ別の便利なツールです。
 
 ### [BruteShark](https://github.com/odedshimon/BruteShark)
 
-- Extracting and encoding usernames and passwords (HTTP, FTP, Telnet, IMAP, SMTP...)
-- Extract authentication hashes and crack them using Hashcat (Kerberos, NTLM, CRAM-MD5, HTTP-Digest...)
-- Build a visual network diagram (Network nodes & users)
-- Extract DNS queries
-- Reconstruct all TCP & UDP Sessions
-- File Carving
+- ユーザー名とパスワードを抽出およびエンコード (HTTP, FTP, Telnet, IMAP, SMTP...)
+- 認証ハッシュを抽出し、Hashcatを使用してクラックします (Kerberos, NTLM, CRAM-MD5, HTTP-Digest...)
+- ビジュアルネットワークダイアグラムを作成 (ネットワークノードとユーザー)
+- DNSクエリを抽出
+- すべてのTCPおよびUDPセッションを再構築
+- ファイルカービング
 
 ### Capinfos
-
 ```
 capinfos capture.pcap
 ```
-
 ### Ngrep
 
-If you are **looking** for **something** inside the pcap you can use **ngrep**. Here is an example using the main filters:
-
+pcap内で**何か**を**探している**場合は、**ngrep**を使用できます。以下は主要なフィルターを使用した例です：
 ```bash
 ngrep -I packets.pcap "^GET" "port 80 and tcp and host 192.168 and dst host 192.168 and src host 192.168"
 ```
+### カービング
 
-### Carving
-
-Using common carving techniques can be useful to extract files and information from the pcap:
+一般的なカービング技術を使用することで、pcapからファイルや情報を抽出するのに役立ちます：
 
 {{#ref}}
 ../partitions-file-systems-carving/file-data-carving-recovery-tools.md
 {{#endref}}
 
-### Capturing credentials
+### 認証情報のキャプチャ
 
-You can use tools like [https://github.com/lgandx/PCredz](https://github.com/lgandx/PCredz) to parse credentials from a pcap or a live interface.
+[https://github.com/lgandx/PCredz](https://github.com/lgandx/PCredz)のようなツールを使用して、pcapまたはライブインターフェースから認証情報を解析できます。
 
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
-
-[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
-
-{% embed url="https://www.rootedcon.com/" %}
-
-## Check Exploits/Malware
+## エクスプロイト/マルウェアの確認
 
 ### Suricata
 
-**Install and setup**
-
+**インストールと設定**
 ```
 apt-get install suricata
 apt-get install oinkmaster
 echo "url = http://rules.emergingthreats.net/open/suricata/emerging.rules.tar.gz" >> /etc/oinkmaster.conf
 oinkmaster -C /etc/oinkmaster.conf -o /etc/suricata/rules
 ```
-
-**Check pcap**
-
+**pcapを確認する**
 ```
 suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 ```
-
 ### YaraPcap
 
-[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) is a tool that
+[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) は、次のことができるツールです。
 
-- Reads a PCAP File and Extracts Http Streams.
-- gzip deflates any compressed streams
-- Scans every file with yara
-- Writes a report.txt
-- Optionally saves matching files to a Dir
+- PCAPファイルを読み取り、Httpストリームを抽出します。
+- gzipは圧縮されたストリームを解凍します。
+- すべてのファイルをyaraでスキャンします。
+- report.txtを書き込みます。
+- 一致するファイルをディレクトリに保存するオプションがあります。
 
 ### Malware Analysis
 
-Check if you can find any fingerprint of a known malware:
+既知のマルウェアのフィンガープリントを見つけられるか確認してください：
 
 {{#ref}}
 ../malware-analysis.md
@@ -151,12 +127,11 @@ Check if you can find any fingerprint of a known malware:
 
 ## Zeek
 
-> [Zeek](https://docs.zeek.org/en/master/about.html) is a passive, open-source network traffic analyzer. Many operators use Zeek as a Network Security Monitor (NSM) to support investigations of suspicious or malicious activity. Zeek also supports a wide range of traffic analysis tasks beyond the security domain, including performance measurement and troubleshooting.
+> [Zeek](https://docs.zeek.org/en/master/about.html) は、受動的なオープンソースのネットワークトラフィックアナライザーです。多くのオペレーターは、疑わしいまたは悪意のある活動の調査をサポートするために、Zeekをネットワークセキュリティモニター（NSM）として使用しています。Zeekは、セキュリティドメインを超えたパフォーマンス測定やトラブルシューティングを含む、幅広いトラフィック分析タスクもサポートしています。
 
-Basically, logs created by `zeek` aren't **pcaps**. Therefore you will need to use **other tools** to analyse the logs where the **information** about the pcaps are.
+基本的に、`zeek`によって作成されたログは**pcap**ではありません。したがって、**pcap**に関する**情報**を分析するために、**他のツール**を使用する必要があります。
 
 ### Connections Info
-
 ```bash
 #Get info about longest connections (add "grep udp" to see only udp traffic)
 #The longest connection might be of malware (constant reverse shell?)
@@ -206,9 +181,7 @@ Score,Source IP,Destination IP,Connections,Avg Bytes,Intvl Range,Size Range,Top 
 1,10.55.100.111,165.227.216.194,20054,92,29,52,1,52,7774,20053,0,0,0,0
 0.838,10.55.200.10,205.251.194.64,210,69,29398,4,300,70,109,205,0,0,0,0
 ```
-
-### DNS info
-
+### DNS情報
 ```bash
 #Get info about each DNS request performed
 cat dns.log | zeek-cut -c id.orig_h query qtype_name answers
@@ -225,8 +198,7 @@ cat dns.log | zeek-cut qtype_name | sort | uniq -c | sort -nr
 #See top DNS domain requested with rita
 rita show-exploded-dns -H --limit 10 zeek_logs
 ```
-
-## Other pcap analysis tricks
+## 他のpcap分析のトリック
 
 {{#ref}}
 dnscat-exfiltration.md
@@ -241,11 +213,5 @@ usb-keystrokes.md
 {{#endref}}
 
 ​
-
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
-
-[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
-
-{% embed url="https://www.rootedcon.com/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}

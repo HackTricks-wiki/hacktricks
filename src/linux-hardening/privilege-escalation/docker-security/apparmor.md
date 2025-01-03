@@ -18,12 +18,12 @@ AppArmorプロファイルには2つの運用モードがあります：
 - **パーサー**：ポリシーをカーネルにロードして強制または報告します。
 - **ユーティリティ**：AppArmorとのインターフェースを提供し、管理するためのユーザーモードプログラムです。
 
-### プロファイルのパス
+### プロファイルパス
 
 AppArmorプロファイルは通常、_**/etc/apparmor.d/**_に保存されます。\
-`sudo aa-status`を使用すると、いくつかのプロファイルによって制限されているバイナリのリストを表示できます。リストされた各バイナリのパスの「/」をドットに変更すると、指定されたフォルダー内のAppArmorプロファイルの名前が得られます。
+`sudo aa-status`を使用すると、いくつかのプロファイルによって制限されているバイナリをリストできます。リストされた各バイナリのパスの「/」をドットに変更すると、指定されたフォルダー内のAppArmorプロファイルの名前が得られます。
 
-例えば、_**/usr/bin/man**_のための**AppArmor**プロファイルは、_**/etc/apparmor.d/usr.bin.man**_にあります。
+例えば、**apparmor**プロファイルは_/usr/bin/man_に対しては、_/etc/apparmor.d/usr.bin.man_にあります。
 
 ### コマンド
 ```bash
@@ -45,9 +45,9 @@ aa-mergeprof  #used to merge the policies
 - **k** (ファイルロック)
 - **l** (ハードリンクの作成)
 - **ix** (新しいプログラムがポリシーを継承して別のプログラムを実行するため)
-- **Px** (環境をクリーンアップした後、別のプロファイルの下で実行)
-- **Cx** (環境をクリーンアップした後、子プロファイルの下で実行)
-- **Ux** (環境をクリーンアップした後、制限なしで実行)
+- **Px** (環境をクリーンにした後、別のプロファイルの下で実行)
+- **Cx** (環境をクリーンにした後、子プロファイルの下で実行)
+- **Ux** (環境をクリーンにした後、制限なしで実行)
 - **変数**はプロファイル内で定義でき、プロファイルの外部から操作できます。例えば： @{PROC} と @{HOME} （プロファイルファイルに #include \<tunables/global> を追加）
 - **許可ルールを上書きするための拒否ルールがサポートされています**。
 
@@ -58,7 +58,7 @@ aa-mergeprof  #used to merge the policies
 ```bash
 sudo aa-genprof /path/to/binary
 ```
-次に、別のコンソールでバイナリが通常実行するすべてのアクションを実行します:
+その後、別のコンソールでバイナリが通常実行するすべてのアクションを実行します：
 ```bash
 /path/to/binary -a dosomething
 ```
@@ -95,9 +95,9 @@ sudo aa-easyprof /path/to/binary
 }
 ```
 > [!NOTE]
-> デフォルトでは、作成されたプロファイルでは何も許可されていないため、すべてが拒否されます。例えば、バイナリが`/etc/passwd`を読み取ることを許可するには、`/etc/passwd r,`のような行を追加する必要があります。
+> デフォルトでは、作成されたプロファイルでは何も許可されていないため、すべてが拒否されます。たとえば、バイナリが`/etc/passwd`を読み取ることを許可するには、`/etc/passwd r,`のような行を追加する必要があります。
 
-その後、**enforce**新しいプロファイルを使用できます。
+その後、新しいプロファイルを**強制**することができます。
 ```bash
 sudo apparmor_parser -a /etc/apparmor.d/path.to.binary
 ```
@@ -108,7 +108,7 @@ sudo apparmor_parser -a /etc/apparmor.d/path.to.binary
 sudo aa-logprof
 ```
 > [!NOTE]
-> 矢印キーを使用して、許可/拒否/その他の選択を行うことができます
+> 矢印キーを使用して、許可/拒否/その他の選択を行うことができます。
 
 ### プロファイルの管理
 ```bash
@@ -143,9 +143,9 @@ Logfile: /var/log/audit/audit.log
 AppArmor denials: 2 (since Wed Jan  6 23:51:08 2021)
 For more information, please see: https://wiki.ubuntu.com/DebuggingApparmor
 ```
-## Apparmor in Docker
+## DockerにおけるApparmor
 
-dockerのプロファイル**docker-profile**がデフォルトで読み込まれることに注意してください:
+デフォルトで**docker-profile**のプロファイルがロードされることに注意してください:
 ```bash
 sudo aa-status
 apparmor module is loaded.
@@ -161,23 +161,23 @@ apparmor module is loaded.
 /usr/lib/connman/scripts/dhclient-script
 docker-default
 ```
-デフォルトでは、**Apparmor docker-default プロファイル**は [https://github.com/moby/moby/tree/master/profiles/apparmor](https://github.com/moby/moby/tree/master/profiles/apparmor) から生成されます。
+デフォルトでは、**Apparmor docker-default profile**は[https://github.com/moby/moby/tree/master/profiles/apparmor](https://github.com/moby/moby/tree/master/profiles/apparmor)から生成されます。
 
-**docker-default プロファイルの概要**:
+**docker-default profileの概要**:
 
 - **すべてのネットワーキング**への**アクセス**
 - **能力**は定義されていません（ただし、いくつかの能力は基本的なベースルールを含むことから来ます。つまり、#include \<abstractions/base>）
 - **/proc**ファイルへの**書き込み**は**許可されていません**
 - **/proc**および**/sys**の他の**サブディレクトリ**/**ファイル**への読み取り/書き込み/ロック/リンク/実行アクセスは**拒否**されます
 - **マウント**は**許可されていません**
-- **Ptrace**は**同じ apparmor プロファイル**によって制限されたプロセスでのみ実行できます
+- **Ptrace**は、**同じapparmor profile**によって制限されたプロセスでのみ実行できます
 
-**docker コンテナを実行すると**、次の出力が表示されるはずです:
+**dockerコンテナを実行すると**、次の出力が表示されるはずです:
 ```bash
 1 processes are in enforce mode.
 docker-default (825)
 ```
-注意してください。**apparmorはデフォルトでコンテナに付与された能力の特権をブロックします**。例えば、デフォルトのdocker apparmorプロファイルがこのアクセスを拒否するため、**SYS_ADMIN能力が付与されていても/proc内に書き込む権限をブロックすることができます**。
+注意してください、**apparmorはデフォルトでコンテナに付与された能力の特権をブロックします**。例えば、**SYS_ADMIN能力が付与されていても/proc内への書き込み権限をブロックすることができます**。なぜなら、デフォルトのdocker apparmorプロファイルはこのアクセスを拒否するからです：
 ```bash
 docker run -it --cap-add SYS_ADMIN --security-opt seccomp=unconfined ubuntu /bin/bash
 echo "" > /proc/stat
@@ -187,7 +187,7 @@ sh: 1: cannot create /proc/stat: Permission denied
 ```bash
 docker run -it --cap-add SYS_ADMIN --security-opt seccomp=unconfined --security-opt apparmor=unconfined ubuntu /bin/bash
 ```
-デフォルトでは、**AppArmor**は**コンテナが内部から**フォルダをマウントすることを**禁止します**。SYS_ADMIN権限があってもです。
+デフォルトでは、**AppArmor**は**コンテナが内部から**フォルダーをマウントすることを**禁止します**。SYS_ADMIN権限があってもです。
 
 **capabilities**をdockerコンテナに**追加/削除**することができます（これは**AppArmor**や**Seccomp**のような保護方法によって制限されます）：
 
@@ -196,7 +196,7 @@ docker run -it --cap-add SYS_ADMIN --security-opt seccomp=unconfined --security-
 - `--cap-drop=ALL --cap-add=SYS_PTRACE` すべての権限を削除し、`SYS_PTRACE`のみを付与
 
 > [!NOTE]
-> 通常、**docker**コンテナの**内部**で**特権権限**が利用可能であることを**発見**したが、**exploitの一部が機能していない**場合、これはdockerの**apparmorがそれを防いでいる**ためです。
+> 通常、**docker**コンテナの**内部**で**特権権限**が利用可能であることを**発見**したが、**エクスプロイトの一部が機能していない**場合、これはdockerの**apparmorがそれを防いでいる**ためです。
 
 ### 例
 
@@ -215,7 +215,7 @@ sudo apparmor_parser -r -W mydocker
 $ sudo apparmor_status  | grep mydocker
 mydocker
 ```
-以下のように、AppArmorプロファイルが「/etc」への書き込みアクセスを防いでいるため、「/etc」を変更しようとするとエラーが発生します。
+以下のように、AppArmorプロファイルが「/etc」への書き込みアクセスを防いでいるため、「/etc/」を変更しようとするとエラーが発生します。
 ```
 $ docker run --rm -it --security-opt apparmor:mydocker -v ~/haproxy:/localhost busybox chmod 400 /etc/hostname
 chmod: /etc/hostname: Permission denied
@@ -236,11 +236,11 @@ find /etc/apparmor.d/ -name "*lowpriv*" -maxdepth 1 2>/dev/null
 
 ### AppArmor Docker バイパス2
 
-**AppArmorはパスベースです。** これは、**`/proc`**のようなディレクトリ内のファイルを**保護**している場合でも、**コンテナの実行方法を構成できる**場合、ホストのプロクスディレクトリを**`/host/proc`**に**マウント**することができ、AppArmorによって**保護されなくなる**ことを意味します。
+**AppArmorはパスベースです。** これは、**`/proc`**のようなディレクトリ内のファイルを**保護**している場合でも、**コンテナの実行方法を構成できる**なら、ホストのプロクスディレクトリを**`/host/proc`**に**マウント**することができ、AppArmorによって**保護されなくなる**ことを意味します。
 
 ### AppArmor シェバング バイパス
 
-[**このバグ**](https://bugs.launchpad.net/apparmor/+bug/1911431)では、**特定のリソースでperlの実行を防いでいる場合でも、**最初の行に**`#!/usr/bin/perl`**を指定したシェルスクリプトを作成し、**ファイルを直接実行**すると、任意のものを実行できる例を見ることができます。例えば：
+[**このバグ**](https://bugs.launchpad.net/apparmor/+bug/1911431)では、**特定のリソースでperlの実行を防いでいる場合でも、**最初の行に**`#!/usr/bin/perl`**を指定したシェルスクリプトを作成し、**ファイルを直接実行**することで、任意のものを実行できる例を見ることができます。例えば：
 ```perl
 echo '#!/usr/bin/perl
 use POSIX qw(strftime);

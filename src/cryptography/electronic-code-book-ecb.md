@@ -2,34 +2,32 @@
 
 # ECB
 
-(ECB) Electronic Code Book - symmetric encryption scheme which **replaces each block of the clear text** by the **block of ciphertext**. It is the **simplest** encryption scheme. The main idea is to **split** the clear text into **blocks of N bits** (depends on the size of the block of input data, encryption algorithm) and then to encrypt (decrypt) each block of clear text using the only key.
+(ECB) 電子コードブック - 対称暗号化方式で、**平文の各ブロックを** **暗号文のブロックに置き換えます**。これは**最も単純な**暗号化方式です。主なアイデアは、**平文をNビットのブロックに分割**（入力データのブロックサイズ、暗号化アルゴリズムに依存）し、次にその平文の各ブロックを唯一のキーを使用して暗号化（復号化）することです。
 
 ![](https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/ECB_decryption.svg/601px-ECB_decryption.svg.png)
 
-Using ECB has multiple security implications:
+ECBを使用することには複数のセキュリティ上の影響があります：
 
-- **Blocks from encrypted message can be removed**
-- **Blocks from encrypted message can be moved around**
+- **暗号化されたメッセージからブロックを削除できる**
+- **暗号化されたメッセージからブロックを移動できる**
 
-# Detection of the vulnerability
+# 脆弱性の検出
 
-Imagine you login into an application several times and you **always get the same cookie**. This is because the cookie of the application is **`<username>|<password>`**.\
-Then, you generate to new users, both of them with the **same long password** and **almost** the **same** **username**.\
-You find out that the **blocks of 8B** where the **info of both users** is the same are **equals**. Then, you imagine that this might be because **ECB is being used**.
+アプリケーションに何度もログインすると、**常に同じクッキーを取得する**ことを想像してください。これは、アプリケーションのクッキーが**`<username>|<password>`**であるためです。\
+次に、**同じ長いパスワード**と**ほぼ同じ****ユーザー名**を持つ新しいユーザーを2人生成します。\
+**両方のユーザーの情報が同じである8Bのブロックが** **等しい**ことがわかります。次に、これは**ECBが使用されている**ためかもしれないと想像します。
 
-Like in the following example. Observe how these** 2 decoded cookies** has several times the block **`\x23U\xE45K\xCB\x21\xC8`**
-
+次の例のように。これらの**2つのデコードされたクッキー**が何度もブロック**`\x23U\xE45K\xCB\x21\xC8`**を持っていることに注目してください。
 ```
 \x23U\xE45K\xCB\x21\xC8\x23U\xE45K\xCB\x21\xC8\x04\xB6\xE1H\xD1\x1E \xB6\x23U\xE45K\xCB\x21\xC8\x23U\xE45K\xCB\x21\xC8+=\xD4F\xF7\x99\xD9\xA9
 
 \x23U\xE45K\xCB\x21\xC8\x23U\xE45K\xCB\x21\xC8\x04\xB6\xE1H\xD1\x1E \xB6\x23U\xE45K\xCB\x21\xC8\x23U\xE45K\xCB\x21\xC8+=\xD4F\xF7\x99\xD9\xA9
 ```
+これは、**それらのクッキーのユーザー名とパスワードに「a」という文字が何度も含まれていたため**です（例えば）。**異なる**ブロックは、**少なくとも1つの異なる文字**（区切り文字「|」やユーザー名の必要な違いなど）を含むブロックです。
 
-This is because the **username and password of those cookies contained several times the letter "a"** (for example). The **blocks** that are **different** are blocks that contained **at least 1 different character** (maybe the delimiter "|" or some necessary difference in the username).
+今、攻撃者はフォーマットが`<username><delimiter><password>`または`<password><delimiter><username>`のどちらであるかを発見する必要があります。そのために、**似たような長いユーザー名とパスワードを持ついくつかのユーザー名を生成するだけで、フォーマットと区切り文字の長さを見つけることができます：**
 
-Now, the attacker just need to discover if the format is `<username><delimiter><password>` or `<password><delimiter><username>`. For doing that, he can just **generate several usernames **with s**imilar and long usernames and passwords until he find the format and the length of the delimiter:**
-
-| Username length: | Password length: | Username+Password length: | Cookie's length (after decoding): |
+| ユーザー名の長さ: | パスワードの長さ: | ユーザー名+パスワードの長さ: | クッキーの長さ（デコード後）: |
 | ---------------- | ---------------- | ------------------------- | --------------------------------- |
 | 2                | 2                | 4                         | 8                                 |
 | 3                | 3                | 6                         | 8                                 |
@@ -37,37 +35,33 @@ Now, the attacker just need to discover if the format is `<username><delimiter><
 | 4                | 4                | 8                         | 16                                |
 | 7                | 7                | 14                        | 16                                |
 
-# Exploitation of the vulnerability
+# 脆弱性の悪用
 
-## Removing entire blocks
+## 全体のブロックを削除する
 
-Knowing the format of the cookie (`<username>|<password>`), in order to impersonate the username `admin` create a new user called `aaaaaaaaadmin` and get the cookie and decode it:
-
+クッキーのフォーマット（`<username>|<password>`）を知っている場合、ユーザー名`admin`を偽装するために、`aaaaaaaaadmin`という新しいユーザーを作成し、クッキーを取得してデコードします：
 ```
 \x23U\xE45K\xCB\x21\xC8\xE0Vd8oE\x123\aO\x43T\x32\xD5U\xD4
 ```
-
-We can see the pattern `\x23U\xE45K\xCB\x21\xC8` created previously with the username that contained only `a`.\
-Then, you can remove the first block of 8B and you will et a valid cookie for the username `admin`:
-
+以前に作成されたパターン `\x23U\xE45K\xCB\x21\xC8` を見ることができます。このパターンは、`a` のみを含むユーザー名で作成されました。\
+次に、最初の8Bのブロックを削除すると、ユーザー名 `admin` の有効なクッキーが得られます：
 ```
 \xE0Vd8oE\x123\aO\x43T\x32\xD5U\xD4
 ```
+## ブロックの移動
 
-## Moving blocks
+多くのデータベースでは、`WHERE username='admin';`を検索するのと、`WHERE username='admin    ';`を検索するのは同じです。 _(余分なスペースに注意)_
 
-In many databases it is the same to search for `WHERE username='admin';` or for `WHERE username='admin    ';` _(Note the extra spaces)_
+したがって、ユーザー`admin`を偽装する別の方法は次のとおりです：
 
-So, another way to impersonate the user `admin` would be to:
+- `len(<username>) + len(<delimiter) % len(block)`を満たすユーザー名を生成します。ブロックサイズが`8B`の場合、`username       `というユーザー名を生成できます。デリミタ`|`を使用すると、チャンク`<username><delimiter>`は2つの8Bのブロックを生成します。
+- 次に、偽装したいユーザー名とスペースを含む正確な数のブロックを埋めるパスワードを生成します。例えば、`admin   `のように。
 
-- Generate a username that: `len(<username>) + len(<delimiter) % len(block)`. With a block size of `8B` you can generate username called: `username       `, with the delimiter `|` the chunk `<username><delimiter>` will generate 2 blocks of 8Bs.
-- Then, generate a password that will fill an exact number of blocks containing the username we want to impersonate and spaces, like: `admin   `
+このユーザーのクッキーは3つのブロックで構成されます：最初の2つはユーザー名+デリミタのブロックで、3つ目は（ユーザー名を偽装している）パスワードです：`username       |admin   `
 
-The cookie of this user is going to be composed by 3 blocks: the first 2 is the blocks of the username + delimiter and the third one of the password (which is faking the username): `username       |admin   `
+**次に、最初のブロックを最後のブロックと置き換えるだけで、ユーザー`admin`を偽装します：`admin          |username`**
 
-**Then, just replace the first block with the last time and will be impersonating the user `admin`: `admin          |username`**
-
-## References
+## 参考文献
 
 - [http://cryptowiki.net/index.php?title=Electronic_Code_Book\_(ECB)](<http://cryptowiki.net/index.php?title=Electronic_Code_Book_(ECB)>)
 

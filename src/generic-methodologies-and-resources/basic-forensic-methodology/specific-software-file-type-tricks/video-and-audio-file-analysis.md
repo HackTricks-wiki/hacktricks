@@ -1,16 +1,16 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Audio and video file manipulation** is a staple in **CTF forensics challenges**, leveraging **steganography** and metadata analysis to hide or reveal secret messages. Tools such as **[mediainfo](https://mediaarea.net/en/MediaInfo)** and **`exiftool`** are essential for inspecting file metadata and identifying content types.
+**音声および動画ファイルの操作**は、**CTFフォレンジックチャレンジ**の定番であり、**ステガノグラフィー**やメタデータ分析を利用して秘密のメッセージを隠したり明らかにしたりします。**[mediainfo](https://mediaarea.net/en/MediaInfo)**や**`exiftool`**などのツールは、ファイルのメタデータを検査し、コンテンツタイプを特定するために不可欠です。
 
-For audio challenges, **[Audacity](http://www.audacityteam.org/)** stands out as a premier tool for viewing waveforms and analyzing spectrograms, essential for uncovering text encoded in audio. **[Sonic Visualiser](http://www.sonicvisualiser.org/)** is highly recommended for detailed spectrogram analysis. **Audacity** allows for audio manipulation like slowing down or reversing tracks to detect hidden messages. **[Sox](http://sox.sourceforge.net/)**, a command-line utility, excels in converting and editing audio files.
+音声チャレンジでは、**[Audacity](http://www.audacityteam.org/)**が波形を表示し、音声に埋め込まれたテキストを明らかにするために必要なスペクトログラムを分析するための主要なツールとして際立っています。**[Sonic Visualiser](http://www.sonicvisualiser.org/)**は、詳細なスペクトログラム分析に強く推奨されます。**Audacity**は、隠されたメッセージを検出するためにトラックを遅くしたり逆再生したりする音声操作を可能にします。**[Sox](http://sox.sourceforge.net/)**は、音声ファイルの変換と編集に優れたコマンドラインユーティリティです。
 
-**Least Significant Bits (LSB)** manipulation is a common technique in audio and video steganography, exploiting the fixed-size chunks of media files to embed data discreetly. **[Multimon-ng](http://tools.kali.org/wireless-attacks/multimon-ng)** is useful for decoding messages hidden as **DTMF tones** or **Morse code**.
+**最下位ビット（LSB）**の操作は、音声および動画のステガノグラフィーで一般的な技術であり、メディアファイルの固定サイズのチャンクを利用してデータを目立たないように埋め込むことができます。**[Multimon-ng](http://tools.kali.org/wireless-attacks/multimon-ng)**は、**DTMFトーン**や**モールス信号**として隠されたメッセージをデコードするのに役立ちます。
 
-Video challenges often involve container formats that bundle audio and video streams. **[FFmpeg](http://ffmpeg.org/)** is the go-to for analyzing and manipulating these formats, capable of de-multiplexing and playing back content. For developers, **[ffmpy](http://ffmpy.readthedocs.io/en/latest/examples.html)** integrates FFmpeg's capabilities into Python for advanced scriptable interactions.
+動画チャレンジは、音声と動画のストリームをバンドルするコンテナフォーマットを含むことがよくあります。**[FFmpeg](http://ffmpeg.org/)**は、これらのフォーマットを分析および操作するための定番であり、デマルチプレクシングやコンテンツの再生が可能です。開発者向けには、**[ffmpy](http://ffmpy.readthedocs.io/en/latest/examples.html)**がFFmpegの機能をPythonに統合し、高度なスクリプト可能なインタラクションを提供します。
 
-This array of tools underscores the versatility required in CTF challenges, where participants must employ a broad spectrum of analysis and manipulation techniques to uncover hidden data within audio and video files.
+このツールの配列は、CTFチャレンジで必要とされる多様性を強調しており、参加者は音声および動画ファイル内の隠されたデータを明らかにするために広範な分析および操作技術を駆使しなければなりません。
 
-## References
+## 参考文献
 
 - [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/)
 

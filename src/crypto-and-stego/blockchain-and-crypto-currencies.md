@@ -1,180 +1,176 @@
 {{#include ../banners/hacktricks-training.md}}
 
-## Basic Concepts
+## 基本概念
 
-- **Smart Contracts** are defined as programs that execute on a blockchain when certain conditions are met, automating agreement executions without intermediaries.
-- **Decentralized Applications (dApps)** build upon smart contracts, featuring a user-friendly front-end and a transparent, auditable back-end.
-- **Tokens & Coins** differentiate where coins serve as digital money, while tokens represent value or ownership in specific contexts.
-  - **Utility Tokens** grant access to services, and **Security Tokens** signify asset ownership.
-- **DeFi** stands for Decentralized Finance, offering financial services without central authorities.
-- **DEX** and **DAOs** refer to Decentralized Exchange Platforms and Decentralized Autonomous Organizations, respectively.
+- **スマートコントラクト**は、特定の条件が満たされたときにブロックチェーン上で実行されるプログラムとして定義され、仲介者なしで合意の実行を自動化します。
+- **分散型アプリケーション (dApps)**はスマートコントラクトに基づいて構築され、ユーザーフレンドリーなフロントエンドと透明で監査可能なバックエンドを特徴とします。
+- **トークンとコイン**は区別され、コインはデジタルマネーとして機能し、トークンは特定の文脈での価値や所有権を表します。
+- **ユーティリティトークン**はサービスへのアクセスを付与し、**セキュリティトークン**は資産の所有権を示します。
+- **DeFi**は分散型金融を意味し、中央集権的な権限なしで金融サービスを提供します。
+- **DEX**と**DAO**はそれぞれ分散型取引所プラットフォームと分散型自律組織を指します。
 
-## Consensus Mechanisms
+## コンセンサスメカニズム
 
-Consensus mechanisms ensure secure and agreed transaction validations on the blockchain:
+コンセンサスメカニズムは、ブロックチェーン上での安全で合意された取引の検証を確保します：
 
-- **Proof of Work (PoW)** relies on computational power for transaction verification.
-- **Proof of Stake (PoS)** demands validators to hold a certain amount of tokens, reducing energy consumption compared to PoW.
+- **プルーフ・オブ・ワーク (PoW)**は、取引の検証に計算能力を依存します。
+- **プルーフ・オブ・ステーク (PoS)**は、バリデーターが一定量のトークンを保持することを要求し、PoWに比べてエネルギー消費を削減します。
 
-## Bitcoin Essentials
+## ビットコインの基本
 
-### Transactions
+### 取引
 
-Bitcoin transactions involve transferring funds between addresses. Transactions are validated through digital signatures, ensuring only the owner of the private key can initiate transfers.
+ビットコインの取引は、アドレス間で資金を移動させることを含みます。取引はデジタル署名を通じて検証され、プライベートキーの所有者のみが転送を開始できることを保証します。
 
-#### Key Components:
+#### 主要コンポーネント：
 
-- **Multisignature Transactions** require multiple signatures to authorize a transaction.
-- Transactions consist of **inputs** (source of funds), **outputs** (destination), **fees** (paid to miners), and **scripts** (transaction rules).
+- **マルチシグネチャ取引**は、取引を承認するために複数の署名を必要とします。
+- 取引は**入力**（資金の出所）、**出力**（目的地）、**手数料**（マイナーに支払われる）、および**スクリプト**（取引ルール）で構成されます。
 
-### Lightning Network
+### ライトニングネットワーク
 
-Aims to enhance Bitcoin's scalability by allowing multiple transactions within a channel, only broadcasting the final state to the blockchain.
+ビットコインのスケーラビリティを向上させることを目的としており、チャネル内で複数の取引を可能にし、最終的な状態のみをブロックチェーンにブロードキャストします。
 
-## Bitcoin Privacy Concerns
+## ビットコインのプライバシーの懸念
 
-Privacy attacks, such as **Common Input Ownership** and **UTXO Change Address Detection**, exploit transaction patterns. Strategies like **Mixers** and **CoinJoin** improve anonymity by obscuring transaction links between users.
+プライバシー攻撃、例えば**共通入力所有権**や**UTXO変更アドレス検出**は、取引パターンを悪用します。**ミキサー**や**CoinJoin**のような戦略は、ユーザー間の取引リンクを隠すことで匿名性を向上させます。
 
-## Acquiring Bitcoins Anonymously
+## ビットコインを匿名で取得する方法
 
-Methods include cash trades, mining, and using mixers. **CoinJoin** mixes multiple transactions to complicate traceability, while **PayJoin** disguises CoinJoins as regular transactions for heightened privacy.
+方法には現金取引、マイニング、ミキサーの使用が含まれます。**CoinJoin**は複数の取引を混ぜて追跡を複雑にし、**PayJoin**はCoinJoinを通常の取引として偽装してプライバシーを高めます。
 
-# Bitcoin Privacy Atacks
+# ビットコインのプライバシー攻撃
 
-# Summary of Bitcoin Privacy Attacks
+# ビットコインのプライバシー攻撃の概要
 
-In the world of Bitcoin, the privacy of transactions and the anonymity of users are often subjects of concern. Here's a simplified overview of several common methods through which attackers can compromise Bitcoin privacy.
+ビットコインの世界では、取引のプライバシーとユーザーの匿名性はしばしば懸念の対象です。攻撃者がビットコインのプライバシーを侵害するいくつかの一般的な方法の簡略化された概要を以下に示します。
 
-## **Common Input Ownership Assumption**
+## **共通入力所有権の仮定**
 
-It is generally rare for inputs from different users to be combined in a single transaction due to the complexity involved. Thus, **two input addresses in the same transaction are often assumed to belong to the same owner**.
+異なるユーザーの入力が単一の取引に結合されることは一般的に稀であり、複雑さが関与します。したがって、**同じ取引内の2つの入力アドレスは、しばしば同じ所有者に属すると仮定されます**。
 
-## **UTXO Change Address Detection**
+## **UTXO変更アドレス検出**
 
-A UTXO, or **Unspent Transaction Output**, must be entirely spent in a transaction. If only a part of it is sent to another address, the remainder goes to a new change address. Observers can assume this new address belongs to the sender, compromising privacy.
+UTXO、または**未使用取引出力**は、取引で完全に消費されなければなりません。もしその一部だけが別のアドレスに送信されると、残りは新しい変更アドレスに送られます。観察者はこの新しいアドレスが送信者に属すると仮定し、プライバシーが侵害されます。
 
-### Example
+### 例
 
-To mitigate this, mixing services or using multiple addresses can help obscure ownership.
+これを軽減するために、ミキシングサービスや複数のアドレスを使用することで所有権を隠すのに役立ちます。
 
-## **Social Networks & Forums Exposure**
+## **ソーシャルネットワークとフォーラムの露出**
 
-Users sometimes share their Bitcoin addresses online, making it **easy to link the address to its owner**.
+ユーザーは時々自分のビットコインアドレスをオンラインで共有し、**アドレスを所有者にリンクさせるのが容易になります**。
 
-## **Transaction Graph Analysis**
+## **取引グラフ分析**
 
-Transactions can be visualized as graphs, revealing potential connections between users based on the flow of funds.
+取引はグラフとして視覚化でき、資金の流れに基づいてユーザー間の潜在的な接続を明らかにします。
 
-## **Unnecessary Input Heuristic (Optimal Change Heuristic)**
+## **不必要な入力ヒューリスティック（最適変更ヒューリスティック）**
 
-This heuristic is based on analyzing transactions with multiple inputs and outputs to guess which output is the change returning to the sender.
+このヒューリスティックは、複数の入力と出力を持つ取引を分析して、どの出力が送信者に戻る変更であるかを推測することに基づいています。
 
-### Example
-
+### 例
 ```bash
 2 btc --> 4 btc
 3 btc     1 btc
 ```
-
 If adding more inputs makes the change output larger than any single input, it can confuse the heuristic.
 
-## **Forced Address Reuse**
+## **強制アドレス再利用**
 
-Attackers may send small amounts to previously used addresses, hoping the recipient combines these with other inputs in future transactions, thereby linking addresses together.
+攻撃者は以前に使用されたアドレスに少額を送信し、受取人が将来の取引でこれらを他の入力と組み合わせることを期待して、アドレスをリンクさせることを狙います。
 
-### Correct Wallet Behavior
+### 正しいウォレットの動作
 
-Wallets should avoid using coins received on already used, empty addresses to prevent this privacy leak.
+ウォレットは、プライバシーの漏洩を防ぐために、すでに使用された空のアドレスで受け取ったコインを使用することを避けるべきです。
 
-## **Other Blockchain Analysis Techniques**
+## **その他のブロックチェーン分析技術**
 
-- **Exact Payment Amounts:** Transactions without change are likely between two addresses owned by the same user.
-- **Round Numbers:** A round number in a transaction suggests it's a payment, with the non-round output likely being the change.
-- **Wallet Fingerprinting:** Different wallets have unique transaction creation patterns, allowing analysts to identify the software used and potentially the change address.
-- **Amount & Timing Correlations:** Disclosing transaction times or amounts can make transactions traceable.
+- **正確な支払い額:** お釣りのない取引は、同じユーザーが所有する2つのアドレス間のものである可能性が高いです。
+- **丸い数字:** 取引における丸い数字は、支払いであることを示唆し、非丸い出力はお釣りである可能性が高いです。
+- **ウォレットフィンガープリンティング:** 異なるウォレットは独自の取引生成パターンを持ち、分析者が使用されたソフトウェアやお釣りのアドレスを特定できるようにします。
+- **金額とタイミングの相関:** 取引の時間や金額を開示することは、取引を追跡可能にする可能性があります。
 
-## **Traffic Analysis**
+## **トラフィック分析**
 
-By monitoring network traffic, attackers can potentially link transactions or blocks to IP addresses, compromising user privacy. This is especially true if an entity operates many Bitcoin nodes, enhancing their ability to monitor transactions.
+ネットワークトラフィックを監視することで、攻撃者は取引やブロックをIPアドレスにリンクさせる可能性があり、ユーザーのプライバシーが侵害されることがあります。これは、あるエンティティが多くのBitcoinノードを運営している場合に特に当てはまり、取引を監視する能力が向上します。
 
-## More
+## もっと
 
-For a comprehensive list of privacy attacks and defenses, visit [Bitcoin Privacy on Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy).
+プライバシー攻撃と防御の包括的なリストについては、[Bitcoin Privacy on Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy)を訪れてください。
 
-# Anonymous Bitcoin Transactions
+# 匿名のBitcoin取引
 
-## Ways to Get Bitcoins Anonymously
+## 匿名でBitcoinを取得する方法
 
-- **Cash Transactions**: Acquiring bitcoin through cash.
-- **Cash Alternatives**: Purchasing gift cards and exchanging them online for bitcoin.
-- **Mining**: The most private method to earn bitcoins is through mining, especially when done alone because mining pools may know the miner's IP address. [Mining Pools Information](https://en.bitcoin.it/wiki/Pooled_mining)
-- **Theft**: Theoretically, stealing bitcoin could be another method to acquire it anonymously, although it's illegal and not recommended.
+- **現金取引**: 現金でビットコインを取得すること。
+- **現金の代替**: ギフトカードを購入し、それをオンラインでビットコインと交換すること。
+- **マイニング**: ビットコインを得る最もプライベートな方法はマイニングであり、特に一人で行う場合は、マイニングプールがマイナーのIPアドレスを知っている可能性があるためです。[マイニングプール情報](https://en.bitcoin.it/wiki/Pooled_mining)
+- **盗難**: 理論的には、ビットコインを盗むことも匿名で取得する方法の一つですが、これは違法であり推奨されません。
 
-## Mixing Services
+## ミキシングサービス
 
-By using a mixing service, a user can **send bitcoins** and receive **different bitcoins in return**, which makes tracing the original owner difficult. Yet, this requires trust in the service not to keep logs and to actually return the bitcoins. Alternative mixing options include Bitcoin casinos.
+ミキシングサービスを使用することで、ユーザーは**ビットコインを送信**し、**異なるビットコインを受け取る**ことができ、元の所有者を追跡することが難しくなります。しかし、これはサービスがログを保持せず、実際にビットコインを返すことを信頼する必要があります。代替のミキシングオプションにはBitcoinカジノが含まれます。
 
 ## CoinJoin
 
-**CoinJoin** merges multiple transactions from different users into one, complicating the process for anyone trying to match inputs with outputs. Despite its effectiveness, transactions with unique input and output sizes can still potentially be traced.
+**CoinJoin**は、異なるユーザーからの複数の取引を1つに統合し、入力と出力を一致させようとする人にとってプロセスを複雑にします。その効果にもかかわらず、ユニークな入力と出力のサイズを持つ取引は、依然として追跡される可能性があります。
 
-Example transactions that may have used CoinJoin include `402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a` and `85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238`.
+CoinJoinを使用した可能性のある取引の例には`402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a`と`85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238`が含まれます。
 
-For more information, visit [CoinJoin](https://coinjoin.io/en). For a similar service on Ethereum, check out [Tornado Cash](https://tornado.cash), which anonymizes transactions with funds from miners.
+詳細については、[CoinJoin](https://coinjoin.io/en)を訪れてください。Ethereumの同様のサービスについては、マイナーからの資金で取引を匿名化する[Tornado Cash](https://tornado.cash)をチェックしてください。
 
 ## PayJoin
 
-A variant of CoinJoin, **PayJoin** (or P2EP), disguises the transaction among two parties (e.g., a customer and a merchant) as a regular transaction, without the distinctive equal outputs characteristic of CoinJoin. This makes it extremely hard to detect and could invalidate the common-input-ownership heuristic used by transaction surveillance entities.
-
+CoinJoinのバリアントである**PayJoin**（またはP2EP）は、2つの当事者（例：顧客と商人）間の取引を通常の取引として偽装し、CoinJoinの特徴的な等しい出力を持たないため、非常に検出が難しくなります。これにより、取引監視機関が使用する一般的な入力所有権のヒューリスティックが無効になる可能性があります。
 ```plaintext
 2 btc --> 3 btc
 5 btc     4 btc
 ```
+上記のようなトランザクションはPayJoinの可能性があり、標準的なビットコイントランザクションと区別がつかないままプライバシーを向上させます。
 
-Transactions like the above could be PayJoin, enhancing privacy while remaining indistinguishable from standard bitcoin transactions.
+**PayJoinの利用は、従来の監視手法を大きく妨げる可能性があります**。これは、トランザクションプライバシーの追求において有望な発展です。
 
-**The utilization of PayJoin could significantly disrupt traditional surveillance methods**, making it a promising development in the pursuit of transactional privacy.
+# 暗号通貨におけるプライバシーのベストプラクティス
 
-# Best Practices for Privacy in Cryptocurrencies
+## **ウォレット同期技術**
 
-## **Wallet Synchronization Techniques**
+プライバシーとセキュリティを維持するためには、ウォレットをブロックチェーンと同期させることが重要です。特に目立つ2つの方法があります：
 
-To maintain privacy and security, synchronizing wallets with the blockchain is crucial. Two methods stand out:
+- **フルノード**：ブロックチェーン全体をダウンロードすることで、フルノードは最大限のプライバシーを確保します。過去に行われたすべてのトランザクションがローカルに保存され、敵対者がユーザーの関心のあるトランザクションやアドレスを特定することは不可能です。
+- **クライアントサイドブロックフィルタリング**：この方法は、ブロックチェーン内の各ブロックにフィルターを作成し、ウォレットが特定の関心をネットワークの観察者にさらすことなく関連するトランザクションを特定できるようにします。軽量ウォレットはこれらのフィルターをダウンロードし、ユーザーのアドレスと一致する場合にのみフルブロックを取得します。
 
-- **Full node**: By downloading the entire blockchain, a full node ensures maximum privacy. All transactions ever made are stored locally, making it impossible for adversaries to identify which transactions or addresses the user is interested in.
-- **Client-side block filtering**: This method involves creating filters for every block in the blockchain, allowing wallets to identify relevant transactions without exposing specific interests to network observers. Lightweight wallets download these filters, only fetching full blocks when a match with the user's addresses is found.
+## **匿名性のためのTorの利用**
 
-## **Utilizing Tor for Anonymity**
+ビットコインがピアツーピアネットワークで動作するため、IPアドレスを隠すためにTorを使用することが推奨され、ネットワークとのやり取り時にプライバシーが向上します。
 
-Given that Bitcoin operates on a peer-to-peer network, using Tor is recommended to mask your IP address, enhancing privacy when interacting with the network.
+## **アドレスの再利用防止**
 
-## **Preventing Address Reuse**
+プライバシーを守るためには、各トランザクションに新しいアドレスを使用することが重要です。アドレスを再利用すると、トランザクションが同じ主体にリンクされることでプライバシーが損なわれる可能性があります。現代のウォレットはその設計によりアドレスの再利用を避けるようにしています。
 
-To safeguard privacy, it's vital to use a new address for every transaction. Reusing addresses can compromise privacy by linking transactions to the same entity. Modern wallets discourage address reuse through their design.
+## **トランザクションプライバシーの戦略**
 
-## **Strategies for Transaction Privacy**
+- **複数のトランザクション**：支払いをいくつかのトランザクションに分割することで、トランザクションの金額を不明瞭にし、プライバシー攻撃を防ぎます。
+- **お釣りの回避**：お釣りの出力が不要なトランザクションを選択することで、プライバシーを向上させ、お釣り検出手法を混乱させます。
+- **複数のお釣り出力**：お釣りを避けることができない場合でも、複数のお釣り出力を生成することでプライバシーを改善できます。
 
-- **Multiple transactions**: Splitting a payment into several transactions can obscure the transaction amount, thwarting privacy attacks.
-- **Change avoidance**: Opting for transactions that don't require change outputs enhances privacy by disrupting change detection methods.
-- **Multiple change outputs**: If avoiding change isn't feasible, generating multiple change outputs can still improve privacy.
+# **モネロ：匿名性の灯台**
 
-# **Monero: A Beacon of Anonymity**
+モネロはデジタルトランザクションにおける絶対的な匿名性の必要性に応え、高いプライバシー基準を設定しています。
 
-Monero addresses the need for absolute anonymity in digital transactions, setting a high standard for privacy.
+# **イーサリアム：ガスとトランザクション**
 
-# **Ethereum: Gas and Transactions**
+## **ガスの理解**
 
-## **Understanding Gas**
+ガスは、イーサリアム上での操作を実行するために必要な計算努力を測定し、**gwei**で価格が設定されています。たとえば、2,310,000 gwei（または0.00231 ETH）のコストがかかるトランザクションは、ガス制限と基本料金があり、マイナーへのインセンティブとしてチップが含まれます。ユーザーは過剰支払いを避けるために最大料金を設定でき、余分な料金は返金されます。
 
-Gas measures the computational effort needed to execute operations on Ethereum, priced in **gwei**. For example, a transaction costing 2,310,000 gwei (or 0.00231 ETH) involves a gas limit and a base fee, with a tip to incentivize miners. Users can set a max fee to ensure they don't overpay, with the excess refunded.
+## **トランザクションの実行**
 
-## **Executing Transactions**
+イーサリアムのトランザクションには送信者と受信者が含まれ、受信者はユーザーまたはスマートコントラクトのアドレスである可能性があります。トランザクションには料金が必要で、マイニングされなければなりません。トランザクションにおける重要な情報には、受信者、送信者の署名、価値、オプションのデータ、ガス制限、料金が含まれます。特に、送信者のアドレスは署名から推測されるため、トランザクションデータに含める必要はありません。
 
-Transactions in Ethereum involve a sender and a recipient, which can be either user or smart contract addresses. They require a fee and must be mined. Essential information in a transaction includes the recipient, sender's signature, value, optional data, gas limit, and fees. Notably, the sender's address is deduced from the signature, eliminating the need for it in the transaction data.
+これらのプラクティスとメカニズムは、プライバシーとセキュリティを優先しながら暗号通貨に関与しようとする人々にとって基礎的なものです。
 
-These practices and mechanisms are foundational for anyone looking to engage with cryptocurrencies while prioritizing privacy and security.
-
-## References
+## 参考文献
 
 - [https://en.wikipedia.org/wiki/Proof_of_stake](https://en.wikipedia.org/wiki/Proof_of_stake)
 - [https://www.mycryptopedia.com/public-key-private-key-explained/](https://www.mycryptopedia.com/public-key-private-key-explained/)

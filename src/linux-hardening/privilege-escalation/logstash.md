@@ -18,7 +18,7 @@ path.config: "/etc/logstash/conf.d/*.conf"
 path.config: "/usr/share/logstash/pipeline/1*.conf"
 pipeline.workers: 6
 ```
-このファイルは、パイプライン構成を含む **.conf** ファイルがどこにあるかを明らかにします。 **Elasticsearch output module** を使用する際、**pipelines** には **Elasticsearch credentials** が含まれることが一般的で、これは Logstash が Elasticsearch にデータを書き込む必要があるため、広範な権限を持つことがよくあります。構成パスのワイルドカードにより、Logstash は指定されたディレクトリ内のすべての一致するパイプラインを実行できます。
+このファイルは、パイプライン構成を含む **.conf** ファイルの場所を明らかにします。 **Elasticsearch output module** を使用する際、**pipelines** に **Elasticsearch credentials** が含まれることが一般的で、これは Logstash が Elasticsearch にデータを書き込む必要があるため、広範な権限を持つことがよくあります。構成パスのワイルドカードにより、Logstash は指定されたディレクトリ内のすべての一致するパイプラインを実行できます。
 
 ### 書き込み可能なパイプラインによる特権昇格
 
@@ -50,7 +50,7 @@ codec => rubydebug
 ```
 ここで、**interval**は実行頻度を秒単位で決定します。与えられた例では、**whoami**コマンドが120秒ごとに実行され、その出力は**/tmp/output.log**に送られます。
 
-**/etc/logstash/logstash.yml**に**config.reload.automatic: true**が設定されている場合、Logstashは再起動することなく新しいまたは変更されたパイプライン構成を自動的に検出して適用します。ワイルドカードがない場合でも、既存の構成に対して変更を加えることは可能ですが、混乱を避けるために注意が必要です。
+**/etc/logstash/logstash.yml**に**config.reload.automatic: true**が設定されている場合、Logstashは再起動することなく新しいまたは変更されたパイプライン設定を自動的に検出して適用します。ワイルドカードがない場合でも、既存の設定に対して変更を加えることは可能ですが、混乱を避けるために注意が必要です。
 
 ## References
 

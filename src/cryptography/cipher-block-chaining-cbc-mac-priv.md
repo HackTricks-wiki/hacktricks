@@ -2,54 +2,54 @@
 
 # CBC
 
-If the **cookie** is **only** the **username** (or the first part of the cookie is the username) and you want to impersonate the username "**admin**". Then, you can create the username **"bdmin"** and **bruteforce** the **first byte** of the cookie.
+もし**クッキー**が**ユーザー名**だけ（またはクッキーの最初の部分がユーザー名である）で、ユーザー名「**admin**」を偽装したい場合、ユーザー名「**bdmin**」を作成し、クッキーの**最初のバイト**を**ブルートフォース**することができます。
 
 # CBC-MAC
 
-**Cipher block chaining message authentication code** (**CBC-MAC**) is a method used in cryptography. It works by taking a message and encrypting it block by block, where each block's encryption is linked to the one before it. This process creates a **chain of blocks**, making sure that changing even a single bit of the original message will lead to an unpredictable change in the last block of encrypted data. To make or reverse such a change, the encryption key is required, ensuring security.
+**暗号ブロック連鎖メッセージ認証コード**（**CBC-MAC**）は、暗号学で使用される方法です。これは、メッセージをブロックごとに暗号化し、各ブロックの暗号化が前のブロックにリンクされることで機能します。このプロセスは**ブロックの連鎖**を作成し、元のメッセージのビットを1つ変更するだけでも、暗号化されたデータの最後のブロックに予測不可能な変化をもたらすことを保証します。このような変更を行うまたは逆にするためには、暗号化キーが必要であり、セキュリティが確保されます。
 
-To calculate the CBC-MAC of message m, one encrypts m in CBC mode with zero initialization vector and keeps the last block. The following figure sketches the computation of the CBC-MAC of a message comprising blocks![https://wikimedia.org/api/rest_v1/media/math/render/svg/bbafe7330a5e40a04f01cc776c9d94fe914b17f5](https://wikimedia.org/api/rest_v1/media/math/render/svg/bbafe7330a5e40a04f01cc776c9d94fe914b17f5) using a secret key k and a block cipher E:
+メッセージmのCBC-MACを計算するには、ゼロ初期化ベクトルでCBCモードでmを暗号化し、最後のブロックを保持します。以下の図は、秘密鍵kとブロック暗号Eを使用して、ブロックからなるメッセージのCBC-MACの計算を概略しています！[https://wikimedia.org/api/rest_v1/media/math/render/svg/bbafe7330a5e40a04f01cc776c9d94fe914b17f5](https://wikimedia.org/api/rest_v1/media/math/render/svg/bbafe7330a5e40a04f01cc776c9d94fe914b17f5) 
 
 ![https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/CBC-MAC_structure_(en).svg/570px-CBC-MAC_structure_(en).svg.png](<https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/CBC-MAC_structure_(en).svg/570px-CBC-MAC_structure_(en).svg.png>)
 
-# Vulnerability
+# 脆弱性
 
-With CBC-MAC usually the **IV used is 0**.\
-This is a problem because 2 known messages (`m1` and `m2`) independently will generate 2 signatures (`s1` and `s2`). So:
+CBC-MACでは通常**使用されるIVは0**です。\
+これは問題です。なぜなら、2つの既知のメッセージ（`m1`と`m2`）が独立して2つの署名（`s1`と`s2`）を生成するからです。したがって：
 
 - `E(m1 XOR 0) = s1`
 - `E(m2 XOR 0) = s2`
 
-Then a message composed by m1 and m2 concatenated (m3) will generate 2 signatures (s31 and s32):
+次に、m1とm2を連結したメッセージ（m3）は2つの署名（s31とs32）を生成します：
 
 - `E(m1 XOR 0) = s31 = s1`
 - `E(m2 XOR s1) = s32`
 
-**Which is possible to calculate without knowing the key of the encryption.**
+**これは暗号化のキーを知らなくても計算可能です。**
 
-Imagine you are encrypting the name **Administrator** in **8bytes** blocks:
+あなたが**Administrator**という名前を**8バイト**のブロックで暗号化していると想像してください：
 
 - `Administ`
 - `rator\00\00\00`
 
-You can create a username called **Administ** (m1) and retrieve the signature (s1).\
-Then, you can create a username called the result of `rator\00\00\00 XOR s1`. This will generate `E(m2 XOR s1 XOR 0)` which is s32.\
-now, you can use s32 as the signature of the full name **Administrator**.
+あなたは「**Administ**」というユーザー名（m1）を作成し、署名（s1）を取得できます。\
+次に、`rator\00\00\00 XOR s1`の結果を持つユーザー名を作成できます。これにより、`E(m2 XOR s1 XOR 0)`がs32を生成します。\
+今、s32を**Administrator**のフルネームの署名として使用できます。
 
-### Summary
+### まとめ
 
-1. Get the signature of username **Administ** (m1) which is s1
-2. Get the signature of username **rator\x00\x00\x00 XOR s1 XOR 0** is s32**.**
-3. Set the cookie to s32 and it will be a valid cookie for the user **Administrator**.
+1. ユーザー名「**Administ**」（m1）の署名を取得し、それがs1です。
+2. ユーザー名「**rator\x00\x00\x00 XOR s1 XOR 0**」の署名はs32です。
+3. クッキーをs32に設定すると、ユーザー「**Administrator**」の有効なクッキーになります。
 
-# Attack Controlling IV
+# IVの制御攻撃
 
-If you can control the used IV the attack could be very easy.\
-If the cookies is just the username encrypted, to impersonate the user "**administrator**" you can create the user "**Administrator**" and you will get it's cookie.\
-Now, if you can control the IV, you can change the first Byte of the IV so **IV\[0] XOR "A" == IV'\[0] XOR "a"** and regenerate the cookie for the user **Administrator.** This cookie will be valid to **impersonate** the user **administrator** with the initial **IV**.
+使用されるIVを制御できる場合、攻撃は非常に簡単になる可能性があります。\
+クッキーが単に暗号化されたユーザー名である場合、ユーザー「**administrator**」を偽装するために、ユーザー「**Administrator**」を作成し、そのクッキーを取得できます。\
+今、IVを制御できる場合、IVの最初のバイトを変更することができ、**IV\[0] XOR "A" == IV'\[0] XOR "a"**となり、ユーザー「**Administrator**」のクッキーを再生成できます。このクッキーは、初期**IV**を使用してユーザー「**administrator**」を**偽装**するのに有効です。
 
-## References
+## 参考文献
 
-More information in [https://en.wikipedia.org/wiki/CBC-MAC](https://en.wikipedia.org/wiki/CBC-MAC)
+詳細は[https://en.wikipedia.org/wiki/CBC-MAC](https://en.wikipedia.org/wiki/CBC-MAC)を参照してください。
 
 {{#include ../banners/hacktricks-training.md}}

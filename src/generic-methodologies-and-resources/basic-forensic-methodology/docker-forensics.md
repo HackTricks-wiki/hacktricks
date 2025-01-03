@@ -2,24 +2,15 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
+## コンテナの改ざん
 
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
-
-{% embed url="https://academy.8ksec.io/" %}
-
-## Container modification
-
-There are suspicions that some docker container was compromised:
-
+いくつかのdockerコンテナが侵害された疑いがあります：
 ```bash
 docker ps
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
 cc03e43a052a        lamp-wordpress      "./run.sh"          2 minutes ago       Up 2 minutes        80/tcp              wordpress
 ```
-
-You can easily **find the modifications done to this container with regards to the image** with:
-
+このコンテナに対する**イメージに関する変更を簡単に見つけることができます**:
 ```bash
 docker diff wordpress
 C /var
@@ -33,70 +24,52 @@ A /var/lib/mysql/mysql/time_zone_leap_second.MYI
 A /var/lib/mysql/mysql/general_log.CSV
 ...
 ```
-
-In the previous command **C** means **Changed** and **A,** **Added**.\
-If you find that some interesting file like `/etc/shadow` was modified you can download it from the container to check for malicious activity with:
-
+前のコマンドで **C** は **Changed** を意味し、**A** は **Added** を意味します。\
+もし `/etc/shadow` のような興味深いファイルが変更されたことがわかった場合、悪意のある活動を確認するためにコンテナからダウンロードすることができます：
 ```bash
 docker cp wordpress:/etc/shadow.
 ```
-
-You can also **compare it with the original one** running a new container and extracting the file from it:
-
+新しいコンテナを実行し、そこからファイルを抽出することで、**元のものと比較することもできます**。
 ```bash
 docker run -d lamp-wordpress
 docker cp b5d53e8b468e:/etc/shadow original_shadow #Get the file from the newly created container
 diff original_shadow shadow
 ```
-
-If you find that **some suspicious file was added** you can access the container and check it:
-
+**いくつかの疑わしいファイルが追加された**場合は、コンテナにアクセスして確認できます：
 ```bash
 docker exec -it wordpress bash
 ```
+## 画像の変更
 
-## Images modifications
-
-When you are given an exported docker image (probably in `.tar` format) you can use [**container-diff**](https://github.com/GoogleContainerTools/container-diff/releases) to **extract a summary of the modifications**:
-
+エクスポートされたDockerイメージ（おそらく`.tar`形式）を受け取った場合、[**container-diff**](https://github.com/GoogleContainerTools/container-diff/releases)を使用して**変更の概要を抽出**できます：
 ```bash
 docker save <image> > image.tar #Export the image to a .tar file
 container-diff analyze -t sizelayer image.tar
 container-diff analyze -t history image.tar
 container-diff analyze -t metadata image.tar
 ```
-
-Then, you can **decompress** the image and **access the blobs** to search for suspicious files you may have found in the changes history:
-
+次に、イメージを**解凍**し、**ブロブにアクセス**して、変更履歴で見つけた疑わしいファイルを検索できます：
 ```bash
 tar -xf image.tar
 ```
+### 基本分析
 
-### Basic Analysis
-
-You can get **basic information** from the image running:
-
+イメージから**基本情報**を取得するには、次のコマンドを実行します:
 ```bash
 docker inspect <image>
 ```
-
-You can also get a summary **history of changes** with:
-
+変更履歴の要約を取得することもできます:
 ```bash
 docker history --no-trunc <image>
 ```
-
-You can also generate a **dockerfile from an image** with:
-
+イメージから**dockerfileを生成**することもできます:
 ```bash
 alias dfimage="docker run -v /var/run/docker.sock:/var/run/docker.sock --rm alpine/dfimage"
 dfimage -sV=1.36 madhuakula/k8s-goat-hidden-in-layers>
 ```
-
 ### Dive
 
-In order to find added/modified files in docker images you can also use the [**dive**](https://github.com/wagoodman/dive) (download it from [**releases**](https://github.com/wagoodman/dive/releases/tag/v0.10.0)) utility:
-
+Dockerイメージ内の追加または変更されたファイルを見つけるために、[**dive**](https://github.com/wagoodman/dive)（[**releases**](https://github.com/wagoodman/dive/releases/tag/v0.10.0)からダウンロード）ユーティリティを使用することもできます：
 ```bash
 #First you need to load the image in your docker repo
 sudo docker load < image.tar                                                                                                                                                                                                         1 ⨯
@@ -105,27 +78,18 @@ Loaded image: flask:latest
 #And then open it with dive:
 sudo dive flask:latest
 ```
+これにより、**Dockerイメージの異なるブロブをナビゲート**し、どのファイルが変更または追加されたかを確認できます。**赤**は追加されたことを意味し、**黄色**は変更されたことを意味します。**タブ**を使用して他のビューに移動し、**スペース**を使用してフォルダーを折りたたむ/開くことができます。
 
-This allows you to **navigate through the different blobs of docker images** and check which files were modified/added. **Red** means added and **yellow** means modified. Use **tab** to move to the other view and **space** to collapse/open folders.
-
-With die you won't be able to access the content of the different stages of the image. To do so you will need to **decompress each layer and access it**.\
-You can decompress all the layers from an image from the directory where the image was decompressed executing:
-
+dieを使用すると、イメージの異なるステージの内容にアクセスすることはできません。そうするためには、**各レイヤーを解凍してアクセスする必要があります**。\
+イメージが解凍されたディレクトリから、イメージのすべてのレイヤーを解凍するには、次のコマンドを実行します:
 ```bash
 tar -xf image.tar
 for d in `find * -maxdepth 0 -type d`; do cd $d; tar -xf ./layer.tar; cd ..; done
 ```
+## メモリからの資格情報
 
-## Credentials from memory
+ホスト内でdockerコンテナを実行するとき、**ホストからコンテナで実行されているプロセスを見ることができます**。単に`ps -ef`を実行するだけです。
 
-Note that when you run a docker container inside a host **you can see the processes running on the container from the host** just running `ps -ef`
-
-Therefore (as root) you can **dump the memory of the processes** from the host and search for **credentials** just [**like in the following example**](../../linux-hardening/privilege-escalation/#process-memory).
-
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
-
-{% embed url="https://academy.8ksec.io/" %}
+したがって（rootとして）、**ホストからプロセスのメモリをダンプし**、**資格情報**を検索することができます。ちょうど[**次の例のように**](../../linux-hardening/privilege-escalation/#process-memory)。
 
 {{#include ../../banners/hacktricks-training.md}}

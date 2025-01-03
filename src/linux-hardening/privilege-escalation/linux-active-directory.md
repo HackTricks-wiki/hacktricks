@@ -4,15 +4,15 @@
 
 LinuxマシンはActive Directory環境内に存在することもあります。
 
-AD内のLinuxマシンは、**ファイル内に異なるCCACHEチケットを保存している可能性があります。このチケットは他のKerberosチケットと同様に使用および悪用できます**。これらのチケットを読み取るには、チケットのユーザー所有者であるか、**root**である必要があります。
+AD内のLinuxマシンは、**異なるCCACHEチケットをファイル内に保存している可能性があります。このチケットは他のKerberosチケットと同様に使用および悪用できます**。これらのチケットを読み取るには、チケットのユーザー所有者であるか、**root**である必要があります。
 
 ## 列挙
 
 ### LinuxからのAD列挙
 
-Linux（またはWindowsのbash）でADにアクセスできる場合、ADを列挙するために[https://github.com/lefayjey/linWinPwn](https://github.com/lefayjey/linWinPwn)を試すことができます。
+Linux（またはWindowsのbash）でADにアクセスできる場合、[https://github.com/lefayjey/linWinPwn](https://github.com/lefayjey/linWinPwn)を試してADを列挙できます。
 
-LinuxからADを列挙する**他の方法**を学ぶために、次のページも確認できます：
+LinuxからADを列挙する**他の方法**を学ぶには、次のページを確認してください：
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-ldap.md
@@ -40,7 +40,7 @@ FreeIPAは、主に**Unix**環境向けのMicrosoft Windows **Active Directory**
 
 CCACHEファイルは**Kerberos資格情報**を保存するためのバイナリ形式で、通常は`/tmp`に600の権限で保存されます。これらのファイルは、ユーザーのUIDに関連する**名前形式`krb5cc_%{uid}`**で識別できます。認証チケットの検証には、**環境変数`KRB5CCNAME`**を希望するチケットファイルのパスに設定する必要があり、再利用を可能にします。
 
-`env | grep KRB5CCNAME`を使用して、認証に使用されている現在のチケットをリストします。形式はポータブルで、環境変数を設定することでチケットを**再利用できます**。`export KRB5CCNAME=/tmp/ticket.ccache`を使用します。Kerberosチケットの名前形式は`krb5cc_%{uid}`で、uidはユーザーのUIDです。
+`env | grep KRB5CCNAME`を使用して、認証に使用されている現在のチケットをリストします。この形式はポータブルで、環境変数を設定することでチケットを**再利用できます**。`export KRB5CCNAME=/tmp/ticket.ccache`を使用します。Kerberosチケットの名前形式は`krb5cc_%{uid}`で、uidはユーザーのUIDです。
 ```bash
 # Find tickets
 ls /tmp/ | grep krb5cc
@@ -62,7 +62,7 @@ make CONF=Release
 ```
 この手順は、さまざまなセッションに注入を試み、抽出されたチケットを `/tmp` に `__krb_UID.ccache` という命名規則で保存することで成功を示します。
 
-### SSSD KCMからのCCACHEチケットの再利用
+### SSSD KCMからのCCACHEチケット再利用
 
 SSSDは、パス `/var/lib/sss/secrets/secrets.ldb` にデータベースのコピーを保持しています。対応するキーは、パス `/var/lib/sss/secrets/.secrets.mkey` に隠しファイルとして保存されています。デフォルトでは、キーは **root** 権限を持っている場合にのみ読み取ることができます。
 
@@ -97,7 +97,7 @@ macOSでは、**`bifrost`**はkeytabファイル分析のためのツールと�
 ```bash
 ./bifrost -action dump -source keytab -path /path/to/your/file
 ```
-抽出されたアカウントとハッシュ情報を利用して、**`crackmapexec`**のようなツールを使用してサーバーへの接続を確立できます。
+抽出したアカウントとハッシュ情報を利用して、**`crackmapexec`**のようなツールを使用してサーバーへの接続を確立できます。
 ```bash
 crackmapexec 10.XXX.XXX.XXX -u 'ServiceAccount$' -H "HashPlaceholder" -d "YourDOMAIN"
 ```

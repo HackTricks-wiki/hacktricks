@@ -25,6 +25,6 @@ Distrolessコンテナを武器化する目的は、**distrolessによって示�
 
 #### openssl
 
-\***\*[**この投稿では、**](https://www.form3.tech/engineering/content/exploiting-distroless-images) バイナリ **`openssl`** がこれらのコンテナに頻繁に見られることが説明されており、これはコンテナ内で実行されるソフトウェアに**必要とされる**可能性があります。
+\***\*[**この投稿では、**](https://www.form3.tech/engineering/content/exploiting-distroless-images) バイナリ **`openssl`** がこれらのコンテナに頻繁に見られることが説明されており、これはコンテナ内で実行されるソフトウェアに**必要とされる**ためかもしれません。
 
 {{#include ../../../banners/hacktricks-training.md}}

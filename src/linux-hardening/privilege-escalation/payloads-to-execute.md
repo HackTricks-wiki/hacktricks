@@ -50,7 +50,7 @@ return 0;
 
 - _/etc/passwd_ にパスワード付きのユーザーを追加
 - _/etc/shadow_ 内のパスワードを変更
-- _/etc/sudoers_ にユーザーをsudoersに追加
+- _/etc/sudoers_ にユーザーを追加
 - 通常 _/run/docker.sock_ または _/var/run/docker.sock_ にあるdockerソケットを通じてdockerを悪用
 
 ### ライブラリの上書き

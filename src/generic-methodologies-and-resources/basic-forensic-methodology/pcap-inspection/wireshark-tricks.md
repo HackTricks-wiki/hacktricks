@@ -1,157 +1,155 @@
-# Wireshark tricks
+# Wiresharkのトリック
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Improve your Wireshark skills
+## Wiresharkスキルの向上
 
-### Tutorials
+### チュートリアル
 
-The following tutorials are amazing to learn some cool basic tricks:
+以下のチュートリアルは、いくつかのクールな基本的なトリックを学ぶのに素晴らしいです：
 
 - [https://unit42.paloaltonetworks.com/unit42-customizing-wireshark-changing-column-display/](https://unit42.paloaltonetworks.com/unit42-customizing-wireshark-changing-column-display/)
 - [https://unit42.paloaltonetworks.com/using-wireshark-display-filter-expressions/](https://unit42.paloaltonetworks.com/using-wireshark-display-filter-expressions/)
 - [https://unit42.paloaltonetworks.com/using-wireshark-identifying-hosts-and-users/](https://unit42.paloaltonetworks.com/using-wireshark-identifying-hosts-and-users/)
 - [https://unit42.paloaltonetworks.com/using-wireshark-exporting-objects-from-a-pcap/](https://unit42.paloaltonetworks.com/using-wireshark-exporting-objects-from-a-pcap/)
 
-### Analysed Information
+### 分析された情報
 
-**Expert Information**
+**エキスパート情報**
 
-Clicking on _**Analyze** --> **Expert Information**_ you will have an **overview** of what is happening in the packets **analyzed**:
+_**Analyze** --> **Expert Information**_をクリックすると、**分析された**パケットで何が起こっているかの**概要**が得られます：
 
 ![](<../../../images/image (256).png>)
 
-**Resolved Addresses**
+**解決されたアドレス**
 
-Under _**Statistics --> Resolved Addresses**_ you can find several **information** that was "**resolved**" by wireshark like port/transport to protocol, MAC to the manufacturer, etc. It is interesting to know what is implicated in the communication.
+_**Statistics --> Resolved Addresses**_の下には、wiresharkによって「**解決された**」いくつかの**情報**（ポート/トランスポートからプロトコル、MACから製造元など）を見つけることができます。通信に何が関与しているかを知るのは興味深いです。
 
 ![](<../../../images/image (893).png>)
 
-**Protocol Hierarchy**
+**プロトコル階層**
 
-Under _**Statistics --> Protocol Hierarchy**_ you can find the **protocols** **involved** in the communication and data about them.
+_**Statistics --> Protocol Hierarchy**_の下には、通信に関与する**プロトコル**とそれに関するデータを見つけることができます。
 
 ![](<../../../images/image (586).png>)
 
-**Conversations**
+**会話**
 
-Under _**Statistics --> Conversations**_ you can find a **summary of the conversations** in the communication and data about them.
+_**Statistics --> Conversations**_の下には、通信の**会話の要約**とそれに関するデータを見つけることができます。
 
 ![](<../../../images/image (453).png>)
 
-**Endpoints**
+**エンドポイント**
 
-Under _**Statistics --> Endpoints**_ you can find a **summary of the endpoints** in the communication and data about each of them.
+_**Statistics --> Endpoints**_の下には、通信の**エンドポイントの要約**とそれぞれに関するデータを見つけることができます。
 
 ![](<../../../images/image (896).png>)
 
-**DNS info**
+**DNS情報**
 
-Under _**Statistics --> DNS**_ you can find statistics about the DNS request captured.
+_**Statistics --> DNS**_の下には、キャプチャされたDNSリクエストに関する統計を見つけることができます。
 
 ![](<../../../images/image (1063).png>)
 
-**I/O Graph**
+**I/Oグラフ**
 
-Under _**Statistics --> I/O Graph**_ you can find a **graph of the communication.**
+_**Statistics --> I/O Graph**_の下には、**通信のグラフ**を見つけることができます。
 
 ![](<../../../images/image (992).png>)
 
-### Filters
+### フィルター
 
-Here you can find wireshark filter depending on the protocol: [https://www.wireshark.org/docs/dfref/](https://www.wireshark.org/docs/dfref/)\
-Other interesting filters:
+ここでは、プロトコルに応じたwiresharkフィルターを見つけることができます：[https://www.wireshark.org/docs/dfref/](https://www.wireshark.org/docs/dfref/)\
+他の興味深いフィルター：
 
 - `(http.request or ssl.handshake.type == 1) and !(udp.port eq 1900)`
-  - HTTP and initial HTTPS traffic
+- HTTPおよび初期HTTPSトラフィック
 - `(http.request or ssl.handshake.type == 1 or tcp.flags eq 0x0002) and !(udp.port eq 1900)`
-  - HTTP and initial HTTPS traffic + TCP SYN
+- HTTPおよび初期HTTPSトラフィック + TCP SYN
 - `(http.request or ssl.handshake.type == 1 or tcp.flags eq 0x0002 or dns) and !(udp.port eq 1900)`
-  - HTTP and initial HTTPS traffic + TCP SYN + DNS requests
+- HTTPおよび初期HTTPSトラフィック + TCP SYN + DNSリクエスト
 
-### Search
+### 検索
 
-If you want to **search** for **content** inside the **packets** of the sessions press _CTRL+f_. You can add new layers to the main information bar (No., Time, Source, etc.) by pressing the right button and then the edit column.
+セッションの**パケット**内の**コンテンツ**を**検索**したい場合は、_CTRL+f_を押します。右ボタンを押してから列を編集することで、メイン情報バー（No.、Time、Sourceなど）に新しいレイヤーを追加できます。
 
-### Free pcap labs
+### 無料のpcapラボ
 
-**Practice with the free challenges of:** [**https://www.malware-traffic-analysis.net/**](https://www.malware-traffic-analysis.net)
+**無料のチャレンジで練習する：** [**https://www.malware-traffic-analysis.net/**](https://www.malware-traffic-analysis.net)
 
-## Identifying Domains
+## ドメインの特定
 
-You can add a column that shows the Host HTTP header:
+Host HTTPヘッダーを表示する列を追加できます：
 
 ![](<../../../images/image (639).png>)
 
-And a column that add the Server name from an initiating HTTPS connection (**ssl.handshake.type == 1**):
+そして、開始HTTPS接続からサーバー名を追加する列（**ssl.handshake.type == 1**）：
 
 ![](<../../../images/image (408) (1).png>)
 
-## Identifying local hostnames
+## ローカルホスト名の特定
 
-### From DHCP
+### DHCPから
 
-In current Wireshark instead of `bootp` you need to search for `DHCP`
+現在のWiresharkでは、`bootp`の代わりに`DHCP`を検索する必要があります。
 
 ![](<../../../images/image (1013).png>)
 
-### From NBNS
+### NBNSから
 
 ![](<../../../images/image (1003).png>)
 
-## Decrypting TLS
+## TLSの復号化
 
-### Decrypting https traffic with server private key
+### サーバーの秘密鍵を使用したhttpsトラフィックの復号化
 
 _edit>preference>protocol>ssl>_
 
 ![](<../../../images/image (1103).png>)
 
-Press _Edit_ and add all the data of the server and the private key (_IP, Port, Protocol, Key file and password_)
+_サーバーと秘密鍵のすべてのデータ（_IP、Port、Protocol、Key file、password_）を追加するために_編集_を押します。
 
-### Decrypting https traffic with symmetric session keys
+### 対称セッションキーを使用したhttpsトラフィックの復号化
 
-Both Firefox and Chrome have the capability to log TLS session keys, which can be used with Wireshark to decrypt TLS traffic. This allows for in-depth analysis of secure communications. More details on how to perform this decryption can be found in a guide at [Red Flag Security](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/).
+FirefoxとChromeの両方は、TLSセッションキーをログに記録する機能があり、これを使用してWiresharkでTLSトラフィックを復号化できます。これにより、安全な通信の詳細な分析が可能になります。この復号化を実行する方法の詳細は、[Red Flag Security](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/)のガイドにあります。
 
-To detect this search inside the environment for to variable `SSLKEYLOGFILE`
+これを検出するには、環境内で変数`SSLKEYLOGFILE`を検索します。
 
-A file of shared keys will look like this:
+共有キーのファイルは次のようになります：
 
 ![](<../../../images/image (820).png>)
 
-To import this in wireshark go to \_edit > preference > protocol > ssl > and import it in (Pre)-Master-Secret log filename:
+これをwiresharkにインポートするには、_edit > preference > protocol > ssl >_に移動し、(Pre)-Master-Secretログファイル名にインポートします：
 
 ![](<../../../images/image (989).png>)
 
-## ADB communication
+## ADB通信
 
-Extract an APK from an ADB communication where the APK was sent:
-
+APKが送信されたADB通信からAPKを抽出します：
 ```python
 from scapy.all import *
 
 pcap = rdpcap("final2.pcapng")
 
 def rm_data(data):
-    splitted = data.split(b"DATA")
-    if len(splitted) == 1:
-        return data
-    else:
-        return splitted[0]+splitted[1][4:]
+splitted = data.split(b"DATA")
+if len(splitted) == 1:
+return data
+else:
+return splitted[0]+splitted[1][4:]
 
 all_bytes = b""
 for pkt in pcap:
-    if Raw in pkt:
-        a = pkt[Raw]
-        if b"WRTE" == bytes(a)[:4]:
-            all_bytes += rm_data(bytes(a)[24:])
-        else:
-            all_bytes += rm_data(bytes(a))
+if Raw in pkt:
+a = pkt[Raw]
+if b"WRTE" == bytes(a)[:4]:
+all_bytes += rm_data(bytes(a)[24:])
+else:
+all_bytes += rm_data(bytes(a))
 print(all_bytes)
 
 f = open('all_bytes.data', 'w+b')
 f.write(all_bytes)
 f.close()
 ```
-
 {{#include ../../../banners/hacktricks-training.md}}

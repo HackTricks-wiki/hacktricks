@@ -25,7 +25,7 @@ generic-methodologies-and-resources/pentesting-methodology.md
 
 彼らの**ブログ**は[**https://blog.stmcyber.com**](https://blog.stmcyber.com)で確認できます。
 
-**STM Cyber**は、HackTricksのようなサイバーセキュリティのオープンソースプロジェクトもサポートしています :)
+**STM Cyber**は、HackTricksのようなサイバーセキュリティオープンソースプロジェクトもサポートしています :)
 
 ---
 
@@ -33,7 +33,7 @@ generic-methodologies-and-resources/pentesting-methodology.md
 
 <figure><img src="images/image (45).png" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com)は、**スペイン**で最も重要なサイバーセキュリティイベントであり、**ヨーロッパ**で最も重要なイベントの1つです。**技術的知識の促進**を使命とし、この会議はあらゆる分野の技術とサイバーセキュリティの専門家の熱い交流の場です。
+[**RootedCON**](https://www.rootedcon.com)は、**スペイン**で最も重要なサイバーセキュリティイベントであり、**ヨーロッパ**で最も重要なイベントの1つです。**技術的知識の促進**を使命とし、この会議はあらゆる分野の技術とサイバーセキュリティの専門家のための熱い交流の場です。
 
 {% embed url="https://www.rootedcon.com/" %}
 
@@ -45,7 +45,7 @@ generic-methodologies-and-resources/pentesting-methodology.md
 
 **Intigriti**は、**ヨーロッパの#1**エシカルハッキングおよび**バグバウンティプラットフォーム**です。
 
-**バグバウンティのヒント**: **Intigriti**に**サインアップ**してください。これは、**ハッカーによって、ハッカーのために作られたプレミアムバグバウンティプラットフォーム**です！今日、[**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks)に参加し、最大**$100,000**の報酬を得始めましょう！
+**バグバウンティのヒント**: **Intigriti**に**サインアップ**してください。これは、**ハッカーによって、ハッカーのために作られたプレミアムバグバウンティプラットフォーム**です！今日[**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks)に参加し、最大**$100,000**の報酬を得始めましょう！
 
 {% embed url="https://go.intigriti.com/hacktricks" %}
 
@@ -100,8 +100,8 @@ SerpApiのプランのサブスクリプションには、Google、Bing、Baidu�
 他のプロバイダーとは異なり、**SerpApiはオーガニック結果だけをスクレイピングするわけではありません**。SerpApiの応答には、常にすべての広告、インライン画像と動画、ナレッジグラフ、検索結果に存在する他の要素や機能が含まれます。
 
 現在のSerpApiの顧客には、**Apple、Shopify、GrubHub**が含まれます。\
-詳細については、彼らの[**ブログ**](https://serpapi.com/blog/)をチェックするか、[**プレイグラウンド**](https://serpapi.com/playground)で例を試してください。\
-**ここで無料アカウントを作成**できます[**こちら**](https://serpapi.com/users/sign_up)**。**
+詳細については、彼らの[**ブログ**](https://serpapi.com/blog/)を確認するか、[**プレイグラウンド**](https://serpapi.com/playground)で例を試してください。\
+**無料アカウントを作成**するには[**こちら**](https://serpapi.com/users/sign_up)をクリックしてください。**
 
 ---
 
@@ -119,19 +119,19 @@ SerpApiのプランのサブスクリプションには、Google、Bing、Baidu�
 
 <figure><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.nl)は、**アムステルダム**に拠点を置くプロフェッショナルなサイバーセキュリティ会社で、**世界中のビジネスを最新のサイバーセキュリティ脅威から保護する**ために、**攻撃的セキュリティサービス**を提供しています。
+[**WebSec**](https://websec.nl)は、**アムステルダム**に拠点を置くプロフェッショナルなサイバーセキュリティ会社で、**最新のサイバーセキュリティ脅威から**世界中のビジネスを**保護する**ために、**攻撃的セキュリティサービス**を提供しています。
 
 WebSecは**オールインワンのセキュリティ会社**であり、ペンテスト、**セキュリティ**監査、意識向上トレーニング、フィッシングキャンペーン、コードレビュー、エクスプロイト開発、セキュリティ専門家のアウトソーシングなど、すべてを行います。
 
 WebSecのもう一つの素晴らしい点は、業界の平均とは異なり、WebSecは**自分たちのスキルに非常に自信を持っている**ことであり、そのため、**最高の品質の結果を保証します**。彼らのウェブサイトには「**私たちがハッキングできなければ、あなたは支払わない！**」と記載されています。詳細については、彼らの[**ウェブサイト**](https://websec.nl/en/)と[**ブログ**](https://websec.nl/blog/)を見てください！
 
-上記に加えて、WebSecは**HackTricksの熱心なサポーターでもあります。**
+上記に加えて、WebSecは**HackTricksの熱心なサポーター**でもあります。
 
 {% embed url="https://www.youtube.com/watch?v=Zq2JycGDCPM" %}
 
 ## License & Disclaimer
 
-チェックしてください：
+彼らを確認してください：
 
 {{#ref}}
 welcome/hacktricks-values-and-faq.md

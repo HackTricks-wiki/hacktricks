@@ -1,36 +1,36 @@
 {{#include ../banners/hacktricks-training.md}}
 
-# Summary of the attack
+# 攻撃の概要
 
-Imagine a server which is **signing** some **data** by **appending** a **secret** to some known clear text data and then hashing that data. If you know:
+サーバーが**データ**に**秘密**を追加して**署名**し、そのデータをハッシュ化していると想像してください。次のことがわかっている場合：
 
-- **The length of the secret** (this can be also bruteforced from a given length range)
-- **The clear text data**
-- **The algorithm (and it's vulnerable to this attack)**
-- **The padding is known**
-  - Usually a default one is used, so if the other 3 requirements are met, this also is
-  - The padding vary depending on the length of the secret+data, that's why the length of the secret is needed
+- **秘密の長さ**（これは与えられた長さの範囲からブルートフォースで求めることもできます）
+- **平文データ**
+- **アルゴリズム（この攻撃に対して脆弱である）**
+- **パディングが知られている**
+- 通常はデフォルトのものが使用されるため、他の3つの要件が満たされていれば、これもそうです
+- パディングは秘密+データの長さによって異なるため、秘密の長さが必要です
 
-Then, it's possible for an **attacker** to **append** **data** and **generate** a valid **signature** for the **previous data + appended data**.
+その場合、**攻撃者**は**データ**を**追加**し、**以前のデータ + 追加されたデータ**の有効な**署名**を**生成**することが可能です。
 
-## How?
+## どうやって？
 
-Basically the vulnerable algorithms generate the hashes by firstly **hashing a block of data**, and then, **from** the **previously** created **hash** (state), they **add the next block of data** and **hash it**.
+基本的に、脆弱なアルゴリズムは、最初に**データのブロックをハッシュ化**し、その後、**以前に**作成された**ハッシュ**（状態）から**次のデータのブロックを追加**して**ハッシュ化**します。
 
-Then, imagine that the secret is "secret" and the data is "data", the MD5 of "secretdata" is 6036708eba0d11f6ef52ad44e8b74d5b.\
-If an attacker wants to append the string "append" he can:
+例えば、秘密が「secret」でデータが「data」の場合、「secretdata」のMD5は6036708eba0d11f6ef52ad44e8b74d5bです。\
+攻撃者が「append」という文字列を追加したい場合、彼は次のことができます：
 
-- Generate a MD5 of 64 "A"s
-- Change the state of the previously initialized hash to 6036708eba0d11f6ef52ad44e8b74d5b
-- Append the string "append"
-- Finish the hash and the resulting hash will be a **valid one for "secret" + "data" + "padding" + "append"**
+- 64個の「A」のMD5を生成する
+- 以前に初期化されたハッシュの状態を6036708eba0d11f6ef52ad44e8b74d5bに変更する
+- 文字列「append」を追加する
+- ハッシュを完了し、結果のハッシュは「secret」 + 「data」 + 「padding」 + 「append」の**有効なもの**になります
 
-## **Tool**
+## **ツール**
 
 {% embed url="https://github.com/iagox86/hash_extender" %}
 
-## References
+## 参考文献
 
-You can find this attack good explained in [https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
+この攻撃については、[https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)でよく説明されています。
 
 {{#include ../banners/hacktricks-training.md}}

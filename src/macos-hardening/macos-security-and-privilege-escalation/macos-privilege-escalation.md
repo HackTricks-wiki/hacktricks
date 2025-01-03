@@ -24,7 +24,7 @@ macos-security-protections/macos-tcc/
 
 元の[Sudoハイジャック技術はLinux特権昇格の投稿内にあります](../../linux-hardening/privilege-escalation/#sudo-hijacking)。
 
-しかし、macOSは**`sudo`**を実行する際にユーザーの**`PATH`**を**維持**します。つまり、この攻撃を達成する別の方法は、**被害者がsudoを実行する際に実行する他のバイナリをハイジャックする**ことです：
+しかし、macOSは**`sudo`**を実行する際にユーザーの**`PATH`**を**維持**します。つまり、この攻撃を達成する別の方法は、被害者が**sudoを実行する際に**実行する**他のバイナリをハイジャックすることです：
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
 cat > /opt/homebrew/bin/ls <<EOF
@@ -49,7 +49,7 @@ sudo ls
 {{#tab name="Chrome Impersonation"}}
 いくつかの提案：
 
-- Dock内にChromeがあるか確認し、その場合はそのエントリを**削除**し、Dock配列の**同じ位置に****偽の**Chromeエントリを**追加**します。&#x20;
+- DockにChromeがあるか確認し、その場合はそのエントリを**削除**し、Dock配列の**同じ位置に****偽の**Chromeエントリを**追加**します。&#x20;
 ```bash
 #!/bin/sh
 
@@ -124,7 +124,7 @@ killall Dock
 {{#tab name="Finder Impersonation"}}
 いくつかの提案：
 
-- **FinderをDockから削除することはできない**ので、Dockに追加する場合は、偽のFinderを本物のFinderのすぐ隣に置くことができます。そのためには、**Dock配列の最初に偽のFinderエントリを追加する必要があります**。
+- **FinderをDockから削除することはできない**ので、Dockに追加する場合は、偽のFinderを本物のすぐ隣に置くことができます。そのためには、**Dock配列の最初に偽のFinderエントリを追加する必要があります**。
 - 別のオプションは、Dockに置かずにただ開くことで、「FinderがFinderを制御するように求めています」はそれほど奇妙ではありません。
 - パスワードを尋ねるひどいボックスなしで**rootに昇格する**別のオプションは、Finderに本当に特権アクションを実行するためのパスワードを要求させることです：
 - Finderに**`/etc/pam.d`**に新しい**`sudo`**ファイルをコピーするように依頼します（パスワードを尋ねるプロンプトは「Finderがsudoをコピーしたい」と示します）。
@@ -205,7 +205,7 @@ killall Dock
 
 ### CVE-2020-9771 - mount_apfs TCC バイパスと特権昇格
 
-**任意のユーザー**（特権のないユーザーも含む）は、タイムマシンのスナップショットを作成してマウントし、そのスナップショットの**すべてのファイルにアクセス**できます。\
+**任意のユーザー**（特権のないユーザーも含む）は、タイムマシンのスナップショットを作成してマウントし、そのスナップショットの**すべてのファイル**にアクセスできます。\
 必要な**唯一の特権**は、使用されるアプリケーション（`Terminal`など）が**フルディスクアクセス**（FDA）アクセス（`kTCCServiceSystemPolicyAllfiles`）を持つことであり、これは管理者によって付与される必要があります。
 ```bash
 # Create snapshot
@@ -226,11 +226,11 @@ mkdir /tmp/snap
 # Access it
 ls /tmp/snap/Users/admin_user # This will work
 ```
-より詳細な説明は[**元のレポートで見つけることができます**](https://theevilbit.github.io/posts/cve_2020_9771/)**。**
+A more detailed explanation can be [**found in the original report**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
 
-## 機密情報
+## センシティブ情報
 
-これは特権を昇格させるのに役立ちます：
+これを使用して特権を昇格させることができます：
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-sensitive-locations.md

@@ -1,147 +1,145 @@
-# Partitions/File Systems/Carving
+# パーティション/ファイルシステム/カービング
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Partitions
+## パーティション
 
-A hard drive or an **SSD disk can contain different partitions** with the goal of separating data physically.\
-The **minimum** unit of a disk is the **sector** (normally composed of 512B). So, each partition size needs to be multiple of that size.
+ハードドライブまたは**SSDディスクは、データを物理的に分離する**ために異なるパーティションを含むことができます。\
+ディスクの**最小**単位は**セクター**（通常は512Bで構成されています）です。したがって、各パーティションのサイズはそのサイズの倍数である必要があります。
 
-### MBR (master Boot Record)
+### MBR（マスターブートレコード）
 
-It's allocated in the **first sector of the disk after the 446B of the boot code**. This sector is essential to indicate to the PC what and from where a partition should be mounted.\
-It allows up to **4 partitions** (at most **just 1** can be active/**bootable**). However, if you need more partitions you can use **extended partitions**. The **final byte** of this first sector is the boot record signature **0x55AA**. Only one partition can be marked as active.\
-MBR allows **max 2.2TB**.
+これは**ブートコードの446Bの後のディスクの最初のセクターに割り当てられています**。このセクターは、PCにどのパーティションをどこからマウントするかを示すために重要です。\
+最大で**4つのパーティション**を許可します（**アクティブ/ブート可能**なのは最大で**1つ**のみ）。ただし、より多くのパーティションが必要な場合は、**拡張パーティション**を使用できます。この最初のセクターの**最終バイト**はブートレコード署名**0x55AA**です。アクティブとしてマークできるのは1つのパーティションのみです。\
+MBRは**最大2.2TB**を許可します。
 
 ![](<../../../images/image (489).png>)
 
 ![](<../../../images/image (490).png>)
 
-From the **bytes 440 to the 443** of the MBR you can find the **Windows Disk Signature** (if Windows is used). The logical drive letter of the hard disk depends on the Windows Disk Signature. Changing this signature could prevent Windows from booting (tool: [**Active Disk Editor**](https://www.disk-editor.org/index.html)**)**.
+MBRの**バイト440から443**の間には**Windowsディスク署名**が見つかります（Windowsが使用されている場合）。ハードディスクの論理ドライブレターはWindowsディスク署名に依存します。この署名を変更すると、Windowsが起動しなくなる可能性があります（ツール: [**Active Disk Editor**](https://www.disk-editor.org/index.html)**)**。
 
 ![](<../../../images/image (493).png>)
 
-**Format**
+**フォーマット**
 
-| Offset      | Length     | Item                |
-| ----------- | ---------- | ------------------- |
-| 0 (0x00)    | 446(0x1BE) | Boot code           |
-| 446 (0x1BE) | 16 (0x10)  | First Partition     |
-| 462 (0x1CE) | 16 (0x10)  | Second Partition    |
-| 478 (0x1DE) | 16 (0x10)  | Third Partition     |
-| 494 (0x1EE) | 16 (0x10)  | Fourth Partition    |
-| 510 (0x1FE) | 2 (0x2)    | Signature 0x55 0xAA |
+| オフセット   | 長さ      | アイテム               |
+| ------------ | --------- | ---------------------- |
+| 0 (0x00)     | 446(0x1BE)| ブートコード           |
+| 446 (0x1BE)  | 16 (0x10) | 最初のパーティション   |
+| 462 (0x1CE)  | 16 (0x10) | 2番目のパーティション  |
+| 478 (0x1DE)  | 16 (0x10) | 3番目のパーティション  |
+| 494 (0x1EE)  | 16 (0x10) | 4番目のパーティション  |
+| 510 (0x1FE)  | 2 (0x2)   | 署名 0x55 0xAA        |
 
-**Partition Record Format**
+**パーティションレコードフォーマット**
 
-| Offset    | Length   | Item                                                   |
-| --------- | -------- | ------------------------------------------------------ |
-| 0 (0x00)  | 1 (0x01) | Active flag (0x80 = bootable)                          |
-| 1 (0x01)  | 1 (0x01) | Start head                                             |
-| 2 (0x02)  | 1 (0x01) | Start sector (bits 0-5); upper bits of cylinder (6- 7) |
-| 3 (0x03)  | 1 (0x01) | Start cylinder lowest 8 bits                           |
-| 4 (0x04)  | 1 (0x01) | Partition type code (0x83 = Linux)                     |
-| 5 (0x05)  | 1 (0x01) | End head                                               |
-| 6 (0x06)  | 1 (0x01) | End sector (bits 0-5); upper bits of cylinder (6- 7)   |
-| 7 (0x07)  | 1 (0x01) | End cylinder lowest 8 bits                             |
-| 8 (0x08)  | 4 (0x04) | Sectors preceding partition (little endian)            |
-| 12 (0x0C) | 4 (0x04) | Sectors in partition                                   |
+| オフセット   | 長さ     | アイテム                                                   |
+| ------------ | -------- | ---------------------------------------------------------- |
+| 0 (0x00)     | 1 (0x01) | アクティブフラグ (0x80 = ブート可能)                      |
+| 1 (0x01)     | 1 (0x01) | 開始ヘッド                                               |
+| 2 (0x02)     | 1 (0x01) | 開始セクター (ビット0-5); シリンダの上位ビット (6-7)   |
+| 3 (0x03)     | 1 (0x01) | 開始シリンダの最下位8ビット                               |
+| 4 (0x04)     | 1 (0x01) | パーティションタイプコード (0x83 = Linux)                 |
+| 5 (0x05)     | 1 (0x01) | 終了ヘッド                                               |
+| 6 (0x06)     | 1 (0x01) | 終了セクター (ビット0-5); シリンダの上位ビット (6-7)     |
+| 7 (0x07)     | 1 (0x01) | 終了シリンダの最下位8ビット                               |
+| 8 (0x08)     | 4 (0x04) | パーティション前のセクター (リトルエンディアン)          |
+| 12 (0x0C)    | 4 (0x04) | パーティション内のセクター                               |
 
-In order to mount an MBR in Linux you first need to get the start offset (you can use `fdisk` and the `p` command)
+LinuxでMBRをマウントするには、まず開始オフセットを取得する必要があります（`fdisk`と`p`コマンドを使用できます）
 
-![](<../../../images/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (12).png>)
+![](<../../../images/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (12).png>)
 
-And then use the following code
-
+その後、次のコードを使用します。
 ```bash
 #Mount MBR in Linux
 mount -o ro,loop,offset=<Bytes>
 #63x512 = 32256Bytes
 mount -o ro,loop,offset=32256,noatime /path/to/image.dd /media/part/
 ```
+**LBA (論理ブロックアドレッシング)**
 
-**LBA (Logical block addressing)**
+**論理ブロックアドレッシング** (**LBA**) は、コンピュータストレージデバイスに保存されたデータブロックの位置を指定するために使用される一般的なスキームであり、通常はハードディスクドライブなどの二次ストレージシステムに関連しています。LBAは特にシンプルな線形アドレッシングスキームであり、**ブロックは整数インデックスによって位置付けられ**、最初のブロックはLBA 0、2番目はLBA 1、というように続きます。
 
-**Logical block addressing** (**LBA**) is a common scheme used for **specifying the location of blocks** of data stored on computer storage devices, generally secondary storage systems such as hard disk drives. LBA is a particularly simple linear addressing scheme; **blocks are located by an integer index**, with the first block being LBA 0, the second LBA 1, and so on.
+### GPT (GUIDパーティションテーブル)
 
-### GPT (GUID Partition Table)
+GUIDパーティションテーブル、通称GPTは、MBR（マスターブートレコード）と比較してその強化された機能のために好まれています。GPTは、**パーティションのためのグローバルに一意の識別子**を持つことが特徴であり、いくつかの点で際立っています：
 
-The GUID Partition Table, known as GPT, is favored for its enhanced capabilities compared to MBR (Master Boot Record). Distinctive for its **globally unique identifier** for partitions, GPT stands out in several ways:
+- **位置とサイズ**: GPTとMBRは両方とも**セクター0**から始まります。しかし、GPTは**64ビット**で動作し、MBRは32ビットです。
+- **パーティション制限**: GPTはWindowsシステムで最大**128パーティション**をサポートし、最大**9.4ZB**のデータを収容できます。
+- **パーティション名**: 最大36のUnicode文字でパーティションに名前を付けることができます。
 
-- **Location and Size**: Both GPT and MBR start at **sector 0**. However, GPT operates on **64bits**, contrasting with MBR's 32bits.
-- **Partition Limits**: GPT supports up to **128 partitions** on Windows systems and accommodates up to **9.4ZB** of data.
-- **Partition Names**: Offers the ability to name partitions with up to 36 Unicode characters.
+**データの耐障害性と回復**:
 
-**Data Resilience and Recovery**:
+- **冗長性**: MBRとは異なり、GPTはパーティショニングとブートデータを単一の場所に制限しません。ディスク全体にこのデータを複製し、データの整合性と耐障害性を向上させます。
+- **循環冗長検査 (CRC)**: GPTはデータの整合性を確保するためにCRCを使用します。データの破損を積極的に監視し、検出された場合、GPTは別のディスク位置から破損したデータを回復しようとします。
 
-- **Redundancy**: Unlike MBR, GPT doesn't confine partitioning and boot data to a single place. It replicates this data across the disk, enhancing data integrity and resilience.
-- **Cyclic Redundancy Check (CRC)**: GPT employs CRC to ensure data integrity. It actively monitors for data corruption, and when detected, GPT attempts to recover the corrupted data from another disk location.
+**保護MBR (LBA0)**:
 
-**Protective MBR (LBA0)**:
-
-- GPT maintains backward compatibility through a protective MBR. This feature resides in the legacy MBR space but is designed to prevent older MBR-based utilities from mistakenly overwriting GPT disks, hence safeguarding the data integrity on GPT-formatted disks.
+- GPTは保護MBRを通じて後方互換性を維持します。この機能はレガシーMBRスペースに存在しますが、古いMBRベースのユーティリティが誤ってGPTディスクを上書きするのを防ぐように設計されており、したがってGPTフォーマットのディスク上のデータ整合性を保護します。
 
 ![https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/GUID_Partition_Table_Scheme.svg/800px-GUID_Partition_Table_Scheme.svg.png](<../../../images/image (491).png>)
 
-**Hybrid MBR (LBA 0 + GPT)**
+**ハイブリッドMBR (LBA 0 + GPT)**
 
 [From Wikipedia](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 
-In operating systems that support **GPT-based boot through BIOS** services rather than EFI, the first sector may also still be used to store the first stage of the **bootloader** code, but **modified** to recognize **GPT** **partitions**. The bootloader in the MBR must not assume a sector size of 512 bytes.
+**BIOS**サービスを介して**GPTベースのブート**をサポートするオペレーティングシステムでは、最初のセクターは**ブートローダー**コードの最初のステージを保存するためにも使用される可能性がありますが、**GPT** **パーティション**を認識するように**修正**されています。MBRのブートローダーは、512バイトのセクターサイズを仮定してはなりません。
 
-**Partition table header (LBA 1)**
+**パーティションテーブルヘッダー (LBA 1)**
 
 [From Wikipedia](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 
-The partition table header defines the usable blocks on the disk. It also defines the number and size of the partition entries that make up the partition table (offsets 80 and 84 in the table).
+パーティションテーブルヘッダーは、ディスク上の使用可能なブロックを定義します。また、パーティションテーブルを構成するパーティションエントリの数とサイズを定義します（テーブルのオフセット80および84）。
 
-| Offset    | Length   | Contents                                                                                                                                                                     |
+| オフセット | 長さ   | 内容                                                                                                                                                                     |
 | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 0 (0x00)  | 8 bytes  | Signature ("EFI PART", 45h 46h 49h 20h 50h 41h 52h 54h or 0x5452415020494645ULL[ ](https://en.wikipedia.org/wiki/GUID_Partition_Table#cite_note-8)on little-endian machines) |
-| 8 (0x08)  | 4 bytes  | Revision 1.0 (00h 00h 01h 00h) for UEFI 2.8                                                                                                                                  |
-| 12 (0x0C) | 4 bytes  | Header size in little endian (in bytes, usually 5Ch 00h 00h 00h or 92 bytes)                                                                                                 |
-| 16 (0x10) | 4 bytes  | [CRC32](https://en.wikipedia.org/wiki/CRC32) of header (offset +0 up to header size) in little endian, with this field zeroed during calculation                             |
-| 20 (0x14) | 4 bytes  | Reserved; must be zero                                                                                                                                                       |
-| 24 (0x18) | 8 bytes  | Current LBA (location of this header copy)                                                                                                                                   |
-| 32 (0x20) | 8 bytes  | Backup LBA (location of the other header copy)                                                                                                                               |
-| 40 (0x28) | 8 bytes  | First usable LBA for partitions (primary partition table last LBA + 1)                                                                                                       |
-| 48 (0x30) | 8 bytes  | Last usable LBA (secondary partition table first LBA − 1)                                                                                                                    |
-| 56 (0x38) | 16 bytes | Disk GUID in mixed endian                                                                                                                                                    |
-| 72 (0x48) | 8 bytes  | Starting LBA of an array of partition entries (always 2 in primary copy)                                                                                                     |
-| 80 (0x50) | 4 bytes  | Number of partition entries in array                                                                                                                                         |
-| 84 (0x54) | 4 bytes  | Size of a single partition entry (usually 80h or 128)                                                                                                                        |
-| 88 (0x58) | 4 bytes  | CRC32 of partition entries array in little endian                                                                                                                            |
-| 92 (0x5C) | \*       | Reserved; must be zeroes for the rest of the block (420 bytes for a sector size of 512 bytes; but can be more with larger sector sizes)                                      |
+| 0 (0x00)  | 8バイト  | シグネチャ ("EFI PART", 45h 46h 49h 20h 50h 41h 52h 54h または 0x5452415020494645ULL[ ](https://en.wikipedia.org/wiki/GUID_Partition_Table#cite_note-8)リトルエンディアンマシン上) |
+| 8 (0x08)  | 4バイト  | バージョン 1.0 (00h 00h 01h 00h) for UEFI 2.8                                                                                                                                  |
+| 12 (0x0C) | 4バイト  | ヘッダーサイズ（リトルエンディアン、バイト単位、通常は5Ch 00h 00h 00hまたは92バイト）                                                                                                 |
+| 16 (0x10) | 4バイト  | [CRC32](https://en.wikipedia.org/wiki/CRC32) ヘッダーのCRC（オフセット +0 からヘッダーサイズまで）リトルエンディアンで、このフィールドは計算中にゼロにされます                             |
+| 20 (0x14) | 4バイト  | 予約; ゼロでなければなりません                                                                                                                                                       |
+| 24 (0x18) | 8バイト  | 現在のLBA（このヘッダーコピーの位置）                                                                                                                                   |
+| 32 (0x20) | 8バイト  | バックアップLBA（他のヘッダーコピーの位置）                                                                                                                               |
+| 40 (0x28) | 8バイト  | パーティションのための最初の使用可能LBA（プライマリパーティションテーブルの最後のLBA + 1）                                                                                                       |
+| 48 (0x30) | 8バイト  | 最後の使用可能LBA（セカンダリパーティションテーブルの最初のLBA − 1）                                                                                                                    |
+| 56 (0x38) | 16バイト | ディスクGUID（ミックスエンディアン）                                                                                                                                                    |
+| 72 (0x48) | 8バイト  | パーティションエントリの配列の開始LBA（常にプライマリコピーで2）                                                                                                     |
+| 80 (0x50) | 4バイト  | 配列内のパーティションエントリの数                                                                                                                                         |
+| 84 (0x54) | 4バイト  | 単一のパーティションエントリのサイズ（通常は80hまたは128）                                                                                                                        |
+| 88 (0x58) | 4バイト  | リトルエンディアンのパーティションエントリ配列のCRC32                                                                                                                            |
+| 92 (0x5C) | \*       | 予約; ブロックの残りの部分はゼロでなければなりません（512バイトのセクターサイズの場合420バイト; ただし、より大きなセクターサイズではより多くなる可能性があります）                                      |
 
-**Partition entries (LBA 2–33)**
+**パーティションエントリ (LBA 2–33)**
 
-| GUID partition entry format |          |                                                                                                               |
+| GUIDパーティションエントリフォーマット |          |                                                                                                               |
 | --------------------------- | -------- | ------------------------------------------------------------------------------------------------------------- |
-| Offset                      | Length   | Contents                                                                                                      |
-| 0 (0x00)                    | 16 bytes | [Partition type GUID](https://en.wikipedia.org/wiki/GUID_Partition_Table#Partition_type_GUIDs) (mixed endian) |
-| 16 (0x10)                   | 16 bytes | Unique partition GUID (mixed endian)                                                                          |
-| 32 (0x20)                   | 8 bytes  | First LBA ([little endian](https://en.wikipedia.org/wiki/Little_endian))                                      |
-| 40 (0x28)                   | 8 bytes  | Last LBA (inclusive, usually odd)                                                                             |
-| 48 (0x30)                   | 8 bytes  | Attribute flags (e.g. bit 60 denotes read-only)                                                               |
-| 56 (0x38)                   | 72 bytes | Partition name (36 [UTF-16](https://en.wikipedia.org/wiki/UTF-16)LE code units)                               |
+| オフセット                      | 長さ   | 内容                                                                                                      |
+| 0 (0x00)                    | 16バイト | [パーティションタイプGUID](https://en.wikipedia.org/wiki/GUID_Partition_Table#Partition_type_GUIDs) (ミックスエンディアン) |
+| 16 (0x10)                   | 16バイト | 一意のパーティションGUID (ミックスエンディアン)                                                                          |
+| 32 (0x20)                   | 8バイト  | 最初のLBA ([リトルエンディアン](https://en.wikipedia.org/wiki/Little_endian))                                      |
+| 40 (0x28)                   | 8バイト  | 最後のLBA（含む、通常は奇数）                                                                             |
+| 48 (0x30)                   | 8バイト  | 属性フラグ（例: ビット60は読み取り専用を示す）                                                               |
+| 56 (0x38)                   | 72バイト | パーティション名（36 [UTF-16](https://en.wikipedia.org/wiki/UTF-16)LEコードユニット）                               |
 
-**Partitions Types**
+**パーティションタイプ**
 
 ![](<../../../images/image (492).png>)
 
-More partition types in [https://en.wikipedia.org/wiki/GUID_Partition_Table](https://en.wikipedia.org/wiki/GUID_Partition_Table)
+より多くのパーティションタイプは[https://en.wikipedia.org/wiki/GUID_Partition_Table](https://en.wikipedia.org/wiki/GUID_Partition_Table)にあります。
 
-### Inspecting
+### 検査
 
-After mounting the forensics image with [**ArsenalImageMounter**](https://arsenalrecon.com/downloads/), you can inspect the first sector using the Windows tool [**Active Disk Editor**](https://www.disk-editor.org/index.html)**.** In the following image an **MBR** was detected on the **sector 0** and interpreted:
+[**ArsenalImageMounter**](https://arsenalrecon.com/downloads/)を使用してフォレンジックイメージをマウントした後、Windowsツール[**Active Disk Editor**](https://www.disk-editor.org/index.html)**を使用して最初のセクターを検査できます**。次の画像では、**セクター0**で**MBR**が検出され、解釈されました：
 
 ![](<../../../images/image (494).png>)
 
-If it was a **GPT table instead of an MBR** it should appear the signature _EFI PART_ in the **sector 1** (which in the previous image is empty).
+もしそれが**MBRの代わりにGPTテーブル**であった場合、**セクター1**にシグネチャ_EFI PART_が表示されるはずです（前の画像では空です）。
 
-## File-Systems
+## ファイルシステム
 
-### Windows file-systems list
+### Windowsファイルシステムリスト
 
 - **FAT12/16**: MSDOS, WIN95/98/NT/200
 - **FAT32**: 95/2000/XP/2003/VISTA/7/8/10
@@ -151,81 +149,81 @@ If it was a **GPT table instead of an MBR** it should appear the signature _EFI 
 
 ### FAT
 
-The **FAT (File Allocation Table)** file system is designed around its core component, the file allocation table, positioned at the volume's start. This system safeguards data by maintaining **two copies** of the table, ensuring data integrity even if one is corrupted. The table, along with the root folder, must be in a **fixed location**, crucial for the system's startup process.
+**FAT (ファイルアロケーションテーブル)**ファイルシステムは、そのコアコンポーネントであるファイルアロケーションテーブルをボリュームの開始位置に配置するように設計されています。このシステムは、**2つのコピー**のテーブルを維持することによってデータを保護し、1つが破損してもデータの整合性を確保します。テーブルとルートフォルダーは**固定位置**に存在する必要があり、これはシステムの起動プロセスにとって重要です。
 
-The file system's basic unit of storage is a **cluster, usually 512B**, comprising multiple sectors. FAT has evolved through versions:
+ファイルシステムの基本的なストレージ単位は**クラスター、通常は512B**であり、複数のセクターで構成されています。FATはバージョンを通じて進化してきました：
 
-- **FAT12**, supporting 12-bit cluster addresses and handling up to 4078 clusters (4084 with UNIX).
-- **FAT16**, enhancing to 16-bit addresses, thereby accommodating up to 65,517 clusters.
-- **FAT32**, further advancing with 32-bit addresses, allowing an impressive 268,435,456 clusters per volume.
+- **FAT12**、12ビットのクラスターアドレスをサポートし、最大4078クラスター（UNIXでは4084）を処理します。
+- **FAT16**、16ビットアドレスに拡張され、最大65,517クラスターを収容します。
+- **FAT32**、32ビットアドレスでさらに進化し、ボリュームごとに驚異的な268,435,456クラスターを許可します。
 
-A significant limitation across FAT versions is the **4GB maximum file size**, imposed by the 32-bit field used for file size storage.
+FATバージョン全体にわたる重要な制限は、**最大ファイルサイズ4GB**であり、これはファイルサイズストレージに使用される32ビットフィールドによって課せられています。
 
-Key components of the root directory, particularly for FAT12 and FAT16, include:
+特にFAT12およびFAT16のルートディレクトリの主要なコンポーネントには以下が含まれます：
 
-- **File/Folder Name** (up to 8 characters)
-- **Attributes**
-- **Creation, Modification, and Last Access Dates**
-- **FAT Table Address** (indicating the start cluster of the file)
-- **File Size**
+- **ファイル/フォルダー名**（最大8文字）
+- **属性**
+- **作成、変更、最終アクセス日**
+- **FATテーブルアドレス**（ファイルの開始クラスターを示す）
+- **ファイルサイズ**
 
 ### EXT
 
-**Ext2** is the most common file system for **not journaling** partitions (**partitions that don't change much**) like the boot partition. **Ext3/4** are **journaling** and are used usually for the **rest partitions**.
+**Ext2**は、**ジャーナリング**しないパーティション（**あまり変更されないパーティション**）に最も一般的なファイルシステムであり、ブートパーティションのようなものです。**Ext3/4**は**ジャーナリング**を行い、通常は**残りのパーティション**に使用されます。
 
-## **Metadata**
+## **メタデータ**
 
-Some files contain metadata. This information is about the content of the file which sometimes might be interesting to an analyst as depending on the file type, it might have information like:
+いくつかのファイルにはメタデータが含まれています。この情報はファイルの内容に関するものであり、ファイルタイプによってはアナリストにとって興味深い情報を持っている場合があります。例えば、以下のような情報が含まれることがあります：
 
-- Title
-- MS Office Version used
-- Author
-- Dates of creation and last modification
-- Model of the camera
-- GPS coordinates
-- Image information
+- タイトル
+- 使用されたMS Officeバージョン
+- 著者
+- 作成日および最終変更日
+- カメラのモデル
+- GPS座標
+- 画像情報
 
-You can use tools like [**exiftool**](https://exiftool.org) and [**Metadiver**](https://www.easymetadata.com/metadiver-2/) to get the metadata of a file.
+[**exiftool**](https://exiftool.org)や[**Metadiver**](https://www.easymetadata.com/metadiver-2/)のようなツールを使用して、ファイルのメタデータを取得できます。
 
-## **Deleted Files Recovery**
+## **削除ファイルの回復**
 
-### Logged Deleted Files
+### ログされた削除ファイル
 
-As was seen before there are several places where the file is still saved after it was "deleted". This is because usually the deletion of a file from a file system just marks it as deleted but the data isn't touched. Then, it's possible to inspect the registries of the files (like the MFT) and find the deleted files.
+前述のように、ファイルが「削除」された後でも、いくつかの場所にファイルがまだ保存されています。これは通常、ファイルシステムからファイルを削除することが単に削除としてマークされるだけで、データは触れられないためです。したがって、ファイルのレジストリ（MFTのような）を検査し、削除されたファイルを見つけることが可能です。
 
-Also, the OS usually saves a lot of information about file system changes and backups, so it's possible to try to use them to recover the file or as much information as possible.
-
-{{#ref}}
-file-data-carving-recovery-tools.md
-{{#endref}}
-
-### **File Carving**
-
-**File carving** is a technique that tries to **find files in the bulk of data**. There are 3 main ways tools like this work: **Based on file types headers and footers**, based on file types **structures** and based on the **content** itself.
-
-Note that this technique **doesn't work to retrieve fragmented files**. If a file **isn't stored in contiguous sectors**, then this technique won't be able to find it or at least part of it.
-
-There are several tools that you can use for file Carving indicating the file types you want to search for
+また、OSは通常、ファイルシステムの変更やバックアップに関する多くの情報を保存しているため、それらを使用してファイルまたはできるだけ多くの情報を回復しようとすることが可能です。
 
 {{#ref}}
 file-data-carving-recovery-tools.md
 {{#endref}}
 
-### Data Stream **C**arving
+### **ファイルカービング**
 
-Data Stream Carving is similar to File Carving but **instead of looking for complete files, it looks for interesting fragments** of information.\
-For example, instead of looking for a complete file containing logged URLs, this technique will search for URLs.
+**ファイルカービング**は、**データの塊の中からファイルを見つけようとする技術**です。このようなツールが機能する主な方法は3つあります：**ファイルタイプのヘッダーとフッターに基づく**、ファイルタイプの**構造に基づく**、および**コンテンツ自体に基づく**。
+
+この技術は**断片化されたファイルを回収するためには機能しない**ことに注意してください。ファイルが**連続したセクターに保存されていない**場合、この技術はそれを見つけることができないか、少なくともその一部を見つけることができません。
+
+ファイルカービングに使用できるツールはいくつかあり、検索したいファイルタイプを指定できます。
 
 {{#ref}}
 file-data-carving-recovery-tools.md
 {{#endref}}
 
-### Secure Deletion
+### データストリーム **C**arving
 
-Obviously, there are ways to **"securely" delete files and part of logs about them**. For example, it's possible to **overwrite the content** of a file with junk data several times, and then **remove** the **logs** from the **$MFT** and **$LOGFILE** about the file, and **remove the Volume Shadow Copies**.\
-You may notice that even performing that action there might be **other parts where the existence of the file is still logged**, and that's true and part of the forensics professional job is to find them.
+データストリームカービングはファイルカービングに似ていますが、**完全なファイルを探すのではなく、興味深い情報の断片を探します**。\
+例えば、ログされたURLを含む完全なファイルを探すのではなく、この技術はURLを検索します。
 
-## References
+{{#ref}}
+file-data-carving-recovery-tools.md
+{{#endref}}
+
+### セキュア削除
+
+明らかに、ファイルやそのログの一部を**「安全に」削除する**方法があります。例えば、ファイルの内容をジャンクデータで数回上書きし、その後**$MFT**や**$LOGFILE**からファイルに関する**ログを削除**し、**ボリュームシャドウコピーを削除**することが可能です。\
+この操作を行っても、**ファイルの存在がまだログされている他の部分があるかもしれない**ことに気付くかもしれませんが、それは真実であり、フォレンジック専門家の仕事の一部はそれらを見つけることです。
+
+## 参考文献
 
 - [https://en.wikipedia.org/wiki/GUID_Partition_Table](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 - [http://ntfs.com/ntfs-permissions.htm](http://ntfs.com/ntfs-permissions.htm)

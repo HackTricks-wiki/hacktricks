@@ -1,30 +1,30 @@
-# Basic Forensic Methodology
+# 基本的なフォレンジック手法
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Creating and Mounting an Image
+## イメージの作成とマウント
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/image-acquisition-and-mount.md
 {{#endref}}
 
-## Malware Analysis
+## マルウェア分析
 
-This **isn't necessary the first step to perform once you have the image**. But you can use this malware analysis techniques independently if you have a file, a file-system image, memory image, pcap... so it's good to **keep these actions in mind**:
+これは**イメージを取得した後に最初に行うべきステップではありません**。しかし、ファイル、ファイルシステムイメージ、メモリイメージ、pcapなどがある場合は、このマルウェア分析技術を独立して使用できますので、これらのアクションを**念頭に置いておくことが重要です**：
 
 {{#ref}}
 malware-analysis.md
 {{#endref}}
 
-## Inspecting an Image
+## イメージの検査
 
-if you are given a **forensic image** of a device you can start **analyzing the partitions, file-system** used and **recovering** potentially **interesting files** (even deleted ones). Learn how in:
+デバイスの**フォレンジックイメージ**が提供された場合、**パーティションやファイルシステム**を**分析**し、潜在的に**興味深いファイル**（削除されたものも含む）を**回復**し始めることができます。方法を学ぶには：
 
 {{#ref}}
 partitions-file-systems-carving/
 {{#endref}}
 
-Depending on the used OSs and even platform different interesting artifacts should be searched:
+使用されるOSやプラットフォームによって、異なる興味深いアーティファクトを検索する必要があります：
 
 {{#ref}}
 windows-forensics/
@@ -38,42 +38,42 @@ linux-forensics.md
 docker-forensics.md
 {{#endref}}
 
-## Deep inspection of specific file-types and Software
+## 特定のファイルタイプとソフトウェアの深い検査
 
-If you have very **suspicious** **file**, then **depending on the file-type and software** that created it several **tricks** may be useful.\
-Read the following page to learn some interesting tricks:
+非常に**疑わしい****ファイル**がある場合、**ファイルタイプとそれを作成したソフトウェア**に応じて、いくつかの**トリック**が役立つかもしれません。\
+興味深いトリックを学ぶには、以下のページをお読みください：
 
 {{#ref}}
 specific-software-file-type-tricks/
 {{#endref}}
 
-I want to do a special mention to the page:
+特に言及したいページがあります：
 
 {{#ref}}
 specific-software-file-type-tricks/browser-artifacts.md
 {{#endref}}
 
-## Memory Dump Inspection
+## メモリダンプの検査
 
 {{#ref}}
 memory-dump-analysis/
 {{#endref}}
 
-## Pcap Inspection
+## Pcapの検査
 
 {{#ref}}
 pcap-inspection/
 {{#endref}}
 
-## **Anti-Forensic Techniques**
+## **アンチフォレンジック技術**
 
-Keep in mind the possible use of anti-forensic techniques:
+アンチフォレンジック技術の使用の可能性を念頭に置いてください：
 
 {{#ref}}
 anti-forensic-techniques.md
 {{#endref}}
 
-## Threat Hunting
+## 脅威ハンティング
 
 {{#ref}}
 file-integrity-monitoring.md

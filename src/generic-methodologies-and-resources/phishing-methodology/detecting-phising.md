@@ -1,69 +1,69 @@
-# Detecting Phishing
+# フィッシングの検出
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Introduction
+## はじめに
 
-To detect a phishing attempt it's important to **understand the phishing techniques that are being used nowadays**. On the parent page of this post, you can find this information, so if you aren't aware of which techniques are being used today I recommend you to go to the parent page and read at least that section.
+フィッシングの試みを検出するには、**現在使用されているフィッシング技術を理解することが重要です**。この投稿の親ページにはこの情報があるので、今日使用されている技術について知らない場合は、親ページに行って少なくともそのセクションを読むことをお勧めします。
 
-This post is based on the idea that the **attackers will try to somehow mimic or use the victim's domain name**. If your domain is called `example.com` and you are phished using a completely different domain name for some reason like `youwonthelottery.com`, these techniques aren't going to uncover it.
+この投稿は、**攻撃者が被害者のドメイン名を何らかの形で模倣または使用しようとする**という考えに基づいています。あなたのドメインが `example.com` と呼ばれ、何らかの理由で `youwonthelottery.com` のような全く異なるドメイン名でフィッシングされる場合、これらの技術ではそれを明らかにすることはできません。
 
-## Domain name variations
+## ドメイン名のバリエーション
 
-It's kind of **easy** to **uncover** those **phishing** attempts that will use a **similar domain** name inside the email.\
-It's enough to **generate a list of the most probable phishing names** that an attacker may use and **check** if it's **registered** or just check if there is any **IP** using it.
+メール内で**類似のドメイン**名を使用するフィッシングの試みを**明らかにするのは比較的簡単**です。\
+攻撃者が使用する可能性のある**最も考えられるフィッシング名のリストを生成し**、それが**登録されているか**、またはその**IP**が使用されているかを**確認**するだけで十分です。
 
-### Finding suspicious domains
+### 疑わしいドメインの発見
 
-For this purpose, you can use any of the following tools. Note that these tolls will also perform DNS requests automatically to check if the domain has any IP assigned to it:
+この目的のために、以下のツールのいずれかを使用できます。これらのツールは、ドメインにIPが割り当てられているかどうかを自動的に確認するDNSリクエストも実行します：
 
 - [**dnstwist**](https://github.com/elceef/dnstwist)
 - [**urlcrazy**](https://github.com/urbanadventurer/urlcrazy)
 
-### Bitflipping
+### ビットフリッピング
 
-**You can find a short the explanation of this technique in the parent page. Or read the original research in** [**https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/**](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
+**この技術の簡単な説明は親ページにあります。あるいは、** [**https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/**](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/) **で元の研究を読むことができます。**
 
-For example, a 1 bit modification in the domain microsoft.com can transform it into _windnws.com._\
-**Attackers may register as many bit-flipping domains as possible related to the victim to redirect legitimate users to their infrastructure**.
+例えば、ドメイン microsoft.com の1ビットの変更は、_windnws.com_ に変換できます。\
+**攻撃者は、被害者に関連するビットフリッピングドメインをできるだけ多く登録し、正当なユーザーを自分のインフラにリダイレクトさせることができます**。
 
-**All possible bit-flipping domain names should be also monitored.**
+**すべての可能なビットフリッピングドメイン名も監視する必要があります。**
 
-### Basic checks
+### 基本的なチェック
 
-Once you have a list of potential suspicious domain names you should **check** them (mainly the ports HTTP and HTTPS) to **see if they are using some login form similar** to someone of the victim's domain.\
-You could also check port 3333 to see if it's open and running an instance of `gophish`.\
-It's also interesting to know **how old each discovered suspicions domain is**, the younger it's the riskier it is.\
-You can also get **screenshots** of the HTTP and/or HTTPS suspicious web page to see if it's suspicious and in that case **access it to take a deeper look**.
+潜在的な疑わしいドメイン名のリストができたら、それらを**チェック**する必要があります（主にHTTPおよびHTTPSポート）**被害者のドメインの誰かに似たログインフォームを使用しているかどうかを確認するために**。\
+ポート3333が開いていて `gophish` のインスタンスが稼働しているかどうかも確認できます。\
+**発見された疑わしいドメインがどれくらい古いかを知ることも興味深い**です。若いほどリスクが高くなります。\
+疑わしいウェブページのHTTPおよび/またはHTTPSの**スクリーンショット**を取得して、それが疑わしいかどうかを確認し、その場合は**アクセスして詳しく見る**ことができます。
 
-### Advanced checks
+### 高度なチェック
 
-If you want to go one step further I would recommend you to **monitor those suspicious domains and search for more** once in a while (every day? it only takes a few seconds/minutes). You should also **check** the open **ports** of the related IPs and **search for instances of `gophish` or similar tools** (yes, attackers also make mistakes) and **monitor the HTTP and HTTPS web pages of the suspicious domains and subdomains** to see if they have copied any login form from the victim's web pages.\
-In order to **automate this** I would recommend having a list of login forms of the victim's domains, spider the suspicious web pages and comparing each login form found inside the suspicious domains with each login form of the victim's domain using something like `ssdeep`.\
-If you have located the login forms of the suspicious domains, you can try to **send junk credentials** and **check if it's redirecting you to the victim's domain**.
+さらに一歩進みたい場合は、**疑わしいドメインを監視し、時々（毎日？数秒/分しかかかりません）さらに検索することをお勧めします**。関連するIPのオープン**ポート**も**チェック**し、**`gophish` や類似のツールのインスタンスを検索**することも必要です（はい、攻撃者も間違いを犯します）し、**疑わしいドメインおよびサブドメインのHTTPおよびHTTPSウェブページを監視**して、被害者のウェブページからログインフォームをコピーしているかどうかを確認します。\
+これを**自動化するために**、被害者のドメインのログインフォームのリストを持ち、疑わしいウェブページをスパイダーし、疑わしいドメイン内で見つかった各ログインフォームを被害者のドメインの各ログインフォームと比較するために `ssdeep` のようなものを使用することをお勧めします。\
+疑わしいドメインのログインフォームを特定した場合、**ジャンククレデンシャルを送信**し、**被害者のドメインにリダイレクトされるかどうかを確認**できます。
 
-## Domain names using keywords
+## キーワードを使用したドメイン名
 
-The parent page also mentions a domain name variation technique that consists of putting the **victim's domain name inside a bigger domain** (e.g. paypal-financial.com for paypal.com).
+親ページでは、**被害者のドメイン名をより大きなドメイン内に入れる**というドメイン名のバリエーション技術についても言及しています（例：paypal-financial.com は paypal.com のためのものです）。
 
-### Certificate Transparency
+### 証明書の透明性
 
-It's not possible to take the previous "Brute-Force" approach but it's actually **possible to uncover such phishing attempts** also thanks to certificate transparency. Every time a certificate is emitted by a CA, the details are made public. This means that by reading the certificate transparency or even monitoring it, it's **possible to find domains that are using a keyword inside its name** For example, if an attacker generates a certificate of [https://paypal-financial.com](https://paypal-financial.com), seeing the certificate it's possible to find the keyword "paypal" and know that suspicious email is being used.
+前述の「ブルートフォース」アプローチを取ることはできませんが、実際には**そのようなフィッシングの試みを明らかにすることも可能です**。CAによって証明書が発行されるたびに、詳細が公開されます。これは、証明書の透明性を読み取ることや監視することで、**名前の中にキーワードを使用しているドメインを見つけることが可能であることを意味します**。例えば、攻撃者が [https://paypal-financial.com](https://paypal-financial.com) の証明書を生成した場合、証明書を見ることで「paypal」というキーワードを見つけ、疑わしいメールが使用されていることを知ることができます。
 
-The post [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/) suggests that you can use Censys to search for certificates affecting a specific keyword and filter by date (only "new" certificates) and by the CA issuer "Let's Encrypt":
+投稿 [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/) では、特定のキーワードに影響を与える証明書を検索し、日付（「新しい」証明書のみ）およびCA発行者「Let's Encrypt」でフィルタリングするためにCensysを使用できると提案しています：
 
 ![https://0xpatrik.com/content/images/2018/07/cert_listing.png](<../../images/image (1115).png>)
 
-However, you can do "the same" using the free web [**crt.sh**](https://crt.sh). You can **search for the keyword** and the **filter** the results **by date and CA** if you wish.
+ただし、無料のウェブ [**crt.sh**](https://crt.sh) を使用して「同じこと」を行うこともできます。**キーワードを検索し**、**結果を日付とCAでフィルタリング**することができます。
 
 ![](<../../images/image (519).png>)
 
-Using this last option you can even use the field Matching Identities to see if any identity from the real domain matches any of the suspicious domains (note that a suspicious domain can be a false positive).
+この最後のオプションを使用すると、Matching Identitiesフィールドを使用して、実際のドメインのいずれかのアイデンティティが疑わしいドメインのいずれかと一致するかどうかを確認できます（疑わしいドメインは偽陽性である可能性があることに注意してください）。
 
-**Another alternative** is the fantastic project called [**CertStream**](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067). CertStream provides a real-time stream of newly generated certificates which you can use to detect specified keywords in (near) real-time. In fact, there is a project called [**phishing_catcher**](https://github.com/x0rz/phishing_catcher) that does just that.
+**もう一つの代替手段**は、[**CertStream**](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067)という素晴らしいプロジェクトです。CertStreamは、新しく生成された証明書のリアルタイムストリームを提供し、指定されたキーワードを（ほぼ）リアルタイムで検出するために使用できます。実際、[**phishing_catcher**](https://github.com/x0rz/phishing_catcher)というプロジェクトがあり、まさにそれを行います。
 
-### **New domains**
+### **新しいドメイン**
 
-**One last alternative** is to gather a list of **newly registered domains** for some TLDs ([Whoxy](https://www.whoxy.com/newly-registered-domains/) provides such service) and **check the keywords in these domains**. However, long domains usually use one or more subdomains, therefore the keyword won't appear inside the FLD and you won't be able to find the phishing subdomain.
+**最後の代替手段**は、いくつかのTLDの**新しく登録されたドメインのリストを収集**し、**これらのドメイン内のキーワードを確認することです**。ただし、長いドメインは通常1つ以上のサブドメインを使用するため、キーワードはFLD内に表示されず、フィッシングサブドメインを見つけることはできません。
 
 {{#include ../../banners/hacktricks-training.md}}
