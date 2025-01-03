@@ -6,7 +6,7 @@ Bardzo ogólnie, to narzędzie pomoże nam znaleźć wartości dla zmiennych, kt
 
 # Podstawowe operacje
 
-## Booleany/And/Or/Not
+## Booleany/I/Lub/Nie
 ```python
 #pip3 install z3-solver
 from z3 import *
@@ -74,7 +74,7 @@ print(simplify(a == b)) #This is False
 ```
 ## Liczby ze znakiem/bez znaku
 
-Z3 oferuje specjalne wersje operacji arytmetycznych ze znakiem, gdzie ma znaczenie, czy **wektor bitowy jest traktowany jako ze znakiem, czy bez znaku**. W Z3Py, operatory **<, <=, >, >=, /, % i >>** odpowiadają wersjom **ze znakiem**. Odpowiednie operatory **bez znaku** to **ULT, ULE, UGT, UGE, UDiv, URem i LShR.**
+Z3 oferuje specjalne wersje operacji arytmetycznych, w których ma znaczenie, czy **wektor bitowy jest traktowany jako ze znakiem, czy bez znaku**. W Z3Py, operatory **<, <=, >, >=, /, % i >>** odpowiadają wersjom **ze znakiem**. Odpowiednie operatory **bez znaku** to **ULT, ULE, UGT, UGE, UDiv, URem i LShR.**
 ```python
 from z3 import *
 
@@ -94,9 +94,9 @@ solve(ULT(x, 0))
 ```
 ## Funkcje
 
-**Funkcje interpretowane** takie jak arytmetyka, gdzie **funkcja +** ma **stałą standardową interpretację** (dodaje dwie liczby). **Funkcje nieinterpretowane** i stałe są **maksymalnie elastyczne**; pozwalają na **dowolną interpretację**, która jest **spójna** z **ograniczeniami** nałożonymi na funkcję lub stałą.
+**Interpretowane funkcje** takie jak arytmetyka, gdzie **funkcja +** ma **stałą standardową interpretację** (dodaje dwie liczby). **Nieinterpretowane funkcje** i stałe są **maksymalnie elastyczne**; pozwalają na **dowolną interpretację**, która jest **spójna** z **ograniczeniami** nałożonymi na funkcję lub stałą.
 
-Przykład: f zastosowane dwukrotnie do x skutkuje ponownie x, ale f zastosowane raz do x jest różne od x.
+Przykład: f zastosowane dwukrotnie do x daje z powrotem x, ale f zastosowane raz do x jest różne od x.
 ```python
 from z3 import *
 

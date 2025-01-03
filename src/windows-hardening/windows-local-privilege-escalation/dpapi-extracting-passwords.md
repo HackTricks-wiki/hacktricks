@@ -14,7 +14,7 @@ Wśród danych osobowych chronionych przez DPAPI znajdują się:
 
 - Hasła i dane autouzupełniania Internet Explorera i Google Chrome
 - Hasła do kont e-mail i wewnętrznych kont FTP dla aplikacji takich jak Outlook i Windows Mail
-- Hasła do folderów współdzielonych, zasobów, sieci bezprzewodowych i Windows Vault, w tym klucze szyfrujące
+- Hasła do folderów udostępnionych, zasobów, sieci bezprzewodowych i Windows Vault, w tym klucze szyfrujące
 - Hasła do połączeń zdalnego pulpitu, .NET Passport oraz klucze prywatne do różnych celów szyfrowania i uwierzytelniania
 - Hasła sieciowe zarządzane przez Credential Manager oraz dane osobowe w aplikacjach korzystających z CryptProtectData, takich jak Skype, MSN messenger i inne
 
@@ -64,7 +64,7 @@ To, jak wygląda zestaw kluczy głównych użytkownika:
 
 ![](<../../images/image (1121).png>)
 
-Zazwyczaj **każdy klucz główny to zaszyfrowany klucz symetryczny, który może odszyfrować inne treści**. Dlatego **wyodrębnienie** **zaszyfrowanego klucza głównego** jest interesujące, aby później **odszyfrować** **inne treści** zaszyfrowane tym kluczem.
+Zazwyczaj **każdy klucz główny to zaszyfrowany klucz symetryczny, który może odszyfrować inny content**. Dlatego **wyodrębnienie** **zaszyfrowanego klucza głównego** jest interesujące, aby **odszyfrować** później ten **inny content** zaszyfrowany za jego pomocą.
 
 ### Wyodrębnij klucz główny i odszyfruj
 
@@ -72,11 +72,11 @@ Sprawdź post [https://www.ired.team/offensive-security/credential-access-and-cr
 
 ## SharpDPAPI
 
-[SharpDPAPI](https://github.com/GhostPack/SharpDPAPI#sharpdpapi-1) to port C# niektórych funkcji DPAPI z projektu [@gentilkiwi](https://twitter.com/gentilkiwi) [Mimikatz](https://github.com/gentilkiwi/mimikatz/).
+[SharpDPAPI](https://github.com/GhostPack/SharpDPAPI#sharpdpapi-1) to port C# niektórych funkcji DPAPI z projektu [@gentilkiwi](https://twitter.com/gentilkiwi)'s [Mimikatz](https://github.com/gentilkiwi/mimikatz/).
 
 ## HEKATOMB
 
-[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) to narzędzie, które automatyzuje wyodrębnianie wszystkich użytkowników i komputerów z katalogu LDAP oraz wyodrębnianie klucza zapasowego kontrolera domeny przez RPC. Skrypt następnie rozwiąże wszystkie adresy IP komputerów i wykona smbclient na wszystkich komputerach, aby odzyskać wszystkie obiekty DPAPI wszystkich użytkowników i odszyfrować wszystko za pomocą klucza zapasowego domeny.
+[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) to narzędzie, które automatyzuje wyodrębnianie wszystkich użytkowników i komputerów z katalogu LDAP oraz wyodrębnianie klucza zapasowego kontrolera domeny przez RPC. Skrypt następnie rozwiąże adresy IP wszystkich komputerów i wykona smbclient na wszystkich komputerach, aby odzyskać wszystkie obiekty DPAPI wszystkich użytkowników i odszyfrować wszystko za pomocą klucza zapasowego domeny.
 
 `python3 hekatomb.py -hashes :ed0052e5a66b1c8e942cc9481a50d56 DOMAIN.local/administrator@10.0.0.1 -debug -dnstcp`
 

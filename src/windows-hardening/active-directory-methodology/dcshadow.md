@@ -61,7 +61,7 @@ Musimy dodać następujące ACE z SID naszego użytkownika na końcu:
 - Na obiekcie użytkownika docelowego: `(A;;WP;;;UserSID)`
 - Na obiekcie Sites w kontenerze Configuration: `(A;CI;CCDC;;;UserSID)`
 
-Aby uzyskać aktualny ACE obiektu: `(New-Object System.DirectoryServices.DirectoryEntry("LDAP://DC=moneycorp,DC=loca l")).psbase.ObjectSecurity.sddl`
+Aby uzyskać aktualny ACE obiektu: `(New-Object System.DirectoryServices.DirectoryEntry("LDAP://DC=moneycorp,DC=local")).psbase.ObjectSecurity.sddl`
 
 Zauważ, że w tym przypadku musisz wprowadzić **kilka zmian,** a nie tylko jedną. Tak więc, w **sesji mimikatz1** (serwer RPC) użyj parametru **`/stack` z każdą zmianą,** którą chcesz wprowadzić. W ten sposób będziesz musiał tylko **`/push`** raz, aby wykonać wszystkie zablokowane zmiany na fałszywym serwerze.
 

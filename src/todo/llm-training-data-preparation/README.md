@@ -43,7 +43,7 @@ Powinieneś zacząć od przeczytania tego posta, aby poznać podstawowe pojęcia
 ## 4. Mechanizmy Uwagowe
 
 > [!TIP]
-> Celem tej czwartej fazy jest bardzo proste: **Zastosować pewne mechanizmy uwagi**. Będą to liczne **powtarzające się warstwy**, które będą **uchwytywać relację słowa w słowniku z jego sąsiadami w bieżącym zdaniu używanym do trenowania LLM**.\
+> Celem tej czwartej fazy jest bardzo proste: **Zastosować pewne mechanizmy uwagi**. Będą to liczne **powtarzające się warstwy**, które będą **uchwytywać relację słowa w słowniku z jego sąsiadami w aktualnym zdaniu używanym do trenowania LLM**.\
 > Do tego celu używa się wielu warstw, więc wiele parametrów do trenowania będzie uchwytywać te informacje.
 
 {{#ref}}
@@ -53,9 +53,9 @@ Powinieneś zacząć od przeczytania tego posta, aby poznać podstawowe pojęcia
 ## 5. Architektura LLM
 
 > [!TIP]
-> Celem tej piątej fazy jest bardzo proste: **Opracować architekturę całego LLM**. Połączyć wszystko, zastosować wszystkie warstwy i stworzyć wszystkie funkcje do generowania tekstu lub przekształcania tekstu na ID i odwrotnie.
+> Celem tej piątej fazy jest bardzo proste: **Rozwinąć architekturę całego LLM**. Połączyć wszystko, zastosować wszystkie warstwy i stworzyć wszystkie funkcje do generowania tekstu lub przekształcania tekstu na ID i odwrotnie.
 >
-> Ta architektura będzie używana zarówno do trenowania, jak i przewidywania tekstu po jego wytrenowaniu.
+> Ta architektura będzie używana zarówno do treningu, jak i przewidywania tekstu po jego wytrenowaniu.
 
 {{#ref}}
 5.-llm-architecture.md
@@ -82,7 +82,7 @@ Powinieneś zacząć od przeczytania tego posta, aby poznać podstawowe pojęcia
 ## 7.1. Dostrajanie do klasyfikacji
 
 > [!TIP]
-> Celem tej sekcji jest pokazanie, jak dostroić już wytrenowany model, aby zamiast generować nowy tekst, LLM podałby **prawdopodobieństwa przypisania danego tekstu do każdej z podanych kategorii** (na przykład, czy tekst jest spamem, czy nie).
+> Celem tej sekcji jest pokazanie, jak dostroić już wytrenowany model, aby zamiast generować nowy tekst, LLM podałby **prawdopodobieństwa, że dany tekst zostanie zaklasyfikowany w każdej z podanych kategorii** (na przykład, czy tekst jest spamem, czy nie).
 
 {{#ref}}
 7.1.-fine-tuning-for-classification.md

@@ -22,13 +22,13 @@ Po pomyślnym żądaniu generowany jest certyfikat wraz z jego kluczem prywatnym
 ```bash
 openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provider v1.0" -export -out cert.pfx
 ```
-Plik `.pfx` może być następnie przesłany do systemu docelowego i użyty z narzędziem o nazwie [**Rubeus**](https://github.com/GhostPack/Rubeus) do żądania Ticket Granting Ticket (TGT) dla użytkownika, przedłużając dostęp atakującego na czas, gdy certyfikat jest **ważny** (zazwyczaj przez rok):
+Plik `.pfx` może być następnie przesłany do systemu docelowego i użyty z narzędziem o nazwie [**Rubeus**](https://github.com/GhostPack/Rubeus) do żądania Ticket Granting Ticket (TGT) dla użytkownika, przedłużając dostęp atakującego tak długo, jak certyfikat jest **ważny** (zazwyczaj przez rok):
 ```bash
 Rubeus.exe asktgt /user:harmj0y /certificate:C:\Temp\cert.pfx /password:CertPass!
 ```
-Ważne ostrzeżenie dotyczy tego, jak ta technika, w połączeniu z inną metodą opisaną w sekcji **THEFT5**, pozwala atakującemu na trwałe uzyskanie **NTLM hash** konta bez interakcji z Local Security Authority Subsystem Service (LSASS) i z kontekstu niepodwyższonego, co zapewnia bardziej dyskretną metodę długoterminowego kradzieży poświadczeń.
+Ważne ostrzeżenie dotyczy tego, jak ta technika, w połączeniu z inną metodą opisaną w sekcji **THEFT5**, pozwala atakującemu na trwałe uzyskanie **NTLM hash** konta bez interakcji z Local Security Authority Subsystem Service (LSASS) i z kontekstu niepodwyższonego, co zapewnia bardziej dyskretną metodę kradzieży poświadczeń na dłuższy czas.
 
-## **Uzyskiwanie trwałości maszyny za pomocą certyfikatów - PERSIST2**
+## **Zyskiwanie trwałości maszyny za pomocą certyfikatów - PERSIST2**
 
 Inna metoda polega na zarejestrowaniu konta maszyny skompromitowanego systemu na certyfikat, wykorzystując domyślny szablon `Machine`, który pozwala na takie działania. Jeśli atakujący uzyska podwyższone uprawnienia w systemie, może użyć konta **SYSTEM** do żądania certyfikatów, co zapewnia formę **trwałości**:
 ```bash

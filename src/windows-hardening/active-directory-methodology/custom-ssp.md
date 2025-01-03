@@ -9,7 +9,7 @@ Możesz stworzyć **własny SSP**, aby **przechwycić** w **czystym tekście** *
 
 #### Mimilib
 
-Możesz użyć binarnego pliku `mimilib.dll` dostarczonego przez Mimikatz. **To zapisze wszystkie poświadczenia w czystym tekście w pliku.**\
+Możesz użyć binarnego pliku `mimilib.dll` dostarczonego przez Mimikatz. **To zapisze wszystkie poświadczenia w czystym tekście do pliku.**\
 Umieść dll w `C:\Windows\System32\`\
 Uzyskaj listę istniejących pakietów zabezpieczeń LSA:
 ```bash:attacker@target

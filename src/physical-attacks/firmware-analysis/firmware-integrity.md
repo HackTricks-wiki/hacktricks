@@ -8,11 +8,11 @@
 2. Należy zidentyfikować architekturę oprogramowania układowego i endianness.
 3. Można zbudować kompilator krzyżowy za pomocą Buildroot lub innych odpowiednich metod dla środowiska.
 4. Backdoor można zbudować za pomocą kompilatora krzyżowego.
-5. Backdoor można skopiować do wyodrębnionego katalogu firmware /usr/bin.
-6. Odpowiedni binarny plik QEMU można skopiować do wyodrębnionego rootfs oprogramowania układowego.
+5. Backdoor można skopiować do wyodrębnionego katalogu oprogramowania układowego /usr/bin.
+6. Odpowiedni plik binarny QEMU można skopiować do wyodrębnionego rootfs oprogramowania układowego.
 7. Backdoor można emulować za pomocą chroot i QEMU.
 8. Backdoor można uzyskać za pomocą netcat.
-9. Binarne pliki QEMU należy usunąć z wyodrębnionego rootfs oprogramowania układowego.
+9. Plik binarny QEMU należy usunąć z wyodrębnionego rootfs oprogramowania układowego.
 10. Zmodyfikowane oprogramowanie układowe można spakować ponownie za pomocą FMK.
 11. Oprogramowanie układowe z backdoorem można przetestować, emulując je za pomocą zestawu narzędzi do analizy oprogramowania układowego (FAT) i łącząc się z docelowym adresem IP i portem backdoora za pomocą netcat.
 
@@ -28,7 +28,7 @@ Jeśli już uzyskano dostęp do powłoki root poprzez analizę dynamiczną, mani
 
 Jeśli to możliwe, można wykorzystać luki w skryptach uruchamiających, aby uzyskać trwały dostęp do urządzenia po ponownych uruchomieniach. Luki te pojawiają się, gdy skrypty uruchamiające odwołują się do, [linkują symbolicznie](https://www.chromium.org/chromium-os/chromiumos-design-docs/hardening-against-malicious-stateful-data) lub polegają na kodzie znajdującym się w nieufnych zamontowanych lokalizacjach, takich jak karty SD i wolumeny flash używane do przechowywania danych poza systemami plików root.
 
-## Referencje
+## Odniesienia
 
 - Aby uzyskać więcej informacji, sprawdź [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
 

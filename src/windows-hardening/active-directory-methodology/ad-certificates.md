@@ -10,16 +10,16 @@
 - **Klucz publiczny** jest sparowany z kluczem prywatnym, aby powiązać certyfikat z jego prawowitym właścicielem.
 - **Okres ważności**, określony przez daty **NotBefore** i **NotAfter**, oznacza czas obowiązywania certyfikatu.
 - Unikalny **Numer seryjny**, dostarczony przez Urząd Certyfikacji (CA), identyfikuje każdy certyfikat.
-- **Wystawca** odnosi się do CA, który wydał certyfikat.
+- **Wydawca** odnosi się do CA, który wydał certyfikat.
 - **SubjectAlternativeName** pozwala na dodatkowe nazwy dla podmiotu, zwiększając elastyczność identyfikacji.
-- **Podstawowe ograniczenia** identyfikują, czy certyfikat jest dla CA czy podmiotu końcowego oraz definiują ograniczenia użytkowania.
-- **Rozszerzone zastosowania kluczy (EKU)** określają konkretne cele certyfikatu, takie jak podpisywanie kodu czy szyfrowanie e-maili, za pomocą identyfikatorów obiektów (OID).
+- **Podstawowe ograniczenia** identyfikują, czy certyfikat jest dla CA, czy dla podmiotu końcowego, oraz definiują ograniczenia użytkowania.
+- **Rozszerzone zastosowania klucza (EKU)** określają konkretne cele certyfikatu, takie jak podpisywanie kodu lub szyfrowanie e-maili, za pomocą identyfikatorów obiektów (OID).
 - **Algorytm podpisu** określa metodę podpisywania certyfikatu.
-- **Podpis**, stworzony za pomocą klucza prywatnego wystawcy, gwarantuje autentyczność certyfikatu.
+- **Podpis**, stworzony za pomocą klucza prywatnego wydawcy, gwarantuje autentyczność certyfikatu.
 
 ### Specjalne uwagi
 
-- **Nazwy alternatywne podmiotu (SAN)** rozszerzają zastosowanie certyfikatu na wiele tożsamości, co jest kluczowe dla serwerów z wieloma domenami. Bezpieczne procesy wydawania są niezbędne, aby uniknąć ryzyka podszywania się przez atakujących manipulujących specyfikacją SAN.
+- **Alternatywne nazwy podmiotu (SAN)** rozszerzają zastosowanie certyfikatu na wiele tożsamości, co jest kluczowe dla serwerów z wieloma domenami. Bezpieczne procesy wydawania są niezbędne, aby uniknąć ryzyka podszywania się przez atakujących manipulujących specyfikacją SAN.
 
 ### Urzędy Certyfikacji (CA) w Active Directory (AD)
 
@@ -35,7 +35,7 @@ AD CS uznaje certyfikaty CA w lesie AD poprzez wyznaczone kontenery, z których 
 1. Proces żądania rozpoczyna się od znalezienia przez klientów CA przedsiębiorstwa.
 2. Tworzony jest CSR, zawierający klucz publiczny i inne szczegóły, po wygenerowaniu pary kluczy publiczno-prywatnych.
 3. CA ocenia CSR w odniesieniu do dostępnych szablonów certyfikatów, wydając certyfikat na podstawie uprawnień szablonu.
-4. Po zatwierdzeniu, CA podpisuje certyfikat swoim kluczem prywatnym i zwraca go do klienta.
+4. Po zatwierdzeniu CA podpisuje certyfikat swoim kluczem prywatnym i zwraca go klientowi.
 
 ### Szablony certyfikatów
 
@@ -51,7 +51,7 @@ Aby klient mógł zażądać certyfikatu, muszą być przyznane **prawa rejestra
 
 Prawa te są określone za pomocą wpisów kontroli dostępu (ACE), szczegółowo opisujących uprawnienia, takie jak:
 
-- Prawa **Certificate-Enrollment** i **Certificate-AutoEnrollment**, z każdym związanym z określonym GUID.
+- Prawa **Certificate-Enrollment** i **Certificate-AutoEnrollment**, z każdym związanym z określonymi GUID.
 - **ExtendedRights**, pozwalające na wszystkie rozszerzone uprawnienia.
 - **FullControl/GenericAll**, zapewniające pełną kontrolę nad szablonem.
 
@@ -87,7 +87,7 @@ Active Directory (AD) wspiera uwierzytelnianie za pomocą certyfikatów, główn
 
 ### Proces Uwierzytelniania Kerberos
 
-W procesie uwierzytelniania Kerberos, żądanie użytkownika o Ticket Granting Ticket (TGT) jest podpisywane za pomocą **klucza prywatnego** certyfikatu użytkownika. To żądanie przechodzi przez kilka walidacji przez kontroler domeny, w tym **ważność** certyfikatu, **ścieżkę** oraz **status unieważnienia**. Walidacje obejmują również weryfikację, że certyfikat pochodzi z zaufanego źródła oraz potwierdzenie obecności wystawcy w **sklepie certyfikatów NTAUTH**. Pomyślne walidacje skutkują wydaniem TGT. Obiekt **`NTAuthCertificates`** w AD, znajdujący się pod:
+W procesie uwierzytelniania Kerberos, żądanie użytkownika o Ticket Granting Ticket (TGT) jest podpisywane za pomocą **klucza prywatnego** certyfikatu użytkownika. To żądanie przechodzi przez kilka walidacji przez kontroler domeny, w tym **ważność** certyfikatu, **ścieżkę** oraz **status unieważnienia**. Walidacje obejmują również weryfikację, że certyfikat pochodzi z zaufanego źródła oraz potwierdzenie obecności wystawcy w **magazynie certyfikatów NTAUTH**. Pomyślne walidacje skutkują wydaniem TGT. Obiekt **`NTAuthCertificates`** w AD, znajdujący się pod:
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```

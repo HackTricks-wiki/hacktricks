@@ -9,7 +9,7 @@
 ### Podstawowa konfiguracja
 
 Po zainstalowaniu jest kilka rzeczy, które warto skonfigurować.\
-W ustawieniach (drugi przycisk zakładki) możesz wybrać **urządzenie SDR** lub **wybrać plik** do odczytu oraz częstotliwość do syntonizacji i częstotliwość próbkowania (zalecane do 2.56Msps, jeśli twój komputer to obsługuje)\\
+W ustawieniach (drugi przycisk zakładki) możesz wybrać **urządzenie SDR** lub **wybrać plik**, aby odczytać i na jakiej częstotliwości syntonizować oraz ustawić częstotliwość próbkowania (zalecane do 2,56 Msps, jeśli twój komputer to obsługuje)\\
 
 ![](<../../images/image (245).png>)
 
@@ -57,10 +57,10 @@ Jeśli sprawdzasz sygnał, istnieją różne sposoby, aby spróbować ustalić, 
 
 - **Wykrywanie AM**: Jeśli na wykresie IQ pojawiają się na przykład **2 okręgi** (prawdopodobnie jeden w 0, a drugi w innej amplitudzie), może to oznaczać, że jest to sygnał AM. Dzieje się tak, ponieważ na wykresie IQ odległość między 0 a okręgiem to amplituda sygnału, więc łatwo jest wizualizować różne amplitudy.
 - **Wykrywanie PM**: Jak w poprzednim obrazie, jeśli znajdziesz małe okręgi, które nie są ze sobą powiązane, prawdopodobnie oznacza to, że używana jest modulacja fazy. Dzieje się tak, ponieważ na wykresie IQ kąt między punktem a 0,0 to faza sygnału, co oznacza, że używane są 4 różne fazy.
-- Zauważ, że jeśli informacja jest ukryta w tym, że faza jest zmieniana, a nie w samej fazie, nie zobaczysz wyraźnie różniących się faz.
-- **Wykrywanie FM**: IQ nie ma pola do identyfikacji częstotliwości (odległość do centrum to amplituda, a kąt to faza).\
+- Zauważ, że jeśli informacja jest ukryta w tym, że faza jest zmieniana, a nie w samej fazie, nie zobaczysz wyraźnie różnie zróżnicowanych faz.
+- **Wykrywanie FM**: IQ nie ma pola do identyfikacji częstotliwości (odległość do środka to amplituda, a kąt to faza).\
 Dlatego, aby zidentyfikować FM, powinieneś **widzieć zasadniczo tylko okrąg** na tym wykresie.\
-Ponadto, inna częstotliwość jest "reprezentowana" przez wykres IQ przez **przyspieszenie prędkości wzdłuż okręgu** (więc w SysDigger wybierając sygnał, wykres IQ jest zapełniony, jeśli znajdziesz przyspieszenie lub zmianę kierunku w utworzonym okręgu, może to oznaczać, że jest to FM):
+Ponadto, inna częstotliwość jest "reprezentowana" przez wykres IQ przez **przyspieszenie prędkości wzdłuż okręgu** (więc w SysDigger wybierając sygnał, wykres IQ jest zapełniany, jeśli znajdziesz przyspieszenie lub zmianę kierunku w utworzonym okręgu, może to oznaczać, że jest to FM):
 
 ## Przykład AM
 
@@ -80,7 +80,7 @@ A tak wygląda część symbolu z falą:
 
 #### Sprawdzanie histogramu
 
-Możesz **wybrać cały sygnał**, w którym znajduje się informacja, wybrać tryb **Amplitudy** i **Wybór**, a następnie kliknąć na **Histogram.** Możesz zaobserwować, że znajdują się tylko 2 wyraźne poziomy.
+Możesz **wybrać cały sygnał**, w którym znajduje się informacja, wybrać tryb **Amplituda** i **Wybór**, a następnie kliknąć na **Histogram.** Możesz zaobserwować, że znajdują się tylko 2 wyraźne poziomy.
 
 ![](<../../images/image (264).png>)
 
@@ -100,7 +100,7 @@ W tym przykładzie możesz zobaczyć, jak jest **duże koło**, ale także **wie
 
 #### Z jednym symbolem
 
-Wybierz najmniejszy symbol, jaki możesz znaleźć (aby mieć pewność, że to tylko 1) i sprawdź "Częstotliwość wyboru". W tym przypadku wynosiłoby to 1.013kHz (czyli 1kHz).
+Wybierz najmniejszy symbol, jaki możesz znaleźć (aby mieć pewność, że to tylko 1) i sprawdź "Częstotliwość wyboru". W tym przypadku wynosiłoby to 1.013 kHz (czyli 1 kHz).
 
 ![](<../../images/image (78).png>)
 
@@ -125,7 +125,7 @@ Naciskając próbkę, pojawia się to:
 
 ![](<../../images/image (644).png>)
 
-Teraz, aby sprawić, by SigDigger zrozumiał **gdzie jest zakres** poziomu przenoszącego informacje, musisz kliknąć na **niższy poziom** i przytrzymać kliknięte, aż do największego poziomu:
+Teraz, aby sprawić, by SigDigger zrozumiał **gdzie jest zakres** poziomu przenoszącego informacje, musisz kliknąć na **niższy poziom** i przytrzymać, aż do największego poziomu:
 
 ![](<../../images/image (439).png>)
 
@@ -137,7 +137,7 @@ Na koniec **zwiększając** **Zoom** i **zmieniając rozmiar wiersza**, możesz 
 
 Jeśli sygnał ma więcej niż 1 bit na symbol (na przykład 2), SigDigger **nie ma sposobu, aby wiedzieć, który symbol to** 00, 01, 10, 11, więc użyje różnych **odcieni szarości**, aby reprezentować każdy (a jeśli skopiujesz bity, użyje **liczb od 0 do 3**, będziesz musiał je przetworzyć).
 
-Ponadto, używaj **kodowań** takich jak **Manchester**, a **up+down** może być **1 lub 0**, a **down+up** może być 1 lub 0. W takich przypadkach musisz **przetworzyć uzyskane up (1) i down (0)**, aby zastąpić pary 01 lub 10 jako 0s lub 1s.
+Ponadto, używaj **kodowań** takich jak **Manchester**, a **up+down** może być **1 lub 0**, a **down+up** może być 1 lub 0. W takich przypadkach musisz **przetworzyć uzyskane ups (1) i downs (0)**, aby zastąpić pary 01 lub 10 jako 0s lub 1s.
 
 ## Przykład FM
 
@@ -183,7 +183,7 @@ A to byłby histogram fazy (co jasno pokazuje, że sygnał nie jest modulowany w
 
 IQ nie ma pola do identyfikacji częstotliwości (odległość do centrum to amplituda, a kąt to faza).\
 Dlatego, aby zidentyfikować FM, powinieneś **widzieć zasadniczo tylko okrąg** na tym wykresie.\
-Ponadto, inna częstotliwość jest "reprezentowana" przez wykres IQ przez **przyspieszenie prędkości wzdłuż okręgu** (więc w SysDigger wybierając sygnał, wykres IQ jest zapełniony, jeśli znajdziesz przyspieszenie lub zmianę kierunku w utworzonym okręgu, może to oznaczać, że jest to FM):
+Ponadto, inna częstotliwość jest "reprezentowana" przez wykres IQ przez **przyspieszenie prędkości wzdłuż okręgu** (więc w SysDigger wybierając sygnał, wykres IQ jest zapełniany, jeśli znajdziesz przyspieszenie lub zmianę kierunku w utworzonym okręgu, może to oznaczać, że jest to FM):
 
 ![](<../../images/image (81).png>)
 

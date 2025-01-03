@@ -4,7 +4,7 @@
 
 ### [**Hugging Face Transformers**](https://github.com/huggingface/transformers)
 
-Hugging Face Transformers to jedna z najpopularniejszych bibliotek open-source do używania, trenowania i wdrażania LLM, takich jak GPT, BERT i wiele innych. Oferuje kompleksowy ekosystem, który obejmuje modele wstępnie wytrenowane, zbiory danych oraz bezproblemową integrację z Hugging Face Hub do dostosowywania i wdrażania.
+Hugging Face Transformers to jedna z najpopularniejszych bibliotek open-source do używania, trenowania i wdrażania LLM, takich jak GPT, BERT i wielu innych. Oferuje kompleksowy ekosystem, który obejmuje modele wstępnie wytrenowane, zbiory danych oraz bezproblemową integrację z Hugging Face Hub do dostosowywania i wdrażania.
 
 ### [**LangChain**](https://github.com/langchain-ai/langchain)
 
@@ -44,7 +44,7 @@ Oferuje kilka sekcji, takich jak:
 
 ## [**Replicate**](https://replicate.com/home)
 
-**Replicate** to platforma, która umożliwia programistom uruchamianie modeli uczenia maszynowego w chmurze za pomocą prostego API. Skupia się na ułatwieniu dostępu do modeli ML i ich wdrażania bez potrzeby rozbudowanego ustawienia infrastruktury.
+**Replicate** to platforma, która pozwala programistom uruchamiać modele uczenia maszynowego w chmurze za pomocą prostego API. Skupia się na ułatwieniu dostępu do modeli ML i ich wdrażania bez potrzeby rozbudowanego ustawienia infrastruktury.
 
 * **Modele:** Repozytorium modeli uczenia maszynowego wniesionych przez społeczność, które użytkownicy mogą przeglądać, wypróbować i integrować modele w swoich aplikacjach z minimalnym wysiłkiem.
 * **Dostęp do API:** Proste API do uruchamiania modeli, które umożliwia programistom łatwe wdrażanie i skalowanie modeli w ramach ich własnych aplikacji.

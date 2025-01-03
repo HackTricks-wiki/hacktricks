@@ -13,7 +13,7 @@ Korzystając z tego, administrator domeny może **zezwolić** komputerowi na **p
 
 Oznacza to, że jeśli **skompromitujesz hash usługi**, możesz **podszywać się pod użytkowników** i uzyskać **dostęp** w ich imieniu do **skonfigurowanej usługi** (możliwe **privesc**).
 
-Ponadto, **nie będziesz miał tylko dostępu do usługi, pod którą użytkownik może się podszyć, ale także do każdej usługi**, ponieważ SPN (nazwa usługi żądana) nie jest sprawdzana, tylko uprawnienia. Dlatego, jeśli masz dostęp do **usługi CIFS**, możesz również uzyskać dostęp do **usługi HOST** używając flagi `/altservice` w Rubeus.
+Ponadto, **nie będziesz miał tylko dostępu do usługi, pod którą użytkownik może się podszyć, ale także do każdej usługi**, ponieważ SPN (nazwa usługi żądanej) nie jest sprawdzana, tylko uprawnienia. Dlatego, jeśli masz dostęp do **usługi CIFS**, możesz również uzyskać dostęp do **usługi HOST** używając flagi `/altservice` w Rubeus.
 
 Również, **dostęp do usługi LDAP na DC**, jest tym, co jest potrzebne do wykorzystania **DCSync**.
 ```bash:Enumerate

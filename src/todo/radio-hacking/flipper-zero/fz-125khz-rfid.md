@@ -45,9 +45,9 @@ To samo dzieje się w tej karcie HID, gdzie tylko 2 z 3 bajtów można znaleźć
 
 ### Emuluj/Zapisz
 
-Po **skopiowaniu** karty lub **wprowadzeniu** ID **ręcznie** można ją **emulować** za pomocą Flipper Zero lub **zapisać** na prawdziwej karcie.
+Po **skopiowaniu** karty lub **wprowadzeniu** ID **ręcznie** możliwe jest **emulowanie** jej za pomocą Flipper Zero lub **zapisanie** jej na prawdziwej karcie.
 
-## Odniesienia
+## Referencje
 
 - [https://blog.flipperzero.one/rfid/](https://blog.flipperzero.one/rfid/)
 

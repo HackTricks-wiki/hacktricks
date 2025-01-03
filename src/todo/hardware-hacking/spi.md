@@ -14,13 +14,13 @@ MOSI (Master Out, Slave In) i MISO (Master In, Slave Out) są odpowiedzialne za 
 
 Zrzut oprogramowania układowego może być przydatny do analizy oprogramowania i znajdowania w nim luk. Często oprogramowanie układowe nie jest dostępne w Internecie lub jest nieistotne z powodu różnych czynników, takich jak numer modelu, wersja itp. Dlatego wydobycie oprogramowania układowego bezpośrednio z fizycznego urządzenia może być pomocne w poszukiwaniu zagrożeń.
 
-Uzyskanie konsoli szeregowej może być pomocne, ale często zdarza się, że pliki są tylko do odczytu. Ogranicza to analizę z różnych powodów. Na przykład, narzędzia, które są potrzebne do wysyłania i odbierania pakietów, mogą nie być obecne w oprogramowaniu układowym. Dlatego wydobycie binariów do inżynierii odwrotnej nie jest wykonalne. Dlatego posiadanie całego oprogramowania układowego zrzutowanego na systemie i wydobycie binariów do analizy może być bardzo pomocne.
+Uzyskanie konsoli szeregowej może być pomocne, ale często zdarza się, że pliki są tylko do odczytu. Ogranicza to analizę z różnych powodów. Na przykład, narzędzia, które są potrzebne do wysyłania i odbierania pakietów, mogą nie być obecne w oprogramowaniu układowym. Dlatego wydobycie binarnych plików do inżynierii odwrotnej nie jest wykonalne. Dlatego posiadanie całego oprogramowania układowego zrzutowanego na systemie i wydobycie binarnych plików do analizy może być bardzo pomocne.
 
 Ponadto, podczas red reaming i uzyskiwania fizycznego dostępu do urządzeń, zrzut oprogramowania układowego może pomóc w modyfikacji plików lub wstrzykiwaniu złośliwych plików, a następnie ponownym wgrywaniu ich do pamięci, co może być pomocne w implantacji tylnej furtki w urządzeniu. Dlatego istnieje wiele możliwości, które można odblokować dzięki zrzutom oprogramowania układowego.
 
 ### Programator i czytnik EEPROM CH341A
 
-To urządzenie jest niedrogim narzędziem do zrzutu oprogramowania układowego z EEPROM i ponownego wgrywania ich z plikami oprogramowania układowego. To popularny wybór do pracy z chipami BIOS komputerów (które są po prostu EEPROM). To urządzenie łączy się przez USB i wymaga minimalnych narzędzi, aby rozpocząć. Ponadto zazwyczaj szybko wykonuje zadanie, więc może być pomocne również w dostępie do fizycznych urządzeń.
+To urządzenie jest niedrogim narzędziem do zrzutowania oprogramowania układowego z EEPROM i ponownego wgrywania ich z plikami oprogramowania układowego. To popularny wybór do pracy z chipami BIOS komputerów (które są po prostu EEPROM). To urządzenie łączy się przez USB i wymaga minimalnych narzędzi, aby rozpocząć. Ponadto zazwyczaj szybko wykonuje zadanie, więc może być pomocne również w dostępie do fizycznych urządzeń.
 
 ![drawing](../../images/board_image_ch341a.jpg)
 
@@ -51,7 +51,7 @@ Należy zauważyć, że nawet jeśli PINOUT Pirate Bus wskazuje piny dla **MOSI*
 
 ![](<../../images/image (360).png>)
 
-W systemie Windows lub Linux możesz użyć programu [**`flashrom`**](https://www.flashrom.org/Flashrom) do zrzutu zawartości pamięci flash, uruchamiając coś takiego:
+W systemie Windows lub Linux można użyć programu [**`flashrom`**](https://www.flashrom.org/Flashrom) do zrzutu zawartości pamięci flash, uruchamiając coś takiego:
 ```bash
 # In this command we are indicating:
 # -VV Verbose

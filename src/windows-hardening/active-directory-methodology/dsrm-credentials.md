@@ -23,6 +23,6 @@ Więcej informacji na ten temat w: [https://adsecurity.org/?p=1714](https://adse
 
 ## Łagodzenie
 
-- Event ID 4657 - Audyt utworzenia/zmiany `HKLM:\System\CurrentControlSet\Control\Lsa DsrmAdminLogonBehavior`
+- Identyfikator zdarzenia 4657 - Audyt utworzenia/zmiany `HKLM:\System\CurrentControlSet\Control\Lsa DsrmAdminLogonBehavior`
 
 {{#include ../../banners/hacktricks-training.md}}

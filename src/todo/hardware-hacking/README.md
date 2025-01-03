@@ -19,9 +19,9 @@ Może również wspierać inne polecenia, takie jak:
 
 Możesz natknąć się na te instrukcje, gdy używasz narzędzia takiego jak JTAGulator.
 
-### The Test Access Port
+### Port dostępu do testów
 
-Skanowanie granic obejmuje testy czteroprzewodowego **Test Access Port (TAP)**, uniwersalnego portu, który zapewnia **dostęp do funkcji wsparcia testów JTAG** wbudowanych w komponent. TAP używa następujących pięciu sygnałów:
+Skanowanie granic obejmuje testy czteroprzewodowego **Portu Dostępu do Testów (TAP)**, uniwersalnego portu, który zapewnia **dostęp do funkcji wsparcia testów JTAG** wbudowanych w komponent. TAP używa następujących pięciu sygnałów:
 
 - Wejście zegara testowego (**TCK**) TCK to **zegarek**, który definiuje, jak często kontroler TAP podejmie pojedynczą akcję (innymi słowy, przejdzie do następnego stanu w maszynie stanów).
 - Wejście wyboru trybu testowego (**TMS**) TMS kontroluje **maszynę stanów skończonych**. Przy każdym uderzeniu zegara kontroler TAP JTAG urządzenia sprawdza napięcie na pinie TMS. Jeśli napięcie jest poniżej określonego progu, sygnał jest uważany za niski i interpretowany jako 0, natomiast jeśli napięcie jest powyżej określonego progu, sygnał jest uważany za wysoki i interpretowany jako 1.
@@ -31,7 +31,7 @@ Skanowanie granic obejmuje testy czteroprzewodowego **Test Access Port (TAP)**, 
 
 Czasami będziesz mógł znaleźć te piny oznaczone na PCB. W innych przypadkach możesz potrzebować **je znaleźć**.
 
-### Identifying JTAG pins
+### Identyfikacja pinów JTAG
 
 Naj szybszym, ale najdroższym sposobem na wykrycie portów JTAG jest użycie **JTAGulator**, urządzenia stworzonego specjalnie do tego celu (chociaż może **również wykrywać pinouty UART**).
 
@@ -39,7 +39,7 @@ Ma **24 kanały**, które możesz podłączyć do pinów płyty. Następnie prze
 
 Tańszym, ale znacznie wolniejszym sposobem identyfikacji pinów JTAG jest użycie [**JTAGenum**](https://github.com/cyphunk/JTAGenum/) załadowanego na mikrokontrolerze kompatybilnym z Arduino.
 
-Używając **JTAGenum**, najpierw **zdefiniujesz piny urządzenia sondy**, które będziesz używać do enumeracji. Musisz odwołać się do diagramu pinów urządzenia, a następnie połączyć te piny z punktami testowymi na docelowym urządzeniu.
+Używając **JTAGenum**, najpierw **definiujesz piny urządzenia sondy**, które będziesz używać do enumeracji. Musisz odwołać się do diagramu pinów urządzenia, a następnie połączyć te piny z punktami testowymi na docelowym urządzeniu.
 
 **Trzecim sposobem** identyfikacji pinów JTAG jest **inspekcja PCB** w poszukiwaniu jednego z pinoutów. W niektórych przypadkach PCB mogą wygodnie zapewniać **interfejs Tag-Connect**, co jest wyraźnym wskazaniem, że płyta ma również złącze JTAG. Możesz zobaczyć, jak ten interfejs wygląda na [https://www.tag-connect.com/info/](https://www.tag-connect.com/info/). Dodatkowo, inspekcja **kart katalogowych chipsetów na PCB** może ujawnić diagramy pinów wskazujące na interfejsy JTAG.
 
@@ -47,6 +47,6 @@ Używając **JTAGenum**, najpierw **zdefiniujesz piny urządzenia sondy**, któr
 
 SWD to protokół specyficzny dla ARM zaprojektowany do debugowania.
 
-Interfejs SWD wymaga **dwóch pinów**: dwukierunkowego sygnału **SWDIO**, który jest odpowiednikiem pinów **TDI i TDO JTAG** oraz zegara, i **SWCLK**, który jest odpowiednikiem **TCK** w JTAG. Wiele urządzeń wspiera **Serial Wire lub JTAG Debug Port (SWJ-DP)**, połączony interfejs JTAG i SWD, który umożliwia podłączenie sondy SWD lub JTAG do celu.
+Interfejs SWD wymaga **dwóch pinów**: dwukierunkowego sygnału **SWDIO**, który jest odpowiednikiem pinów **TDI i TDO JTAG** oraz zegara, i **SWCLK**, który jest odpowiednikiem **TCK** w JTAG. Wiele urządzeń wspiera **Port Debugowania Szeregowego lub JTAG (SWJ-DP)**, połączony interfejs JTAG i SWD, który umożliwia podłączenie sondy SWD lub JTAG do celu.
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,4 +1,4 @@
-# Zewnętrzna domena lasu - jednokierunkowy (wychodzący)
+# External Forest Domain - One-Way (Outbound)
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -30,13 +30,13 @@ MemberDistinguishedName : CN=S-1-5-21-1028541967-2937615241-1935644758-1115,CN=F
 ```
 ## Atak na konto zaufania
 
-Występuje luka w zabezpieczeniach, gdy nawiązywana jest relacja zaufania między dwoma domenami, określonymi tutaj jako domena **A** i domena **B**, gdzie domena **B** rozszerza swoje zaufanie do domeny **A**. W tej konfiguracji w domenie **A** tworzone jest specjalne konto dla domeny **B**, które odgrywa kluczową rolę w procesie uwierzytelniania między tymi dwiema domenami. To konto, powiązane z domeną **B**, jest wykorzystywane do szyfrowania biletów do uzyskiwania dostępu do usług w różnych domenach.
+Występuje luka w zabezpieczeniach, gdy nawiązywana jest relacja zaufania między dwoma domenami, określonymi tutaj jako domena **A** i domena **B**, gdzie domena **B** rozszerza swoje zaufanie do domeny **A**. W tej konfiguracji w domenie **A** tworzone jest specjalne konto dla domeny **B**, które odgrywa kluczową rolę w procesie uwierzytelniania między tymi dwiema domenami. To konto, powiązane z domeną **B**, jest wykorzystywane do szyfrowania biletów do uzyskiwania dostępu do usług w obu domenach.
 
-Kluczowym aspektem do zrozumienia jest to, że hasło i hash tego specjalnego konta mogą być wyodrębnione z kontrolera domeny w domenie **A** za pomocą narzędzia wiersza poleceń. Polecenie do wykonania tej akcji to:
+Krytycznym aspektem do zrozumienia jest to, że hasło i hash tego specjalnego konta mogą być wyodrębnione z kontrolera domeny w domenie **A** za pomocą narzędzia wiersza poleceń. Polecenie do wykonania tej akcji to:
 ```powershell
 Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.my.domain.local
 ```
-To ekstrakcji możliwej jest, ponieważ konto, oznaczone znakiem **$** po swojej nazwie, jest aktywne i należy do grupy "Domain Users" w domenie **A**, dziedzicząc tym samym uprawnienia związane z tą grupą. Umożliwia to osobom uwierzytelnienie się w domenie **A** przy użyciu poświadczeń tego konta.
+Ta ekstrakcja jest możliwa, ponieważ konto, oznaczone znakiem **$** po swojej nazwie, jest aktywne i należy do grupy "Domain Users" w domenie **A**, dziedzicząc tym samym uprawnienia związane z tą grupą. Umożliwia to osobom uwierzytelnienie się w domenie **A** przy użyciu poświadczeń tego konta.
 
 **Ostrzeżenie:** Możliwe jest wykorzystanie tej sytuacji do uzyskania dostępu do domeny **A** jako użytkownik, chociaż z ograniczonymi uprawnieniami. Niemniej jednak, ten dostęp jest wystarczający do przeprowadzenia enumeracji w domenie **A**.
 
@@ -44,7 +44,7 @@ W scenariuszu, w którym `ext.local` jest domeną ufającą, a `root.local` jest
 ```bash
 lsadump::trust /patch
 ```
-Następnie można użyć wyodrębnionego klucza RC4 do uwierzytelnienia jako `root.local\EXT$` w `root.local` za pomocą innej komendy narzędzia:
+Następnie można użyć wyodrębnionego klucza RC4 do uwierzytelnienia jako `root.local\EXT$` w `root.local` za pomocą innego polecenia narzędzia:
 ```bash
 .\Rubeus.exe asktgt /user:EXT$ /domain:root.local /rc4:<RC4> /dc:dc.root.local /ptt
 ```
@@ -52,21 +52,21 @@ Ten krok uwierzytelniania otwiera możliwość enumeracji, a nawet wykorzystania
 ```bash
 .\Rubeus.exe kerberoast /user:svc_sql /domain:root.local /dc:dc.root.local
 ```
-### Zbieranie hasła zaufania w postaci jawnej
+### Zbieranie hasła zaufania w postaci czystego tekstu
 
-W poprzednim przepływie użyto hasha zaufania zamiast **hasła w postaci jawnej** (które również zostało **wyciągnięte przez mimikatz**).
+W poprzednim przepływie użyto hasha zaufania zamiast **hasła w postaci czystego tekstu** (które również zostało **wyciągnięte przez mimikatz**).
 
-Hasło w postaci jawnej można uzyskać, konwertując wyjście \[ CLEAR ] z mimikatz z formatu szesnastkowego i usuwając bajty zerowe ‘\x00’:
+Hasło w postaci czystego tekstu można uzyskać, konwertując wyjście \[ CLEAR \] z mimikatz z formatu szesnastkowego i usuwając bajty null ‘\x00’:
 
 ![](<../../images/image (938).png>)
 
-Czasami podczas tworzenia relacji zaufania użytkownik musi wpisać hasło dla zaufania. W tej demonstracji klucz to oryginalne hasło zaufania i dlatego jest czytelne dla człowieka. W miarę upływu czasu (30 dni) hasło w postaci jawnej nie będzie czytelne dla człowieka, ale technicznie nadal będzie użyteczne.
+Czasami podczas tworzenia relacji zaufania użytkownik musi wpisać hasło dla zaufania. W tej demonstracji klucz to oryginalne hasło zaufania i dlatego jest czytelne dla człowieka. W miarę cyklu klucza (30 dni) hasło w postaci czystego tekstu nie będzie czytelne dla człowieka, ale technicznie nadal będzie użyteczne.
 
-Hasło w postaci jawnej można wykorzystać do przeprowadzenia zwykłej autoryzacji jako konto zaufania, co stanowi alternatywę dla żądania TGT przy użyciu tajnego klucza Kerberos konta zaufania. Tutaj zapytanie do root.local z ext.local o członków Domain Admins:
+Hasło w postaci czystego tekstu można wykorzystać do przeprowadzenia zwykłej autoryzacji jako konto zaufania, co stanowi alternatywę dla żądania TGT przy użyciu tajnego klucza Kerberos konta zaufania. Tutaj zapytanie root.local z ext.local o członków Domain Admins:
 
 ![](<../../images/image (792).png>)
 
-## Odniesienia
+## Referencje
 
 - [https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-7-trust-account-attack-from-trusting-to-trusted](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-7-trust-account-attack-from-trusting-to-trusted)
 

@@ -19,7 +19,7 @@ Aby zrobić migawkę AD, przejdź do `File` --> `Create Snapshot` i wprowadź na
 
 ## ADRecon
 
-[**ADRecon**](https://github.com/adrecon/ADRecon) to narzędzie, które wydobywa i łączy różne artefakty z środowiska AD. Informacje mogą być prezentowane w **specjalnie sformatowanym** raporcie Microsoft Excel **raporcie**, który zawiera podsumowania z metrykami, aby ułatwić analizę i zapewnić całościowy obraz aktualnego stanu docelowego środowiska AD.
+[**ADRecon**](https://github.com/adrecon/ADRecon) to narzędzie, które wyodrębnia i łączy różne artefakty z środowiska AD. Informacje mogą być przedstawione w **specjalnie sformatowanym** raporcie Microsoft Excel **raporcie**, który zawiera podsumowania z metrykami, aby ułatwić analizę i zapewnić całościowy obraz aktualnego stanu docelowego środowiska AD.
 ```bash
 # Run it
 .\ADRecon.ps1
@@ -28,7 +28,7 @@ Aby zrobić migawkę AD, przejdź do `File` --> `Create Snapshot` i wprowadź na
 
 From [https://github.com/BloodHoundAD/BloodHound](https://github.com/BloodHoundAD/BloodHound)
 
-> BloodHound to aplikacja webowa w JavaScript na jednej stronie, zbudowana na bazie [Linkurious](http://linkurio.us/), skompilowana z [Electron](http://electron.atom.io/), z bazą danych [Neo4j](https://neo4j.com/) zasilaną przez zbieracz danych w C#.
+> BloodHound to aplikacja webowa w JavaScript na jednej stronie, zbudowana na bazie [Linkurious](http://linkurio.us/), skompilowana z [Electron](http://electron.atom.io/), z bazą danych [Neo4j](https://neo4j.com/) zasilaną przez zbieracz danych C#.
 
 BloodHound wykorzystuje teorię grafów do ujawnienia ukrytych i często niezamierzonych relacji w środowisku Active Directory lub Azure. Atakujący mogą używać BloodHound do łatwego identyfikowania bardzo złożonych ścieżek ataku, które w przeciwnym razie byłyby niemożliwe do szybkiego zidentyfikowania. Obrońcy mogą używać BloodHound do identyfikacji i eliminacji tych samych ścieżek ataku. Zarówno zespoły niebieskie, jak i czerwone mogą używać BloodHound do łatwego uzyskania głębszego zrozumienia relacji uprawnień w środowisku Active Directory lub Azure.
 

@@ -4,7 +4,7 @@
 
 ## **Wprowadzenie**
 
-Oprogramowanie układowe to niezbędne oprogramowanie, które umożliwia urządzeniom prawidłowe działanie, zarządzając i ułatwiając komunikację między komponentami sprzętowymi a oprogramowaniem, z którym użytkownicy wchodzą w interakcję. Jest przechowywane w pamięci trwałej, co zapewnia, że urządzenie może uzyskać dostęp do istotnych instrukcji od momentu włączenia, prowadząc do uruchomienia systemu operacyjnego. Badanie i potencjalna modyfikacja oprogramowania układowego to kluczowy krok w identyfikacji luk w zabezpieczeniach.
+Oprogramowanie układowe to niezbędne oprogramowanie, które umożliwia urządzeniom prawidłowe działanie, zarządzając i ułatwiając komunikację między komponentami sprzętowymi a oprogramowaniem, z którym użytkownicy wchodzą w interakcje. Jest przechowywane w pamięci trwałej, co zapewnia, że urządzenie może uzyskać dostęp do istotnych instrukcji od momentu włączenia, prowadząc do uruchomienia systemu operacyjnego. Badanie i potencjalna modyfikacja oprogramowania układowego to kluczowy krok w identyfikacji luk w zabezpieczeniach.
 
 ## **Zbieranie informacji**
 
@@ -65,7 +65,7 @@ Binwalk zazwyczaj wyodrębnia go w **folderze nazwanym zgodnie z typem systemu p
 
 #### Ręczne wyodrębnianie systemu plików
 
-Czasami binwalk **nie ma magicznego bajtu systemu plików w swoich sygnaturach**. W takich przypadkach użyj binwalk, aby **znaleźć offset systemu plików i wyciąć skompresowany system plików** z binarnego pliku oraz **ręcznie wyodrębnić** system plików zgodnie z jego typem, korzystając z poniższych kroków.
+Czasami binwalk **nie ma magicznego bajtu systemu plików w swoich sygnaturach**. W takich przypadkach użyj binwalk, aby **znaleźć offset systemu plików i wyciąć skompresowany system plików** z binarnego i **ręcznie wyodrębnić** system plików zgodnie z jego typem, korzystając z poniższych kroków.
 ```
 $ binwalk DIR850L_REVB.bin
 
@@ -113,7 +113,7 @@ Pliki będą w katalogu "`squashfs-root`" po tym.
 
 ## Analiza Oprogramowania Układowego
 
-Gdy oprogramowanie układowe jest już zdobyte, istotne jest jego rozłożenie w celu zrozumienia struktury i potencjalnych luk. Proces ten polega na wykorzystaniu różnych narzędzi do analizy i wydobywania cennych danych z obrazu oprogramowania układowego.
+Gdy oprogramowanie układowe jest już dostępne, istotne jest jego rozłożenie w celu zrozumienia struktury i potencjalnych luk w zabezpieczeniach. Proces ten polega na wykorzystaniu różnych narzędzi do analizy i wydobywania cennych danych z obrazu oprogramowania układowego.
 
 ### Narzędzia do Wstępnej Analizy
 
@@ -128,11 +128,11 @@ fdisk -lu <bin> #lists partitions and filesystems, if there are multiple
 ```
 Aby ocenić status szyfrowania obrazu, sprawdzana jest **entropia** za pomocą `binwalk -E <bin>`. Niska entropia sugeruje brak szyfrowania, podczas gdy wysoka entropia wskazuje na możliwe szyfrowanie lub kompresję.
 
-Do ekstrakcji **osadzonych plików** zaleca się korzystanie z dokumentacji **file-data-carving-recovery-tools** oraz **binvis.io** do inspekcji plików.
+Do **wyodrębniania plików osadzonych** zaleca się korzystanie z dokumentacji **file-data-carving-recovery-tools** oraz **binvis.io** do inspekcji plików.
 
-### Ekstrakcja systemu plików
+### Wyodrębnianie systemu plików
 
-Używając `binwalk -ev <bin>`, można zazwyczaj wyodrębnić system plików, często do katalogu nazwanego na cześć typu systemu plików (np. squashfs, ubifs). Jednak gdy **binwalk** nie rozpoznaje typu systemu plików z powodu brakujących bajtów magicznych, konieczna jest ręczna ekstrakcja. Polega to na użyciu `binwalk` do zlokalizowania offsetu systemu plików, a następnie polecenia `dd` do wycięcia systemu plików:
+Używając `binwalk -ev <bin>`, można zazwyczaj wyodrębnić system plików, często do katalogu nazwanego na cześć typu systemu plików (np. squashfs, ubifs). Jednak gdy **binwalk** nie rozpoznaje typu systemu plików z powodu brakujących bajtów magicznych, konieczne jest ręczne wyodrębnienie. Wymaga to użycia `binwalk` do zlokalizowania offsetu systemu plików, a następnie polecenia `dd`, aby wyciąć system plików:
 ```bash
 $ binwalk DIR850L_REVB.bin
 
@@ -164,7 +164,7 @@ Zarówno kod źródłowy, jak i skompilowane binaria znalezione w systemie plik�
 
 ## Emulacja oprogramowania układowego do analizy dynamicznej
 
-Proces emulacji oprogramowania układowego umożliwia **analizę dynamiczną** zarówno działania urządzenia, jak i pojedynczego programu. Podejście to może napotkać trudności związane z zależnościami sprzętowymi lub architektonicznymi, ale przeniesienie systemu plików root lub konkretnych binariów na urządzenie o dopasowanej architekturze i endianness, takie jak Raspberry Pi, lub na wstępnie zbudowaną maszynę wirtualną, może ułatwić dalsze testowanie.
+Proces emulacji oprogramowania układowego umożliwia **analizę dynamiczną** działania urządzenia lub pojedynczego programu. Podejście to może napotkać trudności związane z zależnościami sprzętowymi lub architektonicznymi, ale przeniesienie systemu plików root lub konkretnych binariów na urządzenie o dopasowanej architekturze i endianness, takie jak Raspberry Pi, lub na wstępnie zbudowaną maszynę wirtualną, może ułatwić dalsze testowanie.
 
 ### Emulacja pojedynczych binariów
 
@@ -192,24 +192,24 @@ Narzędzia takie jak [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmw
 
 ## Analiza dynamiczna w praktyce
 
-Na tym etapie używa się rzeczywistego lub emulowanego środowiska urządzenia do analizy. Ważne jest, aby utrzymać dostęp do powłoki systemu operacyjnego i systemu plików. Emulacja może nie idealnie odwzorowywać interakcje sprzętowe, co wymaga okazjonalnych restartów emulacji. Analiza powinna ponownie przeszukać system plików, wykorzystać ujawnione strony internetowe i usługi sieciowe oraz zbadać luki w bootloaderze. Testy integralności firmware są kluczowe do identyfikacji potencjalnych luk backdoor.
+Na tym etapie używa się rzeczywistego lub emulowanego środowiska urządzenia do analizy. Ważne jest, aby utrzymać dostęp do powłoki systemu operacyjnego i systemu plików. Emulacja może nie idealnie odwzorowywać interakcje sprzętowe, co wymaga okazjonalnych restartów emulacji. Analiza powinna ponownie przeglądać system plików, wykorzystywać ujawnione strony internetowe i usługi sieciowe oraz badać luki w bootloaderze. Testy integralności firmware są kluczowe do identyfikacji potencjalnych luk backdoor.
 
 ## Techniki analizy w czasie rzeczywistym
 
-Analiza w czasie rzeczywistym polega na interakcji z procesem lub binarnym w jego środowisku operacyjnym, przy użyciu narzędzi takich jak gdb-multiarch, Frida i Ghidra do ustawiania punktów przerwania i identyfikacji luk poprzez fuzzing i inne techniki.
+Analiza w czasie rzeczywistym polega na interakcji z procesem lub binarnym w jego środowisku operacyjnym, przy użyciu narzędzi takich jak gdb-multiarch, Frida i Ghidra do ustawiania punktów przerwania i identyfikowania luk poprzez fuzzing i inne techniki.
 
 ## Eksploatacja binarna i dowód koncepcji
 
-Opracowanie PoC dla zidentyfikowanych luk wymaga głębokiego zrozumienia docelowej architektury i programowania w językach niskiego poziomu. Ochrony w czasie rzeczywistym w systemach wbudowanych są rzadkie, ale gdy są obecne, techniki takie jak Return Oriented Programming (ROP) mogą być konieczne.
+Opracowanie PoC dla zidentyfikowanych luk wymaga głębokiego zrozumienia architektury docelowej i programowania w językach niskiego poziomu. Ochrony w czasie rzeczywistym w systemach wbudowanych są rzadkie, ale gdy są obecne, techniki takie jak Return Oriented Programming (ROP) mogą być konieczne.
 
 ## Przygotowane systemy operacyjne do analizy firmware
 
-Systemy operacyjne takie jak [AttifyOS](https://github.com/adi0x90/attifyos) i [EmbedOS](https://github.com/scriptingxss/EmbedOS) oferują wstępnie skonfigurowane środowiska do testowania bezpieczeństwa firmware, wyposażone w niezbędne narzędzia.
+Systemy operacyjne takie jak [AttifyOS](https://github.com/adi0x90/attifyos) i [EmbedOS](https://github.com/scriptingxss/EmbedOS) zapewniają wstępnie skonfigurowane środowiska do testowania bezpieczeństwa firmware, wyposażone w niezbędne narzędzia.
 
 ## Przygotowane systemy operacyjne do analizy firmware
 
-- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS to dystrybucja mająca na celu pomoc w przeprowadzaniu oceny bezpieczeństwa i testów penetracyjnych urządzeń Internetu Rzeczy (IoT). Oszczędza to dużo czasu, oferując wstępnie skonfigurowane środowisko z wszystkimi niezbędnymi narzędziami.
-- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): System operacyjny do testowania bezpieczeństwa wbudowanego, oparty na Ubuntu 18.04, wstępnie załadowany narzędziami do testowania bezpieczeństwa firmware.
+- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS to dystrybucja mająca na celu pomoc w przeprowadzaniu oceny bezpieczeństwa i testów penetracyjnych urządzeń Internetu Rzeczy (IoT). Oszczędza to dużo czasu, zapewniając wstępnie skonfigurowane środowisko z wszystkimi niezbędnymi narzędziami.
+- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): System operacyjny do testowania bezpieczeństwa wbudowanego oparty na Ubuntu 18.04, wstępnie załadowany narzędziami do testowania bezpieczeństwa firmware.
 
 ## Wrażliwe firmware do ćwiczeń
 

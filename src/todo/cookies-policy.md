@@ -11,11 +11,11 @@ Niniejsza Polityka plików cookie dotyczy następujących stron internetowych na
 * book.hacktricks.xyz
 * cloud.hacktricks.xyz
 
-Korzystając z którejkolwiek z tych stron, zgadzasz się na użycie plików cookie zgodnie z niniejszą Polityką plików cookie. Jeśli się nie zgadzasz, proszę wyłączyć pliki cookie w ustawieniach przeglądarki lub powstrzymać się od korzystania z naszych stron.
+Korzystając z którejkolwiek z tych stron, zgadzasz się na użycie plików cookie zgodnie z niniejszą Polityką plików cookie. Jeśli się nie zgadzasz, prosimy o wyłączenie plików cookie w ustawieniach przeglądarki lub powstrzymanie się od korzystania z naszych stron.
 
 ### Czym są pliki cookie?
 
-Pliki cookie to małe pliki tekstowe, które są przechowywane na Twoim komputerze lub urządzeniu mobilnym, gdy odwiedzasz stronę internetową. Są powszechnie używane do działania stron internetowych, poprawy ich funkcjonalności oraz zapewnienia bardziej spersonalizowanego doświadczenia użytkownika.
+Pliki cookie to małe pliki tekstowe, które są przechowywane na Twoim komputerze lub urządzeniu mobilnym, gdy odwiedzasz stronę internetową. Są powszechnie używane do działania stron internetowych, poprawy ich funkcjonalności i zapewnienia bardziej spersonalizowanego doświadczenia użytkownika.
 
 ### Jak używamy plików cookie
 

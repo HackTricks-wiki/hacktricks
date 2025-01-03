@@ -4,7 +4,7 @@
 
 Ta sekcja zawiera wszystko na temat systemów kontrolnych, w tym koncepcje oraz metodologie ich hackowania z różnymi problemami bezpieczeństwa, które w nich występują.
 
-Systemy kontrolne są wszędzie, ponieważ przemysł jest kluczowy dla rozwoju gospodarczego kraju. Jednak te ICS są trudne do aktualizacji, a postępy w tej dziedzinie są ograniczone. Dlatego znajdowanie luk w zabezpieczeniach jest tutaj powszechne. Większość protokołów i standardów używanych tutaj została opracowana w latach 90-tych i ma znacznie mniejsze możliwości w porównaniu do obecnych scenariuszy ataków.
+Systemy kontrolne są wszędzie, ponieważ przemysł jest kluczowy dla rozwoju gospodarczego kraju. Jednak te ICS są trudne do aktualizacji, a postępy w tej dziedzinie są mniejsze. Dlatego znajdowanie luk w zabezpieczeniach jest tutaj powszechne. Większość protokołów i standardów używanych tutaj została opracowana w latach 90-tych i ma znacznie mniejsze możliwości w porównaniu do obecnych scenariuszy ataków.
 
 Zabezpieczenie tych systemów stało się ważne, ponieważ ich uszkodzenie może kosztować dużo, a w najgorszym przypadku nawet życie. Aby zrozumieć bezpieczeństwo systemów kontrolnych, konieczne jest poznanie ich wnętrza.
 

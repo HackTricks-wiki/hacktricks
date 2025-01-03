@@ -6,7 +6,7 @@ W odpowiedzi ping TTL:\
 Reszta, jakiś linux
 
 $1$- md5\
-$2$or $2a$ - Blowfish\
+$2$lub $2a$ - Blowfish\
 $5$- sha256\
 $6$- sha512
 
@@ -15,7 +15,7 @@ Jeśli nie wiesz, co kryje się za usługą, spróbuj wykonać żądanie HTTP GE
 **Skanowanie UDP**\
 nc -nv -u -z -w 1 \<IP> 160-16
 
-Pusty pakiet UDP jest wysyłany do konkretnego portu. Jeśli port UDP jest otwarty, nie zostaje wysłana odpowiedź z maszyny docelowej. Jeśli port UDP jest zamknięty, z maszyny docelowej powinien zostać wysłany pakiet ICMP port unreachable.\
+Pusty pakiet UDP jest wysyłany do konkretnego portu. Jeśli port UDP jest otwarty, nie zostaje wysłana odpowiedź z maszyny docelowej. Jeśli port UDP jest zamknięty, z maszyny docelowej powinien zostać wysłany pakiet ICMP informujący o niedostępności portu.\
 
 Skanowanie portów UDP jest często niewiarygodne, ponieważ zapory sieciowe i routery mogą odrzucać pakiety ICMP.\
 Może to prowadzić do fałszywych pozytywów w twoim skanowaniu, a ty regularnie zobaczysz,\

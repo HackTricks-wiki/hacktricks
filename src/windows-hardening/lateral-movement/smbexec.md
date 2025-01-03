@@ -2,13 +2,14 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+
 ## Jak to działa
 
 **Smbexec** to narzędzie używane do zdalnego wykonywania poleceń na systemach Windows, podobne do **Psexec**, ale unika umieszczania jakichkolwiek złośliwych plików na docelowym systemie.
 
 ### Kluczowe punkty dotyczące **SMBExec**
 
-- Działa poprzez tworzenie tymczasowej usługi (na przykład "BTOBTO") na docelowej maszynie, aby wykonywać polecenia za pomocą cmd.exe (%COMSPEC%), bez zrzucania jakichkolwiek binarnych plików.
+- Działa poprzez tworzenie tymczasowej usługi (na przykład "BTOBTO") na docelowej maszynie, aby wykonywać polecenia za pomocą cmd.exe (%COMSPEC%), bez zrzucania jakichkolwiek binariów.
 - Pomimo swojego dyskretnego podejścia, generuje dzienniki zdarzeń dla każdego wykonanego polecenia, oferując formę nieinteraktywnego "shella".
 - Polecenie do połączenia za pomocą **Smbexec** wygląda tak:
 ```bash

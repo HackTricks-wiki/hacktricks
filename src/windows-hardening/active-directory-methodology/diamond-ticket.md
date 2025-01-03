@@ -4,12 +4,12 @@
 
 ## Diamond Ticket
 
-**Jak złoty bilet**, diamentowy bilet to TGT, który można wykorzystać do **uzyskania dostępu do dowolnej usługi jako dowolny użytkownik**. Złoty bilet jest fałszowany całkowicie offline, szyfrowany hashem krbtgt tej domeny, a następnie wprowadzany do sesji logowania do użycia. Ponieważ kontrolery domeny nie śledzą TGT, które (lub które) zostały legalnie wydane, chętnie akceptują TGT, które są szyfrowane własnym hashem krbtgt.
+**Jak złoty bilet**, diamentowy bilet to TGT, który może być użyty do **dostępu do dowolnej usługi jako dowolny użytkownik**. Złoty bilet jest fałszowany całkowicie offline, szyfrowany hashem krbtgt tej domeny, a następnie przekazywany do sesji logowania do użycia. Ponieważ kontrolery domeny nie śledzą TGT, które (lub które) zostały legalnie wydane, chętnie akceptują TGT, które są szyfrowane ich własnym hashem krbtgt.
 
 Istnieją dwie powszechne techniki wykrywania użycia złotych biletów:
 
 - Szukaj TGS-REQ, które nie mają odpowiadającego AS-REQ.
-- Szukaj TGT z absurdalnymi wartościami, takimi jak domyślna 10-letnia żywotność Mimikatz.
+- Szukaj TGT, które mają absurdalne wartości, takie jak domyślna 10-letnia żywotność Mimikatz.
 
 **Diamentowy bilet** jest tworzony przez **modyfikację pól legalnego TGT, które zostało wydane przez DC**. Osiąga się to poprzez **zażądanie** **TGT**, **odszyfrowanie** go hashem krbtgt domeny, **zmodyfikowanie** pożądanych pól biletu, a następnie **ponowne zaszyfrowanie** go. To **przezwycięża dwa wcześniej wspomniane niedociągnięcia** złotego biletu, ponieważ:
 

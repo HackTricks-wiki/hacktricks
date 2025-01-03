@@ -9,7 +9,7 @@ ASREPRoast to atak bezpieczeństwa, który wykorzystuje użytkowników, którzy 
 Główne wymagania dla tego ataku to:
 
 - **Brak wstępnej autoryzacji Kerberos**: Użytkownicy docelowi nie mogą mieć włączonej tej funkcji zabezpieczeń.
-- **Połączenie z Kontrolerem Domeny (DC)**: Atakujący muszą mieć dostęp do DC, aby wysyłać żądania i odbierać zaszyfrowane wiadomości.
+- **Połączenie z Kontrolerem Domeny (DC)**: Atakujący potrzebują dostępu do DC, aby wysyłać żądania i odbierać zaszyfrowane wiadomości.
 - **Opcjonalne konto domenowe**: Posiadanie konta domenowego pozwala atakującym na bardziej efektywne identyfikowanie podatnych użytkowników za pomocą zapytań LDAP. Bez takiego konta atakujący muszą zgadywać nazwy użytkowników.
 
 #### Enumerowanie podatnych użytkowników (potrzebne dane uwierzytelniające domeny)

@@ -35,7 +35,7 @@ AD CS uznaje certyfikaty CA w lesie AD poprzez wyznaczone kontenery, z których 
 1. Proces żądania rozpoczyna się od znalezienia przez klientów Enterprise CA.
 2. Tworzony jest CSR, zawierający klucz publiczny i inne szczegóły, po wygenerowaniu pary kluczy publiczno-prywatnych.
 3. CA ocenia CSR w odniesieniu do dostępnych szablonów certyfikatów, wydając certyfikat na podstawie uprawnień szablonu.
-4. Po zatwierdzeniu, CA podpisuje certyfikat swoim kluczem prywatnym i zwraca go do klienta.
+4. Po zatwierdzeniu, CA podpisuje certyfikat swoim kluczem prywatnym i zwraca go klientowi.
 
 ### Szablony certyfikatów
 
@@ -43,7 +43,7 @@ Zdefiniowane w AD, te szablony określają ustawienia i uprawnienia do wydawania
 
 ## Rejestracja certyfikatów
 
-Proces rejestracji certyfikatów inicjuje administrator, który **tworzy szablon certyfikatu**, który następnie jest **publikowany** przez Enterprise Certificate Authority (CA). Umożliwia to dostępność szablonu do rejestracji przez klientów, co osiąga się poprzez dodanie nazwy szablonu do pola `certificatetemplates` obiektu Active Directory.
+Proces rejestracji certyfikatów inicjuje administrator, który **tworzy szablon certyfikatu**, który następnie jest **publikowany** przez Enterprise Certificate Authority (CA). To sprawia, że szablon jest dostępny do rejestracji przez klientów, co osiąga się poprzez dodanie nazwy szablonu do pola `certificatetemplates` obiektu Active Directory.
 
 Aby klient mógł zażądać certyfikatu, muszą być przyznane **prawa rejestracji**. Prawa te są definiowane przez deskryptory zabezpieczeń na szablonie certyfikatu oraz samym Enterprise CA. Uprawnienia muszą być przyznane w obu lokalizacjach, aby żądanie mogło być skuteczne.
 
@@ -64,7 +64,7 @@ Prawa CA są określone w jego deskryptorze zabezpieczeń, dostępnym za pośred
 Mogą obowiązywać pewne kontrole, takie jak:
 
 - **Zatwierdzenie menedżera**: Umieszcza żądania w stanie oczekiwania do zatwierdzenia przez menedżera certyfikatów.
-- **Agenci rejestracji i autoryzowane podpisy**: Określają liczbę wymaganych podpisów na CSR oraz niezbędne identyfikatory polityki aplikacji OID.
+- **Agenci rejestracji i autoryzowane podpisy**: Określają liczbę wymaganych podpisów na CSR oraz niezbędne OID polityki aplikacji.
 
 ### Metody żądania certyfikatów
 
@@ -72,9 +72,9 @@ Certyfikaty można żądać za pośrednictwem:
 
 1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), używając interfejsów DCOM.
 2. **ICertPassage Remote Protocol** (MS-ICPR), przez potok nazwany lub TCP/IP.
-3. **interfejsu internetowego rejestracji certyfikatów**, z zainstalowaną rolą Web Enrollment Urzędu Certyfikacji.
+3. **Interfejsu internetowego rejestracji certyfikatów**, z zainstalowaną rolą Web Enrollment Urzędu Certyfikacji.
 4. **Usługi rejestracji certyfikatów** (CES), w połączeniu z usługą polityki rejestracji certyfikatów (CEP).
-5. **Usługi rejestracji urządzeń sieciowych** (NDES) dla urządzeń sieciowych, używając Protokół Prostej Rejestracji Certyfikatów (SCEP).
+5. **Usługi rejestracji urządzeń sieciowych** (NDES) dla urządzeń sieciowych, używając prostego protokołu rejestracji certyfikatów (SCEP).
 
 Użytkownicy systemu Windows mogą również żądać certyfikatów za pośrednictwem GUI (`certmgr.msc` lub `certlm.msc`) lub narzędzi wiersza poleceń (`certreq.exe` lub polecenia `Get-Certificate` PowerShell).
 ```powershell
@@ -87,7 +87,7 @@ Active Directory (AD) wspiera uwierzytelnianie za pomocą certyfikatów, główn
 
 ### Proces Uwierzytelniania Kerberos
 
-W procesie uwierzytelniania Kerberos, żądanie użytkownika o Ticket Granting Ticket (TGT) jest podpisywane za pomocą **klucza prywatnego** certyfikatu użytkownika. To żądanie przechodzi przez kilka walidacji przez kontroler domeny, w tym **ważność** certyfikatu, **ścieżkę** oraz **status unieważnienia**. Walidacje obejmują również weryfikację, że certyfikat pochodzi z zaufanego źródła oraz potwierdzenie obecności wystawcy w **magazynie certyfikatów NTAUTH**. Pomyślne walidacje skutkują wydaniem TGT. Obiekt **`NTAuthCertificates`** w AD, znajdujący się pod:
+W procesie uwierzytelniania Kerberos, żądanie użytkownika o Ticket Granting Ticket (TGT) jest podpisywane za pomocą **klucza prywatnego** certyfikatu użytkownika. To żądanie przechodzi przez kilka walidacji przez kontroler domeny, w tym **ważność**, **ścieżkę** i **status unieważnienia** certyfikatu. Walidacje obejmują również weryfikację, że certyfikat pochodzi z zaufanego źródła oraz potwierdzenie obecności wystawcy w **magazynie certyfikatów NTAUTH**. Pomyślne walidacje skutkują wydaniem TGT. Obiekt **`NTAuthCertificates`** w AD, znajdujący się pod:
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
@@ -99,7 +99,7 @@ Schannel ułatwia bezpieczne połączenia TLS/SSL, gdzie podczas handshake klien
 
 ### Enumeracja usług certyfikatów AD
 
-Usługi certyfikatów AD mogą być enumerowane za pomocą zapytań LDAP, ujawniając informacje o **Enterprise Certificate Authorities (CAs)** i ich konfiguracjach. Jest to dostępne dla każdego użytkownika uwierzytelnionego w domenie bez specjalnych uprawnień. Narzędzia takie jak **[Certify](https://github.com/GhostPack/Certify)** i **[Certipy](https://github.com/ly4k/Certipy)** są używane do enumeracji i oceny podatności w środowiskach AD CS.
+Usługi certyfikatów AD można enumerować za pomocą zapytań LDAP, ujawniając informacje o **Enterprise Certificate Authorities (CAs)** i ich konfiguracjach. Jest to dostępne dla każdego użytkownika uwierzytelnionego w domenie bez specjalnych uprawnień. Narzędzia takie jak **[Certify](https://github.com/GhostPack/Certify)** i **[Certipy](https://github.com/ly4k/Certipy)** są używane do enumeracji i oceny podatności w środowiskach AD CS.
 
 Polecenia do korzystania z tych narzędzi obejmują:
 ```bash

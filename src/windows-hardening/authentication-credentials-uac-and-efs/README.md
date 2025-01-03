@@ -4,10 +4,10 @@
 
 ## Polityka AppLocker
 
-Lista dozwolonych aplikacji to lista zatwierdzonych aplikacji lub plików wykonywalnych, które mogą być obecne i uruchamiane w systemie. Celem jest ochrona środowiska przed szkodliwym oprogramowaniem i niezatwierdzonym oprogramowaniem, które nie odpowiada specyficznym potrzebom biznesowym organizacji.
+Lista dozwolonych aplikacji to lista zatwierdzonych aplikacji lub plików wykonywalnych, które mogą być obecne i uruchamiane w systemie. Celem jest ochrona środowiska przed szkodliwym złośliwym oprogramowaniem i niezatwierdzonym oprogramowaniem, które nie odpowiada specyficznym potrzebom biznesowym organizacji.
 
 [AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) to **rozwiązanie do białej listy aplikacji** firmy Microsoft, które daje administratorom systemu kontrolę nad **tym, które aplikacje i pliki mogą uruchamiać użytkownicy**. Zapewnia **szczegółową kontrolę** nad plikami wykonywalnymi, skryptami, plikami instalacyjnymi Windows, DLL, aplikacjami pakietowymi i instalatorami aplikacji pakietowych.\
-Powszechną praktyką w organizacjach jest **blokowanie cmd.exe i PowerShell.exe** oraz zapisu do niektórych katalogów, **ale to wszystko można obejść**.
+Powszechną praktyką w organizacjach jest **blokowanie cmd.exe i PowerShell.exe** oraz zapisu do niektórych katalogów, **ale wszystko to można obejść**.
 
 ### Sprawdzenie
 
@@ -26,7 +26,7 @@ Ta ścieżka rejestru zawiera konfiguracje i polityki stosowane przez AppLocker,
 
 ### Ominięcie
 
-- Użyteczne **Foldery do zapisu** do ominięcia polityki AppLocker: Jeśli AppLocker zezwala na wykonywanie czegokolwiek w `C:\Windows\System32` lub `C:\Windows`, istnieją **foldery do zapisu**, które możesz wykorzystać do **ominięcia tego**.
+- Użyteczne **zapisywalne foldery** do ominięcia polityki AppLocker: Jeśli AppLocker zezwala na wykonywanie czegokolwiek w `C:\Windows\System32` lub `C:\Windows`, istnieją **zapisywalne foldery**, które możesz wykorzystać do **ominięcia tego**.
 ```
 C:\Windows\System32\Microsoft\Crypto\RSA\MachineKeys
 C:\Windows\System32\spool\drivers\color
@@ -37,7 +37,7 @@ C:\windows\tracing
 - **Źle napisane zasady mogą być również obejście**
 - Na przykład, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, możesz stworzyć **folder o nazwie `allowed`** gdziekolwiek, a będzie on dozwolony.
 - Organizacje często koncentrują się na **blokowaniu pliku wykonywalnego `%System32%\WindowsPowerShell\v1.0\powershell.exe`**, ale zapominają o **innych** [**lokacjach plików wykonywalnych PowerShell**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) takich jak `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` lub `PowerShell_ISE.exe`.
-- **Wymuszanie DLL rzadko włączone** z powodu dodatkowego obciążenia, jakie może nałożyć na system, oraz ilości testów wymaganych do zapewnienia, że nic się nie zepsuje. Dlatego użycie **DLL jako tylnej furtki pomoże w obejściu AppLocker**.
+- **Wymuszanie DLL rzadko włączane** z powodu dodatkowego obciążenia, jakie może nałożyć na system, oraz ilości testów wymaganych do zapewnienia, że nic się nie zepsuje. Dlatego użycie **DLL jako tylnej furtki pomoże w obejściu AppLocker**.
 - Możesz użyć [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) lub [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick), aby **wykonać kod Powershell** w dowolnym procesie i obejść AppLocker. Więcej informacji znajdziesz tutaj: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
 ## Przechowywanie poświadczeń
@@ -50,7 +50,7 @@ Lokalne poświadczenia znajdują się w tym pliku, hasła są haszowane.
 
 **Poświadczenia** (haszowane) są **zapisywane** w **pamięci** tego podsystemu z powodów związanych z jednolitym logowaniem.\
 **LSA** zarządza lokalną **polityką zabezpieczeń** (polityka haseł, uprawnienia użytkowników...), **uwierzytelnianiem**, **tokenami dostępu**...\
-LSA będzie tą, która **sprawdzi** podane poświadczenia w pliku **SAM** (dla lokalnego logowania) i **rozmawia** z **kontrolerem domeny**, aby uwierzytelnić użytkownika domeny.
+LSA będzie tą, która **sprawdzi** podane poświadczenia w pliku **SAM** (dla lokalnego logowania) i **porozmawia** z **kontrolerem domeny**, aby uwierzytelnić użytkownika domeny.
 
 **Poświadczenia** są **zapisywane** wewnątrz **procesu LSASS**: bilety Kerberos, hasze NT i LM, łatwo odszyfrowane hasła.
 
@@ -60,7 +60,7 @@ LSA może zapisać na dysku niektóre poświadczenia:
 
 - Hasło konta komputera w Active Directory (niedostępny kontroler domeny).
 - Hasła kont usług Windows
-- Hasła do zadań zaplanowanych
+- Hasła dla zadań zaplanowanych
 - Więcej (hasło aplikacji IIS...)
 
 ### NTDS.dit
@@ -221,7 +221,7 @@ Więcej można znaleźć [tutaj](https://blog.netspi.com/15-ways-to-bypass-the-p
 
 Jest to API, które może być używane do uwierzytelniania użytkowników.
 
-SSPI będzie odpowiedzialne za znalezienie odpowiedniego protokołu dla dwóch maszyn, które chcą się komunikować. Preferowaną metodą w tym przypadku jest Kerberos. Następnie SSPI negocjuje, który protokół uwierzytelniania będzie używany, te protokoły uwierzytelniania nazywane są dostawcami wsparcia bezpieczeństwa (SSP), znajdują się w każdej maszynie z systemem Windows w postaci DLL, a obie maszyny muszą obsługiwać ten sam, aby mogły się komunikować.
+SSPI będzie odpowiedzialne za znalezienie odpowiedniego protokołu dla dwóch maszyn, które chcą się komunikować. Preferowaną metodą jest Kerberos. Następnie SSPI negocjuje, który protokół uwierzytelniania będzie używany, te protokoły uwierzytelniania nazywane są dostawcami wsparcia bezpieczeństwa (SSP), znajdują się w każdej maszynie z systemem Windows w postaci DLL, a obie maszyny muszą obsługiwać ten sam, aby mogły się komunikować.
 
 ### Główne SSP
 

@@ -9,7 +9,7 @@ Znaleziono dwa klucze rejestru, które były zapisywalne przez bieżącego użyt
 - **`HKLM\SYSTEM\CurrentControlSet\Services\Dnscache`**
 - **`HKLM\SYSTEM\CurrentControlSet\Services\RpcEptMapper`**
 
-Zasugerowano sprawdzenie uprawnień usługi **RpcEptMapper** za pomocą **regedit GUI**, szczególnie zakładki **Efektywne uprawnienia** w oknie **Zaawansowane ustawienia zabezpieczeń**. Takie podejście umożliwia ocenę przyznanych uprawnień dla konkretnych użytkowników lub grup bez potrzeby badania każdego wpisu kontroli dostępu (ACE) z osobna.
+Zasugerowano sprawdzenie uprawnień usługi **RpcEptMapper** za pomocą **regedit GUI**, a konkretnie zakładki **Efektywne uprawnienia** w oknie **Zaawansowane ustawienia zabezpieczeń**. Takie podejście umożliwia ocenę przyznanych uprawnień dla konkretnych użytkowników lub grup bez potrzeby badania każdego wpisu kontroli dostępu (ACE) z osobna.
 
 Zrzut ekranu pokazał uprawnienia przypisane użytkownikowi o niskich uprawnieniach, wśród których wyróżniało się uprawnienie **Utwórz podklucz**. To uprawnienie, znane również jako **AppendData/AddSubdirectory**, odpowiada ustaleniom skryptu.
 
@@ -19,7 +19,7 @@ Pomimo tych ograniczeń, zidentyfikowano potencjał do eskalacji uprawnień popr
 
 Skonsultowano dokumentację na temat podklucza **Performance** i jego wykorzystania do monitorowania wydajności, co doprowadziło do opracowania dowodu koncepcji DLL. Ta DLL, demonstrująca implementację funkcji **OpenPerfData**, **CollectPerfData** i **ClosePerfData**, została przetestowana za pomocą **rundll32**, potwierdzając jej operacyjną skuteczność.
 
-Celem było zmuszenie **usługi RPC Endpoint Mapper** do załadowania stworzonych DLL do wydajności. Obserwacje ujawniły, że wykonywanie zapytań klas WMI związanych z danymi wydajnościowymi za pomocą PowerShell skutkowało utworzeniem pliku dziennika, co umożliwiło wykonanie dowolnego kodu w kontekście **LOCAL SYSTEM**, przyznając tym samym podwyższone uprawnienia.
+Celem było zmuszenie **usługi RPC Endpoint Mapper** do załadowania stworzonych DLL wydajności. Obserwacje ujawniły, że wykonywanie zapytań klas WMI związanych z danymi wydajności za pomocą PowerShell skutkowało utworzeniem pliku dziennika, co umożliwiło wykonanie dowolnego kodu w kontekście **LOCAL SYSTEM**, przyznając tym samym podwyższone uprawnienia.
 
 Podkreślono trwałość i potencjalne implikacje tej luki, zwracając uwagę na jej znaczenie dla strategii poeksploatacyjnych, ruchu lateralnego oraz unikania systemów antywirusowych/EDR.
 

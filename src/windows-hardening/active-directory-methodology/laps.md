@@ -5,7 +5,7 @@
 
 ## Podstawowe informacje
 
-Local Administrator Password Solution (LAPS) to narzędzie używane do zarządzania systemem, w którym **hasła administratorów**, które są **unikalne, losowe i często zmieniane**, są stosowane w komputerach dołączonych do domeny. Te hasła są bezpiecznie przechowywane w Active Directory i są dostępne tylko dla użytkowników, którzy otrzymali pozwolenie za pośrednictwem list kontroli dostępu (ACL). Bezpieczeństwo transmisji haseł z klienta do serwera jest zapewnione dzięki użyciu **Kerberos wersja 5** i **Advanced Encryption Standard (AES)**.
+Local Administrator Password Solution (LAPS) to narzędzie używane do zarządzania systemem, w którym **hasła administratorów**, które są **unikalne, losowe i często zmieniane**, są stosowane do komputerów dołączonych do domeny. Te hasła są bezpiecznie przechowywane w Active Directory i są dostępne tylko dla użytkowników, którzy otrzymali pozwolenie za pośrednictwem list kontroli dostępu (ACL). Bezpieczeństwo transmisji haseł z klienta do serwera jest zapewnione dzięki użyciu **Kerberos wersja 5** i **Advanced Encryption Standard (AES)**.
 
 W obiektach komputerowych domeny wdrożenie LAPS skutkuje dodaniem dwóch nowych atrybutów: **`ms-mcs-AdmPwd`** i **`ms-mcs-AdmPwdExpirationTime`**. Atrybuty te przechowują **hasło administratora w postaci jawnej** oraz **czas jego wygaśnięcia**, odpowiednio.
 
@@ -103,7 +103,7 @@ Password: 2Z@Ae)7!{9#Cq
 
 ### **Data wygaśnięcia**
 
-Po uzyskaniu uprawnień administratora, możliwe jest **uzyskanie haseł** i **zapobieganie** aktualizacji **hasła** maszyny poprzez **ustawienie daty wygaśnięcia w przyszłość**.
+Po uzyskaniu uprawnień administratora, możliwe jest **uzyskanie haseł** i **zapobieżenie** aktualizacji **hasła** maszyny poprzez **ustawienie daty wygaśnięcia w przyszłość**.
 ```powershell
 # Get expiration time
 Get-DomainObject -Identity computer-21 -Properties ms-mcs-admpwdexpirationtime
@@ -117,7 +117,7 @@ Set-DomainObject -Identity wkstn-2 -Set @{"ms-mcs-admpwdexpirationtime"="2326099
 
 ### Backdoor
 
-Oryginalny kod źródłowy dla LAPS można znaleźć [tutaj](https://github.com/GreyCorbel/admpwd), dlatego możliwe jest umieszczenie backdoora w kodzie (w metodzie `Get-AdmPwdPassword` w `Main/AdmPwd.PS/Main.cs`, na przykład), który w jakiś sposób **wyeksfiltruje nowe hasła lub przechowa je gdzieś**.
+Oryginalny kod źródłowy dla LAPS można znaleźć [tutaj](https://github.com/GreyCorbel/admpwd), dlatego możliwe jest umieszczenie backdoora w kodzie (w metodzie `Get-AdmPwdPassword` w `Main/AdmPwd.PS/Main.cs`, na przykład), który w jakiś sposób **wyeksfiltruje nowe hasła lub przechowa je gdzie indziej**.
 
 Następnie wystarczy skompilować nowy `AdmPwd.PS.dll` i przesłać go na maszynę do `C:\Tools\admpwd\Main\AdmPwd.PS\bin\Debug\AdmPwd.PS.dll` (i zmienić czas modyfikacji).
 

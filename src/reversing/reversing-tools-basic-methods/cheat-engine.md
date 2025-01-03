@@ -10,7 +10,7 @@ Po pobraniu i uruchomieniu programu, **zostaniesz** **przedstawiony** z **samouc
 ![](<../../images/image (762).png>)
 
 To narzędzie jest bardzo przydatne do znalezienia **gdzie jakaś wartość** (zwykle liczba) **jest przechowywana w pamięci** programu.\
-**Zwykle liczby** są przechowywane w formacie **4bytes**, ale możesz je również znaleźć w formatach **double** lub **float**, lub możesz chcieć szukać czegoś **innego niż liczba**. Z tego powodu musisz upewnić się, że **wybierasz** to, co chcesz **wyszukiwać**:
+**Zwykle liczby** są przechowywane w formacie **4bytes**, ale możesz je również znaleźć w formatach **double** lub **float**, lub możesz chcieć szukać czegoś **innego niż liczba**. Z tego powodu musisz upewnić się, że **wybierasz** to, co chcesz **wyszukać**:
 
 ![](<../../images/image (324).png>)
 
@@ -40,7 +40,7 @@ A na koniec **zaznaczając pole**, aby wprowadzić modyfikację w pamięci:
 
 **Zmiana** w **pamięci** zostanie natychmiast **zastosowana** (zauważ, że dopóki gra nie użyje tej wartości ponownie, wartość **nie zostanie zaktualizowana w grze**).
 
-## Wyszukiwanie wartości
+## Szukanie wartości
 
 Załóżmy, że istnieje ważna wartość (jak życie twojego użytkownika), którą chcesz poprawić, i szukasz tej wartości w pamięci.
 
@@ -50,7 +50,7 @@ Zakładając, że szukasz wartości 100, **przeprowadzasz skanowanie** w poszuki
 
 ![](<../../images/image (108).png>)
 
-Następnie robisz coś, aby **wartość się zmieniła**, zatrzymujesz grę i **przeprowadzasz** **następne skanowanie**:
+Następnie robisz coś, aby **wartość się zmieniła**, a następnie **zatrzymujesz** grę i **przeprowadzasz** **następne skanowanie**:
 
 ![](<../../images/image (684).png>)
 
@@ -61,15 +61,15 @@ Cheat Engine będzie szukać **wartości**, które **zmieniły się z 100 na now
 
 W scenariuszu, w którym **nie znasz wartości**, ale wiesz **jak ją zmienić** (a nawet wartość zmiany), możesz szukać swojej liczby.
 
-Zacznij od przeprowadzenia skanowania typu "**Nieznana wartość początkowa**":
+Zacznij od przeprowadzenia skanowania typu "**Nieznana początkowa wartość**":
 
 ![](<../../images/image (890).png>)
 
-Następnie zmień wartość, wskaż **jak** **wartość** **się zmieniła** (w moim przypadku zmniejszyła się o 1) i przeprowadź **następne skanowanie**:
+Następnie, zmień wartość, wskaż **jak** **wartość** **się zmieniła** (w moim przypadku zmniejszyła się o 1) i przeprowadź **następne skanowanie**:
 
 ![](<../../images/image (371).png>)
 
-Zostaniesz przedstawiony **wszystkimi wartościami, które zostały zmodyfikowane w wybrany sposób**:
+Zostaną przedstawione **wszystkie wartości, które zostały zmodyfikowane w wybrany sposób**:
 
 ![](<../../images/image (569).png>)
 
@@ -117,7 +117,7 @@ Kliknij na "**Dodaj adres ręcznie**":
 
 ![](<../../images/image (990).png>)
 
-Teraz kliknij na pole wyboru "Wskaźnik" i dodaj znaleziony adres w polu tekstowym (w tym scenariuszu, znaleziony adres na poprzednim obrazie to "Tutorial-i386.exe"+2426B0):
+Teraz zaznacz pole "Wskaźnik" i dodaj znaleziony adres w polu tekstowym (w tym scenariuszu, znaleziony adres na poprzednim obrazie to "Tutorial-i386.exe"+2426B0):
 
 ![](<../../images/image (392).png>)
 
@@ -138,7 +138,7 @@ Wyobraź sobie, że znalazłeś adres, który odejmuje 1 od życia twojego gracz
 ![](<../../images/image (203).png>)
 
 Kliknij na Pokaż disassembler, aby uzyskać **kod disassembly**.\
-Następnie kliknij **CTRL+a**, aby wywołać okno Auto assemble i wybierz _**Template --> Code Injection**_
+Następnie kliknij **CTRL+a**, aby wywołać okno Auto assemble i wybierz _**Template --> Wstrzykiwanie kodu**_
 
 ![](<../../images/image (902).png>)
 

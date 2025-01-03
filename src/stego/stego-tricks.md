@@ -20,7 +20,7 @@ foremost -i file # Extracts data
 ```
 ### **Exiftool**
 
-Pomaga w przeglądaniu metadanych plików, dostępne [tutaj](https://www.sno.phy.queensu.ca/~phil/exiftool/).
+Pomaga w przeglądaniu metadanych plików, dostępne [here](https://www.sno.phy.queensu.ca/~phil/exiftool/).
 ```bash
 exiftool file # Shows the metadata
 ```
@@ -74,7 +74,7 @@ Aby spróbować naprawić uszkodzony obraz, dodanie komentarza w metadanych moż
 ```
 ### **Steghide do ukrywania danych**
 
-Steghide umożliwia ukrywanie danych w plikach `JPEG, BMP, WAV i AU`, zdolnych do osadzania i wydobywania zaszyfrowanych danych. Instalacja jest prosta za pomocą `apt`, a [kod źródłowy jest dostępny na GitHubie](https://github.com/StefanoDeVuono/steghide).
+Steghide ułatwia ukrywanie danych w plikach `JPEG, BMP, WAV i AU`, zdolny do osadzania i wydobywania zaszyfrowanych danych. Instalacja jest prosta za pomocą `apt`, a [kod źródłowy jest dostępny na GitHubie](https://github.com/StefanoDeVuono/steghide).
 
 **Polecenia:**
 
@@ -125,7 +125,7 @@ pngcheck stego.png
 ```
 ### **Dodatkowe narzędzia do analizy obrazów**
 
-Aby uzyskać dalsze informacje, rozważ odwiedzenie:
+Aby dalej eksplorować, rozważ odwiedzenie:
 
 - [Magic Eye Solver](http://magiceye.ecksdee.co.uk/)
 - [Image Error Level Analysis](https://29a.ch/sandbox/2012/imageerrorlevelanalysis/)
@@ -161,11 +161,11 @@ python3 WavSteg.py -r -b 2 -s soundfile -o outputfile
 ```
 ### **Deepsound**
 
-Deepsound umożliwia szyfrowanie i wykrywanie informacji w plikach dźwiękowych za pomocą AES-256. Można go pobrać z [oficjalnej strony](http://jpinsoft.net/deepsound/download.aspx).
+Deepsound pozwala na szyfrowanie i wykrywanie informacji w plikach dźwiękowych za pomocą AES-256. Można go pobrać z [oficjalnej strony](http://jpinsoft.net/deepsound/download.aspx).
 
 ### **Sonic Visualizer**
 
-Niezastąpione narzędzie do wizualnej i analitycznej inspekcji plików audio, Sonic Visualizer może ujawniać ukryte elementy niewykrywalne innymi metodami. Odwiedź [oficjalną stronę](https://www.sonicvisualiser.org/), aby dowiedzieć się więcej.
+Niezastąpione narzędzie do wizualnej i analitycznej inspekcji plików audio, Sonic Visualizer może ujawniać ukryte elementy niewykrywalne innymi metodami. Odwiedź [oficjalną stronę](https://www.sonicvisualiser.org/), aby uzyskać więcej informacji.
 
 ### **DTMF Tones - Dial Tones**
 

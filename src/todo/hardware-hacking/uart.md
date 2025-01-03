@@ -22,11 +22,11 @@ Narzędzia sprzętowe do komunikacji z UART:
 
 UART ma 4 porty: **TX**(Transmit), **RX**(Receive), **Vcc**(Voltage) i **GND**(Ground). Możesz być w stanie znaleźć 4 porty z literami **`TX`** i **`RX`** **napisanymi** na PCB. Ale jeśli nie ma żadnych wskazówek, możesz potrzebować spróbować znaleźć je samodzielnie, używając **multimetru** lub **analizatora logicznego**.
 
-Z **multimetrem** i urządzeniem wyłączonym:
+Z użyciem **multimetru** i urządzenia wyłączonego:
 
 - Aby zidentyfikować pin **GND**, użyj trybu **Testu Ciągłości**, umieść czarny przewód w ziemi i testuj czerwonym, aż usłyszysz dźwięk z multimetru. Na PCB można znaleźć kilka pinów GND, więc możesz znaleźć lub nie ten, który należy do UART.
-- Aby zidentyfikować port **VCC**, ustaw tryb **DC voltage** i ustaw go na 20 V. Czarny przewód na ziemi, a czerwony na pinie. Włącz urządzenie. Jeśli multimetr mierzy stałe napięcie 3.3 V lub 5 V, znalazłeś pin Vcc. Jeśli otrzymasz inne napięcia, spróbuj z innymi portami.
-- Aby zidentyfikować port **TX**, ustaw tryb **DC voltage** na 20 V, czarny przewód na ziemi, a czerwony na pinie, i włącz urządzenie. Jeśli znajdziesz, że napięcie waha się przez kilka sekund, a następnie stabilizuje się na wartości Vcc, najprawdopodobniej znalazłeś port TX. Dzieje się tak, ponieważ podczas włączania wysyła pewne dane debugowania.
+- Aby zidentyfikować port **VCC**, ustaw tryb **DC voltage** i ustaw go na 20 V. Czarny przewód na ziemi, a czerwony przewód na pinie. Włącz urządzenie. Jeśli multimetr mierzy stałe napięcie wynoszące 3,3 V lub 5 V, znalazłeś pin Vcc. Jeśli otrzymasz inne napięcia, spróbuj ponownie z innymi portami.
+- Aby zidentyfikować port **TX**, ustaw tryb **DC voltage** na 20 V, czarny przewód na ziemi, a czerwony przewód na pinie, a następnie włącz urządzenie. Jeśli zauważysz, że napięcie waha się przez kilka sekund, a następnie stabilizuje się na wartości Vcc, najprawdopodobniej znalazłeś port TX. Dzieje się tak, ponieważ podczas włączania wysyła pewne dane debugowania.
 - Port **RX** będzie najbliższy pozostałym 3, ma najmniejsze wahania napięcia i najniższą ogólną wartość ze wszystkich pinów UART.
 
 Możesz pomylić porty TX i RX i nic się nie stanie, ale jeśli pomylisz porty GND i VCC, możesz uszkodzić obwód.
@@ -146,7 +146,7 @@ waiting a few secs to repeat....
 ```
 ## Zrzut oprogramowania układowego za pomocą konsoli UART
 
-Konsola UART zapewnia doskonały sposób na pracę z podstawowym oprogramowaniem układowym w środowisku uruchomieniowym. Jednak gdy dostęp do konsoli UART jest tylko do odczytu, może to wprowadzać wiele ograniczeń. W wielu urządzeniach wbudowanych oprogramowanie układowe jest przechowywane w EEPROM i wykonywane w procesorach, które mają pamięć ulotną. Dlatego oprogramowanie układowe jest utrzymywane w trybie tylko do odczytu, ponieważ oryginalne oprogramowanie układowe podczas produkcji znajduje się w samym EEPROM, a wszelkie nowe pliki mogłyby zostać utracone z powodu pamięci ulotnej. Dlatego zrzut oprogramowania układowego jest cennym wysiłkiem podczas pracy z wbudowanym oprogramowaniem układowym.
+Konsola UART zapewnia doskonały sposób na pracę z podstawowym oprogramowaniem układowym w środowisku uruchomieniowym. Jednak gdy dostęp do konsoli UART jest tylko do odczytu, może to wprowadzać wiele ograniczeń. W wielu urządzeniach wbudowanych oprogramowanie układowe jest przechowywane w EEPROM i wykonywane w procesorach, które mają pamięć ulotną. Dlatego oprogramowanie układowe jest utrzymywane w trybie tylko do odczytu, ponieważ oryginalne oprogramowanie układowe podczas produkcji znajduje się wewnątrz EEPROM, a wszelkie nowe pliki mogłyby zostać utracone z powodu pamięci ulotnej. Dlatego zrzut oprogramowania układowego jest cennym wysiłkiem podczas pracy z wbudowanym oprogramowaniem układowym.
 
 Istnieje wiele sposobów, aby to zrobić, a sekcja SPI obejmuje metody ekstrakcji oprogramowania układowego bezpośrednio z EEPROM za pomocą różnych urządzeń. Zaleca się jednak najpierw spróbować zrzutu oprogramowania układowego za pomocą UART, ponieważ zrzut oprogramowania układowego za pomocą urządzeń fizycznych i interakcji zewnętrznych może być ryzykowny.
 
@@ -162,12 +162,12 @@ md
 ```
 które oznacza "zrzut pamięci". To zrzuci pamięć (zawartość EEPROM) na ekran. Zaleca się zapisanie wyjścia z konsoli szeregowej przed rozpoczęciem procedury, aby uchwycić zrzut pamięci.
 
-Na koniec po prostu usuń wszystkie niepotrzebne dane z pliku dziennika i zapisz plik jako `filename.rom`, a następnie użyj binwalk, aby wyodrębnić zawartość:
+Na koniec wystarczy usunąć wszystkie niepotrzebne dane z pliku dziennika i zapisać plik jako `filename.rom`, a następnie użyć binwalk do wyodrębnienia zawartości:
 ```
 binwalk -e <filename.rom>
 ```
 To będzie lista możliwych zawartości z EEPROM zgodnie z podpisami znalezionymi w pliku hex.
 
-Należy jednak zauważyć, że nie zawsze uboot jest odblokowany, nawet jeśli jest używany. Jeśli klawisz Enter nie działa, sprawdź inne klawisze, takie jak klawisz Spacji itp. Jeśli bootloader jest zablokowany i nie zostanie przerwany, ta metoda nie zadziała. Aby sprawdzić, czy uboot jest bootloaderem dla urządzenia, sprawdź wyjście na konsoli UART podczas uruchamiania urządzenia. Może wspominać o uboot podczas uruchamiania.
+Należy jednak zauważyć, że nie zawsze jest tak, że uboot jest odblokowany, nawet jeśli jest używany. Jeśli klawisz Enter nie działa, sprawdź inne klawisze, takie jak klawisz Spacji itp. Jeśli bootloader jest zablokowany i nie zostanie przerwany, ta metoda nie zadziała. Aby sprawdzić, czy uboot jest bootloaderem dla urządzenia, sprawdź wyjście na konsoli UART podczas uruchamiania urządzenia. Może wspominać o uboot podczas uruchamiania.
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -3,11 +3,11 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## **MSSQL Enumeracja / Odkrywanie**
+## **MSSQL Enumeration / Discovery**
 
 ### Python
 
-Narzędzie [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) opiera się na impacket i pozwala również na uwierzytelnianie za pomocą biletów kerberos oraz atakowanie przez łańcuchy linków.
+Narzędzie [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) opiera się na impacket i umożliwia również uwierzytelnianie za pomocą biletów kerberos oraz atakowanie przez łańcuchy linków.
 
 <figure><img src="https://raw.githubusercontent.com/ScorpionesLabs/MSSqlPwner/main/assets/interractive.png"></figure>
 ```shell
@@ -223,7 +223,7 @@ EXEC sp_linkedservers;
 
 #### Wykonaj zapytania w zaufanym linku
 
-Wykonaj zapytania przez link (przykład: znajdź więcej linków w nowej dostępnej instancji):
+Wykonaj zapytania przez link (przykład: znajdź więcej linków w nowo dostępnym instancji):
 ```sql
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```

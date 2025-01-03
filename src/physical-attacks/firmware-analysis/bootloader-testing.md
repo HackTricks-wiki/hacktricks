@@ -1,14 +1,14 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-Zaleca się następujące kroki w celu modyfikacji konfiguracji uruchamiania urządzenia i bootloaderów, takich jak U-boot:
+Zalecane są następujące kroki w celu modyfikacji konfiguracji uruchamiania urządzenia i bootloaderów, takich jak U-boot:
 
 1. **Dostęp do powłoki interpretera bootloadera**:
 
-- Podczas uruchamiania naciśnij "0", spację lub inne zidentyfikowane "magic codes", aby uzyskać dostęp do powłoki interpretera bootloadera.
+- Podczas uruchamiania naciśnij "0", spację lub inne zidentyfikowane "magiczne kody", aby uzyskać dostęp do powłoki interpretera bootloadera.
 
 2. **Modyfikacja argumentów uruchamiania**:
 
-- Wykonaj następujące polecenia, aby dodać '`init=/bin/sh`' do argumentów uruchamiania, co umożliwi wykonanie polecenia powłoki:
+- Wykonaj następujące polecenia, aby dodać '`init=/bin/sh`' do argumentów uruchamiania, co pozwoli na wykonanie polecenia powłoki:
 %%%
 #printenv
 #setenv bootargs=console=ttyS0,115200 mem=63M root=/dev/mtdblock3 mtdparts=sflash:<partitiionInfo> rootfstype=<fstype> hasEeprom=0 5srst=0 init=/bin/sh
@@ -34,7 +34,7 @@ Zaleca się następujące kroki w celu modyfikacji konfiguracji uruchamiania urz
 
 5. **Sprawdzenie funkcji debugowania**:
 
-- Zweryfikuj, czy funkcje debugowania, takie jak szczegółowe logowanie, ładowanie dowolnych rdzeni lub uruchamianie z niezaufanych źródeł, są włączone.
+- Zweryfikuj, czy funkcje debugowania, takie jak szczegółowe logowanie, ładowanie dowolnych rdzeni lub uruchamianie z nieufnych źródeł, są włączone.
 
 6. **Ostrożność przy zakłóceniu sprzętowym**:
 

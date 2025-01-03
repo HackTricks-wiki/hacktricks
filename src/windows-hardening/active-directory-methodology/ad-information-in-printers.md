@@ -1,11 +1,11 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 W Internecie znajduje się kilka blogów, które **podkreślają niebezpieczeństwa związane z pozostawianiem drukarek skonfigurowanych z LDAP z domyślnymi/słabymi** danymi logowania.\
-Dzieje się tak, ponieważ atakujący może **oszukać drukarkę, aby uwierzytelniła się w fałszywym serwerze LDAP** (zazwyczaj `nc -vv -l -p 444` wystarczy) i przechwycić **dane logowania drukarki w postaci czystego tekstu**.
+Dzieje się tak, ponieważ atakujący może **oszukać drukarkę, aby uwierzytelniła się w fałszywym serwerze LDAP** (zwykle `nc -vv -l -p 444` wystarczy) i przechwycić **dane logowania drukarki w postaci czystego tekstu**.
 
 Ponadto, wiele drukarek zawiera **dzienniki z nazwami użytkowników** lub może nawet być w stanie **pobierać wszystkie nazwy użytkowników** z kontrolera domeny.
 
-Wszystkie te **wrażliwe informacje** oraz powszechna **niedostateczna ochrona** sprawiają, że drukarki są bardzo interesujące dla atakujących.
+Wszystkie te **wrażliwe informacje** oraz powszechny **brak zabezpieczeń** sprawiają, że drukarki są bardzo interesujące dla atakujących.
 
 Kilka blogów na ten temat:
 

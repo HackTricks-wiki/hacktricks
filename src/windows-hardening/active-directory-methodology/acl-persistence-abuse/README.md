@@ -112,7 +112,7 @@ Atak DCSync wykorzystuje specyficzne uprawnienia replikacji w domenie, aby naśl
 
 ### Delegacja GPO
 
-Delegowany dostęp do zarządzania obiektami zasad grupy (GPO) może stwarzać znaczące ryzyko bezpieczeństwa. Na przykład, jeśli użytkownik taki jak `offense\spotless` ma delegowane prawa do zarządzania GPO, może mieć uprawnienia takie jak **WriteProperty**, **WriteDacl** i **WriteOwner**. Te uprawnienia mogą być nadużywane w celach złośliwych, co można zidentyfikować za pomocą PowerView: `bash Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
+Delegowane uprawnienia do zarządzania obiektami zasad grupy (GPO) mogą stwarzać znaczące ryzyko bezpieczeństwa. Na przykład, jeśli użytkownik taki jak `offense\spotless` ma delegowane prawa do zarządzania GPO, może mieć uprawnienia takie jak **WriteProperty**, **WriteDacl** i **WriteOwner**. Te uprawnienia mogą być nadużywane w celach złośliwych, co można zidentyfikować za pomocą PowerView: `bash Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
 
 ### Wyliczanie uprawnień GPO
 
@@ -126,7 +126,7 @@ Aby zidentyfikować źle skonfigurowane GPO, można połączyć cmdlety PowerSpl
 
 ### Nadużycie GPO - New-GPOImmediateTask
 
-Źle skonfigurowane GPO mogą być wykorzystywane do wykonywania kodu, na przykład poprzez utworzenie natychmiastowego zadania zaplanowanego. Można to zrobić, aby dodać użytkownika do lokalnej grupy administratorów na dotkniętych maszynach, znacznie podnosząc uprawnienia:
+Źle skonfigurowane GPO mogą być wykorzystywane do wykonywania kodu, na przykład poprzez utworzenie natychmiastowego zaplanowanego zadania. Można to zrobić, aby dodać użytkownika do lokalnej grupy administratorów na dotkniętych maszynach, znacznie podnosząc uprawnienia:
 ```powershell
 New-GPOImmediateTask -TaskName evilTask -Command cmd -CommandArguments "/c net localgroup administrators spotless /add" -GPODisplayName "Misconfigured Policy" -Verbose -Force
 ```
@@ -155,13 +155,13 @@ Struktura zadania, jak pokazano w pliku konfiguracyjnym XML generowanym przez `N
 
 ### Użytkownicy i grupy
 
-GPO umożliwiają również manipulację członkostwem użytkowników i grup na docelowych systemach. Poprzez bezpośrednią edycję plików polityki Użytkowników i Grup, atakujący mogą dodawać użytkowników do uprzywilejowanych grup, takich jak lokalna grupa `administrators`. Jest to możliwe dzięki delegacji uprawnień zarządzania GPO, co pozwala na modyfikację plików polityki w celu dodania nowych użytkowników lub zmiany członkostwa w grupach.
+GPO umożliwiają również manipulację członkostwem użytkowników i grup na docelowych systemach. Poprzez bezpośrednią edycję plików polityki Użytkownicy i Grupy, atakujący mogą dodawać użytkowników do uprzywilejowanych grup, takich jak lokalna grupa `administrators`. Jest to możliwe dzięki delegacji uprawnień zarządzania GPO, co pozwala na modyfikację plików polityki w celu dodania nowych użytkowników lub zmiany członkostwa w grupach.
 
 Plik konfiguracyjny XML dla Użytkowników i Grup określa, jak te zmiany są wdrażane. Dodając wpisy do tego pliku, określonym użytkownikom można przyznać podwyższone uprawnienia w systemach objętych zmianami. Ta metoda oferuje bezpośrednie podejście do eskalacji uprawnień poprzez manipulację GPO.
 
 Ponadto, dodatkowe metody wykonywania kodu lub utrzymywania trwałości, takie jak wykorzystanie skryptów logowania/wylogowywania, modyfikacja kluczy rejestru dla autorunów, instalacja oprogramowania za pomocą plików .msi lub edytowanie konfiguracji usług, mogą być również rozważane. Te techniki oferują różne możliwości utrzymania dostępu i kontrolowania docelowych systemów poprzez nadużycie GPO.
 
-## Odniesienia
+## Odnośniki
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces)
 - [https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)

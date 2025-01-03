@@ -32,7 +32,7 @@ Bity są kodowane przez modulację szerokości impulsu. Szerokość przestrzeni 
 
 **3. Kodowanie fazowe**
 
-Jest również znane jako kodowanie Manchester. Wartość logiczna jest definiowana przez polaryzację przejścia między wybuchem impulsu a przestrzenią. "Przestrzeń do wybuchu impulsu" oznacza logikę "0", "wybuch impulsu do przestrzeni" oznacza logikę "1".
+Znane również jako kodowanie Manchester. Wartość logiczna jest definiowana przez polaryzację przejścia między wybuchem impulsu a przestrzenią. "Przestrzeń do wybuchu impulsu" oznacza logikę "0", "wybuch impulsu do przestrzeni" oznacza logikę "1".
 
 <figure><img src="../../images/image (634).png" alt=""><figcaption></figcaption></figure>
 
@@ -41,11 +41,11 @@ Jest również znane jako kodowanie Manchester. Wartość logiczna jest definiow
 > [!NOTE]
 > Istnieją protokoły IR, które **próbują stać się uniwersalne** dla kilku typów urządzeń. Najbardziej znane to RC5 i NEC. Niestety, najbardziej znane **nie oznacza najbardziej powszechne**. W moim otoczeniu spotkałem tylko dwa piloty NEC i żadnego RC5.
 >
-> Producenci uwielbiają używać swoich unikalnych protokołów IR, nawet w obrębie tej samej grupy urządzeń (na przykład, dekodery TV). Dlatego piloty z różnych firm, a czasem z różnych modeli tej samej firmy, nie są w stanie współpracować z innymi urządzeniami tego samego typu.
+> Producenci uwielbiają używać swoich unikalnych protokołów IR, nawet w obrębie tej samej grupy urządzeń (na przykład, dekodery TV). Dlatego piloty z różnych firm, a czasami z różnych modeli tej samej firmy, nie są w stanie współpracować z innymi urządzeniami tego samego typu.
 
 ### Badanie sygnału IR
 
-Najbardziej niezawodnym sposobem na zobaczenie, jak wygląda sygnał IR z pilota, jest użycie oscyloskopu. Nie demoduluje ani nie odwraca odebranego sygnału, jest po prostu wyświetlany "tak jak jest". To jest przydatne do testowania i debugowania. Pokażę oczekiwany sygnał na przykładzie protokołu IR NEC.
+Najbardziej niezawodnym sposobem na zobaczenie, jak wygląda sygnał IR pilota, jest użycie oscyloskopu. Nie demoduluje ani nie odwraca odebranego sygnału, jest po prostu wyświetlany "tak jak jest". To jest przydatne do testowania i debugowania. Pokażę oczekiwany sygnał na przykładzie protokołu IR NEC.
 
 <figure><img src="../../images/image (235).png" alt=""><figcaption></figcaption></figure>
 

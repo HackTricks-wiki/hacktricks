@@ -32,7 +32,7 @@ _bash, sh, zsh..._ Więcej tutaj: [https://gtfobins.github.io/](https://gtfobins
 
 # Windows
 
-## Obejście ograniczeń ścieżek
+## Ominięcie ograniczeń ścieżek
 
 - **Zmienne środowiskowe**: Istnieje wiele zmiennych środowiskowych, które wskazują na jakąś ścieżkę
 - **Inne protokoły**: _about:, data:, ftp:, file:, mailto:, news:, res:, telnet:, view-source:_
@@ -40,7 +40,7 @@ _bash, sh, zsh..._ Więcej tutaj: [https://gtfobins.github.io/](https://gtfobins
 - **Skróty**: CTRL+N (otwórz nową sesję), CTRL+R (wykonaj polecenia), CTRL+SHIFT+ESC (Menadżer zadań), Windows+E (otwórz eksplorator), CTRL-B, CTRL-I (Ulubione), CTRL-H (Historia), CTRL-L, CTRL-O (Plik/Otwórz), CTRL-P (Okno drukowania), CTRL-S (Zapisz jako)
 - Ukryte menu administracyjne: CTRL-ALT-F8, CTRL-ESC-F9
 - **Shell URIs**: _shell:Administrative Tools, shell:DocumentsLibrary, shell:Librariesshell:UserProfiles, shell:Personal, shell:SearchHomeFolder, shell:Systemshell:NetworkPlacesFolder, shell:SendTo, shell:UsersProfiles, shell:Common Administrative Tools, shell:MyComputerFolder, shell:InternetFolder_
-- **Ścieżki UNC**: Ścieżki do połączenia z folderami udostępnionymi. Powinieneś spróbować połączyć się z C$ lokalnej maszyny ("\\\127.0.0.1\c$\Windows\System32")
+- **Ścieżki UNC**: Ścieżki do połączenia z udostępnionymi folderami. Powinieneś spróbować połączyć się z C$ lokalnej maszyny ("\\\127.0.0.1\c$\Windows\System32")
 - **Więcej ścieżek UNC:**
 
 | UNC                       | UNC            | UNC                  |
@@ -96,7 +96,7 @@ Edytor rejestru: [https://sourceforge.net/projects/uberregedit/](https://sourcef
 - CTRL+T – Internet Explorer – Nowa karta
 - CTRL+N – Internet Explorer – Nowa strona
 - CTRL+O – Otwórz plik
-- CTRL+S – Zapisz CTRL+N – Nowe RDP / Citrix
+- CTRL+S – Zapisz CTRL+N – Nowy RDP / Citrix
 
 ## Przesunięcia
 
@@ -184,23 +184,23 @@ Powinieneś mieć klawiaturę iPada lub adapter USB do klawiatury. Tylko skróty
 | Klawisz | Nazwa         |
 | --- | ------------ |
 | ⌘   | Komenda      |
-| ⌥   | Opcja (Alt)  |
+| ⌥   | Opcja (Alt) |
 | ⇧   | Shift        |
 | ↩   | Powrót       |
 | ⇥   | Tab          |
-| ^   | Kontrola     |
+| ^   | Kontrola      |
 | ←   | Strzałka w lewo   |
 | →   | Strzałka w prawo  |
 | ↑   | Strzałka w górę     |
-| ↓   | Strzałka w dół     |
+| ↓   | Strzałka w dół   |
 
 ### Skróty systemowe
 
 Te skróty dotyczą ustawień wizualnych i dźwiękowych, w zależności od użycia iPada.
 
-| Skrót | Akcja                                                                         |
+| Skrót | Działanie                                                                         |
 | -------- | ------------------------------------------------------------------------------ |
-| F1       | Przyciemnij ekran                                                                |
+| F1       | Przyciemnij ekran                                                                    |
 | F2       | Rozjaśnij ekran                                                                |
 | F7       | Wróć do poprzedniej piosenki                                                                  |
 | F8       | Odtwarzaj/pauzuj                                                                     |
@@ -212,7 +212,7 @@ Te skróty dotyczą ustawień wizualnych i dźwiękowych, w zależności od uży
 
 ### Nawigacja po iPadzie
 
-| Skrót                                           | Akcja                                                  |
+| Skrót                                           | Działanie                                                  |
 | -------------------------------------------------- | ------------------------------------------------------- |
 | ⌘H                                                 | Przejdź do ekranu głównego                                              |
 | ⌘⇧H (Command-Shift-H)                              | Przejdź do ekranu głównego                                              |
@@ -240,7 +240,7 @@ Te skróty dotyczą ustawień wizualnych i dźwiękowych, w zależności od uży
 
 ### Skróty Safari
 
-| Skrót                | Akcja                                           |
+| Skrót                | Działanie                                           |
 | ----------------------- | ------------------------------------------------ |
 | ⌘L (Command-L)          | Otwórz lokalizację                                    |
 | ⌘T                      | Otwórz nową kartę                                   |
@@ -257,7 +257,7 @@ Te skróty dotyczą ustawień wizualnych i dźwiękowych, w zależności od uży
 
 ### Skróty Mail
 
-| Skrót                   | Akcja                       |
+| Skrót                   | Działanie                       |
 | -------------------------- | ---------------------------- |
 | ⌘L                         | Otwórz lokalizację                |
 | ⌘T                         | Otwórz nową kartę               |

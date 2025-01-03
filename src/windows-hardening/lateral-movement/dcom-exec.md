@@ -36,9 +36,9 @@ ls \\10.10.10.10\c$\Users
 
 **Aby uzyskać więcej informacji na temat tej techniki, sprawdź oryginalny post [https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/](https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/)**
 
-Obiekt **MMC20.Application** został zidentyfikowany jako brakujący w "LaunchPermissions", domyślnie przyznając uprawnienia, które pozwalają Administratorom na dostęp. Aby uzyskać dalsze szczegóły, można zbadać wątek [tutaj](https://twitter.com/tiraniddo/status/817532039771525120), a użycie [@tiraniddo](https://twitter.com/tiraniddo)’s OleView .NET do filtrowania obiektów bez wyraźnych uprawnień uruchomienia jest zalecane.
+Obiekt **MMC20.Application** został zidentyfikowany jako brakujący w "LaunchPermissions", domyślnie przyznając uprawnienia, które pozwalają Administratorom na dostęp. W celu uzyskania dalszych szczegółów, wątek można zbadać [tutaj](https://twitter.com/tiraniddo/status/817532039771525120), a użycie [@tiraniddo](https://twitter.com/tiraniddo)’s OleView .NET do filtrowania obiektów bez wyraźnych uprawnień uruchomienia jest zalecane.
 
-Dwa konkretne obiekty, `ShellBrowserWindow` i `ShellWindows`, zostały wyróżnione z powodu braku wyraźnych uprawnień uruchomienia. Brak wpisu `LaunchPermission` w rejestrze pod `HKCR:\AppID\{guid}` oznacza brak wyraźnych uprawnień.
+Dwa konkretne obiekty, `ShellBrowserWindow` i `ShellWindows`, zostały wyróżnione z powodu braku wyraźnych uprawnień uruchomienia. Brak wpisu rejestru `LaunchPermission` pod `HKCR:\AppID\{guid}` oznacza brak wyraźnych uprawnień.
 
 ### ShellWindows
 

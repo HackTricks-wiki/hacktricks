@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Istnieje wiele sposobów na wykonywanie poleceń w zewnętrznych systemach, tutaj znajdziesz wyjaśnienia, jak działają główne techniki lateralnego ruchu w systemie Windows:
+Istnieje wiele sposobów na wykonywanie poleceń w zewnętrznych systemach, tutaj znajdziesz wyjaśnienia dotyczące działania głównych technik lateralnego ruchu w systemie Windows:
 
 - [**PsExec**](psexec-and-winexec.md)
 - [**SmbExec**](smbexec.md)

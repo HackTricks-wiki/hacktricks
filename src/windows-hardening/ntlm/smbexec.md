@@ -8,7 +8,7 @@
 
 ### Kluczowe punkty dotyczące **SMBExec**
 
-- Działa poprzez tworzenie tymczasowej usługi (na przykład "BTOBTO") na docelowej maszynie, aby wykonywać polecenia za pomocą cmd.exe (%COMSPEC%), bez zrzucania jakichkolwiek binariów.
+- Działa poprzez tworzenie tymczasowej usługi (na przykład "BTOBTO") na docelowej maszynie, aby wykonywać polecenia za pomocą cmd.exe (%COMSPEC%), bez zrzucania jakichkolwiek binarnych plików.
 - Pomimo swojego dyskretnego podejścia, generuje dzienniki zdarzeń dla każdego wykonanego polecenia, oferując formę nieinteraktywnego "shella".
 - Polecenie do połączenia za pomocą **Smbexec** wygląda tak:
 ```bash

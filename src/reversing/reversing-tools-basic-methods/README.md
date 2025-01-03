@@ -12,9 +12,9 @@ Oprogramowanie:
 
 Online:
 
-- Użyj [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html), aby **dekompilować** z wasm (binarnego) do wat (czystego tekstu)
-- Użyj [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/), aby **kompilować** z wat do wasm
-- możesz także spróbować użyć [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/), aby dekompilować
+- Użyj [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html), aby **zdekompilować** z wasm (binarnego) do wat (czystego tekstu)
+- Użyj [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/), aby **skompilować** z wat do wasm
+- możesz także spróbować użyć [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/), aby zdekompilować
 
 Oprogramowanie:
 
@@ -25,7 +25,7 @@ Oprogramowanie:
 
 ### [dotPeek](https://www.jetbrains.com/decompiler/)
 
-dotPeek to dekompilator, który **dekompiluje i bada wiele formatów**, w tym **biblioteki** (.dll), **pliki metadanych Windows** (.winmd) oraz **wykonywalne** (.exe). Po dekompilacji, zestaw można zapisać jako projekt Visual Studio (.csproj).
+dotPeek to dekompilator, który **zdekompilowuje i bada wiele formatów**, w tym **biblioteki** (.dll), **pliki metadanych Windows** (.winmd) oraz **wykonywalne** (.exe). Po zdekompilowaniu, zestaw można zapisać jako projekt Visual Studio (.csproj).
 
 Zaletą jest to, że jeśli utracony kod źródłowy wymaga przywrócenia z przestarzałego zestawu, ta akcja może zaoszczędzić czas. Ponadto, dotPeek zapewnia wygodną nawigację po zdekompilowanym kodzie, co czyni go jednym z idealnych narzędzi do **analizy algorytmów Xamarin.**
 
@@ -37,13 +37,13 @@ Dzięki kompleksowemu modelowi dodatków i API, które rozszerza narzędzie, aby
 - Zapewnia wgląd w implementację i użycie języków i frameworków .NET
 - Znajduje nieudokumentowane i nieujawnione funkcjonalności, aby uzyskać więcej z używanych API i technologii.
 - Znajduje zależności i różne zestawy
-- Śledzi dokładne miejsce błędów w Twoim kodzie, komponentach i bibliotekach firm trzecich.
+- Śledzi dokładne miejsce błędów w Twoim kodzie, komponentach i bibliotekach stron trzecich.
 - Debuguje źródło całego kodu .NET, z którym pracujesz.
 
-### [ILSpy](https://github.com/icsharpcode/ILSpy) & [dnSpy](https://github.com/dnSpy/dnSpy/releases)
+### [ILSpy](https://github.com/icsharpcode/ILSpy) i [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
 [Plugin ILSpy dla Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Możesz go mieć w każdym systemie operacyjnym (możesz zainstalować go bezpośrednio z VSCode, nie ma potrzeby pobierania gita. Kliknij na **Rozszerzenia** i **wyszukaj ILSpy**).\
-Jeśli potrzebujesz **dekompilować**, **modyfikować** i **ponownie kompilować**, możesz użyć [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) lub aktywnie utrzymywanego forka, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Kliknij prawym przyciskiem -> Modyfikuj metodę**, aby zmienić coś w funkcji).
+Jeśli potrzebujesz **zdekompilować**, **zmodyfikować** i **ponownie skompilować**, możesz użyć [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) lub aktywnie utrzymywanego forka, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Kliknij prawym przyciskiem -> Zmień metodę**, aby zmienić coś wewnątrz funkcji).
 
 ### Logowanie DNSpy
 
@@ -134,7 +134,7 @@ Ale jak możesz dotrzeć do kodu DLL, która została załadowana? Używając te
 - **Załaduj rundll32** (64 bity w C:\Windows\System32\rundll32.exe i 32 bity w C:\Windows\SysWOW64\rundll32.exe)
 - **Zmień linię poleceń** (_File --> Change Command Line_) i ustaw ścieżkę do dll oraz funkcję, którą chcesz wywołać, na przykład: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
 - Zmień _Options --> Settings_ i wybierz "**DLL Entry**".
-- Następnie **rozpocznij wykonanie**, debugger zatrzyma się w każdej głównej dll, w pewnym momencie **zatrzymasz się w wejściu dll twojej dll**. Stamtąd po prostu poszukaj punktów, w których chcesz ustawić punkt przerwania.
+- Następnie **rozpocznij wykonanie**, debugger zatrzyma się w każdej głównej dll, w pewnym momencie **zatrzymasz się w wejściu dll twojej dll**. Stamtąd wystarczy poszukać punktów, w których chcesz ustawić punkt przerwania.
 
 Zauważ, że gdy wykonanie zostanie zatrzymane z jakiegokolwiek powodu w win64dbg, możesz zobaczyć **w którym kodzie jesteś**, patrząc na **górę okna win64dbg**:
 
@@ -150,9 +150,9 @@ Następnie, patrząc na to, możesz zobaczyć, kiedy wykonanie zostało zatrzyma
 cheat-engine.md
 {{#endref}}
 
-[**PiNCE**](https://github.com/korcankaraokcu/PINCE) to narzędzie front-endowe/odwróconego inżynierii dla GNU Project Debugger (GDB), skoncentrowane na grach. Może być jednak używane do wszelkich związanych z odwróconą inżynierią rzeczy.
+[**PiNCE**](https://github.com/korcankaraokcu/PINCE) to narzędzie front-end/odwróconego inżynierii dla GNU Project Debugger (GDB), skoncentrowane na grach. Może być jednak używane do wszelkich związanych z odwróconą inżynierią rzeczy.
 
-[**Decompiler Explorer**](https://dogbolt.org/) to internetowy front-end dla wielu dekompilatorów. Ta usługa internetowa pozwala porównywać wyniki różnych dekompilatorów na małych plikach wykonywalnych.
+[**Decompiler Explorer**](https://dogbolt.org/) to internetowy front-end do wielu dekompilatorów. Ta usługa internetowa pozwala porównywać wyniki różnych dekompilatorów na małych plikach wykonywalnych.
 
 ## ARM i MIPS
 
@@ -165,7 +165,7 @@ cheat-engine.md
 [**Blobrunner**](https://github.com/OALabs/BlobRunner) **alokuje** **shellcode** w przestrzeni pamięci, **wskaże** ci **adres pamięci**, w którym shellcode został alokowany i **zatrzyma** wykonanie.\
 Następnie musisz **dołączyć debugger** (Ida lub x64dbg) do procesu i ustawić **punkt przerwania w wskazanym adresie pamięci** oraz **wznowić** wykonanie. W ten sposób będziesz debugować shellcode.
 
-Strona z wydaniami na githubie zawiera zips z skompilowanymi wydaniami: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
+Strona z wydaniami na github zawiera zips z skompilowanymi wydaniami: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
 Możesz znaleźć nieco zmodyfikowaną wersję Blobrunner w następującym linku. Aby ją skompilować, po prostu **stwórz projekt C/C++ w Visual Studio Code, skopiuj i wklej kod i zbuduj go**.
 
 {{#ref}}
@@ -188,7 +188,7 @@ Zauważ, że Cutter pozwala na "Otwórz plik" i "Otwórz shellcode". W moim przy
 
 ![](<../../images/image (562).png>)
 
-Aby rozpocząć emulację w miejscu, w którym chcesz, ustaw tam bp, a najwyraźniej cutter automatycznie rozpocznie emulację stamtąd:
+Aby rozpocząć emulację w miejscu, w którym chcesz, ustaw tam bp, a Cutter automatycznie rozpocznie emulację stamtąd:
 
 ![](<../../images/image (589).png>)
 
@@ -214,7 +214,7 @@ scDbg dysponuje również graficznym uruchamiaczem, w którym możesz wybrać op
 
 ![](<../../images/image (258).png>)
 
-Opcja **Create Dump** zrzuci końcowy shellcode, jeśli jakiekolwiek zmiany zostaną wprowadzone do shellcode dynamicznie w pamięci (przydatne do pobrania zdekodowanego shellcode). **start offset** może być przydatny do rozpoczęcia shellcode w określonym przesunięciu. Opcja **Debug Shell** jest przydatna do debugowania shellcode za pomocą terminala scDbg (jednak uważam, że żadna z wcześniej wyjaśnionych opcji nie jest lepsza w tej kwestii, ponieważ będziesz mógł używać Ida lub x64dbg).
+Opcja **Create Dump** zrzuci końcowy shellcode, jeśli jakiekolwiek zmiany zostaną wprowadzone do shellcode dynamicznie w pamięci (przydatne do pobrania zdekodowanego shellcode). **Start offset** może być przydatny do rozpoczęcia shellcode w określonym przesunięciu. Opcja **Debug Shell** jest przydatna do debugowania shellcode za pomocą terminala scDbg (jednak uważam, że żadna z wcześniej wyjaśnionych opcji nie jest lepsza w tej kwestii, ponieważ będziesz mógł używać Ida lub x64dbg).
 
 ### Disassembling using CyberChef
 
@@ -249,17 +249,17 @@ Mając **nazwy** wywoływanych **funkcji**, przeszukaj je w **Internecie**, aby 
 
 Dla skompilowanych binarek Delphi możesz użyć [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
 
-Jeśli musisz zredukować binarkę Delphi, sugeruję użycie wtyczki IDA [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
+Jeśli musisz zrewersować binarkę Delphi, sugeruję użycie wtyczki IDA [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
 
 Po prostu naciśnij **ATL+f7** (importuj wtyczkę python w IDA) i wybierz wtyczkę python.
 
-Ta wtyczka wykona binarkę i dynamicznie rozwiąże nazwy funkcji na początku debugowania. Po rozpoczęciu debugowania naciśnij ponownie przycisk Start (zielony lub f9), a punkt przerwania zostanie osiągnięty na początku rzeczywistego kodu.
+Ta wtyczka wykona binarkę i dynamicznie rozwiąże nazwy funkcji na początku debugowania. Po rozpoczęciu debugowania naciśnij ponownie przycisk Start (zielony lub f9), a punkt przerwania zatrzyma się na początku rzeczywistego kodu.
 
 Jest to również bardzo interesujące, ponieważ jeśli naciśniesz przycisk w aplikacji graficznej, debugger zatrzyma się w funkcji wywołanej przez ten przycisk.
 
 ## Golang
 
-Jeśli musisz zredukować binarkę Golang, sugeruję użycie wtyczki IDA [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
+Jeśli musisz zrewersować binarkę Golang, sugeruję użycie wtyczki IDA [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
 
 Po prostu naciśnij **ATL+f7** (importuj wtyczkę python w IDA) i wybierz wtyczkę python.
 
@@ -303,7 +303,7 @@ W takim programie interesującą częścią będzie **jak program traktuje dane 
 
 ![](<../../images/image (447).png>)
 
-Na poprzednim obrazku możesz zobaczyć, że funkcja jest wywoływana z **FUN_080015a8** (adresy: _0x080015fa_ i _0x080017ac_).
+Na poprzednim obrazie możesz zobaczyć, że funkcja jest wywoływana z **FUN_080015a8** (adresy: _0x080015fa_ i _0x080017ac_).
 
 W tej funkcji, po kilku operacjach inicjalizacyjnych (bez większego znaczenia):
 ```c
@@ -371,7 +371,7 @@ W poprzednim kodzie widać, że porównujemy **uVar1** (miejsce, w którym znajd
 - Najpierw porównuje się z **wartością 4** (**przycisk SELECT**): W wyzwaniu ten przycisk czyści ekran.
 - Następnie porównuje się z **wartością 8** (**przycisk START**): W wyzwaniu sprawdza, czy kod jest ważny, aby uzyskać flagę.
 - W tym przypadku zmienna **`DAT_030000d8`** jest porównywana z 0xf3, a jeśli wartość jest taka sama, wykonywany jest pewien kod.
-- W innych przypadkach sprawdzana jest zmienna cont (`DAT_030000d4`). To jest cont, ponieważ dodaje 1 tuż po wejściu w kod.\
+- W innych przypadkach sprawdzana jest zmienna cont (`DAT_030000d4`). To jest cont, ponieważ dodaje 1 zaraz po wejściu w kod.\
 **Jeśli** jest mniej niż 8, wykonywane jest coś, co polega na **dodawaniu** wartości do \*\*`DAT_030000d8` \*\* (w zasadzie dodaje wartości naciśniętych klawiszy do tej zmiennej, o ile cont jest mniejszy niż 8).
 
 Tak więc, w tym wyzwaniu, znając wartości przycisków, musiałeś **nacisnąć kombinację o długości mniejszej niż 8, której wynikowa suma to 0xf3.**

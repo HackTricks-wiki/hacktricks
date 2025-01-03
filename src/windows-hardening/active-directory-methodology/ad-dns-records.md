@@ -4,7 +4,7 @@
 
 Domyślnie **każdy użytkownik** w Active Directory może **enumerować wszystkie rekordy DNS** w strefach DNS domeny lub lasu, podobnie jak transfer strefy (użytkownicy mogą wylistować obiekty podrzędne strefy DNS w środowisku AD).
 
-Narzędzie [**adidnsdump**](https://github.com/dirkjanm/adidnsdump) umożliwia **enumerację** i **eksport** **wszystkich rekordów DNS** w strefie w celach rekonesansu wewnętrznych sieci.
+Narzędzie [**adidnsdump**](https://github.com/dirkjanm/adidnsdump) umożliwia **enumerację** i **eksport** **wszystkich rekordów DNS** w strefie do celów rekonesansu wewnętrznych sieci.
 ```bash
 git clone https://github.com/dirkjanm/adidnsdump
 cd adidnsdump

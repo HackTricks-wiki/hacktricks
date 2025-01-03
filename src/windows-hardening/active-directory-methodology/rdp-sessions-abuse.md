@@ -6,7 +6,7 @@
 
 Jeśli **grupa zewnętrzna** ma **dostęp RDP** do jakiegokolwiek **komputera** w bieżącej domenie, **atakujący** może **skompromentować ten komputer i czekać na niego**.
 
-Gdy ten użytkownik uzyska dostęp przez RDP, **atakujący może przejąć sesję tego użytkownika** i nadużyć jego uprawnień w zewnętrznej domenie.
+Gdy ten użytkownik uzyska dostęp przez RDP, **atakujący może przejąć sesję tego użytkownika** i wykorzystać jego uprawnienia w zewnętrznej domenie.
 ```powershell
 # Supposing the group "External Users" has RDP access in the current domain
 ## lets find where they could access

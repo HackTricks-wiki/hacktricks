@@ -25,9 +25,9 @@ Jednakże, jeśli **TGS** użyte w **S4U2Proxy** **NIE jest Forwardable**, prób
 Załóżmy, że atakujący ma już **uprawnienia równoważne do zapisu nad komputerem ofiary**.
 
 1. Atakujący **kompromituje** konto, które ma **SPN** lub **tworzy jedno** (“Usługa A”). Zauważ, że **jakikolwiek** _Użytkownik Administrator_ bez żadnych innych specjalnych uprawnień może **utworzyć** do 10 **obiektów Komputera (**_**MachineAccountQuota**_**)** i ustawić im **SPN**. Więc atakujący może po prostu stworzyć obiekt Komputera i ustawić SPN.
-2. Atakujący **nadużywa swojego uprawnienia ZAPISU** nad komputerem ofiary (UsługaB), aby skonfigurować **delegację ograniczoną na bazie zasobów, aby pozwolić UsłudzeA na podszywanie się pod dowolnego użytkownika** w stosunku do tego komputera ofiary (UsługaB).
+2. Atakujący **nadużywa swojego uprawnienia ZAPISU** nad komputerem ofiary (Usługa B), aby skonfigurować **delegację ograniczoną na bazie zasobów, aby pozwolić Usłudze A na podszywanie się pod dowolnego użytkownika** w stosunku do tego komputera ofiary (Usługa B).
 3. Atakujący używa Rubeus, aby przeprowadzić **pełny atak S4U** (S4U2Self i S4U2Proxy) z Usługi A do Usługi B dla użytkownika **z uprzywilejowanym dostępem do Usługi B**.
-1. S4U2Self (z konta SPN, które zostało skompromitowane/stworzone): Prosi o **TGS Administratora dla mnie** (Nie Forwardable).
+1. S4U2Self (z konta SPN kompromitowanego/tworzonego): Prosi o **TGS Administratora dla mnie** (Nie Forwardable).
 2. S4U2Proxy: Używa **nie Forwardable TGS** z poprzedniego kroku, aby poprosić o **TGS** od **Administratora** do **komputera ofiary**.
 3. Nawet jeśli używasz nie Forwardable TGS, ponieważ wykorzystujesz Delegację Ograniczoną na Bazie Zasobów, to zadziała.
 4. Atakujący może **przekazać bilet** i **podszyć się** pod użytkownika, aby uzyskać **dostęp do UsługiB ofiary**.
@@ -86,9 +86,9 @@ Możesz wygenerować więcej biletów, pytając tylko raz, używając parametru 
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /altservice:krbtgt,cifs,host,http,winrm,RPCSS,wsman,ldap /domain:domain.local /ptt
 ```
 > [!CAUTION]
-> Zauważ, że użytkownicy mają atrybut o nazwie "**Nie można delegować**". Jeśli użytkownik ma ten atrybut ustawiony na True, nie będziesz w stanie go podszyć. Ta właściwość jest widoczna w bloodhound.
+> Zauważ, że użytkownicy mają atrybut o nazwie "**Cannot be delegated**". Jeśli użytkownik ma ten atrybut ustawiony na True, nie będziesz w stanie go podszyć. Ta właściwość jest widoczna w bloodhound.
 
-### Dostęp
+### Accessing
 
 Ostatnia linia poleceń wykona **pełny atak S4U i wstrzyknie TGS** z Administratora do hosta ofiary w **pamięci**.\
 W tym przykładzie zażądano TGS dla usługi **CIFS** od Administratora, więc będziesz mógł uzyskać dostęp do **C$**:
@@ -105,7 +105,7 @@ Dowiedz się o [**dostępnych biletach serwisowych tutaj**](silver-ticket.md#ava
 - **`KRB_AP_ERR_SKEW`**: Oznacza to, że czas bieżącego komputera różni się od czasu DC i kerberos nie działa poprawnie.
 - **`preauth_failed`**: Oznacza to, że podana nazwa użytkownika + hashe nie działają przy logowaniu. Mogłeś zapomnieć wstawić "$" w nazwie użytkownika podczas generowania hashy (`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`)
 - **`KDC_ERR_BADOPTION`**: Może to oznaczać:
-  - Użytkownik, którego próbujesz udawać, nie ma dostępu do żądanej usługi (ponieważ nie możesz go udawać lub nie ma wystarczających uprawnień)
+  - Użytkownik, którego próbujesz naśladować, nie ma dostępu do żądanej usługi (ponieważ nie możesz go naśladować lub nie ma wystarczających uprawnień)
   - Żądana usługa nie istnieje (jeśli prosisz o bilet dla winrm, ale winrm nie działa)
   - Utworzony fakecomputer stracił swoje uprawnienia do podatnego serwera i musisz je przywrócić.
 

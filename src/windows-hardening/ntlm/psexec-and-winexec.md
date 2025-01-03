@@ -13,11 +13,11 @@ Proces jest opisany w poniższych krokach, ilustrując, jak binaria usług są m
 
 ### **Proces ręcznego uruchamiania PsExec**
 
-Zakładając, że istnieje ładunek wykonywalny (stworzony za pomocą msfvenom i z obfuskowanym kodem przy użyciu Veil w celu uniknięcia wykrycia przez oprogramowanie antywirusowe), nazwany 'met8888.exe', reprezentujący ładunek meterpreter reverse_http, podejmowane są następujące kroki:
+Zakładając, że istnieje ładunek wykonywalny (stworzony za pomocą msfvenom i z obfuskowanym kodem przy użyciu Veil, aby uniknąć wykrycia przez oprogramowanie antywirusowe), nazwany 'met8888.exe', reprezentujący ładunek meterpreter reverse_http, podejmowane są następujące kroki:
 
 - **Kopiowanie binarium**: Wykonywalny plik jest kopiowany do udziału ADMIN$ z wiersza poleceń, chociaż może być umieszczony w dowolnym miejscu w systemie plików, aby pozostać ukrytym.
 
-- **Tworzenie usługi**: Wykorzystując polecenie Windows `sc`, które pozwala na zapytania, tworzenie i usuwanie usług Windows zdalnie, tworzona jest usługa o nazwie "meterpreter", wskazująca na przesłane binarium.
+- **Tworzenie usługi**: Wykorzystując polecenie Windows `sc`, które umożliwia zapytania, tworzenie i usuwanie usług Windows zdalnie, tworzona jest usługa o nazwie "meterpreter", wskazująca na przesłane binarium.
 
 - **Uruchamianie usługi**: Ostatni krok polega na uruchomieniu usługi, co prawdopodobnie spowoduje błąd "time-out" z powodu tego, że binarium nie jest prawdziwym binarium usługi i nie zwraca oczekiwanego kodu odpowiedzi. Ten błąd jest nieistotny, ponieważ głównym celem jest wykonanie binarium.
 

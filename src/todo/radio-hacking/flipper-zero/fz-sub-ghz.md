@@ -21,7 +21,7 @@ Flipper Zero ma wbudowany moduł sub-1 GHz oparty na [﻿](https://www.st.com/en
 > [!NOTE]
 > Jak znaleźć, która częstotliwość jest używana przez pilot
 
-Podczas analizy Flipper Zero skanuje siłę sygnałów (RSSI) na wszystkich dostępnych częstotliwościach w konfiguracji częstotliwości. Flipper Zero wyświetla częstotliwość z najwyższą wartością RSSI, z siłą sygnału wyższą niż -90 [dBm](https://en.wikipedia.org/wiki/DBm).
+Podczas analizy Flipper Zero skanuje siłę sygnału (RSSI) na wszystkich dostępnych częstotliwościach w konfiguracji częstotliwości. Flipper Zero wyświetla częstotliwość z najwyższą wartością RSSI, z siłą sygnału wyższą niż -90 [dBm](https://en.wikipedia.org/wiki/DBm).
 
 Aby określić częstotliwość pilota, wykonaj następujące kroki:
 
@@ -37,7 +37,7 @@ Aby określić częstotliwość pilota, wykonaj następujące kroki:
 
 Opcja **Read** **nasłuchuje na skonfigurowanej częstotliwości** na wskazanej modulacji: 433.92 AM domyślnie. Jeśli **coś zostanie znalezione** podczas odczytu, **informacje są podawane** na ekranie. Te informacje mogą być użyte do replikacji sygnału w przyszłości.
 
-Podczas korzystania z Read można nacisnąć **lewy przycisk** i **skonfigurować go**.\
+Podczas korzystania z Read, można nacisnąć **lewy przycisk** i **skonfigurować go**.\
 W tym momencie ma **4 modulacje** (AM270, AM650, FM328 i FM476) oraz **kilka istotnych częstotliwości** zapisanych:
 
 <figure><img src="../../../images/image (947).png" alt=""><figcaption></figcaption></figure>
@@ -54,7 +54,7 @@ Możesz ustawić **dowolną, która Cię interesuje**, jednak jeśli **nie jeste
 
 Opcja **Read Raw** **rejestruje sygnały** wysyłane na nasłuchiwanej częstotliwości. Może to być użyte do **skopiowania** sygnału i **powtórzenia** go.
 
-Domyślnie **Read Raw jest również na 433.92 w AM650**, ale jeśli przy użyciu opcji Read odkryłeś, że sygnał, który Cię interesuje, jest na **innej częstotliwości/modulacji, możesz to również zmodyfikować** naciskając lewy przycisk (gdy jesteś w opcji Read Raw).
+Domyślnie **Read Raw jest również na 433.92 w AM650**, ale jeśli przy użyciu opcji Read odkryłeś, że interesujący Cię sygnał jest na **innej częstotliwości/modulacji, możesz to również zmodyfikować** naciskając lewy przycisk (będąc w opcji Read Raw).
 
 ### Brute-Force
 
@@ -67,22 +67,22 @@ Jeśli znasz protokół używany na przykład przez bramę garażową, możliwe 
 
 #### Lista [obsługiwanych protokołów](https://docs.flipperzero.one/sub-ghz/add-new-remote) <a href="#id-3iglu" id="id-3iglu"></a>
 
-| Princeton_433 (działa z większością systemów statycznych) | 433.92 | Statyczny  |
-| ---------------------------------------------------------- | ------ | --------- |
-| Nice Flo 12bit_433                                        | 433.92 | Statyczny  |
-| Nice Flo 24bit_433                                        | 433.92 | Statyczny  |
-| CAME 12bit_433                                            | 433.92 | Statyczny  |
-| CAME 24bit_433                                            | 433.92 | Statyczny  |
-| Linear_300                                                | 300.00 | Statyczny  |
-| CAME TWEE                                                 | 433.92 | Statyczny  |
-| Gate TX_433                                               | 433.92 | Statyczny  |
-| DoorHan_315                                               | 315.00 | Dynamiczny |
-| DoorHan_433                                               | 433.92 | Dynamiczny |
-| LiftMaster_315                                            | 315.00 | Dynamiczny |
-| LiftMaster_390                                            | 390.00 | Dynamiczny |
-| Security+2.0_310                                          | 310.00 | Dynamiczny |
-| Security+2.0_315                                          | 315.00 | Dynamiczny |
-| Security+2.0_390                                          | 390.00 | Dynamiczny |
+| Princeton_433 (działa z większością systemów kodów statycznych) | 433.92 | Statyczny  |
+| -------------------------------------------------------------- | ------ | ------- |
+| Nice Flo 12bit_433                                             | 433.92 | Statyczny  |
+| Nice Flo 24bit_433                                             | 433.92 | Statyczny  |
+| CAME 12bit_433                                                 | 433.92 | Statyczny  |
+| CAME 24bit_433                                                 | 433.92 | Statyczny  |
+| Linear_300                                                     | 300.00 | Statyczny  |
+| CAME TWEE                                                      | 433.92 | Statyczny  |
+| Gate TX_433                                                    | 433.92 | Statyczny  |
+| DoorHan_315                                                    | 315.00 | Dynamiczny |
+| DoorHan_433                                                    | 433.92 | Dynamiczny |
+| LiftMaster_315                                                 | 315.00 | Dynamiczny |
+| LiftMaster_390                                                 | 390.00 | Dynamiczny |
+| Security+2.0_310                                               | 310.00 | Dynamiczny |
+| Security+2.0_315                                               | 315.00 | Dynamiczny |
+| Security+2.0_390                                               | 390.00 | Dynamiczny |
 
 ### Obsługiwani dostawcy Sub-GHz
 

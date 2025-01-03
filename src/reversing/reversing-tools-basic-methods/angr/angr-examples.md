@@ -392,7 +392,7 @@ main(sys.argv)
 >   #
 >   # hello_txt_contents = claripy.BVV('Hello world, my name is John.', 30*8)
 >   #
->   # Być może chcielibyśmy zastąpić John
+>   # Być może chcielibyśmy wtedy zastąpić John
 >   # zmienną symboliczną. Nazwiemy to:
 >   #
 >   # name_bitvector = claripy.BVS('symbolic_name', 4*8)
@@ -407,7 +407,7 @@ main(sys.argv)
 ### Stosowanie Ograniczeń
 
 > [!NOTE]
-> Czasami proste operacje ludzkie, takie jak porównanie 2 słów o długości 16 **char po char** (pętla), **kosztują** dużo dla **angr**, ponieważ musi generować gałęzie **eksponencjalnie**, ponieważ generuje 1 gałąź na if: `2^16`\
+> Czasami proste operacje ludzkie, takie jak porównanie 2 słów o długości 16 **znak po znaku** (pętla), **kosztują** dużo dla **angr**, ponieważ musi generować gałęzie **eksponencjalnie**, ponieważ generuje 1 gałąź na if: `2^16`\
 > Dlatego łatwiej jest **poprosić angr o powrót do poprzedniego punktu** (gdzie trudna część została już wykonana) i **ustawić te ograniczenia ręcznie**.
 ```python
 # After perform some complex poperations to the input the program checks
@@ -485,7 +485,7 @@ main(sys.argv)
 > [!NOTE]
 > Inną rzeczą, którą możesz zrobić w tych scenariuszach, jest **podpięcie funkcji, dając angr coś, co może zrozumieć** łatwiej.
 
-### Menedżerowie Symulacji
+### Menedżery symulacji
 
 Niektórzy menedżerowie symulacji mogą być bardziej przydatni niż inni. W poprzednim przykładzie wystąpił problem, ponieważ stworzono wiele użytecznych gałęzi. Tutaj technika **veritesting** połączy je i znajdzie rozwiązanie.\
 Ten menedżer symulacji można również aktywować za pomocą: `simulation = project.factory.simgr(initial_state, veritesting=True)`

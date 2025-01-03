@@ -66,7 +66,7 @@ url = {\url{https://book.hacktricks.xyz/specific-page}},
 
 **Wolałbym nie**. To **nie przyniesie korzyści nikomu**, ponieważ **wszystkie treści są już publicznie dostępne** w oficjalnych książkach HackTricks za darmo.
 
-Jeśli obawiasz się, że znikną, po prostu zrób forka na Githubie lub je pobierz, jak już powiedziałem, jest to już darmowe.
+Jeśli obawiasz się, że znikną, po prostu zrób forka na Githubie lub je pobierz, jak już powiedziałem, jest to już za darmo.
 
 > [!WARNING]
 >
@@ -76,7 +76,7 @@ Pierwsza **wartość HackTricks** to oferowanie **DARMOWYCH** zasobów edukacyjn
 
 Jeśli myślisz, że książki HackTricks są stworzone do **celów komercyjnych**, to **JESTEŚ CAŁKOWICIE W BŁĘDZIE**.
 
-Mamy sponsorów, ponieważ, nawet jeśli cała treść jest DARMOWA, chcemy **dać społeczności możliwość docenienia naszej pracy**, jeśli chcą. Dlatego oferujemy ludziom możliwość wsparcia HackTricks poprzez [**sponsorów Github**](https://github.com/sponsors/carlospolop), oraz **odpowiednie firmy zajmujące się cyberbezpieczeństwem**, aby sponsorowały HackTricks i **miały kilka reklam** w książce, które są **zawsze umieszczane w miejscach, które czynią je** **widocznymi**, ale **nie zakłócają procesu nauki**, jeśli ktoś koncentruje się na treści.
+Mamy sponsorów, ponieważ, nawet jeśli cała treść jest DARMOWA, chcemy **dać społeczności możliwość docenienia naszej pracy**, jeśli chcą. Dlatego oferujemy ludziom możliwość wsparcia HackTricks poprzez [**sponsorów Github**](https://github.com/sponsors/carlospolop) oraz **odpowiednie firmy zajmujące się cyberbezpieczeństwem**, aby sponsorowały HackTricks i **miały kilka reklam** w książce, przy czym **reklamy** zawsze umieszczane są w miejscach, które czynią je **widocznymi**, ale **nie zakłócają procesu nauki**, jeśli ktoś koncentruje się na treści.
 
 Nie znajdziesz HackTricks wypełnionych irytującymi reklamami jak inne blogi z dużo mniejszą ilością treści niż HackTricks, ponieważ HackTricks nie jest stworzony do celów komercyjnych.
 
@@ -96,7 +96,7 @@ Zauważ, że posiadanie linków do twojej strony w HackTricks:
 - Treść jest **tłumaczona na więcej niż 15 języków**, co umożliwia większej liczbie osób dostęp do tej treści
 - **HackTricks zachęca** ludzi do **sprawdzenia twojej strony** (kilka osób wspomniało nam, że odkąd jakaś ich strona jest w HackTricks, otrzymują więcej odwiedzin)
 
-Jednak, jeśli nadal chcesz, aby treść twojego bloga została usunięta z HackTricks, po prostu daj nam znać, a my na pewno **usuniemy każdy link do twojego bloga** oraz wszelkie treści na jego podstawie.
+Jednak, jeśli nadal chcesz, aby treść twojego bloga została usunięta z HackTricks, po prostu daj nam znać, a my na pewno **usuniemy każdy link do twojego bloga** oraz wszelką treść na jego podstawie.
 
 > [!CAUTION]
 >
@@ -108,20 +108,20 @@ Zawsze **przyznajemy oryginalnym autorom wszystkie zasługi**. Jeśli znajdziesz
 
 Copyright © Wszystkie prawa zastrzeżone, chyba że zaznaczone inaczej.
 
-#### Podsumowanie licencji:
+#### Podsumowanie Licencji:
 
 - Atrybucja: Masz prawo do:
 - Udostępniania — kopiowania i redystrybucji materiału w dowolnym medium lub formacie.
 - Adaptacji — remiksowania, przekształcania i budowania na podstawie materiału.
 
-#### Dodatkowe warunki:
+#### Dodatkowe Warunki:
 
-- Treści osób trzecich: Niektóre części tego bloga/książki mogą zawierać treści z innych źródeł, takie jak fragmenty z innych blogów lub publikacji. Użycie takich treści odbywa się zgodnie z zasadami dozwolonego użytku lub za wyraźną zgodą odpowiednich właścicieli praw autorskich. Proszę odwołać się do oryginalnych źródeł w celu uzyskania szczegółowych informacji o licencjonowaniu dotyczących treści osób trzecich.
-- Autorstwo: Oryginalne treści autorstwa HackTricks podlegają warunkom tej licencji. Zachęcamy do przypisania tej pracy autorowi podczas udostępniania lub adaptacji.
+- Treści Stron Trzecich: Niektóre części tego bloga/książki mogą zawierać treści z innych źródeł, takie jak fragmenty z innych blogów lub publikacji. Użycie takich treści odbywa się zgodnie z zasadami dozwolonego użytku lub za wyraźną zgodą odpowiednich właścicieli praw autorskich. Proszę odwołać się do oryginalnych źródeł w celu uzyskania szczegółowych informacji o licencjonowaniu dotyczących treści stron trzecich.
+- Autorstwo: Oryginalna treść stworzona przez HackTricks podlega warunkom tej licencji. Zachęcamy do przypisania tej pracy autorowi podczas udostępniania lub adaptacji.
 
 #### Wyjątki:
 
-- Użycie komercyjne: W przypadku zapytań dotyczących komercyjnego wykorzystania tej treści, proszę o kontakt.
+- Użycie Komercyjne: W przypadku zapytań dotyczących komercyjnego wykorzystania tej treści, proszę o kontakt.
 
 Ta licencja nie przyznaje żadnych praw do znaków towarowych ani brandingowych w odniesieniu do treści. Wszystkie znaki towarowe i branding przedstawione w tym blogu/książce są własnością ich odpowiednich właścicieli.
 
@@ -138,6 +138,6 @@ Ta licencja nie przyznaje żadnych praw do znaków towarowych ani brandingowych 
 >
 > Użytkownik ponosi wyłączną odpowiedzialność za wszelkie działania podjęte na podstawie informacji zawartych w tej książce i powinien zawsze szukać profesjonalnej porady i pomocy przy próbie wdrożenia jakichkolwiek technik lub wskazówek opisanych w tej książce.
 >
-> Korzystając z tej książki, użytkownik zgadza się zwolnić autorów i wydawców z wszelkiej odpowiedzialności za jakiekolwiek szkody, straty lub krzywdy, które mogą wyniknąć z korzystania z tej książki lub jakiejkolwiek informacji w niej zawartej.
+> Korzystając z tej książki, użytkownik zgadza się zwolnić autorów i wydawców z wszelkiej odpowiedzialności i odpowiedzialności za jakiekolwiek szkody, straty lub krzywdy, które mogą wyniknąć z korzystania z tej książki lub jakiejkolwiek informacji w niej zawartej.
 
 {{#include ../banners/hacktricks-training.md}}

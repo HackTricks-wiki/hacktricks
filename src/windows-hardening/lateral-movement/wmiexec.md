@@ -13,7 +13,7 @@ Procesy mogą być otwierane na hostach, gdzie znana jest nazwa użytkownika ora
 ### Przestrzeń nazw
 
 Struktura w hierarchii stylu katalogu, najwyższym kontenerem WMI jest \root, pod którym zorganizowane są dodatkowe katalogi, zwane przestrzeniami nazw.
-Komendy do wyświetlenia przestrzeni nazw:
+Komendy do wyświetlania przestrzeni nazw:
 ```bash
 # Retrieval of Root namespaces
 gwmi -namespace "root" -Class "__Namespace" | Select Name
@@ -89,7 +89,7 @@ Zdalne zapytanie WMI o konkretne informacje, takie jak lokalni administratorzy l
 
 ### **Ręczne zdalne zapytania WMI**
 
-Ciche identyfikowanie lokalnych administratorów na zdalnej maszynie i zalogowanych użytkowników można osiągnąć za pomocą konkretnych zapytań WMI. `wmic` wspiera również odczyt z pliku tekstowego, aby jednocześnie wykonywać polecenia na wielu węzłach.
+Ciche identyfikowanie lokalnych administratorów na zdalnej maszynie i zalogowanych użytkowników można osiągnąć za pomocą konkretnych zapytań WMI. `wmic` wspiera również odczyt z pliku tekstowego, aby wykonać polecenia na wielu węzłach jednocześnie.
 
 Aby zdalnie wykonać proces za pomocą WMI, na przykład wdrażając agenta Empire, stosuje się następującą strukturę polecenia, a pomyślne wykonanie jest wskazywane przez wartość zwracaną "0":
 ```bash

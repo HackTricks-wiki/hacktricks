@@ -1,10 +1,10 @@
-# SeImpersonate z High do System
+# SeImpersonate from High To System
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ### Kod
 
-Poniższy kod z [tutaj](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962). Umożliwia **wskazanie identyfikatora procesu jako argumentu** i uruchomienie CMD **działającego jako użytkownik** wskazanego procesu.\
+Następujący kod z [tutaj](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962). Umożliwia **wskazanie identyfikatora procesu jako argumentu** i uruchomienie CMD **działającego jako użytkownik** wskazanego procesu.\
 Uruchamiając w procesie o wysokiej integralności, możesz **wskazać PID procesu działającego jako System** (takiego jak winlogon, wininit) i wykonać cmd.exe jako system.
 ```cpp
 impersonateuser.exe 1234
@@ -142,7 +142,7 @@ return 0;
 ```
 ### Błąd
 
-W niektórych przypadkach możesz spróbować przejąć tożsamość Systemu i to nie zadziała, wyświetlając wynik podobny do poniższego:
+W niektórych przypadkach możesz spróbować przejąć tożsamość Systemu i to nie zadziała, pokazując wynik podobny do poniższego:
 ```cpp
 [+] OpenProcess() success!
 [+] OpenProcessToken() success!
@@ -165,7 +165,7 @@ Sprawdźmy aktualne uprawnienia Administratora nad procesami `svchost.exe` za po
 
 ![](<../../images/image (437).png>)
 
-Poprzedni obrazek zawiera wszystkie uprawnienia, które "Administratorzy" mają nad wybranym procesem (jak widać w przypadku `svchost.exe`, mają tylko uprawnienia "Query")
+Poprzedni obrazek zawiera wszystkie uprawnienia, które "Administratorzy" mają nad wybranym procesem (jak widać w przypadku `svchost.exe`, mają tylko uprawnienia "Zapytanie")
 
 Zobacz uprawnienia, które "Administratorzy" mają nad `winlogon.exe`:
 

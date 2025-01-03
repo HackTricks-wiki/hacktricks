@@ -4,7 +4,7 @@
 
 ## Access Tokens
 
-Każdy **użytkownik zalogowany** do systemu **posiada token dostępu z informacjami o zabezpieczeniach** dla tej sesji logowania. System tworzy token dostępu, gdy użytkownik się loguje. **Każdy proces wykonywany** w imieniu użytkownika **ma kopię tokena dostępu**. Token identyfikuje użytkownika, grupy użytkownika oraz uprawnienia użytkownika. Token zawiera również SID logowania (Identifikator zabezpieczeń), który identyfikuje bieżącą sesję logowania.
+Każdy **użytkownik zalogowany** do systemu **posiada token dostępu z informacjami o zabezpieczeniach** dla tej sesji logowania. System tworzy token dostępu, gdy użytkownik się loguje. **Każdy proces wykonywany** w imieniu użytkownika **ma kopię tokena dostępu**. Token identyfikuje użytkownika, grupy użytkownika oraz uprawnienia użytkownika. Token zawiera również SID logowania (Identifikator Zabezpieczeń), który identyfikuje bieżącą sesję logowania.
 
 Możesz zobaczyć te informacje, wykonując `whoami /all`
 ```
@@ -61,7 +61,7 @@ Jeśli chcesz [**dowiedzieć się więcej o UAC, przeczytaj tę stronę**](../au
 
 ### Uwierzytelnianie użytkownika
 
-Jeśli masz **ważne dane uwierzytelniające innego użytkownika**, możesz **utworzyć** **nową sesję logowania** z tymi danymi:
+Jeśli masz **ważne dane logowania innego użytkownika**, możesz **utworzyć** **nową sesję logowania** z tymi danymi:
 ```
 runas /user:domain\username cmd.exe
 ```
@@ -70,26 +70,26 @@ Możesz uruchomić proces, który **używa różnych poświadczeń do uzyskiwani
 ```
 runas /user:domain\username /netonly cmd.exe
 ```
-To jest przydatne, jeśli masz użyteczne dane uwierzytelniające do uzyskania dostępu do obiektów w sieci, ale te dane uwierzytelniające nie są ważne w bieżącym hoście, ponieważ będą używane tylko w sieci (w bieżącym hoście będą używane uprawnienia twojego aktualnego użytkownika).
+To jest przydatne, jeśli masz użyteczne dane uwierzytelniające do uzyskania dostępu do obiektów w sieci, ale te dane uwierzytelniające nie są ważne w bieżącym hoście, ponieważ będą używane tylko w sieci (w bieżącym hoście będą używane uprawnienia bieżącego użytkownika).
 
 ### Typy tokenów
 
 Dostępne są dwa typy tokenów:
 
-- **Primary Token**: Służy jako reprezentacja poświadczeń bezpieczeństwa procesu. Tworzenie i przypisywanie tokenów głównych do procesów to działania wymagające podwyższonych uprawnień, co podkreśla zasadę separacji uprawnień. Zazwyczaj usługa uwierzytelniania jest odpowiedzialna za tworzenie tokenów, podczas gdy usługa logowania zajmuje się ich przypisaniem do powłoki systemu operacyjnego użytkownika. Warto zauważyć, że procesy dziedziczą token główny swojego procesu macierzystego w momencie tworzenia.
+- **Primary Token**: Służy jako reprezentacja poświadczeń bezpieczeństwa procesu. Tworzenie i przypisywanie tokenów głównych do procesów to działania wymagające podwyższonych uprawnień, co podkreśla zasadę separacji uprawnień. Zazwyczaj usługa uwierzytelniania jest odpowiedzialna za tworzenie tokenów, podczas gdy usługa logowania zajmuje się ich przypisaniem do powłoki systemu operacyjnego użytkownika. Warto zauważyć, że procesy dziedziczą główny token swojego procesu macierzystego w momencie tworzenia.
 - **Impersonation Token**: Umożliwia aplikacji serwerowej tymczasowe przyjęcie tożsamości klienta w celu uzyskania dostępu do zabezpieczonych obiektów. Mechanizm ten jest podzielony na cztery poziomy działania:
 - **Anonymous**: Przyznaje dostęp serwera podobny do tego, który ma nieznany użytkownik.
-- **Identification**: Umożliwia serwerowi weryfikację tożsamości klienta bez wykorzystania jej do uzyskania dostępu do obiektów.
+- **Identification**: Pozwala serwerowi na weryfikację tożsamości klienta bez wykorzystania jej do uzyskania dostępu do obiektów.
 - **Impersonation**: Umożliwia serwerowi działanie pod tożsamością klienta.
 - **Delegation**: Podobnie jak Impersonation, ale obejmuje możliwość rozszerzenia tej tożsamości na zdalne systemy, z którymi serwer wchodzi w interakcje, zapewniając zachowanie poświadczeń.
 
 #### Impersonate Tokens
 
-Korzystając z modułu _**incognito**_ w metasploit, jeśli masz wystarczające uprawnienia, możesz łatwo **wylistować** i **przyjąć** inne **tokeny**. Może to być przydatne do wykonywania **działań tak, jakbyś był innym użytkownikiem**. Możesz również **eskalować uprawnienia** za pomocą tej techniki.
+Używając modułu _**incognito**_ w metasploit, jeśli masz wystarczające uprawnienia, możesz łatwo **wylistować** i **przyjąć** inne **tokeny**. Może to być przydatne do wykonywania **działań, jakbyś był innym użytkownikiem**. Możesz również **podnieść uprawnienia** za pomocą tej techniki.
 
 ### Token Privileges
 
-Dowiedz się, które **uprawnienia tokenów mogą być nadużywane do eskalacji uprawnień:**
+Dowiedz się, które **uprawnienia tokenów mogą być nadużywane do podnoszenia uprawnień:**
 
 {{#ref}}
 privilege-escalation-abusing-tokens.md

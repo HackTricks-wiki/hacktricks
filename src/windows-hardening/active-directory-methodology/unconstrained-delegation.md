@@ -4,7 +4,7 @@
 
 ## Unconstrained delegation
 
-To jest funkcja, którą Administrator Domeny może ustawić dla dowolnego **Komputera** w domenie. Następnie, za każdym razem, gdy **użytkownik loguje się** na Komputerze, **kopie TGT** tego użytkownika będą **wysyłane w TGS** dostarczanym przez DC **i zapisywane w pamięci w LSASS**. Więc, jeśli masz uprawnienia Administratora na maszynie, będziesz mógł **zrzucić bilety i podszyć się pod użytkowników** na dowolnej maszynie.
+To jest funkcja, którą Administrator Domeny może ustawić dla dowolnego **Komputera** w obrębie domeny. Następnie, za każdym razem, gdy **użytkownik loguje się** na tym Komputerze, **kopie TGT** tego użytkownika będą **wysyłane w TGS** dostarczanym przez DC **i zapisywane w pamięci w LSASS**. Więc, jeśli masz uprawnienia Administratora na maszynie, będziesz mógł **zrzucić bilety i podszyć się pod użytkowników** na dowolnej maszynie.
 
 Jeśli więc administrator domeny loguje się na Komputerze z aktywowaną funkcją "Unconstrained Delegation", a ty masz lokalne uprawnienia administratora na tej maszynie, będziesz mógł zrzucić bilet i podszyć się pod Administratora Domeny wszędzie (privesc domeny).
 
@@ -48,6 +48,6 @@ printers-spooler-service-abuse.md
 ### Łagodzenie
 
 - Ogranicz logowania DA/Admin do określonych usług
-- Ustaw "Konto jest wrażliwe i nie może być delegowane" dla kont uprzywilejowanych.
+- Ustaw "Konto jest wrażliwe i nie może być delegowane" dla uprzywilejowanych kont.
 
 {{#include ../../banners/hacktricks-training.md}}

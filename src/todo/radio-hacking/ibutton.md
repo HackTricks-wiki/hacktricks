@@ -4,7 +4,7 @@
 
 ## Wprowadzenie
 
-iButton to ogólna nazwa elektronicznego klucza identyfikacyjnego zapakowanego w **metalowy pojemnik w kształcie monety**. Nazywany jest również **Dallas Touch** Memory lub pamięcią kontaktową. Chociaż często błędnie określa się go jako klucz „magnetyczny”, nie ma w nim **nic magnetycznego**. W rzeczywistości wewnątrz ukryty jest pełnoprawny **mikrochip** działający na protokole cyfrowym.
+iButton to ogólna nazwa elektronicznego klucza identyfikacyjnego zapakowanego w **metalowy pojemnik w kształcie monety**. Nazywany jest również **Dallas Touch** Memory lub pamięcią kontaktową. Chociaż często błędnie określany jako klucz „magnetyczny”, nie ma w nim **nic magnetycznego**. W rzeczywistości wewnątrz ukryty jest pełnoprawny **mikrochip** działający na protokole cyfrowym.
 
 <figure><img src="../../images/image (915).png" alt=""><figcaption></figcaption></figure>
 
@@ -14,7 +14,7 @@ Zazwyczaj iButton odnosi się do fizycznej formy klucza i czytnika - okrągłej 
 
 <figure><img src="../../images/image (1078).png" alt=""><figcaption></figcaption></figure>
 
-Gdy klucz dotrze do czytnika, **styki stykają się** i klucz jest zasilany, aby **przesłać** swoje ID. Czasami klucz **nie jest odczytywany** od razu, ponieważ **PSD styku interkomu jest większy** niż powinien być. W takim przypadku zewnętrzne kontury klucza i czytnika nie mogły się dotknąć. Jeśli tak się stanie, będziesz musiał przycisnąć klucz do jednej ze ścianek czytnika.
+Gdy klucz dotrze do czytnika, **styki stykają się** i klucz jest zasilany, aby **przesłać** swoje ID. Czasami klucz **nie jest odczytywany** od razu, ponieważ **PSD styku domofonu jest większy** niż powinien być. W takim przypadku zewnętrzne kontury klucza i czytnika nie mogły się dotknąć. Jeśli tak się stanie, będziesz musiał przycisnąć klucz do jednej ze ścianek czytnika.
 
 <figure><img src="../../images/image (290).png" alt=""><figcaption></figcaption></figure>
 
@@ -22,7 +22,7 @@ Gdy klucz dotrze do czytnika, **styki stykają się** i klucz jest zasilany, aby
 
 Klucze Dallas wymieniają dane za pomocą protokołu 1-wire. Z tylko jednym stykiem do transferu danych (!!) w obu kierunkach, od mastera do slave'a i odwrotnie. Protokół 1-wire działa zgodnie z modelem Master-Slave. W tej topologii Master zawsze inicjuje komunikację, a Slave podąża za jego instrukcjami.
 
-Gdy klucz (Slave) kontaktuje się z interkomem (Master), chip wewnątrz klucza włącza się, zasilany przez interkom, a klucz jest inicjowany. Następnie interkom żąda ID klucza. Następnie przyjrzymy się temu procesowi bardziej szczegółowo.
+Gdy klucz (Slave) kontaktuje się z domofonem (Master), chip wewnątrz klucza włącza się, zasilany przez domofon, a klucz jest inicjowany. Następnie domofon żąda ID klucza. Następnie przyjrzymy się temu procesowi bardziej szczegółowo.
 
 Flipper może działać zarówno w trybie Master, jak i Slave. W trybie odczytu klucza Flipper działa jako czytnik, to znaczy działa jako Master. A w trybie emulacji klucza, flipper udaje klucz, jest w trybie Slave.
 

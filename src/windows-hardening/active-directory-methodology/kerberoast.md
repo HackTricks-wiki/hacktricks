@@ -13,12 +13,12 @@ Aby wykonać **Kerberoasting**, niezbędne jest konto domenowe zdolne do żądan
 - **Kerberoasting** celuje w **bilety TGS** dla **usług kont użytkowników** w **AD**.
 - Bilety szyfrowane kluczami z **haseł użytkowników** mogą być **łamane offline**.
 - Usługa jest identyfikowana przez **ServicePrincipalName**, który nie jest pusty.
-- **Nie są potrzebne specjalne uprawnienia**, wystarczą **ważne poświadczenia domenowe**.
+- **Nie są potrzebne specjalne uprawnienia**, tylko **ważne poświadczenia domenowe**.
 
 ### **Atak**
 
 > [!WARNING]
-> **Narzędzia Kerberoasting** zazwyczaj żądają **`RC4 encryption`** podczas przeprowadzania ataku i inicjowania żądań TGS-REQ. Dzieje się tak, ponieważ **RC4 jest** [**słabszy**](https://www.stigviewer.com/stig/windows_10/2017-04-28/finding/V-63795) i łatwiejszy do złamania offline przy użyciu narzędzi takich jak Hashcat niż inne algorytmy szyfrowania, takie jak AES-128 i AES-256.\
+> **Narzędzia Kerberoasting** zazwyczaj żądają **`szyfrowania RC4`** podczas przeprowadzania ataku i inicjowania żądań TGS-REQ. Dzieje się tak, ponieważ **RC4 jest** [**słabsze**](https://www.stigviewer.com/stig/windows_10/2017-04-28/finding/V-63795) i łatwiejsze do złamania offline przy użyciu narzędzi takich jak Hashcat niż inne algorytmy szyfrowania, takie jak AES-128 i AES-256.\
 > Hashe RC4 (typ 23) zaczynają się od **`$krb5tgs$23$*`**, podczas gdy AES-256 (typ 18) zaczynają się od **`$krb5tgs$18$*`**.`
 
 #### **Linux**
@@ -39,7 +39,7 @@ adenum -d <DOMAIN.FULL> -ip <DC_IP> -u <USERNAME> -p <PASSWORD> -c
 ```
 #### Windows
 
-- **Enumeruj użytkowników podatnych na Kerberoast**
+- **Wymień użytkowników podatnych na Kerberoast**
 ```powershell
 # Get Kerberoastable users
 setspn.exe -Q */* #This is a built-in binary. Focus on user accounts
@@ -110,7 +110,7 @@ Kerberoasting może być przeprowadzany z wysokim stopniem dyskrecji, jeśli jes
 
 - Nazwa usługi nie powinna być **krbtgt**, ponieważ jest to normalne żądanie.
 - Nazwy usług kończące się na **$** powinny być wykluczone, aby uniknąć uwzględnienia kont maszynowych używanych do usług.
-- Żądania z maszyn powinny być filtrowane poprzez wykluczenie nazw kont sformatowanych jako **machine@domain**.
+- Żądania z maszyn powinny być filtrowane przez wykluczenie nazw kont sformatowanych jako **machine@domain**.
 - Należy brać pod uwagę tylko udane żądania biletów, identyfikowane przez kod błędu **'0x0'**.
 - **Najważniejsze**, typ szyfrowania biletu powinien być **0x17**, który jest często używany w atakach Kerberoasting.
 ```bash
@@ -125,7 +125,7 @@ Wdrażając te środki, organizacje mogą znacznie zmniejszyć ryzyko związane 
 
 ## Kerberoast bez konta domenowego
 
-W **wrześniu 2022** roku nowy sposób na wykorzystanie systemu został ujawniony przez badacza o imieniu Charlie Clark, udostępniony na jego platformie [exploit.ph](https://exploit.ph/). Metoda ta pozwala na pozyskanie **Biletów Serwisowych (ST)** za pomocą żądania **KRB_AS_REQ**, które w sposób niezwykły nie wymaga kontroli nad żadnym kontem Active Directory. Zasadniczo, jeśli główny podmiot jest skonfigurowany w taki sposób, że nie wymaga wstępnej autoryzacji—scenariusz podobny do tego, co w dziedzinie cyberbezpieczeństwa nazywa się atakiem **AS-REP Roasting**—ta cecha może być wykorzystana do manipulacji procesem żądania. Konkretnie, poprzez zmianę atrybutu **sname** w treści żądania, system jest oszukiwany do wydania **ST** zamiast standardowego zaszyfrowanego Biletu Grantującego (TGT).
+W **wrześniu 2022** roku nowy sposób na wykorzystanie systemu został ujawniony przez badacza o imieniu Charlie Clark, udostępniony za pośrednictwem jego platformy [exploit.ph](https://exploit.ph/). Metoda ta pozwala na pozyskanie **Biletów Serwisowych (ST)** za pomocą żądania **KRB_AS_REQ**, które w sposób niezwykły nie wymaga kontroli nad żadnym kontem Active Directory. Zasadniczo, jeśli główny obiekt jest skonfigurowany w taki sposób, że nie wymaga wstępnej autoryzacji—scenariusz podobny do tego, co w dziedzinie cyberbezpieczeństwa nazywane jest atakiem **AS-REP Roasting**—ta cecha może być wykorzystana do manipulacji procesem żądania. Konkretnie, poprzez zmianę atrybutu **sname** w treści żądania, system jest oszukiwany do wydania **ST** zamiast standardowego zaszyfrowanego biletu przyznawania biletów (TGT).
 
 Technika jest w pełni wyjaśniona w tym artykule: [Semperis blog post](https://www.semperis.com/blog/new-attack-paths-as-requested-sts/).
 

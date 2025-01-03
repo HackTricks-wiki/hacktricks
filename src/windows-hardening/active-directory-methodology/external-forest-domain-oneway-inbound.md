@@ -60,7 +60,7 @@ W poprzedniej enumeracji stwierdzono, że użytkownik **`crossuser`** znajduje s
 
 ## Wstępny dostęp
 
-Jeśli **nie mogłeś** znaleźć żadnego **specjalnego** dostępu swojego użytkownika w innej domenie, możesz wrócić do Metodologii AD i spróbować **privesc z użytkownika bez uprawnień** (rzeczy takie jak kerberoasting na przykład):
+Jeśli **nie udało się** znaleźć żadnego **specjalnego** dostępu twojego użytkownika w innej domenie, możesz wrócić do Metodologii AD i spróbować **privesc z użytkownika bez uprawnień** (rzeczy takie jak kerberoasting na przykład):
 
 Możesz użyć **funkcji Powerview** do **enumeracji** **innej domeny** używając parametru `-Domain`, jak w:
 ```powershell
@@ -80,7 +80,7 @@ Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\admini
 ```
 ### Nadużycie historii SID
 
-Możesz również nadużywać [**historii SID**](sid-history-injection.md) w ramach zaufania lasu.
+Możesz również nadużyć [**historii SID**](sid-history-injection.md) w ramach zaufania lasu.
 
 Jeśli użytkownik jest migrowany **z jednego lasu do drugiego** i **filtracja SID nie jest włączona**, możliwe jest **dodanie SID z innego lasu**, a ten **SID** zostanie **dodany** do **tokena użytkownika** podczas uwierzytelniania **w ramach zaufania**.
 
@@ -91,7 +91,7 @@ Jeśli użytkownik jest migrowany **z jednego lasu do drugiego** i **filtracja S
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 
-Możesz **podpisać** z **zaufanym** kluczem **TGT, udając** użytkownika bieżącej domeny.
+Możesz **podpisać** **zaufanym** kluczem **TGT, udając** użytkownika bieżącej domeny.
 ```bash
 # Get a TGT for the cross-domain privileged user to the other domain
 Invoke-Mimikatz -Command '"kerberos::golden /user:<username> /domain:<current domain> /SID:<current domain SID> /rc4:<trusted key> /target:<external.domain> /ticket:C:\path\save\ticket.kirbi"'

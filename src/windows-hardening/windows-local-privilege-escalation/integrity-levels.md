@@ -26,7 +26,7 @@ Możesz również uzyskać swój **aktualny poziom integralności** używając `
 ### Poziomy integralności w systemie plików
 
 Obiekt w systemie plików może wymagać **minimalnego poziomu integralności**, a jeśli proces nie ma tego poziomu integralności, nie będzie mógł z nim współdziałać.\
-Na przykład, stwórzmy **plik z konsoli standardowego użytkownika i sprawdźmy uprawnienia**:
+Na przykład, **stwórzmy plik z konsoli standardowego użytkownika i sprawdźmy uprawnienia**:
 ```
 echo asd >asd.txt
 icacls asd.txt
@@ -37,7 +37,7 @@ NT AUTHORITY\INTERACTIVE:(I)(M,DC)
 NT AUTHORITY\SERVICE:(I)(M,DC)
 NT AUTHORITY\BATCH:(I)(M,DC)
 ```
-Teraz przypiszmy minimalny poziom integralności **Wysoki** do pliku. To **musi być zrobione z konsoli** uruchomionej jako **administrator**, ponieważ **zwykła konsola** będzie działać na poziomie integralności Medium i **nie będzie mogła** przypisać poziomu integralności Wysoki do obiektu:
+Teraz przypiszmy minimalny poziom integralności **Wysoki** do pliku. To **musi być zrobione z konsoli** uruchomionej jako **administrator**, ponieważ **zwykła konsola** będzie działać na poziomie integralności Medium i **nie będzie miała pozwolenia** na przypisanie poziomu integralności Wysoki do obiektu:
 ```
 icacls asd.txt /setintegritylevel(oi)(ci) High
 processed file: asd.txt
@@ -86,6 +86,6 @@ Dla ciekawskich, jeśli przypiszesz wysoki poziom integralności do binarnego (`
 
 Nie wszystkie pliki i foldery mają minimalny poziom integralności, **ale wszystkie procesy działają pod poziomem integralności**. I podobnie jak miało to miejsce w przypadku systemu plików, **jeśli proces chce zapisać w innym procesie, musi mieć przynajmniej ten sam poziom integralności**. Oznacza to, że proces z niskim poziomem integralności nie może otworzyć uchwytu z pełnym dostępem do procesu z średnim poziomem integralności.
 
-Z powodu ograniczeń omówionych w tej i poprzedniej sekcji, z punktu widzenia bezpieczeństwa, zawsze **zaleca się uruchamianie procesu na najniższym możliwym poziomie integralności**.
+Z powodu ograniczeń omówionych w tej i poprzedniej sekcji, z punktu widzenia bezpieczeństwa, zawsze **zaleca się uruchamianie procesu na jak najniższym poziomie integralności**.
 
 {{#include ../../banners/hacktricks-training.md}}

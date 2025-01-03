@@ -38,7 +38,7 @@ Usługa CIFS jest wyróżniana jako powszechny cel do uzyskania dostępu do syst
 | PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>W zależności od systemu operacyjnego także:</p><p>WSMAN</p><p>RPCSS</p> |
 | WinRM                                      | <p>HOST</p><p>HTTP</p><p>W niektórych przypadkach możesz po prostu poprosić o: WINRM</p> |
 | Zaplanowane zadania                        | HOST                                                                      |
-| Udostępnianie plików Windows, także psexec | CIFS                                                                      |
+| Udostępnianie plików w systemie Windows, także psexec | CIFS                                                                      |
 | Operacje LDAP, w tym DCSync               | LDAP                                                                      |
 | Narzędzia do zdalnej administracji serwerów Windows | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                        |
 | Złote bilety                               | krbtgt                                                                    |
@@ -59,7 +59,7 @@ W poniższych przykładach wyobraźmy sobie, że bilet został odzyskany, podszy
 
 ### CIFS
 
-Dzięki temu biletowi będziesz mógł uzyskać dostęp do folderów `C$` i `ADMIN$` za pośrednictwem **SMB** (jeśli są wystawione) i skopiować pliki do części zdalnego systemu plików, po prostu robiąc coś takiego:
+Dzięki temu biletowi będziesz mógł uzyskać dostęp do folderów `C$` i `ADMIN$` za pomocą **SMB** (jeśli są wystawione) i skopiować pliki do części zdalnego systemu plików, po prostu robiąc coś takiego:
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$

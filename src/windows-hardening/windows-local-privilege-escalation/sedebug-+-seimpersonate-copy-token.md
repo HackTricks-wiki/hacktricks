@@ -1,7 +1,7 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 Poniższy kod **wykorzystuje uprawnienia SeDebug i SeImpersonate** do skopiowania tokena z **procesu działającego jako SYSTEM** i z **wszystkimi uprawnieniami tokena**. \
-W tym przypadku kod ten można skompilować i użyć jako **plik binarny usługi Windows**, aby sprawdzić, czy działa.\
+W tym przypadku kod ten można skompilować i użyć jako **binarny plik usługi Windows**, aby sprawdzić, czy działa.\
 Jednak główna część **kodu, w której następuje podniesienie uprawnień**, znajduje się wewnątrz **funkcji `Exploit`**.\
 Wewnątrz tej funkcji można zobaczyć, że **proces **_**lsass.exe**_** jest wyszukiwany**, następnie **jego token jest kopiowany**, a na koniec ten token jest używany do uruchomienia nowego _**cmd.exe**_ z wszystkimi uprawnieniami skopiowanego tokena.
 

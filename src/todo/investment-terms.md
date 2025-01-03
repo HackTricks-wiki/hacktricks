@@ -10,16 +10,16 @@ Zazwyczaj możesz również użyć **aktualnej ceny rynkowej**, aby przeprowadzi
 
 ## Futures
 
-Futures to kontrakt, w którym 2 strony dochodzą do porozumienia, aby **nabyć coś w przyszłości po ustalonej cenie**. Na przykład sprzedać 1 bitcoina za 6 miesięcy za 70.000$.
+Futures to kontrakt, w którym 2 strony dochodzą do porozumienia, aby **nabyć coś w przyszłości po ustalonej cenie**. Na przykład sprzedać 1 bitcoina za 6 miesięcy po 70.000$.
 
 Oczywiście, jeśli za 6 miesięcy wartość bitcoina wynosi 80.000$, strona sprzedająca traci pieniądze, a strona kupująca zyskuje. Jeśli za 6 miesięcy wartość bitcoina wynosi 60.000$, dzieje się odwrotnie.
 
-Jednakże, to jest interesujące na przykład dla firm, które generują produkt i potrzebują mieć pewność, że będą mogły sprzedać go po cenie pokrywającej koszty. Lub dla firm, które chcą zapewnić sobie stałe ceny w przyszłości, nawet jeśli będą wyższe.
+Jednak to jest interesujące na przykład dla firm, które generują produkt i muszą mieć pewność, że będą mogły sprzedać go po cenie pokrywającej koszty. Lub dla firm, które chcą zapewnić sobie stałe ceny w przyszłości, nawet jeśli będą wyższe.
 
-Chociaż na giełdach jest to zazwyczaj używane do próby osiągnięcia zysku.
+Chociaż na giełdach zazwyczaj używa się tego, aby spróbować osiągnąć zysk.
 
-* Zauważ, że "pozycja długa" oznacza, że ktoś stawia na to, że cena wzrośnie.
-* Natomiast "pozycja krótka" oznacza, że ktoś stawia na to, że cena spadnie.
+* Zauważ, że "pozycja długa" oznacza, że ktoś stawia na to, że cena wzrośnie
+* Podczas gdy "pozycja krótka" oznacza, że ktoś stawia na to, że cena spadnie
 
 ### Hedging z użyciem Futures <a href="#mntl-sc-block_7-0" id="mntl-sc-block_7-0"></a>
 
@@ -35,12 +35,12 @@ Zauważ, że w tych przypadkach zyski i straty mogą być w czasie rzeczywistym,
 
 ### Futures z dźwignią
 
-**Dźwignia** pozwala Ci kontrolować większą pozycję na rynku przy mniejszej kwocie pieniędzy. W zasadzie pozwala Ci "stawiać" znacznie więcej pieniędzy, niż posiadasz, ryzykując tylko pieniądze, które faktycznie masz.
+**Dźwignia** pozwala kontrolować większą pozycję na rynku przy mniejszej kwocie pieniędzy. W zasadzie pozwala "stawiać" znacznie więcej pieniędzy, niż się ma, ryzykując tylko pieniądze, które faktycznie się posiada.
 
 Na przykład, jeśli otworzysz pozycję futures w BTC/USDT z 100$ przy dźwigni 50x, oznacza to, że jeśli cena wzrośnie o 1%, wtedy zyskujesz 1x50 = 50% swojego początkowego inwestycji (50$). I w ten sposób będziesz miał 150$.\
-Jednak jeśli cena spadnie o 1%, stracisz 50% swoich funduszy (59$ w tym przypadku). A jeśli cena spadnie o 2%, stracisz całe swoje zakłady (2x50 = 100%).
+Jednak jeśli cena spadnie o 1%, stracisz 50% swoich funduszy (59$ w tym przypadku). A jeśli cena spadnie o 2%, stracisz całą swoją stawkę (2x50 = 100%).
 
-Dlatego dźwignia pozwala kontrolować kwotę pieniędzy, które stawiasz, jednocześnie zwiększając zyski i straty.
+Dlatego dźwignia pozwala kontrolować kwotę pieniędzy, którą stawiasz, jednocześnie zwiększając zyski i straty.
 
 ## Różnice między Futures a Opcjami
 
@@ -55,11 +55,11 @@ Jednak kupujący będzie płacił pewną opłatę sprzedającemu za otwarcie opc
 ### 2. **Ryzyko:**
 
 * **Futures:** Zarówno kupujący, jak i sprzedający ponoszą **nieograniczone ryzyko**, ponieważ są zobowiązani do zrealizowania kontraktu. Ryzyko to różnica między uzgodnioną ceną a ceną rynkową w dniu wygaśnięcia.
-* **Opcje:** Ryzyko kupującego jest ograniczone do **premii** zapłaconej za zakup opcji. Jeśli rynek nie poruszy się na korzyść posiadacza opcji, mogą po prostu pozwolić opcji wygasnąć. Jednak **sprzedający** (wystawca) opcji ma nieograniczone ryzyko, jeśli rynek poruszy się znacząco przeciwko nim.
+* **Opcje:** Ryzyko kupującego jest ograniczone do **premii** zapłaconej za zakup opcji. Jeśli rynek nie poruszy się na korzyść posiadacza opcji, może po prostu pozwolić opcji wygasnąć. Jednak **sprzedający** (wystawca) opcji ma nieograniczone ryzyko, jeśli rynek poruszy się znacząco przeciwko niemu.
 
 ### 3. **Koszt:**
 
-* **Futures:** Nie ma kosztów wstępnych poza marżą wymaganą do utrzymania pozycji, ponieważ zarówno kupujący, jak i sprzedający są zobowiązani do zrealizowania transakcji.
+* **Futures:** Nie ma kosztu początkowego poza marżą wymaganą do utrzymania pozycji, ponieważ zarówno kupujący, jak i sprzedający są zobowiązani do zrealizowania transakcji.
 * **Opcje:** Kupujący musi zapłacić **premię opcyjną** z góry za prawo do wykonania opcji. Ta premia jest zasadniczo kosztem opcji.
 
 ### 4. **Potencjał zysku:**

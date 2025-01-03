@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**To jest małe podsumowanie rozdziałów o kradzieży z niesamowitych badań z [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)**
+**To mały podsumowanie rozdziałów o kradzieży z niesamowitych badań z [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)**
 
 ## Co mogę zrobić z certyfikatem
 
@@ -34,7 +34,7 @@ Więcej informacji o DPAPI w:
 ../../windows-local-privilege-escalation/dpapi-extracting-passwords.md
 {{#endref}}
 
-W systemie Windows, **klucze prywatne certyfikatów są chronione przez DPAPI**. Ważne jest, aby rozpoznać, że **lokalizacje przechowywania kluczy prywatnych użytkownika i maszyny** są różne, a struktury plików różnią się w zależności od używanego przez system operacyjny API kryptograficznego. **SharpDPAPI** to narzędzie, które może automatycznie poruszać się po tych różnicach podczas deszyfrowania blobów DPAPI.
+W systemie Windows **klucze prywatne certyfikatów są chronione przez DPAPI**. Ważne jest, aby rozpoznać, że **lokalizacje przechowywania kluczy prywatnych użytkownika i maszyny** są różne, a struktury plików różnią się w zależności od używanego przez system operacyjny API kryptograficznego. **SharpDPAPI** to narzędzie, które może automatycznie poruszać się po tych różnicach podczas deszyfrowania blobów DPAPI.
 
 **Certyfikaty użytkowników** są głównie przechowywane w rejestrze pod `HKEY_CURRENT_USER\SOFTWARE\Microsoft\SystemCertificates`, ale niektóre można również znaleźć w katalogu `%APPDATA%\Microsoft\SystemCertificates\My\Certificates`. Odpowiednie **klucze prywatne** dla tych certyfikatów są zazwyczaj przechowywane w `%APPDATA%\Microsoft\Crypto\RSA\User SID\` dla kluczy **CAPI** i `%APPDATA%\Microsoft\Crypto\Keys\` dla kluczy **CNG**.
 
@@ -94,9 +94,9 @@ john --wordlist=passwords.txt hash.txt
 
 Podany materiał wyjaśnia metodę kradzieży poświadczeń NTLM za pomocą PKINIT, szczególnie poprzez metodę kradzieży oznaczoną jako THEFT5. Oto ponowne wyjaśnienie w stronie biernej, z zanonimizowanym i podsumowanym materiałem tam, gdzie to możliwe:
 
-Aby wspierać uwierzytelnianie NTLM [MS-NLMP] dla aplikacji, które nie umożliwiają uwierzytelniania Kerberos, KDC jest zaprojektowany tak, aby zwracać jedną funkcję NTLM (OWF) użytkownika w certyfikacie atrybutu uprawnień (PAC), szczególnie w buforze `PAC_CREDENTIAL_INFO`, gdy wykorzystywane jest PKCA. W konsekwencji, jeśli konto uwierzytelni się i zabezpieczy Ticket-Granting Ticket (TGT) za pomocą PKINIT, wbudowany mechanizm umożliwia bieżącemu hostowi wydobycie hasha NTLM z TGT, aby wspierać starsze protokoły uwierzytelniania. Proces ten obejmuje deszyfrowanie struktury `PAC_CREDENTIAL_DATA`, która jest zasadniczo zserializowanym przedstawieniem NTLM w postaci jawnej.
+Aby wspierać uwierzytelnianie NTLM [MS-NLMP] dla aplikacji, które nie umożliwiają uwierzytelniania Kerberos, KDC jest zaprojektowany tak, aby zwracać jednostronną funkcję NTLM użytkownika (OWF) w certyfikacie atrybutów uprawnień (PAC), szczególnie w buforze `PAC_CREDENTIAL_INFO`, gdy wykorzystywane jest PKCA. W konsekwencji, jeśli konto uwierzytelni się i zabezpieczy Ticket-Granting Ticket (TGT) za pomocą PKINIT, wbudowany mechanizm umożliwia bieżącemu hostowi wydobycie hasha NTLM z TGT, aby wspierać starsze protokoły uwierzytelniania. Proces ten obejmuje deszyfrowanie struktury `PAC_CREDENTIAL_DATA`, która jest zasadniczo zserializowanym przedstawieniem NTLM w postaci jawnej.
 
-Narzędzie **Kekeo**, dostępne pod adresem [https://github.com/gentilkiwi/kekeo](https://github.com/gentilkiwi/kekeo), jest wspomniane jako zdolne do żądania TGT zawierającego te konkretne dane, co ułatwia odzyskanie NTLM użytkownika. Używana do tego celu komenda jest następująca:
+Narzędzie **Kekeo**, dostępne pod adresem [https://github.com/gentilkiwi/kekeo](https://github.com/gentilkiwi/kekeo), jest wspomniane jako zdolne do żądania TGT zawierającego te konkretne dane, co ułatwia odzyskanie NTLM użytkownika. Komenda używana w tym celu jest następująca:
 ```bash
 tgt::pac /caname:generic-DC-CA /subject:genericUser /castore:current_user /domain:domain.local
 ```

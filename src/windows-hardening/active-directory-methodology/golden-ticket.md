@@ -6,7 +6,7 @@
 
 Atak **Golden Ticket** polega na **tworzeniu legalnego Ticket Granting Ticket (TGT) podszywając się pod dowolnego użytkownika** za pomocą **hasła NTLM konta krbtgt w Active Directory (AD)**. Technika ta jest szczególnie korzystna, ponieważ **umożliwia dostęp do dowolnej usługi lub maszyny** w obrębie domeny jako podszywający się użytkownik. Ważne jest, aby pamiętać, że **poświadczenia konta krbtgt nigdy nie są automatycznie aktualizowane**.
 
-Aby **zdobyć hasło NTLM** konta krbtgt, można zastosować różne metody. Może być ono wyodrębnione z **procesu Local Security Authority Subsystem Service (LSASS)** lub z **pliku NT Directory Services (NTDS.dit)** znajdującego się na dowolnym kontrolerze domeny (DC) w obrębie domeny. Ponadto, **wykonanie ataku DCsync** jest inną strategią uzyskania tego hasła NTLM, co można zrealizować za pomocą narzędzi takich jak **moduł lsadump::dcsync** w Mimikatz lub **skrypt secretsdump.py** od Impacket. Ważne jest, aby podkreślić, że do przeprowadzenia tych operacji zazwyczaj wymagane są **uprawnienia administratora domeny lub podobny poziom dostępu**.
+Aby **zdobyć hasło NTLM** konta krbtgt, można zastosować różne metody. Może być ono wyodrębnione z **procesu Local Security Authority Subsystem Service (LSASS)** lub z **pliku NT Directory Services (NTDS.dit)** znajdującego się na dowolnym kontrolerze domeny (DC) w obrębie domeny. Ponadto, **wykonanie ataku DCsync** jest inną strategią uzyskania tego hasła NTLM, co można zrealizować za pomocą narzędzi takich jak **moduł lsadump::dcsync** w Mimikatz lub **skrypt secretsdump.py** od Impacket. Ważne jest, aby podkreślić, że do przeprowadzenia tych operacji **zazwyczaj wymagane są uprawnienia administratora domeny lub podobny poziom dostępu**.
 
 Chociaż hasło NTLM jest wykonalną metodą w tym celu, **zdecydowanie zaleca się** **fałszowanie biletów za pomocą kluczy Kerberos w standardzie Advanced Encryption Standard (AES) (AES128 i AES256)** z powodów bezpieczeństwa operacyjnego.
 ```bash:From Linux
@@ -36,9 +36,9 @@ Użyj parametrów `/startoffset`, `/endin` i `/renewmax`, aby kontrolować przes
 ```
 Get-DomainPolicy | select -expand KerberosPolicy
 ```
-Niestety, czas życia TGT nie jest rejestrowany w 4769, więc nie znajdziesz tych informacji w dziennikach zdarzeń systemu Windows. Jednak to, co możesz skorelować, to **widzenie 4769 bez wcześniejszego 4768**. **Nie jest możliwe zażądanie TGS bez TGT**, a jeśli nie ma zapisu o wydaniu TGT, możemy wnioskować, że został on sfałszowany offline.
+Niestety, czas życia TGT nie jest rejestrowany w 4769, więc nie znajdziesz tych informacji w dziennikach zdarzeń systemu Windows. Jednak to, co możesz skorelować, to **widzenie 4769 bez wcześniejszego 4768**. **Nie jest możliwe zażądanie TGS bez TGT**, a jeśli nie ma zapisu o wydaniu TGT, możemy wywnioskować, że został on sfałszowany offline.
 
-Aby **obejść to wykrycie**, sprawdź bilety diamentowe:
+Aby **obejść to wykrywanie**, sprawdź bilety diamentowe:
 
 {{#ref}}
 diamond-ticket.md
@@ -52,7 +52,7 @@ diamond-ticket.md
 
 Inne małe sztuczki, które mogą zastosować obrońcy, to **powiadamianie o 4769 dla wrażliwych użytkowników**, takich jak domyślne konto administratora domeny.
 
-## Referencje
+## Odniesienia
 
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-golden-tickets] (https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-golden-tickets)

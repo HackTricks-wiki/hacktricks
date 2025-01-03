@@ -4,7 +4,7 @@
 
 Tworzenie instalatora MSI zostanie przeprowadzone przy użyciu wixtools, a konkretnie zostaną wykorzystane [wixtools](http://wixtoolset.org). Warto wspomnieć, że próbowano alternatywnych budowniczych MSI, ale nie były one skuteczne w tym przypadku.
 
-Aby uzyskać pełne zrozumienie przykładów użycia wix MSI, zaleca się zapoznanie z [tą stroną](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with). Tutaj można znaleźć różne przykłady ilustrujące użycie wix MSI.
+Aby uzyskać pełne zrozumienie przykładów użycia wix MSI, zaleca się zapoznanie się z [tą stroną](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with). Tutaj można znaleźć różne przykłady ilustrujące użycie wix MSI.
 
 Celem jest wygenerowanie MSI, które uruchomi plik lnk. Aby to osiągnąć, można wykorzystać następujący kod XML ([xml stąd](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)):
 ```markup

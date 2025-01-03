@@ -57,7 +57,7 @@ Możesz uzyskać dostęp do tych danych, **grupując pierwszy dword** i wyszukuj
 
 W tym przypadku, jeśli wyszukasz **0xA56363C6**, możesz znaleźć, że jest związany z **tabelami algorytmu AES**.
 
-## RC4 **(Symetryczna kryptografia)**
+## RC4 **(Kryptografia symetryczna)**
 
 ### Cechy
 
@@ -82,7 +82,7 @@ Składa się z 3 głównych części:
 
 ![](<../../images/image (379).png>)
 
-## **AES (Symetryczna kryptografia)**
+## **AES (Kryptografia symetryczna)**
 
 ### **Cechy**
 
@@ -94,7 +94,7 @@ Składa się z 3 głównych części:
 
 ![](<../../images/image (380).png>)
 
-## Serpent **(Symetryczna kryptografia)**
+## Serpent **(Kryptografia symetryczna)**
 
 ### Cechy
 
@@ -108,13 +108,13 @@ Zauważ także **rozmiar pętli** (**132**) oraz **liczbę operacji XOR** w inst
 
 ![](<../../images/image (381).png>)
 
-Jak wspomniano wcześniej, ten kod może być wizualizowany w dowolnym dekompilatorze jako **bardzo długa funkcja**, ponieważ **nie ma skoków** w jej wnętrzu. Zdekompilowany kod może wyglądać następująco:
+Jak wspomniano wcześniej, ten kod można zobaczyć w dowolnym dekompilatorze jako **bardzo długą funkcję**, ponieważ **nie ma skoków** w jej wnętrzu. Zdekompilowany kod może wyglądać następująco:
 
 ![](<../../images/image (382).png>)
 
-Dlatego możliwe jest zidentyfikowanie tego algorytmu, sprawdzając **magiczną liczbę** i **początkowe XORy**, widząc **bardzo długą funkcję** i **porównując** niektóre **instrukcje** długiej funkcji **z implementacją** (jak przesunięcie w lewo o 7 i obrót w lewo o 22).
+Dlatego możliwe jest zidentyfikowanie tego algorytmu, sprawdzając **magiczną liczbę** i **początkowe XOR**, widząc **bardzo długą funkcję** i **porównując** niektóre **instrukcje** długiej funkcji **z implementacją** (jak przesunięcie w lewo o 7 i obrót w lewo o 22).
 
-## RSA **(Asymetryczna kryptografia)**
+## RSA **(Kryptografia asymetryczna)**
 
 ### Cechy
 
@@ -169,8 +169,8 @@ Algorytm haszujący CRC wygląda jak:
 
 ### Cechy
 
-- Brak rozpoznawalnych stałych
-- Możesz spróbować napisać algorytm w Pythonie i poszukać podobnych rzeczy w Internecie
+- Nie rozpoznawalne stałe
+- Możesz spróbować napisać algorytm w Pythonie i wyszukać podobne rzeczy w Internecie
 
 ### Identyfikacja
 

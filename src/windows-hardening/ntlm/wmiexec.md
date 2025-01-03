@@ -4,7 +4,7 @@
 
 ## Jak to działa
 
-Procesy mogą być otwierane na hostach, gdzie znana jest nazwa użytkownika oraz hasło lub hash, za pomocą WMI. Komendy są wykonywane przy użyciu WMI przez Wmiexec, co zapewnia pół-interaktywne doświadczenie powłoki.
+Procesy mogą być otwierane na hostach, gdzie znana jest nazwa użytkownika oraz hasło lub hash, za pomocą WMI. Komendy są wykonywane przy użyciu WMI przez Wmiexec, co zapewnia pół-interaktywną powłokę.
 
 **dcomexec.py:** Wykorzystując różne punkty końcowe DCOM, ten skrypt oferuje pół-interaktywną powłokę podobną do wmiexec.py, szczególnie wykorzystując obiekt DCOM ShellBrowserWindow. Obecnie obsługuje obiekty MMC20. Application, Shell Windows i Shell Browser Window. (źródło: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
 
@@ -13,7 +13,7 @@ Procesy mogą być otwierane na hostach, gdzie znana jest nazwa użytkownika ora
 ### Przestrzeń nazw
 
 Strukturalnie w hierarchii przypominającej katalog, najwyższym kontenerem WMI jest \root, pod którym zorganizowane są dodatkowe katalogi, zwane przestrzeniami nazw.
-Komendy do wyświetlenia przestrzeni nazw:
+Komendy do wylistowania przestrzeni nazw:
 ```bash
 # Retrieval of Root namespaces
 gwmi -namespace "root" -Class "__Namespace" | Select Name

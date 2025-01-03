@@ -4,7 +4,7 @@
 
 ## UAC
 
-[Kontrola Konta Użytkownika (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) to funkcja, która umożliwia **wyświetlanie komunikatu o zgodzie na podwyższone działania**. Aplikacje mają różne poziomy `integrity`, a program z **wysokim poziomem** może wykonywać zadania, które **mogą potencjalnie zagrozić systemowi**. Gdy UAC jest włączone, aplikacje i zadania zawsze **działają w kontekście bezpieczeństwa konta nie-administratora**, chyba że administrator wyraźnie autoryzuje te aplikacje/zadania do uzyskania dostępu na poziomie administratora w celu ich uruchomienia. Jest to funkcja ułatwiająca, która chroni administratorów przed niezamierzonymi zmianami, ale nie jest uważana za granicę bezpieczeństwa.
+[Kontrola Konta Użytkownika (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) to funkcja, która umożliwia **wyświetlenie komunikatu o zgodzie na podwyższone działania**. Aplikacje mają różne poziomy `integrity`, a program z **wysokim poziomem** może wykonywać zadania, które **mogą potencjalnie zagrozić systemowi**. Gdy UAC jest włączone, aplikacje i zadania zawsze **działają w kontekście bezpieczeństwa konta nie-administratora**, chyba że administrator wyraźnie autoryzuje te aplikacje/zadania do uzyskania dostępu na poziomie administratora w celu ich uruchomienia. Jest to funkcja ułatwiająca, która chroni administratorów przed niezamierzonymi zmianami, ale nie jest uważana za granicę bezpieczeństwa.
 
 Aby uzyskać więcej informacji na temat poziomów integralności:
 
@@ -22,12 +22,12 @@ Ta [strona](https://docs.microsoft.com/en-us/windows/security/identity-protectio
 | [Kontrola Konta Użytkownika: Zezwól aplikacjom UIAccess na wyświetlanie komunikatu o podwyższeniu bez użycia bezpiecznego pulpitu](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-allow-uiaccess-applications-to-prompt-for-elevation-without-using-the-secure-desktop) | EnableUIADesktopToggle      | Wyłączone                                                   |
 | [Kontrola Konta Użytkownika: Zachowanie komunikatu o podwyższeniu dla administratorów w Trybie Zatwierdzania Administratora](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-administrators-in-admin-approval-mode)                     | ConsentPromptBehaviorAdmin  | Prośba o zgodę dla nie-Windowsowych binariów              |
 | [Kontrola Konta Użytkownika: Zachowanie komunikatu o podwyższeniu dla standardowych użytkowników](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-standard-users)                                                                   | ConsentPromptBehaviorUser   | Prośba o dane uwierzytelniające na bezpiecznym pulpicie    |
-| [Kontrola Konta Użytkownika: Wykrywanie instalacji aplikacji i prośba o podwyższenie](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-detect-application-installations-and-prompt-for-elevation)                                                       | EnableInstallerDetection    | Włączone (domyślne dla domów) Wyłączone (domyślne dla przedsiębiorstw) |
-| [Kontrola Konta Użytkownika: Podwyższaj tylko pliki wykonywalne, które są podpisane i zweryfikowane](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-only-elevate-executables-that-are-signed-and-validated)                                                             | ValidateAdminCodeSignatures | Wyłączone                                                   |
-| [Kontrola Konta Użytkownika: Podwyższaj tylko aplikacje UIAccess, które są zainstalowane w bezpiecznych lokalizacjach](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-only-elevate-uiaccess-applications-that-are-installed-in-secure-locations)                       | EnableSecureUIAPaths        | Włączone                                                   |
+| [Kontrola Konta Użytkownika: Wykrywanie instalacji aplikacji i prośba o podwyższenie](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-detect-application-installations-and-prompt-for-elevation)                                                       | EnableInstallerDetection    | Włączone (domyślnie dla domów) Wyłączone (domyślnie dla przedsiębiorstw) |
+| [Kontrola Konta Użytkownika: Tylko podwyższaj wykonywalne, które są podpisane i zweryfikowane](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-only-elevate-executables-that-are-signed-and-validated)                                                             | ValidateAdminCodeSignatures | Wyłączone                                                   |
+| [Kontrola Konta Użytkownika: Tylko podwyższaj aplikacje UIAccess, które są zainstalowane w bezpiecznych lokalizacjach](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-only-elevate-uiaccess-applications-that-are-installed-in-secure-locations)                       | EnableSecureUIAPaths        | Włączone                                                   |
 | [Kontrola Konta Użytkownika: Uruchom wszystkich administratorów w Trybie Zatwierdzania Administratora](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-run-all-administrators-in-admin-approval-mode)                                                                               | EnableLUA                   | Włączone                                                   |
-| [Kontrola Konta Użytkownika: Przełącz na bezpieczny pulpit podczas prośby o podwyższenie](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-switch-to-the-secure-desktop-when-prompting-for-elevation)                                                       | PromptOnSecureDesktop       | Włączone                                                   |
-| [Kontrola Konta Użytkownika: Wirtualizuj niepowodzenia zapisu plików i rejestru do lokalizacji per-user](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-virtualize-file-and-registry-write-failures-to-per-user-locations)                                       | EnableVirtualization        | Włączone                                                   |
+| [Kontrola Konta Użytkownika: Przełącz na bezpieczny pulpit podczas wyświetlania komunikatu o podwyższeniu](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-switch-to-the-secure-desktop-when-prompting-for-elevation)                                                       | PromptOnSecureDesktop       | Włączone                                                   |
+| [Kontrola Konta Użytkownika: Wirtualizuj błędy zapisu plików i rejestru do lokalizacji per-user](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-virtualize-file-and-registry-write-failures-to-per-user-locations)                                       | EnableVirtualization        | Włączone                                                   |
 
 ### Teoria Ominięcia UAC
 
@@ -55,12 +55,12 @@ REG QUERY HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\
 HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System
 ConsentPromptBehaviorAdmin    REG_DWORD    0x5
 ```
-- Jeśli **`0`**, to UAC nie będzie pytać (jak **wyłączone**)
+- Jeśli **`0`**, UAC nie będzie pytać (jak **wyłączone**)
 - Jeśli **`1`**, administrator jest **proszony o nazwę użytkownika i hasło** do wykonania binarnego z wysokimi uprawnieniami (na Secure Desktop)
 - Jeśli **`2`** (**Zawsze powiadamiaj mnie**) UAC zawsze poprosi o potwierdzenie administratora, gdy spróbuje wykonać coś z wysokimi uprawnieniami (na Secure Desktop)
 - Jeśli **`3`**, jak `1`, ale niekoniecznie na Secure Desktop
 - Jeśli **`4`**, jak `2`, ale niekoniecznie na Secure Desktop
-- Jeśli **`5`** (**domyślnie**), poprosi administratora o potwierdzenie uruchomienia binarnych niebędących systemem Windows z wysokimi uprawnieniami
+- Jeśli **`5`** (**domyślnie**), poprosi administratora o potwierdzenie uruchomienia binariów innych niż Windows z wysokimi uprawnieniami
 
 Następnie musisz spojrzeć na wartość **`LocalAccountTokenFilterPolicy`**\
 Jeśli wartość to **`0`**, to tylko użytkownik **RID 500** (**wbudowany Administrator**) może wykonywać **zadania administracyjne bez UAC**, a jeśli to `1`, **wszystkie konta w grupie "Administratorzy"** mogą to robić.
@@ -72,8 +72,8 @@ Jeśli **`0`** (domyślnie), **wbudowane konto Administratora może** wykonywać
 
 - Jeśli `EnableLUA=0` lub **nie istnieje**, **brak UAC dla nikogo**
 - Jeśli `EnableLua=1` i **`LocalAccountTokenFilterPolicy=1`, brak UAC dla nikogo**
-- Jeśli `EnableLua=1` i **`LocalAccountTokenFilterPolicy=0` oraz `FilterAdministratorToken=0`, brak UAC dla RID 500 (Wbudowany Administrator)**
-- Jeśli `EnableLua=1` i **`LocalAccountTokenFilterPolicy=0` oraz `FilterAdministratorToken=1`, UAC dla wszystkich**
+- Jeśli `EnableLua=1` i **`LocalAccountTokenFilterPolicy=0` i `FilterAdministratorToken=0`, brak UAC dla RID 500 (Wbudowany Administrator)**
+- Jeśli `EnableLua=1` i **`LocalAccountTokenFilterPolicy=0` i `FilterAdministratorToken=1`, UAC dla wszystkich**
 
 Wszystkie te informacje można zebrać za pomocą modułu **metasploit**: `post/windows/gather/win_privs`
 
@@ -89,11 +89,11 @@ whoami /groups | findstr Level
 
 Obejście UAC jest potrzebne w następującej sytuacji: **UAC jest aktywowany, twój proces działa w kontekście średniej integralności, a twój użytkownik należy do grupy administratorów**.
 
-Ważne jest, aby wspomnieć, że **znacznie trudniej jest obejść UAC, jeśli jest na najwyższym poziomie bezpieczeństwa (Zawsze) niż jeśli jest na którymkolwiek z innych poziomów (Domyślny).**
+Ważne jest, aby wspomnieć, że **znacznie trudniej jest obejść UAC, jeśli jest on na najwyższym poziomie bezpieczeństwa (Zawsze) niż jeśli jest na którymkolwiek z innych poziomów (Domyślny).**
 
 ### UAC disabled
 
-Jeśli UAC jest już wyłączony (`ConsentPromptBehaviorAdmin` to **`0`**), możesz **wykonać odwrotny shell z uprawnieniami administratora** (wysoki poziom integralności) używając czegoś takiego:
+Jeśli UAC jest już wyłączony (`ConsentPromptBehaviorAdmin` to **`0`**), możesz **wykonać odwrotną powłokę z uprawnieniami administratora** (wysoki poziom integralności) używając czegoś takiego:
 ```bash
 #Put your reverse shell instead of "calc.exe"
 Start-Process powershell -Verb runAs "calc.exe"
@@ -117,7 +117,7 @@ cd C$
 #Or you could just access it:
 dir \\127.0.0.1\c$\Users\Administrator\Desktop
 ```
-### UAC obejście z Cobalt Strike
+### Ominięcie UAC za pomocą Cobalt Strike
 
 Techniki Cobalt Strike będą działać tylko wtedy, gdy UAC nie jest ustawione na maksymalny poziom bezpieczeństwa.
 ```bash
@@ -177,8 +177,8 @@ Jeśli nie zależy ci na hałasie, zawsze możesz **uruchomić coś takiego jak*
 Jeśli spojrzysz na **UACME**, zauważysz, że **większość obejść UAC nadużywa podatności Dll Hijacking** (głównie pisząc złośliwy dll w _C:\Windows\System32_). [Przeczytaj to, aby dowiedzieć się, jak znaleźć podatność Dll Hijacking](../windows-local-privilege-escalation/dll-hijacking.md).
 
 1. Znajdź binarny, który będzie **autoelevate** (sprawdź, czy po uruchomieniu działa na wysokim poziomie integralności).
-2. Za pomocą procmon znajdź zdarzenia "**NAME NOT FOUND**", które mogą być podatne na **DLL Hijacking**.
-3. Prawdopodobnie będziesz musiał **napisać** DLL wewnątrz niektórych **chronionych ścieżek** (takich jak C:\Windows\System32), gdzie nie masz uprawnień do zapisu. Możesz to obejść, używając:
+2. Użyj procmon, aby znaleźć zdarzenia "**NAME NOT FOUND**", które mogą być podatne na **DLL Hijacking**.
+3. Prawdopodobnie będziesz musiał **napisać** DLL w niektórych **chronionych ścieżkach** (takich jak C:\Windows\System32), gdzie nie masz uprawnień do zapisu. Możesz to obejść, używając:
    1. **wusa.exe**: Windows 7, 8 i 8.1. Umożliwia to wyodrębnienie zawartości pliku CAB w chronionych ścieżkach (ponieważ to narzędzie jest uruchamiane z wysokiego poziomu integralności).
    2. **IFileOperation**: Windows 10.
 4. Przygotuj **skrypt**, aby skopiować swój DLL do chronionej ścieżki i uruchomić podatny i autoelevated binarny.

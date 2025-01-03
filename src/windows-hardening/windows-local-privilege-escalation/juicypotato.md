@@ -3,7 +3,7 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 > [!WARNING]
-> **JuicyPotato nie działa** na Windows Server 2019 i Windows 10 w wersji 1809 i nowszych. Jednakże, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato) mogą być użyte do **uzyskania tych samych uprawnień i zdobycia dostępu na poziomie `NT AUTHORITY\SYSTEM`**. _**Sprawdź:**_
+> **JuicyPotato nie działa** na Windows Server 2019 i Windows 10 od wersji 1809. Jednak [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato) mogą być użyte do **uzyskania tych samych uprawnień i zdobycia dostępu na poziomie `NT AUTHORITY\SYSTEM`**. _**Sprawdź:**_
 
 {{#ref}}
 roguepotato-and-printspoofer.md
@@ -11,7 +11,7 @@ roguepotato-and-printspoofer.md
 
 ## Juicy Potato (wykorzystanie złotych uprawnień) <a href="#juicy-potato-abusing-the-golden-privileges" id="juicy-potato-abusing-the-golden-privileges"></a>
 
-_Słodzona wersja_ [_RottenPotatoNG_](https://github.com/breenmachine/RottenPotatoNG)_, z odrobiną soku, tzn. **kolejne narzędzie do eskalacji uprawnień lokalnych, z konta usługi Windows do NT AUTHORITY\SYSTEM**_
+_Słodzona wersja_ [_RottenPotatoNG_](https://github.com/breenmachine/RottenPotatoNG)_, z odrobiną soku, tj. **kolejne narzędzie do eskalacji uprawnień lokalnych, z kont usług Windows do NT AUTHORITY\SYSTEM**_
 
 #### Możesz pobrać juicypotato z [https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts](https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts)
 
@@ -48,7 +48,7 @@ JuicyPotato pozwala Ci:
 - **Argument procesu** _dostosuj argumenty uruchamianego procesu_
 - **Adres serwera RPC** _dla dyskretnego podejścia możesz uwierzytelnić się w zewnętrznym serwerze RPC_
 - **Port serwera RPC** _przydatne, jeśli chcesz uwierzytelnić się w zewnętrznym serwerze, a zapora blokuje port `135`…_
-- **TRYB TESTOWY** _głównie do celów testowych, tzn. testowanie CLSID-ów. Tworzy DCOM i drukuje użytkownika tokena. Zobacz_ [_tutaj do testowania_](http://ohpe.it/juicy-potato/Test/)
+- **TRYB TESTOWY** _głównie do celów testowych, tj. testowanie CLSID-ów. Tworzy DCOM i drukuje użytkownika tokena. Zobacz_ [_tutaj do testowania_](http://ohpe.it/juicy-potato/Test/)
 
 ### Użycie <a href="#usage" id="usage"></a>
 ```
@@ -69,7 +69,7 @@ Optional args:
 ```
 ### Ostateczne myśli <a href="#final-thoughts" id="final-thoughts"></a>
 
-[**Z Readme juicy-potato**](https://github.com/ohpe/juicy-potato/blob/master/README.md#final-thoughts)**:**
+[**Z juicy-potato Readme**](https://github.com/ohpe/juicy-potato/blob/master/README.md#final-thoughts)**:**
 
 Jeśli użytkownik ma uprawnienia `SeImpersonate` lub `SeAssignPrimaryToken`, to jesteś **SYSTEM**.
 

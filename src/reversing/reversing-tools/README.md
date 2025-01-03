@@ -57,7 +57,7 @@ Aby dekompilować bajtkod Java, te narzędzia mogą być bardzo pomocne:
 ### Używając IDA
 
 - **Rundll32** jest ładowany z określonych ścieżek dla wersji 64-bitowych i 32-bitowych.
-- **Windbg** jest wybierany jako debugger z włączoną opcją wstrzymywania przy ładowaniu/wyładowywaniu biblioteki.
+- **Windbg** jest wybierany jako debugger z opcją wstrzymania przy ładowaniu/wyładowywaniu biblioteki włączoną.
 - Parametry wykonania obejmują ścieżkę DLL i nazwę funkcji. Ta konfiguracja zatrzymuje wykonanie przy każdym ładowaniu DLL.
 
 ### Używając x64dbg/x32dbg
@@ -69,7 +69,7 @@ Aby dekompilować bajtkod Java, te narzędzia mogą być bardzo pomocne:
 
 - Punkty zatrzymania wykonania i konfiguracje są ilustrowane za pomocą zrzutów ekranu.
 
-## **ARM & MIPS**
+## **ARM i MIPS**
 
 - Do emulacji, [arm_now](https://github.com/nongiach/arm_now) jest przydatnym zasobem.
 
@@ -108,4 +108,7 @@ scdbg.exe -f shellcode /foff 0x0000004D # Wykonaj z offsetu
 
 # Kursy
 
-- [https://github.com/
+- [https://github.com/0xZ0F/Z0FCourse_ReverseEngineering](https://github.com/0xZ0F/Z0FCourse_ReverseEngineering)
+- [https://github.com/malrev/ABD](https://github.com/malrev/ABD) \(Deobfuskacja binarna\)
+
+{{#include ../../banners/hacktricks-training.md}}

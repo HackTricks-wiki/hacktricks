@@ -6,7 +6,7 @@
 
 ### [Informacje o systemie](windows-local-privilege-escalation/#system-info)
 
-- [ ] Uzyskaj [**informacje o systemie**](windows-local-privilege-escalation/#system-info)
+- [ ] Uzyskaj [**Informacje o systemie**](windows-local-privilege-escalation/#system-info)
 - [ ] Szukaj **eksploatacji jądra** [**za pomocą skryptów**](windows-local-privilege-escalation/#version-exploits)
 - [ ] Użyj **Google do wyszukiwania** eksploatacji **jądra**
 - [ ] Użyj **searchsploit do wyszukiwania** eksploatacji **jądra**
@@ -17,7 +17,7 @@
 - [ ] [**Eksploatacja WSUS**](windows-local-privilege-escalation/#wsus)?
 - [ ] [**AlwaysInstallElevated**](windows-local-privilege-escalation/#alwaysinstallelevated)?
 
-### [Enumaracja logów/AV](windows-local-privilege-escalation/#enumeration)
+### [Logowanie/wyliczanie AV](windows-local-privilege-escalation/#enumeration)
 
 - [ ] Sprawdź ustawienia [**Audytu**](windows-local-privilege-escalation/#audit-settings) i [**WEF**](windows-local-privilege-escalation/#wef)
 - [ ] Sprawdź [**LAPS**](windows-local-privilege-escalation/#laps)
@@ -33,7 +33,7 @@
 - [ ] Czy jesteś [**członkiem jakiejkolwiek grupy z uprawnieniami**](windows-local-privilege-escalation/#privileged-groups)?
 - [ ] Sprawdź, czy masz [jakiekolwiek z tych tokenów włączonych](windows-local-privilege-escalation/#token-manipulation): **SeImpersonatePrivilege, SeAssignPrimaryPrivilege, SeTcbPrivilege, SeBackupPrivilege, SeRestorePrivilege, SeCreateTokenPrivilege, SeLoadDriverPrivilege, SeTakeOwnershipPrivilege, SeDebugPrivilege** ?
 - [ ] [**Sesje użytkowników**](windows-local-privilege-escalation/#logged-users-sessions)?
-- [ ] Sprawdź [**domy użytkowników**](windows-local-privilege-escalation/#home-folders) (dostęp?)
+- [ ] Sprawdź [**domy** użytkowników](windows-local-privilege-escalation/#home-folders) (dostęp?)
 - [ ] Sprawdź [**Politykę haseł**](windows-local-privilege-escalation/#password-policy)
 - [ ] Co jest [**w schowku**](windows-local-privilege-escalation/#get-the-content-of-the-clipboard)?
 
@@ -54,7 +54,7 @@
 - [ ] [Czy możesz **zmodyfikować jakąkolwiek usługę**?](windows-local-privilege-escalation/#permissions)
 - [ ] [Czy możesz **zmodyfikować** **binarne** pliki, które są **wykonywane** przez jakąkolwiek **usługę**?](windows-local-privilege-escalation/#modify-service-binary-path)
 - [ ] [Czy możesz **zmodyfikować** **rejestr** jakiejkolwiek **usługi**?](windows-local-privilege-escalation/#services-registry-modify-permissions)
-- [ ] [Czy możesz skorzystać z jakiejkolwiek **niecytowanej usługi** binarnej **ścieżki**?](windows-local-privilege-escalation/#unquoted-service-paths)
+- [ ] [Czy możesz skorzystać z jakiejkolwiek **niecytowanej ścieżki binarnej usługi**?](windows-local-privilege-escalation/#unquoted-service-paths)
 
 ### [**Aplikacje**](windows-local-privilege-escalation/#applications)
 
@@ -70,7 +70,7 @@
 
 ### [Sieć](windows-local-privilege-escalation/#network)
 
-- [ ] Enumaruj sieć (udostępnienia, interfejsy, trasy, sąsiedzi, ...)
+- [ ] Wylicz sieć (udostępnienia, interfejsy, trasy, sąsiedzi, ...)
 - [ ] Zwróć szczególną uwagę na usługi sieciowe nasłuchujące na localhost (127.0.0.1)
 
 ### [Dane uwierzytelniające Windows](windows-local-privilege-escalation/#windows-credentials)
@@ -81,7 +81,7 @@
 - [ ] Hasła zapisanych [**sieci Wifi**](windows-local-privilege-escalation/#wifi)?
 - [ ] Ciekawe informacje w [**zapisanych połączeniach RDP**](windows-local-privilege-escalation/#saved-rdp-connections)?
 - [ ] Hasła w [**niedawno uruchomionych poleceniach**](windows-local-privilege-escalation/#recently-run-commands)?
-- [ ] [**Menadżer danych uwierzytelniających pulpitu zdalnego**](windows-local-privilege-escalation/#remote-desktop-credential-manager) hasła?
+- [ ] [**Menadżer danych uwierzytelniających zdalnego pulpitu**](windows-local-privilege-escalation/#remote-desktop-credential-manager) hasła?
 - [ ] [**AppCmd.exe** istnieje](windows-local-privilege-escalation/#appcmd-exe)? Dane uwierzytelniające?
 - [ ] [**SCClient.exe**](windows-local-privilege-escalation/#scclient-sccm)? Ładowanie DLL z boku?
 

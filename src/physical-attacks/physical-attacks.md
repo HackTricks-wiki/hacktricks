@@ -26,7 +26,7 @@ RAM przechowuje dane przez krótki czas po odcięciu zasilania, zazwyczaj przez 
 
 ### Live CD/USB do Dostępu do Systemu
 
-Zmiana binarnych plików systemowych, takich jak **_sethc.exe_** lub **_Utilman.exe_**, na kopię **_cmd.exe_** może zapewnić dostęp do wiersza poleceń z uprawnieniami systemowymi. Narzędzia takie jak **chntpw** mogą być używane do edytowania pliku **SAM** instalacji Windows, umożliwiając zmiany hasła.
+Zmiana binarnych plików systemowych, takich jak **_sethc.exe_** lub **_Utilman.exe_**, na kopię **_cmd.exe_** może zapewnić dostęp do wiersza poleceń z uprawnieniami systemowymi. Narzędzia takie jak **chntpw** mogą być używane do edytowania pliku **SAM** instalacji Windows, umożliwiając zmiany haseł.
 
 **Kon-Boot** to narzędzie, które ułatwia logowanie do systemów Windows bez znajomości hasła, tymczasowo modyfikując jądro Windows lub UEFI. Więcej informacji można znaleźć na [https://www.raymond.cc](https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/).
 
@@ -40,7 +40,7 @@ Zmiana binarnych plików systemowych, takich jak **_sethc.exe_** lub **_Utilman.
 
 #### Urządzenia BAD USB
 
-Urządzenia takie jak **Rubber Ducky** i **Teensyduino** służą jako platformy do tworzenia **bad USB**, zdolnych do wykonywania zdefiniowanych ładunków po podłączeniu do docelowego komputera.
+Urządzenia takie jak **Rubber Ducky** i **Teensyduino** służą jako platformy do tworzenia urządzeń **bad USB**, zdolnych do wykonywania zdefiniowanych ładunków po podłączeniu do docelowego komputera.
 
 #### Kopia Cieniowa Woluminu
 
@@ -50,7 +50,7 @@ Uprawnienia administratora pozwalają na tworzenie kopii wrażliwych plików, w 
 
 Szyfrowanie BitLocker można potencjalnie obejść, jeśli **hasło odzyskiwania** zostanie znalezione w pliku zrzutu pamięci (**MEMORY.DMP**). Narzędzia takie jak **Elcomsoft Forensic Disk Decryptor** lub **Passware Kit Forensic** mogą być wykorzystane w tym celu.
 
-### Inżynieria Społeczna dla Dodania Klucza Odzyskiwania
+### Inżynieria Społeczna w celu Dodania Klucza Odzyskiwania
 
 Nowy klucz odzyskiwania BitLocker można dodać za pomocą taktyk inżynierii społecznej, przekonując użytkownika do wykonania polecenia, które dodaje nowy klucz odzyskiwania składający się z zer, co upraszcza proces deszyfrowania.
 

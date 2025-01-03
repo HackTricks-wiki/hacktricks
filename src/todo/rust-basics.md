@@ -1,6 +1,6 @@
-# Rust Basics
+# Podstawy Rust
 
-### Typy generyczne
+### Typy ogólne
 
 Utwórz strukturę, w której 1 z ich wartości może być dowolnym typem
 ```rust
@@ -72,7 +72,7 @@ for (key, hashvalue) in &*map {
 for key in map.keys() {
 for value in map.values() {
 ```
-### Rekurencyjna Pudełko
+### Rekurencyjna Skrzynka
 ```rust
 enum List {
 Cons(i32, List),
@@ -267,7 +267,7 @@ println!("{:?}", apple);
 ```
 #### Wątki
 
-W tym przypadku przekażemy wątkowi zmienną, którą będzie mógł modyfikować
+W tym przypadku przekażemy wątkowi zmienną, którą będzie mógł modyfikować.
 ```rust
 fn main() {
 let status = Arc::new(Mutex::new(JobStatus { jobs_completed: 0 }));

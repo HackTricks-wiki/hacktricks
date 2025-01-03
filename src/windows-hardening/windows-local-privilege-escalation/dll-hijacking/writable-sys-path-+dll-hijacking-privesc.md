@@ -53,15 +53,15 @@ Uruchamiając to na darmowej **wirtualnej maszynie (vmware) Windows 11** uzyska�
 
 <figure><img src="../../../images/image (607).png" alt=""><figcaption></figcaption></figure>
 
-W tym przypadku .exe są bezużyteczne, więc je zignoruj, brakujące DLL pochodziły z:
+W tym przypadku .exe są bezużyteczne, więc je zignoruj, brakujące DLL pochodziły od:
 
 | Usługa                          | Dll                | Linia CMD                                                           |
 | ------------------------------- | ------------------ | ------------------------------------------------------------------- |
-| Harmonogram zadań (Schedule)   | WptsExtensions.dll | `C:\Windows\system32\svchost.exe -k netsvcs -p -s Schedule`         |
+| Harmonogram zadań (Schedule)   | WptsExtensions.dll | `C:\Windows\system32\svchost.exe -k netsvcs -p -s Schedule`        |
 | Usługa polityki diagnostycznej (DPS) | Unknown.DLL        | `C:\Windows\System32\svchost.exe -k LocalServiceNoNetwork -p -s DPS` |
-| ???                             | SharedRes.dll      | `C:\Windows\system32\svchost.exe -k UnistackSvcGroup`               |
+| ???                             | SharedRes.dll      | `C:\Windows\system32\svchost.exe -k UnistackSvcGroup`              |
 
-Po znalezieniu tego, znalazłem ten interesujący post na blogu, który również wyjaśnia, jak [**nadużyć WptsExtensions.dll do eskalacji uprawnień**](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll). Co zamierzamy teraz zrobić.
+Po znalezieniu tego, znalazłem ten interesujący post na blogu, który również wyjaśnia, jak [**nadużyć WptsExtensions.dll do eskalacji uprawnień**](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll). Co właśnie **zamierzamy teraz zrobić**.
 
 ### Eksploatacja
 

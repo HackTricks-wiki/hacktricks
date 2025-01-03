@@ -17,14 +17,14 @@ Aby zastosować tę technikę, muszą być spełnione określone warunki:
 - Wymagany jest co najmniej jeden kontroler domeny Windows Server 2016.
 - Kontroler domeny musi mieć zainstalowany cyfrowy certyfikat uwierzytelniania serwera.
 - Active Directory musi być na poziomie funkcjonalnym Windows Server 2016.
-- Wymagane jest konto z delegowanymi uprawnieniami do modyfikacji atrybutu msDS-KeyCredentialLink obiektu docelowego.
+- Wymagana jest konto z delegowanymi uprawnieniami do modyfikacji atrybutu msDS-KeyCredentialLink obiektu docelowego.
 
 ## Nadużycie
 
 Nadużycie Key Trust dla obiektów komputerowych obejmuje kroki wykraczające poza uzyskanie Ticket Granting Ticket (TGT) i hasha NTLM. Opcje obejmują:
 
 1. Utworzenie **RC4 silver ticket**, aby działać jako uprzywilejowani użytkownicy na zamierzonym hoście.
-2. Użycie TGT z **S4U2Self** do impersonacji **uprzywilejowanych użytkowników**, co wymaga zmian w Service Ticket, aby dodać klasę usługi do nazwy usługi.
+2. Użycie TGT z **S4U2Self** do podszywania się pod **uprzywilejowanych użytkowników**, co wymaga zmian w Service Ticket, aby dodać klasę usługi do nazwy usługi.
 
 Znaczną zaletą nadużycia Key Trust jest jego ograniczenie do prywatnego klucza generowanego przez atakującego, unikając delegacji do potencjalnie wrażliwych kont i nie wymagając tworzenia konta komputerowego, co może być trudne do usunięcia.
 
@@ -51,7 +51,7 @@ python3 pywhisker.py -d "domain.local" -u "user1" -p "complexpassword" --target 
 ```
 ### [ShadowSpray](https://github.com/Dec0ne/ShadowSpray/)
 
-ShadowSpray ma na celu **wykorzystanie uprawnień GenericWrite/GenericAll, które szerokie grupy użytkowników mogą mieć nad obiektami domeny**, aby szeroko stosować ShadowCredentials. Obejmuje to logowanie do domeny, weryfikację poziomu funkcjonalnego domeny, enumerację obiektów domeny oraz próbę dodania KeyCredentials w celu uzyskania TGT i ujawnienia NT hash. Opcje czyszczenia i taktyki rekurencyjnego wykorzystywania zwiększają jego użyteczność.
+ShadowSpray ma na celu **wykorzystanie uprawnień GenericWrite/GenericAll, które mogą mieć szerokie grupy użytkowników nad obiektami domeny**, aby szeroko stosować ShadowCredentials. Obejmuje to logowanie do domeny, weryfikację poziomu funkcjonalnego domeny, enumerację obiektów domeny oraz próbę dodania KeyCredentials w celu uzyskania TGT i ujawnienia NT hash. Opcje czyszczenia i taktyki rekurencyjnego wykorzystania zwiększają jego użyteczność.
 
 ## References
 
