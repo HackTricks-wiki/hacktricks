@@ -4,18 +4,18 @@
 
 ## Informations de base
 
-Le véritable **point d'entrée** d'un binaire Mach-o est le lien dynamique, défini dans `LC_LOAD_DYLINKER`, généralement `/usr/lib/dyld`.
+Le véritable **point d'entrée** d'un binaire Mach-o est le lien dynamique, défini dans `LC_LOAD_DYLINKER`, qui est généralement `/usr/lib/dyld`.
 
 Ce lien devra localiser toutes les bibliothèques exécutables, les mapper en mémoire et lier toutes les bibliothèques non paresseuses. Ce n'est qu'après ce processus que le point d'entrée du binaire sera exécuté.
 
 Bien sûr, **`dyld`** n'a pas de dépendances (il utilise des appels système et des extraits de libSystem).
 
 > [!CAUTION]
-> Si ce lien contient une vulnérabilité, comme il est exécuté avant l'exécution de tout binaire (même ceux avec des privilèges élevés), il serait possible d'**escalader les privilèges**.
+> Si ce lien contient une vulnérabilité, comme il est exécuté avant d'exécuter tout binaire (même ceux avec des privilèges élevés), il serait possible d'**escalader les privilèges**.
 
 ### Flux
 
-Dyld sera chargé par **`dyldboostrap::start`**, qui chargera également des éléments tels que le **canari de pile**. Cela est dû au fait que cette fonction recevra dans son vecteur d'arguments **`apple`** ces valeurs **sensibles**.
+Dyld sera chargé par **`dyldboostrap::start`**, qui chargera également des éléments tels que le **canari de pile**. Cela est dû au fait que cette fonction recevra dans son vecteur d'arguments **`apple`** ces valeurs **sensibles** et d'autres.
 
 **`dyls::_main()`** est le point d'entrée de dyld et sa première tâche est d'exécuter `configureProcessRestrictions()`, qui restreint généralement les variables d'environnement **`DYLD_*`** expliquées dans :
 
@@ -28,7 +28,7 @@ Ensuite, il mappe le cache partagé dyld qui prélie tous les systèmes de bibli
 1. il commence à charger les bibliothèques insérées avec `DYLD_INSERT_LIBRARIES` (si autorisé)
 2. Ensuite, celles mises en cache partagées
 3. Puis, celles importées
-1. &#x20;Puis continue à importer des bibliothèques récursivement
+1. &#x20;Ensuite, continue à importer des bibliothèques récursivement
 
 Une fois que tout est chargé, les **initialisateurs** de ces bibliothèques sont exécutés. Ceux-ci sont codés en utilisant **`__attribute__((constructor))`** défini dans le `LC_ROUTINES[_64]` (désormais obsolète) ou par pointeur dans une section marquée avec `S_MOD_INIT_FUNC_POINTERS` (généralement : **`__DATA.__MOD_INIT_FUNC`**).
 
@@ -107,7 +107,7 @@ Cette dernière fonction, après avoir trouvé l'adresse de la fonction recherch
 
 Enfin, **`dyld_stub_binder`** doit trouver la fonction indiquée et l'écrire à la bonne adresse pour ne pas la rechercher à nouveau. Pour ce faire, il utilise des opcodes (une machine à états finis) au sein de dyld.
 
-## vecteur d'arguments apple\[] 
+## vecteur d'arguments apple\[]
 
 Dans macOS, la fonction principale reçoit en réalité 4 arguments au lieu de 3. Le quatrième s'appelle apple et chaque entrée est sous la forme `key=value`. Par exemple :
 ```c
@@ -180,7 +180,7 @@ il est possible de voir toutes ces valeurs intéressantes en déboguant avant d'
 
 ## dyld_all_image_infos
 
-Ceci est une structure exportée par dyld contenant des informations sur l'état de dyld qui peut être trouvée dans le [**code source**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html) avec des informations comme la version, le pointeur vers le tableau dyld_image_info, vers dyld_image_notifier, si le processus est détaché du cache partagé, si l'initialiseur de libSystem a été appelé, pointeur vers l'en-tête Mach de dyls, pointeur vers la chaîne de version de dyld...
+C'est une structure exportée par dyld contenant des informations sur l'état de dyld qui peut être trouvée dans le [**code source**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html) avec des informations comme la version, le pointeur vers le tableau dyld_image_info, vers dyld_image_notifier, si le processus est détaché du cache partagé, si l'initialiseur de libSystem a été appelé, pointeur vers l'en-tête Mach de dyls, pointeur vers la chaîne de version de dyld...
 
 ## dyld env variables
 
@@ -264,12 +264,12 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 - `DYLD_PRINT_BINDINGS`: Imprimer les symboles lors de la liaison
 - `DYLD_WEAK_BINDINGS`: Imprimer uniquement les symboles faibles lors de la liaison
 - `DYLD_PRINT_CODE_SIGNATURES`: Imprimer les opérations d'enregistrement de signature de code
-- `DYLD_PRINT_DOFS`: Imprimer les sections de format d'objet D-Trace telles que chargées
+- `DYLD_PRINT_DOFS`: Imprimer les sections de format d'objet D-Trace lors du chargement
 - `DYLD_PRINT_ENV`: Imprimer l'environnement vu par dyld
 - `DYLD_PRINT_INTERPOSTING`: Imprimer les opérations d'interposition
 - `DYLD_PRINT_LIBRARIES`: Imprimer les bibliothèques chargées
 - `DYLD_PRINT_OPTS`: Imprimer les options de chargement
-- `DYLD_REBASING`: Imprimer les opérations de rebasing de symboles
+- `DYLD_REBASING`: Imprimer les opérations de réaffectation de symboles
 - `DYLD_RPATHS`: Imprimer les expansions de @rpath
 - `DYLD_PRINT_SEGMENTS`: Imprimer les mappages des segments Mach-O
 - `DYLD_PRINT_STATISTICS`: Imprimer les statistiques de timing

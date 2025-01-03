@@ -80,12 +80,12 @@ Il utilise également quelques sections dans le segment **`__TEXT`** pour stocke
 - **`__objc_classname`** (C-String): Noms de classe
 - **`__objc_methtype`** (C-String): Types de méthode
 
-### Encodage de type
+### Encodage des types
 
 Objective-C utilise un certain mangle pour encoder les sélecteurs et les types de variables de types simples et complexes :
 
 - Les types primitifs utilisent leur première lettre du type `i` pour `int`, `c` pour `char`, `l` pour `long`... et utilisent la lettre majuscule dans le cas où c'est non signé (`L` pour `unsigned Long`).
-- D'autres types de données dont les lettres sont utilisées ou sont spéciales, utilisent d'autres lettres ou symboles comme `q` pour `long long`, `b` pour `bitfields`, `B` pour `booléens`, `#` pour `classes`, `@` pour `id`, `*` pour `pointeurs char`, `^` pour `pointeurs` génériques et `?` pour `indéfini`.
+- D'autres types de données dont les lettres sont utilisées ou sont spéciales, utilisent d'autres lettres ou symboles comme `q` pour `long long`, `b` pour `bitfields`, `B` pour `booleans`, `#` pour `classes`, `@` pour `id`, `*` pour `char pointers`, `^` pour `pointers` génériques et `?` pour `undefined`.
 - Les tableaux, structures et unions utilisent `[`, `{` et `(`
 
 #### Exemple de déclaration de méthode
@@ -140,6 +140,6 @@ data()->setFlags(set);
 Cette classe utilise certains bits du champ isa pour indiquer des informations sur la classe.
 
 Ensuite, la structure a un pointeur vers la structure `class_ro_t` stockée sur le disque qui contient des attributs de la classe comme son nom, ses méthodes de base, ses propriétés et ses variables d'instance.\
-Pendant l'exécution, une structure supplémentaire `class_rw_t` est utilisée, contenant des pointeurs qui peuvent être modifiés, tels que des méthodes, des protocoles, des propriétés... 
+Pendant l'exécution, une structure supplémentaire `class_rw_t` est utilisée, contenant des pointeurs qui peuvent être modifiés tels que des méthodes, des protocoles, des propriétés... 
 
 {{#include ../../../banners/hacktricks-training.md}}

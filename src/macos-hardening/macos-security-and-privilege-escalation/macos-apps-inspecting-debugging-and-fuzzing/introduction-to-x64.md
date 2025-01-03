@@ -26,7 +26,7 @@ La convention d'appel x64 varie selon les systèmes d'exploitation. Par exemple 
 - **Windows** : Les **quatre premiers paramètres** sont passés dans les registres **`rcx`**, **`rdx`**, **`r8`**, et **`r9`**. Les paramètres supplémentaires sont poussés sur la pile. La valeur de retour est dans **`rax`**.
 - **System V (couramment utilisé dans les systèmes de type UNIX)** : Les **six premiers paramètres entiers ou pointeurs** sont passés dans les registres **`rdi`**, **`rsi`**, **`rdx`**, **`rcx`**, **`r8`**, et **`r9`**. La valeur de retour est également dans **`rax`**.
 
-Si la fonction a plus de six entrées, le **reste sera passé sur la pile**. **RSP**, le pointeur de pile, doit être **aligné sur 16 octets**, ce qui signifie que l'adresse à laquelle il pointe doit être divisible par 16 avant qu'un appel ne se produise. Cela signifie que normalement nous devrions nous assurer que RSP est correctement aligné dans notre shellcode avant de faire un appel de fonction. Cependant, en pratique, les appels système fonctionnent souvent même si cette exigence n'est pas respectée.
+Si la fonction a plus de six entrées, le **reste sera passé sur la pile**. **RSP**, le pointeur de pile, doit être **aligné sur 16 octets**, ce qui signifie que l'adresse à laquelle il pointe doit être divisible par 16 avant qu'un appel ne se produise. Cela signifie que normalement, nous devrions nous assurer que RSP est correctement aligné dans notre shellcode avant de faire un appel de fonction. Cependant, en pratique, les appels système fonctionnent souvent même si cette exigence n'est pas respectée.
 
 ### Convention d'appel en Swift
 
@@ -34,7 +34,7 @@ Swift a sa propre **convention d'appel** qui peut être trouvée dans [**https:/
 
 ### **Instructions courantes**
 
-Les instructions x64 ont un ensemble riche, maintenant la compatibilité avec les instructions x86 antérieures et en introduisant de nouvelles.
+Les instructions x64 ont un ensemble riche, maintenant la compatibilité avec les anciennes instructions x86 et en introduisant de nouvelles.
 
 - **`mov`** : **Déplacer** une valeur d'un **registre** ou d'une **emplacement mémoire** à un autre.
 - Exemple : `mov rax, rbx` — Déplace la valeur de `rbx` vers `rax`.
@@ -240,7 +240,7 @@ section .data
 cat_path:      db "/bin/cat", 0
 passwd_path:   db "/etc/passwd", 0
 ```
-#### Invoker une commande avec sh
+#### Invoker la commande avec sh
 ```armasm
 bits 64
 section .text

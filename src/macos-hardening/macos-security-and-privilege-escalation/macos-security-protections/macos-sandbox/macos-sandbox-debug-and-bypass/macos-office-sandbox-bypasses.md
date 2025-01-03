@@ -4,7 +4,7 @@
 
 ### Contournement du Sandbox Word via les Agents de Lancement
 
-L'application utilise un **Sandbox personnalisé** avec le droit **`com.apple.security.temporary-exception.sbpl`** et ce sandbox personnalisé permet d'écrire des fichiers n'importe où tant que le nom du fichier commence par `~$`: `(require-any (require-all (vnode-type REGULAR-FILE) (regex #"(^|/)~$[^/]+$")))`
+L'application utilise un **Sandbox personnalisé** avec le droit **`com.apple.security.temporary-exception.sbpl`** et ce sandbox personnalisé permet d'écrire des fichiers n'importe où tant que le nom de fichier commence par `~$`: `(require-any (require-all (vnode-type REGULAR-FILE) (regex #"(^|/)~$[^/]+$")))`
 
 Par conséquent, l'évasion était aussi simple que **d'écrire un `plist`** LaunchAgent dans `~/Library/LaunchAgents/~$escape.plist`.
 
@@ -42,7 +42,7 @@ Consultez le [**rapport original ici**](https://perception-point.io/blog/technic
 
 ### Contournement du Sandbox Word avec Open et stdin
 
-L'utilitaire **`open`** prend également en charge le paramètre **`--stdin`** (et après le contournement précédent, il n'était plus possible d'utiliser `--env`).
+L'utilitaire **`open`** supportait également le paramètre **`--stdin`** (et après le contournement précédent, il n'était plus possible d'utiliser `--env`).
 
 Le fait est que même si **`python`** était signé par Apple, il **n'exécutera pas** un script avec l'attribut **`quarantine`**. Cependant, il était possible de lui passer un script depuis stdin afin qu'il ne vérifie pas s'il était mis en quarantaine ou non :&#x20;
 

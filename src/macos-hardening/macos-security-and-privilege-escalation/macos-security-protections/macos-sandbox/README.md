@@ -54,7 +54,7 @@ drwx------   2 username  staff    64 Mar 24 18:02 SystemData
 drwx------   2 username  staff    64 Mar 24 18:02 tmp
 ```
 > [!CAUTION]
-> Notez que même si les symlinks sont là pour "s'échapper" du Sandbox et accéder à d'autres dossiers, l'App doit toujours **avoir des permissions** pour y accéder. Ces permissions se trouvent dans le **`.plist`** dans les `RedirectablePaths`.
+> Notez que même si les symlinks sont là pour "s'échapper" du Sandbox et accéder à d'autres dossiers, l'App doit toujours **avoir les permissions** pour y accéder. Ces permissions se trouvent dans le **`.plist`** dans les `RedirectablePaths`.
 
 Le **`SandboxProfileData`** est le profil de sandbox compilé CFData échappé en B64.
 ```bash
@@ -106,11 +106,11 @@ AAAhAboBAAAAAAgAAABZAO4B5AHjBMkEQAUPBSsGPwsgASABHgEgASABHwEf...
 [...]
 ```
 > [!WARNING]
-> Tout ce qui est créé/modifié par une application en bac à sable recevra l'**attribut de quarantaine**. Cela empêchera un espace de bac à sable en déclenchant Gatekeeper si l'application en bac à sable essaie d'exécuter quelque chose avec **`open`**.
+> Tout ce qui est créé/modifié par une application sandboxée recevra l'**attribut de quarantaine**. Cela empêchera un espace sandbox en déclenchant Gatekeeper si l'application sandbox essaie d'exécuter quelque chose avec **`open`**.
 
-## Profils de Bac à Sable
+## Profils de Sandbox
 
-Les profils de bac à sable sont des fichiers de configuration qui indiquent ce qui sera **autorisé/interdit** dans ce **bac à sable**. Il utilise le **Langage de Profil de Bac à Sable (SBPL)**, qui utilise le [**Scheme**](<https://en.wikipedia.org/wiki/Scheme_(programming_language)>) langage de programmation.
+Les profils de Sandbox sont des fichiers de configuration qui indiquent ce qui sera **autorisé/interdit** dans ce **Sandbox**. Il utilise le **Sandbox Profile Language (SBPL)**, qui utilise le langage de programmation [**Scheme**](<https://en.wikipedia.org/wiki/Scheme_(programming_language)>).
 
 Ici, vous pouvez trouver un exemple :
 ```scheme
@@ -145,7 +145,7 @@ Les applications de l'**App Store** utilisent le **profil** **`/System/Library/S
 
 Ensuite, certains **services de démon Apple** utilisent différents profils situés dans `/System/Library/Sandbox/Profiles/*.sb` ou `/usr/share/sandbox/*.sb`. Ces sandboxes sont appliquées dans la fonction principale appelant l'API `sandbox_init_XXX`.
 
-**SIP** est un profil de Sandbox appelé platform_profile dans `/System/Library/Sandbox/rootless.conf`.
+**SIP** est un profil de sandbox appelé platform_profile dans `/System/Library/Sandbox/rootless.conf`.
 
 ### Exemples de Profils de Sandbox
 
@@ -287,14 +287,14 @@ Les extensions permettent de donner des privilèges supplémentaires à un objet
 
 Les extensions sont stockées dans le deuxième emplacement d'étiquette MACF accessible depuis les informations d'identification du processus. Le **`sbtool`** suivant peut accéder à ces informations.
 
-Notez que les extensions sont généralement accordées par des processus autorisés, par exemple, `tccd` accordera le jeton d'extension de `com.apple.tcc.kTCCServicePhotos` lorsqu'un processus essaie d'accéder aux photos et a été autorisé dans un message XPC. Ensuite, le processus devra consommer le jeton d'extension pour qu'il soit ajouté à celui-ci.\
+Notez que les extensions sont généralement accordées par des processus autorisés, par exemple, `tccd` accordera le jeton d'extension de `com.apple.tcc.kTCCServicePhotos` lorsqu'un processus essaie d'accéder aux photos et a été autorisé dans un message XPC. Ensuite, le processus devra consommer le jeton d'extension pour qu'il soit ajouté.\
 Notez que les jetons d'extension sont de longs hexadécimaux qui codent les permissions accordées. Cependant, ils n'ont pas le PID autorisé codé en dur, ce qui signifie que tout processus ayant accès au jeton pourrait être **consommé par plusieurs processus**.
 
 Notez que les extensions sont également très liées aux attributions, donc avoir certaines attributions pourrait automatiquement accorder certaines extensions.
 
 ### **Vérifier les privilèges PID**
 
-[**Selon cela**](https://www.youtube.com/watch?v=mG715HcDgO8&t=3011s), les fonctions **`sandbox_check`** (c'est un `__mac_syscall`), peuvent vérifier **si une opération est autorisée ou non** par le sandbox dans un certain PID, un jeton d'audit ou un ID unique.
+[**Selon cela**](https://www.youtube.com/watch?v=mG715HcDgO8&t=3011s), les fonctions **`sandbox_check`** (c'est un `__mac_syscall`), peuvent vérifier **si une opération est autorisée ou non** par le sandbox dans un certain PID, jeton d'audit ou ID unique.
 
 L'outil [**sbtool**](http://newosxbook.com/src.jl?tree=listings&file=sbtool.c) (trouvez-le [compilé ici](https://newosxbook.com/articles/hitsb.html)) peut vérifier si un PID peut effectuer certaines actions :
 ```bash
@@ -352,21 +352,21 @@ L'appel de fonction `___sandbox_ms` enveloppe `mac_syscall` en indiquant dans le
 
 Notez qu'en iOS, l'extension du noyau contient **tous les profils codés en dur** à l'intérieur du segment `__TEXT.__const` pour éviter qu'ils ne soient modifiés. Voici quelques fonctions intéressantes de l'extension du noyau :
 
-- **`hook_policy_init`** : Il accroche `mpo_policy_init` et est appelé après `mac_policy_register`. Il effectue la plupart des initialisations du Sandbox. Il initialise également SIP.
-- **`hook_policy_initbsd`** : Il configure l'interface sysctl en enregistrant `security.mac.sandbox.sentinel`, `security.mac.sandbox.audio_active` et `security.mac.sandbox.debug_mode` (si démarré avec `PE_i_can_has_debugger`).
-- **`hook_policy_syscall`** : Il est appelé par `mac_syscall` avec "Sandbox" comme premier argument et un code indiquant l'opération dans le deuxième. Un switch est utilisé pour trouver le code à exécuter selon le code demandé.
+- **`hook_policy_init`** : Elle accroche `mpo_policy_init` et est appelée après `mac_policy_register`. Elle effectue la plupart des initialisations du Sandbox. Elle initialise également SIP.
+- **`hook_policy_initbsd`** : Elle configure l'interface sysctl en enregistrant `security.mac.sandbox.sentinel`, `security.mac.sandbox.audio_active` et `security.mac.sandbox.debug_mode` (si démarré avec `PE_i_can_has_debugger`).
+- **`hook_policy_syscall`** : Elle est appelée par `mac_syscall` avec "Sandbox" comme premier argument et un code indiquant l'opération dans le deuxième. Un switch est utilisé pour trouver le code à exécuter selon le code demandé.
 
 ### MACF Hooks
 
-**`Sandbox.kext`** utilise plus d'une centaine de hooks via MACF. La plupart des hooks vérifieront simplement certains cas triviaux qui permettent d'effectuer l'action, sinon, ils appelleront **`cred_sb_evalutate`** avec les **identifiants** de MACF et un nombre correspondant à l'**opération** à effectuer et un **buffer** pour la sortie.
+**`Sandbox.kext`** utilise plus d'une centaine de hooks via MACF. La plupart des hooks vérifieront simplement certains cas triviaux qui permettent d'effectuer l'action, sinon, elles appelleront **`cred_sb_evalutate`** avec les **identifiants** de MACF et un nombre correspondant à l'**opération** à effectuer et un **buffer** pour la sortie.
 
-Un bon exemple de cela est la fonction **`_mpo_file_check_mmap`** qui accroche **`mmap`** et qui commencera à vérifier si la nouvelle mémoire va être modifiable (et si ce n'est pas le cas, autoriser l'exécution), puis elle vérifiera si elle est utilisée pour le cache partagé dyld et si c'est le cas, autoriser l'exécution, et enfin elle appellera **`sb_evaluate_internal`** (ou l'un de ses wrappers) pour effectuer d'autres vérifications d'autorisation.
+Un bon exemple de cela est la fonction **`_mpo_file_check_mmap`** qui accroche **`mmap`** et qui commencera à vérifier si la nouvelle mémoire va être modifiable (et si ce n'est pas le cas, autoriser l'exécution), puis elle vérifiera si elle est utilisée pour le cache partagé dyld et si c'est le cas, autoriser l'exécution, et enfin, elle appellera **`sb_evaluate_internal`** (ou l'un de ses wrappers) pour effectuer d'autres vérifications d'autorisation.
 
 De plus, parmi les centaines de hooks utilisés par Sandbox, il y en a 3 en particulier qui sont très intéressants :
 
-- `mpo_proc_check_for` : Il applique le profil si nécessaire et s'il n'a pas été appliqué précédemment.
-- `mpo_vnode_check_exec` : Appelé lorsqu'un processus charge le binaire associé, puis une vérification de profil est effectuée ainsi qu'une vérification interdisant les exécutions SUID/SGID.
-- `mpo_cred_label_update_execve` : Cela est appelé lorsque l'étiquette est assignée. C'est le plus long car il est appelé lorsque le binaire est entièrement chargé mais qu'il n'a pas encore été exécuté. Il effectuera des actions telles que la création de l'objet sandbox, l'attachement de la structure sandbox aux identifiants kauth, la suppression de l'accès aux ports mach...
+- `mpo_proc_check_for` : Elle applique le profil si nécessaire et si elle n'a pas été appliquée précédemment.
+- `mpo_vnode_check_exec` : Appelée lorsqu'un processus charge le binaire associé, puis une vérification de profil est effectuée et également une vérification interdisant les exécutions SUID/SGID.
+- `mpo_cred_label_update_execve` : Cela est appelé lorsque l'étiquette est assignée. C'est le plus long car il est appelé lorsque le binaire est entièrement chargé mais n'a pas encore été exécuté. Il effectuera des actions telles que la création de l'objet sandbox, l'attachement de la structure sandbox aux identifiants kauth, la suppression de l'accès aux ports mach...
 
 Notez que **`_cred_sb_evalutate`** est un wrapper autour de **`sb_evaluate_internal`** et cette fonction obtient les identifiants passés et effectue ensuite l'évaluation en utilisant la fonction **`eval`** qui évalue généralement le **profil de plateforme** qui est par défaut appliqué à tous les processus et ensuite le **profil de processus spécifique**. Notez que le profil de plateforme est l'un des principaux composants de **SIP** dans macOS.
 

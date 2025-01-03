@@ -16,7 +16,7 @@ Les signatures d'application, également connues sous le nom de signatures de co
 
 Voici comment cela fonctionne :
 
-1. **Signature de l'application :** Lorsqu'un développeur est prêt à distribuer son application, il **signe l'application à l'aide d'une clé privée**. Cette clé privée est associée à un **certificat qu'Apple délivre au développeur** lorsqu'il s'inscrit au programme de développement Apple. Le processus de signature implique de créer un hachage cryptographique de toutes les parties de l'application et de chiffrer ce hachage avec la clé privée du développeur.
+1. **Signature de l'application :** Lorsqu'un développeur est prêt à distribuer son application, il **signe l'application à l'aide d'une clé privée**. Cette clé privée est associée à un **certificat que Apple délivre au développeur** lorsqu'il s'inscrit au programme de développement Apple. Le processus de signature implique de créer un hachage cryptographique de toutes les parties de l'application et de chiffrer ce hachage avec la clé privée du développeur.
 2. **Distribution de l'application :** L'application signée est ensuite distribuée aux utilisateurs avec le certificat du développeur, qui contient la clé publique correspondante.
 3. **Vérification de l'application :** Lorsqu'un utilisateur télécharge et tente d'exécuter l'application, son système d'exploitation Mac utilise la clé publique du certificat du développeur pour déchiffrer le hachage. Il recalcule ensuite le hachage en fonction de l'état actuel de l'application et le compare avec le hachage déchiffré. S'ils correspondent, cela signifie que **l'application n'a pas été modifiée** depuis que le développeur l'a signée, et le système permet à l'application de s'exécuter.
 
@@ -45,7 +45,7 @@ codesign -s <cert-name-keychain> toolsdemo
 ```
 ### Notarisation
 
-Le processus de notarisation d'Apple sert de protection supplémentaire pour protéger les utilisateurs contre les logiciels potentiellement nuisibles. Il implique que le **développeur soumette son application pour examen** par le **Service de Notariat d'Apple**, qui ne doit pas être confondu avec l'App Review. Ce service est un **système automatisé** qui scrute le logiciel soumis à la recherche de **contenu malveillant** et de tout problème potentiel avec la signature du code.
+Le processus de notarisation d'Apple sert de protection supplémentaire pour protéger les utilisateurs contre les logiciels potentiellement nuisibles. Il implique que le **développeur soumette son application à l'examen** du **Service de Notariat d'Apple**, qui ne doit pas être confondu avec l'App Review. Ce service est un **système automatisé** qui scrute le logiciel soumis à la recherche de **contenu malveillant** et de tout problème potentiel avec la signature du code.
 
 Si le logiciel **passe** cette inspection sans soulever de préoccupations, le Service de Notariat génère un ticket de notarisation. Le développeur est ensuite tenu de **joindre ce ticket à son logiciel**, un processus connu sous le nom de 'stapling.' De plus, le ticket de notarisation est également publié en ligne où Gatekeeper, la technologie de sécurité d'Apple, peut y accéder.
 
@@ -118,7 +118,7 @@ spctl --master-disable
 spctl --global-enable
 spctl --master-enable
 ```
-Lorsque complètement activé, une nouvelle option apparaîtra :
+Lorsqu'il est complètement activé, une nouvelle option apparaîtra :
 
 <figure><img src="../../../images/image (1151).png" alt=""><figcaption></figcaption></figure>
 
@@ -158,7 +158,7 @@ Dans le cas où le **drapeau de quarantaine n'est pas présent** (comme avec les
 > [!WARNING]
 > Cet attribut doit être **défini par l'application créant/téléchargeant** le fichier.
 >
-> Cependant, les fichiers qui sont en bac à sable auront cet attribut défini pour chaque fichier qu'ils créent. Et les applications non en bac à sable peuvent le définir elles-mêmes, ou spécifier la clé [**LSFileQuarantineEnabled**](https://developer.apple.com/documentation/bundleresources/information_property_list/lsfilequarantineenabled?language=objc) dans le **Info.plist** qui fera en sorte que le système définisse l'attribut étendu `com.apple.quarantine` sur les fichiers créés,
+> Cependant, les fichiers qui sont en bac à sable auront cet attribut défini pour chaque fichier qu'ils créent. Et les applications non sandboxées peuvent le définir elles-mêmes, ou spécifier la clé [**LSFileQuarantineEnabled**](https://developer.apple.com/documentation/bundleresources/information_property_list/lsfilequarantineenabled?language=objc) dans le **Info.plist** qui fera en sorte que le système définisse l'attribut étendu `com.apple.quarantine` sur les fichiers créés,
 
 De plus, tous les fichiers créés par un processus appelant **`qtn_proc_apply_to_self`** sont mis en quarantaine. Ou l'API **`qtn_file_apply_to_path`** ajoute l'attribut de quarantaine à un chemin de fichier spécifié.
 
@@ -193,7 +193,7 @@ com.apple.quarantine: 00C1;607842eb;Brave;F643CD5F-6071-46AB-83AB-390BA944DEC5
 # Brave -- App
 # F643CD5F-6071-46AB-83AB-390BA944DEC5 -- UID assigned to the file downloaded
 ```
-En fait, un processus "pourrait définir des drapeaux de quarantaine sur les fichiers qu'il crée" (j'ai déjà essayé d'appliquer le drapeau USER_APPROVED dans un fichier créé, mais il ne s'applique pas) :
+En fait, un processus "pourrait définir des drapeaux de quarantaine sur les fichiers qu'il crée" (j'ai déjà essayé d'appliquer le drapeau USER_APPROVED sur un fichier créé, mais il ne s'applique pas) :
 
 <details>
 
@@ -269,7 +269,7 @@ Et trouvez tous les fichiers mis en quarantaine avec :
 ```bash
 find / -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; printf "\n"}' | xargs -I {} xattr -lv {} | grep "com.apple.quarantine"
 ```
-Les informations de quarantaine sont également stockées dans une base de données centrale gérée par LaunchServices dans **`~/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`** qui permet à l'interface graphique d'obtenir des données sur les origines des fichiers. De plus, cela peut être écrasé par des applications qui pourraient être intéressées à cacher leurs origines. De plus, cela peut être fait à partir des API de LaunchServices.
+Les informations de quarantaine sont également stockées dans une base de données centrale gérée par LaunchServices dans **`~/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**, ce qui permet à l'interface graphique d'obtenir des données sur les origines des fichiers. De plus, cela peut être écrasé par des applications qui pourraient être intéressées à cacher leurs origines. De plus, cela peut être fait à partir des API de LaunchServices.
 
 #### **libquarantine.dylb**
 
@@ -290,7 +290,7 @@ Il utilise également quelques MIBs :
 
 ### XProtect
 
-XProtect est une fonctionnalité **anti-malware** intégrée dans macOS. XProtect **vérifie toute application lorsqu'elle est lancée ou modifiée pour la première fois par rapport à sa base de données** de logiciels malveillants connus et de types de fichiers non sécurisés. Lorsque vous téléchargez un fichier via certaines applications, telles que Safari, Mail ou Messages, XProtect analyse automatiquement le fichier. S'il correspond à un logiciel malveillant connu dans sa base de données, XProtect **empêchera le fichier de s'exécuter** et vous alertera sur la menace.
+XProtect est une fonctionnalité **anti-malware** intégrée dans macOS. XProtect **vérifie toute application lorsqu'elle est lancée pour la première fois ou modifiée par rapport à sa base de données** de logiciels malveillants connus et de types de fichiers non sécurisés. Lorsque vous téléchargez un fichier via certaines applications, telles que Safari, Mail ou Messages, XProtect analyse automatiquement le fichier. S'il correspond à un logiciel malveillant connu dans sa base de données, XProtect **empêchera le fichier de s'exécuter** et vous alertera sur la menace.
 
 La base de données XProtect est **mise à jour régulièrement** par Apple avec de nouvelles définitions de logiciels malveillants, et ces mises à jour sont automatiquement téléchargées et installées sur votre Mac. Cela garantit que XProtect est toujours à jour avec les dernières menaces connues.
 
@@ -320,7 +320,27 @@ Cependant, cela n'est plus possible car macOS **empêche la modification des fic
 
 ## Contournements de Gatekeeper
 
-Tout moyen de contourner Gatekeeper (réussir à faire télécharger quelque chose par l'utilisateur et à l'exécuter lorsque Gatekeeper devrait l'interdire) est considéré comme une vulnérabilité dans macOS. Voici
+Tout moyen de contourner Gatekeeper (réussir à faire télécharger quelque chose par l'utilisateur et à l'exécuter lorsque Gatekeeper devrait l'interdire) est considéré comme une vulnérabilité dans macOS. Voici quelques CVE attribués à des techniques qui ont permis de contourner Gatekeeper dans le passé :
+
+### [CVE-2021-1810](https://labs.withsecure.com/publications/the-discovery-of-cve-2021-1810)
+
+Il a été observé que si l'**Archive Utility** est utilisé pour l'extraction, les fichiers avec des **chemins dépassant 886 caractères** ne reçoivent pas l'attribut étendu com.apple.quarantine. Cette situation permet involontairement à ces fichiers de **contourner les** vérifications de sécurité de Gatekeeper.
+
+Consultez le [**rapport original**](https://labs.withsecure.com/publications/the-discovery-of-cve-2021-1810) pour plus d'informations.
+
+### [CVE-2021-30990](https://ronmasas.com/posts/bypass-macos-gatekeeper)
+
+Lorsqu'une application est créée avec **Automator**, les informations sur ce dont elle a besoin pour s'exécuter se trouvent dans `application.app/Contents/document.wflow` et non dans l'exécutable. L'exécutable est juste un binaire Automator générique appelé **Automator Application Stub**.
+
+Par conséquent, vous pourriez faire en sorte que `application.app/Contents/MacOS/Automator\ Application\ Stub` **pointe avec un lien symbolique vers un autre Automator Application Stub à l'intérieur du système** et il exécutera ce qui se trouve dans `document.wflow` (votre script) **sans déclencher Gatekeeper** car l'exécutable réel n'a pas l'attribut xattr de quarantaine.
+
+Exemple d'emplacement attendu : `/System/Library/CoreServices/Automator\ Application\ Stub.app/Contents/MacOS/Automator\ Application\ Stub`
+
+Consultez le [**rapport original**](https://ronmasas.com/posts/bypass-macos-gatekeeper) pour plus d'informations.
+
+### [CVE-2022-22616](https://www.jamf.com/blog/jamf-threat-labs-safari-vuln-gatekeeper-bypass/)
+
+Dans ce contournement, un fichier zip a été créé avec une application commençant à se compresser à partir de `application.app/Contents` au lieu de `application.app`. Par conséquent, l'**attribut de quarantaine** a été appliqué à tous les **fichiers de `application.app/Contents`** mais **pas à `application.app`**, ce qui était ce que Gatekeeper vérifiait, donc Gatekeeper a été contourné car lorsque `application.app` a été déclenché, il **n'avait pas l'attribut de quarantaine.**
 ```bash
 zip -r test.app/Contents test.zip
 ```
@@ -377,7 +397,7 @@ aa archive -d test/ -o test.aar
 
 # If you downloaded the resulting test.aar and decompress it, the file test/._a won't have a quarantitne attribute
 ```
-Être capable de créer un fichier qui n'aura pas l'attribut de quarantaine a permis de **contourner Gatekeeper.** L'astuce consistait à **créer une application de fichier DMG** en utilisant la convention de nom AppleDouble (la commencer par `._`) et à créer un **fichier visible en tant que lien symbolique vers ce fichier caché** sans l'attribut de quarantaine.\
+Être capable de créer un fichier qui n'aura pas l'attribut de quarantaine a permis de **contourner Gatekeeper.** L'astuce consistait à **créer une application de fichier DMG** en utilisant la convention de nom AppleDouble (commencer par `._`) et à créer un **fichier visible en tant que lien symbolique vers ce fichier caché** sans l'attribut de quarantaine.\
 Lorsque le **fichier dmg est exécuté**, comme il n'a pas d'attribut de quarantaine, il **contournera Gatekeeper.**
 ```bash
 # Create an app bundle with the backdoor an call it app.app
@@ -403,9 +423,9 @@ aa archive -d s/ -o app.aar
 - La victime ouvre le fichier tar.gz et exécute l'application.
 - Gatekeeper ne vérifie pas l'application.
 
-### Prévenir l'attribut xattr de quarantaine
+### Prévenir le xattr de Quarantine
 
-Dans un bundle ".app", si l'attribut xattr de quarantaine n'est pas ajouté, lors de son exécution **Gatekeeper ne sera pas déclenché**.
+Dans un bundle ".app", si le xattr de quarantine n'est pas ajouté, lors de son exécution **Gatekeeper ne sera pas déclenché**.
 
 
 {{#include ../../../banners/hacktricks-training.md}}

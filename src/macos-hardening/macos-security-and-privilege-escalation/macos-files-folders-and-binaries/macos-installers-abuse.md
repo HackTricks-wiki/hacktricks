@@ -53,9 +53,9 @@ La hiérarchie d'un fichier DMG peut être différente en fonction du contenu. C
 
 ## Privesc via abus de pkg
 
-### Exécution depuis des répertoires publics
+### Exécution à partir de répertoires publics
 
-Si un script d'installation pré ou post est par exemple exécuté depuis **`/var/tmp/Installerutil`**, un attaquant pourrait contrôler ce script pour qu'il élève les privilèges chaque fois qu'il est exécuté. Ou un autre exemple similaire :
+Si un script d'installation pré ou post est par exemple exécuté à partir de **`/var/tmp/Installerutil`**, un attaquant pourrait contrôler ce script pour qu'il élève les privilèges chaque fois qu'il est exécuté. Ou un autre exemple similaire :
 
 <figure><img src="../../../images/Pasted Graphic 5.png" alt="https://www.youtube.com/watch?v=iASSG0_zobQ"><figcaption><p><a href="https://www.youtube.com/watch?v=kCXhIYtODBg">https://www.youtube.com/watch?v=kCXhIYtODBg</a></p></figcaption></figure>
 

@@ -84,7 +84,7 @@ mpo_cred_check_label_update_t		*mpo_cred_check_label_update;
 ```
 Presque tous les hooks seront rappelés par MACF lorsque l'une de ces opérations est interceptée. Cependant, les hooks **`mpo_policy_*`** sont une exception car `mpo_hook_policy_init()` est un rappel appelé lors de l'enregistrement (donc après `mac_policy_register()`) et `mpo_hook_policy_initbsd()` est appelé lors de l'enregistrement tardif une fois que le sous-système BSD a été correctement initialisé.
 
-De plus, le hook **`mpo_policy_syscall`** peut être enregistré par n'importe quel kext pour exposer un appel de style **ioctl** **interface** privé. Ensuite, un client utilisateur pourra appeler `mac_syscall` (#381) en spécifiant comme paramètres le **nom de la politique** avec un **code** entier et des **arguments** optionnels.\
+De plus, le hook **`mpo_policy_syscall`** peut être enregistré par n'importe quel kext pour exposer un appel de style **ioctl** **interface** privée. Ensuite, un client utilisateur pourra appeler `mac_syscall` (#381) en spécifiant comme paramètres le **nom de la politique** avec un **code** entier et des **arguments** optionnels.\
 Par exemple, le **`Sandbox.kext`** utilise cela beaucoup.
 
 Vérifier le **`__DATA.__const*`** du kext permet d'identifier la structure `mac_policy_ops` utilisée lors de l'enregistrement de la politique. Il est possible de la trouver car son pointeur est à un décalage à l'intérieur de `mpo_policy_conf` et aussi à cause du nombre de pointeurs NULL qui seront dans cette zone.
@@ -168,7 +168,7 @@ Qui passera en revue toutes les politiques mac enregistrées en appelant leurs f
 >  * modules de politique et en vérifiant avec chacun ce qu'il pense de la
 >  * demande. Contrairement à MAC_CHECK, il accorde si des politiques retournent '0',
 >  * et retourne sinon EPERM. Notez qu'il retourne sa valeur via
->  * 'error' dans le scope de l'appelant.
+>  * 'error' dans le contexte de l'appelant.
 >  */
 > #define MAC_GRANT(check, args...) do {                              \
 >     error = EPERM;                                                  \
@@ -188,7 +188,7 @@ Qui passera en revue toutes les politiques mac enregistrées en appelant leurs f
 ### priv_check & priv_grant
 
 Ces appels sont destinés à vérifier et à fournir (des dizaines de) **privilèges** définis dans [**bsd/sys/priv.h**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/priv.h).\
-Certaines parties du code du noyau appelleraient `priv_check_cred()` depuis [**bsd/kern/kern_priv.c**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_priv.c) avec les informations d'identification KAuth du processus et l'un des codes de privilège qui appellera `mac_priv_check` pour voir si une politique **refuse** de donner le privilège, puis elle appelle `mac_priv_grant` pour voir si une politique accorde le `privilège`.
+Certaines parties du code du noyau appelleraient `priv_check_cred()` depuis [**bsd/kern/kern_priv.c**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_priv.c) avec les informations d'identification KAuth du processus et l'un des codes de privilège qui appellera `mac_priv_check` pour voir si une politique **refuse** d'accorder le privilège, puis elle appelle `mac_priv_grant` pour voir si une politique accorde le `privilège`.
 
 ### proc_check_syscall_unix
 

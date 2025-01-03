@@ -6,19 +6,19 @@
 
 Le **noyau de macOS est XNU**, qui signifie "X is Not Unix". Ce noyau est fondamentalement composé du **micro-noyau Mach** (qui sera discuté plus tard), **et** d'éléments de Berkeley Software Distribution (**BSD**). XNU fournit également une plateforme pour **les pilotes de noyau via un système appelé I/O Kit**. Le noyau XNU fait partie du projet open source Darwin, ce qui signifie que **son code source est librement accessible**.
 
-Du point de vue d'un chercheur en sécurité ou d'un développeur Unix, **macOS** peut sembler assez **similaire** à un système **FreeBSD** avec une interface graphique élégante et une multitude d'applications personnalisées. La plupart des applications développées pour BSD se compileront et fonctionneront sur macOS sans nécessiter de modifications, car les outils en ligne de commande familiers aux utilisateurs Unix sont tous présents dans macOS. Cependant, parce que le noyau XNU incorpore Mach, il existe des différences significatives entre un système de type Unix traditionnel et macOS, et ces différences pourraient causer des problèmes potentiels ou offrir des avantages uniques.
+Du point de vue d'un chercheur en sécurité ou d'un développeur Unix, **macOS** peut sembler assez **similaire** à un système **FreeBSD** avec une interface graphique élégante et une multitude d'applications personnalisées. La plupart des applications développées pour BSD se compileront et s'exécuteront sur macOS sans nécessiter de modifications, car les outils en ligne de commande familiers aux utilisateurs Unix sont tous présents dans macOS. Cependant, parce que le noyau XNU incorpore Mach, il existe des différences significatives entre un système de type Unix traditionnel et macOS, et ces différences pourraient causer des problèmes potentiels ou offrir des avantages uniques.
 
 Version open source de XNU : [https://opensource.apple.com/source/xnu/](https://opensource.apple.com/source/xnu/)
 
 ### Mach
 
-Mach est un **micro-noyau** conçu pour être **compatible UNIX**. Un de ses principes de conception clés était de **minimiser** la quantité de **code** s'exécutant dans l'espace **noyau** et de permettre à de nombreuses fonctions typiques du noyau, telles que le système de fichiers, le réseau et l'I/O, de **s'exécuter en tant que tâches de niveau utilisateur**.
+Mach est un **micro-noyau** conçu pour être **compatible UNIX**. L'un de ses principes de conception clés était de **minimiser** la quantité de **code** s'exécutant dans l'espace **noyau** et de permettre à de nombreuses fonctions typiques du noyau, telles que le système de fichiers, le réseau et l'I/O, de **s'exécuter en tant que tâches de niveau utilisateur**.
 
 Dans XNU, Mach est **responsable de nombreuses opérations critiques de bas niveau** qu'un noyau gère généralement, telles que la planification des processeurs, le multitâche et la gestion de la mémoire virtuelle.
 
 ### BSD
 
-Le **noyau** XNU **incorpore** également une quantité significative de code dérivé du projet **FreeBSD**. Ce code **s'exécute comme partie du noyau avec Mach**, dans le même espace d'adresses. Cependant, le code FreeBSD au sein de XNU peut différer considérablement du code FreeBSD original car des modifications étaient nécessaires pour garantir sa compatibilité avec Mach. FreeBSD contribue à de nombreuses opérations du noyau, y compris :
+Le **noyau** XNU **incorpore également** une quantité significative de code dérivé du projet **FreeBSD**. Ce code **s'exécute comme partie du noyau avec Mach**, dans le même espace d'adresses. Cependant, le code FreeBSD au sein de XNU peut différer considérablement du code FreeBSD original car des modifications étaient nécessaires pour garantir sa compatibilité avec Mach. FreeBSD contribue à de nombreuses opérations du noyau, y compris :
 
 - Gestion des processus
 - Gestion des signaux
@@ -45,7 +45,7 @@ macos-iokit.md
 ../macos-proces-abuse/macos-ipc-inter-process-communication/
 {{#endref}}
 
-## Extensions de Noyau macOS
+## Extensions du Noyau macOS
 
 macOS est **très restrictif pour charger des Extensions de Noyau** (.kext) en raison des privilèges élevés avec lesquels le code s'exécutera. En fait, par défaut, il est pratiquement impossible (à moins qu'un contournement ne soit trouvé).
 

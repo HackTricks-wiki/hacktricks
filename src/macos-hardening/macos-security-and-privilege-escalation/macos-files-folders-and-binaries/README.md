@@ -6,7 +6,7 @@
 
 - **/Applications** : Les applications installées devraient être ici. Tous les utilisateurs pourront y accéder.
 - **/bin** : Binaires de ligne de commande
-- **/cores** : S'il existe, il est utilisé pour stocker les dumps de mémoire
+- **/cores** : S'il existe, il est utilisé pour stocker les dumps de noyau
 - **/dev** : Tout est traité comme un fichier, donc vous pouvez voir des périphériques matériels stockés ici.
 - **/etc** : Fichiers de configuration
 - **/Library** : Beaucoup de sous-répertoires et de fichiers liés aux préférences, caches et journaux peuvent être trouvés ici. Un dossier Library existe à la racine et dans le répertoire de chaque utilisateur.
@@ -25,7 +25,7 @@
 - **Les applications système** se trouvent sous `/System/Applications`
 - **Les applications installées** sont généralement installées dans `/Applications` ou dans `~/Applications`
 - **Les données d'application** peuvent être trouvées dans `/Library/Application Support` pour les applications s'exécutant en tant que root et `~/Library/Application Support` pour les applications s'exécutant en tant qu'utilisateur.
-- Les **daemons** d'applications tierces qui **doivent s'exécuter en tant que root** se trouvent généralement dans `/Library/PrivilegedHelperTools/`
+- Les **démons** d'applications tierces qui **doivent s'exécuter en tant que root** se trouvent généralement dans `/Library/PrivilegedHelperTools/`
 - Les applications **sandboxées** sont mappées dans le dossier `~/Library/Containers`. Chaque application a un dossier nommé selon l'ID de bundle de l'application (`com.apple.Safari`).
 - Le **noyau** se trouve dans `/System/Library/Kernels/kernel`
 - **Les extensions de noyau d'Apple** se trouvent dans `/System/Library/Extensions`
@@ -59,8 +59,8 @@ macos-installers-abuse.md
 - **`.app`** : Applications Apple qui suivent une structure de répertoire (C'est un bundle).
 - **`.dylib`** : Bibliothèques dynamiques (comme les fichiers DLL de Windows)
 - **`.pkg`** : Sont les mêmes que xar (format d'archive extensible). La commande d'installation peut être utilisée pour installer le contenu de ces fichiers.
-- **`.DS_Store`** : Ce fichier est dans chaque répertoire, il sauvegarde les attributs et personnalisations du répertoire.
-- **`.Spotlight-V100`** : Ce dossier apparaît dans le répertoire racine de chaque volume sur le système.
+- **`.DS_Store`** : Ce fichier est présent dans chaque répertoire, il sauvegarde les attributs et personnalisations du répertoire.
+- **`.Spotlight-V100`** : Ce dossier apparaît dans le répertoire racine de chaque volume du système.
 - **`.metadata_never_index`** : Si ce fichier est à la racine d'un volume, Spotlight ne l'indexera pas.
 - **`.noindex`** : Les fichiers et dossiers avec cette extension ne seront pas indexés par Spotlight.
 - **`.sdef`** : Fichiers à l'intérieur des bundles spécifiant comment il est possible d'interagir avec l'application depuis un AppleScript.
@@ -80,7 +80,7 @@ Sur macOS (et iOS), toutes les bibliothèques partagées du système, comme les 
 Cela se trouve sur macOS dans `/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/` et dans les versions plus anciennes, vous pourriez trouver le **cache partagé** dans **`/System/Library/dyld/`**.\
 Dans iOS, vous pouvez les trouver dans **`/System/Library/Caches/com.apple.dyld/`**.
 
-Similaire au cache partagé dyld, le noyau et les extensions de noyau sont également compilés dans un cache de noyau, qui est chargé au démarrage.
+Semblable au cache partagé dyld, le noyau et les extensions de noyau sont également compilés dans un cache de noyau, qui est chargé au démarrage.
 
 Pour extraire les bibliothèques du cache partagé de fichiers dylib, il était possible d'utiliser le binaire [dyld_shared_cache_util](https://www.mbsplugins.de/files/dyld_shared_cache_util-dyld-733.8.zip) qui pourrait ne plus fonctionner aujourd'hui, mais vous pouvez également utiliser [**dyldextractor**](https://github.com/arandomdev/dyldextractor) :
 ```bash
@@ -100,7 +100,7 @@ dyldex_all [dyld_shared_cache_path] # Extract all
 Certains extracteurs ne fonctionneront pas car les dylibs sont préliés avec des adresses codées en dur, donc ils pourraient sauter vers des adresses inconnues.
 
 > [!TIP]
-> Il est également possible de télécharger le Cache de Bibliothèque Partagée d'autres appareils \*OS dans macos en utilisant un émulateur dans Xcode. Ils seront téléchargés dans : ls `$HOME/Library/Developer/Xcode/<*>OS\ DeviceSupport/<version>/Symbols/System/Library/Caches/com.apple.dyld/`, comme : `$HOME/Library/Developer/Xcode/iOS\ DeviceSupport/14.1\ (18A8395)/Symbols/System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64`
+> Il est également possible de télécharger le cache de bibliothèque partagée d'autres appareils \*OS dans macos en utilisant un émulateur dans Xcode. Ils seront téléchargés dans : ls `$HOME/Library/Developer/Xcode/<*>OS\ DeviceSupport/<version>/Symbols/System/Library/Caches/com.apple.dyld/`, comme : `$HOME/Library/Developer/Xcode/iOS\ DeviceSupport/14.1\ (18A8395)/Symbols/System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64`
 
 ### Mapping SLC
 
@@ -130,7 +130,7 @@ Il existe certains drapeaux qui peuvent être définis dans les fichiers qui fer
 - **`uchg`** : Connu sous le nom de **drapeau uchange**, il **empêchera toute action** de modification ou de suppression du **fichier**. Pour le définir, faites : `chflags uchg file.txt`
 - L'utilisateur root pourrait **supprimer le drapeau** et modifier le fichier.
 - **`restricted`** : Ce drapeau rend le fichier **protégé par SIP** (vous ne pouvez pas ajouter ce drapeau à un fichier).
-- **`Sticky bit`** : Si un répertoire a le bit collant, **seul** le **propriétaire du répertoire ou root peut renommer ou supprimer** des fichiers. En général, cela est défini sur le répertoire /tmp pour empêcher les utilisateurs ordinaires de supprimer ou de déplacer les fichiers d'autres utilisateurs.
+- **`Sticky bit`** : Si un répertoire a un bit collant, **seul** le **propriétaire du répertoire ou root peut renommer ou supprimer** des fichiers. En général, cela est défini sur le répertoire /tmp pour empêcher les utilisateurs ordinaires de supprimer ou de déplacer les fichiers d'autres utilisateurs.
 
 Tous les drapeaux peuvent être trouvés dans le fichier `sys/stat.h` (trouvez-le en utilisant `mdfind stat.h | grep stat.h`) et sont :
 
@@ -161,7 +161,7 @@ Les **ACLs** de fichier contiennent des **ACE** (Entrées de Contrôle d'Accès)
 Il est possible d'accorder à un **répertoire** ces permissions : `list`, `search`, `add_file`, `add_subdirectory`, `delete_child`, `delete_child`.\
 Et à un **fichier** : `read`, `write`, `append`, `execute`.
 
-Lorsque le fichier contient des ACLs, vous trouverez un "+" lors de la liste des permissions comme dans :
+Lorsque le fichier contient des ACLs, vous trouverez **un "+" lors de la liste des permissions comme dans** :
 ```bash
 ls -ld Movies
 drwx------+   7 username  staff     224 15 Apr 19:42 Movies
@@ -181,18 +181,18 @@ ls -RAle / 2>/dev/null | grep -E -B1 "\d: "
 Les attributs étendus ont un nom et une valeur souhaitée, et peuvent être vus en utilisant `ls -@` et manipulés avec la commande `xattr`. Certains attributs étendus courants sont :
 
 - `com.apple.resourceFork`: Compatibilité avec le fork de ressources. Également visible comme `filename/..namedfork/rsrc`
-- `com.apple.quarantine`: MacOS: Mécanisme de quarantaine de Gatekeeper (III/6)
-- `metadata:*`: MacOS: diverses métadonnées, telles que `_backup_excludeItem`, ou `kMD*`
+- `com.apple.quarantine`: MacOS : Mécanisme de quarantaine de Gatekeeper (III/6)
+- `metadata:*`: MacOS : diverses métadonnées, telles que `_backup_excludeItem`, ou `kMD*`
 - `com.apple.lastuseddate` (#PS): Date de dernière utilisation du fichier
-- `com.apple.FinderInfo`: MacOS: Informations sur le Finder (par exemple, étiquettes de couleur)
+- `com.apple.FinderInfo`: MacOS : Informations sur le Finder (par exemple, étiquettes de couleur)
 - `com.apple.TextEncoding`: Spécifie l'encodage de texte des fichiers texte ASCII
 - `com.apple.logd.metadata`: Utilisé par logd sur les fichiers dans `/var/db/diagnostics`
 - `com.apple.genstore.*`: Stockage générationnel (`/.DocumentRevisions-V100` à la racine du système de fichiers)
-- `com.apple.rootless`: MacOS: Utilisé par la Protection de l'Intégrité du Système pour étiqueter le fichier (III/10)
+- `com.apple.rootless`: MacOS : Utilisé par la Protection de l'Intégrité du Système pour étiqueter le fichier (III/10)
 - `com.apple.uuidb.boot-uuid`: Marquages logd des époques de démarrage avec UUID unique
-- `com.apple.decmpfs`: MacOS: Compression de fichiers transparente (II/7)
-- `com.apple.cprotect`: \*OS: Données de chiffrement par fichier (III/11)
-- `com.apple.installd.*`: \*OS: Métadonnées utilisées par installd, par exemple, `installType`, `uniqueInstallID`
+- `com.apple.decmpfs`: MacOS : Compression de fichiers transparente (II/7)
+- `com.apple.cprotect`: \*OS : Données de chiffrement par fichier (III/11)
+- `com.apple.installd.*`: \*OS : Métadonnées utilisées par installd, par exemple, `installType`, `uniqueInstallID`
 
 ### Forks de Ressources | macOS ADS
 
@@ -240,7 +240,7 @@ macos-memory-dumping.md
 Le répertoire `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/System` est l'endroit où les informations sur le **risque associé à différentes extensions de fichiers sont stockées**. Ce répertoire catégorise les fichiers en divers niveaux de risque, influençant la manière dont Safari gère ces fichiers lors du téléchargement. Les catégories sont les suivantes :
 
 - **LSRiskCategorySafe** : Les fichiers de cette catégorie sont considérés comme **complètement sûrs**. Safari ouvrira automatiquement ces fichiers après leur téléchargement.
-- **LSRiskCategoryNeutral** : Ces fichiers ne comportent aucun avertissement et ne sont **pas ouverts automatiquement** par Safari.
+- **LSRiskCategoryNeutral** : Ces fichiers ne comportent aucun avertissement et **ne sont pas ouverts automatiquement** par Safari.
 - **LSRiskCategoryUnsafeExecutable** : Les fichiers de cette catégorie **déclenchent un avertissement** indiquant que le fichier est une application. Cela sert de mesure de sécurité pour alerter l'utilisateur.
 - **LSRiskCategoryMayContainUnsafeExecutable** : Cette catégorie est pour les fichiers, tels que les archives, qui pourraient contenir un exécutable. Safari **déclenchera un avertissement** à moins qu'il ne puisse vérifier que tous les contenus sont sûrs ou neutres.
 

@@ -1,4 +1,4 @@
-# macOS Chromium Injection
+# Injection Chromium sur macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 

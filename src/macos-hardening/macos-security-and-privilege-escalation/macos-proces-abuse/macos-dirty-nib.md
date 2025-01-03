@@ -6,7 +6,7 @@
 
 ### Qu'est-ce que les fichiers Nib
 
-Les fichiers Nib (abréviation de NeXT Interface Builder), faisant partie de l'écosystème de développement d'Apple, sont destinés à définir **les éléments de l'interface utilisateur** et leurs interactions dans les applications. Ils englobent des objets sérialisés tels que des fenêtres et des boutons, et sont chargés à l'exécution. Malgré leur utilisation continue, Apple préconise désormais les Storyboards pour une visualisation plus complète du flux de l'interface utilisateur.
+Les fichiers Nib (abréviation de NeXT Interface Builder), faisant partie de l'écosystème de développement d'Apple, sont destinés à définir **les éléments UI** et leurs interactions dans les applications. Ils englobent des objets sérialisés tels que des fenêtres et des boutons, et sont chargés à l'exécution. Malgré leur utilisation continue, Apple préconise désormais les Storyboards pour une visualisation plus complète du flux UI.
 
 Le fichier Nib principal est référencé dans la valeur **`NSMainNibFile`** à l'intérieur du fichier `Info.plist` de l'application et est chargé par la fonction **`NSApplicationMain`** exécutée dans la fonction `main` de l'application.
 
@@ -59,15 +59,15 @@ Dans le post [https://sector7.computest.nl/post/2024-04-bringing-process-injecti
 - Les contraintes de lancement entravent l'exécution des applications depuis des emplacements inattendus (par exemple, `/tmp`).
 - Il est possible d'identifier les applications non protégées par des contraintes de lancement et de les cibler pour l'injection de fichiers NIB.
 
-### Autres protections macOS
+### Protections supplémentaires de macOS
 
 Depuis macOS Sonoma, les modifications à l'intérieur des bundles d'applications sont restreintes. Cependant, les méthodes antérieures impliquaient :
 
 1. Copier l'application dans un autre emplacement (par exemple, `/tmp/`).
-2. Renommer les répertoires à l'intérieur du bundle de l'application pour contourner les protections initiales.
+2. Renommer les répertoires au sein du bundle de l'application pour contourner les protections initiales.
 3. Après avoir exécuté l'application pour s'enregistrer auprès de Gatekeeper, modifier le bundle de l'application (par exemple, remplacer MainMenu.nib par Dirty.nib).
 4. Renommer les répertoires et relancer l'application pour exécuter le fichier NIB injecté.
 
-**Remarque** : Les mises à jour récentes de macOS ont atténué cette exploitation en empêchant les modifications de fichiers à l'intérieur des bundles d'applications après la mise en cache de Gatekeeper, rendant l'exploitation inefficace.
+**Remarque** : Les mises à jour récentes de macOS ont atténué cette exploitation en empêchant les modifications de fichiers au sein des bundles d'applications après la mise en cache de Gatekeeper, rendant l'exploitation inefficace.
 
 {{#include ../../../banners/hacktricks-training.md}}

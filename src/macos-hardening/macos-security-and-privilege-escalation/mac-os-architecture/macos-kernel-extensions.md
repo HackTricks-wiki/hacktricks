@@ -4,7 +4,7 @@
 
 ## Informations de base
 
-Les extensions de noyau (Kexts) sont des **packages** avec une extension **`.kext`** qui sont **chargés directement dans l'espace noyau de macOS**, fournissant des fonctionnalités supplémentaires au système d'exploitation principal.
+Les extensions de noyau (Kexts) sont des **paquets** avec une **extension `.kext`** qui sont **chargés directement dans l'espace noyau de macOS**, fournissant des fonctionnalités supplémentaires au système d'exploitation principal.
 
 ### Exigences
 
@@ -16,8 +16,8 @@ Les extensions de noyau (Kexts) sont des **packages** avec une extension **`.kex
 
 - L'extension de noyau doit être **signée avec un certificat de signature de code de noyau**, qui ne peut être **accordé que par Apple**. Qui examinera en détail l'entreprise et les raisons pour lesquelles cela est nécessaire.
 - L'extension de noyau doit également être **notariée**, Apple pourra la vérifier pour détecter des logiciels malveillants.
-- Ensuite, l'utilisateur **root** est celui qui peut **charger l'extension de noyau** et les fichiers à l'intérieur du package doivent **appartenir à root**.
-- Pendant le processus de téléchargement, le package doit être préparé dans un **emplacement protégé non-root** : `/Library/StagedExtensions` (nécessite l'octroi `com.apple.rootless.storage.KernelExtensionManagement`).
+- Ensuite, l'utilisateur **root** est celui qui peut **charger l'extension de noyau** et les fichiers à l'intérieur du paquet doivent **appartenir à root**.
+- Pendant le processus de téléchargement, le paquet doit être préparé dans un **emplacement protégé non-root** : `/Library/StagedExtensions` (nécessite l'octroi `com.apple.rootless.storage.KernelExtensionManagement`).
 - Enfin, lors de la tentative de chargement, l'utilisateur recevra une [**demande de confirmation**](https://developer.apple.com/library/archive/technotes/tn2459/_index.html) et, si acceptée, l'ordinateur doit être **redémarré** pour le charger.
 
 ### Processus de chargement
@@ -47,11 +47,11 @@ kextstat | grep " 22 " | cut -c2-5,50- | cut -d '(' -f1
 > [!CAUTION]
 > Même si les extensions du noyau sont censées se trouver dans `/System/Library/Extensions/`, si vous allez dans ce dossier, vous **ne trouverez aucun binaire**. Cela est dû au **kernelcache** et pour inverser un `.kext`, vous devez trouver un moyen de l'obtenir.
 
-Le **kernelcache** est une **version pré-compilée et pré-lien du noyau XNU**, ainsi que des **drivers** et des **extensions de noyau** essentiels. Il est stocké dans un format **compressé** et est décompressé en mémoire pendant le processus de démarrage. Le kernelcache facilite un **temps de démarrage plus rapide** en ayant une version prête à l'emploi du noyau et des drivers cruciaux disponibles, réduisant le temps et les ressources qui seraient autrement dépensés pour charger et lier dynamiquement ces composants au moment du démarrage.
+Le **kernelcache** est une **version précompilée et préliée du noyau XNU**, ainsi que des **drivers** et des **extensions de noyau** essentiels. Il est stocké dans un format **compressé** et est décompressé en mémoire pendant le processus de démarrage. Le kernelcache facilite un **temps de démarrage plus rapide** en ayant une version prête à l'emploi du noyau et des drivers cruciaux disponibles, réduisant le temps et les ressources qui seraient autrement dépensés pour charger et lier dynamiquement ces composants au moment du démarrage.
 
 ### Local Kerlnelcache
 
-Dans iOS, il est situé dans **`/System/Library/Caches/com.apple.kernelcaches/kernelcache`** dans macOS, vous pouvez le trouver avec : **`find / -name "kernelcache" 2>/dev/null`** \
+Dans iOS, il se trouve dans **`/System/Library/Caches/com.apple.kernelcaches/kernelcache`** dans macOS, vous pouvez le trouver avec : **`find / -name "kernelcache" 2>/dev/null`** \
 Dans mon cas, dans macOS, je l'ai trouvé dans :
 
 - `/System/Volumes/Preboot/1BAEB4B5-180B-4C46-BD53-51152B7D92DA/boot/DAD35E7BC0CDA79634C20BD1BD80678DFB510B2AAD3D25C1228BB34BCD0A711529D3D571C93E29E1D0C1264750FA043F/System/Library/Caches/com.apple.kernelcaches/kernelcache`
@@ -95,7 +95,7 @@ nm -a ~/Downloads/Sandbox.kext/Contents/MacOS/Sandbox | wc -l
 
 Parfois, Apple publie **kernelcache** avec des **symbols**. Vous pouvez télécharger certains firmwares avec des symbols en suivant les liens sur ces pages. Les firmwares contiendront le **kernelcache** parmi d'autres fichiers.
 
-Pour **extraire** les fichiers, commencez par changer l'extension de `.ipsw` à `.zip` et **décompressez**-le.
+Pour **extract** les fichiers, commencez par changer l'extension de `.ipsw` à `.zip` et **unzip** le.
 
 Après avoir extrait le firmware, vous obtiendrez un fichier comme : **`kernelcache.release.iphone14`**. Il est au format **IMG4**, vous pouvez extraire les informations intéressantes avec :
 

@@ -24,7 +24,7 @@ Un autre fichier important lié à la mémoire dans les systèmes MacOS est le *
 
 Pour dumper la mémoire sur une machine MacOS, vous pouvez utiliser [**osxpmem**](https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-2.1.post4.zip).
 
-**Note** : Les instructions suivantes ne fonctionneront que pour les Macs avec architecture Intel. Cet outil est maintenant archivé et la dernière version a été publiée en 2017. Le binaire téléchargé en utilisant les instructions ci-dessous cible les puces Intel car Apple Silicon n'existait pas en 2017. Il peut être possible de compiler le binaire pour l'architecture arm64, mais vous devrez essayer par vous-même.
+**Note** : Les instructions suivantes ne fonctionneront que pour les Macs avec une architecture Intel. Cet outil est maintenant archivé et la dernière version a été publiée en 2017. Le binaire téléchargé en utilisant les instructions ci-dessous cible les puces Intel car Apple Silicon n'était pas disponible en 2017. Il peut être possible de compiler le binaire pour l'architecture arm64, mais vous devrez essayer par vous-même.
 ```bash
 #Dump raw format
 sudo osxpmem.app/osxpmem --format raw -o /tmp/dump_mem

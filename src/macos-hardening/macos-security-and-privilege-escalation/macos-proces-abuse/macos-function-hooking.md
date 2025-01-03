@@ -97,7 +97,7 @@ const struct dyld_interpose_tuple array[], size_t count);
 ```
 ## Méthode Swizzling
 
-En ObjectiveC, voici comment une méthode est appelée : **`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
+En ObjectiveC, c'est ainsi qu'une méthode est appelée : **`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
 
 Il faut l'**objet**, la **méthode** et les **params**. Et lorsqu'une méthode est appelée, un **msg est envoyé** en utilisant la fonction **`objc_msgSend`** : `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
 
@@ -296,7 +296,7 @@ Cependant, les deux options sont **limitées** aux binaires/processus **non prot
 
 Cependant, une attaque par hooking de fonction est très spécifique, un attaquant le fera pour **voler des informations sensibles à l'intérieur d'un processus** (sinon, vous feriez simplement une attaque par injection de processus). Et ces informations sensibles pourraient se trouver dans des applications téléchargées par l'utilisateur telles que MacPass.
 
-Ainsi, le vecteur de l'attaquant serait de trouver une vulnérabilité ou de supprimer la signature de l'application, d'injecter la variable d'environnement **`DYLD_INSERT_LIBRARIES`** à travers le Info.plist de l'application en ajoutant quelque chose comme :
+Ainsi, le vecteur de l'attaquant serait soit de trouver une vulnérabilité, soit de supprimer la signature de l'application, d'injecter la variable d'environnement **`DYLD_INSERT_LIBRARIES`** à travers le Info.plist de l'application en ajoutant quelque chose comme :
 ```xml
 <key>LSEnvironment</key>
 <dict>

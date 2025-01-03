@@ -10,7 +10,7 @@ Par exemple, créez ce script :
 #!/usr/bin/perl
 print "Hello from the Perl script!\n";
 ```
-Maintenant, **exportez la variable d'environnement** et exécutez le script **perl** :
+Maintenant **exportez la variable d'environnement** et exécutez le script **perl** :
 ```bash
 export PERL5OPT='-Mwarnings;system("whoami")'
 perl test.pl # This will execute "whoami"

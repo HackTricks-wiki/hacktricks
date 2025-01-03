@@ -5,7 +5,7 @@
 ## Informations de base
 
 Si vous ne savez pas ce qu'est Electron, vous pouvez trouver [**beaucoup d'informations ici**](https://book.hacktricks.xyz/network-services-pentesting/pentesting-web/xss-to-rce-electron-desktop-apps). Mais pour l'instant, sachez simplement qu'Electron exécute **node**.\
-Et node a certains **paramètres** et **variables d'environnement** qui peuvent être utilisés pour **exécuter d'autres codes** en plus du fichier indiqué.
+Et node a certains **paramètres** et **variables d'environnement** qui peuvent être utilisés pour **exécuter un autre code** en plus du fichier indiqué.
 
 ### Fusibles Electron
 
@@ -21,9 +21,9 @@ Un autre fusible intéressant qui ne préviendra pas l'injection de code est :
 
 - **EnableCookieEncryption** : S'il est activé, le magasin de cookies sur disque est chiffré à l'aide de clés de cryptographie au niveau du système d'exploitation.
 
-### Vérification des fusibles Electron
+### Vérification des Fusibles Electron
 
-Vous pouvez **vérifier ces drapeaux** à partir d'une application avec :
+Vous pouvez **vérifier ces drapeaux** depuis une application avec :
 ```bash
 npx @electron/fuses read --app /Applications/Slack.app
 
@@ -50,7 +50,7 @@ Vous pouvez charger ce fichier dans [https://hexed.it/](https://hexed.it/) et re
 
 <figure><img src="../../../images/image (34).png" alt=""><figcaption></figcaption></figure>
 
-Notez que si vous essayez de **surcharger** le **`binaire du framework Electron`** à l'intérieur d'une application avec ces octets modifiés, l'application ne fonctionnera pas.
+Notez que si vous essayez de **surcharger** le binaire **`Electron Framework`** à l'intérieur d'une application avec ces octets modifiés, l'application ne fonctionnera pas.
 
 ## RCE ajout de code aux applications Electron
 
@@ -64,7 +64,7 @@ Il pourrait y avoir des **fichiers JS/HTML externes** qu'une application Electro
 >
 > Rendant ce chemin d'attaque plus compliqué (ou impossible).
 
-Notez qu'il est possible de contourner l'exigence de **`kTCCServiceSystemPolicyAppBundles`** en copiant l'application dans un autre répertoire (comme **`/tmp`**), en renommant le dossier **`app.app/Contents`** en **`app.app/NotCon`**, **en modifiant** le fichier **asar** avec votre code **malveillant**, en le renommant à nouveau en **`app.app/Contents`** et en l'exécutant.
+Notez qu'il est possible de contourner l'exigence de **`kTCCServiceSystemPolicyAppBundles`** en copiant l'application dans un autre répertoire (comme **`/tmp`**), en renommant le dossier **`app.app/Contents`** en **`app.app/NotCon`**, **modifiant** le fichier **asar** avec votre code **malveillant**, en le renommant à nouveau en **`app.app/Contents`** et en l'exécutant.
 
 Vous pouvez décompresser le code du fichier asar avec :
 ```bash
@@ -169,9 +169,9 @@ ws.connect("ws://localhost:9222/devtools/page/85976D59050BFEFDBA48204E3D865D00",
 ws.send('{\"id\": 1, \"method\": \"Network.getAllCookies\"}')
 print(ws.recv()
 ```
-Dans [**ce billet de blog**](https://hackerone.com/reports/1274695), ce débogage est abusé pour faire en sorte qu'un chrome sans tête **télécharge des fichiers arbitraires à des emplacements arbitraires**.
+Dans [**cet article de blog**](https://hackerone.com/reports/1274695), ce débogage est abusé pour faire en sorte qu'un chrome sans interface **télécharge des fichiers arbitraires à des emplacements arbitraires**.
 
-### Injection depuis le Plist de l'App
+### Injection depuis le Plist de l'Application
 
 Vous pourriez abuser de cette variable d'environnement dans un plist pour maintenir la persistance en ajoutant ces clés :
 ```xml

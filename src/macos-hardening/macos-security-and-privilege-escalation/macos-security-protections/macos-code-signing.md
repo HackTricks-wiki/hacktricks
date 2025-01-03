@@ -106,7 +106,7 @@ Notez qu'il existe différentes versions de cette structure où les anciennes pe
 ## Pages de signature de code
 
 Hacher le binaire complet serait inefficace et même inutile s'il n'est chargé en mémoire que partiellement. Par conséquent, la signature de code est en réalité un hachage de hachages où chaque page binaire est hachée individuellement.\
-En fait, dans le code du **répertoire de code** précédent, vous pouvez voir que la **taille de la page est spécifiée** dans l'un de ses champs. De plus, si la taille du binaire n'est pas un multiple de la taille d'une page, le champ **CodeLimit** spécifie où se termine la signature.
+En fait, dans le code **Code Directory** précédent, vous pouvez voir que la **taille de la page est spécifiée** dans l'un de ses champs. De plus, si la taille du binaire n'est pas un multiple de la taille d'une page, le champ **CodeLimit** spécifie où se termine la signature.
 ```bash
 # Get all hashes of /bin/ps
 codesign -d -vvvvvv /bin/ps
@@ -211,11 +211,11 @@ Notez que la fonction [**exec_mach_imgact**](https://github.com/apple-oss-distri
 
 ## Exigences de signature de code
 
-Chaque application stocke des **exigences** qu'elle doit **satisfaire** pour pouvoir être exécutée. Si les **exigences de l'application ne sont pas satisfaites**, elle ne sera pas exécutée (car elle a probablement été modifiée).
+Chaque application stocke des **exigences** qu'elle doit **satisfaire** pour pouvoir être exécutée. Si les **exigences de l'application ne sont pas satisfaites par l'application**, elle ne sera pas exécutée (car elle a probablement été modifiée).
 
 Les exigences d'un binaire utilisent une **grammaire spéciale** qui est un flux d'**expressions** et sont encodées sous forme de blobs en utilisant `0xfade0c00` comme magie dont le **hash est stocké dans un emplacement de code spécial**.
 
-Les exigences d'un binaire peuvent être consultées en exécutant :
+Les exigences d'un binaire peuvent être vues en exécutant :
 ```bash
 codesign -d -r- /bin/ls
 Executable=/bin/ls

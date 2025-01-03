@@ -37,7 +37,7 @@ Injection :
 ```bash
 DYLD_INSERT_LIBRARIES=inject.dylib ./hello
 ```
-## Exemple de détournement de Dyld
+## Exemple de Dyld Hijacking
 
 Le binaire vulnérable ciblé est `/Applications/VulnDyld.app/Contents/Resources/lib/binary`.
 
@@ -90,7 +90,7 @@ pwd
 find ./ -name lib.dylib
 ./Contents/Resources/lib2/lib.dylib
 ```
-Donc, il est possible de le détourner ! Créez une bibliothèque qui **exécute un code arbitraire et exporte les mêmes fonctionnalités** que la bibliothèque légitime en les réexportant. Et n'oubliez pas de la compiler avec les versions attendues :
+Donc, il est possible de le détourner ! Créez une bibliothèque qui **exécute un code arbitraire et exporte les mêmes fonctionnalités** que la bibliothèque légitime en la réexportant. Et n'oubliez pas de la compiler avec les versions attendues :
 ```objectivec:lib.m
 #import <Foundation/Foundation.h>
 
@@ -133,11 +133,11 @@ Et **exécutez** le binaire et vérifiez que la **bibliothèque a été chargée
 </code></pre>
 
 > [!NOTE]
-> Un bon article sur la façon d'exploiter cette vulnérabilité pour abuser des autorisations de caméra de telegram peut être trouvé à [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)
+> Un bon article sur la façon d'exploiter cette vulnérabilité pour abuser des autorisations de caméra de Telegram peut être trouvé à [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)
 
-## Plus grande échelle
+## Plus Grande Échelle
 
-Si vous prévoyez d'essayer d'injecter des bibliothèques dans des binaires inattendus, vous pourriez vérifier les messages d'événements pour découvrir quand la bibliothèque est chargée à l'intérieur d'un processus (dans ce cas, supprimez le printf et l'exécution de `/bin/bash`).
+Si vous prévoyez d'essayer d'injecter des bibliothèques dans des binaires inattendus, vous pourriez vérifier les messages d'événements pour découvrir quand la bibliothèque est chargée à l'intérieur d'un processus (dans ce cas, retirez le printf et l'exécution de `/bin/bash`).
 ```bash
 sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "[+] dylib"'
 ```

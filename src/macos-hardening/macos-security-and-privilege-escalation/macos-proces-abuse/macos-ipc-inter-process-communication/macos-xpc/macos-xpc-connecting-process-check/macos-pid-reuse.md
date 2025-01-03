@@ -4,7 +4,7 @@
 
 ## Réutilisation de PID
 
-Lorsqu'un **service XPC** macOS vérifie le processus appelé en fonction du **PID** et non du **jeton d'audit**, il est vulnérable à une attaque de réutilisation de PID. Cette attaque repose sur une **condition de course** où un **exploit** va **envoyer des messages au service XPC** **abusant** de la fonctionnalité et juste **après** cela, exécuter **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** avec le binaire **autorisé**.
+Lorsqu'un **service XPC** macOS vérifie le processus appelé en fonction du **PID** et non du **jeton d'audit**, il est vulnérable à une attaque de réutilisation de PID. Cette attaque est basée sur une **condition de course** où un **exploit** va **envoyer des messages au service XPC** **abusant** de la fonctionnalité et juste **après** cela, exécuter **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** avec le binaire **autorisé**.
 
 Cette fonction fera en sorte que le **binaire autorisé possède le PID**, mais le **message XPC malveillant aurait été envoyé** juste avant. Donc, si le service **XPC** **utilise** le **PID** pour **authentifier** l'expéditeur et le vérifie **APRÈS** l'exécution de **`posix_spawn`**, il pensera qu'il provient d'un processus **autorisé**.
 

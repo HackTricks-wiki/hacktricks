@@ -72,11 +72,11 @@ Chaque message XPC est un objet dictionnaire qui simplifie la sérialisation et 
 De plus, la fonction `xpc_copy_description(object)` peut être utilisée pour obtenir une représentation sous forme de chaîne de l'objet, ce qui peut être utile à des fins de débogage.\
 Ces objets ont également certaines méthodes à appeler comme `xpc_<object>_copy`, `xpc_<object>_equal`, `xpc_<object>_hash`, `xpc_<object>_serialize`, `xpc_<object>_deserialize`...
 
-Les `xpc_object_t` sont créés en appelant la fonction `xpc_<objetType>_create`, qui appelle en interne `_xpc_base_create(Class, Size)` où il est indiqué le type de la classe de l'objet (l'un de `XPC_TYPE_*`) et sa taille (40B supplémentaires seront ajoutés à la taille pour les métadonnées). Ce qui signifie que les données de l'objet commenceront à l'offset de 40B.\
+Les `xpc_object_t` sont créés en appelant la fonction `xpc_<objetType>_create`, qui appelle en interne `_xpc_base_create(Class, Size)` où le type de la classe de l'objet (l'un de `XPC_TYPE_*`) et sa taille sont indiqués (40B supplémentaires seront ajoutés à la taille pour les métadonnées). Ce qui signifie que les données de l'objet commenceront à l'offset de 40B.\
 Par conséquent, le `xpc_<objectType>_t` est en quelque sorte une sous-classe du `xpc_object_t` qui serait une sous-classe de `os_object_t*`.
 
 > [!WARNING]
-> Notez que c'est le développeur qui doit utiliser `xpc_dictionary_[get/set]_<objectType>` pour obtenir ou définir le type et la valeur réelle d'une clé.
+> Notez qu'il devrait être le développeur qui utilise `xpc_dictionary_[get/set]_<objectType>` pour obtenir ou définir le type et la valeur réelle d'une clé.
 
 - **`xpc_pipe`**
 
@@ -85,11 +85,11 @@ Il est possible de créer un serveur XPC en appelant `xpc_pipe_create()` ou `xpc
 
 Notez que l'objet **`xpc_pipe`** est un **`xpc_object_t`** avec des informations dans sa structure sur les deux ports Mach utilisés et le nom (le cas échéant). Le nom, par exemple, le démon `secinitd` dans son plist `/System/Library/LaunchDaemons/com.apple.secinitd.plist` configure le tuyau appelé `com.apple.secinitd`.
 
-Un exemple de **`xpc_pipe`** est le **tuyau bootstrap** créé par **`launchd`** rendant possible le partage des ports Mach.
+Un exemple de **`xpc_pipe`** est le **bootstrap pipe** créé par **`launchd`** rendant possible le partage des ports Mach.
 
 - **`NSXPC*`**
 
-Ce sont des objets de haut niveau en Objective-C qui permettent l'abstraction des connexions XPC.\
+Ce sont des objets de haut niveau Objective-C qui permettent l'abstraction des connexions XPC.\
 De plus, il est plus facile de déboguer ces objets avec DTrace que les précédents.
 
 - **`GCD Queues`**
@@ -105,7 +105,7 @@ Ce fichier a d'autres clés de configuration comme `ServiceType` qui peut être 
 
 L'application tente de **se connecter** à un service XPC en utilisant `xpc_connection_create_mach_service`, puis launchd localise le démon et démarre **`xpcproxy`**. **`xpcproxy`** applique les restrictions configurées et crée le service avec les FDs et ports Mach fournis.
 
-Pour améliorer la vitesse de recherche du service XPC, un cache est utilisé.
+Afin d'améliorer la vitesse de recherche du service XPC, un cache est utilisé.
 
 Il est possible de tracer les actions de `xpcproxy` en utilisant :
 ```bash
@@ -444,7 +444,7 @@ Les services qui prennent en charge le XPC distant auront dans leur plist la cl�
 
 De plus, le `RemoteServiceDiscovery.framework` permet d'obtenir des informations à partir du `com.apple.remoted.plugin` exposant des fonctions telles que `get_device`, `get_unique_device`, `connect`...
 
-Une fois que `connect` est utilisé et que le socket `fd` du service est récupéré, il est possible d'utiliser la classe `remote_xpc_connection_*`.
+Une fois que connect est utilisé et que le socket `fd` du service est récupéré, il est possible d'utiliser la classe `remote_xpc_connection_*`.
 
 Il est possible d'obtenir des informations sur les services distants en utilisant l'outil cli `/usr/libexec/remotectl` avec des paramètres tels que :
 ```bash

@@ -13,11 +13,11 @@ Vous définissez des **contraintes d'environnement de lancement et de bibliothè
 Il existe 4 types de contraintes :
 
 - **Contraintes Auto-imposées** : Contraintes appliquées au **binaire en cours d'exécution**.
-- **Processus Parent** : Contraintes appliquées au **parent du processus** (par exemple **`launchd`** exécutant un service XP)
+- **Processus Parent** : Contraintes appliquées au **parent du processus** (par exemple **`launchd`** exécutant un service XPC)
 - **Contraintes Responsables** : Contraintes appliquées au **processus appelant le service** dans une communication XPC
 - **Contraintes de Chargement de Bibliothèque** : Utilisez des contraintes de chargement de bibliothèque pour décrire sélectivement le code qui peut être chargé
 
-Ainsi, lorsqu'un processus essaie de lancer un autre processus — en appelant `execve(_:_:_:)` ou `posix_spawn(_:_:_:_:_:_:)` — le système d'exploitation vérifie que le fichier **exécutable** **satisfait** sa **propre contrainte auto-imposée**. Il vérifie également que l'exécutable du **processus parent** **satisfait** la **contrainte parentale** de l'exécutable, et que l'exécutable du **processus responsable** **satisfait la contrainte de processus responsable** de l'exécutable. Si l'une de ces contraintes de lancement n'est pas satisfaite, le système d'exploitation ne lance pas le programme.
+Ainsi, lorsque qu'un processus essaie de lancer un autre processus — en appelant `execve(_:_:_:)` ou `posix_spawn(_:_:_:_:_:_:)` — le système d'exploitation vérifie que le fichier **exécutable** **satisfait** sa **propre contrainte auto-imposée**. Il vérifie également que l'exécutable du **processus parent** **satisfait** la **contrainte parentale** de l'exécutable, et que l'exécutable du **processus responsable** **satisfait la contrainte de processus responsable** de l'exécutable. Si l'une de ces contraintes de lancement n'est pas satisfaite, le système d'exploitation ne lance pas le programme.
 
 Si lors du chargement d'une bibliothèque, une partie de la **contrainte de bibliothèque n'est pas vraie**, votre processus **ne charge pas** la bibliothèque.
 
@@ -30,7 +30,7 @@ Les [**faits qu'un LC peut utiliser sont documentés**](https://developer.apple.
 - is-init-proc : Une valeur booléenne qui indique si l'exécutable doit être le processus d'initialisation du système d'exploitation (`launchd`).
 - is-sip-protected : Une valeur booléenne qui indique si l'exécutable doit être un fichier protégé par la Protection de l'Intégrité du Système (SIP).
 - `on-authorized-authapfs-volume:` Une valeur booléenne qui indique si le système d'exploitation a chargé l'exécutable à partir d'un volume APFS autorisé et authentifié.
-- `on-authorized-authapfs-volume`: Une valeur booléenne qui indique si le système d'exploitation a chargé l'exécutable à partir d'un volume APFS autorisé et authentifié.
+- `on-authorized-authapfs-volume` : Une valeur booléenne qui indique si le système d'exploitation a chargé l'exécutable à partir d'un volume APFS autorisé et authentifié.
 - Volume Cryptexes
 - `on-system-volume:` Une valeur booléenne qui indique si le système d'exploitation a chargé l'exécutable à partir du volume système actuellement démarré.
 - À l'intérieur de /System...
@@ -143,14 +143,14 @@ Les contraintes de lancement auraient atténué plusieurs anciennes attaques en 
 
 De plus, les contraintes de lancement **atténuent également les attaques de rétrogradation.**
 
-Cependant, elles **n'atténuent pas les abus courants de XPC**, les injections de code **Electron** ou les **injections de dylib** sans validation de bibliothèque (à moins que les ID d'équipe pouvant charger des bibliothèques soient connus).
+Cependant, elles **n'atténuent pas les abus courants de XPC**, les injections de code **Electron** ou les **injections de dylib** sans validation de bibliothèque (à moins que les ID d'équipe qui peuvent charger des bibliothèques soient connus).
 
 ### Protection du démon XPC
 
-Dans la version Sonoma, un point notable est la **configuration de responsabilité** du service XPC. Le service XPC est responsable de lui-même, contrairement au client connectant qui est responsable. Cela est documenté dans le rapport de feedback FB13206884. Cette configuration peut sembler défectueuse, car elle permet certaines interactions avec le service XPC :
+Dans la version Sonoma, un point notable est la **configuration de responsabilité** du service démon XPC. Le service XPC est responsable de lui-même, contrairement au client connectant qui est responsable. Cela est documenté dans le rapport de retour d'information FB13206884. Cette configuration peut sembler défectueuse, car elle permet certaines interactions avec le service XPC :
 
-- **Lancement du service XPC** : Si considéré comme un bug, cette configuration ne permet pas d'initier le service XPC via le code de l'attaquant.
-- **Connexion à un service actif** : Si le service XPC est déjà en cours d'exécution (activé par son application d'origine), il n'y a aucune barrière pour s'y connecter.
+- **Lancement du service XPC** : Si considéré comme un bug, cette configuration ne permet pas d'initier le service XPC par le code de l'attaquant.
+- **Connexion à un service actif** : Si le service XPC est déjà en cours d'exécution (possiblement activé par son application d'origine), il n'y a pas de barrières pour s'y connecter.
 
 Bien que la mise en œuvre de contraintes sur le service XPC puisse être bénéfique en **rétrécissant la fenêtre pour des attaques potentielles**, cela ne répond pas à la préoccupation principale. Assurer la sécurité du service XPC nécessite fondamentalement **de valider efficacement le client connectant**. Cela reste le seul moyen de renforcer la sécurité du service. De plus, il convient de noter que la configuration de responsabilité mentionnée est actuellement opérationnelle, ce qui pourrait ne pas correspondre à la conception prévue.
 

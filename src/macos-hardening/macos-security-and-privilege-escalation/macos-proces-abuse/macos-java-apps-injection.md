@@ -107,7 +107,7 @@ Pour compiler l'agent, exécutez :
 javac Agent.java # Create Agent.class
 jar cvfm Agent.jar manifest.txt Agent.class # Create Agent.jar
 ```
-Avec `manifest.txt`:
+Avec `manifest.txt` :
 ```
 Premain-Class: Agent
 Agent-Class: Agent
@@ -126,7 +126,7 @@ open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Profession
 ## fichier vmoptions
 
 Ce fichier prend en charge la spécification des **params Java** lors de l'exécution de Java. Vous pourriez utiliser certains des trucs précédents pour changer les params java et **faire exécuter des commandes arbitraires** au processus.\
-De plus, ce fichier peut également **inclure d'autres** avec le répertoire `include`, vous pourriez donc également modifier un fichier inclus.
+De plus, ce fichier peut également **inclure d'autres** avec le répertoire `include`, vous pourriez donc également changer un fichier inclus.
 
 Encore plus, certaines applications Java **chargeront plus d'un fichier `vmoptions`**.
 
@@ -141,7 +141,7 @@ Certaines applications comme Android Studio indiquent dans leur **sortie où ell
 2023-12-13 19:53:23.922 studio[74913:581359] parseVMOptions: /Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 2023-12-13 19:53:23.923 studio[74913:581359] parseVMOptions: platform=20 user=1 file=/Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 ```
-Si ils ne le font pas, vous pouvez facilement vérifier cela avec :
+S'ils ne le font pas, vous pouvez facilement vérifier cela avec :
 ```bash
 # Monitor
 sudo eslogger lookup | grep vmoption # Give FDA to the Terminal

@@ -69,7 +69,7 @@ const char *property_getName(objc_property_t prop) {
 return prop->name;
 }
 ```
-Cette fonction agit efficacement comme le `read_func` en retournant le premier champ de `objc_property_t`.
+Cette fonction agit efficacement comme le `read_func` en renvoyant le premier champ de `objc_property_t`.
 
 2. **Écriture en mémoire :**
 Trouver une fonction préconstruite pour écrire en mémoire est plus difficile. Cependant, la fonction `_xpc_int64_set_value()` de libxpc est un candidat approprié avec le désassemblage suivant :
@@ -129,7 +129,7 @@ N'oubliez pas de gérer correctement les détails des ports Mach et des noms d'e
 
 Après avoir établi avec succès la mémoire partagée et acquis des capacités d'exécution arbitraire, nous avons essentiellement obtenu un contrôle total sur le processus cible. Les fonctionnalités clés permettant ce contrôle sont :
 
-1. **Opérations de Mémoire Arbitraires** :
+1. **Opérations Mémoire Arbitraires** :
 
 - Effectuer des lectures de mémoire arbitraires en invoquant `memcpy()` pour copier des données de la région partagée.
 - Exécuter des écritures de mémoire arbitraires en utilisant `memcpy()` pour transférer des données vers la région partagée.
@@ -149,7 +149,7 @@ Ce contrôle complet est encapsulé dans la bibliothèque [threadexec](https://g
 
 ## Considérations Importantes :
 
-- Assurez-vous d'utiliser correctement `memcpy()` pour les opérations de lecture/écriture en mémoire afin de maintenir la stabilité du système et l'intégrité des données.
+- Assurez-vous d'utiliser correctement `memcpy()` pour les opérations de lecture/écriture mémoire afin de maintenir la stabilité du système et l'intégrité des données.
 - Lors du transfert de ports Mach ou de descripteurs de fichier, suivez les protocoles appropriés et gérez les ressources de manière responsable pour éviter les fuites ou les accès non intentionnels.
 
 En respectant ces directives et en utilisant la bibliothèque `threadexec`, on peut gérer et interagir efficacement avec les processus à un niveau granulaire, obtenant ainsi un contrôle total sur le processus cible.

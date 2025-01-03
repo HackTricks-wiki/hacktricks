@@ -24,7 +24,7 @@ Les droits de port, qui définissent quelles opérations une tâche peut effectu
 - Le droit d'envoi peut être **cloné**, de sorte qu'une tâche possédant un droit d'envoi peut cloner le droit et **l'accorder à une troisième tâche**.
 - **Droit d'envoi unique**, qui permet d'envoyer un message au port et disparaît ensuite.
 - **Droit de port set**, qui désigne un _ensemble de ports_ plutôt qu'un port unique. Déqueuer un message d'un ensemble de ports déqueu un message de l'un des ports qu'il contient. Les ensembles de ports peuvent être utilisés pour écouter plusieurs ports simultanément, un peu comme `select`/`poll`/`epoll`/`kqueue` dans Unix.
-- **Nom mort**, qui n'est pas un véritable droit de port, mais simplement un espace réservé. Lorsqu'un port est détruit, tous les droits de port existants sur le port se transforment en noms morts.
+- **Nom mort**, qui n'est pas un véritable droit de port, mais simplement un espace réservé. Lorsqu'un port est détruit, tous les droits de port existants pour le port se transforment en noms morts.
 
 **Les tâches peuvent transférer des droits d'ENVOI à d'autres**, leur permettant d'envoyer des messages en retour. **Les droits d'ENVOI peuvent également être clonés, de sorte qu'une tâche peut dupliquer et donner le droit à une troisième tâche**. Cela, combiné avec un processus intermédiaire connu sous le nom de **serveur de démarrage**, permet une communication efficace entre les tâches.
 
@@ -230,12 +230,12 @@ printf("Sent a message\n");
 - **Port hôte** : Si un processus a le privilège **Send** sur ce port, il peut obtenir des **informations** sur le **système** (par exemple, `host_processor_info`).
 - **Port de privilège hôte** : Un processus avec le droit **Send** sur ce port peut effectuer des **actions privilégiées** comme charger une extension de noyau. Le **processus doit être root** pour obtenir cette permission.
 - De plus, pour appeler l'API **`kext_request`**, il est nécessaire d'avoir d'autres droits **`com.apple.private.kext*`** qui ne sont accordés qu'aux binaires Apple.
-- **Port de nom de tâche** : Une version non privilégiée du _port de tâche_. Il référence la tâche, mais ne permet pas de la contrôler. La seule chose qui semble être disponible à travers lui est `task_info()`.
+- **Port de nom de tâche :** Une version non privilégiée du _port de tâche_. Il référence la tâche, mais ne permet pas de la contrôler. La seule chose qui semble être disponible à travers lui est `task_info()`.
 - **Port de tâche** (également appelé port de noyau) : Avec la permission Send sur ce port, il est possible de contrôler la tâche (lire/écrire en mémoire, créer des threads...).
 - Appelez `mach_task_self()` pour **obtenir le nom** de ce port pour la tâche appelante. Ce port est uniquement **hérité** lors de **`exec()`** ; une nouvelle tâche créée avec `fork()` obtient un nouveau port de tâche (dans un cas particulier, une tâche obtient également un nouveau port de tâche après `exec()` dans un binaire suid). La seule façon de créer une tâche et d'obtenir son port est d'effectuer la ["danse d'échange de port"](https://robert.sesek.com/2014/1/changes_to_xnu_mach_ipc.html) tout en effectuant un `fork()`.
 - Voici les restrictions pour accéder au port (à partir de `macos_task_policy` du binaire `AppleMobileFileIntegrity`) :
 - Si l'application a le droit **`com.apple.security.get-task-allow`**, les processus du **même utilisateur peuvent accéder au port de tâche** (généralement ajouté par Xcode pour le débogage). Le processus de **notarisation** ne le permettra pas pour les versions de production.
-- Les applications avec le droit **`com.apple.system-task-ports`** peuvent obtenir le **port de tâche pour n'importe quel** processus, sauf le noyau. Dans les versions plus anciennes, cela s'appelait **`task_for_pid-allow`**. Cela n'est accordé qu'aux applications Apple.
+- Les applications avec le droit **`com.apple.system-task-ports`** peuvent obtenir le **port de tâche pour n'importe quel** processus, sauf le noyau. Dans les versions antérieures, cela s'appelait **`task_for_pid-allow`**. Cela n'est accordé qu'aux applications Apple.
 - **Root peut accéder aux ports de tâche** des applications **non** compilées avec un runtime **durci** (et pas d'Apple).
 
 ### Injection de shellcode dans le thread via le port de tâche
@@ -502,7 +502,7 @@ gcc -framework Foundation -framework Appkit sc_inject.m -o sc_inject
 
 Dans macOS, les **threads** peuvent être manipulés via **Mach** ou en utilisant l'**api posix `pthread`**. Le thread que nous avons généré dans l'injection précédente a été généré en utilisant l'api Mach, donc **il n'est pas conforme à posix**.
 
-Il a été possible d'**injecter un simple shellcode** pour exécuter une commande car il **n'avait pas besoin de fonctionner avec des apis** conformes à posix, seulement avec Mach. **Des injections plus complexes** nécessiteraient que le **thread** soit également **conforme à posix**.
+Il était possible d'**injecter un simple shellcode** pour exécuter une commande car il **n'avait pas besoin de fonctionner avec des apis conformes à posix**, seulement avec Mach. Des **injections plus complexes** nécessiteraient que le **thread** soit également **conforme à posix**.
 
 Par conséquent, pour **améliorer le thread**, il devrait appeler **`pthread_create_from_mach_thread`** qui va **créer un pthread valide**. Ensuite, ce nouveau pthread pourrait **appeler dlopen** pour **charger une dylib** depuis le système, donc au lieu d'écrire un nouveau shellcode pour effectuer différentes actions, il est possible de charger des bibliothèques personnalisées.
 
@@ -802,7 +802,7 @@ Dans cette technique, un fil du processus est détourné :
 
 ### Informations de base
 
-XPC, qui signifie XNU (le noyau utilisé par macOS) inter-Process Communication, est un cadre pour **la communication entre processus** sur macOS et iOS. XPC fournit un mécanisme pour effectuer des **appels de méthode asynchrones et sécurisés entre différents processus** sur le système. C'est une partie du paradigme de sécurité d'Apple, permettant la **création d'applications séparées par privilèges** où chaque **composant** fonctionne avec **seulement les permissions nécessaires** pour accomplir sa tâche, limitant ainsi les dommages potentiels d'un processus compromis.
+XPC, qui signifie XNU (le noyau utilisé par macOS) inter-Process Communication, est un cadre pour **la communication entre processus** sur macOS et iOS. XPC fournit un mécanisme pour effectuer des **appels de méthode asynchrones et sécurisés entre différents processus** sur le système. C'est une partie du paradigme de sécurité d'Apple, permettant la **création d'applications séparées par privilèges** où chaque **composant** fonctionne avec **seulement les autorisations nécessaires** pour accomplir sa tâche, limitant ainsi les dommages potentiels d'un processus compromis.
 
 Pour plus d'informations sur le fonctionnement de cette **communication** et sur la façon dont elle **pourrait être vulnérable**, consultez :
 

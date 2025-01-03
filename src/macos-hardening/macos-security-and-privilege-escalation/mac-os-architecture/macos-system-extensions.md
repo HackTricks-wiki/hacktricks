@@ -26,9 +26,9 @@ Les extensions réseau offrent la possibilité de personnaliser les comportement
 
 ## Cadre de sécurité des points de terminaison
 
-La sécurité des points de terminaison est un cadre fourni par Apple dans macOS qui offre un ensemble d'API pour la sécurité système. Il est destiné à être utilisé par **des fournisseurs de sécurité et des développeurs pour créer des produits qui peuvent surveiller et contrôler l'activité système** afin d'identifier et de protéger contre les activités malveillantes.
+La sécurité des points de terminaison est un cadre fourni par Apple dans macOS qui offre un ensemble d'APIs pour la sécurité système. Il est destiné à être utilisé par **des fournisseurs de sécurité et des développeurs pour créer des produits qui peuvent surveiller et contrôler l'activité système** afin d'identifier et de protéger contre les activités malveillantes.
 
-Ce cadre fournit une **collection d'API pour surveiller et contrôler l'activité système**, telles que les exécutions de processus, les événements du système de fichiers, les événements réseau et noyau.
+Ce cadre fournit une **collection d'APIs pour surveiller et contrôler l'activité système**, telles que les exécutions de processus, les événements du système de fichiers, les événements réseau et noyau.
 
 Le cœur de ce cadre est implémenté dans le noyau, en tant qu'extension du noyau (KEXT) située à **`/System/Library/Extensions/EndpointSecurity.kext`**. Ce KEXT est composé de plusieurs composants clés :
 

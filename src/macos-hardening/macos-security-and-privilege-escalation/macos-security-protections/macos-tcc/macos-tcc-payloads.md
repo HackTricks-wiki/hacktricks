@@ -44,7 +44,7 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="Shell"}}
-Copier `$HOME/Desktop` vers `/tmp/desktop`.
+Copiez `$HOME/Desktop` dans `/tmp/desktop`.
 ```bash
 cp -r "$HOME/Desktop" "/tmp/desktop"
 ```
@@ -93,7 +93,7 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="Shell"}}
-Copier `$HOME/`Documents vers `/tmp/documents`.
+Copiez `$HOME/`Documents dans `/tmp/documents`.
 ```bash
 cp -r "$HOME/Documents" "/tmp/documents"
 ```
@@ -107,7 +107,7 @@ cp -r "$HOME/Documents" "/tmp/documents"
 
 {{#tabs}}
 {{#tab name="ObjetiveC"}}
-Copier `$HOME/Downloads` dans `/tmp/downloads`.
+Copier `$HOME/Downloads` vers `/tmp/downloads`.
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>

@@ -10,7 +10,7 @@ Créez la bibliothèque **`inject.rb`** dans **`/tmp`** :
 ```ruby:inject.rb
 puts `whoami`
 ```
-Créez n'importe où un script ruby comme :
+Créez n'importe où un script Ruby comme :
 ```ruby:hello.rb
 puts 'Hello, World!'
 ```

@@ -41,13 +41,13 @@ security dump-keychain -d #Dump all the info, included secrets (the user will be
 
 ### Aperçu de Keychaindump
 
-Un outil nommé **keychaindump** a été développé pour extraire des mots de passe des porte-clés macOS, mais il rencontre des limitations sur les versions macOS plus récentes comme Big Sur, comme indiqué dans une [discussion](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760). L'utilisation de **keychaindump** nécessite que l'attaquant obtienne un accès et élève ses privilèges à **root**. L'outil exploite le fait que le porte-clé est déverrouillé par défaut lors de la connexion de l'utilisateur pour des raisons de commodité, permettant aux applications d'y accéder sans nécessiter le mot de passe de l'utilisateur à plusieurs reprises. Cependant, si un utilisateur choisit de verrouiller son porte-clé après chaque utilisation, **keychaindump** devient inefficace.
+Un outil nommé **keychaindump** a été développé pour extraire des mots de passe des porte-clés macOS, mais il rencontre des limitations sur les versions macOS plus récentes comme Big Sur, comme indiqué dans une [discussion](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760). L'utilisation de **keychaindump** nécessite que l'attaquant accède et élève ses privilèges à **root**. L'outil exploite le fait que le porte-clé est déverrouillé par défaut lors de la connexion de l'utilisateur pour plus de commodité, permettant aux applications d'y accéder sans nécessiter le mot de passe de l'utilisateur à plusieurs reprises. Cependant, si un utilisateur choisit de verrouiller son porte-clé après chaque utilisation, **keychaindump** devient inefficace.
 
 **Keychaindump** fonctionne en ciblant un processus spécifique appelé **securityd**, décrit par Apple comme un démon pour les opérations d'autorisation et cryptographiques, crucial pour accéder au porte-clé. Le processus d'extraction implique l'identification d'une **Master Key** dérivée du mot de passe de connexion de l'utilisateur. Cette clé est essentielle pour lire le fichier du porte-clé. Pour localiser la **Master Key**, **keychaindump** scanne le tas de mémoire de **securityd** en utilisant la commande `vmmap`, à la recherche de clés potentielles dans des zones marquées comme `MALLOC_TINY`. La commande suivante est utilisée pour inspecter ces emplacements mémoire :
 ```bash
 sudo vmmap <securityd PID> | grep MALLOC_TINY
 ```
-Après avoir identifié des clés maîtresses potentielles, **keychaindump** recherche dans les tas un motif spécifique (`0x0000000000000018`) qui indique un candidat pour la clé maîtresse. D'autres étapes, y compris la déobfuscation, sont nécessaires pour utiliser cette clé, comme indiqué dans le code source de **keychaindump**. Les analystes se concentrant sur ce domaine doivent noter que les données cruciales pour déchiffrer le trousseau sont stockées dans la mémoire du processus **securityd**. Une commande exemple pour exécuter **keychaindump** est :
+Après avoir identifié des clés maîtresses potentielles, **keychaindump** recherche dans les tas un motif spécifique (`0x0000000000000018`) qui indique un candidat pour la clé maîtresse. D'autres étapes, y compris la déobfuscation, sont nécessaires pour utiliser cette clé, comme l'indique le code source de **keychaindump**. Les analystes se concentrant sur ce domaine doivent noter que les données cruciales pour déchiffrer le trousseau sont stockées dans la mémoire du processus **securityd**. Une commande exemple pour exécuter **keychaindump** est :
 ```bash
 sudo ./keychaindump
 ```
@@ -112,7 +112,7 @@ python2.7 chainbreaker.py --dump-all --password-prompt /Users/<username>/Library
 
 Le fichier **kcpassword** est un fichier qui contient le **mot de passe de connexion de l'utilisateur**, mais seulement si le propriétaire du système a **activé la connexion automatique**. Par conséquent, l'utilisateur sera automatiquement connecté sans qu'on lui demande un mot de passe (ce qui n'est pas très sécurisé).
 
-Le mot de passe est stocké dans le fichier **`/etc/kcpassword`** xored avec la clé **`0x7D 0x89 0x52 0x23 0xD2 0xBC 0xDD 0xEA 0xA3 0xB9 0x1F`**. Si le mot de passe de l'utilisateur est plus long que la clé, la clé sera réutilisée.\
+Le mot de passe est stocké dans le fichier **`/etc/kcpassword`** xored avec la clé **`0x7D 0x89 0x52 0x23 0xD2 0xBC 0xDD 0xEA 0xA3 0xB9 0x1F`**. Si le mot de passe des utilisateurs est plus long que la clé, la clé sera réutilisée.\
 Cela rend le mot de passe assez facile à récupérer, par exemple en utilisant des scripts comme [**celui-ci**](https://gist.github.com/opshope/32f65875d45215c3677d).
 
 ## Informations intéressantes dans les bases de données
@@ -191,7 +191,7 @@ Ce fichier accorde des permissions à des utilisateurs spécifiques par UUID (et
 
 ### Notifications Darwin
 
-Le principal démon pour les notifications est **`/usr/sbin/notifyd`**. Afin de recevoir des notifications, les clients doivent s'enregistrer via le port Mach `com.apple.system.notification_center` (vérifiez-les avec `sudo lsmp -p <pid notifyd>`). Le démon est configurable avec le fichier `/etc/notify.conf`.
+Le démon principal pour les notifications est **`/usr/sbin/notifyd`**. Afin de recevoir des notifications, les clients doivent s'enregistrer via le port Mach `com.apple.system.notification_center` (vérifiez-les avec `sudo lsmp -p <pid notifyd>`). Le démon est configurable avec le fichier `/etc/notify.conf`.
 
 Les noms utilisés pour les notifications sont des notations DNS inversées uniques et lorsqu'une notification est envoyée à l'un d'eux, le(s) client(s) qui ont indiqué qu'ils peuvent la gérer la recevront.
 

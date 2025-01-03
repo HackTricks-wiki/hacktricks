@@ -40,12 +40,12 @@ L'en-tête contient les **octets magiques** suivis du **nombre** d'**archs** que
 Vérifiez-le avec :
 
 <pre class="language-shell-session"><code class="lang-shell-session">% file /bin/ls
-/bin/ls: Mach-O binaire universel avec 2 architectures : [x86_64:Mach-O 64-bit exécutable x86_64] [arm64e:Mach-O 64-bit exécutable arm64e]
-/bin/ls (pour l'architecture x86_64) :	Mach-O 64-bit exécutable x86_64
-/bin/ls (pour l'architecture arm64e) :	Mach-O 64-bit exécutable arm64e
+/bin/ls: Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64e:Mach-O 64-bit executable arm64e]
+/bin/ls (pour l'architecture x86_64):	Mach-O 64-bit executable x86_64
+/bin/ls (pour l'architecture arm64e):	Mach-O 64-bit executable arm64e
 
 % otool -f -v /bin/ls
-En-têtes Fat
+Fat headers
 fat_magic FAT_MAGIC
 <strong>nfat_arch 2
 </strong><strong>architecture x86_64
@@ -131,7 +131,7 @@ Le code source définit également plusieurs drapeaux utiles pour le chargement 
 - `MH_NOUNDEFS` : Pas de références non définies (entièrement lié)
 - `MH_DYLDLINK` : Liaison Dyld
 - `MH_PREBOUND` : Références dynamiques préliées.
-- `MH_SPLIT_SEGS` : Fichier divise les segments r/o et r/w.
+- `MH_SPLIT_SEGS` : Le fichier divise les segments r/o et r/w.
 - `MH_WEAK_DEFINES` : Le binaire a des symboles définis faibles
 - `MH_BINDS_TO_WEAK` : Le binaire utilise des symboles faibles
 - `MH_ALLOW_STACK_EXECUTION` : Rendre la pile exécutable
@@ -147,7 +147,7 @@ Le code source définit également plusieurs drapeaux utiles pour le chargement 
 
 La **disposition du fichier en mémoire** est spécifiée ici, détaillant la **localisation de la table des symboles**, le contexte du thread principal au début de l'exécution, et les **bibliothèques partagées** requises. Des instructions sont fournies au chargeur dynamique **(dyld)** sur le processus de chargement du binaire en mémoire.
 
-Le utilise la structure **load_command**, définie dans le mentionné **`loader.h`** :
+Il utilise la structure **load_command**, définie dans le **`loader.h`** mentionné :
 ```objectivec
 struct load_command {
 uint32_t cmd;           /* type of load command */
@@ -220,7 +220,7 @@ otool -lv /bin/ls
 Segments communs chargés par cette commande :
 
 - **`__PAGEZERO` :** Il indique au noyau de **mapper** l'**adresse zéro** afin qu'elle **ne puisse pas être lue, écrite ou exécutée**. Les variables maxprot et minprot dans la structure sont définies à zéro pour indiquer qu'il n'y a **aucun droit de lecture-écriture-exécution sur cette page**.
-- Cette allocation est importante pour **atténuer les vulnérabilités de déréférencement de pointeur NULL**. En effet, XNU impose une page zéro stricte qui garantit que la première page (seulement la première) de la mémoire est inaccessible (sauf en i386). Un binaire pourrait satisfaire ces exigences en créant un petit \_\_PAGEZERO (en utilisant le `-pagezero_size`) pour couvrir les premiers 4k et en rendant le reste de la mémoire 32 bits accessible à la fois en mode utilisateur et en mode noyau.
+- Cette allocation est importante pour **atténuer les vulnérabilités de déréférencement de pointeur NULL**. En effet, XNU impose une page zéro stricte qui garantit que la première page (seulement la première) de la mémoire est inaccessible (sauf en i386). Un binaire pourrait satisfaire ces exigences en créant un petit \_\_PAGEZERO (en utilisant `-pagezero_size`) pour couvrir les premiers 4k et en rendant le reste de la mémoire 32 bits accessible à la fois en mode utilisateur et en mode noyau.
 - **`__TEXT` :** Contient du **code exécutable** avec des permissions de **lecture** et **d'exécution** (pas d'écriture)**.** Sections communes de ce segment :
 - `__text` : Code binaire compilé
 - `__const` : Données constantes (lecture seule)
@@ -243,13 +243,13 @@ Segments communs chargés par cette commande :
 - Début des fonctions : Table des adresses de début des fonctions
 - Données dans le code : Îles de données dans \_\_text
 - Table des symboles : Symboles dans le binaire
-- Table des symboles indirects : Pointeurs/stubs de symboles
+- Table des symboles indirects : Symboles pointeur/stub
 - Table des chaînes
 - Signature de code
 - **`__OBJC` :** Contient des informations utilisées par le runtime Objective-C. Bien que ces informations puissent également être trouvées dans le segment \_\_DATA, au sein de diverses sections \_\_objc\_\*.
 - **`__RESTRICT` :** Un segment sans contenu avec une seule section appelée **`__restrict`** (également vide) qui garantit que lors de l'exécution du binaire, il ignorera les variables d'environnement DYLD.
 
-Comme il a été possible de le voir dans le code, **les segments prennent également en charge des indicateurs** (bien qu'ils ne soient pas très utilisés) :
+Comme il a été possible de le voir dans le code, **les segments prennent également en charge des drapeaux** (bien qu'ils ne soient pas très utilisés) :
 
 - `SG_HIGHVM` : Core uniquement (non utilisé)
 - `SG_FVMLIB` : Non utilisé
@@ -287,7 +287,7 @@ cpsr 0x00000000
 ### **`LC_CODE_SIGNATURE`**
 
 Contient des informations sur la **signature de code du fichier Macho-O**. Il ne contient qu'un **offset** qui **pointe** vers le **blob de signature**. Cela se trouve généralement à la toute fin du fichier.\
-Cependant, vous pouvez trouver des informations sur cette section dans [**cet article de blog**](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/) et ce [**gist**](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4).
+Cependant, vous pouvez trouver des informations sur cette section dans [**cet article de blog**](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/) et ce [**gists**](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4).
 
 ### **`LC_ENCRYPTION_INFO[_64]`**
 
@@ -360,7 +360,7 @@ Au cœur du fichier se trouve la région de données, qui est composée de plusi
 Cela inclut :
 
 - **Table des fonctions :** Qui contient des informations sur les fonctions du programme.
-- **Table des symboles** : Qui contient des informations sur la fonction externe utilisée par le binaire
+- **Table des symboles** : Qui contient des informations sur les fonctions externes utilisées par le binaire
 - Elle pourrait également contenir des fonctions internes, des noms de variables ainsi que d'autres.
 
 Pour le vérifier, vous pourriez utiliser l'outil [**Mach-O View**](https://sourceforge.net/projects/machoview/) :

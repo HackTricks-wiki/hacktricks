@@ -53,7 +53,7 @@ Consultez cette page sur les **emplacements de démarrage automatique** :
 
 ### Abuser d'autres processus
 
-Si à partir du processus sandbox vous parvenez à **compromettre d'autres processus** s'exécutant dans des sandboxes moins restrictives (ou aucune), vous pourrez échapper à leurs sandboxes :
+Si à partir du processus sandboxé vous parvenez à **compromettre d'autres processus** s'exécutant dans des sandboxes moins restrictives (ou aucune), vous pourrez échapper à leurs sandboxes :
 
 {{#ref}}
 ../../../macos-proces-abuse/
@@ -130,7 +130,7 @@ NSLog(@"run task result:%@, error:%@", bSucc, error);
 ```
 #### /System/Library/PrivateFrameworks/AudioAnalyticsInternal.framework/XPCServices/AudioAnalyticsHelperService.xpc
 
-Ce service XPC permettait à chaque client de toujours retourner OUI et la méthode `createZipAtPath:hourThreshold:withReply:` permettait essentiellement d'indiquer le chemin vers un dossier à compresser et il le compressera dans un fichier ZIP.
+Ce service XPC permettait à chaque client de toujours retourner OUI et la méthode `createZipAtPath:hourThreshold:withReply:` permettait essentiellement d'indiquer le chemin vers un dossier à compresser et il le compresserait dans un fichier ZIP.
 
 Par conséquent, il est possible de générer une fausse structure de dossier d'application, de la compresser, puis de la décompresser et de l'exécuter pour échapper au sandbox car les nouveaux fichiers n'auront pas l'attribut de quarantaine.
 
@@ -456,7 +456,7 @@ Process 2517 resuming
 Sandbox Bypassed!
 Process 2517 exited with status = 0 (0x00000000)
 ```
-> [!WARNING] > **Même avec le contournement du Sandbox, TCC** demandera à l'utilisateur s'il souhaite autoriser le processus à lire des fichiers du bureau
+> [!WARNING] > **Même avec le Sandbox contourné, TCC** demandera à l'utilisateur s'il souhaite autoriser le processus à lire des fichiers du bureau
 
 ## Références
 

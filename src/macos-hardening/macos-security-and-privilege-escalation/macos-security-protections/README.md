@@ -40,7 +40,7 @@ macos-tcc/
 
 ### Contraintes de Lancement/Environnement & Cache de Confiance
 
-Les contraintes de lancement dans macOS sont une fonctionnalité de sécurité pour **réguler l'initiation des processus** en définissant **qui peut lancer** un processus, **comment** et **d'où**. Introduites dans macOS Ventura, elles classifient les binaires système en catégories de contraintes au sein d'un **cache de confiance**. Chaque binaire exécutable a des **règles** définies pour son **lancement**, y compris des contraintes **auto**, **parent** et **responsable**. Étendues aux applications tierces en tant que **Contraintes d'Environnement** dans macOS Sonoma, ces fonctionnalités aident à atténuer les exploitations potentielles du système en régissant les conditions de lancement des processus.
+Les contraintes de lancement dans macOS sont une fonctionnalité de sécurité pour **réguler l'initiation des processus** en définissant **qui peut lancer** un processus, **comment** et **d'où**. Introduites dans macOS Ventura, elles catégorisent les binaires système en catégories de contraintes au sein d'un **cache de confiance**. Chaque binaire exécutable a des **règles** définies pour son **lancement**, y compris des contraintes **soi**, **parent** et **responsable**. Étendues aux applications tierces en tant que **Contraintes d'Environnement** dans macOS Sonoma, ces fonctionnalités aident à atténuer les exploitations potentielles du système en régissant les conditions de lancement des processus.
 
 {{#ref}}
 macos-launch-environment-constraints.md
@@ -50,11 +50,11 @@ macos-launch-environment-constraints.md
 
 L'Outil de Suppression de Malware (MRT) est une autre partie de l'infrastructure de sécurité de macOS. Comme son nom l'indique, la fonction principale de MRT est de **supprimer les malwares connus des systèmes infectés**.
 
-Une fois qu'un malware est détecté sur un Mac (soit par XProtect, soit par d'autres moyens), MRT peut être utilisé pour **supprimer automatiquement le malware**. MRT fonctionne silencieusement en arrière-plan et s'exécute généralement chaque fois que le système est mis à jour ou lorsqu'une nouvelle définition de malware est téléchargée (il semble que les règles que MRT doit suivre pour détecter les malwares se trouvent à l'intérieur du binaire).
+Une fois qu'un malware est détecté sur un Mac (soit par XProtect, soit par d'autres moyens), MRT peut être utilisé pour **supprimer automatiquement le malware**. MRT fonctionne silencieusement en arrière-plan et s'exécute généralement chaque fois que le système est mis à jour ou lorsqu'une nouvelle définition de malware est téléchargée (il semble que les règles que MRT doit suivre pour détecter les malwares soient à l'intérieur du binaire).
 
 Bien que XProtect et MRT fassent tous deux partie des mesures de sécurité de macOS, ils remplissent des fonctions différentes :
 
-- **XProtect** est un outil préventif. Il **vérifie les fichiers au fur et à mesure de leur téléchargement** (via certaines applications), et s'il détecte des types de malwares connus, il **empêche le fichier de s'ouvrir**, empêchant ainsi le malware d'infecter votre système en premier lieu.
+- **XProtect** est un outil préventif. Il **vérifie les fichiers au fur et à mesure de leur téléchargement** (via certaines applications), et s'il détecte des types de malwares connus, il **empêche le fichier de s'ouvrir**, empêchant ainsi le malware d'infecter votre système dès le départ.
 - **MRT**, en revanche, est un **outil réactif**. Il fonctionne après qu'un malware a été détecté sur un système, dans le but de supprimer le logiciel incriminé pour nettoyer le système.
 
 L'application MRT se trouve dans **`/Library/Apple/System/Library/CoreServices/MRT.app`**
@@ -101,11 +101,11 @@ xattr -rc dumpBTM # Remove quarantine attr
 ```
 Ces informations sont stockées dans **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** et le Terminal nécessite FDA.
 
-### Manipulation de BTM
+### Manipulation avec BTM
 
-Lorsqu'une nouvelle persistance est trouvée, un événement de type **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`** est généré. Ainsi, toute méthode pour **prévenir** cet **événement** d'être envoyé ou pour empêcher **l'agent d'alerter** l'utilisateur aidera un attaquant à _**contourner**_ BTM.
+Lorsqu'une nouvelle persistance est trouvée, un événement de type **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`** est généré. Donc, toute méthode pour **prévenir** cet **événement** d'être envoyé ou pour empêcher **l'agent d'alerter** l'utilisateur aidera un attaquant à _**contourner**_ BTM.
 
-- **Réinitialisation de la base de données** : Exécuter la commande suivante réinitialisera la base de données (devrait la reconstruire depuis le début), cependant, pour une raison quelconque, après avoir exécuté cela, **aucune nouvelle persistance ne sera alertée jusqu'à ce que le système soit redémarré**.
+- **Réinitialiser la base de données** : Exécuter la commande suivante réinitialisera la base de données (devrait la reconstruire depuis le début), cependant, pour une raison quelconque, après avoir exécuté cela, **aucune nouvelle persistance ne sera signalée jusqu'à ce que le système soit redémarré**.
 - **root** est requis.
 ```bash
 # Reset the database

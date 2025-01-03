@@ -4,7 +4,7 @@
 
 ## Informations de Base sur les Processus
 
-Un processus est une instance d'un exécutable en cours d'exécution, cependant les processus n'exécutent pas de code, ce sont des threads. Par conséquent, **les processus ne sont que des conteneurs pour des threads en cours d'exécution** fournissant la mémoire, les descripteurs, les ports, les permissions...
+Un processus est une instance d'un exécutable en cours d'exécution, cependant les processus n'exécutent pas de code, ce sont des threads. Par conséquent, **les processus ne sont que des conteneurs pour des threads en cours d'exécution** fournissant la mémoire, des descripteurs, des ports, des permissions...
 
 Traditionnellement, les processus étaient lancés dans d'autres processus (sauf le PID 1) en appelant **`fork`** qui créerait une copie exacte du processus actuel et ensuite le **processus enfant** appellerait généralement **`execve`** pour charger le nouvel exécutable et l'exécuter. Ensuite, **`vfork`** a été introduit pour rendre ce processus plus rapide sans aucune copie de mémoire.\
 Puis **`posix_spawn`** a été introduit combinant **`vfork`** et **`execve`** en un seul appel et acceptant des drapeaux :
@@ -104,10 +104,10 @@ Ce snippet définit `tlv_var` comme une variable locale à un thread. Chaque thr
 
 Dans le binaire Mach-O, les données liées aux variables locales à un thread sont organisées en sections spécifiques :
 
-- **`__DATA.__thread_vars`** : Cette section contient les métadonnées sur les variables locales à un thread, comme leurs types et leur état d'initialisation.
+- **`__DATA.__thread_vars`** : Cette section contient les métadonnées sur les variables locales à un thread, comme leurs types et leur statut d'initialisation.
 - **`__DATA.__thread_bss`** : Cette section est utilisée pour les variables locales à un thread qui ne sont pas explicitement initialisées. C'est une partie de la mémoire réservée pour les données initialisées à zéro.
 
-Mach-O fournit également une API spécifique appelée **`tlv_atexit`** pour gérer les variables locales à un thread lors de la sortie d'un thread. Cette API vous permet de **enregistrer des destructeurs**—des fonctions spéciales qui nettoient les données locales à un thread lorsque celui-ci se termine.
+Mach-O fournit également une API spécifique appelée **`tlv_atexit`** pour gérer les variables locales à un thread lorsqu'un thread se termine. Cette API vous permet de **enregistrer des destructeurs**—des fonctions spéciales qui nettoient les données locales à un thread lorsque celui-ci se termine.
 
 ### Priorités de Thread
 
@@ -124,7 +124,7 @@ Comprendre les priorités des threads implique d'examiner comment le système d'
 
 #### Classes de Qualité de Service (QoS)
 
-Les classes QoS sont une approche plus moderne pour gérer les priorités des threads, en particulier dans des systèmes comme macOS qui prennent en charge **Grand Central Dispatch (GCD)**. Les classes QoS permettent aux développeurs de **catégoriser** le travail en différents niveaux en fonction de leur importance ou de leur urgence. macOS gère automatiquement la priorisation des threads en fonction de ces classes QoS :
+Les classes QoS sont une approche plus moderne pour gérer les priorités des threads, en particulier dans des systèmes comme macOS qui prennent en charge **Grand Central Dispatch (GCD)**. Les classes QoS permettent aux développeurs de **catégoriser** le travail en différents niveaux en fonction de leur importance ou urgence. macOS gère automatiquement la priorisation des threads en fonction de ces classes QoS :
 
 1. **Interactif Utilisateur :**
 - Cette classe est pour les tâches qui interagissent actuellement avec l'utilisateur ou nécessitent des résultats immédiats pour offrir une bonne expérience utilisateur. Ces tâches se voient attribuer la plus haute priorité pour maintenir l'interface réactive (par exemple, animations ou gestion d'événements).
@@ -137,7 +137,7 @@ Les classes QoS sont une approche plus moderne pour gérer les priorités des th
 
 En utilisant les classes QoS, les développeurs n'ont pas besoin de gérer les numéros de priorité exacts mais plutôt de se concentrer sur la nature de la tâche, et le système optimise les ressources CPU en conséquence.
 
-De plus, il existe différentes **politiques de planification des threads** qui spécifient un ensemble de paramètres de planification que le planificateur prendra en considération. Cela peut être fait en utilisant `thread_policy_[set/get]`. Cela pourrait être utile dans les attaques par condition de course.
+De plus, il existe différentes **politiques de planification des threads** qui spécifient un ensemble de paramètres de planification que le planificateur prendra en compte. Cela peut être fait en utilisant `thread_policy_[set/get]`. Cela pourrait être utile dans les attaques par condition de course.
 
 ## Abus de Processus MacOS
 
@@ -153,7 +153,7 @@ macos-library-injection/
 
 ### Hooking de Fonction
 
-Le hooking de fonction implique **d'intercepter les appels de fonction** ou les messages au sein d'un code logiciel. En hookant des fonctions, un attaquant peut **modifier le comportement** d'un processus, observer des données sensibles ou même prendre le contrôle du flux d'exécution.
+Le hooking de fonction implique **d'intercepter les appels de fonction** ou les messages au sein d'un code logiciel. En hookant des fonctions, un attaquant peut **modifier le comportement** d'un processus, observer des données sensibles, ou même prendre le contrôle du flux d'exécution.
 
 {{#ref}}
 macos-function-hooking.md
@@ -161,7 +161,7 @@ macos-function-hooking.md
 
 ### Communication Inter-Processus
 
-La communication inter-processus (IPC) fait référence à différentes méthodes par lesquelles des processus séparés **partagent et échangent des données**. Bien que l'IPC soit fondamental pour de nombreuses applications légitimes, il peut également être mal utilisé pour subvertir l'isolation des processus, fuir des informations sensibles ou effectuer des actions non autorisées.
+La communication inter-processus (IPC) fait référence à différentes méthodes par lesquelles des processus séparés **partagent et échangent des données**. Bien que l'IPC soit fondamental pour de nombreuses applications légitimes, il peut également être mal utilisé pour subvertir l'isolation des processus, divulguer des informations sensibles ou effectuer des actions non autorisées.
 
 {{#ref}}
 macos-ipc-inter-process-communication/
@@ -177,7 +177,7 @@ macos-electron-applications-injection.md
 
 ### Injection de Chromium
 
-Il est possible d'utiliser les drapeaux `--load-extension` et `--use-fake-ui-for-media-stream` pour effectuer une **attaque de l'homme dans le navigateur** permettant de voler des frappes, du trafic, des cookies, d'injecter des scripts dans des pages... :
+Il est possible d'utiliser les drapeaux `--load-extension` et `--use-fake-ui-for-media-stream` pour effectuer une **attaque de type homme dans le navigateur** permettant de voler des frappes, du trafic, des cookies, d'injecter des scripts dans des pages... :
 
 {{#ref}}
 macos-chromium-injection.md
@@ -193,7 +193,7 @@ macos-dirty-nib.md
 
 ### Injection d'Applications Java
 
-Il est possible d'abuser de certaines capacités java (comme la variable d'environnement **`_JAVA_OPTS`**) pour faire exécuter à une application java **du code/commandes arbitraires**.
+Il est possible d'abuser de certaines capacités Java (comme la variable d'environnement **`_JAVA_OPTS`**) pour faire exécuter à une application Java **du code/commandes arbitraires**.
 
 {{#ref}}
 macos-java-apps-injection.md
@@ -217,7 +217,7 @@ macos-perl-applications-injection.md
 
 ### Injection Ruby
 
-Il est également possible d'abuser des variables d'environnement ruby pour faire exécuter des scripts arbitraires du code arbitraire :
+Il est également possible d'abuser des variables d'environnement Ruby pour faire exécuter des scripts arbitraires du code arbitraire :
 
 {{#ref}}
 macos-ruby-applications-injection.md
@@ -225,16 +225,16 @@ macos-ruby-applications-injection.md
 
 ### Injection Python
 
-Si la variable d'environnement **`PYTHONINSPECT`** est définie, le processus python passera à un cli python une fois terminé. Il est également possible d'utiliser **`PYTHONSTARTUP`** pour indiquer un script python à exécuter au début d'une session interactive.\
+Si la variable d'environnement **`PYTHONINSPECT`** est définie, le processus Python passera à un CLI Python une fois terminé. Il est également possible d'utiliser **`PYTHONSTARTUP`** pour indiquer un script Python à exécuter au début d'une session interactive.\
 Cependant, notez que le script **`PYTHONSTARTUP`** ne sera pas exécuté lorsque **`PYTHONINSPECT`** crée la session interactive.
 
-D'autres variables d'environnement telles que **`PYTHONPATH`** et **`PYTHONHOME`** pourraient également être utiles pour faire exécuter une commande python du code arbitraire.
+D'autres variables d'environnement telles que **`PYTHONPATH`** et **`PYTHONHOME`** pourraient également être utiles pour faire exécuter une commande Python du code arbitraire.
 
-Notez que les exécutables compilés avec **`pyinstaller`** n'utiliseront pas ces variables environnementales même s'ils s'exécutent en utilisant un python intégré.
+Notez que les exécutables compilés avec **`pyinstaller`** n'utiliseront pas ces variables environnementales même s'ils s'exécutent avec un Python intégré.
 
 > [!CAUTION]
-> Dans l'ensemble, je n'ai pas trouvé de moyen de faire exécuter du code arbitraire à python en abusant des variables d'environnement.\
-> Cependant, la plupart des gens installent python en utilisant **Homebrew**, qui installera python dans un **emplacement écrivable** pour l'utilisateur admin par défaut. Vous pouvez le détourner avec quelque chose comme :
+> Dans l'ensemble, je n'ai pas trouvé de moyen de faire exécuter du code arbitraire à Python en abusant des variables d'environnement.\
+> Cependant, la plupart des gens installent Python en utilisant **Homebrew**, qui installera Python dans un **emplacement écrivable** pour l'utilisateur admin par défaut. Vous pouvez le détourner avec quelque chose comme :
 >
 > ```bash
 > mv /opt/homebrew/bin/python3 /opt/homebrew/bin/python3.old
@@ -246,18 +246,18 @@ Notez que les exécutables compilés avec **`pyinstaller`** n'utiliseront pas ce
 > chmod +x /opt/homebrew/bin/python3
 > ```
 >
-> Même **root** exécutera ce code lors de l'exécution de python.
+> Même **root** exécutera ce code lors de l'exécution de Python.
 
 ## Détection
 
-### Shield
+### Bouclier
 
-[**Shield**](https://theevilbit.github.io/shield/) ([**Github**](https://github.com/theevilbit/Shield)) est une application open source qui peut **détecter et bloquer les actions d'injection de processus** :
+[**Bouclier**](https://theevilbit.github.io/shield/) ([**Github**](https://github.com/theevilbit/Shield)) est une application open source qui peut **détecter et bloquer les actions d'injection de processus** :
 
 - En utilisant **des variables d'environnement** : Elle surveillera la présence de l'une des variables d'environnement suivantes : **`DYLD_INSERT_LIBRARIES`**, **`CFNETWORK_LIBRARY_PATH`**, **`RAWCAMERA_BUNDLE_PATH`** et **`ELECTRON_RUN_AS_NODE`**
 - En utilisant des appels **`task_for_pid`** : Pour trouver quand un processus veut obtenir le **port de tâche d'un autre** ce qui permet d'injecter du code dans le processus.
 - **Paramètres des applications Electron** : Quelqu'un peut utiliser les arguments de ligne de commande **`--inspect`**, **`--inspect-brk`** et **`--remote-debugging-port`** pour démarrer une application Electron en mode débogage, et ainsi injecter du code.
-- En utilisant **des liens symboliques** ou **des liens durs** : Typiquement, l'abus le plus courant consiste à **placer un lien avec nos privilèges d'utilisateur**, et **pointer vers un emplacement de privilège supérieur**. La détection est très simple pour les liens durs et les liens symboliques. Si le processus créant le lien a un **niveau de privilège différent** de celui du fichier cible, nous créons une **alerte**. Malheureusement, dans le cas des liens symboliques, le blocage n'est pas possible, car nous n'avons pas d'informations sur la destination du lien avant sa création. C'est une limitation du framework EndpointSecurity d'Apple.
+- En utilisant **des liens symboliques** ou **des liens durs** : Typiquement, l'abus le plus courant consiste à **placer un lien avec nos privilèges d'utilisateur**, et **le pointer vers un emplacement de privilège supérieur**. La détection est très simple pour les liens durs et symboliques. Si le processus créant le lien a un **niveau de privilège différent** de celui du fichier cible, nous créons une **alerte**. Malheureusement, dans le cas des liens symboliques, le blocage n'est pas possible, car nous n'avons pas d'informations sur la destination du lien avant sa création. C'est une limitation du cadre EndpointSecurity d'Apple.
 
 ### Appels effectués par d'autres processus
 

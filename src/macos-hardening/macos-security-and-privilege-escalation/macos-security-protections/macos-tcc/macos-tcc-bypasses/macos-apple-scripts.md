@@ -4,8 +4,8 @@
 
 ## Apple Scripts
 
-C'est un langage de script utilisé pour l'automatisation des tâches **interagissant avec des processus distants**. Il facilite assez bien **la demande à d'autres processus d'effectuer certaines actions**. **Les logiciels malveillants** peuvent abuser de ces fonctionnalités pour exploiter des fonctions exportées par d'autres processus.\
-Par exemple, un logiciel malveillant pourrait **injecter du code JS arbitraire dans les pages ouvertes du navigateur**. Ou **cliquer automatiquement** sur certaines autorisations demandées à l'utilisateur ;
+C'est un langage de script utilisé pour l'automatisation des tâches **interagissant avec des processus distants**. Il facilite assez bien **la demande à d'autres processus d'effectuer certaines actions**. **Malware** peut abuser de ces fonctionnalités pour exploiter des fonctions exportées par d'autres processus.\
+Par exemple, un malware pourrait **injecter du code JS arbitraire dans les pages ouvertes du navigateur**. Ou **cliquer automatiquement** sur certaines autorisations demandées à l'utilisateur ;
 ```applescript
 tell window 1 of process "SecurityAgent"
 click button "Always Allow" of group 1

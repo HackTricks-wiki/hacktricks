@@ -52,17 +52,17 @@ Ici, vous pouvez trouver des exemples de la façon dont certains **malwares ont 
 
 ### Gestion des extensions - CVE-2022-26767
 
-L'attribut **`com.apple.macl`** est donné aux fichiers pour donner à une **certaines applications des permissions pour le lire.** Cet attribut est défini lorsque l'on **fait glisser et déposer** un fichier sur une application, ou lorsqu'un utilisateur **double-clique** sur un fichier pour l'ouvrir avec l'**application par défaut**.
+L'attribut **`com.apple.macl`** est donné aux fichiers pour donner à une **certaines applications des permissions pour le lire.** Cet attribut est défini lorsque vous **glissez-déposez** un fichier sur une application, ou lorsqu'un utilisateur **double-clique** sur un fichier pour l'ouvrir avec l'**application par défaut**.
 
 Par conséquent, un utilisateur pourrait **enregistrer une application malveillante** pour gérer toutes les extensions et appeler Launch Services pour **ouvrir** n'importe quel fichier (de sorte que le fichier malveillant obtienne l'accès pour le lire).
 
 ### iCloud
 
-L'attribution **`com.apple.private.icloud-account-access`** permet de communiquer avec le service XPC **`com.apple.iCloudHelper`** qui fournira **des jetons iCloud**.
+L'autorisation **`com.apple.private.icloud-account-access`** permet de communiquer avec le service XPC **`com.apple.iCloudHelper`** qui fournira **des jetons iCloud**.
 
-**iMovie** et **Garageband** avaient cette attribution et d'autres qui le permettaient.
+**iMovie** et **Garageband** avaient cette autorisation et d'autres qui le permettaient.
 
-Pour plus **d'informations** sur l'exploit pour **obtenir des jetons iCloud** à partir de cette attribution, consultez la conférence : [**#OBTS v5.0 : "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+Pour plus **d'informations** sur l'exploit pour **obtenir des jetons iCloud** à partir de cette autorisation, consultez la conférence : [**#OBTS v5.0 : "Que se passe-t-il sur votre Mac, reste sur l'iCloud d'Apple ?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
 ### kTCCServiceAppleEvents / Automation
 
@@ -112,7 +112,7 @@ do shell script "rm " & POSIX path of (copyFile as alias)
 
 ### CVE-2020–9934 - TCC <a href="#c19b" id="c19b"></a>
 
-Le **daemon tccd** de l'espace utilisateur utilise la variable d'environnement **`HOME`** pour accéder à la base de données des utilisateurs TCC depuis : **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**
+Le **daemon tccd** de l'espace utilisateur utilise la variable **`HOME`** **env** pour accéder à la base de données des utilisateurs TCC depuis : **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**
 
 Selon [ce post Stack Exchange](https://stackoverflow.com/questions/135688/setting-environment-variables-on-os-x/3756686#3756686) et parce que le daemon TCC s'exécute via `launchd` dans le domaine de l'utilisateur actuel, il est possible de **contrôler toutes les variables d'environnement** qui lui sont passées.\
 Ainsi, un **attaquant pourrait définir la variable d'environnement `$HOME`** dans **`launchctl`** pour pointer vers un **répertoire contrôlé**, **redémarrer** le **daemon TCC**, puis **modifier directement la base de données TCC** pour se donner **tous les droits TCC disponibles** sans jamais demander à l'utilisateur final.\
@@ -153,7 +153,7 @@ Notes avait accès aux emplacements protégés par TCC, mais lorsqu'une note est
 
 Le binaire `/usr/libexec/lsd` avec la bibliothèque `libsecurity_translocate` avait le droit `com.apple.private.nullfs_allow` qui lui permettait de créer un **nullfs** mount et avait le droit `com.apple.private.tcc.allow` avec **`kTCCServiceSystemPolicyAllFiles`** pour accéder à tous les fichiers.
 
-Il était possible d'ajouter l'attribut de quarantaine à "Library", d'appeler le service XPC **`com.apple.security.translocation`** et ensuite il mapperait Library à **`$TMPDIR/AppTranslocation/d/d/Library`** où tous les documents à l'intérieur de Library pouvaient être **accessed**.
+Il était possible d'ajouter l'attribut de quarantaine à "Library", d'appeler le service XPC **`com.apple.security.translocation`** et ensuite il mapperait Library à **`$TMPDIR/AppTranslocation/d/d/Library`** où tous les documents à l'intérieur de Library pouvaient être **accessibles**.
 
 ### CVE-2023-38571 - Music & TV <a href="#cve-2023-38571-a-macos-tcc-bypass-in-music-and-tv" id="cve-2023-38571-a-macos-tcc-bypass-in-music-and-tv"></a>
 
@@ -167,33 +167,33 @@ Ce **`rename(a, b);`** comportement est vulnérable à une **Race Condition**, c
 ### SQLITE_SQLLOG_DIR - CVE-2023-32422
 
 Si **`SQLITE_SQLLOG_DIR="path/folder"`** signifie essentiellement que **toute base de données ouverte est copiée à ce chemin**. Dans ce CVE, ce contrôle a été abusé pour **écrire** à l'intérieur d'une **base de données SQLite** qui va être **ouverte par un processus avec FDA la base de données TCC**, puis abuser de **`SQLITE_SQLLOG_DIR`** avec un **symlink dans le nom de fichier** afin que lorsque cette base de données est **ouverte**, l'utilisateur **TCC.db est écrasé** avec celle ouverte.\
-**More info** [**in the writeup**](https://gergelykalman.com/sqlol-CVE-2023-32422-a-macos-tcc-bypass.html) **and**[ **in the talk**](https://www.youtube.com/watch?v=f1HA5QhLQ7Y&t=20548s).
+**Plus d'infos** [**dans l'article**](https://gergelykalman.com/sqlol-CVE-2023-32422-a-macos-tcc-bypass.html) **et** [**dans la présentation**](https://www.youtube.com/watch?v=f1HA5QhLQ7Y&t=20548s).
 
 ### **SQLITE_AUTO_TRACE**
 
-Si la variable d'environnement **`SQLITE_AUTO_TRACE`** est définie, la bibliothèque **`libsqlite3.dylib`** commencera à **logger** toutes les requêtes SQL. De nombreuses applications utilisaient cette bibliothèque, il était donc possible de logger toutes leurs requêtes SQLite.
+Si la variable d'environnement **`SQLITE_AUTO_TRACE`** est définie, la bibliothèque **`libsqlite3.dylib`** commencera à **journaliser** toutes les requêtes SQL. De nombreuses applications utilisaient cette bibliothèque, il était donc possible de journaliser toutes leurs requêtes SQLite.
 
-Plusieurs applications Apple utilisaient cette bibliothèque pour accéder à des informations protégées par TCC.
+Plusieurs applications Apple utilisaient cette bibliothèque pour accéder aux informations protégées par TCC.
 ```bash
 # Set this env variable everywhere
 launchctl setenv SQLITE_AUTO_TRACE 1
 ```
 ### MTL_DUMP_PIPELINES_TO_JSON_FILE - CVE-2023-32407
 
-Cette **variable d'environnement est utilisée par le cadre `Metal`** qui est une dépendance pour divers programmes, notamment `Music`, qui a FDA.
+Cette **variable d'environnement est utilisée par le cadre `Metal`** qui est une dépendance à divers programmes, notamment `Music`, qui a FDA.
 
 En définissant ce qui suit : `MTL_DUMP_PIPELINES_TO_JSON_FILE="path/name"`. Si `path` est un répertoire valide, le bug se déclenchera et nous pouvons utiliser `fs_usage` pour voir ce qui se passe dans le programme :
 
 - un fichier sera `open()`é, appelé `path/.dat.nosyncXXXX.XXXXXX` (X est aléatoire)
-- une ou plusieurs `write()` écriront le contenu dans le fichier (nous ne contrôlons pas cela)
+- une ou plusieurs `write()`s écriront le contenu dans le fichier (nous ne contrôlons pas cela)
 - `path/.dat.nosyncXXXX.XXXXXX` sera `renamed()` à `path/name`
 
 C'est un écriture de fichier temporaire, suivie d'un **`rename(old, new)`** **qui n'est pas sécurisé.**
 
-Ce n'est pas sécurisé car cela doit **résoudre les anciens et nouveaux chemins séparément**, ce qui peut prendre un certain temps et peut être vulnérable à une condition de course. Pour plus d'informations, vous pouvez consulter la fonction `renameat_internal()` de `xnu`.
+Ce n'est pas sécurisé car il doit **résoudre les anciens et nouveaux chemins séparément**, ce qui peut prendre un certain temps et peut être vulnérable à une condition de course. Pour plus d'informations, vous pouvez consulter la fonction `renameat_internal()` de `xnu`.
 
 > [!CAUTION]
-> Donc, en gros, si un processus privilégié renomme à partir d'un dossier que vous contrôlez, vous pourriez obtenir un RCE et le faire accéder à un fichier différent ou, comme dans ce CVE, ouvrir le fichier créé par l'application privilégiée et stocker un FD.
+> Donc, en gros, si un processus privilégié renomme à partir d'un dossier que vous contrôlez, vous pourriez obtenir un RCE et le faire accéder à un fichier différent ou, comme dans ce CVE, ouvrir le fichier que l'application privilégiée a créé et stocker un FD.
 >
 > Si le renommage accède à un dossier que vous contrôlez, tout en ayant modifié le fichier source ou en ayant un FD, vous changez le fichier (ou dossier) de destination pour pointer vers un symlink, afin que vous puissiez écrire quand vous le souhaitez.
 
@@ -382,7 +382,7 @@ Il est possible d'invoquer **`open`** même en étant sandboxé
 
 ### Scripts de terminal
 
-Il est assez courant de donner un **Accès Complet au Disque (FDA)** aux terminaux, du moins sur les ordinateurs utilisés par des personnes techniques. Et il est possible d'invoquer des scripts **`.terminal`** avec cela.
+Il est assez courant de donner un **Accès Complet au Disque (ACD)**, du moins sur les ordinateurs utilisés par des personnes techniques. Et il est possible d'invoquer des scripts **`.terminal`** avec cela.
 
 Les scripts **`.terminal`** sont des fichiers plist comme celui-ci avec la commande à exécuter dans la clé **`CommandString`** :
 ```xml
@@ -402,7 +402,7 @@ Les scripts **`.terminal`** sont des fichiers plist comme celui-ci avec la comma
 </dict>
 </plist>
 ```
-Une application pourrait écrire un script terminal dans un emplacement tel que /tmp et le lancer avec une commande telle que :
+Une application pourrait écrire un script de terminal dans un emplacement tel que /tmp et le lancer avec une commande telle que :
 ```objectivec
 // Write plist in /tmp/tcc.terminal
 [...]
@@ -440,7 +440,7 @@ ls /tmp/snap/Users/admin_user # This will work
 ```
 Une explication plus détaillée peut être [**trouvée dans le rapport original**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
 
-### CVE-2021-1784 & CVE-2021-30808 - Monter un fichier TCC
+### CVE-2021-1784 & CVE-2021-30808 - Monter un fichier TCC au-dessus
 
 Même si le fichier de la base de données TCC est protégé, il était possible de **monter un nouveau fichier TCC.db** dans le répertoire :
 ```bash
@@ -463,15 +463,15 @@ os.system("mkdir -p /tmp/mnt/Application\ Support/com.apple.TCC/")
 os.system("cp /tmp/TCC.db /tmp/mnt/Application\ Support/com.apple.TCC/TCC.db")
 os.system("hdiutil detach /tmp/mnt 1>/dev/null")
 ```
-Vérifiez l'**exploitation complète** dans le [**rapport original**](https://theevilbit.github.io/posts/cve-2021-30808/).
+Vérifiez l'**exploit complet** dans le [**rapport original**](https://theevilbit.github.io/posts/cve-2021-30808/).
 
 ### CVE-2024-40855
 
 Comme expliqué dans le [rapport original](https://www.kandji.io/blog/macos-audit-story-part2), ce CVE a abusé de `diskarbitrationd`.
 
-La fonction `DADiskMountWithArgumentsCommon` du framework public `DiskArbitration` effectuait les vérifications de sécurité. Cependant, il est possible de contourner cela en appelant directement `diskarbitrationd` et donc d'utiliser des éléments `../` dans le chemin et des liens symboliques.
+La fonction `DADiskMountWithArgumentsCommon` du framework public `DiskArbitration` effectuait les vérifications de sécurité. Cependant, il est possible de contourner cela en appelant directement `diskarbitrationd` et donc d'utiliser des éléments `../` dans le chemin et des symlinks.
 
-Cela a permis à un attaquant de faire des montages arbitraires à n'importe quel endroit, y compris sur la base de données TCC en raison de l'attribution `com.apple.private.security.storage-exempt.heritable` de `diskarbitrationd`.
+Cela a permis à un attaquant de réaliser des montages arbitraires à n'importe quel endroit, y compris sur la base de données TCC en raison de l'attribution `com.apple.private.security.storage-exempt.heritable` de `diskarbitrationd`.
 
 ### asr
 

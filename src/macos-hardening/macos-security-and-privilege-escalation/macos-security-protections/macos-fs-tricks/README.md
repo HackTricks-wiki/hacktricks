@@ -14,7 +14,7 @@ Permissions dans un **répertoire** :
 
 ### Combinaisons dangereuses
 
-**Comment écraser un fichier/dossier possédé par root**, mais :
+**Comment écraser un fichier/dossier appartenant à root**, mais :
 
 - Un **propriétaire de répertoire parent** dans le chemin est l'utilisateur
 - Un **propriétaire de répertoire parent** dans le chemin est un **groupe d'utilisateurs** avec **accès en écriture**
@@ -34,7 +34,7 @@ Exemple dans : [https://theevilbit.github.io/posts/exploiting_directory_permissi
 
 Si un processus privilégié écrit des données dans un **fichier** qui pourrait être **contrôlé** par un **utilisateur de moindre privilège**, ou qui pourrait avoir été **précédemment créé** par un utilisateur de moindre privilège. L'utilisateur pourrait simplement **le pointer vers un autre fichier** via un lien symbolique ou dur, et le processus privilégié écrira sur ce fichier.
 
-Vérifiez dans les autres sections où un attaquant pourrait **abuser d'une écriture arbitraire pour élever les privilèges**.
+Vérifiez dans les autres sections où un attaquant pourrait **abuser d'une écriture arbitraire pour élever ses privilèges**.
 
 ### Ouvert `O_NOFOLLOW`
 
@@ -62,13 +62,13 @@ Exemple :
 
 Si un appel à `open` n'a pas le drapeau `O_CLOEXEC`, le descripteur de fichier sera hérité par le processus enfant. Donc, si un processus privilégié ouvre un fichier privilégié et exécute un processus contrôlé par l'attaquant, l'attaquant **héritera le FD sur le fichier privilégié**.
 
-Si vous pouvez faire en sorte qu'un **processus ouvre un fichier ou un dossier avec des privilèges élevés**, vous pouvez abuser de **`crontab`** pour ouvrir un fichier dans `/etc/sudoers.d` avec **`EDITOR=exploit.py`**, de sorte que `exploit.py` obtiendra le FD vers le fichier à l'intérieur de `/etc/sudoers` et en abusant de celui-ci.
+Si vous pouvez faire en sorte qu'un **processus ouvre un fichier ou un dossier avec des privilèges élevés**, vous pouvez abuser de **`crontab`** pour ouvrir un fichier dans `/etc/sudoers.d` avec **`EDITOR=exploit.py`**, de sorte que `exploit.py` obtiendra le FD vers le fichier à l'intérieur de `/etc/sudoers` et l'abusera.
 
 Par exemple : [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098), code : https://github.com/gergelykalman/CVE-2023-32428-a-macOS-LPE-via-MallocStackLogging
 
 ## Éviter les astuces xattrs de quarantaine
 
-### Supprimer
+### Supprimer cela
 ```bash
 xattr -d com.apple.quarantine /path/to/file_or_app
 ```
@@ -248,7 +248,7 @@ hdiutil detach /private/tmp/mnt 1>/dev/null
 # You can also create a dmg from an app using:
 hdiutil create -srcfolder justsome.app justsome.dmg
 ```
-Habituellement, macOS monte le disque en communiquant avec le service Mach `com.apple.DiskArbitrarion.diskarbitrariond` (fourni par `/usr/libexec/diskarbitrationd`). Si vous ajoutez le paramètre `-d` au fichier plist des LaunchDaemons et redémarrez, il stockera des journaux dans `/var/log/diskarbitrationd.log`.\
+Habituellement, macOS monte le disque en communiquant avec le service Mach `com.apple.DiskArbitrarion.diskarbitrariond` (fourni par `/usr/libexec/diskarbitrationd`). Si vous ajoutez le paramètre `-d` au fichier plist des LaunchDaemons et redémarrez, il stockera les journaux dans `/var/log/diskarbitrationd.log`.\
 Cependant, il est possible d'utiliser des outils comme `hdik` et `hdiutil` pour communiquer directement avec le kext `com.apple.driver.DiskImages`.
 
 ## Écritures arbitraires
@@ -292,7 +292,7 @@ Vous pouvez également écrire des fichiers dans **`/etc/paths.d`** pour charger
 
 ### cups-files.conf
 
-Cette technique a été utilisée dans [cet article](https://www.kandji.io/blog/macos-audit-story-part1).
+Cette technique a été utilisée dans [ce rapport](https://www.kandji.io/blog/macos-audit-story-part1).
 
 Créez le fichier `/etc/cups/cups-files.conf` avec le contenu suivant :
 ```
@@ -308,7 +308,7 @@ Puis, modifiez à nouveau le fichier `/etc/cups/cups-files.conf` en indiquant `L
 
 ### Évasion du Sandbox
 
-Il est possible d'échapper au sandbox macOS avec un écriture arbitraire sur le FS. Pour quelques exemples, consultez la page [macOS Auto Start](../../../../macos-auto-start-locations.md) mais un cas courant est d'écrire un fichier de préférences Terminal dans `~/Library/Preferences/com.apple.Terminal.plist` qui exécute une commande au démarrage et de l'appeler en utilisant `open`.
+Il est possible d'échapper au sandbox macOS avec un écriture arbitraire sur le FS. Pour quelques exemples, consultez la page [macOS Auto Start](../../../../macos-auto-start-locations.md) mais un exemple courant est d'écrire un fichier de préférences Terminal dans `~/Library/Preferences/com.apple.Terminal.plist` qui exécute une commande au démarrage et de l'appeler en utilisant `open`.
 
 ## Générer des fichiers écrits par d'autres utilisateurs
 
@@ -326,7 +326,7 @@ echo $FILENAME
 ```
 ## Mémoire Partagée POSIX
 
-**La mémoire partagée POSIX** permet aux processus dans des systèmes d'exploitation conformes à POSIX d'accéder à une zone de mémoire commune, facilitant une communication plus rapide par rapport à d'autres méthodes de communication inter-processus. Cela implique de créer ou d'ouvrir un objet de mémoire partagée avec `shm_open()`, de définir sa taille avec `ftruncate()`, et de le mapper dans l'espace d'adresses du processus en utilisant `mmap()`. Les processus peuvent ensuite lire et écrire directement dans cette zone de mémoire. Pour gérer l'accès concurrent et prévenir la corruption des données, des mécanismes de synchronisation tels que des mutex ou des sémaphores sont souvent utilisés. Enfin, les processus désaffichent et ferment la mémoire partagée avec `munmap()` et `close()`, et éventuellement suppriment l'objet de mémoire avec `shm_unlink()`. Ce système est particulièrement efficace pour un IPC rapide et efficace dans des environnements où plusieurs processus doivent accéder rapidement à des données partagées.
+**La mémoire partagée POSIX** permet aux processus dans des systèmes d'exploitation conformes à POSIX d'accéder à une zone de mémoire commune, facilitant une communication plus rapide par rapport à d'autres méthodes de communication inter-processus. Cela implique de créer ou d'ouvrir un objet de mémoire partagée avec `shm_open()`, de définir sa taille avec `ftruncate()`, et de le mapper dans l'espace d'adresses du processus en utilisant `mmap()`. Les processus peuvent ensuite lire et écrire directement dans cette zone de mémoire. Pour gérer l'accès concurrent et prévenir la corruption des données, des mécanismes de synchronisation tels que des mutex ou des sémaphores sont souvent utilisés. Enfin, les processus désassocient et ferment la mémoire partagée avec `munmap()` et `close()`, et éventuellement suppriment l'objet de mémoire avec `shm_unlink()`. Ce système est particulièrement efficace pour un IPC rapide et efficace dans des environnements où plusieurs processus doivent accéder rapidement à des données partagées.
 
 <details>
 
@@ -422,7 +422,7 @@ return 0;
 
 ## Descripteurs protégés macOS
 
-**Les descripteurs protégés macOS** sont une fonctionnalité de sécurité introduite dans macOS pour améliorer la sécurité et la fiabilité des **opérations sur des descripteurs de fichiers** dans les applications utilisateur. Ces descripteurs protégés fournissent un moyen d'associer des restrictions spécifiques ou des "gardes" avec des descripteurs de fichiers, qui sont appliquées par le noyau.
+**Descripteurs protégés macOS** sont une fonctionnalité de sécurité introduite dans macOS pour améliorer la sécurité et la fiabilité des **opérations sur des descripteurs de fichiers** dans les applications utilisateur. Ces descripteurs protégés fournissent un moyen d'associer des restrictions spécifiques ou des "gardes" avec des descripteurs de fichiers, qui sont appliquées par le noyau.
 
 Cette fonctionnalité est particulièrement utile pour prévenir certaines classes de vulnérabilités de sécurité telles que **l'accès non autorisé aux fichiers** ou **les conditions de concurrence**. Ces vulnérabilités se produisent par exemple lorsqu'un thread accède à une description de fichier donnant **à un autre thread vulnérable un accès dessus** ou lorsqu'un descripteur de fichier est **hérité** par un processus enfant vulnérable. Certaines fonctions liées à cette fonctionnalité sont :
 

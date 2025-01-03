@@ -12,11 +12,11 @@ Ces définitions ont 5 sections :
 
 - **Déclaration de sous-système** : Le mot-clé sous-système est utilisé pour indiquer le **nom** et l'**id**. Il est également possible de le marquer comme **`KernelServer`** si le serveur doit s'exécuter dans le noyau.
 - **Inclusions et imports** : MIG utilise le préprocesseur C, donc il est capable d'utiliser des imports. De plus, il est possible d'utiliser `uimport` et `simport` pour le code généré par l'utilisateur ou le serveur.
-- **Déclarations de types** : Il est possible de définir des types de données bien que généralement il importera `mach_types.defs` et `std_types.defs`. Pour des types personnalisés, une certaine syntaxe peut être utilisée :
+- **Déclarations de types** : Il est possible de définir des types de données bien qu'en général, il importera `mach_types.defs` et `std_types.defs`. Pour des types personnalisés, une certaine syntaxe peut être utilisée :
 - \[i`n/out]tran : Fonction qui doit être traduite d'un message entrant ou vers un message sortant
-- `c[user/server]type` : Mapping vers un autre type C.
+- `c[user/server]type` : Mappage vers un autre type C.
 - `destructor` : Appelez cette fonction lorsque le type est libéré.
-- **Opérations** : Ce sont les définitions des méthodes RPC. Il existe 5 types différents :
+- **Opérations** : Ce sont les définitions des méthodes RPC. Il y a 5 types différents :
 - `routine` : S'attend à une réponse
 - `simpleroutine` : Ne s'attend pas à une réponse
 - `procedure` : S'attend à une réponse
@@ -223,7 +223,7 @@ C'est intéressant car si `_NDR_record` est trouvé dans un binaire en tant que 
 
 De plus, les **serveurs MIG** ont la table de dispatch dans `__DATA.__const` (ou dans `__CONST.__constdata` dans le noyau macOS et `__DATA_CONST.__const` dans d'autres noyaux \*OS). Cela peut être extrait avec **`jtool2`**.
 
-Et les **clients MIG** utiliseront le `__NDR_record` pour envoyer avec `__mach_msg` aux serveurs.
+Et les **clients MIG** utiliseront l'`__NDR_record` pour envoyer avec `__mach_msg` aux serveurs.
 
 ## Analyse Binaire
 
@@ -289,7 +289,7 @@ return rax;
 {{#endtab}}
 
 {{#tab name="myipc_server décompilé 2"}}
-C'est la même fonction décompilée dans une version différente de Hopper gratuite :
+C'est la même fonction décompilée dans une version différente de Hopper free :
 
 <pre class="language-c"><code class="lang-c">int _myipc_server(int arg0, int arg1) {
 r31 = r31 - 0x40;

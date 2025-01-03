@@ -29,11 +29,11 @@ Les applications avec le droit d'outil de débogage peuvent appeler `task_for_pi
 
 ### `com.apple.security.cs.disable-library-validation`
 
-Ce droit permet de **charger des frameworks, des plug-ins ou des bibliothèques sans être signés par Apple ou signés avec le même ID d'équipe** que l'exécutable principal, donc un attaquant pourrait abuser d'un chargement de bibliothèque arbitraire pour injecter du code. Consultez [**ceci pour plus d'infos**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
+Ce droit permet de **charger des frameworks, des plug-ins ou des bibliothèques sans être signés par Apple ou signés avec le même ID d'équipe** que l'exécutable principal, donc un attaquant pourrait abuser de n'importe quelle bibliothèque chargée pour injecter du code. Consultez [**ceci pour plus d'infos**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
 
 ### `com.apple.private.security.clear-library-validation`
 
-Ce droit est très similaire à **`com.apple.security.cs.disable-library-validation`** mais **au lieu** de **désactiver directement** la validation des bibliothèques, il permet au processus de **faire un appel système `csops` pour la désactiver**.\
+Ce droit est très similaire à **`com.apple.security.cs.disable-library-validation`** mais **au lieu de** **désactiver directement** la validation des bibliothèques, il permet au processus de **faire un appel système `csops` pour la désactiver**.\
 Consultez [**ceci pour plus d'infos**](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/).
 
 ### `com.apple.security.cs.allow-dyld-environment-variables`
@@ -58,7 +58,7 @@ Le droit **`com.apple.private.icloud-account-access`** permet de communiquer ave
 
 **iMovie** et **Garageband** avaient ce droit.
 
-Pour plus **d'informations** sur l'exploit pour **obtenir des tokens iCloud** à partir de ce droit, consultez la conférence : [**#OBTS v5.0 : "Ce qui se passe sur votre Mac, reste sur iCloud d'Apple ?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+Pour plus **d'informations** sur l'exploit pour **obtenir des tokens icloud** à partir de ce droit, consultez la conférence : [**#OBTS v5.0 : "Que se passe-t-il sur votre Mac, reste sur l'iCloud d'Apple ?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
 ### `com.apple.private.tcc.manager.check-by-audit-token`
 
@@ -66,11 +66,11 @@ TODO : Je ne sais pas ce que cela permet de faire
 
 ### `com.apple.private.apfs.revert-to-snapshot`
 
-TODO : Dans [**ce rapport**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **il est mentionné que cela pourrait être utilisé pour** mettre à jour les contenus protégés par SSV après un redémarrage. Si vous savez comment, envoyez un PR s'il vous plaît !
+TODO : Dans [**ce rapport**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **il est mentionné que cela pourrait être utilisé pour** mettre à jour le contenu protégé par SSV après un redémarrage. Si vous savez comment, envoyez un PR s'il vous plaît !
 
 ### `com.apple.private.apfs.create-sealed-snapshot`
 
-TODO : Dans [**ce rapport**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **il est mentionné que cela pourrait être utilisé pour** mettre à jour les contenus protégés par SSV après un redémarrage. Si vous savez comment, envoyez un PR s'il vous plaît !
+TODO : Dans [**ce rapport**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **il est mentionné que cela pourrait être utilisé pour** mettre à jour le contenu protégé par SSV après un redémarrage. Si vous savez comment, envoyez un PR s'il vous plaît !
 
 ### `keychain-access-groups`
 
@@ -101,7 +101,7 @@ Ou les amener à effectuer **des actions arbitraires**.
 
 ### **`kTCCServiceEndpointSecurityClient`**
 
-Permet, entre autres autorisations, de **modifier la base de données TCC des utilisateurs**.
+Permet, entre autres permissions, de **modifier la base de données TCC des utilisateurs**.
 
 ### **`kTCCServiceSystemPolicySysAdminFiles`**
 
@@ -117,7 +117,7 @@ Il est possible de vérifier qui a cet accès dans _Paramètres Système_ > _Con
 
 ### `kTCCServiceAccessibility`
 
-Le processus pourra **abuser des fonctionnalités d'accessibilité de macOS**, ce qui signifie que, par exemple, il pourra appuyer sur des touches. Il pourrait donc demander l'accès pour contrôler une application comme Finder et approuver la boîte de dialogue avec cette autorisation.
+Le processus pourra **abuser des fonctionnalités d'accessibilité de macOS**, ce qui signifie que, par exemple, il pourra appuyer sur des touches. Il pourrait donc demander l'accès pour contrôler une application comme Finder et approuver la boîte de dialogue avec cette permission.
 
 ## Moyen
 
@@ -149,7 +149,7 @@ Cette autorisation permet de monter un système de fichiers nullfs (interdit par
 
 ### `kTCCServiceAll`
 
-Selon ce billet de blog, cette autorisation TCC se trouve généralement sous la forme :
+Selon ce billet de blog, cette permission TCC se trouve généralement sous la forme :
 ```
 [Key] com.apple.private.tcc.allow-prompting
 [Value]

@@ -95,7 +95,7 @@ Localiser un endroit pour écraser un pointeur de fonction est nécessaire, et d
 
 Pour les systèmes x64, la recherche de signature peut être utilisée pour trouver une référence au symbole `_hlpDynamicFuncTable` dans `libcorclr.dll`.
 
-La fonction de débogage `MT_GetDCB` fournit des informations utiles, y compris l'adresse d'une fonction d'aide, `m_helperRemoteStartAddr`, indiquant l'emplacement de `libcorclr.dll` dans la mémoire du processus. Cette adresse est ensuite utilisée pour commencer une recherche pour le DFT et écraser un pointeur de fonction avec l'adresse du shellcode.
+La fonction de débogage `MT_GetDCB` fournit des informations utiles, y compris l'adresse d'une fonction d'aide, `m_helperRemoteStartAddr`, indiquant l'emplacement de `libcorclr.dll` dans la mémoire du processus. Cette adresse est ensuite utilisée pour commencer une recherche pour la DFT et écraser un pointeur de fonction avec l'adresse du shellcode.
 
 Le code POC complet pour l'injection dans PowerShell est accessible [ici](https://gist.github.com/xpn/b427998c8b3924ab1d63c89d273734b6).
 
