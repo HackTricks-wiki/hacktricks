@@ -11,12 +11,12 @@ Süreç, aşağıdaki adımlarda özetlenmiştir ve hizmet ikili dosyalarının,
 3. Hizmet **uzaktan başlatılır**.
 4. Çıkışta, hizmet **durdurulur ve ikili dosya silinir**.
 
-### **PsExec'i Manuel Olarak Çalıştırma Süreci**
+### **PsExec'i Manuel Olarak Yürütme Süreci**
 
-Antivirüs tespitinden kaçınmak için msfvenom ile oluşturulmuş ve Veil kullanılarak obfuscate edilmiş bir yürütülebilir yük (met8888.exe olarak adlandırılmış), bir meterpreter reverse_http yükünü temsil eder, aşağıdaki adımlar izlenir:
+Antivirüs tespitinden kaçınmak için Veil kullanılarak obfuscate edilmiş, 'met8888.exe' adında bir yürütülebilir yük (msfvenom ile oluşturulmuş) olduğu varsayıldığında, aşağıdaki adımlar izlenir:
 
 - **İkili dosyanın kopyalanması**: Yürütülebilir dosya, bir komut istemcisinden ADMIN$ paylaşımına kopyalanır, ancak dosya sisteminde gizli kalmak için herhangi bir yere yerleştirilebilir.
-- **Bir hizmetin oluşturulması**: Windows `sc` komutunu kullanarak, uzaktan Windows hizmetlerini sorgulama, oluşturma ve silme imkanı sağlayan bir hizmet "meterpreter" adıyla yüklenen ikili dosyaya işaret edecek şekilde oluşturulur.
+- **Bir hizmetin oluşturulması**: Windows `sc` komutu kullanılarak, uzaktan Windows hizmetlerini sorgulama, oluşturma ve silme imkanı sağlayan bir hizmet "meterpreter" adıyla yüklenen ikili dosyaya işaret edecek şekilde oluşturulur.
 - **Hizmetin başlatılması**: Son adım, hizmetin başlatılmasıdır; bu, ikili dosyanın gerçek bir hizmet ikili dosyası olmaması ve beklenen yanıt kodunu döndürmemesi nedeniyle muhtemelen bir "zaman aşımı" hatası ile sonuçlanacaktır. Bu hata önemsizdir çünkü asıl hedef ikili dosyanın yürütülmesidir.
 
 Metasploit dinleyicisinin gözlemlenmesi, oturumun başarıyla başlatıldığını gösterecektir.

@@ -42,7 +42,7 @@ Bu anda **4 modülasyon** (AM270, AM650, FM328 ve FM476) ve **birçok ilgili fre
 
 <figure><img src="../../../images/image (947).png" alt=""><figcaption></figcaption></figure>
 
-**İlginizi çeken herhangi birini** ayarlayabilirsiniz, ancak eğer **hangi frekansın** uzaktan kumandanız tarafından kullanıldığından emin değilseniz, **Hopping'i AÇIK** (varsayılan olarak Kapalı) ayarlayın ve Flipper bunu yakalayana kadar düğmeye birkaç kez basın, böylece frekansı ayarlamak için gereken bilgiyi alırsınız.
+**İlginizi çeken herhangi birini** ayarlayabilirsiniz, ancak eğer **hangi frekansın** uzaktan kumandanız tarafından kullanıldığından **emin değilseniz**, **Hopping'i AÇIK** (varsayılan olarak Kapalı) olarak ayarlayın ve Flipper bunu yakalayana kadar düğmeye birkaç kez basın, böylece frekansı ayarlamak için gereken bilgiyi alırsınız.
 
 > [!CAUTION]
 > Frekanslar arasında geçiş yapmak biraz zaman alır, bu nedenle geçiş sırasında iletilen sinyaller kaçırılabilir. Daha iyi sinyal alımı için, Frekans Analizörü tarafından belirlenen sabit bir frekans ayarlayın.
@@ -54,7 +54,7 @@ Bu anda **4 modülasyon** (AM270, AM650, FM328 ve FM476) ve **birçok ilgili fre
 
 **Ham Oku** seçeneği, dinleme frekansında gönderilen sinyalleri **kaydeder**. Bu, bir sinyali **çalmak** ve **tekrar etmek** için kullanılabilir.
 
-Varsayılan olarak **Ham Oku da 433.92 AM650**'dedir, ancak Okuma seçeneği ile ilginizi çeken sinyalin **farklı bir frekans/modülasyonda olduğunu bulursanız, bunu da değiştirebilirsiniz** (Ham Oku seçeneği içindeyken sola basarak).
+Varsayılan olarak **Ham Oku da 433.92 AM650**'de bulunmaktadır, ancak Okuma seçeneği ile ilginizi çeken sinyalin **farklı bir frekans/modülasyonda olduğunu bulursanız, bunu da değiştirebilirsiniz** sol düğmeye basarak (Ham Oku seçeneği içindeyken).
 
 ### Kaba Kuvvet
 
@@ -69,20 +69,20 @@ Eğer garaj kapısı tarafından kullanılan protokolü biliyorsanız, **tüm ko
 
 | Princeton_433 (statik kod sistemlerinin çoğuyla çalışır) | 433.92 | Statik  |
 | -------------------------------------------------------- | ------ | ------- |
-| Nice Flo 12bit_433                                       | 433.92 | Statik  |
-| Nice Flo 24bit_433                                       | 433.92 | Statik  |
-| CAME 12bit_433                                           | 433.92 | Statik  |
-| CAME 24bit_433                                           | 433.92 | Statik  |
-| Linear_300                                               | 300.00 | Statik  |
-| CAME TWEE                                                | 433.92 | Statik  |
-| Gate TX_433                                              | 433.92 | Statik  |
-| DoorHan_315                                              | 315.00 | Dinamik |
-| DoorHan_433                                              | 433.92 | Dinamik |
-| LiftMaster_315                                           | 315.00 | Dinamik |
-| LiftMaster_390                                           | 390.00 | Dinamik |
-| Security+2.0_310                                         | 310.00 | Dinamik |
-| Security+2.0_315                                         | 315.00 | Dinamik |
-| Security+2.0_390                                         | 390.00 | Dinamik |
+| Nice Flo 12bit_433                                      | 433.92 | Statik  |
+| Nice Flo 24bit_433                                      | 433.92 | Statik  |
+| CAME 12bit_433                                          | 433.92 | Statik  |
+| CAME 24bit_433                                          | 433.92 | Statik  |
+| Linear_300                                              | 300.00 | Statik  |
+| CAME TWEE                                               | 433.92 | Statik  |
+| Gate TX_433                                             | 433.92 | Statik  |
+| DoorHan_315                                             | 315.00 | Dinamik |
+| DoorHan_433                                             | 433.92 | Dinamik |
+| LiftMaster_315                                          | 315.00 | Dinamik |
+| LiftMaster_390                                          | 390.00 | Dinamik |
+| Security+2.0_310                                        | 310.00 | Dinamik |
+| Security+2.0_315                                        | 315.00 | Dinamik |
+| Security+2.0_390                                        | 390.00 | Dinamik |
 
 ### Desteklenen Sub-GHz satıcıları
 
@@ -95,7 +95,7 @@ Eğer garaj kapısı tarafından kullanılan protokolü biliyorsanız, **tüm ko
 ### Test
 
 > [!NOTE]
-> Kaydedilen frekansların dBms'ini alın
+> Kaydedilen frekansların dBm'lerini alın
 
 ## Referans
 

@@ -28,10 +28,10 @@ Evrensel Uzaktan Kumanda modunda güç düğmesine basmak yeterlidir ve Flipper,
 
 Bu tür bir brute-force zaman alır. Sözlük ne kadar büyükse, tamamlanması o kadar uzun sürer. TV'nin tam olarak hangi sinyali tanıdığını bulmak imkansızdır çünkü TV'den geri bildirim yoktur.
 
-### Yeni Uzaktan Kumanda Öğrenme
+### Yeni Uzaktan Kumanda Öğren
 
 Flipper Zero ile **kızılötesi bir sinyali yakalamak** mümkündür. Eğer **veritabanında sinyali bulursa**, Flipper otomatik olarak **bu cihazın ne olduğunu bilecektir** ve sizin onunla etkileşimde bulunmanıza izin verecektir.\
-Eğer bulamazsa, Flipper **sinyali saklayabilir** ve **tekrar oynatmanıza** izin verecektir.
+Eğer bulamazsa, Flipper **sinyali saklayabilir** ve **tekrar oynatmanıza** izin verebilir.
 
 ## Referanslar
 

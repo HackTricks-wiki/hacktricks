@@ -1,10 +1,10 @@
-# RDP Oturum İstismarı
+# RDP Oturumları İstismarı
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## RDP Süreç Enjeksiyonu
 
-Eğer **harici grup**, mevcut alandaki herhangi bir **bilgisayara RDP erişimine** sahipse, bir **saldırgan** o **bilgisayarı ele geçirebilir ve onu bekleyebilir**.
+Eğer **harici grup**, mevcut alandaki herhangi bir **bilgisayara** **RDP erişimine** sahipse, bir **saldırgan** o **bilgisayarı ele geçirebilir ve onu bekleyebilir**.
 
 O kullanıcı RDP üzerinden erişim sağladıktan sonra, **saldırgan o kullanıcının oturumuna geçebilir** ve harici alandaki izinlerini istismar edebilir.
 ```powershell
@@ -30,13 +30,13 @@ PID   PPID  Name                         Arch  Session     User
 beacon> inject 4960 x64 tcp-local
 ## From that beacon you can just run powerview modules interacting with the external domain as that user
 ```
-Diğer araçlarla **oturum çalmanın diğer yollarını** kontrol edin [**bu sayfada.**](../../network-services-pentesting/pentesting-rdp.md#session-stealing)
+Check **other ways to steal sessions with other tools** [**in this page.**](../../network-services-pentesting/pentesting-rdp.md#session-stealing)
 
 ## RDPInception
 
 Eğer bir kullanıcı **RDP ile bir makineye** erişirse ve burada bir **saldırgan** onu **bekliyorsa**, saldırgan **kullanıcının RDP oturumuna bir beacon enjekte edebilir** ve eğer **kurban RDP ile erişirken diski bağladıysa**, **saldırgan buna erişebilir**.
 
-Bu durumda, **kurbanın** **orijinal bilgisayarını** **backdoor** yazarak **tehdit edebilirsiniz** **başlangıç klasörüne**.
+Bu durumda, sadece **kurbanın** **orijinal bilgisayarını** **backdoor** yazarak **tehdit edebilirsiniz**.
 ```powershell
 # Wait til someone logs in:
 net logons

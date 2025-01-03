@@ -18,16 +18,16 @@ smbexec.py WORKGROUP/genericuser:genericpassword@10.10.10.10
 
 - **Smbexec**, hedefte fiziksel ikili dosyalar olmaksızın hizmet binPath'leri aracılığıyla doğrudan komut yürütmeyi sağlar.
 - Bu yöntem, bir Windows hedefinde tek seferlik komutlar yürütmek için faydalıdır. Örneğin, Metasploit'in `web_delivery` modülü ile birleştirildiğinde, PowerShell hedefli ters Meterpreter yükünün yürütülmesini sağlar.
-- Saldırganın makinesinde binPath'i cmd.exe aracılığıyla sağlanan komutu çalıştıracak şekilde ayarlayarak uzaktan bir hizmet oluşturmak, yükün başarılı bir şekilde yürütülmesini sağlamakta ve Metasploit dinleyicisi ile geri çağırma ve yük yürütme elde etmekte mümkündür; hizmet yanıt hataları olsa bile.
+- Saldırganın makinesinde binPath'i cmd.exe aracılığıyla sağlanan komutu çalıştıracak şekilde ayarlayarak uzaktan bir hizmet oluşturmak, yükü başarıyla yürütmek, geri çağırma ve yük yürütme sağlamak mümkündür; bu, hizmet yanıt hataları olsa bile Metasploit dinleyicisi ile gerçekleşir.
 
-### Komutlar Örneği
+### Komut Örneği
 
 Hizmeti oluşturmak ve başlatmak aşağıdaki komutlarla gerçekleştirilebilir:
 ```bash
 sc create [ServiceName] binPath= "cmd.exe /c [PayloadCommand]"
 sc start [ServiceName]
 ```
-Daha fazla detay için [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+Daha fazla bilgi için [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
 ## Referanslar
 

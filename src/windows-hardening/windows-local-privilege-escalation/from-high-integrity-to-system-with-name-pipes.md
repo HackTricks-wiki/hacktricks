@@ -4,7 +4,7 @@
 
 1. Yeni bir Pipe oluşturun
 2. Oluşturulan pipe'a bağlanacak ve bir şey yazacak bir hizmet oluşturun ve başlatın. Hizmet kodu bu kodlanmış PS kodunu çalıştıracak: `$pipe = new-object System.IO.Pipes.NamedPipeClientStream("piper"); $pipe.Connect(); $sw = new-object System.IO.StreamWriter($pipe); $sw.WriteLine("Go"); $sw.Dispose();`
-3. Hizmet, pipe'dan istemciden verileri alır, ImpersonateNamedPipeClient'i çağırır ve hizmetin bitmesini bekler
+3. Hizmet, pipe'da istemciden verileri alır, ImpersonateNamedPipeClient'i çağırır ve hizmetin bitmesini bekler
 4. Son olarak, hizmetten elde edilen token'ı kullanarak yeni bir _cmd.exe_ başlatır
 
 > [!WARNING]

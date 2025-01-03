@@ -4,7 +4,7 @@
 
 ## Nasıl Çalıştığı Açıklandı
 
-Kullanıcı adı ve ya şifre ya da hash bilindiğinde, WMI kullanılarak hostlarda süreçler açılabilir. Komutlar, Wmiexec tarafından WMI kullanılarak yürütülür ve yarı etkileşimli bir shell deneyimi sağlar.
+Kullanıcı adı ve ya şifre ya da hash bilindiğinde, WMI kullanılarak hostlarda süreçler açılabilir. Komutlar Wmiexec tarafından WMI kullanılarak yürütülür ve yarı etkileşimli bir shell deneyimi sağlar.
 
 **dcomexec.py:** Farklı DCOM uç noktalarını kullanarak, bu script wmiexec.py'ye benzer yarı etkileşimli bir shell sunar ve özellikle ShellBrowserWindow DCOM nesnesini kullanır. Şu anda MMC20'yi desteklemektedir. Uygulama, Shell Windows ve Shell Browser Window nesneleri. (kaynak: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
 
@@ -45,7 +45,7 @@ Get-WmiObject -Namespace "root/microsoft/windows/defender" -Class MSFT_MpCompute
 ```
 ### Yöntemler
 
-WMI sınıflarının bir veya daha fazla yürütülebilir işlevi olan yöntemler çalıştırılabilir.
+WMI sınıflarının bir veya daha fazla yürütülebilir işlevi olan yöntemler, çalıştırılabilir.
 ```bash
 # Class loading, method listing, and execution
 $c = [wmiclass]"win32_share"
@@ -57,7 +57,7 @@ $c.methods
 # Method listing and invocation
 Invoke-WmiMethod -Class win32_share -Name Create -ArgumentList @($null, "Description", $null, "Name", $null, "c:\share\path",0)
 ```
-## WMI Sayımı
+## WMI Sınıflandırması
 
 ### WMI Servis Durumu
 
@@ -95,7 +95,7 @@ WMI üzerinden bir işlemi uzaktan yürütmek için, örneğin bir Empire ajanı
 ```bash
 wmic /node:hostname /user:user path win32_process call create "empire launcher string here"
 ```
-Bu süreç, WMI'nin uzaktan yürütme ve sistem sayımı yeteneğini göstermekte, hem sistem yönetimi hem de penetrasyon testi için faydasını vurgulamaktadır.
+Bu süreç, WMI'nin uzaktan yürütme ve sistem sayımı yeteneğini göstermekte olup, hem sistem yönetimi hem de penetrasyon testi için faydasını vurgulamaktadır.
 
 ## Referanslar
 

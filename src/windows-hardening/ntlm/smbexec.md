@@ -8,9 +8,9 @@
 
 ### **SMBExec** Hakkında Ana Noktalar
 
-- Hedef makinede komutları cmd.exe (%COMSPEC%) aracılığıyla yürütmek için geçici bir hizmet (örneğin, "BTOBTO") oluşturarak çalışır, herhangi bir ikili dosya bırakmaz.
-- Gizli yaklaşımına rağmen, yürütülen her komut için olay günlükleri oluşturur ve etkileşimsiz bir "shell" biçimi sunar.
-- **Smbexec** kullanarak bağlanmak için komut şu şekildedir:
+- Hedef makinede cmd.exe (%COMSPEC%) aracılığıyla komutları yürütmek için geçici bir hizmet (örneğin, "BTOBTO") oluşturarak çalışır, herhangi bir ikili dosya bırakmaz.
+- Gizli yaklaşımına rağmen, yürütülen her komut için olay günlükleri oluşturur ve bu, etkileşimsiz bir "shell" biçimi sunar.
+- **Smbexec** kullanarak bağlanma komutu şu şekildedir:
 ```bash
 smbexec.py WORKGROUP/genericuser:genericpassword@10.10.10.10
 ```
@@ -18,9 +18,9 @@ smbexec.py WORKGROUP/genericuser:genericpassword@10.10.10.10
 
 - **Smbexec**, hedefte fiziksel binary'lere ihtiyaç duymadan, hizmet binPath'leri aracılığıyla doğrudan komut yürütmeyi sağlar.
 - Bu yöntem, bir Windows hedefinde tek seferlik komutlar yürütmek için faydalıdır. Örneğin, Metasploit'in `web_delivery` modülü ile birleştirildiğinde, PowerShell hedefli ters Meterpreter yükünün yürütülmesini sağlar.
-- Saldırganın makinesinde binPath'i cmd.exe aracılığıyla sağlanan komutu çalıştıracak şekilde ayarlayarak uzaktan bir hizmet oluşturmak, yükün başarılı bir şekilde yürütülmesini sağlamakta ve Metasploit dinleyicisi ile geri çağırma ve yük yürütme elde etmektedir; hizmet yanıt hataları olsa bile.
+- Saldırganın makinesinde binPath'i cmd.exe aracılığıyla sağlanan komutu çalıştıracak şekilde ayarlayarak uzaktan bir hizmet oluşturmak, yükün başarılı bir şekilde yürütülmesini sağlar; bu, hizmet yanıt hataları olsa bile Metasploit dinleyicisi ile geri çağırma ve yük yürütme elde edilir.
 
-### Komutlar Örneği
+### Komut Örneği
 
 Hizmeti oluşturmak ve başlatmak aşağıdaki komutlarla gerçekleştirilebilir:
 ```bash

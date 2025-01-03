@@ -13,7 +13,7 @@
 - **Verici**, sertifikayı veren CA'yı ifade eder.
 - **SubjectAlternativeName**, kimlik tanımlama esnekliğini artırarak konu için ek adlar sağlar.
 - **Temel Kısıtlamalar**, sertifikanın bir CA veya son varlık için olup olmadığını tanımlar ve kullanım kısıtlamalarını belirler.
-- **Genişletilmiş Anahtar Kullanımları (EKUs)**, sertifikanın belirli amaçlarını, örneğin kod imzalama veya e-posta şifreleme, Nesne Tanımlayıcıları (OIDs) aracılığıyla belirler.
+- **Genişletilmiş Anahtar Kullanımları (EKUs)**, sertifikanın belirli amaçlarını, örneğin kod imzalama veya e-posta şifreleme gibi, Nesne Tanımlayıcıları (OIDs) aracılığıyla belirler.
 - **İmza Algoritması**, sertifikayı imzalamak için kullanılan yöntemi belirtir.
 - **İmza**, vericinin özel anahtarı ile oluşturulur ve sertifikanın doğruluğunu garanti eder.
 
@@ -33,7 +33,7 @@ AD CS, AD ormanında CA sertifikalarını belirlenmiş konteynerler aracılığ�
 ### Certificate Acquisition: Client Certificate Request Flow
 
 1. İstek süreci, istemcilerin bir Kurumsal CA bulmasıyla başlar.
-2. Bir kamu-özel anahtar çifti oluşturulduktan sonra, bir kamu anahtarı ve diğer detayları içeren bir CSR oluşturulur.
+2. Bir kamu-özel anahtar çifti oluşturulduktan sonra, bir CSR oluşturulur; bu, bir açık anahtar ve diğer detayları içerir.
 3. CA, mevcut sertifika şablonlarına karşı CSR'yi değerlendirir ve şablonun izinlerine dayanarak sertifikayı verir.
 4. Onaylandığında, CA sertifikayı özel anahtarı ile imzalar ve istemciye geri gönderir.
 
@@ -53,7 +53,7 @@ Bu haklar, izinleri detaylandıran Erişim Kontrol Girişleri (ACE'ler) aracıl�
 
 - **Sertifika-Kayıt** ve **Sertifika-OtomatikKayıt** hakları, her biri belirli GUID'lerle ilişkilidir.
 - **GenişletilmişHaklar**, tüm genişletilmiş izinlere izin verir.
-- **TamKontrol/GenişTüm**, şablon üzerinde tam kontrol sağlar.
+- **TamKontrol/GenericAll**, şablon üzerinde tam kontrol sağlar.
 
 ### Enterprise CA Enrollment Rights
 
@@ -73,8 +73,8 @@ Sertifikalar şu yöntemlerle talep edilebilir:
 1. **Windows İstemci Sertifika Kayıt Protokolü** (MS-WCCE), DCOM arayüzlerini kullanarak.
 2. **ICertPassage Uzak Protokolü** (MS-ICPR), adlandırılmış borular veya TCP/IP aracılığıyla.
 3. **Sertifika kayıt web arayüzü**, Sertifika Otoritesi Web Kayıt rolü yüklü olduğunda.
-4. **Sertifika Kayıt Hizmeti** (CES), Sertifika Kayıt Politikası (CEP) hizmeti ile birlikte.
-5. **Ağ Cihazı Kayıt Hizmeti** (NDES), ağ cihazları için, Basit Sertifika Kayıt Protokolü (SCEP) kullanarak.
+4. **Sertifika Kayıt Servisi** (CES), Sertifika Kayıt Politikası (CEP) servisi ile birlikte.
+5. **Ağ Cihazı Kayıt Servisi** (NDES), ağ cihazları için, Basit Sertifika Kayıt Protokolü (SCEP) kullanarak.
 
 Windows kullanıcıları ayrıca GUI (`certmgr.msc` veya `certlm.msc`) veya komut satırı araçları (`certreq.exe` veya PowerShell'in `Get-Certificate` komutu) aracılığıyla sertifika talep edebilir.
 ```powershell

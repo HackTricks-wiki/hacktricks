@@ -12,13 +12,13 @@ Bir kullanıcının alan kimlik doğrulamasına izin veren bir sertifika talep e
 ```bash
 Certify.exe find /clientauth
 ```
-Bir sertifikanın gücünün, sertifikanın ait olduğu **kullanıcı olarak kimlik doğrulama** yeteneğinde yattığı, sertifika **geçerli** kaldığı sürece herhangi bir şifre değişikliğinden bağımsız olduğu vurgulanmaktadır.
+Bir sertifikanın gücünün, sertifikanın ait olduğu **kullanıcı olarak kimlik doğrulama** yeteneğinde yattığı, sertifika **geçerli** kaldığı sürece herhangi bir şifre değişikliğinden bağımsız olarak vurgulanmaktadır.
 
 Sertifikalar, `certmgr.msc` kullanarak grafik arayüz üzerinden veya `certreq.exe` ile komut satırından talep edilebilir. **Certify** ile bir sertifika talep etme süreci aşağıdaki gibi basitleştirilmiştir:
 ```bash
 Certify.exe request /ca:CA-SERVER\CA-NAME /template:TEMPLATE-NAME
 ```
-Başarılı bir istek üzerine, bir sertifika ve onun özel anahtarı `.pem` formatında oluşturulur. Bunu Windows sistemlerinde kullanılabilir bir `.pfx` dosyasına dönüştürmek için aşağıdaki komut kullanılır:
+Başarılı bir istek üzerine, `.pem` formatında bir sertifika ve ona ait özel anahtar oluşturulur. Bunu Windows sistemlerinde kullanılabilir bir `.pfx` dosyasına dönüştürmek için aşağıdaki komut kullanılır:
 ```bash
 openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provider v1.0" -export -out cert.pfx
 ```
@@ -26,11 +26,11 @@ openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provid
 ```bash
 Rubeus.exe asktgt /user:harmj0y /certificate:C:\Temp\cert.pfx /password:CertPass!
 ```
-Önemli bir uyarı, bu tekniğin, **THEFT5** bölümünde belirtilen başka bir yöntemle birleştirildiğinde, bir saldırganın Hesapların **NTLM hash**'ini sürekli olarak elde etmesine olanak tanıdığı ve Yerel Güvenlik Otoritesi Alt Sistemi Hizmeti (LSASS) ile etkileşime girmeden, yükseltilmemiş bir bağlamdan sağladığı, uzun vadeli kimlik bilgisi hırsızlığı için daha gizli bir yöntem sunduğunu paylaşmaktadır.
+Önemli bir uyarı, bu tekniğin, **THEFT5** bölümünde belirtilen başka bir yöntemle birleştirildiğinde, bir saldırganın Hesapların **NTLM hash**'ini sürekli olarak elde etmesine olanak tanıdığı ve Yerel Güvenlik Otoritesi Alt Sistemi Hizmeti (LSASS) ile etkileşime girmeden, yükseltilmemiş bir bağlamdan sağlam bir uzun vadeli kimlik bilgisi çalma yöntemi sunduğunu paylaşmaktadır.
 
 ## **Sertifikalar ile Makine Sürekliliği Elde Etme - PERSIST2**
 
-Başka bir yöntem, ele geçirilmiş bir sistemin makine hesabını bir sertifika için kaydettirmeyi içerir; bu, böyle eylemlere izin veren varsayılan `Machine` şablonunu kullanır. Eğer bir saldırgan bir sistemde yükseltilmiş ayrıcalıklar elde ederse, sertifika talep etmek için **SYSTEM** hesabını kullanabilir ve bu da bir tür **süreklilik** sağlar:
+Başka bir yöntem, tehlikeye atılmış bir sistemin makine hesabını bir sertifika için kaydettirmeyi içerir; bu, böyle eylemlere izin veren varsayılan `Machine` şablonunu kullanır. Eğer bir saldırgan bir sistemde yükseltilmiş ayrıcalıklar elde ederse, **SYSTEM** hesabını kullanarak sertifikalar talep edebilir ve bu da bir tür **süreklilik** sağlar:
 ```bash
 Certify.exe request /ca:dc.theshire.local/theshire-DC-CA /template:Machine /machine
 ```

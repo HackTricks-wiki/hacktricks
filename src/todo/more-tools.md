@@ -53,7 +53,7 @@
 - [https://github.com/prodigysml/Dr.-Watson](https://github.com/prodigysml/Dr.-Watson) : Burp eklentisi, alanları, alt alanları ve IP'leri keşfetmek için çevrimdışı analiz
 - [https://github.com/hahwul/WebHackersWeapons](https://github.com/hahwul/WebHackersWeapons): Farklı araçların listesi
 - [https://github.com/gauravnarwani97/Trishul](https://github.com/gauravnarwani97/Trishul) : Açıkları bulmak için BurpSuite Eklentisi (SQLi, XSS, SSTI)
-- [https://github.com/fransr/postMessage-tracker](https://github.com/fransr/postMessage-tracker) : Post-mesaj fonksiyonlarını izlemek için Chrome eklentisi
+- [https://github.com/fransr/postMessage-tracker](https://github.com/fransr/postMessage-tracker) : Post-mesaj fonksiyonlarını izlemek için Chrome uzantısı
 - [https://github.com/Quitten/Autorize](https://github.com/Quitten/Autorize) : Otomatik kimlik doğrulama testleri (çerezleri kaldır ve isteği göndermeyi dene)
 - [https://github.com/pikpikcu/xrcross](https://github.com/pikpikcu/xrcross): XRCross, Penetrasyon / BugBounty testleri için bir Yeniden Yapılandırma, Tarayıcı ve araçtır. Bu araç (XSS|SSRF|CORS|SSTI|IDOR|RCE|LFI|SQLI) açıklarını test etmek için oluşturulmuştur.
 
@@ -64,7 +64,7 @@
 - [https://gist.github.com/netbiosX/ee35fcd3722e401a38136cff7b751d79](https://gist.github.com/netbiosX/ee35fcd3722e401a38136cff7b751d79) ([https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/](https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/)): Süreklilik
 - [https://github.com/odzhan/injection](https://github.com/odzhan/injection) : Windows Süreç Enjeksiyon teknikleri
 - [https://github.com/BankSecurity/Red_Team](https://github.com/BankSecurity/Red_Team) : Kırmızı Ekip betikleri
-- [https://github.com/l0ss/Grouper2](https://github.com/l0ss/Grouper2) : Active Directory Grup Politikasındaki güvenlikle ilgili yanlış yapılandırmaları bul.
+- [https://github.com/l0ss/Grouper2](https://github.com/l0ss/Grouper2) : Active Directory Grup Politikasında güvenlikle ilgili yanlış yapılandırmaları bul.
 - [https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring](https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring) : Securestring obfuscation
 - [https://pentestlab.blog/2020/02/24/parent-pid-spoofing/](https://pentestlab.blog/2020/02/24/parent-pid-spoofing/) : Ebeveyn PID Sahteciliği
 - [https://github.com/the-xentropy/xencrypt](https://github.com/the-xentropy/xencrypt) : Powershell yüklerini şifrele
@@ -75,7 +75,7 @@
 
 # Firmware
 
-Araştırmak için kullanışlı olabilecek araçlar (otomatik):
+Araçlar, firma analiz etmek için hoşuma giden (otomatik):
 
 - [https://github.com/craigz28/firmwalker](https://github.com/craigz28/firmwalker)
 - [https://github.com/fkie-cad/FACT_core](https://github.com/fkie-cad/FACT_core)
@@ -102,18 +102,18 @@ Firmware emülasyonu: FIRMADYNE (https://github.com/firmadyne/firmadyne/) Linux 
 - [https://github.com/skelsec/jackdaw](https://github.com/skelsec/jackdaw)
 - [https://github.com/CoatiSoftware/Sourcetrail](https://github.com/CoatiSoftware/Sourcetrail) : Statik kod analizi
 - [https://www.hackerdecabecera.com/2019/12/blectf-capture-flag-en-formato-hardware.html](https://www.hackerdecabecera.com/2019/12/blectf-capture-flag-en-formato-hardware.html) : Bluetooth LE CTF
-- [https://github.com/skeeto/endlessh](https://github.com/skeeto/endlessh) : Sürekli bir afiş gönderen SSH tarpit.
+- [https://github.com/skeeto/endlessh](https://github.com/skeeto/endlessh) : Sürekli bir banner gönderen SSH tarpit.
 - AWS ve Bulut araçları: [https://github.com/toniblyx/my-arsenal-of-aws-security-tools](https://github.com/toniblyx/my-arsenal-of-aws-security-tools)
-- Phishing için IFS (Interplanetary File System): [https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/using-the-interplanetary-file-system-for-offensive-operations/](https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/using-the-interplanetary-file-system-for-offensive-operations/)
+- IFS (Interplanetary File System) için phishing: [https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/using-the-interplanetary-file-system-for-offensive-operations/](https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/using-the-interplanetary-file-system-for-offensive-operations/)
 - IP döndürme hizmetleri: [https://medium.com/@lokeshdlk77/how-to-rotate-ip-address-in-brute-force-attack-e66407259212](https://medium.com/@lokeshdlk77/how-to-rotate-ip-address-in-brute-force-attack-e66407259212)
 - Linux rootkit: [https://github.com/aesophor/satanic-rootkit](https://github.com/aesophor/satanic-rootkit)
 - [https://theia-ide.org/](https://theia-ide.org) : Çevrimiçi IDE
 - [https://github.com/nahamsec/Resources-for-Beginner-Bug-Bounty-Hunters/](https://github.com/nahamsec/Resources-for-Beginner-Bug-Bounty-Hunters/) : BugBounties'e başlamak için kaynaklar
 - [https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab](https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab) : IOS pentesting araçları
 - [https://github.com/random-robbie/keywords/blob/master/keywords.txt](https://github.com/random-robbie/keywords/blob/master/keywords.txt) : Anahtar kelimeler
-- [https://github.com/ElevenPaths/HomePWN](https://github.com/ElevenPaths/HomePWN) : IoT'yi hackleme (Wifi, BLE, SSDP, MDNS)
+- [https://github.com/ElevenPaths/HomePWN](https://github.com/ElevenPaths/HomePWN) : IoT'yi hacklemek (Wifi, BLE, SSDP, MDNS)
 - [https://github.com/rackerlabs/scantron](https://github.com/rackerlabs/scantron) : taramayı otomatikleştirme
-- [https://github.com/doyensec/awesome-electronjs-hacking](https://github.com/doyensec/awesome-electronjs-hacking) : Bu liste Electron.js güvenlik ile ilgili konuları kapsamayı amaçlamaktadır.
+- [https://github.com/doyensec/awesome-electronjs-hacking](https://github.com/doyensec/awesome-electronjs-hacking) : Bu liste, Electron.js güvenlik ile ilgili konuları kapsamayı amaçlamaktadır.
 - [https://github.com/serain/bbrecon](https://github.com/serain/bbrecon) : BB programları hakkında bilgi
 
 

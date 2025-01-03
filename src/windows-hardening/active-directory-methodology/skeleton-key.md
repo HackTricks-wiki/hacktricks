@@ -4,9 +4,9 @@
 
 ## Skeleton Key Attack
 
-**Skeleton Key saldırısı**, saldırganların **Active Directory kimlik doğrulamasını atlamasına** olanak tanıyan sofistike bir tekniktir; bu, **alan denetleyicisine bir ana şifre enjekte edilmesiyle** gerçekleştirilir. Bu, saldırgana **herhangi bir kullanıcı olarak kimlik doğrulama** yapma imkanı tanır ve böylece **alana sınırsız erişim** sağlar.
+**Skeleton Key saldırısı**, saldırganların **Active Directory kimlik doğrulamasını atlamasına** olanak tanıyan sofistike bir tekniktir; bu, alan denetleyicisine **bir ana şifre enjekte ederek** gerçekleştirilir. Bu, saldırgana **herhangi bir kullanıcı olarak kimlik doğrulama** yapma imkanı tanır ve böylece **alan üzerinde sınırsız erişim** sağlar.
 
-Bu saldırı, [Mimikatz](https://github.com/gentilkiwi/mimikatz) kullanılarak gerçekleştirilebilir. Bu saldırıyı gerçekleştirmek için **Domain Admin hakları gereklidir** ve saldırganın her alan denetleyicisini hedef alması, kapsamlı bir ihlal sağlamak için şarttır. Ancak, saldırının etkisi geçicidir; çünkü **alan denetleyicisinin yeniden başlatılması kötü amaçlı yazılımı ortadan kaldırır**, bu da sürdürülebilir erişim için yeniden uygulanmasını gerektirir.
+Bu saldırı, [Mimikatz](https://github.com/gentilkiwi/mimikatz) kullanılarak gerçekleştirilebilir. Bu saldırıyı gerçekleştirmek için **Domain Admin hakları gereklidir** ve saldırganın her alan denetleyicisini hedef alması, kapsamlı bir ihlal sağlamak için gereklidir. Ancak, saldırının etkisi geçicidir; çünkü **alan denetleyicisinin yeniden başlatılması kötü amaçlı yazılımı ortadan kaldırır**, bu da sürdürülebilir erişim için yeniden uygulanmasını gerektirir.
 
 **Saldırıyı gerçekleştirmek** için tek bir komut gereklidir: `misc::skeleton`.
 

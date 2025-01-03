@@ -17,6 +17,6 @@ Ve bu, yapılandırmanın en önemli kısmıdır:
 
 (Lütfen, kendi ikili dosyanızı paketlemeye çalışırsanız bu değerleri değiştirebileceğinizi unutmayın)
 
-Buradan sadece **sonraki butonlara** tıklayın ve son **oluştur butonuna** basın, kurulumcunuz/sarmalayıcınız oluşturulacaktır.
+Buradan sadece **sonraki butonlara** tıklayın ve son **oluştur butonu** ile yükleyiciniz/sarmalayıcınız oluşturulacaktır. 
 
 {{#include ../../banners/hacktricks-training.md}}

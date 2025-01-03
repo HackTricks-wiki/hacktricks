@@ -201,7 +201,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-Bu senaryoda, girdi `scanf("%u %u")` ile alındı ve değer `"1 1"` verildi, bu nedenle yığın değerleri **`0x00000001`** **kullanıcı girdisinden** gelmektedir. Bu değerlerin `$ebp - 8`'de nasıl başladığını görebilirsiniz. Bu nedenle, kodda **`$esp`'den 8 bayt çıkardık (o anda `$ebp` ve `$esp` aynı değere sahipti)** ve ardından BVS'yi itmiş olduk.
+Bu senaryoda, girdi `scanf("%u %u")` ile alındı ve değer olarak `"1 1"` verildi, bu nedenle yığın üzerindeki **`0x00000001`** değerleri **kullanıcı girdisinden** gelmektedir. Bu değerlerin `$ebp - 8`'de nasıl başladığını görebilirsiniz. Bu nedenle, kodda **`$esp`'den 8 bayt çıkardık (o anda `$ebp` ve `$esp` aynı değere sahipti)** ve ardından BVS'yi itmiş olduk.
 
 ![](<../../../images/image (136).png>)
 
@@ -386,7 +386,7 @@ main(sys.argv)
 > ```python
 >   # Merhaba dünya, benim adım John.
 >   # ^                       ^
->   # ^ adres 0              ^ adres 24 (karakter sayısını sayın)
+>   # ^ adres 0               ^ adres 24 (karakter sayısını sayın)
 >   # Bunu bellekte temsil etmek için, dizeyi dosyanın
 >   # başına yazmak isteyeceğiz:
 >   #
@@ -397,9 +397,10 @@ main(sys.argv)
 >   #
 >   # name_bitvector = claripy.BVS('sembolik_ad', 4*8)
 >   #
->   # Sonra, program fopen('hello.txt', 'r') çağrısını yaptıktan sonra ve
->   # fread(buffer, sizeof(char), 30, hello_txt_file) çağrısını yaptıktan sonra, tampon
->   # dosyadan dizeyi içerecek, ancak adın saklanacağı dört sembolik bayt ile.
+>   # Daha sonra, program fopen('hello.txt', 'r') çağrısını yaptıktan sonra
+>   # fread(buffer, sizeof(char), 30, hello_txt_file) çağrısını yaptığında, tampon
+>   # dosyadan dizeyi içerecek, ancak adın saklanacağı dört sembolik bayt ile
+>   # birlikte.
 >   # (!)
 > ```
 
@@ -407,7 +408,7 @@ main(sys.argv)
 
 > [!NOTE]
 > Bazen 16 karakter uzunluğundaki 2 kelimeyi **karakter karakter** karşılaştırmak gibi basit insan işlemleri, **angr** için çok maliyetli olabilir çünkü her if için 1 dal oluşturması gerektiğinden **üstel** olarak dallar üretmesi gerekir: `2^16`\
-> Bu nedenle, **angr'dan önceki bir noktaya ulaşmasını istemek** (gerçek zor kısmın zaten yapıldığı yer) ve **bu kısıtlamaları manuel olarak ayarlamak** daha kolaydır.
+> Bu nedenle, **angr'den önceki bir noktaya ulaşmasını istemek** ve **bu kısıtlamaları manuel olarak ayarlamak** daha kolaydır.
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -479,7 +480,7 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!CAUTION]
-> Bazı senaryolarda **veritesting**'i etkinleştirebilirsiniz, bu da benzer durumları birleştirerek gereksiz dalları kaydetmek ve çözümü bulmak için: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+> Bazı senaryolarda **veritesting**'i etkinleştirebilirsiniz, bu da benzer durumları birleştirerek gereksiz dalları kaydetmek ve çözümü bulmak için kullanılır: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
 > [!NOTE]
 > Bu senaryolarda yapabileceğiniz bir diğer şey, **angr'ye daha kolay anlayabileceği bir şey vererek fonksiyonu hooklamak**tır.
@@ -677,7 +678,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Birden Fazla Parametre ile scanf'ı Simüle Etmek
+### Birden Fazla Parametre ile scanf'ı Simüle Et
 ```python
 # This time, the solution involves simply replacing scanf with our own version,
 # since Angr does not support requesting multiple parameters with scanf.

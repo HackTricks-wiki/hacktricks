@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Giriş
+## Intro
 
 iButton nedir hakkında daha fazla bilgi için kontrol edin:
 
@@ -10,23 +10,23 @@ iButton nedir hakkında daha fazla bilgi için kontrol edin:
 ../ibutton.md
 {{#endref}}
 
-## Tasarım
+## Design
 
-Aşağıdaki resmin **mavi** kısmı, Flipper'ın **okuyabilmesi için gerçek iButton'ı** nasıl **yerleştirmeniz gerektiğini** gösterir. **Yeşil** kısım ise Flipper Zero ile okuyucuya **doğru bir şekilde iButton'ı taklit etmek için** nasıl **dokunmanız gerektiğini** gösterir.
+Aşağıdaki resmin **mavi** kısmı, Flipper'ın **okuyabilmesi için gerçek iButton'ı** nasıl **yerleştirmeniz gerektiğini** gösterir. **Yeşil** kısım ise Flipper Zero'nun **iButton'ı doğru bir şekilde taklit etmek için okuyucuya nasıl** **dokunması gerektiğini** gösterir.
 
 <figure><img src="../../../images/image (565).png" alt=""><figcaption></figcaption></figure>
 
-## Eylemler
+## Actions
 
-### Oku
+### Read
 
-Okuma Modunda Flipper, iButton anahtarının dokunmasını bekliyor ve üç tür anahtardan herhangi birini sindirebiliyor: **Dallas, Cyfral ve Metakom**. Flipper, anahtarın türünü **kendisi belirleyecektir**. Anahtar protokolünün adı, ID numarasının üzerinde ekranda görüntülenecektir.
+Okuma Modunda Flipper, iButton anahtarının dokunmasını bekliyor ve üç tür anahtarı sindirebiliyor: **Dallas, Cyfral ve Metakom**. Flipper, anahtarın türünü **kendisi belirleyecektir**. Anahtar protokolünün adı, ID numarasının üzerinde ekranda görüntülenecektir.
 
-### Manuel ekle
+### Add manually
 
-**Dallas, Cyfral ve Metakom** türünde bir iButton'ı **manuel olarak eklemek** mümkündür.
+**Manuel olarak** aşağıdaki türde bir iButton eklemek mümkündür: **Dallas, Cyfral ve Metakom**
 
-### **Taklit et**
+### **Emulate**
 
 Kaydedilmiş iButton'ları (okunan veya manuel olarak eklenen) **taklit etmek** mümkündür.
 
@@ -35,7 +35,7 @@ Kaydedilmiş iButton'ları (okunan veya manuel olarak eklenen) **taklit etmek** 
 
 <figure><img src="../../../images/image (138).png" alt=""><figcaption></figcaption></figure>
 
-## Referanslar
+## References
 
 - [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
 

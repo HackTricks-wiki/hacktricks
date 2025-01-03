@@ -1,16 +1,16 @@
-# SID-History Enjeksiyonu
+# SID-History Injection
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## SID History Enjeksiyon Saldırısı
+## SID History Injection Attack
 
-**SID History Enjeksiyon Saldırısı**nın odak noktası, **kullanıcıların alanlar arasında göçünü** sağlarken, eski alanın kaynaklarına erişimin devamını temin etmektir. Bu, kullanıcının önceki Güvenlik Tanımlayıcısının (SID) yeni hesabının SID Geçmişine **dahil edilmesiyle** gerçekleştirilir. Özellikle, bu süreç, ana alanın yüksek ayrıcalıklı bir grubunun (örneğin, Enterprise Admins veya Domain Admins) SID'sini SID Geçmişine ekleyerek yetkisiz erişim sağlamak için manipüle edilebilir. Bu istismar, ana alandaki tüm kaynaklara erişim sağlar.
+**SID History Injection Attack**'ın odak noktası, **kullanıcıların alanlar arasında göçünü** sağlarken, eski alan kaynaklarına erişimin devamını temin etmektir. Bu, kullanıcının önceki Güvenlik Tanımlayıcısını (SID) yeni hesabının SID Geçmişine **ekleyerek** gerçekleştirilir. Özellikle, bu süreç, ana alandan yüksek ayrıcalıklı bir grubun (örneğin, Enterprise Admins veya Domain Admins) SID'sini SID Geçmişine ekleyerek yetkisiz erişim sağlamak için manipüle edilebilir. Bu istismar, ana alandaki tüm kaynaklara erişim sağlar.
 
 Bu saldırıyı gerçekleştirmek için iki yöntem vardır: ya bir **Golden Ticket** ya da bir **Diamond Ticket** oluşturmak.
 
-**"Enterprise Admins"** grubunun SID'sini belirlemek için önce kök alanın SID'sini bulmak gerekir. Tanımlamanın ardından, Enterprise Admins grubunun SID'si kök alanın SID'sine `-519` eklenerek oluşturulabilir. Örneğin, kök alan SID'si `S-1-5-21-280534878-1496970234-700767426` ise, "Enterprise Admins" grubunun sonuçta elde edilen SID'si `S-1-5-21-280534878-1496970234-700767426-519` olacaktır.
+**"Enterprise Admins"** grubunun SID'sini belirlemek için, önce kök alanın SID'sini bulmak gerekir. Tanımlamanın ardından, Enterprise Admins grup SID'si kök alanın SID'sine `-519` eklenerek oluşturulabilir. Örneğin, kök alan SID'si `S-1-5-21-280534878-1496970234-700767426` ise, "Enterprise Admins" grubunun sonuçta elde edilen SID'si `S-1-5-21-280534878-1496970234-700767426-519` olacaktır.
 
-Ayrıca **Domain Admins** gruplarını da kullanabilirsiniz, bu grupların SID'si **512** ile biter.
+Ayrıca **Domain Admins** gruplarını da kullanabilirsiniz, bu grup **512** ile biter.
 
 Diğer bir alanın (örneğin "Domain Admins") grubunun SID'sini bulmanın başka bir yolu:
 ```powershell
@@ -99,14 +99,14 @@ export KRB5CCNAME=hacker.ccache
 # psexec in domain controller of root
 psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.10.10.10
 ```
-#### Automatic using [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
+#### Otomatik olarak [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py) kullanarak
 
-Bu, **çocuk alanından ebeveyn alanına yükseltmeyi otomatikleştiren** bir Impacket betiğidir. Betik şunları gerektirir:
+Bu, **çocuk alanından ebeveyn alanına yükselmeyi otomatikleştiren** bir Impacket betiğidir. Betiğin ihtiyaçları:
 
 - Hedef alan denetleyicisi
 - Çocuk alanındaki bir yönetici kullanıcısı için kimlik bilgileri
 
-Akış şudur:
+Akış şu şekildedir:
 
 - Ebeveyn alanının Enterprise Admins grubunun SID'sini alır
 - Çocuk alanındaki KRBTGT hesabının hash'ini alır

@@ -72,7 +72,7 @@ Bu işlem otomatik olarak [SprayKatz](https://github.com/aas-n/spraykatz) ile ya
 ### **comsvcs.dll** ile lsass'ı dökme
 
 `C:\Windows\System32` içinde bulunan **comsvcs.dll** adlı bir DLL, bir çökme durumunda **işlem belleğini dökmekten** sorumludur. Bu DLL, `rundll32.exe` kullanılarak çağrılmak üzere tasarlanmış **`MiniDumpW`** adlı bir **fonksiyon** içerir.\
-İlk iki argümanı kullanmak önemsizdir, ancak üçüncü argüman üç bileşene ayrılır. Dökümü alınacak işlem kimliği ilk bileşeni oluşturur, döküm dosyası konumu ikinciyi temsil eder ve üçüncü bileşen kesinlikle **full** kelimesidir. Alternatif seçenek yoktur.\
+İlk iki argümanı kullanmak önemsizdir, ancak üçüncü argüman üç bileşene ayrılır. Dökülecek işlem kimliği ilk bileşeni oluşturur, döküm dosyası konumu ikinciyi temsil eder ve üçüncü bileşen kesinlikle **full** kelimesidir. Alternatif seçenek yoktur.\
 Bu üç bileşen ayrıştırıldığında, DLL döküm dosyasını oluşturmakta ve belirtilen işlemin belleğini bu dosyaya aktarmaktadır.\
 **comsvcs.dll** kullanımı, lsass işlemini dökmek için mümkündür, böylece procdump'ı yükleyip çalıştırma ihtiyacı ortadan kalkar. Bu yöntem [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords) adresinde ayrıntılı olarak açıklanmıştır.
 
@@ -98,7 +98,7 @@ Get-Process -Name LSASS
 ```
 ## Dumpin lsass with PPLBlade
 
-[**PPLBlade**](https://github.com/tastypepperoni/PPLBlade) korumalı bir süreç döküm aracı olup, bellek dökümünü obfuscate etme ve bunu uzaktaki iş istasyonlarına disk üzerine bırakmadan aktarma desteği sunar.
+[**PPLBlade**](https://github.com/tastypepperoni/PPLBlade) Korunan Süreç Döküm Aracı, bellek dökümünü obfuscate etme ve bunu uzaktaki iş istasyonlarına disk üzerine bırakmadan aktarma desteği sunar.
 
 **Ana işlevler**:
 
@@ -150,7 +150,7 @@ impacket-secretsdump -sam sam -security security -system system LOCAL
 ```
 ### Hacim Gölgesi Kopyası
 
-Bu hizmeti kullanarak korunan dosyaların kopyasını alabilirsiniz. Yönetici olmanız gerekiyor.
+Bu hizmeti kullanarak korunan dosyaların kopyasını alabilirsiniz. Yönetici olmanız gerekir.
 
 #### vssadmin Kullanarak
 
@@ -184,27 +184,27 @@ Invoke-NinjaCopy.ps1 -Path "C:\Windows\System32\config\sam" -LocalDestination "c
 ```
 ## **Active Directory Kimlik Bilgileri - NTDS.dit**
 
-**NTDS.dit** dosyası, **Active Directory**'nin kalbi olarak bilinir ve kullanıcı nesneleri, gruplar ve bunların üyelikleri hakkında kritik verileri tutar. Bu dosya, alan kullanıcıları için **şifre karma**'larının saklandığı yerdir. Bu dosya, **Genişletilebilir Depolama Motoru (ESE)** veritabanıdır ve **_%SystemRoom%/NTDS/ntds.dit_** konumunda bulunur.
+**NTDS.dit** dosyası, **Active Directory**'nin kalbi olarak bilinir ve kullanıcı nesneleri, gruplar ve bunların üyelikleri hakkında kritik verileri tutar. Bu dosya, etki alanı kullanıcıları için **şifre hash'lerini** depolar. Bu dosya, **Genişletilebilir Depolama Motoru (ESE)** veritabanıdır ve **_%SystemRoom%/NTDS/ntds.dit_** konumunda bulunur.
 
 Bu veritabanında üç ana tablo bulunmaktadır:
 
-- **Veri Tablosu**: Bu tablo, kullanıcılar ve gruplar gibi nesneler hakkında ayrıntıları saklamakla görevlidir.
+- **Veri Tablosu**: Bu tablo, kullanıcılar ve gruplar gibi nesneler hakkında ayrıntıları depolamakla görevlidir.
 - **Bağlantı Tablosu**: Grup üyelikleri gibi ilişkileri takip eder.
-- **SD Tablosu**: Her nesne için **Güvenlik tanımlayıcıları** burada tutulur ve saklanan nesnelerin güvenliği ve erişim kontrolünü sağlar.
+- **SD Tablosu**: Her nesne için **Güvenlik tanımlayıcıları** burada tutulur ve depolanan nesnelerin güvenliği ve erişim kontrolünü sağlar.
 
 Bunun hakkında daha fazla bilgi: [http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
 
 Windows, bu dosyayla etkileşimde bulunmak için _Ntdsa.dll_ kullanır ve _lsass.exe_ tarafından kullanılır. Ardından, **NTDS.dit** dosyasının bir kısmı **`lsass`** belleği içinde bulunabilir (performans iyileştirmesi nedeniyle muhtemelen en son erişilen verileri bulabilirsiniz, çünkü bir **önbellek** kullanılır).
 
-#### NTDS.dit içindeki karmaşaları çözme
+#### NTDS.dit içindeki hash'leri çözme
 
-Karma 3 kez şifrelenmiştir:
+Hash, 3 kez şifrelenmiştir:
 
 1. **BOOTKEY** ve **RC4** kullanarak Şifre Çözme Anahtarını (**PEK**) çözün.
-2. **PEK** ve **RC4** kullanarak **karmayı** çözün.
-3. **DES** kullanarak **karmayı** çözün.
+2. **PEK** ve **RC4** kullanarak **hash**'i çözün.
+3. **DES** kullanarak **hash**'i çözün.
 
-**PEK**, **her alan denetleyicisinde** **aynı değere** sahiptir, ancak **alan denetleyicisinin SYSTEM dosyasının BOOTKEY**'i kullanılarak **NTDS.dit** dosyası içinde **şifrelenmiştir** (alan denetleyicileri arasında farklıdır). Bu nedenle, NTDS.dit dosyasından kimlik bilgilerini almak için **NTDS.dit ve SYSTEM dosyalarına** ihtiyacınız vardır (_C:\Windows\System32\config\SYSTEM_).
+**PEK**, **her etki alanı denetleyicisinde** **aynı değere** sahiptir, ancak **etki alanı denetleyicisinin SYSTEM dosyasının BOOTKEY**'i kullanılarak **NTDS.dit** dosyası içinde **şifrelenmiştir** (etki alanı denetleyicileri arasında farklıdır). Bu nedenle, NTDS.dit dosyasından kimlik bilgilerini almak için **NTDS.dit ve SYSTEM dosyalarına** ihtiyacınız vardır (_C:\Windows\System32\config\SYSTEM_).
 
 ### Ntdsutil kullanarak NTDS.dit kopyalama
 
@@ -212,7 +212,7 @@ Windows Server 2008'den beri mevcuttur.
 ```bash
 ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 ```
-Ayrıca **ntds.dit** dosyasını kopyalamak için [**volume shadow copy**](./#stealing-sam-and-system) hilesini de kullanabilirsiniz. **SYSTEM dosyası**nın bir kopyasına da ihtiyacınız olacağını unutmayın (yine, [**bunu kayıt defterinden dökün veya volume shadow copy**](./#stealing-sam-and-system) hilesini kullanın).
+Ayrıca **ntds.dit** dosyasını kopyalamak için [**volume shadow copy**](./#stealing-sam-and-system) hilesini de kullanabilirsiniz. **SYSTEM file** dosyasının bir kopyasına da ihtiyacınız olacağını unutmayın (yine, [**dump it from the registry or use the volume shadow copy**](./#stealing-sam-and-system) hilesini kullanın).
 
 ### **NTDS.dit'ten hash'leri çıkarmak**
 
@@ -246,7 +246,7 @@ lazagne.exe all
 
 ### Windows credentials Editor (WCE)
 
-Bu araç, bellekten kimlik bilgilerini çıkarmak için kullanılabilir. Bunu buradan indirin: [http://www.ampliasecurity.com/research/windows-credentials-editor/](https://www.ampliasecurity.com/research/windows-credentials-editor/)
+Bu araç, bellekten kimlik bilgilerini çıkarmak için kullanılabilir. Şuradan indirebilirsiniz: [http://www.ampliasecurity.com/research/windows-credentials-editor/](https://www.ampliasecurity.com/research/windows-credentials-editor/)
 
 ### fgdump
 
@@ -265,10 +265,10 @@ type outpwdump
 ```
 ### PwDump7
 
-Buradan indirin: [ http://www.tarasco.org/security/pwdump_7](http://www.tarasco.org/security/pwdump_7) ve sadece **çalıştırın** ve şifreler çıkarılacaktır.
+Şuradan indirin: [ http://www.tarasco.org/security/pwdump_7](http://www.tarasco.org/security/pwdump_7) ve sadece **çalıştırın**, şifreler çıkarılacaktır.
 
 ## Defenses
 
-[**Bazı kimlik bilgisi korumaları hakkında burada bilgi edinin.**](credentials-protections.md)
+[**Burada bazı kimlik bilgisi korumaları hakkında bilgi edinin.**](credentials-protections.md)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -4,9 +4,9 @@
 
 ## Golden ticket
 
-Bir **Golden Ticket** saldırısı, **NTLM hash'ini kullanarak herhangi bir kullanıcıyı taklit eden meşru bir Ticket Granting Ticket (TGT) oluşturulmasından** oluşur. Bu teknik, taklit edilen kullanıcı olarak **alan içindeki herhangi bir hizmete veya makineye erişim sağlaması** nedeniyle özellikle avantajlıdır. **krbtgt hesabının kimlik bilgileri asla otomatik olarak güncellenmez** olduğunu hatırlamak önemlidir.
+Bir **Golden Ticket** saldırısı, **NTLM hash'ini kullanarak herhangi bir kullanıcıyı taklit eden meşru bir Ticket Granting Ticket (TGT) oluşturma** işleminden oluşur. Bu teknik, taklit edilen kullanıcı olarak **alan içindeki herhangi bir hizmete veya makineye erişim sağladığı** için özellikle avantajlıdır. **krbtgt hesabının kimlik bilgileri asla otomatik olarak güncellenmez** olduğunu hatırlamak önemlidir.
 
-**krbtgt hesabının NTLM hash'ini elde etmek** için çeşitli yöntemler kullanılabilir. Bu, alan içindeki herhangi bir Domain Controller (DC) üzerindeki **Local Security Authority Subsystem Service (LSASS) sürecinden** veya **NT Directory Services (NTDS.dit) dosyasından** çıkarılabilir. Ayrıca, bu NTLM hash'ini elde etmek için **DCsync saldırısı gerçekleştirmek** başka bir stratejidir; bu, Mimikatz'taki **lsadump::dcsync modülü** veya Impacket tarafından sağlanan **secretsdump.py scripti** gibi araçlar kullanılarak yapılabilir. Bu işlemleri gerçekleştirmek için genellikle **alan yöneticisi ayrıcalıkları veya benzer bir erişim seviyesi gereklidir**.
+**krbtgt hesabının NTLM hash'ini elde etmek** için çeşitli yöntemler kullanılabilir. Bu hash, alan içindeki herhangi bir Domain Controller (DC) üzerindeki **Local Security Authority Subsystem Service (LSASS) sürecinden** veya **NT Directory Services (NTDS.dit) dosyasından** çıkarılabilir. Ayrıca, bu NTLM hash'ini elde etmek için **DCsync saldırısı gerçekleştirmek** de başka bir stratejidir; bu, Mimikatz'taki **lsadump::dcsync modülü** veya Impacket tarafından sağlanan **secretsdump.py scripti** gibi araçlar kullanılarak yapılabilir. Bu işlemleri gerçekleştirmek için genellikle **alan yöneticisi ayrıcalıkları veya benzer bir erişim seviyesi gereklidir**.
 
 NTLM hash'i bu amaç için geçerli bir yöntem olsa da, operasyonel güvenlik nedenleriyle **Gelişmiş Şifreleme Standardı (AES) Kerberos anahtarlarını (AES128 ve AES256)** kullanarak biletlerin **sahte belgelenmesi** şiddetle tavsiye edilir.
 ```bash:From Linux
@@ -36,9 +36,9 @@ Başlangıç ofsetini, süreyi ve maksimum yenilemeleri kontrol etmek için `/st
 ```
 Get-DomainPolicy | select -expand KerberosPolicy
 ```
-Maalesef, TGT'nin ömrü 4769'da kaydedilmediği için bu bilgiyi Windows olay günlüklerinde bulamazsınız. Ancak, **önceki 4768 olmadan 4769'ları görmek** ile ilişkilendirebilirsiniz. **TGT olmadan bir TGS talep etmek mümkün değildir** ve eğer bir TGT'nin verildiğine dair bir kayıt yoksa, bunun çevrimdışı olarak sahte olduğunu çıkarabiliriz.
+Maalesef, TGT'nin ömrü 4769'da kaydedilmediği için bu bilgiyi Windows olay günlüklerinde bulamazsınız. Ancak, **önceki 4768 olmadan 4769 görmek** ile ilişkilendirebilirsiniz. **TGT olmadan TGS talep etmek mümkün değildir** ve eğer bir TGT'nin verildiğine dair bir kayıt yoksa, bunun çevrimdışı olarak sahte olduğu sonucuna varabiliriz.
 
-Bu **tespit bypass'ı** için elmas biletleri kontrol edin:
+Bu **tespit bypass'ını** gerçekleştirmek için elmas biletlerini kontrol edin:
 
 {{#ref}}
 diamond-ticket.md
@@ -50,7 +50,7 @@ diamond-ticket.md
 - 4672: Yönetici Girişi
 - `Get-WinEvent -FilterHashtable @{Logname='Security';ID=4672} -MaxEvents 1 | Format-List –Property`
 
-Savunucuların yapabileceği diğer küçük hileler, **varsayılan etki alanı yöneticisi hesabı gibi hassas kullanıcılar için 4769'larda uyarı vermektir**.
+Savunucuların yapabileceği diğer küçük numaralar, **varsayılan etki alanı yöneticisi hesabı gibi hassas kullanıcılar için 4769'da uyarı vermektir**.
 
 ## Referanslar
 

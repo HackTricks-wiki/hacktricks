@@ -36,7 +36,7 @@ Bu tokenı etkinleştirdiyseniz, **KERB_S4U_LOGON** kullanarak herhangi bir kull
 
 ### SeBackupPrivilege
 
-Bu ayrıcalık, herhangi bir dosyaya (okuma işlemleriyle sınırlı) **tüm okuma erişim kontrolünü** vermek için sistemin neden olduğu bir ayrıcalıktır. Yerel Yönetici hesaplarının şifre karma değerlerini kayıt defterinden okumak için kullanılır, ardından "**psexec**" veya "**wmiexec**" gibi araçlar hash ile kullanılabilir (Pass-the-Hash tekniği). Ancak, bu teknik iki koşul altında başarısız olur: Yerel Yönetici hesabı devre dışı bırakıldığında veya uzaktan bağlanan Yerel Yöneticilerden yönetim haklarını kaldıran bir politika uygulandığında.\
+Bu ayrıcalık, herhangi bir dosyaya (okuma işlemleriyle sınırlı) **tüm okuma erişim kontrolünü** vermek için sistemin neden olduğu bir ayrıcalıktır. Yerel Yönetici hesaplarının şifre karma değerlerini kayıt defterinden **okumak** için kullanılır, ardından "**psexec**" veya "**wmiexec**" gibi araçlar hash ile kullanılabilir (Pass-the-Hash tekniği). Ancak, bu teknik iki koşul altında başarısız olur: Yerel Yönetici hesabı devre dışı bırakıldığında veya uzaktan bağlanan Yerel Yöneticilerden yönetim haklarını kaldıran bir politika uygulandığında.\
 Bu ayrıcalığı **kötüye kullanabilirsiniz**:
 
 - [https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1](https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1)
@@ -50,11 +50,11 @@ Bu ayrıcalığı **kötüye kullanabilirsiniz**:
 
 ### SeRestorePrivilege
 
-Herhangi bir sistem dosyasına yazma erişimi için, dosyanın Erişim Kontrol Listesi (ACL) ne olursa olsun, bu ayrıcalık tarafından izin verilir. Hizmetleri **değiştirme**, DLL Hijacking yapma ve çeşitli diğer teknikler arasında Görüntü Dosyası Yürütme Seçenekleri aracılığıyla **hata ayıklayıcılar** ayarlama gibi birçok yükseltme olanağı sunar.
+Herhangi bir sistem dosyasına yazma erişimi için izin sağlayan bu ayrıcalık, dosyanın Erişim Kontrol Listesi (ACL) ne olursa olsun geçerlidir. Hizmetleri **değiştirme**, DLL Hijacking yapma ve çeşitli diğer teknikler arasında **hata ayıklayıcılar** ayarlama gibi birçok yükseltme olanağı sunar.
 
 ### SeCreateTokenPrivilege
 
-SeCreateTokenPrivilege, özellikle bir kullanıcının tokenları taklit etme yeteneğine sahip olduğunda güçlü bir izindir, ancak SeImpersonatePrivilege yoksa da kullanışlıdır. Bu yetenek, aynı kullanıcıyı temsil eden ve bütünlük seviyesi mevcut sürecin seviyesini aşmayan bir tokenı taklit etme yeteneğine dayanır.
+SeCreateTokenPrivilege, özellikle bir kullanıcının tokenları taklit etme yeteneğine sahip olduğunda güçlü bir izindir, ancak SeImpersonatePrivilege yoksa da faydalıdır. Bu yetenek, aynı kullanıcıyı temsil eden ve bütünlük seviyesi mevcut sürecin seviyesini aşmayan bir tokenı taklit etme yeteneğine dayanır.
 
 **Ana Noktalar:**
 
@@ -64,7 +64,7 @@ SeCreateTokenPrivilege, özellikle bir kullanıcının tokenları taklit etme ye
 
 ### SeLoadDriverPrivilege
 
-Bu ayrıcalık, `ImagePath` ve `Type` için belirli değerlerle bir kayıt defteri girişi oluşturarak **cihaz sürücülerini yükleme ve boşaltma** izni verir. `HKLM` (HKEY_LOCAL_MACHINE) üzerinde doğrudan yazma erişimi kısıtlandığından, bunun yerine `HKCU` (HKEY_CURRENT_USER) kullanılmalıdır. Ancak, `HKCU`'nun sürücü yapılandırması için çekirdek tarafından tanınabilmesi için belirli bir yol izlenmelidir.
+Bu ayrıcalık, `ImagePath` ve `Type` için belirli değerlerle bir kayıt defteri girişi oluşturarak **cihaz sürücülerini yükleme ve boşaltma** izni verir. `HKLM` (HKEY_LOCAL_MACHINE) üzerinde doğrudan yazma erişimi kısıtlandığı için, bunun yerine `HKCU` (HKEY_CURRENT_USER) kullanılmalıdır. Ancak, `HKCU`'nun sürücü yapılandırması için çekirdek tarafından tanınabilmesi için belirli bir yol izlenmelidir.
 
 Bu yol `\Registry\User\<RID>\System\CurrentControlSet\Services\DriverName` şeklindedir, burada `<RID>` mevcut kullanıcının Göreceli Tanımlayıcısıdır. `HKCU` içinde, bu tüm yol oluşturulmalı ve iki değer ayarlanmalıdır:
 
@@ -92,7 +92,7 @@ Daha fazla bu ayrıcalığı kötüye kullanma yolu için [https://www.ired.team
 
 ### SeTakeOwnershipPrivilege
 
-Bu, **SeRestorePrivilege** ile benzerdir. Ana işlevi, bir sürecin **bir nesnenin mülkiyetini üstlenmesine** izin vermek olup, bu da WRITE_OWNER erişim hakları sağlanarak açık takdir erişimi gereksinimini aşar. Süreç, önce yazma amacıyla hedef kayıt defteri anahtarının mülkiyetini güvence altına almayı, ardından yazma işlemlerini etkinleştirmek için DACL'yi değiştirmeyi içerir.
+Bu, **SeRestorePrivilege** ile benzerdir. Temel işlevi, bir sürecin **bir nesnenin mülkiyetini üstlenmesine** izin vermek olup, bu da WRITE_OWNER erişim hakları sağlanarak açık takdir erişimi gereksinimini aşar. Süreç, önce yazma amacıyla hedef kayıt defteri anahtarının mülkiyetini güvence altına almayı, ardından yazma işlemlerini etkinleştirmek için DACL'yi değiştirmeyi içerir.
 ```bash
 takeown /f 'C:\some\file.txt' #Now the file is owned by you
 icacls 'C:\some\file.txt' /grant <your_username>:F #Now you have full access
@@ -110,11 +110,11 @@ c:\inetpub\wwwwroot\web.config
 ```
 ### SeDebugPrivilege
 
-Bu ayrıcalık, **diğer süreçleri hata ayıklamayı** sağlar, buna bellek içinde okuma ve yazma da dahildir. Çoğu antivirüs ve host saldırı önleme çözümlerini atlatabilen çeşitli bellek enjeksiyon stratejileri, bu ayrıcalıkla kullanılabilir.
+Bu ayrıcalık, **diğer süreçleri hata ayıklamayı** sağlar, buna bellek içinde okuma ve yazma da dahildir. Çoğu antivirüs ve host saldırı önleme çözümünü atlatabilen çeşitli bellek enjeksiyon stratejileri, bu ayrıcalıkla kullanılabilir.
 
 #### Belleği dökme
 
-Bir sürecin **belleğini yakalamak için** [ProcDump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) aracını [SysInternals Suite](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite) içinden kullanabilirsiniz. Özellikle, bir kullanıcının bir sisteme başarıyla giriş yaptıktan sonra kullanıcı kimlik bilgilerini saklamaktan sorumlu olan **Yerel Güvenlik Otoritesi Alt Sistemi Hizmeti (**[**LSASS**](https://en.wikipedia.org/wiki/Local_Security_Authority_Subsystem_Service)**)** sürecine uygulanabilir.
+Bir sürecin **belleğini yakalamak** için [ProcDump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) aracını [SysInternals Suite](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite) üzerinden kullanabilirsiniz. Özellikle, bir kullanıcının bir sisteme başarıyla giriş yaptıktan sonra kullanıcı kimlik bilgilerini depolamakla sorumlu olan **Yerel Güvenlik Otoritesi Alt Sistemi Hizmeti (**[**LSASS**](https://en.wikipedia.org/wiki/Local_Security_Authority_Subsystem_Service)**)** sürecine uygulanabilir.
 
 Bu dökümü daha sonra şifreleri elde etmek için mimikatz'a yükleyebilirsiniz:
 ```
@@ -138,7 +138,7 @@ import-module psgetsys.ps1; [MyProcess]::CreateProcessFromParent(<system_pid>,<c
 ```
 whoami /priv
 ```
-**Devre Dışı Görünen Token'lar** etkinleştirilebilir, aslında _Etkin_ ve _Devre Dışı_ token'ları istismar edebilirsiniz.
+**Devre Dışı Görünen Token'lar** etkinleştirilebilir, aslında _Etkin_ ve _Devre Dışı_ token'ları kötüye kullanabilirsiniz.
 
 ### Tüm Token'ları Etkinleştir
 

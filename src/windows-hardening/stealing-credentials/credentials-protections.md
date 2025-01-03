@@ -6,11 +6,11 @@
 
 ## WDigest
 
-[WDigest](<https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396>) protokolü, Windows XP ile tanıtılmıştır ve HTTP Protokolü aracılığıyla kimlik doğrulama için tasarlanmıştır ve **Windows XP'den Windows 8.0'a ve Windows Server 2003'ten Windows Server 2012'ye kadar varsayılan olarak etkindir**. Bu varsayılan ayar, **LSASS'ta düz metin şifre depolamasına** yol açar. Bir saldırgan, Mimikatz kullanarak **bu kimlik bilgilerini çıkarmak için** aşağıdaki komutu çalıştırabilir:
+[WDigest](<https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396>) protokolü, Windows XP ile tanıtılmıştır ve HTTP Protokolü üzerinden kimlik doğrulama için tasarlanmıştır ve **Windows XP'den Windows 8.0'a ve Windows Server 2003'ten Windows Server 2012'ye kadar varsayılan olarak etkindir**. Bu varsayılan ayar, **LSASS'ta (Yerel Güvenlik Otoritesi Alt Sistem Servisi) düz metin şifre depolamasına** yol açar. Bir saldırgan, Mimikatz kullanarak **bu kimlik bilgilerini çıkarmak için** aşağıdaki komutu çalıştırabilir:
 ```bash
 sekurlsa::wdigest
 ```
-Bu özelliği **açmak veya kapatmak için**, _**UseLogonCredential**_ ve _**Negotiate**_ kayıt anahtarları _**HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\WDigest**_ içinde "1" olarak ayarlanmalıdır. Eğer bu anahtarlar **yoksa veya "0" olarak ayarlanmışsa**, WDigest **devre dışı**dır:
+Bu özelliği **açmak veya kapatmak için**, _**UseLogonCredential**_ ve _**Negotiate**_ kayıt defteri anahtarları _**HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\WDigest**_ içinde "1" olarak ayarlanmalıdır. Eğer bu anahtarlar **yoksa veya "0" olarak ayarlanmışsa**, WDigest **devre dışı**dır:
 ```bash
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest /v UseLogonCredential
 ```
@@ -32,11 +32,11 @@ Bu korumayı Mimikatz sürücüsü mimidrv.sys kullanarak atlamak mümkündür:
 
 Varsayılan olarak, **Credential Guard** aktif değildir ve bir organizasyon içinde manuel olarak etkinleştirilmesi gerekir. **Mimikatz** gibi araçlara karşı güvenliği artırmak için kritik öneme sahiptir; bu araçlar, kimlik bilgilerini çıkarmada kısıtlanır. Ancak, özel **Security Support Providers (SSP)** eklenerek, giriş denemeleri sırasında kimlik bilgilerini düz metin olarak yakalamak için hala açıklar istismar edilebilir.
 
-**Credential Guard**'ın etkinlik durumunu doğrulamak için, _**HKLM\System\CurrentControlSet\Control\LSA**_ altındaki kayıt defteri anahtarı _**LsaCfgFlags**_ incelenebilir. "**1**" değeri, **UEFI kilidi** ile etkinleştirildiğini, "**2**" kilitsiz olduğunu ve "**0**" ise etkinleştirilmediğini gösterir. Bu kayıt defteri kontrolü, güçlü bir gösterge olmasına rağmen, Credential Guard'ı etkinleştirmek için tek adım değildir. Bu özelliği etkinleştirmek için ayrıntılı kılavuz ve bir PowerShell betiği çevrimiçi olarak mevcuttur.
+**Credential Guard**'ın etkinlik durumunu doğrulamak için, _**HKLM\System\CurrentControlSet\Control\LSA**_ altındaki kayıt defteri anahtarı _**LsaCfgFlags**_ incelenebilir. "**1**" değeri **UEFI kilidi** ile etkinleştirildiğini, "**2**" kilitsiz olduğunu ve "**0**" ise etkinleştirilmediğini gösterir. Bu kayıt defteri kontrolü, güçlü bir gösterge olmasına rağmen, Credential Guard'ı etkinleştirmek için tek adım değildir. Bu özelliği etkinleştirmek için ayrıntılı kılavuz ve bir PowerShell betiği çevrimiçi olarak mevcuttur.
 ```powershell
 reg query HKLM\System\CurrentControlSet\Control\LSA /v LsaCfgFlags
 ```
-Kapsamlı bir anlayış ve **Credential Guard**'ı Windows 10'da etkinleştirme ile **Windows 11 Enterprise ve Education (sürüm 22H2)** uyumlu sistemlerde otomatik aktivasyonu hakkında talimatlar için [Microsoft'un belgelerine](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage) göz atın.
+Kapsamlı bir anlayış ve **Windows 10**'da **Credential Guard**'ı etkinleştirme ile **Windows 11 Enterprise ve Education (sürüm 22H2)** uyumlu sistemlerde otomatik aktivasyonu hakkında talimatlar için [Microsoft'un belgelerine](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage) göz atın.
 
 Kimlik bilgilerini yakalamak için özel SSP'lerin uygulanmasıyla ilgili daha fazla ayrıntı [bu kılavuzda](../active-directory-methodology/custom-ssp.md) sağlanmaktadır.
 
@@ -46,7 +46,7 @@ Kimlik bilgilerini yakalamak için özel SSP'lerin uygulanmasıyla ilgili daha f
 
 Geleneksel olarak, RDP aracılığıyla bir uzak bilgisayara bağlandığınızda, kimlik bilgileriniz hedef makinede saklanır. Bu, özellikle yükseltilmiş ayrıcalıklara sahip hesaplar kullanıldığında önemli bir güvenlik riski oluşturur. Ancak, _**Restricted Admin modu**_ ile bu risk önemli ölçüde azaltılmıştır.
 
-**mstsc.exe /RestrictedAdmin** komutunu kullanarak bir RDP bağlantısı başlatıldığında, uzak bilgisayara kimlik doğrulaması yapılırken kimlik bilgileriniz üzerinde saklanmaz. Bu yaklaşım, bir kötü amaçlı yazılım enfeksiyonu durumunda veya kötü niyetli bir kullanıcının uzak sunucuya erişim sağlaması durumunda, kimlik bilgilerinizin tehlikeye girmediğini garanti eder, çünkü sunucuda saklanmazlar.
+**mstsc.exe /RestrictedAdmin** komutunu kullanarak bir RDP bağlantısı başlatıldığında, uzak bilgisayara kimlik doğrulama, kimlik bilgilerinizin üzerinde saklanmadan gerçekleştirilir. Bu yaklaşım, bir kötü amaçlı yazılım enfeksiyonu durumunda veya kötü niyetli bir kullanıcının uzak sunucuya erişim sağlaması durumunda, kimlik bilgilerinizin tehlikeye girmediğini garanti eder, çünkü sunucuda saklanmamaktadır.
 
 **Restricted Admin modu**'nda, RDP oturumundan ağ kaynaklarına erişim girişimleri kişisel kimlik bilgilerinizi kullanmaz; bunun yerine **makinenin kimliği** kullanılır.
 
@@ -92,16 +92,17 @@ Daha ayrıntılı bilgi için resmi [belgelere](https://docs.microsoft.com/en-us
 | Yöneticiler            | Yöneticiler             | Yöneticiler                                                                  | Yöneticiler                 |
 | Yöneticiler            | Yöneticiler             | Yöneticiler                                                                  | Yöneticiler                 |
 | Yedek Operatörleri     | Yedek Operatörleri      | Yedek Operatörleri                                                           | Yedek Operatörleri          |
-| Sertifika Yayımcıları  |                          |                                                                               |                              |
+| Sertifika Yayımcıları   |                          |                                                                               |                              |
 | Alan Yöneticileri      | Alan Yöneticileri       | Alan Yöneticileri                                                            | Alan Yöneticileri           |
 | Alan Denetleyicileri   | Alan Denetleyicileri    | Alan Denetleyicileri                                                         | Alan Denetleyicileri        |
 | Kurumsal Yöneticiler   | Kurumsal Yöneticiler    | Kurumsal Yöneticiler                                                         | Kurumsal Yöneticiler        |
 |                         |                          |                                                                               | Kurumsal Anahtar Yöneticileri|
 |                         |                          |                                                                               | Anahtar Yöneticileri        |
 | Krbtgt                  | Krbtgt                   | Krbtgt                                                                        | Krbtgt                       |
-| Yazdırma Operatörleri   | Yazdırma Operatörleri    | Yazdırma Operatörleri                                                         | Yazdırma Operatörleri       |
+| Yazıcı Operatörleri     | Yazıcı Operatörleri      | Yazıcı Operatörleri                                                           | Yazıcı Operatörleri         |
 |                         |                          | Salt okunur Alan Denetleyicileri                                             | Salt okunur Alan Denetleyicileri|
 | Çoğaltıcı              | Çoğaltıcı               | Çoğaltıcı                                                                    | Çoğaltıcı                   |
 | Şema Yöneticileri      | Şema Yöneticileri       | Şema Yöneticileri                                                            | Şema Yöneticileri           |
+| Sunucu Operatörleri     | Sunucu Operatörleri      | Sunucu Operatörleri                                                           | Sunucu Operatörleri         |
 
 {{#include ../../banners/hacktricks-training.md}}

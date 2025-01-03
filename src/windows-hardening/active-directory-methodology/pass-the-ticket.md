@@ -4,7 +4,7 @@
 
 ## Pass The Ticket (PTT)
 
-**Pass The Ticket (PTT)** saldırı yönteminde, saldırganlar **bir kullanıcının kimlik doğrulama biletini** çalarlar, bunun yerine şifrelerini veya hash değerlerini almazlar. Bu çalınan bilet, **kullanıcının kimliğini taklit etmek** için kullanılır ve bir ağ içindeki kaynaklara ve hizmetlere yetkisiz erişim sağlar.
+**Pass The Ticket (PTT)** saldırı yönteminde, saldırganlar **bir kullanıcının kimlik doğrulama biletini** çalarlar, bunun yerine şifrelerini veya hash değerlerini almazlar. Çalınan bu bilet, **kullanıcının taklit edilmesi** için kullanılır ve bir ağ içindeki kaynaklara ve hizmetlere yetkisiz erişim sağlar.
 
 **Oku**:
 
@@ -21,7 +21,7 @@ Converting ccache => kirbi
 python ticket_converter.py velociraptor.kirbi velociraptor.ccache
 Converting kirbi => ccache
 ```
-Windows'da [Kekeo](https://github.com/gentilkiwi/kekeo) kullanılabilir.
+Windows'ta [Kekeo](https://github.com/gentilkiwi/kekeo) kullanılabilir.
 
 ### Pass The Ticket Saldırısı
 ```bash:Linux

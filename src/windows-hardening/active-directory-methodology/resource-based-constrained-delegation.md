@@ -20,16 +20,16 @@ Ancak, **S4U2Proxy**'de kullanılan **TGS** **İleri Yönlendirilebilir DEĞİLS
 
 ### Saldırı Yapısı
 
-> Eğer bir **Bilgisayar** hesabı üzerinde **eşdeğer yazma ayrıcalıklarına** sahipseniz, o makinede **ayrılmış erişim** elde edebilirsiniz.
+> Eğer bir **Bilgisayar** hesabı üzerinde **yazma eşdeğer ayrıcalıklarına** sahipseniz, o makinede **ayrılmış erişim** elde edebilirsiniz.
 
-Saldırganın zaten **kurban bilgisayar üzerinde eşdeğer yazma ayrıcalıklarına** sahip olduğunu varsayalım.
+Saldırganın zaten **kurban bilgisayarı üzerinde yazma eşdeğer ayrıcalıklarına** sahip olduğunu varsayalım.
 
-1. Saldırgan, bir **SPN**'ye sahip bir hesabı **ele geçirir** veya **oluşturur** (“Hizmet A”). Herhangi bir _Yönetici Kullanıcı_ özel bir ayrıcalığa sahip olmadan **10'a kadar Bilgisayar nesnesi** (**_MachineAccountQuota_**) **oluşturabilir** ve bunlara bir **SPN** ayarlayabilir. Bu nedenle, saldırgan sadece bir Bilgisayar nesnesi oluşturup bir SPN ayarlayabilir.
-2. Saldırgan, kurban bilgisayar (ServiceB) üzerindeki **yazma ayrıcalığını** kötüye kullanarak **Kaynağa dayalı kısıtlı delegasyonu, ServiceA'nın o kurban bilgisayar (ServiceB) üzerinde herhangi bir kullanıcıyı taklit etmesine izin verecek şekilde** yapılandırır.
+1. Saldırgan, bir **SPN**'ye sahip bir hesabı **ele geçirir** veya **oluşturur** (“Hizmet A”). Herhangi bir _Yönetici Kullanıcı_ özel bir ayrıcalığa sahip olmadan **10'a kadar Bilgisayar nesnesi oluşturabilir** (**_MachineAccountQuota_** olarak) ve bunlara bir **SPN** ayarlayabilir. Bu nedenle, saldırgan sadece bir Bilgisayar nesnesi oluşturup bir SPN ayarlayabilir.
+2. Saldırgan, kurban bilgisayar (ServiceB) üzerindeki **yazma ayrıcalığını** kötüye kullanarak **Kaynağa Dayalı kısıtlı delegasyonu, ServiceA'nın o kurban bilgisayar (ServiceB) üzerinde herhangi bir kullanıcıyı taklit etmesine izin verecek şekilde yapılandırır**.
 3. Saldırgan, **Service B**'ye **ayrılmış erişime** sahip bir kullanıcı için **tam bir S4U saldırısı** (S4U2Self ve S4U2Proxy) gerçekleştirmek üzere Rubeus'u kullanır.
 1. S4U2Self (ele geçirilen/oluşturulan SPN'den): **Yönetici için bana bir TGS iste** (İleri Yönlendirilemez).
-2. S4U2Proxy: Önceki adımda **İleri Yönlendirilemez TGS**'yi kullanarak **kurban ana bilgisayara** **Yönetici**'den bir **TGS** talep et.
-3. İleri Yönlendirilemez bir TGS kullanıyor olsanız bile, Kaynağa dayalı kısıtlı delegasyonu istismar ettiğiniz için bu **çalışacaktır**.
+2. S4U2Proxy: Önceki adımda **İleri Yönlendirilemez TGS**'yi kullanarak **kurban ana bilgisayara** **Yönetici**'den bir **TGS** istemek.
+3. İleri Yönlendirilemez bir TGS kullanıyor olsanız bile, Kaynağa Dayalı kısıtlı delegasyonu istismar ettiğiniz için bu **çalışacaktır**.
 4. Saldırgan, **bilet geçişi** yapabilir ve kullanıcıyı **kurban ServiceB'ye erişim sağlamak için taklit edebilir**.
 
 Alan adının _**MachineAccountQuota**_ değerini kontrol etmek için şunu kullanabilirsiniz:
@@ -40,7 +40,7 @@ Get-DomainObject -Identity "dc=domain,dc=local" -Domain domain.local | select Ma
 
 ### Bir Bilgisayar Nesnesi Oluşturma
 
-Bir alan içinde bir bilgisayar nesnesi oluşturmak için [powermad](https://github.com/Kevin-Robertson/Powermad)**:**
+Bir bilgisayar nesnesi oluşturmak için [powermad](https://github.com/Kevin-Robertson/Powermad)**:**
 ```powershell
 import-module powermad
 New-MachineAccount -MachineAccount SERVICEA -Password $(ConvertTo-SecureString '123456' -AsPlainText -Force) -Verbose
@@ -72,7 +72,7 @@ msds-allowedtoactonbehalfofotheridentity
 ```
 ### Tam bir S4U saldırısı gerçekleştirme
 
-Öncelikle, `123456` şifresiyle yeni bir Bilgisayar nesnesi oluşturduk, bu yüzden o şifrenin hash'ine ihtiyacımız var:
+Öncelikle, `123456` şifresi ile yeni bir Bilgisayar nesnesi oluşturduk, bu yüzden o şifrenin hash'ine ihtiyacımız var:
 ```bash
 .\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local
 ```
@@ -90,8 +90,8 @@ rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:admin
 
 ### Erişim
 
-Son komut satırı, **tam S4U saldırısını gerçekleştirecek ve TGS'yi** Administrator'dan kurban makinesine **belleğe** enjekte edecektir.\
-Bu örnekte, Administrator'dan **CIFS** servisi için bir TGS talep edilmiştir, böylece **C$**'ye erişebileceksiniz:
+Son komut satırı, **tam S4U saldırısını gerçekleştirecek ve TGS'yi** Yönetici'den kurban makinesine **belleğe** enjekte edecektir.\
+Bu örnekte, Yönetici'den **CIFS** hizmeti için bir TGS talep edilmiştir, böylece **C$**'ye erişebileceksiniz:
 ```bash
 ls \\victim.domain.local\C$
 ```
@@ -107,7 +107,7 @@ ls \\victim.domain.local\C$
 - **`KDC_ERR_BADOPTION`**: Bu, şunları ifade edebilir:
   - Taklit etmeye çalıştığınız kullanıcı, istenen hizmete erişemiyor (çünkü onu taklit edemezsiniz veya yeterli ayrıcalıklara sahip değildir)
   - İstenen hizmet mevcut değil (eğer winrm için bir bilet isterseniz ama winrm çalışmıyorsa)
-  - Oluşturulan fakecomputer, hedef sunucu üzerindeki ayrıcalıklarını kaybetmiştir ve bunları geri vermeniz gerekir.
+  - Oluşturulan fakecomputer, savunmasız sunucu üzerindeki ayrıcalıklarını kaybetmiştir ve bunları geri vermeniz gerekir.
 
 ## Referanslar
 

@@ -8,25 +8,25 @@
 
 **Özet**: Eğer bir kullanıcı/bilgisayarın **msDS-KeyCredentialLink** özelliğine yazabiliyorsanız, o nesnenin **NT hash'ini** alabilirsiniz.
 
-Gönderide, hedefin NTLM hash'ini içeren benzersiz bir **Service Ticket** almak için **public-private key authentication credentials** kurma yöntemi özetlenmiştir. Bu süreç, şifrelenmiş NTLM_SUPPLEMENTAL_CREDENTIAL'in deşifre edilebileceği Privilege Attribute Certificate (PAC) içinde yer alır.
+Gönderide, hedefin NTLM hash'ini içeren benzersiz bir **Servis Bileti** almak için **açık-özel anahtar kimlik doğrulama kimlik bilgileri** kurma yöntemi özetlenmiştir. Bu süreç, şifrelenmiş NTLM_SUPPLEMENTAL_CREDENTIAL'in deşifre edilebileceği Privilege Attribute Certificate (PAC) içinde yer alır.
 
 ### Gereksinimler
 
-Bu tekniği uygulamak için belirli koşulların sağlanması gerekmektedir:
+Bu tekniği uygulamak için belirli koşulların sağlanması gerekir:
 
-- En az bir Windows Server 2016 Domain Controller gereklidir.
-- Domain Controller'da bir sunucu kimlik doğrulama dijital sertifikası yüklü olmalıdır.
+- En az bir Windows Server 2016 Etki Alanı Denetleyicisi gereklidir.
+- Etki Alanı Denetleyicisinde bir sunucu kimlik doğrulama dijital sertifikası yüklü olmalıdır.
 - Active Directory, Windows Server 2016 Fonksiyonel Seviyesinde olmalıdır.
 - Hedef nesnenin msDS-KeyCredentialLink niteliğini değiştirmek için yetkilendirilmiş bir hesaba ihtiyaç vardır.
 
 ## Abuse
 
-Bilgisayar nesneleri için Key Trust'ın kötüye kullanımı, Ticket Granting Ticket (TGT) ve NTLM hash'ini elde etmenin ötesinde adımları kapsamaktadır. Seçenekler şunlardır:
+Bilgisayar nesneleri için Anahtar Güveni istismarı, Ticket Granting Ticket (TGT) ve NTLM hash'ini elde etmenin ötesinde adımları içerir. Seçenekler şunlardır:
 
-1. Hedef makinede ayrıcalıklı kullanıcılar olarak hareket etmek için bir **RC4 gümüş bileti** oluşturmak.
-2. **S4U2Self** ile TGT'yi kullanarak **ayrıcalıklı kullanıcıların** taklit edilmesi, hizmet adını eklemek için Service Ticket'ta değişiklikler gerektirir.
+1. Hedef ana bilgisayarda ayrıcalıklı kullanıcılar olarak hareket etmek için bir **RC4 gümüş bileti** oluşturmak.
+2. **S4U2Self** ile TGT'yi kullanarak **ayrıcalıklı kullanıcıların** taklit edilmesi, servis adını eklemek için Servis Biletinde değişiklikler gerektirir.
 
-Key Trust kötüye kullanımının önemli bir avantajı, saldırgan tarafından üretilen özel anahtarla sınırlı olmasıdır; bu, potansiyel olarak savunmasız hesaplara devredilmesini önler ve kaldırılması zor olabilecek bir bilgisayar hesabı oluşturulmasını gerektirmez.
+Anahtar Güveni istismarının önemli bir avantajı, saldırgan tarafından üretilen özel anahtarla sınırlı olmasıdır; bu, potansiyel olarak savunmasız hesaplara devredilmesini önler ve kaldırılması zor olabilecek bir bilgisayar hesabı oluşturulmasını gerektirmez.
 
 ## Tools
 
@@ -39,7 +39,7 @@ Bu saldırı için bir C# arayüzü sağlayan DSInternals'a dayanmaktadır. Whis
 - **Ekle**: Bir anahtar çifti oluşturur ve bir anahtar kimlik bilgisi ekler.
 - **Listele**: Tüm anahtar kimlik bilgisi girişlerini görüntüler.
 - **Kaldır**: Belirtilen bir anahtar kimlik bilgisini siler.
-- **Temizle**: Tüm anahtar kimlik bilgilerini siler, bu da meşru WHfB kullanımını potansiyel olarak kesintiye uğratabilir.
+- **Temizle**: Tüm anahtar kimlik bilgilerini siler, bu da meşru WHfB kullanımını bozabilir.
 ```shell
 Whisker.exe add /target:computername$ /domain:constoso.local /dc:dc1.contoso.local /path:C:\path\to\file.pfx /password:P@ssword1
 ```

@@ -4,18 +4,18 @@
 
 ## Kısıtlı Delegasyon
 
-Bunu kullanarak bir Domain yöneticisi bir bilgisayarın bir **kullanıcı veya bilgisayarı** bir makinenin **hizmeti** karşısında **taklit etmesine** **izin verebilir**.
+Bunu kullanarak bir Domain yöneticisi, bir bilgisayarın bir **kullanıcı veya bilgisayarı** bir makinenin **hizmeti** karşısında **taklit etmesine** **izin verebilir**.
 
 - **Kullanıcı için Hizmet (**_**S4U2self**_**):** Eğer bir **hizmet hesabı** _userAccountControl_ değeri [TRUSTED_TO_AUTH_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) (T2A4D) içeriyorsa, o zaman kendisi (hizmet) adına herhangi bir kullanıcı için bir TGS alabilir.
-- **Kullanıcı için Proxy Hizmeti(**_**S4U2proxy**_**):** Bir **hizmet hesabı**, **msDS-AllowedToDelegateTo**'da ayarlanan hizmet için herhangi bir kullanıcı adına bir TGS alabilir. Bunu yapmak için, önce o kullanıcıdan kendisine bir TGS alması gerekir, ancak diğerini talep etmeden önce bu TGS'yi elde etmek için S4U2self kullanabilir.
+- **Kullanıcı için Proxy Hizmeti (**_**S4U2proxy**_**):** Bir **hizmet hesabı**, **msDS-AllowedToDelegateTo**'da ayarlanan hizmet için herhangi bir kullanıcı adına bir TGS alabilir. Bunu yapmak için, önce o kullanıcıdan kendisine bir TGS alması gerekir, ancak diğerini talep etmeden önce bu TGS'yi elde etmek için S4U2self kullanabilir.
 
 **Not**: Eğer bir kullanıcı AD'de ‘_Hesap hassas ve devredilemez_’ olarak işaretlenmişse, onu **taklit edemezsiniz**.
 
-Bu, eğer **hizmetin hash'ini ele geçirirseniz** kullanıcıları **taklit edebileceğiniz** ve onların adına **hizmete erişim** elde edebileceğiniz anlamına gelir (mümkün **privesc**).
+Bu, eğer **hizmetin hash'ini ele geçirirseniz**, **kullanıcıları taklit edebileceğiniz** ve onların adına **hizmete erişim** elde edebileceğiniz anlamına gelir (mümkün **privesc**).
 
-Ayrıca, **kullanıcının taklit edebileceği hizmete** erişiminiz olmayacak, aynı zamanda **herhangi bir hizmete** de erişiminiz olacak çünkü SPN (istenen hizmet adı) kontrol edilmez, sadece ayrıcalıklar kontrol edilir. Bu nedenle, eğer **CIFS hizmetine** erişiminiz varsa, Rubeus'ta `/altservice` bayrağını kullanarak **HOST hizmetine** de erişiminiz olabilir.
+Ayrıca, **kullanıcının taklit edebileceği hizmete erişiminiz olmayacak, aynı zamanda herhangi bir hizmete** de erişiminiz olacak çünkü SPN (istenen hizmet adı) kontrol edilmemektedir, yalnızca ayrıcalıklar kontrol edilmektedir. Bu nedenle, eğer **CIFS hizmetine** erişiminiz varsa, Rubeus'ta `/altservice` bayrağını kullanarak **HOST hizmetine** de erişiminiz olabilir.
 
-Ayrıca, **DC üzerindeki LDAP hizmet erişimi**, bir **DCSync**'i istismar etmek için gereklidir.
+Ayrıca, **DC'deki LDAP hizmet erişimi**, bir **DCSync**'i istismar etmek için gereklidir.
 ```bash:Enumerate
 # Powerview
 Get-DomainUser -TrustedToAuth | select userprincipalname, name, msds-allowedtodelegateto
@@ -44,9 +44,9 @@ tgt::ask /user:dcorp-adminsrv$ /domain:dollarcorp.moneycorp.local /rc4:8c6264140
 .\Rubeus.exe asktgt /user:dcorp-adminsrv$ /rc4:cc098f204c5887eaa8253e7c2749156f /outfile:TGT_websvc.kirbi
 ```
 > [!WARNING]
-> Bilgisayarda SYSTEM olmadan **TGT bileti** veya **RC4** ya da **AES256** elde etmenin **başka yolları** vardır; bunlar arasında Yazıcı Hatası, kısıtlanmamış delegasyon, NTLM ile yönlendirme ve Active Directory Sertifika Servisi istismarı bulunmaktadır.
+> Bilgisayarda SYSTEM olmadan **TGT bileti** veya **RC4** ya da **AES256** elde etmenin **başka yolları** vardır; bunlar arasında Yazıcı Hatası, kısıtlanmamış delegasyon, NTLM ile iletim ve Active Directory Sertifika Servisi istismarı bulunmaktadır.
 >
-> **Sadece o TGT biletine (veya hash'ine) sahip olarak, tüm bilgisayarı tehlikeye atmadan bu saldırıyı gerçekleştirebilirsiniz.**
+> **Sadece bu TGT biletine (veya hash'ine) sahip olarak, tüm bilgisayarı tehlikeye atmadan bu saldırıyı gerçekleştirebilirsiniz.**
 ```bash:Using Rubeus
 #Obtain a TGS of the Administrator user to self
 .\Rubeus.exe s4u /ticket:TGT_websvc.kirbi /impersonateuser:Administrator /outfile:TGS_administrator

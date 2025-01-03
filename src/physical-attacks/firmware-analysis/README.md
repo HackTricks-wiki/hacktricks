@@ -8,16 +8,16 @@ Firmware, cihazların doğru bir şekilde çalışmasını sağlayan ve donanım
 
 ## **Bilgi Toplama**
 
-**Bilgi toplama**, bir cihazın yapısını ve kullandığı teknolojileri anlamada kritik bir ilk adımdır. Bu süreç, aşağıdaki verilerin toplanmasını içerir:
+**Bilgi toplama**, bir cihazın yapısını ve kullandığı teknolojileri anlamanın kritik bir başlangıç adımıdır. Bu süreç, aşağıdaki verilerin toplanmasını içerir:
 
-- CPU mimarisi ve çalıştığı işletim sistemi
+- Çalıştığı CPU mimarisi ve işletim sistemi
 - Bootloader ayrıntıları
 - Donanım düzeni ve veri sayfaları
 - Kod tabanı metrikleri ve kaynak konumları
 - Harici kütüphaneler ve lisans türleri
 - Güncelleme geçmişleri ve düzenleyici sertifikalar
 - Mimari ve akış diyagramları
-- Güvenlik değerlendirmeleri ve belirlenen açıklar
+- Güvenlik değerlendirmeleri ve belirlenen güvenlik açıkları
 
 Bu amaçla, **açık kaynak istihbaratı (OSINT)** araçları çok değerlidir; ayrıca mevcut açık kaynak yazılım bileşenlerinin manuel ve otomatik inceleme süreçleriyle analizi de önemlidir. [Coverity Scan](https://scan.coverity.com) ve [Semmle’nin LGTM](https://lgtm.com/#explore) gibi araçlar, potansiyel sorunları bulmak için kullanılabilecek ücretsiz statik analiz sunar.
 
@@ -29,12 +29,12 @@ Firmware edinmek, her biri kendi karmaşıklık seviyesine sahip çeşitli yolla
 - Verilen talimatlardan **oluşturarak**
 - Resmi destek sitelerinden **indirerek**
 - Barındırılan firmware dosyalarını bulmak için **Google dork** sorguları kullanarak
-- [S3Scanner](https://github.com/sa7mon/S3Scanner) gibi araçlarla **bulut depolama**'ya doğrudan erişerek
+- [S3Scanner](https://github.com/sa7mon/S3Scanner) gibi araçlarla **bulut depolama** alanlarına doğrudan erişerek
 - Adam ortada teknikleriyle **güncellemeleri** yakalayarak
 - **UART**, **JTAG** veya **PICit** gibi bağlantılar aracılığıyla cihazdan **çıkararak**
 - Cihaz iletişimi içinde güncelleme taleplerini **dinleyerek**
 - **Sabit kodlu güncelleme uç noktalarını** tanımlayıp kullanarak
-- Bootloader veya ağdan **dump** yaparak
+- Bootloader veya ağdan **dump** alarak
 - Tüm bunlar başarısız olursa, uygun donanım araçları kullanarak depolama çipini **çıkartıp okuyarak**
 
 ## Firmware'i Analiz Etme
@@ -48,7 +48,7 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head # might find signatures in header
 fdisk -lu <bin> #lists a drives partition and filesystems if multiple
 ```
-Eğer bu araçlarla çok şey bulamazsanız, görüntünün **entropisini** `binwalk -E <bin>` ile kontrol edin, düşük entropi varsa, muhtemelen şifrelenmemiştir. Yüksek entropi varsa, muhtemelen şifrelenmiştir (veya bir şekilde sıkıştırılmıştır).
+Eğer bu araçlarla pek bir şey bulamazsanız, görüntünün **entropisini** `binwalk -E <bin>` ile kontrol edin, düşük entropi varsa, muhtemelen şifrelenmemiştir. Yüksek entropi varsa, muhtemelen şifrelenmiştir (veya bir şekilde sıkıştırılmıştır).
 
 Ayrıca, bu araçları **firmware içinde gömülü dosyaları çıkarmak için** kullanabilirsiniz:
 
@@ -61,11 +61,11 @@ Veya dosyayı incelemek için [**binvis.io**](https://binvis.io/#/) ([code](http
 ### Dosya Sistemini Alma
 
 Önceki yorumlanan araçlarla `binwalk -ev <bin>` kullanarak **dosya sistemini çıkarmış olmalısınız**.\
-Binwalk genellikle bunu **dosya sistemi türüyle adlandırılan bir klasörün içine çıkarır**, bu genellikle aşağıdakilerden biridir: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
+Binwalk genellikle **dosya sistemi türüyle adlandırılan bir klasörün içine çıkarır**, bu genellikle aşağıdakilerden biridir: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
 
 #### Manuel Dosya Sistemi Çıkartma
 
-Bazen, binwalk **dosya sisteminin sihirli baytını imzalarında bulamayabilir**. Bu durumlarda, binwalk'ı kullanarak **dosya sisteminin ofsetini bulun ve sıkıştırılmış dosya sistemini** ikili dosyadan çıkarın ve **aşağıdaki adımları kullanarak** dosya sistemini türüne göre **manuel olarak çıkarın**.
+Bazen, binwalk **dosya sisteminin sihirli baytını imzalarında bulamayabilir**. Bu durumlarda, binwalk kullanarak **dosya sisteminin ofsetini bulun ve sıkıştırılmış dosya sistemini** ikili dosyadan çıkarın ve **aşağıdaki adımları kullanarak** dosya sistemini türüne göre **manuel olarak çıkarın**.
 ```
 $ binwalk DIR850L_REVB.bin
 
@@ -91,7 +91,7 @@ Alternatif olarak, aşağıdaki komut da çalıştırılabilir.
 
 `$ dd if=DIR850L_REVB.bin bs=1 skip=$((0x1A0094)) of=dir.squashfs`
 
-- squashfs için (yukarıdaki örnekte kullanılmıştır)
+- squashfs (yukarıdaki örnekte kullanılan)
 
 `$ unsquashfs dir.squashfs`
 
@@ -132,7 +132,7 @@ Görüntünün şifreleme durumunu değerlendirmek için **entropy** `binwalk -E
 
 ### Dosya Sistemini Çıkarma
 
-`binwalk -ev <bin>` kullanarak genellikle dosya sistemi çıkarılabilir, genellikle dosya sistemi türüyle adlandırılmış bir dizine (örneğin, squashfs, ubifs) çıkarılır. Ancak, **binwalk** sihirli baytların eksikliği nedeniyle dosya sistemi türünü tanımadığında, manuel çıkarma gereklidir. Bu, dosya sisteminin ofsetini bulmak için `binwalk` kullanmayı ve ardından dosya sistemini çıkarmak için `dd` komutunu içermektedir:
+`binwalk -ev <bin>` kullanarak genellikle dosya sistemi çıkarılabilir, genellikle dosya sistemi türüyle adlandırılan bir dizine (örneğin, squashfs, ubifs) çıkarılır. Ancak, **binwalk** sihirli baytların eksikliği nedeniyle dosya sistemi türünü tanımadığında, manuel çıkarma gereklidir. Bu, dosya sisteminin ofsetini bulmak için `binwalk` kullanmayı ve ardından dosya sistemini çıkarmak için `dd` komutunu içermektedir:
 ```bash
 $ binwalk DIR850L_REVB.bin
 
@@ -196,7 +196,7 @@ Bu aşamada, analiz için gerçek veya emüle edilmiş bir cihaz ortamı kullan�
 
 ## Çalışma Zamanı Analiz Teknikleri
 
-Çalışma zamanı analizi, bir süreç veya ikili dosya ile işletim ortamında etkileşimde bulunmayı içerir; gdb-multiarch, Frida ve Ghidra gibi araçlar, kesme noktaları ayarlamak ve fuzzing ve diğer teknikler aracılığıyla zafiyetleri tanımlamak için kullanılır.
+Çalışma zamanı analizi, bir süreç veya ikili dosya ile işletim ortamında etkileşimde bulunmayı içerir; gdb-multiarch, Frida ve Ghidra gibi araçlar kullanılarak kesme noktaları ayarlanır ve fuzzing gibi tekniklerle zafiyetler belirlenir.
 
 ## İkili İstismar ve Kanıt Konsepti
 
@@ -208,7 +208,7 @@ Belirlenen zafiyetler için bir PoC geliştirmek, hedef mimarinin derin bir anla
 
 ## Firmware Analizi için Hazırlanmış OS'ler
 
-- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS, Internet of Things (IoT) cihazlarının güvenlik değerlendirmesi ve penetrasyon testleri yapmanıza yardımcı olmak için tasarlanmış bir dağıtımdır. Tüm gerekli araçların yüklü olduğu önceden yapılandırılmış bir ortam sağlayarak size çok zaman kazandırır.
+- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS, Internet of Things (IoT) cihazlarının güvenlik değerlendirmesi ve penetrasyon testleri yapmanıza yardımcı olmak için tasarlanmış bir dağıtımdır. Tüm gerekli araçların yüklü olduğu önceden yapılandırılmış bir ortam sunarak size çok zaman kazandırır.
 - [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Gömülü güvenlik testleri için firmware güvenlik test araçları ile önceden yüklenmiş Ubuntu 18.04 tabanlı bir işletim sistemi.
 
 ## Pratik Yapmak için Zayıf Firmware

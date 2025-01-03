@@ -10,7 +10,7 @@
 
 ### Arduino
 
-Arduino'da, kabloları bağladıktan sonra (pin 2'den 11'e kadar JTAG pinlerine ve Arduino GND'yi ana kart GND'ye bağlayarak), **Arduino'da JTAGenum programını yükleyin** ve Seri Monitörde **`h`** (yardım komutu) gönderin ve yardım metnini görmelisiniz:
+Arduino'da, kabloları bağladıktan sonra (pin 2'den 11'e kadar JTAG pinlerine ve Arduino GND'yi ana kart GND'ye bağlayarak), **JTAGenum programını Arduino'ya yükleyin** ve Seri Monitörde **`h`** (yardım komutu) gönderin ve yardım metnini görmelisiniz:
 
 ![](<../../images/image (939).png>)
 

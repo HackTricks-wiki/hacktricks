@@ -74,7 +74,7 @@ print(simplify(a == b)) #This is False
 ```
 ## İmzalı/İmzalı Olmayan Sayılar
 
-Z3, aritmetik işlemlerin imzalı versiyonlarını sağlar; burada **bit vektörünün imzalı mı yoksa imzasız mı** olarak ele alındığı önemlidir. Z3Py'de, operatörler **<, <=, >, >=, /, % ve >>** **imzalı** versiyonlara karşılık gelir. Karşılık gelen **imzasız** operatörler **ULT, ULE, UGT, UGE, UDiv, URem ve LShR.**
+Z3, aritmetik işlemlerin imzalı versiyonlarını sağlar; burada **bit-vektörün imzalı mı yoksa imzasız mı** olarak ele alındığı önemlidir. Z3Py'de, operatörler **<, <=, >, >=, /, % ve >>** **imzalı** versiyonlara karşılık gelir. Karşılık gelen **imzasız** operatörler **ULT, ULE, UGT, UGE, UDiv, URem ve LShR.**
 ```python
 from z3 import *
 
@@ -94,7 +94,7 @@ solve(ULT(x, 0))
 ```
 ## Fonksiyonlar
 
-**Yorumlanan fonksiyonlar**, aritmetik gibi, **fonksiyon +**'nın **sabit bir standart yorumu** olduğu yerlerde (iki sayıyı toplar). **Yorumlanmamış fonksiyonlar** ve sabitler **maksimum esneklik** sunar; bunlar, fonksiyon veya sabit üzerindeki **kısıtlamalarla** **tutarlı** olan **herhangi bir yoruma** izin verir.
+**Yorumlanan fonksiyonlar**, aritmetik gibi, **fonksiyon +**'nın **sabit bir standart yorumu** olduğu durumlarda (iki sayıyı toplar). **Yorumlanmamış fonksiyonlar** ve sabitler **maksimum esneklik** sunar; bunlar, fonksiyon veya sabit üzerindeki **kısıtlamalarla** **tutarlı** olan **herhangi bir yoruma** izin verir.
 
 Örnek: f'nin x'e iki kez uygulanması x'e geri döner, ancak f'nin x'e bir kez uygulanması x'ten farklıdır.
 ```python

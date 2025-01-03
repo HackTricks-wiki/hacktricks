@@ -11,7 +11,7 @@ roguepotato-and-printspoofer.md
 
 ## Juicy Potato (altın ayrıcalıkları kötüye kullanma) <a href="#juicy-potato-abusing-the-golden-privileges" id="juicy-potato-abusing-the-golden-privileges"></a>
 
-_Biraz şekerli versiyonu_ [_RottenPotatoNG_](https://github.com/breenmachine/RottenPotatoNG)_, yani **Windows Servis Hesaplarından NT AUTHORITY\SYSTEM'e başka bir Yerel Ayrıcalık Yükseltme aracı**_
+_Biraz şekerlenmiş_ [_RottenPotatoNG_](https://github.com/breenmachine/RottenPotatoNG)_, yani **Windows Servis Hesaplarından NT AUTHORITY\SYSTEM'e başka bir Yerel Ayrıcalık Yükseltme aracı**_
 
 #### Juicypotato'yu [https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts](https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts) adresinden indirebilirsiniz.
 
@@ -19,7 +19,7 @@ _Biraz şekerli versiyonu_ [_RottenPotatoNG_](https://github.com/breenmachine/Ro
 
 [**Juicy-potato Readme'den**](https://github.com/ohpe/juicy-potato/blob/master/README.md)**:**
 
-[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) ve onun [varyantları](https://github.com/decoder-it/lonelypotato), [`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [servisi](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) temelinde ayrıcalık yükseltme zincirini kullanır ve `127.0.0.1:6666` üzerinde MiTM dinleyicisi vardır ve `SeImpersonate` veya `SeAssignPrimaryToken` ayrıcalıklarına sahip olduğunuzda çalışır. Bir Windows build incelemesi sırasında, `BITS`'in kasıtlı olarak devre dışı bırakıldığı ve `6666` portunun alındığı bir kurulum bulduk.
+[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) ve onun [varyantları](https://github.com/decoder-it/lonelypotato), [`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [servisi](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) üzerinden ayrıcalık yükseltme zincirini kullanır ve `127.0.0.1:6666` üzerinde MiTM dinleyicisi vardır ve `SeImpersonate` veya `SeAssignPrimaryToken` ayrıcalıklarına sahip olduğunuzda çalışır. Bir Windows build incelemesi sırasında, `BITS`'in kasıtlı olarak devre dışı bırakıldığı ve `6666` portunun alındığı bir kurulum bulduk.
 
 [RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG)'yi silahlandırmaya karar verdik: **Juicy Potato'ya merhaba deyin.**
 
@@ -27,9 +27,9 @@ _Biraz şekerli versiyonu_ [_RottenPotatoNG_](https://github.com/breenmachine/Ro
 
 `BITS` dışında, kötüye kullanabileceğimiz birkaç COM sunucusu olduğunu keşfettik. Bunların sadece:
 
-1. mevcut kullanıcı tarafından örneklendirilebilir olması, genellikle taklit ayrıcalıklarına sahip bir "servis kullanıcısı"
+1. mevcut kullanıcı tarafından örneklendirilebilir olması, genellikle taklit ayrıcalıklarına sahip bir “servis kullanıcısı”
 2. `IMarshal` arayüzünü uygulaması
-3. yükseltilmiş bir kullanıcı (SYSTEM, Yönetici, ...) olarak çalışması gerekir.
+3. yükseltilmiş bir kullanıcı (SYSTEM, Yönetici, …) olarak çalışması gerekir.
 
 Biraz test yaptıktan sonra, birkaç Windows sürümünde [ilginç CLSID'lerin](http://ohpe.it/juicy-potato/CLSID/) kapsamlı bir listesini elde ettik ve test ettik.
 
@@ -116,7 +116,7 @@ c:\Users\Public>
 
 [Join-Object.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/utils/Join-Object.ps1) dosyasını indirin ve PS oturumunuza yükleyin, ardından [GetCLSID.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/GetCLSID.ps1) dosyasını indirin ve çalıştırın. Bu script, test edilecek olası CLSID'lerin bir listesini oluşturacaktır.
 
-Sonra [test_clsid.bat](https://github.com/ohpe/juicy-potato/blob/master/Test/test_clsid.bat) dosyasını indirin (CLSID listesi ve juicypotato çalıştırılabilir dosyasının yolunu değiştirin) ve çalıştırın. Her CLSID'yi denemeye başlayacaktır ve **port numarası değiştiğinde, bu CLSID'nin çalıştığı anlamına gelecektir**.
+Sonra [test_clsid.bat](https://github.com/ohpe/juicy-potato/blob/master/Test/test_clsid.bat) dosyasını indirin (CLSID listesi ve juicypotato çalıştırılabilir dosyası için yolu değiştirin) ve çalıştırın. Her CLSID'yi denemeye başlayacaktır ve **port numarası değiştiğinde, bu CLSID'nin çalıştığı anlamına gelecektir**.
 
 **-c parametresini kullanarak** çalışan CLSID'leri **kontrol edin**
 

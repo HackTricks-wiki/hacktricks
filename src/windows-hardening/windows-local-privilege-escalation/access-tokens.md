@@ -76,12 +76,12 @@ Bu, ağdaki nesnelere erişim için geçerli kimlik bilgilerine sahip olduğunuz
 
 İki tür token mevcuttur:
 
-- **Birincil Token**: Bir sürecin güvenlik kimlik bilgilerini temsil eder. Birincil tokenların oluşturulması ve süreçlerle ilişkilendirilmesi, ayrıcalık ayrımını vurgulayan yükseltilmiş ayrıcalıklar gerektiren eylemlerdir. Genellikle, bir kimlik doğrulama hizmeti token oluşturma ile sorumluyken, bir oturum açma hizmeti bunun kullanıcı işletim sistemi kabuğu ile ilişkilendirilmesini yönetir. Süreçlerin, oluşturulduklarında ebeveyn süreçlerinin birincil tokenını miras aldığını belirtmekte fayda var.
+- **Birincil Token**: Bir sürecin güvenlik kimlik bilgilerini temsil eder. Birincil tokenların oluşturulması ve süreçlerle ilişkilendirilmesi, ayrıcalık ayrımı ilkesini vurgulayan, yükseltilmiş ayrıcalıklar gerektiren eylemlerdir. Genellikle, token oluşturma işlemi bir kimlik doğrulama hizmeti tarafından gerçekleştirilirken, bir oturum açma hizmeti, tokenın kullanıcının işletim sistemi kabuğuyla ilişkilendirilmesinden sorumludur. Süreçlerin, oluşturulduklarında ebeveyn süreçlerinin birincil tokenını miras aldığını belirtmek gerekir.
 - **Taklit Token**: Bir sunucu uygulamasının, güvenli nesnelere erişim için istemcinin kimliğini geçici olarak benimsemesini sağlar. Bu mekanizma dört işlem seviyesine ayrılmıştır:
 - **Anonim**: Sunucuya, tanımlanamayan bir kullanıcınınki gibi erişim izni verir.
 - **Kimlik Doğrulama**: Sunucunun, nesne erişimi için kullanmadan istemcinin kimliğini doğrulamasına olanak tanır.
 - **Taklit**: Sunucunun, istemcinin kimliği altında çalışmasını sağlar.
-- **Delege**: Taklit ile benzer, ancak sunucunun etkileşimde bulunduğu uzak sistemlere bu kimlik varsayımını genişletme yeteneğini içerir, kimlik bilgilerini korur.
+- **Delege**: Taklit ile benzer, ancak sunucunun etkileşimde bulunduğu uzak sistemlere bu kimlik varsayımını genişletme yeteneğini içerir ve kimlik bilgilerini korur.
 
 #### Taklit Tokenlar
 
@@ -89,13 +89,13 @@ Metasploit'in _**incognito**_ modülünü kullanarak yeterli ayrıcalıklara sah
 
 ### Token Ayrıcalıkları
 
-Hangi **token ayrıcalıklarının ayrıcalıkları yükseltmek için kötüye kullanılabileceğini** öğrenin:
+Hangi **token ayrıcalıklarının ayrıcalıkları yükseltmek için kötüye kullanılabileceğini öğrenin:**
 
 {{#ref}}
 privilege-escalation-abusing-tokens.md
 {{#endref}}
 
-[**tüm olası token ayrıcalıklarına ve bu dış sayfadaki bazı tanımlara**](https://github.com/gtworek/Priv2Admin) göz atın.
+[**Tüm olası token ayrıcalıklarına ve bu dış sayfadaki bazı tanımlara**](https://github.com/gtworek/Priv2Admin) göz atın.
 
 ## Referanslar
 

@@ -6,7 +6,7 @@
 
 ### **Binwalk**
 
-Gömülü gizli dosyaları ve verileri aramak için kullanılan bir araçtır. `apt` ile kurulur ve kaynak kodu [GitHub](https://github.com/ReFirmLabs/binwalk) üzerinde mevcuttur.
+Gömülü gizli dosyaları ve verileri aramak için kullanılan bir araçtır. `apt` ile kurulur ve kaynak kodu [GitHub](https://github.com/ReFirmLabs/binwalk)'ta mevcuttur.
 ```bash
 binwalk file # Displays the embedded data
 binwalk -e file # Extracts the data
@@ -26,7 +26,7 @@ exiftool file # Shows the metadata
 ```
 ### **Exiv2**
 
-Exiftool'e benzer, metadata görüntüleme için. `apt` ile kurulabilir, kaynağı [GitHub](https://github.com/Exiv2/exiv2)'da ve bir [resmi web sitesi](http://www.exiv2.org/) vardır.
+Metadata görüntüleme için exiftool'a benzer. `apt` ile kurulabilir, kaynağı [GitHub](https://github.com/Exiv2/exiv2)'da bulunmaktadır ve bir [resmi web sitesi](http://www.exiv2.org/) vardır.
 ```bash
 exiv2 file # Shows the metadata
 ```
@@ -50,7 +50,7 @@ strings -e B -n 6 file # 32bit strings (big-endian)
 ```
 ### **Karşılaştırma (cmp)**
 
-Çevrimiçi bulunan orijinal versiyonuyla değiştirilmiş bir dosyayı karşılaştırmak için yararlıdır.
+Çevrimiçi bulunan orijinal versiyonla değiştirilmiş bir dosyayı karşılaştırmak için kullanışlıdır.
 ```bash
 cmp original.jpg stego.jpg -b -l
 ```
@@ -62,19 +62,19 @@ Görünüşte boş olan alanlardaki görünmez karakterler bilgi saklayabilir. B
 
 ## **Görüntülerden Veri Çıkarılması**
 
-### **GraphicMagick ile Görüntü Ayrıntılarını Belirleme**
+### **GraphicMagick ile Görüntü Detaylarını Belirleme**
 
 [GraphicMagick](https://imagemagick.org/script/download.php), görüntü dosyası türlerini belirlemek ve olası bozulmaları tanımlamak için kullanılır. Bir görüntüyü incelemek için aşağıdaki komutu çalıştırın:
 ```bash
 ./magick identify -verbose stego.jpg
 ```
-Hasarlı bir görüntüyü onarmaya çalışmak için, bir meta veri yorumu eklemek yardımcı olabilir:
+Hasar görmüş bir görüntüyü onarmaya çalışmak için, bir meta veri yorumu eklemek faydalı olabilir:
 ```bash
 ./magick mogrify -set comment 'Extraneous bytes removed' stego.jpg
 ```
 ### **Veri Gizleme için Steghide**
 
-Steghide, `JPEG, BMP, WAV ve AU` dosyaları içinde veri gizlemeyi kolaylaştırır, şifreli verileri gömme ve çıkarma yeteneğine sahiptir. Kurulum `apt` kullanarak basittir ve [kaynak kodu GitHub'da mevcuttur](https://github.com/StefanoDeVuono/steghide).
+Steghide, `JPEG, BMP, WAV ve AU` dosyaları içinde veri gizlemeyi kolaylaştırır, şifreli verileri gömme ve çıkarma yeteneğine sahiptir. Kurulum, `apt` kullanarak basittir ve [kaynak kodu GitHub'da mevcuttur](https://github.com/StefanoDeVuono/steghide).
 
 **Komutlar:**
 
@@ -110,7 +110,7 @@ Hızlı Fourier Dönüşümü (FFT) teknikleri, görüntülerde gizli içeriği 
 
 - [EPFL Demo](http://bigwww.epfl.ch/demo/ip/demos/FFT/)
 - [Ejectamenta](https://www.ejectamenta.com/Fourifier-fullscreen/)
-- [GitHub'da FFTStegPic](https://github.com/0xcomposure/FFTStegPic)
+- [FFTStegPic GitHub'da](https://github.com/0xcomposure/FFTStegPic)
 
 ### **Stegpy Ses ve Görüntü Dosyaları için**
 
@@ -118,7 +118,7 @@ Stegpy, PNG, BMP, GIF, WebP ve WAV gibi formatları destekleyerek bilgi gömülm
 
 ### **PNG Dosyası Analizi için Pngcheck**
 
-PNG dosyalarını analiz etmek veya doğruluklarını kontrol etmek için:
+PNG dosyalarını analiz etmek veya doğruluğunu kontrol etmek için:
 ```bash
 apt-get install pngcheck
 pngcheck stego.png
@@ -153,7 +153,7 @@ ffmpeg -v info -i stego.mp3 -f null -
 ```
 ### **WavSteg (WAV)**
 
-WavSteg, en az anlamlı bit stratejisini kullanarak WAV dosyaları içinde verileri gizleme ve çıkarma konusunda mükemmeldir. [GitHub](https://github.com/ragibson/Steganography#WavSteg) üzerinde erişilebilir. Komutlar şunlardır:
+WavSteg, en az anlamlı bit stratejisini kullanarak WAV dosyaları içinde verileri gizleme ve çıkarma konusunda mükemmeldir. [GitHub](https://github.com/ragibson/Steganography#WavSteg)'da erişilebilir. Komutlar şunlardır:
 ```bash
 python3 WavSteg.py -r -b 1 -s soundfile -o outputfile
 

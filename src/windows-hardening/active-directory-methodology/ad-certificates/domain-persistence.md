@@ -8,12 +8,12 @@
 
 Bir sertifikanın CA sertifikası olduğunu nasıl anlarsınız?
 
-Bir sertifikanın CA sertifikası olduğu, birkaç koşulun sağlanması durumunda belirlenebilir:
+Bir sertifikanın CA sertifikası olduğu, birkaç koşulun sağlanmasıyla belirlenebilir:
 
 - Sertifika, CA sunucusunda depolanır ve özel anahtarı makinenin DPAPI'si veya işletim sistemi destekliyorsa TPM/HSM gibi donanım tarafından korunur.
 - Sertifikanın Hem Verici (Issuer) hem de Konu (Subject) alanları CA'nın ayırt edici adıyla eşleşir.
-- CA sertifikalarında yalnızca "CA Version" uzantısı bulunur.
-- Sertifika, Genişletilmiş Anahtar Kullanımı (EKU) alanlarından yoksundur.
+- "CA Version" uzantısı yalnızca CA sertifikalarında mevcuttur.
+- Sertifikada Genişletilmiş Anahtar Kullanımı (EKU) alanları yoktur.
 
 Bu sertifikanın özel anahtarını çıkarmak için, CA sunucusundaki `certsrv.msc` aracı, yerleşik GUI aracılığıyla desteklenen yöntemdir. Ancak, bu sertifika sistemde depolanan diğerlerinden farklı değildir; bu nedenle, [THEFT2 tekniği](certificate-theft.md#user-certificate-theft-via-dpapi-theft2) gibi yöntemler çıkarım için uygulanabilir.
 

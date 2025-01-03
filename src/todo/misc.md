@@ -3,22 +3,22 @@
 Bir ping yanıtında TTL:\
 127 = Windows\
 254 = Cisco\
-Diğerleri, bazılinux
+Diğerleri, bazı linux
 
 $1$- md5\
-$2$veya $2a$ - Blowfish\
+$2$ veya $2a$ - Blowfish\
 $5$- sha256\
 $6$- sha512
 
 Bir hizmetin arkasında ne olduğunu bilmiyorsanız, bir HTTP GET isteği yapmayı deneyin.
 
-**UDP Tarama**\
+**UDP Taramaları**\
 nc -nv -u -z -w 1 \<IP> 160-16
 
 Boş bir UDP paketi belirli bir porta gönderilir. Eğer UDP portu açıksa, hedef makineden geri bir yanıt gönderilmez. Eğer UDP portu kapalıysa, hedef makineden bir ICMP port ulaşılamaz paketi gönderilmelidir.\
 
 UDP port taraması genellikle güvenilir değildir, çünkü güvenlik duvarları ve yönlendiriciler ICMP\
-paketlerini düşürebilir. Bu, taramanızda yanlış pozitiflere yol açabilir ve taranan bir makinede tüm UDP portlarının açık olduğunu gösteren UDP port taramaları görebilirsiniz.\
+paketlerini düşürebilir. Bu, taramanızda yanlış pozitiflere yol açabilir ve taranan bir makinede tüm UDP portlarının açık olduğunu gösteren UDP port taramaları göreceksiniz.\
 Çoğu port tarayıcı tüm mevcut portları taramaz ve genellikle taranan "ilginç portlar" için önceden ayarlanmış bir listeye sahiptir.
 
 # CTF - Hileler
@@ -51,6 +51,6 @@ Snow --> Mesajları boşluklar ve sekmeler kullanarak gizle
 
 # Karakterler
 
-%E2%80%AE => RTL Karakteri (yükleme verilerini ters yazar)
+%E2%80%AE => RTL Karakteri (yükleme dosyalarını ters yazar)
 
 {{#include ../banners/hacktricks-training.md}}

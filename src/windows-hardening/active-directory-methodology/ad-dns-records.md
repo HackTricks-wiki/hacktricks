@@ -4,7 +4,7 @@
 
 Varsayılan olarak **herhangi bir kullanıcı** Active Directory'de **tüm DNS kayıtlarını** Alan veya Orman DNS alanlarında **listeleyebilir**, bu bir alan transferine benzer (kullanıcılar, bir AD ortamında bir DNS alanının alt nesnelerini listeleyebilir).
 
-Araç [**adidnsdump**](https://github.com/dirkjanm/adidnsdump), iç ağların keşif amaçları için alandaki **tüm DNS kayıtlarının** **listelemesini** ve **dışa aktarılmasını** sağlar.
+Araç [**adidnsdump**](https://github.com/dirkjanm/adidnsdump), iç ağların keşif amaçları için alan içindeki **tüm DNS kayıtlarının** **listelemesini** ve **dışa aktarılmasını** sağlar.
 ```bash
 git clone https://github.com/dirkjanm/adidnsdump
 cd adidnsdump

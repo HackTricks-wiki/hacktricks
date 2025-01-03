@@ -2,32 +2,31 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-
 ## Giriş
 
 Kerberos "Double Hop" problemi, bir saldırganın **Kerberos kimlik doğrulamasını iki** **atlama** üzerinden kullanmaya çalıştığında ortaya çıkar; örneğin **PowerShell**/**WinRM** kullanarak.
 
 Bir **kimlik doğrulaması** **Kerberos** üzerinden gerçekleştiğinde, **kimlik bilgileri** **bellekte** **önbelleğe alınmaz.** Bu nedenle, eğer mimikatz çalıştırırsanız, kullanıcı makinede işlem çalıştırıyor olsa bile **kimlik bilgilerini bulamazsınız.**
 
-Bu, Kerberos ile bağlanırken izlenen adımlar nedeniyle olur:
+Bu, Kerberos ile bağlanırken izlenen adımların şöyle olmasındandır:
 
-1. User1 kimlik bilgilerini sağlar ve **alan denetleyicisi** User1'e bir Kerberos **TGT** döner.
-2. User1, **Server1**'e bağlanmak için bir **hizmet bileti** talep etmek üzere **TGT**'yi kullanır.
+1. User1 kimlik bilgilerini sağlar ve **alan denetleyici** User1'e bir Kerberos **TGT** döner.
+2. User1, Server1'e **bağlanmak** için bir **hizmet bileti** talep etmek üzere **TGT** kullanır.
 3. User1 **Server1**'e **bağlanır** ve **hizmet biletini** sağlar.
 4. **Server1**, User1'in kimlik bilgilerini veya User1'in **TGT**'sini **önbelleğe almaz.** Bu nedenle, User1 Server1'den ikinci bir sunucuya giriş yapmaya çalıştığında, **kimlik doğrulaması yapılamaz.**
 
 ### Sınırsız Delegasyon
 
-Eğer PC'de **sınırsız delegasyon** etkinleştirilmişse, bu durum gerçekleşmez çünkü **Sunucu**, ona erişen her kullanıcının **TGT**'sini **alır.** Dahası, sınırsız delegasyon kullanılıyorsa, muhtemelen **Alan Denetleyicisi'ni** ele geçirebilirsiniz.\
+Eğer PC'de **sınırsız delegasyon** etkinleştirilmişse, bu durum gerçekleşmez çünkü **Sunucu**, ona erişen her kullanıcının **TGT**'sini **alır.** Ayrıca, sınırsız delegasyon kullanılıyorsa, muhtemelen **Alan Denetleyicisini** ele geçirebilirsiniz.\
 [**Sınırsız delegasyon sayfasında daha fazla bilgi**](unconstrained-delegation.md).
 
 ### CredSSP
 
-Bu problemi önlemenin bir diğer yolu, [**özellikle güvensiz**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) olan **Kimlik Bilgisi Güvenlik Destek Sağlayıcısı**dır. Microsoft'tan:
+Bu problemi önlemenin bir diğer yolu, [**belirgin şekilde güvensiz**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) olan **Kimlik Bilgisi Güvenlik Destek Sağlayıcısı**dır. Microsoft'tan:
 
-> CredSSP kimlik doğrulaması, kullanıcı kimlik bilgilerini yerel bilgisayardan uzak bir bilgisayara devreder. Bu uygulama, uzak işlemin güvenlik riskini artırır. Uzak bilgisayar ele geçirilirse, kimlik bilgileri ona iletildiğinde, bu kimlik bilgileri ağ oturumunu kontrol etmek için kullanılabilir.
+> CredSSP kimlik doğrulaması, kullanıcı kimlik bilgilerini yerel bilgisayardan uzak bir bilgisayara devreder. Bu uygulama, uzak işlemin güvenlik riskini artırır. Uzak bilgisayar ele geçirilirse, kimlik bilgileri ona iletildiğinde, kimlik bilgileri ağ oturumunu kontrol etmek için kullanılabilir.
 
-Güvenlik endişeleri nedeniyle, **CredSSP**'nin üretim sistemlerinde, hassas ağlarda ve benzeri ortamlarda devre dışı bırakılması şiddetle önerilir. **CredSSP**'nin etkin olup olmadığını belirlemek için `Get-WSManCredSSP` komutu çalıştırılabilir. Bu komut, **CredSSP durumunu kontrol etmeye** olanak tanır ve **WinRM** etkinse uzaktan bile çalıştırılabilir.
+Güvenlik endişeleri nedeniyle, **CredSSP**'nin üretim sistemlerinde, hassas ağlarda ve benzeri ortamlarda devre dışı bırakılması şiddetle önerilir. **CredSSP**'nin etkin olup olmadığını belirlemek için `Get-WSManCredSSP` komutu çalıştırılabilir. Bu komut, **CredSSP durumunu kontrol etmeye** olanak tanır ve **WinRM** etkinse uzaktan da çalıştırılabilir.
 ```powershell
 Invoke-Command -ComputerName bizintel -Credential ta\redsuit -ScriptBlock {
 Get-WSManCredSSP
@@ -44,7 +43,7 @@ Invoke-Command -ComputerName bizintel -Credential $cred -ScriptBlock {
 Invoke-Command -ComputerName secdev -Credential $cred -ScriptBlock {hostname}
 }
 ```
-Alternatif olarak, ilk sunucu ile bir PS-Session kurmak ve `$cred` kullanarak `Invoke-Command` çalıştırmak, görevleri merkezileştirmek için önerilmektedir.
+Alternatif olarak, ilk sunucu ile bir PS-Session kurmak ve `$cred` kullanarak `Invoke-Command` çalıştırmak, görevleri merkezi hale getirmek için önerilmektedir.
 
 ### PSSession Yapılandırmasını Kaydet
 
@@ -70,7 +69,7 @@ winrs -r:http://bizintel:5446 -u:ta\redsuit -p:2600leet hostname
 ```
 ### OpenSSH
 
-İlk sunucuya OpenSSH yüklemek, özellikle jump box senaryoları için yararlı olan double-hop sorununa bir çözüm sağlar. Bu yöntem, Windows için OpenSSH'nin CLI ile yüklenmesini ve yapılandırılmasını gerektirir. Şifre Kimlik Doğrulaması için yapılandırıldığında, bu, aracılık sunucusunun kullanıcı adına bir TGT almasına olanak tanır.
+İlk sunucuya OpenSSH yüklemek, özellikle jump box senaryoları için yararlı olan double-hop sorununa bir çözüm sağlar. Bu yöntem, Windows için OpenSSH'nin CLI ile yüklenmesini ve yapılandırılmasını gerektirir. Parola Kimlik Doğrulaması için yapılandırıldığında, bu, aracılık sunucusunun kullanıcı adına bir TGT almasına olanak tanır.
 
 #### OpenSSH Yükleme Adımları
 

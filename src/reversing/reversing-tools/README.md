@@ -57,13 +57,13 @@ Java bytecode'u decompile etmek için bu araçlar oldukça yardımcı olabilir:
 ### IDA Kullanarak
 
 - **Rundll32**, 64-bit ve 32-bit sürümleri için belirli yollar üzerinden yüklenir.
-- **Windbg**, kütüphane yükleme/boşaltma sırasında askıya alma seçeneği etkinleştirilmiş olarak hata ayıklayıcı olarak seçilir.
+- **Windbg**, kütüphane yükleme/boşaltma sırasında askıya alma seçeneği etkinleştirilmiş debugger olarak seçilir.
 - Çalıştırma parametreleri DLL yolu ve fonksiyon adını içerir. Bu yapılandırma, her DLL'nin yüklenmesi sırasında yürütmeyi durdurur.
 
 ### x64dbg/x32dbg Kullanarak
 
 - IDA'ya benzer şekilde, **rundll32** komut satırı değişiklikleri ile DLL ve fonksiyonu belirtmek için yüklenir.
-- DLL girişinde kırılma noktası ayarlamak için ayarlar, DLL giriş noktasında kırılma noktası ayarlamaya izin verecek şekilde ayarlanır.
+- DLL girişinde kırılma noktası ayarlamak için ayarlar, DLL girişinde kırılma noktası ayarlamak üzere ayarlanır.
 
 ### Görseller
 

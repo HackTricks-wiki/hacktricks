@@ -22,6 +22,6 @@ Ayrıca [SharpLateral](https://github.com/mertdas/SharpLateral) kullanabilirsini
 ```bash
 SharpLateral schedule HOSTNAME C:\Users\Administrator\Desktop\malware.exe TaskName
 ```
-Daha fazla bilgi için [**schtasks'in silver ticket'larla kullanımı burada**](../active-directory-methodology/silver-ticket.md#host). 
+Daha fazla bilgi için [**schtasks kullanımına ilişkin gümüş biletler burada**](../active-directory-methodology/silver-ticket.md#host).
 
 {{#include ../../banners/hacktricks-training.md}}

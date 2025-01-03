@@ -4,11 +4,11 @@
 
 ## DCSync
 
-**DCSync** izni, alan üzerinde bu izinlere sahip olmayı gerektirir: **DS-Replication-Get-Changes**, **Replicating Directory Changes All** ve **Replicating Directory Changes In Filtered Set**.
+**DCSync** izni, alanın kendisi üzerinde bu izinlere sahip olmayı gerektirir: **DS-Replication-Get-Changes**, **Replicating Directory Changes All** ve **Replicating Directory Changes In Filtered Set**.
 
 **DCSync ile ilgili Önemli Notlar:**
 
-- **DCSync saldırısı, bir Alan Denetleyicisinin davranışını simüle eder ve diğer Alan Denetleyicilerinden bilgileri çoğaltmalarını ister** Directory Replication Service Remote Protocol (MS-DRSR) kullanarak. MS-DRSR, Active Directory'nin geçerli ve gerekli bir işlevi olduğundan, kapatılamaz veya devre dışı bırakılamaz.
+- **DCSync saldırısı, bir Domain Controller'ın davranışını simüle eder ve diğer Domain Controller'lardan bilgileri çoğaltmalarını ister** Directory Replication Service Remote Protocol (MS-DRSR) kullanarak. MS-DRSR, Active Directory'nin geçerli ve gerekli bir işlevi olduğundan, kapatılamaz veya devre dışı bırakılamaz.
 - Varsayılan olarak yalnızca **Domain Admins, Enterprise Admins, Administrators ve Domain Controllers** grupları gerekli ayrıcalıklara sahiptir.
 - Herhangi bir hesap parolası tersine çevrilebilir şifreleme ile saklanıyorsa, Mimikatz'ta parolayı düz metin olarak döndürmek için bir seçenek mevcuttur.
 

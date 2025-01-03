@@ -11,14 +11,14 @@
 **Active Directory** içindeki anahtar kavramlar şunlardır:
 
 1. **Dizin** – Active Directory nesneleri ile ilgili tüm bilgileri barındırır.
-2. **Nesne** – Dizin içindeki varlıkları, **kullanıcılar**, **gruplar** veya **paylaşılan klasörler** gibi, ifade eder.
+2. **Nesne** – Dizin içindeki varlıkları, **kullanıcılar**, **gruplar** veya **paylaşılan klasörler** dahil olmak üzere belirtir.
 3. **Alan** – Dizin nesneleri için bir konteyner görevi görür, bir **orman** içinde birden fazla alanın bir arada bulunabilme yeteneğine sahiptir ve her biri kendi nesne koleksiyonunu korur.
 4. **Ağaç** – Ortak bir kök alanı paylaşan alanların bir gruplamasıdır.
-5. **Orman** – Active Directory'deki organizasyon yapısının zirvesidir, aralarında **güven ilişkileri** bulunan birkaç ağaçtan oluşur.
+5. **Orman** – Active Directory'deki organizasyon yapısının zirvesi, aralarında **güven ilişkileri** bulunan birkaç ağaçtan oluşur.
 
 **Active Directory Alan Hizmetleri (AD DS)**, bir ağ içinde merkezi yönetim ve iletişim için kritik olan bir dizi hizmeti kapsar. Bu hizmetler şunları içerir:
 
-1. **Alan Hizmetleri** – Veri depolamasını merkezi hale getirir ve **kullanıcılar** ile **alanlar** arasındaki etkileşimleri yönetir, **kimlik doğrulama** ve **arama** işlevselliklerini içerir.
+1. **Alan Hizmetleri** – Veri depolamasını merkezileştirir ve **kullanıcılar** ile **alanlar** arasındaki etkileşimleri yönetir, **kimlik doğrulama** ve **arama** işlevlerini içerir.
 2. **Sertifika Hizmetleri** – Güvenli **dijital sertifikaların** oluşturulması, dağıtımı ve yönetimini denetler.
 3. **Hafif Dizin Hizmetleri** – **LDAP protokolü** aracılığıyla dizin destekli uygulamaları destekler.
 4. **Dizin Federasyon Hizmetleri** – Bir oturumda birden fazla web uygulaması arasında kullanıcıları kimlik doğrulamak için **tek oturum açma** yetenekleri sağlar.
@@ -36,7 +36,7 @@ Bir AD'yi **saldırmak** için **Kerberos kimlik doğrulama sürecini** gerçekt
 
 AD'yi listelemek/sömürmek için hangi komutları çalıştırabileceğinizi hızlıca görmek için [https://wadcoms.github.io/](https://wadcoms.github.io) adresine göz atabilirsiniz.
 
-## Active Directory'yi Keşfetme (Kimlik bilgisi/oturum yok)
+## Recon Active Directory (Kimlik bilgisi/oturum yok)
 
 Eğer sadece bir AD ortamına erişiminiz varsa ama hiçbir kimlik bilgisi/oturumunuz yoksa şunları yapabilirsiniz:
 
@@ -57,7 +57,7 @@ Eğer sadece bir AD ortamına erişiminiz varsa ama hiçbir kimlik bilgisi/oturu
 
 - **Ldap'ı listele**
 - `nmap -n -sV --script "ldap* and not brute" -p 389 <DC IP>`
-- LDAP'ı listelemek için daha ayrıntılı bir kılavuzu burada bulabilirsiniz (lütfen **anonim erişime** özel dikkat gösterin):
+- LDAP'ı listelemek için daha ayrıntılı bir kılavuzu burada bulabilirsiniz (özellikle **anonim erişime** dikkat edin):
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-ldap.md
@@ -65,7 +65,7 @@ Eğer sadece bir AD ortamına erişiminiz varsa ama hiçbir kimlik bilgisi/oturu
 
 - **Ağı zehirle**
 - Kimlik bilgilerini [**Responder ile hizmetleri taklit ederek**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) toplayın.
-- [**relay saldırısını istismar ederek**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) bir ana makineye erişin.
+- [**relay saldırısını istismar ederek**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) bir ana bilgisayara erişin.
 - Kimlik bilgilerini **sahte UPnP hizmetlerini** [**evil-S ile açığa çıkararak**](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md)[**SDP**](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856) toplayın.
 - [**OSINT**](https://book.hacktricks.xyz/external-recon-methodology):
 - Alan ortamları içindeki iç belgelerden, sosyal medyadan, hizmetlerden (özellikle web) kullanıcı adlarını/isimlerini çıkarın ve ayrıca kamuya açık olanlardan.
@@ -77,7 +77,7 @@ Eğer sadece bir AD ortamına erişiminiz varsa ama hiçbir kimlik bilgisi/oturu
 ### Kullanıcı listeleme
 
 - **Anonim SMB/LDAP listeleme:** [**pentesting SMB**](../../network-services-pentesting/pentesting-smb/) ve [**pentesting LDAP**](../../network-services-pentesting/pentesting-ldap.md) sayfalarını kontrol edin.
-- **Kerbrute listeleme**: Bir **geçersiz kullanıcı adı istendiğinde**, sunucu **Kerberos hata** kodu _KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN_ kullanarak yanıt verecek, bu da kullanıcı adının geçersiz olduğunu belirlememizi sağlayacaktır. **Geçerli kullanıcı adları**, ya **AS-REP** yanıtında **TGT** alacak ya da _KRB5KDC_ERR_PREAUTH_REQUIRED_ hatasını verecek, bu da kullanıcının ön kimlik doğrulama yapması gerektiğini gösterir.
+- **Kerbrute listeleme**: Bir **geçersiz kullanıcı adı istendiğinde**, sunucu **Kerberos hatası** kodu _KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN_ kullanarak yanıt verecek, bu da kullanıcı adının geçersiz olduğunu belirlememizi sağlayacaktır. **Geçerli kullanıcı adları**, ya **AS-REP** yanıtında **TGT** alacak ya da _KRB5KDC_ERR_PREAUTH_REQUIRED_ hatasını verecek, bu da kullanıcının ön kimlik doğrulama yapması gerektiğini gösterir.
 ```bash
 ./kerbrute_linux_amd64 userenum -d lab.ropnop.com --dc 10.10.10.10 usernames.txt #From https://github.com/ropnop/kerbrute/releases
 
@@ -103,7 +103,7 @@ Invoke-PasswordSprayOWA -ExchHostname [ip] -UserList .\valid.txt -Password Summe
 Get-GlobalAddressList -ExchHostname [ip] -UserName [domain]\[username] -Password Summer2021 -OutFile gal.txt
 ```
 > [!WARNING]
-> Kullanıcı adı listelerini [**bu github repo**](https://github.com/danielmiessler/SecLists/tree/master/Usernames/Names) \*\*\*\* ve bu ([**istatistiksel-olasılık-kullanıcı-adları**](https://github.com/insidetrust/statistically-likely-usernames)) içinde bulabilirsiniz.
+> Kullanıcı adı listelerini [**bu github repo**](https://github.com/danielmiessler/SecLists/tree/master/Usernames/Names) \*\*\*\* ve bu ([**istatistiksel-olasılıkta-kullanıcı-adları**](https://github.com/insidetrust/statistically-likely-usernames)) bulabilirsiniz.
 >
 > Ancak, bu adımdan önce gerçekleştirmiş olmanız gereken keşif aşamasından **şirket çalışanlarının isimlerini** almış olmalısınız. İsim ve soyadı ile [**namemash.py**](https://gist.github.com/superkojiman/11076951) scriptini kullanarak potansiyel geçerli kullanıcı adları oluşturabilirsiniz.
 
@@ -127,13 +127,13 @@ Bazı zorluk **hash'lerini** elde edebilmek için **ağ** protokollerini **zehir
 ../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
 {{#endref}}
 
-### NTML İletimi
+### NTML Relay
 
-Eğer aktif dizini listelemeyi başardıysanız, **daha fazla e-posta ve ağ hakkında daha iyi bir anlayışa sahip olacaksınız**. NTML [**iletim saldırılarını**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) \*\*\*\* zorlayarak AD ortamına erişim sağlamayı deneyebilirsiniz.
+Eğer aktif dizini listelemeyi başardıysanız, **daha fazla e-posta ve ağ hakkında daha iyi bir anlayışa sahip olacaksınız**. NTML [**relay saldırılarını**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) \*\*\*\* zorlayarak AD ortamına erişim sağlamayı deneyebilirsiniz.
 
 ### NTLM Kimlik Bilgilerini Çalmak
 
-Eğer **null veya misafir kullanıcısı** ile **diğer PC'lere veya paylaşımlara erişiminiz varsa**, **dosyalar yerleştirebilirsiniz** (örneğin bir SCF dosyası) ve bu dosyaya bir şekilde erişildiğinde **sizinle NTML kimlik doğrulaması tetiklenecektir**, böylece **NTLM zorluğunu çalabilirsiniz**:
+Eğer **null veya misafir kullanıcısı** ile **diğer PC'lere veya paylaşımlara erişiminiz varsa**, **dosyalar yerleştirebilirsiniz** (örneğin bir SCF dosyası) ve bu dosyaya bir şekilde erişildiğinde **NTML kimlik doğrulamasını tetikler**; böylece **NTLM zorluğunu çalabilirsiniz**:
 
 {{#ref}}
 ../ntlm/places-to-steal-ntlm-creds.md
@@ -141,7 +141,7 @@ Eğer **null veya misafir kullanıcısı** ile **diğer PC'lere veya paylaşıml
 
 ## Kimlik Bilgileri/oturum ile Aktif Dizin Listeleme
 
-Bu aşama için **geçerli bir alan hesabının kimlik bilgilerini veya oturumunu ele geçirmiş olmanız gerekir.** Eğer geçerli kimlik bilgilerine veya bir alan kullanıcısı olarak bir shell'e sahipseniz, **önceden verilen seçeneklerin diğer kullanıcıları ele geçirmek için hala geçerli olduğunu unutmamalısınız.**
+Bu aşama için **geçerli bir alan hesabının kimlik bilgilerini veya oturumunu ele geçirmiş olmanız gerekir.** Eğer geçerli kimlik bilgilerine veya bir alan kullanıcısı olarak bir shell'e sahipseniz, **önceki seçeneklerin hala diğer kullanıcıları ele geçirmek için seçenekler olduğunu unutmamalısınız**.
 
 Kimlik doğrulamalı listelemeye başlamadan önce **Kerberos çift atlama sorununu** bilmelisiniz.
 
@@ -158,11 +158,11 @@ Bir hesabı ele geçirmek, **tüm alanı ele geçirmeye başlamak için büyük 
 - [**Temel bir keşif yapmak için CMD kullanabilirsiniz**](../basic-cmd-for-pentesters.md#domain-info)
 - Ayrıca [**keşif için powershell kullanabilirsiniz**](../basic-powershell-for-pentesters/) bu daha gizli olacaktır
 - Daha ayrıntılı bilgi çıkarmak için [**powerview kullanabilirsiniz**](../basic-powershell-for-pentesters/powerview.md)
-- Aktif dizinde keşif için başka bir harika araç [**BloodHound**](bloodhound.md). **Çok gizli değildir** (kullandığınız toplama yöntemlerine bağlı olarak), ama **bununla ilgilenmiyorsanız**, kesinlikle denemelisiniz. Kullanıcıların RDP yapabileceği yerleri bulun, diğer gruplara giden yolları keşfedin, vb.
+- Aktif dizinde keşif için başka bir harika araç [**BloodHound**](bloodhound.md). **Çok gizli değildir** (kullandığınız toplama yöntemlerine bağlı olarak), ama **bununla ilgilenmiyorsanız**, kesinlikle denemelisiniz. Kullanıcıların RDP yapabileceği yerleri bulun, diğer gruplara giden yolları bulun, vb.
 - **Diğer otomatik AD listeleme araçları şunlardır:** [**AD Explorer**](bloodhound.md#ad-explorer)**,** [**ADRecon**](bloodhound.md#adrecon)**,** [**Group3r**](bloodhound.md#group3r)**,** [**PingCastle**](bloodhound.md#pingcastle)**.**
 - [**AD'nin DNS kayıtları**](ad-dns-records.md) ilginç bilgiler içerebilir.
 - Dizin listelemek için kullanabileceğiniz bir **GUI aracı** **SysInternal** Suite'den **AdExplorer.exe**'dir.
-- Ayrıca _userPassword_ & _unixUserPassword_ alanlarında veya hatta _Description_ için kimlik bilgilerini aramak üzere **ldapsearch** ile LDAP veritabanında arama yapabilirsiniz. Diğer yöntemler için [PayloadsAllTheThings'deki AD Kullanıcı yorumundaki Şifre](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#password-in-ad-user-comment) bağlantısına bakın.
+- Ayrıca _userPassword_ ve _unixUserPassword_ alanlarında kimlik bilgilerini aramak için **ldapsearch** ile LDAP veritabanında arama yapabilir veya _Description_ için bile arama yapabilirsiniz. Diğer yöntemler için [PayloadsAllTheThings'deki AD Kullanıcı yorumundaki şifre](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#password-in-ad-user-comment) bağlantısına bakın.
 - **Linux** kullanıyorsanız, [**pywerview**](https://github.com/the-useless-one/pywerview) kullanarak alanı listeleyebilirsiniz.
 - Ayrıca otomatik araçlar denemek isteyebilirsiniz:
 - [**tomcarver16/ADSearch**](https://github.com/tomcarver16/ADSearch)
@@ -171,7 +171,7 @@ Bir hesabı ele geçirmek, **tüm alanı ele geçirmeye başlamak için büyük 
 
 Windows'tan tüm alan kullanıcı adlarını elde etmek çok kolaydır (`net user /domain`, `Get-DomainUser` veya `wmic useraccount get name,sid`). Linux'ta ise şunları kullanabilirsiniz: `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username` veya `enum4linux -a -u "user" -p "password" <DC IP>`
 
-> Bu Listeleme bölümü küçük görünse de, bu tümünün en önemli kısmıdır. Bağlantılara erişin (özellikle cmd, powershell, powerview ve BloodHound olanlara), bir alanı nasıl listeleyeceğinizi öğrenin ve rahat hissettiğiniz zamana kadar pratik yapın. Bir değerlendirme sırasında, bu DA'ya ulaşmak veya hiçbir şey yapılamayacağına karar vermek için ana an olacaktır.
+> Bu Listeleme bölümü küçük görünse de, bu tümünün en önemli kısmıdır. Bağlantılara erişin (özellikle cmd, powershell, powerview ve BloodHound olanlara), bir alanı nasıl listeleyeceğinizi öğrenin ve rahat hissettiğinizdeye kadar pratik yapın. Bir değerlendirme sırasında, bu DA'ya ulaşmak veya hiçbir şey yapılamayacağına karar vermek için ana an olacaktır.
 
 ### Kerberoast
 
@@ -189,7 +189,7 @@ Bazı kimlik bilgilerini elde ettikten sonra, herhangi bir **makineye** erişimi
 
 ### Yerel Yetki Yükseltme
 
-Eğer ele geçirilmiş kimlik bilgilerine veya bir oturuma sahipseniz ve bu kullanıcı ile **alan içindeki herhangi bir makineye erişiminiz varsa**, **yerel olarak yetki yükseltme yollarını bulmaya ve kimlik bilgilerini çalmaya** çalışmalısınız. Çünkü yalnızca yerel yönetici ayrıcalıkları ile diğer kullanıcıların **hash'lerini** bellekte (LSASS) ve yerelde (SAM) **dökmek** mümkün olacaktır.
+Eğer ele geçirilmiş kimlik bilgilerine veya bir oturuma sahipseniz ve bu kullanıcı ile **alan içindeki herhangi bir makineye erişiminiz varsa**, **yerel olarak yetki yükseltme yollarını bulmaya ve kimlik bilgilerini çalmaya** çalışmalısınız. Çünkü yalnızca yerel yönetici ayrıcalıkları ile **diğer kullanıcıların hash'lerini** bellekte (LSASS) ve yerel olarak (SAM) **dökmek** mümkün olacaktır.
 
 Bu kitapta [**Windows'ta yerel yetki yükseltme**](../windows-local-privilege-escalation/) hakkında bir sayfa ve bir [**kontrol listesi**](../checklist-windows-privilege-escalation.md) bulunmaktadır. Ayrıca, [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) kullanmayı unutmayın.
 
@@ -242,7 +242,7 @@ Sonra, bellek ve yerel olarak tüm hash'leri dökme zamanı.\
 ### Hash'i Geç
 
 **Bir kullanıcının hash'ine sahip olduğunuzda**, onu **taklit etmek için** kullanabilirsiniz.\
-Bu **hash** ile **NTLM kimlik doğrulamasını gerçekleştirecek** bir **araç** kullanmalısınız, **ya da** yeni bir **oturum açma** oluşturup bu **hash'i** **LSASS** içine **enjekte** edebilirsiniz, böylece herhangi bir **NTLM kimlik doğrulaması gerçekleştirildiğinde**, o **hash kullanılacaktır.** Son seçenek, mimikatz'ın yaptığıdır.\
+Bu **hash** ile **NTLM kimlik doğrulamasını gerçekleştirecek** bir **araç** kullanmalısınız, **ya da** yeni bir **oturum açma** oluşturup bu **hash'i** **LSASS** içine **enjekte** edebilirsiniz, böylece herhangi bir **NTLM kimlik doğrulaması yapıldığında**, o **hash kullanılacaktır.** Son seçenek, mimikatz'ın yaptığıdır.\
 [**Daha fazla bilgi için bu sayfayı okuyun.**](../ntlm/#pass-the-hash)
 
 ### Hash'i Aşma/ Anahtarı Geç
@@ -274,8 +274,8 @@ crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9c
 
 ### MSSQL Kötüye Kullanımı & Güvenilir Bağlantılar
 
-Bir kullanıcının **MSSQL örneklerine erişim** yetkisi varsa, MSSQL ana bilgisayarında **komutlar çalıştırmak** için bunu kullanabilir (eğer SA olarak çalışıyorsa), NetNTLM **hash**'ini **çalıp** alabilir veya hatta bir **relay** **saldırısı** gerçekleştirebilir.\
-Ayrıca, bir MSSQL örneği başka bir MSSQL örneği tarafından güvenilir (veritabanı bağlantısı) olarak işaretlenmişse. Kullanıcı güvenilir veritabanı üzerinde yetkilere sahipse, **güven ilişkisini kullanarak diğer örnekte de sorgular çalıştırabilecektir**. Bu güven ilişkileri zincirlenebilir ve bir noktada kullanıcı, komut çalıştırabileceği yanlış yapılandırılmış bir veritabanı bulabilir.\
+Bir kullanıcının **MSSQL örneklerine erişim** yetkisi varsa, MSSQL ana bilgisayarında **komutlar çalıştırmak**, NetNTLM **hash**'ini **çalmak** veya hatta bir **relay** **saldırısı** gerçekleştirmek için bunu kullanabilir.\
+Ayrıca, bir MSSQL örneği başka bir MSSQL örneği tarafından güvenilir (veritabanı bağlantısı) olarak işaretlenmişse. Kullanıcı güvenilir veritabanı üzerinde yetkilere sahipse, **güven ilişkisini kullanarak diğer örnekte de sorgular çalıştırabilecektir**. Bu güven ilişkileri zincirlenebilir ve bir noktada kullanıcı, komutları çalıştırabileceği yanlış yapılandırılmış bir veritabanı bulabilir.\
 **Veritabanları arasındaki bağlantılar, orman güvenleri arasında bile çalışır.**
 
 {{#ref}}
@@ -284,9 +284,9 @@ abusing-ad-mssql.md
 
 ### Sınırsız Delegasyon
 
-Eğer [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) niteliğine sahip herhangi bir Bilgisayar nesnesi bulursanız ve bilgisayarda alan yetkileriniz varsa, bilgisayara giriş yapan her kullanıcının bellekten TGT'lerini dökme yeteneğine sahip olursunuz.\
+[ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) niteliğine sahip herhangi bir Bilgisayar nesnesi bulursanız ve bilgisayarda alan yetkileriniz varsa, bilgisayara giriş yapan her kullanıcının bellekten TGT'lerini dökme yeteneğine sahip olursunuz.\
 Yani, eğer bir **Domain Admin bilgisayara giriş yaparsa**, onun TGT'sini dökebilir ve [Pass the Ticket](pass-the-ticket.md) kullanarak onu taklit edebilirsiniz.\
-Sınırlı delegasyon sayesinde, bir **Yazıcı Sunucusunu otomatik olarak ele geçirebilirsiniz** (umarım bu bir DC olacaktır).
+Sınırlı delegasyon sayesinde, **bir Yazıcı Sunucusunu otomatik olarak tehlikeye atabilirsiniz** (umarım bu bir DC olacaktır).
 
 {{#ref}}
 unconstrained-delegation.md
@@ -294,8 +294,8 @@ unconstrained-delegation.md
 
 ### Sınırlı Delegasyon
 
-Eğer bir kullanıcı veya bilgisayara "Sınırlı Delegasyon" izni verilmişse, bu, **bir kullanıcının bir bilgisayardaki bazı hizmetlere erişmek için herhangi bir kullanıcıyı taklit etmesine** olanak tanır.\
-Sonrasında, eğer bu kullanıcı/bilgisayarın **hash'ini ele geçirirseniz**, **herhangi bir kullanıcıyı** (hatta alan yöneticilerini) taklit ederek bazı hizmetlere erişebilirsiniz.
+Bir kullanıcı veya bilgisayara "Sınırlı Delegasyon" izni verilmişse, bu, **bir kullanıcının bir bilgisayardaki bazı hizmetlere erişmek için herhangi bir kullanıcıyı taklit etmesine** olanak tanır.\
+Sonrasında, eğer bu kullanıcı/bilgisayarın **hash'ini tehlikeye atarsanız**, **herhangi bir kullanıcıyı** (hatta alan yöneticilerini) taklit ederek bazı hizmetlere erişebilirsiniz.
 
 {{#ref}}
 constrained-delegation.md
@@ -311,7 +311,7 @@ resource-based-constrained-delegation.md
 
 ### ACL'lerin Kötüye Kullanımı
 
-Ele geçirilmiş bir kullanıcının, bazı alan nesneleri üzerinde **ilginç yetkilere** sahip olması, kullanıcının **yanal hareket etmesine**/**yetkileri yükseltmesine** olanak tanıyabilir.
+Tehlikeye atılmış bir kullanıcının, bazı alan nesneleri üzerinde bazı **ilginç yetkilere** sahip olması, kullanıcının **yanal hareket etmesine**/**yetkileri yükseltmesine** olanak tanıyabilir.
 
 {{#ref}}
 acl-persistence-abuse/
@@ -327,7 +327,7 @@ printers-spooler-service-abuse.md
 
 ### Üçüncü Taraf Oturumlarının Kötüye Kullanımı
 
-Eğer **diğer kullanıcılar** **ele geçirilmiş** makineye **erişirse**, bellekten **kimlik bilgilerini toplamak** ve hatta **onların süreçlerine sinyaller enjekte etmek** mümkündür.\
+Eğer **diğer kullanıcılar** **tehlikeye atılmış** makineye **erişirse**, bellekten **kimlik bilgilerini toplamak** ve hatta **onların süreçlerine sinyaller enjekte etmek** mümkündür.\
 Genellikle kullanıcılar sisteme RDP aracılığıyla erişir, bu nedenle burada üçüncü taraf RDP oturumları üzerinde birkaç saldırı gerçekleştirme yöntemini bulabilirsiniz:
 
 {{#ref}}
@@ -344,7 +344,7 @@ laps.md
 
 ### Sertifika Hırsızlığı
 
-Ele geçirilmiş bir makineden **sertifikaları toplamak**, ortam içinde yetkileri yükseltmenin bir yolu olabilir:
+Tehlikeye atılmış makineden **sertifikaları toplamak**, ortam içinde yetkileri yükseltmenin bir yolu olabilir:
 
 {{#ref}}
 ad-certificates/certificate-theft.md
@@ -352,17 +352,17 @@ ad-certificates/certificate-theft.md
 
 ### Sertifika Şablonlarının Kötüye Kullanımı
 
-Eğer **savunmasız şablonlar** yapılandırılmışsa, bunları yetkileri yükseltmek için kötüye kullanmak mümkündür:
+Eğer **savunmasız şablonlar** yapılandırılmışsa, bunları kötüye kullanarak yetkileri yükseltmek mümkündür:
 
 {{#ref}}
 ad-certificates/domain-escalation.md
 {{#endref}}
 
-## Yüksek Yetkili Hesap ile Post-Exploitation
+## Yüksek Yetkili Hesap ile Post-Exploitasyon
 
 ### Alan Kimlik Bilgilerini Dökme
 
-Bir kez **Domain Admin** veya daha iyi bir **Enterprise Admin** yetkisi elde ettiğinizde, **alan veritabanını** dökebilirsiniz: _ntds.dit_.
+**Domain Admin** veya daha iyi bir **Enterprise Admin** yetkisi elde ettiğinizde, **alan veritabanını** dökebilirsiniz: _ntds.dit_.
 
 [**DCSync saldırısı hakkında daha fazla bilgi burada bulunabilir**](dcsync.md).
 
@@ -411,7 +411,7 @@ golden-ticket.md
 
 ### Elmas Bilet
 
-Bunlar, **yaygın altın bilet tespit mekanizmalarını atlayacak şekilde** sahte olarak oluşturulmuş altın biletler gibidir.
+Bunlar, **yaygın altın bilet tespit mekanizmalarını atlayacak şekilde** sahte bir şekilde oluşturulmuş altın biletler gibidir.
 
 {{#ref}}
 diamond-ticket.md
@@ -441,7 +441,7 @@ Active Directory'deki **AdminSDHolder** nesnesi, **yetkili grupların** (Domain 
 
 ### DSRM Kimlik Bilgileri
 
-Her **Domain Controller (DC)** içinde bir **yerel yönetici** hesabı bulunur. Böyle bir makinede yönetici hakları elde ederek, yerel Yönetici hash'ini **mimikatz** kullanarak çıkarabilirsiniz. Ardından, bu parolanın **kullanımını etkinleştirmek** için bir kayıt defteri değişikliği gereklidir; bu, yerel Yönetici hesabına uzaktan erişim sağlar.
+Her **Domain Controller (DC)** içinde bir **yerel yönetici** hesabı bulunur. Böyle bir makinede yönetici hakları elde ederek, yerel Yönetici hash'ini **mimikatz** kullanarak çıkartabilirsiniz. Ardından, bu parolanın **kullanımını etkinleştirmek** için bir kayıt defteri değişikliği gereklidir; bu, yerel Yönetici hesabına uzaktan erişim sağlar.
 
 {{#ref}}
 dsrm-credentials.md
@@ -449,7 +449,7 @@ dsrm-credentials.md
 
 ### ACL Sürekliliği
 
-Belirli alan nesneleri üzerinde bir **kullanıcıya** bazı **özel izinler** verebilir ve bu, kullanıcının gelecekte **yetkileri yükseltmesine** olanak tanır.
+Belirli alan nesneleri üzerinde bir **kullanıcıya** bazı **özel izinler** verebilir ve bu, kullanıcının **gelecekte yetkileri yükseltmesine** olanak tanır.
 
 {{#ref}}
 acl-persistence-abuse/
@@ -465,7 +465,7 @@ security-descriptors.md
 
 ### İskelet Anahtar
 
-**LSASS**'ı bellekte değiştirerek, tüm alan hesaplarına erişim sağlayan bir **evrensel parola** oluşturun.
+**LSASS**'ı bellekte değiştirerek, tüm alan hesaplarına erişim sağlayan **evrensel bir parola** oluşturun.
 
 {{#ref}}
 skeleton-key.md
@@ -473,7 +473,7 @@ skeleton-key.md
 
 ### Özel SSP
 
-[SSP (Güvenlik Destek Sağlayıcısı) nedir burada öğrenin.](../authentication-credentials-uac-and-efs/#security-support-provider-interface-sspi)\
+[Bir SSP'nin (Güvenlik Destek Sağlayıcısı) ne olduğunu burada öğrenin.](../authentication-credentials-uac-and-efs/#security-support-provider-interface-sspi)\
 Kendi **SSP'nizi** oluşturabilir ve makineye erişim için kullanılan **kimlik bilgilerini** **düz metin** olarak **yakalamak** için kullanabilirsiniz.\\
 
 {{#ref}}
@@ -482,7 +482,7 @@ custom-ssp.md
 
 ### DCShadow
 
-AD'de **yeni bir Domain Controller** kaydeder ve belirtilen nesnelerde **özellikleri** (SIDHistory, SPNs...) **güncellemeleri** **log** bırakmadan **itme** işlemi yapar. **DA** yetkilerine sahip olmanız ve **kök alan** içinde olmanız gerekir.\
+AD'de **yeni bir Domain Controller** kaydeder ve belirli nesnelerde **özellikleri** (SIDHistory, SPNs...) **güncellemeleri** **log bırakmadan** itmek için kullanır. **DA** yetkilerine sahip olmanız ve **kök alan** içinde olmanız gerekir.\
 Yanlış veri kullanırsanız, oldukça kötü loglar ortaya çıkacaktır.
 
 {{#ref}}
@@ -491,7 +491,7 @@ dcshadow.md
 
 ### LAPS Sürekliliği
 
-Daha önce, **LAPS parolalarını okuma iznine sahip olduğunuzda** yetkileri nasıl yükseltebileceğimiz hakkında konuştuk. Ancak, bu parolalar **sürekliliği sağlamak** için de kullanılabilir.\
+Daha önce, **LAPS parolalarını okuma iznine sahip olduğunuzda** yetkileri nasıl yükseltebileceğimizi tartıştık. Ancak, bu parolalar **sürekliliği sağlamak için** de kullanılabilir.\
 Kontrol edin:
 
 {{#ref}}
@@ -500,29 +500,29 @@ laps.md
 
 ## Orman Yetki Yükseltme - Alan Güvenleri
 
-Microsoft, **Ormanı** güvenlik sınırı olarak görmektedir. Bu, **tek bir alanın ele geçirilmesinin, tüm Ormanın ele geçirilmesine yol açabileceği** anlamına gelir.
+Microsoft, **Ormanı** güvenlik sınırı olarak görmektedir. Bu, **tek bir alanın tehlikeye atılmasının, tüm Ormanın tehlikeye atılmasına yol açabileceği** anlamına gelir.
 
 ### Temel Bilgiler
 
-Bir [**alan güveni**](<http://technet.microsoft.com/en-us/library/cc759554(v=ws.10).aspx>) , bir **alan** kullanıcısının başka bir **alan** içindeki kaynaklara erişimini sağlayan bir güvenlik mekanizmasıdır. Temelde, iki alanın kimlik doğrulama sistemleri arasında bir bağlantı oluşturur ve kimlik doğrulama doğrulamalarının sorunsuz bir şekilde akmasına olanak tanır. Alanlar bir güven oluşturduğunda, güvenin bütünlüğü için kritik olan belirli **anahtarları** **Domain Controller'ları (DC'ler)** arasında değiş tokuş eder ve saklar.
+Bir [**alan güveni**](<http://technet.microsoft.com/en-us/library/cc759554(v=ws.10).aspx>), bir kullanıcının bir **alan** içindeki kaynaklara erişmesini sağlayan bir güvenlik mekanizmasıdır. Temelde, iki alanın kimlik doğrulama sistemleri arasında bir bağlantı oluşturur ve kimlik doğrulama doğrulamalarının sorunsuz bir şekilde akmasına olanak tanır. Alanlar bir güven oluşturduğunda, güvenin bütünlüğü için kritik olan belirli **anahtarları** **Domain Controller'ları (DC'ler)** arasında değiş tokuş eder ve saklar.
 
-Tipik bir senaryoda, bir kullanıcı **güvenilir bir alandaki** bir hizmete erişmek istediğinde, önce kendi alanının DC'sinden **inter-realm TGT** olarak bilinen özel bir bilet talep etmelidir. Bu TGT, her iki alanın üzerinde anlaştığı bir **anahtar** ile şifrelenmiştir. Kullanıcı daha sonra bu TGT'yi **güvenilir alanın DC'sine** sunarak bir hizmet bileti (**TGS**) alır. Güvenilir alanın DC'si inter-realm TGT'yi başarılı bir şekilde doğruladığında, bir TGS vererek kullanıcıya hizmete erişim izni verir.
+Tipik bir senaryoda, bir kullanıcı **güvenilir bir alandaki** bir hizmete erişmek istiyorsa, önce kendi alanının DC'sinden **inter-realm TGT** olarak bilinen özel bir bilet talep etmelidir. Bu TGT, her iki alanın üzerinde anlaştığı bir **anahtar** ile şifrelenmiştir. Kullanıcı daha sonra bu TGT'yi **güvenilir alanın DC'sine** sunarak bir hizmet bileti (**TGS**) alır. Güvenilir alanın DC'si inter-realm TGT'yi başarılı bir şekilde doğruladıktan sonra, kullanıcıya hizmete erişim izni veren bir TGS verir.
 
 **Adımlar**:
 
-1. **Domain 1**'deki bir **istemci bilgisayar**, **Domain Controller (DC1)**'den **Ticket Granting Ticket (TGT)** talep etmek için **NTLM hash**'ini kullanarak süreci başlatır.
-2. DC1, istemci başarılı bir şekilde kimlik doğrulandıysa yeni bir TGT verir.
+1. **Domain 1**'deki bir **istemci bilgisayar**, **Domain Controller (DC1)**'den **Ticket Granting Ticket (TGT)** talep ederek süreci başlatır.
+2. İstemci başarılı bir şekilde kimlik doğrulandıysa, DC1 yeni bir TGT verir.
 3. İstemci daha sonra **Domain 2**'deki kaynaklara erişmek için gereken **inter-realm TGT**'yi DC1'den talep eder.
-4. Inter-realm TGT, DC1 ve DC2 arasında iki yönlü alan güveni olarak paylaşılan bir **güven anahtarı** ile şifrelenmiştir.
+4. Inter-realm TGT, DC1 ve DC2 arasında iki yönlü alan güveni kapsamında paylaşılan bir **güven anahtarı** ile şifrelenmiştir.
 5. İstemci inter-realm TGT'yi **Domain 2'nin Domain Controller'ı (DC2)**'ye götürür.
 6. DC2, inter-realm TGT'yi paylaşılan güven anahtarı ile doğrular ve geçerli ise, istemcinin erişmek istediği Domain 2'deki sunucu için bir **Ticket Granting Service (TGS)** verir.
 7. Son olarak, istemci bu TGS'yi sunucuya sunar; bu, sunucunun hesap hash'i ile şifrelenmiştir ve Domain 2'deki hizmete erişim sağlar.
 
 ### Farklı Güvenler
 
-**Bir güvenin 1 yönlü veya 2 yönlü olabileceğini** belirtmek önemlidir. 2 yönlü seçeneklerde, her iki alan da birbirine güvenecektir, ancak **1 yönlü** güven ilişkisi durumunda bir alan **güvenilen** ve diğeri **güvenen** alan olacaktır. Son durumda, **güvenilen alandan güvenen alandaki kaynaklara erişim sağlayabilirsiniz**.
+**Bir güvenin 1 yönlü veya 2 yönlü olabileceğini** belirtmek önemlidir. 2 yönlü seçeneklerde, her iki alan birbirine güvenecektir, ancak **1 yönlü** güven ilişkisi durumunda bir alan **güvenilir** ve diğeri **güvenen** alan olacaktır. Son durumda, **güvenilir alandan güvenen alana** yalnızca güvenen alan içindeki kaynaklara erişim sağlayabilirsiniz.
 
-Eğer Alan A, Alan B'ye güveniyorsa, A güvenen alan ve B güvenilen alandır. Ayrıca, **Alan A**'da bu bir **Çıkış güveni**; **Alan B**'de ise bu bir **Giriş güveni** olacaktır.
+Eğer Alan A, Alan B'ye güveniyorsa, A güvenen alan ve B güvenilir alandır. Ayrıca, **Alan A**'da bu bir **Çıkış güveni**; ve **Alan B**'de bu bir **Giriş güveni** olacaktır.
 
 **Farklı güvenen ilişkileri**
 
@@ -535,21 +535,21 @@ Eğer Alan A, Alan B'ye güveniyorsa, A güvenen alan ve B güvenilen alandır. 
 
 #### **Güvenen ilişkilerdeki diğer farklılıklar**
 
-- Bir güven ilişkisi **geçişli** (A güveniyor B, B güveniyor C, o zaman A güveniyor C) veya **geçişli olmayan** olabilir.
+- Bir güven ilişkisi **geçişli** (A güveniyor B'ye, B güveniyor C'ye, o zaman A güveniyor C'ye) veya **geçişli olmayan** olabilir.
 - Bir güven ilişkisi **iki yönlü güven** (her ikisi de birbirine güvenir) veya **bir yönlü güven** (sadece biri diğerine güvenir) olarak kurulabilir.
 
 ### Saldırı Yolu
 
 1. **Güvenen ilişkileri** listeleyin
-2. Herhangi bir **güvenlik ilkesi** (kullanıcı/grup/bilgisayar) **diğer alanın** kaynaklarına **erişime** sahip olup olmadığını kontrol edin, belki ACE girişleri veya diğer alanın gruplarında yer alarak. **Alanlar arası ilişkileri** arayın (güven bu nedenle oluşturulmuş olabilir).
+2. Herhangi bir **güvenlik ilkesi** (kullanıcı/grup/bilgisayar) **diğer alanın** kaynaklarına **erişime** sahip olup olmadığını kontrol edin; belki ACE girişleri veya diğer alanın gruplarında yer alarak. **Alanlar arası ilişkileri** arayın (güven bu nedenle oluşturulmuş olabilir).
 1. Bu durumda kerberoast başka bir seçenek olabilir.
-3. **Hesapları ele geçirin** ve **alanlar arasında geçiş yapın**.
+3. **Hesapları tehlikeye atın** ve **alanlar arası geçiş** yapın.
 
 Saldırganlar, başka bir alandaki kaynaklara erişim sağlamak için üç ana mekanizma kullanabilir:
 
-- **Yerel Grup Üyeliği**: İlkeler, makinelerdeki yerel gruplara eklenebilir; örneğin, bir sunucudaki "Yöneticiler" grubu, onlara o makine üzerinde önemli kontrol sağlar.
+- **Yerel Grup Üyeliği**: İlkeler, makinelerdeki yerel gruplara eklenebilir; örneğin, bir sunucudaki “Yöneticiler” grubu, onlara o makine üzerinde önemli kontrol sağlar.
 - **Yabancı Alan Grup Üyeliği**: İlkeler, yabancı alandaki grupların üyeleri de olabilir. Ancak, bu yöntemin etkinliği güvenin doğasına ve grubun kapsamına bağlıdır.
-- **Erişim Kontrol Listeleri (ACL'ler)**: İlkeler, belirli kaynaklara erişim sağlamak için bir **ACL**'de belirtilmiş olabilir; özellikle bir **DACL** içindeki **ACE'ler** olarak. ACL'ler, DACL'ler ve ACE'ler hakkında daha derinlemesine bilgi edinmek isteyenler için, “[An ACE Up The Sleeve](https://specterops.io/assets/resources/an_ace_up_the_sleeve.pdf)” başlıklı beyaz kağıt değerli bir kaynaktır.
+- **Erişim Kontrol Listeleri (ACL'ler)**: İlkeler, belirli kaynaklara erişim sağlamak için bir **ACL**'de, özellikle bir **DACL** içindeki **ACE'ler** olarak belirtilmiş olabilir. ACL'ler, DACL'ler ve ACE'ler hakkında daha derinlemesine bilgi edinmek isteyenler için “[An ACE Up The Sleeve](https://specterops.io/assets/resources/an_ace_up_the_sleeve.pdf)” başlıklı beyaz kağıt değerli bir kaynaktır.
 
 ### Çocuktan Ana Orman Yetki Yükseltmesi
 ```
@@ -572,7 +572,7 @@ WhenChanged     : 2/19/2021 1:28:00 PM
 > Invoke-Mimikatz -Command '"lsadump::dcsync /user:dcorp\mcorp$"'
 > ```
 
-#### SID-History Enjeksiyonu
+#### SID-History Injection
 
 SID-History enjeksiyonunu kullanarak çocuk/ebeveyn alanına Enterprise admin olarak yükselme:
 
@@ -580,31 +580,31 @@ SID-History enjeksiyonunu kullanarak çocuk/ebeveyn alanına Enterprise admin ol
 sid-history-injection.md
 {{#endref}}
 
-#### Yazılabilir Konfigürasyon NC'yi Sömürme
+#### Yazılabilir Configuration NC'yi istismar etme
 
-Konfigürasyon İsimlendirme Bağlamı (NC) nasıl sömürülebileceğini anlamak çok önemlidir. Konfigürasyon NC, Active Directory (AD) ortamlarında bir orman genelinde konfigürasyon verileri için merkezi bir depo işlevi görür. Bu veriler, ormandaki her Alan Denetleyicisi (DC) ile çoğaltılır ve yazılabilir DC'ler, Konfigürasyon NC'nin yazılabilir bir kopyasını tutar. Bunu sömürmek için, bir DC üzerinde **SYSTEM ayrıcalıklarına** sahip olmak gerekir, tercihen bir çocuk DC.
+Configuration Naming Context (NC) nasıl istismar edileceğini anlamak çok önemlidir. Configuration NC, Active Directory (AD) ortamlarında bir orman genelinde yapılandırma verileri için merkezi bir depo görevi görür. Bu veriler, ormandaki her Domain Controller (DC) ile çoğaltılır ve yazılabilir DC'ler, Configuration NC'nin yazılabilir bir kopyasını tutar. Bunu istismar etmek için, bir DC üzerinde **SYSTEM ayrıcalıklarına** sahip olmak gerekir, tercihen bir çocuk DC.
 
 **GPO'yu kök DC alanına bağlama**
 
-Konfigürasyon NC'nin Siteler konteyneri, AD ormanındaki tüm alan bağlı bilgisayarların siteleri hakkında bilgi içerir. Herhangi bir DC üzerinde SYSTEM ayrıcalıkları ile çalışan saldırganlar, GPO'ları kök DC alanlarına bağlayabilir. Bu eylem, bu alanlara uygulanan politikaları manipüle ederek kök alanı tehlikeye atabilir.
+Configuration NC'nin Sites konteyneri, AD ormanındaki tüm alan bağlı bilgisayarların alanları hakkında bilgi içerir. Herhangi bir DC üzerinde SYSTEM ayrıcalıkları ile çalışan saldırganlar, GPO'ları kök DC alanlarına bağlayabilir. Bu eylem, bu alanlara uygulanan politikaları manipüle ederek kök alanı tehlikeye atabilir.
 
-Derinlemesine bilgi için, [SID Filtrelemesini Aşma](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-4-bypass-sid-filtering-research) üzerine yapılan araştırmalara göz atılabilir.
+Derinlemesine bilgi için, [SID Filtering'i Aşma](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-4-bypass-sid-filtering-research) üzerine yapılan araştırmalara göz atılabilir.
 
 **Ormandaki herhangi bir gMSA'yı tehlikeye atma**
 
-Bir saldırı vektörü, alan içindeki ayrıcalıklı gMSA'ları hedef almaktır. gMSA'ların şifrelerini hesaplamak için gerekli olan KDS Root anahtarı, Konfigürasyon NC içinde saklanır. Herhangi bir DC üzerinde SYSTEM ayrıcalıkları ile, KDS Root anahtarına erişmek ve ormandaki herhangi bir gMSA'nın şifrelerini hesaplamak mümkündür.
+Bir saldırı vektörü, alan içindeki ayrıcalıklı gMSA'ları hedef almaktır. gMSA'ların şifrelerini hesaplamak için gerekli olan KDS Root anahtarı, Configuration NC içinde saklanır. Herhangi bir DC üzerinde SYSTEM ayrıcalıkları ile, KDS Root anahtarına erişmek ve ormandaki herhangi bir gMSA için şifreleri hesaplamak mümkündür.
 
-Detaylı analiz, [Altın gMSA Güven Saldırıları](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent) üzerine yapılan tartışmada bulunabilir.
+Detaylı analiz, [Golden gMSA Trust Attacks](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent) konusundaki tartışmada bulunabilir.
 
 **Şema değişikliği saldırısı**
 
-Bu yöntem, yeni ayrıcalıklı AD nesnelerinin oluşturulmasını bekleyerek sabır gerektirir. SYSTEM ayrıcalıkları ile, bir saldırgan AD Şemasını değiştirerek herhangi bir kullanıcıya tüm sınıflar üzerinde tam kontrol verebilir. Bu, yetkisiz erişim ve yeni oluşturulan AD nesneleri üzerinde kontrol sağlama ile sonuçlanabilir.
+Bu yöntem, yeni ayrıcalıklı AD nesnelerinin oluşturulmasını beklemeyi gerektirir. SYSTEM ayrıcalıkları ile, bir saldırgan AD Şemasını değiştirerek herhangi bir kullanıcıya tüm sınıflar üzerinde tam kontrol verebilir. Bu, yetkisiz erişim ve yeni oluşturulan AD nesneleri üzerinde kontrol sağlama ile sonuçlanabilir.
 
-Daha fazla okuma için [Şema Değişikliği Güven Saldırıları](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-6-schema-change-trust-attack-from-child-to-parent) üzerine bakılabilir.
+Daha fazla okuma için [Schema Change Trust Attacks](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-6-schema-change-trust-attack-from-child-to-parent) üzerine bakılabilir.
 
 **DA'dan EA'ya ADCS ESC5 ile**
 
-ADCS ESC5 açığı, ormandaki herhangi bir kullanıcı olarak kimlik doğrulama sağlayan bir sertifika şablonu oluşturmak için Kamu Anahtar Altyapısı (PKI) nesneleri üzerindeki kontrolü hedef alır. PKI nesneleri Konfigürasyon NC içinde bulunduğundan, yazılabilir bir çocuk DC'nin tehlikeye atılması ESC5 saldırılarının gerçekleştirilmesini sağlar.
+ADCS ESC5 açığı, ormandaki herhangi bir kullanıcı olarak kimlik doğrulama sağlayan bir sertifika şablonu oluşturmak için Kamu Anahtar Altyapısı (PKI) nesneleri üzerindeki kontrolü hedef alır. PKI nesneleri Configuration NC içinde bulunduğundan, yazılabilir bir çocuk DC'yi tehlikeye atmak, ESC5 saldırılarının gerçekleştirilmesini sağlar.
 
 Bununla ilgili daha fazla ayrıntı [DA'dan EA'ya ESC5 ile](https://posts.specterops.io/from-da-to-ea-with-esc5-f9f045aa105c) makalesinde okunabilir. ADCS olmayan senaryolarda, saldırgan gerekli bileşenleri kurma yeteneğine sahiptir; bu konu [Çocuk Alan Yöneticilerinden Kurumsal Yöneticilere Yükselme](https://www.pkisolutions.com/escalating-from-child-domains-admins-to-enterprise-admins-in-5-minutes-by-abusing-ad-cs-a-follow-up/) makalesinde tartışılmıştır.
 
@@ -637,17 +637,17 @@ TrustDirection  : Outbound        --> Outbound trust
 WhenCreated     : 2/19/2021 10:15:24 PM
 WhenChanged     : 2/19/2021 10:15:24 PM
 ```
-Bu senaryoda **domain'iniz** **farklı domainlerden** bir **prensipe** bazı **ayrımcı haklar** vermektedir.
+Bu senaryoda **domain'iniz** bazı **yetkileri** **farklı domainlerden** bir prensipe **güvenmektedir**.
 
-Ancak, bir **domain güvenilir** olduğunda, güvenilir domain **tahmin edilebilir bir isimle** bir **kullanıcı oluşturur** ve bu kullanıcı **güvenilir şifreyi** **şifre** olarak kullanır. Bu, **güvenilir domain'e girmek için güvenen domain'den bir kullanıcıya erişmenin** mümkün olduğu anlamına gelir; bu kullanıcıyı listeleyebilir ve daha fazla yetki artırmaya çalışabilirsiniz:
+Ancak, bir **domain güvenildiğinde**, güvenen domain, **tahmin edilebilir bir isimle** bir **kullanıcı oluşturur** ve bu kullanıcı **güvenilen şifreyi** **şifre** olarak kullanır. Bu, **güvenen domain'den bir kullanıcıya erişimin** mümkün olduğu ve bununla **güvenilen domain'e girmek** için daha fazla yetki elde etmeye çalışmanın mümkün olduğu anlamına gelir:
 
 {{#ref}}
 external-forest-domain-one-way-outbound.md
 {{#endref}}
 
-Güvenilir domain'i tehlikeye atmanın bir başka yolu, **domain güveni** yönünde oluşturulmuş bir [**SQL güvenilir bağlantısı**](abusing-ad-mssql.md#mssql-trusted-links) bulmaktır (bu pek yaygın değildir).
+Güvenilen domain'i tehlikeye atmanın bir başka yolu, **domain güveni** yönünde **oluşturulmuş bir [**SQL güvenilir bağlantısı**](abusing-ad-mssql.md#mssql-trusted-links)** bulmaktır (bu çok yaygın değildir).
 
-Güvenilir domain'i tehlikeye atmanın bir başka yolu, **güvenilir domain'den bir kullanıcının erişebileceği** bir makinede beklemektir ve **RDP** üzerinden giriş yapmaktır. Ardından, saldırgan RDP oturum sürecine kod enjekte edebilir ve buradan **kurbanın orijinal domainine erişebilir**.\
+Güvenilen domain'i tehlikeye atmanın bir başka yolu, **güvenilen domain'den bir kullanıcının erişebileceği** bir makinede beklemektir ve **RDP** üzerinden giriş yapmaktır. Ardından, saldırgan RDP oturum sürecine kod enjekte edebilir ve buradan **kurbanın orijinal domainine erişebilir**.\
 Ayrıca, eğer **kurban sabit diskini bağladıysa**, RDP oturum sürecinden saldırgan **sabit diskin başlangıç klasörüne** **arka kapılar** depolayabilir. Bu teknik **RDPInception** olarak adlandırılır.
 
 {{#ref}}
@@ -663,7 +663,7 @@ rdp-sessions-abuse.md
 
 ### **Seçici Kimlik Doğrulama:**
 
-- Ormanlar arası güvenler için Seçici Kimlik Doğrulama kullanmak, iki ormandan gelen kullanıcıların otomatik olarak kimlik doğrulamasını sağlamaz. Bunun yerine, güvenen domain veya orman içindeki domainlere ve sunuculara erişim için açık izinler gereklidir.
+- Ormanlar arası güvenler için Seçici Kimlik Doğrulama kullanmak, iki ormandan gelen kullanıcıların otomatik olarak kimlik doğrulamasını sağlamaz. Bunun yerine, güvenen domain veya ormandaki domainlere ve sunuculara erişim için açık izinler gereklidir.
 - Bu önlemlerin, yazılabilir Yapılandırma İsimlendirme Bağlamı (NC) istismarına veya güven hesaplarına yönelik saldırılara karşı koruma sağlamadığını belirtmek önemlidir.
 
 [**Domain güvenleri hakkında daha fazla bilgi için ired.team'e bakın.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
@@ -676,22 +676,22 @@ rdp-sessions-abuse.md
 
 [**Kimlik bilgilerini koruma hakkında daha fazla bilgi edinin.**](../stealing-credentials/credentials-protections.md)\\
 
-### **Kimlik Bilgisi Koruma için Savunma Önlemleri**
+### **Kimlik Bilgilerini Koruma için Savunma Önlemleri**
 
-- **Domain Yöneticileri Kısıtlamaları**: Domain Yöneticilerinin yalnızca Domain Denetleyicilerine giriş yapmalarına izin verilmesi önerilir; diğer ana bilgisayarlarda kullanılmamalıdır.
-- **Hizmet Hesabı Ayrıcalıkları**: Hizmetler, güvenliği sağlamak için Domain Yöneticisi (DA) ayrıcalıkları ile çalıştırılmamalıdır.
-- **Geçici Ayrıcalık Sınırlaması**: DA ayrıcalıkları gerektiren görevler için süreleri sınırlı olmalıdır. Bu, `Add-ADGroupMember -Identity ‘Domain Admins’ -Members newDA -MemberTimeToLive (New-TimeSpan -Minutes 20)` ile gerçekleştirilebilir.
+- **Domain Yöneticileri Kısıtlamaları**: Domain Yöneticilerinin yalnızca Domain Denetleyicilerine giriş yapmalarına izin verilmesi önerilir, diğer hostlarda kullanılmamalıdır.
+- **Hizmet Hesabı Yetkileri**: Hizmetler, güvenliği sağlamak için Domain Yöneticisi (DA) yetkileri ile çalıştırılmamalıdır.
+- **Geçici Yetki Sınırlaması**: DA yetkileri gerektiren görevler için süreleri sınırlı olmalıdır. Bu, `Add-ADGroupMember -Identity ‘Domain Admins’ -Members newDA -MemberTimeToLive (New-TimeSpan -Minutes 20)` ile gerçekleştirilebilir.
 
 ### **Aldatma Tekniklerini Uygulama**
 
-- Aldatmayı uygulamak, şifrelerin süresi dolmayan veya Delegasyon için Güvenilir olarak işaretlenmiş sahte kullanıcılar veya bilgisayarlar gibi tuzaklar kurmayı içerir. Detaylı bir yaklaşım, belirli haklara sahip kullanıcılar oluşturmayı veya bunları yüksek ayrıcalıklı gruplara eklemeyi içerir.
+- Aldatma uygulamak, şifrelerin süresi dolmayan veya Delegasyon için Güvenilir olarak işaretlenmiş sahte kullanıcılar veya bilgisayarlar gibi tuzaklar kurmayı içerir. Detaylı bir yaklaşım, belirli haklara sahip kullanıcılar oluşturmayı veya bunları yüksek yetkili gruplara eklemeyi içerir.
 - Pratik bir örnek, `Create-DecoyUser -UserFirstName user -UserLastName manager-uncommon -Password Pass@123 | DeployUserDeception -UserFlag PasswordNeverExpires -GUID d07da11f-8a3d-42b6-b0aa-76c962be719a -Verbose` gibi araçlar kullanmaktır.
 - Aldatma tekniklerini dağıtma hakkında daha fazla bilgi [Deploy-Deception on GitHub](https://github.com/samratashok/Deploy-Deception) adresinde bulunabilir.
 
 ### **Aldatmayı Tanımlama**
 
-- **Kullanıcı Nesneleri için**: Şüpheli göstergeler arasında alışılmadık ObjectSID, nadir oturum açma, oluşturma tarihleri ve düşük kötü şifre sayıları bulunur.
-- **Genel Göstergeler**: Potansiyel sahte nesnelerin özelliklerini gerçek nesnelerin özellikleriyle karşılaştırmak, tutarsızlıkları ortaya çıkarabilir. [HoneypotBuster](https://github.com/JavelinNetworks/HoneypotBuster) gibi araçlar, bu tür aldatmaları tanımlamaya yardımcı olabilir.
+- **Kullanıcı Nesneleri için**: Şüpheli göstergeler arasında alışılmadık ObjectSID, nadir oturum açma, oluşturulma tarihleri ve düşük kötü şifre sayıları bulunur.
+- **Genel Göstergeler**: Potansiyel sahte nesnelerin özelliklerini gerçek nesnelerin özellikleriyle karşılaştırmak tutarsızlıkları ortaya çıkarabilir. [HoneypotBuster](https://github.com/JavelinNetworks/HoneypotBuster) gibi araçlar bu tür aldatmaları tanımlamada yardımcı olabilir.
 
 ### **Algılama Sistemlerini Aşma**
 

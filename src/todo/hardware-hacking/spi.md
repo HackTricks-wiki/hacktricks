@@ -4,7 +4,7 @@
 
 ## Temel Bilgiler
 
-SPI (Seri Peripheral Arayüzü), entegre devreler (IC'ler) arasında kısa mesafeli iletişim için gömülü sistemlerde kullanılan Senkron Seri İletişim Protokolüdür. SPI İletişim Protokolü, Saat ve Çip Seçim Sinyali tarafından yönetilen master-slave mimarisini kullanır. Bir master-slave mimarisi, EEPROM, sensörler, kontrol cihazları gibi harici çevresel birimleri yöneten bir master (genellikle bir mikroişlemci) içerir ve bunlar köle olarak kabul edilir.
+SPI (Seri Peripheral Arayüzü), entegre devreler (IC'ler) arasında kısa mesafeli iletişim için gömülü sistemlerde kullanılan Senkron Seri İletişim Protokolüdür. SPI İletişim Protokolü, Saat ve Çip Seçim Sinyali tarafından yönetilen master-slave mimarisini kullanır. Bir master-slave mimarisi, EEPROM, sensörler, kontrol cihazları gibi harici çevre birimlerini yöneten bir master'ı (genellikle bir mikroişlemci) içerir ve bunlar köle olarak kabul edilir.
 
 Bir master'a birden fazla köle bağlanabilir, ancak köleler birbirleriyle iletişim kuramaz. Köleler, saat ve çip seçimi olmak üzere iki pin ile yönetilir. SPI senkron bir iletişim protokolü olduğundan, giriş ve çıkış pinleri saat sinyallerini takip eder. Çip seçimi, master tarafından bir köleyi seçmek ve onunla etkileşimde bulunmak için kullanılır. Çip seçimi yüksek olduğunda, köle cihaz seçilmezken, düşük olduğunda çip seçilmiş olur ve master köle ile etkileşimde bulunur.
 
@@ -14,9 +14,9 @@ MOSI (Master Out, Slave In) ve MISO (Master In, Slave Out) veri gönderme ve alm
 
 Firmware dökümü, firmware'i analiz etmek ve içindeki zayıflıkları bulmak için yararlı olabilir. Çoğu zaman, firmware internet üzerinde mevcut değildir veya model numarası, versiyon gibi faktörlerin varyasyonları nedeniyle alakasızdır. Bu nedenle, tehditleri avlarken spesifik olmak için firmware'i doğrudan fiziksel cihazdan çıkarmak faydalı olabilir.
 
-Seri Konsol almak yararlı olabilir, ancak çoğu zaman dosyaların yalnızca okunabilir olduğu durumlarla karşılaşılır. Bu, çeşitli nedenlerden dolayı analizi kısıtlar. Örneğin, paketleri göndermek ve almak için gereken araçlar firmware'de bulunmayabilir. Bu nedenle, ikili dosyaları tersine mühendislik yapmak için çıkarmak mümkün değildir. Bu nedenle, sistemde tüm firmware'in dökülmesi ve analiz için ikili dosyaların çıkarılması çok faydalı olabilir.
+Seri Konsol almak faydalı olabilir, ancak çoğu zaman dosyaların yalnızca okunabilir olduğu durumlarla karşılaşılır. Bu, çeşitli nedenlerden dolayı analizi kısıtlar. Örneğin, paketleri göndermek ve almak için gereken araçlar firmware'de bulunmayabilir. Bu nedenle, ikili dosyaları tersine mühendislik yapmak için çıkarmak mümkün değildir. Bu nedenle, sistemde tüm firmware'in dökülmesi ve analiz için ikili dosyaların çıkarılması çok faydalı olabilir.
 
-Ayrıca, kırmızı okuma sırasında ve cihazlara fiziksel erişim sağlarken, firmware dökümü dosyaları değiştirmeye veya kötü niyetli dosyalar eklemeye yardımcı olabilir ve ardından bunları belleğe yeniden yüklemek, cihazda bir arka kapı yerleştirmek için faydalı olabilir. Bu nedenle, firmware dökümü ile açılabilecek birçok olasılık vardır.
+Ayrıca, kırmızı okuma sırasında ve cihazlara fiziksel erişim sağlarken, firmware dökümü dosyaları değiştirmek veya kötü niyetli dosyalar enjekte etmek ve ardından bunları belleğe yeniden yüklemek için yardımcı olabilir; bu da cihazda bir arka kapı yerleştirmek için faydalı olabilir. Bu nedenle, firmware dökümü ile açılabilecek birçok olasılık vardır.
 
 ### CH341A EEPROM Programlayıcı ve Okuyucu
 
@@ -24,7 +24,7 @@ Bu cihaz, EEPROM'lerden firmware dökmek ve bunları firmware dosyalarıyla yeni
 
 ![drawing](../../images/board_image_ch341a.jpg)
 
-EEPROM belleğini CH341a Programlayıcı ile bağlayın ve cihazı bilgisayara takın. Cihaz algılanmıyorsa, bilgisayara sürücü yüklemeyi deneyin. Ayrıca, EEPROM'un doğru yönde bağlandığından emin olun (genellikle, VCC Pin'ini USB konektörüne ters yönde yerleştirin) aksi takdirde yazılım çipi algılayamaz. Gerekirse diyagrama bakın:
+EEPROM belleğini CH341a Programlayıcı ile bağlayın ve cihazı bilgisayara takın. Cihaz algılanmıyorsa, bilgisayara sürücüleri yüklemeyi deneyin. Ayrıca, EEPROM'un doğru yönde bağlandığından emin olun (genellikle, VCC Pin'ini USB konektörüne ters yönde yerleştirin) aksi takdirde yazılım çipi algılayamaz. Gerekirse diyagrama bakın:
 
 ![drawing](../../images/connect_wires_ch341a.jpg) ![drawing](../../images/eeprom_plugged_ch341a.jpg)
 
@@ -47,7 +47,7 @@ Bu, kullanılan araçlar ve yapılandırmalara göre .bin veya .rom olabilir.
 
 ![](<../../images/image (910).png>)
 
-Pirate Bus'ın PINOUT'u **MOSI** ve **MISO** pinlerini SPI'ye bağlamak için gösterse de, bazı SPIs pinleri DI ve DO olarak gösterebilir. **MOSI -> DI, MISO -> DO**
+Pirate Bus'ın PINOUT'u **MOSI** ve **MISO** için SPI'ye bağlanacak pinleri gösterse de, bazı SPIs pinleri DI ve DO olarak gösterebilir. **MOSI -> DI, MISO -> DO**
 
 ![](<../../images/image (360).png>)
 

@@ -8,9 +8,9 @@
 Birçok **geçerli kullanıcı adı** bulduktan sonra, her bir keşfedilen kullanıcı ile en **yaygın şifreleri** deneyebilirsiniz (ortamın şifre politikalarını göz önünde bulundurun).\
 **Varsayılan** olarak **minimum** **şifre** **uzunluğu** **7**'dir.
 
-Yaygın kullanıcı adı listeleri de faydalı olabilir: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
+Yaygın kullanıcı adları listeleri de faydalı olabilir: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
 
-Birden fazla yanlış şifre denerseniz bazı hesapların **kilitlenebileceğini** unutmayın (varsayılan olarak 10'dan fazla).
+Birden fazla yanlış şifre denerseniz bazı hesapların kilitlenebileceğini unutmayın (varsayılan olarak 10'dan fazla).
 
 ### Şifre politikasını öğrenme
 
@@ -31,7 +31,7 @@ net accounts
 
 (Get-DomainPolicy)."SystemAccess" #From powerview
 ```
-### Linux'ten (veya tümünden) Sömürü
+### Linux'ten Sömürü (veya hepsi)
 
 - **crackmapexec** kullanarak:
 ```bash

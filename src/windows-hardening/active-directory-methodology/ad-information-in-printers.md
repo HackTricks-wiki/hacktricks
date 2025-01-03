@@ -3,7 +3,7 @@
 İnternette, **varsayılan/zayıf** oturum açma kimlik bilgileriyle yapılandırılmış yazıcıların tehlikelerini **vurgulayan** birkaç blog bulunmaktadır.\
 Bu, bir saldırganın yazıcıyı **kötü niyetli bir LDAP sunucusuna kimlik doğrulaması yapmaya kandırabileceği** anlamına gelir (genellikle bir `nc -vv -l -p 444` yeterlidir) ve yazıcının **kimlik bilgilerini açık metin olarak** yakalayabilir.
 
-Ayrıca, birçok yazıcı **kullanıcı adlarıyla günlükler** içerebilir veya hatta **Tüm kullanıcı adlarını** Domain Controller'dan indirebilir.
+Ayrıca, birçok yazıcı **kullanıcı adlarıyla günlükler** içerebilir veya hatta **Tüm kullanıcı adlarını** Alan Denetleyicisinden indirebilir.
 
 Tüm bu **hassas bilgiler** ve yaygın **güvenlik eksiklikleri**, yazıcıları saldırganlar için çok ilginç hale getirir.
 

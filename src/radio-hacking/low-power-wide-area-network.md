@@ -4,7 +4,7 @@
 
 ## Giriş
 
-**Düşük Güçlü Geniş Alan Ağı** (LPWAN), **uzun menzilli iletişim** için düşük bit hızıyla tasarlanmış kablosuz, düşük güç tüketimli geniş alan ağı teknolojilerinin bir grubudur.\
+**Düşük Güçlü Geniş Alan Ağı** (LPWAN), **uzun menzilli iletişim** için düşük bit hızında tasarlanmış kablosuz, düşük güç tüketimli geniş alan ağı teknolojilerinin bir grubudur.\
 Altı milin üzerinde mesafelere ulaşabilirler ve **pilleri** 20 yıla kadar dayanabilir.
 
 Uzun Menzil (**LoRa**), birçok ülkede popülerdir ve **LoRaWAN** adında açık kaynak bir spesifikasyona sahiptir.

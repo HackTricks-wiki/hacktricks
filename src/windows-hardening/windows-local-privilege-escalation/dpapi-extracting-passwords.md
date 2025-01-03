@@ -1,4 +1,4 @@
-# DPAPI - Parolaların Çıkarılması
+# DPAPI - Şifrelerin Çıkarılması
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -12,11 +12,11 @@ Data Protection API (DPAPI), esasen Windows işletim sisteminde **asimetrik öze
 
 DPAPI tarafından korunan kişisel veriler arasında şunlar bulunmaktadır:
 
-- Internet Explorer ve Google Chrome'un parolaları ve otomatik tamamlama verileri
-- Outlook ve Windows Mail gibi uygulamalar için e-posta ve dahili FTP hesap parolaları
-- Paylaşılan klasörler, kaynaklar, kablosuz ağlar ve Windows Vault için parolalar, şifreleme anahtarları dahil
-- Uzak masaüstü bağlantıları, .NET Passport ve çeşitli şifreleme ve kimlik doğrulama amaçları için özel anahtarlar için parolalar
-- Credential Manager tarafından yönetilen ağ parolaları ve CryptProtectData kullanan uygulamalardaki kişisel veriler, örneğin Skype, MSN messenger ve daha fazlası
+- Internet Explorer ve Google Chrome'un şifreleri ve otomatik tamamlama verileri
+- Outlook ve Windows Mail gibi uygulamalar için e-posta ve dahili FTP hesap şifreleri
+- Paylaşılan klasörler, kaynaklar, kablosuz ağlar ve Windows Vault için şifreler, şifreleme anahtarları dahil
+- Uzak masaüstü bağlantıları, .NET Passport ve çeşitli şifreleme ve kimlik doğrulama amaçları için özel anahtarlar için şifreler
+- Credential Manager tarafından yönetilen ağ şifreleri ve CryptProtectData kullanan uygulamalardaki kişisel veriler, örneğin Skype, MSN messenger ve daha fazlası
 
 ## Liste Vault
 ```bash
@@ -51,7 +51,7 @@ dpapi::cred /in:C:\path\to\encrypted\file /masterkey:<MASTERKEY>
 ```
 ## Master Keys
 
-DPAPI anahtarları, kullanıcının RSA anahtarlarını şifrelemek için `%APPDATA%\Microsoft\Protect\{SID}` dizininde saklanır; burada {SID} o kullanıcının [**Güvenlik Tanımlayıcısı**](https://en.wikipedia.org/wiki/Security_Identifier) **dır**. **DPAPI anahtarı, kullanıcıların özel anahtarlarını koruyan anahtar ile aynı dosyada saklanır**. Genellikle 64 bayt rastgele veriden oluşur. (Bu dizinin korunduğunu unutmayın, bu nedenle `dir` komutunu kullanarak listeleyemezsiniz, ancak PS'den listeleyebilirsiniz).
+DPAPI anahtarları, kullanıcının RSA anahtarlarını şifrelemek için `%APPDATA%\Microsoft\Protect\{SID}` dizininde saklanır; burada {SID} o kullanıcının [**Güvenlik Tanımlayıcısı**](https://en.wikipedia.org/wiki/Security_Identifier) **dır**. **DPAPI anahtarı, kullanıcıların özel anahtarlarını koruyan anahtar ile aynı dosyada saklanır**. Genellikle 64 bayt rastgele veriden oluşur. (Bu dizinin korunduğunu ve bu nedenle `dir` komutunu kullanarak listeleyemeyeceğinizi, ancak PS'den listeleyebileceğinizi unutmayın).
 ```bash
 Get-ChildItem C:\Users\USER\AppData\Roaming\Microsoft\Protect\
 Get-ChildItem C:\Users\USER\AppData\Local\Microsoft\Protect
@@ -64,11 +64,11 @@ Bu, bir kullanıcının bir dizi Master Key'inin nasıl görüneceğidir:
 
 ![](<../../images/image (1121).png>)
 
-Genellikle **her master key, diğer içeriği şifreleyebilen bir şifreli simetrik anahtardır**. Bu nedenle, **şifreli Master Key'i çıkarmak**, daha sonra onunla şifrelenmiş **diğer içeriği** **şifre çözmek** için ilginçtir.
+Genellikle **her master key, diğer içeriği şifreleyebilen bir şifreli simetrik anahtardır**. Bu nedenle, **şifreli Master Key'i çıkarmak**, daha sonra onunla şifrelenmiş **diğer içeriği** **şifrelemek** için ilginçtir.
 
-### Master key'i çıkar ve şifre çöz
+### Master key'i çıkar ve deşifre et
 
-Master key'i çıkarmak ve şifre çözmek için bir örnek için [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#extracting-dpapi-backup-keys-with-domain-admin) gönderisine bakın.
+Master key'i çıkarmak ve deşifre etmek için bir örnek için [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#extracting-dpapi-backup-keys-with-domain-admin) gönderisine bakın.
 
 ## SharpDPAPI
 
@@ -76,13 +76,13 @@ Master key'i çıkarmak ve şifre çözmek için bir örnek için [https://www.i
 
 ## HEKATOMB
 
-[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB), LDAP dizininden tüm kullanıcıların ve bilgisayarların çıkarılmasını ve alan denetleyici yedek anahtarının RPC üzerinden çıkarılmasını otomatikleştiren bir araçtır. Script, ardından tüm bilgisayarların IP adreslerini çözecek ve tüm kullanıcıların DPAPI blob'larını almak için tüm bilgisayarlarda smbclient gerçekleştirecek ve her şeyi alan yedek anahtarı ile şifre çözecektir.
+[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB), LDAP dizininden tüm kullanıcıların ve bilgisayarların çıkarılmasını ve RPC aracılığıyla etki alanı denetleyici yedek anahtarının çıkarılmasını otomatikleştiren bir araçtır. Script, ardından tüm bilgisayarların IP adreslerini çözecek ve tüm kullanıcıların tüm DPAPI blob'larını almak için tüm bilgisayarlarda smbclient gerçekleştirecek ve her şeyi etki alanı yedek anahtarı ile deşifre edecektir.
 
 `python3 hekatomb.py -hashes :ed0052e5a66b1c8e942cc9481a50d56 DOMAIN.local/administrator@10.0.0.1 -debug -dnstcp`
 
 LDAP'tan çıkarılan bilgisayar listesi ile, onları bilmeseniz bile her alt ağı bulabilirsiniz!
 
-"Çünkü Alan Yöneticisi hakları yeterli değil. Hepsini hackle."
+"Çünkü Etki Alanı Yönetici hakları yeterli değil. Hepsini hackleyin."
 
 ## DonPAPI
 

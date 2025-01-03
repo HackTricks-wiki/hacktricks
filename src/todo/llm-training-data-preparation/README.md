@@ -22,7 +22,7 @@ Bilmeniz gereken bazı temel kavramlar için bu gönderiyi okumaya başlamalıs�
 ## 2. Veri Örnekleme
 
 > [!TIP]
-> Bu ikinci aşamanın amacı çok basit: **Girdi verisini örneklemek ve genellikle belirli bir uzunluktaki cümlelere ayırarak eğitim aşamasına hazırlamak ve ayrıca beklenen yanıtı üretmek.**
+> Bu ikinci aşamanın amacı çok basit: **Girdi verilerini örneklemek ve genellikle belirli bir uzunluktaki cümlelere ayırarak eğitim aşamasına hazırlamak ve ayrıca beklenen yanıtı üretmek.**
 
 {{#ref}}
 2.-data-sampling.md
@@ -82,7 +82,7 @@ Bilmeniz gereken bazı temel kavramlar için bu gönderiyi okumaya başlamalıs�
 ## 7.1. Sınıflandırma için İnce Ayar
 
 > [!TIP]
-> Bu bölümün amacı, zaten önceden eğitilmiş bir modeli ince ayar yapmayı göstermektir, böylece yeni metin oluşturmak yerine LLM, **verilen metnin her bir verilen kategoriye sınıflandırılma olasılıklarını** seçecektir (örneğin, bir metnin spam olup olmadığını).
+> Bu bölümün amacı, zaten önceden eğitilmiş bir modeli ince ayar yapmayı göstermektir, böylece yeni metin oluşturmak yerine LLM, **verilen metnin her bir verilen kategoriye sınıflandırılma olasılıklarını** seçecektir (örneğin, bir metnin spam olup olmadığını belirlemek).
 
 {{#ref}}
 7.1.-fine-tuning-for-classification.md
@@ -91,7 +91,7 @@ Bilmeniz gereken bazı temel kavramlar için bu gönderiyi okumaya başlamalıs�
 ## 7.2. Talimatları Takip Etmek için İnce Ayar
 
 > [!TIP]
-> Bu bölümün amacı, **metin oluşturmak yerine talimatları takip etmek için zaten önceden eğitilmiş bir modeli ince ayar yapmayı** göstermektir, örneğin, bir sohbet botu olarak görevlere yanıt vermek. 
+> Bu bölümün amacı, **metin oluşturmak yerine talimatları takip etmek için zaten önceden eğitilmiş bir modeli ince ayar yapmayı** göstermektir, örneğin, bir sohbet botu olarak görevlere yanıt vermek.
 
 {{#ref}}
 7.2.-fine-tuning-to-follow-instructions.md

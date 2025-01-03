@@ -5,7 +5,7 @@
 ### Kod
 
 Aşağıdaki kod [buradan](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962) alınmıştır. Bu, **bir İşlem Kimliğini argüman olarak belirtmenizi** sağlar ve belirtilen işlemin **kullanıcısı olarak çalışan bir CMD** çalıştırılacaktır.\
-Yüksek Bütünlükte bir işlemde çalışırken, **Sistem olarak çalışan bir işlemin PID'sini** (winlogon, wininit gibi) belirtebilir ve cmd.exe'yi sistem olarak çalıştırabilirsiniz.
+Yüksek Bütünlükte bir işlemde çalışırken, **Sistem olarak çalışan bir işlemin PID'sini belirtebilir** (örneğin winlogon, wininit) ve cmd.exe'yi sistem olarak çalıştırabilirsiniz.
 ```cpp
 impersonateuser.exe 1234
 ```

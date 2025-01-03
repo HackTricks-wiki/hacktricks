@@ -4,7 +4,7 @@
 
 ## Unconstrained delegation
 
-Bu, bir Alan Yöneticisinin alan içindeki herhangi bir **Bilgisayar** için ayarlayabileceği bir özelliktir. Daha sonra, bir **kullanıcı Bilgisayara giriş yaptığında**, o kullanıcının **TGT'sinin bir kopyası** DC tarafından sağlanan **TGS'ye gönderilecek** ve **LSASS'ta bellekte saklanacaktır**. Bu nedenle, makinede Yönetici ayrıcalıklarınız varsa, **biletleri dökebilir ve kullanıcıları taklit edebilirsiniz**.
+Bu, bir Alan Yöneticisinin alan içindeki herhangi bir **Bilgisayar** için ayarlayabileceği bir özelliktir. Daha sonra, bir **kullanıcı Bilgisayara giriş yaptığında**, o kullanıcının **TGT'sinin bir kopyası** DC tarafından sağlanan **TGS'ye gönderilecek** ve **LSASS'ta bellekte saklanacaktır**. Yani, makinede Yönetici ayrıcalıklarınız varsa, **biletleri dökebilir ve kullanıcıları taklit edebilirsiniz**.
 
 Bu nedenle, "Unconstrained Delegation" özelliği etkinleştirilmiş bir Bilgisayara giriş yapan bir alan yöneticisi varsa ve o makinede yerel yönetici ayrıcalıklarınız varsa, bileti dökebilir ve Alan Yöneticisini her yerde taklit edebilirsiniz (alan privesc).
 
@@ -30,9 +30,9 @@ Daha fazla bilgi: [https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/](htt
 ### **Force Authentication**
 
 Eğer bir saldırgan "Unconstrained Delegation" için izin verilen bir bilgisayarı **ele geçirebilirse**, bir **Yazıcı sunucusunu** **otomatik olarak giriş yapmaya** **kandırabilir** ve bu da sunucunun belleğinde bir TGT **kaydedebilir**.\
-Daha sonra, saldırgan, kullanıcı Yazıcı sunucu bilgisayar hesabını taklit etmek için **Pass the Ticket saldırısı** gerçekleştirebilir.
+Daha sonra, saldırgan **Yazıcı sunucu bilgisayar hesabını taklit etmek için Pass the Ticket saldırısı** gerçekleştirebilir.
 
-Bir yazıcı sunucusunun herhangi bir makineye giriş yapmasını sağlamak için [**SpoolSample**](https://github.com/leechristensen/SpoolSample) kullanabilirsiniz:
+Bir yazıcı sunucusunu herhangi bir makineye giriş yapması için [**SpoolSample**](https://github.com/leechristensen/SpoolSample) kullanabilirsiniz:
 ```bash
 .\SpoolSample.exe <printmachine> <unconstrinedmachine>
 ```

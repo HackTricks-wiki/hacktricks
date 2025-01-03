@@ -18,7 +18,7 @@ Bu özellik, bir DCOM uygulaması aracılığıyla bir ağ üzerinde komutların
 ```
 Bu komut DCOM uygulamasına bağlanır ve COM nesnesinin bir örneğini döndürür. ExecuteShellCommand yöntemi daha sonra uzak ana bilgisayarda bir işlemi yürütmek için çağrılabilir. İşlem aşağıdaki adımları içerir:
 
-Check methods:
+Yöntemleri kontrol et:
 ```powershell
 $com = [activator]::CreateInstance([type]::GetTypeFromProgID("MMC20.Application", "10.10.10.10"))
 $com.Document.ActiveView | Get-Member
@@ -36,7 +36,7 @@ ls \\10.10.10.10\c$\Users
 
 **Bu teknik hakkında daha fazla bilgi için orijinal gönderiyi kontrol edin [https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/](https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/)**
 
-**MMC20.Application** nesnesinin açık "LaunchPermissions" eksikliği olduğu tespit edildi ve bu, Yöneticilerin erişimine izin veren varsayılan izinlere geri dönmektedir. Daha fazla ayrıntı için bir konu [burada](https://twitter.com/tiraniddo/status/817532039771525120) incelenebilir ve açık Launch Permission olmayan nesneleri filtrelemek için [@tiraniddo](https://twitter.com/tiraniddo)’nun OleView .NET kullanımının önerildiği belirtilmiştir.
+**MMC20.Application** nesnesinin açık "LaunchPermissions" eksikliği olduğu tespit edildi ve bu, Yöneticilere erişim izni veren varsayılan izinlere geri dönmektedir. Daha fazla ayrıntı için bir konu [burada](https://twitter.com/tiraniddo/status/817532039771525120) incelenebilir ve açık Launch Permission olmayan nesneleri filtrelemek için [@tiraniddo](https://twitter.com/tiraniddo)’nun OleView .NET kullanımının önerildiği belirtilmiştir.
 
 Açık Launch Permissions eksikliği nedeniyle iki özel nesne, `ShellBrowserWindow` ve `ShellWindows`, vurgulanmıştır. `HKCR:\AppID\{guid}` altında bir `LaunchPermission` kayıt girişi olmaması, açık izinlerin olmadığını gösterir.
 
@@ -55,7 +55,7 @@ $item.Document.Application.ShellExecute("cmd.exe", "/c calc.exe", "c:\windows\sy
 
 Lateral hareket, DCOM Excel nesnelerini istismar ederek gerçekleştirilebilir. Ayrıntılı bilgi için, DCOM üzerinden lateral hareket için Excel DDE'yi kullanma konusundaki tartışmayı [Cybereason'un blogunda](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom) okumanız önerilir.
 
-Empire projesi, DCOM nesnelerini manipüle ederek uzaktan kod yürütme (RCE) için Excel'in kullanımını gösteren bir PowerShell betiği sağlar. Aşağıda, Excel'i RCE için istismar etmenin farklı yöntemlerini sergileyen [Empire'ın GitHub deposundaki](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1) betikten alıntılar bulunmaktadır:
+Empire projesi, DCOM nesnelerini manipüle ederek uzaktan kod yürütme (RCE) için Excel'in kullanımını gösteren bir PowerShell betiği sağlar. Aşağıda, RCE için Excel'i istismar etmenin farklı yöntemlerini sergileyen [Empire'ın GitHub deposundaki](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1) betikten alıntılar bulunmaktadır:
 ```powershell
 # Detection of Office version
 elseif ($Method -Match "DetectOffice") {

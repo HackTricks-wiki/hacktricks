@@ -4,28 +4,28 @@
 
 ## Integrity Levels
 
-Windows Vista ve sonraki sürümlerde, tüm korunan öğeler bir **bütünlük seviyesi** etiketi ile gelir. Bu yapılandırma, belirli klasörler ve Internet Explorer 7'nin düşük bütünlük seviyesinde yazabileceği dosyalar hariç, dosyalara ve kayıt defteri anahtarlarına genellikle "orta" bir bütünlük seviyesi atar. Varsayılan davranış, standart kullanıcılar tarafından başlatılan süreçlerin orta bütünlük seviyesine sahip olmasıdır, oysa hizmetler genellikle sistem bütünlük seviyesinde çalışır. Yüksek bir bütünlük etiketi, kök dizini korur.
+Windows Vista ve sonraki sürümlerde, tüm korunan öğeler bir **bütünlük seviyesi** etiketi ile gelir. Bu yapılandırma, belirli klasörler ve Internet Explorer 7'nin düşük bütünlük seviyesinde yazabileceği dosyalar hariç, dosyalara ve kayıt defteri anahtarlarına genellikle "orta" bütünlük seviyesi atar. Varsayılan davranış, standart kullanıcılar tarafından başlatılan süreçlerin orta bütünlük seviyesine sahip olmasıdır, oysa hizmetler genellikle sistem bütünlük seviyesinde çalışır. Yüksek bütünlük etiketi, kök dizini korur.
 
 Ana kural, nesnelerin, nesnenin seviyesinden daha düşük bir bütünlük seviyesine sahip süreçler tarafından değiştirilemeyeceğidir. Bütünlük seviyeleri şunlardır:
 
 - **Güvenilmez**: Bu seviye, anonim oturum açma ile çalışan süreçler içindir. %%%Örnek: Chrome%%%
-- **Düşük**: Temelde internet etkileşimleri için, özellikle Internet Explorer'ın Korunan Modu'nda, ilişkili dosyaları ve süreçleri etkileyen ve **Geçici İnternet Klasörü** gibi belirli klasörler için. Düşük bütünlük seviyesine sahip süreçler, kayıt defteri yazma erişimi olmaması ve sınırlı kullanıcı profili yazma erişimi dahil olmak üzere önemli kısıtlamalarla karşılaşır.
+- **Düşük**: Temelde internet etkileşimleri için, özellikle Internet Explorer'ın Korunan Modu'nda, ilişkili dosyaları ve süreçleri etkileyen ve **Geçici İnternet Klasörü** gibi belirli klasörler için. Düşük bütünlük seviyesine sahip süreçler, kayıt defterine yazma erişimi olmaması ve sınırlı kullanıcı profili yazma erişimi dahil olmak üzere önemli kısıtlamalarla karşılaşır.
 - **Orta**: Çoğu etkinlik için varsayılan seviye, standart kullanıcılara ve belirli bütünlük seviyeleri olmayan nesnelere atanır. Yöneticiler grubunun üyeleri bile varsayılan olarak bu seviyede çalışır.
 - **Yüksek**: Yöneticiler için ayrılmıştır, onlara daha düşük bütünlük seviyelerine sahip nesneleri değiştirme yetkisi verir, bunlar yüksek seviyedeki nesneleri de içerir.
-- **Sistem**: Windows çekirdeği ve temel hizmetler için en yüksek operasyonel seviyedir, yöneticiler için bile erişilemez, kritik sistem işlevlerinin korunmasını sağlar.
-- **Yükleyici**: Diğer tüm seviyelerin üzerinde yer alan benzersiz bir seviyedir, bu seviyedeki nesnelerin herhangi bir diğer nesneyi kaldırmasına olanak tanır.
+- **Sistem**: Windows çekirdeği ve temel hizmetler için en yüksek operasyonel seviyedir, yöneticiler için bile erişilemez, hayati sistem işlevlerinin korunmasını sağlar.
+- **Kurulumcu**: Diğer tüm seviyelerin üzerinde yer alan benzersiz bir seviyedir, bu seviyedeki nesnelerin herhangi bir diğer nesneyi kaldırmasına olanak tanır.
 
-Bir sürecin bütünlük seviyesini **Sysinternals**'dan **Process Explorer** kullanarak, sürecin **özelliklerine** erişip "**Güvenlik**" sekmesine bakarak öğrenebilirsiniz:
+Bir sürecin bütünlük seviyesini **Sysinternals**'dan **Process Explorer** kullanarak alabilirsiniz, sürecin **özelliklerine** erişip "**Güvenlik**" sekmesine bakarak:
 
 ![](<../../images/image (824).png>)
 
-Ayrıca `whoami /groups` komutunu kullanarak **mevcut bütünlük seviyenizi** de öğrenebilirsiniz.
+Ayrıca `whoami /groups` komutunu kullanarak **mevcut bütünlük seviyenizi** de alabilirsiniz.
 
 ![](<../../images/image (325).png>)
 
 ### Integrity Levels in File-system
 
-Dosya sistemindeki bir nesne, bir **minimum bütünlük seviyesi gereksinimi** gerektirebilir ve eğer bir süreç bu bütünlük seviyesine sahip değilse, onunla etkileşimde bulunamayacaktır.\
+Dosya sistemindeki bir nesne, **minimum bütünlük seviyesi gereksinimi** gerektirebilir ve bir süreç bu bütünlük seviyesine sahip değilse, onunla etkileşimde bulunamayacaktır.\
 Örneğin, **standart bir kullanıcı konsolundan bir dosya oluşturalım ve izinleri kontrol edelim**:
 ```
 echo asd >asd.txt
@@ -66,7 +66,7 @@ Access is denied.
 
 ### Binaries'deki Bütünlük Seviyeleri
 
-`cmd.exe` dosyasının bir kopyasını `C:\Windows\System32\cmd-low.exe` olarak oluşturdum ve ona **bir yönetici konsolundan düşük bir bütünlük seviyesi ayarladım:**
+`cmd.exe` dosyasının bir kopyasını `C:\Windows\System32\cmd-low.exe` olarak oluşturdum ve ona **bir yönetici konsolundan düşük bir bütünlük seviyesi atadım:**
 ```
 icacls C:\Windows\System32\cmd-low.exe
 C:\Windows\System32\cmd-low.exe NT AUTHORITY\SYSTEM:(I)(F)
@@ -76,15 +76,15 @@ APPLICATION PACKAGE AUTHORITY\ALL APPLICATION PACKAGES:(I)(RX)
 APPLICATION PACKAGE AUTHORITY\ALL RESTRICTED APP PACKAGES:(I)(RX)
 Mandatory Label\Low Mandatory Level:(NW)
 ```
-Şimdi, `cmd-low.exe` çalıştırdığımda, **orta bir seviyede değil, düşük bir bütünlük seviyesinde çalışacak**:
+Şimdi, `cmd-low.exe` çalıştırdığımda, **orta yerine düşük bir bütünlük seviyesi altında çalışacak**:
 
 ![](<../../images/image (313).png>)
 
-Meraklılar için, bir ikili dosyaya yüksek bütünlük seviyesi atarsanız (`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`), otomatik olarak yüksek bütünlük seviyesinde çalışmayacaktır (orta bütünlük seviyesinden çağırırsanız --varsayılan olarak-- orta bütünlük seviyesinde çalışacaktır).
+Meraklılar için, bir ikili dosyaya yüksek bütünlük seviyesi atarsanız (`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`), otomatik olarak yüksek bütünlük seviyesi ile çalışmayacaktır (orta bütünlük seviyesinden çağırırsanız --varsayılan olarak-- orta bütünlük seviyesi altında çalışacaktır).
 
 ### Süreçlerde Bütünlük Seviyeleri
 
-Tüm dosya ve klasörlerin minimum bir bütünlük seviyesi yoktur, **ancak tüm süreçler bir bütünlük seviyesinde çalışmaktadır**. Ve dosya sistemiyle olan benzer bir şekilde, **bir süreç başka bir süreç içinde yazmak istiyorsa en az aynı bütünlük seviyesine sahip olmalıdır**. Bu, düşük bütünlük seviyesine sahip bir sürecin, orta bütünlük seviyesine sahip bir sürece tam erişimle bir tanıtıcı açamayacağı anlamına gelir.
+Tüm dosya ve klasörlerin minimum bir bütünlük seviyesi yoktur, **ancak tüm süreçler bir bütünlük seviyesi altında çalışmaktadır**. Ve dosya sistemiyle olan benzer bir şekilde, **bir süreç başka bir süreç içinde yazmak istiyorsa en az aynı bütünlük seviyesine sahip olmalıdır**. Bu, düşük bütünlük seviyesine sahip bir sürecin, orta bütünlük seviyesine sahip bir sürece tam erişim ile bir tanıtıcı açamayacağı anlamına gelir.
 
 Bu ve önceki bölümde belirtilen kısıtlamalar nedeniyle, güvenlik açısından, her zaman **bir süreci mümkün olan en düşük bütünlük seviyesinde çalıştırmak önerilir**.
 

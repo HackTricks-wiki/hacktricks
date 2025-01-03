@@ -25,7 +25,7 @@
 >
 > - **Bu kaynaklar için çok teşekkür ederim, size nasıl teşekkür edebilirim?**
 
-Bu kaynakları bir araya getiren HackTricks ekiplerine [**@hacktricks_live**](https://twitter.com/hacktricks_live) şeklinde bir tweet atarak kamuya açık bir şekilde teşekkür edebilirsiniz.\
+HackTricks ekiplerine bu kaynakları bir tweet ile [**@hacktricks_live**](https://twitter.com/hacktricks_live) olarak bahsederek kamuya açık bir şekilde teşekkür edebilirsiniz.\
 Eğer özellikle minnettar iseniz, [**projeyi burada destekleyebilirsiniz**](https://github.com/sponsors/carlospolop).\
 Ve Github projelerine **bir yıldız vermeyi unutmayın!** (Aşağıdaki bağlantıları bulun).
 
@@ -44,7 +44,7 @@ Github projelerine **bir yıldız vermeyi unutmayın!**
 >
 > - **HackTricks'ten bazı içerikleri kopyalayıp bloguma koyabilir miyim?**
 
-Evet, yapabilirsiniz, ancak **içeriğin alındığı belirli bağlantıları** belirtmeyi unutmayın.
+Evet, koyabilirsiniz, ancak **içeriğin alındığı belirli bağlantıları** belirtmeyi unutmayın.
 
 > [!TIP]
 >
@@ -78,11 +78,11 @@ Eğer HackTricks kitaplarının **ticari amaçlar** için yapıldığını düş
 
 Sponsorlarımız var çünkü, tüm içerik **ÜCRETSİZ** olsa da, topluluğa **çalışmamızı takdir etme imkanı sunmak** istiyoruz. Bu nedenle, insanlara HackTricks'e [**Github sponsorları**](https://github.com/sponsors/carlospolop) aracılığıyla bağış yapma seçeneği sunuyoruz ve **ilgili siber güvenlik şirketleri** HackTricks'i sponsor olarak destekleyip kitapta **bazı reklamlar** bulundurabiliyor, bu **reklamlar** her zaman görünür yerlerde ama öğrenme sürecini **rahatsız etmeyecek** şekilde yerleştirilmektedir.
 
-HackTricks'i, HackTricks'ten çok daha az içeriğe sahip diğer bloglar gibi rahatsız edici reklamlarla dolu bulamayacaksınız, çünkü HackTricks ticari amaçlar için yapılmamıştır.
+HackTricks, HackTricks'ten çok daha az içeriğe sahip diğer bloglar gibi rahatsız edici reklamlarla dolu değildir çünkü HackTricks ticari amaçlar için yapılmamıştır.
 
 > [!CAUTION]
 >
-> - **Eğer bazı HackTricks sayfası blog yazıma dayanıyorsa ama referans verilmemişse ne yapmalıyım?**
+> - **Eğer bazı HackTricks sayfaları blog yazıma dayanıyorsa ama referans verilmemişse ne yapmalıyım?**
 
 **Çok üzgünüz. Bu olmamalıydı**. Lütfen, HackTricks sayfasının içeriği ile birlikte blogunuzun linkini Github sorunları, Twitter, Discord... aracılığıyla bize bildirin ve **bunu kontrol edip en kısa sürede ekleyeceğiz**.
 
@@ -90,11 +90,11 @@ HackTricks'i, HackTricks'ten çok daha az içeriğe sahip diğer bloglar gibi ra
 >
 > - **Eğer HackTricks'te blogumdan içerik varsa ve orada olmasını istemiyorsam ne yapmalıyım?**
 
-HackTricks'te sayfanıza bağlantıların bulunmasının:
+HackTricks'te sayfanıza bağlantı olmasının:
 
-- **SEO**'nuzu iyileştirdiğini
-- İçeriğin **15'ten fazla dile** çevrildiğini ve daha fazla insanın bu içeriğe erişim sağladığını
-- **HackTricks'in** insanları **sayfanızı kontrol etmeye** teşvik ettiğini (birçok kişi, HackTricks'te sayfalarının bulunmasının ardından daha fazla ziyaret aldıklarını belirtti)
+- **SEO**'nu geliştirir
+- İçerik **15'ten fazla dile** çevrilir, bu da daha fazla insanın bu içeriğe erişmesini sağlar
+- **HackTricks**, insanların **sayfanızı kontrol etmelerini** teşvik eder (birçok kişi, HackTricks'te bazı sayfalarının bulunması nedeniyle daha fazla ziyaret aldıklarını belirtmiştir)
 
 Ancak, eğer blogunuzun içeriğinin HackTricks'ten kaldırılmasını istiyorsanız, sadece bize bildirin ve kesinlikle **blogunuza olan her bağlantıyı** ve buna dayanan her içeriği **kaldıracağız**.
 
@@ -102,7 +102,7 @@ Ancak, eğer blogunuzun içeriğinin HackTricks'ten kaldırılmasını istiyorsa
 >
 > - **Eğer HackTricks'te kopyala-yapıştır içerik bulursam ne yapmalıyım?**
 
-Her zaman **orijinal yazarlara tüm kredileri veriyoruz**. Eğer orijinal kaynak belirtilmeden kopyala-yapıştır içerik içeren bir sayfa bulursanız, bize bildirin ve ya **kaldıracağız**, **metnin önüne bağlantıyı ekleyeceğiz**, ya da **bağlantıyı ekleyerek yeniden yazacağız**.
+Her zaman **orijinal yazarlara tüm kredileri veriyoruz**. Eğer orijinal kaynak belirtilmeden kopyala-yapıştır içerik içeren bir sayfa bulursanız, lütfen bize bildirin ve ya **kaldıracağız**, ya **metnin önüne bağlantıyı ekleyeceğiz**, ya da **bağlantıyı ekleyerek yeniden yazacağız**.
 
 ## LICENSE
 
@@ -130,14 +130,14 @@ Bu lisans, içeriğe ilişkin herhangi bir ticari marka veya marka hakları verm
 ## **Açıklama**
 
 > [!CAUTION]
-> Bu kitap, 'HackTricks', yalnızca eğitim ve bilgilendirme amaçlıdır. Bu kitap içindeki içerik, 'olduğu gibi' esasına dayanmaktadır ve yazarlar ve yayıncılar, bu kitapta yer alan bilgilerin, ürünlerin, hizmetlerin veya ilgili grafiklerin tamlığı, doğruluğu, güvenilirliği, uygunluğu veya kullanılabilirliği hakkında herhangi bir türde, açık veya zımni, herhangi bir beyan veya garanti vermez. Bu tür bilgilere dayanarak yaptığınız herhangi bir güven, tamamen kendi riskinizdedir.
+> Bu kitap, 'HackTricks', yalnızca eğitim ve bilgilendirme amaçlıdır. Bu kitap içindeki içerik, 'olduğu gibi' sağlanmaktadır ve yazarlar ve yayıncılar, bu kitapta yer alan bilgilerin, ürünlerin, hizmetlerin veya ilgili grafiklerin tamlığı, doğruluğu, güvenilirliği, uygunluğu veya kullanılabilirliği hakkında herhangi bir türde, açık veya zımni, herhangi bir beyan veya garanti vermez. Bu tür bilgilere dayanarak yaptığınız herhangi bir güven, tamamen kendi riskinizdedir.
 >
-> Yazarlar ve yayıncılar, bu kitabın kullanımından kaynaklanan veya bununla bağlantılı olarak veri kaybı veya kar kaybı dahil ancak bunlarla sınırlı olmamak üzere, herhangi bir kayıp veya zarardan sorumlu tutulamaz.
+> Yazarlar ve yayıncılar, bu kitabın kullanımından kaynaklanan veri kaybı veya kar kaybı dahil, dolaylı veya sonuç olarak ortaya çıkan herhangi bir kayıp veya zarardan, ya da bu kitaptan kaynaklanan veya bağlantılı herhangi bir kayıp veya zarardan sorumlu tutulamaz.
 >
-> Ayrıca, bu kitapta açıklanan teknikler ve ipuçları yalnızca eğitim ve bilgilendirme amaçlıdır ve herhangi bir yasa dışı veya kötü niyetli faaliyetler için kullanılmamalıdır. Yazarlar ve yayıncılar, herhangi bir yasa dışı veya etik olmayan faaliyetleri onaylamaz veya desteklemez ve bu kitapta yer alan bilgilerin herhangi bir kullanımı, kullanıcının kendi riskine ve takdirine bağlıdır.
+> Ayrıca, bu kitapta açıklanan teknikler ve ipuçları yalnızca eğitim ve bilgilendirme amaçlıdır ve herhangi bir yasa dışı veya kötü niyetli faaliyet için kullanılmamalıdır. Yazarlar ve yayıncılar, herhangi bir yasa dışı veya etik olmayan faaliyetleri onaylamaz veya desteklemez ve bu kitapta yer alan bilgilerin herhangi bir kullanımı, kullanıcının kendi riskine ve takdirine bağlıdır.
 >
 > Kullanıcı, bu kitapta yer alan bilgilere dayanarak alınan herhangi bir eylemden tamamen sorumludur ve burada açıklanan teknikleri veya ipuçlarını uygulamaya çalışırken her zaman profesyonel tavsiye ve yardım almalıdır.
 >
-> Bu kitabı kullanarak, kullanıcı, yazarları ve yayıncıları, bu kitabın kullanımından kaynaklanabilecek herhangi bir zarar, kayıp veya zarar için her türlü sorumluluktan muaf tutmayı kabul eder.
+> Bu kitabı kullanarak, kullanıcı, yazarları ve yayıncıları, bu kitabın veya içindeki bilgilerin kullanımından kaynaklanabilecek herhangi bir zarar, kayıp veya zarardan sorumluluktan muaf tutmayı kabul eder.
 
 {{#include ../banners/hacktricks-training.md}}

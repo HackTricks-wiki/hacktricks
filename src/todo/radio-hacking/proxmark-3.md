@@ -9,8 +9,8 @@ Yapmanız gereken ilk şey bir [**Proxmark3**](https://proxmark.com) edinmek ve 
 ### MIFARE Classic 1KB'ye Saldırma
 
 **16 sektör** vardır, her birinde **4 blok** ve her blokta **16B** bulunur. UID, sektör 0 blok 0'da (ve değiştirilemez).\
-Her sektöre erişmek için **2 anahtara** (**A** ve **B**) ihtiyacınız var, bunlar **her sektörün blok 3'ünde** saklanır (sektör trailer). Sektör trailer ayrıca **erişim bitlerini** saklar, bu bitler **her blokta** 2 anahtarı kullanarak **okuma ve yazma** izinleri verir.\
-2 anahtar, ilkini biliyorsanız okumak için ve ikincisini biliyorsanız yazmak için izin vermek için kullanışlıdır (örneğin).
+Her sektöre erişmek için **2 anahtar** (**A** ve **B**) gerekir, bunlar **her sektörün blok 3'ünde** (sektör trailer) saklanır. Sektör trailer ayrıca **okuma ve yazma** izinlerini veren **erişim bitlerini** saklar.\
+2 anahtar, ilkini biliyorsanız okumak ve ikincisini biliyorsanız yazmak için izin vermek için kullanışlıdır (örneğin).
 
 Birçok saldırı gerçekleştirilebilir.
 ```bash
@@ -49,10 +49,10 @@ Bu bilgilerle kart hakkında ve onunla iletişim kurma yöntemi hakkında bilgi 
 
 ### Scriptler
 
-Proxmark3 yazılımı, basit görevleri yerine getirmek için kullanabileceğiniz önceden yüklenmiş bir **otomasyon scriptleri** listesi ile birlikte gelir. Tam listeyi almak için `script list` komutunu kullanın. Ardından, script'in adını takip eden `script run` komutunu kullanın:
+Proxmark3 yazılımı, basit görevleri yerine getirmek için kullanabileceğiniz önceden yüklenmiş bir **otomasyon scriptleri** listesi ile birlikte gelir. Tam listeyi almak için `script list` komutunu kullanın. Ardından, scriptin adını takip eden `script run` komutunu kullanın:
 ```
 proxmark3> script run mfkeys
 ```
-Bir **fuzz tag okuyucuları** oluşturmak için bir script yazabilirsiniz, böylece bir **geçerli kartın** verilerini kopyalamak için sadece bir **Lua scripti** yazın, bir veya daha fazla rastgele **baytı** rastgeleleştirip **okuyucunun çöküp çökmediğini** kontrol edin. 
+Bir **fuzz tag okuyucuları** için bir script oluşturabilirsiniz, böylece bir **geçerli kartın** verilerini kopyalamak için sadece bir **Lua scripti** yazın, bir veya daha fazla rastgele **baytı** rastgeleleştirip **okuyucunun çöküp çökmediğini** kontrol edin. 
 
 {{#include ../../banners/hacktricks-training.md}}

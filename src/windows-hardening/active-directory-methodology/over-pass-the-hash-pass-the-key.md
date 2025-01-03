@@ -5,9 +5,9 @@
 
 ## Overpass The Hash/Pass The Key (PTK)
 
-**Overpass The Hash/Pass The Key (PTK)** saldırısı, geleneksel NTLM protokolünün kısıtlandığı ve Kerberos kimlik doğrulamasının öncelik kazandığı ortamlara yönelik tasarlanmıştır. Bu saldırı, bir kullanıcının NTLM hash'ini veya AES anahtarlarını kullanarak Kerberos biletleri talep eder ve bu sayede bir ağ içindeki kaynaklara yetkisiz erişim sağlar.
+**Overpass The Hash/Pass The Key (PTK)** saldırısı, geleneksel NTLM protokolünün kısıtlandığı ve Kerberos kimlik doğrulamasının öncelik kazandığı ortamlara yönelik olarak tasarlanmıştır. Bu saldırı, bir kullanıcının NTLM hash'ini veya AES anahtarlarını kullanarak Kerberos biletleri talep eder ve bu sayede bir ağ içindeki kaynaklara yetkisiz erişim sağlar.
 
-Bu saldırıyı gerçekleştirmek için ilk adım, hedef kullanıcının hesabının NTLM hash'ini veya şifresini edinmektir. Bu bilgiyi güvence altına aldıktan sonra, hesap için bir Ticket Granting Ticket (TGT) alınabilir ve bu da saldırganın kullanıcının izinlerine sahip olduğu hizmetlere veya makinelere erişmesini sağlar.
+Bu saldırıyı gerçekleştirmek için ilk adım, hedef kullanıcının hesabının NTLM hash'ini veya şifresini edinmektir. Bu bilgiyi güvence altına aldıktan sonra, hesap için bir Ticket Granting Ticket (TGT) alınabilir ve bu da saldırganın kullanıcının izinleri olan hizmetlere veya makinelere erişmesine olanak tanır.
 
 İşlem, aşağıdaki komutlarla başlatılabilir:
 ```bash
@@ -24,7 +24,7 @@ Rubeus.exe kullanarak alternatif bir komut dizisi, bu tekniğin başka bir yön�
 .\Rubeus.exe asktgt /domain:jurassic.park /user:velociraptor /rc4:2a3de7fe356ee524cc9f3d579f2e0aa7 /ptt
 .\PsExec.exe -accepteula \\labwws02.jurassic.park cmd
 ```
-Bu yöntem, kimlik doğrulama amaçları için bileti doğrudan ele geçirme ve kullanma üzerine odaklanan **Pass the Key** yaklaşımını yansıtır. Bir TGT isteğinin başlatılmasının, varsayılan olarak RC4-HMAC kullanımını belirten `4768: A Kerberos authentication ticket (TGT) was requested` olayını tetiklediğini belirtmek önemlidir; ancak modern Windows sistemleri AES256'yı tercih etmektedir.
+Bu yöntem, kimlik doğrulama amaçları için bileti doğrudan ele geçirme ve kullanma odaklı **Pass the Key** yaklaşımını yansıtır. Bir TGT isteğinin başlatılmasının, varsayılan olarak RC4-HMAC kullanımını belirten `4768: A Kerberos authentication ticket (TGT) was requested` olayını tetiklediğini belirtmek önemlidir; ancak modern Windows sistemleri AES256'yı tercih etmektedir.
 
 Operasyonel güvenliğe uymak ve AES256 kullanmak için aşağıdaki komut uygulanabilir:
 ```bash

@@ -38,7 +38,7 @@ Aşağıdaki adımlar, U-boot gibi cihaz başlangıç yapılandırmalarını ve 
 
 6. **Dikkatli Donanım Müdahalesi**:
 
-- Cihazın başlatma sırası sırasında bir pini toprağa bağlarken ve SPI veya NAND flash yongaları ile etkileşimde bulunurken dikkatli olun, özellikle çekirdek açılmadan önce. Pinleri kısa devre yapmadan önce NAND flash yongasının veri sayfasını kontrol edin.
+- Cihazın başlatma sırası sırasında bir pini toprağa bağlarken ve SPI veya NAND flash yongaları ile etkileşimde bulunurken dikkatli olun, özellikle çekirdek açılmadan önce. Pinleri kısaltmadan önce NAND flash yongasının veri sayfasını kontrol edin.
 
 7. **Sahte DHCP Sunucusu Yapılandırın**:
 - PXE başlatma sırasında bir cihazın alması için kötü niyetli parametrelerle sahte bir DHCP sunucusu kurun. Metasploit'in (MSF) DHCP yardımcı sunucusu gibi araçları kullanın. 'FILENAME' parametresini `'a";/bin/sh;#'` gibi komut enjeksiyon komutları ile değiştirerek cihaz başlangıç prosedürleri için giriş doğrulamasını test edin.

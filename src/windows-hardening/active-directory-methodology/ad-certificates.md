@@ -8,24 +8,24 @@
 
 - Sertifikanın **Sahibi**, sertifikanın sahibini belirtir.
 - **Açık Anahtar**, sertifikayı gerçek sahibine bağlamak için özel bir anahtarla eşleştirilir.
-- **Geçerlilik Süresi**, **NotBefore** ve **NotAfter** tarihleriyle tanımlanır ve sertifikanın etkin süresini işaret eder.
+- **Geçerlilik Süresi**, **NotBefore** ve **NotAfter** tarihleri ile tanımlanır ve sertifikanın etkin süresini işaret eder.
 - Sertifikayı tanımlayan benzersiz bir **Seri Numarası**, Sertifika Otoritesi (CA) tarafından sağlanır.
 - **Verici**, sertifikayı veren CA'yı ifade eder.
 - **SubjectAlternativeName**, kimlik tanımlama esnekliğini artırarak konu için ek adlar sağlar.
 - **Temel Kısıtlamalar**, sertifikanın bir CA veya son varlık için olup olmadığını belirler ve kullanım kısıtlamalarını tanımlar.
 - **Genişletilmiş Anahtar Kullanımları (EKU'lar)**, sertifikanın belirli amaçlarını, örneğin kod imzalama veya e-posta şifreleme, Nesne Tanımlayıcıları (OID'ler) aracılığıyla belirler.
 - **İmza Algoritması**, sertifikayı imzalamak için kullanılan yöntemi belirtir.
-- **İmza**, vericinin özel anahtarıyla oluşturulur ve sertifikanın doğruluğunu garanti eder.
+- **İmza**, vericinin özel anahtarı ile oluşturulur ve sertifikanın doğruluğunu garanti eder.
 
 ### Özel Hususlar
 
-- **Subject Alternative Names (SAN'lar)**, bir sertifikanın birden fazla kimliğe uygulanabilirliğini genişletir, bu da birden fazla alan adı olan sunucular için kritik öneme sahiptir. Güvenli verilme süreçleri, saldırganların SAN spesifikasyonunu manipüle etmesiyle kimlik taklit risklerini önlemek için hayati öneme sahiptir.
+- **Subject Alternative Names (SAN'lar)**, bir sertifikanın birden fazla kimliğe uygulanabilirliğini genişletir, bu da birden fazla alan adı olan sunucular için kritik öneme sahiptir. Güvenli verilme süreçleri, saldırganların SAN spesifikasyonunu manipüle ederek kimlik taklidi risklerini önlemek için hayati öneme sahiptir.
 
-### Aktif Dizin (AD) İçindeki Sertifika Otoriteleri (CA'lar)
+### Aktif Dizin (AD) İçindeki Sertifika Otoriteleri (CA)
 
 AD CS, AD ormanında CA sertifikalarını belirlenmiş konteynerler aracılığıyla tanır; her biri benzersiz roller üstlenir:
 
-- **Sertifika Otoriteleri** konteyneri, güvenilir kök CA sertifikalarını barındırır.
+- **Sertifika Otoriteleri** konteyneri, güvenilir kök CA sertifikalarını tutar.
 - **Kayıt Hizmetleri** konteyneri, Kurumsal CA'lar ve sertifika şablonlarını detaylandırır.
 - **NTAuthCertificates** nesnesi, AD kimlik doğrulaması için yetkilendirilmiş CA sertifikalarını içerir.
 - **AIA (Otorite Bilgi Erişimi)** konteyneri, ara ve çapraz CA sertifikaları ile sertifika zinciri doğrulamasını kolaylaştırır.
@@ -35,7 +35,7 @@ AD CS, AD ormanında CA sertifikalarını belirlenmiş konteynerler aracılığ�
 1. Talep süreci, istemcilerin bir Kurumsal CA bulmasıyla başlar.
 2. Bir açık anahtar ve diğer detayları içeren bir CSR oluşturulur, ardından bir açık-özel anahtar çifti üretilir.
 3. CA, mevcut sertifika şablonlarına karşı CSR'yi değerlendirir ve şablonun izinlerine dayanarak sertifikayı verir.
-4. Onaylandığında, CA sertifikayı özel anahtarıyla imzalar ve istemciye geri gönderir.
+4. Onaylandığında, CA sertifikayı özel anahtarı ile imzalar ve istemciye geri gönderir.
 
 ### Sertifika Şablonları
 
@@ -49,11 +49,11 @@ Bir istemcinin sertifika talep edebilmesi için, **kayıt hakları** verilmelidi
 
 ### Şablon Kayıt Hakları
 
-Bu haklar, belirli izinleri detaylandıran Erişim Kontrol Girişleri (ACE'ler) aracılığıyla belirtilir:
+Bu haklar, izinleri detaylandıran Erişim Kontrol Girişleri (ACE'ler) aracılığıyla belirtilir:
 
 - **Sertifika-Kayıt** ve **Sertifika-Otomatik Kayıt** hakları, her biri belirli GUID'lerle ilişkilidir.
 - **GenişletilmişHaklar**, tüm genişletilmiş izinlere izin verir.
-- **TamKontrol/GenericAll**, şablon üzerinde tam kontrol sağlar.
+- **TamKontrol/GeniGenericAll**, şablon üzerinde tam kontrol sağlar.
 
 ### Kurumsal CA Kayıt Hakları
 
@@ -73,8 +73,8 @@ Sertifikalar şu yollarla talep edilebilir:
 1. **Windows İstemci Sertifika Kayıt Protokolü** (MS-WCCE), DCOM arayüzlerini kullanarak.
 2. **ICertPassage Uzak Protokolü** (MS-ICPR), adlandırılmış borular veya TCP/IP aracılığıyla.
 3. **Sertifika kayıt web arayüzü**, Sertifika Otoritesi Web Kayıt rolü yüklü olduğunda.
-4. **Sertifika Kayıt Servisi** (CES), Sertifika Kayıt Politikası (CEP) servisi ile birlikte.
-5. **Ağ Cihazı Kayıt Servisi** (NDES), ağ cihazları için, Basit Sertifika Kayıt Protokolü (SCEP) kullanarak.
+4. **Sertifika Kayıt Hizmeti** (CES), Sertifika Kayıt Politikası (CEP) hizmeti ile birlikte.
+5. **Ağ Cihazı Kayıt Hizmeti** (NDES), ağ cihazları için, Basit Sertifika Kayıt Protokolü (SCEP) kullanarak.
 
 Windows kullanıcıları ayrıca GUI (`certmgr.msc` veya `certlm.msc`) veya komut satırı araçları (`certreq.exe` veya PowerShell'in `Get-Certificate` komutu) aracılığıyla sertifika talep edebilir.
 ```powershell
@@ -95,11 +95,11 @@ güvenilirliği sağlamak için merkezi bir öneme sahiptir.
 
 ### Güvenli Kanal (Schannel) Kimlik Doğrulaması
 
-Schannel, bir el sıkışma sırasında istemcinin, başarılı bir şekilde doğrulanırsa erişimi yetkilendiren bir sertifika sunduğu güvenli TLS/SSL bağlantılarını kolaylaştırır. Bir sertifikanın bir AD hesabına eşlenmesi, Kerberos'un **S4U2Self** işlevini veya sertifikanın **Subject Alternative Name (SAN)**'ini içeren diğer yöntemleri içerebilir.
+Schannel, bir el sıkışma sırasında istemcinin, başarılı bir şekilde doğrulandığında erişimi yetkilendiren bir sertifika sunduğu güvenli TLS/SSL bağlantılarını kolaylaştırır. Bir sertifikanın bir AD hesabına eşlenmesi, Kerberos'un **S4U2Self** işlevini veya sertifikanın **Subject Alternative Name (SAN)**'ini içeren diğer yöntemleri içerebilir.
 
 ### AD Sertifika Hizmetleri Sayımı
 
-AD'nin sertifika hizmetleri, **Enterprise Certificate Authorities (CAs)** ve bunların yapılandırmaları hakkında bilgi ortaya çıkaran LDAP sorguları aracılığıyla sayılabilir. Bu, özel ayrıcalıklara sahip olmadan herhangi bir alan kimlik doğrulamalı kullanıcı tarafından erişilebilir. **[Certify](https://github.com/GhostPack/Certify)** ve **[Certipy](https://github.com/ly4k/Certipy)** gibi araçlar, AD CS ortamlarında sayım ve güvenlik açığı değerlendirmesi için kullanılır.
+AD'nin sertifika hizmetleri, **Enterprise Certificate Authorities (CAs)** ve bunların yapılandırmaları hakkında bilgi açığa çıkaran LDAP sorguları aracılığıyla sayılabilir. Bu, özel ayrıcalıklara sahip olmadan herhangi bir alan kimlik doğrulama kullanıcısı tarafından erişilebilir. **[Certify](https://github.com/GhostPack/Certify)** ve **[Certipy](https://github.com/ly4k/Certipy)** gibi araçlar, AD CS ortamlarında sayım ve güvenlik açığı değerlendirmesi için kullanılır.
 
 Bu araçları kullanmak için komutlar şunlardır:
 ```bash

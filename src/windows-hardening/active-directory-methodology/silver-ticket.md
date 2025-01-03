@@ -6,7 +6,7 @@
 
 ## Silver ticket
 
-**Silver Ticket** saldırısı, Active Directory (AD) ortamlarında hizmet biletlerinin istismarını içerir. Bu yöntem, **bir hizmet hesabının NTLM hash'ini elde etmeye** dayanır, örneğin bir bilgisayar hesabı, bir Ticket Granting Service (TGS) bileti oluşturmak için. Bu sahte bilet ile bir saldırgan, ağdaki belirli hizmetlere erişebilir, **herhangi bir kullanıcıyı taklit ederek**, genellikle yönetici ayrıcalıkları elde etmeyi hedefler. Biletleri sahtelemek için AES anahtarlarının kullanılmasının daha güvenli ve daha az tespit edilebilir olduğu vurgulanmaktadır.
+**Silver Ticket** saldırısı, Active Directory (AD) ortamlarında hizmet biletlerinin istismarını içerir. Bu yöntem, **bir hizmet hesabının NTLM hash'ini elde etmeye** dayanır, örneğin bir bilgisayar hesabı, bir Ticket Granting Service (TGS) bileti oluşturmak için. Bu sahte bilet ile bir saldırgan, ağdaki belirli hizmetlere erişebilir, **herhangi bir kullanıcıyı taklit ederek**, genellikle yönetici ayrıcalıkları elde etmeyi hedefler. Biletleri oluştururken AES anahtarlarının kullanılmasının daha güvenli ve daha az tespit edilebilir olduğu vurgulanmaktadır.
 
 Bilet oluşturma için, işletim sistemine bağlı olarak farklı araçlar kullanılmaktadır:
 
@@ -32,7 +32,7 @@ CIFS servisi, kurbanın dosya sistemine erişim için yaygın bir hedef olarak �
 
 ## Mevcut Hizmetler
 
-| Hizmet Türü                                | Hizmet Gümüş Biletler                                                    |
+| Hizmet Türü                                | Hizmet Gümüş Biletleri                                                   |
 | ------------------------------------------ | ------------------------------------------------------------------------ |
 | WMI                                        | <p>HOST</p><p>RPCSS</p>                                                |
 | PowerShell Uzak Bağlantı                  | <p>HOST</p><p>HTTP</p><p>İşletim sistemine bağlı olarak ayrıca:</p><p>WSMAN</p><p>RPCSS</p> |
@@ -97,7 +97,7 @@ Invoke-WmiMethod win32_process -ComputerName $Computer -name create -argumentlis
 #You can also use wmic
 wmic remote.computer.local list full /format:list
 ```
-Daha fazla **wmiexec hakkında bilgi** için aşağıdaki sayfayı ziyaret edin:
+Daha fazla bilgi için **wmiexec** hakkında aşağıdaki sayfayı inceleyin:
 
 {{#ref}}
 ../lateral-movement/wmiexec.md

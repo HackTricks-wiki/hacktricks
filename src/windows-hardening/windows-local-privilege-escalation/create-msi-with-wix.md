@@ -4,7 +4,7 @@
 
 MSI yükleyicisinin oluşturulması wixtools kullanılarak yapılacaktır, özellikle [wixtools](http://wixtoolset.org) kullanılacaktır. Alternatif MSI oluşturucularının denendiği, ancak bu özel durumda başarılı olunamadığı belirtilmelidir.
 
-Wix MSI kullanım örnekleri hakkında kapsamlı bir anlayış için, [bu sayfayı](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with) incelemeniz önerilir. Burada, wix MSI kullanımını gösteren çeşitli örnekler bulabilirsiniz.
+Wix MSI kullanım örnekleri hakkında kapsamlı bir anlayış için, [bu sayfaya](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with) danışılması önerilir. Burada, wix MSI kullanımını gösteren çeşitli örnekler bulabilirsiniz.
 
 Amaç, lnk dosyasını çalıştıracak bir MSI oluşturmaktır. Bunu başarmak için aşağıdaki XML kodu kullanılabilir ([xml buradan](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)):
 ```markup
@@ -52,7 +52,7 @@ light.exe -out C:\tm\Ethereal\rick.msi C:\tmp\wix
 ```
 Önceki komutla benzer şekilde, komutu ve çıktısını gösteren bir resim gönderide yer almaktadır.
 
-Bu özetin değerli bilgiler sağlamayı amaçladığını lütfen unutmayın, ancak daha kapsamlı detaylar ve doğru talimatlar için orijinal gönderiye başvurulması önerilir.
+Bu özetin değerli bilgiler sağlamayı amaçladığını lütfen unutmayın, ancak daha kapsamlı detaylar ve doğru talimatlar için orijinal gönderiye başvurmanız önerilir.
 
 ## Referanslar
 

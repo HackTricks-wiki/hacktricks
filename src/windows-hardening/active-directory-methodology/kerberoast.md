@@ -4,9 +4,9 @@
 
 ## Kerberoast
 
-Kerberoasting, **Active Directory (AD)** altında çalışan **kullanıcı hesapları** ile ilgili olan **TGS biletlerinin** edinilmesine odaklanır; **bilgisayar hesapları** hariçtir. Bu biletlerin şifrelemesi, **kullanıcı şifrelerinden** kaynaklanan anahtarları kullanır ve bu da **çevrimdışı kimlik bilgisi kırma** olasılığını sağlar. Bir kullanıcı hesabının hizmet olarak kullanıldığı, boş olmayan bir **"ServicePrincipalName"** özelliği ile belirtilir.
+Kerberoasting, **Active Directory (AD)** altında **kullanıcı hesapları** ile çalışan hizmetlere ait **TGS biletlerinin** edinilmesine odaklanır; **bilgisayar hesapları** hariçtir. Bu biletlerin şifrelemesi, **kullanıcı şifrelerinden** kaynaklanan anahtarları kullanır ve bu da **çevrimdışı kimlik bilgisi kırma** olasılığını sağlar. Bir kullanıcı hesabının hizmet olarak kullanıldığı, boş olmayan bir **"ServicePrincipalName"** özelliği ile belirtilir.
 
-**Kerberoasting** gerçekleştirmek için, **TGS biletleri** talep edebilen bir alan hesabı gereklidir; ancak bu süreç **özel ayrıcalıklar** talep etmez, bu da **geçerli alan kimlik bilgilerine** sahip olan herkesin erişimine açık olduğu anlamına gelir.
+**Kerberoasting** gerçekleştirmek için, **TGS biletleri** talep edebilen bir alan hesabı gereklidir; ancak bu süreç **özel ayrıcalıklar** talep etmez, bu da **geçerli alan kimlik bilgilerine** sahip herkesin erişimine açık olduğu anlamına gelir.
 
 ### Ana Noktalar:
 
@@ -18,7 +18,7 @@ Kerberoasting, **Active Directory (AD)** altında çalışan **kullanıcı hesap
 ### **Saldırı**
 
 > [!WARNING]
-> **Kerberoasting araçları**, saldırıyı gerçekleştirirken ve TGS-REQ isteklerini başlatırken genellikle **`RC4 şifrelemesi`** talep eder. Bunun nedeni, **RC4'ün** [**daha zayıf**](https://www.stigviewer.com/stig/windows_10/2017-04-28/finding/V-63795) olması ve Hashcat gibi araçlar kullanılarak çevrimdışı kırılmasının diğer şifreleme algoritmaları olan AES-128 ve AES-256'dan daha kolay olmasıdır.\
+> **Kerberoasting araçları**, saldırıyı gerçekleştirirken ve TGS-REQ talepleri başlatırken genellikle **`RC4 şifrelemesi`** talep eder. Bunun nedeni, **RC4'ün** [**daha zayıf**](https://www.stigviewer.com/stig/windows_10/2017-04-28/finding/V-63795) olması ve Hashcat gibi araçlar kullanılarak çevrimdışı kırılmasının diğer şifreleme algoritmaları olan AES-128 ve AES-256'dan daha kolay olmasıdır.\
 > RC4 (tip 23) hash'leri **`$krb5tgs$23$*`** ile başlarken, AES-256 (tip 18) **`$krb5tgs$18$*`** ile başlar.`
 
 #### **Linux**
@@ -83,7 +83,7 @@ iex (new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com
 Invoke-Kerberoast -OutputFormat hashcat | % { $_.Hash } | Out-File -Encoding ASCII hashes.kerberoast
 ```
 > [!WARNING]
-> Bir TGS talep edildiğinde, Windows olayı `4769 - A Kerberos service ticket was requested` oluşturulur.
+> Bir TGS talep edildiğinde, Windows olayı `4769 - Bir Kerberos hizmet bileti talep edildi` oluşturulur.
 
 ### Kırma
 ```bash
@@ -99,12 +99,12 @@ Set-DomainObject -Identity <username> -Set @{serviceprincipalname='just/whatever
 ```
 Burada **kerberoast** saldırıları için faydalı **araçlar** bulabilirsiniz: [https://github.com/nidem/kerberoast](https://github.com/nidem/kerberoast)
 
-Eğer Linux'tan bu **hata** ile karşılaşırsanız: **`Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)`** bu, yerel saatinizle ilgilidir, hostu DC ile senkronize etmeniz gerekir. Birkaç seçenek var:
+Eğer Linux'ta bu **hata** ile karşılaşırsanız: **`Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)`** bu, yerel saatinizle ilgilidir, hostu DC ile senkronize etmeniz gerekir. Birkaç seçenek var:
 
-- `ntpdate <DC'nin IP'si>` - Ubuntu 16.04 itibarıyla kullanımdan kaldırılmıştır
+- `ntpdate <DC'nin IP'si>` - Ubuntu 16.04 itibarıyla kullanımdan kaldırılmıştır.
 - `rdate -n <DC'nin IP'si>`
 
-### Mitigation
+### Mitigasyon
 
 Kerberoasting, eğer istismar edilebiliyorsa, yüksek bir gizlilik derecesi ile gerçekleştirilebilir. Bu aktiviteyi tespit etmek için **Security Event ID 4769**'a dikkat edilmelidir; bu, bir Kerberos biletinin talep edildiğini gösterir. Ancak, bu olayın yüksek sıklığı nedeniyle, şüpheli aktiviteleri izole etmek için belirli filtreler uygulanmalıdır:
 
@@ -119,13 +119,13 @@ Get-WinEvent -FilterHashtable @{Logname='Security';ID=4769} -MaxEvents 1000 | ?{
 Kerberoasting riskini azaltmak için:
 
 - **Hizmet Hesabı Parolalarının tahmin edilmesi zor olmasını** sağlayın, **25 karakterden** uzun bir uzunluk önerilmektedir.
-- **Yönetilen Hizmet Hesaplarını** kullanın; bu, **otomatik parola değişiklikleri** ve **devredilmiş Hizmet Prensip Adı (SPN) Yönetimi** gibi avantajlar sunarak bu tür saldırılara karşı güvenliği artırır.
+- **Yönetilen Hizmet Hesaplarını** kullanın, bu da **otomatik parola değişiklikleri** ve **devredilmiş Hizmet Prensip Adı (SPN) Yönetimi** gibi avantajlar sunarak bu tür saldırılara karşı güvenliği artırır.
 
 Bu önlemleri uygulayarak, organizasyonlar Kerberoasting ile ilişkili riski önemli ölçüde azaltabilir.
 
 ## Kerberoast w/o domain account
 
-**Eylül 2022**'de, Charlie Clark adında bir araştırmacı tarafından bir sistemin istismar edilmesi için yeni bir yol ortaya çıkarıldı ve bu, kendi platformu [exploit.ph](https://exploit.ph/) üzerinden paylaşıldı. Bu yöntem, herhangi bir Active Directory hesabı üzerinde kontrol gerektirmeden **KRB_AS_REQ** isteği aracılığıyla **Hizmet Biletleri (ST)** edinilmesine olanak tanır. Temelde, bir prensip, ön kimlik doğrulama gerektirmeyecek şekilde ayarlandığında—siber güvenlik alanında **AS-REP Roasting saldırısı** olarak bilinen bir senaryoya benzer—bu özellik, istek sürecini manipüle etmek için kullanılabilir. Özellikle, isteğin gövdesindeki **sname** niteliğini değiştirerek, sistemin standart şifreli Bilet Verme Bileti (TGT) yerine bir **ST** vermesi sağlanır.
+**Eylül 2022**'de, Charlie Clark adında bir araştırmacı tarafından bir sistemin istismar edilmesi için yeni bir yol ortaya kondu ve bu, [exploit.ph](https://exploit.ph/) platformu aracılığıyla paylaşıldı. Bu yöntem, herhangi bir Active Directory hesabı üzerinde kontrol gerektirmeden **KRB_AS_REQ** isteği aracılığıyla **Hizmet Biletleri (ST)** edinilmesine olanak tanır. Temelde, bir prensip, ön kimlik doğrulama gerektirmeyecek şekilde ayarlandığında—siber güvenlik alanında **AS-REP Roasting saldırısı** olarak bilinen bir senaryoya benzer—bu özellik, istek sürecini manipüle etmek için kullanılabilir. Özellikle, isteğin gövdesindeki **sname** niteliğini değiştirerek, sistemin standart şifreli Bilet Verme Bileti (TGT) yerine bir **ST** vermesi sağlanır.
 
 Teknik, bu makalede tam olarak açıklanmaktadır: [Semperis blog post](https://www.semperis.com/blog/new-attack-paths-as-requested-sts/).
 

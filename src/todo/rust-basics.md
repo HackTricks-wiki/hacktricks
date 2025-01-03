@@ -81,7 +81,7 @@ Nil,
 
 let list = Cons(1, Cons(2, Cons(3, Nil)));
 ```
-### Koşullar
+### Koşullu İfadeler
 
 #### eğer
 ```rust
@@ -254,7 +254,7 @@ assert_ne!(true, false);
 
 #### Arc
 
-Bir Arc, nesne üzerinde daha fazla referans oluşturmak için Clone kullanabilir ve bunları thread'lere iletebilir. Bir değere işaret eden son referans işlevselliği dışına çıktığında, değişken düşürülür.
+Bir Arc, nesne üzerinde daha fazla referans oluşturmak için Clone kullanabilir ve bunları thread'lere iletebilir. Bir değere işaret eden son referans işlev alanından çıktığında, değişken düşürülür.
 ```rust
 use std::sync::Arc;
 let apple = Arc::new("the same apple");
@@ -265,9 +265,9 @@ println!("{:?}", apple);
 });
 }
 ```
-#### İpleri
+#### Threads
 
-Bu durumda, ipliğe değiştirebileceği bir değişken geçeceğiz.
+Bu durumda, iş parçacığına değiştirebileceği bir değişken geçireceğiz.
 ```rust
 fn main() {
 let status = Arc::new(Mutex::new(JobStatus { jobs_completed: 0 }));

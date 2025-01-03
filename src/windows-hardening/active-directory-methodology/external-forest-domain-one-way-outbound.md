@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Bu senaryoda **alanınız** **başka alanlardan** bir **prensipe** bazı **yetkiler** **güveniyor**.
+Bu senaryoda **alanınız** **farklı alanlardan** bir **prensipe** bazı **yetkiler** **güveniyor**.
 
 ## Sayım
 
@@ -36,11 +36,11 @@ Burada anlaşılması gereken kritik nokta, bu özel hesabın şifresi ve hash'i
 ```powershell
 Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.my.domain.local
 ```
-Bu çıkarım, adının sonunda **$** ile belirtilen hesabın aktif olması ve **A** alanının "Domain Users" grubuna ait olması nedeniyle mümkündür; bu da bu grupla ilişkili izinleri miras almasını sağlar. Bu, bireylerin bu hesabın kimlik bilgilerini kullanarak **A** alanına kimlik doğrulaması yapmalarına olanak tanır.
+Bu çıkarım, adının sonunda **$** ile belirtilen hesabın aktif olması ve **A** alanının "Domain Users" grubuna ait olması nedeniyle mümkündür; bu da bu grubun ilişkili izinlerini miras almasını sağlar. Bu, bireylerin bu hesabın kimlik bilgilerini kullanarak **A** alanına kimlik doğrulaması yapmalarına olanak tanır.
 
 **Uyarı:** Bu durumu, sınırlı izinlerle de olsa bir kullanıcı olarak **A** alanında bir yer edinmek için kullanmak mümkündür. Ancak, bu erişim **A** alanında numaralandırma yapmak için yeterlidir.
 
-`ext.local` güvenen alan ve `root.local` güvenilen alan olduğunda, `root.local` içinde `EXT$` adında bir kullanıcı hesabı oluşturulacaktır. Belirli araçlar aracılığıyla, Kerberos güven anahtarlarını dökme işlemi gerçekleştirilebilir ve `root.local` içindeki `EXT$` kimlik bilgileri açığa çıkarılabilir. Bunu başarmak için kullanılacak komut:
+`ext.local` güvenen alan ve `root.local` güvenilen alan olduğunda, `root.local` içinde `EXT$` adında bir kullanıcı hesabı oluşturulacaktır. Belirli araçlar aracılığıyla, Kerberos güven anahtarlarını dökerek `root.local` içindeki `EXT$` kimlik bilgilerini açığa çıkarmak mümkündür. Bunu başarmak için kullanılan komut şudur:
 ```bash
 lsadump::trust /patch
 ```
@@ -54,9 +54,9 @@ Bu kimlik doğrulama adımı, `root.local` içindeki hizmetleri listeleme ve hat
 ```
 ### Açık metin güven ilişkisi parolasını toplama
 
-Önceki akışta, **açık metin parolası** (aynı zamanda **mimikatz ile döküldü**) yerine güven ilişkisi hash'i kullanıldı.
+Önceki akışta, **açık metin parolası** (aynı zamanda **mimikatz ile dökülen**) yerine güven ilişkisi hash'i kullanıldı.
 
-Açık metin parolası, mimikatz'tan alınan \[ CLEAR ] çıktısını onaltılıdan çevirerek ve null byte'ları ‘\x00’ kaldırarak elde edilebilir:
+Açık metin parolası, mimikatz'tan alınan \[ CLEAR ] çıktısını onaltılıdan dönüştürerek ve null byte'ları ‘\x00’ kaldırarak elde edilebilir:
 
 ![](<../../images/image (938).png>)
 

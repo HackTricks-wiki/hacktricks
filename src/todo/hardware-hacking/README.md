@@ -23,7 +23,7 @@ JTAGulator gibi bir araç kullandığınızda bu talimatlarla karşılaşabilirs
 
 Sınır taramaları, dört telli **Test Erişim Noktası (TAP)** testlerini içerir; bu, bir bileşene entegre edilmiş **JTAG test destek** işlevlerine erişim sağlayan genel amaçlı bir porttur. TAP, aşağıdaki beş sinyali kullanır:
 
-- Test saat girişi (**TCK**) TCK, TAP denetleyicisinin tek bir eylem gerçekleştireceği sıklığı tanımlayan **saat**'tir (diğer bir deyişle, durum makinesinde bir sonraki duruma geçiş yapar).
+- Test saat girişi (**TCK**) TCK, TAP denetleyicisinin tek bir eylem gerçekleştireceği sıklığı tanımlayan **saat**tir (diğer bir deyişle, durum makinesinde bir sonraki duruma geçiş).
 - Test modu seçimi (**TMS**) girişi TMS, **sonlu durum makinesini** kontrol eder. Saatin her vuruşunda, cihazın JTAG TAP denetleyicisi TMS pinindeki voltajı kontrol eder. Voltaj belirli bir eşik değerinin altındaysa, sinyal düşük kabul edilir ve 0 olarak yorumlanır; voltaj belirli bir eşik değerinin üzerindeyse, sinyal yüksek kabul edilir ve 1 olarak yorumlanır.
 - Test veri girişi (**TDI**) TDI, **veriyi çipe tarama hücreleri aracılığıyla gönderen** pindir. Her satıcı, bu pin üzerinden iletişim protokolünü tanımlamaktan sorumludur, çünkü JTAG bunu tanımlamaz.
 - Test veri çıkışı (**TDO**) TDO, **veriyi çipten dışarı gönderen** pindir.
@@ -39,14 +39,14 @@ JTAG portlarını tespit etmenin en hızlı ama en pahalı yolu, bu amaç için 
 
 JTAG pinout'larını tanımlamanın daha ucuz ama çok daha yavaş bir yolu, bir Arduino uyumlu mikrodenetleyiciye yüklenmiş [**JTAGenum**](https://github.com/cyphunk/JTAGenum/) kullanmaktır.
 
-**JTAGenum** kullanarak, önce **numune alma** cihazının pinlerini tanımlamanız gerekir. Cihazın pinout diyagramına atıfta bulunmanız ve ardından bu pinleri hedef cihazınızdaki test noktalarıyla bağlamanız gerekir.
+**JTAGenum** kullanarak, önce **kullanacağınız prob cihazının pinlerini tanımlarsınız**. Cihazın pinout diyagramına atıfta bulunmanız ve ardından bu pinleri hedef cihazınızdaki test noktalarıyla bağlamanız gerekir.
 
-JTAG pinlerini tanımlamanın **üçüncü yolu**, PCB'yi bir pinout için **incelemektir**. Bazı durumlarda, PCB'ler **Tag-Connect arayüzünü** sağlama kolaylığı gösterebilir; bu, kartın bir JTAG konektörüne sahip olduğunun açık bir göstergesidir. O arayüzün nasıl göründüğünü [https://www.tag-connect.com/info/](https://www.tag-connect.com/info/) adresinde görebilirsiniz. Ayrıca, PCB'deki çip setlerinin **veri sayfalarını** incelemek, JTAG arayüzlerine işaret eden pinout diyagramlarını ortaya çıkarabilir.
+JTAG pinlerini tanımlamanın **üçüncü yolu**, PCB'yi bir pinout için **incelemektir**. Bazı durumlarda, PCB'ler **Tag-Connect arayüzünü** sağlama kolaylığı gösterebilir; bu, kartın bir JTAG konektörüne sahip olduğunun açık bir göstergesidir. O arayüzün nasıl göründüğünü [https://www.tag-connect.com/info/](https://www.tag-connect.com/info/) adresinde görebilirsiniz. Ayrıca, PCB'deki çipsetlerin **veri sayfalarını** incelemek, JTAG arayüzlerine işaret eden pinout diyagramlarını ortaya çıkarabilir.
 
 ## SDW
 
 SWD, hata ayıklama için tasarlanmış ARM'a özgü bir protokoldür.
 
-SWD arayüzü, **iki pin** gerektirir: JTAG’ın **TDI ve TDO pinlerine** eşdeğer olan iki yönlü **SWDIO** sinyali ve **TCK**'ya eşdeğer olan **SWCLK**. Birçok cihaz, hedefe ya bir SWD ya da JTAG probu bağlamanızı sağlayan birleşik bir JTAG ve SWD arayüzü olan **Seri Tel veya JTAG Hata Ayıklama Portu (SWJ-DP)**'yi destekler.
+SWD arayüzü, **iki pin** gerektirir: JTAG’ın **TDI ve TDO pinlerine** eşdeğer olan iki yönlü **SWDIO** sinyali ve **SWCLK**, JTAG'daki **TCK**'ye eşdeğerdir. Birçok cihaz, hedefe ya bir SWD ya da JTAG probu bağlamanızı sağlayan birleştirilmiş JTAG ve SWD arayüzü olan **Seri Tel veya JTAG Hata Ayıklama Portu (SWJ-DP)**'yi destekler.
 
 {{#include ../../banners/hacktricks-training.md}}

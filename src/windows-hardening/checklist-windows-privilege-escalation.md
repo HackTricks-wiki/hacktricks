@@ -7,9 +7,9 @@
 ### [Sistem Bilgisi](windows-local-privilege-escalation/#system-info)
 
 - [ ] [**Sistem bilgilerini**](windows-local-privilege-escalation/#system-info) elde et
-- [ ] **kernel** için [**saldırılar aramak**](windows-local-privilege-escalation/#version-exploits) amacıyla **scriptler** kullan
-- [ ] **Google ile kernel** **saldırılarını aramak** için kullan
-- [ ] **searchsploit ile kernel** **saldırılarını aramak** için kullan
+- [ ] **kernel** için [**saldırılar aramak**](windows-local-privilege-escalation/#version-exploits)
+- [ ] **Google ile kernel** **saldırılarını aramak**
+- [ ] **searchsploit ile kernel** **saldırılarını aramak**
 - [ ] [**env vars**](windows-local-privilege-escalation/#environment) içinde ilginç bilgiler var mı?
 - [ ] [**PowerShell geçmişinde**](windows-local-privilege-escalation/#powershell-history) şifreler var mı?
 - [ ] [**Internet ayarlarında**](windows-local-privilege-escalation/#internet-settings) ilginç bilgiler var mı?
@@ -31,11 +31,11 @@
 - [ ] [**Kullanıcı Yetkileri**](windows-local-privilege-escalation/#users-and-groups)
 - [ ] [**mevcut** kullanıcı **yetkilerini**](windows-local-privilege-escalation/#users-and-groups) kontrol et
 - [ ] [**herhangi bir ayrıcalıklı grubun**](windows-local-privilege-escalation/#privileged-groups) üyesi misin?
-- [ ] [**bu tokenlerden herhangi biri etkin mi**](windows-local-privilege-escalation/#token-manipulation): **SeImpersonatePrivilege, SeAssignPrimaryPrivilege, SeTcbPrivilege, SeBackupPrivilege, SeRestorePrivilege, SeCreateTokenPrivilege, SeLoadDriverPrivilege, SeTakeOwnershipPrivilege, SeDebugPrivilege** ?
+- [ ] [**SeImpersonatePrivilege, SeAssignPrimaryPrivilege, SeTcbPrivilege, SeBackupPrivilege, SeRestorePrivilege, SeCreateTokenPrivilege, SeLoadDriverPrivilege, SeTakeOwnershipPrivilege, SeDebugPrivilege**](windows-local-privilege-escalation/#token-manipulation) gibi bu token'ların herhangi biri etkin mi kontrol et?
 - [ ] [**Kullanıcı Oturumları**](windows-local-privilege-escalation/#logged-users-sessions)?
 - [ ] [**kullanıcı evlerini**](windows-local-privilege-escalation/#home-folders) kontrol et (erişim?)
 - [ ] [**Şifre Politikası**](windows-local-privilege-escalation/#password-policy) kontrol et
-- [ ] [**Pano içinde ne var**](windows-local-privilege-escalation/#get-the-content-of-the-clipboard)?
+- [ ] [**Pano içinde neler var**](windows-local-privilege-escalation/#get-the-content-of-the-clipboard)?
 
 ### [Ağ](windows-local-privilege-escalation/#network)
 
@@ -58,14 +58,14 @@
 
 ### [**Uygulamalar**](windows-local-privilege-escalation/#applications)
 
-- [ ] **Yüklenmiş uygulamalar üzerindeki** [**yazma izinleri**](windows-local-privilege-escalation/#write-permissions)
+- [ ] **Yüklenmiş uygulamalarda** [**yazma**](windows-local-privilege-escalation/#write-permissions) izinleri
 - [ ] [**Başlangıç Uygulamaları**](windows-local-privilege-escalation/#run-at-startup)
 - [ ] **Zayıf** [**Sürücüler**](windows-local-privilege-escalation/#drivers)
 
 ### [DLL Hijacking](windows-local-privilege-escalation/#path-dll-hijacking)
 
 - [ ] **PATH içindeki herhangi bir klasöre yazabilir misin**?
-- [ ] **yüklemeye çalışan** bilinen bir hizmet ikilisi var mı **mevcut olmayan DLL**?
+- [ ] **yüklemeye çalışan** bilinen bir hizmet ikilisi var mı **herhangi bir mevcut olmayan DLL**?
 - [ ] **herhangi bir** ikili klasöre **yazabilir misin**?
 
 ### [Ağ](windows-local-privilege-escalation/#network)
@@ -98,7 +98,7 @@
 - [ ] [**web** **günlüklerinde**](windows-local-privilege-escalation/#logs) ilginç bilgiler var mı?
 - [ ] Kullanıcıdan [**kimlik bilgilerini istemek**](windows-local-privilege-escalation/#ask-for-credentials) ister misin?
 - [ ] [**Geri Dönüşüm Kutusu içindeki ilginç dosyalar**](windows-local-privilege-escalation/#credentials-in-the-recyclebin)?
-- [ ] [**kimlik bilgileri içeren diğer**](windows-local-privilege-escalation/#inside-the-registry) kayıt defterleri?
+- [ ] [**kimlik bilgileri içeren diğer kayıt defterleri**](windows-local-privilege-escalation/#inside-the-registry)?
 - [ ] [**Tarayıcı verileri içinde**](windows-local-privilege-escalation/#browsers-history) (dbs, geçmiş, yer imleri, ...)?
 - [ ] Dosyalar ve kayıt defterinde [**genel şifre araması**](windows-local-privilege-escalation/#generic-password-search-in-files-and-registry)
 - [ ] Şifreleri otomatik olarak aramak için [**Araçlar**](windows-local-privilege-escalation/#tools-that-search-for-passwords)
@@ -107,7 +107,7 @@
 
 - [ ] Yönetici tarafından çalıştırılan bir sürecin herhangi bir işleyicisine erişimin var mı?
 
-### [Pipe İstemci Taklit Etme](windows-local-privilege-escalation/#named-pipe-client-impersonation)
+### [Borulama İstemcisi Taklidi](windows-local-privilege-escalation/#named-pipe-client-impersonation)
 
 - [ ] Bunu kötüye kullanıp kullanamayacağını kontrol et
 

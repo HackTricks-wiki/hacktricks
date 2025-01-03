@@ -2,6 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
+
 ## Giriş
 
 125kHz etiketlerinin nasıl çalıştığı hakkında daha fazla bilgi için kontrol edin:
@@ -16,10 +17,10 @@ Bu tür etiketler hakkında daha fazla bilgi için [**bu girişi okuyun**](../pe
 
 ### Oku
 
-Kart bilgilerini **okumaya** çalışır. Sonra bunları **taklit** edebilir.
+Kart bilgisini **okumaya** çalışır. Sonra bunları **taklit** edebilir.
 
 > [!WARNING]
-> Bazı interkomların, okumadan önce bir yazma komutu göndererek anahtar çoğaltımına karşı kendilerini korumaya çalıştığını unutmayın. Yazma başarılı olursa, o etiket sahte olarak kabul edilir. Flipper RFID'yi taklit ettiğinde, okuyucunun bunu orijinalinden ayırt etmesi için bir yolu yoktur, bu nedenle böyle bir sorun ortaya çıkmaz.
+> Bazı interkomların, okuma işleminden önce bir yazma komutu göndererek anahtar kopyalamaya karşı kendilerini korumaya çalıştığını unutmayın. Yazma başarılı olursa, o etiket sahte olarak kabul edilir. Flipper RFID'yi taklit ettiğinde, okuyucunun bunu orijinalinden ayırt etmesi için bir yol yoktur, bu nedenle böyle bir sorun ortaya çıkmaz.
 
 ### Manuel Ekle
 
@@ -27,7 +28,7 @@ Flipper Zero'da **verileri belirterek sahte kartlar oluşturabilirsiniz** ve ard
 
 #### Kartlardaki Kimlikler
 
-Bazen, bir kart aldığınızda, kartta görünür şekilde yazılı olan kimliği (veya bir kısmını) bulacaksınız.
+Bazen, bir kart aldığınızda, kartın görünür kısmında ID'sini (veya bir kısmını) bulabilirsiniz.
 
 - **EM Marin**
 
@@ -44,10 +45,11 @@ Bu HID kartında da aynı durum geçerlidir; burada yalnızca 3 bayttan 2'si kar
 
 ### Taklit/Yaz
 
-Bir kartı **kopyaladıktan** veya kimliği **manuel olarak** **girdikten** sonra, Flipper Zero ile bunu **taklit** etmek veya gerçek bir karta **yazmak** mümkündür.
+Bir kartı **kopyaladıktan** veya ID'yi **manuel olarak** girdikten sonra, Flipper Zero ile bunu **taklit** etmek veya gerçek bir karta **yazmak** mümkündür.
 
 ## Referanslar
 
 - [https://blog.flipperzero.one/rfid/](https://blog.flipperzero.one/rfid/)
+
 
 {{#include ../../../banners/hacktricks-training.md}}

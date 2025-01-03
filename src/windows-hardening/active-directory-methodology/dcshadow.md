@@ -15,7 +15,7 @@ lsadump::dcshadow /object:username /attribute:Description /value="My new descrip
 ```bash:mimikatz2 (push) - Needs DA or similar
 lsadump::dcshadow /push
 ```
-Dikkat edin ki **`elevate::token`** `mimikatz1` oturumunda çalışmayacak çünkü bu, iş parçacığının ayrıcalıklarını yükseltiyor, ancak **işlemin ayrıcalıklarını** yükseltmemiz gerekiyor.\
+Dikkat edin ki **`elevate::token`** `mimikatz1` oturumunda çalışmayacak çünkü bu, iş parçacığının ayrıcalıklarını yükseltti, ancak biz **işlemin ayrıcalığını** yükseltmemiz gerekiyor.\
 Ayrıca bir "LDAP" nesnesi seçebilirsiniz: `/object:CN=Administrator,CN=Users,DC=JEFFLAB,DC=local`
 
 Değişiklikleri bir DA'dan veya bu minimum izinlere sahip bir kullanıcıdan gönderebilirsiniz:
@@ -25,7 +25,7 @@ Değişiklikleri bir DA'dan veya bu minimum izinlere sahip bir kullanıcıdan g�
 - _DS-Replication-Manage-Topology_ (Replikasyon Topolojisini Yönet)
 - _DS-Replication-Synchronize_ (Replikasyon Senkronizasyonu)
 - **Yapılandırma konteynerindeki** **Siteler nesnesi** (ve çocukları):
-- _CreateChild ve DeleteChild_
+- _CreateChild and DeleteChild_
 - **DC olarak kaydedilen** **bilgisayar nesnesi**:
 - _WriteProperty_ (Yazma değil)
 - **hedef nesne**:

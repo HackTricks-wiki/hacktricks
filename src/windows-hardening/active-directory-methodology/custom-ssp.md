@@ -18,7 +18,7 @@ PS C:\> reg query hklm\system\currentcontrolset\control\lsa\ /v "Security Packag
 HKEY_LOCAL_MACHINE\system\currentcontrolset\control\lsa
 Security Packages    REG_MULTI_SZ    kerberos\0msv1_0\0schannel\0wdigest\0tspkg\0pku2u
 ```
-`mimilib.dll`'yi Güvenlik Destek Sağlayıcıları listesine (Güvenlik Paketleri) ekleyin:
+`mimilib.dll`'yi Güvenlik Destek Sağlayıcı listesine (Güvenlik Paketleri) ekleyin:
 ```powershell
 reg add "hklm\system\currentcontrolset\control\lsa\" /v "Security Packages"
 ```

@@ -32,7 +32,7 @@ GUI davranışında, PC'niz destekliyorsa birkaç şeyi etkinleştirmeniz öneri
 
 ### Radyo kanalı ile senkronize olma
 
-[**SigDigger** ](https://github.com/BatchDrake/SigDigger) ile duymak istediğiniz kanal ile senkronize olun, "Temel bant ses önizlemesi" seçeneğini yapılandırın, gönderilen tüm bilgileri almak için bant genişliğini ayarlayın ve ardından Tuner'ı gürültünün gerçekten artmaya başlamadan önceki seviyeye ayarlayın:
+[**SigDigger** ](https://github.com/BatchDrake/SigDigger) ile duymak istediğiniz kanalla senkronize olun, "Temel bant ses önizlemesi" seçeneğini yapılandırın, gönderilen tüm bilgileri almak için bant genişliğini ayarlayın ve ardından Tuner'ı gürültünün gerçekten artmaya başlamadan önceki seviyeye ayarlayın:
 
 ![](<../../images/image (585).png>)
 
@@ -45,12 +45,12 @@ GUI davranışında, PC'niz destekliyorsa birkaç şeyi etkinleştirmeniz öneri
 
 ![](<../../images/image (597).png>)
 
-- **Bitleri geri aldıktan sonra, onları bir şekilde işlemeniz gerekebilir**. Örneğin, Manchester kodlamasında bir yukarı+aşağı 1 veya 0 olacak ve bir aşağı+yukarı diğerini temsil edecektir. Bu nedenle, 1'lerin ve 0'ların çiftleri (yukarı ve aşağı) gerçek bir 1 veya gerçek bir 0 olacaktır.
+- **Bitleri geri aldıktan sonra, onları bir şekilde işlemeniz gerekebilir**. Örneğin, Manchester kodlamasında bir yukarı+aşağı 1 veya 0 olacak ve bir aşağı+yukarı diğerini temsil edecektir. Yani 1'lerin ve 0'ların çiftleri (yukarı ve aşağı) gerçek bir 1 veya gerçek bir 0 olacaktır.
 - Bir sinyal Manchester kodlaması kullanıyorsa (bir sırada iki 0 veya 1'den fazlasını bulmak imkansızdır), **önsözde birden fazla 1 veya 0 bulabilirsiniz**!
 
 ### IQ ile modülasyon türünü açığa çıkarma
 
-Sinyallerde bilgiyi depolamanın 3 yolu vardır: **amplitüd**, **frekans** veya **faz** ile modüle etmek.\
+Sinyallerde bilgiyi depolamanın 3 yolu vardır: **amplitüd**, **frekans** veya **faz** modüle etmek.\
 Bir sinyali kontrol ediyorsanız, bilgiyi depolamak için neyin kullanıldığını anlamanın farklı yolları vardır (aşağıda daha fazla yol bulabilirsiniz) ama iyi bir yol IQ grafiğini kontrol etmektir.
 
 ![](<../../images/image (788).png>)
@@ -60,7 +60,7 @@ Bir sinyali kontrol ediyorsanız, bilgiyi depolamak için neyin kullanıldığı
 - Bilginin, bir fazın değişmesi gerçeğinde gizli olduğunu ve fazın kendisinde değilse, farklı fazların net bir şekilde ayrılmadığını unutmayın.
 - **FM'yi tespit etme**: IQ'nun frekansları tanımlamak için bir alanı yoktur (merkeze olan mesafe amplitüd ve açı fazdır).\
 Bu nedenle, FM'yi tanımlamak için, bu grafikte **temelde sadece bir daire görmelisiniz**.\
-Ayrıca, farklı bir frekans IQ grafiğinde **daire boyunca hızlanma** ile "temsil edilir" (bu nedenle SysDigger'da sinyali seçtiğinizde IQ grafiği doldurulur, eğer oluşturulan dairede bir hızlanma veya yön değişikliği bulursanız, bu FM olduğu anlamına gelebilir):
+Ayrıca, farklı bir frekans IQ grafiği tarafından **daire boyunca hızlanma** ile "temsil edilir" (bu nedenle SysDigger'da sinyali seçtiğinizde IQ grafiği doldurulur, eğer oluşturulan dairede bir hızlanma veya yön değişikliği bulursanız, bu FM olduğu anlamına gelebilir):
 
 ## AM Örneği
 
@@ -88,7 +88,7 @@ Bilgi bulunan **tüm sinyali** seçebilir, **Amplitüd** modunu ve **Seçim** se
 
 ![](<../../images/image (732).png>)
 
-Eğer birçok frekans bulursanız, bu muhtemelen bir FM olmayacaktır, sinyal frekansı sadece kanal nedeniyle değiştirilmiş olabilir.
+Eğer birçok frekans bulursanız, bu muhtemelen bir FM olmayacaktır, muhtemelen sinyal frekansı sadece kanal nedeniyle değiştirilmiştir.
 
 #### IQ ile
 
@@ -112,7 +112,7 @@ Seçtiğiniz sembol sayısını da belirtebilir ve SigDigger 1 sembolün frekans
 
 ### Bitleri Alma
 
-Bunun bir **AM modüle edilmiş** sinyal olduğunu ve **sembol hızını** (ve bu durumda yukarı bir şeyin 1 ve aşağı bir şeyin 0 anlamına geldiğini bilerek), sinyalde kodlanmış **bitleri elde etmek** çok kolaydır. Bu nedenle, bilgiyi içeren sinyali seçin ve örnekleme ve karar verme ayarlarını yapılandırın ve örnekle düğmesine basın (lütfen **Amplitüd**'ün seçili olduğundan, keşfedilen **Sembol hızının** yapılandırıldığından ve **Gadner saat geri kazanımının** seçildiğinden emin olun):
+Bunun bir **AM modüle edilmiş** sinyal olduğunu ve **sembol hızını** bulduktan sonra (ve bu durumda yukarı bir şeyin 1 ve aşağı bir şeyin 0 anlamına geldiğini bilerek), sinyalde kodlanmış **bitleri elde etmek** çok kolaydır. Bu nedenle, bilgiyi içeren sinyali seçin ve örnekleme ve karar verme ayarlarını yapılandırın ve örnekle butonuna basın (lütfen **Amplitüd**'ün seçili olduğundan, keşfedilen **Sembol hızının** yapılandırıldığından ve **Gadner saat geri kazanımının** seçili olduğundan emin olun):
 
 ![](<../../images/image (965).png>)
 
@@ -121,23 +121,23 @@ Bunun bir **AM modüle edilmiş** sinyal olduğunu ve **sembol hızını** (ve b
 - **Sabit aralık seçimi** ile seçilmesi gereken aralık sayısını belirtirsiniz ve sembol hızını buradan hesaplar.
 - **Gadner saat geri kazanımı** genellikle en iyi seçenektir, ancak yine de bazı yaklaşık sembol hızını belirtmeniz gerekir.
 
-Örnekleme düğmesine bastığınızda bu görünür:
+Örnekle butonuna bastığınızda bu görünür:
 
 ![](<../../images/image (644).png>)
 
-Artık SigDigger'ın **bilgi taşıyan seviyenin aralığını** anlaması için **alt seviyeye** tıklayıp en yüksek seviyeye kadar basılı tutmanız gerekir:
+Şimdi, SigDigger'ın **bilgi taşıyan seviyenin aralığını** anlaması için **alt seviyeye** tıklayıp en yüksek seviyeye kadar basılı tutmanız gerekir:
 
 ![](<../../images/image (439).png>)
 
 Eğer örneğin **4 farklı amplitüd seviyesi** olsaydı, **Sembol başına bit sayısını 2** olarak yapılandırmanız ve en küçüğünden en büyüğüne kadar seçmeniz gerekirdi.
 
-Son olarak, **Zoom**'u **artırarak** ve **Satır boyutunu** **değiştirerek** bitleri görebilirsiniz (ve tüm bitleri almak için hepsini seçip kopyalayabilirsiniz):
+Son olarak, **Zoom**'u **artırarak** ve **Satır boyutunu** **değiştirerek** bitleri görebilir (ve tüm bitleri almak için hepsini seçip kopyalayabilirsiniz):
 
 ![](<../../images/image (276).png>)
 
-Eğer sinyalin sembol başına 1'den fazla bit varsa (örneğin 2), SigDigger'ın **hangi sembolün** 00, 01, 10, 11 olduğunu bilmesi **mümkün değildir**, bu nedenle her birini temsil etmek için farklı **gri tonları** kullanacaktır (ve eğer bitleri kopyalarsanız **0'dan 3'e kadar** sayılar kullanacaktır, bunları işlemeniz gerekecektir).
+Eğer sinyalin sembol başına 1'den fazla bit varsa (örneğin 2), SigDigger **hangi sembolün** 00, 01, 10, 11 olduğunu bilmenin bir yoluna sahip değildir, bu nedenle her birini temsil etmek için farklı **gri tonları** kullanacaktır (ve eğer bitleri kopyalarsanız **0'dan 3'e kadar** sayılar kullanacaktır, bunları işlemeniz gerekecektir).
 
-Ayrıca, **Manchester** gibi **kodlamalar** kullanın ve **yukarı+aşağı** **1 veya 0** olabilir ve bir aşağı+yukarı 1 veya 0 olabilir. Bu durumlarda, elde edilen yukarıları (1) ve aşağıları (0) **işlemeniz** gerekir, böylece 01 veya 10 çiftlerini 0 veya 1 olarak değiştirebilirsiniz.
+Ayrıca, **Manchester** gibi **kodlamalar** kullanın ve **yukarı+aşağı** **1 veya 0** olabilir ve bir aşağı+yukarı 1 veya 0 olabilir. Bu durumlarda, elde edilen yukarıları (1) ve aşağıları (0) **0 veya 1 olarak** değiştirmek için **işlemeniz gerekir**.
 
 ## FM Örneği
 
@@ -151,7 +151,7 @@ FM'de modüle edilmiş bilgi gönderen sinyal örneği:
 
 ![](<../../images/image (725).png>)
 
-Önceki resimde, **2 frekansın kullanıldığını** oldukça iyi gözlemleyebilirsiniz, ancak **dalga formunu** gözlemlediğinizde **2 farklı frekansı doğru bir şekilde tanımlamakta zorlanabilirsiniz**:
+Önceki resimde, **2 frekansın kullanıldığını** oldukça iyi gözlemleyebilirsiniz, ancak eğer **dalga formunu** gözlemliyorsanız, **2 farklı frekansı doğru bir şekilde tanımlamakta zorlanabilirsiniz**:
 
 ![](<../../images/image (717).png>)
 
@@ -183,7 +183,7 @@ Ve bu, faz modülasyonunun olmadığını çok net bir şekilde gösteren faz hi
 
 IQ'nun frekansları tanımlamak için bir alanı yoktur (merkeze olan mesafe amplitüd ve açı fazdır).\
 Bu nedenle, FM'yi tanımlamak için, bu grafikte **temelde sadece bir daire görmelisiniz**.\
-Ayrıca, farklı bir frekans IQ grafiğinde **daire boyunca hızlanma** ile "temsil edilir" (bu nedenle SysDigger'da sinyali seçtiğinizde IQ grafiği doldurulur, eğer oluşturulan dairede bir hızlanma veya yön değişikliği bulursanız, bu FM olduğu anlamına gelebilir):
+Ayrıca, farklı bir frekans IQ grafiği tarafından **daire boyunca hızlanma** ile "temsil edilir" (bu nedenle SysDigger'da sinyali seçtiğinizde IQ grafiği doldurulur, eğer oluşturulan dairede bir hızlanma veya yön değişikliği bulursanız, bu FM olduğu anlamına gelebilir):
 
 ![](<../../images/image (81).png>)
 
@@ -193,6 +193,6 @@ Sembolleri taşıyan frekansları bulduktan sonra, sembol hızını almak için 
 
 ### Bitleri Alma
 
-Sinyalin **frekans modüle edildiğini** ve **sembol hızını** bulduktan sonra, bitleri almak için **AM örneğinde kullanılan aynı tekniği** kullanabilirsiniz.
+Sinyalin **frekansa modüle edildiğini** ve **sembol hızını** bulduktan sonra, bitleri almak için **AM örneğinde kullanılan aynı tekniği** kullanabilirsiniz.
 
 {{#include ../../banners/hacktricks-training.md}}

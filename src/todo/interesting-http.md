@@ -1,16 +1,16 @@
 {{#include ../banners/hacktricks-training.md}}
 
-# Yönlendiren başlıklar ve politika
+# Referrer başlıkları ve politikası
 
-Yönlendiren, tarayıcılar tarafından hangi sayfanın önceki ziyaret edildiğini belirtmek için kullanılan başlıktır.
+Referrer, tarayıcıların hangi sayfanın önceki ziyaret edildiğini belirtmek için kullandığı başlıktır.
 
 ## Hassas bilgilerin sızdırılması
 
-Eğer bir web sayfasında herhangi bir noktada hassas bilgiler GET isteği parametrelerinde yer alıyorsa, eğer sayfa dış kaynaklara bağlantılar içeriyorsa veya bir saldırgan kullanıcının saldırgan tarafından kontrol edilen bir URL'yi ziyaret etmesini sağlamak için (sosyal mühendislik) bir öneride bulunabiliyorsa, en son GET isteğindeki hassas bilgileri dışarıya sızdırabilir.
+Eğer bir web sayfası içinde herhangi bir hassas bilgi GET isteği parametrelerinde yer alıyorsa, eğer sayfa dış kaynaklara bağlantılar içeriyorsa veya bir saldırgan kullanıcının saldırgan tarafından kontrol edilen bir URL'yi ziyaret etmesini sağlamak için (sosyal mühendislik) bir öneride bulunabiliyorsa, en son GET isteği içindeki hassas bilgileri dışarıya sızdırabilir.
 
 ## Azaltma
 
-Tarayıcının hassas bilgilerin diğer web uygulamalarına gönderilmesini **önleyebilecek** bir **Yönlendiren politikası** izlemesini sağlayabilirsiniz:
+Tarayıcının hassas bilgilerin diğer web uygulamalarına gönderilmesini **önleyebilecek** bir **Referrer-policy** izlemesini sağlayabilirsiniz:
 ```
 Referrer-Policy: no-referrer
 Referrer-Policy: no-referrer-when-downgrade

@@ -6,7 +6,7 @@
 
 [AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) Sysinternal Suite'ten gelmektedir:
 
-> Gelişmiş bir Active Directory (AD) görüntüleyici ve düzenleyici. AD Explorer'ı kullanarak bir AD veritabanında kolayca gezinebilir, favori konumlar tanımlayabilir, nesne özelliklerini ve niteliklerini diyalog kutuları açmadan görüntüleyebilir, izinleri düzenleyebilir, bir nesnenin şemasını görüntüleyebilir ve kaydedip yeniden çalıştırabileceğiniz karmaşık aramalar gerçekleştirebilirsiniz.
+> Gelişmiş bir Active Directory (AD) görüntüleyici ve düzenleyicisidir. AD Explorer'ı kullanarak bir AD veritabanında kolayca gezinebilir, favori konumlar tanımlayabilir, nesne özelliklerini ve niteliklerini diyalog kutuları açmadan görüntüleyebilir, izinleri düzenleyebilir, bir nesnenin şemasını görüntüleyebilir ve kaydedip yeniden çalıştırabileceğiniz karmaşık aramalar gerçekleştirebilirsiniz.
 
 ### Anlık Görüntüler
 
@@ -19,7 +19,7 @@ AD'nin anlık görüntüsünü almak için `File` --> `Create Snapshot` yolunu i
 
 ## ADRecon
 
-[**ADRecon**](https://github.com/adrecon/ADRecon) bir AD ortamından çeşitli artefaktları çıkaran ve birleştiren bir araçtır. Bilgiler, analiz kolaylığı sağlamak ve hedef AD ortamının mevcut durumu hakkında bütünsel bir resim sunmak için metriklerle birlikte özet görünümler içeren **özel formatlanmış** Microsoft Excel **raporu** şeklinde sunulabilir.
+[**ADRecon**](https://github.com/adrecon/ADRecon), bir AD ortamından çeşitli artefaktları çıkaran ve birleştiren bir araçtır. Bilgiler, analiz kolaylığı sağlamak ve hedef AD ortamının mevcut durumu hakkında bütünsel bir resim sunmak için metriklerle birlikte özet görünümler içeren **özel formatlanmış** Microsoft Excel **raporu** şeklinde sunulabilir.
 ```bash
 # Run it
 .\ADRecon.ps1
@@ -32,7 +32,7 @@ From [https://github.com/BloodHoundAD/BloodHound](https://github.com/BloodHoundA
 
 BloodHound, bir Active Directory veya Azure ortamındaki gizli ve genellikle istenmeyen ilişkileri ortaya çıkarmak için grafik teorisini kullanır. Saldırganlar, BloodHound'u kullanarak, aksi takdirde hızlı bir şekilde tanımlanması imkansız olan son derece karmaşık saldırı yollarını kolayca belirleyebilirler. Savunucular, BloodHound'u kullanarak aynı saldırı yollarını tanımlayıp ortadan kaldırabilirler. Hem mavi hem de kırmızı takımlar, BloodHound'u kullanarak bir Active Directory veya Azure ortamındaki ayrıcalık ilişkilerini daha derinlemesine anlamak için kolayca faydalanabilirler.
 
-Bu nedenle, [Bloodhound ](https://github.com/BloodHoundAD/BloodHound) otomatik olarak bir alanı listeleyebilen, tüm bilgileri kaydedebilen, olası ayrıcalık yükseltme yollarını bulabilen ve tüm bilgileri grafikler kullanarak gösterebilen harika bir araçtır.
+Bu nedenle, [Bloodhound ](https://github.com/BloodHoundAD/BloodHound) otomatik olarak bir alanı listeleyebilen, tüm bilgileri kaydedebilen, olası ayrıcalık yükseltme yollarını bulabilen ve tüm bilgileri grafikler kullanarak gösteren harika bir araçtır.
 
 BloodHound, 2 ana bölümden oluşur: **ingestors** ve **görselleştirme uygulaması**.
 
@@ -44,7 +44,7 @@ BloodHound, 2 ana bölümden oluşur: **ingestors** ve **görselleştirme uygula
 
 BloodHound CE'nin oluşturulmasından sonra, tüm proje Docker ile kullanım kolaylığı için güncellendi. Başlamak için en kolay yol, önceden yapılandırılmış Docker Compose yapılandırmasını kullanmaktır.
 
-1. Docker Compose'u kurun. Bu, [Docker Desktop](https://www.docker.com/products/docker-desktop/) kurulumu ile birlikte gelmelidir.
+1. Docker Compose'u kurun. Bu, [Docker Desktop](https://www.docker.com/products/docker-desktop/) kurulumuyla birlikte gelmelidir.
 2. Çalıştırın:
 ```
 curl -L https://ghst.ly/getbhce | docker compose -f - up
@@ -61,7 +61,7 @@ Birçok seçeneği var ama eğer alan adına katılmış bir PC'den SharpHound'u
 ./SharpHound.exe --CollectionMethods All
 Invoke-BloodHound -CollectionMethod All
 ```
-> **CollectionMethod** ve döngü oturumu hakkında daha fazla bilgi edinebilirsiniz [burada](https://support.bloodhoundenterprise.io/hc/en-us/articles/17481375424795-All-SharpHound-Community-Edition-Flags-Explained)
+> **CollectionMethod** ve döngü oturumu hakkında daha fazla bilgiye [buradan](https://support.bloodhoundenterprise.io/hc/en-us/articles/17481375424795-All-SharpHound-Community-Edition-Flags-Explained) ulaşabilirsiniz.
 
 Farklı kimlik bilgileri kullanarak SharpHound'u çalıştırmak isterseniz, bir CMD netonly oturumu oluşturabilir ve oradan SharpHound'u çalıştırabilirsiniz:
 ```
@@ -71,8 +71,8 @@ runas /netonly /user:domain\user "powershell.exe -exec bypass"
 
 ## Group3r
 
-[**Group3r**](https://github.com/Group3r/Group3r), **Grup Politikası** ile ilişkili Active Directory'deki **açıkları** bulmak için bir araçtır. \
-**group3r'ı** alan içindeki bir hosttan **herhangi bir alan kullanıcısı** ile çalıştırmanız gerekir.
+[**Group3r**](https://github.com/Group3r/Group3r) Active Directory ile ilişkili **Grup Politikası** içindeki **açıkları** bulmak için bir araçtır. \
+**group3r'ı** alan içindeki bir hosttan **herhangi bir alan kullanıcısı** ile çalıştırmalısınız.
 ```bash
 group3r.exe -f <filepath-name.log>
 # -s sends results to stdin
@@ -80,8 +80,8 @@ group3r.exe -f <filepath-name.log>
 ```
 ## PingCastle
 
-[**PingCastle**](https://www.pingcastle.com/documentation/) **AD ortamının güvenlik durumunu değerlendirir** ve güzel bir **rapor** ile grafikler sunar.
+[**PingCastle**](https://www.pingcastle.com/documentation/) **AD ortamının güvenlik durumunu değerlendirir** ve grafiklerle güzel bir **rapor** sunar.
 
-Çalıştırmak için, `PingCastle.exe` ikili dosyasını çalıştırabilir ve seçeneklerin bir menüsünü sunan bir **etkileşimli oturum** başlatır. Kullanılacak varsayılan seçenek **`healthcheck`** olup, **alan** hakkında bir temel **genel bakış** oluşturacak ve **yanlış yapılandırmaları** ve **zayıflıkları** bulacaktır.&#x20;
+Çalıştırmak için, `PingCastle.exe` ikili dosyasını çalıştırabilir ve seçeneklerin bulunduğu bir **etkileşimli oturum** başlatır. Kullanılacak varsayılan seçenek **`healthcheck`** olup, **alan** hakkında bir temel **genel bakış** oluşturacak ve **yanlış yapılandırmaları** ve **zayıflıkları** bulacaktır.&#x20;
 
 {{#include ../../banners/hacktricks-training.md}}
