@@ -4,7 +4,7 @@
 
 ## Osnovne informacije
 
-PID (Process IDentifier) namespace je funkcija u Linux kernelu koja obezbeđuje izolaciju procesa omogućavajući grupi procesa da ima svoj set jedinstvenih PID-ova, odvojenih od PID-ova u drugim namespace-ima. Ovo je posebno korisno u kontejnerizaciji, gde je izolacija procesa ključna za bezbednost i upravljanje resursima.
+PID (Process IDentifier) namespace je funkcija u Linux kernelu koja obezbeđuje izolaciju procesa omogućavajući grupi procesa da imaju svoj set jedinstvenih PID-ova, odvojenih od PID-ova u drugim namespace-ima. Ovo je posebno korisno u kontejnerizaciji, gde je izolacija procesa ključna za bezbednost i upravljanje resursima.
 
 Kada se kreira novi PID namespace, prvi proces u tom namespace-u dobija PID 1. Ovaj proces postaje "init" proces novog namespace-a i odgovoran je za upravljanje drugim procesima unutar namespace-a. Svaki sledeći proces kreiran unutar namespace-a će imati jedinstven PID unutar tog namespace-a, a ovi PID-ovi će biti nezavisni od PID-ova u drugim namespace-ima.
 
@@ -43,7 +43,7 @@ Kada se `unshare` izvrši bez `-f` opcije, dolazi do greške zbog načina na koj
 
 3. **Rešenje**:
 - Problem se može rešiti korišćenjem `-f` opcije sa `unshare`. Ova opcija čini da `unshare` fork-uje novi proces nakon kreiranja novog PID prostora imena.
-- Izvršavanje `%unshare -fp /bin/bash%` osigurava da sam `unshare` komanda postane PID 1 u novom prostoru imena. `/bin/bash` i njegovi podprocesi su tada bezbedno sadržani unutar ovog novog prostora imena, sprečavajući prevremeni izlazak PID 1 i omogućavajući normalno dodeljivanje PID-a.
+- Izvršavanje `%unshare -fp /bin/bash%` osigurava da sam `unshare` komanda postane PID 1 u novom prostoru imena. `/bin/bash` i njegovi podprocesi su tada sigurno sadržani unutar ovog novog prostora imena, sprečavajući prevremeni izlazak PID 1 i omogućavajući normalno dodeljivanje PID-a.
 
 Osiguravanjem da `unshare` radi sa `-f` oznakom, novi PID prostor imena se ispravno održava, omogućavajući `/bin/bash` i njegovim podprocesima da funkcionišu bez susretanja greške u dodeljivanju memorije.
 
@@ -72,7 +72,7 @@ nsenter -t TARGET_PID --pid /bin/bash
 ```
 Kada uđete u PID namespace iz podrazumevanog namespace-a, i dalje ćete moći da vidite sve procese. A proces iz tog PID ns će moći da vidi novi bash u PID ns.
 
-Takođe, možete **ući u drugi proces PID namespace samo ako ste root**. I **ne možete** **ući** u drugi namespace **bez deskriptora** koji pokazuje na njega (kao što je `/proc/self/ns/pid`)
+Takođe, možete **ući u drugi PID namespace samo ako ste root**. I **ne možete** **ući** u drugi namespace **bez deskriptora** koji na njega pokazuje (kao što je `/proc/self/ns/pid`)
 
 ## References
 

@@ -12,8 +12,8 @@
 
 ## Bekstvo iz Montiranog Docker Soka
 
-Ako nekako otkrijete da je **docker sok** montiran unutar docker kontejnera, moći ćete da pobegnete iz njega.\
-To se obično dešava u docker kontejnerima koji iz nekog razloga treba da se povežu sa docker demonima kako bi izvršili radnje.
+Ako nekako otkrijete da je **docker sok montiran** unutar docker kontejnera, moći ćete da pobegnete iz njega.\
+To se obično dešava u docker kontejnerima koji iz nekog razloga moraju da se povežu sa docker demon da bi izvršili radnje.
 ```bash
 #Search the socket
 find / -name docker.sock 2>/dev/null
@@ -39,7 +39,7 @@ docker run -it -v /:/host/ --cap-add=ALL --security-opt apparmor=unconfined --se
 Docker daemon može takođe [slušati na portu (po defaultu 2375, 2376)](../../../../network-services-pentesting/2375-pentesting-docker.md) ili na sistemima zasnovanim na Systemd, komunikacija sa Docker daemon-om može se odvijati preko Systemd socket-a `fd://`.
 
 > [!NOTE]
-> Pored toga, obratite pažnju na runtime socket-e drugih visoko-nivo rješenja:
+> Pored toga, obratite pažnju na runtime socket-e drugih visoko-nivo runtima:
 >
 > - dockershim: `unix:///var/run/dockershim.sock`
 > - containerd: `unix:///run/containerd/containerd.sock`
@@ -48,11 +48,11 @@ Docker daemon može takođe [slušati na portu (po defaultu 2375, 2376)](../../.
 > - rktlet: `unix:///var/run/rktlet.sock`
 > - ...
 
-## Zloupotreba sposobnosti za bekstvo
+## Zloupotreba Kapaciteta
 
-Trebalo bi da proverite sposobnosti kontejnera, ako ima neku od sledećih, možda ćete moći da pobegnete iz njega: **`CAP_SYS_ADMIN`**_,_ **`CAP_SYS_PTRACE`**, **`CAP_SYS_MODULE`**, **`DAC_READ_SEARCH`**, **`DAC_OVERRIDE, CAP_SYS_RAWIO`, `CAP_SYSLOG`, `CAP_NET_RAW`, `CAP_NET_ADMIN`**
+Trebalo bi da proverite kapacitete kontejnera, ako ima neki od sledećih, možda ćete moći da pobegnete iz njega: **`CAP_SYS_ADMIN`**_,_ **`CAP_SYS_PTRACE`**, **`CAP_SYS_MODULE`**, **`DAC_READ_SEARCH`**, **`DAC_OVERRIDE, CAP_SYS_RAWIO`, `CAP_SYSLOG`, `CAP_NET_RAW`, `CAP_NET_ADMIN`**
 
-Možete proveriti trenutne sposobnosti kontejnera koristeći **prethodno pomenute automatske alate** ili:
+Možete proveriti trenutne kapacitete kontejnera koristeći **prethodno pomenute automatske alate** ili:
 ```bash
 capsh --print
 ```
@@ -64,7 +64,7 @@ Na sledećoj stranici možete **saznati više o linux sposobnostima** i kako ih 
 
 ## Bekstvo iz privilegovanih kontejnera
 
-Privilegovani kontejner može biti kreiran sa oznakom `--privileged` ili onemogućavanjem specifičnih odbrana:
+Privilegovan kontejner može biti kreiran sa oznakom `--privileged` ili onemogućavanjem specifičnih odbrana:
 
 - `--cap-add=ALL`
 - `--security-opt apparmor=unconfined`
@@ -82,7 +82,7 @@ Oznaka `--privileged` značajno smanjuje bezbednost kontejnera, nudeći **neogra
 ../docker-privileged.md
 {{#endref}}
 
-### Privilegovani + hostPID
+### Privilegovan + hostPID
 
 Sa ovim dozvolama možete jednostavno **preći u prostor imena procesa koji se izvršava na hostu kao root** poput init (pid:1) jednostavno pokretanjem: `nsenter --target 1 --mount --uts --ipc --net --pid -- bash`
 
@@ -310,7 +310,7 @@ root         9     2  0 11:25 ?        00:00:00 [mm_percpu_wq]
 root        10     2  0 11:25 ?        00:00:00 [ksoftirqd/0]
 ...
 ```
-#### Eskalacija privilegija zloupotrebom osetljivih montaža
+#### Eskalacija privilegija zloupotrebom osetljivih montiranja
 
 Postoji nekoliko fajlova koji mogu biti montirani i koji daju **informacije o osnovnom hostu**. Neki od njih mogu čak ukazivati na **nešto što će host izvršiti kada se nešto dogodi** (što će omogućiti napadaču da pobegne iz kontejnera).\
 Zloupotreba ovih fajlova može omogućiti:
@@ -327,16 +327,16 @@ Međutim, možete pronaći **druge osetljive fajlove** koje treba proveriti na o
 sensitive-mounts.md
 {{#endref}}
 
-### Arbitrarni montaži
+### Arbitrarna montiranja
 
-U nekoliko slučajeva ćete primetiti da **kontejner ima neki volumen montiran sa hosta**. Ako ovaj volumen nije pravilno konfigurisan, možda ćete moći da **pristupite/izmenite osetljive podatke**: Pročitajte tajne, promenite ssh authorized_keys…
+U nekoliko slučajeva ćete primetiti da **kontejner ima neki volumen montiran sa hosta**. Ako ovaj volumen nije pravilno konfigurisan, možda ćete moći da **pristupite/izmenite osetljive podatke**: Čitajte tajne, menjajte ssh authorized_keys…
 ```bash
 docker run --rm -it -v /:/host ubuntu bash
 ```
 ### Eskalacija privilegija sa 2 shell-a i host mount-om
 
-Ako imate pristup kao **root unutar kontejnera** koji ima neku fasciklu sa hosta montiranu i ako ste **pobegli kao korisnik bez privilegija na host** i imate pristup za čitanje nad montiranom fasciklom.\
-Možete kreirati **bash suid fajl** u **montiranoj fascikli** unutar **kontejnera** i **izvršiti ga sa host-a** da biste eskalirali privilegije.
+Ako imate pristup kao **root unutar kontejnera** koji ima neku fasciklu sa hosta montiranu i imate **pobeđeno kao neprivilegovan korisnik na hostu** i imate pristup za čitanje nad montiranom fasciklom.\
+Možete kreirati **bash suid fajl** u **montiranoj fascikli** unutar **kontejnera** i **izvršiti ga sa hosta** da biste eskalirali privilegije.
 ```bash
 cp /bin/bash . #From non priv inside mounted folder
 # You need to copy it from the host as the bash binaries might be diferent in the host and in the container
@@ -445,7 +445,7 @@ Sa `hostIPC=true`, dobijate pristup resursima međuprocesne komunikacije (IPC) h
 
 ### Oporavak sposobnosti
 
-Ako syscall **`unshare`** nije zabranjen, možete povratiti sve sposobnosti pokretanjem:
+Ako sistemski poziv **`unshare`** nije zabranjen, možete povratiti sve sposobnosti pokretanjem:
 ```bash
 unshare -UrmCpf bash
 # Check them with
@@ -462,11 +462,11 @@ Druga tehnika objašnjena u postu [https://labs.withsecure.com/blog/abusing-the-
 U slučaju da možete izvršiti `docker exec` kao root (verovatno sa sudo), pokušajte da eskalirate privilegije bežeći iz kontejnera zloupotrebljavajući CVE-2019-5736 (eksploit [ovde](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)). Ova tehnika će u suštini **prepisati** _**/bin/sh**_ binarni fajl **hosta** **iz kontejnera**, tako da svako ko izvršava docker exec može aktivirati payload.
 
 Promenite payload u skladu sa tim i izgradite main.go sa `go build main.go`. Rezultantni binarni fajl treba da bude smešten u docker kontejner za izvršavanje.\
-Po izvršavanju, čim prikaže `[+] Overwritten /bin/sh successfully`, potrebno je izvršiti sledeće sa host mašine:
+Po izvršavanju, čim prikaže `[+] Overwritten /bin/sh successfully` potrebno je izvršiti sledeće sa host mašine:
 
 `docker exec -it <container-name> /bin/sh`
 
-Ovo će aktivirati payload koji je prisutan u main.go fajlu.
+Ovo će aktivirati payload koji je prisutan u main.go datoteci.
 
 Za više informacija: [https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html](https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html)
 
@@ -477,7 +477,7 @@ Za više informacija: [https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape
 
 ### Površina za Eskapadu Docker-a
 
-- **Imenski prostori:** Proces bi trebao biti **potpuno odvojen od drugih procesa** putem imenskih prostora, tako da ne možemo pobeći interagujući sa drugim procesima zbog imenskih prostora (po defaultu ne mogu komunicirati putem IPC-a, unix soketa, mrežnih usluga, D-Bus-a, `/proc` drugih procesa).
+- **Imenski prostori:** Proces bi trebao biti **potpuno odvojen od drugih procesa** putem imenskih prostora, tako da ne možemo pobjeći interagujući sa drugim procesima zbog imenskih prostora (po defaultu ne mogu komunicirati putem IPC-a, unix soketa, mrežnih usluga, D-Bus-a, `/proc` drugih procesa).
 - **Root korisnik**: Po defaultu, korisnik koji pokreće proces je root korisnik (međutim, njegove privilegije su ograničene).
 - **Kapaciteti**: Docker ostavlja sledeće kapacitete: `cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap=ep`
 - **Syscalls**: Ovo su syscalls koje **root korisnik neće moći da pozove** (zbog nedostatka kapaciteta + Seccomp). Ostali syscalls bi mogli biti korišćeni da pokušaju da pobegnu.

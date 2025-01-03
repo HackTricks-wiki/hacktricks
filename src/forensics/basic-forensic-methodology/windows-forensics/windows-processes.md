@@ -2,105 +2,105 @@
 
 ## smss.exe
 
-**Session Manager**.\
-Session 0 starts **csrss.exe** and **wininit.exe** (**OS** **services**) while Session 1 starts **csrss.exe** and **winlogon.exe** (**User** **session**). However, you should see **only one process** of that **binary** without children in the processes tree.
+**Menadžer sesije**.\
+Sesija 0 pokreće **csrss.exe** i **wininit.exe** (**OS** **usluge**) dok Sesija 1 pokreće **csrss.exe** i **winlogon.exe** (**Korisnička** **sesija**). Međutim, trebali biste videti **samo jedan proces** tog **binarija** bez dece u stablu procesa.
 
-Also, sessions apart from 0 and 1 may mean that RDP sessions are occurring.
+Takođe, sesije osim 0 i 1 mogu značiti da se odvijaju RDP sesije.
 
 ## csrss.exe
 
-**Client/Server Run Subsystem Process**.\
-It manages **processes** and **threads**, makes the **Windows** **API** available for other processes and also **maps drive letters**, create **temp files**, and handles the **shutdown** **process**.
+**Klijent/Server Run Subsystem Process**.\
+Upravlja **procesima** i **nitima**, omogućava **Windows** **API** za druge procese i takođe **mapira slova drajvova**, kreira **temp fajlove** i upravlja **procesom gašenja**.
 
-There is one **running in Session 0 and another one in Session 1** (so **2 processes** in the processes tree). Another one is created **per new Session**.
+Postoji jedan **koji se izvršava u Sesiji 0 i još jedan u Sesiji 1** (tako da **2 procesa** u stablu procesa). Još jedan se kreira **po novoj Sesiji**.
 
 ## winlogon.exe
 
 **Windows Logon Process**.\
-It's responsible for user **logon**/**logoffs**. It launches **logonui.exe** to ask for username and password and then calls **lsass.exe** to verify them.
+Odgovoran je za korisnički **prijavu**/**odjavu**. Pokreće **logonui.exe** da zatraži korisničko ime i lozinku, a zatim poziva **lsass.exe** da ih verifikuje.
 
-Then it launches **userinit.exe** which is specified in **`HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`** with key **Userinit**.
+Zatim pokreće **userinit.exe** koji je naveden u **`HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`** sa ključem **Userinit**.
 
-Mover over, the previous registry should have **explorer.exe** in the **Shell key** or it might be abused as a **malware persistence method**.
+Pored toga, prethodni registar bi trebao imati **explorer.exe** u **Shell ključu** ili bi mogao biti zloupotrebljen kao **metoda postojanosti malvera**.
 
 ## wininit.exe
 
 **Windows Initialization Process**. \
-It launches **services.exe**, **lsass.exe**, and **lsm.exe** in Session 0. There should only be 1 process.
+Pokreće **services.exe**, **lsass.exe**, i **lsm.exe** u Sesiji 0. Trebalo bi da postoji samo 1 proces.
 
 ## userinit.exe
 
 **Userinit Logon Application**.\
-Loads the **ntduser.dat in HKCU** and initialises the **user** **environment** and runs **logon** **scripts** and **GPO**.
+Učitava **ntduser.dat u HKCU** i inicijalizuje **korisničko** **okruženje** i pokreće **logon** **skripte** i **GPO**.
 
-It launches **explorer.exe**.
+Pokreće **explorer.exe**.
 
 ## lsm.exe
 
-**Local Session Manager**.\
-It works with smss.exe to manipulate user sessions: Logon/logoff, shell start, lock/unlock desktop, etc.
+**Menadžer lokalnih sesija**.\
+Radi sa smss.exe da manipuliše korisničkim sesijama: Prijava/odjava, pokretanje shell-a, zaključavanje/otključavanje radne površine, itd.
 
-After W7 lsm.exe was transformed into a service (lsm.dll).
+Nakon W7, lsm.exe je transformisan u uslugu (lsm.dll).
 
-There should only be 1 process in W7 and from them a service running the DLL.
+Trebalo bi da postoji samo 1 proces u W7 i od njih usluga koja pokreće DLL.
 
 ## services.exe
 
-**Service Control Manager**.\
-It **loads** **services** configured as **auto-start** and **drivers**.
+**Menadžer kontrole usluga**.\
+**Učitava** **usluge** konfigurirane kao **automatski start** i **drajvere**.
 
-It's the parent process of **svchost.exe**, **dllhost.exe**, **taskhost.exe**, **spoolsv.exe** and many more.
+To je roditeljski proces **svchost.exe**, **dllhost.exe**, **taskhost.exe**, **spoolsv.exe** i mnoge druge.
 
-Services are defined in `HKLM\SYSTEM\CurrentControlSet\Services` and this process maintains a DB in memory of service info that can be queried by sc.exe.
+Usluge su definisane u `HKLM\SYSTEM\CurrentControlSet\Services` i ovaj proces održava bazu podataka u memoriji o informacijama o uslugama koje se mogu upititi putem sc.exe.
 
-Note how **some** **services** are going to be running in a **process of their own** and others are going to be **sharing a svchost.exe process**.
+Obratite pažnju kako će **neke** **usluge** raditi u **svojim procesima**, dok će druge **deliti svchost.exe proces**.
 
-There should only be 1 process.
+Trebalo bi da postoji samo 1 proces.
 
 ## lsass.exe
 
-**Local Security Authority Subsystem**.\
-It's responsible for the user **authentication** and create the **security** **tokens**. It uses authentication packages located in `HKLM\System\CurrentControlSet\Control\Lsa`.
+**Podsystem lokalne bezbednosti**.\
+Odgovoran je za **autentifikaciju** korisnika i kreira **bezbednosne** **tokene**. Koristi pakete autentifikacije smeštene u `HKLM\System\CurrentControlSet\Control\Lsa`.
 
-It writes to the **Security** **event** **log** and there should only be 1 process.
+Piše u **log** **događaja** **bezbednosti** i trebalo bi da postoji samo 1 proces.
 
-Keep in mind that this process is highly attacked to dump passwords.
+Imajte na umu da je ovaj proces često napadnut da bi se iskopirali lozinke.
 
 ## svchost.exe
 
-**Generic Service Host Process**.\
-It hosts multiple DLL services in one shared process.
+**Generički proces hosta usluga**.\
+Hostuje više DLL usluga u jednom deljenom procesu.
 
-Usually, you will find that **svchost.exe** is launched with the `-k` flag. This will launch a query to the registry **HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Svchost** where there will be a key with the argument mentioned in -k that will contain the services to launch in the same process.
+Obično ćete naći da je **svchost.exe** pokrenut sa `-k` oznakom. Ovo će pokrenuti upit u registru **HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Svchost** gde će biti ključ sa argumentom pomenutim u -k koji će sadržati usluge koje treba pokrenuti u istom procesu.
 
-For example: `-k UnistackSvcGroup` will launch: `PimIndexMaintenanceSvc MessagingService WpnUserService CDPUserSvc UnistoreSvc UserDataSvc OneSyncSvc`
+Na primer: `-k UnistackSvcGroup` će pokrenuti: `PimIndexMaintenanceSvc MessagingService WpnUserService CDPUserSvc UnistoreSvc UserDataSvc OneSyncSvc`
 
-If the **flag `-s`** is also used with an argument, then svchost is asked to **only launch the specified service** in this argument.
+Ako se **oznaka `-s`** takođe koristi sa argumentom, tada se svchost traži da **pokrene samo određenu uslugu** u ovom argumentu.
 
-There will be several processes of `svchost.exe`. If any of them is **not using the `-k` flag**, then that's very suspicious. If you find that **services.exe is not the parent**, that's also very suspicious.
+Biće nekoliko procesa `svchost.exe`. Ako nijedan od njih **ne koristi `-k` oznaku**, to je veoma sumnjivo. Ako otkrijete da **services.exe nije roditelj**, to je takođe veoma sumnjivo.
 
 ## taskhost.exe
 
-This process act as a host for processes running from DLLs. It also loads the services that are running from DLLs.
+Ovaj proces deluje kao host za procese koji se izvršavaju iz DLL-ova. Takođe učitava usluge koje se izvršavaju iz DLL-ova.
 
-In W8 this is called taskhostex.exe and in W10 taskhostw.exe.
+U W8 ovo se zove taskhostex.exe, a u W10 taskhostw.exe.
 
 ## explorer.exe
 
-This is the process responsible for the **user's desktop** and launching files via file extensions.
+Ovo je proces odgovoran za **radnu površinu korisnika** i pokretanje fajlova putem ekstenzija fajlova.
 
-**Only 1** process should be spawned **per logged on user.**
+**Samo 1** proces bi trebao biti pokrenut **po prijavljenom korisniku.**
 
-This is run from **userinit.exe** which should be terminated, so **no parent** should appear for this process.
+Ovo se pokreće iz **userinit.exe** koji bi trebao biti prekinut, tako da **nema roditelja** za ovaj proces.
 
-# Catching Malicious Processes
+# Hvatanje zlonamernih procesa
 
-- Is it running from the expected path? (No Windows binaries run from temp location)
-- Is it communicating with weird IPs?
-- Check digital signatures (Microsoft artifacts should be signed)
-- Is it spelled correctly?
-- Is running under the expected SID?
-- Is the parent process the expected one (if any)?
-- Are the children processes the expecting ones? (no cmd.exe, wscript.exe, powershell.exe..?)
+- Da li se pokreće iz očekivane putanje? (Nijedna Windows binarna datoteka se ne pokreće iz temp lokacije)
+- Da li komunicira sa čudnim IP-ovima?
+- Proverite digitalne potpise (Microsoft artefakti bi trebali biti potpisani)
+- Da li je pravilno napisano?
+- Da li se izvršava pod očekivanim SID-om?
+- Da li je roditeljski proces očekivani (ako postoji)?
+- Da li su procesi dece oni koje očekujete? (nema cmd.exe, wscript.exe, powershell.exe..?)
 
 {{#include ../../../banners/hacktricks-training.md}}

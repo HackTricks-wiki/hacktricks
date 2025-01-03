@@ -1,12 +1,12 @@
-# Zanimljive Grupe - Linux Privesc
+# Interesting Groups - Linux Privesc
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Sudo/Admin Grupe
+## Sudo/Admin Groups
 
-### **PE - Metod 1**
+### **PE - Method 1**
 
-**Ponekad**, **po defaultu (ili zato što neki softver to zahteva)** unutar **/etc/sudoers** fajla možete pronaći neke od ovih linija:
+**Ponekad**, **po defaultu (ili zato što neki softver to zahteva)** unutar **/etc/sudoers** datoteke možete pronaći neke od ovih linija:
 ```bash
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
@@ -26,7 +26,7 @@ Pronađite sve suid binarne datoteke i proverite da li postoji binarna datoteka 
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-Ako otkrijete da je binarni fajl **pkexec SUID binarni fajl** i da pripadate grupama **sudo** ili **admin**, verovatno možete izvršavati binarne fajlove kao sudo koristeći `pkexec`.\
+Ako otkrijete da je binarni fajl **pkexec SUID binarni fajl** i da pripadate grupi **sudo** ili **admin**, verovatno možete izvršavati binarne fajlove kao sudo koristeći `pkexec`.\
 To je zato što su obično to grupe unutar **polkit politike**. Ova politika u suštini identifikuje koje grupe mogu koristiti `pkexec`. Proverite to sa:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
@@ -43,7 +43,7 @@ polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freed
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-**Nije zato što nemate dozvole, već zato što niste povezani bez GUI-a**. I postoji rešenje za ovaj problem ovde: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Potrebno vam je **2 različite ssh sesije**:
+**Nije zato što nemate dozvole, već zato što niste povezani bez GUI-a**. I postoji rešenje za ovaj problem ovde: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Potrebne su vam **2 različite ssh sesije**:
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -74,11 +74,11 @@ Korisnici iz **grupe shadow** mogu **čitati** **/etc/shadow** datoteku:
 ```
 Тако, прочитајте датотеку и покушајте да **разбијете неке хешеве**.
 
-## Група запослених
+## Група особља
 
 **staff**: Омогућава корисницима да додају локалне модификације систему (`/usr/local`) без потребе за root привилегијама (имајте на уму да су извршни фајлови у `/usr/local/bin` у PATH променљивој сваког корисника, и могу "преписати" извршне фајлове у `/bin` и `/usr/bin` са истим именом). Упоредите са групом "adm", која је више повезана са мониторингом/безбедношћу. [\[source\]](https://wiki.debian.org/SystemGroups)
 
-У дебијан дистрибуцијама, `$PATH` променљива показује да ће `/usr/local/` бити покренута као највиша приоритетна, без обзира да ли сте привилеговани корисник или не.
+У дебијан дистрибуцијама, `$PATH` променљива показује да ће `/usr/local/` бити покренут као највиша приоритет, без обзира да ли сте привилеговани корисник или не.
 ```bash
 $ echo $PATH
 /usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
@@ -141,7 +141,7 @@ debugfs: ls
 debugfs: cat /root/.ssh/id_rsa
 debugfs: cat /etc/shadow
 ```
-Napomena da pomoću debugfs možete takođe **pisati fajlove**. Na primer, da kopirate `/tmp/asd1.txt` u `/tmp/asd2.txt` možete uraditi:
+Napomena: korišćenjem debugfs možete takođe **pisati fajlove**. Na primer, da kopirate `/tmp/asd1.txt` u `/tmp/asd2.txt` možete uraditi:
 ```bash
 debugfs -w /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
@@ -167,13 +167,13 @@ Da biste **otvorili** **sirovu sliku**, možete koristiti **GIMP**, odabrati **`
 
 ![](<../../../images/image (463).png>)
 
-Zatim promenite Širinu i Visinu na one koje se koriste na ekranu i proverite različite Tipove slika (i odaberite onaj koji bolje prikazuje ekran):
+Zatim promenite Širinu i Visinu na one koje koristi ekran i proverite različite Tipove slika (i odaberite onaj koji bolje prikazuje ekran):
 
 ![](<../../../images/image (317).png>)
 
 ## Root Grupa
 
-Izgleda da po defaultu **članovi root grupe** mogu imati pristup da **modifikuju** neke **konfiguracione** datoteke **usluga** ili neke **biblioteke** ili **druge zanimljive stvari** koje bi mogle biti korišćene za eskalaciju privilegija...
+Izgleda da po defaultu **članovi root grupe** mogu imati pristup da **modifikuju** neke **konfiguracione** datoteke usluga ili neke **biblioteke** ili **druge zanimljive stvari** koje bi mogle biti korišćene za eskalaciju privilegija...
 
 **Proverite koje datoteke članovi root grupe mogu modifikovati**:
 ```bash
@@ -218,7 +218,7 @@ Stoga, ako ste kompromitovali korisnika unutar ove grupe, definitivno biste treb
 
 ## Auth grupa
 
-Unutar OpenBSD **auth** grupa obično može da piše u foldere _**/etc/skey**_ i _**/var/db/yubikey**_ ako se koriste.\
+Unutar OpenBSD, **auth** grupa obično može da piše u foldere _**/etc/skey**_ i _**/var/db/yubikey**_ ako se koriste.\
 Ove dozvole se mogu zloupotrebiti sa sledećim eksploatom da bi se **eskalirale privilegije** na root: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
 
 {{#include ../../../banners/hacktricks-training.md}}

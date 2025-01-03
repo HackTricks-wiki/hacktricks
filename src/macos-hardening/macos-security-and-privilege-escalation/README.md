@@ -37,7 +37,7 @@ macos-protocols.md
 {{#endref}}
 
 - **Opensource** macOS: [https://opensource.apple.com/](https://opensource.apple.com/)
-- Da preuzmete `tar.gz`, promenite URL kao što je [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) u [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
+- Da preuzmete `tar.gz`, promenite URL kao [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) u [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
 
 ### MacOS MDM
 
@@ -63,7 +63,7 @@ macos-security-protections/
 
 ### Dozvole Fajlova
 
-Ako **proces koji se izvršava kao root piše** fajl koji može kontrolisati korisnik, korisnik bi to mogao zloupotrebiti da **eskalira privilegije**.\
+Ako **proces koji se izvršava kao root piše** fajl koji može kontrolisati korisnik, korisnik bi mogao da iskoristi ovo za **eskalaciju privilegija**.\
 To se može dogoditi u sledećim situacijama:
 
 - Fajl koji se koristi je već kreiran od strane korisnika (u vlasništvu korisnika)
@@ -73,7 +73,7 @@ To se može dogoditi u sledećim situacijama:
 
 Mogućnost da **kreirate fajl** koji će biti **koristen od strane root-a**, omogućava korisniku da **iskoristi njegov sadržaj** ili čak kreira **simlinkove/hardlinkove** da ga usmeri na drugo mesto.
 
-Za ovu vrstu ranjivosti ne zaboravite da **proverite ranjive `.pkg` instalere**:
+Za ovakve vrste ranjivosti ne zaboravite da **proverite ranjive `.pkg` instalere**:
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-installers-abuse.md

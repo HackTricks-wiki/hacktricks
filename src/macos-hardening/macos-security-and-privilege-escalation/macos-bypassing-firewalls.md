@@ -28,7 +28,7 @@ Neke ideje za pokušaj zaobilaženja firewalla
 
 ### Proverite dozvoljeni saobraćaj
 
-Poznavanje dozvoljenog saobraćaja će vam pomoći da identifikujete potencijalno bele liste domene ili koje aplikacije imaju dozvolu za pristup njima
+Poznavanje dozvoljenog saobraćaja će vam pomoći da identifikujete potencijalno bele liste domene ili koje aplikacije imaju dozvolu za pristup njima.
 ```bash
 lsof -i TCP -sTCP:ESTABLISHED
 ```

@@ -5,7 +5,7 @@
 
 ## **PE - Metod 1**
 
-**Ponekad**, **po defaultu \(ili zato što neki softver to zahteva\)** unutar **/etc/sudoers** fajla možete pronaći neke od ovih linija:
+**Ponekad**, **po defaultu \(ili zato što neka softverska rešenja to zahtevaju\)** unutar **/etc/sudoers** fajla možete pronaći neke od ovih linija:
 ```bash
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
@@ -13,7 +13,7 @@
 # Allow members of group admin to execute any command
 %admin 	ALL=(ALL:ALL) ALL
 ```
-To znači da **bilo koji korisnik koji pripada grupi sudo ili admin može izvršavati bilo šta kao sudo**.
+To znači da **bilo koji korisnik koji pripada grupi sudo ili admin može izvršiti bilo šta kao sudo**.
 
 Ako je to slučaj, da **postanete root, možete jednostavno izvršiti**:
 ```text
@@ -42,7 +42,7 @@ polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freed
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-**Nije zato što nemate dozvole, već zato što niste povezani bez GUI-a**. I postoji rešenje za ovaj problem ovde: [https://github.com/NixOS/nixpkgs/issues/18012\#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Potrebne su vam **2 različite ssh sesije**:
+**Nije zato što nemate dozvole, već zato što niste povezani bez GUI-a**. I postoji rešenje za ovaj problem ovde: [https://github.com/NixOS/nixpkgs/issues/18012\#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Potrebno vam je **2 različite ssh sesije**:
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -71,7 +71,7 @@ Korisnici iz **grupe shadow** mogu **čitati** **/etc/shadow** datoteku:
 ```text
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
-Dakle, pročitajte datoteku i pokušajte da **provalite neke hešove**.
+Dakle, pročitajte datoteku i pokušajte da **provalite neke hash-e**.
 
 # Disk Grupa
 
@@ -111,13 +111,13 @@ Da biste **otvorili** **sirovu sliku**, možete koristiti **GIMP**, odabrati **`
 
 ![](../../images/image%20%28208%29.png)
 
-Zatim modifikujte Širinu i Visinu na one koje koristi ekran i proverite različite Tipove slika \(i odaberite onaj koji najbolje prikazuje ekran\):
+Zatim modifikujte Širinu i Visinu na one koje koristi ekran i proverite različite Tipove slika \(i odaberite onaj koji bolje prikazuje ekran\):
 
 ![](../../images/image%20%28295%29.png)
 
 # Root Grupa
 
-Izgleda da po defaultu **članovi root grupe** mogu imati pristup da **modifikuju** neke **konfiguracione** datoteke servisa ili neke **biblioteke** ili **druge zanimljive stvari** koje bi mogle biti korišćene za eskalaciju privilegija...
+Izgleda da po defaultu **članovi root grupe** mogu imati pristup **modifikaciji** nekih **konfiguracionih** datoteka usluga ili nekih **biblioteka** ili **drugih interesantnih stvari** koje bi mogle biti korišćene za eskalaciju privilegija...
 
 **Proverite koje datoteke članovi root grupe mogu modifikovati**:
 ```bash

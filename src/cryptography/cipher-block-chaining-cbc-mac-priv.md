@@ -2,54 +2,54 @@
 
 # CBC
 
-If the **cookie** is **only** the **username** (or the first part of the cookie is the username) and you want to impersonate the username "**admin**". Then, you can create the username **"bdmin"** and **bruteforce** the **first byte** of the cookie.
+Ako je **kolačić** **samo** **korisničko ime** (ili je prva deo kolačića korisničko ime) i želite da se pretvarate da ste korisnik "**admin**". Tada možete kreirati korisničko ime **"bdmin"** i **bruteforce**-ovati **prvi bajt** kolačića.
 
 # CBC-MAC
 
-**Cipher block chaining message authentication code** (**CBC-MAC**) is a method used in cryptography. It works by taking a message and encrypting it block by block, where each block's encryption is linked to the one before it. This process creates a **chain of blocks**, making sure that changing even a single bit of the original message will lead to an unpredictable change in the last block of encrypted data. To make or reverse such a change, the encryption key is required, ensuring security.
+**Cipher block chaining message authentication code** (**CBC-MAC**) je metoda koja se koristi u kriptografiji. Funkcioniše tako što uzima poruku i šifruje je blok po blok, pri čemu je šifrovanje svakog bloka povezano sa prethodnim. Ovaj proces stvara **lanac blokova**, osiguravajući da će promena čak i jednog bita originalne poruke dovesti do nepredvidive promene u poslednjem bloku šifrovanih podataka. Da bi se izvršila ili obrnula takva promena, potrebna je šifrovana ključeva, čime se osigurava bezbednost.
 
-To calculate the CBC-MAC of message m, one encrypts m in CBC mode with zero initialization vector and keeps the last block. The following figure sketches the computation of the CBC-MAC of a message comprising blocks![https://wikimedia.org/api/rest_v1/media/math/render/svg/bbafe7330a5e40a04f01cc776c9d94fe914b17f5](https://wikimedia.org/api/rest_v1/media/math/render/svg/bbafe7330a5e40a04f01cc776c9d94fe914b17f5) using a secret key k and a block cipher E:
+Da bi se izračunao CBC-MAC poruke m, šifruje se m u CBC režimu sa nultim inicijalizacionim vektorom i čuva se poslednji blok. Sledeća slika prikazuje izračunavanje CBC-MAC-a poruke koja se sastoji od blokova![https://wikimedia.org/api/rest_v1/media/math/render/svg/bbafe7330a5e40a04f01cc776c9d94fe914b17f5](https://wikimedia.org/api/rest_v1/media/math/render/svg/bbafe7330a5e40a04f01cc776c9d94fe914b17f5) koristeći tajni ključ k i blok šifru E:
 
 ![https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/CBC-MAC_structure_(en).svg/570px-CBC-MAC_structure_(en).svg.png](<https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/CBC-MAC_structure_(en).svg/570px-CBC-MAC_structure_(en).svg.png>)
 
-# Vulnerability
+# Ranljivost
 
-With CBC-MAC usually the **IV used is 0**.\
-This is a problem because 2 known messages (`m1` and `m2`) independently will generate 2 signatures (`s1` and `s2`). So:
+Sa CBC-MAC obično je **IV koji se koristi 0**.\
+To je problem jer 2 poznate poruke (`m1` i `m2`) nezavisno će generisati 2 potpisa (`s1` i `s2`). Tako:
 
 - `E(m1 XOR 0) = s1`
 - `E(m2 XOR 0) = s2`
 
-Then a message composed by m1 and m2 concatenated (m3) will generate 2 signatures (s31 and s32):
+Tada poruka sastavljena od m1 i m2 konkateniranih (m3) će generisati 2 potpisa (s31 i s32):
 
 - `E(m1 XOR 0) = s31 = s1`
 - `E(m2 XOR s1) = s32`
 
-**Which is possible to calculate without knowing the key of the encryption.**
+**Što je moguće izračunati bez poznavanja ključa šifrovanja.**
 
-Imagine you are encrypting the name **Administrator** in **8bytes** blocks:
+Zamislite da šifrujete ime **Administrator** u **8 bajtnih** blokova:
 
 - `Administ`
 - `rator\00\00\00`
 
-You can create a username called **Administ** (m1) and retrieve the signature (s1).\
-Then, you can create a username called the result of `rator\00\00\00 XOR s1`. This will generate `E(m2 XOR s1 XOR 0)` which is s32.\
-now, you can use s32 as the signature of the full name **Administrator**.
+Možete kreirati korisničko ime pod nazivom **Administ** (m1) i dobiti potpis (s1).\
+Zatim, možete kreirati korisničko ime koje je rezultat `rator\00\00\00 XOR s1`. Ovo će generisati `E(m2 XOR s1 XOR 0)` što je s32.\
+sada, možete koristiti s32 kao potpis punog imena **Administrator**.
 
-### Summary
+### Sažetak
 
-1. Get the signature of username **Administ** (m1) which is s1
-2. Get the signature of username **rator\x00\x00\x00 XOR s1 XOR 0** is s32**.**
-3. Set the cookie to s32 and it will be a valid cookie for the user **Administrator**.
+1. Dobijte potpis korisničkog imena **Administ** (m1) koji je s1
+2. Dobijte potpis korisničkog imena **rator\x00\x00\x00 XOR s1 XOR 0** je s32**.**
+3. Postavite kolačić na s32 i biće to validan kolačić za korisnika **Administrator**.
 
-# Attack Controlling IV
+# Napad Kontrolisanjem IV
 
-If you can control the used IV the attack could be very easy.\
-If the cookies is just the username encrypted, to impersonate the user "**administrator**" you can create the user "**Administrator**" and you will get it's cookie.\
-Now, if you can control the IV, you can change the first Byte of the IV so **IV\[0] XOR "A" == IV'\[0] XOR "a"** and regenerate the cookie for the user **Administrator.** This cookie will be valid to **impersonate** the user **administrator** with the initial **IV**.
+Ako možete kontrolisati korišćeni IV, napad bi mogao biti vrlo lak.\
+Ako je kolačić samo korisničko ime šifrovano, da biste se pretvarali da ste korisnik "**administrator**" možete kreirati korisnika "**Administrator**" i dobićete njegov kolačić.\
+Sada, ako možete kontrolisati IV, možete promeniti prvi bajt IV-a tako da **IV\[0] XOR "A" == IV'\[0] XOR "a"** i regenerisati kolačić za korisnika **Administrator.** Ovaj kolačić će biti validan za **pretvaranje** korisnika **administrator** sa inicijalnim **IV**.
 
-## References
+## Reference
 
-More information in [https://en.wikipedia.org/wiki/CBC-MAC](https://en.wikipedia.org/wiki/CBC-MAC)
+Više informacija na [https://en.wikipedia.org/wiki/CBC-MAC](https://en.wikipedia.org/wiki/CBC-MAC)
 
 {{#include ../banners/hacktricks-training.md}}

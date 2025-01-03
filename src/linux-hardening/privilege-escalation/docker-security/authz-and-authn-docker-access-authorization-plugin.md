@@ -12,11 +12,11 @@ Kada se napravi **HTTP** **zahtev** ka Docker **demonu** putem CLI-a ili putem E
 
 Dijagrami sekvenci ispod prikazuju tok autorizacije za dozvolu i odbijanje:
 
-![Tok dozvole autorizacije](https://docs.docker.com/engine/extend/images/authz_allow.png)
+![Tok autorizacije - Dozvola](https://docs.docker.com/engine/extend/images/authz_allow.png)
 
-![Tok odbijanja autorizacije](https://docs.docker.com/engine/extend/images/authz_deny.png)
+![Tok autorizacije - Odbijanje](https://docs.docker.com/engine/extend/images/authz_deny.png)
 
-Svaki zahtev poslat pluginu **uključuje autentifikovanog korisnika, HTTP zaglavlja i telo zahteva/odgovora**. Samo su **ime korisnika** i **metoda autentifikacije** koja se koristi prosleđeni pluginu. Najvažnije, **nema** korisničkih **akreditiva** ili tokena koji se prosleđuju. Na kraju, **ne šalju se svi zahtevi/tela odgovora** autorizacionom pluginu. Samo se ona tela zahteva/odgovora gde je `Content-Type` ili `text/*` ili `application/json` šalju.
+Svaki zahtev poslat pluginu **uključuje autentifikovanog korisnika, HTTP zaglavlja i telo zahteva/odgovora**. Samo se **ime korisnika** i **metoda autentifikacije** koriste prosleđuju pluginu. Najvažnije, **nema** korisničkih **akreditiva** ili tokena koji se prosleđuju. Na kraju, **ne šalju se svi zahtevi/tela odgovora** autorizacionom pluginu. Samo se ona tela zahteva/odgovora gde je `Content-Type` ili `text/*` ili `application/json` šalju.
 
 Za komande koje potencijalno mogu preuzeti HTTP vezu (`HTTP Upgrade`), kao što je `exec`, autorizacioni plugin se poziva samo za inicijalne HTTP zahteve. Kada plugin odobri komandu, autorizacija se ne primenjuje na ostatak toka. Konkretno, streaming podaci se ne prosleđuju autorizacionim pluginima. Za komande koje vraćaju delimične HTTP odgovore, kao što su `logs` i `events`, samo se HTTP zahtev šalje autorizacionim pluginima.
 
@@ -58,7 +58,7 @@ docker run --rm -it --cap-add=SYS_ADMIN --security-opt apparmor=unconfined ubunt
 ```
 ### Pokretanje kontejnera i zatim dobijanje privilegovane sesije
 
-U ovom slučaju, sysadmin **nije dozvolio korisnicima da montiraju volumene i pokreću kontejnere sa `--privileged` oznakom** ili da daju bilo kakvu dodatnu sposobnost kontejneru:
+U ovom slučaju, sysadmin **nije dozvolio korisnicima da montiraju volumene i pokreću kontejnere sa `--privileged` oznakom** ili daju bilo koju dodatnu sposobnost kontejneru:
 ```bash
 docker run -d --privileged modified-ubuntu
 docker: Error response from daemon: authorization denied by plugin customauth: [DOCKER FIREWALL] Specified Privileged option value is Disallowed.
@@ -80,7 +80,7 @@ Sada, korisnik može da pobegne iz kontejnera koristeći neku od [**prethodno di
 
 ## Montiranje Writable Folder-a
 
-U ovom slučaju, sysadmin je **onemogućio korisnicima da pokreću kontejnere sa `--privileged` flagom** ili daju bilo kakvu dodatnu sposobnost kontejneru, i dozvolio je samo montiranje `/tmp` foldera:
+U ovom slučaju, sysadmin je **onemogućio korisnicima da pokreću kontejnere sa `--privileged` flag-om** ili daju bilo kakvu dodatnu sposobnost kontejneru, i dozvolio je samo montiranje `/tmp` foldera:
 ```bash
 host> cp /bin/bash /tmp #Cerate a copy of bash
 host> docker run -it -v /tmp:/host ubuntu:18.04 bash #Mount the /tmp folder of the host and get a shell
@@ -151,7 +151,7 @@ capsh --print
 #You can abuse the SYS_MODULE capability
 ```
 > [!NOTE]
-> **`HostConfig`** je ključ koji obično sadrži **zanimljive** **privilegije** za bekstvo iz kontejnera. Međutim, kao što smo prethodno razgovarali, imajte na umu da korišćenje Binds van njega takođe funkcioniše i može vam omogućiti da zaobiđete ograničenja.
+> **`HostConfig`** je ključ koji obično sadrži **zanimljive** **privilegije** za izlazak iz kontejnera. Međutim, kao što smo prethodno razgovarali, imajte na umu da korišćenje Binds van njega takođe funkcioniše i može vam omogućiti da zaobiđete ograničenja.
 
 ## Onemogućavanje Plugina
 

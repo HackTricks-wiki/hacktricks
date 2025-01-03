@@ -15,7 +15,7 @@ Neki **primeri** **distroless kontejnera** su:
 
 ## Weaponizing Distroless
 
-Cilj oružavanja distroless kontejnera je da se omogući **izvršavanje proizvoljnih binarnih datoteka i payload-a čak i sa ograničenjima** koja podrazumeva **distroless** (nedostatak uobičajenih binarnih datoteka u sistemu) i takođe zaštitama koje se obično nalaze u kontejnerima kao što su **samo za čitanje** ili **bez izvršavanja** u `/dev/shm`.
+Cilj oružavanja distroless kontejnera je da se omogući **izvršavanje proizvoljnih binarnih datoteka i payload-a čak i sa ograničenjima** koja podrazumeva **distroless** (nedostatak uobičajenih binarnih datoteka u sistemu) i takođe zaštitama koje se obično nalaze u kontejnerima kao što su **samo-za-čitanje** ili **bez-izvršavanja** u `/dev/shm`.
 
 ### Kroz memoriju
 

@@ -1,47 +1,38 @@
-# Certificates
+# Sertifikati
 
 {{#include ../banners/hacktricks-training.md}}
 
-<figure><img src="../images/image (48).png" alt=""><figcaption></figcaption></figure>
+## Šta je Sertifikat
 
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=certificates) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+**Javni ključ sertifikat** je digitalni ID koji se koristi u kriptografiji da dokaže da neko poseduje javni ključ. Uključuje detalje o ključevi, identitet vlasnika (subjekt) i digitalni potpis od poverljive vlasti (izdavača). Ako softver veruje izdavaču i potpis je validan, sigurna komunikacija sa vlasnikom ključa je moguća.
 
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=certificates" %}
+Sertifikati se uglavnom izdaju od strane [sertifikacionih tela](https://en.wikipedia.org/wiki/Certificate_authority) (CAs) u [infrastrukturi javnog ključa](https://en.wikipedia.org/wiki/Public-key_infrastructure) (PKI) postavci. Druga metoda je [mreža poverenja](https://en.wikipedia.org/wiki/Web_of_trust), gde korisnici direktno verifikuju ključeve jedni drugih. Uobičajeni format za sertifikate je [X.509](https://en.wikipedia.org/wiki/X.509), koji se može prilagoditi specifičnim potrebama kako je navedeno u RFC 5280.
 
-## What is a Certificate
+## x509 Uobičajena Polja
 
-A **public key certificate** is a digital ID used in cryptography to prove someone owns a public key. It includes the key's details, the owner's identity (the subject), and a digital signature from a trusted authority (the issuer). If the software trusts the issuer and the signature is valid, secure communication with the key's owner is possible.
+### **Uobičajena Polja u x509 Sertifikatima**
 
-Certificates are mostly issued by [certificate authorities](https://en.wikipedia.org/wiki/Certificate_authority) (CAs) in a [public-key infrastructure](https://en.wikipedia.org/wiki/Public-key_infrastructure) (PKI) setup. Another method is the [web of trust](https://en.wikipedia.org/wiki/Web_of_trust), where users directly verify each other’s keys. The common format for certificates is [X.509](https://en.wikipedia.org/wiki/X.509), which can be adapted for specific needs as outlined in RFC 5280.
+U x509 sertifikatima, nekoliko **polja** igra ključne uloge u obezbeđivanju validnosti i sigurnosti sertifikata. Evo pregleda ovih polja:
 
-## x509 Common Fields
+- **Broj Verzije** označava verziju x509 formata.
+- **Serijski Broj** jedinstveno identifikuje sertifikat unutar sistema Sertifikacione vlasti (CA), uglavnom za praćenje opoziva.
+- **Subjekt** polje predstavlja vlasnika sertifikata, što može biti mašina, pojedinac ili organizacija. Uključuje detaljnu identifikaciju kao što su:
+- **Uobičajeno Ime (CN)**: Domeni pokriveni sertifikatom.
+- **Zemlja (C)**, **Lokacija (L)**, **Država ili Pokrajina (ST, S, ili P)**, **Organizacija (O)**, i **Organizaciona Jedinica (OU)** pružaju geografske i organizacione detalje.
+- **Istaknuto Ime (DN)** obuhvata punu identifikaciju subjekta.
+- **Izdavač** detaljno opisuje ko je verifikovao i potpisao sertifikat, uključujući slična podpolja kao Subjekt za CA.
+- **Period Validnosti** označen je **Ne Pre** i **Ne Posle** vremenskim oznakama, osiguravajući da sertifikat nije korišćen pre ili posle određenog datuma.
+- **Javni Ključ** sekcija, ključna za sigurnost sertifikata, specificira algoritam, veličinu i druge tehničke detalje javnog ključa.
+- **x509v3 ekstenzije** poboljšavaju funkcionalnost sertifikata, specificirajući **Korišćenje Ključa**, **Prošireno Korišćenje Ključa**, **Alternativno Ime Subjekta**, i druge osobine za fino podešavanje primene sertifikata.
 
-### **Common Fields in x509 Certificates**
+#### **Korišćenje Ključa i Ekstenzije**
 
-In x509 certificates, several **fields** play critical roles in ensuring the certificate's validity and security. Here's a breakdown of these fields:
-
-- **Version Number** signifies the x509 format's version.
-- **Serial Number** uniquely identifies the certificate within a Certificate Authority's (CA) system, mainly for revocation tracking.
-- The **Subject** field represents the certificate's owner, which could be a machine, an individual, or an organization. It includes detailed identification such as:
-  - **Common Name (CN)**: Domains covered by the certificate.
-  - **Country (C)**, **Locality (L)**, **State or Province (ST, S, or P)**, **Organization (O)**, and **Organizational Unit (OU)** provide geographical and organizational details.
-  - **Distinguished Name (DN)** encapsulates the full subject identification.
-- **Issuer** details who verified and signed the certificate, including similar subfields as the Subject for the CA.
-- **Validity Period** is marked by **Not Before** and **Not After** timestamps, ensuring the certificate is not used before or after a certain date.
-- The **Public Key** section, crucial for the certificate's security, specifies the algorithm, size, and other technical details of the public key.
-- **x509v3 extensions** enhance the certificate's functionality, specifying **Key Usage**, **Extended Key Usage**, **Subject Alternative Name**, and other properties to fine-tune the certificate's application.
-
-#### **Key Usage and Extensions**
-
-- **Key Usage** identifies cryptographic applications of the public key, like digital signature or key encipherment.
-- **Extended Key Usage** further narrows down the certificate's use cases, e.g., for TLS server authentication.
-- **Subject Alternative Name** and **Basic Constraint** define additional host names covered by the certificate and whether it's a CA or end-entity certificate, respectively.
-- Identifiers like **Subject Key Identifier** and **Authority Key Identifier** ensure uniqueness and traceability of keys.
-- **Authority Information Access** and **CRL Distribution Points** provide paths to verify the issuing CA and check certificate revocation status.
-- **CT Precertificate SCTs** offer transparency logs, crucial for public trust in the certificate.
-
+- **Korišćenje Ključa** identifikuje kriptografske primene javnog ključa, kao što su digitalni potpis ili enkripcija ključa.
+- **Prošireno Korišćenje Ključa** dodatno sužava slučajeve korišćenja sertifikata, npr. za TLS autentifikaciju servera.
+- **Alternativno Ime Subjekta** i **Osnovna Ograničenja** definišu dodatne nazive hostova pokrivene sertifikatom i da li je to CA ili sertifikat krajnjeg entiteta, redom.
+- Identifikatori kao što su **Identifikator Ključa Subjekta** i **Identifikator Ključa Vlasti** osiguravaju jedinstvenost i praćenje ključeva.
+- **Pristup Informacijama o Vlasti** i **CRL Distribucione Tačke** pružaju puteve za verifikaciju izdavača CA i proveru statusa opoziva sertifikata.
+- **CT Precertifikat SCTs** nude transparente dnevnike, što je ključno za javno poverenje u sertifikat.
 ```python
 # Example of accessing and using x509 certificate fields programmatically:
 from cryptography import x509
@@ -49,8 +40,8 @@ from cryptography.hazmat.backends import default_backend
 
 # Load an x509 certificate (assuming cert.pem is a certificate file)
 with open("cert.pem", "rb") as file:
-    cert_data = file.read()
-    certificate = x509.load_pem_x509_certificate(cert_data, default_backend())
+cert_data = file.read()
+certificate = x509.load_pem_x509_certificate(cert_data, default_backend())
 
 # Accessing fields
 serial_number = certificate.serial_number
@@ -63,160 +54,123 @@ print(f"Issuer: {issuer}")
 print(f"Subject: {subject}")
 print(f"Public Key: {public_key}")
 ```
+### **Razlika između OCSP i CRL distribucionih tačaka**
 
-### **Difference between OCSP and CRL Distribution Points**
+**OCSP** (**RFC 2560**) uključuje klijenta i odgovarača koji zajedno proveravaju da li je digitalni javni ključ sertifikat opozvan, bez potrebe za preuzimanjem celog **CRL**. Ova metoda je efikasnija od tradicionalnog **CRL**, koji pruža listu opozvanih serijskih brojeva sertifikata, ali zahteva preuzimanje potencijalno velikog fajla. CRL može sadržati do 512 unosa. Više detalja je dostupno [ovde](https://www.arubanetworks.com/techdocs/ArubaOS%206_3_1_Web_Help/Content/ArubaFrameStyles/CertRevocation/About_OCSP_and_CRL.htm).
 
-**OCSP** (**RFC 2560**) involves a client and a responder working together to check if a digital public-key certificate has been revoked, without needing to download the full **CRL**. This method is more efficient than the traditional **CRL**, which provides a list of revoked certificate serial numbers but requires downloading a potentially large file. CRLs can include up to 512 entries. More details are available [here](https://www.arubanetworks.com/techdocs/ArubaOS%206_3_1_Web_Help/Content/ArubaFrameStyles/CertRevocation/About_OCSP_and_CRL.htm).
+### **Šta je transparentnost sertifikata**
 
-### **What is Certificate Transparency**
+Transparentnost sertifikata pomaže u borbi protiv pretnji vezanih za sertifikate osiguravajući da je izdavanje i postojanje SSL sertifikata vidljivo vlasnicima domena, CA i korisnicima. Njeni ciljevi su:
 
-Certificate Transparency helps combat certificate-related threats by ensuring the issuance and existence of SSL certificates are visible to domain owners, CAs, and users. Its objectives are:
+- Sprečavanje CA da izdaju SSL sertifikate za domen bez znanja vlasnika domena.
+- Uspostavljanje otvorenog sistema revizije za praćenje greškom ili zlonamerno izdatih sertifikata.
+- Zaštita korisnika od prevarantskih sertifikata.
 
-- Preventing CAs from issuing SSL certificates for a domain without the domain owner's knowledge.
-- Establishing an open auditing system for tracking mistakenly or maliciously issued certificates.
-- Safeguarding users against fraudulent certificates.
+#### **Dnevnici sertifikata**
 
-#### **Certificate Logs**
+Dnevnici sertifikata su javno revizibilni, samo za dodavanje zapisi o sertifikatima, koje održavaju mrežne usluge. Ovi dnevnici pružaju kriptografske dokaze za svrhe revizije. Izdavaoci i javnost mogu podnositi sertifikate ovim dnevnicima ili ih pretraživati radi verifikacije. Dok tačan broj servera za dnevnik nije fiksiran, očekuje se da će biti manje od hiljadu globalno. Ove servere mogu nezavisno upravljati CA, ISP ili bilo koja zainteresovana strana.
 
-Certificate logs are publicly auditable, append-only records of certificates, maintained by network services. These logs provide cryptographic proofs for auditing purposes. Both issuance authorities and the public can submit certificates to these logs or query them for verification. While the exact number of log servers is not fixed, it's expected to be less than a thousand globally. These servers can be independently managed by CAs, ISPs, or any interested entity.
+#### **Upit**
 
-#### **Query**
+Da biste istražili dnevnike transparentnosti sertifikata za bilo koji domen, posetite [https://crt.sh/](https://crt.sh).
 
-To explore Certificate Transparency logs for any domain, visit [https://crt.sh/](https://crt.sh).
+Postoje različiti formati za skladištenje sertifikata, svaki sa svojim slučajevima upotrebe i kompatibilnošću. Ovaj pregled pokriva glavne formate i pruža smernice za konvertovanje između njih.
 
-Different formats exist for storing certificates, each with its own use cases and compatibility. This summary covers the main formats and provides guidance on converting between them.
+## **Formati**
 
-## **Formats**
+### **PEM format**
 
-### **PEM Format**
+- Najšire korišćen format za sertifikate.
+- Zahteva odvojene fajlove za sertifikate i privatne ključeve, kodirane u Base64 ASCII.
+- Uobičajene ekstenzije: .cer, .crt, .pem, .key.
+- Pretežno koriste Apache i slični serveri.
 
-- Most widely used format for certificates.
-- Requires separate files for certificates and private keys, encoded in Base64 ASCII.
-- Common extensions: .cer, .crt, .pem, .key.
-- Primarily used by Apache and similar servers.
+### **DER format**
 
-### **DER Format**
+- Binarni format sertifikata.
+- Nedostaju "BEGIN/END CERTIFICATE" izjave koje se nalaze u PEM fajlovima.
+- Uobičajene ekstenzije: .cer, .der.
+- Često se koristi sa Java platformama.
 
-- A binary format of certificates.
-- Lacks the "BEGIN/END CERTIFICATE" statements found in PEM files.
-- Common extensions: .cer, .der.
-- Often used with Java platforms.
+### **P7B/PKCS#7 format**
 
-### **P7B/PKCS#7 Format**
+- Skladišti se u Base64 ASCII, sa ekstenzijama .p7b ili .p7c.
+- Sadrži samo sertifikate i lance sertifikata, isključujući privatni ključ.
+- Podržava ga Microsoft Windows i Java Tomcat.
 
-- Stored in Base64 ASCII, with extensions .p7b or .p7c.
-- Contains only certificates and chain certificates, excluding the private key.
-- Supported by Microsoft Windows and Java Tomcat.
+### **PFX/P12/PKCS#12 format**
 
-### **PFX/P12/PKCS#12 Format**
+- Binarni format koji enkapsulira server sertifikate, međusertifikate i privatne ključeve u jednom fajlu.
+- Ekstenzije: .pfx, .p12.
+- Pretežno se koristi na Windows-u za uvoz i izvoz sertifikata.
 
-- A binary format that encapsulates server certificates, intermediate certificates, and private keys in one file.
-- Extensions: .pfx, .p12.
-- Mainly used on Windows for certificate import and export.
+### **Konvertovanje formata**
 
-### **Converting Formats**
-
-**PEM conversions** are essential for compatibility:
+**PEM konverzije** su neophodne za kompatibilnost:
 
 - **x509 to PEM**
-
 ```bash
 openssl x509 -in certificatename.cer -outform PEM -out certificatename.pem
 ```
-
-- **PEM to DER**
-
+- **PEM u DER**
 ```bash
 openssl x509 -outform der -in certificatename.pem -out certificatename.der
 ```
-
-- **DER to PEM**
-
+- **DER u PEM**
 ```bash
 openssl x509 -inform der -in certificatename.der -out certificatename.pem
 ```
-
-- **PEM to P7B**
-
+- **PEM u P7B**
 ```bash
 openssl crl2pkcs7 -nocrl -certfile certificatename.pem -out certificatename.p7b -certfile CACert.cer
 ```
-
-- **PKCS7 to PEM**
-
+- **PKCS7 u PEM**
 ```bash
 openssl pkcs7 -print_certs -in certificatename.p7b -out certificatename.pem
 ```
+**PFX konverzije** su ključne za upravljanje sertifikatima na Windows-u:
 
-**PFX conversions** are crucial for managing certificates on Windows:
-
-- **PFX to PEM**
-
+- **PFX u PEM**
 ```bash
 openssl pkcs12 -in certificatename.pfx -out certificatename.pem
 ```
-
-- **PFX to PKCS#8** involves two steps:
-  1. Convert PFX to PEM
-
+- **PFX to PKCS#8** uključuje dva koraka:
+1. Konvertujte PFX u PEM
 ```bash
 openssl pkcs12 -in certificatename.pfx -nocerts -nodes -out certificatename.pem
 ```
-
-2. Convert PEM to PKCS8
-
+2. Konvertujte PEM u PKCS8
 ```bash
 openSSL pkcs8 -in certificatename.pem -topk8 -nocrypt -out certificatename.pk8
 ```
-
-- **P7B to PFX** also requires two commands:
-  1. Convert P7B to CER
-
+- **P7B to PFX** takođe zahteva dve komande:
+1. Konvertujte P7B u CER
 ```bash
 openssl pkcs7 -print_certs -in certificatename.p7b -out certificatename.cer
 ```
-
-2. Convert CER and Private Key to PFX
-
+2. Konvertujte CER i privatni ključ u PFX
 ```bash
 openssl pkcs12 -export -in certificatename.cer -inkey privateKey.key -out certificatename.pfx -certfile cacert.cer
 ```
-
-- **ASN.1 (DER/PEM) editing** (works with certificates or almost any other ASN.1 structure):
-  1. Clone [asn1template](https://github.com/wllm-rbnt/asn1template/)
-
+- **ASN.1 (DER/PEM) uređivanje** (radi sa sertifikatima ili gotovo bilo kojom drugom ASN.1 strukturom):
+1. Klonirajte [asn1template](https://github.com/wllm-rbnt/asn1template/)
 ```bash
 git clone https://github.com/wllm-rbnt/asn1template.git
 ```
-
-2. Convert DER/PEM to OpenSSL's generation format
-
+2. Konvertujte DER/PEM u OpenSSL-ov format generacije
 ```bash
 asn1template/asn1template.pl certificatename.der > certificatename.tpl
 asn1template/asn1template.pl -p certificatename.pem > certificatename.tpl
 ```
-
-3. Edit certificatename.tpl according to your requirements
-
+3. Izmenite certificatename.tpl prema vašim zahtevima
 ```bash
 vim certificatename.tpl
 ```
-
-4. Rebuild the modified certificate
-
+4. Ponovo izgradite modifikovani sertifikat
 ```bash
 openssl asn1parse -genconf certificatename.tpl -out certificatename_new.der
 openssl asn1parse -genconf certificatename.tpl -outform PEM -out certificatename_new.pem
 ```
-
----
-
-<figure><img src="../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=certificates) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=certificates" %}
+--- 
 
 {{#include ../banners/hacktricks-training.md}}

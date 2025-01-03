@@ -6,7 +6,7 @@
 
 **Seccomp**, što znači Secure Computing mode, je bezbednosna funkcija **Linux jezgra dizajnirana da filtrira sistemske pozive**. Ograničava procese na ograničen skup sistemskih poziva (`exit()`, `sigreturn()`, `read()`, i `write()` za već otvorene deskriptore datoteka). Ako proces pokuša da pozove bilo šta drugo, kernel ga prekida koristeći SIGKILL ili SIGSYS. Ovaj mehanizam ne virtualizuje resurse, već izoluje proces od njih.
 
-Postoje dva načina za aktiviranje seccomp-a: putem sistemskog poziva `prctl(2)` sa `PR_SET_SECCOMP`, ili za Linux jezgra 3.17 i novije, sistemski poziv `seccomp(2)`. Stariji metod omogućavanja seccomp-a pisanjem u `/proc/self/seccomp` je ukinut u korist `prctl()`.
+Postoje dva načina za aktiviranje seccomp-a: putem sistemskog poziva `prctl(2)` sa `PR_SET_SECCOMP`, ili za Linux jezgra 3.17 i novija, sistemski poziv `seccomp(2)`. Stariji metod omogućavanja seccomp-a pisanjem u `/proc/self/seccomp` je ukinut u korist `prctl()`.
 
 Poboljšanje, **seccomp-bpf**, dodaje mogućnost filtriranja sistemskih poziva sa prilagodljivom politikom, koristeći Berkeley Packet Filter (BPF) pravila. Ova ekstenzija se koristi u softveru kao što su OpenSSH, vsftpd, i Chrome/Chromium pregledači na Chrome OS-u i Linux-u za fleksibilno i efikasno filtriranje syscall-a, nudeći alternativu sada neodržavanom systrace-u za Linux.
 
@@ -96,7 +96,7 @@ printf("this process is %d\n", getpid());
 ```
 ## Seccomp u Dockeru
 
-**Seccomp-bpf** je podržan od strane **Docker**-a da ograniči **syscalls** iz kontejnera, efikasno smanjujući površinu napada. Možete pronaći **syscalls koje su blokirane** po **defaultu** na [https://docs.docker.com/engine/security/seccomp/](https://docs.docker.com/engine/security/seccomp/) i **default seccomp profil** se može pronaći ovde [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json).\
+**Seccomp-bpf** je podržan od strane **Docker**-a kako bi se efikasno ograničili **syscalls** iz kontejnera, smanjujući tako površinu napada. Možete pronaći **syscalls koje su blokirane** po **defaultu** na [https://docs.docker.com/engine/security/seccomp/](https://docs.docker.com/engine/security/seccomp/) i **default seccomp profil** se može pronaći ovde [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json).\
 Možete pokrenuti docker kontejner sa **drugom seccomp** politikom sa:
 ```bash
 docker run --rm \
@@ -104,9 +104,9 @@ docker run --rm \
 --security-opt seccomp=/path/to/seccomp/profile.json \
 hello-world
 ```
-Ako želite, na primer, da **zabranite** kontejneru da izvršava neku **syscall** poput `uname`, možete preuzeti podrazumevani profil sa [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json) i jednostavno **ukloniti `uname` string sa liste**.\
-Ako želite da se uverite da **neki binarni program ne radi unutar docker kontejnera**, možete koristiti strace da navedete syscalls koje binarni program koristi i zatim ih zabraniti.\
-U sledećem primeru otkrivene su **syscalls** za `uname`:
+Ako želite, na primer, da **zabranite** kontejneru da izvršava neki **syscall** poput `uname`, možete preuzeti podrazumevani profil sa [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json) i jednostavno **ukloniti `uname` string sa liste**.\
+Ako želite da se uverite da **neki binarni program ne radi unutar docker kontejnera**, možete koristiti strace da navedete syscalls koje binarni program koristi i zatim ih zabranite.\
+U sledećem primeru otkrivaju se **syscalls** za `uname`:
 ```bash
 docker run -it --security-opt seccomp=default.json modified-ubuntu strace uname
 ```
@@ -129,13 +129,13 @@ Da ilustrujemo Seccomp funkciju, hajde da kreiramo Seccomp profil koji onemoguć
 ]
 }
 ```
-U gornjem profilu, postavili smo podrazumevanu akciju na "dozvoli" i kreirali crnu listu da onemogućimo "chmod". Da bismo bili sigurniji, možemo postaviti podrazumevanu akciju na odbacivanje i kreirati belu listu da selektivno omogućimo sistemske pozive.\
-Prikazani izlaz pokazuje da "chmod" poziv vraća grešku jer je onemogućen u seccomp profilu.
+U gornjem profilu, postavili smo podrazumevanu akciju na "dozvoli" i kreirali crnu listu da onemogućimo "chmod". Da bismo bili sigurniji, možemo postaviti podrazumevanu akciju na odbaci i kreirati belu listu da selektivno omogućimo sistemske pozive.\
+Sledeći izlaz prikazuje "chmod" poziv koji vraća grešku jer je onemogućen u seccomp profilu.
 ```bash
 $ docker run --rm -it --security-opt seccomp:/home/smakam14/seccomp/profile.json busybox chmod 400 /etc/hosts
 chmod: /etc/hosts: Operation not permitted
 ```
-Sledeći izlaz prikazuje “docker inspect” koji prikazuje profil:
+Sledeći izlaz prikazuje "docker inspect" koji prikazuje profil:
 ```json
 "SecurityOpt": [
 "seccomp:{\"defaultAction\":\"SCMP_ACT_ALLOW\",\"syscalls\":[{\"name\":\"chmod\",\"action\":\"SCMP_ACT_ERRNO\"}]}"

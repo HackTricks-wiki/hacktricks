@@ -23,7 +23,7 @@
 
 - Omogućava uređajima da se autonomno registruju sa unapred definisanim MDM serverom prilikom prve aktivacije.
 - Prvenstveno korisno za potpuno nove uređaje, ali takođe primenljivo na uređaje koji prolaze kroz rekonfiguraciju.
-- Olakšava jednostavno podešavanje, čineći uređaje spremnim za organizacionu upotrebu brzo.
+- Olakšava jednostavnu postavku, čineći uređaje spremnim za organizacionu upotrebu brzo.
 
 ### **Razmatranje bezbednosti**
 
@@ -40,7 +40,7 @@ Važno je napomenuti da lakoća registracije koju pruža DEP, iako korisna, mož
 ### Šta su Konfiguracijski profili (aka mobileconfigs)?
 
 - Apple-ov zvanični način **postavljanja/primene sistemske konfiguracije.**
-- Format datoteke koji može sadržati više opterećenja.
+- Format datoteke koji može sadržati više tereta.
 - Zasnovan na listama svojstava (XML tip).
 - “mogu biti potpisani i šifrovani kako bi se potvrdio njihov izvor, osigurala njihova celovitost i zaštitili njihovi sadržaji.” Osnovi — Strana 70, iOS Security Guide, januar 2018.
 
@@ -67,7 +67,7 @@ Važno je napomenuti da lakoća registracije koju pruža DEP, iako korisna, mož
 
 - RESTful
 - sinhronizuje zapise uređaja sa Apple-a na MDM server
-- sinhronizuje “DEP profile” sa Apple-a sa MDM servera (isporučeni od strane Apple-a uređaju kasnije)
+- sinhronizuje “DEP profile” sa Apple-om sa MDM servera (isporučuje Apple uređaju kasnije)
 - DEP “profil” sadrži:
 - URL MDM dobavljača servera
 - Dodatni pouzdani sertifikati za URL servera (opciono pinovanje)
@@ -75,7 +75,7 @@ Važno je napomenuti da lakoća registracije koju pruža DEP, iako korisna, mož
 
 ## Serijski broj
 
-Apple uređaji proizvedeni nakon 2010. godine obično imaju **12-znamenkaste alfanumeričke** serijske brojeve, pri čemu **prva tri broja predstavljaju mesto proizvodnje**, sledeća **dva** označavaju **godinu** i **nedelju** proizvodnje, sledeća **tri** broja daju **jedinstveni** **identifikator**, a **poslednja** **četiri** broja predstavljaju **broj modela**.
+Apple uređaji proizvedeni nakon 2010. obično imaju **12-znamenkaste alfanumeričke** serijske brojeve, pri čemu **prva tri broja predstavljaju mesto proizvodnje**, sledeća **dva** označavaju **godinu** i **nedelju** proizvodnje, sledeća **tri** broja daju **jedinstveni** **identifikator**, a **poslednja** **četiri** broja predstavljaju **broj modela**.
 
 {{#ref}}
 macos-serial-number.md
@@ -88,7 +88,7 @@ macos-serial-number.md
 3. Sinhronizacija zapisa uređaja (MDM dobavljač): MDM sinhronizuje zapise uređaja i šalje DEP profile Apple-u
 4. DEP prijava (Uređaj): Uređaj dobija svoj DEP profil
 5. Preuzimanje profila (Uređaj)
-6. Instalacija profila (Uređaj) a. uključuje MDM, SCEP i root CA opterećenja
+6. Instalacija profila (Uređaj) a. uključuje MDM, SCEP i root CA terete
 7. Izdavanje MDM komande (Uređaj)
 
 ![](<../../../images/image (694).png>)
@@ -101,7 +101,7 @@ Ovaj deo procesa se odvija kada **korisnik prvi put pokrene Mac** (ili nakon pot
 
 ![](<../../../images/image (1044).png>)
 
-ili kada se izvrši `sudo profiles show -type enrollment`
+ili kada se izvršava `sudo profiles show -type enrollment`
 
 - Utvrditi **da li je uređaj DEP omogućen**
 - Aktivacioni zapis je interno ime za **DEP “profil”**
@@ -121,7 +121,7 @@ Sledi nekoliko koraka da se dobije aktivacioni zapis koji obavlja **`MCTeslaConf
 4. Uspostavi sesiju (**`NACKeyEstablishment`**)
 5. Napravi zahtev
 1. POST na [https://iprofiles.apple.com/macProfile](https://iprofiles.apple.com/macProfile) šaljući podatke `{ "action": "RequestProfileConfiguration", "sn": "" }`
-2. JSON opterećenje je šifrovano koristeći Absinthe (**`NACSign`**)
+2. JSON teret je šifrovan koristeći Absinthe (**`NACSign`**)
 3. Svi zahtevi preko HTTPs, korišćeni su ugrađeni root sertifikati
 
 ![](<../../../images/image (566) (1).png>)
@@ -129,14 +129,14 @@ Sledi nekoliko koraka da se dobije aktivacioni zapis koji obavlja **`MCTeslaConf
 Odgovor je JSON rečnik sa nekim važnim podacima kao što su:
 
 - **url**: URL domaćina MDM dobavljača za aktivacioni profil
-- **anchor-certs**: Niz DER sertifikata korišćenih kao pouzdani ankeri
+- **anchor-certs**: Niz DER sertifikata korišćenih kao pouzdani sidri
 
 ### **Korak 5: Preuzimanje profila**
 
 ![](<../../../images/image (444).png>)
 
 - Zahtev poslat na **url naveden u DEP profilu**.
-- **Anchor sertifikati** se koriste za **procenu poverenja** ako su navedeni.
+- **Sidreni sertifikati** se koriste za **procenu poverenja** ako su navedeni.
 - Podsetnik: **anchor_certs** svojstvo DEP profila
 - **Zahtev je jednostavan .plist** sa identifikacijom uređaja
 - Primeri: **UDID, verzija OS-a**.
@@ -144,7 +144,7 @@ Odgovor je JSON rečnik sa nekim važnim podacima kao što su:
 - Potpisan koristeći **sertifikat identiteta uređaja (iz APNS-a)**
 - **Lanac sertifikata** uključuje istekao **Apple iPhone Device CA**
 
-![](<../../../images/image (567) (1) (2) (2) (2) (2) (2) (2) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (2) (2).png>)
+![](<../../../images/image (567) (1) (2) (2) (2) (2) (2) (2) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (2) (2).png>)
 
 ### Korak 6: Instalacija profila
 
@@ -153,39 +153,39 @@ Odgovor je JSON rečnik sa nekim važnim podacima kao što su:
 - Pokreće ga **`CPInstallActivationProfile`**
 - Implementira ga mdmclient preko XPC
 - LaunchDaemon (kao root) ili LaunchAgent (kao korisnik), u zavisnosti od konteksta
-- Konfiguracijski profili imaju više opterećenja za instalaciju
+- Konfiguracijski profili imaju više tereta za instalaciju
 - Okvir ima arhitekturu zasnovanu na plugin-ima za instalaciju profila
-- Svaka vrsta opterećenja je povezana sa plugin-om
+- Svaka vrsta tereta je povezana sa plugin-om
 - Može biti XPC (u okviru) ili klasični Cocoa (u ManagedClient.app)
 - Primer:
-- Opterećenja sertifikata koriste CertificateService.xpc
+- Tereti sertifikata koriste CertificateService.xpc
 
-Obično, **aktivacioni profil** koji pruža MDM dobavljač će **uključivati sledeća opterećenja**:
+Obično, **aktivacioni profil** koji pruža MDM dobavljač će **uključivati sledeće terete**:
 
 - `com.apple.mdm`: da **registruje** uređaj u MDM
 - `com.apple.security.scep`: da sigurno obezbedi **sertifikat klijenta** uređaju.
 - `com.apple.security.pem`: da **instalira pouzdane CA sertifikate** u sistemski ključan.
-- Instalacija MDM opterećenja ekvivalentna je **MDM prijavi u dokumentaciji**
-- Opterećenje **sadrži ključne osobine**:
+- Instalacija MDM tereta ekvivalentna je **MDM prijavi u dokumentaciji**
+- Teret **sadrži ključne osobine**:
 - - MDM Check-In URL (**`CheckInURL`**)
 - MDM Command Polling URL (**`ServerURL`**) + APNs tema za aktivaciju
-- Da bi se instaliralo MDM opterećenje, zahtev se šalje na **`CheckInURL`**
+- Da bi se instalirao MDM teret, zahtev se šalje na **`CheckInURL`**
 - Implementirano u **`mdmclient`**
-- MDM opterećenje može zavisiti od drugih opterećenja
+- MDM teret može zavisiti od drugih tereta
 - Omogućava **zahteve da budu pinovani na specifične sertifikate**:
 - Svojstvo: **`CheckInURLPinningCertificateUUIDs`**
 - Svojstvo: **`ServerURLPinningCertificateUUIDs`**
-- Isporučeno putem PEM opterećenja
+- Isporučuje se putem PEM tereta
 - Omogućava uređaju da bude dodeljen sertifikat identiteta:
 - Svojstvo: IdentityCertificateUUID
-- Isporučeno putem SCEP opterećenja
+- Isporučuje se putem SCEP tereta
 
 ### **Korak 7: Slušanje za MDM komande**
 
 - Nakon što je MDM prijava završena, dobavljač može **izdati push obaveštenja koristeći APNs**
 - Po prijemu, obrađuje ih **`mdmclient`**
 - Da bi proverio MDM komande, zahtev se šalje na ServerURL
-- Koristi prethodno instalirano MDM opterećenje:
+- Koristi prethodno instalirani MDM teret:
 - **`ServerURLPinningCertificateUUIDs`** za pinovanje zahteva
 - **`IdentityCertificateUUID`** za TLS sertifikat klijenta
 
@@ -193,7 +193,7 @@ Obično, **aktivacioni profil** koji pruža MDM dobavljač će **uključivati sl
 
 ### Registracija uređaja u drugim organizacijama
 
-Kao što je ranije komentarisano, da bi se pokušalo registrovati uređaj u organizaciji **potreban je samo Serijski broj koji pripada toj organizaciji**. Kada se uređaj registruje, nekoliko organizacija će instalirati osetljive podatke na novom uređaju: sertifikate, aplikacije, WiFi lozinke, VPN konfiguracije [i tako dalje](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
+Kao što je ranije komentarisano, da bi pokušali da registruju uređaj u organizaciji **potreban je samo Serijski broj koji pripada toj organizaciji**. Kada se uređaj registruje, nekoliko organizacija će instalirati osetljive podatke na novi uređaj: sertifikate, aplikacije, WiFi lozinke, VPN konfiguracije [i tako dalje](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
 Stoga, ovo bi moglo biti opasno mesto za napadače ako proces registracije nije pravilno zaštićen:
 
 {{#ref}}

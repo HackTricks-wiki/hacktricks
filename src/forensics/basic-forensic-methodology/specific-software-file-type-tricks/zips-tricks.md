@@ -1,20 +1,20 @@
-# ZIPs tricks
+# ZIPs trikovi
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Command-line tools** for managing **zip files** are essential for diagnosing, repairing, and cracking zip files. Here are some key utilities:
+**Alatke za komandnu liniju** za upravljanje **zip datotekama** su neophodne za dijagnostikovanje, popravku i probijanje zip datoteka. Evo nekoliko ključnih alata:
 
-- **`unzip`**: Reveals why a zip file may not decompress.
-- **`zipdetails -v`**: Offers detailed analysis of zip file format fields.
-- **`zipinfo`**: Lists contents of a zip file without extracting them.
-- **`zip -F input.zip --out output.zip`** and **`zip -FF input.zip --out output.zip`**: Try to repair corrupted zip files.
-- **[fcrackzip](https://github.com/hyc/fcrackzip)**: A tool for brute-force cracking of zip passwords, effective for passwords up to around 7 characters.
+- **`unzip`**: Otkriva zašto zip datoteka možda ne može da se raspakuje.
+- **`zipdetails -v`**: Pruža detaljnu analizu polja formata zip datoteke.
+- **`zipinfo`**: Navodi sadržaj zip datoteke bez vađenja.
+- **`zip -F input.zip --out output.zip`** i **`zip -FF input.zip --out output.zip`**: Pokušavaju da poprave oštećene zip datoteke.
+- **[fcrackzip](https://github.com/hyc/fcrackzip)**: Alat za brute-force probijanje zip lozinki, efikasan za lozinke do oko 7 karaktera.
 
-The [Zip file format specification](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT) provides comprehensive details on the structure and standards of zip files.
+[Specifikacija formata zip datoteka](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT) pruža sveobuhvatne detalje o strukturi i standardima zip datoteka.
 
-It's crucial to note that password-protected zip files **do not encrypt filenames or file sizes** within, a security flaw not shared with RAR or 7z files which encrypt this information. Furthermore, zip files encrypted with the older ZipCrypto method are vulnerable to a **plaintext attack** if an unencrypted copy of a compressed file is available. This attack leverages the known content to crack the zip's password, a vulnerability detailed in [HackThis's article](https://www.hackthis.co.uk/articles/known-plaintext-attack-cracking-zip-files) and further explained in [this academic paper](https://www.cs.auckland.ac.nz/~mike/zipattacks.pdf). However, zip files secured with **AES-256** encryption are immune to this plaintext attack, showcasing the importance of choosing secure encryption methods for sensitive data.
+Važno je napomenuti da zip datoteke zaštićene lozinkom **ne enkriptuju imena datoteka ili veličine datoteka** unutar, što je sigurnosni propust koji RAR ili 7z datoteke ne dele, jer enkriptuju te informacije. Pored toga, zip datoteke enkriptovane starijom metodom ZipCrypto su podložne **napadu u običnom tekstu** ako je dostupna neenkriptovana kopija kompresovane datoteke. Ovaj napad koristi poznati sadržaj za probijanje zip lozinke, ranjivost detaljno opisanu u [HackThis članku](https://www.hackthis.co.uk/articles/known-plaintext-attack-cracking-zip-files) i dodatno objašnjenu u [ovoj akademskoj studiji](https://www.cs.auckland.ac.nz/~mike/zipattacks.pdf). Međutim, zip datoteke zaštićene **AES-256** enkripcijom su imune na ovaj napad u običnom tekstu, što pokazuje važnost izbora sigurnih metoda enkripcije za osetljive podatke.
 
-## References
+## Reference
 
 - [https://michael-myers.github.io/blog/categories/ctf/](https://michael-myers.github.io/blog/categories/ctf/)
 

@@ -4,18 +4,18 @@
 
 ## Osnovne informacije
 
-AppArmor je **poboljšanje kernela dizajnirano da ograniči resurse dostupne programima kroz profile po programu**, efikasno implementirajući Obaveznu Kontrolu Pristupa (MAC) vezujući atribute kontrole pristupa direktno za programe umesto za korisnike. Ovaj sistem funkcioniše tako što **učitava profile u kernel**, obično tokom pokretanja, a ovi profili određuju koje resurse program može da pristupi, kao što su mrežne veze, pristup sirovim soketima i dozvole za datoteke.
+AppArmor je **poboljšanje jezgra dizajnirano da ograniči resurse dostupne programima kroz profile po programu**, efikasno implementirajući Obaveznu Kontrolu Pristupa (MAC) vezujući atribute kontrole pristupa direktno za programe umesto za korisnike. Ovaj sistem funkcioniše tako što **učitava profile u jezgro**, obično tokom pokretanja, a ovi profili određuju koje resurse program može da pristupi, kao što su mrežne veze, pristup sirovim soketima i dozvole za datoteke.
 
 Postoje dva operativna moda za AppArmor profile:
 
-- **Režim sprovođenja**: Ovaj režim aktivno sprovodi politike definisane unutar profila, blokirajući radnje koje krše te politike i beležeći sve pokušaje kršenja putem sistema kao što su syslog ili auditd.
+- **Režim sprovođenja**: Ovaj režim aktivno sprovodi politike definisane unutar profila, blokirajući radnje koje krše te politike i beležeći sve pokušaje da ih se prekrši putem sistema kao što su syslog ili auditd.
 - **Režim žalbe**: Za razliku od režima sprovođenja, režim žalbe ne blokira radnje koje su protiv politike profila. Umesto toga, beleži ove pokušaje kao kršenja politike bez sprovođenja ograničenja.
 
 ### Komponente AppArmor-a
 
-- **Kernel modul**: Odgovoran za sprovođenje politika.
+- **Modul jezgra**: Odgovoran za sprovođenje politika.
 - **Politike**: Specifikuju pravila i ograničenja za ponašanje programa i pristup resursima.
-- **Parser**: Učitava politike u kernel za sprovođenje ili izveštavanje.
+- **Parser**: Učitava politike u jezgro za sprovođenje ili izveštavanje.
 - **Alati**: Ovo su programi u korisničkom režimu koji pružaju interfejs za interakciju i upravljanje AppArmor-om.
 
 ### Putanja profila
@@ -37,11 +37,11 @@ aa-mergeprof  #used to merge the policies
 ```
 ## Kreiranje profila
 
-- Da biste označili pogođeni izvršni fajl, **apsolutne putanje i džokeri** su dozvoljeni (za pretragu fajlova) za specificiranje fajlova.
+- Da biste označili pogođeni izvršni fajl, **apsolutne putanje i džokeri** su dozvoljeni (za globovanje fajlova) za specificiranje fajlova.
 - Da biste označili pristup koji će binarni fajl imati nad **fajlovima**, mogu se koristiti sledeće **kontrole pristupa**:
 - **r** (čitati)
 - **w** (pisati)
-- **m** (mapirati u memoriju kao izvršni)
+- **m** (mapiranje u memoriju kao izvršno)
 - **k** (zaključavanje fajlova)
 - **l** (kreiranje tvrdih linkova)
 - **ix** (izvršiti drugi program sa novim programom koji nasleđuje politiku)
@@ -49,11 +49,11 @@ aa-mergeprof  #used to merge the policies
 - **Cx** (izvršiti pod detetom profilom, nakon čišćenja okruženja)
 - **Ux** (izvršiti bez ograničenja, nakon čišćenja okruženja)
 - **Promenljive** se mogu definisati u profilima i mogu se manipulisati izvan profila. Na primer: @{PROC} i @{HOME} (dodajte #include \<tunables/global> u fajl profila)
-- **Pravila odbijanja su podržana da bi nadjačala pravila dozvola**.
+- **Pravila odbijanja su podržana da bi nadjačala pravila dozvole**.
 
 ### aa-genprof
 
-Da biste lako započeli kreiranje profila, apparmor vam može pomoći. Moguće je da **apparmor ispita radnje koje izvršni fajl obavlja i zatim vam omogući da odlučite koje radnje želite da dozvolite ili odbijete**.\
+Da biste lako započeli kreiranje profila, apparmor vam može pomoći. Moguće je da **apparmor ispita radnje koje izvršava binarni fajl i zatim vam omogući da odlučite koje radnje želite da dozvolite ili odbijete**.\
 Samo treba da pokrenete:
 ```bash
 sudo aa-genprof /path/to/binary
@@ -65,11 +65,11 @@ Zatim, u drugoj konzoli izvršite sve radnje koje će binarni fajl obično izves
 Zatim, u prvoj konzoli pritisnite "**s**" i zatim u zabeleženim radnjama označite da li želite da ignorišete, dozvolite ili nešto drugo. Kada završite, pritisnite "**f**" i novi profil će biti kreiran u _/etc/apparmor.d/path.to.binary_
 
 > [!NOTE]
-> Koristeći tastere sa strelicama možete odabrati šta želite da dozvolite/odbacite/ili nešto drugo
+> Koristeći tastere sa strelicama možete izabrati šta želite da dozvolite/odbacite/šta god
 
 ### aa-easyprof
 
-Takođe možete kreirati šablon apparmor profila za binarni fajl sa:
+Takođe možete kreirati šablon apparmor profila binarne datoteke sa:
 ```bash
 sudo aa-easyprof /path/to/binary
 # vim:syntax=apparmor
@@ -120,7 +120,7 @@ apparmor_parser -R /etc/apparmor.d/profile.name #Remove profile
 ```
 ## Logs
 
-Primer **AUDIT** i **DENIED** logova iz _/var/log/audit/audit.log_ izvršnog **`service_bin`**:
+Primer **AUDIT** i **DENIED** logova iz _/var/log/audit/audit.log_ izvršnog fajla **`service_bin`**:
 ```bash
 type=AVC msg=audit(1610061880.392:286): apparmor="AUDIT" operation="getattr" profile="/bin/rcat" name="/dev/pts/1" pid=954 comm="service_bin" requested_mask="r" fsuid=1000 ouid=1000
 type=AVC msg=audit(1610061880.392:287): apparmor="DENIED" operation="open" profile="/bin/rcat" name="/etc/hosts" pid=954 comm="service_bin" requested_mask="r" denied_mask="r" fsuid=1000 ouid=0
@@ -183,11 +183,11 @@ docker run -it --cap-add SYS_ADMIN --security-opt seccomp=unconfined ubuntu /bin
 echo "" > /proc/stat
 sh: 1: cannot create /proc/stat: Permission denied
 ```
-Morate **onemogućiti apparmor** da biste zaobišli njegova ograničenja:
+Morate da **onemogućite apparmor** da biste zaobišli njena ograničenja:
 ```bash
 docker run -it --cap-add SYS_ADMIN --security-opt seccomp=unconfined --security-opt apparmor=unconfined ubuntu /bin/bash
 ```
-Napomena da po defaultu **AppArmor** takođe **zabranjuje kontejneru da montira** foldere iznutra čak i sa SYS_ADMIN sposobnošću.
+Napomena da će po defaultu **AppArmor** takođe **zabraniti kontejneru da montira** foldere iznutra čak i sa SYS_ADMIN sposobnošću.
 
 Napomena da možete **dodati/ukloniti** **sposobnosti** kontejneru (to će i dalje biti ograničeno zaštitnim metodama kao što su **AppArmor** i **Seccomp**):
 
@@ -196,7 +196,7 @@ Napomena da možete **dodati/ukloniti** **sposobnosti** kontejneru (to će i dal
 - `--cap-drop=ALL --cap-add=SYS_PTRACE` uklanja sve sposobnosti i dodeljuje samo `SYS_PTRACE`
 
 > [!NOTE]
-> Obično, kada **otkrijete** da imate **privilegovanu sposobnost** dostupnu **unutar** **docker** kontejnera **ali** neki deo **eksploatacije ne funkcioniše**, to će biti zato što **apparmor** u dockeru **sprečava to**.
+> Obično, kada **otkrijete** da imate **privilegovanu sposobnost** dostupnu **unutar** **docker** kontejnera **ali** neki deo **eksploatacije ne funkcioniše**, to će biti zato što **apparmor docker sprečava**.
 
 ### Primer
 

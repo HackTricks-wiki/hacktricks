@@ -9,34 +9,34 @@ Stoga, ovo može biti opasna tačka ulaza za napadače ako proces upisivanja nij
 
 **Sledeće je sažetak istraživanja [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe). Proverite ga za dodatne tehničke detalje!**
 
-## Pregled DEP i MDM Analize Binarnih Datoteka
+## Pregled DEP i MDM Analize Binarnih Fajlova
 
-Ovo istraživanje se bavi binarnim datotekama povezanim sa Programom za Upis Uređaja (DEP) i Upravom Mobilnih Uređaja (MDM) na macOS-u. Ključne komponente uključuju:
+Ovo istraživanje se bavi binarnim fajlovima povezanim sa Programom za Upisivanje Uređaja (DEP) i Upravom Mobilnih Uređaja (MDM) na macOS-u. Ključne komponente uključuju:
 
 - **`mdmclient`**: Komunicira sa MDM serverima i pokreće DEP prijave na macOS verzijama pre 10.13.4.
 - **`profiles`**: Upravljanje Konfiguracionim Profilima, i pokreće DEP prijave na macOS verzijama 10.13.4 i kasnijim.
-- **`cloudconfigurationd`**: Upravljanje DEP API komunikacijama i preuzimanje profila za Upis Uređaja.
+- **`cloudconfigurationd`**: Upravljanje DEP API komunikacijama i preuzimanje profila za Upisivanje Uređaja.
 
 DEP prijave koriste `CPFetchActivationRecord` i `CPGetActivationRecord` funkcije iz privatnog okvira Konfiguracionih Profila za preuzimanje Aktivacionog Zapisa, pri čemu `CPFetchActivationRecord` koordinira sa `cloudconfigurationd` putem XPC.
 
-## Tesla Protokol i Inženjering Reverzibilnog Schematizma Absinthe
+## Tesla Protokol i Inženjering Reverzibilnog Schematizovanja Absinthe
 
-DEP prijava uključuje `cloudconfigurationd` koji šalje enkriptovani, potpisani JSON payload na _iprofiles.apple.com/macProfile_. Payload uključuje serijski broj uređaja i akciju "RequestProfileConfiguration". Šema enkripcije koja se koristi interno se naziva "Absinthe". Razotkrivanje ove šeme je složeno i uključuje brojne korake, što je dovelo do istraživanja alternativnih metoda za umetanje proizvoljnih serijskih brojeva u zahtev za Aktivacioni Zapis.
+DEP prijava uključuje `cloudconfigurationd` slanje enkriptovanog, potpisanog JSON tereta na _iprofiles.apple.com/macProfile_. Teret uključuje serijski broj uređaja i akciju "RequestProfileConfiguration". Šema enkripcije koja se koristi interno se naziva "Absinthe". Razotkrivanje ove šeme je složeno i uključuje brojne korake, što je dovelo do istraživanja alternativnih metoda za umetanje proizvoljnih serijskih brojeva u zahtev za Aktivacioni Zapis.
 
 ## Proksiranje DEP Zahteva
 
-Pokušaji presretanja i modifikacije DEP zahteva ka _iprofiles.apple.com_ korišćenjem alata kao što je Charles Proxy su ometeni enkripcijom payload-a i SSL/TLS bezbednosnim merama. Međutim, omogućavanje konfiguracije `MCCloudConfigAcceptAnyHTTPSCertificate` omogućava zaobilaženje validacije sertifikata servera, iako enkriptovana priroda payload-a i dalje sprečava modifikaciju serijskog broja bez ključa za dekripciju.
+Pokušaji presretanja i modifikacije DEP zahteva ka _iprofiles.apple.com_ korišćenjem alata kao što je Charles Proxy su ometeni enkripcijom tereta i SSL/TLS bezbednosnim merama. Međutim, omogućavanje konfiguracije `MCCloudConfigAcceptAnyHTTPSCertificate` omogućava zaobilaženje validacije sertifikata servera, iako enkriptovana priroda tereta i dalje sprečava modifikaciju serijskog broja bez ključa za dekripciju.
 
-## Instrumentacija Sistemskih Binarnih Datoteka koje Interaguju sa DEP
+## Instrumentacija Sistemskih Binarnih Fajlova koji Interaguju sa DEP
 
-Instrumentacija sistemskih binarnih datoteka kao što je `cloudconfigurationd` zahteva onemogućavanje Zaštite Integriteta Sistema (SIP) na macOS-u. Sa onemogućenim SIP-om, alati kao što je LLDB mogu se koristiti za povezivanje sa sistemskim procesima i potencijalno modifikovanje serijskog broja koji se koristi u DEP API interakcijama. Ova metoda je poželjnija jer izbegava složenosti prava i potpisivanja koda.
+Instrumentacija sistemskih binarnih fajlova kao što je `cloudconfigurationd` zahteva onemogućavanje Zaštite Integriteta Sistema (SIP) na macOS-u. Sa onemogućenim SIP-om, alati kao što je LLDB mogu se koristiti za povezivanje sa sistemskim procesima i potencijalno modifikovanje serijskog broja koji se koristi u DEP API interakcijama. Ova metoda je poželjnija jer izbegava složenosti prava i potpisivanja koda.
 
 **Eksploatacija Binarne Instrumentacije:**
-Modifikacija DEP zahteva payload-a pre JSON serijalizacije u `cloudconfigurationd` se pokazala efikasnom. Proces je uključivao:
+Modifikacija DEP zahteva tereta pre JSON serijalizacije u `cloudconfigurationd` se pokazala efikasnom. Proces je uključivao:
 
 1. Povezivanje LLDB sa `cloudconfigurationd`.
 2. Lociranje tačke gde se preuzima sistemski serijski broj.
-3. Umetanje proizvoljnog serijskog broja u memoriju pre nego što se payload enkriptuje i pošalje.
+3. Umetanje proizvoljnog serijskog broja u memoriju pre nego što se teret enkriptuje i pošalje.
 
 Ova metoda je omogućila preuzimanje kompletnog DEP profila za proizvoljne serijske brojeve, pokazujući potencijalnu ranjivost.
 

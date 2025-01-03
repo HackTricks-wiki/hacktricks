@@ -1,25 +1,25 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# Baseline
+# Osnovna linija
 
-A baseline consists of taking a snapshot of certain parts of a system to **compare it with a future status to highlight changes**.
+Osnovna linija se sastoji od pravljenja snimka određenih delova sistema kako bi se **uporedila sa budućim statusom radi isticanja promena**.
 
-For example, you can calculate and store the hash of each file of the filesystem to be able to find out which files were modified.\
-This can also be done with the user accounts created, processes running, services running and any other thing that shouldn't change much, or at all.
+Na primer, možete izračunati i sačuvati hash svake datoteke u datotečnom sistemu kako biste mogli da saznate koje su datoteke modifikovane.\
+To se takođe može uraditi sa korisničkim nalozima koji su kreirani, procesima koji se izvršavaju, servisima koji se izvršavaju i bilo čim drugim što ne bi trebalo da se mnogo menja, ili uopšte.
 
-## File Integrity Monitoring
+## Praćenje integriteta datoteka
 
-File Integrity Monitoring (FIM) is a critical security technique that protects IT environments and data by tracking changes in files. It involves two key steps:
+Praćenje integriteta datoteka (FIM) je kritična bezbednosna tehnika koja štiti IT okruženja i podatke praćenjem promena u datotekama. Uključuje dva ključna koraka:
 
-1. **Baseline Comparison:** Establish a baseline using file attributes or cryptographic checksums (like MD5 or SHA-2) for future comparisons to detect modifications.
-2. **Real-Time Change Notification:** Get instant alerts when files are accessed or altered, typically through OS kernel extensions.
+1. **Uporedna analiza osnovne linije:** Uspostavite osnovnu liniju koristeći atribute datoteka ili kriptografske heš vrednosti (kao što su MD5 ili SHA-2) za buduće upoređivanje radi otkrivanja modifikacija.
+2. **Obaveštenje o promenama u realnom vremenu:** Dobijajte trenutna obaveštenja kada se datoteke pristupaju ili menjaju, obično putem ekstenzija jezgra OS-a.
 
-## Tools
+## Alati
 
 - [https://github.com/topics/file-integrity-monitoring](https://github.com/topics/file-integrity-monitoring)
 - [https://www.solarwinds.com/security-event-manager/use-cases/file-integrity-monitoring-software](https://www.solarwinds.com/security-event-manager/use-cases/file-integrity-monitoring-software)
 
-## References
+## Reference
 
 - [https://cybersecurity.att.com/blogs/security-essentials/what-is-file-integrity-monitoring-and-why-you-need-it](https://cybersecurity.att.com/blogs/security-essentials/what-is-file-integrity-monitoring-and-why-you-need-it)
 

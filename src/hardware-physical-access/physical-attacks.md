@@ -1,56 +1,56 @@
-# Physical Attacks
+# Fizički Napadi
 
 {{#include ../banners/hacktricks-training.md}}
 
-## BIOS Password Recovery and System Security
+## BIOS Oporavak Lozinke i Bezbednost Sistema
 
-**Resetting the BIOS** can be achieved in several ways. Most motherboards include a **battery** that, when removed for around **30 minutes**, will reset the BIOS settings, including the password. Alternatively, a **jumper on the motherboard** can be adjusted to reset these settings by connecting specific pins.
+**Resetovanje BIOS-a** može se postići na nekoliko načina. Većina matičnih ploča uključuje **bateriju** koja, kada se ukloni na oko **30 minuta**, resetuje BIOS podešavanja, uključujući lozinku. Alternativno, **jumper na matičnoj ploči** može se prilagoditi za resetovanje ovih podešavanja povezivanjem specifičnih pinova.
 
-For situations where hardware adjustments are not possible or practical, **software tools** offer a solution. Running a system from a **Live CD/USB** with distributions like **Kali Linux** provides access to tools like **_killCmos_** and **_CmosPWD_**, which can assist in BIOS password recovery.
+Za situacije u kojima prilagođavanje hardvera nije moguće ili praktično, **softverski alati** nude rešenje. Pokretanje sistema sa **Live CD/USB** sa distribucijama kao što je **Kali Linux** omogućava pristup alatima kao što su **_killCmos_** i **_CmosPWD_**, koji mogu pomoći u oporavku BIOS lozinke.
 
-In cases where the BIOS password is unknown, entering it incorrectly **three times** will typically result in an error code. This code can be used on websites like [https://bios-pw.org](https://bios-pw.org) to potentially retrieve a usable password.
+U slučajevima kada je BIOS lozinka nepoznata, pogrešno unošenje **tri puta** obično rezultira kodom greške. Ovaj kod može se koristiti na sajtovima kao što je [https://bios-pw.org](https://bios-pw.org) da bi se potencijalno povratila upotrebljiva lozinka.
 
-### UEFI Security
+### UEFI Bezbednost
 
-For modern systems using **UEFI** instead of traditional BIOS, the tool **chipsec** can be utilized to analyze and modify UEFI settings, including the disabling of **Secure Boot**. This can be accomplished with the following command:
+Za moderne sisteme koji koriste **UEFI** umesto tradicionalnog BIOS-a, alat **chipsec** može se koristiti za analizu i modifikaciju UEFI podešavanja, uključujući onemogućavanje **Secure Boot**. To se može postići sledećom komandom:
 
 `python chipsec_main.py -module exploits.secure.boot.pk`
 
-### RAM Analysis and Cold Boot Attacks
+### Analiza RAM-a i Hladni Napadi
 
-RAM retains data briefly after power is cut, usually for **1 to 2 minutes**. This persistence can be extended to **10 minutes** by applying cold substances, such as liquid nitrogen. During this extended period, a **memory dump** can be created using tools like **dd.exe** and **volatility** for analysis.
+RAM zadržava podatke kratko nakon isključenja napajanja, obično od **1 do 2 minuta**. Ova postojanost može se produžiti na **10 minuta** primenom hladnih supstanci, kao što je tečni azot. Tokom ovog produženog perioda, može se napraviti **dump memorije** koristeći alate kao što su **dd.exe** i **volatility** za analizu.
 
-### Direct Memory Access (DMA) Attacks
+### Napadi Direktnog Pristupa Memoriji (DMA)
 
-**INCEPTION** is a tool designed for **physical memory manipulation** through DMA, compatible with interfaces like **FireWire** and **Thunderbolt**. It allows for bypassing login procedures by patching memory to accept any password. However, it's ineffective against **Windows 10** systems.
+**INCEPTION** je alat dizajniran za **fizičku manipulaciju memorijom** putem DMA, kompatibilan sa interfejsima kao što su **FireWire** i **Thunderbolt**. Omogućava zaobilaženje procedura prijavljivanja patch-ovanjem memorije da prihvati bilo koju lozinku. Međutim, nije efikasan protiv **Windows 10** sistema.
 
-### Live CD/USB for System Access
+### Live CD/USB za Pristup Sistemima
 
-Changing system binaries like **_sethc.exe_** or **_Utilman.exe_** with a copy of **_cmd.exe_** can provide a command prompt with system privileges. Tools such as **chntpw** can be used to edit the **SAM** file of a Windows installation, allowing password changes.
+Promena sistemskih binarnih fajlova kao što su **_sethc.exe_** ili **_Utilman.exe_** sa kopijom **_cmd.exe_** može omogućiti komandnu liniju sa sistemskim privilegijama. Alati kao što su **chntpw** mogu se koristiti za uređivanje **SAM** fajla Windows instalacije, omogućavajući promene lozinke.
 
-**Kon-Boot** is a tool that facilitates logging into Windows systems without knowing the password by temporarily modifying the Windows kernel or UEFI. More information can be found at [https://www.raymond.cc](https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/).
+**Kon-Boot** je alat koji olakšava prijavljivanje na Windows sisteme bez poznavanja lozinke tako što privremeno modifikuje Windows kernel ili UEFI. Više informacija može se naći na [https://www.raymond.cc](https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/).
 
-### Handling Windows Security Features
+### Rukovanje Windows Bezbednosnim Funkcijama
 
-#### Boot and Recovery Shortcuts
+#### Prečice za Pokretanje i Oporavak
 
-- **Supr**: Access BIOS settings.
-- **F8**: Enter Recovery mode.
-- Pressing **Shift** after the Windows banner can bypass autologon.
+- **Supr**: Pristup BIOS podešavanjima.
+- **F8**: Ulazak u režim oporavka.
+- Pritiskom na **Shift** nakon Windows banera može se zaobići automatsko prijavljivanje.
 
-#### BAD USB Devices
+#### BAD USB Uređaji
 
-Devices like **Rubber Ducky** and **Teensyduino** serve as platforms for creating **bad USB** devices, capable of executing predefined payloads when connected to a target computer.
+Uređaji kao što su **Rubber Ducky** i **Teensyduino** služe kao platforme za kreiranje **bad USB** uređaja, sposobnih za izvršavanje unapred definisanih payload-a kada su povezani na ciljni računar.
 
 #### Volume Shadow Copy
 
-Administrator privileges allow for the creation of copies of sensitive files, including the **SAM** file, through PowerShell.
+Administratorske privilegije omogućavaju kreiranje kopija osetljivih fajlova, uključujući **SAM** fajl, putem PowerShell-a.
 
-### Bypassing BitLocker Encryption
+### Zaobilaženje BitLocker Enkripcije
 
-BitLocker encryption can potentially be bypassed if the **recovery password** is found within a memory dump file (**MEMORY.DMP**). Tools like **Elcomsoft Forensic Disk Decryptor** or **Passware Kit Forensic** can be utilized for this purpose.
+BitLocker enkripcija može se potencijalno zaobići ako se **oporavna lozinka** pronađe unutar dump fajla memorije (**MEMORY.DMP**). Alati kao što su **Elcomsoft Forensic Disk Decryptor** ili **Passware Kit Forensic** mogu se koristiti u tu svrhu.
 
-### Social Engineering for Recovery Key Addition
+### Socijalno Inženjerstvo za Dodavanje Oporavne Ključeve
 
-A new BitLocker recovery key can be added through social engineering tactics, convincing a user to execute a command that adds a new recovery key composed of zeros, thereby simplifying the decryption process.
+Nova BitLocker oporavna lozinka može se dodati putem taktika socijalnog inženjeringa, ubeđujući korisnika da izvrši komandu koja dodaje novu oporavnu lozinku sastavljenu od nula, čime se pojednostavljuje proces dekripcije.
 {{#include ../banners/hacktricks-training.md}}

@@ -4,20 +4,20 @@
 
 ## Partitions
 
-A hard drive or an **SSD disk can contain different partitions** with the goal of separating data physically.\
-The **minimum** unit of a disk is the **sector** (normally composed of 512B). So, each partition size needs to be multiple of that size.
+Hard disk ili **SSD disk može sadržati različite particije** sa ciljem fizičkog razdvajanja podataka.\
+**Minimalna** jedinica diska je **sektor** (normalno sastavljen od 512B). Tako da, veličina svake particije mora biti višekratnik te veličine.
 
 ### MBR (master Boot Record)
 
-It's allocated in the **first sector of the disk after the 446B of the boot code**. This sector is essential to indicate to the PC what and from where a partition should be mounted.\
-It allows up to **4 partitions** (at most **just 1** can be active/**bootable**). However, if you need more partitions you can use **extended partitions**. The **final byte** of this first sector is the boot record signature **0x55AA**. Only one partition can be marked as active.\
-MBR allows **max 2.2TB**.
+Dodeljuje se u **prvom sektoru diska nakon 446B boot koda**. Ovaj sektor je ključan za indikaciju PC-u šta i odakle treba da se montira particija.\
+Omogućava do **4 particije** (najviše **samo 1** može biti aktivna/**bootable**). Međutim, ako vam je potrebno više particija, možete koristiti **proširene particije**. **Zadnji bajt** ovog prvog sektora je potpis boot zapisa **0x55AA**. Samo jedna particija može biti označena kao aktivna.\
+MBR omogućava **maksimalno 2.2TB**.
 
 ![](<../../../images/image (350).png>)
 
 ![](<../../../images/image (304).png>)
 
-From the **bytes 440 to the 443** of the MBR you can find the **Windows Disk Signature** (if Windows is used). The logical drive letter of the hard disk depends on the Windows Disk Signature. Changing this signature could prevent Windows from booting (tool: [**Active Disk Editor**](https://www.disk-editor.org/index.html)**)**.
+Od **bajtova 440 do 443** MBR-a možete pronaći **Windows Disk Signature** (ako se koristi Windows). Logičko slovo diska hard diska zavisi od Windows Disk Signature. Promena ovog potpisa može sprečiti Windows da se pokrene (alat: [**Active Disk Editor**](https://www.disk-editor.org/index.html)**)**.
 
 ![](<../../../images/image (310).png>)
 
@@ -26,122 +26,120 @@ From the **bytes 440 to the 443** of the MBR you can find the **Windows Disk Sig
 | Offset      | Length     | Item                |
 | ----------- | ---------- | ------------------- |
 | 0 (0x00)    | 446(0x1BE) | Boot code           |
-| 446 (0x1BE) | 16 (0x10)  | First Partition     |
-| 462 (0x1CE) | 16 (0x10)  | Second Partition    |
-| 478 (0x1DE) | 16 (0x10)  | Third Partition     |
-| 494 (0x1EE) | 16 (0x10)  | Fourth Partition    |
-| 510 (0x1FE) | 2 (0x2)    | Signature 0x55 0xAA |
+| 446 (0x1BE) | 16 (0x10)  | Prva particija     |
+| 462 (0x1CE) | 16 (0x10)  | Druga particija    |
+| 478 (0x1DE) | 16 (0x10)  | Treća particija    |
+| 494 (0x1EE) | 16 (0x10)  | Četvrta particija   |
+| 510 (0x1FE) | 2 (0x2)    | Potpis 0x55 0xAA   |
 
-**Partition Record Format**
+**Format zapisa particije**
 
 | Offset    | Length   | Item                                                   |
 | --------- | -------- | ------------------------------------------------------ |
-| 0 (0x00)  | 1 (0x01) | Active flag (0x80 = bootable)                          |
-| 1 (0x01)  | 1 (0x01) | Start head                                             |
-| 2 (0x02)  | 1 (0x01) | Start sector (bits 0-5); upper bits of cylinder (6- 7) |
-| 3 (0x03)  | 1 (0x01) | Start cylinder lowest 8 bits                           |
-| 4 (0x04)  | 1 (0x01) | Partition type code (0x83 = Linux)                     |
-| 5 (0x05)  | 1 (0x01) | End head                                               |
-| 6 (0x06)  | 1 (0x01) | End sector (bits 0-5); upper bits of cylinder (6- 7)   |
-| 7 (0x07)  | 1 (0x01) | End cylinder lowest 8 bits                             |
-| 8 (0x08)  | 4 (0x04) | Sectors preceding partition (little endian)            |
-| 12 (0x0C) | 4 (0x04) | Sectors in partition                                   |
+| 0 (0x00)  | 1 (0x01) | Aktivna zastavica (0x80 = bootable)                   |
+| 1 (0x01)  | 1 (0x01) | Početna glava                                         |
+| 2 (0x02)  | 1 (0x01) | Početni sektor (bitovi 0-5); gornji bitovi cilindra (6- 7) |
+| 3 (0x03)  | 1 (0x01) | Početni cilindar najniži 8 bitova                    |
+| 4 (0x04)  | 1 (0x01) | Kod tipa particije (0x83 = Linux)                     |
+| 5 (0x05)  | 1 (0x01) | Kraj glave                                           |
+| 6 (0x06)  | 1 (0x01) | Kraj sektora (bitovi 0-5); gornji bitovi cilindra (6- 7)   |
+| 7 (0x07)  | 1 (0x01) | Kraj cilindra najniži 8 bitova                       |
+| 8 (0x08)  | 4 (0x04) | Sektori koji prethode particiji (little endian)      |
+| 12 (0x0C) | 4 (0x04) | Sektori u particiji                                   |
 
-In order to mount an MBR in Linux you first need to get the start offset (you can use `fdisk` and the `p` command)
+Da biste montirali MBR u Linux-u, prvo morate dobiti početni offset (možete koristiti `fdisk` i komandu `p`)
 
 ![](<../../../images/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
-And then use the following code
-
+A zatim koristite sledeći kod
 ```bash
 #Mount MBR in Linux
 mount -o ro,loop,offset=<Bytes>
 #63x512 = 32256Bytes
 mount -o ro,loop,offset=32256,noatime /path/to/image.dd /media/part/
 ```
+**LBA (Logičko adresiranje blokova)**
 
-**LBA (Logical block addressing)**
+**Logičko adresiranje blokova** (**LBA**) je uobičajen sistem koji se koristi za **specifikaciju lokacije blokova** podataka koji se čuvaju na uređajima za skladištenje računara, obično na sekundarnim sistemima skladištenja kao što su hard diskovi. LBA je posebno jednostavan linearni sistem adresiranja; **blokovi se lociraju pomoću celobrojnog indeksa**, pri čemu je prvi blok LBA 0, drugi LBA 1, i tako dalje.
 
-**Logical block addressing** (**LBA**) is a common scheme used for **specifying the location of blocks** of data stored on computer storage devices, generally secondary storage systems such as hard disk drives. LBA is a particularly simple linear addressing scheme; **blocks are located by an integer index**, with the first block being LBA 0, the second LBA 1, and so on.
+### GPT (GUID tabela particija)
 
-### GPT (GUID Partition Table)
+GUID tabela particija, poznata kao GPT, favorizovana je zbog svojih poboljšanih mogućnosti u poređenju sa MBR (Master Boot Record). Karakteristična po svom **globalno jedinstvenom identifikatoru** za particije, GPT se izdvaja na nekoliko načina:
 
-The GUID Partition Table, known as GPT, is favored for its enhanced capabilities compared to MBR (Master Boot Record). Distinctive for its **globally unique identifier** for partitions, GPT stands out in several ways:
+- **Lokacija i veličina**: I GPT i MBR počinju na **sektoru 0**. Međutim, GPT radi na **64bita**, u kontrastu sa MBR-ovih 32bita.
+- **Ograničenja particija**: GPT podržava do **128 particija** na Windows sistemima i može da primi do **9.4ZB** podataka.
+- **Imena particija**: Omogućava imenovanje particija sa do 36 Unicode karaktera.
 
-- **Location and Size**: Both GPT and MBR start at **sector 0**. However, GPT operates on **64bits**, contrasting with MBR's 32bits.
-- **Partition Limits**: GPT supports up to **128 partitions** on Windows systems and accommodates up to **9.4ZB** of data.
-- **Partition Names**: Offers the ability to name partitions with up to 36 Unicode characters.
+**Otpornost podataka i oporavak**:
 
-**Data Resilience and Recovery**:
+- **Redundancija**: Za razliku od MBR-a, GPT ne ograničava particionisanje i podatke o pokretanju na jedno mesto. Replikuje ove podatke širom diska, poboljšavajući integritet i otpornost podataka.
+- **Ciklična kontrola redundancije (CRC)**: GPT koristi CRC za osiguranje integriteta podataka. Aktivno prati oštećenje podataka, a kada se otkrije, GPT pokušava da povrati oštećene podatke sa druge lokacije na disku.
 
-- **Redundancy**: Unlike MBR, GPT doesn't confine partitioning and boot data to a single place. It replicates this data across the disk, enhancing data integrity and resilience.
-- **Cyclic Redundancy Check (CRC)**: GPT employs CRC to ensure data integrity. It actively monitors for data corruption, and when detected, GPT attempts to recover the corrupted data from another disk location.
+**Zaštitni MBR (LBA0)**:
 
-**Protective MBR (LBA0)**:
-
-- GPT maintains backward compatibility through a protective MBR. This feature resides in the legacy MBR space but is designed to prevent older MBR-based utilities from mistakenly overwriting GPT disks, hence safeguarding the data integrity on GPT-formatted disks.
+- GPT održava unazad kompatibilnost kroz zaštitni MBR. Ova funkcija se nalazi u prostoru nasleđenog MBR-a, ali je dizajnirana da spreči starije MBR-bazirane alate da greškom prepisuju GPT diskove, čime se štiti integritet podataka na GPT-formatiranim diskovima.
 
 ![https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/GUID_Partition_Table_Scheme.svg/800px-GUID_Partition_Table_Scheme.svg.png](<../../../images/image (1062).png>)
 
-**Hybrid MBR (LBA 0 + GPT)**
+**Hibridni MBR (LBA 0 + GPT)**
 
-[From Wikipedia](https://en.wikipedia.org/wiki/GUID_Partition_Table)
+[Sa Vikipedije](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 
-In operating systems that support **GPT-based boot through BIOS** services rather than EFI, the first sector may also still be used to store the first stage of the **bootloader** code, but **modified** to recognize **GPT** **partitions**. The bootloader in the MBR must not assume a sector size of 512 bytes.
+U operativnim sistemima koji podržavaju **GPT-bazirano pokretanje putem BIOS** usluga umesto EFI, prvi sektor se takođe može koristiti za skladištenje prve faze **bootloader** koda, ali **modifikovan** da prepozna **GPT** **particije**. Bootloader u MBR-u ne sme da pretpostavlja veličinu sektora od 512 bajta.
 
-**Partition table header (LBA 1)**
+**Zaglavlje tabele particija (LBA 1)**
 
-[From Wikipedia](https://en.wikipedia.org/wiki/GUID_Partition_Table)
+[Sa Vikipedije](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 
-The partition table header defines the usable blocks on the disk. It also defines the number and size of the partition entries that make up the partition table (offsets 80 and 84 in the table).
+Zaglavlje tabele particija definiše upotrebljive blokove na disku. Takođe definiše broj i veličinu unosa particija koji čine tabelu particija (offseti 80 i 84 u tabeli).
 
-| Offset    | Length   | Contents                                                                                                                                                                     |
+| Offset    | Dužina   | Sadržaj                                                                                                                                                                     |
 | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 0 (0x00)  | 8 bytes  | Signature ("EFI PART", 45h 46h 49h 20h 50h 41h 52h 54h or 0x5452415020494645ULL[ ](https://en.wikipedia.org/wiki/GUID_Partition_Table#cite_note-8)on little-endian machines) |
-| 8 (0x08)  | 4 bytes  | Revision 1.0 (00h 00h 01h 00h) for UEFI 2.8                                                                                                                                  |
-| 12 (0x0C) | 4 bytes  | Header size in little endian (in bytes, usually 5Ch 00h 00h 00h or 92 bytes)                                                                                                 |
-| 16 (0x10) | 4 bytes  | [CRC32](https://en.wikipedia.org/wiki/CRC32) of header (offset +0 up to header size) in little endian, with this field zeroed during calculation                             |
-| 20 (0x14) | 4 bytes  | Reserved; must be zero                                                                                                                                                       |
-| 24 (0x18) | 8 bytes  | Current LBA (location of this header copy)                                                                                                                                   |
-| 32 (0x20) | 8 bytes  | Backup LBA (location of the other header copy)                                                                                                                               |
-| 40 (0x28) | 8 bytes  | First usable LBA for partitions (primary partition table last LBA + 1)                                                                                                       |
-| 48 (0x30) | 8 bytes  | Last usable LBA (secondary partition table first LBA − 1)                                                                                                                    |
-| 56 (0x38) | 16 bytes | Disk GUID in mixed endian                                                                                                                                                    |
-| 72 (0x48) | 8 bytes  | Starting LBA of an array of partition entries (always 2 in primary copy)                                                                                                     |
-| 80 (0x50) | 4 bytes  | Number of partition entries in array                                                                                                                                         |
-| 84 (0x54) | 4 bytes  | Size of a single partition entry (usually 80h or 128)                                                                                                                        |
-| 88 (0x58) | 4 bytes  | CRC32 of partition entries array in little endian                                                                                                                            |
-| 92 (0x5C) | \*       | Reserved; must be zeroes for the rest of the block (420 bytes for a sector size of 512 bytes; but can be more with larger sector sizes)                                      |
+| 0 (0x00)  | 8 bajtova| Potpis ("EFI PART", 45h 46h 49h 20h 50h 41h 52h 54h ili 0x5452415020494645ULL[ ](https://en.wikipedia.org/wiki/GUID_Partition_Table#cite_note-8) na little-endian mašinama) |
+| 8 (0x08)  | 4 bajta  | Revizija 1.0 (00h 00h 01h 00h) za UEFI 2.8                                                                                                                                  |
+| 12 (0x0C) | 4 bajta  | Veličina zaglavlja u little endian (u bajtovima, obično 5Ch 00h 00h 00h ili 92 bajta)                                                                                                 |
+| 16 (0x10) | 4 bajta  | [CRC32](https://en.wikipedia.org/wiki/CRC32) zaglavlja (offset +0 do veličine zaglavlja) u little endian, sa ovim poljem nula tokom izračunavanja                             |
+| 20 (0x14) | 4 bajta  | Rezervisano; mora biti nula                                                                                                                                                       |
+| 24 (0x18) | 8 bajtova| Trenutni LBA (lokacija ove kopije zaglavlja)                                                                                                                                   |
+| 32 (0x20) | 8 bajtova| Backup LBA (lokacija druge kopije zaglavlja)                                                                                                                               |
+| 40 (0x28) | 8 bajtova| Prvi upotrebljivi LBA za particije (poslednji LBA primarne tabele particija + 1)                                                                                                       |
+| 48 (0x30) | 8 bajtova| Poslednji upotrebljivi LBA (prvi LBA sekundarne tabele particija − 1)                                                                                                                    |
+| 56 (0x38) | 16 bajtova| Disk GUID u mešovitom endian                                                                                                                                                    |
+| 72 (0x48) | 8 bajtova| Početni LBA niza unosa particija (uvek 2 u primarnoj kopiji)                                                                                                     |
+| 80 (0x50) | 4 bajta  | Broj unosa particija u nizu                                                                                                                                         |
+| 84 (0x54) | 4 bajta  | Veličina jednog unosa particije (obično 80h ili 128)                                                                                                                        |
+| 88 (0x58) | 4 bajta  | CRC32 niza unosa particija u little endian                                                                                                                            |
+| 92 (0x5C) | \*       | Rezervisano; mora biti nule za ostatak bloka (420 bajtova za veličinu sektora od 512 bajta; ali može biti više sa većim veličinama sektora)                                      |
 
-**Partition entries (LBA 2–33)**
+**Unosi particija (LBA 2–33)**
 
-| GUID partition entry format |          |                                                                                                               |
+| Format unosa GUID particije |          |                                                                                                               |
 | --------------------------- | -------- | ------------------------------------------------------------------------------------------------------------- |
-| Offset                      | Length   | Contents                                                                                                      |
-| 0 (0x00)                    | 16 bytes | [Partition type GUID](https://en.wikipedia.org/wiki/GUID_Partition_Table#Partition_type_GUIDs) (mixed endian) |
-| 16 (0x10)                   | 16 bytes | Unique partition GUID (mixed endian)                                                                          |
-| 32 (0x20)                   | 8 bytes  | First LBA ([little endian](https://en.wikipedia.org/wiki/Little_endian))                                      |
-| 40 (0x28)                   | 8 bytes  | Last LBA (inclusive, usually odd)                                                                             |
-| 48 (0x30)                   | 8 bytes  | Attribute flags (e.g. bit 60 denotes read-only)                                                               |
-| 56 (0x38)                   | 72 bytes | Partition name (36 [UTF-16](https://en.wikipedia.org/wiki/UTF-16)LE code units)                               |
+| Offset                      | Dužina   | Sadržaj                                                                                                      |
+| 0 (0x00)                    | 16 bajtova | [GUID tipa particije](https://en.wikipedia.org/wiki/GUID_Partition_Table#Partition_type_GUIDs) (mešovit endian) |
+| 16 (0x10)                   | 16 bajtova | Jedinstveni GUID particije (mešovit endian)                                                                          |
+| 32 (0x20)                   | 8 bajtova  | Prvi LBA ([little endian](https://en.wikipedia.org/wiki/Little_endian))                                      |
+| 40 (0x28)                   | 8 bajtova  | Poslednji LBA (uključivo, obično neparan)                                                                             |
+| 48 (0x30)                   | 8 bajtova  | Zastavice atributa (npr. bit 60 označava samo za čitanje)                                                               |
+| 56 (0x38)                   | 72 bajtova | Ime particije (36 [UTF-16](https://en.wikipedia.org/wiki/UTF-16)LE kodnih jedinica)                               |
 
-**Partitions Types**
+**Tipovi particija**
 
 ![](<../../../images/image (83).png>)
 
-More partition types in [https://en.wikipedia.org/wiki/GUID_Partition_Table](https://en.wikipedia.org/wiki/GUID_Partition_Table)
+Više tipova particija na [https://en.wikipedia.org/wiki/GUID_Partition_Table](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 
-### Inspecting
+### Istraživanje
 
-After mounting the forensics image with [**ArsenalImageMounter**](https://arsenalrecon.com/downloads/), you can inspect the first sector using the Windows tool [**Active Disk Editor**](https://www.disk-editor.org/index.html)**.** In the following image an **MBR** was detected on the **sector 0** and interpreted:
+Nakon montiranja forenzičke slike sa [**ArsenalImageMounter**](https://arsenalrecon.com/downloads/), možete ispitati prvi sektor koristeći Windows alat [**Active Disk Editor**](https://www.disk-editor.org/index.html)**.** Na sledećoj slici je otkriven **MBR** na **sektoru 0** i interpretiran:
 
 ![](<../../../images/image (354).png>)
 
-If it was a **GPT table instead of an MBR** it should appear the signature _EFI PART_ in the **sector 1** (which in the previous image is empty).
+Ako je to bila **GPT tabela umesto MBR-a**, trebala bi se pojaviti oznaka _EFI PART_ u **sektoru 1** (koji je na prethodnoj slici prazan).
 
-## File-Systems
+## Sistemi datoteka
 
-### Windows file-systems list
+### Lista Windows sistema datoteka
 
 - **FAT12/16**: MSDOS, WIN95/98/NT/200
 - **FAT32**: 95/2000/XP/2003/VISTA/7/8/10
@@ -151,49 +149,49 @@ If it was a **GPT table instead of an MBR** it should appear the signature _EFI 
 
 ### FAT
 
-The **FAT (File Allocation Table)** file system is designed around its core component, the file allocation table, positioned at the volume's start. This system safeguards data by maintaining **two copies** of the table, ensuring data integrity even if one is corrupted. The table, along with the root folder, must be in a **fixed location**, crucial for the system's startup process.
+**FAT (Tabela alokacije datoteka)** sistem datoteka je dizajniran oko svoje osnovne komponente, tabele alokacije datoteka, koja se nalazi na početku volumena. Ovaj sistem štiti podatke održavanjem **dvije kopije** tabele, osiguravajući integritet podataka čak i ako je jedna oštećena. Tabela, zajedno sa korenskim folderom, mora biti na **fiksnoj lokaciji**, što je ključno za proces pokretanja sistema.
 
-The file system's basic unit of storage is a **cluster, usually 512B**, comprising multiple sectors. FAT has evolved through versions:
+Osnovna jedinica skladištenja sistema datoteka je **klaster, obično 512B**, koji se sastoji od više sektora. FAT se razvijao kroz verzije:
 
-- **FAT12**, supporting 12-bit cluster addresses and handling up to 4078 clusters (4084 with UNIX).
-- **FAT16**, enhancing to 16-bit addresses, thereby accommodating up to 65,517 clusters.
-- **FAT32**, further advancing with 32-bit addresses, allowing an impressive 268,435,456 clusters per volume.
+- **FAT12**, podržava 12-bitne adrese klastera i obrađuje do 4078 klastera (4084 sa UNIX-om).
+- **FAT16**, unapređuje na 16-bitne adrese, čime se omogućava do 65,517 klastera.
+- **FAT32**, dodatno napreduje sa 32-bitnim adresama, omogućavajući impresivnih 268,435,456 klastera po volumenu.
 
-A significant limitation across FAT versions is the **4GB maximum file size**, imposed by the 32-bit field used for file size storage.
+Značajno ograničenje kod FAT verzija je **maksimalna veličina datoteke od 4GB**, koju nameće 32-bitno polje korišćeno za skladištenje veličine datoteke.
 
-Key components of the root directory, particularly for FAT12 and FAT16, include:
+Ključne komponente korenskog direktorijuma, posebno za FAT12 i FAT16, uključuju:
 
-- **File/Folder Name** (up to 8 characters)
-- **Attributes**
-- **Creation, Modification, and Last Access Dates**
-- **FAT Table Address** (indicating the start cluster of the file)
-- **File Size**
+- **Ime datoteke/foldera** (do 8 karaktera)
+- **Atributi**
+- **Datumi kreiranja, modifikacije i poslednjeg pristupa**
+- **Adresa FAT tabele** (koja označava početni klaster datoteke)
+- **Veličina datoteke**
 
 ### EXT
 
-**Ext2** is the most common file system for **not journaling** partitions (**partitions that don't change much**) like the boot partition. **Ext3/4** are **journaling** and are used usually for the **rest partitions**.
+**Ext2** je najčešći sistem datoteka za **ne-journal** particije (**particije koje se ne menjaju mnogo**) kao što je particija za pokretanje. **Ext3/4** su **journal** i obično se koriste za **ostale particije**.
 
-## **Metadata**
+## **Metapodaci**
 
-Some files contain metadata. This information is about the content of the file which sometimes might be interesting to an analyst as depending on the file type, it might have information like:
+Neke datoteke sadrže metapodatke. Ove informacije se odnose na sadržaj datoteke koji ponekad može biti zanimljiv analitičaru jer, u zavisnosti od tipa datoteke, može sadržati informacije kao što su:
 
-- Title
-- MS Office Version used
-- Author
-- Dates of creation and last modification
-- Model of the camera
-- GPS coordinates
-- Image information
+- Naslov
+- Verzija MS Office-a koja se koristi
+- Autor
+- Datumi kreiranja i poslednje modifikacije
+- Model kamere
+- GPS koordinate
+- Informacije o slici
 
-You can use tools like [**exiftool**](https://exiftool.org) and [**Metadiver**](https://www.easymetadata.com/metadiver-2/) to get the metadata of a file.
+Možete koristiti alate kao što su [**exiftool**](https://exiftool.org) i [**Metadiver**](https://www.easymetadata.com/metadiver-2/) da dobijete metapodatke datoteke.
 
-## **Deleted Files Recovery**
+## **Oporavak obrisanih datoteka**
 
-### Logged Deleted Files
+### Zabeležene obrisane datoteke
 
-As was seen before there are several places where the file is still saved after it was "deleted". This is because usually the deletion of a file from a file system just marks it as deleted but the data isn't touched. Then, it's possible to inspect the registries of the files (like the MFT) and find the deleted files.
+Kao što je ranije viđeno, postoji nekoliko mesta gde je datoteka još uvek sačuvana nakon što je "obrisana". To je zato što obično brisanje datoteke iz sistema datoteka samo označava da je obrisana, ali podaci nisu dodirnuti. Tada je moguće ispitati registre datoteka (kao što je MFT) i pronaći obrisane datoteke.
 
-Also, the OS usually saves a lot of information about file system changes and backups, so it's possible to try to use them to recover the file or as much information as possible.
+Takođe, OS obično čuva mnogo informacija o promenama u sistemu datoteka i rezervnim kopijama, tako da je moguće pokušati da ih iskoristite za oporavak datoteke ili što više informacija.
 
 {{#ref}}
 file-data-carving-recovery-tools.md
@@ -201,11 +199,11 @@ file-data-carving-recovery-tools.md
 
 ### **File Carving**
 
-**File carving** is a technique that tries to **find files in the bulk of data**. There are 3 main ways tools like this work: **Based on file types headers and footers**, based on file types **structures** and based on the **content** itself.
+**File carving** je tehnika koja pokušava da **pronađe datoteke u masi podataka**. Postoje 3 glavna načina na koje alati poput ovog funkcionišu: **Na osnovu zaglavlja i podnožja tipova datoteka**, na osnovu **struktura** tipova datoteka i na osnovu **sadržaja** same datoteke.
 
-Note that this technique **doesn't work to retrieve fragmented files**. If a file **isn't stored in contiguous sectors**, then this technique won't be able to find it or at least part of it.
+Napomena da ova tehnika **ne funkcioniše za vraćanje fragmentisanih datoteka**. Ako datoteka **nije smeštena u kontiguitetne sektore**, tada ova tehnika neće moći da je pronađe ili barem deo nje.
 
-There are several tools that you can use for file Carving indicating the file types you want to search for
+Postoji nekoliko alata koje možete koristiti za file carving koji označavaju tipove datoteka koje želite da pretražujete.
 
 {{#ref}}
 file-data-carving-recovery-tools.md
@@ -213,24 +211,24 @@ file-data-carving-recovery-tools.md
 
 ### Data Stream **C**arving
 
-Data Stream Carving is similar to File Carving but **instead of looking for complete files, it looks for interesting fragments** of information.\
-For example, instead of looking for a complete file containing logged URLs, this technique will search for URLs.
+Data Stream Carving je sličan File Carving-u, ali **umesto da traži kompletne datoteke, traži zanimljive fragmente** informacija.\
+Na primer, umesto da traži kompletnu datoteku koja sadrži zabeležene URL-ove, ova tehnika će tražiti URL-ove.
 
 {{#ref}}
 file-data-carving-recovery-tools.md
 {{#endref}}
 
-### Secure Deletion
+### Sigurno brisanje
 
-Obviously, there are ways to **"securely" delete files and part of logs about them**. For example, it's possible to **overwrite the content** of a file with junk data several times, and then **remove** the **logs** from the **$MFT** and **$LOGFILE** about the file, and **remove the Volume Shadow Copies**.\
-You may notice that even performing that action there might be **other parts where the existence of the file is still logged**, and that's true and part of the forensics professional job is to find them.
+Očigledno, postoje načini da se **"sigurno" obrišu datoteke i deo logova o njima**. Na primer, moguće je **prepisati sadržaj** datoteke sa smešnim podacima nekoliko puta, a zatim **ukloniti** **logove** iz **$MFT** i **$LOGFILE** o datoteci, i **ukloniti kopije senki volumena**.\
+Možda ćete primetiti da čak i obavljanjem te akcije može postojati **drugi delovi gde je postojanje datoteke još uvek zabeleženo**, i to je tačno, a deo posla forenzičkog stručnjaka je da ih pronađe.
 
-## References
+## Reference
 
 - [https://en.wikipedia.org/wiki/GUID_Partition_Table](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 - [http://ntfs.com/ntfs-permissions.htm](http://ntfs.com/ntfs-permissions.htm)
 - [https://www.osforensics.com/faqs-and-tutorials/how-to-scan-ntfs-i30-entries-deleted-files.html](https://www.osforensics.com/faqs-and-tutorials/how-to-scan-ntfs-i30-entries-deleted-files.html)
 - [https://docs.microsoft.com/en-us/windows-server/storage/file-server/volume-shadow-copy-service](https://docs.microsoft.com/en-us/windows-server/storage/file-server/volume-shadow-copy-service)
-- **iHackLabs Certified Digital Forensics Windows**
+- **iHackLabs Sertifikovani Digitalni Forenzik Windows**
 
 {{#include ../../../banners/hacktricks-training.md}}

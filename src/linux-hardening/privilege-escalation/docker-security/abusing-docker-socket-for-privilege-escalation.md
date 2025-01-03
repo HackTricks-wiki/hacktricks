@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Postoje neki slučajevi kada imate **pristup docker socket-u** i želite da ga iskoristite za **eskalaciju privilegija**. Neke radnje mogu biti veoma sumnjive i možda ćete želeti da ih izbegnete, pa ovde možete pronaći različite zastavice koje mogu biti korisne za eskalaciju privilegija:
+Postoje neki slučajevi kada imate **pristup docker socket-u** i želite da ga iskoristite za **escalaciju privilegija**. Neke akcije mogu biti veoma sumnjive i možda ćete želeti da ih izbegnete, pa ovde možete pronaći različite zastavice koje mogu biti korisne za eskalaciju privilegija:
 
 ### Via mount
 
@@ -34,7 +34,7 @@ Takođe možete **iskoristiti mount za eskalaciju privilegija** unutar kontejner
 ### Escaping from the container
 
 - **`--privileged`** -> Sa ovom zastavicom [uklanjate svu izolaciju iz kontejnera](docker-privileged.md#what-affects). Proverite tehnike za [izlazak iz privilegovanih kontejnera kao root](docker-breakout-privilege-escalation/#automatic-enumeration-and-escape).
-- **`--cap-add=<CAPABILITY/ALL> [--security-opt apparmor=unconfined] [--security-opt seccomp=unconfined] [-security-opt label:disable]`** -> Da biste [eskalirali koristeći sposobnosti](../linux-capabilities.md), **dodelite tu sposobnost kontejneru** i onemogućite druge metode zaštite koje mogu sprečiti da eksploatacija funkcioniše.
+- **`--cap-add=<CAPABILITY/ALL> [--security-opt apparmor=unconfined] [--security-opt seccomp=unconfined] [-security-opt label:disable]`** -> Da biste [escalirali koristeći sposobnosti](../linux-capabilities.md), **dodelite tu sposobnost kontejneru** i onemogućite druge metode zaštite koje mogu sprečiti da eksploatacija funkcioniše.
 
 ### Curl
 

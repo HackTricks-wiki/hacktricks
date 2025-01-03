@@ -1,157 +1,155 @@
-# Wireshark tricks
+# Wireshark trikovi
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Improve your Wireshark skills
+## Poboljšajte svoje veštine u Wireshark-u
 
-### Tutorials
+### Tutorijali
 
-The following tutorials are amazing to learn some cool basic tricks:
+Sledeći tutorijali su sjajni za učenje nekih cool osnovnih trikova:
 
 - [https://unit42.paloaltonetworks.com/unit42-customizing-wireshark-changing-column-display/](https://unit42.paloaltonetworks.com/unit42-customizing-wireshark-changing-column-display/)
 - [https://unit42.paloaltonetworks.com/using-wireshark-display-filter-expressions/](https://unit42.paloaltonetworks.com/using-wireshark-display-filter-expressions/)
 - [https://unit42.paloaltonetworks.com/using-wireshark-identifying-hosts-and-users/](https://unit42.paloaltonetworks.com/using-wireshark-identifying-hosts-and-users/)
 - [https://unit42.paloaltonetworks.com/using-wireshark-exporting-objects-from-a-pcap/](https://unit42.paloaltonetworks.com/using-wireshark-exporting-objects-from-a-pcap/)
 
-### Analysed Information
+### Analizirane informacije
 
-**Expert Information**
+**Stručne informacije**
 
-Clicking on _**Analyze** --> **Expert Information**_ you will have an **overview** of what is happening in the packets **analyzed**:
+Klikom na _**Analiziraj** --> **Stručne informacije**_ dobićete **pregled** onoga što se dešava u **analiziranim** paketima:
 
 ![](<../../../images/image (256).png>)
 
-**Resolved Addresses**
+**Rešene adrese**
 
-Under _**Statistics --> Resolved Addresses**_ you can find several **information** that was "**resolved**" by wireshark like port/transport to protocol, MAC to the manufacturer, etc. It is interesting to know what is implicated in the communication.
+Pod _**Statistika --> Rešene adrese**_ možete pronaći nekoliko **informacija** koje je wireshark "**rešio**", kao što su port/transport do protokola, MAC do proizvođača itd. Zanimljivo je znati šta je uključeno u komunikaciju.
 
 ![](<../../../images/image (893).png>)
 
-**Protocol Hierarchy**
+**Hijerarhija protokola**
 
-Under _**Statistics --> Protocol Hierarchy**_ you can find the **protocols** **involved** in the communication and data about them.
+Pod _**Statistika --> Hijerarhija protokola**_ možete pronaći **protokole** **uključene** u komunikaciju i podatke o njima.
 
 ![](<../../../images/image (586).png>)
 
-**Conversations**
+**Razgovori**
 
-Under _**Statistics --> Conversations**_ you can find a **summary of the conversations** in the communication and data about them.
+Pod _**Statistika --> Razgovori**_ možete pronaći **rezime razgovora** u komunikaciji i podatke o njima.
 
 ![](<../../../images/image (453).png>)
 
-**Endpoints**
+**Krajnje tačke**
 
-Under _**Statistics --> Endpoints**_ you can find a **summary of the endpoints** in the communication and data about each of them.
+Pod _**Statistika --> Krajnje tačke**_ možete pronaći **rezime krajnjih tačaka** u komunikaciji i podatke o svakoj od njih.
 
 ![](<../../../images/image (896).png>)
 
-**DNS info**
+**DNS informacije**
 
-Under _**Statistics --> DNS**_ you can find statistics about the DNS request captured.
+Pod _**Statistika --> DNS**_ možete pronaći statistiku o uhvaćenim DNS zahtevima.
 
 ![](<../../../images/image (1063).png>)
 
-**I/O Graph**
+**I/O graf**
 
-Under _**Statistics --> I/O Graph**_ you can find a **graph of the communication.**
+Pod _**Statistika --> I/O graf**_ možete pronaći **graf komunikacije.**
 
 ![](<../../../images/image (992).png>)
 
-### Filters
+### Filteri
 
-Here you can find wireshark filter depending on the protocol: [https://www.wireshark.org/docs/dfref/](https://www.wireshark.org/docs/dfref/)\
-Other interesting filters:
+Ovde možete pronaći wireshark filtere u zavisnosti od protokola: [https://www.wireshark.org/docs/dfref/](https://www.wireshark.org/docs/dfref/)\
+Ostali zanimljivi filteri:
 
 - `(http.request or ssl.handshake.type == 1) and !(udp.port eq 1900)`
-  - HTTP and initial HTTPS traffic
+- HTTP i inicijalni HTTPS saobraćaj
 - `(http.request or ssl.handshake.type == 1 or tcp.flags eq 0x0002) and !(udp.port eq 1900)`
-  - HTTP and initial HTTPS traffic + TCP SYN
+- HTTP i inicijalni HTTPS saobraćaj + TCP SYN
 - `(http.request or ssl.handshake.type == 1 or tcp.flags eq 0x0002 or dns) and !(udp.port eq 1900)`
-  - HTTP and initial HTTPS traffic + TCP SYN + DNS requests
+- HTTP i inicijalni HTTPS saobraćaj + TCP SYN + DNS zahtevi
 
-### Search
+### Pretraga
 
-If you want to **search** for **content** inside the **packets** of the sessions press _CTRL+f_. You can add new layers to the main information bar (No., Time, Source, etc.) by pressing the right button and then the edit column.
+Ako želite da **pretražujete** **sadržaj** unutar **paketa** sesija pritisnite _CTRL+f_. Možete dodati nove slojeve u glavnu informativnu traku (Br., Vreme, Izvor itd.) pritiskom desnog dugmeta i zatim uređivanjem kolone.
 
-### Free pcap labs
+### Besplatni pcap laboratoriji
 
-**Practice with the free challenges of:** [**https://www.malware-traffic-analysis.net/**](https://www.malware-traffic-analysis.net)
+**Vežbajte sa besplatnim izazovima:** [**https://www.malware-traffic-analysis.net/**](https://www.malware-traffic-analysis.net)
 
-## Identifying Domains
+## Identifikacija domena
 
-You can add a column that shows the Host HTTP header:
+Možete dodati kolonu koja prikazuje Host HTTP zaglavlje:
 
 ![](<../../../images/image (639).png>)
 
-And a column that add the Server name from an initiating HTTPS connection (**ssl.handshake.type == 1**):
+I kolonu koja dodaje ime servera iz inicijalne HTTPS veze (**ssl.handshake.type == 1**):
 
 ![](<../../../images/image (408) (1).png>)
 
-## Identifying local hostnames
+## Identifikacija lokalnih imena hostova
 
-### From DHCP
+### Iz DHCP
 
-In current Wireshark instead of `bootp` you need to search for `DHCP`
+U trenutnom Wireshark-u umesto `bootp` treba da tražite `DHCP`
 
 ![](<../../../images/image (1013).png>)
 
-### From NBNS
+### Iz NBNS
 
 ![](<../../../images/image (1003).png>)
 
-## Decrypting TLS
+## Dekriptovanje TLS
 
-### Decrypting https traffic with server private key
+### Dekriptovanje https saobraćaja sa privatnim ključem servera
 
 _edit>preference>protocol>ssl>_
 
 ![](<../../../images/image (1103).png>)
 
-Press _Edit_ and add all the data of the server and the private key (_IP, Port, Protocol, Key file and password_)
+Pritisnite _Edit_ i dodajte sve podatke o serveru i privatnom ključu (_IP, Port, Protokol, Datoteka ključa i lozinka_)
 
-### Decrypting https traffic with symmetric session keys
+### Dekriptovanje https saobraćaja sa simetričnim sesijskim ključevima
 
-Both Firefox and Chrome have the capability to log TLS session keys, which can be used with Wireshark to decrypt TLS traffic. This allows for in-depth analysis of secure communications. More details on how to perform this decryption can be found in a guide at [Red Flag Security](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/).
+I Firefox i Chrome imaju mogućnost da beleže TLS sesijske ključeve, koji se mogu koristiti sa Wireshark-om za dekriptovanje TLS saobraćaja. Ovo omogućava dubinsku analizu sigurnih komunikacija. Više detalja o tome kako izvršiti ovo dekriptovanje može se naći u vodiču na [Red Flag Security](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/).
 
-To detect this search inside the environment for to variable `SSLKEYLOGFILE`
+Da biste to otkrili, pretražujte unutar okruženja za promenljivu `SSLKEYLOGFILE`
 
-A file of shared keys will look like this:
+Datoteka deljenih ključeva će izgledati ovako:
 
 ![](<../../../images/image (820).png>)
 
-To import this in wireshark go to \_edit > preference > protocol > ssl > and import it in (Pre)-Master-Secret log filename:
+Da biste to uvezli u wireshark idite na \_edit > preference > protocol > ssl > i uvezite to u (Pre)-Master-Secret log filename:
 
 ![](<../../../images/image (989).png>)
 
-## ADB communication
+## ADB komunikacija
 
-Extract an APK from an ADB communication where the APK was sent:
-
+Izvucite APK iz ADB komunikacije gde je APK poslat:
 ```python
 from scapy.all import *
 
 pcap = rdpcap("final2.pcapng")
 
 def rm_data(data):
-    splitted = data.split(b"DATA")
-    if len(splitted) == 1:
-        return data
-    else:
-        return splitted[0]+splitted[1][4:]
+splitted = data.split(b"DATA")
+if len(splitted) == 1:
+return data
+else:
+return splitted[0]+splitted[1][4:]
 
 all_bytes = b""
 for pkt in pcap:
-    if Raw in pkt:
-        a = pkt[Raw]
-        if b"WRTE" == bytes(a)[:4]:
-            all_bytes += rm_data(bytes(a)[24:])
-        else:
-            all_bytes += rm_data(bytes(a))
+if Raw in pkt:
+a = pkt[Raw]
+if b"WRTE" == bytes(a)[:4]:
+all_bytes += rm_data(bytes(a)[24:])
+else:
+all_bytes += rm_data(bytes(a))
 print(all_bytes)
 
 f = open('all_bytes.data', 'w+b')
 f.write(all_bytes)
 f.close()
 ```
-
 {{#include ../../../banners/hacktricks-training.md}}

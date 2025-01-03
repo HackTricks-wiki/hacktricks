@@ -1,24 +1,24 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# Identifying packed binaries
+# Identifikacija pakovanih binarnih datoteka
 
-- **lack of strings**: It's common to find that packed binaries doesn't have almost any string
-- A lot of **unused strings**: Also, when a malware is using some kind of commercial packer it's common to find a lot of strings without cross-references. Even if these strings exist that doesn't mean that the binary isn't packed.
-- You can also use some tools to try to find which packer was used to pack a binary:
-  - [PEiD](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/PEiD-updated.shtml)
-  - [Exeinfo PE](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/ExEinfo-PE.shtml)
-  - [Language 2000](http://farrokhi.net/language/)
+- **nedostatak stringova**: Uobičajeno je da pakovane binarne datoteke nemaju gotovo nikakve stringove
+- Puno **neiskorišćenih stringova**: Takođe, kada malware koristi neku vrstu komercijalnog pakera, uobičajeno je pronaći puno stringova bez međureferenci. Čak i ako ovi stringovi postoje, to ne znači da binarna datoteka nije pakovana.
+- Takođe možete koristiti neke alate da pokušate da otkrijete koji je pakera korišćen za pakovanje binarne datoteke:
+- [PEiD](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/PEiD-updated.shtml)
+- [Exeinfo PE](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/ExEinfo-PE.shtml)
+- [Language 2000](http://farrokhi.net/language/)
 
-# Basic Recommendations
+# Osnovne preporuke
 
-- **Start** analysing the packed binary **from the bottom in IDA and move up**. Unpackers exit once the unpacked code exit so it's unlikely that the unpacker passes execution to the unpacked code at the start.
-- Search for **JMP's** or **CALLs** to **registers** or **regions** of **memory**. Also search for **functions pushing arguments and an address direction and then calling `retn`**, because the return of the function in that case may call the address just pushed to the stack before calling it.
-- Put a **breakpoint** on `VirtualAlloc` as this allocates space in memory where the program can write unpacked code. The "run to user code" or use F8 to **get to value inside EAX** after executing the function and "**follow that address in dump**". You never know if that is the region where the unpacked code is going to be saved.
-  - **`VirtualAlloc`** with the value "**40**" as an argument means Read+Write+Execute (some code that needs execution is going to be copied here).
-- **While unpacking** code it's normal to find **several calls** to **arithmetic operations** and functions like **`memcopy`** or **`Virtual`**`Alloc`. If you find yourself in a function that apparently only perform arithmetic operations and maybe some `memcopy` , the recommendation is to try to **find the end of the function** (maybe a JMP or call to some register) **or** at least the **call to the last function** and run to then as the code isn't interesting.
-- While unpacking code **note** whenever you **change memory region** as a memory region change may indicate the **starting of the unpacking code**. You can easily dump a memory region using Process Hacker (process --> properties --> memory).
-- While trying to unpack code a good way to **know if you are already working with the unpacked code** (so you can just dump it) is to **check the strings of the binary**. If at some point you perform a jump (maybe changing the memory region) and you notice that **a lot more strings where added**, then you can know **you are working with the unpacked code**.\
-  However, if the packer already contains a lot of strings you can see how many strings contains the word "http" and see if this number increases.
-- When you dump an executable from a region of memory you can fix some headers using [PE-bear](https://github.com/hasherezade/pe-bear-releases/releases).
+- **Počnite** analizu pakovane binarne datoteke **od dna u IDA-i i pomerajte se ka vrhu**. Alati za dekompresiju izlaze kada dekompresovani kod završi, tako da je malo verovatno da će dekompresor preneti izvršenje na dekompresovani kod na početku.
+- Pretražujte za **JMP-ovima** ili **CALL-ovima** ka **registrima** ili **regionima** **memorije**. Takođe pretražujte za **funkcijama koje prosleđuju argumente i adresu, a zatim pozivaju `retn`**, jer povratak funkcije u tom slučaju može pozvati adresu koja je upravo prosleđena na stek pre nego što je pozvana.
+- Postavite **prekidač** na `VirtualAlloc` jer ovo alocira prostor u memoriji gde program može pisati dekompresovani kod. "Pokreni do korisničkog koda" ili koristite F8 da **dobijete vrednost unutar EAX** nakon izvršavanja funkcije i "**pratite tu adresu u dump-u**". Nikada ne znate da li je to region gde će dekompresovani kod biti sačuvan.
+- **`VirtualAlloc`** sa vrednošću "**40**" kao argument znači Čitanje+Pisanje+Izvršavanje (neki kod koji treba da se izvrši će biti kopiran ovde).
+- **Tokom dekompresije** koda normalno je pronaći **several calls** ka **aritmetičkim operacijama** i funkcijama kao što su **`memcopy`** ili **`Virtual`**`Alloc`. Ako se nađete u funkciji koja očigledno samo vrši aritmetičke operacije i možda neki `memcopy`, preporuka je da pokušate da **pronađete kraj funkcije** (možda JMP ili poziv nekog registra) **ili** barem **poziv poslednje funkcije** i pokrenete do tada jer kod nije zanimljiv.
+- Tokom dekompresije koda **napomena** kada god **promenite region memorije** jer promena regiona memorije može ukazivati na **početak dekompresionog koda**. Možete lako dump-ovati region memorije koristeći Process Hacker (process --> properties --> memory).
+- Dok pokušavate da dekompresujete kod, dobar način da **znate da li već radite sa dekompresovanim kodom** (tako da ga možete samo dump-ovati) je da **proverite stringove binarne datoteke**. Ako u nekom trenutku izvršite skok (možda menjajući region memorije) i primetite da su **dodati mnogi više stringova**, tada možete znati **da radite sa dekompresovanim kodom**.\
+Međutim, ako pakera već sadrži puno stringova, možete videti koliko stringova sadrži reč "http" i proveriti da li se ovaj broj povećava.
+- Kada dump-ujete izvršnu datoteku iz regiona memorije, možete ispraviti neke zaglavlja koristeći [PE-bear](https://github.com/hasherezade/pe-bear-releases/releases).
 
 {{#include ../../banners/hacktricks-training.md}}

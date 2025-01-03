@@ -1,6 +1,6 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-Here you can find interesting tricks for specific file-types and/or software:
+Ovde možete pronaći zanimljive trikove za specifične tipove fajlova i/ili softver:
 
 {{#ref}}
 .pyc.md

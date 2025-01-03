@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Ako **enumerišete** mašinu **interno** ili **eksterno** i pronađete da **Splunk radi** (port 8090), ako srećom znate neke **validne kredencijale**, možete **iskoristiti Splunk servis** da **izvršite shell** kao korisnik koji pokreće Splunk. Ako ga pokreće root, možete eskalirati privilegije na root.
+Ako **enumerišete** mašinu **interno** ili **eksterno** i pronađete **Splunk koji radi** (port 8090), ako srećom znate neke **validne kredencijale** možete **iskoristiti Splunk servis** da **izvršite shell** kao korisnik koji pokreće Splunk. Ako ga pokreće root, možete eskalirati privilegije na root.
 
 Takođe, ako ste **već root i Splunk servis ne sluša samo na localhost**, možete **ukrasti** **datoteku** sa **lozinkama** **iz** Splunk servisa i **provaliti** lozinke, ili **dodati nove** kredencijale. I održati persistenciju na hostu.
 

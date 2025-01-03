@@ -90,7 +90,7 @@ pwd
 find ./ -name lib.dylib
 ./Contents/Resources/lib2/lib.dylib
 ```
-Dakle, moguće je preuzeti kontrolu! Kreirajte biblioteku koja **izvršava neki proizvoljni kod i izvozi iste funkcionalnosti** kao legitimna biblioteka ponovnim izvoženjem. I zapamtite da je kompajlirate sa očekivanim verzijama:
+Dakle, moguće je preuzeti kontrolu! Kreirajte biblioteku koja **izvršava neki proizvoljni kod i izvozi iste funkcionalnosti** kao legitimna biblioteka ponovnim izvozom. I zapamtite da je kompajlirate sa očekivanim verzijama:
 ```objectivec:lib.m
 #import <Foundation/Foundation.h>
 

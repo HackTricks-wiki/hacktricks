@@ -1,28 +1,20 @@
-# PDF File analysis
+# PDF analiza
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="../../../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+**Za više detalja proverite:** [**https://trailofbits.github.io/ctf/forensics/**](https://trailofbits.github.io/ctf/forensics/)
 
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+PDF format je poznat po svojoj složenosti i potencijalu za prikrivanje podataka, što ga čini centralnom tačkom za CTF forenzičke izazove. Kombinuje elemente običnog teksta sa binarnim objektima, koji mogu biti kompresovani ili enkriptovani, i može uključivati skripte u jezicima kao što su JavaScript ili Flash. Da bi se razumeo PDF struktura, može se konsultovati [uvodni materijal](https://blog.didierstevens.com/2008/04/09/quickpost-about-the-physical-and-logical-structure-of-pdf-files/) Didiera Stevensa, ili koristiti alate kao što su tekstualni editor ili PDF-specifični editor kao što je Origami.
 
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+Za dubinsko istraživanje ili manipulaciju PDF-ova, dostupni su alati kao što su [qpdf](https://github.com/qpdf/qpdf) i [Origami](https://github.com/mobmewireless/origami-pdf). Sakriveni podaci unutar PDF-ova mogu biti prikriveni u:
 
-**For further details check:** [**https://trailofbits.github.io/ctf/forensics/**](https://trailofbits.github.io/ctf/forensics/)
+- Nevidljivim slojevima
+- XMP metapodacima formata od Adobe-a
+- Inkrementalnim generacijama
+- Tekstu iste boje kao pozadina
+- Tekstu iza slika ili preklapajućih slika
+- Neprikazanim komentarima
 
-The PDF format is known for its complexity and potential for concealing data, making it a focal point for CTF forensics challenges. It combines plain-text elements with binary objects, which might be compressed or encrypted, and can include scripts in languages like JavaScript or Flash. To understand PDF structure, one can refer to Didier Stevens's [introductory material](https://blog.didierstevens.com/2008/04/09/quickpost-about-the-physical-and-logical-structure-of-pdf-files/), or use tools like a text editor or a PDF-specific editor such as Origami.
-
-For in-depth exploration or manipulation of PDFs, tools like [qpdf](https://github.com/qpdf/qpdf) and [Origami](https://github.com/mobmewireless/origami-pdf) are available. Hidden data within PDFs might be concealed in:
-
-- Invisible layers
-- XMP metadata format by Adobe
-- Incremental generations
-- Text with the same color as the background
-- Text behind images or overlapping images
-- Non-displayed comments
-
-For custom PDF analysis, Python libraries like [PeepDF](https://github.com/jesparza/peepdf) can be used to craft bespoke parsing scripts. Further, the PDF's potential for hidden data storage is so vast that resources like the NSA guide on PDF risks and countermeasures, though no longer hosted at its original location, still offer valuable insights. A [copy of the guide](http://www.itsecure.hu/library/file/Biztons%C3%A1gi%20%C3%BAtmutat%C3%B3k/Alkalmaz%C3%A1sok/Hidden%20Data%20and%20Metadata%20in%20Adobe%20PDF%20Files.pdf) and a collection of [PDF format tricks](https://github.com/corkami/docs/blob/master/PDF/PDF.md) by Ange Albertini can provide further reading on the subject.
+Za prilagođenu analizu PDF-a, Python biblioteke kao što su [PeepDF](https://github.com/jesparza/peepdf) mogu se koristiti za izradu specijalizovanih skripti za parsiranje. Pored toga, potencijal PDF-a za skladištenje skrivenih podataka je toliko ogroman da resursi poput NSA vodiča o rizicima i protivmera vezanim za PDF, iako više nisu dostupni na svojoj originalnoj lokaciji, i dalje nude dragocene uvide. [Kopija vodiča](http://www.itsecure.hu/library/file/Biztons%C3%A1gi%20%C3%BAtmutat%C3%B3k/Alkalmaz%C3%A1sok/Hidden%20Data%20and%20Metadata%20in%20Adobe%20PDF%20Files.pdf) i kolekcija [trikova za PDF format](https://github.com/corkami/docs/blob/master/PDF/PDF.md) od Ange Albertinija mogu pružiti dodatno čitanje o ovoj temi.
 
 {{#include ../../../banners/hacktricks-training.md}}

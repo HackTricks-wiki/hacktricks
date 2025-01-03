@@ -2,72 +2,66 @@
 
 # ECB
 
-(ECB) Electronic Code Book - symmetric encryption scheme which **replaces each block of the clear text** by the **block of ciphertext**. It is the **simplest** encryption scheme. The main idea is to **split** the clear text into **blocks of N bits** (depends on the size of the block of input data, encryption algorithm) and then to encrypt (decrypt) each block of clear text using the only key.
+(ECB) Elektronska knjiga kodova - simetrična šema enkripcije koja **menja svaki blok otvorenog teksta** sa **blokom šifrovanog teksta**. To je **najjednostavnija** šema enkripcije. Glavna ideja je da se **podeli** otvoreni tekst na **blokove od N bita** (zavisi od veličine bloka ulaznih podataka, algoritma enkripcije) i zatim da se enkriptuje (dekriptuje) svaki blok otvorenog teksta koristeći jedini ključ.
 
 ![](https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/ECB_decryption.svg/601px-ECB_decryption.svg.png)
 
-Using ECB has multiple security implications:
+Korišćenje ECB ima više bezbednosnih implikacija:
 
-- **Blocks from encrypted message can be removed**
-- **Blocks from encrypted message can be moved around**
+- **Blokovi iz šifrovane poruke mogu biti uklonjeni**
+- **Blokovi iz šifrovane poruke mogu biti pomerani**
 
-# Detection of the vulnerability
+# Otkrivanje ranjivosti
 
-Imagine you login into an application several times and you **always get the same cookie**. This is because the cookie of the application is **`<username>|<password>`**.\
-Then, you generate to new users, both of them with the **same long password** and **almost** the **same** **username**.\
-You find out that the **blocks of 8B** where the **info of both users** is the same are **equals**. Then, you imagine that this might be because **ECB is being used**.
+Zamislite da se prijavljujete u aplikaciju nekoliko puta i **uvek dobijate isti kolačić**. To je zato što je kolačić aplikacije **`<username>|<password>`**.\
+Zatim, generišete nove korisnike, oboje sa **istim dugim lozinkama** i **gotovo** **istim** **korisničkim imenima**.\
+Otkrivate da su **blokovi od 8B** gde su **informacije obojice korisnika** iste **jednaki**. Tada zamišljate da bi to moglo biti zato što se **koristi ECB**.
 
-Like in the following example. Observe how these** 2 decoded cookies** has several times the block **`\x23U\xE45K\xCB\x21\xC8`**
-
+Kao u sledećem primeru. Posmatrajte kako ova **2 dekodirana kolačića** imaju nekoliko puta blok **`\x23U\xE45K\xCB\x21\xC8`**.
 ```
 \x23U\xE45K\xCB\x21\xC8\x23U\xE45K\xCB\x21\xC8\x04\xB6\xE1H\xD1\x1E \xB6\x23U\xE45K\xCB\x21\xC8\x23U\xE45K\xCB\x21\xC8+=\xD4F\xF7\x99\xD9\xA9
 
 \x23U\xE45K\xCB\x21\xC8\x23U\xE45K\xCB\x21\xC8\x04\xB6\xE1H\xD1\x1E \xB6\x23U\xE45K\xCB\x21\xC8\x23U\xE45K\xCB\x21\xC8+=\xD4F\xF7\x99\xD9\xA9
 ```
+Ovo je zato što su **korisničko ime i lozinka tih kolačića sadržavali nekoliko puta slovo "a"** (na primer). **Blokovi** koji su **različiti** su blokovi koji su sadržavali **barem 1 različit karakter** (možda delimiter "|" ili neka neophodna razlika u korisničkom imenu).
 
-This is because the **username and password of those cookies contained several times the letter "a"** (for example). The **blocks** that are **different** are blocks that contained **at least 1 different character** (maybe the delimiter "|" or some necessary difference in the username).
+Sada, napadaču je potrebno samo da otkrije da li je format `<korisničko_ime><delimiter><lozinka>` ili `<lozinka><delimiter><korisničko_ime>`. Da bi to uradio, može jednostavno **generisati nekoliko korisničkih imena** sa **sličnim i dugim korisničkim imenima i lozinkama dok ne pronađe format i dužinu delimitera:**
 
-Now, the attacker just need to discover if the format is `<username><delimiter><password>` or `<password><delimiter><username>`. For doing that, he can just **generate several usernames **with s**imilar and long usernames and passwords until he find the format and the length of the delimiter:**
+| Dužina korisničkog imena: | Dužina lozinke: | Dužina korisničkog imena+lozinke: | Dužina kolačića (nakon dekodiranja): |
+| -------------------------- | ---------------- | --------------------------------- | ------------------------------------- |
+| 2                          | 2                | 4                                 | 8                                   |
+| 3                          | 3                | 6                                 | 8                                   |
+| 3                          | 4                | 7                                 | 8                                   |
+| 4                          | 4                | 8                                 | 16                                  |
+| 7                          | 7                | 14                                | 16                                  |
 
-| Username length: | Password length: | Username+Password length: | Cookie's length (after decoding): |
-| ---------------- | ---------------- | ------------------------- | --------------------------------- |
-| 2                | 2                | 4                         | 8                                 |
-| 3                | 3                | 6                         | 8                                 |
-| 3                | 4                | 7                         | 8                                 |
-| 4                | 4                | 8                         | 16                                |
-| 7                | 7                | 14                        | 16                                |
+# Iskorišćavanje ranjivosti
 
-# Exploitation of the vulnerability
+## Uklanjanje celih blokova
 
-## Removing entire blocks
-
-Knowing the format of the cookie (`<username>|<password>`), in order to impersonate the username `admin` create a new user called `aaaaaaaaadmin` and get the cookie and decode it:
-
+Znajući format kolačića (`<korisničko_ime>|<lozinka>`), kako bi se predstavilo korisničko ime `admin`, kreirajte novog korisnika pod imenom `aaaaaaaaadmin` i dobijte kolačić i dekodirajte ga:
 ```
 \x23U\xE45K\xCB\x21\xC8\xE0Vd8oE\x123\aO\x43T\x32\xD5U\xD4
 ```
-
-We can see the pattern `\x23U\xE45K\xCB\x21\xC8` created previously with the username that contained only `a`.\
-Then, you can remove the first block of 8B and you will et a valid cookie for the username `admin`:
-
+Možemo videti obrazac `\x23U\xE45K\xCB\x21\xC8` koji je prethodno kreiran sa korisničkim imenom koje je sadržalo samo `a`.\
+Zatim, možete ukloniti prvi blok od 8B i dobićete važeći kolačić za korisničko ime `admin`:
 ```
 \xE0Vd8oE\x123\aO\x43T\x32\xD5U\xD4
 ```
+## Premještanje blokova
 
-## Moving blocks
+U mnogim bazama podataka je isto pretraživati `WHERE username='admin';` ili `WHERE username='admin    ';` _(Obratite pažnju na dodatne razmake)_
 
-In many databases it is the same to search for `WHERE username='admin';` or for `WHERE username='admin    ';` _(Note the extra spaces)_
+Dakle, drugi način da se lažno predstavi korisnik `admin` bio bi:
 
-So, another way to impersonate the user `admin` would be to:
+- Generisati korisničko ime koje: `len(<username>) + len(<delimiter) % len(block)`. Sa veličinom bloka od `8B` možete generisati korisničko ime pod nazivom: `username       `, sa delimiterom `|` deo `<username><delimiter>` će generisati 2 bloka od 8B.
+- Zatim, generisati lozinku koja će popuniti tačan broj blokova koji sadrže korisničko ime koje želimo da lažno predstavimo i razmake, kao što je: `admin   `
 
-- Generate a username that: `len(<username>) + len(<delimiter) % len(block)`. With a block size of `8B` you can generate username called: `username       `, with the delimiter `|` the chunk `<username><delimiter>` will generate 2 blocks of 8Bs.
-- Then, generate a password that will fill an exact number of blocks containing the username we want to impersonate and spaces, like: `admin   `
+Kolačić ovog korisnika će se sastojati od 3 bloka: prva 2 su blokovi korisničkog imena + delimiter, a treći je lozinka (koja lažno predstavlja korisničko ime): `username       |admin   `
 
-The cookie of this user is going to be composed by 3 blocks: the first 2 is the blocks of the username + delimiter and the third one of the password (which is faking the username): `username       |admin   `
+**Zatim, samo zamenite prvi blok sa poslednjim i lažno ćete predstavljati korisnika `admin`: `admin          |username`**
 
-**Then, just replace the first block with the last time and will be impersonating the user `admin`: `admin          |username`**
-
-## References
+## Reference
 
 - [http://cryptowiki.net/index.php?title=Electronic_Code_Book\_(ECB)](<http://cryptowiki.net/index.php?title=Electronic_Code_Book_(ECB)>)
 

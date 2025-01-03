@@ -4,7 +4,7 @@
 
 ## Osnovne informacije
 
-Cgroup namespace je funkcija Linux jezgra koja pruža **izolaciju cgroup hijerarhija za procese koji se izvršavaju unutar namespace-a**. Cgroups, skraćeno za **kontrolne grupe**, su funkcija jezgra koja omogućava organizovanje procesa u hijerarhijske grupe radi upravljanja i sprovođenja **ograničenja na sistemske resurse** kao što su CPU, memorija i I/O.
+Cgroup namespace je funkcija Linux kernela koja pruža **izolaciju cgroup hijerarhija za procese koji se izvršavaju unutar namespace-a**. Cgroups, skraćeno za **kontrolne grupe**, su funkcija kernela koja omogućava organizovanje procesa u hijerarhijske grupe radi upravljanja i sprovođenja **ograničenja na sistemske resurse** kao što su CPU, memorija i I/O.
 
 Iako cgroup namespace-i nisu poseban tip namespace-a kao što su drugi koje smo ranije diskutovali (PID, mount, network, itd.), oni su povezani sa konceptom izolacije namespace-a. **Cgroup namespace-i virtualizuju pogled na cgroup hijerarhiju**, tako da procesi koji se izvršavaju unutar cgroup namespace-a imaju drugačiji pogled na hijerarhiju u poređenju sa procesima koji se izvršavaju na hostu ili u drugim namespace-ima.
 
@@ -20,7 +20,7 @@ Za više informacija o CGroups proverite:
 ../cgroups.md
 {{#endref}}
 
-## Laboratorija:
+## Lab:
 
 ### Kreirajte različite Namespace-e
 
@@ -34,13 +34,13 @@ Montiranjem nove instance `/proc` datotečnog sistema ako koristite parametar `-
 
 <summary>Greška: bash: fork: Ne može da dodeli memoriju</summary>
 
-Kada se `unshare` izvrši bez opcije `-f`, dolazi do greške zbog načina na koji Linux upravlja novim PID (ID procesa) namespace-ima. Ključni detalji i rešenje su navedeni u nastavku:
+Kada se `unshare` izvrši bez opcije `-f`, dolazi do greške zbog načina na koji Linux upravlja novim PID (Process ID) namespace-ima. Ključni detalji i rešenje su navedeni u nastavku:
 
 1. **Objašnjenje problema**:
 
 - Linux kernel omogućava procesu da kreira nove namespace-e koristeći `unshare` sistemski poziv. Međutim, proces koji inicira kreiranje novog PID namespace-a (poznat kao "unshare" proces) ne ulazi u novi namespace; samo njegovi podprocesi to čine.
 - Pokretanjem `%unshare -p /bin/bash%` pokreće se `/bin/bash` u istom procesu kao `unshare`. Kao rezultat, `/bin/bash` i njegovi podprocesi su u originalnom PID namespace-u.
-- Prvi podproces `/bin/bash` u novom namespace-u postaje PID 1. Kada ovaj proces izađe, pokreće čišćenje namespace-a ako nema drugih procesa, jer PID 1 ima posebnu ulogu usvajanja siročadi procesa. Linux kernel će tada onemogućiti dodelu PID-a u tom namespace-u.
+- Prvi podproces `/bin/bash` u novom namespace-u postaje PID 1. Kada ovaj proces izađe, pokreće čišćenje namespace-a ako nema drugih procesa, jer PID 1 ima posebnu ulogu usvajanja siročadi. Linux kernel će tada onemogućiti dodelu PID-a u tom namespace-u.
 
 2. **Posledica**:
 
@@ -48,7 +48,7 @@ Kada se `unshare` izvrši bez opcije `-f`, dolazi do greške zbog načina na koj
 
 3. **Rešenje**:
 - Problem se može rešiti korišćenjem opcije `-f` sa `unshare`. Ova opcija čini da `unshare` fork-uje novi proces nakon kreiranja novog PID namespace-a.
-- Izvršavanje `%unshare -fp /bin/bash%` osigurava da `unshare` komanda sama postane PID 1 u novom namespace-u. `/bin/bash` i njegovi podprocesi su tada sigurno sadržani unutar ovog novog namespace-a, sprečavajući prevremeni izlazak PID 1 i omogućavajući normalnu dodelu PID-a.
+- Izvršavanje `%unshare -fp /bin/bash%` osigurava da sam `unshare` komanda postane PID 1 u novom namespace-u. `/bin/bash` i njegovi podprocesi su tada sigurno sadržani unutar ovog novog namespace-a, sprečavajući prevremeni izlazak PID 1 i omogućavajući normalnu dodelu PID-a.
 
 Osiguravanjem da `unshare` radi sa `-f` oznakom, novi PID namespace se ispravno održava, omogućavajući `/bin/bash` i njegovim podprocesima da funkcionišu bez susretanja greške u dodeli memorije.
 
@@ -69,11 +69,11 @@ sudo find /proc -maxdepth 3 -type l -name cgroup -exec readlink {} \; 2>/dev/nul
 # Find the processes with an specific namespace
 sudo find /proc -maxdepth 3 -type l -name cgroup -exec ls -l  {} \; 2>/dev/null | grep <ns-number>
 ```
-### Uđite u CGroup namespace
+### Uđite unutar CGroup imenskog prostora
 ```bash
 nsenter -C TARGET_PID --pid /bin/bash
 ```
-Takođe, možete **ući u drugi procesni namespace samo ako ste root**. I **ne možete** **ući** u drugi namespace **bez deskriptora** koji na njega ukazuje (kao što je `/proc/self/ns/cgroup`).
+Takođe, možete **ući u drugi procesni prostor imena samo ako ste root**. I **ne možete** **ući** u drugo ime prostora **bez deskriptora** koji na njega ukazuje (kao što je `/proc/self/ns/cgroup`).
 
 ## References
 

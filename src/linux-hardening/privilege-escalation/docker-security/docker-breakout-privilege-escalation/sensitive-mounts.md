@@ -2,7 +2,7 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Izlaganje `/proc` i `/sys` bez odgovarajuće izolacije prostora imena uvodi značajne bezbednosne rizike, uključujući povećanje napadačke površine i otkrivanje informacija. Ovi direktorijumi sadrže osetljive datoteke koje, ako su pogrešno konfigurisane ili pristupene od strane neovlašćenog korisnika, mogu dovesti do bekstva iz kontejnera, modifikacije hosta ili pružiti informacije koje pomažu daljim napadima. Na primer, pogrešno montiranje `-v /proc:/host/proc` može zaobići AppArmor zaštitu zbog svoje putanje, ostavljajući `/host/proc` nezaštićenim.
+Izlaganje `/proc` i `/sys` bez odgovarajuće izolacije prostora imena uvodi značajne bezbednosne rizike, uključujući povećanje napadačke površine i otkrivanje informacija. Ovi direktorijumi sadrže osetljive datoteke koje, ako su pogrešno konfigurisane ili pristupaju im neovlašćeni korisnici, mogu dovesti do bekstva iz kontejnera, modifikacije hosta ili pružiti informacije koje pomažu daljim napadima. Na primer, pogrešno montiranje `-v /proc:/host/proc` može zaobići AppArmor zaštitu zbog svoje putanje, ostavljajući `/host/proc` nezaštićenim.
 
 **Možete pronaći dodatne detalje o svakoj potencijalnoj ranjivosti u** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**.**
 
@@ -91,13 +91,13 @@ echo b > /proc/sysrq-trigger # Reboots the host
 
 - Predstavlja fizičku memoriju sistema u ELF core formatu.
 - Čitanje može otkriti sadržaj memorije host sistema i drugih kontejnera.
-- Velika veličina datoteke može dovesti do problema sa čitanjem ili rušenjem softvera.
+- Velika veličina datoteke može dovesti do problema sa čitanjem ili padom softvera.
 - Detaljna upotreba u [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/).
 
 #### **`/proc/kmem`**
 
 - Alternativni interfejs za `/dev/kmem`, predstavlja kernel virtuelnu memoriju.
-- Omogućava čitanje i pisanje, što znači direktnu modifikaciju kernel memorije.
+- Omogućava čitanje i pisanje, što omogućava direktnu modifikaciju kernel memorije.
 
 #### **`/proc/mem`**
 
@@ -148,7 +148,7 @@ cat /output %%%
 
 #### **`/sys/kernel/vmcoreinfo`**
 
-- Curi kernel adrese, potencijalno kompromitujući KASLR.
+- Curi adrese kernela, potencijalno kompromitujući KASLR.
 
 #### **`/sys/kernel/security`**
 
@@ -162,7 +162,7 @@ cat /output %%%
 
 #### **`/sys/kernel/debug`**
 
-- `debugfs` nudi "bez pravila" interfejs za debagovanje kernela.
+- `debugfs` nudi "bez pravila" debagiranje interfejsa za kernel.
 - Istorija bezbednosnih problema zbog svoje neograničene prirode.
 
 ### References

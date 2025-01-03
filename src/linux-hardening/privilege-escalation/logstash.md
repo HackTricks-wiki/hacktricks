@@ -18,7 +18,7 @@ path.config: "/etc/logstash/conf.d/*.conf"
 path.config: "/usr/share/logstash/pipeline/1*.conf"
 pipeline.workers: 6
 ```
-Ovaj fajl otkriva gde se nalaze **.conf** fajlovi koji sadrže konfiguracije pipeline-a. Kada se koristi **Elasticsearch output module**, uobičajeno je da **pipelines** uključuju **Elasticsearch credentials**, koje često imaju opsežne privilegije zbog potrebe Logstash-a da piše podatke u Elasticsearch. Wildcard-ovi u putanjama konfiguracije omogućavaju Logstash-u da izvrši sve odgovarajuće pipeline-ove u određenom direktorijumu.
+Ovaj fajl otkriva gde se nalaze **.conf** fajlovi koji sadrže konfiguracije pipeline-a. Kada se koristi **Elasticsearch output module**, uobičajeno je da **pipelines** uključuju **Elasticsearch credentials**, koje često imaju opsežne privilegije zbog potrebe Logstasha da piše podatke u Elasticsearch. Wildcard-ovi u putanjama konfiguracije omogućavaju Logstashi da izvrši sve odgovarajuće pipeline-ove u određenom direktorijumu.
 
 ### Eskalacija privilegija putem zapisivih pipeline-a
 
@@ -50,7 +50,7 @@ codec => rubydebug
 ```
 Ovde, **interval** određuje učestalost izvršavanja u sekundama. U datom primeru, **whoami** komanda se izvršava svake 120 sekundi, a njen izlaz se usmerava na **/tmp/output.log**.
 
-Sa **config.reload.automatic: true** u **/etc/logstash/logstash.yml**, Logstash će automatski otkriti i primeniti nove ili izmenjene konfiguracije cevi bez potrebe za ponovnim pokretanjem. Ako nema džokera, izmene se i dalje mogu vršiti na postojećim konfiguracijama, ali se savetuje oprez kako bi se izbegle smetnje.
+Sa **config.reload.automatic: true** u **/etc/logstash/logstash.yml**, Logstash će automatski otkriti i primeniti nove ili izmenjene konfiguracije cevi bez potrebe za ponovnim pokretanjem. Ako nema džokera, izmene se i dalje mogu praviti na postojećim konfiguracijama, ali se savetuje oprez kako bi se izbegle smetnje.
 
 ## References
 

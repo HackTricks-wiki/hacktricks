@@ -1,28 +1,17 @@
 # Linux Forensics
 
-<figure><img src="../../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-
 {{#include ../../banners/hacktricks-training.md}}
 
-## Initial Information Gathering
+## Početno prikupljanje informacija
 
-### Basic Information
+### Osnovne informacije
 
-First of all, it's recommended to have some **USB** with **good known binaries and libraries on it** (you can just get ubuntu and copy the folders _/bin_, _/sbin_, _/lib,_ and _/lib64_), then mount the USB, and modify the env variables to use those binaries:
-
+Prvo, preporučuje se da imate neki **USB** sa **dobro poznatim binarnim datotekama i bibliotekama** (možete jednostavno preuzeti ubuntu i kopirati foldere _/bin_, _/sbin_, _/lib,_ i _/lib64_), zatim montirajte USB i modifikujte env varijable da koristite te binarne datoteke:
 ```bash
 export PATH=/mnt/usb/bin:/mnt/usb/sbin
 export LD_LIBRARY_PATH=/mnt/usb/lib:/mnt/usb/lib64
 ```
-
-Once you have configured the system to use good and known binaries you can start **extracting some basic information**:
-
+Kada konfigurišete sistem da koristi dobre i poznate binarne datoteke, možete početi sa **ekstrakcijom osnovnih informacija**:
 ```bash
 date #Date and time (Clock may be skewed, Might be at a different timezone)
 uname -a #OS info
@@ -40,50 +29,46 @@ cat /etc/passwd #Unexpected data?
 cat /etc/shadow #Unexpected data?
 find /directory -type f -mtime -1 -print #Find modified files during the last minute in the directory
 ```
+#### Sumnjive informacije
 
-#### Suspicious information
+Dok prikupljate osnovne informacije, trebali biste proveriti čudne stvari kao što su:
 
-While obtaining the basic information you should check for weird things like:
+- **Root procesi** obično se pokreću sa niskim PIDS, pa ako pronađete root proces sa velikim PID-om, možete posumnjati
+- Proverite **registrovane prijave** korisnika bez shel-a unutar `/etc/passwd`
+- Proverite **hash-eve lozinke** unutar `/etc/shadow` za korisnike bez shel-a
 
-- **Root processes** usually run with low PIDS, so if you find a root process with a big PID you may suspect
-- Check **registered logins** of users without a shell inside `/etc/passwd`
-- Check for **password hashes** inside `/etc/shadow` for users without a shell
+### Dump memorije
 
-### Memory Dump
-
-To obtain the memory of the running system, it's recommended to use [**LiME**](https://github.com/504ensicsLabs/LiME).\
-To **compile** it, you need to use the **same kernel** that the victim machine is using.
+Da biste dobili memoriju pokrenutog sistema, preporučuje se korišćenje [**LiME**](https://github.com/504ensicsLabs/LiME).\
+Da biste ga **kompajlirali**, morate koristiti **isti kernel** koji koristi žrtvinska mašina.
 
 > [!NOTE]
-> Remember that you **cannot install LiME or any other thing** in the victim machine as it will make several changes to it
+> Zapamtite da **ne možete instalirati LiME ili bilo šta drugo** na žrtvinskoj mašini jer će to napraviti nekoliko promena na njoj
 
-So, if you have an identical version of Ubuntu you can use `apt-get install lime-forensics-dkms`\
-In other cases, you need to download [**LiME**](https://github.com/504ensicsLabs/LiME) from github and compile it with correct kernel headers. To **obtain the exact kernel headers** of the victim machine, you can just **copy the directory** `/lib/modules/<kernel version>` to your machine, and then **compile** LiME using them:
-
+Dakle, ako imate identičnu verziju Ubuntua, možete koristiti `apt-get install lime-forensics-dkms`\
+U drugim slučajevima, potrebno je preuzeti [**LiME**](https://github.com/504ensicsLabs/LiME) sa github-a i kompajlirati ga sa ispravnim kernel header-ima. Da biste **dobili tačne kernel header-e** žrtvinske mašine, možete jednostavno **kopirati direktorijum** `/lib/modules/<kernel version>` na vašu mašinu, a zatim **kompajlirati** LiME koristeći ih:
 ```bash
 make -C /lib/modules/<kernel version>/build M=$PWD
 sudo insmod lime.ko "path=/home/sansforensics/Desktop/mem_dump.bin format=lime"
 ```
+LiME podržava 3 **formata**:
 
-LiME supports 3 **formats**:
+- Raw (svaki segment spojен zajedno)
+- Padded (isto kao raw, ali sa nulama u desnim bitovima)
+- Lime (preporučeni format sa metapodacima)
 
-- Raw (every segment concatenated together)
-- Padded (same as raw, but with zeroes in right bits)
-- Lime (recommended format with metadata
-
-LiME can also be used to **send the dump via network** instead of storing it on the system using something like: `path=tcp:4444`
+LiME se takođe može koristiti za **slanje dump-a putem mreže** umesto da se čuva na sistemu koristeći nešto poput: `path=tcp:4444`
 
 ### Disk Imaging
 
-#### Shutting down
+#### Isključivanje
 
-First of all, you will need to **shut down the system**. This isn't always an option as some times system will be a production server that the company cannot afford to shut down.\
-There are **2 ways** of shutting down the system, a **normal shutdown** and a **"plug the plug" shutdown**. The first one will allow the **processes to terminate as usual** and the **filesystem** to be **synchronized**, but it will also allow the possible **malware** to **destroy evidence**. The "pull the plug" approach may carry **some information loss** (not much of the info is going to be lost as we already took an image of the memory ) and the **malware won't have any opportunity** to do anything about it. Therefore, if you **suspect** that there may be a **malware**, just execute the **`sync`** **command** on the system and pull the plug.
+Prvo, potrebno je da **isključite sistem**. Ovo nije uvek opcija jer ponekad sistem može biti produkcijski server koji kompanija ne može priuštiti da isključi.\
+Postoje **2 načina** za isključivanje sistema, **normalno isključivanje** i **"isključi kabl" isključivanje**. Prvi će omogućiti da se **procesi završe kao obično** i da se **fajl sistem** **sinhronizuje**, ali će takođe omogućiti mogućem **malware-u** da **uništi dokaze**. Pristup "isključi kabl" može doneti **neke gubitke informacija** (neće se mnogo informacija izgubiti jer smo već uzeli sliku memorije) i **malware neće imati priliku** da uradi bilo šta povodom toga. Stoga, ako **sumnjate** da može biti **malware**, jednostavno izvršite **`sync`** **komandu** na sistemu i isključite kabl.
 
-#### Taking an image of the disk
+#### Uzimanje slike diska
 
-It's important to note that **before connecting your computer to anything related to the case**, you need to be sure that it's going to be **mounted as read only** to avoid modifying any information.
-
+Važno je napomenuti da **pre nego što povežete svoj računar sa bilo čim vezanim za slučaj**, morate biti sigurni da će biti **montiran kao samo za čitanje** kako biste izbegli modifikaciju bilo kojih informacija.
 ```bash
 #Create a raw copy of the disk
 dd if=<subject device> of=<image file> bs=512
@@ -92,11 +77,9 @@ dd if=<subject device> of=<image file> bs=512
 dcfldd if=<subject device> of=<image file> bs=512 hash=<algorithm> hashwindow=<chunk size> hashlog=<hash file>
 dcfldd if=/dev/sdc of=/media/usb/pc.image hash=sha256 hashwindow=1M hashlog=/media/usb/pc.hashes
 ```
-
 ### Disk Image pre-analysis
 
-Imaging a disk image with no more data.
-
+Imaging disk slike bez dodatnih podataka.
 ```bash
 #Find out if it's a disk image using "file" command
 file disk.img
@@ -108,12 +91,12 @@ raw
 #You can list supported types with
 img_stat -i list
 Supported image format types:
-        raw (Single or split raw file (dd))
-        aff (Advanced Forensic Format)
-        afd (AFF Multiple File)
-        afm (AFF with external metadata)
-        afflib (All AFFLIB image formats (including beta ones))
-        ewf (Expert Witness Format (EnCase))
+raw (Single or split raw file (dd))
+aff (Advanced Forensic Format)
+afd (AFF Multiple File)
+afm (AFF with external metadata)
+afflib (All AFFLIB image formats (including beta ones))
+ewf (Expert Witness Format (EnCase))
 
 #Data of the image
 fsstat -i raw -f ext4 disk.img
@@ -149,41 +132,31 @@ r/r 16: secret.txt
 icat -i raw -f ext4 disk.img 16
 ThisisTheMasterSecret
 ```
+## Pretraga poznatog Malware-a
 
-<figure><img src="../../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+### Izmenjeni sistemski fajlovi
 
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Linux nudi alate za osiguranje integriteta sistemskih komponenti, što je ključno za uočavanje potencijalno problematičnih fajlova.
 
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+- **RedHat-bazirani sistemi**: Koristite `rpm -Va` za sveobuhvatnu proveru.
+- **Debian-bazirani sistemi**: `dpkg --verify` za inicijalnu verifikaciju, a zatim `debsums | grep -v "OK$"` (nakon instalacije `debsums` sa `apt-get install debsums`) za identifikaciju bilo kakvih problema.
 
-## Search for known Malware
+### Malware/Rootkit detektori
 
-### Modified System Files
-
-Linux offers tools for ensuring the integrity of system components, crucial for spotting potentially problematic files.
-
-- **RedHat-based systems**: Use `rpm -Va` for a comprehensive check.
-- **Debian-based systems**: `dpkg --verify` for initial verification, followed by `debsums | grep -v "OK$"` (after installing `debsums` with `apt-get install debsums`) to identify any issues.
-
-### Malware/Rootkit Detectors
-
-Read the following page to learn about tools that can be useful to find malware:
+Pročitajte sledeću stranicu da biste saznali o alatima koji mogu biti korisni za pronalaženje malware-a:
 
 {{#ref}}
 malware-analysis.md
 {{#endref}}
 
-## Search installed programs
+## Pretraga instaliranih programa
 
-To effectively search for installed programs on both Debian and RedHat systems, consider leveraging system logs and databases alongside manual checks in common directories.
+Da biste efikasno pretražili instalirane programe na Debian i RedHat sistemima, razmotrite korišćenje sistemskih logova i baza podataka zajedno sa ručnim proverama u uobičajenim direktorijumima.
 
-- For Debian, inspect _**`/var/lib/dpkg/status`**_ and _**`/var/log/dpkg.log`**_ to fetch details about package installations, using `grep` to filter for specific information.
-- RedHat users can query the RPM database with `rpm -qa --root=/mntpath/var/lib/rpm` to list installed packages.
+- Za Debian, proverite _**`/var/lib/dpkg/status`**_ i _**`/var/log/dpkg.log`**_ da biste dobili detalje o instalacijama paketa, koristeći `grep` za filtriranje specifičnih informacija.
+- RedHat korisnici mogu upititi RPM bazu podataka sa `rpm -qa --root=/mntpath/var/lib/rpm` da bi prikazali instalirane pakete.
 
-To uncover software installed manually or outside of these package managers, explore directories like _**`/usr/local`**_, _**`/opt`**_, _**`/usr/sbin`**_, _**`/usr/bin`**_, _**`/bin`**_, and _**`/sbin`**_. Combine directory listings with system-specific commands to identify executables not associated with known packages, enhancing your search for all installed programs.
-
+Da biste otkrili softver instaliran ručno ili van ovih menadžera paketa, istražite direktorijume kao što su _**`/usr/local`**_, _**`/opt`**_, _**`/usr/sbin`**_, _**`/usr/bin`**_, _**`/bin`**_, i _**`/sbin`**_. Kombinujte liste direktorijuma sa sistemskim komandama kako biste identifikovali izvršne fajlove koji nisu povezani sa poznatim paketima, čime poboljšavate pretragu za svim instaliranim programima.
 ```bash
 # Debian package and log details
 cat /var/lib/dpkg/status | grep -E "Package:|Status:"
@@ -199,29 +172,17 @@ find /sbin/ –exec rpm -qf {} \; | grep "is not"
 # Find exacuable files
 find / -type f -executable | grep <something>
 ```
+## Oporavak Izbrisanih Pokrenutih Binarnih Fajlova
 
-<figure><img src="../../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-
-## Recover Deleted Running Binaries
-
-Imagine a process that was executed from /tmp/exec and then deleted. It's possible to extract it
-
+Zamislite proces koji je izvršen iz /tmp/exec i zatim obrisan. Moguće je da se izvuče.
 ```bash
 cd /proc/3746/ #PID with the exec file deleted
 head -1 maps #Get address of the file. It was 08048000-08049000
 dd if=mem bs=1 skip=08048000 count=1000 of=/tmp/exec2 #Recorver it
 ```
+## Inspekcija lokacija za automatsko pokretanje
 
-## Inspect Autostart locations
-
-### Scheduled Tasks
-
+### Zakazani zadaci
 ```bash
 cat /var/spool/cron/crontabs/*  \
 /var/spool/cron/atjobs \
@@ -235,61 +196,60 @@ cat /var/spool/cron/crontabs/*  \
 #MacOS
 ls -l /usr/lib/cron/tabs/ /Library/LaunchAgents/ /Library/LaunchDaemons/ ~/Library/LaunchAgents/
 ```
+### Usluge
 
-### Services
+Putanje gde se zlonamerni softver može instalirati kao usluga:
 
-Paths where a malware could be installed as a service:
+- **/etc/inittab**: Poziva skripte inicijalizacije kao što su rc.sysinit, usmeravajući dalje na skripte za pokretanje.
+- **/etc/rc.d/** i **/etc/rc.boot/**: Sadrže skripte za pokretanje usluga, pri čemu se potonja nalazi u starijim verzijama Linux-a.
+- **/etc/init.d/**: Koristi se u određenim verzijama Linux-a kao što je Debian za čuvanje skripti za pokretanje.
+- Usluge se takođe mogu aktivirati putem **/etc/inetd.conf** ili **/etc/xinetd/**, u zavisnosti od varijante Linux-a.
+- **/etc/systemd/system**: Direktorijum za skripte menadžera sistema i usluga.
+- **/etc/systemd/system/multi-user.target.wants/**: Sadrži linkove do usluga koje treba pokrenuti u višekorisničkom režimu.
+- **/usr/local/etc/rc.d/**: Za prilagođene ili usluge trećih strana.
+- **\~/.config/autostart/**: Za automatske aplikacije specifične za korisnika, koje mogu biti skriveno mesto za zlonamerni softver usmeren na korisnike.
+- **/lib/systemd/system/**: Podrazumevane jedinice sistema koje obezbeđuju instalirani paketi.
 
-- **/etc/inittab**: Calls initialization scripts like rc.sysinit, directing further to startup scripts.
-- **/etc/rc.d/** and **/etc/rc.boot/**: Contain scripts for service startup, the latter being found in older Linux versions.
-- **/etc/init.d/**: Used in certain Linux versions like Debian for storing startup scripts.
-- Services may also be activated via **/etc/inetd.conf** or **/etc/xinetd/**, depending on the Linux variant.
-- **/etc/systemd/system**: A directory for system and service manager scripts.
-- **/etc/systemd/system/multi-user.target.wants/**: Contains links to services that should be started in a multi-user runlevel.
-- **/usr/local/etc/rc.d/**: For custom or third-party services.
-- **\~/.config/autostart/**: For user-specific automatic startup applications, which can be a hiding spot for user-targeted malware.
-- **/lib/systemd/system/**: System-wide default unit files provided by installed packages.
+### Kernel moduli
 
-### Kernel Modules
+Linux kernel moduli, često korišćeni od strane zlonamernog softvera kao komponenti rootkita, učitavaju se prilikom pokretanja sistema. Direktorijumi i datoteke kritične za ove module uključuju:
 
-Linux kernel modules, often utilized by malware as rootkit components, are loaded at system boot. The directories and files critical for these modules include:
+- **/lib/modules/$(uname -r)**: Sadrži module za trenutnu verziju kernela.
+- **/etc/modprobe.d**: Sadrži konfiguracione datoteke za kontrolu učitavanja modula.
+- **/etc/modprobe** i **/etc/modprobe.conf**: Datoteke za globalne postavke modula.
 
-- **/lib/modules/$(uname -r)**: Holds modules for the running kernel version.
-- **/etc/modprobe.d**: Contains configuration files to control module loading.
-- **/etc/modprobe** and **/etc/modprobe.conf**: Files for global module settings.
+### Druge lokacije za automatsko pokretanje
 
-### Other Autostart Locations
+Linux koristi razne datoteke za automatsko izvršavanje programa prilikom prijavljivanja korisnika, potencijalno skrivajući zlonamerni softver:
 
-Linux employs various files for automatically executing programs upon user login, potentially harboring malware:
+- **/etc/profile.d/**\*, **/etc/profile**, i **/etc/bash.bashrc**: Izvršavaju se za bilo koju prijavu korisnika.
+- **\~/.bashrc**, **\~/.bash_profile**, **\~/.profile**, i **\~/.config/autostart**: Datoteke specifične za korisnika koje se pokreću prilikom njihove prijave.
+- **/etc/rc.local**: Izvršava se nakon što su sve sistemske usluge pokrenute, označavajući kraj prelaska na višekorisničko okruženje.
 
-- **/etc/profile.d/**\*, **/etc/profile**, and **/etc/bash.bashrc**: Executed for any user login.
-- **\~/.bashrc**, **\~/.bash_profile**, **\~/.profile**, and **\~/.config/autostart**: User-specific files that run upon their login.
-- **/etc/rc.local**: Runs after all system services have started, marking the end of the transition to a multiuser environment.
+## Istraži logove
 
-## Examine Logs
+Linux sistemi prate aktivnosti korisnika i događaje sistema kroz razne log datoteke. Ovi logovi su ključni za identifikaciju neovlašćenog pristupa, infekcija zlonamernim softverom i drugih bezbednosnih incidenata. Ključne log datoteke uključuju:
 
-Linux systems track user activities and system events through various log files. These logs are pivotal for identifying unauthorized access, malware infections, and other security incidents. Key log files include:
-
-- **/var/log/syslog** (Debian) or **/var/log/messages** (RedHat): Capture system-wide messages and activities.
-- **/var/log/auth.log** (Debian) or **/var/log/secure** (RedHat): Record authentication attempts, successful and failed logins.
-  - Use `grep -iE "session opened for|accepted password|new session|not in sudoers" /var/log/auth.log` to filter relevant authentication events.
-- **/var/log/boot.log**: Contains system startup messages.
-- **/var/log/maillog** or **/var/log/mail.log**: Logs email server activities, useful for tracking email-related services.
-- **/var/log/kern.log**: Stores kernel messages, including errors and warnings.
-- **/var/log/dmesg**: Holds device driver messages.
-- **/var/log/faillog**: Records failed login attempts, aiding in security breach investigations.
-- **/var/log/cron**: Logs cron job executions.
-- **/var/log/daemon.log**: Tracks background service activities.
-- **/var/log/btmp**: Documents failed login attempts.
-- **/var/log/httpd/**: Contains Apache HTTPD error and access logs.
-- **/var/log/mysqld.log** or **/var/log/mysql.log**: Logs MySQL database activities.
-- **/var/log/xferlog**: Records FTP file transfers.
-- **/var/log/**: Always check for unexpected logs here.
+- **/var/log/syslog** (Debian) ili **/var/log/messages** (RedHat): Zabeležavaju poruke i aktivnosti širom sistema.
+- **/var/log/auth.log** (Debian) ili **/var/log/secure** (RedHat): Beleže pokušaje autentifikacije, uspešne i neuspešne prijave.
+- Koristite `grep -iE "session opened for|accepted password|new session|not in sudoers" /var/log/auth.log` za filtriranje relevantnih događaja autentifikacije.
+- **/var/log/boot.log**: Sadrži poruke o pokretanju sistema.
+- **/var/log/maillog** ili **/var/log/mail.log**: Logovi aktivnosti email servera, korisni za praćenje usluga vezanih za email.
+- **/var/log/kern.log**: Čuva poruke kernela, uključujući greške i upozorenja.
+- **/var/log/dmesg**: Sadrži poruke drajvera uređaja.
+- **/var/log/faillog**: Beleži neuspešne pokušaje prijave, pomažući u istragama bezbednosnih proboja.
+- **/var/log/cron**: Logovi izvršavanja cron poslova.
+- **/var/log/daemon.log**: Prati aktivnosti pozadinskih usluga.
+- **/var/log/btmp**: Dokumentuje neuspešne pokušaje prijave.
+- **/var/log/httpd/**: Sadrži Apache HTTPD greške i logove pristupa.
+- **/var/log/mysqld.log** ili **/var/log/mysql.log**: Logovi aktivnosti MySQL baze podataka.
+- **/var/log/xferlog**: Beleži FTP prenose datoteka.
+- **/var/log/**: Uvek proverite za neočekivane logove ovde.
 
 > [!NOTE]
-> Linux system logs and audit subsystems may be disabled or deleted in an intrusion or malware incident. Because logs on Linux systems generally contain some of the most useful information about malicious activities, intruders routinely delete them. Therefore, when examining available log files, it is important to look for gaps or out of order entries that might be an indication of deletion or tampering.
+> Linux sistemski logovi i audit pod-sistemi mogu biti onemogućeni ili obrisani tokom upada ili incidenta sa zlonamernim softverom. Pošto logovi na Linux sistemima obično sadrže neke od najkorisnijih informacija o zlonamernim aktivnostima, napadači ih rutinski brišu. Stoga, prilikom ispitivanja dostupnih log datoteka, važno je tražiti praznine ili neuredne unose koji bi mogli biti indikacija brisanja ili manipulacije.
 
-**Linux maintains a command history for each user**, stored in:
+**Linux održava istoriju komandi za svakog korisnika**, koja se čuva u:
 
 - \~/.bash_history
 - \~/.zsh_history
@@ -297,42 +257,39 @@ Linux systems track user activities and system events through various log files.
 - \~/.python_history
 - \~/.\*\_history
 
-Moreover, the `last -Faiwx` command provides a list of user logins. Check it for unknown or unexpected logins.
+Pored toga, komanda `last -Faiwx` pruža listu prijava korisnika. Proverite je za nepoznate ili neočekivane prijave.
 
-Check files that can grant extra rprivileges:
+Proverite datoteke koje mogu dodeliti dodatne privilegije:
 
-- Review `/etc/sudoers` for unanticipated user privileges that may have been granted.
-- Review `/etc/sudoers.d/` for unanticipated user privileges that may have been granted.
-- Examine `/etc/groups` to identify any unusual group memberships or permissions.
-- Examine `/etc/passwd` to identify any unusual group memberships or permissions.
+- Pregledajte `/etc/sudoers` za neočekivane privilegije korisnika koje su možda dodeljene.
+- Pregledajte `/etc/sudoers.d/` za neočekivane privilegije korisnika koje su možda dodeljene.
+- Istražite `/etc/groups` da identifikujete bilo kakva neobična članstva u grupama ili dozvole.
+- Istražite `/etc/passwd` da identifikujete bilo kakva neobična članstva u grupama ili dozvole.
 
-Some apps alse generates its own logs:
+Neke aplikacije takođe generišu svoje logove:
 
-- **SSH**: Examine _\~/.ssh/authorized_keys_ and _\~/.ssh/known_hosts_ for unauthorized remote connections.
-- **Gnome Desktop**: Look into _\~/.recently-used.xbel_ for recently accessed files via Gnome applications.
-- **Firefox/Chrome**: Check browser history and downloads in _\~/.mozilla/firefox_ or _\~/.config/google-chrome_ for suspicious activities.
-- **VIM**: Review _\~/.viminfo_ for usage details, such as accessed file paths and search history.
-- **Open Office**: Check for recent document access that may indicate compromised files.
-- **FTP/SFTP**: Review logs in _\~/.ftp_history_ or _\~/.sftp_history_ for file transfers that might be unauthorized.
-- **MySQL**: Investigate _\~/.mysql_history_ for executed MySQL queries, potentially revealing unauthorized database activities.
-- **Less**: Analyze _\~/.lesshst_ for usage history, including viewed files and commands executed.
-- **Git**: Examine _\~/.gitconfig_ and project _.git/logs_ for changes to repositories.
+- **SSH**: Istražite _\~/.ssh/authorized_keys_ i _\~/.ssh/known_hosts_ za neovlašćene udaljene konekcije.
+- **Gnome Desktop**: Pogledajte _\~/.recently-used.xbel_ za nedavno pristupane datoteke putem Gnome aplikacija.
+- **Firefox/Chrome**: Proverite istoriju pretraživača i preuzimanja u _\~/.mozilla/firefox_ ili _\~/.config/google-chrome_ za sumnjive aktivnosti.
+- **VIM**: Pregledajte _\~/.viminfo_ za detalje o korišćenju, kao što su pristupane putanje datoteka i istorija pretrage.
+- **Open Office**: Proverite za nedavni pristup dokumentima koji mogu ukazivati na kompromitovane datoteke.
+- **FTP/SFTP**: Pregledajte logove u _\~/.ftp_history_ ili _\~/.sftp_history_ za prenose datoteka koji bi mogli biti neovlašćeni.
+- **MySQL**: Istražite _\~/.mysql_history_ za izvršene MySQL upite, što može otkriti neovlašćene aktivnosti u bazi podataka.
+- **Less**: Analizirajte _\~/.lesshst_ za istoriju korišćenja, uključujući pregledane datoteke i izvršene komande.
+- **Git**: Istražite _\~/.gitconfig_ i projekat _.git/logs_ za promene u repozitorijumima.
 
-### USB Logs
+### USB logovi
 
-[**usbrip**](https://github.com/snovvcrash/usbrip) is a small piece of software written in pure Python 3 which parses Linux log files (`/var/log/syslog*` or `/var/log/messages*` depending on the distro) for constructing USB event history tables.
+[**usbrip**](https://github.com/snovvcrash/usbrip) je mali komad softvera napisan u čistom Python 3 koji analizira Linux log datoteke (`/var/log/syslog*` ili `/var/log/messages*` u zavisnosti od distribucije) za konstruisanje tabela istorije događaja USB-a.
 
-It is interesting to **know all the USBs that have been used** and it will be more useful if you have an authorized list of USBs to find "violation events" (the use of USBs that aren't inside that list).
+Zanimljivo je **znati sve USB uređaje koji su korišćeni** i biće korisnije ako imate ovlašćenu listu USB uređaja da pronađete "događaje kršenja" (korišćenje USB uređaja koji nisu na toj listi).
 
-### Installation
-
+### Instalacija
 ```bash
 pip3 install usbrip
 usbrip ids download #Download USB ID database
 ```
-
-### Examples
-
+### Primeri
 ```bash
 usbrip events history #Get USB history of your curent linux machine
 usbrip events history --pid 0002 --vid 0e0f --user kali #Search by pid OR vid OR user
@@ -340,40 +297,30 @@ usbrip events history --pid 0002 --vid 0e0f --user kali #Search by pid OR vid OR
 usbrip ids download #Downlaod database
 usbrip ids search --pid 0002 --vid 0e0f #Search for pid AND vid
 ```
+Više primera i informacija unutar github-a: [https://github.com/snovvcrash/usbrip](https://github.com/snovvcrash/usbrip)
 
-More examples and info inside the github: [https://github.com/snovvcrash/usbrip](https://github.com/snovvcrash/usbrip)
+## Pregled korisničkih naloga i aktivnosti prijavljivanja
 
-<figure><img src="../../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+Istražite _**/etc/passwd**_, _**/etc/shadow**_ i **bezbednosne logove** za neobična imena ili naloge koji su kreirani i ili korišćeni u bliskoj blizini poznatih neovlašćenih događaja. Takođe, proverite moguće sudo brute-force napade.\
+Pored toga, proverite datoteke kao što su _**/etc/sudoers**_ i _**/etc/groups**_ za neočekivane privilegije dodeljene korisnicima.\
+Na kraju, potražite naloge sa **bez lozinki** ili **lako pogađanim** lozinkama.
 
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+## Istraživanje fajl sistema
 
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+### Analiza struktura fajl sistema u istraživanju malvera
 
-## Review User Accounts and Logon Activities
+Kada istražujete incidente sa malverom, struktura fajl sistema je ključni izvor informacija, otkrivajući kako redosled događaja tako i sadržaj malvera. Međutim, autori malvera razvijaju tehnike za ometanje ove analize, kao što su modifikovanje vremenskih oznaka fajlova ili izbegavanje fajl sistema za skladištenje podataka.
 
-Examine the _**/etc/passwd**_, _**/etc/shadow**_ and **security logs** for unusual names or accounts created and or used in close proximity to known unauthorized events. Also, check possible sudo brute-force attacks.\
-Moreover, check files like _**/etc/sudoers**_ and _**/etc/groups**_ for unexpected privileges given to users.\
-Finally, look for accounts with **no passwords** or **easily guessed** passwords.
+Da biste se suprotstavili ovim anti-forenzičkim metodama, važno je:
 
-## Examine File System
-
-### Analyzing File System Structures in Malware Investigation
-
-When investigating malware incidents, the structure of the file system is a crucial source of information, revealing both the sequence of events and the malware's content. However, malware authors are developing techniques to hinder this analysis, such as modifying file timestamps or avoiding the file system for data storage.
-
-To counter these anti-forensic methods, it's essential to:
-
-- **Conduct a thorough timeline analysis** using tools like **Autopsy** for visualizing event timelines or **Sleuth Kit's** `mactime` for detailed timeline data.
-- **Investigate unexpected scripts** in the system's $PATH, which might include shell or PHP scripts used by attackers.
-- **Examine `/dev` for atypical files**, as it traditionally contains special files, but may house malware-related files.
-- **Search for hidden files or directories** with names like ".. " (dot dot space) or "..^G" (dot dot control-G), which could conceal malicious content.
-- **Identify setuid root files** using the command: `find / -user root -perm -04000 -print` This finds files with elevated permissions, which could be abused by attackers.
-- **Review deletion timestamps** in inode tables to spot mass file deletions, possibly indicating the presence of rootkits or trojans.
-- **Inspect consecutive inodes** for nearby malicious files after identifying one, as they may have been placed together.
-- **Check common binary directories** (_/bin_, _/sbin_) for recently modified files, as these could be altered by malware.
-
+- **Sprovesti temeljnu analizu vremenske linije** koristeći alate kao što su **Autopsy** za vizualizaciju vremenskih linija događaja ili **Sleuth Kit's** `mactime` za detaljne podatke o vremenskoj liniji.
+- **Istražiti neočekivane skripte** u sistemskom $PATH, koje mogu uključivati shell ili PHP skripte koje koriste napadači.
+- **Istražiti `/dev` za atipične fajlove**, jer tradicionalno sadrži specijalne fajlove, ali može sadržati i fajlove povezane sa malverom.
+- **Pretražiti skrivene fajlove ili direktorijume** sa imenima kao što su ".. " (tačka tačka razmak) ili "..^G" (tačka tačka kontrola-G), koji mogu prikrivati zlonamerni sadržaj.
+- **Identifikovati setuid root fajlove** koristeći komandu: `find / -user root -perm -04000 -print` Ovo pronalazi fajlove sa povišenim privilegijama, koje napadači mogu zloupotrebiti.
+- **Pregledati vremenske oznake brisanja** u inode tabelama kako bi se uočila masovna brisanja fajlova, što može ukazivati na prisustvo rootkit-ova ili trojanaca.
+- **Inspektovati uzastopne inode** za obližnje zlonamerne fajlove nakon identifikacije jednog, jer su možda postavljeni zajedno.
+- **Proveriti uobičajene binarne direktorijume** (_/bin_, _/sbin_) za nedavno modifikovane fajlove, jer bi ovi mogli biti izmenjeni od strane malvera.
 ````bash
 # List recent files in a directory:
 ls -laR --sort=time /bin```
@@ -381,58 +328,43 @@ ls -laR --sort=time /bin```
 # Sort files in a directory by inode:
 ls -lai /bin | sort -n```
 ````
-
 > [!NOTE]
-> Note that an **attacker** can **modify** the **time** to make **files appear** **legitimate**, but he **cannot** modify the **inode**. If you find that a **file** indicates that it was created and modified at the **same time** as the rest of the files in the same folder, but the **inode** is **unexpectedly bigger**, then the **timestamps of that file were modified**.
+> Imajte na umu da **napadač** može **modifikovati** **vreme** kako bi **datoteke izgledale** **legitimno**, ali ne može **modifikovati** **inode**. Ako otkrijete da **datoteka** pokazuje da je kreirana i modifikovana u **isto vreme** kao i ostale datoteke u istoj fascikli, ali je **inode** **neočekivano veći**, onda su **vremenske oznake te datoteke modifikovane**.
 
-## Compare files of different filesystem versions
+## Upoređivanje datoteka različitih verzija datotečnog sistema
 
-### Filesystem Version Comparison Summary
+### Sažetak upoređivanja verzija datotečnog sistema
 
-To compare filesystem versions and pinpoint changes, we use simplified `git diff` commands:
+Da bismo uporedili verzije datotečnog sistema i precizno odredili promene, koristimo pojednostavljene `git diff` komande:
 
-- **To find new files**, compare two directories:
-
+- **Da pronađete nove datoteke**, uporedite dve fascikle:
 ```bash
 git diff --no-index --diff-filter=A path/to/old_version/ path/to/new_version/
 ```
-
-- **For modified content**, list changes while ignoring specific lines:
-
+- **Za izmenjen sadržaj**, navedite promene ignorišući specifične linije:
 ```bash
 git diff --no-index --diff-filter=M path/to/old_version/ path/to/new_version/ | grep -E "^\+" | grep -v "Installed-Time"
 ```
-
-- **To detect deleted files**:
-
+- **Da biste otkrili obrisane fajlove**:
 ```bash
 git diff --no-index --diff-filter=D path/to/old_version/ path/to/new_version/
 ```
+- **Opcije filtriranja** (`--diff-filter`) pomažu u sužavanju na specifične promene kao što su dodati (`A`), obrisani (`D`), ili izmenjeni (`M`) fajlovi.
+- `A`: Dodati fajlovi
+- `C`: Kopirani fajlovi
+- `D`: Obrisani fajlovi
+- `M`: Izmenjeni fajlovi
+- `R`: Preimenovani fajlovi
+- `T`: Promene tipa (npr., fajl u symlink)
+- `U`: Neusaglašeni fajlovi
+- `X`: Nepoznati fajlovi
+- `B`: Pokvareni fajlovi
 
-- **Filter options** (`--diff-filter`) help narrow down to specific changes like added (`A`), deleted (`D`), or modified (`M`) files.
-  - `A`: Added files
-  - `C`: Copied files
-  - `D`: Deleted files
-  - `M`: Modified files
-  - `R`: Renamed files
-  - `T`: Type changes (e.g., file to symlink)
-  - `U`: Unmerged files
-  - `X`: Unknown files
-  - `B`: Broken files
-
-## References
+## Reference
 
 - [https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems_Ch3.pdf](https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems_Ch3.pdf)
 - [https://www.plesk.com/blog/featured/linux-logs-explained/](https://www.plesk.com/blog/featured/linux-logs-explained/)
 - [https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203](https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203)
-- **Book: Malware Forensics Field Guide for Linux Systems: Digital Forensics Field Guides**
+- **Knjiga: Malware Forensics Field Guide for Linux Systems: Digital Forensics Field Guides**
 
 {{#include ../../banners/hacktricks-training.md}}
-
-<figure><img src="../../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}

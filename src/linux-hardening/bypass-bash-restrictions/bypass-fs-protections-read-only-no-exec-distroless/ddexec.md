@@ -2,18 +2,17 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Context
+## Kontekst
 
-In Linux in order to run a program it must exist as a file, it must be accessible in some way through the file system hierarchy (this is just how `execve()` works). This file may reside on disk or in ram (tmpfs, memfd) but you need a filepath. This has made very easy to control what is run on a Linux system, it makes easy to detect threats and attacker's tools or to prevent them from trying to execute anything of theirs at all (_e. g._ not allowing unprivileged users to place executable files anywhere).
+U Linuxu, da bi se pokrenuo program, mora postojati kao datoteka, mora biti dostupna na neki način kroz hijerarhiju datotečnog sistema (to je jednostavno kako `execve()` funkcioniše). Ova datoteka može biti na disku ili u RAM-u (tmpfs, memfd), ali vam je potreban put do datoteke. To je olakšalo kontrolu onoga što se pokreće na Linux sistemu, olakšava otkrivanje pretnji i alata napadača ili sprečavanje da pokušaju da izvrše bilo šta svoje (_npr._ ne dozvoljavajući korisnicima bez privilegija da postavljaju izvršne datoteke bilo gde).
 
-But this technique is here to change all of this. If you can not start the process you want... **then you hijack one already existing**.
+Ali ova tehnika je ovde da promeni sve to. Ako ne možete da pokrenete proces koji želite... **onda preuzimate već postojeći**.
 
-This technique allows you to **bypass common protection techniques such as read-only, noexec, file-name whitelisting, hash whitelisting...**
+Ova tehnika vam omogućava da **zaobiđete uobičajene zaštitne tehnike kao što su samo za čitanje, noexec, bela lista imena datoteka, bela lista hešova...**
 
-## Dependencies
+## Zavisnosti
 
-The final script depends on the following tools to work, they need to be accessible in the system you are attacking (by default you will find all of them everywhere):
-
+Konačni skript zavisi od sledećih alata da bi radio, oni moraju biti dostupni u sistemu koji napadate (po defaultu ćete ih pronaći svuda):
 ```
 dd
 bash | zsh | ash (busybox)
@@ -27,68 +26,61 @@ wc
 tr
 base64
 ```
+## Tehnika
 
-## The technique
+Ako ste u mogućnosti da proizvoljno modifikujete memoriju procesa, onda ga možete preuzeti. Ovo se može koristiti za preuzimanje već postojećeg procesa i zamenu sa drugim programom. To možemo postići ili korišćenjem `ptrace()` sistemskog poziva (što zahteva da imate mogućnost izvršavanja sistemskih poziva ili da imate gdb dostupan na sistemu) ili, što je zanimljivije, pisanjem u `/proc/$pid/mem`.
 
-If you are able to modify arbitrarily the memory of a process then you can take over it. This can be used to hijack an already existing process and replace it with another program. We can achieve this either by using the `ptrace()` syscall (which requires you to have the ability to execute syscalls or to have gdb available on the system) or, more interestingly, writing to `/proc/$pid/mem`.
+Datoteka `/proc/$pid/mem` je jedan-na-jedan mapiranje celog adresnog prostora procesa (_npr._ od `0x0000000000000000` do `0x7ffffffffffff000` u x86-64). To znači da je čitanje ili pisanje u ovu datoteku na offsetu `x` isto kao čitanje ili modifikovanje sadržaja na virtuelnoj adresi `x`.
 
-The file `/proc/$pid/mem` is a one-to-one mapping of the entire address space of a process (_e. g._ from `0x0000000000000000` to `0x7ffffffffffff000` in x86-64). This means that reading from or writing to this file at an offset `x` is the same as reading from or modifying the contents at the virtual address `x`.
+Sada imamo četiri osnovna problema sa kojima se suočavamo:
 
-Now, we have four basic problems to face:
-
-- In general, only root and the program owner of the file may modify it.
+- Uopšte, samo root i vlasnik programa datoteke mogu da je modifikuju.
 - ASLR.
-- If we try to read or write to an address not mapped in the address space of the program we will get an I/O error.
+- Ako pokušamo da čitamo ili pišemo na adresu koja nije mapirana u adresnom prostoru programa, dobićemo I/O grešku.
 
-This problems have solutions that, although they are not perfect, are good:
+Ovi problemi imaju rešenja koja, iako nisu savršena, su dobra:
 
-- Most shell interpreters allow the creation of file descriptors that will then be inherited by child processes. We can create a fd pointing to the `mem` file of the sell with write permissions... so child processes that use that fd will be able to modify the shell's memory.
-- ASLR isn't even a problem, we can check the shell's `maps` file or any other from the procfs in order to gain information about the address space of the process.
-- So we need to `lseek()` over the file. From the shell this cannot be done unless using the infamous `dd`.
+- Većina shell interpretera omogućava kreiranje deskriptora datoteka koji će zatim biti nasledni od strane podprocesa. Možemo kreirati fd koji pokazuje na `mem` datoteku shelle sa dozvolama za pisanje... tako da podprocesi koji koriste taj fd mogu modifikovati memoriju shelle.
+- ASLR čak nije ni problem, možemo proveriti `maps` datoteku shelle ili bilo koju drugu iz procfs kako bismo dobili informacije o adresnom prostoru procesa.
+- Tako da treba da `lseek()` preko datoteke. Iz shelle to ne može biti urađeno osim korišćenjem infamoznog `dd`.
 
-### In more detail
+### Detaljnije
 
-The steps are relatively easy and do not require any kind of expertise to understand them:
+Koraci su relativno laki i ne zahtevaju nikakvu vrstu stručnosti da bi ih razumeli:
 
-- Parse the binary we want to run and the loader to find out what mappings they need. Then craft a "shell"code that will perform, broadly speaking, the same steps that the kernel does upon each call to `execve()`:
-  - Create said mappings.
-  - Read the binaries into them.
-  - Set up permissions.
-  - Finally initialize the stack with the arguments for the program and place the auxiliary vector (needed by the loader).
-  - Jump into the loader and let it do the rest (load libraries needed by the program).
-- Obtain from the `syscall` file the address to which the process will return after the syscall it is executing.
-- Overwrite that place, which will be executable, with our shellcode (through `mem` we can modify unwritable pages).
-- Pass the program we want to run to the stdin of the process (will be `read()` by said "shell"code).
-- At this point it is up to the loader to load the necessary libraries for our program and jump into it.
+- Parsirajte binarni fajl koji želimo da pokrenemo i loader da saznamo koje mape su im potrebne. Zatim kreirajte "shell" kod koji će, u širokom smislu, izvesti iste korake koje kernel preduzima pri svakom pozivu `execve()`:
+- Kreirajte pomenute mape.
+- Učitajte binarne fajlove u njih.
+- Postavite dozvole.
+- Na kraju, inicijalizujte stek sa argumentima za program i postavite pomoćni vektor (potreban loader-u).
+- Skočite u loader i pustite ga da uradi ostalo (učita biblioteke potrebne programu).
+- Dobijte iz `syscall` datoteke adresu na koju će se proces vratiti nakon sistemskog poziva koji izvršava.
+- Prepišite to mesto, koje će biti izvršivo, našim shell kodom (kroz `mem` možemo modifikovati nepisive stranice).
+- Prosledite program koji želimo da pokrenemo na stdin procesa (biće `read()` od strane pomenutog "shell" koda).
+- U ovom trenutku, na loader-u je da učita potrebne biblioteke za naš program i skoči u njega.
 
-**Check out the tool in** [**https://github.com/arget13/DDexec**](https://github.com/arget13/DDexec)
+**Pogledajte alat na** [**https://github.com/arget13/DDexec**](https://github.com/arget13/DDexec)
 
 ## EverythingExec
 
-There are several alternatives to `dd`, one of which, `tail`, is currently the default program used to `lseek()` through the `mem` file (which was the sole purpose for using `dd`). Said alternatives are:
-
+Postoji nekoliko alternativa za `dd`, od kojih je jedna, `tail`, trenutno podrazumevani program koji se koristi za `lseek()` kroz `mem` datoteku (što je bio jedini cilj korišćenja `dd`). Te alternative su:
 ```bash
 tail
 hexdump
 cmp
 xxd
 ```
-
-Setting the variable `SEEKER` you may change the seeker used, _e. g._:
-
+Podešavanjem promenljive `SEEKER` možete promeniti korišćenog tražioca, _npr._:
 ```bash
 SEEKER=cmp bash ddexec.sh ls -l <<< $(base64 -w0 /bin/ls)
 ```
-
-If you find another valid seeker not implemented in the script you may still use it setting the `SEEKER_ARGS` variable:
-
+Ako pronađete drugog validnog tražioca koji nije implementiran u skripti, još uvek ga možete koristiti postavljanjem promenljive `SEEKER_ARGS`:
 ```bash
 SEEKER=xxd SEEKER_ARGS='-s $offset' zsh ddexec.sh ls -l <<< $(base64 -w0 /bin/ls)
 ```
+Blokirajte ovo, EDR-ove.
 
-Block this, EDRs.
-
-## References
+## Reference
 
 - [https://github.com/arget13/DDexec](https://github.com/arget13/DDexec)
 

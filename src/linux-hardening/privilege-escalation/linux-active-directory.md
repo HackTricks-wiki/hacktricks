@@ -6,7 +6,7 @@ Linux mašina može biti prisutna unutar Active Directory okruženja.
 
 Linux mašina u AD može **čuvati različite CCACHE karte unutar fajlova. Ove karte se mogu koristiti i zloupotrebljavati kao i svaka druga kerberos karta**. Da biste pročitali ove karte, potrebno je da budete korisnik vlasnik karte ili **root** unutar mašine.
 
-## Enumeracija
+## Enumeration
 
 ### AD enumeracija sa linux-a
 
@@ -20,7 +20,7 @@ Takođe možete proveriti sledeću stranicu da biste naučili **druge načine za
 
 ### FreeIPA
 
-FreeIPA je open-source **alternativa** za Microsoft Windows **Active Directory**, uglavnom za **Unix** okruženja. Kombinuje kompletnu **LDAP direktoriju** sa MIT **Kerberos** Centrom za distribuciju ključeva za upravljanje sličnim Active Directory. Koristi Dogtag **Sistem sertifikata** za upravljanje CA i RA sertifikatima, podržava **multi-factor** autentifikaciju, uključujući pametne kartice. SSSD je integrisan za Unix procese autentifikacije. Saznajte više o tome na:
+FreeIPA je open-source **alternativa** za Microsoft Windows **Active Directory**, uglavnom za **Unix** okruženja. Kombinuje kompletnu **LDAP direktoriju** sa MIT **Kerberos** Centrom za distribuciju ključeva za upravljanje sličnim Active Directory. Koristi Dogtag **Sistem sertifikata** za upravljanje CA i RA sertifikatima, podržava **multi-factor** autentifikaciju, uključujući pametne kartice. SSSD je integrisan za Unix procese autentifikacije. Saznajte više o tome u:
 
 {{#ref}}
 ../freeipa-pentesting.md
@@ -49,11 +49,11 @@ krb5cc_1000
 # Prepare to use it
 export KRB5CCNAME=/tmp/krb5cc_1000
 ```
-### CCACHE ponovna upotreba karata iz keyring-a
+### CCACHE ticket reuse from keyring
 
-**Kerberos karte pohranjene u memoriji procesa mogu se izvući**, posebno kada je zaštita ptrace-a na mašini onemogućena (`/proc/sys/kernel/yama/ptrace_scope`). Koristan alat za ovu svrhu se može pronaći na [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey), koji olakšava ekstrakciju injektovanjem u sesije i dumpovanjem karata u `/tmp`.
+**Kerberos karte pohranjene u memoriji procesa mogu biti izvučene**, posebno kada je zaštita ptrace na mašini onemogućena (`/proc/sys/kernel/yama/ptrace_scope`). Koristan alat za ovu svrhu se može pronaći na [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey), koji olakšava ekstrakciju injektovanjem u sesije i dumpovanjem karata u `/tmp`.
 
-Da bi se konfigurisao i koristio ovaj alat, slede se koraci u nastavku:
+Da biste konfigurisali i koristili ovaj alat, slede se koraci u nastavku:
 ```bash
 git clone https://github.com/TarlogicSecurity/tickey
 cd tickey/tickey
@@ -64,16 +64,16 @@ Ova procedura će pokušati da injektuje u različite sesije, označavajući usp
 
 ### CCACHE ponovna upotreba karata iz SSSD KCM
 
-SSSD održava kopiju baze podataka na putanji `/var/lib/sss/secrets/secrets.ldb`. Odgovarajući ključ se čuva kao skriveni fajl na putanji `/var/lib/sss/secrets/.secrets.mkey`. Po defaultu, ključ je čitljiv samo ako imate **root** dozvole.
+SSSD održava kopiju baze podataka na putanji `/var/lib/sss/secrets/secrets.ldb`. Odgovarajući ključ se čuva kao skriveni fajl na putanji `/var/lib/sss/secrets/.secrets.mkey`. Po defaultu, ključ je samo čitljiv ako imate **root** dozvole.
 
-Pozivanje \*\*`SSSDKCMExtractor` \*\* sa parametrima --database i --key će analizirati bazu podataka i **dekriptovati tajne**.
+Pozivanje \*\*`SSSDKCMExtractor` \*\* sa --database i --key parametrima će analizirati bazu podataka i **dekriptovati tajne**.
 ```bash
 git clone https://github.com/fireeye/SSSDKCMExtractor
 python3 SSSDKCMExtractor.py --database secrets.ldb --key secrets.mkey
 ```
 **Keširanje kredencijala Kerberos blob može se konvertovati u upotrebljivu Kerberos CCache** datoteku koja se može proslediti Mimikatz/Rubeus.
 
-### Ponovna upotreba CCACHE karte iz keytab-a
+### Ponovna upotreba CCACHE karata iz keytab-a
 ```bash
 git clone https://github.com/its-a-feature/KeytabParser
 python KeytabParser.py /etc/krb5.keytab
@@ -81,7 +81,7 @@ klist -k /etc/krb5.keytab
 ```
 ### Izvlačenje naloga iz /etc/krb5.keytab
 
-Ključevi servisnog naloga, koji su neophodni za servise koji rade sa root privilegijama, sigurno su pohranjeni u **`/etc/krb5.keytab`** datotekama. Ovi ključevi, slični lozinkama za servise, zahtevaju strogu poverljivost.
+Ključevi servisnog naloga, koji su neophodni za usluge koje rade sa root privilegijama, sigurno su pohranjeni u **`/etc/krb5.keytab`** datotekama. Ovi ključevi, slični lozinkama za usluge, zahtevaju strogu poverljivost.
 
 Da biste pregledali sadržaj keytab datoteke, može se koristiti **`klist`**. Ovaj alat je dizajniran da prikaže detalje o ključevima, uključujući **NT Hash** za autentifikaciju korisnika, posebno kada je tip ključa identifikovan kao 23.
 ```bash

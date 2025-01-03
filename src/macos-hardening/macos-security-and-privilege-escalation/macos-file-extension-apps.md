@@ -12,7 +12,7 @@ Moguće je izvući ovu bazu podataka sa:
 ```
 Ili korišćenjem alata [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
 
-**`/usr/libexec/lsd`** je mozak baze podataka. Pruža **several XPC services** kao što su `.lsd.installation`, `.lsd.open`, `.lsd.openurl` i još mnogo toga. Ali takođe **zahteva neka ovlašćenja** za aplikacije da bi mogle da koriste izložene XPC funkcionalnosti, kao što su `.launchservices.changedefaulthandler` ili `.launchservices.changeurlschemehandler` za promenu podrazumevanih aplikacija za mime tipove ili url sheme i druge.
+**`/usr/libexec/lsd`** je mozak baze podataka. Pruža **several XPC services** kao što su `.lsd.installation`, `.lsd.open`, `.lsd.openurl`, i još mnogo toga. Ali takođe **zahteva neka ovlašćenja** za aplikacije da bi mogle da koriste izložene XPC funkcionalnosti, kao što su `.launchservices.changedefaulthandler` ili `.launchservices.changeurlschemehandler` za promenu podrazumevanih aplikacija za mime tipove ili url sheme i druge.
 
 **`/System/Library/CoreServices/launchservicesd`** zahteva uslugu `com.apple.coreservices.launchservicesd` i može se upititi da bi se dobile informacije o pokrenutim aplikacijama. Može se upititi pomoću sistemskog alata /**`usr/bin/lsappinfo`** ili sa [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
 
@@ -29,7 +29,7 @@ Ili koristite nešto poput [**SwiftDefaultApps**](https://github.com/Lord-Kamina
 ./swda getUTIs #Get all the UTIs
 ./swda getHandler --URL ftp #Get ftp handler
 ```
-Možete takođe proveriti ekstenzije koje podržava aplikacija tako što ćete uraditi:
+Možete takođe proveriti ekstenzije koje podržava aplikacija tako što ćete:
 ```
 cd /Applications/Safari.app/Contents
 grep -A3 CFBundleTypeExtensions Info.plist  | grep string

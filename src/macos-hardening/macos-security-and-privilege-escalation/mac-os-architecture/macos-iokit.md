@@ -4,7 +4,7 @@
 
 ## Osnovne informacije
 
-I/O Kit je open-source, objektno orijentisan **framework za drajvere uređaja** u XNU kernelu, koji upravlja **dinamički učitanim drajverima uređaja**. Omogućava dodavanje modularnog koda u kernel u hodu, podržavajući raznovrsni hardver.
+I/O Kit je open-source, objektno orijentisani **framework za drajvere uređaja** u XNU kernelu, koji upravlja **dinamički učitanim drajverima uređaja**. Omogućava dodavanje modularnog koda u kernel u hodu, podržavajući raznovrsni hardver.
 
 IOKit drajveri će u osnovi **izvoziti funkcije iz kernela**. Ovi parametri funkcija **tipovi** su **preddefinisani** i verifikovani. Štaviše, slično XPC-u, IOKit je samo još jedan sloj **iznad Mach poruka**.
 
@@ -23,18 +23,18 @@ __ZN16IOUserClient202222dispatchExternalMethodEjP31IOExternalMethodArgumentsOpaq
 IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
 > [!CAUTION]
-> IOKit **izložene funkcije** mogu izvršiti **dodatne provere bezbednosti** kada klijent pokuša da pozove funkciju, ali imajte na umu da su aplikacije obično **ograničene** od strane **sandbox-a** sa kojima IOKit funkcije mogu da interaguju.
+> IOKit **izložene funkcije** mogu izvršiti **dodatne provere bezbednosti** kada klijent pokuša da pozove funkciju, ali imajte na umu da su aplikacije obično **ograničene** od **sandbox-a** sa kojim IOKit funkcije mogu da interaguju.
 
 ## Drajveri
 
-U macOS-u se nalaze u:
+U macOS se nalaze u:
 
 - **`/System/Library/Extensions`**
 - KEXT datoteke ugrađene u OS X operativni sistem.
 - **`/Library/Extensions`**
 - KEXT datoteke instalirane od strane softvera trećih strana
 
-U iOS-u se nalaze u:
+U iOS se nalaze u:
 
 - **`/System/Library/Extensions`**
 ```bash
@@ -54,7 +54,7 @@ Index Refs Address            Size       Wired      Name (Version) UUID <Linked 
 9    2 0xffffff8003317000 0xe000     0xe000     com.apple.kec.Libm (1) 6C1342CC-1D74-3D0F-BC43-97D5AD38200A <5>
 10   12 0xffffff8003544000 0x92000    0x92000    com.apple.kec.corecrypto (11.1) F5F1255F-6552-3CF4-A9DB-D60EFDEB4A9A <8 7 6 5 3 1>
 ```
-Do broja 9 navedeni drajveri su **učitani na adresi 0**. To znači da to nisu pravi drajveri već **deo kernela i ne mogu se ukloniti**.
+Dok broj 9, navedeni drajveri su **učitani na adresi 0**. To znači da to nisu pravi drajveri već **deo kernela i ne mogu se ukloniti**.
 
 Da biste pronašli specifične ekstenzije, možete koristiti:
 ```bash
@@ -68,9 +68,9 @@ kextunload com.apple.iokit.IOReportFamily
 ```
 ## IORegistry
 
-**IORegistry** je ključni deo IOKit okvira u macOS i iOS koji služi kao baza podataka za predstavljanje hardverske konfiguracije i stanja sistema. To je **hijerarhijska kolekcija objekata koji predstavljaju sav hardver i drajvere** učitane na sistemu, i njihove međusobne odnose.
+**IORegistry** je ključni deo IOKit okvira u macOS i iOS koji služi kao baza podataka za predstavljanje hardverske konfiguracije i stanja sistema. To je **hijerarhijska kolekcija objekata koja predstavlja sav hardver i drajvere** učitane na sistemu, i njihove međusobne odnose.
 
-Možete dobiti IORegistry koristeći cli **`ioreg`** da ga pregledate iz konzole (posebno korisno za iOS).
+Možete dobiti IORegistry koristeći cli **`ioreg`** da biste ga pregledali iz konzole (posebno korisno za iOS).
 ```bash
 ioreg -l #List all
 ioreg -w 0 #Not cut lines
@@ -162,7 +162,7 @@ Možete početi dekompilaciju funkcije **`externalMethod`** jer je to funkcija d
 
 <figure><img src="../../../images/image (1169).png" alt=""><figcaption></figcaption></figure>
 
-Ta strašna pozivna funkcija demanglovana znači:
+Ta strašna pozivna demanglovana znači:
 ```cpp
 IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
@@ -176,7 +176,7 @@ IOUserClient2022::dispatchExternalMethod(uint32_t selector, IOExternalMethodArgu
 const IOExternalMethodDispatch2022 dispatchArray[], size_t dispatchArrayCount,
 OSObject * target, void * reference)
 ```
-Sa ovim informacijama možete prepisati Ctrl+Desno -> `Edit function signature` i postaviti poznate tipove:
+Sa ovom informacijom možete prepraviti Ctrl+Desno -> `Edit function signature` i postaviti poznate tipove:
 
 <figure><img src="../../../images/image (1174).png" alt=""><figcaption></figcaption></figure>
 
@@ -209,6 +209,6 @@ Nakon što je niz kreiran, možete videti sve eksportovane funkcije:
 <figure><img src="../../../images/image (1181).png" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> Ako se sećate, da **pozovete** **eksportovanu** funkciju iz korisničkog prostora, ne treba da pozivate ime funkcije, već **broj selektora**. Ovde možete videti da je selektor **0** funkcija **`initializeDecoder`**, selektor **1** je **`startDecoder`**, selektor **2** **`initializeEncoder`**...
+> Ako se sećate, da **pozovete** **eksportovanu** funkciju iz korisničkog prostora ne treba da pozivate ime funkcije, već **broj selektora**. Ovde možete videti da je selektor **0** funkcija **`initializeDecoder`**, selektor **1** je **`startDecoder`**, selektor **2** **`initializeEncoder`**...
 
 {{#include ../../../banners/hacktricks-training.md}}

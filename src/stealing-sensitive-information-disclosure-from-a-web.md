@@ -1,13 +1,13 @@
-# Stealing Sensitive Information Disclosure from a Web
+# Krađa Osetljivih Informacija putem Otkrića sa Veba
 
 {{#include ./banners/hacktricks-training.md}}
 
-If at some point you find a **web page that presents you sensitive information based on your session**: Maybe it's reflecting cookies, or printing or CC details or any other sensitive information, you may try to steal it.\
-Here I present you the main ways to can try to achieve it:
+Ako u nekom trenutku pronađete **vеб страницу koja vam prikazuje osetljive informacije na osnovu vaše sesije**: Možda odražava kolačiće, ili štampa ili CC detalje ili bilo koje druge osetljive informacije, možete pokušati da ih ukradete.\
+Evo glavnih načina na koje možete pokušati da to postignete:
 
-- [**CORS bypass**](pentesting-web/cors-bypass.md): If you can bypass CORS headers you will be able to steal the information performing Ajax request for a malicious page.
-- [**XSS**](pentesting-web/xss-cross-site-scripting/): If you find a XSS vulnerability on the page you may be able to abuse it to steal the information.
-- [**Danging Markup**](pentesting-web/dangling-markup-html-scriptless-injection/): If you cannot inject XSS tags you still may be able to steal the info using other regular HTML tags.
-- [**Clickjaking**](pentesting-web/clickjacking.md): If there is no protection against this attack, you may be able to trick the user into sending you the sensitive data (an example [here](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)).
+- [**CORS zaobilaženje**](pentesting-web/cors-bypass.md): Ako možete da zaobiđete CORS zaglavlja, moći ćete da ukradete informacije izvršavajući Ajax zahtev za zloćudnu stranicu.
+- [**XSS**](pentesting-web/xss-cross-site-scripting/): Ako pronađete XSS ranjivost na stranici, možda ćete moći da je iskoristite da ukradete informacije.
+- [**Danging Markup**](pentesting-web/dangling-markup-html-scriptless-injection/): Ako ne možete da injektujete XSS oznake, i dalje možete da ukradete informacije koristeći druge uobičajene HTML oznake.
+- [**Clickjaking**](pentesting-web/clickjacking.md): Ako ne postoji zaštita protiv ovog napada, možda ćete moći da prevarite korisnika da vam pošalje osetljive podatke (primer [ovde](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)).
 
 {{#include ./banners/hacktricks-training.md}}

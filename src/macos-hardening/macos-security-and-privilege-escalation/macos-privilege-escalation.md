@@ -12,7 +12,7 @@ macos-security-protections/macos-tcc/
 
 ## Linux Privesc
 
-Imajte na umu da **većina trikova o eskalaciji privilegija koji utiču na Linux/Unix će takođe uticati na MacOS** mašine. Tako da pogledajte:
+Molimo vas da imate na umu da **većina trikova o eskalaciji privilegija koji utiču na Linux/Unix će takođe uticati na MacOS** mašine. Tako da pogledajte:
 
 {{#ref}}
 ../../linux-hardening/privilege-escalation/
@@ -22,7 +22,7 @@ Imajte na umu da **većina trikova o eskalaciji privilegija koji utiču na Linux
 
 ### Sudo Otmica
 
-Možete pronaći originalnu [tehniku Sudo Otmice unutar posta o Eskalaciji Privilegija za Linux](../../linux-hardening/privilege-escalation/#sudo-hijacking).
+Možete pronaći originalnu [Sudo Otmicu tehniku unutar posta o Eskalaciji Privilegija za Linux](../../linux-hardening/privilege-escalation/#sudo-hijacking).
 
 Međutim, macOS **održava** korisnikov **`PATH`** kada izvršava **`sudo`**. Što znači da bi drugi način da se postigne ovaj napad bio da se **otmu drugi binarni fajlovi** koje žrtva još uvek izvršava kada **pokreće sudo:**
 ```bash
@@ -43,10 +43,10 @@ Napomena da korisnik koji koristi terminal verovatno ima **Homebrew instaliran**
 
 ### Impersonacija Dock-a
 
-Korišćenjem nekih **socijalnih inženjeringa** mogli biste **impersonirati na primer Google Chrome** unutar dock-a i zapravo izvršiti svoj skript:
+Korišćenjem nekih **socijalnih inženjeringa** mogli biste **impersonirati, na primer, Google Chrome** unutar dock-a i zapravo izvršiti svoj skript:
 
 {{#tabs}}
-{{#tab name="Chrome Impersonation"}}
+{{#tab name="Impersonacija Chrome-a"}}
 Neki predlozi:
 
 - Proverite u Dock-u da li postoji Chrome, i u tom slučaju **uklonite** tu stavku i **dodajte** **lažnu** **Chrome stavku na istu poziciju** u Dock nizu.&#x20;
@@ -205,7 +205,7 @@ killall Dock
 
 ### CVE-2020-9771 - mount_apfs TCC zaobilaženje i eskalacija privilegija
 
-**Bilo koji korisnik** (čak i oni bez privilegija) može da kreira i montira snapshot vremenske mašine i **pristupi SVI datotekama** tog snapshot-a.\
+**Bilo koji korisnik** (čak i oni bez privilegija) može da kreira i montira snapshot vremenske mašine i **pristupi SVIM datotekama** tog snapshot-a.\
 **Jedina privilegija** koja je potrebna je da aplikacija koja se koristi (kao što je `Terminal`) ima **Potpun pristup disku** (FDA) (`kTCCServiceSystemPolicyAllfiles`) koji mora biti odobren od strane administratora.
 ```bash
 # Create snapshot

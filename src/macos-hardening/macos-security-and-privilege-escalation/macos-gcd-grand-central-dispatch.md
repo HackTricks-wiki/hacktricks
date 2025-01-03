@@ -23,14 +23,14 @@ Međutim, na nivou kompajlera blokovi ne postoje, oni su `os_object`s. Svaki od 
 - `NSConcreteGlobalBlock` (blokovi iz `__DATA.__const`)
 - `NSConcreteMallocBlock` (blokovi u heap-u)
 - `NSConcreateStackBlock` (blokovi u steku)
-- Ima **`flags`** (koji označavaju polja prisutna u opisu bloka) i neka rezervisana bajta
+- Ima **`flags`** (koji označavaju polja prisutna u opisu bloka) i nekoliko rezervisanih bajtova
 - Pokazivač na funkciju koja se poziva
 - Pokazivač na opis bloka
 - Uvezene promenljive bloka (ako ih ima)
-- **opis bloka**: Njegova veličina zavisi od podataka koji su prisutni (kako je naznačeno u prethodnim flagovima)
-- Ima neka rezervisana bajta
+- **opis bloka**: Njegova veličina zavisi od podataka koji su prisutni (kako je naznačeno u prethodnim oznakama)
+- Ima nekoliko rezervisanih bajtova
 - Njegova veličina
-- Obično će imati pokazivač na Objective-C stil potpis kako bi znao koliko prostora je potrebno za parametre (flag `BLOCK_HAS_SIGNATURE`)
+- Obično će imati pokazivač na Objective-C stil potpis kako bi znao koliko prostora je potrebno za parametre (oznaka `BLOCK_HAS_SIGNATURE`)
 - Ako su promenljive referencirane, ovaj blok će takođe imati pokazivače na pomoćnika za kopiranje (kopiranje vrednosti na početku) i pomoćnika za oslobađanje (oslobađanje).
 
 ### Redovi
@@ -42,8 +42,8 @@ Blokovi se postavljaju u redove za izvršavanje, a ovi podržavaju 2 moda: `DISP
 Podrazumevani redovi:
 
 - `.main-thread`: Iz `dispatch_get_main_queue()`
-- `.libdispatch-manager`: GCD-ov upravitelj redova
-- `.root.libdispatch-manager`: GCD-ov upravitelj redova
+- `.libdispatch-manager`: GCD-ov menadžer redova
+- `.root.libdispatch-manager`: GCD-ov menadžer redova
 - `.root.maintenance-qos`: Zadaci najniže prioriteta
 - `.root.maintenance-qos.overcommit`
 - `.root.background-qos`: Dostupno kao `DISPATCH_QUEUE_PRIORITY_BACKGROUND`
@@ -61,9 +61,9 @@ Obratite pažnju da će sistem odlučiti **koje niti upravljaju kojim redovima u
 
 #### Atributi
 
-Kada kreirate red sa **`dispatch_queue_create`** treći argument je `dispatch_queue_attr_t`, koji obično može biti ili `DISPATCH_QUEUE_SERIAL` (što je zapravo NULL) ili `DISPATCH_QUEUE_CONCURRENT` koji je pokazivač na `dispatch_queue_attr_t` strukturu koja omogućava kontrolu nekih parametara reda.
+Kada kreirate red sa **`dispatch_queue_create`**, treći argument je `dispatch_queue_attr_t`, koji obično može biti ili `DISPATCH_QUEUE_SERIAL` (što je zapravo NULL) ili `DISPATCH_QUEUE_CONCURRENT`, što je pokazivač na `dispatch_queue_attr_t` strukturu koja omogućava kontrolu nekih parametara reda.
 
-### Objekti za raspodelu
+### Dispatch objekti
 
 Postoji nekoliko objekata koje libdispatch koristi, a redovi i blokovi su samo 2 od njih. Moguće je kreirati ove objekte sa `dispatch_object_create`:
 
@@ -73,14 +73,14 @@ Postoji nekoliko objekata koje libdispatch koristi, a redovi i blokovi su samo 2
 - `io`: Asinhroni I/O zahtevi
 - `mach`: Mach portovi
 - `mach_msg`: Mach poruke
-- `pthread_root_queue`: Red sa pthread nitnim bazenom i ne radnim redovima
+- `pthread_root_queue`: Red sa pthread nitnim bazenom, a ne radnim redovima
 - `queue`
 - `semaphore`
 - `source`: Izvor događaja
 
 ## Objective-C
 
-U Objective-C postoje različite funkcije za slanje bloka za izvršavanje u paraleli:
+U Objective-C postoje različite funkcije za slanje bloka na izvršavanje u paraleli:
 
 - [**dispatch_async**](https://developer.apple.com/documentation/dispatch/1453057-dispatch_async): Podnosi blok za asinhrono izvršavanje na redu za raspodelu i odmah se vraća.
 - [**dispatch_sync**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync): Podnosi blok objekat za izvršavanje i vraća se nakon što taj blok završi sa izvršavanjem.
@@ -132,8 +132,8 @@ return 0;
 ```
 ## Swift
 
-**`libswiftDispatch`** je biblioteka koja pruža **Swift vezu** za Grand Central Dispatch (GCD) okvir koji je prvobitno napisan u C.\
-Biblioteka **`libswiftDispatch`** obavija C GCD API-je u interfejs koji je više prilagođen Swift-u, olakšavajući i čineći intuitivnijim rad za Swift programere sa GCD-om.
+**`libswiftDispatch`** je biblioteka koja pruža **Swift vezu** sa Grand Central Dispatch (GCD) okvirom koji je prvobitno napisan u C.\
+Biblioteka **`libswiftDispatch`** obavija C GCD API-je u interfejs koji je više prilagođen Swift-u, olakšavajući i čineći intuitivnijim rad sa GCD za Swift programere.
 
 - **`DispatchQueue.global().sync{ ... }`**
 - **`DispatchQueue.global().async{ ... }`**
@@ -185,7 +185,7 @@ Backtrace:
 ```
 ## Ghidra
 
-Trenutno Ghidra ne razume ni ObjectiveC **`dispatch_block_t`** strukturu, ni **`swift_dispatch_block`**.
+Trenutno Ghidra ne razume ni **`dispatch_block_t`** strukturu iz ObjectiveC, ni **`swift_dispatch_block`**.
 
 Dakle, ako želite da ih razume, možete ih jednostavno **deklarisati**:
 
@@ -198,7 +198,7 @@ Dakle, ako želite da ih razume, možete ih jednostavno **deklarisati**:
 Zatim, pronađite mesto u kodu gde se **koriste**:
 
 > [!TIP]
-> Zabeležite sve reference na "block" da biste razumeli kako možete da shvatite da se struktura koristi.
+> Zabeležite sve reference na "block" kako biste razumeli kako možete da shvatite da se struktura koristi.
 
 <figure><img src="../../images/image (1164).png" alt="" width="563"><figcaption></figcaption></figure>
 

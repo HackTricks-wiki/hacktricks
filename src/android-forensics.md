@@ -10,11 +10,11 @@ Da biste započeli ekstrakciju podataka sa Android uređaja, mora biti otključa
 - Proveriti za mogući [smudge attack](https://www.usenix.org/legacy/event/woot10/tech/full_papers/Aviv.pdf)
 - Pokušati sa [Brute-force](https://www.cultofmac.com/316532/this-brute-force-device-can-crack-any-iphones-pin-code/)
 
-## Akvizicija podataka
+## Ekstrakcija podataka
 
 Kreirajte [android backup koristeći adb](mobile-pentesting/android-app-pentesting/adb-commands.md#backup) i ekstraktujte ga koristeći [Android Backup Extractor](https://sourceforge.net/projects/adbextractor/): `java -jar abe.jar unpack file.backup file.tar`
 
-### Ako postoji root pristup ili fizička veza sa JTAG interfejsom
+### Ako imate root pristup ili fizičku vezu sa JTAG interfejsom
 
 - `cat /proc/partitions` (pronađite putanju do flash memorije, obično je prvi unos _mmcblk0_ i odgovara celoj flash memoriji).
 - `df /data` (otkrijte veličinu bloka sistema).

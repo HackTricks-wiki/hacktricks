@@ -123,7 +123,7 @@ Naučite tehnologije i veštine potrebne za izvođenje istraživanja ranjivosti,
 
 WebSec je **sve-u-jednom bezbednosna kompanija** što znači da rade sve; Pentesting, **Bezbednosne** revizije, Obuke o svesti, Phishing kampanje, Revizije koda, Razvoj eksploata, Outsourcing bezbednosnih stručnjaka i još mnogo toga.
 
-Još jedna zanimljiva stvar o WebSec-u je da, za razliku od industrijskog proseka, WebSec je **veoma siguran u svoje veštine**, do te mere da **garantuje najbolje kvalitetne rezultate**, kako stoji na njihovom sajtu "**Ako ne možemo da hakujemo, ne plaćate!**". Za više informacija pogledajte njihov [**sajt**](https://websec.nl/en/) i [**blog**](https://websec.nl/blog/)!
+Još jedna zanimljiva stvar o WebSec-u je da, za razliku od industrijskog proseka, WebSec je **veoma siguran u svoje veštine**, do te mere da **garantuje najbolje kvalitetne rezultate**, kako stoji na njihovoj veb stranici "**Ako ne možemo da hakujemo, ne plaćate!**". Za više informacija pogledajte njihovu [**vеб страницу**](https://websec.nl/en/) i [**blog**](https://websec.nl/blog/)!
 
 Pored navedenog, WebSec je takođe **posvećen podržavalac HackTricks.**
 

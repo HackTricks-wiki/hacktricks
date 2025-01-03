@@ -24,7 +24,7 @@ printf "\nThe following services are OFF if '0', or ON otherwise:\nScreen Sharin
 ```
 ### Pentesting ARD
 
-Apple Remote Desktop (ARD) je unapređena verzija [Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing) prilagođena za macOS, koja nudi dodatne funkcije. Značajna ranjivost u ARD-u je njegova metoda autentifikacije za lozinku kontrolne ekrana, koja koristi samo prvih 8 karaktera lozinke, što je čini podložnom [brute force napadima](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) sa alatima kao što su Hydra ili [GoRedShell](https://github.com/ahhh/GoRedShell/), jer ne postoje podrazumevani ograničenja brzine.
+Apple Remote Desktop (ARD) je unapređena verzija [Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing) prilagođena za macOS, koja nudi dodatne funkcije. Značajna ranjivost u ARD-u je njegova metoda autentifikacije za lozinku kontrolne ekrana, koja koristi samo prvih 8 karaktera lozinke, što je čini podložnom [brute force napadima](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) sa alatima kao što su Hydra ili [GoRedShell](https://github.com/ahhh/GoRedShell/), jer ne postoje podrazumevana ograničenja brzine.
 
 Ranjive instance se mogu identifikovati korišćenjem **nmap**-ovog `vnc-info` skripta. Usluge koje podržavaju `VNC Authentication (2)` su posebno podložne brute force napadima zbog skraćivanja lozinke na 8 karaktera.
 
@@ -32,7 +32,7 @@ Da biste omogućili ARD za razne administrativne zadatke kao što su eskalacija 
 ```bash
 sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -allowAccessFor -allUsers -privs -all -clientopts -setmenuextra -menuextra yes
 ```
-ARD pruža svestrane nivoe kontrole, uključujući posmatranje, deljenu kontrolu i punu kontrolu, sa sesijama koje traju čak i nakon promene korisničke lozinke. Omogućava slanje Unix komandi direktno, izvršavajući ih kao root za administrativne korisnike. Planiranje zadataka i daljinsko Spotlight pretraživanje su značajne karakteristike, olakšavajući daljinsko, niskoprofilno pretraživanje osetljivih fajlova na više mašina.
+ARD pruža svestrane nivoe kontrole, uključujući posmatranje, deljenu kontrolu i punu kontrolu, sa sesijama koje traju čak i nakon promene korisničke lozinke. Omogućava slanje Unix komandi direktno, izvršavajući ih kao root za administrativne korisnike. Planiranje zadataka i daljinsko Spotlight pretraživanje su značajne karakteristike, olakšavajući daljinsko, nisko-utično pretraživanje osetljivih fajlova na više mašina.
 
 ## Bonjour Protokol
 
@@ -48,11 +48,11 @@ Uređaji koji koriste Bonjour dodeljuju sebi **IP adresu iz opsega 169.254/16** 
 
 Za DNS, Bonjour koristi **Multicast DNS (mDNS) protokol**. mDNS funkcioniše preko **porta 5353/UDP**, koristeći **standardne DNS upite** ali cilja **multicast adresu 224.0.0.251**. Ovaj pristup osigurava da svi uređaji koji slušaju na mreži mogu primati i odgovarati na upite, olakšavajući ažuriranje njihovih zapisa.
 
-Prilikom pridruživanja mreži, svaki uređaj samostalno bira ime, obično završavajući sa **.local**, koje može biti izvedeno iz imena hosta ili nasumično generisano.
+Prilikom pridruživanja mreži, svaki uređaj samostalno bira ime, obično završava u **.local**, koje može biti izvedeno iz imena hosta ili nasumično generisano.
 
-Otkrivanje usluga unutar mreže olakšava **DNS Service Discovery (DNS-SD)**. Koristeći format DNS SRV zapisa, DNS-SD koristi **DNS PTR zapise** za omogućavanje liste više usluga. Klijent koji traži određenu uslugu će zatražiti PTR zapis za `<Service>.<Domain>`, primajući zauzvrat listu PTR zapisa formatiranih kao `<Instance>.<Service>.<Domain>` ako je usluga dostupna sa više hostova.
+Otkrivanje usluga unutar mreže olakšava **DNS Service Discovery (DNS-SD)**. Koristeći format DNS SRV zapisa, DNS-SD koristi **DNS PTR zapise** da omogući listanje više usluga. Klijent koji traži određenu uslugu će zatražiti PTR zapis za `<Service>.<Domain>`, primajući zauzvrat listu PTR zapisa formatiranih kao `<Instance>.<Service>.<Domain>` ako je usluga dostupna sa više hostova.
 
-Alat `dns-sd` može se koristiti za **otkrivanje i oglašavanje mrežnih usluga**. Evo nekoliko primera njegove upotrebe:
+`dns-sd` alat može se koristiti za **otkrivanje i oglašavanje mrežnih usluga**. Evo nekoliko primera njegove upotrebe:
 
 ### Pretraživanje SSH Usluga
 
@@ -60,11 +60,11 @@ Za pretraživanje SSH usluga na mreži koristi se sledeća komanda:
 ```bash
 dns-sd -B _ssh._tcp
 ```
-Ova komanda pokreće pretragu za \_ssh.\_tcp servisima i prikazuje detalje kao što su vremenska oznaka, zastavice, interfejs, domen, tip servisa i ime instance.
+Ova komanda pokreće pretragu za \_ssh.\_tcp servisima i prikazuje detalje kao što su vremenska oznaka, zastavice, interfejs, domen, tip usluge i ime instance.
 
-### Oglašavanje HTTP Servisa
+### Oglašavanje HTTP Usluge
 
-Da biste oglasili HTTP servis, možete koristiti:
+Da biste oglasili HTTP uslugu, možete koristiti:
 ```bash
 dns-sd -R "Index" _http._tcp . 80 path=/index.html
 ```
@@ -78,7 +78,7 @@ Kada usluga počne, ona najavljuje svoju dostupnost svim uređajima na podmreži
 
 Za korisnički prijatniji interfejs, aplikacija **Discovery - DNS-SD Browser** dostupna na Apple App Store-u može vizualizovati usluge koje se nude na vašoj lokalnoj mreži.
 
-Alternativno, mogu se napisati prilagođeni skripti za pretraživanje i otkrivanje usluga koristeći biblioteku `python-zeroconf`. Skripta [**python-zeroconf**](https://github.com/jstasiak/python-zeroconf) demonstrira kreiranje pretraživača usluga za `_http._tcp.local.` usluge, štampajući dodate ili uklonjene usluge:
+Alternativno, mogu se napisati prilagođeni skripti za pretraživanje i otkrivanje usluga koristeći `python-zeroconf` biblioteku. Skripta [**python-zeroconf**](https://github.com/jstasiak/python-zeroconf) demonstrira kreiranje pretraživača usluga za `_http._tcp.local.` usluge, štampajući dodate ili uklonjene usluge:
 ```python
 from zeroconf import ServiceBrowser, Zeroconf
 

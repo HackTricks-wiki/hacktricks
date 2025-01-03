@@ -8,11 +8,11 @@ UTS (UNIX Time-Sharing System) namespace je funkcija Linux kernela koja obezbeđ
 
 ### Kako to funkcioniše:
 
-1. Kada se kreira novi UTS namespace, on počinje sa **kopijom hostname-a i NIS domena iz svog roditeljskog namespace-a**. To znači da, prilikom kreiranja, novi namespace **deliti iste identifikatore kao njegov roditelj**. Međutim, sve kasnije promene na hostname-u ili NIS domena unutar namespace-a neće uticati na druge namespace-e.
+1. Kada se kreira novi UTS namespace, on počinje sa **kopijom hostname-a i NIS domena iz svog roditeljskog namespace-a**. To znači da, prilikom kreiranja, novi namespace **deliti iste identifikatore kao njegov roditelj**. Međutim, sve kasnije promene na hostname-u ili NIS domenu unutar namespace-a neće uticati na druge namespace-e.
 2. Procesi unutar UTS namespace-a **mogu promeniti hostname i NIS domen** koristeći `sethostname()` i `setdomainname()` sistemske pozive, redom. Ove promene su lokalne za namespace i ne utiču na druge namespace-e ili host sistem.
 3. Procesi mogu prelaziti između namespace-a koristeći `setns()` sistemski poziv ili kreirati nove namespace-e koristeći `unshare()` ili `clone()` sistemske pozive sa `CLONE_NEWUTS` flagom. Kada proces pređe u novi namespace ili ga kreira, počeće da koristi hostname i NIS domen koji su povezani sa tim namespace-om.
 
-## Lab:
+## Laboratorija:
 
 ### Kreirajte različite Namespace-e
 
@@ -36,7 +36,7 @@ Kada se `unshare` izvrši bez opcije `-f`, dolazi do greške zbog načina na koj
 
 2. **Posledica**:
 
-- Izlazak PID 1 u novom namespace-u dovodi do čišćenja `PIDNS_HASH_ADDING` oznake. To rezultira neuspehom funkcije `alloc_pid` da dodeli novi PID prilikom kreiranja novog procesa, proizvodeći grešku "Ne može da dodeli memoriju".
+- Izlazak PID 1 u novom namespace-u dovodi do čišćenja `PIDNS_HASH_ADDING` oznake. To rezultira neuspehom funkcije `alloc_pid` da dodeli novi PID prilikom kreiranja novog procesa, što proizvodi grešku "Ne može da dodeli memoriju".
 
 3. **Rešenje**:
 - Problem se može rešiti korišćenjem opcije `-f` sa `unshare`. Ova opcija čini da `unshare` fork-uje novi proces nakon kreiranja novog PID namespace-a.

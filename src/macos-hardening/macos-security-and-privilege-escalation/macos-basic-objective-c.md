@@ -50,9 +50,9 @@ self.numberOfWheels += value;
 
 @end
 ```
-### **Objekat i Pozivanje Metode**
+### **Objekat i pozivanje metode**
 
-Da bi se kreirala instanca klase, poziva se metoda **`alloc`** koja **alokira memoriju** za svaku **svojstvo** i **postavlja** te alokacije na nulu. Zatim se poziva **`init`**, koja **inicijalizuje svojstva** na **potrebne vrednosti**.
+Da biste kreirali instancu klase, poziva se metoda **`alloc`** koja **alokira memoriju** za svaku **svojstvo** i **postavlja** te alokacije na nulu. Zatim se poziva **`init`**, koja **inicijalizuje svojstva** na **potrebne vrednosti**.
 ```objectivec
 // Something like this:
 MyVehicle *newVehicle = [[MyVehicle alloc] init];
@@ -72,7 +72,7 @@ Klasa metode se definišu sa **plus znakom** (+) a ne sa crticom (-) koja se kor
 ```
 ### Setter & Getter
 
-Da biste **postavili** i **dobili** svojstva, možete to uraditi sa **tačkom** ili kao da **pozivate metodu**:
+Da **postavite** i **dobijete** svojstva, možete to uraditi sa **tačkom** ili kao da **pozivate metodu**:
 ```objectivec
 // Set
 newVehicle.numberOfWheels = 2;
@@ -93,7 +93,7 @@ NSLog(@"Number of wheels: %i", self.numberOfLeaves);
 ```
 ### Protokoli
 
-Protokoli su skupovi deklaracija metoda (bez svojstava). Klasa koja implementira protokol implementira deklarisane metode.
+Protokoli su skup deklaracija metoda (bez svojstava). Klasa koja implementira protokol implementira deklarisane metode.
 
 Postoje 2 tipa metoda: **obavezni** i **opcionalni**. Po **definiciji** metod je **obavezan** (ali to možete takođe naznačiti sa **`@required`** oznakom). Da biste naznačili da je metod opcionalan, koristite **`@optional`**.
 ```objectivec

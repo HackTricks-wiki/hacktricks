@@ -1,51 +1,51 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-The following steps are recommended for modifying device startup configurations and bootloaders like U-boot:
+Preporučeni koraci za modifikaciju konfiguracija pokretanja uređaja i bootloader-a kao što je U-boot:
 
-1. **Access Bootloader's Interpreter Shell**:
+1. **Pristup Bootloader-ovom Interpreter Shell-u**:
 
-   - During boot, press "0", space, or other identified "magic codes" to access the bootloader's interpreter shell.
+- Tokom pokretanja, pritisnite "0", razmak ili druge identifikovane "magične kodove" da biste pristupili bootloader-ovom interpreter shell-u.
 
-2. **Modify Boot Arguments**:
+2. **Modifikujte Boot Argumente**:
 
-   - Execute the following commands to append '`init=/bin/sh`' to the boot arguments, allowing execution of a shell command:
-     %%%
-     #printenv
-     #setenv bootargs=console=ttyS0,115200 mem=63M root=/dev/mtdblock3 mtdparts=sflash:<partitiionInfo> rootfstype=<fstype> hasEeprom=0 5srst=0 init=/bin/sh
-     #saveenv
-     #boot
-     %%%
+- Izvršite sledeće komande da dodate '`init=/bin/sh`' boot argumentima, omogućavajući izvršavanje shell komande:
+%%%
+#printenv
+#setenv bootargs=console=ttyS0,115200 mem=63M root=/dev/mtdblock3 mtdparts=sflash:<partitiionInfo> rootfstype=<fstype> hasEeprom=0 5srst=0 init=/bin/sh
+#saveenv
+#boot
+%%%
 
-3. **Setup TFTP Server**:
+3. **Postavite TFTP Server**:
 
-   - Configure a TFTP server to load images over a local network:
-     %%%
-     #setenv ipaddr 192.168.2.2 #local IP of the device
-     #setenv serverip 192.168.2.1 #TFTP server IP
-     #saveenv
-     #reset
-     #ping 192.168.2.1 #check network access
-     #tftp ${loadaddr} uImage-3.6.35 #loadaddr takes the address to load the file into and the filename of the image on the TFTP server
-     %%%
+- Konfigurišite TFTP server za učitavanje slika preko lokalne mreže:
+%%%
+#setenv ipaddr 192.168.2.2 #lokalna IP adresa uređaja
+#setenv serverip 192.168.2.1 #IP adresa TFTP servera
+#saveenv
+#reset
+#ping 192.168.2.1 #proverite pristup mreži
+#tftp ${loadaddr} uImage-3.6.35 #loadaddr uzima adresu za učitavanje fajla i ime fajla na TFTP serveru
+%%%
 
-4. **Utilize `ubootwrite.py`**:
+4. **Iskoristite `ubootwrite.py`**:
 
-   - Use `ubootwrite.py` to write the U-boot image and push a modified firmware to gain root access.
+- Koristite `ubootwrite.py` za pisanje U-boot slike i slanje modifikovanog firmvera za dobijanje root pristupa.
 
-5. **Check Debug Features**:
+5. **Proverite Debug Funkcije**:
 
-   - Verify if debug features like verbose logging, loading arbitrary kernels, or booting from untrusted sources are enabled.
+- Proverite da li su debug funkcije kao što su detaljno logovanje, učitavanje proizvoljnih kernela ili pokretanje sa nepouzdanih izvora omogućene.
 
-6. **Cautionary Hardware Interference**:
+6. **Opasna Hardverska Interferencija**:
 
-   - Be cautious when connecting one pin to ground and interacting with SPI or NAND flash chips during the device boot-up sequence, particularly before the kernel decompresses. Consult the NAND flash chip's datasheet before shorting pins.
+- Budite oprezni prilikom povezivanja jednog pina na masu i interakcije sa SPI ili NAND flash čipovima tokom sekvence pokretanja uređaja, posebno pre nego što se kernel dekompresuje. Konsultujte tehnički list NAND flash čipa pre nego što kratko spojite pinove.
 
-7. **Configure Rogue DHCP Server**:
-   - Set up a rogue DHCP server with malicious parameters for a device to ingest during a PXE boot. Utilize tools like Metasploit's (MSF) DHCP auxiliary server. Modify the 'FILENAME' parameter with command injection commands such as `'a";/bin/sh;#'` to test input validation for device startup procedures.
+7. **Konfigurišite Rogue DHCP Server**:
+- Postavite rogue DHCP server sa zlonamernim parametrima za uređaj da ih prihvati tokom PXE pokretanja. Iskoristite alate kao što je Metasploit-ov (MSF) DHCP pomoćni server. Modifikujte 'FILENAME' parametar sa komandama za injekciju kao što su `'a";/bin/sh;#'` da biste testirali validaciju unosa za procedure pokretanja uređaja.
 
-**Note**: The steps involving physical interaction with device pins (\*marked with asterisks) should be approached with extreme caution to avoid damaging the device.
+**Napomena**: Koraci koji uključuju fizičku interakciju sa pinovima uređaja (\*označeni zvezdicama) treba da se pristupaju sa ekstremnim oprezom kako bi se izbeglo oštećenje uređaja.
 
-## References
+## Reference
 
 - [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
 

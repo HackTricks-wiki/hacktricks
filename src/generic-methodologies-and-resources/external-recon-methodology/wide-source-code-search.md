@@ -2,17 +2,17 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-The goal of this page is to enumerate **platforms that allow to search for code** (literal or regex) in across thousands/millions of repos in one or more platforms.
+Cilj ove stranice je da nabroji **platforme koje omogućavaju pretragu koda** (literalno ili regex) u hiljadama/milionima repozitorijuma na jednoj ili više platformi.
 
-This helps in several occasions to **search for leaked information** or for **vulnerabilities** patterns.
+Ovo pomaže u nekoliko slučajeva da **pronađete provale informacija** ili **uzorke ranjivosti**.
 
-- [**SourceGraph**](https://sourcegraph.com/search): Search in millions of repos. There is a free version and an enterprise version (with 15 days free). It supports regexes.
-- [**Github Search**](https://github.com/search): Search across Github. It supports regexes.
-  - Maybe it's also useful to check also [**Github Code Search**](https://cs.github.com/).
-- [**Gitlab Advanced Search**](https://docs.gitlab.com/ee/user/search/advanced_search.html): Search across Gitlab projects. Support regexes.
-- [**SearchCode**](https://searchcode.com/): Search code in millions of projects.
+- [**SourceGraph**](https://sourcegraph.com/search): Pretražujte u milionima repozitorijuma. Postoji besplatna verzija i verzija za preduzeća (sa 15 dana besplatno). Podržava regex.
+- [**Github Search**](https://github.com/search): Pretražujte po Github-u. Podržava regex.
+- Možda je takođe korisno proveriti i [**Github Code Search**](https://cs.github.com/).
+- [**Gitlab Advanced Search**](https://docs.gitlab.com/ee/user/search/advanced_search.html): Pretražujte po Gitlab projektima. Podržava regex.
+- [**SearchCode**](https://searchcode.com/): Pretražujte kod u milionima projekata.
 
 > [!WARNING]
-> When you look for leaks in a repo and run something like `git log -p` don't forget there might be **other branches with other commits** containing secrets!
+> Kada tražite provale u repozitorijumu i pokrenete nešto poput `git log -p`, ne zaboravite da mogu postojati **druge grane sa drugim commit-ima** koje sadrže tajne!
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -35,10 +35,10 @@ cpu              nbd0             pts              stdout           tty27       
 
 ### Datoteke sistema jezgra samo za čitanje
 
-Datoteke sistema jezgra pružaju mehanizam za proces da modifikuje ponašanje jezgra. Međutim, kada su u pitanju procesi kontejnera, želimo da sprečimo njihovo menjanje jezgra. Stoga, montiramo datoteke sistema jezgra kao **samo za čitanje** unutar kontejnera, osiguravajući da procesi kontejnera ne mogu modifikovati jezgro.
+Datoteke sistema jezgra pružaju mehanizam za proces da modifikuje ponašanje jezgra. Međutim, kada su u pitanju procesi kontejnera, želimo da sprečimo da vrše bilo kakve promene na jezgru. Stoga, montiramo datoteke sistema jezgra kao **samo za čitanje** unutar kontejnera, osiguravajući da procesi kontejnera ne mogu modifikovati jezgro.
 
 {{#tabs}}
-{{#tab name="Inside default container"}}
+{{#tab name="Unutar podrazumevanog kontejnera"}}
 ```bash
 # docker run --rm -it alpine sh
 mount | grep '(ro'
@@ -59,7 +59,7 @@ mount  | grep '(ro'
 
 ### Maskiranje nad kernel datotečnim sistemima
 
-**/proc** datotečni sistem je selektivno zapisiv, ali radi bezbednosti, određeni delovi su zaštićeni od pristupa za pisanje i čitanje preklapanjem sa **tmpfs**, osiguravajući da procesi u kontejneru ne mogu pristupiti osetljivim oblastima.
+**/proc** datotečni sistem je selektivno zapisiv, ali iz bezbednosnih razloga, određeni delovi su zaštićeni od pisanja i čitanja preklapanjem sa **tmpfs**, osiguravajući da procesi u kontejneru ne mogu pristupiti osetljivim oblastima.
 
 > [!NOTE] > **tmpfs** je datotečni sistem koji čuva sve datoteke u virtuelnoj memoriji. tmpfs ne kreira nikakve datoteke na vašem hard disku. Dakle, ako odmontirate tmpfs datotečni sistem, sve datoteke koje se u njemu nalaze su izgubljene zauvek.
 
@@ -118,7 +118,7 @@ Možete manipulisati sposobnostima dostupnim kontejneru bez pokretanja u `--priv
 
 ### Seccomp
 
-**Seccomp** je koristan za **ograničavanje** **syscalls** koje kontejner može pozvati. Podrazumevani seccomp profil je omogućen podrazumevano prilikom pokretanja docker kontejnera, ali u privilegovanom režimu je on onemogućen. Saznajte više o Seccomp-u ovde:
+**Seccomp** je koristan za **ograničavanje** **syscall-a** koje kontejner može pozvati. Podrazumevani seccomp profil je omogućen podrazumevano prilikom pokretanja docker kontejnera, ali u privilegovanom režimu je on onemogućen. Saznajte više o Seccomp-u ovde:
 
 {{#ref}}
 seccomp.md
@@ -175,7 +175,7 @@ Pokretanje kontejnera sa `--privileged` zastavicom onemogućava **SELinux oznake
 
 ### Namespaces
 
-Namespaces **NISU pogođeni** `--privileged` oznakom. Iako nemaju omogućena bezbednosna ograničenja, **ne vide sve procese na sistemu ili na host mreži, na primer**. Korisnici mogu onemogućiti pojedinačne namespaces koristeći **`--pid=host`, `--net=host`, `--ipc=host`, `--uts=host`** oznake kontejnerskih motora.
+Namespaces **NISU pogođeni** `--privileged` oznakom. Iako nemaju omogućena bezbednosna ograničenja, **ne vide sve procese na sistemu ili host mreži, na primer**. Korisnici mogu onemogućiti pojedinačne namespaces koristeći **`--pid=host`, `--net=host`, `--ipc=host`, `--uts=host`** oznake kontejnerskog motora.
 
 {{#tabs}}
 {{#tab name="Inside default privileged container"}}
@@ -203,7 +203,7 @@ PID   USER     TIME  COMMAND
 
 ### Korisnički prostor
 
-**Podrazumevano, motori kontejnera ne koriste korisničke prostore, osim za kontejnerе bez root privilegija**, koji ih zahtevaju za montiranje datotečnih sistema i korišćenje više UID-ova. Korisnički prostori, koji su od suštinskog značaja za kontejnerе bez root privilegija, ne mogu se onemogućiti i značajno poboljšavaju bezbednost ograničavanjem privilegija.
+**Po defaultu, kontejnerski alati ne koriste korisničke prostore, osim za kontejnerе bez root privilegija**, koji ih zahtevaju za montiranje fajl sistema i korišćenje više UID-ova. Korisnički prostori, koji su ključni za kontejnerе bez root privilegija, ne mogu se onemogućiti i značajno poboljšavaju bezbednost ograničavanjem privilegija.
 
 ## Reference
 
