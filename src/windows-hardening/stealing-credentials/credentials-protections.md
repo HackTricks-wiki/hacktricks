@@ -28,9 +28,9 @@ Es posible eludir esta protección utilizando el controlador de Mimikatz mimidrv
 
 ## Credential Guard
 
-**Credential Guard**, una característica exclusiva de **Windows 10 (ediciones Enterprise y Education)**, mejora la seguridad de las credenciales de la máquina utilizando **Virtual Secure Mode (VSM)** y **Virtualization Based Security (VBS)**. Aprovecha las extensiones de virtualización de la CPU para aislar procesos clave dentro de un espacio de memoria protegido, lejos del alcance del sistema operativo principal. Este aislamiento asegura que incluso el kernel no pueda acceder a la memoria en VSM, protegiendo efectivamente las credenciales de ataques como **pass-the-hash**. La **Local Security Authority (LSA)** opera dentro de este entorno seguro como un trustlet, mientras que el proceso **LSASS** en el sistema operativo principal actúa meramente como un comunicador con la LSA de VSM.
+**Credential Guard**, una característica exclusiva de **Windows 10 (ediciones Enterprise y Education)**, mejora la seguridad de las credenciales de la máquina utilizando **Virtual Secure Mode (VSM)** y **Virtualization Based Security (VBS)**. Aprovecha las extensiones de virtualización de la CPU para aislar procesos clave dentro de un espacio de memoria protegido, lejos del alcance del sistema operativo principal. Este aislamiento asegura que incluso el kernel no pueda acceder a la memoria en VSM, protegiendo efectivamente las credenciales de ataques como **pass-the-hash**. La **Local Security Authority (LSA)** opera dentro de este entorno seguro como un trustlet, mientras que el proceso **LSASS** en el sistema operativo principal actúa simplemente como un comunicador con la LSA de VSM.
 
-Por defecto, **Credential Guard** no está activo y requiere activación manual dentro de una organización. Es crítico para mejorar la seguridad contra herramientas como **Mimikatz**, que se ven obstaculizadas en su capacidad para extraer credenciales. Sin embargo, las vulnerabilidades aún pueden ser explotadas mediante la adición de **Security Support Providers (SSP)** personalizados para capturar credenciales en texto claro durante los intentos de inicio de sesión.
+Por defecto, **Credential Guard** no está activo y requiere activación manual dentro de una organización. Es fundamental para mejorar la seguridad contra herramientas como **Mimikatz**, que se ven obstaculizadas en su capacidad para extraer credenciales. Sin embargo, las vulnerabilidades aún pueden ser explotadas mediante la adición de **Security Support Providers (SSP)** personalizados para capturar credenciales en texto claro durante los intentos de inicio de sesión.
 
 Para verificar el estado de activación de **Credential Guard**, se puede inspeccionar la clave del registro _**LsaCfgFlags**_ bajo _**HKLM\System\CurrentControlSet\Control\LSA**_. Un valor de "**1**" indica activación con **UEFI lock**, "**2**" sin bloqueo, y "**0**" denota que no está habilitado. Esta verificación del registro, aunque es un fuerte indicador, no es el único paso para habilitar Credential Guard. Se dispone de orientación detallada y un script de PowerShell para habilitar esta característica en línea.
 ```powershell
@@ -38,7 +38,7 @@ reg query HKLM\System\CurrentControlSet\Control\LSA /v LsaCfgFlags
 ```
 Para una comprensión completa e instrucciones sobre cómo habilitar **Credential Guard** en Windows 10 y su activación automática en sistemas compatibles de **Windows 11 Enterprise y Education (versión 22H2)**, visita [la documentación de Microsoft](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage).
 
-Se proporcionan más detalles sobre la implementación de SSPs personalizados para la captura de credenciales en [esta guía](../active-directory-methodology/custom-ssp.md).
+Más detalles sobre la implementación de SSPs personalizados para la captura de credenciales se proporcionan en [esta guía](../active-directory-methodology/custom-ssp.md).
 
 ## Modo RestrictedAdmin de RDP
 
@@ -46,7 +46,7 @@ Se proporcionan más detalles sobre la implementación de SSPs personalizados pa
 
 Tradicionalmente, al conectarse a una computadora remota a través de RDP, sus credenciales se almacenan en la máquina objetivo. Esto representa un riesgo de seguridad significativo, especialmente al usar cuentas con privilegios elevados. Sin embargo, con la introducción del _**modo Restricted Admin**_, este riesgo se reduce sustancialmente.
 
-Al iniciar una conexión RDP utilizando el comando **mstsc.exe /RestrictedAdmin**, la autenticación a la computadora remota se realiza sin almacenar sus credenciales en ella. Este enfoque asegura que, en caso de una infección de malware o si un usuario malicioso obtiene acceso al servidor remoto, sus credenciales no se vean comprometidas, ya que no están almacenadas en el servidor.
+Al iniciar una conexión RDP utilizando el comando **mstsc.exe /RestrictedAdmin**, la autenticación en la computadora remota se realiza sin almacenar sus credenciales en ella. Este enfoque asegura que, en caso de una infección de malware o si un usuario malicioso obtiene acceso al servidor remoto, sus credenciales no se vean comprometidas, ya que no están almacenadas en el servidor.
 
 Es importante tener en cuenta que en **modo Restricted Admin**, los intentos de acceder a recursos de red desde la sesión RDP no utilizarán sus credenciales personales; en su lugar, se utiliza la **identidad de la máquina**.
 

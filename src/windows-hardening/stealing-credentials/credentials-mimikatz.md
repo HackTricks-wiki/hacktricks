@@ -8,10 +8,10 @@
 
 Desde Windows 8.1 y Windows Server 2012 R2 en adelante, se han implementado medidas significativas para proteger contra el robo de credenciales:
 
-- **Los hashes LM y las contraseñas en texto claro** ya no se almacenan en memoria para mejorar la seguridad. Se debe configurar un ajuste específico del registro, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ con un valor DWORD de `0` para deshabilitar la Autenticación Digest, asegurando que las contraseñas en "texto claro" no se almacenen en caché en LSASS.
+- **Los hashes LM y las contraseñas en texto claro** ya no se almacenan en memoria para mejorar la seguridad. Se debe configurar un ajuste específico del registro, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ con un valor DWORD de `0` para deshabilitar la Autenticación Digest, asegurando que las contraseñas "en texto claro" no se almacenen en caché en LSASS.
 
 - **La Protección LSA** se introduce para proteger el proceso de la Autoridad de Seguridad Local (LSA) de la lectura no autorizada de memoria y la inyección de código. Esto se logra marcando el LSASS como un proceso protegido. La activación de la Protección LSA implica:
-1. Modificar el registro en _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ estableciendo `RunAsPPL` en `dword:00000001`.
+1. Modificar el registro en _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ configurando `RunAsPPL` a `dword:00000001`.
 2. Implementar un Objeto de Política de Grupo (GPO) que haga cumplir este cambio de registro en los dispositivos gestionados.
 
 A pesar de estas protecciones, herramientas como Mimikatz pueden eludir la Protección LSA utilizando controladores específicos, aunque tales acciones probablemente se registren en los registros de eventos.

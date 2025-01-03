@@ -36,11 +36,11 @@ El aspecto crítico a entender aquí es que la contraseña y el hash de esta cue
 ```powershell
 Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.my.domain.local
 ```
-Esta extracción es posible porque la cuenta, identificada con un **$** después de su nombre, está activa y pertenece al grupo "Domain Users" del dominio **A**, heredando así los permisos asociados con este grupo. Esto permite a los individuos autenticarse en el dominio **A** utilizando las credenciales de esta cuenta.
+Esta extracción es posible porque la cuenta, identificada con un **$** después de su nombre, está activa y pertenece al grupo "Domain Users" del dominio **A**, heredando así los permisos asociados con este grupo. Esto permite a los individuos autenticarse contra el dominio **A** utilizando las credenciales de esta cuenta.
 
 **Advertencia:** Es factible aprovechar esta situación para obtener un acceso inicial en el dominio **A** como usuario, aunque con permisos limitados. Sin embargo, este acceso es suficiente para realizar enumeración en el dominio **A**.
 
-En un escenario donde `ext.local` es el dominio de confianza y `root.local` es el dominio confiado, se crearía una cuenta de usuario llamada `EXT$` dentro de `root.local`. A través de herramientas específicas, es posible volcar las claves de confianza de Kerberos, revelando las credenciales de `EXT$` en `root.local`. El comando para lograr esto es:
+En un escenario donde `ext.local` es el dominio confiador y `root.local` es el dominio confiado, se crearía una cuenta de usuario llamada `EXT$` dentro de `root.local`. A través de herramientas específicas, es posible volcar las claves de confianza de Kerberos, revelando las credenciales de `EXT$` en `root.local`. El comando para lograr esto es:
 ```bash
 lsadump::trust /patch
 ```
@@ -62,7 +62,7 @@ La contraseña en texto claro se puede obtener convirtiendo la salida \[ CLEAR ]
 
 A veces, al crear una relación de confianza, el usuario debe escribir una contraseña para la confianza. En esta demostración, la clave es la contraseña de confianza original y, por lo tanto, legible por humanos. A medida que la clave cambia (cada 30 días), el texto claro no será legible por humanos, pero técnicamente seguirá siendo utilizable.
 
-La contraseña en texto claro se puede utilizar para realizar autenticación regular como la cuenta de confianza, una alternativa a solicitar un TGT utilizando la clave secreta de Kerberos de la cuenta de confianza. Aquí, consultando root.local desde ext.local para miembros de Domain Admins:
+La contraseña en texto claro se puede usar para realizar autenticación regular como la cuenta de confianza, una alternativa a solicitar un TGT utilizando la clave secreta de Kerberos de la cuenta de confianza. Aquí, consultando root.local desde ext.local para miembros de Domain Admins:
 
 ![](<../../images/image (792).png>)
 

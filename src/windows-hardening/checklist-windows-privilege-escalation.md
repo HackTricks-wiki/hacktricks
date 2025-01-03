@@ -81,7 +81,7 @@
 - [ ] ¿Contraseñas de redes [**Wifi guardadas**](windows-local-privilege-escalation/#wifi)?
 - [ ] ¿Información interesante en [**Conexiones RDP guardadas**](windows-local-privilege-escalation/#saved-rdp-connections)?
 - [ ] ¿Contraseñas en [**comandos ejecutados recientemente**](windows-local-privilege-escalation/#recently-run-commands)?
-- [ ] ¿Contraseñas del [**Administrador de Credenciales de Escritorio Remoto**](windows-local-privilege-escalation/#remote-desktop-credential-manager)?
+- [ ] ¿Contraseñas del [**Administrador de credenciales de Escritorio Remoto**](windows-local-privilege-escalation/#remote-desktop-credential-manager)?
 - [ ] ¿Existe [**AppCmd.exe**](windows-local-privilege-escalation/#appcmd-exe)? ¿Credenciales?
 - [ ] ¿[**SCClient.exe**](windows-local-privilege-escalation/#scclient-sccm)? ¿Carga lateral de DLL?
 
@@ -100,7 +100,7 @@
 - [ ] ¿Archivos [**interesantes dentro de la Papelera de reciclaje**](windows-local-privilege-escalation/#credentials-in-the-recyclebin)?
 - [ ] ¿Otros [**registros que contienen credenciales**](windows-local-privilege-escalation/#inside-the-registry)?
 - [ ] ¿Dentro de [**datos del navegador**](windows-local-privilege-escalation/#browsers-history) (dbs, historial, marcadores, ...)?
-- [ ] [**Búsqueda de contraseñas genéricas**](windows-local-privilege-escalation/#generic-password-search-in-files-and-registry) en archivos y registro
+- [ ] Búsqueda de [**contraseña genérica**](windows-local-privilege-escalation/#generic-password-search-in-files-and-registry) en archivos y registro
 - [ ] [**Herramientas**](windows-local-privilege-escalation/#tools-that-search-for-passwords) para buscar contraseñas automáticamente
 
 ### [Manejadores filtrados](windows-local-privilege-escalation/#leaked-handlers)

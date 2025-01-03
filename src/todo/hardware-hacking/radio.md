@@ -9,7 +9,7 @@
 ### Configuración básica
 
 Después de instalar, hay algunas cosas que podrías considerar configurar.\
-En la configuración (el segundo botón de pestaña) puedes seleccionar el **dispositivo SDR** o **seleccionar un archivo** para leer y qué frecuencia sintonizar y la tasa de muestreo (recomendado hasta 2.56Msps si tu PC lo soporta)\\
+En la configuración (el segundo botón de pestaña) puedes seleccionar el **dispositivo SDR** o **seleccionar un archivo** para leer y qué frecuencia sintonizar y la tasa de muestreo (se recomienda hasta 2.56Msps si tu PC lo soporta)\\
 
 ![](<../../images/image (245).png>)
 
@@ -50,8 +50,8 @@ Con [**SigDigger** ](https://github.com/BatchDrake/SigDigger)sincroniza con el c
 
 ### Descubriendo el tipo de modulación con IQ
 
-Hay 3 formas de almacenar información en señales: Modulando la **amplitud**, **frecuencia** o **fase**.\
-Si estás revisando una señal, hay diferentes maneras de intentar averiguar qué se está utilizando para almacenar información (encuentra más formas a continuación), pero una buena es revisar el gráfico IQ.
+Hay 3 formas de almacenar información en señales: modulando la **amplitud**, **frecuencia** o **fase**.\
+Si estás revisando una señal, hay diferentes formas de intentar averiguar qué se está utilizando para almacenar información (encuentra más formas a continuación), pero una buena es revisar el gráfico IQ.
 
 ![](<../../images/image (788).png>)
 
@@ -80,7 +80,7 @@ Y así es como se ve parte del símbolo con la forma de onda:
 
 #### Revisando el histograma
 
-Puedes **seleccionar toda la señal** donde se encuentra la información, seleccionar el modo **Amplitud** y **Selección** y hacer clic en **Histograma.** Puedes observar que solo se encuentran 2 niveles claros.
+Puedes **seleccionar toda la señal** donde se encuentra la información, seleccionar el modo **Amplitud** y **Selección** y hacer clic en **Histograma**. Puedes observar que solo se encuentran 2 niveles claros.
 
 ![](<../../images/image (264).png>)
 
@@ -88,7 +88,7 @@ Por ejemplo, si seleccionas Frecuencia en lugar de Amplitud en esta señal AM, s
 
 ![](<../../images/image (732).png>)
 
-Si encuentras muchas frecuencias, potencialmente esto no será un FM, probablemente la frecuencia de la señal solo se modificó debido al canal.
+Si encuentras muchas frecuencias, potencialmente esto no será un FM; probablemente la frecuencia de la señal solo se modificó debido al canal.
 
 #### Con IQ
 
@@ -112,14 +112,14 @@ También puedes indicar el número de símbolos que vas a seleccionar y SigDigge
 
 ### Obtener bits
 
-Habiendo encontrado que esta es una señal **modulada en AM** y la **tasa de símbolos** (y sabiendo que en este caso algo up significa 1 y algo down significa 0), es muy fácil **obtener los bits** codificados en la señal. Así que, selecciona la señal con información y configura el muestreo y la decisión y presiona muestrear (verifica que **Amplitud** esté seleccionada, que la **Tasa de símbolos** descubierta esté configurada y que la **recuperación de reloj de Gadner** esté seleccionada):
+Habiendo encontrado que esta es una señal **modulada en AM** y la **tasa de símbolos** (y sabiendo que en este caso algo up significa 1 y algo down significa 0), es muy fácil **obtener los bits** codificados en la señal. Así que, selecciona la señal con información y configura el muestreo y la decisión y presiona muestrear (verifica que **Amplitud** esté seleccionada, que la **Tasa de símbolos** descubierta esté configurada y que la **recuperación de reloj de Gardner** esté seleccionada):
 
 ![](<../../images/image (965).png>)
 
 - **Sincronizar a intervalos de selección** significa que si previamente seleccionaste intervalos para encontrar la tasa de símbolos, esa tasa de símbolos se utilizará.
-- **Manual** significa que la tasa de símbolos indicada se utilizará.
+- **Manual** significa que se utilizará la tasa de símbolos indicada.
 - En **Selección de intervalo fijo** indicas el número de intervalos que deben seleccionarse y calcula la tasa de símbolos a partir de ello.
-- **Recuperación de reloj de Gadner** es generalmente la mejor opción, pero aún necesitas indicar alguna tasa de símbolos aproximada.
+- **Recuperación de reloj de Gardner** suele ser la mejor opción, pero aún necesitas indicar alguna tasa de símbolos aproximada.
 
 Al presionar muestrear, esto aparece:
 
@@ -137,7 +137,7 @@ Finalmente, **aumentando** el **Zoom** y **cambiando el tamaño de fila**, puede
 
 Si la señal tiene más de 1 bit por símbolo (por ejemplo, 2), SigDigger **no tiene forma de saber qué símbolo es** 00, 01, 10, 11, así que usará diferentes **escalas de grises** para representar cada uno (y si copias los bits, usará **números del 0 al 3**, necesitarás tratarlos).
 
-Además, usa **codificaciones** como **Manchester**, y **up+down** puede ser **1 o 0** y un down+up puede ser un 1 o 0. En esos casos necesitas **tratar los ups obtenidos (1) y downs (0)** para sustituir los pares de 01 o 10 como 0s o 1s.
+Además, usa **codificaciones** como **Manchester**, y **up+down** puede ser **1 o 0** y un down+up puede ser un 1 o 0. En esos casos, necesitas **tratar los ups (1) y downs (0) obtenidos** para sustituir los pares de 01 o 10 como 0s o 1s.
 
 ## Ejemplo de FM
 

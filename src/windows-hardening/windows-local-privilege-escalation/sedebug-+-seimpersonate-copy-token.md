@@ -3,7 +3,7 @@
 El siguiente código **exploita los privilegios SeDebug y SeImpersonate** para copiar el token de un **proceso que se ejecuta como SYSTEM** y con **todos los privilegios del token**. \
 En este caso, este código puede ser compilado y utilizado como un **binario de servicio de Windows** para verificar que está funcionando.\
 Sin embargo, la parte principal del **código donde ocurre la elevación** está dentro de la **función** **`Exploit`**.\
-Dentro de esa función puedes ver que se **busca el proceso** _**lsass.exe**_, luego se **copia su token**, y finalmente ese token se utiliza para iniciar un nuevo _**cmd.exe**_ con todos los privilegios del token copiado.
+Dentro de esa función puedes ver que se **busca el proceso **_**lsass.exe**_**, luego se **copia su token**, y finalmente ese token se utiliza para iniciar un nuevo _**cmd.exe**_ con todos los privilegios del token copiado.
 
 **Otros procesos** que se ejecutan como SYSTEM con todos o la mayoría de los privilegios del token son: **services.exe**, **svhost.exe** (uno de los primeros), **wininit.exe**, **csrss.exe**... (_recuerda que no podrás copiar un token de un proceso protegido_). Además, puedes usar la herramienta [Process Hacker](https://processhacker.sourceforge.io/downloads.php) ejecutándose como administrador para ver los tokens de un proceso.
 ```c

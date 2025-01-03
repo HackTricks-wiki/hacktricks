@@ -17,7 +17,7 @@ Se observó la incapacidad de modificar ciertos valores directamente, pero la ca
 
 A pesar de estas limitaciones, se identificó un potencial para la escalada de privilegios a través de la posibilidad de aprovechar la subclave **Performance** dentro de la estructura de registro del servicio **RpcEptMapper**, una subclave que no está presente por defecto. Esto podría permitir el registro de DLL y la monitorización del rendimiento.
 
-Se consultó la documentación sobre la subclave **Performance** y su utilización para la monitorización del rendimiento, lo que llevó al desarrollo de una DLL de prueba de concepto. Esta DLL, que demuestra la implementación de las funciones **OpenPerfData**, **CollectPerfData** y **ClosePerfData**, fue probada a través de **rundll32**, confirmando su éxito operativo.
+Se consultó documentación sobre la subclave **Performance** y su utilización para la monitorización del rendimiento, lo que llevó al desarrollo de una DLL de prueba de concepto. Esta DLL, que demuestra la implementación de las funciones **OpenPerfData**, **CollectPerfData** y **ClosePerfData**, fue probada a través de **rundll32**, confirmando su éxito operativo.
 
 El objetivo era forzar al **servicio de Mapeo de Puntos de Finalización RPC** a cargar la DLL de rendimiento creada. Las observaciones revelaron que la ejecución de consultas de clase WMI relacionadas con Datos de Rendimiento a través de PowerShell resultó en la creación de un archivo de registro, lo que permitió la ejecución de código arbitrario bajo el contexto de **SISTEMA LOCAL**, otorgando así privilegios elevados.
 

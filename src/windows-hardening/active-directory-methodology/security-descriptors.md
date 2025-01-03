@@ -26,7 +26,7 @@ Set-RemotePSRemoting -UserName student1 -ComputerName <remotehost> -Remove #Remo
 ```
 ### Acceso remoto a hashes
 
-Accede al **registro** y **volcar hashes** creando una **puerta trasera de Reg usando** [**DAMP**](https://github.com/HarmJ0y/DAMP)**,** para que puedas en cualquier momento recuperar el **hash de la computadora**, el **SAM** y cualquier **credencial AD** en caché en la computadora. Así que, es muy útil otorgar este permiso a un **usuario regular contra una computadora de Controlador de Dominio**:
+Accede al **registro** y **volcar hashes** creando una **puerta trasera de Reg usando** [**DAMP**](https://github.com/HarmJ0y/DAMP)**,** para que puedas en cualquier momento recuperar el **hash de la computadora**, el **SAM** y cualquier **credencial AD** en caché en la computadora. Por lo tanto, es muy útil otorgar este permiso a un **usuario regular contra una computadora de Controlador de Dominio**:
 ```bash
 # allows for the remote retrieval of a system's machine and local account hashes, as well as its domain cached credentials.
 Add-RemoteRegBackdoor -ComputerName <remotehost> -Trustee student1 -Verbose

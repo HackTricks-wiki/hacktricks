@@ -18,7 +18,7 @@ Para sistemas modernos que utilizan **UEFI** en lugar del BIOS tradicional, se p
 
 ### Análisis de RAM y Ataques de Arranque en Frío
 
-La RAM retiene datos brevemente después de que se corta la energía, generalmente durante **1 a 2 minutos**. Esta persistencia se puede extender a **10 minutos** aplicando sustancias frías, como nitrógeno líquido. Durante este período extendido, se puede crear un **volcado de memoria** utilizando herramientas como **dd.exe** y **volatility** para análisis.
+La RAM retiene datos brevemente después de que se corta la energía, generalmente durante **1 a 2 minutos**. Esta persistencia se puede extender a **10 minutos** aplicando sustancias frías, como nitrógeno líquido. Durante este período extendido, se puede crear un **volcado de memoria** utilizando herramientas como **dd.exe** y **volatility** para su análisis.
 
 ### Ataques de Acceso Directo a la Memoria (DMA)
 
@@ -28,7 +28,7 @@ La RAM retiene datos brevemente después de que se corta la energía, generalmen
 
 Cambiar binarios del sistema como **_sethc.exe_** o **_Utilman.exe_** con una copia de **_cmd.exe_** puede proporcionar un símbolo del sistema con privilegios de sistema. Herramientas como **chntpw** se pueden usar para editar el archivo **SAM** de una instalación de Windows, permitiendo cambios de contraseña.
 
-**Kon-Boot** es una herramienta que facilita el inicio de sesión en sistemas Windows sin conocer la contraseña al modificar temporalmente el núcleo de Windows o UEFI. Se puede encontrar más información en [https://www.raymond.cc](https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/).
+**Kon-Boot** es una herramienta que facilita el inicio de sesión en sistemas Windows sin conocer la contraseña al modificar temporalmente el núcleo de Windows o UEFI. Más información se puede encontrar en [https://www.raymond.cc](https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/).
 
 ### Manejo de Características de Seguridad de Windows
 
@@ -48,7 +48,7 @@ Los privilegios de administrador permiten la creación de copias de archivos sen
 
 ### Eludir la Encriptación de BitLocker
 
-La encriptación de BitLocker puede potencialmente ser eludida si se encuentra la **contraseña de recuperación** dentro de un archivo de volcado de memoria (**MEMORY.DMP**). Se pueden utilizar herramientas como **Elcomsoft Forensic Disk Decryptor** o **Passware Kit Forensic** para este propósito.
+La encriptación de BitLocker puede potencialmente ser eludida si se encuentra la **contraseña de recuperación** dentro de un archivo de volcado de memoria (**MEMORY.DMP**). Herramientas como **Elcomsoft Forensic Disk Decryptor** o **Passware Kit Forensic** se pueden utilizar para este propósito.
 
 ### Ingeniería Social para Adición de Clave de Recuperación
 

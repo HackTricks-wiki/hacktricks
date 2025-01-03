@@ -1,6 +1,6 @@
-# Algoritmos Criptográficos/De Compresión
+# Algoritmos Criptográficos/Compresión
 
-## Algoritmos Criptográficos/De Compresión
+## Algoritmos Criptográficos/Compresión
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -28,7 +28,7 @@ De [la documentación](https://learn.microsoft.com/en-us/windows/win32/api/wincr
 
 **CryptCreateHash**
 
-Inicia el hashing de un flujo de datos. Si se utiliza esta función, puedes encontrar qué **algoritmo se está utilizando** verificando el valor del segundo parámetro:
+Inicia el hash de un flujo de datos. Si se utiliza esta función, puedes encontrar qué **algoritmo se está utilizando** verificando el valor del segundo parámetro:
 
 ![](<../../images/image (376).png>)
 
@@ -70,7 +70,7 @@ Está compuesto por 3 partes principales:
 > [!NOTE]
 > **Para identificar un RC4 en un código desensamblado/decompilado, puedes buscar 2 bucles de tamaño 0x100 (con el uso de una clave) y luego un XOR de los datos de entrada con los 256 valores creados anteriormente en los 2 bucles, probablemente usando un %256 (mod 256)**
 
-### **Etapa de Inicialización/Caja de Sustitución:** (Nota el número 256 usado como contador y cómo se escribe un 0 en cada lugar de los 256 caracteres)
+### **Etapa de Inicialización/Caja de Sustitución:** (Nota el número 256 utilizado como contador y cómo se escribe un 0 en cada lugar de los 256 caracteres)
 
 ![](<../../images/image (377).png>)
 
@@ -120,7 +120,7 @@ Por lo tanto, es posible identificar este algoritmo verificando el **número má
 
 - Más complejo que los algoritmos simétricos
 - ¡No hay constantes! (las implementaciones personalizadas son difíciles de determinar)
-- KANAL (un analizador criptográfico) no logra mostrar pistas sobre RSA ya que se basa en constantes.
+- KANAL (un analizador criptográfico) no muestra pistas sobre RSA ya que se basa en constantes.
 
 ### Identificación por comparaciones
 

@@ -23,6 +23,6 @@ Más información sobre esto en: [https://adsecurity.org/?p=1714](https://adsecu
 
 ## Mitigación
 
-- Event ID 4657 - Auditoría de creación/cambio de `HKLM:\System\CurrentControlSet\Control\Lsa DsrmAdminLogonBehavior`
+- ID de evento 4657 - Auditoría de creación/cambio de `HKLM:\System\CurrentControlSet\Control\Lsa DsrmAdminLogonBehavior`
 
 {{#include ../../banners/hacktricks-training.md}}

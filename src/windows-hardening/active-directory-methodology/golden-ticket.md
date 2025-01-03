@@ -8,7 +8,7 @@ Un **ataque de Golden Ticket** consiste en la **creación de un Ticket Granting 
 
 Para **adquirir el hash NTLM** de la cuenta krbtgt, se pueden emplear varios métodos. Puede ser extraído del **proceso de Local Security Authority Subsystem Service (LSASS)** o del **archivo NT Directory Services (NTDS.dit)** ubicado en cualquier Controlador de Dominio (DC) dentro del dominio. Además, **ejecutar un ataque DCsync** es otra estrategia para obtener este hash NTLM, que se puede realizar utilizando herramientas como el **módulo lsadump::dcsync** en Mimikatz o el **script secretsdump.py** de Impacket. Es importante subrayar que para llevar a cabo estas operaciones, **normalmente se requieren privilegios de administrador de dominio o un nivel de acceso similar**.
 
-Aunque el hash NTLM sirve como un método viable para este propósito, se **recomienda encarecidamente** **forjar tickets utilizando las claves Kerberos de Advanced Encryption Standard (AES) (AES128 y AES256)** por razones de seguridad operativa.
+Aunque el hash NTLM sirve como un método viable para este propósito, se **recomienda encarecidamente** **forjar tickets utilizando las claves Kerberos del Estándar de Cifrado Avanzado (AES) (AES128 y AES256)** por razones de seguridad operativa.
 ```bash:From Linux
 python ticketer.py -nthash 25b2076cda3bfd6209161a6c78a69c1c -domain-sid S-1-5-21-1339291983-1349129144-367733775 -domain jurassic.park stegosaurus
 export KRB5CCNAME=/root/impacket-examples/stegosaurus.ccache
@@ -38,7 +38,7 @@ Get-DomainPolicy | select -expand KerberosPolicy
 ```
 Desafortunadamente, la duración del TGT no se registra en los 4769, por lo que no encontrarás esta información en los registros de eventos de Windows. Sin embargo, lo que puedes correlacionar es **ver 4769 sin un previo 4768**. **No es posible solicitar un TGS sin un TGT**, y si no hay registro de que se haya emitido un TGT, podemos inferir que fue forjado fuera de línea.
 
-Para **eludir esta detección**, revisa los diamond tickets:
+Para **eludir esta detección**, verifica los diamond tickets:
 
 {{#ref}}
 diamond-ticket.md

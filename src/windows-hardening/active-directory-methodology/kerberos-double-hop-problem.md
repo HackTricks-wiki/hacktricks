@@ -22,11 +22,11 @@ Si la **delegación no restringida** está habilitada en la PC, esto no suceder�
 
 ### CredSSP
 
-Otra forma de evitar este problema, que es [**notablemente insegura**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7), es el **Proveedor de Soporte de Seguridad de Credenciales**. De Microsoft:
+Otra forma de evitar este problema que es [**notablemente insegura**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) es el **Proveedor de Soporte de Seguridad de Credenciales**. De Microsoft:
 
 > La autenticación CredSSP delega las credenciales del usuario desde la computadora local a una computadora remota. Esta práctica aumenta el riesgo de seguridad de la operación remota. Si la computadora remota es comprometida, cuando se pasan las credenciales a ella, las credenciales pueden ser utilizadas para controlar la sesión de red.
 
-Se recomienda encarecidamente que **CredSSP** esté deshabilitado en sistemas de producción, redes sensibles y entornos similares debido a preocupaciones de seguridad. Para determinar si **CredSSP** está habilitado, se puede ejecutar el comando `Get-WSManCredSSP`. Este comando permite **verificar el estado de CredSSP** e incluso puede ser ejecutado de forma remota, siempre que **WinRM** esté habilitado.
+Se recomienda encarecidamente que **CredSSP** esté deshabilitado en sistemas de producción, redes sensibles y entornos similares debido a preocupaciones de seguridad. Para determinar si **CredSSP** está habilitado, se puede ejecutar el comando `Get-WSManCredSSP`. Este comando permite **verificar el estado de CredSSP** y puede incluso ejecutarse de forma remota, siempre que **WinRM** esté habilitado.
 ```powershell
 Invoke-Command -ComputerName bizintel -Credential ta\redsuit -ScriptBlock {
 Get-WSManCredSSP
@@ -73,7 +73,7 @@ Instalar OpenSSH en el primer servidor permite una solución para el problema de
 
 #### Pasos de Instalación de OpenSSH
 
-1. Descargue y mueva el último archivo zip de OpenSSH a el servidor objetivo.
+1. Descargue y mueva el último zip de la versión de OpenSSH al servidor objetivo.
 2. Descomprima y ejecute el script `Install-sshd.ps1`.
 3. Agregue una regla de firewall para abrir el puerto 22 y verifique que los servicios SSH estén en funcionamiento.
 

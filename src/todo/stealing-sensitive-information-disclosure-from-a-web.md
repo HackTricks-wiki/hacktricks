@@ -2,7 +2,7 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-Si en algún momento encuentras una **página web que te presenta información sensible basada en tu sesión**: Tal vez esté reflejando cookies, o imprimiendo detalles de tarjetas de crédito u otra información sensible, puedes intentar robarla.\
+Si en algún momento encuentras una **página web que te presenta información sensible basada en tu sesión**: Tal vez esté reflejando cookies, o imprimiendo detalles de tarjetas de crédito o cualquier otra información sensible, puedes intentar robarla.\
 Aquí te presento las principales formas en que puedes intentar lograrlo:
 
 - [**CORS bypass**](../pentesting-web/cors-bypass.md): Si puedes eludir los encabezados CORS, podrás robar la información realizando una solicitud Ajax a una página maliciosa.

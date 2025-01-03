@@ -29,7 +29,7 @@ Más info: [https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/](https://ww
 
 ### **Forzar Autenticación**
 
-Si un atacante puede **comprometer una computadora permitida para "Delegación No Restringida"**, podría **engañar** a un **servidor de impresión** para **iniciar sesión automáticamente** contra él **guardando un TGT** en la memoria del servidor.\
+Si un atacante puede **comprometer una computadora permitida para "Delegación No Restringida"**, podría **engañar** a un **servidor de impresión** para que **inicie sesión automáticamente** contra él **guardando un TGT** en la memoria del servidor.\
 Luego, el atacante podría realizar un **ataque Pass the Ticket para impersonar** la cuenta de computadora del usuario del servidor de impresión.
 
 Para hacer que un servidor de impresión inicie sesión contra cualquier máquina, puedes usar [**SpoolSample**](https://github.com/leechristensen/SpoolSample):

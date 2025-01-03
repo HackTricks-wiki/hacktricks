@@ -1,8 +1,8 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# Verificar posibles acciones dentro de la aplicación GUI
+# Verifique las posibles acciones dentro de la aplicación GUI
 
-**Diálogos Comunes** son aquellas opciones de **guardar un archivo**, **abrir un archivo**, seleccionar una fuente, un color... La mayoría de ellos **ofrecerán una funcionalidad completa de Explorador**. Esto significa que podrás acceder a las funcionalidades del Explorador si puedes acceder a estas opciones:
+**Diálogos Comunes** son esas opciones de **guardar un archivo**, **abrir un archivo**, seleccionar una fuente, un color... La mayoría de ellos **ofrecerán una funcionalidad completa de Explorador**. Esto significa que podrás acceder a las funcionalidades del Explorador si puedes acceder a estas opciones:
 
 - Cerrar/Cerrar como
 - Abrir/Abrir con
@@ -24,7 +24,7 @@ Quizás **usando una opción `Abrir con`** puedas abrir/ejecutar algún tipo de 
 
 ### Windows
 
-Por ejemplo _cmd.exe, command.com, Powershell/Powershell ISE, mmc.exe, at.exe, taskschd.msc..._ encuentra más binarios que pueden ser utilizados para ejecutar comandos (y realizar acciones inesperadas) aquí: [https://lolbas-project.github.io/](https://lolbas-project.github.io)
+Por ejemplo _cmd.exe, command.com, Powershell/Powershell ISE, mmc.exe, at.exe, taskschd.msc..._ encuentra más binarios que se pueden usar para ejecutar comandos (y realizar acciones inesperadas) aquí: [https://lolbas-project.github.io/](https://lolbas-project.github.io)
 
 ### \*NIX \_\_
 
@@ -88,7 +88,7 @@ Editor de registro: [https://sourceforge.net/projects/uberregedit/](https://sour
 - WINDOWS+F – Buscar
 - SHIFT+F10 – Menú contextual
 - CTRL+SHIFT+ESC – Administrador de tareas
-- CTRL+ALT+DEL – Pantalla de inicio en versiones más recientes de Windows
+- CTRL+ALT+DEL – Pantalla de inicio en versiones más nuevas de Windows
 - F1 – Ayuda F3 – Buscar
 - F6 – Barra de direcciones
 - F11 – Alternar pantalla completa dentro de Internet Explorer
@@ -171,7 +171,7 @@ Fuente: https://medium.com/@Rend_/give-me-a-browser-ill-give-you-a-shell-de19811
 
 - Desliza rápido 1 dedo desde el centro de la pantalla hacia la derecha o hacia la izquierda: Para cambiar a la siguiente/última aplicación
 
-- Presiona y mantén el botón de Encendido/**Apagar**/Reposo en la esquina superior derecha del **iPad +** Mueve el control deslizante para **apagar** todo el camino hacia la derecha: Para apagar
+- Presiona y mantén el botón de Encendido/**Apagar**/Reposo en la esquina superior derecha del **iPad +** Mueve el control deslizante de **apagar** todo el camino hacia la derecha: Para apagar
 
 - Presiona el botón de Encendido/**Apagar**/Reposo en la esquina superior derecha del **iPad y el botón de inicio durante unos segundos**: Para forzar un apagado duro
 
@@ -186,7 +186,7 @@ Deberías tener un teclado de iPad o un adaptador de teclado USB. Solo se mostra
 | ⌘   | Comando      |
 | ⌥   | Opción (Alt) |
 | ⇧   | Shift        |
-| ↩   | Retorno       |
+| ↩   | Retorno      |
 | ⇥   | Tab          |
 | ^   | Control      |
 | ←   | Flecha Izquierda   |
@@ -200,7 +200,7 @@ Estos atajos son para la configuración visual y de sonido, dependiendo del uso 
 
 | Atajo | Acción                                                                         |
 | -------- | ------------------------------------------------------------------------------ |
-| F1       | Atenuar pantalla                                                                    |
+| F1       | Disminuir brillo de pantalla                                                                    |
 | F2       | Aumentar brillo de pantalla                                                                |
 | F7       | Retroceder una canción                                                                  |
 | F8       | Reproducir/pausar                                                                     |
@@ -230,9 +230,9 @@ Estos atajos son para la configuración visual y de sonido, dependiendo del uso 
 | → (Flecha derecha)                                    | Siguiente ítem                                               |
 | ← (Flecha izquierda)                                     | Ítem anterior                                           |
 | ↑↓ (Flecha arriba, Flecha abajo)                          | Toca simultáneamente el ítem seleccionado                        |
-| ⌥ ↓ (Opción-Flecha abajo)                            | Desplazarse hacia abajo                                             |
-| ⌥↑ (Opción-Flecha arriba)                               | Desplazarse hacia arriba                                               |
-| ⌥← o ⌥→ (Opción-Flecha izquierda o Opción-Flecha derecha) | Desplazarse a la izquierda o a la derecha                                    |
+| ⌥ ↓ (Flecha hacia abajo)                            | Desplazarse hacia abajo                                             |
+| ⌥↑ (Flecha hacia arriba)                               | Desplazarse hacia arriba                                               |
+| ⌥← o ⌥→ (Flecha hacia la izquierda o Flecha hacia la derecha) | Desplazarse a la izquierda o a la derecha                                    |
 | ^⌥S (Control-Opción-S)                             | Activar o desactivar el habla de VoiceOver                         |
 | ⌘⇧⇥ (Comando-Shift-Tab)                            | Cambiar a la aplicación anterior                              |
 | ⌘⇥ (Comando-Tab)                                   | Volver a la aplicación original                         |
@@ -253,7 +253,7 @@ Estos atajos son para la configuración visual y de sonido, dependiendo del uso 
 | ⌘⇧T (Comando-Shift-T)   | Abrir la última pestaña cerrada (se puede usar varias veces) |
 | ⌘\[                     | Regresar una página en tu historial de navegación      |
 | ⌘]                      | Avanzar una página en tu historial de navegación   |
-| ⌘⇧R                     | Activar Modo de Lectura                             |
+| ⌘⇧R                     | Activar Modo Lector                             |
 
 ### Atajos de Mail
 

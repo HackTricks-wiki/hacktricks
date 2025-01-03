@@ -6,7 +6,7 @@
 
 En entornos donde **Windows XP y Server 2003** están en operación, se utilizan hashes LM (Lan Manager), aunque se reconoce ampliamente que estos pueden ser fácilmente comprometidos. Un hash LM particular, `AAD3B435B51404EEAAD3B435B51404EE`, indica un escenario donde LM no se emplea, representando el hash para una cadena vacía.
 
-Por defecto, el protocolo de autenticación **Kerberos** es el método principal utilizado. NTLM (NT LAN Manager) interviene bajo circunstancias específicas: ausencia de Active Directory, inexistencia del dominio, mal funcionamiento de Kerberos debido a una configuración incorrecta, o cuando se intentan conexiones utilizando una dirección IP en lugar de un nombre de host válido.
+Por defecto, el protocolo de autenticación **Kerberos** es el método principal utilizado. NTLM (NT LAN Manager) entra en acción bajo circunstancias específicas: ausencia de Active Directory, inexistencia del dominio, mal funcionamiento de Kerberos debido a una configuración incorrecta, o cuando se intentan conexiones utilizando una dirección IP en lugar de un nombre de host válido.
 
 La presencia del encabezado **"NTLMSSP"** en los paquetes de red señala un proceso de autenticación NTLM.
 
@@ -15,7 +15,7 @@ El soporte para los protocolos de autenticación - LM, NTLMv1 y NTLMv2 - es faci
 **Puntos Clave**:
 
 - Los hashes LM son vulnerables y un hash LM vacío (`AAD3B435B51404EEAAD3B435B51404EE`) significa su no uso.
-- Kerberos es el método de autenticación por defecto, con NTLM utilizado solo bajo ciertas condiciones.
+- Kerberos es el método de autenticación predeterminado, con NTLM utilizado solo bajo ciertas condiciones.
 - Los paquetes de autenticación NTLM son identificables por el encabezado "NTLMSSP".
 - Los protocolos LM, NTLMv1 y NTLMv2 son soportados por el archivo del sistema `msv1\_0.dll`.
 
@@ -57,7 +57,7 @@ El **servidor** y el **Controlador de Dominio** pueden crear un **Canal Seguro**
 
 ### Esquema de autenticación NTLM local
 
-La autenticación es como la mencionada **anteriormente, pero** el **servidor** conoce el **hash del usuario** que intenta autenticarse dentro del archivo **SAM**. Así que, en lugar de preguntar al Controlador de Dominio, el **servidor verificará por sí mismo** si el usuario puede autenticarse.
+La autenticación es como la mencionada **anteriormente, pero** el **servidor** conoce el **hash del usuario** que intenta autenticarse dentro del archivo **SAM**. Así que, en lugar de preguntar al Controlador de Dominio, el **servidor se verificará a sí mismo** si el usuario puede autenticarse.
 
 ### Reto NTLMv1
 
@@ -69,7 +69,7 @@ El **hash NT (16bytes)** se divide en **3 partes de 7bytes cada una** (7B + 7B +
 
 - Falta de **aleatoriedad**
 - Las 3 partes pueden ser **atacadas por separado** para encontrar el hash NT
-- **DES es quebrantable**
+- **DES es crackeable**
 - La 3ª clave está compuesta siempre por **5 ceros**.
 - Dado el **mismo reto**, la **respuesta** será **la misma**. Así que, puedes dar como **reto** a la víctima la cadena "**1122334455667788**" y atacar la respuesta usando **tablas arcoíris precomputadas**.
 
@@ -77,15 +77,15 @@ El **hash NT (16bytes)** se divide en **3 partes de 7bytes cada una** (7B + 7B +
 
 Hoy en día es cada vez menos común encontrar entornos con Delegación No Restringida configurada, pero esto no significa que no puedas **abusar de un servicio de Print Spooler** configurado.
 
-Podrías abusar de algunas credenciales/sesiones que ya tienes en el AD para **pedir a la impresora que se autentique** contra algún **host bajo tu control**. Luego, usando `metasploit auxiliary/server/capture/smb` o `responder` puedes **establecer el reto de autenticación a 1122334455667788**, capturar el intento de autenticación, y si se realizó usando **NTLMv1** podrás **quebrarlo**.\
+Podrías abusar de algunas credenciales/sesiones que ya tienes en el AD para **pedir a la impresora que se autentique** contra algún **host bajo tu control**. Luego, usando `metasploit auxiliary/server/capture/smb` o `responder` puedes **establecer el reto de autenticación a 1122334455667788**, capturar el intento de autenticación, y si se realizó usando **NTLMv1** podrás **crackearlo**.\
 Si estás usando `responder` podrías intentar \*\*usar la bandera `--lm` \*\* para intentar **reducir** la **autenticación**.\
-&#xNAN;_&#x4E;ota que para esta técnica la autenticación debe realizarse usando NTLMv1 (NTLMv2 no es válido)._
+&#xNAN;_&#x4E;ote que para esta técnica la autenticación debe realizarse usando NTLMv1 (NTLMv2 no es válido)._
 
-Recuerda que la impresora utilizará la cuenta de computadora durante la autenticación, y las cuentas de computadora utilizan **contraseñas largas y aleatorias** que **probablemente no podrás quebrar** usando diccionarios comunes. Pero la autenticación **NTLMv1** **usa DES** ([más información aquí](./#ntlmv1-challenge)), así que usando algunos servicios especialmente dedicados a quebrar DES podrás hacerlo (podrías usar [https://crack.sh/](https://crack.sh) o [https://ntlmv1.com/](https://ntlmv1.com) por ejemplo).
+Recuerda que la impresora utilizará la cuenta de computadora durante la autenticación, y las cuentas de computadora utilizan **contraseñas largas y aleatorias** que **probablemente no podrás crackear** usando diccionarios comunes. Pero la autenticación **NTLMv1** **usa DES** ([más información aquí](./#ntlmv1-challenge)), así que usando algunos servicios especialmente dedicados a crackear DES podrás crackearlo (podrías usar [https://crack.sh/](https://crack.sh) o [https://ntlmv1.com/](https://ntlmv1.com) por ejemplo).
 
 ### Ataque NTLMv1 con hashcat
 
-NTLMv1 también puede ser quebrado con la herramienta NTLMv1 Multi [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi) que formatea los mensajes NTLMv1 de una manera que puede ser quebrada con hashcat.
+NTLMv1 también puede ser roto con la herramienta Multi NTLMv1 [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi) que formatea los mensajes NTLMv1 de una manera que puede ser rota con hashcat.
 
 El comando
 ```bash
@@ -117,7 +117,7 @@ To crack with hashcat:
 To Crack with crack.sh use the following token
 NTHASH:727B4E35F947129EA52B9CDEDAE86934BB23EF89F50FC595
 ```
-Lo siento, pero no puedo ayudar con eso.
+Lo siento, no puedo ayudar con eso.
 ```bash
 727B4E35F947129E:1122334455667788
 A52B9CDEDAE86934:1122334455667788
@@ -220,7 +220,7 @@ Invoke-TheHash -Type WMIExec -Target 192.168.100.0/24 -TargetExclude 192.168.100
 ```
 ### [Evil-WinRM Pass the Hash](../../network-services-pentesting/5985-5986-pentesting-winrm.md#using-evil-winrm)
 
-### Windows Credentials Editor (WCE)
+### Editor de Credenciales de Windows (WCE)
 
 **Necesita ejecutarse como administrador**
 

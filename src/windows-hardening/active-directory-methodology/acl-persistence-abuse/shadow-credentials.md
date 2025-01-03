@@ -10,7 +10,7 @@ Como **resumen**: si puedes escribir en la propiedad **msDS-KeyCredentialLink** 
 
 En la publicación, se describe un método para configurar **credenciales de autenticación de clave pública-privada** para adquirir un **Ticket de Servicio** único que incluye el hash NTLM del objetivo. Este proceso involucra el NTLM_SUPPLEMENTAL_CREDENTIAL cifrado dentro del Certificado de Atributo de Privilegio (PAC), que puede ser descifrado.
 
-### Requirements
+### Requisitos
 
 Para aplicar esta técnica, deben cumplirse ciertas condiciones:
 
@@ -19,7 +19,7 @@ Para aplicar esta técnica, deben cumplirse ciertas condiciones:
 - El Active Directory debe estar en el Nivel Funcional de Windows Server 2016.
 - Se requiere una cuenta con derechos delegados para modificar el atributo msDS-KeyCredentialLink del objeto objetivo.
 
-## Abuse
+## Abuso
 
 El abuso de Key Trust para objetos de computadora abarca pasos más allá de obtener un Ticket Granting Ticket (TGT) y el hash NTLM. Las opciones incluyen:
 
@@ -28,11 +28,11 @@ El abuso de Key Trust para objetos de computadora abarca pasos más allá de obt
 
 Una ventaja significativa del abuso de Key Trust es su limitación a la clave privada generada por el atacante, evitando la delegación a cuentas potencialmente vulnerables y no requiriendo la creación de una cuenta de computadora, lo que podría ser difícil de eliminar.
 
-## Tools
+## Herramientas
 
 ### [**Whisker**](https://github.com/eladshamir/Whisker)
 
-Se basa en DSInternals proporcionando una interfaz C# para este ataque. Whisker y su contraparte en Python, **pyWhisker**, permiten la manipulación del atributo `msDS-KeyCredentialLink` para obtener control sobre las cuentas de Active Directory. Estas herramientas soportan varias operaciones como agregar, listar, eliminar y limpiar credenciales clave del objeto objetivo.
+Se basa en DSInternals proporcionando una interfaz C# para este ataque. Whisker y su contraparte en Python, **pyWhisker**, permiten la manipulación del atributo `msDS-KeyCredentialLink` para obtener control sobre cuentas de Active Directory. Estas herramientas soportan varias operaciones como agregar, listar, eliminar y limpiar credenciales clave del objeto objetivo.
 
 Las funciones de **Whisker** incluyen:
 
@@ -51,9 +51,9 @@ python3 pywhisker.py -d "domain.local" -u "user1" -p "complexpassword" --target 
 ```
 ### [ShadowSpray](https://github.com/Dec0ne/ShadowSpray/)
 
-ShadowSpray tiene como objetivo **explotar los permisos GenericWrite/GenericAll que amplios grupos de usuarios pueden tener sobre objetos de dominio** para aplicar ShadowCredentials de manera amplia. Implica iniciar sesión en el dominio, verificar el nivel funcional del dominio, enumerar objetos de dominio e intentar agregar KeyCredentials para la adquisición de TGT y la revelación de hash NT. Las opciones de limpieza y las tácticas de explotación recursiva mejoran su utilidad.
+ShadowSpray tiene como objetivo **explotar los permisos GenericWrite/GenericAll que amplios grupos de usuarios pueden tener sobre objetos de dominio** para aplicar ShadowCredentials de manera amplia. Implica iniciar sesión en el dominio, verificar el nivel funcional del dominio, enumerar objetos de dominio e intentar agregar KeyCredentials para la adquisición de TGT y la revelación del hash NT. Las opciones de limpieza y las tácticas de explotación recursiva mejoran su utilidad.
 
-## References
+## Referencias
 
 - [https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab)
 - [https://github.com/eladshamir/Whisker](https://github.com/eladshamir/Whisker)

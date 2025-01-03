@@ -5,7 +5,7 @@
 1. Crear un nuevo Pipe
 2. Crear e iniciar un servicio que se conectará al pipe creado y escribirá algo. El código del servicio ejecutará este código PS codificado: `$pipe = new-object System.IO.Pipes.NamedPipeClientStream("piper"); $pipe.Connect(); $sw = new-object System.IO.StreamWriter($pipe); $sw.WriteLine("Go"); $sw.Dispose();`
 3. El servicio recibe los datos del cliente en el pipe, llama a ImpersonateNamedPipeClient y espera a que el servicio termine
-4. Finalmente, utiliza el token obtenido del servicio para iniciar un nuevo _cmd.exe_
+4. Finalmente, utiliza el token obtenido del servicio para generar un nuevo _cmd.exe_
 
 > [!WARNING]
 > Si no tienes suficientes privilegios, el exploit puede quedar atascado y nunca regresar.

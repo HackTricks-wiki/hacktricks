@@ -2,26 +2,20 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="../../../images/i3.png" alt=""><figcaption></figcaption></figure>
-
-**Consejo de recompensas por errores**: **regístrate** en **Intigriti**, ¡una plataforma de **recompensas por errores premium creada por hackers, para hackers**! Únete a nosotros en [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) hoy, y comienza a ganar recompensas de hasta **$100,000**!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
-
 ## Información Básica
 
-El DLL Hijacking implica manipular una aplicación de confianza para cargar un DLL malicioso. Este término abarca varias tácticas como **DLL Spoofing, Injection, y Side-Loading**. Se utiliza principalmente para la ejecución de código, logrando persistencia y, menos comúnmente, escalada de privilegios. A pesar del enfoque en la escalada aquí, el método de secuestro sigue siendo consistente a través de los objetivos.
+El DLL Hijacking implica manipular una aplicación de confianza para cargar un DLL malicioso. Este término abarca varias tácticas como **DLL Spoofing, Injection, y Side-Loading**. Se utiliza principalmente para la ejecución de código, lograr persistencia y, menos comúnmente, escalada de privilegios. A pesar del enfoque en la escalada aquí, el método de secuestro sigue siendo consistente a través de los objetivos.
 
 ### Técnicas Comunes
 
 Se emplean varios métodos para el DLL hijacking, cada uno con su efectividad dependiendo de la estrategia de carga de DLL de la aplicación:
 
-1. **Reemplazo de DLL**: Intercambiar un DLL genuino por uno malicioso, opcionalmente utilizando DLL Proxying para preservar la funcionalidad del DLL original.
+1. **Reemplazo de DLL**: Intercambiar un DLL genuino por uno malicioso, utilizando opcionalmente DLL Proxying para preservar la funcionalidad del DLL original.
 2. **Secuestro del Orden de Búsqueda de DLL**: Colocar el DLL malicioso en una ruta de búsqueda antes del legítimo, explotando el patrón de búsqueda de la aplicación.
 3. **Secuestro de DLL Fantasma**: Crear un DLL malicioso para que una aplicación lo cargue, pensando que es un DLL requerido que no existe.
 4. **Redirección de DLL**: Modificar parámetros de búsqueda como `%PATH%` o archivos `.exe.manifest` / `.exe.local` para dirigir la aplicación al DLL malicioso.
-5. **Reemplazo de DLL en WinSxS**: Sustituir el DLL legítimo por un contraparte malicioso en el directorio WinSxS, un método a menudo asociado con el side-loading de DLL.
-6. **Secuestro de DLL por Ruta Relativa**: Colocar el DLL malicioso en un directorio controlado por el usuario con la aplicación copiada, pareciendo técnicas de Ejecución de Proxy Binario.
+5. **Reemplazo de DLL en WinSxS**: Sustituir el DLL legítimo por uno malicioso en el directorio WinSxS, un método a menudo asociado con el side-loading de DLL.
+6. **Secuestro de DLL por Ruta Relativa**: Colocar el DLL malicioso en un directorio controlado por el usuario junto con la aplicación copiada, pareciendo técnicas de Ejecución de Proxy Binario.
 
 ## Encontrando DLLs Faltantes
 
@@ -40,13 +34,13 @@ Si estás buscando una **DLL faltante dentro de un ejecutable específico**, deb
 
 ## Explotando DLLs Faltantes
 
-Para escalar privilegios, la mejor oportunidad que tenemos es poder **escribir un DLL que un proceso privilegiado intentará cargar** en algún **lugar donde se va a buscar**. Por lo tanto, podremos **escribir** un DLL en una **carpeta** donde el **DLL se busca antes** de la carpeta donde se encuentra el **DLL original** (caso extraño), o podremos **escribir en alguna carpeta donde se va a buscar el DLL** y el **DLL original no existe** en ninguna carpeta.
+Para escalar privilegios, la mejor oportunidad que tenemos es poder **escribir un DLL que un proceso privilegiado intentará cargar** en alguno de **los lugares donde se va a buscar**. Por lo tanto, podremos **escribir** un DLL en una **carpeta** donde el **DLL se busca antes** de la carpeta donde se encuentra el **DLL original** (caso extraño), o podremos **escribir en alguna carpeta donde se va a buscar el DLL** y el **DLL original no existe** en ninguna carpeta.
 
 ### Orden de Búsqueda de DLL
 
 **Dentro de la** [**documentación de Microsoft**](https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order#factors-that-affect-searching) **puedes encontrar cómo se cargan específicamente los DLLs.**
 
-**Las aplicaciones de Windows** buscan DLLs siguiendo un conjunto de **rutas de búsqueda predefinidas**, adhiriéndose a una secuencia particular. El problema del DLL hijacking surge cuando un DLL dañino se coloca estratégicamente en uno de estos directorios, asegurando que se cargue antes que el DLL auténtico. Una solución para prevenir esto es asegurarse de que la aplicación utilice rutas absolutas al referirse a los DLLs que necesita.
+**Las aplicaciones de Windows** buscan DLLs siguiendo un conjunto de **rutas de búsqueda predefinidas**, adhiriéndose a una secuencia particular. El problema del DLL hijacking surge cuando un DLL dañino se coloca estratégicamente en uno de estos directorios, asegurando que se cargue antes que el DLL auténtico. Una solución para prevenir esto es asegurarse de que la aplicación use rutas absolutas al referirse a los DLLs que necesita.
 
 Puedes ver el **orden de búsqueda de DLL en sistemas de 32 bits** a continuación:
 
@@ -57,9 +51,9 @@ Puedes ver el **orden de búsqueda de DLL en sistemas de 32 bits** a continuaci�
 5. El directorio actual.
 6. Los directorios que están listados en la variable de entorno PATH. Ten en cuenta que esto no incluye la ruta por aplicación especificada por la clave de registro **App Paths**. La clave **App Paths** no se utiliza al calcular la ruta de búsqueda de DLL.
 
-Ese es el **orden de búsqueda predeterminado** con **SafeDllSearchMode** habilitado. Cuando está deshabilitado, el directorio actual asciende al segundo lugar. Para deshabilitar esta función, crea el valor de registro **HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager**\\**SafeDllSearchMode** y configúralo en 0 (el valor predeterminado está habilitado).
+Ese es el **orden de búsqueda** predeterminado con **SafeDllSearchMode** habilitado. Cuando está deshabilitado, el directorio actual asciende al segundo lugar. Para deshabilitar esta función, crea el valor de registro **HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager**\\**SafeDllSearchMode** y configúralo en 0 (el valor predeterminado está habilitado).
 
-Si se llama a la función [**LoadLibraryEx**](https://docs.microsoft.com/en-us/windows/desktop/api/LibLoaderAPI/nf-libloaderapi-loadlibraryexa) con **LOAD_WITH_ALTERED_SEARCH_PATH**, la búsqueda comienza en el directorio del módulo ejecutable que **LoadLibraryEx** está cargando.
+Si la función [**LoadLibraryEx**](https://docs.microsoft.com/en-us/windows/desktop/api/LibLoaderAPI/nf-libloaderapi-loadlibraryexa) se llama con **LOAD_WITH_ALTERED_SEARCH_PATH**, la búsqueda comienza en el directorio del módulo ejecutable que **LoadLibraryEx** está cargando.
 
 Finalmente, ten en cuenta que **un DLL podría ser cargado indicando la ruta absoluta en lugar de solo el nombre**. En ese caso, ese DLL **solo se buscará en esa ruta** (si el DLL tiene alguna dependencia, se buscarán como si se cargaran solo por nombre).
 
@@ -67,11 +61,11 @@ Hay otras formas de alterar el orden de búsqueda, pero no voy a explicarlas aqu
 
 #### Excepciones en el orden de búsqueda de DLL según la documentación de Windows
 
-Ciertas excepciones al orden de búsqueda estándar de DLL se anotan en la documentación de Windows:
+Ciertas excepciones al orden de búsqueda estándar de DLL se mencionan en la documentación de Windows:
 
 - Cuando se encuentra un **DLL que comparte su nombre con uno ya cargado en memoria**, el sistema omite la búsqueda habitual. En su lugar, realiza una verificación de redirección y un manifiesto antes de recurrir al DLL ya en memoria. **En este escenario, el sistema no realiza una búsqueda del DLL**.
 - En casos donde el DLL es reconocido como un **DLL conocido** para la versión actual de Windows, el sistema utilizará su versión del DLL conocido, junto con cualquiera de sus DLLs dependientes, **omitindo el proceso de búsqueda**. La clave de registro **HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs** contiene una lista de estos DLLs conocidos.
-- Si un **DLL tiene dependencias**, la búsqueda de estos DLLs dependientes se lleva a cabo como si se indicaran solo por sus **nombres de módulo**, independientemente de si el DLL inicial se identificó a través de una ruta completa.
+- Si un **DLL tiene dependencias**, la búsqueda de estos DLLs dependientes se realiza como si se indicaran solo por sus **nombres de módulo**, independientemente de si el DLL inicial fue identificado a través de una ruta completa.
 
 ### Escalando Privilegios
 
@@ -81,7 +75,7 @@ Ciertas excepciones al orden de búsqueda estándar de DLL se anotan en la docum
 - Asegurarse de que hay **acceso de escritura** disponible para cualquier **directorio** en el que se **buscará el DLL**. Esta ubicación podría ser el directorio del ejecutable o un directorio dentro de la ruta del sistema.
 
 Sí, los requisitos son complicados de encontrar ya que **por defecto es un poco extraño encontrar un ejecutable privilegiado que falte un DLL** y es aún **más extraño tener permisos de escritura en una carpeta de ruta del sistema** (no puedes por defecto). Pero, en entornos mal configurados esto es posible.\
-En el caso de que tengas suerte y te encuentres cumpliendo con los requisitos, podrías revisar el proyecto [UACME](https://github.com/hfiref0x/UACME). Aunque el **objetivo principal del proyecto es eludir UAC**, puedes encontrar allí un **PoC** de un Dll hijacking para la versión de Windows que puedes usar (probablemente solo cambiando la ruta de la carpeta donde tienes permisos de escritura).
+En el caso de que tengas suerte y cumplas con los requisitos, podrías revisar el proyecto [UACME](https://github.com/hfiref0x/UACME). Aunque el **objetivo principal del proyecto es eludir UAC**, puedes encontrar allí un **PoC** de un DLL hijacking para la versión de Windows que puedes usar (probablemente solo cambiando la ruta de la carpeta donde tienes permisos de escritura).
 
 Ten en cuenta que puedes **verificar tus permisos en una carpeta** haciendo:
 ```bash
@@ -111,13 +105,13 @@ Otras herramientas automatizadas interesantes para descubrir esta vulnerabilidad
 ### Ejemplo
 
 En caso de que encuentres un escenario explotable, una de las cosas más importantes para explotarlo con éxito sería **crear un dll que exporte al menos todas las funciones que el ejecutable importará de él**. De todos modos, ten en cuenta que Dll Hijacking es útil para [escalar de nivel de integridad medio a alto **(eludiendo UAC)**](../../authentication-credentials-uac-and-efs/#uac) o de [**alta integridad a SYSTEM**](../#from-high-integrity-to-system)**.** Puedes encontrar un ejemplo de **cómo crear un dll válido** dentro de este estudio de dll hijacking enfocado en dll hijacking para ejecución: [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**.**\
-Además, en la **siguiente sección** puedes encontrar algunos **códigos dll básicos** que podrían ser útiles como **plantillas** o para crear un **dll con funciones no requeridas exportadas**.
+Además, en la **siguiente sección** puedes encontrar algunos **códigos dll básicos** que pueden ser útiles como **plantillas** o para crear un **dll con funciones no requeridas exportadas**.
 
 ## **Creando y compilando Dlls**
 
-### **Dll Proxifying**
+### **Proxificación de Dll**
 
-Básicamente, un **Dll proxy** es un Dll capaz de **ejecutar tu código malicioso cuando se carga**, pero también de **exponer** y **funcionar** como **se esperaba** al **redirigir todas las llamadas a la biblioteca real**.
+Básicamente, un **proxy de Dll** es un Dll capaz de **ejecutar tu código malicioso cuando se carga**, pero también de **exponer** y **funcionar** como **se esperaba** al **redirigir todas las llamadas a la biblioteca real**.
 
 Con la herramienta [**DLLirant**](https://github.com/redteamsocietegenerale/DLLirant) o [**Spartacus**](https://github.com/Accenture/Spartacus) puedes **indicar un ejecutable y seleccionar la biblioteca** que deseas proxificar y **generar un dll proxificado** o **indicar el Dll** y **generar un dll proxificado**.
 
@@ -223,10 +217,5 @@ return TRUE;
 - [https://medium.com/@pranaybafna/tcapt-dll-hijacking-888d181ede8e](https://medium.com/@pranaybafna/tcapt-dll-hijacking-888d181ede8e)
 - [https://cocomelonc.github.io/pentest/2021/09/24/dll-hijacking-1.html](https://cocomelonc.github.io/pentest/2021/09/24/dll-hijacking-1.html)
 
-<figure><img src="../../../images/i3.png" alt=""><figcaption></figcaption></figure>
-
-**Consejo de recompensas por errores**: **regístrate** en **Intigriti**, una **plataforma de recompensas por errores premium creada por hackers, para hackers**! Únete a nosotros en [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) hoy, y comienza a ganar recompensas de hasta **$100,000**!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 {{#include ../../../banners/hacktricks-training.md}}

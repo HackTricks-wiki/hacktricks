@@ -148,7 +148,7 @@ reg save HKLM\security security
 samdump2 SYSTEM SAM
 impacket-secretsdump -sam sam -security security -system system LOCAL
 ```
-### Volume Shadow Copy
+### Copia de Sombra de Volumen
 
 Puedes realizar copias de archivos protegidos utilizando este servicio. Necesitas ser Administrador.
 
@@ -204,7 +204,7 @@ El hash está cifrado 3 veces:
 2. Desencriptar el **hash** usando **PEK** y **RC4**.
 3. Desencriptar el **hash** usando **DES**.
 
-**PEK** tiene el **mismo valor** en **cada controlador de dominio**, pero está **cifrado** dentro del archivo **NTDS.dit** usando el **BOOTKEY** del **archivo SYSTEM del controlador de dominio (es diferente entre controladores de dominio)**. Por eso, para obtener las credenciales del archivo NTDS.dit **necesitas los archivos NTDS.dit y SYSTEM** (_C:\Windows\System32\config\SYSTEM_).
+**PEK** tiene el **mismo valor** en **cada controlador de dominio**, pero está **cifrado** dentro del archivo **NTDS.dit** usando el **BOOTKEY** del **archivo SYSTEM del controlador de dominio (es diferente entre controladores de dominio)**. Por esta razón, para obtener las credenciales del archivo NTDS.dit **necesitas los archivos NTDS.dit y SYSTEM** (_C:\Windows\System32\config\SYSTEM_).
 
 ### Copiando NTDS.dit usando Ntdsutil
 
@@ -212,7 +212,7 @@ Disponible desde Windows Server 2008.
 ```bash
 ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 ```
-También podrías usar el truco de [**copia de sombra de volumen**](./#stealing-sam-and-system) para copiar el archivo **ntds.dit**. Recuerda que también necesitarás una copia del **archivo SYSTEM** (nuevamente, [**sácala del registro o usa el truco de copia de sombra de volumen**](./#stealing-sam-and-system)).
+También podrías usar el truco de [**copia de sombra de volumen**](./#stealing-sam-and-system) para copiar el archivo **ntds.dit**. Recuerda que también necesitarás una copia del **archivo SYSTEM** (nuevamente, [**dumps desde el registro o usa el truco de copia de sombra de volumen**](./#stealing-sam-and-system)).
 
 ### **Extracción de hashes de NTDS.dit**
 
@@ -228,7 +228,7 @@ Para **grandes archivos NTDS.dit** se recomienda extraerlo usando [gosecretsdump
 
 Finalmente, también puedes usar el **módulo de metasploit**: _post/windows/gather/credentials/domain_hashdump_ o **mimikatz** `lsadump::lsa /inject`
 
-### **Extracción de objetos de dominio de NTDS.dit a una base de datos SQLite**
+### **Extrayendo objetos de dominio de NTDS.dit a una base de datos SQLite**
 
 Los objetos NTDS se pueden extraer a una base de datos SQLite con [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite). No solo se extraen secretos, sino también todos los objetos y sus atributos para una extracción de información adicional cuando el archivo NTDS.dit en bruto ya ha sido recuperado.
 ```
@@ -244,7 +244,7 @@ lazagne.exe all
 ```
 ## Otras herramientas para extraer credenciales de SAM y LSASS
 
-### Windows Credentials Editor (WCE)
+### Windows credentials Editor (WCE)
 
 Esta herramienta se puede utilizar para extraer credenciales de la memoria. Descárgala de: [http://www.ampliasecurity.com/research/windows-credentials-editor/](https://www.ampliasecurity.com/research/windows-credentials-editor/)
 
@@ -265,7 +265,7 @@ type outpwdump
 ```
 ### PwDump7
 
-Descárgalo de: [ http://www.tarasco.org/security/pwdump_7](http://www.tarasco.org/security/pwdump_7) y simplemente **ejecútalo** y las contraseñas serán extraídas.
+Descárgalo de: [ http://www.tarasco.org/security/pwdump_7](http://www.tarasco.org/security/pwdump_7) y simplemente **ejecuta** y las contraseñas serán extraídas.
 
 ## Defensas
 

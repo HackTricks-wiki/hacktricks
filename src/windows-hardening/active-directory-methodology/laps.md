@@ -26,7 +26,7 @@ Get-DomainObject -SearchBase "LDAP://DC=sub,DC=domain,DC=local" | ? { $_."ms-mcs
 
 Puedes **descargar la política LAPS en bruto** desde `\\dc\SysVol\domain\Policies\{4A8A4E8E-929F-401A-95BD-A7D40E0976C8}\Machine\Registry.pol` y luego usar **`Parse-PolFile`** del paquete [**GPRegistryPolicyParser**](https://github.com/PowerShell/GPRegistryPolicyParser) para convertir este archivo en un formato legible por humanos.
 
-Además, se pueden usar los **cmdlets de PowerShell nativos de LAPS** si están instalados en una máquina a la que tenemos acceso:
+Además, los **cmdlets nativos de PowerShell de LAPS** se pueden usar si están instalados en una máquina a la que tenemos acceso:
 ```powershell
 Get-Command *AdmPwd*
 
@@ -103,7 +103,7 @@ Password: 2Z@Ae)7!{9#Cq
 
 ### **Fecha de Expiración**
 
-Una vez que se tiene acceso de administrador, es posible **obtener las contraseñas** y **prevenir** que una máquina **actualice** su **contraseña** al **establecer la fecha de expiración en el futuro**.
+Una vez que se tiene acceso de administrador, es posible **obtener las contraseñas** y **prevenir** que una máquina **actualice** su **contraseña** **estableciendo la fecha de expiración en el futuro**.
 ```powershell
 # Get expiration time
 Get-DomainObject -Identity computer-21 -Properties ms-mcs-admpwdexpirationtime

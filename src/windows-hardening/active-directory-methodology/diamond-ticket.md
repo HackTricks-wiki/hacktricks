@@ -4,17 +4,17 @@
 
 ## Diamond Ticket
 
-**Como un ticket dorado**, un ticket de diamante es un TGT que se puede usar para **acceder a cualquier servicio como cualquier usuario**. Un ticket dorado se forja completamente fuera de línea, se cifra con el hash krbtgt de ese dominio y luego se pasa a una sesión de inicio de sesión para su uso. Debido a que los controladores de dominio no rastrean los TGT que (o ellos) han emitido legítimamente, aceptarán felizmente los TGT que están cifrados con su propio hash krbtgt.
+**Como un billete dorado**, un billete de diamante es un TGT que se puede usar para **acceder a cualquier servicio como cualquier usuario**. Un billete dorado se forja completamente fuera de línea, se cifra con el hash krbtgt de ese dominio y luego se pasa a una sesión de inicio de sesión para su uso. Debido a que los controladores de dominio no rastrean los TGT que han emitido legítimamente, aceptarán felizmente los TGT que están cifrados con su propio hash krbtgt.
 
-Hay dos técnicas comunes para detectar el uso de tickets dorados:
+Hay dos técnicas comunes para detectar el uso de billetes dorados:
 
 - Buscar TGS-REQs que no tengan un AS-REQ correspondiente.
 - Buscar TGTs que tengan valores absurdos, como la vida útil predeterminada de 10 años de Mimikatz.
 
-Un **ticket de diamante** se crea **modificando los campos de un TGT legítimo que fue emitido por un DC**. Esto se logra **solicitando** un **TGT**, **descifrándolo** con el hash krbtgt del dominio, **modificando** los campos deseados del ticket y luego **volviéndolo a cifrar**. Esto **supera las dos desventajas mencionadas anteriormente** de un ticket dorado porque:
+Un **billete de diamante** se crea al **modificar los campos de un TGT legítimo que fue emitido por un DC**. Esto se logra al **solicitar** un **TGT**, **descifrarlo** con el hash krbtgt del dominio, **modificar** los campos deseados del billete y luego **vuelve a cifrarlo**. Esto **supera las dos deficiencias mencionadas anteriormente** de un billete dorado porque:
 
 - Los TGS-REQs tendrán un AS-REQ anterior.
-- El TGT fue emitido por un DC, lo que significa que tendrá todos los detalles correctos de la política Kerberos del dominio. Aunque estos pueden ser forjados con precisión en un ticket dorado, es más complejo y propenso a errores.
+- El TGT fue emitido por un DC, lo que significa que tendrá todos los detalles correctos de la política Kerberos del dominio. Aunque estos pueden ser forjados con precisión en un billete dorado, es más complejo y propenso a errores.
 ```bash
 # Get user RID
 powershell Get-DomainUser -Identity <username> -Properties objectsid

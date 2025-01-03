@@ -142,7 +142,7 @@ return 0;
 ```
 ### Error
 
-En algunas ocasiones, puede que intentes suplantar a System y no funcione, mostrando una salida como la siguiente:
+En algunas ocasiones, puedes intentar suplantar a System y no funcionará, mostrando una salida como la siguiente:
 ```cpp
 [+] OpenProcess() success!
 [+] OpenProcessToken() success!

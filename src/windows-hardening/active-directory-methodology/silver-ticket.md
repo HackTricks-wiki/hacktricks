@@ -47,13 +47,13 @@ Usando **Rubeus** puedes **pedir todos** estos tickets usando el parámetro:
 
 - `/altservice:host,RPCSS,http,wsman,cifs,ldap,krbtgt,winrm`
 
-### IDs de Evento de Silver Tickets
+### IDs de Evento de Tickets Silver
 
 - 4624: Inicio de Sesión de Cuenta
 - 4634: Cierre de Sesión de Cuenta
 - 4672: Inicio de Sesión de Administrador
 
-## Abusando de los tickets de Servicio
+## Abusando de Tickets de Servicio
 
 En los siguientes ejemplos imaginemos que el ticket se recupera suplantando la cuenta de administrador.
 

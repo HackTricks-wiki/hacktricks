@@ -21,7 +21,7 @@ LitServe es una herramienta de despliegue de Lightning AI diseñada para despleg
 
 ### [**Axolotl**](https://github.com/axolotl-ai-cloud/axolotl)
 
-Axolotl es una plataforma basada en la nube diseñada para optimizar el despliegue, escalado y gestión de modelos de IA, incluidos LLMs. Ofrece características como escalado automatizado, monitoreo e integración con varios servicios en la nube, facilitando el despliegue de modelos en entornos de producción sin una gestión extensa de infraestructura.
+Axolotl es una plataforma basada en la nube diseñada para optimizar el despliegue, escalado y gestión de modelos de IA, incluidos LLMs. Ofrece características como escalado automático, monitoreo e integración con varios servicios en la nube, facilitando el despliegue de modelos en entornos de producción sin una gestión extensa de infraestructura.
 
 ## Probar modelos en línea
 
@@ -34,7 +34,7 @@ Ofrece varias secciones como:
 * **Conjuntos de datos:** Una **colección integral de conjuntos de datos** utilizados para entrenar y evaluar modelos. Facilita el acceso fácil a diversas fuentes de datos, permitiendo a los usuarios encontrar y utilizar datos para sus proyectos específicos de aprendizaje automático.
 * **Espacios:** Una plataforma para alojar y compartir **aplicaciones interactivas de aprendizaje automático** y demostraciones. Permite a los desarrolladores **mostrar** sus modelos en acción, crear interfaces amigables y colaborar con otros compartiendo demostraciones en vivo.
 
-## [**TensorFlow Hub**](https://www.tensorflow.org/hub) **&** [**Kaggle**](https://www.kaggle.com/)
+## [**TensorFlow Hub**](https://www.tensorflow.org/hub) **y** [**Kaggle**](https://www.kaggle.com/)
 
 **TensorFlow Hub** es un repositorio integral de módulos reutilizables de aprendizaje automático desarrollados por Google. Se centra en facilitar la compartición y despliegue de modelos de aprendizaje automático, especialmente aquellos construidos con TensorFlow.
 

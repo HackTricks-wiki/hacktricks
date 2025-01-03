@@ -85,15 +85,15 @@ whoami /groups | findstr Level
 ## Bypass de UAC
 
 > [!NOTE]
-> Tenga en cuenta que si tiene acceso gráfico a la víctima, el bypass de UAC es sencillo, ya que puede simplemente hacer clic en "Sí" cuando aparece el aviso de UAC.
+> Tenga en cuenta que si tiene acceso gráfico a la víctima, el bypass de UAC es directo, ya que simplemente puede hacer clic en "Sí" cuando aparece el aviso de UAC.
 
 El bypass de UAC es necesario en la siguiente situación: **el UAC está activado, su proceso se está ejecutando en un contexto de integridad media y su usuario pertenece al grupo de administradores**.
 
 Es importante mencionar que es **mucho más difícil eludir el UAC si está en el nivel de seguridad más alto (Siempre) que si está en cualquiera de los otros niveles (Predeterminado).**
 
-### UAC deshabilitado
+### UAC desactivado
 
-Si el UAC ya está deshabilitado (`ConsentPromptBehaviorAdmin` es **`0`**) puede **ejecutar un shell inverso con privilegios de administrador** (nivel de integridad alto) utilizando algo como:
+Si el UAC ya está desactivado (`ConsentPromptBehaviorAdmin` es **`0`**) puede **ejecutar un shell inverso con privilegios de administrador** (nivel de integridad alto) utilizando algo como:
 ```bash
 #Put your reverse shell instead of "calc.exe"
 Start-Process powershell -Verb runAs "calc.exe"
@@ -139,7 +139,7 @@ Documentación y herramienta en [https://github.com/wh0amitz/KRBUACBypass](https
 
 ### Explotaciones de elusión de UAC
 
-[**UACME** ](https://github.com/hfiref0x/UACME)que es una **compilación** de varias explotaciones de elusión de UAC. Ten en cuenta que necesitarás **compilar UACME usando visual studio o msbuild**. La compilación creará varios ejecutables (como `Source\Akagi\outout\x64\Debug\Akagi.exe`), necesitarás saber **cuál necesitas.**\
+[**UACME** ](https://github.com/hfiref0x/UACME) que es una **compilación** de varias explotaciones de elusión de UAC. Ten en cuenta que necesitarás **compilar UACME usando visual studio o msbuild**. La compilación creará varios ejecutables (como `Source\Akagi\outout\x64\Debug\Akagi.exe`), necesitarás saber **cuál necesitas.**\
 Debes **tener cuidado** porque algunas elusiones **solicitarán algunos otros programas** que **alertarán** al **usuario** que algo está sucediendo.
 
 UACME tiene la **versión de compilación desde la cual cada técnica comenzó a funcionar**. Puedes buscar una técnica que afecte tus versiones:

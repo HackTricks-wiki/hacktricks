@@ -19,12 +19,12 @@ Para escenarios que requieren AES256, se puede utilizar la opción `-aesKey [AES
 
 Los problemas encontrados como _PyAsn1Error_ o _KDC cannot find the name_ se resuelven típicamente actualizando la biblioteca Impacket o utilizando el nombre de host en lugar de la dirección IP, asegurando la compatibilidad con el KDC de Kerberos.
 
-Una secuencia de comandos alternativa usando Rubeus.exe demuestra otro aspecto de esta técnica:
+Una secuencia de comandos alternativa utilizando Rubeus.exe demuestra otro aspecto de esta técnica:
 ```bash
 .\Rubeus.exe asktgt /domain:jurassic.park /user:velociraptor /rc4:2a3de7fe356ee524cc9f3d579f2e0aa7 /ptt
 .\PsExec.exe -accepteula \\labwws02.jurassic.park cmd
 ```
-Este método refleja el enfoque de **Pass the Key**, con un enfoque en apoderarse y utilizar el ticket directamente para fines de autenticación. Es crucial notar que la iniciación de una solicitud de TGT activa el evento `4768: A Kerberos authentication ticket (TGT) was requested`, lo que significa un uso de RC4-HMAC por defecto, aunque los sistemas Windows modernos prefieren AES256.
+Este método refleja el enfoque de **Pass the Key**, con un enfoque en apoderarse y utilizar el ticket directamente para fines de autenticación. Es crucial notar que la iniciación de una solicitud de TGT activa el evento `4768: Se solicitó un ticket de autenticación Kerberos (TGT)`, lo que significa un uso de RC4-HMAC por defecto, aunque los sistemas Windows modernos prefieren AES256.
 
 Para conformarse a la seguridad operativa y usar AES256, se puede aplicar el siguiente comando:
 ```bash

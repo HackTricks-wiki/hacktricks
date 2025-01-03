@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## AD Explorer
+## Explorador de AD
 
 [AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) es parte de Sysinternal Suite:
 
@@ -15,7 +15,7 @@ Se puede usar para descubrir vulnerabilidades sin conexión, o para comparar dif
 
 Se requerirá el nombre de usuario, la contraseña y la dirección para conectarse (se requiere cualquier usuario de AD).
 
-Para tomar una instantánea de AD, ve a `File` --> `Create Snapshot` y ingresa un nombre para la instantánea.
+Para tomar una instantánea de AD, ve a `File` --> `Create Snapshot` y entra un nombre para la instantánea.
 
 ## ADRecon
 

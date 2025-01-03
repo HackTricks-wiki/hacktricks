@@ -80,7 +80,7 @@ Hay dos tipos de tokens disponibles:
 - **Token de Suplantación**: Permite a una aplicación de servidor adoptar temporalmente la identidad del cliente para acceder a objetos seguros. Este mecanismo se estratifica en cuatro niveles de operación:
 - **Anónimo**: Otorga acceso al servidor similar al de un usuario no identificado.
 - **Identificación**: Permite al servidor verificar la identidad del cliente sin utilizarla para el acceso a objetos.
-- **Suplantación**: Permite al servidor operar bajo la identidad del cliente.
+- **Suplantación**: Habilita al servidor para operar bajo la identidad del cliente.
 - **Delegación**: Similar a la Suplantación, pero incluye la capacidad de extender esta asunción de identidad a sistemas remotos con los que el servidor interactúa, asegurando la preservación de credenciales.
 
 #### Tokens de Suplantación

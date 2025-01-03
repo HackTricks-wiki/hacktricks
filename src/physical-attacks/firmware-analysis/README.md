@@ -77,7 +77,7 @@ DECIMAL HEXADECIMAL DESCRIPTION
 1704052 0x1A0074 PackImg section delimiter tag, little endian size: 32256 bytes; big endian size: 8257536 bytes
 1704084 0x1A0094 Squashfs filesystem, little endian, version 4.0, compression:lzma, size: 8256900 bytes, 2688 inodes, blocksize: 131072 bytes, created: 2016-07-12 02:28:41
 ```
-Ejecuta el siguiente **comando dd** extrayendo el sistema de archivos Squashfs.
+Ejecuta el siguiente **comando dd** para extraer el sistema de archivos Squashfs.
 ```
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
@@ -164,11 +164,11 @@ Tanto el código fuente como los binarios compilados encontrados en el sistema d
 
 ## Emulando Firmware para Análisis Dinámico
 
-El proceso de emular firmware permite un **análisis dinámico** ya sea del funcionamiento de un dispositivo o de un programa individual. Este enfoque puede encontrar desafíos con dependencias de hardware o arquitectura, pero transferir el sistema de archivos raíz o binarios específicos a un dispositivo con arquitectura y endianness coincidentes, como una Raspberry Pi, o a una máquina virtual preconstruida, puede facilitar pruebas adicionales.
+El proceso de emular firmware permite un **análisis dinámico** ya sea de la operación de un dispositivo o de un programa individual. Este enfoque puede encontrar desafíos con dependencias de hardware o arquitectura, pero transferir el sistema de archivos raíz o binarios específicos a un dispositivo con arquitectura y endianness coincidentes, como una Raspberry Pi, o a una máquina virtual preconstruida, puede facilitar pruebas adicionales.
 
 ### Emulando Binarios Individuales
 
-Para examinar programas individuales, identificar el endianness y la arquitectura de CPU del programa es crucial.
+Para examinar programas individuales, es crucial identificar el endianness y la arquitectura de CPU del programa.
 
 #### Ejemplo con Arquitectura MIPS
 
@@ -192,7 +192,7 @@ Herramientas como [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware
 
 ## Análisis Dinámico en Práctica
 
-En esta etapa, se utiliza un entorno de dispositivo real o emulado para el análisis. Es esencial mantener acceso a la shell del sistema operativo y al sistema de archivos. La emulación puede no imitar perfectamente las interacciones de hardware, lo que requiere reinicios ocasionales de la emulación. El análisis debe revisar el sistema de archivos, explotar páginas web expuestas y servicios de red, y explorar vulnerabilidades del bootloader. Las pruebas de integridad del firmware son críticas para identificar posibles vulnerabilidades de puerta trasera.
+En esta etapa, se utiliza un entorno de dispositivo real o emulado para el análisis. Es esencial mantener acceso a la shell del sistema operativo y al sistema de archivos. La emulación puede no imitar perfectamente las interacciones de hardware, lo que requiere reinicios ocasionales de la emulación. El análisis debe revisar el sistema de archivos, explotar páginas web y servicios de red expuestos, y explorar vulnerabilidades del bootloader. Las pruebas de integridad del firmware son críticas para identificar posibles vulnerabilidades de puerta trasera.
 
 ## Técnicas de Análisis en Tiempo de Ejecución
 

@@ -17,8 +17,8 @@ Crea un [respaldo de android usando adb](../mobile-pentesting/android-app-pentes
 ### Si hay acceso root o conexión física a la interfaz JTAG
 
 - `cat /proc/partitions` (busca la ruta a la memoria flash, generalmente la primera entrada es _mmcblk0_ y corresponde a toda la memoria flash).
-- `df /data` (Descubre el tamaño del bloque del sistema).
-- dd if=/dev/block/mmcblk0 of=/sdcard/blk0.img bs=4096 (ejecuta con la información recopilada del tamaño del bloque).
+- `df /data` (Descubre el tamaño de bloque del sistema).
+- dd if=/dev/block/mmcblk0 of=/sdcard/blk0.img bs=4096 (ejecuta con la información recopilada del tamaño de bloque).
 
 ### Memoria
 

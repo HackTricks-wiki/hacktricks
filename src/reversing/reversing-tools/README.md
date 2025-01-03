@@ -7,7 +7,7 @@ En el ámbito de **WebAssembly**, las herramientas para **decompilar** y **compi
 ## Herramientas en Línea
 
 - Para **decompilar** Wasm a Wat, la herramienta disponible en [la demo wasm2wat de Wabt](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) es útil.
-- Para **compilar** Wat de vuelta a Wasm, [la demo wat2wasm de Wabt](https://webassembly.github.io/wabt/demo/wat2wasm/) cumple su propósito.
+- Para **compilar** Wat de vuelta a Wasm, [la demo wat2wasm de Wabt](https://webassembly.github.io/wabt/demo/wat2wasm/) cumple con el propósito.
 - Otra opción de decompilación se puede encontrar en [web-wasmdec](https://wwwg.github.io/web-wasmdec/).
 
 ## Soluciones de Software

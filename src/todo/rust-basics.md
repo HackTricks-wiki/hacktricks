@@ -30,7 +30,7 @@ Puedes usar funciones como `is_some()` o `is_none()` para verificar el valor de 
 
 ### Macros
 
-Las macros son más poderosas que las funciones porque se expanden para producir más código del que has escrito manualmente. Por ejemplo, una firma de función debe declarar el número y tipo de parámetros que tiene la función. Las macros, por otro lado, pueden tomar un número variable de parámetros: podemos llamar a `println!("hello")` con un argumento o `println!("hello {}", name)` con dos argumentos. Además, las macros se expanden antes de que el compilador interprete el significado del código, por lo que una macro puede, por ejemplo, implementar un trait en un tipo dado. Una función no puede, porque se llama en tiempo de ejecución y un trait necesita ser implementado en tiempo de compilación.
+Las macros son más poderosas que las funciones porque se expanden para producir más código del que has escrito manualmente. Por ejemplo, una firma de función debe declarar el número y tipo de parámetros que tiene la función. Las macros, por otro lado, pueden tomar un número variable de parámetros: podemos llamar a `println!("hello")` con un argumento o `println!("hello {}", name)` con dos argumentos. Además, las macros se expanden antes de que el compilador interprete el significado del código, por lo que una macro puede, por ejemplo, implementar un rasgo en un tipo dado. Una función no puede, porque se llama en tiempo de ejecución y un rasgo necesita ser implementado en tiempo de compilación.
 ```rust
 macro_rules! my_macro {
 () => {

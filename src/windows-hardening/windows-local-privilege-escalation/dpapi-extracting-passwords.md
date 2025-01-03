@@ -2,7 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## ¿Qué es DPAPI?
+
+
+## Qué es DPAPI
 
 La API de Protección de Datos (DPAPI) se utiliza principalmente dentro del sistema operativo Windows para la **cifrado simétrico de claves privadas asimétricas**, aprovechando ya sea secretos de usuario o del sistema como una fuente significativa de entropía. Este enfoque simplifica el cifrado para los desarrolladores al permitirles cifrar datos utilizando una clave derivada de los secretos de inicio de sesión del usuario o, para el cifrado del sistema, los secretos de autenticación del dominio del sistema, eliminando así la necesidad de que los desarrolladores gestionen la protección de la clave de cifrado ellos mismos.
 
@@ -12,9 +14,9 @@ Entre los datos personales protegidos por DPAPI se encuentran:
 
 - Contraseñas y datos de autocompletado de Internet Explorer y Google Chrome
 - Contraseñas de cuentas de correo electrónico y FTP interno para aplicaciones como Outlook y Windows Mail
-- Contraseñas para carpetas compartidas, recursos, redes inalámbricas y Windows Vault, incluyendo claves de cifrado
+- Contraseñas para carpetas compartidas, recursos, redes inalámbricas y Windows Vault, incluidas claves de cifrado
 - Contraseñas para conexiones de escritorio remoto, .NET Passport y claves privadas para diversos propósitos de cifrado y autenticación
-- Contraseñas de red gestionadas por el Administrador de Credenciales y datos personales en aplicaciones que utilizan CryptProtectData, como Skype, MSN messenger y más
+- Contraseñas de red gestionadas por Credential Manager y datos personales en aplicaciones que utilizan CryptProtectData, como Skype, MSN messenger y más
 
 ## List Vault
 ```bash
@@ -43,7 +45,7 @@ guidMasterKey      : {3e90dd9e-f901-40a1-b691-84d7f647b8fe}
 pbData             : b8f619[...snip...]b493fe
 [..]
 ```
-Puedes usar el **módulo mimikatz** `dpapi::cred` con el `/masterkey` apropiado para desencriptar:
+Puedes usar el **módulo mimikatz** `dpapi::cred` con el `/masterkey` apropiado para descifrar:
 ```
 dpapi::cred /in:C:\path\to\encrypted\file /masterkey:<MASTERKEY>
 ```
@@ -58,15 +60,15 @@ Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\
 Get-ChildItem -Hidden C:\Users\USER\AppData\Roaming\Microsoft\Protect\{SID}
 Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\{SID}
 ```
-Esto es lo que un montón de Claves Maestras de un usuario se verá:
+Esto es lo que un montón de Master Keys de un usuario se verá:
 
 ![](<../../images/image (1121).png>)
 
-Usualmente **cada clave maestra es una clave simétrica encriptada que puede desencriptar otro contenido**. Por lo tanto, **extraer** la **Clave Maestra encriptada** es interesante para **desencriptar** más tarde ese **otro contenido** encriptado con ella.
+Usualmente **cada master key es una clave simétrica encriptada que puede desencriptar otro contenido**. Por lo tanto, **extraer** la **Master Key encriptada** es interesante para **desencriptar** más tarde ese **otro contenido** encriptado con ella.
 
-### Extraer clave maestra y desencriptar
+### Extraer master key y desencriptar
 
-Consulta la publicación [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#extracting-dpapi-backup-keys-with-domain-admin) para un ejemplo de cómo extraer la clave maestra y desencriptarla.
+Consulta el post [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#extracting-dpapi-backup-keys-with-domain-admin) para un ejemplo de cómo extraer la master key y desencriptarla.
 
 ## SharpDPAPI
 
@@ -80,7 +82,7 @@ Consulta la publicación [https://www.ired.team/offensive-security/credential-ac
 
 ¡Con la lista de computadoras extraídas de LDAP puedes encontrar cada subred incluso si no las conocías!
 
-"Porque los derechos de Administrador de Dominio no son suficientes. Hackea a todos."
+"Porque los derechos de Domain Admin no son suficientes. Hackéalos a todos."
 
 ## DonPAPI
 

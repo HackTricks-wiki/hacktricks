@@ -22,7 +22,7 @@ smbexec.py WORKGROUP/genericuser:genericpassword@10.10.10.10
 
 ### Ejemplo de Comandos
 
-Crear y comenzar el servicio se puede lograr con los siguientes comandos:
+Crear e iniciar el servicio se puede lograr con los siguientes comandos:
 ```bash
 sc create [ServiceName] binPath= "cmd.exe /c [PayloadCommand]"
 sc start [ServiceName]

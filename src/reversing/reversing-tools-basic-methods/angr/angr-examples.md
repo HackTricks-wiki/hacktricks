@@ -386,7 +386,7 @@ main(sys.argv)
 > ```python
 >   # Hola mundo, mi nombre es John.
 >   # ^                       ^
->   # ^ dirección 0          ^ dirección 24 (cuente el número de caracteres)
+>   # ^ dirección 0             ^ dirección 24 (cuente el número de caracteres)
 >   # Para representar esto en memoria, querríamos escribir la cadena al
 >   # principio del archivo:
 >   #
@@ -408,7 +408,7 @@ main(sys.argv)
 
 > [!NOTE]
 > A veces, operaciones humanas simples como comparar 2 palabras de longitud 16 **carácter por carácter** (bucle), **cuestan** mucho a **angr** porque necesita generar ramas **exponencialmente** ya que genera 1 rama por cada if: `2^16`\
-> Por lo tanto, es más fácil **pedir a angr que regrese a un punto anterior** (donde la parte realmente difícil ya se había hecho) y **establecer esas restricciones manualmente**.
+> Por lo tanto, es más fácil **pedir a angr que regrese a un punto anterior** (donde la parte realmente difícil ya fue hecha) y **establecer esas restricciones manualmente**.
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:

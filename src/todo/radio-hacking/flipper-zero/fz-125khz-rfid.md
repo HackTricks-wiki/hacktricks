@@ -24,7 +24,7 @@ Intenta **leer** la información de la tarjeta. Luego puede **emularlas**.
 
 ### Add Manually
 
-Puedes crear **tarjetas falsas en Flipper Zero indicando los datos** que ingresas manualmente y luego emularla.
+Puedes crear **tarjetas falsas en Flipper Zero indicando los datos** manualmente y luego emularla.
 
 #### IDs on cards
 
@@ -32,7 +32,7 @@ A veces, cuando obtienes una tarjeta, encontrarás el ID (o parte de él) escrit
 
 - **EM Marin**
 
-Por ejemplo, en esta tarjeta EM-Marin, en la tarjeta física es posible **leer los últimos 3 de 5 bytes en claro**.\
+Por ejemplo, en esta tarjeta EM-Marin es posible **leer los últimos 3 de 5 bytes en claro**.\
 Los otros 2 pueden ser forzados por fuerza bruta si no puedes leerlos de la tarjeta.
 
 <figure><img src="../../../images/image (104).png" alt=""><figcaption></figcaption></figure>

@@ -26,20 +26,20 @@ Los bits se codifican modulando la duración del espacio entre pulsos. El ancho 
 
 **2. Codificación por Ancho de Pulso**
 
-Los bits se codifican mediante la modulación del ancho del pulso. El ancho del espacio después de la explosión de pulso es constante.
+Los bits se codifican mediante la modulación del ancho del pulso. El ancho del espacio después de la ráfaga de pulso es constante.
 
 <figure><img src="../../images/image (282).png" alt=""><figcaption></figcaption></figure>
 
 **3. Codificación por Fase**
 
-También se conoce como codificación Manchester. El valor lógico se define por la polaridad de la transición entre la explosión de pulso y el espacio. "Espacio a explosión de pulso" denota lógica "0", "explosión de pulso a espacio" denota lógica "1".
+También se conoce como codificación Manchester. El valor lógico se define por la polaridad de la transición entre la ráfaga de pulso y el espacio. "Espacio a ráfaga de pulso" denota lógica "0", "ráfaga de pulso a espacio" denota lógica "1".
 
 <figure><img src="../../images/image (634).png" alt=""><figcaption></figcaption></figure>
 
 **4. Combinación de las anteriores y otras exóticas**
 
 > [!NOTE]
-> Hay protocolos IR que están **tratando de volverse universales** para varios tipos de dispositivos. Los más famosos son RC5 y NEC. Desafortunadamente, el más famoso **no significa el más común**. En mi entorno, solo encontré dos controles remotos NEC y ninguno RC5.
+> Hay protocolos IR que están **intentando volverse universales** para varios tipos de dispositivos. Los más famosos son RC5 y NEC. Desafortunadamente, lo más famoso **no significa lo más común**. En mi entorno, solo encontré dos controles remotos NEC y ninguno RC5.
 >
 > A los fabricantes les encanta usar sus propios protocolos IR únicos, incluso dentro de la misma gama de dispositivos (por ejemplo, cajas de TV). Por lo tanto, los controles remotos de diferentes empresas y a veces de diferentes modelos de la misma empresa, no pueden trabajar con otros dispositivos del mismo tipo.
 
@@ -55,11 +55,11 @@ Luego se transmiten los datos. La estructura, el preámbulo y el método de codi
 
 El **protocolo IR NEC** contiene un comando corto y un código de repetición, que se envía mientras se presiona el botón. Tanto el comando como el código de repetición tienen el mismo preámbulo al principio.
 
-El **comando NEC**, además del preámbulo, consiste en un byte de dirección y un byte de número de comando, por el cual el dispositivo entiende qué debe realizar. Los bytes de dirección y número de comando se duplican con valores inversos, para verificar la integridad de la transmisión. Hay un bit de parada adicional al final del comando.
+El **comando NEC**, además del preámbulo, consiste en un byte de dirección y un byte de número de comando, por el cual el dispositivo entiende qué debe realizarse. Los bytes de dirección y número de comando se duplican con valores inversos, para verificar la integridad de la transmisión. Hay un bit de parada adicional al final del comando.
 
 El **código de repetición** tiene un "1" después del preámbulo, que es un bit de parada.
 
-Para **lógica "0" y "1"** NEC utiliza Codificación por Distancia de Pulso: primero, se transmite una explosión de pulso después de la cual hay una pausa, cuya longitud establece el valor del bit.
+Para **lógica "0" y "1"** NEC utiliza Codificación por Distancia de Pulso: primero, se transmite una ráfaga de pulso después de la cual hay una pausa, cuya longitud establece el valor del bit.
 
 ### Aires Acondicionados
 

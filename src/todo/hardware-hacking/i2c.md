@@ -155,7 +155,7 @@ NACK
 ```
 ### Sniffer
 
-En este escenario vamos a esnifar la comunicación I2C entre el arduino y la EPROM anterior, solo necesitas comunicar ambos dispositivos y luego conectar el bus pirate a los pines SCL, SDA y GND:
+En este escenario vamos a espiar la comunicación I2C entre el arduino y la EPROM anterior, solo necesitas comunicar ambos dispositivos y luego conectar el bus pirate a los pines SCL, SDA y GND:
 
 ![](<../../images/image (166).png>)
 ```bash

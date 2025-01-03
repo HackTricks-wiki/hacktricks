@@ -4,7 +4,7 @@
 
 ### Búsqueda de componentes COM no existentes
 
-Dado que los valores de HKCU pueden ser modificados por los usuarios, **COM Hijacking** podría ser utilizado como un **mecanismo persistente**. Usando `procmon` es fácil encontrar registros COM buscados que no existen y que un atacante podría crear para persistir. Filtros:
+Dado que los valores de HKCU pueden ser modificados por los usuarios, **COM Hijacking** podría ser utilizado como un **mecanismo persistente**. Usando `procmon`, es fácil encontrar registros COM buscados que no existen y que un atacante podría crear para persistir. Filtros:
 
 - Operaciones de **RegOpenKey**.
 - donde el _Resultado_ es **NOMBRE NO ENCONTRADO**.
@@ -18,7 +18,7 @@ New-ItemProperty -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F
 ```
 ### Componentes COM del Programador de Tareas que se pueden secuestrar
 
-Las Tareas de Windows utilizan Disparadores Personalizados para llamar a objetos COM y, debido a que se ejecutan a través del Programador de Tareas, es más fácil predecir cuándo se activarán.
+Las Tareas de Windows utilizan Disparadores Personalizados para llamar a objetos COM y, dado que se ejecutan a través del Programador de Tareas, es más fácil predecir cuándo se activarán.
 
 <pre class="language-powershell"><code class="lang-powershell"># Mostrar CLSIDs de COM
 $Tasks = Get-ScheduledTask

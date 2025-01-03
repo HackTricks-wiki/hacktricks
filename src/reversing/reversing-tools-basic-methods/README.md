@@ -57,7 +57,7 @@ File.AppendAllText(path, "Password: " + password + "\n");
 
 Para depurar código usando DNSpy, necesitas:
 
-Primero, cambia los **atributos de la Asamblea** relacionados con la **depuración**:
+Primero, cambia los **atributos de ensamblado** relacionados con la **depuración**:
 
 ![](<../../images/image (973).png>)
 ```aspnet
@@ -78,7 +78,7 @@ Luego guarda el nuevo archivo a través de _**Archivo >> Guardar módulo...**_:
 
 ![](<../../images/image (602).png>)
 
-Esto es necesario porque si no lo haces, en **tiempo de ejecución** se aplicarán varias **optimizaciones** al código y podría ser posible que mientras depuras un **punto de interrupción nunca se active** o algunas **variables no existan**.
+Esto es necesario porque si no lo haces, en **tiempo de ejecución** se aplicarán varias **optimizaciones** al código y podría ser posible que mientras depuras un **punto de interrupción nunca se active** o que algunas **variables no existan**.
 
 Luego, si tu aplicación .NET está siendo **ejecutada** por **IIS**, puedes **reiniciarla** con:
 ```
@@ -125,22 +125,22 @@ Haz clic derecho en cualquier módulo en **Assembly Explorer** y haz clic en **S
 
 ![](<../../images/image (704).png>)
 
-Luego, cuando comiences a depurar **la ejecución se detendrá cuando se cargue cada DLL**, luego, cuando rundll32 cargue tu DLL, la ejecución se detendrá.
+Luego, cuando comiences a depurar, **la ejecución se detendrá cuando se cargue cada DLL**, luego, cuando rundll32 cargue tu DLL, la ejecución se detendrá.
 
 Pero, ¿cómo puedes llegar al código de la DLL que fue cargada? Usando este método, no sé cómo.
 
 ### Usando x64dbg/x32dbg
 
 - **Cargar rundll32** (64 bits en C:\Windows\System32\rundll32.exe y 32 bits en C:\Windows\SysWOW64\rundll32.exe)
-- **Cambiar la Línea de Comando** (_File --> Change Command Line_) y establecer la ruta de la dll y la función que deseas llamar, por ejemplo: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
+- **Cambiar la línea de comandos** (_File --> Change Command Line_) y establecer la ruta de la dll y la función que deseas llamar, por ejemplo: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
 - Cambiar _Options --> Settings_ y seleccionar "**DLL Entry**".
 - Luego **iniciar la ejecución**, el depurador se detendrá en cada main de dll, en algún momento te **detendrás en la entrada de la dll de tu dll**. Desde allí, solo busca los puntos donde deseas poner un punto de interrupción.
 
-Ten en cuenta que cuando la ejecución se detiene por cualquier razón en win64dbg puedes ver **en qué código estás** mirando en **la parte superior de la ventana de win64dbg**:
+Ten en cuenta que cuando la ejecución se detiene por cualquier razón en win64dbg, puedes ver **en qué código estás** mirando en **la parte superior de la ventana de win64dbg**:
 
 ![](<../../images/image (842).png>)
 
-Luego, mirando esto puedes ver cuándo se detuvo la ejecución en la dll que deseas depurar.
+Luego, mirando esto, puedes ver cuándo se detuvo la ejecución en la dll que deseas depurar.
 
 ## Aplicaciones GUI / Videojuegos
 
@@ -150,7 +150,7 @@ Luego, mirando esto puedes ver cuándo se detuvo la ejecución en la dll que des
 cheat-engine.md
 {{#endref}}
 
-[**PiNCE**](https://github.com/korcankaraokcu/PINCE) es una herramienta de front-end/reverse engineering para el Depurador del Proyecto GNU (GDB), enfocada en juegos. Sin embargo, se puede usar para cualquier cosa relacionada con la ingeniería inversa.
+[**PiNCE**](https://github.com/korcankaraokcu/PINCE) es una herramienta de front-end/reverse engineering para el depurador del Proyecto GNU (GDB), enfocada en juegos. Sin embargo, se puede usar para cualquier cosa relacionada con la ingeniería inversa.
 
 [**Decompiler Explorer**](https://dogbolt.org/) es un front-end web para varios descompiladores. Este servicio web te permite comparar la salida de diferentes descompiladores en pequeños ejecutables.
 
@@ -174,7 +174,7 @@ blobrunner.md
 
 ### Depurando un shellcode con jmp2it
 
-[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) es muy similar a blobrunner. **Asignará** el **shellcode** dentro de un espacio de memoria y comenzará un **bucle eterno**. Luego necesitas **adjuntar el depurador** al proceso, **jugar iniciar esperar 2-5 segundos y presionar detener** y te encontrarás dentro del **bucle eterno**. Salta a la siguiente instrucción del bucle eterno ya que será una llamada al shellcode, y finalmente te encontrarás ejecutando el shellcode.
+[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) es muy similar a blobrunner. **Asignará** el **shellcode** dentro de un espacio de memoria y comenzará un **bucle eterno**. Luego necesitas **adjuntar el depurador** al proceso, **presionar iniciar, esperar 2-5 segundos y presionar detener** y te encontrarás dentro del **bucle eterno**. Salta a la siguiente instrucción del bucle eterno, ya que será una llamada al shellcode, y finalmente te encontrarás ejecutando el shellcode.
 
 ![](<../../images/image (509).png>)
 
@@ -184,7 +184,7 @@ Puedes descargar una versión compilada de [jmp2it en la página de lanzamientos
 
 [**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) es la GUI de radare. Usando cutter puedes emular el shellcode e inspeccionarlo dinámicamente.
 
-Ten en cuenta que Cutter te permite "Abrir Archivo" y "Abrir Shellcode". En mi caso, cuando abrí el shellcode como un archivo, lo descompiló correctamente, pero cuando lo abrí como un shellcode no lo hizo:
+Ten en cuenta que Cutter te permite "Abrir archivo" y "Abrir shellcode". En mi caso, cuando abrí el shellcode como un archivo, lo descompiló correctamente, pero cuando lo abrí como un shellcode no lo hizo:
 
 ![](<../../images/image (562).png>)
 
@@ -368,8 +368,8 @@ DAT_030000d8 = DAT_030000d8 + 0x3a;
 ```
 En el código anterior, puedes ver que estamos comparando **uVar1** (el lugar donde está el **valor del botón presionado**) con algunos valores:
 
-- Primero, se compara con el **valor 4** (botón **SELECT**): En el desafío, este botón borra la pantalla.
-- Luego, se compara con el **valor 8** (botón **START**): En el desafío, esto verifica si el código es válido para obtener la bandera.
+- Primero, se compara con el **valor 4** (**botón SELECT**): En el desafío, este botón borra la pantalla.
+- Luego, se compara con el **valor 8** (**botón START**): En el desafío, esto verifica si el código es válido para obtener la bandera.
 - En este caso, la var **`DAT_030000d8`** se compara con 0xf3 y si el valor es el mismo, se ejecuta algún código.
 - En cualquier otro caso, se verifica algún cont (`DAT_030000d4`). Es un cont porque se suma 1 justo después de entrar en el código.\
 **Si** es menor que 8, se realiza algo que involucra **sumar** valores a \*\*`DAT_030000d8` \*\* (básicamente, se suman los valores de las teclas presionadas en esta variable siempre que el cont sea menor que 8).

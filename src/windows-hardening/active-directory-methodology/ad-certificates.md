@@ -37,7 +37,7 @@ AD CS reconoce los certificados de CA en un bosque de AD a través de contenedor
 3. La CA evalúa el CSR en función de las plantillas de certificados disponibles, emitiendo el certificado según los permisos de la plantilla.
 4. Tras la aprobación, la CA firma el certificado con su clave privada y se lo devuelve al cliente.
 
-### Plantillas de Certificados
+### Plantillas de Certificado
 
 Definidas dentro de AD, estas plantillas describen la configuración y permisos para emitir certificados, incluyendo EKUs permitidos y derechos de inscripción o modificación, críticos para gestionar el acceso a los servicios de certificados.
 
@@ -47,19 +47,19 @@ El proceso de inscripción para certificados es iniciado por un administrador qu
 
 Para que un cliente solicite un certificado, deben otorgarse **derechos de inscripción**. Estos derechos están definidos por descriptores de seguridad en la plantilla de certificado y en la CA Empresarial misma. Los permisos deben otorgarse en ambos lugares para que una solicitud sea exitosa.
 
-### Derechos de Inscripción de Plantillas
+### Derechos de Inscripción de Plantilla
 
 Estos derechos se especifican a través de Entradas de Control de Acceso (ACEs), detallando permisos como:
 
 - Derechos de **Inscripción de Certificado** y **Autoinscripción de Certificado**, cada uno asociado con GUIDs específicos.
 - **Derechos Extendidos**, que permiten todos los permisos extendidos.
-- **ControlTotal/TodosGenéricos**, proporcionando control completo sobre la plantilla.
+- **ControlTotal/TodosGenericos**, proporcionando control completo sobre la plantilla.
 
 ### Derechos de Inscripción de CA Empresarial
 
 Los derechos de la CA están delineados en su descriptor de seguridad, accesible a través de la consola de gestión de la Autoridad de Certificación. Algunas configuraciones incluso permiten a usuarios con bajos privilegios acceso remoto, lo que podría ser una preocupación de seguridad.
 
-### Controles Adicionales de Emisión
+### Controles de Emisión Adicionales
 
 Ciertos controles pueden aplicarse, como:
 

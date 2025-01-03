@@ -35,7 +35,7 @@ A veces podrás encontrar esos pines marcados en el PCB. En otras ocasiones, pod
 
 La forma más rápida pero más cara de detectar puertos JTAG es utilizando el **JTAGulator**, un dispositivo creado específicamente para este propósito (aunque también puede **detectar salidas de UART**).
 
-Tiene **24 canales** a los que puedes conectar los pines de las placas. Luego realiza un **ataque BF** de todas las combinaciones posibles enviando comandos de escaneo de límites **IDCODE** y **BYPASS**. Si recibe una respuesta, muestra el canal correspondiente a cada señal JTAG.
+Tiene **24 canales** que puedes conectar a los pines de las placas. Luego realiza un **ataque BF** de todas las combinaciones posibles enviando comandos de escaneo de límites **IDCODE** y **BYPASS**. Si recibe una respuesta, muestra el canal correspondiente a cada señal JTAG.
 
 Una forma más barata pero mucho más lenta de identificar salidas JTAG es utilizando [**JTAGenum**](https://github.com/cyphunk/JTAGenum/) cargado en un microcontrolador compatible con Arduino.
 

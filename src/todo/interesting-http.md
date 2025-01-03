@@ -30,6 +30,6 @@ Puedes anular esta regla utilizando una etiqueta meta HTML (el atacante necesita
 ```
 ## Defensa
 
-Nunca pongas datos sensibles dentro de los parámetros GET o rutas en la URL.
+Nunca pongas datos sensibles dentro de parámetros GET o rutas en la URL.
 
 {{#include ../banners/hacktricks-training.md}}

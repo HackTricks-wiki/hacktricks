@@ -15,7 +15,7 @@ Una regla clave es que los objetos no pueden ser modificados por procesos con un
 - **Sistema**: El nivel operativo más alto para el núcleo de Windows y servicios centrales, fuera del alcance incluso para administradores, asegurando la protección de funciones vitales del sistema.
 - **Instalador**: Un nivel único que se encuentra por encima de todos los demás, permitiendo a los objetos en este nivel desinstalar cualquier otro objeto.
 
-Puedes obtener el nivel de integridad de un proceso usando **Process Explorer** de **Sysinternals**, accediendo a las **propiedades** del proceso y viendo la pestaña "**Seguridad**":
+Puedes obtener el nivel de integridad de un proceso usando **Process Explorer** de **Sysinternals**, accediendo a las **propiedades** del proceso y viendo la pestaña de "**Seguridad**":
 
 ![](<../../images/image (824).png>)
 
@@ -52,7 +52,7 @@ NT AUTHORITY\SERVICE:(I)(M,DC)
 NT AUTHORITY\BATCH:(I)(M,DC)
 Mandatory Label\High Mandatory Level:(NW)
 ```
-Aquí es donde las cosas se ponen interesantes. Puedes ver que el usuario `DESKTOP-IDJHTKP\user` tiene **privilegios COMPLETOS** sobre el archivo (de hecho, este fue el usuario que creó el archivo), sin embargo, debido al nivel de integridad mínimo implementado, no podrá modificar el archivo a menos que esté ejecutándose dentro de un Alto Nivel de Integridad (ten en cuenta que podrá leerlo):
+Aquí es donde las cosas se ponen interesantes. Puedes ver que el usuario `DESKTOP-IDJHTKP\user` tiene **privilegios COMPLETOS** sobre el archivo (de hecho, este fue el usuario que creó el archivo), sin embargo, debido al nivel de integridad mínimo implementado, no podrá modificar el archivo a menos que esté ejecutándose dentro de un Nivel de Integridad Alto (ten en cuenta que podrá leerlo):
 ```
 echo 1234 > asd.txt
 Access is denied.
@@ -76,15 +76,15 @@ APPLICATION PACKAGE AUTHORITY\ALL APPLICATION PACKAGES:(I)(RX)
 APPLICATION PACKAGE AUTHORITY\ALL RESTRICTED APP PACKAGES:(I)(RX)
 Mandatory Label\Low Mandatory Level:(NW)
 ```
-Ahora, cuando ejecuto `cmd-low.exe`, **se ejecutará bajo un nivel de integridad bajo** en lugar de uno medio:
+Ahora, cuando ejecuto `cmd-low.exe` se **ejecutará bajo un nivel de integridad bajo** en lugar de uno medio:
 
 ![](<../../images/image (313).png>)
 
-Para los curiosos, si asignas un nivel de integridad alto a un binario (`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`), no se ejecutará automáticamente con un nivel de integridad alto (si lo invocas desde un nivel de integridad medio --por defecto-- se ejecutará bajo un nivel de integridad medio).
+Para los curiosos, si asignas un nivel de integridad alto a un binario (`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`) no se ejecutará automáticamente con un nivel de integridad alto (si lo invocas desde un nivel de integridad medio --por defecto-- se ejecutará bajo un nivel de integridad medio).
 
 ### Niveles de Integridad en Procesos
 
-No todos los archivos y carpetas tienen un nivel de integridad mínimo, **pero todos los procesos se ejecutan bajo un nivel de integridad**. Y similar a lo que ocurrió con el sistema de archivos, **si un proceso quiere escribir dentro de otro proceso, debe tener al menos el mismo nivel de integridad**. Esto significa que un proceso con un nivel de integridad bajo no puede abrir un manejador con acceso total a un proceso con un nivel de integridad medio.
+No todos los archivos y carpetas tienen un nivel de integridad mínimo, **pero todos los procesos se ejecutan bajo un nivel de integridad**. Y similar a lo que ocurrió con el sistema de archivos, **si un proceso quiere escribir dentro de otro proceso debe tener al menos el mismo nivel de integridad**. Esto significa que un proceso con un nivel de integridad bajo no puede abrir un manejador con acceso total a un proceso con un nivel de integridad medio.
 
 Debido a las restricciones comentadas en esta y la sección anterior, desde un punto de vista de seguridad, siempre es **recomendado ejecutar un proceso en el nivel de integridad más bajo posible**.
 

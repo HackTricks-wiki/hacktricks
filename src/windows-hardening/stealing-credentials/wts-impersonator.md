@@ -1,6 +1,6 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-La herramienta **WTS Impersonator** explota el **"\\pipe\LSM_API_service"** RPC Named pipe para enumerar sigilosamente a los usuarios conectados y secuestrar sus tokens, eludiendo las técnicas tradicionales de Impersonación de Tokens. Este enfoque facilita movimientos laterales sin problemas dentro de las redes. La innovación detrás de esta técnica se atribuye a **Omri Baso, cuyo trabajo es accesible en [GitHub](https://github.com/OmriBaso/WTSImpersonator)**.
+La herramienta **WTS Impersonator** explota el **"\\pipe\LSM_API_service"** RPC Named pipe para enumerar sigilosamente a los usuarios conectados y secuestrar sus tokens, eludiendo las técnicas tradicionales de suplantación de tokens. Este enfoque facilita movimientos laterales sin problemas dentro de las redes. La innovación detrás de esta técnica se atribuye a **Omri Baso, cuyo trabajo es accesible en [GitHub](https://github.com/OmriBaso/WTSImpersonator)**.
 
 ### Funcionalidad Principal
 
@@ -21,7 +21,7 @@ WTSEnumerateSessionsA → WTSQuerySessionInformationA → WTSQueryUserToken → 
 .\WTSImpersonator.exe -m enum -s 192.168.40.131
 ```
 
-- **Ejecutando Comandos**: Los módulos `exec` y `exec-remote` requieren un contexto de **Servicio** para funcionar. La ejecución local simplemente necesita el ejecutable WTSImpersonator y un comando:
+- **Ejecutando Comandos**: Los módulos `exec` y `exec-remote` requieren un contexto de **Servicio** para funcionar. La ejecución local simplemente necesita el ejecutable de WTSImpersonator y un comando:
 
 - Ejemplo para la ejecución de comandos local:
 ```powershell

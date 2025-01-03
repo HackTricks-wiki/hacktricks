@@ -14,7 +14,7 @@ Usualmente, iButton implica la forma física de la clave y el lector: una moneda
 
 <figure><img src="../../images/image (1078).png" alt=""><figcaption></figcaption></figure>
 
-Cuando la clave llega al lector, **los contactos se tocan** y la clave se alimenta para **transmitir** su ID. A veces, la clave **no se lee** de inmediato porque el **PSD de contacto de un intercomunicador es más grande** de lo que debería ser. Así que los contornos exteriores de la clave y el lector no podrían tocarse. Si ese es el caso, tendrás que presionar la clave sobre una de las paredes del lector.
+Cuando la clave llega al lector, los **contactos se tocan** y la clave se alimenta para **transmitir** su ID. A veces, la clave **no se lee** de inmediato porque el **PSD de contacto de un intercomunicador es más grande** de lo que debería ser. Así que los contornos exteriores de la clave y el lector no podrían tocarse. Si ese es el caso, tendrás que presionar la clave sobre una de las paredes del lector.
 
 <figure><img src="../../images/image (290).png" alt=""><figcaption></figcaption></figure>
 

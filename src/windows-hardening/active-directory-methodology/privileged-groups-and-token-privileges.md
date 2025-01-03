@@ -22,7 +22,7 @@ Agregar nuevos usuarios está permitido, así como el inicio de sesión local en
 
 La lista de control de acceso (ACL) del grupo **AdminSDHolder** es crucial, ya que establece permisos para todos los "grupos protegidos" dentro de Active Directory, incluidos los grupos de alto privilegio. Este mecanismo garantiza la seguridad de estos grupos al prevenir modificaciones no autorizadas.
 
-Un atacante podría explotar esto modificando la ACL del grupo **AdminSDHolder**, otorgando permisos completos a un usuario estándar. Esto le daría efectivamente a ese usuario control total sobre todos los grupos protegidos. Si los permisos de este usuario son alterados o eliminados, se restablecerían automáticamente dentro de una hora debido al diseño del sistema.
+Un atacante podría explotar esto modificando la ACL del grupo **AdminSDHolder**, otorgando permisos completos a un usuario estándar. Esto le daría efectivamente a ese usuario control total sobre todos los grupos protegidos. Si los permisos de este usuario se alteran o eliminan, se restablecerían automáticamente dentro de una hora debido al diseño del sistema.
 
 Los comandos para revisar los miembros y modificar permisos incluyen:
 ```powershell
@@ -54,7 +54,7 @@ Este comando revela que `Server Operators` tienen acceso completo, lo que permit
 
 ## Backup Operators
 
-La membresía en el grupo `Backup Operators` proporciona acceso al sistema de archivos de `DC01` debido a los privilegios `SeBackup` y `SeRestore`. Estos privilegios permiten la navegación por carpetas, la enumeración y la capacidad de copiar archivos, incluso sin permisos explícitos, utilizando la bandera `FILE_FLAG_BACKUP_SEMANTICS`. Es necesario utilizar scripts específicos para este proceso.
+La membresía en el grupo `Backup Operators` proporciona acceso al sistema de archivos `DC01` debido a los privilegios `SeBackup` y `SeRestore`. Estos privilegios permiten la navegación por carpetas, la enumeración y la capacidad de copiar archivos, incluso sin permisos explícitos, utilizando la bandera `FILE_FLAG_BACKUP_SEMANTICS`. Es necesario utilizar scripts específicos para este proceso.
 
 Para listar los miembros del grupo, ejecute:
 ```powershell
@@ -102,7 +102,7 @@ exit
 ```cmd
 Copy-FileSeBackupPrivilege E:\Windows\NTDS\ntds.dit C:\Tools\ntds.dit
 ```
-Alternativamente, utiliza `robocopy` para copiar archivos:
+Alternativamente, usa `robocopy` para copiar archivos:
 ```cmd
 robocopy /B F:\Windows\NTDS .\ntds ntds.dit
 ```
@@ -126,7 +126,7 @@ wbadmin get versions
 echo "Y" | wbadmin start recovery -version:<date-time> -itemtype:file -items:c:\windows\ntds\ntds.dit -recoverytarget:C:\ -notrestoreacl
 ```
 
-Para una demostración práctica, consulta [VIDEO DEMOSTRATIVO CON IPPSEC](https://www.youtube.com/watch?v=IfCysW0Od8w&t=2610s).
+Para una demostración práctica, consulta [DEMO VIDEO WITH IPPSEC](https://www.youtube.com/watch?v=IfCysW0Od8w&t=2610s).
 
 ## DnsAdmins
 
@@ -201,15 +201,15 @@ sc.exe start MozillaMaintenance
 ```
 Nota: La explotación de enlaces duros ha sido mitigada en las actualizaciones recientes de Windows.
 
-## Gestión de la Organización
+## Organización de la Gestión
 
-En entornos donde se despliega **Microsoft Exchange**, un grupo especial conocido como **Organización Management** tiene capacidades significativas. Este grupo tiene privilegios para **acceder a los buzones de todos los usuarios del dominio** y mantiene **control total sobre la Unidad Organizativa (OU) 'Microsoft Exchange Security Groups'**. Este control incluye el grupo **`Exchange Windows Permissions`**, que puede ser explotado para la escalación de privilegios.
+En entornos donde se despliega **Microsoft Exchange**, un grupo especial conocido como **Organización de Gestión** posee capacidades significativas. Este grupo tiene privilegios para **acceder a los buzones de todos los usuarios del dominio** y mantiene **control total sobre la Unidad Organizativa (OU) 'Grupos de Seguridad de Microsoft Exchange'**. Este control incluye el grupo **`Exchange Windows Permissions`**, que puede ser explotado para la escalación de privilegios.
 
 ### Explotación de Privilegios y Comandos
 
 #### Operadores de Impresión
 
-Los miembros del grupo **Print Operators** están dotados de varios privilegios, incluyendo el **`SeLoadDriverPrivilege`**, que les permite **iniciar sesión localmente en un Controlador de Dominio**, apagarlo y gestionar impresoras. Para explotar estos privilegios, especialmente si **`SeLoadDriverPrivilege`** no es visible en un contexto no elevado, es necesario eludir el Control de Cuentas de Usuario (UAC).
+Los miembros del grupo **Operadores de Impresión** están dotados de varios privilegios, incluyendo el **`SeLoadDriverPrivilege`**, que les permite **iniciar sesión localmente en un Controlador de Dominio**, apagarlo y gestionar impresoras. Para explotar estos privilegios, especialmente si **`SeLoadDriverPrivilege`** no es visible en un contexto no elevado, es necesario eludir el Control de Cuentas de Usuario (UAC).
 
 Para listar los miembros de este grupo, se utiliza el siguiente comando de PowerShell:
 ```powershell
@@ -233,11 +233,11 @@ Los miembros pueden acceder a PCs a través de **Windows Remote Management (WinR
 Get-NetGroupMember -Identity "Remote Management Users" -Recurse
 Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Management Users"
 ```
-Para técnicas de explotación relacionadas con **WinRM**, se debe consultar la documentación específica.
+Para las técnicas de explotación relacionadas con **WinRM**, se debe consultar la documentación específica.
 
 #### Operadores de Servidor
 
-Este grupo tiene permisos para realizar varias configuraciones en Controladores de Dominio, incluyendo privilegios de respaldo y restauración, cambiar la hora del sistema y apagar el sistema. Para enumerar los miembros, el comando proporcionado es:
+Este grupo tiene permisos para realizar varias configuraciones en los Controladores de Dominio, incluyendo privilegios de copia de seguridad y restauración, cambio de hora del sistema y apagado del sistema. Para enumerar los miembros, el comando proporcionado es:
 ```powershell
 Get-NetGroupMember -Identity "Server Operators" -Recurse
 ```

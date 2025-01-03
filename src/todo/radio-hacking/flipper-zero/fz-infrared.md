@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Intro <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
+## Introducción <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
 
 Para más información sobre cómo funciona el infrarrojo, consulta:
 
@@ -16,7 +16,7 @@ Flipper utiliza un receptor de señal IR digital TSOP, que **permite interceptar
 
 El **receptor infrarrojo de Flipper es bastante sensible**. Incluso puedes **captar la señal** mientras te mantienes **en algún lugar entre** el control remoto y el televisor. No es necesario apuntar el control remoto directamente al puerto IR de Flipper. Esto es útil cuando alguien está cambiando de canal mientras está cerca del televisor, y tanto tú como Flipper están a cierta distancia.
 
-Como la **decodificación de la señal infrarroja** ocurre del lado del **software**, Flipper Zero potencialmente soporta la **recepción y transmisión de cualquier código remoto IR**. En el caso de protocolos **desconocidos** que no se pueden reconocer, **graba y reproduce** la señal en bruto exactamente como se recibió.
+Como la **decodificación de la señal infrarroja** ocurre del lado del **software**, Flipper Zero potencialmente soporta la **recepción y transmisión de cualquier código remoto IR**. En el caso de **protocolos desconocidos** que no se pueden reconocer, **graba y reproduce** la señal en bruto exactamente como se recibió.
 
 ## Acciones
 
@@ -26,7 +26,7 @@ Flipper Zero puede ser utilizado como un **control remoto universal para control
 
 Basta con presionar el botón de encendido en el modo de Control Remoto Universal, y Flipper **enviará secuencialmente comandos de "Apagar"** de todos los televisores que conoce: Sony, Samsung, Panasonic... y así sucesivamente. Cuando el televisor recibe su señal, reaccionará y se apagará.
 
-Tal fuerza bruta toma tiempo. Cuanto más grande sea el diccionario, más tiempo tomará terminar. Es imposible averiguar qué señal exactamente reconoció el televisor, ya que no hay retroalimentación del televisor.
+Tal ataque de fuerza bruta toma tiempo. Cuanto más grande sea el diccionario, más tiempo tomará terminar. Es imposible averiguar qué señal exactamente reconoció el televisor, ya que no hay retroalimentación del televisor.
 
 ### Aprender Nuevo Control Remoto
 

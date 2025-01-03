@@ -15,7 +15,7 @@ El proceso se describe en los pasos a continuación, ilustrando cómo se manipul
 
 Suponiendo que hay una carga útil ejecutable (creada con msfvenom y ofuscada usando Veil para evadir la detección de antivirus), llamada 'met8888.exe', que representa una carga útil de meterpreter reverse_http, se llevan a cabo los siguientes pasos:
 
-- **Copia del binario**: El ejecutable se copia al recurso compartido ADMIN$ desde un símbolo del sistema, aunque puede colocarse en cualquier parte del sistema de archivos para permanecer oculto.
+- **Copia del binario**: El ejecutable se copia en el recurso compartido ADMIN$ desde un símbolo del sistema, aunque puede colocarse en cualquier parte del sistema de archivos para permanecer oculto.
 
 - **Creación de un servicio**: Utilizando el comando `sc` de Windows, que permite consultar, crear y eliminar servicios de Windows de forma remota, se crea un servicio llamado "meterpreter" que apunta al binario subido.
 
@@ -23,7 +23,7 @@ Suponiendo que hay una carga útil ejecutable (creada con msfvenom y ofuscada us
 
 La observación del listener de Metasploit revelará que la sesión se ha iniciado con éxito.
 
-[Learn more about the `sc` command](https://technet.microsoft.com/en-us/library/bb490995.aspx).
+[Aprende más sobre el comando `sc`](https://technet.microsoft.com/en-us/library/bb490995.aspx).
 
 Encuentra pasos más detallados en: [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 

@@ -29,7 +29,7 @@ En caso de que el precio baje, el gestor de fondos obtendrá beneficios porque v
 
 ### Futuros Perpetuos
 
-**Estos son "futuros" que durarán indefinidamente** (sin una fecha de contrato final). Es muy común encontrarlos, por ejemplo, en intercambios de criptomonedas donde puedes entrar y salir de futuros basados en el precio de las criptos.
+**Estos son "futuros" que durarán indefinidamente** (sin una fecha de contrato final). Es muy común encontrarlos, por ejemplo, en intercambios de criptomonedas donde puedes entrar y salir de futuros basados en el precio de las criptomonedas.
 
 Ten en cuenta que en estos casos, los beneficios y pérdidas pueden ser en tiempo real; si el precio aumenta un 1%, ganas un 1%; si el precio disminuye un 1%, lo perderás.
 
@@ -40,7 +40,7 @@ Ten en cuenta que en estos casos, los beneficios y pérdidas pueden ser en tiemp
 Por ejemplo, si abres una posición de futuro en el BTC/USDT con 100$ a un apalancamiento de 50x, esto significa que si el precio aumenta un 1%, entonces ganarías 1x50 = 50% de tu inversión inicial (50$). Y por lo tanto, tendrías 150$.\
 Sin embargo, si el precio disminuye un 1%, perderás el 50% de tus fondos (59$ en este caso). Y si el precio disminuye un 2%, perderás toda tu apuesta (2x50 = 100%).
 
-Por lo tanto, el apalancamiento permite controlar la cantidad de dinero que apuestas mientras aumentas las ganancias y las pérdidas.
+Por lo tanto, el apalancamiento permite controlar la cantidad de dinero que apuestas mientras aumenta las ganancias y pérdidas.
 
 ## Diferencias entre Futuros y Opciones
 

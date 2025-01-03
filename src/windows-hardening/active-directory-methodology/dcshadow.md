@@ -2,7 +2,7 @@
 
 # DCShadow
 
-Registra un **nuevo Controlador de Dominio** en el AD y lo utiliza para **empujar atributos** (SIDHistory, SPNs...) en objetos específicos **sin** dejar ningún **registro** sobre las **modificaciones**. Necesitas privilegios de **DA** y estar dentro del **dominio raíz**.\
+Registra un **nuevo Controlador de Dominio** en el AD y lo utiliza para **empujar atributos** (SIDHistory, SPNs...) en objetos especificados **sin** dejar ningún **registro** sobre las **modificaciones**. **Necesitas privilegios de DA** y estar dentro del **dominio raíz**.\
 Ten en cuenta que si usas datos incorrectos, aparecerán registros bastante feos.
 
 Para realizar el ataque necesitas 2 instancias de mimikatz. Una de ellas iniciará los servidores RPC con privilegios de SYSTEM (aquí debes indicar los cambios que deseas realizar), y la otra instancia se utilizará para empujar los valores:
@@ -21,7 +21,7 @@ También puedes seleccionar un objeto "LDAP": `/object:CN=Administrator,CN=Users
 Puedes enviar los cambios desde un DA o desde un usuario con estos permisos mínimos:
 
 - En el **objeto de dominio**:
-- _DS-Install-Replica_ (Agregar/Eliminar Réplica en Dominio)
+- _DS-Install-Replica_ (Agregar/Quitar Réplica en Dominio)
 - _DS-Replication-Manage-Topology_ (Gestionar Topología de Replicación)
 - _DS-Replication-Synchronize_ (Sincronización de Replicación)
 - El **objeto de Sitios** (y sus hijos) en el **contenedor de Configuración**:
@@ -49,7 +49,7 @@ lsadump::dcshadow /object:student1 /attribute:primaryGroupID /value:519
 #Second, add to the ACE permissions to your user and push it using DCShadow
 lsadump::dcshadow /object:CN=AdminSDHolder,CN=System,DC=moneycorp,DC=local /attribute:ntSecurityDescriptor /value:<whole modified ACL>
 ```
-## Shadowception - Dar permisos de DCShadow usando DCShadow (sin registros de permisos modificados)
+## Shadowception - Dar permisos a DCShadow usando DCShadow (sin registros de permisos modificados)
 
 Necesitamos agregar los siguientes ACEs con el SID de nuestro usuario al final:
 
@@ -63,7 +63,7 @@ Necesitamos agregar los siguientes ACEs con el SID de nuestro usuario al final:
 
 Para obtener el ACE actual de un objeto: `(New-Object System.DirectoryServices.DirectoryEntry("LDAP://DC=moneycorp,DC=local")).psbase.ObjectSecurity.sddl`
 
-Ten en cuenta que en este caso necesitas hacer **varios cambios,** no solo uno. Así que, en la **sesión de mimikatz1** (servidor RPC) usa el parámetro **`/stack` con cada cambio** que quieras hacer. De esta manera, solo necesitarás **`/push`** una vez para realizar todos los cambios acumulados en el servidor rogue.
+Ten en cuenta que en este caso necesitas hacer **varios cambios,** no solo uno. Así que, en la **sesión mimikatz1** (servidor RPC) usa el parámetro **`/stack` con cada cambio** que quieras hacer. De esta manera, solo necesitarás **`/push`** una vez para realizar todos los cambios acumulados en el servidor rogue.
 
 [**Más información sobre DCShadow en ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)
 

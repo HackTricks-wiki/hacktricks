@@ -150,7 +150,7 @@ Se generará una plantilla:
 
 ![](<../../images/image (944).png>)
 
-Así que, inserta tu nuevo código ensamblador en la sección "**newmem**" y elimina el código original de "**originalcode**" si no deseas que se ejecute\*\*.\*\* En este ejemplo, el código inyectado sumará 2 puntos en lugar de restar 1:
+Así que, inserta tu nuevo código de ensamblador en la sección "**newmem**" y elimina el código original de "**originalcode**" si no deseas que se ejecute\*\*.\*\* En este ejemplo, el código inyectado sumará 2 puntos en lugar de restar 1:
 
 ![](<../../images/image (521).png>)
 

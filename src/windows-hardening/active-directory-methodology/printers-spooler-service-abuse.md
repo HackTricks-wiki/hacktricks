@@ -19,7 +19,7 @@ Get-ADComputer -Filter {(OperatingSystem -like "*windows*server*") -and (Operati
 ```
 ### Encontrar servicios de Spooler escuchando
 
-Usando una versión ligeramente modificada de @mysmartlogin (Vincent Le Toux) [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket), verifica si el Servicio de Spooler está escuchando:
+Usando un @mysmartlogin ligeramente modificado (Vincent Le Toux) [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket), verifica si el Servicio de Spooler está escuchando:
 ```bash
 . .\Get-SpoolStatus.ps1
 ForEach ($server in Get-Content servers.txt) {Get-SpoolStatus $server}
@@ -80,7 +80,7 @@ O utiliza esta otra técnica: [https://github.com/p0dalirius/MSSQL-Analysis-Coer
 
 ### Certutil
 
-Es posible usar certutil.exe lolbin (binario firmado por Microsoft) para forzar la autenticación NTLM:
+Es posible utilizar certutil.exe lolbin (binario firmado por Microsoft) para forzar la autenticación NTLM:
 ```bash
 certutil.exe -syncwithWU  \\127.0.0.1\share
 ```
@@ -102,7 +102,7 @@ Si puedes realizar un ataque MitM a una computadora e inyectar HTML en una pági
 ```
 ## Cracking NTLMv1
 
-Si puedes capturar [los desafíos de NTLMv1 lee aquí cómo crackearlos](../ntlm/#ntlmv1-attack).\
-&#xNAN;_&#x52;ecuerda que para crackear NTLMv1 necesitas establecer el desafío de Responder a "1122334455667788"_
+Si puedes capturar [los desafíos NTLMv1 lee aquí cómo crackearlos](../ntlm/#ntlmv1-attack).\
+&#xNAN;_&#x52;ecuerda que para crackear NTLMv1 necesitas establecer el desafío de Responder en "1122334455667788"_
 
 {{#include ../../banners/hacktricks-training.md}}

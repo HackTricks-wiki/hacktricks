@@ -74,7 +74,7 @@ Las claves de registro conocidas como **Run** y **RunOnce** están diseñadas pa
 - `HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnceEx`
 - `HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx`
 
-En Windows Vista y versiones posteriores, las claves de registro **Run** y **RunOnce** no se generan automáticamente. Las entradas en estas claves pueden iniciar programas directamente o especificarlos como dependencias. Por ejemplo, para cargar un archivo DLL al iniciar sesión, se podría usar la clave de registro **RunOnceEx** junto con una clave "Depend". Esto se demuestra añadiendo una entrada de registro para ejecutar "C:\temp\evil.dll" durante el arranque del sistema:
+En Windows Vista y versiones posteriores, las claves de registro **Run** y **RunOnce** no se generan automáticamente. Las entradas en estas claves pueden iniciar programas directamente o especificarlos como dependencias. Por ejemplo, para cargar un archivo DLL al iniciar sesión, se podría usar la clave de registro **RunOnceEx** junto con una clave "Depend". Esto se demuestra al agregar una entrada de registro para ejecutar "C:\temp\evil.dll" durante el arranque del sistema:
 ```
 reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d "C:\\temp\\evil.dll"
 ```
@@ -174,7 +174,7 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVers
 > [!NOTE]
 > Si puedes sobrescribir el valor del registro o el binario, podrás escalar privilegios.
 
-### Configuración de Políticas
+### Configuraciones de Política
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
@@ -201,7 +201,7 @@ Pasos para crear una opción de arranque para iniciar automáticamente en "Modo 
 5. Vuelve a aplicar los atributos originales del archivo: `attrib c:\boot.ini +r +s +h`
 
 - **Explotación 1:** Cambiar la clave del registro **AlternateShell** permite la configuración de un shell de comandos personalizado, potencialmente para acceso no autorizado.
-- **Explotación 2 (Permisos de Escritura en PATH):** Tener permisos de escritura en cualquier parte de la variable del sistema **PATH**, especialmente antes de `C:\Windows\system32`, te permite ejecutar un `cmd.exe` personalizado, que podría ser una puerta trasera si el sistema se inicia en Modo Seguro.
+- **Explotación 2 (Permisos de Escritura en PATH):** Tener permisos de escritura en cualquier parte de la variable **PATH** del sistema, especialmente antes de `C:\Windows\system32`, te permite ejecutar un `cmd.exe` personalizado, que podría ser una puerta trasera si el sistema se inicia en Modo Seguro.
 - **Explotación 3 (Permisos de Escritura en PATH y boot.ini):** El acceso de escritura a `boot.ini` permite el inicio automático en Modo Seguro, facilitando el acceso no autorizado en el próximo reinicio.
 
 Para verificar la configuración actual de **AlternateShell**, utiliza estos comandos:
@@ -229,7 +229,7 @@ Dentro de estas claves, existen varias subclaves, cada una correspondiente a un 
 
 **Perspectivas de Seguridad:**
 
-- Modificar o escribir en una clave donde **`IsInstalled`** esté configurado como `"1"` con un **`StubPath`** específico puede llevar a la ejecución no autorizada de comandos, potencialmente para la escalada de privilegios.
+- Modificar o escribir en una clave donde **`IsInstalled`** esté configurado en `"1"` con un **`StubPath`** específico puede llevar a la ejecución no autorizada de comandos, potencialmente para la escalada de privilegios.
 - Alterar el archivo binario referenciado en cualquier valor de **`StubPath`** también podría lograr la escalada de privilegios, dado que se tengan los permisos suficientes.
 
 Para inspeccionar las configuraciones de **`StubPath`** a través de los componentes de Active Setup, se pueden usar estos comandos:
@@ -293,7 +293,7 @@ HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Executi
 ```
 ## SysInternals
 
-Tenga en cuenta que todos los sitios donde puede encontrar autoruns ya han sido **buscados por** [**winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Sin embargo, para una **lista más completa de archivos auto-ejecutados**, puede usar [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) de Sysinternals:
+Tenga en cuenta que todos los sitios donde puede encontrar autoruns ya han sido **buscados por** [**winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Sin embargo, para una **lista más completa de archivos autoejecutados**, puede usar [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) de Sysinternals:
 ```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```

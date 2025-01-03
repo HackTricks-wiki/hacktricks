@@ -21,7 +21,7 @@ El certificado y la clave privada también se pueden obtener utilizando Certipy 
 ```bash
 certipy ca 'corp.local/administrator@ca.corp.local' -hashes :123123.. -backup
 ```
-Al adquirir el certificado de CA y su clave privada en formato `.pfx`, se pueden utilizar herramientas como [ForgeCert](https://github.com/GhostPack/ForgeCert) para generar certificados válidos:
+Al adquirir el certificado CA y su clave privada en formato `.pfx`, se pueden utilizar herramientas como [ForgeCert](https://github.com/GhostPack/ForgeCert) para generar certificados válidos:
 ```bash
 # Generating a new certificate with ForgeCert
 ForgeCert.exe --CaCertPath ca.pfx --CaCertPassword Password123! --Subject "CN=User" --SubjectAltName localadmin@theshire.local --NewCertPath localadmin.pfx --NewCertPassword Password123!
@@ -58,6 +58,6 @@ Las oportunidades para la **persistencia** a través de **modificaciones del des
 - Cualquier **objeto o contenedor AD descendiente** en **`CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>`** (por ejemplo, el contenedor de Plantillas de Certificado, contenedor de Autoridades de Certificación, el objeto NTAuthCertificates, etc.)
 - **Grupos AD a los que se les delegaron derechos para controlar AD CS** por defecto o por la organización (como el grupo incorporado Cert Publishers y cualquiera de sus miembros)
 
-Un ejemplo de implementación maliciosa implicaría a un atacante, que tiene **permisos elevados** en el dominio, agregando el permiso **`WriteOwner`** a la plantilla de certificado **`User`** predeterminada, siendo el atacante el principal para el derecho. Para explotar esto, el atacante primero cambiaría la propiedad de la plantilla **`User`** a sí mismo. Después de esto, el **`mspki-certificate-name-flag`** se establecería en **1** en la plantilla para habilitar **`ENROLLEE_SUPPLIES_SUBJECT`**, permitiendo a un usuario proporcionar un Nombre Alternativo de Sujeto en la solicitud. Posteriormente, el atacante podría **inscribirse** usando la **plantilla**, eligiendo un nombre de **administrador de dominio** como nombre alternativo, y utilizar el certificado adquirido para autenticarse como el DA.
+Un ejemplo de implementación maliciosa implicaría a un atacante, que tiene **permisos elevados** en el dominio, agregando el permiso **`WriteOwner`** a la plantilla de certificado **`User`** por defecto, siendo el atacante el principal para el derecho. Para explotar esto, el atacante primero cambiaría la propiedad de la plantilla **`User`** a sí mismo. Después de esto, el **`mspki-certificate-name-flag`** se establecería en **1** en la plantilla para habilitar **`ENROLLEE_SUPPLIES_SUBJECT`**, permitiendo a un usuario proporcionar un Nombre Alternativo de Sujeto en la solicitud. Posteriormente, el atacante podría **inscribirse** usando la **plantilla**, eligiendo un nombre de **administrador de dominio** como nombre alternativo, y utilizar el certificado adquirido para autenticarse como el DA.
 
 {{#include ../../../banners/hacktricks-training.md}}
