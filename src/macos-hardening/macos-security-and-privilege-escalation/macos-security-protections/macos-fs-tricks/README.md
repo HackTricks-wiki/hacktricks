@@ -14,7 +14,7 @@
 
 ### 위험한 조합
 
-**루트가 소유한 파일/폴더를 덮어쓰는 방법**, 그러나:
+**루트가 소유한 파일/폴더를 덮어쓰는 방법**, 하지만:
 
 - 경로의 부모 **디렉토리 소유자**가 사용자입니다.
 - 경로의 부모 **디렉토리 소유자**가 **쓰기 권한**이 있는 **사용자 그룹**입니다.
@@ -24,7 +24,7 @@
 
 ### 폴더 루트 R+X 특별 사례
 
-**루트만 R+X 접근 권한**이 있는 **디렉토리**에 파일이 있는 경우, 그 파일은 **다른 누구도 접근할 수 없습니다**. 따라서 **제한**으로 인해 사용자가 읽을 수 없는 **읽기 가능한 파일**을 이 폴더에서 **다른 폴더로 이동**할 수 있는 취약점이 있다면, 이를 악용하여 이러한 파일을 읽을 수 있습니다.
+**루트만 R+X 접근 권한**을 가진 **디렉토리**에 파일이 있는 경우, 그 파일은 **다른 누구도 접근할 수 없습니다**. 따라서 **제한**으로 인해 사용자가 읽을 수 없는 **읽기 가능한 파일**을 이 폴더에서 **다른 폴더로 이동**할 수 있는 취약점이 있다면, 이를 악용하여 이러한 파일을 읽을 수 있습니다.
 
 예시: [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions)
 
@@ -62,9 +62,9 @@
 
 `open` 호출에 `O_CLOEXEC` 플래그가 없으면 파일 설명자가 자식 프로세스에 의해 상속됩니다. 따라서, 권한이 있는 프로세스가 권한이 있는 파일을 열고 공격자가 제어하는 프로세스를 실행하면, 공격자는 **권한이 있는 파일에 대한 FD를 상속받게 됩니다**.
 
-**높은 권한으로 파일이나 폴더를 열도록 프로세스를 만들 수 있다면**, **`crontab`**를 악용하여 **`EDITOR=exploit.py`**로 `/etc/sudoers.d`에 있는 파일을 열 수 있습니다. 그러면 `exploit.py`는 `/etc/sudoers` 내부의 파일에 대한 FD를 얻고 이를 악용할 수 있습니다.
+**높은 권한으로 파일이나 폴더를 열도록 프로세스를 만들 수 있다면**, **`crontab`**를 악용하여 **`EDITOR=exploit.py`**로 `/etc/sudoers.d`의 파일을 열 수 있습니다. 그러면 `exploit.py`는 `/etc/sudoers` 내부의 파일에 대한 FD를 얻고 이를 악용할 수 있습니다.
 
-예를 들어: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098), 코드: https://github.com/gergelykalman/CVE-2023-32428-a-macOS-LPE-via-MallocStackLogging
+예: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098), 코드: https://github.com/gergelykalman/CVE-2023-32428-a-macOS-LPE-via-MallocStackLogging
 
 ## 격리 xattrs 트릭 피하기
 
@@ -74,7 +74,7 @@ xattr -d com.apple.quarantine /path/to/file_or_app
 ```
 ### uchg / uchange / uimmutable 플래그
 
-파일/폴더에 이 불변 속성이 설정되어 있으면 xattr를 추가할 수 없습니다.
+파일/폴더에 이 불변 속성이 있으면 xattr를 설정할 수 없습니다.
 ```bash
 echo asd > /tmp/asd
 chflags uchg /tmp/asd # "chflags uchange /tmp/asd" or "chflags uimmutable /tmp/asd"
@@ -122,7 +122,7 @@ ls -le /tmp/test
 
 **AppleDouble** 파일 형식은 ACE를 포함하여 파일을 복사합니다.
 
-[**소스 코드**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html)에서 **`com.apple.acl.text`**라는 xattr에 저장된 ACL 텍스트 표현이 압축 해제된 파일의 ACL로 설정될 것임을 확인할 수 있습니다. 따라서, ACL이 다른 xattrs가 작성되는 것을 방지하는 애플리케이션을 **AppleDouble** 파일 형식의 zip 파일로 압축했다면... 애플리케이션에 격리 xattr가 설정되지 않았습니다:
+[**소스 코드**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html)에서 **`com.apple.acl.text`**라는 xattr에 저장된 ACL 텍스트 표현이 압축 해제된 파일의 ACL로 설정될 것임을 확인할 수 있습니다. 따라서, ACL이 다른 xattrs가 작성되는 것을 방지하는 zip 파일로 애플리케이션을 압축했다면... 애플리케이션에 격리 xattr가 설정되지 않았습니다:
 
 자세한 정보는 [**원본 보고서**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)를 확인하세요.
 
@@ -156,7 +156,7 @@ macos-xattr-acls-extra-stuff.md
 
 ### 플랫폼 바이너리 검사 우회
 
-일부 보안 검사는 바이너리가 **플랫폼 바이너리**인지 확인하여 XPC 서비스에 연결할 수 있도록 합니다. 그러나 https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/에서 설명된 바와 같이, 플랫폼 바이너리(예: /bin/ls)를 가져와서 `DYLD_INSERT_LIBRARIES` 환경 변수를 사용하여 dyld를 통해 익스플로잇을 주입함으로써 이 검사를 우회할 수 있습니다.
+일부 보안 검사는 바이너리가 **플랫폼 바이너리**인지 확인하여 XPC 서비스에 연결할 수 있도록 합니다. 그러나 https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/에서 노출된 것처럼, 플랫폼 바이너리(예: /bin/ls)를 가져와 dyld를 통해 환경 변수 `DYLD_INSERT_LIBRARIES`를 사용하여 익스플로잇을 주입함으로써 이 검사를 우회할 수 있습니다.
 
 ### 플래그 `CS_REQUIRE_LV` 및 `CS_FORCED_LV` 우회
 
@@ -175,9 +175,9 @@ NSLog(@"=====Inject successfully into %d(%@), csflags=0x%x", pid, exePath, statu
 ```
 ## 코드 서명 우회
 
-번들에는 **`_CodeSignature/CodeResources`** 파일이 포함되어 있으며, 이 파일에는 **번들** 내의 모든 **파일**의 **해시**가 포함되어 있습니다. CodeResources의 해시도 **실행 파일**에 **내장**되어 있으므로, 우리는 그것을 건드릴 수 없습니다.
+번들에는 **`_CodeSignature/CodeResources`** 파일이 포함되어 있으며, 이 파일에는 **번들** 내의 모든 **파일**의 **해시**가 포함되어 있습니다. CodeResources의 해시는 **실행 파일**에도 **내장**되어 있으므로, 그것을 건드릴 수 없습니다.
 
-그러나 서명이 확인되지 않는 일부 파일이 있으며, 이러한 파일은 plist에서 omit 키를 가지고 있습니다.
+그러나 서명이 확인되지 않는 일부 파일이 있으며, 이 파일들은 plist에서 omit 키를 가지고 있습니다.
 ```xml
 <dict>
 ...
@@ -227,7 +227,7 @@ openssl dgst -binary -sha1 /System/Cryptexes/App/System/Applications/Safari.app/
 ```
 ## Mount dmgs
 
-사용자는 기존 폴더 위에 생성된 사용자 정의 dmg를 마운트할 수 있습니다. 이렇게 하면 사용자 정의 콘텐츠가 포함된 사용자 정의 dmg 패키지를 생성할 수 있습니다:
+사용자는 기존 폴더 위에 생성된 사용자 정의 dmg를 마운트할 수 있습니다. 이렇게 하면 사용자 정의 콘텐츠로 사용자 정의 dmg 패키지를 생성할 수 있습니다:
 ```bash
 # Create the volume
 hdiutil create /private/tmp/tmp.dmg -size 2m -ov -volname CustomVolName -fs APFS 1>/dev/null
@@ -261,7 +261,7 @@ hdiutil create -srcfolder justsome.app justsome.dmg
 
 ### 데몬
 
-임의의 **LaunchDaemon**을 작성하여 **`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`**와 같은 plist를 사용하여 임의의 스크립트를 실행하도록 합니다:
+임의의 스크립트를 실행하는 plist와 함께 **`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`**와 같은 임의의 **LaunchDaemon**을 작성합니다.
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -308,11 +308,11 @@ LogFilePerm 777
 
 ### 샌드박스 탈출
 
-FS 임의 쓰기를 통해 macOS 샌드박스를 탈출하는 것이 가능합니다. 몇 가지 예시는 [macOS Auto Start](../../../../macos-auto-start-locations.md) 페이지를 확인하세요. 그러나 일반적인 방법은 `~/Library/Preferences/com.apple.Terminal.plist`에 터미널 환경설정 파일을 작성하여 시작 시 명령을 실행하고 `open`을 사용하여 호출하는 것입니다.
+FS 임의 쓰기를 통해 macOS 샌드박스를 탈출할 수 있습니다. 몇 가지 예시는 [macOS Auto Start](../../../../macos-auto-start-locations.md) 페이지를 확인하세요. 그러나 일반적인 방법은 `~/Library/Preferences/com.apple.Terminal.plist`에 터미널 환경설정 파일을 작성하여 시작 시 명령을 실행하고 `open`을 사용하여 호출하는 것입니다.
 
 ## 다른 사용자로서 쓰기 가능한 파일 생성
 
-이것은 내가 쓸 수 있는 루트 소유의 파일을 생성합니다 ([**code from here**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). 이것은 권한 상승으로도 작동할 수 있습니다:
+이것은 내가 쓸 수 있는 루트 소속의 파일을 생성합니다 ([**code from here**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). 이것은 권한 상승으로도 작동할 수 있습니다:
 ```bash
 DIRNAME=/usr/local/etc/periodic/daily
 
@@ -326,7 +326,7 @@ echo $FILENAME
 ```
 ## POSIX 공유 메모리
 
-**POSIX 공유 메모리**는 POSIX 호환 운영 체제에서 프로세스가 공통 메모리 영역에 접근할 수 있도록 하여 다른 프로세스 간 통신 방법에 비해 더 빠른 통신을 가능하게 합니다. 이는 `shm_open()`을 사용하여 공유 메모리 객체를 생성하거나 열고, `ftruncate()`로 크기를 설정하며, `mmap()`을 사용하여 프로세스의 주소 공간에 매핑하는 과정을 포함합니다. 프로세스는 이 메모리 영역에서 직접 읽고 쓸 수 있습니다. 동시 접근을 관리하고 데이터 손상을 방지하기 위해 뮤텍스나 세마포와 같은 동기화 메커니즘이 자주 사용됩니다. 마지막으로, 프로세스는 `munmap()`과 `close()`를 사용하여 공유 메모리를 언매핑하고 닫으며, 선택적으로 `shm_unlink()`로 메모리 객체를 제거할 수 있습니다. 이 시스템은 여러 프로세스가 공유 데이터에 빠르게 접근해야 하는 환경에서 효율적이고 빠른 IPC를 위해 특히 효과적입니다.
+**POSIX 공유 메모리**는 POSIX 호환 운영 체제에서 프로세스가 공통 메모리 영역에 접근할 수 있도록 하여 다른 프로세스 간 통신 방법에 비해 더 빠른 통신을 가능하게 합니다. 이는 `shm_open()`을 사용하여 공유 메모리 객체를 생성하거나 열고, `ftruncate()`로 크기를 설정하며, `mmap()`을 사용하여 프로세스의 주소 공간에 매핑하는 과정을 포함합니다. 프로세스는 이 메모리 영역에서 직접 읽고 쓸 수 있습니다. 동시 접근을 관리하고 데이터 손상을 방지하기 위해 뮤텍스나 세마포와 같은 동기화 메커니즘이 자주 사용됩니다. 마지막으로, 프로세스는 `munmap()`과 `close()`를 사용하여 공유 메모리를 언매핑하고 닫으며, 선택적으로 `shm_unlink()`로 메모리 객체를 제거합니다. 이 시스템은 여러 프로세스가 공유 데이터에 빠르게 접근해야 하는 환경에서 효율적이고 빠른 IPC를 위해 특히 효과적입니다.
 
 <details>
 

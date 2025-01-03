@@ -180,7 +180,7 @@ block(authRightName, authRightDefault, authRightDesc);
 
 ### 권한 검증
 
-`HelperTool/HelperTool.m`에서 **`readLicenseKeyAuthorization`** 함수는 호출자가 **해당 방법을 실행할 수 있는 권한이 있는지** 확인하기 위해 **`checkAuthorization`** 함수를 호출합니다. 이 함수는 호출 프로세스에서 전송된 **authData**가 **올바른 형식**인지 확인한 다음, 특정 방법을 호출하기 위해 **권한을 얻기 위해 필요한 것**을 확인합니다. 모든 것이 잘 진행되면 **반환된 `error`는 `nil`이 됩니다**:
+`HelperTool/HelperTool.m`에서 함수 **`readLicenseKeyAuthorization`**는 호출자가 **해당 방법을 실행할 수 있는지** 확인하기 위해 **`checkAuthorization`** 함수를 호출합니다. 이 함수는 호출 프로세스에서 전송된 **authData**가 **올바른 형식**인지 확인한 다음, 특정 방법을 호출하기 위해 **권한을 얻기 위해 필요한 것**을 확인합니다. 모든 것이 잘 진행되면 **반환된 `error`는 `nil`이 됩니다**:
 ```objectivec
 - (NSError *)checkAuthorization:(NSData *)authData command:(SEL)command
 {
@@ -240,25 +240,25 @@ sudo sqlite3 /var/db/auth.db
 SELECT name FROM rules;
 SELECT name FROM rules WHERE name LIKE '%safari%';
 ```
-그럼, 다음을 통해 권한에 접근할 수 있는 사람을 확인할 수 있습니다:
+그런 다음, 다음을 사용하여 권한에 접근할 수 있는 사람을 읽을 수 있습니다:
 ```bash
 security authorizationdb read com.apple.safaridriver.allow
 ```
 ### 허용 권한
 
-**모든 권한 구성** [**여기에서**](https://www.dssw.co.uk/reference/authorization-rights/) 찾을 수 있지만, 사용자 상호작용이 필요하지 않은 조합은 다음과 같습니다:
+**모든 권한 구성**은 [**여기에서**](https://www.dssw.co.uk/reference/authorization-rights/) 확인할 수 있지만, 사용자 상호작용이 필요하지 않은 조합은 다음과 같습니다:
 
 1. **'authenticate-user': 'false'**
 - 이것은 가장 직접적인 키입니다. `false`로 설정하면 사용자가 이 권한을 얻기 위해 인증을 제공할 필요가 없음을 지정합니다.
-- 이는 아래의 2개 중 하나와 조합하여 사용되거나 사용자가 속해야 하는 그룹을 나타내는 데 사용됩니다.
+- 이는 아래의 2개 중 하나와 조합되거나 사용자가 속해야 하는 그룹을 나타내는 데 사용됩니다.
 2. **'allow-root': 'true'**
 - 사용자가 루트 사용자로 작동하고(권한이 상승된 상태), 이 키가 `true`로 설정되면 루트 사용자가 추가 인증 없이 이 권한을 얻을 수 있습니다. 그러나 일반적으로 루트 사용자 상태에 도달하려면 이미 인증이 필요하므로 대부분의 사용자에게는 "인증 없음" 시나리오가 아닙니다.
 3. **'session-owner': 'true'**
 - `true`로 설정되면 세션의 소유자(현재 로그인한 사용자)가 자동으로 이 권한을 얻습니다. 사용자가 이미 로그인한 경우 추가 인증을 우회할 수 있습니다.
 4. **'shared': 'true'**
-- 이 키는 인증 없이 권한을 부여하지 않습니다. 대신, `true`로 설정되면 권한이 인증된 후 여러 프로세스 간에 공유될 수 있으며 각 프로세스가 다시 인증할 필요가 없습니다. 그러나 권한의 초기 부여는 여전히 인증이 필요하며, `'authenticate-user': 'false'`와 같은 다른 키와 결합되지 않는 한 그렇습니다.
+- 이 키는 인증 없이 권한을 부여하지 않습니다. 대신, `true`로 설정되면 권한이 인증된 후 여러 프로세스 간에 공유될 수 있으며, 각 프로세스가 다시 인증할 필요가 없습니다. 그러나 권한의 초기 부여는 여전히 인증이 필요하며, `'authenticate-user': 'false'`와 같은 다른 키와 결합되지 않는 한 그렇습니다.
 
-[**이 스크립트**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9)를 사용하여 흥미로운 권한을 얻을 수 있습니다:
+흥미로운 권한을 얻으려면 [**이 스크립트**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9)를 사용할 수 있습니다:
 ```bash
 Rights with 'authenticate-user': 'false':
 is-admin (admin), is-admin-nonshared (admin), is-appstore (_appstore), is-developer (_developer), is-lpadmin (_lpadmin), is-root (run as root), is-session-owner (session owner), is-webdeveloper (_webdeveloper), system-identity-write-self (session owner), system-install-iap-software (run as root), system-install-software-iap (run as root)
@@ -273,19 +273,19 @@ authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-se
 
 ### EvenBetterAuthorization 사용 여부 확인
 
-**`[HelperTool checkAuthorization:command:]`** 함수를 찾으면, 아마도 이 프로세스는 이전에 언급된 권한 부여 스키마를 사용하고 있을 것입니다:
+함수 **`[HelperTool checkAuthorization:command:]`** 를 찾으면, 아마도 이 프로세스는 이전에 언급된 권한 부여 스키마를 사용하고 있을 것입니다:
 
 <figure><img src="../../../../../images/image (42).png" alt=""><figcaption></figcaption></figure>
 
-이 함수가 `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights`, `AuhtorizationFree`와 같은 함수를 호출하고 있다면, [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154)을 사용하고 있는 것입니다.
+이 경우, 이 함수가 `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights`, `AuhtorizationFree`와 같은 함수를 호출하고 있다면, [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154)을 사용하고 있는 것입니다.
 
-**`/var/db/auth.db`**를 확인하여 사용자 상호작용 없이 일부 권한 있는 작업을 호출할 수 있는지 확인하십시오.
+**`/var/db/auth.db`** 를 확인하여 사용자 상호작용 없이 일부 권한 있는 작업을 호출할 수 있는지 확인하십시오.
 
 ### 프로토콜 통신
 
 그런 다음, XPC 서비스와 통신을 설정할 수 있도록 프로토콜 스키마를 찾아야 합니다.
 
-**`shouldAcceptNewConnection`** 함수는 내보내는 프로토콜을 나타냅니다:
+함수 **`shouldAcceptNewConnection`** 은 내보내는 프로토콜을 나타냅니다:
 
 <figure><img src="../../../../../images/image (44).png" alt=""><figcaption></figcaption></figure>
 

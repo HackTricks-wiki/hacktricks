@@ -12,7 +12,7 @@
 
 사용자의 **`$TMPDIR`**를 방문하면 .Net 애플리케이션을 디버깅하기 위한 디버깅 FIFO를 찾을 수 있습니다.
 
-[**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259)는 디버거로부터의 통신 관리를 담당합니다. 새로운 디버깅 세션을 시작하려면, 디버거는 `out` 파이프를 통해 `MessageHeader` 구조체로 시작하는 메시지를 전송해야 하며, 이는 .NET 소스 코드에 자세히 설명되어 있습니다:
+[**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259)는 디버거로부터의 통신 관리를 담당합니다. 새로운 디버깅 세션을 시작하려면, 디버거는 `MessageHeader` 구조체로 시작하는 메시지를 `out` 파이프를 통해 전송해야 하며, 이는 .NET 소스 코드에 자세히 설명되어 있습니다:
 ```c
 struct MessageHeader {
 MessageType   m_eType;        // Message type
@@ -31,7 +31,7 @@ DWORD         m_dwMinorVersion;
 BYTE          m_sMustBeZero[8];
 }
 ```
-새 세션을 요청하기 위해, 이 구조체는 다음과 같이 채워지며, 메시지 유형을 `MT_SessionRequest`로 설정하고 프로토콜 버전을 현재 버전으로 설정합니다:
+새 세션을 요청하기 위해 이 구조체는 다음과 같이 채워지며, 메시지 유형을 `MT_SessionRequest`로 설정하고 프로토콜 버전을 현재 버전으로 설정합니다:
 ```c
 static const DWORD kCurrentMajorVersion = 2;
 static const DWORD kCurrentMinorVersion = 0;

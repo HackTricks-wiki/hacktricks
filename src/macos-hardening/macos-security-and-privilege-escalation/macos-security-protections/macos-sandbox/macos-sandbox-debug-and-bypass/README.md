@@ -6,25 +6,25 @@
 
 <figure><img src="../../../../../images/image (901).png" alt=""><figcaption><p>Image from <a href="http://newosxbook.com/files/HITSB.pdf">http://newosxbook.com/files/HITSB.pdf</a></p></figcaption></figure>
 
-이전 이미지에서 **샌드박스가 어떻게 로드되는지** 관찰할 수 있습니다. 이는 **`com.apple.security.app-sandbox`** 권한을 가진 애플리케이션이 실행될 때 발생합니다.
+이전 이미지에서 **샌드박스가 어떻게 로드되는지** 관찰할 수 있습니다. 이는 **`com.apple.security.app-sandbox`** 권한이 있는 애플리케이션이 실행될 때 발생합니다.
 
 컴파일러는 `/usr/lib/libSystem.B.dylib`를 바이너리에 링크합니다.
 
-그런 다음, **`libSystem.B`**는 여러 다른 함수를 호출하여 **`xpc_pipe_routine`**이 애플리케이션의 권한을 **`securityd`**에 전송합니다. Securityd는 프로세스가 샌드박스 내에서 격리되어야 하는지 확인하고, 그렇다면 격리합니다.\
+그런 다음, **`libSystem.B`**는 여러 다른 함수를 호출하여 **`xpc_pipe_routine`**이 앱의 권한을 **`securityd`**에 전송할 때까지 진행합니다. Securityd는 프로세스가 샌드박스 내에서 격리되어야 하는지 확인하고, 그렇다면 격리합니다.\
 마지막으로, 샌드박스는 **`__sandbox_ms`**에 대한 호출로 활성화되며, 이는 **`__mac_syscall`**을 호출합니다.
 
 ## Possible Bypasses
 
 ### Bypassing quarantine attribute
 
-**샌드박스화된 프로세스에 의해 생성된 파일**은 샌드박스 탈출을 방지하기 위해 **격리 속성**이 추가됩니다. 그러나 샌드박스화된 애플리케이션 내에서 **격리 속성이 없는 `.app` 폴더를 생성**할 수 있다면, 애플리케이션 번들 바이너리를 **`/bin/bash`**로 가리키게 하고 **plist**에 몇 가지 환경 변수를 추가하여 **`open`**을 악용하여 **새 애플리케이션을 샌드박스 없이 실행**할 수 있습니다.
+**샌드박스화된 프로세스에 의해 생성된 파일**은 샌드박스 탈출을 방지하기 위해 **격리 속성**이 추가됩니다. 그러나 샌드박스화된 애플리케이션 내에서 **격리 속성이 없는 `.app` 폴더를 생성**할 수 있다면, 앱 번들 바이너리를 **`/bin/bash`**로 가리키게 하고 **plist**에 몇 가지 환경 변수를 추가하여 **`open`**을 악용하여 **새 앱을 샌드박스 없이 실행**할 수 있습니다.
 
 이것은 [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)**에서 수행된 작업입니다.**
 
 > [!CAUTION]
-> 따라서 현재로서는 **`.app`**로 끝나는 이름의 폴더를 격리 속성 없이 생성할 수 있다면, 샌드박스를 탈출할 수 있습니다. macOS는 **`.app` 폴더**와 **주 실행 파일**에서만 **격리** 속성을 **확인**하기 때문입니다 (그리고 우리는 주 실행 파일을 **`/bin/bash`**로 가리키게 할 것입니다).
+> 따라서 현재로서는 **격리 속성이 없는 `.app`**로 끝나는 이름의 폴더를 생성할 수 있다면, 샌드박스를 탈출할 수 있습니다. macOS는 **`.app` 폴더**와 **주 실행 파일**에서만 **격리** 속성을 **확인**하기 때문입니다 (그리고 우리는 주 실행 파일을 **`/bin/bash`**로 가리키게 할 것입니다).
 >
-> 이미 실행할 수 있도록 승인된 .app 번들이 있다면 (실행 승인 플래그가 있는 격리 xttr가 있는 경우), 그것을 악용할 수도 있습니다... 단, 이제는 샌드박스 내에서 **`.app`** 번들에 쓸 수 없게 됩니다. (특권 TCC 권한이 없기 때문입니다).
+> 이미 실행할 수 있도록 승인된 .app 번들이 있다면 (실행 승인 플래그가 있는 격리 xttr가 있는 경우), 그것을 악용할 수도 있습니다... 단, 이제는 샌드박스 높은 권한 내에서는 **`.app`** 번들 내에 쓸 수 없습니다.
 
 ### Abusing Open functionality
 
@@ -37,13 +37,13 @@ macos-office-sandbox-bypasses.md
 ### Launch Agents/Daemons
 
 애플리케이션이 **샌드박스화되도록 설계되었더라도** (`com.apple.security.app-sandbox`), 예를 들어 **LaunchAgent** (`~/Library/LaunchAgents`)에서 실행되면 샌드박스를 우회할 수 있습니다.\
-[**이 게시물**](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818)에서 설명한 바와 같이, 샌드박스화된 애플리케이션으로 지속성을 얻으려면 LaunchAgent로 자동 실행되도록 설정하고 DyLib 환경 변수를 통해 악성 코드를 주입할 수 있습니다.
+[**이 게시물**](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818)에서 설명한 바와 같이, 샌드박스화된 애플리케이션으로 지속성을 얻으려면 LaunchAgent로 자동 실행되도록 만들고 DyLib 환경 변수를 통해 악성 코드를 주입할 수 있습니다.
 
 ### Abusing Auto Start Locations
 
-샌드박스화된 프로세스가 **나중에 샌드박스 없이 실행될 애플리케이션이 바이너리를 실행할 위치에** **쓰기** 할 수 있다면, 그곳에 바이너리를 배치함으로써 **탈출할 수 있습니다**. 이러한 위치의 좋은 예는 `~/Library/LaunchAgents` 또는 `/System/Library/LaunchDaemons`입니다.
+샌드박스화된 프로세스가 **나중에 샌드박스 없이 실행될 애플리케이션이 바이너리를 실행할 위치에 쓸 수 있다면**, 그곳에 바이너리를 배치하여 **탈출할 수 있습니다**. 이러한 위치의 좋은 예는 `~/Library/LaunchAgents` 또는 `/System/Library/LaunchDaemons`입니다.
 
-이를 위해서는 **2단계**가 필요할 수 있습니다: **더 관대한 샌드박스** (`file-read*`, `file-write*`)를 가진 프로세스를 실행하여 실제로 **샌드박스 없이 실행될 위치에** 코드를 작성하게 합니다.
+이를 위해서는 **2단계**가 필요할 수 있습니다: **더 관대 한 샌드박스** (`file-read*`, `file-write*`)를 가진 프로세스를 실행하여 실제로 **샌드박스 없이 실행될 위치에** 코드를 작성하게 합니다.
 
 **자동 시작 위치**에 대한 이 페이지를 확인하세요:
 
@@ -53,7 +53,7 @@ macos-office-sandbox-bypasses.md
 
 ### Abusing other processes
 
-샌드박스 프로세스에서 **덜 제한적인 샌드박스**(또는 없는 샌드박스)에서 실행 중인 다른 프로세스를 **타격**할 수 있다면, 그들의 샌드박스를 탈출할 수 있습니다:
+샌드박스 프로세스에서 **덜 제한적인 샌드박스**(또는 없는 샌드박스)에서 실행 중인 다른 프로세스를 **타격할 수 있다면**, 그들의 샌드박스를 탈출할 수 있습니다:
 
 {{#ref}}
 ../../../macos-proces-abuse/
@@ -61,9 +61,9 @@ macos-office-sandbox-bypasses.md
 
 ### Available System and User Mach services
 
-샌드박스는 또한 프로필 `application.sb`를 통해 특정 **Mach 서비스**와 통신할 수 있도록 허용합니다. 이러한 서비스 중 하나를 **악용**할 수 있다면 **샌드박스를 탈출**할 수 있습니다.
+샌드박스는 또한 프로필 `application.sb`에 정의된 특정 **Mach 서비스**와 XPC를 통해 통신할 수 있도록 허용합니다. 이러한 서비스 중 하나를 **악용**할 수 있다면 **샌드박스를 탈출할 수 있습니다**.
 
-[이 글](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)에서 언급된 바와 같이, Mach 서비스에 대한 정보는 `/System/Library/xpc/launchd.plist`에 저장됩니다. `<string>System</string>` 및 `<string>User</string>`를 해당 파일에서 검색하여 모든 시스템 및 사용자 Mach 서비스를 찾을 수 있습니다.
+[이 글](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)에서 언급된 바와 같이, Mach 서비스에 대한 정보는 `/System/Library/xpc/launchd.plist`에 저장됩니다. `<string>System</string>` 및 `<string>User</string>`를 해당 파일 내에서 검색하여 모든 시스템 및 사용자 Mach 서비스를 찾을 수 있습니다.
 
 또한, `bootstrap_look_up`을 호출하여 샌드박스화된 애플리케이션에 Mach 서비스가 사용 가능한지 확인할 수 있습니다.
 ```objectivec
@@ -90,20 +90,20 @@ checkService(serviceName.UTF8String);
 ```
 ### 사용 가능한 PID Mach 서비스
 
-이 Mach 서비스는 [이 문서에서 샌드박스를 탈출하기 위해 처음으로 악용되었습니다](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/). 그 당시, **애플리케이션과 그 프레임워크에서 요구되는 모든 XPC 서비스**가 앱의 PID 도메인에서 볼 수 있었습니다 (이들은 `ServiceType`이 `Application`인 Mach 서비스입니다).
+이 Mach 서비스는 처음에 [이 문서에서 샌드박스를 탈출하는 데 악용되었습니다](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/). 그 당시, **애플리케이션과 그 프레임워크에서 요구되는 모든 XPC 서비스**가 앱의 PID 도메인에서 볼 수 있었습니다(이들은 `ServiceType`이 `Application`인 Mach 서비스입니다).
 
 **PID 도메인 XPC 서비스에 연락하기 위해서는**, 앱 내에서 다음과 같은 한 줄로 등록하기만 하면 됩니다:
 ```objectivec
 [[NSBundle bundleWithPath:@“/System/Library/PrivateFrameworks/ShoveService.framework"]load];
 ```
-또한, `System/Library/xpc/launchd.plist`에서 `<string>Application</string>`를 검색하여 모든 **Application** Mach 서비스를 찾는 것이 가능합니다.
+또한, `<string>Application</string>`에 대해 `System/Library/xpc/launchd.plist` 내에서 검색하여 모든 **Application** Mach 서비스를 찾는 것이 가능합니다.
 
 유효한 xpc 서비스를 찾는 또 다른 방법은 다음의 서비스를 확인하는 것입니다:
 ```bash
 find /System/Library/Frameworks -name "*.xpc"
 find /System/Library/PrivateFrameworks -name "*.xpc"
 ```
-이 기술을 악용한 여러 예시는 [**원본 작성물**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)에서 찾을 수 있지만, 다음은 요약된 몇 가지 예입니다.
+여러 가지 이 기술을 악용한 예시는 [**원본 작성물**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)에서 찾을 수 있지만, 다음은 요약된 몇 가지 예입니다.
 
 #### /System/Library/PrivateFrameworks/StorageKit.framework/XPCServices/storagekitfsrunner.xpc
 
@@ -130,9 +130,9 @@ NSLog(@"run task result:%@, error:%@", bSucc, error);
 ```
 #### /System/Library/PrivateFrameworks/AudioAnalyticsInternal.framework/XPCServices/AudioAnalyticsHelperService.xpc
 
-이 XPC 서비스는 항상 YES를 반환하여 모든 클라이언트를 허용했으며, 메서드 `createZipAtPath:hourThreshold:withReply:`는 기본적으로 압축할 폴더의 경로를 지정할 수 있게 해주었습니다. 그리고 그것은 ZIP 파일로 압축됩니다.
+이 XPC 서비스는 항상 YES를 반환하여 모든 클라이언트를 허용했으며, 메서드 `createZipAtPath:hourThreshold:withReply:`는 기본적으로 압축할 폴더의 경로를 지정할 수 있게 해주었습니다. 그러면 ZIP 파일로 압축됩니다.
 
-따라서 가짜 앱 폴더 구조를 생성하고 압축한 다음, 이를 풀고 실행하여 샌드박스를 탈출할 수 있습니다. 새로운 파일은 격리 속성을 가지지 않기 때문입니다.
+따라서 가짜 앱 폴더 구조를 생성하고 압축한 다음, 이를 풀고 실행하여 샌드박스를 탈출할 수 있습니다. 새로운 파일은 격리 속성이 없기 때문입니다.
 
 익스플로잇은:
 ```objectivec
@@ -248,13 +248,13 @@ open /tmp/poc.app
 ```
 ### Interposting Bypass
 
-**Interposting**에 대한 자세한 내용은 다음을 확인하세요:
+**Interposting**에 대한 자세한 정보는 다음을 확인하세요:
 
 {{#ref}}
 ../../../macos-proces-abuse/macos-function-hooking.md
 {{#endref}}
 
-#### 샌드박스를 방지하기 위해 `_libsecinit_initializer`를 인터포스팅합니다.
+#### 샌드박스를 방지하기 위해 `_libsecinit_initializer`를 인터포스트합니다.
 ```c
 // gcc -dynamiclib interpose.c -o interpose.dylib
 

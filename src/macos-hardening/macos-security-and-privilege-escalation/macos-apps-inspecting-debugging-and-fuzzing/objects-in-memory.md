@@ -6,7 +6,7 @@
 
 CF\* 객체는 CoreFoundation에서 제공되며, `CFString`, `CFNumber` 또는 `CFAllocator`와 같은 50개 이상의 객체 클래스를 제공합니다.
 
-이 모든 클래스는 `CFRuntimeClass` 클래스의 인스턴스이며, 호출 시 `__CFRuntimeClassTable`에 대한 인덱스를 반환합니다. CFRuntimeClass는 [**CFRuntime.h**](https://opensource.apple.com/source/CF/CF-1153.18/CFRuntime.h.auto.html)에서 정의됩니다:
+이 모든 클래스는 `CFRuntimeClass` 클래스의 인스턴스이며, 호출되면 `__CFRuntimeClassTable`에 대한 인덱스를 반환합니다. CFRuntimeClass는 [**CFRuntime.h**](https://opensource.apple.com/source/CF/CF-1153.18/CFRuntime.h.auto.html)에서 정의됩니다:
 ```objectivec
 // Some comments were added to the original code
 
@@ -57,7 +57,7 @@ uintptr_t requiredAlignment; // Or in _kCFRuntimeRequiresAlignment in the .versi
 
 ### 메모리 섹션 사용
 
-ObjectiveC 런타임에서 사용하는 대부분의 데이터는 실행 중에 변경되므로, 메모리의 **\_\_DATA** 세그먼트에서 일부 섹션을 사용합니다:
+ObjectiveC 런타임에서 사용하는 대부분의 데이터는 실행 중에 변경되므로, 메모리의 **\_\_DATA** 세그먼트에서 몇 가지 섹션을 사용합니다:
 
 - **`__objc_msgrefs`** (`message_ref_t`): 메시지 참조
 - **`__objc_ivar`** (`ivar`): 인스턴스 변수
@@ -85,8 +85,8 @@ ObjectiveC 런타임에서 사용하는 대부분의 데이터는 실행 중에 
 Objective-C는 선택자 및 변수 유형을 단순 및 복합 유형으로 인코딩하기 위해 일부 맹글링을 사용합니다:
 
 - 원시 유형은 유형의 첫 글자를 사용합니다. `i`는 `int`, `c`는 `char`, `l`은 `long`...이며, 부호 없는 경우 대문자를 사용합니다 (`L`은 `unsigned Long`).
-- 다른 데이터 유형의 글자가 사용되거나 특별한 경우, `q`는 `long long`, `b`는 `bitfields`, `B`는 `booleans`, `#`는 `classes`, `@`는 `id`, `*`는 `char pointers`, `^`는 일반 `pointers`, `?`는 `undefined`와 같은 다른 글자나 기호를 사용합니다.
-- 배열, 구조체 및 유니온은 `[`, `{` 및 `(`를 사용합니다.
+- 다른 데이터 유형의 경우, 사용되는 글자나 특수한 경우에는 `q`는 `long long`, `b`는 `bitfields`, `B`는 `booleans`, `#`는 `classes`, `@`는 `id`, `*`는 `char pointers`, `^`는 일반 `pointers`, `?`는 `undefined`와 같은 다른 글자나 기호를 사용합니다.
+- 배열, 구조체 및 유니온은 각각 `[`, `{` 및 `(`를 사용합니다.
 
 #### 예제 메서드 선언
 ```objectivec
@@ -116,7 +116,7 @@ Objective-C는 선택자 및 변수 유형을 단순 및 복합 유형으로 인
 
 ### **클래스**
 
-Objective-C의 클래스는 속성, 메서드 포인터가 있는 구조체입니다... 구조체 `objc_class`를 찾는 것이 가능합니다 [**소스 코드**](https://opensource.apple.com/source/objc4/objc4-756.2/runtime/objc-runtime-new.h.auto.html):
+Objective-C의 클래스는 속성, 메서드 포인터가 있는 구조체입니다... 구조체 `objc_class`를 [**소스 코드**](https://opensource.apple.com/source/objc4/objc4-756.2/runtime/objc-runtime-new.h.auto.html)에서 찾는 것이 가능합니다:
 ```objectivec
 struct objc_class : objc_object {
 // Class ISA;

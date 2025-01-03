@@ -27,13 +27,13 @@ macOS의 번들은 애플리케이션, 라이브러리 및 기타 필요한 파�
 
 `Safari.app`와 같은 번들의 내용을 탐색하려면 다음 명령어를 사용할 수 있습니다: `bash ls -lR /Applications/Safari.app/Contents`
 
-이 탐색은 `_CodeSignature`, `MacOS`, `Resources`와 같은 디렉토리 및 `Info.plist`와 같은 파일을 드러내며, 각각 애플리케이션을 보호하고 사용자 인터페이스 및 운영 매개변수를 정의하는 고유한 목적을 가지고 있습니다.
+이 탐색은 `_CodeSignature`, `MacOS`, `Resources`와 같은 디렉토리 및 `Info.plist`와 같은 파일을 드러내며, 각각 애플리케이션 보안, 사용자 인터페이스 정의 및 운영 매개변수 설정과 같은 고유한 목적을 수행합니다.
 
 #### Additional Bundle Directories
 
 일반 디렉토리 외에도 번들은 다음을 포함할 수 있습니다:
 
-- **Frameworks**: 애플리케이션에서 사용하는 번들된 프레임워크를 포함합니다. 프레임워크는 추가 리소스가 있는 dylib와 같습니다.
+- **Frameworks**: 애플리케이션에서 사용하는 번들된 프레임워크를 포함합니다. 프레임워크는 추가 리소스가 있는 dylibs와 같습니다.
 - **PlugIns**: 애플리케이션의 기능을 향상시키는 플러그인 및 확장을 위한 디렉토리입니다.
 - **XPCServices**: 애플리케이션이 프로세스 외 통신을 위해 사용하는 XPC 서비스를 보유합니다.
 

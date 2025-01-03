@@ -4,7 +4,7 @@
 
 ## 기본 정보
 
-Mach-o 바이너리는 바이너리 내부의 서명의 **오프셋**과 **크기**를 나타내는 **`LC_CODE_SIGNATURE`**라는 로드 명령을 포함합니다. 실제로 GUI 도구인 MachOView를 사용하면 바이너리의 끝에서 이 정보를 포함하는 **Code Signature**라는 섹션을 찾을 수 있습니다:
+Mach-o 바이너리는 바이너리 내부의 서명의 **오프셋**과 **크기**를 나타내는 **`LC_CODE_SIGNATURE`**라는 로드 명령을 포함합니다. 실제로 GUI 도구인 MachOView를 사용하면 바이너리의 끝에서 이 정보를 포함하는 **코드 서명**이라는 섹션을 찾을 수 있습니다:
 
 <figure><img src="../../../images/image (1) (1) (1) (1).png" alt="" width="431"><figcaption></figcaption></figure>
 
@@ -103,10 +103,10 @@ __attribute__ ((aligned(1)));
 ```
 다양한 버전의 이 구조체가 있으며, 이전 버전은 정보가 적을 수 있습니다.
 
-## 코드 서명 페이지
+## 서명 코드 페이지
 
 전체 바이너리를 해싱하는 것은 비효율적이며, 메모리에 부분적으로만 로드될 경우에는 심지어 쓸모가 없습니다. 따라서 코드 서명은 실제로 각 바이너리 페이지가 개별적으로 해싱된 해시의 해시입니다.\
-실제로 이전 **코드 디렉토리** 코드에서 **페이지 크기가 지정되어** 있는 것을 볼 수 있습니다. 또한, 바이너리의 크기가 페이지 크기의 배수가 아닌 경우, 필드 **CodeLimit**는 서명의 끝이 어디인지 지정합니다.
+실제로 이전 **Code Directory** 코드에서 **페이지 크기가 지정되어** 있는 것을 볼 수 있습니다. 게다가, 바이너리의 크기가 페이지 크기의 배수가 아닐 경우, 필드 **CodeLimit**는 서명의 끝이 어디인지 지정합니다.
 ```bash
 # Get all hashes of /bin/ps
 codesign -d -vvvvvv /bin/ps
@@ -211,7 +211,7 @@ Note that the function [**exec_mach_imgact**](https://github.com/apple-oss-distr
 
 ## 코드 서명 요구 사항
 
-각 애플리케이션은 실행될 수 있도록 **충족해야 하는** **요구 사항**을 저장합니다. **애플리케이션이 충족하지 않는 요구 사항을 포함하는 경우**, 애플리케이션은 실행되지 않습니다(변경되었을 가능성이 높기 때문입니다).
+각 애플리케이션은 실행될 수 있도록 **충족해야 하는** **요구 사항**을 저장합니다. **애플리케이션이 충족하지 않는 요구 사항을 포함하고 있다면**, 실행되지 않습니다(변경되었을 가능성이 높기 때문입니다).
 
 바이너리의 요구 사항은 **특별한 문법**을 사용하며, 이는 **표현식**의 흐름으로 `0xfade0c00`을 매직으로 사용하여 블롭으로 인코딩됩니다. 이 **해시는 특별한 코드 슬롯에 저장됩니다**.
 
@@ -226,9 +226,9 @@ Executable=/Applications/Signal.app/Contents/MacOS/Signal
 designated => identifier "org.whispersystems.signal-desktop" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = U68MSDN6DR
 ```
 > [!NOTE]
-> 이 서명이 인증 정보, TeamID, ID, 권한 및 기타 많은 데이터를 확인할 수 있는 방법에 주목하세요.
+> 이 서명이 인증 정보, TeamID, ID, 권한 및 기타 많은 데이터를 확인할 수 있는 방법에 유의하십시오.
 
-또한, `csreq` 도구를 사용하여 일부 컴파일된 요구 사항을 생성하는 것이 가능합니다:
+또한, `csreq` 도구를 사용하여 일부 컴파일된 요구 사항을 생성할 수 있습니다:
 ```bash
 # Generate compiled requirements
 csreq -b /tmp/output.csreq -r='identifier "org.whispersystems.signal-desktop" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = U68MSDN6DR'
@@ -240,8 +240,6 @@ od -A x -t x1 /tmp/output.csreq
 0000020    00  00  00  21  6f  72  67  2e  77  68  69  73  70  65  72  73
 [...]
 ```
-It's possible to access this information and create or modify requirements with some APIs from the `Security.framework` like:
-
 #### **유효성 검사**
 
 - **`Sec[Static]CodeCheckValidity`**: 요구 사항에 따라 SecCodeRef의 유효성을 검사합니다.
@@ -263,7 +261,7 @@ It's possible to access this information and create or modify requirements with 
 #### **코드 요구 사항 수정**
 
 - **`SecCodeSignerCreate`**: 코드 서명 작업을 수행하기 위한 `SecCodeSignerRef` 객체를 생성합니다.
-- **`SecCodeSignerSetRequirement`**: 서명 중에 적용할 코드 서명자에 대한 새로운 요구 사항을 설정합니다.
+- **`SecCodeSignerSetRequirement`**: 서명 중에 적용할 새로운 요구 사항을 설정합니다.
 - **`SecCodeSignerAddSignature`**: 지정된 서명자로 서명되는 코드에 서명을 추가합니다.
 
 #### **요구 사항으로 코드 검증**
@@ -272,11 +270,11 @@ It's possible to access this information and create or modify requirements with 
 
 #### **추가 유용한 API**
 
-- **`SecCodeCopy[Internal/Designated]Requirement`: SecCodeRef에서 SecRequirementRef 가져오기**
+- **`SecCodeCopy[Internal/Designated]Requirement`: SecCodeRef에서 SecRequirementRef를 가져옵니다.**
 - **`SecCodeCopyGuestWithAttributes`**: 특정 속성을 기반으로 하는 코드 객체를 나타내는 `SecCodeRef`를 생성하며, 샌드박싱에 유용합니다.
 - **`SecCodeCopyPath`**: `SecCodeRef`와 관련된 파일 시스템 경로를 검색합니다.
 - **`SecCodeCopySigningIdentifier`**: `SecCodeRef`에서 서명 식별자(예: 팀 ID)를 얻습니다.
-- **`SecCodeGetTypeID`**: `SecCodeRef` 객체에 대한 유형 식별자를 반환합니다.
+- **`SecCodeGetTypeID`**: `SecCodeRef` 객체의 유형 식별자를 반환합니다.
 - **`SecRequirementGetTypeID`**: `SecRequirementRef`의 CFTypeID를 가져옵니다.
 
 #### **코드 서명 플래그 및 상수**

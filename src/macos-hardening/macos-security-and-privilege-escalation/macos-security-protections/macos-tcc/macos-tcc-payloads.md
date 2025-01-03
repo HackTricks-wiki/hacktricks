@@ -580,7 +580,7 @@ ffmpeg -f avfoundation -i ":1" -t 5 /tmp/recording.wav
 
 {{#tabs}}
 {{#tab name="ObjectiveC"}}
-위치를 `/tmp/logs.txt`에 기록합니다.
+`/tmp/logs.txt`에 위치를 기록합니다.
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -630,7 +630,7 @@ freopen("/tmp/logs.txt", "w", stderr); // Redirect stderr to /tmp/logs.txt
 {{#endtab}}
 
 {{#tab name="Shell"}}
-위치에 접근하십시오.
+위치에 접근하기
 ```
 ???
 ```
@@ -877,6 +877,6 @@ return 0;
 {{#endtab}}
 {{#endtabs}}
 
-> [!CAUTION] > **접근성은 매우 강력한 권한입니다**, 이를 다른 방식으로 악용할 수 있습니다. 예를 들어, **키스트로크 공격**을 수행할 수 있으며, 이를 위해 System Events를 호출할 필요가 없습니다.
+> [!CAUTION] > **접근성은 매우 강력한 권한입니다**, 이를 다른 방식으로 악용할 수 있습니다. 예를 들어, System Events를 호출할 필요 없이 **키스트로크 공격**을 수행할 수 있습니다.
 
 {{#include ../../../../banners/hacktricks-training.md}}

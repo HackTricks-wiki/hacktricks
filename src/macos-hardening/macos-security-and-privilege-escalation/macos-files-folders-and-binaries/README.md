@@ -11,14 +11,14 @@
 - **/etc**: 구성 파일
 - **/Library**: 환경 설정, 캐시 및 로그와 관련된 많은 하위 디렉토리와 파일을 찾을 수 있습니다. 루트와 각 사용자 디렉토리에 Library 폴더가 존재합니다.
 - **/private**: 문서화되지 않았지만 언급된 많은 폴더는 개인 디렉토리에 대한 심볼릭 링크입니다.
-- **/sbin**: 필수 시스템 바이너리 (관리와 관련)
-- **/System**: OS X을 실행하기 위한 파일입니다. 여기에는 주로 Apple 특정 파일만 있어야 합니다 (서드파티 아님).
-- **/tmp**: 파일은 3일 후에 삭제됩니다 (이는 /private/tmp에 대한 소프트 링크입니다).
+- **/sbin**: 필수 시스템 바이너리(관리와 관련됨)
+- **/System**: OS X을 실행하기 위한 파일입니다. 여기에는 주로 Apple 특정 파일만 있어야 합니다(서드파티 아님).
+- **/tmp**: 파일은 3일 후에 삭제됩니다(이는 /private/tmp에 대한 소프트 링크입니다).
 - **/Users**: 사용자의 홈 디렉토리입니다.
 - **/usr**: 구성 및 시스템 바이너리
 - **/var**: 로그 파일
 - **/Volumes**: 마운트된 드라이브가 여기에 나타납니다.
-- **/.vol**: `stat a.txt`를 실행하면 `16777223 7545753 -rw-r--r-- 1 username wheel ...`와 같은 결과를 얻습니다. 여기서 첫 번째 숫자는 파일이 존재하는 볼륨의 ID 번호이고 두 번째는 inode 번호입니다. 이 정보를 사용하여 `cat /.vol/16777223/7545753`를 실행하여 이 파일의 내용을 접근할 수 있습니다.
+- **/.vol**: `stat a.txt`를 실행하면 `16777223 7545753 -rw-r--r-- 1 username wheel ...`와 같은 결과를 얻습니다. 여기서 첫 번째 숫자는 파일이 존재하는 볼륨의 ID 번호이고 두 번째 숫자는 inode 번호입니다. 이 정보를 사용하여 `cat /.vol/16777223/7545753`를 실행하여 이 파일의 내용을 접근할 수 있습니다.
 
 ### 애플리케이션 폴더
 
@@ -56,9 +56,9 @@ macos-installers-abuse.md
 - `plutil -p ~/Library/Preferences/com.apple.screensaver.plist`
 - `plutil -convert xml1 ~/Library/Preferences/com.apple.screensaver.plist -o -`
 - `plutil -convert json ~/Library/Preferences/com.apple.screensaver.plist -o -`
-- **`.app`**: 디렉토리 구조를 따르는 Apple 애플리케이션입니다 (번들입니다).
-- **`.dylib`**: 동적 라이브러리 (Windows DLL 파일과 유사)
-- **`.pkg`**: xar (eXtensible Archive format)와 동일합니다. 설치 명령을 사용하여 이러한 파일의 내용을 설치할 수 있습니다.
+- **`.app`**: 디렉토리 구조를 따르는 Apple 애플리케이션입니다(번들입니다).
+- **`.dylib`**: 동적 라이브러리(Windows DLL 파일과 유사)
+- **`.pkg`**: xar(확장 가능한 아카이브 형식)와 동일합니다. 설치 명령을 사용하여 이러한 파일의 내용을 설치할 수 있습니다.
 - **`.DS_Store`**: 이 파일은 각 디렉토리에 있으며, 디렉토리의 속성과 사용자 정의를 저장합니다.
 - **`.Spotlight-V100`**: 이 폴더는 시스템의 모든 볼륨의 루트 디렉토리에 나타납니다.
 - **`.metadata_never_index`**: 이 파일이 볼륨의 루트에 있으면 Spotlight는 해당 볼륨을 인덱싱하지 않습니다.
@@ -67,22 +67,22 @@ macos-installers-abuse.md
 
 ### macOS 번들
 
-번들은 **Finder에서 객체처럼 보이는 디렉토리**입니다 (번들의 예는 `*.app` 파일입니다).
+번들은 **Finder에서 객체처럼 보이는 디렉토리**입니다(번들의 예는 `*.app` 파일입니다).
 
 {{#ref}}
 macos-bundles.md
 {{#endref}}
 
-## Dyld 공유 라이브러리 캐시 (SLC)
+## Dyld 공유 라이브러리 캐시(SLC)
 
-macOS (및 iOS)에서 모든 시스템 공유 라이브러리, 프레임워크 및 dylibs는 **단일 파일**로 **결합되어** 있으며, 이를 **dyld 공유 캐시**라고 합니다. 이는 성능을 향상시켜 코드가 더 빠르게 로드될 수 있도록 합니다.
+macOS(및 iOS)에서 모든 시스템 공유 라이브러리, 프레임워크 및 dylib는 **단일 파일**로 **결합되어** 있으며, 이를 **dyld 공유 캐시**라고 합니다. 이는 성능을 향상시켜 코드가 더 빠르게 로드될 수 있도록 합니다.
 
-이것은 macOS에서 `/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/`에 위치하며, 이전 버전에서는 **`/System/Library/dyld/`**에서 **공유 캐시**를 찾을 수 있습니다.\
+macOS에서는 `/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/`에 위치하며, 이전 버전에서는 **`/System/Library/dyld/`**에서 **공유 캐시**를 찾을 수 있습니다.\
 iOS에서는 **`/System/Library/Caches/com.apple.dyld/`**에서 찾을 수 있습니다.
 
 dyld 공유 캐시와 유사하게, 커널과 커널 확장도 부팅 시 로드되는 커널 캐시에 컴파일됩니다.
 
-단일 파일 dylib 공유 캐시에서 라이브러리를 추출하기 위해 [dyld_shared_cache_util](https://www.mbsplugins.de/files/dyld_shared_cache_util-dyld-733.8.zip)이라는 바이너리를 사용할 수 있었으나 현재는 작동하지 않을 수 있으며, [**dyldextractor**](https://github.com/arandomdev/dyldextractor)도 사용할 수 있습니다:
+단일 파일 dylib 공유 캐시에서 라이브러리를 추출하기 위해 [dyld_shared_cache_util](https://www.mbsplugins.de/files/dyld_shared_cache_util-dyld-733.8.zip)라는 바이너리를 사용할 수 있었으나 현재는 작동하지 않을 수 있습니다. 대신 [**dyldextractor**](https://github.com/arandomdev/dyldextractor)를 사용할 수 있습니다:
 ```bash
 # dyld_shared_cache_util
 dyld_shared_cache_util -extract ~/shared_cache/ /System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e
@@ -114,25 +114,25 @@ SLC가 첫 번째 사용 시 슬라이드되더라도 모든 **프로세스**는
 
 환경 변수를 사용하여:
 
-- **`DYLD_DHARED_REGION=private DYLD_SHARED_CACHE_DIR=</path/dir> DYLD_SHARED_CACHE_DONT_VALIDATE=1`** -> 새로운 공유 라이브러리 캐시를 로드할 수 있게 해줍니다.
+- **`DYLD_DHARED_REGION=private DYLD_SHARED_CACHE_DIR=</path/dir> DYLD_SHARED_CACHE_DONT_VALIDATE=1`** -> 이는 새로운 공유 라이브러리 캐시를 로드할 수 있게 해줍니다.
 - **`DYLD_SHARED_CACHE_DIR=avoid`** 및 실제 라이브러리로의 심볼릭 링크로 공유 캐시의 라이브러리를 수동으로 교체합니다 (추출해야 함).
 
 ## 특별 파일 권한
 
 ### 폴더 권한
 
-**폴더**에서 **읽기**는 **목록을 나열할 수 있게** 하고, **쓰기**는 **파일을 삭제하고 작성할 수 있게** 하며, **실행**은 **디렉토리를 탐색할 수 있게** 합니다. 예를 들어, **실행 권한이 없는 디렉토리** 내의 **파일에 대한 읽기 권한이 있는 사용자**는 **파일을 읽을 수 없습니다**.
+**폴더**에서 **읽기**는 **목록을 나열할 수 있게** 하고, **쓰기**는 **삭제** 및 **파일 쓰기**를 허용하며, **실행**은 **디렉토리를 탐색할 수 있게** 합니다. 예를 들어, **실행 권한이 없는 디렉토리** 내의 **파일에 대한 읽기 권한**이 있는 사용자는 **파일을 읽을 수 없습니다**.
 
 ### 플래그 수정자
 
-파일에 설정할 수 있는 몇 가지 플래그가 있으며, 이로 인해 파일이 다르게 동작할 수 있습니다. 디렉토리 내 파일의 **플래그를 확인하려면** `ls -lO /path/directory`를 사용하세요.
+파일에 설정할 수 있는 몇 가지 플래그가 있으며, 이는 파일이 다르게 동작하게 만듭니다. 디렉토리 내의 파일 플래그를 **확인하려면** `ls -lO /path/directory`를 사용하세요.
 
-- **`uchg`**: **uchange** 플래그로, **파일**을 변경하거나 삭제하는 **모든 작업을 방지**합니다. 설정하려면: `chflags uchg file.txt`
-- 루트 사용자는 **플래그를 제거하고 파일을 수정할 수 있습니다**.
+- **`uchg`**: **uchange** 플래그로, **파일**의 변경 또는 삭제를 **방지**합니다. 설정하려면: `chflags uchg file.txt`
+- 루트 사용자는 **플래그를 제거**하고 파일을 수정할 수 있습니다.
 - **`restricted`**: 이 플래그는 파일이 **SIP에 의해 보호**되도록 합니다 (이 플래그를 파일에 추가할 수 없습니다).
-- **`Sticky bit`**: 스티키 비트가 있는 디렉토리에서는 **오직** **디렉토리 소유자 또는 루트만 파일을 이름 변경하거나 삭제할 수 있습니다**. 일반적으로 이는 /tmp 디렉토리에 설정되어 일반 사용자가 다른 사용자의 파일을 삭제하거나 이동하지 못하도록 합니다.
+- **`Sticky bit`**: 스티키 비트가 있는 디렉토리에서는 **오직** **디렉토리 소유자 또는 루트만 파일을 이름 변경하거나 삭제**할 수 있습니다. 일반적으로 이는 /tmp 디렉토리에 설정되어 일반 사용자가 다른 사용자의 파일을 삭제하거나 이동하지 못하도록 합니다.
 
-모든 플래그는 파일 `sys/stat.h`에서 찾을 수 있으며 (다음 명령어로 찾을 수 있습니다: `mdfind stat.h | grep stat.h`) 다음과 같습니다:
+모든 플래그는 파일 `sys/stat.h`에서 찾을 수 있으며 (다음 명령어로 찾기: `mdfind stat.h | grep stat.h`) 다음과 같습니다:
 
 - `UF_SETTABLE` 0x0000ffff: 소유자 변경 가능 플래그의 마스크.
 - `UF_NODUMP` 0x00000001: 파일 덤프를 하지 않음.
@@ -182,12 +182,12 @@ ls -RAle / 2>/dev/null | grep -E -B1 "\d: "
 
 - `com.apple.resourceFork`: 리소스 포크 호환성. `filename/..namedfork/rsrc`로도 볼 수 있음
 - `com.apple.quarantine`: MacOS: Gatekeeper 격리 메커니즘 (III/6)
-- `metadata:*`: MacOS: 다양한 메타데이터, 예를 들어 `_backup_excludeItem` 또는 `kMD*`
+- `metadata:*`: MacOS: `_backup_excludeItem` 또는 `kMD*`와 같은 다양한 메타데이터
 - `com.apple.lastuseddate` (#PS): 마지막 파일 사용 날짜
 - `com.apple.FinderInfo`: MacOS: Finder 정보 (예: 색상 태그)
 - `com.apple.TextEncoding`: ASCII 텍스트 파일의 텍스트 인코딩을 지정
 - `com.apple.logd.metadata`: `/var/db/diagnostics`의 파일에서 logd에 의해 사용됨
-- `com.apple.genstore.*`: 세대 저장소 (`/.DocumentRevisions-V100` 파일 시스템의 루트에)
+- `com.apple.genstore.*`: 세대 저장소 (`/.DocumentRevisions-V100` 파일 시스템의 루트에 위치)
 - `com.apple.rootless`: MacOS: 시스템 무결성 보호에 의해 파일에 레이블을 붙이는 데 사용됨 (III/10)
 - `com.apple.uuidb.boot-uuid`: 고유 UUID로 부팅 에포크의 logd 마킹
 - `com.apple.decmpfs`: MacOS: 투명 파일 압축 (II/7)
@@ -196,7 +196,7 @@ ls -RAle / 2>/dev/null | grep -E -B1 "\d: "
 
 ### 리소스 포크 | macOS ADS
 
-이는 **MacOS에서 대체 데이터 스트림을 얻는 방법**입니다. **file/..namedfork/rsrc**에 있는 확장 속성 **com.apple.ResourceFork** 안에 내용을 저장할 수 있습니다.
+이는 **MacOS에서 대체 데이터 스트림을 얻는 방법**입니다. **file/..namedfork/rsrc**에 있는 **com.apple.ResourceFork**라는 확장 속성 안에 내용을 저장할 수 있습니다.
 ```bash
 echo "Hello" > a.txt
 echo "Hello Mac ADS" > a.txt/..namedfork/rsrc
@@ -239,9 +239,9 @@ macos-memory-dumping.md
 
 디렉토리 `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/System`는 **다양한 파일 확장자와 관련된 위험 정보가 저장되는 곳**입니다. 이 디렉토리는 파일을 다양한 위험 수준으로 분류하여 Safari가 다운로드 시 이러한 파일을 처리하는 방식에 영향을 미칩니다. 카테고리는 다음과 같습니다:
 
-- **LSRiskCategorySafe**: 이 카테고리의 파일은 **완전히 안전한** 것으로 간주됩니다. Safari는 다운로드 후 자동으로 이러한 파일을 엽니다.
+- **LSRiskCategorySafe**: 이 카테고리의 파일은 **완전히 안전한** 것으로 간주됩니다. Safari는 다운로드 후 이러한 파일을 자동으로 엽니다.
 - **LSRiskCategoryNeutral**: 이 파일은 경고 없이 제공되며 Safari에 의해 **자동으로 열리지 않습니다**.
-- **LSRiskCategoryUnsafeExecutable**: 이 카테고리의 파일은 **경고를 발생시킵니다**, 파일이 애플리케이션임을 나타냅니다. 이는 사용자에게 경고하기 위한 보안 조치입니다.
+- **LSRiskCategoryUnsafeExecutable**: 이 카테고리의 파일은 **경고를 발생시킵니다**, 파일이 애플리케이션임을 나타냅니다. 이는 사용자에게 경고하는 보안 조치입니다.
 - **LSRiskCategoryMayContainUnsafeExecutable**: 이 카테고리는 실행 파일을 포함할 수 있는 아카이브와 같은 파일을 위한 것입니다. Safari는 모든 내용이 안전하거나 중립적임을 확인할 수 없는 경우 **경고를 발생시킵니다**.
 
 ## Log files

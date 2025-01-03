@@ -133,11 +133,11 @@ cp lib.dylib "/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib"
 </code></pre>
 
 > [!NOTE]
-> 이 취약점을 악용하여 텔레그램의 카메라 권한을 악용하는 방법에 대한 좋은 글은 [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)에서 찾을 수 있습니다.
+> 텔레그램의 카메라 권한을 악용하는 방법에 대한 좋은 글은 [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)에서 찾을 수 있습니다.
 
 ## 더 큰 규모
 
-예상치 못한 이진 파일에 라이브러리를 주입하려는 경우, 프로세스 내에서 라이브러리가 로드될 때를 알아내기 위해 이벤트 메시지를 확인할 수 있습니다(이 경우 printf와 `/bin/bash` 실행을 제거하십시오).
+예상치 못한 이진 파일에 라이브러리를 주입하려는 경우, 이벤트 메시지를 확인하여 프로세스 내에서 라이브러리가 로드되는 시점을 파악할 수 있습니다(이 경우 printf와 `/bin/bash` 실행을 제거하십시오).
 ```bash
 sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "[+] dylib"'
 ```

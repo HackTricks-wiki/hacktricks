@@ -14,9 +14,9 @@
 - **name**: 권한 시스템 내에서 규칙을 식별하고 참조하는 데 사용되는 고유한 규칙 이름입니다.
 - **type**: 규칙의 유형을 지정하며, 권한 논리를 정의하기 위해 1 또는 2의 값으로 제한됩니다.
 - **class**: 규칙을 특정 클래스에 분류하며, 양의 정수여야 합니다.
-- "allow"는 허용을, "deny"는 거부를, "user"는 그룹 속성이 접근을 허용하는 그룹을 나타내는 경우, "rule"은 충족해야 할 규칙을 배열로 나타내며, "evaluate-mechanisms"는 `mechanisms` 배열을 따르며, 이는 내장형이거나 `/System/Library/CoreServices/SecurityAgentPlugins/` 또는 /Library/Security//SecurityAgentPlugins 내의 번들 이름입니다.
+- "allow"는 허용을 의미하고, "deny"는 거부를 의미하며, "user"는 그룹 속성이 접근을 허용하는 그룹을 나타내는 경우, "rule"은 충족해야 할 규칙을 배열로 나타내며, "evaluate-mechanisms"는 `mechanisms` 배열을 따르며, 이는 내장형이거나 `/System/Library/CoreServices/SecurityAgentPlugins/` 또는 /Library/Security//SecurityAgentPlugins 내의 번들 이름입니다.
 - **group**: 그룹 기반 권한 부여를 위한 규칙과 관련된 사용자 그룹을 나타냅니다.
-- **kofn**: "k-of-n" 매개변수를 나타내며, 총 수 중에서 얼마나 많은 하위 규칙이 충족되어야 하는지를 결정합니다.
+- **kofn**: "k-of-n" 매개변수를 나타내며, 총 수에서 얼마나 많은 하위 규칙이 충족되어야 하는지를 결정합니다.
 - **timeout**: 규칙에 의해 부여된 권한이 만료되기 전의 지속 시간을 초 단위로 정의합니다.
 - **flags**: 규칙의 동작 및 특성을 수정하는 다양한 플래그를 포함합니다.
 - **tries**: 보안을 강화하기 위해 허용된 권한 시도 횟수를 제한합니다.

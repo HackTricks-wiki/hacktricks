@@ -1,4 +1,4 @@
-# macOS TCC 우회
+# macOS TCC Bypasses
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
@@ -6,7 +6,7 @@
 
 ### 쓰기 우회
 
-이것은 우회가 아니라 TCC가 작동하는 방식입니다: **쓰기에서 보호하지 않습니다**. 만약 Terminal이 **사용자의 바탕화면을 읽을 수 있는 권한이 없다면 여전히 그 안에 쓸 수 있습니다**:
+이것은 우회가 아니라 TCC가 작동하는 방식입니다: **쓰기 보호가 없습니다**. 만약 터미널이 **사용자의 바탕화면을 읽을 수 있는 권한이 없다면 여전히 그 안에 쓸 수 있습니다**:
 ```shell-session
 username@hostname ~ % ls Desktop
 ls: Desktop: Operation not permitted
@@ -20,7 +20,7 @@ asd
 
 ### TCC ClickJacking
 
-사용자가 이를 **인식하지 못한 채** **수락**하도록 **TCC 프롬프트 위에 창을 올리는** 것이 가능합니다. [**TCC-ClickJacking**](https://github.com/breakpointHQ/TCC-ClickJacking)**에서 PoC를 찾을 수 있습니다.**
+사용자가 **알지 못한 채로** TCC 프롬프트 위에 **창을 올려놓는** 것이 가능합니다. [**TCC-ClickJacking**](https://github.com/breakpointHQ/TCC-ClickJacking)**에서 PoC를 찾을 수 있습니다.**
 
 <figure><img src="broken-reference" alt=""><figcaption><p><a href="https://github.com/breakpointHQ/TCC-ClickJacking/raw/main/resources/clickjacking.jpg">https://github.com/breakpointHQ/TCC-ClickJacking/raw/main/resources/clickjacking.jpg</a></p></figcaption></figure>
 
@@ -39,7 +39,7 @@ asd
 
 ### SSH 우회
 
-기본적으로 **SSH를 통한 접근은 "전체 디스크 접근"**을 가져야 했습니다. 이를 비활성화하려면 목록에 나열되어 있지만 비활성화되어 있어야 합니다(목록에서 제거하는 것은 이러한 권한을 제거하지 않습니다):
+기본적으로 **SSH를 통한 접근은 "전체 디스크 접근"**을 가지고 있었습니다. 이를 비활성화하려면 목록에 나열되어 있지만 비활성화되어 있어야 합니다(목록에서 제거하는 것은 이러한 권한을 제거하지 않습니다):
 
 ![](<../../../../../images/image (1077).png>)
 
@@ -54,7 +54,7 @@ asd
 
 속성 **`com.apple.macl`**은 파일에 부여되어 **특정 애플리케이션이 이를 읽을 수 있는 권한을 부여합니다.** 이 속성은 **파일을 앱 위로 드래그 앤 드롭**하거나 사용자가 **더블 클릭**하여 **기본 애플리케이션**으로 파일을 열 때 설정됩니다.
 
-따라서 사용자는 **모든 확장을 처리하는 악성 앱을 등록**하고 Launch Services를 호출하여 **파일을 열 수 있습니다**(따라서 악성 파일이 읽을 수 있는 접근 권한을 부여받게 됩니다).
+따라서 사용자는 **모든 확장을 처리하는 악성 앱을 등록하고** Launch Services를 호출하여 **파일을 열 수 있습니다**(따라서 악성 파일이 읽을 수 있는 접근 권한을 부여받게 됩니다).
 
 ### iCloud
 
@@ -62,11 +62,11 @@ asd
 
 **iMovie**와 **Garageband**는 이 권한을 가지고 있었고, 다른 앱들도 허용되었습니다.
 
-이 권한에서 **icloud 토큰을 얻기 위한** 익스플로잇에 대한 더 많은 **정보**는 다음 강의를 확인하세요: [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+이 권한에서 **icloud 토큰을 얻기 위한** exploit에 대한 더 많은 **정보**는 다음 강의를 확인하세요: [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
 ### kTCCServiceAppleEvents / 자동화
 
-**`kTCCServiceAppleEvents`** 권한이 있는 앱은 **다른 앱을 제어할 수 있습니다**. 이는 다른 앱에 부여된 권한을 **남용할 수 있음을 의미합니다**.
+**`kTCCServiceAppleEvents`** 권한을 가진 앱은 **다른 앱을 제어할 수 있습니다**. 이는 다른 앱에 부여된 권한을 **남용할 수 있음을 의미합니다**.
 
 Apple Scripts에 대한 더 많은 정보는 다음을 확인하세요:
 
@@ -98,7 +98,7 @@ osascript iterm.script
 ```
 #### Over Finder
 
-또는 앱이 Finder에 대한 액세스 권한이 있는 경우, 다음과 같은 스크립트를 사용할 수 있습니다:
+또는 앱이 Finder에 대한 접근 권한이 있는 경우, 다음과 같은 스크립트를 사용할 수 있습니다:
 ```applescript
 set a_user to do shell script "logname"
 tell application "Finder"
@@ -114,8 +114,8 @@ do shell script "rm " & POSIX path of (copyFile as alias)
 
 사용자 공간의 **tccd 데몬**은 **`HOME`** **env** 변수를 사용하여 TCC 사용자 데이터베이스에 접근합니다: **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**
 
-[이 Stack Exchange 게시물](https://stackoverflow.com/questions/135688/setting-environment-variables-on-os-x/3756686#3756686)에 따르면, TCC 데몬은 현재 사용자의 도메인 내에서 `launchd`를 통해 실행되므로, **전달되는 모든 환경 변수를 제어**할 수 있습니다.\
-따라서 **공격자는 `$HOME` 환경** 변수를 **`launchctl`**에서 **제어된** **디렉토리**를 가리키도록 설정하고, **TCC** 데몬을 **재시작**한 다음, **TCC 데이터베이스를 직접 수정**하여 최종 사용자에게 아무런 요청 없이 **모든 TCC 권한**을 부여할 수 있습니다.\
+[이 Stack Exchange 게시물](https://stackoverflow.com/questions/135688/setting-environment-variables-on-os-x/3756686#3756686)에 따르면, TCC 데몬이 현재 사용자의 도메인 내에서 `launchd`를 통해 실행되기 때문에, **모든 환경 변수**를 **제어**할 수 있습니다.\
+따라서 **공격자는 `$HOME` 환경** 변수를 **`launchctl`**에서 **제어된** **디렉토리**를 가리키도록 설정하고, **TCC** 데몬을 **재시작**한 다음, **TCC 데이터베이스를 직접 수정**하여 **최종 사용자에게 아무런 프롬프트 없이** **모든 TCC 권한**을 부여할 수 있습니다.\
 PoC:
 ```bash
 # reset database just in case (no cheating!)
@@ -145,7 +145,7 @@ $> ls ~/Documents
 ```
 ### CVE-2021-30761 - 노트
 
-노트는 TCC 보호 위치에 접근할 수 있지만, 노트가 생성될 때 **비보호 위치**에 생성됩니다. 따라서 노트에 보호된 파일을 노트에 복사하도록 요청할 수 있으며(즉, 비보호 위치에) 그 파일에 접근할 수 있습니다:
+노트는 TCC 보호 위치에 접근할 수 있었지만, 노트가 생성될 때 **비보호 위치**에 생성됩니다. 따라서 노트에 보호된 파일을 노트에 복사하도록 요청할 수 있으며(즉, 비보호 위치에) 그 파일에 접근할 수 있습니다:
 
 <figure><img src="../../../../../images/image (476).png" alt=""><figcaption></figcaption></figure>
 
@@ -157,21 +157,21 @@ $> ls ~/Documents
 
 ### CVE-2023-38571 - 음악 및 TV <a href="#cve-2023-38571-a-macos-tcc-bypass-in-music-and-tv" id="cve-2023-38571-a-macos-tcc-bypass-in-music-and-tv"></a>
 
-**`Music`**는 흥미로운 기능을 가지고 있습니다: 실행 중일 때 **`~/Music/Music/Media.localized/Automatically Add to Music.localized`**에 드롭된 파일을 사용자의 "미디어 라이브러리"로 **가져옵니다**. 게다가, **`rename(a, b);`**와 같은 호출을 하며, 여기서 `a`와 `b`는 다음과 같습니다:
+**`Music`**는 흥미로운 기능을 가지고 있습니다: 실행 중일 때, **`~/Music/Music/Media.localized/Automatically Add to Music.localized`**에 드롭된 파일을 사용자의 "미디어 라이브러리"로 **가져옵니다**. 게다가, **`rename(a, b);`**와 같은 호출을 합니다. 여기서 `a`와 `b`는:
 
 - `a = "~/Music/Music/Media.localized/Automatically Add to Music.localized/myfile.mp3"`
-- `b = "~/Music/Music/Media.localized/Automatically Add to Music.localized/Not Added.localized/2023-09-25 11.06.28/myfile.mp3`
+- `b = "~/Music/Music/Media.localized/Automatically Add to Music.localized/Not Added.localized/2023-09-25 11.06.28/myfile.mp3"`
 
-이 **`rename(a, b);`** 동작은 **경쟁 조건**에 취약합니다. 왜냐하면 `Automatically Add to Music.localized` 폴더에 가짜 **TCC.db** 파일을 넣고, 새 폴더(b)가 생성될 때 파일을 복사하고 삭제한 후 **`~/Library/Application Support/com.apple.TCC`**를 가리키도록 할 수 있기 때문입니다.
+이 **`rename(a, b);`** 동작은 **경쟁 조건**에 취약합니다. 왜냐하면 `Automatically Add to Music.localized` 폴더에 가짜 **TCC.db** 파일을 넣고, 새 폴더(b)가 생성될 때 파일을 복사하고 삭제한 후 **`~/Library/Application Support/com.apple.TCC`**로 포인팅할 수 있기 때문입니다.
 
 ### SQLITE_SQLLOG_DIR - CVE-2023-32422
 
-**`SQLITE_SQLLOG_DIR="path/folder"`**는 기본적으로 **열려 있는 모든 db가 해당 경로로 복사됨**을 의미합니다. 이 CVE에서는 이 제어가 남용되어 **TCC 데이터베이스**를 열 프로세스에 의해 **열릴** **SQLite 데이터베이스** 내부에 **쓰기**가 이루어졌고, **파일 이름에 symlink**를 사용하여 **`SQLITE_SQLLOG_DIR`**를 남용하여 그 데이터베이스가 **열릴** 때 사용자 **TCC.db가 열려 있는 것으로 덮어씌워졌습니다.**\
-**자세한 정보** [**작성물에서**](https://gergelykalman.com/sqlol-CVE-2023-32422-a-macos-tcc-bypass.html) **및** [**강의에서**](https://www.youtube.com/watch?v=f1HA5QhLQ7Y&t=20548s).
+**`SQLITE_SQLLOG_DIR="path/folder"`**는 기본적으로 **열려 있는 모든 db가 해당 경로로 복사됨**을 의미합니다. 이 CVE에서는 이 제어가 남용되어 **SQLite 데이터베이스** 내부에 **쓰기**가 이루어졌고, FDA TCC 데이터베이스로 열릴 프로세스에 의해 **열리는** 데이터베이스에 대해 **`SQLITE_SQLLOG_DIR`**를 **파일 이름의 심볼릭 링크**로 남용하여 그 데이터베이스가 **열릴** 때 사용자 **TCC.db가 열리는 데이터베이스로 덮어씌워졌습니다**.\
+**자세한 정보** [**작성물에서**](https://gergelykalman.com/sqlol-CVE-2023-32422-a-macos-tcc-bypass.html) **및** [**강연에서**](https://www.youtube.com/watch?v=f1HA5QhLQ7Y&t=20548s).
 
 ### **SQLITE_AUTO_TRACE**
 
-환경 변수 **`SQLITE_AUTO_TRACE`**가 설정되면, 라이브러리 **`libsqlite3.dylib`**는 모든 SQL 쿼리를 **로그**하기 시작합니다. 많은 애플리케이션이 이 라이브러리를 사용했기 때문에 모든 SQLite 쿼리를 기록할 수 있었습니다.
+환경 변수 **`SQLITE_AUTO_TRACE`**가 설정되면, 라이브러리 **`libsqlite3.dylib`**는 모든 SQL 쿼리를 **로그**하기 시작합니다. 많은 애플리케이션이 이 라이브러리를 사용했기 때문에 모든 SQLite 쿼리를 로그할 수 있었습니다.
 
 여러 애플리케이션이 TCC 보호 정보를 접근하기 위해 이 라이브러리를 사용했습니다.
 ```bash
@@ -190,7 +190,7 @@ launchctl setenv SQLITE_AUTO_TRACE 1
 
 이는 임시 파일 쓰기 후 **`rename(old, new)`** **가 안전하지 않습니다.**
 
-안전하지 않은 이유는 **이전 및 새로운 경로를 별도로 해결해야 하기 때문**이며, 이는 시간이 걸릴 수 있고 경쟁 조건에 취약할 수 있습니다. 더 많은 정보는 `xnu` 함수 `renameat_internal()`을 확인할 수 있습니다.
+안전하지 않은 이유는 **구식 및 새 경로를 별도로 해결해야 하기 때문**이며, 이는 시간이 걸릴 수 있고 경쟁 조건에 취약할 수 있습니다. 더 많은 정보는 `xnu` 함수 `renameat_internal()`을 확인할 수 있습니다.
 
 > [!CAUTION]
 > 기본적으로, 권한이 있는 프로세스가 당신이 제어하는 폴더에서 이름을 바꾸면, RCE를 얻고 다른 파일에 접근하게 하거나, 이 CVE와 같이 권한 있는 앱이 생성한 파일을 열고 FD를 저장할 수 있습니다.
@@ -222,7 +222,7 @@ launchctl setenv SQLITE_AUTO_TRACE 1
 
 ## By **NFSHomeDirectory**
 
-TCC는 사용자의 HOME 폴더에 있는 데이터베이스를 사용하여 **$HOME/Library/Application Support/com.apple.TCC/TCC.db**에서 사용자에게 특정 리소스에 대한 접근을 제어합니다.\
+TCC는 사용자의 HOME 폴더에 있는 데이터베이스를 사용하여 **$HOME/Library/Application Support/com.apple.TCC/TCC.db**에서 사용자에게 특정한 리소스에 대한 접근을 제어합니다.\
 따라서 사용자가 $HOME env 변수를 **다른 폴더**를 가리키도록 재시작하면, 사용자는 **/Library/Application Support/com.apple.TCC/TCC.db**에 새로운 TCC 데이터베이스를 생성하고 TCC를 속여 모든 TCC 권한을 모든 앱에 부여할 수 있습니다.
 
 > [!TIP]
@@ -243,7 +243,7 @@ TCC는 사용자의 HOME 폴더에 있는 데이터베이스를 사용하여 **$
 5. [**dsimport**](https://www.unix.com/man-page/osx/1/dsimport/)를 사용하여 수정된 디렉토리 서비스 항목을 가져옵니다.
 6. 사용자의 _tccd_를 중지하고 프로세스를 재부팅합니다.
 
-두 번째 POC는 **`/usr/libexec/configd`**를 사용했으며, 여기에는 `com.apple.private.tcc.allow`가 `kTCCServiceSystemPolicySysAdminFiles` 값으로 설정되어 있었습니다.\
+두 번째 POC는 `com.apple.private.tcc.allow`가 `kTCCServiceSystemPolicySysAdminFiles` 값으로 설정된 **`/usr/libexec/configd`**를 사용했습니다.\
 **`-t`** 옵션으로 **`configd`**를 실행할 수 있었고, 공격자는 **로드할 사용자 정의 번들을 지정**할 수 있었습니다. 따라서 이 익스플로잇은 사용자의 홈 디렉토리를 변경하는 **`dsexport`** 및 **`dsimport`** 방법을 **`configd` 코드 주입**으로 대체합니다.
 
 자세한 정보는 [**원본 보고서**](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/)를 확인하세요.
@@ -263,7 +263,7 @@ TCC는 사용자의 HOME 폴더에 있는 데이터베이스를 사용하여 **$
 
 애플리케이션 `/System/Library/CoreServices/Applications/Directory Utility.app`는 **`kTCCServiceSystemPolicySysAdminFiles`** 권한을 가지고 있으며, **`.daplug`** 확장자를 가진 플러그인을 로드하고 **강화된** 런타임이 없습니다.
 
-이 CVE를 무기화하기 위해 **`NFSHomeDirectory`**가 **변경**되어 (이전 권한을 악용하여) 사용자의 TCC 데이터베이스를 **장악**할 수 있도록 합니다.
+이 CVE를 무기화하기 위해 **`NFSHomeDirectory`**가 **변경**되어 사용자의 TCC 데이터베이스를 **탈취**할 수 있도록 합니다.
 
 자세한 정보는 [**원본 보고서**](https://wojciechregula.blog/post/change-home-directory-and-bypass-tcc-aka-cve-2020-27937/)를 확인하세요.
 
@@ -304,7 +304,7 @@ exit(0);
 
 Core Media I/O를 통해 카메라 스트림을 여는 시스템 애플리케이션(**`kTCCServiceCamera`**가 있는 앱)은 `/Library/CoreMediaIO/Plug-Ins/DAL`에 위치한 **이 플러그인들을 프로세스에서 로드**합니다 (SIP 제한 없음).
 
-여기에 일반 **생성자**가 있는 라이브러리를 저장하는 것만으로도 **코드를 주입**하는 데 효과적입니다.
+여기에 일반 **생성자**가 있는 라이브러리를 저장하는 것만으로도 **코드를 주입**할 수 있습니다.
 
 여러 Apple 애플리케이션이 이에 취약했습니다.
 
@@ -340,13 +340,13 @@ Executable=/Applications/Firefox.app/Contents/MacOS/firefox
 
 ### CVE-2020-10006
 
-바이너리 `/system/Library/Filesystems/acfs.fs/Contents/bin/xsanctl`는 **`com.apple.private.tcc.allow`** 및 **`com.apple.security.get-task-allow`** 권한을 가지고 있어 프로세스 내에 코드를 주입하고 TCC 권한을 사용할 수 있었습니다.
+바이너리 `/system/Library/Filesystems/acfs.fs/Contents/bin/xsanctl`는 **`com.apple.private.tcc.allow`** 및 **`com.apple.security.get-task-allow`** 권한을 가지고 있어, 프로세스 내에 코드를 주입하고 TCC 권한을 사용할 수 있었습니다.
 
 ### CVE-2023-26818 - Telegram
 
-Telegram은 **`com.apple.security.cs.allow-dyld-environment-variables`** 및 **`com.apple.security.cs.disable-library-validation`** 권한을 가지고 있어 카메라로 녹화하는 등의 **권한에 접근할 수 있는** 악용이 가능했습니다. [**페이로드는 작성물에서 찾을 수 있습니다**](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/) .
+Telegram은 **`com.apple.security.cs.allow-dyld-environment-variables`** 및 **`com.apple.security.cs.disable-library-validation`** 권한을 가지고 있어, 이를 악용하여 **카메라로 녹화하는 등의 권한에 접근**할 수 있었습니다. [**페이로드는 작성물에서 찾을 수 있습니다**](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/) .
 
-환경 변수를 사용하여 라이브러리를 로드하는 방법에 주목하세요. **커스텀 plist**가 이 라이브러리를 주입하기 위해 생성되었고 **`launchctl`**이 이를 실행하는 데 사용되었습니다:
+환경 변수를 사용하여 라이브러리를 로드하는 방법에 주목하세요. **커스텀 plist**가 생성되어 이 라이브러리를 주입하고 **`launchctl`**이 이를 실행하는 데 사용되었습니다:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -378,7 +378,7 @@ launchctl load com.telegram.launcher.plist
 ```
 ## 열린 호출로
 
-샌드박스화된 상태에서도 **`open`**을 호출할 수 있습니다.
+샌드박스 상태에서도 **`open`**을 호출할 수 있습니다.
 
 ### 터미널 스크립트
 
@@ -402,7 +402,7 @@ launchctl load com.telegram.launcher.plist
 </dict>
 </plist>
 ```
-응용 프로그램은 /tmp와 같은 위치에 터미널 스크립트를 작성하고 다음과 같은 명령으로 실행할 수 있습니다:
+애플리케이션은 /tmp와 같은 위치에 터미널 스크립트를 작성하고 다음과 같은 명령으로 실행할 수 있습니다:
 ```objectivec
 // Write plist in /tmp/tcc.terminal
 [...]
@@ -413,12 +413,12 @@ task.arguments = @[@"-a", @"/System/Applications/Utilities/Terminal.app",
 exploit_location]; task.standardOutput = pipe;
 [task launch];
 ```
-## 마운트하여
+## 마운팅을 통해
 
 ### CVE-2020-9771 - mount_apfs TCC 우회 및 권한 상승
 
 **모든 사용자** (특권이 없는 사용자 포함)는 타임 머신 스냅샷을 생성하고 마운트하여 **해당 스냅샷의 모든 파일**에 접근할 수 있습니다.\
-필요한 **유일한 특권**은 사용되는 애플리케이션(예: `Terminal`)이 **전체 디스크 접근** (FDA) 접근 권한(`kTCCServiceSystemPolicyAllfiles`)을 가져야 하며, 이는 관리자가 부여해야 합니다.
+필요한 **유일한 특권**은 사용되는 애플리케이션(예: `Terminal`)이 **전체 디스크 접근** (FDA) 권한(`kTCCServiceSystemPolicyAllfiles`)을 가져야 하며, 이는 관리자가 부여해야 합니다.
 ```bash
 # Create snapshot
 tmutil localsnapshot
@@ -438,7 +438,7 @@ mkdir /tmp/snap
 # Access it
 ls /tmp/snap/Users/admin_user # This will work
 ```
-보다 자세한 설명은 [**원본 보고서에서 확인할 수 있습니다**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
+더 자세한 설명은 [**원본 보고서에서 확인할 수 있습니다**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
 
 ### CVE-2021-1784 & CVE-2021-30808 - TCC 파일 위에 마운트
 
@@ -471,15 +471,15 @@ Check the **full exploit** in the [**original writeup**](https://theevilbit.gith
 
 공용 `DiskArbitration` 프레임워크의 함수 `DADiskMountWithArgumentsCommon`이 보안 검사를 수행했습니다. 그러나 `diskarbitrationd`를 직접 호출하여 경로에 `../` 요소와 심볼릭 링크를 사용할 수 있습니다.
 
-이로 인해 공격자는 `diskarbitrationd`의 권한 `com.apple.private.security.storage-exempt.heritable`로 인해 TCC 데이터베이스를 포함하여 임의의 위치에 마운트를 할 수 있었습니다.
+이로 인해 공격자는 `diskarbitrationd`의 권한 `com.apple.private.security.storage-exempt.heritable`로 인해 TCC 데이터베이스를 포함한 모든 위치에서 임의의 마운트를 수행할 수 있었습니다.
 
 ### asr
 
-도구 **`/usr/sbin/asr`**는 전체 디스크를 복사하고 TCC 보호를 우회하여 다른 위치에 마운트할 수 있게 해주었습니다.
+도구 **`/usr/sbin/asr`**는 TCC 보호를 우회하여 전체 디스크를 복사하고 다른 위치에 마운트할 수 있게 해주었습니다.
 
 ### Location Services
 
-**`/var/db/locationd/clients.plist`**에 TCC 데이터베이스가 세 번째로 존재하여 **위치 서비스에 접근할 수 있는 클라이언트**를 나타냅니다.\
+**`/var/db/locationd/clients.plist`**에 제3의 TCC 데이터베이스가 있어 **위치 서비스에 접근할 수 있는 클라이언트**를 나타냅니다.\
 폴더 **`/var/db/locationd/`는 DMG 마운트에서 보호되지 않았기 때문에** 우리 자신의 plist를 마운트할 수 있었습니다.
 
 ## By startup apps
@@ -490,13 +490,13 @@ Check the **full exploit** in the [**original writeup**](https://theevilbit.gith
 
 ## By grep
 
-여러 경우에 파일이 이메일, 전화번호, 메시지 등과 같은 민감한 정보를 보호되지 않은 위치에 저장합니다(이는 Apple의 취약점으로 간주됩니다).
+여러 경우에 파일이 이메일, 전화번호, 메시지 등과 같은 민감한 정보를 비보호 위치에 저장합니다(이는 Apple의 취약점으로 간주됩니다).
 
 <figure><img src="../../../../../images/image (474).png" alt=""><figcaption></figcaption></figure>
 
 ## Synthetic Clicks
 
-이제는 작동하지 않지만, [**과거에는 작동했습니다**](https://twitter.com/noarfromspace/status/639125916233416704/photo/1)**:**
+이 방법은 더 이상 작동하지 않지만, [**과거에는 작동했습니다**](https://twitter.com/noarfromspace/status/639125916233416704/photo/1)**:**
 
 <figure><img src="../../../../../images/image (29).png" alt=""><figcaption></figcaption></figure>
 

@@ -4,7 +4,7 @@
 
 ## Enumeration
 
-시스템에 설치된 Java 애플리케이션을 찾습니다. **Info.plist**에 있는 Java 앱은 **`java.`** 문자열을 포함하는 일부 Java 매개변수를 포함하고 있으므로, 이를 검색할 수 있습니다:
+시스템에 설치된 Java 애플리케이션을 찾습니다. **Info.plist**에 있는 Java 앱은 **`java.`** 문자열을 포함하는 일부 Java 매개변수를 포함하는 것으로 확인되었습니다. 따라서 이를 검색할 수 있습니다:
 ```bash
 # Search only in /Applications folder
 sudo find /Applications -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
@@ -73,7 +73,7 @@ NSMutableDictionary *environment = [NSMutableDictionary dictionaryWithDictionary
 return 0;
 }
 ```
-그러나, 이는 실행된 앱에서 오류를 발생시킬 것이며, 더 은밀한 방법은 자바 에이전트를 생성하고 다음을 사용하는 것입니다:
+그러나, 이는 실행된 앱에서 오류를 발생시킬 것이며, 더 은밀한 방법은 자바 에이전트를 생성하고 사용하는 것입니다:
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -83,7 +83,7 @@ export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
 ```
 > [!CAUTION]
-> 에이전트를 애플리케이션과 **다른 Java 버전**으로 생성하면 에이전트와 애플리케이션 모두의 실행이 중단될 수 있습니다.
+> 에이전트를 **다른 Java 버전**으로 생성하면 에이전트와 애플리케이션 모두의 실행이 중단될 수 있습니다.
 
 에이전트는 다음과 같을 수 있습니다:
 ```java:Agent.java
@@ -114,7 +114,7 @@ Agent-Class: Agent
 Can-Redefine-Classes: true
 Can-Retransform-Classes: true
 ```
-그런 다음 env 변수를 내보내고 다음과 같이 Java 애플리케이션을 실행합니다:
+그리고 환경 변수를 내보낸 후 다음과 같이 Java 애플리케이션을 실행합니다:
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -149,6 +149,6 @@ sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
 # Launch the Java app
 /Applications/Android\ Studio.app/Contents/MacOS/studio
 ```
-안드로이드 스튜디오가 이 예제에서 **`/Applications/Android Studio.app.vmoptions`** 파일을 로드하려고 시도하는 것이 얼마나 흥미로운지 주목하세요. 이곳은 **`admin` 그룹**의 모든 사용자가 쓰기 권한을 가진 장소입니다. 
+안드로이드 스튜디오가 이 예제에서 **`/Applications/Android Studio.app.vmoptions`** 파일을 로드하려고 시도하는 것이 얼마나 흥미로운지 주목하세요. 이곳은 **`admin` 그룹**의 모든 사용자가 쓰기 권한을 가진 장소입니다.
 
 {{#include ../../../banners/hacktricks-training.md}}

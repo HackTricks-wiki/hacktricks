@@ -40,7 +40,7 @@ macos-tcc/
 
 ### 실행/환경 제약 및 신뢰 캐시
 
-macOS의 실행 제약은 **프로세스 시작을 규제**하는 보안 기능으로, **누가** 프로세스를 시작할 수 있는지, **어떻게**, **어디서** 시작할 수 있는지를 정의합니다. macOS Ventura에서 도입된 이 기능은 시스템 바이너리를 제약 카테고리로 분류하여 **신뢰 캐시** 내에 저장합니다. 모든 실행 가능한 바이너리는 **자기**, **부모**, **책임** 제약을 포함한 **시작**에 대한 **규칙**이 설정되어 있습니다. macOS Sonoma에서 **환경** 제약으로 제3자 앱에 확장되어, 이러한 기능은 프로세스 시작 조건을 규제하여 잠재적인 시스템 악용을 완화하는 데 도움이 됩니다.
+macOS의 실행 제약은 **프로세스 시작을 규제**하는 보안 기능으로, **누가** 프로세스를 시작할 수 있는지, **어떻게**, **어디서** 시작할 수 있는지를 정의합니다. macOS Ventura에서 도입된 이 기능은 시스템 바이너리를 신뢰 캐시 내의 제약 카테고리로 분류합니다. 모든 실행 가능한 바이너리는 **자기**, **부모**, **책임** 제약을 포함한 **시작**에 대한 **규칙**이 설정되어 있습니다. macOS Sonoma에서 **환경** 제약으로 제3자 앱에 확장되어, 이러한 기능은 프로세스 시작 조건을 규제하여 잠재적인 시스템 악용을 완화하는 데 도움이 됩니다.
 
 {{#ref}}
 macos-launch-environment-constraints.md
@@ -67,9 +67,9 @@ MRT 애플리케이션은 **`/Library/Apple/System/Library/CoreServices/MRT.app`
 
 이는 `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/backgroundtaskmanagementd`에 위치한 **데몬**과 `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Support/BackgroundTaskManagementAgent.app`에 위치한 **에이전트**와 함께 실행됩니다.
 
-**`backgroundtaskmanagementd`**가 지속적인 폴더에 설치된 무언가를 아는 방법은 **FSEvents를 가져오고** 이를 위한 **핸들러**를 생성하는 것입니다.
+**`backgroundtaskmanagementd`**가 지속적인 폴더에 설치된 것을 아는 방법은 **FSEvents를 가져오고** 이를 위한 **핸들러**를 생성하는 것입니다.
 
-또한, 애플이 유지 관리하는 **잘 알려진 애플리케이션**이 포함된 plist 파일이 있으며, 이는 `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`에 위치합니다.
+또한, 애플이 관리하는 **잘 알려진 애플리케이션**이 포함된 plist 파일이 있으며, 이는 `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`에 위치합니다.
 ```json
 [...]
 "us.zoom.ZoomDaemon" => {
@@ -103,7 +103,7 @@ xattr -rc dumpBTM # Remove quarantine attr
 
 ### BTM 조작하기
 
-새로운 지속성이 발견되면 **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`** 유형의 이벤트가 발생합니다. 따라서, 이 **이벤트**가 전송되는 것을 **방지**하거나 **에이전트가 사용자에게 경고하는 것을 방지**하는 방법은 공격자가 BTM을 _**우회**_하는 데 도움이 됩니다.
+새로운 지속성이 발견되면 **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`** 유형의 이벤트가 발생합니다. 따라서 이 **이벤트**가 전송되는 것을 **방지**하거나 **사용자에게 경고하는 에이전트**를 방지하는 방법은 공격자가 BTM을 _**우회**_하는 데 도움이 됩니다.
 
 - **데이터베이스 재설정**: 다음 명령을 실행하면 데이터베이스가 재설정됩니다(기초부터 다시 구축해야 함). 그러나 어떤 이유로 인해, 이를 실행한 후에는 **시스템이 재부팅될 때까지 새로운 지속성이 경고되지 않습니다**.
 - **root** 권한이 필요합니다.

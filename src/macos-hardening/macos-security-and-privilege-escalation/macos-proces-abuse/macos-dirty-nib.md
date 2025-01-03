@@ -2,11 +2,11 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**기술에 대한 자세한 내용은 다음 원본 게시물을 확인하세요:** [**https://blog.xpnsec.com/dirtynib/**](https://blog.xpnsec.com/dirtynib/) 및 [**https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/**](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) **를 참조하세요.** 다음은 요약입니다:
+**기술에 대한 자세한 내용은 다음 원본 게시물을 확인하십시오:** [**https://blog.xpnsec.com/dirtynib/**](https://blog.xpnsec.com/dirtynib/) 및 [**https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/**](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)**.** 다음은 요약입니다:
 
 ### Nib 파일이란
 
-Nib(NeXT Interface Builder의 약자) 파일은 Apple의 개발 생태계의 일부로, 애플리케이션의 **UI 요소** 및 그 상호작용을 정의하는 데 사용됩니다. 이들은 창 및 버튼과 같은 직렬화된 객체를 포함하며, 런타임에 로드됩니다. 지속적으로 사용되고 있지만, Apple은 이제 더 포괄적인 UI 흐름 시각화를 위해 Storyboards를 권장합니다.
+Nib(NeXT Interface Builder의 약자) 파일은 Apple의 개발 생태계의 일부로, 애플리케이션에서 **UI 요소**와 그 상호작용을 정의하는 데 사용됩니다. 이들은 창 및 버튼과 같은 직렬화된 객체를 포함하며 런타임에 로드됩니다. 지속적으로 사용되고 있지만, Apple은 이제 더 포괄적인 UI 흐름 시각화를 위해 Storyboards를 권장합니다.
 
 주요 Nib 파일은 애플리케이션의 `Info.plist` 파일 내의 **`NSMainNibFile`** 값에서 참조되며, 애플리케이션의 `main` 함수에서 실행되는 **`NSApplicationMain`** 함수에 의해 로드됩니다.
 
@@ -16,7 +16,7 @@ Nib(NeXT Interface Builder의 약자) 파일은 Apple의 개발 생태계의 일
 
 1. **초기 설정**:
 - XCode를 사용하여 새 NIB 파일을 생성합니다.
-- 인터페이스에 객체를 추가하고, 그 클래스는 `NSAppleScript`로 설정합니다.
+- 인터페이스에 객체를 추가하고 그 클래스는 `NSAppleScript`로 설정합니다.
 - 사용자 정의 런타임 속성을 통해 초기 `source` 속성을 구성합니다.
 2. **코드 실행 가젯**:
 - 이 설정은 필요에 따라 AppleScript를 실행할 수 있도록 합니다.
@@ -48,7 +48,7 @@ display dialog theDialogText
 
 ### 코드 샘플: 악성 .xib 파일
 
-- 임의의 코드를 실행하는 [**악성 .xib 파일 샘플**](https://gist.github.com/xpn/16bfbe5a3f64fedfcc1822d0562636b4)을 접근하고 검토합니다.
+- 임의 코드를 실행하는 [**악성 .xib 파일 샘플**](https://gist.github.com/xpn/16bfbe5a3f64fedfcc1822d0562636b4)을 접근하고 검토합니다.
 
 ### 다른 예
 
@@ -61,13 +61,13 @@ display dialog theDialogText
 
 ### 추가 macOS 보호 조치
 
-macOS Sonoma 이후, 앱 번들 내의 수정이 제한됩니다. 그러나 이전 방법은 다음과 같았습니다:
+macOS Sonoma 이후로 앱 번들 내 수정이 제한됩니다. 그러나 이전 방법은 다음과 같았습니다:
 
 1. 앱을 다른 위치(예: `/tmp/`)로 복사합니다.
-2. 초기 보호를 우회하기 위해 앱 번들 내의 디렉토리 이름을 변경합니다.
+2. 초기 보호를 우회하기 위해 앱 번들 내 디렉토리 이름을 변경합니다.
 3. Gatekeeper에 등록하기 위해 앱을 실행한 후, 앱 번들을 수정합니다(예: MainMenu.nib를 Dirty.nib로 교체).
 4. 디렉토리 이름을 다시 변경하고 앱을 재실행하여 주입된 NIB 파일을 실행합니다.
 
-**참고**: 최근 macOS 업데이트는 Gatekeeper 캐싱 후 앱 번들 내의 파일 수정을 방지하여 이 익스플로잇을 무효화했습니다.
+**참고**: 최근 macOS 업데이트는 Gatekeeper 캐싱 후 앱 번들 내 파일 수정을 방지하여 이 익스플로잇을 무효화했습니다.
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -4,7 +4,7 @@
 
 ## Pkg 기본 정보
 
-macOS **설치 패키지**(`.pkg` 파일로도 알려짐)는 macOS에서 **소프트웨어를 배포하기 위해 사용되는 파일 형식**입니다. 이 파일들은 소프트웨어가 올바르게 설치되고 실행되는 데 필요한 모든 것을 담고 있는 **상자**와 같습니다.
+macOS **설치 패키지**(또는 `.pkg` 파일로도 알려짐)는 macOS에서 **소프트웨어를 배포하기 위해 사용되는 파일 형식**입니다. 이 파일들은 소프트웨어가 올바르게 설치되고 실행되는 데 필요한 모든 것을 담고 있는 **상자**와 같습니다.
 
 패키지 파일 자체는 **대상** 컴퓨터에 설치될 **파일 및 디렉토리의 계층**을 포함하는 아카이브입니다. 또한 설치 전후에 작업을 수행하기 위한 **스크립트**를 포함할 수 있으며, 예를 들어 구성 파일을 설정하거나 소프트웨어의 이전 버전을 정리하는 작업이 있습니다.
 
@@ -12,11 +12,11 @@ macOS **설치 패키지**(`.pkg` 파일로도 알려짐)는 macOS에서 **소�
 
 <figure><img src="../../../images/Pasted Graphic.png" alt="https://www.youtube.com/watch?v=iASSG0_zobQ"><figcaption></figcaption></figure>
 
-- **배포(xml)**: 사용자 정의(제목, 환영 텍스트…) 및 스크립트/설치 확인
-- **PackageInfo(xml)**: 정보, 설치 요구 사항, 설치 위치, 실행할 스크립트 경로
-- **자재 명세서(bom)**: 설치, 업데이트 또는 제거할 파일 목록과 파일 권한
-- **페이로드(CPIO 아카이브 gzip 압축)**: PackageInfo에서 `install-location`에 설치할 파일
-- **스크립트(CPIO 아카이브 gzip 압축)**: 설치 전후 스크립트 및 실행을 위해 임시 디렉토리에 추출된 추가 리소스.
+- **배포 (xml)**: 사용자 정의(제목, 환영 텍스트…) 및 스크립트/설치 확인
+- **PackageInfo (xml)**: 정보, 설치 요구 사항, 설치 위치, 실행할 스크립트 경로
+- **자재 명세서 (bom)**: 설치, 업데이트 또는 제거할 파일 목록과 파일 권한
+- **페이로드 (CPIO 아카이브 gzip 압축)**: PackageInfo에서 `install-location`에 설치할 파일
+- **스크립트 (CPIO 아카이브 gzip 압축)**: 설치 전후 스크립트 및 실행을 위해 임시 디렉토리에 추출된 추가 리소스.
 
 ### 압축 해제
 ```bash
@@ -61,7 +61,7 @@ DMG 파일의 계층 구조는 내용에 따라 다를 수 있습니다. 그러�
 
 ### AuthorizationExecuteWithPrivileges
 
-이것은 여러 설치 프로그램과 업데이트 프로그램이 **루트로 무언가를 실행하기 위해 호출하는 [공개 함수](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg)**입니다. 이 함수는 **실행할 파일의 경로**를 매개변수로 받아들이지만, 공격자가 이 파일을 **수정**할 수 있다면, 루트로 실행을 **악용**하여 **권한을 상승**시킬 수 있습니다.
+이는 여러 설치 프로그램과 업데이트 프로그램이 **루트로 무언가를 실행하기 위해 호출하는 [공개 함수](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg)**입니다. 이 함수는 **실행할 파일의 경로**를 매개변수로 받아들이지만, 공격자가 이 파일을 **수정**할 수 있다면, 루트로 실행을 **악용**하여 **권한을 상승**시킬 수 있습니다.
 ```bash
 # Breakpoint in the function to check wich file is loaded
 (lldb) b AuthorizationExecuteWithPrivileges

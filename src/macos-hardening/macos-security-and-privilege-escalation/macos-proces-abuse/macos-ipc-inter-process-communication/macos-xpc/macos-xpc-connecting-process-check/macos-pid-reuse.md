@@ -10,7 +10,7 @@ macOS **XPC 서비스**가 **PID**를 기반으로 호출된 프로세스를 확
 
 ### 익스플로잇 예시
 
-**`shouldAcceptNewConnection`** 함수나 이를 호출하는 함수가 **`processIdentifier`**를 호출하고 **`auditToken`**을 호출하지 않는 경우를 찾으면, 이는 **프로세스 PID를 검증**하고 있으며 감사 토큰을 검증하지 않는다는 것을 의미합니다.\
+**`shouldAcceptNewConnection`** 함수나 이를 호출하는 함수가 **`processIdentifier`**를 호출하고 **`auditToken`**을 호출하지 않는 경우를 찾으면, 이는 **프로세스 PID**를 확인하고 감사 토큰을 확인하지 않는다는 것을 의미합니다.\
 예를 들어, 이 이미지에서처럼 (참조에서 가져옴):
 
 <figure><img src="../../../../../../images/image (306).png" alt="https://wojciechregula.blog/images/2020/04/pid.png"><figcaption></figcaption></figure>
@@ -18,7 +18,7 @@ macOS **XPC 서비스**가 **PID**를 기반으로 호출된 프로세스를 확
 익스플로잇의 두 부분을 확인하기 위해 이 예시 익스플로잇을 확인하세요 (다시, 참조에서 가져옴):
 
 - 여러 개의 포크를 **생성하는** 부분
-- **각 포크**는 메시지를 전송한 직후 **`posix_spawn`**을 실행하면서 **페이로드**를 XPC 서비스에 **전송**합니다.
+- **각 포크**는 메시지를 전송한 직후 **`posix_spawn`**을 실행하면서 **XPC 서비스**에 **페이로드**를 **전송**합니다.
 
 > [!CAUTION]
 > 익스플로잇이 작동하려면 ` export`` `` `**`OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`**를 설정하거나 익스플로잇 내부에 다음을 넣는 것이 중요합니다:

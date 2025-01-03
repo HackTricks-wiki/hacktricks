@@ -84,7 +84,7 @@ Hello from interpose
 
 ### 동적 인터포징
 
-이제 **`dyld_dynamic_interpose`** 함수를 사용하여 동적으로 함수를 인터포즈할 수 있습니다. 이를 통해 시작할 때만 하는 것이 아니라 런타임에 프로그램적으로 함수를 인터포즈할 수 있습니다.
+이제 **`dyld_dynamic_interpose`** 함수를 사용하여 동적으로 함수를 인터포즈하는 것도 가능합니다. 이를 통해 시작할 때만 하는 것이 아니라 런타임에 프로그램적으로 함수를 인터포즈할 수 있습니다.
 
 **대체할 함수와 대체 함수의 튜플**을 지정하기만 하면 됩니다.
 ```c
@@ -97,20 +97,20 @@ const struct dyld_interpose_tuple array[], size_t count);
 ```
 ## Method Swizzling
 
-ObjectiveC에서 메소드는 다음과 같이 호출됩니다: **`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
+In ObjectiveC this is how a method is called like: **`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
 
-필요한 것은 **객체**, **메소드** 및 **매개변수**입니다. 메소드가 호출될 때 **msg가 전송됩니다**. 이때 사용하는 함수는 **`objc_msgSend`**입니다: `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
+필요한 것은 **객체**, **메서드** 및 **매개변수**입니다. 메서드가 호출될 때 **msg가 전송**되며, 함수 **`objc_msgSend`**를 사용합니다: `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
 
-객체는 **`someObject`**, 메소드는 **`@selector(method1p1:p2:)`**이며, 인자는 **value1**, **value2**입니다.
+객체는 **`someObject`**, 메서드는 **`@selector(method1p1:p2:)`**이며, 인수는 **value1**, **value2**입니다.
 
-객체 구조를 따라가면 **메소드 배열**에 도달할 수 있으며, 여기에는 **이름**과 **메소드 코드에 대한 포인터**가 **위치**해 있습니다.
+객체 구조를 따라가면 **메서드 배열**에 도달할 수 있으며, 여기에는 **이름**과 **메서드 코드에 대한 포인터**가 **위치**합니다.
 
 > [!CAUTION]
-> 메소드와 클래스가 이름을 기반으로 접근되기 때문에 이 정보는 바이너리에 저장됩니다. 따라서 `otool -ov </path/bin>` 또는 [`class-dump </path/bin>`](https://github.com/nygard/class-dump)로 이를 검색할 수 있습니다.
+> 메서드와 클래스가 이름을 기반으로 접근되기 때문에 이 정보는 바이너리에 저장됩니다. 따라서 `otool -ov </path/bin>` 또는 [`class-dump </path/bin>`](https://github.com/nygard/class-dump)로 검색할 수 있습니다.
 
 ### Accessing the raw methods
 
-메소드의 이름, 매개변수 수 또는 주소와 같은 정보를 다음 예제와 같이 접근할 수 있습니다:
+메서드의 이름, 매개변수 수 또는 주소와 같은 정보를 다음 예제와 같이 접근할 수 있습니다:
 ```objectivec
 // gcc -framework Foundation test.m -o test
 
@@ -232,9 +232,9 @@ return 0;
 
 ### method_setImplementation을 이용한 메서드 스위즐링
 
-이전 형식은 서로 다른 두 메서드의 구현을 변경하기 때문에 이상합니다. **`method_setImplementation`** 함수를 사용하면 **하나의 메서드의 구현을 다른 메서드로 변경**할 수 있습니다.
+이전 형식은 서로 다른 두 메서드의 구현을 변경하기 때문에 이상합니다. **`method_setImplementation`** 함수를 사용하면 **다른 메서드의 구현**을 **변경**할 수 있습니다.
 
-새로운 구현에서 호출하기 전에 원래 구현의 주소를 **저장**하는 것을 잊지 마세요. 그렇지 않으면 나중에 그 주소를 찾기가 훨씬 복잡해질 것입니다.
+새로운 구현에서 호출하기 전에 **원래 구현의 주소를 저장**하는 것을 잊지 마세요. 그렇지 않으면 나중에 그 주소를 찾기가 훨씬 복잡해질 것입니다.
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
@@ -311,7 +311,7 @@ return 0;
 정보를 유출하기 위한 후킹 코드를 해당 라이브러리에 추가하세요: 비밀번호, 메시지...
 
 > [!CAUTION]
-> 최신 버전의 macOS에서는 애플리케이션 바이너리의 **서명을 제거**하고 이전에 실행된 경우, macOS는 **더 이상 애플리케이션을 실행하지 않습니다**.
+> 최신 버전의 macOS에서는 애플리케이션 바이너리의 **서명을 제거**하고 이전에 실행된 경우, macOS가 더 이상 **애플리케이션을 실행하지 않습니다**.
 
 #### 라이브러리 예제
 ```objectivec
@@ -349,7 +349,7 @@ IMP fake_IMP = (IMP)custom_setPassword;
 real_setPassword = method_setImplementation(real_Method, fake_IMP);
 }
 ```
-## References
+## 참고문헌
 
 - [https://nshipster.com/method-swizzling/](https://nshipster.com/method-swizzling/)
 
