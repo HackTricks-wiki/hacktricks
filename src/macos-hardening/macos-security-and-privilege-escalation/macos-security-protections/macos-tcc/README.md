@@ -557,7 +557,7 @@ AllowApplicationsList.plist:
 ### TCC Bypassy
 
 {{#ref}}
-macos-tcc-bypassy/
+macos-tcc-bypasses/
 {{#endref}}
 
 ## Odniesienia
