@@ -16,3 +16,4 @@ Long Range (**LoRa**) it’s popular in multiple countries and has an open sourc
 {{#include ../banners/hacktricks-training.md}}
 
 
+

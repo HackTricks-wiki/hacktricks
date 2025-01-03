@@ -104,3 +104,4 @@ Check the list in [https://docs.flipperzero.one/sub-ghz/frequencies](https://doc
 {{#include ../../../banners/hacktricks-training.md}}
 
 
+

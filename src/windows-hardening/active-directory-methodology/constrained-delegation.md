@@ -83,3 +83,4 @@ Invoke-Mimikatz -Command '"kerberos::ptt TGS_Administrator@dollarcorp.moneycorp.
 {{#include ../../banners/hacktricks-training.md}}
 
 
+

@@ -47,3 +47,4 @@ klist #List tickets in cache to cehck that mimikatz has loaded the ticket
 {{#include ../../banners/hacktricks-training.md}}
 
 
+

@@ -97,3 +97,4 @@ To run it, can execute the binary `PingCastle.exe` and it will start an **intera
 {{#include ../../banners/hacktricks-training.md}}
 
 
+

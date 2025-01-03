@@ -81,3 +81,4 @@ Then, you can just create the HKCU entry and everytime the user logs in, your ba
 {{#include ../../banners/hacktricks-training.md}}
 
 
+

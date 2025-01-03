@@ -276,3 +276,4 @@ These shortcuts are for the visual settings and sound settings, depending on the
 {{#include ../../banners/hacktricks-training.md}}
 
 
+

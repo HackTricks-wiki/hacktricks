@@ -343,3 +343,4 @@ autorunsc.exe -m -nobanner -a * -ct /accepteula
 {{#include ../../banners/hacktricks-training.md}}
 
 
+
