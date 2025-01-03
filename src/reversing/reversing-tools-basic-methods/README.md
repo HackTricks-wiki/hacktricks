@@ -27,7 +27,7 @@ Software:
 
 dotPeek é um descompilador que **descompila e examina múltiplos formatos**, incluindo **bibliotecas** (.dll), **arquivos de metadados do Windows** (.winmd) e **executáveis** (.exe). Uma vez descompilado, um assembly pode ser salvo como um projeto do Visual Studio (.csproj).
 
-O mérito aqui é que se um código fonte perdido requer restauração de um assembly legado, essa ação pode economizar tempo. Além disso, dotPeek fornece navegação prática por todo o código descompilado, tornando-o uma das ferramentas perfeitas para **análise de algoritmos Xamarin.**
+O mérito aqui é que se um código fonte perdido requer restauração a partir de um assembly legado, essa ação pode economizar tempo. Além disso, dotPeek fornece navegação prática por todo o código descompilado, tornando-o uma das ferramentas perfeitas para **análise de algoritmos Xamarin.**
 
 ### [.NET Reflector](https://www.red-gate.com/products/reflector/)
 
@@ -70,17 +70,17 @@ DebuggableAttribute.DebuggingModes.DisableOptimizations |
 DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints |
 DebuggableAttribute.DebuggingModes.EnableEditAndContinue)]
 ```
-E clique em **compile**:
+E clique em **compilar**:
 
 ![](<../../images/image (314) (1).png>)
 
-Em seguida, salve o novo arquivo via _**File >> Save module...**_:
+Em seguida, salve o novo arquivo via _**Arquivo >> Salvar módulo...**_:
 
 ![](<../../images/image (602).png>)
 
-Isso é necessário porque se você não fizer isso, em **runtime** várias **optimisations** serão aplicadas ao código e pode ser possível que enquanto depurando um **break-point nunca seja atingido** ou algumas **variáveis não existam**.
+Isso é necessário porque, se você não fizer isso, durante a **execução** várias **otimizações** serão aplicadas ao código e pode ser que, ao depurar, um **ponto de interrupção nunca seja atingido** ou algumas **variáveis não existam**.
 
-Então, se sua aplicação .NET estiver sendo **run** pelo **IIS**, você pode **restart** ela com:
+Então, se sua aplicação .NET estiver sendo **executada** pelo **IIS**, você pode **reiniciá-la** com:
 ```
 iisreset /noforce
 ```
@@ -156,7 +156,9 @@ cheat-engine.md
 
 ## ARM & MIPS
 
-{% embed url="https://github.com/nongiach/arm_now" %}
+{{#ref}}
+https://github.com/nongiach/arm_now
+{{#endref}}
 
 ## Shellcodes
 
@@ -165,7 +167,7 @@ cheat-engine.md
 [**Blobrunner**](https://github.com/OALabs/BlobRunner) irá **alocar** o **shellcode** dentro de um espaço de memória, irá **indicar** o **endereço de memória** onde o shellcode foi alocado e irá **parar** a execução.\
 Então, você precisa **anexar um depurador** (Ida ou x64dbg) ao processo e colocar um **breakpoint no endereço de memória indicado** e **retomar** a execução. Dessa forma, você estará depurando o shellcode.
 
-A página de lançamentos do github contém zips contendo os lançamentos compilados: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
+A página de lançamentos do github contém zips com os lançamentos compilados: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
 Você pode encontrar uma versão ligeiramente modificada do Blobrunner no seguinte link. Para compilá-lo, basta **criar um projeto C/C++ no Visual Studio Code, copiar e colar o código e compilar**.
 
 {{#ref}}
@@ -194,7 +196,7 @@ Para iniciar a emulação no lugar que você deseja, defina um bp lá e aparente
 
 ![](<../../images/image (387).png>)
 
-Você pode ver a pilha, por exemplo, dentro de um dump hex:
+Você pode ver a pilha, por exemplo, dentro de um dump hexadecimal:
 
 ![](<../../images/image (186).png>)
 
@@ -214,7 +216,7 @@ scDbg também conta com um lançador gráfico onde você pode selecionar as opç
 
 ![](<../../images/image (258).png>)
 
-A opção **Create Dump** irá despejar o shellcode final se alguma alteração for feita no shellcode dinamicamente na memória (útil para baixar o shellcode decodificado). O **start offset** pode ser útil para iniciar o shellcode em um deslocamento específico. A opção **Debug Shell** é útil para depurar o shellcode usando o terminal scDbg (no entanto, eu acho que qualquer uma das opções explicadas anteriormente é melhor para isso, pois você poderá usar o Ida ou x64dbg).
+A opção **Create Dump** irá despejar o shellcode final se alguma alteração for feita no shellcode dinamicamente na memória (útil para baixar o shellcode decodificado). O **start offset** pode ser útil para iniciar o shellcode em um deslocamento específico. A opção **Debug Shell** é útil para depurar o shellcode usando o terminal scDbg (no entanto, eu acho que qualquer uma das opções explicadas antes é melhor para isso, pois você poderá usar o Ida ou x64dbg).
 
 ### Desmontando usando CyberChef
 
@@ -255,7 +257,7 @@ Basta pressionar **ATL+f7** (importar plugin python no IDA) e selecionar o plugi
 
 Este plugin executará o binário e resolverá os nomes das funções dinamicamente no início da depuração. Após iniciar a depuração, pressione novamente o botão Iniciar (o verde ou f9) e um ponto de interrupção será atingido no início do código real.
 
-É também muito interessante porque, se você pressionar um botão na aplicação gráfica, o depurador parará na função executada por esse botão.
+É também muito interessante porque, se você pressionar um botão na aplicação gráfica, o depurador parará na função executada por aquele botão.
 
 ## Golang
 
@@ -326,7 +328,7 @@ FUN_08000dd0(&DAT_02009584,0x6000000,&DAT_030000dc);
 FUN_08000354(&DAT_030000dc,0x3c);
 uVar4 = DAT_030004d8;
 ```
-Foi encontrado este código:
+Encontrou este código:
 ```c
 do {
 DAT_030004da = uVar4; //This is the last key pressed
@@ -366,7 +368,7 @@ FUN_08000864();
 if (uVar1 == 0x10) {
 DAT_030000d8 = DAT_030000d8 + 0x3a;
 ```
-No código anterior, você pode ver que estamos comparando **uVar1** (o lugar onde está o **valor do botão pressionado**) com alguns valores:
+No código anterior, você pode ver que estamos comparando **uVar1** (o lugar onde está **o valor do botão pressionado**) com alguns valores:
 
 - Primeiro, é comparado com o **valor 4** (botão **SELECT**): No desafio, este botão limpa a tela.
 - Em seguida, é comparado com o **valor 8** (botão **START**): No desafio, isso verifica se o código é válido para obter a bandeira.
@@ -374,13 +376,15 @@ No código anterior, você pode ver que estamos comparando **uVar1** (o lugar on
 - Em qualquer outro caso, algum cont (`DAT_030000d4`) é verificado. É um cont porque está adicionando 1 logo após entrar no código.\
 **Se** for menor que 8, algo que envolve **adicionar** valores a \*\*`DAT_030000d8` \*\* é feito (basicamente, está adicionando os valores das teclas pressionadas nesta variável, desde que o cont seja menor que 8).
 
-Portanto, neste desafio, sabendo os valores dos botões, você precisava **pressionar uma combinação com um comprimento menor que 8 que a adição resultante seja 0xf3.**
+Portanto, neste desafio, sabendo os valores dos botões, você precisava **pressionar uma combinação com um comprimento menor que 8 cuja soma resultante é 0xf3.**
 
 **Referência para este tutorial:** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)
 
 ## Game Boy
 
-{% embed url="https://www.youtube.com/watch?v=VVbRe7wr3G4" %}
+{{#ref}}
+https://www.youtube.com/watch?v=VVbRe7wr3G4
+{{#endref}}
 
 ## Cursos
 

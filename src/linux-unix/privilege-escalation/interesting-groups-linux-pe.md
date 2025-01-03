@@ -1,11 +1,10 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-
 # Grupos Sudo/Admin
 
 ## **PE - Método 1**
 
-**Às vezes**, **por padrão \(ou porque algum software precisa\)** dentro do **/etc/sudoers** você pode encontrar algumas dessas linhas:
+**Às vezes**, **por padrão \(ou porque algum software precisa disso\)** dentro do **/etc/sudoers** você pode encontrar algumas dessas linhas:
 ```bash
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
@@ -29,7 +28,7 @@ Se você descobrir que o binário pkexec é um binário SUID e você pertence ao
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
-Lá você encontrará quais grupos têm permissão para executar **pkexec** e **por padrão** em alguns linux podem **aparecer** alguns dos grupos **sudo ou admin**.
+Lá você encontrará quais grupos têm permissão para executar **pkexec** e **por padrão** em algumas distribuições Linux podem **aparecer** alguns dos grupos **sudo ou admin**.
 
 Para **se tornar root você pode executar**:
 ```bash
@@ -58,7 +57,7 @@ pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 ```text
 %wheel	ALL=(ALL:ALL) ALL
 ```
-Isso significa que **qualquer usuário que pertence ao grupo wheel pode executar qualquer coisa como sudo**.
+Isso significa que **qualquer usuário que pertença ao grupo wheel pode executar qualquer coisa como sudo**.
 
 Se este for o caso, para **se tornar root você pode apenas executar**:
 ```text
@@ -76,7 +75,7 @@ Então, leia o arquivo e tente **quebrar algumas hashes**.
 
 Esse privilégio é quase **equivalente ao acesso root** pois você pode acessar todos os dados dentro da máquina.
 
-Arquivos:`/dev/sd[a-z][1-9]`
+Arquivos: `/dev/sd[a-z][1-9]`
 ```text
 debugfs /dev/sda1
 debugfs: cd /root
@@ -126,9 +125,13 @@ find / -group root -perm -g=w 2>/dev/null
 
 Você pode montar o sistema de arquivos raiz da máquina host em um volume da instância, então quando a instância inicia, ela imediatamente carrega um `chroot` nesse volume. Isso efetivamente lhe dá acesso root na máquina.
 
-{% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
+{{#ref}}
+https://github.com/KrustyHack/docker-privilege-escalation
+{{#endref}}
 
-{% embed url="https://fosterelli.co/privilege-escalation-via-docker.html" %}
+{{#ref}}
+https://fosterelli.co/privilege-escalation-via-docker.html
+{{#endref}}
 
 # Grupo lxc/lxd
 

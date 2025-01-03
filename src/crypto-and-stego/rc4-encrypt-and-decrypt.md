@@ -4,8 +4,12 @@ Se você puder de alguma forma criptografar um texto simples usando RC4, poderá
 
 Se você puder criptografar um texto simples conhecido, também poderá extrair a senha. Mais referências podem ser encontradas na máquina HTB Kryptos:
 
-{% embed url="https://0xrick.github.io/hack-the-box/kryptos/" %}
+{{#ref}}
+https://0xrick.github.io/hack-the-box/kryptos/
+{{#endref}}
 
-{% embed url="https://0xrick.github.io/hack-the-box/kryptos/" %}
+{{#ref}}
+https://0xrick.github.io/hack-the-box/kryptos/
+{{#endref}}
 
 {{#include ../banners/hacktricks-training.md}}

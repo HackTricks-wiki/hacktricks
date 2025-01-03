@@ -45,13 +45,15 @@ Se um atacante já comprometeu um computador com [Delegação Não Restrita](unc
 
 ## Autenticação Forçada RCP
 
-{% embed url="https://github.com/p0dalirius/Coercer" %}
+{{#ref}}
+https://github.com/p0dalirius/Coercer
+{{#endref}}
 
 ## PrivExchange
 
-O ataque `PrivExchange` é resultado de uma falha encontrada no **recurso `PushSubscription` do Exchange Server**. Este recurso permite que o servidor Exchange seja forçado por qualquer usuário de domínio com uma caixa de correio a se autenticar em qualquer host fornecido pelo cliente via HTTP.
+O ataque `PrivExchange` é resultado de uma falha encontrada na **funcionalidade `PushSubscription` do Exchange Server**. Esta funcionalidade permite que o servidor Exchange seja forçado por qualquer usuário de domínio com uma caixa de correio a se autenticar em qualquer host fornecido pelo cliente via HTTP.
 
-Por padrão, o **serviço Exchange é executado como SYSTEM** e recebe privilégios excessivos (especificamente, possui **privilégios WriteDacl na atualização cumulativa do domínio anterior a 2019**). Essa falha pode ser explorada para permitir o **encaminhamento de informações para o LDAP e, subsequentemente, extrair o banco de dados NTDS do domínio**. Em casos onde o encaminhamento para o LDAP não é possível, essa falha ainda pode ser usada para encaminhar e autenticar em outros hosts dentro do domínio. A exploração bem-sucedida deste ataque concede acesso imediato ao Admin do Domínio com qualquer conta de usuário de domínio autenticada.
+Por padrão, o **serviço Exchange é executado como SYSTEM** e recebe privilégios excessivos (especificamente, possui **privilégios WriteDacl na atualização cumulativa do domínio anterior a 2019**). Esta falha pode ser explorada para permitir o **encaminhamento de informações para o LDAP e, subsequentemente, extrair o banco de dados NTDS do domínio**. Em casos onde o encaminhamento para o LDAP não é possível, esta falha ainda pode ser usada para encaminhar e autenticar em outros hosts dentro do domínio. A exploração bem-sucedida deste ataque concede acesso imediato ao Admin do Domínio com qualquer conta de usuário autenticada do domínio.
 
 ## Dentro do Windows
 
@@ -103,6 +105,6 @@ Se você puder realizar um ataque MitM a um computador e injetar HTML em uma pá
 ## Quebrando NTLMv1
 
 Se você conseguir capturar [desafios NTLMv1 leia aqui como quebrá-los](../ntlm/#ntlmv1-attack).\
-&#xNAN;_&#x52;emembre-se de que para quebrar NTLMv1 você precisa definir o desafio do Responder como "1122334455667788"_
+&#xNAN;_&#x52;emember que para quebrar NTLMv1 você precisa definir o desafio do Responder como "1122334455667788"_
 
 {{#include ../../banners/hacktricks-training.md}}

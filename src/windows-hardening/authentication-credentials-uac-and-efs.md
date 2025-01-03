@@ -103,7 +103,7 @@ sc query windefend
 ```
 ## Encrypted File System (EFS)
 
-EFS protege arquivos por meio de criptografia, utilizando uma **chave simétrica** conhecida como **File Encryption Key (FEK)**. Esta chave é criptografada com a **chave pública** do usuário e armazenada dentro do **fluxo de dados alternativo** $EFS do arquivo criptografado. Quando a descriptografia é necessária, a correspondente **chave privada** do certificado digital do usuário é usada para descriptografar a FEK do fluxo $EFS. Mais detalhes podem ser encontrados [aqui](https://en.wikipedia.org/wiki/Encrypting_File_System).
+EFS protege arquivos por meio de criptografia, utilizando uma **chave simétrica** conhecida como **File Encryption Key (FEK)**. Esta chave é criptografada com a **chave pública** do usuário e armazenada dentro do **fluxo de dados alternativo** $EFS do arquivo criptografado. Quando a descriptografia é necessária, a correspondente **chave privada** do certificado digital do usuário é usada para descriptografar o FEK do fluxo $EFS. Mais detalhes podem ser encontrados [aqui](https://en.wikipedia.org/wiki/Encrypting_File_System).
 
 **Cenários de descriptografia sem a iniciação do usuário** incluem:
 
@@ -114,8 +114,8 @@ Este método de criptografia permite **acesso transparente** a arquivos criptogr
 
 **Principais Conclusões**:
 
-- EFS usa uma FEK simétrica, criptografada com a chave pública do usuário.
-- A descriptografia utiliza a chave privada do usuário para acessar a FEK.
+- EFS usa um FEK simétrico, criptografado com a chave pública do usuário.
+- A descriptografia utiliza a chave privada do usuário para acessar o FEK.
 - A descriptografia automática ocorre sob condições específicas, como copiar para FAT32 ou transmissão pela rede.
 - Arquivos criptografados são acessíveis ao proprietário sem etapas adicionais.
 
@@ -134,17 +134,19 @@ Esse método requer que o **usuário vítima** esteja **executando** um **proces
 
 #### Conhecendo a senha do usuário
 
-{% embed url="https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files" %}
+{{#ref}}
+https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
+{{#endref}}
 
 ## Group Managed Service Accounts (gMSA)
 
-A Microsoft desenvolveu **Group Managed Service Accounts (gMSA)** para simplificar a gestão de contas de serviço em infraestruturas de TI. Ao contrário das contas de serviço tradicionais que frequentemente têm a configuração "**Senha nunca expira**" ativada, os gMSAs oferecem uma solução mais segura e gerenciável:
+A Microsoft desenvolveu **Group Managed Service Accounts (gMSA)** para simplificar a gestão de contas de serviço em infraestruturas de TI. Ao contrário das contas de serviço tradicionais que frequentemente têm a configuração "**Senha nunca expira**" habilitada, os gMSAs oferecem uma solução mais segura e gerenciável:
 
 - **Gerenciamento Automático de Senhas**: gMSAs usam uma senha complexa de 240 caracteres que muda automaticamente de acordo com a política de domínio ou computador. Este processo é gerenciado pelo Serviço de Distribuição de Chaves (KDC) da Microsoft, eliminando a necessidade de atualizações manuais de senha.
 - **Segurança Aprimorada**: Essas contas são imunes a bloqueios e não podem ser usadas para logins interativos, aumentando sua segurança.
-- **Suporte a Múltiplos Hosts**: gMSAs podem ser compartilhados entre vários hosts, tornando-os ideais para serviços que rodam em vários servidores.
+- **Suporte a Múltiplos Hosts**: gMSAs podem ser compartilhados entre vários hosts, tornando-os ideais para serviços que rodam em múltiplos servidores.
 - **Capacidade de Tarefas Agendadas**: Ao contrário das contas de serviço gerenciadas, gMSAs suportam a execução de tarefas agendadas.
-- **Gerenciamento Simplificado de SPN**: O sistema atualiza automaticamente o Nome Principal de Serviço (SPN) quando há alterações nos detalhes do sAMaccount do computador ou no nome DNS, simplificando o gerenciamento de SPN.
+- **Gerenciamento Simplificado de SPN**: O sistema atualiza automaticamente o Nome Principal do Serviço (SPN) quando há alterações nos detalhes do sAMaccount do computador ou no nome DNS, simplificando o gerenciamento de SPN.
 
 As senhas para gMSAs são armazenadas na propriedade LDAP _**msDS-ManagedPassword**_ e são redefinidas automaticamente a cada 30 dias pelos Controladores de Domínio (DCs). Esta senha, um blob de dados criptografados conhecido como [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e), só pode ser recuperada por administradores autorizados e pelos servidores nos quais os gMSAs estão instalados, garantindo um ambiente seguro. Para acessar essas informações, é necessária uma conexão segura, como LDAPS, ou a conexão deve ser autenticada com 'Sealing & Secure'.
 
@@ -156,11 +158,11 @@ Você pode ler esta senha com [**GMSAPasswordReader**](https://github.com/rvazar
 ```
 [**Encontre mais informações neste post**](https://cube0x0.github.io/Relaying-for-gMSA/)
 
-Além disso, confira esta [página da web](https://cube0x0.github.io/Relaying-for-gMSA/) sobre como realizar um **ataque de retransmissão NTLM** para **ler** a **senha** do **gMSA**.
+Além disso, verifique esta [página da web](https://cube0x0.github.io/Relaying-for-gMSA/) sobre como realizar um **ataque de retransmissão NTLM** para **ler** a **senha** do **gMSA**.
 
 ## LAPS
 
-A **Solução de Senha do Administrador Local (LAPS)**, disponível para download na [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), permite a gestão de senhas de Administrador local. Essas senhas, que são **aleatórias**, únicas e **trocadas regularmente**, são armazenadas centralmente no Active Directory. O acesso a essas senhas é restrito através de ACLs a usuários autorizados. Com permissões suficientes concedidas, a capacidade de ler senhas de administrador local é fornecida.
+A **Solução de Senha do Administrador Local (LAPS)**, disponível para download no [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), permite a gestão de senhas de Administrador local. Essas senhas, que são **aleatórias**, únicas e **regularmente alteradas**, são armazenadas centralmente no Active Directory. O acesso a essas senhas é restrito por meio de ACLs a usuários autorizados. Com permissões suficientes concedidas, a capacidade de ler senhas de administrador local é fornecida.
 
 {{#ref}}
 active-directory-methodology/laps.md
@@ -245,6 +247,5 @@ O SSPI será responsável por encontrar o protocolo adequado para duas máquinas
 {{#ref}}
 windows-security-controls/uac-user-account-control.md
 {{#endref}}
-
 
 {{#include ../banners/hacktricks-training.md}}

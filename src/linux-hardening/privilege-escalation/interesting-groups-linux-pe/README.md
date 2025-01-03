@@ -6,7 +6,7 @@
 
 ### **PE - Método 1**
 
-**Às vezes**, **por padrão (ou porque algum software precisa disso)** dentro do **/etc/sudoers** você pode encontrar algumas dessas linhas:
+**Às vezes**, **por padrão (ou porque algum software precisa disso)** dentro do arquivo **/etc/sudoers** você pode encontrar algumas dessas linhas:
 ```bash
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
@@ -27,7 +27,7 @@ Encontre todos os binários suid e verifique se há o binário **Pkexec**:
 find / -perm -4000 2>/dev/null
 ```
 Se você descobrir que o binário **pkexec é um binário SUID** e você pertence ao **sudo** ou **admin**, você provavelmente poderá executar binários como sudo usando `pkexec`.\
-Isso ocorre porque, normalmente, esses são os grupos dentro da **política do polkit**. Essa política basicamente identifica quais grupos podem usar `pkexec`. Verifique com:
+Isso ocorre porque, normalmente, esses são os grupos dentro da **polkit policy**. Essa política basicamente identifica quais grupos podem usar `pkexec`. Verifique com:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
@@ -66,7 +66,7 @@ Se este for o caso, para **se tornar root você pode apenas executar**:
 ```
 sudo su
 ```
-## Grupo Shadow
+## Shadow Group
 
 Usuários do **grupo shadow** podem **ler** o **/etc/shadow** arquivo:
 ```
@@ -86,7 +86,7 @@ $ echo $PATH
 # echo $PATH
 /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ```
-Se conseguirmos sequestrar alguns programas em `/usr/local`, podemos facilmente obter root.
+Se conseguirmos sequestrar alguns programas em `/usr/local`, podemos facilmente obter acesso root.
 
 Sequestrar o programa `run-parts` é uma maneira fácil de obter root, porque a maioria dos programas executará um `run-parts`, como (crontab, quando o ssh faz login).
 ```bash
@@ -181,7 +181,7 @@ find / -group root -perm -g=w 2>/dev/null
 ```
 ## Grupo Docker
 
-Você pode **montar o sistema de arquivos raiz da máquina host em um volume da instância**, de modo que, quando a instância inicia, ela carrega imediatamente um `chroot` nesse volume. Isso efetivamente lhe dá acesso root na máquina.
+Você pode **montar o sistema de arquivos raiz da máquina host em um volume da instância**, para que quando a instância iniciar, ela carregue imediatamente um `chroot` nesse volume. Isso efetivamente lhe dá acesso root na máquina.
 ```bash
 docker image #Get images from the docker service
 
@@ -201,9 +201,13 @@ Finalmente, se você não gosta de nenhuma das sugestões anteriores, ou elas n�
 
 Se você tiver permissões de escrita sobre o socket do docker, leia [**este post sobre como escalar privilégios abusando do socket do docker**](../#writable-docker-socket)**.**
 
-{% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
+{{#ref}}
+https://github.com/KrustyHack/docker-privilege-escalation
+{{#endref}}
 
-{% embed url="https://fosterelli.co/privilege-escalation-via-docker.html" %}
+{{#ref}}
+https://fosterelli.co/privilege-escalation-via-docker.html
+{{#endref}}
 
 ## Grupo lxc/lxd
 
@@ -213,7 +217,7 @@ Se você tiver permissões de escrita sobre o socket do docker, leia [**este pos
 
 ## Grupo Adm
 
-Normalmente, **membros** do grupo **`adm`** têm permissões para **ler arquivos de log** localizados em _/var/log/_.\
+Normalmente, **membros** do grupo **`adm`** têm permissões para **ler arquivos de log** localizados dentro de _/var/log/_.\
 Portanto, se você comprometeu um usuário dentro deste grupo, você definitivamente deve dar uma **olhada nos logs**.
 
 ## Grupo Auth

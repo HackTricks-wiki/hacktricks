@@ -2,8 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-> [!WARNING]
-> **JuicyPotato não funciona** no Windows Server 2019 e no Windows 10 build 1809 em diante. No entanto, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato) podem ser usados para **aproveitar os mesmos privilégios e obter acesso ao nível `NT AUTHORITY\SYSTEM`**. _**Verifique:**_
+> [!WARNING] > **JuicyPotato não funciona** no Windows Server 2019 e no Windows 10 build 1809 em diante. No entanto, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato) podem ser usados para **aproveitar os mesmos privilégios e obter acesso ao nível `NT AUTHORITY\SYSTEM`**. _**Verifique:**_
 
 {{#ref}}
 roguepotato-and-printspoofer.md
@@ -11,15 +10,15 @@ roguepotato-and-printspoofer.md
 
 ## Juicy Potato (abusando dos privilégios dourados) <a href="#juicy-potato-abusing-the-golden-privileges" id="juicy-potato-abusing-the-golden-privileges"></a>
 
-_Uma versão adoçada de_ [_RottenPotatoNG_](https://github.com/breenmachine/RottenPotatoNG)_, com um pouco de suco, ou seja, **outro ferramenta de Escalação de Privilégios Local, de Contas de Serviço do Windows para NT AUTHORITY\SYSTEM**_
+_Uma versão adoçada de_ [_RottenPotatoNG_](https://github.com/breenmachine/RottenPotatoNG)_, com um pouco de suco, ou seja, **outro ferramenta de Escalação de Privilégios Locais, de Contas de Serviço do Windows para NT AUTHORITY\SYSTEM**_
 
-#### Você pode baixar juicypotato em [https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts](https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts)
+#### Você pode baixar juicypotato de [https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts](https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts)
 
 ### Resumo <a href="#summary" id="summary"></a>
 
 [**Do Readme do juicy-potato**](https://github.com/ohpe/juicy-potato/blob/master/README.md)**:**
 
-[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) e suas [variantes](https://github.com/decoder-it/lonelypotato) aproveitam a cadeia de escalonamento de privilégios baseada no [`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [serviço](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) tendo o ouvinte MiTM em `127.0.0.1:6666` e quando você tem privilégios `SeImpersonate` ou `SeAssignPrimaryToken`. Durante uma revisão de build do Windows, encontramos uma configuração onde `BITS` foi intencionalmente desativado e a porta `6666` estava ocupada.
+[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) e suas [variantes](https://github.com/decoder-it/lonelypotato) aproveitam a cadeia de escalonamento de privilégios baseada no [`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [serviço](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) tendo o ouvinte MiTM em `127.0.0.1:6666` e quando você tem privilégios `SeImpersonate` ou `SeAssignPrimaryToken`. Durante uma revisão de build do Windows, encontramos uma configuração onde `BITS` foi intencionalmente desativado e a porta `6666` foi ocupada.
 
 Decidimos transformar em arma [RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG): **Diga olá para Juicy Potato**.
 
@@ -38,7 +37,7 @@ Após alguns testes, obtivemos e testamos uma lista extensa de [CLSID’s intere
 JuicyPotato permite que você:
 
 - **CLSID de destino** _escolha qualquer CLSID que você quiser._ [_Aqui_](http://ohpe.it/juicy-potato/CLSID/) _você pode encontrar a lista organizada por SO._
-- **Porta de escuta COM** _defina a porta de escuta COM que você prefere (em vez da 6666 codificada)_
+- **Porta de escuta COM** _defina a porta de escuta COM que preferir (em vez do 6666 codificado na marshalling)_
 - **Endereço IP de escuta COM** _vincule o servidor a qualquer IP_
 - **Modo de criação de processo** _dependendo dos privilégios do usuário impersonado, você pode escolher entre:_
 - `CreateProcessWithToken` (precisa de `SeImpersonate`)
@@ -69,7 +68,7 @@ Optional args:
 ```
 ### Considerações finais <a href="#final-thoughts" id="final-thoughts"></a>
 
-[**Do juicy-potato Readme**](https://github.com/ohpe/juicy-potato/blob/master/README.md#final-thoughts)**:**
+[**Do Readme do juicy-potato**](https://github.com/ohpe/juicy-potato/blob/master/README.md#final-thoughts)**:**
 
 Se o usuário tiver privilégios `SeImpersonate` ou `SeAssignPrimaryToken`, então você é **SYSTEM**.
 
@@ -108,7 +107,9 @@ c:\Users\Public>
 
 Muitas vezes, o CLSID padrão que o JuicyPotato usa **não funciona** e a exploração falha. Normalmente, são necessárias várias tentativas para encontrar um **CLSID funcional**. Para obter uma lista de CLSIDs para tentar em um sistema operacional específico, você deve visitar esta página:
 
-{% embed url="https://ohpe.it/juicy-potato/CLSID/" %}
+{{#ref}}
+https://ohpe.it/juicy-potato/CLSID/
+{{#endref}}
 
 ### **Verificando CLSIDs**
 

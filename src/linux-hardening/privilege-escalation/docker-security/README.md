@@ -17,7 +17,7 @@ O Docker engine, por padrão, escuta no socket Unix em `unix:///var/run/docker.s
 DOCKER_OPTS="-D -H unix:///var/run/docker.sock -H tcp://192.168.56.101:2376"
 sudo service docker restart
 ```
-No entanto, expor o daemon do Docker via HTTP não é recomendado devido a preocupações de segurança. É aconselhável proteger as conexões usando HTTPS. Existem duas abordagens principais para garantir a conexão:
+No entanto, expor o daemon do Docker via HTTP não é recomendado devido a preocupações de segurança. É aconselhável proteger as conexões usando HTTPS. Existem duas abordagens principais para proteger a conexão:
 
 1. O cliente verifica a identidade do servidor.
 2. Tanto o cliente quanto o servidor autenticam mutuamente a identidade um do outro.
@@ -103,14 +103,14 @@ Em ambientes containerizados, isolar projetos e seus processos é fundamental pa
 **Grupos de Controle (CGroups)**
 
 - **Função**: Usado principalmente para alocar recursos entre processos.
-- **Aspecto de Segurança**: Os CGroups em si não oferecem segurança de isolamento, exceto pelo recurso `release_agent`, que, se mal configurado, pode ser potencialmente explorado para acesso não autorizado.
+- **Aspecto de Segurança**: Os CGroups em si não oferecem segurança de isolamento, exceto pelo recurso `release_agent`, que, se mal configurado, poderia ser potencialmente explorado para acesso não autorizado.
 
 **Queda de Capacidades**
 
 - **Importância**: É um recurso de segurança crucial para o isolamento de processos.
 - **Funcionalidade**: Restringe as ações que um processo root pode realizar, eliminando certas capacidades. Mesmo que um processo seja executado com privilégios de root, a falta das capacidades necessárias impede que ele execute ações privilegiadas, pois as syscalls falharão devido a permissões insuficientes.
 
-Estas são as **capacidades restantes** após o processo descartar as outras:
+Estas são as **capacidades restantes** após o processo eliminar as outras:
 ```
 Current: cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap=ep
 ```
@@ -219,7 +219,7 @@ authz-and-authn-docker-access-authorization-plugin.md
 
 ## DoS de um contêiner
 
-Se você não estiver limitando adequadamente os recursos que um contêiner pode usar, um contêiner comprometido poderia causar DoS no host onde está sendo executado.
+Se você não estiver limitando adequadamente os recursos que um contêiner pode usar, um contêiner comprometido poderia causar DoS ao host onde está sendo executado.
 
 - DoS de CPU
 ```bash
@@ -229,15 +229,15 @@ sudo apt-get install -y stress-ng && stress-ng --vm 1 --vm-bytes 1G --verify -t 
 # While loop
 docker run -d --name malicious-container -c 512 busybox sh -c 'while true; do :; done'
 ```
-- DoS de Largura de Banda
+- Bandwidth DoS
 ```bash
 nc -lvp 4444 >/dev/null & while true; do cat /dev/urandom | nc <target IP> 4444; done
 ```
 ## Flags Interessantes do Docker
 
-### --privileged flag
+### Flag --privileged
 
-Na página a seguir, você pode aprender **o que o flag `--privileged` implica**:
+Na página a seguir, você pode aprender **o que a flag `--privileged` implica**:
 
 {{#ref}}
 docker-privileged.md
@@ -272,7 +272,7 @@ Para mais opções **`--security-opt`** consulte: [https://docs.docker.com/engin
 
 ## Outras Considerações de Segurança
 
-### Gerenciamento de Segredos: Melhores Práticas
+### Gerenciando Segredos: Melhores Práticas
 
 É crucial evitar embutir segredos diretamente em imagens Docker ou usar variáveis de ambiente, pois esses métodos expõem suas informações sensíveis a qualquer pessoa com acesso ao contêiner através de comandos como `docker inspect` ou `exec`.
 
@@ -290,7 +290,7 @@ BuildKit permite o uso de segredos em tempo de construção com a opção `--sec
 ```bash
 docker build --secret my_key=my_value ,src=path/to/my_secret_file .
 ```
-Para segredos necessários em um contêiner em execução, **Docker Compose e Kubernetes** oferecem soluções robustas. O Docker Compose utiliza uma chave `secrets` na definição do serviço para especificar arquivos secretos, como mostrado em um exemplo de `docker-compose.yml`:
+Para segredos necessários em um contêiner em execução, **Docker Compose e Kubernetes** oferecem soluções robustas. Docker Compose utiliza uma chave `secrets` na definição do serviço para especificar arquivos secretos, como mostrado em um exemplo de `docker-compose.yml`:
 ```yaml
 version: "3.7"
 services:
@@ -311,23 +311,27 @@ Em ambientes Kubernetes, segredos são suportados nativamente e podem ser gerenc
 
 **gVisor** é um kernel de aplicativo, escrito em Go, que implementa uma parte substancial da superfície do sistema Linux. Inclui um runtime da [Open Container Initiative (OCI)](https://www.opencontainers.org) chamado `runsc` que fornece uma **fronteira de isolamento entre o aplicativo e o kernel do host**. O runtime `runsc` se integra ao Docker e Kubernetes, facilitando a execução de contêineres em sandbox.
 
-{% embed url="https://github.com/google/gvisor" %}
+{{#ref}}
+https://github.com/google/gvisor
+{{#endref}}
 
 ### Kata Containers
 
-**Kata Containers** é uma comunidade de código aberto que trabalha para construir um runtime de contêiner seguro com máquinas virtuais leves que se comportam e desempenham como contêineres, mas fornecem **isolamento de carga de trabalho mais forte usando tecnologia de virtualização de hardware** como uma segunda camada de defesa.
+**Kata Containers** é uma comunidade de código aberto que trabalha para construir um runtime de contêiner seguro com máquinas virtuais leves que se comportam e têm desempenho como contêineres, mas fornecem **isolamento de carga de trabalho mais forte usando tecnologia de virtualização de hardware** como uma segunda camada de defesa.
 
-{% embed url="https://katacontainers.io/" %}
+{{#ref}}
+https://katacontainers.io/
+{{#endref}}
 
 ### Dicas Resumidas
 
-- **Não use a flag `--privileged` ou monte um** [**socket Docker dentro do contêiner**](https://raesene.github.io/blog/2016/03/06/The-Dangers-Of-Docker.sock/)**.** O socket docker permite a criação de contêineres, então é uma maneira fácil de ter controle total do host, por exemplo, executando outro contêiner com a flag `--privileged`.
-- **Não execute como root dentro do contêiner. Use um** [**usuário diferente**](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user) **e** [**namespaces de usuário**](https://docs.docker.com/engine/security/userns-remap/)**.** O root no contêiner é o mesmo que no host, a menos que remapeado com namespaces de usuário. É apenas levemente restrito por, principalmente, namespaces do Linux, capacidades e cgroups.
+- **Não use a flag `--privileged` ou monte um** [**socket Docker dentro do contêiner**](https://raesene.github.io/blog/2016/03/06/The-Dangers-Of-Docker.sock/)**.** O socket docker permite a criação de contêineres, então é uma maneira fácil de assumir o controle total do host, por exemplo, executando outro contêiner com a flag `--privileged`.
+- **Não execute como root dentro do contêiner. Use um** [**usuário diferente**](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user) **e** [**namespaces de usuário**](https://docs.docker.com/engine/security/userns-remap/)**.** O root no contêiner é o mesmo que no host, a menos que seja remapeado com namespaces de usuário. É apenas levemente restrito por, principalmente, namespaces do Linux, capacidades e cgroups.
 - [**Remova todas as capacidades**](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities) **(`--cap-drop=all`) e habilite apenas aquelas que são necessárias** (`--cap-add=...`). Muitas cargas de trabalho não precisam de capacidades e adicioná-las aumenta o escopo de um ataque potencial.
 - [**Use a opção de segurança “no-new-privileges”**](https://raesene.github.io/blog/2019/06/01/docker-capabilities-and-no-new-privs/) para evitar que processos ganhem mais privilégios, por exemplo, através de binários suid.
 - [**Limite os recursos disponíveis para o contêiner**](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources)**.** Limites de recursos podem proteger a máquina contra ataques de negação de serviço.
 - **Ajuste** [**seccomp**](https://docs.docker.com/engine/security/seccomp/)**,** [**AppArmor**](https://docs.docker.com/engine/security/apparmor/) **(ou SELinux)** perfis para restringir as ações e syscalls disponíveis para o contêiner ao mínimo necessário.
-- **Use** [**imagens docker oficiais**](https://docs.docker.com/docker-hub/official_images/) **e exija assinaturas** ou construa suas próprias com base nelas. Não herde ou use imagens [com backdoor](https://arstechnica.com/information-technology/2018/06/backdoored-images-downloaded-5-million-times-finally-removed-from-docker-hub/). Também armazene chaves root e senhas em um lugar seguro. O Docker tem planos para gerenciar chaves com UCP.
+- **Use** [**imagens docker oficiais**](https://docs.docker.com/docker-hub/official_images/) **e exija assinaturas** ou construa suas próprias com base nelas. Não herde ou use imagens [backdoored](https://arstechnica.com/information-technology/2018/06/backdoored-images-downloaded-5-million-times-finally-removed-from-docker-hub/). Também armazene chaves root, senhas em um lugar seguro. O Docker tem planos para gerenciar chaves com UCP.
 - **Reconstrua regularmente** suas imagens para **aplicar patches de segurança ao host e às imagens.**
 - Gerencie seus **segredos com sabedoria** para que seja difícil para o atacante acessá-los.
 - Se você **expor o daemon docker, use HTTPS** com autenticação de cliente e servidor.
@@ -344,9 +348,9 @@ Se você está **dentro de um contêiner docker** ou tem acesso a um usuário no
 docker-breakout-privilege-escalation/
 {{#endref}}
 
-## Bypass do Plugin de Autenticação Docker
+## Bypass do Plugin de Autenticação do Docker
 
-Se você tem acesso ao socket docker ou tem acesso a um usuário no **grupo docker, mas suas ações estão sendo limitadas por um plugin de autenticação docker**, verifique se você pode **contorná-lo:**
+Se você tem acesso ao socket docker ou tem acesso a um usuário no **grupo docker, mas suas ações estão sendo limitadas por um plugin de autenticação do docker**, verifique se você pode **contorná-lo:**
 
 {{#ref}}
 authz-and-authn-docker-access-authorization-plugin.md
@@ -372,6 +376,5 @@ Você precisa executar a ferramenta a partir do host que executa o docker ou de 
 - [https://docs.docker.com/engine/extend/plugins_authorization](https://docs.docker.com/engine/extend/plugins_authorization)
 - [https://towardsdatascience.com/top-20-docker-security-tips-81c41dd06f57](https://towardsdatascience.com/top-20-docker-security-tips-81c41dd06f57)
 - [https://resources.experfy.com/bigdata-cloud/top-20-docker-security-tips/](https://resources.experfy.com/bigdata-cloud/top-20-docker-security-tips/)
-
 
 {{#include ../../../banners/hacktricks-training.md}}

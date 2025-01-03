@@ -1,13 +1,10 @@
 # HackTricks
 
-Reading time: {{ #reading_time }}
-
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
 _Logos e design em movimento do Hacktricks por_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
 
-> [!TIP]
-> **Bem-vindo ao wiki onde você encontrará cada truque/técnica de hacking/qualquer coisa que aprendi em CTFs, aplicativos da vida real, lendo pesquisas e notícias.**
+> [!TIP] > **Bem-vindo ao wiki onde você encontrará cada truque/técnica/habilidade de hacking que aprendi em CTFs, aplicativos da vida real, lendo pesquisas e notícias.**
 
 Para começar, siga esta página onde você encontrará o **fluxo típico** que **você deve seguir ao realizar pentesting** em uma ou mais **máquinas:**
 
@@ -35,7 +32,9 @@ Você pode conferir o **blog** deles em [**https://blog.stmcyber.com**](https://
 
 [**RootedCON**](https://www.rootedcon.com) é o evento de cibersegurança mais relevante na **Espanha** e um dos mais importantes na **Europa**. Com **a missão de promover o conhecimento técnico**, este congresso é um ponto de encontro fervilhante para profissionais de tecnologia e cibersegurança em todas as disciplinas.
 
-{% embed url="https://www.rootedcon.com/" %}
+{{#ref}}
+https://www.rootedcon.com/
+{{#endref}}
 
 ---
 
@@ -43,11 +42,13 @@ Você pode conferir o **blog** deles em [**https://blog.stmcyber.com**](https://
 
 <figure><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** é a **plataforma de hacking ético e bug bounty número 1 da Europa.**
+**Intigriti** é a **plataforma de hacking ético e bug bounty #1 da Europa.**
 
 **Dica de bug bounty**: **inscreva-se** no **Intigriti**, uma plataforma premium de **bug bounty criada por hackers, para hackers**! Junte-se a nós em [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) hoje e comece a ganhar recompensas de até **$100,000**!
 
-{% embed url="https://go.intigriti.com/hacktricks" %}
+{{#ref}}
+https://go.intigriti.com/hacktricks
+{{#endref}}
 
 ---
 
@@ -60,7 +61,9 @@ Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banne
 
 Acesse hoje:
 
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+{{#ref}}
+https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks
+{{#endref}}
 
 ---
 
@@ -70,7 +73,7 @@ Acesse hoje:
 
 Junte-se ao servidor [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) para se comunicar com hackers experientes e caçadores de bugs!
 
-- **Insights de Hacking:** Envolva-se com conteúdo que mergulha na emoção e nos desafios do hacking
+- **Insights de Hacking:** Envolva-se com conteúdo que explora a emoção e os desafios do hacking
 - **Notícias de Hack em Tempo Real:** Mantenha-se atualizado com o mundo do hacking em ritmo acelerado através de notícias e insights em tempo real
 - **Últimos Anúncios:** Fique informado sobre os novos bug bounties lançados e atualizações cruciais da plataforma
 
@@ -86,7 +89,9 @@ Junte-se ao servidor [**HackenProof Discord**](https://discord.com/invite/N3FrSb
 
 **Encontre e relate vulnerabilidades críticas e exploráveis com impacto real nos negócios.** Use nossas mais de 20 ferramentas personalizadas para mapear a superfície de ataque, encontrar problemas de segurança que permitem escalar privilégios e usar exploits automatizados para coletar evidências essenciais, transformando seu trabalho árduo em relatórios persuasivos.
 
-{% embed url="https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons" %}
+{{#ref}}
+https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons
+{{#endref}}
 
 ---
 
@@ -111,7 +116,9 @@ Você pode **criar uma conta gratuita** [**aqui**](https://serpapi.com/users/sig
 
 Aprenda as tecnologias e habilidades necessárias para realizar pesquisa de vulnerabilidades, testes de penetração e engenharia reversa para proteger aplicativos e dispositivos móveis. **Domine a segurança de iOS e Android** através de nossos cursos sob demanda e **obtenha certificação**:
 
-{% embed url="https://academy.8ksec.io/" %}
+{{#ref}}
+https://academy.8ksec.io/
+{{#endref}}
 
 ---
 
@@ -121,13 +128,15 @@ Aprenda as tecnologias e habilidades necessárias para realizar pesquisa de vuln
 
 [**WebSec**](https://websec.nl) é uma empresa profissional de cibersegurança com sede em **Amsterdã** que ajuda a **proteger** empresas **em todo o mundo** contra as mais recentes ameaças de cibersegurança, fornecendo **serviços de segurança ofensiva** com uma abordagem **moderna**.
 
-WebSec é uma **empresa de segurança tudo-em-um**, o que significa que eles fazem tudo; Pentesting, **Auditorias** de Segurança, Treinamentos de Conscientização, Campanhas de Phishing, Revisão de Código, Desenvolvimento de Exploits, Terceirização de Especialistas em Segurança e muito mais.
+WebSec é uma **empresa de segurança tudo-em-um**, o que significa que eles fazem tudo; Pentesting, **Auditorias de Segurança**, Treinamentos de Conscientização, Campanhas de Phishing, Revisão de Código, Desenvolvimento de Exploits, Terceirização de Especialistas em Segurança e muito mais.
 
-Outra coisa legal sobre a WebSec é que, ao contrário da média do setor, a WebSec é **muito confiante em suas habilidades**, a tal ponto que **garante os melhores resultados de qualidade**, afirmando em seu site "**Se não conseguimos hackear, você não paga!**". Para mais informações, dê uma olhada em seu [**site**](https://websec.nl/en/) e [**blog**](https://websec.nl/blog/)!
+Outra coisa legal sobre a WebSec é que, ao contrário da média da indústria, a WebSec é **muito confiante em suas habilidades**, a tal ponto que **garante os melhores resultados de qualidade**, afirmando em seu site "**Se não conseguimos hackear, você não paga!**". Para mais informações, dê uma olhada em seu [**site**](https://websec.nl/en/) e [**blog**](https://websec.nl/blog/)!
 
 Além do acima, a WebSec também é um **apoiador comprometido do HackTricks.**
 
-{% embed url="https://www.youtube.com/watch?v=Zq2JycGDCPM" %}
+{{#ref}}
+https://www.youtube.com/watch?v=Zq2JycGDCPM
+{{#endref}}
 
 ## Licença & Isenção de Responsabilidade
 
