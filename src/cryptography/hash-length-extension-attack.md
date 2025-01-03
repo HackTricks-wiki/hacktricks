@@ -27,7 +27,9 @@ Se un attaccante vuole aggiungere la stringa "append" può:
 
 ## **Strumento**
 
-{% embed url="https://github.com/iagox86/hash_extender" %}
+{{#ref}}
+https://github.com/iagox86/hash_extender
+{{#endref}}
 
 ## Riferimenti
 

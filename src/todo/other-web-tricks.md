@@ -20,11 +20,13 @@ Prova a registrarti come un utente già esistente. Prova anche a utilizzare cara
 
 ### Prendere il controllo delle email
 
-Registrati con un'email, prima di confermarla cambia l'email, poi, se la nuova email di conferma viene inviata alla prima email registrata, puoi prendere il controllo di qualsiasi email. Oppure, se puoi abilitare la seconda email confermando la prima, puoi anche prendere il controllo di qualsiasi account.
+Registrati con un'email, prima di confermarla cambia l'email, poi, se la nuova email di conferma viene inviata alla prima email registrata, puoi prendere il controllo di qualsiasi email. Oppure, se puoi abilitare la seconda email che conferma la prima, puoi anche prendere il controllo di qualsiasi account.
 
 ### Accesso al servicedesk interno delle aziende che utilizzano Atlassian
 
-{% embed url="https://yourcompanyname.atlassian.net/servicedesk/customer/user/login" %}
+{{#ref}}
+https://yourcompanyname.atlassian.net/servicedesk/customer/user/login
+{{#endref}}
 
 ### Metodo TRACE
 

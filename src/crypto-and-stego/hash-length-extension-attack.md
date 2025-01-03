@@ -6,11 +6,11 @@
 
 Immagina un server che **firma** alcuni **dati** **aggiungendo** un **segreto** a dei dati di testo chiaro noti e poi hashando quei dati. Se conosci:
 
-- **La lunghezza del segreto** (questo può essere anche forzato a bruteforce da un dato intervallo di lunghezza)
+- **La lunghezza del segreto** (questo può essere anche forzato a bruteforce da un intervallo di lunghezza dato)
 - **I dati di testo chiaro**
 - **L'algoritmo (e è vulnerabile a questo attacco)**
 - **Il padding è noto**
-- Di solito viene utilizzato uno predefinito, quindi se gli altri 3 requisiti sono soddisfatti, anche questo lo è
+- Di solito viene utilizzato un padding predefinito, quindi se gli altri 3 requisiti sono soddisfatti, anche questo lo è
 - Il padding varia a seconda della lunghezza del segreto + dati, ecco perché è necessaria la lunghezza del segreto
 
 Allora, è possibile per un **attaccante** **aggiungere** **dati** e **generare** una **firma** valida per i **dati precedenti + dati aggiunti**.
@@ -19,7 +19,7 @@ Allora, è possibile per un **attaccante** **aggiungere** **dati** e **generare*
 
 Fondamentalmente, gli algoritmi vulnerabili generano gli hash prima **hashando un blocco di dati**, e poi, **dallo** **hash** **precedentemente** creato (stato), **aggiungono il prossimo blocco di dati** e **lo hashano**.
 
-Immagina che il segreto sia "secret" e i dati siano "data", l'MD5 di "secretdata" è 6036708eba0d11f6ef52ad44e8b74d5b.\
+Poi, immagina che il segreto sia "secret" e i dati siano "data", l'MD5 di "secretdata" è 6036708eba0d11f6ef52ad44e8b74d5b.\
 Se un attaccante vuole aggiungere la stringa "append" può:
 
 - Generare un MD5 di 64 "A"
@@ -29,7 +29,9 @@ Se un attaccante vuole aggiungere la stringa "append" può:
 
 ### **Strumento**
 
-{% embed url="https://github.com/iagox86/hash_extender" %}
+{{#ref}}
+https://github.com/iagox86/hash_extender
+{{#endref}}
 
 ### Riferimenti
 

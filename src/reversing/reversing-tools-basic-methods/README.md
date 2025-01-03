@@ -55,7 +55,7 @@ File.AppendAllText(path, "Password: " + password + "\n");
 ```
 ### Debugging con DNSpy
 
-Per eseguire il debug del codice utilizzando DNSpy, è necessario:
+Per eseguire il debug del codice utilizzando DNSpy è necessario:
 
 Innanzitutto, modificare gli **attributi dell'Assembly** relativi al **debugging**:
 
@@ -121,7 +121,7 @@ Fai clic con il tasto destro su qualsiasi modulo in **Assembly Explorer** e clic
 
 ![](<../../images/image (868).png>)
 
-- Configura i **parametri** dell'esecuzione mettendo il **percorso della DLL** e la funzione che vuoi chiamare:
+- Configura i **parametri** dell'esecuzione inserendo il **percorso della DLL** e la funzione che desideri chiamare:
 
 ![](<../../images/image (704).png>)
 
@@ -132,15 +132,15 @@ Ma, come puoi arrivare al codice della DLL che è stata caricata? Usando questo 
 ### Usando x64dbg/x32dbg
 
 - **Carica rundll32** (64bit in C:\Windows\System32\rundll32.exe e 32 bit in C:\Windows\SysWOW64\rundll32.exe)
-- **Cambia la Command Line** (_File --> Change Command Line_) e imposta il percorso della dll e la funzione che vuoi chiamare, per esempio: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
+- **Cambia la Command Line** (_File --> Change Command Line_) e imposta il percorso della dll e la funzione che desideri chiamare, ad esempio: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
 - Cambia _Options --> Settings_ e seleziona "**DLL Entry**".
-- Poi **avvia l'esecuzione**, il debugger si fermerà in ogni main della dll, a un certo punto ti fermerai **nell'Entry della dll**. Da lì, cerca i punti in cui vuoi mettere un breakpoint.
+- Poi **avvia l'esecuzione**, il debugger si fermerà in ogni main della dll, a un certo punto ti fermerai **nell'Entry della dll**. Da lì, cerca i punti in cui desideri mettere un breakpoint.
 
 Nota che quando l'esecuzione si ferma per qualsiasi motivo in win64dbg puoi vedere **in quale codice ti trovi** guardando **in cima alla finestra di win64dbg**:
 
 ![](<../../images/image (842).png>)
 
-Poi, guardando questo puoi vedere quando l'esecuzione si è fermata nella dll che vuoi debuggare.
+Poi, guardando questo puoi vedere quando l'esecuzione si è fermata nella dll che desideri debuggare.
 
 ## App GUI / Videogiochi
 
@@ -156,7 +156,9 @@ cheat-engine.md
 
 ## ARM & MIPS
 
-{% embed url="https://github.com/nongiach/arm_now" %}
+{{#ref}}
+https://github.com/nongiach/arm_now
+{{#endref}}
 
 ## Shellcodes
 
@@ -174,7 +176,7 @@ blobrunner.md
 
 ### Debugging di uno shellcode con jmp2it
 
-[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) è molto simile a blobrunner. **Allochera** lo **shellcode** all'interno di uno spazio di memoria e avvierà un **ciclo eterno**. Devi quindi **attaccare il debugger** al processo, **premere start, attendere 2-5 secondi e premere stop** e ti troverai all'interno del **ciclo eterno**. Salta alla prossima istruzione del ciclo eterno poiché sarà una chiamata allo shellcode, e infine ti troverai ad eseguire lo shellcode.
+[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4)è molto simile a blobrunner. **Allochera** lo **shellcode** all'interno di uno spazio di memoria e avvierà un **ciclo eterno**. Devi quindi **attaccare il debugger** al processo, **premere start, attendere 2-5 secondi e premere stop** e ti troverai all'interno del **ciclo eterno**. Salta alla prossima istruzione del ciclo eterno poiché sarà una chiamata allo shellcode, e infine ti troverai ad eseguire lo shellcode.
 
 ![](<../../images/image (509).png>)
 
@@ -214,7 +216,7 @@ scDbg dispone anche di un launcher grafico dove puoi selezionare le opzioni desi
 
 ![](<../../images/image (258).png>)
 
-L'opzione **Create Dump** eseguirà il dump del shellcode finale se viene apportata una modifica al shellcode dinamicamente in memoria (utile per scaricare il shellcode decodificato). L'**offset di avvio** può essere utile per avviare il shellcode a un offset specifico. L'opzione **Debug Shell** è utile per eseguire il debug del shellcode utilizzando il terminale scDbg (tuttavia, trovo che nessuna delle opzioni spiegate prima sia migliore per questo scopo, poiché sarai in grado di utilizzare Ida o x64dbg).
+L'opzione **Create Dump** eseguirà il dump del shellcode finale se viene apportata qualche modifica al shellcode dinamicamente in memoria (utile per scaricare il shellcode decodificato). L'**start offset** può essere utile per avviare il shellcode a un offset specifico. L'opzione **Debug Shell** è utile per eseguire il debug del shellcode utilizzando il terminale scDbg (tuttavia, trovo che nessuna delle opzioni spiegate prima sia migliore per questo scopo, poiché sarai in grado di utilizzare Ida o x64dbg).
 
 ### Disassemblaggio usando CyberChef
 
@@ -253,7 +255,7 @@ Se devi fare reverse engineering di un binario Delphi ti consiglio di usare il p
 
 Premi semplicemente **ATL+f7** (importa il plugin python in IDA) e seleziona il plugin python.
 
-Questo plugin eseguirà il binario e risolverà i nomi delle funzioni dinamicamente all'inizio del debug. Dopo aver avviato il debug premi di nuovo il pulsante Start (quello verde o f9) e un breakpoint si attiverà all'inizio del codice reale.
+Questo plugin eseguirà il binario e risolverà i nomi delle funzioni dinamicamente all'inizio del debug. Dopo aver avviato il debug premi di nuovo il pulsante Start (quello verde o f9) e un breakpoint verrà attivato all'inizio del codice reale.
 
 È anche molto interessante perché se premi un pulsante nell'applicazione grafica il debugger si fermerà nella funzione eseguita da quel pulsante.
 
@@ -275,7 +277,7 @@ In questa pagina puoi trovare come ottenere il codice python da un binario pytho
 
 ## GBA - Game Body Advance
 
-Se ottieni il **binario** di un gioco GBA puoi usare diversi strumenti per **emularlo** e **debuggarlo**:
+Se ottieni il **binario** di un gioco GBA puoi usare diversi strumenti per **emulare** e **debuggare**:
 
 - [**no$gba**](https://problemkaputt.de/gba.htm) (_Scarica la versione di debug_) - Contiene un debugger con interfaccia
 - [**mgba** ](https://mgba.io)- Contiene un debugger CLI
@@ -380,7 +382,9 @@ Quindi, in questa sfida, conoscendo i valori dei pulsanti, dovevi **premere una 
 
 ## Game Boy
 
-{% embed url="https://www.youtube.com/watch?v=VVbRe7wr3G4" %}
+{{#ref}}
+https://www.youtube.com/watch?v=VVbRe7wr3G4
+{{#endref}}
 
 ## Corsi
 

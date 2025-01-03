@@ -1,13 +1,10 @@
 # HackTricks
 
-Reading time: {{ #reading_time }}
-
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_I loghi e il design in movimento di Hacktricks sono di_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
+_Hacktricks loghi e design in movimento di_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
 
-> [!TIP]
-> **Benvenuto nel wiki dove troverai ogni trucco/tecnica/hacking che ho imparato da CTF, applicazioni della vita reale, letture di ricerche e notizie.**
+> [!TIP] > **Benvenuto nel wiki dove troverai ogni trucco/tecnica/hacking che ho imparato da CTF, applicazioni della vita reale, lettura di ricerche e notizie.**
 
 Per iniziare, segui questa pagina dove troverai il **flusso tipico** che **dovresti seguire quando fai pentesting** su una o più **macchine:**
 
@@ -35,7 +32,9 @@ Puoi controllare il loro **blog** in [**https://blog.stmcyber.com**](https://blo
 
 [**RootedCON**](https://www.rootedcon.com) è l'evento di cybersecurity più rilevante in **Spagna** e uno dei più importanti in **Europa**. Con **la missione di promuovere la conoscenza tecnica**, questo congresso è un punto di incontro vivace per professionisti della tecnologia e della cybersecurity in ogni disciplina.
 
-{% embed url="https://www.rootedcon.com/" %}
+{{#ref}}
+https://www.rootedcon.com/
+{{#endref}}
 
 ---
 
@@ -43,11 +42,13 @@ Puoi controllare il loro **blog** in [**https://blog.stmcyber.com**](https://blo
 
 <figure><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** è la **piattaforma di ethical hacking e bug bounty #1 in Europa.**
+**Intigriti** è la **#1 in Europa** piattaforma di hacking etico e **bug bounty.**
 
-**Suggerimento bug bounty**: **iscriviti** a **Intigriti**, una premium **piattaforma di bug bounty creata da hacker, per hacker**! Unisciti a noi su [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) oggi, e inizia a guadagnare bounty fino a **$100,000**!
+**Suggerimento bug bounty**: **iscriviti** a **Intigriti**, una premium **bug bounty platform creata da hacker, per hacker**! Unisciti a noi su [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) oggi, e inizia a guadagnare bounty fino a **$100,000**!
 
-{% embed url="https://go.intigriti.com/hacktricks" %}
+{{#ref}}
+https://go.intigriti.com/hacktricks
+{{#endref}}
 
 ---
 
@@ -56,11 +57,13 @@ Puoi controllare il loro **blog** in [**https://blog.stmcyber.com**](https://blo
 <figure><img src="images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Usa [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) per costruire e **automatizzare facilmente i flussi di lavoro** alimentati dagli strumenti della comunità **più avanzati** al mondo.
+Usa [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) per costruire e **automatizzare flussi di lavoro** facilmente, alimentati dagli **strumenti comunitari più avanzati** al mondo.
 
 Accedi oggi:
 
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+{{#ref}}
+https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks
+{{#endref}}
 
 ---
 
@@ -70,9 +73,9 @@ Accedi oggi:
 
 Unisciti al server [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) per comunicare con hacker esperti e cacciatori di bug bounty!
 
-- **Hacking Insights:** Interagisci con contenuti che approfondiscono l'emozione e le sfide dell'hacking
-- **Notizie di hacking in tempo reale:** Rimani aggiornato con il mondo dell'hacking in rapida evoluzione attraverso notizie e approfondimenti in tempo reale
-- **Ultimi annunci:** Rimani informato sugli ultimi bug bounty in partenza e aggiornamenti cruciali della piattaforma
+- **Approfondimenti sul hacking:** Interagisci con contenuti che approfondiscono l'emozione e le sfide dell'hacking
+- **Notizie di hacking in tempo reale:** Rimani aggiornato con il mondo frenetico dell'hacking attraverso notizie e approfondimenti in tempo reale
+- **Ultimi annunci:** Rimani informato sui nuovi bug bounty in arrivo e aggiornamenti cruciali della piattaforma
 
 **Unisciti a noi su** [**Discord**](https://discord.com/invite/N3FrSbmwdy) e inizia a collaborare con i migliori hacker oggi!
 
@@ -86,7 +89,9 @@ Unisciti al server [**HackenProof Discord**](https://discord.com/invite/N3FrSbmw
 
 **Trova e segnala vulnerabilità critiche ed esploitabili con un impatto reale sul business.** Usa i nostri oltre 20 strumenti personalizzati per mappare la superficie di attacco, trovare problemi di sicurezza che ti permettano di elevare i privilegi e utilizzare exploit automatizzati per raccogliere prove essenziali, trasformando il tuo duro lavoro in report persuasivi.
 
-{% embed url="https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons" %}
+{{#ref}}
+https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons
+{{#endref}}
 
 ---
 
@@ -111,7 +116,9 @@ Puoi **creare un account gratuito** [**qui**](https://serpapi.com/users/sign_up)
 
 Impara le tecnologie e le competenze necessarie per eseguire ricerche sulle vulnerabilità, penetration testing e reverse engineering per proteggere le applicazioni e i dispositivi mobili. **Padroneggia la sicurezza di iOS e Android** attraverso i nostri corsi on-demand e **ottieni la certificazione**:
 
-{% embed url="https://academy.8ksec.io/" %}
+{{#ref}}
+https://academy.8ksec.io/
+{{#endref}}
 
 ---
 
@@ -119,15 +126,17 @@ Impara le tecnologie e le competenze necessarie per eseguire ricerche sulle vuln
 
 <figure><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.nl) è un'azienda di cybersecurity professionale con sede ad **Amsterdam** che aiuta **a proteggere** le aziende **in tutto il mondo** contro le ultime minacce alla cybersecurity fornendo **servizi di sicurezza offensiva** con un approccio **moderno**.
+[**WebSec**](https://websec.nl) è un'azienda di cybersecurity professionale con sede ad **Amsterdam** che aiuta **a proteggere** le aziende **in tutto il mondo** contro le ultime minacce di cybersecurity fornendo **servizi di sicurezza offensiva** con un **approccio moderno**.
 
 WebSec è un'**azienda di sicurezza all-in-one**, il che significa che fanno tutto; Pentesting, **Audit** di Sicurezza, Formazione sulla Consapevolezza, Campagne di Phishing, Revisione del Codice, Sviluppo di Exploit, Outsourcing di Esperti di Sicurezza e molto altro.
 
-Un'altra cosa interessante di WebSec è che, a differenza della media del settore, WebSec è **molto sicura delle proprie capacità**, tanto da **garantire i migliori risultati di qualità**, affermando sul loro sito web "**Se non possiamo hackarlo, non lo paghi!**". Per ulteriori informazioni, dai un'occhiata al loro [**sito web**](https://websec.nl/en/) e [**blog**](https://websec.nl/blog/)!
+Un'altra cosa interessante di WebSec è che, a differenza della media del settore, WebSec è **molto sicura delle proprie competenze**, tanto da **garantire i migliori risultati di qualità**, affermando sul loro sito web "**Se non possiamo hackarlo, non lo paghi!**". Per ulteriori informazioni, dai un'occhiata al loro [**sito web**](https://websec.nl/en/) e [**blog**](https://websec.nl/blog/)!
 
 In aggiunta a quanto sopra, WebSec è anche un **sostenitore impegnato di HackTricks.**
 
-{% embed url="https://www.youtube.com/watch?v=Zq2JycGDCPM" %}
+{{#ref}}
+https://www.youtube.com/watch?v=Zq2JycGDCPM
+{{#endref}}
 
 ## License & Disclaimer
 

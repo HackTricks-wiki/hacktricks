@@ -2,8 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-> [!WARNING]
-> **JuicyPotato non funziona** su Windows Server 2019 e Windows 10 build 1809 e successivi. Tuttavia, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato) possono essere utilizzati per **sfruttare gli stessi privilegi e ottenere accesso a livello `NT AUTHORITY\SYSTEM`**. _**Controlla:**_
+> [!WARNING] > **JuicyPotato non funziona** su Windows Server 2019 e Windows 10 build 1809 e successivi. Tuttavia, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato) possono essere utilizzati per **sfruttare gli stessi privilegi e ottenere accesso a livello `NT AUTHORITY\SYSTEM`**. _**Controlla:**_
 
 {{#ref}}
 roguepotato-and-printspoofer.md
@@ -19,7 +18,7 @@ _Versione zuccherata di_ [_RottenPotatoNG_](https://github.com/breenmachine/Rott
 
 [**Dal Readme di juicy-potato**](https://github.com/ohpe/juicy-potato/blob/master/README.md)**:**
 
-[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) e le sue [varianti](https://github.com/decoder-it/lonelypotato) sfruttano la catena di escalation dei privilegi basata su [`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [servizio](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) che ha il listener MiTM su `127.0.0.1:6666` e quando hai privilegi `SeImpersonate` o `SeAssignPrimaryToken`. Durante una revisione della build di Windows abbiamo trovato una configurazione in cui `BITS` era intenzionalmente disabilitato e la porta `6666` era occupata.
+[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) e le sue [varianti](https://github.com/decoder-it/lonelypotato) sfruttano la catena di escalation dei privilegi basata sul [`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [servizio](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) avendo il listener MiTM su `127.0.0.1:6666` e quando hai privilegi `SeImpersonate` o `SeAssignPrimaryToken`. Durante una revisione della build di Windows abbiamo trovato una configurazione in cui `BITS` era intenzionalmente disabilitato e la porta `6666` era occupata.
 
 Abbiamo deciso di armare [RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG): **Dì ciao a Juicy Potato**.
 
@@ -108,7 +107,9 @@ c:\Users\Public>
 
 Spesso, il CLSID predefinito che JuicyPotato utilizza **non funziona** e l'exploit fallisce. Di solito, ci vogliono più tentativi per trovare un **CLSID funzionante**. Per ottenere un elenco di CLSID da provare per un sistema operativo specifico, dovresti visitare questa pagina:
 
-{% embed url="https://ohpe.it/juicy-potato/CLSID/" %}
+{{#ref}}
+https://ohpe.it/juicy-potato/CLSID/
+{{#endref}}
 
 ### **Controllo dei CLSID**
 

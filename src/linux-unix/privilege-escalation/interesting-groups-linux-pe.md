@@ -1,6 +1,5 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-
 # Gruppi Sudo/Admin
 
 ## **PE - Metodo 1**
@@ -25,7 +24,7 @@ Trova tutti i binari suid e controlla se c'è il binario **Pkexec**:
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-Se scopri che il binario pkexec è un binario SUID e appartieni a sudo o admin, potresti probabilmente eseguire binari come sudo utilizzando pkexec. Controlla il contenuto di:
+Se scopri che il binario pkexec è un binario SUID e appartieni a sudo o admin, probabilmente potresti eseguire binari come sudo utilizzando pkexec. Controlla il contenuto di:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
@@ -41,7 +40,7 @@ polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freed
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-**Non è perché non hai permessi, ma perché non sei connesso senza una GUI**. E c'è una soluzione per questo problema qui: [https://github.com/NixOS/nixpkgs/issues/18012\#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Hai bisogno di **2 sessioni ssh diverse**:
+**Non è perché non hai permessi, ma perché non sei connesso senza una GUI**. E c'è una soluzione a questo problema qui: [https://github.com/NixOS/nixpkgs/issues/18012\#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Hai bisogno di **2 sessioni ssh diverse**:
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -52,7 +51,7 @@ pkexec "/bin/bash" #Step 3, execute pkexec
 pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 #Step 4, you will be asked in this session to authenticate to pkexec
 ```
-# Gruppo Wheel
+# Wheel Group
 
 **A volte**, **per impostazione predefinita** all'interno del **/etc/sudoers** file puoi trovare questa riga:
 ```text
@@ -101,12 +100,12 @@ moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
 Il **tty1** significa che l'utente **yossi è connesso fisicamente** a un terminale sulla macchina.
 
-Il **gruppo video** ha accesso per visualizzare l'output dello schermo. Fondamentalmente puoi osservare gli schermi. Per fare ciò, devi **catturare l'immagine attuale sullo schermo** in dati grezzi e ottenere la risoluzione che lo schermo sta utilizzando. I dati dello schermo possono essere salvati in `/dev/fb0` e puoi trovare la risoluzione di questo schermo in `/sys/class/graphics/fb0/virtual_size`
+Il **gruppo video** ha accesso per visualizzare l'output dello schermo. Fondamentalmente puoi osservare gli schermi. Per fare ciò, devi **catturare l'immagine corrente sullo schermo** in dati grezzi e ottenere la risoluzione che lo schermo sta utilizzando. I dati dello schermo possono essere salvati in `/dev/fb0` e puoi trovare la risoluzione di questo schermo in `/sys/class/graphics/fb0/virtual_size`
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-Per **aprire** l'**immagine raw** puoi usare **GIMP**, selezionare il file **`screen.raw`** e selezionare come tipo di file **Raw image data**:
+Per **aprire** l'**immagine raw** puoi usare **GIMP**, selezionare il file **`screen.raw`** e selezionare come tipo di file **Dati immagine raw**:
 
 ![](../../images/image%20%28208%29.png)
 
@@ -116,7 +115,7 @@ Poi modifica la Larghezza e l'Altezza a quelle utilizzate sullo schermo e contro
 
 # Gruppo Root
 
-Sembra che per impostazione predefinita i **membri del gruppo root** possano avere accesso a **modificare** alcuni file di configurazione dei **servizi** o alcuni file di **librerie** o **altre cose interessanti** che potrebbero essere utilizzate per escalare i privilegi...
+Sembra che per impostazione predefinita i **membri del gruppo root** possano avere accesso a **modificare** alcuni file di configurazione dei **servizi** o alcuni file di **librerie** o **altre cose interessanti** che potrebbero essere utilizzate per elevare i privilegi...
 
 **Controlla quali file i membri root possono modificare**:
 ```bash
@@ -126,13 +125,16 @@ find / -group root -perm -g=w 2>/dev/null
 
 Puoi montare il filesystem root della macchina host su un volume dell'istanza, così quando l'istanza si avvia carica immediatamente un `chroot` in quel volume. Questo ti dà effettivamente i privilegi di root sulla macchina.
 
-{% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
+{{#ref}}
+https://github.com/KrustyHack/docker-privilege-escalation
+{{#endref}}
 
-{% embed url="https://fosterelli.co/privilege-escalation-via-docker.html" %}
+{{#ref}}
+https://fosterelli.co/privilege-escalation-via-docker.html
+{{#endref}}
 
 # Gruppo lxc/lxd
 
 [lxc - Privilege Escalation](lxd-privilege-escalation.md)
-
 
 {{#include ../../banners/hacktricks-training.md}}
