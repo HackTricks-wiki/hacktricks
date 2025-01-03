@@ -5,7 +5,7 @@
 Καταχωρεί έναν **νέο Domain Controller** στο AD και τον χρησιμοποιεί για να **σπρώξει χαρακτηριστικά** (SIDHistory, SPNs...) σε καθορισμένα αντικείμενα **χωρίς** να αφήνει κανένα **καταγραφή** σχετικά με τις **τροποποιήσεις**. Χρειάζεστε δικαιώματα DA και να είστε μέσα στο **root domain**.\
 Σημειώστε ότι αν χρησιμοποιήσετε λανθασμένα δεδομένα, θα εμφανιστούν αρκετά άσχημες καταγραφές.
 
-Για να εκτελέσετε την επίθεση χρειάζεστε 2 περιπτώσεις του mimikatz. Μία από αυτές θα ξεκινήσει τους RPC servers με δικαιώματα SYSTEM (πρέπει να υποδείξετε εδώ τις αλλαγές που θέλετε να εκτελέσετε), και η άλλη περίπτωση θα χρησιμοποιηθεί για να σπρώξει τις τιμές:
+Για να εκτελέσετε την επίθεση χρειάζεστε 2 instances του mimikatz. Ένα από αυτά θα ξεκινήσει τους RPC servers με δικαιώματα SYSTEM (πρέπει να υποδείξετε εδώ τις αλλαγές που θέλετε να εκτελέσετε), και η άλλη instance θα χρησιμοποιηθεί για να σπρώξει τις τιμές:
 ```bash:mimikatz1 (RPC servers)
 !+
 !processtoken
@@ -24,9 +24,9 @@ lsadump::dcshadow /push
 - _DS-Install-Replica_ (Προσθήκη/Αφαίρεση Αντιγράφου στο Τομέα)
 - _DS-Replication-Manage-Topology_ (Διαχείριση Τοπολογίας Αναπαραγωγής)
 - _DS-Replication-Synchronize_ (Συγχρονισμός Αναπαραγωγής)
-- Το **αντικείμενο Sites** (και τα παιδιά του) στο **δοχείο Διαμόρφωσης**:
+- Το **αντικείμενο Τοποθεσιών** (και τα παιδιά του) στο **δοχείο Διαμόρφωσης**:
 - _CreateChild and DeleteChild_
-- Το αντικείμενο του **υπολογιστή που είναι καταχωρισμένος ως DC**:
+- Το αντικείμενο του **υπολογιστή που είναι καταχωρημένος ως DC**:
 - _WriteProperty_ (Όχι Γράψιμο)
 - Το **στόχο αντικείμενο**:
 - _WriteProperty_ (Όχι Γράψιμο)
@@ -34,7 +34,7 @@ lsadump::dcshadow /push
 Μπορείτε να χρησιμοποιήσετε [**Set-DCShadowPermissions**](https://github.com/samratashok/nishang/blob/master/ActiveDirectory/Set-DCShadowPermissions.ps1) για να δώσετε αυτά τα δικαιώματα σε έναν χρήστη χωρίς δικαιώματα (σημειώστε ότι αυτό θα αφήσει κάποια αρχεία καταγραφής). Αυτό είναι πολύ πιο περιοριστικό από το να έχετε δικαιώματα DA.\
 Για παράδειγμα: `Set-DCShadowPermissions -FakeDC mcorp-student1 SAMAccountName root1user -Username student1 -Verbose` Αυτό σημαίνει ότι το όνομα χρήστη _**student1**_ όταν συνδεθεί στη μηχανή _**mcorp-student1**_ έχει άδειες DCShadow πάνω στο αντικείμενο _**root1user**_.
 
-## Χρήση του DCShadow για τη δημιουργία backdoors
+## Χρήση του DCShadow για τη δημιουργία πισωπόρτων
 ```bash:Set Enterprise Admins in SIDHistory to a user
 lsadump::dcshadow /object:student1 /attribute:SIDHistory /value:S-1-521-280534878-1496970234-700767426-519
 ```
@@ -59,11 +59,11 @@ lsadump::dcshadow /object:CN=AdminSDHolder,CN=System,DC=moneycorp,DC=local /attr
 - `(OA;;CR;1131f6ab-9c07-11d1-f79f-00c04fc2dcd2;;UserSID)`
 - Στο αντικείμενο υπολογιστή του επιτιθέμενου: `(A;;WP;;;UserSID)`
 - Στο αντικείμενο του στόχου χρήστη: `(A;;WP;;;UserSID)`
-- Στο αντικείμενο Sites στο δοχείο Configuration: `(A;CI;CCDC;;;UserSID)`
+- Στο αντικείμενο Sites στο κοντέινερ Configuration: `(A;CI;CCDC;;;UserSID)`
 
 Για να αποκτήσετε το τρέχον ACE ενός αντικειμένου: `(New-Object System.DirectoryServices.DirectoryEntry("LDAP://DC=moneycorp,DC=local")).psbase.ObjectSecurity.sddl`
 
-Σημειώστε ότι σε αυτή την περίπτωση πρέπει να κάνετε **πολλές αλλαγές,** όχι μόνο μία. Έτσι, στη **συνεδρία mimikatz1** (RPC server) χρησιμοποιήστε την παράμετρο **`/stack` με κάθε αλλαγή** που θέλετε να κάνετε. Με αυτόν τον τρόπο, θα χρειαστεί να **`/push`** μόνο μία φορά για να εκτελέσετε όλες τις συσσωρευμένες αλλαγές στον ρουγέ server.
+Σημειώστε ότι σε αυτή την περίπτωση πρέπει να κάνετε **πολλές αλλαγές,** όχι μόνο μία. Έτσι, στη **συνεδρία mimikatz1** (RPC server) χρησιμοποιήστε την παράμετρο **`/stack` με κάθε αλλαγή** που θέλετε να κάνετε. Με αυτόν τον τρόπο, θα χρειαστεί να **`/push`** μόνο μία φορά για να εκτελέσετε όλες τις σωρευμένες αλλαγές στον ρουγέ server.
 
 [**Περισσότερες πληροφορίες σχετικά με το DCShadow στο ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)
 

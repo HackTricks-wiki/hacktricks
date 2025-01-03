@@ -18,8 +18,8 @@ smbexec.py WORKGROUP/genericuser:genericpassword@10.10.10.10
 ### Εκτέλεση Εντολών Χωρίς Δυαδικά
 
 - **Smbexec** επιτρέπει την άμεση εκτέλεση εντολών μέσω των binPaths υπηρεσίας, εξαλείφοντας την ανάγκη για φυσικά δυαδικά στον στόχο.
-- Αυτή η μέθοδος είναι χρήσιμη για την εκτέλεση εντολών μίας φοράς σε έναν στόχο Windows. Για παράδειγμα, η σύνδεση της με το module `web_delivery` του Metasploit επιτρέπει την εκτέλεση ενός PowerShell-στοχευμένου αντίστροφου Meterpreter payload.
-- Δημιουργώντας μια απομακρυσμένη υπηρεσία στη μηχανή του επιτιθέμενου με το binPath ρυθμισμένο να εκτελεί την παρεχόμενη εντολή μέσω του cmd.exe, είναι δυνατό να εκτελεστεί επιτυχώς το payload, επιτυγχάνοντας callback και εκτέλεση payload με τον listener του Metasploit, ακόμη και αν προκύψουν σφάλματα απόκρισης υπηρεσίας.
+- Αυτή η μέθοδος είναι χρήσιμη για την εκτέλεση εντολών μίας φοράς σε έναν στόχο Windows. Για παράδειγμα, η σύνδεση της με το module `web_delivery` του Metasploit επιτρέπει την εκτέλεση ενός PowerShell-στοχευμένου αντίστροφου payload Meterpreter.
+- Δημιουργώντας μια απομακρυσμένη υπηρεσία στη μηχανή του επιτιθέμενου με το binPath ρυθμισμένο να εκτελεί την παρεχόμενη εντολή μέσω του cmd.exe, είναι δυνατό να εκτελεστεί το payload με επιτυχία, επιτυγχάνοντας callback και εκτέλεση payload με τον listener του Metasploit, ακόμη και αν προκύψουν σφάλματα απόκρισης υπηρεσίας.
 
 ### Παράδειγμα Εντολών
 
@@ -28,7 +28,7 @@ smbexec.py WORKGROUP/genericuser:genericpassword@10.10.10.10
 sc create [ServiceName] binPath= "cmd.exe /c [PayloadCommand]"
 sc start [ServiceName]
 ```
-Για περισσότερες λεπτομέρειες ελέγξτε [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+Για περισσότερες λεπτομέρειες, ελέγξτε [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
 ## Αναφορές
 

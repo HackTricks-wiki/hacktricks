@@ -26,7 +26,7 @@ vaultcmd /listcreds:"Windows Credentials" /all
 # From mimikatz
 mimikatz vault::list
 ```
-## Credential Files
+## Αρχεία Διαπιστευτηρίων
 
 Τα **αρχεία διαπιστευτηρίων που προστατεύονται** θα μπορούσαν να βρίσκονται σε:
 ```

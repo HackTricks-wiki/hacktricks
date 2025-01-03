@@ -31,7 +31,7 @@ nc -nv -u -z -w 1 \<IP> 160-16
 binwalk --dd=".*" <file> #Extract everything
 binwalk -M -e -d=10000 suspicious.pdf #Extract, look inside extracted files and continue extracing (depth of 10000)
 ```
-## Crypto
+## Κρυπτογραφία
 
 **featherduster**\
 
@@ -51,8 +51,8 @@ rsatool
 
 Snow --> Κρύψε μηνύματα χρησιμοποιώντας κενά και tabs
 
-# Characters
+# Χαρακτήρες
 
-%E2%80%AE => RTL Character (γράφει payloads ανάποδα)
+%E2%80%AE => RTL Χαρακτήρας (γράφει payloads ανάποδα)
 
 {{#include ../banners/hacktricks-training.md}}

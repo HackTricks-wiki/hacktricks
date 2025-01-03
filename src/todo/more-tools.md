@@ -38,7 +38,7 @@
 - [https://github.com/BitTheByte/Monitorizer/](https://github.com/BitTheByte/Monitorizer/)
 - [https://github.com/spinkham/skipfish](https://github.com/spinkham/skipfish)
 - [https://github.com/blark/aiodnsbrute](https://github.com/blark/aiodnsbrute) : Βίαιη επίθεση σε ονόματα τομέων ασύγχρονα
-- [https://crt.sh/?q=%.yahoo.com](https://crt.sh/?q=%.yahoo.com) : Βίαιη επίθεση υποτομέων
+- [https://crt.sh/?q=%.yahoo.com](https://crt.sh/?q=%.yahoo.com) : Βίαιη επίθεση σε υποτομείς
 - [https://github.com/tomnomnom/httprobe](https://github.com/tomnomnom/httprobe): Έλεγχος αν οι διακομιστές ιστού σε έναν τομέα είναι προσβάσιμοι
 - [https://github.com/aboul3la/Sublist3r](https://github.com/aboul3la/Sublist3r) : Ανακάλυψη υποτομέων
 - [https://github.com/gwen001/github-search/blob/master/github-subdomains.py](https://github.com/gwen001/github-search/blob/master/github-subdomains.py) : Ανακάλυψη υποτομέων στο github
@@ -113,7 +113,7 @@ Emulation firmware: FIRMADYNE (https://github.com/firmadyne/firmadyne/) είνα
 - [https://github.com/random-robbie/keywords/blob/master/keywords.txt](https://github.com/random-robbie/keywords/blob/master/keywords.txt) : Λέξεις-κλειδιά
 - [https://github.com/ElevenPaths/HomePWN](https://github.com/ElevenPaths/HomePWN) : Hacking IoT (Wifi, BLE, SSDP, MDNS)
 - [https://github.com/rackerlabs/scantron](https://github.com/rackerlabs/scantron) : αυτοματοποίηση σάρωσης
-- [https://github.com/doyensec/awesome-electronjs-hacking](https://github.com/doyensec/awesome-electronjs-hacking) : Αυτή η λίστα στοχεύει να καλύψει θέματα ασφάλειας σχετιζόμενα με το Electron.js.
+- [https://github.com/doyensec/awesome-electronjs-hacking](https://github.com/doyensec/awesome-electronjs-hacking) : Αυτή η λίστα στοχεύει να καλύψει θέματα ασφάλειας που σχετίζονται με το Electron.js.
 - [https://github.com/serain/bbrecon](https://github.com/serain/bbrecon) : Πληροφορίες σχετικά με προγράμματα BB
 
 

@@ -4,15 +4,15 @@
 
 ## Security Descriptors
 
-[From the docs](https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language): Η Γλώσσα Ορισμού Ασφαλείας (SDDL) ορίζει τη μορφή που χρησιμοποιείται για να περιγράψει έναν ασφαλιστικό περιγραφέα. Η SDDL χρησιμοποιεί συμβολοσειρές ACE για DACL και SACL: `ace_type;ace_flags;rights;object_guid;inherit_object_guid;account_sid;`
+[Από τα έγγραφα](https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language): Η Γλώσσα Ορισμού Ασφαλείας (SDDL) ορίζει τη μορφή που χρησιμοποιείται για να περιγράψει έναν ασφαλιστικό περιγραφέα. Η SDDL χρησιμοποιεί συμβολοσειρές ACE για DACL και SACL: `ace_type;ace_flags;rights;object_guid;inherit_object_guid;account_sid;`
 
 Οι **ασφαλιστικοί περιγραφείς** χρησιμοποιούνται για να **αποθηκεύσουν** τις **άδειες** που έχει ένα **αντικείμενο** **πάνω** σε ένα **αντικείμενο**. Αν μπορείτε να **κάνετε** μια **μικρή αλλαγή** στον **ασφαλιστικό περιγραφέα** ενός αντικειμένου, μπορείτε να αποκτήσετε πολύ ενδιαφέροντα προνόμια πάνω σε αυτό το αντικείμενο χωρίς να χρειάζεται να είστε μέλος μιας προνομιούχας ομάδας.
 
-Τότε, αυτή η τεχνική επιμονής βασίζεται στην ικανότητα να αποκτήσετε κάθε προνόμιο που χρειάζεται σε ορισμένα αντικείμενα, ώστε να μπορείτε να εκτελέσετε μια εργασία που συνήθως απαιτεί προνόμια διαχειριστή αλλά χωρίς την ανάγκη να είστε διαχειριστής.
+Τότε, αυτή η τεχνική επιμονής βασίζεται στην ικανότητα να αποκτήσετε κάθε προνόμιο που απαιτείται κατά ορισμένων αντικειμένων, ώστε να μπορείτε να εκτελέσετε μια εργασία που συνήθως απαιτεί προνόμια διαχειριστή αλλά χωρίς την ανάγκη να είστε διαχειριστής.
 
 ### Access to WMI
 
-Μπορείτε να δώσετε σε έναν χρήστη πρόσβαση για να **εκτελεί απομακρυσμένα WMI** [**using this**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1):
+Μπορείτε να δώσετε σε έναν χρήστη πρόσβαση για **να εκτελεί απομακρυσμένα WMI** [**χρησιμοποιώντας αυτό**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1):
 ```bash
 Set-RemoteWMI -UserName student1 -ComputerName dcorp-dc –namespace 'root\cimv2' -Verbose
 Set-RemoteWMI -UserName student1 -ComputerName dcorp-dc–namespace 'root\cimv2' -Remove -Verbose #Remove

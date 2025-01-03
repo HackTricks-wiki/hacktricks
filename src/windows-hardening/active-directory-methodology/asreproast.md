@@ -33,7 +33,7 @@ python GetNPUsers.py jurassic.park/triceratops:Sh4rpH0rns -request -format hashc
 Get-ASREPHash -Username VPN114user -verbose #From ASREPRoast.ps1 (https://github.com/HarmJ0y/ASREPRoast)
 ```
 > [!WARNING]
-> Η AS-REP Roasting με το Rubeus θα δημιουργήσει ένα 4768 με τύπο κρυπτογράφησης 0x17 και τύπο προαυτοποίησης 0.
+> Η εκτέλεση AS-REP Roasting με το Rubeus θα δημιουργήσει ένα 4768 με τύπο κρυπτογράφησης 0x17 και τύπο προαυτοποίησης 0.
 
 ### Cracking
 ```bash

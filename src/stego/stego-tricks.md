@@ -58,7 +58,7 @@ cmp original.jpg stego.jpg -b -l
 
 ### **Κρυφά Δεδομένα σε Κενά**
 
-Αόρατοι χαρακτήρες σε φαινομενικά κενά σημεία μπορεί να κρύβουν πληροφορίες. Για να εξαγάγετε αυτά τα δεδομένα, επισκεφθείτε [https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder).
+Αόρατοι χαρακτήρες σε φαινομενικά κενά μπορεί να κρύβουν πληροφορίες. Για να εξαγάγετε αυτά τα δεδομένα, επισκεφθείτε [https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder).
 
 ## **Εξαγωγή Δεδομένων από Εικόνες**
 
@@ -78,8 +78,8 @@ cmp original.jpg stego.jpg -b -l
 
 **Εντολές:**
 
-- `steghide info file` αποκαλύπτει αν ένα αρχείο περιέχει κρυμμένα δεδομένα.
-- `steghide extract -sf file [--passphrase password]` εξάγει τα κρυμμένα δεδομένα, ο κωδικός πρόσβασης είναι προαιρετικός.
+- `steghide info file` αποκαλύπτει αν ένα αρχείο περιέχει κρυφά δεδομένα.
+- `steghide extract -sf file [--passphrase password]` εξάγει τα κρυφά δεδομένα, ο κωδικός πρόσβασης είναι προαιρετικός.
 
 Για εξαγωγή μέσω διαδικτύου, επισκεφθείτε [αυτή την ιστοσελίδα](https://futureboy.us/stegano/decinput.html).
 
@@ -89,7 +89,7 @@ cmp original.jpg stego.jpg -b -l
 ```bash
 stegcracker <file> [<wordlist>]
 ```
-### **zsteg για PNG και BMP Αρχεία**
+### **zsteg για αρχεία PNG και BMP**
 
 zsteg ειδικεύεται στην αποκάλυψη κρυφών δεδομένων σε αρχεία PNG και BMP. Η εγκατάσταση γίνεται μέσω `gem install zsteg`, με την [πηγή του στο GitHub](https://github.com/zed-0xff/zsteg).
 
@@ -104,7 +104,7 @@ zsteg ειδικεύεται στην αποκάλυψη κρυφών δεδομ
 
 **Stegsolve** εφαρμόζει διάφορα φίλτρα χρώματος για να αποκαλύψει κρυφά κείμενα ή μηνύματα μέσα σε εικόνες. Είναι διαθέσιμο στο [GitHub](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve).
 
-### **FFT για Ανίχνευση Κρυφού Περιεχομένου**
+### **FFT για ανίχνευση κρυφού περιεχομένου**
 
 Οι τεχνικές Fast Fourier Transform (FFT) μπορούν να αποκαλύψουν κρυφό περιεχόμενο σε εικόνες. Χρήσιμοι πόροι περιλαμβάνουν:
 
@@ -112,11 +112,11 @@ zsteg ειδικεύεται στην αποκάλυψη κρυφών δεδομ
 - [Ejectamenta](https://www.ejectamenta.com/Fourifier-fullscreen/)
 - [FFTStegPic στο GitHub](https://github.com/0xcomposure/FFTStegPic)
 
-### **Stegpy για Αρχεία Ήχου και Εικόνας**
+### **Stegpy για αρχεία ήχου και εικόνας**
 
 Stegpy επιτρέπει την ενσωμάτωση πληροφοριών σε αρχεία εικόνας και ήχου, υποστηρίζοντας μορφές όπως PNG, BMP, GIF, WebP και WAV. Είναι διαθέσιμο στο [GitHub](https://github.com/dhsdshdhk/stegpy).
 
-### **Pngcheck για Ανάλυση Αρχείων PNG**
+### **Pngcheck για ανάλυση αρχείων PNG**
 
 Για να αναλύσετε αρχεία PNG ή να επιβεβαιώσετε την αυθεντικότητά τους, χρησιμοποιήστε:
 ```bash
@@ -153,7 +153,7 @@ ffmpeg -v info -i stego.mp3 -f null -
 ```
 ### **WavSteg (WAV)**
 
-Το WavSteg διακρίνεται στην απόκρυψη και εξαγωγή δεδομένων μέσα σε αρχεία WAV χρησιμοποιώντας τη στρατηγική του λιγότερο σημαντικού bit. Είναι διαθέσιμο στο [GitHub](https://github.com/ragibson/Steganography#WavSteg). Οι εντολές περιλαμβάνουν:
+Το WavSteg διακρίνεται στην απόκρυψη και εξαγωγή δεδομένων μέσα σε αρχεία WAV χρησιμοποιώντας τη στρατηγική του λιγότερο σημαντικού bit. Είναι προσβάσιμο στο [GitHub](https://github.com/ragibson/Steganography#WavSteg). Οι εντολές περιλαμβάνουν:
 ```bash
 python3 WavSteg.py -r -b 1 -s soundfile -o outputfile
 
@@ -180,7 +180,7 @@ python3 WavSteg.py -r -b 2 -s soundfile -o outputfile
 import math
 math.sqrt(2500) #50
 ```
-Για τη μετατροπή δυαδικών σε εικόνα, ελέγξτε το [dcode](https://www.dcode.fr/binary-image). Για να διαβάσετε QR codes, χρησιμοποιήστε [this online barcode reader](https://online-barcode-reader.inliteresearch.com/).
+Για τη μετατροπή δυαδικών σε εικόνα, ελέγξτε [dcode](https://www.dcode.fr/binary-image). Για να διαβάσετε QR κωδικούς, χρησιμοποιήστε [this online barcode reader](https://online-barcode-reader.inliteresearch.com/).
 
 ### **Μετάφραση Μπράιγ**
 

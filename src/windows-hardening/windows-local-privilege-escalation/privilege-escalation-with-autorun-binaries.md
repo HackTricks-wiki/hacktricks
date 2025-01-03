@@ -1,10 +1,12 @@
-# Privilege Escalation with Autoruns
+# Ανύψωση Δικαιωμάτων με Autoruns
 
 {{#include ../../banners/hacktricks-training.md}}
 
+
+
 ## WMIC
 
-**Wmic** μπορεί να χρησιμοποιηθεί για να εκτελεί προγράμματα κατά την **εκκίνηση**. Δείτε ποια binaries είναι προγραμματισμένα να εκτελούνται κατά την εκκίνηση με:
+**Wmic** μπορεί να χρησιμοποιηθεί για να εκτελεί προγράμματα κατά την **εκκίνηση**. Δείτε ποια δυαδικά προγράμματα είναι προγραμματισμένα να εκτελούνται κατά την εκκίνηση με:
 ```bash
 wmic startup get caption,command 2>nul & ^
 Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
@@ -24,7 +26,7 @@ schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "SchedPE" /TR "cmd /c net localgro
 ```
 ## Φάκελοι
 
-Όλα τα εκτελέσιμα αρχεία που βρίσκονται στους **φακέλους Εκκίνησης θα εκτελούνται κατά την εκκίνηση**. Οι κοινές φάκελοι εκκίνησης είναι αυτοί που αναφέρονται στη συνέχεια, αλλά ο φάκελος εκκίνησης υποδεικνύεται στο μητρώο. [Read this to learn where.](privilege-escalation-with-autorun-binaries.md#startup-path)
+Όλα τα εκτελέσιμα αρχεία που βρίσκονται στους **φακέλους Εκκίνησης θα εκτελούνται κατά την εκκίνηση**. Οι κοινές φάκελοι εκκίνησης είναι αυτοί που αναφέρονται στη συνέχεια, αλλά ο φάκελος εκκίνησης υποδεικνύεται στο μητρώο. [Διαβάστε αυτό για να μάθετε πού.](privilege-escalation-with-autorun-binaries.md#startup-path)
 ```bash
 dir /b "C:\Documents and Settings\All Users\Start Menu\Programs\Startup" 2>nul
 dir /b "C:\Documents and Settings\%username%\Start Menu\Programs\Startup" 2>nul
@@ -77,10 +79,10 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d "C:\\temp\\evil.dll"
 ```
 > [!NOTE]
-> **Εκμετάλλευση 1**: Αν μπορείτε να γράψετε μέσα σε οποιοδήποτε από τα αναφερόμενα μητρώα μέσα στο **HKLM**, μπορείτε να κλιμακώσετε τα δικαιώματα όταν συνδεθεί ένας διαφορετικός χρήστης.
+> **Εκμετάλλευση 1**: Αν μπορείτε να γράψετε μέσα σε οποιοδήποτε από τα αναφερόμενα μητρώα μέσα στο **HKLM**, μπορείτε να κλιμακώσετε τα προνόμια όταν συνδεθεί ένας διαφορετικός χρήστης.
 
 > [!NOTE]
-> **Εκμετάλλευση 2**: Αν μπορείτε να αντικαταστήσετε οποιοδήποτε από τα δυαδικά αρχεία που αναφέρονται σε οποιοδήποτε από τα μητρώα μέσα στο **HKLM**, μπορείτε να τροποποιήσετε αυτό το δυαδικό αρχείο με μια πίσω πόρτα όταν συνδεθεί ένας διαφορετικός χρήστης και να κλιμακώσετε τα δικαιώματα.
+> **Εκμετάλλευση 2**: Αν μπορείτε να αντικαταστήσετε οποιοδήποτε από τα δυαδικά αρχεία που αναφέρονται σε οποιοδήποτε από τα μητρώα μέσα στο **HKLM**, μπορείτε να τροποποιήσετε αυτό το δυαδικό αρχείο με μια πίσω πόρτα όταν συνδεθεί ένας διαφορετικός χρήστης και να κλιμακώσετε τα προνόμια.
 ```bash
 #CMD
 reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Run
@@ -143,7 +145,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 
-Οι συντομεύσεις που τοποθετούνται στον φάκελο **Startup** θα ενεργοποιούν αυτόματα υπηρεσίες ή εφαρμογές κατά τη διάρκεια της σύνδεσης του χρήστη ή της επανεκκίνησης του συστήματος. Η τοποθεσία του φακέλου **Startup** ορίζεται στο μητρώο για τους τομείς **Local Machine** και **Current User**. Αυτό σημαίνει ότι οποιαδήποτε συντόμευση προστεθεί σε αυτές τις καθορισμένες τοποθεσίες **Startup** θα διασφαλίσει ότι η συνδεδεμένη υπηρεσία ή πρόγραμμα θα ξεκινήσει μετά τη διαδικασία σύνδεσης ή επανεκκίνησης, καθιστώντας το μια απλή μέθοδο για τον προγραμματισμό προγραμμάτων να εκτελούνται αυτόματα.
+Οι συντομεύσεις που τοποθετούνται στον φάκελο **Startup** θα ενεργοποιούν αυτόματα υπηρεσίες ή εφαρμογές κατά τη διάρκεια της σύνδεσης του χρήστη ή της επανεκκίνησης του συστήματος. Η τοποθεσία του φακέλου **Startup** ορίζεται στο μητρώο τόσο για το **Local Machine** όσο και για το **Current User**. Αυτό σημαίνει ότι οποιαδήποτε συντόμευση προστεθεί σε αυτές τις καθορισμένες τοποθεσίες **Startup** θα διασφαλίσει ότι η συνδεδεμένη υπηρεσία ή πρόγραμμα θα ξεκινήσει μετά τη διαδικασία σύνδεσης ή επανεκκίνησης, καθιστώντας το μια απλή μέθοδο για τον προγραμματισμό προγραμμάτων να εκτελούνται αυτόματα.
 
 > [!NOTE]
 > Αν μπορείτε να αντικαταστήσετε οποιοδήποτε \[User] Shell Folder κάτω από **HKLM**, θα μπορείτε να το κατευθύνετε σε έναν φάκελο που ελέγχετε και να τοποθετήσετε μια backdoor που θα εκτελείται κάθε φορά που ένας χρήστης συνδέεται στο σύστημα, κλιμακώνοντας τα δικαιώματα.
@@ -186,7 +188,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 ```
 ### AlternateShell
 
-### Αλλαγή της Γραμμής Εντολών Ασφαλούς Λειτουργίας
+### Αλλαγή της Γραμμής Εντολών σε Ασφαλή Λειτουργία
 
 Στο Μητρώο των Windows κάτω από `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, υπάρχει μια τιμή **`AlternateShell`** που είναι ρυθμισμένη από προεπιλογή σε `cmd.exe`. Αυτό σημαίνει ότι όταν επιλέγετε "Ασφαλής Λειτουργία με Γραμμή Εντολών" κατά την εκκίνηση (πατώντας F8), χρησιμοποιείται το `cmd.exe`. Ωστόσο, είναι δυνατόν να ρυθμίσετε τον υπολογιστή σας να ξεκινά αυτόματα σε αυτή τη λειτουργία χωρίς να χρειάζεται να πατήσετε F8 και να την επιλέξετε χειροκίνητα.
 
@@ -223,7 +225,7 @@ Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Co
 - **IsInstalled:**
 - `0` υποδεικνύει ότι η εντολή του συστατικού δεν θα εκτελεστεί.
 - `1` σημαίνει ότι η εντολή θα εκτελεστεί μία φορά για κάθε χρήστη, που είναι η προεπιλεγμένη συμπεριφορά αν η τιμή `IsInstalled` λείπει.
-- **StubPath:** Ορίζει την εντολή που θα εκτελείται από το Active Setup. Μπορεί να είναι οποιαδήποτε έγκυρη γραμμή εντολών, όπως η εκκίνηση του `notepad`.
+- **StubPath:** Ορίζει την εντολή που θα εκτελεστεί από το Active Setup. Μπορεί να είναι οποιαδήποτε έγκυρη γραμμή εντολών, όπως η εκκίνηση του `notepad`.
 
 **Ασφαλιστικές Γνώσεις:**
 
@@ -243,16 +245,16 @@ reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components
 
 Τα Browser Helper Objects (BHOs) είναι DLL modules που προσθέτουν επιπλέον δυνατότητες στον Internet Explorer της Microsoft. Φορτώνονται στον Internet Explorer και τον Windows Explorer σε κάθε εκκίνηση. Ωστόσο, η εκτέλεσή τους μπορεί να αποκλειστεί ρυθμίζοντας το **NoExplorer** key σε 1, αποτρέποντας την φόρτωσή τους με τις περιπτώσεις του Windows Explorer.
 
-Τα BHOs είναι συμβατά με τα Windows 10 μέσω του Internet Explorer 11 αλλά δεν υποστηρίζονται στον Microsoft Edge, τον προεπιλεγμένο περιηγητή σε νεότερες εκδόσεις των Windows.
+Τα BHOs είναι συμβατά με τα Windows 10 μέσω του Internet Explorer 11 αλλά δεν υποστηρίζονται στο Microsoft Edge, τον προεπιλεγμένο περιηγητή σε νεότερες εκδόσεις των Windows.
 
-Για να εξερευνήσετε τα BHOs που είναι καταχωρημένα σε ένα σύστημα, μπορείτε να ελέγξετε τα παρακάτω κλειδιά μητρώου:
+Για να εξερευνήσετε τα BHOs που είναι καταχωρημένα σε ένα σύστημα, μπορείτε να ελέγξετε τα εξής κλειδιά μητρώου:
 
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 - `HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 
 Κάθε BHO εκπροσωπείται από το **CLSID** του στο μητρώο, που λειτουργεί ως μοναδικός αναγνωριστικός αριθμός. Λεπτομερείς πληροφορίες σχετικά με κάθε CLSID μπορούν να βρεθούν κάτω από `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`.
 
-Για την ερώτηση BHOs στο μητρώο, μπορούν να χρησιμοποιηθούν οι παρακάτω εντολές:
+Για την ερώτηση BHOs στο μητρώο, μπορούν να χρησιμοποιηθούν οι εξής εντολές:
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
 reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
@@ -274,7 +276,7 @@ reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows NT\CurrentVersion\Font Dr
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Font Drivers'
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows NT\CurrentVersion\Font Drivers'
 ```
-### Ανοιχτή Εντολή
+### Άνοιγμα Εντολής
 
 - `HKLM\SOFTWARE\Classes\htmlfile\shell\open\command`
 - `HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command`

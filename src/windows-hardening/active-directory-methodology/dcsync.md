@@ -10,7 +10,7 @@
 
 - Η **επίθεση DCSync προσομοιώνει τη συμπεριφορά ενός Domain Controller και ζητά από άλλους Domain Controllers να αναπαράγουν πληροφορίες** χρησιμοποιώντας το Directory Replication Service Remote Protocol (MS-DRSR). Δεδομένου ότι το MS-DRSR είναι μια έγκυρη και απαραίτητη λειτουργία του Active Directory, δεν μπορεί να απενεργοποιηθεί ή να απενεργοποιηθεί.
 - Από προεπιλογή μόνο οι ομάδες **Domain Admins, Enterprise Admins, Administrators, και Domain Controllers** έχουν τα απαιτούμενα προνόμια.
-- Εάν οποιοιδήποτε κωδικοί πρόσβασης ληφθούν με αναστρέψιμη κρυπτογράφηση, υπάρχει μια επιλογή στο Mimikatz για να επιστρέψει τον κωδικό πρόσβασης σε καθαρό κείμενο.
+- Εάν οποιοιδήποτε κωδικοί πρόσβασης λογαριασμών αποθηκεύονται με αναστρέψιμη κρυπτογράφηση, υπάρχει μια επιλογή στο Mimikatz για να επιστρέψει τον κωδικό πρόσβασης σε καθαρό κείμενο.
 
 ### Enumeration
 
@@ -33,7 +33,7 @@ secretsdump.py -just-dc <user>:<password>@<ipaddress> -outputfile dcsync_hashes
 
 - ένα με τους **NTLM hashes**
 - ένα με τα **Kerberos keys**
-- ένα με καθαρούς κωδικούς πρόσβασης από το NTDS για οποιουςδήποτε λογαριασμούς έχουν ρυθμιστεί με [**reversible encryption**](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/store-passwords-using-reversible-encryption) ενεργοποιημένο. Μπορείτε να αποκτήσετε χρήστες με reversible encryption με
+- ένα με καθαρό κείμενο κωδικούς πρόσβασης από το NTDS για οποιουσδήποτε λογαριασμούς που έχουν ρυθμιστεί με [**reversible encryption**](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/store-passwords-using-reversible-encryption) ενεργοποιημένο. Μπορείτε να αποκτήσετε χρήστες με reversible encryption με
 
 ```powershell
 Get-DomainUser -Identity * | ? {$_.useraccountcontrol -like '*ENCRYPTED_TEXT_PWD_ALLOWED*'} |select samaccountname,useraccountcontrol

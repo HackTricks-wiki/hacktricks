@@ -81,7 +81,7 @@ Optional args:
 
 ## Παραδείγματα
 
-Σημείωση: Επισκεφθείτε [αυτή τη σελίδα](https://ohpe.it/juicy-potato/CLSID/) για μια λίστα με CLSIDs που να δοκιμάσετε.
+Σημείωση: Επισκεφθείτε [αυτή τη σελίδα](https://ohpe.it/juicy-potato/CLSID/) για μια λίστα με CLSIDs που μπορείτε να δοκιμάσετε.
 
 ### Πάρτε ένα nc.exe reverse shell
 ```

@@ -118,7 +118,7 @@
 
 Ανιχνεύει γεωγραφική τοποθεσία IP, κέντρο δεδομένων, ASN και ακόμη και πληροφορίες VPN. Προσφέρει δωρεάν 30K ερωτήσεις ανά μήνα.
 
-[https://dnsdumpster.com/](https://dnsdumpster.com/) (σε εμπορικό εργαλείο;)
+[https://dnsdumpster.com/](https://dnsdumpster.com/)(σε εμπορικό εργαλείο;)
 
 [https://www.netcraft.com/](https://www.netcraft.com/) (σε εμπορικό εργαλείο;)
 

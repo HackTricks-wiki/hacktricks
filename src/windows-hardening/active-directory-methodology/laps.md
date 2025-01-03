@@ -5,9 +5,9 @@
 
 ## Basic Information
 
-Η Λύση Τοπικού Διαχειριστή Κωδικού (LAPS) είναι ένα εργαλείο που χρησιμοποιείται για τη διαχείριση ενός συστήματος όπου οι **κωδικοί διαχειριστή**, οι οποίοι είναι **μοναδικοί, τυχαίοι και συχνά αλλάζουν**, εφαρμόζονται σε υπολογιστές που είναι συνδεδεμένοι στο domain. Αυτοί οι κωδικοί αποθηκεύονται με ασφάλεια μέσα στο Active Directory και είναι προσβάσιμοι μόνο σε χρήστες που έχουν λάβει άδεια μέσω Λιστών Ελέγχου Πρόσβασης (ACLs). Η ασφάλεια των μεταδόσεων κωδικών από τον πελάτη στον διακομιστή διασφαλίζεται με τη χρήση του **Kerberos έκδοση 5** και του **Προηγμένου Προτύπου Κρυπτογράφησης (AES)**.
+Η Λύση Τοπικού Διαχειριστή Κωδικού (LAPS) είναι ένα εργαλείο που χρησιμοποιείται για τη διαχείριση ενός συστήματος όπου οι **κωδικοί πρόσβασης διαχειριστή**, οι οποίοι είναι **μοναδικοί, τυχαίοι και συχνά αλλάζουν**, εφαρμόζονται σε υπολογιστές που είναι συνδεδεμένοι στο τομέα. Αυτοί οι κωδικοί πρόσβασης αποθηκεύονται με ασφάλεια μέσα στο Active Directory και είναι προσβάσιμοι μόνο σε χρήστες που έχουν λάβει άδεια μέσω Λιστών Ελέγχου Πρόσβασης (ACLs). Η ασφάλεια των μεταδόσεων κωδικών πρόσβασης από τον πελάτη στον διακομιστή διασφαλίζεται μέσω της χρήσης του **Kerberos έκδοση 5** και του **Προηγμένου Προτύπου Κρυπτογράφησης (AES)**.
 
-Στα αντικείμενα υπολογιστών του domain, η υλοποίηση του LAPS έχει ως αποτέλεσμα την προσθήκη δύο νέων χαρακτηριστικών: **`ms-mcs-AdmPwd`** και **`ms-mcs-AdmPwdExpirationTime`**. Αυτά τα χαρακτηριστικά αποθηκεύουν τον **κωδικό διαχειριστή σε απλή μορφή** και **τον χρόνο λήξης του**, αντίστοιχα.
+Στα αντικείμενα υπολογιστών του τομέα, η υλοποίηση του LAPS έχει ως αποτέλεσμα την προσθήκη δύο νέων χαρακτηριστικών: **`ms-mcs-AdmPwd`** και **`ms-mcs-AdmPwdExpirationTime`**. Αυτά τα χαρακτηριστικά αποθηκεύουν τον **κωδικό πρόσβασης διαχειριστή σε απλή μορφή** και **τον χρόνο λήξης του**, αντίστοιχα.
 
 ### Check if activated
 ```bash
@@ -22,11 +22,11 @@ Get-DomainGPO | ? { $_.DisplayName -like "*laps*" } | select DisplayName, Name, 
 # Search computer objects where the ms-Mcs-AdmPwdExpirationTime property is not null (any Domain User can read this property)
 Get-DomainObject -SearchBase "LDAP://DC=sub,DC=domain,DC=local" | ? { $_."ms-mcs-admpwdexpirationtime" -ne $null } | select DnsHostname
 ```
-### LAPS Password Access
+### Πρόσβαση Κωδικού LAPS
 
-Μπορείτε να **κατεβάσετε την αρχική πολιτική LAPS** από `\\dc\SysVol\domain\Policies\{4A8A4E8E-929F-401A-95BD-A7D40E0976C8}\Machine\Registry.pol` και στη συνέχεια να χρησιμοποιήσετε το **`Parse-PolFile`** από το [**GPRegistryPolicyParser**](https://github.com/PowerShell/GPRegistryPolicyParser) πακέτο για να μετατρέψετε αυτό το αρχείο σε αναγνώσιμη μορφή.
+Μπορείτε να **κατεβάσετε την αρχική πολιτική LAPS** από `\\dc\SysVol\domain\Policies\{4A8A4E8E-929F-401A-95BD-A7D40E0976C8}\Machine\Registry.pol` και στη συνέχεια να χρησιμοποιήσετε **`Parse-PolFile`** από το [**GPRegistryPolicyParser**](https://github.com/PowerShell/GPRegistryPolicyParser) πακέτο για να μετατρέψετε αυτό το αρχείο σε αναγνώσιμη μορφή.
 
-Επιπλέον, οι **ενσωματωμένες LAPS PowerShell cmdlets** μπορούν να χρησιμοποιηθούν αν είναι εγκατεστημένες σε μια μηχανή στην οποία έχουμε πρόσβαση:
+Επιπλέον, οι **εντολές PowerShell LAPS** μπορούν να χρησιμοποιηθούν αν είναι εγκατεστημένες σε μια μηχανή στην οποία έχουμε πρόσβαση:
 ```powershell
 Get-Command *AdmPwd*
 
@@ -103,7 +103,7 @@ Password: 2Z@Ae)7!{9#Cq
 
 ### **Ημερομηνία Λήξης**
 
-Μόλις γίνετε διαχειριστής, είναι δυνατόν να **αποκτήσετε τους κωδικούς πρόσβασης** και να **αποτρέψετε** μια μηχανή από το **να ενημερώσει** τον **κωδικό πρόσβασης** της **ορίζοντας την ημερομηνία λήξης στο μέλλον**.
+Μόλις γίνετε διαχειριστής, είναι δυνατόν να **αποκτήσετε τους κωδικούς πρόσβασης** και να **αποτρέψετε** μια μηχανή από το **να ενημερώνει** τον **κωδικό πρόσβασης** ρυθμίζοντας την ημερομηνία λήξης στο μέλλον.
 ```powershell
 # Get expiration time
 Get-DomainObject -Identity computer-21 -Properties ms-mcs-admpwdexpirationtime
@@ -113,7 +113,7 @@ Get-DomainObject -Identity computer-21 -Properties ms-mcs-admpwdexpirationtime
 Set-DomainObject -Identity wkstn-2 -Set @{"ms-mcs-admpwdexpirationtime"="232609935231523081"}
 ```
 > [!WARNING]
-> Ο κωδικός πρόσβασης θα επαναρυθμιστεί αν ένας **admin** χρησιμοποιήσει το **`Reset-AdmPwdPassword`** cmdlet; ή αν είναι ενεργοποιημένο το **Do not allow password expiration time longer than required by policy** στην πολιτική LAPS GPO.
+> Ο κωδικός πρόσβασης θα επαναρυθμιστεί αν ένας **admin** χρησιμοποιήσει την **`Reset-AdmPwdPassword`** cmdlet; ή αν είναι ενεργοποιημένο το **Do not allow password expiration time longer than required by policy** στην πολιτική LAPS GPO.
 
 ### Backdoor
 

@@ -36,15 +36,15 @@ ls \\10.10.10.10\c$\Users
 
 **Για περισσότερες πληροφορίες σχετικά με αυτή την τεχνική, ελέγξτε την αρχική ανάρτηση [https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/](https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/)**
 
-Το **MMC20.Application** αντικείμενο αναγνωρίστηκε ότι στερείται ρητών "LaunchPermissions," προεπιλέγοντας άδειες που επιτρέπουν την πρόσβαση στους Διαχειριστές. Για περισσότερες λεπτομέρειες, μπορεί να εξερευνηθεί ένα νήμα [εδώ](https://twitter.com/tiraniddo/status/817532039771525120), και συνιστάται η χρήση του [@tiraniddo](https://twitter.com/tiraniddo)’s OleView .NET για φιλτράρισμα αντικειμένων χωρίς ρητή Άδεια Εκκίνησης.
+Το **MMC20.Application** αντικείμενο αναγνωρίστηκε ότι στερείται ρητών "LaunchPermissions," προεπιλέγοντας δικαιώματα που επιτρέπουν την πρόσβαση στους Διαχειριστές. Για περισσότερες λεπτομέρειες, μπορεί να εξερευνηθεί ένα νήμα [εδώ](https://twitter.com/tiraniddo/status/817532039771525120), και συνιστάται η χρήση του [@tiraniddo](https://twitter.com/tiraniddo)’s OleView .NET για φιλτράρισμα αντικειμένων χωρίς ρητή Άδεια Εκκίνησης.
 
 Δύο συγκεκριμένα αντικείμενα, `ShellBrowserWindow` και `ShellWindows`, επισημάνθηκαν λόγω της έλλειψης ρητών Αδειών Εκκίνησης. Η απουσία μιας καταχώρισης `LaunchPermission` στο μητρώο κάτω από `HKCR:\AppID\{guid}` σημαίνει ότι δεν υπάρχουν ρητές άδειες.
 
 ### ShellWindows
 
-Για το `ShellWindows`, το οποίο στερείται ProgID, οι μέθοδοι .NET `Type.GetTypeFromCLSID` και `Activator.CreateInstance` διευκολύνουν την εγκατάσταση του αντικειμένου χρησιμοποιώντας το AppID του. Αυτή η διαδικασία εκμεταλλεύεται το OleView .NET για να ανακτήσει το CLSID για το `ShellWindows`. Μόλις εγκατασταθεί, είναι δυνατή η αλληλεπίδραση μέσω της μεθόδου `WindowsShell.Item`, οδηγώντας σε κλήσεις μεθόδων όπως `Document.Application.ShellExecute`.
+Για το `ShellWindows`, το οποίο στερείται ProgID, οι μέθοδοι .NET `Type.GetTypeFromCLSID` και `Activator.CreateInstance` διευκολύνουν την δημιουργία αντικειμένων χρησιμοποιώντας το AppID του. Αυτή η διαδικασία εκμεταλλεύεται το OleView .NET για να ανακτήσει το CLSID για το `ShellWindows`. Μόλις δημιουργηθεί, η αλληλεπίδραση είναι δυνατή μέσω της μεθόδου `WindowsShell.Item`, οδηγώντας σε κλήσεις μεθόδων όπως `Document.Application.ShellExecute`.
 
-Παραδείγματα εντολών PowerShell παρέχονται για την εγκατάσταση του αντικειμένου και την εκτέλεση εντολών απομακρυσμένα:
+Παραδείγματα εντολών PowerShell παρέχονται για να δημιουργήσουν το αντικείμενο και να εκτελέσουν εντολές απομακρυσμένα:
 ```powershell
 $com = [Type]::GetTypeFromCLSID("<clsid>", "<IP>")
 $obj = [System.Activator]::CreateInstance($com)
@@ -78,7 +78,7 @@ $Obj.DisplayAlerts = $false
 $Obj.DDEInitiate("cmd", "/c $Command")
 }
 ```
-### Automation Tools for Lateral Movement
+### Εργαλεία Αυτοματοποίησης για Πλευρική Κίνηση
 
 Δύο εργαλεία επισημαίνονται για την αυτοματοποίηση αυτών των τεχνικών:
 

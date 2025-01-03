@@ -12,7 +12,7 @@
 - [ ] Χρησιμοποιήστε **searchsploit για αναζήτηση** για kernel **exploits**
 - [ ] Ενδιαφέρουσες πληροφορίες σε [**env vars**](windows-local-privilege-escalation/#environment)?
 - [ ] Κωδικοί πρόσβασης στην [**ιστορία PowerShell**](windows-local-privilege-escalation/#powershell-history)?
-- [ ] Ενδιαφέρουσες πληροφορίες στις [**ρυθμίσεις Internet**](windows-local-privilege-escalation/#internet-settings)?
+- [ ] Ενδιαφέρουσες πληροφορίες στις [**Ρυθμίσεις Internet**](windows-local-privilege-escalation/#internet-settings)?
 - [ ] [**Δίσκοι**](windows-local-privilege-escalation/#drives)?
 - [ ] [**WSUS exploit**](windows-local-privilege-escalation/#wsus)?
 - [ ] [**AlwaysInstallElevated**](windows-local-privilege-escalation/#alwaysinstallelevated)?
@@ -35,7 +35,7 @@
 - [ ] [**Συνεδρίες Χρηστών**](windows-local-privilege-escalation/#logged-users-sessions)?
 - [ ] Ελέγξτε [**τα σπίτια χρηστών**](windows-local-privilege-escalation/#home-folders) (πρόσβαση?)
 - [ ] Ελέγξτε την [**Πολιτική Κωδικών Πρόσβασης**](windows-local-privilege-escalation/#password-policy)
-- [ ] Τι υπάρχει [**μέσα στο Clipboard**](windows-local-privilege-escalation/#get-the-content-of-the-clipboard)?
+- [ ] Τι υπάρχει [**μέσα στο Πρόχειρο**](windows-local-privilege-escalation/#get-the-content-of-the-clipboard)?
 
 ### [Δίκτυο](windows-local-privilege-escalation/#network)
 
@@ -45,16 +45,16 @@
 ### [Τρέχουσες Διαδικασίες](windows-local-privilege-escalation/#running-processes)
 
 - [ ] Δικαιώματα [**αρχείων και φακέλων διαδικασιών**](windows-local-privilege-escalation/#file-and-folder-permissions)
-- [ ] [**Mining Κωδικών Πρόσβασης Μνήμης**](windows-local-privilege-escalation/#memory-password-mining)
+- [ ] [**Εξόρυξη Κωδικών Πρόσβασης Μνήμης**](windows-local-privilege-escalation/#memory-password-mining)
 - [ ] [**Ανασφαλείς εφαρμογές GUI**](windows-local-privilege-escalation/#insecure-gui-apps)
-- [ ] Κλέψτε διαπιστευτήρια με **ενδιαφέρουσες διαδικασίες** μέσω `ProcDump.exe` ? (firefox, chrome, κ.λπ ...)
+- [ ] Κλέψτε διαπιστευτήρια με **ενδιαφέρουσες διαδικασίες** μέσω του `ProcDump.exe` ? (firefox, chrome, κ.λπ ...)
 
 ### [Υπηρεσίες](windows-local-privilege-escalation/#services)
 
 - [ ] [Μπορείτε να **τροποποιήσετε κάποια υπηρεσία**;](windows-local-privilege-escalation/#permissions)
 - [ ] [Μπορείτε να **τροποποιήσετε** το **δυαδικό** που εκτελείται από κάποια **υπηρεσία**;](windows-local-privilege-escalation/#modify-service-binary-path)
 - [ ] [Μπορείτε να **τροποποιήσετε** το **μητρώο** οποιασδήποτε **υπηρεσίας**;](windows-local-privilege-escalation/#services-registry-modify-permissions)
-- [ ] [Μπορείτε να εκμεταλλευτείτε οποιαδήποτε **μη αναφερόμενη διαδρομή** δυαδικής υπηρεσίας;](windows-local-privilege-escalation/#unquoted-service-paths)
+- [ ] [Μπορείτε να εκμεταλλευτείτε οποιαδήποτε **μη αναφερόμενη υπηρεσία** δυαδική **διαδρομή**;](windows-local-privilege-escalation/#unquoted-service-paths)
 
 ### [**Εφαρμογές**](windows-local-privilege-escalation/#applications)
 
@@ -79,7 +79,7 @@
 - [ ] [**Windows Vault**](windows-local-privilege-escalation/#credentials-manager-windows-vault) διαπιστευτήρια που θα μπορούσατε να χρησιμοποιήσετε?
 - [ ] Ενδιαφέροντα [**DPAPI διαπιστευτήρια**](windows-local-privilege-escalation/#dpapi)?
 - [ ] Κωδικοί πρόσβασης αποθηκευμένων [**Wifi δικτύων**](windows-local-privilege-escalation/#wifi)?
-- [ ] Ενδιαφέρουσες πληροφορίες σε [**αποθηκευμένες συνδέσεις RDP**](windows-local-privilege-escalation/#saved-rdp-connections)?
+- [ ] Ενδιαφέρουσες πληροφορίες σε [**αποθηκευμένες RDP Συνδέσεις**](windows-local-privilege-escalation/#saved-rdp-connections)?
 - [ ] Κωδικοί πρόσβασης σε [**πρόσφατα εκτελούμενες εντολές**](windows-local-privilege-escalation/#recently-run-commands)?
 - [ ] [**Remote Desktop Credentials Manager**](windows-local-privilege-escalation/#remote-desktop-credential-manager) κωδικοί πρόσβασης?
 - [ ] [**AppCmd.exe** υπάρχει](windows-local-privilege-escalation/#appcmd-exe)? Διαπιστευτήρια?
@@ -87,8 +87,8 @@
 
 ### [Αρχεία και Μητρώο (Διαπιστευτήρια)](windows-local-privilege-escalation/#files-and-registry-credentials)
 
-- [ ] **Putty:** [**Creds**](windows-local-privilege-escalation/#putty-creds) **και** [**κλειδιά SSH**](windows-local-privilege-escalation/#putty-ssh-host-keys)
-- [ ] [**Κλειδιά SSH στο μητρώο**](windows-local-privilege-escalation/#ssh-keys-in-registry)?
+- [ ] **Putty:** [**Creds**](windows-local-privilege-escalation/#putty-creds) **και** [**SSH host keys**](windows-local-privilege-escalation/#putty-ssh-host-keys)
+- [ ] [**SSH κλειδιά στο μητρώο**](windows-local-privilege-escalation/#ssh-keys-in-registry)?
 - [ ] Κωδικοί πρόσβασης σε [**unattended αρχεία**](windows-local-privilege-escalation/#unattended-files)?
 - [ ] Οποιοδήποτε [**SAM & SYSTEM**](windows-local-privilege-escalation/#sam-and-system-backups) αντίγραφο ασφαλείας?
 - [ ] [**Cloud διαπιστευτήρια**](windows-local-privilege-escalation/#cloud-credentials)?
