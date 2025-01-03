@@ -54,7 +54,7 @@ Você pode definir **qualquer uma que lhe interesse**, no entanto, se você **n�
 
 A opção **Ler Raw** **grava sinais** enviados na frequência de escuta. Isso pode ser usado para **roubar** um sinal e **repeti-lo**.
 
-Por padrão, **Ler Raw também está em 433.92 em AM650**, mas se com a opção Ler você descobriu que o sinal que lhe interessa está em uma **frequência/modulação diferente, você também pode modificar isso** pressionando à esquerda (enquanto estiver na opção Ler Raw).
+Por padrão, **Ler Raw também está em 433.92 em AM650**, mas se com a opção Ler você descobrir que o sinal que lhe interessa está em uma **frequência/modulação diferente, você também pode modificar isso** pressionando à esquerda (enquanto estiver na opção Ler Raw).
 
 ### Força Bruta
 

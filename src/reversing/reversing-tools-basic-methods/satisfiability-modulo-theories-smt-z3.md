@@ -41,7 +41,7 @@ print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 set_option(precision=30)
 print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 ```
-## Imprimindo Modelo
+## Impressão de Modelo
 ```python
 from z3 import *
 

@@ -4,7 +4,7 @@
 
 ## Política do AppLocker
 
-Uma lista de permissões de aplicativos é uma lista de aplicativos de software ou executáveis aprovados que são permitidos para estar presentes e serem executados em um sistema. O objetivo é proteger o ambiente de malware prejudicial e software não aprovado que não se alinha com as necessidades específicas de negócios de uma organização.
+Uma lista de permissões de aplicativos é uma lista de aplicativos de software ou executáveis aprovados que são permitidos estar presentes e serem executados em um sistema. O objetivo é proteger o ambiente de malware prejudicial e software não aprovado que não se alinha com as necessidades específicas de negócios de uma organização.
 
 [AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) é a **solução de lista de permissões de aplicativos** da Microsoft e dá aos administradores de sistema controle sobre **quais aplicativos e arquivos os usuários podem executar**. Ele fornece **controle granular** sobre executáveis, scripts, arquivos de instalação do Windows, DLLs, aplicativos empacotados e instaladores de aplicativos empacotados.\
 É comum que as organizações **bloqueiem cmd.exe e PowerShell.exe** e o acesso de gravação a certos diretórios, **mas tudo isso pode ser contornado**.
@@ -142,7 +142,7 @@ A Microsoft desenvolveu **Group Managed Service Accounts (gMSA)** para simplific
 
 - **Gerenciamento Automático de Senhas**: gMSAs usam uma senha complexa de 240 caracteres que muda automaticamente de acordo com a política de domínio ou computador. Este processo é gerenciado pelo Serviço de Distribuição de Chaves (KDC) da Microsoft, eliminando a necessidade de atualizações manuais de senha.
 - **Segurança Aprimorada**: Essas contas são imunes a bloqueios e não podem ser usadas para logins interativos, aumentando sua segurança.
-- **Suporte a Múltiplos Hosts**: gMSAs podem ser compartilhadas entre vários hosts, tornando-as ideais para serviços que rodam em vários servidores.
+- **Suporte a Múltiplos Hosts**: gMSAs podem ser compartilhados entre vários hosts, tornando-os ideais para serviços que rodam em vários servidores.
 - **Capacidade de Tarefas Agendadas**: Ao contrário das contas de serviço gerenciadas, gMSAs suportam a execução de tarefas agendadas.
 - **Gerenciamento Simplificado de SPN**: O sistema atualiza automaticamente o Nome Principal de Serviço (SPN) quando há alterações nos detalhes do sAMaccount do computador ou no nome DNS, simplificando o gerenciamento de SPN.
 
@@ -160,13 +160,13 @@ Além disso, confira esta [página da web](https://cube0x0.github.io/Relaying-fo
 
 ## LAPS
 
-A **Solução de Senha do Administrador Local (LAPS)**, disponível para download no [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), permite a gestão de senhas de Administrador local. Essas senhas, que são **aleatórias**, únicas e **trocadas regularmente**, são armazenadas centralmente no Active Directory. O acesso a essas senhas é restrito através de ACLs a usuários autorizados. Com permissões suficientes concedidas, a capacidade de ler senhas de administrador local é fornecida.
+A **Solução de Senha do Administrador Local (LAPS)**, disponível para download na [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), permite a gestão de senhas de Administrador local. Essas senhas, que são **aleatórias**, únicas e **trocadas regularmente**, são armazenadas centralmente no Active Directory. O acesso a essas senhas é restrito através de ACLs a usuários autorizados. Com permissões suficientes concedidas, a capacidade de ler senhas de administrador local é fornecida.
 
 {{#ref}}
 active-directory-methodology/laps.md
 {{#endref}}
 
-## Modo de Linguagem Constrangida do PS
+## Modo de Linguagem Constrangida do PowerShell
 
 O PowerShell [**Modo de Linguagem Constrangida**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **limita muitas das funcionalidades** necessárias para usar o PowerShell de forma eficaz, como bloquear objetos COM, permitindo apenas tipos .NET aprovados, fluxos de trabalho baseados em XAML, classes do PowerShell e mais.
 
@@ -195,7 +195,7 @@ Você pode usar [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTo
 
 ## Política de Execução do PS
 
-Por padrão, está definida como **restrita.** Principais maneiras de contornar essa política:
+Por padrão, está configurada como **restrita.** Principais maneiras de contornar essa política:
 ```powershell
 1º Just copy and paste inside the interactive PS console
 2º Read en Exec
@@ -233,7 +233,7 @@ O SSPI será responsável por encontrar o protocolo adequado para duas máquinas
 - %windir%\Windows\System32\Wdigest.dll
 - **Schannel**: SSL e TLS
 - %windir%\Windows\System32\Schannel.dll
-- **Negotiate**: É usado para negociar o protocolo a ser utilizado (Kerberos ou NTLM, sendo Kerberos o padrão)
+- **Negotiate**: É usado para negociar o protocolo a ser usado (Kerberos ou NTLM, sendo Kerberos o padrão)
 - %windir%\Windows\System32\lsasrv.dll
 
 #### A negociação pode oferecer vários métodos ou apenas um.

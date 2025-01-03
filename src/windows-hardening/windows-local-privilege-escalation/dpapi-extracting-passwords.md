@@ -49,7 +49,7 @@ Você pode usar o **mimikatz module** `dpapi::cred` com o `/masterkey` apropriad
 ```
 dpapi::cred /in:C:\path\to\encrypted\file /masterkey:<MASTERKEY>
 ```
-## Master Keys
+## Chaves Mestras
 
 As chaves DPAPI usadas para criptografar as chaves RSA do usuário são armazenadas no diretório `%APPDATA%\Microsoft\Protect\{SID}`, onde {SID} é o [**Identificador de Segurança**](https://en.wikipedia.org/wiki/Security_Identifier) **desse usuário**. **A chave DPAPI é armazenada no mesmo arquivo que a chave mestra que protege as chaves privadas dos usuários**. Geralmente, são 64 bytes de dados aleatórios. (Observe que este diretório é protegido, então você não pode listá-lo usando `dir` no cmd, mas pode listá-lo a partir do PS).
 ```bash
@@ -72,7 +72,7 @@ Verifique o post [https://www.ired.team/offensive-security/credential-access-and
 
 ## SharpDPAPI
 
-[SharpDPAPI](https://github.com/GhostPack/SharpDPAPI#sharpdpapi-1) é uma porta em C# de algumas funcionalidades do DPAPI do projeto [@gentilkiwi](https://twitter.com/gentilkiwi)'s [Mimikatz](https://github.com/gentilkiwi/mimikatz/).
+[SharpDPAPI](https://github.com/GhostPack/SharpDPAPI#sharpdpapi-1) é uma porta em C# de algumas funcionalidades do DPAPI do projeto [Mimikatz](https://github.com/gentilkiwi/mimikatz/) de [@gentilkiwi](https://twitter.com/gentilkiwi).
 
 ## HEKATOMB
 
@@ -86,7 +86,7 @@ Com a lista de computadores extraída do LDAP, você pode encontrar toda sub-red
 
 ## DonPAPI
 
-[**DonPAPI**](https://github.com/login-securite/DonPAPI) pode despejar segredos protegidos pelo DPAPI automaticamente.
+[**DonPAPI**](https://github.com/login-securite/DonPAPI) pode despejar segredos protegidos por DPAPI automaticamente.
 
 ## Referências
 

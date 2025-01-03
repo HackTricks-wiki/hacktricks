@@ -1,4 +1,4 @@
-# AD DNS Records
+# Registros DNS do AD
 
 {{#include ../../banners/hacktricks-training.md}}
 

@@ -36,11 +36,11 @@ Alterar binários do sistema como **_sethc.exe_** ou **_Utilman.exe_** com uma c
 
 - **Supr**: Acessar configurações do BIOS.
 - **F8**: Entrar no modo de Recuperação.
-- Pressionar **Shift** após a bandeira do Windows pode contornar o autologon.
+- Pressionar **Shift** após a banner do Windows pode contornar o autologon.
 
 #### Dispositivos BAD USB
 
-Dispositivos como **Rubber Ducky** e **Teensyduino** servem como plataformas para criar dispositivos **bad USB**, capazes de executar cargas úteis predefinidas quando conectados a um computador alvo.
+Dispositivos como **Rubber Ducky** e **Teensyduino** servem como plataformas para criar dispositivos **bad USB**, capazes de executar payloads predefinidos quando conectados a um computador alvo.
 
 #### Cópia de Sombra de Volume
 

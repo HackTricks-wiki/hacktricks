@@ -36,7 +36,7 @@ Para mais detalhes, visite [ired.team](https://ired.team/offensive-security-expe
 
 ## Lixeira do AD
 
-A adesão a este grupo permite a leitura de objetos do Active Directory deletados, o que pode revelar informações sensíveis:
+A filiação a este grupo permite a leitura de objetos do Active Directory deletados, o que pode revelar informações sensíveis:
 ```bash
 Get-ADObject -filter 'isDeleted -eq $true' -includeDeletedObjects -Properties *
 ```
@@ -54,7 +54,7 @@ Este comando revela que `Server Operators` têm acesso total, permitindo a manip
 
 ## Backup Operators
 
-A filiação no grupo `Backup Operators` fornece acesso ao sistema de arquivos `DC01` devido aos privilégios `SeBackup` e `SeRestore`. Esses privilégios permitem a travessia de pastas, listagem e capacidades de cópia de arquivos, mesmo sem permissões explícitas, usando a flag `FILE_FLAG_BACKUP_SEMANTICS`. É necessário utilizar scripts específicos para este processo.
+A adesão ao grupo `Backup Operators` fornece acesso ao sistema de arquivos `DC01` devido aos privilégios `SeBackup` e `SeRestore`. Esses privilégios permitem a travessia de pastas, listagem e cópia de arquivos, mesmo sem permissões explícitas, usando a flag `FILE_FLAG_BACKUP_SEMANTICS`. É necessário utilizar scripts específicos para este processo.
 
 Para listar os membros do grupo, execute:
 ```powershell
@@ -79,11 +79,11 @@ Get-SeBackupPrivilege
 dir C:\Users\Administrator\
 Copy-FileSeBackupPrivilege C:\Users\Administrator\report.pdf c:\temp\x.pdf -Overwrite
 ```
-### Ataque AD
+### AD Attack
 
 O acesso direto ao sistema de arquivos do Controlador de Domínio permite o roubo do banco de dados `NTDS.dit`, que contém todos os hashes NTLM para usuários e computadores do domínio.
 
-#### Usando diskshadow.exe
+#### Using diskshadow.exe
 
 1. Crie uma cópia sombra do drive `C`:
 ```cmd

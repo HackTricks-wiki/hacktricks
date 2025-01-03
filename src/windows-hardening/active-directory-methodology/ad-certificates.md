@@ -91,7 +91,7 @@ No processo de autenticação Kerberos, o pedido de um usuário para um Ticket G
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
-é central para estabelecer confiança na autenticação de certificados.
+é central para estabelecer confiança para autenticação de certificados.
 
 ### Autenticação de Canal Seguro (Schannel)
 

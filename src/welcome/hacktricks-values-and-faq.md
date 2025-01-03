@@ -13,8 +13,8 @@
 > - **ARMAZENAR** técnicas de **hacking** incríveis que a comunidade publica, dando aos **AUTORES** **ORIGINAIS** todos os **créditos**.
 >   - **Não queremos o crédito de outras pessoas**, apenas queremos armazenar truques legais para todos.
 >   - Também escrevemos **nossas próprias pesquisas** no HackTricks.
->   - Em vários casos, escreveremos **no HackTricks um resumo das partes importantes** da técnica e **incentivaremos o leitor a visitar o post original** para mais detalhes.
-> - **ORGANIZAR** todas as técnicas de hacking no livro para que sejam **MAIS ACESSÍVEIS**
+>   - Em vários casos, escreveremos **no HackTricks um resumo das partes importantes** da técnica e **encorajaremos o leitor a visitar o post original** para mais detalhes.
+> - **ORGANIZAR** todas as técnicas de hacking no livro para que seja **MAIS ACESSÍVEL**
 >   - A equipe do HackTricks dedicou milhares de horas gratuitamente **apenas para organizar o conteúdo** para que as pessoas possam **aprender mais rápido**
 
 <figure><img src="../images/hack tricks gif.gif" alt="" width="375"><figcaption></figcaption></figure>
@@ -76,7 +76,7 @@ O primeiro **valor** do **HackTricks** é oferecer recursos educacionais de hack
 
 Se você acha que os livros do HackTricks são feitos para **fins comerciais**, você está **COMPLETAMENTE ERRADO**.
 
-Temos patrocinadores porque, mesmo que todo o conteúdo seja GRATUITO, queremos **oferecer à comunidade a possibilidade de apreciar nosso trabalho** se assim desejarem. Portanto, oferecemos às pessoas a opção de doar para o HackTricks via [**Github sponsors**](https://github.com/sponsors/carlospolop), e **empresas de cibersegurança relevantes** para patrocinar o HackTricks e **ter alguns anúncios** no livro, sendo os **anúncios** sempre colocados em locais que os tornem **visíveis**, mas que **não atrapalhem o processo de aprendizado** se alguém se concentrar no conteúdo.
+Temos patrocinadores porque, mesmo que todo o conteúdo seja GRATUITO, queremos **oferecer à comunidade a possibilidade de apreciar nosso trabalho** se assim desejarem. Portanto, oferecemos às pessoas a opção de doar para o HackTricks via [**patrocinadores do Github**](https://github.com/sponsors/carlospolop), e **empresas de cibersegurança relevantes** para patrocinar o HackTricks e **ter alguns anúncios** no livro, sendo os **anúncios** sempre colocados em locais que os tornem **visíveis**, mas que **não atrapalhem o processo de aprendizado** se alguém se concentrar no conteúdo.
 
 Você não encontrará o HackTricks cheio de anúncios irritantes como outros blogs com muito menos conteúdo do que o HackTricks, porque o HackTricks não é feito para fins comerciais.
 
@@ -84,7 +84,7 @@ Você não encontrará o HackTricks cheio de anúncios irritantes como outros bl
 >
 > - **O que devo fazer se alguma página do HackTricks for baseada no meu post de blog, mas não estiver referenciada?**
 
-**Lamentamos muito. Isso não deveria ter acontecido**. Por favor, nos avise via Github issues, Twitter, Discord... o link da página do HackTricks com o conteúdo e o link do seu blog e **nós iremos verificar e adicionar o mais rápido possível**.
+**Lamentamos muito. Isso não deveria ter acontecido**. Por favor, nos avise via problemas do Github, Twitter, Discord... o link da página do HackTricks com o conteúdo e o link do seu blog e **nós iremos verificar e adicionar o mais rápido possível**.
 
 > [!CAUTION]
 >
@@ -93,8 +93,8 @@ Você não encontrará o HackTricks cheio de anúncios irritantes como outros bl
 Observe que ter links para sua página no HackTricks:
 
 - Melhora seu **SEO**
-- O conteúdo é **traduzido para mais de 15 idiomas**, possibilitando que mais pessoas acessem esse conteúdo
-- **HackTricks incentiva** as pessoas a **verificarem sua página** (várias pessoas nos mencionaram que, desde que alguma página delas está no HackTricks, recebem mais visitas)
+- O conteúdo é **traduzido para mais de 15 idiomas**, possibilitando que mais pessoas acessem este conteúdo
+- **HackTricks incentiva** as pessoas a **verem sua página** (várias pessoas nos mencionaram que, desde que alguma página delas está no HackTricks, recebem mais visitas)
 
 No entanto, se você ainda quiser que o conteúdo do seu blog seja removido do HackTricks, basta nos avisar e nós definitivamente **removeremos todos os links para o seu blog**, e qualquer conteúdo baseado nele.
 

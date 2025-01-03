@@ -21,7 +21,7 @@ O certificado e a chave privada também podem ser obtidos usando Certipy com o s
 ```bash
 certipy ca 'corp.local/administrator@ca.corp.local' -hashes :123123.. -backup
 ```
-Após adquirir o certificado CA e sua chave privada no formato `.pfx`, ferramentas como [ForgeCert](https://github.com/GhostPack/ForgeCert) podem ser utilizadas para gerar certificados válidos:
+Após adquirir o certificado CA e sua chave privada em formato `.pfx`, ferramentas como [ForgeCert](https://github.com/GhostPack/ForgeCert) podem ser utilizadas para gerar certificados válidos:
 ```bash
 # Generating a new certificate with ForgeCert
 ForgeCert.exe --CaCertPath ca.pfx --CaCertPassword Password123! --Subject "CN=User" --SubjectAltName localadmin@theshire.local --NewCertPath localadmin.pfx --NewCertPassword Password123!
@@ -38,7 +38,7 @@ certipy auth -pfx administrator_forged.pfx -dc-ip 172.16.126.128
 > [!WARNING]
 > O usuário alvo para a falsificação de certificados deve estar ativo e ser capaz de autenticar no Active Directory para que o processo tenha sucesso. Falsificar um certificado para contas especiais como krbtgt é ineficaz.
 
-Este certificado falsificado será **válido** até a data de término especificada e **enquanto o certificado CA raiz for válido** (geralmente de 5 a **10+ anos**). Também é válido para **máquinas**, então combinado com **S4U2Self**, um atacante pode **manter persistência em qualquer máquina do domínio** enquanto o certificado CA for válido.\
+Este certificado falsificado será **válido** até a data de término especificada e **enquanto o certificado CA raiz for válido** (geralmente de 5 a **10+ anos**). Ele também é válido para **máquinas**, então, combinado com **S4U2Self**, um atacante pode **manter persistência em qualquer máquina do domínio** enquanto o certificado CA for válido.\
 Além disso, os **certificados gerados** com este método **não podem ser revogados**, pois a CA não está ciente deles.
 
 ## Confiando em Certificados CA Maliciosos - DPERSIST2

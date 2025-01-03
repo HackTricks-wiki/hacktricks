@@ -113,7 +113,7 @@ Editor de registro: [https://sourceforge.net/projects/uberregedit/](https://sour
 
 ### Protocolo Shell
 
-Digite essas URLs para obter uma visualização do Explorer:
+Digite estas URLs para obter uma visualização do Explorer:
 
 - `shell:Administrative Tools`
 - `shell:DocumentsLibrary`
@@ -200,7 +200,7 @@ Esses atalhos são para as configurações visuais e de som, dependendo do uso d
 
 | Atalho | Ação                                                                         |
 | -------- | ------------------------------------------------------------------------------ |
-| F1       | Diminuir a tela                                                                    |
+| F1       | Diminuir a tela                                                                |
 | F2       | Aumentar a tela                                                                |
 | F7       | Voltar uma música                                                                  |
 | F8       | Reproduzir/pausar                                                                     |
@@ -208,7 +208,7 @@ Esses atalhos são para as configurações visuais e de som, dependendo do uso d
 | F10      | Mudo                                                                           |
 | F11      | Diminuir volume                                                                |
 | F12      | Aumentar volume                                                                |
-| ⌘ Espaço  | Exibir uma lista de idiomas disponíveis; para escolher um, toque na barra de espaço novamente. |
+| ⌘ Espaço  | Exibir uma lista de idiomas disponíveis; para escolher um, toque novamente na barra de espaço. |
 
 ### Navegação no iPad
 

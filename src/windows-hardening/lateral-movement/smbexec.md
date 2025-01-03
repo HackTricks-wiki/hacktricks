@@ -10,7 +10,7 @@
 
 - Ele opera criando um serviço temporário (por exemplo, "BTOBTO") na máquina alvo para executar comandos via cmd.exe (%COMSPEC%), sem deixar binários.
 - Apesar de sua abordagem furtiva, ele gera logs de eventos para cada comando executado, oferecendo uma forma de "shell" não interativa.
-- O comando para se conectar usando **Smbexec** se parece com isto:
+- O comando para conectar usando **Smbexec** se parece com isto:
 ```bash
 smbexec.py WORKGROUP/genericuser:genericpassword@10.10.10.10
 ```

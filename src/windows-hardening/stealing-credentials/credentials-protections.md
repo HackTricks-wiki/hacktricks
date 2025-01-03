@@ -6,7 +6,7 @@
 
 ## WDigest
 
-O protocolo [WDigest](<https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396>), introduzido com o Windows XP, é projetado para autenticação via Protocolo HTTP e está **ativado por padrão no Windows XP até o Windows 8.0 e no Windows Server 2003 até o Windows Server 2012**. Essa configuração padrão resulta em **armazenamento de senhas em texto simples no LSASS** (Serviço de Subsistema de Autoridade de Segurança Local). Um atacante pode usar o Mimikatz para **extrair essas credenciais** executando:
+O protocolo [WDigest](<https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396>), introduzido com o Windows XP, é projetado para autenticação via o Protocolo HTTP e está **ativado por padrão no Windows XP até o Windows 8.0 e no Windows Server 2003 até o Windows Server 2012**. Essa configuração padrão resulta em **armazenamento de senhas em texto simples no LSASS** (Serviço de Subsistema de Autoridade de Segurança Local). Um atacante pode usar o Mimikatz para **extrair essas credenciais** executando:
 ```bash
 sekurlsa::wdigest
 ```
@@ -16,13 +16,13 @@ reg query HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest /v Use
 ```
 ## Proteção LSA
 
-A partir do **Windows 8.1**, a Microsoft aprimorou a segurança do LSA para **bloquear leituras de memória não autorizadas ou injeções de código por processos não confiáveis**. Esse aprimoramento dificulta o funcionamento típico de comandos como `mimikatz.exe sekurlsa:logonpasswords`. Para **habilitar essa proteção aprimorada**, o valor _**RunAsPPL**_ em _**HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA**_ deve ser ajustado para 1:
+A partir do **Windows 8.1**, a Microsoft aprimorou a segurança do LSA para **bloquear leituras de memória não autorizadas ou injeções de código por processos não confiáveis**. Esse aprimoramento dificulta o funcionamento típico de comandos como `mimikatz.exe sekurlsa:logonpasswords`. Para **ativar essa proteção aprimorada**, o valor _**RunAsPPL**_ em _**HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA**_ deve ser ajustado para 1:
 ```
 reg query HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA /v RunAsPPL
 ```
 ### Bypass
 
-É possível contornar essa proteção usando o driver Mimikatz mimidrv.sys:
+É possível contornar essa proteção usando o driver do Mimikatz mimidrv.sys:
 
 ![](../../images/mimidrv.png)
 
@@ -42,15 +42,15 @@ Mais detalhes sobre a implementação de SSPs personalizados para captura de cre
 
 ## Modo RestrictedAdmin do RDP
 
-O **Windows 8.1 e o Windows Server 2012 R2** introduziram várias novas funcionalidades de segurança, incluindo o _**modo Restricted Admin para RDP**_. Este modo foi projetado para aumentar a segurança, mitigando os riscos associados a ataques de [**pass the hash**](https://blog.ahasayen.com/pass-the-hash/).
+O **Windows 8.1 e o Windows Server 2012 R2** introduziram vários novos recursos de segurança, incluindo o _**modo Restricted Admin para RDP**_. Este modo foi projetado para aumentar a segurança, mitigando os riscos associados a [**pass the hash**](https://blog.ahasayen.com/pass-the-hash/) ataques.
 
 Tradicionalmente, ao conectar-se a um computador remoto via RDP, suas credenciais são armazenadas na máquina alvo. Isso representa um risco significativo de segurança, especialmente ao usar contas com privilégios elevados. No entanto, com a introdução do _**modo Restricted Admin**_, esse risco é substancialmente reduzido.
 
 Ao iniciar uma conexão RDP usando o comando **mstsc.exe /RestrictedAdmin**, a autenticação no computador remoto é realizada sem armazenar suas credenciais nele. Essa abordagem garante que, no caso de uma infecção por malware ou se um usuário malicioso ganhar acesso ao servidor remoto, suas credenciais não sejam comprometidas, pois não estão armazenadas no servidor.
 
-É importante notar que no **modo Restricted Admin**, as tentativas de acessar recursos de rede a partir da sessão RDP não usarão suas credenciais pessoais; em vez disso, a **identidade da máquina** é utilizada.
+É importante notar que no **modo Restricted Admin**, tentativas de acessar recursos de rede a partir da sessão RDP não usarão suas credenciais pessoais; em vez disso, a **identidade da máquina** é utilizada.
 
-Esse recurso marca um avanço significativo na segurança das conexões de desktop remoto e na proteção de informações sensíveis contra exposição em caso de violação de segurança.
+Esse recurso marca um avanço significativo na segurança das conexões de desktop remoto e na proteção de informações sensíveis contra exposição em caso de uma violação de segurança.
 
 ![](../../images/RAM.png)
 
@@ -58,7 +58,7 @@ Para mais informações detalhadas, visite [este recurso](https://blog.ahasayen.
 
 ## Credenciais em Cache
 
-O Windows protege as **credenciais de domínio** através da **Local Security Authority (LSA)**, suportando processos de logon com protocolos de segurança como **Kerberos** e **NTLM**. Uma característica chave do Windows é sua capacidade de armazenar em cache os **últimos dez logons de domínio** para garantir que os usuários ainda possam acessar seus computadores mesmo se o **controlador de domínio estiver offline**—uma vantagem para usuários de laptops que frequentemente estão fora da rede da empresa.
+O Windows protege as **credenciais de domínio** através da **Local Security Authority (LSA)**, suportando processos de logon com protocolos de segurança como **Kerberos** e **NTLM**. Um recurso chave do Windows é sua capacidade de armazenar em cache os **últimos dez logons de domínio** para garantir que os usuários ainda possam acessar seus computadores mesmo se o **controlador de domínio estiver offline**—uma vantagem para usuários de laptops que frequentemente estão fora da rede da empresa.
 
 O número de logons em cache é ajustável através de uma **chave de registro específica ou política de grupo**. Para visualizar ou alterar essa configuração, o seguinte comando é utilizado:
 ```bash

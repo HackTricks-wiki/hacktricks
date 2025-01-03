@@ -11,8 +11,8 @@ A partir do Windows 8.1 e Windows Server 2012 R2, medidas significativas foram i
 - **Hashes LM e senhas em texto claro** não são mais armazenados na memória para aumentar a segurança. Uma configuração específica do registro, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_, deve ser configurada com um valor DWORD de `0` para desativar a Autenticação Digest, garantindo que senhas "em texto claro" não sejam armazenadas em cache no LSASS.
 
 - **Proteção LSA** é introduzida para proteger o processo da Autoridade de Segurança Local (LSA) contra leitura não autorizada de memória e injeção de código. Isso é alcançado marcando o LSASS como um processo protegido. A ativação da Proteção LSA envolve:
-1. Modificar o registro em _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ definindo `RunAsPPL` para `dword:00000001`.
-2. Implementar um Objeto de Política de Grupo (GPO) que aplica essa alteração de registro em dispositivos gerenciados.
+1. Modificar o registro em _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ definindo `RunAsPPL` como `dword:00000001`.
+2. Implementar um Objeto de Política de Grupo (GPO) que aplique essa alteração de registro em dispositivos gerenciados.
 
 Apesar dessas proteções, ferramentas como Mimikatz podem contornar a Proteção LSA usando drivers específicos, embora tais ações provavelmente sejam registradas nos logs de eventos.
 
@@ -173,7 +173,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 - **SEKURLSA::Tickets**: Extrair tickets do Kerberos da memória.
 - `mimikatz "sekurlsa::tickets /export" exit`
 
-### Manipulação de SID e Token
+### Manipulação de Sid e Token
 
 - **SID::add/modify**: Alterar SID e SIDHistory.
 

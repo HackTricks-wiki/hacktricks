@@ -26,17 +26,17 @@ Os bits são codificados modulando a duração do espaço entre os pulsos. A lar
 
 **2. Codificação por Largura de Pulso**
 
-Os bits são codificados pela modulação da largura do pulso. A largura do espaço após o estouro do pulso é constante.
+Os bits são codificados pela modulação da largura do pulso. A largura do espaço após a explosão do pulso é constante.
 
 <figure><img src="../../images/image (282).png" alt=""><figcaption></figcaption></figure>
 
 **3. Codificação de Fase**
 
-Também é conhecida como codificação Manchester. O valor lógico é definido pela polaridade da transição entre o estouro do pulso e o espaço. "Espaço para estouro do pulso" denota lógica "0", "estouro do pulso para espaço" denota lógica "1".
+Também é conhecida como codificação Manchester. O valor lógico é definido pela polaridade da transição entre a explosão do pulso e o espaço. "Espaço para explosão de pulso" denota lógica "0", "explosão de pulso para espaço" denota lógica "1".
 
 <figure><img src="../../images/image (634).png" alt=""><figcaption></figcaption></figure>
 
-**4. Combinação dos anteriores e outras exóticas**
+**4. Combinação das anteriores e outras exóticas**
 
 > [!NOTE]
 > Existem protocolos IR que estão **tentando se tornar universais** para vários tipos de dispositivos. Os mais famosos são RC5 e NEC. Infelizmente, o mais famoso **não significa o mais comum**. No meu ambiente, encontrei apenas dois controles remotos NEC e nenhum RC5.
@@ -59,7 +59,7 @@ O **comando NEC**, além do preâmbulo, consiste em um byte de endereço e um by
 
 O **código de repetição** tem um "1" após o preâmbulo, que é um bit de parada.
 
-Para **lógica "0" e "1"**, o NEC usa Codificação por Distância de Pulso: primeiro, um estouro de pulso é transmitido, após o qual há uma pausa, cuja duração define o valor do bit.
+Para **lógica "0" e "1"**, o NEC usa Codificação por Distância de Pulso: primeiro, uma explosão de pulso é transmitida, após a qual há uma pausa, cuja duração define o valor do bit.
 
 ### Ar Condicionados
 

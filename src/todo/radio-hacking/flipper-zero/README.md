@@ -4,7 +4,7 @@
 
 Com [**Flipper Zero**](https://flipperzero.one/) você pode:
 
-- **Ouvir/Capturar/Repetir frequências de rádio:** [**Sub-GHz**](fz-sub-ghz.md)
+- **Ouvir/Capturar/Reproduzir frequências de rádio:** [**Sub-GHz**](fz-sub-ghz.md)
 - **Ler/Capturar/Emular cartões NFC:** [**NFC**](fz-nfc.md)
 - **Ler/Capturar/Emular tags de 125kHz:** [**125kHz RFID**](fz-125khz-rfid.md)
 - **Ler/Capturar/Enviar sinais infravermelhos:** [**Infravermelho**](fz-infrared.md)

@@ -33,7 +33,7 @@ Esta [página](https://docs.microsoft.com/en-us/windows/security/identity-protec
 
 Alguns programas são **autoelevados automaticamente** se o **usuário pertence** ao **grupo de administradores**. Esses binários têm dentro de seus _**Manifests**_ a opção _**autoElevate**_ com valor _**True**_. O binário também deve ser **assinado pela Microsoft**.
 
-Então, para **burlar** o **UAC** (elevar do **nível** de integridade **médio** **para alto**) alguns atacantes usam esse tipo de binários para **executar código arbitrário** porque será executado a partir de um **processo de alta integridade**.
+Então, para **burlar** o **UAC** (elevar do nível de integridade **médio** **para alto**) alguns atacantes usam esse tipo de binários para **executar código arbitrário** porque será executado a partir de um **processo de alta integridade**.
 
 Você pode **verificar** o _**Manifest**_ de um binário usando a ferramenta _**sigcheck.exe**_ do Sysinternals. E você pode **ver** o **nível de integridade** dos processos usando _Process Explorer_ ou _Process Monitor_ (do Sysinternals).
 
@@ -56,11 +56,11 @@ HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System
 ConsentPromptBehaviorAdmin    REG_DWORD    0x5
 ```
 - Se **`0`**, então, o UAC não solicitará (como **desativado**)
-- Se **`1`**, o administrador é **solicitado a fornecer nome de usuário e senha** para executar o binário com altos direitos (na Área de Trabalho Segura)
-- Se **`2`** (**Sempre me notifique**) o UAC sempre pedirá confirmação ao administrador quando ele tentar executar algo com altos privilégios (na Área de Trabalho Segura)
-- Se **`3`**, como `1`, mas não necessariamente na Área de Trabalho Segura
-- Se **`4`**, como `2`, mas não necessariamente na Área de Trabalho Segura
-- se **`5`**(**padrão**) pedirá ao administrador para confirmar a execução de binários não Windows com altos privilégios
+- Se **`1`**, o administrador é **solicitado a fornecer nome de usuário e senha** para executar o binário com altos direitos (no Secure Desktop)
+- Se **`2`** (**Sempre me notifique**) o UAC sempre pedirá confirmação ao administrador quando ele tentar executar algo com altos privilégios (no Secure Desktop)
+- Se **`3`**, como `1`, mas não necessariamente no Secure Desktop
+- Se **`4`**, como `2`, mas não necessariamente no Secure Desktop
+- se **`5`**(**padrão**), pedirá ao administrador para confirmar a execução de binários não Windows com altos privilégios
 
 Então, você deve olhar para o valor de **`LocalAccountTokenFilterPolicy`**\
 Se o valor for **`0`**, então, apenas o usuário **RID 500** (**Administrador embutido**) pode realizar **tarefas administrativas sem UAC**, e se for `1`, **todas as contas dentro do grupo "Administradores"** podem fazê-lo.
@@ -70,7 +70,7 @@ Se **`0`**(padrão), a **conta de Administrador embutido pode** realizar tarefas
 
 #### Resumo
 
-- Se `EnableLUA=0` ou **não existe**, **sem UAC para ninguém**
+- Se `EnableLUA=0` ou **não existir**, **sem UAC para ninguém**
 - Se `EnableLua=1` e **`LocalAccountTokenFilterPolicy=1`, sem UAC para ninguém**
 - Se `EnableLua=1` e **`LocalAccountTokenFilterPolicy=0` e `FilterAdministratorToken=0`, sem UAC para RID 500 (Administrador embutido)**
 - Se `EnableLua=1` e **`LocalAccountTokenFilterPolicy=0` e `FilterAdministratorToken=1`, UAC para todos**
@@ -93,7 +93,7 @@ O bypass do UAC é necessário na seguinte situação: **o UAC está ativado, se
 
 ### UAC desativado
 
-Se o UAC já estiver desativado (`ConsentPromptBehaviorAdmin` é **`0`**), você pode **executar um shell reverso com privilégios de administrador** (nível de integridade alto) usando algo como:
+Se o UAC já estiver desativado (`ConsentPromptBehaviorAdmin` é **`0`**) você pode **executar um shell reverso com privilégios de administrador** (nível de integridade alto) usando algo como:
 ```bash
 #Put your reverse shell instead of "calc.exe"
 Start-Process powershell -Verb runAs "calc.exe"
@@ -142,7 +142,7 @@ Documentação e ferramenta em [https://github.com/wh0amitz/KRBUACBypass](https:
 [**UACME** ](https://github.com/hfiref0x/UACME) que é uma **compilação** de vários exploits de bypass do UAC. Note que você precisará **compilar o UACME usando o visual studio ou msbuild**. A compilação criará vários executáveis (como `Source\Akagi\outout\x64\Debug\Akagi.exe`), você precisará saber **qual você precisa.**\
 Você deve **ter cuidado** porque alguns bypasses irão **solicitar outros programas** que irão **alertar** o **usuário** que algo está acontecendo.
 
-O UACME tem a **versão de build a partir da qual cada técnica começou a funcionar**. Você pode procurar por uma técnica que afete suas versões:
+O UACME tem a **versão de compilação a partir da qual cada técnica começou a funcionar**. Você pode procurar por uma técnica que afete suas versões:
 ```
 PS C:\> [environment]::OSVersion.Version
 
@@ -154,7 +154,7 @@ Também, usando [esta](https://en.wikipedia.org/wiki/Windows_10_version_history)
 
 #### Mais bypass de UAC
 
-**Todas** as técnicas usadas aqui para contornar o AUC **exigem** um **shell interativo completo** com a vítima (um shell comum do nc.exe não é suficiente).
+**Todas** as técnicas usadas aqui para contornar o AUC **requerem** um **shell interativo completo** com a vítima (um shell comum do nc.exe não é suficiente).
 
 Você pode obter usando uma sessão de **meterpreter**. Migre para um **processo** que tenha o valor de **Session** igual a **1**:
 
@@ -170,7 +170,7 @@ Além disso, se você obtiver uma sessão GUI que alguém estava usando (potenci
 
 ### Bypass de UAC barulhento por força bruta
 
-Se você não se importar em ser barulhento, você sempre poderia **executar algo como** [**https://github.com/Chainski/ForceAdmin**](https://github.com/Chainski/ForceAdmin) que **pede para elevar permissões até que o usuário aceite**.
+Se você não se importa em ser barulhento, você sempre poderia **executar algo como** [**https://github.com/Chainski/ForceAdmin**](https://github.com/Chainski/ForceAdmin) que **pede para elevar permissões até que o usuário aceite**.
 
 ### Seu próprio bypass - Metodologia básica de bypass de UAC
 

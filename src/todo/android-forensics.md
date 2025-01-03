@@ -16,7 +16,7 @@ Crie um [backup android usando adb](../mobile-pentesting/android-app-pentesting/
 
 ### Se acesso root ou conexão física à interface JTAG
 
-- `cat /proc/partitions` (procure o caminho para a memória flash, geralmente a primeira entrada é _mmcblk0_ e corresponde a toda a memória flash).
+- `cat /proc/partitions` (procure o caminho para a memória flash, geralmente a primeira entrada é _mmcblk0_ e corresponde à memória flash inteira).
 - `df /data` (Descubra o tamanho do bloco do sistema).
 - dd if=/dev/block/mmcblk0 of=/sdcard/blk0.img bs=4096 (execute com as informações coletadas do tamanho do bloco).
 

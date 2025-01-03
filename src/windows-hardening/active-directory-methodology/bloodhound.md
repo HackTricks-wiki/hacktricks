@@ -6,7 +6,7 @@
 
 [AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) é da Sysinternal Suite:
 
-> Um visualizador e editor avançado de Active Directory (AD). Você pode usar o AD Explorer para navegar facilmente em um banco de dados AD, definir locais favoritos, visualizar propriedades e atributos de objetos sem abrir caixas de diálogo, editar permissões, visualizar o esquema de um objeto e executar pesquisas sofisticadas que você pode salvar e reexecutar.
+> Um visualizador e editor avançado de Active Directory (AD). Você pode usar o AD Explorer para navegar facilmente em um banco de dados AD, definir locais favoritos, visualizar propriedades de objetos e atributos sem abrir caixas de diálogo, editar permissões, visualizar o esquema de um objeto e executar pesquisas sofisticadas que você pode salvar e reexecutar.
 
 ### Capturas de Tela
 
@@ -15,7 +15,7 @@ Ele pode ser usado para descobrir vulnerabilidades offline ou para comparar dife
 
 Você precisará do nome de usuário, senha e direção para se conectar (qualquer usuário AD é necessário).
 
-Para fazer uma captura de tela do AD, vá para `File` --> `Create Snapshot` e insira um nome para a captura.
+Para tirar uma captura de tela do AD, vá para `File` --> `Create Snapshot` e insira um nome para a captura.
 
 ## ADRecon
 

@@ -14,13 +14,13 @@ Pode ser realizado usando [Mimikatz](https://github.com/gentilkiwi/mimikatz). Pa
 
 As estratégias de mitigação contra tais ataques incluem monitorar IDs de eventos específicos que indicam a instalação de serviços ou o uso de privilégios sensíveis. Especificamente, procurar pelo ID de Evento do Sistema 7045 ou ID de Evento de Segurança 4673 pode revelar atividades suspeitas. Além disso, executar `lsass.exe` como um processo protegido pode dificultar significativamente os esforços dos atacantes, pois isso exige que eles utilizem um driver em modo kernel, aumentando a complexidade do ataque.
 
-Aqui estão os comandos do PowerShell para aprimorar as medidas de segurança:
+Aqui estão os comandos PowerShell para aprimorar as medidas de segurança:
 
 - Para detectar a instalação de serviços suspeitos, use: `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*"}`
 
 - Especificamente, para detectar o driver do Mimikatz, o seguinte comando pode ser utilizado: `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*" -and $_.message -like "*mimidrv*"}`
 
-- Para fortalecer `lsass.exe`, é recomendável habilitá-lo como um processo protegido: `New-ItemProperty HKLM:\SYSTEM\CurrentControlSet\Control\Lsa -Name RunAsPPL -Value 1 -Verbose`
+- Para fortalecer `lsass.exe`, é recomendado habilitá-lo como um processo protegido: `New-ItemProperty HKLM:\SYSTEM\CurrentControlSet\Control\Lsa -Name RunAsPPL -Value 1 -Verbose`
 
 A verificação após a reinicialização do sistema é crucial para garantir que as medidas de proteção tenham sido aplicadas com sucesso. Isso pode ser alcançado através de: `Get-WinEvent -FilterHashtable @{Logname='System';ID=12} | ?{$_.message -like "*protected process*`
 

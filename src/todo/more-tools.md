@@ -50,9 +50,9 @@
 - [https://github.com/izo30/google-dorker](https://github.com/izo30/google-dorker) : Google dorks
 - [https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md](https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md) : Checklist de BugBounty para web
 - [https://github.com/Naategh/dom-red](https://github.com/Naategh/dom-red) : Verificar uma lista de domínios contra Redirecionamento Aberto
-- [https://github.com/prodigysml/Dr.-Watson](https://github.com/prodigysml/Dr.-Watson) : Plugin do Burp, análise offline para descobrir domínios, subdomínios e IPs
+- [https://github.com/prodigysml/Dr.-Watson](https://github.com/prodigysml/Dr.-Watson) : Plugin Burp, análise offline para descobrir domínios, subdomínios e IPs
 - [https://github.com/hahwul/WebHackersWeapons](https://github.com/hahwul/WebHackersWeapons): Lista de diferentes ferramentas
-- [https://github.com/gauravnarwani97/Trishul](https://github.com/gauravnarwani97/Trishul) : Plugin do BurpSuite para encontrar vulnerabilidades (SQLi, XSS, SSTI)
+- [https://github.com/gauravnarwani97/Trishul](https://github.com/gauravnarwani97/Trishul) : Plugin BurpSuite para encontrar vulnerabilidades (SQLi, XSS, SSTI)
 - [https://github.com/fransr/postMessage-tracker](https://github.com/fransr/postMessage-tracker) : Extensão do Chrome para rastrear funções de post-messages
 - [https://github.com/Quitten/Autorize](https://github.com/Quitten/Autorize) : Testes automáticos de autenticação (remover cookies e tentar enviar a solicitação)
 - [https://github.com/pikpikcu/xrcross](https://github.com/pikpikcu/xrcross): XRCross é uma ferramenta de Reconstrução, Scanner e para testes de penetração / BugBounty. Esta ferramenta foi criada para testar vulnerabilidades (XSS|SSRF|CORS|SSTI|IDOR|RCE|LFI|SQLI)
@@ -100,7 +100,7 @@ Emulação de firmware: FIRMADYNE (https://github.com/firmadyne/firmadyne/) é u
 - [https://github.com/weev3/LKWA](https://github.com/weev3/LKWA)
 - [https://h0mbre.github.io/Learn-C-By-Creating-A-Rootkit/](https://h0mbre.github.io/Learn-C-By-Creating-A-Rootkit/)
 - [https://github.com/skelsec/jackdaw](https://github.com/skelsec/jackdaw)
-- [https://github.com/CoatiSoftware/Sourcetrail](https://github.com/CoatiSoftware/Sourcetrail) : Análise de código estática
+- [https://github.com/CoatiSoftware/Sourcetrail](https://github.com/CoatiSoftware/Sourcetrail) : Análise de código estático
 - [https://www.hackerdecabecera.com/2019/12/blectf-capture-flag-en-formato-hardware.html](https://www.hackerdecabecera.com/2019/12/blectf-capture-flag-en-formato-hardware.html) : Bluetooth LE CTF
 - [https://github.com/skeeto/endlessh](https://github.com/skeeto/endlessh) : SSH tarpit que envia lentamente um banner infinito.
 - Ferramentas AWS e Cloud: [https://github.com/toniblyx/my-arsenal-of-aws-security-tools](https://github.com/toniblyx/my-arsenal-of-aws-security-tools)
@@ -112,7 +112,7 @@ Emulação de firmware: FIRMADYNE (https://github.com/firmadyne/firmadyne/) é u
 - [https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab](https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab) : Ferramentas de pentesting para IOS
 - [https://github.com/random-robbie/keywords/blob/master/keywords.txt](https://github.com/random-robbie/keywords/blob/master/keywords.txt) : Palavras-chave
 - [https://github.com/ElevenPaths/HomePWN](https://github.com/ElevenPaths/HomePWN) : Hacking IoT (Wifi, BLE, SSDP, MDNS)
-- [https://github.com/rackerlabs/scantron](https://github.com/rackerlabs/scantron) : automação de escaneamento
+- [https://github.com/rackerlabs/scantron](https://github.com/rackerlabs/scantron) : automatizando escaneamento
 - [https://github.com/doyensec/awesome-electronjs-hacking](https://github.com/doyensec/awesome-electronjs-hacking) : Esta lista visa cobrir tópicos relacionados à segurança do Electron.js.
 - [https://github.com/serain/bbrecon](https://github.com/serain/bbrecon) : Informações sobre programas de BB
 

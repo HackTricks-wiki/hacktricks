@@ -6,7 +6,7 @@
 
 Se você descobriu que pode **escrever em uma pasta do System Path** (note que isso não funcionará se você puder escrever em uma pasta do User Path), é possível que você possa **escalar privilégios** no sistema.
 
-Para fazer isso, você pode abusar de um **Dll Hijacking**, onde você vai **sequestrar uma biblioteca sendo carregada** por um serviço ou processo com **mais privilégios** do que o seu, e como esse serviço está carregando uma Dll que provavelmente nem existe em todo o sistema, ele tentará carregá-la do System Path onde você pode escrever.
+Para fazer isso, você pode abusar de um **Dll Hijacking**, onde você vai **sequestar uma biblioteca sendo carregada** por um serviço ou processo com **mais privilégios** do que o seu, e como esse serviço está carregando uma Dll que provavelmente nem existe em todo o sistema, ele tentará carregá-la do System Path onde você pode escrever.
 
 Para mais informações sobre **o que é Dll Hijacking**, consulte:
 

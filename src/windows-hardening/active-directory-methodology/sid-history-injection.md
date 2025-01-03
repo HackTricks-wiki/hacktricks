@@ -4,11 +4,11 @@
 
 ## Ataque de Injeção de SID History
 
-O foco do **Ataque de Injeção de SID History** é auxiliar **na migração de usuários entre domínios** enquanto garante o acesso contínuo a recursos do domínio anterior. Isso é realizado **incorporando o Identificador de Segurança (SID) anterior do usuário no SID History** de sua nova conta. Notavelmente, esse processo pode ser manipulado para conceder acesso não autorizado ao adicionar o SID de um grupo de alto privilégio (como Enterprise Admins ou Domain Admins) do domínio pai ao SID History. Essa exploração confere acesso a todos os recursos dentro do domínio pai.
+O foco do **Ataque de Injeção de SID History** é auxiliar **na migração de usuários entre domínios** enquanto garante o acesso contínuo a recursos do domínio anterior. Isso é realizado **incorporando o Identificador de Segurança (SID) anterior do usuário ao SID History** de sua nova conta. Notavelmente, esse processo pode ser manipulado para conceder acesso não autorizado ao adicionar o SID de um grupo de alto privilégio (como Enterprise Admins ou Domain Admins) do domínio pai ao SID History. Essa exploração confere acesso a todos os recursos dentro do domínio pai.
 
 Existem dois métodos para executar esse ataque: através da criação de um **Golden Ticket** ou um **Diamond Ticket**.
 
-Para identificar o SID do grupo **"Enterprise Admins"**, é necessário primeiro localizar o SID do domínio raiz. Após a identificação, o SID do grupo Enterprise Admins pode ser construído anexando `-519` ao SID do domínio raiz. Por exemplo, se o SID do domínio raiz for `S-1-5-21-280534878-1496970234-700767426`, o SID resultante para o grupo "Enterprise Admins" seria `S-1-5-21-280534878-1496970234-700767426-519`.
+Para identificar o SID do grupo **"Enterprise Admins"**, é necessário primeiro localizar o SID do domínio raiz. Após a identificação, o SID do grupo Enterprise Admins pode ser construído adicionando `-519` ao SID do domínio raiz. Por exemplo, se o SID do domínio raiz for `S-1-5-21-280534878-1496970234-700767426`, o SID resultante para o grupo "Enterprise Admins" seria `S-1-5-21-280534878-1496970234-700767426-519`.
 
 Você também pode usar os grupos **Domain Admins**, que terminam em **512**.
 

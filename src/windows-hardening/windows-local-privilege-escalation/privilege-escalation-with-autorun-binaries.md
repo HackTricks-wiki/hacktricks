@@ -2,6 +2,8 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+
+
 ## WMIC
 
 **Wmic** pode ser usado para executar programas na **inicialização**. Veja quais binários estão programados para serem executados na inicialização com:
@@ -24,7 +26,7 @@ schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "SchedPE" /TR "cmd /c net localgro
 ```
 ## Pastas
 
-Todos os binários localizados nas **pastas de Inicialização serão executados na inicialização**. As pastas de inicialização comuns são as listadas a seguir, mas a pasta de inicialização é indicada no registro. [Leia isso para aprender onde.](privilege-escalation-with-autorun-binaries.md#startup-path)
+Todos os binários localizados nas **pastas de Inicialização serão executados na inicialização**. As pastas de inicialização comuns são as listadas a seguir, mas a pasta de inicialização é indicada no registro. [Read this to learn where.](privilege-escalation-with-autorun-binaries.md#startup-path)
 ```bash
 dir /b "C:\Documents and Settings\All Users\Start Menu\Programs\Startup" 2>nul
 dir /b "C:\Documents and Settings\%username%\Start Menu\Programs\Startup" 2>nul
@@ -162,7 +164,7 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion
 
 `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`
 
-Normalmente, a chave **Userinit** é definida como **userinit.exe**. No entanto, se essa chave for modificada, o executável especificado também será iniciado pelo **Winlogon** ao fazer login do usuário. Da mesma forma, a chave **Shell** deve apontar para **explorer.exe**, que é o shell padrão do Windows.
+Normalmente, a chave **Userinit** é definida como **userinit.exe**. No entanto, se essa chave for modificada, o executável especificado também será iniciado pelo **Winlogon** ao fazer login do usuário. Da mesma forma, a chave **Shell** é destinada a apontar para **explorer.exe**, que é o shell padrão do Windows.
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Userinit"
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Shell"
@@ -223,7 +225,7 @@ Dentro dessas chaves, existem várias subchaves, cada uma correspondendo a um co
 - **IsInstalled:**
 - `0` indica que o comando do componente não será executado.
 - `1` significa que o comando será executado uma vez para cada usuário, que é o comportamento padrão se o valor `IsInstalled` estiver ausente.
-- **StubPath:** Define o comando a ser executado pelo Active Setup. Pode ser qualquer linha de comando válida, como iniciar o `notepad`.
+- **StubPath:** Define o comando a ser executado pelo Active Setup. Pode ser qualquer linha de comando válida, como iniciar `notepad`.
 
 **Insights de Segurança:**
 
@@ -245,7 +247,7 @@ Os Objetos Auxiliares do Navegador (BHOs) são módulos DLL que adicionam recurs
 
 Os BHOs são compatíveis com o Windows 10 via Internet Explorer 11, mas não são suportados no Microsoft Edge, o navegador padrão nas versões mais recentes do Windows.
 
-Para explorar os BHOs registrados em um sistema, você pode inspecionar as seguintes chaves do registro:
+Para explorar os BHOs registrados em um sistema, você pode inspecionar as seguintes chaves de registro:
 
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 - `HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`

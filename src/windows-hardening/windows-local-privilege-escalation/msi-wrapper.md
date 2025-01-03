@@ -17,6 +17,6 @@ E esta é a parte mais importante da configuração:
 
 (Por favor, note que se você tentar empacotar seu próprio binário, você poderá modificar esses valores)
 
-A partir daqui, basta clicar nos **botões de próximo** e no último **botão de construção e seu instalador/envelope será gerado.**
+A partir daqui, basta clicar nos **botões de próximo** e no último **botão de construir e seu instalador/envelope será gerado.**
 
 {{#include ../../banners/hacktricks-training.md}}

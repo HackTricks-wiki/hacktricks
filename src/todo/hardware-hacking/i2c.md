@@ -4,7 +4,7 @@
 
 ## Bus Pirate
 
-Para testar se um Bus Pirate está funcionando, conecte +5V com VPU e 3.3V com ADC e acesse o bus pirate (Usando Tera Term, por exemplo) e use o comando `~`:
+Para testar se um Bus Pirate está funcionando, conecte +5V com VPU e 3.3V com ADC e acesse o bus pirate (usando Tera Term, por exemplo) e use o comando `~`:
 ```bash
 # Use command
 HiZ>~

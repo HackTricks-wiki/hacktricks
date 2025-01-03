@@ -36,7 +36,7 @@ Use os parâmetros `/startoffset`, `/endin` e `/renewmax` para controlar o deslo
 ```
 Get-DomainPolicy | select -expand KerberosPolicy
 ```
-Infelizmente, a duração do TGT não é registrada nos eventos 4769, então você não encontrará essa informação nos logs de eventos do Windows. No entanto, o que você pode correlacionar é **ver 4769's sem um 4768 anterior**. **Não é possível solicitar um TGS sem um TGT**, e se não houver registro de um TGT sendo emitido, podemos inferir que ele foi forjado offline.
+Infelizmente, a duração do TGT não é registrada nos eventos 4769, então você não encontrará essa informação nos logs de eventos do Windows. No entanto, o que você pode correlacionar é **ver 4769's sem um 4768 anterior**. É **impossível solicitar um TGS sem um TGT**, e se não houver registro de um TGT sendo emitido, podemos inferir que foi forjado offline.
 
 Para **contornar essa detecção**, verifique os diamond tickets:
 

@@ -20,7 +20,7 @@ Os dados são transmitidos no protocolo Modbus como ASCII ou Binário, embora o 
 
 ## Códigos de Função
 
-O Protocolo ModBus funciona com a transmissão de códigos de função específicos que são usados para operar os PLCs e vários dispositivos de controle. Esta parte é importante para entender, uma vez que ataques de replay podem ser realizados retransmitindo códigos de função. Dispositivos legados não suportam nenhuma criptografia para a transmissão de dados e geralmente possuem fios longos que os conectam, o que resulta na manipulação desses fios e captura/injeção de dados.
+O Protocolo ModBus funciona com a transmissão de códigos de função específicos que são usados para operar os PLCs e vários dispositivos de controle. Esta parte é importante para entender, uma vez que ataques de replay podem ser realizados retransmitindo códigos de função. Dispositivos legados não suportam nenhuma criptografia para a transmissão de dados e geralmente possuem fios longos que os conectam, o que resulta em manipulação desses fios e captura/injeção de dados.
 
 ## Endereçamento do Modbus
 

@@ -15,10 +15,10 @@ Isso acontece porque, ao conectar-se com o Kerberos, estes são os passos:
 3. User1 **conecta-se** ao **Server1** e fornece o **ticket de serviço**.
 4. O **Server1** **não tem** as **credenciais** do User1 armazenadas ou o **TGT** do User1. Portanto, quando o User1 do Server1 tenta fazer login em um segundo servidor, ele **não consegue se autenticar**.
 
-### Delegação Inconstrangida
+### Delegação Não Restrita
 
-Se a **delegação inconstrangida** estiver habilitada no PC, isso não acontecerá, pois o **Servidor** irá **obter** um **TGT** de cada usuário que o acessar. Além disso, se a delegação inconstrangida for usada, você provavelmente pode **comprometer o Controlador de Domínio** a partir disso.\
-[**Mais informações na página de delegação inconstrangida**](unconstrained-delegation.md).
+Se a **delegação não restrita** estiver habilitada no PC, isso não acontecerá, pois o **Servidor** irá **obter** um **TGT** de cada usuário que o acessar. Além disso, se a delegação não restrita for usada, você provavelmente pode **comprometer o Controlador de Domínio** a partir disso.\
+[**Mais informações na página de delegação não restrita**](unconstrained-delegation.md).
 
 ### CredSSP
 
@@ -36,7 +36,7 @@ Get-WSManCredSSP
 
 ### Invoke Command
 
-Para resolver o problema do double hop, é apresentado um método que envolve um `Invoke-Command` aninhado. Isso não resolve o problema diretamente, mas oferece uma solução alternativa sem a necessidade de configurações especiais. A abordagem permite executar um comando (`hostname`) em um servidor secundário através de um comando PowerShell executado de uma máquina de ataque inicial ou através de uma PS-Session previamente estabelecida com o primeiro servidor. Veja como é feito:
+Para resolver o problema do double hop, é apresentado um método envolvendo um `Invoke-Command` aninhado. Isso não resolve o problema diretamente, mas oferece uma solução alternativa sem a necessidade de configurações especiais. A abordagem permite executar um comando (`hostname`) em um servidor secundário através de um comando PowerShell executado de uma máquina de ataque inicial ou através de uma PS-Session previamente estabelecida com o primeiro servidor. Veja como é feito:
 ```powershell
 $cred = Get-Credential ta\redsuit
 Invoke-Command -ComputerName bizintel -Credential $cred -ScriptBlock {

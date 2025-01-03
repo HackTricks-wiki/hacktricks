@@ -5,7 +5,7 @@
 
 ## Overpass The Hash/Pass The Key (PTK)
 
-O ataque **Overpass The Hash/Pass The Key (PTK)** é projetado para ambientes onde o protocolo NTLM tradicional é restrito, e a autenticação Kerberos tem prioridade. Este ataque aproveita o hash NTLM ou as chaves AES de um usuário para solicitar tickets Kerberos, permitindo acesso não autorizado a recursos dentro de uma rede.
+O **Overpass The Hash/Pass The Key (PTK)** é um ataque projetado para ambientes onde o protocolo NTLM tradicional é restrito e a autenticação Kerberos tem prioridade. Este ataque aproveita o hash NTLM ou as chaves AES de um usuário para solicitar tickets Kerberos, permitindo acesso não autorizado a recursos dentro de uma rede.
 
 Para executar este ataque, o primeiro passo envolve adquirir o hash NTLM ou a senha da conta do usuário alvo. Após garantir essa informação, um Ticket Granting Ticket (TGT) para a conta pode ser obtido, permitindo que o atacante acesse serviços ou máquinas para os quais o usuário tem permissões.
 

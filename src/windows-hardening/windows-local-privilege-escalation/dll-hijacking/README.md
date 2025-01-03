@@ -2,15 +2,9 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="../../../images/i3.png" alt=""><figcaption></figcaption></figure>
-
-**Dica de bug bounty**: **inscreva-se** na **Intigriti**, uma plataforma premium de **bug bounty criada por hackers, para hackers**! Junte-se a nós em [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) hoje e comece a ganhar recompensas de até **$100,000**!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
-
 ## Informações Básicas
 
-DLL Hijacking envolve manipular um aplicativo confiável para carregar uma DLL maliciosa. Este termo abrange várias táticas como **DLL Spoofing, Injection e Side-Loading**. É utilizado principalmente para execução de código, alcançando persistência e, menos comumente, escalonamento de privilégios. Apesar do foco no escalonamento aqui, o método de hijacking permanece consistente entre os objetivos.
+DLL Hijacking envolve manipular um aplicativo confiável para carregar um DLL malicioso. Este termo abrange várias táticas como **DLL Spoofing, Injection, e Side-Loading**. É utilizado principalmente para execução de código, alcançando persistência e, menos comumente, escalonamento de privilégios. Apesar do foco em escalonamento aqui, o método de hijacking permanece consistente entre os objetivos.
 
 ### Técnicas Comuns
 
@@ -25,7 +19,7 @@ Vários métodos são empregados para DLL hijacking, cada um com sua eficácia d
 
 ## Encontrando DLLs Faltantes
 
-A maneira mais comum de encontrar DLLs faltantes em um sistema é executando [procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon) do sysinternals, **definindo** os **seguintes 2 filtros**:
+A maneira mais comum de encontrar DLLs faltantes dentro de um sistema é executando [procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon) do sysinternals, **definindo** os **seguintes 2 filtros**:
 
 ![](<../../../images/image (961).png>)
 
@@ -40,7 +34,7 @@ Se você está procurando por uma **dll faltante dentro de um executável espec�
 
 ## Explorando DLLs Faltantes
 
-Para escalar privilégios, a melhor chance que temos é ser capaz de **escrever uma dll que um processo privilegiado tentará carregar** em algum **lugar onde será procurada**. Portanto, seremos capazes de **escrever** uma dll em uma **pasta** onde a **dll é procurada antes** da pasta onde a **dll original** está (caso estranho), ou seremos capazes de **escrever em alguma pasta onde a dll será procurada** e a **dll original não existe** em nenhuma pasta.
+Para escalar privilégios, a melhor chance que temos é ser capaz de **escrever uma dll que um processo privilegiado tentará carregar** em algum **lugar onde será pesquisada**. Portanto, seremos capazes de **escrever** uma dll em uma **pasta** onde a **dll é pesquisada antes** da pasta onde a **dll original** está (caso estranho), ou seremos capazes de **escrever em alguma pasta onde a dll será pesquisada** e a **dll original não existe** em nenhuma pasta.
 
 ### Ordem de Busca de DLL
 
@@ -57,11 +51,11 @@ Você pode ver a **ordem de busca de DLL em sistemas de 32 bits** abaixo:
 5. O diretório atual.
 6. Os diretórios listados na variável de ambiente PATH. Note que isso não inclui o caminho por aplicativo especificado pela chave de registro **App Paths**. A chave **App Paths** não é usada ao calcular o caminho de busca de DLL.
 
-Essa é a **ordem de busca padrão** com **SafeDllSearchMode** habilitado. Quando desabilitado, o diretório atual sobe para o segundo lugar. Para desativar esse recurso, crie o valor de registro **HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager**\\**SafeDllSearchMode** e defina-o como 0 (o padrão é habilitado).
+Essa é a **ordem de busca padrão** com **SafeDllSearchMode** habilitado. Quando desabilitado, o diretório atual sobe para o segundo lugar. Para desabilitar esse recurso, crie o valor de registro **HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager**\\**SafeDllSearchMode** e defina-o como 0 (o padrão é habilitado).
 
 Se a função [**LoadLibraryEx**](https://docs.microsoft.com/en-us/windows/desktop/api/LibLoaderAPI/nf-libloaderapi-loadlibraryexa) for chamada com **LOAD_WITH_ALTERED_SEARCH_PATH**, a busca começa no diretório do módulo executável que **LoadLibraryEx** está carregando.
 
-Finalmente, note que **uma dll pode ser carregada indicando o caminho absoluto em vez de apenas o nome**. Nesse caso, essa dll **será procurada apenas nesse caminho** (se a dll tiver dependências, elas serão procuradas como se fossem carregadas apenas pelo nome).
+Finalmente, note que **uma dll pode ser carregada indicando o caminho absoluto em vez de apenas o nome**. Nesse caso, essa dll **será pesquisada apenas nesse caminho** (se a dll tiver dependências, elas serão pesquisadas como se fossem carregadas apenas pelo nome).
 
 Existem outras maneiras de alterar a ordem de busca, mas não vou explicá-las aqui.
 
@@ -70,18 +64,18 @@ Existem outras maneiras de alterar a ordem de busca, mas não vou explicá-las a
 Certas exceções à ordem padrão de busca de DLL são notadas na documentação do Windows:
 
 - Quando uma **DLL que compartilha seu nome com uma já carregada na memória** é encontrada, o sistema ignora a busca usual. Em vez disso, ele realiza uma verificação de redirecionamento e um manifesto antes de recorrer à DLL já na memória. **Nesse cenário, o sistema não realiza uma busca pela DLL**.
-- Em casos onde a DLL é reconhecida como uma **DLL conhecida** para a versão atual do Windows, o sistema utilizará sua versão da DLL conhecida, juntamente com quaisquer DLLs dependentes, **abrindo mão do processo de busca**. A chave de registro **HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs** contém uma lista dessas DLLs conhecidas.
-- Se uma **DLL tiver dependências**, a busca por essas DLLs dependentes é realizada como se fossem indicadas apenas pelos **nomes dos módulos**, independentemente de a DLL inicial ter sido identificada por um caminho completo.
+- Em casos onde a DLL é reconhecida como uma **DLL conhecida** para a versão atual do Windows, o sistema utilizará sua versão da DLL conhecida, juntamente com quaisquer de suas DLLs dependentes, **abrindo mão do processo de busca**. A chave de registro **HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs** contém uma lista dessas DLLs conhecidas.
+- Se uma **DLL tiver dependências**, a busca por essas DLLs dependentes é realizada como se fossem indicadas apenas por seus **nomes de módulo**, independentemente de a DLL inicial ter sido identificada através de um caminho completo.
 
-### Escalando Privilégios
+### Escalonando Privilégios
 
 **Requisitos**:
 
 - Identificar um processo que opera ou operará sob **diferentes privilégios** (movimento horizontal ou lateral), que está **faltando uma DLL**.
-- Garantir que o **acesso de escrita** esteja disponível para qualquer **diretório** no qual a **DLL** será **procurada**. Este local pode ser o diretório do executável ou um diretório dentro do caminho do sistema.
+- Garantir que o **acesso de escrita** esteja disponível para qualquer **diretório** no qual a **DLL** será **pesquisada**. Este local pode ser o diretório do executável ou um diretório dentro do caminho do sistema.
 
 Sim, os requisitos são complicados de encontrar, pois **por padrão é meio estranho encontrar um executável privilegiado faltando uma dll** e é ainda **mais estranho ter permissões de escrita em uma pasta do caminho do sistema** (você não pode por padrão). Mas, em ambientes mal configurados, isso é possível.\
-Caso você tenha sorte e se encontre atendendo aos requisitos, você pode verificar o projeto [UACME](https://github.com/hfiref0x/UACME). Mesmo que o **objetivo principal do projeto seja contornar o UAC**, você pode encontrar lá um **PoC** de um Dll hijacking para a versão do Windows que você pode usar (provavelmente apenas mudando o caminho da pasta onde você tem permissões de escrita).
+No caso de você ter sorte e se encontrar atendendo aos requisitos, você pode verificar o projeto [UACME](https://github.com/hfiref0x/UACME). Mesmo que o **objetivo principal do projeto seja contornar o UAC**, você pode encontrar lá um **PoC** de um Dll hijacking para a versão do Windows que você pode usar (provavelmente apenas mudando o caminho da pasta onde você tem permissões de escrita).
 
 Note que você pode **verificar suas permissões em uma pasta** fazendo:
 ```bash
@@ -117,7 +111,7 @@ Além disso, na **próxima seção** você pode encontrar alguns **códigos dll 
 
 ### **Dll Proxifying**
 
-Basicamente, um **Dll proxy** é um Dll capaz de **executar seu código malicioso quando carregado**, mas também **expor** e **funcionar** como **esperado** ao **revezar todas as chamadas para a biblioteca real**.
+Basicamente, um **Dll proxy** é um Dll capaz de **executar seu código malicioso quando carregado**, mas também de **expor** e **funcionar** como **esperado** ao **revezar todas as chamadas para a biblioteca real**.
 
 Com a ferramenta [**DLLirant**](https://github.com/redteamsocietegenerale/DLLirant) ou [**Spartacus**](https://github.com/Accenture/Spartacus), você pode realmente **indicar um executável e selecionar a biblioteca** que deseja proxificar e **gerar um dll proxificado** ou **indicar o Dll** e **gerar um dll proxificado**.
 
@@ -223,10 +217,5 @@ return TRUE;
 - [https://medium.com/@pranaybafna/tcapt-dll-hijacking-888d181ede8e](https://medium.com/@pranaybafna/tcapt-dll-hijacking-888d181ede8e)
 - [https://cocomelonc.github.io/pentest/2021/09/24/dll-hijacking-1.html](https://cocomelonc.github.io/pentest/2021/09/24/dll-hijacking-1.html)
 
-<figure><img src="../../../images/i3.png" alt=""><figcaption></figcaption></figure>
-
-**Dica de bug bounty**: **inscreva-se** na **Intigriti**, uma plataforma premium de **bug bounty criada por hackers, para hackers**! Junte-se a nós em [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) hoje e comece a ganhar recompensas de até **$100,000**!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 {{#include ../../../banners/hacktricks-training.md}}

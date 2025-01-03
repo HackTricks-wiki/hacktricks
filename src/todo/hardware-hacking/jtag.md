@@ -17,7 +17,7 @@ No Arduino, após conectar os cabos (pino 2 a 11 aos pinos JTAG e GND do Arduino
 ![](<../../images/image (578).png>)
 
 Configure **"Sem final de linha" e 115200baud**.\
-Envie o comando s para começar a escanear:
+Envie o comando s para iniciar a varredura:
 
 ![](<../../images/image (774).png>)
 

@@ -4,12 +4,12 @@
 
 **Esta página é principalmente um resumo das técnicas de** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces) **e** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)**. Para mais detalhes, consulte os artigos originais.**
 
-## **Direitos GenericAll no Usuário**
+## **Direitos GenericAll em Usuário**
 
 Este privilégio concede a um atacante controle total sobre uma conta de usuário alvo. Uma vez que os direitos `GenericAll` são confirmados usando o comando `Get-ObjectAcl`, um atacante pode:
 
 - **Alterar a Senha do Alvo**: Usando `net user <username> <password> /domain`, o atacante pode redefinir a senha do usuário.
-- **Kerberoasting Direcionado**: Atribuir um SPN à conta do usuário para torná-la kerberoastable, em seguida, usar Rubeus e targetedKerberoast.py para extrair e tentar quebrar os hashes do ticket-granting ticket (TGT).
+- **Kerberoasting Direcionado**: Atribua um SPN à conta do usuário para torná-la kerberoastable, depois use Rubeus e targetedKerberoast.py para extrair e tentar quebrar os hashes do ticket-granting ticket (TGT).
 ```powershell
 Set-DomainObject -Credential $creds -Identity <username> -Set @{serviceprincipalname="fake/NOTHING"}
 .\Rubeus.exe kerberoast /user:<username> /nowrap
@@ -46,7 +46,7 @@ net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domai
 ```
 ## **Auto (Auto-Membresia) em Grupo**
 
-Esse privilégio permite que atacantes se adicionem a grupos específicos, como `Domain Admins`, por meio de comandos que manipulam a membresia de grupos diretamente. Usar a seguinte sequência de comandos permite a auto-adição:
+Esse privilégio permite que atacantes se adicionem a grupos específicos, como `Domain Admins`, por meio de comandos que manipulam a membresia do grupo diretamente. Usar a seguinte sequência de comandos permite a auto-adição:
 ```powershell
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
@@ -59,7 +59,7 @@ net group "domain admins" spotless /add /domain
 ```
 ## **ForceChangePassword**
 
-Ter o `ExtendedRight` em um usuário para `User-Force-Change-Password` permite redefinições de senha sem conhecer a senha atual. A verificação desse direito e sua exploração podem ser feitas através do PowerShell ou ferramentas de linha de comando alternativas, oferecendo vários métodos para redefinir a senha de um usuário, incluindo sessões interativas e one-liners para ambientes não interativos. Os comandos variam desde invocações simples do PowerShell até o uso de `rpcclient` no Linux, demonstrando a versatilidade dos vetores de ataque.
+Ter o `ExtendedRight` em um usuário para `User-Force-Change-Password` permite redefinições de senha sem conhecer a senha atual. A verificação desse direito e sua exploração podem ser feitas através do PowerShell ou ferramentas de linha de comando alternativas, oferecendo vários métodos para redefinir a senha de um usuário, incluindo sessões interativas e comandos de uma linha para ambientes não interativos. Os comandos variam desde invocações simples do PowerShell até o uso de `rpcclient` no Linux, demonstrando a versatilidade dos vetores de ataque.
 ```powershell
 Get-ObjectAcl -SamAccountName delegate -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}
 Set-DomainUserPassword -Identity delegate -Verbose

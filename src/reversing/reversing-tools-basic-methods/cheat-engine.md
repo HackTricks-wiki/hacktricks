@@ -30,7 +30,7 @@ Em _**Edit --> Settings --> Hotkeys**_ você pode definir diferentes **teclas de
 
 ## Modificando o valor
 
-Uma vez que você **encontrou** onde está o **valor** que está **procurando** (mais sobre isso nos próximos passos), você pode **modificá-lo** clicando duas vezes nele, e depois clicando duas vezes em seu valor:
+Uma vez que você **encontrou** onde está o **valor** que está **procurando** (mais sobre isso nos próximos passos), você pode **modificá-lo** clicando duas vezes nele e, em seguida, clicando duas vezes em seu valor:
 
 ![](<../../images/image (563).png>)
 
@@ -42,7 +42,7 @@ A **mudança** na **memória** será imediatamente **aplicada** (note que até o
 
 ## Buscando o valor
 
-Então, vamos supor que há um valor importante (como a vida do seu usuário) que você deseja melhorar, e você está procurando por esse valor na memória)
+Então, vamos supor que há um valor importante (como a vida do seu usuário) que você deseja melhorar, e você está procurando por esse valor na memória.
 
 ### Através de uma mudança conhecida
 
@@ -59,13 +59,13 @@ Cheat Engine irá procurar os **valores** que **foram de 100 para o novo valor**
 
 ### Valor desconhecido, mudança conhecida
 
-No cenário em que você **não sabe o valor** mas sabe **como fazê-lo mudar** (e até mesmo o valor da mudança), você pode procurar seu número.
+No cenário em que você **não sabe o valor**, mas sabe **como fazê-lo mudar** (e até mesmo o valor da mudança), você pode procurar seu número.
 
 Então, comece realizando uma varredura do tipo "**Valor inicial desconhecido**":
 
 ![](<../../images/image (890).png>)
 
-Depois, faça o valor mudar, indique **como** o **valor** **mudou** (no meu caso, foi diminuído em 1) e realize uma **próxima varredura**:
+Em seguida, faça o valor mudar, indique **como** o **valor** **mudou** (no meu caso, foi diminuído em 1) e realize uma **próxima varredura**:
 
 ![](<../../images/image (371).png>)
 
@@ -83,12 +83,12 @@ Note que há uma **grande quantidade de mudanças possíveis** e você pode faze
 
 Até agora, aprendemos como encontrar um endereço que armazena um valor, mas é altamente provável que em **diferentes execuções do jogo, esse endereço esteja em lugares diferentes da memória**. Então, vamos descobrir como sempre encontrar esse endereço.
 
-Usando alguns dos truques mencionados, encontre o endereço onde seu jogo atual está armazenando o valor importante. Então (parando o jogo se desejar) clique com o botão direito no **endereço** encontrado e selecione "**Descobrir o que acessa esse endereço**" ou "**Descobrir o que escreve para esse endereço**":
+Usando alguns dos truques mencionados, encontre o endereço onde seu jogo atual está armazenando o valor importante. Então (parando o jogo se desejar), clique com o botão direito no **endereço** encontrado e selecione "**Descobrir o que acessa este endereço**" ou "**Descobrir o que escreve neste endereço**":
 
 ![](<../../images/image (1067).png>)
 
 A **primeira opção** é útil para saber quais **partes** do **código** estão **usando** esse **endereço** (o que é útil para mais coisas, como **saber onde você pode modificar o código** do jogo).\
-A **segunda opção** é mais **específica**, e será mais útil neste caso, pois estamos interessados em saber **de onde esse valor está sendo escrito**.
+A **segunda opção** é mais **específica** e será mais útil neste caso, pois estamos interessados em saber **de onde esse valor está sendo escrito**.
 
 Uma vez que você tenha selecionado uma dessas opções, o **debugger** será **anexado** ao programa e uma nova **janela vazia** aparecerá. Agora, **jogue** o **jogo** e **modifique** esse **valor** (sem reiniciar o jogo). A **janela** deve ser **preenchida** com os **endereços** que estão **modificando** o **valor**:
 
@@ -98,15 +98,15 @@ Agora que você encontrou o endereço que está modificando o valor, você pode 
 
 ![](<../../images/image (1057).png>)
 
-Assim, você pode agora modificá-lo para que o código não afete seu número, ou sempre afete de uma maneira positiva.
+Assim, você pode agora modificá-lo para que o código não afete seu número ou sempre afete de maneira positiva.
 
 ### Endereço de memória aleatório - Encontrando o ponteiro
 
-Seguindo os passos anteriores, encontre onde o valor que você está interessado está. Então, usando "**Descobrir o que escreve para esse endereço**", descubra qual endereço escreve esse valor e clique duas vezes nele para obter a visualização da desassemblagem:
+Seguindo os passos anteriores, encontre onde o valor que você está interessado está. Então, usando "**Descobrir o que escreve neste endereço**", descubra qual endereço escreve esse valor e clique duas vezes nele para obter a visualização da desassemblagem:
 
 ![](<../../images/image (1039).png>)
 
-Depois, realize uma nova varredura **buscando o valor hex entre "\[]"** (o valor de $edx neste caso):
+Em seguida, realize uma nova varredura **buscando o valor hex entre "\[]"** (o valor de $edx neste caso):
 
 ![](<../../images/image (994).png>)
 
@@ -138,7 +138,7 @@ Então, imagine que você encontrou o endereço que está subtraindo 1 da vida d
 ![](<../../images/image (203).png>)
 
 Clique em Mostrar desassemblador para obter o **código desassemblado**.\
-Depois, clique **CTRL+a** para invocar a janela de Auto assemble e selecione _**Template --> Injeção de Código**_
+Em seguida, clique **CTRL+a** para invocar a janela de Auto assemble e selecione _**Template --> Injeção de Código**_
 
 ![](<../../images/image (902).png>)
 
@@ -154,7 +154,7 @@ Então, insira seu novo código assembly na seção "**newmem**" e remova o cód
 
 ![](<../../images/image (521).png>)
 
-**Clique em executar e assim seu código deve ser injetado no programa mudando o comportamento da funcionalidade!**
+**Clique em executar e assim seu código deve ser injetado no programa, mudando o comportamento da funcionalidade!**
 
 ## **Referências**
 

@@ -4,7 +4,7 @@
 
 ## Níveis de Integridade
 
-No Windows Vista e versões posteriores, todos os itens protegidos vêm com uma etiqueta de **nível de integridade**. Essa configuração geralmente atribui um nível de integridade "médio" a arquivos e chaves de registro, exceto para certas pastas e arquivos que o Internet Explorer 7 pode gravar em um nível de integridade baixo. O comportamento padrão é que processos iniciados por usuários padrão tenham um nível de integridade médio, enquanto serviços normalmente operam em um nível de integridade do sistema. Um rótulo de alta integridade protege o diretório raiz.
+No Windows Vista e versões posteriores, todos os itens protegidos vêm com uma etiqueta de **nível de integridade**. Essa configuração geralmente atribui um nível de integridade "médio" a arquivos e chaves de registro, exceto por certas pastas e arquivos que o Internet Explorer 7 pode gravar em um nível de integridade baixo. O comportamento padrão é que processos iniciados por usuários padrão tenham um nível de integridade médio, enquanto serviços normalmente operam em um nível de integridade do sistema. Um rótulo de alta integridade protege o diretório raiz.
 
 Uma regra chave é que objetos não podem ser modificados por processos com um nível de integridade inferior ao nível do objeto. Os níveis de integridade são:
 

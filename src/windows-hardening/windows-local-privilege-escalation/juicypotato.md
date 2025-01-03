@@ -11,7 +11,7 @@ roguepotato-and-printspoofer.md
 
 ## Juicy Potato (abusando dos privilégios dourados) <a href="#juicy-potato-abusing-the-golden-privileges" id="juicy-potato-abusing-the-golden-privileges"></a>
 
-_Uma versão adoçada de_ [_RottenPotatoNG_](https://github.com/breenmachine/RottenPotatoNG)_, com um pouco de suco, ou seja, **outro ferramenta de Escalação de Privilégios Locais, de Contas de Serviço do Windows para NT AUTHORITY\SYSTEM**_
+_Uma versão adoçada de_ [_RottenPotatoNG_](https://github.com/breenmachine/RottenPotatoNG)_, com um pouco de suco, ou seja, **outro ferramenta de Escalação de Privilégios Local, de Contas de Serviço do Windows para NT AUTHORITY\SYSTEM**_
 
 #### Você pode baixar juicypotato em [https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts](https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts)
 
@@ -19,13 +19,13 @@ _Uma versão adoçada de_ [_RottenPotatoNG_](https://github.com/breenmachine/Rot
 
 [**Do Readme do juicy-potato**](https://github.com/ohpe/juicy-potato/blob/master/README.md)**:**
 
-[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) e suas [variantes](https://github.com/decoder-it/lonelypotato) aproveitam a cadeia de escalonamento de privilégios baseada no [`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [serviço](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) tendo o ouvinte MiTM em `127.0.0.1:6666` e quando você tem privilégios `SeImpersonate` ou `SeAssignPrimaryToken`. Durante uma revisão de build do Windows, encontramos uma configuração onde `BITS` foi intencionalmente desativado e a porta `6666` foi ocupada.
+[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) e suas [variantes](https://github.com/decoder-it/lonelypotato) aproveitam a cadeia de escalonamento de privilégios baseada no [`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [serviço](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) tendo o ouvinte MiTM em `127.0.0.1:6666` e quando você tem privilégios `SeImpersonate` ou `SeAssignPrimaryToken`. Durante uma revisão de build do Windows, encontramos uma configuração onde `BITS` foi intencionalmente desativado e a porta `6666` estava ocupada.
 
-Decidimos armar [RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG): **Diga olá para Juicy Potato**.
+Decidimos transformar em arma [RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG): **Diga olá para Juicy Potato**.
 
 > Para a teoria, veja [Rotten Potato - Escalonamento de Privilégios de Contas de Serviço para SYSTEM](https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/) e siga a cadeia de links e referências.
 
-Descobrimos que, além de `BITS`, há vários servidores COM que podemos abusar. Eles só precisam:
+Descobrimos que, além de `BITS`, existem vários servidores COM que podemos abusar. Eles só precisam:
 
 1. ser instanciáveis pelo usuário atual, normalmente um “usuário de serviço” que tem privilégios de impersonação
 2. implementar a interface `IMarshal`
@@ -38,7 +38,7 @@ Após alguns testes, obtivemos e testamos uma lista extensa de [CLSID’s intere
 JuicyPotato permite que você:
 
 - **CLSID de destino** _escolha qualquer CLSID que você quiser._ [_Aqui_](http://ohpe.it/juicy-potato/CLSID/) _você pode encontrar a lista organizada por SO._
-- **Porta de escuta COM** _defina a porta de escuta COM que preferir (em vez da 6666 codificada)_
+- **Porta de escuta COM** _defina a porta de escuta COM que você prefere (em vez da 6666 codificada)_
 - **Endereço IP de escuta COM** _vincule o servidor a qualquer IP_
 - **Modo de criação de processo** _dependendo dos privilégios do usuário impersonado, você pode escolher entre:_
 - `CreateProcessWithToken` (precisa de `SeImpersonate`)
@@ -46,8 +46,8 @@ JuicyPotato permite que você:
 - `ambos`
 - **Processo a ser iniciado** _inicie um executável ou script se a exploração for bem-sucedida_
 - **Argumento do Processo** _personalize os argumentos do processo iniciado_
-- **Endereço do Servidor RPC** _para uma abordagem furtiva, você pode autenticar-se em um servidor RPC externo_
-- **Porta do Servidor RPC** _útil se você quiser autenticar-se em um servidor externo e o firewall estiver bloqueando a porta `135`…_
+- **Endereço do Servidor RPC** _para uma abordagem furtiva, você pode se autenticar em um servidor RPC externo_
+- **Porta do Servidor RPC** _útil se você quiser se autenticar em um servidor externo e o firewall estiver bloqueando a porta `135`…_
 - **MODO DE TESTE** _principalmente para fins de teste, ou seja, testando CLSIDs. Ele cria o DCOM e imprime o usuário do token. Veja_ [_aqui para testes_](http://ohpe.it/juicy-potato/Test/)
 
 ### Uso <a href="#usage" id="usage"></a>

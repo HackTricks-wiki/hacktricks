@@ -2,7 +2,7 @@
 
 # Credenciais DSRM
 
-Há uma conta de **administrador local** dentro de cada **DC**. Tendo privilégios de administrador nesta máquina, você pode usar mimikatz para **extrair o hash do Administrador local**. Em seguida, modificando um registro para **ativar esta senha** para que você possa acessar remotamente este usuário Administrador local.\
+Há uma conta de **administrador local** dentro de cada **DC**. Tendo privilégios de administrador nesta máquina, você pode usar o mimikatz para **extrair o hash do Administrador local**. Em seguida, modificando um registro para **ativar esta senha** para que você possa acessar remotamente este usuário Administrador local.\
 Primeiro, precisamos **extrair** o **hash** do usuário **Administrador local** dentro do DC:
 ```bash
 Invoke-Mimikatz -Command '"token::elevate" "lsadump::sam"'

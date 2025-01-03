@@ -85,7 +85,7 @@ wmic useraccount list /format:list
 wmic group list /format:list
 wmic sysaccount list /format:list
 ```
-A consulta remota do WMI para informações específicas, como administradores locais ou usuários conectados, é viável com uma construção cuidadosa de comandos.
+Consultas remotas ao WMI para informações específicas, como administradores locais ou usuários conectados, são viáveis com uma construção cuidadosa de comandos.
 
 ### **Consulta WMI Remota Manual**
 

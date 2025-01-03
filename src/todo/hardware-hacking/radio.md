@@ -26,7 +26,7 @@ No comportamento da GUI, é recomendado habilitar algumas coisas se seu PC supor
 
 ![](<../../images/image (960).png>)
 
-- O **Tuner** do SigDigger ajuda a **capturar melhores sinais** (mas também pode degradá-los). Idealmente, comece com 0 e continue **aumentando até** que você encontre o **ruído** introduzido que é **maior** do que a **melhoria do sinal** que você precisa).
+- O **Tuner** do SigDigger ajuda a **capturar melhores sinais** (mas também pode degradá-los). Idealmente, comece com 0 e continue **aumentando até** encontrar o **ruído** introduzido que é **maior** do que a **melhoria do sinal** que você precisa).
 
 ![](<../../images/image (1099).png>)
 
@@ -70,7 +70,7 @@ Além disso, uma frequência diferente é "representada" pelo gráfico IQ por um
 
 #### Verificando o envelope
 
-Verificando informações AM com [**SigDigger** ](https://github.com/BatchDrake/SigDigger)e apenas olhando para o **envelope**, você pode ver diferentes níveis de amplitude claros. O sinal utilizado está enviando pulsos com informações em AM, assim é como um pulso se parece:
+Verificando informações AM com [**SigDigger** ](https://github.com/BatchDrake/SigDigger)e apenas olhando para o **envelope**, você pode ver diferentes níveis de amplitude claros. O sinal usado está enviando pulsos com informações em AM, assim é como um pulso se parece:
 
 ![](<../../images/image (590).png>)
 
@@ -112,13 +112,13 @@ Você também pode indicar o número de símbolos que você vai selecionar e o S
 
 ### Obter Bits
 
-Tendo encontrado que este é um sinal **modulado em AM** e a **taxa de símbolos** (e sabendo que neste caso algo up significa 1 e algo down significa 0), é muito fácil **obter os bits** codificados no sinal. Então, selecione o sinal com informações e configure a amostragem e a decisão e pressione amostra (verifique se **Amplitude** está selecionado, a **Taxa de Símbolos** descoberta está configurada e a **recuperação de clock de Gadner** está selecionada):
+Tendo encontrado que este é um sinal **modulado em AM** e a **taxa de símbolos** (e sabendo que neste caso algo para cima significa 1 e algo para baixo significa 0), é muito fácil **obter os bits** codificados no sinal. Então, selecione o sinal com informações e configure a amostragem e a decisão e pressione amostra (verifique se **Amplitude** está selecionado, a **Taxa de Símbolos** descoberta está configurada e a **recuperação de clock de Gadner** está selecionada):
 
 ![](<../../images/image (965).png>)
 
 - **Sincronizar com intervalos de seleção** significa que se você selecionou anteriormente intervalos para encontrar a taxa de símbolos, essa taxa de símbolos será usada.
-- **Manual** significa que a taxa de símbolos indicada será usada.
-- Na **Seleção de intervalo fixo**, você indica o número de intervalos que devem ser selecionados e calcula a taxa de símbolos a partir disso.
+- **Manual** significa que a taxa de símbolos indicada será usada
+- Na **Seleção de intervalo fixo**, você indica o número de intervalos que devem ser selecionados e calcula a taxa de símbolos a partir disso
 - **Recuperação de clock de Gadner** é geralmente a melhor opção, mas você ainda precisa indicar alguma taxa de símbolos aproximada.
 
 Pressionando amostra, isso aparece:
@@ -135,7 +135,7 @@ Finalmente, **aumentando** o **Zoom** e **mudando o tamanho da Linha**, você po
 
 ![](<../../images/image (276).png>)
 
-Se o sinal tiver mais de 1 bit por símbolo (por exemplo, 2), o SigDigger **não tem como saber qual símbolo é** 00, 01, 10, 11, então usará diferentes **escalas de cinza** para representar cada um (e se você copiar os bits, usará **números de 0 a 3**, você precisará tratá-los).
+Se o sinal tiver mais de 1 bit por símbolo (por exemplo, 2), o SigDigger **não tem como saber qual símbolo é** 00, 01, 10, 11, então usará diferentes **escala de cinza** para representar cada um (e se você copiar os bits, usará **números de 0 a 3**, você precisará tratá-los).
 
 Além disso, use **codificações** como **Manchester**, e **up+down** pode ser **1 ou 0** e um down+up pode ser um 1 ou 0. Nesses casos, você precisa **tratar os ups (1) e downs (0) obtidos** para substituir os pares de 01 ou 10 por 0s ou 1s.
 
@@ -151,7 +151,7 @@ Exemplo de sinal enviando informações moduladas em FM:
 
 ![](<../../images/image (725).png>)
 
-Na imagem anterior, você pode observar bem que **2 frequências estão sendo usadas**, mas se você **observar** a **forma de onda**, pode **não ser capaz de identificar corretamente as 2 diferentes frequências**:
+Na imagem anterior, você pode observar bem que **2 frequências estão sendo usadas**, mas se você **observar** a **forma de onda**, pode **não ser capaz de identificar corretamente as 2 frequências diferentes**:
 
 ![](<../../images/image (717).png>)
 
@@ -159,7 +159,7 @@ Isso ocorre porque capturei o sinal em ambas as frequências, portanto, uma é a
 
 ![](<../../images/image (942).png>)
 
-Se a frequência sincronizada estiver **mais próxima de uma frequência do que da outra**, você pode facilmente ver as 2 diferentes frequências:
+Se a frequência sincronizada estiver **mais próxima de uma frequência do que da outra**, você pode ver facilmente as 2 frequências diferentes:
 
 ![](<../../images/image (422).png>)
 
@@ -171,11 +171,11 @@ Verificando o histograma de frequência do sinal com informações, você pode f
 
 ![](<../../images/image (871).png>)
 
-Neste caso, se você verificar o **histograma de Amplitude**, encontrará **apenas uma amplitude**, então **não pode ser AM** (se você encontrar muitas amplitudes, pode ser porque o sinal tem perdido potência ao longo do canal):
+Neste caso, se você verificar o **histograma de Amplitude**, encontrará **apenas uma amplitude**, então **não pode ser AM** (se você encontrar muitas amplitudes, pode ser porque o sinal perdeu potência ao longo do canal):
 
 ![](<../../images/image (817).png>)
 
-E este seria o histograma de fase (que deixa muito claro que o sinal não está modulado em fase):
+E este seria o histograma de fase (que deixa muito claro que o sinal não é modulado em fase):
 
 ![](<../../images/image (996).png>)
 
@@ -193,6 +193,6 @@ Você pode usar a **mesma técnica que a usada no exemplo de AM** para obter a t
 
 ### Obter Bits
 
-Você pode usar a **mesma técnica que a usada no exemplo de AM** para obter os bits uma vez que você tenha **descoberto que o sinal está modulado em frequência** e a **taxa de símbolos**.
+Você pode usar a **mesma técnica que a usada no exemplo de AM** para obter os bits uma vez que você tenha **descoberto que o sinal é modulado em frequência** e a **taxa de símbolos**.
 
 {{#include ../../banners/hacktricks-training.md}}

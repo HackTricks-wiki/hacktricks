@@ -47,7 +47,7 @@ Se você precisar **descompilar**, **modificar** e **recompilar** novamente, pod
 
 ### Registro DNSpy
 
-Para fazer com que **DNSpy registre algumas informações em um arquivo**, você pode usar este trecho:
+Para fazer **DNSpy registrar algumas informações em um arquivo**, você pode usar este trecho:
 ```cs
 using System.IO;
 path = "C:\\inetpub\\temp\\MyTest2.txt";
@@ -78,9 +78,9 @@ Em seguida, salve o novo arquivo via _**File >> Save module...**_:
 
 ![](<../../images/image (602).png>)
 
-Isso é necessário porque, se você não fizer isso, durante a **execução** várias **otimizações** serão aplicadas ao código e pode ser possível que, ao depurar, um **ponto de interrupção nunca seja atingido** ou algumas **variáveis não existam**.
+Isso é necessário porque se você não fizer isso, em **runtime** várias **optimisations** serão aplicadas ao código e pode ser possível que enquanto depurando um **break-point nunca seja atingido** ou algumas **variáveis não existam**.
 
-Então, se sua aplicação .NET estiver sendo **executada** pelo **IIS**, você pode **reiniciá-la** com:
+Então, se sua aplicação .NET estiver sendo **run** pelo **IIS**, você pode **restart** ela com:
 ```
 iisreset /noforce
 ```
@@ -165,7 +165,7 @@ cheat-engine.md
 [**Blobrunner**](https://github.com/OALabs/BlobRunner) irá **alocar** o **shellcode** dentro de um espaço de memória, irá **indicar** o **endereço de memória** onde o shellcode foi alocado e irá **parar** a execução.\
 Então, você precisa **anexar um depurador** (Ida ou x64dbg) ao processo e colocar um **breakpoint no endereço de memória indicado** e **retomar** a execução. Dessa forma, você estará depurando o shellcode.
 
-A página de lançamentos do github contém zips com os lançamentos compilados: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
+A página de lançamentos do github contém zips contendo os lançamentos compilados: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
 Você pode encontrar uma versão ligeiramente modificada do Blobrunner no seguinte link. Para compilá-lo, basta **criar um projeto C/C++ no Visual Studio Code, copiar e colar o código e compilar**.
 
 {{#ref}}
@@ -184,7 +184,7 @@ Você pode baixar uma versão compilada de [jmp2it na página de lançamentos](h
 
 [**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) é a GUI do radare. Usando o cutter, você pode emular o shellcode e inspecioná-lo dinamicamente.
 
-Observe que o Cutter permite que você "Abra Arquivo" e "Abra Shellcode". No meu caso, quando abri o shellcode como um arquivo, ele o decompilou corretamente, mas quando o abri como um shellcode, não:
+Observe que o Cutter permite que você "Abra Arquivo" e "Abra Shellcode". No meu caso, quando eu abri o shellcode como um arquivo, ele o decompilou corretamente, mas quando eu o abri como um shellcode, não:
 
 ![](<../../images/image (562).png>)
 
@@ -214,7 +214,7 @@ scDbg também conta com um lançador gráfico onde você pode selecionar as opç
 
 ![](<../../images/image (258).png>)
 
-A opção **Create Dump** irá despejar o shellcode final se alguma alteração for feita no shellcode dinamicamente na memória (útil para baixar o shellcode decodificado). O **start offset** pode ser útil para iniciar o shellcode em um deslocamento específico. A opção **Debug Shell** é útil para depurar o shellcode usando o terminal scDbg (no entanto, eu acho que qualquer uma das opções explicadas antes é melhor para isso, pois você poderá usar o Ida ou x64dbg).
+A opção **Create Dump** irá despejar o shellcode final se alguma alteração for feita no shellcode dinamicamente na memória (útil para baixar o shellcode decodificado). O **start offset** pode ser útil para iniciar o shellcode em um deslocamento específico. A opção **Debug Shell** é útil para depurar o shellcode usando o terminal scDbg (no entanto, eu acho que qualquer uma das opções explicadas anteriormente é melhor para isso, pois você poderá usar o Ida ou x64dbg).
 
 ### Desmontando usando CyberChef
 
@@ -249,17 +249,17 @@ Tendo o **nome** das **funções** sendo chamadas, pesquise por elas na **Intern
 
 Para binários compilados em Delphi, você pode usar [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
 
-Se você precisar reverter um binário Delphi, eu sugeriria usar o plugin IDA [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
+Se você precisar reverter um binário Delphi, eu sugeriria que você usasse o plugin IDA [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
 
 Basta pressionar **ATL+f7** (importar plugin python no IDA) e selecionar o plugin python.
 
 Este plugin executará o binário e resolverá os nomes das funções dinamicamente no início da depuração. Após iniciar a depuração, pressione novamente o botão Iniciar (o verde ou f9) e um ponto de interrupção será atingido no início do código real.
 
-É também muito interessante porque se você pressionar um botão na aplicação gráfica, o depurador parará na função executada por esse botão.
+É também muito interessante porque, se você pressionar um botão na aplicação gráfica, o depurador parará na função executada por esse botão.
 
 ## Golang
 
-Se você precisar reverter um binário Golang, eu sugeriria usar o plugin IDA [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
+Se você precisar reverter um binário Golang, eu sugeriria que você usasse o plugin IDA [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
 
 Basta pressionar **ATL+f7** (importar plugin python no IDA) e selecionar o plugin python.
 
@@ -267,7 +267,7 @@ Isso resolverá os nomes das funções.
 
 ## Python Compilado
 
-Nesta página você pode encontrar como obter o código python de um binário python compilado ELF/EXE:
+Nesta página, você pode encontrar como obter o código python de um binário python compilado ELF/EXE:
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md
@@ -326,7 +326,7 @@ FUN_08000dd0(&DAT_02009584,0x6000000,&DAT_030000dc);
 FUN_08000354(&DAT_030000dc,0x3c);
 uVar4 = DAT_030004d8;
 ```
-Encontrou este código:
+Foi encontrado este código:
 ```c
 do {
 DAT_030004da = uVar4; //This is the last key pressed

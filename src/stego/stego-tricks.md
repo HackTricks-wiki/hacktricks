@@ -91,7 +91,7 @@ stegcracker <file> [<wordlist>]
 ```
 ### **zsteg para Arquivos PNG e BMP**
 
-zsteg se especializa em descobrir dados ocultos em arquivos PNG e BMP. A instalação é feita via `gem install zsteg`, com sua [fonte no GitHub](https://github.com/zed-0xff/zsteg).
+zsteg se especializa em descobrir dados ocultos em arquivos PNG e BMP. A instalação é feita via `gem install zsteg`, com seu [código-fonte no GitHub](https://github.com/zed-0xff/zsteg).
 
 **Comandos:**
 

@@ -110,22 +110,22 @@ Kerberoasting pode ser realizado com um alto grau de furtividade se for explorá
 
 - O nome do serviço não deve ser **krbtgt**, pois este é um pedido normal.
 - Nomes de serviços que terminam com **$** devem ser excluídos para evitar incluir contas de máquina usadas para serviços.
-- Pedidos de máquinas devem ser filtrados excluindo nomes de contas formatados como **machine@domain**.
-- Apenas pedidos de ticket bem-sucedidos devem ser considerados, identificados por um código de falha de **'0x0'**.
+- Solicitações de máquinas devem ser filtradas excluindo nomes de contas formatados como **machine@domain**.
+- Apenas solicitações de ticket bem-sucedidas devem ser consideradas, identificadas por um código de falha de **'0x0'**.
 - **Mais importante**, o tipo de criptografia do ticket deve ser **0x17**, que é frequentemente usado em ataques de Kerberoasting.
 ```bash
 Get-WinEvent -FilterHashtable @{Logname='Security';ID=4769} -MaxEvents 1000 | ?{$_.Message.split("`n")[8] -ne 'krbtgt' -and $_.Message.split("`n")[8] -ne '*$' -and $_.Message.split("`n")[3] -notlike '*$@*' -and $_.Message.split("`n")[18] -like '*0x0*' -and $_.Message.split("`n")[17] -like "*0x17*"} | select ExpandProperty message
 ```
 Para mitigar o risco de Kerberoasting:
 
-- Assegure que **Senhas de Contas de Serviço sejam difíceis de adivinhar**, recomendando um comprimento de mais de **25 caracteres**.
+- Assegure-se de que **Senhas de Contas de Serviço sejam difíceis de adivinhar**, recomendando um comprimento de mais de **25 caracteres**.
 - Utilize **Contas de Serviço Gerenciadas**, que oferecem benefícios como **mudanças automáticas de senha** e **Gerenciamento Delegado de Nome Principal de Serviço (SPN)**, aumentando a segurança contra tais ataques.
 
 Ao implementar essas medidas, as organizações podem reduzir significativamente o risco associado ao Kerberoasting.
 
 ## Kerberoast sem conta de domínio
 
-Em **setembro de 2022**, uma nova forma de explorar um sistema foi revelada por um pesquisador chamado Charlie Clark, compartilhada através de sua plataforma [exploit.ph](https://exploit.ph/). Este método permite a aquisição de **Tickets de Serviço (ST)** via uma solicitação **KRB_AS_REQ**, que notavelmente não requer controle sobre nenhuma conta do Active Directory. Essencialmente, se um principal estiver configurado de tal forma que não exija pré-autenticação—um cenário semelhante ao que é conhecido no campo da cibersegurança como um ataque **AS-REP Roasting**—essa característica pode ser aproveitada para manipular o processo de solicitação. Especificamente, ao alterar o atributo **sname** dentro do corpo da solicitação, o sistema é enganado para emitir um **ST** em vez do padrão Ticket Granting Ticket (TGT) criptografado.
+Em **setembro de 2022**, uma nova forma de explorar um sistema foi revelada por um pesquisador chamado Charlie Clark, compartilhada através de sua plataforma [exploit.ph](https://exploit.ph/). Este método permite a aquisição de **Tickets de Serviço (ST)** via uma solicitação **KRB_AS_REQ**, que notavelmente não requer controle sobre nenhuma conta do Active Directory. Essencialmente, se um principal estiver configurado de tal forma que não exija pré-autenticação—um cenário semelhante ao que é conhecido no campo da cibersegurança como um **ataque AS-REP Roasting**—essa característica pode ser aproveitada para manipular o processo de solicitação. Especificamente, ao alterar o atributo **sname** dentro do corpo da solicitação, o sistema é enganado para emitir um **ST** em vez do padrão Ticket Granting Ticket (TGT) criptografado.
 
 A técnica é totalmente explicada neste artigo: [Semperis blog post](https://www.semperis.com/blog/new-attack-paths-as-requested-sts/).
 

@@ -40,7 +40,7 @@ O serviço CIFS é destacado como um alvo comum para acessar o sistema de arquiv
 | Tarefas Agendadas                         | HOST                                                                       |
 | Compartilhamento de Arquivos do Windows, também psexec | CIFS                                                                       |
 | Operações LDAP, incluindo DCSync          | LDAP                                                                       |
-| Ferramentas de Administração de Servidores Remotos do Windows | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
+| Ferramentas de Administração de Servidor Remoto do Windows | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
 | Golden Tickets                             | krbtgt                                                                     |
 
 Usando **Rubeus** você pode **pedir todos** esses tickets usando o parâmetro:
@@ -59,7 +59,7 @@ Nos exemplos a seguir, vamos imaginar que o ticket é recuperado impersonando a 
 
 ### CIFS
 
-Com este ticket, você poderá acessar a pasta `C$` e `ADMIN$` via **SMB** (se estiverem expostas) e copiar arquivos para uma parte do sistema de arquivos remoto apenas fazendo algo como:
+Com este ticket você poderá acessar a pasta `C$` e `ADMIN$` via **SMB** (se estiverem expostas) e copiar arquivos para uma parte do sistema de arquivos remoto apenas fazendo algo como:
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$

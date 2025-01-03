@@ -40,6 +40,6 @@ Get-RemoteLocalAccountHash -ComputerName <remotehost> -Verbose
 # Abuses the ACL backdoor set by Add-RemoteRegBackdoor to remotely retrieve the domain cached credentials for the specified machine.
 Get-RemoteCachedCredential -ComputerName <remotehost> -Verbose
 ```
-Verifique [**Silver Tickets**](silver-ticket.md) para aprender como você pode usar o hash da conta do computador de um Controlador de Domínio.
+Verifique [**Silver Tickets**](silver-ticket.md) para aprender como você poderia usar o hash da conta do computador de um Controlador de Domínio.
 
 {{#include ../../banners/hacktricks-training.md}}

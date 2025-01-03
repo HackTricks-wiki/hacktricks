@@ -54,7 +54,7 @@ Este passo de autenticação abre a possibilidade de enumerar e até explorar se
 ```
 ### Coletando a senha de confiança em texto claro
 
-No fluxo anterior, foi utilizado o hash de confiança em vez da **senha em texto claro** (que também foi **extraída pelo mimikatz**).
+No fluxo anterior, foi usado o hash de confiança em vez da **senha em texto claro** (que também foi **extraída pelo mimikatz**).
 
 A senha em texto claro pode ser obtida convertendo a saída \[ CLEAR ] do mimikatz de hexadecimal e removendo bytes nulos ‘\x00’:
 

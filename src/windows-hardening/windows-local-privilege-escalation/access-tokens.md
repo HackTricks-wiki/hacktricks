@@ -56,7 +56,7 @@ ou usando _Process Explorer_ da Sysinternals (selecione o processo e acesse a ab
 
 ### Administrador local
 
-Quando um administrador local faz login, **dois tokens de acesso são criados**: Um com direitos de administrador e outro com direitos normais. **Por padrão**, quando esse usuário executa um processo, o que possui **direitos regulares** (não-administrador) **é usado**. Quando esse usuário tenta **executar** qualquer coisa **como administrador** ("Executar como Administrador", por exemplo), o **UAC** será usado para pedir permissão.\
+Quando um administrador local faz login, **dois tokens de acesso são criados**: um com direitos de administrador e outro com direitos normais. **Por padrão**, quando esse usuário executa um processo, o que tem **direitos regulares** (não-administrador) **é usado**. Quando esse usuário tenta **executar** qualquer coisa **como administrador** ("Executar como Administrador", por exemplo), o **UAC** será usado para pedir permissão.\
 Se você quiser [**saber mais sobre o UAC, leia esta página**](../authentication-credentials-uac-and-efs/#uac)**.**
 
 ### Impersonação de credenciais de usuário
@@ -76,7 +76,7 @@ Isso é útil se você tiver credenciais úteis para acessar objetos na rede, ma
 
 Existem dois tipos de tokens disponíveis:
 
-- **Token Primário**: Serve como uma representação das credenciais de segurança de um processo. A criação e associação de tokens primários com processos são ações que requerem privilégios elevados, enfatizando o princípio da separação de privilégios. Normalmente, um serviço de autenticação é responsável pela criação do token, enquanto um serviço de logon lida com sua associação ao shell do sistema operacional do usuário. Vale ressaltar que os processos herdam o token primário de seu processo pai na criação.
+- **Token Primário**: Serve como uma representação das credenciais de segurança de um processo. A criação e associação de tokens primários com processos são ações que requerem privilégios elevados, enfatizando o princípio da separação de privilégios. Normalmente, um serviço de autenticação é responsável pela criação do token, enquanto um serviço de logon lida com sua associação com o shell do sistema operacional do usuário. Vale ressaltar que os processos herdam o token primário de seu processo pai na criação.
 - **Token de Impersonação**: Capacita uma aplicação de servidor a adotar temporariamente a identidade do cliente para acessar objetos seguros. Este mecanismo é estratificado em quatro níveis de operação:
 - **Anônimo**: Concede acesso ao servidor semelhante ao de um usuário não identificado.
 - **Identificação**: Permite que o servidor verifique a identidade do cliente sem utilizá-la para acesso a objetos.

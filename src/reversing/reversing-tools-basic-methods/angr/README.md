@@ -120,8 +120,8 @@ simgr.active[0].regs.rip #Get RIP from the last state
 ## Chamando funções
 
 - Você pode passar uma lista de argumentos através de `args` e um dicionário de variáveis de ambiente através de `env` para `entry_state` e `full_init_state`. Os valores nessas estruturas podem ser strings ou bitvectors, e serão serializados no estado como os argumentos e o ambiente para a execução simulada. O `args` padrão é uma lista vazia, então se o programa que você está analisando espera encontrar pelo menos um `argv[0]`, você deve sempre fornecer isso!
-- Se você gostaria que `argc` fosse simbólico, pode passar um bitvector simbólico como `argc` para os construtores `entry_state` e `full_init_state`. Tenha cuidado, porém: se você fizer isso, também deve adicionar uma restrição ao estado resultante de que seu valor para argc não pode ser maior do que o número de args que você passou para `args`.
-- Para usar o estado de chamada, você deve chamá-lo com `.call_state(addr, arg1, arg2, ...)`, onde `addr` é o endereço da função que você deseja chamar e `argN` é o N-ésimo argumento para essa função, seja como um inteiro python, string, ou array, ou um bitvector. Se você quiser ter memória alocada e realmente passar um ponteiro para um objeto, deve envolvê-lo em um PointerWrapper, ou seja, `angr.PointerWrapper("apontar para mim!")`. Os resultados desta API podem ser um pouco imprevisíveis, mas estamos trabalhando nisso.
+- Se você quiser que `argc` seja simbólico, pode passar um bitvector simbólico como `argc` para os construtores `entry_state` e `full_init_state`. Tenha cuidado, porém: se você fizer isso, também deve adicionar uma restrição ao estado resultante de que seu valor para argc não pode ser maior do que o número de args que você passou para `args`.
+- Para usar o estado de chamada, você deve chamá-lo com `.call_state(addr, arg1, arg2, ...)`, onde `addr` é o endereço da função que você deseja chamar e `argN` é o N-ésimo argumento para essa função, seja como um inteiro python, string, ou array, ou um bitvector. Se você quiser que a memória seja alocada e realmente passar um ponteiro para um objeto, você deve envolvê-lo em um PointerWrapper, ou seja, `angr.PointerWrapper("apontar para mim!")`. Os resultados desta API podem ser um pouco imprevisíveis, mas estamos trabalhando nisso.
 
 ## BitVectors
 ```python
@@ -184,7 +184,7 @@ True
 >>> proj.is_hooked(0x20000)
 True
 ```
-Além disso, você pode usar `proj.hook_symbol(name, hook)`, fornecendo o nome de um símbolo como o primeiro argumento, para conectar o endereço onde o símbolo reside.
+Além disso, você pode usar `proj.hook_symbol(name, hook)`, fornecendo o nome de um símbolo como o primeiro argumento, para conectar o endereço onde o símbolo reside
 
 # Exemplos
 

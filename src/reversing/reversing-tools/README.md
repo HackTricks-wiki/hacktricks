@@ -57,7 +57,7 @@ Para descompilar bytecode Java, estas ferramentas podem ser muito úteis:
 ### Usando IDA
 
 - **Rundll32** é carregado de caminhos específicos para versões de 64 bits e 32 bits.
-- **Windbg** é selecionado como o depurador com a opção de suspender no carregamento/descarregamento da biblioteca habilitada.
+- **Windbg** é selecionado como o depurador com a opção de suspender no carregamento/descarregamento de bibliotecas habilitada.
 - Os parâmetros de execução incluem o caminho da DLL e o nome da função. Esta configuração interrompe a execução ao carregar cada DLL.
 
 ### Usando x64dbg/x32dbg
@@ -94,7 +94,7 @@ scdbg.exe -f shellcode /findsc # Encontrar deslocamento inicial
 scdbg.exe -f shellcode /foff 0x0000004D # Executar a partir do deslocamento
 %%%
 
-- **CyberChef** para desassemblar shellcode: [Receita CyberChef](https://gchq.github.io/CyberChef/#recipe=To_Hex%28'Space',0%29Disassemble_x86%28'32','Full%20x86%20architecture',16,0,true,true%29)
+- **CyberChef** para desassemblar shellcode: [receita CyberChef](https://gchq.github.io/CyberChef/#recipe=To_Hex%28'Space',0%29Disassemble_x86%28'32','Full%20x86%20architecture',16,0,true,true%29)
 
 ## **Movfuscator**
 

@@ -4,7 +4,7 @@
 
 FISSURE é um framework de RF e engenharia reversa de código aberto projetado para todos os níveis de habilidade, com ganchos para detecção e classificação de sinais, descoberta de protocolos, execução de ataques, manipulação de IQ, análise de vulnerabilidades, automação e IA/ML. O framework foi construído para promover a integração rápida de módulos de software, rádios, protocolos, dados de sinal, scripts, gráficos de fluxo, material de referência e ferramentas de terceiros. FISSURE é um facilitador de fluxo de trabalho que mantém o software em um único local e permite que as equipes se atualizem facilmente enquanto compartilham a mesma configuração base comprovada para distribuições específicas do Linux.
 
-O framework e as ferramentas incluídas no FISSURE são projetados para detectar a presença de energia RF, entender as características de um sinal, coletar e analisar amostras, desenvolver técnicas de transmissão e/ou injeção e criar cargas úteis ou mensagens personalizadas. O FISSURE contém uma biblioteca crescente de informações sobre protocolos e sinais para auxiliar na identificação, criação de pacotes e fuzzing. Existem capacidades de arquivo online para baixar arquivos de sinal e construir playlists para simular tráfego e testar sistemas.
+O framework e as ferramentas incluídas no FISSURE são projetados para detectar a presença de energia RF, entender as características de um sinal, coletar e analisar amostras, desenvolver técnicas de transmissão e/ou injeção e criar cargas úteis ou mensagens personalizadas. FISSURE contém uma biblioteca crescente de informações sobre protocolos e sinais para auxiliar na identificação, criação de pacotes e fuzzing. Existem capacidades de arquivo online para baixar arquivos de sinal e construir playlists para simular tráfego e testar sistemas.
 
 A base de código Python amigável e a interface do usuário permitem que iniciantes aprendam rapidamente sobre ferramentas e técnicas populares envolvendo RF e engenharia reversa. Educadores em cibersegurança e engenharia podem aproveitar o material embutido ou utilizar o framework para demonstrar suas próprias aplicações do mundo real. Desenvolvedores e pesquisadores podem usar o FISSURE para suas tarefas diárias ou para expor suas soluções de ponta a um público mais amplo. À medida que a conscientização e o uso do FISSURE crescem na comunidade, também crescerá a extensão de suas capacidades e a abrangência da tecnologia que abrange.
 
@@ -58,7 +58,7 @@ Em seguida, selecione a opção que melhor corresponde ao seu sistema operaciona
 | :--------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------: |
 | ![install1b](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/install1b.png) | ![install1a](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/install1a.png) | ![install1c](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/install1c.png) |
 
-É recomendável instalar o FISSURE em um sistema operacional limpo para evitar conflitos existentes. Selecione todas as caixas de seleção recomendadas (botão padrão) para evitar erros ao operar as várias ferramentas dentro do FISSURE. Haverá vários prompts durante a instalação, principalmente solicitando permissões elevadas e nomes de usuário. Se um item contiver uma seção "Verificar" no final, o instalador executará o comando que se segue e destacará o item da caixa de seleção em verde ou vermelho, dependendo se algum erro for produzido pelo comando. Itens marcados sem uma seção "Verificar" permanecerão pretos após a instalação.
+É recomendável instalar o FISSURE em um sistema operacional limpo para evitar conflitos existentes. Selecione todas as caixas de seleção recomendadas (botão padrão) para evitar erros ao operar as várias ferramentas dentro do FISSURE. Haverá vários prompts durante a instalação, principalmente pedindo permissões elevadas e nomes de usuário. Se um item contiver uma seção "Verificar" no final, o instalador executará o comando que se segue e destacará o item da caixa de seleção em verde ou vermelho, dependendo se algum erro for produzido pelo comando. Itens marcados sem uma seção "Verificar" permanecerão pretos após a instalação.
 
 ![install2](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/install2.png)
 
@@ -84,7 +84,7 @@ Consulte o menu de Ajuda do FISSURE para mais detalhes sobre o uso.
 
 **Capacidades**
 
-| ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/detector.png)_**Detector de Sinal**_ | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/iq.png)_**Manipulação de IQ**_      | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/library.png)_**Busca de Sinal**_          | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/pd.png)_**Reconhecimento de Padrão**_ |
+| ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/detector.png)_**Detector de Sinal**_ | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/iq.png)_**Manipulação de IQ**_      | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/library.png)_**Busca de Sinal**_          | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/pd.png)_**Reconhecimento de Padrões**_ |
 | --------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/attack.png)_**Ataques**_           | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/fuzzing.png)_**Fuzzing**_         | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/archive.png)_**Playlists de Sinal**_       | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/gallery.png)_**Galeria de Imagens**_  |
 | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/packet.png)_**Criação de Pacotes**_   | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/scapy.png)_**Integração com Scapy**_ | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/crc\_calculator.png)_**Calculadora de CRC**_ | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/log.png)_**Registro**_            |
@@ -124,8 +124,8 @@ O FISSURE vem com vários guias úteis para se familiarizar com diferentes tecno
 * [ ] Suportar mais sistemas operacionais
 * [ ] Desenvolver material de aula em torno do FISSURE (Ataques RF, Wi-Fi, GNU Radio, PyQt, etc.)
 * [ ] Criar um condicionador de sinal, extrator de características e classificador de sinal com técnicas AI/ML selecionáveis
-* [ ] Implementar mecanismos de demodulação recursiva para produzir um bitstream a partir de sinais desconhecidos
-* [ ] Transitar os principais componentes do FISSURE para um esquema de implantação de nó sensor genérico
+* [ ] Implementar mecanismos de demodulação recursiva para produzir um fluxo de bits a partir de sinais desconhecidos
+* [ ] Transitar os principais componentes do FISSURE para um esquema genérico de implantação de nós sensores
 
 ## Contribuindo
 
@@ -151,7 +151,7 @@ Criar [Issues](https://github.com/ainfosec/FISSURE/issues) para chamar a atenç�
 
 ## Colaborando
 
-Entre em contato com a Assured Information Security, Inc. (AIS) Desenvolvimento de Negócios para propor e formalizar quaisquer oportunidades de colaboração com o FISSURE – seja dedicando tempo para integrar seu software, tendo as pessoas talentosas da AIS desenvolvendo soluções para seus desafios técnicos, ou integrando o FISSURE em outras plataformas/aplicações.
+Entre em contato com a Assured Information Security, Inc. (AIS) Desenvolvimento de Negócios para propor e formalizar quaisquer oportunidades de colaboração no FISSURE – seja dedicando tempo para integrar seu software, tendo as pessoas talentosas da AIS desenvolvendo soluções para seus desafios técnicos, ou integrando o FISSURE em outras plataformas/aplicações.
 
 ## Licença
 

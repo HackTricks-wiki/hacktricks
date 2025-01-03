@@ -16,7 +16,7 @@ Alguns blogs sobre o tema:
 
 - **Localização**: A lista de servidores LDAP é encontrada em: `Network > LDAP Setting > Setting Up LDAP`.
 - **Comportamento**: A interface permite modificações no servidor LDAP sem reintroduzir credenciais, visando a conveniência do usuário, mas apresentando riscos de segurança.
-- **Exploit**: O exploit envolve redirecionar o endereço do servidor LDAP para uma máquina controlada e aproveitar o recurso "Test Connection" para capturar credenciais.
+- **Exploit**: O exploit envolve redirecionar o endereço do servidor LDAP para uma máquina controlada e aproveitar o recurso "Testar Conexão" para capturar credenciais.
 
 ## Capturando Credenciais
 
@@ -32,7 +32,7 @@ No entanto, o sucesso deste método varia.
 
 ### Método 2: Servidor LDAP Completo com Slapd
 
-Uma abordagem mais confiável envolve a configuração de um servidor LDAP completo, pois a impressora realiza um null bind seguido por uma consulta antes de tentar a vinculação de credenciais.
+Uma abordagem mais confiável envolve a configuração de um servidor LDAP completo, pois a impressora realiza um bind nulo seguido por uma consulta antes de tentar o bind de credenciais.
 
 1. **Configuração do Servidor LDAP**: O guia segue os passos desta [fonte](https://www.server-world.info/en/note?os=Fedora_26&p=openldap).
 2. **Passos Chave**:

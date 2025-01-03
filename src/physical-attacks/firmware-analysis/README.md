@@ -13,7 +13,7 @@ Firmware é um software essencial que permite que dispositivos operem corretamen
 - A arquitetura da CPU e o sistema operacional que ele executa
 - Especificações do bootloader
 - Layout de hardware e folhas de dados
-- Métricas da base de código e locais de origem
+- Métricas de código e locais de origem
 - Bibliotecas externas e tipos de licença
 - Históricos de atualização e certificações regulatórias
 - Diagramas arquitetônicos e de fluxo
@@ -65,7 +65,7 @@ O binwalk geralmente o extrai dentro de uma **pasta nomeada como o tipo de siste
 
 #### Extração Manual do Sistema de Arquivos
 
-Às vezes, o binwalk **não terá o byte mágico do sistema de arquivos em suas assinaturas**. Nesses casos, use o binwalk para **encontrar o deslocamento do sistema de arquivos e esculpir o sistema de arquivos comprimido** do binário e **extrair manualmente** o sistema de arquivos de acordo com seu tipo usando os passos abaixo.
+Às vezes, o binwalk **não terá o byte mágico do sistema de arquivos em suas assinaturas**. Nesses casos, use o binwalk para **encontrar o deslocamento do sistema de arquivos e recortar o sistema de arquivos comprimido** do binário e **extrair manualmente** o sistema de arquivos de acordo com seu tipo usando os passos abaixo.
 ```
 $ binwalk DIR850L_REVB.bin
 
@@ -132,7 +132,7 @@ Para extrair **arquivos incorporados**, ferramentas e recursos como a documenta�
 
 ### Extraindo o Sistema de Arquivos
 
-Usando `binwalk -ev <bin>`, geralmente é possível extrair o sistema de arquivos, muitas vezes em um diretório nomeado de acordo com o tipo de sistema de arquivos (por exemplo, squashfs, ubifs). No entanto, quando **binwalk** não consegue reconhecer o tipo de sistema de arquivos devido à falta de bytes mágicos, a extração manual é necessária. Isso envolve usar `binwalk` para localizar o deslocamento do sistema de arquivos, seguido pelo comando `dd` para extrair o sistema de arquivos:
+Usando `binwalk -ev <bin>`, geralmente é possível extrair o sistema de arquivos, muitas vezes em um diretório nomeado de acordo com o tipo de sistema de arquivos (por exemplo, squashfs, ubifs). No entanto, quando **binwalk** não consegue reconhecer o tipo de sistema de arquivos devido à falta de bytes mágicos, a extração manual é necessária. Isso envolve usar `binwalk` para localizar o deslocamento do sistema de arquivos, seguido do comando `dd` para extrair o sistema de arquivos:
 ```bash
 $ binwalk DIR850L_REVB.bin
 
@@ -200,7 +200,7 @@ A análise em tempo de execução envolve interagir com um processo ou binário 
 
 ## Exploração Binária e Prova de Conceito
 
-Desenvolver um PoC para vulnerabilidades identificadas requer um entendimento profundo da arquitetura alvo e programação em linguagens de baixo nível. Proteções de tempo de execução em sistemas embarcados são raras, mas quando presentes, técnicas como Return Oriented Programming (ROP) podem ser necessárias.
+Desenvolver um PoC para vulnerabilidades identificadas requer um entendimento profundo da arquitetura alvo e programação em linguagens de baixo nível. Proteções de tempo de execução binárias em sistemas embarcados são raras, mas quando presentes, técnicas como Return Oriented Programming (ROP) podem ser necessárias.
 
 ## Sistemas Operacionais Preparados para Análise de Firmware
 
@@ -217,15 +217,15 @@ Para praticar a descoberta de vulnerabilidades em firmware, use os seguintes pro
 
 - OWASP IoTGoat
 - [https://github.com/OWASP/IoTGoat](https://github.com/OWASP/IoTGoat)
-- O Projeto de Firmware de Roteador Extremamente Vulnerável
+- The Damn Vulnerable Router Firmware Project
 - [https://github.com/praetorian-code/DVRF](https://github.com/praetorian-code/DVRF)
-- Roteador ARM Extremamente Vulnerável (DVAR)
+- Damn Vulnerable ARM Router (DVAR)
 - [https://blog.exploitlab.net/2018/01/dvar-damn-vulnerable-arm-router.html](https://blog.exploitlab.net/2018/01/dvar-damn-vulnerable-arm-router.html)
 - ARM-X
 - [https://github.com/therealsaumil/armx#downloads](https://github.com/therealsaumil/armx#downloads)
 - Azeria Labs VM 2.0
 - [https://azeria-labs.com/lab-vm-2-0/](https://azeria-labs.com/lab-vm-2-0/)
-- Dispositivo IoT Extremamente Vulnerável (DVID)
+- Damn Vulnerable IoT Device (DVID)
 - [https://github.com/Vulcainreo/DVID](https://github.com/Vulcainreo/DVID)
 
 ## Referências

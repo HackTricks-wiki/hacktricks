@@ -8,8 +8,8 @@ No método de ataque **Pass The Ticket (PTT)**, os atacantes **roubam o ticket d
 
 **Leia**:
 
-- [Harvesting tickets from Windows](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-windows.md)
-- [Harvesting tickets from Linux](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-linux.md)
+- [Coletando tickets do Windows](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-windows.md)
+- [Coletando tickets do Linux](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-linux.md)
 
 ### **Trocando tickets do Linux e Windows entre plataformas**
 

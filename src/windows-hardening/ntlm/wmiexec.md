@@ -12,7 +12,7 @@ Processos podem ser abertos em hosts onde o nome de usuário e a senha ou hash s
 
 ### Namespace
 
-Estruturado em uma hierarquia de estilo diretório, o contêiner de nível superior do WMI é \root, sob o qual diretórios adicionais, referidos como namespaces, estão organizados.  
+Estruturado em uma hierarquia estilo diretório, o contêiner de nível superior do WMI é \root, sob o qual diretórios adicionais, referidos como namespaces, estão organizados.  
 Comandos para listar namespaces:
 ```bash
 # Retrieval of Root namespaces
@@ -89,7 +89,7 @@ A consulta remota do WMI para informações específicas, como administradores l
 
 ### **Consulta WMI Remota Manual**
 
-A identificação discreta de administradores locais em uma máquina remota e usuários conectados pode ser alcançada por meio de consultas WMI específicas. `wmic` também suporta a leitura de um arquivo de texto para executar comandos em vários nós simultaneamente.
+A identificação furtiva de administradores locais em uma máquina remota e usuários conectados pode ser alcançada por meio de consultas WMI específicas. `wmic` também suporta a leitura de um arquivo de texto para executar comandos em múltiplos nós simultaneamente.
 
 Para executar remotamente um processo via WMI, como implantar um agente Empire, a seguinte estrutura de comando é empregada, com a execução bem-sucedida indicada por um valor de retorno de "0":
 ```bash

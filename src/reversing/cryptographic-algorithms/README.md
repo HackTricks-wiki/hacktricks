@@ -37,7 +37,7 @@ Verifique aqui a tabela de algoritmos possíveis e seus valores atribuídos: [ht
 
 ### Constantes de código
 
-Às vezes, é realmente fácil identificar um algoritmo graças ao fato de que ele precisa usar um valor especial e único.
+Às vezes, é muito fácil identificar um algoritmo graças ao fato de que ele precisa usar um valor especial e único.
 
 ![](<../../images/image (370).png>)
 
@@ -108,7 +108,7 @@ Também note o **tamanho do loop** (**132**) e o **número de operações XOR** 
 
 ![](<../../images/image (381).png>)
 
-Como foi mencionado antes, este código pode ser visualizado dentro de qualquer decompilador como uma **função muito longa**, pois **não há saltos** dentro dele. O código decompilado pode parecer o seguinte:
+Como foi mencionado anteriormente, este código pode ser visualizado dentro de qualquer decompilador como uma **função muito longa**, pois **não há saltos** dentro dela. O código decompilado pode parecer o seguinte:
 
 ![](<../../images/image (382).png>)
 

@@ -105,7 +105,7 @@ sc query windefend
 
 EFS protege arquivos por meio de criptografia, utilizando uma **chave simétrica** conhecida como **File Encryption Key (FEK)**. Esta chave é criptografada com a **chave pública** do usuário e armazenada dentro do **fluxo de dados alternativo** $EFS do arquivo criptografado. Quando a descriptografia é necessária, a correspondente **chave privada** do certificado digital do usuário é usada para descriptografar a FEK do fluxo $EFS. Mais detalhes podem ser encontrados [aqui](https://en.wikipedia.org/wiki/Encrypting_File_System).
 
-**Cenários de descriptografia sem iniciação do usuário** incluem:
+**Cenários de descriptografia sem a iniciação do usuário** incluem:
 
 - Quando arquivos ou pastas são movidos para um sistema de arquivos não-EFS, como [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table), eles são automaticamente descriptografados.
 - Arquivos criptografados enviados pela rede via protocolo SMB/CIFS são descriptografados antes da transmissão.
@@ -121,7 +121,7 @@ Este método de criptografia permite **acesso transparente** a arquivos criptogr
 
 ### Verificar informações do EFS
 
-Verifique se um **usuário** **usou** este **serviço** verificando se este caminho existe:`C:\users\<username>\appdata\roaming\Microsoft\Protect`
+Verifique se um **usuário** **usou** este **serviço** verificando se este caminho existe: `C:\users\<username>\appdata\roaming\Microsoft\Protect`
 
 Verifique **quem** tem **acesso** ao arquivo usando cipher /c \<file>\
 Você também pode usar `cipher /e` e `cipher /d` dentro de uma pasta para **criptografar** e **descriptografar** todos os arquivos
@@ -130,7 +130,7 @@ Você também pode usar `cipher /e` e `cipher /d` dentro de uma pasta para **cri
 
 #### Sendo Autoridade do Sistema
 
-Esse método requer que o **usuário vítima** esteja **executando** um **processo** dentro do host. Se esse for o caso, usando uma sessão `meterpreter`, você pode impersonar o token do processo do usuário (`impersonate_token` do `incognito`). Ou você poderia apenas `migrar` para o processo do usuário.
+Esse método requer que o **usuário vítima** esteja **executando** um **processo** dentro do host. Se esse for o caso, usando uma sessão `meterpreter`, você pode impersonar o token do processo do usuário (`impersonate_token` do `incognito`). Ou você poderia apenas `migrate` para o processo do usuário.
 
 #### Conhecendo a senha dos usuários
 
@@ -138,7 +138,7 @@ Esse método requer que o **usuário vítima** esteja **executando** um **proces
 
 ## Group Managed Service Accounts (gMSA)
 
-A Microsoft desenvolveu **Group Managed Service Accounts (gMSA)** para simplificar a gestão de contas de serviço em infraestruturas de TI. Ao contrário das contas de serviço tradicionais que frequentemente têm a configuração "**Senha nunca expira**" habilitada, os gMSAs oferecem uma solução mais segura e gerenciável:
+A Microsoft desenvolveu **Group Managed Service Accounts (gMSA)** para simplificar a gestão de contas de serviço em infraestruturas de TI. Ao contrário das contas de serviço tradicionais que frequentemente têm a configuração "**Senha nunca expira**" ativada, os gMSAs oferecem uma solução mais segura e gerenciável:
 
 - **Gerenciamento Automático de Senhas**: gMSAs usam uma senha complexa de 240 caracteres que muda automaticamente de acordo com a política de domínio ou computador. Este processo é gerenciado pelo Serviço de Distribuição de Chaves (KDC) da Microsoft, eliminando a necessidade de atualizações manuais de senha.
 - **Segurança Aprimorada**: Essas contas são imunes a bloqueios e não podem ser usadas para logins interativos, aumentando sua segurança.
@@ -160,7 +160,7 @@ Além disso, verifique esta [página da web](https://cube0x0.github.io/Relaying-
 
 ## LAPS
 
-A **Solução de Senha do Administrador Local (LAPS)**, disponível para download na [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), permite a gestão de senhas de Administrador local. Essas senhas, que são **aleatórias**, únicas e **regularmente alteradas**, são armazenadas centralmente no Active Directory. O acesso a essas senhas é restrito por meio de ACLs a usuários autorizados. Com permissões suficientes concedidas, a capacidade de ler senhas de administrador local é fornecida.
+A **Solução de Senha do Administrador Local (LAPS)**, disponível para download na [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), permite a gestão de senhas de Administrador local. Essas senhas, que são **aleatórias**, únicas e **trocadas regularmente**, são armazenadas centralmente no Active Directory. O acesso a essas senhas é restrito por meio de ACLs a usuários autorizados. Com permissões suficientes concedidas, a capacidade de ler senhas de administrador local é fornecida.
 
 {{#ref}}
 ../active-directory-methodology/laps.md
@@ -168,7 +168,7 @@ A **Solução de Senha do Administrador Local (LAPS)**, disponível para downloa
 
 ## Modo de Linguagem Constrangida do PowerShell
 
-O [**Modo de Linguagem Constrangida do PowerShell**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **bloqueia muitos dos recursos** necessários para usar o PowerShell de forma eficaz, como bloquear objetos COM, permitindo apenas tipos .NET aprovados, fluxos de trabalho baseados em XAML, classes do PowerShell e mais.
+O [**Modo de Linguagem Constrangida do PowerShell**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **limita muitas das funcionalidades** necessárias para usar o PowerShell de forma eficaz, como bloquear objetos COM, permitindo apenas tipos .NET aprovados, fluxos de trabalho baseados em XAML, classes do PowerShell e mais.
 
 ### **Verifique**
 ```powershell
@@ -233,7 +233,7 @@ O SSPI será responsável por encontrar o protocolo adequado para duas máquinas
 - %windir%\Windows\System32\Wdigest.dll
 - **Schannel**: SSL e TLS
 - %windir%\Windows\System32\Schannel.dll
-- **Negotiate**: É usado para negociar o protocolo a ser usado (Kerberos ou NTLM, sendo Kerberos o padrão)
+- **Negotiate**: É usado para negociar o protocolo a ser utilizado (Kerberos ou NTLM, sendo Kerberos o padrão)
 - %windir%\Windows\System32\lsasrv.dll
 
 #### A negociação pode oferecer vários métodos ou apenas um.

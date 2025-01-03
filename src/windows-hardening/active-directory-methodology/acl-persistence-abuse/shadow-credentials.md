@@ -23,7 +23,7 @@ Para aplicar esta técnica, certas condições devem ser atendidas:
 
 O abuso do Key Trust para objetos de computador abrange etapas além de obter um Ticket Granting Ticket (TGT) e o hash NTLM. As opções incluem:
 
-1. Criar um **ticket prateado RC4** para agir como usuários privilegiados no host pretendido.
+1. Criar um **ticket prata RC4** para agir como usuários privilegiados no host pretendido.
 2. Usar o TGT com **S4U2Self** para a impersonação de **usuários privilegiados**, necessitando alterações no Ticket de Serviço para adicionar uma classe de serviço ao nome do serviço.
 
 Uma vantagem significativa do abuso do Key Trust é sua limitação à chave privada gerada pelo atacante, evitando a delegação para contas potencialmente vulneráveis e não exigindo a criação de uma conta de computador, o que poderia ser desafiador de remover.

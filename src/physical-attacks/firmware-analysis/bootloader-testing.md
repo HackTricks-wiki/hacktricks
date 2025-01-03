@@ -38,7 +38,7 @@ Os seguintes passos são recomendados para modificar as configurações de inici
 
 6. **Interferência Cautelosa de Hardware**:
 
-- Tenha cuidado ao conectar um pino ao terra e interagir com chips SPI ou NAND flash durante a sequência de inicialização do dispositivo, especialmente antes da descompressão do kernel. Consulte o datasheet do chip NAND flash antes de encurtar pinos.
+- Tenha cuidado ao conectar um pino ao terra e interagir com chips SPI ou NAND flash durante a sequência de inicialização do dispositivo, especialmente antes que o kernel descompacte. Consulte o datasheet do chip NAND flash antes de encurtar pinos.
 
 7. **Configurar Servidor DHCP Malicioso**:
 - Configure um servidor DHCP malicioso com parâmetros prejudiciais para que um dispositivo os receba durante uma inicialização PXE. Utilize ferramentas como o servidor auxiliar DHCP do Metasploit (MSF). Modifique o parâmetro 'FILENAME' com comandos de injeção de comando, como `'a";/bin/sh;#'` para testar a validação de entrada para procedimentos de inicialização do dispositivo.

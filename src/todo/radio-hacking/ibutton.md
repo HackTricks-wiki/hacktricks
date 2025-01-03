@@ -22,7 +22,7 @@ Quando a chave chega ao leitor, os **contatos se tocam** e a chave é alimentada
 
 As chaves Dallas trocam dados usando o protocolo 1-wire. Com apenas um contato para transferência de dados (!!) em ambas as direções, do mestre para o escravo e vice-versa. O protocolo 1-wire funciona de acordo com o modelo Master-Slave. Nesta topologia, o Master sempre inicia a comunicação e o Slave segue suas instruções.
 
-Quando a chave (Slave) contata o intercomunicador (Master), o chip dentro da chave é ativado, alimentado pelo intercomunicador, e a chave é inicializada. Em seguida, o intercomunicador solicita a ID da chave. A seguir, examinaremos esse processo em mais detalhes.
+Quando a chave (Slave) entra em contato com o intercomunicador (Master), o chip dentro da chave é ativado, alimentado pelo intercomunicador, e a chave é inicializada. Em seguida, o intercomunicador solicita a ID da chave. A seguir, examinaremos esse processo em mais detalhes.
 
 Flipper pode funcionar tanto em modos Master quanto Slave. No modo de leitura da chave, o Flipper atua como um leitor, ou seja, funciona como um Master. E no modo de emulação da chave, o Flipper finge ser uma chave, estando no modo Slave.
 

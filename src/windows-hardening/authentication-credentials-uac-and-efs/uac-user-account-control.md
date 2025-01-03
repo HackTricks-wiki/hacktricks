@@ -4,7 +4,7 @@
 
 ## UAC
 
-[Controle de Conta de Usuário (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) é um recurso que permite um **prompt de consentimento para atividades elevadas**. Aplicativos têm diferentes níveis de `integridade`, e um programa com um **alto nível** pode realizar tarefas que **podem potencialmente comprometer o sistema**. Quando o UAC está habilitado, aplicativos e tarefas sempre **são executados sob o contexto de segurança de uma conta não-administradora** a menos que um administrador autorize explicitamente esses aplicativos/tarefas a ter acesso de nível administrador ao sistema para serem executados. É um recurso de conveniência que protege os administradores de alterações não intencionais, mas não é considerado uma barreira de segurança.
+[Controle de Conta de Usuário (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) é um recurso que permite um **prompt de consentimento para atividades elevadas**. Aplicativos têm diferentes níveis de `integridade`, e um programa com um **alto nível** pode realizar tarefas que **podem potencialmente comprometer o sistema**. Quando o UAC está habilitado, aplicativos e tarefas sempre **são executados sob o contexto de segurança de uma conta não-administradora** a menos que um administrador autorize explicitamente esses aplicativos/tarefas a ter acesso de nível administrador ao sistema para serem executados. É um recurso de conveniência que protege os administradores de mudanças não intencionais, mas não é considerado uma barreira de segurança.
 
 Para mais informações sobre níveis de integridade:
 
@@ -33,7 +33,7 @@ Esta [página](https://docs.microsoft.com/en-us/windows/security/identity-protec
 
 Alguns programas são **autoelevados automaticamente** se o **usuário pertence** ao **grupo de administradores**. Esses binários têm dentro de seus _**Manifests**_ a opção _**autoElevate**_ com valor _**True**_. O binário também deve ser **assinado pela Microsoft**.
 
-Então, para **burlar** o **UAC** (elevar do nível de integridade **médio** **para alto**) alguns atacantes usam esse tipo de binários para **executar código arbitrário** porque será executado a partir de um **processo de alta integridade**.
+Então, para **burlar** o **UAC** (elevar do **nível** de integridade **médio** **para alto**) alguns atacantes usam esse tipo de binários para **executar código arbitrário** porque será executado a partir de um **processo de alta integridade**.
 
 Você pode **verificar** o _**Manifest**_ de um binário usando a ferramenta _**sigcheck.exe**_ do Sysinternals. E você pode **ver** o **nível de integridade** dos processos usando _Process Explorer_ ou _Process Monitor_ (do Sysinternals).
 
@@ -62,10 +62,10 @@ ConsentPromptBehaviorAdmin    REG_DWORD    0x5
 - Se **`4`**, como `2`, mas não necessariamente na Área de Trabalho Segura
 - se **`5`**(**padrão**) pedirá ao administrador para confirmar a execução de binários não Windows com altos privilégios
 
-Então, você deve olhar para o valor de **`LocalAccountTokenFilterPolicy`**\
+Então, você deve olhar o valor de **`LocalAccountTokenFilterPolicy`**\
 Se o valor for **`0`**, então, apenas o usuário **RID 500** (**Administrador embutido**) pode realizar **tarefas administrativas sem UAC**, e se for `1`, **todas as contas dentro do grupo "Administradores"** podem fazê-lo.
 
-E, finalmente, olhe para o valor da chave **`FilterAdministratorToken`**\
+E, finalmente, olhe o valor da chave **`FilterAdministratorToken`**\
 Se **`0`**(padrão), a **conta de Administrador embutido pode** realizar tarefas de administração remota e se **`1`**, a conta de Administrador embutido **não pode** realizar tarefas de administração remota, a menos que `LocalAccountTokenFilterPolicy` esteja definido como `1`.
 
 #### Resumo
@@ -139,10 +139,10 @@ Documentação e ferramenta em [https://github.com/wh0amitz/KRBUACBypass](https:
 
 ### Exploits de bypass do UAC
 
-[**UACME** ](https://github.com/hfiref0x/UACME) que é uma **compilação** de vários exploits de bypass do UAC. Note que você precisará **compilar o UACME usando visual studio ou msbuild**. A compilação criará vários executáveis (como `Source\Akagi\outout\x64\Debug\Akagi.exe`), você precisará saber **qual você precisa.**\
+[**UACME**](https://github.com/hfiref0x/UACME) que é uma **compilação** de vários exploits de bypass do UAC. Note que você precisará **compilar o UACME usando visual studio ou msbuild**. A compilação criará vários executáveis (como `Source\Akagi\outout\x64\Debug\Akagi.exe`), você precisará saber **qual você precisa.**\
 Você deve **ter cuidado** porque alguns bypasses irão **solicitar outros programas** que irão **alertar** o **usuário** que algo está acontecendo.
 
-O UACME tem a **versão de build a partir da qual cada técnica começou a funcionar**. Você pode procurar por uma técnica que afete suas versões:
+UACME tem a **versão de build a partir da qual cada técnica começou a funcionar**. Você pode procurar por uma técnica que afete suas versões:
 ```
 PS C:\> [environment]::OSVersion.Version
 
@@ -154,7 +154,7 @@ Também, usando [esta](https://en.wikipedia.org/wiki/Windows_10_version_history)
 
 #### Mais bypass de UAC
 
-**Todas** as técnicas usadas aqui para contornar o AUC **exigem** um **shell interativo completo** com a vítima (um shell comum do nc.exe não é suficiente).
+**Todas** as técnicas usadas aqui para contornar o AUC **requerem** um **shell interativo completo** com a vítima (um shell comum do nc.exe não é suficiente).
 
 Você pode obter usando uma sessão de **meterpreter**. Migre para um **processo** que tenha o valor de **Session** igual a **1**:
 
@@ -174,10 +174,10 @@ Se você não se importar em ser barulhento, você sempre poderia **executar alg
 
 ### Seu próprio bypass - Metodologia básica de bypass de UAC
 
-Se você olhar para **UACME**, você notará que **a maioria dos bypasses de UAC abusa de uma vulnerabilidade de Dll Hijacking** (principalmente escrevendo a dll maliciosa em _C:\Windows\System32_). [Leia isso para aprender como encontrar uma vulnerabilidade de Dll Hijacking](../windows-local-privilege-escalation/dll-hijacking/).
+Se você olhar para **UACME**, você notará que **a maioria dos bypasses de UAC abusam de uma vulnerabilidade de Dll Hijacking** (principalmente escrevendo a dll maliciosa em _C:\Windows\System32_). [Leia isso para aprender como encontrar uma vulnerabilidade de Dll Hijacking](../windows-local-privilege-escalation/dll-hijacking/).
 
 1. Encontre um binário que irá **autoelevar** (verifique se, quando executado, ele roda em um nível de integridade alto).
-2. Com procmon, encontre eventos "**NAME NOT FOUND**" que podem ser vulneráveis a **DLL Hijacking**.
+2. Com o procmon, encontre eventos "**NAME NOT FOUND**" que podem ser vulneráveis a **DLL Hijacking**.
 3. Você provavelmente precisará **escrever** a DLL dentro de alguns **caminhos protegidos** (como C:\Windows\System32) onde você não tem permissões de escrita. Você pode contornar isso usando:
    1. **wusa.exe**: Windows 7, 8 e 8.1. Permite extrair o conteúdo de um arquivo CAB dentro de caminhos protegidos (porque essa ferramenta é executada a partir de um nível de integridade alto).
    2. **IFileOperation**: Windows 10.

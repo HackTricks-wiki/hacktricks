@@ -395,11 +395,11 @@ main(sys.argv)
 >   # Talvez, então, queiramos substituir John por uma
 >   # variável simbólica. Chamaremos:
 >   #
->   # name_bitvector = claripy.BVS('nome_simbólico', 4*8)
+>   # name_bitvector = claripy.BVS('symbolic_name', 4*8)
 >   #
 >   # Então, após o programa chamar fopen('hello.txt', 'r') e depois
 >   # fread(buffer, sizeof(char), 30, hello_txt_file), o buffer conteria
->   # a string do arquivo, exceto por quatro bytes simbólicos onde o nome seria
+>   # a string do arquivo, exceto quatro bytes simbólicos onde o nome seria
 >   # armazenado.
 >   # (!)
 > ```

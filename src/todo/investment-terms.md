@@ -2,11 +2,11 @@
 
 ## Spot
 
-Esta é a maneira mais básica de fazer algumas negociações. Você pode **indicar a quantidade do ativo e o preço** que deseja comprar ou vender, e sempre que esse preço for alcançado, a operação é realizada.
+Esta é a forma mais básica de realizar algumas negociações. Você pode **indicar a quantidade do ativo e o preço** que deseja comprar ou vender, e sempre que esse preço for alcançado, a operação é realizada.
 
 Normalmente, você também pode usar o **preço de mercado atual** para realizar a transação o mais rápido possível ao preço atual.
 
-**Stop Loss - Limite**: Você também pode indicar a quantidade e o preço dos ativos para comprar ou vender, enquanto também indica um preço mais baixo para comprar ou vender caso seja alcançado (para parar perdas).
+**Stop Loss - Limit**: Você também pode indicar a quantidade e o preço dos ativos para comprar ou vender, enquanto também indica um preço mais baixo para comprar ou vender caso seja alcançado (para parar perdas).
 
 ## Futuros
 
@@ -31,7 +31,7 @@ Caso o preço caia, o gerente do fundo ganhará benefícios porque venderá os a
 
 **Estes são "futuros" que durarão indefinidamente** (sem uma data de contrato final). É muito comum encontrá-los, por exemplo, em exchanges de criptomoedas, onde você pode entrar e sair de futuros com base no preço das criptos.
 
-Observe que, nesses casos, os benefícios e perdas podem ser em tempo real; se o preço aumentar 1%, você ganha 1%, se o preço diminuir 1%, você perderá.
+Observe que, nesses casos, os benefícios e perdas podem ser em tempo real; se o preço aumentar 1%, você ganha 1%; se o preço diminuir 1%, você perderá.
 
 ### Futuros com Alavancagem
 
@@ -55,12 +55,12 @@ No entanto, o comprador pagará uma taxa ao vendedor para abrir a opção (entã
 ### 2. **Risco:**
 
 * **Futuros:** Tanto o comprador quanto o vendedor assumem **risco ilimitado** porque estão obrigados a completar o contrato. O risco é a diferença entre o preço acordado e o preço de mercado na data de expiração.
-* **Opções:** O risco do comprador é limitado ao **prêmio** pago para adquirir a opção. Se o mercado não se mover a favor do detentor da opção, ele pode simplesmente deixar a opção expirar. No entanto, o **vendedor** (escritor) da opção tem risco ilimitado se o mercado se mover significativamente contra ele.
+* **Opções:** O risco do comprador é limitado ao **prêmio** pago para adquirir a opção. Se o mercado não se mover a favor do titular da opção, ele pode simplesmente deixar a opção expirar. No entanto, o **vendedor** (escritor) da opção tem risco ilimitado se o mercado se mover significativamente contra ele.
 
 ### 3. **Custo:**
 
 * **Futuros:** Não há custo inicial além da margem necessária para manter a posição, já que o comprador e o vendedor estão ambos obrigados a completar a negociação.
-* **Opções:** O comprador deve pagar um **prêmio da opção** antecipadamente pelo direito de exercer a opção. Este prêmio é essencialmente o custo da opção.
+* **Opções:** O comprador deve pagar um **prêmio de opção** antecipadamente pelo direito de exercer a opção. Este prêmio é essencialmente o custo da opção.
 
 ### 4. **Potencial de Lucro:**
 

@@ -19,21 +19,21 @@
 
 ### Considerações Especiais
 
-- **Subject Alternative Names (SANs)** expandem a aplicabilidade de um certificado para múltiplas identidades, crucial para servidores com múltiplos domínios. Processos de emissão seguros são vitais para evitar riscos de impersonação por atacantes manipulando a especificação SAN.
+- **Subject Alternative Names (SANs)** expandem a aplicabilidade de um certificado para múltiplas identidades, crucial para servidores com múltiplos domínios. Processos de emissão seguros são vitais para evitar riscos de impersonação por atacantes que manipulam a especificação SAN.
 
 ### Autoridades Certificadoras (CAs) no Active Directory (AD)
 
-AD CS reconhece certificados CA em uma floresta AD através de contêineres designados, cada um servindo a papéis únicos:
+O AD CS reconhece certificados de CA em uma floresta AD através de contêineres designados, cada um servindo a papéis únicos:
 
-- O contêiner **Certification Authorities** contém certificados CA raiz confiáveis.
+- O contêiner **Certification Authorities** contém certificados de CA raiz confiáveis.
 - O contêiner **Enrolment Services** detalha CAs Empresariais e seus modelos de certificado.
-- O objeto **NTAuthCertificates** inclui certificados CA autorizados para autenticação AD.
-- O contêiner **AIA (Authority Information Access)** facilita a validação da cadeia de certificados com certificados CA intermediários e cruzados.
+- O objeto **NTAuthCertificates** inclui certificados de CA autorizados para autenticação AD.
+- O contêiner **AIA (Authority Information Access)** facilita a validação da cadeia de certificados com certificados de CA intermediários e cruzados.
 
 ### Aquisição de Certificado: Fluxo de Solicitação de Certificado do Cliente
 
 1. O processo de solicitação começa com os clientes encontrando uma CA Empresarial.
-2. Um CSR é criado, contendo uma chave pública e outros detalhes, após a geração de um par de chaves pública-privada.
+2. Um CSR é criado, contendo uma chave pública e outros detalhes, após gerar um par de chaves pública-privada.
 3. A CA avalia o CSR em relação aos modelos de certificado disponíveis, emitindo o certificado com base nas permissões do modelo.
 4. Após a aprovação, a CA assina o certificado com sua chave privada e o retorna ao cliente.
 

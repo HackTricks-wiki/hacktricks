@@ -12,7 +12,7 @@ LangChain é uma estrutura projetada para construir aplicações com LLMs. Permi
 
 ### [**LitGPT**](https://github.com/Lightning-AI/litgpt)
 
-LitGPT é um projeto desenvolvido pela Lightning AI que aproveita a estrutura Lightning para facilitar o treinamento, ajuste fino e implantação de modelos baseados em GPT. Integra-se perfeitamente com outras ferramentas da Lightning AI, proporcionando fluxos de trabalho otimizados para lidar com modelos de linguagem em larga escala com desempenho e escalabilidade aprimorados.
+LitGPT é um projeto desenvolvido pela Lightning AI que aproveita a estrutura Lightning para facilitar o treinamento, ajuste fino e implantação de modelos baseados em GPT. Integra-se perfeitamente com outras ferramentas da Lightning AI, proporcionando fluxos de trabalho otimizados para lidar com modelos de linguagem em grande escala com desempenho e escalabilidade aprimorados.
 
 ### [**LitServe**](https://github.com/Lightning-AI/LitServe)
 
@@ -32,7 +32,7 @@ Oferece várias seções como:
 
 * **Modelos**: Um vasto repositório de **modelos de aprendizado de máquina pré-treinados** onde os usuários podem navegar, baixar e integrar modelos para várias tarefas como geração de texto, tradução, reconhecimento de imagem e mais.
 * **Conjuntos de Dados:** Uma **coleção abrangente de conjuntos de dados** usados para treinar e avaliar modelos. Facilita o acesso fácil a diversas fontes de dados, permitindo que os usuários encontrem e utilizem dados para seus projetos específicos de aprendizado de máquina.
-* **Espaços:** Uma plataforma para hospedar e compartilhar **aplicações interativas de aprendizado de máquina** e demonstrações. Permite que os desenvolvedores **demonstrem** seus modelos em ação, criem interfaces amigáveis e colaborem com outros compartilhando demonstrações ao vivo.
+* **Espaços:** Uma plataforma para hospedar e compartilhar **aplicações interativas de aprendizado de máquina** e demonstrações. Permite que os desenvolvedores **apresentem** seus modelos em ação, criem interfaces amigáveis e colaborem com outros compartilhando demonstrações ao vivo.
 
 ## [**TensorFlow Hub**](https://www.tensorflow.org/hub) **&** [**Kaggle**](https://www.kaggle.com/)
 
