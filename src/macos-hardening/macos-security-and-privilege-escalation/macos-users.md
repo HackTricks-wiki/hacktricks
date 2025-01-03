@@ -21,9 +21,9 @@ for i in "${state[@]}"; do sysadminctl -"${i}" status; done;
 ## User Privileges
 
 - **Standard User:** Mtumiaji wa msingi zaidi. Mtumiaji huyu anahitaji ruhusa zinazotolewa na mtumiaji wa admin anapojaribu kufunga programu au kufanya kazi nyingine za juu. Hawawezi kufanya hivyo peke yao.
-- **Admin User**: Mtumiaji ambaye hufanya kazi kwa muda mwingi kama mtumiaji wa kawaida lakini pia anaruhusiwa kufanya vitendo vya root kama vile kufunga programu na kazi nyingine za kiutawala. Watumiaji wote wanaotokana na kundi la admin **wanapewa ufikiaji wa root kupitia faili ya sudoers**.
+- **Admin User**: Mtumiaji ambaye anafanya kazi mara nyingi kama mtumiaji wa kawaida lakini pia anaruhusiwa kufanya vitendo vya root kama vile kufunga programu na kazi nyingine za kiutawala. Watumiaji wote wanaotegemea kundi la admin **wanapewa ufikiaji wa root kupitia faili ya sudoers**.
 - **Root**: Root ni mtumiaji anayeruhusiwa kufanya karibu kila kitendo (kuna vizuizi vinavyowekwa na ulinzi kama vile System Integrity Protection).
-- Kwa mfano, root hataweza kuweka faili ndani ya `/System`
+- Kwa mfano root hataweza kuweka faili ndani ya `/System`
 
 ## External Accounts
 

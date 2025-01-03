@@ -5,7 +5,7 @@
 
 ## **PE - Method 1**
 
-**Wakati mwingine**, **kwa kawaida \(au kwa sababu programu fulani inahitaji hivyo\)** ndani ya faili **/etc/sudoers** unaweza kupata baadhi ya mistari hii:
+**Wakati mwingine**, **kwa kawaida \(au kwa sababu programu fulani inahitaji hivyo\)** ndani ya faili ya **/etc/sudoers** unaweza kupata baadhi ya mistari hii:
 ```bash
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
@@ -29,7 +29,7 @@ Ikiwa unapata kwamba binary pkexec ni binary ya SUID na unategemea sudo au admin
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
-Hapo utapata ni kundi gani lina ruhusa ya kutekeleza **pkexec** na **kwa default** katika baadhi ya linux zinaweza **kuonekana** baadhi ya makundi **sudo au admin**.
+Hapo utapata ni vikundi vipi vinavyoruhusiwa kutekeleza **pkexec** na **kwa kawaida** katika baadhi ya linux vinaweza **kuonekana** baadhi ya vikundi **sudo au admin**.
 
 Ili **kuwa root unaweza kutekeleza**:
 ```bash
@@ -54,25 +54,25 @@ pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 ```
 # Wheel Group
 
-**Wakati mwingine**, **kwa default** ndani ya **/etc/sudoers** faili unaweza kupata mstari huu:
+**Wakati mwingine**, **kwa kawaida** ndani ya **/etc/sudoers** faili unaweza kupata mstari huu:
 ```text
 %wheel	ALL=(ALL:ALL) ALL
 ```
-Hii inamaanisha kwamba **mtumiaji yeyote anaye belong kwenye kundi la wheel anaweza kutekeleza chochote kama sudo**.
+Hii inamaanisha kwamba **mtumiaji yeyote anaye belong kwa kundi la wheel anaweza kutekeleza chochote kama sudo**.
 
-Ikiwa hii ni hali, ili **kuwa root unaweza tu kutekeleza**:
+Ikiwa hii ni hali, **ili kuwa root unaweza tu kutekeleza**:
 ```text
 sudo su
 ```
 # Shadow Group
 
-Watumiaji kutoka **group shadow** wanaweza **kusoma** faili **/etc/shadow**:
+Watumiaji kutoka **group shadow** wanaweza **kusoma** faili ya **/etc/shadow**:
 ```text
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
 Hivyo, soma faili na jaribu **kufungua baadhi ya hash**.
 
-# Kikundi cha Disk
+# Kundi la Disk
 
 Hii haki ni karibu **sawa na ufikiaji wa root** kwani unaweza kufikia data zote ndani ya mashine.
 
@@ -84,7 +84,7 @@ debugfs: ls
 debugfs: cat /root/.ssh/id_rsa
 debugfs: cat /etc/shadow
 ```
-Kumbuka kwamba kutumia debugfs unaweza pia **kuandika faili**. Kwa mfano, ili nakala ya `/tmp/asd1.txt` kwenda `/tmp/asd2.txt` unaweza kufanya:
+Kumbuka kwamba ukitumia debugfs unaweza pia **kuandika faili**. Kwa mfano, ili nakala ya `/tmp/asd1.txt` kwenda `/tmp/asd2.txt` unaweza kufanya:
 ```bash
 debugfs -w /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
@@ -93,7 +93,7 @@ Hata hivyo, ikiwa unajaribu **kuandika faili zinazomilikiwa na root** \(kama `/e
 
 # Video Group
 
-Kwa kutumia amri `w` unaweza kupata **nani aliyeingia kwenye mfumo** na itakuonyesha matokeo kama yafuatayo:
+Kwa kutumia amri `w` unaweza kupata **nani aliyeingia kwenye mfumo** na itaonyesha matokeo kama ifuatavyo:
 ```bash
 USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
 yossi    tty1                      22:16    5:13m  0.05s  0.04s -bash
@@ -110,13 +110,13 @@ Ili **kufungua** **picha halisi** unaweza kutumia **GIMP**, chagua faili **`scre
 
 ![](../../images/image%20%28208%29.png)
 
-Kisha badilisha Upana na Kimo kuwa zile zinazotumika kwenye skrini na angalia Aina tofauti za Picha \(na uchague ile inayoonyesha vizuri skrini\):
+Kisha badilisha Upana na Kimo kuwa zile zinazotumika kwenye skrini na angalia aina tofauti za Picha \(na uchague ile inayoonyesha vizuri skrini\):
 
 ![](../../images/image%20%28295%29.png)
 
 # Kundi la Root
 
-Inaonekana kwamba kwa kawaida **wanachama wa kundi la root** wanaweza kuwa na ufikiaji wa **kubadilisha** baadhi ya **faili za usanidi** wa **huduma** au baadhi ya **faili za maktaba** au **mambo mengine ya kuvutia** ambayo yanaweza kutumika kuongeza mamlaka...
+Inaonekana kama kwa kawaida **wanachama wa kundi la root** wanaweza kuwa na ufikiaji wa **kubadilisha** baadhi ya **faili za usanidi** wa **huduma** au baadhi ya **faili za maktaba** au **mambo mengine ya kuvutia** ambayo yanaweza kutumika kuongeza mamlaka...
 
 **Angalia ni faili zipi wanachama wa root wanaweza kubadilisha**:
 ```bash
@@ -124,7 +124,7 @@ find / -group root -perm -g=w 2>/dev/null
 ```
 # Kundi la Docker
 
-Unaweza kuunganisha mfumo wa faili wa mwenyeji kwenye kiasi cha mfano, hivyo wakati mfano unapoanza, mara moja inachaji `chroot` kwenye kiasi hicho. Hii inakupa kwa ufanisi root kwenye mashine.
+Unaweza kuunganisha mfumo wa faili wa mizizi wa mashine mwenyeji kwenye kiasi cha mfano, hivyo wakati mfano unapoanza, mara moja inachaji `chroot` kwenye kiasi hicho. Hii inakupa kwa ufanisi mizizi kwenye mashine hiyo.
 
 {% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
 

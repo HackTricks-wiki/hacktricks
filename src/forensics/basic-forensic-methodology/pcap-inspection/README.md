@@ -2,31 +2,25 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
-
-[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
-
-{% embed url="https://www.rootedcon.com/" %}
-
 > [!NOTE]
-> A note about **PCAP** vs **PCAPNG**: there are two versions of the PCAP file format; **PCAPNG is newer and not supported by all tools**. You may need to convert a file from PCAPNG to PCAP using Wireshark or another compatible tool, in order to work with it in some other tools.
+> Kumbuka kuhusu **PCAP** dhidi ya **PCAPNG**: kuna toleo mbili za muundo wa faili wa PCAP; **PCAPNG ni mpya na haikubaliwi na zana zote**. Unaweza kuhitaji kubadilisha faili kutoka PCAPNG hadi PCAP kwa kutumia Wireshark au zana nyingine zinazofaa, ili kufanya kazi nayo katika zana nyingine.
 
-## Online tools for pcaps
+## Zana za mtandaoni za pcaps
 
-- If the header of your pcap is **broken** you should try to **fix** it using: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)
-- Extract **information** and search for **malware** inside a pcap in [**PacketTotal**](https://packettotal.com)
-- Search for **malicious activity** using [**www.virustotal.com**](https://www.virustotal.com) and [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com)
+- Ikiwa kichwa cha pcap yako ni **kilichovunjika** unapaswa kujaribu **kurekebisha** kwa kutumia: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)
+- Toa **habari** na tafuta **malware** ndani ya pcap katika [**PacketTotal**](https://packettotal.com)
+- Tafuta **shughuli mbaya** kwa kutumia [**www.virustotal.com**](https://www.virustotal.com) na [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com)
 
-## Extract Information
+## Toa Habari
 
-The following tools are useful to extract statistics, files, etc.
+Zana zifuatazo ni muhimu kutoa takwimu, faili, n.k.
 
 ### Wireshark
 
 > [!NOTE]
-> **If you are going to analyze a PCAP you basically must to know how to use Wireshark**
+> **Ikiwa unakusudia kuchambua PCAP lazima ujue jinsi ya kutumia Wireshark**
 
-You can find some Wireshark tricks in:
+Unaweza kupata hila za Wireshark katika:
 
 {{#ref}}
 wireshark-tricks.md
@@ -34,64 +28,56 @@ wireshark-tricks.md
 
 ### Xplico Framework
 
-[**Xplico** ](https://github.com/xplico/xplico)_(only linux)_ can **analyze** a **pcap** and extract information from it. For example, from a pcap file Xplico, extracts each email (POP, IMAP, and SMTP protocols), all HTTP contents, each VoIP call (SIP), FTP, TFTP, and so on.
+[**Xplico** ](https://github.com/xplico/xplico)_(tu linux)_ inaweza **kuchambua** **pcap** na kutoa habari kutoka kwake. Kwa mfano, kutoka kwa faili ya pcap Xplico, inatoa kila barua pepe (protokali za POP, IMAP, na SMTP), maudhui yote ya HTTP, kila simu ya VoIP (SIP), FTP, TFTP, na kadhalika.
 
-**Install**
-
+**Sakinisha**
 ```bash
 sudo bash -c 'echo "deb http://repo.xplico.org/ $(lsb_release -s -c) main" /etc/apt/sources.list'
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 791C25CE
 sudo apt-get update
 sudo apt-get install xplico
 ```
-
-**Run**
-
+**Kimbia**
 ```
 /etc/init.d/apache2 restart
 /etc/init.d/xplico start
 ```
+Kupata _**127.0.0.1:9876**_ kwa akauti _**xplico:xplico**_
 
-Access to _**127.0.0.1:9876**_ with credentials _**xplico:xplico**_
-
-Then create a **new case**, create a **new session** inside the case and **upload the pcap** file.
+Kisha tengeneza **kesi mpya**, tengeneza **sehemu mpya** ndani ya kesi na **pakia** faili ya pcap.
 
 ### NetworkMiner
 
-Like Xplico it is a tool to **analyze and extract objects from pcaps**. It has a free edition that you can **download** [**here**](https://www.netresec.com/?page=NetworkMiner). It works with **Windows**.\
-This tool is also useful to get **other information analysed** from the packets in order to be able to know what was happening in a **quicker** way.
+Kama Xplico, ni chombo cha **kuchambua na kutoa vitu kutoka pcaps**. Ina toleo la bure ambalo unaweza **kupakua** [**hapa**](https://www.netresec.com/?page=NetworkMiner). Inafanya kazi na **Windows**.\
+Chombo hiki pia ni muhimu kupata **habari nyingine zilizochambuliwa** kutoka kwa pakiti ili uweze kujua kilichokuwa kinaendelea kwa **njia ya haraka**.
 
 ### NetWitness Investigator
 
-You can download [**NetWitness Investigator from here**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **(It works in Windows)**.\
-This is another useful tool that **analyses the packets** and sorts the information in a useful way to **know what is happening inside**.
+Unaweza kupakua [**NetWitness Investigator kutoka hapa**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **(Inafanya kazi kwenye Windows)**.\
+Hiki ni chombo kingine muhimu ambacho **kuchambua pakiti** na kupanga habari kwa njia inayofaa ili **kujua kinachoendelea ndani**.
 
 ### [BruteShark](https://github.com/odedshimon/BruteShark)
 
-- Extracting and encoding usernames and passwords (HTTP, FTP, Telnet, IMAP, SMTP...)
-- Extract authentication hashes and crack them using Hashcat (Kerberos, NTLM, CRAM-MD5, HTTP-Digest...)
-- Build a visual network diagram (Network nodes & users)
-- Extract DNS queries
-- Reconstruct all TCP & UDP Sessions
-- File Carving
+- Kutolewa na kuandika majina ya watumiaji na nywila (HTTP, FTP, Telnet, IMAP, SMTP...)
+- Toa hash za uthibitishaji na uzivunje kwa kutumia Hashcat (Kerberos, NTLM, CRAM-MD5, HTTP-Digest...)
+- Jenga mchoro wa mtandao wa kuona (Vituo vya Mtandao & watumiaji)
+- Toa maswali ya DNS
+- Rejesha kila Kikao cha TCP & UDP
+- Kukata Faili
 
 ### Capinfos
-
 ```
 capinfos capture.pcap
 ```
-
 ### Ngrep
 
-If you are **looking** for **something** inside the pcap you can use **ngrep**. Here is an example using the main filters:
-
+Ikiwa unatafuta **kitu** ndani ya pcap unaweza kutumia **ngrep**. Hapa kuna mfano ukitumia vichujio vikuu:
 ```bash
 ngrep -I packets.pcap "^GET" "port 80 and tcp and host 192.168 and dst host 192.168 and src host 192.168"
 ```
-
 ### Carving
 
-Using common carving techniques can be useful to extract files and information from the pcap:
+Kutumia mbinu za kawaida za carving kunaweza kuwa na manufaa kutoa faili na taarifa kutoka pcap:
 
 {{#ref}}
 ../partitions-file-systems-carving/file-data-carving-recovery-tools.md
@@ -99,46 +85,36 @@ Using common carving techniques can be useful to extract files and information f
 
 ### Capturing credentials
 
-You can use tools like [https://github.com/lgandx/PCredz](https://github.com/lgandx/PCredz) to parse credentials from a pcap or a live interface.
-
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
-
-[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
-
-{% embed url="https://www.rootedcon.com/" %}
+Unaweza kutumia zana kama [https://github.com/lgandx/PCredz](https://github.com/lgandx/PCredz) kuchambua credentials kutoka pcap au interface ya moja kwa moja.
 
 ## Check Exploits/Malware
 
 ### Suricata
 
 **Install and setup**
-
 ```
 apt-get install suricata
 apt-get install oinkmaster
 echo "url = http://rules.emergingthreats.net/open/suricata/emerging.rules.tar.gz" >> /etc/oinkmaster.conf
 oinkmaster -C /etc/oinkmaster.conf -o /etc/suricata/rules
 ```
-
-**Check pcap**
-
+**Angalia pcap**
 ```
 suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 ```
-
 ### YaraPcap
 
-[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) is a tool that
+[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) ni chombo ambacho
 
-- Reads a PCAP File and Extracts Http Streams.
-- gzip deflates any compressed streams
-- Scans every file with yara
-- Writes a report.txt
-- Optionally saves matching files to a Dir
+- Hutoa Faili la PCAP na Kutolewa kwa Mito ya Http.
+- gzip inachambua mitiririko yoyote iliyoshinikizwa
+- Inachunguza kila faili kwa kutumia yara
+- Inaandika ripoti.txt
+- Kwa hiari huhifadhi faili zinazolingana kwenye Dir
 
-### Malware Analysis
+### Uchambuzi wa Malware
 
-Check if you can find any fingerprint of a known malware:
+Angalia kama unaweza kupata alama yoyote ya malware inayojulikana:
 
 {{#ref}}
 ../malware-analysis.md
@@ -146,12 +122,11 @@ Check if you can find any fingerprint of a known malware:
 
 ## Zeek
 
-> [Zeek](https://docs.zeek.org/en/master/about.html) is a passive, open-source network traffic analyzer. Many operators use Zeek as a Network Security Monitor (NSM) to support investigations of suspicious or malicious activity. Zeek also supports a wide range of traffic analysis tasks beyond the security domain, including performance measurement and troubleshooting.
+> [Zeek](https://docs.zeek.org/en/master/about.html) ni mchambuzi wa trafiki wa mtandao wa wazi na wa kupita. Wengi wa waendeshaji hutumia Zeek kama Msimamizi wa Usalama wa Mtandao (NSM) kusaidia uchunguzi wa shughuli za kushuku au zenye uhalifu. Zeek pia inasaidia aina mbalimbali za kazi za uchambuzi wa trafiki zaidi ya eneo la usalama, ikiwa ni pamoja na kipimo cha utendaji na kutatua matatizo.
 
-Basically, logs created by `zeek` aren't **pcaps**. Therefore you will need to use **other tools** to analyse the logs where the **information** about the pcaps are.
+Kimsingi, kumbukumbu zinazoundwa na `zeek` si **pcaps**. Hivyo utahitaji kutumia **vifaa vingine** kuchambua kumbukumbu ambapo **habari** kuhusu pcaps ziko. 
 
-### Connections Info
-
+### Taarifa za Munganisho
 ```bash
 #Get info about longest connections (add "grep udp" to see only udp traffic)
 #The longest connection might be of malware (constant reverse shell?)
@@ -201,9 +176,7 @@ Score,Source IP,Destination IP,Connections,Avg Bytes,Intvl Range,Size Range,Top 
 1,10.55.100.111,165.227.216.194,20054,92,29,52,1,52,7774,20053,0,0,0,0
 0.838,10.55.200.10,205.251.194.64,210,69,29398,4,300,70,109,205,0,0,0,0
 ```
-
-### DNS info
-
+### Taarifa za DNS
 ```bash
 #Get info about each DNS request performed
 cat dns.log | zeek-cut -c id.orig_h query qtype_name answers
@@ -220,8 +193,7 @@ cat dns.log | zeek-cut qtype_name | sort | uniq -c | sort -nr
 #See top DNS domain requested with rita
 rita show-exploded-dns -H --limit 10 zeek_logs
 ```
-
-## Other pcap analysis tricks
+## Njia Nyingine za Uchambuzi wa pcap
 
 {{#ref}}
 dnscat-exfiltration.md
@@ -236,11 +208,5 @@ usb-keystrokes.md
 {{#endref}}
 
 ​
-
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
-
-[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
-
-{% embed url="https://www.rootedcon.com/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}

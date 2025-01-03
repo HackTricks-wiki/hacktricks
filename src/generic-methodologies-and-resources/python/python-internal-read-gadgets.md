@@ -4,41 +4,35 @@
 
 ## Basic Information
 
-Different vulnerabilities such as [**Python Format Strings**](bypass-python-sandboxes/#python-format-string) or [**Class Pollution**](class-pollution-pythons-prototype-pollution.md) might allow you to **read python internal data but won't allow you to execute code**. Therefore, a pentester will need to make the most of these read permissions to **obtain sensitive privileges and escalate the vulnerability**.
+Different vulnerabilities such as [**Python Format Strings**](bypass-python-sandboxes/#python-format-string) or [**Class Pollution**](class-pollution-pythons-prototype-pollution.md) might allow you to **kusoma data za ndani za python lakini hazitakuruhusu kuendesha code**. Therefore, a pentester will need to make the most of these read permissions to **kupata mamlaka nyeti na kuongeza udhaifu**.
 
 ### Flask - Read secret key
 
-The main page of a Flask application will probably have the **`app`** global object where this **secret is configured**.
-
+The main page of a Flask application will probably have the **`app`** global object where this **siri imewekwa**.
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
+Katika kesi hii inawezekana kufikia kitu hiki kwa kutumia gadget yoyote ili **kufikia vitu vya kimataifa** kutoka kwenye [**ukurasa wa Bypass Python sandboxes**](bypass-python-sandboxes/).
 
-In this case it's possible to access this object just using any gadget to **access global objects** from the [**Bypass Python sandboxes page**](bypass-python-sandboxes/).
+Katika kesi ambapo **udhaifu uko katika faili tofauti la python**, unahitaji gadget ili kupita faili ili kufikia faili kuu ili **kufikia kitu cha kimataifa `app.secret_key`** kubadilisha funguo za siri za Flask na kuwa na uwezo wa [**kuinua mamlaka** ukijua funguo hii](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
 
-In the case where **the vulnerability is in a different python file**, you need a gadget to traverse files to get to the main one to **access the global object `app.secret_key`** to change the Flask secret key and be able to [**escalate privileges** knowing this key](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
-
-A payload like this one [from this writeup](https://ctftime.org/writeup/36082):
-
+Payload kama hii [kutoka kwenye andiko hili](https://ctftime.org/writeup/36082):
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
+Tumia payload hii kubadilisha **`app.secret_key`** (jina katika programu yako linaweza kuwa tofauti) ili uweze kusaini vidakuzi vya flask vipya na vya kibali zaidi.
 
-Use this payload to **change `app.secret_key`** (the name in your app might be different) to be able to sign new and more privileges flask cookies.
+### Werkzeug - machine_id na node uuid
 
-### Werkzeug - machine_id and node uuid
-
-[**Using these payload from this writeup**](https://vozec.fr/writeups/tweedle-dum-dee/) you will be able to access the **machine_id** and the **uuid** node, which are the **main secrets** you need to [**generate the Werkzeug pin**](../../network-services-pentesting/pentesting-web/werkzeug.md) you can use to access the python console in `/console` if the **debug mode is enabled:**
-
+[**Kwa kutumia payload hizi kutoka kwa andiko hili**](https://vozec.fr/writeups/tweedle-dum-dee/) utaweza kufikia **machine_id** na **uuid** node, ambazo ni **siri kuu** unazohitaji ili [**kuunda pin ya Werkzeug**](../../network-services-pentesting/pentesting-web/werkzeug.md) unayoweza kutumia kufikia konso ya python katika `/console` ikiwa **mode ya debug imewezeshwa:**
 ```python
 {ua.__class__.__init__.__globals__[t].sys.modules[werkzeug.debug]._machine_id}
 {ua.__class__.__init__.__globals__[t].sys.modules[werkzeug.debug].uuid._node}
 ```
-
 > [!WARNING]
-> Note that you can get the **servers local path to the `app.py`** generating some **error** in the web page which will **give you the path**.
+> Kumbuka kwamba unaweza kupata **njia ya ndani ya seva kwa `app.py`** kwa kuzalisha **kosa** kwenye ukurasa wa wavuti ambayo itakupa **njia**.
 
-If the vulnerability is in a different python file, check the previous Flask trick to access the objects from the main python file.
+Ikiwa udhaifu uko katika faili tofauti la python, angalia hila ya Flask ya awali ili kufikia vitu kutoka kwa faili kuu la python.
 
 {{#include ../../banners/hacktricks-training.md}}

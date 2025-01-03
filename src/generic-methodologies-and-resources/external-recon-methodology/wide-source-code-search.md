@@ -2,17 +2,17 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-The goal of this page is to enumerate **platforms that allow to search for code** (literal or regex) in across thousands/millions of repos in one or more platforms.
+Lengo la ukurasa huu ni kuorodhesha **majukwaa yanayoruhusu kutafuta msimbo** (halisi au regex) katika maelfu/mamilioni ya repos katika jukwaa moja au zaidi.
 
-This helps in several occasions to **search for leaked information** or for **vulnerabilities** patterns.
+Hii inasaidia katika matukio kadhaa kutafuta **habari zilizovuja** au kwa mifumo ya **udhaifu**.
 
-- [**SourceGraph**](https://sourcegraph.com/search): Search in millions of repos. There is a free version and an enterprise version (with 15 days free). It supports regexes.
-- [**Github Search**](https://github.com/search): Search across Github. It supports regexes.
-  - Maybe it's also useful to check also [**Github Code Search**](https://cs.github.com/).
-- [**Gitlab Advanced Search**](https://docs.gitlab.com/ee/user/search/advanced_search.html): Search across Gitlab projects. Support regexes.
-- [**SearchCode**](https://searchcode.com/): Search code in millions of projects.
+- [**SourceGraph**](https://sourcegraph.com/search): Tafuta katika mamilioni ya repos. Kuna toleo la bure na toleo la biashara (pamoja na siku 15 za bure). Inasaidia regexes.
+- [**Github Search**](https://github.com/search): Tafuta katika Github. Inasaidia regexes.
+- Labda pia ni muhimu kuangalia pia [**Github Code Search**](https://cs.github.com/).
+- [**Gitlab Advanced Search**](https://docs.gitlab.com/ee/user/search/advanced_search.html): Tafuta katika miradi ya Gitlab. Inasaidia regexes.
+- [**SearchCode**](https://searchcode.com/): Tafuta msimbo katika mamilioni ya miradi.
 
 > [!WARNING]
-> When you look for leaks in a repo and run something like `git log -p` don't forget there might be **other branches with other commits** containing secrets!
+> Unapofanya utafiti wa uvujaji katika repo na kuendesha kitu kama `git log -p` usisahau kunaweza kuwa na **matawi mengine yenye commits nyingine** yanayoshikilia siri!
 
 {{#include ../../banners/hacktricks-training.md}}

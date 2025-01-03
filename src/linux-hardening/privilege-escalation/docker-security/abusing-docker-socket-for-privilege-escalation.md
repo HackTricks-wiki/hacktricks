@@ -10,7 +10,7 @@ Unaweza **kuunganisha** sehemu tofauti za **filesystem** katika kontena linalote
 Pia unaweza **kudhulumu kuunganisha ili kuinua mamlaka** ndani ya kontena.
 
 - **`-v /:/host`** -> Unganisha filesystem ya mwenyeji katika kontena ili uweze **kusoma filesystem ya mwenyeji.**
-- Ikiwa unataka **kujihisi kama uko kwenye mwenyeji** lakini uko kwenye kontena unaweza kuzima mitambo mingine ya ulinzi kwa kutumia bendera kama:
+- Ikiwa unataka **kujihisi kama uko kwenye mwenyeji** lakini ukiwa kwenye kontena unaweza kuzima mitambo mingine ya ulinzi kwa kutumia bendera kama:
 - `--privileged`
 - `--cap-add=ALL`
 - `--security-opt apparmor=unconfined`
@@ -20,9 +20,9 @@ Pia unaweza **kudhulumu kuunganisha ili kuinua mamlaka** ndani ya kontena.
 - `--userns=host`
 - `--uts=host`
 - `--cgroupns=host`
-- \*\*`--device=/dev/sda1 --cap-add=SYS_ADMIN --security-opt apparmor=unconfined` \*\* -> Hii ni sawa na njia ya awali, lakini hapa tunafanya **kuunganisha diski ya kifaa**. Kisha, ndani ya kontena endesha `mount /dev/sda1 /mnt` na unaweza **kuipata** **filesystem ya mwenyeji** katika `/mnt`
+- \*\*`--device=/dev/sda1 --cap-add=SYS_ADMIN --security-opt apparmor=unconfined` \*\* -> Hii ni sawa na njia ya awali, lakini hapa tunafanya **kuunganisha diski ya kifaa**. Kisha, ndani ya kontena endesha `mount /dev/sda1 /mnt` na unaweza **kupata** **filesystem ya mwenyeji** katika `/mnt`
 - Endesha `fdisk -l` kwenye mwenyeji ili kupata kifaa `</dev/sda1>` cha kuunganisha
-- **`-v /tmp:/host`** -> Ikiwa kwa sababu fulani unaweza **kuunganisha tu directory fulani** kutoka kwa mwenyeji na una ufikiaji ndani ya mwenyeji. Unganisha na uunde **`/bin/bash`** yenye **suid** katika directory iliyounganishwa ili uweze **kuitekeleza kutoka kwa mwenyeji na kuinua hadi root**.
+- **`-v /tmp:/host`** -> Ikiwa kwa sababu fulani unaweza **kuunganisha tu directory fulani** kutoka kwa mwenyeji na una ufikiaji ndani ya mwenyeji. Unganisha na uunde **`/bin/bash`** yenye **suid** katika directory iliyounganishwa ili uweze **kuikimbia kutoka kwa mwenyeji na kuinua hadi root**.
 
 > [!NOTE]
 > Kumbuka kwamba huenda usiweze kuunganisha folda `/tmp` lakini unaweza kuunganisha **folda nyingine inayoweza kuandikwa**. Unaweza kupata directories zinazoweza kuandikwa kwa kutumia: `find / -writable -type d 2>/dev/null`

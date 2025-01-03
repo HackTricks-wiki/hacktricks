@@ -2,45 +2,44 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## **Introduction**
+## **Utangulizi**
 
-Firmware is essential software that enables devices to operate correctly by managing and facilitating communication between the hardware components and the software that users interact with. It's stored in permanent memory, ensuring the device can access vital instructions from the moment it's powered on, leading to the operating system's launch. Examining and potentially modifying firmware is a critical step in identifying security vulnerabilities.
+Firmware ni programu muhimu inayowezesha vifaa kufanya kazi ipasavyo kwa kusimamia na kuwezesha mawasiliano kati ya vipengele vya vifaa na programu ambayo watumiaji wanashirikiana nayo. Inahifadhiwa katika kumbukumbu ya kudumu, kuhakikisha kwamba kifaa kinaweza kufikia maagizo muhimu tangu wakati kinapowashwa, na kusababisha uzinduzi wa mfumo wa uendeshaji. Kuchunguza na labda kubadilisha firmware ni hatua muhimu katika kubaini udhaifu wa usalama.
 
-## **Gathering Information**
+## **Kukusanya Taarifa**
 
-**Gathering information** is a critical initial step in understanding a device's makeup and the technologies it uses. This process involves collecting data on:
+**Kukusanya taarifa** ni hatua ya awali muhimu katika kuelewa muundo wa kifaa na teknolojia zinazotumiwa. Mchakato huu unahusisha kukusanya data kuhusu:
 
-- The CPU architecture and operating system it runs
-- Bootloader specifics
-- Hardware layout and datasheets
-- Codebase metrics and source locations
-- External libraries and license types
-- Update histories and regulatory certifications
-- Architectural and flow diagrams
-- Security assessments and identified vulnerabilities
+- Mchoro wa CPU na mfumo wa uendeshaji unaotumia
+- Maelezo ya bootloader
+- Mpangilio wa vifaa na karatasi za data
+- Vipimo vya msingi wa msimbo na maeneo ya chanzo
+- Maktaba za nje na aina za leseni
+- Historia za sasisho na vyeti vya udhibiti
+- Mchoro wa usanifu na michoro ya mtiririko
+- Tathmini za usalama na udhaifu ulioainishwa
 
-For this purpose, **open-source intelligence (OSINT)** tools are invaluable, as is the analysis of any available open-source software components through manual and automated review processes. Tools like [Coverity Scan](https://scan.coverity.com) and [Semmle’s LGTM](https://lgtm.com/#explore) offer free static analysis that can be leveraged to find potential issues.
+Kwa kusudi hili, zana za **open-source intelligence (OSINT)** ni muhimu, kama vile uchambuzi wa vipengele vyovyote vya programu za chanzo wazi vinavyopatikana kupitia michakato ya ukaguzi wa mikono na otomatiki. Zana kama [Coverity Scan](https://scan.coverity.com) na [Semmle’s LGTM](https://lgtm.com/#explore) hutoa uchambuzi wa statiki bure ambao unaweza kutumika kugundua masuala yanayoweza kutokea.
 
-## **Acquiring the Firmware**
+## **Kupata Firmware**
 
-Obtaining firmware can be approached through various means, each with its own level of complexity:
+Kupata firmware kunaweza kufanywa kwa njia mbalimbali, kila moja ikiwa na ngazi yake ya ugumu:
 
-- **Directly** from the source (developers, manufacturers)
-- **Building** it from provided instructions
-- **Downloading** from official support sites
-- Utilizing **Google dork** queries for finding hosted firmware files
-- Accessing **cloud storage** directly, with tools like [S3Scanner](https://github.com/sa7mon/S3Scanner)
-- Intercepting **updates** via man-in-the-middle techniques
-- **Extracting** from the device through connections like **UART**, **JTAG**, or **PICit**
-- **Sniffing** for update requests within device communication
-- Identifying and using **hardcoded update endpoints**
-- **Dumping** from the bootloader or network
-- **Removing and reading** the storage chip, when all else fails, using appropriate hardware tools
+- **Moja kwa moja** kutoka kwa chanzo (waendelezaji, watengenezaji)
+- **Kujenga** kutoka kwa maelekezo yaliyotolewa
+- **Kupakua** kutoka kwenye tovuti rasmi za msaada
+- Kutumia **Google dork** maswali ya kutafuta faili za firmware zilizohifadhiwa
+- Kufikia **hifadhi ya wingu** moja kwa moja, kwa kutumia zana kama [S3Scanner](https://github.com/sa7mon/S3Scanner)
+- Kukamata **sasisho** kupitia mbinu za mtu katikati
+- **Kutoa** kutoka kwa kifaa kupitia muunganisho kama **UART**, **JTAG**, au **PICit**
+- **Kusikiliza** maombi ya sasisho ndani ya mawasiliano ya kifaa
+- Kutambua na kutumia **nukta za sasisho zilizowekwa**
+- **Kutoa** kutoka kwa bootloader au mtandao
+- **Kuondoa na kusoma** chip ya hifadhi, wakati kila kitu kingine kimeshindwa, kwa kutumia zana sahihi za vifaa
 
-## Analyzing the firmware
+## Kuchambua firmware
 
-Now that you **have the firmware**, you need to extract information about it to know how to treat it. Different tools you can use for that:
-
+Sasa kwamba una **firmware**, unahitaji kutoa taarifa kuhusu hiyo ili kujua jinsi ya kuitendea. Zana tofauti unazoweza kutumia kwa hiyo:
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -49,26 +48,24 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head # might find signatures in header
 fdisk -lu <bin> #lists a drives partition and filesystems if multiple
 ```
+Ikiwa hujapata mengi na zana hizo, angalia **entropy** ya picha kwa kutumia `binwalk -E <bin>`, ikiwa entropy ni ya chini, basi haiwezekani kuwa imefungwa. Ikiwa entropy ni ya juu, inawezekana imefungwa (au imepandwa kwa njia fulani).
 
-If you don't find much with those tools check the **entropy** of the image with `binwalk -E <bin>`, if low entropy, then it's not likely to be encrypted. If high entropy, Its likely encrypted (or compressed in some way).
-
-Moreover, you can use these tools to extract **files embedded inside the firmware**:
+Zaidi ya hayo, unaweza kutumia zana hizi kutoa **faili zilizojumuishwa ndani ya firmware**:
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/partitions-file-systems-carving/file-data-carving-recovery-tools.md
 {{#endref}}
 
-Or [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/p/binvis/)) to inspect the file.
+Au [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/p/binvis/)) kuchunguza faili hiyo.
 
-### Getting the Filesystem
+### Kupata Mfumo wa Faili
 
-With the previous commented tools like `binwalk -ev <bin>` you should have been able to **extract the filesystem**.\
-Binwalk usually extracts it inside a **folder named as the filesystem type**, which usually is one of the following: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
+Kwa zana zilizotajwa hapo awali kama `binwalk -ev <bin>`, unapaswa kuwa umeweza **kutoa mfumo wa faili**.\
+Binwalk kawaida hutoa ndani ya **folda iliyo na jina la aina ya mfumo wa faili**, ambayo kawaida ni moja ya zifuatazo: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
 
-#### Manual Filesystem Extraction
+#### Utoaji wa Mfumo wa Faili kwa Mikono
 
-Sometimes, binwalk will **not have the magic byte of the filesystem in its signatures**. In these cases, use binwalk to **find the offset of the filesystem and carve the compressed filesystem** from the binary and **manually extract** the filesystem according to its type using the steps below.
-
+Wakati mwingine, binwalk **haitakuwa na byte ya kichawi ya mfumo wa faili katika saini zake**. Katika kesi hizi, tumia binwalk **kupata offset ya mfumo wa faili na kuchonga mfumo wa faili ulio pandwa** kutoka kwa binary na **kutoa kwa mikono** mfumo wa faili kulingana na aina yake kwa kutumia hatua zilizo hapa chini.
 ```
 $ binwalk DIR850L_REVB.bin
 
@@ -80,9 +77,7 @@ DECIMAL HEXADECIMAL DESCRIPTION
 1704052 0x1A0074 PackImg section delimiter tag, little endian size: 32256 bytes; big endian size: 8257536 bytes
 1704084 0x1A0094 Squashfs filesystem, little endian, version 4.0, compression:lzma, size: 8256900 bytes, 2688 inodes, blocksize: 131072 bytes, created: 2016-07-12 02:28:41
 ```
-
-Run the following **dd command** carving the Squashfs filesystem.
-
+Kimbia amri hii **dd** ikichonga mfumo wa faili wa Squashfs.
 ```
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
@@ -92,39 +87,37 @@ $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
 8257536 bytes (8.3 MB, 7.9 MiB) copied, 12.5777 s, 657 kB/s
 ```
-
-Alternatively, the following command could also be run.
+Kwa upande mwingine, amri ifuatayo inaweza pia kutekelezwa.
 
 `$ dd if=DIR850L_REVB.bin bs=1 skip=$((0x1A0094)) of=dir.squashfs`
 
-- For squashfs (used in the example above)
+- Kwa squashfs (iliyotumika katika mfano hapo juu)
 
 `$ unsquashfs dir.squashfs`
 
-Files will be in "`squashfs-root`" directory afterwards.
+Faili zitakuwa katika "`squashfs-root`" directory baada ya hapo.
 
-- CPIO archive files
+- Faili za archive za CPIO
 
 `$ cpio -ivd --no-absolute-filenames -F <bin>`
 
-- For jffs2 filesystems
+- Kwa mifumo ya faili ya jffs2
 
 `$ jefferson rootfsfile.jffs2`
 
-- For ubifs filesystems with NAND flash
+- Kwa mifumo ya faili ya ubifs yenye NAND flash
 
 `$ ubireader_extract_images -u UBI -s <start_offset> <bin>`
 
 `$ ubidump.py <bin>`
 
-## Analyzing Firmware
+## Kuchambua Firmware
 
-Once the firmware is obtained, it's essential to dissect it for understanding its structure and potential vulnerabilities. This process involves utilizing various tools to analyze and extract valuable data from the firmware image.
+Mara tu firmware inapopatikana, ni muhimu kuichambua ili kuelewa muundo wake na uwezekano wa udhaifu. Mchakato huu unahusisha kutumia zana mbalimbali kuchambua na kutoa data muhimu kutoka kwa picha ya firmware.
 
-### Initial Analysis Tools
+### Zana za Uchambuzi wa Awali
 
-A set of commands is provided for initial inspection of the binary file (referred to as `<bin>`). These commands help in identifying file types, extracting strings, analyzing binary data, and understanding the partition and filesystem details:
-
+Seti ya amri imetolewa kwa ukaguzi wa awali wa faili ya binary (inayorejelewa kama `<bin>`). Amri hizi husaidia katika kubaini aina za faili, kutoa nyuzi, kuchambua data ya binary, na kuelewa maelezo ya sehemu na mfumo wa faili:
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -133,121 +126,114 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head #useful for finding signatures in the header
 fdisk -lu <bin> #lists partitions and filesystems, if there are multiple
 ```
+Ili kutathmini hali ya usimbaji wa picha, **entropy** inakaguliwa kwa `binwalk -E <bin>`. Entropy ya chini inaashiria ukosefu wa usimbaji, wakati entropy ya juu inaonyesha uwezekano wa usimbaji au ufinyanzi.
 
-To assess the encryption status of the image, the **entropy** is checked with `binwalk -E <bin>`. Low entropy suggests a lack of encryption, while high entropy indicates possible encryption or compression.
+Kwa ajili ya kutoa **faili zilizojumuishwa**, zana na rasilimali kama vile hati za **file-data-carving-recovery-tools** na **binvis.io** kwa ajili ya ukaguzi wa faili zinapendekezwa.
 
-For extracting **embedded files**, tools and resources like the **file-data-carving-recovery-tools** documentation and **binvis.io** for file inspection are recommended.
+### Kutolewa kwa Faili za Mfumo
 
-### Extracting the Filesystem
-
-Using `binwalk -ev <bin>`, one can usually extract the filesystem, often into a directory named after the filesystem type (e.g., squashfs, ubifs). However, when **binwalk** fails to recognize the filesystem type due to missing magic bytes, manual extraction is necessary. This involves using `binwalk` to locate the filesystem's offset, followed by the `dd` command to carve out the filesystem:
-
+Kwa kutumia `binwalk -ev <bin>`, mtu anaweza kawaida kutoa mfumo wa faili, mara nyingi katika saraka iliyopewa jina la aina ya mfumo wa faili (mfano, squashfs, ubifs). Hata hivyo, wakati **binwalk** inashindwa kutambua aina ya mfumo wa faili kutokana na kukosekana kwa byte za kichawi, utoaji wa mikono unahitajika. Hii inahusisha kutumia `binwalk` kutafuta offset ya mfumo wa faili, ikifuatiwa na amri ya `dd` ili kuchonga mfumo wa faili:
 ```bash
 $ binwalk DIR850L_REVB.bin
 
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 ```
+Baada ya hapo, kulingana na aina ya mfumo wa faili (kwa mfano, squashfs, cpio, jffs2, ubifs), amri tofauti hutumika kutoa maudhui kwa mikono.
 
-Afterwards, depending on the filesystem type (e.g., squashfs, cpio, jffs2, ubifs), different commands are used to manually extract the contents.
+### Uchambuzi wa Mfumo wa Faili
 
-### Filesystem Analysis
+Mara mfumo wa faili unapokuwa umetolewa, utafutaji wa kasoro za usalama huanza. Kipaumbele kinatolewa kwa daemons zisizo salama za mtandao, akidi za siri zilizowekwa kwa nguvu, mwisho wa API, kazi za seva za sasisho, msimbo usio na muundo, skripti za kuanzisha, na binaries zilizokusanywa kwa uchambuzi wa mbali.
 
-With the filesystem extracted, the search for security flaws begins. Attention is paid to insecure network daemons, hardcoded credentials, API endpoints, update server functionalities, uncompiled code, startup scripts, and compiled binaries for offline analysis.
+**Mikoa muhimu** na **vitu** vya kukagua ni pamoja na:
 
-**Key locations** and **items** to inspect include:
+- **etc/shadow** na **etc/passwd** kwa ajili ya akidi za watumiaji
+- Vyeti vya SSL na funguo katika **etc/ssl**
+- Faili za usanidi na skripti kwa ajili ya uwezekano wa udhaifu
+- Binaries zilizojumuishwa kwa uchambuzi zaidi
+- Seva za wavuti za vifaa vya IoT na binaries
 
-- **etc/shadow** and **etc/passwd** for user credentials
-- SSL certificates and keys in **etc/ssl**
-- Configuration and script files for potential vulnerabilities
-- Embedded binaries for further analysis
-- Common IoT device web servers and binaries
+Zana kadhaa zinasaidia katika kufichua taarifa nyeti na udhaifu ndani ya mfumo wa faili:
 
-Several tools assist in uncovering sensitive information and vulnerabilities within the filesystem:
+- [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) na [**Firmwalker**](https://github.com/craigz28/firmwalker) kwa ajili ya utafutaji wa taarifa nyeti
+- [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) kwa ajili ya uchambuzi wa kina wa firmware
+- [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer), [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep), [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go), na [**EMBA**](https://github.com/e-m-b-a/emba) kwa ajili ya uchambuzi wa statiki na wa dinamik
 
-- [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) and [**Firmwalker**](https://github.com/craigz28/firmwalker) for sensitive information search
-- [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) for comprehensive firmware analysis
-- [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer), [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep), [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go), and [**EMBA**](https://github.com/e-m-b-a/emba) for static and dynamic analysis
+### Ukaguzi wa Usalama kwenye Binaries Zilizokusanywa
 
-### Security Checks on Compiled Binaries
+Msimbo wa chanzo na binaries zilizokusanywa zinazopatikana katika mfumo wa faili zinapaswa kuchunguzwa kwa udhaifu. Zana kama **checksec.sh** kwa binaries za Unix na **PESecurity** kwa binaries za Windows husaidia kubaini binaries zisizo na ulinzi ambazo zinaweza kutumika.
 
-Both source code and compiled binaries found in the filesystem must be scrutinized for vulnerabilities. Tools like **checksec.sh** for Unix binaries and **PESecurity** for Windows binaries help identify unprotected binaries that could be exploited.
+## Kuiga Firmware kwa Uchambuzi wa Dinamik
 
-## Emulating Firmware for Dynamic Analysis
+Mchakato wa kuiga firmware unaruhusu **uchambuzi wa dinamik** wa uendeshaji wa kifaa au programu binafsi. Njia hii inaweza kukutana na changamoto za utegemezi wa vifaa au usanifu, lakini kuhamasisha mfumo wa faili wa mzizi au binaries maalum kwa kifaa chenye usanifu na endianness inayolingana, kama vile Raspberry Pi, au kwa mashine halisi iliyojengwa awali, kunaweza kuwezesha majaribio zaidi.
 
-The process of emulating firmware enables **dynamic analysis** either of a device's operation or an individual program. This approach can encounter challenges with hardware or architecture dependencies, but transferring the root filesystem or specific binaries to a device with matching architecture and endianness, such as a Raspberry Pi, or to a pre-built virtual machine, can facilitate further testing.
+### Kuiga Binaries Binafsi
 
-### Emulating Individual Binaries
+Kwa ajili ya kuchunguza programu moja, kubaini endianness ya programu na usanifu wa CPU ni muhimu.
 
-For examining single programs, identifying the program's endianness and CPU architecture is crucial.
+#### Mfano na Usanifu wa MIPS
 
-#### Example with MIPS Architecture
-
-To emulate a MIPS architecture binary, one can use the command:
-
+Ili kuiga binary ya usanifu wa MIPS, mtu anaweza kutumia amri:
 ```bash
 file ./squashfs-root/bin/busybox
 ```
-
-And to install the necessary emulation tools:
-
+Na ili kufunga zana za emulation zinazohitajika:
 ```bash
 sudo apt-get install qemu qemu-user qemu-user-static qemu-system-arm qemu-system-mips qemu-system-x86 qemu-utils
 ```
+Kwa MIPS (big-endian), `qemu-mips` inatumika, na kwa binaries za little-endian, `qemu-mipsel` itakuwa chaguo.
 
-For MIPS (big-endian), `qemu-mips` is used, and for little-endian binaries, `qemu-mipsel` would be the choice.
+#### Uigaji wa Muktadha wa ARM
 
-#### ARM Architecture Emulation
+Kwa binaries za ARM, mchakato ni sawa, na emulator `qemu-arm` inatumika kwa uigaji.
 
-For ARM binaries, the process is similar, with the `qemu-arm` emulator being utilized for emulation.
+### Uigaji wa Mfumo Kamili
 
-### Full System Emulation
+Zana kama [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit), na zingine, zinawezesha uigaji kamili wa firmware, zikifanya mchakato kuwa wa kiotomatiki na kusaidia katika uchambuzi wa dynamic.
 
-Tools like [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit), and others, facilitate full firmware emulation, automating the process and aiding in dynamic analysis.
+## Uchambuzi wa Dynamic katika Vitendo
 
-## Dynamic Analysis in Practice
+Katika hatua hii, mazingira halisi au ya kuigiza ya kifaa yanatumika kwa uchambuzi. Ni muhimu kudumisha ufikiaji wa shell kwa OS na mfumo wa faili. Uigaji huenda usifanane kikamilifu na mwingiliano wa vifaa, hivyo inahitajika mara kwa mara kuanzisha upya uigaji. Uchambuzi unapaswa kutembelea mfumo wa faili, kutumia kurasa za wavuti zilizofichuliwa na huduma za mtandao, na kuchunguza udhaifu wa bootloader. Majaribio ya uadilifu wa firmware ni muhimu ili kubaini udhaifu wa backdoor unaoweza kuwepo.
 
-At this stage, either a real or emulated device environment is used for analysis. It's essential to maintain shell access to the OS and filesystem. Emulation may not perfectly mimic hardware interactions, necessitating occasional emulation restarts. Analysis should revisit the filesystem, exploit exposed webpages and network services, and explore bootloader vulnerabilities. Firmware integrity tests are critical to identify potential backdoor vulnerabilities.
+## Mbinu za Uchambuzi wa Wakati wa Uendeshaji
 
-## Runtime Analysis Techniques
+Uchambuzi wa wakati wa uendeshaji unahusisha kuingiliana na mchakato au binary katika mazingira yake ya uendeshaji, kwa kutumia zana kama gdb-multiarch, Frida, na Ghidra kwa kuweka breakpoints na kubaini udhaifu kupitia fuzzing na mbinu nyingine.
 
-Runtime analysis involves interacting with a process or binary in its operating environment, using tools like gdb-multiarch, Frida, and Ghidra for setting breakpoints and identifying vulnerabilities through fuzzing and other techniques.
+## Ukatili wa Binary na Ushahidi wa Dhihirisho
 
-## Binary Exploitation and Proof-of-Concept
+Kuunda PoC kwa udhaifu ulioainishwa kunahitaji uelewa wa kina wa usanifu wa lengo na programu katika lugha za kiwango cha chini. Ulinzi wa wakati wa uendeshaji wa binary katika mifumo iliyojumuishwa ni nadra, lakini inapokuwepo, mbinu kama Return Oriented Programming (ROP) zinaweza kuwa muhimu.
 
-Developing a PoC for identified vulnerabilities requires a deep understanding of the target architecture and programming in lower-level languages. Binary runtime protections in embedded systems are rare, but when present, techniques like Return Oriented Programming (ROP) may be necessary.
+## Mifumo ya Uendeshaji Iliyoandaliwa kwa Uchambuzi wa Firmware
 
-## Prepared Operating Systems for Firmware Analysis
+Mifumo ya uendeshaji kama [AttifyOS](https://github.com/adi0x90/attifyos) na [EmbedOS](https://github.com/scriptingxss/EmbedOS) hutoa mazingira yaliyoandaliwa mapema kwa ajili ya mtihani wa usalama wa firmware, yakiwa na zana muhimu.
 
-Operating systems like [AttifyOS](https://github.com/adi0x90/attifyos) and [EmbedOS](https://github.com/scriptingxss/EmbedOS) provide pre-configured environments for firmware security testing, equipped with necessary tools.
+## Mifumo ya Uendeshaji Iliyoandaliwa Kuchambua Firmware
 
-## Prepared OSs to analyze Firmware
+- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS ni distro iliyokusudiwa kukusaidia kufanya tathmini ya usalama na mtihani wa penetration wa vifaa vya Internet of Things (IoT). Inakuokoa muda mwingi kwa kutoa mazingira yaliyoandaliwa mapema na zana zote muhimu zilizopakiwa.
+- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Mfumo wa uendeshaji wa mtihani wa usalama wa embedded unaotegemea Ubuntu 18.04 uliojaa zana za mtihani wa usalama wa firmware.
 
-- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS is a distro intended to help you perform security assessment and penetration testing of Internet of Things (IoT) devices. It saves you a lot of time by providing a pre-configured environment with all the necessary tools loaded.
-- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Embedded security testing operating system based on Ubuntu 18.04 preloaded with firmware security testing tools.
+## Firmware Zenye Udhaifu za Kufanya Mazoezi
 
-## Vulnerable firmware to practice
-
-To practice discovering vulnerabilities in firmware, use the following vulnerable firmware projects as a starting point.
+Ili kufanya mazoezi ya kugundua udhaifu katika firmware, tumia miradi ifuatayo ya firmware yenye udhaifu kama hatua ya kuanzia.
 
 - OWASP IoTGoat
-  - [https://github.com/OWASP/IoTGoat](https://github.com/OWASP/IoTGoat)
-- The Damn Vulnerable Router Firmware Project
-  - [https://github.com/praetorian-code/DVRF](https://github.com/praetorian-code/DVRF)
-- Damn Vulnerable ARM Router (DVAR)
-  - [https://blog.exploitlab.net/2018/01/dvar-damn-vulnerable-arm-router.html](https://blog.exploitlab.net/2018/01/dvar-damn-vulnerable-arm-router.html)
+- [https://github.com/OWASP/IoTGoat](https://github.com/OWASP/IoTGoat)
+- Mradi wa Firmware ya Router yenye Udhaifu
+- [https://github.com/praetorian-code/DVRF](https://github.com/praetorian-code/DVRF)
+- Router ya ARM yenye Udhaifu (DVAR)
+- [https://blog.exploitlab.net/2018/01/dvar-damn-vulnerable-arm-router.html](https://blog.exploitlab.net/2018/01/dvar-damn-vulnerable-arm-router.html)
 - ARM-X
-  - [https://github.com/therealsaumil/armx#downloads](https://github.com/therealsaumil/armx#downloads)
+- [https://github.com/therealsaumil/armx#downloads](https://github.com/therealsaumil/armx#downloads)
 - Azeria Labs VM 2.0
-  - [https://azeria-labs.com/lab-vm-2-0/](https://azeria-labs.com/lab-vm-2-0/)
-- Damn Vulnerable IoT Device (DVID)
-  - [https://github.com/Vulcainreo/DVID](https://github.com/Vulcainreo/DVID)
+- [https://azeria-labs.com/lab-vm-2-0/](https://azeria-labs.com/lab-vm-2-0/)
+- Kifaa cha IoT chenye Udhaifu (DVID)
+- [https://github.com/Vulcainreo/DVID](https://github.com/Vulcainreo/DVID)
 
-## References
+## Marejeleo
 
 - [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
 - [Practical IoT Hacking: The Definitive Guide to Attacking the Internet of Things](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
 
-## Trainning and Cert
+## Mafunzo na Cheti
 
 - [https://www.attify-store.com/products/offensive-iot-exploitation](https://www.attify-store.com/products/offensive-iot-exploitation)
 

@@ -15,7 +15,7 @@ $1 >$t/o" >/c;chmod +x /c;sh -c "echo 0 >$d/w/cgroup.procs";sleep 1;cat /o
 Uthibitisho wa dhana (PoC) unaonyesha njia ya kutumia cgroups kwa kuunda faili ya `release_agent` na kuanzisha kuitwa kwake ili kutekeleza amri zisizo na mipaka kwenye mwenyeji wa kontena. Hapa kuna muhtasari wa hatua zinazohusika:
 
 1. **Andaa Mazingira:**
-- Kadiria `/tmp/cgrp` kinaundwa ili kutumikia kama sehemu ya kuunganisha kwa cgroup.
+- Kadiria `/tmp/cgrp` inaundwa ili kutumikia kama sehemu ya kuunganisha kwa cgroup.
 - Kidhibiti cha cgroup cha RDMA kinaunganishwa kwenye hii directory. Katika kesi ya kutokuwepo kwa kidhibiti cha RDMA, inapendekezwa kutumia kidhibiti cha cgroup cha `memory` kama mbadala.
 ```shell
 mkdir /tmp/cgrp && mount -t cgroup -o rdma cgroup /tmp/cgrp && mkdir /tmp/cgrp/x

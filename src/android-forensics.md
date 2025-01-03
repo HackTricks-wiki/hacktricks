@@ -4,7 +4,7 @@
 
 ## Locked Device
 
-Ili kuanza kutoa data kutoka kwa kifaa cha Android, lazima kifaa kiwe wazi. Ikiwa kimefungwa unaweza:
+Ili kuanza kutoa data kutoka kwa kifaa cha Android, lazima kiwe kimefunguliwa. Ikiwa kimefungwa unaweza:
 
 - Kuangalia ikiwa kifaa kina ufuatiliaji kupitia USB umewezeshwa.
 - Kuangalia kwa shambulio la [smudge attack](https://www.usenix.org/legacy/event/woot10/tech/full_papers/Aviv.pdf)

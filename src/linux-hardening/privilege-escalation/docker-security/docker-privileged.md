@@ -20,7 +20,7 @@ core     full     null     pts      shm      stdin    tty      zero
 ```
 {{#endtab}}
 
-{{#tab name="Ndani ya Kontena ya Haki"}}
+{{#tab name="Ndani ya Kontena la Kipekee"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 ls /dev
@@ -35,7 +35,7 @@ cpu              nbd0             pts              stdout           tty27       
 
 ### Mfumo wa faili wa kernel wa kusoma tu
 
-Mifumo ya faili ya kernel inatoa njia kwa mchakato kubadilisha tabia ya kernel. Hata hivyo, linapokuja suala la michakato ya kontena, tunataka kuzuia mabadiliko yoyote kwa kernel. Hivyo basi, tunashikilia mifumo ya faili ya kernel kama **kusoma tu** ndani ya kontena, kuhakikisha kwamba michakato ya kontena haiwezi kubadilisha kernel.
+Mifumo ya faili ya kernel inatoa njia kwa mchakato kubadilisha tabia ya kernel. Hata hivyo, linapokuja suala la michakato ya kontena, tunataka kuzuia mabadiliko yoyote kwenye kernel. Hivyo basi, tunashikilia mifumo ya faili ya kernel kama **kusoma tu** ndani ya kontena, kuhakikisha kwamba michakato ya kontena haiwezi kubadilisha kernel.
 
 {{#tabs}}
 {{#tab name="Ndani ya kontena ya kawaida"}}
@@ -49,7 +49,7 @@ cpuacct on /sys/fs/cgroup/cpuacct type cgroup (ro,nosuid,nodev,noexec,relatime,c
 ```
 {{#endtab}}
 
-{{#tab name="Ndani ya Kontena ya Kipekee"}}
+{{#tab name="Ndani ya Kontena la Haki"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 mount  | grep '(ro'
@@ -74,7 +74,7 @@ tmpfs on /proc/keys type tmpfs (rw,nosuid,size=65536k,mode=755)
 ```
 {{#endtab}}
 
-{{#tab name="Ndani ya Kontena ya Haki"}}
+{{#tab name="Ndani ya Kontena la Haki"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 mount  | grep /proc.*tmpfs
@@ -84,7 +84,7 @@ mount  | grep /proc.*tmpfs
 
 ### Uwezo wa Linux
 
-Mifumo ya kontena inazindua kontena na **idadi ndogo ya uwezo** ili kudhibiti kinachofanyika ndani ya kontena kwa kawaida. Wale **wa kipaumbele** wana **uwezo wote** unaopatikana. Ili kujifunza kuhusu uwezo soma:
+Mifumo ya kontena inazindua kontena na **idadi ndogo ya uwezo** ili kudhibiti kinachotokea ndani ya kontena kwa kawaida. Wale wa **haki** wana **uwezo wote** unaopatikana. Ili kujifunza kuhusu uwezo, soma:
 
 {{#ref}}
 ../linux-capabilities.md
@@ -102,7 +102,7 @@ Bounding set =cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setg
 ```
 {{#endtab}}
 
-{{#tab name="Ndani ya Kontena la Kipekee"}}
+{{#tab name="Ndani ya Kontena la Haki"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 apk add -U libcap; capsh --print
@@ -118,7 +118,7 @@ Unaweza kudhibiti uwezo unaopatikana kwa kontena bila kukimbia katika hali ya `-
 
 ### Seccomp
 
-**Seccomp** ni muhimu ili **kudhibiti** **syscalls** ambazo kontena linaweza kuita. Profaili ya seccomp ya kawaida imewezeshwa kwa default wakati wa kukimbia kwa kontena za docker, lakini katika hali ya privileged imezimwa. Jifunze zaidi kuhusu Seccomp hapa:
+**Seccomp** ni muhimu ili **kudhibiti** **syscalls** ambazo kontena linaweza kuita. Profaili ya seccomp ya kawaida imewezeshwa kwa default wakati wa kukimbia kontena za docker, lakini katika hali ya privileged imezimwa. Jifunze zaidi kuhusu Seccomp hapa:
 
 {{#ref}}
 seccomp.md
@@ -134,7 +134,7 @@ Seccomp_filters:	1
 ```
 {{#endtab}}
 
-{{#tab name="Ndani ya Kontena ya Kipekee"}}
+{{#tab name="Ndani ya Kontena la Kipekee"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 grep Seccomp /proc/1/status
@@ -147,7 +147,7 @@ Seccomp_filters:	0
 # You can manually disable seccomp in docker with
 --security-opt seccomp=unconfined
 ```
-Pia, kumbuka kwamba wakati Docker (au CRIs nyingine) zinapotumika katika **Kubernetes** cluster, **seccomp filter imezimwa kwa default**
+Pia, kumbuka kwamba wakati Docker (au CRIs zingine) zinapotumika katika **Kubernetes** cluster, **seccomp filter imezimwa kwa default**
 
 ### AppArmor
 
@@ -175,10 +175,10 @@ Kukimbia kontena na bendera `--privileged` kunazima **lebo za SELinux**, na kusa
 
 ### Majina
 
-Majina **hayakathiriwi** na bendera ya `--privileged`. Ingawa hayana vizuizi vya usalama vilivyowekwa, **hayaoni mchakato wote kwenye mfumo au mtandao wa mwenyeji, kwa mfano**. Watumiaji wanaweza kuzima majina binafsi kwa kutumia bendera za **`--pid=host`, `--net=host`, `--ipc=host`, `--uts=host`** za injini za kontena.
+Majina **hayakathiriwi** na bendera ya `--privileged`. Ingawa hayana vikwazo vya usalama vilivyowekwa, **hayaoni mchakato wote kwenye mfumo au mtandao wa mwenyeji, kwa mfano**. Watumiaji wanaweza kuzima majina binafsi kwa kutumia bendera za injini za kontena **`--pid=host`, `--net=host`, `--ipc=host`, `--uts=host`**.
 
 {{#tabs}}
-{{#tab name="Ndani ya kontena la kawaida lililo na haki"}}
+{{#tab name="Inside default privileged container"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 ps -ef
@@ -203,7 +203,7 @@ PID   USER     TIME  COMMAND
 
 ### User namespace
 
-**Kwa kawaida, injini za kontena hazitumiwi majina ya watumiaji, isipokuwa kwa kontena zisizo na mizizi**, ambazo zinahitaji majina ya watumiaji kwa ajili ya kuunganisha mfumo wa faili na kutumia UID nyingi. Majina ya watumiaji, ambayo ni muhimu kwa kontena zisizo na mizizi, hayawezi kuzuiliwa na yanaboresha usalama kwa kiasi kikubwa kwa kupunguza mamlaka.
+**Kwa kawaida, injini za kontena hazitumiwi majina ya watumiaji, isipokuwa kwa kontena zisizo na mizizi**, ambazo zinahitaji majina ya watumiaji kwa ajili ya usakinishaji wa mfumo wa faili na kutumia UID nyingi. Majina ya watumiaji, ambayo ni muhimu kwa kontena zisizo na mizizi, hayawezi kuzuiliwa na yanaboresha usalama kwa kiasi kikubwa kwa kupunguza mamlaka.
 
 ## References
 

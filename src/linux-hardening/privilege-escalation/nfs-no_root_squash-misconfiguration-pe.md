@@ -1,8 +1,8 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-Soma faili _ **/etc/exports** _ , ikiwa unapata directory ambayo imewekwa kama **no_root_squash**, basi unaweza **kufikia** kutoka **kama mteja** na **kuandika ndani** ya hiyo directory **kama** ungekuwa **root** wa mashine hiyo.
+Soma _ **/etc/exports** _ faili, ikiwa unapata directory ambayo imewekwa kama **no_root_squash**, basi unaweza **kufikia** hiyo kutoka **kama mteja** na **kuandika ndani** ya hiyo directory **kama** ungekuwa **root** wa mashine hiyo.
 
-**no_root_squash**: Chaguo hili kimsingi linampa mamlaka mtumiaji root kwenye mteja kufikia faili kwenye seva ya NFS kama root. Na hii inaweza kusababisha athari mbaya za usalama.
+**no_root_squash**: Chaguo hili kimsingi linampa mamlaka mtumiaji wa root kwenye mteja kufikia faili kwenye seva ya NFS kama root. Na hii inaweza kusababisha athari kubwa za usalama.
 
 **no_all_squash:** Hii ni sawa na chaguo la **no_root_squash** lakini inatumika kwa **watumiaji wasiokuwa root**. Fikiria, una shell kama mtumiaji nobody; umeangalia faili ya /etc/exports; chaguo la no_all_squash lipo; angalia faili ya /etc/passwd; fanya kama mtumiaji asiye root; tengeneza faili ya suid kama mtumiaji huyo (kwa kuunganisha kwa kutumia nfs). Tekeleza suid kama mtumiaji nobody na kuwa mtumiaji tofauti.
 
@@ -12,7 +12,7 @@ Soma faili _ **/etc/exports** _ , ikiwa unapata directory ambayo imewekwa kama *
 
 Ikiwa umepata udhaifu huu, unaweza kuutumia:
 
-- **Kuweka hiyo directory** kwenye mashine ya mteja, na **kama root kunakili** ndani ya folda iliyounganishwa faili ya **/bin/bash** na kuipa haki za **SUID**, na **kutekeleza kutoka kwa mashine** ya mwathirika hiyo binary ya bash.
+- **Kuweka hiyo directory** kwenye mashine ya mteja, na **kama root kunakili** ndani ya folda iliyounganishwa faili ya **/bin/bash** na kumpa haki za **SUID**, na **kutekeleza kutoka kwa mashine** ya mwathirika hiyo binary ya bash.
 ```bash
 #Attacker, as root user
 mkdir /tmp/pe
@@ -45,11 +45,11 @@ cd <SHAREDD_FOLDER>
 > Kumbuka kwamba ikiwa unaweza kuunda **tunnel kutoka kwa mashine yako hadi mashine ya mwathirika unaweza bado kutumia toleo la Remote kutekeleza kupanda kwa haki hii kwa kutunga bandari zinazohitajika**.\
 > Huu ni ujanja wa kufuata ikiwa faili `/etc/exports` **inaonyesha IP**. Katika kesi hii **hutaweza kutumia** kwa hali yoyote **exploit ya mbali** na utahitaji **kudhulumu ujanja huu**.\
 > Sharti lingine muhimu ili exploit ifanye kazi ni kwamba **export ndani ya `/etc/export`** **lazima litumie bendera ya `insecure`**.\
-> --_Sijui kama `/etc/export` inaonyesha anwani ya IP ujanja huu utafanya kazi_--
+> --_Sijui kama `/etc/export` inaonyesha anwani ya IP ujanja huu utafanikiwa_--
 
 ## Basic Information
 
-Hali hii inahusisha kutumia NFS share iliyowekwa kwenye mashine ya ndani, ikitumia kasoro katika spesifikesheni ya NFSv3 ambayo inaruhusu mteja kubainisha uid/gid yake, ambayo inaweza kuwezesha ufikiaji usioidhinishwa. Kutekeleza kunahusisha kutumia [libnfs](https://github.com/sahlberg/libnfs), maktaba inayoruhusu kutunga wito wa NFS RPC.
+Hali hii inahusisha kutumia NFS share iliyowekwa kwenye mashine ya ndani, ikitumia kasoro katika spesifikesheni ya NFSv3 ambayo inaruhusu mteja kubainisha uid/gid yake, ambayo inaweza kuwezesha ufikiaji usioidhinishwa. Kutekeleza kunahusisha kutumia [libnfs](https://github.com/sahlberg/libnfs), maktaba inayoruhusu kutunga NFS RPC calls.
 
 ### Compiling the Library
 
@@ -62,7 +62,7 @@ gcc -fPIC -shared -o ld_nfs.so examples/ld_nfs.c -ldl -lnfs -I./include/ -L./lib
 ```
 ### Kufanya Uhalifu
 
-Uhalifu unahusisha kuunda programu rahisi ya C (`pwn.c`) inayoinua mamlaka hadi root na kisha kutekeleza shell. Programu inakusanywa, na binary inayotokana (`a.out`) inawekwa kwenye sehemu yenye suid root, ikitumia `ld_nfs.so` kudanganya uid katika wito za RPC:
+Uhalifu unahusisha kuunda programu rahisi ya C (`pwn.c`) inayoinua mamlaka hadi root na kisha kutekeleza shell. Programu inakusanywa, na binary inayotokana (`a.out`) inawekwa kwenye sehemu yenye suid root, ikitumia `ld_nfs.so` kuficha uid katika wito za RPC:
 
 1. **Kusanya msimbo wa uhalifu:**
 
@@ -72,7 +72,7 @@ int main(void){setreuid(0,0); system("/bin/bash"); return 0;}
 gcc pwn.c -o a.out
 ```
 
-2. **Weka uhalifu kwenye sehemu na badilisha ruhusa zake kwa kudanganya uid:**
+2. **Weka uhalifu kwenye sehemu na badilisha ruhusa zake kwa kuficha uid:**
 
 ```bash
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so cp ../a.out nfs://nfs-server/nfs_root/

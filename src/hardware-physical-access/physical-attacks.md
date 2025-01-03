@@ -4,53 +4,53 @@
 
 ## BIOS Password Recovery and System Security
 
-**Resetting the BIOS** can be achieved in several ways. Most motherboards include a **battery** that, when removed for around **30 minutes**, will reset the BIOS settings, including the password. Alternatively, a **jumper on the motherboard** can be adjusted to reset these settings by connecting specific pins.
+**Kurekebisha BIOS** kunaweza kufanywa kwa njia kadhaa. Karamani nyingi zina **betri** ambayo, ikiondolewa kwa takriban **dakika 30**, itarejesha mipangilio ya BIOS, ikiwa ni pamoja na nenosiri. Vinginevyo, **jumper kwenye karatasi mama** inaweza kubadilishwa ili kurekebisha mipangilio hii kwa kuunganisha pini maalum.
 
-For situations where hardware adjustments are not possible or practical, **software tools** offer a solution. Running a system from a **Live CD/USB** with distributions like **Kali Linux** provides access to tools like **_killCmos_** and **_CmosPWD_**, which can assist in BIOS password recovery.
+Kwa hali ambapo marekebisho ya vifaa hayawezekani au si ya vitendo, **zana za programu** zinatoa suluhisho. Kuendesha mfumo kutoka kwa **Live CD/USB** na usambazaji kama **Kali Linux** kunatoa ufikiaji wa zana kama **_killCmos_** na **_CmosPWD_**, ambazo zinaweza kusaidia katika urejeleaji wa nenosiri la BIOS.
 
-In cases where the BIOS password is unknown, entering it incorrectly **three times** will typically result in an error code. This code can be used on websites like [https://bios-pw.org](https://bios-pw.org) to potentially retrieve a usable password.
+Katika matukio ambapo nenosiri la BIOS halijulikani, kuingiza kwa makosa **maradufu tatu** kawaida husababisha msimbo wa kosa. Msimbo huu unaweza kutumika kwenye tovuti kama [https://bios-pw.org](https://bios-pw.org) ili kupata nenosiri linaloweza kutumika.
 
 ### UEFI Security
 
-For modern systems using **UEFI** instead of traditional BIOS, the tool **chipsec** can be utilized to analyze and modify UEFI settings, including the disabling of **Secure Boot**. This can be accomplished with the following command:
+Kwa mifumo ya kisasa inayotumia **UEFI** badala ya BIOS ya jadi, zana **chipsec** inaweza kutumika kuchambua na kubadilisha mipangilio ya UEFI, ikiwa ni pamoja na kuzima **Secure Boot**. Hii inaweza kufanywa kwa amri ifuatayo:
 
 `python chipsec_main.py -module exploits.secure.boot.pk`
 
 ### RAM Analysis and Cold Boot Attacks
 
-RAM retains data briefly after power is cut, usually for **1 to 2 minutes**. This persistence can be extended to **10 minutes** by applying cold substances, such as liquid nitrogen. During this extended period, a **memory dump** can be created using tools like **dd.exe** and **volatility** for analysis.
+RAM huhifadhi data kwa muda mfupi baada ya nguvu kukatwa, kawaida kwa **dakika 1 hadi 2**. Ustahimilivu huu unaweza kupanuliwa hadi **dakika 10** kwa kutumia vitu baridi, kama nitrojeni ya kioevu. Wakati huu wa kupanuliwa, **memory dump** inaweza kuundwa kwa kutumia zana kama **dd.exe** na **volatility** kwa uchambuzi.
 
 ### Direct Memory Access (DMA) Attacks
 
-**INCEPTION** is a tool designed for **physical memory manipulation** through DMA, compatible with interfaces like **FireWire** and **Thunderbolt**. It allows for bypassing login procedures by patching memory to accept any password. However, it's ineffective against **Windows 10** systems.
+**INCEPTION** ni zana iliyoundwa kwa ajili ya **manipulation ya kumbukumbu ya kimwili** kupitia DMA, inayoendana na interfaces kama **FireWire** na **Thunderbolt**. Inaruhusu kupita taratibu za kuingia kwa kubadilisha kumbukumbu ili kukubali nenosiri lolote. Hata hivyo, haiwezi kufanya kazi dhidi ya mifumo ya **Windows 10**.
 
 ### Live CD/USB for System Access
 
-Changing system binaries like **_sethc.exe_** or **_Utilman.exe_** with a copy of **_cmd.exe_** can provide a command prompt with system privileges. Tools such as **chntpw** can be used to edit the **SAM** file of a Windows installation, allowing password changes.
+Kubadilisha binaries za mfumo kama **_sethc.exe_** au **_Utilman.exe_** kwa nakala ya **_cmd.exe_** kunaweza kutoa dirisha la amri lenye mamlaka ya mfumo. Zana kama **chntpw** zinaweza kutumika kuhariri faili ya **SAM** ya usakinishaji wa Windows, kuruhusu mabadiliko ya nenosiri.
 
-**Kon-Boot** is a tool that facilitates logging into Windows systems without knowing the password by temporarily modifying the Windows kernel or UEFI. More information can be found at [https://www.raymond.cc](https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/).
+**Kon-Boot** ni zana inayorahisisha kuingia kwenye mifumo ya Windows bila kujua nenosiri kwa kubadilisha kwa muda kernel ya Windows au UEFI. Taarifa zaidi zinaweza kupatikana kwenye [https://www.raymond.cc](https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/).
 
 ### Handling Windows Security Features
 
 #### Boot and Recovery Shortcuts
 
-- **Supr**: Access BIOS settings.
-- **F8**: Enter Recovery mode.
-- Pressing **Shift** after the Windows banner can bypass autologon.
+- **Supr**: Fikia mipangilio ya BIOS.
+- **F8**: Ingia katika hali ya Urejeleaji.
+- Kubonyeza **Shift** baada ya bendera ya Windows kunaweza kupita autologon.
 
 #### BAD USB Devices
 
-Devices like **Rubber Ducky** and **Teensyduino** serve as platforms for creating **bad USB** devices, capable of executing predefined payloads when connected to a target computer.
+Vifaa kama **Rubber Ducky** na **Teensyduino** vinatumika kama majukwaa ya kuunda **bad USB** devices, zenye uwezo wa kutekeleza payload zilizowekwa wakati zinapounganishwa na kompyuta lengwa.
 
 #### Volume Shadow Copy
 
-Administrator privileges allow for the creation of copies of sensitive files, including the **SAM** file, through PowerShell.
+Mamlaka ya msimamizi yanaruhusu kuunda nakala za faili nyeti, ikiwa ni pamoja na faili ya **SAM**, kupitia PowerShell.
 
 ### Bypassing BitLocker Encryption
 
-BitLocker encryption can potentially be bypassed if the **recovery password** is found within a memory dump file (**MEMORY.DMP**). Tools like **Elcomsoft Forensic Disk Decryptor** or **Passware Kit Forensic** can be utilized for this purpose.
+BitLocker encryption inaweza kupitishwa ikiwa **nenosiri la urejeleaji** litapatikana ndani ya faili ya memory dump (**MEMORY.DMP**). Zana kama **Elcomsoft Forensic Disk Decryptor** au **Passware Kit Forensic** zinaweza kutumika kwa kusudi hili.
 
 ### Social Engineering for Recovery Key Addition
 
-A new BitLocker recovery key can be added through social engineering tactics, convincing a user to execute a command that adds a new recovery key composed of zeros, thereby simplifying the decryption process.
+Nenosiri jipya la urejeleaji la BitLocker linaweza kuongezwa kupitia mbinu za ushirikiano wa kijamii, kumshawishi mtumiaji kutekeleza amri inayoongeza nenosiri jipya lililotengenezwa kwa sifuri, hivyo kurahisisha mchakato wa ufichuzi.
 {{#include ../banners/hacktricks-training.md}}

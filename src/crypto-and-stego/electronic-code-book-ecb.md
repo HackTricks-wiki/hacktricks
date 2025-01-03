@@ -2,72 +2,66 @@
 
 # ECB
 
-(ECB) Electronic Code Book - symmetric encryption scheme which **replaces each block of the clear text** by the **block of ciphertext**. It is the **simplest** encryption scheme. The main idea is to **split** the clear text into **blocks of N bits** (depends on the size of the block of input data, encryption algorithm) and then to encrypt (decrypt) each block of clear text using the only key.
+(ECB) Electronic Code Book - mpango wa usimbaji wa symmetrick ambao **unabadilisha kila block ya maandiko wazi** kwa **block ya maandiko yaliyosimbwa**. Ni mpango wa usimbaji **rahisi zaidi**. Wazo kuu ni **kugawanya** maandiko wazi katika **blocks za N bits** (inategemea ukubwa wa block ya data ya ingizo, algorithm ya usimbaji) na kisha kusimbua (kufungua) kila block ya maandiko wazi kwa kutumia funguo pekee.
 
 ![](https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/ECB_decryption.svg/601px-ECB_decryption.svg.png)
 
-Using ECB has multiple security implications:
+Kutumia ECB kuna athari nyingi za usalama:
 
-- **Blocks from encrypted message can be removed**
-- **Blocks from encrypted message can be moved around**
+- **Blocks kutoka kwa ujumbe uliofungwa zinaweza kuondolewa**
+- **Blocks kutoka kwa ujumbe uliofungwa zinaweza kuhamishwa**
 
-# Detection of the vulnerability
+# Ugunduzi wa udhaifu
 
-Imagine you login into an application several times and you **always get the same cookie**. This is because the cookie of the application is **`<username>|<password>`**.\
-Then, you generate to new users, both of them with the **same long password** and **almost** the **same** **username**.\
-You find out that the **blocks of 8B** where the **info of both users** is the same are **equals**. Then, you imagine that this might be because **ECB is being used**.
+Fikiria unapoingia kwenye programu mara kadhaa na **daima unapata cookie ile ile**. Hii ni kwa sababu cookie ya programu ni **`<username>|<password>`**.\
+Kisha, unaunda watumiaji wapya, wote wawili wakiwa na **nenosiri refu sawa** na **karibu** **jina la mtumiaji** **sawa**.\
+Unagundua kwamba **blocks za 8B** ambapo **info ya watumiaji wote wawili** ni sawa ni **sawa**. Kisha, unafikiria kwamba hii inaweza kuwa kwa sababu **ECB inatumika**.
 
-Like in the following example. Observe how these** 2 decoded cookies** has several times the block **`\x23U\xE45K\xCB\x21\xC8`**
-
+Kama katika mfano ufuatao. Angalia jinsi hizi **2 cookies zilizofunguliwa** zina block **`\x23U\xE45K\xCB\x21\xC8`** mara kadhaa.
 ```
 \x23U\xE45K\xCB\x21\xC8\x23U\xE45K\xCB\x21\xC8\x04\xB6\xE1H\xD1\x1E \xB6\x23U\xE45K\xCB\x21\xC8\x23U\xE45K\xCB\x21\xC8+=\xD4F\xF7\x99\xD9\xA9
 
 \x23U\xE45K\xCB\x21\xC8\x23U\xE45K\xCB\x21\xC8\x04\xB6\xE1H\xD1\x1E \xB6\x23U\xE45K\xCB\x21\xC8\x23U\xE45K\xCB\x21\xC8+=\xD4F\xF7\x99\xD9\xA9
 ```
+Hii ni kwa sababu **jina la mtumiaji na nenosiri la vidakuzi hivyo vilikuwa na herufi "a" mara kadhaa** (kwa mfano). **Vizuizi** ambavyo ni **tofauti** ni vizuizi vilivyokuwa na **angalau herufi 1 tofauti** (labda mkataba "|" au tofauti muhimu katika jina la mtumiaji).
 
-This is because the **username and password of those cookies contained several times the letter "a"** (for example). The **blocks** that are **different** are blocks that contained **at least 1 different character** (maybe the delimiter "|" or some necessary difference in the username).
+Sasa, mshambuliaji anahitaji tu kugundua kama muundo ni `<username><delimiter><password>` au `<password><delimiter><username>`. Ili kufanya hivyo, anaweza tu **kuunda majina kadhaa ya watumiaji** yenye **majina marefu na yanayofanana** na nenosiri hadi apate muundo na urefu wa mkataba: 
 
-Now, the attacker just need to discover if the format is `<username><delimiter><password>` or `<password><delimiter><username>`. For doing that, he can just **generate several usernames **with s**imilar and long usernames and passwords until he find the format and the length of the delimiter:**
+| Urefu wa jina la mtumiaji: | Urefu wa nenosiri: | Urefu wa Jina la mtumiaji+Nenosiri: | Urefu wa vidakuzi (baada ya kufichua): |
+| --------------------------- | ------------------ | ----------------------------------- | ------------------------------------- |
+| 2                           | 2                  | 4                                   | 8                                     |
+| 3                           | 3                  | 6                                   | 8                                     |
+| 3                           | 4                  | 7                                   | 8                                     |
+| 4                           | 4                  | 8                                   | 16                                    |
+| 7                           | 7                  | 14                                  | 16                                    |
 
-| Username length: | Password length: | Username+Password length: | Cookie's length (after decoding): |
-| ---------------- | ---------------- | ------------------------- | --------------------------------- |
-| 2                | 2                | 4                         | 8                                 |
-| 3                | 3                | 6                         | 8                                 |
-| 3                | 4                | 7                         | 8                                 |
-| 4                | 4                | 8                         | 16                                |
-| 7                | 7                | 14                        | 16                                |
+# Ukatili wa udhaifu
 
-# Exploitation of the vulnerability
+## Kuondoa vizuizi vyote
 
-## Removing entire blocks
-
-Knowing the format of the cookie (`<username>|<password>`), in order to impersonate the username `admin` create a new user called `aaaaaaaaadmin` and get the cookie and decode it:
-
+Kujua muundo wa cookie (`<username>|<password>`), ili kujifanya kuwa jina la mtumiaji `admin` tengeneza mtumiaji mpya anayeitwa `aaaaaaaaadmin` na pata cookie na uifichue:
 ```
 \x23U\xE45K\xCB\x21\xC8\xE0Vd8oE\x123\aO\x43T\x32\xD5U\xD4
 ```
-
-We can see the pattern `\x23U\xE45K\xCB\x21\xC8` created previously with the username that contained only `a`.\
-Then, you can remove the first block of 8B and you will et a valid cookie for the username `admin`:
-
+Tunaweza kuona muundo `\x23U\xE45K\xCB\x21\xC8` ulioanzishwa hapo awali na jina la mtumiaji lililokuwa na `a` pekee.\
+Kisha, unaweza kuondoa block ya kwanza ya 8B na utapata cookie halali kwa jina la mtumiaji `admin`:
 ```
 \xE0Vd8oE\x123\aO\x43T\x32\xD5U\xD4
 ```
+## Kuhamasisha vizuizi
 
-## Moving blocks
+Katika hifadhidata nyingi, ni sawa kutafuta `WHERE username='admin';` au `WHERE username='admin    ';` _(Kumbuka nafasi za ziada)_
 
-In many databases it is the same to search for `WHERE username='admin';` or for `WHERE username='admin    ';` _(Note the extra spaces)_
+Hivyo, njia nyingine ya kujifanya kuwa mtumiaji `admin` ingekuwa:
 
-So, another way to impersonate the user `admin` would be to:
+- Kuunda jina la mtumiaji ambalo: `len(<username>) + len(<delimiter) % len(block)`. Kwa saizi ya block ya `8B` unaweza kuunda jina la mtumiaji linaloitwa: `username       `, na delimiter `|` kipande `<username><delimiter>` kitazalisha vizuizi 2 vya 8Bs.
+- Kisha, tengeneza nenosiri ambalo litajaza idadi sahihi ya vizuizi vinavyomwonyesha jina la mtumiaji tunataka kujifanya na nafasi, kama: `admin   `
 
-- Generate a username that: `len(<username>) + len(<delimiter) % len(block)`. With a block size of `8B` you can generate username called: `username       `, with the delimiter `|` the chunk `<username><delimiter>` will generate 2 blocks of 8Bs.
-- Then, generate a password that will fill an exact number of blocks containing the username we want to impersonate and spaces, like: `admin   `
+Keki ya mtumiaji huyu itakuwa na vizuizi 3: vya kwanza 2 ni vizuizi vya jina la mtumiaji + delimiter na vya tatu ni nenosiri (ambalo linajifanya kuwa jina la mtumiaji): `username       |admin   `
 
-The cookie of this user is going to be composed by 3 blocks: the first 2 is the blocks of the username + delimiter and the third one of the password (which is faking the username): `username       |admin   `
+**Kisha, badilisha tu block ya kwanza na ya mwisho na utakuwa unajifanya kuwa mtumiaji `admin`: `admin          |username`**
 
-**Then, just replace the first block with the last time and will be impersonating the user `admin`: `admin          |username`**
-
-## References
+## Marejeleo
 
 - [http://cryptowiki.net/index.php?title=Electronic_Code_Book\_(ECB)](<http://cryptowiki.net/index.php?title=Electronic_Code_Book_(ECB)>)
 

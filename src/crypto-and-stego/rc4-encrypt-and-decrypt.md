@@ -1,8 +1,8 @@
 {{#include ../banners/hacktricks-training.md}}
 
-If you can somehow encrypt a plaintext using RC4, you can decrypt any content encrypted by that RC4 (using the same password) just using the encryption function.
+Ikiwa unaweza kwa namna fulani kuandika maandiko ya wazi kwa kutumia RC4, unaweza kufungua maudhui yoyote yaliyoandikwa kwa RC4 hiyo (ukitumia nenosiri lile lile) kwa kutumia tu kazi ya kuandika.
 
-If you can encrypt a known plaintext you can also extract the password. More references can be found in the HTB Kryptos machine:
+Ikiwa unaweza kuandika maandiko ya wazi yanayojulikana unaweza pia kutoa nenosiri. Marejeleo zaidi yanaweza kupatikana katika mashine ya HTB Kryptos:
 
 {% embed url="https://0xrick.github.io/hack-the-box/kryptos/" %}
 

@@ -2,17 +2,17 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Command-line tools** for managing **zip files** are essential for diagnosing, repairing, and cracking zip files. Here are some key utilities:
+**Zana za mistari wa amri** kwa usimamizi wa **zip files** ni muhimu kwa ajili ya kugundua, kurekebisha, na kuvunja zip files. Hapa kuna zana muhimu:
 
-- **`unzip`**: Reveals why a zip file may not decompress.
-- **`zipdetails -v`**: Offers detailed analysis of zip file format fields.
-- **`zipinfo`**: Lists contents of a zip file without extracting them.
-- **`zip -F input.zip --out output.zip`** and **`zip -FF input.zip --out output.zip`**: Try to repair corrupted zip files.
-- **[fcrackzip](https://github.com/hyc/fcrackzip)**: A tool for brute-force cracking of zip passwords, effective for passwords up to around 7 characters.
+- **`unzip`**: Inaonyesha kwa nini zip file inaweza isifunguke.
+- **`zipdetails -v`**: Inatoa uchambuzi wa kina wa maeneo ya muundo wa zip file.
+- **`zipinfo`**: Inataja maudhui ya zip file bila kuyatoa.
+- **`zip -F input.zip --out output.zip`** na **`zip -FF input.zip --out output.zip`**: Jaribu kurekebisha zip files zilizoharibika.
+- **[fcrackzip](https://github.com/hyc/fcrackzip)**: Zana ya kuvunja nenosiri la zip kwa nguvu, inafanya kazi kwa nenosiri hadi karibu herufi 7.
 
 The [Zip file format specification](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT) provides comprehensive details on the structure and standards of zip files.
 
-It's crucial to note that password-protected zip files **do not encrypt filenames or file sizes** within, a security flaw not shared with RAR or 7z files which encrypt this information. Furthermore, zip files encrypted with the older ZipCrypto method are vulnerable to a **plaintext attack** if an unencrypted copy of a compressed file is available. This attack leverages the known content to crack the zip's password, a vulnerability detailed in [HackThis's article](https://www.hackthis.co.uk/articles/known-plaintext-attack-cracking-zip-files) and further explained in [this academic paper](https://www.cs.auckland.ac.nz/~mike/zipattacks.pdf). However, zip files secured with **AES-256** encryption are immune to this plaintext attack, showcasing the importance of choosing secure encryption methods for sensitive data.
+Ni muhimu kutambua kwamba zip files zilizo na nenosiri **hazifichi majina ya faili au ukubwa wa faili** ndani, kasoro ya usalama ambayo haipatikani kwa RAR au 7z files ambazo zinaficha taarifa hii. Zaidi ya hayo, zip files zilizofichwa kwa njia ya zamani ya ZipCrypto zinaweza kuathiriwa na **shambulio la plaintext** ikiwa nakala isiyo na usiri ya faili iliyoshinikizwa inapatikana. Shambulio hili linatumia maudhui yanayojulikana kuvunja nenosiri la zip, udhaifu ulioelezwa kwa kina katika [HackThis's article](https://www.hackthis.co.uk/articles/known-plaintext-attack-cracking-zip-files) na kufafanuliwa zaidi katika [this academic paper](https://www.cs.auckland.ac.nz/~mike/zipattacks.pdf). Hata hivyo, zip files zilizolindwa na **AES-256** encryption hazihusiki na shambulio hili la plaintext, ikionyesha umuhimu wa kuchagua mbinu za usimbaji salama kwa data nyeti.
 
 ## References
 

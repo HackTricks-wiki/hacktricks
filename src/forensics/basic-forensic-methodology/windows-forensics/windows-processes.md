@@ -2,105 +2,105 @@
 
 ## smss.exe
 
-**Session Manager**.\
-Session 0 starts **csrss.exe** and **wininit.exe** (**OS** **services**) while Session 1 starts **csrss.exe** and **winlogon.exe** (**User** **session**). However, you should see **only one process** of that **binary** without children in the processes tree.
+**Meneja wa Kikao**.\
+Kikao 0 kinaanzisha **csrss.exe** na **wininit.exe** (**huduma za OS**) wakati Kikao 1 kinaanzisha **csrss.exe** na **winlogon.exe** (**kikao cha Mtumiaji**). Hata hivyo, unapaswa kuona **mchakato mmoja tu** wa hiyo **binary** bila watoto katika mti wa michakato.
 
-Also, sessions apart from 0 and 1 may mean that RDP sessions are occurring.
+Pia, vikao mbali na 0 na 1 vinaweza kumaanisha kuwa vikao vya RDP vinafanyika.
 
 ## csrss.exe
 
-**Client/Server Run Subsystem Process**.\
-It manages **processes** and **threads**, makes the **Windows** **API** available for other processes and also **maps drive letters**, create **temp files**, and handles the **shutdown** **process**.
+**Mchakato wa Mfumo wa Mteja/Server**.\
+Inasimamia **michakato** na **nyuzi**, inafanya **API ya Windows** ipatikane kwa michakato mingine na pia **inaandika herufi za diski**, kuunda **faili za muda**, na kushughulikia **mchakato wa kuzima**.
 
-There is one **running in Session 0 and another one in Session 1** (so **2 processes** in the processes tree). Another one is created **per new Session**.
+Kuna moja **inayoendesha katika Kikao 0 na nyingine katika Kikao 1** (hivyo **michakato 2** katika mti wa michakato). Nyingine inaundwa **kwa kila Kikao kipya**.
 
 ## winlogon.exe
 
-**Windows Logon Process**.\
-It's responsible for user **logon**/**logoffs**. It launches **logonui.exe** to ask for username and password and then calls **lsass.exe** to verify them.
+**Mchakato wa Kuingia wa Windows**.\
+Inawajibika kwa **kuingia**/**kutoka** kwa mtumiaji. Inaanzisha **logonui.exe** ili kuuliza jina la mtumiaji na nenosiri kisha inaita **lsass.exe** ili kuyathibitisha.
 
-Then it launches **userinit.exe** which is specified in **`HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`** with key **Userinit**.
+Kisha inaanzisha **userinit.exe** ambayo imeainishwa katika **`HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`** na ufunguo **Userinit**.
 
-Mover over, the previous registry should have **explorer.exe** in the **Shell key** or it might be abused as a **malware persistence method**.
+Zaidi ya hayo, rejista ya awali inapaswa kuwa na **explorer.exe** katika ufunguo wa **Shell** au inaweza kutumika vibaya kama **njia ya kudumu ya malware**.
 
 ## wininit.exe
 
-**Windows Initialization Process**. \
-It launches **services.exe**, **lsass.exe**, and **lsm.exe** in Session 0. There should only be 1 process.
+**Mchakato wa Kuanza wa Windows**. \
+Inaanzisha **services.exe**, **lsass.exe**, na **lsm.exe** katika Kikao 0. Inapaswa kuwa na mchakato 1 tu.
 
 ## userinit.exe
 
-**Userinit Logon Application**.\
-Loads the **ntduser.dat in HKCU** and initialises the **user** **environment** and runs **logon** **scripts** and **GPO**.
+**Programu ya Kuingia ya Userinit**.\
+Inapakia **ntduser.dat katika HKCU** na kuanzisha **mazingira ya mtumiaji** na kuendesha **script za kuingia** na **GPO**.
 
-It launches **explorer.exe**.
+Inaanzisha **explorer.exe**.
 
 ## lsm.exe
 
-**Local Session Manager**.\
-It works with smss.exe to manipulate user sessions: Logon/logoff, shell start, lock/unlock desktop, etc.
+**Meneja wa Kikao cha Mitaa**.\
+Inafanya kazi na smss.exe ili kudhibiti vikao vya watumiaji: Kuingia/kutoka, kuanzisha shell, kufunga/kufungua desktop, nk.
 
-After W7 lsm.exe was transformed into a service (lsm.dll).
+Baada ya W7 lsm.exe ilibadilishwa kuwa huduma (lsm.dll).
 
-There should only be 1 process in W7 and from them a service running the DLL.
+Inapaswa kuwa na mchakato 1 tu katika W7 na kutoka kwao huduma inayokimbia DLL.
 
 ## services.exe
 
-**Service Control Manager**.\
-It **loads** **services** configured as **auto-start** and **drivers**.
+**Meneja wa Udhibiti wa Huduma**.\
+In **pakia** **huduma** zilizowekwa kama **kuanzisha kiotomatiki** na **madereva**.
 
-It's the parent process of **svchost.exe**, **dllhost.exe**, **taskhost.exe**, **spoolsv.exe** and many more.
+Ni mchakato mzazi wa **svchost.exe**, **dllhost.exe**, **taskhost.exe**, **spoolsv.exe** na mengi zaidi.
 
-Services are defined in `HKLM\SYSTEM\CurrentControlSet\Services` and this process maintains a DB in memory of service info that can be queried by sc.exe.
+Huduma zinaainishwa katika `HKLM\SYSTEM\CurrentControlSet\Services` na mchakato huu unahifadhi DB katika kumbukumbu ya taarifa za huduma ambazo zinaweza kuulizwa na sc.exe.
 
-Note how **some** **services** are going to be running in a **process of their own** and others are going to be **sharing a svchost.exe process**.
+Kumbuka jinsi **huduma** **zingine** zitakuwa zinaendesha katika **mchakato wao wenyewe** na nyingine zitakuwa **zinashiriki mchakato wa svchost.exe**.
 
-There should only be 1 process.
+Inapaswa kuwa na mchakato 1 tu.
 
 ## lsass.exe
 
-**Local Security Authority Subsystem**.\
-It's responsible for the user **authentication** and create the **security** **tokens**. It uses authentication packages located in `HKLM\System\CurrentControlSet\Control\Lsa`.
+**Mifumo ya Mamlaka ya Usalama wa Mitaa**.\
+Inawajibika kwa **uthibitishaji** wa mtumiaji na kuunda **tokeni za usalama**. Inatumia pakiti za uthibitishaji zilizoko katika `HKLM\System\CurrentControlSet\Control\Lsa`.
 
-It writes to the **Security** **event** **log** and there should only be 1 process.
+Inandika kwenye **kumbukumbu ya tukio la Usalama** na inapaswa kuwa na mchakato 1 tu.
 
-Keep in mind that this process is highly attacked to dump passwords.
+Kumbuka kuwa mchakato huu unashambuliwa sana ili kuteka nenosiri.
 
 ## svchost.exe
 
-**Generic Service Host Process**.\
-It hosts multiple DLL services in one shared process.
+**Mchakato wa Kihost wa Huduma ya Kijeneriki**.\
+Inahifadhi huduma nyingi za DLL katika mchakato mmoja wa pamoja.
 
-Usually, you will find that **svchost.exe** is launched with the `-k` flag. This will launch a query to the registry **HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Svchost** where there will be a key with the argument mentioned in -k that will contain the services to launch in the same process.
+Kwa kawaida, utapata kuwa **svchost.exe** inazinduliwa na bendera `-k`. Hii itazindua uchunguzi kwenye rejista **HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Svchost** ambapo kutakuwa na ufunguo wenye hoja iliyotajwa katika -k ambayo itakuwa na huduma za kuzindua katika mchakato huo huo.
 
-For example: `-k UnistackSvcGroup` will launch: `PimIndexMaintenanceSvc MessagingService WpnUserService CDPUserSvc UnistoreSvc UserDataSvc OneSyncSvc`
+Kwa mfano: `-k UnistackSvcGroup` itazindua: `PimIndexMaintenanceSvc MessagingService WpnUserService CDPUserSvc UnistoreSvc UserDataSvc OneSyncSvc`
 
-If the **flag `-s`** is also used with an argument, then svchost is asked to **only launch the specified service** in this argument.
+Ikiwa **bendera `-s`** pia inatumika na hoja, basi svchost inaombwa **kuanzisha huduma iliyotajwa tu** katika hoja hii.
 
-There will be several processes of `svchost.exe`. If any of them is **not using the `-k` flag**, then that's very suspicious. If you find that **services.exe is not the parent**, that's also very suspicious.
+Kutakuwa na michakato kadhaa ya `svchost.exe`. Ikiwa yoyote kati yao **haitumii bendera `-k`**, basi hiyo ni ya kushuku sana. Ikiwa unapata kuwa **services.exe si mzazi**, hiyo pia ni ya kushuku sana.
 
 ## taskhost.exe
 
-This process act as a host for processes running from DLLs. It also loads the services that are running from DLLs.
+Mchakato huu unafanya kazi kama mwenyeji wa michakato inayokimbia kutoka kwa DLLs. Pia inapakia huduma zinazokimbia kutoka kwa DLLs.
 
-In W8 this is called taskhostex.exe and in W10 taskhostw.exe.
+Katika W8 hii inaitwa taskhostex.exe na katika W10 taskhostw.exe.
 
 ## explorer.exe
 
-This is the process responsible for the **user's desktop** and launching files via file extensions.
+Huu ni mchakato unaohusika na **desktop ya mtumiaji** na kuanzisha faili kupitia nyongeza za faili.
 
-**Only 1** process should be spawned **per logged on user.**
+**Mchakato 1 tu** unapaswa kuanzishwa **kwa kila mtumiaji aliyeingia.**
 
-This is run from **userinit.exe** which should be terminated, so **no parent** should appear for this process.
+Hii inakimbia kutoka **userinit.exe** ambayo inapaswa kumalizika, hivyo **hakuna mzazi** anapaswa kuonekana kwa mchakato huu.
 
-# Catching Malicious Processes
+# Kukamata Michakato ya Uhalifu
 
-- Is it running from the expected path? (No Windows binaries run from temp location)
-- Is it communicating with weird IPs?
-- Check digital signatures (Microsoft artifacts should be signed)
-- Is it spelled correctly?
-- Is running under the expected SID?
-- Is the parent process the expected one (if any)?
-- Are the children processes the expecting ones? (no cmd.exe, wscript.exe, powershell.exe..?)
+- Je, inakimbia kutoka kwenye njia inayotarajiwa? (Hakuna binaries za Windows zinazoendesha kutoka eneo la muda)
+- Je, inawasiliana na IP za ajabu?
+- Angalia saini za kidijitali (vitu vya Microsoft vinapaswa kusainiwa)
+- Je, imeandikwa vizuri?
+- Je, inakimbia chini ya SID inayotarajiwa?
+- Je, mchakato mzazi ni yule anayetarajiwa (ikiwa upo)?
+- Je, michakato ya watoto ni zile zinazotarajiwa? (hakuna cmd.exe, wscript.exe, powershell.exe..?)
 
 {{#include ../../../banners/hacktricks-training.md}}

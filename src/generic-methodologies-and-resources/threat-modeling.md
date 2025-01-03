@@ -2,110 +2,110 @@
 
 ## Threat Modeling
 
-Welcome to HackTricks' comprehensive guide on Threat Modeling! Embark on an exploration of this critical aspect of cybersecurity, where we identify, understand, and strategize against potential vulnerabilities in a system. This thread serves as a step-by-step guide packed with real-world examples, helpful software, and easy-to-understand explanations. Ideal for both novices and experienced practitioners looking to fortify their cybersecurity defenses.
+Karibu kwenye mwongozo wa kina wa HackTricks kuhusu Threat Modeling! Anza uchunguzi wa kipengele hiki muhimu cha usalama wa mtandao, ambapo tunatambua, kuelewa, na kupanga mikakati dhidi ya udhaifu wa uwezekano katika mfumo. Thread hii inatoa mwongozo wa hatua kwa hatua uliojaa mifano halisi, programu za kusaidia, na maelezo rahisi kueleweka. Inafaa kwa wapya na wataalamu wenye uzoefu wanaotafuta kuimarisha ulinzi wao wa usalama wa mtandao.
 
 ### Commonly Used Scenarios
 
-1. **Software Development**: As part of the Secure Software Development Life Cycle (SSDLC), threat modeling helps in **identifying potential sources of vulnerabilities** in the early stages of development.
-2. **Penetration Testing**: The Penetration Testing Execution Standard (PTES) framework requires **threat modeling to understand the system's vulnerabilities** before carrying out the test.
+1. **Software Development**: Kama sehemu ya Mzunguko wa Maisha ya Maendeleo ya Programu Salama (SSDLC), threat modeling husaidia katika **kutambua vyanzo vya udhaifu** katika hatua za awali za maendeleo.
+2. **Penetration Testing**: Mfumo wa Kiwango cha Utekelezaji wa Upimaji wa Penetration (PTES) unahitaji **threat modeling ili kuelewa udhaifu wa mfumo** kabla ya kufanya mtihani.
 
 ### Threat Model in a Nutshell
 
-A Threat Model is typically represented as a diagram, image, or some other form of visual illustration that depicts the planned architecture or existing build of an application. It bears resemblance to a **data flow diagram**, but the key distinction lies in its security-oriented design.
+Model ya Threat kwa kawaida inawakilishwa kama mchoro, picha, au aina nyingine ya uwasilishaji wa kuona unaoonyesha usanifu uliopangwa au ujenzi wa sasa wa programu. Inafanana na **mchoro wa mtiririko wa data**, lakini tofauti kuu iko katika muundo wake unaolenga usalama.
 
-Threat models often feature elements marked in red, symbolizing potential vulnerabilities, risks, or barriers. To streamline the process of risk identification, the CIA (Confidentiality, Integrity, Availability) triad is employed, forming the basis of many threat modeling methodologies, with STRIDE being one of the most common. However, the chosen methodology can vary depending on the specific context and requirements.
+Mifano ya threat mara nyingi ina vipengele vilivyotajwa kwa rangi nyekundu, vinavyowakilisha udhaifu, hatari, au vizuizi vya uwezekano. Ili kurahisisha mchakato wa kutambua hatari, triad ya CIA (Ufaragha, Uaminifu, Upatikanaji) inatumika, ikifanya msingi wa mbinu nyingi za threat modeling, huku STRIDE ikiwa moja ya maarufu zaidi. Hata hivyo, mbinu iliyochaguliwa inaweza kutofautiana kulingana na muktadha maalum na mahitaji.
 
 ### The CIA Triad
 
-The CIA Triad is a widely recognized model in the field of information security, standing for Confidentiality, Integrity, and Availability. These three pillars form the foundation upon which many security measures and policies are built, including threat modeling methodologies.
+Triad ya CIA ni mfano unaotambulika sana katika uwanja wa usalama wa habari, ikisimama kwa Ufaragha, Uaminifu, na Upatikanaji. Nguzo hizi tatu zinaunda msingi ambao hatua nyingi za usalama na sera zimejengwa, ikiwa ni pamoja na mbinu za threat modeling.
 
-1. **Confidentiality**: Ensuring that the data or system is not accessed by unauthorized individuals. This is a central aspect of security, requiring appropriate access controls, encryption, and other measures to prevent data breaches.
-2. **Integrity**: The accuracy, consistency, and trustworthiness of the data over its lifecycle. This principle ensures that the data is not altered or tampered with by unauthorized parties. It often involves checksums, hashing, and other data verification methods.
-3. **Availability**: This ensures that data and services are accessible to authorized users when needed. This often involves redundancy, fault tolerance, and high-availability configurations to keep systems running even in the face of disruptions.
+1. **Confidentiality**: Kuhakikisha kwamba data au mfumo haupatikani kwa watu wasioidhinishwa. Hii ni kipengele cha kati cha usalama, kinachohitaji udhibiti sahihi wa ufikiaji, usimbaji, na hatua nyingine za kuzuia uvunjaji wa data.
+2. **Integrity**: Usahihi, uthabiti, na uaminifu wa data katika mzunguko wake wa maisha. Kanuni hii inahakikisha kwamba data haibadilishwi au kuingiliwa na wahusika wasioidhinishwa. Mara nyingi inahusisha checksums, hashing, na mbinu nyingine za uthibitishaji wa data.
+3. **Availability**: Hii inahakikisha kwamba data na huduma zinapatikana kwa watumiaji walioidhinishwa wanapohitajika. Hii mara nyingi inahusisha redundancy, uvumilivu wa makosa, na usanifu wa upatikanaji wa juu ili kuweka mifumo ikifanya kazi hata mbele ya usumbufu.
 
 ### Threat Modeling Methodlogies
 
-1. **STRIDE**: Developed by Microsoft, STRIDE is an acronym for **Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, and Elevation of Privilege**. Each category represents a type of threat, and this methodology is commonly used in the design phase of a program or system to identify potential threats.
-2. **DREAD**: This is another methodology from Microsoft used for risk assessment of identified threats. DREAD stands for **Damage potential, Reproducibility, Exploitability, Affected users, and Discoverability**. Each of these factors is scored, and the result is used to prioritize identified threats.
-3. **PASTA** (Process for Attack Simulation and Threat Analysis): This is a seven-step, **risk-centric** methodology. It includes defining and identifying security objectives, creating a technical scope, application decomposition, threat analysis, vulnerability analysis, and risk/triage assessment.
-4. **Trike**: This is a risk-based methodology that focuses on defending assets. It starts from a **risk management** perspective and looks at threats and vulnerabilities in that context.
-5. **VAST** (Visual, Agile, and Simple Threat modeling): This approach aims to be more accessible and integrates into Agile development environments. It combines elements from the other methodologies and focuses on **visual representations of threats**.
-6. **OCTAVE** (Operationally Critical Threat, Asset, and Vulnerability Evaluation): Developed by the CERT Coordination Center, this framework is geared toward **organizational risk assessment rather than specific systems or software**.
+1. **STRIDE**: Iliyotengenezwa na Microsoft, STRIDE ni kifupi cha **Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, and Elevation of Privilege**. Kila kundi linawakilisha aina ya tishio, na mbinu hii hutumiwa mara nyingi katika hatua ya kubuni ya programu au mfumo kutambua vitisho vya uwezekano.
+2. **DREAD**: Hii ni mbinu nyingine kutoka Microsoft inayotumika kwa tathmini ya hatari ya vitisho vilivyotambuliwa. DREAD inasimama kwa **Damage potential, Reproducibility, Exploitability, Affected users, and Discoverability**. Kila moja ya mambo haya inapata alama, na matokeo yake yanatumika kuipa kipaumbele vitisho vilivyotambuliwa.
+3. **PASTA** (Process for Attack Simulation and Threat Analysis): Hii ni mbinu ya hatua saba, **iliyolenga hatari**. Inajumuisha kufafanua na kutambua malengo ya usalama, kuunda upeo wa kiufundi, uharibifu wa programu, uchambuzi wa vitisho, uchambuzi wa udhaifu, na tathmini ya hatari/triage.
+4. **Trike**: Hii ni mbinu inayotegemea hatari inayolenga kulinda mali. Inaanza kutoka mtazamo wa **usimamizi wa hatari** na inatazama vitisho na udhaifu katika muktadha huo.
+5. **VAST** (Visual, Agile, and Simple Threat modeling): Mbinu hii inalenga kuwa rahisi zaidi na kuunganishwa katika mazingira ya maendeleo ya Agile. Inachanganya vipengele kutoka mbinu nyingine na inazingatia **uwakilishi wa kuona wa vitisho**.
+6. **OCTAVE** (Operationally Critical Threat, Asset, and Vulnerability Evaluation): Iliyotengenezwa na Kituo cha Uratibu wa CERT, mfumo huu unalenga **tathmini ya hatari ya shirika badala ya mifumo au programu maalum**.
 
 ## Tools
 
-There are several tools and software solutions available that can **assist** with the creation and management of threat models. Here are a few you might consider.
+Kuna zana kadhaa na suluhisho za programu zinazopatikana ambazo zinaweza **kusaidia** katika uundaji na usimamizi wa mifano ya vitisho. Hapa kuna chache unazoweza kuzingatia.
 
 ### [SpiderSuite](https://github.com/3nock/SpiderSuite)
 
-An advance cross-platform and multi-feature GUI web spider/crawler for cyber security professionals. Spider Suite can be used for attack surface mapping and analysis.
+Zana ya kisasa ya GUI ya wavuti ya kuvua/kuvua kwa wataalamu wa usalama wa mtandao. Spider Suite inaweza kutumika kwa ramani na uchambuzi wa uso wa shambulio.
 
 **Usage**
 
-1. Pick a URL and Crawl
+1. Chagua URL na Crawl
 
 <figure><img src="../images/threatmodel_spidersuite_1.png" alt=""><figcaption></figcaption></figure>
 
-2. View Graph
+2. Tazama Mchoro
 
 <figure><img src="../images/threatmodel_spidersuite_2.png" alt=""><figcaption></figcaption></figure>
 
 ### [OWASP Threat Dragon](https://github.com/OWASP/threat-dragon/releases)
 
-An open-source project from OWASP, Threat Dragon is both a web and desktop application that includes system diagramming as well as a rule engine to auto-generate threats/mitigations.
+Mradi wa chanzo wazi kutoka OWASP, Threat Dragon ni programu ya wavuti na desktop ambayo inajumuisha uchoraji wa mifumo pamoja na injini ya sheria za kuunda vitisho/mipango kiotomatiki.
 
 **Usage**
 
-1. Create New Project
+1. Unda Mradi Mpya
 
 <figure><img src="../images/create_new_project_1.jpg" alt=""><figcaption></figcaption></figure>
 
-Sometimes it could look like this:
+Wakati mwingine inaweza kuonekana kama hii:
 
 <figure><img src="../images/1_threatmodel_create_project.jpg" alt=""><figcaption></figcaption></figure>
 
-2. Launch New Project
+2. Anzisha Mradi Mpya
 
 <figure><img src="../images/launch_new_project_2.jpg" alt=""><figcaption></figcaption></figure>
 
-3. Save The New Project
+3. Hifadhi Mradi Mpya
 
 <figure><img src="../images/save_new_project.jpg" alt=""><figcaption></figcaption></figure>
 
-4. Create your model
+4. Unda mfano wako
 
-You can use tools like SpiderSuite Crawler to give you inspiration, a basic model would look something like this
+Unaweza kutumia zana kama SpiderSuite Crawler kukupa inspiration, mfano wa msingi ungeweza kuonekana kama hii
 
 <figure><img src="../images/0_basic_threat_model.jpg" alt=""><figcaption></figcaption></figure>
 
-Just a little bit of explanation about the entities:
+Tu kidogo ya maelezo kuhusu viumbe:
 
-- Process (The entity itself such as Webserver or web functionality)
-- Actor (A Person such as a Website Visitor, User or Administrator)
-- Data Flow Line (Indicator of Interaction)
-- Trust Boundary (Different network segments or scopes.)
-- Store (Things where data are stored at such as Databases)
+- Mchakato (Kiumbe chenyewe kama vile Webserver au kazi ya wavuti)
+- Mchezaji (Mtu kama vile Mtembezi wa Tovuti, Mtumiaji au Msimamizi)
+- Mstari wa Mtiririko wa Data (Kiashiria cha Maingiliano)
+- Mipaka ya Kuamini (Sehemu tofauti za mtandao au upeo.)
+- Hifadhi (Mambo ambapo data zinahifadhiwa kama vile Mifumo ya Takwimu)
 
-5. Create a Threat (Step 1)
+5. Unda Tishio (Hatua ya 1)
 
-First you have to pick the layer you wish to add a threat to
+Kwanza unapaswa kuchagua safu unayotaka kuongeza tishio
 
 <figure><img src="../images/3_threatmodel_chose-threat-layer.jpg" alt=""><figcaption></figcaption></figure>
 
-Now you can create the threat
+Sasa unaweza kuunda tishio
 
 <figure><img src="../images/4_threatmodel_create-threat.jpg" alt=""><figcaption></figcaption></figure>
 
-Keep in mind that there is a difference between Actor Threats and Process Threats. If you would add a threat to an Actor then you will only be able to choose "Spoofing" and "Repudiation. However in our example we add threat to a Process entity so we will see this in the threat creation box:
+Kumbuka kwamba kuna tofauti kati ya Vitisho vya Mchezaji na Vitisho vya Mchakato. Ikiwa ungeongeza tishio kwa Mchezaji basi utaweza kuchagua tu "Spoofing" na "Repudiation". Hata hivyo katika mfano wetu tunaongeza tishio kwa kiumbe cha Mchakato hivyo tutaona hii katika sanduku la uundaji wa tishio:
 
 <figure><img src="../images/2_threatmodel_type-option.jpg" alt=""><figcaption></figcaption></figure>
 
-6. Done
+6. Imekamilika
 
-Now your finished model should look something like this. And this is how you make a simple threat model with OWASP Threat Dragon.
+Sasa mfano wako wa kumaliza unapaswa kuonekana kama hii. Na hivi ndivyo unavyofanya mfano rahisi wa tishio na OWASP Threat Dragon.
 
 <figure><img src="../images/threat_model_finished.jpg" alt=""><figcaption></figcaption></figure>
 
 ### [Microsoft Threat Modeling Tool](https://aka.ms/threatmodelingtool)
 
-This is a free tool from Microsoft that helps in finding threats in the design phase of software projects. It uses the STRIDE methodology and is particularly suitable for those developing on Microsoft's stack.
+Hii ni zana ya bure kutoka Microsoft inayosaidia katika kutafuta vitisho katika hatua ya kubuni ya miradi ya programu. Inatumia mbinu ya STRIDE na inafaa hasa kwa wale wanaoendeleza kwenye stack ya Microsoft.

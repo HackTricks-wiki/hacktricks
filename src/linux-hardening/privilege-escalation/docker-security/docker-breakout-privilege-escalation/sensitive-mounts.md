@@ -62,7 +62,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Angalia ufikiaji wa modprobe
 
 #### **`/proc/sysrq-trigger`**
 
-- Inaruhusu kuanzisha amri za Sysrq, ambazo zinaweza kusababisha upya wa mfumo mara moja au hatua nyingine muhimu.
+- Inaruhusu kuanzisha amri za Sysrq, ambayo inaweza kusababisha upya wa mfumo mara moja au hatua nyingine muhimu.
 - **Mfano wa Kuanzisha Upya Mwenyeji**:
 
 ```bash
@@ -78,14 +78,14 @@ echo b > /proc/sysrq-trigger # Inarejesha mwenyeji
 
 - Inataja alama za kernel zilizotolewa na anwani zao.
 - Muhimu kwa maendeleo ya ukatili wa kernel, hasa kwa kushinda KASLR.
-- Taarifa za anwani zinapunguziliwa mbali ikiwa `kptr_restrict` imewekwa kuwa `1` au `2`.
+- Taarifa za anwani zinapunguzwa ikiwa `kptr_restrict` imewekwa kwa `1` au `2`.
 - Maelezo katika [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
 #### **`/proc/[pid]/mem`**
 
 - Inafanya kazi na kifaa cha kumbukumbu ya kernel `/dev/mem`.
 - Kihistoria ilikuwa na udhaifu wa mashambulizi ya kupanda kwa haki.
-- Zaidi katika [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- Zaidi juu ya [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
 #### **`/proc/kcore`**
 
@@ -96,12 +96,12 @@ echo b > /proc/sysrq-trigger # Inarejesha mwenyeji
 
 #### **`/proc/kmem`**
 
-- Njia mbadala kwa `/dev/kmem`, inawakilisha kumbukumbu ya virtual ya kernel.
+- Kiolesura mbadala kwa `/dev/kmem`, kinawakilisha kumbukumbu ya virtual ya kernel.
 - Inaruhusu kusoma na kuandika, hivyo kubadilisha moja kwa moja kumbukumbu ya kernel.
 
 #### **`/proc/mem`**
 
-- Njia mbadala kwa `/dev/mem`, inawakilisha kumbukumbu ya kimwili.
+- Kiolesura mbadala kwa `/dev/mem`, kinawakilisha kumbukumbu ya kimwili.
 - Inaruhusu kusoma na kuandika, kubadilisha kumbukumbu yote kunahitaji kutatua anwani za virtual hadi za kimwili.
 
 #### **`/proc/sched_debug`**
@@ -152,17 +152,17 @@ cat /output %%%
 
 #### **`/sys/kernel/security`**
 
-- Ina interface ya `securityfs`, inayoruhusu usanidi wa Moduli za Usalama za Linux kama AppArmor.
+- Ina nyumba ya kiolesura cha `securityfs`, kinachoruhusu usanidi wa Moduli za Usalama za Linux kama AppArmor.
 - Ufikiaji unaweza kuwezesha kontena kuzima mfumo wake wa MAC.
 
 #### **`/sys/firmware/efi/vars` na `/sys/firmware/efi/efivars`**
 
-- Inafichua interfaces za kuingiliana na mabadiliko ya EFI katika NVRAM.
-- Usanidi mbaya au ukatili unaweza kusababisha kompyuta za mkononi zisizoweza kuanzishwa au mashine za mwenyeji zisizoweza kuanzishwa.
+- Inafichua violesura vya kuingiliana na mabadiliko ya EFI katika NVRAM.
+- Usanidi mbaya au ukatili unaweza kusababisha kompyuta zisizoweza kuanzishwa au kompyuta za mwenyeji zisizoweza kuanzishwa.
 
 #### **`/sys/kernel/debug`**
 
-- `debugfs` inatoa interface ya "hakuna sheria" ya ufuatiliaji wa kernel.
+- `debugfs` inatoa kiolesura cha "hakuna sheria" kwa ufuatiliaji wa kernel.
 - Historia ya masuala ya usalama kutokana na asili yake isiyo na mipaka.
 
 ### References

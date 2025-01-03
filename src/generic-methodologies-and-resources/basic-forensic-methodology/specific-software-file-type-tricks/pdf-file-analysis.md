@@ -2,27 +2,19 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="../../../images/image (48).png" alt=""><figcaption></figcaption></figure>
+**Kwa maelezo zaidi angalia:** [**https://trailofbits.github.io/ctf/forensics/**](https://trailofbits.github.io/ctf/forensics/)
 
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=pdf-file-analysis) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Muundo wa PDF unajulikana kwa ugumu wake na uwezo wa kuficha data, na kufanya kuwa kitovu cha changamoto za forensics za CTF. Unachanganya vipengele vya maandiko ya kawaida na vitu vya binary, ambavyo vinaweza kuwa vimefinywa au kufichwa, na vinaweza kujumuisha skripti katika lugha kama JavaScript au Flash. Ili kuelewa muundo wa PDF, mtu anaweza kurejelea [nyenzo za utangulizi](https://blog.didierstevens.com/2008/04/09/quickpost-about-the-physical-and-logical-structure-of-pdf-files/) za Didier Stevens, au kutumia zana kama mhariri wa maandiko au mhariri maalum wa PDF kama Origami.
 
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=pdf-file-analysis" %}
+Kwa uchunguzi wa kina au usimamizi wa PDFs, zana kama [qpdf](https://github.com/qpdf/qpdf) na [Origami](https://github.com/mobmewireless/origami-pdf) zinapatikana. Data zilizofichwa ndani ya PDFs zinaweza kufichwa katika:
 
-**For further details check:** [**https://trailofbits.github.io/ctf/forensics/**](https://trailofbits.github.io/ctf/forensics/)
+- Tabaka zisizoonekana
+- Muundo wa metadata wa XMP na Adobe
+- Vizazi vya ongezeko
+- Maandishi yenye rangi sawa na ya nyuma
+- Maandishi nyuma ya picha au picha zinazovutana
+- Maoni yasiyoonyeshwa
 
-The PDF format is known for its complexity and potential for concealing data, making it a focal point for CTF forensics challenges. It combines plain-text elements with binary objects, which might be compressed or encrypted, and can include scripts in languages like JavaScript or Flash. To understand PDF structure, one can refer to Didier Stevens's [introductory material](https://blog.didierstevens.com/2008/04/09/quickpost-about-the-physical-and-logical-structure-of-pdf-files/), or use tools like a text editor or a PDF-specific editor such as Origami.
-
-For in-depth exploration or manipulation of PDFs, tools like [qpdf](https://github.com/qpdf/qpdf) and [Origami](https://github.com/mobmewireless/origami-pdf) are available. Hidden data within PDFs might be concealed in:
-
-- Invisible layers
-- XMP metadata format by Adobe
-- Incremental generations
-- Text with the same color as the background
-- Text behind images or overlapping images
-- Non-displayed comments
-
-For custom PDF analysis, Python libraries like [PeepDF](https://github.com/jesparza/peepdf) can be used to craft bespoke parsing scripts. Further, the PDF's potential for hidden data storage is so vast that resources like the NSA guide on PDF risks and countermeasures, though no longer hosted at its original location, still offer valuable insights. A [copy of the guide](http://www.itsecure.hu/library/file/Biztons%C3%A1gi%20%C3%BAtmutat%C3%B3k/Alkalmaz%C3%A1sok/Hidden%20Data%20and%20Metadata%20in%20Adobe%20PDF%20Files.pdf) and a collection of [PDF format tricks](https://github.com/corkami/docs/blob/master/PDF/PDF.md) by Ange Albertini can provide further reading on the subject.
+Kwa uchambuzi wa PDF wa kawaida, maktaba za Python kama [PeepDF](https://github.com/jesparza/peepdf) zinaweza kutumika kuunda skripti za uchambuzi maalum. Zaidi, uwezo wa PDF wa kuhifadhi data zilizofichwa ni mkubwa kiasi kwamba rasilimali kama mwongozo wa NSA kuhusu hatari za PDF na hatua za kupambana, ingawa haupo tena kwenye eneo lake la awali, bado unatoa maarifa muhimu. [Nakala ya mwongozo](http://www.itsecure.hu/library/file/Biztons%C3%A1gi%20%C3%BAtmutat%C3%B3k/Alkalmaz%C3%A1s/Hidden%20Data%20and%20Metadata%20in%20Adobe%20PDF%20Files.pdf) na mkusanyiko wa [hila za muundo wa PDF](https://github.com/corkami/docs/blob/master/PDF/PDF.md) kutoka kwa Ange Albertini zinaweza kutoa kusoma zaidi juu ya mada hiyo.
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,69 +1,69 @@
-# Detecting Phishing
+# Kugundua Phishing
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Introduction
+## Utangulizi
 
-To detect a phishing attempt it's important to **understand the phishing techniques that are being used nowadays**. On the parent page of this post, you can find this information, so if you aren't aware of which techniques are being used today I recommend you to go to the parent page and read at least that section.
+Ili kugundua jaribio la phishing ni muhimu **kuelewa mbinu za phishing zinazotumiwa leo**. Kwenye ukurasa wa mzazi wa chapisho hili, unaweza kupata taarifa hii, hivyo kama hujui ni mbinu zipi zinazotumiwa leo nakusihi uende kwenye ukurasa wa mzazi na usome angalau sehemu hiyo.
 
-This post is based on the idea that the **attackers will try to somehow mimic or use the victim's domain name**. If your domain is called `example.com` and you are phished using a completely different domain name for some reason like `youwonthelottery.com`, these techniques aren't going to uncover it.
+Chapisho hili linategemea wazo kwamba **washambuliaji watajaribu kwa namna fulani kuiga au kutumia jina la kikoa la mwathirika**. Ikiwa kikoa chako kinaitwa `example.com` na unapata phishing ukitumia jina la kikoa tofauti kabisa kwa sababu fulani kama `youwonthelottery.com`, mbinu hizi hazitakufichua.
 
-## Domain name variations
+## Mabadiliko ya majina ya kikoa
 
-It's kind of **easy** to **uncover** those **phishing** attempts that will use a **similar domain** name inside the email.\
-It's enough to **generate a list of the most probable phishing names** that an attacker may use and **check** if it's **registered** or just check if there is any **IP** using it.
+Ni rahisi **kufichua** jaribio hizo za **phishing** ambazo zitatumia jina la **kikoa linalofanana** ndani ya barua pepe.\
+Inatosha **kuunda orodha ya majina ya phishing yanayoweza kutokea** ambayo mshambuliaji anaweza kutumia na **kuangalia** ikiwa yame **jiandikisha** au kuangalia ikiwa kuna **IP** inayotumia hilo.
 
-### Finding suspicious domains
+### Kupata kikoa chenye shaka
 
-For this purpose, you can use any of the following tools. Note that these tolls will also perform DNS requests automatically to check if the domain has any IP assigned to it:
+Kwa kusudi hili, unaweza kutumia yoyote ya zana zifuatazo. Kumbuka kwamba zana hizi pia zitafanya maombi ya DNS kiotomatiki ili kuangalia ikiwa kikoa kina IP yoyote iliyotolewa:
 
 - [**dnstwist**](https://github.com/elceef/dnstwist)
 - [**urlcrazy**](https://github.com/urbanadventurer/urlcrazy)
 
 ### Bitflipping
 
-**You can find a short the explanation of this technique in the parent page. Or read the original research in** [**https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/**](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
+**Unaweza kupata maelezo mafupi ya mbinu hii kwenye ukurasa wa mzazi. Au soma utafiti wa asili katika** [**https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/**](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
 
-For example, a 1 bit modification in the domain microsoft.com can transform it into _windnws.com._\
-**Attackers may register as many bit-flipping domains as possible related to the victim to redirect legitimate users to their infrastructure**.
+Kwa mfano, mabadiliko ya bit 1 katika kikoa microsoft.com yanaweza kubadilisha kuwa _windnws.com._\
+**Washambuliaji wanaweza kujiandikisha kwa majina mengi ya kikoa yanayohusiana na mwathirika ili kuwahamisha watumiaji halali kwenye miundombinu yao**.
 
-**All possible bit-flipping domain names should be also monitored.**
+**Majina yote ya kikoa yanayoweza kubadilishwa yanapaswa pia kufuatiliwa.**
 
-### Basic checks
+### Ukaguzi wa Msingi
 
-Once you have a list of potential suspicious domain names you should **check** them (mainly the ports HTTP and HTTPS) to **see if they are using some login form similar** to someone of the victim's domain.\
-You could also check port 3333 to see if it's open and running an instance of `gophish`.\
-It's also interesting to know **how old each discovered suspicions domain is**, the younger it's the riskier it is.\
-You can also get **screenshots** of the HTTP and/or HTTPS suspicious web page to see if it's suspicious and in that case **access it to take a deeper look**.
+Mara tu unapokuwa na orodha ya majina ya kikoa yenye shaka unapaswa **kuangalia** (hasa bandari za HTTP na HTTPS) ili **kuona ikiwa wanatumia fomu ya kuingia inayofanana** na moja ya kikoa cha mwathirika.\
+Unaweza pia kuangalia bandari 3333 kuona ikiwa iko wazi na inafanya kazi ya `gophish`.\
+Ni muhimu pia kujua **umri wa kila kikoa chenye shaka kilichogunduliwa**, kadri inavyokuwa changa ndivyo inavyokuwa hatari zaidi.\
+Unaweza pia kupata **picha za skrini** za ukurasa wa wavuti wa HTTP na/au HTTPS wenye shaka ili kuona ikiwa ni ya shaka na katika hali hiyo **ingia ili kuangalia kwa undani zaidi**.
 
-### Advanced checks
+### Ukaguzi wa Juu
 
-If you want to go one step further I would recommend you to **monitor those suspicious domains and search for more** once in a while (every day? it only takes a few seconds/minutes). You should also **check** the open **ports** of the related IPs and **search for instances of `gophish` or similar tools** (yes, attackers also make mistakes) and **monitor the HTTP and HTTPS web pages of the suspicious domains and subdomains** to see if they have copied any login form from the victim's web pages.\
-In order to **automate this** I would recommend having a list of login forms of the victim's domains, spider the suspicious web pages and comparing each login form found inside the suspicious domains with each login form of the victim's domain using something like `ssdeep`.\
-If you have located the login forms of the suspicious domains, you can try to **send junk credentials** and **check if it's redirecting you to the victim's domain**.
+Ikiwa unataka kwenda hatua moja mbele nakusihi **ufuatilie majina hayo ya kikoa yenye shaka na kutafuta zaidi** mara kwa mara (kila siku? inachukua sekunde/chache tu). Unapaswa pia **kuangalia** bandari **zilizofunguliwa** za IP zinazohusiana na **kutafuta mifano ya `gophish` au zana zinazofanana** (ndiyo, washambuliaji pia hufanya makosa) na **kufuatilia ukurasa wa wavuti wa HTTP na HTTPS wa majina ya kikoa yenye shaka na subdomains** ili kuona ikiwa wameiga fomu yoyote ya kuingia kutoka kwenye kurasa za wavuti za mwathirika.\
+Ili **kujiandaa** kwa hili nakusihi uwe na orodha ya fomu za kuingia za majina ya kikoa ya mwathirika, spider ukurasa wa wavuti wenye shaka na kulinganisha kila fomu ya kuingia iliyopatikana ndani ya majina ya kikoa yenye shaka na kila fomu ya kuingia ya kikoa cha mwathirika kwa kutumia kitu kama `ssdeep`.\
+Ikiwa umepata fomu za kuingia za majina ya kikoa yenye shaka, unaweza kujaribu **kutuma akidi za takataka** na **kuangalia ikiwa inakuhamisha kwenye kikoa cha mwathirika**.
 
-## Domain names using keywords
+## Majina ya kikoa yanayotumia maneno muhimu
 
-The parent page also mentions a domain name variation technique that consists of putting the **victim's domain name inside a bigger domain** (e.g. paypal-financial.com for paypal.com).
+Ukurasa wa mzazi pia unataja mbinu ya mabadiliko ya jina la kikoa ambayo inajumuisha kuweka **jina la kikoa la mwathirika ndani ya kikoa kikubwa** (kwa mfano, paypal-financial.com kwa paypal.com).
 
-### Certificate Transparency
+### Uwazi wa Cheti
 
-It's not possible to take the previous "Brute-Force" approach but it's actually **possible to uncover such phishing attempts** also thanks to certificate transparency. Every time a certificate is emitted by a CA, the details are made public. This means that by reading the certificate transparency or even monitoring it, it's **possible to find domains that are using a keyword inside its name** For example, if an attacker generates a certificate of [https://paypal-financial.com](https://paypal-financial.com), seeing the certificate it's possible to find the keyword "paypal" and know that suspicious email is being used.
+Haiwezekani kuchukua mbinu ya awali ya "Brute-Force" lakini kwa kweli **inawezekana kufichua jaribio kama hilo la phishing** pia kwa shukrani kwa uwazi wa cheti. Kila wakati cheti kinapotolewa na CA, maelezo yanapatikana hadharani. Hii inamaanisha kwamba kwa kusoma uwazi wa cheti au hata kufuatilia, **inawezekana kupata majina ya kikoa yanayotumia neno muhimu ndani ya jina lake** Kwa mfano, ikiwa mshambuliaji anaunda cheti cha [https://paypal-financial.com](https://paypal-financial.com), kuona cheti kunawezekana kupata neno muhimu "paypal" na kujua kwamba barua pepe yenye shaka inatumika.
 
-The post [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/) suggests that you can use Censys to search for certificates affecting a specific keyword and filter by date (only "new" certificates) and by the CA issuer "Let's Encrypt":
+Chapisho [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/) linapendekeza kwamba unaweza kutumia Censys kutafuta vyeti vinavyoathiri neno muhimu maalum na kuchuja kwa tarehe (vyeti "vipya" pekee) na kwa mtoaji wa CA "Let's Encrypt":
 
 ![https://0xpatrik.com/content/images/2018/07/cert_listing.png](<../../images/image (1115).png>)
 
-However, you can do "the same" using the free web [**crt.sh**](https://crt.sh). You can **search for the keyword** and the **filter** the results **by date and CA** if you wish.
+Hata hivyo, unaweza kufanya "kile kile" kwa kutumia wavuti ya bure [**crt.sh**](https://crt.sh). Unaweza **kutafuta neno muhimu** na **kuchuja** matokeo **kwa tarehe na CA** ikiwa unataka.
 
 ![](<../../images/image (519).png>)
 
-Using this last option you can even use the field Matching Identities to see if any identity from the real domain matches any of the suspicious domains (note that a suspicious domain can be a false positive).
+Kwa kutumia chaguo hili la mwisho unaweza hata kutumia uwanja wa Matching Identities kuona ikiwa kuna kitambulisho chochote kutoka kwenye kikoa halisi kinacholingana na chochote cha majina ya kikoa yenye shaka (kumbuka kwamba jina la kikoa lenye shaka linaweza kuwa la uwongo).
 
-**Another alternative** is the fantastic project called [**CertStream**](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067). CertStream provides a real-time stream of newly generated certificates which you can use to detect specified keywords in (near) real-time. In fact, there is a project called [**phishing_catcher**](https://github.com/x0rz/phishing_catcher) that does just that.
+**Chaguo lingine** ni mradi mzuri unaoitwa [**CertStream**](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067). CertStream inatoa mtiririko wa wakati halisi wa vyeti vilivyoundwa hivi karibuni ambavyo unaweza kutumia kugundua maneno muhimu yaliyotajwa katika wakati (karibu) halisi. Kwa kweli, kuna mradi unaoitwa [**phishing_catcher**](https://github.com/x0rz/phishing_catcher) ambao unafanya hivyo.
 
-### **New domains**
+### **Majina mapya ya kikoa**
 
-**One last alternative** is to gather a list of **newly registered domains** for some TLDs ([Whoxy](https://www.whoxy.com/newly-registered-domains/) provides such service) and **check the keywords in these domains**. However, long domains usually use one or more subdomains, therefore the keyword won't appear inside the FLD and you won't be able to find the phishing subdomain.
+**Chaguo la mwisho** ni kukusanya orodha ya **majina mapya ya kikoa yaliyosajiliwa** kwa baadhi ya TLDs ([Whoxy](https://www.whoxy.com/newly-registered-domains/) inatoa huduma hiyo) na **kuangalia maneno muhimu katika majina haya ya kikoa**. Hata hivyo, majina marefu ya kikoa mara nyingi hutumia moja au zaidi ya subdomains, hivyo neno muhimu halitaonekana ndani ya FLD na huwezi kupata subdomain ya phishing.
 
 {{#include ../../banners/hacktricks-training.md}}

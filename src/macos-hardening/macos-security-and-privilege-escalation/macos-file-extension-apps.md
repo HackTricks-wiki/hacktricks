@@ -4,21 +4,21 @@
 
 ## LaunchServices Database
 
-Hii ni hifadhidata ya programu zote zilizowekwa katika macOS ambazo zinaweza kuulizwa ili kupata taarifa kuhusu kila programu iliyowekwa kama vile mipango ya URL inayounga mkono na aina za MIME.
+Hii ni database ya programu zote zilizowekwa kwenye macOS ambazo zinaweza kuulizwa ili kupata taarifa kuhusu kila programu iliyowekwa kama vile mipango ya URL inayounga mkono na aina za MIME.
 
-Inawezekana kutoa hifadhidata hii kwa:
+Inawezekana kutoa data hii kwa:
 ```
 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -dump
 ```
-Au kutumia chombo [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
+Au kutumia zana [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
 
-**`/usr/libexec/lsd`** ni ubongo wa hifadhidata. Inatoa **huduma kadhaa za XPC** kama vile `.lsd.installation`, `.lsd.open`, `.lsd.openurl`, na zaidi. Lakini pia **inahitaji baadhi ya ruhusa** kwa ajili ya programu ili kuweza kutumia kazi za XPC zilizofichuliwa, kama vile `.launchservices.changedefaulthandler` au `.launchservices.changeurlschemehandler` kubadilisha programu za kawaida kwa aina za mime au mipango ya url na mengineyo.
+**`/usr/libexec/lsd`** ni ubongo wa hifadhidata. Inatoa **huduma kadhaa za XPC** kama vile `.lsd.installation`, `.lsd.open`, `.lsd.openurl`, na zaidi. Lakini pia **inahitaji baadhi ya ruhusa** kwa programu ili kuweza kutumia kazi za XPC zilizofichuliwa, kama vile `.launchservices.changedefaulthandler` au `.launchservices.changeurlschemehandler` kubadilisha programu za kawaida kwa aina za mime au mipango ya url na zingine.
 
-**`/System/Library/CoreServices/launchservicesd`** inadai huduma `com.apple.coreservices.launchservicesd` na inaweza kuulizwa ili kupata taarifa kuhusu programu zinazotembea. Inaweza kuulizwa kwa chombo cha mfumo /**`usr/bin/lsappinfo`** au kwa kutumia [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
+**`/System/Library/CoreServices/launchservicesd`** inadai huduma `com.apple.coreservices.launchservicesd` na inaweza kuulizwa ili kupata taarifa kuhusu programu zinazotembea. Inaweza kuulizwa kwa zana ya mfumo /**`usr/bin/lsappinfo`** au kwa kutumia [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
 
 ## Wakala wa programu za Kiambatisho cha Faili & mpango wa URL
 
-Mistari ifuatayo inaweza kuwa na manufaa katika kutafuta programu ambazo zinaweza kufungua faili kulingana na kiambatisho:
+Mistari ifuatayo inaweza kuwa na manufaa kutafuta programu ambazo zinaweza kufungua faili kulingana na kiambatisho:
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -dump | grep -E "path:|bindings:|name:"
 ```

@@ -1,36 +1,36 @@
 {{#include ../banners/hacktricks-training.md}}
 
-# Summary of the attack
+# Muhtasari wa shambulio
 
-Imagine a server which is **signing** some **data** by **appending** a **secret** to some known clear text data and then hashing that data. If you know:
+Fikiria seva ambayo in **tishe** baadhi ya **data** kwa **kuongeza** **siri** kwa baadhi ya data ya wazi inayojulikana na kisha kuhashi data hiyo. Ikiwa unajua:
 
-- **The length of the secret** (this can be also bruteforced from a given length range)
-- **The clear text data**
-- **The algorithm (and it's vulnerable to this attack)**
-- **The padding is known**
-  - Usually a default one is used, so if the other 3 requirements are met, this also is
-  - The padding vary depending on the length of the secret+data, that's why the length of the secret is needed
+- **Urefu wa siri** (hii inaweza pia kubruteforced kutoka kwa anuwai ya urefu uliopewa)
+- **Data ya wazi**
+- **Algorithimu (na inahatarishwa kwa shambulio hili)**
+- **Padding inajulikana**
+- Kawaida moja ya chaguo la msingi inatumika, hivyo ikiwa mahitaji mengine 3 yanakidhi, hii pia inafanya hivyo
+- Padding inatofautiana kulingana na urefu wa siri + data, ndivyo maana urefu wa siri unahitajika
 
-Then, it's possible for an **attacker** to **append** **data** and **generate** a valid **signature** for the **previous data + appended data**.
+Basi, inawezekana kwa **mshambuliaji** **kuongeza** **data** na **kuunda** **sahihi** halali kwa **data ya awali + data iliyoongezwa**.
 
-## How?
+## Vipi?
 
-Basically the vulnerable algorithms generate the hashes by firstly **hashing a block of data**, and then, **from** the **previously** created **hash** (state), they **add the next block of data** and **hash it**.
+Kimsingi, algorithimu zinazohatarishwa zinaweza kuunda hash kwa kwanza **kuhashi block ya data**, na kisha, **kutoka** kwa **hash** iliyoundwa **awali** (hali), wana **ongeza block inayofuata ya data** na **kuhashi**.
 
-Then, imagine that the secret is "secret" and the data is "data", the MD5 of "secretdata" is 6036708eba0d11f6ef52ad44e8b74d5b.\
-If an attacker wants to append the string "append" he can:
+Basi, fikiria kwamba siri ni "siri" na data ni "data", MD5 ya "siri data" ni 6036708eba0d11f6ef52ad44e8b74d5b.\
+Ikiwa mshambuliaji anataka kuongeza mfuatano "append" anaweza:
 
-- Generate a MD5 of 64 "A"s
-- Change the state of the previously initialized hash to 6036708eba0d11f6ef52ad44e8b74d5b
-- Append the string "append"
-- Finish the hash and the resulting hash will be a **valid one for "secret" + "data" + "padding" + "append"**
+- Kuunda MD5 ya "A" 64
+- Kubadilisha hali ya hash iliyowekwa awali kuwa 6036708eba0d11f6ef52ad44e8b74d5b
+- Kuongeza mfuatano "append"
+- Kumaliza hash na hash inayotokana itakuwa **halali kwa "siri" + "data" + "padding" + "append"**
 
-## **Tool**
+## **Chombo**
 
 {% embed url="https://github.com/iagox86/hash_extender" %}
 
-## References
+## Marejeo
 
-You can find this attack good explained in [https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
+Unaweza kupata shambulio hili limeelezwa vizuri katika [https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
 
 {{#include ../banners/hacktricks-training.md}}

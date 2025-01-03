@@ -6,96 +6,96 @@
 
 ### **Windows Version and Owner Info**
 
-- Located at **`Software\Microsoft\Windows NT\CurrentVersion`**, you'll find the Windows version, Service Pack, installation time, and the registered owner's name in a straightforward manner.
+- Iko katika **`Software\Microsoft\Windows NT\CurrentVersion`**, utapata toleo la Windows, Service Pack, wakati wa usakinishaji, na jina la mmiliki aliyejiandikisha kwa njia rahisi.
 
 ### **Computer Name**
 
-- The hostname is found under **`System\ControlSet001\Control\ComputerName\ComputerName`**.
+- Jina la kompyuta linapatikana chini ya **`System\ControlSet001\Control\ComputerName\ComputerName`**.
 
 ### **Time Zone Setting**
 
-- The system's time zone is stored in **`System\ControlSet001\Control\TimeZoneInformation`**.
+- Muda wa mfumo umehifadhiwa katika **`System\ControlSet001\Control\TimeZoneInformation`**.
 
 ### **Access Time Tracking**
 
-- By default, the last access time tracking is turned off (**`NtfsDisableLastAccessUpdate=1`**). To enable it, use:
-  `fsutil behavior set disablelastaccess 0`
+- Kwa kawaida, ufuatiliaji wa wakati wa mwisho wa ufikiaji umezimwa (**`NtfsDisableLastAccessUpdate=1`**). Ili kuuwezesha, tumia:
+`fsutil behavior set disablelastaccess 0`
 
 ### Windows Versions and Service Packs
 
-- The **Windows version** indicates the edition (e.g., Home, Pro) and its release (e.g., Windows 10, Windows 11), while **Service Packs** are updates that include fixes and, sometimes, new features.
+- **Toleo la Windows** linaonyesha toleo (mfano, Home, Pro) na kutolewa kwake (mfano, Windows 10, Windows 11), wakati **Service Packs** ni masasisho yanayojumuisha marekebisho na, wakati mwingine, vipengele vipya.
 
 ### Enabling Last Access Time
 
-- Enabling last access time tracking allows you to see when files were last opened, which can be critical for forensic analysis or system monitoring.
+- Kuwawezesha ufuatiliaji wa wakati wa mwisho wa ufikiaji kunakuwezesha kuona wakati faili zilifunguliwa kwa mara ya mwisho, ambayo inaweza kuwa muhimu kwa uchambuzi wa forensics au ufuatiliaji wa mfumo.
 
 ### Network Information Details
 
-- The registry holds extensive data on network configurations, including **types of networks (wireless, cable, 3G)** and **network categories (Public, Private/Home, Domain/Work)**, which are vital for understanding network security settings and permissions.
+- Usajili una data kubwa kuhusu usanidi wa mtandao, ikiwa ni pamoja na **aina za mitandao (wireless, cable, 3G)** na **makundi ya mtandao (Public, Private/Home, Domain/Work)**, ambayo ni muhimu kwa kuelewa mipangilio ya usalama wa mtandao na ruhusa.
 
 ### Client Side Caching (CSC)
 
-- **CSC** enhances offline file access by caching copies of shared files. Different **CSCFlags** settings control how and what files are cached, affecting performance and user experience, especially in environments with intermittent connectivity.
+- **CSC** inaboresha ufikiaji wa faili za mbali kwa kuhifadhi nakala za faili zilizoshirikiwa. Mipangilio tofauti ya **CSCFlags** inasimamia jinsi na ni faili zipi zinazohifadhiwa, ikihusisha utendaji na uzoefu wa mtumiaji, hasa katika mazingira yenye muunganisho wa muda mfupi.
 
 ### AutoStart Programs
 
-- Programs listed in various `Run` and `RunOnce` registry keys are automatically launched at startup, affecting system boot time and potentially being points of interest for identifying malware or unwanted software.
+- Programu zilizoorodheshwa katika funguo mbalimbali za usajili za `Run` na `RunOnce` zinaanzishwa moja kwa moja wakati wa kuanzisha, zikihusisha muda wa kuanzisha mfumo na kuwa maeneo ya kupigiwa mfano kwa kutambua malware au programu zisizohitajika.
 
 ### Shellbags
 
-- **Shellbags** not only store preferences for folder views but also provide forensic evidence of folder access even if the folder no longer exists. They are invaluable for investigations, revealing user activity that isn't obvious through other means.
+- **Shellbags** sio tu hifadhi mapendeleo ya maoni ya folda bali pia hutoa ushahidi wa forensics wa ufikiaji wa folda hata kama folda hiyo haipo tena. Ni muhimu kwa uchunguzi, ikifunua shughuli za mtumiaji ambazo hazionekani kupitia njia nyingine.
 
 ### USB Information and Forensics
 
-- The details stored in the registry about USB devices can help trace which devices were connected to a computer, potentially linking a device to sensitive file transfers or unauthorized access incidents.
+- Maelezo yaliyohifadhiwa katika usajili kuhusu vifaa vya USB yanaweza kusaidia kufuatilia ni vifaa gani vilivyounganishwa kwenye kompyuta, ikihusisha kifaa na uhamishaji wa faili nyeti au matukio ya ufikiaji usioidhinishwa.
 
 ### Volume Serial Number
 
-- The **Volume Serial Number** can be crucial for tracking the specific instance of a file system, useful in forensic scenarios where file origin needs to be established across different devices.
+- **Nambari ya Serial ya Volume** inaweza kuwa muhimu kwa kufuatilia tukio maalum la mfumo wa faili, muhimu katika hali za forensics ambapo asili ya faili inahitaji kuanzishwa kati ya vifaa tofauti.
 
 ### **Shutdown Details**
 
-- Shutdown time and count (the latter only for XP) are kept in **`System\ControlSet001\Control\Windows`** and **`System\ControlSet001\Control\Watchdog\Display`**.
+- Wakati wa kuzima na hesabu (hii ya mwisho ni kwa XP pekee) zinawekwa katika **`System\ControlSet001\Control\Windows`** na **`System\ControlSet001\Control\Watchdog\Display`**.
 
 ### **Network Configuration**
 
-- For detailed network interface info, refer to **`System\ControlSet001\Services\Tcpip\Parameters\Interfaces{GUID_INTERFACE}`**.
-- First and last network connection times, including VPN connections, are logged under various paths in **`Software\Microsoft\Windows NT\CurrentVersion\NetworkList`**.
+- Kwa maelezo ya kina ya kiunganishi cha mtandao, rejelea **`System\ControlSet001\Services\Tcpip\Parameters\Interfaces{GUID_INTERFACE}`**.
+- Wakati wa kwanza na wa mwisho wa muunganisho wa mtandao, ikiwa ni pamoja na muunganisho wa VPN, umeandikwa chini ya njia mbalimbali katika **`Software\Microsoft\Windows NT\CurrentVersion\NetworkList`**.
 
 ### **Shared Folders**
 
-- Shared folders and settings are under **`System\ControlSet001\Services\lanmanserver\Shares`**. The Client Side Caching (CSC) settings dictate offline file availability.
+- Folda zilizoshirikiwa na mipangilio ziko chini ya **`System\ControlSet001\Services\lanmanserver\Shares`**. Mipangilio ya Client Side Caching (CSC) inaamuru upatikanaji wa faili za mbali.
 
 ### **Programs that Start Automatically**
 
-- Paths like **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run`** and similar entries under `Software\Microsoft\Windows\CurrentVersion` detail programs set to run at startup.
+- Njia kama **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run`** na entries zinazofanana chini ya `Software\Microsoft\Windows\CurrentVersion` zinaelezea programu zilizowekwa kuanzishwa wakati wa kuanzisha.
 
 ### **Searches and Typed Paths**
 
-- Explorer searches and typed paths are tracked in the registry under **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer`** for WordwheelQuery and TypedPaths, respectively.
+- Utafutaji wa Explorer na njia zilizotajwa zinafuatiliwa katika usajili chini ya **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer`** kwa WordwheelQuery na TypedPaths, mtawalia.
 
 ### **Recent Documents and Office Files**
 
-- Recent documents and Office files accessed are noted in `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs` and specific Office version paths.
+- Hati za hivi karibuni na faili za Ofisi zilizofikiwa zinaandikwa katika `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs` na njia maalum za toleo la Ofisi.
 
 ### **Most Recently Used (MRU) Items**
 
-- MRU lists, indicating recent file paths and commands, are stored in various `ComDlg32` and `Explorer` subkeys under `NTUSER.DAT`.
+- Orodha za MRU, zikionyesha njia za faili za hivi karibuni na amri, zimehifadhiwa katika funguo mbalimbali za `ComDlg32` na `Explorer` chini ya `NTUSER.DAT`.
 
 ### **User Activity Tracking**
 
-- The User Assist feature logs detailed application usage stats, including run count and last run time, at **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`**.
+- Kipengele cha User Assist kinaandika takwimu za kina za matumizi ya programu, ikiwa ni pamoja na hesabu ya kuendesha na wakati wa mwisho wa kuendesha, katika **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`**.
 
 ### **Shellbags Analysis**
 
-- Shellbags, revealing folder access details, are stored in `USRCLASS.DAT` and `NTUSER.DAT` under `Software\Microsoft\Windows\Shell`. Use **[Shellbag Explorer](https://ericzimmerman.github.io/#!index.md)** for analysis.
+- Shellbags, zikifunua maelezo ya ufikiaji wa folda, zimehifadhiwa katika `USRCLASS.DAT` na `NTUSER.DAT` chini ya `Software\Microsoft\Windows\Shell`. Tumia **[Shellbag Explorer](https://ericzimmerman.github.io/#!index.md)** kwa uchambuzi.
 
 ### **USB Device History**
 
-- **`HKLM\SYSTEM\ControlSet001\Enum\USBSTOR`** and **`HKLM\SYSTEM\ControlSet001\Enum\USB`** contain rich details on connected USB devices, including manufacturer, product name, and connection timestamps.
-- The user associated with a specific USB device can be pinpointed by searching `NTUSER.DAT` hives for the device's **{GUID}**.
-- The last mounted device and its volume serial number can be traced through `System\MountedDevices` and `Software\Microsoft\Windows NT\CurrentVersion\EMDMgmt`, respectively.
+- **`HKLM\SYSTEM\ControlSet001\Enum\USBSTOR`** na **`HKLM\SYSTEM\ControlSet001\Enum\USB`** zina maelezo mengi kuhusu vifaa vya USB vilivyounganishwa, ikiwa ni pamoja na mtengenezaji, jina la bidhaa, na muda wa kuunganishwa.
+- Mtumiaji anayehusishwa na kifaa maalum cha USB anaweza kupatikana kwa kutafuta hives za `NTUSER.DAT` kwa **{GUID}** ya kifaa.
+- Kifaa cha mwisho kilichounganishwa na nambari yake ya serial ya volume kinaweza kufuatiliwa kupitia `System\MountedDevices` na `Software\Microsoft\Windows NT\CurrentVersion\EMDMgmt`, mtawalia.
 
-This guide condenses the crucial paths and methods for accessing detailed system, network, and user activity information on Windows systems, aiming for clarity and usability.
+Hii mwongozo inakusanya njia muhimu na mbinu za kufikia maelezo ya kina ya mfumo, mtandao, na shughuli za mtumiaji kwenye mifumo ya Windows, ikilenga uwazi na matumizi.
 
 {{#include ../../../banners/hacktricks-training.md}}

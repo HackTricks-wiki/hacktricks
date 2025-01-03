@@ -4,13 +4,13 @@
 
 ## Basic Information
 
-I/O Kit ni mfumo wa **madereva wa vifaa** wa chanzo wazi, unaoelekezwa na vitu katika kernel ya XNU, unashughulikia **madereva wa vifaa wanaopakiwa kwa nguvu**. Inaruhusu msimbo wa moduli kuongezwa kwenye kernel mara moja, ikisaidia vifaa mbalimbali.
+I/O Kit ni mfumo wa **madereva wa vifaa** wa chanzo wazi, unaoelekezwa kwenye vitu katika kernel ya XNU, unashughulikia **madereva wa vifaa wanaopakiwa kwa nguvu**. Inaruhusu msimbo wa moduli kuongezwa kwenye kernel mara moja, ikisaidia vifaa mbalimbali.
 
-Madereva ya IOKit kwa msingi **yanatoa kazi kutoka kwa kernel**. Aina za **vigezo** vya kazi hizi ni **zilizopangwa awali** na zinathibitishwa. Zaidi ya hayo, kama ilivyo kwa XPC, IOKit ni safu nyingine juu ya **ujumbe wa Mach**.
+Madereva wa IOKit kwa msingi **hupeleka kazi kutoka kwenye kernel**. Aina za **vigezo** vya kazi hizi ni **zilizopangwa awali** na zinathibitishwa. Zaidi ya hayo, kama ilivyo kwa XPC, IOKit ni safu nyingine juu ya **ujumbe wa Mach**.
 
-**Msimbo wa kernel ya IOKit XNU** umewekwa wazi na Apple katika [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit). Aidha, vipengele vya IOKit katika nafasi ya mtumiaji pia ni chanzo wazi [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
+**Msimbo wa kernel wa IOKit XNU** umewekwa wazi na Apple katika [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit). Aidha, vipengele vya IOKit vya nafasi ya mtumiaji pia ni chanzo wazi [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
 
-Hata hivyo, **hakuna madereva ya IOKit** yanayopatikana kama chanzo wazi. Hata hivyo, mara kwa mara, toleo la dereva linaweza kuja na alama zinazofanya iwe rahisi kuifanyia ufuatiliaji. Angalia jinsi ya [**kupata nyongeza za dereva kutoka kwa firmware hapa**](./#ipsw)**.**
+Hata hivyo, **hakuna madereva ya IOKit** yanayopatikana kama chanzo wazi. Hata hivyo, mara kwa mara, toleo la dereva linaweza kuja na alama zinazofanya iwe rahisi kuifanyia ufuatiliaji. Angalia jinsi ya [**kupata nyongeza za dereva kutoka kwenye firmware hapa**](./#ipsw)**.**
 
 Imeandikwa kwa **C++**. Unaweza kupata alama za C++ zisizokuwa na mchanganyiko kwa:
 ```bash
@@ -23,7 +23,7 @@ __ZN16IOUserClient202222dispatchExternalMethodEjP31IOExternalMethodArgumentsOpaq
 IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
 > [!CAUTION]
-> IOKit **imefunua kazi** inaweza kufanya **ukaguzi wa ziada wa usalama** wakati mteja anapojaribu kuita kazi lakini kumbuka kwamba programu mara nyingi **zina mipaka** na **sandbox** ambayo IOKit kazi zinaweza kuingiliana nayo.
+> IOKit **imefunua kazi** inaweza kufanya **ukaguzi wa ziada wa usalama** wakati mteja anapojaribu kuita kazi lakini kumbuka kwamba programu mara nyingi **zina mipaka** na **sandbox** ambayo IOKit kazi zinaweza kuingiliana nazo.
 
 ## Madereva
 
@@ -83,10 +83,10 @@ Unaweza kupakua **`IORegistryExplorer`** kutoka **Xcode Additional Tools** kutok
 Katika IORegistryExplorer, "planes" zinatumika kuandaa na kuonyesha uhusiano kati ya vitu tofauti katika IORegistry. Kila plane inawakilisha aina maalum ya uhusiano au mtazamo maalum wa usanidi wa vifaa na madereva wa mfumo. Hapa kuna baadhi ya planes za kawaida ambazo unaweza kukutana nazo katika IORegistryExplorer:
 
 1. **IOService Plane**: Hii ni plane ya jumla zaidi, ikionyesha vitu vya huduma vinavyowakilisha madereva na nubs (michannel ya mawasiliano kati ya madereva). Inaonyesha uhusiano wa mtoa huduma-mteja kati ya vitu hivi.
-2. **IODeviceTree Plane**: Plane hii inawakilisha muunganisho wa kimwili kati ya vifaa kadri vinavyounganishwa kwenye mfumo. Mara nyingi hutumiwa kuonyesha hierarchi ya vifaa vilivyounganishwa kupitia mabasi kama USB au PCI.
+2. **IODeviceTree Plane**: Hii plane inawakilisha muunganisho wa kimwili kati ya vifaa kadri vinavyounganishwa kwenye mfumo. Mara nyingi hutumiwa kuonyesha hierarchi ya vifaa vilivyounganishwa kupitia mabasi kama USB au PCI.
 3. **IOPower Plane**: Inaonyesha vitu na uhusiano wao kwa upande wa usimamizi wa nguvu. Inaweza kuonyesha ni vitu gani vinavyoathiri hali ya nguvu ya vingine, muhimu kwa kutatua matatizo yanayohusiana na nguvu.
-4. **IOUSB Plane**: Imejikita hasa kwenye vifaa vya USB na uhusiano wao, ikionyesha hierarchi ya USB hubs na vifaa vilivyounganishwa.
-5. **IOAudio Plane**: Plane hii inawakilisha vifaa vya sauti na uhusiano wao ndani ya mfumo.
+4. **IOUSB Plane**: Inazingatia hasa vifaa vya USB na uhusiano wao, ikionyesha hierarchi ya USB hubs na vifaa vilivyounganishwa.
+5. **IOAudio Plane**: Hii plane inawakilisha vifaa vya sauti na uhusiano wao ndani ya mfumo.
 6. ...
 
 ## Mfano wa Msimbo wa Comm wa Dereva
@@ -150,7 +150,7 @@ IOObjectRelease(iter);
 return 0;
 }
 ```
-Kuna **zingine** kazi ambazo zinaweza kutumika kuita kazi za IOKit mbali na **`IOConnectCallScalarMethod`** kama **`IOConnectCallMethod`**, **`IOConnectCallStructMethod`**...
+Kuna **mifumo** mingine ambayo inaweza kutumika kuita kazi za IOKit mbali na **`IOConnectCallScalarMethod`** kama **`IOConnectCallMethod`**, **`IOConnectCallStructMethod`**...
 
 ## Kurejesha kiingilio cha dereva
 
@@ -180,11 +180,11 @@ Kwa habari hii unaweza kuandika upya Ctrl+Right -> `Edit function signature` na 
 
 <figure><img src="../../../images/image (1174).png" alt=""><figcaption></figcaption></figure>
 
-Msimbo mpya uliofanywa upya utaonekana kama ifuatavyo:
+Msimbo mpya uliofichuliwa utaonekana kama ifuatavyo:
 
 <figure><img src="../../../images/image (1175).png" alt=""><figcaption></figcaption></figure>
 
-Kwa hatua inayofuata tunahitaji kuwa na muundo wa **`IOExternalMethodDispatch2022`** umefafanuliwa. Ni wazi katika [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176), unaweza kuifafanua:
+Kwa hatua inayofuata tunahitaji kuwa na muundo wa **`IOExternalMethodDispatch2022`** umefafanuliwa. Ni wa chanzo wazi katika [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176), unaweza kuufafanua:
 
 <figure><img src="../../../images/image (1170).png" alt=""><figcaption></figcaption></figure>
 
@@ -200,7 +200,7 @@ baada ya mabadiliko:
 
 <figure><img src="../../../images/image (1179).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Na kama tunavyojua huko tuna **array ya vipengele 7** (angalia msimbo wa mwisho uliofanywa upya), bonyeza kuunda array ya vipengele 7:
+Na kama tunavyojua hapa tuna **array ya vipengele 7** (angalia msimbo wa mwisho uliofichuliwa), bonyeza kuunda array ya vipengele 7:
 
 <figure><img src="../../../images/image (1180).png" alt="" width="563"><figcaption></figcaption></figure>
 

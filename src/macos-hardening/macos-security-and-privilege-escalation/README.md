@@ -41,7 +41,7 @@ macos-protocols.md
 
 ### MacOS MDM
 
-Katika kampuni **sistimu za macOS** zina uwezekano mkubwa wa kuwa **zinazosimamiwa na MDM**. Hivyo, kutoka mtazamo wa mshambuliaji ni muhimu kujua **jinsi hiyo inavyofanya kazi**:
+Katika kampuni **sistimu za macOS** zina uwezekano mkubwa wa **kusimamiwa na MDM**. Hivyo, kutoka mtazamo wa mshambuliaji ni muhimu kujua **jinsi hiyo inavyofanya kazi**:
 
 {{#ref}}
 ../macos-red-teaming/macos-mdm/
@@ -71,7 +71,7 @@ Hii inaweza kutokea katika hali zifuatazo:
 - Faili iliyotumika iko ndani ya directory inayomilikiwa na mtumiaji (mtumiaji anaweza kuunda faili hiyo)
 - Faili iliyotumika iko ndani ya directory inayomilikiwa na root lakini mtumiaji ana ufaccess wa kuandika juu yake kwa sababu ya kundi (mtumiaji anaweza kuunda faili hiyo)
 
-Kuwa na uwezo wa **kuunda faili** ambayo itatumika na **root**, inamruhusu mtumiaji **kunufaika na maudhui yake** au hata kuunda **symlinks/hardlinks** kuielekeza mahali pengine.
+Kuweza **kuunda faili** ambayo itatumika na **root**, inamruhusu mtumiaji **kunufaika na maudhui yake** au hata kuunda **symlinks/hardlinks** kuielekeza mahali pengine.
 
 Kwa aina hii ya udhaifu usisahau **kuangalia waandishi wa `.pkg` walio hatarini**:
 
@@ -93,7 +93,7 @@ Katika macOS **programu na binaries zinaweza kuwa na ruhusa** za kufikia folda a
 
 Hivyo, mshambuliaji anayetaka kufanikiwa kuathiri mashine ya macOS atahitaji **kuinua ruhusa zake za TCC** (au hata **kupita SIP**, kulingana na mahitaji yake).
 
-Ruhusa hizi kwa kawaida hutolewa kwa njia ya **entitlements** ambayo programu imesainiwa nayo, au programu inaweza kuomba baadhi ya ufaccess na baada ya **mtumiaji kuidhinisha** zinaweza kupatikana katika **maktaba za TCC**. Njia nyingine mchakato unaweza kupata ruhusa hizi ni kwa kuwa **mtoto wa mchakato** wenye hizo **ruhusa** kwani kwa kawaida **zinarithiwa**.
+Ruhusa hizi kwa kawaida hutolewa kwa njia ya **entitlements** ambayo programu imeandikwa nayo, au programu inaweza kuomba baadhi ya ufaccess na baada ya **mtumiaji kuidhinisha** zinaweza kupatikana katika **maktaba za TCC**. Njia nyingine mchakato unaweza kupata ruhusa hizi ni kwa kuwa **mtoto wa mchakato** wenye **ruhusa hizo** kwani kwa kawaida **zinarithiwa**.
 
 Fuata viungo hivi kupata njia tofauti za [**kuinua ruhusa katika TCC**](macos-security-protections/macos-tcc/#tcc-privesc-and-bypasses), [**kupita TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) na jinsi katika siku za nyuma [**SIP imepita**](macos-security-protections/macos-sip.md#sip-bypasses).
 

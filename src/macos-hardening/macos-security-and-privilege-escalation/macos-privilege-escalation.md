@@ -12,7 +12,7 @@ macos-security-protections/macos-tcc/
 
 ## Linux Privesc
 
-Tafadhali kumbuka kwamba **sehemu nyingi za hila kuhusu privilege escalation zinazohusiana na Linux/Unix pia zitaathiri mashine za MacOS**. Hivyo angalia:
+Tafadhali kumbuka kwamba **sehemu nyingi za hila kuhusu privilege escalation zinazohusisha Linux/Unix pia zitaathiri mashine za MacOS**. Hivyo angalia:
 
 {{#ref}}
 ../../linux-hardening/privilege-escalation/
@@ -22,7 +22,7 @@ Tafadhali kumbuka kwamba **sehemu nyingi za hila kuhusu privilege escalation zin
 
 ### Sudo Hijacking
 
-Unaweza kupata [Sudo Hijacking technique ya asili ndani ya chapisho la Linux Privilege Escalation](../../linux-hardening/privilege-escalation/#sudo-hijacking).
+Unaweza kupata [Sudo Hijacking technique asili ndani ya chapisho la Linux Privilege Escalation](../../linux-hardening/privilege-escalation/#sudo-hijacking).
 
 Hata hivyo, macOS **inaendelea** na **`PATH`** ya mtumiaji anapotekeleza **`sudo`**. Hii ina maana kwamba njia nyingine ya kufanikisha shambulio hili ingekuwa **kudukua binaries nyingine** ambazo mwathirika bado atatekeleza anapokuwa **akifanya sudo:**
 ```bash
@@ -39,17 +39,17 @@ chmod +x /opt/homebrew/bin/ls
 # victim
 sudo ls
 ```
-Kumbuka kwamba mtumiaji anayetumia terminal atakuwa na uwezekano mkubwa wa kuwa na **Homebrew installed**. Hivyo inawezekana kuiba binaries katika **`/opt/homebrew/bin`**.
+Kumbuka kwamba mtumiaji anayetumia terminal atakuwa na uwezekano mkubwa wa kuwa na **Homebrew installed**. Hivyo inawezekana kuingilia binaries katika **`/opt/homebrew/bin`**.
 
 ### Dock Impersonation
 
-Kwa kutumia **social engineering** unaweza **kujifanya mfano Google Chrome** ndani ya dock na kwa kweli kutekeleza script yako mwenyewe:
+Kwa kutumia **social engineering** unaweza **kujifanya kwa mfano Google Chrome** ndani ya dock na kwa kweli kutekeleza script yako mwenyewe:
 
 {{#tabs}}
 {{#tab name="Chrome Impersonation"}}
 Mapendekezo kadhaa:
 
-- Angalia katika Dock ikiwa kuna Chrome, na katika kesi hiyo **ondoa** ile entry na **ongeza** ile **fake** **Chrome entry katika nafasi ile ile** katika Dock array.&#x20;
+- Angalia katika Dock kama kuna Chrome, na katika hali hiyo **ondoa** ile entry na **ongeza** ile **fake** **Chrome entry katika nafasi ile ile** katika Dock array.&#x20;
 ```bash
 #!/bin/sh
 
@@ -126,9 +126,9 @@ Baadhi ya mapendekezo:
 
 - Huwezi kuondoa Finder kutoka kwenye Dock, hivyo ikiwa unataka kuiongeza kwenye Dock, unaweza kuweka Finder bandia karibu na ile halisi. Kwa hili unahitaji **kuongeza kipengee cha Finder bandia mwanzoni mwa orodha ya Dock**.
 - Chaguo lingine ni kutokuweka kwenye Dock na kuifungua tu, "Finder inahitaji kudhibiti Finder" si ya ajabu sana.
-- Chaguo lingine ili **kuinua hadhi hadi root bila kuomba** nenosiri kwa sanduku mbaya, ni kumfanya Finder kweli aombe nenosiri ili kutekeleza kitendo chenye mamlaka:
-- Muulize Finder nakala kwa **`/etc/pam.d`** faili mpya ya **`sudo`** (Kichocheo kinachoomba nenosiri kitaonyesha kwamba "Finder anataka kunakili sudo")
-- Muulize Finder nakala ya **Plugin ya Uidhinishaji** mpya (Unaweza kudhibiti jina la faili ili kichocheo kinachoomba nenosiri kiwe kioneshe kwamba "Finder anataka kunakili Finder.bundle")
+- Chaguo lingine ili **kuinua hadhi hadi root bila kuomba** nenosiri kwa sanduku mbaya, ni kufanya Finder kweli kuomba nenosiri ili kutekeleza kitendo chenye mamlaka:
+- Omba Finder nakala kwa **`/etc/pam.d`** faili mpya ya **`sudo`** (Kichocheo kinachoomba nenosiri kitaonyesha kwamba "Finder inataka kunakili sudo")
+- Omba Finder nakala ya **Plugin ya Uidhinishaji** mpya (Unaweza kudhibiti jina la faili ili kichocheo kinachoomba nenosiri kiwe kioneshe kwamba "Finder inataka kunakili Finder.bundle")
 ```bash
 #!/bin/sh
 

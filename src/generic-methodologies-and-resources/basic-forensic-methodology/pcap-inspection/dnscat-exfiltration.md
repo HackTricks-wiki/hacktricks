@@ -1,11 +1,10 @@
-# DNSCat pcap analysis
+# Uchambuzi wa pcap wa DNSCat
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-If you have pcap with data being **exfiltrated by DNSCat** (without using encryption), you can find the exfiltrated content.
+Ikiwa una pcap yenye data inay **exfiltrated na DNSCat** (bila kutumia usimbaji), unaweza kupata maudhui yaliyotolewa.
 
-You only need to know that the **first 9 bytes** are not real data but are related to the **C\&C communication**:
-
+Unahitaji tu kujua kwamba **bytes 9 za kwanza** si data halisi bali zinahusiana na **mawasiliano ya C\&C**:
 ```python
 from scapy.all import rdpcap, DNSQR, DNSRR
 import struct
@@ -13,25 +12,22 @@ import struct
 f = ""
 last = ""
 for p in rdpcap('ch21.pcap'):
-	if p.haslayer(DNSQR) and not p.haslayer(DNSRR):
+if p.haslayer(DNSQR) and not p.haslayer(DNSRR):
 
-		qry = p[DNSQR].qname.replace(".jz-n-bs.local.","").strip().split(".")
-		qry = ''.join(_.decode('hex') for _ in qry)[9:]
-		if last != qry:
-			print(qry)
-			f += qry
-		last = qry
+qry = p[DNSQR].qname.replace(".jz-n-bs.local.","").strip().split(".")
+qry = ''.join(_.decode('hex') for _ in qry)[9:]
+if last != qry:
+print(qry)
+f += qry
+last = qry
 
 #print(f)
 ```
-
-For more information: [https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)\
+Kwa maelezo zaidi: [https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)\
 [https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md](https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md)
 
-There is a script that works with Python3: [https://github.com/josemlwdf/DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder)
-
+Kuna script inayofanya kazi na Python3: [https://github.com/josemlwdf/DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder)
 ```
 python3 dnscat_decoder.py sample.pcap bad_domain
 ```
-
 {{#include ../../../banners/hacktricks-training.md}}

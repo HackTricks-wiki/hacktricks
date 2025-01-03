@@ -1,77 +1,73 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
-
 # Timestamps
 
-An attacker may be interested in **changing the timestamps of files** to avoid being detected.\
-It's possible to find the timestamps inside the MFT in attributes `$STANDARD_INFORMATION` ** and ** `$FILE_NAME`.
+Mshambuliaji anaweza kuwa na hamu ya **kubadilisha timestamps za faili** ili kuepuka kugunduliwa.\
+Inawezekana kupata timestamps ndani ya MFT katika sifa `$STANDARD_INFORMATION` ** na ** `$FILE_NAME`.
 
-Both attributes have 4 timestamps: **Modification**, **access**, **creation**, and **MFT registry modification** (MACE or MACB).
+Sifa zote zina timestamps 4: **Modification**, **access**, **creation**, na **MFT registry modification** (MACE au MACB).
 
-**Windows explorer** and other tools show the information from **`$STANDARD_INFORMATION`**.
+**Windows explorer** na zana nyingine zinaonyesha taarifa kutoka **`$STANDARD_INFORMATION`**.
 
 ## TimeStomp - Anti-forensic Tool
 
-This tool **modifies** the timestamp information inside **`$STANDARD_INFORMATION`** **but** **not** the information inside **`$FILE_NAME`**. Therefore, it's possible to **identify** **suspicious** **activity**.
+Zana hii **inasanifu** taarifa za timestamp ndani ya **`$STANDARD_INFORMATION`** **lakini** **sio** taarifa ndani ya **`$FILE_NAME`**. Hivyo, inawezekana **kutambua** **shughuli** **za kutatanisha**.
 
 ## Usnjrnl
 
-The **USN Journal** (Update Sequence Number Journal) is a feature of the NTFS (Windows NT file system) that keeps track of volume changes. The [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) tool allows for the examination of these changes.
+**USN Journal** (Update Sequence Number Journal) ni kipengele cha NTFS (Windows NT file system) kinachofuatilia mabadiliko ya kiasi. Zana ya [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) inaruhusu uchambuzi wa mabadiliko haya.
 
 ![](<../../images/image (449).png>)
 
-The previous image is the **output** shown by the **tool** where it can be observed that some **changes were performed** to the file.
+Picha ya awali ni **matokeo** yanayoonyeshwa na **zana** ambapo inaonekana kuwa baadhi ya **mabadiliko yalifanywa** kwa faili.
 
 ## $LogFile
 
-**All metadata changes to a file system are logged** in a process known as [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging). The logged metadata is kept in a file named `**$LogFile**`, located in the root directory of an NTFS file system. Tools such as [LogFileParser](https://github.com/jschicht/LogFileParser) can be used to parse this file and identify changes.
+**Mabadiliko yote ya metadata kwa mfumo wa faili yanarekodiwa** katika mchakato unaojulikana kama [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging). Metadata iliyorekodiwa inahifadhiwa katika faili inayoitwa `**$LogFile**`, iliyoko katika saraka kuu ya mfumo wa faili wa NTFS. Zana kama [LogFileParser](https://github.com/jschicht/LogFileParser) zinaweza kutumika kuchambua faili hii na kutambua mabadiliko.
 
 ![](<../../images/image (450).png>)
 
-Again, in the output of the tool it's possible to see that **some changes were performed**.
+Tena, katika matokeo ya zana inawezekana kuona kuwa **baadhi ya mabadiliko yalifanywa**.
 
-Using the same tool it's possible to identify to **which time the timestamps were modified**:
+Kwa kutumia zana hiyo hiyo inawezekana kutambua **ni wakati gani timestamps zilipobadilishwa**:
 
 ![](<../../images/image (451).png>)
 
-- CTIME: File's creation time
-- ATIME: File's modification time
-- MTIME: File's MFT registry modification
-- RTIME: File's access time
+- CTIME: Wakati wa uumbaji wa faili
+- ATIME: Wakati wa mabadiliko ya faili
+- MTIME: Mabadiliko ya usajili wa MFT wa faili
+- RTIME: Wakati wa ufikiaji wa faili
 
-## `$STANDARD_INFORMATION` and `$FILE_NAME` comparison
+## `$STANDARD_INFORMATION` na `$FILE_NAME` kulinganisha
 
-Another way to identify suspicious modified files would be to compare the time on both attributes looking for **mismatches**.
+Njia nyingine ya kutambua faili zilizobadilishwa kwa njia ya kutatanisha ni kulinganisha wakati kwenye sifa zote mbili kutafuta **mismatch**.
 
 ## Nanoseconds
 
-**NTFS** timestamps have a **precision** of **100 nanoseconds**. Then, finding files with timestamps like 2010-10-10 10:10:**00.000:0000 is very suspicious**.
+**NTFS** timestamps zina **usahihi** wa **nanoseconds 100**. Hivyo, kupata faili zikiwa na timestamps kama 2010-10-10 10:10:**00.000:0000 ni ya kutatanisha sana**.
 
 ## SetMace - Anti-forensic Tool
 
-This tool can modify both attributes `$STARNDAR_INFORMATION` and `$FILE_NAME`. However, from Windows Vista, it's necessary for a live OS to modify this information.
+Zana hii inaweza kubadilisha sifa zote mbili `$STARNDAR_INFORMATION` na `$FILE_NAME`. Hata hivyo, kuanzia Windows Vista, ni lazima kwa OS hai kubadilisha taarifa hii.
 
 # Data Hiding
 
-NFTS uses a cluster and the minimum information size. That means that if a file occupies uses and cluster and a half, the **reminding half is never going to be used** until the file is deleted. Then, it's possible to **hide data in this slack space**.
+NFTS inatumia klasta na ukubwa wa taarifa wa chini. Hii inamaanisha kwamba ikiwa faili inachukua klasta na nusu, **nusu iliyobaki haitatumika kamwe** hadi faili itakapofutwa. Hivyo, inawezekana **kuficha data katika nafasi hii ya slack**.
 
-There are tools like slacker that allow hiding data in this "hidden" space. However, an analysis of the `$logfile` and `$usnjrnl` can show that some data was added:
+Kuna zana kama slacker zinazoruhusu kuficha data katika nafasi hii "iliyojificha". Hata hivyo, uchambuzi wa `$logfile` na `$usnjrnl` unaweza kuonyesha kuwa baadhi ya data iliongezwa:
 
 ![](<../../images/image (452).png>)
 
-Then, it's possible to retrieve the slack space using tools like FTK Imager. Note that this kind of tool can save the content obfuscated or even encrypted.
+Hivyo, inawezekana kurejesha nafasi ya slack kwa kutumia zana kama FTK Imager. Kumbuka kuwa aina hii ya zana inaweza kuhifadhi maudhui yaliyofichwa au hata yaliyosimbwa.
 
 # UsbKill
 
-This is a tool that will **turn off the computer if any change in the USB** ports is detected.\
-A way to discover this would be to inspect the running processes and **review each python script running**.
+Hii ni zana ambayo it **izima kompyuta ikiwa mabadiliko yoyote katika USB** bandari yanagundulika.\
+Njia moja ya kugundua hii ni kukagua michakato inayoendesha na **kurejea kila script ya python inayotembea**.
 
 # Live Linux Distributions
 
-These distros are **executed inside the RAM** memory. The only way to detect them is **in case the NTFS file-system is mounted with write permissions**. If it's mounted just with read permissions it won't be possible to detect the intrusion.
+Hizi distros zina **tekelezwa ndani ya RAM** kumbukumbu. Njia pekee ya kuzitambua ni **ikiwa mfumo wa faili wa NTFS umewekwa na ruhusa za kuandika**. Ikiwa umewekwa tu na ruhusa za kusoma haitakuwa rahisi kugundua uvamizi.
 
 # Secure Deletion
 
@@ -79,81 +75,77 @@ These distros are **executed inside the RAM** memory. The only way to detect the
 
 # Windows Configuration
 
-It's possible to disable several windows logging methods to make the forensics investigation much harder.
+Inawezekana kuzima mbinu kadhaa za kurekodi za windows ili kufanya uchunguzi wa forensics kuwa mgumu zaidi.
 
 ## Disable Timestamps - UserAssist
 
-This is a registry key that maintains dates and hours when each executable was run by the user.
+Hii ni funguo ya rejista inayohifadhi tarehe na saa wakati kila executable ilipokimbizwa na mtumiaji.
 
-Disabling UserAssist requires two steps:
+Kuzima UserAssist kunahitaji hatua mbili:
 
-1. Set two registry keys, `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` and `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled`, both to zero in order to signal that we want UserAssist disabled.
-2. Clear your registry subtrees that look like `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>`.
+1. Weka funguo mbili za rejista, `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` na `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled`, zote kuwa sifuri ili kuashiria kwamba tunataka UserAssist izimwe.
+2. Futa subtrees zako za rejista zinazofanana na `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>`.
 
 ## Disable Timestamps - Prefetch
 
-This will save information about the applications executed with the goal of improving the performance of the Windows system. However, this can also be useful for forensics practices.
+Hii itahifadhi taarifa kuhusu programu zilizotekelezwa kwa lengo la kuboresha utendaji wa mfumo wa Windows. Hata hivyo, hii inaweza pia kuwa muhimu kwa mazoea ya forensics.
 
-- Execute `regedit`
-- Select the file path `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters`
-- Right-click on both `EnablePrefetcher` and `EnableSuperfetch`
-- Select Modify on each of these to change the value from 1 (or 3) to 0
-- Restart
+- Tekeleza `regedit`
+- Chagua njia ya faili `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters`
+- Bonyeza kulia kwenye `EnablePrefetcher` na `EnableSuperfetch`
+- Chagua Badilisha kwenye kila moja ya hizi kubadilisha thamani kutoka 1 (au 3) hadi 0
+- Anzisha upya
 
 ## Disable Timestamps - Last Access Time
 
-Whenever a folder is opened from an NTFS volume on a Windows NT server, the system takes the time to **update a timestamp field on each listed folder**, called the last access time. On a heavily used NTFS volume, this can affect performance.
+Wakati wowote folda inafunguliwa kutoka kiasi cha NTFS kwenye seva ya Windows NT, mfumo unachukua wakati wa **kupdate timestamp field kwenye kila folda iliyoorodheshwa**, inayoitwa wakati wa mwisho wa ufikiaji. Katika kiasi cha NTFS kinachotumiwa sana, hii inaweza kuathiri utendaji.
 
-1. Open the Registry Editor (Regedit.exe).
-2. Browse to `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`.
-3. Look for `NtfsDisableLastAccessUpdate`. If it doesn’t exist, add this DWORD and set its value to 1, which will disable the process.
-4. Close the Registry Editor, and reboot the server.
+1. Fungua Mhariri wa Rejista (Regedit.exe).
+2. Tembelea `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`.
+3. Tafuta `NtfsDisableLastAccessUpdate`. Ikiwa haipo, ongeza hii DWORD na weka thamani yake kuwa 1, ambayo itazima mchakato.
+4. Funga Mhariri wa Rejista, na uanzishe upya seva.
 
 ## Delete USB History
 
-All the **USB Device Entries** are stored in Windows Registry Under the **USBSTOR** registry key that contains sub keys which are created whenever you plug a USB Device into your PC or Laptop. You can find this key here H`KEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Deleting this** you will delete the USB history.\
-You may also use the tool [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) to be sure you have deleted them (and to delete them).
+Makala yote ya **USB Device Entries** huhifadhiwa katika Rejista ya Windows Chini ya funguo ya **USBSTOR** ambayo ina funguo ndogo zinazoundwa kila wakati unapoingiza Kifaa cha USB kwenye PC au Laptop yako. Unaweza kupata funguo hii hapa `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Kufuta hii** utafuta historia ya USB.\
+Unaweza pia kutumia zana [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) kuhakikisha umekifuta (na kukifuta).
 
-Another file that saves information about the USBs is the file `setupapi.dev.log` inside `C:\Windows\INF`. This should also be deleted.
+Faili nyingine inayohifadhi taarifa kuhusu USB ni faili `setupapi.dev.log` ndani ya `C:\Windows\INF`. Hii pia inapaswa kufutwa.
 
 ## Disable Shadow Copies
 
-**List** shadow copies with `vssadmin list shadowstorage`\
-**Delete** them running `vssadmin delete shadow`
+**Orodha** ya nakala za kivuli kwa kutumia `vssadmin list shadowstorage`\
+**Futa** kwa kuendesha `vssadmin delete shadow`
 
-You can also delete them via GUI following the steps proposed in [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
+Unaweza pia kuzifuta kupitia GUI ukifuatilia hatua zilizopendekezwa katika [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
 
-To disable shadow copies [steps from here](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
+Ili kuzima nakala za kivuli [hatua kutoka hapa](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
 
-1. Open the Services program by typing "services" into the text search box after clicking the Windows start button.
-2. From the list, find "Volume Shadow Copy", select it, and then access Properties by right-clicking.
-3. Choose Disabled from the "Startup type" drop-down menu, and then confirm the change by clicking Apply and OK.
+1. Fungua programu za Huduma kwa kuandika "services" kwenye kisanduku cha kutafuta maandiko baada ya kubonyeza kitufe cha kuanzisha cha Windows.
+2. Kutoka kwenye orodha, pata "Volume Shadow Copy", chagua, kisha upate Mali kwa kubonyeza kulia.
+3. Chagua Zime kutoka kwenye orodha ya "Aina ya Kuanzisha", kisha thibitisha mabadiliko kwa kubonyeza Apply na OK.
 
-It's also possible to modify the configuration of which files are going to be copied in the shadow copy in the registry `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
+Pia inawezekana kubadilisha usanidi wa faili zipi zitakazokopwa katika nakala ya kivuli katika rejista `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
 
 ## Overwrite deleted files
 
-- You can use a **Windows tool**: `cipher /w:C` This will indicate cipher to remove any data from the available unused disk space inside the C drive.
-- You can also use tools like [**Eraser**](https://eraser.heidi.ie)
+- Unaweza kutumia **zana ya Windows**: `cipher /w:C` Hii itamwambia cipher kuondoa data yoyote kutoka kwenye nafasi isiyotumika ya diski ndani ya diski ya C.
+- Unaweza pia kutumia zana kama [**Eraser**](https://eraser.heidi.ie)
 
 ## Delete Windows event logs
 
-- Windows + R --> eventvwr.msc --> Expand "Windows Logs" --> Right click each category and select "Clear Log"
+- Windows + R --> eventvwr.msc --> Panua "Windows Logs" --> Bonyeza kulia kila kundi na uchague "Clear Log"
 - `for /F "tokens=*" %1 in ('wevtutil.exe el') DO wevtutil.exe cl "%1"`
 - `Get-EventLog -LogName * | ForEach { Clear-EventLog $_.Log }`
 
 ## Disable Windows event logs
 
 - `reg add 'HKLM\SYSTEM\CurrentControlSet\Services\eventlog' /v Start /t REG_DWORD /d 4 /f`
-- Inside the services section disable the service "Windows Event Log"
-- `WEvtUtil.exec clear-log` or `WEvtUtil.exe cl`
+- Ndani ya sehemu za huduma zima huduma "Windows Event Log"
+- `WEvtUtil.exec clear-log` au `WEvtUtil.exe cl`
 
 ## Disable $UsnJrnl
 
 - `fsutil usn deletejournal /d c:`
-
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

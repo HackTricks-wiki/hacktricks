@@ -8,497 +8,406 @@
 
 ### Windows 10 Notifications
 
-In the path `\Users\<username>\AppData\Local\Microsoft\Windows\Notifications` you can find the database `appdb.dat` (before Windows anniversary) or `wpndatabase.db` (after Windows Anniversary).
+Katika njia `\Users\<username>\AppData\Local\Microsoft\Windows\Notifications` unaweza kupata database `appdb.dat` (kabla ya Windows anniversary) au `wpndatabase.db` (baada ya Windows Anniversary).
 
-Inside this SQLite database, you can find the `Notification` table with all the notifications (in XML format) that may contain interesting data.
+Ndani ya database hii ya SQLite, unaweza kupata jedwali la `Notification` lenye taarifa zote za arifa (katika muundo wa XML) ambazo zinaweza kuwa na data ya kuvutia.
 
 ### Timeline
 
-Timeline is a Windows characteristic that provides **chronological history** of web pages visited, edited documents, and executed applications.
+Timeline ni sifa ya Windows inayotoa **historia ya muda** ya kurasa za wavuti zilizotembelewa, hati zilizohaririwa, na programu zilizotekelezwa.
 
-The database resides in the path `\Users\<username>\AppData\Local\ConnectedDevicesPlatform\<id>\ActivitiesCache.db`. This database can be opened with an SQLite tool or with the tool [**WxTCmd**](https://github.com/EricZimmerman/WxTCmd) **which generates 2 files that can be opened with the tool** [**TimeLine Explorer**](https://ericzimmerman.github.io/#!index.md).
+Database inapatikana katika njia `\Users\<username>\AppData\Local\ConnectedDevicesPlatform\<id>\ActivitiesCache.db`. Database hii inaweza kufunguliwa kwa zana ya SQLite au kwa zana [**WxTCmd**](https://github.com/EricZimmerman/WxTCmd) **ambayo inazalisha faili 2 ambazo zinaweza kufunguliwa kwa zana** [**TimeLine Explorer**](https://ericzimmerman.github.io/#!index.md).
 
 ### ADS (Alternate Data Streams)
 
-Files downloaded may contain the **ADS Zone.Identifier** indicating **how** it was **downloaded** from the intranet, internet, etc. Some software (like browsers) usually put even **more** **information** like the **URL** from where the file was downloaded.
+Faili zilizopakuliwa zinaweza kuwa na **ADS Zone.Identifier** ikionyesha **jinsi** ilivyokuwa **imepakuliwa** kutoka intranet, internet, n.k. Programu zingine (kama vivinjari) kawaida huweka hata **zaidi** ya **taarifa** kama **URL** kutoka ambapo faili ilipakuliwa.
 
 ## **File Backups**
 
 ### Recycle Bin
 
-In Vista/Win7/Win8/Win10 the **Recycle Bin** can be found in the folder **`$Recycle.bin`** in the root of the drive (`C:\$Recycle.bin`).\
-When a file is deleted in this folder 2 specific files are created:
+Katika Vista/Win7/Win8/Win10 **Recycle Bin** inaweza kupatikana katika folda **`$Recycle.bin`** katika mzizi wa diski (`C:\$Recycle.bin`).\
+Wakati faili inafuta katika folda hii, faili 2 maalum zinaundwa:
 
-- `$I{id}`: File information (date of when it was deleted}
-- `$R{id}`: Content of the file
+- `$I{id}`: Taarifa za faili (tarehe ya kufutwa)
+- `$R{id}`: Maudhui ya faili
 
 ![](<../../../images/image (1029).png>)
 
-Having these files you can use the tool [**Rifiuti**](https://github.com/abelcheung/rifiuti2) to get the original address of the deleted files and the date it was deleted (use `rifiuti-vista.exe` for Vista – Win10).
-
+Kuwa na faili hizi unaweza kutumia zana [**Rifiuti**](https://github.com/abelcheung/rifiuti2) kupata anwani ya asili ya faili zilizofutwa na tarehe ilifutwa (tumia `rifiuti-vista.exe` kwa Vista – Win10).
 ```
 .\rifiuti-vista.exe C:\Users\student\Desktop\Recycle
 ```
-
 ![](<../../../images/image (495) (1) (1) (1).png>)
 
-### Volume Shadow Copies
+### Nakala za Kivuli
 
-Shadow Copy is a technology included in Microsoft Windows that can create **backup copies** or snapshots of computer files or volumes, even when they are in use.
+Shadow Copy ni teknolojia iliyojumuishwa katika Microsoft Windows ambayo inaweza kuunda **nakala za akiba** au picha za faili au volumu za kompyuta, hata wakati zinatumika.
 
-These backups are usually located in the `\System Volume Information` from the root of the file system and the name is composed of **UIDs** shown in the following image:
+Nakala hizi za akiba kwa kawaida zinapatikana katika `\System Volume Information` kutoka kwenye mzizi wa mfumo wa faili na jina lake linaundwa na **UIDs** zilizoonyeshwa katika picha ifuatayo:
 
 ![](<../../../images/image (94).png>)
 
-Mounting the forensics image with the **ArsenalImageMounter**, the tool [**ShadowCopyView**](https://www.nirsoft.net/utils/shadow_copy_view.html) can be used to inspect a shadow copy and even **extract the files** from the shadow copy backups.
+Kuweka picha ya uchunguzi kwa kutumia **ArsenalImageMounter**, chombo [**ShadowCopyView**](https://www.nirsoft.net/utils/shadow_copy_view.html) kinaweza kutumika kuchunguza nakala ya kivuli na hata **kutoa faili** kutoka kwenye nakala za akiba za kivuli.
 
 ![](<../../../images/image (576).png>)
 
-The registry entry `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\BackupRestore` contains the files and keys **to not backup**:
+Kichupo cha rejista `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\BackupRestore` kina faili na funguo **za kutokuweka akiba**:
 
 ![](<../../../images/image (254).png>)
 
-The registry `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VSS` also contains configuration information about the `Volume Shadow Copies`.
+Rejista `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VSS` pia ina taarifa za usanidi kuhusu `Volume Shadow Copies`.
 
-### Office AutoSaved Files
+### Faili za Ofisi Zilizohifadhiwa Kiotomatiki
 
-You can find the office autosaved files in: `C:\Usuarios\\AppData\Roaming\Microsoft{Excel|Word|Powerpoint}\`
+Unaweza kupata faili za ofisi zilizohifadhiwa kiotomatiki katika: `C:\Usuarios\\AppData\Roaming\Microsoft{Excel|Word|Powerpoint}\`
 
-## Shell Items
+## Vitu vya Shell
 
-A shell item is an item that contains information about how to access another file.
+Kitu cha shell ni kitu kinachobeba taarifa kuhusu jinsi ya kufikia faili nyingine.
 
-### Recent Documents (LNK)
+### Hati za Karibuni (LNK)
 
-Windows **automatically** **creates** these **shortcuts** when the user **open, uses or creates a file** in:
+Windows **hujenga** hizi **kiungo** kiotomatiki wakati mtumiaji **anapofungua, kutumia au kuunda faili** katika:
 
 - Win7-Win10: `C:\Users\\AppData\Roaming\Microsoft\Windows\Recent\`
-- Office: `C:\Users\\AppData\Roaming\Microsoft\Office\Recent\`
+- Ofisi: `C:\Users\\AppData\Roaming\Microsoft\Office\Recent\`
 
-When a folder is created, a link to the folder, to the parent folder, and the grandparent folder is also created.
+Wakati folda inaundwa, kiungo kwa folda, kwa folda ya mzazi, na folda ya babu pia kinaundwa.
 
-These automatically created link files **contain information about the origin** like if it's a **file** **or** a **folder**, **MAC** **times** of that file, **volume information** of where is the file stored and **folder of the target file**. This information can be useful to recover those files in case they were removed.
+Hizi faili za kiungo zilizoundwa kiotomatiki **zina taarifa kuhusu asili** kama ikiwa ni **faili** **au** **folda**, **MAC** **nyakati** za faili hiyo, **taarifa za volumu** ya mahali faili imehifadhiwa na **folda ya faili lengwa**. Taarifa hii inaweza kuwa muhimu kurejesha faili hizo ikiwa zingeondolewa.
 
-Also, the **date created of the link** file is the first **time** the original file was **first** **used** and the **date** **modified** of the link file is the **last** **time** the origin file was used.
+Pia, **tarehe iliyoundwa ya kiungo** faili ni **wakati** wa kwanza faili asili ilitumika na **tarehe** **iliyorekebishwa** ya faili ya kiungo ni **wakati** wa **mwisho** faili asili ilitumika.
 
-To inspect these files you can use [**LinkParser**](http://4discovery.com/our-tools/).
+Ili kuchunguza faili hizi unaweza kutumia [**LinkParser**](http://4discovery.com/our-tools/).
 
-In this tools you will find **2 sets** of timestamps:
+Katika chombo hiki utapata **seti 2** za nyakati:
 
-- **First Set:**
-  1. FileModifiedDate
-  2. FileAccessDate
-  3. FileCreationDate
-- **Second Set:**
-  1. LinkModifiedDate
-  2. LinkAccessDate
-  3. LinkCreationDate.
+- **Seti ya Kwanza:**
+1. FileModifiedDate
+2. FileAccessDate
+3. FileCreationDate
+- **Seti ya Pili:**
+1. LinkModifiedDate
+2. LinkAccessDate
+3. LinkCreationDate.
 
-The first set of timestamp references the **timestamps of the file itself**. The second set references the **timestamps of the linked file**.
+Seti ya kwanza ya nyakati inarejelea **nyakati za faili yenyewe**. Seti ya pili inarejelea **nyakati za faili iliyounganishwa**.
 
-You can get the same information running the Windows CLI tool: [**LECmd.exe**](https://github.com/EricZimmerman/LECmd)
-
+Unaweza kupata taarifa sawa ukitumia chombo cha CLI cha Windows: [**LECmd.exe**](https://github.com/EricZimmerman/LECmd)
 ```
 LECmd.exe -d C:\Users\student\Desktop\LNKs --csv C:\Users\student\Desktop\LNKs
 ```
-
-In this case, the information is going to be saved inside a CSV file.
+Katika kesi hii, habari itahifadhiwa ndani ya faili ya CSV.
 
 ### Jumplists
 
-These are the recent files that are indicated per application. It's the list of **recent files used by an application** that you can access on each application. They can be created **automatically or be custom**.
+Hizi ni faili za hivi karibuni ambazo zinaonyeshwa kwa kila programu. Ni orodha ya **faili za hivi karibuni zinazotumiwa na programu** ambazo unaweza kufikia kwenye kila programu. Zinaundwa **kiotomatiki au kuwa za kawaida**.
 
-The **jumplists** created automatically are stored in `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\AutomaticDestinations\`. The jumplists are named following the format `{id}.autmaticDestinations-ms` where the initial ID is the ID of the application.
+**Jumplists** zilizoundwa kiotomatiki zinahifadhiwa katika `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\AutomaticDestinations\`. Jumplists zinaitwa kwa kufuata muundo wa `{id}.autmaticDestinations-ms` ambapo ID ya awali ni ID ya programu.
 
-The custom jumplists are stored in `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\CustomDestination\` and they are created by the application usually because something **important** has happened with the file (maybe marked as favorite)
+Jumplists za kawaida zinahifadhiwa katika `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\CustomDestination\` na huundwa na programu kwa kawaida kwa sababu jambo **muhimu** limetokea na faili (labda imewekwa kama kipenzi).
 
-The **created time** of any jumplist indicates the **the first time the file was accessed** and the **modified time the last time**.
+**Wakati ulioanzishwa** wa jumplist yoyote unaonyesha **wakati wa kwanza faili ilipofikiwa** na **wakati uliobadilishwa mara ya mwisho**.
 
-You can inspect the jumplists using [**JumplistExplorer**](https://ericzimmerman.github.io/#!index.md).
+Unaweza kuchunguza jumplists kwa kutumia [**JumplistExplorer**](https://ericzimmerman.github.io/#!index.md).
 
 ![](<../../../images/image (168).png>)
 
-(_Note that the timestamps provided by JumplistExplorer are related to the jumplist file itself_)
+(_Kumbuka kwamba alama za wakati zinazotolewa na JumplistExplorer zinahusiana na faili ya jumplist yenyewe_)
 
 ### Shellbags
 
-[**Follow this link to learn what are the shellbags.**](interesting-windows-registry-keys.md#shellbags)
+[**Fuata kiungo hiki kujifunza ni nini shellbags.**](interesting-windows-registry-keys.md#shellbags)
 
-## Use of Windows USBs
+## Matumizi ya Windows USBs
 
-It's possible to identify that a USB device was used thanks to the creation of:
+Inawezekana kubaini kwamba kifaa cha USB kilitumika kutokana na uundaji wa:
 
-- Windows Recent Folder
-- Microsoft Office Recent Folder
+- Folda ya Hivi Karibuni ya Windows
+- Folda ya Hivi Karibuni ya Microsoft Office
 - Jumplists
 
-Note that some LNK file instead of pointing to the original path, points to the WPDNSE folder:
+Kumbuka kwamba baadhi ya faili za LNK badala ya kuelekeza kwenye njia ya asili, zinaelekeza kwenye folda ya WPDNSE:
 
 ![](<../../../images/image (218).png>)
 
-The files in the folder WPDNSE are a copy of the original ones, then won't survive a restart of the PC and the GUID is taken from a shellbag.
+Faili katika folda ya WPDNSE ni nakala ya zile za asili, hivyo hazitakuwa na uwezo wa kuishi baada ya kuanzisha tena PC na GUID inachukuliwa kutoka shellbag.
 
-### Registry Information
+### Taarifa za Registry
 
-[Check this page to learn](interesting-windows-registry-keys.md#usb-information) which registry keys contain interesting information about USB connected devices.
+[Angalia ukurasa huu kujifunza](interesting-windows-registry-keys.md#usb-information) ni funguo zipi za registry zina habari za kuvutia kuhusu vifaa vilivyounganishwa vya USB.
 
 ### setupapi
 
-Check the file `C:\Windows\inf\setupapi.dev.log` to get the timestamps about when the USB connection was produced (search for `Section start`).
+Angalia faili `C:\Windows\inf\setupapi.dev.log` ili kupata alama za wakati kuhusu wakati muunganisho wa USB ulifanyika (tafuta `Section start`).
 
-![](<../../../images/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (14) (2).png>)
+![](<../../../images/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (14) (2).png>)
 
 ### USB Detective
 
-[**USBDetective**](https://usbdetective.com) can be used to obtain information about the USB devices that have been connected to an image.
+[**USBDetective**](https://usbdetective.com) inaweza kutumika kupata habari kuhusu vifaa vya USB ambavyo vimeunganishwa kwenye picha.
 
 ![](<../../../images/image (452).png>)
 
 ### Plug and Play Cleanup
 
-The scheduled task known as 'Plug and Play Cleanup' is primarily designed for the removal of outdated driver versions. Contrary to its specified purpose of retaining the latest driver package version, online sources suggest it also targets drivers that have been inactive for 30 days. Consequently, drivers for removable devices not connected in the past 30 days may be subject to deletion.
+Kazi iliyopangwa inayojulikana kama 'Plug and Play Cleanup' imeundwa hasa kwa ajili ya kuondoa toleo la zamani la madereva. Kinyume na kusudi lake lililotajwa la kuhifadhi toleo la hivi karibuni la kifurushi cha dereva, vyanzo vya mtandaoni vinapendekeza pia inawalenga madereva ambayo hayajatumika kwa siku 30. Kwa hivyo, madereva ya vifaa vinavyoweza kuondolewa ambavyo havijaundwa katika siku 30 zilizopita yanaweza kufutwa.
 
-The task is located at the following path: `C:\Windows\System32\Tasks\Microsoft\Windows\Plug and Play\Plug and Play Cleanup`.
+Kazi hiyo iko katika njia ifuatayo: `C:\Windows\System32\Tasks\Microsoft\Windows\Plug and Play\Plug and Play Cleanup`.
 
-A screenshot depicting the task's content is provided: ![](https://2.bp.blogspot.com/-wqYubtuR_W8/W19bV5S9XyI/AAAAAAAANhU/OHsBDEvjqmg9ayzdNwJ4y2DKZnhCdwSMgCLcBGAs/s1600/xml.png)
+Picha ya skrini inayoonyesha maudhui ya kazi hiyo inapatikana: ![](https://2.bp.blogspot.com/-wqYubtuR_W8/W19bV5S9XyI/AAAAAAAANhU/OHsBDEvjqmg9ayzdNwJ4y2DKZnhCdwSMgCLcBGAs/s1600/xml.png)
 
-**Key Components and Settings of the Task:**
+**Vipengele Muhimu na Mipangilio ya Kazi:**
 
-- **pnpclean.dll**: This DLL is responsible for the actual cleanup process.
-- **UseUnifiedSchedulingEngine**: Set to `TRUE`, indicating the use of the generic task scheduling engine.
+- **pnpclean.dll**: DLL hii inawajibika kwa mchakato halisi wa kusafisha.
+- **UseUnifiedSchedulingEngine**: Imewekwa kuwa `TRUE`, ikionyesha matumizi ya injini ya kupanga kazi ya kawaida.
 - **MaintenanceSettings**:
-  - **Period ('P1M')**: Directs the Task Scheduler to initiate the cleanup task monthly during regular Automatic maintenance.
-  - **Deadline ('P2M')**: Instructs the Task Scheduler, if the task fails for two consecutive months, to execute the task during emergency Automatic maintenance.
+- **Period ('P1M')**: Inamwelekeza Mpangaji wa Kazi kuanzisha kazi ya kusafisha kila mwezi wakati wa matengenezo ya Kiotomatiki.
+- **Deadline ('P2M')**: Inamwelekeza Mpangaji wa Kazi, ikiwa kazi hiyo inashindwa kwa miezi miwili mfululizo, kutekeleza kazi hiyo wakati wa matengenezo ya dharura ya Kiotomatiki.
 
-This configuration ensures regular maintenance and cleanup of drivers, with provisions for reattempting the task in case of consecutive failures.
+Usanidi huu unahakikisha matengenezo ya kawaida na kusafisha madereva, huku ukiweka masharti ya kujaribu tena kazi hiyo endapo kutakuwa na kushindwa mfululizo.
 
-**For more information check:** [**https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html**](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html)
+**Kwa maelezo zaidi angalia:** [**https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html**](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html)
 
-## Emails
+## Barua pepe
 
-Emails contain **2 interesting parts: The headers and the content** of the email. In the **headers** you can find information like:
+Barua pepe zina **sehemu 2 za kuvutia: Vichwa na maudhui** ya barua pepe. Katika **vichwa** unaweza kupata habari kama:
 
-- **Who** sent the emails (email address, IP, mail servers that have redirected the email)
-- **When** was the email sent
+- **Nani** alituma barua pepe (anwani ya barua pepe, IP, seva za barua ambazo zimeelekeza barua pepe)
+- **Lini** barua pepe ilitumwa
 
-Also, inside the `References` and `In-Reply-To` headers you can find the ID of the messages:
+Pia, ndani ya vichwa vya `References` na `In-Reply-To` unaweza kupata ID ya ujumbe:
 
 ![](<../../../images/image (593).png>)
 
 ### Windows Mail App
 
-This application saves emails in HTML or text. You can find the emails inside subfolders inside `\Users\<username>\AppData\Local\Comms\Unistore\data\3\`. The emails are saved with the `.dat` extension.
+Programu hii huhifadhi barua pepe katika HTML au maandiko. Unaweza kupata barua pepe ndani ya folda ndogo ndani ya `\Users\<username>\AppData\Local\Comms\Unistore\data\3\`. Barua pepe huhifadhiwa kwa kiendelezi cha `.dat`.
 
-The **metadata** of the emails and the **contacts** can be found inside the **EDB database**: `\Users\<username>\AppData\Local\Comms\UnistoreDB\store.vol`
+**Metadata** ya barua pepe na **mawasiliano** yanaweza kupatikana ndani ya **EDB database**: `\Users\<username>\AppData\Local\Comms\UnistoreDB\store.vol`
 
-**Change the extension** of the file from `.vol` to `.edb` and you can use the tool [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html) to open it. Inside the `Message` table you can see the emails.
+**Badilisha kiendelezi** cha faili kutoka `.vol` kuwa `.edb` na unaweza kutumia zana [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html) kuifungua. Ndani ya jedwali la `Message` unaweza kuona barua pepe.
 
 ### Microsoft Outlook
 
-When Exchange servers or Outlook clients are used there are going to be some MAPI headers:
+Wakati seva za Exchange au wateja wa Outlook zinapotumika kutakuwa na vichwa vya MAPI:
 
-- `Mapi-Client-Submit-Time`: Time of the system when the email was sent
-- `Mapi-Conversation-Index`: Number of children messages of the thread and timestamp of each message of the thread
-- `Mapi-Entry-ID`: Message identifier.
-- `Mappi-Message-Flags` and `Pr_last_Verb-Executed`: Information about the MAPI client (message read? no read? responded? redirected? out of the office?)
+- `Mapi-Client-Submit-Time`: Wakati wa mfumo wakati barua pepe ilitumwa
+- `Mapi-Conversation-Index`: Idadi ya ujumbe wa watoto wa thread na alama za wakati za kila ujumbe wa thread
+- `Mapi-Entry-ID`: Kitambulisho cha ujumbe.
+- `Mappi-Message-Flags` na `Pr_last_Verb-Executed`: Habari kuhusu mteja wa MAPI (ujumbe umesomwa? haujasomwa? umejibu? umeelekezwa? nje ya ofisi?)
 
-In the Microsoft Outlook client, all the sent/received messages, contacts data, and calendar data are stored in a PST file in:
+Katika mteja wa Microsoft Outlook, ujumbe wote waliotumwa/waliopokelewa, data za mawasiliano, na data za kalenda huhifadhiwa katika faili ya PST katika:
 
 - `%USERPROFILE%\Local Settings\Application Data\Microsoft\Outlook` (WinXP)
 - `%USERPROFILE%\AppData\Local\Microsoft\Outlook`
 
-The registry path `HKEY_CURRENT_USER\Software\Microsoft\WindowsNT\CurrentVersion\Windows Messaging Subsystem\Profiles\Outlook` indicates the file that is being used.
+Njia ya registry `HKEY_CURRENT_USER\Software\Microsoft\WindowsNT\CurrentVersion\Windows Messaging Subsystem\Profiles\Outlook` inaonyesha faili inayotumika.
 
-You can open the PST file using the tool [**Kernel PST Viewer**](https://www.nucleustechnologies.com/es/visor-de-pst.html).
+Unaweza kufungua faili ya PST kwa kutumia zana [**Kernel PST Viewer**](https://www.nucleustechnologies.com/es/visor-de-pst.html).
 
 ![](<../../../images/image (498).png>)
 
 ### Microsoft Outlook OST Files
 
-An **OST file** is generated by Microsoft Outlook when it's configured with **IMAP** or an **Exchange** server, storing similar information to a PST file. This file is synchronized with the server, retaining data for **the last 12 months** up to a **maximum size of 50GB**, and is located in the same directory as the PST file. To view an OST file, the [**Kernel OST viewer**](https://www.nucleustechnologies.com/ost-viewer.html) can be utilized.
-
-### Retrieving Attachments
-
-Lost attachments might be recoverable from:
-
-- For **IE10**: `%APPDATA%\Local\Microsoft\Windows\Temporary Internet Files\Content.Outlook`
-- For **IE11 and above**: `%APPDATA%\Local\Microsoft\InetCache\Content.Outlook`
-
-### Thunderbird MBOX Files
-
-**Thunderbird** utilizes **MBOX files** to store data, located at `\Users\%USERNAME%\AppData\Roaming\Thunderbird\Profiles`.
-
-### Image Thumbnails
-
-- **Windows XP and 8-8.1**: Accessing a folder with thumbnails generates a `thumbs.db` file storing image previews, even after deletion.
-- **Windows 7/10**: `thumbs.db` is created when accessed over a network via UNC path.
-- **Windows Vista and newer**: Thumbnail previews are centralized in `%userprofile%\AppData\Local\Microsoft\Windows\Explorer` with files named **thumbcache_xxx.db**. [**Thumbsviewer**](https://thumbsviewer.github.io) and [**ThumbCache Viewer**](https://thumbcacheviewer.github.io) are tools for viewing these files.
-
-### Windows Registry Information
-
-The Windows Registry, storing extensive system and user activity data, is contained within files in:
-
-- `%windir%\System32\Config` for various `HKEY_LOCAL_MACHINE` subkeys.
-- `%UserProfile%{User}\NTUSER.DAT` for `HKEY_CURRENT_USER`.
-- Windows Vista and later versions back up `HKEY_LOCAL_MACHINE` registry files in `%Windir%\System32\Config\RegBack\`.
-- Additionally, program execution information is stored in `%UserProfile%\{User}\AppData\Local\Microsoft\Windows\USERCLASS.DAT` from Windows Vista and Windows 2008 Server onwards.
-
-### Tools
-
-Some tools are useful to analyze the registry files:
-
-- **Registry Editor**: It's installed in Windows. It's a GUI to navigate through the Windows registry of the current session.
-- [**Registry Explorer**](https://ericzimmerman.github.io/#!index.md): It allows you to load the registry file and navigate through them with a GUI. It also contains Bookmarks highlighting keys with interesting information.
-- [**RegRipper**](https://github.com/keydet89/RegRipper3.0): Again, it has a GUI that allows to navigate through the loaded registry and also contains plugins that highlight interesting information inside the loaded registry.
-- [**Windows Registry Recovery**](https://www.mitec.cz/wrr.html): Another GUI application capable of extracting the important information from the registry loaded.
-
-### Recovering Deleted Element
-
-When a key is deleted it's marked as such, but until the space it's occupying is needed it won't be removed. Therefore, using tools like **Registry Explorer** it's possible to recover these deleted keys.
-
-### Last Write Time
-
-Each Key-Value contains a **timestamp** indicating the last time it was modified.
-
-### SAM
-
-The file/hive **SAM** contains the **users, groups and users passwords** hashes of the system.
-
-In `SAM\Domains\Account\Users` you can obtain the username, the RID, last login, last failed logon, login counter, password policy and when the account was created. To get the **hashes** you also **need** the file/hive **SYSTEM**.
-
-### Interesting entries in the Windows Registry
-
-{{#ref}}
-interesting-windows-registry-keys.md
-{{#endref}}
-
-## Programs Executed
-
-### Basic Windows Processes
-
-In [this post](https://jonahacks.medium.com/investigating-common-windows-processes-18dee5f97c1d) you can learn about the common Windows processes to detect suspicious behaviours.
-
-### Windows Recent APPs
-
-Inside the registry `NTUSER.DAT` in the path `Software\Microsoft\Current Version\Search\RecentApps` you can subkeys with information about the **application executed**, **last time** it was executed, and **number of times** it was launched.
-
-### BAM (Background Activity Moderator)
-
-You can open the `SYSTEM` file with a registry editor and inside the path `SYSTEM\CurrentControlSet\Services\bam\UserSettings\{SID}` you can find the information about the **applications executed by each user** (note the `{SID}` in the path) and at **what time** they were executed (the time is inside the Data value of the registry).
-
-### Windows Prefetch
-
-Prefetching is a technique that allows a computer to silently **fetch the necessary resources needed to display content** that a user **might access in the near future** so resources can be accessed quicker.
-
-Windows prefetch consists of creating **caches of the executed programs** to be able to load them faster. These caches as created as `.pf` files inside the path: `C:\Windows\Prefetch`. There is a limit of 128 files in XP/VISTA/WIN7 and 1024 files in Win8/Win10.
-
-The file name is created as `{program_name}-{hash}.pf` (the hash is based on the path and arguments of the executable). In W10 these files are compressed. Do note that the sole presence of the file indicates that **the program was executed** at some point.
-
-The file `C:\Windows\Prefetch\Layout.ini` contains the **names of the folders of the files that are prefetched**. This file contains **information about the number of the executions**, **dates** of the execution and **files** **open** by the program.
-
-To inspect these files you can use the tool [**PEcmd.exe**](https://github.com/EricZimmerman/PECmd):
-
+Faili ya **OST** inaundwa na Microsoft Outlook wakati imewekwa
 ```bash
 .\PECmd.exe -d C:\Users\student\Desktop\Prefetch --html "C:\Users\student\Desktop\out_folder"
 ```
-
 ![](<../../../images/image (315).png>)
 
 ### Superprefetch
 
-**Superprefetch** has the same goal as prefetch, **load programs faster** by predicting what is going to be loaded next. However, it doesn't substitute the prefetch service.\
-This service will generate database files in `C:\Windows\Prefetch\Ag*.db`.
+**Superprefetch** ina lengo sawa na prefetch, **kupakia programu haraka zaidi** kwa kutabiri kile kitakachopakuliwa next. Hata hivyo, haitoi huduma ya prefetch.\
+Huduma hii itaunda faili za database katika `C:\Windows\Prefetch\Ag*.db`.
 
-In these databases you can find the **name** of the **program**, **number** of **executions**, **files** **opened**, **volume** **accessed**, **complete** **path**, **timeframes** and **timestamps**.
+Katika hizi databases unaweza kupata **jina** la **programu**, **idadi** ya **utekelezaji**, **faili** **zilizofunguliwa**, **kiasi** **kilichofikiwa**, **njia** **kamili**, **muda** na **alama za muda**.
 
-You can access this information using the tool [**CrowdResponse**](https://www.crowdstrike.com/resources/community-tools/crowdresponse/).
+Unaweza kufikia taarifa hii kwa kutumia chombo [**CrowdResponse**](https://www.crowdstrike.com/resources/community-tools/crowdresponse/).
 
 ### SRUM
 
-**System Resource Usage Monitor** (SRUM) **monitors** the **resources** **consumed** **by a process**. It appeared in W8 and it stores the data in an ESE database located in `C:\Windows\System32\sru\SRUDB.dat`.
+**System Resource Usage Monitor** (SRUM) **inasimamia** **rasilimali** **zinazotumika** **na mchakato**. Ilionekana katika W8 na inahifadhi data katika database ya ESE iliyoko katika `C:\Windows\System32\sru\SRUDB.dat`.
 
-It gives the following information:
+Inatoa taarifa zifuatazo:
 
-- AppID and Path
-- User that executed the process
-- Sent Bytes
-- Received Bytes
-- Network Interface
-- Connection duration
-- Process duration
+- AppID na Njia
+- Mtumiaji aliyeendesha mchakato
+- Bytes zilizotumwa
+- Bytes zilizopokelewa
+- Kiunganishi cha Mtandao
+- Muda wa Muunganisho
+- Muda wa Mchakato
 
-This information is updated every 60 mins.
+Taarifa hii inasasishwa kila dakika 60.
 
-You can obtain the date from this file using the tool [**srum_dump**](https://github.com/MarkBaggett/srum-dump).
-
+Unaweza kupata tarehe kutoka faili hii kwa kutumia chombo [**srum_dump**](https://github.com/MarkBaggett/srum-dump).
 ```bash
 .\srum_dump.exe -i C:\Users\student\Desktop\SRUDB.dat -t SRUM_TEMPLATE.xlsx -o C:\Users\student\Desktop\srum
 ```
-
 ### AppCompatCache (ShimCache)
 
-The **AppCompatCache**, also known as **ShimCache**, forms a part of the **Application Compatibility Database** developed by **Microsoft** to tackle application compatibility issues. This system component records various pieces of file metadata, which include:
+**AppCompatCache**, pia inajulikana kama **ShimCache**, ni sehemu ya **Database ya Ufanisi wa Maombi** iliyotengenezwa na **Microsoft** ili kushughulikia masuala ya ufanisi wa maombi. Kipengele hiki cha mfumo kinarekodi vipande mbalimbali vya metadata ya faili, ambavyo vinajumuisha:
 
-- Full path of the file
-- Size of the file
-- Last Modified time under **$Standard_Information** (SI)
-- Last Updated time of the ShimCache
-- Process Execution Flag
+- Njia kamili ya faili
+- Ukubwa wa faili
+- Wakati wa Marekebisho ya Mwisho chini ya **$Standard_Information** (SI)
+- Wakati wa Sasisho la Mwisho la ShimCache
+- Bendera ya Utekelezaji wa Mchakato
 
-Such data is stored within the registry at specific locations based on the version of the operating system:
+Taarifa kama hizi zinahifadhiwa ndani ya rejista katika maeneo maalum kulingana na toleo la mfumo wa uendeshaji:
 
-- For XP, the data is stored under `SYSTEM\CurrentControlSet\Control\SessionManager\Appcompatibility\AppcompatCache` with a capacity for 96 entries.
-- For Server 2003, as well as for Windows versions 2008, 2012, 2016, 7, 8, and 10, the storage path is `SYSTEM\CurrentControlSet\Control\SessionManager\AppcompatCache\AppCompatCache`, accommodating 512 and 1024 entries, respectively.
+- Kwa XP, data inahifadhiwa chini ya `SYSTEM\CurrentControlSet\Control\SessionManager\Appcompatibility\AppcompatCache` ikiwa na uwezo wa kuingia 96.
+- Kwa Server 2003, pamoja na toleo la Windows 2008, 2012, 2016, 7, 8, na 10, njia ya hifadhi ni `SYSTEM\CurrentControlSet\Control\SessionManager\AppcompatCache\AppCompatCache`, ikikubali kuingia 512 na 1024, mtawalia.
 
-To parse the stored information, the [**AppCompatCacheParser** tool](https://github.com/EricZimmerman/AppCompatCacheParser) is recommended for use.
+Ili kuchambua taarifa zilizohifadhiwa, zana ya [**AppCompatCacheParser**](https://github.com/EricZimmerman/AppCompatCacheParser) inapendekezwa kutumika.
 
 ![](<../../../images/image (75).png>)
 
 ### Amcache
 
-The **Amcache.hve** file is essentially a registry hive that logs details about applications that have been executed on a system. It is typically found at `C:\Windows\AppCompat\Programas\Amcache.hve`.
+Faili ya **Amcache.hve** kimsingi ni hive ya rejista inayorekodi maelezo kuhusu maombi ambayo yamefanywa kwenye mfumo. Kawaida hupatikana katika `C:\Windows\AppCompat\Programas\Amcache.hve`.
 
-This file is notable for storing records of recently executed processes, including the paths to the executable files and their SHA1 hashes. This information is invaluable for tracking the activity of applications on a system.
+Faili hii ni ya kipekee kwa kuhifadhi rekodi za michakato iliyotekelezwa hivi karibuni, ikiwa ni pamoja na njia za faili zinazoweza kutekelezwa na hash zao za SHA1. Taarifa hii ni muhimu kwa kufuatilia shughuli za maombi kwenye mfumo.
 
-To extract and analyze the data from **Amcache.hve**, the [**AmcacheParser**](https://github.com/EricZimmerman/AmcacheParser) tool can be used. The following command is an example of how to use AmcacheParser to parse the contents of the **Amcache.hve** file and output the results in CSV format:
-
+Ili kutoa na kuchambua data kutoka **Amcache.hve**, zana ya [**AmcacheParser**](https://github.com/EricZimmerman/AmcacheParser) inaweza kutumika. Amri ifuatayo ni mfano wa jinsi ya kutumia AmcacheParser kuchambua maudhui ya faili ya **Amcache.hve** na kutoa matokeo katika muundo wa CSV:
 ```bash
 AmcacheParser.exe -f C:\Users\genericUser\Desktop\Amcache.hve --csv C:\Users\genericUser\Desktop\outputFolder
 ```
+Kati ya faili za CSV zilizozalishwa, `Amcache_Unassociated file entries` ni muhimu sana kutokana na taarifa nyingi inazotoa kuhusu faili zisizohusishwa.
 
-Among the generated CSV files, the `Amcache_Unassociated file entries` is particularly noteworthy due to the rich information it provides about unassociated file entries.
-
-The most interesting CVS file generated is the `Amcache_Unassociated file entries`.
+Faili ya CVS inayovutia zaidi iliyozalishwa ni `Amcache_Unassociated file entries`.
 
 ### RecentFileCache
 
-This artifact can only be found in W7 in `C:\Windows\AppCompat\Programs\RecentFileCache.bcf` and it contains information about the recent execution of some binaries.
+Kichaka hiki kinaweza kupatikana tu katika W7 katika `C:\Windows\AppCompat\Programs\RecentFileCache.bcf` na kina taarifa kuhusu utekelezaji wa hivi karibuni wa baadhi ya binaries.
 
-You can use the tool [**RecentFileCacheParse**](https://github.com/EricZimmerman/RecentFileCacheParser) to parse the file.
+Unaweza kutumia chombo [**RecentFileCacheParse**](https://github.com/EricZimmerman/RecentFileCacheParser) kuchambua faili hiyo.
 
 ### Scheduled tasks
 
-You can extract them from `C:\Windows\Tasks` or `C:\Windows\System32\Tasks` and read them as XML.
+Unaweza kuzitoa kutoka `C:\Windows\Tasks` au `C:\Windows\System32\Tasks` na kuzisoma kama XML.
 
 ### Services
 
-You can find them in the registry under `SYSTEM\ControlSet001\Services`. You can see what is going to be executed and when.
+Unaweza kuziona katika rejista chini ya `SYSTEM\ControlSet001\Services`. Unaweza kuona kinachotarajiwa kutekelezwa na lini.
 
 ### **Windows Store**
 
-The installed applications can be found in `\ProgramData\Microsoft\Windows\AppRepository\`\
-This repository has a **log** with **each application installed** in the system inside the database **`StateRepository-Machine.srd`**.
+Programu zilizowekwa zinaweza kupatikana katika `\ProgramData\Microsoft\Windows\AppRepository\`\
+Hifadhi hii ina **log** yenye **kila programu iliyowekwa** katika mfumo ndani ya database **`StateRepository-Machine.srd`**.
 
-Inside the Application table of this database, it's possible to find the columns: "Application ID", "PackageNumber", and "Display Name". These columns have information about pre-installed and installed applications and it can be found if some applications were uninstalled because the IDs of installed applications should be sequential.
+Ndani ya jedwali la Programu la database hii, inawezekana kupata safu: "Application ID", "PackageNumber", na "Display Name". Safu hizi zina taarifa kuhusu programu zilizowekwa awali na zilizowekwa na zinaweza kupatikana ikiwa baadhi ya programu ziliondolewa kwa sababu IDs za programu zilizowekwa zinapaswa kuwa za mfululizo.
 
-It's also possible to **find installed application** inside the registry path: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Applications\`\
-And **uninstalled** **applications** in: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Deleted\`
+Pia inawezekana **kupata programu zilizowekwa** ndani ya njia ya rejista: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Applications\`\
+Na **programu zilizondolewa** katika: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Deleted\`
 
 ## Windows Events
 
-Information that appears inside Windows events are:
+Taarifa zinazojitokeza ndani ya matukio ya Windows ni:
 
-- What happened
-- Timestamp (UTC + 0)
-- Users involved
-- Hosts involved (hostname, IP)
-- Assets accessed (files, folder, printer, services)
+- Nini kilitokea
+- Wakati (UTC + 0)
+- Watumiaji waliohusika
+- Kompyuta zilizohusika (jina la kompyuta, IP)
+- Mali zilizofikiwa (faili, folda, printer, huduma)
 
-The logs are located in `C:\Windows\System32\config` before Windows Vista and in `C:\Windows\System32\winevt\Logs` after Windows Vista. Before Windows Vista, the event logs were in binary format and after it, they are in **XML format** and use the **.evtx** extension.
+Marekodi yako katika `C:\Windows\System32\config` kabla ya Windows Vista na katika `C:\Windows\System32\winevt\Logs` baada ya Windows Vista. Kabla ya Windows Vista, marekodi ya matukio yalikuwa katika muundo wa binary na baada yake, yako katika **muundo wa XML** na yanatumia kiendelezi **.evtx**.
 
-The location of the event files can be found in the SYSTEM registry in **`HKLM\SYSTEM\CurrentControlSet\services\EventLog\{Application|System|Security}`**
+Mahali pa faili za matukio yanaweza kupatikana katika rejista ya SYSTEM katika **`HKLM\SYSTEM\CurrentControlSet\services\EventLog\{Application|System|Security}`**
 
-They can be visualized from the Windows Event Viewer (**`eventvwr.msc`**) or with other tools like [**Event Log Explorer**](https://eventlogxp.com) **or** [**Evtx Explorer/EvtxECmd**](https://ericzimmerman.github.io/#!index.md)**.**
+Zinaweza kuonyeshwa kutoka kwa Windows Event Viewer (**`eventvwr.msc`**) au kwa zana nyingine kama [**Event Log Explorer**](https://eventlogxp.com) **au** [**Evtx Explorer/EvtxECmd**](https://ericzimmerman.github.io/#!index.md)**.**
 
-## Understanding Windows Security Event Logging
+## Kuelewa Usajili wa Matukio ya Usalama wa Windows
 
-Access events are recorded in the security configuration file located at `C:\Windows\System32\winevt\Security.evtx`. This file's size is adjustable, and when its capacity is reached, older events are overwritten. Recorded events include user logins and logoffs, user actions, and changes to security settings, as well as file, folder, and shared asset access.
+Matukio ya ufikiaji yanarekodiwa katika faili ya usanidi wa usalama iliyoko katika `C:\Windows\System32\winevt\Security.evtx`. Ukubwa wa faili hii unaweza kubadilishwa, na wakati uwezo wake unafikiwa, matukio ya zamani yanabadilishwa. Matukio yaliyorekodiwa ni pamoja na kuingia na kutoka kwa watumiaji, vitendo vya watumiaji, na mabadiliko ya mipangilio ya usalama, pamoja na ufikiaji wa faili, folda, na mali zilizoshirikiwa.
 
-### Key Event IDs for User Authentication:
+### Nambari za Matukio Muhimu za Uthibitishaji wa Mtumiaji:
 
-- **EventID 4624**: Indicates a user successfully authenticated.
-- **EventID 4625**: Signals an authentication failure.
-- **EventIDs 4634/4647**: Represent user logoff events.
-- **EventID 4672**: Denotes login with administrative privileges.
+- **EventID 4624**: Inaonyesha mtumiaji ameweza kuthibitishwa kwa mafanikio.
+- **EventID 4625**: Inaashiria kushindwa kwa uthibitishaji.
+- **EventIDs 4634/4647**: Zinawakilisha matukio ya kutoka kwa mtumiaji.
+- **EventID 4672**: Inaashiria kuingia kwa mamlaka ya usimamizi.
 
-#### Sub-types within EventID 4634/4647:
+#### Aina za chini ndani ya EventID 4634/4647:
 
-- **Interactive (2)**: Direct user login.
-- **Network (3)**: Access to shared folders.
-- **Batch (4)**: Execution of batch processes.
-- **Service (5)**: Service launches.
-- **Proxy (6)**: Proxy authentication.
-- **Unlock (7)**: Screen unlocked with a password.
-- **Network Cleartext (8)**: Clear text password transmission, often from IIS.
-- **New Credentials (9)**: Usage of different credentials for access.
-- **Remote Interactive (10)**: Remote desktop or terminal services login.
-- **Cache Interactive (11)**: Login with cached credentials without domain controller contact.
-- **Cache Remote Interactive (12)**: Remote login with cached credentials.
-- **Cached Unlock (13)**: Unlocking with cached credentials.
+- **Interactive (2)**: Kuingia moja kwa moja kwa mtumiaji.
+- **Network (3)**: Ufikiaji wa folda zilizoshirikiwa.
+- **Batch (4)**: Utekelezaji wa michakato ya batch.
+- **Service (5)**: Uzinduzi wa huduma.
+- **Proxy (6)**: Uthibitishaji wa proxy.
+- **Unlock (7)**: Skrini imefunguliwa kwa neno la siri.
+- **Network Cleartext (8)**: Uhamasishaji wa nenosiri wazi, mara nyingi kutoka IIS.
+- **New Credentials (9)**: Matumizi ya uthibitisho tofauti kwa ufikiaji.
+- **Remote Interactive (10)**: Kuingia kwa desktop ya mbali au huduma za terminal.
+- **Cache Interactive (11)**: Kuingia kwa uthibitisho wa cache bila kuwasiliana na udhibiti wa kikoa.
+- **Cache Remote Interactive (12)**: Kuingia kwa mbali kwa uthibitisho wa cache.
+- **Cached Unlock (13)**: Kufungua kwa uthibitisho wa cache.
 
-#### Status and Sub Status Codes for EventID 4625:
+#### Nambari za Hali na Nambari za Hali za chini kwa EventID 4625:
 
-- **0xC0000064**: User name does not exist - Could indicate a username enumeration attack.
-- **0xC000006A**: Correct user name but wrong password - Possible password guessing or brute-force attempt.
-- **0xC0000234**: User account locked out - May follow a brute-force attack resulting in multiple failed logins.
-- **0xC0000072**: Account disabled - Unauthorized attempts to access disabled accounts.
-- **0xC000006F**: Logon outside allowed time - Indicates attempts to access outside of set login hours, a possible sign of unauthorized access.
-- **0xC0000070**: Violation of workstation restrictions - Could be an attempt to login from an unauthorized location.
-- **0xC0000193**: Account expiration - Access attempts with expired user accounts.
-- **0xC0000071**: Expired password - Login attempts with outdated passwords.
-- **0xC0000133**: Time sync issues - Large time discrepancies between client and server may be indicative of more sophisticated attacks like pass-the-ticket.
-- **0xC0000224**: Mandatory password change required - Frequent mandatory changes might suggest an attempt to destabilize account security.
-- **0xC0000225**: Indicates a system bug rather than a security issue.
-- **0xC000015b**: Denied logon type - Access attempt with unauthorized logon type, such as a user trying to execute a service logon.
+- **0xC0000064**: Jina la mtumiaji halipo - Inaweza kuashiria shambulio la kuhesabu majina ya watumiaji.
+- **0xC000006A**: Jina la mtumiaji sahihi lakini nenosiri si sahihi - Jaribio la kukisia nenosiri au jaribio la nguvu.
+- **0xC0000234**: Akaunti ya mtumiaji imefungwa - Inaweza kufuatia shambulio la nguvu linalosababisha kuingia kwa mara nyingi bila mafanikio.
+- **0xC0000072**: Akaunti imezuiliwa - Jaribio zisizoidhinishwa za kufikia akaunti zilizozuiliwa.
+- **0xC000006F**: Kuingia nje ya wakati ulioidhinishwa - Inaonyesha jaribio la kufikia nje ya masaa yaliyowekwa ya kuingia, ishara inayoweza kuashiria ufikiaji usioidhinishwa.
+- **0xC0000070**: Kukiuka vikwazo vya workstation - Inaweza kuwa jaribio la kuingia kutoka eneo lisiloidhinishwa.
+- **0xC0000193**: Kuisha kwa akaunti - Jaribio la kufikia akaunti za mtumiaji zilizokwisha.
+- **0xC0000071**: Nenosiri lililoisha - Jaribio la kuingia kwa nenosiri lililokwisha.
+- **0xC0000133**: Masuala ya usawazishaji wa wakati - Tofauti kubwa za wakati kati ya mteja na seva zinaweza kuashiria mashambulizi ya hali ya juu kama pass-the-ticket.
+- **0xC0000224**: Mabadiliko ya nenosiri ya lazima yanahitajika - Mabadiliko ya lazima mara kwa mara yanaweza kuashiria jaribio la kuharibu usalama wa akaunti.
+- **0xC0000225**: Inaonyesha hitilafu ya mfumo badala ya suala la usalama.
+- **0xC000015b**: Aina ya kuingia iliyopewa ruhusa - Jaribio la ufikiaji kwa aina ya kuingia isiyoidhinishwa, kama mtumiaji anajaribu kutekeleza kuingia kwa huduma.
 
 #### EventID 4616:
 
-- **Time Change**: Modification of the system time, could obscure the timeline of events.
+- **Mabadiliko ya Wakati**: Mabadiliko ya wakati wa mfumo, yanaweza kuficha mfululizo wa matukio.
 
-#### EventID 6005 and 6006:
+#### EventID 6005 na 6006:
 
-- **System Startup and Shutdown**: EventID 6005 indicates the system starting up, while EventID 6006 marks it shutting down.
+- **Kuanza na Kufunga Mfumo**: EventID 6005 inaonyesha mfumo unaanzishwa, wakati EventID 6006 inaashiria unafungwa.
 
 #### EventID 1102:
 
-- **Log Deletion**: Security logs being cleared, which is often a red flag for covering up illicit activities.
+- **Futa Marekodi**: Marekodi ya usalama yanapofutwa, ambayo mara nyingi ni ishara mbaya ya kuficha shughuli haramu.
 
-#### EventIDs for USB Device Tracking:
+#### EventIDs za Ufuatiliaji wa Kifaa cha USB:
 
-- **20001 / 20003 / 10000**: USB device first connection.
-- **10100**: USB driver update.
-- **EventID 112**: Time of USB device insertion.
+- **20001 / 20003 / 10000**: Muunganisho wa kwanza wa kifaa cha USB.
+- **10100**: Sasisho la dereva wa USB.
+- **EventID 112**: Wakati wa kuingizwa kwa kifaa cha USB.
 
-For practical examples on simulating these login types and credential dumping opportunities, refer to [Altered Security's detailed guide](https://www.alteredsecurity.com/post/fantastic-windows-logon-types-and-where-to-find-credentials-in-them).
+Kwa mifano halisi ya kuiga aina hizi za kuingia na fursa za kutupa uthibitisho, rejelea [mwongozo wa kina wa Altered Security](https://www.alteredsecurity.com/post/fantastic-windows-logon-types-and-where-to-find-credentials-in-them).
 
-Event details, including status and sub-status codes, provide further insights into event causes, particularly notable in Event ID 4625.
+Maelezo ya matukio, ikiwa ni pamoja na nambari za hali na za hali za chini, yanatoa ufahamu zaidi kuhusu sababu za matukio, hasa yanayoonekana katika Event ID 4625.
 
-### Recovering Windows Events
+### Kuokoa Matukio ya Windows
 
-To enhance the chances of recovering deleted Windows Events, it's advisable to power down the suspect computer by directly unplugging it. **Bulk_extractor**, a recovery tool specifying the `.evtx` extension, is recommended for attempting to recover such events.
+Ili kuongeza nafasi za kuokoa matukio ya Windows yaliyofutwa, ni vyema kuzima kompyuta inayoshukiwa kwa kuiondoa moja kwa moja. **Bulk_extractor**, chombo cha kuokoa kinachobainisha kiendelezi cha `.evtx`, kinapendekezwa kwa kujaribu kuokoa matukio kama haya.
 
-### Identifying Common Attacks via Windows Events
+### Kutambua Mashambulizi ya Kawaida kupitia Matukio ya Windows
 
-For a comprehensive guide on utilizing Windows Event IDs in identifying common cyber attacks, visit [Red Team Recipe](https://redteamrecipe.com/event-codes/).
+Kwa mwongozo wa kina juu ya kutumia Nambari za Matukio ya Windows katika kutambua mashambulizi ya kawaida ya mtandao, tembelea [Red Team Recipe](https://redteamrecipe.com/event-codes/).
 
-#### Brute Force Attacks
+#### Mashambulizi ya Nguvu
 
-Identifiable by multiple EventID 4625 records, followed by an EventID 4624 if the attack succeeds.
+Inatambulika kwa rekodi nyingi za EventID 4625, ikifuatwa na EventID 4624 ikiwa shambulio linafanikiwa.
 
-#### Time Change
+#### Mabadiliko ya Wakati
 
-Recorded by EventID 4616, changes to system time can complicate forensic analysis.
+Yanakumbukwa na EventID 4616, mabadiliko ya wakati wa mfumo yanaweza kuleta changamoto katika uchambuzi wa forensics.
 
-#### USB Device Tracking
+#### Ufuatiliaji wa Kifaa cha USB
 
-Useful System EventIDs for USB device tracking include 20001/20003/10000 for initial use, 10100 for driver updates, and EventID 112 from DeviceSetupManager for insertion timestamps.
+Nambari za Matukio za Mfumo zinazofaa kwa ufuatiliaji wa kifaa cha USB ni pamoja na 20001/20003/10000 kwa matumizi ya awali, 10100 kwa sasisho za dereva, na EventID 112 kutoka kwa DeviceSetupManager kwa wakati wa kuingizwa.
 
-#### System Power Events
+#### Matukio ya Nguvu ya Mfumo
 
-EventID 6005 indicates system startup, while EventID 6006 marks shutdown.
+EventID 6005 inaonyesha kuanzishwa kwa mfumo, wakati EventID 6006 inaashiria kufungwa.
 
-#### Log Deletion
+#### Futa Marekodi
 
-Security EventID 1102 signals the deletion of logs, a critical event for forensic analysis.
+EventID ya Usalama 1102 inaashiria kufutwa kwa marekodi, tukio muhimu kwa uchambuzi wa forensics.
 
 {{#include ../../../banners/hacktricks-training.md}}

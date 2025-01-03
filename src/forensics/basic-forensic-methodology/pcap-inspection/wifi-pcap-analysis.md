@@ -1,8 +1,8 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-# Check BSSIDs
+# Angalia BSSIDs
 
-When you receive a capture whose principal traffic is Wifi using WireShark you can start investigating all the SSIDs of the capture with _Wireless --> WLAN Traffic_:
+Unapopokea kukamata ambayo trafiki yake kuu ni Wifi ukitumia WireShark unaweza kuanza kuchunguza SSIDs zote za kukamata kwa kutumia _Wireless --> WLAN Traffic_:
 
 ![](<../../../images/image (424).png>)
 
@@ -10,31 +10,29 @@ When you receive a capture whose principal traffic is Wifi using WireShark you c
 
 ## Brute Force
 
-One of the columns of that screen indicates if **any authentication was found inside the pcap**. If that is the case you can try to Brute force it using `aircrack-ng`:
-
+Moja ya nguzo za skrini hiyo inaonyesha kama **uthibitisho wowote uligundulika ndani ya pcap**. Ikiwa ndivyo ilivyo unaweza kujaribu kuifanya Brute force kwa kutumia `aircrack-ng`:
 ```bash
 aircrack-ng -w pwds-file.txt -b <BSSID> file.pcap
 ```
+Kwa mfano, itapata WPA passphrase inayolinda PSK (pre shared-key), ambayo itahitajika kufungua trafiki baadaye.
 
-For example it will retrieve the WPA passphrase protecting a PSK (pre shared-key), that will be required to decrypt the trafic later.
+# Data katika Beacons / Channel ya Kando
 
-# Data in Beacons / Side Channel
+Ikiwa unashuku kwamba **data inavuja ndani ya beacons za mtandao wa Wifi** unaweza kuangalia beacons za mtandao kwa kutumia chujio kama ifuatavyo: `wlan contains <NAMEofNETWORK>`, au `wlan.ssid == "NAMEofNETWORK"` tafuta ndani ya pakiti zilizochujwa kwa nyuzi za kushangaza.
 
-If you suspect that **data is being leaked inside beacons of a Wifi network** you can check the beacons of the network using a filter like the following one: `wlan contains <NAMEofNETWORK>`, or `wlan.ssid == "NAMEofNETWORK"` search inside the filtered packets for suspicious strings.
+# Pata Anwani za MAC zisizojulikana katika Mtandao wa Wifi
 
-# Find Unknown MAC Addresses in A Wifi Network
-
-The following link will be useful to find the **machines sending data inside a Wifi Network**:
+Kiungo kinachofuata kitakuwa na manufaa kupata **mashine zinazotuma data ndani ya Mtandao wa Wifi**:
 
 - `((wlan.ta == e8:de:27:16:70:c9) && !(wlan.fc == 0x8000)) && !(wlan.fc.type_subtype == 0x0005) && !(wlan.fc.type_subtype ==0x0004) && !(wlan.addr==ff:ff:ff:ff:ff:ff) && wlan.fc.type==2`
 
-If you already know **MAC addresses you can remove them from the output** adding checks like this one: `&& !(wlan.addr==5c:51:88:31:a0:3b)`
+Ikiwa tayari unajua **anwani za MAC unaweza kuondoa hizo kutoka kwa matokeo** ukiongeza ukaguzi kama huu: `&& !(wlan.addr==5c:51:88:31:a0:3b)`
 
-Once you have detected **unknown MAC** addresses communicating inside the network you can use **filters** like the following one: `wlan.addr==<MAC address> && (ftp || http || ssh || telnet)` to filter its traffic. Note that ftp/http/ssh/telnet filters are useful if you have decrypted the traffic.
+Mara tu unapogundua **anwani za MAC zisizojulikana** zinazowasiliana ndani ya mtandao unaweza kutumia **vichujio** kama ifuatavyo: `wlan.addr==<MAC address> && (ftp || http || ssh || telnet)` kuchuja trafiki yake. Kumbuka kwamba vichujio vya ftp/http/ssh/telnet ni vya manufaa ikiwa umepata ufunguo wa trafiki.
 
-# Decrypt Traffic
+# Fungua Trafiki
 
-Edit --> Preferences --> Protocols --> IEEE 802.11--> Edit
+Hariri --> Mipendeleo --> Protokali --> IEEE 802.11--> Hariri
 
 ![](<../../../images/image (426).png>)
 

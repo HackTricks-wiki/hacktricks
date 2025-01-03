@@ -1,49 +1,37 @@
-# Memory dump analysis
+# Uchambuzi wa dump ya kumbukumbu
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
+## Anza
 
-[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
-
-{% embed url="https://www.rootedcon.com/" %}
-
-## Start
-
-Start **searching** for **malware** inside the pcap. Use the **tools** mentioned in [**Malware Analysis**](../malware-analysis.md).
+Anza **kutafuta** **malware** ndani ya pcap. Tumia **zana** zilizotajwa katika [**Uchambuzi wa Malware**](../malware-analysis.md).
 
 ## [Volatility](volatility-cheatsheet.md)
 
-**Volatility is the main open-source framework for memory dump analysis**. This Python tool analyzes dumps from external sources or VMware VMs, identifying data like processes and passwords based on the dump's OS profile. It's extensible with plugins, making it highly versatile for forensic investigations.
+**Volatility ni mfumo mkuu wa chanzo wazi kwa uchambuzi wa dump ya kumbukumbu**. Zana hii ya Python inachambua dumps kutoka vyanzo vya nje au VMware VMs, ikitambua data kama mchakato na nywila kulingana na profaili ya OS ya dump. Inaweza kupanuliwa kwa plugins, na kuifanya kuwa na matumizi mengi kwa uchunguzi wa kisheria.
 
-[**Find here a cheatsheet**](volatility-cheatsheet.md)
+[**Pata hapa cheatsheet**](volatility-cheatsheet.md)
 
-## Mini dump crash report
+## Ripoti ya ajali ya mini dump
 
-When the dump is small (just some KB, maybe a few MB) then it's probably a mini dump crash report and not a memory dump.
+Wakati dump ni ndogo (kama KB chache, labda MB chache) basi huenda ni ripoti ya ajali ya mini dump na sio dump ya kumbukumbu.
 
 ![](<../../../images/image (532).png>)
 
-If you have Visual Studio installed, you can open this file and bind some basic information like process name, architecture, exception info and modules being executed:
+Ikiwa una Visual Studio imewekwa, unaweza kufungua faili hii na kuunganisha taarifa za msingi kama jina la mchakato, usanifu, taarifa za makosa na moduli zinazotekelezwa:
 
 ![](<../../../images/image (263).png>)
 
-You can also load the exception and see the decompiled instructions
+Pia unaweza kupakia makosa na kuona maagizo yaliyotafsiriwa
 
 ![](<../../../images/image (142).png>)
 
 ![](<../../../images/image (610).png>)
 
-Anyway, Visual Studio isn't the best tool to perform an analysis of the depth of the dump.
+Hata hivyo, Visual Studio si zana bora kwa kufanya uchambuzi wa kina wa dump.
 
-You should **open** it using **IDA** or **Radare** to inspection it in **depth**.
+Unapaswa **kuifungua** kwa kutumia **IDA** au **Radare** ili kuikagua kwa **undani**.
 
 ​
-
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
-
-[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
-
-{% embed url="https://www.rootedcon.com/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}

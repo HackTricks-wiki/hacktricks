@@ -9,7 +9,7 @@ AppArmor ni **kuimarisha kernel iliyoundwa kupunguza rasilimali zinazopatikana k
 Kuna njia mbili za uendeshaji kwa wasifu wa AppArmor:
 
 - **Enforcement Mode**: Njia hii inatekeleza kwa nguvu sera zilizofafanuliwa ndani ya wasifu, ikizuia vitendo vinavyokiuka sera hizi na kuandika jaribio lolote la kuvunja sheria kupitia mifumo kama syslog au auditd.
-- **Complain Mode**: Tofauti na njia ya utekelezaji, njia ya malalamiko haizuia vitendo vinavyokwenda kinyume na sera za wasifu. Badala yake, inaandika jaribio hizi kama ukiukaji wa sera bila kutekeleza vizuizi.
+- **Complain Mode**: Tofauti na njia ya utekelezaji, njia ya malalamiko haisitishi vitendo vinavyokwenda kinyume na sera za wasifu. Badala yake, inaandika jaribio hizi kama ukiukaji wa sera bila kutekeleza vizuizi.
 
 ### Components of AppArmor
 
@@ -38,7 +38,7 @@ aa-mergeprof  #used to merge the policies
 ## Kuunda wasifu
 
 - Ili kuonyesha executable iliyoathirika, **njia za moja kwa moja na wildcards** zinakubaliwa (kwa ajili ya kufafanua faili).
-- Kuonyesha ufikiaji ambao binary itakuwa nao juu ya **faili**, **udhibiti wa ufikiaji** zifuatazo zinaweza kutumika:
+- Ili kuonyesha ufikiaji ambao binary itakuwa nao juu ya **faili**, **udhibiti wa ufikiaji** zifuatazo zinaweza kutumika:
 - **r** (kusoma)
 - **w** (kuandika)
 - **m** (ramani ya kumbukumbu kama executable)
@@ -53,7 +53,7 @@ aa-mergeprof  #used to merge the policies
 
 ### aa-genprof
 
-Ili kuanza kwa urahisi kuunda wasifu, apparmor inaweza kukusaidia. Inawezekana kufanya **apparmor ikague vitendo vilivyofanywa na binary kisha kukuruhusu uamue ni vitendo gani unataka kuruhusu au kukataa**.\
+Ili kuanza kwa urahisi kuunda wasifu, apparmor inaweza kukusaidia. Inawezekana kufanya **apparmor ikague vitendo vilivyofanywa na binary kisha kukuruhusu uamue ni vitendo vipi unavyotaka kuruhusu au kukataa**.\
 Unahitaji tu kukimbia:
 ```bash
 sudo aa-genprof /path/to/binary
@@ -69,7 +69,7 @@ Kisha, katika console ya kwanza bonyeza "**s**" na kisha katika vitendo vilivyor
 
 ### aa-easyprof
 
-Unaweza pia kuunda kiolezo cha wasifu wa apparmor wa binary kwa:
+Unaweza pia kuunda kiolezo cha wasifu wa apparmor wa binary kwa kutumia:
 ```bash
 sudo aa-easyprof /path/to/binary
 # vim:syntax=apparmor
@@ -103,7 +103,7 @@ sudo apparmor_parser -a /etc/apparmor.d/path.to.binary
 ```
 ### Kubadilisha wasifu kutoka kwa kumbukumbu
 
-Chombo kifuatacho kitaisoma kumbukumbu na kumuuliza mtumiaji kama anataka kuruhusu baadhi ya vitendo vilivyogunduliwa kuwa haramu:
+Zana ifuatayo itasoma kumbukumbu na kumuuliza mtumiaji kama anataka kuruhusu baadhi ya vitendo vilivyogunduliwa ambavyo ni marufuku:
 ```bash
 sudo aa-logprof
 ```
@@ -125,7 +125,7 @@ Mfano wa **AUDIT** na **DENIED** logs kutoka _/var/log/audit/audit.log_ ya execu
 type=AVC msg=audit(1610061880.392:286): apparmor="AUDIT" operation="getattr" profile="/bin/rcat" name="/dev/pts/1" pid=954 comm="service_bin" requested_mask="r" fsuid=1000 ouid=1000
 type=AVC msg=audit(1610061880.392:287): apparmor="DENIED" operation="open" profile="/bin/rcat" name="/etc/hosts" pid=954 comm="service_bin" requested_mask="r" denied_mask="r" fsuid=1000 ouid=0
 ```
-Unaweza pia kupata habari hii ukitumia:
+Unaweza pia kupata taarifa hii kwa kutumia:
 ```bash
 sudo aa-notify -s 1 -v
 Profile: /bin/service_bin
@@ -168,11 +168,11 @@ Kwa default **Apparmor docker-default profile** inatengenezwa kutoka [https://gi
 - **Upatikanaji** wa **mtandao** wote
 - **Hakuna uwezo** ulioelezwa (Hata hivyo, baadhi ya uwezo utaweza kuja kutokana na kuingiza sheria za msingi i.e. #include \<abstractions/base>)
 - **Kuandika** kwenye faili yoyote ya **/proc** **hakuruhusiwi**
-- **Madirisha**/**faili** mengine ya /**proc** na /**sys** yanakataliwa upatikanaji wa kusoma/kuandika/kufunga/kuunganisha/kutekeleza
+- **Madirisha**/**faili** mengine ya /**proc** na /**sys** **yanakataliwa** upatikanaji wa kusoma/kuandika/kufunga/kuunganisha/kutekeleza
 - **Kuweka** **hakuruhusiwi**
 - **Ptrace** inaweza kuendeshwa tu kwenye mchakato ambao umekandamizwa na **profil ya apparmor** sawa
 
-Mara tu unapofanya **kazi na docker container** unapaswa kuona matokeo yafuatayo:
+Mara tu unapofanya **kazi na kontena la docker** unapaswa kuona matokeo yafuatayo:
 ```bash
 1 processes are in enforce mode.
 docker-default (825)
@@ -187,7 +187,7 @@ Unahitaji **kuondoa apparmor** ili kupita vizuizi vyake:
 ```bash
 docker run -it --cap-add SYS_ADMIN --security-opt seccomp=unconfined --security-opt apparmor=unconfined ubuntu /bin/bash
 ```
-Kumbuka kwamba kwa kawaida **AppArmor** pia **itakataza kontena kuunganisha** folda kutoka ndani hata ikiwa na uwezo wa SYS_ADMIN.
+Kumbuka kwamba kwa kawaida **AppArmor** pia **itakataza kontena kuunganisha** folda kutoka ndani hata na uwezo wa SYS_ADMIN.
 
 Kumbuka kwamba unaweza **kuongeza/kuondoa** **uwezo** kwa kontena la docker (hii bado itakuwa na mipaka kutokana na mbinu za ulinzi kama **AppArmor** na **Seccomp**):
 
@@ -196,13 +196,13 @@ Kumbuka kwamba unaweza **kuongeza/kuondoa** **uwezo** kwa kontena la docker (hii
 - `--cap-drop=ALL --cap-add=SYS_PTRACE` ondoa uwezo wote na toa tu `SYS_PTRACE`
 
 > [!NOTE]
-> Kwa kawaida, unapogundua kuwa una **uwezo wa kipaumbele** uliopatikana **ndani** ya **kontena** la **docker** **lakini** sehemu fulani ya **kuvamia haifanyi kazi**, hii itakuwa kwa sababu docker **apparmor itakuwa inazuia**.
+> Kwa kawaida, unapokuwa **unapata** kwamba una **uwezo wa kipaumbele** upatikanaji **ndani** ya **kontena** la **docker** **lakini** sehemu fulani ya **exploit haifanyi kazi**, hii itakuwa kwa sababu docker **apparmor itakuwa inazuia**.
 
 ### Mfano
 
 (Mfano kutoka [**hapa**](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-2docker-engine/))
 
-Ili kuonyesha kazi za AppArmor, niliumba profaili mpya ya Docker "mydocker" na mstari ufuatao umeongezwa:
+Ili kuonyesha kazi ya AppArmor, niliumba profaili mpya ya Docker "mydocker" na mstari ufuatao umeongezwa:
 ```
 deny /etc/* w,   # deny write for all files directly in /etc (not in a subdir)
 ```
@@ -228,7 +228,7 @@ docker inspect 9d622d73a614 | grep lowpriv
 "AppArmorProfile": "lowpriv",
 "apparmor=lowpriv"
 ```
-Kisha, unaweza kukimbia mstari ufuatao ili **kupata wasifu sahihi unaotumika**:
+Kisha, unaweza kukimbia mstari ufuatao ili **kupata wasifu halisi unaotumika**:
 ```bash
 find /etc/apparmor.d/ -name "*lowpriv*" -maxdepth 1 2>/dev/null
 ```
@@ -236,11 +236,11 @@ Katika hali ya ajabu unaweza **kubadilisha profaili ya apparmor docker na kuipak
 
 ### AppArmor Docker Bypass2
 
-**AppArmor ni ya msingi wa njia**, hii inamaanisha kwamba hata kama inaweza kuwa **inalinda** faili ndani ya directory kama **`/proc`** ikiwa unaweza **kuweka jinsi kontena litakavyokuwa linaendeshwa**, unaweza **kuunganisha** directory ya proc ya mwenyeji ndani ya **`/host/proc`** na haitakuwa **inalindwa na AppArmor tena**.
+**AppArmor ni msingi wa njia**, hii inamaanisha kwamba hata kama inaweza kuwa **inalinda** faili ndani ya directory kama **`/proc`** ikiwa unaweza **kuweka jinsi kontena litakavyokuwa linaendeshwa**, unaweza **kuunganisha** directory ya proc ya mwenyeji ndani ya **`/host/proc`** na haitakuwa **inalindwa na AppArmor tena**.
 
 ### AppArmor Shebang Bypass
 
-Katika [**bug hii**](https://bugs.launchpad.net/apparmor/+bug/1911431) unaweza kuona mfano wa jinsi **hata kama unazuia perl kuendeshwa na rasilimali fulani**, ikiwa tu unaunda script ya shell **ukitaja** katika mstari wa kwanza **`#!/usr/bin/perl`** na unafanya **kufanya faili moja kwa moja**, utaweza kutekeleza chochote unachotaka. Mfano:
+Katika [**bug hii**](https://bugs.launchpad.net/apparmor/+bug/1911431) unaweza kuona mfano wa jinsi **hata kama unazuia perl kuendeshwa na rasilimali fulani**, ikiwa tu unaunda script ya shell **ukitaja** katika mstari wa kwanza **`#!/usr/bin/perl`** na un **atekeleza faili moja kwa moja**, utaweza kutekeleza chochote unachotaka. Mfano:
 ```perl
 echo '#!/usr/bin/perl
 use POSIX qw(strftime);

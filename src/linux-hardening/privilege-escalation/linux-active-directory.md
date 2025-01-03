@@ -49,9 +49,9 @@ krb5cc_1000
 # Prepare to use it
 export KRB5CCNAME=/tmp/krb5cc_1000
 ```
-### CCACHE ticket reuse from keyring
+### CCACHE tiketi matumizi kutoka kwenye keyring
 
-**Tiketi za Kerberos zilizohifadhiwa katika kumbukumbu ya mchakato zinaweza kutolewa**, hasa wakati ulinzi wa ptrace wa mashine umezimwa (`/proc/sys/kernel/yama/ptrace_scope`). Chombo chenye manufaa kwa kusudi hili kinapatikana kwenye [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey), ambacho kinasaidia kutoa tiketi kwa kuingiza katika vikao na kutupa tiketi kwenye `/tmp`.
+**Tiketi za Kerberos zilizohifadhiwa katika kumbukumbu ya mchakato zinaweza kutolewa**, hasa wakati ulinzi wa ptrace wa mashine umezimwa (`/proc/sys/kernel/yama/ptrace_scope`). Chombo chenye manufaa kwa kusudi hili kinapatikana kwenye [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey), ambacho kinasaidia kutoa tiketi kwa kuingiza kwenye vikao na kutupa tiketi kwenye `/tmp`.
 
 Ili kuunda na kutumia chombo hiki, hatua zilizo hapa chini zinafuatwa:
 ```bash
@@ -71,9 +71,9 @@ Kuita \*\*`SSSDKCMExtractor` \*\* na vigezo --database na --key vitachambua hifa
 git clone https://github.com/fireeye/SSSDKCMExtractor
 python3 SSSDKCMExtractor.py --database secrets.ldb --key secrets.mkey
 ```
-**Kikundi cha akiba ya sifa za Kerberos kinaweza kubadilishwa kuwa faili ya Kerberos CCache inayoweza kutumika** ambayo inaweza kupitishwa kwa Mimikatz/Rubeus.
+**Kikasha cha akiba ya sifa za Kerberos kinaweza kubadilishwa kuwa faili ya Kerberos CCache inayoweza kutumika** ambayo inaweza kupitishwa kwa Mimikatz/Rubeus.
 
-### Urejeleaji wa tiketi ya CCACHE kutoka kwa keytab
+### Urejeleaji wa tiketi za CCACHE kutoka kwa keytab
 ```bash
 git clone https://github.com/its-a-feature/KeytabParser
 python KeytabParser.py /etc/krb5.keytab
@@ -88,7 +88,7 @@ Ili kukagua maudhui ya faili ya keytab, **`klist`** inaweza kutumika. Chombo hik
 klist.exe -t -K -e -k FILE:C:/Path/to/your/krb5.keytab
 # Output includes service principal details and the NT Hash
 ```
-Kwa watumiaji wa Linux, **`KeyTabExtract`** inatoa kazi ya kutoa hash ya RC4 HMAC, ambayo inaweza kutumika kwa ajili ya matumizi ya kurudiwa kwa hash ya NTLM.
+Kwa watumiaji wa Linux, **`KeyTabExtract`** inatoa kazi ya kutoa hash ya RC4 HMAC, ambayo inaweza kutumika kwa ajili ya matumizi tena ya hash ya NTLM.
 ```bash
 python3 keytabextract.py krb5.keytab
 # Expected output varies based on hash availability

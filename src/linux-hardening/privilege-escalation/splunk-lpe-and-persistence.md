@@ -19,13 +19,13 @@ Ulaghai unaolenga Agent wa Splunk Universal Forwarder (UF) unaruhusu washambulia
 
 - Agent wa UF hauhakiki muunganisho unaokuja au uhalali wa msimbo, hivyo unakuwa hatarini kwa utekelezaji wa msimbo usioidhinishwa.
 - Njia za kawaida za kupata nenosiri ni pamoja na kuzitafuta kwenye directories za mtandao, kushiriki faili, au nyaraka za ndani.
-- Ulaghai uliofanikiwa unaweza kusababisha ufikiaji wa kiwango cha SYSTEM au root kwenye mwenyeji walioathirika, kuhamasisha data, na kuingia zaidi kwenye mtandao.
+- Ulaghai uliofanikiwa unaweza kusababisha ufikiaji wa kiwango cha SYSTEM au root kwenye wenyeji walioathirika, uhamasishaji wa data, na kuingia zaidi kwenye mtandao.
 
 **Utekelezaji wa Ulaghai:**
 
 1. Mshambuliaji anapata nenosiri la agent wa UF.
 2. Anatumia API ya Splunk kutuma amri au skripti kwa mawakala.
-3. Vitendo vinavyowezekana ni pamoja na uchimbaji wa faili, usimamizi wa akaunti za mtumiaji, na kuathiri mfumo.
+3. Vitendo vinavyowezekana ni pamoja na uchimbaji wa faili, usimamizi wa akaunti za watumiaji, na kuathiri mfumo.
 
 **Athari:**
 

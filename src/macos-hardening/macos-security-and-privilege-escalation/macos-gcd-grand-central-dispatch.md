@@ -4,19 +4,19 @@
 
 ## Basic Information
 
-**Grand Central Dispatch (GCD),** pia inajulikana kama **libdispatch** (`libdispatch.dyld`), inapatikana katika macOS na iOS. Ni teknolojia iliyotengenezwa na Apple kuboresha msaada wa programu kwa utekelezaji wa sambamba (multithreaded) kwenye vifaa vya multicore.
+**Grand Central Dispatch (GCD),** pia inajulikana kama **libdispatch** (`libdispatch.dyld`), inapatikana katika macOS na iOS. Ni teknolojia iliyotengenezwa na Apple kuboresha msaada wa programu kwa ajili ya utekelezaji wa sambamba (multithreaded) kwenye vifaa vya multicore.
 
 **GCD** inatoa na kusimamia **FIFO queues** ambazo programu yako inaweza **kuwasilisha kazi** katika mfumo wa **block objects**. Blocks zilizowasilishwa kwa dispatch queues zina **tekelezwa kwenye mchanganyiko wa nyuzi** zinazodhibitiwa kikamilifu na mfumo. GCD kiotomatiki huunda nyuzi za kutekeleza kazi katika dispatch queues na kupanga kazi hizo zitekelezwe kwenye cores zinazopatikana.
 
 > [!TIP]
-> Kwa muhtasari, ili kutekeleza msimbo kwa **sambamba**, michakato inaweza kutuma **blocks za msimbo kwa GCD**, ambayo itashughulikia utekelezaji wao. Hivyo, michakato haisababisha nyuzi mpya; **GCD inatekeleza msimbo uliotolewa kwa mchanganyiko wake wa nyuzi** (ambayo inaweza kuongezeka au kupungua kadri inavyohitajika).
+> Kwa muhtasari, ili kutekeleza msimbo kwa **sambamba**, michakato inaweza kutuma **blocks za msimbo kwa GCD**, ambayo itashughulikia utekelezaji wao. Hivyo, michakato haisababisha nyuzi mpya; **GCD inatekeleza msimbo uliopewa kwa mchanganyiko wake wa nyuzi** (ambayo inaweza kuongezeka au kupungua kadri inavyohitajika).
 
 Hii ni muhimu sana kusimamia utekelezaji wa sambamba kwa mafanikio, ikipunguza kwa kiasi kikubwa idadi ya nyuzi ambazo michakato inaunda na kuboresha utekelezaji wa sambamba. Hii ni bora kwa kazi zinazohitaji **paralelism mkubwa** (brute-forcing?) au kwa kazi ambazo hazipaswi kuzuia nyuzi kuu: Kwa mfano, nyuzi kuu kwenye iOS inashughulikia mwingiliano wa UI, hivyo kazi nyingine yoyote ambayo inaweza kufanya programu ikang'ang'ane (kutafuta, kufikia wavuti, kusoma faili...) inasimamiwa kwa njia hii.
 
 ### Blocks
 
 Block ni **sehemu ya msimbo iliyo na uhuru** (kama kazi yenye hoja inayorejesha thamani) na inaweza pia kubainisha mabadiliko yaliyofungwa.\
-Hata hivyo, katika ngazi ya kompyuta blocks hazipo, ni `os_object`s. Kila moja ya hizi ni muundo wa miundo miwili:
+Hata hivyo, katika kiwango cha kompyuta blocks hazipo, ni `os_object`s. Kila moja ya vitu hivi inaundwa na muundo miwili:
 
 - **block literal**:&#x20;
 - Inaanza na **`isa`** uwanja, ikielekeza kwenye darasa la block:
@@ -26,7 +26,7 @@ Hata hivyo, katika ngazi ya kompyuta blocks hazipo, ni `os_object`s. Kila moja y
 - Ina **`flags`** (zinazoonyesha maeneo yaliyopo katika block descriptor) na baadhi ya bytes zilizohifadhiwa
 - Pointer ya kazi ya kuita
 - Pointer kwa block descriptor
-- Mabadiliko yaliyopitishwa kwenye block (ikiwa yapo)
+- Mabadiliko yaliyopatikana ya block (ikiwa yapo)
 - **block descriptor**: Ukubwa wake unategemea data iliyopo (kama ilivyoonyeshwa katika flags zilizopita)
 - Ina baadhi ya bytes zilizohifadhiwa
 - Ukubwa wake
@@ -35,9 +35,9 @@ Hata hivyo, katika ngazi ya kompyuta blocks hazipo, ni `os_object`s. Kila moja y
 
 ### Queues
 
-Dispatch queue ni kitu chenye jina kinachotoa mpangilio wa FIFO wa blocks kwa utekelezaji.
+Dispatch queue ni kitu chenye jina kinachotoa mpangilio wa FIFO wa blocks kwa ajili ya utekelezaji.
 
-Blocks huwekwa katika queues ili kutekelezwa, na hizi zinasaidia njia 2: `DISPATCH_QUEUE_SERIAL` na `DISPATCH_QUEUE_CONCURRENT`. Bila shaka **serial** moja **haitakuwa na matatizo ya hali ya mashindano** kwani block haitatekelezwa hadi ile ya awali ikamilike. Lakini **aina nyingine ya queue inaweza kuwa nayo**.
+Blocks huwekwa katika queues ili kutekelezwa, na hizi zinasaidia njia 2: `DISPATCH_QUEUE_SERIAL` na `DISPATCH_QUEUE_CONCURRENT`. Bila shaka **serial** moja **haitakuwa na matatizo ya hali ya mashindano** kwani block haitatekelezwa mpaka ile ya awali ikamilike. Lakini **aina nyingine ya queue inaweza kuwa nayo**.
 
 Queues za kawaida:
 
@@ -73,14 +73,14 @@ Kuna vitu vingi ambavyo libdispatch inatumia na queues na blocks ni 2 tu kati ya
 - `io`: Maombi ya Async I/O
 - `mach`: Mach ports
 - `mach_msg`: Mach messages
-- `pthread_root_queue`: Queue yenye mchanganyiko wa nyuzi za pthread na si workqueues
+- `pthread_root_queue`: Queue yenye mchanganyiko wa nyuzi za pthread na sio workqueues
 - `queue`
 - `semaphore`
 - `source`: Chanzo cha tukio
 
 ## Objective-C
 
-Katika Objetive-C kuna kazi tofauti za kutuma block kutekelezwa kwa sambamba:
+Katika Objetive-C kuna kazi tofauti za kutuma block ili kutekelezwa kwa sambamba:
 
 - [**dispatch_async**](https://developer.apple.com/documentation/dispatch/1453057-dispatch_async): Inawasilisha block kwa utekelezaji wa asynchronous kwenye dispatch queue na inarudi mara moja.
 - [**dispatch_sync**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync): Inawasilisha block object kwa utekelezaji na inarudi baada ya block hiyo kumaliza kutekelezwa.

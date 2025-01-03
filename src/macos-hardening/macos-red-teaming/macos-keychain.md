@@ -21,7 +21,7 @@ Faili hizi, ingawa hazina ulinzi wa ndani na zinaweza **kupakuliwa**, zimefungwa
 Kila kipengele katika keychain kinatawaliwa na **Access Control Lists (ACLs)** ambazo zinaelekeza nani anaweza kufanya vitendo mbalimbali kwenye kipengele cha keychain, ikiwa ni pamoja na:
 
 - **ACLAuhtorizationExportClear**: Inaruhusu mwenyewe kupata maandiko ya siri.
-- **ACLAuhtorizationExportWrapped**: Inaruhusu mwenyewe kupata maandiko ya siri yaliyofungwa kwa nywila nyingine iliyotolewa.
+- **ACLAuhtorizationExportWrapped**: Inaruhusu mwenyewe kupata maandiko ya siri yaliyofichwa kwa nywila nyingine iliyotolewa.
 - **ACLAuhtorizationAny**: Inaruhusu mwenyewe kufanya kitendo chochote.
 
 ACLs zinakuja na **orodha ya programu zinazotegemewa** ambazo zinaweza kufanya vitendo hivi bila kuombwa. Hii inaweza kuwa:
@@ -40,7 +40,7 @@ Pia kipengele kinaweza kuwa na funguo **`ACLAuthorizationPartitionID`,** ambayo 
 
 Wakati **kipengele kipya** kinaundwa kwa kutumia **`Keychain Access.app`**, sheria zifuatazo zinatumika:
 
-- Programu zote zinaweza kufunga.
+- Programu zote zinaweza kuficha.
 - **Hakuna programu** zinaweza kusafirisha/kufungua (bila kuombwa mtumiaji).
 - Programu zote zinaweza kuona ukaguzi wa uaminifu.
 - Hakuna programu zinaweza kubadilisha ACLs.
@@ -48,7 +48,7 @@ Wakati **kipengele kipya** kinaundwa kwa kutumia **`Keychain Access.app`**, sher
 
 Wakati **programu inaunda kipengele katika keychain**, sheria ni tofauti kidogo:
 
-- Programu zote zinaweza kufunga.
+- Programu zote zinaweza kuficha.
 - Ni **programu inayounda** tu (au programu nyingine yoyote iliyoongezwa wazi) zinaweza kusafirisha/kufungua (bila kuombwa mtumiaji).
 - Programu zote zinaweza kuona ukaguzi wa uaminifu.
 - Hakuna programu zinaweza kubadilisha ACLs.
@@ -108,22 +108,22 @@ Na hizi ndizo **mahitaji** ya kuwa na uwezo wa **kusafirisha siri bila kiashiria
 - Ikiwa **1+ maombi ya kuaminika** yameorodheshwa:
 - Inahitaji **idhini** sahihi (**`Nil`**, au kuwa **sehemu** ya orodha inayoruhusiwa ya maombi katika idhini ya kufikia info ya siri)
 - Inahitaji saini ya msimbo kuendana na **PartitionID**
-- Inahitaji saini ya msimbo kuendana na ile ya **programu moja ya kuaminika** (au kuwa mwanachama wa Kundi la KeychainAccess sahihi)
+- Inahitaji saini ya msimbo kuendana na ile ya **programu moja ya kuaminika** (au kuwa mwanachama wa kundi sahihi la KeychainAccessGroup)
 - Ikiwa **maombi yote ni ya kuaminika**:
 - Inahitaji **idhini** sahihi
 - Inahitaji saini ya msimbo kuendana na **PartitionID**
 - Ikiwa **hakuna PartitionID**, basi hii haitahitajika
 
 > [!CAUTION]
-> Kwa hivyo, ikiwa kuna **1 programu iliyoorodheshwa**, unahitaji **kuingiza msimbo katika programu hiyo**.
+> Hivyo, ikiwa kuna **1 programu iliyoorodheshwa**, unahitaji **kuingiza msimbo katika programu hiyo**.
 >
-> Ikiwa **apple** inaonyeshwa katika **partitionID**, unaweza kuipata kwa kutumia **`osascript`** hivyo chochote kinachotegemea maombi yote na apple katika partitionID. **`Python`** inaweza pia kutumika kwa hili.
+> Ikiwa **apple** inaonyeshwa katika **partitionID**, unaweza kuipata kwa kutumia **`osascript`** hivyo chochote kinachounga mkono maombi yote na apple katika partitionID. **`Python`** inaweza pia kutumika kwa hili.
 
 ### Sifa mbili za ziada
 
 - **Invisible**: Ni bendera ya boolean ili **kuficha** kiingilio kutoka kwa programu ya **UI** Keychain
 - **General**: Ni kuhifadhi **metadata** (hivyo SI IMESIMBWA)
-- Microsoft ilikuwa ikihifadhi katika maandiko yote ya wazi tokens za refresher ili kufikia kiwambo nyeti.
+- Microsoft ilikuwa ikihifadhi katika maandiko yote ya wazi tokens za refresher kufikia kiwambo nyeti.
 
 ## References
 

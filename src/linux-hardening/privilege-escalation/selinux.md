@@ -16,6 +16,6 @@ system_u:system_r:container_t:s0:c647,c780
 ```
 # Watumiaji wa SELinux
 
-Kuna watumiaji wa SELinux pamoja na watumiaji wa kawaida wa Linux. Watumiaji wa SELinux ni sehemu ya sera ya SELinux. Kila mtumiaji wa Linux ameunganishwa na mtumiaji wa SELinux kama sehemu ya sera. Hii inaruhusu watumiaji wa Linux kurithi vizuizi na sheria za usalama na mifumo iliyowekwa kwa watumiaji wa SELinux.
+Kuna watumiaji wa SELinux pamoja na watumiaji wa kawaida wa Linux. Watumiaji wa SELinux ni sehemu ya sera ya SELinux. Kila mtumiaji wa Linux ameunganishwa na mtumiaji wa SELinux kama sehemu ya sera hiyo. Hii inaruhusu watumiaji wa Linux kurithi vizuizi na sheria za usalama na mifumo iliyowekwa kwa watumiaji wa SELinux.
 
 {{#include ../../banners/hacktricks-training.md}}

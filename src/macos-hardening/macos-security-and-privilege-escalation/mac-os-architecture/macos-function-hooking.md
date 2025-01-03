@@ -6,7 +6,7 @@
 
 Unda **dylib** yenye sehemu ya **`__interpose`** (au sehemu iliyo na alama ya **`S_INTERPOSING`**) inayojumuisha tuples za **function pointers** zinazorejelea **asili** na **mbadala** za kazi.
 
-Kisha, **ingiza** dylib kwa kutumia **`DYLD_INSERT_LIBRARIES`** (kuingilia kunahitaji kutokea kabla ya programu kuu kupakia). Kwa wazi, [**vizuizi** vinavyotumika kwa matumizi ya **`DYLD_INSERT_LIBRARIES`** vinatumika hapa pia](../macos-proces-abuse/macos-library-injection/#check-restrictions).&#x20;
+Kisha, **ingiza** dylib kwa kutumia **`DYLD_INSERT_LIBRARIES`** (kuingilia kunahitaji kutokea kabla ya programu kuu kupakia). Kwa wazi, [**vizuizi** vilivyowekwa kwa matumizi ya **`DYLD_INSERT_LIBRARIES`** vinatumika hapa pia](../macos-proces-abuse/macos-library-injection/#check-restrictions).&#x20;
 
 ### Interpose printf
 
@@ -88,7 +88,7 @@ Kitu ni **`someObject`**, njia ni **`@selector(method1p1:p2:)`** na hoja ni **va
 Kufuata muundo wa vitu, inawezekana kufikia **array ya njia** ambapo **majina** na **viashiria** vya msimbo wa njia viko **pamoja**.
 
 > [!CAUTION]
-> Kumbuka kwamba kwa sababu njia na madarasa yanapata kwa msingi wa majina yao, taarifa hii inahifadhiwa katika binary, hivyo inawezekana kuipata kwa `otool -ov </path/bin>` au [`class-dump </path/bin>`](https://github.com/nygard/class-dump)
+> Kumbuka kwamba kwa sababu njia na madarasa yanaccessiwa kulingana na majina yao, taarifa hii inahifadhiwa katika binary, hivyo inawezekana kuipata kwa `otool -ov </path/bin>` au [`class-dump </path/bin>`](https://github.com/nygard/class-dump)
 
 ### Accessing the raw methods
 
@@ -158,7 +158,7 @@ NSLog(@"Uppercase string: %@", uppercaseString3);
 return 0;
 }
 ```
-### Method Swizzling na method_exchangeImplementations
+### Method Swizzling with method_exchangeImplementations
 
 Kazi **`method_exchangeImplementations`** inaruhusu **kubadilisha** **anwani** ya **utekelezaji** wa **kazi moja kwa nyingine**.
 
@@ -208,7 +208,7 @@ return 0;
 }
 ```
 > [!WARNING]
-> Katika kesi hii ikiwa **kanuni ya utekelezaji ya halali** inachunguza **jina la mbinu** inaweza **gundua** hii swizzling na kuzuia isifanye kazi.
+> Katika kesi hii ikiwa **kanuni ya utekelezaji ya halali** inachunguza **jina la mbinu** inaweza **kubaini** hii swizzling na kuzuia isifanye kazi.
 >
 > Mbinu ifuatayo haina kizuizi hiki.
 
@@ -276,7 +276,7 @@ Ili kufanya hivyo, mbinu rahisi zaidi ya kutumia ni kuingiza [Dyld kupitia mabad
 
 Hata hivyo, chaguo zote mbili ni **za mipaka** kwa **binaries/mchakato zisizo na ulinzi**. Angalia kila mbinu ili kujifunza zaidi kuhusu mipaka.
 
-Hata hivyo, shambulio la kuhooki kazi ni maalum sana, mshambuliaji atafanya hivi ili **kuiba taarifa nyeti kutoka ndani ya mchakato** (ikiwa sivyo ungeweza tu kufanya shambulio la kuingiza mchakato). Na taarifa hii nyeti inaweza kuwa katika programu zilizopakuliwa na mtumiaji kama MacPass.
+Hata hivyo, shambulio la kuhooki kazi ni maalum sana, mshambuliaji atafanya hivi ili **kuiba taarifa nyeti kutoka ndani ya mchakato** (ikiwa sivyo ungehitaji tu kufanya shambulio la kuingiza mchakato). Na taarifa hii nyeti inaweza kuwa katika programu zilizopakuliwa na mtumiaji kama MacPass.
 
 Hivyo, njia ya mshambuliaji itakuwa ama kupata udhaifu au kuondoa saini ya programu, kuingiza **`DYLD_INSERT_LIBRARIES`** env variable kupitia Info.plist ya programu kwa kuongeza kitu kama:
 ```xml
@@ -290,10 +290,10 @@ na kisha **re-register** programu hiyo:
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f /Applications/Application.app
 ```
-Ongeza katika maktaba hiyo msimbo wa hooking ili kuhamasisha taarifa: Nywila, ujumbe...
+Ongeza katika maktaba hiyo msimbo wa hooking ili kutoa taarifa: Nywila, ujumbe...
 
 > [!CAUTION]
-> Kumbuka kwamba katika matoleo mapya ya macOS ikiwa **unafuta saini** ya binary ya programu na ilikuwa imefanywa awali, macOS **haitakuwa ikitekeleza programu** tena.
+> Kumbuka kwamba katika matoleo mapya ya macOS ikiwa **unafuta saini** ya binary ya programu na ilitekelezwa hapo awali, macOS **haitatekeleza programu hiyo** tena.
 
 #### Mfano wa maktaba
 ```objectivec

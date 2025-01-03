@@ -39,7 +39,7 @@ docker run -it -v /:/host/ --cap-add=ALL --security-opt apparmor=unconfined --se
 Docker daemon inaweza pia [kusikiliza kwenye bandari (kwa kawaida 2375, 2376)](../../../../network-services-pentesting/2375-pentesting-docker.md) au kwenye mifumo ya Systemd, mawasiliano na Docker daemon yanaweza kufanyika kupitia socket ya Systemd `fd://`.
 
 > [!NOTE]
-> Zaidi ya hayo, zingatia sockets za wakati wa utekelezaji za runtimes nyingine za kiwango cha juu:
+> Zaidi ya hayo, zingatia sockets za wakati wa uendeshaji za runtimes nyingine za kiwango cha juu:
 >
 > - dockershim: `unix:///var/run/dockershim.sock`
 > - containerd: `unix:///run/containerd/containerd.sock`
@@ -52,7 +52,7 @@ Docker daemon inaweza pia [kusikiliza kwenye bandari (kwa kawaida 2375, 2376)](.
 
 Unapaswa kuangalia uwezo wa kontena, ikiwa ina mojawapo ya zifuatazo, huenda ukawa na uwezo wa kutoroka kutoka kwake: **`CAP_SYS_ADMIN`**_,_ **`CAP_SYS_PTRACE`**, **`CAP_SYS_MODULE`**, **`DAC_READ_SEARCH`**, **`DAC_OVERRIDE, CAP_SYS_RAWIO`, `CAP_SYSLOG`, `CAP_NET_RAW`, `CAP_NET_ADMIN`**
 
-Unaweza kuangalia uwezo wa kontena kwa sasa kwa kutumia **zana za kiotomatiki zilizotajwa hapo awali** au:
+Unaweza kuangalia uwezo wa sasa wa kontena kwa kutumia **zana za kiotomatiki zilizotajwa hapo awali** au:
 ```bash
 capsh --print
 ```
@@ -64,7 +64,7 @@ Katika ukurasa ufuatao unaweza **kujifunza zaidi kuhusu uwezo wa linux** na jins
 
 ## Kutoroka kutoka kwa Mifuko ya Kipekee
 
-Mifuko ya kipekee inaweza kuundwa kwa kutumia bendera `--privileged` au kuzima ulinzi maalum:
+Mifuko ya kipekee inaweza kuundwa kwa bendera `--privileged` au kuzima ulinzi maalum:
 
 - `--cap-add=ALL`
 - `--security-opt apparmor=unconfined`
@@ -76,7 +76,7 @@ Mifuko ya kipekee inaweza kuundwa kwa kutumia bendera `--privileged` au kuzima u
 - `--cgroupns=host`
 - `Mount /dev`
 
-Bendera `--privileged` inapunguza usalama wa mfuko kwa kiasi kikubwa, ikitoa **ufikiaji wa vifaa usio na kikomo** na kupita **ulinzi kadhaa**. Kwa maelezo ya kina, rejelea nyaraka kuhusu athari kamili za `--privileged`.
+Bendera `--privileged` inapunguza usalama wa mfuko kwa kiasi kikubwa, ikitoa **ufikiaji wa vifaa usio na kikomo** na kupita **ulinzi kadhaa**. Kwa ufafanuzi wa kina, rejelea nyaraka kuhusu athari kamili za `--privileged`.
 
 {{#ref}}
 ../docker-privileged.md
@@ -100,7 +100,7 @@ docker run --rm -it --privileged ubuntu bash
 ```
 #### Mounting Disk - Poc1
 
-Mikono ya docker iliyowekwa vizuri haitaruhusu amri kama **fdisk -l**. Hata hivyo, kwenye amri za docker zisizo na usanidi mzuri ambapo bendera `--privileged` au `--device=/dev/sda1` yenye herufi kubwa imewekwa, inawezekana kupata mamlaka ya kuona diski ya mwenyeji.
+Mikono ya docker iliyowekwa vizuri haitaruhusu amri kama **fdisk -l**. Hata hivyo, kwenye amri za docker zisizo na usahihi ambapo bendera `--privileged` au `--device=/dev/sda1` yenye herufi kubwa imewekwa, inawezekana kupata mamlaka ya kuona diski ya mwenyeji.
 
 ![](https://bestestredteam.com/content/images/2019/08/image-16.png)
 
@@ -109,11 +109,11 @@ Hivyo, kuchukua udhibiti wa mashine ya mwenyeji, ni rahisi:
 mkdir -p /mnt/hola
 mount /dev/sda1 /mnt/hola
 ```
-Na voilà! Sasa unaweza kufikia mfumo wa faili wa mwenyeji kwa sababu umewekwa katika folda ya `/mnt/hola`.
+Na voilà! Sasa unaweza kufikia mfumo wa faili wa mwenyeji kwa sababu umewekwa katika folda `/mnt/hola`.
 
 #### Kuunganisha Diski - Poc2
 
-Ndani ya kontena, mshambuliaji anaweza kujaribu kupata ufikiaji zaidi wa mfumo wa uendeshaji wa mwenyeji kupitia kiasi cha hostPath kinachoweza kuandikwa kilichoundwa na klasta. Hapa chini kuna mambo ya kawaida unayoweza kuangalia ndani ya kontena ili kuona kama unaweza kutumia njia hii ya mshambuliaji:
+Ndani ya kontena, mshambuliaji anaweza kujaribu kupata ufikiaji zaidi wa mfumo wa uendeshaji wa mwenyeji kupitia kiasi cha hostPath kinachoweza kuandikwa kilichoundwa na klasta. Hapa chini kuna mambo ya kawaida unayoweza kukagua ndani ya kontena ili kuona kama unaweza kutumia njia hii ya mshambuliaji:
 ```bash
 ### Check if You Can Write to a File-system
 echo 1 > /proc/sysrq-trigger
@@ -315,7 +315,7 @@ root        10     2  0 11:25 ?        00:00:00 [ksoftirqd/0]
 Kuna faili kadhaa ambazo zinaweza kuunganishwa ambazo zinatoa **habari kuhusu mwenyeji wa chini**. Baadhi yao wanaweza hata kuashiria **kitu kinachoweza kutekelezwa na mwenyeji wakati kitu kinatokea** (ambacho kitamruhusu mshambuliaji kutoroka kutoka kwenye kontena).\
 Kukandamiza faili hizi kunaweza kuruhusu:
 
-- release_agent (iliyoshughulikiwa tayari)
+- release_agent (tayari imejadiliwa hapo awali)
 - [binfmt_misc](sensitive-mounts.md#proc-sys-fs-binfmt_misc)
 - [core_pattern](sensitive-mounts.md#proc-sys-kernel-core_pattern)
 - [uevent_helper](sensitive-mounts.md#sys-kernel-uevent_helper)
@@ -347,9 +347,9 @@ bash -p #From non priv inside mounted folder
 ### Privilege Escalation with 2 shells
 
 Ikiwa una ufikiaji kama **root ndani ya kontena** na ume **kimbia kama mtumiaji asiye na mamlaka hadi kwenye mwenyeji**, unaweza kutumia shell zote mbili ili **privesc ndani ya mwenyeji** ikiwa una uwezo wa MKNOD ndani ya kontena (ni kwa default) kama [**ilivyoelezwa katika chapisho hili**](https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/).\
-Kwa uwezo kama huo, mtumiaji wa root ndani ya kontena anaruhusiwa **kuunda faili za kifaa cha block**. Faili za kifaa ni faili maalum ambazo zinatumika ili **kufikia vifaa vya chini na moduli za kernel**. Kwa mfano, faili ya kifaa cha block /dev/sda inatoa ufikiaji wa **kusoma data safi kwenye diski ya mfumo**.
+Kwa uwezo huo mtumiaji wa root ndani ya kontena anaruhusiwa **kuunda faili za kifaa cha block**. Faili za kifaa ni faili maalum zinazotumika ili **kufikia vifaa vya chini na moduli za kernel**. Kwa mfano, faili ya kifaa cha block /dev/sda inatoa ufikiaji wa **kusoma data safi kwenye diski za mifumo**.
 
-Docker inalinda dhidi ya matumizi mabaya ya kifaa cha block ndani ya kontena kwa kutekeleza sera ya cgroup ambayo **inasitisha operesheni za kusoma/kandika kifaa cha block**. Hata hivyo, ikiwa kifaa cha block **kimeundwa ndani ya kontena**, kinapatikana kutoka nje ya kontena kupitia **/proc/PID/root/** directory. Ufikiaji huu unahitaji **mmiliki wa mchakato kuwa sawa** ndani na nje ya kontena.
+Docker inalinda dhidi ya matumizi mabaya ya faili za kifaa cha block ndani ya kontena kwa kutekeleza sera ya cgroup ambayo **inasitisha operesheni za kusoma/kandika faili za kifaa cha block**. Hata hivyo, ikiwa faili ya kifaa cha block **imeundwa ndani ya kontena**, inakuwa inapatikana kutoka nje ya kontena kupitia **/proc/PID/root/** directory. Ufikiaji huu unahitaji **mmiliki wa mchakato kuwa sawa** ndani na nje ya kontena.
 
 **Mfano wa Ukatili** kutoka kwenye [**andika hii**](https://radboudinstituteof.pwning.nl/posts/htbunictfquals2021/goodgames/):
 ```bash
@@ -395,7 +395,7 @@ docker run --rm -it --pid=host ubuntu bash
 ```
 Kwa mfano, utaweza kuorodhesha michakato ukitumia kitu kama `ps auxn` na kutafuta maelezo nyeti katika amri.
 
-Kisha, kwa sababu unaweza **kufikia kila mchakato wa mwenyeji katika /proc/ unaweza tu kuiba siri zao za env** ukikimbia:
+Kisha, kwa kuwa unaweza **kufikia kila mchakato wa mwenyeji katika /proc/ unaweza tu kuiba siri zao za env** ukikimbia:
 ```bash
 for e in `ls /proc/*/environ`; do echo; echo $e; xargs -0 -L1 -a $e; done
 /proc/988058/environ
@@ -404,7 +404,7 @@ HOSTNAME=argocd-server-69678b4f65-6mmql
 USER=abrgocd
 ...
 ```
-Unaweza pia **kufikia viashiria vya faili vya michakato mingine na kusoma faili zao zilizofunguliwa**:
+Unaweza pia **kufikia viashiria vya faili vya michakato mingine na kusoma faili zao zilizo wazi**:
 ```bash
 for fd in `find /proc/*/fd`; do ls -al $fd/* 2>/dev/null | grep \>; done > fds.txt
 less fds.txt
@@ -423,9 +423,9 @@ Unaweza pia **kuua michakato na kusababisha DoS**.
 ```
 docker run --rm -it --network=host ubuntu bash
 ```
-Ikiwa kontena ilikamilishwa na Docker [host networking driver (`--network=host`)](https://docs.docker.com/network/host/), stack ya mtandao ya kontena hiyo haijatengwa kutoka kwa mwenyeji wa Docker (kontena inashiriki namespace ya mtandao wa mwenyeji), na kontena hiyo haipati anwani yake ya IP. Kwa maneno mengine, **kontena inafunga huduma zote moja kwa moja kwenye IP ya mwenyeji**. Zaidi ya hayo, kontena inaweza **kuchukua TRAFIKI YOTE ya mtandao ambayo mwenyeji** anatumia na kupokea kwenye interface iliyoshirikiwa `tcpdump -i eth0`.
+Ikiwa kontena ilikamilishwa na dereva wa mtandao wa Docker [host networking driver (`--network=host`)](https://docs.docker.com/network/host/), stack ya mtandao ya kontena hiyo haijajitenga na mwenyeji wa Docker (kontena inashiriki namespace ya mtandao wa mwenyeji), na kontena hiyo haipati anwani yake ya IP. Kwa maneno mengine, **kontena inafunga huduma zote moja kwa moja kwenye IP ya mwenyeji**. Zaidi ya hayo, kontena inaweza **kuchukua na hata kubadilisha trafiki ZOTE za mtandao ambazo mwenyeji** anatumia na kupokea kwenye interface iliyoshirikiwa `tcpdump -i eth0`.
 
-Kwa mfano, unaweza kutumia hii **kunusa na hata kudanganya trafiki** kati ya mwenyeji na mfano wa metadata.
+Kwa mfano, unaweza kutumia hii **kunusa na hata kubadilisha trafiki** kati ya mwenyeji na mfano wa metadata.
 
 Kama katika mifano ifuatayo:
 
@@ -438,7 +438,7 @@ Utakuwa na uwezo pia wa kufikia **huduma za mtandao zilizofungwa kwa localhost**
 ```bash
 docker run --rm -it --ipc=host ubuntu bash
 ```
-Na `hostIPC=true`, unapata ufikiaji wa rasilimali za mawasiliano kati ya michakato ya mwenyeji (IPC), kama vile **kumbukumbu ya pamoja** katika `/dev/shm`. Hii inaruhusu kusoma/kandika ambapo rasilimali hizo za IPC zinatumika na michakato mingine ya mwenyeji au pod. Tumia `ipcs` kuchunguza mbinu hizi za IPC zaidi.
+Kwa `hostIPC=true`, unapata ufikiaji wa rasilimali za mawasiliano kati ya michakato ya mwenyeji (IPC), kama vile **kumbukumbu ya pamoja** katika `/dev/shm`. Hii inaruhusu kusoma/kandika ambapo rasilimali hizo za IPC zinatumika na michakato mingine ya mwenyeji au pod. Tumia `ipcs` kuchunguza mbinu hizi za IPC zaidi.
 
 - **Chunguza /dev/shm** - Angalia faili zozote katika eneo hili la kumbukumbu ya pamoja: `ls -la /dev/shm`
 - **Chunguza vifaa vya IPC vilivyopo** – Unaweza kuangalia kama vifaa vyovyote vya IPC vinatumika kwa `/usr/bin/ipcs`. Angalia kwa: `ipcs -a`
@@ -459,7 +459,7 @@ Tekniki ya pili iliyoelezwa katika chapisho [https://labs.withsecure.com/blog/ab
 
 ### Runc exploit (CVE-2019-5736)
 
-Iwapo unaweza kutekeleza `docker exec` kama root (labda kwa kutumia sudo), jaribu kupandisha haki kwa kutoroka kutoka kwenye kontena kwa kutumia CVE-2019-5736 (exploit [hapa](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)). Tekni hii kwa msingi it **andika upya** _**/bin/sh**_ binary ya **mwenyeji** **kutoka kwenye kontena**, hivyo mtu yeyote anayetekeleza docker exec anaweza kuanzisha payload.
+Iwapo unaweza kutekeleza `docker exec` kama root (labda kwa sudo), jaribu kupandisha haki kwa kutoroka kutoka kwenye kontena kwa kutumia CVE-2019-5736 (exploit [hapa](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)). Tekni hii kimsingi it **andika upya** _**/bin/sh**_ binary ya **mwenyeji** **kutoka kwenye kontena**, hivyo mtu yeyote anayetekeleza docker exec anaweza kuanzisha payload.
 
 Badilisha payload ipasavyo na jenga main.go kwa `go build main.go`. Binary inayotokana inapaswa kuwekwa kwenye kontena la docker kwa ajili ya utekelezaji.\
 Pale inapoanzishwa, mara tu inapoonyesha `[+] Overwritten /bin/sh successfully` unahitaji kutekeleza yafuatayo kutoka kwenye mashine ya mwenyeji:
@@ -477,8 +477,8 @@ Kwa maelezo zaidi: [https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-fr
 
 ### Uso wa Kutoroka wa Docker
 
-- **Namespaces:** Mchakato unapaswa kuwa **separate kabisa kutoka kwa michakato mingine** kupitia namespaces, hivyo hatuwezi kutoroka kwa kuingiliana na procs wengine kutokana na namespaces (kwa default haiwezi kuwasiliana kupitia IPCs, unix sockets, huduma za mtandao, D-Bus, `/proc` za procs wengine).
-- **Mtumiaji wa Root**: Kwa default mtumiaji anayekimbia mchakato ni mtumiaji wa root (hata hivyo haki zake zimepunguzika).
+- **Namespaces:** Mchakato unapaswa kuwa **separate kabisa kutoka kwa michakato mingine** kupitia namespaces, hivyo hatuwezi kutoroka kwa kuingiliana na procs wengine kutokana na namespaces (kwa default hatuwezi kuwasiliana kupitia IPCs, unix sockets, huduma za mtandao, D-Bus, `/proc` za procs wengine).
+- **Mtumiaji wa Root**: Kwa default mtumiaji anayekimbia mchakato ni mtumiaji wa root (hata hivyo haki zake zimepunguzwa).
 - **Uwezo**: Docker inacha uwezo ufuatao: `cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap=ep`
 - **Syscalls**: Hizi ndizo syscalls ambazo **mtumiaji wa root hataweza kuita** (kwa sababu ya kukosa uwezo + Seccomp). Syscalls nyingine zinaweza kutumika kujaribu kutoroka.
 

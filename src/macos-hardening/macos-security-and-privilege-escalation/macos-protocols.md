@@ -32,7 +32,7 @@ Ili kuwezesha ARD kwa kazi mbalimbali za kiutawala kama vile kupandisha hadhi, u
 ```bash
 sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -allowAccessFor -allUsers -privs -all -clientopts -setmenuextra -menuextra yes
 ```
-ARD inatoa viwango tofauti vya udhibiti, ikiwa ni pamoja na ufuatiliaji, udhibiti wa pamoja, na udhibiti kamili, huku vikao vikidumu hata baada ya mabadiliko ya nenosiri la mtumiaji. Inaruhusu kutuma amri za Unix moja kwa moja, na kuzitekeleza kama root kwa watumiaji wa kiutawala. Upangaji wa kazi na utafutaji wa Remote Spotlight ni vipengele muhimu, vinavyorahisisha utafutaji wa mbali, usio na athari kubwa kwa faili nyeti katika mashine nyingi.
+ARD inatoa viwango tofauti vya udhibiti, ikiwa ni pamoja na ufuatiliaji, udhibiti wa pamoja, na udhibiti kamili, huku vikao vikidumu hata baada ya mabadiliko ya nenosiri la mtumiaji. Inaruhusu kutuma amri za Unix moja kwa moja, kuzitekeleza kama root kwa watumiaji wa kiutawala. Upangaji wa kazi na utafutaji wa Remote Spotlight ni vipengele vya kutambulika, vinavyorahisisha utafutaji wa mbali, wa athari ndogo kwa faili nyeti katika mashine nyingi.
 
 ## Bonjour Protocol
 
@@ -40,7 +40,7 @@ Bonjour, teknolojia iliyoundwa na Apple, inaruhusu **vifaa kwenye mtandao mmoja 
 
 Zero Configuration Networking, inayotolewa na Bonjour, inahakikisha kwamba vifaa vinaweza:
 
-- **Kupata anwani ya IP kiotomatiki** hata bila kuwepo kwa seva ya DHCP.
+- **Kujipatia Anwani ya IP kiotomatiki** hata bila kuwepo kwa seva ya DHCP.
 - Kufanya **tafsiri ya jina hadi anwani** bila kuhitaji seva ya DNS.
 - **Gundua huduma** zinazopatikana kwenye mtandao.
 
@@ -48,11 +48,11 @@ Vifaa vinavyotumia Bonjour vitajipatia **anwani ya IP kutoka kwenye anuwai ya 16
 
 Kwa DNS, Bonjour inatumia **Multicast DNS (mDNS) protocol**. mDNS inafanya kazi juu ya **port 5353/UDP**, ikitumia **maswali ya kawaida ya DNS** lakini ikilenga **anwani ya multicast 224.0.0.251**. Njia hii inahakikisha kwamba vifaa vyote vinavyosikiliza kwenye mtandao vinaweza kupokea na kujibu maswali, na hivyo kurahisisha sasisho la rekodi zao.
 
-Pale kifaa kinapojiunga na mtandao, kila kifaa kinajichagulia jina, ambacho kwa kawaida kinaishia na **.local**, ambacho kinaweza kutokana na jina la mwenyeji au kutengenezwa kwa bahati nasibu.
+Pale kifaa kinapojiunga na mtandao, kila kifaa kinajichagulia jina, ambacho kwa kawaida kinamalizika kwa **.local**, ambacho kinaweza kutokana na jina la mwenyeji au kutengenezwa kwa bahati nasibu.
 
-Gundua huduma ndani ya mtandao inarahisishwa na **DNS Service Discovery (DNS-SD)**. Kwa kutumia muundo wa rekodi za DNS SRV, DNS-SD inatumia **rekodi za DNS PTR** kuwezesha orodha ya huduma nyingi. Mteja anayepata huduma maalum ataomba rekodi ya PTR kwa `<Service>.<Domain>`, akipokea orodha ya rekodi za PTR zilizoundwa kama `<Instance>.<Service>.<Domain>` ikiwa huduma inapatikana kutoka kwa mwenyeji wengi.
+Gundua huduma ndani ya mtandao inarahisishwa na **DNS Service Discovery (DNS-SD)**. Kwa kutumia muundo wa rekodi za DNS SRV, DNS-SD inatumia **rekodi za DNS PTR** kuwezesha orodha ya huduma nyingi. Mteja anayepata huduma maalum atahitaji rekodi ya PTR kwa `<Service>.<Domain>`, akipokea orodha ya rekodi za PTR zilizoundwa kama `<Instance>.<Service>.<Domain>` ikiwa huduma inapatikana kutoka kwa mwenyeji wengi.
 
-Zana ya `dns-sd` inaweza kutumika kwa **kugundua na kutangaza huduma za mtandao**. Hapa kuna mifano kadhaa ya matumizi yake:
+Zana ya `dns-sd` inaweza kutumika kwa **kugundua na kutangaza huduma za mtandao**. Hapa kuna mifano ya matumizi yake:
 
 ### Kutafuta Huduma za SSH
 
@@ -60,7 +60,7 @@ Ili kutafuta huduma za SSH kwenye mtandao, amri ifuatayo inatumika:
 ```bash
 dns-sd -B _ssh._tcp
 ```
-Amri hii inaanzisha kuvinjari huduma za \_ssh.\_tcp na kutoa maelezo kama vile alama ya wakati, bendera, kiunganishi, kikoa, aina ya huduma, na jina la mfano.
+Amri hii inaanzisha kuvinjari huduma za \_ssh.\_tcp na kutoa maelezo kama vile alama ya muda, bendera, kiunganishi, kikoa, aina ya huduma, na jina la mfano.
 
 ### Kutangaza Huduma ya HTTP
 
@@ -76,7 +76,7 @@ dns-sd -B _http._tcp
 ```
 Wakati huduma inaanza, inatangaza upatikanaji wake kwa vifaa vyote kwenye subnet kwa kutangaza uwepo wake. Vifaa vinavyovutiwa na huduma hizi havihitaji kutuma maombi bali vinahitaji kusikiliza matangazo haya.
 
-Kwa kiolesura rafiki zaidi kwa mtumiaji, programu ya **Discovery - DNS-SD Browser** inayopatikana kwenye Apple App Store inaweza kuonyesha huduma zinazotolewa kwenye mtandao wako wa ndani.
+Kwa kiolesura kinachofaa kwa mtumiaji, programu ya **Discovery - DNS-SD Browser** inayopatikana kwenye Apple App Store inaweza kuonyesha huduma zinazotolewa kwenye mtandao wako wa ndani.
 
 Vinginevyo, skripti maalum zinaweza kuandikwa ili kuvinjari na kugundua huduma kwa kutumia maktaba ya `python-zeroconf`. Skripti ya [**python-zeroconf**](https://github.com/jstasiak/python-zeroconf) inaonyesha jinsi ya kuunda kivinjari cha huduma kwa huduma za `_http._tcp.local.`, ikichapisha huduma zilizoongezwa au kuondolewa:
 ```python
@@ -107,7 +107,7 @@ sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.mDNSResponder.p
 ```
 ## Marejeo
 
-- [**Kitabu cha Mac Hacker**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt_other?_encoding=UTF8&me=&qid=)
+- [**The Mac Hacker's Handbook**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt_other?_encoding=UTF8&me=&qid=)
 - [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
 - [**https://lockboxx.blogspot.com/2019/07/macos-red-teaming-206-ard-apple-remote.html**](https://lockboxx.blogspot.com/2019/07/macos-red-teaming-206-ard-apple-remote.html)
 

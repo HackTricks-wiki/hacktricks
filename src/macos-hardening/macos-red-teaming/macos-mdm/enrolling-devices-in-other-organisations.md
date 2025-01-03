@@ -17,15 +17,15 @@ Utafiti huu unachunguza binaries zinazohusiana na Programu ya Kujiandikisha Vifa
 - **`profiles`**: Inasimamia Profaili za Mipangilio, na kuanzisha ukaguzi wa DEP kwenye toleo la macOS 10.13.4 na baadaye.
 - **`cloudconfigurationd`**: Inasimamia mawasiliano ya DEP API na inapata profaili za Kujiandikisha Vifaa.
 
-Ukaguzi wa DEP unatumia kazi za `CPFetchActivationRecord` na `CPGetActivationRecord` kutoka kwa mfumo wa faragha wa Profaili za Mipangilio ili kupata Rekodi ya Uanzishaji, huku `CPFetchActivationRecord` ikishirikiana na `cloudconfigurationd` kupitia XPC.
+Ukaguzi wa DEP unatumia kazi za `CPFetchActivationRecord` na `CPGetActivationRecord` kutoka kwa mfumo wa ndani wa Profaili za Mipangilio ili kupata Rekodi ya Uanzishaji, huku `CPFetchActivationRecord` ikishirikiana na `cloudconfigurationd` kupitia XPC.
 
 ## Uhandisi wa Kurudi wa Protokali ya Tesla na Mpango wa Absinthe
 
-Ukaguzi wa DEP unahusisha `cloudconfigurationd` kutuma payload ya JSON iliyosainiwa na iliyosimbwa kwa _iprofiles.apple.com/macProfile_. Payload hiyo inajumuisha nambari ya serial ya kifaa na hatua "RequestProfileConfiguration". Mpango wa usimbaji unaotumika unajulikana kwa ndani kama "Absinthe". Kufichua mpango huu ni ngumu na kunahusisha hatua nyingi, ambazo zilisababisha kuchunguza mbinu mbadala za kuingiza nambari za serial zisizo za kawaida katika ombi la Rekodi ya Uanzishaji.
+Ukaguzi wa DEP unahusisha `cloudconfigurationd` kutuma payload ya JSON iliyosainiwa na iliyofichwa kwa _iprofiles.apple.com/macProfile_. Payload hiyo inajumuisha nambari ya serial ya kifaa na hatua "RequestProfileConfiguration". Mpango wa ufichuzi unaotumika unajulikana kwa ndani kama "Absinthe". Kufichua mpango huu ni ngumu na kunahusisha hatua nyingi, ambazo zilisababisha kuchunguza mbinu mbadala za kuingiza nambari za serial zisizo za kawaida katika ombi la Rekodi ya Uanzishaji.
 
 ## Kuweka Proxy kwa Maombi ya DEP
 
-Jaribio la kukamata na kubadilisha maombi ya DEP kwa _iprofiles.apple.com_ kwa kutumia zana kama Charles Proxy lilikwamishwa na usimbaji wa payload na hatua za usalama za SSL/TLS. Hata hivyo, kuwezesha usanidi wa `MCCloudConfigAcceptAnyHTTPSCertificate` kunaruhusu kupita uthibitishaji wa cheti cha seva, ingawa asili ya payload iliyosimbwa bado inazuia kubadilisha nambari ya serial bila funguo ya kufichua.
+Jaribio la kukamata na kubadilisha maombi ya DEP kwa _iprofiles.apple.com_ kwa kutumia zana kama Charles Proxy lilikwamishwa na ufichuzi wa payload na hatua za usalama za SSL/TLS. Hata hivyo, kuwezesha usanidi wa `MCCloudConfigAcceptAnyHTTPSCertificate` kunaruhusu kupita uthibitishaji wa cheti cha seva, ingawa asili ya payload iliyofichwa bado inazuia kubadilisha nambari ya serial bila funguo ya ufichuzi.
 
 ## Kuweka Vifaa vya Mfumo Vinavyoshirikiana na DEP
 
@@ -36,7 +36,7 @@ Kubadilisha payload ya ombi la DEP kabla ya serialization ya JSON katika `cloudc
 
 1. Kuunganisha LLDB na `cloudconfigurationd`.
 2. Kutafuta mahali ambapo nambari ya serial ya mfumo inapatikana.
-3. Kuingiza nambari ya serial isiyo ya kawaida kwenye kumbukumbu kabla ya payload kusimbwa na kutumwa.
+3. Kuingiza nambari ya serial isiyo ya kawaida kwenye kumbukumbu kabla ya payload kufichwa na kutumwa.
 
 Njia hii iliruhusu kupata profaili kamili za DEP kwa nambari za serial zisizo za kawaida, ikionyesha udhaifu wa uwezekano.
 

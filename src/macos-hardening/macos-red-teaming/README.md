@@ -3,7 +3,7 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## Kutumia MDMs vibaya
+## Kutumia MDMs
 
 - JAMF Pro: `jamf checkJSSConnection`
 - Kandji
@@ -20,15 +20,15 @@ macos-mdm/
 
 MDM itakuwa na ruhusa ya kufunga, kuuliza au kuondoa profaili, kufunga programu, kuunda akaunti za admin za ndani, kuweka nenosiri la firmware, kubadilisha funguo za FileVault...
 
-Ili kuendesha MDM yako mwenyewe unahitaji **CSR yako isainiwe na muuzaji** ambayo unaweza kujaribu kupata na [**https://mdmcert.download/**](https://mdmcert.download/). Na ili kuendesha MDM yako mwenyewe kwa vifaa vya Apple unaweza kutumia [**MicroMDM**](https://github.com/micromdm/micromdm).
+Ili kuendesha MDM yako mwenyewe unahitaji **CSR yako isainiwe na muuzaji** ambayo unaweza kujaribu kupata na [**https://mdmcert.download/**](https://mdmcert.download/). Na kuendesha MDM yako mwenyewe kwa vifaa vya Apple unaweza kutumia [**MicroMDM**](https://github.com/micromdm/micromdm).
 
 Hata hivyo, ili kufunga programu kwenye kifaa kilichosajiliwa, bado unahitaji isainiwe na akaunti ya developer... hata hivyo, wakati wa usajili wa MDM **kifaa kinaongeza cheti cha SSL cha MDM kama CA inayotambulika**, hivyo sasa unaweza kusaini chochote.
 
-Ili kusajili kifaa katika MDM unahitaji kufunga **`mobileconfig`** faili kama root, ambayo inaweza kutolewa kupitia faili ya **pkg** (unaweza kuifunga katika zip na wakati inapakuliwa kutoka safari itakua isiyofunguliwa).
+Ili kusajili kifaa katika MDM unahitaji kufunga **`mobileconfig`** faili kama root, ambayo inaweza kutolewa kupitia **pkg** faili (unaweza kuifunga katika zip na wakati inapakuliwa kutoka safari itakua decompressed).
 
 **Mythic agent Orthrus** inatumia mbinu hii.
 
-### Kutumia JAMF PRO vibaya
+### Kutumia JAMF PRO
 
 JAMF inaweza kuendesha **scripts za kawaida** (scripts zilizotengenezwa na sysadmin), **payloads za asili** (kuunda akaunti za ndani, kuweka nenosiri la EFI, ufuatiliaji wa faili/mchakato...) na **MDM** (mipangilio ya kifaa, vyeti vya kifaa...).
 
@@ -46,10 +46,10 @@ Zaidi ya hayo, baada ya kupata akauti sahihi unaweza kuwa na uwezo wa kujaribu n
 
 <figure><img src="../../images/image (167).png" alt=""><figcaption></figcaption></figure>
 
-Binary ya **`jamf`** ilikuwa na siri ya kufungua keychain ambayo wakati wa ugunduzi ilikuwa **shirikishi** kati ya kila mtu na ilikuwa: **`jk23ucnq91jfu9aj`**.\
-Zaidi ya hayo, jamf **inaendelea** kama **LaunchDaemon** katika **`/Library/LaunchAgents/com.jamf.management.agent.plist`**
+Binary ya **`jamf`** ilihifadhi siri ya kufungua keychain ambayo wakati wa ugunduzi ilikuwa **shirikishi** kati ya kila mtu na ilikuwa: **`jk23ucnq91jfu9aj`**.\
+Zaidi ya hayo, jamf **inasalia** kama **LaunchDaemon** katika **`/Library/LaunchAgents/com.jamf.management.agent.plist`**
 
-#### Kuchukua Udhibiti wa Kifaa cha JAMF
+#### Kuchukua Kifaa cha JAMF
 
 **JSS** (Jamf Software Server) **URL** ambayo **`jamf`** itatumia iko katika **`/Library/Preferences/com.jamfsoftware.jamf.plist`**.\
 Faili hii kimsingi ina URL:
@@ -119,10 +119,10 @@ Zana **za ndani za MacOS** ambazo zinaweza pia kukusaidia ni `dscl`:
 ```bash
 dscl "/Active Directory/[Domain]/All Domains" ls /
 ```
-Pia kuna zana kadhaa zilizotayarishwa kwa MacOS ili kuhesabu moja kwa moja AD na kucheza na kerberos:
+Pia kuna zana zilizotayarishwa kwa MacOS ili kuhesabu moja kwa moja AD na kucheza na kerberos:
 
-- [**Machound**](https://github.com/XMCyber/MacHound): MacHound ni nyongeza kwa chombo cha ukaguzi wa Bloodhound kinachoruhusu kukusanya na kuingiza uhusiano wa Active Directory kwenye mwenyeji wa MacOS.
-- [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost ni mradi wa Objective-C ulioandaliwa ili kuingiliana na Heimdal krb5 APIs kwenye macOS. Lengo la mradi ni kuwezesha upimaji bora wa usalama kuhusiana na Kerberos kwenye vifaa vya macOS kwa kutumia APIs za asili bila kuhitaji mfumo mwingine wowote au pakiti kwenye lengo.
+- [**Machound**](https://github.com/XMCyber/MacHound): MacHound ni nyongeza kwa zana ya ukaguzi ya Bloodhound inayoruhusu kukusanya na kuingiza uhusiano wa Active Directory kwenye mwenyeji wa MacOS.
+- [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost ni mradi wa Objective-C ulioandaliwa ili kuingiliana na Heimdal krb5 APIs kwenye macOS. Lengo la mradi ni kuwezesha upimaji bora wa usalama kuhusiana na Kerberos kwenye vifaa vya macOS kwa kutumia APIs za asili bila kuhitaji mfumo mwingine au pakiti kwenye lengo.
 - [**Orchard**](https://github.com/its-a-feature/Orchard): Zana ya JavaScript kwa Utaftaji (JXA) kufanya hesabu ya Active Directory.
 
 ### Taarifa za Kikoa
@@ -174,11 +174,11 @@ Pata nywila kwa kutumia:
 ```bash
 bifrost --action askhash --username [name] --password [password] --domain [domain]
 ```
-Inawezekana kufikia **`Computer$`** nenosiri ndani ya mfumo wa keychain.
+Inawezekana kufikia nenosiri la **`Computer$`** ndani ya mfumo wa keychain.
 
 ### Over-Pass-The-Hash
 
-Pata TGT kwa mtumiaji maalum na huduma:
+Pata TGT kwa mtumiaji na huduma maalum:
 ```bash
 bifrost --action asktgt --username [user] --domain [domain.com] \
 --hash [hash] --enctype [enctype] --keytab [/path/to/keytab]

@@ -1,6 +1,6 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-## Mfano wa kuunganisha socket na Python
+## Mfano wa kuunganisha socket kwa Python
 
 Katika mfano ufuatao, **socket ya unix inaundwa** (`/tmp/socket_test.s`) na kila kitu **kilichopokelewa** kitakuwa **kinatekelezwa** na `os.system`. Najua huenda usikute hii katika mazingira halisi, lakini lengo la mfano huu ni kuona jinsi msimbo unaotumia socket za unix unavyoonekana, na jinsi ya kudhibiti ingizo katika hali mbaya zaidi.
 ```python:s.py
@@ -24,7 +24,7 @@ print(datagram)
 os.system(datagram)
 conn.close()
 ```
-**Tekeleza** msimbo kwa kutumia python: `python s.py` na **angalia jinsi socket inavyosikiliza**:
+**Teza** msimbo ukitumia python: `python s.py` na **angalia jinsi socket inavyosikiliza**:
 ```python
 netstat -a -p --unix | grep "socket_test"
 (Not all processes could be identified, non-owned process info

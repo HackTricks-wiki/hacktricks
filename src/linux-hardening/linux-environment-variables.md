@@ -4,35 +4,28 @@
 
 ## Global variables
 
-The global variables **will be** inherited by **child processes**.
+Vigezo vya ulimwengu **vitakuwa** vinarithiwa na **mchakato wa watoto**.
 
-You can create a global variable for your current session doing:
-
+Unaweza kuunda kigezo cha ulimwengu kwa ajili ya kikao chako cha sasa kwa kufanya:
 ```bash
 export MYGLOBAL="hello world"
 echo $MYGLOBAL #Prints: hello world
 ```
+Kigezo hiki kitapatikana na vikao vyako vya sasa na michakato yake ya watoto.
 
-This variable will be accessible by your current sessions and its child processes.
-
-You can **remove** a variable doing:
-
+Unaweza **kuondoa** kigezo kwa kufanya:
 ```bash
 unset MYGLOBAL
 ```
-
 ## Local variables
 
-The **local variables** can only be **accessed** by the **current shell/script**.
-
+Mabadiliko ya **local** yanaweza tu **kupatikana** na **shell/script** ya **sasa**.
 ```bash
 LOCAL="my local"
 echo $LOCAL
 unset LOCAL
 ```
-
-## List current variables
-
+## Orodha ya mabadiliko ya sasa
 ```bash
 set
 env
@@ -40,84 +33,75 @@ printenv
 cat /proc/$$/environ
 cat /proc/`python -c "import os; print(os.getppid())"`/environ
 ```
-
 ## Common variables
 
 From: [https://geek-university.com/linux/common-environment-variables/](https://geek-university.com/linux/common-environment-variables/)
 
-- **DISPLAY** – the display used by **X**. This variable is usually set to **:0.0**, which means the first display on the current computer.
-- **EDITOR** – the user’s preferred text editor.
-- **HISTFILESIZE** – the maximum number of lines contained in the history file.
-- **HISTSIZE** – Number of lines added to the history file when the user finish his session
-- **HOME** – your home directory.
-- **HOSTNAME** – the hostname of the computer.
-- **LANG** – your current language.
-- **MAIL** – the location of the user’s mail spool. Usually **/var/spool/mail/USER**.
-- **MANPATH** – the list of directories to search for manual pages.
-- **OSTYPE** – the type of operating system.
-- **PS1** – the default prompt in bash.
-- **PATH** – stores the path of all the directories which holds binary files you want to execute just by specifying the name of the file and not by relative or absolute path.
-- **PWD** – the current working directory.
-- **SHELL** – the path to the current command shell (for example, **/bin/bash**).
-- **TERM** – the current terminal type (for example, **xterm**).
-- **TZ** – your time zone.
-- **USER** – your current username.
+- **DISPLAY** – onyesho linalotumiwa na **X**. Kigezo hiki kawaida huwekwa kwenye **:0.0**, ambayo inamaanisha onyesho la kwanza kwenye kompyuta ya sasa.
+- **EDITOR** – mhariri wa maandiko anayependelea mtumiaji.
+- **HISTFILESIZE** – idadi ya juu ya mistari iliyomo kwenye faili ya historia.
+- **HISTSIZE** – Idadi ya mistari iliyoongezwa kwenye faili ya historia wakati mtumiaji anamaliza kikao chake.
+- **HOME** – saraka yako ya nyumbani.
+- **HOSTNAME** – jina la mwenyeji wa kompyuta.
+- **LANG** – lugha yako ya sasa.
+- **MAIL** – eneo la spuli ya barua ya mtumiaji. Kawaida **/var/spool/mail/USER**.
+- **MANPATH** – orodha ya saraka za kutafuta kurasa za mwongozo.
+- **OSTYPE** – aina ya mfumo wa uendeshaji.
+- **PS1** – kiashiria cha chaguo-msingi katika bash.
+- **PATH** – huhifadhi njia ya saraka zote ambazo zina faili za binary unazotaka kutekeleza kwa kutaja tu jina la faili na si kwa njia ya uhusiano au ya moja kwa moja.
+- **PWD** – saraka ya kazi ya sasa.
+- **SHELL** – njia ya shell ya amri ya sasa (kwa mfano, **/bin/bash**).
+- **TERM** – aina ya terminal ya sasa (kwa mfano, **xterm**).
+- **TZ** – eneo lako la muda.
+- **USER** – jina lako la mtumiaji wa sasa.
 
 ## Interesting variables for hacking
 
 ### **HISTFILESIZE**
 
-Change the **value of this variable to 0**, so when you **end your session** the **history file** (\~/.bash_history) **will be deleted**.
-
+Badilisha **thamani ya kigezo hiki kuwa 0**, ili wakati unapo **maliza kikao chako** faili ya **historia** (\~/.bash_history) **itafutwa**.
 ```bash
 export HISTFILESIZE=0
 ```
-
 ### **HISTSIZE**
 
-Change the **value of this variable to 0**, so when you **end your session** any command will be added to the **history file** (\~/.bash_history).
-
+Badilisha **thamani ya hii variable kuwa 0**, ili wakati unapo **maliza kikao chako** amri yoyote itaongezwa kwenye **faili ya historia** (\~/.bash_history).
 ```bash
 export HISTSIZE=0
 ```
-
 ### http_proxy & https_proxy
 
-The processes will use the **proxy** declared here to connect to internet through **http or https**.
-
+Mchakato utautumia **proxy** iliyotangazwa hapa kuungana na mtandao kupitia **http au https**.
 ```bash
 export http_proxy="http://10.10.10.10:8080"
 export https_proxy="http://10.10.10.10:8080"
 ```
-
 ### SSL_CERT_FILE & SSL_CERT_DIR
 
-The processes will trust the certificates indicated in **these env variables**.
-
+Mchakato utaamini vyeti vilivyoonyeshwa katika **hizi env variables**.
 ```bash
 export SSL_CERT_FILE=/path/to/ca-bundle.pem
 export SSL_CERT_DIR=/path/to/ca-certificates
 ```
-
 ### PS1
 
-Change how your prompt looks.
+Badilisha jinsi ya kuonekana kwa kiashiria chako.
 
-[**This is an example**](https://gist.github.com/carlospolop/43f7cd50f3deea972439af3222b68808)
+[**Hii ni mfano**](https://gist.github.com/carlospolop/43f7cd50f3deea972439af3222b68808)
 
-Root:
+Mtu mzima:
 
 ![](<../images/image (897).png>)
 
-Regular user:
+Mtumiaji wa kawaida:
 
 ![](<../images/image (740).png>)
 
-One, two and three backgrounded jobs:
+Kazi tatu zilizopangwa nyuma:
 
 ![](<../images/image (145).png>)
 
-One background job, one stopped and last command didn't finish correctly:
+Kazi moja iliyopangwa nyuma, moja ilisimamishwa na amri ya mwisho haikukamilika vizuri:
 
 ![](<../images/image (715).png>)
 

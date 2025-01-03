@@ -5,7 +5,7 @@
 ## Objective-C
 
 > [!CAUTION]
-> Kumbuka kwamba programu zilizoandikwa kwa Objective-C **zinahifadhi** matangazo yao ya darasa **wakati** **zinapokanzwa** kuwa [Mach-O binaries](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md). Matangazo kama hayo ya darasa **yanajumuisha** jina na aina ya:
+> Kumbuka kwamba programu zilizoandikwa kwa Objective-C **zinashikilia** matangazo yao ya darasa **wakati** **zinapokewa** katika [Mach-O binaries](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md). Matangazo kama hayo ya darasa **yanajumuisha** jina na aina ya:
 
 - Darasa
 - Mbinu za darasa
@@ -66,7 +66,7 @@ MyVehicle *newVehicle = [MyVehicle new];
 ```
 ### **Mbinu za Darasa**
 
-Mbinu za darasa zinaelezewa kwa kutumia **ishara ya kuongeza** (+) si alama ya kupunguza (-) inayotumika na mbinu za mfano. Kama mbinu ya darasa ya **NSString** **`stringWithString`**:
+Mbinu za darasa zinaelezewa kwa kutumia **ishara ya kuongeza** (+) si alama ya kuunganisha (-) inayotumiwa na mbinu za mfano. Kama mbinu ya darasa ya **NSString** **`stringWithString`**:
 ```objectivec
 + (id)stringWithString:(NSString *)aString;
 ```
@@ -91,11 +91,11 @@ _numberOfWheels = +10000;
 NSLog(@"Number of wheels: %i", self.numberOfLeaves);
 }
 ```
-### Protocols
+### Mikataba
 
-Protocols ni seti za matangazo ya mbinu (bila mali). Darasa linalotekeleza protokali linafanya mbinu zilizotangazwa.
+Mikataba ni seti ya matamko ya mbinu (bila mali). Darasa linalotekeleza mikataba linafanya kazi za kutangazwa.
 
-Kuna aina 2 za mbinu: **lazima** na **hiari**. Kwa **kawaida** mbinu ni **lazima** (lakini unaweza pia kuashiria hivyo kwa lebo ya **`@required`**). Kuashiria kwamba mbinu ni hiari tumia **`@optional`**.
+Kuna aina 2 za mbinu: **lazima** na **hiari**. Kwa **kawaida** mbinu ni **lazima** (lakini unaweza pia kuonyesha hivyo kwa lebo ya **`@required`**). Kuonyesha kwamba mbinu ni hiari tumia **`@optional`**.
 ```objectivec
 @protocol myNewProtocol
 - (void) method1; //mandatory
@@ -155,20 +155,20 @@ NSLog(@"Number of wheels: %i", mySuperCar.numberOfWheels);
 [mySuperCar makeLongTruck];
 }
 ```
-### Basic Classes
+### Makundi Msingi
 
-#### String
+#### Msimbo
 ```objectivec
 // NSString
 NSString *bookTitle = @"The Catcher in the Rye";
 NSString *bookAuthor = [[NSString alloc] initWithCString:"J.D. Salinger" encoding:NSUTF8StringEncoding];
 NSString *bookPublicationYear = [NSString stringWithCString:"1951" encoding:NSUTF8StringEncoding];
 ```
-Darasa za msingi ni **zisizobadilika**, hivyo ili kuongezea mfuatano wa herufi kwenye moja iliyopo **NSString mpya inahitaji kuundwa**.
+Darasa la msingi ni **lisiloweza kubadilishwa**, hivyo ili kuongeza mfuatano wa herufi kwenye mfuatano uliopo **NSString mpya inahitaji kuundwa**.
 ```objectivec
 NSString *bookDescription = [NSString stringWithFormat:@"%@ by %@ was published in %@", bookTitle, bookAuthor, bookPublicationYear];
 ```
-Au unaweza pia kutumia darasa la **mutable** string:
+Au unaweza pia kutumia darasa la **mutable** la string:
 ```objectivec
 NSMutableString *mutableString = [NSMutableString stringWithString:@"The book "];
 [mutableString appendString:bookTitle];
@@ -257,7 +257,7 @@ return a+b;
 };
 NSLog(@"3+4 = %d", suma(3,4));
 ```
-Inawezekana pia **kufafanua aina ya block inayotumika kama parameter** katika kazi:
+Inawezekana pia **kufafanua aina ya block kutumika kama parameter** katika kazi:
 ```objectivec
 // Define the block type
 typedef void (^callbackLogger)(void);

@@ -14,9 +14,9 @@
 # Allow members of group admin to execute any command
 %admin 	ALL=(ALL:ALL) ALL
 ```
-Hii inamaanisha kwamba **mtumiaji yeyote anaye belong kwenye kundi la sudo au admin anaweza kutekeleza chochote kama sudo**.
+Hii inamaanisha kwamba **mtumiaji yeyote anaye belong kwa kundi la sudo au admin anaweza kutekeleza chochote kama sudo**.
 
-Ikiwa hii ni hali, ili **kuwa root unaweza tu kutekeleza**:
+Ikiwa hii ni hali, **ili kuwa root unaweza tu kutekeleza**:
 ```
 sudo su
 ```
@@ -26,12 +26,12 @@ Pata binaries zote za suid na angalia kama kuna binary **Pkexec**:
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-Ikiwa unapata kwamba **pkexec ni binary ya SUID** na unategemea **sudo** au **admin**, huenda ukawa na uwezo wa kutekeleza binaries kama sudo ukitumia `pkexec`.\
+Ikiwa unapata kwamba binary **pkexec ni binary ya SUID** na unategemea **sudo** au **admin**, huenda unaweza kutekeleza binaries kama sudo ukitumia `pkexec`.\
 Hii ni kwa sababu kawaida hizo ndizo vikundi ndani ya **polkit policy**. Sera hii kimsingi inatambua ni vikundi vipi vinaweza kutumia `pkexec`. Angalia kwa:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
-Hapo utapata ni vikundi vipi vinavyoruhusiwa kutekeleza **pkexec** na **kwa kawaida** katika baadhi ya distros za linux vikundi **sudo** na **admin** vinajitokeza.
+Hapo utapata ni vikundi vipi vinavyoruhusiwa kutekeleza **pkexec** na **kwa kawaida** katika baadhi ya distros za linux vikundi **sudo** na **admin** vinaonekana.
 
 Ili **kuwa root unaweza kutekeleza**:
 ```bash
@@ -43,7 +43,7 @@ polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freed
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-**Sio kwa sababu huna ruhusa bali kwa sababu haujaunganishwa bila GUI**. Na kuna suluhisho kwa tatizo hili hapa: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Unahitaji **sehemu 2 tofauti za ssh**:
+**Sio kwa sababu huna ruhusa bali kwa sababu haujaunganishwa bila GUI**. Na kuna suluhisho la tatizo hili hapa: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Unahitaji **sehemu 2 tofauti za ssh**:
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -62,7 +62,7 @@ pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 ```
 Hii inamaanisha kwamba **mtumiaji yeyote anaye belong kwenye kundi la wheel anaweza kutekeleza chochote kama sudo**.
 
-Ikiwa hii ndiyo hali, ili **kuwa root unaweza tu kutekeleza**:
+Ikiwa hii ni hali, **ili kuwa root unaweza tu kutekeleza**:
 ```
 sudo su
 ```
@@ -74,9 +74,9 @@ Watumiaji kutoka **group shadow** wanaweza **kusoma** faili **/etc/shadow**:
 ```
 Hivyo, soma faili na jaribu **kufungua baadhi ya hashes**.
 
-## Kikundi cha Wafanyakazi
+## Kundi la Wafanyakazi
 
-**staff**: Inaruhusu watumiaji kuongeza marekebisho ya ndani kwenye mfumo (`/usr/local`) bila kuhitaji ruhusa za mzizi (zingatia kwamba executable katika `/usr/local/bin` ziko kwenye mabadiliko ya PATH ya mtumiaji yeyote, na zinaweza "kufunika" executable katika `/bin` na `/usr/bin` zenye jina sawa). Linganisha na kikundi "adm", ambacho kinahusiana zaidi na ufuatiliaji/usalama. [\[source\]](https://wiki.debian.org/SystemGroups)
+**staff**: Inaruhusu watumiaji kuongeza marekebisho ya ndani kwenye mfumo (`/usr/local`) bila kuhitaji ruhusa za mzizi (zingatia kwamba executable katika `/usr/local/bin` ziko kwenye mabadiliko ya PATH ya mtumiaji yeyote, na zinaweza "kufunika" executable katika `/bin` na `/usr/bin` zenye jina sawa). Linganisha na kundi "adm", ambalo lina uhusiano zaidi na ufuatiliaji/usalama. [\[source\]](https://wiki.debian.org/SystemGroups)
 
 Katika usambazaji wa debian, mabadiliko ya `$PATH` yanaonyesha kwamba `/usr/local/` itatekelezwa kama kipaumbele cha juu zaidi, iwe wewe ni mtumiaji mwenye ruhusa au la.
 ```bash
@@ -163,7 +163,7 @@ Kikundi cha **video** kina ufikiaji wa kuangalia matokeo ya skrini. Kimsingi una
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-Ili **kufungua** **picha halisi** unaweza kutumia **GIMP**, chagua faili \*\*`screen.raw`\*\* na chagua kama aina ya faili **Data ya picha halisi**:
+Ili **kufungua** **picha halisi** unaweza kutumia **GIMP**, chagua faili \*\*`screen.raw` \*\* na chagua kama aina ya faili **Data ya picha halisi**:
 
 ![](<../../../images/image (463).png>)
 
@@ -181,7 +181,7 @@ find / -group root -perm -g=w 2>/dev/null
 ```
 ## Docker Group
 
-Unaweza **kuunganisha mfumo wa faili wa mwenyeji kwenye kiasi cha mfano**, hivyo wakati mfano unapoanza inachukua mara moja `chroot` kwenye kiasi hicho. Hii inakupa kwa ufanisi root kwenye mashine.
+Unaweza **kuunganisha mfumo wa faili wa mizizi wa mashine mwenyeji kwenye kiasi cha mfano**, hivyo wakati mfano unapoanza inachaji mara moja `chroot` kwenye kiasi hicho. Hii inakupa kwa ufanisi mizizi kwenye mashine.
 ```bash
 docker image #Get images from the docker service
 
@@ -193,13 +193,13 @@ echo 'toor:$1$.ZcF5ts0$i4k6rQYzeegUkacRCvfxC0:0:0:root:/root:/bin/sh' >> /etc/pa
 #Ifyou just want filesystem and network access you can startthe following container:
 docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chroot /mnt bashbash
 ```
-Hatimaye, ikiwa hupendi mapendekezo yoyote ya hapo awali, au hayafanyi kazi kwa sababu fulani (docker api firewall?) unaweza kila wakati kujaribu **kufanya kazi kwenye kontena lenye mamlaka na kutoroka kutoka kwake** kama ilivyoelezwa hapa:
+Hatimaye, ikiwa hupendi mapendekezo yoyote ya awali, au hayafanyi kazi kwa sababu fulani (docker api firewall?) unaweza kila wakati kujaribu **kufanya kazi kwenye kontena lenye mamlaka na kutoroka kutoka kwake** kama ilivyoelezwa hapa:
 
 {{#ref}}
 ../docker-security/
 {{#endref}}
 
-Ikiwa una ruhusa za kuandika juu ya docker socket soma [**hii chapisho kuhusu jinsi ya kupandisha mamlaka kwa kutumia docker socket**](../#writable-docker-socket)**.**
+Ikiwa una ruhusa za kuandika juu ya docker socket soma [**hiki kipande kuhusu jinsi ya kupandisha mamlaka kwa kutumia docker socket**](../#writable-docker-socket)**.**
 
 {% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
 
@@ -213,8 +213,8 @@ Ikiwa una ruhusa za kuandika juu ya docker socket soma [**hii chapisho kuhusu ji
 
 ## Kundi la Adm
 
-Kwa kawaida **wanachama** wa kundi **`adm`** wana ruhusa za **kusoma faili za log** zilizoko ndani ya _/var/log/_.\
-Hivyo, ikiwa umepata mtumiaji ndani ya kundi hili unapaswa kwa hakika kuangalia **logi**.
+Kwa kawaida **wanachama** wa kundi **`adm`** wana ruhusa za **kusoma faili za log** zilizopo ndani ya _/var/log/_.\
+Hivyo, ikiwa umepata mtumiaji ndani ya kundi hili unapaswa kuangalia **logi**.
 
 ## Kundi la Auth
 

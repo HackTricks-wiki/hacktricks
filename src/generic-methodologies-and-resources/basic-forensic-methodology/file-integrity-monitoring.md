@@ -1,25 +1,25 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# Baseline
+# Msingi
 
-A baseline consists of taking a snapshot of certain parts of a system to **compare it with a future status to highlight changes**.
+Msingi unajumuisha kuchukua picha ya sehemu fulani za mfumo ili **kuilinganisha na hali ya baadaye ili kuonyesha mabadiliko**.
 
-For example, you can calculate and store the hash of each file of the filesystem to be able to find out which files were modified.\
-This can also be done with the user accounts created, processes running, services running and any other thing that shouldn't change much, or at all.
+Kwa mfano, unaweza kuhesabu na kuhifadhi hash ya kila faili ya mfumo wa faili ili uweze kugundua ni faili zipi zilizobadilishwa.\
+Hii inaweza pia kufanywa na akaunti za watumiaji zilizoundwa, michakato inayoendesha, huduma zinazotumika na chochote kingine ambacho hakipaswi kubadilika sana, au hata kidogo.
 
-## File Integrity Monitoring
+## Ufuatiliaji wa Uadilifu wa Faili
 
-File Integrity Monitoring (FIM) is a critical security technique that protects IT environments and data by tracking changes in files. It involves two key steps:
+Ufuatiliaji wa Uadilifu wa Faili (FIM) ni mbinu muhimu ya usalama inayolinda mazingira ya IT na data kwa kufuatilia mabadiliko katika faili. Inajumuisha hatua mbili muhimu:
 
-1. **Baseline Comparison:** Establish a baseline using file attributes or cryptographic checksums (like MD5 or SHA-2) for future comparisons to detect modifications.
-2. **Real-Time Change Notification:** Get instant alerts when files are accessed or altered, typically through OS kernel extensions.
+1. **Ulinganisho wa Msingi:** Kuanzisha msingi kwa kutumia sifa za faili au checksums za kificho (kama MD5 au SHA-2) kwa ajili ya ulinganisho wa baadaye ili kugundua mabadiliko.
+2. **Arifa za Mabadiliko ya Wakati Halisi:** Pata arifa za papo hapo wakati faili zinapofikiwa au kubadilishwa, kawaida kupitia nyongeza za kernel za OS.
 
-## Tools
+## Zana
 
 - [https://github.com/topics/file-integrity-monitoring](https://github.com/topics/file-integrity-monitoring)
 - [https://www.solarwinds.com/security-event-manager/use-cases/file-integrity-monitoring-software](https://www.solarwinds.com/security-event-manager/use-cases/file-integrity-monitoring-software)
 
-## References
+## Marejeleo
 
 - [https://cybersecurity.att.com/blogs/security-essentials/what-is-file-integrity-monitoring-and-why-you-need-it](https://cybersecurity.att.com/blogs/security-essentials/what-is-file-integrity-monitoring-and-why-you-need-it)
 

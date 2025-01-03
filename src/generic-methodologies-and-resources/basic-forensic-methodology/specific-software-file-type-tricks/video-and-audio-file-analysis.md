@@ -1,14 +1,14 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Audio and video file manipulation** is a staple in **CTF forensics challenges**, leveraging **steganography** and metadata analysis to hide or reveal secret messages. Tools such as **[mediainfo](https://mediaarea.net/en/MediaInfo)** and **`exiftool`** are essential for inspecting file metadata and identifying content types.
+**Ushughulikiaji wa faili za sauti na video** ni msingi katika **changamoto za forensics za CTF**, ikitumia **steganography** na uchambuzi wa metadata kuficha au kufichua ujumbe wa siri. Zana kama **[mediainfo](https://mediaarea.net/en/MediaInfo)** na **`exiftool`** ni muhimu kwa kukagua metadata ya faili na kubaini aina za maudhui.
 
-For audio challenges, **[Audacity](http://www.audacityteam.org/)** stands out as a premier tool for viewing waveforms and analyzing spectrograms, essential for uncovering text encoded in audio. **[Sonic Visualiser](http://www.sonicvisualiser.org/)** is highly recommended for detailed spectrogram analysis. **Audacity** allows for audio manipulation like slowing down or reversing tracks to detect hidden messages. **[Sox](http://sox.sourceforge.net/)**, a command-line utility, excels in converting and editing audio files.
+Kwa changamoto za sauti, **[Audacity](http://www.audacityteam.org/)** inajitokeza kama zana bora ya kutazama mawimbi na kuchambua spekrogamu, muhimu kwa kugundua maandiko yaliyoandikwa katika sauti. **[Sonic Visualiser](http://www.sonicvisualiser.org/)** inapendekezwa sana kwa uchambuzi wa kina wa spekrogamu. **Audacity** inaruhusu ushawishi wa sauti kama kupunguza kasi au kurudisha nyimbo ili kugundua ujumbe uliofichwa. **[Sox](http://sox.sourceforge.net/)**, zana ya amri, inajitahidi katika kubadilisha na kuhariri faili za sauti.
 
-**Least Significant Bits (LSB)** manipulation is a common technique in audio and video steganography, exploiting the fixed-size chunks of media files to embed data discreetly. **[Multimon-ng](http://tools.kali.org/wireless-attacks/multimon-ng)** is useful for decoding messages hidden as **DTMF tones** or **Morse code**.
+**Least Significant Bits (LSB)** ushawishi ni mbinu ya kawaida katika steganography ya sauti na video, ikitumia vipande vya saizi thabiti vya faili za media kuficha data kwa siri. **[Multimon-ng](http://tools.kali.org/wireless-attacks/multimon-ng)** ni muhimu kwa kufichua ujumbe uliofichwa kama **DTMF tones** au **Morse code**.
 
-Video challenges often involve container formats that bundle audio and video streams. **[FFmpeg](http://ffmpeg.org/)** is the go-to for analyzing and manipulating these formats, capable of de-multiplexing and playing back content. For developers, **[ffmpy](http://ffmpy.readthedocs.io/en/latest/examples.html)** integrates FFmpeg's capabilities into Python for advanced scriptable interactions.
+Changamoto za video mara nyingi zinahusisha muundo wa kontena unaounganisha mstream za sauti na video. **[FFmpeg](http://ffmpeg.org/)** ndiyo chaguo bora kwa kuchambua na kushughulikia muundo hizi, ikiwa na uwezo wa ku-de-multiplex na kucheza maudhui. Kwa waendelezaji, **[ffmpy](http://ffmpy.readthedocs.io/en/latest/examples.html)** inachanganya uwezo wa FFmpeg katika Python kwa mwingiliano wa hali ya juu wa kuandikwa.
 
-This array of tools underscores the versatility required in CTF challenges, where participants must employ a broad spectrum of analysis and manipulation techniques to uncover hidden data within audio and video files.
+Mfululizo huu wa zana unaonyesha ufanisi unaohitajika katika changamoto za CTF, ambapo washiriki wanapaswa kutumia anuwai ya mbinu za uchambuzi na ushawishi ili kugundua data iliyofichwa ndani ya faili za sauti na video.
 
 ## References
 

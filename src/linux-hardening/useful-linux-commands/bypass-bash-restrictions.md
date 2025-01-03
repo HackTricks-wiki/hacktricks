@@ -145,7 +145,7 @@ Unaweza kutumia **burpcollab** au [**pingb**](http://pingb.in) kwa mfano.
 
 ### Builtins
 
-Iwapo huwezi kutekeleza kazi za nje na una ufikiaji tu wa **seti ndogo ya builtins kupata RCE**, kuna mbinu kadhaa za kufanya hivyo. Kawaida **hutoweza kutumia zote** za **builtins**, hivyo unapaswa **kujua chaguo zako zote** ili kujaribu kupita gerezani. Wazo kutoka [**devploit**](https://twitter.com/devploit).\
+Iwapo huwezi kutekeleza kazi za nje na una ufikiaji tu wa **seti ndogo ya builtins kupata RCE**, kuna mbinu za kusaidia kufanya hivyo. Kawaida **hutoweza kutumia zote** za **builtins**, hivyo unapaswa **kujua chaguo zako zote** ili kujaribu kupita gerezani. Wazo kutoka [**devploit**](https://twitter.com/devploit).\
 Kwanza kabisa angalia zote [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Hapa kuna baadhi ya **mapendekezo**:
 ```bash
 # Get list of builtins

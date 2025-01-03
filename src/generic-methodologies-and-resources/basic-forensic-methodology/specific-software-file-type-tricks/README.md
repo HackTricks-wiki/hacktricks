@@ -1,6 +1,6 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-Here you can find interesting tricks for specific file-types and/or software:
+Hapa unaweza kupata mbinu za kuvutia za aina maalum za faili na/au programu:
 
 {{#ref}}
 .pyc.md

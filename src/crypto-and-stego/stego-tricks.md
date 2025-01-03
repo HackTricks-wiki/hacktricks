@@ -2,50 +2,41 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## **Extracting Data from Files**
+## **Kutoa Data kutoka kwa Faili**
 
 ### **Binwalk**
 
-A tool for searching binary files for embedded hidden files and data. It's installed via `apt` and its source is available on [GitHub](https://github.com/ReFirmLabs/binwalk).
-
+Chombo cha kutafuta faili za binary kwa ajili ya faili na data zilizofichwa. Inapatikana kupitia `apt` na chanzo chake kinapatikana kwenye [GitHub](https://github.com/ReFirmLabs/binwalk).
 ```bash
 binwalk file # Displays the embedded data
 binwalk -e file # Extracts the data
 binwalk --dd ".*" file # Extracts all data
 ```
-
 ### **Foremost**
 
-Recovers files based on their headers and footers, useful for png images. Installed via `apt` with its source on [GitHub](https://github.com/korczis/foremost).
-
+Inarejesha faili kulingana na vichwa na miguu yao, muhimu kwa picha za png. Imewekwa kupitia `apt` na chanzo chake kiko kwenye [GitHub](https://github.com/korczis/foremost).
 ```bash
 foremost -i file # Extracts data
 ```
-
 ### **Exiftool**
 
-Helps to view file metadata, available [here](https://www.sno.phy.queensu.ca/~phil/exiftool/).
-
+Inasaidia kuona metadata ya faili, inapatikana [here](https://www.sno.phy.queensu.ca/~phil/exiftool/).
 ```bash
 exiftool file # Shows the metadata
 ```
-
 ### **Exiv2**
 
-Similar to exiftool, for metadata viewing. Installable via `apt`, source on [GitHub](https://github.com/Exiv2/exiv2), and has an [official website](http://www.exiv2.org/).
-
+Inafanana na exiftool, kwa ajili ya kuangalia metadata. Inaweza kusakinishwa kupitia `apt`, chanzo kiko kwenye [GitHub](https://github.com/Exiv2/exiv2), na ina [tovuti rasmi](http://www.exiv2.org/).
 ```bash
 exiv2 file # Shows the metadata
 ```
-
 ### **File**
 
-Identify the type of file you're dealing with.
+Tambua aina ya faili unayoshughulika nayo.
 
 ### **Strings**
 
-Extracts readable strings from files, using various encoding settings to filter the output.
-
+Hutoa maandiko yanayosomika kutoka kwa faili, kwa kutumia mipangilio mbalimbali ya uandishi ili kuchuja matokeo.
 ```bash
 strings -n 6 file # Extracts strings with a minimum length of 6
 strings -n 6 file | head -n 20 # First 20 strings
@@ -57,95 +48,84 @@ strings -e b -n 6 file # 16bit strings (big-endian)
 strings -e L -n 6 file # 32bit strings (little-endian)
 strings -e B -n 6 file # 32bit strings (big-endian)
 ```
-
 ### **Comparison (cmp)**
 
-Useful for comparing a modified file with its original version found online.
-
+Inatumika kulinganisha faili iliyobadilishwa na toleo lake la asili lililopatikana mtandaoni.
 ```bash
 cmp original.jpg stego.jpg -b -l
 ```
+## **Kutoa Takwimu Zilizofichwa Katika Maandishi**
 
-## **Extracting Hidden Data in Text**
+### **Takwimu Zilizofichwa Katika Nafasi**
 
-### **Hidden Data in Spaces**
+Makarakteri yasiyoonekana katika nafasi zinazonekana kuwa tupu yanaweza kuficha taarifa. Ili kutoa data hii, tembelea [https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder).
 
-Invisible characters in seemingly empty spaces may hide information. To extract this data, visit [https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder).
+## **Kutoa Takwimu Kutoka kwa Picha**
 
-## **Extracting Data from Images**
+### **Kutambua Maelezo ya Picha kwa kutumia GraphicMagick**
 
-### **Identifying Image Details with GraphicMagick**
-
-[GraphicMagick](https://imagemagick.org/script/download.php) serves to determine image file types and identify potential corruption. Execute the command below to inspect an image:
-
+[GraphicMagick](https://imagemagick.org/script/download.php) inatumika kubaini aina za faili za picha na kutambua uwezekano wa uharibifu. Tekeleza amri iliyo hapa chini ili kukagua picha:
 ```bash
 ./magick identify -verbose stego.jpg
 ```
-
-To attempt repair on a damaged image, adding a metadata comment might help:
-
+Ili kujaribu kurekebisha picha iliyo haribika, kuongeza maoni ya metadata kunaweza kusaidia:
 ```bash
 ./magick mogrify -set comment 'Extraneous bytes removed' stego.jpg
 ```
+### **Steghide kwa Kuficha Data**
 
-### **Steghide for Data Concealment**
+Steghide inarahisisha kuficha data ndani ya faili za `JPEG, BMP, WAV, na AU`, inauwezo wa kuingiza na kutoa data iliyosimbwa. Usanidi ni rahisi kutumia `apt`, na [kanuni yake ya chanzo inapatikana kwenye GitHub](https://github.com/StefanoDeVuono/steghide).
 
-Steghide facilitates hiding data within `JPEG, BMP, WAV, and AU` files, capable of embedding and extracting encrypted data. Installation is straightforward using `apt`, and its [source code is available on GitHub](https://github.com/StefanoDeVuono/steghide).
+**Amri:**
 
-**Commands:**
+- `steghide info file` inaonyesha kama faili ina data iliyofichwa.
+- `steghide extract -sf file [--passphrase password]` inatoa data iliyofichwa, nenosiri ni hiari.
 
-- `steghide info file` reveals if a file contains hidden data.
-- `steghide extract -sf file [--passphrase password]` extracts the hidden data, password optional.
+Kwa utoaji wa mtandaoni, tembelea [tovuti hii](https://futureboy.us/stegano/decinput.html).
 
-For web-based extraction, visit [this website](https://futureboy.us/stegano/decinput.html).
+**Shambulio la Bruteforce na Stegcracker:**
 
-**Bruteforce Attack with Stegcracker:**
-
-- To attempt password cracking on Steghide, use [stegcracker](https://github.com/Paradoxis/StegCracker.git) as follows:
-
+- Ili kujaribu kuvunja nenosiri kwenye Steghide, tumia [stegcracker](https://github.com/Paradoxis/StegCracker.git) kama ifuatavyo:
 ```bash
 stegcracker <file> [<wordlist>]
 ```
+### **zsteg kwa Faili za PNG na BMP**
 
-### **zsteg for PNG and BMP Files**
+zsteg inajikita katika kufichua data iliyofichwa katika faili za PNG na BMP. Usanidi unafanywa kupitia `gem install zsteg`, ikiwa na [chanzo kwenye GitHub](https://github.com/zed-0xff/zsteg).
 
-zsteg specializes in uncovering hidden data in PNG and BMP files. Installation is done via `gem install zsteg`, with its [source on GitHub](https://github.com/zed-0xff/zsteg).
+**Amri:**
 
-**Commands:**
+- `zsteg -a file` inatumia mbinu zote za kugundua kwenye faili.
+- `zsteg -E file` inaelezea payload kwa ajili ya uchimbaji wa data.
 
-- `zsteg -a file` applies all detection methods on a file.
-- `zsteg -E file` specifies a payload for data extraction.
+### **StegoVeritas na Stegsolve**
 
-### **StegoVeritas and Stegsolve**
+**stegoVeritas** inakagua metadata, inafanya mabadiliko ya picha, na inatumia LSB brute forcing miongoni mwa vipengele vingine. Tumia `stegoveritas.py -h` kwa orodha kamili ya chaguzi na `stegoveritas.py stego.jpg` kutekeleza ukaguzi wote.
 
-**stegoVeritas** checks metadata, performs image transformations, and applies LSB brute forcing among other features. Use `stegoveritas.py -h` for a full list of options and `stegoveritas.py stego.jpg` to execute all checks.
+**Stegsolve** inatumia filters mbalimbali za rangi kufichua maandiko au ujumbe uliofichwa ndani ya picha. Inapatikana kwenye [GitHub](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve).
 
-**Stegsolve** applies various color filters to reveal hidden texts or messages within images. It's available on [GitHub](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve).
+### **FFT kwa Ugunduzi wa Maudhui ya Fichwa**
 
-### **FFT for Hidden Content Detection**
-
-Fast Fourier Transform (FFT) techniques can unveil concealed content in images. Useful resources include:
+Mbinu za Fast Fourier Transform (FFT) zinaweza kufichua maudhui yaliyofichwa katika picha. Rasilimali muhimu ni pamoja na:
 
 - [EPFL Demo](http://bigwww.epfl.ch/demo/ip/demos/FFT/)
 - [Ejectamenta](https://www.ejectamenta.com/Fourifier-fullscreen/)
-- [FFTStegPic on GitHub](https://github.com/0xcomposure/FFTStegPic)
+- [FFTStegPic kwenye GitHub](https://github.com/0xcomposure/FFTStegPic)
 
-### **Stegpy for Audio and Image Files**
+### **Stegpy kwa Faili za Sauti na Picha**
 
-Stegpy allows embedding information into image and audio files, supporting formats like PNG, BMP, GIF, WebP, and WAV. It's available on [GitHub](https://github.com/dhsdshdhk/stegpy).
+Stegpy inaruhusu kuingiza taarifa katika faili za picha na sauti, ikisaidia fomati kama PNG, BMP, GIF, WebP, na WAV. Inapatikana kwenye [GitHub](https://github.com/dhsdshdhk/stegpy).
 
-### **Pngcheck for PNG File Analysis**
+### **Pngcheck kwa Uchambuzi wa Faili za PNG**
 
-To analyze PNG files or to validate their authenticity, use:
-
+Ili kuchambua faili za PNG au kuthibitisha uhalali wao, tumia:
 ```bash
 apt-get install pngcheck
 pngcheck stego.png
 ```
+### **Zana Zaidi za Uchambuzi wa Picha**
 
-### **Additional Tools for Image Analysis**
-
-For further exploration, consider visiting:
+Kwa uchunguzi zaidi, fikiria kutembelea:
 
 - [Magic Eye Solver](http://magiceye.ecksdee.co.uk/)
 - [Image Error Level Analysis](https://29a.ch/sandbox/2012/imageerrorlevelanalysis/)
@@ -153,66 +133,60 @@ For further exploration, consider visiting:
 - [OpenStego](https://www.openstego.com/)
 - [DIIT](https://diit.sourceforge.net/)
 
-## **Extracting Data from Audios**
+## **Kutoa Data Kutoka kwa Sauti**
 
-**Audio steganography** offers a unique method to conceal information within sound files. Different tools are utilized for embedding or retrieving hidden content.
+**Audio steganography** inatoa njia ya kipekee ya kuficha taarifa ndani ya faili za sauti. Zana tofauti hutumiwa kwa ajili ya kuingiza au kupata maudhui yaliyofichwa.
 
 ### **Steghide (JPEG, BMP, WAV, AU)**
 
-Steghide is a versatile tool designed for hiding data in JPEG, BMP, WAV, and AU files. Detailed instructions are provided in the [stego tricks documentation](stego-tricks.md#steghide).
+Steghide ni zana yenye uwezo wa kuficha data katika faili za JPEG, BMP, WAV, na AU. Maelekezo ya kina yanapatikana katika [stego tricks documentation](stego-tricks.md#steghide).
 
 ### **Stegpy (PNG, BMP, GIF, WebP, WAV)**
 
-This tool is compatible with a variety of formats including PNG, BMP, GIF, WebP, and WAV. For more information, refer to [Stegpy's section](stego-tricks.md#stegpy-png-bmp-gif-webp-wav).
+Zana hii inafaa na aina mbalimbali za muundo ikiwa ni pamoja na PNG, BMP, GIF, WebP, na WAV. Kwa maelezo zaidi, rejelea [Stegpy's section](stego-tricks.md#stegpy-png-bmp-gif-webp-wav).
 
 ### **ffmpeg**
 
-ffmpeg is crucial for assessing the integrity of audio files, highlighting detailed information and pinpointing any discrepancies.
-
+ffmpeg ni muhimu kwa kutathmini uadilifu wa faili za sauti, ikionyesha taarifa za kina na kubaini tofauti zozote.
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
-
 ### **WavSteg (WAV)**
 
-WavSteg excels in concealing and extracting data within WAV files using the least significant bit strategy. It is accessible on [GitHub](https://github.com/ragibson/Steganography#WavSteg). Commands include:
-
+WavSteg inajulikana kwa kuficha na kutoa data ndani ya faili za WAV kwa kutumia mkakati wa bit isiyo na umuhimu. Inapatikana kwenye [GitHub](https://github.com/ragibson/Steganography#WavSteg). Amri zinajumuisha:
 ```bash
 python3 WavSteg.py -r -b 1 -s soundfile -o outputfile
 
 python3 WavSteg.py -r -b 2 -s soundfile -o outputfile
 ```
-
 ### **Deepsound**
 
-Deepsound allows for the encryption and detection of information within sound files using AES-256. It can be downloaded from [the official page](http://jpinsoft.net/deepsound/download.aspx).
+Deepsound inaruhusu usimbaji na kugundua habari ndani ya faili za sauti kwa kutumia AES-256. Inaweza kupakuliwa kutoka [the official page](http://jpinsoft.net/deepsound/download.aspx).
 
 ### **Sonic Visualizer**
 
-An invaluable tool for visual and analytical inspection of audio files, Sonic Visualizer can unveil hidden elements undetectable by other means. Visit the [official website](https://www.sonicvisualiser.org/) for more.
+Kifaa kisicho na thamani kwa ukaguzi wa kuona na wa uchambuzi wa faili za sauti, Sonic Visualizer inaweza kufichua vipengele vilivyofichwa ambavyo haviwezi kugundulika kwa njia nyingine. Tembelea [official website](https://www.sonicvisualiser.org/) kwa maelezo zaidi.
 
 ### **DTMF Tones - Dial Tones**
 
-Detecting DTMF tones in audio files can be achieved through online tools such as [this DTMF detector](https://unframework.github.io/dtmf-detect/) and [DialABC](http://dialabc.com/sound/detect/index.html).
+Kugundua sauti za DTMF katika faili za sauti kunaweza kufanywa kupitia zana za mtandaoni kama [this DTMF detector](https://unframework.github.io/dtmf-detect/) na [DialABC](http://dialabc.com/sound/detect/index.html).
 
 ## **Other Techniques**
 
 ### **Binary Length SQRT - QR Code**
 
-Binary data that squares to a whole number might represent a QR code. Use this snippet to check:
-
+Data za binary ambazo zinafanya mraba kuwa nambari kamili zinaweza kuwakilisha QR code. Tumia kipande hiki kuangalia:
 ```python
 import math
 math.sqrt(2500) #50
 ```
+Kwa kubadilisha binary kuwa picha, angalia [dcode](https://www.dcode.fr/binary-image). Kusoma QR codes, tumia [this online barcode reader](https://online-barcode-reader.inliteresearch.com/).
 
-For binary to image conversion, check [dcode](https://www.dcode.fr/binary-image). To read QR codes, use [this online barcode reader](https://online-barcode-reader.inliteresearch.com/).
+### **Tafsiri ya Braille**
 
-### **Braille Translation**
+Kwa kutafsiri Braille, [Branah Braille Translator](https://www.branah.com/braille-translator) ni rasilimali bora.
 
-For translating Braille, the [Branah Braille Translator](https://www.branah.com/braille-translator) is an excellent resource.
-
-## **References**
+## **Marejeo**
 
 - [**https://0xrick.github.io/lists/stego/**](https://0xrick.github.io/lists/stego/)
 - [**https://github.com/DominicBreuker/stego-toolkit**](https://github.com/DominicBreuker/stego-toolkit)

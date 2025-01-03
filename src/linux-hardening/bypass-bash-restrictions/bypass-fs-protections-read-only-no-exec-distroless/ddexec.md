@@ -2,18 +2,17 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Context
+## Muktadha
 
-In Linux in order to run a program it must exist as a file, it must be accessible in some way through the file system hierarchy (this is just how `execve()` works). This file may reside on disk or in ram (tmpfs, memfd) but you need a filepath. This has made very easy to control what is run on a Linux system, it makes easy to detect threats and attacker's tools or to prevent them from trying to execute anything of theirs at all (_e. g._ not allowing unprivileged users to place executable files anywhere).
+Katika Linux ili kuendesha programu lazima iwepo kama faili, lazima iweze kupatikana kwa njia fulani kupitia hierarchi ya mfumo wa faili (hii ndiyo jinsi `execve()` inavyofanya kazi). Faili hii inaweza kuwa kwenye diski au kwenye ram (tmpfs, memfd) lakini unahitaji njia ya faili. Hii imefanya iwe rahisi kudhibiti kile kinachokimbia kwenye mfumo wa Linux, inafanya iwe rahisi kugundua vitisho na zana za mshambuliaji au kuzuia wao kujaribu kutekeleza chochote chao kabisa (_e. g._ kutoruhusu watumiaji wasio na mamlaka kuweka faili zinazoweza kutekelezwa mahali popote).
 
-But this technique is here to change all of this. If you can not start the process you want... **then you hijack one already existing**.
+Lakini mbinu hii iko hapa kubadilisha yote haya. Ikiwa huwezi kuanzisha mchakato unayotaka... **basi unachukua moja iliyopo tayari**.
 
-This technique allows you to **bypass common protection techniques such as read-only, noexec, file-name whitelisting, hash whitelisting...**
+Mbinu hii inakuwezesha **kuzidi mbinu za kawaida za ulinzi kama vile kusoma tu, noexec, orodha ya majina ya faili yaliyoruhusiwa, orodha ya hash iliyoruhusiwa...**
 
-## Dependencies
+## Mahitaji
 
-The final script depends on the following tools to work, they need to be accessible in the system you are attacking (by default you will find all of them everywhere):
-
+Script ya mwisho inategemea zana zifuatazo ili kufanya kazi, zinahitaji kupatikana katika mfumo unaoshambulia (kwa default utaona zote kila mahali):
 ```
 dd
 bash | zsh | ash (busybox)
@@ -27,68 +26,61 @@ wc
 tr
 base64
 ```
+## Mbinu
 
-## The technique
+Ikiwa unaweza kubadilisha kwa njia isiyo na mipaka kumbukumbu ya mchakato, basi unaweza kuichukua. Hii inaweza kutumika kuhamasisha mchakato uliopo tayari na kuubadilisha na programu nyingine. Tunaweza kufikia hili ama kwa kutumia syscall ya `ptrace()` (ambayo inahitaji uwe na uwezo wa kutekeleza syscalls au kuwa na gdb inapatikana kwenye mfumo) au, kwa njia ya kuvutia zaidi, kuandika kwenye `/proc/$pid/mem`.
 
-If you are able to modify arbitrarily the memory of a process then you can take over it. This can be used to hijack an already existing process and replace it with another program. We can achieve this either by using the `ptrace()` syscall (which requires you to have the ability to execute syscalls or to have gdb available on the system) or, more interestingly, writing to `/proc/$pid/mem`.
+Faili ya `/proc/$pid/mem` ni ramani ya moja kwa moja ya nafasi yote ya anwani ya mchakato (_e. g._ kutoka `0x0000000000000000` hadi `0x7ffffffffffff000` katika x86-64). Hii ina maana kwamba kusoma au kuandika kwenye faili hili kwa offset `x` ni sawa na kusoma au kubadilisha yaliyomo kwenye anwani ya virtual `x`.
 
-The file `/proc/$pid/mem` is a one-to-one mapping of the entire address space of a process (_e. g._ from `0x0000000000000000` to `0x7ffffffffffff000` in x86-64). This means that reading from or writing to this file at an offset `x` is the same as reading from or modifying the contents at the virtual address `x`.
+Sasa, tuna matatizo manne ya msingi ya kukabiliana nayo:
 
-Now, we have four basic problems to face:
-
-- In general, only root and the program owner of the file may modify it.
+- Kwa ujumla, ni root tu na mmiliki wa programu ya faili wanaweza kuibadilisha.
 - ASLR.
-- If we try to read or write to an address not mapped in the address space of the program we will get an I/O error.
+- Ikiwa tutajaribu kusoma au kuandika kwenye anwani isiyopangwa katika nafasi ya anwani ya programu, tutapata kosa la I/O.
 
-This problems have solutions that, although they are not perfect, are good:
+Matatizo haya yana suluhisho ambayo, ingawa si kamilifu, ni mazuri:
 
-- Most shell interpreters allow the creation of file descriptors that will then be inherited by child processes. We can create a fd pointing to the `mem` file of the sell with write permissions... so child processes that use that fd will be able to modify the shell's memory.
-- ASLR isn't even a problem, we can check the shell's `maps` file or any other from the procfs in order to gain information about the address space of the process.
-- So we need to `lseek()` over the file. From the shell this cannot be done unless using the infamous `dd`.
+- Watafsiri wengi wa shell huruhusu uundaji wa vigezo vya faili ambavyo vitarithiwa na michakato ya watoto. Tunaweza kuunda fd inayotaja faili ya `mem` ya shell yenye ruhusa za kuandika... hivyo michakato ya watoto inayotumia fd hiyo itakuwa na uwezo wa kubadilisha kumbukumbu ya shell.
+- ASLR si tatizo, tunaweza kuangalia faili ya `maps` ya shell au nyingine yoyote kutoka procfs ili kupata taarifa kuhusu nafasi ya anwani ya mchakato.
+- Hivyo tunahitaji `lseek()` juu ya faili. Kutoka kwa shell hili haliwezi kufanywa isipokuwa kwa kutumia `dd` maarufu.
 
-### In more detail
+### Kwa maelezo zaidi
 
-The steps are relatively easy and do not require any kind of expertise to understand them:
+Hatua ni rahisi na hazihitaji aina yoyote ya utaalamu ili kuzielewa:
 
-- Parse the binary we want to run and the loader to find out what mappings they need. Then craft a "shell"code that will perform, broadly speaking, the same steps that the kernel does upon each call to `execve()`:
-  - Create said mappings.
-  - Read the binaries into them.
-  - Set up permissions.
-  - Finally initialize the stack with the arguments for the program and place the auxiliary vector (needed by the loader).
-  - Jump into the loader and let it do the rest (load libraries needed by the program).
-- Obtain from the `syscall` file the address to which the process will return after the syscall it is executing.
-- Overwrite that place, which will be executable, with our shellcode (through `mem` we can modify unwritable pages).
-- Pass the program we want to run to the stdin of the process (will be `read()` by said "shell"code).
-- At this point it is up to the loader to load the necessary libraries for our program and jump into it.
+- Parse binary tunayotaka kuendesha na loader ili kugundua ni ramani gani wanahitaji. Kisha tengeneza "shell"code itakayofanya, kwa ujumla, hatua sawa na zile ambazo kernel inafanya kila wakati inapoita `execve()`:
+- Unda ramani hizo.
+- Soma binaries ndani yao.
+- Weka ruhusa.
+- Hatimaye anza stack na hoja za programu na weka vector ya ziada (inayohitajika na loader).
+- Ruka kwenye loader na acha ifanye mengine (pakia maktaba zinazohitajika na programu).
+- Pata kutoka kwa faili ya `syscall` anwani ambayo mchakato utarudi baada ya syscall inayotekelezwa.
+- Badilisha mahali hapo, ambalo litakuwa la kutekelezeka, na shellcode yetu (kupitia `mem` tunaweza kubadilisha kurasa zisizoweza kuandikwa).
+- Pass programu tunayotaka kuendesha kwa stdin ya mchakato (itakuwa `read()` na "shell"code hiyo).
+- Katika hatua hii ni juu ya loader kupakia maktaba zinazohitajika kwa programu yetu na kuruka ndani yake.
 
-**Check out the tool in** [**https://github.com/arget13/DDexec**](https://github.com/arget13/DDexec)
+**Angalia chombo katika** [**https://github.com/arget13/DDexec**](https://github.com/arget13/DDexec)
 
 ## EverythingExec
 
-There are several alternatives to `dd`, one of which, `tail`, is currently the default program used to `lseek()` through the `mem` file (which was the sole purpose for using `dd`). Said alternatives are:
-
+Kuna chaguzi kadhaa za `dd`, moja ya hizo, `tail`, kwa sasa ndiyo programu ya default inayotumika ku `lseek()` kupitia faili ya `mem` (ambayo ilikuwa sababu pekee ya kutumia `dd`). Chaguzi hizo ni:
 ```bash
 tail
 hexdump
 cmp
 xxd
 ```
-
-Setting the variable `SEEKER` you may change the seeker used, _e. g._:
-
+Kuweka variable `SEEKER` unaweza kubadilisha mtafutaji anayetumika, _e. g._:
 ```bash
 SEEKER=cmp bash ddexec.sh ls -l <<< $(base64 -w0 /bin/ls)
 ```
-
-If you find another valid seeker not implemented in the script you may still use it setting the `SEEKER_ARGS` variable:
-
+Ikiwa utapata mtafutaji mwingine halali ambao haujatekelezwa katika skripti, bado unaweza kuutumia kwa kuweka kiambishi cha `SEEKER_ARGS`:
 ```bash
 SEEKER=xxd SEEKER_ARGS='-s $offset' zsh ddexec.sh ls -l <<< $(base64 -w0 /bin/ls)
 ```
+Block hii, EDRs.
 
-Block this, EDRs.
-
-## References
+## Marejeleo
 
 - [https://github.com/arget13/DDexec](https://github.com/arget13/DDexec)
 

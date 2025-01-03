@@ -2,28 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
+**Kurasa za kuvutia kuangalia:**
 
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=python) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=python" %}
-
-**Interesting pages to check:**
-
-- [**Pyscript hacking tricks**](pyscript.md)
+- [**Hacks za Pyscript**](pyscript.md)
 - [**Python deserializations**](../../pentesting-web/deserialization/#python)
-- [**Tricks to bypass python sandboxes**](bypass-python-sandboxes/)
-- [**Basic python web requests syntax**](web-requests.md)
-- [**Basic python syntax and libraries**](basic-python.md)
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=python) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=python" %}
+- [**Njia za kupita python sandboxes**](bypass-python-sandboxes/)
+- [**Msingi wa sintaksia ya maombi ya wavuti ya python**](web-requests.md)
+- [**Msingi wa sintaksia ya python na maktaba**](basic-python.md)
 
 {{#include ../../banners/hacktricks-training.md}}

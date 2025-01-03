@@ -4,7 +4,7 @@
 
 ## Basic information
 
-Ikiwa unataka kujifunza zaidi kuhusu **runc** angalia ukurasa ufuatao:
+If you want to learn more about **runc** check the following page:
 
 {{#ref}}
 ../../network-services-pentesting/2375-pentesting-docker.md
@@ -12,7 +12,7 @@ Ikiwa unataka kujifunza zaidi kuhusu **runc** angalia ukurasa ufuatao:
 
 ## PE
 
-Ikiwa unapata kwamba `runc` imewekwa kwenye mwenyeji unaweza kuwa na uwezo wa **kuendesha kontena ukitumia folda ya mizizi / ya mwenyeji**.
+If you find that `runc` is installed in the host you may be able to **kufanya kazi na kontena ikitumia folda ya mzizi / ya mwenyeji**.
 ```bash
 runc -help #Get help and see if runc is intalled
 runc spec #This will create the config.json file in your current folder

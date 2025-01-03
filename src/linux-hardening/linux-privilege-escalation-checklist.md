@@ -1,124 +1,109 @@
-# Checklist - Linux Privilege Escalation
+# Orodha ya Ukandamizaji wa Haki za Linux
 
 {{#include ../banners/hacktricks-training.md}}
 
-<figure><img src="../images/image (3).png" alt=""><figcaption></figcaption></figure>
+### **Zana bora ya kutafuta njia za ukandamizaji wa haki za ndani za Linux:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
 
-Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
+### [Taarifa za Mfumo](privilege-escalation/#system-information)
 
-**Hacking Insights**\
-Engage with content that delves into the thrill and challenges of hacking
+- [ ] Pata **taarifa za OS**
+- [ ] Angalia [**PATH**](privilege-escalation/#path), kuna **folda inayoweza kuandikwa**?
+- [ ] Angalia [**mabadiliko ya mazingira**](privilege-escalation/#env-info), kuna maelezo nyeti yoyote?
+- [ ] Tafuta [**exploits za kernel**](privilege-escalation/#kernel-exploits) **ukitumia scripts** (DirtyCow?)
+- [ ] **Angalia** kama [**toleo la sudo** lina udhaifu](privilege-escalation/#sudo-version)
+- [ ] [**Dmesg** uthibitisho wa saini umeshindwa](privilege-escalation/#dmesg-signature-verification-failed)
+- [ ] Mengi zaidi ya mfumo ([tarehe, takwimu za mfumo, taarifa za cpu, printers](privilege-escalation/#more-system-enumeration))
+- [ ] [**Tathmini ulinzi zaidi**](privilege-escalation/#enumerate-possible-defenses)
 
-**Real-Time Hack News**\
-Keep up-to-date with fast-paced hacking world through real-time news and insights
+### [Diski](privilege-escalation/#drives)
 
-**Latest Announcements**\
-Stay informed with the newest bug bounties launching and crucial platform updates
+- [ ] **Orodhesha diski zilizowekwa**
+- [ ] **Kuna diski isiyowekwa?**
+- [ ] **Kuna akreditivu katika fstab?**
 
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
+### [**Programu Zilizowekwa**](privilege-escalation/#installed-software)
 
-### **Best tool to look for Linux local privilege escalation vectors:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
+- [ ] **Angalia** [**programu muhimu**](privilege-escalation/#useful-software) **zilizowekwa**
+- [ ] **Angalia** [**programu zenye udhaifu**](privilege-escalation/#vulnerable-software-installed) **zilizowekwa**
 
-### [System Information](privilege-escalation/#system-information)
+### [Mchakato](privilege-escalation/#processes)
 
-- [ ] Get **OS information**
-- [ ] Check the [**PATH**](privilege-escalation/#path), any **writable folder**?
-- [ ] Check [**env variables**](privilege-escalation/#env-info), any sensitive detail?
-- [ ] Search for [**kernel exploits**](privilege-escalation/#kernel-exploits) **using scripts** (DirtyCow?)
-- [ ] **Check** if the [**sudo version** is vulnerable](privilege-escalation/#sudo-version)
-- [ ] [**Dmesg** signature verification failed](privilege-escalation/#dmesg-signature-verification-failed)
-- [ ] More system enum ([date, system stats, cpu info, printers](privilege-escalation/#more-system-enumeration))
-- [ ] [Enumerate more defenses](privilege-escalation/#enumerate-possible-defenses)
+- [ ] Je, kuna **programu isiyojulikana inayoendesha**?
+- [ ] Je, kuna programu inayoendesha kwa **haki zaidi kuliko inavyopaswa kuwa**?
+- [ ] Tafuta **exploits za michakato inayoendesha** (hasa toleo linaloendesha).
+- [ ] Je, unaweza **kubadilisha binary** ya mchakato wowote unaoendesha?
+- [ ] **Fuatilia michakato** na uone kama kuna mchakato wa kuvutia unaoendesha mara kwa mara.
+- [ ] Je, unaweza **kusoma** baadhi ya **kumbukumbu za mchakato** (ambapo nywila zinaweza kuhifadhiwa)?
 
-### [Drives](privilege-escalation/#drives)
+### [Kazi za Ratiba/Cron?](privilege-escalation/#scheduled-jobs)
 
-- [ ] **List mounted** drives
-- [ ] **Any unmounted drive?**
-- [ ] **Any creds in fstab?**
+- [ ] Je, [**PATH**](privilege-escalation/#cron-path) inabadilishwa na cron fulani na unaweza **kuandika** ndani yake?
+- [ ] Kuna [**wildcard**](privilege-escalation/#cron-using-a-script-with-a-wildcard-wildcard-injection) katika kazi ya cron?
+- [ ] Baadhi ya [**script inayoweza kubadilishwa**](privilege-escalation/#cron-script-overwriting-and-symlink) inatekelezwa au iko ndani ya **folda inayoweza kubadilishwa**?
+- [ ] Je, umepata kuwa baadhi ya **script** zinaweza au zina [**tekelezwa mara kwa mara**](privilege-escalation/#frequent-cron-jobs)? (kila dakika 1, 2 au 5)
 
-### [**Installed Software**](privilege-escalation/#installed-software)
+### [Huduma](privilege-escalation/#services)
 
-- [ ] **Check for**[ **useful software**](privilege-escalation/#useful-software) **installed**
-- [ ] **Check for** [**vulnerable software**](privilege-escalation/#vulnerable-software-installed) **installed**
+- [ ] Kuna **faili ya .service inayoweza kuandikwa**?
+- [ ] Kuna **binary inayoweza kuandikwa** inayotekelezwa na **huduma**?
+- [ ] Kuna **folda inayoweza kuandikwa katika PATH ya systemd**?
 
-### [Processes](privilege-escalation/#processes)
+### [Wakati](privilege-escalation/#timers)
 
-- [ ] Is any **unknown software running**?
-- [ ] Is any software running with **more privileges than it should have**?
-- [ ] Search for **exploits of running processes** (especially the version running).
-- [ ] Can you **modify the binary** of any running process?
-- [ ] **Monitor processes** and check if any interesting process is running frequently.
-- [ ] Can you **read** some interesting **process memory** (where passwords could be saved)?
-
-### [Scheduled/Cron jobs?](privilege-escalation/#scheduled-jobs)
-
-- [ ] Is the [**PATH** ](privilege-escalation/#cron-path)being modified by some cron and you can **write** in it?
-- [ ] Any [**wildcard** ](privilege-escalation/#cron-using-a-script-with-a-wildcard-wildcard-injection)in a cron job?
-- [ ] Some [**modifiable script** ](privilege-escalation/#cron-script-overwriting-and-symlink)is being **executed** or is inside **modifiable folder**?
-- [ ] Have you detected that some **script** could be or are being [**executed** very **frequently**](privilege-escalation/#frequent-cron-jobs)? (every 1, 2 or 5 minutes)
-
-### [Services](privilege-escalation/#services)
-
-- [ ] Any **writable .service** file?
-- [ ] Any **writable binary** executed by a **service**?
-- [ ] Any **writable folder in systemd PATH**?
-
-### [Timers](privilege-escalation/#timers)
-
-- [ ] Any **writable timer**?
+- [ ] Kuna **timer inayoweza kuandikwa**?
 
 ### [Sockets](privilege-escalation/#sockets)
 
-- [ ] Any **writable .socket** file?
-- [ ] Can you **communicate with any socket**?
-- [ ] **HTTP sockets** with interesting info?
+- [ ] Kuna **faili ya .socket inayoweza kuandikwa**?
+- [ ] Je, unaweza **kuwasiliana na socket yoyote**?
+- [ ] **HTTP sockets** zikiwa na taarifa za kuvutia?
 
 ### [D-Bus](privilege-escalation/#d-bus)
 
-- [ ] Can you **communicate with any D-Bus**?
+- [ ] Je, unaweza **kuwasiliana na D-Bus yoyote**?
 
-### [Network](privilege-escalation/#network)
+### [Mtandao](privilege-escalation/#network)
 
-- [ ] Enumerate the network to know where you are
-- [ ] **Open ports you couldn't access before** getting a shell inside the machine?
-- [ ] Can you **sniff traffic** using `tcpdump`?
+- [ ] Tathmini mtandao ili kujua uko wapi
+- [ ] **Port zilizofunguliwa ambazo huwezi kufikia kabla** ya kupata shell ndani ya mashine?
+- [ ] Je, unaweza **kusikia trafiki** ukitumia `tcpdump`?
 
-### [Users](privilege-escalation/#users)
+### [Watumiaji](privilege-escalation/#users)
 
-- [ ] Generic users/groups **enumeration**
-- [ ] Do you have a **very big UID**? Is the **machine** **vulnerable**?
-- [ ] Can you [**escalate privileges thanks to a group**](privilege-escalation/interesting-groups-linux-pe/) you belong to?
-- [ ] **Clipboard** data?
-- [ ] Password Policy?
-- [ ] Try to **use** every **known password** that you have discovered previously to login **with each** possible **user**. Try to login also without a password.
+- [ ] Orodha ya watumiaji/mikundi **ya jumla**
+- [ ] Je, una **UID kubwa sana**? Je, **mashine** ina **udhaifu**?
+- [ ] Je, unaweza [**kuinua haki kwa sababu ya kundi**](privilege-escalation/interesting-groups-linux-pe/) unalotegemea?
+- [ ] **Data za Clipboard**?
+- [ ] Sera ya Nywila?
+- [ ] Jaribu **kutumia** kila **nywila inayojulikana** uliyogundua awali kuingia **na kila** **mtumiaji** anayeweza. Jaribu kuingia pia bila nywila.
 
-### [Writable PATH](privilege-escalation/#writable-path-abuses)
+### [PATH inayoweza kuandikwa](privilege-escalation/#writable-path-abuses)
 
-- [ ] If you have **write privileges over some folder in PATH** you may be able to escalate privileges
+- [ ] Ikiwa una **haki za kuandika juu ya folda fulani katika PATH** unaweza kuwa na uwezo wa kuinua haki
 
-### [SUDO and SUID commands](privilege-escalation/#sudo-and-suid)
+### [Amri za SUDO na SUID](privilege-escalation/#sudo-and-suid)
 
-- [ ] Can you execute **any command with sudo**? Can you use it to READ, WRITE or EXECUTE anything as root? ([**GTFOBins**](https://gtfobins.github.io))
-- [ ] Is any **exploitable SUID binary**? ([**GTFOBins**](https://gtfobins.github.io))
-- [ ] Are [**sudo** commands **limited** by **path**? can you **bypass** the restrictions](privilege-escalation/#sudo-execution-bypassing-paths)?
-- [ ] [**Sudo/SUID binary without path indicated**](privilege-escalation/#sudo-command-suid-binary-without-command-path)?
-- [ ] [**SUID binary specifying path**](privilege-escalation/#suid-binary-with-command-path)? Bypass
+- [ ] Je, unaweza kutekeleza **amri yoyote kwa sudo**? Je, unaweza kuitumia KUSOMA, KUANDIKA au KUTEKELEZA chochote kama root? ([**GTFOBins**](https://gtfobins.github.io))
+- [ ] Je, kuna **binary ya SUID inayoweza kutumika**? ([**GTFOBins**](https://gtfobins.github.io))
+- [ ] Je, [**amri za sudo** **zimepunguzika** na **path**? Je, unaweza **kuzidi** vizuizi](privilege-escalation/#sudo-execution-bypassing-paths)?
+- [ ] [**Sudo/SUID binary bila path iliyotajwa**](privilege-escalation/#sudo-command-suid-binary-without-command-path)?
+- [ ] [**SUID binary ikitaja path**](privilege-escalation/#suid-binary-with-command-path)? Pita
 - [ ] [**LD_PRELOAD vuln**](privilege-escalation/#ld_preload)
-- [ ] [**Lack of .so library in SUID binary**](privilege-escalation/#suid-binary-so-injection) from a writable folder?
-- [ ] [**SUDO tokens available**](privilege-escalation/#reusing-sudo-tokens)? [**Can you create a SUDO token**](privilege-escalation/#var-run-sudo-ts-less-than-username-greater-than)?
-- [ ] Can you [**read or modify sudoers files**](privilege-escalation/#etc-sudoers-etc-sudoers-d)?
-- [ ] Can you [**modify /etc/ld.so.conf.d/**](privilege-escalation/#etc-ld-so-conf-d)?
-- [ ] [**OpenBSD DOAS**](privilege-escalation/#doas) command
+- [ ] [**Ukosefu wa maktaba ya .so katika binary ya SUID**](privilege-escalation/#suid-binary-so-injection) kutoka folda inayoweza kuandikwa?
+- [ ] [**Token za SUDO zinazopatikana**](privilege-escalation/#reusing-sudo-tokens)? [**Je, unaweza kuunda token ya SUDO**](privilege-escalation/#var-run-sudo-ts-less-than-username-greater-than)?
+- [ ] Je, unaweza [**kusoma au kubadilisha faili za sudoers**](privilege-escalation/#etc-sudoers-etc-sudoers-d)?
+- [ ] Je, unaweza [**kubadilisha /etc/ld.so.conf.d/**](privilege-escalation/#etc-ld-so-conf-d)?
+- [ ] [**Amri ya OpenBSD DOAS**](privilege-escalation/#doas)
 
-### [Capabilities](privilege-escalation/#capabilities)
+### [Uwezo](privilege-escalation/#capabilities)
 
-- [ ] Has any binary any **unexpected capability**?
+- [ ] Je, kuna binary yoyote yenye **uwezo usiotarajiwa**?
 
 ### [ACLs](privilege-escalation/#acls)
 
-- [ ] Has any file any **unexpected ACL**?
+- [ ] Je, kuna faili yoyote yenye **ACL isiyotegemewa**?
 
-### [Open Shell sessions](privilege-escalation/#open-shell-sessions)
+### [Mikutano ya Shell Iliyofunguliwa](privilege-escalation/#open-shell-sessions)
 
 - [ ] **screen**
 - [ ] **tmux**
@@ -126,48 +111,33 @@ Stay informed with the newest bug bounties launching and crucial platform update
 ### [SSH](privilege-escalation/#ssh)
 
 - [ ] **Debian** [**OpenSSL Predictable PRNG - CVE-2008-0166**](privilege-escalation/#debian-openssl-predictable-prng-cve-2008-0166)
-- [ ] [**SSH Interesting configuration values**](privilege-escalation/#ssh-interesting-configuration-values)
+- [ ] [**Thamani za usanidi za SSH za kuvutia**](privilege-escalation/#ssh-interesting-configuration-values)
 
-### [Interesting Files](privilege-escalation/#interesting-files)
+### [Faili za Kuvutia](privilege-escalation/#interesting-files)
 
-- [ ] **Profile files** - Read sensitive data? Write to privesc?
-- [ ] **passwd/shadow files** - Read sensitive data? Write to privesc?
-- [ ] **Check commonly interesting folders** for sensitive data
-- [ ] **Weird Location/Owned files,** you may have access to or alter executable files
-- [ ] **Modified** in last mins
-- [ ] **Sqlite DB files**
-- [ ] **Hidden files**
-- [ ] **Script/Binaries in PATH**
-- [ ] **Web files** (passwords?)
-- [ ] **Backups**?
-- [ ] **Known files that contains passwords**: Use **Linpeas** and **LaZagne**
-- [ ] **Generic search**
+- [ ] **Faili za Profaili** - Soma data nyeti? Andika kwa privesc?
+- [ ] **faili za passwd/shadow** - Soma data nyeti? Andika kwa privesc?
+- [ ] **Angalia folda zinazovutia kwa kawaida** kwa data nyeti
+- [ ] **Mahali/Picha za Ajabu,** unaweza kuwa na ufikiaji au kubadilisha faili zinazoweza kutekelezwa
+- [ ] **Imebadilishwa** katika dakika za mwisho
+- [ ] **Faili za Sqlite DB**
+- [ ] **Faili zilizofichwa**
+- [ ] **Script/Binaries katika PATH**
+- [ ] **Faili za Mtandao** (nywila?)
+- [ ] **Nakala za akiba**?
+- [ ] **Faili zinazojulikana ambazo zina nywila**: Tumia **Linpeas** na **LaZagne**
+- [ ] **Utafutaji wa jumla**
 
-### [**Writable Files**](privilege-escalation/#writable-files)
+### [**Faili Zinazoweza Kuandikwa**](privilege-escalation/#writable-files)
 
-- [ ] **Modify python library** to execute arbitrary commands?
-- [ ] Can you **modify log files**? **Logtotten** exploit
-- [ ] Can you **modify /etc/sysconfig/network-scripts/**? Centos/Redhat exploit
-- [ ] Can you [**write in ini, int.d, systemd or rc.d files**](privilege-escalation/#init-init-d-systemd-and-rc-d)?
+- [ ] **Badilisha maktaba ya python** ili kutekeleza amri zisizo za kawaida?
+- [ ] Je, unaweza **kubadilisha faili za log**? **Logtotten** exploit
+- [ ] Je, unaweza **kubadilisha /etc/sysconfig/network-scripts/**? Centos/Redhat exploit
+- [ ] Je, unaweza [**kuandika katika faili za ini, int.d, systemd au rc.d**](privilege-escalation/#init-init-d-systemd-and-rc-d)?
 
-### [**Other tricks**](privilege-escalation/#other-tricks)
+### [**Hila Nyingine**](privilege-escalation/#other-tricks)
 
-- [ ] Can you [**abuse NFS to escalate privileges**](privilege-escalation/#nfs-privilege-escalation)?
-- [ ] Do you need to [**escape from a restrictive shell**](privilege-escalation/#escaping-from-restricted-shells)?
-
-<figure><img src="../images/image (3).png" alt=""><figcaption></figcaption></figure>
-
-Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
-
-**Hacking Insights**\
-Engage with content that delves into the thrill and challenges of hacking
-
-**Real-Time Hack News**\
-Keep up-to-date with fast-paced hacking world through real-time news and insights
-
-**Latest Announcements**\
-Stay informed with the newest bug bounties launching and crucial platform updates
-
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
+- [ ] Je, unaweza [**kudhulumu NFS ili kuinua haki**](privilege-escalation/#nfs-privilege-escalation)?
+- [ ] Je, unahitaji [**kutoroka kutoka shell yenye vizuizi**](privilege-escalation/#escaping-from-restricted-shells)?
 
 {{#include ../banners/hacktricks-training.md}}

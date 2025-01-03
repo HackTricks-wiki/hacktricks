@@ -4,42 +4,42 @@
 
 ## Methodology
 
-1. Recon the victim
-   1. Select the **victim domain**.
-   2. Perform some basic web enumeration **searching for login portals** used by the victim and **decide** which one you will **impersonate**.
-   3. Use some **OSINT** to **find emails**.
-2. Prepare the environment
-   1. **Buy the domain** you are going to use for the phishing assessment
-   2. **Configure the email service** related records (SPF, DMARC, DKIM, rDNS)
-   3. Configure the VPS with **gophish**
-3. Prepare the campaign
-   1. Prepare the **email template**
-   2. Prepare the **web page** to steal the credentials
-4. Launch the campaign!
+1. Fanya utafiti kuhusu mwathirika
+1. Chagua **domeni la mwathirika**.
+2. Fanya utafiti wa msingi wa wavuti **ukitafuta milango ya kuingia** inayotumiwa na mwathirika na **amua** ni ipi utakuwa **ukijifanya**.
+3. Tumia **OSINT** ili **kupata barua pepe**.
+2. Andaa mazingira
+1. **Nunua domeni** ambayo utatumia kwa tathmini ya phishing
+2. **Sanidi huduma ya barua pepe** rekodi zinazohusiana (SPF, DMARC, DKIM, rDNS)
+3. Sanidi VPS na **gophish**
+3. Andaa kampeni
+1. Andaa **kigezo cha barua pepe**
+2. Andaa **ukurasa wa wavuti** wa kuiba taarifa za kuingia
+4. Anzisha kampeni!
 
-## Generate similar domain names or buy a trusted domain
+## Tengeneza majina ya domeni yanayofanana au nunua domeni inayotegemewa
 
-### Domain Name Variation Techniques
+### Mbinu za Mabadiliko ya Jina la Domeni
 
-- **Keyword**: The domain name **contains** an important **keyword** of the original domain (e.g., zelster.com-management.com).
-- **hypened subdomain**: Change the **dot for a hyphen** of a subdomain (e.g., www-zelster.com).
-- **New TLD**: Same domain using a **new TLD** (e.g., zelster.org)
-- **Homoglyph**: It **replaces** a letter in the domain name with **letters that look similar** (e.g., zelfser.com).
-- **Transposition:** It **swaps two letters** within the domain name (e.g., zelsetr.com).
-- **Singularization/Pluralization**: Adds or removes “s” at the end of the domain name (e.g., zeltsers.com).
-- **Omission**: It **removes one** of the letters from the domain name (e.g., zelser.com).
-- **Repetition:** It **repeats one** of the letters in the domain name (e.g., zeltsser.com).
-- **Replacement**: Like homoglyph but less stealthy. It replaces one of the letters in the domain name, perhaps with a letter in proximity of the original letter on the keyboard (e.g, zektser.com).
-- **Subdomained**: Introduce a **dot** inside the domain name (e.g., ze.lster.com).
-- **Insertion**: It **inserts a letter** into the domain name (e.g., zerltser.com).
-- **Missing dot**: Append the TLD to the domain name. (e.g., zelstercom.com)
+- **Neno muhimu**: Jina la domeni **linajumuisha** neno muhimu la **domeni la asili** (mfano, zelster.com-management.com).
+- **subdomain yenye hyphen**: Badilisha **dot kuwa hyphen** ya subdomain (mfano, www-zelster.com).
+- **TLD Mpya**: Domeni sawa ikitumia **TLD mpya** (mfano, zelster.org)
+- **Homoglyph**: In **badilisha** herufi katika jina la domeni na **herufi zinazofanana** (mfano, zelfser.com).
+- **Ubadilishaji:** In **badilisha herufi mbili** ndani ya jina la domeni (mfano, zelsetr.com).
+- **Kuweka umoja/mengi**: Ongeza au ondolea “s” mwishoni mwa jina la domeni (mfano, zeltsers.com).
+- **Kuondoa**: In **ondoa moja** ya herufi kutoka jina la domeni (mfano, zelser.com).
+- **Kurudia:** In **rudia moja** ya herufi katika jina la domeni (mfano, zeltsser.com).
+- **Badiliko**: Kama homoglyph lakini si ya siri sana. Inabadilisha moja ya herufi katika jina la domeni, labda kwa herufi iliyo karibu na herufi ya asili kwenye kibodi (mfano, zektser.com).
+- **Subdomained**: Ingiza **dot** ndani ya jina la domeni (mfano, ze.lster.com).
+- **Kuingiza**: In **ingiza herufi** ndani ya jina la domeni (mfano, zerltser.com).
+- **Dot iliyokosekana**: Ongeza TLD kwenye jina la domeni. (mfano, zelstercom.com)
 
-**Automatic Tools**
+**Zana za Kiotomatiki**
 
 - [**dnstwist**](https://github.com/elceef/dnstwist)
 - [**urlcrazy**](https://github.com/urbanadventurer/urlcrazy)
 
-**Websites**
+**Tovuti**
 
 - [https://dnstwist.it/](https://dnstwist.it)
 - [https://dnstwister.report/](https://dnstwister.report)
@@ -47,54 +47,51 @@
 
 ### Bitflipping
 
-There is a **possibility that one of some bits stored or in communication might get automatically flipped** due to various factors like solar flares, cosmic rays, or hardware errors.
+Kuna **uwezekano kwamba moja ya baadhi ya bits zilizohifadhiwa au katika mawasiliano inaweza kubadilishwa kiotomatiki** kutokana na sababu mbalimbali kama vile miale ya jua, mionzi ya anga, au makosa ya vifaa.
 
-When this concept is **applied to DNS requests**, it is possible that the **domain received by the DNS server** is not the same as the domain initially requested.
+Wakati dhana hii inatumika kwa maombi ya DNS, inawezekana kwamba **domeni iliyopokelewa na seva ya DNS** si sawa na domeni iliyotakiwa awali.
 
-For example, a single bit modification in the domain "windows.com" can change it to "windnws.com."
+Kwa mfano, mabadiliko ya bit moja katika jina la domeni "windows.com" yanaweza kubadilisha kuwa "windnws.com."
 
-Attackers may **take advantage of this by registering multiple bit-flipping domains** that are similar to the victim's domain. Their intention is to redirect legitimate users to their own infrastructure.
+Washambuliaji wanaweza **kunufaika na hii kwa kujiandikisha kwa domeni nyingi za bit-flipping** ambazo zinafanana na domeni ya mwathirika. Nia yao ni kuelekeza watumiaji halali kwenye miundombinu yao.
 
-For more information read [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
+Kwa maelezo zaidi soma [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
 
-### Buy a trusted domain
+### Nunua domeni inayotegemewa
 
-You can search in [https://www.expireddomains.net/](https://www.expireddomains.net) for a expired domain that you could use.\
-In order to make sure that the expired domain that you are going to buy **has already a good SEO** you could search how is it categorized in:
+Unaweza kutafuta katika [https://www.expireddomains.net/](https://www.expireddomains.net) kwa domeni iliyokwisha ambayo unaweza kutumia.\
+Ili kuhakikisha kwamba domeni iliyokwisha unayotarajia kununua **ina SEO nzuri tayari** unaweza kutafuta jinsi inavyopangwa katika:
 
 - [http://www.fortiguard.com/webfilter](http://www.fortiguard.com/webfilter)
 - [https://urlfiltering.paloaltonetworks.com/query/](https://urlfiltering.paloaltonetworks.com/query/)
 
-## Discovering Emails
+## Kugundua Barua Pepe
 
-- [https://github.com/laramies/theHarvester](https://github.com/laramies/theHarvester) (100% free)
-- [https://phonebook.cz/](https://phonebook.cz) (100% free)
+- [https://github.com/laramies/theHarvester](https://github.com/laramies/theHarvester) (100% bure)
+- [https://phonebook.cz/](https://phonebook.cz) (100% bure)
 - [https://maildb.io/](https://maildb.io)
 - [https://hunter.io/](https://hunter.io)
 - [https://anymailfinder.com/](https://anymailfinder.com)
 
-In order to **discover more** valid email addresses or **verify the ones** you have already discovered you can check if you can brute-force them smtp servers of the victim. [Learn how to verify/discover email address here](../../network-services-pentesting/pentesting-smtp/#username-bruteforce-enumeration).\
-Moreover, don't forget that if the users use **any web portal to access their mails**, you can check if it's vulnerable to **username brute force**, and exploit the vulnerability if possible.
+Ili **kugundua zaidi** anwani halali za barua pepe au **kuhakiki zile** ulizozigundua tayari unaweza kuangalia kama unaweza kujaribu nguvu kwenye seva za smtp za mwathirika. [Jifunze jinsi ya kuangalia/kugundua anwani ya barua pepe hapa](../../network-services-pentesting/pentesting-smtp/#username-bruteforce-enumeration).\
+Zaidi ya hayo, usisahau kwamba ikiwa watumiaji wanatumia **milango yoyote ya wavuti kuingia kwenye barua zao**, unaweza kuangalia kama inahatarishwa kwa **kujaribu nguvu jina la mtumiaji**, na kutumia udhaifu huo ikiwa inawezekana.
 
-## Configuring GoPhish
+## Sanidi GoPhish
 
-### Installation
+### Usanidi
 
-You can download it from [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)
+Unaweza kuipakua kutoka [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)
 
-Download and decompress it inside `/opt/gophish` and execute `/opt/gophish/gophish`\
-You will be given a password for the admin user in port 3333 in the output. Therefore, access that port and use those credentials to change the admin password. You may need to tunnel that port to local:
-
+Pakua na uondoe ndani ya `/opt/gophish` na uendeshe `/opt/gophish/gophish`\
+Utapewa nenosiri kwa mtumiaji wa admin kwenye bandari 3333 katika matokeo. Hivyo, fikia bandari hiyo na tumia akidi hizo kubadilisha nenosiri la admin. Unaweza kuhitaji kupitisha bandari hiyo kwa local:
 ```bash
 ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 ```
+### Mipangilio
 
-### Configuration
+**Mipangilio ya cheti cha TLS**
 
-**TLS certificate configuration**
-
-Before this step you should have **already bought the domain** you are going to use and it must be **pointing** to the **IP of the VPS** where you are configuring **gophish**.
-
+Kabla ya hatua hii unapaswa kuwa **umeshanunua jina la kikoa** unalotaka kutumia na lazima liwe **linaanika** kwenye **IP ya VPS** ambapo unafanya mipangilio ya **gophish**.
 ```bash
 DOMAIN="<domain>"
 wget https://dl.eff.org/certbot-auto
@@ -110,67 +107,61 @@ mkdir /opt/gophish/ssl_keys
 cp "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /opt/gophish/ssl_keys/key.pem
 cp "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" /opt/gophish/ssl_keys/key.crt​
 ```
+**Mipangilio ya barua pepe**
 
-**Mail configuration**
+Anza kufunga: `apt-get install postfix`
 
-Start installing: `apt-get install postfix`
-
-Then add the domain to the following files:
+Kisha ongeza kikoa kwenye faili zifuatazo:
 
 - **/etc/postfix/virtual_domains**
 - **/etc/postfix/transport**
 - **/etc/postfix/virtual_regexp**
 
-**Change also the values of the following variables inside /etc/postfix/main.cf**
+**Badilisha pia thamani za vigezo vifuatavyo ndani ya /etc/postfix/main.cf**
 
 `myhostname = <domain>`\
 `mydestination = $myhostname, <domain>, localhost.com, localhost`
 
-Finally modify the files **`/etc/hostname`** and **`/etc/mailname`** to your domain name and **restart your VPS.**
+Hatimaye badilisha faili **`/etc/hostname`** na **`/etc/mailname`** kuwa jina la kikoa chako na **anzisha upya VPS yako.**
 
-Now, create a **DNS A record** of `mail.<domain>` pointing to the **ip address** of the VPS and a **DNS MX** record pointing to `mail.<domain>`
+Sasa, tengeneza **rekodi ya DNS A** ya `mail.<domain>` ikielekeza kwenye **anwani ya ip** ya VPS na rekodi ya **DNS MX** ikielekeza kwa `mail.<domain>`
 
-Now lets test to send an email:
-
+Sasa hebu jaribu kutuma barua pepe:
 ```bash
 apt install mailutils
 echo "This is the body of the email" | mail -s "This is the subject line" test@email.com
 ```
+**Mipangilio ya Gophish**
 
-**Gophish configuration**
-
-Stop the execution of gophish and lets configure it.\
-Modify `/opt/gophish/config.json` to the following (note the use of https):
-
+Acha utekelezaji wa gophish na hebu tuipange.\
+Badilisha `/opt/gophish/config.json` kuwa ifuatayo (zingatia matumizi ya https):
 ```bash
 {
-        "admin_server": {
-                "listen_url": "127.0.0.1:3333",
-                "use_tls": true,
-                "cert_path": "gophish_admin.crt",
-                "key_path": "gophish_admin.key"
-        },
-        "phish_server": {
-                "listen_url": "0.0.0.0:443",
-                "use_tls": true,
-                "cert_path": "/opt/gophish/ssl_keys/key.crt",
-                "key_path": "/opt/gophish/ssl_keys/key.pem"
-        },
-        "db_name": "sqlite3",
-        "db_path": "gophish.db",
-        "migrations_prefix": "db/db_",
-        "contact_address": "",
-        "logging": {
-                "filename": "",
-                "level": ""
-        }
+"admin_server": {
+"listen_url": "127.0.0.1:3333",
+"use_tls": true,
+"cert_path": "gophish_admin.crt",
+"key_path": "gophish_admin.key"
+},
+"phish_server": {
+"listen_url": "0.0.0.0:443",
+"use_tls": true,
+"cert_path": "/opt/gophish/ssl_keys/key.crt",
+"key_path": "/opt/gophish/ssl_keys/key.pem"
+},
+"db_name": "sqlite3",
+"db_path": "gophish.db",
+"migrations_prefix": "db/db_",
+"contact_address": "",
+"logging": {
+"filename": "",
+"level": ""
+}
 }
 ```
+**Sanidi huduma ya gophish**
 
-**Configure gophish service**
-
-In order to create the gophish service so it can be started automatically and managed a service you can create the file `/etc/init.d/gophish` with the following content:
-
+Ili kuunda huduma ya gophish ili iweze kuanzishwa kiotomatiki na kusimamiwa kama huduma, unaweza kuunda faili `/etc/init.d/gophish` yenye maudhui yafuatayo:
 ```bash
 #!/bin/bash
 # /etc/init.d/gophish
@@ -191,35 +182,33 @@ logfile=/var/log/gophish/gophish.log
 errfile=/var/log/gophish/gophish.error
 
 start() {
-    echo 'Starting '${processName}'...'
-    cd ${appDirectory}
-    nohup ./$process >>$logfile 2>>$errfile &
-    sleep 1
+echo 'Starting '${processName}'...'
+cd ${appDirectory}
+nohup ./$process >>$logfile 2>>$errfile &
+sleep 1
 }
 
 stop() {
-    echo 'Stopping '${processName}'...'
-    pid=$(/bin/pidof ${process})
-    kill ${pid}
-    sleep 1
+echo 'Stopping '${processName}'...'
+pid=$(/bin/pidof ${process})
+kill ${pid}
+sleep 1
 }
 
 status() {
-    pid=$(/bin/pidof ${process})
-    if [["$pid" != ""| "$pid" != "" ]]; then
-        echo ${processName}' is running...'
-    else
-        echo ${processName}' is not running...'
-    fi
+pid=$(/bin/pidof ${process})
+if [["$pid" != ""| "$pid" != "" ]]; then
+echo ${processName}' is running...'
+else
+echo ${processName}' is not running...'
+fi
 }
 
 case $1 in
-    start|stop|status) "$1" ;;
+start|stop|status) "$1" ;;
 esac
 ```
-
-Finish configuring the service and checking it doing:
-
+Maliza kuunda huduma na kuangalia inavyofanya:
 ```bash
 mkdir /var/log/gophish
 chmod +x /etc/init.d/gophish
@@ -230,68 +219,60 @@ service gophish status
 ss -l | grep "3333\|443"
 service gophish stop
 ```
+## Kuunda seva ya barua na kikoa
 
-## Configuring mail server and domain
+### Subiri & kuwa halali
 
-### Wait & be legit
+Kadiri kikoa kilivyo na umri mrefu ndivyo inavyokuwa na uwezekano mdogo wa kukamatwa kama spam. Hivyo unapaswa kusubiri muda mrefu iwezekanavyo (angalau wiki 1) kabla ya tathmini ya phishing. Aidha, ikiwa utaweka ukurasa kuhusu sekta yenye sifa, sifa iliyopatikana itakuwa bora.
 
-The older a domain is the less probable it's going to be caught as spam. Then you should wait as much time as possible (at least 1week) before the phishing assessment. moreover, if you put a page about a reputational sector the reputation obtained will be better.
+Kumbuka kwamba hata kama unapaswa kusubiri wiki moja unaweza kumaliza kuunda kila kitu sasa.
 
-Note that even if you have to wait a week you can finish configuring everything now.
+### Sanidi Rekodi ya Reverse DNS (rDNS)
 
-### Configure Reverse DNS (rDNS) record
+Weka rekodi ya rDNS (PTR) inayotatua anwani ya IP ya VPS kwa jina la kikoa.
 
-Set a rDNS (PTR) record that resolves the IP address of the VPS to the domain name.
+### Rekodi ya Sender Policy Framework (SPF)
 
-### Sender Policy Framework (SPF) Record
+Lazima **uunde rekodi ya SPF kwa kikoa kipya**. Ikiwa hujui ni nini rekodi ya SPF [**soma ukurasa huu**](../../network-services-pentesting/pentesting-smtp/#spf).
 
-You must **configure a SPF record for the new domain**. If you don't know what is a SPF record [**read this page**](../../network-services-pentesting/pentesting-smtp/#spf).
-
-You can use [https://www.spfwizard.net/](https://www.spfwizard.net) to generate your SPF policy (use the IP of the VPS machine)
+Unaweza kutumia [https://www.spfwizard.net/](https://www.spfwizard.net) kuunda sera yako ya SPF (tumia IP ya mashine ya VPS)
 
 ![](<../../images/image (1037).png>)
 
-This is the content that must be set inside a TXT record inside the domain:
-
+Hii ndiyo maudhui ambayo yanapaswa kuwekwa ndani ya rekodi ya TXT ndani ya kikoa:
 ```bash
 v=spf1 mx a ip4:ip.ip.ip.ip ?all
 ```
-
 ### Domain-based Message Authentication, Reporting & Conformance (DMARC) Record
 
-You must **configure a DMARC record for the new domain**. If you don't know what is a DMARC record [**read this page**](../../network-services-pentesting/pentesting-smtp/#dmarc).
+Lazima **uweke rekodi ya DMARC kwa jina jipya la kikoa**. Ikiwa hujui ni nini rekodi ya DMARC [**soma ukurasa huu**](../../network-services-pentesting/pentesting-smtp/#dmarc).
 
-You have to create a new DNS TXT record pointing the hostname `_dmarc.<domain>` with the following content:
-
+Lazima uunde rekodi mpya ya DNS TXT ikielekeza jina la mwenyeji `_dmarc.<domain>` yenye maudhui yafuatayo:
 ```bash
 v=DMARC1; p=none
 ```
-
 ### DomainKeys Identified Mail (DKIM)
 
-You must **configure a DKIM for the new domain**. If you don't know what is a DMARC record [**read this page**](../../network-services-pentesting/pentesting-smtp/#dkim).
+Lazima **uweke DKIM kwa jina jipya la kikoa**. Ikiwa hujui ni rekodi gani ya DMARC [**soma ukurasa huu**](../../network-services-pentesting/pentesting-smtp/#dkim).
 
-This tutorial is based on: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
+Huu ni mwongozo unaotegemea: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
 
 > [!NOTE]
-> You need to concatenate both B64 values that the DKIM key generates:
+> Unahitaji kuunganisha thamani zote mbili za B64 ambazo funguo za DKIM zinazalisha:
 >
 > ```
 > v=DKIM1; h=sha256; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0wPibdqPtzYk81njjQCrChIcHzxOp8a1wjbsoNtka2X9QXCZs+iXkvw++QsWDtdYu3q0Ofnr0Yd/TmG/Y2bBGoEgeE+YTUG2aEgw8Xx42NLJq2D1pB2lRQPW4IxefROnXu5HfKSm7dyzML1gZ1U0pR5X4IZCH0wOPhIq326QjxJZm79E1nTh3xj" "Y9N/Dt3+fVnIbMupzXE216TdFuifKM6Tl6O/axNsbswMS1TH812euno8xRpsdXJzFlB9q3VbMkVWig4P538mHolGzudEBg563vv66U8D7uuzGYxYT4WS8NVm3QBMg0QKPWZaKp+bADLkOSB9J2nUpk4Aj9KB5swIDAQAB
 > ```
 
-### Test your email configuration score
+### Jaribu alama ya usanidi wa barua pepe yako
 
-You can do that using [https://www.mail-tester.com/](https://www.mail-tester.com)\
-Just access the page and send an email to the address they give you:
-
+Unaweza kufanya hivyo kwa kutumia [https://www.mail-tester.com/](https://www.mail-tester.com)\
+Fikia tu ukurasa huo na tuma barua pepe kwa anwani wanayokupa:
 ```bash
 echo "This is the body of the email" | mail -s "This is the subject line" test-iimosa79z@srv1.mail-tester.com
 ```
-
-You can also **check your email configuration** sending an email to `check-auth@verifier.port25.com` and **reading the response** (for this you will need to **open** port **25** and see the response in the file _/var/mail/root_ if you send the email a as root).\
-Check that you pass all the tests:
-
+Unaweza pia **kuangalia usanidi wako wa barua pepe** kwa kutuma barua pepe kwa `check-auth@verifier.port25.com` na **kusoma jibu** (kwa hili utahitaji **kufungua** bandari **25** na kuona jibu katika faili _/var/mail/root_ ikiwa utatuma barua pepe kama root).\
+Angalia kwamba unapitisha majaribio yote:
 ```bash
 ==========================================================
 Summary of Results
@@ -302,48 +283,44 @@ DKIM check:         pass
 Sender-ID check:    pass
 SpamAssassin check: ham
 ```
-
-You could also send **message to a Gmail under your control**, and check the **email’s headers** in your Gmail inbox, `dkim=pass` should be present in the `Authentication-Results` header field.
-
+Unaweza pia kutuma **ujumbe kwa Gmail chini ya udhibiti wako**, na kuangalia **vichwa vya barua pepe** katika kikasha chako cha Gmail, `dkim=pass` inapaswa kuwepo katika uwanja wa kichwa cha `Authentication-Results`.
 ```
 Authentication-Results: mx.google.com;
-       spf=pass (google.com: domain of contact@example.com designates --- as permitted sender) smtp.mail=contact@example.com;
-       dkim=pass header.i=@example.com;
+spf=pass (google.com: domain of contact@example.com designates --- as permitted sender) smtp.mail=contact@example.com;
+dkim=pass header.i=@example.com;
 ```
+### ​Kuondoa kutoka kwenye Orodha ya Spamhouse
 
-### ​Removing from Spamhouse Blacklist
+Ukurasa [www.mail-tester.com](https://www.mail-tester.com) unaweza kuonyesha ikiwa domain yako inazuia na spamhouse. Unaweza kuomba kuondolewa kwa domain/IP yako hapa: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
 
-The page [www.mail-tester.com](https://www.mail-tester.com) can indicate you if you your domain is being blocked by spamhouse. You can request your domain/IP to be removed at: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
+### Kuondoa kutoka kwenye Orodha ya Microsoft
 
-### Removing from Microsoft Blacklist
+​​Unaweza kuomba kuondolewa kwa domain/IP yako hapa [https://sender.office.com/](https://sender.office.com).
 
-​​You can request your domain/IP to be removed at [https://sender.office.com/](https://sender.office.com).
+## Unda & Anzisha Kampeni ya GoPhish
 
-## Create & Launch GoPhish Campaign
+### Profaili ya Kutuma
 
-### Sending Profile
+- Weka **jina la kutambulisha** profaili ya mtumaji
+- Amua kutoka kwenye akaunti gani utaenda kutuma barua pepe za phishing. Mapendekezo: _noreply, support, servicedesk, salesforce..._
+- Unaweza kuacha jina la mtumiaji na nenosiri kuwa tupu, lakini hakikisha umeangalia Ignore Certificate Errors
 
-- Set some **name to identify** the sender profile
-- Decide from which account are you going to send the phishing emails. Suggestions: _noreply, support, servicedesk, salesforce..._
-- You can leave blank the username and password, but make sure to check the Ignore Certificate Errors
-
-![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
+![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
 > [!NOTE]
-> It's recommended to use the "**Send Test Email**" functionality to test that everything is working.\
-> I would recommend to **send the test emails to 10min mails addresses** in order to avoid getting blacklisted making tests.
+> Inapendekezwa kutumia kazi ya "**Send Test Email**" ili kujaribu kwamba kila kitu kinafanya kazi.\
+> Ningependekeza **kutuma barua pepe za majaribio kwa anwani za barua za 10min** ili kuepuka kuorodheshwa kwenye orodha ya wezi wakati wa majaribio.
 
-### Email Template
+### Kiolezo cha Barua Pepe
 
-- Set some **name to identify** the template
-- Then write a **subject** (nothing estrange, just something you could expect to read in a regular email)
-- Make sure you have checked "**Add Tracking Image**"
-- Write the **email template** (you can use variables like in the following example):
-
+- Weka **jina la kutambulisha** kiolezo
+- Kisha andika **kichwa** (hakuna kitu cha ajabu, ni kitu ambacho unaweza kutarajia kusoma katika barua pepe ya kawaida)
+- Hakikisha umeangalia "**Add Tracking Image**"
+- Andika **kiolezo cha barua pepe** (unaweza kutumia vigezo kama katika mfano ufuatao):
 ```markup
 <html>
 <head>
-    <title></title>
+<title></title>
 </head>
 <body>
 <p class="MsoNormal"><span style="font-size:10.0pt;font-family:&quot;Verdana&quot;,sans-serif;color:black">Dear {{.FirstName}} {{.LastName}},</span></p>
@@ -358,107 +335,106 @@ WRITE HERE SOME SIGNATURE OF SOMEONE FROM THE COMPANY
 </body>
 </html>
 ```
+Kumbuka kwamba **ili kuongeza uaminifu wa barua pepe**, inapendekezwa kutumia saini kutoka kwa barua pepe ya mteja. Mapendekezo:
 
-Note that **in order to increase the credibility of the email**, it's recommended to use some signature from an email from the client. Suggestions:
-
-- Send an email to a **non existent address** and check if the response has any signature.
-- Search for **public emails** like info@ex.com or press@ex.com or public@ex.com and send them an email and wait for the response.
-- Try to contact **some valid discovered** email and wait for the response
+- Tuma barua pepe kwa **anwani isiyo na uwepo** na angalia kama jibu lina saini yoyote.
+- Tafuta **barua pepe za umma** kama info@ex.com au press@ex.com au public@ex.com na uwatume barua pepe na subiri jibu.
+- Jaribu kuwasiliana na **barua pepe halali zilizogunduliwa** na subiri jibu.
 
 ![](<../../images/image (80).png>)
 
 > [!NOTE]
-> The Email Template also allows to **attach files to send**. If you would also like to steal NTLM challenges using some specially crafted files/documents [read this page](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md).
+> Template ya Barua Pepe pia inaruhusu **kuambatisha faili za kutuma**. Ikiwa ungependa pia kuiba changamoto za NTLM kwa kutumia faili/hati zilizoundwa kwa njia maalum [soma ukurasa huu](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md).
 
-### Landing Page
+### Ukurasa wa Kutua
 
-- Write a **name**
-- **Write the HTML code** of the web page. Note that you can **import** web pages.
-- Mark **Capture Submitted Data** and **Capture Passwords**
-- Set a **redirection**
+- Andika **jina**
+- **Andika msimbo wa HTML** wa ukurasa wa wavuti. Kumbuka kwamba unaweza **kuagiza** kurasa za wavuti.
+- Mark **Kamata Data Iliyowasilishwa** na **Kamata Nywila**
+- Weka **mwelekeo**
 
 ![](<../../images/image (826).png>)
 
 > [!NOTE]
-> Usually you will need to modify the HTML code of the page and make some tests in local (maybe using some Apache server) **until you like the results.** Then, write that HTML code in the box.\
-> Note that if you need to **use some static resources** for the HTML (maybe some CSS and JS pages) you can save them in _**/opt/gophish/static/endpoint**_ and then access them from _**/static/\<filename>**_
+> Kawaida utahitaji kubadilisha msimbo wa HTML wa ukurasa na kufanya majaribio katika eneo la ndani (labda ukitumia seva ya Apache) **hadi upate matokeo unayopenda.** Kisha, andika msimbo huo wa HTML katika kisanduku.\
+> Kumbuka kwamba ikiwa unahitaji **kutumia rasilimali za kudumu** kwa HTML (labda kurasa za CSS na JS) unaweza kuziokoa katika _**/opt/gophish/static/endpoint**_ na kisha uzifikie kutoka _**/static/\<filename>**_
 
 > [!NOTE]
-> For the redirection you could **redirect the users to the legit main web page** of the victim, or redirect them to _/static/migration.html_ for example, put some **spinning wheel (**[**https://loading.io/**](https://loading.io)**) for 5 seconds and then indicate that the process was successful**.
+> Kwa mwelekeo unaweza **kuwapeleka watumiaji kwenye ukurasa halali wa wavuti** wa mwathirika, au kuwapeleka kwenye _/static/migration.html_ kwa mfano, weka **gari inayozunguka (**[**https://loading.io/**](https://loading.io)**) kwa sekunde 5 na kisha onyesha kwamba mchakato ulikuwa wa mafanikio**.
 
-### Users & Groups
+### Watumiaji na Makundi
 
-- Set a name
-- **Import the data** (note that in order to use the template for the example you need the firstname, last name and email address of each user)
+- Weka jina
+- **Agiza data** (kumbuka kwamba ili kutumia template kwa mfano unahitaji jina la kwanza, jina la mwisho na anwani ya barua pepe ya kila mtumiaji)
 
 ![](<../../images/image (163).png>)
 
-### Campaign
+### Kampeni
 
-Finally, create a campaign selecting a name, the email template, the landing page, the URL, the sending profile and the group. Note that the URL will be the link sent to the victims
+Hatimaye, tengeneza kampeni kwa kuchagua jina, template ya barua pepe, ukurasa wa kutua, URL, wasifu wa kutuma na kundi. Kumbuka kwamba URL itakuwa kiungo kitakachotumwa kwa wahanga.
 
-Note that the **Sending Profile allow to send a test email to see how will the final phishing email looks like**:
+Kumbuka kwamba **Wasifu wa Kutuma unaruhusu kutuma barua pepe ya majaribio kuona jinsi barua pepe ya mwisho ya udukuzi itakavyokuwa**:
 
 ![](<../../images/image (192).png>)
 
 > [!NOTE]
-> I would recommend to **send the test emails to 10min mails addresses** in order to avoid getting blacklisted making tests.
+> Ningependekeza **kutuma barua pepe za majaribio kwa anwani za barua pepe za 10min** ili kuepuka kuorodheshwa kwenye orodha za mblacklisted wakati wa kufanya majaribio.
 
-Once everything is ready, just launch the campaign!
+Mara kila kitu kiko tayari, uzindue kampeni!
 
-## Website Cloning
+## Kloni ya Tovuti
 
-If for any reason you want to clone the website check the following page:
+Ikiwa kwa sababu yoyote unataka kunakili tovuti angalia ukurasa ufuatao:
 
 {{#ref}}
 clone-a-website.md
 {{#endref}}
 
-## Backdoored Documents & Files
+## Hati na Faili Zenye Backdoor
 
-In some phishing assessments (mainly for Red Teams) you will want to also **send files containing some kind of backdoor** (maybe a C2 or maybe just something that will trigger an authentication).\
-Check out the following page for some examples:
+Katika tathmini za udukuzi (hasa kwa Timu za Red) utataka pia **kutuma faili zinazokuwa na aina fulani ya backdoor** (labda C2 au labda kitu ambacho kitachochea uthibitisho).\
+Angalia ukurasa ufuatao kwa mifano:
 
 {{#ref}}
 phishing-documents.md
 {{#endref}}
 
-## Phishing MFA
+## Udukuzi wa MFA
 
-### Via Proxy MitM
+### Kupitia Proxy MitM
 
-The previous attack is pretty clever as you are faking a real website and gathering the information set by the user. Unfortunately, if the user didn't put the correct password or if the application you faked is configured with 2FA, **this information won't allow you to impersonate the tricked user**.
+Shambulio la awali ni la busara kwani unafanyia kazi tovuti halisi na kukusanya taarifa zilizowekwa na mtumiaji. Kwa bahati mbaya, ikiwa mtumiaji hakuweka nywila sahihi au ikiwa programu uliyofanya kazi nayo imewekwa na 2FA, **habari hii haitakuruhusu kujifanya kama mtumiaji aliyejipatia hila**.
 
-This is where tools like [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) and [**muraena**](https://github.com/muraenateam/muraena) are useful. This tool will allow you to generate a MitM like attack. Basically, the attacks works in the following way:
+Hapa ndipo zana kama [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) na [**muraena**](https://github.com/muraenateam/muraena) zinakuwa na manufaa. Zana hii itakuruhusu kuunda shambulio kama la MitM. K基本, shambulio linafanya kazi kwa njia ifuatayo:
 
-1. You **impersonate the login** form of the real webpage.
-2. The user **send** his **credentials** to your fake page and the tool send those to the real webpage, **checking if the credentials work**.
-3. If the account is configured with **2FA**, the MitM page will ask for it and once the **user introduces** it the tool will send it to the real web page.
-4. Once the user is authenticated you (as attacker) will have **captured the credentials, the 2FA, the cookie and any information** of every interaction your while the tool is performing a MitM.
+1. Unajifanya **fomu ya kuingia** ya ukurasa halisi wa wavuti.
+2. Mtumiaji **anatumia** **taarifa zake** kwenye ukurasa wako wa uongo na zana hiyo inatumia hizo kwenye ukurasa halisi wa wavuti, **ikikagua ikiwa taarifa hizo zinafanya kazi**.
+3. Ikiwa akaunti imewekwa na **2FA**, ukurasa wa MitM utauliza kwa hiyo na mara **mtumiaji anapoweka** hiyo zana itatuma kwa ukurasa halisi wa wavuti.
+4. Mara mtumiaji anapothibitishwa wewe (kama mshambuliaji) utakuwa **umechukua taarifa, 2FA, cookie na taarifa yoyote** ya kila mwingiliano wako wakati zana hiyo inatekeleza MitM.
 
-### Via VNC
+### Kupitia VNC
 
-What if instead of **sending the victim to a malicious page** with the same looks as the original one, you send him to a **VNC session with a browser connected to the real web page**? You will be able to see what he does, steal the password, the MFA used, the cookies...\
-You can do this with [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)
+Je, ni vipi badala ya **kumpeleka mwathirika kwenye ukurasa mbaya** wenye muonekano sawa na wa asili, unampeleka kwenye **kikao cha VNC chenye kivinjari kilichounganishwa na ukurasa halisi wa wavuti**? Utaweza kuona anachofanya, kuiba nywila, MFA iliyotumika, cookies...\
+Unaweza kufanya hivi na [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)
 
-## Detecting the detection
+## Kugundua kugunduliwa
 
-Obviously one of the best ways to know if you have been busted is to **search your domain inside blacklists**. If it appears listed, somehow your domain was detected as suspicions.\
-One easy way to check if you domain appears in any blacklist is to use [https://malwareworld.com/](https://malwareworld.com)
+Kwa wazi moja ya njia bora za kujua ikiwa umekamatwa ni **kutafuta kikoa chako ndani ya orodha za mblacklisted**. Ikiwa inajitokeza, kwa namna fulani kikoa chako kiligunduliwa kama cha mashaka.\
+Njia rahisi ya kuangalia ikiwa kikoa chako kinajitokeza katika orodha yoyote ya mblacklisted ni kutumia [https://malwareworld.com/](https://malwareworld.com)
 
-However, there are other ways to know if the victim is **actively looking for suspicions phishing activity in the wild** as explained in:
+Hata hivyo, kuna njia nyingine za kujua ikiwa mwathirika **anatafuta kwa nguvu shughuli za udukuzi za mashaka katika mazingira** kama ilivyoelezwa katika:
 
 {{#ref}}
 detecting-phising.md
 {{#endref}}
 
-You can **buy a domain with a very similar name** to the victims domain **and/or generate a certificate** for a **subdomain** of a domain controlled by you **containing** the **keyword** of the victim's domain. If the **victim** perform any kind of **DNS or HTTP interaction** with them, you will know that **he is actively looking** for suspicious domains and you will need to be very stealth.
+Unaweza **kununua kikoa chenye jina linalofanana sana** na kikoa cha mwathirika **na/au kuunda cheti** kwa **subdomain** ya kikoa kinachodhibitiwa na wewe **kilichokuwa** na **neno muhimu** la kikoa cha mwathirika. Ikiwa **mwathirika** atafanya aina yoyote ya **DNS au mwingiliano wa HTTP** nao, utajua kwamba **anatafuta kwa nguvu** kikoa cha mashaka na utahitaji kuwa na uangalifu mkubwa.
 
-### Evaluate the phishing
+### Kadiria udukuzi
 
-Use [**Phishious** ](https://github.com/Rices/Phishious)to evaluate if your email is going to end in the spam folder or if it's going to be blocked or successful.
+Tumia [**Phishious** ](https://github.com/Rices/Phishious)kadiria ikiwa barua pepe yako itakwenda kwenye folda ya spam au ikiwa itazuiwa au kufanikiwa.
 
-## References
+## Marejeleo
 
 - [https://zeltser.com/domain-name-variations-in-phishing/](https://zeltser.com/domain-name-variations-in-phishing/)
 - [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/)

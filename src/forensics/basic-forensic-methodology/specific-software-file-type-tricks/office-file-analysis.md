@@ -1,36 +1,18 @@
-# Office file analysis
+# Uchambuzi wa faili za Ofisi
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="../../../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+Kwa maelezo zaidi angalia [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/). Hii ni muhtasari tu:
 
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Microsoft imeunda aina nyingi za fomati za hati za ofisi, ambapo aina mbili kuu ni **OLE formats** (kama RTF, DOC, XLS, PPT) na **Office Open XML (OOXML) formats** (kama DOCX, XLSX, PPTX). Fomati hizi zinaweza kujumuisha macros, na kuifanya kuwa malengo ya phishing na malware. Faili za OOXML zimeundwa kama vyombo vya zip, kuruhusu ukaguzi kupitia unzipping, ikifunua muundo wa faili na folda na maudhui ya faili ya XML.
 
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+Ili kuchunguza muundo wa faili za OOXML, amri ya kufungua hati na muundo wa matokeo zimepewa. Mbinu za kuficha data katika faili hizi zimeandikwa, zikionyesha uvumbuzi unaoendelea katika kuficha data ndani ya changamoto za CTF.
 
-For further information check [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/). This is just a sumary:
+Kwa uchambuzi, **oletools** na **OfficeDissector** hutoa seti kamili za zana za kuchunguza hati za OLE na OOXML. Zana hizi husaidia katika kubaini na kuchambua macros zilizojumuishwa, ambazo mara nyingi hutumikia kama njia za usambazaji wa malware, kwa kawaida zinapakua na kutekeleza mzigo mbaya wa ziada. Uchambuzi wa macros za VBA unaweza kufanywa bila Microsoft Office kwa kutumia Libre Office, ambayo inaruhusu urekebishaji kwa kutumia breakpoints na watch variables.
 
-Microsoft has created many office document formats, with two main types being **OLE formats** (like RTF, DOC, XLS, PPT) and **Office Open XML (OOXML) formats** (such as DOCX, XLSX, PPTX). These formats can include macros, making them targets for phishing and malware. OOXML files are structured as zip containers, allowing inspection through unzipping, revealing the file and folder hierarchy and XML file contents.
-
-To explore OOXML file structures, the command to unzip a document and the output structure are given. Techniques for hiding data in these files have been documented, indicating ongoing innovation in data concealment within CTF challenges.
-
-For analysis, **oletools** and **OfficeDissector** offer comprehensive toolsets for examining both OLE and OOXML documents. These tools help in identifying and analyzing embedded macros, which often serve as vectors for malware delivery, typically downloading and executing additional malicious payloads. Analysis of VBA macros can be conducted without Microsoft Office by utilizing Libre Office, which allows for debugging with breakpoints and watch variables.
-
-Installation and usage of **oletools** are straightforward, with commands provided for installing via pip and extracting macros from documents. Automatic execution of macros is triggered by functions like `AutoOpen`, `AutoExec`, or `Document_Open`.
-
+Usanidi na matumizi ya **oletools** ni rahisi, huku amri zikipewa kwa ajili ya kusanidi kupitia pip na kutoa macros kutoka kwa hati. Utekelezaji wa moja kwa moja wa macros unasababishwa na kazi kama `AutoOpen`, `AutoExec`, au `Document_Open`.
 ```bash
 sudo pip3 install -U oletools
 olevba -c /path/to/document #Extract macros
 ```
-
-<figure><img src="../../../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-
 {{#include ../../../banners/hacktricks-training.md}}

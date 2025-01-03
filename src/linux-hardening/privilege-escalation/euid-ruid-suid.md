@@ -2,88 +2,80 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
-
-{% embed url="https://academy.8ksec.io/" %}
 
 ### User Identification Variables
 
-- **`ruid`**: The **real user ID** denotes the user who initiated the process.
-- **`euid`**: Known as the **effective user ID**, it represents the user identity utilized by the system to ascertain process privileges. Generally, `euid` mirrors `ruid`, barring instances like a SetUID binary execution, where `euid` assumes the file owner's identity, thus granting specific operational permissions.
-- **`suid`**: This **saved user ID** is pivotal when a high-privilege process (typically running as root) needs to temporarily relinquish its privileges to perform certain tasks, only to later reclaim its initial elevated status.
+- **`ruid`**: **kitambulisho halisi cha mtumiaji** kinamaanisha mtumiaji aliyeanzisha mchakato.
+- **`euid`**: Inajulikana kama **kitambulisho cha mtumiaji kinachofanya kazi**, kinawakilisha utambulisho wa mtumiaji unaotumiwa na mfumo kubaini ruhusa za mchakato. Kwa ujumla, `euid` inafanana na `ruid`, isipokuwa katika matukio kama utekelezaji wa binary ya SetUID, ambapo `euid` inachukua utambulisho wa mmiliki wa faili, hivyo kutoa ruhusa maalum za uendeshaji.
+- **`suid`**: Huu **kitambulisho kilichohifadhiwa cha mtumiaji** ni muhimu wakati mchakato wa kiwango cha juu (kawaida ukifanya kazi kama root) unahitaji kuachana kwa muda na ruhusa zake ili kutekeleza kazi fulani, kisha baadaye kurejesha hadhi yake ya juu ya awali.
 
 #### Important Note
 
-A process not operating under root can only modify its `euid` to match the current `ruid`, `euid`, or `suid`.
+Mchakato usiokuwa chini ya root unaweza kubadilisha `euid` yake ili ifanane na `ruid`, `euid`, au `suid` ya sasa tu.
 
 ### Understanding set\*uid Functions
 
-- **`setuid`**: Contrary to initial assumptions, `setuid` primarily modifies `euid` rather than `ruid`. Specifically, for privileged processes, it aligns `ruid`, `euid`, and `suid` with the specified user, often root, effectively solidifying these IDs due to the overriding `suid`. Detailed insights can be found in the [setuid man page](https://man7.org/linux/man-pages/man2/setuid.2.html).
-- **`setreuid`** and **`setresuid`**: These functions allow for the nuanced adjustment of `ruid`, `euid`, and `suid`. However, their capabilities are contingent on the process's privilege level. For non-root processes, modifications are restricted to the current values of `ruid`, `euid`, and `suid`. In contrast, root processes or those with `CAP_SETUID` capability can assign arbitrary values to these IDs. More information can be gleaned from the [setresuid man page](https://man7.org/linux/man-pages/man2/setresuid.2.html) and the [setreuid man page](https://man7.org/linux/man-pages/man2/setreuid.2.html).
+- **`setuid`**: Kinyume na dhana za awali, `setuid` hasa inabadilisha `euid` badala ya `ruid`. Kwa mchakato wenye ruhusa, inalinganisha `ruid`, `euid`, na `suid` na mtumiaji aliyeainishwa, mara nyingi root, kwa ufanisi inaimarisha vitambulisho hivi kutokana na `suid` inayoshinda. Maelezo ya kina yanaweza kupatikana kwenye [setuid man page](https://man7.org/linux/man-pages/man2/setuid.2.html).
+- **`setreuid`** na **`setresuid`**: Hizi kazi zinaruhusu marekebisho ya kina ya `ruid`, `euid`, na `suid`. Hata hivyo, uwezo wao unategemea kiwango cha ruhusa za mchakato. Kwa michakato isiyo ya root, marekebisho yanakabiliwa na thamani za sasa za `ruid`, `euid`, na `suid`. Kinyume chake, michakato ya root au zile zenye uwezo wa `CAP_SETUID` zinaweza kupewa thamani zisizo za kawaida kwa vitambulisho hivi. Maelezo zaidi yanaweza kupatikana kwenye [setresuid man page](https://man7.org/linux/man-pages/man2/setresuid.2.html) na [setreuid man page](https://man7.org/linux/man-pages/man2/setreuid.2.html).
 
-These functionalities are designed not as a security mechanism but to facilitate the intended operational flow, such as when a program adopts another user's identity by altering its effective user ID.
+Hizi kazi zimeundwa si kama mekanismu ya usalama bali kusaidia mtiririko wa uendeshaji unaokusudiwa, kama vile wakati programu inachukua utambulisho wa mtumiaji mwingine kwa kubadilisha kitambulisho chake cha mtumiaji kinachofanya kazi.
 
-Notably, while `setuid` might be a common go-to for privilege elevation to root (since it aligns all IDs to root), differentiating between these functions is crucial for understanding and manipulating user ID behaviors in varying scenarios.
+Kwa kuzingatia, ingawa `setuid` inaweza kuwa chaguo la kawaida kwa kuinua ruhusa hadi root (kwa kuwa inalinganisha vitambulisho vyote na root), kutofautisha kati ya hizi kazi ni muhimu kwa kuelewa na kudhibiti tabia za kitambulisho cha mtumiaji katika hali tofauti.
 
 ### Program Execution Mechanisms in Linux
 
 #### **`execve` System Call**
 
-- **Functionality**: `execve` initiates a program, determined by the first argument. It takes two array arguments, `argv` for arguments and `envp` for the environment.
-- **Behavior**: It retains the memory space of the caller but refreshes the stack, heap, and data segments. The program's code is replaced by the new program.
+- **Functionality**: `execve` inaanzisha programu, inayoamuliwa na hoja ya kwanza. Inachukua hoja mbili za array, `argv` kwa ajili ya hoja na `envp` kwa mazingira.
+- **Behavior**: Inahifadhi nafasi ya kumbukumbu ya mwitikiaji lakini inasasisha stack, heap, na sehemu za data. Msimbo wa programu unabadilishwa na programu mpya.
 - **User ID Preservation**:
-  - `ruid`, `euid`, and supplementary group IDs remain unaltered.
-  - `euid` might have nuanced changes if the new program has the SetUID bit set.
-  - `suid` gets updated from `euid` post-execution.
-- **Documentation**: Detailed information can be found on the [`execve` man page](https://man7.org/linux/man-pages/man2/execve.2.html).
+- `ruid`, `euid`, na vitambulisho vya makundi ya ziada vinabaki bila kubadilika.
+- `euid` inaweza kuwa na mabadiliko madogo ikiwa programu mpya ina SetUID bit iliyowekwa.
+- `suid` inasasishwa kutoka `euid` baada ya utekelezaji.
+- **Documentation**: Maelezo ya kina yanaweza kupatikana kwenye [`execve` man page](https://man7.org/linux/man-pages/man2/execve.2.html).
 
 #### **`system` Function**
 
-- **Functionality**: Unlike `execve`, `system` creates a child process using `fork` and executes a command within that child process using `execl`.
-- **Command Execution**: Executes the command via `sh` with `execl("/bin/sh", "sh", "-c", command, (char *) NULL);`.
-- **Behavior**: As `execl` is a form of `execve`, it operates similarly but in the context of a new child process.
-- **Documentation**: Further insights can be obtained from the [`system` man page](https://man7.org/linux/man-pages/man3/system.3.html).
+- **Functionality**: Kinyume na `execve`, `system` inaunda mchakato wa mtoto kwa kutumia `fork` na inatekeleza amri ndani ya mchakato huo wa mtoto kwa kutumia `execl`.
+- **Command Execution**: Inatekeleza amri kupitia `sh` kwa `execl("/bin/sh", "sh", "-c", command, (char *) NULL);`.
+- **Behavior**: Kwa kuwa `execl` ni aina ya `execve`, inafanya kazi kwa njia sawa lakini katika muktadha wa mchakato mpya wa mtoto.
+- **Documentation**: Maelezo zaidi yanaweza kupatikana kwenye [`system` man page](https://man7.org/linux/man-pages/man3/system.3.html).
 
 #### **Behavior of `bash` and `sh` with SUID**
 
 - **`bash`**:
-  - Has a `-p` option influencing how `euid` and `ruid` are treated.
-  - Without `-p`, `bash` sets `euid` to `ruid` if they initially differ.
-  - With `-p`, the initial `euid` is preserved.
-  - More details can be found on the [`bash` man page](https://linux.die.net/man/1/bash).
+- Ina chaguo la `-p` linaloathiri jinsi `euid` na `ruid` zinavyoshughulikiwa.
+- Bila `-p`, `bash` inabadilisha `euid` kuwa `ruid` ikiwa awali zinatofautiana.
+- Kwa `-p`, `euid` ya awali inahifadhiwa.
+- Maelezo zaidi yanaweza kupatikana kwenye [`bash` man page](https://linux.die.net/man/1/bash).
 - **`sh`**:
-  - Does not possess a mechanism similar to `-p` in `bash`.
-  - The behavior concerning user IDs is not explicitly mentioned, except under the `-i` option, emphasizing the preservation of `euid` and `ruid` equality.
-  - Additional information is available on the [`sh` man page](https://man7.org/linux/man-pages/man1/sh.1p.html).
+- Haina mekanismu inayofanana na `-p` katika `bash`.
+- Tabia kuhusu vitambulisho vya mtumiaji haijatajwa wazi, isipokuwa chini ya chaguo la `-i`, ikisisitiza uhifadhi wa usawa wa `euid` na `ruid`.
+- Maelezo ya ziada yanapatikana kwenye [`sh` man page](https://man7.org/linux/man-pages/man1/sh.1p.html).
 
-These mechanisms, distinct in their operation, offer a versatile range of options for executing and transitioning between programs, with specific nuances in how user IDs are managed and preserved.
+Mekanismu hizi, tofauti katika uendeshaji wao, zinatoa anuwai ya chaguzi za kutekeleza na kubadilisha kati ya programu, huku zikiwa na tofauti maalum katika jinsi vitambulisho vya mtumiaji vinavyoshughulikiwa na kuhifadhiwa.
 
 ### Testing User ID Behaviors in Executions
 
-Examples taken from https://0xdf.gitlab.io/2022/05/31/setuid-rabbithole.html#testing-on-jail, check it for further information
+Mifano imechukuliwa kutoka https://0xdf.gitlab.io/2022/05/31/setuid-rabbithole.html#testing-on-jail, angalia kwa maelezo zaidi
 
 #### Case 1: Using `setuid` with `system`
 
-**Objective**: Understanding the effect of `setuid` in combination with `system` and `bash` as `sh`.
+**Objective**: Kuelewa athari ya `setuid` kwa pamoja na `system` na `bash` kama `sh`.
 
 **C Code**:
-
 ```c
 #define _GNU_SOURCE
 #include <stdlib.h>
 #include <unistd.h>
 
 int main(void) {
-    setuid(1000);
-    system("id");
-    return 0;
+setuid(1000);
+system("id");
+return 0;
 }
 ```
-
-**Compilation and Permissions:**
-
+**Uundaji na Ruhusa:**
 ```bash
 oxdf@hacky$ gcc a.c -o /mnt/nfsshare/a;
 oxdf@hacky$ chmod 4755 /mnt/nfsshare/a
@@ -93,132 +85,108 @@ oxdf@hacky$ chmod 4755 /mnt/nfsshare/a
 bash-4.2$ $ ./a
 uid=99(nobody) gid=99(nobody) groups=99(nobody) context=system_u:system_r:unconfined_service_t:s0
 ```
-
 **Analysis:**
 
-- `ruid` and `euid` start as 99 (nobody) and 1000 (frank) respectively.
-- `setuid` aligns both to 1000.
-- `system` executes `/bin/bash -c id` due to the symlink from sh to bash.
-- `bash`, without `-p`, adjusts `euid` to match `ruid`, resulting in both being 99 (nobody).
+- `ruid` na `euid` huanza kama 99 (nobody) na 1000 (frank) mtawalia.
+- `setuid` inawalinganisha wote kuwa 1000.
+- `system` inatekeleza `/bin/bash -c id` kutokana na symlink kutoka sh hadi bash.
+- `bash`, bila `-p`, inarekebisha `euid` ili ifanane na `ruid`, na kusababisha wote kuwa 99 (nobody).
 
 #### Case 2: Using setreuid with system
 
 **C Code**:
-
 ```c
 #define _GNU_SOURCE
 #include <stdlib.h>
 #include <unistd.h>
 
 int main(void) {
-    setreuid(1000, 1000);
-    system("id");
-    return 0;
+setreuid(1000, 1000);
+system("id");
+return 0;
 }
 ```
-
-**Compilation and Permissions:**
-
+**Uundaji na Ruhusa:**
 ```bash
 oxdf@hacky$ gcc b.c -o /mnt/nfsshare/b; chmod 4755 /mnt/nfsshare/b
 ```
-
-**Execution and Result:**
-
+**Utekelezaji na Matokeo:**
 ```bash
 bash-4.2$ $ ./b
 uid=1000(frank) gid=99(nobody) groups=99(nobody) context=system_u:system_r:unconfined_service_t:s0
 ```
+**Uchambuzi:**
 
-**Analysis:**
+- `setreuid` inaweka ruid na euid zote mbili kuwa 1000.
+- `system` inaita bash, ambayo inashikilia vitambulisho vya mtumiaji kutokana na usawa wao, ikifanya kazi kama frank.
 
-- `setreuid` sets both ruid and euid to 1000.
-- `system` invokes bash, which maintains the user IDs due to their equality, effectively operating as frank.
+#### Kesi ya 3: Kutumia setuid na execve
 
-#### Case 3: Using setuid with execve
-
-Objective: Exploring the interaction between setuid and execve.
-
+Lengo: Kuchunguza mwingiliano kati ya setuid na execve.
 ```bash
 #define _GNU_SOURCE
 #include <stdlib.h>
 #include <unistd.h>
 
 int main(void) {
-    setuid(1000);
-    execve("/usr/bin/id", NULL, NULL);
-    return 0;
+setuid(1000);
+execve("/usr/bin/id", NULL, NULL);
+return 0;
 }
 ```
-
-**Execution and Result:**
-
+**Utekelezaji na Matokeo:**
 ```bash
 bash-4.2$ $ ./c
 uid=99(nobody) gid=99(nobody) euid=1000(frank) groups=99(nobody) context=system_u:system_r:unconfined_service_t:s0
 ```
+**Uchambuzi:**
 
-**Analysis:**
+- `ruid` inabaki 99, lakini euid imewekwa kwa 1000, kulingana na athari ya setuid.
 
-- `ruid` remains 99, but euid is set to 1000, in line with setuid's effect.
-
-**C Code Example 2 (Calling Bash):**
-
+**Mfano wa Kode ya C 2 (Kuita Bash):**
 ```bash
 #define _GNU_SOURCE
 #include <stdlib.h>
 #include <unistd.h>
 
 int main(void) {
-    setuid(1000);
-    execve("/bin/bash", NULL, NULL);
-    return 0;
+setuid(1000);
+execve("/bin/bash", NULL, NULL);
+return 0;
 }
 ```
-
-**Execution and Result:**
-
+**Utekelezaji na Matokeo:**
 ```bash
 bash-4.2$ $ ./d
 bash-4.2$ $ id
 uid=99(nobody) gid=99(nobody) groups=99(nobody) context=system_u:system_r:unconfined_service_t:s0
 ```
+**Uchambuzi:**
 
-**Analysis:**
+- Ingawa `euid` imewekwa kuwa 1000 na `setuid`, `bash` inarejesha euid kuwa `ruid` (99) kutokana na ukosefu wa `-p`.
 
-- Although `euid` is set to 1000 by `setuid`, `bash` resets euid to `ruid` (99) due to the absence of `-p`.
-
-**C Code Example 3 (Using bash -p):**
-
+**Mfano wa Kode ya C 3 (Kutumia bash -p):**
 ```bash
 #define _GNU_SOURCE
 #include <stdlib.h>
 #include <unistd.h>
 
 int main(void) {
-    char *const paramList[10] = {"/bin/bash", "-p", NULL};
-    setuid(1000);
-    execve(paramList[0], paramList, NULL);
-    return 0;
+char *const paramList[10] = {"/bin/bash", "-p", NULL};
+setuid(1000);
+execve(paramList[0], paramList, NULL);
+return 0;
 }
 ```
-
-**Execution and Result:**
-
+**Utekelezaji na Matokeo:**
 ```bash
 bash-4.2$ $ ./e
 bash-4.2$ $ id
 uid=99(nobody) gid=99(nobody) euid=100
 ```
-
-## References
+## Marejeleo
 
 - [https://0xdf.gitlab.io/2022/05/31/setuid-rabbithole.html#testing-on-jail](https://0xdf.gitlab.io/2022/05/31/setuid-rabbithole.html#testing-on-jail)
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
-
-{% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

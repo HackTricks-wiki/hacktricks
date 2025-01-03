@@ -1,47 +1,38 @@
-# Certificates
+# Vyeti
 
 {{#include ../banners/hacktricks-training.md}}
 
-<figure><img src="../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+## Nini ni Cheti
 
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Cheti cha **funguo ya umma** ni kitambulisho cha kidijitali kinachotumika katika cryptography kuthibitisha kwamba mtu anamiliki funguo ya umma. Kinajumuisha maelezo ya funguo, utambulisho wa mmiliki (mada), na saini ya kidijitali kutoka kwa mamlaka inayotegemewa (mtoaji). Ikiwa programu inategemea mtoaji na saini ni halali, mawasiliano salama na mmiliki wa funguo yanawezekana.
 
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+Vyeti kwa kawaida vinatolewa na [mamlaka ya vyeti](https://en.wikipedia.org/wiki/Certificate_authority) (CAs) katika muundo wa [miundombinu ya funguo za umma](https://en.wikipedia.org/wiki/Public-key_infrastructure) (PKI). Njia nyingine ni [mtandao wa kuaminiana](https://en.wikipedia.org/wiki/Web_of_trust), ambapo watumiaji wanathibitisha funguo za kila mmoja moja kwa moja. Muundo wa kawaida wa vyeti ni [X.509](https://en.wikipedia.org/wiki/X.509), ambayo inaweza kubadilishwa kwa mahitaji maalum kama ilivyoelezwa katika RFC 5280.
 
-## What is a Certificate
+## x509 Sehemu za Kawaida
 
-A **public key certificate** is a digital ID used in cryptography to prove someone owns a public key. It includes the key's details, the owner's identity (the subject), and a digital signature from a trusted authority (the issuer). If the software trusts the issuer and the signature is valid, secure communication with the key's owner is possible.
+### **Sehemu za Kawaida katika Vyeti vya x509**
 
-Certificates are mostly issued by [certificate authorities](https://en.wikipedia.org/wiki/Certificate_authority) (CAs) in a [public-key infrastructure](https://en.wikipedia.org/wiki/Public-key_infrastructure) (PKI) setup. Another method is the [web of trust](https://en.wikipedia.org/wiki/Web_of_trust), where users directly verify each other’s keys. The common format for certificates is [X.509](https://en.wikipedia.org/wiki/X.509), which can be adapted for specific needs as outlined in RFC 5280.
+Katika vyeti vya x509, sehemu kadhaa **zinacheza** majukumu muhimu katika kuhakikisha halali na usalama wa cheti. Hapa kuna muhtasari wa sehemu hizi:
 
-## x509 Common Fields
+- **Nambari ya Toleo** inaashiria toleo la muundo wa x509.
+- **Nambari ya Mfululizo** inatambulisha cheti kwa kipekee ndani ya mfumo wa Mamlaka ya Cheti (CA), hasa kwa ajili ya kufuatilia kufutwa.
+- Sehemu ya **Mada** inawakilisha mmiliki wa cheti, ambaye anaweza kuwa mashine, mtu binafsi, au shirika. Inajumuisha utambulisho wa kina kama:
+- **Jina la Kawaida (CN)**: Majina ya maeneo yanayofunikwa na cheti.
+- **Nchi (C)**, **Eneo (L)**, **Jimbo au Mkoa (ST, S, au P)**, **Shirika (O)**, na **Kitengo cha Shirika (OU)** vinatoa maelezo ya kijiografia na ya shirika.
+- **Jina Lililotambulika (DN)** linajumuisha utambulisho kamili wa mada.
+- Maelezo ya **Mtoaji** yanaeleza nani alithibitisha na kusaini cheti, ikiwa ni pamoja na sehemu zinazofanana kama za Mada kwa CA.
+- **Muda wa Halali** umewekwa alama na **Siyo Kabla** na **Siyo Baada** ya alama za muda, kuhakikisha cheti hakitumiki kabla au baada ya tarehe fulani.
+- Sehemu ya **Funguo ya Umma**, muhimu kwa usalama wa cheti, inaelezea algorithimu, ukubwa, na maelezo mengine ya kiufundi ya funguo ya umma.
+- **x509v3 nyongeza** zinaboresha kazi za cheti, zikielezea **Matumizi ya Funguo**, **Matumizi ya Funguo ya Kupanuliwa**, **Jina Alternatif la Mada**, na mali nyingine za kuboresha matumizi ya cheti.
 
-### **Common Fields in x509 Certificates**
+#### **Matumizi ya Funguo na Nyongeza**
 
-In x509 certificates, several **fields** play critical roles in ensuring the certificate's validity and security. Here's a breakdown of these fields:
-
-- **Version Number** signifies the x509 format's version.
-- **Serial Number** uniquely identifies the certificate within a Certificate Authority's (CA) system, mainly for revocation tracking.
-- The **Subject** field represents the certificate's owner, which could be a machine, an individual, or an organization. It includes detailed identification such as:
-  - **Common Name (CN)**: Domains covered by the certificate.
-  - **Country (C)**, **Locality (L)**, **State or Province (ST, S, or P)**, **Organization (O)**, and **Organizational Unit (OU)** provide geographical and organizational details.
-  - **Distinguished Name (DN)** encapsulates the full subject identification.
-- **Issuer** details who verified and signed the certificate, including similar subfields as the Subject for the CA.
-- **Validity Period** is marked by **Not Before** and **Not After** timestamps, ensuring the certificate is not used before or after a certain date.
-- The **Public Key** section, crucial for the certificate's security, specifies the algorithm, size, and other technical details of the public key.
-- **x509v3 extensions** enhance the certificate's functionality, specifying **Key Usage**, **Extended Key Usage**, **Subject Alternative Name**, and other properties to fine-tune the certificate's application.
-
-#### **Key Usage and Extensions**
-
-- **Key Usage** identifies cryptographic applications of the public key, like digital signature or key encipherment.
-- **Extended Key Usage** further narrows down the certificate's use cases, e.g., for TLS server authentication.
-- **Subject Alternative Name** and **Basic Constraint** define additional host names covered by the certificate and whether it's a CA or end-entity certificate, respectively.
-- Identifiers like **Subject Key Identifier** and **Authority Key Identifier** ensure uniqueness and traceability of keys.
-- **Authority Information Access** and **CRL Distribution Points** provide paths to verify the issuing CA and check certificate revocation status.
-- **CT Precertificate SCTs** offer transparency logs, crucial for public trust in the certificate.
-
+- **Matumizi ya Funguo** yanatambulisha matumizi ya cryptographic ya funguo ya umma, kama saini ya kidijitali au ufichaji wa funguo.
+- **Matumizi ya Funguo ya Kupanuliwa** yanapunguza zaidi matumizi ya cheti, kwa mfano, kwa uthibitisho wa seva ya TLS.
+- **Jina Alternatif la Mada** na **Kikomo cha Msingi** vin定义 majina mengine ya mwenyeji yanayofunikwa na cheti na ikiwa ni cheti cha CA au cheti cha mwisho, mtawalia.
+- Vitambulisho kama **Vitambulisho vya Funguo vya Mada** na **Vitambulisho vya Funguo vya Mamlaka** vinahakikisha upekee na ufuatiliaji wa funguo.
+- **Upatikanaji wa Taarifa za Mamlaka** na **Nukta za Usambazaji wa CRL** vinatoa njia za kuthibitisha CA inayotoa na kuangalia hali ya kufutwa kwa cheti.
+- **CT Precertificate SCTs** vinatoa kumbukumbu za uwazi, muhimu kwa uaminifu wa umma katika cheti.
 ```python
 # Example of accessing and using x509 certificate fields programmatically:
 from cryptography import x509
@@ -49,8 +40,8 @@ from cryptography.hazmat.backends import default_backend
 
 # Load an x509 certificate (assuming cert.pem is a certificate file)
 with open("cert.pem", "rb") as file:
-    cert_data = file.read()
-    certificate = x509.load_pem_x509_certificate(cert_data, default_backend())
+cert_data = file.read()
+certificate = x509.load_pem_x509_certificate(cert_data, default_backend())
 
 # Accessing fields
 serial_number = certificate.serial_number
@@ -63,133 +54,104 @@ print(f"Issuer: {issuer}")
 print(f"Subject: {subject}")
 print(f"Public Key: {public_key}")
 ```
+### **Tofauti kati ya OCSP na CRL Distribution Points**
 
-### **Difference between OCSP and CRL Distribution Points**
+**OCSP** (**RFC 2560**) inahusisha mteja na responder wakifanya kazi pamoja kuangalia kama cheti cha umma wa dijiti kimeondolewa, bila kuhitaji kupakua **CRL** kamili. Njia hii ni bora zaidi kuliko **CRL** ya jadi, ambayo inatoa orodha ya nambari za serial za vyeti vilivyondolewa lakini inahitaji kupakua faili kubwa. CRLs zinaweza kujumuisha hadi entries 512. Maelezo zaidi yanapatikana [here](https://www.arubanetworks.com/techdocs/ArubaOS%206_3_1_Web_Help/Content/ArubaFrameStyles/CertRevocation/About_OCSP_and_CRL.htm).
 
-**OCSP** (**RFC 2560**) involves a client and a responder working together to check if a digital public-key certificate has been revoked, without needing to download the full **CRL**. This method is more efficient than the traditional **CRL**, which provides a list of revoked certificate serial numbers but requires downloading a potentially large file. CRLs can include up to 512 entries. More details are available [here](https://www.arubanetworks.com/techdocs/ArubaOS%206_3_1_Web_Help/Content/ArubaFrameStyles/CertRevocation/About_OCSP_and_CRL.htm).
+### **Nini maana ya Uwazi wa Cheti**
 
-### **What is Certificate Transparency**
+Uwazi wa Cheti husaidia kupambana na vitisho vinavyohusiana na vyeti kwa kuhakikisha utoaji na uwepo wa vyeti vya SSL unaonekana kwa wamiliki wa domain, CAs, na watumiaji. Malengo yake ni:
 
-Certificate Transparency helps combat certificate-related threats by ensuring the issuance and existence of SSL certificates are visible to domain owners, CAs, and users. Its objectives are:
+- Kuzuia CAs kutoa vyeti vya SSL kwa domain bila maarifa ya mmiliki wa domain.
+- Kuanzisha mfumo wa ukaguzi wa wazi wa kufuatilia vyeti vilivyotolewa kwa makosa au kwa uovu.
+- Kulinda watumiaji dhidi ya vyeti vya udanganyifu.
 
-- Preventing CAs from issuing SSL certificates for a domain without the domain owner's knowledge.
-- Establishing an open auditing system for tracking mistakenly or maliciously issued certificates.
-- Safeguarding users against fraudulent certificates.
+#### **Makaratasi ya Vyeti**
 
-#### **Certificate Logs**
+Makaratasi ya vyeti ni rekodi za vyeti zinazoweza kukaguliwa hadharani, zinazoongezwa tu, zinazoshughulikiwa na huduma za mtandao. Makaratasi haya yanatoa uthibitisho wa kihesabu kwa ajili ya ukaguzi. Mamlaka za utoaji na umma wanaweza kuwasilisha vyeti kwenye makaratasahaya au kuyatafuta kwa ajili ya uthibitisho. Ingawa idadi halisi ya seva za log haijafanywa kuwa thabiti, inatarajiwa kuwa chini ya elfu moja duniani kote. Seva hizi zinaweza kusimamiwa kwa uhuru na CAs, ISPs, au shirika lolote linalovutiwa.
 
-Certificate logs are publicly auditable, append-only records of certificates, maintained by network services. These logs provide cryptographic proofs for auditing purposes. Both issuance authorities and the public can submit certificates to these logs or query them for verification. While the exact number of log servers is not fixed, it's expected to be less than a thousand globally. These servers can be independently managed by CAs, ISPs, or any interested entity.
+#### **Utafutaji**
 
-#### **Query**
+Ili kuchunguza makaratasahaya ya Uwazi wa Cheti kwa domain yoyote, tembelea [https://crt.sh/](https://crt.sh).
 
-To explore Certificate Transparency logs for any domain, visit [https://crt.sh/](https://crt.sh).
+Mifumo tofauti inapatikana kwa ajili ya kuhifadhi vyeti, kila moja ikiwa na matumizi yake na ulinganifu. Muhtasari huu unashughulikia mifumo kuu na kutoa mwongozo juu ya kubadilisha kati yao.
 
-Different formats exist for storing certificates, each with its own use cases and compatibility. This summary covers the main formats and provides guidance on converting between them.
-
-## **Formats**
+## **Mifumo**
 
 ### **PEM Format**
 
-- Most widely used format for certificates.
-- Requires separate files for certificates and private keys, encoded in Base64 ASCII.
-- Common extensions: .cer, .crt, .pem, .key.
-- Primarily used by Apache and similar servers.
+- Mfumo unaotumika zaidi kwa vyeti.
+- Unahitaji faili tofauti kwa vyeti na funguo za faragha, zilizowekwa katika Base64 ASCII.
+- Upanuzi wa kawaida: .cer, .crt, .pem, .key.
+- Kimsingi hutumiwa na Apache na seva zinazofanana.
 
 ### **DER Format**
 
-- A binary format of certificates.
-- Lacks the "BEGIN/END CERTIFICATE" statements found in PEM files.
-- Common extensions: .cer, .der.
-- Often used with Java platforms.
+- Mfumo wa binary wa vyeti.
+- Huna taarifa za "BEGIN/END CERTIFICATE" zinazopatikana katika faili za PEM.
+- Upanuzi wa kawaida: .cer, .der.
+- Mara nyingi hutumiwa na majukwaa ya Java.
 
 ### **P7B/PKCS#7 Format**
 
-- Stored in Base64 ASCII, with extensions .p7b or .p7c.
-- Contains only certificates and chain certificates, excluding the private key.
-- Supported by Microsoft Windows and Java Tomcat.
+- Huhifadhiwa katika Base64 ASCII, ikiwa na upanuzi .p7b au .p7c.
+- Inajumuisha vyeti tu na vyeti vya mnyororo, ikiondoa funguo ya faragha.
+- Inasaidiwa na Microsoft Windows na Java Tomcat.
 
 ### **PFX/P12/PKCS#12 Format**
 
-- A binary format that encapsulates server certificates, intermediate certificates, and private keys in one file.
-- Extensions: .pfx, .p12.
-- Mainly used on Windows for certificate import and export.
+- Mfumo wa binary unaojumuisha vyeti vya seva, vyeti vya kati, na funguo za faragha katika faili moja.
+- Upanuzi: .pfx, .p12.
+- Kimsingi hutumiwa kwenye Windows kwa ajili ya kuagiza na kusafirisha vyeti.
 
-### **Converting Formats**
+### **Kubadilisha Mifumo**
 
-**PEM conversions** are essential for compatibility:
+**Mabadiliko ya PEM** ni muhimu kwa ajili ya ulinganifu:
 
 - **x509 to PEM**
-
 ```bash
 openssl x509 -in certificatename.cer -outform PEM -out certificatename.pem
 ```
-
-- **PEM to DER**
-
+- **PEM hadi DER**
 ```bash
 openssl x509 -outform der -in certificatename.pem -out certificatename.der
 ```
-
-- **DER to PEM**
-
+- **DER hadi PEM**
 ```bash
 openssl x509 -inform der -in certificatename.der -out certificatename.pem
 ```
-
-- **PEM to P7B**
-
+- **PEM hadi P7B**
 ```bash
 openssl crl2pkcs7 -nocrl -certfile certificatename.pem -out certificatename.p7b -certfile CACert.cer
 ```
-
-- **PKCS7 to PEM**
-
+- **PKCS7 hadi PEM**
 ```bash
 openssl pkcs7 -print_certs -in certificatename.p7b -out certificatename.pem
 ```
-
-**PFX conversions** are crucial for managing certificates on Windows:
+**PFX conversions** ni muhimu kwa usimamizi wa vyeti kwenye Windows:
 
 - **PFX to PEM**
-
 ```bash
 openssl pkcs12 -in certificatename.pfx -out certificatename.pem
 ```
-
-- **PFX to PKCS#8** involves two steps:
-  1. Convert PFX to PEM
-
+- **PFX hadi PKCS#8** inahusisha hatua mbili:
+1. Geuza PFX kuwa PEM
 ```bash
 openssl pkcs12 -in certificatename.pfx -nocerts -nodes -out certificatename.pem
 ```
-
-2. Convert PEM to PKCS8
-
+2. Geuza PEM kuwa PKCS8
 ```bash
 openSSL pkcs8 -in certificatename.pem -topk8 -nocrypt -out certificatename.pk8
 ```
-
-- **P7B to PFX** also requires two commands:
-  1. Convert P7B to CER
-
+- **P7B to PFX** pia inahitaji amri mbili:
+1. Geuza P7B kuwa CER
 ```bash
 openssl pkcs7 -print_certs -in certificatename.p7b -out certificatename.cer
 ```
-
-2. Convert CER and Private Key to PFX
-
+2. Badilisha CER na Funguo Binafsi kuwa PFX
 ```bash
 openssl pkcs12 -export -in certificatename.cer -inkey privateKey.key -out certificatename.pfx -certfile cacert.cer
 ```
-
----
-
-<figure><img src="../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+--- 
 
 {{#include ../banners/hacktricks-training.md}}

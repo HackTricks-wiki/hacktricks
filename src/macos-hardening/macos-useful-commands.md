@@ -115,9 +115,9 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### Installed Software & Services
+### Programu na Huduma Zilizowekwa
 
-Angalia kwa **maombi** ya **shaka** yaliyosakinishwa na **mamlaka** juu ya rasilimali zilizowekwa:
+Angalia kwa **maombi** ya **shaka** yaliyowekwa na **mamlaka** juu ya rasilimali zilizowekwa:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework

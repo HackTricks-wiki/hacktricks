@@ -1,9 +1,9 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-**PNG files** are highly regarded in **CTF challenges** for their **lossless compression**, making them ideal for embedding hidden data. Tools like **Wireshark** enable the analysis of PNG files by dissecting their data within network packets, revealing embedded information or anomalies.
+**Fail za PNG** zinaheshimiwa sana katika **changamoto za CTF** kwa **kuhifadhi bila kupoteza**, na kuifanya kuwa bora kwa kuingiza data zilizofichwa. Zana kama **Wireshark** zinawezesha uchambuzi wa faili za PNG kwa kuchambua data zao ndani ya pakiti za mtandao, zikifunua taarifa zilizofichwa au kasoro.
 
-For checking PNG file integrity and repairing corruption, **pngcheck** is a crucial tool, offering command-line functionality to validate and diagnose PNG files ([pngcheck](http://libpng.org/pub/png/apps/pngcheck.html)). When files are beyond simple fixes, online services like [OfficeRecovery's PixRecovery](https://online.officerecovery.com/pixrecovery/) provide a web-based solution for **repairing corrupted PNGs**, aiding in the recovery of crucial data for CTF participants.
+Ili kuangalia uhalali wa faili za PNG na kurekebisha uharibifu, **pngcheck** ni zana muhimu, ikitoa kazi za amri za mstari kuthibitisha na kugundua faili za PNG ([pngcheck](http://libpng.org/pub/png/apps/pngcheck.html)). Wakati faili zimepitiliza marekebisho rahisi, huduma za mtandaoni kama [OfficeRecovery's PixRecovery](https://online.officerecovery.com/pixrecovery/) zinatoa suluhisho la mtandaoni kwa **kurekebisha PNG zilizoharibika**, kusaidia katika kuokoa data muhimu kwa washiriki wa CTF.
 
-These strategies underscore the importance of a comprehensive approach in CTFs, utilizing a blend of analytical tools and repair techniques to uncover and recover hidden or lost data.
+Mikakati hii inaonyesha umuhimu wa mbinu kamili katika CTFs, ikitumia mchanganyiko wa zana za uchambuzi na mbinu za ukarabati ili kufichua na kuokoa data zilizofichwa au kupotea.
 
 {{#include ../../../banners/hacktricks-training.md}}

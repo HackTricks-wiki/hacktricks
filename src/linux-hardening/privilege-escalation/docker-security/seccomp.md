@@ -4,7 +4,7 @@
 
 ## Basic Information
 
-**Seccomp**, inamaanisha Hali ya Usalama wa Kompyuta, ni kipengele cha usalama cha **kernel ya Linux kilichoundwa kuchuja wito wa mfumo**. Inapunguza michakato kwa seti ndogo ya wito wa mfumo (`exit()`, `sigreturn()`, `read()`, na `write()` kwa viashiria vya faili vilivyo wazi tayari). Ikiwa mchakato unajaribu kuita chochote kingine, unauawa na kernel kwa kutumia SIGKILL au SIGSYS. Mekanism hii haitengenezi rasilimali lakini inatenga mchakato kutoka kwao.
+**Seccomp**, inamaanisha Hali ya Usalama wa Kompyuta, ni kipengele cha usalama cha **kernel ya Linux kilichoundwa kuchuja wito wa mfumo**. Inapunguza michakato kwa seti ndogo ya wito wa mfumo (`exit()`, `sigreturn()`, `read()`, na `write()` kwa viashiria vya faili vilivyo wazi tayari). Ikiwa mchakato unajaribu kuita chochote kingine, unauawa na kernel kwa kutumia SIGKILL au SIGSYS. Mekanism hii haisimami rasilimali lakini inatenga mchakato kutoka kwao.
 
 Kuna njia mbili za kuanzisha seccomp: kupitia wito wa mfumo `prctl(2)` na `PR_SET_SECCOMP`, au kwa kernel za Linux 3.17 na juu, wito wa mfumo `seccomp(2)`. Njia ya zamani ya kuwezesha seccomp kwa kuandika kwenye `/proc/self/seccomp` imeondolewa kwa ajili ya `prctl()`.
 
@@ -12,7 +12,7 @@ Uboreshaji, **seccomp-bpf**, unongeza uwezo wa kuchuja wito wa mfumo kwa sera in
 
 ### **Original/Strict Mode**
 
-Katika hali hii Seccomp **inaruhusu tu syscalls** `exit()`, `sigreturn()`, `read()` na `write()` kwa viashiria vya faili vilivyo wazi tayari. Ikiwa syscall nyingine yoyote inafanywa, mchakato unauawa kwa kutumia SIGKILL.
+Katika hali hii Seccomp **inaruhusu tu wito wa mfumo** `exit()`, `sigreturn()`, `read()` na `write()` kwa viashiria vya faili vilivyo wazi tayari. Ikiwa wito mwingine wowote wa mfumo unafanywa, mchakato unauawa kwa kutumia SIGKILL.
 ```c:seccomp_strict.c
 #include <fcntl.h>
 #include <stdio.h>
@@ -104,8 +104,8 @@ docker run --rm \
 --security-opt seccomp=/path/to/seccomp/profile.json \
 hello-world
 ```
-Ikiwa unataka kwa mfano **kuzuia** kontena kutekeleza **syscall** kama `uname` unaweza kupakua profaili ya default kutoka [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json) na tu **ondoa string ya `uname` kutoka kwenye orodha**.\
-Ikiwa unataka kuhakikisha kwamba **binary fulani haifanyi kazi ndani ya kontena la docker** unaweza kutumia strace kuorodhesha syscalls ambazo binary inatumia na kisha kuzikataa.\
+Ikiwa unataka kwa mfano **kuzuia** kontena kutekeleza **syscall** kama `uname` unaweza kupakua profaili ya kawaida kutoka [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json) na tu **ondoa mfuatano wa `uname` kutoka kwenye orodha**.\
+Ikiwa unataka kuhakikisha kwamba **binafsi fulani haifanyi kazi ndani ya kontena la docker** unaweza kutumia strace kuorodhesha syscalls ambazo binafsi inatumia na kisha kuzikataa.\
 Katika mfano ufuatao **syscalls** za `uname` zinagunduliwa:
 ```bash
 docker run -it --security-opt seccomp=default.json modified-ubuntu strace uname
