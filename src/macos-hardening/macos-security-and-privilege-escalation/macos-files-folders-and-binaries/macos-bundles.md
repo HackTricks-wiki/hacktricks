@@ -27,9 +27,9 @@ O arquivo `Info.plist` é uma pedra angular para a configuração do aplicativo,
 
 Para explorar o conteúdo de um bundle, como `Safari.app`, o seguinte comando pode ser usado: `bash ls -lR /Applications/Safari.app/Contents`
 
-Essa exploração revela diretórios como `_CodeSignature`, `MacOS`, `Resources` e arquivos como `Info.plist`, cada um servindo a um propósito único, desde a segurança do aplicativo até a definição de sua interface de usuário e parâmetros operacionais.
+Essa exploração revela diretórios como `_CodeSignature`, `MacOS`, `Resources`, e arquivos como `Info.plist`, cada um servindo a um propósito único, desde a segurança do aplicativo até a definição de sua interface do usuário e parâmetros operacionais.
 
-#### Diretórios Adicionais de Bundle
+#### Diretórios Adicionais de Bundles
 
 Além dos diretórios comuns, bundles também podem incluir:
 

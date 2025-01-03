@@ -24,7 +24,7 @@ macos-sip.md
 
 ### Sandbox
 
-O Sandbox do macOS **limita as aplicações** que estão rodando dentro do sandbox às **ações permitidas especificadas no perfil do Sandbox** com o qual o aplicativo está rodando. Isso ajuda a garantir que **a aplicação só acessará recursos esperados**.
+O Sandbox do macOS **limita as aplicações** que estão rodando dentro do sandbox às **ações permitidas especificadas no perfil do Sandbox** com o qual o aplicativo está rodando. Isso ajuda a garantir que **a aplicação acessará apenas os recursos esperados**.
 
 {{#ref}}
 macos-sandbox/
@@ -61,7 +61,7 @@ O aplicativo MRT está localizado em **`/Library/Apple/System/Library/CoreServic
 
 ## Gerenciamento de Tarefas em Segundo Plano
 
-**macOS** agora **alerta** toda vez que uma ferramenta usa uma **técnica bem conhecida para persistir a execução de código** (como Itens de Login, Daemons...), para que o usuário saiba melhor **qual software está persistindo**.
+**macOS** agora **alerta** sempre que uma ferramenta usa uma **técnica bem conhecida para persistir a execução de código** (como Itens de Login, Daemons...), para que o usuário saiba melhor **qual software está persistindo**.
 
 <figure><img src="../../../images/image (1183).png" alt=""><figcaption></figcaption></figure>
 
@@ -99,13 +99,13 @@ chmod +x dumpBTM
 xattr -rc dumpBTM # Remove quarantine attr
 ./dumpBTM
 ```
-Esta informação está sendo armazenada em **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** e o Terminal precisa de FDA.
+Essas informações estão sendo armazenadas em **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** e o Terminal precisa de FDA.
 
 ### Brincando com BTM
 
 Quando uma nova persistência é encontrada, um evento do tipo **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`** é gerado. Portanto, qualquer maneira de **prevenir** que este **evento** seja enviado ou que o **agente alerte** o usuário ajudará um atacante a _**contornar**_ o BTM.
 
-- **Redefinindo o banco de dados**: Executar o seguinte comando irá redefinir o banco de dados (deve reconstruí-lo do zero), no entanto, por algum motivo, após executar isso, **nenhuma nova persistência será alertada até que o sistema seja reiniciado**.
+- **Redefinindo o banco de dados**: Executar o seguinte comando redefinirá o banco de dados (deve reconstruí-lo do zero), no entanto, por algum motivo, após executar isso, **nenhuma nova persistência será alertada até que o sistema seja reiniciado**.
 - **root** é necessário.
 ```bash
 # Reset the database
@@ -124,7 +124,7 @@ kill -SIGSTOP 1011
 ps -o state 1011
 T
 ```
-- **Bug**: Se o **processo que criou a persistência existir rapidamente após ele**, o daemon tentará **obter informações** sobre isso, **falhará** e **não conseguirá enviar o evento** indicando que uma nova coisa está persistindo.
+- **Bug**: Se o **processo que criou a persistência existir rapidamente logo após ele**, o daemon tentará **obter informações** sobre isso, **falhará** e **não conseguirá enviar o evento** indicando que uma nova coisa está persistindo.
 
 Referências e **mais informações sobre BTM**:
 

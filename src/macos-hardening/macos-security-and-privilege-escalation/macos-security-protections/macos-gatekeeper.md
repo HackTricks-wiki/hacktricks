@@ -6,13 +6,13 @@
 
 **Gatekeeper** é um recurso de segurança desenvolvido para sistemas operacionais Mac, projetado para garantir que os usuários **executem apenas software confiável** em seus sistemas. Ele funciona **validando o software** que um usuário baixa e tenta abrir de **fontes externas à App Store**, como um aplicativo, um plug-in ou um pacote de instalação.
 
-O mecanismo chave do Gatekeeper reside em seu processo de **verificação**. Ele verifica se o software baixado está **assinado por um desenvolvedor reconhecido**, garantindo a autenticidade do software. Além disso, ele verifica se o software está **notarizado pela Apple**, confirmando que está livre de conteúdo malicioso conhecido e que não foi adulterado após a notarização.
+O mecanismo chave do Gatekeeper reside em seu processo de **verificação**. Ele verifica se o software baixado está **assinado por um desenvolvedor reconhecido**, garantindo a autenticidade do software. Além disso, ele verifica se o software está **notarizado pela Apple**, confirmando que está livre de conteúdo malicioso conhecido e não foi adulterado após a notarização.
 
 Além disso, o Gatekeeper reforça o controle e a segurança do usuário, **solicitando que os usuários aprovem a abertura** do software baixado pela primeira vez. Essa salvaguarda ajuda a evitar que os usuários executem inadvertidamente código executável potencialmente prejudicial que possam ter confundido com um arquivo de dados inofensivo.
 
 ### Assinaturas de Aplicativos
 
-As assinaturas de aplicativos, também conhecidas como assinaturas de código, são um componente crítico da infraestrutura de segurança da Apple. Elas são usadas para **verificar a identidade do autor do software** (o desenvolvedor) e para garantir que o código não foi adulterado desde a última assinatura.
+As assinaturas de aplicativos, também conhecidas como assinaturas de código, são um componente crítico da infraestrutura de segurança da Apple. Elas são usadas para **verificar a identidade do autor do software** (o desenvolvedor) e garantir que o código não foi adulterado desde a última assinatura.
 
 Veja como funciona:
 
@@ -45,7 +45,7 @@ codesign -s <cert-name-keychain> toolsdemo
 ```
 ### Notarização
 
-O processo de notarização da Apple serve como uma proteção adicional para proteger os usuários de software potencialmente prejudicial. Envolve o **desenvolvedor enviando sua aplicação para exame** pelo **Serviço de Notário da Apple**, que não deve ser confundido com a Revisão de Aplicativos. Este serviço é um **sistema automatizado** que analisa o software enviado em busca de **conteúdo malicioso** e quaisquer problemas potenciais com a assinatura de código.
+O processo de notarização da Apple serve como uma proteção adicional para proteger os usuários de software potencialmente prejudicial. Ele envolve o **desenvolvedor enviando sua aplicação para exame** pelo **Serviço de Notário da Apple**, que não deve ser confundido com a Revisão de Aplicativos. Este serviço é um **sistema automatizado** que analisa o software enviado em busca de **conteúdo malicioso** e quaisquer problemas potenciais com a assinatura de código.
 
 Se o software **passar** nesta inspeção sem levantar preocupações, o Serviço de Notário gera um ticket de notarização. O desenvolvedor é então obrigado a **anexar este ticket ao seu software**, um processo conhecido como 'stapling'. Além disso, o ticket de notarização também é publicado online, onde o Gatekeeper, a tecnologia de segurança da Apple, pode acessá-lo.
 
@@ -158,9 +158,9 @@ No caso em que o **flag de quarentena não está presente** (como com arquivos b
 > [!WARNING]
 > Este atributo deve ser **definido pelo aplicativo que cria/baixa** o arquivo.
 >
-> No entanto, arquivos que estão em sandbox terão esse atributo definido para cada arquivo que criarem. E aplicativos não sandboxed podem defini-lo eles mesmos ou especificar a chave [**LSFileQuarantineEnabled**](https://developer.apple.com/documentation/bundleresources/information_property_list/lsfilequarantineenabled?language=objc) no **Info.plist**, que fará com que o sistema defina o atributo estendido `com.apple.quarantine` nos arquivos criados.
+> No entanto, arquivos que estão em sandbox terão esse atributo definido para cada arquivo que criam. E aplicativos não sandboxed podem defini-lo eles mesmos ou especificar a chave [**LSFileQuarantineEnabled**](https://developer.apple.com/documentation/bundleresources/information_property_list/lsfilequarantineenabled?language=objc) no **Info.plist**, que fará com que o sistema defina o atributo estendido `com.apple.quarantine` nos arquivos criados.
 
-Além disso, todos os arquivos criados por um processo chamando **`qtn_proc_apply_to_self`** são colocados em quarentena. Ou a API **`qtn_file_apply_to_path`** adiciona o atributo de quarentena a um caminho de arquivo especificado.
+Além disso, todos os arquivos criados por um processo que chama **`qtn_proc_apply_to_self`** são colocados em quarentena. Ou a API **`qtn_file_apply_to_path`** adiciona o atributo de quarentena a um caminho de arquivo especificado.
 
 É possível **verificar seu status e habilitar/desabilitar** (root necessário) com:
 ```bash
@@ -171,7 +171,7 @@ spctl --enable
 spctl --disable
 #You can also allow nee identifies to execute code using the binary "spctl"
 ```
-Você também pode **descobrir se um arquivo tem o atributo estendido de quarentena** com:
+Você também pode **verificar se um arquivo tem o atributo estendido de quarentena** com:
 ```bash
 xattr file.png
 com.apple.macl
@@ -294,9 +294,9 @@ XProtect é um recurso de **anti-malware** embutido no macOS. O XProtect **verif
 
 O banco de dados do XProtect é **atualizado regularmente** pela Apple com novas definições de malware, e essas atualizações são baixadas e instaladas automaticamente no seu Mac. Isso garante que o XProtect esteja sempre atualizado com as últimas ameaças conhecidas.
 
-No entanto, vale a pena notar que **o XProtect não é uma solução antivírus completa**. Ele apenas verifica uma lista específica de ameaças conhecidas e não realiza varredura em tempo de acesso como a maioria dos softwares antivírus.
+No entanto, vale a pena notar que **o XProtect não é uma solução antivírus completa**. Ele apenas verifica uma lista específica de ameaças conhecidas e não realiza varredura em acesso como a maioria dos softwares antivírus.
 
-Você pode obter informações sobre a atualização mais recente do XProtect executando:
+Você pode obter informações sobre a última atualização do XProtect executando:
 ```bash
 system_profiler SPInstallHistoryDataType 2>/dev/null | grep -A 4 "XProtectPlistConfigData" | tail -n 5
 ```
@@ -312,11 +312,11 @@ Note que há outro aplicativo em **`/Library/Apple/System/Library/CoreServices/X
 ### Não é Gatekeeper
 
 > [!CAUTION]
-> Note que o Gatekeeper **não é executado toda vez** que você executa um aplicativo, apenas _**AppleMobileFileIntegrity**_ (AMFI) **verificará assinaturas de código executável** quando você executar um aplicativo que já foi executado e verificado pelo Gatekeeper.
+> Note que o Gatekeeper **não é executado toda vez** que você executa um aplicativo, apenas _**AppleMobileFileIntegrity**_ (AMFI) **verificará assinaturas de código executáveis** quando você executar um aplicativo que já foi executado e verificado pelo Gatekeeper.
 
 Portanto, anteriormente era possível executar um aplicativo para armazená-lo em cache com o Gatekeeper, depois **modificar arquivos não executáveis da aplicação** (como arquivos Electron asar ou NIB) e se nenhuma outra proteção estivesse em vigor, a aplicação seria **executada** com as adições **maliciosas**.
 
-No entanto, agora isso não é mais possível porque o macOS **impede a modificação de arquivos** dentro dos bundles de aplicativos. Assim, se você tentar o ataque [Dirty NIB](../macos-proces-abuse/macos-dirty-nib.md), descobrirá que não é mais possível abusar disso porque, após executar o aplicativo para armazená-lo em cache com o Gatekeeper, você não poderá modificar o bundle. E se você mudar, por exemplo, o nome do diretório Contents para NotCon (como indicado no exploit), e então executar o binário principal do aplicativo para armazená-lo em cache com o Gatekeeper, isso acionará um erro e não será executado.
+No entanto, agora isso não é mais possível porque o macOS **impede a modificação de arquivos** dentro dos bundles de aplicativos. Assim, se você tentar o ataque [Dirty NIB](../macos-proces-abuse/macos-dirty-nib.md), você descobrirá que não é mais possível abusar disso porque, após executar o aplicativo para armazená-lo em cache com o Gatekeeper, você não poderá modificar o bundle. E se você mudar, por exemplo, o nome do diretório Contents para NotCon (como indicado no exploit), e então executar o binário principal do aplicativo para armazená-lo em cache com o Gatekeeper, isso gerará um erro e não será executado.
 
 ## Bypasses do Gatekeeper
 
@@ -387,7 +387,7 @@ Foi descoberto que **o Google Chrome não estava definindo o atributo de quarent
 
 ### [CVE-2023-27951](https://redcanary.com/blog/gatekeeper-bypass-vulnerabilities/)
 
-Os formatos de arquivo AppleDouble armazenam os atributos de um arquivo em um arquivo separado que começa com `._`, isso ajuda a copiar os atributos do arquivo **entre máquinas macOS**. No entanto, foi notado que após descompactar um arquivo AppleDouble, o arquivo que começa com `._` **não recebeu o atributo de quarentena**.
+Os formatos de arquivo AppleDouble armazenam os atributos de um arquivo em um arquivo separado que começa com `._`, isso ajuda a copiar os atributos do arquivo **entre máquinas macOS**. No entanto, foi notado que, após descompactar um arquivo AppleDouble, o arquivo que começa com `._` **não recebeu o atributo de quarentena**.
 ```bash
 mkdir test
 echo a > test/a
@@ -397,7 +397,7 @@ aa archive -d test/ -o test.aar
 
 # If you downloaded the resulting test.aar and decompress it, the file test/._a won't have a quarantitne attribute
 ```
-Ser capaz de criar um arquivo que não terá o atributo de quarentena definido, foi **possível contornar o Gatekeeper.** O truque era **criar um aplicativo de arquivo DMG** usando a convenção de nome AppleDouble (começar com `._`) e criar um **arquivo visível como um link simbólico para este arquivo oculto** sem o atributo de quarentena.\
+Ser capaz de criar um arquivo que não terá o atributo de quarentena definido, foi **possível contornar o Gatekeeper.** O truque era **criar um arquivo DMG** usando a convenção de nome AppleDouble (começar com `._`) e criar um **arquivo visível como um link simbólico para este arquivo oculto** sem o atributo de quarentena.\
 Quando o **arquivo dmg é executado**, como não tem um atributo de quarentena, ele **contornará o Gatekeeper.**
 ```bash
 # Create an app bundle with the backdoor an call it app.app

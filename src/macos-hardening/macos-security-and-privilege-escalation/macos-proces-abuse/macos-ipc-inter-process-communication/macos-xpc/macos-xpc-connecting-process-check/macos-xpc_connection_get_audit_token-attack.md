@@ -2,7 +2,7 @@
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
 
-**Para mais informações, consulte a postagem original:** [**https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/**](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/). Este é um resumo:
+**Para mais informações, consulte o post original:** [**https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/**](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/). Este é um resumo:
 
 ## Informações Básicas sobre Mensagens Mach
 
@@ -25,7 +25,7 @@ Se você não sabe como uma conexão XPC é estabelecida, verifique:
 
 ## Resumo da Vulnerabilidade
 
-O que é interessante saber é que **a abstração do XPC é uma conexão de um para um**, mas é baseada em uma tecnologia que **pode ter múltiplos remetentes, então:**
+O que é interessante saber é que **a abstração do XPC é uma conexão um-para-um**, mas é baseada em uma tecnologia que **pode ter múltiplos remetentes, então:**
 
 - Mach ports são de um único receptor, **múltiplos remetentes**.
 - O token de auditoria de uma conexão XPC é o token de auditoria **copiado da mensagem recebida mais recentemente**.
@@ -33,8 +33,8 @@ O que é interessante saber é que **a abstração do XPC é uma conexão de um 
 
 Embora a situação anterior pareça promissora, existem alguns cenários onde isso não causará problemas ([daqui](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing)):
 
-- Tokens de auditoria são frequentemente usados para uma verificação de autorização para decidir se aceitam uma conexão. Como isso acontece usando uma mensagem para o serviço, **nenhuma conexão foi estabelecida ainda**. Mais mensagens nesse port serão tratadas apenas como solicitações de conexão adicionais. Portanto, quaisquer **verificações antes de aceitar uma conexão não são vulneráveis** (isso também significa que dentro de `-listener:shouldAcceptNewConnection:` o token de auditoria é seguro). Portanto, estamos **procurando conexões XPC que verificam ações específicas**.
-- Manipuladores de eventos XPC são tratados de forma síncrona. Isso significa que o manipulador de eventos para uma mensagem deve ser concluído antes de chamá-lo para a próxima, mesmo em filas de despacho concorrentes. Portanto, dentro de um **manipulador de eventos XPC, o token de auditoria não pode ser sobrescrito** por outras mensagens normais (não de resposta!).
+- Tokens de auditoria são frequentemente usados para uma verificação de autorização para decidir se aceitam uma conexão. Como isso acontece usando uma mensagem para o serviço port, **nenhuma conexão foi estabelecida ainda**. Mais mensagens nesse port serão tratadas apenas como solicitações de conexão adicionais. Portanto, quaisquer **verificações antes de aceitar uma conexão não são vulneráveis** (isso também significa que dentro de `-listener:shouldAcceptNewConnection:` o token de auditoria é seguro). Portanto, estamos **procurando conexões XPC que verificam ações específicas**.
+- Manipuladores de eventos XPC são tratados de forma síncrona. Isso significa que o manipulador de eventos para uma mensagem deve ser concluído antes de chamá-lo para a próxima, mesmo em filas de despacho concorrentes. Portanto, dentro de um **manipulador de eventos XPC, o token de auditoria não pode ser sobrescrito** por outras mensagens normais (não-resposta!).
 
 Dois métodos diferentes que podem ser exploráveis:
 
@@ -98,7 +98,7 @@ Para explorar essa vulnerabilidade, a seguinte configuração é necessária:
 O processo de exploração envolve os seguintes passos:
 
 1. Aguarde o serviço **`A`** enviar uma mensagem que espera uma resposta.
-2. Em vez de responder diretamente a **`A`**, o port de resposta é sequestrado e usado para enviar uma mensagem ao serviço **`B`**.
+2. Em vez de responder diretamente a **`A`**, o port de resposta é sequestrado e usado para enviar uma mensagem para o serviço **`B`**.
 3. Subsequentemente, uma mensagem envolvendo a ação proibida é despachada, com a expectativa de que será processada de forma concorrente com a resposta de **`B`**.
 
 Abaixo está uma representação visual do cenário de ataque descrito:
@@ -111,8 +111,8 @@ Abaixo está uma representação visual do cenário de ataque descrito:
 
 - **Dificuldades em Localizar Instâncias**: A busca por instâncias de uso de `xpc_connection_get_audit_token` foi desafiadora, tanto estaticamente quanto dinamicamente.
 - **Metodologia**: Frida foi empregada para interceptar a função `xpc_connection_get_audit_token`, filtrando chamadas que não se originavam de manipuladores de eventos. No entanto, esse método foi limitado ao processo interceptado e exigiu uso ativo.
-- **Ferramentas de Análise**: Ferramentas como IDA/Ghidra foram usadas para examinar serviços mach acessíveis, mas o processo foi demorado, complicado por chamadas envolvendo o cache compartilhado do dyld.
-- **Limitações de Script**: Tentativas de scriptar a análise para chamadas a `xpc_connection_get_audit_token` a partir de blocos `dispatch_async` foram dificultadas por complexidades na análise de blocos e interações com o cache compartilhado do dyld.
+- **Ferramentas de Análise**: Ferramentas como IDA/Ghidra foram usadas para examinar serviços mach acessíveis, mas o processo foi demorado, complicado por chamadas envolvendo o cache compartilhado dyld.
+- **Limitações de Script**: Tentativas de scriptar a análise para chamadas a `xpc_connection_get_audit_token` a partir de blocos `dispatch_async` foram dificultadas por complexidades na análise de blocos e interações com o cache compartilhado dyld.
 
 ## A correção <a href="#the-fix" id="the-fix"></a>
 

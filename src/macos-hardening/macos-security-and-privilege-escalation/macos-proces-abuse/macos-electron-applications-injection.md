@@ -13,8 +13,8 @@ Essas técnicas serão discutidas a seguir, mas nos últimos tempos o Electron a
 
 - **`RunAsNode`**: Se desativado, impede o uso da variável de ambiente **`ELECTRON_RUN_AS_NODE`** para injetar código.
 - **`EnableNodeCliInspectArguments`**: Se desativado, parâmetros como `--inspect`, `--inspect-brk` não serão respeitados. Evitando assim a injeção de código.
-- **`EnableEmbeddedAsarIntegrityValidation`**: Se ativado, o **`arquivo asar`** carregado será **validado** pelo macOS. **Prevenindo** assim a **injeção de código** ao modificar o conteúdo deste arquivo.
-- **`OnlyLoadAppFromAsar`**: Se isso estiver ativado, em vez de procurar carregar na seguinte ordem: **`app.asar`**, **`app`** e finalmente **`default_app.asar`**. Ele apenas verificará e usará app.asar, garantindo assim que quando **combinado** com a fuse **`embeddedAsarIntegrityValidation`** é **impossível** **carregar código não validado**.
+- **`EnableEmbeddedAsarIntegrityValidation`**: Se ativado, o **`arquivo`** **`asar`** carregado será **validado** pelo macOS. **Prevenindo** assim a **injeção de código** ao modificar o conteúdo deste arquivo.
+- **`OnlyLoadAppFromAsar`**: Se isso estiver ativado, em vez de procurar carregar na seguinte ordem: **`app.asar`**, **`app`** e finalmente **`default_app.asar`**. Ele apenas verificará e usará app.asar, garantindo assim que, quando **combinado** com a fuse **`embeddedAsarIntegrityValidation`**, é **impossível** **carregar código não validado**.
 - **`LoadBrowserProcessSpecificV8Snapshot`**: Se ativado, o processo do navegador usa o arquivo chamado `browser_v8_context_snapshot.bin` para seu snapshot V8.
 
 Outra fuse interessante que não estará prevenindo a injeção de código é:
@@ -147,7 +147,7 @@ Você pode abusar dessa variável de ambiente em um plist para manter a persist�
 ```
 ## RCE com inspeção
 
-De acordo com [**este**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f), se você executar um aplicativo Electron com flags como **`--inspect`**, **`--inspect-brk`** e **`--remote-debugging-port`**, uma **porta de depuração será aberta** para que você possa se conectar a ela (por exemplo, a partir do Chrome em `chrome://inspect`) e você poderá **injetar código nela** ou até mesmo iniciar novos processos.\  
+De acordo com [**este**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f), se você executar um aplicativo Electron com flags como **`--inspect`**, **`--inspect-brk`** e **`--remote-debugging-port`**, uma **porta de depuração será aberta** para que você possa se conectar a ela (por exemplo, do Chrome em `chrome://inspect`) e você poderá **injetar código nela** ou até mesmo iniciar novos processos.\
 Por exemplo:
 ```bash
 /Applications/Signal.app/Contents/MacOS/Signal --inspect=9229
@@ -169,11 +169,11 @@ ws.connect("ws://localhost:9222/devtools/page/85976D59050BFEFDBA48204E3D865D00",
 ws.send('{\"id\": 1, \"method\": \"Network.getAllCookies\"}')
 print(ws.recv()
 ```
-Em [**este post do blog**](https://hackerone.com/reports/1274695), esse depurador é abusado para fazer um chrome sem interface **baixar arquivos arbitrários em locais arbitrários**.
+Em [**este post do blog**](https://hackerone.com/reports/1274695), esse debugging é abusado para fazer um chrome headless **baixar arquivos arbitrários em locais arbitrários**.
 
 ### Injeção do Plist do App
 
-Você poderia abusar dessa variável de ambiente em um plist para manter a persistência adicionando essas chaves:
+Você poderia abusar dessa variável de ambiente em um plist para manter persistência adicionando essas chaves:
 ```xml
 <dict>
 <key>ProgramArguments</key>
@@ -190,16 +190,16 @@ Você poderia abusar dessa variável de ambiente em um plist para manter a persi
 ## Bypass TCC abusando de Versões Antigas
 
 > [!TIP]
-> O daemon TCC do macOS não verifica a versão executada da aplicação. Portanto, se você **não conseguir injetar código em uma aplicação Electron** com nenhuma das técnicas anteriores, você pode baixar uma versão anterior do APP e injetar código nela, pois ainda obterá as permissões do TCC (a menos que o Trust Cache impeça).
+> O daemon TCC do macOS não verifica a versão executada do aplicativo. Portanto, se você **não conseguir injetar código em um aplicativo Electron** com qualquer uma das técnicas anteriores, você pode baixar uma versão anterior do APP e injetar código nela, pois ainda obterá as permissões do TCC (a menos que o Trust Cache impeça).
 
 ## Executar Código não JS
 
-As técnicas anteriores permitirão que você execute **código JS dentro do processo da aplicação electron**. No entanto, lembre-se de que os **processos filhos são executados sob o mesmo perfil de sandbox** que a aplicação pai e **herdam suas permissões do TCC**.\
+As técnicas anteriores permitirão que você execute **código JS dentro do processo do aplicativo electron**. No entanto, lembre-se de que os **processos filhos são executados sob o mesmo perfil de sandbox** que o aplicativo pai e **herdam suas permissões do TCC**.\
 Portanto, se você quiser abusar de permissões para acessar a câmera ou o microfone, por exemplo, você pode simplesmente **executar outro binário a partir do processo**.
 
 ## Injeção Automática
 
-A ferramenta [**electroniz3r**](https://github.com/r3ggi/electroniz3r) pode ser facilmente usada para **encontrar aplicações electron vulneráveis** instaladas e injetar código nelas. Esta ferramenta tentará usar a técnica **`--inspect`**:
+A ferramenta [**electroniz3r**](https://github.com/r3ggi/electroniz3r) pode ser facilmente usada para **encontrar aplicativos electron vulneráveis** instalados e injetar código neles. Esta ferramenta tentará usar a técnica **`--inspect`**:
 
 Você precisa compilá-la você mesmo e pode usá-la assim:
 ```bash

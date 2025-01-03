@@ -31,9 +31,9 @@ ARM64 possui **31 registradores de uso geral**, rotulados de `x0` a `x30`. Cada 
 3. **`x9`** a **`x15`** - Mais registradores temporários, frequentemente usados para variáveis locais.
 4. **`x16`** e **`x17`** - **Registradores de Chamada Intra-procedural**. Registradores temporários para valores imediatos. Eles também são usados para chamadas de função indiretas e stubs da PLT (Tabela de Ligação de Procedimentos).
 - **`x16`** é usado como o **número da chamada de sistema** para a instrução **`svc`** em **macOS**.
-5. **`x18`** - **Registrador de Plataforma**. Pode ser usado como um registrador de uso geral, mas em algumas plataformas, este registrador é reservado para usos específicos da plataforma: Ponteiro para o bloco de ambiente de thread local no Windows, ou para apontar para a estrutura de tarefa atualmente **executando no kernel do Linux**.
+5. **`x18`** - **Registrador de Plataforma**. Pode ser usado como um registrador de uso geral, mas em algumas plataformas, este registrador é reservado para usos específicos da plataforma: Ponteiro para o bloco de ambiente de thread local no Windows, ou para apontar para a estrutura de tarefa **executando atualmente no kernel do Linux**.
 6. **`x19`** a **`x28`** - Estes são registradores salvos pelo chamado. Uma função deve preservar os valores desses registradores para seu chamador, então eles são armazenados na pilha e recuperados antes de voltar para o chamador.
-7. **`x29`** - **Ponteiro de Quadro** para acompanhar o quadro da pilha. Quando um novo quadro de pilha é criado porque uma função é chamada, o registrador **`x29`** é **armazenado na pilha** e o endereço do **novo** ponteiro de quadro é (**endereço `sp`**) **armazenado neste registrador**.
+7. **`x29`** - **Ponteiro de Quadro** para acompanhar o quadro da pilha. Quando um novo quadro de pilha é criado porque uma função é chamada, o registrador **`x29`** é **armazenado na pilha** e o **novo** endereço do ponteiro de quadro é (**endereço `sp`**) **armazenado neste registrador**.
 - Este registrador também pode ser usado como um **registrador de uso geral**, embora geralmente seja usado como referência para **variáveis locais**.
 8. **`x30`** ou **`lr`** - **Registrador de Link**. Ele mantém o **endereço de retorno** quando uma instrução `BL` (Branch with Link) ou `BLR` (Branch with Link to Register) é executada, armazenando o valor **`pc`** neste registrador.
 - Ele também pode ser usado como qualquer outro registrador.
@@ -41,20 +41,20 @@ ARM64 possui **31 registradores de uso geral**, rotulados de `x0` a `x30`. Cada 
 9. **`sp`** - **Ponteiro de Pilha**, usado para acompanhar o topo da pilha.
 - O valor **`sp`** deve sempre ser mantido em pelo menos um **alinhamento de quadword** ou uma exceção de alinhamento pode ocorrer.
 10. **`pc`** - **Contador de Programa**, que aponta para a próxima instrução. Este registrador só pode ser atualizado através de gerações de exceção, retornos de exceção e branches. As únicas instruções ordinárias que podem ler este registrador são instruções de branch com link (BL, BLR) para armazenar o endereço **`pc`** em **`lr`** (Registrador de Link).
-11. **`xzr`** - **Registrador Zero**. Também chamado de **`wzr`** em sua forma de registrador de **32** bits. Pode ser usado para obter o valor zero facilmente (operação comum) ou para realizar comparações usando **`subs`** como **`subs XZR, Xn, #10`** armazenando os dados resultantes em nenhum lugar (em **`xzr`**).
+11. **`xzr`** - **Registrador Zero**. Também chamado de **`wzr`** em sua forma de registrador **32**-bit. Pode ser usado para obter facilmente o valor zero (operação comum) ou para realizar comparações usando **`subs`** como **`subs XZR, Xn, #10`** armazenando os dados resultantes em nenhum lugar (em **`xzr`**).
 
-Os registradores **`Wn`** são a versão **de 32 bits** do registrador **`Xn`**.
+Os registradores **`Wn`** são a versão **32bit** do registrador **`Xn`**.
 
 ### Registradores SIMD e de Ponto Flutuante
 
-Além disso, existem outros **32 registradores de 128 bits** que podem ser usados em operações otimizadas de múltiplos dados de instrução única (SIMD) e para realizar aritmética de ponto flutuante. Estes são chamados de registradores Vn, embora também possam operar em **64** bits, **32** bits, **16** bits e **8** bits e então são chamados de **`Qn`**, **`Dn`**, **`Sn`**, **`Hn`** e **`Bn`**.
+Além disso, existem outros **32 registradores de 128 bits** que podem ser usados em operações otimizadas de múltiplos dados de instrução única (SIMD) e para realizar aritmética de ponto flutuante. Estes são chamados de registradores Vn, embora também possam operar em **64**-bit, **32**-bit, **16**-bit e **8**-bit e então são chamados de **`Qn`**, **`Dn`**, **`Sn`**, **`Hn`** e **`Bn`**.
 
 ### Registradores do Sistema
 
 **Existem centenas de registradores do sistema**, também chamados de registradores de propósito especial (SPRs), usados para **monitorar** e **controlar** o comportamento dos **processadores**.\
 Eles só podem ser lidos ou configurados usando as instruções especiais dedicadas **`mrs`** e **`msr`**.
 
-Os registradores especiais **`TPIDR_EL0`** e **`TPIDDR_EL0`** são comumente encontrados ao realizar engenharia reversa. O sufixo `EL0` indica a **exceção mínima** a partir da qual o registrador pode ser acessado (neste caso, EL0 é o nível de exceção (privilégio) regular com o qual os programas regulares operam).\
+Os registradores especiais **`TPIDR_EL0`** e **`TPIDDR_EL0`** são comumente encontrados ao realizar engenharia reversa. O sufixo `EL0` indica a **exceção mínima** a partir da qual o registrador pode ser acessado (neste caso, EL0 é o nível de exceção regular (privilégio) com o qual programas regulares são executados).\
 Eles são frequentemente usados para armazenar o **endereço base da região de armazenamento local de thread** na memória. Geralmente, o primeiro é legível e gravável para programas executando em EL0, mas o segundo pode ser lido de EL0 e escrito de EL1 (como o kernel).
 
 - `mrs x0, TPIDR_EL0 ; Ler TPIDR_EL0 em x0`
@@ -67,7 +67,7 @@ Estes são os campos acessíveis:
 
 <figure><img src="../../../images/image (1196).png" alt=""><figcaption></figcaption></figure>
 
-- As **flags de condição `N`**, `Z`, `C` e `V`:
+- As **flags de condição `N`**, **`Z`**, **`C`** e **`V`**:
 - **`N`** significa que a operação resultou em um resultado negativo.
 - **`Z`** significa que a operação resultou em zero.
 - **`C`** significa que a operação teve carry.
@@ -82,17 +82,17 @@ Estes são os campos acessíveis:
 
 - A **flag de largura de registrador atual (`nRW`)**: Se a flag tiver o valor 0, o programa será executado no estado de execução AArch64 uma vez retomado.
 - O **Nível de Exceção** (**`EL`**): Um programa regular executando em EL0 terá o valor 0.
-- A **flag de passo único** (**`SS`**): Usada por depuradores para passo único, definindo a flag SS para 1 dentro de **`SPSR_ELx`** através de uma exceção. O programa executará um passo e emitirá uma exceção de passo único.
+- A **flag de passo único** (**`SS`**): Usada por depuradores para executar um passo único definindo a flag SS para 1 dentro de **`SPSR_ELx`** através de uma exceção. O programa executará um passo e emitirá uma exceção de passo único.
 - A **flag de estado de exceção ilegal** (**`IL`**): É usada para marcar quando um software privilegiado realiza uma transferência de nível de exceção inválida, esta flag é definida como 1 e o processador aciona uma exceção de estado ilegal.
 - As flags **`DAIF`**: Essas flags permitem que um programa privilegiado oculte seletivamente certas exceções externas.
-- Se **`A`** for 1, significa que **aborts assíncronos** serão acionados. O **`I`** configura para responder a **Solicitações de Interrupção** (IRQs) de hardware externo. e o F está relacionado a **Solicitações de Interrupção Rápida** (FIRs).
-- As flags de seleção de ponteiro de pilha (**`SPS`**): Programas privilegiados executando em EL1 e acima podem alternar entre usar seu próprio registrador de ponteiro de pilha e o de modelo de usuário (por exemplo, entre `SP_EL1` e `EL0`). Esta troca é realizada escrevendo no registrador especial **`SPSel`**. Isso não pode ser feito a partir de EL0.
+- Se **`A`** for 1, significa que **aborts assíncronos** serão acionados. O **`I`** configura para responder a **Solicitações de Interrupção** (IRQs) de hardware externas. e o F está relacionado a **Solicitações de Interrupção Rápida** (FIRs).
+- As flags de seleção do ponteiro de pilha (**`SPS`**): Programas privilegiados executando em EL1 e acima podem alternar entre usar seu próprio registrador de ponteiro de pilha e o modelo de usuário (por exemplo, entre `SP_EL1` e `EL0`). Esta troca é realizada escrevendo no registrador especial **`SPSel`**. Isso não pode ser feito a partir de EL0.
 
 ## **Convenção de Chamada (ARM64v8)**
 
 A convenção de chamada ARM64 especifica que os **primeiros oito parâmetros** para uma função são passados em registradores **`x0` a `x7`**. **Parâmetros adicionais** são passados na **pilha**. O **valor de retorno** é passado de volta no registrador **`x0`**, ou em **`x1`** também **se for longo de 128 bits**. Os registradores **`x19`** a **`x30`** e **`sp`** devem ser **preservados** entre chamadas de função.
 
-Ao ler uma função em assembly, procure o **prólogo e epílogo da função**. O **prólogo** geralmente envolve **salvar o ponteiro de quadro (`x29`)**, **configurar** um **novo ponteiro de quadro** e **alocar espaço na pilha**. O **epílogo** geralmente envolve **restaurar o ponteiro de quadro salvo** e **retornar** da função.
+Ao ler uma função em assembly, procure o **prólogo e epílogo da função**. O **prólogo** geralmente envolve **salvar o ponteiro de quadro (`x29`)**, **configurar** um **novo ponteiro de quadro**, e **alocar espaço na pilha**. O **epílogo** geralmente envolve **restaurar o ponteiro de quadro salvo** e **retornar** da função.
 
 ### Convenção de Chamada em Swift
 
@@ -129,13 +129,13 @@ As instruções ARM64 geralmente têm o **formato `opcode dst, src1, src2`**, on
 - Xn2 -> Operando 1
 - Xn3 | #imm -> Operando 2 (registrador ou imediato)
 - \[shift #N | RRX] -> Realizar um deslocamento ou chamar RRX.
-- Exemplo: `add x0, x1, x2` — Isso adiciona os valores em `x1` e `x2` juntos e armazena o resultado em `x0`.
+- Exemplo: `add x0, x1, x2` — Isso adiciona os valores em `x1` e `x2` e armazena o resultado em `x0`.
 - `add x5, x5, #1, lsl #12` — Isso é igual a 4096 (um 1 deslocado 12 vezes) -> 1 0000 0000 0000 0000.
 - **`adds`** Isso realiza um `add` e atualiza as flags.
 - **`sub`**: **Subtrair** os valores de dois registradores e armazenar o resultado em um registrador.
 - Verifique a **sintaxe de `add`**.
 - Exemplo: `sub x0, x1, x2` — Isso subtrai o valor em `x2` de `x1` e armazena o resultado em `x0`.
-- **`subs`** Isso é como sub, mas atualiza a flag.
+- **`subs`** Isso é como sub, mas atualizando a flag.
 - **`mul`**: **Multiplicar** os valores de **dois registradores** e armazenar o resultado em um registrador.
 - Exemplo: `mul x0, x1, x2` — Isso multiplica os valores em `x1` e `x2` e armazena o resultado em `x0`.
 - **`div`**: **Dividir** o valor de um registrador por outro e armazenar o resultado em um registrador.
@@ -143,7 +143,7 @@ As instruções ARM64 geralmente têm o **formato `opcode dst, src1, src2`**, on
 - **`lsl`**, **`lsr`**, **`asr`**, **`ror`, `rrx`**:
 - **Deslocamento lógico à esquerda**: Adiciona 0s do final movendo os outros bits para frente (multiplica por n vezes 2).
 - **Deslocamento lógico à direita**: Adiciona 1s no início movendo os outros bits para trás (divide por n vezes 2 em não assinado).
-- **Deslocamento aritmético à direita**: Como **`lsr`**, mas em vez de adicionar 0s se o bit mais significativo for 1, **1s são adicionados** (divide por n vezes 2 em assinado).
+- **Deslocamento aritmético à direita**: Como **`lsr`**, mas em vez de adicionar 0s, se o bit mais significativo for 1, **1s são adicionados** (divide por n vezes 2 em assinado).
 - **Rotacionar à direita**: Como **`lsr`**, mas o que for removido da direita é anexado à esquerda.
 - **Rotacionar à direita com extensão**: Como **`ror`**, mas com a flag de carry como o "bit mais significativo". Assim, a flag de carry é movida para o bit 31 e o bit removido para a flag de carry.
 - **`bfm`**: **Movimento de Campo de Bits**, essas operações **copiam bits `0...n`** de um valor e os colocam em posições **`m..m+n`**. O **`#s`** especifica a **posição do bit mais à esquerda** e **`#r`** a **quantidade de rotação à direita**.
@@ -162,12 +162,12 @@ As instruções ARM64 geralmente têm o **formato `opcode dst, src1, src2`**, on
 - **`SXTH X1, W2`** Estende o sinal de um número de 16 bits **de W2 para X1** para preencher os 64 bits.
 - **`SXTW X1, W2`** Estende o sinal de um byte **de W2 para X1** para preencher os 64 bits.
 - **`UXTB X1, W2`** Adiciona 0s (não assinado) a um byte **de W2 para X1** para preencher os 64 bits.
-- **`extr`:** Extrai bits de um **par de registradores concatenados**.
+- **`extr`:** Extrai bits de um **par de registradores especificados concatenados**.
 - Exemplo: `EXTR W3, W2, W1, #3` Isso irá **concatenar W1+W2** e obter **do bit 3 de W2 até o bit 3 de W1** e armazená-lo em W3.
 - **`cmp`**: **Comparar** dois registradores e definir flags de condição. É um **alias de `subs`** definindo o registrador de destino como o registrador zero. Útil para saber se `m == n`.
 - Suporta a **mesma sintaxe que `subs`**.
 - Exemplo: `cmp x0, x1` — Isso compara os valores em `x0` e `x1` e define as flags de condição de acordo.
-- **`cmn`**: **Comparar** operando negativo. Neste caso, é um **alias de `adds`** e suporta a mesma sintaxe. Útil para saber se `m == -n`.
+- **`cmn`**: **Comparar o operando negativo**. Neste caso, é um **alias de `adds`** e suporta a mesma sintaxe. Útil para saber se `m == -n`.
 - **`ccmp`**: Comparação condicional, é uma comparação que será realizada apenas se uma comparação anterior foi verdadeira e definirá especificamente os bits nzcv.
 - `cmp x1, x2; ccmp x3, x4, 0, NE; blt _func` -> se x1 != x2 e x3 < x4, salte para func.
 - Isso ocorre porque **`ccmp`** só será executado se a **comparação anterior `cmp` foi um `NE`**, se não foi, os bits `nzcv` serão definidos como 0 (o que não satisfará a comparação `blt`).
@@ -185,18 +185,18 @@ As instruções ARM64 geralmente têm o **formato `opcode dst, src1, src2`**, on
 - Exemplo: `blr x1` — Isso chama a função cujo endereço está contido em `x1` e armazena o endereço de retorno em `x30`.
 - **`ret`**: **Retornar** da **sub-rotina**, tipicamente usando o endereço em **`x30`**.
 - Exemplo: `ret` — Isso retorna da sub-rotina atual usando o endereço de retorno em `x30`.
-- **`b.<cond>`**: Branches condicionais.
-- **`b.eq`**: **Branch se igual**, baseado na instrução `cmp` anterior.
+- **`b.<cond>`**: Branchs condicionais.
+- **`b.eq`**: **Branch se igual**, com base na instrução `cmp` anterior.
 - Exemplo: `b.eq label` — Se a instrução `cmp` anterior encontrou dois valores iguais, isso salta para `label`.
-- **`b.ne`**: **Branch se Não Igual**. Esta instrução verifica as flags de condição (que foram definidas por uma instrução de comparação anterior), e se os valores comparados não forem iguais, ela salta para um rótulo ou endereço.
+- **`b.ne`**: **Branch se Não Igual**. Esta instrução verifica as flags de condição (que foram definidas por uma instrução de comparação anterior), e se os valores comparados não forem iguais, ela faz um branch para um rótulo ou endereço.
 - Exemplo: Após uma instrução `cmp x0, x1`, `b.ne label` — Se os valores em `x0` e `x1 não forem iguais, isso salta para `label`.
-- **`cbz`**: **Comparar e Branch em Zero**. Esta instrução compara um registrador com zero, e se forem iguais, salta para um rótulo ou endereço.
+- **`cbz`**: **Comparar e Branch em Zero**. Esta instrução compara um registrador com zero, e se forem iguais, faz um branch para um rótulo ou endereço.
 - Exemplo: `cbz x0, label` — Se o valor em `x0` for zero, isso salta para `label`.
-- **`cbnz`**: **Comparar e Branch em Não Zero**. Esta instrução compara um registrador com zero, e se não forem iguais, salta para um rótulo ou endereço.
+- **`cbnz`**: **Comparar e Branch em Não Zero**. Esta instrução compara um registrador com zero, e se não forem iguais, faz um branch para um rótulo ou endereço.
 - Exemplo: `cbnz x0, label` — Se o valor em `x0` for não zero, isso salta para `label`.
-- **`tbnz`**: Testa o bit e salta se não for zero.
+- **`tbnz`**: Testa o bit e faz branch em não zero.
 - Exemplo: `tbnz x0, #8, label`.
-- **`tbz`**: Testa o bit e salta se for zero.
+- **`tbz`**: Testa o bit e faz branch em zero.
 - Exemplo: `tbz x0, #8, label`.
 - **Operações de seleção condicional**: Estas são operações cujo comportamento varia dependendo dos bits condicionais.
 - `csel Xd, Xn, Xm, cond` -> `csel X0, X1, X2, EQ` -> Se verdadeiro, X0 = X1, se falso, X0 = X2.
@@ -210,18 +210,18 @@ As instruções ARM64 geralmente têm o **formato `opcode dst, src1, src2`**, on
 - `csetm Xd, Xn, Xm, cond` -> Se verdadeiro, Xd = \<todos 1>, se falso, Xd = 0.
 - **`adrp`**: Computa o **endereço da página de um símbolo** e o armazena em um registrador.
 - Exemplo: `adrp x0, symbol` — Isso computa o endereço da página de `symbol` e o armazena em `x0`.
-- **`ldrsw`**: **Carregar** um valor **assinado de 32 bits** da memória e **estender o sinal para 64** bits.
-- Exemplo: `ldrsw x0, [x1]` — Isso carrega um valor assinado de 32 bits da localização de memória apontada por `x1`, estende o sinal para 64 bits e o armazena em `x0`.
+- **`ldrsw`**: **Carregar** um valor **32-bit** assinado da memória e **estendê-lo para 64** bits.
+- Exemplo: `ldrsw x0, [x1]` — Isso carrega um valor assinado de 32 bits da localização de memória apontada por `x1`, estende-o para 64 bits e o armazena em `x0`.
 - **`stur`**: **Armazenar um valor de registrador em uma localização de memória**, usando um deslocamento de outro registrador.
 - Exemplo: `stur x0, [x1, #4]` — Isso armazena o valor em `x0` na localização de memória que é 4 bytes maior do que o endereço atualmente em `x1`.
-- **`svc`** : Fazer uma **chamada de sistema**. Significa "Supervisor Call". Quando o processador executa esta instrução, ele **muda do modo de usuário para o modo de kernel** e salta para um local específico na memória onde o **código de manipulação de chamadas de sistema do kernel** está localizado.
+- **`svc`** : Fazer uma **chamada de sistema**. Significa "Chamada de Supervisor". Quando o processador executa esta instrução, ele **muda do modo de usuário para o modo de kernel** e salta para um local específico na memória onde o **código de manipulação de chamadas de sistema do kernel** está localizado.
 
 - Exemplo:
 
 ```armasm
-mov x8, 93  ; Carrega o número da chamada de sistema para sair (93) no registrador x8.
-mov x0, 0   ; Carrega o código de status de saída (0) no registrador x0.
-svc 0       ; Faz a chamada de sistema.
+mov x8, 93  ; Carregar o número da chamada de sistema para sair (93) no registrador x8.
+mov x0, 0   ; Carregar o código de status de saída (0) no registrador x0.
+svc 0       ; Fazer a chamada de sistema.
 ```
 
 ### **Prólogo da Função**
@@ -245,10 +245,10 @@ ldp x29, x30, [sp], #16  ; load pair x29 and x30 from the stack and increment th
 ## Estado de Execução AARCH32
 
 Armv8-A suporta a execução de programas de 32 bits. **AArch32** pode operar em um dos **dois conjuntos de instruções**: **`A32`** e **`T32`** e pode alternar entre eles via **`interworking`**.\
-Programas **privilegiados** de 64 bits podem agendar a **execução de programas de 32 bits** executando uma transferência de nível de exceção para o nível de privilégio inferior de 32 bits.\
-Note que a transição de 64 bits para 32 bits ocorre com uma redução do nível de exceção (por exemplo, um programa de 64 bits em EL1 acionando um programa em EL0). Isso é feito configurando o **bit 4 de** **`SPSR_ELx`** registro especial **para 1** quando o thread do processo `AArch32` está pronto para ser executado e o restante de `SPSR_ELx` armazena o **CPSR** dos programas **`AArch32`**. Em seguida, o processo privilegiado chama a instrução **`ERET`** para que o processador transite para **`AArch32`** entrando em A32 ou T32 dependendo do CPSR\*\*.\*\*
+Programas **privilegiados** de 64 bits podem agendar a **execução de programas de 32 bits** executando uma transferência de nível de exceção para o de 32 bits de menor privilégio.\
+Note que a transição de 64 bits para 32 bits ocorre com uma redução do nível de exceção (por exemplo, um programa de 64 bits em EL1 acionando um programa em EL0). Isso é feito configurando o **bit 4 do** **`SPSR_ELx`** registro especial **para 1** quando o thread do processo `AArch32` está pronto para ser executado e o restante de `SPSR_ELx` armazena o **CPSR** dos programas **`AArch32`**. Em seguida, o processo privilegiado chama a instrução **`ERET`** para que o processador transite para **`AArch32`** entrando em A32 ou T32 dependendo do CPSR\*\*.\*\*
 
-O **`interworking`** ocorre usando os bits J e T do CPSR. `J=0` e `T=0` significa **`A32`** e `J=0` e `T=1` significa **T32**. Isso basicamente se traduz em definir o **bit mais baixo como 1** para indicar que o conjunto de instruções é T32.\
+O **`interworking`** ocorre usando os bits J e T do CPSR. `J=0` e `T=0` significa **`A32`** e `J=0` e `T=1` significa **T32**. Isso basicamente se traduz em configurar o **bit mais baixo para 1** para indicar que o conjunto de instruções é T32.\
 Isso é configurado durante as **instruções de ramificação de interworking**, mas também pode ser configurado diretamente com outras instruções quando o PC é definido como o registrador de destino. Exemplo:
 
 Outro exemplo:
@@ -305,17 +305,17 @@ A instrução **`SEL`** usa essas flags GE para realizar ações condicionais.
 
 <figure><img src="../../../images/image (1200).png" alt=""><figcaption></figcaption></figure>
 
-- **`AIF`**: Certas exceções podem ser desativadas usando os bits **`A`**, `I`, `F`. Se **`A`** for 1, significa que **aborts assíncronos** serão acionados. O **`I`** configura para responder a **Solicitações de Interrupção** de hardware externo (IRQs). e o F está relacionado a **Solicitações de Interrupção Rápida** (FIRs).
+- **`AIF`**: Certas exceções podem ser desativadas usando os bits **`A`**, `I`, `F`. Se **`A`** for 1, significa que **aborts assíncronos** serão acionados. O **`I`** configura para responder a **Solicitações de Interrupção** de hardware externas (IRQs). e o F está relacionado a **Solicitações de Interrupção Rápida** (FIRs).
 
 ## macOS
 
 ### Chamadas de sistema BSD
 
-Confira [**syscalls.master**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master). Chamadas de sistema BSD terão **x16 > 0**.
+Confira [**syscalls.master**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master). As chamadas de sistema BSD terão **x16 > 0**.
 
 ### Armadilhas Mach
 
-Confira em [**syscall_sw.c**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/kern/syscall_sw.c.auto.html) a `mach_trap_table` e em [**mach_traps.h**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/mach/mach_traps.h) os protótipos. O número máximo de armadilhas Mach é `MACH_TRAP_TABLE_COUNT` = 128. Armadilhas Mach terão **x16 < 0**, então você precisa chamar os números da lista anterior com um **menos**: **`_kernelrpc_mach_vm_allocate_trap`** é **`-10`**.
+Confira em [**syscall_sw.c**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/kern/syscall_sw.c.auto.html) a `mach_trap_table` e em [**mach_traps.h**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/mach/mach_traps.h) os protótipos. O número máximo de armadilhas Mach é `MACH_TRAP_TABLE_COUNT` = 128. As armadilhas Mach terão **x16 < 0**, então você precisa chamar os números da lista anterior com um **menos**: **`_kernelrpc_mach_vm_allocate_trap`** é **`-10`**.
 
 Você também pode verificar **`libsystem_kernel.dylib`** em um desassemblador para encontrar como chamar essas (e BSD) chamadas de sistema:
 ```bash
@@ -389,7 +389,7 @@ Quando essa função é chamada, é necessário encontrar o método chamado da i
 - Tentar lista de métodos da superclasse:
 - Se encontrado, preencher cache e feito
 - Se (resolver) tentar resolvedor de métodos e repetir a busca da classe
-- Se ainda aqui (= tudo o mais falhou) tentar forwarder
+- Se ainda aqui (= tudo o mais falhou) tentar encaminhador
 
 ### Shellcodes
 

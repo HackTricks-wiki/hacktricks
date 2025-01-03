@@ -200,7 +200,7 @@ log show --style syslog --predicate 'eventMessage contains[c] "sandbox"' --last 
 {{#endtabs}}
 
 > [!NOTE]
-> Note que o **software** **desenvolvido pela Apple** que roda em **Windows** **não possui precauções de segurança adicionais**, como o sandboxing de aplicativos.
+> Observe que o **software** **desenvolvido pela Apple** que roda em **Windows** **não possui precauções de segurança adicionais**, como o sandboxing de aplicativos.
 
 Exemplos de bypass:
 
@@ -220,7 +220,7 @@ E então, apenas execute algo usando esse perfil:
 ```bash
 sandbox-exec -f /tmp/trace.sb /bin/ls
 ```
-Em `/tmp/trace.out`, você poderá ver cada verificação de sandbox realizada toda vez que foi chamada (ou seja, muitos duplicados).
+Em `/tmp/trace.out` você poderá ver cada verificação de sandbox realizada toda vez que foi chamada (ou seja, muitos duplicados).
 
 Também é possível rastrear o sandbox usando o **`-t`** parâmetro: `sandbox-exec -t /path/trace.out -p "(version 1)" /bin/ls`
 
@@ -315,7 +315,7 @@ Observe que, para chamar a função de suspensão, algumas permissões são veri
 
 ## mac_syscall
 
-Esta chamada de sistema (#381) espera um primeiro argumento de string que indicará o módulo a ser executado e, em seguida, um código no segundo argumento que indicará a função a ser executada. O terceiro argumento dependerá da função executada.
+Esta chamada de sistema (#381) espera um primeiro argumento do tipo string que indicará o módulo a ser executado e, em seguida, um código no segundo argumento que indicará a função a ser executada. O terceiro argumento dependerá da função executada.
 
 A chamada da função `___sandbox_ms` envolve `mac_syscall`, indicando no primeiro argumento `"Sandbox"`, assim como `___sandbox_msp` é um wrapper de `mac_set_proc` (#387). Então, alguns dos códigos suportados por `___sandbox_ms` podem ser encontrados nesta tabela:
 
@@ -331,7 +331,7 @@ A chamada da função `___sandbox_ms` envolve `mac_syscall`, indicando no primei
 - **extension_twiddle (#9)**: Ajusta ou modifica uma extensão de arquivo existente (por exemplo, TextEdit, rtf, rtfd).
 - **suspend (#10)**: Suspende temporariamente todas as verificações da sandbox (requer permissões apropriadas).
 - **unsuspend (#11)**: Retoma todas as verificações da sandbox que foram suspensas anteriormente.
-- **passthrough_access (#12)**: Permite acesso direto a um recurso, contornando as verificações da sandbox.
+- **passthrough_access (#12)**: Permite acesso direto a um recurso, ignorando as verificações da sandbox.
 - **set_container_path (#13)**: (apenas iOS) Define um caminho de contêiner para um grupo de aplicativos ou ID de assinatura.
 - **container_map (#14)**: (apenas iOS) Recupera um caminho de contêiner do `containermanagerd`.
 - **sandbox_user_state_item_buffer_send (#15)**: (iOS 10+) Define metadados de modo de usuário na sandbox.
@@ -354,7 +354,7 @@ Observe que no iOS a extensão do kernel contém **todos os perfis codificados**
 
 - **`hook_policy_init`**: Ele conecta `mpo_policy_init` e é chamado após `mac_policy_register`. Realiza a maior parte das inicializações da Sandbox. Também inicializa o SIP.
 - **`hook_policy_initbsd`**: Configura a interface sysctl registrando `security.mac.sandbox.sentinel`, `security.mac.sandbox.audio_active` e `security.mac.sandbox.debug_mode` (se inicializado com `PE_i_can_has_debugger`).
-- **`hook_policy_syscall`**: É chamado por `mac_syscall` com "Sandbox" como primeiro argumento e código indicando a operação no segundo. Um switch é usado para encontrar o código a ser executado de acordo com o código solicitado.
+- **`hook_policy_syscall`**: É chamado por `mac_syscall` com "Sandbox" como primeiro argumento e um código indicando a operação no segundo. Um switch é usado para encontrar o código a ser executado de acordo com o código solicitado.
 
 ### MACF Hooks
 

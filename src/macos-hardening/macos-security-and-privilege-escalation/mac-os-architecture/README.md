@@ -18,7 +18,7 @@ No XNU, Mach é **responsável por muitas das operações críticas de baixo ní
 
 ### BSD
 
-O **núcleo** XNU também **incorpora** uma quantidade significativa de código derivado do projeto **FreeBSD**. Este código **executa como parte do núcleo junto com Mach**, no mesmo espaço de endereço. No entanto, o código FreeBSD dentro do XNU pode diferir substancialmente do código FreeBSD original porque modificações foram necessárias para garantir sua compatibilidade com Mach. FreeBSD contribui para muitas operações do núcleo, incluindo:
+O **núcleo** XNU também **incorpora** uma quantidade significativa de código derivado do projeto **FreeBSD**. Este código **executa como parte do núcleo junto com Mach**, no mesmo espaço de endereço. No entanto, o código FreeBSD dentro do XNU pode diferir substancialmente do código FreeBSD original porque modificações foram necessárias para garantir sua compatibilidade com Mach. O FreeBSD contribui para muitas operações do núcleo, incluindo:
 
 - Gerenciamento de processos
 - Manipulação de sinais
@@ -29,7 +29,7 @@ O **núcleo** XNU também **incorpora** uma quantidade significativa de código 
 
 Entender a interação entre BSD e Mach pode ser complexo, devido aos seus diferentes frameworks conceituais. Por exemplo, o BSD usa processos como sua unidade fundamental de execução, enquanto Mach opera com base em threads. Essa discrepância é reconciliada no XNU **associando cada processo BSD a uma tarefa Mach** que contém exatamente uma thread Mach. Quando a chamada de sistema fork() do BSD é usada, o código BSD dentro do núcleo utiliza funções Mach para criar uma estrutura de tarefa e thread.
 
-Além disso, **Mach e BSD mantêm diferentes modelos de segurança**: o modelo de segurança de **Mach** é baseado em **direitos de porta**, enquanto o modelo de segurança do BSD opera com base em **propriedade de processos**. Disparidades entre esses dois modelos ocasionalmente resultaram em vulnerabilidades de escalonamento de privilégios locais. Além das chamadas de sistema típicas, também existem **traps Mach que permitem que programas de espaço de usuário interajam com o núcleo**. Esses diferentes elementos juntos formam a arquitetura híbrida multifacetada do núcleo do macOS.
+Além disso, **Mach e BSD mantêm diferentes modelos de segurança**: o modelo de segurança do **Mach** é baseado em **direitos de porta**, enquanto o modelo de segurança do BSD opera com base em **propriedade de processos**. Disparidades entre esses dois modelos ocasionalmente resultaram em vulnerabilidades de escalonamento de privilégios locais. Além das chamadas de sistema típicas, também existem **traps Mach que permitem que programas de espaço de usuário interajam com o núcleo**. Esses diferentes elementos juntos formam a arquitetura híbrida multifacetada do núcleo do macOS.
 
 ### I/O Kit - Drivers
 
@@ -39,15 +39,15 @@ O I/O Kit é um framework de **driver de dispositivo** orientado a objetos e de 
 macos-iokit.md
 {{#endref}}
 
-### IPC - Comunicação entre Processos
+### IPC - Inter Process Communication
 
 {{#ref}}
 ../macos-proces-abuse/macos-ipc-inter-process-communication/
 {{#endref}}
 
-## Extensões do Núcleo do macOS
+## macOS Kernel Extensions
 
-O macOS é **super restritivo para carregar Extensões do Núcleo** (.kext) devido aos altos privilégios com que o código será executado. Na verdade, por padrão, é virtualmente impossível (a menos que um bypass seja encontrado).
+O macOS é **super restritivo para carregar Extensões de Núcleo** (.kext) devido aos altos privilégios com que o código será executado. Na verdade, por padrão, é virtualmente impossível (a menos que um bypass seja encontrado).
 
 Na página seguinte, você também pode ver como recuperar o `.kext` que o macOS carrega dentro de seu **kernelcache**:
 
@@ -55,15 +55,15 @@ Na página seguinte, você também pode ver como recuperar o `.kext` que o macOS
 macos-kernel-extensions.md
 {{#endref}}
 
-### Extensões do Sistema do macOS
+### macOS System Extensions
 
-Em vez de usar Extensões do Núcleo, o macOS criou as Extensões do Sistema, que oferecem APIs em nível de usuário para interagir com o núcleo. Dessa forma, os desenvolvedores podem evitar o uso de extensões do núcleo.
+Em vez de usar Extensões de Núcleo, o macOS criou as Extensões de Sistema, que oferecem APIs em nível de usuário para interagir com o núcleo. Dessa forma, os desenvolvedores podem evitar o uso de extensões de núcleo.
 
 {{#ref}}
 macos-system-extensions.md
 {{#endref}}
 
-## Referências
+## References
 
 - [**The Mac Hacker's Handbook**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt_other?_encoding=UTF8&me=&qid=)
 - [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)

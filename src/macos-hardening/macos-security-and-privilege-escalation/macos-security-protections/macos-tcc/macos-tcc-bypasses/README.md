@@ -74,13 +74,13 @@ Para mais informações sobre Apple Scripts, confira:
 macos-apple-scripts.md
 {{#endref}}
 
-Por exemplo, se um aplicativo tem **permissão de Automação sobre `iTerm`**, por exemplo, neste exemplo **`Terminal`** tem acesso sobre iTerm:
+Por exemplo, se um aplicativo tem **permissão de Automação sobre `iTerm`**, por exemplo, neste exemplo **`Terminal`** tem acesso ao iTerm:
 
 <figure><img src="../../../../../images/image (981).png" alt=""><figcaption></figcaption></figure>
 
 #### Sobre iTerm
 
-Terminal, que não tem FDA, pode chamar iTerm, que tem, e usá-lo para realizar ações:
+Terminal, que não tem FDA, pode chamar o iTerm, que tem, e usá-lo para realizar ações:
 ```applescript:iterm.script
 tell application "iTerm"
 activate
@@ -96,7 +96,7 @@ end tell
 ```bash
 osascript iterm.script
 ```
-#### Over Finder
+#### Sobre o Finder
 
 Ou se um aplicativo tiver acesso ao Finder, pode ser um script como este:
 ```applescript
@@ -115,7 +115,7 @@ do shell script "rm " & POSIX path of (copyFile as alias)
 O **daemon tccd** do userland estava usando a variável de ambiente **`HOME`** para acessar o banco de dados de usuários do TCC em: **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**
 
 De acordo com [este post do Stack Exchange](https://stackoverflow.com/questions/135688/setting-environment-variables-on-os-x/3756686#3756686) e porque o daemon TCC está sendo executado via `launchd` dentro do domínio do usuário atual, é possível **controlar todas as variáveis de ambiente** passadas para ele.\
-Assim, um **atacante poderia definir a variável de ambiente `$HOME`** no **`launchctl`** para apontar para um **diretório controlado**, **reiniciar** o **daemon TCC**, e então **modificar diretamente o banco de dados TCC** para se conceder **todas as permissões TCC disponíveis** sem nunca solicitar ao usuário final.\
+Assim, um **atacante poderia definir a variável de ambiente `$HOME`** em **`launchctl`** para apontar para um **diretório controlado**, **reiniciar** o **daemon TCC**, e então **modificar diretamente o banco de dados TCC** para se conceder **todas as permissões TCC disponíveis** sem nunca solicitar ao usuário final.\
 PoC:
 ```bash
 # reset database just in case (no cheating!)
@@ -145,7 +145,7 @@ $> ls ~/Documents
 ```
 ### CVE-2021-30761 - Notas
 
-Notas tinham acesso a locais protegidos pelo TCC, mas quando uma nota é criada, ela é **criada em um local não protegido**. Assim, você poderia pedir para notas copiarem um arquivo protegido em uma nota (ou seja, em um local não protegido) e então acessar o arquivo:
+Notas tinha acesso a locais protegidos pelo TCC, mas quando uma nota é criada, ela é **criada em um local não protegido**. Assim, você poderia pedir para notas copiar um arquivo protegido em uma nota (então em um local não protegido) e depois acessar o arquivo:
 
 <figure><img src="../../../../../images/image (476).png" alt=""><figcaption></figcaption></figure>
 
@@ -185,7 +185,7 @@ Esta **variável de ambiente é usada pelo framework `Metal`** que é uma depend
 Definindo o seguinte: `MTL_DUMP_PIPELINES_TO_JSON_FILE="path/name"`. Se `path` for um diretório válido, o bug será acionado e podemos usar `fs_usage` para ver o que está acontecendo no programa:
 
 - um arquivo será `open()`ado, chamado `path/.dat.nosyncXXXX.XXXXXX` (X é aleatório)
-- uma ou mais `write()`s escreverão o conteúdo no arquivo (não controlamos isso)
+- um ou mais `write()`s escreverão o conteúdo no arquivo (não controlamos isso)
 - `path/.dat.nosyncXXXX.XXXXXX` será `renamed()` para `path/name`
 
 É uma gravação de arquivo temporário, seguida por um **`rename(old, new)`** **que não é seguro.**
@@ -206,7 +206,7 @@ Este foi o ataque no CVE: Por exemplo, para sobrescrever o `TCC.db` do usuário,
 - capturar o `open()` de `/Users/hacker/tmp/.dat.nosyncXXXX.XXXXXX` (X é aleatório)
 - aqui também `open()` este arquivo para escrita e segurar o descritor de arquivo
 - trocar atomicamente `/Users/hacker/tmp` com `/Users/hacker/ourlink` **em um loop**
-- fazemos isso para maximizar nossas chances de sucesso, pois a janela de corrida é bastante estreita, mas perder a corrida tem desvantagens negligenciáveis
+- fazemos isso para maximizar nossas chances de sucesso, já que a janela de corrida é bem estreita, mas perder a corrida tem desvantagens negligenciáveis
 - esperar um pouco
 - testar se tivemos sorte
 - se não, executar novamente do início
@@ -250,7 +250,7 @@ Para mais informações, confira o [**relatório original**](https://www.microso
 
 ## Por injeção de processo
 
-Existem diferentes técnicas para injetar código dentro de um processo e abusar de seus privilégios TCC:
+Existem diferentes técnicas para injetar código dentro de um processo e abusar de suas permissões TCC:
 
 {{#ref}}
 ../../../macos-proces-abuse/
@@ -336,7 +336,7 @@ Executable=/Applications/Firefox.app/Contents/MacOS/firefox
 </dict>
 </plist>
 ```
-Para mais informações sobre como explorar isso facilmente [**ver o relatório original**](https://wojciechregula.blog/post/how-to-rob-a-firefox/).
+Para mais informações sobre como explorar isso facilmente [**verifique o relatório original**](https://wojciechregula.blog/post/how-to-rob-a-firefox/).
 
 ### CVE-2020-10006
 
@@ -417,7 +417,7 @@ exploit_location]; task.standardOutput = pipe;
 
 ### CVE-2020-9771 - bypass do TCC do mount_apfs e escalonamento de privilégios
 
-**Qualquer usuário** (mesmo os sem privilégios) pode criar e montar um snapshot do time machine e **acessar TODOS os arquivos** desse snapshot.\
+**Qualquer usuário** (mesmo os sem privilégios) pode criar e montar um snapshot do Time Machine e **acessar TODOS os arquivos** desse snapshot.\
 O **único privilégio** necessário é que o aplicativo usado (como `Terminal`) tenha acesso **Full Disk Access** (FDA) (`kTCCServiceSystemPolicyAllfiles`), que precisa ser concedido por um administrador.
 ```bash
 # Create snapshot
@@ -467,7 +467,7 @@ Verifique o **exploit completo** na [**escrita original**](https://theevilbit.gi
 
 ### CVE-2024-40855
 
-Conforme explicado na [escrita original](https://www.kandji.io/blog/macos-audit-story-part2), este CVE abusou do `diskarbitrationd`.
+Como explicado na [escrita original](https://www.kandji.io/blog/macos-audit-story-part2), este CVE abusou do `diskarbitrationd`.
 
 A função `DADiskMountWithArgumentsCommon` do framework público `DiskArbitration` realizava as verificações de segurança. No entanto, é possível contorná-la chamando diretamente o `diskarbitrationd` e, portanto, usar elementos `../` no caminho e symlinks.
 
@@ -475,7 +475,7 @@ Isso permitiu que um atacante realizasse montagens arbitrárias em qualquer loca
 
 ### asr
 
-A ferramenta **`/usr/sbin/asr`** permitiu copiar todo o disco e montá-lo em outro lugar contornando as proteções do TCC.
+A ferramenta **`/usr/sbin/asr`** permitiu copiar todo o disco e montá-lo em outro lugar, contornando as proteções do TCC.
 
 ### Serviços de Localização
 

@@ -6,7 +6,7 @@
 
 ### Swap Files
 
-Os arquivos de swap, como `/private/var/vm/swapfile0`, servem como **caches quando a memória física está cheia**. Quando não há mais espaço na memória física, seus dados são transferidos para um arquivo de swap e, em seguida, trazidos de volta para a memória física conforme necessário. Vários arquivos de swap podem estar presentes, com nomes como swapfile0, swapfile1 e assim por diante.
+Os arquivos de troca, como `/private/var/vm/swapfile0`, servem como **caches quando a memória física está cheia**. Quando não há mais espaço na memória física, seus dados são transferidos para um arquivo de troca e, em seguida, trazidos de volta para a memória física conforme necessário. Vários arquivos de troca podem estar presentes, com nomes como swapfile0, swapfile1 e assim por diante.
 
 ### Hibernate Image
 

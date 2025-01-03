@@ -14,18 +14,18 @@
 - **/sbin**: Binários essenciais do sistema (relacionados à administração)
 - **/System**: Arquivo para fazer o OS X funcionar. Você deve encontrar principalmente apenas arquivos específicos da Apple aqui (não de terceiros).
 - **/tmp**: Arquivos são excluídos após 3 dias (é um link simbólico para /private/tmp)
-- **/Users**: Diretório inicial para usuários.
+- **/Users**: Diretório home para usuários.
 - **/usr**: Configuração e binários do sistema
 - **/var**: Arquivos de log
 - **/Volumes**: As unidades montadas aparecerão aqui.
-- **/.vol**: Executando `stat a.txt` você obtém algo como `16777223 7545753 -rw-r--r-- 1 username wheel ...` onde o primeiro número é o número de identificação do volume onde o arquivo existe e o segundo é o número do inode. Você pode acessar o conteúdo deste arquivo através de /.vol/ com essa informação executando `cat /.vol/16777223/7545753`
+- **/.vol**: Executando `stat a.txt` você obtém algo como `16777223 7545753 -rw-r--r-- 1 username wheel ...` onde o primeiro número é o número de id do volume onde o arquivo existe e o segundo é o número do inode. Você pode acessar o conteúdo deste arquivo através de /.vol/ com essa informação executando `cat /.vol/16777223/7545753`
 
 ### Pastas de Aplicativos
 
 - **Aplicativos do sistema** estão localizados em `/System/Applications`
 - **Aplicativos instalados** geralmente são instalados em `/Applications` ou em `~/Applications`
-- **Dados de aplicativos** podem ser encontrados em `/Library/Application Support` para os aplicativos executando como root e `~/Library/Application Support` para aplicativos executando como o usuário.
-- **Daemons** de aplicativos de terceiros que **precisam ser executados como root** geralmente estão localizados em `/Library/PrivilegedHelperTools/`
+- **Dados do aplicativo** podem ser encontrados em `/Library/Application Support` para os aplicativos executando como root e `~/Library/Application Support` para aplicativos executando como o usuário.
+- Daemons de aplicativos de terceiros que **precisam ser executados como root** geralmente estão localizados em `/Library/PrivilegedHelperTools/`
 - Aplicativos **Sandboxed** são mapeados na pasta `~/Library/Containers`. Cada aplicativo tem uma pasta nomeada de acordo com o ID do bundle do aplicativo (`com.apple.Safari`).
 - O **kernel** está localizado em `/System/Library/Kernels/kernel`
 - **Extensões do kernel da Apple** estão localizadas em `/System/Library/Extensions`
@@ -39,7 +39,7 @@ MacOS armazena informações como senhas em vários lugares:
 macos-sensitive-locations.md
 {{#endref}}
 
-### Instaladores pkg vulneráveis
+### Instaladores pkg Vulneráveis
 
 {{#ref}}
 macos-installers-abuse.md
@@ -75,7 +75,7 @@ macos-bundles.md
 
 ## Cache de Biblioteca Compartilhada Dyld (SLC)
 
-No macOS (e iOS), todas as bibliotecas compartilhadas do sistema, como frameworks e dylibs, são **combinadas em um único arquivo**, chamado de **cache compartilhado dyld**. Isso melhora o desempenho, já que o código pode ser carregado mais rapidamente.
+No macOS (e iOS), todas as bibliotecas compartilhadas do sistema, como frameworks e dylibs, são **combinadas em um único arquivo**, chamado de **cache compartilhado dyld**. Isso melhorou o desempenho, já que o código pode ser carregado mais rapidamente.
 
 Isso está localizado no macOS em `/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/` e em versões mais antigas você pode encontrar o **cache compartilhado** em **`/System/Library/dyld/`**.\
 No iOS, você pode encontrá-los em **`/System/Library/Caches/com.apple.dyld/`**.
@@ -97,7 +97,7 @@ dyldex_all [dyld_shared_cache_path] # Extract all
 
 <figure><img src="../../../images/image (1152).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Alguns extratores não funcionarão, pois os dylibs estão pré-vinculados com endereços codificados, portanto, podem estar pulando para endereços desconhecidos.
+Alguns extratores não funcionarão, pois as dylibs estão pré-vinculadas com endereços codificados, portanto, podem estar pulando para endereços desconhecidos.
 
 > [!TIP]
 > Também é possível baixar o Cache de Biblioteca Compartilhada de outros dispositivos \*OS no macos usando um emulador no Xcode. Eles serão baixados dentro de: ls `$HOME/Library/Developer/Xcode/<*>OS\ DeviceSupport/<version>/Symbols/System/Library/Caches/com.apple.dyld/`, como: `$HOME/Library/Developer/Xcode/iOS\ DeviceSupport/14.1\ (18A8395)/Symbols/System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64`
@@ -108,14 +108,14 @@ Alguns extratores não funcionarão, pois os dylibs estão pré-vinculados com e
 
 Note que mesmo que o SLC seja deslizante no primeiro uso, todos os **processos** usam a **mesma cópia**, o que **elimina a proteção ASLR** se o atacante conseguir executar processos no sistema. Isso foi, na verdade, explorado no passado e corrigido com o pager de região compartilhada.
 
-Branch pools são pequenos dylibs Mach-O que criam pequenos espaços entre mapeamentos de imagem, tornando impossível interpor as funções.
+Branch pools são pequenas dylibs Mach-O que criam pequenos espaços entre mapeamentos de imagem, tornando impossível interpor as funções.
 
 ### Substituir SLCs
 
 Usando as variáveis de ambiente:
 
 - **`DYLD_DHARED_REGION=private DYLD_SHARED_CACHE_DIR=</path/dir> DYLD_SHARED_CACHE_DONT_VALIDATE=1`** -> Isso permitirá carregar um novo cache de biblioteca compartilhada.
-- **`DYLD_SHARED_CACHE_DIR=avoid`** e substituir manualmente as bibliotecas com symlinks para o cache compartilhado com as reais (você precisará extraí-las).
+- **`DYLD_SHARED_CACHE_DIR=avoid`** e substituir manualmente as bibliotecas por symlinks para o cache compartilhado com as reais (você precisará extraí-las).
 
 ## Permissões Especiais de Arquivo
 
@@ -158,10 +158,10 @@ Todas as flags podem ser encontradas no arquivo `sys/stat.h` (encontre usando `m
 
 As **ACLs** de arquivo contêm **ACE** (Entradas de Controle de Acesso) onde permissões **mais granulares** podem ser atribuídas a diferentes usuários.
 
-É possível conceder a um **diretório** essas permissões: `listar`, `pesquisar`, `adicionar_arquivo`, `adicionar_subdiretório`, `deletar_filho`, `deletar_filho`.\
+É possível conceder a um **diretório** estas permissões: `listar`, `pesquisar`, `adicionar_arquivo`, `adicionar_subdiretório`, `deletar_filho`, `deletar_filho`.\
 E a um **arquivo**: `ler`, `escrever`, `adicionar`, `executar`.
 
-Quando o arquivo contém ACLs, você encontrará um "+" ao listar as permissões, como em:
+Quando o arquivo contém ACLs, você encontrará um "+" ao listar as permissões como em:
 ```bash
 ls -ld Movies
 drwx------+   7 username  staff     224 15 Apr 19:42 Movies
@@ -196,7 +196,7 @@ Atributos estendidos têm um nome e qualquer valor desejado, e podem ser vistos 
 
 ### Forks de Recurso | macOS ADS
 
-Esta é uma maneira de obter **Fluxos de Dados Alternativos em máquinas MacOS**. Você pode salvar conteúdo dentro de um atributo estendido chamado **com.apple.ResourceFork** dentro de um arquivo salvando-o em **file/..namedfork/rsrc**.
+Esta é uma maneira de obter **Fluxos de Dados Alternativos no MacOS**. Você pode salvar conteúdo dentro de um atributo estendido chamado **com.apple.ResourceFork** dentro de um arquivo salvando-o em **file/..namedfork/rsrc**.
 ```bash
 echo "Hello" > a.txt
 echo "Hello Mac ADS" > a.txt/..namedfork/rsrc

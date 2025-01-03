@@ -21,14 +21,14 @@ Network Extensions fornecem a capacidade de personalizar comportamentos de rede.
 - **App Proxy**: Isso é usado para criar um cliente VPN que implementa um protocolo VPN personalizado orientado a fluxo. Isso significa que ele lida com o tráfego de rede com base em conexões (ou fluxos) em vez de pacotes individuais.
 - **Packet Tunnel**: Isso é usado para criar um cliente VPN que implementa um protocolo VPN personalizado orientado a pacotes. Isso significa que ele lida com o tráfego de rede com base em pacotes individuais.
 - **Filter Data**: Isso é usado para filtrar "fluxos" de rede. Ele pode monitorar ou modificar dados de rede no nível do fluxo.
-- **Filter Packet**: Isso é usado para filtrar pacotes de rede individuais. Ele pode monitorar ou modificar dados de rede no nível do pacote.
+- **Filter Packet**: Isso é usado para filtrar pacotes individuais de rede. Ele pode monitorar ou modificar dados de rede no nível do pacote.
 - **DNS Proxy**: Isso é usado para criar um provedor DNS personalizado. Ele pode ser usado para monitorar ou modificar solicitações e respostas DNS.
 
 ## Endpoint Security Framework
 
 Endpoint Security é um framework fornecido pela Apple no macOS que oferece um conjunto de APIs para segurança do sistema. É destinado ao uso por **fornecedores de segurança e desenvolvedores para construir produtos que podem monitorar e controlar a atividade do sistema** para identificar e proteger contra atividades maliciosas.
 
-Este framework fornece uma **coleção de APIs para monitorar e controlar a atividade do sistema**, como execuções de processos, eventos do sistema de arquivos, eventos de rede e do kernel.
+Este framework fornece uma **coleção de APIs para monitorar e controlar a atividade do sistema**, como execuções de processos, eventos do sistema de arquivos, eventos de rede e eventos do kernel.
 
 O núcleo deste framework é implementado no kernel, como uma Kernel Extension (KEXT) localizada em **`/System/Library/Extensions/EndpointSecurity.kext`**. Este KEXT é composto por vários componentes-chave:
 
@@ -71,7 +71,7 @@ tccutil reset All
 ```
 Para **mais informações** sobre este bypass e relacionados, confira a palestra [#OBTS v5.0: "The Achilles Heel of EndpointSecurity" - Fitzl Csaba](https://www.youtube.com/watch?v=lQO7tvNCoTI)
 
-No final, isso foi corrigido ao conceder a nova permissão **`kTCCServiceEndpointSecurityClient`** ao aplicativo de segurança gerenciado por **`tccd`**, de modo que `tccutil` não limpe suas permissões, impedindo-o de ser executado.
+No final, isso foi corrigido ao dar a nova permissão **`kTCCServiceEndpointSecurityClient`** ao aplicativo de segurança gerenciado por **`tccd`**, para que `tccutil` não limpe suas permissões, impedindo-o de ser executado.
 
 ## Referências
 

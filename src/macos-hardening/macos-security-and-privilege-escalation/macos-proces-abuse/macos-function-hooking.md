@@ -226,11 +226,11 @@ return 0;
 }
 ```
 > [!WARNING]
-> Neste caso, se o **código de implementação do método legit** **verificar** o **nome do método**, ele pode **detectar** essa troca e impedir que ela seja executada.
+> Neste caso, se o **código de implementação do legit** método **verificar** o **nome** do **método**, ele pode **detectar** esse swizzling e impedir que ele seja executado.
 >
 > A técnica a seguir não tem essa restrição.
 
-### Troca de Métodos com method_setImplementation
+### Method Swizzling com method_setImplementation
 
 O formato anterior é estranho porque você está trocando a implementação de 2 métodos um pelo outro. Usando a função **`method_setImplementation`**, você pode **mudar** a **implementação** de um **método para o outro**.
 
@@ -296,7 +296,7 @@ No entanto, ambas as opções são **limitadas** a binários/processos **não pr
 
 No entanto, um ataque de hooking de função é muito específico, um atacante fará isso para **roubar informações sensíveis de dentro de um processo** (se não, você apenas faria um ataque de injeção de processo). E essas informações sensíveis podem estar localizadas em aplicativos baixados pelo usuário, como o MacPass.
 
-Assim, o vetor do atacante seria encontrar uma vulnerabilidade ou remover a assinatura da aplicação, injetar a variável de ambiente **`DYLD_INSERT_LIBRARIES`** através do Info.plist da aplicação, adicionando algo como:
+Assim, o vetor do atacante seria encontrar uma vulnerabilidade ou remover a assinatura da aplicação, injetar a variável de ambiente **`DYLD_INSERT_LIBRARIES`** através do Info.plist da aplicação adicionando algo como:
 ```xml
 <key>LSEnvironment</key>
 <dict>

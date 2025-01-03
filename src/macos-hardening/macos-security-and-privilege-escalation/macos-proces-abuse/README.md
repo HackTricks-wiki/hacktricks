@@ -6,7 +6,7 @@
 
 Um processo é uma instância de um executável em execução, no entanto, os processos não executam código, esses são threads. Portanto, **os processos são apenas contêineres para threads em execução** fornecendo memória, descritores, portas, permissões...
 
-Tradicionalmente, os processos eram iniciados dentro de outros processos (exceto o PID 1) chamando **`fork`**, que criaria uma cópia exata do processo atual e então o **processo filho** geralmente chamaria **`execve`** para carregar o novo executável e executá-lo. Então, **`vfork`** foi introduzido para tornar esse processo mais rápido sem cópias de memória.\
+Tradicionalmente, os processos eram iniciados dentro de outros processos (exceto o PID 1) chamando **`fork`**, que criaria uma cópia exata do processo atual e então o **processo filho** geralmente chamaria **`execve`** para carregar o novo executável e executá-lo. Então, **`vfork`** foi introduzido para tornar esse processo mais rápido sem qualquer cópia de memória.\
 Depois, **`posix_spawn`** foi introduzido combinando **`vfork`** e **`execve`** em uma única chamada e aceitando flags:
 
 - `POSIX_SPAWN_RESETIDS`: Redefinir ids efetivos para ids reais
@@ -34,12 +34,12 @@ PIDs, identificadores de processo, identificam um processo único. No XNU, os **
 **Processos** podem ser inseridos em **grupos** para facilitar seu manuseio. Por exemplo, comandos em um script de shell estarão no mesmo grupo de processos, então é possível **sinalizá-los juntos** usando kill, por exemplo.\
 Também é possível **agrupar processos em sessões**. Quando um processo inicia uma sessão (`setsid(2)`), os processos filhos são colocados dentro da sessão, a menos que iniciem sua própria sessão.
 
-Coalizão é outra maneira de agrupar processos no Darwin. Um processo que se junta a uma coalizão permite acessar recursos compartilhados, compartilhando um livro-razão ou enfrentando Jetsam. As coalizões têm diferentes papéis: Líder, serviço XPC, Extensão.
+Coalizão é outra maneira de agrupar processos no Darwin. Um processo que se junta a uma coalizão permite acessar recursos do pool, compartilhando um livro-razão ou enfrentando Jetsam. As coalizões têm diferentes papéis: Líder, serviço XPC, Extensão.
 
 ### Credenciais e Personas
 
 Cada processo possui **credenciais** que **identificam seus privilégios** no sistema. Cada processo terá um `uid` primário e um `gid` primário (embora possa pertencer a vários grupos).\
-Também é possível alterar o id do usuário e do grupo se o binário tiver o bit `setuid/setgid`.\
+Também é possível mudar o id do usuário e do grupo se o binário tiver o bit `setuid/setgid`.\
 Existem várias funções para **definir novos uids/gids**.
 
 A syscall **`persona`** fornece um conjunto **alternativo** de **credenciais**. Adotar uma persona assume seu uid, gid e associações de grupo **de uma só vez**. No [**código-fonte**](https://github.com/apple/darwin-xnu/blob/main/bsd/sys/persona.h) é possível encontrar a struct:
@@ -58,7 +58,7 @@ char     persona_name[MAXLOGNAME + 1];
 ```
 ## Informações Básicas sobre Threads
 
-1. **POSIX Threads (pthreads):** o macOS suporta threads POSIX (`pthreads`), que fazem parte de uma API de threading padrão para C/C++. A implementação de pthreads no macOS é encontrada em `/usr/lib/system/libsystem_pthread.dylib`, que vem do projeto `libpthread` disponível publicamente. Esta biblioteca fornece as funções necessárias para criar e gerenciar threads.
+1. **POSIX Threads (pthreads):** O macOS suporta threads POSIX (`pthreads`), que fazem parte de uma API de threading padrão para C/C++. A implementação de pthreads no macOS é encontrada em `/usr/lib/system/libsystem_pthread.dylib`, que vem do projeto `libpthread` disponível publicamente. Esta biblioteca fornece as funções necessárias para criar e gerenciar threads.
 2. **Criando Threads:** A função `pthread_create()` é usada para criar novas threads. Internamente, essa função chama `bsdthread_create()`, que é uma chamada de sistema de nível inferior específica para o kernel XNU (o kernel no qual o macOS é baseado). Esta chamada de sistema aceita várias flags derivadas de `pthread_attr` (atributos) que especificam o comportamento da thread, incluindo políticas de agendamento e tamanho da pilha.
 - **Tamanho da Pilha Padrão:** O tamanho da pilha padrão para novas threads é de 512 KB, o que é suficiente para operações típicas, mas pode ser ajustado através de atributos de thread se mais ou menos espaço for necessário.
 3. **Inicialização da Thread:** A função `__pthread_init()` é crucial durante a configuração da thread, utilizando o argumento `env[]` para analisar variáveis de ambiente que podem incluir detalhes sobre a localização e o tamanho da pilha.
@@ -90,7 +90,7 @@ Para gerenciar o acesso a recursos compartilhados e evitar condições de corrid
 
 ### Variáveis Locais de Thread (TLV)
 
-**Variáveis Locais de Thread (TLV)** no contexto de arquivos Mach-O (o formato para executáveis no macOS) são usadas para declarar variáveis que são específicas para **cada thread** em uma aplicação multi-threaded. Isso garante que cada thread tenha sua própria instância separada de uma variável, proporcionando uma maneira de evitar conflitos e manter a integridade dos dados sem a necessidade de mecanismos de sincronização explícitos como mutexes.
+**Variáveis Locais de Thread (TLV)** no contexto de arquivos Mach-O (o formato para executáveis no macOS) são usadas para declarar variáveis que são específicas para **cada thread** em uma aplicação multi-threaded. Isso garante que cada thread tenha sua própria instância separada de uma variável, proporcionando uma maneira de evitar conflitos e manter a integridade dos dados sem a necessidade de mecanismos de sincronização explícitos, como mutexes.
 
 Em C e linguagens relacionadas, você pode declarar uma variável local de thread usando a palavra-chave **`__thread`**. Aqui está como funciona em seu exemplo:
 ```c
@@ -107,7 +107,7 @@ No binário Mach-O, os dados relacionados a variáveis locais de thread são org
 - **`__DATA.__thread_vars`**: Esta seção contém os metadados sobre as variáveis locais de thread, como seus tipos e status de inicialização.
 - **`__DATA.__thread_bss`**: Esta seção é usada para variáveis locais de thread que não são explicitamente inicializadas. É uma parte da memória reservada para dados inicializados com zero.
 
-Mach-O também fornece uma API específica chamada **`tlv_atexit`** para gerenciar variáveis locais de thread quando uma thread sai. Esta API permite que você **registre destrutores**—funções especiais que limpam dados locais de thread quando uma thread termina.
+Mach-O também fornece uma API específica chamada **`tlv_atexit`** para gerenciar variáveis locais de thread quando uma thread sai. Esta API permite que você **registre destrutores**—funções especiais que limpam os dados locais de thread quando uma thread termina.
 
 ### Prioridades de Thread
 
@@ -135,7 +135,7 @@ As classes de QoS são uma abordagem mais moderna para lidar com prioridades de 
 4. **Fundo:**
 - Esta classe é para tarefas que operam em segundo plano e não são visíveis para o usuário. Estas podem ser tarefas como indexação, sincronização ou backups. Elas têm a menor prioridade e impacto mínimo no desempenho do sistema.
 
-Usando classes de QoS, os desenvolvedores não precisam gerenciar os números de prioridade exatos, mas sim focar na natureza da tarefa, e o sistema otimiza os recursos de CPU de acordo.
+Usando classes de QoS, os desenvolvedores não precisam gerenciar os números de prioridade exatos, mas sim se concentrar na natureza da tarefa, e o sistema otimiza os recursos de CPU de acordo.
 
 Além disso, existem diferentes **políticas de agendamento de thread** que fluem para especificar um conjunto de parâmetros de agendamento que o escalonador levará em consideração. Isso pode ser feito usando `thread_policy_[set/get]`. Isso pode ser útil em ataques de condição de corrida.
 
@@ -153,7 +153,7 @@ macos-library-injection/
 
 ### Hooking de Função
 
-O Hooking de Função envolve **interceptar chamadas de função** ou mensagens dentro de um código de software. Ao hookar funções, um atacante pode **modificar o comportamento** de um processo, observar dados sensíveis ou até mesmo ganhar controle sobre o fluxo de execução.
+O Hooking de Função envolve **interceptar chamadas de função** ou mensagens dentro de um código de software. Ao hookear funções, um atacante pode **modificar o comportamento** de um processo, observar dados sensíveis ou até mesmo ganhar controle sobre o fluxo de execução.
 
 {{#ref}}
 macos-function-hooking.md
@@ -246,7 +246,7 @@ Observe que executáveis compilados com **`pyinstaller`** não usarão essas var
 > chmod +x /opt/homebrew/bin/python3
 > ```
 >
-> Mesmo **root** executará este código ao executar o Python.
+> Mesmo **root** executará este código ao rodar o Python.
 
 ## Detecção
 
@@ -263,7 +263,7 @@ Observe que executáveis compilados com **`pyinstaller`** não usarão essas var
 
 Em [**este post do blog**](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html) você pode encontrar como é possível usar a função **`task_name_for_pid`** para obter informações sobre outros **processos que injetam código em um processo** e, em seguida, obter informações sobre esse outro processo.
 
-Observe que para chamar essa função você precisa ser **o mesmo uid** que o que está executando o processo ou **root** (e ela retorna informações sobre o processo, não uma maneira de injetar código).
+Observe que, para chamar essa função, você precisa ser **o mesmo uid** que o que está executando o processo ou **root** (e ela retorna informações sobre o processo, não uma maneira de injetar código).
 
 ## Referências
 

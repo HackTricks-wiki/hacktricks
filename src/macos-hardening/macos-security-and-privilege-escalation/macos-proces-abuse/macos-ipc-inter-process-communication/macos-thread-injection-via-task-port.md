@@ -13,7 +13,7 @@ Inicialmente, a função **`task_threads()`** é invocada na porta da tarefa par
 
 Para controlar a thread, **`thread_suspend()`** é chamada, interrompendo sua execução.
 
-As únicas operações permitidas na thread remota envolvem **parar** e **iniciar** a thread, **recuperar** e **modificar** seus valores de registradores. Chamadas de função remotas são iniciadas configurando os registradores `x0` a `x7` com os **argumentos**, configurando **`pc`** para direcionar à função desejada e ativando a thread. Garantir que a thread não falhe após o retorno requer a detecção do retorno.
+As únicas operações permitidas na thread remota envolvem **parar** e **iniciar** ela, **recuperar** e **modificar** seus valores de registradores. Chamadas de função remotas são iniciadas configurando os registradores `x0` a `x7` com os **argumentos**, configurando **`pc`** para direcionar à função desejada e ativando a thread. Garantir que a thread não falhe após o retorno requer a detecção do retorno.
 
 Uma estratégia envolve **registrar um manipulador de exceção** para a thread remota usando `thread_set_exception_ports()`, configurando o registrador `lr` para um endereço inválido antes da chamada da função. Isso aciona uma exceção após a execução da função, enviando uma mensagem para a porta de exceção, permitindo a inspeção do estado da thread para recuperar o valor de retorno. Alternativamente, como adotado do exploit triple_fetch de Ian Beer, `lr` é configurado para loop infinito. Os registradores da thread são então monitorados continuamente até que **`pc` aponte para essa instrução**.
 
@@ -69,7 +69,7 @@ const char *property_getName(objc_property_t prop) {
 return prop->name;
 }
 ```
-Esta função atua efetivamente como a `read_func` ao retornar o primeiro campo de `objc_property_t`.
+Esta função atua efetivamente como o `read_func`, retornando o primeiro campo de `objc_property_t`.
 
 2. **Escrevendo na Memória:**
 Encontrar uma função pré-construída para escrever na memória é mais desafiador. No entanto, a função `_xpc_int64_set_value()` da libxpc é um candidato adequado com a seguinte desassemblagem:
@@ -98,14 +98,14 @@ O objetivo é estabelecer memória compartilhada entre tarefas locais e remotas,
 2. **Criando Memória Compartilhada no Processo Remoto**:
 
 - Alocar memória para o objeto `OS_xpc_shmem` no processo remoto com uma chamada remota para `malloc()`.
-- Copiar o conteúdo do objeto local `OS_xpc_shmem` para o processo remoto. No entanto, essa cópia inicial terá nomes de entrada de memória Mach incorretos no deslocamento `0x18`.
+- Copiar o conteúdo do objeto local `OS_xpc_shmem` para o processo remoto. No entanto, essa cópia inicial terá nomes de entradas de memória Mach incorretos no deslocamento `0x18`.
 
 3. **Corrigindo a Entrada de Memória Mach**:
 
 - Utilizar o método `thread_set_special_port()` para inserir um direito de envio para a entrada de memória Mach na tarefa remota.
 - Corrigir o campo da entrada de memória Mach no deslocamento `0x18` sobrescrevendo-o com o nome da entrada de memória remota.
 
-4. **Finalizando a Configuração de Memória Compartilhada**:
+4. **Finalizando a Configuração da Memória Compartilhada**:
 - Validar o objeto remoto `OS_xpc_shmem`.
 - Estabelecer o mapeamento de memória compartilhada com uma chamada remota para `xpc_shmem_remote()`.
 
@@ -145,7 +145,7 @@ Ao estabelecer com sucesso a memória compartilhada e ganhar capacidades de exec
 4. **Transferência de Descritores de Arquivo**:
 - Transferir descritores de arquivo entre processos usando fileports, uma técnica destacada por Ian Beer em `triple_fetch`.
 
-Esse controle abrangente está encapsulado na biblioteca [threadexec](https://github.com/bazad/threadexec), fornecendo uma implementação detalhada e uma API amigável para interação com o processo vítima.
+Esse controle abrangente está encapsulado na biblioteca [threadexec](https://github.com/bazad/threadexec), fornecendo uma implementação detalhada e uma API amigável para interação com o processo da vítima.
 
 ## Considerações Importantes:
 

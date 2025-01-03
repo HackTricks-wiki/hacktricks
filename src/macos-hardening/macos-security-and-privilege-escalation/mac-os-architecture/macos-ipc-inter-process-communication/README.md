@@ -8,7 +8,7 @@
 
 Mach usa **tarefas** como a **menor unidade** para compartilhar recursos, e cada tarefa pode conter **múltiplas threads**. Essas **tarefas e threads são mapeadas 1:1 para processos e threads POSIX**.
 
-A comunicação entre tarefas ocorre via Comunicação Inter-Processos Mach (IPC), utilizando canais de comunicação unidirecionais. **Mensagens são transferidas entre portas**, que atuam como **filas de mensagens** gerenciadas pelo kernel.
+A comunicação entre tarefas ocorre via Comunicação Inter-Processos Mach (IPC), utilizando canais de comunicação unidirecionais. **As mensagens são transferidas entre portas**, que atuam como **filas de mensagens** gerenciadas pelo kernel.
 
 Cada processo possui uma **tabela IPC**, onde é possível encontrar as **portas mach do processo**. O nome de uma porta mach é, na verdade, um número (um ponteiro para o objeto do kernel).
 
@@ -19,7 +19,7 @@ Um processo também pode enviar um nome de porta com alguns direitos **para uma 
 Os direitos de porta, que definem quais operações uma tarefa pode realizar, são fundamentais para essa comunicação. Os possíveis **direitos de porta** são ([definições daqui](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)):
 
 - **Direito de Receber**, que permite receber mensagens enviadas para a porta. As portas Mach são filas MPSC (múltiplos produtores, um único consumidor), o que significa que pode haver apenas **um direito de receber para cada porta** em todo o sistema (diferente de pipes, onde múltiplos processos podem manter descritores de arquivo para a extremidade de leitura de um pipe).
-- Uma **tarefa com o Direito de Receber** pode receber mensagens e **criar Direitos de Envio**, permitindo que envie mensagens. Originalmente, apenas a **própria tarefa tem o Direito de Receber sobre sua porta**.
+- Uma **tarefa com o Direito de Receber** pode receber mensagens e **criar Direitos de Envio**, permitindo que envie mensagens. Originalmente, apenas a **própria tarefa possui o Direito de Receber sobre sua porta**.
 - **Direito de Enviar**, que permite enviar mensagens para a porta.
 - O Direito de Enviar pode ser **clonado**, de modo que uma tarefa que possui um Direito de Enviar pode clonar o direito e **concedê-lo a uma terceira tarefa**.
 - **Direito de Enviar uma vez**, que permite enviar uma mensagem para a porta e depois desaparece.
@@ -51,7 +51,7 @@ Então, a Apple armazena os **nomes dos serviços fornecidos pelo sistema** em a
 
 Para esses serviços predefinidos, o **processo de busca difere ligeiramente**. Quando um nome de serviço está sendo buscado, o launchd inicia o serviço dinamicamente. O novo fluxo de trabalho é o seguinte:
 
-- A tarefa **B** inicia uma **busca de inicialização** por um nome de serviço.
+- A tarefa **B** inicia uma **busca** de inicialização por um nome de serviço.
 - **launchd** verifica se a tarefa está em execução e, se não estiver, **inicia**.
 - A tarefa **A** (o serviço) realiza um **check-in de inicialização**. Aqui, o **servidor de inicialização** cria um direito de ENVIAR, retém-o e **transfere o direito de RECEBER para a Tarefa A**.
 - O launchd duplica o **direito de ENVIAR e o envia para a Tarefa B**.
@@ -76,7 +76,7 @@ mach_msg_id_t                 msgh_id;
 ```
 Processos que possuem um _**direito de recebimento**_ podem receber mensagens em uma porta Mach. Por outro lado, os **remetentes** recebem um _**direito de envio**_ ou um _**direito de envio-uma-vez**_. O direito de envio-uma-vez é exclusivamente para enviar uma única mensagem, após a qual se torna inválido.
 
-Para alcançar uma fácil **comunicação bidirecional**, um processo pode especificar uma **porta mach** no **cabeçalho da mensagem** chamada de _porta de resposta_ (**`msgh_local_port`**) onde o **receptor** da mensagem pode **enviar uma resposta** a esta mensagem. Os bits em **`msgh_bits`** podem ser usados para **indicar** que um **direito de envio-uma-vez** deve ser derivado e transferido para esta porta (`MACH_MSG_TYPE_MAKE_SEND_ONCE`).
+Para alcançar uma fácil **comunicação bidirecional**, um processo pode especificar uma **porta mach** no **cabeçalho da mensagem** mach chamada de _porta de resposta_ (**`msgh_local_port`**) onde o **receptor** da mensagem pode **enviar uma resposta** a esta mensagem. Os bits em **`msgh_bits`** podem ser usados para **indicar** que um **direito de envio-uma-vez** deve ser derivado e transferido para esta porta (`MACH_MSG_TYPE_MAKE_SEND_ONCE`).
 
 > [!TIP]
 > Note que esse tipo de comunicação bidirecional é usado em mensagens XPC que esperam uma resposta (`xpc_connection_send_message_with_reply` e `xpc_connection_send_message_with_reply_sync`). Mas **geralmente portas diferentes são criadas** como explicado anteriormente para criar a comunicação bidirecional.
@@ -99,7 +99,7 @@ Você pode instalar esta ferramenta no iOS baixando-a de [http://newosxbook.com/
 
 ### Exemplo de código
 
-Note como o **remetente** **aloca** uma porta, cria um **direito de envio** para o nome `org.darlinghq.example` e o envia para o **servidor de bootstrap**, enquanto o remetente solicitou o **direito de envio** desse nome e o usou para **enviar uma mensagem**.
+Note como o **remetente** **aloca** uma porta, cria um **direito de envio** para o nome `org.darlinghq.example` e o envia para o **servidor de bootstrap**, enquanto o remetente pediu o **direito de envio** desse nome e o usou para **enviar uma mensagem**.
 
 {{#tabs}}
 {{#tab name="receiver.c"}}
@@ -236,7 +236,7 @@ printf("Sent a message\n");
 - Estas são as restrições para acessar a porta (do `macos_task_policy` do binário `AppleMobileFileIntegrity`):
 - Se o aplicativo tiver a **isenção `com.apple.security.get-task-allow`**, processos do **mesmo usuário podem acessar a porta de tarefa** (comumente adicionada pelo Xcode para depuração). O processo de **notarização** não permitirá isso em lançamentos de produção.
 - Aplicativos com a isenção **`com.apple.system-task-ports`** podem obter a **porta de tarefa para qualquer** processo, exceto o kernel. Em versões mais antigas, era chamada de **`task_for_pid-allow`**. Isso é concedido apenas a aplicativos da Apple.
-- **Root pode acessar portas de tarefa** de aplicativos **não** compilados com um runtime **endurecido** (e não da Apple).
+- **Root pode acessar portas de tarefa** de aplicativos **não** compilados com um tempo de execução **endurecido** (e não da Apple).
 
 ### Injeção de Shellcode em thread via Porta de Tarefa
 

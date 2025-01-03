@@ -38,14 +38,14 @@ char data[];
 } CS_GenericBlob
 __attribute__ ((aligned(1)));
 ```
-Blobs comuns contidos são Code Directory, Requirements e Entitlements e um Cryptographic Message Syntax (CMS).\
+Blobs comuns contidos são Diretório de Código, Requisitos e Direitos e uma Sintaxe de Mensagem Criptográfica (CMS).\
 Além disso, note como os dados codificados nos blobs são codificados em **Big Endian.**
 
-Além disso, as assinaturas podem ser destacadas dos binários e armazenadas em `/var/db/DetachedSignatures` (usado pelo iOS).
+Além disso, assinaturas podem ser destacadas dos binários e armazenadas em `/var/db/DetachedSignatures` (usado pelo iOS).
 
-## Code Directory Blob
+## Blob do Diretório de Código
 
-É possível encontrar a declaração do [Code Directory Blob no código](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L104):
+É possível encontrar a declaração do [Blob do Diretório de Código no código](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L104):
 ```c
 typedef struct __CodeDirectory {
 uint32_t magic;                                 /* magic number (CSMAGIC_CODEDIRECTORY) */
@@ -154,7 +154,7 @@ Na verdade, é possível ver nas estruturas do Code Directory um parâmetro cham
 
 - Hash de `info.plist` (ou o que está dentro de `__TEXT.__info__plist`).
 - Hash dos Requisitos
-- Hash do Diretório de Recursos (hash do arquivo `_CodeSignature/CodeResources` dentro do bundle).
+- Hash do Resource Directory (hash do arquivo `_CodeSignature/CodeResources` dentro do bundle).
 - Específico da aplicação (não utilizado)
 - Hash dos direitos
 - Assinaturas de código DMG apenas
@@ -270,7 +270,7 @@ od -A x -t x1 /tmp/output.csreq
 
 - **`SecStaticCodeCheckValidity`**: Valida um objeto de código estático contra requisitos especificados.
 
-#### **APIs Adicionais Úteis**
+#### **APIs Úteis Adicionais**
 
 - **`SecCodeCopy[Internal/Designated]Requirement`: Obter SecRequirementRef de SecCodeRef**
 - **`SecCodeCopyGuestWithAttributes`**: Cria um `SecCodeRef` representando um objeto de código com base em atributos específicos, útil para sandboxing.
@@ -290,7 +290,7 @@ O **kernel** é quem **verifica a assinatura do código** antes de permitir que 
 
 ## `cs_blobs` & `cs_blob`
 
-[**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) a struct contém as informações sobre o direito do processo em execução sobre ele. `csb_platform_binary` também informa se a aplicação é um binário de plataforma (o que é verificado em diferentes momentos pelo OS para aplicar mecanismos de segurança, como proteger os direitos SEND para as portas de tarefa desses processos).
+[**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) a struct contém as informações sobre o direito do processo em execução sobre ele. `csb_platform_binary` também informa se a aplicação é um binário de plataforma (o que é verificado em diferentes momentos pelo OS para aplicar mecanismos de segurança, como proteger os direitos de SEND para as portas de tarefa desses processos).
 ```c
 struct cs_blob {
 struct cs_blob  *csb_next;

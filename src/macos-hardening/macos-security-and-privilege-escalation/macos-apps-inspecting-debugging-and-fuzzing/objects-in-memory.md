@@ -6,7 +6,7 @@
 
 Os objetos CF\* vêm do CoreFoundation, que fornece mais de 50 classes de objetos como `CFString`, `CFNumber` ou `CFAllocator`.
 
-Todas essas classes são instâncias da classe `CFRuntimeClass`, que quando chamada retorna um índice para a `__CFRuntimeClassTable`. A CFRuntimeClass é definida em [**CFRuntime.h**](https://opensource.apple.com/source/CF/CF-1153.18/CFRuntime.h.auto.html):
+Todas essas classes são instâncias da classe `CFRuntimeClass`, que, quando chamada, retorna um índice para a `__CFRuntimeClassTable`. A CFRuntimeClass é definida em [**CFRuntime.h**](https://opensource.apple.com/source/CF/CF-1153.18/CFRuntime.h.auto.html):
 ```objectivec
 // Some comments were added to the original code
 

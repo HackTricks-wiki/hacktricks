@@ -66,13 +66,13 @@ No variant specified, falling back to release
 ## amfid
 
 Este é o daemon em modo de usuário que `AMFI.kext` usará para verificar assinaturas de código em modo de usuário.\
-Para que `AMFI.kext` se comunique com o daemon, ele usa mensagens mach pela porta `HOST_AMFID_PORT`, que é a porta especial `18`.
+Para que `AMFI.kext` se comunique com o daemon, ele usa mensagens mach através da porta `HOST_AMFID_PORT`, que é a porta especial `18`.
 
 Note que no macOS não é mais possível que processos root sequestram portas especiais, pois elas são protegidas pelo `SIP` e apenas o launchd pode acessá-las. No iOS, é verificado se o processo que envia a resposta de volta tem o CDHash hardcoded de `amfid`.
 
 É possível ver quando `amfid` é solicitado a verificar um binário e a resposta dele depurando-o e definindo um ponto de interrupção em `mach_msg`.
 
-Uma vez que uma mensagem é recebida pela porta especial, **MIG** é usado para enviar cada função para a função que está chamando. As principais funções foram revertidas e explicadas dentro do livro.
+Uma vez que uma mensagem é recebida através da porta especial, **MIG** é usado para enviar cada função para a função que está chamando. As principais funções foram revertidas e explicadas dentro do livro.
 
 ## Provisioning Profiles
 
@@ -92,7 +92,7 @@ Embora às vezes referidos como certificados, esses perfis de provisionamento t�
 
 - **AppIDName:** O Identificador da Aplicação
 - **AppleInternalProfile**: Designa isso como um perfil Interno da Apple
-- **ApplicationIdentifierPrefix**: Precedido ao AppIDName (igual ao TeamIdentifier)
+- **ApplicationIdentifierPrefix**: Precedido ao AppIDName (mesmo que TeamIdentifier)
 - **CreationDate**: Data no formato `YYYY-MM-DDTHH:mm:ssZ`
 - **DeveloperCertificates**: Um array de (geralmente um) certificado(s), codificado como dados Base64
 - **Entitlements**: Os direitos permitidos com direitos para este perfil
@@ -120,7 +120,7 @@ No macOS, isso está dentro de `MobileDevice.framework`.
 
 O AMFI do iOS mantém uma lista de hashes conhecidos que são assinados ad-hoc, chamada de **Trust Cache** e encontrada na seção `__TEXT.__const` do kext. Note que em operações muito específicas e sensíveis, é possível estender esse Trust Cache com um arquivo externo.
 
-## Referências
+## References
 
 - [**\*OS Internals Volume III**](https://newosxbook.com/home.html)
 

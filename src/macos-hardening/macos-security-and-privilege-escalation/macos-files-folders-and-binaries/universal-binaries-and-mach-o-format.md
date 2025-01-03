@@ -72,7 +72,7 @@ Como você pode estar pensando, geralmente um universal binary compilado para 2 
 
 ## **Cabeçalho Mach-O**
 
-O cabeçalho contém informações básicas sobre o arquivo, como bytes mágicos para identificá-lo como um arquivo Mach-O e informações sobre a arquitetura alvo. Você pode encontrá-lo em: `mdfind loader.h | grep -i mach-o | grep -E "loader.h$"`
+O cabeçalho contém informações básicas sobre o arquivo, como bytes mágicos para identificá-lo como um arquivo Mach-O e informações sobre a arquitetura de destino. Você pode encontrá-lo em: `mdfind loader.h | grep -i mach-o | grep -E "loader.h$"`
 ```c
 #define	MH_MAGIC	0xfeedface	/* the mach magic number */
 #define MH_CIGAM	0xcefaedfe	/* NXSwapInt(MH_MAGIC) */
@@ -111,7 +111,7 @@ Existem diferentes tipos de arquivos, que podem ser encontrados definidos no [**
 - `MH_DYLIB`: Bibliotecas dinâmicas.
 - `MH_DYLINKER`: Linker dinâmico.
 - `MH_BUNDLE`: "Arquivos de plugin". Gerados usando -bundle no gcc e carregados explicitamente por `NSBundle` ou `dlopen`.
-- `MH_DYSM`: Arquivo acompanhante `.dSym` (arquivo com símbolos para depuração).
+- `MH_DYSM`: Arquivo companion `.dSym` (arquivo com símbolos para depuração).
 - `MH_KEXT_BUNDLE`: Extensões do Kernel.
 ```bash
 # Checking the mac header of a binary
@@ -131,11 +131,11 @@ O código-fonte também define várias flags úteis para carregar bibliotecas:
 - `MH_NOUNDEFS`: Sem referências indefinidas (totalmente vinculado)
 - `MH_DYLDLINK`: Vinculação Dyld
 - `MH_PREBOUND`: Referências dinâmicas pré-vinculadas.
-- `MH_SPLIT_SEGS`: Arquivo divide segmentos r/o e r/w.
+- `MH_SPLIT_SEGS`: O arquivo divide segmentos r/o e r/w.
 - `MH_WEAK_DEFINES`: O binário tem símbolos definidos fracos
 - `MH_BINDS_TO_WEAK`: O binário usa símbolos fracos
 - `MH_ALLOW_STACK_EXECUTION`: Torna a pilha executável
-- `MH_NO_REEXPORTED_DYLIBS`: Biblioteca não tem comandos LC_REEXPORT
+- `MH_NO_REEXPORTED_DYLIBS`: Biblioteca não possui comandos LC_REEXPORT
 - `MH_PIE`: Executável Independente de Posição
 - `MH_HAS_TLV_DESCRIPTORS`: Há uma seção com variáveis locais de thread
 - `MH_NO_HEAP_EXECUTION`: Sem execução para páginas de heap/dados
@@ -223,7 +223,7 @@ Segmentos comuns carregados por este cmd:
 - Esta alocação é importante para **mitigar vulnerabilidades de desreferência de ponteiro NULL**. Isso ocorre porque o XNU impõe uma página zero rígida que garante que a primeira página (apenas a primeira) da memória seja inacessível (exceto em i386). Um binário poderia atender a esses requisitos criando um pequeno \_\_PAGEZERO (usando o `-pagezero_size`) para cobrir os primeiros 4k e tendo o restante da memória de 32 bits acessível tanto em modo de usuário quanto em modo kernel.
 - **`__TEXT`**: Contém **código** **executável** com permissões de **leitura** e **execução** (sem permissões de escrita)**.** Seções comuns deste segmento:
 - `__text`: Código binário compilado
-- `__const`: Dados constantes (apenas leitura)
+- `__const`: Dados constantes (somente leitura)
 - `__[c/u/os_log]string`: Constantes de string C, Unicode ou logs do os
 - `__stubs` e `__stubs_helper`: Envolvidos durante o processo de carregamento da biblioteca dinâmica
 - `__unwind_info`: Dados de desempilhamento.
@@ -232,15 +232,15 @@ Segmentos comuns carregados por este cmd:
 - `__got:` Tabela de Deslocamento Global
 - `__nl_symbol_ptr`: Ponteiro de símbolo não preguiçoso (vinculado na carga)
 - `__la_symbol_ptr`: Ponteiro de símbolo preguiçoso (vinculado no uso)
-- `__const`: Deveria ser dados apenas de leitura (não é realmente)
+- `__const`: Deve ser dados somente leitura (não realmente)
 - `__cfstring`: Strings do CoreFoundation
 - `__data`: Variáveis globais (que foram inicializadas)
 - `__bss`: Variáveis estáticas (que não foram inicializadas)
 - `__objc_*` (\_\_objc_classlist, \_\_objc_protolist, etc): Informações usadas pelo runtime do Objective-C
-- **`__DATA_CONST`**: \_\_DATA.\_\_const não é garantido que seja constante (permissões de escrita), nem outros ponteiros e a GOT. Esta seção torna `__const`, alguns inicializadores e a tabela GOT (uma vez resolvida) **apenas leitura** usando `mprotect`.
+- **`__DATA_CONST`**: \_\_DATA.\_\_const não é garantido que seja constante (permissões de escrita), nem outros ponteiros e a GOT. Esta seção torna `__const`, alguns inicializadores e a tabela GOT (uma vez resolvida) **somente leitura** usando `mprotect`.
 - **`__LINKEDIT`**: Contém informações para o linker (dyld), como entradas de tabela de símbolos, strings e relocação. É um contêiner genérico para conteúdos que não estão em `__TEXT` ou `__DATA` e seu conteúdo é descrito em outros comandos de carregamento.
 - Informações do dyld: Rebase, opcodes de vinculação não preguiçosa/preguiçosa/fraca e informações de exportação
-- Início de funções: Tabela de endereços de início de funções
+- Inícios de funções: Tabela de endereços de início de funções
 - Dados em Código: Ilhas de dados em \_\_text
 - Tabela de Símbolos: Símbolos no binário
 - Tabela de Símbolos Indiretos: Símbolos de ponteiro/stub
@@ -249,10 +249,10 @@ Segmentos comuns carregados por este cmd:
 - **`__OBJC`**: Contém informações usadas pelo runtime do Objective-C. Embora essas informações também possam ser encontradas no segmento \_\_DATA, dentro de várias seções em \_\_objc\_\*.
 - **`__RESTRICT`**: Um segmento sem conteúdo com uma única seção chamada **`__restrict`** (também vazia) que garante que, ao executar o binário, ele ignorará variáveis de ambiente DYLD.
 
-Como foi possível ver no código, **os segmentos também suportam flags** (embora não sejam muito utilizadas):
+Como foi possível ver no código, **os segmentos também suportam flags** (embora não sejam muito usadas):
 
-- `SG_HIGHVM`: Apenas núcleo (não utilizado)
-- `SG_FVMLIB`: Não utilizado
+- `SG_HIGHVM`: Apenas núcleo (não usado)
+- `SG_FVMLIB`: Não usado
 - `SG_NORELOC`: O segmento não tem relocação
 - `SG_PROTECTED_VERSION_1`: Criptografia. Usado, por exemplo, pelo Finder para criptografar o segmento `__TEXT`.
 
@@ -287,15 +287,15 @@ cpsr 0x00000000
 ### **`LC_CODE_SIGNATURE`**
 
 Contém informações sobre a **assinatura de código do arquivo Macho-O**. Ele contém apenas um **offset** que **aponta** para o **blob de assinatura**. Isso geralmente está no final do arquivo.\
-No entanto, você pode encontrar algumas informações sobre esta seção em [**este post de blog**](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/) e neste [**gists**](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4).
+No entanto, você pode encontrar algumas informações sobre esta seção em [**este post do blog**](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/) e este [**gists**](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4).
 
 ### **`LC_ENCRYPTION_INFO[_64]`**
 
-Suporte para criptografia binária. No entanto, é claro que, se um atacante conseguir comprometer o processo, ele poderá despejar a memória sem criptografia.
+Suporte para criptografia binária. No entanto, claro, se um atacante conseguir comprometer o processo, ele poderá despejar a memória sem criptografia.
 
 ### **`LC_LOAD_DYLINKER`**
 
-Contém o **caminho para o executável do vinculador dinâmico** que mapeia bibliotecas compartilhadas no espaço de endereço do processo. O **valor é sempre definido como `/usr/lib/dyld`**. É importante notar que no macOS, o mapeamento de dylib acontece em **modo de usuário**, não em modo de kernel.
+Contém o **caminho para o executável do linker dinâmico** que mapeia bibliotecas compartilhadas no espaço de endereço do processo. O **valor é sempre definido como `/usr/lib/dyld`**. É importante notar que no macOS, o mapeamento de dylib acontece em **modo de usuário**, não em modo de kernel.
 
 ### **`LC_IDENT`**
 
@@ -307,11 +307,11 @@ UUID aleatório. É útil para qualquer coisa diretamente, mas o XNU o armazena 
 
 ### **`LC_DYLD_ENVIRONMENT`**
 
-Permite indicar variáveis de ambiente para o dyld antes que o processo seja executado. Isso pode ser muito perigoso, pois pode permitir a execução de código arbitrário dentro do processo, então este comando de carga é usado apenas em builds do dyld com `#define SUPPORT_LC_DYLD_ENVIRONMENT` e restringe ainda mais o processamento apenas para variáveis da forma `DYLD_..._PATH` especificando caminhos de carga.
+Permite indicar variáveis de ambiente para o dyld antes que o processo seja executado. Isso pode ser muito perigoso, pois pode permitir a execução de código arbitrário dentro do processo, então este comando de carga é usado apenas em dyld construído com `#define SUPPORT_LC_DYLD_ENVIRONMENT` e restringe ainda mais o processamento apenas para variáveis da forma `DYLD_..._PATH` especificando caminhos de carga.
 
 ### **`LC_LOAD_DYLIB`**
 
-Este comando de carga descreve uma **dependência de biblioteca** **dinâmica** que **instrui** o **carregador** (dyld) a **carregar e vincular a referida biblioteca**. Há um comando de carga `LC_LOAD_DYLIB` **para cada biblioteca** que o binário Mach-O requer.
+Este comando de carga descreve uma **dependência de biblioteca** **dinâmica** que **instrui** o **loader** (dyld) a **carregar e vincular a referida biblioteca**. Há um comando de carga `LC_LOAD_DYLIB` **para cada biblioteca** que o binário Mach-O requer.
 
 - Este comando de carga é uma estrutura do tipo **`dylib_command`** (que contém uma struct dylib, descrevendo a biblioteca dinâmica dependente real):
 ```objectivec
@@ -338,7 +338,7 @@ otool -L /bin/ls
 /usr/lib/libncurses.5.4.dylib (compatibility version 5.4.0, current version 5.4.0)
 /usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1319.0.0)
 ```
-Algumas bibliotecas relacionadas a malware potenciais são:
+Algumas bibliotecas potenciais relacionadas a malware são:
 
 - **DiskArbitration**: Monitoramento de drives USB
 - **AVFoundation:** Captura de áudio e vídeo
@@ -371,7 +371,7 @@ Ou a partir da cli:
 ```bash
 size -m /bin/ls
 ```
-## Objetive-C Seções Comuns
+## Seções Comuns do Objective-C
 
 No segmento `__TEXT` (r-x):
 
@@ -381,7 +381,7 @@ No segmento `__TEXT` (r-x):
 
 No segmento `__DATA` (rw-):
 
-- `__objc_classlist`: Ponteiros para todas as classes Objetive-C
+- `__objc_classlist`: Ponteiros para todas as classes Objective-C
 - `__objc_nlclslist`: Ponteiros para classes Objective-C Não-Lazy
 - `__objc_catlist`: Ponteiro para Categorias
 - `__objc_nlcatlist`: Ponteiro para Categorias Não-Lazy

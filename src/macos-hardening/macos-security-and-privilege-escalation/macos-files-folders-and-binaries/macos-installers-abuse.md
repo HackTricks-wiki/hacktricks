@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Informações Básicas do Pkg
+## Informações Básicas sobre Pkg
 
 Um **pacote de instalador** do macOS (também conhecido como arquivo `.pkg`) é um formato de arquivo usado pelo macOS para **distribuir software**. Esses arquivos são como uma **caixa que contém tudo o que um software** precisa para ser instalado e executado corretamente.
 
@@ -39,7 +39,7 @@ Para visualizar o conteúdo do instalador sem descompactá-lo manualmente, você
 Arquivos DMG, ou Imagens de Disco da Apple, são um formato de arquivo usado pelo macOS da Apple para imagens de disco. Um arquivo DMG é essencialmente uma **imagem de disco montável** (contém seu próprio sistema de arquivos) que contém dados brutos geralmente comprimidos e às vezes criptografados. Quando você abre um arquivo DMG, o macOS **o monta como se fosse um disco físico**, permitindo que você acesse seu conteúdo.
 
 > [!CAUTION]
-> Note que instaladores **`.dmg`** suportam **tantos formatos** que no passado alguns deles contendo vulnerabilidades foram abusados para obter **execução de código no kernel**.
+> Note que instaladores **`.dmg`** suportam **muitos formatos** que no passado foram abusados para obter **execução de código no kernel**.
 
 ### Hierarquia
 
@@ -49,7 +49,7 @@ A hierarquia de um arquivo DMG pode ser diferente com base no conteúdo. No enta
 
 - Nível Superior: Este é a raiz da imagem de disco. Frequentemente contém o aplicativo e possivelmente um link para a pasta Aplicativos.
 - Aplicativo (.app): Este é o aplicativo real. No macOS, um aplicativo é tipicamente um pacote que contém muitos arquivos e pastas individuais que compõem o aplicativo.
-- Link de Aplicativos: Este é um atalho para a pasta Aplicativos no macOS. O objetivo disso é facilitar a instalação do aplicativo. Você pode arrastar o arquivo .app para este atalho para instalar o app.
+- Link para Aplicativos: Este é um atalho para a pasta Aplicativos no macOS. O objetivo disso é facilitar a instalação do aplicativo. Você pode arrastar o arquivo .app para este atalho para instalar o app.
 
 ## Privesc via abuso de pkg
 
@@ -79,11 +79,11 @@ Um exemplo disso é **CVE-2021-26089**, que conseguiu **substituir um script per
 
 ### Payload Vazio
 
-É possível gerar apenas um arquivo **`.pkg`** com **scripts de pré e pós-instalação** sem nenhum payload real, além do malware dentro dos scripts.
+É possível gerar apenas um arquivo **`.pkg`** com **scripts de pré e pós-instalação** sem nenhum payload real além do malware dentro dos scripts.
 
 ### JS no xml de Distribuição
 
-É possível adicionar tags **`<script>`** no arquivo **xml de distribuição** do pacote e esse código será executado, podendo **executar comandos** usando **`system.run`**:
+É possível adicionar tags **`<script>`** no arquivo **xml de distribuição** do pacote e esse código será executado e pode **executar comandos** usando **`system.run`**:
 
 <figure><img src="../../../images/image (1043).png" alt=""><figcaption></figcaption></figure>
 

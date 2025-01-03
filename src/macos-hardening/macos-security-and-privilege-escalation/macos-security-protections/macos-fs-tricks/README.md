@@ -10,7 +10,7 @@ Permissões em um **diretório**:
 - **escrita** - você pode **deletar/escrever** **arquivos** no diretório e pode **deletar pastas vazias**.
 - Mas você **não pode deletar/modificar pastas não vazias** a menos que tenha permissões de escrita sobre elas.
 - Você **não pode modificar o nome de uma pasta** a menos que a possua.
-- **execução** - você está **autorizado a percorrer** o diretório - se você não tiver esse direito, não pode acessar nenhum arquivo dentro dele, ou em subdiretórios.
+- **execução** - você está **autorizado a percorrer** o diretório - se você não tiver esse direito, não pode acessar nenhum arquivo dentro dele, ou em quaisquer subdiretórios.
 
 ### Combinações Perigosas
 
@@ -18,7 +18,7 @@ Permissões em um **diretório**:
 
 - Um **proprietário de diretório pai** no caminho é o usuário
 - Um **proprietário de diretório pai** no caminho é um **grupo de usuários** com **acesso de escrita**
-- Um **grupo de usuários** tem **acesso de escrita** ao **arquivo**
+- Um **grupo** de usuários tem **acesso de escrita** ao **arquivo**
 
 Com qualquer uma das combinações anteriores, um atacante poderia **injetar** um **link simbólico/duro** no caminho esperado para obter uma escrita arbitrária privilegiada.
 
@@ -38,11 +38,11 @@ Verifique nas outras seções onde um atacante poderia **abusar de uma escrita a
 
 ### Abrir `O_NOFOLLOW`
 
-A flag `O_NOFOLLOW` quando usada pela função `open` não seguirá um symlink no último componente do caminho, mas seguirá o resto do caminho. A maneira correta de evitar seguir symlinks no caminho é usando a flag `O_NOFOLLOW_ANY`.
+A flag `O_NOFOLLOW` quando usada pela função `open` não seguirá um symlink no último componente do caminho, mas seguirá o restante do caminho. A maneira correta de evitar seguir symlinks no caminho é usando a flag `O_NOFOLLOW_ANY`.
 
 ## .fileloc
 
-Arquivos com extensão **`.fileloc`** podem apontar para outros aplicativos ou binários, então quando são abertos, o aplicativo/binário será o executado.\
+Arquivos com extensão **`.fileloc`** podem apontar para outros aplicativos ou binários, então quando são abertos, o aplicativo/binário será o que será executado.\
 Exemplo:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -248,7 +248,7 @@ hdiutil detach /private/tmp/mnt 1>/dev/null
 # You can also create a dmg from an app using:
 hdiutil create -srcfolder justsome.app justsome.dmg
 ```
-Normalmente, o macOS monta discos conversando com o serviço Mach `com.apple.DiskArbitration.diskarbitrationd` (fornecido por `/usr/libexec/diskarbitrationd`). Se você adicionar o parâmetro `-d` ao arquivo plist do LaunchDaemons e reiniciar, ele armazenará logs em `/var/log/diskarbitrationd.log`.\
+Normalmente, o macOS monta discos conversando com o serviço Mach `com.apple.DiskArbitrarion.diskarbitrariond` (fornecido por `/usr/libexec/diskarbitrationd`). Se você adicionar o parâmetro `-d` ao arquivo plist do LaunchDaemons e reiniciar, ele armazenará logs em `/var/log/diskarbitrationd.log`.\
 No entanto, é possível usar ferramentas como `hdik` e `hdiutil` para se comunicar diretamente com o kext `com.apple.driver.DiskImages`.
 
 ## Escritas Arbitrárias
@@ -300,19 +300,19 @@ ErrorLog /etc/sudoers.d/lpe
 LogFilePerm 777
 <some junk>
 ```
-Isto criará o arquivo `/etc/sudoers.d/lpe` com permissões 777. O lixo extra no final é para acionar a criação do log de erros.
+Isso criará o arquivo `/etc/sudoers.d/lpe` com permissões 777. O lixo extra no final é para acionar a criação do log de erros.
 
 Em seguida, escreva em `/etc/sudoers.d/lpe` a configuração necessária para escalar privilégios como `%staff ALL=(ALL) NOPASSWD:ALL`.
 
 Depois, modifique o arquivo `/etc/cups/cups-files.conf` novamente indicando `LogFilePerm 700` para que o novo arquivo sudoers se torne válido ao invocar `cupsctl`.
 
-### Escape do Sandbox
+### Sandbox Escape
 
-É possível escapar do sandbox do macOS com uma gravação arbitrária de FS. Para alguns exemplos, verifique a página [macOS Auto Start](../../../../macos-auto-start-locations.md), mas um comum é escrever um arquivo de preferências do Terminal em `~/Library/Preferences/com.apple.Terminal.plist` que executa um comando na inicialização e chamá-lo usando `open`.
+É possível escapar do sandbox do macOS com uma gravação arbitrária de FS. Para alguns exemplos, consulte a página [macOS Auto Start](../../../../macos-auto-start-locations.md), mas um comum é escrever um arquivo de preferências do Terminal em `~/Library/Preferences/com.apple.Terminal.plist` que executa um comando na inicialização e chamá-lo usando `open`.
 
 ## Gerar arquivos graváveis como outros usuários
 
-Isto gerará um arquivo que pertence ao root e que é gravável por mim ([**código daqui**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Isso também pode funcionar como privesc:
+Isso gerará um arquivo que pertence ao root e que é gravável por mim ([**código daqui**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Isso também pode funcionar como privesc:
 ```bash
 DIRNAME=/usr/local/etc/periodic/daily
 
@@ -330,7 +330,7 @@ echo $FILENAME
 
 <details>
 
-<summary>Exemplo de Código do Produtor</summary>
+<summary>Código de Exemplo do Produtor</summary>
 ```c
 // gcc producer.c -o producer -lrt
 #include <fcntl.h>
@@ -428,7 +428,7 @@ Esse recurso é particularmente útil para prevenir certas classes de vulnerabil
 
 - `guarded_open_np`: Abre um FD com uma guarda
 - `guarded_close_np`: Fecha-o
-- `change_fdguard_np`: Altera as flags de guarda em um descritor (até removendo a proteção de guarda)
+- `change_fdguard_np`: Altera as flags de guarda em um descritor (até removendo a proteção da guarda)
 
 ## Referências
 

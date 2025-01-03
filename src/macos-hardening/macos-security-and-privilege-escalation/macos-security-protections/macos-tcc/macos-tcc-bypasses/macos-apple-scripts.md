@@ -23,7 +23,7 @@ No entanto, esses scripts também podem ser **exportados como "Somente leitura"*
 file mal.scpt
 mal.scpt: AppleScript compiled
 ```
-e, neste caso, o conteúdo não pode ser decompilado mesmo com `osadecompile`
+e neste caso o conteúdo não pode ser decompilado mesmo com `osadecompile`
 
 No entanto, ainda existem algumas ferramentas que podem ser usadas para entender esse tipo de executáveis, [**leia esta pesquisa para mais informações**](https://labs.sentinelone.com/fade-dead-adventures-in-reversing-malicious-run-only-applescripts/)). A ferramenta [**applescript-disassembler**](https://github.com/Jinmo/applescript-disassembler) com [**aevt_decompile**](https://github.com/SentineLabs/aevt_decompile) será muito útil para entender como o script funciona.
 

@@ -4,7 +4,7 @@
 
 ## **Introdução ao x64**
 
-x64, também conhecido como x86-64, é uma arquitetura de processador de 64 bits predominantemente utilizada em computação de desktop e servidores. Originada da arquitetura x86 produzida pela Intel e posteriormente adotada pela AMD com o nome AMD64, é a arquitetura prevalente em computadores pessoais e servidores hoje.
+x64, também conhecido como x86-64, é uma arquitetura de processador de 64 bits predominantemente usada em computação de desktop e servidor. Originada da arquitetura x86 produzida pela Intel e posteriormente adotada pela AMD com o nome AMD64, é a arquitetura prevalente em computadores pessoais e servidores hoje.
 
 ### **Registradores**
 
@@ -34,7 +34,7 @@ Swift tem sua própria **convenção de chamada** que pode ser encontrada em [**
 
 ### **Instruções Comuns**
 
-As instruções x64 possuem um conjunto rico, mantendo compatibilidade com instruções x86 anteriores e introduzindo novas.
+As instruções x64 têm um conjunto rico, mantendo compatibilidade com instruções x86 anteriores e introduzindo novas.
 
 - **`mov`**: **Mover** um valor de um **registrador** ou **local de memória** para outro.
 - Exemplo: `mov rax, rbx` — Move o valor de `rbx` para `rax`.

@@ -20,14 +20,14 @@ Considere o exemplo abaixo:
 * /usr/local
 * /usr/share/man
 ```
-Este trecho implica que, embora o SIP geralmente proteja o diretório **`/usr`**, existem subdiretórios específicos (`/usr/libexec/cups`, `/usr/local` e `/usr/share/man`) onde modificações são permitidas, conforme indicado pelo asterisco (\*) que precede seus caminhos.
+Este trecho implica que, embora o SIP geralmente proteja o **`/usr`** diretório, existem subdiretórios específicos (`/usr/libexec/cups`, `/usr/local` e `/usr/share/man`) onde modificações são permitidas, conforme indicado pelo asterisco (\*) que precede seus caminhos.
 
 Para verificar se um diretório ou arquivo está protegido pelo SIP, você pode usar o comando **`ls -lOd`** para verificar a presença da flag **`restricted`** ou **`sunlnk`**. Por exemplo:
 ```bash
 ls -lOd /usr/libexec/cups
 drwxr-xr-x  11 root  wheel  sunlnk 352 May 13 00:29 /usr/libexec/cups
 ```
-Neste caso, a flag **`sunlnk`** significa que o diretório `/usr/libexec/cups` em si **não pode ser deletado**, embora arquivos dentro dele possam ser criados, modificados ou deletados.
+Neste caso, a flag **`sunlnk`** significa que o diretório `/usr/libexec/cups` **não pode ser deletado**, embora arquivos dentro dele possam ser criados, modificados ou deletados.
 
 Por outro lado:
 ```bash
@@ -77,7 +77,7 @@ csrutil enable --without debug
 ### **Direitos Relacionados ao SIP**
 
 - `com.apple.rootless.xpc.bootstrap`: Controlar launchd
-- `com.apple.rootless.install[.heritable]`: Acessar o sistema de arquivos
+- `com.apple.rootless.install[.heritable]`: Acessar sistema de arquivos
 - `com.apple.rootless.kext-management`: `kext_request`
 - `com.apple.rootless.datavault.controller`: Gerenciar UF_DATAVAULT
 - `com.apple.rootless.xpc.bootstrap`: Capacidades de configuração do XPC
@@ -85,8 +85,8 @@ csrutil enable --without debug
 - `com.apple.rootless.restricted-block-devices`: Acesso a dispositivos de bloco brutos
 - `com.apple.rootless.internal.installer-equivalent`: Acesso irrestrito ao sistema de arquivos
 - `com.apple.rootless.restricted-nvram-variables[.heritable]`: Acesso total ao NVRAM
-- `com.apple.rootless.storage.label`: Modificar arquivos restritos pelo com.apple.rootless xattr com o rótulo correspondente
-- `com.apple.rootless.volume.VM.label`: Manter a troca de VM no volume
+- `com.apple.rootless.storage.label`: Modificar arquivos restritos por com.apple.rootless xattr com o rótulo correspondente
+- `com.apple.rootless.volume.VM.label`: Manter swap de VM no volume
 
 ## Bypasses do SIP
 
@@ -124,13 +124,13 @@ Se um pacote fosse instalado a partir de uma imagem montada ou unidade externa, 
 
 O daemon **`system_installd`** instalará pacotes que foram assinados pela **Apple**.
 
-Os pesquisadores descobriram que durante a instalação de um pacote assinado pela Apple (.pkg), **`system_installd`** **executa** quaisquer **scripts pós-instalação** incluídos no pacote. Esses scripts são executados pelo shell padrão, **`zsh`**, que automaticamente **executa** comandos do arquivo **`/etc/zshenv`**, se existir, mesmo em modo não interativo. Esse comportamento poderia ser explorado por atacantes: criando um arquivo `/etc/zshenv` malicioso e esperando que **`system_installd` invocasse `zsh`**, eles poderiam realizar operações arbitrárias no dispositivo.
+Os pesquisadores descobriram que durante a instalação de um pacote assinado pela Apple (.pkg), **`system_installd`** **executa** quaisquer **scripts pós-instalação** incluídos no pacote. Esses scripts são executados pelo shell padrão, **`zsh`**, que automaticamente **executa** comandos do arquivo **`/etc/zshenv`**, se existir, mesmo em modo não interativo. Esse comportamento poderia ser explorado por atacantes: criando um arquivo `/etc/zshenv` malicioso e aguardando que **`system_installd` invocasse `zsh`**, eles poderiam realizar operações arbitrárias no dispositivo.
 
-Além disso, foi descoberto que **`/etc/zshenv` poderia ser usado como uma técnica de ataque geral**, não apenas para um bypass do SIP. Cada perfil de usuário tem um arquivo `~/.zshenv`, que se comporta da mesma forma que `/etc/zshenv`, mas não requer permissões de root. Este arquivo poderia ser usado como um mecanismo de persistência, sendo acionado toda vez que `zsh` inicia, ou como um mecanismo de elevação de privilégios. Se um usuário admin elevar para root usando `sudo -s` ou `sudo <comando>`, o arquivo `~/.zshenv` seria acionado, efetivamente elevando para root.
+Além disso, foi descoberto que **`/etc/zshenv` poderia ser usado como uma técnica de ataque geral**, não apenas para contornar o SIP. Cada perfil de usuário tem um arquivo `~/.zshenv`, que se comporta da mesma forma que `/etc/zshenv`, mas não requer permissões de root. Este arquivo poderia ser usado como um mecanismo de persistência, sendo acionado toda vez que `zsh` inicia, ou como um mecanismo de elevação de privilégios. Se um usuário administrador elevar para root usando `sudo -s` ou `sudo <comando>`, o arquivo `~/.zshenv` seria acionado, efetivamente elevando para root.
 
 #### [**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-2022-22583/)
 
-Em [**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-2022-22583/) foi descoberto que o mesmo processo **`system_installd`** ainda poderia ser abusado porque estava colocando o **script pós-instalação dentro de uma pasta nomeada aleatoriamente protegida pelo SIP dentro de `/tmp`**. O fato é que **`/tmp` em si não é protegido pelo SIP**, então era possível **montar** uma **imagem virtual nele**, então o **instalador** colocaria lá o **script pós-instalação**, **desmontaria** a imagem virtual, **recriaria** todas as **pastas** e **adicionaria** o **script de pós-instalação** com a **carga útil** a ser executada.
+Em [**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-2022-22583/) foi descoberto que o mesmo processo **`system_installd`** ainda poderia ser abusado porque estava colocando o **script pós-instalação dentro de uma pasta nomeada aleatoriamente protegida pelo SIP dentro de `/tmp`**. O fato é que **`/tmp` em si não é protegido pelo SIP**, então era possível **montar** uma **imagem virtual nele**, então o **instalador** colocaria o **script pós-instalação** lá, **desmontaria** a imagem virtual, **recriaria** todas as **pastas** e **adicionaria** o **script de pós-instalação** com a **carga** a ser executada.
 
 #### [fsck_cs utility](https://www.theregister.com/2016/03/30/apple_os_x_rootless/)
 
@@ -240,7 +240,7 @@ O comando **`diskutil apfs list`** lista os **detalhes dos volumes APFS** e seu 
 |   FileVault:                 Yes (Unlocked)
 </code></pre>
 
-Na saída anterior, é possível ver que **locais acessíveis ao usuário** estão montados sob `/System/Volumes/Data`.
+Na saída anterior, é possível ver que **locais acessíveis ao usuário** estão montados em `/System/Volumes/Data`.
 
 Além disso, a **instantânea do volume do sistema macOS** está montada em `/` e está **selada** (assinada criptograficamente pelo OS). Portanto, se o SIP for contornado e modificado, o **OS não inicializará mais**.
 

@@ -47,7 +47,7 @@ Uma ferramenta chamada **keychaindump** foi desenvolvida para extrair senhas dos
 ```bash
 sudo vmmap <securityd PID> | grep MALLOC_TINY
 ```
-Após identificar chaves mestres potenciais, **keychaindump** procura nos heaps por um padrão específico (`0x0000000000000018`) que indica um candidato para a chave mestre. Passos adicionais, incluindo desofuscação, são necessários para utilizar esta chave, conforme descrito no código-fonte do **keychaindump**. Analistas que se concentram nesta área devem observar que os dados cruciais para descriptografar o chaveiro estão armazenados na memória do processo **securityd**. Um exemplo de comando para executar o **keychaindump** é:
+Após identificar chaves mestres potenciais, **keychaindump** procura nos heaps por um padrão específico (`0x0000000000000018`) que indica um candidato para a chave mestre. Passos adicionais, incluindo desofuscação, são necessários para utilizar esta chave, conforme descrito no código-fonte do **keychaindump**. Analistas que se concentram nesta área devem observar que os dados cruciais para descriptografar o chaveiro estão armazenados na memória do processo **securityd**. Um comando de exemplo para executar o **keychaindump** é:
 ```bash
 sudo ./keychaindump
 ```
@@ -81,7 +81,7 @@ hexdump -s 8 -n 24 -e '1/1 "%.2x"' /var/db/SystemKey && echo
 ## Use the previous key to decrypt the passwords
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
-#### **Extrair chaves do chaveiro (com senhas) quebrando o hash**
+#### **Extrair chaves do keychain (com senhas) quebrando o hash**
 ```bash
 # Get the keychain hash
 python2.7 chainbreaker.py --dump-keychain-password-hash /Library/Keychains/System.keychain
@@ -193,7 +193,7 @@ Este arquivo concede permissões a usuários específicos por UUID (e não uid) 
 
 O daemon principal para notificações é **`/usr/sbin/notifyd`**. Para receber notificações, os clientes devem se registrar através da porta Mach `com.apple.system.notification_center` (verifique-os com `sudo lsmp -p <pid notifyd>`). O daemon é configurável com o arquivo `/etc/notify.conf`.
 
-Os nomes usados para notificações são notações DNS reversas únicas e, quando uma notificação é enviada para um deles, o(s) cliente(s) que indicaram que podem manipulá-la a receberão.
+Os nomes usados para notificações são notações DNS reversas únicas e, quando uma notificação é enviada para um deles, o(s) cliente(s) que indicaram que podem lidar com isso a receberão.
 
 É possível despejar o status atual (e ver todos os nomes) enviando o sinal SIGUSR2 para o processo notifyd e lendo o arquivo gerado: `/var/run/notifyd_<pid>.status`:
 ```bash
@@ -217,8 +217,8 @@ O **Distributed Notification Center** cujo binário principal é **`/usr/sbin/di
 
 ### Apple Push Notifications (APN)
 
-Neste caso, os aplicativos podem se registrar para **tópicos**. O cliente gerará um token contatando os servidores da Apple através do **`apsd`**.\
-Então, os provedores também terão gerado um token e poderão se conectar aos servidores da Apple para enviar mensagens aos clientes. Essas mensagens serão recebidas localmente pelo **`apsd`** que irá retransmitir a notificação para o aplicativo que a aguarda.
+Neste caso, as aplicações podem se registrar para **tópicos**. O cliente gerará um token contatando os servidores da Apple através do **`apsd`**.\
+Então, os provedores também terão gerado um token e poderão se conectar aos servidores da Apple para enviar mensagens aos clientes. Essas mensagens serão recebidas localmente pelo **`apsd`** que irá retransmitir a notificação para a aplicação que a aguarda.
 
 As preferências estão localizadas em `/Library/Preferences/com.apple.apsd.plist`.
 

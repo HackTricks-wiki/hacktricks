@@ -17,7 +17,7 @@ Existem 4 tipos de restrições:
 - **Restrições Responsáveis**: Restrições aplicadas ao **processo que chama o serviço** em uma comunicação XPC
 - **Restrições de carregamento de biblioteca**: Use restrições de carregamento de biblioteca para descrever seletivamente o código que pode ser carregado
 
-Assim, quando um processo tenta lançar outro processo — chamando `execve(_:_:_:)` ou `posix_spawn(_:_:_:_:_:_:)` — o sistema operacional verifica se o arquivo **executável** **satisfaz** sua **própria restrição própria**. Ele também verifica se o executável do **processo pai** **satisfaz** a **restrição de pai** do executável, e se o executável do **processo responsável** **satisfaz** a **restrição de processo responsável** do executável. Se alguma dessas restrições de lançamento não for satisfeita, o sistema operacional não executa o programa.
+Assim, quando um processo tenta iniciar outro processo — chamando `execve(_:_:_:)` ou `posix_spawn(_:_:_:_:_:_:)` — o sistema operacional verifica se o arquivo **executável** **satisfaz** sua **própria restrição própria**. Ele também verifica se o **executável** do **processo pai** **satisfaz** a **restrição de pai** do executável, e se o **executável** do **processo responsável** **satisfaz a restrição de processo responsável** do executável. Se alguma dessas restrições de lançamento não for satisfeita, o sistema operacional não executa o programa.
 
 Se ao carregar uma biblioteca qualquer parte da **restrição da biblioteca não for verdadeira**, seu processo **não carrega** a biblioteca.
 
@@ -39,7 +39,7 @@ Os [**fatos que um LC pode usar estão documentados**](https://developer.apple.c
 Quando um binário da Apple é assinado, ele **o atribui a uma categoria LC** dentro do **cache de confiança**.
 
 - As **categorias LC do iOS 16** foram [**revertidas e documentadas aqui**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056).
-- As **categorias LC atuais (macOS 14 - Sonoma)** foram revertidas e suas [**descrições podem ser encontradas aqui**](https://gist.github.com/theevilbit/a6fef1e0397425a334d064f7b6e1be53).
+- As **categorias LC atuais (macOS 14 - Somona)** foram revertidas e suas [**descrições podem ser encontradas aqui**](https://gist.github.com/theevilbit/a6fef1e0397425a334d064f7b6e1be53).
 
 Por exemplo, a Categoria 1 é:
 ```
@@ -54,7 +54,7 @@ Parent Constraint: is-init-proc
 
 ### Reversão das Categorias LC
 
-Você tem mais informações [**sobre isso aqui**](https://theevilbit.github.io/posts/launch_constraints_deep_dive/#reversing-constraints), mas basicamente, elas são definidas no **AMFI (AppleMobileFileIntegrity)**, então você precisa baixar o Kernel Development Kit para obter o **KEXT**. Os símbolos que começam com **`kConstraintCategory`** são os **interessantes**. Extraindo-os, você obterá um fluxo codificado DER (ASN.1) que precisará decodificar com [ASN.1 Decoder](https://holtstrom.com/michael/tools/asn1decoder.php) ou a biblioteca python-asn1 e seu script `dump.py`, [andrivet/python-asn1](https://github.com/andrivet/python-asn1/tree/master), que lhe dará uma string mais compreensível.
+Você pode encontrar mais informações [**aqui**](https://theevilbit.github.io/posts/launch_constraints_deep_dive/#reversing-constraints), mas basicamente, elas são definidas no **AMFI (AppleMobileFileIntegrity)**, então você precisa baixar o Kernel Development Kit para obter o **KEXT**. Os símbolos que começam com **`kConstraintCategory`** são os **interessantes**. Extraindo-os, você obterá um fluxo codificado DER (ASN.1) que precisará decodificar com [ASN.1 Decoder](https://holtstrom.com/michael/tools/asn1decoder.php) ou a biblioteca python-asn1 e seu script `dump.py`, [andrivet/python-asn1](https://github.com/andrivet/python-asn1/tree/master), que lhe dará uma string mais compreensível.
 
 ## Restrições de Ambiente
 
@@ -143,13 +143,13 @@ As Restrições de Lançamento teriam mitigado vários ataques antigos ao **gara
 
 Além disso, as Restrições de Lançamento também **mitigam ataques de downgrade.**
 
-No entanto, elas **não mitigam abusos comuns de XPC**, **injeções de código Electron** ou **injeções de dylib** sem validação de biblioteca (a menos que os IDs de equipe que podem carregar bibliotecas sejam conhecidos).
+No entanto, elas **não mitigam abusos comuns de XPC**, injeções de código **Electron** ou **injeções de dylib** sem validação de biblioteca (a menos que os IDs de equipe que podem carregar bibliotecas sejam conhecidos).
 
 ### Proteção do Daemon XPC
 
 Na versão Sonoma, um ponto notável é a **configuração de responsabilidade** do serviço daemon XPC. O serviço XPC é responsável por si mesmo, ao contrário do cliente conectado ser responsável. Isso está documentado no relatório de feedback FB13206884. Essa configuração pode parecer falha, pois permite certas interações com o serviço XPC:
 
-- **Lançando o Serviço XPC**: Se considerado um bug, essa configuração não permite iniciar o serviço XPC através do código do atacante.
+- **Iniciando o Serviço XPC**: Se considerado um bug, essa configuração não permite iniciar o serviço XPC através do código do atacante.
 - **Conectando a um Serviço Ativo**: Se o serviço XPC já estiver em execução (possivelmente ativado por seu aplicativo original), não há barreiras para se conectar a ele.
 
 Embora implementar restrições no serviço XPC possa ser benéfico ao **reduzir a janela para ataques potenciais**, isso não aborda a preocupação principal. Garantir a segurança do serviço XPC requer fundamentalmente **validar efetivamente o cliente conectado**. Este permanece o único método para fortalecer a segurança do serviço. Além disso, vale a pena notar que a configuração de responsabilidade mencionada está atualmente operacional, o que pode não estar alinhado com o design pretendido.

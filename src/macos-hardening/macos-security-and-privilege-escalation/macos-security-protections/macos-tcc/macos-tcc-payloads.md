@@ -53,7 +53,7 @@ cp -r "$HOME/Desktop" "/tmp/desktop"
 
 ### Documentos
 
-- **Entitlement**: Nenhum
+- **Direito**: Nenhum
 - **TCC**: `kTCCServiceSystemPolicyDocumentsFolder`
 
 {{#tabs}}
@@ -572,7 +572,7 @@ ffmpeg -f avfoundation -i ":1" -t 5 /tmp/recording.wav
 
 ### Localização
 
-> [!TIP]
+> [!DICA]
 > Para que um aplicativo obtenha a localização, **Serviços de Localização** (de Privacidade e Segurança) **devem estar ativados,** caso contrário, não conseguirá acessá-la.
 
 - **Direito**: `com.apple.security.personal-information.location`

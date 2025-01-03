@@ -4,14 +4,14 @@
 
 ## Informações Básicas
 
-O verdadeiro **ponto de entrada** de um binário Mach-o é o link dinâmico, definido em `LC_LOAD_DYLINKER`, que geralmente é `/usr/lib/dyld`.
+O verdadeiro **ponto de entrada** de um binário Mach-o é o linkador dinâmico, definido em `LC_LOAD_DYLINKER`, que geralmente é `/usr/lib/dyld`.
 
-Este linker precisará localizar todas as bibliotecas executáveis, mapeá-las na memória e vincular todas as bibliotecas não preguiçosas. Somente após esse processo, o ponto de entrada do binário será executado.
+Esse linkador precisará localizar todas as bibliotecas executáveis, mapeá-las na memória e vincular todas as bibliotecas não preguiçosas. Somente após esse processo, o ponto de entrada do binário será executado.
 
 Claro, **`dyld`** não tem dependências (ele usa syscalls e trechos da libSystem).
 
 > [!CAUTION]
-> Se este linker contiver alguma vulnerabilidade, como está sendo executado antes de qualquer binário (mesmo os altamente privilegiados), seria possível **escalar privilégios**.
+> Se esse linkador contiver alguma vulnerabilidade, como está sendo executado antes de qualquer binário (mesmo os altamente privilegiados), seria possível **escalar privilégios**.
 
 ### Fluxo
 
@@ -107,9 +107,9 @@ Esta última função, após encontrar o endereço da função procurada, escrev
 
 Finalmente, **`dyld_stub_binder`** precisa encontrar a função indicada e escrevê-la no endereço apropriado para não procurá-la novamente. Para isso, ele usa códigos de operação (uma máquina de estados finita) dentro do dyld.
 
-## vetor de argumentos apple\[] 
+## vetor de argumentos apple\[]
 
-No macOS, a função principal recebe na verdade 4 argumentos em vez de 3. O quarto é chamado de apple e cada entrada está na forma `key=value`. Por exemplo:
+No macOS, a função principal recebe na verdade 4 argumentos em vez de 3. O quarto é chamado apple e cada entrada está na forma `key=value`. Por exemplo:
 ```c
 // gcc apple.c -o apple
 #include <stdio.h>
@@ -137,7 +137,7 @@ Desculpe, não há texto fornecido para traduzir. Por favor, forneça o conteúd
 > [!TIP]
 > Quando esses valores chegam à função principal, informações sensíveis já foram removidas deles ou teria ocorrido um vazamento de dados.
 
-é possível ver todos esses valores interessantes depurando antes de entrar na main com:
+é possível ver todos esses valores interessantes depurando antes de entrar na função main com:
 
 <pre><code>lldb ./apple
 
@@ -254,7 +254,7 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 ### Outros
 
 - `DYLD_BIND_AT_LAUNCH`: Vínculos preguiçosos são resolvidos com os não preguiçosos
-- `DYLD_DISABLE_PREFETCH`: Desabilitar pré-busca de conteúdo \_\_DATA e \_\_LINKEDIT
+- `DYLD_DISABLE_PREFETCH`: Desativar a pré-busca de conteúdo \_\_DATA e \_\_LINKEDIT
 - `DYLD_FORCE_FLAT_NAMESPACE`: Vínculos de nível único
 - `DYLD_[FRAMEWORK/LIBRARY]_PATH | DYLD_FALLBACK_[FRAMEWORK/LIBRARY]_PATH | DYLD_VERSIONED_[FRAMEWORK/LIBRARY]_PATH`: Caminhos de resolução
 - `DYLD_INSERT_LIBRARIES`: Carregar uma biblioteca específica
@@ -265,7 +265,7 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 - `DYLD_WEAK_BINDINGS`: Imprimir apenas símbolos fracos quando vinculados
 - `DYLD_PRINT_CODE_SIGNATURES`: Imprimir operações de registro de assinatura de código
 - `DYLD_PRINT_DOFS`: Imprimir seções do formato de objeto D-Trace conforme carregadas
-- `DYLD_PRINT_ENV`: Imprimir ambiente visto pelo dyld
+- `DYLD_PRINT_ENV`: Imprimir env visto pelo dyld
 - `DYLD_PRINT_INTERPOSTING`: Imprimir operações de interposição
 - `DYLD_PRINT_LIBRARIES`: Imprimir bibliotecas carregadas
 - `DYLD_PRINT_OPTS`: Imprimir opções de carregamento
@@ -283,12 +283,12 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 ```bash
 strings /usr/lib/dyld | grep "^DYLD_" | sort -u
 ```
-Ou baixar o projeto dyld de [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) e executar dentro da pasta:
+Ou baixando o projeto dyld de [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) e executando dentro da pasta:
 ```bash
 find . -type f | xargs grep strcmp| grep key,\ \" | cut -d'"' -f2 | sort -u
 ```
 ## Referências
 
-- [**\*OS Internals, Volume I: User Mode. Por Jonathan Levin**](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
+- [**\*OS Internals, Volume I: User Mode. By Jonathan Levin**](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
 
 {{#include ../../../../banners/hacktricks-training.md}}

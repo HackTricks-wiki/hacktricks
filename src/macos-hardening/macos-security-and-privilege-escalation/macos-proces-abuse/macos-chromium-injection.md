@@ -6,11 +6,11 @@
 
 Navegadores baseados em Chromium, como Google Chrome, Microsoft Edge, Brave e outros. Esses navegadores são construídos sobre o projeto de código aberto Chromium, o que significa que compartilham uma base comum e, portanto, têm funcionalidades e opções de desenvolvedor semelhantes.
 
-#### `--load-extension` Flag
+#### Flag `--load-extension`
 
 A flag `--load-extension` é usada ao iniciar um navegador baseado em Chromium a partir da linha de comando ou de um script. Essa flag permite **carregar automaticamente uma ou mais extensões** no navegador ao iniciar.
 
-#### `--use-fake-ui-for-media-stream` Flag
+#### Flag `--use-fake-ui-for-media-stream`
 
 A flag `--use-fake-ui-for-media-stream` é outra opção de linha de comando que pode ser usada para iniciar navegadores baseados em Chromium. Essa flag é projetada para **contornar os prompts normais do usuário que pedem permissão para acessar fluxos de mídia da câmera e do microfone**. Quando essa flag é usada, o navegador concede automaticamente permissão a qualquer site ou aplicativo que solicite acesso à câmera ou ao microfone.
 

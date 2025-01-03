@@ -6,7 +6,7 @@
 
 **MACF** significa **Mandatory Access Control Framework**, que é um sistema de segurança embutido no sistema operacional para ajudar a proteger seu computador. Ele funciona estabelecendo **regras rigorosas sobre quem ou o que pode acessar certas partes do sistema**, como arquivos, aplicativos e recursos do sistema. Ao impor essas regras automaticamente, o MACF garante que apenas usuários e processos autorizados possam realizar ações específicas, reduzindo o risco de acesso não autorizado ou atividades maliciosas.
 
-Observe que o MACF não toma realmente decisões, pois apenas **intercepta** ações, deixando as decisões para os **módulos de política** (extensões do kernel) que chama, como `AppleMobileFileIntegrity.kext`, `Quarantine.kext`, `Sandbox.kext`, `TMSafetyNet.kext` e `mcxalr.kext`.
+Observe que o MACF não toma realmente nenhuma decisão, pois apenas **intercepta** ações, deixando as decisões para os **módulos de política** (extensões do kernel) que chama, como `AppleMobileFileIntegrity.kext`, `Quarantine.kext`, `Sandbox.kext`, `TMSafetyNet.kext` e `mcxalr.kext`.
 
 ### Fluxo
 
@@ -22,7 +22,7 @@ Observe que o MACF não toma realmente decisões, pois apenas **intercepta** aç
 
 ### Rótulos
 
-O MACF usa **rótulos** que, em seguida, as políticas verificam se devem conceder algum acesso ou não. O código da declaração da estrutura de rótulos pode ser [encontrado aqui](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/_label.h), que é então usado dentro da **`struct ucred`** em [**aqui**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ucred.h#L86) na parte **`cr_label`**. O rótulo contém flags e um número de **slots** que podem ser usados pelas **políticas do MACF para alocar ponteiros**. Por exemplo, o Sandbox apontará para o perfil do contêiner.
+O MACF usa **rótulos** que, em seguida, as políticas verificam se devem conceder algum acesso ou não. O código da declaração da estrutura dos rótulos pode ser [encontrado aqui](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/_label.h), que é então usado dentro da **`struct ucred`** em [**aqui**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ucred.h#L86) na parte **`cr_label`**. O rótulo contém flags e um número de **slots** que podem ser usados pelas **políticas do MACF para alocar ponteiros**. Por exemplo, o Sandbox apontará para o perfil do contêiner.
 
 ## Políticas do MACF
 
@@ -84,7 +84,7 @@ mpo_cred_check_label_update_t		*mpo_cred_check_label_update;
 ```
 Quase todos os hooks serão chamados de volta pelo MACF quando uma dessas operações for interceptada. No entanto, os hooks **`mpo_policy_*`** são uma exceção porque `mpo_hook_policy_init()` é um callback chamado durante o registro (após `mac_policy_register()`) e `mpo_hook_policy_initbsd()` é chamado durante o registro tardio, uma vez que o subsistema BSD tenha sido inicializado corretamente.
 
-Além disso, o hook **`mpo_policy_syscall`** pode ser registrado por qualquer kext para expor uma chamada de estilo **ioctl** **interface** privada. Assim, um cliente de usuário poderá chamar `mac_syscall` (#381) especificando como parâmetros o **nome da política** com um **código** inteiro e **argumentos** opcionais.\
+Além disso, o hook **`mpo_policy_syscall`** pode ser registrado por qualquer kext para expor uma chamada de estilo **ioctl** **interface** privada. Então, um cliente de usuário poderá chamar `mac_syscall` (#381) especificando como parâmetros o **nome da política** com um **código** inteiro e **argumentos** opcionais.\
 Por exemplo, o **`Sandbox.kext`** usa isso com frequência.
 
 Verificando o **`__DATA.__const*`** do kext, é possível identificar a estrutura `mac_policy_ops` usada ao registrar a política. É possível encontrá-la porque seu ponteiro está em um deslocamento dentro de `mpo_policy_conf` e também devido à quantidade de ponteiros NULL que estarão naquela área.
@@ -166,9 +166,9 @@ O que irá percorrer todas as políticas mac registradas chamando suas funções
 > /*
 >  * MAC_GRANT realiza a verificação designada percorrendo a lista de
 >  * módulos de política e verificando com cada um como se sente em
->  * relação ao pedido. Ao contrário do MAC_CHECK, concede se
+>  * relação ao pedido. Ao contrário do MAC_CHECK, ele concede se
 >  * qualquer política retornar '0', e caso contrário retorna EPERM.
->  * Note que retorna seu valor via 'error' no escopo do chamador.
+>  * Note que ele retorna seu valor via 'error' no escopo do chamador.
 >  */
 > #define MAC_GRANT(check, args...) do {                              \
 >     error = EPERM;                                                  \

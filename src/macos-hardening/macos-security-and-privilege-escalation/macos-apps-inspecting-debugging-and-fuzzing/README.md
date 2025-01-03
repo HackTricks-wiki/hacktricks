@@ -204,27 +204,27 @@ swift demangle
 ## Análise Dinâmica
 
 > [!WARNING]
-> Note que, para depurar binários, **o SIP precisa ser desativado** (`csrutil disable` ou `csrutil enable --without debug`) ou copiar os binários para uma pasta temporária e **remover a assinatura** com `codesign --remove-signature <binary-path>` ou permitir a depuração do binário (você pode usar [este script](https://gist.github.com/carlospolop/a66b8d72bb8f43913c4b5ae45672578b))
+> Note que para depurar binários, **o SIP precisa estar desativado** (`csrutil disable` ou `csrutil enable --without debug`) ou copiar os binários para uma pasta temporária e **remover a assinatura** com `codesign --remove-signature <binary-path>` ou permitir a depuração do binário (você pode usar [este script](https://gist.github.com/carlospolop/a66b8d72bb8f43913c4b5ae45672578b))
 
 > [!WARNING]
-> Note que, para **instrumentar binários do sistema**, (como `cloudconfigurationd`) no macOS, **o SIP deve ser desativado** (apenas remover a assinatura não funcionará).
+> Note que para **instrumentar binários do sistema**, (como `cloudconfigurationd`) no macOS, **o SIP deve estar desativado** (apenas remover a assinatura não funcionará).
 
 ### APIs
 
 macOS expõe algumas APIs interessantes que fornecem informações sobre os processos:
 
 - `proc_info`: Este é o principal que fornece muitas informações sobre cada processo. Você precisa ser root para obter informações de outros processos, mas não precisa de direitos especiais ou portas mach.
-- `libsysmon.dylib`: Permite obter informações sobre processos através de funções expostas pelo XPC, no entanto, é necessário ter a autorização `com.apple.sysmond.client`.
+- `libsysmon.dylib`: Permite obter informações sobre processos através de funções expostas pelo XPC, no entanto, é necessário ter o direito `com.apple.sysmond.client`.
 
 ### Stackshot & microstackshots
 
-**Stackshotting** é uma técnica usada para capturar o estado dos processos, incluindo as pilhas de chamadas de todas as threads em execução. Isso é particularmente útil para depuração, análise de desempenho e compreensão do comportamento do sistema em um momento específico. No iOS e macOS, o stackshotting pode ser realizado usando várias ferramentas e métodos, como as ferramentas **`sample`** e **`spindump`**.
+**Stackshotting** é uma técnica usada para capturar o estado dos processos, incluindo as pilhas de chamadas de todas as threads em execução. Isso é particularmente útil para depuração, análise de desempenho e compreensão do comportamento do sistema em um ponto específico no tempo. No iOS e macOS, o stackshotting pode ser realizado usando várias ferramentas e métodos, como as ferramentas **`sample`** e **`spindump`**.
 
 ### Sysdiagnose
 
 Esta ferramenta (`/usr/bini/ysdiagnose`) basicamente coleta muitas informações do seu computador executando dezenas de comandos diferentes, como `ps`, `zprint`...
 
-Deve ser executada como **root** e o daemon `/usr/libexec/sysdiagnosed` possui autorizações muito interessantes, como `com.apple.system-task-ports` e `get-task-allow`.
+Deve ser executada como **root** e o daemon `/usr/libexec/sysdiagnosed` possui direitos muito interessantes, como `com.apple.system-task-ports` e `get-task-allow`.
 
 Seu plist está localizado em `/System/Library/LaunchDaemons/com.apple.sysdiagnose.plist`, que declara 3 MachServices:
 
@@ -258,13 +258,13 @@ Além disso, na **parte inferior do meio, você pode escrever comandos em python
 
 #### Painel direito
 
-No painel direito, você pode ver informações interessantes, como o **histórico de navegação** (para saber como você chegou à situação atual), o **gráfico de chamadas** onde você pode ver todas as **funções que chamam esta função** e todas as funções que **esta função chama**, e informações sobre **variáveis locais**.
+No painel direito, você pode ver informações interessantes, como o **histórico de navegação** (para que você saiba como chegou à situação atual), o **gráfico de chamadas** onde você pode ver todas as **funções que chamam esta função** e todas as funções que **esta função chama**, e informações sobre **variáveis locais**.
 
 ### dtrace
 
-Permite que os usuários acessem aplicativos em um nível extremamente **baixo** e fornece uma maneira para os usuários **rastrearem** **programas** e até mesmo mudarem seu fluxo de execução. O Dtrace usa **probes** que são **colocados em todo o kernel** e estão em locais como o início e o fim das chamadas de sistema.
+Permite que os usuários acessem aplicativos em um nível extremamente **baixo** e fornece uma maneira para os usuários **rastrearem** **programas** e até mesmo mudarem seu fluxo de execução. Dtrace usa **probes** que são **colocadas em todo o kernel** e estão em locais como o início e o fim das chamadas de sistema.
 
-O DTrace usa a função **`dtrace_probe_create`** para criar uma probe para cada chamada de sistema. Essas probes podem ser acionadas no **ponto de entrada e saída de cada chamada de sistema**. A interação com o DTrace ocorre através de /dev/dtrace, que está disponível apenas para o usuário root.
+DTrace usa a função **`dtrace_probe_create`** para criar uma probe para cada chamada de sistema. Essas probes podem ser acionadas no **ponto de entrada e saída de cada chamada de sistema**. A interação com o DTrace ocorre através de /dev/dtrace, que está disponível apenas para o usuário root.
 
 > [!TIP]
 > Para habilitar o Dtrace sem desativar completamente a proteção SIP, você pode executar no modo de recuperação: `csrutil enable --without dtrace`
@@ -290,6 +290,8 @@ Uma explicação mais detalhada e mais exemplos podem ser encontrados em [https:
 #### Exemplos
 
 Execute `man -k dtrace` para listar os **scripts DTrace disponíveis**. Exemplo: `sudo dtruss -n binary`
+
+- Na linha
 ```bash
 #Count the number of syscalls of each running process
 sudo dtrace -n 'syscall:::entry {@[execname] = count()}'
@@ -357,11 +359,11 @@ Para interagir com kdebug com um cliente personalizado, geralmente esses são os
 
 Para obter essas informações, é possível usar a ferramenta da Apple **`trace`** ou a ferramenta personalizada [kDebugView (kdv)](https://newosxbook.com/tools/kdv.html)**.**
 
-**Note que Kdebug está disponível apenas para 1 cliente por vez.** Portanto, apenas uma ferramenta alimentada por k-debug pode ser executada ao mesmo tempo.
+**Observe que Kdebug está disponível apenas para 1 cliente por vez.** Portanto, apenas uma ferramenta com k-debug pode ser executada ao mesmo tempo.
 
 ### ktrace
 
-As APIs `ktrace_*` vêm de `libktrace.dylib`, que envolvem as de `Kdebug`. Assim, um cliente pode apenas chamar `ktrace_session_create` e `ktrace_events_[single/class]` para definir callbacks em códigos específicos e, em seguida, iniciá-lo com `ktrace_start`.
+As APIs `ktrace_*` vêm de `libktrace.dylib`, que envolvem as de `Kdebug`. Assim, um cliente pode simplesmente chamar `ktrace_session_create` e `ktrace_events_[single/class]` para definir callbacks em códigos específicos e, em seguida, iniciá-lo com `ktrace_start`.
 
 Você pode usar este mesmo com **SIP ativado**
 
@@ -438,7 +440,7 @@ settings set target.x86-disassembly-flavor intel
 > [!WARNING]
 > Dentro do lldb, despeje um processo com `process save-core`
 
-<table data-header-hidden><thead><tr><th width="225"></th><th></th></tr></thead><tbody><tr><td><strong>(lldb) Comando</strong></td><td><strong>Descrição</strong></td></tr><tr><td><strong>run (r)</strong></td><td>Inicia a execução, que continuará sem interrupções até que um ponto de interrupção seja atingido ou o processo termine.</td></tr><tr><td><strong>process launch --stop-at-entry</strong></td><td>Inicia a execução parando no ponto de entrada</td></tr><tr><td><strong>continue (c)</strong></td><td>Continua a execução do processo depurado.</td></tr><tr><td><strong>nexti (n / ni)</strong></td><td>Executa a próxima instrução. Este comando irá pular chamadas de função.</td></tr><tr><td><strong>stepi (s / si)</strong></td><td>Executa a próxima instrução. Ao contrário do comando nexti, este comando irá entrar nas chamadas de função.</td></tr><tr><td><strong>finish (f)</strong></td><td>Executa o restante das instruções na função atual (“frame”), retorna e para.</td></tr><tr><td><strong>control + c</strong></td><td>Pausa a execução. Se o processo foi executado (r) ou continuado (c), isso fará com que o processo pare ...onde quer que esteja executando atualmente.</td></tr><tr><td><strong>breakpoint (b)</strong></td><td><p><code>b main</code> #Qualquer função chamada main</p><p><code>b &#x3C;binname>`main</code> #Função principal do bin</p><p><code>b set -n main --shlib &#x3C;lib_name></code> #Função principal do bin indicado</p><p><code>breakpoint set -r '\[NSFileManager .*\]$'</code> #Qualquer método NSFileManager</p><p><code>breakpoint set -r '\[NSFileManager contentsOfDirectoryAtPath:.*\]$'</code></p><p><code>break set -r . -s libobjc.A.dylib</code> # Interrompe em todas as funções daquela biblioteca</p><p><code>b -a 0x0000000100004bd9</code></p><p><code>br l</code> #Lista de pontos de interrupção</p><p><code>br e/dis &#x3C;num></code> #Habilitar/Desabilitar ponto de interrupção</p><p>breakpoint delete &#x3C;num></p></td></tr><tr><td><strong>help</strong></td><td><p>help breakpoint #Obter ajuda do comando breakpoint</p><p>help memory write #Obter ajuda para escrever na memória</p></td></tr><tr><td><strong>reg</strong></td><td><p>reg read</p><p>reg read $rax</p><p>reg read $rax --format &#x3C;<a href="https://lldb.llvm.org/use/variable.html#type-format">formato</a>></p><p>reg write $rip 0x100035cc0</p></td></tr><tr><td><strong>x/s &#x3C;reg/endereço de memória></strong></td><td>Exibe a memória como uma string terminada em nulo.</td></tr><tr><td><strong>x/i &#x3C;reg/endereço de memória></strong></td><td>Exibe a memória como instrução de assembly.</td></tr><tr><td><strong>x/b &#x3C;reg/endereço de memória></strong></td><td>Exibe a memória como byte.</td></tr><tr><td><strong>print object (po)</strong></td><td><p>Isso imprimirá o objeto referenciado pelo parâmetro</p><p>po $raw</p><p><code>{</code></p><p><code>dnsChanger = {</code></p><p><code>"affiliate" = "";</code></p><p><code>"blacklist_dns" = ();</code></p><p>Note que a maioria das APIs ou métodos Objective-C da Apple retornam objetos, e, portanto, devem ser exibidos via o comando “print object” (po). Se po não produzir uma saída significativa, use <code>x/b</code></p></td></tr><tr><td><strong>memory</strong></td><td>memory read 0x000....<br>memory read $x0+0xf2a<br>memory write 0x100600000 -s 4 0x41414141 #Escreve AAAA nesse endereço<br>memory write -f s $rip+0x11f+7 "AAAA" #Escreve AAAA no addr</td></tr><tr><td><strong>disassembly</strong></td><td><p>dis #Desmonta a função atual</p><p>dis -n &#x3C;funcname> #Desmonta a função</p><p>dis -n &#x3C;funcname> -b &#x3C;basename> #Desmonta a função<br>dis -c 6 #Desmonta 6 linhas<br>dis -c 0x100003764 -e 0x100003768 # De um add até o outro<br>dis -p -c 4 # Começa no endereço atual desmontando</p></td></tr><tr><td><strong>parray</strong></td><td>parray 3 (char **)$x1 # Verifica array de 3 componentes no reg x1</td></tr><tr><td><strong>image dump sections</strong></td><td>Imprime o mapa da memória do processo atual</td></tr><tr><td><strong>image dump symtab &#x3C;library></strong></td><td><code>image dump symtab CoreNLP</code> #Obtém o endereço de todos os símbolos do CoreNLP</td></tr></tbody></table>
+<table data-header-hidden><thead><tr><th width="225"></th><th></th></tr></thead><tbody><tr><td><strong>(lldb) Comando</strong></td><td><strong>Descrição</strong></td></tr><tr><td><strong>run (r)</strong></td><td>Inicia a execução, que continuará sem interrupções até que um ponto de interrupção seja atingido ou o processo termine.</td></tr><tr><td><strong>process launch --stop-at-entry</strong></td><td>Inicia a execução parando no ponto de entrada</td></tr><tr><td><strong>continue (c)</strong></td><td>Continua a execução do processo depurado.</td></tr><tr><td><strong>nexti (n / ni)</strong></td><td>Executa a próxima instrução. Este comando irá pular chamadas de função.</td></tr><tr><td><strong>stepi (s / si)</strong></td><td>Executa a próxima instrução. Ao contrário do comando nexti, este comando irá entrar nas chamadas de função.</td></tr><tr><td><strong>finish (f)</strong></td><td>Executa o restante das instruções na função atual (“frame”) e retorna, parando.</td></tr><tr><td><strong>control + c</strong></td><td>Pausa a execução. Se o processo foi executado (r) ou continuado (c), isso fará com que o processo pare ...onde quer que esteja executando atualmente.</td></tr><tr><td><strong>breakpoint (b)</strong></td><td><p><code>b main</code> #Qualquer função chamada main</p><p><code>b &#x3C;binname>`main</code> #Função principal do bin</p><p><code>b set -n main --shlib &#x3C;lib_name></code> #Função principal do bin indicado</p><p><code>breakpoint set -r '\[NSFileManager .*\]$'</code> #Qualquer método NSFileManager</p><p><code>breakpoint set -r '\[NSFileManager contentsOfDirectoryAtPath:.*\]$'</code></p><p><code>break set -r . -s libobjc.A.dylib</code> # Interrompe em todas as funções daquela biblioteca</p><p><code>b -a 0x0000000100004bd9</code></p><p><code>br l</code> #Lista de pontos de interrupção</p><p><code>br e/dis &#x3C;num></code> #Habilitar/Desabilitar ponto de interrupção</p><p>breakpoint delete &#x3C;num></p></td></tr><tr><td><strong>help</strong></td><td><p>help breakpoint #Obter ajuda do comando breakpoint</p><p>help memory write #Obter ajuda para escrever na memória</p></td></tr><tr><td><strong>reg</strong></td><td><p>reg read</p><p>reg read $rax</p><p>reg read $rax --format &#x3C;<a href="https://lldb.llvm.org/use/variable.html#type-format">formato</a>></p><p>reg write $rip 0x100035cc0</p></td></tr><tr><td><strong>x/s &#x3C;reg/endereço de memória></strong></td><td>Exibe a memória como uma string terminada em nulo.</td></tr><tr><td><strong>x/i &#x3C;reg/endereço de memória></strong></td><td>Exibe a memória como instrução de assembly.</td></tr><tr><td><strong>x/b &#x3C;reg/endereço de memória></strong></td><td>Exibe a memória como byte.</td></tr><tr><td><strong>print object (po)</strong></td><td><p>Isso imprimirá o objeto referenciado pelo parâmetro</p><p>po $raw</p><p><code>{</code></p><p><code>dnsChanger = {</code></p><p><code>"affiliate" = "";</code></p><p><code>"blacklist_dns" = ();</code></p><p>Note que a maioria das APIs ou métodos Objective-C da Apple retornam objetos, e, portanto, devem ser exibidos via o comando “print object” (po). Se po não produzir uma saída significativa, use <code>x/b</code></p></td></tr><tr><td><strong>memory</strong></td><td>memory read 0x000....<br>memory read $x0+0xf2a<br>memory write 0x100600000 -s 4 0x41414141 #Escreve AAAA nesse endereço<br>memory write -f s $rip+0x11f+7 "AAAA" #Escreve AAAA no addr</td></tr><tr><td><strong>disassembly</strong></td><td><p>dis #Desmonta a função atual</p><p>dis -n &#x3C;funcname> #Desmonta a função</p><p>dis -n &#x3C;funcname> -b &#x3C;basename> #Desmonta a função<br>dis -c 6 #Desmonta 6 linhas<br>dis -c 0x100003764 -e 0x100003768 # De um add até o outro<br>dis -p -c 4 # Começa no endereço atual desmontando</p></td></tr><tr><td><strong>parray</strong></td><td>parray 3 (char **)$x1 # Verifica array de 3 componentes no reg x1</td></tr><tr><td><strong>image dump sections</strong></td><td>Imprime o mapa da memória do processo atual</td></tr><tr><td><strong>image dump symtab &#x3C;library></strong></td><td><code>image dump symtab CoreNLP</code> #Obtém o endereço de todos os símbolos do CoreNLP</td></tr></tbody></table>
 
 > [!NOTE]
 > Ao chamar a função **`objc_sendMsg`**, o registrador **rsi** contém o **nome do método** como uma string terminada em nulo (“C”). Para imprimir o nome via lldb faça:
@@ -460,19 +462,19 @@ settings set target.x86-disassembly-flavor intel
 - Também é possível descobrir **se um processo está sendo depurado** com um código simples como:
 - `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //processo sendo depurado }`
 - Ele também pode invocar a chamada de sistema **`ptrace`** com a flag **`PT_DENY_ATTACH`**. Isso **impede** que um depurador se anexe e trace.
-- Você pode verificar se a função **`sysctl`** ou **`ptrace`** está sendo **importada** (mas o malware poderia importá-la dinamicamente)
+- Você pode verificar se a função **`sysctl`** ou **`ptrace`** está sendo **importada** (mas o malware pode importá-la dinamicamente)
 - Como observado neste relatório, “[Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)” :\
 “_A mensagem Process # exited with **status = 45 (0x0000002d)** é geralmente um sinal claro de que o alvo de depuração está usando **PT_DENY_ATTACH**_”
 
-## Core Dumps
+## Dumps de Core
 
-Core dumps são criados se:
+Dumps de core são criados se:
 
 - `kern.coredump` sysctl está definido como 1 (por padrão)
 - Se o processo não era suid/sgid ou `kern.sugid_coredump` é 1 (por padrão é 0)
-- O limite `AS_CORE` permite a operação. É possível suprimir a criação de core dumps chamando `ulimit -c 0` e reabilitá-los com `ulimit -c unlimited`.
+- O limite `AS_CORE` permite a operação. É possível suprimir a criação de dumps de core chamando `ulimit -c 0` e reabilitá-los com `ulimit -c unlimited`.
 
-Nesses casos, o core dump é gerado de acordo com `kern.corefile` sysctl e armazenado geralmente em `/cores/core/.%P`.
+Nesses casos, o dump de core é gerado de acordo com `kern.corefile` sysctl e geralmente armazenado em `/cores/core/.%P`.
 
 ## Fuzzing
 

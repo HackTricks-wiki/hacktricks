@@ -93,11 +93,11 @@ vmmap -pages 35829 | grep "rwx/rwx"
 ```
 Localizar um lugar para sobrescrever um ponteiro de função é necessário, e no .NET Core, isso pode ser feito direcionando-se para a **Dynamic Function Table (DFT)**. Esta tabela, detalhada em [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h), é usada pelo runtime para funções auxiliares de compilação JIT.
 
-Para sistemas x64, a busca por assinaturas pode ser usada para encontrar uma referência ao símbolo `_hlpDynamicFuncTable` em `libcorclr.dll`.
+Para sistemas x64, a busca por assinatura pode ser usada para encontrar uma referência ao símbolo `_hlpDynamicFuncTable` em `libcorclr.dll`.
 
 A função de depuração `MT_GetDCB` fornece informações úteis, incluindo o endereço de uma função auxiliar, `m_helperRemoteStartAddr`, indicando a localização de `libcorclr.dll` na memória do processo. Este endereço é então usado para iniciar uma busca pela DFT e sobrescrever um ponteiro de função com o endereço do shellcode.
 
-O código completo do POC para injeção no PowerShell está acessível [aqui](https://gist.github.com/xpn/b427998c8b3924ab1d63c89d273734b6).
+O código completo de POC para injeção no PowerShell está acessível [aqui](https://gist.github.com/xpn/b427998c8b3924ab1d63c89d273734b6).
 
 ## Referências
 

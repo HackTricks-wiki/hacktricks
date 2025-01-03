@@ -8,11 +8,11 @@
 
 Os usuários encontram o TCC quando os aplicativos solicitam acesso a recursos protegidos. Isso é visível através de um prompt que permite aos usuários **aprovar ou negar o acesso**. Além disso, o TCC acomoda ações diretas do usuário, como **arrastar e soltar arquivos em um aplicativo**, para conceder acesso a arquivos específicos, garantindo que os aplicativos tenham acesso apenas ao que é explicitamente permitido.
 
-![Um exemplo de um prompt TCC](https://rainforest.engineering/images/posts/macos-tcc/tcc-prompt.png?1620047855)
+![Um exemplo de um prompt do TCC](https://rainforest.engineering/images/posts/macos-tcc/tcc-prompt.png?1620047855)
 
 **TCC** é gerenciado pelo **daemon** localizado em `/System/Library/PrivateFrameworks/TCC.framework/Support/tccd` e configurado em `/System/Library/LaunchDaemons/com.apple.tccd.system.plist` (registrando o serviço mach `com.apple.tccd.system`).
 
-Há um **tccd em modo de usuário** em execução por usuário logado definido em `/System/Library/LaunchAgents/com.apple.tccd.plist` registrando os serviços mach `com.apple.tccd` e `com.apple.usernotifications.delegate.com.apple.tccd`.
+Há um **tccd em modo usuário** em execução por usuário logado definido em `/System/Library/LaunchAgents/com.apple.tccd.plist` registrando os serviços mach `com.apple.tccd` e `com.apple.usernotifications.delegate.com.apple.tccd`.
 
 Aqui você pode ver o tccd rodando como sistema e como usuário:
 ```bash
@@ -78,7 +78,7 @@ sqlite> select * from access where client LIKE "%telegram%" and auth_value=0;
 ```
 {{#endtab}}
 
-{{#tab name="banco de dados do sistema"}}
+{{#tab name="system DB"}}
 ```bash
 sqlite3 /Library/Application\ Support/com.apple.TCC/TCC.db
 sqlite> .schema
@@ -104,7 +104,7 @@ sqlite> select * from access where client LIKE "%telegram%" and auth_value=0;
 > [!DICA]
 > Verificando ambos os bancos de dados, você pode verificar as permissões que um aplicativo permitiu, proibiu ou não possui (ele solicitará).
 
-- O **`service`** é a representação em string da **permissão** do TCC
+- O **`service`** é a representação em string da **permissão** TCC
 - O **`client`** é o **ID do pacote** ou **caminho para o binário** com as permissões
 - O **`client_type`** indica se é um Identificador de Pacote (0) ou um caminho absoluto (1)
 
@@ -260,7 +260,7 @@ O atributo estendido `com.apple.macl` **não pode ser limpo** como outros atribu
 
 ### Inserir no TCC
 
-Se em algum momento você conseguir acesso de escrita a um banco de dados TCC, pode usar algo como o seguinte para adicionar uma entrada (remova os comentários):
+Se em algum momento você conseguir acesso de gravação a um banco de dados TCC, pode usar algo como o seguinte para adicionar uma entrada (remova os comentários):
 
 <details>
 
@@ -345,7 +345,7 @@ EOD
 ```
 {{#endtab}}
 
-{{
+{{#tab name="Roubar sistemas TCC.db"}}
 ```applescript
 osascript<<EOD
 tell application "Finder"
@@ -363,14 +363,14 @@ Você poderia abusar disso para **escrever seu próprio banco de dados TCC de us
 > [!WARNING]
 > Com esta permissão, você poderá **pedir ao Finder para acessar pastas restritas do TCC** e lhe fornecer os arquivos, mas até onde sei, você **não poderá fazer o Finder executar código arbitrário** para abusar totalmente do seu acesso FDA.
 >
-> Portanto, você não poderá abusar de todas as habilidades do FDA.
+> Portanto, você não poderá abusar das plenas habilidades do FDA.
 
 Este é o prompt do TCC para obter privilégios de Automação sobre o Finder:
 
 <figure><img src="../../../../images/image (27).png" alt="" width="244"><figcaption></figcaption></figure>
 
 > [!CAUTION]
-> Note que, porque o aplicativo **Automator** tem a permissão TCC **`kTCCServiceAppleEvents`**, ele pode **controlar qualquer aplicativo**, como o Finder. Portanto, tendo a permissão para controlar o Automator, você também poderia controlar o **Finder** com um código como o abaixo:
+> Note que, como o aplicativo **Automator** tem a permissão TCC **`kTCCServiceAppleEvents`**, ele pode **controlar qualquer aplicativo**, como o Finder. Portanto, tendo a permissão para controlar o Automator, você também poderia controlar o **Finder** com um código como o abaixo:
 
 <details>
 
@@ -502,13 +502,13 @@ Se você tem **`kTCCServiceEndpointSecurityClient`**, você tem FDA. Fim.
 
 ### Arquivo de Política do Sistema SysAdmin para FDA
 
-**`kTCCServiceSystemPolicySysAdminFiles`** permite **alterar** o atributo **`NFSHomeDirectory`** de um usuário que muda sua pasta inicial e, portanto, permite **contornar o TCC**.
+**`kTCCServiceSystemPolicySysAdminFiles`** permite **alterar** o atributo **`NFSHomeDirectory`** de um usuário que altera sua pasta inicial e, portanto, permite **contornar o TCC**.
 
 ### Banco de Dados TCC do Usuário para FDA
 
 Obtendo **permissões de escrita** sobre o banco de dados **TCC do usuário**, você \*\*não pode\*\* conceder a si mesmo permissões **`FDA`**, apenas aquele que vive no banco de dados do sistema pode conceder isso.
 
-Mas você pode **dar** a si mesmo **`direitos de Automação ao Finder`**, e abusar da técnica anterior para escalar para FDA\*.
+Mas você pode **dar** a si mesmo **`Direitos de Automação ao Finder`**, e abusar da técnica anterior para escalar para FDA\*.
 
 ### **Permissões de FDA para TCC**
 
@@ -518,7 +518,7 @@ Eu não acho que isso seja um verdadeiro privesc, mas só para o caso de você a
 
 ### **Contorno de SIP para Contorno de TCC**
 
-O **banco de dados TCC** do sistema é protegido por **SIP**, por isso apenas processos com as **autorizações indicadas poderão modificá-lo**. Portanto, se um atacante encontrar um **contorno de SIP** sobre um **arquivo** (ser capaz de modificar um arquivo restrito por SIP), ele poderá:
+O **banco de dados TCC** do sistema é protegido por **SIP**, por isso apenas processos com as **autorizações indicadas poderão modificá-lo**. Portanto, se um atacante encontrar um **contorno de SIP** sobre um **arquivo** (conseguir modificar um arquivo restrito por SIP), ele poderá:
 
 - **Remover a proteção** de um banco de dados TCC e dar a si mesmo todas as permissões TCC. Ele poderia abusar de qualquer um desses arquivos, por exemplo:
 - O banco de dados do sistema TCC

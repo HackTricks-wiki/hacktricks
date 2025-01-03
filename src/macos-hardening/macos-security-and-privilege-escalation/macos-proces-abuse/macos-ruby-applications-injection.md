@@ -1,16 +1,16 @@
-# macOS Ruby Applications Injection
+# Injeção de Aplicações Ruby no macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## RUBYOPT
 
-Usando esta variável de ambiente, é possível **adicionar novos parâmetros** ao **ruby** sempre que ele for executado. Embora o parâmetro **`-e`** não possa ser usado para especificar o código ruby a ser executado, é possível usar os parâmetros **`-I`** e **`-r`** para adicionar uma nova pasta ao caminho das bibliotecas a serem carregadas e então **especificar uma biblioteca para carregar**.
+Usando essa variável de ambiente, é possível **adicionar novos parâmetros** ao **ruby** sempre que ele for executado. Embora o parâmetro **`-e`** não possa ser usado para especificar código ruby a ser executado, é possível usar os parâmetros **`-I`** e **`-r`** para adicionar uma nova pasta ao caminho de bibliotecas a serem carregadas e então **especificar uma biblioteca para carregar**.
 
 Crie a biblioteca **`inject.rb`** em **`/tmp`**:
 ```ruby:inject.rb
 puts `whoami`
 ```
-Crie em qualquer lugar um script Ruby como:
+Crie um script Ruby em qualquer lugar como:
 ```ruby:hello.rb
 puts 'Hello, World!'
 ```

@@ -128,7 +128,7 @@ open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Profession
 Este arquivo suporta a especificação de **parâmetros Java** quando o Java é executado. Você pode usar alguns dos truques anteriores para alterar os parâmetros java e **fazer o processo executar comandos arbitrários**.\
 Além disso, este arquivo também pode **incluir outros** com o diretório `include`, então você também pode alterar um arquivo incluído.
 
-Ainda mais, alguns aplicativos Java irão **carregar mais de um arquivo `vmoptions`**.
+Além disso, alguns aplicativos Java **carregarão mais de um arquivo `vmoptions`**.
 
 Alguns aplicativos como o Android Studio indicam em sua **saída onde estão procurando** por esses arquivos, como:
 ```bash
@@ -141,7 +141,7 @@ Alguns aplicativos como o Android Studio indicam em sua **saída onde estão pro
 2023-12-13 19:53:23.922 studio[74913:581359] parseVMOptions: /Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 2023-12-13 19:53:23.923 studio[74913:581359] parseVMOptions: platform=20 user=1 file=/Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 ```
-Se eles não o fizerem, você pode facilmente verificar com:
+Se eles não fizerem isso, você pode facilmente verificar com:
 ```bash
 # Monitor
 sudo eslogger lookup | grep vmoption # Give FDA to the Terminal

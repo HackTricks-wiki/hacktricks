@@ -1,8 +1,8 @@
-# Reutilização de PID no macOS
+# macOS PID Reuse
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
 
-## Reutilização de PID
+## PID Reuse
 
 Quando um **serviço XPC** do macOS está verificando o processo chamado com base no **PID** e não no **token de auditoria**, ele é vulnerável a um ataque de reutilização de PID. Este ataque é baseado em uma **condição de corrida** onde um **exploit** vai **enviar mensagens para o serviço XPC** **abusando** da funcionalidade e logo **após** isso, executando **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** com o binário **permitido**.
 

@@ -17,14 +17,14 @@ Finalmente, o sandbox será ativado com uma chamada para **`__sandbox_ms`** que 
 
 ### Ignorando o atributo de quarentena
 
-**Arquivos criados por processos em sandbox** recebem o **atributo de quarentena** para evitar a fuga do sandbox. No entanto, se você conseguir **criar uma pasta `.app` sem o atributo de quarentena** dentro de um aplicativo em sandbox, você poderá fazer o binário do pacote do aplicativo apontar para **`/bin/bash`** e adicionar algumas variáveis de ambiente no **plist** para abusar do **`open`** e **iniciar o novo aplicativo sem sandbox**.
+**Arquivos criados por processos em sandbox** recebem o **atributo de quarentena** para evitar a fuga do sandbox. No entanto, se você conseguir **criar uma pasta `.app` sem o atributo de quarentena** dentro de um aplicativo em sandbox, você poderá fazer o binário do pacote do aplicativo apontar para **`/bin/bash`** e adicionar algumas variáveis de ambiente no **plist** para abusar do **`open`** para **iniciar o novo aplicativo sem sandbox**.
 
 Isso foi o que foi feito em [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)**.**
 
 > [!CAUTION]
 > Portanto, no momento, se você for capaz de criar uma pasta com um nome terminando em **`.app`** sem um atributo de quarentena, você pode escapar do sandbox porque o macOS apenas **verifica** o **atributo de quarentena** na **pasta `.app`** e no **executável principal** (e nós apontaremos o executável principal para **`/bin/bash`**).
 >
-> Note que se um pacote .app já foi autorizado a ser executado (ele tem um xttr de quarentena com a flag de autorizado a executar), você também poderia abusar disso... exceto que agora você não pode escrever dentro de pacotes **`.app`** a menos que tenha algumas permissões privilegiadas do TCC (que você não terá dentro de um sandbox alto).
+> Note que se um pacote .app já foi autorizado a ser executado (ele tem um xttr de quarentena com a flag de autorizado a executar ativada), você também poderia abusar disso... exceto que agora você não pode escrever dentro de pacotes **`.app`** a menos que tenha algumas permissões privilegiadas do TCC (que você não terá dentro de um sandbox alto).
 
 ### Abusando da funcionalidade Open
 
@@ -103,7 +103,7 @@ Outra maneira de encontrar serviços xpc válidos é verificar aqueles em:
 find /System/Library/Frameworks -name "*.xpc"
 find /System/Library/PrivateFrameworks -name "*.xpc"
 ```
-Vários exemplos abusando dessa técnica podem ser encontrados na [**escrita original**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), no entanto, a seguir estão alguns exemplos resumidos.
+Vários exemplos abusando dessa técnica podem ser encontrados no [**escrito original**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), no entanto, a seguir estão alguns exemplos resumidos.
 
 #### /System/Library/PrivateFrameworks/StorageKit.framework/XPCServices/storagekitfsrunner.xpc
 
@@ -132,7 +132,7 @@ NSLog(@"run task result:%@, error:%@", bSucc, error);
 
 Este serviço XPC permitia que cada cliente sempre retornasse YES e o método `createZipAtPath:hourThreshold:withReply:` basicamente permitia indicar o caminho para uma pasta a ser compactada e ela será compactada em um arquivo ZIP.
 
-Portanto, é possível gerar uma estrutura de pasta de aplicativo falsa, compactá-la, depois descompactá-la e executá-la para escapar do sandbox, pois os novos arquivos não terão o atributo de quarentena.
+Portanto, é possível gerar uma estrutura de pasta de aplicativo falsa, compactá-la, depois descompactá-la e executá-la para escapar do sandbox, já que os novos arquivos não terão o atributo de quarentena.
 
 A exploração foi:
 ```objectivec
@@ -324,7 +324,7 @@ Sandbox Bypassed!
 ```
 ### Depurar e contornar o Sandbox com lldb
 
-Vamos compilar um aplicativo que deve ser isolado: 
+Vamos compilar um aplicativo que deve ser isolado:
 
 {{#tabs}}
 {{#tab name="sand.c"}}
