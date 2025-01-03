@@ -25,7 +25,7 @@ Ten plik jest **używany tylko** wtedy, gdy system działa w **trybie pojedyncze
 
 ### Zrzut Keychain
 
-Zauważ, że podczas używania binarnego pliku security do **zrzutu odszyfrowanych haseł**, kilka komunikatów poprosi użytkownika o zezwolenie na tę operację.
+Należy zauważyć, że podczas używania binarnego pliku security do **zrzutu odszyfrowanych haseł**, kilka komunikatów poprosi użytkownika o zezwolenie na tę operację.
 ```bash
 #security
 security dump-trust-settings [-s] [-d] #List certificates
@@ -37,17 +37,17 @@ security dump-keychain -d #Dump all the info, included secrets (the user will be
 ### [Keychaindump](https://github.com/juuso/keychaindump)
 
 > [!OSTRZEŻENIE]
-> Na podstawie tego komentarza [juuso/keychaindump#10 (komentarz)](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760) wygląda na to, że te narzędzia nie działają już w Big Sur.
+> Na podstawie tego komentarza [juuso/keychaindump#10 (komentarz)](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760) wygląda na to, że te narzędzia już nie działają w Big Sur.
 
 ### Przegląd Keychaindump
 
 Narzędzie o nazwie **keychaindump** zostało opracowane w celu wydobywania haseł z kluczy macOS, ale napotyka ograniczenia w nowszych wersjach macOS, takich jak Big Sur, co zostało wskazane w [dyskusji](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760). Użycie **keychaindump** wymaga, aby atakujący uzyskał dostęp i podniósł uprawnienia do **root**. Narzędzie wykorzystuje fakt, że klucz jest domyślnie odblokowany po zalogowaniu użytkownika dla wygody, co pozwala aplikacjom na dostęp do niego bez konieczności wielokrotnego wprowadzania hasła użytkownika. Jednak jeśli użytkownik zdecyduje się zablokować swój klucz po każdym użyciu, **keychaindump** staje się nieskuteczne.
 
-**Keychaindump** działa, celując w konkretny proces zwany **securityd**, opisany przez Apple jako demon do autoryzacji i operacji kryptograficznych, kluczowy do uzyskania dostępu do klucza. Proces wydobywania polega na zidentyfikowaniu **Master Key** pochodzącego z hasła logowania użytkownika. Klucz ten jest niezbędny do odczytu pliku klucza. Aby zlokalizować **Master Key**, **keychaindump** skanuje stos pamięci **securityd** za pomocą polecenia `vmmap`, szukając potencjalnych kluczy w obszarach oznaczonych jako `MALLOC_TINY`. Następujące polecenie jest używane do sprawdzenia tych lokalizacji pamięci:
+**Keychaindump** działa, celując w konkretny proces zwany **securityd**, opisany przez Apple jako demon do autoryzacji i operacji kryptograficznych, kluczowy do uzyskania dostępu do klucza. Proces wydobywania polega na zidentyfikowaniu **Master Key** pochodzącego z hasła logowania użytkownika. Ten klucz jest niezbędny do odczytu pliku klucza. Aby zlokalizować **Master Key**, **keychaindump** skanuje stos pamięci **securityd** za pomocą polecenia `vmmap`, szukając potencjalnych kluczy w obszarach oznaczonych jako `MALLOC_TINY`. Następujące polecenie jest używane do sprawdzenia tych lokalizacji pamięci:
 ```bash
 sudo vmmap <securityd PID> | grep MALLOC_TINY
 ```
-Po zidentyfikowaniu potencjalnych kluczy głównych, **keychaindump** przeszukuje sterty w poszukiwaniu konkretnego wzoru (`0x0000000000000018`), który wskazuje na kandydata na klucz główny. Dalsze kroki, w tym deobfuskacja, są wymagane do wykorzystania tego klucza, jak opisano w kodzie źródłowym **keychaindump**. Analitycy koncentrujący się na tym obszarze powinni zauważyć, że kluczowe dane do odszyfrowania pęku kluczy są przechowywane w pamięci procesu **securityd**. Przykładowe polecenie do uruchomienia **keychaindump** to:
+Po zidentyfikowaniu potencjalnych kluczy głównych, **keychaindump** przeszukuje sterty w poszukiwaniu konkretnego wzoru (`0x0000000000000018`), który wskazuje na kandydata na klucz główny. Dalsze kroki, w tym deobfuskacja, są wymagane do wykorzystania tego klucza, jak opisano w kodzie źródłowym **keychaindump**. Analitycy koncentrujący się na tym obszarze powinni zauważyć, że kluczowe dane do odszyfrowania pęku kluczy są przechowywane w pamięci procesu **securityd**. Przykładowa komenda do uruchomienia **keychaindump** to:
 ```bash
 sudo ./keychaindump
 ```
@@ -64,7 +64,7 @@ sudo ./keychaindump
 - Bezpieczne notatki
 - Hasła Appleshare
 
-Dając hasło do odblokowania keychain, klucz główny uzyskany za pomocą [volafox](https://github.com/n0fate/volafox) lub [volatility](https://github.com/volatilityfoundation/volatility), lub plik odblokowujący, taki jak SystemKey, Chainbreaker również dostarczy hasła w postaci tekstu jawnego.
+Dając hasło do odblokowania keychain, klucz główny uzyskany za pomocą [volafox](https://github.com/n0fate/volafox) lub [volatility](https://github.com/volatilityfoundation/volatility), lub plik odblokowujący taki jak SystemKey, Chainbreaker również dostarczy hasła w postaci tekstu jawnego.
 
 Bez jednej z tych metod odblokowywania Keychain, Chainbreaker wyświetli wszystkie inne dostępne informacje.
 
@@ -90,7 +90,7 @@ hashcat.exe -m 23100 --keep-guessing hashes.txt dictionary.txt
 # Use the key to decrypt the passwords
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
-#### **Zrzut kluczy z pęku (z hasłami) za pomocą zrzutu pamięci**
+#### **Zrzut kluczy z pęku kluczy (z hasłami) za pomocą zrzutu pamięci**
 
 [Postępuj zgodnie z tymi krokami](../#dumping-memory-with-osxpmem), aby wykonać **zrzut pamięci**
 ```bash
@@ -113,7 +113,7 @@ python2.7 chainbreaker.py --dump-all --password-prompt /Users/<username>/Library
 Plik **kcpassword** to plik, który przechowuje **hasło logowania użytkownika**, ale tylko jeśli właściciel systemu **włączył automatyczne logowanie**. W związku z tym użytkownik będzie automatycznie zalogowany bez pytania o hasło (co nie jest zbyt bezpieczne).
 
 Hasło jest przechowywane w pliku **`/etc/kcpassword`** xored z kluczem **`0x7D 0x89 0x52 0x23 0xD2 0xBC 0xDD 0xEA 0xA3 0xB9 0x1F`**. Jeśli hasło użytkownika jest dłuższe niż klucz, klucz będzie używany ponownie.\
-To sprawia, że hasło jest dość łatwe do odzyskania, na przykład przy użyciu skryptów takich jak [**ten**](https://gist.github.com/opshope/32f65875d45215c3677d).
+To sprawia, że hasło jest dość łatwe do odzyskania, na przykład przy użyciu skryptów jak [**ten**](https://gist.github.com/opshope/32f65875d45215c3677d).
 
 ## Ciekawe informacje w bazach danych
 

@@ -4,9 +4,9 @@
 
 ## XNU Kernel
 
-**Rdzeń macOS to XNU**, co oznacza "X is Not Unix". Ten kernel składa się zasadniczo z **mikrokernela Mach** (omówionego później) **i** elementów z Berkeley Software Distribution (**BSD**). XNU zapewnia również platformę dla **sterowników jądra za pośrednictwem systemu zwanego I/O Kit**. Kernel XNU jest częścią projektu open source Darwin, co oznacza, że **jego kod źródłowy jest ogólnodostępny**.
+**Rdzeń macOS to XNU**, co oznacza "X nie jest Unixem". Ten kernel składa się zasadniczo z **mikrokernela Mach** (omówionego później) **i** elementów z Berkeley Software Distribution (**BSD**). XNU zapewnia również platformę dla **sterowników jądra za pośrednictwem systemu zwanego I/O Kit**. Kernel XNU jest częścią projektu open source Darwin, co oznacza, że **jego kod źródłowy jest ogólnodostępny**.
 
-Z perspektywy badacza bezpieczeństwa lub dewelopera Unix, **macOS** może wydawać się dość **podobny** do systemu **FreeBSD** z eleganckim interfejsem graficznym i wieloma niestandardowymi aplikacjami. Większość aplikacji opracowanych dla BSD skompiluje się i uruchomi na macOS bez potrzeby modyfikacji, ponieważ narzędzia wiersza poleceń znane użytkownikom Unix są obecne w macOS. Jednakże, ponieważ kernel XNU zawiera Mach, istnieją istotne różnice między tradycyjnym systemem podobnym do Unix a macOS, a te różnice mogą powodować potencjalne problemy lub zapewniać unikalne zalety.
+Z perspektywy badacza bezpieczeństwa lub dewelopera Unix, **macOS** może wydawać się dość **podobny** do systemu **FreeBSD** z eleganckim interfejsem graficznym i wieloma niestandardowymi aplikacjami. Większość aplikacji opracowanych dla BSD skompiluje się i uruchomi na macOS bez potrzeby modyfikacji, ponieważ narzędzia wiersza poleceń znane użytkownikom Unix są obecne w macOS. Jednakże, ponieważ kernel XNU zawiera Mach, istnieją istotne różnice między tradycyjnym systemem podobnym do Unixa a macOS, a te różnice mogą powodować potencjalne problemy lub zapewniać unikalne zalety.
 
 Otwartoźródłowa wersja XNU: [https://opensource.apple.com/source/xnu/](https://opensource.apple.com/source/xnu/)
 
@@ -27,7 +27,7 @@ Kernel XNU **zawiera** również znaczną ilość kodu pochodzącego z projektu 
 - Stos TCP/IP i gniazda
 - Zapora ogniowa i filtrowanie pakietów
 
-Zrozumienie interakcji między BSD a Machem może być skomplikowane, z powodu ich różnych ram koncepcyjnych. Na przykład, BSD używa procesów jako swojej podstawowej jednostki wykonawczej, podczas gdy Mach działa na podstawie wątków. Ta rozbieżność jest rozwiązywana w XNU poprzez **powiązanie każdego procesu BSD z zadaniem Mach**, które zawiera dokładnie jeden wątek Mach. Gdy używane jest wywołanie systemowe fork() w BSD, kod BSD w jądrze używa funkcji Mach do tworzenia struktury zadania i wątku.
+Zrozumienie interakcji między BSD a Machem może być skomplikowane, z powodu ich różnych ram koncepcyjnych. Na przykład, BSD używa procesów jako swojej podstawowej jednostki wykonawczej, podczas gdy Mach działa na podstawie wątków. Ta rozbieżność jest uzgadniana w XNU poprzez **powiązanie każdego procesu BSD z zadaniem Mach**, które zawiera dokładnie jeden wątek Mach. Gdy używane jest wywołanie systemowe fork() w BSD, kod BSD w jądrze używa funkcji Mach do utworzenia struktury zadania i wątku.
 
 Ponadto, **Mach i BSD utrzymują różne modele bezpieczeństwa**: model bezpieczeństwa **Macha** oparty jest na **prawach portów**, podczas gdy model bezpieczeństwa BSD działa na podstawie **własności procesów**. Różnice między tymi dwoma modelami czasami prowadziły do lokalnych luk w podnoszeniu uprawnień. Oprócz typowych wywołań systemowych, istnieją również **pułapki Mach, które pozwalają programom w przestrzeni użytkownika na interakcję z jądrem**. Te różne elementy razem tworzą wieloaspektową, hybrydową architekturę jądra macOS.
 
@@ -49,7 +49,7 @@ macos-iokit.md
 
 macOS jest **bardzo restrykcyjny w ładowaniu rozszerzeń jądra** (.kext) z powodu wysokich uprawnień, z jakimi kod będzie działał. W rzeczywistości, domyślnie jest to praktycznie niemożliwe (chyba że znajdzie się obejście).
 
-Na następnej stronie możesz również zobaczyć, jak odzyskać `.kext`, które macOS ładuje wewnątrz swojego **kernelcache**:
+Na następnej stronie można również zobaczyć, jak odzyskać `.kext`, które macOS ładuje wewnątrz swojego **kernelcache**:
 
 {{#ref}}
 macos-kernel-extensions.md
@@ -65,7 +65,7 @@ macos-system-extensions.md
 
 ## Referencje
 
-- [**The Mac Hacker's Handbook**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt_other?_encoding=UTF8&me=&qid=)
+- [**Podręcznik hakera Maca**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt_other?_encoding=UTF8&me=&qid=)
 - [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

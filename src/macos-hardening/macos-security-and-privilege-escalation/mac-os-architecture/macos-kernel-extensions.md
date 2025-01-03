@@ -8,7 +8,7 @@ Rozszerzenia jądra (Kexts) to **pakiety** z rozszerzeniem **`.kext`**, które s
 
 ### Wymagania
 
-Oczywiście, jest to tak potężne, że **załadowanie rozszerzenia jądra** jest **skomplikowane**. Oto **wymagania**, które musi spełniać rozszerzenie jądra, aby mogło być załadowane:
+Oczywiście, jest to tak potężne, że **załadowanie rozszerzenia jądra** jest **skomplikowane**. Oto **wymagania**, które musi spełnić rozszerzenie jądra, aby mogło być załadowane:
 
 - Podczas **wejścia w tryb odzyskiwania**, rozszerzenia jądra **muszą być dozwolone** do załadowania:
 
@@ -45,7 +45,7 @@ kextstat | grep " 22 " | cut -c2-5,50- | cut -d '(' -f1
 ## Kernelcache
 
 > [!CAUTION]
-> Mimo że rozszerzenia jądra powinny znajdować się w `/System/Library/Extensions/`, jeśli przejdziesz do tego folderu, **nie znajdziesz żadnego pliku binarnego**. Dzieje się tak z powodu **kernelcache** i aby odwrócić jeden `.kext`, musisz znaleźć sposób na jego uzyskanie.
+> Mimo że rozszerzenia jądra powinny znajdować się w `/System/Library/Extensions/`, jeśli przejdziesz do tego folderu, **nie znajdziesz żadnego pliku binarnego**. Dzieje się tak z powodu **kernelcache** i aby odwrócić jedno `.kext`, musisz znaleźć sposób na jego uzyskanie.
 
 **Kernelcache** to **wstępnie skompilowana i wstępnie połączona wersja jądra XNU**, wraz z niezbędnymi **sterownikami** i **rozszerzeniami jądra**. Jest przechowywana w formacie **skompresowanym** i dekompresowana do pamięci podczas procesu uruchamiania. Kernelcache ułatwia **szybszy czas uruchamiania**, mając gotową do uruchomienia wersję jądra i kluczowych sterowników, co zmniejsza czas i zasoby, które w przeciwnym razie byłyby wydawane na dynamiczne ładowanie i łączenie tych komponentów w czasie uruchamiania.
 
@@ -73,7 +73,7 @@ Zwykle składa się z następujących komponentów:
 - Zapobiega powtarzaniu niektórych aktualizacji
 - OPCJONALNE: Zwykle to nie jest znalezione
 
-Rozpakuj Kernelcache:
+Dekomprymuj Kernelcache:
 ```bash
 # img4tool (https://github.com/tihmstar/img4tool
 img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
@@ -85,9 +85,9 @@ pyimg4 im4p extract -i kernelcache.release.iphone14 -o kernelcache.release.iphon
 
 - [**KernelDebugKit Github**](https://github.com/dortania/KdkSupportPkg/releases)
 
-W [https://github.com/dortania/KdkSupportPkg/releases](https://github.com/dortania/KdkSupportPkg/releases) można znaleźć wszystkie zestawy debugowania jądra. Możesz je pobrać, zamontować, otworzyć za pomocą narzędzia [Suspicious Package](https://www.mothersruin.com/software/SuspiciousPackage/get.html), uzyskać dostęp do folderu **`.kext`** i **wyodrębnić**.
+W [https://github.com/dortania/KdkSupportPkg/releases](https://github.com/dortania/KdkSupportPkg/releases) można znaleźć wszystkie zestawy debugowania jądra. Możesz je pobrać, zamontować, otworzyć za pomocą narzędzia [Suspicious Package](https://www.mothersruin.com/software/SuspiciousPackage/get.html), uzyskać dostęp do folderu **`.kext`** i **wyodrębnić go**.
 
-Sprawdź to pod kątem symboli za pomocą:
+Sprawdź go pod kątem symboli za pomocą:
 ```bash
 nm -a ~/Downloads/Sandbox.kext/Contents/MacOS/Sandbox | wc -l
 ```
@@ -95,7 +95,7 @@ nm -a ~/Downloads/Sandbox.kext/Contents/MacOS/Sandbox | wc -l
 
 Czasami Apple wydaje **kernelcache** z **symbolami**. Możesz pobrać niektóre firmware z symbolami, korzystając z linków na tych stronach. Firmware będzie zawierać **kernelcache** oraz inne pliki.
 
-Aby **wyodrębnić** pliki, zacznij od zmiany rozszerzenia z `.ipsw` na `.zip` i **rozpakuj** je.
+Aby **wyodrębnić** pliki, zacznij od zmiany rozszerzenia z `.ipsw` na `.zip` i **rozpakuj** go.
 
 Po wyodrębnieniu firmware otrzymasz plik taki jak: **`kernelcache.release.iphone14`**. Jest w formacie **IMG4**, możesz wyodrębnić interesujące informacje za pomocą:
 

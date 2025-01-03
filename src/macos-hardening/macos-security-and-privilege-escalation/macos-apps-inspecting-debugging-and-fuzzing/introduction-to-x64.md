@@ -38,9 +38,9 @@ Instrukcje x64 mają bogaty zestaw, zachowując zgodność z wcześniejszymi ins
 
 - **`mov`**: **Przenieś** wartość z jednego **rejestru** lub **lokacji pamięci** do innego.
 - Przykład: `mov rax, rbx` — Przenosi wartość z `rbx` do `rax`.
-- **`push`** i **`pop`**: Umieść lub wyjmij wartości z **stosu**.
-- Przykład: `push rax` — Umieszcza wartość w `rax` na stosie.
-- Przykład: `pop rax` — Wyjmuje górną wartość ze stosu do `rax`.
+- **`push`** i **`pop`**: Wstawiaj lub usuwaj wartości do/z **stosu**.
+- Przykład: `push rax` — Wstawia wartość w `rax` na stos.
+- Przykład: `pop rax` — Usuwa górną wartość ze stosu do `rax`.
 - **`add`** i **`sub`**: Operacje **dodawania** i **odejmowania**.
 - Przykład: `add rax, rcx` — Dodaje wartości w `rax` i `rcx`, zapisując wynik w `rax`.
 - **`mul`** i **`div`**: Operacje **mnożenia** i **dzielenia**. Uwaga: mają one specyficzne zachowania dotyczące użycia operandów.
@@ -55,14 +55,14 @@ Instrukcje x64 mają bogaty zestaw, zachowując zgodność z wcześniejszymi ins
 
 ### **Prolog funkcji**
 
-1. **Umieść stary wskaźnik bazowy**: `push rbp` (zapisuje wskaźnik bazowy wywołującego)
+1. **Wstaw stary wskaźnik bazowy**: `push rbp` (zapisuje wskaźnik bazowy wywołującego)
 2. **Przenieś aktualny wskaźnik stosu do wskaźnika bazowego**: `mov rbp, rsp` (ustawia nowy wskaźnik bazowy dla bieżącej funkcji)
 3. **Przydziel miejsce na stosie dla zmiennych lokalnych**: `sub rsp, <size>` (gdzie `<size>` to liczba bajtów potrzebnych)
 
 ### **Epilog funkcji**
 
 1. **Przenieś aktualny wskaźnik bazowy do wskaźnika stosu**: `mov rsp, rbp` (zwalnia zmienne lokalne)
-2. **Wyjmij stary wskaźnik bazowy ze stosu**: `pop rbp` (przywraca wskaźnik bazowy wywołującego)
+2. **Usuń stary wskaźnik bazowy ze stosu**: `pop rbp` (przywraca wskaźnik bazowy wywołującego)
 3. **Zwróć**: `ret` (zwraca kontrolę do wywołującego)
 
 ## macOS
@@ -78,7 +78,7 @@ Istnieją różne klasy wywołań systemowych, możesz [**znaleźć je tutaj**](
 #define SYSCALL_CLASS_DIAG	4	/* Diagnostics */
 #define SYSCALL_CLASS_IPC	5	/* Mach IPC */
 ```
-Następnie możesz znaleźć każdy numer syscall [**w tym adresie URL**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)**:**
+Następnie możesz znaleźć każdy numer syscall [**w tym URL**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)**:**
 ```c
 0	AUE_NULL	ALL	{ int nosys(void); }   { indirect syscall }
 1	AUE_EXIT	ALL	{ void exit(int rval); }

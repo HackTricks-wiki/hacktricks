@@ -8,12 +8,12 @@ W architekturze ARMv8 poziomy wykonania, znane jako Poziomy Wyjątków (EL), def
 
 1. **EL0 - Tryb Użytkownika**:
 - Jest to poziom o najmniejszych uprawnieniach i jest używany do wykonywania zwykłego kodu aplikacji.
-- Aplikacje działające na EL0 są izolowane od siebie i od oprogramowania systemowego, co zwiększa bezpieczeństwo i stabilność.
+- Aplikacje działające na poziomie EL0 są izolowane od siebie i od oprogramowania systemowego, co zwiększa bezpieczeństwo i stabilność.
 2. **EL1 - Tryb Jądra Systemu Operacyjnego**:
 - Większość jąder systemów operacyjnych działa na tym poziomie.
 - EL1 ma więcej uprawnień niż EL0 i może uzyskiwać dostęp do zasobów systemowych, ale z pewnymi ograniczeniami, aby zapewnić integralność systemu.
 3. **EL2 - Tryb Hypervisora**:
-- Ten poziom jest używany do wirtualizacji. Hypervisor działający na EL2 może zarządzać wieloma systemami operacyjnymi (każdy w swoim własnym EL1) działającymi na tym samym sprzęcie fizycznym.
+- Ten poziom jest używany do wirtualizacji. Hypervisor działający na poziomie EL2 może zarządzać wieloma systemami operacyjnymi (każdy w swoim własnym EL1) działającymi na tym samym sprzęcie fizycznym.
 - EL2 zapewnia funkcje izolacji i kontroli wirtualizowanych środowisk.
 4. **EL3 - Tryb Monitorowania Bezpieczeństwa**:
 - Jest to poziom o najwyższych uprawnieniach i jest często używany do bezpiecznego uruchamiania i zaufanych środowisk wykonawczych.
@@ -29,13 +29,13 @@ ARM64 ma **31 rejestrów ogólnego przeznaczenia**, oznaczonych od `x0` do `x30`
 - **`x0`** również przenosi dane zwracane przez funkcję.
 2. **`x8`** - W jądrze Linuxa, `x8` jest używany jako numer wywołania systemowego dla instrukcji `svc`. **W macOS używany jest x16!**
 3. **`x9`** do **`x15`** - Więcej rejestrów tymczasowych, często używanych do zmiennych lokalnych.
-4. **`x16`** i **`x17`** - **Rejestry Wywołań Wewnątrzproceduralnych**. Tymczasowe rejestry dla wartości natychmiastowych. Są również używane do pośrednich wywołań funkcji i stubów PLT (Tabela Łączenia Procedur).
+4. **`x16`** i **`x17`** - **Rejestry Wywołań Wewnątrzproceduralnych**. Rejestry tymczasowe dla wartości natychmiastowych. Są również używane do pośrednich wywołań funkcji i stubów PLT (Tabela Łączenia Procedur).
 - **`x16`** jest używany jako **numer wywołania systemowego** dla instrukcji **`svc`** w **macOS**.
-5. **`x18`** - **Rejestr platformy**. Może być używany jako rejestr ogólnego przeznaczenia, ale na niektórych platformach ten rejestr jest zarezerwowany do użycia specyficznego dla platformy: Wskaźnik do bloku środowiskowego wątku lokalnego w Windows lub wskaźnik do aktualnie **wykonującej się struktury zadania w jądrze linux**.
+5. **`x18`** - **Rejestr platformy**. Może być używany jako rejestr ogólnego przeznaczenia, ale na niektórych platformach ten rejestr jest zarezerwowany do specyficznych zastosowań platformy: wskaźnik do bloku środowiska wątku w Windows lub wskaźnik do aktualnie **wykonującej się struktury zadania w jądrze Linuxa**.
 6. **`x19`** do **`x28`** - To rejestry zachowywane przez wywoływaną funkcję. Funkcja musi zachować wartości tych rejestrów dla swojego wywołującego, więc są one przechowywane na stosie i odzyskiwane przed powrotem do wywołującego.
 7. **`x29`** - **Wskaźnik ramki** do śledzenia ramki stosu. Gdy tworzona jest nowa ramka stosu z powodu wywołania funkcji, rejestr **`x29`** jest **przechowywany na stosie**, a adres **nowego** wskaźnika ramki (adres **`sp`**) jest **przechowywany w tym rejestrze**.
 - Ten rejestr może być również używany jako **rejestr ogólnego przeznaczenia**, chociaż zazwyczaj jest używany jako odniesienie do **zmiennych lokalnych**.
-8. **`x30`** lub **`lr`** - **Rejestr łączenia**. Przechowuje **adres powrotu**, gdy wykonywana jest instrukcja `BL` (Branch with Link) lub `BLR` (Branch with Link to Register), przechowując wartość **`pc`** w tym rejestrze.
+8. **`x30`** lub **`lr`** - **Rejestr łączenia**. Przechowuje **adres zwrotu**, gdy wykonywana jest instrukcja `BL` (Branch with Link) lub `BLR` (Branch with Link to Register), przechowując wartość **`pc`** w tym rejestrze.
 - Może być również używany jak każdy inny rejestr.
 - Jeśli bieżąca funkcja ma wywołać nową funkcję i tym samym nadpisać `lr`, przechowa ją na stosie na początku, to jest epilog (`stp x29, x30 , [sp, #-48]; mov x29, sp` -> Przechowaj `fp` i `lr`, wygeneruj przestrzeń i uzyskaj nowy `fp`) i odzyska ją na końcu, to jest prolog (`ldp x29, x30, [sp], #48; ret` -> Odzyskaj `fp` i `lr` i zwróć).
 9. **`sp`** - **Wskaźnik stosu**, używany do śledzenia szczytu stosu.
@@ -47,15 +47,15 @@ Rejestry **`Wn`** są **32-bitową** wersją rejestru **`Xn`**.
 
 ### Rejestry SIMD i zmiennoprzecinkowe
 
-Ponadto istnieje kolejne **32 rejestry o długości 128 bitów**, które mogą być używane w zoptymalizowanych operacjach SIMD (jedna instrukcja, wiele danych) oraz do wykonywania arytmetyki zmiennoprzecinkowej. Nazywane są rejestrami Vn, chociaż mogą również działać w **64**-bitach, **32**-bitach, **16**-bitach i **8**-bitach, a wtedy nazywane są **`Qn`**, **`Dn`**, **`Sn`**, **`Hn`** i **`Bn`**.
+Ponadto istnieje kolejne **32 rejestry o długości 128 bitów**, które mogą być używane w zoptymalizowanych operacjach SIMD (jedna instrukcja, wiele danych) oraz do wykonywania arytmetyki zmiennoprzecinkowej. Nazywane są rejestrami Vn, chociaż mogą również działać w **64**-bitowym, **32**-bitowym, **16**-bitowym i **8**-bitowym, a wtedy nazywane są **`Qn`**, **`Dn`**, **`Sn`**, **`Hn`** i **`Bn`**.
 
 ### Rejestry systemowe
 
 **Istnieją setki rejestrów systemowych**, zwanych również rejestrami specjalnego przeznaczenia (SPRs), które są używane do **monitorowania** i **kontrolowania** zachowania **procesorów**.\
 Mogą być odczytywane lub ustawiane tylko za pomocą dedykowanej specjalnej instrukcji **`mrs`** i **`msr`**.
 
-Specjalne rejestry **`TPIDR_EL0`** i **`TPIDDR_EL0`** są często spotykane podczas inżynierii odwrotnej. Sufiks `EL0` wskazuje na **minimalny wyjątek**, z którego rejestr może być dostępny (w tym przypadku EL0 to regularny poziom wyjątku (uprawnienia), na którym działają zwykłe programy).\
-Często są używane do przechowywania **adresu bazowego regionu pamięci lokalnej dla wątku**. Zwykle pierwszy z nich jest odczytywalny i zapisywalny dla programów działających w EL0, ale drugi może być odczytywany z EL0 i zapisywany z EL1 (jak jądro).
+Specjalne rejestry **`TPIDR_EL0`** i **`TPIDDR_EL0`** są często spotykane podczas inżynierii odwrotnej. Sufiks `EL0` wskazuje na **minimalny wyjątek**, z którego rejestr może być dostępny (w tym przypadku EL0 jest regularnym poziomem wyjątku (uprawnień), na którym działają zwykłe programy).\
+Często są używane do przechowywania **adresu bazowego lokalizacji pamięci** dla przechowywania lokalnego wątku. Zazwyczaj pierwszy z nich jest odczytywalny i zapisywalny dla programów działających w EL0, ale drugi może być odczytywany z EL0 i zapisywany z EL1 (jak jądro).
 
 - `mrs x0, TPIDR_EL0 ; Odczytaj TPIDR_EL0 do x0`
 - `msr TPIDR_EL0, X0 ; Zapisz x0 do TPIDR_EL0`
@@ -82,10 +82,10 @@ Oto dostępne pola:
 
 - Flaga **szerokości rejestru (`nRW`)**: Jeśli flaga ma wartość 0, program będzie działał w stanie wykonawczym AArch64 po wznowieniu.
 - Bieżący **Poziom Wyjątków** (**`EL`**): Zwykły program działający w EL0 będzie miał wartość 0.
-- Flaga **jednoetapowego** (**`SS`**): Używana przez debugery do jednoetapowego działania, ustawiając flagę SS na 1 wewnątrz **`SPSR_ELx`** przez wyjątek. Program wykona krok i wyda wyjątek jednoetapowy.
-- Flaga stanu **nielegalnego wyjątku** (**`IL`**): Używana do oznaczania, gdy oprogramowanie z uprawnieniami wykonuje nieprawidłowe przejście na poziom wyjątku, ta flaga jest ustawiana na 1, a procesor wyzwala wyjątek stanu nielegalnego.
+- Flaga **jednoetapowego** (**`SS`**): Używana przez debugery do jednoetapowego wykonania, ustawiając flagę SS na 1 wewnątrz **`SPSR_ELx`** przez wyjątek. Program wykona krok i wyda wyjątek jednoetapowy.
+- Flaga **nielegalnego stanu wyjątku** (**`IL`**): Używana do oznaczania, gdy oprogramowanie z uprawnieniami wykonuje nieprawidłowe przejście na poziom wyjątku, ta flaga jest ustawiana na 1, a procesor wyzwala wyjątek stanu nielegalnego.
 - Flagi **`DAIF`**: Te flagi pozwalają programowi z uprawnieniami na selektywne maskowanie niektórych zewnętrznych wyjątków.
-- Jeśli **`A`** wynosi 1, oznacza to, że będą wyzwalane **asynchroniczne przerwania**. Flaga **`I`** konfiguruje odpowiedź na zewnętrzne żądania przerwań sprzętowych (IRQ). a F jest związana z **Szybkimi Żądaniami Przerwań** (FIR).
+- Jeśli **`A`** wynosi 1, oznacza to, że będą wyzwalane **asynchroniczne przerwania**. Flaga **`I`** konfiguruje odpowiedź na zewnętrzne żądania przerwań sprzętowych (IRQ). a F jest związana z **szybkimi żądaniami przerwań** (FIR).
 - Flagi **wyboru wskaźnika stosu** (**`SPS`**): Programy z uprawnieniami działające w EL1 i wyżej mogą przełączać się między używaniem własnego rejestru wskaźnika stosu a wskaźnikiem modelu użytkownika (np. między `SP_EL1` a `EL0`). To przełączanie odbywa się przez zapis do specjalnego rejestru **`SPSel`**. Nie można tego zrobić z EL0.
 
 ## **Konwencja Wywołań (ARM64v8)**
@@ -100,7 +100,7 @@ Swift ma swoją własną **konwencję wywołań**, którą można znaleźć w [*
 
 ## **Typowe Instrukcje (ARM64v8)**
 
-Instrukcje ARM64 mają zazwyczaj **format `opcode dst, src1, src2`**, gdzie **`opcode`** to **operacja**, która ma być wykonana (taka jak `add`, `sub`, `mov` itp.), **`dst`** to **rejestr docelowy**, w którym zostanie przechowany wynik, a **`src1`** i **`src2`** to **rejestry źródłowe**. Wartości natychmiastowe mogą być również używane zamiast rejestrów źródłowych.
+Instrukcje ARM64 zazwyczaj mają **format `opcode dst, src1, src2`**, gdzie **`opcode`** to **operacja**, która ma być wykonana (taka jak `add`, `sub`, `mov` itp.), **`dst`** to **rejestr docelowy**, w którym zostanie przechowany wynik, a **`src1`** i **`src2`** to **rejestry źródłowe**. Wartości natychmiastowe mogą być również używane zamiast rejestrów źródłowych.
 
 - **`mov`**: **Przenieś** wartość z jednego **rejestru** do drugiego.
 - Przykład: `mov x0, x1` — To przenosi wartość z `x1` do `x0`.
@@ -130,7 +130,7 @@ Instrukcje ARM64 mają zazwyczaj **format `opcode dst, src1, src2`**, gdzie **`o
 - Xn3 | #imm -> Operand 2 (rejestr lub natychmiastowy)
 - \[shift #N | RRX] -> Wykonaj przesunięcie lub wywołaj RRX
 - Przykład: `add x0, x1, x2` — To dodaje wartości w `x1` i `x2` razem i przechowuje wynik w `x0`.
-- `add x5, x5, #1, lsl #12` — To równa się 4096 (1 przesunięcie 12 razy) -> 1 0000 0000 0000 0000
+- `add x5, x5, #1, lsl #12` — To równa się 4096 (1 przesunięte 12 razy) -> 1 0000 0000 0000 0000
 - **`adds`** To wykonuje `add` i aktualizuje flagi
 - **`sub`**: **Odejmij** wartości dwóch rejestrów i przechowaj wynik w rejestrze.
 - Sprawdź **`add`** **składnię**.
@@ -142,23 +142,23 @@ Instrukcje ARM64 mają zazwyczaj **format `opcode dst, src1, src2`**, gdzie **`o
 - Przykład: `div x0, x1, x2` — To dzieli wartość w `x1` przez `x2` i przechowuje wynik w `x0`.
 - **`lsl`**, **`lsr`**, **`asr`**, **`ror`, `rrx`**:
 - **Logiczne przesunięcie w lewo**: Dodaj 0 z końca, przesuwając inne bity do przodu (mnożenie przez n razy 2)
-- **Logiczne przesunięcie w prawo**: Dodaj 1 na początku, przesuwając inne bity do tyłu (dzielenie przez n razy 2 w nieskładanym)
+- **Logiczne przesunięcie w prawo**: Dodaj 1 na początku, przesuwając inne bity do tyłu (dzielenie przez n razy 2 w bez znaku)
 - **Arytmetyczne przesunięcie w prawo**: Jak **`lsr`**, ale zamiast dodawania 0, jeśli najbardziej znaczący bit to 1, dodawane są **1** (\*\*dzielenie przez n razy 2 w ze znakiem)
-- **Obracanie w prawo**: Jak **`lsr`**, ale cokolwiek usunięte z prawej jest dodawane z lewej
-- **Obracanie w prawo z rozszerzeniem**: Jak **`ror`**, ale z flagą przeniesienia jako "najbardziej znaczący bit". Więc flaga przeniesienia jest przesuwana do bitu 31, a usunięty bit do flagi przeniesienia.
+- **Obracanie w prawo**: Jak **`lsr`**, ale cokolwiek usunięte z prawej strony jest dodawane z lewej
+- **Obracanie w prawo z rozszerzeniem**: Jak **`ror`**, ale z flagą przeniesienia jako "najbardziej znaczący bit". Tak więc flaga przeniesienia jest przesuwana do bitu 31, a usunięty bit do flagi przeniesienia.
 - **`bfm`**: **Przesunięcie Bitowe**, te operacje **kopiują bity `0...n`** z wartości i umieszczają je w pozycjach **`m..m+n`**. **`#s`** określa **pozycję najbardziej lewego bitu**, a **`#r`** ilość przesunięcia w prawo.
 - Przesunięcie bitowe: `BFM Xd, Xn, #r`
 - Przesunięcie bitowe ze znakiem: `SBFM Xd, Xn, #r, #s`
 - Przesunięcie bitowe bez znaku: `UBFM Xd, Xn, #r, #s`
-- **Ekstrakcja i Wstawianie Bitów:** Kopiuje pole bitowe z rejestru i kopiuje je do innego rejestru.
+- **Ekstrakcja i Wstawianie Bitów:** Kopiuje pole bitowe z rejestru i wstawia je do innego rejestru.
 - **`BFI X1, X2, #3, #4`** Wstawia 4 bity z X2 z 3. bitu X1
 - **`BFXIL X1, X2, #3, #4`** Ekstrahuje 4 bity z 3. bitu X2 i kopiuje je do X1
 - **`SBFIZ X1, X2, #3, #4`** Rozszerza znak 4 bitów z X2 i wstawia je do X1, zaczynając od pozycji bitu 3, zerując prawe bity
-- **`SBFX X1, X2, #3, #4`** Ekstrahuje 4 bity zaczynając od bitu 3 z X2, rozszerza je, a wynik umieszcza w X1
+- **`SBFX X1, X2, #3, #4`** Ekstrahuje 4 bity zaczynając od bitu 3 z X2, rozszerza je ze znakiem i umieszcza wynik w X1
 - **`UBFIZ X1, X2, #3, #4`** Zeruje 4 bity z X2 i wstawia je do X1, zaczynając od pozycji bitu 3, zerując prawe bity
-- **`UBFX X1, X2, #3, #4`** Ekstrahuje 4 bity zaczynając od bitu 3 z X2 i umieszcza zerowo rozszerzony wynik w X1.
+- **`UBFX X1, X2, #3, #4`** Ekstrahuje 4 bity zaczynając od bitu 3 z X2 i umieszcza wynik z rozszerzeniem zerowym w X1.
 - **Rozszerzenie znaku do X:** Rozszerza znak (lub dodaje tylko 0 w wersji bez znaku) wartości, aby móc wykonywać operacje z nią:
-- **`SXTB X1, W2`** Rozszerza znak bajtu **z W2 do X1** (`W2` to połowa `X2`) aby wypełnić 64 bity
+- **`SXTB X1, W2`** Rozszerza znak bajtu **z W2 do X1** (`W2` jest połową `X2`) aby wypełnić 64 bity
 - **`SXTH X1, W2`** Rozszerza znak liczby 16-bitowej **z W2 do X1** aby wypełnić 64 bity
 - **`SXTW X1, W2`** Rozszerza znak bajtu **z W2 do X1** aby wypełnić 64 bity
 - **`UXTB X1, W2`** Dodaje 0 (bez znaku) do bajtu **z W2 do X1** aby wypełnić 64 bity
@@ -171,20 +171,20 @@ Instrukcje ARM64 mają zazwyczaj **format `opcode dst, src1, src2`**, gdzie **`o
 - **`ccmp`**: Porównanie warunkowe, to porównanie, które zostanie wykonane tylko wtedy, gdy wcześniejsze porównanie było prawdziwe i specjalnie ustawi bity nzcv.
 - `cmp x1, x2; ccmp x3, x4, 0, NE; blt _func` -> jeśli x1 != x2 i x3 < x4, skocz do func
 - Dzieje się tak, ponieważ **`ccmp`** zostanie wykonane tylko wtedy, gdy **poprzedni `cmp` był `NE`**, jeśli nie, bity `nzcv` zostaną ustawione na 0 (co nie zaspokoi porównania `blt`).
-- Może to być również używane jako `ccmn` (to samo, ale negatywne, jak `cmp` w porównaniu do `cmn`).
+- Może to być również używane jako `ccmn` (to samo, ale negatywne, jak `cmp` vs `cmn`).
 - **`tst`**: Sprawdza, czy którakolwiek z wartości porównania jest równa 1 (działa jak ANDS bez przechowywania wyniku gdziekolwiek). Przydatne do sprawdzenia rejestru z wartością i sprawdzenia, czy którakolwiek z bitów rejestru wskazanych w wartości jest równa 1.
 - Przykład: `tst X1, #7` Sprawdź, czy którakolwiek z ostatnich 3 bitów X1 jest równa 1
-- **`teq`**: Operacja XOR, odrzucając wynik
+- **`teq`**: Operacja XOR, zrzucając wynik
 - **`b`**: Bezwarunkowy skok
 - Przykład: `b myFunction`
-- Zauważ, że to nie wypełni rejestru łączenia adresem powrotu (nieodpowiednie do wywołań podprogramów, które muszą wrócić)
-- **`bl`**: **Skok** z łącznikiem, używany do **wywołania** **podprogramu**. Przechowuje **adres powrotu w `x30`**.
-- Przykład: `bl myFunction` — To wywołuje funkcję `myFunction` i przechowuje adres powrotu w `x30`.
-- Zauważ, że to nie wypełni rejestru łączenia adresem powrotu (nieodpowiednie do wywołań podprogramów, które muszą wrócić)
-- **`blr`**: **Skok** z łącznikiem do rejestru, używany do **wywołania** **podprogramu**, gdzie cel jest **określony** w **rejestrze**. Przechowuje adres powrotu w `x30`. (To jest
-- Przykład: `blr x1` — To wywołuje funkcję, której adres znajduje się w `x1` i przechowuje adres powrotu w `x30`.
+- Zauważ, że to nie wypełni rejestru łączenia adresem zwrotu (nieodpowiednie do wywołań podprogramów, które muszą wrócić)
+- **`bl`**: **Skok** z łącznikiem, używany do **wywołania** **podprogramu**. Przechowuje **adres zwrotu w `x30`**.
+- Przykład: `bl myFunction` — To wywołuje funkcję `myFunction` i przechowuje adres zwrotu w `x30`.
+- Zauważ, że to nie wypełni rejestru łączenia adresem zwrotu (nieodpowiednie do wywołań podprogramów, które muszą wrócić)
+- **`blr`**: **Skok** z łącznikiem do rejestru, używany do **wywołania** **podprogramu**, gdzie cel jest **określony** w **rejestrze**. Przechowuje adres zwrotu w `x30`. (To jest
+- Przykład: `blr x1` — To wywołuje funkcję, której adres znajduje się w `x1` i przechowuje adres zwrotu w `x30`.
 - **`ret`**: **Powrót** z **podprogramu**, zazwyczaj używając adresu w **`x30`**.
-- Przykład: `ret` — To wraca z bieżącego podprogramu, używając adresu powrotu w `x30`.
+- Przykład: `ret` — To wraca z bieżącego podprogramu, używając adresu zwrotu w `x30`.
 - **`b.<cond>`**: Skoki warunkowe
 - **`b.eq`**: **Skok, jeśli równo**, na podstawie poprzedniej instrukcji `cmp`.
 - Przykład: `b.eq label` — Jeśli poprzednia instrukcja `cmp` znalazła dwie równe wartości, to skacze do `label`.
@@ -210,17 +210,17 @@ Instrukcje ARM64 mają zazwyczaj **format `opcode dst, src1, src2`**, gdzie **`o
 - `csetm Xd, Xn, Xm, cond` -> Jeśli prawda, Xd = \<wszystkie 1>, jeśli fałsz, Xd = 0
 - **`adrp`**: Oblicz **adres strony symbolu** i przechowaj go w rejestrze.
 - Przykład: `adrp x0, symbol` — To oblicza adres strony symbolu i przechowuje go w `x0`.
-- **`ldrsw`**: **Załaduj** podpisaną **32-bitową** wartość z pamięci i **rozszerz ją do 64** bitów.
-- Przykład: `ldrsw x0, [x1]` — To ładuje podpisaną 32-bitową wartość z lokalizacji pamięci wskazywanej przez `x1`, rozszerza ją do 64 bitów i przechowuje w `x0`.
+- **`ldrsw`**: **Załaduj** wartość **32-bitową** ze znakiem z pamięci i **rozszerz ją do 64** bitów.
+- Przykład: `ldrsw x0, [x1]` — To ładuje wartość 32-bitową ze znakiem z lokalizacji pamięci wskazywanej przez `x1`, rozszerza ją do 64 bitów i przechowuje w `x0`.
 - **`stur`**: **Zapisz wartość rejestru do lokalizacji pamięci**, używając offsetu z innego rejestru.
-- Przykład: `stur x0, [x1, #4]` — To zapisuje wartość w `x0` do adresu pamięci, który jest o 4 bajty większy niż adres aktualnie w `x1`.
-- **`svc`** : Wykonaj **wywołanie systemowe**. Oznacza "Wywołanie Nadzorcy". Gdy procesor wykonuje tę instrukcję, **przełącza się z trybu użytkownika do trybu jądra** i skacze do określonej lokalizacji w pamięci, gdzie znajduje się **kod obsługi wywołań systemowych jądra**.
+- Przykład: `stur x0, [x1, #4]` — To zapisuje wartość w `x0` do lokalizacji pamięci, która jest o 4 bajty większa niż adres aktualnie w `x1`.
+- **`svc`** : Wykonaj **wywołanie systemowe**. Oznacza "Wywołanie Nadzorcy". Gdy procesor wykonuje tę instrukcję, **przechodzi z trybu użytkownika do trybu jądra** i skacze do określonej lokalizacji w pamięci, gdzie znajduje się **kod obsługi wywołań systemowych jądra**.
 
 - Przykład:
 
 ```armasm
-mov x8, 93  ; Załaduj numer wywołania systemowego dla exit (93) do rejestru x8.
-mov x0, 0   ; Załaduj kod statusu wyjścia (0) do rejestru x0.
+mov x8, 93  ; Załaduj numer wywołania systemowego dla zakończenia (93) do rejestru x8.
+mov x0, 0   ; Załaduj kod statusu zakończenia (0) do rejestru x0.
 svc 0       ; Wykonaj wywołanie systemowe.
 ```
 
@@ -289,10 +289,10 @@ Pola są podzielone na kilka grup:
 #### Rejestr Statusu Programu Aplikacji (APSR)
 
 - Flagi **`N`**, **`Z`**, **`C`**, **`V`** (tak jak w AArch64)
-- Flaga **`Q`**: Jest ustawiana na 1, gdy **występuje nasycenie całkowite** podczas wykonywania specjalizowanej instrukcji arytmetycznej nasycającej. Gdy jest ustawiona na **`1`**, utrzyma tę wartość, aż zostanie ręcznie ustawiona na 0. Ponadto, nie ma żadnej instrukcji, która sprawdzałaby jej wartość w sposób impliczny, musi to być zrobione poprzez ręczne odczytanie.
+- Flaga **`Q`**: Jest ustawiana na 1, gdy **występuje nasycenie całkowite** podczas wykonywania specjalizowanej instrukcji arytmetycznej nasycającej. Gdy jest ustawiona na **`1`**, utrzyma tę wartość, aż zostanie ręcznie ustawiona na 0. Ponadto, nie ma żadnej instrukcji, która sprawdzałaby jej wartość w sposób impliczny, musi to być zrobione przez odczytanie jej ręcznie.
 - Flagi **`GE`** (Większe lub równe): Używane są w operacjach SIMD (Jedna Instrukcja, Wiele Danych), takich jak "dodawanie równoległe" i "odejmowanie równoległe". Te operacje pozwalają na przetwarzanie wielu punktów danych w jednej instrukcji.
 
-Na przykład, instrukcja **`UADD8`** **dodaje cztery pary bajtów** (z dwóch 32-bitowych operandów) równolegle i przechowuje wyniki w 32-bitowym rejestrze. Następnie **ustawia flagi `GE` w `APSR`** na podstawie tych wyników. Każda flaga GE odpowiada jednej z dodawanych par bajtów, wskazując, czy dodawanie dla tej pary bajtów **przepełniło**.
+Na przykład, instrukcja **`UADD8`** **dodaje cztery pary bajtów** (z dwóch 32-bitowych operandów) równolegle i przechowuje wyniki w 32-bitowym rejestrze. Następnie **ustawia flagi `GE` w `APSR`** na podstawie tych wyników. Każda flaga GE odpowiada jednej z dodawanych par bajtów, wskazując, czy dodawanie dla tej pary bajtów **przepełniło się**.
 
 Instrukcja **`SEL`** wykorzystuje te flagi GE do wykonywania warunkowych działań.
 
@@ -325,18 +325,18 @@ dyldex -e libsystem_kernel.dylib /System/Volumes/Preboot/Cryptexes/OS/System/Lib
 # iOS
 dyldex -e libsystem_kernel.dylib /System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64
 ```
-Zauważ, że **Ida** i **Ghidra** mogą również dekompilować **specyficzne dyliby** z pamięci podręcznej, po prostu przechodząc przez pamięć podręczną.
+Zauważ, że **Ida** i **Ghidra** mogą również dekompilować **specyficzne dyliby** z pamięci podręcznej, po prostu przekazując pamięć podręczną.
 
 > [!TIP]
 > Czasami łatwiej jest sprawdzić **dekompilowany** kod z **`libsystem_kernel.dylib`** **niż** sprawdzać **kod źródłowy**, ponieważ kod kilku wywołań systemowych (BSD i Mach) jest generowany za pomocą skryptów (sprawdź komentarze w kodzie źródłowym), podczas gdy w dylib można znaleźć, co jest wywoływane.
 
 ### wywołania machdep
 
-XNU obsługuje inny typ wywołań zwany zależnymi od maszyny. Liczba tych wywołań zależy od architektury, a ani wywołania, ani liczby nie są gwarantowane, że pozostaną stałe.
+XNU obsługuje inny typ wywołań zwany zależnymi od maszyny. Liczba tych wywołań zależy od architektury i ani wywołania, ani liczby nie są gwarantowane, że pozostaną stałe.
 
 ### strona comm
 
-To jest strona pamięci należąca do jądra, która jest mapowana w przestrzeni adresowej każdego procesu użytkownika. Ma na celu przyspieszenie przejścia z trybu użytkownika do przestrzeni jądra w porównaniu do używania wywołań systemowych dla usług jądra, które są używane tak często, że to przejście byłoby bardzo nieefektywne.
+To jest strona pamięci właściciela jądra, która jest mapowana w przestrzeni adresowej każdego procesu użytkownika. Ma na celu przyspieszenie przejścia z trybu użytkownika do przestrzeni jądra w porównaniu do używania wywołań systemowych dla usług jądra, które są używane tak często, że to przejście byłoby bardzo nieefektywne.
 
 Na przykład wywołanie `gettimeofdate` odczytuje wartość `timeval` bezpośrednio z strony comm.
 
@@ -350,7 +350,7 @@ Parametry ([więcej informacji w dokumentacji](https://developer.apple.com/docum
 - x1: op -> Selektor metody
 - x2... -> Reszta argumentów wywoływanej metody
 
-Więc, jeśli ustawisz punkt przerwania przed przejściem do tej funkcji, możesz łatwo znaleźć, co jest wywoływane w lldb (w tym przykładzie obiekt wywołuje obiekt z `NSConcreteTask`, który uruchomi polecenie):
+Więc, jeśli ustawisz punkt przerwania przed gałęzią do tej funkcji, możesz łatwo znaleźć, co jest wywoływane w lldb (w tym przykładzie obiekt wywołuje obiekt z `NSConcreteTask`, który uruchomi polecenie):
 ```bash
 # Right in the line were objc_msgSend will be called
 (lldb) po $x0

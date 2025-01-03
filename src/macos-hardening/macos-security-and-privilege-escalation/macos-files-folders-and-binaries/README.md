@@ -77,12 +77,12 @@ macos-bundles.md
 
 W macOS (i iOS) wszystkie współdzielone biblioteki systemowe, takie jak frameworki i dyliby, są **połączone w jeden plik**, zwany **cache współdzielonym dyld**. To poprawia wydajność, ponieważ kod może być ładowany szybciej.
 
-Znajduje się to w macOS w `/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/` i w starszych wersjach możesz znaleźć **cache współdzielony** w **`/System/Library/dyld/`**.\
-W iOS możesz je znaleźć w **`/System/Library/Caches/com.apple.dyld/`**.
+Znajduje się to w macOS w `/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/`, a w starszych wersjach możesz znaleźć **cache współdzielony** w **`/System/Library/dyld/`**.\
+W iOS można je znaleźć w **`/System/Library/Caches/com.apple.dyld/`**.
 
 Podobnie jak cache współdzielony dyld, jądro i rozszerzenia jądra są również kompilowane do cache jądra, które jest ładowane podczas uruchamiania.
 
-Aby wyodrębnić biblioteki z pojedynczego pliku cache współdzielonego dylib, można było użyć binarnego [dyld_shared_cache_util](https://www.mbsplugins.de/files/dyld_shared_cache_util-dyld-733.8.zip), który może już nie działać, ale możesz również użyć [**dyldextractor**](https://github.com/arandomdev/dyldextractor):
+Aby wyodrębnić biblioteki z pojedynczego pliku cache współdzielonego dylib, można było użyć binarnego [dyld_shared_cache_util](https://www.mbsplugins.de/files/dyld_shared_cache_util-dyld-733.8.zip), który może już nie działać, ale można również użyć [**dyldextractor**](https://github.com/arandomdev/dyldextractor):
 ```bash
 # dyld_shared_cache_util
 dyld_shared_cache_util -extract ~/shared_cache/ /System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e
@@ -114,8 +114,8 @@ Pule gałęzi to małe dyliby Mach-O, które tworzą małe przestrzenie między 
 
 Używając zmiennych środowiskowych:
 
-- **`DYLD_DHARED_REGION=private DYLD_SHARED_CACHE_DIR=</path/dir> DYLD_SHARED_CACHE_DONT_VALIDATE=1`** -> To pozwoli na załadowanie nowej pamięci podręcznej biblioteki współdzielonej.
-- **`DYLD_SHARED_CACHE_DIR=avoid`** i ręczne zastąpienie bibliotek dowiązaniami do pamięci podręcznej z rzeczywistymi (będziesz musiał je wyodrębnić).
+- **`DYLD_DHARED_REGION=private DYLD_SHARED_CACHE_DIR=</path/dir> DYLD_SHARED_CACHE_DONT_VALIDATE=1`** -> To pozwoli załadować nową pamięć podręczną wspólnej biblioteki.
+- **`DYLD_SHARED_CACHE_DIR=avoid`** i ręcznie zastąpić biblioteki dowiązaniami do pamięci podręcznej z rzeczywistymi (będziesz musiał je wyodrębnić).
 
 ## Specjalne uprawnienia plików
 
@@ -130,7 +130,7 @@ Istnieją pewne flagi, które mogą być ustawione w plikach, co sprawi, że pli
 - **`uchg`**: Znana jako flaga **uchange**, będzie **zapobiegać jakiejkolwiek akcji** zmieniającej lub usuwającej **plik**. Aby ją ustawić, użyj: `chflags uchg file.txt`
 - Użytkownik root może **usunąć flagę** i zmodyfikować plik.
 - **`restricted`**: Ta flaga sprawia, że plik jest **chroniony przez SIP** (nie możesz dodać tej flagi do pliku).
-- **`Sticky bit`**: Jeśli katalog ma bit sticky, **tylko** właściciel **katalogu lub root mogą zmieniać nazwy lub usuwać** pliki. Zazwyczaj jest to ustawiane w katalogu /tmp, aby zapobiec zwykłym użytkownikom w usuwaniu lub przenoszeniu plików innych użytkowników.
+- **`Sticky bit`**: Jeśli katalog ma bit sticky, **tylko** właściciel **katalogu lub root mogą zmieniać nazwy lub usuwać** pliki. Zazwyczaj ustawia się to w katalogu /tmp, aby zapobiec zwykłym użytkownikom w usuwaniu lub przenoszeniu plików innych użytkowników.
 
 Wszystkie flagi można znaleźć w pliku `sys/stat.h` (znajdź go używając `mdfind stat.h | grep stat.h`) i są:
 
@@ -184,7 +184,7 @@ Atrybuty rozszerzone mają nazwę i dowolną wartość, a ich zawartość można
 - `com.apple.quarantine`: MacOS: mechanizm kwarantanny Gatekeepera (III/6)
 - `metadata:*`: MacOS: różne metadane, takie jak `_backup_excludeItem` lub `kMD*`
 - `com.apple.lastuseddate` (#PS): Data ostatniego użycia pliku
-- `com.apple.FinderInfo`: MacOS: Informacje o Finderze (np. kolorowe tagi)
+- `com.apple.FinderInfo`: MacOS: informacje o Finderze (np. kolorowe tagi)
 - `com.apple.TextEncoding`: Określa kodowanie tekstu plików ASCII
 - `com.apple.logd.metadata`: Używane przez logd w plikach w `/var/db/diagnostics`
 - `com.apple.genstore.*`: Przechowywanie generacyjne (`/.DocumentRevisions-V100` w katalogu głównym systemu plików)
@@ -196,7 +196,7 @@ Atrybuty rozszerzone mają nazwę i dowolną wartość, a ich zawartość można
 
 ### Forki zasobów | macOS ADS
 
-To sposób na uzyskanie **Alternatywnych Strumieni Danych w MacOS**. Możesz zapisać zawartość w atrybucie rozszerzonym o nazwie **com.apple.ResourceFork** wewnątrz pliku, zapisując go w **file/..namedfork/rsrc**.
+To sposób na uzyskanie **Alternatywnych Strumieni Danych w maszynach MacOS**. Możesz zapisać zawartość w atrybucie rozszerzonym o nazwie **com.apple.ResourceFork** wewnątrz pliku, zapisując go w **file/..namedfork/rsrc**.
 ```bash
 echo "Hello" > a.txt
 echo "Hello Mac ADS" > a.txt/..namedfork/rsrc
@@ -213,9 +213,9 @@ find / -type f -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf
 ```
 ### decmpfs
 
-Rozszerzony atrybut `com.apple.decmpfs` wskazuje, że plik jest przechowywany w zaszyfrowanej formie, `ls -l` zgłosi **rozmiar 0**, a skompresowane dane znajdują się w tym atrybucie. Kiedy plik jest otwierany, jest on odszyfrowywany w pamięci.
+Rozszerzony atrybut `com.apple.decmpfs` wskazuje, że plik jest przechowywany w zaszyfrowanej formie, `ls -l` zgłosi **rozmiar 0**, a skompresowane dane znajdują się w tym atrybucie. Kiedy plik jest otwierany, zostanie odszyfrowany w pamięci.
 
-Ten atrybut można zobaczyć za pomocą `ls -lO`, oznaczony jako skompresowany, ponieważ skompresowane pliki są również oznaczone flagą `UF_COMPRESSED`. Jeśli skompresowany plik zostanie usunięty z tą flagą za pomocą `chflags nocompressed </path/to/file>`, system nie będzie wiedział, że plik był skompresowany i dlatego nie będzie w stanie go dekompresować i uzyskać dostępu do danych (pomyśli, że jest on w rzeczywistości pusty).
+Ten atrybut można zobaczyć za pomocą `ls -lO`, oznaczony jako skompresowany, ponieważ skompresowane pliki są również oznaczone flagą `UF_COMPRESSED`. Jeśli skompresowany plik zostanie usunięty z tą flagą za pomocą `chflags nocompressed </path/to/file>`, system nie będzie wiedział, że plik był skompresowany i dlatego nie będzie w stanie go dekompresować i uzyskać dostęp do danych (pomyśli, że jest rzeczywiście pusty).
 
 Narzędzie afscexpand może być użyte do wymuszenia dekompresji pliku.
 
@@ -247,7 +247,7 @@ Katalog `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/System
 ## Pliki dziennika
 
 - **`$HOME/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**: Zawiera informacje o pobranych plikach, takie jak adres URL, z którego zostały pobrane.
-- **`/var/log/system.log`**: Główny dziennik systemów OSX. com.apple.syslogd.plist jest odpowiedzialny za wykonywanie syslogowania (możesz sprawdzić, czy jest wyłączony, szukając "com.apple.syslogd" w `launchctl list`).
+- **`/var/log/system.log`**: Główny dziennik systemów OSX. com.apple.syslogd.plist jest odpowiedzialny za wykonywanie syslogowania (możesz sprawdzić, czy jest wyłączone, szukając "com.apple.syslogd" w `launchctl list`).
 - **`/private/var/log/asl/*.asl`**: To są Dzienniki Systemowe Apple, które mogą zawierać interesujące informacje.
 - **`$HOME/Library/Preferences/com.apple.recentitems.plist`**: Przechowuje ostatnio otwierane pliki i aplikacje przez "Finder".
 - **`$HOME/Library/Preferences/com.apple.loginitems.plsit`**: Przechowuje elementy do uruchomienia po starcie systemu.

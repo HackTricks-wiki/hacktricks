@@ -40,7 +40,7 @@ macos-tcc/
 
 ### Ograniczenia uruchamiania/środowiska i pamięć podręczna zaufania
 
-Ograniczenia uruchamiania w macOS to funkcja zabezpieczeń, która **reguluje inicjację procesów** poprzez definiowanie **kto może uruchomić** proces, **jak** i **skąd**. Wprowadzona w macOS Ventura, klasyfikuje binaria systemowe w kategorie ograniczeń w ramach **pamięci podręcznej zaufania**. Każdy wykonywalny plik binarny ma ustalone **zasady** dotyczące swojego **uruchamiania**, w tym **samego siebie**, **rodzica** i **odpowiedzialnych** ograniczeń. Rozszerzone na aplikacje innych firm jako **Ograniczenia Środowiska** w macOS Sonoma, te funkcje pomagają łagodzić potencjalne wykorzystania systemu poprzez regulowanie warunków uruchamiania procesów.
+Ograniczenia uruchamiania w macOS to funkcja zabezpieczeń, która **reguluje inicjację procesów** poprzez definiowanie **kto może uruchomić** proces, **jak** i **skąd**. Wprowadzona w macOS Ventura, klasyfikuje binaria systemowe w kategorie ograniczeń w **pamięci podręcznej zaufania**. Każdy wykonywalny plik binarny ma ustalone **zasady** dotyczące swojego **uruchamiania**, w tym **własne**, **rodzica** i **odpowiedzialne** ograniczenia. Rozszerzone na aplikacje innych firm jako **Ograniczenia Środowiska** w macOS Sonoma, te funkcje pomagają łagodzić potencjalne wykorzystania systemu poprzez regulowanie warunków uruchamiania procesów.
 
 {{#ref}}
 macos-launch-environment-constraints.md
@@ -54,7 +54,7 @@ Gdy złośliwe oprogramowanie zostanie wykryte na Macu (czy to przez XProtect, c
 
 Chociaż zarówno XProtect, jak i MRT są częścią środków zabezpieczeń macOS, pełnią różne funkcje:
 
-- **XProtect** jest narzędziem zapobiegawczym. **Sprawdza pliki w momencie ich pobierania** (za pośrednictwem niektórych aplikacji), a jeśli wykryje jakiekolwiek znane rodzaje złośliwego oprogramowania, **zapobiega otwarciu pliku**, tym samym zapobiegając zainfekowaniu systemu w pierwszej kolejności.
+- **XProtect** jest narzędziem zapobiegawczym. **Sprawdza pliki w momencie ich pobierania** (za pośrednictwem niektórych aplikacji), a jeśli wykryje jakiekolwiek znane rodzaje złośliwego oprogramowania, **zapobiega otwarciu pliku**, tym samym zapobiegając infekcji systemu przez złośliwe oprogramowanie.
 - **MRT**, z drugiej strony, jest **narzędziem reaktywnym**. Działa po wykryciu złośliwego oprogramowania w systemie, mając na celu usunięcie szkodliwego oprogramowania w celu oczyszczenia systemu.
 
 Aplikacja MRT znajduje się w **`/Library/Apple/System/Library/CoreServices/MRT.app`**
@@ -67,7 +67,7 @@ Aplikacja MRT znajduje się w **`/Library/Apple/System/Library/CoreServices/MRT.
 
 Działa to z **demonem** znajdującym się w `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/backgroundtaskmanagementd` oraz **agentem** w `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Support/BackgroundTaskManagementAgent.app`
 
-Sposób, w jaki **`backgroundtaskmanagementd`** wie, że coś jest zainstalowane w folderze persistent, to **uzyskanie FSEvents** i stworzenie kilku **handlerów** dla nich.
+Sposób, w jaki **`backgroundtaskmanagementd`** wie, że coś jest zainstalowane w folderze persistent, polega na **uzyskaniu FSEvents** i utworzeniu kilku **handlerów** dla nich.
 
 Ponadto istnieje plik plist, który zawiera **znane aplikacje**, które często się utrzymują, zarządzany przez Apple, znajdujący się w: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`
 ```json
@@ -124,7 +124,7 @@ kill -SIGSTOP 1011
 ps -o state 1011
 T
 ```
-- **Błąd**: Jeśli **proces, który stworzył persistencję, istnieje szybko zaraz po nim**, demon spróbuje **uzyskać informacje** na jego temat, **nie powiedzie się** i **nie będzie w stanie wysłać zdarzenia** wskazującego, że nowa rzecz jest persistowana.
+- **Błąd**: Jeśli **proces, który stworzył persistencję, istnieje szybko po nim**, demon spróbuje **uzyskać informacje** na jego temat, **nie powiedzie się** i **nie będzie w stanie wysłać zdarzenia** wskazującego, że nowa rzecz jest persistowana.
 
 Referencje i **więcej informacji o BTM**:
 

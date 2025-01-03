@@ -27,7 +27,7 @@ newConnection.exportedObject = self;
 return YES;
 }
 ```
-Dla uzyskania dodatkowych informacji na temat prawidłowej konfiguracji tego sprawdzenia:
+Aby uzyskać więcej informacji na temat prawidłowej konfiguracji tego sprawdzenia, zobacz:
 
 {{#ref}}
 macos-xpc-connecting-process-check/
@@ -35,7 +35,7 @@ macos-xpc-connecting-process-check/
 
 ### Prawa aplikacji
 
-Jednakże, zachodzi pewne **autoryzowanie, gdy wywoływana jest metoda z HelperTool**.
+Jednakże, gdy wywoływana jest metoda z HelperTool, zachodzi pewna **autoryzacja**.
 
 Funkcja **`applicationDidFinishLaunching`** z `App/AppDelegate.m` utworzy pusty odnośnik autoryzacji po uruchomieniu aplikacji. To powinno zawsze działać.\
 Następnie spróbuje **dodać pewne prawa** do tego odnośnika autoryzacji, wywołując `setupAuthorizationRights`:
@@ -172,15 +172,15 @@ block(authRightName, authRightDefault, authRightDesc);
 }];
 }
 ```
-To oznacza, że na końcu tego procesu, uprawnienia zadeklarowane wewnątrz `commandInfo` będą przechowywane w `/var/db/auth.db`. Zauważ, że możesz znaleźć dla **każdej metody**, która **wymaga autoryzacji**, **nazwę uprawnienia** oraz **`kCommandKeyAuthRightDefault`**. To ostatnie **wskazuje, kto może uzyskać to prawo**.
+To oznacza, że na końcu tego procesu, uprawnienia zadeklarowane w `commandInfo` będą przechowywane w `/var/db/auth.db`. Zauważ, że możesz znaleźć dla **każdej metody**, która **wymaga autoryzacji**, **nazwę uprawnienia** oraz **`kCommandKeyAuthRightDefault`**. To ostatnie **wskazuje, kto może uzyskać to prawo**.
 
-Istnieją różne zakresy, aby wskazać, kto może uzyskać prawo. Niektóre z nich są zdefiniowane w [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) (możesz znaleźć [wszystkie z nich tutaj](https://www.dssw.co.uk/reference/authorization-rights/)), ale w skrócie:
+Istnieją różne zakresy, aby wskazać, kto może uzyskać dostęp do prawa. Niektóre z nich są zdefiniowane w [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) (możesz znaleźć [wszystkie z nich tutaj](https://www.dssw.co.uk/reference/authorization-rights/)), ale w skrócie:
 
 <table><thead><tr><th width="284.3333333333333">Nazwa</th><th width="165">Wartość</th><th>Opis</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>Każdy</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>Nikt</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>Aktualny użytkownik musi być administratorem (w grupie administratorów)</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>Poproś użytkownika o autoryzację.</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>Poproś użytkownika o autoryzację. Musi być administratorem (w grupie administratorów)</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>Określ zasady</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>Określ dodatkowe komentarze dotyczące prawa</td></tr></tbody></table>
 
 ### Weryfikacja Praw
 
-W `HelperTool/HelperTool.m` funkcja **`readLicenseKeyAuthorization`** sprawdza, czy wywołujący jest uprawniony do **wykonania takiej metody**, wywołując funkcję **`checkAuthorization`**. Ta funkcja sprawdzi, czy **authData** wysłane przez wywołujący proces ma **poprawny format**, a następnie sprawdzi **co jest potrzebne, aby uzyskać prawo** do wywołania konkretnej metody. Jeśli wszystko pójdzie dobrze, **zwrócony `error` będzie `nil`**:
+W `HelperTool/HelperTool.m` funkcja **`readLicenseKeyAuthorization`** sprawdza, czy wywołujący ma uprawnienia do **wykonania takiej metody**, wywołując funkcję **`checkAuthorization`**. Ta funkcja sprawdzi, czy **authData** wysłane przez wywołujący proces ma **poprawny format**, a następnie sprawdzi **co jest potrzebne, aby uzyskać prawo** do wywołania konkretnej metody. Jeśli wszystko pójdzie dobrze, **zwrócony `error` będzie `nil`**:
 ```objectivec
 - (NSError *)checkAuthorization:(NSData *)authData command:(SEL)command
 {
@@ -232,7 +232,7 @@ Zauważ, że aby **sprawdzić wymagania do uzyskania** prawa do wywołania tej m
 
 W tym przypadku, aby wywołać funkcję `readLicenseKeyAuthorization`, `kCommandKeyAuthRightDefault` jest zdefiniowane jako `@kAuthorizationRuleClassAllow`. Tak więc **każdy może to wywołać**.
 
-### DB Information
+### Informacje o DB
 
 Wspomniano, że te informacje są przechowywane w `/var/db/auth.db`. Możesz wylistować wszystkie przechowywane reguły za pomocą:
 ```sql
@@ -277,7 +277,7 @@ Jeśli znajdziesz funkcję: **`[HelperTool checkAuthorization:command:]`**, praw
 
 <figure><img src="../../../../../images/image (42).png" alt=""><figcaption></figcaption></figure>
 
-Jeśli ta funkcja wywołuje funkcje takie jak `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights`, `AuhtorizationFree`, to korzysta z [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154).
+Jeśli ta funkcja wywołuje funkcje takie jak `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights`, `AuhtorizationFree`, to używa [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154).
 
 Sprawdź **`/var/db/auth.db`**, aby zobaczyć, czy możliwe jest uzyskanie uprawnień do wywołania niektórej uprzywilejowanej akcji bez interakcji użytkownika.
 

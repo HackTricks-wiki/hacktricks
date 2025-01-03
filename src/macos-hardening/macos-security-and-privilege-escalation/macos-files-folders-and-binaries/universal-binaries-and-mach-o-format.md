@@ -35,7 +35,7 @@ uint32_t	align;		/* wyrównanie jako potęga 2 */
 };
 </code></pre>
 
-Nagłówek zawiera **magiczne** bajty, po których następuje **liczba** **architektur**, które plik **zawiera** (`nfat_arch`), a każda architektura będzie miała strukturę `fat_arch`.
+Nagłówek zawiera **magiczne** bajty, a następnie **liczbę** **architektur**, które plik **zawiera** (`nfat_arch`), a każda architektura będzie miała strukturę `fat_arch`.
 
 Sprawdź to za pomocą:
 
@@ -110,7 +110,7 @@ Istnieją różne typy plików, które można znaleźć zdefiniowane w [**kodzie
 - `MH_PRELOAD`: Wstępnie załadowany plik wykonywalny (już nieobsługiwany w XNU)
 - `MH_DYLIB`: Biblioteki dynamiczne
 - `MH_DYLINKER`: Ładowarka dynamiczna
-- `MH_BUNDLE`: "Pliki wtyczek". Generowane za pomocą -bundle w gcc i ładowane przez `NSBundle` lub `dlopen`.
+- `MH_BUNDLE`: "Pliki wtyczek". Generowane za pomocą -bundle w gcc i ładowane explicite przez `NSBundle` lub `dlopen`.
 - `MH_DYSM`: Towarzyszący plik `.dSym` (plik z symbolami do debugowania).
 - `MH_KEXT_BUNDLE`: Rozszerzenia jądra.
 ```bash
@@ -138,7 +138,7 @@ Kod źródłowy definiuje również kilka flag przydatnych do ładowania bibliot
 - `MH_NO_REEXPORTED_DYLIBS`: Biblioteka nie ma poleceń LC_REEXPORT
 - `MH_PIE`: Wykonywalny niezależny od pozycji
 - `MH_HAS_TLV_DESCRIPTORS`: Istnieje sekcja z lokalnymi zmiennymi wątku
-- `MH_NO_HEAP_EXECUTION`: Brak wykonania dla stron sterty/danych
+- `MH_NO_HEAP_EXECUTION`: Brak wykonania dla stron heap/data
 - `MH_HAS_OBJC`: Plik binarny ma sekcje oBject-C
 - `MH_SIM_SUPPORT`: Wsparcie dla symulatora
 - `MH_DYLIB_IN_CACHE`: Używane w dylibach/frameworkach w pamięci podręcznej biblioteki współdzielonej.
@@ -154,7 +154,7 @@ uint32_t cmd;           /* type of load command */
 uint32_t cmdsize;       /* total size of command in bytes */
 };
 ```
-Istnieje około **50 różnych typów poleceń ładujących**, które system obsługuje w różny sposób. Najczęściej spotykane to: `LC_SEGMENT_64`, `LC_LOAD_DYLINKER`, `LC_MAIN`, `LC_LOAD_DYLIB` i `LC_CODE_SIGNATURE`.
+Są około **50 różnych typów poleceń ładujących**, które system obsługuje w różny sposób. Najczęstsze z nich to: `LC_SEGMENT_64`, `LC_LOAD_DYLINKER`, `LC_MAIN`, `LC_LOAD_DYLIB` i `LC_CODE_SIGNATURE`.
 
 ### **LC_SEGMENT/LC_SEGMENT_64**
 
@@ -169,18 +169,18 @@ Istnieją **różne typy** segmentów, takie jak segment **\_\_TEXT**, który za
 
 W nagłówku najpierw znajdziesz **nagłówek segmentu**:
 
-<pre class="language-c"><code class="lang-c">struct segment_command_64 { /* for 64-bit architectures */
+<pre class="language-c"><code class="lang-c">struct segment_command_64 { /* dla architektur 64-bitowych */
 uint32_t	cmd;		/* LC_SEGMENT_64 */
-uint32_t	cmdsize;	/* includes sizeof section_64 structs */
-char		segname[16];	/* segment name */
-uint64_t	vmaddr;		/* memory address of this segment */
-uint64_t	vmsize;		/* memory size of this segment */
-uint64_t	fileoff;	/* file offset of this segment */
-uint64_t	filesize;	/* amount to map from the file */
-int32_t		maxprot;	/* maximum VM protection */
-int32_t		initprot;	/* initial VM protection */
-<strong>	uint32_t	nsects;		/* number of sections in segment */
-</strong>	uint32_t	flags;		/* flags */
+uint32_t	cmdsize;	/* obejmuje sizeof section_64 structs */
+char		segname[16];	/* nazwa segmentu */
+uint64_t	vmaddr;		/* adres pamięci tego segmentu */
+uint64_t	vmsize;		/* rozmiar pamięci tego segmentu */
+uint64_t	fileoff;	/* offset pliku tego segmentu */
+uint64_t	filesize;	/* ilość do zmapowania z pliku */
+int32_t		maxprot;	/* maksymalna ochrona VM */
+int32_t		initprot;	/* początkowa ochrona VM */
+<strong>	uint32_t	nsects;		/* liczba sekcji w segmencie */
+</strong>	uint32_t	flags;		/* flagi */
 };
 </code></pre>
 
@@ -213,7 +213,7 @@ Jeśli **dodasz** **przesunięcie sekcji** (0x37DC) + **przesunięcie**, w któr
 
 <figure><img src="../../../images/image (701).png" alt=""><figcaption></figcaption></figure>
 
-Możliwe jest również uzyskanie **informacji o nagłówkach** z **wiersza poleceń** za pomocą:
+Możliwe jest również uzyskanie **informacji o nagłówkach** z **linii poleceń** za pomocą:
 ```bash
 otool -lv /bin/ls
 ```
@@ -225,28 +225,28 @@ Common segments loaded by this cmd:
 - `__text`: Skonstruowany kod binarny
 - `__const`: Dane stałe (tylko do odczytu)
 - `__[c/u/os_log]string`: Stałe ciągi C, Unicode lub os logów
-- `__stubs` i `__stubs_helper`: Uczestniczą w procesie ładowania biblioteki dynamicznej
+- `__stubs` i `__stubs_helper`: Uczestniczą w procesie ładowania dynamicznej biblioteki
 - `__unwind_info`: Dane o rozwijaniu stosu.
-- Zauważ, że cała ta zawartość jest podpisana, ale również oznaczona jako wykonywalna (tworząc więcej opcji dla eksploatacji sekcji, które niekoniecznie potrzebują tego przywileju, jak sekcje dedykowane ciągom).
+- Zauważ, że cała ta zawartość jest podpisana, ale również oznaczona jako wykonywalna (tworząc więcej opcji do wykorzystania sekcji, które niekoniecznie potrzebują tego przywileju, jak sekcje dedykowane ciągom).
 - **`__DATA`**: Zawiera dane, które są **czytelne** i **zapisywalne** (brak wykonywalnych)**.**
-- `__got:` Tabela Global Offset
+- `__got:` Globalna tabela przesunięć
 - `__nl_symbol_ptr`: Wskaźnik symbolu non lazy (wiąże przy ładowaniu)
 - `__la_symbol_ptr`: Wskaźnik symbolu lazy (wiąże przy użyciu)
 - `__const`: Powinny być danymi tylko do odczytu (nie do końca)
 - `__cfstring`: Ciągi CoreFoundation
 - `__data`: Zmienne globalne (które zostały zainicjowane)
 - `__bss`: Zmienne statyczne (które nie zostały zainicjowane)
-- `__objc_*` (\_\_objc_classlist, \_\_objc_protolist, itd): Informacje używane przez środowisko wykonawcze Objective-C
-- **`__DATA_CONST`**: \_\_DATA.\_\_const nie jest gwarantowane jako stałe (uprawnienia do zapisu), ani inne wskaźniki i GOT. Ta sekcja czyni `__const`, niektóre inicjalizatory i tabelę GOT (po rozwiązaniu) **tylko do odczytu** przy użyciu `mprotect`.
+- `__objc_*` (\_\_objc_classlist, \_\_objc_protolist, itd): Informacje używane przez środowisko uruchomieniowe Objective-C
+- **`__DATA_CONST`**: \_\_DATA.\_\_const nie jest gwarantowane jako stałe (uprawnienia do zapisu), ani inne wskaźniki i GOT. Ta sekcja sprawia, że `__const`, niektóre inicjalizatory i tabela GOT (po rozwiązaniu) są **tylko do odczytu** przy użyciu `mprotect`.
 - **`__LINKEDIT`**: Zawiera informacje dla linkera (dyld), takie jak symbole, ciągi i wpisy tabeli relokacji. Jest to ogólny kontener dla treści, które nie znajdują się w `__TEXT` ani `__DATA`, a jego zawartość jest opisana w innych poleceniach ładowania.
-- Informacje dyld: Rebase, Non-lazy/lazy/weak binding opcodes i informacje o eksporcie
+- Informacje dyld: Rebase, opcodes wiązania non-lazy/lazy/weak i informacje o eksporcie
 - Funkcje startowe: Tabela adresów startowych funkcji
 - Dane w kodzie: Wyspy danych w \_\_text
 - Tabela symboli: Symbole w binarnym
-- Tabela symboli pośrednich: Wskaźniki/stub symbole
+- Tabela symboli pośrednich: Wskaźniki/stuby symboli
 - Tabela ciągów
 - Podpis kodu
-- **`__OBJC`**: Zawiera informacje używane przez środowisko wykonawcze Objective-C. Chociaż te informacje mogą być również znalezione w segmencie \_\_DATA, w różnych sekcjach \_\_objc\_\*.
+- **`__OBJC`**: Zawiera informacje używane przez środowisko uruchomieniowe Objective-C. Chociaż te informacje mogą być również znalezione w segmencie \_\_DATA, w różnych sekcjach \_\_objc\_\*.
 - **`__RESTRICT`**: Segment bez zawartości z jedną sekcją o nazwie **`__restrict`** (również pusta), która zapewnia, że podczas uruchamiania binarnego zignoruje zmienne środowiskowe DYLD.
 
 Jak można było zobaczyć w kodzie, **segmenty również wspierają flagi** (chociaż nie są zbyt często używane):
@@ -371,7 +371,7 @@ Lub z poziomu cli:
 ```bash
 size -m /bin/ls
 ```
-## Sekcje wspólne w Objetive-C
+## Sekcje wspólne Objective-C
 
 W segmencie `__TEXT` (r-x):
 
@@ -381,10 +381,10 @@ W segmencie `__TEXT` (r-x):
 
 W segmencie `__DATA` (rw-):
 
-- `__objc_classlist`: Wskaźniki do wszystkich klas Objetive-C
-- `__objc_nlclslist`: Wskaźniki do klas Non-Lazy Objective-C
+- `__objc_classlist`: Wskaźniki do wszystkich klas Objective-C
+- `__objc_nlclslist`: Wskaźniki do klas Objective-C bez leniwego ładowania
 - `__objc_catlist`: Wskaźnik do Kategorii
-- `__objc_nlcatlist`: Wskaźnik do Kategorii Non-Lazy
+- `__objc_nlcatlist`: Wskaźnik do Kategorii bez leniwego ładowania
 - `__objc_protolist`: Lista protokołów
 - `__objc_const`: Dane stałe
 - `__objc_imageinfo`, `__objc_selrefs`, `objc__protorefs`...

@@ -38,7 +38,7 @@ char data[];
 } CS_GenericBlob
 __attribute__ ((aligned(1)));
 ```
-Powstarzane bloby zawierają Code Directory, Requirements i Entitlements oraz Cryptographic Message Syntax (CMS).\
+Zwykłe bloby zawierają Code Directory, Requirements i Entitlements oraz Cryptographic Message Syntax (CMS).\
 Ponadto, zauważ, że dane zakodowane w blobach są zakodowane w **Big Endian.**
 
 Ponadto, podpisy mogą być odłączane od binariów i przechowywane w `/var/db/DetachedSignatures` (używane przez iOS).
@@ -144,17 +144,17 @@ openssl sha256 /tmp/*.page.*
 ```
 ## Entitlements Blob
 
-Zauważ, że aplikacje mogą również zawierać **entitlement blob**, w którym zdefiniowane są wszystkie uprawnienia. Co więcej, niektóre binaria iOS mogą mieć swoje uprawnienia specyficzne w specjalnym slocie -7 (zamiast w specjalnym slocie -5 dla uprawnień).
+Zauważ, że aplikacje mogą również zawierać **blob uprawnień**, w którym zdefiniowane są wszystkie uprawnienia. Co więcej, niektóre binaria iOS mogą mieć swoje uprawnienia specyficzne w specjalnym slocie -7 (zamiast w specjalnym slocie -5 dla uprawnień).
 
 ## Special Slots
 
-Aplikacje MacOS nie mają wszystkiego, co potrzebne do wykonania wewnątrz binarnego, ale korzystają również z **zewnętrznych zasobów** (zwykle wewnątrz **bundle** aplikacji). Dlatego w binarnym znajdują się pewne sloty, które będą zawierać hashe niektórych interesujących zewnętrznych zasobów, aby sprawdzić, czy nie zostały zmodyfikowane.
+Aplikacje MacOS nie mają wszystkiego, co potrzebne do wykonania wewnątrz binarnego, ale korzystają również z **zewnętrznych zasobów** (zwykle wewnątrz **bundla** aplikacji). Dlatego w binarnym znajdują się pewne sloty, które będą zawierać hashe niektórych interesujących zewnętrznych zasobów, aby sprawdzić, czy nie zostały zmodyfikowane.
 
-W rzeczywistości można zobaczyć w strukturach Code Directory parametr zwany **`nSpecialSlots`**, który wskazuje liczbę specjalnych slotów. Nie ma slotu specjalnego 0, a najczęściej spotykane (od -1 do -6) to:
+W rzeczywistości można zobaczyć w strukturach Code Directory parametr zwany **`nSpecialSlots`**, który wskazuje liczbę specjalnych slotów. Nie ma slotu specjalnego 0, a najczęstsze z nich (od -1 do -6) to:
 
 - Hash `info.plist` (lub ten wewnątrz `__TEXT.__info__plist`).
 - Hash Wymagań
-- Hash Katalogu Zasobów (hash pliku `_CodeSignature/CodeResources` wewnątrz bundle).
+- Hash Katalogu Zasobów (hash pliku `_CodeSignature/CodeResources` wewnątrz bundla).
 - Specyficzny dla aplikacji (niewykorzystany)
 - Hash uprawnień
 - Tylko podpisy kodu DMG
@@ -211,7 +211,7 @@ Zauważ, że funkcja [**exec_mach_imgact**](https://github.com/apple-oss-distrib
 
 ## Wymagania dotyczące podpisu kodu
 
-Każda aplikacja przechowuje **wymagania**, które musi **spełniać**, aby mogła być uruchomiona. Jeśli **aplikacja zawiera wymagania, które nie są spełnione przez aplikację**, nie zostanie uruchomiona (prawdopodobnie została zmieniona).
+Każda aplikacja przechowuje **wymagania**, które musi **spełniać**, aby mogła być uruchomiona. Jeśli **wymagania aplikacji nie są spełnione**, nie zostanie ona uruchomiona (prawdopodobnie została zmieniona).
 
 Wymagania binarne używają **specjalnej gramatyki**, która jest strumieniem **wyrażeń** i są kodowane jako blob za pomocą `0xfade0c00` jako magii, której **hash jest przechowywany w specjalnym slocie kodu**.
 
@@ -252,10 +252,10 @@ Możliwe jest uzyskanie dostępu do tych informacji oraz tworzenie lub modyfikow
 
 - **`SecRequirementCreateWithData`:** Tworzy `SecRequirementRef` z danych binarnych reprezentujących wymaganie.
 - **`SecRequirementCreateWithString`:** Tworzy `SecRequirementRef` z wyrażenia tekstowego wymagania.
-- **`SecRequirementCopy[Data/String]`**: Pobiera reprezentację danych binarnych `SecRequirementRef`.
+- **`SecRequirementCopy[Data/String]`**: Pobiera binarną reprezentację danych `SecRequirementRef`.
 - **`SecRequirementCreateGroup`**: Tworzy wymaganie dla członkostwa w grupie aplikacji.
 
-#### **Uzyskiwanie informacji o podpisie kodu**
+#### **Uzyskiwanie informacji o podpisywaniu kodu**
 
 - **`SecStaticCodeCreateWithPath`**: Inicjalizuje obiekt `SecStaticCodeRef` z ścieżki systemu plików do inspekcji podpisów kodu.
 - **`SecCodeCopySigningInformation`**: Uzyskuje informacje o podpisie z `SecCodeRef` lub `SecStaticCodeRef`.
@@ -279,14 +279,14 @@ Możliwe jest uzyskanie dostępu do tych informacji oraz tworzenie lub modyfikow
 - **`SecCodeGetTypeID`**: Zwraca identyfikator typu dla obiektów `SecCodeRef`.
 - **`SecRequirementGetTypeID`**: Uzyskuje CFTypeID `SecRequirementRef`.
 
-#### **Flagi i stałe podpisu kodu**
+#### **Flagi i stałe podpisywania kodu**
 
 - **`kSecCSDefaultFlags`**: Domyślne flagi używane w wielu funkcjach Security.framework do operacji podpisywania kodu.
 - **`kSecCSSigningInformation`**: Flaga używana do określenia, że informacje o podpisie powinny być pobrane.
 
 ## Egzekwowanie podpisu kodu
 
-**Jądro** to ono, które **sprawdza podpis kodu** przed zezwoleniem na wykonanie kodu aplikacji. Ponadto, jednym ze sposobów na możliwość zapisu i wykonania nowego kodu w pamięci jest nadużycie JIT, jeśli `mprotect` jest wywoływane z flagą `MAP_JIT`. Należy zauważyć, że aplikacja potrzebuje specjalnego uprawnienia, aby móc to zrobić.
+**Jądro** to ono, które **sprawdza podpis kodu** przed zezwoleniem na wykonanie kodu aplikacji. Ponadto, jednym ze sposobów na możliwość pisania i wykonywania nowego kodu w pamięci jest nadużycie JIT, jeśli `mprotect` jest wywoływane z flagą `MAP_JIT`. Należy zauważyć, że aplikacja potrzebuje specjalnego uprawnienia, aby móc to zrobić.
 
 ## `cs_blobs` & `cs_blob`
 

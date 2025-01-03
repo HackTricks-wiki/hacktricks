@@ -97,16 +97,16 @@ const struct dyld_interpose_tuple array[], size_t count);
 ```
 ## Method Swizzling
 
-W ObjectiveC metoda jest wywoływana w następujący sposób: **`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
+W ObjectiveC wywołanie metody wygląda tak: **`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
 
 Potrzebny jest **obiekt**, **metoda** i **parametry**. A gdy metoda jest wywoływana, **msg jest wysyłany** za pomocą funkcji **`objc_msgSend`**: `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
 
 Obiekt to **`someObject`**, metoda to **`@selector(method1p1:p2:)`**, a argumenty to **value1**, **value2**.
 
-Śledząc struktury obiektów, możliwe jest dotarcie do **tablicy metod**, w której **nazwy** i **wskaźniki** do kodu metod są **zlokalizowane**.
+Zgodnie z strukturami obiektów, możliwe jest dotarcie do **tablicy metod**, w której **nazwy** i **wskaźniki** do kodu metody są **zlokalizowane**.
 
 > [!CAUTION]
-> Zauważ, że ponieważ metody i klasy są dostępne na podstawie ich nazw, te informacje są przechowywane w binarnym pliku, więc możliwe jest ich odzyskanie za pomocą `otool -ov </path/bin>` lub [`class-dump </path/bin>`](https://github.com/nygard/class-dump)
+> Zauważ, że ponieważ metody i klasy są dostępne na podstawie ich nazw, te informacje są przechowywane w binarnym pliku, więc można je odzyskać za pomocą `otool -ov </path/bin>` lub [`class-dump </path/bin>`](https://github.com/nygard/class-dump)
 
 ### Accessing the raw methods
 
@@ -226,7 +226,7 @@ return 0;
 }
 ```
 > [!WARNING]
-> W tym przypadku, jeśli **kod implementacji legit** metody **weryfikuje** **nazwę** **metody**, może **wykryć** to swizzling i zapobiec jego uruchomieniu.
+> W tym przypadku, jeśli **kod implementacji** legalnej **metody** **weryfikuje** **nazwę** **metody**, może **wykryć** to swizzling i zapobiec jego uruchomieniu.
 >
 > Następująca technika nie ma tego ograniczenia.
 
@@ -290,7 +290,7 @@ return 0;
 
 Na tej stronie omówiono różne sposoby hookowania funkcji. Jednak polegały one na **uruchamianiu kodu wewnątrz procesu w celu ataku**.
 
-Aby to zrobić, najłatwiejszą techniką do użycia jest wstrzyknięcie [Dyld za pomocą zmiennych środowiskowych lub przejęcia](macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md). Jednak przypuszczam, że można to również zrobić za pomocą [wstrzykiwania Dylib do procesu](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port).
+Aby to zrobić, najłatwiejszą techniką do użycia jest wstrzyknięcie [Dyld za pomocą zmiennych środowiskowych lub przejęcia](macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md). Jednak przypuszczam, że można to również zrobić za pomocą [wstrzykiwania procesu Dylib](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port).
 
 Jednak obie opcje są **ograniczone** do **niechronionych** binarek/procesów. Sprawdź każdą technikę, aby dowiedzieć się więcej o ograniczeniach.
 

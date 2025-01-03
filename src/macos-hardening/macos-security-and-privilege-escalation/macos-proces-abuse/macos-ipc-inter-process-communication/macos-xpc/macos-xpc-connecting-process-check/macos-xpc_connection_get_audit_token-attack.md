@@ -33,8 +33,8 @@ Co jest interesujące do wiedzenia, to że **abstrakcja XPC to połączenie jede
 
 Chociaż poprzednia sytuacja brzmi obiecująco, istnieją pewne scenariusze, w których nie spowoduje to problemów ([stąd](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing)):
 
-- Tokeny audytu są często używane do sprawdzenia autoryzacji, aby zdecydować, czy zaakceptować połączenie. Ponieważ dzieje się to za pomocą wiadomości do portu usługi, **połączenie nie zostało jeszcze nawiązane**. Więcej wiadomości na tym porcie będzie traktowane jako dodatkowe żądania połączenia. Tak więc wszelkie **sprawdzenia przed zaakceptowaniem połączenia nie są podatne** (to również oznacza, że w `-listener:shouldAcceptNewConnection:` token audytu jest bezpieczny). Dlatego **szukamy połączeń XPC, które weryfikują konkretne działania**.
-- Obsługa zdarzeń XPC jest realizowana synchronicznie. Oznacza to, że obsługa zdarzenia dla jednej wiadomości musi być zakończona przed wywołaniem jej dla następnej, nawet na równoległych kolejkach dyspozytorskich. Tak więc wewnątrz **obsługi zdarzeń XPC token audytu nie może być nadpisany** przez inne normalne (nie-odpowiedzi!) wiadomości.
+- Tokeny audytu są często używane do sprawdzenia autoryzacji, aby zdecydować, czy zaakceptować połączenie. Ponieważ dzieje się to za pomocą wiadomości do portu usługi, **połączenie nie zostało jeszcze nawiązane**. Więcej wiadomości na tym porcie będzie po prostu traktowane jako dodatkowe żądania połączenia. Tak więc wszelkie **sprawdzenia przed zaakceptowaniem połączenia nie są podatne** (to również oznacza, że w `-listener:shouldAcceptNewConnection:` token audytu jest bezpieczny). Dlatego **szukamy połączeń XPC, które weryfikują konkretne działania**.
+- Obsługa zdarzeń XPC jest realizowana synchronicznie. Oznacza to, że obsługa zdarzenia dla jednej wiadomości musi być zakończona przed wywołaniem jej dla następnej, nawet w równoległych kolejkach dyspozycyjnych. Tak więc wewnątrz **obsługi zdarzeń XPC token audytu nie może być nadpisany** przez inne normalne (nie-odpowiedzi!) wiadomości.
 
 Dwie różne metody, które mogą być wykorzystywane:
 
@@ -43,7 +43,7 @@ Dwie różne metody, które mogą być wykorzystywane:
 - Usługa **B** może wywołać **funkcjonalność z uprawnieniami** w usłudze A, której użytkownik nie może
 - Usługa **A** wywołuje **`xpc_connection_get_audit_token`** podczas _**nie**_ będąc w **obsłudze zdarzeń** dla połączenia w **`dispatch_async`**.
 - Tak więc **inna** wiadomość mogłaby **nadpisać token audytu**, ponieważ jest wysyłana asynchronicznie poza obsługą zdarzeń.
-- Eksploit przekazuje **usłudze B prawo do wysyłania do usługi A**.
+- Eksploit przekazuje **usłudze B prawo do WYSYŁANIA do usługi A**.
 - Tak więc svc **B** będzie faktycznie **wysyłać** **wiadomości** do usługi **A**.
 - **Eksploit** próbuje **wywołać** **uprzywilejowane działanie.** W RC svc **A** **sprawdza** autoryzację tego **działania**, podczas gdy **svc B nadpisał token audytu** (dając exploitowi dostęp do wywołania uprzywilejowanego działania).
 2. Variant 2:
@@ -64,9 +64,9 @@ Scenariusz:
 > [!CAUTION]
 > W tym przypadku atakujący mógłby wywołać **Race Condition**, tworząc **eksploit**, który **prosi A o wykonanie akcji** kilka razy, podczas gdy **B wysyła wiadomości do `A`**. Gdy RC jest **udane**, **token audytu** **B** zostanie skopiowany w pamięci **podczas** gdy żądanie naszego **eksploit** jest **obsługiwane** przez A, dając mu **dostęp do uprzywilejowanej akcji, którą tylko B mógłby zażądać**.
 
-To zdarzyło się z **`A`** jako `smd` i **`B`** jako `diagnosticd`. Funkcja [`SMJobBless`](https://developer.apple.com/documentation/servicemanagement/1431078-smjobbless?language=objc) z smb może być użyta do zainstalowania nowego uprzywilejowanego narzędzia pomocniczego (jako **root**). Jeśli **proces działający jako root skontaktuje się** z **smd**, żadne inne kontrole nie będą przeprowadzane.
+To zdarzyło się z **`A`** jako `smd` i **`B`** jako `diagnosticd`. Funkcja [`SMJobBless`](https://developer.apple.com/documentation/servicemanagement/1431078-smjobbless?language=objc) z smb może być używana do instalacji nowego uprzywilejowanego narzędzia pomocniczego (jako **root**). Jeśli **proces działający jako root skontaktuje się** z **smd**, żadne inne kontrole nie będą przeprowadzane.
 
-Dlatego usługa **B** to **`diagnosticd`**, ponieważ działa jako **root** i może być używana do **monitorowania** procesu, więc gdy monitorowanie zostanie rozpoczęte, będzie **wysyłać wiele wiadomości na sekundę.**
+Dlatego usługa **B** to **`diagnosticd`**, ponieważ działa jako **root** i może być używana do **monitorowania** procesu, więc po rozpoczęciu monitorowania, będzie **wysyłać wiele wiadomości na sekundę.**
 
 Aby przeprowadzić atak:
 
@@ -84,7 +84,7 @@ Aby przeprowadzić atak:
 W środowisku XPC (Cross-Process Communication), chociaż obsługa zdarzeń nie wykonuje się równolegle, obsługa wiadomości odpowiedzi ma unikalne zachowanie. Konkretnie, istnieją dwa różne sposoby wysyłania wiadomości, które oczekują odpowiedzi:
 
 1. **`xpc_connection_send_message_with_reply`**: Tutaj wiadomość XPC jest odbierana i przetwarzana w wyznaczonej kolejce.
-2. **`xpc_connection_send_message_with_reply_sync`**: Z drugiej strony, w tej metodzie wiadomość XPC jest odbierana i przetwarzana w bieżącej kolejce dyspozytorskiej.
+2. **`xpc_connection_send_message_with_reply_sync`**: Z kolei w tej metodzie wiadomość XPC jest odbierana i przetwarzana w bieżącej kolejce dyspozycyjnej.
 
 To rozróżnienie jest kluczowe, ponieważ pozwala na możliwość **parsing odpowiedzi równolegle z wykonaniem obsługi zdarzeń XPC**. Należy zauważyć, że podczas gdy `_xpc_connection_set_creds` implementuje blokady, aby chronić przed częściowym nadpisaniem tokenu audytu, nie rozszerza tej ochrony na cały obiekt połączenia. W rezultacie tworzy to lukę, w której token audytu może być zastąpiony w czasie między analizą pakietu a wykonaniem jego obsługi zdarzeń.
 

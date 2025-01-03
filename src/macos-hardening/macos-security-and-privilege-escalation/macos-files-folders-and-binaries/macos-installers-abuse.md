@@ -36,7 +36,7 @@ Aby zobaczyć zawartość instalatora bez ręcznego dekompresowania, możesz ró
 
 ## Podstawowe informacje o DMG
 
-Pliki DMG, czyli obrazy dysków Apple, to format plików używany przez macOS firmy Apple do obrazów dysków. Plik DMG to w zasadzie **montowalny obraz dysku** (zawiera własny system plików), który zawiera surowe dane blokowe, zazwyczaj skompresowane, a czasami zaszyfrowane. Gdy otwierasz plik DMG, macOS **montuje go tak, jakby był fizycznym dyskiem**, co pozwala na dostęp do jego zawartości.
+Pliki DMG, czyli obrazy dysków Apple, to format plików używany przez macOS firmy Apple do obrazów dysków. Plik DMG to w zasadzie **montowalny obraz dysku** (zawiera własny system plików), który zawiera surowe dane blokowe, zazwyczaj skompresowane, a czasami szyfrowane. Gdy otwierasz plik DMG, macOS **montuje go tak, jakby był fizycznym dyskiem**, co pozwala na dostęp do jego zawartości.
 
 > [!CAUTION]
 > Zauważ, że instalatory **`.dmg`** obsługują **tak wiele formatów**, że w przeszłości niektóre z nich zawierające luki były wykorzystywane do uzyskania **wykonania kodu jądra**.
@@ -61,19 +61,19 @@ Jeśli skrypt przed lub po instalacji na przykład wykonuje się z **`/var/tmp/I
 
 ### AuthorizationExecuteWithPrivileges
 
-To jest [publiczna funkcja](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg), którą kilka instalatorów i aktualizatorów wywoła, aby **wykonać coś jako root**. Ta funkcja akceptuje **ścieżkę** do **pliku**, który ma być **wykonany** jako parametr, jednak jeśli atakujący mógłby **zmodyfikować** ten plik, będzie w stanie **nadużyć** jego wykonania z uprawnieniami roota, aby **eskalować uprawnienia**.
+To jest [publiczna funkcja](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg), którą kilka instalatorów i aktualizatorów wywoła, aby **wykonać coś jako root**. Ta funkcja akceptuje **ścieżkę** do **pliku**, który ma być **wykonany** jako parametr, jednak jeśli atakujący mógłby **zmodyfikować** ten plik, mógłby **nadużyć** jego wykonania z uprawnieniami roota, aby **eskalować uprawnienia**.
 ```bash
 # Breakpoint in the function to check wich file is loaded
 (lldb) b AuthorizationExecuteWithPrivileges
 # You could also check FS events to find this missconfig
 ```
-For more info check this talk: [https://www.youtube.com/watch?v=lTOItyjTTkw](https://www.youtube.com/watch?v=lTOItyjTTkw)
+Dla uzyskania dodatkowych informacji sprawdź tę prezentację: [https://www.youtube.com/watch?v=lTOItyjTTkw](https://www.youtube.com/watch?v=lTOItyjTTkw)
 
 ### Wykonanie przez montowanie
 
-Jeśli instalator zapisuje do `/tmp/fixedname/bla/bla`, możliwe jest **utworzenie montażu** nad `/tmp/fixedname` bez właścicieli, aby móc **zmodyfikować dowolny plik podczas instalacji**, aby nadużyć procesu instalacji.
+Jeśli instalator zapisuje do `/tmp/fixedname/bla/bla`, możliwe jest **utworzenie montażu** nad `/tmp/fixedname` bez właścicieli, aby móc **zmodyfikować dowolny plik podczas instalacji** w celu nadużycia procesu instalacji.
 
-Przykładem tego jest **CVE-2021-26089**, które udało się **nadpisać okresowy skrypt**, aby uzyskać wykonanie jako root. Aby uzyskać więcej informacji, zapoznaj się z wykładem: [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)
+Przykładem tego jest **CVE-2021-26089**, który zdołał **nadpisać skrypt okresowy**, aby uzyskać wykonanie jako root. Aby uzyskać więcej informacji, zapoznaj się z prezentacją: [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)
 
 ## pkg jako złośliwe oprogramowanie
 

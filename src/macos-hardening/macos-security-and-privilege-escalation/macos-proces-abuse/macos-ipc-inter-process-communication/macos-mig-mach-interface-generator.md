@@ -4,7 +4,7 @@
 
 ## Podstawowe informacje
 
-MIG został stworzony, aby **uprościć proces tworzenia kodu Mach IPC**. W zasadzie **generuje potrzebny kod** dla serwera i klienta do komunikacji na podstawie danej definicji. Nawet jeśli wygenerowany kod jest brzydki, programista będzie musiał tylko go zaimportować, a jego kod będzie znacznie prostszy niż wcześniej.
+MIG został stworzony, aby **uprościć proces tworzenia kodu Mach IPC**. W zasadzie **generuje potrzebny kod** dla serwera i klienta do komunikacji z daną definicją. Nawet jeśli wygenerowany kod jest brzydki, programista będzie musiał tylko go zaimportować, a jego kod będzie znacznie prostszy niż wcześniej.
 
 Definicja jest określona w języku definicji interfejsu (IDL) z użyciem rozszerzenia `.defs`.
 
@@ -12,7 +12,7 @@ Te definicje mają 5 sekcji:
 
 - **Deklaracja podsystemu**: Słowo kluczowe subsystem jest używane do wskazania **nazwa** i **id**. Możliwe jest również oznaczenie go jako **`KernelServer`**, jeśli serwer ma działać w jądrze.
 - **Inkluzje i importy**: MIG używa preprocesora C, więc może korzystać z importów. Ponadto możliwe jest użycie `uimport` i `simport` dla kodu generowanego przez użytkownika lub serwer.
-- **Deklaracje typów**: Możliwe jest zdefiniowanie typów danych, chociaż zazwyczaj zaimportuje `mach_types.defs` i `std_types.defs`. Dla niestandardowych można użyć pewnej składni:
+- **Deklaracje typów**: Możliwe jest definiowanie typów danych, chociaż zazwyczaj zaimportuje `mach_types.defs` i `std_types.defs`. Dla niestandardowych można użyć pewnej składni:
 - \[i`n/out]tran`: Funkcja, która musi być przetłumaczona z wiadomości przychodzącej lub do wiadomości wychodzącej
 - `c[user/server]type`: Mapowanie na inny typ C.
 - `destructor`: Wywołaj tę funkcję, gdy typ jest zwalniany.
@@ -217,9 +217,9 @@ USERPREFSubtract(port, 40, 2);
 
 ### NDR_record
 
-NDR_record jest eksportowany przez `libsystem_kernel.dylib` i jest to struktura, która pozwala MIG na **transformację danych, aby były niezależne od systemu**, w którym są używane, ponieważ MIG był zaprojektowany do użycia między różnymi systemami (a nie tylko na tej samej maszynie).
+NDR_record jest eksportowany przez `libsystem_kernel.dylib` i jest to struktura, która pozwala MIG na **transformację danych, aby były niezależne od systemu**, w którym są używane, ponieważ MIG miał być używany między różnymi systemami (a nie tylko na tej samej maszynie).
 
-To jest interesujące, ponieważ jeśli `_NDR_record` zostanie znaleziony w binarnym pliku jako zależność (`jtool2 -S <binary> | grep NDR` lub `nm`), oznacza to, że binarny plik jest klientem lub serwerem MIG.
+To jest interesujące, ponieważ jeśli `_NDR_record` zostanie znaleziony w binarnym pliku jako zależność (`jtool2 -S <binary> | grep NDR` lub `nm`), oznacza to, że plik binarny jest klientem lub serwerem MIG.
 
 Ponadto **serwery MIG** mają tabelę dyspozycyjną w `__DATA.__const` (lub w `__CONST.__constdata` w jądrze macOS i `__DATA_CONST.__const` w innych jądrze \*OS). Można to zrzucić za pomocą **`jtool2`**.
 
@@ -365,7 +365,7 @@ return r0;
 {{#endtab}}
 {{#endtabs}}
 
-W rzeczywistości, jeśli przejdziesz do funkcji **`0x100004000`**, znajdziesz tablicę struktur **`routine_descriptor`**. Pierwszym elementem struktury jest **adres**, w którym **funkcja** jest zaimplementowana, a **struktura zajmuje 0x28 bajtów**, więc co 0x28 bajtów (zaczynając od bajtu 0) możesz uzyskać 8 bajtów, a to będzie **adres funkcji**, która zostanie wywołana:
+W rzeczywistości, jeśli przejdziesz do funkcji **`0x100004000`**, znajdziesz tablicę struktur **`routine_descriptor`**. Pierwszym elementem struktury jest **adres**, w którym **funkcja** jest zaimplementowana, a **struktura zajmuje 0x28 bajtów**, więc co 0x28 bajtów (zaczynając od bajtu 0) możesz uzyskać 8 bajtów, a to będzie **adres funkcji**, która ma być wywołana:
 
 <figure><img src="../../../../images/image (35).png" alt=""><figcaption></figcaption></figure>
 

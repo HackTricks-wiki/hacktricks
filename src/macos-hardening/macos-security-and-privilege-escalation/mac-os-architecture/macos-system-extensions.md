@@ -53,7 +53,7 @@ Zdarzenia, które framework Endpoint Security może monitorować, są klasyfikow
 - **EndpointSecurityDriverClient**: Wymaga uprawnienia `com.apple.private.endpoint-security.manager`, które posiada tylko proces systemowy `endpointsecurityd`.
 - **EndpointSecurityExternalClient**: Wymaga uprawnienia `com.apple.developer.endpoint-security.client`. Zwykle byłoby to używane przez oprogramowanie zabezpieczające firm trzecich, które musi współdziałać z frameworkiem Endpoint Security.
 
-Rozszerzenia Endpoint Security:**`libEndpointSecurity.dylib`** to biblioteka C, którą rozszerzenia systemowe używają do komunikacji z jądrem. Ta biblioteka używa I/O Kit (`IOKit`) do komunikacji z KEXT Endpoint Security.
+Rozszerzenia Endpoint Security:**`libEndpointSecurity.dylib`** to biblioteka C, której używają rozszerzenia systemowe do komunikacji z jądrem. Ta biblioteka wykorzystuje I/O Kit (`IOKit`) do komunikacji z KEXT Endpoint Security.
 
 **`endpointsecurityd`** to kluczowy demon systemowy zaangażowany w zarządzanie i uruchamianie rozszerzeń systemowych zabezpieczeń punktów końcowych, szczególnie podczas wczesnego procesu rozruchu. **Tylko rozszerzenia systemowe** oznaczone jako **`NSEndpointSecurityEarlyBoot`** w ich pliku `Info.plist` otrzymują tę wczesną obsługę rozruchu.
 
@@ -65,15 +65,15 @@ ESF jest używane przez narzędzia zabezpieczające, które będą próbować wy
 
 ### CVE-2021-30965
 
-Problem polega na tym, że aplikacja zabezpieczająca musi mieć **uprawnienia do pełnego dostępu do dysku**. Więc jeśli atakujący mógłby to usunąć, mógłby zapobiec uruchomieniu oprogramowania:
+Problem polega na tym, że aplikacja zabezpieczająca musi mieć **uprawnienia do pełnego dostępu do dysku**. Jeśli więc atakujący mógłby to usunąć, mógłby zapobiec uruchomieniu oprogramowania:
 ```bash
 tccutil reset All
 ```
-Dla **więcej informacji** na temat tego obejścia i pokrewnych, sprawdź wykład [#OBTS v5.0: "The Achilles Heel of EndpointSecurity" - Fitzl Csaba](https://www.youtube.com/watch?v=lQO7tvNCoTI)
+Aby uzyskać **więcej informacji** na temat tego obejścia i pokrewnych, sprawdź wykład [#OBTS v5.0: "The Achilles Heel of EndpointSecurity" - Fitzl Csaba](https://www.youtube.com/watch?v=lQO7tvNCoTI)
 
-Na koniec to zostało naprawione poprzez nadanie nowego uprawnienia **`kTCCServiceEndpointSecurityClient`** aplikacji zabezpieczającej zarządzanej przez **`tccd`**, dzięki czemu `tccutil` nie usunie jej uprawnień, co uniemożliwi jej działanie.
+Na koniec naprawiono to, przyznając nową uprawnienie **`kTCCServiceEndpointSecurityClient`** aplikacji zabezpieczającej zarządzanej przez **`tccd`**, dzięki czemu `tccutil` nie usunie jej uprawnień, co uniemożliwi jej działanie.
 
-## Odniesienia
+## Referencje
 
 - [**OBTS v3.0: "Endpoint Security & Insecurity" - Scott Knight**](https://www.youtube.com/watch?v=jaVkpM1UqOs)
 - [**https://knight.sc/reverse%20engineering/2019/08/24/system-extension-internals.html**](https://knight.sc/reverse%20engineering/2019/08/24/system-extension-internals.html)

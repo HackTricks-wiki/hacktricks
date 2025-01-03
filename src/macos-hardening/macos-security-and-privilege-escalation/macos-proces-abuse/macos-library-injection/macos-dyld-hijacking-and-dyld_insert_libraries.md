@@ -4,7 +4,7 @@
 
 ## DYLD_INSERT_LIBRARIES Podstawowy przykład
 
-**Biblioteka do wstrzyknięcia** w celu wykonania powłoki:
+**Biblioteka do wstrzyknięcia** w celu uruchomienia powłoki:
 ```c
 // gcc -dynamiclib -o inject.dylib inject.c
 
@@ -22,7 +22,7 @@ execv("/bin/bash", 0);
 //system("cp -r ~/Library/Messages/ /tmp/Messages/");
 }
 ```
-Binary do ataku:
+Binarne do ataku:
 ```c
 // gcc hello.c -o hello
 #include <stdio.h>
@@ -90,7 +90,7 @@ pwd
 find ./ -name lib.dylib
 ./Contents/Resources/lib2/lib.dylib
 ```
-Więc to możliwe, aby to przejąć! Stwórz bibliotekę, która **wykonuje dowolny kod i eksportuje te same funkcjonalności** co legalna biblioteka, poprzez jej ponowny eksport. I pamiętaj, aby skompilować ją z oczekiwanymi wersjami:
+Więc to możliwe, aby to przejąć! Stwórz bibliotekę, która **wykonuje dowolny kod i eksportuje te same funkcjonalności** co legalna biblioteka, reeksportując ją. I pamiętaj, aby skompilować ją z oczekiwanymi wersjami:
 ```objectivec:lib.m
 #import <Foundation/Foundation.h>
 
@@ -137,7 +137,7 @@ I **wykonaj** binarny i sprawdź, czy **biblioteka została załadowana**:
 
 ## Większa skala
 
-Jeśli planujesz spróbować wstrzyknąć biblioteki w niespodziewane binarne pliki, możesz sprawdzić komunikaty zdarzeń, aby dowiedzieć się, kiedy biblioteka jest ładowana w procesie (w tym przypadku usuń printf i wykonanie `/bin/bash`).
+Jeśli planujesz spróbować wstrzyknąć biblioteki w niespodziewane binaria, możesz sprawdzić komunikaty o zdarzeniach, aby dowiedzieć się, kiedy biblioteka jest ładowana w procesie (w tym przypadku usuń printf i wykonanie `/bin/bash`).
 ```bash
 sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "[+] dylib"'
 ```

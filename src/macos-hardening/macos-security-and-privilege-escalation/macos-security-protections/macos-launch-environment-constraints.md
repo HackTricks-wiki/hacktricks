@@ -4,7 +4,7 @@
 
 ## Basic Information
 
-Ograniczenia uruchamiania w macOS zostały wprowadzone w celu zwiększenia bezpieczeństwa poprzez **regulowanie, jak, kto i skąd proces może być inicjowany**. Wprowadzone w macOS Ventura, zapewniają ramy, które klasyfikują **każdy systemowy plik binarny w odrębne kategorie ograniczeń**, które są zdefiniowane w **cache zaufania**, liście zawierającej pliki binarne systemu i ich odpowiednie hashe. Ograniczenia te obejmują każdy wykonywalny plik binarny w systemie, co wiąże się z zestawem **reguł** określających wymagania dotyczące **uruchamiania konkretnego pliku binarnego**. Reguły obejmują ograniczenia własne, które plik binarny musi spełnić, ograniczenia rodzica, które muszą być spełnione przez proces rodzica, oraz ograniczenia odpowiedzialności, które muszą być przestrzegane przez inne odpowiednie podmioty.
+Ograniczenia uruchamiania w macOS zostały wprowadzone w celu zwiększenia bezpieczeństwa poprzez **regulowanie, jak, kto i skąd proces może być inicjowany**. Wprowadzone w macOS Ventura, zapewniają ramy, które klasyfikują **każdy systemowy plik binarny w odrębne kategorie ograniczeń**, które są zdefiniowane w **pamięci zaufania**, liście zawierającej pliki binarne systemu i ich odpowiednie hashe. Ograniczenia te obejmują każdy wykonywalny plik binarny w systemie, co wiąże się z zestawem **reguł** określających wymagania dotyczące **uruchamiania konkretnego pliku binarnego**. Reguły obejmują ograniczenia własne, które plik binarny musi spełnić, ograniczenia rodzica, które muszą być spełnione przez jego proces nadrzędny, oraz ograniczenia odpowiedzialności, które muszą być przestrzegane przez inne odpowiednie podmioty.
 
 Mechanizm ten rozszerza się na aplikacje firm trzecich poprzez **Ograniczenia Środowiskowe**, począwszy od macOS Sonoma, umożliwiając deweloperom ochronę swoich aplikacji poprzez określenie **zestawu kluczy i wartości dla ograniczeń środowiskowych.**
 
@@ -17,7 +17,7 @@ Istnieją 4 typy ograniczeń:
 - **Ograniczenia Odpowiedzialności**: Ograniczenia stosowane do **procesu wywołującego usługę** w komunikacji XPC
 - **Ograniczenia ładowania biblioteki**: Użyj ograniczeń ładowania biblioteki, aby selektywnie opisać kod, który może być załadowany
 
-Gdy proces próbuje uruchomić inny proces — wywołując `execve(_:_:_:)` lub `posix_spawn(_:_:_:_:_:_:)` — system operacyjny sprawdza, czy plik **wykonywalny** **spełnia** swoje **własne ograniczenie własne**. Sprawdza również, czy plik wykonywalny **procesu rodzica** **spełnia** **ograniczenie rodzica** pliku wykonywalnego oraz czy plik wykonywalny **procesu odpowiedzialnego** **spełnia ograniczenie procesu odpowiedzialnego** pliku wykonywalnego. Jeśli którekolwiek z tych ograniczeń uruchamiania nie jest spełnione, system operacyjny nie uruchamia programu.
+Gdy proces próbuje uruchomić inny proces — wywołując `execve(_:_:_:)` lub `posix_spawn(_:_:_:_:_:_:)` — system operacyjny sprawdza, czy plik **wykonywalny** **spełnia** swoje **własne ograniczenie własne**. Sprawdza również, czy plik wykonywalny **procesu rodzica** **spełnia** **ograniczenie rodzica** pliku wykonywalnego oraz czy plik wykonywalny **procesu odpowiedzialnego** **spełnia ograniczenie procesu odpowiedzialnego** pliku wykonywalnego. Jeśli jakiekolwiek z tych ograniczeń uruchamiania nie są spełnione, system operacyjny nie uruchamia programu.
 
 Jeśli podczas ładowania biblioteki jakakolwiek część **ograniczenia biblioteki nie jest prawdziwa**, twój proces **nie ładuje** biblioteki.
 
@@ -31,12 +31,12 @@ LC składa się z **faktów** i **operacji logicznych** (i, lub..) łączących 
 - is-sip-protected: Wartość logiczna, która wskazuje, czy plik wykonywalny musi być plikiem chronionym przez System Integrity Protection (SIP).
 - `on-authorized-authapfs-volume:` Wartość logiczna, która wskazuje, czy system operacyjny załadował plik wykonywalny z autoryzowanej, uwierzytelnionej objętości APFS.
 - `on-authorized-authapfs-volume`: Wartość logiczna, która wskazuje, czy system operacyjny załadował plik wykonywalny z autoryzowanej, uwierzytelnionej objętości APFS.
-- Objętości Cryptexes
+- Cryptexes volume
 - `on-system-volume:` Wartość logiczna, która wskazuje, czy system operacyjny załadował plik wykonywalny z aktualnie uruchomionej objętości systemowej.
 - Wewnątrz /System...
 - ...
 
-Gdy plik binarny Apple jest podpisany, **przypisuje go do kategorii LC** wewnątrz **cache zaufania**.
+Gdy plik binarny Apple jest podpisany, **przypisuje go do kategorii LC** w **pamięci zaufania**.
 
 - **Kategorie LC iOS 16** zostały [**odwrócone i udokumentowane tutaj**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056).
 - Aktualne **Kategorie LC (macOS 14 - Somona)** zostały odwrócone, a ich [**opisy można znaleźć tutaj**](https://gist.github.com/theevilbit/a6fef1e0397425a334d064f7b6e1be53).
@@ -58,13 +58,13 @@ Masz więcej informacji [**na ten temat tutaj**](https://theevilbit.github.io/po
 
 ## Ograniczenia środowiskowe
 
-To są Ograniczenia Uruchamiania skonfigurowane w **aplikacjach firm trzecich**. Programista może wybrać **fakty** i **operatory logiczne do użycia** w swojej aplikacji, aby ograniczyć dostęp do niej samej.
+To są Ograniczenia Uruchamiania skonfigurowane w **aplikacjach stron trzecich**. Programista może wybrać **fakty** i **operandy logiczne do użycia** w swojej aplikacji, aby ograniczyć dostęp do niej samej.
 
 Możliwe jest enumerowanie Ograniczeń Środowiskowych aplikacji za pomocą:
 ```bash
 codesign -d -vvvv app.app
 ```
-## Pamięci Zaufania
+## Trust Caches
 
 W **macOS** istnieje kilka pamięci zaufania:
 
@@ -77,7 +77,7 @@ A w iOS wygląda to na **`/usr/standalone/firmware/FUD/StaticTrustCache.img4`**.
 > [!WARNING]
 > W macOS działającym na urządzeniach Apple Silicon, jeśli binarny plik podpisany przez Apple nie znajduje się w pamięci zaufania, AMFI odmówi jego załadowania.
 
-### Enumeracja Pamięci Zaufania
+### Enumerating Trust Caches
 
 Poprzednie pliki pamięci zaufania są w formacie **IMG4** i **IM4P**, przy czym IM4P to sekcja ładunku formatu IMG4.
 
@@ -141,18 +141,18 @@ Na podstawie tych danych możesz sprawdzić aplikacje z **wartością ogranicze�
 
 Ograniczenia uruchamiania mogłyby złagodzić kilka starych ataków, **zapewniając, że proces nie będzie uruchamiany w nieoczekiwanych warunkach:** Na przykład z nieoczekiwanych lokalizacji lub wywoływany przez nieoczekiwany proces nadrzędny (jeśli tylko launchd powinien go uruchamiać).
 
-Ponadto, Ograniczenia uruchamiania również **łagodzą ataki downgrade.**
+Ponadto, Ograniczenia uruchamiania również **łagodzą ataki typu downgrade.**
 
 Jednakże, **nie łagodzą powszechnych nadużyć XPC**, **wstrzyknięć kodu Electron** ani **wstrzyknięć dylib** bez walidacji biblioteki (chyba że znane są identyfikatory zespołów, które mogą ładować biblioteki).
 
 ### Ochrona demona XPC
 
-W wydaniu Sonoma, istotnym punktem jest **konfiguracja odpowiedzialności** usługi demona XPC. Usługa XPC jest odpowiedzialna za siebie, w przeciwieństwie do klienta łączącego się, który jest odpowiedzialny. Jest to udokumentowane w raporcie zwrotnym FB13206884. Ta konfiguracja może wydawać się wadliwa, ponieważ pozwala na pewne interakcje z usługą XPC:
+W wydaniu Sonoma, istotnym punktem jest **konfiguracja odpowiedzialności** usługi demona XPC. Usługa XPC jest odpowiedzialna za siebie, w przeciwieństwie do klienta łączącego, który jest odpowiedzialny. Jest to udokumentowane w raporcie zwrotnym FB13206884. Ta konfiguracja może wydawać się wadliwa, ponieważ pozwala na pewne interakcje z usługą XPC:
 
 - **Uruchamianie usługi XPC**: Jeśli uznane za błąd, ta konfiguracja nie pozwala na inicjowanie usługi XPC za pomocą kodu atakującego.
 - **Łączenie z aktywną usługą**: Jeśli usługa XPC już działa (prawdopodobnie aktywowana przez swoją oryginalną aplikację), nie ma przeszkód w łączeniu się z nią.
 
-Chociaż wprowadzenie ograniczeń na usłudze XPC może być korzystne poprzez **zawężenie okna dla potencjalnych ataków**, nie rozwiązuje to głównego problemu. Zapewnienie bezpieczeństwa usługi XPC zasadniczo wymaga **skutecznej walidacji łączącego się klienta**. To pozostaje jedyną metodą na wzmocnienie bezpieczeństwa usługi. Warto również zauważyć, że wspomniana konfiguracja odpowiedzialności jest obecnie operacyjna, co może nie być zgodne z zamierzonym projektem.
+Chociaż wdrożenie ograniczeń na usłudze XPC może być korzystne poprzez **zawężenie okna dla potencjalnych ataków**, nie rozwiązuje to głównego problemu. Zapewnienie bezpieczeństwa usługi XPC zasadniczo wymaga **skutecznej walidacji łączącego klienta**. To pozostaje jedyną metodą na wzmocnienie bezpieczeństwa usługi. Warto również zauważyć, że wspomniana konfiguracja odpowiedzialności jest obecnie operacyjna, co może nie być zgodne z zamierzonym projektem.
 
 ### Ochrona Electron
 

@@ -66,7 +66,7 @@ Od macOS Sonoma w górę, modyfikacje wewnątrz pakietów aplikacji są ogranicz
 1. Skopiowanie aplikacji do innej lokalizacji (np. `/tmp/`).
 2. Zmiana nazw katalogów w pakiecie aplikacji, aby obejść początkowe zabezpieczenia.
 3. Po uruchomieniu aplikacji, aby zarejestrować się w Gatekeeperze, modyfikacja pakietu aplikacji (np. zastąpienie MainMenu.nib plikiem Dirty.nib).
-4. Przywrócenie nazw katalogów i ponowne uruchomienie aplikacji w celu wykonania wstrzykniętego pliku NIB.
+4. Przywrócenie nazw katalogów i ponowne uruchomienie aplikacji, aby wykonać wstrzyknięty plik NIB.
 
 **Uwaga**: Ostatnie aktualizacje macOS złagodziły ten exploit, uniemożliwiając modyfikacje plików w pakietach aplikacji po buforowaniu Gatekeepera, co czyni exploit nieskutecznym.
 

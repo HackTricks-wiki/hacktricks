@@ -4,7 +4,7 @@
 
 ## CFRuntimeClass
 
-Obiekty CF\* pochodzą z CoreFoundation, które oferuje ponad 50 klas obiektów, takich jak `CFString`, `CFNumber` czy `CFAllocator`.
+Obiekty CF\* pochodzą z CoreFoundation, który oferuje ponad 50 klas obiektów, takich jak `CFString`, `CFNumber` czy `CFAllocator`.
 
 Wszystkie te klasy są instancjami klasy `CFRuntimeClass`, która po wywołaniu zwraca indeks do `__CFRuntimeClassTable`. CFRuntimeClass jest zdefiniowana w [**CFRuntime.h**](https://opensource.apple.com/source/CF/CF-1153.18/CFRuntime.h.auto.html):
 ```objectivec
@@ -94,12 +94,12 @@ Objective-C używa pewnego mangle'owania do kodowania selektorów i typów zmien
 ```
 Selektor to `processString:withOptions:andError:`
 
-#### Kodowanie typów
+#### Kodowanie Typu
 
 - `id` jest kodowane jako `@`
 - `char *` jest kodowane jako `*`
 
-Pełne kodowanie typów dla metody to:
+Pełne kodowanie typu dla metody to:
 ```less
 @24@0:8@16*20^@24
 ```
@@ -112,7 +112,7 @@ Pełne kodowanie typów dla metody to:
 5. **Drugi argument (`NSDictionary * options`)**: Zakodowany jako `@`, w przesunięciu 20
 6. **Trzeci argument (`NSError ** error`)**: Zakodowany jako `^@`, w przesunięciu 24
 
-**Dzięki selektorowi + kodowaniu możesz odtworzyć metodę.**
+**Z selektorem + kodowaniem możesz odtworzyć metodę.**
 
 ### **Klasy**
 

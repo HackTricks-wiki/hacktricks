@@ -24,9 +24,9 @@ Prawa portu, które definiują, jakie operacje zadanie może wykonać, są klucz
 - Prawo wysyłania może być **klonowane**, więc zadanie posiadające prawo wysyłania może sklonować to prawo i **przyznać je trzeciemu zadaniu**.
 - **Prawo wysyłania raz**, które pozwala na wysłanie jednej wiadomości do portu, a następnie znika.
 - **Prawo zestawu portów**, które oznacza _zestaw portów_ zamiast pojedynczego portu. Usunięcie wiadomości z zestawu portów usuwa wiadomość z jednego z portów, które zawiera. Zestawy portów mogą być używane do nasłuchiwania na kilku portach jednocześnie, podobnie jak `select`/`poll`/`epoll`/`kqueue` w Unixie.
-- **Martwa nazwa**, która nie jest rzeczywistym prawem portu, ale jedynie miejscem zastępczym. Gdy port zostaje zniszczony, wszystkie istniejące prawa portu do portu zamieniają się w martwe nazwy.
+- **Martwa nazwa**, która nie jest rzeczywistym prawem portu, ale jedynie miejscem zastępczym. Gdy port jest niszczony, wszystkie istniejące prawa portu do portu zamieniają się w martwe nazwy.
 
-**Zadania mogą przekazywać prawa WYSYŁANIA innym**, umożliwiając im wysyłanie wiadomości z powrotem. **Prawa WYSYŁANIA mogą być również klonowane, więc zadanie może skopiować i przyznać prawo trzeciemu zadaniu**. To, w połączeniu z pośrednim procesem znanym jako **serwer bootstrap**, umożliwia skuteczną komunikację między zadaniami.
+**Zadania mogą przekazywać prawa WYSYŁANIA innym**, umożliwiając im wysyłanie wiadomości z powrotem. **Prawa WYSYŁANIA mogą być również klonowane, więc zadanie może skopiować i przekazać prawo trzeciemu zadaniu**. To, w połączeniu z pośrednim procesem znanym jako **serwer bootstrap**, umożliwia skuteczną komunikację między zadaniami.
 
 ### File Ports
 
@@ -38,7 +38,7 @@ Porty plikowe pozwalają na enkapsulację deskryptorów plików w portach Mac (u
 
 Jak wspomniano, aby nawiązać kanał komunikacyjny, zaangażowany jest **serwer bootstrap** (**launchd** w mac).
 
-1. Zadanie **A** inicjuje **nowy port**, uzyskując w tym procesie **prawo ODBIORU**.
+1. Zadanie **A** inicjuje **nowy port**, uzyskując w procesie **prawo ODBIORU**.
 2. Zadanie **A**, będąc posiadaczem prawa ODBIORU, **generuje prawo WYSYŁANIA dla portu**.
 3. Zadanie **A** nawiązuje **połączenie** z **serwerem bootstrap**, podając **nazwę usługi portu** i **prawo WYSYŁANIA** poprzez procedurę znaną jako rejestracja bootstrap.
 4. Zadanie **B** wchodzi w interakcję z **serwerem bootstrap**, aby wykonać bootstrap **wyszukiwanie nazwy usługi**. Jeśli się powiedzie, **serwer duplikuje prawo WYSYŁANIA** otrzymane od Zadania A i **przesyła je do Zadania B**.
@@ -74,12 +74,12 @@ mach_port_name_t              msgh_voucher_port;
 mach_msg_id_t                 msgh_id;
 } mach_msg_header_t;
 ```
-Procesy posiadające _**prawo odbioru**_ mogą odbierać wiadomości na porcie Mach. Z kolei **nadawcy** otrzymują _**prawo wysyłania**_ lub _**prawo wysyłania-jednorazowego**_. Prawo wysyłania-jednorazowego jest przeznaczone wyłącznie do wysyłania pojedynczej wiadomości, po czym staje się nieważne.
+Procesy posiadające _**prawo odbioru**_ mogą odbierać wiadomości na porcie Mach. Z kolei **nadawcy** otrzymują _**prawo wysyłania**_ lub _**prawo wysyłania jednokrotnego**_. Prawo wysyłania jednokrotnego jest przeznaczone wyłącznie do wysyłania pojedynczej wiadomości, po czym staje się nieważne.
 
-Aby osiągnąć łatwą **komunikację dwukierunkową**, proces może określić **port mach** w nagłówku **wiadomości mach** zwanym _portem odpowiedzi_ (**`msgh_local_port`**), gdzie **odbiorca** wiadomości może **wysłać odpowiedź** na tę wiadomość. Flagi bitowe w **`msgh_bits`** mogą być używane do **wskazania**, że **prawo wysyłania-jednorazowego** powinno być uzyskane i przeniesione dla tego portu (`MACH_MSG_TYPE_MAKE_SEND_ONCE`).
+Aby osiągnąć łatwą **komunikację dwukierunkową**, proces może określić **port mach** w nagłówku **wiadomości mach** zwanym _portem odpowiedzi_ (**`msgh_local_port`**), gdzie **odbiorca** wiadomości może **wysłać odpowiedź** na tę wiadomość. Flagi bitowe w **`msgh_bits`** mogą być używane do **wskazania**, że **prawo wysyłania jednokrotnego** powinno być uzyskane i przeniesione dla tego portu (`MACH_MSG_TYPE_MAKE_SEND_ONCE`).
 
 > [!TIP]
-> Zauważ, że tego rodzaju komunikacja dwukierunkowa jest używana w wiadomościach XPC, które oczekują odpowiedzi (`xpc_connection_send_message_with_reply` i `xpc_connection_send_message_with_reply_sync`). Ale **zwykle tworzone są różne porty**, jak wyjaśniono wcześniej, aby stworzyć komunikację dwukierunkową.
+> Zauważ, że ten rodzaj komunikacji dwukierunkowej jest używany w wiadomościach XPC, które oczekują odpowiedzi (`xpc_connection_send_message_with_reply` i `xpc_connection_send_message_with_reply_sync`). Ale **zwykle tworzone są różne porty**, jak wyjaśniono wcześniej, aby stworzyć komunikację dwukierunkową.
 
 Inne pola nagłówka wiadomości to:
 
@@ -89,7 +89,7 @@ Inne pola nagłówka wiadomości to:
 - `msgh_id`: identyfikator tej wiadomości, który jest interpretowany przez odbiorcę.
 
 > [!CAUTION]
-> Zauważ, że **wiadomości mach są wysyłane przez \_port mach\_**, który jest **jednym odbiorcą**, **wieloma nadawcami** kanałem komunikacyjnym wbudowanym w jądro mach. **Wiele procesów** może **wysyłać wiadomości** do portu mach, ale w danym momencie tylko **jeden proces może odczytać** z niego.
+> Zauważ, że **wiadomości mach są wysyłane przez \_port mach\_**, który jest **jednokierunkowym odbiorcą**, **wieloma nadawcami** kanałem komunikacyjnym wbudowanym w jądro mach. **Wiele procesów** może **wysyłać wiadomości** do portu mach, ale w danym momencie tylko **jeden proces może z niego odczytać**.
 
 ### Wyliczanie portów
 ```bash
@@ -99,7 +99,7 @@ Możesz zainstalować to narzędzie w iOS, pobierając je z [http://newosxbook.c
 
 ### Przykład kodu
 
-Zauważ, jak **nadawca** **przydziela** port, tworzy **prawo wysyłania** dla nazwy `org.darlinghq.example` i wysyła je do **serwera bootstrap**, podczas gdy nadawca prosił o **prawo wysyłania** tej nazwy i użył go do **wysłania wiadomości**.
+Zauważ, jak **nadawca** **przydziela** port, tworzy **prawo do wysyłania** dla nazwy `org.darlinghq.example` i wysyła je do **serwera bootstrap**, podczas gdy nadawca prosił o **prawo do wysyłania** tej nazwy i użył go do **wysłania wiadomości**.
 
 {{#tabs}}
 {{#tab name="receiver.c"}}
@@ -234,11 +234,11 @@ printf("Sent a message\n");
 - **Port zadania** (znany również jako port jądra)**:** Z uprawnieniem wysyłania na tym porcie możliwe jest kontrolowanie zadania (odczyt/zapis pamięci, tworzenie wątków...).
 - Wywołaj `mach_task_self()`, aby **uzyskać nazwę** dla tego portu dla wywołującego zadania. Ten port jest tylko **dziedziczony** przez **`exec()`**; nowe zadanie utworzone za pomocą `fork()` otrzymuje nowy port zadania (w szczególnym przypadku, zadanie również otrzymuje nowy port zadania po `exec()` w binarnym pliku suid). Jedynym sposobem na uruchomienie zadania i uzyskanie jego portu jest wykonanie ["tańca wymiany portów"](https://robert.sesek.com/2014/1/changes_to_xnu_mach_ipc.html) podczas wykonywania `fork()`.
 - Oto ograniczenia dostępu do portu (z `macos_task_policy` z binarnego pliku `AppleMobileFileIntegrity`):
-- Jeśli aplikacja ma **uprawnienie `com.apple.security.get-task-allow`**, procesy z **tego samego użytkownika mogą uzyskać dostęp do portu zadania** (zwykle dodawane przez Xcode do debugowania). Proces **notaryzacji** nie pozwoli na to w wersjach produkcyjnych.
+- Jeśli aplikacja ma **uprawnienie `com.apple.security.get-task-allow`**, procesy od **tego samego użytkownika mogą uzyskać dostęp do portu zadania** (zwykle dodawane przez Xcode do debugowania). Proces **notaryzacji** nie pozwoli na to w wersjach produkcyjnych.
 - Aplikacje z uprawnieniem **`com.apple.system-task-ports`** mogą uzyskać **port zadania dla dowolnego** procesu, z wyjątkiem jądra. W starszych wersjach nazywało się to **`task_for_pid-allow`**. To uprawnienie jest przyznawane tylko aplikacjom Apple.
 - **Root może uzyskać dostęp do portów zadań** aplikacji **nie** skompilowanych z **wzmocnionym** czasem wykonywania (i nie od Apple).
 
-### Wstrzykiwanie shellcode w wątek za pomocą portu zadania
+### Wstrzykiwanie shellcode w wątku za pomocą portu zadania
 
 Możesz pobrać shellcode z:
 
@@ -502,7 +502,7 @@ gcc -framework Foundation -framework Appkit sc_inject.m -o sc_inject
 
 W macOS **wątki** mogą być manipulowane za pomocą **Mach** lub używając **posix `pthread` api**. Wątek, który wygenerowaliśmy w poprzednim wstrzyknięciu, został wygenerowany za pomocą api Mach, więc **nie jest zgodny z posix**.
 
-Możliwe było **wstrzyknięcie prostego shellcode** do wykonania polecenia, ponieważ **nie musiał działać z api** zgodnymi z posix, tylko z Mach. **Bardziej złożone wstrzyknięcia** wymagałyby, aby **wątek** był również **zgodny z posix**.
+Możliwe było **wstrzyknięcie prostego shellcode** do wykonania polecenia, ponieważ **nie musiał działać z api zgodnymi z posix**, tylko z Mach. **Bardziej złożone wstrzyknięcia** wymagałyby, aby **wątek** był również **zgodny z posix**.
 
 Dlatego, aby **ulepszyć wątek**, powinien on wywołać **`pthread_create_from_mach_thread`**, co **utworzy ważny pthread**. Następnie ten nowy pthread mógłby **wywołać dlopen**, aby **załadować dylib** z systemu, więc zamiast pisać nowy shellcode do wykonywania różnych działań, można załadować niestandardowe biblioteki.
 
@@ -802,7 +802,7 @@ W tej technice wątek procesu jest przechwytywany:
 
 ### Podstawowe informacje
 
-XPC, co oznacza XNU (jądro używane przez macOS), to framework do **komunikacji między procesami** na macOS i iOS. XPC zapewnia mechanizm do wykonywania **bezpiecznych, asynchronicznych wywołań metod między różnymi procesami** w systemie. Jest częścią paradygmatu bezpieczeństwa Apple, umożliwiając **tworzenie aplikacji z oddzielonymi uprawnieniami**, gdzie każdy **komponent** działa z **tylko tymi uprawnieniami, których potrzebuje**, aby wykonać swoją pracę, ograniczając w ten sposób potencjalne szkody wynikające z kompromitacji procesu.
+XPC, co oznacza XNU (jądro używane przez macOS), to framework do **komunikacji między procesami** na macOS i iOS. XPC zapewnia mechanizm do wykonywania **bezpiecznych, asynchronicznych wywołań metod między różnymi procesami** w systemie. Jest częścią paradygmatu bezpieczeństwa Apple, umożliwiając **tworzenie aplikacji z oddzielonymi uprawnieniami**, gdzie każdy **komponent** działa z **tylko tymi uprawnieniami, których potrzebuje** do wykonania swojej pracy, ograniczając w ten sposób potencjalne szkody wynikające z kompromitacji procesu.
 
 Aby uzyskać więcej informacji na temat tego, jak ta **komunikacja działa** i jak **może być podatna**, sprawdź:
 
@@ -812,7 +812,7 @@ Aby uzyskać więcej informacji na temat tego, jak ta **komunikacja działa** i 
 
 ## MIG - Generator interfejsu Mach
 
-MIG został stworzony, aby **uproszczać proces tworzenia kodu Mach IPC**. W zasadzie **generuje potrzebny kod** dla serwera i klienta do komunikacji z danym zdefiniowaniem. Nawet jeśli wygenerowany kod jest brzydki, programista będzie musiał go tylko zaimportować, a jego kod będzie znacznie prostszy niż wcześniej.
+MIG został stworzony, aby **uproszczyć proces tworzenia kodu Mach IPC**. W zasadzie **generuje potrzebny kod** dla serwera i klienta do komunikacji z danym definicją. Nawet jeśli wygenerowany kod jest brzydki, programista będzie musiał tylko go zaimportować, a jego kod będzie znacznie prostszy niż wcześniej.
 
 Aby uzyskać więcej informacji, sprawdź:
 

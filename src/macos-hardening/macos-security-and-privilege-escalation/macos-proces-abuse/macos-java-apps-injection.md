@@ -73,7 +73,7 @@ NSMutableDictionary *environment = [NSMutableDictionary dictionaryWithDictionary
 return 0;
 }
 ```
-Jednak spowoduje to błąd w uruchomionej aplikacji, innym, bardziej dyskretnym sposobem jest stworzenie agenta Java i użycie:
+Jednak spowoduje to błąd w wykonywanej aplikacji, innym, bardziej dyskretnym sposobem jest stworzenie agenta Java i użycie:
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"

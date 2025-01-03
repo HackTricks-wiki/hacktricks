@@ -4,7 +4,7 @@
 
 ## AppleMobileFileIntegrity.kext i amfid
 
-Skupia się na egzekwowaniu integralności kodu działającego w systemie, zapewniając logikę stojącą za weryfikacją podpisu kodu XNU. Może również sprawdzać uprawnienia i obsługiwać inne wrażliwe zadania, takie jak umożliwienie debugowania lub uzyskiwanie portów zadań.
+Skupia się na egzekwowaniu integralności kodu działającego w systemie, zapewniając logikę weryfikacji podpisu kodu XNU. Może również sprawdzać uprawnienia i obsługiwać inne wrażliwe zadania, takie jak umożliwienie debugowania lub uzyskiwanie portów zadań.
 
 Ponadto, w przypadku niektórych operacji, kext woli kontaktować się z działającym w przestrzeni użytkownika demonem `/usr/libexec/amfid`. Ta relacja zaufania była nadużywana w kilku jailbreakach.
 
@@ -18,7 +18,7 @@ AMFI używa **MACF** polityk i rejestruje swoje haki w momencie uruchomienia. Po
 
 Oto niektóre z polityk MACF, które rejestruje:
 
-- **`cred_check_label_update_execve:`** Aktualizacja etykiety zostanie przeprowadzona i zwróci 1
+- **`cred_check_label_update_execve:`** Aktualizacja etykiety zostanie wykonana i zwróci 1
 - **`cred_label_associate`**: Aktualizuje slot etykiety mac AMFI
 - **`cred_label_destroy`**: Usuwa slot etykiety mac AMFI
 - **`cred_label_init`**: Ustawia 0 w slocie etykiety mac AMFI
@@ -26,8 +26,8 @@ Oto niektóre z polityk MACF, które rejestruje:
 - **`file_check_mmap`:** Sprawdza, czy mmap uzyskuje pamięć i ustawia ją jako wykonywalną. W takim przypadku sprawdza, czy potrzebna jest walidacja biblioteki i, jeśli tak, wywołuje funkcję walidacji biblioteki.
 - **`file_check_library_validation`**: Wywołuje funkcję walidacji biblioteki, która sprawdza między innymi, czy platformowe binarne ładują inne platformowe binarne lub czy proces i nowo załadowany plik mają ten sam TeamID. Niektóre uprawnienia również pozwalają na ładowanie dowolnej biblioteki.
 - **`policy_initbsd`**: Ustawia zaufane klucze NVRAM
-- **`policy_syscall`**: Sprawdza polityki DYLD, takie jak to, czy binarny ma nieograniczone segmenty, czy powinien zezwolić na zmienne środowiskowe... to jest również wywoływane, gdy proces jest uruchamiany przez `amfi_check_dyld_policy_self()`.
-- **`proc_check_inherit_ipc_ports`**: Sprawdza, czy gdy proces wykonuje nowy binarny, inne procesy z prawami SEND nad portem zadania procesu powinny je zachować, czy nie. Platformowe binaria są dozwolone, uprawnienie `get-task-allow` to umożliwia, uprawnienia `task_for_pid-allow` są dozwolone, a binaria z tym samym TeamID.
+- **`policy_syscall`**: Sprawdza polityki DYLD, takie jak to, czy binarny ma nieograniczone segmenty, czy powinien zezwalać na zmienne środowiskowe... jest to również wywoływane, gdy proces jest uruchamiany przez `amfi_check_dyld_policy_self()`.
+- **`proc_check_inherit_ipc_ports`**: Sprawdza, czy gdy proces wykonuje nowy binarny, inne procesy z prawami SEND nad portem zadania procesu powinny je zachować, czy nie. Dozwolone są platformowe binaria, uprawnienie `get-task-allow` to umożliwia, uprawnienia `task_for_pid-allow` są dozwolone, a binaria z tym samym TeamID.
 - **`proc_check_expose_task`**: egzekwuje uprawnienia
 - **`amfi_exc_action_check_exception_send`**: Wiadomość o wyjątku jest wysyłana do debuggera
 - **`amfi_exc_action_label_associate & amfi_exc_action_label_copy/populate & amfi_exc_action_label_destroy & amfi_exc_action_label_init & amfi_exc_action_label_update`**: Cykl życia etykiety podczas obsługi wyjątków (debugowanie)
@@ -68,7 +68,7 @@ No variant specified, falling back to release
 To jest demon działający w trybie użytkownika, który `AMFI.kext` wykorzysta do sprawdzania podpisów kodu w trybie użytkownika.\
 Aby `AMFI.kext` mogło komunikować się z demonem, używa wiadomości mach przez port `HOST_AMFID_PORT`, który jest specjalnym portem `18`.
 
-Należy zauważyć, że w macOS nie jest już możliwe, aby procesy root przejmowały specjalne porty, ponieważ są one chronione przez `SIP` i tylko launchd może je uzyskać. W iOS sprawdzane jest, czy proces wysyłający odpowiedź ma hardcodowany CDHash `amfid`.
+Należy zauważyć, że w macOS nie jest już możliwe, aby procesy root przejmowały specjalne porty, ponieważ są one chronione przez `SIP`, a tylko launchd może je uzyskać. W iOS sprawdzane jest, czy proces wysyłający odpowiedź ma hardcodowany CDHash `amfid`.
 
 Można zobaczyć, kiedy `amfid` jest proszony o sprawdzenie binarnego pliku oraz jego odpowiedź, debugując go i ustawiając punkt przerwania w `mach_msg`.
 
@@ -94,13 +94,13 @@ Chociaż czasami nazywane certyfikowanymi, te profile provisioningowe mają wię
 - **AppleInternalProfile**: Oznacza to jako profil wewnętrzny Apple
 - **ApplicationIdentifierPrefix**: Dodawany do AppIDName (taki sam jak TeamIdentifier)
 - **CreationDate**: Data w formacie `YYYY-MM-DDTHH:mm:ssZ`
-- **DeveloperCertificates**: Tablica (zwykle jeden) certyfikat(ów), zakodowanych jako dane Base64
+- **DeveloperCertificates**: Tablica (zwykle jednego) certyfikatu(ów), zakodowanych jako dane Base64
 - **Entitlements**: Uprawnienia dozwolone z uprawnieniami dla tego profilu
 - **ExpirationDate**: Data wygaśnięcia w formacie `YYYY-MM-DDTHH:mm:ssZ`
 - **Name**: Nazwa aplikacji, taka sama jak AppIDName
 - **ProvisionedDevices**: Tablica (dla certyfikatów dewelopera) UDID-ów, dla których ten profil jest ważny
 - **ProvisionsAllDevices**: Wartość logiczna (prawda dla certyfikatów korporacyjnych)
-- **TeamIdentifier**: Tablica (zwykle jeden) alfanumerycznych ciągów używanych do identyfikacji dewelopera w celach interakcji między aplikacjami
+- **TeamIdentifier**: Tablica (zwykle jednego) ciągu alfanumerycznego używanego do identyfikacji dewelopera w celach interakcji między aplikacjami
 - **TeamName**: Nazwa czytelna dla człowieka używana do identyfikacji dewelopera
 - **TimeToLive**: Ważność (w dniach) certyfikatu
 - **UUID**: Uniwersalny unikalny identyfikator dla tego profilu
@@ -112,13 +112,13 @@ Zauważ, że profile zazwyczaj znajdują się w `/var/MobileDeviceProvisioningPr
 
 ## **libmis.dyld**
 
-To zewnętrzna biblioteka, którą `amfid` wywołuje, aby zapytać, czy powinien coś zezwolić, czy nie. Historycznie była nadużywana w jailbreakingu przez uruchamianie jej backdoored wersji, która pozwalałaby na wszystko.
+To zewnętrzna biblioteka, którą `amfid` wywołuje, aby zapytać, czy powinien coś zezwolić, czy nie. Historycznie była nadużywana w jailbreakingu poprzez uruchamianie jej z backdoorem, co pozwalało na wszystko.
 
 W macOS znajduje się w `MobileDevice.framework`.
 
 ## AMFI Trust Caches
 
-iOS AMFI utrzymuje listę znanych hashy, które są podpisane ad-hoc, nazywaną **Trust Cache** i znajdującą się w sekcji `__TEXT.__const` kext. Zauważ, że w bardzo specyficznych i wrażliwych operacjach możliwe jest rozszerzenie tej Trust Cache za pomocą zewnętrznego pliku.
+iOS AMFI utrzymuje listę znanych hashy, które są podpisane ad-hoc, nazywaną **Trust Cache** i znajdującą się w sekcji `__TEXT.__const` kextu. Zauważ, że w bardzo specyficznych i wrażliwych operacjach możliwe jest rozszerzenie tej Trust Cache za pomocą zewnętrznego pliku.
 
 ## References
 

@@ -50,11 +50,11 @@ ARCH=x86_64 jtool2 --sig /System/Applications/Automator.app/Contents/MacOS/Autom
 # Get MIG information
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
-> [!OSTRZEŻENIE] > **jtool jest przestarzały na rzecz disarm**
+> [!CAUTION] > **jtool jest przestarzały na rzecz disarm**
 
 ### Codesign / ldid
 
-> [!WSKAZÓWKA] > **`Codesign`** można znaleźć w **macOS**, podczas gdy **`ldid`** można znaleźć w **iOS**
+> [!TIP] > **`Codesign`** można znaleźć w **macOS**, podczas gdy **`ldid`** można znaleźć w **iOS**
 ```bash
 # Get signer
 codesign -vv -d /bin/ls 2>&1 | grep -E "Authority|TeamIdentifier"
@@ -116,13 +116,13 @@ Zauważ, że te nazwy mogą być zafałszowane, aby utrudnić odwracanie binari�
 
 ### Wywoływanie funkcji
 
-Gdy funkcja jest wywoływana w binarnym pliku, który używa Objective-C, skompilowany kod zamiast wywoływać tę funkcję, wywoła **`objc_msgSend`**. Który wywoła finalną funkcję:
+Gdy funkcja jest wywoływana w binarium, które używa Objective-C, skompilowany kod zamiast wywoływać tę funkcję, wywoła **`objc_msgSend`**. Które wywoła finalną funkcję:
 
 ![](<../../../images/image (305).png>)
 
 Parametry, których ta funkcja oczekuje, to:
 
-- Pierwszy parametr (**self**) to "wskaźnik, który wskazuje na **instancję klasy, która ma otrzymać wiadomość**". Mówiąc prościej, to obiekt, na którym wywoływana jest metoda. Jeśli metoda jest metodą klasy, będzie to instancja obiektu klasy (jako całość), natomiast dla metody instancji, self będzie wskazywać na zainicjowaną instancję klasy jako obiekt.
+- Pierwszy parametr (**self**) to "wskaźnik, który wskazuje na **instancję klasy, która ma otrzymać wiadomość**". Mówiąc prościej, jest to obiekt, na którym wywoływana jest metoda. Jeśli metoda jest metodą klasy, będzie to instancja obiektu klasy (jako całość), natomiast dla metody instancji, self będzie wskazywać na zainicjowaną instancję klasy jako obiekt.
 - Drugi parametr (**op**) to "selekcja metody, która obsługuje wiadomość". Mówiąc prościej, to po prostu **nazwa metody.**
 - Pozostałe parametry to wszelkie **wartości wymagane przez metodę** (op).
 
@@ -135,14 +135,14 @@ arm64-basic-assembly.md
 x64:
 
 | **Argument**      | **Rejestr**                                                    | **(dla) objc_msgSend**                                 |
-| ----------------- | --------------------------------------------------------------- | ------------------------------------------------------ |
-| **1. argument**   | **rdi**                                                         | **self: obiekt, na którym wywoływana jest metoda**    |
-| **2. argument**   | **rsi**                                                         | **op: nazwa metody**                                  |
-| **3. argument**   | **rdx**                                                         | **1. argument do metody**                             |
-| **4. argument**   | **rcx**                                                         | **2. argument do metody**                             |
-| **5. argument**   | **r8**                                                          | **3. argument do metody**                             |
-| **6. argument**   | **r9**                                                          | **4. argument do metody**                             |
-| **7. i więcej**   | <p><strong>rsp+</strong><br><strong>(na stosie)</strong></p> | **5. i więcej argumentów do metody**                  |
+| ----------------- | -------------------------------------------------------------- | ------------------------------------------------------ |
+| **1. argument**   | **rdi**                                                        | **self: obiekt, na którym wywoływana jest metoda**     |
+| **2. argument**   | **rsi**                                                        | **op: nazwa metody**                                   |
+| **3. argument**   | **rdx**                                                        | **1. argument do metody**                              |
+| **4. argument**   | **rcx**                                                        | **2. argument do metody**                              |
+| **5. argument**   | **r8**                                                         | **3. argument do metody**                              |
+| **6. argument**   | **r9**                                                         | **4. argument do metody**                              |
+| **7. argument i więcej** | <p><strong>rsp+</strong><br><strong>(na stosie)</strong></p> | **5. argument i więcej do metody**                     |
 
 ### Zrzut metadanych ObjectiveC
 
@@ -191,7 +191,7 @@ Mem: 0x100027064-0x1000274cc        __TEXT.__swift5_fieldmd
 Mem: 0x1000274cc-0x100027608        __TEXT.__swift5_capture
 [...]
 ```
-Możesz znaleźć więcej informacji o [**informacjach przechowywanych w tej sekcji w tym wpisie na blogu**](https://knight.sc/reverse%20engineering/2019/07/17/swift-metadata.html).
+Możesz znaleźć więcej informacji o [**informacjach przechowywanych w tej sekcji w tym poście na blogu**](https://knight.sc/reverse%20engineering/2019/07/17/swift-metadata.html).
 
 Ponadto, **binarne pliki Swift mogą mieć symbole** (na przykład biblioteki muszą przechowywać symbole, aby ich funkcje mogły być wywoływane). **Symbole zazwyczaj zawierają informacje o nazwie funkcji** i atrybucie w nieczytelny sposób, więc są bardzo przydatne, a istnieją "**demanglery**", które mogą uzyskać oryginalną nazwę:
 ```bash
@@ -211,7 +211,7 @@ swift demangle
 
 ### APIs
 
-macOS udostępnia kilka interesujących API, które dostarczają informacji o procesach:
+macOS udostępnia kilka interesujących API, które dają informacje o procesach:
 
 - `proc_info`: To główne API, które dostarcza wiele informacji o każdym procesie. Musisz być rootem, aby uzyskać informacje o innych procesach, ale nie potrzebujesz specjalnych uprawnień ani portów mach.
 - `libsysmon.dylib`: Umożliwia uzyskanie informacji o procesach za pomocą funkcji XPC, jednak potrzebne jest posiadanie uprawnienia `com.apple.sysmond.client`.
@@ -224,13 +224,13 @@ macOS udostępnia kilka interesujących API, które dostarczają informacji o pr
 
 To narzędzie (`/usr/bini/ysdiagnose`) zasadniczo zbiera wiele informacji z twojego komputera, wykonując dziesiątki różnych poleceń, takich jak `ps`, `zprint`...
 
-Musi być uruchomione jako **root**, a demon `/usr/libexec/sysdiagnosed` ma bardzo interesujące uprawnienia, takie jak `com.apple.system-task-ports` i `get-task-allow`.
+Musi być uruchamiane jako **root**, a demon `/usr/libexec/sysdiagnosed` ma bardzo interesujące uprawnienia, takie jak `com.apple.system-task-ports` i `get-task-allow`.
 
 Jego plist znajduje się w `/System/Library/LaunchDaemons/com.apple.sysdiagnose.plist`, który deklaruje 3 MachServices:
 
 - `com.apple.sysdiagnose.CacheDelete`: Usuwa stare archiwa w /var/rmp
 - `com.apple.sysdiagnose.kernel.ipc`: Specjalny port 23 (jądro)
-- `com.apple.sysdiagnose.service.xpc`: Interfejs trybu użytkownika przez klasę Obj-C `Libsysdiagnose`. Można przekazać trzy argumenty w słowniku (`compress`, `display`, `run`)
+- `com.apple.sysdiagnose.service.xpc`: Interfejs w trybie użytkownika przez klasę Obj-C `Libsysdiagnose`. Można przekazać trzy argumenty w słowniku (`compress`, `display`, `run`)
 
 ### Unified Logs
 
@@ -254,7 +254,7 @@ Klikając prawym przyciskiem myszy na obiekt kodu, można zobaczyć **odniesieni
 
 <figure><img src="../../../images/image (1117).png" alt=""><figcaption></figcaption></figure>
 
-Ponadto, w **dolnej części środkowego panelu można pisać polecenia Pythona**.
+Ponadto, w **dolnej części środkowego panelu można pisać polecenia w Pythonie**.
 
 #### Right panel
 
@@ -375,15 +375,15 @@ Or `tailspin`.
 
 Jest używany do profilowania na poziomie jądra i jest zbudowany przy użyciu wywołań `Kdebug`.
 
-W zasadzie, globalna zmienna `kernel_debug_active` jest sprawdzana, a jeśli jest ustawiona, wywołuje `kperf_kdebug_handler` z kodem `Kdebug` i adresem ramki jądra. Jeśli kod `Kdebug` pasuje do jednego z wybranych, uzyskuje "akcje" skonfigurowane jako bitmapa (sprawdź `osfmk/kperf/action.h` dla opcji).
+W zasadzie sprawdzana jest globalna zmienna `kernel_debug_active`, a jeśli jest ustawiona, wywołuje `kperf_kdebug_handler` z kodem `Kdebug` i adresem ramki jądra. Jeśli kod `Kdebug` pasuje do jednego z wybranych, uzyskuje "akcje" skonfigurowane jako bitmapa (sprawdź `osfmk/kperf/action.h` dla opcji).
 
 Kperf ma również tabelę MIB sysctl: (jako root) `sysctl kperf`. Te kody można znaleźć w `osfmk/kperf/kperfbsd.c`.
 
-Ponadto, podzbiór funkcjonalności Kperf znajduje się w `kpc`, który dostarcza informacji o licznikach wydajności maszyny.
+Ponadto, podzbiór funkcjonalności Kperfs znajduje się w `kpc`, który dostarcza informacji o licznikach wydajności maszyny.
 
 ### ProcessMonitor
 
-[**ProcessMonitor**](https://objective-see.com/products/utilities.html#ProcessMonitor) to bardzo przydatne narzędzie do sprawdzania działań związanych z procesami, które wykonuje dany proces (na przykład, monitorowanie, które nowe procesy tworzy dany proces).
+[**ProcessMonitor**](https://objective-see.com/products/utilities.html#ProcessMonitor) to bardzo przydatne narzędzie do sprawdzania działań związanych z procesami, które wykonuje dany proces (na przykład monitorowanie, które nowe procesy tworzy dany proces).
 
 ### SpriteTree
 
@@ -420,7 +420,7 @@ Sprawdza również procesy binarne w stosunku do **virustotal** i pokazuje infor
 
 ## PT_DENY_ATTACH <a href="#page-title" id="page-title"></a>
 
-W [**tym wpisie na blogu**](https://knight.sc/debugging/2019/06/03/debugging-apple-binaries-that-use-pt-deny-attach.html) można znaleźć przykład, jak **debugować działający demon**, który używał **`PT_DENY_ATTACH`** do zapobiegania debugowaniu, nawet jeśli SIP był wyłączony.
+W [**tym wpisie na blogu**](https://knight.sc/debugging/2019/06/03/debugging-apple-binaries-that-use-pt-deny-attach.html) można znaleźć przykład, jak **debugować działający demon**, który używał **`PT_DENY_ATTACH`**, aby zapobiec debugowaniu, nawet jeśli SIP był wyłączony.
 
 ### lldb
 
@@ -431,14 +431,14 @@ lldb -p 1122
 lldb -n malware.bin
 lldb -n malware.bin --waitfor
 ```
-Możesz ustawić smak intel, używając lldb, tworząc plik o nazwie **`.lldbinit`** w swoim folderze domowym z następującą linią:
+Możesz ustawić smak intel, używając lldb, tworząc plik o nazwie **`.lldbinit`** w swoim katalogu domowym z następującą linią:
 ```bash
 settings set target.x86-disassembly-flavor intel
 ```
 > [!WARNING]
 > Wewnątrz lldb, zrzutuj proces za pomocą `process save-core`
 
-<table data-header-hidden><thead><tr><th width="225"></th><th></th></tr></thead><tbody><tr><td><strong>(lldb) Komenda</strong></td><td><strong>Opis</strong></td></tr><tr><td><strong>run (r)</strong></td><td>Rozpoczęcie wykonania, które będzie kontynuowane, aż do osiągnięcia punktu przerwania lub zakończenia procesu.</td></tr><tr><td><strong>process launch --stop-at-entry</strong></td><td>Rozpocznij wykonanie zatrzymując się w punkcie wejścia</td></tr><tr><td><strong>continue (c)</strong></td><td>Kontynuuj wykonanie debugowanego procesu.</td></tr><tr><td><strong>nexti (n / ni)</strong></td><td>Wykonaj następną instrukcję. Ta komenda pominie wywołania funkcji.</td></tr><tr><td><strong>stepi (s / si)</strong></td><td>Wykonaj następną instrukcję. W przeciwieństwie do komendy nexti, ta komenda wejdzie w wywołania funkcji.</td></tr><tr><td><strong>finish (f)</strong></td><td>Wykonaj resztę instrukcji w bieżącej funkcji (“ramce”) i zatrzymaj.</td></tr><tr><td><strong>control + c</strong></td><td>Wstrzymaj wykonanie. Jeśli proces był uruchomiony (r) lub kontynuowany (c), spowoduje to zatrzymanie procesu ...gdziekolwiek aktualnie się wykonuje.</td></tr><tr><td><strong>breakpoint (b)</strong></td><td><p><code>b main</code> #Każda funkcja o nazwie main</p><p><code>b &#x3C;binname>`main</code> #Funkcja main bin</p><p><code>b set -n main --shlib &#x3C;lib_name></code> #Funkcja main wskazanego bin</p><p><code>breakpoint set -r '\[NSFileManager .*\]$'</code> #Każda metoda NSFileManager</p><p><code>breakpoint set -r '\[NSFileManager contentsOfDirectoryAtPath:.*\]$'</code></p><p><code>break set -r . -s libobjc.A.dylib</code> # Zatrzymaj w wszystkich funkcjach tej biblioteki</p><p><code>b -a 0x0000000100004bd9</code></p><p><code>br l</code> #Lista punktów przerwania</p><p><code>br e/dis &#x3C;num></code> #Włącz/Wyłącz punkt przerwania</p><p>breakpoint delete &#x3C;num></p></td></tr><tr><td><strong>help</strong></td><td><p>help breakpoint #Uzyskaj pomoc dla komendy breakpoint</p><p>help memory write #Uzyskaj pomoc w zapisywaniu do pamięci</p></td></tr><tr><td><strong>reg</strong></td><td><p>reg read</p><p>reg read $rax</p><p>reg read $rax --format &#x3C;<a href="https://lldb.llvm.org/use/variable.html#type-format">format</a>></p><p>reg write $rip 0x100035cc0</p></td></tr><tr><td><strong>x/s &#x3C;reg/adres pamięci></strong></td><td>Wyświetl pamięć jako łańcuch zakończony zerem.</td></tr><tr><td><strong>x/i &#x3C;reg/adres pamięci></strong></td><td>Wyświetl pamięć jako instrukcję asemblera.</td></tr><tr><td><strong>x/b &#x3C;reg/adres pamięci></strong></td><td>Wyświetl pamięć jako bajt.</td></tr><tr><td><strong>print object (po)</strong></td><td><p>To wydrukuje obiekt wskazywany przez parametr</p><p>po $raw</p><p><code>{</code></p><p><code>dnsChanger = {</code></p><p><code>"affiliate" = "";</code></p><p><code>"blacklist_dns" = ( );</code></p><p>Należy pamiętać, że większość API lub metod Objective-C Apple zwraca obiekty, a zatem powinny być wyświetlane za pomocą komendy “print object” (po). Jeśli po nie produkuje znaczącego wyniku, użyj <code>x/b</code></p></td></tr><tr><td><strong>memory</strong></td><td>memory read 0x000....<br>memory read $x0+0xf2a<br>memory write 0x100600000 -s 4 0x41414141 #Zapisz AAAA w tym adresie<br>memory write -f s $rip+0x11f+7 "AAAA" #Zapisz AAAA w adresie</td></tr><tr><td><strong>disassembly</strong></td><td><p>dis #Disas bieżącą funkcję</p><p>dis -n &#x3C;funcname> #Disas funkcję</p><p>dis -n &#x3C;funcname> -b &#x3C;basename> #Disas funkcję<br>dis -c 6 #Disas 6 linii<br>dis -c 0x100003764 -e 0x100003768 # Od jednego adresu do drugiego<br>dis -p -c 4 # Rozpocznij w bieżącym adresie disasembli</p></td></tr><tr><td><strong>parray</strong></td><td>parray 3 (char **)$x1 # Sprawdź tablicę 3 komponentów w rejestrze x1</td></tr><tr><td><strong>image dump sections</strong></td><td>Wydrukuj mapę pamięci bieżącego procesu</td></tr><tr><td><strong>image dump symtab &#x3C;library></strong></td><td><code>image dump symtab CoreNLP</code> #Uzyskaj adres wszystkich symboli z CoreNLP</td></tr></tbody></table>
+<table data-header-hidden><thead><tr><th width="225"></th><th></th></tr></thead><tbody><tr><td><strong>(lldb) Komenda</strong></td><td><strong>Opis</strong></td></tr><tr><td><strong>run (r)</strong></td><td>Rozpoczęcie wykonania, które będzie kontynuowane, aż do osiągnięcia punktu przerwania lub zakończenia procesu.</td></tr><tr><td><strong>process launch --stop-at-entry</strong></td><td>Rozpocznij wykonanie zatrzymując się w punkcie wejścia</td></tr><tr><td><strong>continue (c)</strong></td><td>Kontynuuj wykonanie debugowanego procesu.</td></tr><tr><td><strong>nexti (n / ni)</strong></td><td>Wykonaj następną instrukcję. Ta komenda pominie wywołania funkcji.</td></tr><tr><td><strong>stepi (s / si)</strong></td><td>Wykonaj następną instrukcję. W przeciwieństwie do komendy nexti, ta komenda wejdzie w wywołania funkcji.</td></tr><tr><td><strong>finish (f)</strong></td><td>Wykonaj resztę instrukcji w bieżącej funkcji (“ramce”), zwróć i zatrzymaj.</td></tr><tr><td><strong>control + c</strong></td><td>Wstrzymaj wykonanie. Jeśli proces był uruchomiony (r) lub kontynuowany (c), spowoduje to zatrzymanie procesu ...gdziekolwiek aktualnie się wykonuje.</td></tr><tr><td><strong>breakpoint (b)</strong></td><td><p><code>b main</code> #Każda funkcja o nazwie main</p><p><code>b &#x3C;binname>`main</code> #Funkcja main bin</p><p><code>b set -n main --shlib &#x3C;lib_name></code> #Funkcja main wskazanego bin</p><p><code>breakpoint set -r '\[NSFileManager .*\]$'</code> #Każda metoda NSFileManager</p><p><code>breakpoint set -r '\[NSFileManager contentsOfDirectoryAtPath:.*\]$'</code></p><p><code>break set -r . -s libobjc.A.dylib</code> # Zatrzymaj w wszystkich funkcjach tej biblioteki</p><p><code>b -a 0x0000000100004bd9</code></p><p><code>br l</code> #Lista punktów przerwania</p><p><code>br e/dis &#x3C;num></code> #Włącz/Wyłącz punkt przerwania</p><p>breakpoint delete &#x3C;num></p></td></tr><tr><td><strong>help</strong></td><td><p>help breakpoint #Uzyskaj pomoc dla komendy breakpoint</p><p>help memory write #Uzyskaj pomoc w zapisywaniu do pamięci</p></td></tr><tr><td><strong>reg</strong></td><td><p>reg read</p><p>reg read $rax</p><p>reg read $rax --format &#x3C;<a href="https://lldb.llvm.org/use/variable.html#type-format">format</a>></p><p>reg write $rip 0x100035cc0</p></td></tr><tr><td><strong>x/s &#x3C;reg/adres pamięci></strong></td><td>Wyświetl pamięć jako łańcuch zakończony zerem.</td></tr><tr><td><strong>x/i &#x3C;reg/adres pamięci></strong></td><td>Wyświetl pamięć jako instrukcję asemblera.</td></tr><tr><td><strong>x/b &#x3C;reg/adres pamięci></strong></td><td>Wyświetl pamięć jako bajt.</td></tr><tr><td><strong>print object (po)</strong></td><td><p>To wydrukuje obiekt wskazywany przez parametr</p><p>po $raw</p><p><code>{</code></p><p><code>dnsChanger = {</code></p><p><code>"affiliate" = "";</code></p><p><code>"blacklist_dns" = ( );</code></p><p>Uwaga, że większość API lub metod Objective-C Apple zwraca obiekty, a zatem powinny być wyświetlane za pomocą komendy “print object” (po). Jeśli po nie produkuje sensownego wyniku, użyj <code>x/b</code></p></td></tr><tr><td><strong>memory</strong></td><td>memory read 0x000....<br>memory read $x0+0xf2a<br>memory write 0x100600000 -s 4 0x41414141 #Zapisz AAAA w tym adresie<br>memory write -f s $rip+0x11f+7 "AAAA" #Zapisz AAAA w adresie</td></tr><tr><td><strong>disassembly</strong></td><td><p>dis #Disas bieżącą funkcję</p><p>dis -n &#x3C;funcname> #Disas funkcję</p><p>dis -n &#x3C;funcname> -b &#x3C;basename> #Disas funkcję<br>dis -c 6 #Disas 6 linii<br>dis -c 0x100003764 -e 0x100003768 # Od jednego adresu do drugiego<br>dis -p -c 4 # Rozpocznij w bieżącym adresie disasembli</p></td></tr><tr><td><strong>parray</strong></td><td>parray 3 (char **)$x1 # Sprawdź tablicę 3 komponentów w rejestrze x1</td></tr><tr><td><strong>image dump sections</strong></td><td>Wydrukuj mapę pamięci bieżącego procesu</td></tr><tr><td><strong>image dump symtab &#x3C;library></strong></td><td><code>image dump symtab CoreNLP</code> #Uzyskaj adres wszystkich symboli z CoreNLP</td></tr></tbody></table>
 
 > [!NOTE]
 > Przy wywoływaniu funkcji **`objc_sendMsg`**, rejestr **rsi** przechowuje **nazwę metody** jako łańcuch zakończony zerem (“C”). Aby wydrukować nazwę za pomocą lldb, zrób:
@@ -454,12 +454,12 @@ settings set target.x86-disassembly-flavor intel
 
 #### Wykrywanie VM
 
-- Komenda **`sysctl hw.model`** zwraca "Mac", gdy **host to MacOS**, ale coś innego, gdy jest to VM.
+- Komenda **`sysctl hw.model`** zwraca "Mac", gdy **host jest MacOS**, ale coś innego, gdy jest to VM.
 - Bawiąc się wartościami **`hw.logicalcpu`** i **`hw.physicalcpu`**, niektóre złośliwe oprogramowanie próbują wykryć, czy to VM.
 - Niektóre złośliwe oprogramowanie mogą również **wykrywać**, czy maszyna jest **oparta na VMware** na podstawie adresu MAC (00:50:56).
 - Możliwe jest również sprawdzenie **czy proces jest debugowany** za pomocą prostego kodu, takiego jak:
 - `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //proces jest debugowany }`
-- Może również wywołać systemowe wywołanie **`ptrace`** z flagą **`PT_DENY_ATTACH`**. To **zapobiega** dołączeniu i śledzeniu przez debuger.
+- Może również wywołać wywołanie systemowe **`ptrace`** z flagą **`PT_DENY_ATTACH`**. To **zapobiega** dołączeniu i śledzeniu przez debuger.
 - Możesz sprawdzić, czy funkcja **`sysctl`** lub **`ptrace`** jest **importowana** (ale złośliwe oprogramowanie mogłoby zaimportować ją dynamicznie)
 - Jak zauważono w tym opisie, “[Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)” :\
 “_Wiadomość Process # exited with **status = 45 (0x0000002d)** jest zazwyczaj wyraźnym znakiem, że cel debugowania używa **PT_DENY_ATTACH**_”
@@ -479,7 +479,7 @@ W tych przypadkach zrzut rdzenia jest generowany zgodnie z `kern.corefile` sysct
 ### [ReportCrash](https://ss64.com/osx/reportcrash.html)
 
 ReportCrash **analizuje procesy, które uległy awarii i zapisuje raport o awarii na dysku**. Raport o awarii zawiera informacje, które mogą **pomóc programiście zdiagnozować** przyczynę awarii.\
-Dla aplikacji i innych procesów **uruchamianych w kontekście launchd dla użytkownika**, ReportCrash działa jako LaunchAgent i zapisuje raporty o awariach w `~/Library/Logs/DiagnosticReports/` użytkownika.\
+Dla aplikacji i innych procesów **uruchamianych w kontekście launchd per-user**, ReportCrash działa jako LaunchAgent i zapisuje raporty o awariach w `~/Library/Logs/DiagnosticReports/` użytkownika.\
 Dla demonów, innych procesów **uruchamianych w kontekście launchd systemu** i innych procesów z uprawnieniami, ReportCrash działa jako LaunchDaemon i zapisuje raporty o awariach w `/Library/Logs/DiagnosticReports` systemu.
 
 Jeśli obawiasz się, że raporty o awariach **są wysyłane do Apple**, możesz je wyłączyć. Jeśli nie, raporty o awariach mogą być przydatne do **ustalenia, jak serwer uległ awarii**.
@@ -502,7 +502,7 @@ Podczas fuzzingu na MacOS ważne jest, aby nie pozwolić Macowi na uśpienie:
 
 #### Rozłączenie SSH
 
-Jeśli fuzzujesz przez połączenie SSH, ważne jest, aby upewnić się, że sesja nie zostanie zakończona. Zmień plik sshd_config na:
+Jeśli fuzzujesz przez połączenie SSH, ważne jest, aby upewnić się, że sesja nie zostanie przerwana. Zmień plik sshd_config na:
 
 - TCPKeepAlive Yes
 - ClientAliveInterval 0
@@ -513,7 +513,7 @@ sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist
 ```
 ### Wewnętrzni obsługiwacze
 
-**Sprawdź następującą stronę**, aby dowiedzieć się, jak znaleźć, która aplikacja jest odpowiedzialna za **obsługę określonego schematu lub protokołu:**
+**Sprawdź następującą stronę**, aby dowiedzieć się, jak znaleźć, która aplikacja odpowiada za **obsługę określonego schematu lub protokołu:**
 
 {{#ref}}
 ../macos-file-extension-apps.md

@@ -4,9 +4,9 @@
 
 ## PID Reuse
 
-Kiedy **usługa XPC** w macOS sprawdza wywoływany proces na podstawie **PID** i nie na podstawie **tokena audytu**, jest podatna na atak ponownego użycia PID. Atak ten opiera się na **warunkach wyścigu**, gdzie **eksploit** będzie **wysyłać wiadomości do usługi XPC**, **nadużywając** funkcjonalności, a dopiero **po** tym wykona **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** z **dozwolonym** binarnym.
+Kiedy **usługa XPC** w macOS sprawdza wywołany proces na podstawie **PID** i nie na podstawie **tokena audytu**, jest podatna na atak ponownego użycia PID. Atak ten opiera się na **warunkach wyścigu**, gdzie **eksploit** będzie **wysyłać wiadomości do usługi XPC**, **nadużywając** funkcjonalności, a dopiero **po** tym wykona **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** z **dozwolonym** binarnym.
 
-Ta funkcja sprawi, że **dozwolona binarna** przejmie PID, ale **złośliwa wiadomość XPC** zostanie wysłana tuż przed tym. Więc, jeśli usługa **XPC** **używa** **PID** do **uwierzytelnienia** nadawcy i sprawdza go **PO** wykonaniu **`posix_spawn`**, pomyśli, że pochodzi z **autoryzowanego** procesu.
+Ta funkcja sprawi, że **dozwolona binarna** przejmie PID, ale **złośliwa wiadomość XPC** zostanie wysłana tuż przed tym. Więc, jeśli usługa **XPC** **używa** **PID** do **uwierzytelnienia** nadawcy i sprawdza to **PO** wykonaniu **`posix_spawn`**, pomyśli, że pochodzi z **autoryzowanego** procesu.
 
 ### Przykład eksploitu
 
@@ -17,7 +17,7 @@ Jak na przykład na tym obrazku (pochodzącym z odniesienia):
 
 Sprawdź ten przykład eksploitu (ponownie, pochodzący z odniesienia), aby zobaczyć 2 części eksploitu:
 
-- Jeden, który **generuje kilka forków**
+- Jedna, która **generuje kilka forków**
 - **Każdy fork** **wyśle** **ładunek** do usługi XPC, wykonując **`posix_spawn`** tuż po wysłaniu wiadomości.
 
 > [!CAUTION]
@@ -280,7 +280,7 @@ return 0;
 
 - [https://gergelykalman.com/why-you-shouldnt-use-a-commercial-vpn-amateur-hour-with-windscribe.html](https://gergelykalman.com/why-you-shouldnt-use-a-commercial-vpn-amateur-hour-with-windscribe.html)
 
-## Odniesienia
+## Źródła
 
 - [https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/](https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/)
 - [https://saelo.github.io/presentations/warcon18_dont_trust_the_pid.pdf](https://saelo.github.io/presentations/warcon18_dont_trust_the_pid.pdf)

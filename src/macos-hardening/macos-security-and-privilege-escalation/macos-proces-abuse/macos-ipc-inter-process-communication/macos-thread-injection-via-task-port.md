@@ -9,7 +9,7 @@
 
 ## 1. Przejęcie wątku
 
-Początkowo wywoływana jest funkcja **`task_threads()`** na porcie zadania, aby uzyskać listę wątków z zdalnego zadania. Wątek jest wybierany do przejęcia. To podejście różni się od konwencjonalnych metod wstrzykiwania kodu, ponieważ tworzenie nowego zdalnego wątku jest zabronione z powodu nowej mitigacji blokującej `thread_create_running()`.
+Początkowo funkcja **`task_threads()`** jest wywoływana na porcie zadania, aby uzyskać listę wątków z zdalnego zadania. Wątek jest wybierany do przejęcia. To podejście różni się od konwencjonalnych metod wstrzykiwania kodu, ponieważ tworzenie nowego zdalnego wątku jest zabronione z powodu nowej mitigacji blokującej `thread_create_running()`.
 
 Aby kontrolować wątek, wywoływana jest **`thread_suspend()`**, zatrzymując jego wykonanie.
 
@@ -131,8 +131,8 @@ Po pomyślnym ustanowieniu pamięci współdzielonej i uzyskaniu możliwości do
 
 1. **Dowolne Operacje na Pamięci**:
 
-- Wykonuj dowolne odczyty pamięci, wywołując `memcpy()`, aby skopiować dane z obszaru współdzielonego.
-- Wykonuj dowolne zapisy pamięci, używając `memcpy()`, aby przenieść dane do obszaru współdzielonego.
+- Wykonuj dowolne odczyty pamięci, wywołując `memcpy()`, aby skopiować dane z regionu współdzielonego.
+- Wykonuj dowolne zapisy pamięci, używając `memcpy()`, aby przenieść dane do regionu współdzielonego.
 
 2. **Obsługa Wywołań Funkcji z Wieloma Argumentami**:
 
@@ -150,9 +150,9 @@ Ta kompleksowa kontrola jest zawarta w bibliotece [threadexec](https://github.co
 ## Ważne Rozważania:
 
 - Zapewnij prawidłowe użycie `memcpy()` do operacji odczytu/zapisu pamięci, aby utrzymać stabilność systemu i integralność danych.
-- Przy transferze portów Mach lub deskryptorów plików, przestrzegaj odpowiednich protokołów i odpowiedzialnie zarządzaj zasobami, aby zapobiec wyciekom lub niezamierzonym dostępom.
+- Podczas transferu portów Mach lub deskryptorów plików, przestrzegaj odpowiednich protokołów i odpowiedzialnie zarządzaj zasobami, aby zapobiec wyciekom lub niezamierzonym dostępom.
 
-Przestrzegając tych wytycznych i korzystając z biblioteki `threadexec`, można efektywnie zarządzać i interagować z procesami na szczegółowym poziomie, osiągając pełną kontrolę nad docelowym procesem.
+Przestrzegając tych wytycznych i wykorzystując bibliotekę `threadexec`, można efektywnie zarządzać i interagować z procesami na szczegółowym poziomie, osiągając pełną kontrolę nad docelowym procesem.
 
 ## Odniesienia
 

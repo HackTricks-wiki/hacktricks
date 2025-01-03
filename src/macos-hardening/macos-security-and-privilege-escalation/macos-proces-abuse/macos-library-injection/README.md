@@ -15,9 +15,9 @@ macos-dyld-process.md
 
 ## **DYLD_INSERT_LIBRARIES**
 
-To jest jak [**LD_PRELOAD na Linuxie**](../../../../linux-hardening/privilege-escalation/#ld_preload). Umożliwia wskazanie procesu, który ma być uruchomiony, aby załadować konkretną bibliotekę z określonej ścieżki (jeśli zmienna env jest włączona).
+To jest jak [**LD_PRELOAD na Linuxie**](../../../../linux-hardening/privilege-escalation/#ld_preload). Umożliwia wskazanie procesu, który ma być uruchomiony, aby załadować konkretną bibliotekę z określonej ścieżki (jeśli zmienna env jest włączona)
 
-Ta technika może być również **używana jako technika ASEP**, ponieważ każda zainstalowana aplikacja ma plist o nazwie "Info.plist", który pozwala na **przypisanie zmiennych środowiskowych** za pomocą klucza o nazwie `LSEnvironmental`.
+Ta technika może być również **używana jako technika ASEP**, ponieważ każda zainstalowana aplikacja ma plist o nazwie "Info.plist", która pozwala na **przypisanie zmiennych środowiskowych** za pomocą klucza o nazwie `LSEnvironmental`.
 
 > [!NOTE]
 > Od 2012 roku **Apple drastycznie ograniczyło moc** **`DYLD_INSERT_LIBRARIES`**.
@@ -35,7 +35,7 @@ Ta technika może być również **używana jako technika ASEP**, ponieważ każ
 
 ### Walidacja Bibliotek
 
-Nawet jeśli binarka pozwala na użycie zmiennej env **`DYLD_INSERT_LIBRARIES`**, jeśli binarka sprawdza podpis biblioteki do załadowania, nie załaduje niestandardowej.
+Nawet jeśli binarka pozwala na użycie zmiennej środowiskowej **`DYLD_INSERT_LIBRARIES`**, jeśli binarka sprawdza podpis biblioteki do załadowania, nie załaduje niestandardowej.
 
 Aby załadować niestandardową bibliotekę, binarka musi mieć **jedno z następujących uprawnień**:
 
@@ -59,14 +59,14 @@ macos-dyld-hijacking-and-dyld_insert_libraries.md
 > [!CAUTION]
 > Pamiętaj, że **wcześniejsze ograniczenia walidacji bibliotek również mają zastosowanie** do przeprowadzania ataków Dylib hijacking.
 
-Podobnie jak w Windows, w MacOS możesz również **przechwytywać dyliby**, aby sprawić, że **aplikacje** **wykonają** **dowolny** **kod** (właściwie, z poziomu zwykłego użytkownika może to nie być możliwe, ponieważ możesz potrzebować zgody TCC, aby pisać wewnątrz pakietu `.app` i przechwycić bibliotekę).\
-Jednak sposób, w jaki **aplikacje MacOS** **ładują** biblioteki, jest **bardziej ograniczony** niż w Windows. Oznacza to, że **deweloperzy złośliwego oprogramowania** mogą nadal używać tej techniki do **ukrywania**, ale prawdopodobieństwo, że będą mogli **nadużyć tego do eskalacji uprawnień, jest znacznie mniejsze**.
+Podobnie jak w Windows, w MacOS możesz również **przechwytywać dyliby**, aby sprawić, by **aplikacje** **wykonywały** **dowolny** **kod** (właściwie, z poziomu zwykłego użytkownika może to nie być możliwe, ponieważ możesz potrzebować zgody TCC, aby pisać wewnątrz pakietu `.app` i przechwycić bibliotekę).\
+Jednak sposób, w jaki **aplikacje MacOS** **ładują** biblioteki, jest **bardziej ograniczony** niż w Windows. Oznacza to, że **deweloperzy złośliwego oprogramowania** mogą nadal używać tej techniki do **ukrycia**, ale prawdopodobieństwo, że będą mogli **nadużyć tego do eskalacji uprawnień, jest znacznie mniejsze**.
 
 Przede wszystkim, jest **bardziej powszechne**, że **binarki MacOS wskazują pełną ścieżkę** do bibliotek do załadowania. Po drugie, **MacOS nigdy nie szuka** w folderach **$PATH** bibliotek.
 
 **Główna** część **kodu** związana z tą funkcjonalnością znajduje się w **`ImageLoader::recursiveLoadLibraries`** w `ImageLoader.cpp`.
 
-Istnieją **4 różne polecenia nagłówkowe**, które binarka macho może użyć do załadowania bibliotek:
+Istnieją **4 różne polecenia nagłówkowe**, które binarka macho może użyć do ładowania bibliotek:
 
 - **`LC_LOAD_DYLIB`** to standardowe polecenie do ładowania dylibu.
 - **`LC_LOAD_WEAK_DYLIB`** działa jak poprzednie, ale jeśli dylib nie zostanie znaleziony, wykonanie kontynuuje bez żadnego błędu.
@@ -97,10 +97,10 @@ compatibility version 1.0.0
 >
 > **`@loader_path`**: To **ścieżka** do **katalogu** zawierającego **binarkę Mach-O**, która zawiera polecenie ładowania.
 >
-> - Gdy używane w pliku wykonywalnym, **`@loader_path`** jest w zasadzie **tym samym** co **`@executable_path`**.
-> - Gdy używane w **dylib**, **`@loader_path`** daje **ścieżkę** do **dylib**.
+> - Gdy jest używane w pliku wykonywalnym, **`@loader_path`** jest w zasadzie **tym samym** co **`@executable_path`**.
+> - Gdy jest używane w **dylib**, **`@loader_path`** daje **ścieżkę** do **dylib**.
 
-Sposób na **eskalację uprawnień** nadużywając tej funkcjonalności byłby w rzadkim przypadku, gdy **aplikacja** uruchamiana **przez** **roota** **szuka** jakiejś **biblioteki w jakimś folderze, w którym atakujący ma uprawnienia do zapisu.**
+Sposób na **eskalację uprawnień** nadużywając tej funkcjonalności byłby w rzadkim przypadku, gdy **aplikacja** uruchamiana **przez** **root** **szuka** jakiejś **biblioteki w jakimś folderze, w którym atakujący ma uprawnienia do zapisu.**
 
 > [!TIP]
 > Fajnym **skanerem** do znajdowania **brakujących bibliotek** w aplikacjach jest [**Dylib Hijack Scanner**](https://objective-see.com/products/dhs.html) lub [**wersja CLI**](https://github.com/pandazheng/DylibHijack).\
@@ -119,7 +119,7 @@ macos-dyld-hijacking-and-dyld_insert_libraries.md
 
 Z **`man dlopen`**:
 
-- Gdy ścieżka **nie zawiera znaku ukośnika** (tj. jest tylko nazwą liścia), **dlopen() będzie szukać**. Jeśli **`$DYLD_LIBRARY_PATH`** został ustawiony przy uruchomieniu, dyld najpierw **spojrzy w tym katalogu**. Następnie, jeśli plik mach-o wywołujący lub główny plik wykonywalny określają **`LC_RPATH`**, dyld **spojrzy w tych** katalogach. Następnie, jeśli proces jest **nieograniczony**, dyld będzie szukać w **bieżącym katalogu roboczym**. Na koniec, dla starych binarek, dyld spróbuje kilku alternatyw. Jeśli **`$DYLD_FALLBACK_LIBRARY_PATH`** został ustawiony przy uruchomieniu, dyld będzie szukać w **tych katalogach**, w przeciwnym razie dyld spojrzy w **`/usr/local/lib/`** (jeśli proces jest nieograniczony), a następnie w **`/usr/lib/`** (te informacje zostały wzięte z **`man dlopen`**).
+- Gdy ścieżka **nie zawiera znaku ukośnika** (tj. jest tylko nazwą liścia), **dlopen() będzie szukać**. Jeśli **`$DYLD_LIBRARY_PATH`** został ustawiony przy uruchomieniu, dyld najpierw **sprawdzi w tym katalogu**. Następnie, jeśli plik mach-o wywołujący lub główny plik wykonywalny określają **`LC_RPATH`**, dyld **sprawdzi w tych** katalogach. Następnie, jeśli proces jest **nieograniczony**, dyld będzie szukać w **bieżącym katalogu roboczym**. Na koniec, dla starych binarek, dyld spróbuje kilku alternatyw. Jeśli **`$DYLD_FALLBACK_LIBRARY_PATH`** został ustawiony przy uruchomieniu, dyld będzie szukać w **tych katalogach**, w przeciwnym razie dyld będzie szukać w **`/usr/local/lib/`** (jeśli proces jest nieograniczony), a następnie w **`/usr/lib/`** (te informacje zostały wzięte z **`man dlopen`**).
 1. `$DYLD_LIBRARY_PATH`
 2. `LC_RPATH`
 3. `CWD`(jeśli nieograniczony)
@@ -133,7 +133,7 @@ Z **`man dlopen`**:
 > - Jeśli jakiekolwiek **`LC_RPATH`** jest **zapisywalne** (ale podpis jest sprawdzany, więc do tego potrzebujesz również, aby binarka była nieograniczona)
 > - Jeśli binarka jest **nieograniczona**, a następnie możliwe jest załadowanie czegoś z CWD (lub nadużycie jednej z wymienionych zmiennych env)
 
-- Gdy ścieżka **wygląda jak ścieżka frameworku** (np. `/stuff/foo.framework/foo`), jeśli **`$DYLD_FRAMEWORK_PATH`** został ustawiony przy uruchomieniu, dyld najpierw spojrzy w tym katalogu w poszukiwaniu **częściowej ścieżki frameworku** (np. `foo.framework/foo`). Następnie dyld spróbuje **podanej ścieżki tak, jak jest** (używając bieżącego katalogu roboczego dla ścieżek względnych). Na koniec, dla starych binarek, dyld spróbuje kilku alternatyw. Jeśli **`$DYLD_FALLBACK_FRAMEWORK_PATH`** został ustawiony przy uruchomieniu, dyld będzie szukać w tych katalogach. W przeciwnym razie, będzie szukać w **`/Library/Frameworks`** (na macOS, jeśli proces jest nieograniczony), a następnie **`/System/Library/Frameworks`**.
+- Gdy ścieżka **wygląda jak ścieżka frameworku** (np. `/stuff/foo.framework/foo`), jeśli **`$DYLD_FRAMEWORK_PATH`** został ustawiony przy uruchomieniu, dyld najpierw sprawdzi w tym katalogu dla **częściowej ścieżki frameworku** (np. `foo.framework/foo`). Następnie dyld spróbuje **podanej ścieżki tak, jak jest** (używając bieżącego katalogu roboczego dla ścieżek względnych). Na koniec, dla starych binarek, dyld spróbuje kilku alternatyw. Jeśli **`$DYLD_FALLBACK_FRAMEWORK_PATH`** został ustawiony przy uruchomieniu, dyld będzie szukać w tych katalogach. W przeciwnym razie, będzie szukać w **`/Library/Frameworks`** (na macOS, jeśli proces jest nieograniczony), a następnie **`/System/Library/Frameworks`**.
 1. `$DYLD_FRAMEWORK_PATH`
 2. podana ścieżka (używając bieżącego katalogu roboczego dla ścieżek względnych, jeśli nieograniczony)
 3. `$DYLD_FALLBACK_FRAMEWORK_PATH`
@@ -145,7 +145,7 @@ Z **`man dlopen`**:
 >
 > - Jeśli proces jest **nieograniczony**, nadużywając **względnej ścieżki z CWD** wspomnianych zmiennych env (nawet jeśli nie jest to powiedziane w dokumentacji, jeśli proces jest ograniczony, zmienne DYLD\_\* są usuwane)
 
-- Gdy ścieżka **zawiera ukośnik, ale nie jest ścieżką frameworku** (tj. pełna ścieżka lub częściowa ścieżka do dylibu), dlopen() najpierw sprawdza (jeśli ustawione) w **`$DYLD_LIBRARY_PATH`** (z częścią liścia z ścieżki). Następnie dyld **próbuje podanej ścieżki** (używając bieżącego katalogu roboczego dla ścieżek względnych (ale tylko dla nieograniczonych procesów)). Na koniec, dla starszych binarek, dyld spróbuje kilku alternatyw. Jeśli **`$DYLD_FALLBACK_LIBRARY_PATH`** został ustawiony przy uruchomieniu, dyld będzie szukać w tych katalogach, w przeciwnym razie dyld spojrzy w **`/usr/local/lib/`** (jeśli proces jest nieograniczony), a następnie w **`/usr/lib/`**.
+- Gdy ścieżka **zawiera ukośnik, ale nie jest ścieżką frameworku** (tj. pełna ścieżka lub częściowa ścieżka do dylibu), dlopen() najpierw sprawdza (jeśli ustawione) w **`$DYLD_LIBRARY_PATH`** (z częścią liścia z ścieżki). Następnie dyld **próbuje podanej ścieżki** (używając bieżącego katalogu roboczego dla ścieżek względnych (ale tylko dla nieograniczonych procesów)). Na koniec, dla starszych binarek, dyld spróbuje kilku alternatyw. Jeśli **`$DYLD_FALLBACK_LIBRARY_PATH`** został ustawiony przy uruchomieniu, dyld będzie szukać w tych katalogach, w przeciwnym razie dyld będzie szukać w **`/usr/local/lib/`** (jeśli proces jest nieograniczony), a następnie w **`/usr/lib/`**.
 1. `$DYLD_LIBRARY_PATH`
 2. podana ścieżka (używając bieżącego katalogu roboczego dla ścieżek względnych, jeśli nieograniczony)
 3. `$DYLD_FALLBACK_LIBRARY_PATH`
@@ -217,7 +217,7 @@ sudo fs_usage | grep "dlopentest"
 ```
 ## Relative Path Hijacking
 
-Jeśli **uprzywilejowany binarny/aplikacja** (jak SUID lub inny binarny z potężnymi uprawnieniami) **ładował bibliotekę z relatywną ścieżką** (na przykład używając `@executable_path` lub `@loader_path`) i ma **wyłączoną walidację bibliotek**, możliwe jest przeniesienie binarnego do lokalizacji, w której atakujący mógłby **zmodyfikować ładowaną bibliotekę z relatywną ścieżką** i wykorzystać to do wstrzyknięcia kodu do procesu.
+Jeśli **uprzywilejowany binarny/aplikacja** (jak SUID lub inny binarny z potężnymi uprawnieniami) **ładował bibliotekę z relatywną ścieżką** (na przykład używając `@executable_path` lub `@loader_path`) i ma **wyłączoną walidację bibliotek**, możliwe jest przeniesienie binarnego do lokalizacji, w której atakujący mógłby **zmodyfikować ładowaną bibliotekę z relatywną ścieżką**, i wykorzystać to do wstrzyknięcia kodu do procesu.
 
 ## Prune `DYLD_*` and `LD_LIBRARY_PATH` env variables
 
@@ -231,7 +231,7 @@ Funkcja ta jest wywoływana z funkcji **`_main`** tego samego pliku, jeśli celu
 if ( !gLinkContext.allowEnvVarsPrint && !gLinkContext.allowEnvVarsPath && !gLinkContext.allowEnvVarsSharedCache ) {
 pruneEnvironmentVariables(envp, &apple);
 ```
-a te flagi boolowskie są ustawione w tym samym pliku w kodzie:
+i te flagi boolean są ustawione w tym samym pliku w kodzie:
 ```cpp
 #if TARGET_OS_OSX
 // support chrooting from old kernel
@@ -262,7 +262,7 @@ gLinkContext.allowClassicFallbackPaths   = !isRestricted;
 gLinkContext.allowInsertFailures         = false;
 gLinkContext.allowInterposing         	 = true;
 ```
-Co w zasadzie oznacza, że jeśli binarka jest **suid** lub **sgid**, lub ma segment **RESTRICT** w nagłówkach, lub została podpisana flagą **CS_RESTRICT**, to **`!gLinkContext.allowEnvVarsPrint && !gLinkContext.allowEnvVarsPath && !gLinkContext.allowEnvVarsSharedCache`** jest prawdziwe, a zmienne środowiskowe są usuwane.
+Co zasadniczo oznacza, że jeśli binarka jest **suid** lub **sgid**, lub ma segment **RESTRICT** w nagłówkach, lub została podpisana flagą **CS_RESTRICT**, to **`!gLinkContext.allowEnvVarsPrint && !gLinkContext.allowEnvVarsPath && !gLinkContext.allowEnvVarsSharedCache`** jest prawdziwe, a zmienne środowiskowe są usuwane.
 
 Zauważ, że jeśli CS_REQUIRE_LV jest prawdziwe, to zmienne nie będą usuwane, ale walidacja biblioteki sprawdzi, czy używają tego samego certyfikatu co oryginalna binarka.
 

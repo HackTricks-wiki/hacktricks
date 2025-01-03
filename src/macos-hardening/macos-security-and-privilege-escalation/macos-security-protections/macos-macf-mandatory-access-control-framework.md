@@ -82,12 +82,12 @@ mpo_cred_check_label_update_execve_t	*mpo_cred_check_label_update_execve;
 mpo_cred_check_label_update_t		*mpo_cred_check_label_update;
 [...]
 ```
-Prawie wszystkie hooki będą wywoływane przez MACF, gdy jedna z tych operacji zostanie przechwycona. Jednak hooki **`mpo_policy_*`** są wyjątkiem, ponieważ `mpo_hook_policy_init()` jest wywołaniem zwrotnym wywoływanym podczas rejestracji (więc po `mac_policy_register()`), a `mpo_hook_policy_initbsd()` jest wywoływane podczas późnej rejestracji, gdy podsystem BSD został poprawnie zainicjowany.
+Prawie wszystkie haki będą wywoływane przez MACF, gdy jedna z tych operacji zostanie przechwycona. Jednak haki **`mpo_policy_*`** są wyjątkiem, ponieważ `mpo_hook_policy_init()` jest wywołaniem zwrotnym wywoływanym podczas rejestracji (więc po `mac_policy_register()`), a `mpo_hook_policy_initbsd()` jest wywoływane podczas późnej rejestracji, gdy podsystem BSD został poprawnie zainicjowany.
 
-Ponadto hook **`mpo_policy_syscall`** może być rejestrowany przez dowolny kext, aby udostępnić prywatny interfejs wywołań w stylu **ioctl**. Następnie klient użytkownika będzie mógł wywołać `mac_syscall` (#381), określając jako parametry **nazwa polityki** z całkowitą **liczbą** i opcjonalnymi **argumentami**.\
+Ponadto hak **`mpo_policy_syscall`** może być rejestrowany przez dowolny kext, aby udostępnić prywatny interfejs wywołań w stylu **ioctl**. Następnie klient użytkownika będzie mógł wywołać `mac_syscall` (#381), określając jako parametry **nazwa polityki** z całkowitą **liczbą** i opcjonalnymi **argumentami**.\
 Na przykład **`Sandbox.kext`** używa tego często.
 
-Sprawdzając **`__DATA.__const*`** kexta, można zidentyfikować strukturę `mac_policy_ops` używaną podczas rejestracji polityki. Można ją znaleźć, ponieważ wskaźnik znajduje się w przesunięciu wewnątrz `mpo_policy_conf`, a także z powodu liczby wskaźników NULL, które będą w tym obszarze.
+Sprawdzając **`__DATA.__const*`** kextu, można zidentyfikować strukturę `mac_policy_ops` używaną podczas rejestracji polityki. Można ją znaleźć, ponieważ wskaźnik znajduje się w przesunięciu wewnątrz `mpo_policy_conf`, a także z powodu liczby wskaźników NULL, które będą w tym obszarze.
 
 Ponadto możliwe jest również uzyskanie listy kextów, które skonfigurowały politykę, poprzez zrzut z pamięci struktury **`_mac_policy_list`**, która jest aktualizowana przy każdej zarejestrowanej polityce.
 
@@ -165,8 +165,8 @@ Który przejdzie przez wszystkie zarejestrowane polityki mac, wywołując ich fu
 > ```c
 > /*
 >  * MAC_GRANT wykonuje wyznaczone sprawdzenie, przechodząc przez listę
->  * modułów polityki i sprawdzając z każdym, co o tym myśli
->  * wniosku. W przeciwieństwie do MAC_CHECK, przyznaje, jeśli jakiekolwiek polityki zwracają '0',
+>  * modułów polityki i sprawdzając z każdym, co sądzą o
+>  * żądaniu. W przeciwieństwie do MAC_CHECK, przyznaje, jeśli jakiekolwiek polityki zwracają '0',
 >  * a w przeciwnym razie zwraca EPERM. Zauważ, że zwraca swoją wartość przez
 >  * 'error' w zakresie wywołującego.
 >  */
@@ -203,13 +203,13 @@ goto skip_syscall;
 }
 #endif /* CONFIG_MACF */
 ```
-Który sprawdzi w wywołującym procesie **bitmaskę**, czy bieżące wywołanie systemowe powinno wywołać `mac_proc_check_syscall_unix`. Dzieje się tak, ponieważ wywołania systemowe są wywoływane tak często, że warto unikać wywoływania `mac_proc_check_syscall_unix` za każdym razem.
+Który sprawdzi w wywołującym procesie **bitmaskę**, czy bieżące wywołanie syscalls powinno wywołać `mac_proc_check_syscall_unix`. Dzieje się tak, ponieważ wywołania syscalls są wywoływane tak często, że warto unikać wywoływania `mac_proc_check_syscall_unix` za każdym razem.
 
-Zauważ, że funkcja `proc_set_syscall_filter_mask()`, która ustawia bitmaskę wywołań systemowych w procesie, jest wywoływana przez Sandbox w celu ustawienia masek na procesach w piaskownicy.
+Zauważ, że funkcja `proc_set_syscall_filter_mask()`, która ustawia bitmaskę wywołań syscalls w procesie, jest wywoływana przez Sandbox w celu ustawienia masek na procesach w piaskownicy.
 
-## Ekspozycja wywołań systemowych MACF
+## Ekspozycja syscalls MACF
 
-Możliwe jest interakcja z MACF za pomocą niektórych wywołań systemowych zdefiniowanych w [security/mac.h](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac.h#L151):
+Możliwe jest interakcja z MACF za pomocą niektórych wywołań syscalls zdefiniowanych w [security/mac.h](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac.h#L151):
 ```c
 /*
 * Extended non-POSIX.1e interfaces that offer additional services

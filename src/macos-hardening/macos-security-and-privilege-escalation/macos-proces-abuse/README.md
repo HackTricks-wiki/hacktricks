@@ -7,10 +7,10 @@
 Proces to instancja uruchamianego pliku wykonywalnego, jednak procesy nie wykonują kodu, to wątki. Dlatego **procesy są tylko kontenerami dla uruchamianych wątków**, zapewniając pamięć, deskryptory, porty, uprawnienia...
 
 Tradycyjnie procesy były uruchamiane w ramach innych procesów (z wyjątkiem PID 1) poprzez wywołanie **`fork`**, które tworzyło dokładną kopię bieżącego procesu, a następnie **proces potomny** zazwyczaj wywoływał **`execve`**, aby załadować nowy plik wykonywalny i go uruchomić. Następnie wprowadzono **`vfork`**, aby przyspieszyć ten proces bez kopiowania pamięci.\
-Następnie wprowadzono **`posix_spawn`**, łącząc **`vfork`** i **`execve`** w jednym wywołaniu i akceptując flagi:
+Potem wprowadzono **`posix_spawn`**, łącząc **`vfork`** i **`execve`** w jednym wywołaniu i akceptując flagi:
 
 - `POSIX_SPAWN_RESETIDS`: Resetuj efektywne identyfikatory do rzeczywistych identyfikatorów
-- `POSIX_SPAWN_SETPGROUP`: Ustaw przynależność do grupy procesów
+- `POSIX_SPAWN_SETPGROUP`: Ustaw afiliację grupy procesów
 - `POSUX_SPAWN_SETSIGDEF`: Ustaw domyślne zachowanie sygnałów
 - `POSIX_SPAWN_SETSIGMASK`: Ustaw maskę sygnałów
 - `POSIX_SPAWN_SETEXEC`: Wykonaj w tym samym procesie (jak `execve` z dodatkowymi opcjami)
@@ -23,7 +23,7 @@ Następnie wprowadzono **`posix_spawn`**, łącząc **`vfork`** i **`execve`** w
 
 Ponadto `posix_spawn` pozwala określić tablicę **`posix_spawnattr`**, która kontroluje niektóre aspekty uruchamianego procesu, oraz **`posix_spawn_file_actions`**, aby zmodyfikować stan deskryptorów.
 
-Gdy proces umiera, wysyła **kod zwrotu do procesu macierzystego** (jeśli proces macierzysty umarł, nowym procesem macierzystym jest PID 1) z sygnałem `SIGCHLD`. Proces macierzysty musi uzyskać tę wartość, wywołując `wait4()` lub `waitid()`, a do tego czasu proces potomny pozostaje w stanie zombie, gdzie nadal jest wymieniany, ale nie zużywa zasobów.
+Gdy proces umiera, wysyła **kod zwrotu do procesu macierzystego** (jeśli proces macierzysty umarł, nowym rodzicem jest PID 1) z sygnałem `SIGCHLD`. Proces macierzysty musi uzyskać tę wartość, wywołując `wait4()` lub `waitid()`, a do tego czasu proces potomny pozostaje w stanie zombie, gdzie nadal jest wymieniany, ale nie zużywa zasobów.
 
 ### PIDs
 
@@ -42,7 +42,7 @@ Każdy proces posiada **uprawnienia**, które **identyfikują jego przywileje** 
 Możliwe jest również zmienienie identyfikatora użytkownika i grupy, jeśli binarka ma bit `setuid/setgid`.\
 Istnieje kilka funkcji do **ustawiania nowych uid/gid**.
 
-Wywołanie systemowe **`persona`** zapewnia **alternatywny** zestaw **uprawnień**. Przyjęcie persony zakłada jej uid, gid i przynależności do grup **jednocześnie**. W [**kodzie źródłowym**](https://github.com/apple/darwin-xnu/blob/main/bsd/sys/persona.h) można znaleźć strukturę:
+Wywołanie systemowe **`persona`** zapewnia **alternatywny** zestaw **uprawnień**. Przyjęcie persony zakłada jej uid, gid i przynależności grupowe **jednocześnie**. W [**kodzie źródłowym**](https://github.com/apple/darwin-xnu/blob/main/bsd/sys/persona.h) można znaleźć strukturę:
 ```c
 struct kpersona_info { uint32_t persona_info_version;
 uid_t    persona_id; /* overlaps with UID */
@@ -65,7 +65,7 @@ char     persona_name[MAXLOGNAME + 1];
 
 #### Zakończenie wątków w macOS
 
-1. **Zakończenie wątków:** Wątki są zazwyczaj kończone przez wywołanie `pthread_exit()`. Ta funkcja pozwala wątkowi na czyste zakończenie, wykonując niezbędne czynności porządkowe i umożliwiając wątkowi przesłanie wartości zwrotnej do wszelkich dołączających.
+1. **Zamykanie wątków:** Wątki są zazwyczaj kończone przez wywołanie `pthread_exit()`. Ta funkcja pozwala wątkowi na czyste zakończenie, wykonując niezbędne czynności porządkowe i umożliwiając wątkowi przesłanie wartości zwrotnej do wszelkich dołączających.
 2. **Czyszczenie wątku:** Po wywołaniu `pthread_exit()`, wywoływana jest funkcja `pthread_terminate()`, która zajmuje się usunięciem wszystkich powiązanych struktur wątku. Zwalnia porty wątków Mach (Mach to podsystem komunikacyjny w jądrze XNU) i wywołuje `bsdthread_terminate`, wywołanie systemowe, które usuwa struktury na poziomie jądra związane z wątkiem.
 
 #### Mechanizmy synchronizacji
@@ -81,7 +81,18 @@ Aby zarządzać dostępem do wspólnych zasobów i unikać warunków wyścigu, m
 3. **Zmienna Once (Podpis: 0x4f4e4345):**
 - Zapewnia, że fragment kodu inicjalizacyjnego jest wykonywany tylko raz. Jej rozmiar wynosi 12 bajtów.
 4. **Blokady do odczytu i zapisu:**
-- Umożliwiają jednoczesny dostęp wielu czytelników lub jednego pisarza, ułatwiając efektywny dostęp do wspólnych
+- Umożliwiają jednoczesny dostęp wielu czytelników lub jednego pisarza, ułatwiając efektywny dostęp do wspólnych danych.
+- **Blokada do odczytu i zapisu (Podpis: 0x52574c4b):** O rozmiarze 196 bajtów.
+- **Atrybuty blokady do odczytu i zapisu (Podpis: 0x52574c41):** Atrybuty dla blokad do odczytu i zapisu, o rozmiarze 20 bajtów.
+
+> [!TIP]
+> Ostatnie 4 bajty tych obiektów są używane do wykrywania przepełnień.
+
+### Zmienne lokalne wątku (TLV)
+
+**Zmienne lokalne wątku (TLV)** w kontekście plików Mach-O (format dla plików wykonywalnych w macOS) są używane do deklarowania zmiennych, które są specyficzne dla **każdego wątku** w aplikacji wielowątkowej. Zapewnia to, że każdy wątek ma swoją własną oddzielną instancję zmiennej, co pozwala unikać konfliktów i utrzymywać integralność danych bez potrzeby stosowania jawnych mechanizmów synchronizacji, takich jak mutexy.
+
+W C i pokrewnych językach możesz zadeklarować zmienną lokalną wątku, używając słowa kluczowego **`__thread`**. Oto jak to działa w twoim przykładzie:
 ```c
 cCopy code__thread int tlv_var;
 
@@ -91,16 +102,16 @@ tlv_var = 10;
 ```
 Ten fragment definiuje `tlv_var` jako zmienną lokalną dla wątku. Każdy wątek uruchamiający ten kod będzie miał swoją własną `tlv_var`, a zmiany wprowadzone przez jeden wątek w `tlv_var` nie wpłyną na `tlv_var` w innym wątku.
 
-W binarnym pliku Mach-O dane związane z lokalnymi zmiennymi wątkowymi są zorganizowane w określone sekcje:
+W binarnym pliku Mach-O dane związane z zmiennymi lokalnymi dla wątków są zorganizowane w określone sekcje:
 
-- **`__DATA.__thread_vars`**: Ta sekcja zawiera metadane dotyczące zmiennych lokalnych wątków, takie jak ich typy i status inicjalizacji.
-- **`__DATA.__thread_bss`**: Ta sekcja jest używana dla zmiennych lokalnych wątków, które nie są jawnie inicjalizowane. Jest to część pamięci zarezerwowanej dla danych z inicjalizacją zerową.
+- **`__DATA.__thread_vars`**: Ta sekcja zawiera metadane dotyczące zmiennych lokalnych dla wątków, takie jak ich typy i status inicjalizacji.
+- **`__DATA.__thread_bss`**: Ta sekcja jest używana dla zmiennych lokalnych dla wątków, które nie są jawnie inicjalizowane. Jest to część pamięci zarezerwowanej dla danych z inicjalizacją zerową.
 
-Mach-O zapewnia również specyficzne API o nazwie **`tlv_atexit`** do zarządzania zmiennymi lokalnymi wątków, gdy wątek kończy działanie. To API pozwala na **rejestrowanie destruktorów**—specjalnych funkcji, które sprzątają dane lokalne wątków, gdy wątek kończy działanie.
+Mach-O zapewnia również specyficzne API o nazwie **`tlv_atexit`**, aby zarządzać zmiennymi lokalnymi dla wątków, gdy wątek kończy działanie. To API pozwala na **rejestrowanie destruktorów**—specjalnych funkcji, które sprzątają dane lokalne dla wątków, gdy wątek kończy działanie.
 
 ### Priorytety Wątków
 
-Zrozumienie priorytetów wątków polega na przyjrzeniu się, jak system operacyjny decyduje, które wątki uruchomić i kiedy. Ta decyzja jest wpływana przez poziom priorytetu przypisany do każdego wątku. W systemach macOS i podobnych do Uniksa, obsługiwane jest to za pomocą koncepcji takich jak `nice`, `renice` i klasy jakości usług (QoS).
+Zrozumienie priorytetów wątków polega na przyjrzeniu się, jak system operacyjny decyduje, które wątki uruchomić i kiedy. Ta decyzja jest wpływana przez poziom priorytetu przypisany do każdego wątku. W systemach macOS i podobnych do Uniksa, obsługiwane jest to za pomocą koncepcji takich jak `nice`, `renice` i klasy Quality of Service (QoS).
 
 #### Nice i Renice
 
@@ -111,9 +122,9 @@ Zrozumienie priorytetów wątków polega na przyjrzeniu się, jak system operacy
 - `renice` to polecenie używane do zmiany wartości nice już działającego procesu. Może być używane do dynamicznego dostosowywania priorytetu procesów, zarówno zwiększając, jak i zmniejszając ich przydział czasu CPU na podstawie nowych wartości nice.
 - Na przykład, jeśli proces potrzebuje więcej zasobów CPU tymczasowo, możesz obniżyć jego wartość nice za pomocą `renice`.
 
-#### Klasy Jakości Usług (QoS)
+#### Klasy Quality of Service (QoS)
 
-Klasy QoS to nowocześniejsze podejście do zarządzania priorytetami wątków, szczególnie w systemach takich jak macOS, które wspierają **Grand Central Dispatch (GCD)**. Klasy QoS pozwalają programistom na **kategoryzowanie** pracy w różne poziomy w zależności od ich znaczenia lub pilności. macOS automatycznie zarządza priorytetami wątków na podstawie tych klas QoS:
+Klasy QoS to nowocześniejsze podejście do zarządzania priorytetami wątków, szczególnie w systemach takich jak macOS, które wspierają **Grand Central Dispatch (GCD)**. Klasy QoS pozwalają programistom na **kategoryzowanie** pracy na różne poziomy w zależności od ich znaczenia lub pilności. macOS automatycznie zarządza priorytetami wątków na podstawie tych klas QoS:
 
 1. **Interaktywne dla Użytkownika:**
 - Ta klasa jest przeznaczona dla zadań, które aktualnie wchodzą w interakcję z użytkownikiem lub wymagają natychmiastowych wyników, aby zapewnić dobrą jakość doświadczenia użytkownika. Te zadania mają najwyższy priorytet, aby utrzymać responsywność interfejsu (np. animacje lub obsługa zdarzeń).
@@ -124,13 +135,13 @@ Klasy QoS to nowocześniejsze podejście do zarządzania priorytetami wątków, 
 4. **Tło:**
 - Ta klasa jest przeznaczona dla zadań, które działają w tle i nie są widoczne dla użytkownika. Mogą to być zadania takie jak indeksowanie, synchronizacja lub kopie zapasowe. Mają najniższy priorytet i minimalny wpływ na wydajność systemu.
 
-Korzystając z klas QoS, programiści nie muszą zarządzać dokładnymi numerami priorytetów, ale raczej skupić się na naturze zadania, a system optymalizuje zasoby CPU odpowiednio.
+Korzystając z klas QoS, programiści nie muszą zarządzać dokładnymi numerami priorytetów, ale raczej koncentrować się na naturze zadania, a system optymalizuje zasoby CPU odpowiednio.
 
 Ponadto istnieją różne **polityki planowania wątków**, które określają zestaw parametrów planowania, które planista weźmie pod uwagę. Można to zrobić za pomocą `thread_policy_[set/get]`. Może to być przydatne w atakach na warunki wyścigu.
 
 ## Nadużycie Procesów w MacOS
 
-MacOS, podobnie jak każdy inny system operacyjny, oferuje różnorodne metody i mechanizmy, które umożliwiają **interakcję, komunikację i dzielenie się danymi** między procesami. Chociaż te techniki są niezbędne do efektywnego funkcjonowania systemu, mogą być również nadużywane przez aktorów zagrożeń do **przeprowadzania złośliwych działań**.
+MacOS, podobnie jak każdy inny system operacyjny, oferuje różnorodne metody i mechanizmy, aby **procesy mogły wchodzić w interakcje, komunikować się i dzielić danymi**. Chociaż te techniki są niezbędne do efektywnego funkcjonowania systemu, mogą być również nadużywane przez aktorów zagrożeń do **przeprowadzania złośliwych działań**.
 
 ### Wstrzykiwanie Bibliotek
 
@@ -166,7 +177,7 @@ macos-electron-applications-injection.md
 
 ### Wstrzykiwanie Chromium
 
-Możliwe jest użycie flag `--load-extension` i `--use-fake-ui-for-media-stream` do przeprowadzenia **ataku man-in-the-browser**, co pozwala na kradzież naciśnięć klawiszy, ruchu, ciasteczek, wstrzykiwanie skryptów na stronach...:
+Możliwe jest użycie flag `--load-extension` i `--use-fake-ui-for-media-stream`, aby przeprowadzić **atak man-in-the-browser**, pozwalający na kradzież naciśnięć klawiszy, ruchu, ciasteczek, wstrzykiwanie skryptów na stronach...:
 
 {{#ref}}
 macos-chromium-injection.md
@@ -174,7 +185,7 @@ macos-chromium-injection.md
 
 ### Brudny NIB
 
-Pliki NIB **definiują elementy interfejsu użytkownika (UI)** i ich interakcje w aplikacji. Mogą jednak **wykonywać dowolne polecenia** i **Gatekeeper nie zatrzymuje** już uruchomionej aplikacji przed jej ponownym uruchomieniem, jeśli **plik NIB jest zmodyfikowany**. Dlatego mogą być używane do uruchamiania dowolnych programów w celu wykonania dowolnych poleceń:
+Pliki NIB **definiują elementy interfejsu użytkownika (UI)** i ich interakcje w aplikacji. Mogą jednak **wykonywać dowolne polecenia**, a **Gatekeeper nie zatrzymuje** już uruchomionej aplikacji przed jej ponownym uruchomieniem, jeśli **plik NIB jest zmodyfikowany**. Dlatego mogą być używane do uruchamiania dowolnych programów w celu wykonania dowolnych poleceń:
 
 {{#ref}}
 macos-dirty-nib.md
@@ -182,7 +193,7 @@ macos-dirty-nib.md
 
 ### Wstrzykiwanie Aplikacji Java
 
-Możliwe jest nadużycie niektórych możliwości javy (takich jak zmienna środowiskowa **`_JAVA_OPTS`**) w celu wykonania **dowolnego kodu/poleceń** przez aplikację java.
+Możliwe jest nadużycie niektórych możliwości Javy (takich jak zmienna środowiskowa **`_JAVA_OPTS`**), aby sprawić, że aplikacja Java wykona **dowolny kod/polecenia**.
 
 {{#ref}}
 macos-java-apps-injection.md
@@ -198,7 +209,7 @@ macos-.net-applications-injection.md
 
 ### Wstrzykiwanie Perla
 
-Sprawdź różne opcje, aby sprawić, by skrypt Perla wykonywał dowolny kod w:
+Sprawdź różne opcje, aby sprawić, że skrypt Perla wykona dowolny kod w:
 
 {{#ref}}
 macos-perl-applications-injection.md
@@ -206,7 +217,7 @@ macos-perl-applications-injection.md
 
 ### Wstrzykiwanie Ruby
 
-Możliwe jest również nadużycie zmiennych środowiskowych Ruby, aby sprawić, by dowolne skrypty wykonywały dowolny kod:
+Możliwe jest również nadużycie zmiennych środowiskowych Ruby, aby sprawić, że dowolne skrypty wykonają dowolny kod:
 
 {{#ref}}
 macos-ruby-applications-injection.md
@@ -214,16 +225,16 @@ macos-ruby-applications-injection.md
 
 ### Wstrzykiwanie Pythona
 
-Jeśli zmienna środowiskowa **`PYTHONINSPECT`** jest ustawiona, proces pythona przechodzi do interfejsu CLI Pythona po zakończeniu. Możliwe jest również użycie **`PYTHONSTARTUP`**, aby wskazać skrypt Pythona do wykonania na początku interaktywnej sesji.\
-Jednak należy zauważyć, że skrypt **`PYTHONSTARTUP`** nie zostanie wykonany, gdy **`PYTHONINSPECT`** tworzy interaktywną sesję.
+Jeśli zmienna środowiskowa **`PYTHONINSPECT`** jest ustawiona, proces Pythona przejdzie do interaktywnego CLI Pythona po zakończeniu. Możliwe jest również użycie **`PYTHONSTARTUP`**, aby wskazać skrypt Pythona do wykonania na początku interaktywnej sesji.\
+Należy jednak zauważyć, że skrypt **`PYTHONSTARTUP`** nie zostanie wykonany, gdy **`PYTHONINSPECT`** utworzy interaktywną sesję.
 
-Inne zmienne środowiskowe, takie jak **`PYTHONPATH`** i **`PYTHONHOME`**, mogą być również przydatne do wykonania dowolnego kodu przez polecenie pythona.
+Inne zmienne środowiskowe, takie jak **`PYTHONPATH`** i **`PYTHONHOME`**, mogą być również przydatne do wykonania dowolnego kodu w poleceniu Pythona.
 
-Należy zauważyć, że pliki wykonywalne skompilowane za pomocą **`pyinstaller`** nie będą używać tych zmiennych środowiskowych, nawet jeśli działają przy użyciu osadzonego pythona.
+Należy zauważyć, że pliki wykonywalne skompilowane za pomocą **`pyinstaller`** nie będą używać tych zmiennych środowiskowych, nawet jeśli działają z wbudowanym Pythonem.
 
-> [!OSTRZEŻENIE]
-> Ogólnie nie mogłem znaleźć sposobu na zmuszenie pythona do wykonania dowolnego kodu, nadużywając zmiennych środowiskowych.\
-> Jednak większość ludzi instaluje pythona za pomocą **Homebrew**, co zainstaluje pythona w **zapisywalnej lokalizacji** dla domyślnego użytkownika administracyjnego. Możesz to przejąć za pomocą czegoś takiego jak:
+> [!CAUTION]
+> Ogólnie nie mogłem znaleźć sposobu na zmuszenie Pythona do wykonania dowolnego kodu, nadużywając zmiennych środowiskowych.\
+> Jednak większość ludzi instaluje Pythona za pomocą **Homebrew**, co zainstaluje Pythona w **zapisywalnej lokalizacji** dla domyślnego użytkownika administracyjnego. Możesz to przejąć za pomocą czegoś takiego jak:
 >
 > ```bash
 > mv /opt/homebrew/bin/python3 /opt/homebrew/bin/python3.old
@@ -235,7 +246,7 @@ Należy zauważyć, że pliki wykonywalne skompilowane za pomocą **`pyinstaller
 > chmod +x /opt/homebrew/bin/python3
 > ```
 >
-> Nawet **root** uruchomi ten kod, gdy uruchomi pythona.
+> Nawet **root** uruchomi ten kod, gdy uruchomi Pythona.
 
 ## Wykrywanie
 
@@ -246,13 +257,13 @@ Należy zauważyć, że pliki wykonywalne skompilowane za pomocą **`pyinstaller
 - Używając **zmiennych środowiskowych**: Będzie monitorować obecność którejkolwiek z następujących zmiennych środowiskowych: **`DYLD_INSERT_LIBRARIES`**, **`CFNETWORK_LIBRARY_PATH`**, **`RAWCAMERA_BUNDLE_PATH`** i **`ELECTRON_RUN_AS_NODE`**
 - Używając wywołań **`task_for_pid`**: Aby znaleźć, kiedy jeden proces chce uzyskać **port zadania innego**, co pozwala na wstrzykiwanie kodu do procesu.
 - **Parametry aplikacji Electron**: Ktoś może użyć argumentów wiersza poleceń **`--inspect`**, **`--inspect-brk`** i **`--remote-debugging-port`**, aby uruchomić aplikację Electron w trybie debugowania, a tym samym wstrzyknąć do niej kod.
-- Używając **symlinków** lub **hardlinków**: Typowo najczęstszym nadużyciem jest **umieszczenie linku z naszymi uprawnieniami** i **wskazanie go na lokalizację o wyższych uprawnieniach**. Wykrywanie jest bardzo proste zarówno dla hardlinków, jak i symlinków. Jeśli proces tworzący link ma **inny poziom uprawnień** niż plik docelowy, tworzymy **alert**. Niestety w przypadku symlinków blokowanie nie jest możliwe, ponieważ nie mamy informacji o docelowej lokalizacji linku przed jego utworzeniem. To jest ograniczenie frameworka EndpointSecurity firmy Apple.
+- Używając **symlinków** lub **hardlinków**: Typowo najczęstszym nadużyciem jest **umieszczenie linku z naszymi uprawnieniami użytkownika** i **wskazanie go na lokalizację o wyższych uprawnieniach**. Wykrywanie jest bardzo proste zarówno dla hardlinków, jak i symlinków. Jeśli proces tworzący link ma **inny poziom uprawnień** niż plik docelowy, tworzymy **alert**. Niestety w przypadku symlinków blokowanie nie jest możliwe, ponieważ nie mamy informacji o docelowej lokalizacji linku przed jego utworzeniem. To jest ograniczenie frameworka EndpointSecurity firmy Apple.
 
 ### Wywołania wykonywane przez inne procesy
 
-W [**tym wpisie na blogu**](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html) można znaleźć, jak można użyć funkcji **`task_name_for_pid`**, aby uzyskać informacje o innych **procesach wstrzykujących kod do procesu** i następnie uzyskać informacje o tym innym procesie.
+W [**tym poście na blogu**](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html) można znaleźć, jak można użyć funkcji **`task_name_for_pid`**, aby uzyskać informacje o innych **procesach wstrzykujących kod do procesu** i następnie uzyskać informacje o tym innym procesie.
 
-Należy zauważyć, że aby wywołać tę funkcję, musisz mieć **ten sam uid**, co ten, który uruchamia proces lub **root** (i zwraca informacje o procesie, a nie sposób na wstrzykiwanie kodu).
+Należy zauważyć, że aby wywołać tę funkcję, musisz mieć **ten sam uid**, co ten, który uruchamia proces, lub **root** (i zwraca informacje o procesie, a nie sposób na wstrzykiwanie kodu).
 
 ## Odniesienia
 

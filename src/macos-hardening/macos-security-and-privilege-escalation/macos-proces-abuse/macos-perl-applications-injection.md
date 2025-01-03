@@ -4,7 +4,7 @@
 
 ## Poprzez zmienną środowiskową `PERL5OPT` i `PERL5LIB`
 
-Używając zmiennej środowiskowej PERL5OPT, możliwe jest zmuszenie perla do wykonywania dowolnych poleceń.\
+Używając zmiennej środowiskowej PERL5OPT, można sprawić, że perl wykona dowolne polecenia.\
 Na przykład, stwórz ten skrypt:
 ```perl:test.pl
 #!/usr/bin/perl
@@ -44,7 +44,7 @@ Co zwróci coś takiego jak:
 /System/Library/Perl/Extras/5.30/darwin-thread-multi-2level
 /System/Library/Perl/Extras/5.30
 ```
-Niektóre z zwróconych folderów nawet nie istnieją, jednak **`/Library/Perl/5.30`** **istnieje**, **nie jest** **chroniony** przez **SIP** i znajduje się **przed** folderami **chronionymi przez SIP**. Dlatego ktoś mógłby nadużyć tego folderu, aby dodać zależności skryptów, aby skrypt Perl z wysokimi uprawnieniami mógł je załadować.
+Niektóre z zwróconych folderów nawet nie istnieją, jednak **`/Library/Perl/5.30`** **istnieje**, **nie jest** **chroniony** przez **SIP** i znajduje się **przed** folderami **chronionymi przez SIP**. Dlatego ktoś mógłby nadużyć tego folderu, aby dodać tam zależności skryptów, tak aby skrypt Perl z wysokimi uprawnieniami mógł go załadować.
 
 > [!WARNING]
 > Należy jednak pamiętać, że **musisz być rootem, aby pisać w tym folderze** i obecnie otrzymasz ten **monit TCC**:

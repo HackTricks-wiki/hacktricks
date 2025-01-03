@@ -10,7 +10,7 @@ XPC używa formy Inter-Process Communication (IPC), która jest zestawem metod d
 
 Główne korzyści z XPC obejmują:
 
-1. **Bezpieczeństwo**: Dzięki oddzieleniu pracy na różne procesy, każdy proces może otrzymać tylko te uprawnienia, które są mu potrzebne. Oznacza to, że nawet jeśli proces zostanie skompromitowany, ma ograniczone możliwości wyrządzenia szkód.
+1. **Bezpieczeństwo**: Dzięki oddzieleniu pracy na różne procesy, każdy proces może otrzymać tylko te uprawnienia, które są mu potrzebne. Oznacza to, że nawet jeśli proces zostanie skompromitowany, ma ograniczone możliwości wyrządzenia szkody.
 2. **Stabilność**: XPC pomaga izolować awarie do komponentu, w którym występują. Jeśli proces ulegnie awarii, może zostać uruchomiony ponownie bez wpływu na resztę systemu.
 3. **Wydajność**: XPC umożliwia łatwą współbieżność, ponieważ różne zadania mogą być wykonywane jednocześnie w różnych procesach.
 
@@ -20,15 +20,15 @@ Jedynym **minusem** jest to, że **oddzielanie aplikacji na kilka procesów** i 
 
 Komponenty XPC aplikacji są **wewnątrz samej aplikacji.** Na przykład, w Safari można je znaleźć w **`/Applications/Safari.app/Contents/XPCServices`**. Mają rozszerzenie **`.xpc`** (jak **`com.apple.Safari.SandboxBroker.xpc`**) i są **również pakietami** z głównym binarnym w środku: `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker` oraz `Info.plist: /Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`
 
-Jak możesz pomyśleć, **komponent XPC będzie miał różne uprawnienia i przywileje** niż inne komponenty XPC lub główny binarny aplikacji. Z WYJĄTKIEM, gdy usługa XPC jest skonfigurowana z [**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information_property_list/xpcservice/joinexistingsession) ustawionym na „True” w swoim **pliku Info.plist**. W takim przypadku usługa XPC będzie działać w **tej samej sesji bezpieczeństwa co aplikacja**, która ją wywołała.
+Jak możesz pomyśleć, **komponent XPC będzie miał różne uprawnienia i przywileje** niż inne komponenty XPC lub główny plik binarny aplikacji. Z WYJĄTKIEM, gdy usługa XPC jest skonfigurowana z [**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information_property_list/xpcservice/joinexistingsession) ustawionym na „True” w swoim **pliku Info.plist**. W takim przypadku usługa XPC będzie działać w **tej samej sesji bezpieczeństwa co aplikacja**, która ją wywołała.
 
-Usługi XPC są **uruchamiane** przez **launchd** w razie potrzeby i **zatrzymywane** po zakończeniu wszystkich zadań, aby zwolnić zasoby systemowe. **Komponenty XPC specyficzne dla aplikacji mogą być wykorzystywane tylko przez aplikację**, co zmniejsza ryzyko związane z potencjalnymi lukami.
+Usługi XPC są **uruchamiane** przez **launchd** w razie potrzeby i **zatrzymywane** po zakończeniu wszystkich zadań, aby zwolnić zasoby systemowe. **Specyficzne dla aplikacji komponenty XPC mogą być wykorzystywane tylko przez aplikację**, co zmniejsza ryzyko związane z potencjalnymi lukami.
 
 ## Usługi XPC w systemie
 
 Usługi XPC w systemie są dostępne dla wszystkich użytkowników. Te usługi, czy to launchd, czy typu Mach, muszą być **zdefiniowane w plikach plist** znajdujących się w określonych katalogach, takich jak **`/System/Library/LaunchDaemons`**, **`/Library/LaunchDaemons`**, **`/System/Library/LaunchAgents`**, lub **`/Library/LaunchAgents`**.
 
-Te pliki plist będą miały klucz o nazwie **`MachServices`** z nazwą usługi oraz klucz o nazwie **`Program`** z ścieżką do binarnego:
+Te pliki plist będą miały klucz o nazwie **`MachServices`** z nazwą usługi oraz klucz o nazwie **`Program`** z ścieżką do pliku binarnego:
 ```xml
 cat /Library/LaunchDaemons/com.jamf.management.daemon.plist
 
@@ -72,7 +72,7 @@ Każda wiadomość XPC jest obiektem słownika, który upraszcza serializację i
 Ponadto, funkcja `xpc_copy_description(object)` może być używana do uzyskania reprezentacji tekstowej obiektu, co może być przydatne do celów debugowania.\
 Te obiekty mają również pewne metody do wywołania, takie jak `xpc_<object>_copy`, `xpc_<object>_equal`, `xpc_<object>_hash`, `xpc_<object>_serialize`, `xpc_<object>_deserialize`...
 
-Obiekty `xpc_object_t` są tworzone przez wywołanie funkcji `xpc_<objetType>_create`, która wewnętrznie wywołuje `_xpc_base_create(Class, Size)`, gdzie wskazany jest typ klasy obiektu (jeden z `XPC_TYPE_*`) oraz jego rozmiar (do rozmiaru zostanie dodane dodatkowe 40B na metadane). Co oznacza, że dane obiektu będą zaczynały się od przesunięcia 40B.\
+Obiekty `xpc_object_t` są tworzone przez wywołanie funkcji `xpc_<objetType>_create`, która wewnętrznie wywołuje `_xpc_base_create(Class, Size)`, gdzie wskazany jest typ klasy obiektu (jeden z `XPC_TYPE_*`) oraz jego rozmiar (do rozmiaru dodawane jest dodatkowe 40B na metadane). Oznacza to, że dane obiektu będą zaczynać się od przesunięcia 40B.\
 Dlatego `xpc_<objectType>_t` jest rodzajem podklasy `xpc_object_t`, która byłaby podklasą `os_object_t*`.
 
 > [!WARNING]
@@ -83,7 +83,7 @@ Dlatego `xpc_<objectType>_t` jest rodzajem podklasy `xpc_object_t`, która była
 **`xpc_pipe`** to rura FIFO, którą procesy mogą używać do komunikacji (komunikacja wykorzystuje wiadomości Mach).\
 Możliwe jest utworzenie serwera XPC, wywołując `xpc_pipe_create()` lub `xpc_pipe_create_from_port()`, aby utworzyć go za pomocą konkretnego portu Mach. Następnie, aby odbierać wiadomości, można wywołać `xpc_pipe_receive` i `xpc_pipe_try_receive`.
 
-Należy zauważyć, że obiekt **`xpc_pipe`** jest **`xpc_object_t`** z informacjami w swojej strukturze o dwóch używanych portach Mach i nazwie (jeśli istnieje). Nazwa, na przykład, demona `secinitd` w jego plist `/System/Library/LaunchDaemons/com.apple.secinitd.plist` konfiguruje rurę o nazwie `com.apple.secinitd`.
+Należy zauważyć, że obiekt **`xpc_pipe`** jest **`xpc_object_t`** z informacjami w swojej strukturze o dwóch używanych portach Mach oraz nazwie (jeśli istnieje). Nazwa, na przykład, demona `secinitd` w jego plist `/System/Library/LaunchDaemons/com.apple.secinitd.plist` konfiguruje rurę o nazwie `com.apple.secinitd`.
 
 Przykładem **`xpc_pipe`** jest **bootstrap pipe** utworzona przez **`launchd`**, co umożliwia udostępnianie portów Mach.
 
@@ -128,7 +128,7 @@ macos-xpc-connecting-process-check/
 
 ## Autoryzacja XPC
 
-Apple pozwala również aplikacjom na **konfigurowanie niektórych praw i sposobów ich uzyskania**, więc jeśli wywołujący proces je ma, będzie **mógł wywołać metodę** z usługi XPC:
+Apple pozwala również aplikacjom na **konfigurowanie pewnych praw i sposobów ich uzyskania**, więc jeśli wywołujący proces je ma, będzie **mógł wywołać metodę** z usługi XPC:
 
 {{#ref}}
 macos-xpc-authorization.md

@@ -8,7 +8,7 @@
 
 ### **Ustanawianie sesji debugowania** <a href="#net-core-debugging" id="net-core-debugging"></a>
 
-Zarządzanie komunikacją między debuggerem a debugowanym w .NET odbywa się za pomocą [**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp). Ten komponent ustawia dwa nazwane potoki dla każdego procesu .NET, jak widać w [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127), które są inicjowane za pomocą [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27). Te potoki mają sufiksy **`-in`** i **`-out`**.
+Zarządzanie komunikacją między debuggerem a debugowanym w .NET odbywa się za pomocą [**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp). Ten komponent ustawia dwa nazwane potoki na każdy proces .NET, jak widać w [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127), które są inicjowane za pomocą [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27). Te potoki mają sufiksy **`-in`** i **`-out`**.
 
 Odwiedzając **`$TMPDIR`** użytkownika, można znaleźć dostępne FIFOs do debugowania aplikacji .Net.
 

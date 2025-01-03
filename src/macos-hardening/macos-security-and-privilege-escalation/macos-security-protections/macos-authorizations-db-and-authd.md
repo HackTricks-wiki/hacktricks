@@ -14,7 +14,7 @@ Reguły są przechowywane w tabeli `rules` wewnątrz bazy danych i zawierają na
 - **name**: Unikalna nazwa reguły używana do identyfikacji i odniesienia się do niej w systemie autoryzacji.
 - **type**: Określa typ reguły, ograniczony do wartości 1 lub 2 w celu zdefiniowania jej logiki autoryzacji.
 - **class**: Kategoruje regułę do określonej klasy, zapewniając, że jest to liczba całkowita dodatnia.
-- "allow" dla zezwolenia, "deny" dla odmowy, "user" jeśli właściwość grupy wskazuje na grupę, której członkostwo pozwala na dostęp, "rule" wskazuje w tablicy regułę do spełnienia, "evaluate-mechanisms" po którym następuje tablica `mechanisms`, która jest albo wbudowana, albo nazwą pakietu wewnątrz `/System/Library/CoreServices/SecurityAgentPlugins/` lub /Library/Security//SecurityAgentPlugins
+- "allow" dla zezwolenia, "deny" dla odmowy, "user" jeśli właściwość grupy wskazuje na grupę, której członkostwo umożliwia dostęp, "rule" wskazuje w tablicy regułę do spełnienia, "evaluate-mechanisms" po którym następuje tablica `mechanisms`, która jest albo wbudowana, albo nazwą pakietu wewnątrz `/System/Library/CoreServices/SecurityAgentPlugins/` lub /Library/Security//SecurityAgentPlugins
 - **group**: Wskazuje grupę użytkowników związaną z regułą dla autoryzacji opartej na grupach.
 - **kofn**: Reprezentuje parametr "k-of-n", określający, ile subreguł musi być spełnionych z całkowitej liczby.
 - **timeout**: Określa czas trwania w sekundach, zanim autoryzacja przyznana przez regułę wygaśnie.
@@ -25,7 +25,7 @@ Reguły są przechowywane w tabeli `rules` wewnątrz bazy danych i zawierają na
 - **modified**: Przechowuje znacznik czasu ostatniej modyfikacji dokonanej w regule.
 - **hash**: Przechowuje wartość hasha reguły, aby zapewnić jej integralność i wykryć manipulacje.
 - **identifier**: Dostarcza unikalny identyfikator w postaci ciągu, taki jak UUID, dla zewnętrznych odniesień do reguły.
-- **requirement**: Zawiera zserializowane dane definiujące specyficzne wymagania autoryzacyjne i mechanizmy reguły.
+- **requirement**: Zawiera zserializowane dane definiujące specyficzne wymagania autoryzacji i mechanizmy reguły.
 - **comment**: Oferuje opis lub komentarz w formie czytelnej dla człowieka dotyczący reguły w celach dokumentacyjnych i jasności.
 
 ### Przykład
@@ -77,7 +77,7 @@ To demon, który odbiera żądania autoryzacji klientów do wykonywania wrażliw
 
 Ponadto, korzystając z narzędzia security, możliwe jest testowanie wielu interfejsów API `Security.framework`. Na przykład `AuthorizationExecuteWithPrivileges` uruchamiając: `security execute-with-privileges /bin/ls`
 
-To spowoduje fork i exec `/usr/libexec/security_authtrampoline /bin/ls` jako root, co poprosi o uprawnienia w oknie dialogowym do wykonania ls jako root:
+To spowoduje fork i exec `/usr/libexec/security_authtrampoline /bin/ls` jako root, co poprosi o uprawnienia w oknie dialogowym, aby wykonać ls jako root:
 
 <figure><img src="../../../images/image (10).png" alt=""><figcaption></figcaption></figure>
 
