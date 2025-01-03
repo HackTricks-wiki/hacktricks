@@ -13,3 +13,4 @@ https://0xrick.github.io/hack-the-box/kryptos/
 {{#endref}}
 
 {{#include ../banners/hacktricks-training.md}}
+

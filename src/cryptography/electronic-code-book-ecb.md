@@ -74,3 +74,4 @@ The cookie of this user is going to be composed by 3 blocks: the first 2 is the 
 {{#include ../banners/hacktricks-training.md}}
 
 
+

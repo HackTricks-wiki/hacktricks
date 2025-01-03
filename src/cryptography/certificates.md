@@ -179,3 +179,4 @@ openssl pkcs12 -export -in certificatename.cer -inkey privateKey.key -out certif
 {{#include ../banners/hacktricks-training.md}}
 
 
+

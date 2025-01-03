@@ -74,3 +74,4 @@ You can use the linux command line tool **pdftotext** to transform a pdf into te
 {{#include ../../../banners/hacktricks-training.md}}
 
 
+

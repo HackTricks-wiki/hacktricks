@@ -43,3 +43,4 @@ Edit --> Preferences --> Protocols --> IEEE 802.11--> Edit
 {{#include ../../../banners/hacktricks-training.md}}
 
 
+

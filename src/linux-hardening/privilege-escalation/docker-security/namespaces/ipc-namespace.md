@@ -101,3 +101,4 @@ ipcs -m # Nothing is seen
 {{#include ../../../../banners/hacktricks-training.md}}
 
 
+
