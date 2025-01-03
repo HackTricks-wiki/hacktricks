@@ -25,7 +25,7 @@ Za dvosmernu komunikaciju, kreiraju se dva Mach prava primanja: jedno u lokalnom
 
 Fokusirajući se na lokalni port, pravo primanja drži lokalni task. Port se kreira sa `mach_port_allocate()`. Izazov leži u prenosu prava slanja na ovaj port u udaljeni task.
 
-Strategija uključuje korišćenje `thread_set_special_port()` da se postavi pravo slanja na lokalni port u `THREAD_KERNEL_PORT` udaljene niti. Zatim, udaljena nit se upućuje da pozove `mach_thread_self()` da bi dobila pravo slanja.
+Strategija uključuje korišćenje `thread_set_special_port()` da se postavi pravo slanja na lokalni port u `THREAD_KERNEL_PORT` udaljene niti. Zatim, udaljenoj niti se naređuje da pozove `mach_thread_self()` da bi dobila pravo slanja.
 
 Za udaljeni port, proces se suštinski obrće. Udaljena nit se usmerava da generiše Mach port putem `mach_reply_port()` (jer `mach_port_allocate()` nije prikladan zbog svog mehanizma vraćanja). Nakon kreiranja porta, `mach_port_insert_right()` se poziva u udaljenoj niti da uspostavi pravo slanja. Ovo pravo se zatim čuva u kernelu koristeći `thread_set_special_port()`. Ponovo u lokalnom tasku, `thread_get_special_port()` se koristi na udaljenoj niti da bi se steklo pravo slanja na novokreirani Mach port u udaljenom tasku.
 
@@ -33,7 +33,7 @@ Završetak ovih koraka rezultira uspostavljanjem Mach portova, postavljajući te
 
 ## 3. Basic Memory Read/Write Primitives
 
-U ovom odeljku, fokus je na korišćenju izvršnog primitiva za uspostavljanje osnovnih primitiva za čitanje i pisanje u memoriju. Ovi inicijalni koraci su ključni za sticanje veće kontrole nad udaljenim procesom, iako primitivni u ovoj fazi neće služiti mnogim svrhama. Ubrzo će biti unapređeni na naprednije verzije.
+U ovom odeljku, fokus je na korišćenju izvršnog primitiva za uspostavljanje osnovnih primitiva za čitanje i pisanje u memoriju. Ovi inicijalni koraci su ključni za sticanje veće kontrole nad udaljenim procesom, iako primitivi u ovoj fazi neće služiti mnogim svrhama. Ubrzo će biti unapređeni na naprednije verzije.
 
 ### Memory Reading and Writing Using Execute Primitive
 
@@ -58,12 +58,12 @@ _write_func:
 str x1, [x0]
 ret
 ```
-### Identifikacija Pogodnih Funkcija
+### Identifying Suitable Functions
 
-Skener zajedničkih biblioteka otkrio je odgovarajuće kandidate za ove operacije:
+Skeneranje uobičajenih biblioteka otkrilo je odgovarajuće kandidate za ove operacije:
 
-1. **Čitanje Memorije:**
-Funkcija `property_getName()` iz [Objective-C runtime biblioteke](https://opensource.apple.com/source/objc4/objc4-723/runtime/objc-runtime-new.mm.auto.html) je identifikovana kao pogodna funkcija za čitanje memorije. Funkcija je opisana u nastavku:
+1. **Reading Memory:**
+Funkcija `property_getName()` iz [Objective-C runtime library](https://opensource.apple.com/source/objc4/objc4-723/runtime/objc-runtime-new.mm.auto.html) je identifikovana kao pogodna funkcija za čitanje memorije. Funkcija je opisana u nastavku:
 ```c
 const char *property_getName(objc_property_t prop) {
 return prop->name;
@@ -78,7 +78,7 @@ __xpc_int64_set_value:
 str x1, [x0, #0x18]
 ret
 ```
-Da biste izvršili 64-bitno pisanje na specifičnu adresu, daleki poziv se strukturira kao:
+Da biste izvršili 64-bitno pisanje na specifičnu adresu, daleki poziv je strukturiran kao:
 ```c
 _xpc_int64_set_value(address - 0x18, value)
 ```
@@ -131,7 +131,7 @@ Nakon uspešnog uspostavljanja deljene memorije i sticanja sposobnosti proizvolj
 
 1. **Proizvoljne Operacije sa Memorijom**:
 
-- Izvršite proizvoljna čitanja iz memorije pozivajući `memcpy()` da kopira podatke iz deljene oblasti.
+- Izvršite proizvoljna čitanja iz memorije pozivajući `memcpy()` da kopirate podatke iz deljene oblasti.
 - Izvršite proizvoljna pisanja u memoriju koristeći `memcpy()` za prenos podataka u deljenu oblast.
 
 2. **Obrada Poziva Funkcija sa Više Argumenta**:

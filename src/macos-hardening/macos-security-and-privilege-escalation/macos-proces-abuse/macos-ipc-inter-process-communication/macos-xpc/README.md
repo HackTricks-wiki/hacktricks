@@ -62,7 +62,7 @@ cat /Library/LaunchDaemons/com.jamf.management.daemon.plist
 </dict>
 </plist>
 ```
-Ones u **`LaunchDaemons`** se pokreću kao root. Dakle, ako neprivilegovan proces može da komunicira sa jednim od ovih, mogao bi da eskalira privilegije.
+Ones u **`LaunchDameons`** se pokreću kao root. Dakle, ako neprivilegovan proces može da komunicira sa jednim od ovih, mogao bi da eskalira privilegije.
 
 ## XPC Objekti
 
@@ -76,16 +76,16 @@ Ovi objekti takođe imaju neke metode koje se mogu pozvati kao što su `xpc_<obj
 Dakle, `xpc_<objectType>_t` je neka vrsta podklase `xpc_object_t` koja bi bila podklasa `os_object_t*`.
 
 > [!WARNING]
-> Imajte na umu da bi to trebao biti programer koji koristi `xpc_dictionary_[get/set]_<objectType>` da dobije ili postavi tip i stvarnu vrednost ključa.
+> Imajte na umu da bi developer trebao da koristi `xpc_dictionary_[get/set]_<objectType>` da dobije ili postavi tip i stvarnu vrednost ključa.
 
 - **`xpc_pipe`**
 
-**`xpc_pipe`** je FIFO cev koja procesi mogu koristiti za komunikaciju (komunikacija koristi Mach poruke).\
-Moguće je kreirati XPC server pozivajući `xpc_pipe_create()` ili `xpc_pipe_create_from_port()` da ga kreirate koristeći specifičnu Mach port. Zatim, da primite poruke, moguće je pozvati `xpc_pipe_receive` i `xpc_pipe_try_receive`.
+**`xpc_pipe`** je FIFO cev koju procesi mogu koristiti za komunikaciju (komunikacija koristi Mach poruke).\
+Moguće je kreirati XPC server pozivajući `xpc_pipe_create()` ili `xpc_pipe_create_from_port()` da bi se kreirao koristeći specifičnu Mach port. Zatim, da bi primili poruke, moguće je pozvati `xpc_pipe_receive` i `xpc_pipe_try_receive`.
 
-Imajte na umu da je objekat **`xpc_pipe`** **`xpc_object_t`** sa informacijama u svojoj strukturi o dva korišćena Mach porta i imenu (ako postoji). Ime, na primer, demon `secinitd` u svom plist-u `/System/Library/LaunchDaemons/com.apple.secinitd.plist` konfiguriše cev nazvanu `com.apple.secinitd`.
+Imajte na umu da je objekat **`xpc_pipe`** **`xpc_object_t`** sa informacijama u svojoj strukturi o dva korišćena Mach porta i imenu (ako postoji). Ime, na primer, daemon `secinitd` u svom plist-u `/System/Library/LaunchDaemons/com.apple.secinitd.plist` konfiguriše cev nazvanu `com.apple.secinitd`.
 
-Primer **`xpc_pipe`** je **bootstrap pipe** kreiran od strane **`launchd`** koji omogućava deljenje Mach portova.
+Primer **`xpc_pipe`** je **bootstrap pip**e koju kreira **`launchd`** čime se omogućava deljenje Mach portova.
 
 - **`NSXPC*`**
 
@@ -94,7 +94,7 @@ Ovo su objekti visokog nivoa u Objective-C koji omogućavaju apstrakciju XPC vez
 
 - **`GCD Queues`**
 
-XPC koristi GCD za slanje poruka, štaviše generiše određene redove za raspoređivanje kao što su `xpc.transactionq`, `xpc.io`, `xpc-events.add-listenerq`, `xpc.service-instance`...
+XPC koristi GCD za slanje poruka, pored toga generiše određene redove za raspoređivanje kao što su `xpc.transactionq`, `xpc.io`, `xpc-events.add-listenerq`, `xpc.service-instance`...
 
 ## XPC Servisi
 
@@ -103,7 +103,7 @@ Ova datoteka ima druge konfiguracione ključeve kao što su `ServiceType` koji m
 
 ### Pokretanje Servisa
 
-Aplikacija pokušava da **poveže** sa XPC servisom koristeći `xpc_connection_create_mach_service`, zatim launchd locira demon i pokreće **`xpcproxy`**. **`xpcproxy`** sprovodi konfigurisana ograničenja i pokreće servis sa obezbeđenim FDs i Mach portovima.
+Aplikacija pokušava da **poveže** sa XPC servisom koristeći `xpc_connection_create_mach_service`, zatim launchd locira daemon i pokreće **`xpcproxy`**. **`xpcproxy`** sprovodi konfigurisana ograničenja i pokreće servis sa obezbeđenim FDs i Mach portovima.
 
 Da bi se poboljšala brzina pretrage XPC servisa, koristi se keš.
 
@@ -444,7 +444,7 @@ Usluge koje podržavaju daljinski XPC će imati u svom plist-u ključ UsesRemote
 
 Pored toga, `RemoteServiceDiscovery.framework` omogućava dobijanje informacija iz `com.apple.remoted.plugin` izlažući funkcije kao što su `get_device`, `get_unique_device`, `connect`...
 
-Kada se koristi connect i socket `fd` usluge se prikupi, moguće je koristiti `remote_xpc_connection_*` klasu.
+Kada se koristi connect i socket `fd` usluge se prikupi, moguće je koristiti klasu `remote_xpc_connection_*`.
 
 Moguće je dobiti informacije o daljinskim uslugama koristeći cli alat `/usr/libexec/remotectl` koristeći parametre kao:
 ```bash

@@ -4,9 +4,9 @@
 
 ## XNU Kernel
 
-**Osnova macOS je XNU**, što znači "X nije Unix". Ovaj kernel se fundamentalno sastoji od **Mach mikrokerne**la (o kojem će biti reči kasnije), **i** elemenata iz Berkeley Software Distribution (**BSD**). XNU takođe pruža platformu za **kernel drajvere putem sistema nazvanog I/O Kit**. XNU kernel je deo Darwin open source projekta, što znači da je **njegov izvorni kod slobodno dostupan**.
+**Osnova macOS-a je XNU**, što znači "X nije Unix". Ovaj kernel se fundamentalno sastoji od **Mach mikrokerne**la (o kojem će biti reči kasnije), **i** elemenata iz Berkeley Software Distribution (**BSD**). XNU takođe pruža platformu za **kernel drajvere putem sistema nazvanog I/O Kit**. XNU kernel je deo Darwin open source projekta, što znači da je **njegov izvorni kod slobodno dostupan**.
 
-Iz perspektive istraživača bezbednosti ili Unix programera, **macOS** može delovati prilično **slično** **FreeBSD** sistemu sa elegantnim GUI-jem i mnoštvom prilagođenih aplikacija. Većina aplikacija razvijenih za BSD će se kompajlirati i raditi na macOS bez potrebe za modifikacijama, jer su svi komandno-linijski alati poznati korisnicima Unixa prisutni u macOS-u. Međutim, pošto XNU kernel uključuje Mach, postoje neke značajne razlike između tradicionalnog Unix-sličnog sistema i macOS-a, a te razlike mogu izazvati potencijalne probleme ili pružiti jedinstvene prednosti.
+Iz perspektive istraživača bezbednosti ili Unix programera, **macOS** može delovati prilično **slično** **FreeBSD** sistemu sa elegantnim GUI-jem i mnoštvom prilagođenih aplikacija. Većina aplikacija razvijenih za BSD će se kompajlirati i raditi na macOS-u bez potrebe za modifikacijama, jer su svi komandno-linijski alati poznati korisnicima Unixa prisutni u macOS-u. Međutim, pošto XNU kernel uključuje Mach, postoje neke značajne razlike između tradicionalnog Unix-sličnog sistema i macOS-a, a te razlike mogu izazvati potencijalne probleme ili pružiti jedinstvene prednosti.
 
 Open source verzija XNU: [https://opensource.apple.com/source/xnu/](https://opensource.apple.com/source/xnu/)
 
@@ -18,7 +18,7 @@ U XNU, Mach je **odgovoran za mnoge kritične niskonivo operacije** koje kernel 
 
 ### BSD
 
-XNU **kernel** takođe **uključuje** značajnu količinu koda izvedenog iz **FreeBSD** projekta. Ovaj kod **radi kao deo kernela zajedno sa Mach**, u istom adresnom prostoru. Međutim, FreeBSD kod unutar XNU može se značajno razlikovati od originalnog FreeBSD koda jer su modifikacije bile potrebne da bi se osigurala njegova kompatibilnost sa Mach. FreeBSD doprinosi mnogim kernel operacijama uključujući:
+XNU **kernel** takođe **uključuje** značajnu količinu koda izvedenog iz **FreeBSD** projekta. Ovaj kod **radi kao deo kernela zajedno sa Mach-om**, u istom adresnom prostoru. Međutim, FreeBSD kod unutar XNU može se značajno razlikovati od originalnog FreeBSD koda jer su modifikacije bile potrebne da bi se osigurala njegova kompatibilnost sa Mach-om. FreeBSD doprinosi mnogim kernel operacijama uključujući:
 
 - Upravljanje procesima
 - Obrada signala
@@ -27,19 +27,19 @@ XNU **kernel** takođe **uključuje** značajnu količinu koda izvedenog iz **Fr
 - TCP/IP stek i soketi
 - Firewall i filtriranje paketa
 
-Razumevanje interakcije između BSD i Mach može biti složeno, zbog njihovih različitih konceptualnih okvira. Na primer, BSD koristi procese kao svoju osnovnu izvršnu jedinicu, dok Mach funkcioniše na osnovu niti. Ova razlika se pomiruje u XNU tako što se **svakom BSD procesu pridružuje Mach zadatak** koji sadrži tačno jednu Mach nit. Kada se koristi BSD-ov fork() sistemski poziv, BSD kod unutar kernela koristi Mach funkcije za kreiranje strukture zadatka i niti.
+Razumevanje interakcije između BSD-a i Mach-a može biti složeno, zbog njihovih različitih konceptualnih okvira. Na primer, BSD koristi procese kao svoju osnovnu izvršnu jedinicu, dok Mach funkcioniše na osnovu niti. Ova razlika se pomiruje u XNU tako što se **svakom BSD procesu pridružuje Mach zadatak** koji sadrži tačno jednu Mach nit. Kada se koristi BSD-ov fork() sistemski poziv, BSD kod unutar kernela koristi Mach funkcije za kreiranje strukture zadatka i niti.
 
-Štaviše, **Mach i BSD svaki održavaju različite bezbednosne modele**: **Machov** bezbednosni model se zasniva na **pravima portova**, dok BSD-ov bezbednosni model funkcioniše na osnovu **vlasništva procesa**. Razlike između ova dva modela su povremeno rezultirale lokalnim ranjivostima za eskalaciju privilegija. Pored tipičnih sistemskih poziva, postoje i **Mach zamke koje omogućavaju programima u korisničkom prostoru da komuniciraju sa kernelom**. Ovi različiti elementi zajedno čine složenu, hibridnu arhitekturu macOS kernela.
+Štaviše, **Mach i BSD svaki održavaju različite bezbednosne modele**: **Mach-ov** bezbednosni model se zasniva na **pravima portova**, dok BSD-ov bezbednosni model funkcioniše na osnovu **vlasništva procesa**. Razlike između ova dva modela su povremeno rezultirale lokalnim ranjivostima za eskalaciju privilegija. Pored tipičnih sistemskih poziva, postoje i **Mach zamke koje omogućavaju programima u korisničkom prostoru da komuniciraju sa kernelom**. Ovi različiti elementi zajedno čine složenu, hibridnu arhitekturu macOS kernela.
 
 ### I/O Kit - Drajveri
 
-I/O Kit je open-source, objektno orijentisan **okvir za drajvere uređaja** u XNU kernelu, koji upravlja **dinamički učitanim drajverima uređaja**. Omogućava dodavanje modularnog koda u kernel u hodu, podržavajući raznovrsni hardver.
+I/O Kit je open-source, objektno-orijentisani **okvir za drajvere uređaja** u XNU kernelu, koji upravlja **dinamički učitanim drajverima uređaja**. Omogućava dodavanje modularnog koda u kernel u hodu, podržavajući raznovrsni hardver.
 
 {{#ref}}
 macos-iokit.md
 {{#endref}}
 
-### IPC - Inter Process Communication
+### IPC - Inter Procesna Komunikacija
 
 {{#ref}}
 ../macos-proces-abuse/macos-ipc-inter-process-communication/
@@ -57,7 +57,7 @@ macos-kernel-extensions.md
 
 ### macOS System Extensions
 
-Umesto korišćenja Kernel Extensions, macOS je stvorio System Extensions, koje nude API-je na korisničkom nivou za interakciju sa kernelom. Na ovaj način, programeri mogu da izbegnu korišćenje kernel ekstenzija.
+Umesto korišćenja Kernel Extensions, macOS je kreirao System Extensions, koje nude API-je na korisničkom nivou za interakciju sa kernelom. Na ovaj način, programeri mogu da izbegnu korišćenje kernel ekstenzija.
 
 {{#ref}}
 macos-system-extensions.md

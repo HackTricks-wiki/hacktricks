@@ -1,8 +1,8 @@
-# macOS Java Applications Injection
+# macOS Java aplikacije injekcija
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Enumeration
+## Enumeracija
 
 Pronađite Java aplikacije instalirane na vašem sistemu. Primećeno je da Java aplikacije u **Info.plist** sadrže neke java parametre koji sadrže string **`java.`**, tako da možete pretraživati za tim:
 ```bash
@@ -126,11 +126,11 @@ open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Profession
 ## vmoptions datoteka
 
 Ova datoteka podržava specifikaciju **Java parametara** kada se Java izvršava. Možete koristiti neke od prethodnih trikova da promenite java parametre i **naterate proces da izvrši proizvoljne komande**.\
-Pored toga, ova datoteka može takođe **uključivati druge** sa `include` direktorijumom, tako da možete promeniti i uključenu datoteku.
+Štaviše, ova datoteka može takođe **uključivati druge** sa `include` direktorijumom, tako da možete promeniti i uključenu datoteku.
 
 Još više, neke Java aplikacije će **učitati više od jedne `vmoptions`** datoteke.
 
-Neke aplikacije poput Android Studio-a ukazuju u svom **izlazu gde traže** ove datoteke, kao:
+Neke aplikacije kao što je Android Studio ukazuju u svom **izlazu gde traže** ove datoteke, kao:
 ```bash
 /Applications/Android\ Studio.app/Contents/MacOS/studio 2>&1 | grep vmoptions
 

@@ -67,14 +67,14 @@ Većina podataka koje koristi ObjectiveC runtime će se menjati tokom izvršavan
 - **`__objc_protorefs`** (`protocol_t *`): Reference protokola
 - **`__objc_selrefs`** (`SEL`): Reference selektora
 - **`__objc_const`** (`...`): Klasa `r/o` podaci i drugi (nadamo se) konstantni podaci
-- **`__objc_imageinfo`** (`version, flags`): Koristi se tokom učitavanja slike: Verzija trenutno `0`; Zastavice specificiraju podršku za preoptimizovani GC, itd.
+- **`__objc_imageinfo`** (`version, flags`): Koristi se tokom učitavanja slike: Verzija trenutno `0`; Zastavice specificiraju unapred optimizovanu GC podršku, itd.
 - **`__objc_protolist`** (`protocol_t *`): Lista protokola
 - **`__objc_nlcatlist`** (`category_t`): Pokazivač na Non-Lazy Kategorije definisane u ovom binarnom fajlu
 - **`__objc_catlist`** (`category_t`): Pokazivač na Kategorije definisane u ovom binarnom fajlu
 - **`__objc_nlclslist`** (`classref_t`): Pokazivač na Non-Lazy Objective-C klase definisane u ovom binarnom fajlu
 - **`__objc_classlist`** (`classref_t`): Pokazivači na sve Objective-C klase definisane u ovom binarnom fajlu
 
-Takođe koristi nekoliko sekcija u **`__TEXT`** segmentu za čuvanje konstantnih vrednosti ako nije moguće pisati u ovu sekciju:
+Takođe koristi nekoliko sekcija u **`__TEXT`** segmentu za čuvanje konstantnih vrednosti ako nije moguće pisati u ovoj sekciji:
 
 - **`__objc_methname`** (C-String): Imena metoda
 - **`__objc_classname`** (C-String): Imena klasa
@@ -84,8 +84,8 @@ Takođe koristi nekoliko sekcija u **`__TEXT`** segmentu za čuvanje konstantnih
 
 Objective-C koristi određeno mangle-ovanje za kodiranje selektora i tipova promenljivih jednostavnih i složenih tipova:
 
-- Primitivni tipovi koriste prvo slovo tipa `i` za `int`, `c` za `char`, `l` za `long`... i koriste veliko slovo u slučaju da je bez znakova (`L` za `unsigned Long`).
-- Drugi tipovi podataka čija su slova korišćena ili su posebni, koriste druga slova ili simbole kao što su `q` za `long long`, `b` za `bitfields`, `B` za `booleans`, `#` za `classes`, `@` za `id`, `*` za `char pointers`, `^` za generičke `pointers` i `?` za `undefined`.
+- Primitivni tipovi koriste prvo slovo tipa `i` za `int`, `c` za `char`, `l` za `long`... i koristi veliko slovo u slučaju da je bez znakova (`L` za `unsigned Long`).
+- Drugi tipovi podataka čija su slova korišćena ili su posebna, koriste druga slova ili simbole kao što su `q` za `long long`, `b` za `bitfields`, `B` za `booleans`, `#` za `classes`, `@` za `id`, `*` za `char pointers`, `^` za generičke `pointers` i `?` za `undefined`.
 - Nizovi, strukture i unije koriste `[`, `{` i `(`
 
 #### Primer Deklaracije Metode

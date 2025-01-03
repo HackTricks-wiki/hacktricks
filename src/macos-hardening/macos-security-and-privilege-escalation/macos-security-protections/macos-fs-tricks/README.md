@@ -8,8 +8,8 @@ Dozvole u **direktorijumu**:
 
 - **čitanje** - možete **nabrojati** unose u direktorijumu
 - **pisanje** - možete **brisati/pisati** **fajlove** u direktorijumu i možete **brisati prazne foldere**.
-- Ali ne **možete brisati/modifikovati neprazne foldere** osim ako nemate dozvolu za pisanje nad njima.
-- Ne **možete modifikovati ime foldera** osim ako ga ne posedujete.
+- Ali ne možete **brisati/modifikovati neprazne foldere** osim ako imate dozvolu za pisanje nad njima.
+- Ne možete **modifikovati ime foldera** osim ako ga posedujete.
 - **izvršavanje** - **dozvoljeno vam je da prolazite** kroz direktorijum - ako nemate ovo pravo, ne možete pristupiti nijednom fajlu unutar njega, niti u bilo kojim poddirektorijumima.
 
 ### Opasne kombinacije
@@ -18,13 +18,13 @@ Dozvole u **direktorijumu**:
 
 - Jedan roditeljski **vlasnik direktorijuma** u putanji je korisnik
 - Jedan roditeljski **vlasnik direktorijuma** u putanji je **grupa korisnika** sa **pristupom za pisanje**
-- Grupa korisnika ima **pristup za pisanje** na **fajl**
+- Grupa korisnika ima **pristup za pisanje** do **fajla**
 
-Sa bilo kojom od prethodnih kombinacija, napadač bi mogao **ubaciti** **sim/link** na očekivanu putanju da bi dobio privilegovano proizvoljno pisanje.
+Sa bilo kojom od prethodnih kombinacija, napadač bi mogao **ubaciti** **sim/link** na očekivanu putanju da bi dobio privilegovano arbitrano pisanje.
 
 ### Folder root R+X Poseban slučaj
 
-Ako postoje fajlovi u **direktorijumu** gde **samo root ima R+X pristup**, ti fajlovi su **nedostupni bilo kome drugom**. Tako da ranjivost koja omogućava **premestiti fajl koji je čitljiv od strane korisnika**, koji ne može biti pročitan zbog te **restrikcije**, iz ovog foldera **u drugi**, može se zloupotrebiti da bi se pročitali ti fajlovi.
+Ako postoje fajlovi u **direktorijumu** gde **samo root ima R+X pristup**, ti fajlovi su **nedostupni bilo kome drugom**. Tako da ranjivost koja omogućava **premestiti fajl koji je čitljiv od strane korisnika**, a koji ne može biti pročitan zbog te **restrikcije**, iz ovog foldera **u drugi**, može se zloupotrebiti da bi se pročitali ti fajlovi.
 
 Primer u: [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions)
 
@@ -34,9 +34,9 @@ Primer u: [https://theevilbit.github.io/posts/exploiting_directory_permissions_o
 
 Ako privilegovani proces piše podatke u **fajl** koji bi mogao biti **kontrolisan** od strane **korisnika sa nižim privilegijama**, ili koji bi mogao biti **prethodno kreiran** od strane korisnika sa nižim privilegijama. Korisnik bi mogao samo **usmeriti na drugi fajl** putem simboličkog ili hard linka, i privilegovani proces će pisati na taj fajl.
 
-Proverite u drugim sekcijama gde bi napadač mogao **zloupotrebiti proizvoljno pisanje da bi eskalirao privilegije**.
+Proverite u drugim sekcijama gde bi napadač mogao **zloupotrebiti arbitrano pisanje da bi eskalirao privilegije**.
 
-### Otvoreno `O_NOFOLLOW`
+### Otvoriti `O_NOFOLLOW`
 
 Zastavica `O_NOFOLLOW` kada se koristi u funkciji `open` neće pratiti simbolički link u poslednjem komponentu putanje, ali će pratiti ostatak putanje. Ispravan način da se spreči praćenje simboličkih linkova u putanji je korišćenje zastavice `O_NOFOLLOW_ANY`.
 
@@ -68,7 +68,7 @@ Na primer: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t
 
 ## Izbegavajte trikove sa xattrs u karantinu
 
-### Ukloni to
+### Uklonite to
 ```bash
 xattr -d com.apple.quarantine /path/to/file_or_app
 ```
@@ -122,7 +122,7 @@ ls -le /tmp/test
 
 **AppleDouble** format datoteka kopira datoteku uključujući njene ACE.
 
-U [**izvornom kodu**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) moguće je videti da će ACL tekstualna reprezentacija smeštena unutar xattr pod nazivom **`com.apple.acl.text`** biti postavljena kao ACL u dekompresovanoj datoteci. Dakle, ako ste kompresovali aplikaciju u zip datoteku sa **AppleDouble** formatom datoteke sa ACL-om koji sprečava da se drugi xattrs upisuju u nju... xattr karantina nije postavljen u aplikaciju:
+U [**izvornom kodu**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) moguće je videti da će ACL tekstualna reprezentacija smeštena unutar xattr pod nazivom **`com.apple.acl.text`** biti postavljena kao ACL u dekompresovanoj datoteci. Dakle, ako ste kompresovali aplikaciju u zip datoteku sa **AppleDouble** formatom datoteke sa ACL-om koji sprečava da se drugi xattrs upisuju u nju... xattr za karantin nije postavljen u aplikaciju:
 
 Proverite [**originalni izveštaj**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) za više informacija.
 
@@ -156,7 +156,7 @@ macos-xattr-acls-extra-stuff.md
 
 ### Obilaženje provere platformskih binarnih datoteka
 
-Neke sigurnosne provere proveravaju da li je binarna datoteka **platformska binarna datoteka**, na primer, da bi se omogućilo povezivanje sa XPC servisom. Međutim, kao što je izloženo u obilaženju na https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/, moguće je zaobići ovu proveru dobijanjem platformskih binarnih datoteka (kao što je /bin/ls) i injektovanjem eksploita putem dyld koristeći promenljivu okruženja `DYLD_INSERT_LIBRARIES`.
+Neke sigurnosne provere proveravaju da li je binarna datoteka **platformska binarna datoteka**, na primer, da bi se omogućilo povezivanje sa XPC servisom. Međutim, kao što je izloženo u obilaženju na https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/, moguće je zaobići ovu proveru dobijanjem platformskog binarnog fajla (kao što je /bin/ls) i injektovanjem eksploita putem dyld koristeći env promenljivu `DYLD_INSERT_LIBRARIES`.
 
 ### Obilaženje zastavica `CS_REQUIRE_LV` i `CS_FORCED_LV`
 
@@ -292,7 +292,7 @@ Takođe možete pisati datoteke u **`/etc/paths.d`** da biste učitali nove fold
 
 ### cups-files.conf
 
-Ova tehnika je korišćena u [ovoj analizi](https://www.kandji.io/blog/macos-audit-story-part1).
+Ova tehnika je korišćena u [ovom izveštaju](https://www.kandji.io/blog/macos-audit-story-part1).
 
 Kreirajte datoteku `/etc/cups/cups-files.conf` sa sledećim sadržajem:
 ```
@@ -308,11 +308,11 @@ Zatim, ponovo izmenite datoteku `/etc/cups/cups-files.conf` tako da označite `L
 
 ### Sandbox Escape
 
-Moguće je pobjeći iz macOS sandbox-a sa FS proizvoljnim pisanjem. Za neke primere pogledajte stranicu [macOS Auto Start](../../../../macos-auto-start-locations.md), ali uobičajen primer je pisanje datoteke sa podešavanjima Terminala u `~/Library/Preferences/com.apple.Terminal.plist` koja izvršava komandu pri pokretanju i poziva je koristeći `open`.
+Moguće je pobjeći iz macOS sandbox-a sa FS proizvoljnim pisanjem. Za neke primere pogledajte stranicu [macOS Auto Start](../../../../macos-auto-start-locations.md) ali uobičajen primer je pisanje Terminal preferencijske datoteke u `~/Library/Preferences/com.apple.Terminal.plist` koja izvršava komandu pri pokretanju i poziva je koristeći `open`.
 
 ## Generišite pisane datoteke kao drugi korisnici
 
-Ovo će generisati datoteku koja pripada root-u, a koju mogu pisati ja ([**code from here**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Ovo bi takođe moglo raditi kao privesc:
+Ovo će generisati datoteku koja pripada root-u koja je pisana od strane mene ([**code from here**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Ovo bi takođe moglo raditi kao privesc:
 ```bash
 DIRNAME=/usr/local/etc/periodic/daily
 
@@ -326,7 +326,7 @@ echo $FILENAME
 ```
 ## POSIX Deljena Memorija
 
-**POSIX deljena memorija** omogućava procesima u POSIX-kompatibilnim operativnim sistemima da pristupaju zajedničkom memorijskom prostoru, olakšavajući bržu komunikaciju u poređenju sa drugim metodama međuprocesne komunikacije. To uključuje kreiranje ili otvaranje objekta deljene memorije pomoću `shm_open()`, postavljanje njegove veličine pomoću `ftruncate()`, i mapiranje u adresni prostor procesa koristeći `mmap()`. Procesi zatim mogu direktno čitati iz i pisati u ovaj memorijski prostor. Da bi se upravljalo konkurentnim pristupom i sprečila korupcija podataka, mehanizmi sinhronizacije kao što su mutexi ili semafori se često koriste. Na kraju, procesi demapiraju i zatvaraju deljenu memoriju pomoću `munmap()` i `close()`, i opcionalno uklanjaju objekat memorije pomoću `shm_unlink()`. Ovaj sistem je posebno efikasan za brzu IPC u okruženjima gde više procesa treba brzo da pristupi deljenim podacima.
+**POSIX deljena memorija** omogućava procesima u POSIX-kompatibilnim operativnim sistemima da pristupaju zajedničkom memorijskom prostoru, olakšavajući bržu komunikaciju u poređenju sa drugim metodama međuprocesne komunikacije. To uključuje kreiranje ili otvaranje objekta deljene memorije pomoću `shm_open()`, postavljanje njegove veličine pomoću `ftruncate()`, i mapiranje u adresni prostor procesa koristeći `mmap()`. Procesi zatim mogu direktno čitati i pisati u ovaj memorijski prostor. Da bi se upravljalo konkurentnim pristupom i sprečila korupcija podataka, mehanizmi sinhronizacije kao što su mutexi ili semafori se često koriste. Na kraju, procesi demapiraju i zatvaraju deljenu memoriju pomoću `munmap()` i `close()`, i opcionalno uklanjaju objekat memorije pomoću `shm_unlink()`. Ovaj sistem je posebno efikasan za brzu IPC u okruženjima gde više procesa treba brzo da pristupi deljenim podacima.
 
 <details>
 

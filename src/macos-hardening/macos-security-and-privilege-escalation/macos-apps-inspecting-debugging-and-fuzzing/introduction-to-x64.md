@@ -1,75 +1,75 @@
-# Uvod u x64
+# Увод у x64
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## **Uvod u x64**
+## **Увод у x64**
 
-x64, poznat i kao x86-64, je 64-bitna procesorska arhitektura koja se pretežno koristi u desktop i server računarstvu. Potekla je iz x86 arhitekture koju je proizveo Intel, a kasnije je usvojila AMD pod imenom AMD64, i danas je to preovlađujuća arhitektura u ličnim računarima i serverima.
+x64, познат и као x86-64, је 64-битна архитектура процесора која се превасходно користи у десктоп и сервер рачунарству. Потиче из x86 архитектуре коју је произвео Intel, а касније је усвојила AMD под именом AMD64, и данас је преовлађујућа архитектура у личним рачунарима и серверима.
 
-### **Registari**
+### **Регистри**
 
-x64 se nadovezuje na x86 arhitekturu, sadrži **16 registara opšte namene** označenih kao `rax`, `rbx`, `rcx`, `rdx`, `rbp`, `rsp`, `rsi`, `rdi`, i `r8` do `r15`. Svaki od ovih registara može da čuva **64-bitnu** (8-bajtnu) vrednost. Ovi registri takođe imaju 32-bitne, 16-bitne i 8-bitne podregistare za kompatibilnost i specifične zadatke.
+x64 се проширује на x86 архитектуру, имајући **16 регистара опште намене** обележених `rax`, `rbx`, `rcx`, `rdx`, `rbp`, `rsp`, `rsi`, `rdi`, и `r8` до `r15`. Сваки од ових може да чува **64-битну** (8-бајтну) вредност. Ови регистри такође имају 32-битне, 16-битне и 8-битне подрегистре за компатибилност и специфичне задатке.
 
-1. **`rax`** - Tradicionalno se koristi za **vraćene vrednosti** iz funkcija.
-2. **`rbx`** - Često se koristi kao **bazični registar** za operacije sa memorijom.
-3. **`rcx`** - Obično se koristi za **brojače petlji**.
-4. **`rdx`** - Koristi se u raznim ulogama uključujući proširene aritmetičke operacije.
-5. **`rbp`** - **Bazični pokazivač** za stek okvir.
-6. **`rsp`** - **Pokazivač steka**, prati vrh steka.
-7. **`rsi`** i **`rdi`** - Koriste se za **izvorne** i **odredišne** indekse u operacijama sa stringovima/memorijom.
-8. **`r8`** do **`r15`** - Dodatni registri opšte namene uvedeni u x64.
+1. **`rax`** - Традиционално се користи за **вредности повратка** из функција.
+2. **`rbx`** - Често се користи као **базни регистар** за операције са меморијом.
+3. **`rcx`** - Обично се користи за **бројаче петљи**.
+4. **`rdx`** - Користи се у разним улогама укључујући проширене аритметичке операције.
+5. **`rbp`** - **Базни показивач** за стек фрејм.
+6. **`rsp`** - **Показивач стека**, прати врх стека.
+7. **`rsi`** и **`rdi`** - Користе се за **изворне** и **одредишне** индексе у операцијама са низовима/меморијом.
+8. **`r8`** до **`r15`** - Додатни регистри опште намене уведени у x64.
 
-### **Konvencija pozivanja**
+### **Конвенција позива**
 
-Konvencija pozivanja x64 varira između operativnih sistema. Na primer:
+Конвенција позива x64 варира између оперативних система. На пример:
 
-- **Windows**: Prva **četiri parametra** se prenose u registre **`rcx`**, **`rdx`**, **`r8`**, i **`r9`**. Dalji parametri se stavljaju na stek. Vraćena vrednost je u **`rax`**.
-- **System V (obično korišćen u UNIX-sličnim sistemima)**: Prvih **šest celobrojnih ili pokazivačkih parametara** se prenose u registre **`rdi`**, **`rsi`**, **`rdx`**, **`rcx`**, **`r8`**, i **`r9`**. Vraćena vrednost je takođe u **`rax`**.
+- **Windows**: Прва **четири параметра** се преносе у регистре **`rcx`**, **`rdx`**, **`r8`**, и **`r9`**. Додатни параметри се стављају на стек. Вредност повратка је у **`rax`**.
+- **System V (обично коришћен у UNIX-подобним системима)**: Прва **шест целих или показивачких параметара** се преносе у регистре **`rdi`**, **`rsi`**, **`rdx`**, **`rcx`**, **`r8`**, и **`r9`**. Вредност повратка је такође у **`rax`**.
 
-Ako funkcija ima više od šest ulaza, **ostali će biti preneseni na stek**. **RSP**, pokazivač steka, mora biti **poravnat na 16 bajtova**, što znači da adresa na koju pokazuje mora biti deljiva sa 16 pre nego što se poziv izvrši. To znači da obično moramo osigurati da je RSP pravilno poravnat u našem shellcode-u pre nego što izvršimo poziv funkcije. Međutim, u praksi, sistemski pozivi često funkcionišu i kada ovaj zahtev nije ispunjen.
+Ако функција има више од шест улаза, **остали ће бити пренесени на стек**. **RSP**, показивач стека, мора бити **поредио на 16 бајтова**, што значи да адреса на коју указује мора бити делљива са 16 пре него што се позив догоди. То значи да обично морамо осигурати да је RSP правилно поређен у нашем shellcode-у пре него што направимо позив функцији. Међутим, у пракси, системски позиви функционишу многе пута иако овај захтев није испуњен.
 
-### Konvencija pozivanja u Swift-u
+### Конвенција позива у Swift
 
-Swift ima svoju **konvenciju pozivanja** koja se može naći u [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64)
+Swift има своју **конвенцију позива** која се може наћи у [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64)
 
-### **Uobičajene instrukcije**
+### **Уобичајене инструкције**
 
-x64 instrukcije imaju bogat skup, održavajući kompatibilnost sa ranijim x86 instrukcijama i uvodeći nove.
+x64 инструкције имају богат сет, одржавајући компатибилност са ранијим x86 инструкцијама и уводећи нове.
 
-- **`mov`**: **Premesti** vrednost iz jednog **registra** ili **memorijske lokacije** u drugi.
-- Primer: `mov rax, rbx` — Premesti vrednost iz `rbx` u `rax`.
-- **`push`** i **`pop`**: Pomeranje ili vraćanje vrednosti na/sa **steka**.
-- Primer: `push rax` — Pomeranje vrednosti u `rax` na stek.
-- Primer: `pop rax` — Vraća vrh vrednosti sa steka u `rax`.
-- **`add`** i **`sub`**: Operacije **sabiranja** i **oduzimanja**.
-- Primer: `add rax, rcx` — Sabira vrednosti u `rax` i `rcx`, čuvajući rezultat u `rax`.
-- **`mul`** i **`div`**: Operacije **množenja** i **deljenja**. Napomena: ove imaju specifična ponašanja u vezi sa korišćenjem operanada.
-- **`call`** i **`ret`**: Koriste se za **pozivanje** i **vraćanje iz funkcija**.
-- **`int`**: Koristi se za aktiviranje softverskog **prekida**. Na primer, `int 0x80` se koristio za sistemske pozive u 32-bitnom x86 Linux-u.
-- **`cmp`**: **Uporedi** dve vrednosti i postavi CPU-ove zastavice na osnovu rezultata.
-- Primer: `cmp rax, rdx` — Upoređuje `rax` sa `rdx`.
-- **`je`, `jne`, `jl`, `jge`, ...**: **Uslovne skok** instrukcije koje menjaju tok kontrole na osnovu rezultata prethodnog `cmp` ili testa.
-- Primer: Nakon `cmp rax, rdx` instrukcije, `je label` — Skoči na `label` ako je `rax` jednak `rdx`.
-- **`syscall`**: Koristi se za **sistemske pozive** u nekim x64 sistemima (poput modernog Unixa).
-- **`sysenter`**: Optimizovana **instrukcija sistemskog poziva** na nekim platformama.
+- **`mov`**: **Премести** вредност из једног **регистра** или **меморијске локације** у други.
+- Пример: `mov rax, rbx` — Премешта вредност из `rbx` у `rax`.
+- **`push`** и **`pop`**: Постави или уклони вредности на/са **стека**.
+- Пример: `push rax` — Поставља вредност у `rax` на стек.
+- Пример: `pop rax` — Уклоњава врх вредности са стека у `rax`.
+- **`add`** и **`sub`**: Операције **сабирања** и **одузимања**.
+- Пример: `add rax, rcx` — Сабира вредности у `rax` и `rcx`, чувајући резултат у `rax`.
+- **`mul`** и **`div`**: Операције **мултипликације** и **делења**. Напомена: ове имају специфична понашања у вези са коришћењем операнда.
+- **`call`** и **`ret`**: Користе се за **позивање** и **враћање из функција**.
+- **`int`**: Користи се за активирање софтверског **прекида**. На пример, `int 0x80` се користио за системске позиве у 32-битном x86 Linux-у.
+- **`cmp`**: **Упоређује** две вредности и поставља флагове ЦПУ-а на основу резултата.
+- Пример: `cmp rax, rdx` — Упоређује `rax` са `rdx`.
+- **`je`, `jne`, `jl`, `jge`, ...**: **Условне скокне** инструкције које мењају ток контроле на основу резултата претходне `cmp` или теста.
+- Пример: Након `cmp rax, rdx` инструкције, `je label` — Скаче на `label` ако је `rax` једнак `rdx`.
+- **`syscall`**: Користи се за **системске позиве** у неким x64 системима (као што је модерни Unix).
+- **`sysenter`**: Оптимизована **инструкција системског позива** на неким платформама.
 
-### **Prolog funkcije**
+### **Проба функције**
 
-1. **Pomeranje starog bazičnog pokazivača**: `push rbp` (čuva bazični pokazivač pozivaoca)
-2. **Premesti trenutni pokazivač steka u bazični pokazivač**: `mov rbp, rsp` (postavlja novi bazični pokazivač za trenutnu funkciju)
-3. **Dodeli prostor na steku za lokalne promenljive**: `sub rsp, <size>` (gde je `<size>` broj bajtova koji su potrebni)
+1. **Постави стари базни показивач**: `push rbp` (чува базни показивач позиваоца)
+2. **Премести тренутни показивач стека у базни показивач**: `mov rbp, rsp` (поставља нови базни показивач за текућу функцију)
+3. **Алокирај простор на стеку за локалне променљиве**: `sub rsp, <size>` (где је `<size>` број бајтова који су потребни)
 
-### **Epilog funkcije**
+### **Епилог функције**
 
-1. **Premesti trenutni bazični pokazivač u pokazivač steka**: `mov rsp, rbp` (dealokacija lokalnih promenljivih)
-2. **Vraćanje starog bazičnog pokazivača sa steka**: `pop rbp` (obnavlja bazični pokazivač pozivaoca)
-3. **Vraćanje**: `ret` (vraća kontrolu pozivaocu)
+1. **Премести тренутни базни показивач у показивач стека**: `mov rsp, rbp` (ослобађа локалне променљиве)
+2. **Уклонити стари базни показивач са стека**: `pop rbp` (враћа базни показивач позиваоца)
+3. **Врати се**: `ret` (враћа контролу позиваоцу)
 
 ## macOS
 
 ### syscalls
 
-Postoje različite klase syscalls, možete [**pronaći ih ovde**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/osfmk/mach/i386/syscall_sw.h)**:**
+Постоје различите класе системских позива, можете [**наћи их овде**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/osfmk/mach/i386/syscall_sw.h)**:**
 ```c
 #define SYSCALL_CLASS_NONE	0	/* Invalid */
 #define SYSCALL_CLASS_MACH	1	/* Mach */

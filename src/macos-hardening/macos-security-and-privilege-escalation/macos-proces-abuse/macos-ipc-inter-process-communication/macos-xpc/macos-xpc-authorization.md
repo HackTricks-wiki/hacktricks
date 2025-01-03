@@ -6,7 +6,7 @@
 
 Apple takođe predlaže još jedan način za autentifikaciju da li povezani proces ima **dozvole da pozove izloženu XPC metodu**.
 
-Kada aplikacija treba da **izvrši akcije kao privilegovani korisnik**, umesto da pokreće aplikaciju kao privilegovanog korisnika, obično instalira kao root HelperTool kao XPC servis koji može biti pozvan iz aplikacije da izvrši te akcije. Međutim, aplikacija koja poziva servis treba da ima dovoljno autorizacije.
+Kada aplikacija treba da **izvrši akcije kao privilegovani korisnik**, umesto da pokreće aplikaciju kao privilegovani korisnik, obično instalira kao root HelperTool kao XPC servis koji može biti pozvan iz aplikacije da izvrši te akcije. Međutim, aplikacija koja poziva servis treba da ima dovoljno autorizacije.
 
 ### ShouldAcceptNewConnection uvek YES
 
@@ -94,7 +94,7 @@ assert(blockErr == errAuthorizationSuccess);
 }];
 }
 ```
-Funkcija `enumer
+Funkcija `enumerateRightsUsingBlock` se koristi za dobijanje dozvola aplikacija, koje su definisane u `commandInfo`:
 ```objectivec
 static NSString * kCommandKeyAuthRightName    = @"authRightName";
 static NSString * kCommandKeyAuthRightDefault = @"authRightDefault";
@@ -174,7 +174,7 @@ block(authRightName, authRightDefault, authRightDesc);
 ```
 To znači da će na kraju ovog procesa, dozvole deklarisane unutar `commandInfo` biti sačuvane u `/var/db/auth.db`. Obratite pažnju da možete pronaći za **svaku metodu** koja će **zahtevati autentifikaciju**, **ime dozvole** i **`kCommandKeyAuthRightDefault`**. Potonji **ukazuje ko može dobiti ovo pravo**.
 
-Postoje različiti opsezi koji ukazuju ko može pristupiti pravu. Neki od njih su definisani u [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) (možete pronaći [sve ovde](https://www.dssw.co.uk/reference/authorization-rights/)), ali kao sažetak:
+Postoje različiti opsezi koji ukazuju ko može pristupiti pravu. Neki od njih su definisani u [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) (možete pronaći [sve njih ovde](https://www.dssw.co.uk/reference/authorization-rights/)), ali kao sažetak:
 
 <table><thead><tr><th width="284.3333333333333">Ime</th><th width="165">Vrednost</th><th>Opis</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>Bilo ko</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>Niko</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>Trenutni korisnik treba da bude admin (unutar admin grupe)</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>Traži od korisnika da se autentifikuje.</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>Traži od korisnika da se autentifikuje. Mora biti admin (unutar admin grupe)</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>Specifikujte pravila</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>Specifikujte neke dodatne komentare o pravu</td></tr></tbody></table>
 
@@ -230,11 +230,11 @@ return error;
 ```
 Napomena da će funkcija `authorizationRightForCommand` samo proveriti prethodno komentarisani objekat **`commandInfo`** da bi **proverila zahteve za dobijanje prava** da pozove tu metodu. Zatim će pozvati **`AuthorizationCopyRights`** da proveri **da li ima prava** da pozove funkciju (napomena da zastavice omogućavaju interakciju sa korisnikom).
 
-U ovom slučaju, da bi pozvala funkciju `readLicenseKeyAuthorization`, `kCommandKeyAuthRightDefault` je definisan kao `@kAuthorizationRuleClassAllow`. Tako da **svako može da je pozove**.
+U ovom slučaju, da bi pozvala funkciju `readLicenseKeyAuthorization`, `kCommandKeyAuthRightDefault` je definisan kao `@kAuthorizationRuleClassAllow`. Tako da **bilo ko može da je pozove**.
 
 ### DB Informacije
 
-Pomenuto je da se ove informacije čuvaju u `/var/db/auth.db`. Možete nabrojati sve sačuvane pravila sa:
+Pomenuto je da su ove informacije sačuvane u `/var/db/auth.db`. Možete nabrojati sve sačuvane pravila sa:
 ```sql
 sudo sqlite3 /var/db/auth.db
 SELECT name FROM rules;
@@ -256,7 +256,7 @@ Možete pronaći **sve konfiguracije dozvola** [**ovde**](https://www.dssw.co.uk
 3. **'session-owner': 'true'**
 - Ako je postavljeno na `true`, vlasnik sesije (trenutno prijavljeni korisnik) bi automatski dobio ovu dozvolu. Ovo bi moglo zaobići dodatnu autentifikaciju ako je korisnik već prijavljen.
 4. **'shared': 'true'**
-- Ovaj ključ ne dodeljuje dozvole bez autentifikacije. Umesto toga, ako je postavljen na `true`, to znači da, jednom kada je dozvola autentifikovana, može se deliti među više procesa bez potrebe da se svaki od njih ponovo autentifikuje. Ali inicijalno dodeljivanje dozvole bi i dalje zahtevalo autentifikaciju osim ako nije kombinovano sa drugim ključevima kao što su `'authenticate-user': 'false'`.
+- Ovaj ključ ne dodeljuje dozvole bez autentifikacije. Umesto toga, ako je postavljen na `true`, to znači da kada je dozvola autentifikovana, može se deliti među više procesa bez potrebe da se svaki od njih ponovo autentifikuje. Ali inicijalno dodeljivanje dozvole bi i dalje zahtevalo autentifikaciju osim ako nije kombinovano sa drugim ključevima kao što su `'authenticate-user': 'false'`.
 
 Možete [**koristiti ovaj skript**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9) da dobijete zanimljive dozvole:
 ```bash
@@ -269,7 +269,7 @@ com-apple-aosnotification-findmymac-remove, com-apple-diskmanagement-reservekek,
 Rights with 'session-owner': 'true':
 authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-session-user, com-apple-safari-allow-apple-events-to-run-javascript, com-apple-safari-allow-javascript-in-smart-search-field, com-apple-safari-allow-unsigned-app-extensions, com-apple-safari-install-ephemeral-extensions, com-apple-safari-show-credit-card-numbers, com-apple-safari-show-passwords, com-apple-icloud-passwordreset, com-apple-icloud-passwordreset, is-session-owner, system-identity-write-self, use-login-window-ui
 ```
-## Obrtanje Autorizacije
+## Obrtanje autorizacije
 
 ### Proveravanje da li se koristi EvenBetterAuthorization
 
@@ -281,7 +281,7 @@ Ako ova funkcija poziva funkcije kao što su `AuthorizationCreateFromExternalFor
 
 Proverite **`/var/db/auth.db`** da vidite da li je moguće dobiti dozvole za pozivanje neke privilegovane akcije bez interakcije korisnika.
 
-### Protokol Komunikacije
+### Protokol komunikacije
 
 Zatim, potrebno je pronaći šemu protokola kako biste mogli uspostaviti komunikaciju sa XPC servisom.
 
@@ -291,7 +291,7 @@ Funkcija **`shouldAcceptNewConnection`** ukazuje na protokol koji se izlaže:
 
 U ovom slučaju, imamo isto kao u EvenBetterAuthorizationSample, [**proverite ovu liniju**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94).
 
-Znajući ime korišćenog protokola, moguće je **izvršiti dump njegove definicije zaglavlja** sa:
+Znajući naziv korišćenog protokola, moguće je **izvršiti dump njegove definicije zaglavlja** sa:
 ```bash
 class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
 
@@ -409,7 +409,7 @@ NSLog(@"Response: %@", error);
 NSLog(@"Finished!");
 }
 ```
-## Ostali XPC privilegijski pomagači koji su zloupotrebljeni
+## Drugi XPC privilegijski pomagači koji su zloupotrebljeni
 
 - [https://blog.securelayer7.net/applied-endpointsecurity-framework-previlege-escalation/?utm_source=pocket_shared](https://blog.securelayer7.net/applied-endpointsecurity-framework-previlege-escalation/?utm_source=pocket_shared)
 

@@ -30,10 +30,10 @@ Endpoint Security je okvir koji pruža Apple u macOS-u i koji obezbeđuje skup A
 
 Ovaj okvir pruža **kolekciju API-ja za praćenje i kontrolu aktivnosti sistema**, kao što su izvršenja procesa, događaji u datotečnom sistemu, mrežni i kernel događaji.
 
-Osnova ovog okvira je implementirana u kernelu, kao Kernel Extension (KEXT) lociran u **`/System/Library/Extensions/EndpointSecurity.kext`**. Ovaj KEXT se sastoji od nekoliko ključnih komponenti:
+Osnova ovog okvira je implementirana u kernelu, kao Kernel Extension (KEXT) lociran na **`/System/Library/Extensions/EndpointSecurity.kext`**. Ovaj KEXT se sastoji od nekoliko ključnih komponenti:
 
 - **EndpointSecurityDriver**: Ovo deluje kao "ulazna tačka" za kernel ekstenziju. To je glavno mesto interakcije između OS-a i Endpoint Security okvira.
-- **EndpointSecurityEventManager**: Ova komponenta je odgovorna za implementaciju kernel hook-ova. Kernel hook-ovi omogućavaju okviru da prati događaje sistema presretanjem sistemskih poziva.
+- **EndpointSecurityEventManager**: Ova komponenta je odgovorna za implementaciju kernel hook-ova. Kernel hook-ovi omogućavaju okviru da prati sistemske događaje presretanjem sistemskih poziva.
 - **EndpointSecurityClientManager**: Ovo upravlja komunikacijom sa klijentima u korisničkom prostoru, prateći koji klijenti su povezani i treba da prime obaveštenja o događajima.
 - **EndpointSecurityMessageManager**: Ovo šalje poruke i obaveštenja o događajima klijentima u korisničkom prostoru.
 

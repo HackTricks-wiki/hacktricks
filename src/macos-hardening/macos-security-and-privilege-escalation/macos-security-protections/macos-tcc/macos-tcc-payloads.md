@@ -303,7 +303,7 @@ cp -r "$HOME/Library/Calendars" "/tmp/calendars"
 
 {{#tabs}}
 {{#tab name="ObjetiveC - Snimanje"}}
-Snimite video od 3s i sačuvajte ga u **`/tmp/recording.mov`**
+Snimite 3s video i sačuvajte ga u **`/tmp/recording.mov`**
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -573,14 +573,14 @@ ffmpeg -f avfoundation -i ":1" -t 5 /tmp/recording.wav
 ### Lokacija
 
 > [!TIP]
-> Da bi aplikacija dobila lokaciju, **Usluge lokacije** (iz Privatnosti i bezbednosti) **moraju biti omogućene,** inače neće moći da joj pristupi.
+> Da bi aplikacija dobila lokaciju, **Servisi Lokacije** (iz Privatnosti i Bezbednosti) **moraju biti omogućeni,** inače neće moći da joj pristupi.
 
 - **Ovlašćenje**: `com.apple.security.personal-information.location`
 - **TCC**: Dodeljeno u `/var/db/locationd/clients.plist`
 
 {{#tabs}}
 {{#tab name="ObjectiveC"}}
-Napišite lokaciju u `/tmp/logs.txt`
+Napiši lokaciju u `/tmp/logs.txt`
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -877,6 +877,6 @@ return 0;
 {{#endtab}}
 {{#endtabs}}
 
-> [!CAUTION] > **Pristup je veoma moćna dozvola**, mogli biste je zloupotrebiti na druge načine, na primer, mogli biste izvesti **napad pomoću pritisaka tastera** samo iz nje bez potrebe da pozivate System Events.
+> [!CAUTION] > **Pristup je veoma moćna dozvola**, mogli biste je zloupotrebiti na druge načine, na primer, mogli biste izvršiti **napad pomoću pritisaka tastera** samo iz nje bez potrebe da pozivate System Events.
 
 {{#include ../../../../banners/hacktricks-training.md}}

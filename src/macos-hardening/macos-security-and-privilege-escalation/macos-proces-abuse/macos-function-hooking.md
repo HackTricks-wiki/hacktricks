@@ -2,13 +2,13 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Interposing funkcija
+## Interpozicija funkcija
 
 Kreirajte **dylib** sa **`__interpose` (`__DATA___interpose`)** sekcijom (ili sekcijom označenom sa **`S_INTERPOSING`**) koja sadrži parove **pokazivača na funkcije** koji se odnose na **originalne** i **zamenske** funkcije.
 
-Zatim, **ubacite** dylib sa **`DYLD_INSERT_LIBRARIES`** (interponovanje treba da se desi pre nego što se glavna aplikacija učita). Očigledno, [**ograničenja** koja se primenjuju na korišćenje **`DYLD_INSERT_LIBRARIES`** važe i ovde](macos-library-injection/#check-restrictions).
+Zatim, **ubacite** dylib sa **`DYLD_INSERT_LIBRARIES`** (interpozicija treba da se desi pre nego što se glavna aplikacija učita). Očigledno, [**ograničenja** koja se primenjuju na korišćenje **`DYLD_INSERT_LIBRARIES`** važe i ovde](macos-library-injection/#check-restrictions).
 
-### Interpose printf
+### Interpozicija printf
 
 {{#tabs}}
 {{#tab name="interpose.c"}}
@@ -176,7 +176,7 @@ NSLog(@"Uppercase string: %@", uppercaseString3);
 return 0;
 }
 ```
-### Metoda Swizzling sa method_exchangeImplementations
+### Method Swizzling sa method_exchangeImplementations
 
 Funkcija **`method_exchangeImplementations`** omogućava da se **promeni** **adresa** **implementacije** **jedne funkcije za drugu**.
 
@@ -226,13 +226,13 @@ return 0;
 }
 ```
 > [!WARNING]
-> U ovom slučaju, ako **implementacioni kod legit** metode **proverava** **ime** **metode**, mogao bi da **otkrije** ovo swizzling i spreči da se izvrši.
+> U ovom slučaju, ako **implementacioni kod legit** metode **proverava** **ime** **metode**, mogao bi da **otkrije** ovo swizzling i spreči njegovo izvršavanje.
 >
 > Sledeća tehnika nema ovo ograničenje.
 
-### Method Swizzling sa method_setImplementation
+### Method Swizzling with method_setImplementation
 
-Prethodni format je čudan jer menjate implementaciju 2 metode jednu za drugu. Koristeći funkciju **`method_setImplementation`**, možete **promeniti** **implementaciju** **metode za drugu**.
+Prethodni format je čudan jer menjate implementaciju 2 metode jednu iz druge. Koristeći funkciju **`method_setImplementation`**, možete **promeniti** **implementaciju** **metode za drugu**.
 
 Samo zapamtite da **sačuvate adresu implementacije originalne** metode ako planirate da je pozovete iz nove implementacije pre nego što je prepišete, jer će kasnije biti mnogo komplikovanije locirati tu adresu.
 ```objectivec
@@ -294,7 +294,7 @@ Da bi se to postiglo, najlakša tehnika koja se može koristiti je injekcija [Dy
 
 Međutim, obe opcije su **ograničene** na **nezaštićene** binarne datoteke/procese. Proverite svaku tehniku da biste saznali više o ograničenjima.
 
-Međutim, napad putem hook-ovanja funkcija je veoma specifičan, napadač će to uraditi da bi **ukrao osetljive informacije iznutra procesa** (inače biste jednostavno uradili napad injekcijom procesa). A te osetljive informacije mogu biti smeštene u aplikacijama preuzetim od strane korisnika, kao što je MacPass.
+Međutim, napad putem hook-ovanja funkcija je veoma specifičan, napadač će to uraditi da bi **ukrao osetljive informacije iz procesa** (inače biste jednostavno uradili napad injekcijom procesa). A te osetljive informacije mogu biti smeštene u aplikacijama preuzetim od strane korisnika, kao što je MacPass.
 
 Dakle, vektor napadača bi bio da pronađe ranjivost ili ukloni potpis aplikacije, injektira **`DYLD_INSERT_LIBRARIES`** env promenljivu kroz Info.plist aplikacije dodajući nešto poput:
 ```xml
@@ -308,7 +308,7 @@ i zatim **ponovo registrujte** aplikaciju:
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f /Applications/Application.app
 ```
-Dodajte u tu biblioteku kod za hooking kako biste eksfiltrirali informacije: Lozinke, poruke...
+Dodajte u tu biblioteku kod za hook-ovanje za eksfiltraciju informacija: Lozinke, poruke...
 
 > [!CAUTION]
 > Imajte na umu da u novijim verzijama macOS-a, ako **uklonite potpis** aplikacionog binarnog fajla i je prethodno izvršen, macOS **neće više izvršavati aplikaciju**.

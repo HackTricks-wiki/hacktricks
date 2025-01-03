@@ -45,7 +45,7 @@ Dozvole/odbijanja se zatim čuvaju u nekim TCC bazama podataka:
 > TCC baza podataka u **iOS** je u **`/private/var/mobile/Library/TCC/TCC.db`**.
 
 > [!NOTE]
-> **UI centra za obaveštenja** može da napravi **promene u sistemskoj TCC bazi podataka**:
+> **UI centra za obaveštenja** može napraviti **promene u sistemskoj TCC bazi podataka**:
 >
 > ```bash
 > codesign -dv --entitlements :- /System/Library/PrivateFrameworks/TCC.framework/> Support/tccd
@@ -102,7 +102,7 @@ sqlite> select * from access where client LIKE "%telegram%" and auth_value=0;
 {{#endtabs}}
 
 > [!TIP]
-> Proverom obe baze podataka možete proveriti dozvole koje je aplikacija dozvolila, zabranila ili nema (tražiće ih).
+> Proverom obe baze podataka možete proveriti dozvole koje je aplikacija dozvolila, zabranila ili ih nema (tražiće ih).
 
 - **`service`** je TCC **dozvola** u string reprezentaciji
 - **`client`** je **bundle ID** ili **putanja do binarnog fajla** sa dozvolama
@@ -206,7 +206,7 @@ csreq -t -r /tmp/telegram_csreq.bin
 Aplikacije **ne samo da treba** da **zatraže** i da im bude **odobren pristup** nekim resursima, već takođe treba da **imaju relevantna ovlašćenja**.\
 Na primer, **Telegram** ima ovlašćenje `com.apple.security.device.camera` da zatraži **pristup kameri**. Aplikacija koja **nema** ovo **ovlašćenje neće moći** da pristupi kameri (i korisnik neće biti ni upitan za dozvole).
 
-Međutim, da bi aplikacije **pristupile** **određenim korisničkim folderima**, kao što su `~/Desktop`, `~/Downloads` i `~/Documents`, **ne treba** da imaju nikakva specifična **ovlašćenja.** Sistem će transparentno upravljati pristupom i **pitanjem korisnika** po potrebi.
+Međutim, da bi aplikacije **pristupile** **određenim korisničkim folderima**, kao što su `~/Desktop`, `~/Downloads` i `~/Documents`, **ne treba** da imaju nikakva specifična **ovlašćenja.** Sistem će transparentno upravljati pristupom i **pitanje korisnika** će se pojaviti po potrebi.
 
 Apple-ove aplikacije **neće generisati upite**. Sadrže **pre-odobrene prava** u svom **spisku ovlašćenja**, što znači da **nikada neće generisati iskačući prozor**, **niti** će se pojaviti u bilo kojoj od **TCC baza podataka.** Na primer:
 ```bash
@@ -228,13 +228,13 @@ Neke TCC dozvole su: kTCCServiceAppleEvents, kTCCServiceCalendar, kTCCServicePho
 
 ### Osetljiva nezaštićena mesta
 
-- $HOME (sam)
+- $HOME (samo)
 - $HOME/.ssh, $HOME/.aws, itd
 - /tmp
 
 ### Korisnička namera / com.apple.macl
 
-Kao što je ranije pomenuto, moguće je **dodeliti pristup aplikaciji do datoteke prevlačenjem i ispuštanjem**. Ovaj pristup neće biti naveden u nijednoj TCC bazi podataka, već kao **proširena** **atribut datoteke**. Ovaj atribut će **čuvati UUID** dozvoljene aplikacije:
+Kao što je ranije pomenuto, moguće je **dodeliti pristup aplikaciji do datoteke tako što ćete je prevući i ispustiti na nju**. Ovaj pristup neće biti naveden u nijednoj TCC bazi podataka, već kao **proširena** **atribut datoteke**. Ovaj atribut će **čuvati UUID** dozvoljene aplikacije:
 ```bash
 xattr Desktop/private.txt
 com.apple.macl
@@ -252,7 +252,7 @@ uuid 769FD8F1-90E0-3206-808C-A8947BEBD6C3
 > [!NOTE]
 > Zanimljivo je da **`com.apple.macl`** atribut upravlja **Sandbox**, a ne tccd.
 >
-> Takođe, imajte na umu da ako premestite datoteku koja omogućava UUID aplikacije na vašem računaru na drugi računar, pošto će ista aplikacija imati različite UID-ove, neće omogućiti pristup toj aplikaciji.
+> Takođe, imajte na umu da ako premestite datoteku koja omogućava UUID aplikacije na vašem računaru na drugi računar, pošto će ista aplikacija imati različite UIDs, neće omogućiti pristup toj aplikaciji.
 
 Prošireni atribut `com.apple.macl` **ne može biti obrisan** kao drugi prošireni atributi jer je **zaštićen SIP-om**. Međutim, kao što je [**objašnjeno u ovom postu**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/), moguće je onemogućiti ga **kompresovanjem** datoteke, **brisanje** i **dekompresovanjem**.
 
@@ -345,7 +345,7 @@ EOD
 ```
 {{#endtab}}
 
-{{#tab name="Steal systems TCC.db"}}
+{{#tab name="Kradite sisteme TCC.db"}}
 ```applescript
 osascript<<EOD
 tell application "Finder"
@@ -398,7 +398,7 @@ EOD
 
 Isto se dešava sa **Script Editor aplikacijom,** može kontrolisati Finder, ali korišćenjem AppleScript-a ne možete je naterati da izvrši skriptu.
 
-### Automatizacija (SE) do nekog TCC
+### Automatizacija (SE) do nekih TCC
 
 **Sistemski događaji mogu kreirati akcije za foldere, a akcije za foldere mogu pristupiti nekim TCC folderima** (Desktop, Documents & Downloads), tako da se skripta poput sledeće može koristiti za zloupotrebu ovog ponašanja:
 ```bash
@@ -500,32 +500,32 @@ Pogledajte ovu stranicu za neke [**payloads za zloupotrebu dozvola pristupa**](m
 
 Ako imate **`kTCCServiceEndpointSecurityClient`**, imate FDA. Kraj.
 
-### Sistemska politika SysAdmin datoteka do FDA
+### System Policy SysAdmin File do FDA
 
-**`kTCCServiceSystemPolicySysAdminFiles`** omogućava **promenu** **`NFSHomeDirectory`** atributa korisnika koji menja njegovu početnu fasciklu i stoga omogućava **obiđite TCC**.
+**`kTCCServiceSystemPolicySysAdminFiles`** omogućava **promenu** **`NFSHomeDirectory`** atributa korisnika koji menja njegovu početnu fasciklu i stoga omogućava **obići TCC**.
 
-### Korisnički TCC DB do FDA
+### User TCC DB do FDA
 
-Dobijanje **dozvola za pisanje** nad **korisničkom TCC** bazom ne možete sebi dodeliti **`FDA`** dozvole, samo onaj koji živi u sistemskoj bazi može to dodeliti.
+Dobijanje **dozvola za pisanje** nad **user TCC** bazom podataka ne možete sebi dodeliti **`FDA`** dozvole, samo onaj koji živi u sistemskoj bazi može to dodeliti.
 
-Ali možete **možete** sebi dati **`Automatizacione prava za Finder`**, i zloupotrebiti prethodnu tehniku da se eskalirate do FDA\*.
+Ali možete **dati** sebi **`Automation rights to Finder`**, i zloupotrebiti prethodnu tehniku da se eskalirate do FDA\*.
 
 ### **FDA do TCC dozvola**
 
-**Puni pristup disku** je TCC naziv **`kTCCServiceSystemPolicyAllFiles`**
+**Full Disk Access** je TCC naziv **`kTCCServiceSystemPolicyAllFiles`**
 
-Ne mislim da je ovo pravi privesc, ali samo u slučaju da to smatrate korisnim: Ako kontrolišete program sa FDA, možete **modifikovati korisničku TCC bazu i dati sebi bilo koji pristup**. Ovo može biti korisno kao tehnika postojanosti u slučaju da izgubite svoje FDA dozvole.
+Ne mislim da je ovo pravi privesc, ali samo u slučaju da to smatrate korisnim: Ako kontrolišete program sa FDA, možete **modifikovati korisničku TCC bazu podataka i dati sebi bilo koji pristup**. Ovo može biti korisno kao tehnika postojanosti u slučaju da izgubite svoje FDA dozvole.
 
-### **SIP zaobilaženje do TCC zaobilaženje**
+### **SIP Bypass do TCC Bypass**
 
-Sistemska **TCC baza** je zaštićena **SIP**, zato samo procesi sa **navedenim ovlašćenjima će moći da je modifikuju**. Stoga, ako napadač pronađe **SIP zaobilaženje** preko **datoteke** (može da modifikuje datoteku koja je ograničena od strane SIP-a), moći će da:
+Sistem **TCC baza podataka** je zaštićena **SIP**, zato samo procesi sa **navedenim privilegijama će moći da je modifikuju**. Stoga, ako napadač pronađe **SIP bypass** preko **fajla** (da može da modifikuje fajl koji je ograničen SIP-om), moći će da:
 
-- **Ukloni zaštitu** TCC baze, i da sebi dodeli sve TCC dozvole. Mogao bi zloupotrebiti bilo koju od ovih datoteka, na primer:
-- TCC sistemska baza
+- **Ukloni zaštitu** TCC baze podataka i da sebi dodeli sve TCC dozvole. Mogao bi zloupotrebiti bilo koji od ovih fajlova, na primer:
+- TCC sistemska baza podataka
 - REG.db
 - MDMOverrides.plist
 
-Međutim, postoji još jedna opcija za zloupotrebu ovog **SIP zaobilaženja da bi se zaobišao TCC**, datoteka `/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist` je lista dozvoljenih aplikacija koje zahtevaju TCC izuzetak. Stoga, ako napadač može **ukloniti SIP zaštitu** sa ove datoteke i dodati svoju **vlastitu aplikaciju**, aplikacija će moći da zaobiđe TCC.\
+Međutim, postoji još jedna opcija za zloupotrebu ovog **SIP bypass-a da bi se obišao TCC**, fajl `/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist` je lista dozvoljenih aplikacija koje zahtevaju TCC izuzetak. Stoga, ako napadač može **ukloniti SIP zaštitu** sa ovog fajla i dodati svoju **vlastitu aplikaciju**, aplikacija će moći da obiđe TCC.\
 Na primer, da doda terminal:
 ```bash
 # Get needed info

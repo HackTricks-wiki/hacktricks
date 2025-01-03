@@ -4,7 +4,7 @@
 
 ## Osnovne informacije
 
-Kernel ekstenzije (Kexts) su **paketi** sa **`.kext`** ekstenzijom koji se **učitavaju direktno u macOS kernel prostor**, pružajući dodatnu funkcionalnost glavnom operativnom sistemu.
+Kernel ekstenzije (Kexts) su **paketi** sa **`.kext`** ekstenzijom koji se **direktno učitavaju u macOS kernel prostor**, pružajući dodatnu funkcionalnost glavnom operativnom sistemu.
 
 ### Zahtevi
 
@@ -27,9 +27,9 @@ U Catalini je to izgledalo ovako: Zanimljivo je napomenuti da se **proverava** p
 1. **`kextutil`** cli **pokreće** **proveru** procesa za učitavanje ekstenzije
 - Razgovaraće sa **`kextd`** slanjem putem **Mach servisa**.
 2. **`kextd`** će proveriti nekoliko stvari, kao što je **potpis**
-- Razgovaraće sa **`syspolicyd`** da bi **proverio** da li se ekstenzija može **učitati**.
+- Razgovaraće sa **`syspolicyd`** da **proveri** da li se ekstenzija može **učitati**.
 3. **`syspolicyd`** će **pitati** **korisnika** ako ekstenzija nije prethodno učitana.
-- **`syspolicyd`** će izvestiti rezultat **`kextd`**
+- **`syspolicyd`** će prijaviti rezultat **`kextd`**
 4. **`kextd`** će konačno moći da **kaže kernelu da učita** ekstenziju
 
 Ako **`kextd`** nije dostupan, **`kextutil`** može izvršiti iste provere.
@@ -47,7 +47,7 @@ kextstat | grep " 22 " | cut -c2-5,50- | cut -d '(' -f1
 > [!CAUTION]
 > Iako se očekuje da su kernel ekstenzije u `/System/Library/Extensions/`, ako odete u ovu fasciklu **nećete pronaći nijedan binarni fajl**. To je zbog **kernelcache** i da biste obrnuli jedan `.kext` potrebno je da pronađete način da ga dobijete.
 
-**Kernelcache** je **prekompajlirana i prelinkovana verzija XNU kernela**, zajedno sa esencijalnim uređajskim **drajverima** i **kernel ekstenzijama**. Čuva se u **kompresovanom** formatu i dekompresuje se u memoriju tokom procesa pokretanja. Kernelcache omogućava **brže vreme pokretanja** tako što ima verziju kernela i ključnih drajvera spremnu za rad, smanjujući vreme i resurse koji bi inače bili potrošeni na dinamičko učitavanje i linkovanje ovih komponenti prilikom pokretanja.
+**Kernelcache** je **prekompajlirana i prelinkovana verzija XNU kernela**, zajedno sa esencijalnim uređajskim **drajverima** i **kernel ekstenzijama**. Čuva se u **kompresovanom** formatu i dekompresuje se u memoriju tokom procesa pokretanja. Kernelcache olakšava **brže vreme pokretanja** tako što ima verziju kernela i ključnih drajvera spremnu za rad, smanjujući vreme i resurse koji bi inače bili potrošeni na dinamičko učitavanje i linkovanje ovih komponenti prilikom pokretanja.
 
 ### Lokalni Kernelcache
 
@@ -58,7 +58,7 @@ U mom slučaju u macOS-u pronašao sam ga u:
 
 #### IMG4
 
-IMG4 format fajla je kontejnerski format koji koristi Apple u svojim iOS i macOS uređajima za sigurno **čuvanje i verifikaciju firmware** komponenti (kao što je **kernelcache**). IMG4 format uključuje zaglavlje i nekoliko oznaka koje enkapsuliraju različite delove podataka uključujući stvarni payload (kao što je kernel ili bootloader), potpis i skup manifest svojstava. Format podržava kriptografsku verifikaciju, omogućavajući uređaju da potvrdi autentičnost i integritet firmware komponente pre nego što je izvrši.
+IMG4 format fajla je kontejnerski format koji koristi Apple u svojim iOS i macOS uređajima za sigurno **čuvanje i verifikaciju firmware** komponenti (kao što je **kernelcache**). IMG4 format uključuje zaglavlje i nekoliko oznaka koje obuhvataju različite delove podataka uključujući stvarni payload (kao što su kernel ili bootloader), potpis i skup manifest svojstava. Format podržava kriptografsku verifikaciju, omogućavajući uređaju da potvrdi autentičnost i integritet firmware komponente pre nego što je izvrši.
 
 Obično se sastoji od sledećih komponenti:
 
@@ -97,7 +97,7 @@ Ponekad Apple objavljuje **kernelcache** sa **symbolima**. Možete preuzeti neke
 
 Da biste **izvukli** datoteke, počnite tako što ćete promeniti ekstenziju sa `.ipsw` na `.zip` i **raspakovati** je.
 
-Nakon vađenja firmvera dobićete datoteku poput: **`kernelcache.release.iphone14`**. U **IMG4** formatu, možete izvući zanimljive informacije sa:
+Nakon vađenja firmvera dobićete datoteku poput: **`kernelcache.release.iphone14`**. U **IMG4** formatu, možete izvući zanimljive informacije pomoću:
 
 [**pyimg4**](https://github.com/m1stadev/PyIMG4)**:**
 ```bash

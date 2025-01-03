@@ -10,16 +10,16 @@ Nib (skraćeno od NeXT Interface Builder) datoteke, deo Apple-ovog razvojnog eko
 
 Glavna Nib datoteka se poziva u vrednosti **`NSMainNibFile`** unutar `Info.plist` datoteke aplikacije i učitava je funkcija **`NSApplicationMain`** koja se izvršava u `main` funkciji aplikacije.
 
-### Dirty Nib Proces Injekcije
+### Proces Injekcije Prljavog Niba
 
 #### Kreiranje i Postavljanje NIB Datoteke
 
-1. **Početna Postavka**:
+1. **Početna Konfiguracija**:
 - Kreirajte novu NIB datoteku koristeći XCode.
 - Dodajte objekat u interfejs, postavljajući njegovu klasu na `NSAppleScript`.
 - Konfigurišite početnu `source` svojstvo putem User Defined Runtime Attributes.
 2. **Gadget za Izvršavanje Koda**:
-- Postavka omogućava pokretanje AppleScript-a na zahtev.
+- Konfiguracija omogućava pokretanje AppleScript-a na zahtev.
 - Integrisati dugme za aktiviranje `Apple Script` objekta, posebno pokrećući `executeAndReturnError:` selektor.
 3. **Testiranje**:
 
@@ -42,7 +42,7 @@ display dialog theDialogText
 3. **Izvršavanje**:
 - Pokrenite izvršavanje interakcijom sa aplikacijom (npr. odabirom `About` menija).
 
-#### Dokaz Koncepta: Pristupanje Korisničkim Podacima
+#### Dokaz Koncepta: Pristup Korisničkim Podacima
 
 - Izmenite AppleScript da pristupi i izvuče korisničke podatke, kao što su fotografije, bez pristanka korisnika.
 
@@ -52,12 +52,12 @@ display dialog theDialogText
 
 ### Drugi Primer
 
-U postu [https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) možete pronaći tutorijal o tome kako kreirati dirty nib.&#x20;
+U postu [https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) možete pronaći tutorijal o tome kako kreirati prljavi nib.&#x20;
 
 ### Rešavanje Ograničenja Pokretanja
 
-- Ograničenja pokretanja ometaju izvršavanje aplikacija iz neočekivanih lokacija (npr. `/tmp`).
-- Moguće je identifikovati aplikacije koje nisu zaštićene Ograničenjima pokretanja i ciljati ih za NIB datoteku injekciju.
+- Ograničenja pokretanja sprečavaju izvršavanje aplikacija iz neočekivanih lokacija (npr. `/tmp`).
+- Moguće je identifikovati aplikacije koje nisu zaštićene Ograničenjima pokretanja i ciljati ih za injekciju NIB datoteka.
 
 ### Dodatne macOS Zaštite
 

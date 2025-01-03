@@ -14,7 +14,7 @@ Pravila se čuvaju u `rules` tabeli unutar baze podataka i sadrže sledeće kolo
 - **name**: Jedinstveno ime pravila koje se koristi za identifikaciju i referenciranje unutar sistema autorizacije.
 - **type**: Određuje tip pravila, ograničeno na vrednosti 1 ili 2 za definisanje njegove logike autorizacije.
 - **class**: Kategorizuje pravilo u određenu klasu, osiguravajući da je pozitivni ceo broj.
-- "allow" za dozvolu, "deny" za odbijanje, "user" ako grupna svojstva ukazuju na grupu čije članstvo omogućava pristup, "rule" ukazuje u nizu na pravilo koje treba ispuniti, "evaluate-mechanisms" praćeno nizom `mechanisms` koji su ili ugrađeni ili naziv paketa unutar `/System/Library/CoreServices/SecurityAgentPlugins/` ili /Library/Security//SecurityAgentPlugins
+- "allow" za dozvolu, "deny" za odbijanje, "user" ako grupna svojstva ukazuju na grupu članstvo koje omogućava pristup, "rule" ukazuje u nizu na pravilo koje treba ispuniti, "evaluate-mechanisms" praćeno nizom `mechanisms` koji su ili ugrađeni ili naziv paketa unutar `/System/Library/CoreServices/SecurityAgentPlugins/` ili /Library/Security//SecurityAgentPlugins
 - **group**: Ukazuje na korisničku grupu povezanu sa pravilom za autorizaciju zasnovanu na grupi.
 - **kofn**: Predstavlja "k-of-n" parametar, određujući koliko podpravila mora biti ispunjeno od ukupnog broja.
 - **timeout**: Definiše trajanje u sekundama pre nego što autorizacija koju dodeljuje pravilo istekne.
@@ -73,11 +73,11 @@ Osim toga, na [https://www.dssw.co.uk/reference/authorization-rights/authenticat
 ```
 ## Authd
 
-To je demon koji će primati zahteve za autorizaciju klijenata da izvrše osetljive radnje. Radi kao XPC servis definisan unutar `XPCServices/` foldera i koristi da piše svoje logove u `/var/log/authd.log`.
+To je demon koji će primati zahteve za autorizaciju klijenata da izvrše osetljive radnje. Radi kao XPC servis definisan unutar `XPCServices/` foldera i koristi se za pisanje svojih logova u `/var/log/authd.log`.
 
 Pored toga, korišćenjem bezbednosnog alata moguće je testirati mnoge `Security.framework` API-je. Na primer, `AuthorizationExecuteWithPrivileges` se pokreće: `security execute-with-privileges /bin/ls`
 
-To će fork-ovati i izvršiti `/usr/libexec/security_authtrampoline /bin/ls` kao root, što će tražiti dozvole u promptu da izvrši ls kao root:
+To će fork-ovati i exec-ovati `/usr/libexec/security_authtrampoline /bin/ls` kao root, što će tražiti dozvole u promptu da izvrši ls kao root:
 
 <figure><img src="../../../images/image (10).png" alt=""><figcaption></figcaption></figure>
 

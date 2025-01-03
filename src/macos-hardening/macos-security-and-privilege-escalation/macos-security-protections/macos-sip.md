@@ -4,14 +4,14 @@
 
 ## **Osnovne Informacije**
 
-**System Integrity Protection (SIP)** u macOS-u je mehanizam dizajniran da spreči čak i najprivilegovanije korisnike da prave neovlašćene promene u ključnim sistemskim folderima. Ova funkcija igra ključnu ulogu u održavanju integriteta sistema ograničavajući radnje poput dodavanja, modifikovanja ili brisanja datoteka u zaštićenim oblastima. Glavni folderi zaštićeni SIP-om uključuju:
+**System Integrity Protection (SIP)** u macOS-u je mehanizam dizajniran da spreči čak i najprivilegovanije korisnike da vrše neovlašćene promene u ključnim sistemskim folderima. Ova funkcija igra ključnu ulogu u održavanju integriteta sistema ograničavanjem radnji kao što su dodavanje, modifikovanje ili brisanje datoteka u zaštićenim oblastima. Glavni folderi zaštićeni SIP-om uključuju:
 
 - **/System**
 - **/bin**
 - **/sbin**
 - **/usr**
 
-Pravila koja upravljaju ponašanjem SIP-a definisana su u konfiguracionom fajlu smeštenom na **`/System/Library/Sandbox/rootless.conf`**. Unutar ovog fajla, putevi koji su prefiksirani zvezdicom (\*) označeni su kao izuzeci od inače strogih SIP ograničenja.
+Pravila koja upravljaju ponašanjem SIP-a definisana su u konfiguracionom fajlu koji se nalazi na **`/System/Library/Sandbox/rootless.conf`**. Unutar ovog fajla, putevi koji su označeni zvezdicom (\*) se smatraju izuzecima od inače strogih SIP ograničenja.
 
 Razmotrite primer ispod:
 ```javascript
@@ -81,21 +81,21 @@ csrutil enable --without debug
 - `com.apple.rootless.kext-management`: `kext_request`
 - `com.apple.rootless.datavault.controller`: Upravljanje UF_DATAVAULT
 - `com.apple.rootless.xpc.bootstrap`: XPC postavke sposobnosti
-- `com.apple.rootless.xpc.effective-root`: Root putem launchd XPC
+- `com.apple.rootless.xpc.effective-root`: Root preko launchd XPC
 - `com.apple.rootless.restricted-block-devices`: Pristup sirovim blok uređajima
 - `com.apple.rootless.internal.installer-equivalent`: Neograničen pristup datotečnom sistemu
-- `com.apple.rootless.restricted-nvram-variables[.heritable]`: Potpun pristup NVRAM-u
+- `com.apple.rootless.restricted-nvram-variables[.heritable]`: Potpuni pristup NVRAM-u
 - `com.apple.rootless.storage.label`: Modifikovanje datoteka ograničenih od strane com.apple.rootless xattr sa odgovarajućom oznakom
 - `com.apple.rootless.volume.VM.label`: Održavanje VM swap na volumenu
 
-## SIP Zaobilaženja
+## SIP Obilaženja
 
-Zaobilaženje SIP-a omogućava napadaču da:
+Obilaženje SIP omogućava napadaču da:
 
 - **Pristupi korisničkim podacima**: Čita osetljive korisničke podatke poput maila, poruka i Safari istorije sa svih korisničkih naloga.
-- **TCC Zaobilaženje**: Direktno manipuliše TCC (Transparentnost, Saglasnost i Kontrola) bazom podataka kako bi omogućio neovlašćen pristup kameri, mikrofonu i drugim resursima.
+- **TCC Obilaženje**: Direktno manipuliše TCC (Transparentnost, Saglasnost i Kontrola) bazom podataka kako bi omogućio neovlašćen pristup kameri, mikrofonu i drugim resursima.
 - **Uspostavi postojanost**: Postavi malver na SIP-om zaštićenim lokacijama, čineći ga otpornim na uklanjanje, čak i od strane root privilegija. Ovo takođe uključuje potencijal za manipulaciju Alatom za uklanjanje malvera (MRT).
-- **Učita kernel ekstenzije**: Iako postoje dodatne zaštite, zaobilaženje SIP-a pojednostavljuje proces učitavanja nepodpisanih kernel ekstenzija.
+- **Učita kernel ekstenzije**: Iako postoje dodatne zaštite, obilaženje SIP pojednostavljuje proces učitavanja nepodpisanih kernel ekstenzija.
 
 ### Instalacijski Paketi
 
@@ -143,7 +143,7 @@ fsck_cs /dev/diskX 1>&-
 touch /Library/Extensions/
 reboot
 ```
-Eksploatacija ove ranjivosti ima ozbiljne posledice. Datoteka `Info.plist`, koja je obično odgovorna za upravljanje dozvolama za kernel ekstenzije, postaje neefikasna. To uključuje nemogućnost da se određene ekstenzije stave na crnu listu, kao što je `AppleHWAccess.kext`. Kao rezultat toga, sa SIP-ovim kontrolnim mehanizmom van funkcije, ova ekstenzija može biti učitana, omogućavajući neovlašćen pristup za čitanje i pisanje RAM-u sistema.
+Eksploatacija ove ranjivosti ima ozbiljne posledice. Datoteka `Info.plist`, koja je obično odgovorna za upravljanje dozvolama za kernel ekstenzije, postaje neefikasna. To uključuje nemogućnost da se stavi na crnu listu određene ekstenzije, kao što je `AppleHWAccess.kext`. Kao rezultat toga, sa SIP-ovim kontrolnim mehanizmom van funkcije, ova ekstenzija može biti učitana, omogućavajući neovlašćen pristup za čitanje i pisanje RAM-u sistema.
 
 #### [Mount over SIP protected folders](https://www.slideshare.net/i0n1c/syscan360-stefan-esser-os-x-el-capitan-sinking-the-ship)
 
@@ -156,11 +156,11 @@ hdiutil attach -mountpoint /System/Library/Snadbox/ evil.dmg
 ```
 #### [Upgrader bypass (2016)](https://objective-see.org/blog/blog_0x14.html)
 
-Sistem je podešen da se pokrene sa ugrađenog instalacionog diska unutar `Install macOS Sierra.app` za nadogradnju operativnog sistema, koristeći `bless` alat. Korisćena komanda je sledeća:
+Sistem je podešen da se pokrene sa ugrađenog instalacionog diska unutar `Install macOS Sierra.app` za nadogradnju operativnog sistema, koristeći `bless` alat. Komanda koja se koristi je sledeća:
 ```bash
 /usr/sbin/bless -setBoot -folder /Volumes/Macintosh HD/macOS Install Data -bootefi /Volumes/Macintosh HD/macOS Install Data/boot.efi -options config="\macOS Install Data\com.apple.Boot" -label macOS Installer
 ```
-Bezbednost ovog procesa može biti kompromitovana ako napadač izmeni sliku za nadogradnju (`InstallESD.dmg`) pre pokretanja. Strategija uključuje zamenu dinamičkog učitavača (dyld) sa zloćudnom verzijom (`libBaseIA.dylib`). Ova zamena rezultira izvršavanjem napadačevog koda kada se pokrene instalater.
+Bezbednost ovog procesa može biti kompromitovana ako napadač izmeni sliku za nadogradnju (`InstallESD.dmg`) pre pokretanja. Strategija uključuje zamenu dinamičkog učitavača (dyld) sa zloćudnom verzijom (`libBaseIA.dylib`). Ova zamena rezultira izvršavanjem napadačevog koda kada se instalater pokrene.
 
 Napadačev kod preuzima kontrolu tokom procesa nadogradnje, koristeći poverenje sistema u instalater. Napad se nastavlja izmenom slike `InstallESD.dmg` putem metode swizzling, posebno ciljanjem na metodu `extractBootBits`. Ovo omogućava injekciju zloćudnog koda pre nego što se slika diska upotrebi.
 
@@ -168,7 +168,7 @@ Napadačev kod preuzima kontrolu tokom procesa nadogradnje, koristeći poverenje
 
 #### [systemmigrationd (2023)](https://www.youtube.com/watch?v=zxZesAN-TEk)
 
-U ovom predavanju sa [**DEF CON 31**](https://www.youtube.com/watch?v=zxZesAN-TEk), prikazano je kako **`systemmigrationd`** (koji može zaobići SIP) izvršava **bash** i **perl** skriptu, koja može biti zloupotrebljena putem env varijabli **`BASH_ENV`** i **`PERL5OPT`**.
+U ovom govoru sa [**DEF CON 31**](https://www.youtube.com/watch?v=zxZesAN-TEk), prikazano je kako **`systemmigrationd`** (koji može zaobići SIP) izvršava **bash** i **perl** skriptu, koja može biti zloupotrebljena putem env varijabli **`BASH_ENV`** i **`PERL5OPT`**.
 
 #### CVE-2023-42860 <a href="#cve-a-detailed-look" id="cve-a-detailed-look"></a>
 
@@ -194,14 +194,14 @@ Zapečaćene sistemske snimke su funkcija koju je Apple uveo u **macOS Big Sur (
 Evo detaljnijeg pregleda:
 
 1. **Nepromenljiv sistem**: Zapečaćene sistemske snimke čine macOS sistemski volumen "nepromenljivim", što znači da ne može biti modifikovan. Ovo sprečava bilo kakve neovlašćene ili slučajne promene na sistemu koje bi mogle ugroziti bezbednost ili stabilnost sistema.
-2. **Ažuriranja sistemskog softvera**: Kada instalirate ažuriranja ili nadogradnje za macOS, macOS kreira novu sistemsku snimku. Zatim, macOS pokreće volumen koristeći **APFS (Apple File System)** da pređe na ovu novu snimku. Ceo proces primene ažuriranja postaje sigurniji i pouzdaniji jer se sistem uvek može vratiti na prethodnu snimku ako nešto pođe po zlu tokom ažuriranja.
+2. **Ažuriranja sistemskog softvera**: Kada instalirate ažuriranja ili nadogradnje za macOS, macOS kreira novu sistemsku snimku. Zatim, macOS startni volumen koristi **APFS (Apple File System)** da pređe na ovu novu snimku. Ceo proces primene ažuriranja postaje sigurniji i pouzdaniji jer se sistem uvek može vratiti na prethodnu snimku ako nešto pođe po zlu tokom ažuriranja.
 3. **Separacija podataka**: U skladu sa konceptom separacije podataka i sistemskog volumena uvedenim u macOS Catalina, funkcija zapečaćenih sistemskih snimaka osigurava da su svi vaši podaci i podešavanja smešteni na odvojenom "**Data**" volumenu. Ova separacija čini vaše podatke nezavisnim od sistema, što pojednostavljuje proces ažuriranja sistema i poboljšava bezbednost sistema.
 
 Zapamtite da ove snimke automatski upravlja macOS i ne zauzimaju dodatni prostor na vašem disku, zahvaljujući mogućnostima deljenja prostora APFS-a. Takođe je važno napomenuti da su ove snimke različite od **Time Machine snimaka**, koje su korisnički dostupne sigurnosne kopije celog sistema.
 
 ### Proverite snimke
 
-Komanda **`diskutil apfs list`** prikazuje **detalje o APFS volumenima** i njihovom rasporedu:
+Komanda **`diskutil apfs list`** prikazuje **detalje APFS volumena** i njihov raspored:
 
 <pre><code>+-- Container disk3 966B902E-EDBA-4775-B743-CF97A0556A13
 |   ====================================================
@@ -242,7 +242,7 @@ Komanda **`diskutil apfs list`** prikazuje **detalje o APFS volumenima** i njiho
 
 U prethodnom izlazu je moguće videti da su **lokacije dostupne korisnicima** montirane pod `/System/Volumes/Data`.
 
-Pored toga, **sistem volumena snimka macOS-a** je montiran u `/` i on je **zapečaćen** (kriptografski potpisan od strane OS-a). Dakle, ako se SIP zaobiđe i modifikuje, **OS više neće moći da se pokrene**.
+Pored toga, **macOS sistemska snimka volumena** je montirana u `/` i ona je **zapečaćena** (kriptografski potpisana od strane OS-a). Dakle, ako se SIP zaobiđe i modifikuje, **OS više neće moći da se pokrene**.
 
 Takođe je moguće **proveriti da li je pečat omogućen** pokretanjem:
 ```bash

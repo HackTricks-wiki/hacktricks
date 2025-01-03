@@ -41,9 +41,9 @@ security dump-keychain -d #Dump all the info, included secrets (the user will be
 
 ### Pregled Keychaindump-a
 
-Alat pod nazivom **keychaindump** razvijen je za ekstrakciju lozinki iz macOS keychain-a, ali se suočava sa ograničenjima na novijim verzijama macOS-a kao što je Big Sur, kako je navedeno u [diskusiji](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760). Korišćenje **keychaindump** zahteva od napadača da dobije pristup i eskalira privilegije na **root**. Alat koristi činjenicu da je keychain po defaultu otključan prilikom prijave korisnika radi pogodnosti, omogućavajući aplikacijama da mu pristupe bez ponovnog traženja korisničke lozinke. Međutim, ako korisnik odluči da zaključa svoj keychain nakon svake upotrebe, **keychaindump** postaje neefikasan.
+Alat pod nazivom **keychaindump** razvijen je za ekstrakciju lozinki iz macOS keychain-a, ali se suočava sa ograničenjima na novijim verzijama macOS-a kao što je Big Sur, kako je naznačeno u [diskusiji](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760). Korišćenje **keychaindump** zahteva od napadača da dobije pristup i eskalira privilegije na **root**. Alat koristi činjenicu da je keychain po defaultu otključan prilikom prijave korisnika radi pogodnosti, omogućavajući aplikacijama da mu pristupe bez ponovnog traženja lozinke korisnika. Međutim, ako korisnik odluči da zaključa svoj keychain nakon svake upotrebe, **keychaindump** postaje neefikasan.
 
-**Keychaindump** funkcioniše tako što cilja specifičan proces nazvan **securityd**, koji Apple opisuje kao demon za autorizaciju i kriptografske operacije, što je ključno za pristup keychain-u. Proces ekstrakcije uključuje identifikaciju **Master Key**-a izvedenog iz korisničke lozinke. Ovaj ključ je neophodan za čitanje datoteke keychain-a. Da bi locirao **Master Key**, **keychaindump** skenira memorijski heap **securityd** koristeći komandu `vmmap`, tražeći potencijalne ključeve unutar oblasti označenih kao `MALLOC_TINY`. Sledeća komanda se koristi za inspekciju ovih memorijskih lokacija:
+**Keychaindump** funkcioniše tako što cilja specifičan proces nazvan **securityd**, koji Apple opisuje kao demon za autorizaciju i kriptografske operacije, što je ključno za pristup keychain-u. Proces ekstrakcije uključuje identifikaciju **Master Key**-a izvedenog iz lozinke za prijavu korisnika. Ovaj ključ je neophodan za čitanje datoteke keychain-a. Da bi locirao **Master Key**, **keychaindump** skenira memorijski heap **securityd** koristeći komandu `vmmap`, tražeći potencijalne ključeve unutar oblasti označenih kao `MALLOC_TINY`. Sledeća komanda se koristi za inspekciju ovih memorijskih lokacija:
 ```bash
 sudo vmmap <securityd PID> | grep MALLOC_TINY
 ```
@@ -66,7 +66,7 @@ sudo ./keychaindump
 
 Ukoliko je dostupna lozinka za otključavanje keychain-a, master ključ dobijen korišćenjem [volafox](https://github.com/n0fate/volafox) ili [volatility](https://github.com/volatilityfoundation/volatility), ili datoteka za otključavanje kao što je SystemKey, Chainbreaker će takođe pružiti lozinke u običnom tekstu.
 
-Bez jedne od ovih metoda otključavanja keychain-a, Chainbreaker će prikazati sve druge dostupne informacije.
+Bez jedne od ovih metoda otključavanja Keychain-a, Chainbreaker će prikazati sve druge dostupne informacije.
 
 #### **Dump keychain keys**
 ```bash
@@ -81,7 +81,7 @@ hexdump -s 8 -n 24 -e '1/1 "%.2x"' /var/db/SystemKey && echo
 ## Use the previous key to decrypt the passwords
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
-#### **Ispusti ključeve iz keychain-a (sa lozinkama) razbijajući hash**
+#### **Ispisivanje ključeva iz keychain-a (sa lozinkama) razbijanje heša**
 ```bash
 # Get the keychain hash
 python2.7 chainbreaker.py --dump-keychain-password-hash /Library/Keychains/System.keychain
@@ -110,10 +110,10 @@ python2.7 chainbreaker.py --dump-all --password-prompt /Users/<username>/Library
 ```
 ### kcpassword
 
-Datoteka **kcpassword** je datoteka koja sadrži **lozinku za prijavu korisnika**, ali samo ako je vlasnik sistema **omogućio automatsku prijavu**. Stoga će korisnik biti automatski prijavljen bez traženja lozinke (što nije baš sigurno).
+Datoteka **kcpassword** je datoteka koja sadrži **lozinku za prijavu korisnika**, ali samo ako je vlasnik sistema **omogućio automatsku prijavu**. Stoga, korisnik će biti automatski prijavljen bez traženja lozinke (što nije baš sigurno).
 
 Lozinka se čuva u datoteci **`/etc/kcpassword`** xored sa ključem **`0x7D 0x89 0x52 0x23 0xD2 0xBC 0xDD 0xEA 0xA3 0xB9 0x1F`**. Ako je lozinka korisnika duža od ključa, ključ će se ponovo koristiti.\
-To čini lozinku prilično lakom za oporavak, na primer koristeći skripte poput [**ove**](https://gist.github.com/opshope/32f65875d45215c3677d).
+To čini lozinku prilično lakom za oporavak, na primer koristeći skripte kao [**ovu**](https://gist.github.com/opshope/32f65875d45215c3677d).
 
 ## Zanimljive informacije u bazama podataka
 
@@ -147,9 +147,9 @@ for i in $(sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.s
 
 U macOS aplikacijama, podešavanja se nalaze u **`$HOME/Library/Preferences`** a u iOS-u su u `/var/mobile/Containers/Data/Application/<UUID>/Library/Preferences`.
 
-U macOS-u, cli alat **`defaults`** može se koristiti za **modifikovanje Preferences datoteke**.
+U macOS-u, cli alat **`defaults`** može se koristiti za **modifikaciju Preferences datoteke**.
 
-**`/usr/sbin/cfprefsd`** preuzima XPC servise `com.apple.cfprefsd.daemon` i `com.apple.cfprefsd.agent` i može se pozvati da izvrši radnje kao što je modifikovanje podešavanja.
+**`/usr/sbin/cfprefsd`** preuzima XPC usluge `com.apple.cfprefsd.daemon` i `com.apple.cfprefsd.agent` i može se pozvati da izvrši radnje kao što je modifikacija podešavanja.
 
 ## OpenDirectory permissions.plist
 
@@ -217,7 +217,7 @@ common: com.apple.security.octagon.joined-with-bottle
 
 ### Apple Push Notifications (APN)
 
-U ovom slučaju, aplikacije se mogu registrovati za **topics**. Klijent će generisati token kontaktirajući Apple-ove servere putem **`apsd`**.\
+U ovom slučaju, aplikacije mogu da se registruju za **topics**. Klijent će generisati token kontaktirajući Apple-ove servere putem **`apsd`**.\
 Zatim, provajderi će takođe generisati token i moći će da se povežu sa Apple-ovim serverima kako bi slali poruke klijentima. Ove poruke će lokalno primiti **`apsd`** koji će proslediti obaveštenje aplikaciji koja ga čeka.
 
 Podešavanja se nalaze u `/Library/Preferences/com.apple.apsd.plist`.

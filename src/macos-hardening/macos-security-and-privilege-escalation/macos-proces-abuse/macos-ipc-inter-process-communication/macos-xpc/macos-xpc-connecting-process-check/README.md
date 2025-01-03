@@ -9,7 +9,7 @@ Kada se uspostavi veza sa XPC servisom, server će proveriti da li je veza dozvo
 1. Proveri da li je **proces koji se povezuje potpisan Apple-ovim** sertifikatom (samo ga izdaje Apple).
 - Ako ovo **nije verifikovano**, napadač bi mogao da kreira **lažni sertifikat** koji bi odgovarao bilo kojoj drugoj proveri.
 2. Proveri da li je proces koji se povezuje potpisan **sertifikatom organizacije** (verifikacija tim ID-a).
-- Ako ovo **nije verifikovano**, **bilo koji developerski sertifikat** od Apple-a može se koristiti za potpisivanje i povezivanje sa servisom.
+- Ako ovo **nije verifikovano**, **bilo koji developerski sertifikat** iz Apple-a može se koristiti za potpisivanje i povezivanje sa servisom.
 3. Proveri da li proces koji se povezuje **sadrži odgovarajući bundle ID**.
 - Ako ovo **nije verifikovano**, bilo koji alat **potpisan od iste organizacije** mogao bi se koristiti za interakciju sa XPC servisom.
 4. (4 ili 5) Proveri da li proces koji se povezuje ima **odgovarajući broj verzije softvera**.
@@ -18,7 +18,7 @@ Kada se uspostavi veza sa XPC servisom, server će proveriti da li je veza dozvo
 1. Ako ovo **nije verifikovano**, klijent bi mogao biti **ranjiv na injekciju koda**.
 6. Proveri da li proces koji se povezuje ima **pravo** koje mu omogućava povezivanje sa servisom. Ovo se primenjuje na Apple binarne datoteke.
 7. **Verifikacija** mora biti **zasnovana** na **audit token-u klijenta** **umesto** na njegovom ID-u procesa (**PID**) pošto prvi sprečava **napade ponovne upotrebe PID-a**.
-- Programeri **retko koriste audit token** API poziv pošto je **privatan**, tako da Apple može **promeniti** u bilo kojem trenutku. Pored toga, korišćenje privatnog API-ja nije dozvoljeno u aplikacijama Mac App Store-a.
+- Developeri **retko koriste audit token** API poziv pošto je **privatan**, tako da Apple može **promeniti** u bilo kojem trenutku. Pored toga, korišćenje privatnog API-ja nije dozvoljeno u aplikacijama Mac App Store-a.
 - Ako se metoda **`processIdentifier`** koristi, može biti ranjiva.
 - **`xpc_dictionary_get_audit_token`** treba koristiti umesto **`xpc_connection_get_audit_token`**, pošto bi poslednji mogao biti [ranjiv u određenim situacijama](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/).
 
@@ -49,7 +49,7 @@ Server će implementirati ovu **verifikaciju** u funkciji nazvanoj **`shouldAcce
 return YES;
 }
 ```
-Objekat NSXPCConnection ima **privatnu** osobinu **`auditToken`** (onu koja bi trebala da se koristi, ali može da se promeni) i **javnu** osobinu **`processIdentifier`** (onu koja ne bi trebala da se koristi).
+Objekat NSXPCConnection ima **privatnu** osobinu **`auditToken`** (onu koja bi trebala da se koristi, ali može se promeniti) i **javnu** osobinu **`processIdentifier`** (onu koja ne bi trebala da se koristi).
 
 Povezani proces može se verifikovati sa nečim poput:
 ```objectivec

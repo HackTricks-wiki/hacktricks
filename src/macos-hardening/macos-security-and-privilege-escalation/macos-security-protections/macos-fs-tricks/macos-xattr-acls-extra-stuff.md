@@ -1,4 +1,4 @@
-# macOS xattr-acls dodatne informacije
+# macOS xattr-acls dodatne stvari
 
 {{#include ../../../../banners/hacktricks-training.md}}
 ```bash
@@ -14,7 +14,7 @@ ACL in hex: \x21\x23\x61\x63\x6c\x20\x31\x0a\x67\x72\x6f\x75\x70\x3a\x41\x42\x43
 ```
 <details>
 
-<summary>Код за get_acls</summary>
+<summary>Код get_acls</summary>
 ```c
 // gcc -o get_acls get_acls
 #include <stdio.h>

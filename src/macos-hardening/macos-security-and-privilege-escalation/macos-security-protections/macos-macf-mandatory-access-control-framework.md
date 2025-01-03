@@ -13,7 +13,7 @@ Napomena da MACF zapravo ne donosi nikakve odluke jer samo **presreće** radnje,
 1. Proces izvršava syscall/mach trap
 2. Relevantna funkcija se poziva unutar kernela
 3. Funkcija poziva MACF
-4. MACF proverava module politike koji su zatražili da se ta funkcija poveže u njihovoj politici
+4. MACF proverava module politike koji su zatražili da se povežu sa tom funkcijom u svojoj politici
 5. MACF poziva relevantne politike
 6. Politike označavaju da li dozvoljavaju ili odbacuju radnju
 
@@ -24,11 +24,11 @@ Napomena da MACF zapravo ne donosi nikakve odluke jer samo **presreće** radnje,
 
 MACF koristi **oznake** koje zatim politike koriste da provere da li treba da odobre neki pristup ili ne. Kod deklaracije strukture oznaka može se [pronaći ovde](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/_label.h), koja se zatim koristi unutar **`struct ucred`** u [**ovde**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ucred.h#L86) u delu **`cr_label`**. Oznaka sadrži zastavice i broj **slotova** koji se mogu koristiti od strane **MACF politika za dodeljivanje pokazivača**. Na primer, Sanbox će ukazivati na profil kontejnera.
 
-## MACF politike
+## MACF Politike
 
 MACF politika definiše **pravila i uslove koji se primenjuju u određenim operacijama kernela**.&#x20;
 
-Kernel ekstenzija može konfigurisati `mac_policy_conf` strukturu i zatim je registrovati pozivajući `mac_policy_register`. Iz [ovde](https://opensource.apple.com/source/xnu/xnu-2050.18.24/security/mac_policy.h.auto.html):
+Kernel ekstenzija može konfigurisati `mac_policy_conf` strukturu i zatim je registrovati pozivajući `mac_policy_register`. Od [ovde](https://opensource.apple.com/source/xnu/xnu-2050.18.24/security/mac_policy.h.auto.html):
 ```c
 #define mpc_t	struct mac_policy_conf *
 
@@ -84,7 +84,7 @@ mpo_cred_check_label_update_t		*mpo_cred_check_label_update;
 ```
 Skoro svi hook-ovi će biti pozvani od strane MACF kada se jedna od tih operacija presretne. Međutim, **`mpo_policy_*`** hook-ovi su izuzetak jer je `mpo_hook_policy_init()` callback koji se poziva prilikom registracije (dakle, nakon `mac_policy_register()`) i `mpo_hook_policy_initbsd()` se poziva tokom kasne registracije kada je BSD podsystem pravilno inicijalizovan.
 
-Štaviše, **`mpo_policy_syscall`** hook može biti registrovan od strane bilo kog kext-a da izloži privatni **ioctl** stil poziva **interfejs**. Tada će korisnički klijent moći da pozove `mac_syscall` (#381) navodeći kao parametre **ime politike** sa celobrojnim **kodom** i opcionim **argumentima**.\
+Štaviše, **`mpo_policy_syscall`** hook može biti registrovan od strane bilo kog kext-a da izloži privatni **ioctl** stil poziva **interface**. Tada će korisnički klijent moći da pozove `mac_syscall` (#381) navodeći kao parametre **ime politike** sa celobrojnim **kodom** i opcionim **argumentima**.\
 Na primer, **`Sandbox.kext`** to često koristi.
 
 Proverom **`__DATA.__const*`** kext-a moguće je identifikovati `mac_policy_ops` strukturu koja se koristi prilikom registracije politike. Moguće je pronaći je jer je njen pokazivač na offset-u unutar `mpo_policy_conf` i takođe zbog broja NULL pokazivača koji će biti u toj oblasti.
@@ -93,14 +93,14 @@ Proverom **`__DATA.__const*`** kext-a moguće je identifikovati `mac_policy_ops`
 
 ## MACF Inicijalizacija
 
-MACF se inicijalizuje vrlo brzo. Postavlja se u XNU-ovom `bootstrap_thread`: nakon `ipc_bootstrap` poziva na `mac_policy_init()` koji inicijalizuje `mac_policy_list` i trenutak kasnije se poziva `mac_policy_initmach()`. Između ostalog, ova funkcija će dobiti sve Apple kext-ove sa `AppleSecurityExtension` ključem u njihovom Info.plist kao što su `ALF.kext`, `AppleMobileFileIntegrity.kext`, `Quarantine.kext`, `Sandbox.kext` i `TMSafetyNet.kext` i učitati ih.
+MACF se inicijalizuje vrlo brzo. Postavlja se u XNU-ovom `bootstrap_thread`: nakon `ipc_bootstrap` poziva na `mac_policy_init()` koji inicijalizuje `mac_policy_list`, a trenutak kasnije se poziva `mac_policy_initmach()`. Između ostalog, ova funkcija će dobiti sve Apple kext-ove sa `AppleSecurityExtension` ključem u njihovom Info.plist kao što su `ALF.kext`, `AppleMobileFileIntegrity.kext`, `Quarantine.kext`, `Sandbox.kext` i `TMSafetyNet.kext` i učitati ih.
 
 ## MACF Pozivi
 
 Uobičajeno je pronaći pozive ka MACF definisane u kodu kao: **`#if CONFIG_MAC`** uslovni blokovi. Štaviše, unutar ovih blokova moguće je pronaći pozive na `mac_proc_check*` koji poziva MACF da **proveri dozvole** za izvršavanje određenih akcija. Takođe, format MACF poziva je: **`mac_<object>_<opType>_opName`**.
 
 Objekat je jedan od sledećih: `bpfdesc`, `cred`, `file`, `proc`, `vnode`, `mount`, `devfs`, `ifnet`, `inpcb`, `mbuf`, `ipq`, `pipe`, `sysv[msg/msq/shm/sem]`, `posix[shm/sem]`, `socket`, `kext`.\
-`opType` je obično check koji će se koristiti za dozvoljavanje ili odbijanje akcije. Međutim, takođe je moguće pronaći `notify`, što će omogućiti kext-u da reaguje na datu akciju.
+`opType` je obično check koji će se koristiti za dozvoljavanje ili odbijanje akcije. Međutim, takođe je moguće pronaći `notify`, koji će omogućiti kext-u da reaguje na datu akciju.
 
 Možete pronaći primer u [https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_mman.c#L621](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_mman.c#L621):
 
@@ -157,7 +157,7 @@ error = mac_error_select(__step_err, error);         \
 });                                                             \
 } while (0)
 ```
-Koji će pregledati sve registrovane mac politike pozivajući njihove funkcije i čuvajući izlaz unutar promenljive error, koja će moći da se prepiše samo pomoću `mac_error_select` kodova uspeha, tako da ako bilo koja provera ne uspe, cela provera će propasti i akcija neće biti dozvoljena.
+Koji će proći kroz sve registrovane mac politike pozivajući njihove funkcije i čuvajući izlaz unutar promenljive error, koja će biti prepisiva samo od strane `mac_error_select` pomoću kodova uspeha, tako da ako bilo koja provera ne uspe, cela provera će propasti i akcija neće biti dozvoljena.
 
 > [!TIP]
 > Međutim, zapamtite da se ne koriste svi MACF pozivi samo za odbijanje akcija. Na primer, `mac_priv_grant` poziva makro [**MAC_GRANT**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_internal.h#L274), koji će odobriti traženu privilegiju ako bilo koja politika odgovori sa 0:

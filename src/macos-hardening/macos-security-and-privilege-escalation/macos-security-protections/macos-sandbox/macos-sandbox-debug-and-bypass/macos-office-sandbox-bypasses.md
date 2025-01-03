@@ -12,7 +12,7 @@ Proverite [**originalni izveštaj ovde**](https://www.mdsec.co.uk/2018/08/escapi
 
 ### Word Sandbox bypass via Login Items and zip
 
-Zapamtite da iz prvog bekstva, Word može pisati proizvoljne fajlove čije ime počinje sa `~$` iako nakon zakrpe prethodne ranjivosti nije bilo moguće pisati u `/Library/Application Scripts` ili u `/Library/LaunchAgents`.
+Zapamtite da iz prvog bekstva, Word može pisati proizvoljne fajlove čija imena počinju sa `~$` iako nakon zakrpe prethodne ranjivosti nije bilo moguće pisati u `/Library/Application Scripts` ili u `/Library/LaunchAgents`.
 
 Otkriveno je da iz sandbox-a može da se kreira **Login Item** (aplikacije koje će se izvršavati kada se korisnik prijavi). Međutim, ove aplikacije **neće se izvršiti osim ako** nisu **notarizovane** i **nije moguće dodati argumente** (tako da ne možete samo pokrenuti reverznu ljusku koristeći **`bash`**).
 
@@ -22,13 +22,13 @@ Proverite [**originalni izveštaj ovde**](https://objective-see.org/blog/blog_0x
 
 ### Word Sandbox bypass via Login Items and .zshenv
 
-(Zapamtite da iz prvog bekstva, Word može pisati proizvoljne fajlove čije ime počinje sa `~$`).
+(Zapamtite da iz prvog bekstva, Word može pisati proizvoljne fajlove čija imena počinju sa `~$`).
 
 Međutim, prethodna tehnika je imala ograničenje, ako folder **`~/Library/LaunchAgents`** postoji jer ga je neka druga aplikacija kreirala, to bi propalo. Tako je otkrivena drugačija lanac Login Items za ovo.
 
-Napadač bi mogao da kreira fajlove **`.bash_profile`** i **`.zshenv** sa payload-om za izvršavanje i zatim ih zipuje i **napisati zip u korisnički** folder žrtve: **`~/~$escape.zip`**.
+Napadač bi mogao da kreira fajlove **`.bash_profile`** i **`.zshenv`** sa payload-om za izvršavanje i zatim ih zipuje i **piše zip u korisnički** folder žrtve: **`~/~$escape.zip`**.
 
-Zatim, dodajte zip fajl u **Login Items** i zatim aplikaciju **`Terminal`**. Kada se korisnik ponovo prijavi, zip fajl bi bio raspakovan u korisničkom folderu, prepisujući **`.bash_profile`** i **`.zshenv`** i stoga, terminal će izvršiti jedan od ovih fajlova (u zavisnosti od toga da li se koristi bash ili zsh).
+Zatim, dodajte zip fajl u **Login Items** i zatim aplikaciju **`Terminal`**. Kada se korisnik ponovo prijavi, zip fajl bi bio raspakovan u korisničkom folderu, prepisujući **`.bash_profile`** i **`.zshenv`** i stoga će terminal izvršiti jedan od ovih fajlova (u zavisnosti od toga da li se koristi bash ili zsh).
 
 Proverite [**originalni izveštaj ovde**](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c).
 

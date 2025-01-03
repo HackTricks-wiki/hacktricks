@@ -25,11 +25,11 @@ Ova dozvola omogućava drugim procesima sa dozvolom **`com.apple.security.cs.deb
 
 ### `com.apple.security.cs.debugger`
 
-Aplikacije sa dozvolom za alat za debagovanje mogu pozvati `task_for_pid()` da dobiju važeći task port za nesignirane i treće strane aplikacije sa dozvolom `Get Task Allow` postavljenom na `true`. Međutim, čak i sa dozvolom za alat za debagovanje, debager **ne može dobiti task portove** procesa koji **nemaju dozvolu `Get Task Allow`**, i koji su stoga zaštićeni Sistemskom Integritetnom Zaštitom. Proverite [**ovo za više informacija**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
+Aplikacije sa dozvolom za alat za debagovanje mogu pozvati `task_for_pid()` da dobiju važeći task port za nesignirane i treće strane aplikacije sa dozvolom `Get Task Allow` postavljenom na `true`. Međutim, čak i sa dozvolom za alat za debagovanje, debager **ne može dobiti task portove** procesa koji **nemaju dozvolu `Get Task Allow`**, i koji su stoga zaštićeni Sistemskom Integritetom. Proverite [**ovo za više informacija**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
 
 ### `com.apple.security.cs.disable-library-validation`
 
-Ova dozvola omogućava **učitavanje okvira, dodataka ili biblioteka bez da budu potpisani od strane Apple-a ili potpisani sa istim Team ID** kao glavni izvršni fajl, tako da napadač može zloupotrebiti učitavanje neke proizvoljne biblioteke da ubaci kod. Proverite [**ovo za više informacija**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
+Ova dozvola omogućava **učitavanje okvira, dodataka ili biblioteka bez da budu potpisani od strane Apple-a ili potpisani sa istim Team ID** kao glavni izvršni fajl, tako da bi napadač mogao zloupotrebiti učitavanje neke proizvoljne biblioteke da ubaci kod. Proverite [**ovo za više informacija**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
 
 ### `com.apple.private.security.clear-library-validation`
 
@@ -38,7 +38,7 @@ Proverite [**ovo za više informacija**](https://theevilbit.github.io/posts/com.
 
 ### `com.apple.security.cs.allow-dyld-environment-variables`
 
-Ova dozvola omogućava **korišćenje DYLD promenljivih okruženja** koje se mogu koristiti za ubacivanje biblioteka i koda. Proverite [**ovo za više informacija**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables).
+Ova dozvola omogućava **korišćenje DYLD promenljivih okruženja** koje bi mogle biti korišćene za ubacivanje biblioteka i koda. Proverite [**ovo za više informacija**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables).
 
 ### `com.apple.private.tcc.manager` ili `com.apple.rootless.storage`.`TCC`
 
@@ -93,7 +93,7 @@ Daje **Full Disk Access** dozvole, jednu od najviših TCC dozvola koje možete i
 
 Omogućava aplikaciji da šalje događaje drugim aplikacijama koje se obično koriste za **automatsko izvršavanje zadataka**. Kontrolisanjem drugih aplikacija, može zloupotrebiti dozvole koje su dodeljene tim drugim aplikacijama.
 
-Kao što je navođenje da traže od korisnika njegovu lozinku:
+Kao što je navođenje korisnika da zatraži njegovu lozinku:
 ```bash
 osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to activate' -e 'tell app "App Store" to display dialog "App Store requires your password to continue." & return & return default answer "" with icon 1 with hidden answer with title "App Store Alert"'
 ```

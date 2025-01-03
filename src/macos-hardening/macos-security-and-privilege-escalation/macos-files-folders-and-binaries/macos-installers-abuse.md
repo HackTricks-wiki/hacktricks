@@ -36,7 +36,7 @@ Da biste vizualizovali sadržaj instalatera bez ručnog dekompresovanja, možete
 
 ## DMG Osnovne Informacije
 
-DMG datoteke, ili Apple Disk Images, su format datoteka koji koristi Apple-ov macOS za disk slike. DMG datoteka je u suštini **montabilna disk slika** (sadrži sopstveni fajl sistem) koja sadrži sirove blok podatke obično kompresovane i ponekad enkriptovane. Kada otvorite DMG datoteku, macOS **montira** je kao da je fizički disk, omogućavajući vam pristup njenom sadržaju.
+DMG datoteke, ili Apple Disk Images, su format datoteka koji koristi Apple-ov macOS za disk slike. DMG datoteka je u suštini **montabilna disk slika** (sadrži sopstveni fajl sistem) koja sadrži sirove blok podatke obično kompresovane i ponekad enkriptovane. Kada otvorite DMG datoteku, macOS **montira kao da je fizički disk**, omogućavajući vam pristup njenom sadržaju.
 
 > [!CAUTION]
 > Imajte na umu da **`.dmg`** instalateri podržavaju **toliko formata** da su u prošlosti neki od njih koji su sadržavali ranjivosti zloupotrebljavani za dobijanje **izvršavanja kernel koda**.
@@ -55,13 +55,13 @@ Hijerarhija DMG datoteke može biti različita u zavisnosti od sadržaja. Međut
 
 ### Izvršavanje iz javnih direktorijuma
 
-Ako pre ili post instalacioni skript, na primer, izvršava iz **`/var/tmp/Installerutil`**, napadač može kontrolisati taj skript kako bi eskalirao privilegije svaki put kada se izvrši. Ili drugi sličan primer:
+Ako pre ili post instalacioni skript, na primer, izvršava iz **`/var/tmp/Installerutil`**, napadač bi mogao kontrolisati taj skript kako bi eskalirao privilegije svaki put kada se izvrši. Ili drugi sličan primer:
 
 <figure><img src="../../../images/Pasted Graphic 5.png" alt="https://www.youtube.com/watch?v=iASSG0_zobQ"><figcaption><p><a href="https://www.youtube.com/watch?v=kCXhIYtODBg">https://www.youtube.com/watch?v=kCXhIYtODBg</a></p></figcaption></figure>
 
 ### AuthorizationExecuteWithPrivileges
 
-Ovo je [javna funkcija](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg) koju će nekoliko instalatera i ažuriranja pozvati da **izvrši nešto kao root**. Ova funkcija prihvata **putanju** do **datoteke** koju treba **izvršiti** kao parametar, međutim, ako napadač može **modifikovati** ovu datoteku, biće u mogućnosti da **zloupotrebi** njeno izvršavanje sa root-om da **eskalira privilegije**.
+Ovo je [javna funkcija](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg) koju će nekoliko instalatera i ažuriranja pozvati da **izvrši nešto kao root**. Ova funkcija prihvata **putanju** do **datoteke** koju treba **izvršiti** kao parametar, međutim, ako napadač može **modifikovati** ovu datoteku, moći će da **zloupotrebi** njeno izvršavanje sa root-om da **eskalira privilegije**.
 ```bash
 # Breakpoint in the function to check wich file is loaded
 (lldb) b AuthorizationExecuteWithPrivileges

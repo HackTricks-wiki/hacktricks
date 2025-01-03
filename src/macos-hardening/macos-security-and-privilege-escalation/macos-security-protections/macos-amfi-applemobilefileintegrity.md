@@ -6,7 +6,7 @@
 
 Fokusira se na sprovođenje integriteta koda koji se izvršava na sistemu, pružajući logiku iza verifikacije potpisa koda XNU-a. Takođe može da proveri prava i obavlja druge osetljive zadatke kao što su omogućavanje debagovanja ili dobijanje portova zadataka.
 
-Štaviše, za neke operacije, kext preferira da kontaktira korisnički prostor koji pokreće demon `/usr/libexec/amfid`. Ova međusobna povezanost je zloupotrebljena u nekoliko jailbreak-ova.
+Štaviše, za neke operacije, kext preferira da kontaktira korisnički prostor koji pokreće demon `/usr/libexec/amfid`. Ova međusobna poverenja su zloupotrebljena u nekoliko jailbreak-ova.
 
 AMFI koristi **MACF** politike i registruje svoje hook-ove u trenutku kada se pokrene. Takođe, sprečavanje njegovog učitavanja ili isključivanja može izazvati kernel panic. Međutim, postoje neki boot argumenti koji omogućavaju oslabiti AMFI:
 
@@ -26,7 +26,7 @@ Ovo su neke od MACF politika koje registruje:
 - **`file_check_mmap`:** Proverava da li mmap stiče memoriju i postavlja je kao izvršivu. U tom slučaju proverava da li je potrebna validacija biblioteke i, ako jeste, poziva funkciju za validaciju biblioteke.
 - **`file_check_library_validation`**: Poziva funkciju za validaciju biblioteke koja proverava, između ostalog, da li platforma binarna učitava drugu platformu binarnu ili da li proces i novo učitani fajl imaju isti TeamID. Određena prava će takođe omogućiti učitavanje bilo koje biblioteke.
 - **`policy_initbsd`**: Postavlja poverljive NVRAM ključeve
-- **`policy_syscall`**: Proverava DYLD politike kao što su da li binarna ima neograničene segmente, da li bi trebalo da dozvoli env var... ovo se takođe poziva kada se proces pokrene putem `amfi_check_dyld_policy_self()`.
+- **`policy_syscall`**: Proverava DYLD politike kao što su da li binarna ima neograničene segmente, da li bi trebalo da dozvoli env varijable... ovo se takođe poziva kada se proces pokrene putem `amfi_check_dyld_policy_self()`.
 - **`proc_check_inherit_ipc_ports`**: Proverava da li kada proces izvršava novu binarnu, drugi procesi sa SEND pravima nad portom zadatka procesa treba da ih zadrže ili ne. Platforme binarne su dozvoljene, `get-task-allow` pravo to omogućava, `task_for_pid-allow` prava su dozvoljena i binarne sa istim TeamID.
 - **`proc_check_expose_task`**: sprovodi prava
 - **`amfi_exc_action_check_exception_send`**: Poruka izuzetka se šalje debageru
@@ -65,18 +65,18 @@ No variant specified, falling back to release
 ```
 ## amfid
 
-Ovo je demon koji radi u korisničkom režimu i koji `AMFI.kext` koristi za proveru potpisa koda u korisničkom režimu.\
+Ovo je demon koji radi u korisničkom režimu i koji će `AMFI.kext` koristiti za proveru potpisa koda u korisničkom režimu.\
 Da bi `AMFI.kext` komunicirao sa demonom, koristi mach poruke preko porta `HOST_AMFID_PORT`, koji je poseban port `18`.
 
 Napomena: u macOS-u više nije moguće da root procesi preuzmu posebne portove jer su zaštićeni `SIP`-om i samo launchd može da ih dobije. U iOS-u se proverava da proces koji šalje odgovor ima hardkodovani CDHash `amfid`.
 
 Moguće je videti kada se `amfid` traži da proveri binarni fajl i odgovor na to tako što se debaguje i postavi breakpoint u `mach_msg`.
 
-Kada se poruka primi putem posebnog porta, **MIG** se koristi za slanje svake funkcije funkciji koju poziva. Glavne funkcije su obrnute i objašnjene unutar knjige.
+Kada se poruka primi preko posebnog porta, **MIG** se koristi za slanje svake funkcije funkciji koju poziva. Glavne funkcije su obrnute i objašnjene unutar knjige.
 
 ## Provisioning Profiles
 
-Provisioning profil se može koristiti za potpisivanje koda. Postoje **Developer** profili koji se mogu koristiti za potpisivanje koda i njegovo testiranje, i **Enterprise** profili koji se mogu koristiti na svim uređajima.
+Provisioning profil se može koristiti za potpisivanje koda. Postoje **Developer** profili koji se mogu koristiti za potpisivanje koda i testiranje, i **Enterprise** profili koji se mogu koristiti na svim uređajima.
 
 Nakon što je aplikacija poslata u Apple Store, ako je odobrena, potpisuje je Apple i provisioning profil više nije potreban.
 
@@ -92,7 +92,7 @@ Iako se ponekad nazivaju sertifikovanim, ovi profili za postavljanje imaju više
 
 - **AppIDName:** Identifikator aplikacije
 - **AppleInternalProfile**: Oznaka da je ovo Apple interni profil
-- **ApplicationIdentifierPrefix**: Dodaje se na AppIDName (isto kao TeamIdentifier)
+- **ApplicationIdentifierPrefix**: Prependovan na AppIDName (isto kao TeamIdentifier)
 - **CreationDate**: Datum u formatu `YYYY-MM-DDTHH:mm:ssZ`
 - **DeveloperCertificates**: Niz (obično jedan) sertifikat(a), kodiran kao Base64 podaci
 - **Entitlements**: Prava dozvoljena sa pravima za ovaj profil
@@ -100,13 +100,13 @@ Iako se ponekad nazivaju sertifikovanim, ovi profili za postavljanje imaju više
 - **Name**: Ime aplikacije, isto kao AppIDName
 - **ProvisionedDevices**: Niz (za sertifikate programera) UDID-ova za koje je ovaj profil važeći
 - **ProvisionsAllDevices**: Boolean (true za preduzetničke sertifikate)
-- **TeamIdentifier**: Niz (obično jedan) alfanumerički string(ovi) korišćeni za identifikaciju programera u svrhe interakcije između aplikacija
-- **TeamName**: Ime koje je lako čitati, korišćeno za identifikaciju programera
+- **TeamIdentifier**: Niz (obično jedan) alfanumeričkih stringova koji se koriste za identifikaciju programera u svrhe interakcije između aplikacija
+- **TeamName**: Ime koje je lako čitljivo i koristi se za identifikaciju programera
 - **TimeToLive**: Važenje (u danima) sertifikata
 - **UUID**: Univerzalno jedinstveni identifikator za ovaj profil
 - **Version**: Trenutno postavljeno na 1
 
-Napomena da će unos prava sadržati ograničen skup prava i da će profil za postavljanje moći da dodeli samo ta specifična prava kako bi se sprečilo dodeljivanje privatnih prava Apple-u.
+Napomena da će unos prava sadržati ograničen skup prava i da će profil za postavljanje moći da dodeli samo ta specifična prava kako bi se sprečilo dodeljivanje Apple privatnih prava.
 
 Napomena da se profili obično nalaze u `/var/MobileDeviceProvisioningProfiles` i moguće je proveriti ih sa **`security cms -D -i /path/to/profile`**
 

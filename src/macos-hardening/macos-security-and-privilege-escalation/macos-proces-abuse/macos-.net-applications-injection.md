@@ -8,11 +8,11 @@
 
 ### **Usmeravanje Debugging Sesije** <a href="#net-core-debugging" id="net-core-debugging"></a>
 
-Upravljanje komunikacijom između debagera i debuggee u .NET-u se vrši putem [**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp). Ova komponenta postavlja dve imenovane cevi po .NET procesu kao što je prikazano u [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127), koje se iniciraju putem [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27). Ove cevi su sa sufiksima **`-in`** i **`-out`**.
+Upravljanje komunikacijom između debagera i debuggee u .NET-u se vrši putem [**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp). Ova komponenta postavlja dve imenovane cevi po .NET procesu, kao što je prikazano u [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127), koje se iniciraju putem [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27). Ove cevi su sa sufiksima **`-in`** i **`-out`**.
 
-Posetom korisnikovom **`$TMPDIR`**, mogu se pronaći debugging FIFO-ovi dostupni za debugging .Net aplikacija.
+Posetom korisnikovom **`$TMPDIR`**, mogu se pronaći debugging FIFO dostupni za debugging .Net aplikacije.
 
-[**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259) je odgovoran za upravljanje komunikacijom iz debagera. Da bi se započela nova debugging sesija, debager mora poslati poruku putem `out` cevi koja počinje sa `MessageHeader` strukturom, detaljno opisano u .NET izvoru:
+[**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259) je odgovoran za upravljanje komunikacijom iz debagera. Da bi se započela nova debugging sesija, debager mora poslati poruku putem `out` cevi koja počinje sa `MessageHeader` strukturom, detaljno opisanu u .NET izvoru:
 ```c
 struct MessageHeader {
 MessageType   m_eType;        // Message type
@@ -42,7 +42,7 @@ sSendHeader.TypeSpecificData.VersionInfo.m_dwMajorVersion = kCurrentMajorVersion
 sSendHeader.TypeSpecificData.VersionInfo.m_dwMinorVersion = kCurrentMinorVersion;
 sSendHeader.m_cbDataBlock = sizeof(SessionRequestData);
 ```
-Ova glava se zatim šalje cilju koristeći `write` syscall, praćena `sessionRequestData` strukturom koja sadrži GUID za sesiju:
+Ova glava se zatim šalje cilju koristeći `write` syscall, nakon čega sledi `sessionRequestData` struktura koja sadrži GUID za sesiju:
 ```c
 write(wr, &sSendHeader, sizeof(MessageHeader));
 memset(&sDataBlock.m_sSessionID, 9, sizeof(SessionRequestData));
@@ -91,7 +91,7 @@ Da bi se izvršio kod, potrebno je identifikovati memorijsku oblast sa rwx dozvo
 vmmap -pages [pid]
 vmmap -pages 35829 | grep "rwx/rwx"
 ```
-Lociranje mesta za prepisivanje pokazivača funkcije je neophodno, a u .NET Core, to se može uraditi ciljanjem na **Dynamic Function Table (DFT)**. Ova tabela, detaljno opisana u [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h), koristi se od strane runtime-a za JIT kompajlaciju pomoćnih funkcija.
+Lociranje mesta za prepisivanje pokazivača funkcije je neophodno, a u .NET Core, to se može uraditi ciljanjem na **Dynamic Function Table (DFT)**. Ova tabela, detaljno opisana u [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h), koristi se od strane runtime-a za JIT kompilacione pomoćne funkcije.
 
 Za x64 sisteme, pretraživanje potpisa može se koristiti za pronalaženje reference na simbol `_hlpDynamicFuncTable` u `libcorclr.dll`.
 

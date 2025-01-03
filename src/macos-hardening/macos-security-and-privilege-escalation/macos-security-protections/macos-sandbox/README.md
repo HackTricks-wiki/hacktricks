@@ -2,13 +2,13 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Osnovne informacije
+## Basic Information
 
-MacOS Sandbox (prvobitno nazvan Seatbelt) **ograničava aplikacije** koje se izvršavaju unutar sandboxes-a na **dozvoljene radnje navedene u Sandbox profilu** sa kojim aplikacija radi. Ovo pomaže da se osigura da **aplikacija pristupa samo očekivanim resursima**.
+MacOS Sandbox (prvobitno nazvan Seatbelt) **ograničava aplikacije** koje se pokreću unutar sandboxes-a na **dozvoljene radnje specificirane u Sandbox profilu** sa kojim aplikacija radi. Ovo pomaže da se osigura da **aplikacija pristupa samo očekivanim resursima**.
 
-Svaka aplikacija sa **entitlement** **`com.apple.security.app-sandbox`** će se izvršavati unutar sandboxes-a. **Apple binarni** obično se izvršavaju unutar Sandbox-a, a sve aplikacije iz **App Store-a imaju tu entitlement**. Tako će se nekoliko aplikacija izvršavati unutar sandboxes-a.
+Svaka aplikacija sa **entitlement** **`com.apple.security.app-sandbox`** će biti izvršena unutar sandboxes-a. **Apple binarni** obično se izvršavaju unutar Sandbox-a, a sve aplikacije iz **App Store-a imaju tu entitlement**. Tako će nekoliko aplikacija biti izvršeno unutar sandboxes-a.
 
-Da bi se kontrolisalo šta proces može ili ne može da radi, **Sandbox ima hooks** u skoro svakoj operaciji koju proces može pokušati (uključujući većinu syscalls) koristeći **MACF**. Međutim, **zavisno** od **entitlements** aplikacije, Sandbox može biti permisivniji prema procesu.
+Kako bi se kontrolisalo šta proces može ili ne može da radi, **Sandbox ima hooks** u skoro svakoj operaciji koju proces može pokušati (uključujući većinu syscalls) koristeći **MACF**. Međutim, **zavisno** od **entitlements** aplikacije, Sandbox može biti permisivniji prema procesu.
 
 Neki važni sastavni delovi Sandbox-a su:
 
@@ -17,7 +17,7 @@ Neki važni sastavni delovi Sandbox-a su:
 - **daemon** koji se izvršava u userland-u `/usr/libexec/sandboxd`
 - **kontejneri** `~/Library/Containers`
 
-### Kontejneri
+### Containers
 
 Svaka sandboxed aplikacija će imati svoj vlastiti kontejner u `~/Library/Containers/{CFBundleIdentifier}` :
 ```bash
@@ -106,11 +106,11 @@ AAAhAboBAAAAAAgAAABZAO4B5AHjBMkEQAUPBSsGPwsgASABHgEgASABHwEf...
 [...]
 ```
 > [!WARNING]
-> Sve što kreira/menja aplikacija u Sandbox-u dobiće **atribut karantina**. To će sprečiti prostor sandboksiranja aktiviranjem Gatekeeper-a ako aplikacija u sandboksu pokuša da izvrši nešto sa **`open`**.
+> Sve što kreira/menja aplikacija u Sandbox-u dobiće **atribut karantina**. To će sprečiti prostor sandboksovanja aktiviranjem Gatekeeper-a ako aplikacija u sandboksu pokuša da izvrši nešto sa **`open`**.
 
 ## Sandbox Profili
 
-Sandbox profili su konfiguracione datoteke koje označavaju šta će biti **dozvoljeno/zabranjeno** u tom **Sandbox-u**. Koristi **Sandbox Profile Language (SBPL)**, koja koristi [**Scheme**](<https://en.wikipedia.org/wiki/Scheme_(programming_language)>) programski jezik.
+Sandbox profili su konfiguracione datoteke koje označavaju šta će biti **dozvoljeno/zabranjeno** u tom **Sandbox-u**. Koristi **Sandbox Profile Language (SBPL)**, koji koristi [**Scheme**](<https://en.wikipedia.org/wiki/Scheme_(programming_language)>) programski jezik.
 
 Ovde možete pronaći primer:
 ```scheme
@@ -141,7 +141,7 @@ Važne **sistemske usluge** takođe rade unutar svojih prilagođenih **sandbox-a
 - **`/System/Library/Sandbox/Profiles`**
 - Ostale sandbox profile možete proveriti na [https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles](https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles).
 
-**App Store** aplikacije koriste **profil** **`/System/Library/Sandbox/Profiles/application.sb`**. Možete proveriti u ovom profilu kako ovlašćenja kao što je **`com.apple.security.network.server`** omogućavaju procesu da koristi mrežu.
+**App Store** aplikacije koriste **profil** **`/System/Library/Sandbox/Profiles/application.sb`**. Možete proveriti u ovom profilu kako privilegije kao što je **`com.apple.security.network.server`** omogućavaju procesu korišćenje mreže.
 
 Zatim, neki **Apple daemon servisi** koriste različite profile smeštene u `/System/Library/Sandbox/Profiles/*.sb` ili `/usr/share/sandbox/*.sb`. Ovi sandbox-i se primenjuju u glavnoj funkciji koja poziva API `sandbox_init_XXX`.
 
@@ -200,7 +200,7 @@ log show --style syslog --predicate 'eventMessage contains[c] "sandbox"' --last 
 {{#endtabs}}
 
 > [!NOTE]
-> Imajte na umu da **softver** koji je **napisao Apple** i koji radi na **Windows-u** **nema dodatnih bezbednosnih mera**, kao što je aplikaciono sandboxing.
+> Imajte na umu da **softver** koji je **napisao Apple** koji radi na **Windows-u** **nema dodatne bezbednosne mere**, kao što je aplikaciono sandboxing.
 
 Primeri zaobilaženja:
 
@@ -237,7 +237,7 @@ Takođe je moguće uraditi nešto slično pozivajući `sandbox_vtrace_enable()` 
 
 MacOS čuva sistemske sandbox profile na dve lokacije: **/usr/share/sandbox/** i **/System/Library/Sandbox/Profiles**.
 
-I ako aplikacija treće strane nosi _**com.apple.security.app-sandbox**_ pravo, sistem primenjuje **/System/Library/Sandbox/Profiles/application.sb** profil na taj proces.
+I ako treća strana aplikacija nosi _**com.apple.security.app-sandbox**_ pravo, sistem primenjuje **/System/Library/Sandbox/Profiles/application.sb** profil na taj proces.
 
 U iOS-u, podrazumevani profil se zove **container** i nemamo SBPL tekstualnu reprezentaciju. U memoriji, ovaj sandbox je predstavljen kao binarno stablo Dozvoli/Zabranjeno za svaku dozvolu iz sandboxes.
 
@@ -265,9 +265,9 @@ Pored toga, da bi se proces ograničio unutar kontejnera, može pozvati `sandbox
 
 ## Debug & Bypass Sandbox
 
-Na macOS-u, za razliku od iOS-a gde su procesi od početka sandboxovani od strane kernela, **procesi moraju sami da se prijave za sandbox**. To znači da na macOS-u, proces nije ograničen sandbox-om dok aktivno ne odluči da uđe u njega, iako su aplikacije iz App Store-a uvek sandboxovane.
+Na macOS-u, za razliku od iOS-a gde su procesi od samog početka sandboxovani od strane kernela, **procesi moraju sami da se prijave za sandbox**. To znači da na macOS-u, proces nije ograničen sandbox-om dok aktivno ne odluči da uđe u njega, iako su aplikacije iz App Store-a uvek sandboxovane.
 
-Procesi se automatski sandboxuju iz userlanda kada počnu ako imaju pravo: `com.apple.security.app-sandbox`. Za detaljno objašnjenje ovog procesa pogledajte:
+Procesi se automatski sandboxuju iz userlanda kada počnu ako imaju pravo: `com.apple.security.app-sandbox`. Za detaljno objašnjenje ovog procesa proverite:
 
 {{#ref}}
 macos-sandbox-debug-and-bypass/
@@ -317,7 +317,7 @@ Napomena da se prilikom pozivanja funkcije suspend proveravaju neka prava kako b
 
 Ovaj sistemski poziv (#381) očekuje jedan string kao prvi argument koji će označiti modul koji treba pokrenuti, a zatim kod u drugom argumentu koji će označiti funkciju koja treba da se izvrši. Tada će treći argument zavisiti od izvršene funkcije.
 
-Poziv funkcije `___sandbox_ms` obavija `mac_syscall` označavajući u prvom argumentu `"Sandbox"` baš kao što je `___sandbox_msp` obavijač `mac_set_proc` (#387). Tada se neki od podržanih kodova od strane `___sandbox_ms` mogu naći u ovoj tabeli:
+Funkcija `___sandbox_ms` obavija `mac_syscall` označavajući u prvom argumentu `"Sandbox"` baš kao što je `___sandbox_msp` obavijač `mac_set_proc` (#387). Tada se neki od podržanih kodova od strane `___sandbox_ms` mogu naći u ovoj tabeli:
 
 - **set_profile (#0)**: Primeni kompajlirani ili imenovani profil na proces.
 - **platform_policy (#1)**: Sprovodi provere politike specifične za platformu (razlikuje se između macOS i iOS).
@@ -325,9 +325,9 @@ Poziv funkcije `___sandbox_ms` obavija `mac_syscall` označavajući u prvom argu
 - **note (#3)**: Dodaje anotaciju sandboxu.
 - **container (#4)**: Priključuje anotaciju sandboxu, obično za debagovanje ili identifikaciju.
 - **extension_issue (#5)**: Generiše novu ekstenziju za proces.
-- **extension_consume (#6)**: Konzumira datu ekstenziju.
-- **extension_release (#7)**: Oslobađa memoriju vezanu za konzumiranu ekstenziju.
-- **extension_update_file (#8)**: Menja parametre postojeće ekstenzije datoteke unutar sandboxa.
+- **extension_consume (#6)**: Potroši zadatu ekstenziju.
+- **extension_release (#7)**: Oslobađa memoriju vezanu za potrošenu ekstenziju.
+- **extension_update_file (#8)**: Menja parametre postojeće ekstenzije unutar sandboxa.
 - **extension_twiddle (#9)**: Prilagođava ili menja postojeću ekstenziju datoteke (npr. TextEdit, rtf, rtfd).
 - **suspend (#10)**: Privremeno suspenduje sve sandbox provere (zahteva odgovarajuća prava).
 - **unsuspend (#11)**: Nastavlja sve prethodno suspendovane sandbox provere.
@@ -362,13 +362,13 @@ Napomena da u iOS kernel ekstenzija sadrži **hardkodirane sve profile** unutar 
 
 Dobar primer toga je funkcija **`_mpo_file_check_mmap`** koja hook-uje **`mmap`** i koja će početi da proverava da li nova memorija može biti zapisiva (i ako ne, dozvoliti izvršenje), zatim će proveriti da li se koristi za dyld deljenu keš memoriju i ako jeste, dozvoliti izvršenje, i na kraju će pozvati **`sb_evaluate_internal`** (ili jedan od njegovih obavijača) da izvrši dalja provere dozvola.
 
-Štaviše, od stotina hook-ova koje Sandbox koristi, postoje 3 koja su posebno zanimljiva:
+Pored toga, od stotina hook-ova koje Sandbox koristi, postoje 3 koja su posebno zanimljiva:
 
 - `mpo_proc_check_for`: Primeni profil ako je potrebno i ako prethodno nije primenjen.
-- `mpo_vnode_check_exec`: Poziva se kada proces učita povezanu binarnu datoteku, zatim se vrši provera profila i takođe provera koja zabranjuje SUID/SGID izvršenja.
-- `mpo_cred_label_update_execve`: Ovo se poziva kada se dodeljuje oznaka. Ovo je najduže jer se poziva kada je bina potpuno učitana, ali još nije izvršena. Izvršiće akcije kao što su kreiranje sandbox objekta, povezivanje sandbox strukture sa kauth akreditivima, uklanjanje pristupa mach portovima...
+- `mpo_vnode_check_exec`: Poziva se kada proces učita povezani binarni fajl, zatim se vrši provera profila i takođe provera koja zabranjuje SUID/SGID izvršenja.
+- `mpo_cred_label_update_execve`: Ovo se poziva kada je oznaka dodeljena. Ovo je najduže jer se poziva kada je binarni fajl potpuno učitan, ali još nije izvršen. Izvršiće akcije kao što su kreiranje sandbox objekta, povezivanje sandbox strukture sa kauth akreditivima, uklanjanje pristupa mach portovima...
 
-Napomena da je **`_cred_sb_evalutate`** obavijač preko **`sb_evaluate_internal`** i ova funkcija dobija akreditive koji su prosleđeni i zatim izvršava evaluaciju koristeći funkciju **`eval`** koja obično evaluira **platformski profil** koji se po defaultu primenjuje na sve procese, a zatim **specifični procesni profil**. Napomena da je platformski profil jedan od glavnih komponenti **SIP** u macOS-u.
+Napomena da je **`_cred_sb_evalutate`** obavijač preko **`sb_evaluate_internal`** i ova funkcija dobija akreditive koji su prosleđeni i zatim vrši evaluaciju koristeći **`eval`** funkciju koja obično procenjuje **platformski profil** koji je po defaultu primenjen na sve procese, a zatim **specifični procesni profil**. Napomena da je platformski profil jedan od glavnih komponenti **SIP** u macOS.
 
 ## Sandboxd
 

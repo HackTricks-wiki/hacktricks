@@ -4,7 +4,7 @@
 
 ## PID Reuse
 
-Kada **XPC servis** na macOS-u proverava pozvani proces na osnovu **PID-a** a ne na osnovu **audit token-a**, ranjiv je na napad ponovne upotrebe PID-a. Ovaj napad se zasniva na **trkaćem uslovu** gde će **eksploit** **slati poruke XPC** servisu **zloupotrebljavajući** funkcionalnost i tek **nakon** toga izvršiti **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** sa **dozvoljenim** binarnim fajlom.
+Kada **XPC servis** na macOS-u proverava pozvani proces na osnovu **PID-a** a ne na osnovu **audit token-a**, ranjiv je na napad ponovne upotrebe PID-a. Ovaj napad se zasniva na **trci** gde **eksploit** šalje poruke XPC servisu **zloupotrebljavajući** funkcionalnost i tek **nakon** toga izvršava **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** sa **dozvoljenim** binarnim fajlom.
 
 Ova funkcija će učiniti da **dozvoljeni binarni fajl preuzme PID**, ali bi **maliciozna XPC poruka bila poslata** neposredno pre toga. Dakle, ako **XPC** servis **koristi** **PID** za **autentifikaciju** pošiljaoca i proverava ga **Nakon** izvršenja **`posix_spawn`**, pomisliće da dolazi iz **ovlašćenog** procesa.
 
@@ -31,7 +31,7 @@ Proverite ovaj primer eksploita (ponovo, uzet iz reference) da vidite 2 dela eks
 
 {{#tabs}}
 {{#tab name="NSTasks"}}
-Prva opcija koristi **`NSTasks`** i argument za pokretanje dece da bi se iskoristio RC
+Prva opcija koristi **`NSTasks`** i argument za pokretanje dece da bi se iskoristila RC
 ```objectivec
 // Code from https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/
 // gcc -framework Foundation expl.m -o expl

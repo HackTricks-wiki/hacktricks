@@ -11,21 +11,21 @@
 - **/etc**: Konfiguracione datoteke
 - **/Library**: Ovdje se može naći mnogo poddirektorijuma i datoteka povezanih sa preferencama, kešom i logovima. Fascikla Library postoji u root-u i u direktorijumu svakog korisnika.
 - **/private**: Nedokumentovano, ali mnoge od pomenutih fascikala su simboličke veze ka privatnom direktorijumu.
-- **/sbin**: Esencijalne sistemske binarne datoteke (vezane za administraciju)
+- **/sbin**: Osnovne sistemske binarne datoteke (vezane za administraciju)
 - **/System**: Datoteka za pokretanje OS X-a. Ovde bi trebali pronaći uglavnom samo Apple specifične datoteke (ne treće strane).
 - **/tmp**: Datoteke se brišu nakon 3 dana (to je softverska veza ka /private/tmp)
 - **/Users**: Kućni direktorijum za korisnike.
 - **/usr**: Konfiguracione i sistemske binarne datoteke
 - **/var**: Log datoteke
 - **/Volumes**: Montirani diskovi će se ovde pojaviti.
-- **/.vol**: Pokretanjem `stat a.txt` dobijate nešto poput `16777223 7545753 -rw-r--r-- 1 username wheel ...` gde je prvi broj ID broj volumena gde datoteka postoji, a drugi je inode broj. Možete pristupiti sadržaju ove datoteke kroz /.vol/ koristeći te informacije pokretanjem `cat /.vol/16777223/7545753`
+- **/.vol**: Pokretanjem `stat a.txt` dobijate nešto poput `16777223 7545753 -rw-r--r-- 1 username wheel ...` gde je prvi broj ID broj volumena gde datoteka postoji, a drugi je inode broj. Možete pristupiti sadržaju ove datoteke kroz /.vol/ sa tom informacijom pokretanjem `cat /.vol/16777223/7545753`
 
 ### Fascikle aplikacija
 
 - **Sistemske aplikacije** se nalaze pod `/System/Applications`
 - **Instalirane** aplikacije se obično instaliraju u `/Applications` ili u `~/Applications`
 - **Podaci aplikacija** mogu se naći u `/Library/Application Support` za aplikacije koje se pokreću kao root i `~/Library/Application Support` za aplikacije koje se pokreću kao korisnik.
-- Treće strane **daemoni** koji **moraju da se pokreću kao root** obično se nalaze u `/Library/PrivilegedHelperTools/`
+- Daemons **trećih strana** koji **moraju da se pokreću kao root** obično se nalaze u `/Library/PrivilegedHelperTools/`
 - **Sandboxed** aplikacije su mapirane u fasciklu `~/Library/Containers`. Svaka aplikacija ima fasciklu nazvanu prema ID-u paketa aplikacije (`com.apple.Safari`).
 - **Kernel** se nalazi u `/System/Library/Kernels/kernel`
 - **Apple-ove kernel ekstenzije** se nalaze u `/System/Library/Extensions`
@@ -57,7 +57,7 @@ macos-installers-abuse.md
 - `plutil -convert xml1 ~/Library/Preferences/com.apple.screensaver.plist -o -`
 - `plutil -convert json ~/Library/Preferences/com.apple.screensaver.plist -o -`
 - **`.app`**: Apple aplikacije koje prate strukturu direktorijuma (to je paket).
-- **`.dylib`**: Dinamičke biblioteke (poput Windows DLL datoteka)
+- **`.dylib`**: Dinamičke biblioteke (kao Windows DLL datoteke)
 - **`.pkg`**: Iste su kao xar (eXtensible Archive format). Komanda za instalaciju može se koristiti za instalaciju sadržaja ovih datoteka.
 - **`.DS_Store`**: Ova datoteka se nalazi u svakoj fascikli, čuva atribute i prilagođavanja fascikle.
 - **`.Spotlight-V100`**: Ova fascikla se pojavljuje u root direktorijumu svakog volumena na sistemu.
@@ -77,10 +77,10 @@ macos-bundles.md
 
 Na macOS-u (i iOS-u) sve sistemske deljene biblioteke, kao što su framework-i i dylibs, su **kombinovane u jednu datoteku**, nazvanu **dyld shared cache**. Ovo poboljšava performanse, jer se kod može učitati brže.
 
-Ovo se nalazi u macOS-u u `/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/` i u starijim verzijama možda ćete moći da pronađete **shared cache** u **`/System/Library/dyld/`**.\
+Ovo se nalazi u macOS-u u `/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/` i u starijim verzijama možda ćete moći da pronađete **deljenu keš memoriju** u **`/System/Library/dyld/`**.\
 U iOS-u ih možete pronaći u **`/System/Library/Caches/com.apple.dyld/`**.
 
-Slično dyld shared cache-u, kernel i kernel ekstenzije su takođe kompajlirani u kernel cache, koji se učitava prilikom pokretanja.
+Slično dyld shared cache-u, kernel i kernel ekstenzije su takođe kompajlirani u kernel keš, koji se učitava prilikom pokretanja.
 
 Da biste izvukli biblioteke iz jedne datoteke dylib shared cache, bilo je moguće koristiti binarni [dyld_shared_cache_util](https://www.mbsplugins.de/files/dyld_shared_cache_util-dyld-733.8.zip) koji možda više ne radi, ali možete koristiti i [**dyldextractor**](https://github.com/arandomdev/dyldextractor):
 ```bash
@@ -106,16 +106,16 @@ Neki ekstraktori neće raditi jer su dylibs prelinkovani sa hardkodiranim adresa
 
 **`dyld`** koristi syscall **`shared_region_check_np`** da zna da li je SLC mapiran (što vraća adresu) i **`shared_region_map_and_slide_np`** da mapira SLC.
 
-Imajte na umu da čak i ako je SLC pomeren pri prvom korišćenju, svi **procesi** koriste **istu kopiju**, što **ukida ASLR** zaštitu ako je napadač mogao da pokrene procese u sistemu. Ovo je zapravo iskorišćeno u prošlosti i ispravljeno sa shared region pager-om.
+Imajte na umu da čak i ako je SLC pomeren pri prvom korišćenju, svi **procesi** koriste **istu kopiju**, što **eliminiše ASLR** zaštitu ako je napadač mogao da pokrene procese u sistemu. Ovo je zapravo iskorišćeno u prošlosti i ispravljeno sa shared region pager-om.
 
-Branch pools su mali Mach-O dylibs koji kreiraju male prostore između mapiranja slika, čineći nemogućim da se funkcije međusobno preklapaju.
+Branch pools su mali Mach-O dylibs koji kreiraju male prostore između mapiranja slika, što onemogućava interpoziciju funkcija.
 
 ### Override SLCs
 
 Korišćenjem env varijabli:
 
-- **`DYLD_DHARED_REGION=private DYLD_SHARED_CACHE_DIR=</path/dir> DYLD_SHARED_CACHE_DONT_VALIDATE=1`** -> Ovo će omogućiti učitavanje novog deljenog bibliotečkog keša.
-- **`DYLD_SHARED_CACHE_DIR=avoid`** i ručno zameniti biblioteke sa symlink-ovima na deljeni keš sa pravim (biće potrebno da ih izvučete).
+- **`DYLD_DHARED_REGION=private DYLD_SHARED_CACHE_DIR=</path/dir> DYLD_SHARED_CACHE_DONT_VALIDATE=1`** -> Ovo će omogućiti učitavanje novog shared library cache-a.
+- **`DYLD_SHARED_CACHE_DIR=avoid`** i ručno zameniti biblioteke sa symlinkovima na shared cache sa pravim (biće potrebno da ih ekstraktujete).
 
 ## Special File Permissions
 
@@ -180,7 +180,7 @@ ls -RAle / 2>/dev/null | grep -E -B1 "\d: "
 
 Prošireni atributi imaju ime i bilo koju željenu vrednost, a mogu se videti koristeći `ls -@` i manipulisati koristeći komandu `xattr`. Neki uobičajeni prošireni atributi su:
 
-- `com.apple.resourceFork`: Kompatibilnost sa resursnim fork-om. Takođe vidljivo kao `filename/..namedfork/rsrc`
+- `com.apple.resourceFork`: Kompatibilnost sa resursnim fork-ovima. Takođe vidljivo kao `filename/..namedfork/rsrc`
 - `com.apple.quarantine`: MacOS: Mehanizam karantina Gatekeeper-a (III/6)
 - `metadata:*`: MacOS: razni metapodaci, kao što su `_backup_excludeItem`, ili `kMD*`
 - `com.apple.lastuseddate` (#PS): Datum poslednje upotrebe datoteke
@@ -219,9 +219,9 @@ Ovaj atribut se može videti sa `ls -lO` označen kao kompresovan jer su kompres
 
 Alat afscexpand može se koristiti za prisilno dekompresovanje datoteke.
 
-## **Univerzalni binarni &** Mach-o Format
+## **Univerzalne binarne datoteke &** Mach-o Format
 
-Mac OS binarni obično se kompajliraju kao **univerzalni binarni**. **Univerzalni binarni** može **podržavati više arhitektura u istoj datoteci**.
+Mac OS binarne datoteke obično se kompajliraju kao **univerzalne binarne datoteke**. **Univerzalna binarna datoteka** može **podržavati više arhitektura u istoj datoteci**.
 
 {{#ref}}
 universal-binaries-and-mach-o-format.md
@@ -253,6 +253,6 @@ Direktorij `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/Sys
 - **`$HOME/Library/Preferences/com.apple.loginitems.plsit`**: Čuva stavke koje se pokreću prilikom pokretanja sistema.
 - **`$HOME/Library/Logs/DiskUtility.log`**: Log datoteka za DiskUtility aplikaciju (informacije o diskovima, uključujući USB).
 - **`/Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist`**: Podaci o bežičnim pristupnim tačkama.
-- **`/private/var/db/launchd.db/com.apple.launchd/overrides.plist`**: Lista deaktiviranih daemon-a.
+- **`/private/var/db/launchd.db/com.apple.launchd/overrides.plist`**: Lista deaktiviranih demona.
 
 {{#include ../../../banners/hacktricks-training.md}}

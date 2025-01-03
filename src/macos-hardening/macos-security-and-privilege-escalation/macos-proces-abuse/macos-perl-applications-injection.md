@@ -44,7 +44,7 @@ perl -e 'print join("\n", @INC)'
 /System/Library/Perl/Extras/5.30/darwin-thread-multi-2level
 /System/Library/Perl/Extras/5.30
 ```
-Neki od vraćenih foldera čak ni ne postoje, međutim, **`/Library/Perl/5.30`** **postoji**, **nije** **zaštićen** od **SIP** i **nalazi se** **pre** foldera **zaštićenih od SIP**. Stoga, neko bi mogao da zloupotrebi taj folder da doda zavisnosti skripti tako da visoko privilegovana Perl skripta učita to.
+Neki od vraćenih foldera čak ni ne postoje, međutim, **`/Library/Perl/5.30`** **postoji**, **nije** **zaštićen** **SIP-om** i **nalazi se** **pre** foldera **zaštićenih SIP-om**. Stoga, neko bi mogao da zloupotrebi taj folder da doda zavisnosti skripti tako da visoko privilegovana Perl skripta učita to.
 
 > [!WARNING]
 > Međutim, imajte na umu da **morate biti root da biste pisali u taj folder** i danas ćete dobiti ovaj **TCC prompt**:
