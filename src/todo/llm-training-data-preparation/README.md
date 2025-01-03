@@ -7,7 +7,7 @@
 Deberías comenzar leyendo esta publicación para algunos conceptos básicos que deberías conocer:
 
 {{#ref}}
-0.-conceptos-basicos-llm.md
+0.-basic-llm-concepts.md
 {{#endref}}
 
 ## 1. Tokenización
