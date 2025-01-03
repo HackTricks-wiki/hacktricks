@@ -13,15 +13,15 @@
 
 ### **PsExecを手動で実行するプロセス**
 
-msfvenomで作成され、Veilを使用してウイルス対策検出を回避するように難読化された実行可能ペイロード「met8888.exe」を仮定すると、以下のステップが取られます：
+msfvenomで作成され、Veilを使用してウイルス対策ソフトウェアの検出を回避するように難読化された実行可能ペイロード「met8888.exe」を仮定すると、以下のステップが取られます：
 
 - **バイナリのコピー**：実行可能ファイルはコマンドプロンプトからADMIN$共有にコピーされますが、ファイルシステムのどこにでも配置して隠すことができます。
 - **サービスの作成**：Windowsの`sc`コマンドを使用して、リモートでWindowsサービスを照会、作成、削除することができ、「meterpreter」という名前のサービスがアップロードされたバイナリを指すように作成されます。
-- **サービスの開始**：最終ステップはサービスを開始することで、バイナリが本物のサービスバイナリでないため、期待される応答コードを返さず「タイムアウト」エラーが発生する可能性があります。このエラーは、主な目的がバイナリの実行であるため、重要ではありません。
+- **サービスの開始**：最終ステップはサービスを開始することで、バイナリが本物のサービスバイナリでないため、期待される応答コードを返さずに「タイムアウト」エラーが発生する可能性があります。このエラーは、バイナリの実行が主な目的であるため、重要ではありません。
 
 Metasploitリスナーを観察すると、セッションが正常に開始されたことがわかります。
 
-[Learn more about the `sc` command](https://technet.microsoft.com/en-us/library/bb490995.aspx).
+[`sc`コマンドの詳細を学ぶ](https://technet.microsoft.com/en-us/library/bb490995.aspx)。
 
 詳細な手順については、[https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)を参照してください。
 

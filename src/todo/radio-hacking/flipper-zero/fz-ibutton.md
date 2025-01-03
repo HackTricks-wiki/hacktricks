@@ -12,7 +12,7 @@ iButtonについての詳細は以下を参照してください:
 
 ## Design
 
-以下の画像の**青**い部分は、Flipperが**読み取るために本物のiButtonを**置く必要がある場所です。**緑**の部分は、Flipper zeroで**iButtonを正しくエミュレートするためにリーダーに**触れる必要がある場所です。
+以下の画像の**青**い部分が、Flipperが**読み取るために本物のiButtonを置く必要がある**場所です。**緑**の部分は、Flipper zeroで**iButtonを正しくエミュレートするためにリーダーに触れる必要がある**場所です。
 
 <figure><img src="../../../images/image (565).png" alt=""><figcaption></figcaption></figure>
 

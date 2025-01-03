@@ -6,14 +6,14 @@
 
 ## WMIC
 
-**Wmic**は**スタートアップ**でプログラムを実行するために使用できます。スタートアップで実行されるようにプログラムされているバイナリを確認するには、次のコマンドを使用します:
+**Wmic**は**スタートアップ**でプログラムを実行するために使用できます。スタートアップで実行されるようにプログラムされたバイナリを確認するには、次のコマンドを使用します:
 ```bash
 wmic startup get caption,command 2>nul & ^
 Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
 ```
 ## スケジュールされたタスク
 
-**タスク**は**特定の頻度**で実行されるようにスケジュールできます。実行されるようにスケジュールされたバイナリを確認するには:
+**タスク**は**特定の頻度**で実行されるようにスケジュールできます。実行されるようにスケジュールされているバイナリを確認するには:
 ```bash
 schtasks /query /fo TABLE /nh | findstr /v /i "disable deshab"
 schtasks /query /fo LIST 2>nul | findstr TaskName
@@ -38,7 +38,7 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ## レジストリ
 
 > [!NOTE]
-> [Note from here](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): **Wow6432Node** レジストリエントリは、64ビットのWindowsバージョンを実行していることを示します。オペレーティングシステムは、このキーを使用して、64ビットWindowsバージョンで実行される32ビットアプリケーションのためにHKEY_LOCAL_MACHINE\SOFTWAREの別のビューを表示します。
+> [ここからの注意](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): **Wow6432Node** レジストリエントリは、64ビットのWindowsバージョンを実行していることを示します。オペレーティングシステムは、このキーを使用して、64ビットのWindowsバージョンで実行される32ビットアプリケーションのために、HKEY_LOCAL_MACHINE\SOFTWAREの別のビューを表示します。
 
 ### 実行
 
@@ -145,7 +145,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 
-**スタートアップ**フォルダーに配置されたショートカットは、ユーザーのログオンまたはシステムの再起動時にサービスやアプリケーションを自動的に起動します。**スタートアップ**フォルダーの場所は、**ローカルマシン**と**現在のユーザー**のスコープの両方でレジストリに定義されています。これは、これらの指定された**スタートアップ**の場所に追加されたショートカットが、ログオンまたは再起動プロセスに続いてリンクされたサービスやプログラムが起動することを保証することを意味し、プログラムを自動的に実行するための簡単な方法となります。
+**スタートアップ**フォルダーに配置されたショートカットは、ユーザーのログオンまたはシステムの再起動時にサービスやアプリケーションを自動的に起動します。**スタートアップ**フォルダーの場所は、**ローカルマシン**と**現在のユーザー**のスコープの両方でレジストリに定義されています。これは、これらの指定された**スタートアップ**場所に追加されたショートカットが、ログオンまたは再起動プロセスに続いてリンクされたサービスやプログラムが起動することを保証することを意味し、プログラムを自動的に実行するための簡単な方法となります。
 
 > [!NOTE]
 > **HKLM**の下の任意の\[User] Shell Folderを上書きできる場合、あなたが制御するフォルダーを指すように設定でき、ユーザーがシステムにログインするたびに実行されるバックドアを配置することができます。
@@ -194,17 +194,17 @@ Windowsレジストリの`HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`には�
 
 「コマンドプロンプト付きセーフモード」で自動的に起動するためのブートオプションを作成する手順：
 
-1. `boot.ini`ファイルの属性を変更して、読み取り専用、システム、隠しフラグを削除します：`attrib c:\boot.ini -r -s -h`
+1. `boot.ini`ファイルの属性を変更して、読み取り専用、システム、隠しフラグを削除します: `attrib c:\boot.ini -r -s -h`
 2. `boot.ini`を編集のために開きます。
-3. 次のような行を挿入します：`multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
+3. 次のような行を挿入します: `multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
 4. `boot.ini`への変更を保存します。
-5. 元のファイル属性を再適用します：`attrib c:\boot.ini +r +s +h`
+5. 元のファイル属性を再適用します: `attrib c:\boot.ini +r +s +h`
 
 - **Exploit 1:** **AlternateShell**レジストリキーを変更することで、カスタムコマンドシェルの設定が可能になり、不正アクセスの可能性があります。
 - **Exploit 2 (PATH書き込み権限):** システムの**PATH**変数の任意の部分に書き込み権限があると、特に`C:\Windows\system32`の前にある場合、カスタム`cmd.exe`を実行でき、セーフモードでシステムが起動した場合はバックドアになる可能性があります。
 - **Exploit 3 (PATHとboot.ini書き込み権限):** `boot.ini`への書き込みアクセスにより、自動的なセーフモード起動が可能になり、次回の再起動時に不正アクセスを容易にします。
 
-現在の**AlternateShell**設定を確認するには、これらのコマンドを使用します：
+現在の**AlternateShell**設定を確認するには、これらのコマンドを使用します:
 ```bash
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot /v AlternateShell
 Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot' -Name 'AlternateShell'
@@ -293,7 +293,7 @@ HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Executi
 ```
 ## SysInternals
 
-autorunsを見つけることができるすべてのサイトは、**すでに**[**winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe)によって検索されています。しかし、**自動実行される**ファイルの**より包括的なリスト**を得るには、Sysinternalsの[autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)を使用することができます:
+autorunsを見つけることができるすべてのサイトは、**すでに**[**winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe)によって検索されています。しかし、**自動実行される**ファイルの**より包括的なリスト**については、Sysinternalsの[autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)を使用することができます:
 ```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```

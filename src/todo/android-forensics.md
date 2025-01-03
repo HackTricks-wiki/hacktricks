@@ -12,7 +12,7 @@ Androidデバイスからデータを抽出するには、デバイスがロッ�
 
 ## データ取得
 
-[adbを使用してandroidバックアップを作成](../mobile-pentesting/android-app-pentesting/adb-commands.md#backup)し、[Android Backup Extractor](https://sourceforge.net/projects/adbextractor/)を使用して抽出します：`java -jar abe.jar unpack file.backup file.tar`
+[adbを使用してandroidバックアップを作成](../mobile-pentesting/android-app-pentesting/adb-commands.md#backup)し、[Android Backup Extractor](https://sourceforge.net/projects/adbextractor/)を使用して抽出します： `java -jar abe.jar unpack file.backup file.tar`
 
 ### ルートアクセスまたはJTAGインターフェースへの物理接続がある場合
 

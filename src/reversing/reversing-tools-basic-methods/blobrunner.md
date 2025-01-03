@@ -1,6 +1,7 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-[オリジナルコード](https://github.com/OALabs/BlobRunner)からの唯一の修正された行は10行目です。コンパイルするには、**Visual Studio CodeでC/C++プロジェクトを作成し、コードをコピーして貼り付けてビルドします**。
+[オリジナルコード](https://github.com/OALabs/BlobRunner)からの唯一の修正された行は10行目です。
+コンパイルするには、**Visual Studio CodeでC/C++プロジェクトを作成し、コードをコピーして貼り付けてビルドします**。
 ```c
 #include <stdio.h>
 #include <windows.h>

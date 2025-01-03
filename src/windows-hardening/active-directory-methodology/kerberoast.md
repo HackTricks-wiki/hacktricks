@@ -4,14 +4,14 @@
 
 ## Kerberoast
 
-Kerberoastingは、**Active Directory (AD)**内の**ユーザーアカウント**に関連する**TGSチケット**の取得に焦点を当てており、**コンピューターアカウント**は除外されます。これらのチケットの暗号化は**ユーーパスワード**から生成されたキーを使用しており、**オフラインの資格情報クラッキング**の可能性を提供します。ユーザーアカウントをサービスとして使用することは、非空の**"ServicePrincipalName"**プロパティによって示されます。
+Kerberoastingは、**Active Directory (AD)**内の**ユーザーアカウント**に関連する**TGSチケット**の取得に焦点を当てており、**コンピューターアカウント**は除外されます。これらのチケットの暗号化は**ユーザーパスワード**から派生したキーを利用しており、**オフラインの資格情報クラッキング**の可能性を許可します。サービスとしてのユーザーアカウントの使用は、非空の**"ServicePrincipalName"**プロパティによって示されます。
 
-**Kerberoasting**を実行するには、**TGSチケット**を要求できるドメインアカウントが必要ですが、このプロセスは**特別な権限**を必要とせず、**有効なドメイン資格情報**を持つ誰でもアクセス可能です。
+**Kerberoasting**を実行するには、**TGSチケット**を要求できるドメインアカウントが必要ですが、このプロセスは**特別な権限**を要求せず、**有効なドメイン資格情報**を持つ誰でもアクセス可能です。
 
 ### Key Points:
 
 - **Kerberoasting**は**AD**内の**ユーザーアカウントサービス**のための**TGSチケット**をターゲットにします。
-- **ユーーパスワード**からのキーで暗号化されたチケットは**オフラインでクラッキング**可能です。
+- **ユーザーパスワード**からのキーで暗号化されたチケットは**オフラインでクラッキング**可能です。
 - サービスは、nullでない**ServicePrincipalName**によって識別されます。
 - **特別な権限**は必要なく、**有効なドメイン資格情報**のみが必要です。
 
@@ -93,26 +93,26 @@ hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ```
 ### Persistence
 
-もしユーザーに対して**十分な権限**があれば、そのユーザーを**kerberoastable**にすることができます：
+ユーザーに対して**十分な権限**があれば、そのユーザーを**kerberoastable**にすることができます：
 ```bash
 Set-DomainObject -Identity <username> -Set @{serviceprincipalname='just/whateverUn1Que'} -verbose
 ```
 有用な**ツール**はここで見つけることができます: [https://github.com/nidem/kerberoast](https://github.com/nidem/kerberoast)
 
-Linuxからこの**エラー**が表示された場合: **`Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)`** これはローカル時間のためで、ホストをDCと同期させる必要があります。いくつかのオプションがあります:
+Linuxからこの**エラー**が表示された場合: **`Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)`** は、ローカル時間が原因です。ホストをDCと同期させる必要があります。いくつかのオプションがあります:
 
 - `ntpdate <IP of DC>` - Ubuntu 16.04以降は非推奨
 - `rdate -n <IP of DC>`
 
 ### 緩和策
 
-Kerberoastingは、悪用可能な場合、高度な隠密性で実施できます。この活動を検出するためには、**Security Event ID 4769**に注意を払う必要があります。これはKerberosチケットが要求されたことを示します。しかし、このイベントの頻度が高いため、疑わしい活動を特定するために特定のフィルターを適用する必要があります:
+Kerberoastingは、悪用可能な場合、高度な隠密性で実施できます。この活動を検出するためには、**Security Event ID 4769**に注意を払う必要があります。これは、Kerberosチケットが要求されたことを示します。しかし、このイベントの頻度が高いため、疑わしい活動を特定するために特定のフィルターを適用する必要があります:
 
 - サービス名は**krbtgt**であってはならず、これは通常のリクエストです。
 - **$**で終わるサービス名は、サービスに使用されるマシンアカウントを含まないように除外する必要があります。
 - マシンからのリクエストは、**machine@domain**形式のアカウント名を除外することでフィルタリングする必要があります。
 - 成功したチケットリクエストのみを考慮し、失敗コード**'0x0'**で識別します。
-- **最も重要なこと**は、チケット暗号化タイプが**0x17**である必要があり、これはKerberoasting攻撃でよく使用されます。
+- **最も重要なこと**は、チケットの暗号化タイプが**0x17**である必要があり、これはKerberoasting攻撃でよく使用されます。
 ```bash
 Get-WinEvent -FilterHashtable @{Logname='Security';ID=4769} -MaxEvents 1000 | ?{$_.Message.split("`n")[8] -ne 'krbtgt' -and $_.Message.split("`n")[8] -ne '*$' -and $_.Message.split("`n")[3] -notlike '*$@*' -and $_.Message.split("`n")[18] -like '*0x0*' -and $_.Message.split("`n")[17] -like "*0x17*"} | select ExpandProperty message
 ```

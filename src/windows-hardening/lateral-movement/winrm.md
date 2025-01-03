@@ -2,6 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-[**WinRMについてはこのページを参照してください**](../../network-services-pentesting/5985-5986-pentesting-winrm.md)の情報。
+[**WinRMについての情報はこのページを参照してください**](../../network-services-pentesting/5985-5986-pentesting-winrm.md)。
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -3,7 +3,7 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 > [!WARNING]
-> **JuicyPotatoは** Windows Server 2019 および Windows 10 ビルド 1809 以降では動作しません。しかし、[**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**、** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**、** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato) を使用して **同じ特権を利用し、`NT AUTHORITY\SYSTEM`** レベルのアクセスを取得できます。 _**確認:**_
+> **JuicyPotatoは** Windows Server 2019 および Windows 10 ビルド 1809 以降では動作しません。しかし、 [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**、** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**、** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato) を使用して **同じ特権を利用し、`NT AUTHORITY\SYSTEM`** レベルのアクセスを取得できます。 _**確認:**_
 
 {{#ref}}
 roguepotato-and-printspoofer.md
@@ -19,7 +19,7 @@ _少しのジュースを加えた_ [_RottenPotatoNG_](https://github.com/breenm
 
 [**juicy-potato Readme から**](https://github.com/ohpe/juicy-potato/blob/master/README.md)**:**
 
-[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) とその [バリアント](https://github.com/decoder-it/lonelypotato) は、[`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [サービス](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) に基づく特権昇格チェーンを利用し、`127.0.0.1:6666` で MiTM リスナーを持ち、`SeImpersonate` または `SeAssignPrimaryToken` 特権を持っている場合に機能します。Windows ビルドレビュー中に、`BITS` が意図的に無効にされ、ポート `6666` が使用されている設定を見つけました。
+[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) とその [バリアント](https://github.com/decoder-it/lonelypotato) は、[`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [サービス](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) に基づく特権昇格チェーンを利用し、`127.0.0.1:6666` で MiTM リスナーを持ち、`SeImpersonate` または `SeAssignPrimaryToken` 特権を持っているときに機能します。Windows ビルドレビュー中に、`BITS` が意図的に無効にされ、ポート `6666` が使用されている設定を見つけました。
 
 私たちは [RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) を武器化することに決めました: **Juicy Potato にこんにちはを言いましょう**。
 
@@ -81,7 +81,7 @@ Optional args:
 
 ## 例
 
-注意: CLSIDのリストについては [このページ](https://ohpe.it/juicy-potato/CLSID/) を訪れてください。
+注意: CLSIDのリストを試すには、[このページ](https://ohpe.it/juicy-potato/CLSID/)を訪れてください。
 
 ### nc.exeリバースシェルを取得する
 ```
@@ -118,7 +118,7 @@ c:\Users\Public>
 
 次に、[test_clsid.bat](https://github.com/ohpe/juicy-potato/blob/master/Test/test_clsid.bat)をダウンロードし（CLSIDリストとjuicypotato実行可能ファイルへのパスを変更）、実行します。これにより、すべてのCLSIDを試し始め、**ポート番号が変更されると、CLSIDが機能したことを意味します**。
 
-**パラメータ-cを使用して**動作するCLSIDを**確認してください**
+**-cパラメータを使用して**動作するCLSIDを**確認してください**
 
 ## 参考文献
 

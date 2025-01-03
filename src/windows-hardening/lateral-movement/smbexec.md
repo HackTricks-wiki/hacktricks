@@ -22,7 +22,7 @@ smbexec.py WORKGROUP/genericuser:genericpassword@10.10.10.10
 
 ### コマンドの例
 
-サービスを作成して開始するには、以下のコマンドを使用できます：
+サービスの作成と開始は、以下のコマンドで実行できます：
 ```bash
 sc create [ServiceName] binPath= "cmd.exe /c [PayloadCommand]"
 sc start [ServiceName]

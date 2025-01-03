@@ -10,7 +10,7 @@
 
 ## アカウントオペレーター
 
-このグループは、ドメイン上で管理者でないアカウントやグループを作成する権限を持っています。さらに、ドメインコントローラー（DC）へのローカルログインを可能にします。
+このグループは、ドメイン上の管理者でないアカウントやグループを作成する権限を持っています。さらに、ドメインコントローラー（DC）へのローカルログインを可能にします。
 
 このグループのメンバーを特定するために、次のコマンドが実行されます：
 ```powershell
@@ -130,7 +130,7 @@ echo "Y" | wbadmin start recovery -version:<date-time> -itemtype:file -items:c:\
 
 ## DnsAdmins
 
-**DnsAdmins**グループのメンバーは、DNSサーバー上でSYSTEM権限を持つ任意のDLLをロードするためにその権限を悪用できます。これは通常、ドメインコントローラー上でホストされています。この能力は、重大な悪用の可能性を提供します。
+**DnsAdmins**グループのメンバーは、DNSサーバー上でSYSTEM権限を持つ任意のDLLをロードするためにその権限を悪用できます。これは通常、ドメインコントローラー上でホストされています。この機能は、重大な悪用の可能性を提供します。
 
 DnsAdminsグループのメンバーをリストするには、次のコマンドを使用します：
 ```powershell
@@ -174,7 +174,7 @@ sc.exe \\dc01 start dns
 DnsAdminsは、グローバルクエリブロックリストを無効にした後にWPADレコードを作成することで、DNSレコードを操作してMan-in-the-Middle (MitM) 攻撃を実行できます。ResponderやInveighのようなツールを使用して、スプーフィングやネットワークトラフィックのキャプチャが可能です。
 
 ### イベントログリーダー
-メンバーはイベントログにアクセスでき、プレーンテキストのパスワードやコマンド実行の詳細など、機密情報を見つける可能性があります。
+メンバーはイベントログにアクセスでき、平文のパスワードやコマンド実行の詳細など、機密情報を見つける可能性があります。
 ```powershell
 # Get members and search logs for sensitive information
 Get-NetGroupMember -Identity "Event Log Readers" -Recurse
@@ -203,13 +203,13 @@ sc.exe start MozillaMaintenance
 
 ## 組織管理
 
-**Microsoft Exchange** が展開されている環境では、**Organization Management** と呼ばれる特別なグループが重要な権限を持っています。このグループは **すべてのドメインユーザーのメールボックスにアクセスする** 特権を持ち、**'Microsoft Exchange Security Groups'** 組織単位 (OU) に対して **完全な制御** を維持しています。この制御には、特権昇格に悪用可能な **`Exchange Windows Permissions`** グループが含まれます。
+**Microsoft Exchange**が展開されている環境では、**Organization Management**と呼ばれる特別なグループが重要な権限を持っています。このグループは**すべてのドメインユーザーのメールボックスにアクセスする**特権を持ち、**'Microsoft Exchange Security Groups'**の組織単位（OU）に対して**完全な制御**を維持しています。この制御には、特権昇格に悪用される可能性のある**`Exchange Windows Permissions`**グループが含まれます。
 
 ### 特権の悪用とコマンド
 
 #### プリントオペレーター
 
-**Print Operators** グループのメンバーは、**`SeLoadDriverPrivilege`** を含むいくつかの特権を付与されており、これにより **ドメインコントローラーにローカルでログオン** し、シャットダウンし、プリンターを管理することができます。これらの特権を悪用するには、特に **`SeLoadDriverPrivilege`** が昇格されていないコンテキストで表示されない場合、ユーザーアカウント制御 (UAC) をバイパスする必要があります。
+**Print Operators**グループのメンバーは、**`SeLoadDriverPrivilege`**を含むいくつかの特権を持っており、これにより**ドメインコントローラーにローカルでログオン**し、シャットダウンし、プリンターを管理することができます。これらの特権を悪用するには、特に**`SeLoadDriverPrivilege`**が昇格されていないコンテキストで表示されない場合、ユーザーアカウント制御（UAC）をバイパスする必要があります。
 
 このグループのメンバーをリストするには、次のPowerShellコマンドが使用されます:
 ```powershell

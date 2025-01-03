@@ -21,18 +21,18 @@ WTSEnumerateSessionsA → WTSQuerySessionInformationA → WTSQueryUserToken → 
 .\WTSImpersonator.exe -m enum -s 192.168.40.131
 ```
 
-- **コマンドの実行**: `exec` および `exec-remote` モジュールは、機能するために **サービス** コンテキストを必要とします。ローカル実行には、WTSImpersonator 実行可能ファイルとコマンドが必要です。
+- **コマンドの実行**: `exec` および `exec-remote` モジュールは、機能するために **サービス** コンテキストを必要とします。ローカル実行には、WTSImpersonator実行可能ファイルとコマンドが必要です。
 
 - ローカルコマンド実行の例:
 ```powershell
 .\WTSImpersonator.exe -m exec -s 3 -c C:\Windows\System32\cmd.exe
 ```
-- PsExec64.exe を使用してサービスコンテキストを取得できます:
+- PsExec64.exeを使用してサービスコンテキストを取得できます:
 ```powershell
 .\PsExec64.exe -accepteula -s cmd.exe
 ```
 
-- **リモートコマンド実行**: PsExec.exe に似たサービスをリモートで作成およびインストールし、適切な権限で実行を可能にします。
+- **リモートコマンド実行**: PsExec.exeに似たサービスをリモートで作成およびインストールし、適切な権限で実行を可能にします。
 
 - リモート実行の例:
 ```powershell

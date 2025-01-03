@@ -4,9 +4,9 @@
 
 ## UAC
 
-[ユーザーアカウント制御 (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) は、**昇格された活動のための同意プロンプト**を有効にする機能です。アプリケーションには異なる `integrity` レベルがあり、**高いレベル**のプログラムは、**システムを危険にさらす可能性のある**タスクを実行できます。UACが有効になっている場合、アプリケーションやタスクは常に**非管理者アカウントのセキュリティコンテキストの下で実行され**、管理者が明示的にこれらのアプリケーション/タスクに管理者レベルのアクセスを許可しない限り、システムを実行することはできません。これは、管理者が意図しない変更から保護される便利な機能ですが、セキュリティ境界とは見なされません。
+[ユーザーアカウント制御 (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) は、**昇格された活動のための同意プロンプト**を有効にする機能です。アプリケーションには異なる `integrity` レベルがあり、**高いレベル**のプログラムは、**システムを危険にさらす可能性のあるタスク**を実行できます。UACが有効になっている場合、アプリケーションやタスクは常に**非管理者アカウントのセキュリティコンテキストの下で実行**され、管理者が明示的にこれらのアプリケーション/タスクに管理者レベルのアクセスを許可しない限り、システムを実行することはできません。これは、管理者が意図しない変更から保護される便利な機能ですが、セキュリティ境界とは見なされません。
 
-インテグリティレベルに関する詳細情報は次のとおりです：
+インテグリティレベルに関する詳細情報:
 
 {{#ref}}
 ../windows-local-privilege-escalation/integrity-levels.md
@@ -20,8 +20,8 @@ UACが有効な場合、管理者ユーザーには2つのトークンが与え�
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------- | ------------------------------------------------------------ |
 | [ユーザーアカウント制御：組み込みの管理者アカウントの管理者承認モード](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-admin-approval-mode-for-the-built-in-administrator-account)                                                     | FilterAdministratorToken    | 無効                                                       |
 | [ユーザーアカウント制御：UIAccessアプリケーションがセキュアデスクトップを使用せずに昇格を要求できるようにする](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-allow-uiaccess-applications-to-prompt-for-elevation-without-using-the-secure-desktop) | EnableUIADesktopToggle      | 無効                                                       |
-| [ユーザーアカウント制御：管理者の管理者承認モードにおける昇格プロンプトの動作](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-administrators-in-admin-approval-mode)                     | ConsentPromptBehaviorAdmin  | 非Windowsバイナリに対して同意を求めるプロンプト            |
-| [ユーザーアカウント制御：標準ユーザーの昇格プロンプトの動作](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-standard-users)                                                                   | ConsentPromptBehaviorUser   | セキュアデスクトップでの資格情報を求めるプロンプト         |
+| [ユーザーアカウント制御：管理者の昇格プロンプトの動作（管理者承認モード）](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-administrators-in-admin-approval-mode)                     | ConsentPromptBehaviorAdmin  | 非Windowsバイナリに対して同意を求めるプロンプト            |
+| [ユーザーアカウント制御：標準ユーザーの昇格プロンプトの動作](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-standard-users)                                                                   | ConsentPromptBehaviorUser   | セキュアデスクトップでの資格情報を求めるプロンプト        |
 | [ユーザーアカウント制御：アプリケーションのインストールを検出し、昇格を要求する](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-detect-application-installations-and-prompt-for-elevation)                                                       | EnableInstallerDetection    | 有効（ホームのデフォルト）無効（エンタープライズのデフォルト） |
 | [ユーザーアカウント制御：署名され、検証された実行可能ファイルのみを昇格させる](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-only-elevate-executables-that-are-signed-and-validated)                                                             | ValidateAdminCodeSignatures | 無効                                                       |
 | [ユーザーアカウント制御：セキュアな場所にインストールされたUIAccessアプリケーションのみを昇格させる](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-only-elevate-uiaccess-applications-that-are-installed-in-secure-locations)                       | EnableSecureUIAPaths        | 有効                                                       |
@@ -31,9 +31,9 @@ UACが有効な場合、管理者ユーザーには2つのトークンが与え�
 
 ### UACバイパス理論
 
-一部のプログラムは、**ユーザーが** **管理者グループに属している**場合に**自動的に昇格**されます。これらのバイナリには、_**Manifests**_ 内に _**autoElevate**_ オプションが _**True**_ の値で含まれています。バイナリは、**Microsoftによって署名されている**必要があります。
+一部のプログラムは、**ユーザーが** **管理者グループに属している場合**、**自動的に自動昇格**されます。これらのバイナリには、_**Manifests**_ 内に _**autoElevate**_ オプションが _**True**_ の値で含まれています。バイナリは、**Microsoftによって署名されている必要があります**。
 
-次に、**UAC**を**バイパス**するために（**中**のインテグリティレベルから**高**に昇格するために）、一部の攻撃者はこの種のバイナリを使用して**任意のコードを実行**します。なぜなら、それは**高いインテグリティプロセス**から実行されるからです。
+次に、**UAC**を**バイパス**するために（**中**のインテグリティレベルから**高**に昇格する）、一部の攻撃者はこの種のバイナリを使用して**任意のコードを実行**します。なぜなら、それは**高いインテグリティプロセス**から実行されるからです。
 
 バイナリの_**Manifest**_を確認するには、Sysinternalsのツール_**sigcheck.exe**_を使用できます。また、_Process Explorer_や_Sysinternals_の_Process Monitor_を使用してプロセスの**インテグリティレベル**を確認できます。
 
@@ -57,22 +57,22 @@ ConsentPromptBehaviorAdmin    REG_DWORD    0x5
 ```
 - **`0`** の場合、UACはプロンプトを表示しません（**無効**のように）
 - **`1`** の場合、管理者はバイナリを高い権限で実行するために**ユーザー名とパスワード**を求められます（セキュアデスクトップ上で）
-- **`2`** の場合（**常に通知**）、UACは管理者が高い権限で何かを実行しようとするたびに常に確認を求めます（セキュアデスクトップ上で）
+- **`2`** （**常に通知する**）の場合、UACは管理者が高い権限で何かを実行しようとするたびに常に確認を求めます（セキュアデスクトップ上で）
 - **`3`** の場合、`1` と同様ですが、セキュアデスクトップ上で必要ではありません
 - **`4`** の場合、`2` と同様ですが、セキュアデスクトップ上で必要ではありません
-- **`5`** の場合（**デフォルト**）、非Windowsバイナリを高い権限で実行するために管理者に確認を求めます
+- **`5`** （**デフォルト**）の場合、管理者に非Windowsバイナリを高い権限で実行するための確認を求めます
 
 次に、**`LocalAccountTokenFilterPolicy`** の値を確認する必要があります。\
-値が **`0`** の場合、**RID 500** ユーザー（**ビルトイン管理者**）のみがUACなしで**管理タスク**を実行できます。値が `1` の場合、**「Administrators」** グループ内のすべてのアカウントがそれを実行できます。
+値が **`0`** の場合、**RID 500** ユーザー（**組み込みの管理者**）のみがUACなしで**管理タスク**を実行できます。値が `1` の場合、**「Administrators」** グループ内のすべてのアカウントがそれを実行できます。
 
 最後に、キー **`FilterAdministratorToken`** の値を確認します。\
-**`0`**（デフォルト）の場合、**ビルトイン管理者アカウントは**リモート管理タスクを実行できます。**`1`** の場合、ビルトインアカウント管理者は**リモート管理タスクを実行できません**が、`LocalAccountTokenFilterPolicy` が `1` に設定されている場合を除きます。
+**`0`**（デフォルト）の場合、**組み込みの管理者アカウントは**リモート管理タスクを実行できます。**`1`** の場合、組み込みの管理者アカウントは**リモート管理タスクを実行できません**が、`LocalAccountTokenFilterPolicy` が `1` に設定されている場合を除きます。
 
 #### 概要
 
 - `EnableLUA=0` または **存在しない**場合、**誰に対してもUACなし**
 - `EnableLua=1` かつ **`LocalAccountTokenFilterPolicy=1`** の場合、誰に対してもUACなし
-- `EnableLua=1` かつ **`LocalAccountTokenFilterPolicy=0`** かつ `FilterAdministratorToken=0` の場合、RID 500（ビルトイン管理者）に対してUACなし
+- `EnableLua=1` かつ **`LocalAccountTokenFilterPolicy=0`** かつ `FilterAdministratorToken=0` の場合、RID 500（組み込みの管理者）に対してUACなし
 - `EnableLua=1` かつ **`LocalAccountTokenFilterPolicy=0`** かつ `FilterAdministratorToken=1` の場合、全員に対してUACあり
 
 このすべての情報は、**metasploit** モジュール `post/windows/gather/win_privs` を使用して収集できます。
@@ -89,7 +89,7 @@ whoami /groups | findstr Level
 
 UACバイパスは以下の状況で必要です: **UACが有効で、プロセスが中程度の整合性コンテキストで実行されており、ユーザーが管理者グループに属している場合**。
 
-UACが**最高のセキュリティレベル（常に）**に設定されている場合、UACをバイパスするのは**他のレベル（デフォルト）の場合よりもはるかに難しい**ことを言及することが重要です。
+UACが**最高のセキュリティレベル（常に）**に設定されている場合、他のレベル（デフォルト）の場合よりもUACをバイパスするのが**はるかに難しい**ことを言及することが重要です。
 
 ### UAC無効
 
@@ -154,7 +154,7 @@ Major  Minor  Build  Revision
 
 #### さらなるUACバイパス
 
-**ここで使用されるすべての技術は、AUCをバイパスするために** **フルインタラクティブシェル** **を必要とします**（一般的なnc.exeシェルでは不十分です）。
+**ここで使用されるすべての技術は、AUCをバイパスするために** **完全なインタラクティブシェル** **を必要とします**（一般的なnc.exeシェルでは不十分です）。
 
 **meterpreter**セッションを使用して取得できます。**Session**値が**1**に等しい**プロセス**に移行します：
 
@@ -166,19 +166,19 @@ Major  Minor  Build  Revision
 
 **GUIにアクセスできる場合、UACプロンプトが表示されたときにそれを受け入れるだけで済みます**。実際にはバイパスは必要ありません。したがって、GUIにアクセスすることでUACをバイパスできます。
 
-さらに、誰かが使用していたGUIセッション（おそらくRDP経由）を取得した場合、**管理者として実行されるいくつかのツール**があり、そこから**cmd**を例えば**管理者として**直接実行でき、再度UACによるプロンプトが表示されることはありません。 [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif)のように。これは少し**ステルス**になるかもしれません。
+さらに、誰かが使用していたGUIセッション（おそらくRDP経由）を取得すると、**管理者として実行されるいくつかのツール**があり、そこから**cmd**を例えば**管理者として**直接実行でき、再度UACによるプロンプトが表示されることはありません。これは少し**ステルス**かもしれません。
 
 ### 騒がしいブルートフォースUACバイパス
 
-騒がしいことを気にしないのであれば、常に[**https://github.com/Chainski/ForceAdmin**](https://github.com/Chainski/ForceAdmin)のようなものを**実行することができます**。これは**ユーザーが受け入れるまで権限を昇格するように要求します**。
+騒がしいことを気にしないのであれば、常に**[**https://github.com/Chainski/ForceAdmin**](https://github.com/Chainski/ForceAdmin)**のようなものを**実行して、ユーザーが受け入れるまで権限を昇格するように要求することができます**。
 
 ### 自分自身のバイパス - 基本的なUACバイパス手法
 
-**UACME**を見てみると、**ほとんどのUACバイパスはDLLハイジャックの脆弱性を悪用しています**（主に悪意のあるdllを_C:\Windows\System32_に書き込むこと）。 [DLLハイジャックの脆弱性を見つける方法を学ぶには、これを読んでください](../windows-local-privilege-escalation/dll-hijacking/)。
+**UACME**を見てみると、**ほとんどのUACバイパスはDLLハイジャックの脆弱性を悪用している**ことに気付くでしょう（主に悪意のあるdllを_C:\Windows\System32_に書き込むこと）。[DLLハイジャックの脆弱性を見つける方法を学ぶにはこれを読んでください](../windows-local-privilege-escalation/dll-hijacking/)。
 
 1. **自動昇格**するバイナリを見つけます（実行時に高い整合性レベルで実行されることを確認します）。
 2. procmonを使用して、**DLLハイジャック**に脆弱な可能性のある"**NAME NOT FOUND**"イベントを見つけます。
-3. おそらく、**書き込み権限がない**いくつかの**保護されたパス**（C:\Windows\System32など）内にDLLを**書き込む**必要があります。これをバイパスするには、次の方法を使用できます：
+3. おそらく、**書き込み権限がない**いくつかの**保護されたパス**（C:\Windows\System32など）内にDLLを**書き込む**必要があります。これをバイパスするには：
    1. **wusa.exe**：Windows 7、8、8.1。CABファイルの内容を保護されたパス内に抽出することができます（このツールは高い整合性レベルから実行されるため）。
    2. **IFileOperation**：Windows 10。
 4. 保護されたパス内にDLLをコピーし、脆弱で自動昇格されたバイナリを実行するための**スクリプト**を準備します。

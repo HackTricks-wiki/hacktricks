@@ -12,13 +12,13 @@
 
 ## Mitigations
 
-このような攻撃に対する緩和策には、サービスのインストールや敏感な特権の使用を示す特定のイベントIDを監視することが含まれます。具体的には、システムイベントID 7045またはセキュリティイベントID 4673を探すことで、疑わしい活動を明らかにできます。さらに、`lsass.exe`を保護されたプロセスとして実行することで、攻撃者の努力を大幅に妨げることができ、これによりカーネルモードドライバを使用する必要が生じ、攻撃の複雑さが増します。
+このような攻撃に対する緩和策には、サービスのインストールや敏感な特権の使用を示す特定のイベントIDを監視することが含まれます。具体的には、システムイベントID 7045またはセキュリティイベントID 4673を探すことで、疑わしい活動を明らかにできます。さらに、`lsass.exe`を保護されたプロセスとして実行することで、攻撃者の努力を大幅に妨げることができ、これによりカーネルモードドライバーを使用する必要が生じ、攻撃の複雑さが増します。
 
 セキュリティ対策を強化するためのPowerShellコマンドは以下の通りです:
 
 - 疑わしいサービスのインストールを検出するには、次のコマンドを使用します: `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*"}`
 
-- 特にMimikatzのドライバを検出するには、次のコマンドを利用できます: `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*" -and $_.message -like "*mimidrv*"}`
+- 特にMimikatzのドライバーを検出するには、次のコマンドを利用できます: `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*" -and $_.message -like "*mimidrv*"}`
 
 - `lsass.exe`を強化するためには、保護されたプロセスとして有効にすることが推奨されます: `New-ItemProperty HKLM:\SYSTEM\CurrentControlSet\Control\Lsa -Name RunAsPPL -Value 1 -Verbose`
 

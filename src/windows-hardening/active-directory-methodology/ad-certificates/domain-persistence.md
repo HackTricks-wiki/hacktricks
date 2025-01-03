@@ -2,16 +2,16 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**これは、[https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)で共有されたドメイン持続性技術の概要です**。詳細については確認してください。
+**これは、[https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)で共有されているドメイン持続性技術の概要です**。詳細については確認してください。
 
 ## 盗まれたCA証明書を使用した証明書の偽造 - DPERSIST1
 
 証明書がCA証明書であることをどのように判断できますか？
 
-いくつかの条件が満たされる場合、証明書がCA証明書であることが判断できます：
+いくつかの条件が満たされると、証明書がCA証明書であることが判断できます：
 
 - 証明書はCAサーバーに保存されており、その秘密鍵はマシンのDPAPIによって保護されているか、オペレーティングシステムがサポートしている場合はTPM/HSMなどのハードウェアによって保護されています。
-- 証明書の発行者（Issuer）および対象（Subject）フィールドがCAの識別名と一致します。
+- 証明書の発行者（Issuer）および主題（Subject）フィールドがCAの識別名と一致します。
 - "CA Version"拡張がCA証明書にのみ存在します。
 - 証明書にはExtended Key Usage (EKU)フィールドがありません。
 
@@ -39,11 +39,11 @@ certipy auth -pfx administrator_forged.pfx -dc-ip 172.16.126.128
 > 証明書の偽造の対象となるユーザーは、プロセスが成功するためにアクティブであり、Active Directoryで認証できる必要があります。krbtgtのような特別なアカウントのために証明書を偽造することは効果がありません。
 
 この偽造された証明書は、指定された終了日まで**有効**であり、**ルートCA証明書が有効である限り**（通常は5年から**10年以上**）有効です。また、**マシン**にも有効であるため、**S4U2Self**と組み合わせることで、攻撃者はCA証明書が有効である限り、**任意のドメインマシンで持続性を維持**できます。\
-さらに、この方法で**生成された証明書は**、CAがそれらを認識していないため、**取り消すことができません**。
+さらに、この方法で**生成された証明書**は、CAがそれらを認識していないため、**取り消すことができません**。
 
 ## 悪意のあるCA証明書の信頼 - DPERSIST2
 
-`NTAuthCertificates`オブジェクトは、Active Directory（AD）が利用する`cacertificate`属性内に1つ以上の**CA証明書**を含むように定義されています。**ドメインコントローラー**による検証プロセスは、認証する**証明書**の発行者フィールドに指定された**CA**に一致するエントリを`NTAuthCertificates`オブジェクトで確認することを含みます。一致が見つかれば、認証が進行します。
+`NTAuthCertificates`オブジェクトは、Active Directory（AD）が利用する`cacertificate`属性内に1つ以上の**CA証明書**を含むように定義されています。**ドメインコントローラー**による検証プロセスは、認証する**証明書**の発行者フィールドに指定された**CA**と一致するエントリを`NTAuthCertificates`オブジェクトで確認することを含みます。一致が見つかれば、認証が進行します。
 
 自己署名のCA証明書は、攻撃者がこのADオブジェクトを制御している場合、`NTAuthCertificates`オブジェクトに追加できます。通常、**Enterprise Admin**グループのメンバーと、**forest rootのドメイン**内の**Domain Admins**または**Administrators**のみがこのオブジェクトを変更する権限を与えられます。彼らは、`certutil.exe`を使用して`NTAuthCertificates`オブジェクトを編集することができ、コマンド`certutil.exe -dspublish -f C:\Temp\CERT.crt NTAuthCA126`を使用するか、[**PKI Health Tool**](https://docs.microsoft.com/en-us/troubleshoot/windows-server/windows-security/import-third-party-ca-to-enterprise-ntauth-store#method-1---import-a-certificate-by-using-the-pki-health-tool)を使用します。
 

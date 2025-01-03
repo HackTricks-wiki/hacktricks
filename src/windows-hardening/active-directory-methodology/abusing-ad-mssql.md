@@ -79,7 +79,7 @@ mssqlpwner hosts.txt brute -ul users.txt -pl passwords.txt
 mssqlpwner hosts.txt brute -ul users.txt -hl hashes.txt
 
 ```
-### ドメインセッションなしでのネットワークからの列挙
+### ドメインセッションなしでネットワークから列挙する
 ```
 
 # Interactive mode
@@ -202,13 +202,13 @@ metasploitを使用して、信頼できるリンクを簡単に確認できま�
 msf> use exploit/windows/mssql/mssql_linkcrawler
 [msf> set DEPLOY true] #Set DEPLOY to true if you want to abuse the privileges to obtain a meterpreter session
 ```
-メタスプリットはMSSQLの`openquery()`関数のみを悪用しようとすることに注意してください（したがって、`openquery()`でコマンドを実行できない場合は、コマンドを実行するために`EXECUTE`メソッドを**手動で**試す必要があります。詳細は以下を参照してください。）
+注意してください、metasploitはMSSQLの`openquery()`関数のみを悪用しようとします（したがって、`openquery()`でコマンドを実行できない場合は、コマンドを実行するために`EXECUTE`メソッドを**手動で**試す必要があります。詳細は以下を参照してください。）
 
 ### 手動 - Openquery()
 
 **Linux**からは、**sqsh**と**mssqlclient.py**を使用してMSSQLコンソールシェルを取得できます。
 
-**Windows**からも、リンクを見つけて手動でコマンドを実行することができる**MSSQLクライアントのような** [**HeidiSQL**](https://www.heidisql.com)を使用できます。
+**Windows**からも、リンクを見つけて手動でコマンドを実行することができる**MSSQLクライアントのような**[**HeidiSQL**](https://www.heidisql.com)を使用できます。
 
 _Windows認証を使用してログイン：_
 
@@ -256,7 +256,6 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 
 多くの著者が考案した戦略は、攻撃者が作成した悪意のあるまたは中間者サービスにSYSTEMサービスを認証させることです。この悪意のあるサービスは、認証を試みている間にSYSTEMサービスを偽装することができます。
 
-[SweetPotato](https://github.com/CCob/SweetPotato)は、Beaconの`execute-assembly`コマンドを介して実行できるこれらのさまざまな技術のコレクションを持っています。
-
+[SweetPotato](https://github.com/CCob/SweetPotato)には、Beaconの`execute-assembly`コマンドを介して実行できるこれらのさまざまな技術のコレクションがあります。
 
 {{#include ../../banners/hacktricks-training.md}}

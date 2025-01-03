@@ -15,12 +15,12 @@ lsadump::dcshadow /object:username /attribute:Description /value="My new descrip
 ```bash:mimikatz2 (push) - Needs DA or similar
 lsadump::dcshadow /push
 ```
-注意してください **`elevate::token`** は `mimikatz1` セッションでは機能しません。これはスレッドの特権を昇格させますが、私たちは **プロセスの特権を昇格させる** 必要があります。\
+**`elevate::token`** は `mimikatz1` セッションでは機能しません。なぜなら、これはスレッドの特権を昇格させるだけで、私たちは **プロセスの特権を昇格させる** 必要があるからです。\
 また、"LDAP" オブジェクトを選択することもできます: `/object:CN=Administrator,CN=Users,DC=JEFFLAB,DC=local`
 
 DA からまたはこの最小限の権限を持つユーザーから変更をプッシュできます:
 
-- **ドメインオブジェクト**内:
+- **ドメインオブジェクト**内で:
 - _DS-Install-Replica_ (ドメイン内のレプリカの追加/削除)
 - _DS-Replication-Manage-Topology_ (レプリケーショントポロジーの管理)
 - _DS-Replication-Synchronize_ (レプリケーションの同期)
@@ -31,7 +31,7 @@ DA からまたはこの最小限の権限を持つユーザーから変更を�
 - **ターゲットオブジェクト**:
 - _WriteProperty_ (Not Write)
 
-[**Set-DCShadowPermissions**](https://github.com/samratashok/nishang/blob/master/ActiveDirectory/Set-DCShadowPermissions.ps1) を使用して、特権のないユーザーにこれらの権限を与えることができます (これによりいくつかのログが残ることに注意してください)。これは DA 権限を持つよりもはるかに制限されています。\
+[**Set-DCShadowPermissions**](https://github.com/samratashok/nishang/blob/master/ActiveDirectory/Set-DCShadowPermissions.ps1) を使用して、特権のないユーザーにこれらの権限を与えることができます (これはいくつかのログを残すことに注意してください)。これは DA 権限を持つよりもはるかに制限されています。\
 例えば: `Set-DCShadowPermissions -FakeDC mcorp-student1 SAMAccountName root1user -Username student1 -Verbose` これは、ユーザー名 _**student1**_ がマシン _**mcorp-student1**_ にログインしているときに、オブジェクト _**root1user**_ に対して DCShadow 権限を持つことを意味します。
 
 ## DCShadow を使用してバックドアを作成する
@@ -61,7 +61,7 @@ lsadump::dcshadow /object:CN=AdminSDHolder,CN=System,DC=moneycorp,DC=local /attr
 - ターゲットユーザーオブジェクト上：`(A;;WP;;;UserSID)`
 - 設定コンテナ内のサイトオブジェクト上：`(A;CI;CCDC;;;UserSID)`
 
-オブジェクトの現在のACEを取得するには：`(New-Object System.DirectoryServices.DirectoryEntry("LDAP://DC=moneycorp,DC=local")).psbase.ObjectSecurity.sddl`
+オブジェクトの現在のACEを取得するには：`(New-Object System.DirectoryServices.DirectoryEntry("LDAP://DC=moneycorp,DC=loca l")).psbase.ObjectSecurity.sddl`
 
 この場合、**いくつかの変更を行う必要がある**ことに注意してください。したがって、**mimikatz1セッション**（RPCサーバー）で、行いたい各変更に対して**`/stack`パラメータを使用**してください。この方法では、すべてのスタックされた変更をルージュサーバーで実行するために**`/push`**を一度だけ実行する必要があります。
 

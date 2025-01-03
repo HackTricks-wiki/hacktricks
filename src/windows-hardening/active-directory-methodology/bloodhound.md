@@ -11,7 +11,7 @@
 ### Snapshots
 
 AD Explorer は AD のスナップショットを作成できるため、オフラインで確認できます。\
-オフラインで脆弱性を発見したり、時間を通じて AD DB の異なる状態を比較したりするために使用できます。
+オフラインで脆弱性を発見したり、時間の経過に伴う AD DB の異なる状態を比較するために使用できます。
 
 接続するためには、ユーザー名、パスワード、および接続先のディレクションが必要です（任意の AD ユーザーが必要です）。
 
@@ -30,7 +30,7 @@ From [https://github.com/BloodHoundAD/BloodHound](https://github.com/BloodHoundA
 
 > BloodHoundは、[Linkurious](http://linkurio.us/)の上に構築された単一ページのJavascriptウェブアプリケーションで、[Electron](http://electron.atom.io/)でコンパイルされ、C#データコレクターによって供給される[Neo4j](https://neo4j.com/)データベースを持っています。
 
-BloodHoundは、グラフ理論を使用して、Active DirectoryまたはAzure環境内の隠れた、しばしば意図しない関係を明らかにします。攻撃者はBloodHoundを使用して、迅速に特定することが不可能な非常に複雑な攻撃経路を簡単に特定できます。防御者はBloodHoundを使用して、同じ攻撃経路を特定し排除することができます。ブルーチームとレッドチームの両方がBloodHoundを使用して、Active DirectoryまたはAzure環境における特権関係をより深く理解することができます。
+BloodHoundは、グラフ理論を使用して、Active DirectoryまたはAzure環境内の隠れた、しばしば意図しない関係を明らかにします。攻撃者はBloodHoundを使用して、迅速に特定することが不可能な非常に複雑な攻撃経路を簡単に特定できます。防御者はBloodHoundを使用して、同じ攻撃経路を特定し排除することができます。ブルーチームとレッドチームの両方が、Active DirectoryまたはAzure環境内の特権関係をより深く理解するためにBloodHoundを簡単に使用できます。
 
 したがって、[Bloodhound](https://github.com/BloodHoundAD/BloodHound)は、ドメインを自動的に列挙し、すべての情報を保存し、可能な特権昇格経路を見つけ、グラフを使用してすべての情報を表示する素晴らしいツールです。
 
@@ -42,17 +42,17 @@ BloodHoundは、**ingestors**と**visualisation application**の2つの主要な
 
 ### Installation
 
-BloodHound CEの作成後、プロジェクト全体がDockerを使用しやすく更新されました。始める最も簡単な方法は、事前に構成されたDocker Compose構成を使用することです。
+BloodHound CEの作成後、プロジェクト全体がDockerを使用しやすくするために更新されました。始める最も簡単な方法は、事前に構成されたDocker Compose構成を使用することです。
 
 1. Docker Composeをインストールします。これは[Docker Desktop](https://www.docker.com/products/docker-desktop/)のインストールに含まれているはずです。
-2. 実行します:
+2. 実行:
 ```
 curl -L https://ghst.ly/getbhce | docker compose -f - up
 ```
-3. Docker Composeのターミナル出力にあるランダムに生成されたパスワードを見つけます。
-4. ブラウザでhttp://localhost:8080/ui/loginに移動します。ユーザー名にadminを入力し、ログからのランダムに生成されたパスワードでログインします。
+3. Docker Composeのターミナル出力でランダムに生成されたパスワードを見つけます。  
+4. ブラウザで http://localhost:8080/ui/login に移動します。ユーザー名にadmin、ログからのランダムに生成されたパスワードでログインします。
 
-その後、ランダムに生成されたパスワードを変更する必要があり、新しいインターフェースが準備されます。そこから直接イングestorをダウンロードできます。
+その後、ランダムに生成されたパスワードを変更する必要があり、新しいインターフェースが準備されます。そこから直接ingestorsをダウンロードできます。
 
 ### SharpHound
 
@@ -71,7 +71,7 @@ runas /netonly /user:domain\user "powershell.exe -exec bypass"
 
 ## Group3r
 
-[**Group3r**](https://github.com/Group3r/Group3r) は、**グループポリシー**に関連するActive Directoryの**脆弱性**を見つけるためのツールです。 \
+[**Group3r**](https://github.com/Group3r/Group3r)は、**グループポリシー**に関連するActive Directoryの**脆弱性**を見つけるためのツールです。 \
 **任意のドメインユーザー**を使用して、ドメイン内のホストから**group3rを実行する**必要があります。
 ```bash
 group3r.exe -f <filepath-name.log>

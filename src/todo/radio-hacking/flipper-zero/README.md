@@ -4,11 +4,11 @@
 
 With [**Flipper Zero**](https://flipperzero.one/) you can:
 
-- **ラジオ周波数を聞く/キャプチャする/再生する:** [**Sub-GHz**](fz-sub-ghz.md)
-- **NFCカードを読み取る/キャプチャする/エミュレートする:** [**NFC**](fz-nfc.md)
-- **125kHzタグを読み取る/キャプチャする/エミュレートする:** [**125kHz RFID**](fz-125khz-rfid.md)
-- **赤外線信号を読み取る/キャプチャする/送信する:** [**Infrared**](fz-infrared.md)
-- **iButtonsを読み取る/キャプチャする/エミュレートする:** [**iButton**](../ibutton.md)
+- **ラジオ周波数を聞く/キャプチャ/再生する:** [**Sub-GHz**](fz-sub-ghz.md)
+- **NFCカードを読み取る/キャプチャ/エミュレートする:** [**NFC**](fz-nfc.md)
+- **125kHzタグを読み取る/キャプチャ/エミュレートする:** [**125kHz RFID**](fz-125khz-rfid.md)
+- **赤外線信号を読み取る/キャプチャ/送信する:** [**Infrared**](fz-infrared.md)
+- **iButtonsを読み取る/キャプチャ/エミュレートする:** [**iButton**](../ibutton.md)
 - **Bad USBとして使用する**
 - **セキュリティキー(U2F)として使用する**
 - **スネークをプレイする**

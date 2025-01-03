@@ -37,7 +37,7 @@
 - [https://github.com/hahwul/XSpear](https://github.com/hahwul/XSpear)
 - [https://github.com/BitTheByte/Monitorizer/](https://github.com/BitTheByte/Monitorizer/)
 - [https://github.com/spinkham/skipfish](https://github.com/spinkham/skipfish)
-- [https://github.com/blark/aiodnsbrute](https://github.com/blark/aiodnsbrute) : 非同期でドメイン名をブルートフォース
+- [https://github.com/blark/aiodnsbrute](https://github.com/blark/aiodnsbrute) : ドメイン名を非同期でブルートフォース
 - [https://crt.sh/?q=%.yahoo.com](https://crt.sh/?q=%.yahoo.com) : サブドメインブルートフォース
 - [https://github.com/tomnomnom/httprobe](https://github.com/tomnomnom/httprobe): ドメイン内のウェブサーバーがアクセス可能か確認する
 - [https://github.com/aboul3la/Sublist3r](https://github.com/aboul3la/Sublist3r) : サブドメイン発見
@@ -53,7 +53,7 @@
 - [https://github.com/prodigysml/Dr.-Watson](https://github.com/prodigysml/Dr.-Watson) : Burpプラグイン、ドメイン、サブドメイン、IPを発見するためのオフライン分析
 - [https://github.com/hahwul/WebHackersWeapons](https://github.com/hahwul/WebHackersWeapons): 様々なツールのリスト
 - [https://github.com/gauravnarwani97/Trishul](https://github.com/gauravnarwani97/Trishul) : 脆弱性を見つけるためのBurpSuiteプラグイン（SQLi、XSS、SSTI）
-- [https://github.com/fransr/postMessage-tracker](https://github.com/fransr/postMessage-tracker) : ポストメッセージ関数を追跡するためのChrome拡張
+- [https://github.com/fransr/postMessage-tracker](https://github.com/fransr/postMessage-tracker) : ポストメッセージ関数を追跡するためのChrome拡張機能
 - [https://github.com/Quitten/Autorize](https://github.com/Quitten/Autorize) : 自動認証テスト（クッキーを削除し、リクエストを送信しようとする）
 - [https://github.com/pikpikcu/xrcross](https://github.com/pikpikcu/xrcross): XRCrossは再構築、スキャナー、ペネトレーション/バグバウンティテスト用のツールです。このツールは（XSS|SSRF|CORS|SSTI|IDOR|RCE|LFI|SQLI）脆弱性をテストするために構築されました。
 
@@ -86,7 +86,7 @@
 - [https://blog.mindedsecurity.com/2018/09/pentesting-iot-devices-part-1-static.html](https://blog.mindedsecurity.com/2018/09/pentesting-iot-devices-part-1-static.html)
 - [https://blog.mindedsecurity.com/2018/10/pentesting-iot-devices-part-2-dynamic.html](https://blog.mindedsecurity.com/2018/10/pentesting-iot-devices-part-2-dynamic.html)
 
-ファームウェアをオンラインで見つけられない場合の抽出方法：[https://www.youtube.com/watch?v=Kxvpbu9STU4](https://www.youtube.com/watch?v=Kxvpbu9STU4)
+オンラインで見つからない場合のファームウェアの抽出方法：[https://www.youtube.com/watch?v=Kxvpbu9STU4](https://www.youtube.com/watch?v=Kxvpbu9STU4)
 
 分析するための脆弱性のあるファームウェア：[https://github.com/scriptingxss/IoTGoat](https://github.com/scriptingxss/IoTGoat)
 
@@ -102,7 +102,7 @@
 - [https://github.com/skelsec/jackdaw](https://github.com/skelsec/jackdaw)
 - [https://github.com/CoatiSoftware/Sourcetrail](https://github.com/CoatiSoftware/Sourcetrail) : 静的コード分析
 - [https://www.hackerdecabecera.com/2019/12/blectf-capture-flag-en-formato-hardware.html](https://www.hackerdecabecera.com/2019/12/blectf-capture-flag-en-formato-hardware.html) : Bluetooth LE CTF
-- [https://github.com/skeeto/endlessh](https://github.com/skeeto/endlessh) : SSHターピットがゆっくりと無限のバナーを送信します。
+- [https://github.com/skeeto/endlessh](https://github.com/skeeto/endlessh) : SSHターピットが無限のバナーをゆっくり送信します。
 - AWSおよびクラウドツール：[https://github.com/toniblyx/my-arsenal-of-aws-security-tools](https://github.com/toniblyx/my-arsenal-of-aws-security-tools)
 - フィッシング用のIFS（Interplanetary File System）：[https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/using-the-interplanetary-file-system-for-offensive-operations/](https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/using-the-interplanetary-file-system-for-offensive-operations/)
 - IPローテーションサービス：[https://medium.com/@lokeshdlk77/how-to-rotate-ip-address-in-brute-force-attack-e66407259212](https://medium.com/@lokeshdlk77/how-to-rotate-ip-address-in-brute-force-attack-e66407259212)

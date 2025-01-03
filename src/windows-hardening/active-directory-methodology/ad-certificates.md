@@ -7,13 +7,13 @@
 ### Components of a Certificate
 
 - **証明書の主題**はその所有者を示します。
-- **公開鍵**は、証明書を正当な所有者にリンクするために、プライベートキーとペアになっています。
+- **公開鍵**は、証明書を正当な所有者にリンクするために、プライベートキーとペアになります。
 - **有効期間**は、**NotBefore**および**NotAfter**の日付によって定義され、証明書の有効な期間を示します。
 - 一意の**シリアル番号**は、証明書機関（CA）によって提供され、各証明書を識別します。
 - **発行者**は、証明書を発行したCAを指します。
 - **SubjectAlternativeName**は、主題の追加名を許可し、識別の柔軟性を高めます。
 - **基本制約**は、証明書がCA用かエンドエンティティ用かを識別し、使用制限を定義します。
-- **拡張キー使用法（EKU）**は、オブジェクト識別子（OID）を通じて、コード署名やメール暗号化など、証明書の特定の目的を区別します。
+- **拡張キー使用法（EKU）**は、オブジェクト識別子（OID）を通じて、コード署名やメール暗号化など、証明書の特定の目的を示します。
 - **署名アルゴリズム**は、証明書に署名する方法を指定します。
 - **署名**は、発行者のプライベートキーで作成され、証明書の真正性を保証します。
 
@@ -23,12 +23,12 @@
 
 ### Certificate Authorities (CAs) in Active Directory (AD)
 
-AD CSは、ADフォレスト内のCA証明書を指定されたコンテナを通じて認識し、それぞれが独自の役割を果たします：
+AD CSは、指定されたコンテナを通じてADフォレスト内のCA証明書を認識し、それぞれが独自の役割を果たします：
 
 - **Certification Authorities**コンテナは、信頼されたルートCA証明書を保持します。
 - **Enrolment Services**コンテナは、エンタープライズCAとその証明書テンプレートの詳細を示します。
 - **NTAuthCertificates**オブジェクトは、AD認証のために承認されたCA証明書を含みます。
-- **AIA (Authority Information Access)**コンテナは、中間CAおよびクロスCA証明書を使用して証明書チェーンの検証を促進します。
+- **AIA (Authority Information Access)**コンテナは、中間CAおよびクロスCA証明書を使用して証明書チェーンの検証を容易にします。
 
 ### Certificate Acquisition: Client Certificate Request Flow
 
@@ -39,7 +39,7 @@ AD CSは、ADフォレスト内のCA証明書を指定されたコンテナを�
 
 ### Certificate Templates
 
-AD内で定義されたこれらのテンプレートは、証明書を発行するための設定と権限を概説し、許可されたEKUや登録または変更権限を含み、証明書サービスへのアクセス管理において重要です。
+AD内で定義されているこれらのテンプレートは、証明書を発行するための設定と権限を概説し、許可されたEKUや登録または変更権限を含み、証明書サービスへのアクセス管理において重要です。
 
 ## Certificate Enrollment
 
@@ -72,9 +72,9 @@ CAの権限は、そのセキュリティ記述子に記載されており、証
 
 1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE)、DCOMインターフェースを使用。
 2. **ICertPassage Remote Protocol** (MS-ICPR)、名前付きパイプまたはTCP/IPを介して。
-3. **証明書登録ウェブインターフェース**、証明書機関ウェブ登録役割がインストールされていること。
-4. **Certificate Enrollment Service** (CES)、証明書登録ポリシー（CEP）サービスと連携。
-5. **Network Device Enrollment Service** (NDES)、ネットワークデバイス用、シンプル証明書登録プロトコル（SCEP）を使用。
+3. **証明書登録Webインターフェース**、証明書機関Web登録役割がインストールされていること。
+4. **証明書登録サービス** (CES)、証明書登録ポリシー（CEP）サービスと連携して。
+5. **ネットワークデバイス登録サービス** (NDES)、ネットワークデバイス用に、シンプル証明書登録プロトコル（SCEP）を使用。
 
 Windowsユーザーは、GUI（`certmgr.msc`または`certlm.msc`）またはコマンドラインツール（`certreq.exe`またはPowerShellの`Get-Certificate`コマンド）を介しても証明書をリクエストできます。
 ```powershell
@@ -95,7 +95,7 @@ CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<do
 
 ### セキュアチャネル (Schannel) 認証
 
-Schannelは、安全なTLS/SSL接続を促進し、ハンドシェイク中にクライアントが証明書を提示します。証明書が正常に検証されると、アクセスが許可されます。証明書をADアカウントにマッピングするには、Kerberosの**S4U2Self**機能や証明書の**Subject Alternative Name (SAN)**など、他の方法が関与する場合があります。
+Schannelは安全なTLS/SSL接続を促進し、ハンドシェイク中にクライアントが証明書を提示します。証明書が正常に検証されると、アクセスが許可されます。証明書をADアカウントにマッピングするには、Kerberosの**S4U2Self**機能や証明書の**Subject Alternative Name (SAN)**など、他の方法が関与する場合があります。
 
 ### AD証明書サービスの列挙
 

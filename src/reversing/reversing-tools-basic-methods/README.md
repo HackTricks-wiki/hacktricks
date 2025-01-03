@@ -12,9 +12,9 @@
 
 オンライン:
 
-- [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html)を使用して、**wasm**（バイナリ）から**wat**（クリアテキスト）に**デコンパイル**します。
-- [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/)を使用して、**wat**から**wasm**に**コンパイル**します。
-- [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/)を使用してデコンパイルすることもできます。
+- [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html)を使用して**デコンパイル**します（wasm（バイナリ）からwat（クリアテキスト）へ）
+- [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/)を使用して**コンパイル**します（watからwasmへ）
+- [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/)を使用してデコンパイルすることもできます
 
 ソフトウェア:
 
@@ -31,23 +31,23 @@ dotPeekは、**ライブラリ**（.dll）、**Windowsメタデータファイ�
 
 ### [.NET Reflector](https://www.red-gate.com/products/reflector/)
 
-包括的なアドインモデルと、ツールを正確なニーズに合わせて拡張するAPIを備えた.NET Reflectorは、時間を節約し、開発を簡素化します。このツールが提供する逆コンパイルサービスの豊富さを見てみましょう：
+包括的なアドインモデルと、ツールを正確なニーズに合わせて拡張するAPIを備えた.NET Reflectorは、時間を節約し、開発を簡素化します。このツールが提供する逆コンパイルサービスの数々を見てみましょう：
 
-- ライブラリやコンポーネントを通じてデータがどのように流れるかの洞察を提供します。
-- .NET言語やフレームワークの実装と使用に関する洞察を提供します。
-- 使用されているAPIや技術からより多くの機能を引き出すために、文書化されていない機能や公開されていない機能を見つけます。
-- 依存関係や異なるアセンブリを見つけます。
-- コード、サードパーティコンポーネント、およびライブラリ内のエラーの正確な場所を追跡します。
-- あなたが扱うすべての.NETコードのソースをデバッグします。
+- ライブラリやコンポーネントを通じてデータがどのように流れるかの洞察を提供
+- .NET言語やフレームワークの実装と使用に関する洞察を提供
+- APIや使用されている技術からより多くの機能を引き出すために、文書化されていない機能や公開されていない機能を見つける
+- 依存関係や異なるアセンブリを見つける
+- コード、サードパーティコンポーネント、ライブラリ内のエラーの正確な場所を追跡
+- あなたが扱うすべての.NETコードのソースをデバッグ
 
 ### [ILSpy](https://github.com/icsharpcode/ILSpy) & [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
-[Visual Studio Code用ILSpyプラグイン](https://github.com/icsharpcode/ilspy-vscode): どのOSでも使用できます（VSCodeから直接インストールできます。gitをダウンロードする必要はありません。**拡張機能**をクリックし、**ILSpy**を検索します）。\
-**デコンパイル**、**修正**、および再**コンパイル**する必要がある場合は、[**dnSpy**](https://github.com/dnSpy/dnSpy/releases)またはそのアクティブにメンテナンスされているフォークである[**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases)を使用できます。（**右クリック -> メソッドを修正**して関数内の何かを変更します）。
+[Visual Studio Code用ILSpyプラグイン](https://github.com/icsharpcode/ilspy-vscode): どのOSでも使用できます（VSCodeから直接インストールできます。gitをダウンロードする必要はありません。**拡張機能**をクリックし、**ILSpyを検索**します）。\
+**デコンパイル**、**修正**、再度**コンパイル**する必要がある場合は、[**dnSpy**](https://github.com/dnSpy/dnSpy/releases)またはそのアクティブにメンテナンスされているフォークである[**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases)を使用できます。（**右クリック -> メソッドを修正**して関数内の何かを変更します）。
 
 ### DNSpyロギング
 
-**DNSpyがファイルに情報をログする**ために、このスニペットを使用できます：
+**DNSpyがファイルに情報をログする**ために、このスニペットを使用できます:
 ```cs
 using System.IO;
 path = "C:\\inetpub\\temp\\MyTest2.txt";
@@ -63,28 +63,28 @@ DNSpy を使用してコードをデバッグするには、次の手順を実�
 ```aspnet
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints)]
 ```
-翻訳する内容が提供されていません。翻訳が必要なテキストを提供してください。
+翻訳するテキストが提供されていません。翻訳が必要な内容を教えてください。
 ```
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.Default |
 DebuggableAttribute.DebuggingModes.DisableOptimizations |
 DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints |
 DebuggableAttribute.DebuggingModes.EnableEditAndContinue)]
 ```
-そして、**compile**をクリックします：
+そして、**コンパイル**をクリックします：
 
 ![](<../../images/image (314) (1).png>)
 
-次に、_**File >> Save module...**_を介して新しいファイルを保存します：
+次に、_**ファイル >> モジュールを保存...**_を介して新しいファイルを保存します：
 
 ![](<../../images/image (602).png>)
 
-これは必要です。なぜなら、これを行わないと、**runtime**中にいくつかの**optimisations**がコードに適用され、デバッグ中に**break-pointが決してヒットしない**か、いくつかの**variablesが存在しない**可能性があるからです。
+これは必要です。なぜなら、これを行わないと、**ランタイム**中にいくつかの**最適化**がコードに適用され、デバッグ中に**ブレークポイントが決してヒットしない**か、いくつかの**変数が存在しない**可能性があるからです。
 
-次に、.NETアプリケーションが**IIS**によって**run**されている場合は、次のコマンドで**restart**できます：
+次に、.NETアプリケーションが**IIS**によって**実行**されている場合は、次のコマンドで**再起動**できます：
 ```
 iisreset /noforce
 ```
-すべての開いているファイルを閉じて、**Debug Tab**内で**Attach to Process...**を選択します：
+すべての開いているファイルを閉じた後、**Debug Tab**内で**Attach to Process...**を選択します：
 
 ![](<../../images/image (318).png>)
 
@@ -121,7 +121,7 @@ iisreset /noforce
 
 ![](<../../images/image (868).png>)
 
-- 実行の**parameters**を設定し、**DLLのパス**と呼び出したい関数を指定します：
+- 実行の**パラメータ**を設定し、**DLLのパス**と呼び出したい関数を指定します：
 
 ![](<../../images/image (704).png>)
 
@@ -144,13 +144,13 @@ iisreset /noforce
 
 ## GUI Apps / Videogames
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php)は、実行中のゲームのメモリ内に重要な値が保存されている場所を見つけて変更するのに役立つプログラムです。詳細は以下を参照してください：
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php)は、実行中のゲームのメモリ内に重要な値が保存されている場所を見つけて変更するための便利なプログラムです。詳細は以下を参照してください：
 
 {{#ref}}
 cheat-engine.md
 {{#endref}}
 
-[**PiNCE**](https://github.com/korcankaraokcu/PINCE)は、GNU Project Debugger (GDB)のフロントエンド/リバースエンジニアリングツールで、ゲームに特化しています。ただし、リバースエンジニアリングに関連する任意の作業にも使用できます。
+[**PiNCE**](https://github.com/korcankaraokcu/PINCE)は、GNU Project Debugger (GDB)のフロントエンド/リバースエンジニアリングツールで、ゲームに特化しています。ただし、リバースエンジニアリング関連の作業にも使用できます。
 
 [**Decompiler Explorer**](https://dogbolt.org/)は、いくつかのデコンパイラへのウェブフロントエンドです。このウェブサービスを使用すると、小さな実行可能ファイルに対する異なるデコンパイラの出力を比較できます。
 
@@ -163,7 +163,7 @@ cheat-engine.md
 ### Debugging a shellcode with blobrunner
 
 [**Blobrunner**](https://github.com/OALabs/BlobRunner)は、**shellcode**をメモリのスペース内に**割り当て**、**shellcode**が割り当てられた**メモリアドレス**を**示し**、実行を**停止**します。\
-その後、プロセスに**デバッガ**（Idaまたはx64dbg）をアタッチし、**指定されたメモリアドレスにブレークポイントを設定**し、実行を**再開**します。これにより、shellcodeのデバッグが行えます。
+その後、プロセスに**デバッガ**（Idaまたはx64dbg）をアタッチし、**指定されたメモリアドレスにブレークポイントを設定**し、実行を**再開**します。この方法で、shellcodeをデバッグします。
 
 リリースのGitHubページには、コンパイルされたリリースを含むzipファイルがあります：[https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
 以下のリンクにBlobrunnerのわずかに修正されたバージョンがあります。コンパイルするには、**Visual Studio CodeでC/C++プロジェクトを作成し、コードをコピー＆ペーストしてビルド**します。
@@ -174,7 +174,7 @@ blobrunner.md
 
 ### Debugging a shellcode with jmp2it
 
-[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4)は、blobrunnerに非常に似ています。**shellcode**をメモリのスペース内に**割り当て**、**永続ループ**を開始します。その後、プロセスに**デバッガをアタッチ**し、**再生を開始して2-5秒待ち、停止を押す**と、**永続ループ**内に入ります。永続ループの次の命令にジャンプすると、それはshellcodeへの呼び出しになります。最終的に、shellcodeを実行している自分を見つけることができます。
+[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4)は、blobrunnerに非常に似ています。**shellcode**をメモリのスペース内に**割り当て**、**永遠のループ**を開始します。その後、プロセスに**デバッガをアタッチ**し、**再生を開始して2-5秒待ち、停止を押す**と、**永遠のループ**内に入ります。永遠のループの次の命令にジャンプすると、それはshellcodeへの呼び出しになります。最終的に、shellcodeを実行している自分を見つけることができます。
 
 ![](<../../images/image (509).png>)
 
@@ -253,7 +253,7 @@ Delphiバイナリをリバースする必要がある場合は、IDAプラグ�
 
 **ATL+f7**を押して（IDAにPythonプラグインをインポート）Pythonプラグインを選択します。
 
-このプラグインは、バイナリを実行し、デバッグの開始時に関数名を動的に解決します。デバッグを開始した後、再度スタートボタン（緑のボタンまたはf9）を押すと、実際のコードの最初にブレークポイントがヒットします。
+このプラグインは、バイナリを実行し、デバッグの開始時に関数名を動的に解決します。デバッグを開始した後、再度スタートボタン（緑のボタンまたはf9）を押すと、実際のコードの最初でブレークポイントがヒットします。
 
 また、グラフィックアプリケーションでボタンを押すと、デバッガーはそのボタンによって実行された関数で停止するため、非常に興味深いです。
 
@@ -273,20 +273,20 @@ Golangバイナリをリバースする必要がある場合は、IDAプラグ�
 ../../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md
 {{#endref}}
 
-## GBA - Game Body Advance
+## GBA - ゲームボディアドバンス
 
 GBAゲームの**バイナリ**を取得した場合、さまざまなツールを使用して**エミュレート**および**デバッグ**できます:
 
 - [**no$gba**](https://problemkaputt.de/gba.htm) (_デバッグ版をダウンロード_) - インターフェースを持つデバッガーを含む
-- [**mgba** ](https://mgba.io) - CLIデバッガーを含む
+- [**mgba** ](https://mgba.io)- CLIデバッガーを含む
 - [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Ghidraプラグイン
 - [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Ghidraプラグイン
 
-[**no$gba**](https://problemkaputt.de/gba.htm)の_**Options --> Emulation Setup --> Controls**_\*\* \*\*では、Game Boy Advanceの**ボタン**を押す方法を確認できます。
+[**no$gba**](https://problemkaputt.de/gba.htm)の_**オプション --> エミュレーション設定 --> コントロール**_\*\* \*\*では、ゲームボーイアドバンスの**ボタン**を押す方法を確認できます。
 
 ![](<../../images/image (581).png>)
 
-押すと、各**キーには識別するための値**があります:
+押されると、各**キーには識別するための値**があります:
 ```
 A = 1
 B = 2
@@ -372,7 +372,7 @@ DAT_030000d8 = DAT_030000d8 + 0x3a;
 - 次に、**値8**（**START**ボタン）と比較されています：このチャレンジでは、コードがフラグを取得するのに有効かどうかを確認します。
 - この場合、変数**`DAT_030000d8`**は0xf3と比較され、値が同じであればいくつかのコードが実行されます。
 - その他のケースでは、いくつかのcont（`DAT_030000d4`）がチェックされます。これは、コードに入った直後に1を加算するためcontです。\
-**8未満**の場合、**`DAT_030000d8`**に値を**加算する**ことが行われます（基本的には、contが8未満の間、押されたキーの値をこの変数に加算しています）。
+**8未満の場合、**\*\*`DAT_030000d8` \*\*に値を**加算する**ことが行われます（基本的に、contが8未満の間、押されたキーの値をこの変数に加算しています）。
 
 したがって、このチャレンジでは、ボタンの値を知っている必要があり、**結果の合計が0xf3になるように、長さが8未満の組み合わせを押す必要があります。**
 

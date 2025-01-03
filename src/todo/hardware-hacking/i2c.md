@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## バスパイレート
+## Bus Pirate
 
-バスパイレートが動作しているかテストするには、+5VをVPUに、3.3VをADCに接続し、バスパイレートにアクセスします（例えばTera Termを使用）し、コマンド`~`を使用します:
+Bus Pirateが動作しているかテストするには、+5VをVPUに、3.3VをADCに接続し、バスパイレートにアクセスします（例えばTera Termを使用）し、コマンド`~`を使用します:
 ```bash
 # Use command
 HiZ>~
@@ -155,7 +155,7 @@ NACK
 ```
 ### Sniffer
 
-このシナリオでは、Arduinoと前のEPROM間のI2C通信をスニッフィングします。両方のデバイスを通信させ、その後バスパイレートをSCL、SDA、およびGNDピンに接続するだけです：
+このシナリオでは、arduinoと前のEPROM間のI2C通信をスニッフィングします。両方のデバイスを通信させ、その後バスパイレートをSCL、SDA、GNDピンに接続するだけです：
 
 ![](<../../images/image (166).png>)
 ```bash

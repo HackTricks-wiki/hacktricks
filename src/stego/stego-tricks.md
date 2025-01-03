@@ -20,7 +20,7 @@ foremost -i file # Extracts data
 ```
 ### **Exiftool**
 
-ファイルメタデータを表示するのに役立ちます。利用可能なリンクは[こちら](https://www.sno.phy.queensu.ca/~phil/exiftool/)。
+ファイルメタデータを表示するのに役立ちます。利用可能なリンクは[こちら](https://www.sno.phy.queensu.ca/~phil/exiftool/)です。
 ```bash
 exiftool file # Shows the metadata
 ```
@@ -54,17 +54,17 @@ strings -e B -n 6 file # 32bit strings (big-endian)
 ```bash
 cmp original.jpg stego.jpg -b -l
 ```
-## **テキスト内の隠れたデータの抽出**
+## **テキスト内の隠されたデータの抽出**
 
-### **スペース内の隠れたデータ**
+### **スペース内の隠されたデータ**
 
 見た目には空のスペースに隠された情報があるかもしれません。このデータを抽出するには、[https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)を訪れてください。
 
-## **画像からのデータ抽出**
+## **画像からのデータの抽出**
 
-### **GraphicMagickを使用した画像詳細の特定**
+### **GraphicMagickを使用した画像の詳細の特定**
 
-[GraphicMagick](https://imagemagick.org/script/download.php)は、画像ファイルの種類を特定し、潜在的な破損を識別するために使用されます。以下のコマンドを実行して画像を検査します：
+[GraphicMagick](https://imagemagick.org/script/download.php)は、画像ファイルの種類を特定し、潜在的な破損を識別するために使用されます。画像を検査するには、以下のコマンドを実行してください：
 ```bash
 ./magick identify -verbose stego.jpg
 ```
@@ -72,9 +72,9 @@ cmp original.jpg stego.jpg -b -l
 ```bash
 ./magick mogrify -set comment 'Extraneous bytes removed' stego.jpg
 ```
-### **Steghideによるデータ隠蔽**
+### **データ隠蔽のためのSteghide**
 
-Steghideは、`JPEG, BMP, WAV, AU`ファイル内にデータを隠すことを可能にし、暗号化されたデータの埋め込みと抽出ができます。インストールは`apt`を使用して簡単に行え、[ソースコードはGitHubで入手可能です](https://github.com/StefanoDeVuono/steghide)。
+Steghideは、`JPEG, BMP, WAV, AU`ファイル内にデータを隠すことを容易にし、暗号化されたデータの埋め込みと抽出が可能です。インストールは`apt`を使用して簡単に行え、[ソースコードはGitHubで入手可能です](https://github.com/StefanoDeVuono/steghide)。
 
 **コマンド:**
 
@@ -114,11 +114,11 @@ zstegはPNGおよびBMPファイル内の隠れたデータを発見すること
 
 ### **Stegpy for Audio and Image Files**
 
-Stegpyは画像および音声ファイルに情報を埋め込むことを可能にし、PNG、BMP、GIF、WebP、WAVなどのフォーマットをサポートしています。これは[GitHub](https://github.com/dhsdshdhk/stegpy)で入手可能です。
+Stegpyは、PNG、BMP、GIF、WebP、WAVなどの形式をサポートし、画像および音声ファイルに情報を埋め込むことを可能にします。これは[GitHub](https://github.com/dhsdshdhk/stegpy)で入手可能です。
 
 ### **Pngcheck for PNG File Analysis**
 
-PNGファイルを分析したり、その真正性を検証するには、次のコマンドを使用します：
+PNGファイルを分析するか、その真正性を検証するには、次のコマンドを使用します：
 ```bash
 apt-get install pngcheck
 pngcheck stego.png
@@ -135,15 +135,15 @@ pngcheck stego.png
 
 ## **オーディオからのデータ抽出**
 
-**オーディオステガノグラフィ**は、音声ファイル内に情報を隠す独自の方法を提供します。隠されたコンテンツを埋め込むまたは取得するために、さまざまなツールが利用されます。
+**オーディオステガノグラフィ**は、音声ファイル内に情報を隠すユニークな方法を提供します。隠されたコンテンツを埋め込むまたは取得するために、さまざまなツールが利用されます。
 
 ### **Steghide (JPEG, BMP, WAV, AU)**
 
-Steghideは、JPEG、BMP、WAV、およびAUファイルにデータを隠すために設計された多目的ツールです。詳細な手順は[stego tricks documentation](stego-tricks.md#steghide)に記載されています。
+Steghideは、JPEG、BMP、WAV、およびAUファイルにデータを隠すために設計された多目的ツールです。詳細な指示は[stego tricks documentation](stego-tricks.md#steghide)に記載されています。
 
 ### **Stegpy (PNG, BMP, GIF, WebP, WAV)**
 
-このツールは、PNG、BMP、GIF、WebP、およびWAVを含むさまざまなフォーマットに対応しています。詳細については[Stegpy's section](stego-tricks.md#stegpy-png-bmp-gif-webp-wav)を参照してください。
+このツールは、PNG、BMP、GIF、WebP、およびWAVを含むさまざまなフォーマットに対応しています。詳細については、[Stegpy's section](stego-tricks.md#stegpy-png-bmp-gif-webp-wav)を参照してください。
 
 ### **ffmpeg**
 
@@ -153,7 +153,7 @@ ffmpeg -v info -i stego.mp3 -f null -
 ```
 ### **WavSteg (WAV)**
 
-WavStegは、最下位ビット戦略を使用してWAVファイル内にデータを隠蔽および抽出するのに優れています。これは[GitHub](https://github.com/ragibson/Steganography#WavSteg)で入手可能です。コマンドには次が含まれます:
+WavStegは、最下位ビット戦略を使用してWAVファイル内にデータを隠蔽および抽出するのに優れています。これは[GitHub](https://github.com/ragibson/Steganography#WavSteg)で入手可能です。コマンドには次のものが含まれます:
 ```bash
 python3 WavSteg.py -r -b 1 -s soundfile -o outputfile
 
@@ -167,13 +167,13 @@ Deepsoundは、AES-256を使用して音声ファイル内の情報を暗号化�
 
 音声ファイルの視覚的および分析的検査において非常に貴重なツールであるSonic Visualizerは、他の手段では検出できない隠れた要素を明らかにすることができます。 詳細は[公式ウェブサイト](https://www.sonicvisualiser.org/)をご覧ください。
 
-### **DTMFトーン - ダイヤルトーン**
+### **DTMF Tones - Dial Tones**
 
 音声ファイル内のDTMFトーンを検出するには、[このDTMF検出器](https://unframework.github.io/dtmf-detect/)や[DialABC](http://dialabc.com/sound/detect/index.html)などのオンラインツールを使用できます。
 
-## **その他の技術**
+## **Other Techniques**
 
-### **バイナリ長SQRT - QRコード**
+### **Binary Length SQRT - QR Code**
 
 整数に平方するバイナリデータはQRコードを表す可能性があります。このスニペットを使用して確認してください：
 ```python

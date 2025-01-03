@@ -4,7 +4,7 @@
 
 ## アクセストークン
 
-各**システムにログインしているユーザー**は、そのログオンセッションの**セキュリティ情報を持つアクセストークンを保持しています**。システムはユーザーがログインするときにアクセストークンを作成します。**ユーザーのために実行されるすべてのプロセス**は**アクセストークンのコピーを持っています**。トークンはユーザー、ユーザーのグループ、およびユーザーの特権を識別します。トークンには、現在のログオンセッションを識別するログオンSID（セキュリティ識別子）も含まれています。
+各**システムにログインしているユーザー**は、そのログオンセッションの**セキュリティ情報を持つアクセストークン**を保持しています。ユーザーがログインすると、システムはアクセストークンを作成します。**ユーザーのために実行されるすべてのプロセス**は**アクセストークンのコピーを持っています**。トークンはユーザー、ユーザーのグループ、およびユーザーの権限を識別します。トークンには、現在のログオンセッションを識別するログオンSID（セキュリティ識別子）も含まれています。
 
 この情報は`whoami /all`を実行することで確認できます。
 ```
@@ -50,27 +50,27 @@ SeUndockPrivilege             Remove computer from docking station Disabled
 SeIncreaseWorkingSetPrivilege Increase a process working set       Disabled
 SeTimeZonePrivilege           Change the time zone                 Disabled
 ```
-または、Sysinternalsの _Process Explorer_ を使用して（プロセスを選択し、「セキュリティ」タブにアクセス）：
+or using _Process Explorer_ from Sysinternals (select process and access"Security" tab):
 
 ![](<../../images/image (772).png>)
 
 ### ローカル管理者
 
-ローカル管理者がログインすると、**2つのアクセス トークンが作成されます**: 1つは管理者権限付き、もう1つは通常の権限付きです。**デフォルトでは**、このユーザーがプロセスを実行するとき、**通常の**（非管理者）**権限が使用されます**。このユーザーが**管理者として**何かを**実行**しようとすると（例えば「管理者として実行」）、**UAC**が許可を求めるために使用されます。\
-**UACについてさらに学びたい場合は、このページをお読みください** [**こちら**](../authentication-credentials-uac-and-efs/#uac)**。**
+ローカル管理者がログインすると、**2つのアクセス トークンが作成されます**: 1つは管理者権限を持ち、もう1つは通常の権限を持ちます。**デフォルトでは**、このユーザーがプロセスを実行するとき、**通常の**（非管理者）**権限のトークンが使用されます**。このユーザーが**管理者として**何かを**実行**しようとすると（たとえば「管理者として実行」）、**UAC**が許可を求めるために使用されます。\
+UACについて[**詳しく学ぶにはこのページを読んでください**](../authentication-credentials-uac-and-efs/#uac)**。**
 
 ### 資格情報のユーザーなりすまし
 
-他のユーザーの**有効な資格情報**がある場合、その資格情報を使用して**新しいログオン セッションを作成**できます：
+他のユーザーの**有効な資格情報**がある場合、その資格情報を使用して**新しいログオン セッションを作成**できます:
 ```
 runas /user:domain\username cmd.exe
 ```
 **アクセス トークン**には、**LSASS**内のログオン セッションの**参照**も含まれています。これは、プロセスがネットワークのいくつかのオブジェクトにアクセスする必要がある場合に便利です。\
-ネットワーク サービスにアクセスするために**異なる資格情報を使用する**プロセスを起動するには、次のようにします:
+ネットワーク サービスにアクセスするために**異なる資格情報を使用する**プロセスを起動するには、次のコマンドを使用します:
 ```
 runas /user:domain\username /netonly cmd.exe
 ```
-これは、ネットワーク内のオブジェクトにアクセスするための有用な資格情報を持っているが、その資格情報が現在のホスト内では無効である場合に役立ちます（現在のホストでは、現在のユーザー権限が使用されます）。
+これは、ネットワーク内のオブジェクトにアクセスするための有用な資格情報を持っているが、その資格情報が現在のホスト内では無効である場合に役立ちます（現在のホストでは現在のユーザー権限が使用されます）。
 
 ### トークンの種類
 
@@ -85,20 +85,20 @@ runas /user:domain\username /netonly cmd.exe
 
 #### インパーソネートトークン
 
-metasploitの_**incognito**_モジュールを使用すると、十分な権限があれば、他の**トークン**を簡単に**リスト**および**インパーソネート**できます。これは、**他のユーザーのように行動するため**に役立つ可能性があります。この技術を使用して**権限を昇格**させることもできます。
+metasploitの_**incognito**_モジュールを使用すると、十分な権限があれば他の**トークン**を簡単に**リスト**および**インパーソネート**できます。これは、**他のユーザーのように行動するために**役立つ可能性があります。この技術を使用して**権限を昇格**させることもできます。
 
-### トークンの権限
+### トークン権限
 
-**権限を昇格させるために悪用できるトークンの権限を学びましょう：**
+**権限を昇格させるために悪用できるトークン権限を学びましょう：**
 
 {{#ref}}
 privilege-escalation-abusing-tokens.md
 {{#endref}}
 
-[**すべての可能なトークンの権限とこの外部ページのいくつかの定義を確認してください**](https://github.com/gtworek/Priv2Admin)。
+[**すべての可能なトークン権限とこの外部ページのいくつかの定義を確認してください**](https://github.com/gtworek/Priv2Admin)。
 
 ## 参考文献
 
-トークンについての詳細は、次のチュートリアルを参照してください：[https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa) および [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
+このチュートリアルでトークンについてもっと学びましょう：[https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa) および [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
 
 {{#include ../../banners/hacktricks-training.md}}

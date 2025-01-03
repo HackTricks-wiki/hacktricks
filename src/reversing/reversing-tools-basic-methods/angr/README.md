@@ -121,7 +121,7 @@ simgr.active[0].regs.rip #Get RIP from the last state
 
 - `entry_state` と `full_init_state` に `args` を通じて引数のリストを渡し、`env` を通じて環境変数の辞書を渡すことができます。これらの構造内の値は文字列またはビットベクタであり、シミュレーションされた実行の引数と環境として状態にシリアライズされます。デフォルトの `args` は空のリストなので、分析しているプログラムが少なくとも `argv[0]` を見つけることを期待している場合は、常にそれを提供する必要があります！
 - `argc` をシンボリックにしたい場合は、`entry_state` と `full_init_state` コンストラクタにシンボリックビットベクタを `argc` として渡すことができます。ただし、注意が必要です：これを行う場合、`argc` の値が `args` に渡した引数の数より大きくならないように、結果の状態に制約を追加する必要があります。
-- コールステートを使用するには、`.call_state(addr, arg1, arg2, ...)` で呼び出す必要があります。ここで `addr` は呼び出したい関数のアドレスで、`argN` はその関数への N 番目の引数であり、Python の整数、文字列、配列、またはビットベクタのいずれかです。メモリを割り当ててオブジェクトへのポインタを実際に渡したい場合は、`PointerWrapper` でラップする必要があります。つまり、`angr.PointerWrapper("point to me!")` のようにします。この API の結果は少し予測不可能ですが、改善に取り組んでいます。
+- コールステートを使用するには、`.call_state(addr, arg1, arg2, ...)` で呼び出す必要があります。ここで `addr` は呼び出したい関数のアドレスで、`argN` はその関数への N 番目の引数であり、Python の整数、文字列、配列、またはビットベクタのいずれかです。メモリを割り当ててオブジェクトへのポインタを実際に渡したい場合は、`angr.PointerWrapper("point to me!")` のように PointerWrapper でラップする必要があります。この API の結果は少し予測不可能ですが、改善に取り組んでいます。
 
 ## ビットベクタ
 ```python
@@ -166,7 +166,7 @@ solver.eval_exact(expression, n) #n solutions to the given expression, throwing 
 solver.min(expression) #minimum possible solution to the given expression.
 solver.max(expression) #maximum possible solution to the given expression.
 ```
-## フック
+## フッキング
 ```python
 >>> stub_func = angr.SIM_PROCEDURES['stubs']['ReturnUnconstrained'] # this is a CLASS
 >>> proj.hook(0x10000, stub_func())  # hook with an instance of the class

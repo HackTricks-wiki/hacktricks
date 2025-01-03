@@ -1,8 +1,8 @@
 # Rust Basics
 
-### ジェネリック型
+### Generic Types
 
-任意の型を持つ値の1つを含む構造体を作成します。
+任意の型を持つことができる値の1つを持つ構造体を作成します。
 ```rust
 struct Wrapper<T> {
 value: T,
@@ -55,7 +55,7 @@ println!("Check out my macro!");
 }
 }
 ```
-### 繰り返す
+### 反復する
 ```rust
 // Iterate through a vector
 let my_fav_fruits = vec!["banana", "raspberry"];

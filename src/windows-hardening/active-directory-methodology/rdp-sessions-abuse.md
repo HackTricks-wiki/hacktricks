@@ -30,11 +30,11 @@ PID   PPID  Name                         Arch  Session     User
 beacon> inject 4960 x64 tcp-local
 ## From that beacon you can just run powerview modules interacting with the external domain as that user
 ```
-他のツールを使用してセッションを盗む**他の方法**を確認してください [**このページで。**](../../network-services-pentesting/pentesting-rdp.md#session-stealing)
+他のツールを使用してセッションを盗む**他の方法を確認してください** [**このページで。**](../../network-services-pentesting/pentesting-rdp.md#session-stealing)
 
 ## RDPInception
 
-ユーザーが**RDPを介してマシンにアクセス**し、**攻撃者**が**待機**している場合、攻撃者は**ユーザーのRDPセッションにビーコンを注入**することができ、**被害者がRDP経由でアクセスする際にドライブをマウント**していれば、**攻撃者はそれにアクセスできる**。
+ユーザーが**RDPを介してマシンにアクセス**し、**攻撃者**が**待機**している場合、攻撃者は**ユーザーのRDPセッションにビーコンを注入**することができ、**被害者がRDP経由でアクセスする際にドライブをマウントした場合、**攻撃者はそれにアクセスできる**。
 
 この場合、**被害者の** **元のコンピュータ**を**バックドア**を**スタートアップフォルダ**に書き込むことで**妥協**することができます。
 ```powershell

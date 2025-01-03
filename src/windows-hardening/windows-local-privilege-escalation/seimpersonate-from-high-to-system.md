@@ -4,8 +4,8 @@
 
 ### コード
 
-以下のコードは[こちら](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)からです。**プロセスIDを引数として指定**し、指定されたプロセスの**ユーザーとして実行されるCMD**が実行されます。\
-High Integrityプロセスで実行することで、**Systemとして実行されているプロセスのPIDを指定**し、cmd.exeをSystemとして実行できます。
+以下のコードは [here](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962) からのものです。**引数としてプロセスIDを指定する**ことができ、指定されたプロセスの**ユーザーとして実行されるCMD**が実行されます。\
+High Integrityプロセスで実行している場合、**Systemとして実行されているプロセスのPIDを指定する**ことができ（winlogonやwininitのように）、cmd.exeをSystemとして実行できます。
 ```cpp
 impersonateuser.exe 1234
 ```
@@ -154,14 +154,14 @@ return 0;
 [-] CreateProcessWithTokenW Error: 1326
 ```
 これは、High Integrityレベルで実行していても、**十分な権限がない**ことを意味します。\
-現在のAdministrator権限を`svchost.exe`プロセスに対して**processes explorer**（またはprocess hackerを使用することもできます）で確認しましょう：
+現在の`svchost.exe`プロセスに対するAdministrator権限を**processes explorer**（またはprocess hackerを使用することもできます）で確認しましょう：
 
 1. `svchost.exe`のプロセスを選択します
 2. 右クリック --> プロパティ
-3. "セキュリティ"タブの右下にある"権限"ボタンをクリックします
-4. "詳細"をクリックします
-5. "Administrators"を選択し、"編集"をクリックします
-6. "詳細な権限を表示"をクリックします
+3. "セキュリティ"タブの右下にある"権限"ボタンをクリック
+4. "詳細"をクリック
+5. "Administrators"を選択し、"編集"をクリック
+6. "詳細な権限を表示"をクリック
 
 ![](<../../images/image (437).png>)
 

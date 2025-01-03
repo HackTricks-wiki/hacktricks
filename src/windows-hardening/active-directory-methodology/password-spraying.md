@@ -1,19 +1,19 @@
-# パスワードスプレイング / ブルートフォース
+# パスワードスプレー / ブルートフォース
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## **パスワードスプレイング**
+## **パスワードスプレー**
 
 いくつかの**有効なユーザー名**を見つけたら、発見した各ユーザーに対して最も**一般的なパスワード**を試すことができます（環境のパスワードポリシーを考慮してください）。\
 **デフォルト**では、**最小****パスワード****長**は**7**です。
 
 一般的なユーザー名のリストも役立つかもしれません: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
 
-いくつかの間違ったパスワードを試すと**アカウントがロックアウトされる可能性があることに注意してください**（デフォルトでは10回以上）。
+いくつかの間違ったパスワードを試すと、**アカウントがロックアウトされる可能性があることに注意してください**（デフォルトでは10回以上）。
 
 ### パスワードポリシーを取得する
 
-ユーザーの資格情報やドメインユーザーとしてのシェルがある場合は、**次のコマンドでパスワードポリシーを取得できます**:
+ユーザーの資格情報やドメインユーザーとしてのシェルがある場合、**次のコマンドでパスワードポリシーを取得できます**:
 ```bash
 # From Linux
 crackmapexec <IP> -u 'user' -p 'password' --pass-pol
@@ -117,7 +117,7 @@ Outlookに対するp**assword spraying**のための複数のツールがあり�
 - [https://github.com/Rhynorater/Okta-Password-Sprayer](https://github.com/Rhynorater/Okta-Password-Sprayer)
 - [https://github.com/knavesec/CredMaster](https://github.com/knavesec/CredMaster)
 
-## 参考文献
+## References
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/active-directory-password-spraying](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/active-directory-password-spraying)
 - [https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell](https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell)

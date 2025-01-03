@@ -6,7 +6,7 @@
 
 ユーザー名とパスワードまたはハッシュが知られているホスト上でプロセスを開くことができます。WMIを使用してコマンドが実行され、Wmiexecによってセミインタラクティブなシェル体験が提供されます。
 
-**dcomexec.py:** 異なるDCOMエンドポイントを利用して、このスクリプトはwmiexec.pyに似たセミインタラクティブなシェルを提供し、特にShellBrowserWindow DCOMオブジェクトを活用しています。現在、MMC20、アプリケーション、シェルウィンドウ、およびシェルブラウザウィンドウオブジェクトをサポートしています。(source: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
+**dcomexec.py:** 異なるDCOMエンドポイントを利用して、このスクリプトはwmiexec.pyに似たセミインタラクティブなシェルを提供し、特にShellBrowserWindow DCOMオブジェクトを活用しています。現在、MMC20、Application、Shell Windows、およびShell Browser Windowオブジェクトをサポートしています。(source: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
 
 ## WMIの基本
 
@@ -32,7 +32,7 @@ gwmi -Namespace "root/microsoft" -List -Recurse
 ### **クラス**
 
 WMIクラス名（例：win32_process）とその存在する名前空間を知ることは、すべてのWMI操作において重要です。  
-`win32`で始まるクラスをリストするコマンド：
+`win32`で始まるクラスをリストするためのコマンド：
 ```bash
 Get-WmiObject -Recurse -List -class win32* | more # Defaults to "root\cimv2"
 gwmi -Namespace "root/microsoft" -List -Recurse -Class "MSFT_MpComput*"

@@ -1,10 +1,10 @@
-# AD DNS Records
+# AD DNS レコード
 
 {{#include ../../banners/hacktricks-training.md}}
 
-デフォルトでは、Active Directoryの**すべてのユーザー**がドメインまたはフォレストDNSゾーン内の**すべてのDNSレコードを列挙**できます。これはゾーン転送に似ています（ユーザーはAD環境内のDNSゾーンの子オブジェクトをリストできます）。
+デフォルトでは、Active Directory の **すべてのユーザー** がドメインまたはフォレスト DNS ゾーン内の **すべての DNS レコードを列挙** できます。これはゾーン転送に似ています（ユーザーは AD 環境内の DNS ゾーンの子オブジェクトをリストできます）。
 
-ツール[**adidnsdump**](https://github.com/dirkjanm/adidnsdump)は、内部ネットワークの偵察目的でゾーン内の**すべてのDNSレコードの列挙**と**エクスポート**を可能にします。
+ツール [**adidnsdump**](https://github.com/dirkjanm/adidnsdump) は、内部ネットワークの偵察目的でゾーン内の **すべての DNS レコードの列挙** と **エクスポート** を可能にします。
 ```bash
 git clone https://github.com/dirkjanm/adidnsdump
 cd adidnsdump

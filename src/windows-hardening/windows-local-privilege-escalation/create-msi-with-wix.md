@@ -6,7 +6,7 @@ MSIインストーラーの作成はwixtoolsを使用して行われ、特に[wi
 
 wix MSIの使用例を包括的に理解するためには、[このページ](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with)を参照することをお勧めします。ここでは、wix MSIの使用を示すさまざまな例を見つけることができます。
 
-目的は、lnkファイルを実行するMSIを生成することです。これを達成するために、以下のXMLコードを使用することができます（[xmlはこちらから](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)）：
+目的は、lnkファイルを実行するMSIを生成することです。これを達成するために、以下のXMLコードを使用することができます（[xml from here](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)）：
 ```markup
 <?xml version="1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
@@ -38,9 +38,9 @@ fail_here
 </Product>
 </Wix>
 ```
-Package要素には、InstallerVersionやCompressedなどの属性が含まれており、インストーラーのバージョンを指定し、パッケージが圧縮されているかどうかを示します。
+パッケージ要素には、インストーラーのバージョンを指定する InstallerVersion や、パッケージが圧縮されているかどうかを示す Compressed などの属性が含まれていることに注意することが重要です。
 
-作成プロセスでは、wixtoolsのツールであるcandle.exeを利用して、msi.xmlからwixobjectを生成します。次のコマンドを実行する必要があります:
+作成プロセスでは、wixtools のツールである candle.exe を利用して msi.xml から wixobject を生成します。次のコマンドを実行する必要があります:
 ```
 candle.exe -out C:\tem\wix C:\tmp\Ethereal\msi.xml
 ```

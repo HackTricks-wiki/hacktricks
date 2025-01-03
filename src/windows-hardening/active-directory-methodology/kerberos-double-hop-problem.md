@@ -17,7 +17,7 @@ Kerberosの「ダブルホップ」問題は、攻撃者が**2つのホップ**�
 
 ### Unconstrained Delegation
 
-PCで**制約のない委任**が有効になっている場合、これは発生しません。なぜなら、**サーバー**はアクセスする各ユーザーの**TGT**を取得するからです。さらに、制約のない委任が使用される場合、**ドメインコントローラー**を**侵害**する可能性があります。\
+PCで**制約のない委任**が有効になっている場合、これは発生しません。なぜなら、**サーバー**はアクセスする各ユーザーの**TGT**を取得するからです。さらに、制約のない委任が使用される場合、**ドメインコントローラーを侵害する**可能性があります。\
 [**制約のない委任ページの詳細**](unconstrained-delegation.md)。
 
 ### CredSSP
@@ -47,7 +47,7 @@ Invoke-Command -ComputerName secdev -Credential $cred -ScriptBlock {hostname}
 
 ### PSSession構成の登録
 
-ダブルホップの問題を回避するための解決策は、`Enter-PSSession`とともに`Register-PSSessionConfiguration`を使用することです。この方法は`evil-winrm`とは異なるアプローチを必要とし、ダブルホップの制限を受けないセッションを可能にします。
+ダブルホップ問題を回避するための解決策は、`Enter-PSSession`とともに`Register-PSSessionConfiguration`を使用することです。この方法は`evil-winrm`とは異なるアプローチを必要とし、ダブルホップの制限を受けないセッションを可能にします。
 ```powershell
 Register-PSSessionConfiguration -Name doublehopsess -RunAsCredential domain_name\username
 Restart-Service WinRM
@@ -56,7 +56,7 @@ klist
 ```
 ### PortForwarding
 
-中間ターゲットのローカル管理者にとって、ポートフォワーディングは最終サーバーにリクエストを送信できるようにします。`netsh`を使用して、ポートフォワーディングのルールを追加し、転送されたポートを許可するWindowsファイアウォールルールを追加できます。
+中間ターゲットのローカル管理者にとって、ポートフォワーディングはリクエストを最終サーバーに送信できるようにします。`netsh`を使用して、ポートフォワーディングのルールを追加し、転送されたポートを許可するWindowsファイアウォールルールを追加できます。
 ```bash
 netsh interface portproxy add v4tov4 listenport=5446 listenaddress=10.35.8.17 connectport=5985 connectaddress=10.35.8.23
 netsh advfirewall firewall add rule name=fwd dir=in action=allow protocol=TCP localport=5446
@@ -69,9 +69,9 @@ winrs -r:http://bizintel:5446 -u:ta\redsuit -p:2600leet hostname
 ```
 ### OpenSSH
 
-最初のサーバーにOpenSSHをインストールすることで、ダブルホップの問題に対する回避策が有効になり、特にジャンプボックスシナリオに役立ちます。この方法では、Windows用のOpenSSHのCLIインストールと設定が必要です。パスワード認証用に構成されると、これにより中間サーバーがユーザーの代わりにTGTを取得できます。
+最初のサーバーにOpenSSHをインストールすることで、ダブルホップの問題に対する回避策が有効になり、特にジャンプボックスシナリオに役立ちます。この方法では、Windows用のOpenSSHのCLIインストールと設定が必要です。パスワード認証用に設定されると、これにより中間サーバーがユーザーの代わりにTGTを取得できます。
 
-#### OpenSSH インストール手順
+#### OpenSSHインストール手順
 
 1. 最新のOpenSSHリリースzipをダウンロードしてターゲットサーバーに移動します。
 2. 解凍して`Install-sshd.ps1`スクリプトを実行します。

