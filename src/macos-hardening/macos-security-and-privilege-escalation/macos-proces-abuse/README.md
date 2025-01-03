@@ -70,7 +70,7 @@ char     persona_name[MAXLOGNAME + 1];
 
 #### 同步机制
 
-为了管理对共享资源的访问并避免竞争条件，macOS 提供了几种同步原语。这些在多线程环境中对于确保数据完整性和系统稳定性至关重要：
+为了管理对共享资源的访问并避免竞争条件，macOS 提供了几种同步原语。这些在多线程环境中至关重要，以确保数据完整性和系统稳定性：
 
 1. **互斥锁:**
 - **常规互斥锁 (签名: 0x4D555458):** 标准互斥锁，内存占用为 60 字节（互斥锁 56 字节，签名 4 字节）。
@@ -104,21 +104,21 @@ tlv_var = 10;
 
 在 Mach-O 二进制文件中，与线程局部变量相关的数据被组织成特定的部分：
 
-- **`__DATA.__thread_vars`**：此部分包含有关线程局部变量的元数据，如它们的类型和初始化状态。
-- **`__DATA.__thread_bss`**：此部分用于未显式初始化的线程局部变量。它是为零初始化数据保留的内存的一部分。
+- **`__DATA.__thread_vars`**: 此部分包含有关线程局部变量的元数据，如它们的类型和初始化状态。
+- **`__DATA.__thread_bss`**: 此部分用于未显式初始化的线程局部变量。它是为零初始化数据保留的内存的一部分。
 
 Mach-O 还提供了一个特定的 API，称为 **`tlv_atexit`**，用于管理线程退出时的线程局部变量。此 API 允许您 **注册析构函数**——在线程终止时清理线程局部数据的特殊函数。
 
 ### 线程优先级
 
-理解线程优先级涉及查看操作系统如何决定运行哪些线程以及何时运行。这一决定受到分配给每个线程的优先级级别的影响。在 macOS 和类 Unix 系统中，这通过 `nice`、`renice` 和服务质量 (QoS) 类等概念来处理。
+理解线程优先级涉及查看操作系统如何决定哪些线程运行以及何时运行。这个决定受到分配给每个线程的优先级级别的影响。在 macOS 和类 Unix 系统中，这通过 `nice`、`renice` 和服务质量 (QoS) 类等概念来处理。
 
 #### Nice 和 Renice
 
-1. **Nice：**
+1. **Nice:**
 - 进程的 `nice` 值是一个影响其优先级的数字。每个进程都有一个范围从 -20（最高优先级）到 19（最低优先级）的 nice 值。进程创建时的默认 nice 值通常为 0。
 - 较低的 nice 值（接近 -20）使进程更“自私”，相对于其他具有较高 nice 值的进程，给予其更多的 CPU 时间。
-2. **Renice：**
+2. **Renice:**
 - `renice` 是一个用于更改已运行进程的 nice 值的命令。这可以用于动态调整进程的优先级，基于新的 nice 值增加或减少其 CPU 时间分配。
 - 例如，如果一个进程暂时需要更多的 CPU 资源，您可能会使用 `renice` 降低其 nice 值。
 
@@ -126,16 +126,16 @@ Mach-O 还提供了一个特定的 API，称为 **`tlv_atexit`**，用于管理�
 
 QoS 类是处理线程优先级的更现代的方法，特别是在支持 **Grand Central Dispatch (GCD)** 的 macOS 等系统中。QoS 类允许开发人员根据任务的重要性或紧急性将工作 **分类** 为不同级别。macOS 根据这些 QoS 类自动管理线程优先级：
 
-1. **用户交互：**
+1. **用户交互:**
 - 此类用于当前与用户交互或需要立即结果以提供良好用户体验的任务。这些任务被赋予最高优先级，以保持界面的响应性（例如，动画或事件处理）。
-2. **用户启动：**
-- 用户启动并期望立即结果的任务，例如打开文档或单击需要计算的按钮。这些任务优先级高，但低于用户交互。
-3. **实用程序：**
-- 这些任务是长时间运行的，通常显示进度指示器（例如，下载文件、导入数据）。它们的优先级低于用户启动的任务，并且不需要立即完成。
-4. **后台：**
+2. **用户发起:**
+- 用户发起并期望立即结果的任务，例如打开文档或单击需要计算的按钮。这些任务优先级高，但低于用户交互。
+3. **实用程序:**
+- 这些任务是长时间运行的，通常显示进度指示器（例如，下载文件、导入数据）。它们的优先级低于用户发起的任务，不需要立即完成。
+4. **后台:**
 - 此类用于在后台运行且对用户不可见的任务。这些可以是索引、同步或备份等任务。它们的优先级最低，对系统性能的影响最小。
 
-使用 QoS 类，开发人员不需要管理确切的优先级数字，而是专注于任务的性质，系统会相应地优化 CPU 资源。
+使用 QoS 类，开发人员不需要管理确切的优先级数字，而是专注于任务的性质，系统会相应优化 CPU 资源。
 
 此外，还有不同的 **线程调度策略**，用于指定调度器将考虑的一组调度参数。这可以通过 `thread_policy_[set/get]` 来完成。这在竞争条件攻击中可能会很有用。
 
@@ -177,7 +177,7 @@ macos-electron-applications-injection.md
 
 ### Chromium 注入
 
-可以使用标志 `--load-extension` 和 `--use-fake-ui-for-media-stream` 执行 **浏览器中的人攻击**，从而窃取击键、流量、cookie，向页面注入脚本...：
+可以使用标志 `--load-extension` 和 `--use-fake-ui-for-media-stream` 执行 **浏览器中的人攻击**，从而窃取击键、流量、cookie，在页面中注入脚本...：
 
 {{#ref}}
 macos-chromium-injection.md
@@ -185,7 +185,7 @@ macos-chromium-injection.md
 
 ### 脏 NIB
 
-NIB 文件 **定义用户界面 (UI) 元素** 及其在应用程序中的交互。然而，它们可以 **执行任意命令**，而且 **Gatekeeper 不会阻止** 已执行的应用程序在 **NIB 文件被修改** 的情况下继续执行。因此，它们可以用于使任意程序执行任意命令：
+NIB 文件 **定义用户界面 (UI) 元素** 及其在应用程序中的交互。然而，它们可以 **执行任意命令**，而且 **Gatekeeper 不会阻止** 已执行的应用程序在 **NIB 文件被修改** 后继续执行。因此，它们可以用于使任意程序执行任意命令：
 
 {{#ref}}
 macos-dirty-nib.md
@@ -207,4 +207,67 @@ macos-java-apps-injection.md
 macos-.net-applications-injection.md
 {{#endref}}
 
-### Perl
+### Perl 注入
+
+检查不同选项以使 Perl 脚本执行任意代码：
+
+{{#ref}}
+macos-perl-applications-injection.md
+{{#endref}}
+
+### Ruby 注入
+
+也可以滥用 Ruby 环境变量使任意脚本执行任意代码：
+
+{{#ref}}
+macos-ruby-applications-injection.md
+{{#endref}}
+
+### Python 注入
+
+如果环境变量 **`PYTHONINSPECT`** 被设置，Python 进程将在完成后进入 Python CLI。也可以使用 **`PYTHONSTARTUP`** 指定在交互会话开始时执行的 Python 脚本。\
+然而，请注意，当 **`PYTHONINSPECT`** 创建交互会话时，**`PYTHONSTARTUP`** 脚本不会被执行。
+
+其他环境变量如 **`PYTHONPATH`** 和 **`PYTHONHOME`** 也可能对执行任意代码的 Python 命令有用。
+
+请注意，使用 **`pyinstaller`** 编译的可执行文件即使在使用嵌入式 Python 运行时也不会使用这些环境变量。
+
+> [!CAUTION]
+> 总的来说，我找不到通过滥用环境变量使 Python 执行任意代码的方法。\
+> 然而，大多数人使用 **Hombrew** 安装 Python，这将把 Python 安装在 **可写位置**，供默认管理员用户使用。您可以通过以下方式劫持它：
+>
+> ```bash
+> mv /opt/homebrew/bin/python3 /opt/homebrew/bin/python3.old
+> cat > /opt/homebrew/bin/python3 <<EOF
+> #!/bin/bash
+> # 额外劫持代码
+> /opt/homebrew/bin/python3.old "$@"
+> EOF
+> chmod +x /opt/homebrew/bin/python3
+> ```
+>
+> 即使是 **root** 在运行 Python 时也会执行此代码。
+
+## 检测
+
+### Shield
+
+[**Shield**](https://theevilbit.github.io/shield/) ([**Github**](https://github.com/theevilbit/Shield)) 是一个开源应用程序，可以 **检测和阻止进程注入** 行为：
+
+- 使用 **环境变量**: 它将监控以下任何环境变量的存在：**`DYLD_INSERT_LIBRARIES`**、**`CFNETWORK_LIBRARY_PATH`**、**`RAWCAMERA_BUNDLE_PATH`** 和 **`ELECTRON_RUN_AS_NODE`**
+- 使用 **`task_for_pid`** 调用: 查找一个进程何时想要获取 **另一个进程的任务端口**，这允许在该进程中注入代码。
+- **Electron 应用程序参数**: 有人可以使用 **`--inspect`**、**`--inspect-brk`** 和 **`--remote-debugging-port`** 命令行参数以调试模式启动 Electron 应用程序，从而注入代码。
+- 使用 **符号链接** 或 **硬链接**: 通常最常见的滥用是 **放置一个具有我们用户权限的链接**，并 **指向一个更高权限** 的位置。对于硬链接和符号链接，检测非常简单。如果创建链接的进程与目标文件具有 **不同的权限级别**，我们会创建一个 **警报**。不幸的是，在符号链接的情况下，阻止是不可能的，因为我们在创建之前没有关于链接目标的信息。这是 Apple 的 EndpointSecuriy 框架的一个限制。
+
+### 其他进程发出的调用
+
+在 [**这篇博客文章**](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html) 中，您可以找到如何使用函数 **`task_name_for_pid`** 获取有关其他 **进程注入代码到一个进程** 的信息，然后获取有关该其他进程的信息。
+
+请注意，要调用该函数，您需要与运行该进程的 **相同 uid** 或 **root**（并且它返回有关进程的信息，而不是注入代码的方法）。
+
+## 参考文献
+
+- [https://theevilbit.github.io/shield/](https://theevilbit.github.io/shield/)
+- [https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f)
+
+{{#include ../../../banners/hacktricks-training.md}}

@@ -12,7 +12,7 @@ click button "Always Allow" of group 1
 end tell
 ```
 这里有一些示例: [https://github.com/abbeycode/AppleScripts](https://github.com/abbeycode/AppleScripts)\
-有关使用苹果脚本的恶意软件的更多信息 [**请点击这里**](https://www.sentinelone.com/blog/how-offensive-actors-use-applescript-for-attacking-macos/)。
+在这里找到有关恶意软件使用苹果脚本的更多信息 [**here**](https://www.sentinelone.com/blog/how-offensive-actors-use-applescript-for-attacking-macos/)。
 
 苹果脚本可以很容易地 "**编译**"。这些版本可以通过 `osadecompile` 很容易地 "**反编译**"。
 

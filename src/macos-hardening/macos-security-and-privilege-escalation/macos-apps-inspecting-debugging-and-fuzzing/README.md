@@ -123,10 +123,10 @@ hdiutil attach ~/Downloads/Firefox\ 58.0.2.dmg
 该函数期望的参数为：
 
 - 第一个参数 (**self**) 是 "指向 **接收消息的类实例的指针**"。更简单地说，它是正在调用该方法的对象。如果该方法是类方法，则这是类对象的一个实例（作为整体），而对于实例方法，self 将指向类的一个实例化对象。
-- 第二个参数 (**op**) 是 "处理消息的方法选择器"。同样，更简单地说，这只是 **方法的名称**。
+- 第二个参数 (**op**) 是 "处理消息的方法的选择器"。同样，更简单地说，这只是 **方法的名称**。
 - 剩余的参数是方法所需的任何 **值** (op)。
 
-请参见如何在此页面中 **使用 `lldb` 在 ARM64 中轻松获取此信息**：
+请参见如何在 ARM64 中 **使用 `lldb` 轻松获取此信息**：
 
 {{#ref}}
 arm64-basic-assembly.md
@@ -135,13 +135,13 @@ arm64-basic-assembly.md
 x64:
 
 | **参数**         | **寄存器**                                                    | **(对于) objc_msgSend**                                 |
-| ----------------- | --------------------------------------------------------------- | ------------------------------------------------------ |
-| **第一个参数**    | **rdi**                                                         | **self: 正在调用该方法的对象**                         |
-| **第二个参数**    | **rsi**                                                         | **op: 方法的名称**                                     |
-| **第三个参数**    | **rdx**                                                         | **方法的第一个参数**                                   |
-| **第四个参数**    | **rcx**                                                         | **方法的第二个参数**                                   |
-| **第五个参数**    | **r8**                                                          | **方法的第三个参数**                                   |
-| **第六个参数**    | **r9**                                                          | **方法的第四个参数**                                   |
+| ---------------- | ------------------------------------------------------------- | ------------------------------------------------------ |
+| **第一个参数**   | **rdi**                                                       | **self: 正在调用该方法的对象**                         |
+| **第二个参数**   | **rsi**                                                       | **op: 方法的名称**                                     |
+| **第三个参数**   | **rdx**                                                       | **方法的第一个参数**                                   |
+| **第四个参数**   | **rcx**                                                       | **方法的第二个参数**                                   |
+| **第五个参数**   | **r8**                                                        | **方法的第三个参数**                                   |
+| **第六个参数**   | **r9**                                                        | **方法的第四个参数**                                   |
 | **第七个及以上参数** | <p><strong>rsp+</strong><br><strong>(在栈上)</strong></p> | **方法的第五个及以上参数**                             |
 
 ### 转储 ObjectiveC 元数据
@@ -162,13 +162,13 @@ objdump --macho --objc-meta-data /path/to/bin
 ```
 #### class-dump
 
-[**class-dump**](https://github.com/nygard/class-dump/) 是一个原始工具，用于生成 ObjetiveC 格式代码中类、类别和协议的声明。
+[**class-dump**](https://github.com/nygard/class-dump/) 是一个原始工具，用于生成 ObjetiveC 格式代码中的类、类别和协议的声明。
 
-它很旧且未维护，因此可能无法正常工作。
+它已经过时且未维护，因此可能无法正常工作。
 
 #### ICDump
 
-[**iCDump**](https://github.com/romainthomas/iCDump) 是一个现代的跨平台 Objective-C 类转储工具。与现有工具相比，iCDump 可以独立于 Apple 生态系统运行，并且它提供了 Python 绑定。
+[**iCDump**](https://github.com/romainthomas/iCDump) 是一个现代的跨平台 Objective-C 类转储工具。与现有工具相比，iCDump 可以独立于 Apple 生态系统运行，并且提供 Python 绑定。
 ```python
 import icdump
 metadata = icdump.objc.parse("/path/to/bin")
@@ -193,7 +193,7 @@ Mem: 0x1000274cc-0x100027608        __TEXT.__swift5_capture
 ```
 您可以在[**此博客文章中找到有关这些部分存储的信息**](https://knight.sc/reverse%20engineering/2019/07/17/swift-metadata.html)。
 
-此外，**Swift 二进制文件可能具有符号**（例如，库需要存储符号以便可以调用其函数）。**符号通常以丑陋的方式包含有关函数名称和属性的信息**，因此它们非常有用，并且有“**去混淆器**”可以获取原始名称：
+此外，**Swift 二进制文件可能包含符号**（例如，库需要存储符号以便可以调用其函数）。**符号通常以丑陋的方式包含有关函数名称和属性的信息**，因此它们非常有用，并且有“**去混淆器**”可以获取原始名称：
 ```bash
 # Ghidra plugin
 https://github.com/ghidraninja/ghidra_scripts/blob/master/swift_demangler.py
@@ -204,7 +204,7 @@ swift demangle
 ## 动态分析
 
 > [!WARNING]
-> 请注意，为了调试二进制文件，**需要禁用 SIP**（`csrutil disable` 或 `csrutil enable --without debug`），或者将二进制文件复制到临时文件夹并**移除签名**（`codesign --remove-signature <binary-path>`），或者允许调试该二进制文件（您可以使用 [this script](https://gist.github.com/carlospolop/a66b8d72bb8f43913c4b5ae45672578b)）
+> 请注意，为了调试二进制文件，**需要禁用 SIP**（`csrutil disable` 或 `csrutil enable --without debug`），或者将二进制文件复制到临时文件夹并使用 `codesign --remove-signature <binary-path>` **移除签名**，或者允许调试该二进制文件（您可以使用 [this script](https://gist.github.com/carlospolop/a66b8d72bb8f43913c4b5ae45672578b)）
 
 > [!WARNING]
 > 请注意，为了在 macOS 上**插桩系统二进制文件**（例如 `cloudconfigurationd`），**必须禁用 SIP**（仅移除签名是无效的）。
@@ -222,9 +222,9 @@ macOS 暴露了一些有趣的 API，提供有关进程的信息：
 
 ### Sysdiagnose
 
-该工具（`/usr/bini/ysdiagnose`）基本上从您的计算机收集大量信息，执行数十个不同的命令，例如 `ps`、`zprint`...
+该工具（`/usr/bini/ysdiagnose`）基本上从您的计算机收集大量信息，执行数十个不同的命令，如 `ps`、`zprint`...
 
-它必须以 **root** 身份运行，守护进程 `/usr/libexec/sysdiagnosed` 具有非常有趣的权限，例如 `com.apple.system-task-ports` 和 `get-task-allow`。
+它必须以 **root** 身份运行，守护进程 `/usr/libexec/sysdiagnosed` 具有非常有趣的权限，如 `com.apple.system-task-ports` 和 `get-task-allow`。
 
 其 plist 位于 `/System/Library/LaunchDaemons/com.apple.sysdiagnose.plist`，声明了 3 个 MachServices：
 
@@ -246,7 +246,7 @@ MacOS 生成大量日志，这在运行应用程序时尝试理解**它在做什
 
 #### 中间面板
 
-在中间面板中，您可以看到**反汇编代码**。您可以查看**原始**反汇编、**图形**、**反编译**和**二进制**，通过单击相应的图标：
+在中间面板中，您可以看到**反汇编代码**。您可以查看**原始**反汇编、**图形**、**反编译**和**二进制**，通过点击相应的图标：
 
 <figure><img src="../../../images/image (343).png" alt=""><figcaption></figcaption></figure>
 
@@ -254,7 +254,7 @@ MacOS 生成大量日志，这在运行应用程序时尝试理解**它在做什
 
 <figure><img src="../../../images/image (1117).png" alt=""><figcaption></figcaption></figure>
 
-此外，在**中间下方，您可以编写 python 命令**。
+此外，在**中间下方，您可以编写 Python 命令**。
 
 #### 右侧面板
 
@@ -262,9 +262,9 @@ MacOS 生成大量日志，这在运行应用程序时尝试理解**它在做什
 
 ### dtrace
 
-它允许用户以极低的**级别**访问应用程序，并提供了一种方法，让用户能够**跟踪** **程序**，甚至更改其执行流程。Dtrace 使用**探针**，这些探针**分布在内核中**，位于系统调用的开始和结束位置。
+它允许用户以极低的**级别**访问应用程序，并提供了一种方法，让用户**跟踪** **程序**，甚至更改其执行流程。Dtrace 使用**探针**，这些探针**分布在内核中**，位于系统调用的开始和结束位置。
 
-DTrace 使用 **`dtrace_probe_create`** 函数为每个系统调用创建一个探针。这些探针可以在**每个系统调用的入口和出口点**触发。与 DTrace 的交互通过 /dev/dtrace 进行，该接口仅对 root 用户可用。
+DTrace 使用 **`dtrace_probe_create`** 函数为每个系统调用创建一个探针。这些探针可以在每个系统调用的**入口和出口**触发。与 DTrace 的交互通过 /dev/dtrace 进行，该接口仅对 root 用户可用。
 
 > [!TIP]
 > 要在不完全禁用 SIP 保护的情况下启用 Dtrace，您可以在恢复模式下执行：`csrutil enable --without dtrace`
@@ -281,7 +281,7 @@ ID   PROVIDER            MODULE                          FUNCTION NAME
 43    profile                                                     profile-97
 44    profile                                                     profile-199
 ```
-探针名称由四个部分组成：提供者、模块、函数和名称（`fbt:mach_kernel:ptrace:entry`）。如果您未指定名称的某个部分，Dtrace 将将该部分应用为通配符。
+探针名称由四个部分组成：提供者、模块、函数和名称（`fbt:mach_kernel:ptrace:entry`）。如果您没有指定名称的某个部分，Dtrace 将将该部分应用为通配符。
 
 要配置 DTrace 以激活探针并指定触发时要执行的操作，我们需要使用 D 语言。
 
@@ -345,7 +345,7 @@ dtruss -c -p 1000 #get syscalls of PID 1000
 
 要与 `kdebug` 进行接口，使用 `sysctl` 通过 `kern.kdebug` 命名空间，使用的 MIB 可以在 `sys/sysctl.h` 中找到，相关函数在 `bsd/kern/kdebug.c` 中实现。
 
-与 kdebug 进行交互的自定义客户端通常遵循以下步骤：
+要与 kdebug 进行交互，通常步骤如下：
 
 - 使用 KERN_KDSETREMOVE 移除现有设置
 - 使用 KERN_KDSETBUF 和 KERN_KDSETUP 设置跟踪
@@ -361,7 +361,7 @@ dtruss -c -p 1000 #get syscalls of PID 1000
 
 ### ktrace
 
-`ktrace_*` API 来自 `libktrace.dylib`，它封装了 `Kdebug` 的 API。然后，客户端可以直接调用 `ktrace_session_create` 和 `ktrace_events_[single/class]` 在特定代码上设置回调，然后使用 `ktrace_start` 启动它。
+`ktrace_*` API 来自 `libktrace.dylib`，它封装了 `Kdebug` 的 API。然后，客户端可以直接调用 `ktrace_session_create` 和 `ktrace_events_[single/class]` 来设置特定代码的回调，然后使用 `ktrace_start` 启动它。
 
 即使在 **SIP 激活** 的情况下也可以使用这个。
 
@@ -373,13 +373,13 @@ ktrace trace -s -S -t c -c ls | grep "ls("
 
 ### kperf
 
-这用于进行内核级别的性能分析，并使用 `Kdebug` 调用构建。
+这用于进行内核级别的性能分析，使用 `Kdebug` 调用构建。
 
 基本上，检查全局变量 `kernel_debug_active`，如果设置了它，则调用 `kperf_kdebug_handler`，传入 `Kdebug` 代码和调用的内核帧地址。如果 `Kdebug` 代码与所选的匹配，则获取配置为位图的“操作”（查看 `osfmk/kperf/action.h` 以获取选项）。
 
 Kperf 还有一个 sysctl MIB 表： (作为 root) `sysctl kperf`。这些代码可以在 `osfmk/kperf/kperfbsd.c` 中找到。
 
-此外，Kperf 的一部分功能位于 `kpc` 中，它提供有关机器性能计数器的信息。
+此外，Kperf 功能的一个子集位于 `kpc` 中，提供有关机器性能计数器的信息。
 
 ### ProcessMonitor
 
@@ -420,7 +420,7 @@ fs_usage -w -f network curl #This tracks network actions
 
 ## PT_DENY_ATTACH <a href="#page-title" id="page-title"></a>
 
-在 [**这篇博客文章**](https://knight.sc/debugging/2019/06/03/debugging-apple-binaries-that-use-pt-deny-attach.html) 中，你可以找到一个关于如何 **debug a running daemon** 的示例，该守护进程使用 **`PT_DENY_ATTACH`** 来防止调试，即使 SIP 被禁用。
+在 [**这篇博客文章**](https://knight.sc/debugging/2019/06/03/debugging-apple-binaries-that-use-pt-deny-attach.html) 中，你可以找到一个关于如何 **调试一个正在运行的守护进程** 的示例，该守护进程使用 **`PT_DENY_ATTACH`** 来防止调试，即使 SIP 被禁用。
 
 ### lldb
 
@@ -431,7 +431,7 @@ lldb -p 1122
 lldb -n malware.bin
 lldb -n malware.bin --waitfor
 ```
-您可以通过在您的主文件夹中创建一个名为 **`.lldbinit`** 的文件，并添加以下行来设置 intel 风味：
+您可以通过在您的主文件夹中创建一个名为 **`.lldbinit`** 的文件，并添加以下行来设置 intel 风格：
 ```bash
 settings set target.x86-disassembly-flavor intel
 ```
@@ -460,26 +460,26 @@ settings set target.x86-disassembly-flavor intel
 - 也可以通过简单的代码检查 **进程是否正在被调试**：
 - `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //进程正在被调试 }`
 - 它还可以调用 **`ptrace`** 系统调用，使用 **`PT_DENY_ATTACH`** 标志。这 **防止** 调试器附加和跟踪。
-- 您可以检查 **`sysctl`** 或 **`ptrace`** 函数是否被 **导入**（但恶意软件可能会动态导入它）
-- 正如在这篇文章中所提到的，“[击败反调试技术：macOS ptrace 变体](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)”：\
+- 您可以检查 **`sysctl`** 或 **`ptrace`** 函数是否被 **导入**（但恶意软件可以动态导入它）
+- 正如在这篇文章中所述，“[击败反调试技术：macOS ptrace 变体](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)”：\
 “_消息 Process # exited with **status = 45 (0x0000002d)** 通常是调试目标使用 **PT_DENY_ATTACH** 的明显迹象_”
 
 ## 核心转储
 
-如果满足以下条件，则会创建核心转储：
+核心转储在以下情况下创建：
 
 - `kern.coredump` sysctl 设置为 1（默认值）
 - 如果进程不是 suid/sgid 或 `kern.sugid_coredump` 为 1（默认值为 0）
 - `AS_CORE` 限制允许该操作。可以通过调用 `ulimit -c 0` 来抑制核心转储的创建，并通过 `ulimit -c unlimited` 重新启用它们。
 
-在这些情况下，核心转储根据 `kern.corefile` sysctl 生成，并通常存储在 `/cores/core/.%P` 中。
+在这些情况下，核心转储根据 `kern.corefile` sysctl 生成，通常存储在 `/cores/core/.%P` 中。
 
 ## 模糊测试
 
 ### [ReportCrash](https://ss64.com/osx/reportcrash.html)
 
 ReportCrash **分析崩溃的进程并将崩溃报告保存到磁盘**。崩溃报告包含可以 **帮助开发人员诊断** 崩溃原因的信息。\
-对于在每个用户的 launchd 上下文中 **运行的应用程序和其他进程**，ReportCrash 作为 LaunchAgent 运行，并将崩溃报告保存在用户的 `~/Library/Logs/DiagnosticReports/` 中。\
+对于在每个用户 launchd 上下文中 **运行的应用程序和其他进程**，ReportCrash 作为 LaunchAgent 运行，并将崩溃报告保存在用户的 `~/Library/Logs/DiagnosticReports/` 中。\
 对于守护进程、在系统 launchd 上下文中 **运行的其他进程** 和其他特权进程，ReportCrash 作为 LaunchDaemon 运行，并将崩溃报告保存在系统的 `/Library/Logs/DiagnosticReports` 中。
 
 如果您担心崩溃报告 **被发送到 Apple**，可以禁用它们。如果不担心，崩溃报告可以帮助 **找出服务器崩溃的原因**。

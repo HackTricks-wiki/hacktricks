@@ -21,13 +21,13 @@ macOS 中的 Bundles 作为各种资源的容器，包括应用程序、库和�
 
 - **CFBundleExecutable**: 指定位于 `Contents/MacOS` 目录中的主可执行文件的名称。
 - **CFBundleIdentifier**: 提供应用程序的全局标识符，macOS 在应用程序管理中广泛使用。
-- **LSMinimumSystemVersion**: 指示运行应用程序所需的最低 macOS 版本。
+- **LSMinimumSystemVersion**: 指示运行该应用程序所需的最低 macOS 版本。
 
 ### 探索 Bundles
 
 要探索 bundle 的内容，例如 `Safari.app`，可以使用以下命令： `bash ls -lR /Applications/Safari.app/Contents`
 
-此探索揭示了如 `_CodeSignature`、`MacOS`、`Resources` 等目录，以及 `Info.plist` 等文件，每个文件都在保护应用程序、定义其用户界面和操作参数方面发挥独特作用。
+此探索揭示了如 `_CodeSignature`、`MacOS`、`Resources` 等目录，以及如 `Info.plist` 的文件，每个文件都在保护应用程序、定义其用户界面和操作参数方面发挥独特作用。
 
 #### 其他 Bundle 目录
 

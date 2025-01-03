@@ -40,7 +40,7 @@ macos-tcc/
 
 ### 启动/环境约束与信任缓存
 
-macOS 中的启动约束是一种安全功能，用于 **调节进程启动**，通过定义 **谁可以启动** 进程、**如何** 启动以及 **从哪里** 启动。该功能在 macOS Ventura 中引入，将系统二进制文件分类为信任缓存中的约束类别。每个可执行二进制文件都有设定的 **启动规则**，包括 **自我**、**父级** 和 **责任** 约束。扩展到第三方应用程序作为 macOS Sonoma 中的 **环境** 约束，这些功能通过管理进程启动条件来帮助减轻潜在的系统利用。
+macOS 中的启动约束是一种安全功能，用于 **调节进程启动**，通过定义 **谁可以启动** 进程、**如何** 启动以及 **从哪里** 启动。该功能在 macOS Ventura 中引入，将系统二进制文件分类到信任缓存中的约束类别。每个可执行二进制文件都有设定的 **启动规则**，包括 **自我**、**父级** 和 **责任** 约束。扩展到第三方应用程序作为 macOS Sonoma 中的 **环境** 约束，这些功能通过管理进程启动条件来帮助减轻潜在的系统利用。
 
 {{#ref}}
 macos-launch-environment-constraints.md
@@ -50,7 +50,7 @@ macos-launch-environment-constraints.md
 
 恶意软件移除工具 (MRT) 是 macOS 安全基础设施的另一个组成部分。顾名思义，MRT 的主要功能是 **从感染的系统中移除已知恶意软件**。
 
-一旦在 Mac 上检测到恶意软件（无论是通过 XProtect 还是其他方式），可以使用 MRT 自动 **移除恶意软件**。MRT 在后台静默运行，通常在系统更新或下载新恶意软件定义时运行（看起来 MRT 检测恶意软件的规则在二进制文件内）。
+一旦在 Mac 上检测到恶意软件（无论是通过 XProtect 还是其他方式），可以使用 MRT 自动 **移除恶意软件**。MRT 在后台静默运行，通常在系统更新或下载新恶意软件定义时运行（看起来 MRT 检测恶意软件的规则在二进制文件内部）。
 
 虽然 XProtect 和 MRT 都是 macOS 安全措施的一部分，但它们执行不同的功能：
 
@@ -61,7 +61,7 @@ MRT 应用程序位于 **`/Library/Apple/System/Library/CoreServices/MRT.app`**
 
 ## 背景任务管理
 
-**macOS** 现在 **在每次工具使用众所周知的 **技术来保持代码执行**（如登录项、守护进程...）时发出警报，以便用户更好地了解 **哪些软件在持续运行**。
+**macOS** 现在 **会在每次工具使用众所周知的 **技术来保持代码执行**（如登录项、守护进程...）时发出警报，以便用户更好地了解 **哪些软件在持续运行**。
 
 <figure><img src="../../../images/image (1183).png" alt=""><figcaption></figcaption></figure>
 
@@ -87,7 +87,7 @@ MRT 应用程序位于 **`/Library/Apple/System/Library/CoreServices/MRT.app`**
 ```
 ### 枚举
 
-可以使用 Apple cli 工具 **枚举所有** 配置的后台项目：
+可以使用 Apple cli 工具**枚举所有**配置的后台项目：
 ```bash
 # The tool will always ask for the users password
 sfltool dumpbtm
@@ -111,7 +111,7 @@ xattr -rc dumpBTM # Remove quarantine attr
 # Reset the database
 sfltool resettbtm
 ```
-- **停止代理**：可以向代理发送停止信号，以便它**不会在发现新检测时提醒用户**。
+- **停止代理**：可以向代理发送停止信号，以便它 **不会在发现新检测时提醒用户**。
 ```bash
 # Get PID
 pgrep BackgroundTaskManagementAgent

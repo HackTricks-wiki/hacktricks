@@ -22,7 +22,7 @@
 
 ### 标签
 
-MACF 使用 **标签**，然后策略检查是否应该授予某些访问权限。标签结构声明的代码可以在 [这里](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/_label.h) 找到，该代码随后在 [**这里**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ucred.h#L86) 的 **`struct ucred`** 中使用，位于 **`cr_label`** 部分。标签包含标志和可由 **MACF 策略分配指针** 的 **槽** 数量。例如，Sandbox 将指向容器配置文件。
+MACF 使用 **标签**，然后策略会检查是否应该授予某些访问权限。标签结构声明的代码可以在 [这里](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/_label.h) 找到，该代码随后在 [**这里**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ucred.h#L86) 的 **`struct ucred`** 中使用，位于 **`cr_label`** 部分。标签包含标志和可由 **MACF 策略分配指针** 的 **槽** 数量。例如，Sandbox 将指向容器配置文件。
 
 ## MACF 策略
 
@@ -82,25 +82,25 @@ mpo_cred_check_label_update_execve_t	*mpo_cred_check_label_update_execve;
 mpo_cred_check_label_update_t		*mpo_cred_check_label_update;
 [...]
 ```
-几乎所有的钩子在拦截这些操作时都会被 MACF 回调。然而，**`mpo_policy_*`** 钩子是一个例外，因为 `mpo_hook_policy_init()` 是在注册时调用的回调（即在 `mac_policy_register()` 之后），而 `mpo_hook_policy_initbsd()` 是在 BSD 子系统正确初始化后进行晚期注册时调用的。
+几乎所有的钩子在拦截这些操作时都会被MACF回调。然而，**`mpo_policy_*`** 钩子是一个例外，因为 `mpo_hook_policy_init()` 是在注册时调用的回调（即在 `mac_policy_register()` 之后），而 `mpo_hook_policy_initbsd()` 是在BSD子系统正确初始化后进行晚期注册时调用的。
 
-此外，**`mpo_policy_syscall`** 钩子可以被任何 kext 注册，以暴露一个私有的 **ioctl** 风格调用 **接口**。然后，用户客户端将能够调用 `mac_syscall` (#381)，并指定参数为 **策略名称**、一个整数 **代码** 和可选的 **参数**。\
+此外，**`mpo_policy_syscall`** 钩子可以被任何kext注册，以暴露一个私有的 **ioctl** 风格调用 **接口**。然后，用户客户端将能够调用 `mac_syscall` (#381)，并指定参数为 **策略名称** 和一个整数 **代码** 以及可选的 **参数**。\
 例如，**`Sandbox.kext`** 经常使用这个。
 
-检查 kext 的 **`__DATA.__const*`** 可以识别在注册策略时使用的 `mac_policy_ops` 结构。可以找到它，因为它的指针在 `mpo_policy_conf` 内部的一个偏移量处，并且因为该区域内将有许多 NULL 指针。
+检查kext的 **`__DATA.__const*`** 可以识别在注册策略时使用的 `mac_policy_ops` 结构。可以找到它，因为它的指针在 `mpo_policy_conf` 内部的一个偏移量处，并且因为该区域将有许多NULL指针。
 
-此外，还可以通过从内存中转储结构 **`_mac_policy_list`** 来获取已配置策略的 kext 列表，该结构会随着每个注册的策略而更新。
+此外，还可以通过从内存中转储结构 **`_mac_policy_list`** 来获取已配置策略的kext列表，该结构会随着每个注册的策略而更新。
 
 ## MACF 初始化
 
-MACF 很快就会初始化。它在 XNU 的 `bootstrap_thread` 中设置：在 `ipc_bootstrap` 之后调用 `mac_policy_init()`，该函数初始化 `mac_policy_list`，随后调用 `mac_policy_initmach()`。除了其他功能外，该函数将获取所有在其 Info.plist 中具有 `AppleSecurityExtension` 键的 Apple kext，如 `ALF.kext`、`AppleMobileFileIntegrity.kext`、`Quarantine.kext`、`Sandbox.kext` 和 `TMSafetyNet.kext` 并加载它们。
+MACF 很快就会初始化。它在XNU的 `bootstrap_thread` 中设置：在 `ipc_bootstrap` 之后调用 `mac_policy_init()`，该函数初始化 `mac_policy_list`，随后调用 `mac_policy_initmach()`。除了其他功能外，该函数将获取所有在其 Info.plist 中具有 `AppleSecurityExtension` 键的Apple kext，如 `ALF.kext`、`AppleMobileFileIntegrity.kext`、`Quarantine.kext`、`Sandbox.kext` 和 `TMSafetyNet.kext` 并加载它们。
 
 ## MACF 回调
 
-在代码中常常可以找到对 MACF 的回调定义，例如：**`#if CONFIG_MAC`** 条件块。此外，在这些块内可以找到对 `mac_proc_check*` 的调用，该调用会调用 MACF 来 **检查权限** 以执行某些操作。此外，MACF 回调的格式为：**`mac_<object>_<opType>_opName`**。
+在代码中常常可以找到对MACF的回调定义，例如：**`#if CONFIG_MAC`** 条件块。此外，在这些块内可以找到对 `mac_proc_check*` 的调用，该调用会调用MACF以 **检查权限** 以执行某些操作。此外，MACF回调的格式为：**`mac_<object>_<opType>_opName`**。
 
 对象是以下之一：`bpfdesc`、`cred`、`file`、`proc`、`vnode`、`mount`、`devfs`、`ifnet`、`inpcb`、`mbuf`、`ipq`、`pipe`、`sysv[msg/msq/shm/sem]`、`posix[shm/sem]`、`socket`、`kext`。\
-`opType` 通常是 check，用于允许或拒绝该操作。然而，也可以找到 `notify`，这将允许 kext 对给定操作做出反应。
+`opType` 通常是 check，用于允许或拒绝该操作。然而，也可以找到 `notify`，这将允许kext对给定操作做出反应。
 
 您可以在 [https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_mman.c#L621](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_mman.c#L621) 中找到一个示例：
 
@@ -157,18 +157,18 @@ error = mac_error_select(__step_err, error);         \
 });                                                             \
 } while (0)
 ```
-将遍历所有注册的 mac 策略，调用它们的函数并将输出存储在 error 变量中，该变量只能通过成功代码的 `mac_error_select` 被覆盖，因此如果任何检查失败，整个检查将失败，操作将不被允许。
+将遍历所有注册的 mac 策略，调用它们的函数并将输出存储在 error 变量中，该变量仅可通过成功代码的 `mac_error_select` 进行覆盖，因此如果任何检查失败，整个检查将失败，操作将不被允许。
 
 > [!TIP]
-> 然而，请记住，并非所有 MACF 调用仅用于拒绝操作。例如，`mac_priv_grant` 调用宏 [**MAC_GRANT**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_internal.h#L274)，如果任何策略返回 0，将授予请求的特权：
+> 然而，请记住，并非所有 MACF 调用仅用于拒绝操作。例如，`mac_priv_grant` 调用宏 [**MAC_GRANT**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_internal.h#L274)，如果任何策略返回 0，则将授予请求的特权：
 >
 > ```c
 > /*
 >  * MAC_GRANT 执行指定的检查，通过遍历策略
 >  * 模块列表并与每个模块检查其对请求的看法。
->  * 与 MAC_CHECK 不同，如果任何策略返回 '0'，它将授予，
+>  * 与 MAC_CHECK 不同，如果任何策略返回 '0'，则授予，
 >  * 否则返回 EPERM。请注意，它通过
->  * 调用者的 'error' 返回其值。
+>  * 调用者的作用域中的 'error' 返回其值。
 >  */
 > #define MAC_GRANT(check, args...) do {                              \
 >     error = EPERM;                                                  \
@@ -188,11 +188,11 @@ error = mac_error_select(__step_err, error);         \
 ### priv_check & priv_grant
 
 这些调用旨在检查和提供在 [**bsd/sys/priv.h**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/priv.h) 中定义的（数十个）**特权**。\
-一些内核代码会使用进程的 KAuth 凭据调用 `priv_check_cred()`，并使用特权代码之一，这将调用 `mac_priv_check` 来查看是否有任何策略 **拒绝** 授予特权，然后调用 `mac_priv_grant` 来查看是否有任何策略授予该 `privilege`。
+一些内核代码会使用进程的 KAuth 凭据调用 `priv_check_cred()`，并使用特权代码之一，这将调用 `mac_priv_check` 以查看任何策略是否**拒绝**授予特权，然后调用 `mac_priv_grant` 以查看任何策略是否授予该 `privilege`。
 
 ### proc_check_syscall_unix
 
-此钩子允许拦截所有系统调用。在 `bsd/dev/[i386|arm]/systemcalls.c` 中，可以看到声明的函数 [`unix_syscall`](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/dev/arm/systemcalls.c#L160C1-L167C25)，其中包含以下代码：
+此钩子允许拦截所有系统调用。在 `bsd/dev/[i386|arm]/systemcalls.c` 中，可以看到声明的函数 [`unix_syscall`](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/dev/arm/systemcalls.c#L160C1-L167C25)，其中包含此代码：
 ```c
 #if CONFIG_MACF
 if (__improbable(proc_syscall_filter_mask(proc) != NULL && !bitstr_test(proc_syscall_filter_mask(proc), syscode))) {
@@ -205,7 +205,7 @@ goto skip_syscall;
 ```
 将检查调用进程的 **bitmask** 是否当前系统调用应该调用 `mac_proc_check_syscall_unix`。这是因为系统调用被调用的频率很高，因此避免每次都调用 `mac_proc_check_syscall_unix` 是很有意义的。
 
-请注意，函数 `proc_set_syscall_filter_mask()`，它在进程中设置 bitmask 系统调用，是由 Sandbox 调用以在沙箱进程上设置掩码。
+请注意，函数 `proc_set_syscall_filter_mask()`，它在进程中设置 bitmask 系统调用，是由 Sandbox 调用以在沙箱进程上设置掩码的。
 
 ## 暴露的 MACF 系统调用
 

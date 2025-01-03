@@ -51,17 +51,17 @@ DMG 文件的层级结构可能会根据内容而有所不同。然而，对于�
 - 应用程序 (.app)：这就是实际的应用程序。在 macOS 中，应用程序通常是一个包含许多单独文件和文件夹的包，这些文件和文件夹构成了该应用程序。
 - 应用程序链接：这是指向 macOS 中应用程序文件夹的快捷方式。这样做的目的是方便您安装应用程序。您可以将 .app 文件拖到此快捷方式上以安装该应用程序。
 
-## 通过 pkg 滥用提升权限
+## 通过 pkg 滥用进行特权提升
 
 ### 从公共目录执行
 
-如果预安装或后安装脚本例如从 **`/var/tmp/Installerutil`** 执行，攻击者可以控制该脚本，从而在每次执行时提升权限。或者另一个类似的例子：
+如果预安装或后安装脚本例如从 **`/var/tmp/Installerutil`** 执行，攻击者可以控制该脚本，从而在每次执行时提升特权。或者另一个类似的例子：
 
 <figure><img src="../../../images/Pasted Graphic 5.png" alt="https://www.youtube.com/watch?v=iASSG0_zobQ"><figcaption><p><a href="https://www.youtube.com/watch?v=kCXhIYtODBg">https://www.youtube.com/watch?v=kCXhIYtODBg</a></p></figcaption></figure>
 
 ### AuthorizationExecuteWithPrivileges
 
-这是一个 [公共函数](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg)，多个安装程序和更新程序将调用它以 **以 root 身份执行某些操作**。此函数接受要 **执行** 的 **文件** 的 **路径** 作为参数，然而，如果攻击者能够 **修改** 此文件，他将能够 **滥用** 其以 root 身份执行以 **提升权限**。
+这是一个 [公共函数](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg)，多个安装程序和更新程序将调用它以 **以 root 身份执行某些操作**。此函数接受要 **执行** 的 **文件** 的 **路径** 作为参数，然而，如果攻击者能够 **修改** 此文件，他将能够 **滥用** 其以 root 身份执行以 **提升特权**。
 ```bash
 # Breakpoint in the function to check wich file is loaded
 (lldb) b AuthorizationExecuteWithPrivileges
@@ -83,7 +83,7 @@ For more info check this talk: [https://www.youtube.com/watch?v=lTOItyjTTkw](htt
 
 ### 分发 xml 中的 JS
 
-可以在包的 **分发 xml** 文件中添加 **`<script>`** 标签，这段代码将被执行，并且可以使用 **`system.run`** **执行命令**：
+可以在包的 **分发 xml** 文件中添加 **`<script>`** 标签，这段代码将被执行，并且可以 **使用 `system.run` 执行命令**：
 
 <figure><img src="../../../images/image (1043).png" alt=""><figcaption></figcaption></figure>
 

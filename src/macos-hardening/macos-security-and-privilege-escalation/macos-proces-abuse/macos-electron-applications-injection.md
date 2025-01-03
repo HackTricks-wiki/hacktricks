@@ -9,15 +9,15 @@
 
 ### Electron 保护机制
 
-这些技术将在接下来的部分讨论，但最近 Electron 添加了几个 **安全标志以防止它们**。这些是 [**Electron 保护机制**](https://www.electronjs.org/docs/latest/tutorial/fuses)，用于 **防止** macOS 上的 Electron 应用程序 **加载任意代码**：
+这些技术将在接下来讨论，但最近 Electron 添加了几个 **安全标志以防止它们**。这些是 [**Electron 保护机制**](https://www.electronjs.org/docs/latest/tutorial/fuses)，用于 **防止** macOS 中的 Electron 应用程序 **加载任意代码**：
 
 - **`RunAsNode`**：如果禁用，它会阻止使用环境变量 **`ELECTRON_RUN_AS_NODE`** 来注入代码。
 - **`EnableNodeCliInspectArguments`**：如果禁用，像 `--inspect`、`--inspect-brk` 这样的参数将不被尊重。避免通过这种方式注入代码。
 - **`EnableEmbeddedAsarIntegrityValidation`**：如果启用，加载的 **`asar`** **文件** 将由 macOS **验证**。以此方式 **防止** 通过修改该文件的内容进行 **代码注入**。
-- **`OnlyLoadAppFromAsar`**：如果启用，它将只检查并使用 app.asar，而不是按以下顺序加载：**`app.asar`**、**`app`**，最后是 **`default_app.asar`**，从而确保当与 **`embeddedAsarIntegrityValidation`** 保护机制 **结合** 使用时，**不可能** **加载未验证的代码**。
-- **`LoadBrowserProcessSpecificV8Snapshot`**：如果启用，浏览器进程将使用名为 `browser_v8_context_snapshot.bin` 的文件作为其 V8 快照。
+- **`OnlyLoadAppFromAsar`**：如果启用，它将只检查并使用 app.asar，而不是按以下顺序加载：**`app.asar`**、**`app`**，最后是 **`default_app.asar`**。因此确保当与 **`embeddedAsarIntegrityValidation`** 保护机制 **结合** 时，**不可能** **加载未验证的代码**。
+- **`LoadBrowserProcessSpecificV8Snapshot`**：如果启用，浏览器进程使用名为 `browser_v8_context_snapshot.bin` 的文件作为其 V8 快照。
 
-另一个有趣的保护机制不会阻止代码注入的是：
+另一个有趣的保护机制不会防止代码注入的是：
 
 - **EnableCookieEncryption**：如果启用，磁盘上的 cookie 存储将使用操作系统级别的加密密钥进行加密。
 
@@ -39,20 +39,20 @@ LoadBrowserProcessSpecificV8Snapshot is Disabled
 ```
 ### 修改 Electron Fuses
 
-如[**文档所述**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode)，**Electron Fuses**的配置是在**Electron 二进制文件**内部配置的，该文件中包含字符串**`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`**。
+如[**文档所述**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode)，**Electron Fuses**的配置是在包含字符串**`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`**的**Electron 二进制文件**内部配置的。
 
 在 macOS 应用程序中，这通常位于`application.app/Contents/Frameworks/Electron Framework.framework/Electron Framework`
 ```bash
 grep -R "dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX" Slack.app/
 Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework matches
 ```
-您可以在 [https://hexed.it/](https://hexed.it/) 中加载此文件并搜索前面的字符串。在此字符串后，您可以在 ASCII 中看到数字 "0" 或 "1"，指示每个保险丝是禁用还是启用。只需修改十六进制代码（`0x30` 是 `0`，`0x31` 是 `1`）以 **修改保险丝值**。
+您可以在 [https://hexed.it/](https://hexed.it/) 中加载此文件并搜索前面的字符串。在此字符串之后，您可以在 ASCII 中看到数字 "0" 或 "1"，指示每个保险丝是禁用还是启用。只需修改十六进制代码（`0x30` 是 `0`，`0x31` 是 `1`）以 **修改保险丝值**。
 
 <figure><img src="../../../images/image (34).png" alt=""><figcaption></figcaption></figure>
 
 请注意，如果您尝试 **覆盖** 应用程序内部的 **`Electron Framework`** 二进制文件并修改这些字节，则应用程序将无法运行。
 
-## 向 Electron 应用程序添加 RCE 代码
+## RCE 向 Electron 应用程序添加代码
 
 可能有 **外部 JS/HTML 文件** 被 Electron 应用程序使用，因此攻击者可以在这些文件中注入代码，这些文件的签名不会被检查，并在应用程序的上下文中执行任意代码。
 
@@ -62,7 +62,7 @@ Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions
 > - 修改应用程序需要 **`kTCCServiceSystemPolicyAppBundles`** 权限，因此默认情况下这不再可能。
 > - 编译后的 **`asap`** 文件通常具有 **`embeddedAsarIntegrityValidation`** 和 **`onlyLoadAppFromAsar`** 权限 `启用`
 >
-> 这使得攻击路径更加复杂（或不可能）。
+> 使得此攻击路径更加复杂（或不可能）。
 
 请注意，可以通过将应用程序复制到另一个目录（如 **`/tmp`**），将文件夹 **`app.app/Contents`** 重命名为 **`app.app/NotCon`**，**修改** **asar** 文件以包含您的 **恶意** 代码，然后将其重命名回 **`app.app/Contents`** 并执行它，从而绕过 **`kTCCServiceSystemPolicyAppBundles`** 的要求。
 
@@ -88,7 +88,7 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 
 ### 从应用程序 Plist 注入
 
-正如 [**这里提到的**](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks/)，您可以在 plist 中滥用这个环境变量以保持持久性：
+正如 [**这里提到的**](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks/)，您可以在 plist 中滥用此环境变量以保持持久性：
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -129,7 +129,7 @@ NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Di
 
 ### 从 App Plist 注入
 
-您可以在 plist 中滥用此环境变量以保持持久性，添加以下键：
+您可以在 plist 中滥用此环境变量，通过添加以下键来保持持久性：
 ```xml
 <dict>
 <key>EnvironmentVariables</key>
@@ -147,7 +147,7 @@ NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Di
 ```
 ## RCE with inspecting
 
-根据[**这个**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f)，如果你使用 **`--inspect`**、**`--inspect-brk`** 和 **`--remote-debugging-port`** 等标志执行 Electron 应用程序，**调试端口将会打开**，这样你就可以连接到它（例如从 Chrome 的 `chrome://inspect`）并且你将能够**在其上注入代码**，甚至启动新进程。\
+根据[**这个**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f)的说法，如果你使用 **`--inspect`**、**`--inspect-brk`** 和 **`--remote-debugging-port`** 等标志执行 Electron 应用程序，将会 **打开一个调试端口**，这样你就可以连接到它（例如从 Chrome 的 `chrome://inspect`）并且你将能够 **在其上注入代码**，甚至启动新进程。\
 例如：
 ```bash
 /Applications/Signal.app/Contents/MacOS/Signal --inspect=9229
@@ -159,7 +159,7 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 >
 > 然而，您仍然可以使用 **electron 参数 `--remote-debugging-port=9229`**，但之前的有效载荷将无法执行其他进程。
 
-使用参数 **`--remote-debugging-port=9222`** 可以从 Electron 应用程序中窃取一些信息，如 **历史记录**（使用 GET 命令）或浏览器的 **cookies**（因为它们在浏览器内部 **解密**，并且有一个 **json 端点** 可以提供它们）。
+使用参数 **`--remote-debugging-port=9222`** 可以从 Electron 应用程序中窃取一些信息，如 **历史记录**（使用 GET 命令）或浏览器的 **cookies**（因为它们在浏览器内部是 **解密** 的，并且有一个 **json 端点** 可以提供它们）。
 
 您可以在 [**这里**](https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e) 和 [**这里**](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f) 学习如何做到这一点，并使用自动工具 [WhiteChocolateMacademiaNut](https://github.com/slyd0g/WhiteChocolateMacademiaNut) 或简单的脚本，如：
 ```python
@@ -169,7 +169,7 @@ ws.connect("ws://localhost:9222/devtools/page/85976D59050BFEFDBA48204E3D865D00",
 ws.send('{\"id\": 1, \"method\": \"Network.getAllCookies\"}')
 print(ws.recv()
 ```
-在[**这篇博客**](https://hackerone.com/reports/1274695)中，这种调试被滥用，使得无头 Chrome **在任意位置下载任意文件**。
+在[**这篇博客**](https://hackerone.com/reports/1274695)中，这种调试被滥用以使无头 Chrome **在任意位置下载任意文件**。
 
 ### 从应用程序 Plist 注入
 

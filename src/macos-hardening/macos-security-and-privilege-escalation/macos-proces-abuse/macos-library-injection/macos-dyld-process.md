@@ -6,18 +6,18 @@
 
 Mach-o 二进制文件的真正 **入口点** 是动态链接的，定义在 `LC_LOAD_DYLINKER` 中，通常是 `/usr/lib/dyld`。
 
-这个链接器需要定位所有可执行库，将它们映射到内存中，并链接所有非惰性库。只有在这个过程完成后，二进制文件的入口点才会被执行。
+这个链接器需要定位所有可执行库，将它们映射到内存中，并链接所有非惰性库。只有在这个过程之后，二进制文件的入口点才会被执行。
 
 当然，**`dyld`** 没有任何依赖（它使用系统调用和 libSystem 摘录）。
 
 > [!CAUTION]
-> 如果这个链接器包含任何漏洞，因为它在执行任何二进制文件（即使是高度特权的）之前被执行，那么就有可能 **提升权限**。
+> 如果这个链接器包含任何漏洞，因为它在执行任何二进制文件（即使是高度特权的）之前被执行，那么就有可能 **提升特权**。
 
 ### 流程
 
-Dyld 将由 **`dyldboostrap::start`** 加载，这也会加载诸如 **栈金丝雀** 之类的内容。这是因为这个函数将在其 **`apple`** 参数向量中接收这些和其他 **敏感** **值**。
+Dyld 将由 **`dyldboostrap::start`** 加载，这也会加载一些东西，比如 **栈金丝雀**。这是因为这个函数将在其 **`apple`** 参数向量中接收这个和其他 **敏感** **值**。
 
-**`dyls::_main()`** 是 dyld 的入口点，它的第一个任务是运行 `configureProcessRestrictions()`，通常会限制 **`DYLD_*`** 环境变量，详见：
+**`dyls::_main()`** 是 dyld 的入口点，它的第一个任务是运行 `configureProcessRestrictions()`，通常会限制 **`DYLD_*`** 环境变量，具体解释见：
 
 {{#ref}}
 ./
@@ -30,24 +30,24 @@ Dyld 将由 **`dyldboostrap::start`** 加载，这也会加载诸如 **栈金丝
 3. 然后是导入的库
 1. &#x20;然后继续递归导入库
 
-一旦所有库都加载完成，这些库的 **初始化器** 将被运行。这些是使用 **`__attribute__((constructor))`** 编写的，定义在 `LC_ROUTINES[_64]`（现已弃用）或通过指针在标记为 `S_MOD_INIT_FUNC_POINTERS` 的部分中（通常是：**`__DATA.__MOD_INIT_FUNC`**）。
+一旦所有库都加载完成，这些库的 **初始化器** 将被运行。这些是使用 **`__attribute__((constructor))`** 编码的，定义在 `LC_ROUTINES[_64]`（现已弃用）或通过指针在标记为 `S_MOD_INIT_FUNC_POINTERS` 的部分中（通常是：**`__DATA.__MOD_INIT_FUNC`**）。
 
-终结器使用 **`__attribute__((destructor))`** 编写，并位于标记为 `S_MOD_TERM_FUNC_POINTERS` 的部分中（**`__DATA.__mod_term_func`**）。
+终结器使用 **`__attribute__((destructor))`** 编码，并位于标记为 `S_MOD_TERM_FUNC_POINTERS` 的部分中（**`__DATA.__mod_term_func`**）。
 
 ### 存根
 
-macOS 中的所有二进制文件都是动态链接的。因此，它们包含一些存根部分，帮助二进制文件在不同机器和上下文中跳转到正确的代码。当二进制文件被执行时，dyld 是需要解析这些地址的“大脑”（至少是非惰性地址）。
+macOS 中的所有二进制文件都是动态链接的。因此，它们包含一些存根部分，帮助二进制文件在不同的机器和上下文中跳转到正确的代码。当二进制文件被执行时，dyld 是需要解析这些地址的“大脑”（至少是非惰性地址）。
 
 二进制文件中的一些存根部分：
 
 - **`__TEXT.__[auth_]stubs`**：来自 `__DATA` 部分的指针
 - **`__TEXT.__stub_helper`**：调用动态链接的小代码，包含要调用的函数的信息
-- **`__DATA.__[auth_]got`**：全局偏移表（导入函数的地址，当解析时，（在加载时绑定，因为它标记为 `S_NON_LAZY_SYMBOL_POINTERS`））
+- **`__DATA.__[auth_]got`**：全局偏移表（导入函数的地址，当解析时，（在加载时绑定，因为它标记为 `S_NON_LAZY_SYMBOL_POINTERS`）
 - **`__DATA.__nl_symbol_ptr`**：非惰性符号指针（在加载时绑定，因为它标记为 `S_NON_LAZY_SYMBOL_POINTERS`）
 - **`__DATA.__la_symbol_ptr`**：惰性符号指针（在首次访问时绑定）
 
 > [!WARNING]
-> 请注意，前缀为 "auth\_" 的指针使用一个进程内加密密钥来保护它（PAC）。此外，可以使用 arm64 指令 `BLRA[A/B]` 来验证指针，然后再跟随它。RETA\[A/B] 可以用作 RET 地址。\
+> 请注意，前缀为 "auth\_" 的指针使用一个进程内加密密钥来保护它（PAC）。此外，可以使用 arm64 指令 `BLRA[A/B]` 来验证指针，然后再跟随它。并且 RETA\[A/B] 可以用作 RET 地址。\
 > 实际上，**`__TEXT.__auth_stubs`** 中的代码将使用 **`braa`** 而不是 **`bl`** 来调用请求的函数以验证指针。
 >
 > 还要注意，当前的 dyld 版本加载 **所有内容都为非惰性**。
@@ -109,7 +109,7 @@ Disassembly of section __TEXT,__stubs:
 
 ## apple\[] 参数向量
 
-在macOS中，主函数实际上接收4个参数而不是3个。第四个被称为apple，每个条目都是`key=value`的形式。例如：
+在macOS中，主函数实际上接收4个参数而不是3个。第四个参数称为apple，每个条目以`key=value`的形式出现。例如：
 ```c
 // gcc apple.c -o apple
 #include <stdio.h>
@@ -258,9 +258,9 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 - `DYLD_FORCE_FLAT_NAMESPACE`: 单级绑定
 - `DYLD_[FRAMEWORK/LIBRARY]_PATH | DYLD_FALLBACK_[FRAMEWORK/LIBRARY]_PATH | DYLD_VERSIONED_[FRAMEWORK/LIBRARY]_PATH`: 解析路径
 - `DYLD_INSERT_LIBRARIES`: 加载特定库
-- `DYLD_PRINT_TO_FILE`: 将 dyld 调试写入文件
+- `DYLD_PRINT_TO_FILE`: 将 dyld 调试信息写入文件
 - `DYLD_PRINT_APIS`: 打印 libdyld API 调用
-- `DYLD_PRINT_APIS_APP`: 打印主程序的 libdyld API 调用
+- `DYLD_PRINT_APIS_APP`: 打印主程序调用的 libdyld API
 - `DYLD_PRINT_BINDINGS`: 打印绑定时的符号
 - `DYLD_WEAK_BINDINGS`: 仅在绑定时打印弱符号
 - `DYLD_PRINT_CODE_SIGNATURES`: 打印代码签名注册操作
@@ -276,7 +276,7 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 - `DYLD_PRINT_STATISTICS_DETAILS`: 打印详细时间统计
 - `DYLD_PRINT_WARNINGS`: 打印警告信息
 - `DYLD_SHARED_CACHE_DIR`: 用于共享库缓存的路径
-- `DYLD_SHARED_REGION`: "use", "private", "avoid"
+- `DYLD_SHARED_REGION`: "使用", "私有", "避免"
 - `DYLD_USE_CLOSURES`: 启用闭包
 
 可以通过类似的方式找到更多内容：

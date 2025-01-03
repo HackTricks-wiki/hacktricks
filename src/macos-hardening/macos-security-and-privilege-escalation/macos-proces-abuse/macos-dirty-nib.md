@@ -65,7 +65,7 @@ display dialog theDialogText
 
 1. 将应用程序复制到不同的位置（例如，`/tmp/`）。
 2. 重命名应用程序包内的目录以绕过初始保护。
-3. 在应用程序运行以注册 Gatekeeper 后，修改应用程序包（例如，用 Dirty.nib 替换 MainMenu.nib）。
+3. 在运行应用程序以注册 Gatekeeper 后，修改应用程序包（例如，用 Dirty.nib 替换 MainMenu.nib）。
 4. 将目录重命名回去并重新运行应用程序以执行注入的 NIB 文件。
 
 **注意**：最近的 macOS 更新通过防止在 Gatekeeper 缓存后修改应用程序包内的文件来减轻此漏洞，使其无效。

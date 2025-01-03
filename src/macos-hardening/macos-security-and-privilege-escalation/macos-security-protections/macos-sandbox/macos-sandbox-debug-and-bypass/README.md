@@ -10,7 +10,7 @@
 
 编译器将链接 `/usr/lib/libSystem.B.dylib` 到二进制文件。
 
-然后，**`libSystem.B`** 将调用其他几个函数，直到 **`xpc_pipe_routine`** 将应用程序的权限发送到 **`securityd`**。Securityd 检查该进程是否应该在沙箱内进行隔离，如果是，它将被隔离。\
+然后，**`libSystem.B`** 将调用其他几个函数，直到 **`xpc_pipe_routine`** 将应用程序的权限发送到 **`securityd`**。Securityd 检查该进程是否应该在沙箱内被隔离，如果是，它将被隔离。\
 最后，沙箱将通过调用 **`__sandbox_ms`** 激活，该调用将调用 **`__mac_syscall`**。
 
 ## Possible Bypasses
@@ -36,7 +36,7 @@ macos-office-sandbox-bypasses.md
 
 ### Launch Agents/Daemons
 
-即使一个应用程序 **旨在被沙箱化** (`com.apple.security.app-sandbox`)，如果它是 **从 LaunchAgent 执行**（例如 `~/Library/LaunchAgents`），也有可能绕过沙箱。\
+即使一个应用程序 **旨在被沙箱化** (`com.apple.security.app-sandbox`)，如果它是 **从 LaunchAgent 执行**（例如 `~/Library/LaunchAgents`），也可以绕过沙箱。\
 正如在 [**这篇文章**](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818) 中所解释的，如果你想要在一个沙箱应用程序中获得持久性，你可以使其作为 LaunchAgent 自动执行，并可能通过 DyLib 环境变量注入恶意代码。
 
 ### Abusing Auto Start Locations
@@ -53,7 +53,7 @@ macos-office-sandbox-bypasses.md
 
 ### Abusing other processes
 
-如果从沙箱进程中你能够 **妥协其他在较少限制沙箱中运行的进程**（或没有沙箱），你将能够逃离它们的沙箱：
+如果从沙箱进程中你能够 **妥协其他在较少限制沙箱（或没有沙箱）中运行的进程**，你将能够逃离它们的沙箱：
 
 {{#ref}}
 ../../../macos-proces-abuse/
@@ -90,24 +90,24 @@ checkService(serviceName.UTF8String);
 ```
 ### 可用的 PID Mach 服务
 
-这些 Mach 服务最初被滥用以 [在这篇文章中逃离沙箱](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)。那时，**应用程序及其框架所需的所有 XPC 服务**在应用程序的 PID 域中都是可见的（这些是 `ServiceType` 为 `Application` 的 Mach 服务）。
+这些 Mach 服务最初被滥用以 [在这篇文章中逃离沙盒](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)。那时，**应用程序及其框架所需的所有 XPC 服务**在应用程序的 PID 域中都是可见的（这些是 `ServiceType` 为 `Application` 的 Mach 服务）。
 
-为了 **联系 PID 域 XPC 服务**，只需在应用程序中注册它，使用如下代码：
+为了 **联系一个 PID 域 XPC 服务**，只需在应用程序中注册它，使用如下代码：
 ```objectivec
 [[NSBundle bundleWithPath:@“/System/Library/PrivateFrameworks/ShoveService.framework"]load];
 ```
 此外，可以通过在 `System/Library/xpc/launchd.plist` 中搜索 `<string>Application</string>` 来找到所有的 **Application** Mach 服务。
 
-找到有效的 xpc 服务的另一种方法是检查以下内容：
+找到有效的 xpc 服务的另一种方法是检查以下服务：
 ```bash
 find /System/Library/Frameworks -name "*.xpc"
 find /System/Library/PrivateFrameworks -name "*.xpc"
 ```
-几个滥用此技术的示例可以在[**原始报告**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)中找到，以下是一些总结的示例。
+几个滥用此技术的示例可以在 [**原始报告**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/) 中找到，然而，以下是一些总结的示例。
 
 #### /System/Library/PrivateFrameworks/StorageKit.framework/XPCServices/storagekitfsrunner.xpc
 
-此服务通过始终返回`YES`来允许每个XPC连接，方法`runTask:arguments:withReply:`执行任意命令和任意参数。
+此服务通过始终返回 `YES` 来允许每个 XPC 连接，方法 `runTask:arguments:withReply:` 执行任意命令和任意参数。
 
 该漏洞的利用“简单到”：
 ```objectivec
@@ -134,7 +134,7 @@ NSLog(@"run task result:%@, error:%@", bSucc, error);
 
 因此，可以生成一个虚假的应用程序文件夹结构，压缩它，然后解压并执行，以逃离沙盒，因为新文件将没有隔离属性。
 
-该漏洞是：
+利用的漏洞是：
 ```objectivec
 @protocol AudioAnalyticsHelperServiceProtocol
 -(void)pruneZips:(NSString *)path hourThreshold:(int)threshold withReply:(void (^)(id *))reply;
@@ -219,7 +219,7 @@ ld: dynamic executables or dylibs must link with libSystem.dylib for architectur
 ```
 ### 不继承的限制
 
-正如**[这篇文章的附加内容](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)**中所解释的，沙箱限制如：
+正如在 **[这篇文章的附加内容](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)** 中所解释的，沙箱限制如：
 ```
 (version 1)
 (allow default)

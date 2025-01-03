@@ -4,7 +4,7 @@
 
 ## **基本信息**
 
-**TCC (透明性、同意和控制)** 是一个安全协议，专注于规范应用程序权限。其主要作用是保护敏感功能，如 **位置服务、联系人、照片、麦克风、相机、辅助功能和完整磁盘访问**。通过在授予应用程序访问这些元素之前要求明确的用户同意，TCC 增强了隐私和用户对其数据的控制。
+**TCC (透明性、同意和控制)** 是一个安全协议，专注于规范应用程序权限。它的主要作用是保护敏感功能，如 **位置服务、联系人、照片、麦克风、相机、辅助功能和完整磁盘访问**。通过在授予应用程序访问这些元素之前要求明确的用户同意，TCC 增强了隐私和用户对其数据的控制。
 
 当应用程序请求访问受保护的功能时，用户会遇到 TCC。这通过一个提示可见，允许用户 **批准或拒绝访问**。此外，TCC 还支持直接用户操作，例如 **将文件拖放到应用程序中**，以授予对特定文件的访问，确保应用程序仅访问明确允许的内容。
 
@@ -12,9 +12,9 @@
 
 **TCC** 由位于 `/System/Library/PrivateFrameworks/TCC.framework/Support/tccd` 的 **守护进程** 处理，并在 `/System/Library/LaunchDaemons/com.apple.tccd.system.plist` 中配置（注册 mach 服务 `com.apple.tccd.system`）。
 
-每个登录用户都有一个 **用户模式 tccd** 在 `/System/Library/LaunchAgents/com.apple.tccd.plist` 中定义，注册 mach 服务 `com.apple.tccd` 和 `com.apple.usernotifications.delegate.com.apple.tccd`。
+每个登录用户都有一个 **用户模式 tccd** 在运行，定义在 `/System/Library/LaunchAgents/com.apple.tccd.plist` 中，注册 mach 服务 `com.apple.tccd` 和 `com.apple.usernotifications.delegate.com.apple.tccd`。
 
-在这里，您可以看到 tccd 作为系统和用户运行：
+在这里你可以看到 tccd 作为系统和用户运行：
 ```bash
 ps -ef | grep tcc
 0   374     1   0 Thu07PM ??         2:01.66 /System/Library/PrivateFrameworks/TCC.framework/Support/tccd system
@@ -27,22 +27,22 @@ ps -ef | grep tcc
 允许/拒绝的设置存储在一些 TCC 数据库中：
 
 - 系统范围的数据库在 **`/Library/Application Support/com.apple.TCC/TCC.db`**。
-- 该数据库是**SIP 保护**的，因此只有 SIP 绕过才能写入。
+- 该数据库是**SIP 保护**的，因此只有 SIP 绕过可以写入。
 - 用户 TCC 数据库 **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`** 用于每个用户的偏好设置。
-- 该数据库受到保护，因此只有具有高 TCC 权限的进程（如完全磁盘访问）才能写入（但它不受 SIP 保护）。
+- 该数据库受到保护，因此只有具有高 TCC 权限的进程（如完全磁盘访问）可以写入（但它不受 SIP 保护）。
 
 > [!WARNING]
 > 之前的数据库也**受到 TCC 保护以进行读取访问**。因此，除非是来自 TCC 特权进程，否则您**无法读取**常规用户 TCC 数据库。
 >
-> 但是，请记住，具有这些高权限的进程（如**FDA**或**`kTCCServiceEndpointSecurityClient`**）将能够写入用户的 TCC 数据库。
+> 但是，请记住，具有这些高权限的进程（如 **FDA** 或 **`kTCCServiceEndpointSecurityClient`**）将能够写入用户的 TCC 数据库。
 
 - 还有一个**第三个** TCC 数据库在 **`/var/db/locationd/clients.plist`** 中，指示允许**访问位置服务**的客户端。
-- SIP 保护的文件 **`/Users/carlospolop/Downloads/REG.db`**（也受到 TCC 的读取访问保护）包含所有**有效 TCC 数据库**的**位置**。
-- SIP 保护的文件 **`/Users/carlospolop/Downloads/MDMOverrides.plist`**（也受到 TCC 的读取访问保护）包含更多 TCC 授予的权限。
-- SIP 保护的文件 **`/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist`**（任何人都可以读取）是需要 TCC 例外的应用程序的允许列表。
+- SIP 保护文件 **`/Users/carlospolop/Downloads/REG.db`**（也受到 TCC 的读取访问保护）包含所有**有效 TCC 数据库**的**位置**。
+- SIP 保护文件 **`/Users/carlospolop/Downloads/MDMOverrides.plist`**（也受到 TCC 的读取访问保护）包含更多 TCC 授予的权限。
+- SIP 保护文件 **`/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist`**（任何人都可以读取）是需要 TCC 例外的应用程序的允许列表。
 
 > [!TIP]
-> **iOS** 中的 TCC 数据库在 **`/private/var/mobile/Library/TCC/TCC.db`** 中。
+> **iOS** 中的 TCC 数据库在 **`/private/var/mobile/Library/TCC/TCC.db`**。
 
 > [!NOTE]
 > **通知中心 UI** 可以对**系统 TCC 数据库**进行**更改**：
@@ -54,7 +54,7 @@ ps -ef | grep tcc
 > com.apple.rootless.storage.TCC
 > ```
 >
-> 但是，用户可以使用**`tccutil`**命令行工具**删除或查询规则**。
+> 但是，用户可以使用 **`tccutil`** 命令行工具**删除或查询规则**。
 
 #### 查询数据库
 
@@ -174,7 +174,7 @@ echo "X'$REQ_HEX'"
 您还可以在`System Preferences --> Security & Privacy --> Privacy --> Files and Folders`中检查**已授予的权限**。
 
 > [!TIP]
-> 用户_可以_**删除或查询规则**，使用**`tccutil`**。
+> 用户 _可以_ **使用 `tccutil` 删除或查询规则**。
 
 #### 重置 TCC 权限
 ```bash
@@ -186,7 +186,7 @@ tccutil reset All
 ```
 ### TCC 签名检查
 
-TCC **数据库**存储应用程序的 **Bundle ID**，但它还 **存储** **信息**，以 **确保** 请求使用权限的应用是正确的。
+TCC **数据库**存储应用程序的 **Bundle ID**，但它还 **存储** **信息**，以 **确保** 请求使用权限的应用程序是正确的。
 ```bash
 # From sqlite
 sqlite> select service, client, hex(csreq) from access where auth_value=2;
@@ -208,7 +208,7 @@ csreq -t -r /tmp/telegram_csreq.bin
 
 然而，对于应用程序 **访问** 某些用户文件夹，如 `~/Desktop`、`~/Downloads` 和 `~/Documents`，它们 **不需要** 任何特定的 **权限**。系统将透明地处理访问并 **根据需要提示用户**。
 
-苹果的应用程序 **不会生成提示**。它们在其 **权限** 列表中包含 **预授予的权利**，这意味着它们 **永远不会生成弹出窗口**，**也** 不会出现在任何 **TCC 数据库** 中。例如：
+苹果的应用程序 **不会生成提示**。它们在其 **权限** 列表中包含 **预先授予的权利**，这意味着它们 **永远不会生成弹出窗口**，**也** 不会出现在任何 **TCC 数据库** 中。例如：
 ```bash
 codesign -dv --entitlements :- /System/Applications/Calendar.app
 [...]
@@ -252,15 +252,15 @@ uuid 769FD8F1-90E0-3206-808C-A8947BEBD6C3
 > [!NOTE]
 > 有趣的是，**`com.apple.macl`** 属性是由 **Sandbox** 管理的，而不是 tccd。
 >
-> 还要注意，如果您将允许计算机上某个应用程序的 UUID 的文件移动到另一台计算机，由于同一应用程序将具有不同的 UID，它将不会授予该应用程序访问权限。
+> 还要注意，如果您将允许计算机上某个应用的 UUID 的文件移动到另一台计算机，由于同一应用将具有不同的 UID，它将无法授予该应用访问权限。
 
-扩展属性 `com.apple.macl` **无法像其他扩展属性那样被清除**，因为它是 **受 SIP 保护的**。然而，正如 [**在这篇文章中解释的**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/)，可以通过 **压缩** 文件、**删除** 它和 **解压** 它来禁用它。
+扩展属性 `com.apple.macl` **无法像其他扩展属性那样被清除**，因为它是 **受 SIP 保护的**。然而，正如 [**在这篇文章中解释的**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/)，可以通过 **压缩** 文件、**删除** 它并 **解压** 来禁用它。
 
 ## TCC 权限提升与绕过
 
 ### 插入到 TCC
 
-如果您在某个时刻成功获得对 TCC 数据库的写入访问权限，可以使用以下内容添加条目（删除注释）：
+如果您在某个时刻成功获得 TCC 数据库的写入访问权限，可以使用以下内容添加条目（删除注释）：
 
 <details>
 
@@ -518,14 +518,14 @@ EOF
 
 ### **SIP 绕过到 TCC 绕过**
 
-系统 **TCC 数据库** 受到 **SIP** 保护，这就是为什么只有具有 **指定权限的进程才能修改** 它。因此，如果攻击者找到一个 **SIP 绕过** 通过一个 **文件**（能够修改一个受 SIP 限制的文件），他将能够：
+系统 **TCC 数据库** 受到 **SIP** 保护，这就是为什么只有具有 **指示的权限** 的进程才能修改它。因此，如果攻击者找到一个 **SIP 绕过** 通过一个 **文件**（能够修改一个受 SIP 限制的文件），他将能够：
 
 - **移除** TCC 数据库的保护，并授予自己所有 TCC 权限。他可以滥用这些文件中的任何一个，例如：
 - TCC 系统数据库
 - REG.db
 - MDMOverrides.plist
 
-然而，还有另一种选择可以滥用这个 **SIP 绕过以绕过 TCC**，文件 `/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist` 是一个需要 TCC 例外的应用程序的允许列表。因此，如果攻击者可以 **移除此文件的 SIP 保护** 并添加他 **自己的应用程序**，该应用程序将能够绕过 TCC。\
+然而，还有另一种选择可以滥用这个 **SIP 绕过来绕过 TCC**，文件 `/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist` 是一个需要 TCC 例外的应用程序的允许列表。因此，如果攻击者可以 **移除此文件的 SIP 保护** 并添加他 **自己的应用程序**，该应用程序将能够绕过 TCC。\
 例如添加终端：
 ```bash
 # Get needed info

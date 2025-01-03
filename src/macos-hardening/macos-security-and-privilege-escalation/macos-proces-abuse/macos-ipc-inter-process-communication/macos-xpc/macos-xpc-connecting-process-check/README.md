@@ -18,7 +18,7 @@
 1. 如果 **未验证**，客户端可能 **易受代码注入** 攻击。
 6. 检查连接的进程是否具有允许其连接到服务的 **权限**。这适用于 Apple 二进制文件。
 7. **验证** 必须 **基于** 连接 **客户端的审计令牌** **而不是** 其进程 ID (**PID**)，因为前者可以防止 **PID 重用攻击**。
-- 开发者 **很少使用审计令牌** API 调用，因为它是 **私有的**，所以 Apple 随时可能 **更改**。此外，Mac App Store 应用不允许使用私有 API。
+- 开发者 **很少使用审计令牌** API 调用，因为它是 **私有的**，所以 Apple 可能会 **随时更改**。此外，Mac App Store 应用不允许使用私有 API。
 - 如果使用 **`processIdentifier`** 方法，可能会存在漏洞。
 - 应使用 **`xpc_dictionary_get_audit_token`** 而不是 **`xpc_connection_get_audit_token`**，因为后者在某些情况下也可能 [存在漏洞](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)。
 
@@ -36,7 +36,7 @@ macos-pid-reuse.md
 macos-xpc_connection_get_audit_token-attack.md
 {{#endref}}
 
-### Trustcache - 降级攻击防范
+### Trustcache - 降级攻击防护
 
 Trustcache 是一种防御方法，旨在 Apple Silicon 机器中引入，存储 Apple 二进制文件的 CDHSAH 数据库，以便仅允许未修改的二进制文件执行。这可以防止降级版本的执行。
 
@@ -71,7 +71,7 @@ SecCodeCheckValidity(code, kSecCSDefaultFlags, requirementRef);
 SecTaskRef taskRef = SecTaskCreateWithAuditToken(NULL, ((ExtendedNSXPCConnection*)newConnection).auditToken);
 SecTaskValidateForRequirement(taskRef, (__bridge CFStringRef)(requirementString))
 ```
-如果开发者不想检查客户端的版本，他至少可以检查客户端是否不易受进程注入攻击：
+如果开发者不想检查客户端的版本，他至少可以检查客户端是否不易受到进程注入的攻击：
 ```objectivec
 [...]
 CFDictionaryRef csInfo = NULL;

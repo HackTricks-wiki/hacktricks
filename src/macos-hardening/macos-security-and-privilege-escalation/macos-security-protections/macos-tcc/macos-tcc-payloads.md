@@ -4,7 +4,7 @@
 
 ### 桌面
 
-- **Entitlement**: 无
+- **权限**: 无
 - **TCC**: kTCCServiceSystemPolicyDesktopFolder
 
 {{#tabs}}
@@ -382,7 +382,7 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Check"}}
-检查程序是否有权访问相机。
+检查程序是否有访问相机的权限。
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -529,7 +529,7 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Check"}}
-检查应用程序是否有权访问麦克风。
+检查应用是否有权访问麦克风。
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -877,6 +877,6 @@ return 0;
 {{#endtab}}
 {{#endtabs}}
 
-> [!CAUTION] > **可访问性是一个非常强大的权限**，你可以以其他方式滥用它，例如你可以仅通过它执行**击键攻击**，而无需调用系统事件。
+> [!CAUTION] > **无障碍功能是一个非常强大的权限**，你可以以其他方式滥用它，例如你可以仅通过它执行**击键攻击**，而无需调用系统事件。
 
 {{#include ../../../../banners/hacktricks-training.md}}

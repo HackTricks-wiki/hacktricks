@@ -1,4 +1,4 @@
-# macOS Perl 应用程序注入
+# macOS Perl Applications Injection
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -28,7 +28,7 @@ PERL5LIB=/tmp/ PERL5OPT=-Mpmod
 ```
 ## 通过依赖
 
-可以列出运行 Perl 的依赖文件夹顺序：
+可以列出运行的 Perl 依赖文件夹顺序：
 ```bash
 perl -e 'print join("\n", @INC)'
 ```
@@ -47,7 +47,7 @@ perl -e 'print join("\n", @INC)'
 一些返回的文件夹甚至不存在，然而，**`/Library/Perl/5.30`** 确实 **存在**，它 **不** 被 **SIP** **保护**，并且在被 **SIP** 保护的文件夹 **之前**。因此，有人可以滥用该文件夹在其中添加脚本依赖项，以便高权限的 Perl 脚本将其加载。
 
 > [!WARNING]
-> 然而，请注意，您 **需要是 root 才能写入该文件夹**，而如今您会看到这个 **TCC 提示**：
+> 然而，请注意，您 **需要是 root 才能写入该文件夹**，而如今您会收到这个 **TCC 提示**：
 
 <figure><img src="../../../images/image (28).png" alt="" width="244"><figcaption></figcaption></figure>
 

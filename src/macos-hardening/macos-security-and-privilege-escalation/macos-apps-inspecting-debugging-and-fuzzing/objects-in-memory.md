@@ -74,7 +74,7 @@ uintptr_t requiredAlignment; // Or in _kCFRuntimeRequiresAlignment in the .versi
 - **`__objc_nlclslist`** (`classref_t`): 指向此二进制文件中定义的非延迟 Objective-C 类的指针
 - **`__objc_classlist`** (`classref_t`): 指向此二进制文件中定义的所有 Objective-C 类的指针
 
-它还使用 **`__TEXT`** 段中的一些部分来存储常量值，如果无法在此部分中写入：
+它还使用 **`__TEXT`** 段中的一些部分来存储常量值，如果无法在此部分写入：
 
 - **`__objc_methname`** (C-String): 方法名称
 - **`__objc_classname`** (C-String): 类名称

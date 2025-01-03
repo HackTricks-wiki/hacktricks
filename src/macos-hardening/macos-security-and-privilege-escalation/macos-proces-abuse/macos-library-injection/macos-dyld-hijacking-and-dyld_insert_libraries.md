@@ -22,7 +22,7 @@ execv("/bin/bash", 0);
 //system("cp -r ~/Library/Messages/ /tmp/Messages/");
 }
 ```
-攻击的二进制文件：
+二进制攻击目标：
 ```c
 // gcc hello.c -o hello
 #include <stdio.h>

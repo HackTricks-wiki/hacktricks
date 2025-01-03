@@ -4,7 +4,7 @@
 
 ## PID 重用
 
-当 macOS **XPC 服务** 基于 **PID** 而不是 **审计令牌** 检查被调用的进程时，它容易受到 PID 重用攻击。该攻击基于 **竞争条件**，其中 **利用** 将 **消息发送到 XPC** 服务 **滥用** 功能，随后执行 **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** 使用 **允许的** 二进制文件。
+当 macOS **XPC 服务** 基于 **PID** 而不是 **审计令牌** 检查被调用的进程时，它容易受到 PID 重用攻击。此攻击基于 **竞争条件**，其中 **利用** 将 **消息发送到 XPC** 服务 **滥用** 功能，随后执行 **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** 以使用 **允许的** 二进制文件。
 
 此函数将使 **允许的二进制文件拥有 PID**，但 **恶意的 XPC 消息会在此之前发送**。因此，如果 **XPC** 服务 **使用** **PID** 来 **验证** 发送者，并在执行 **`posix_spawn`** 之后检查它，它将认为消息来自 **授权** 进程。
 

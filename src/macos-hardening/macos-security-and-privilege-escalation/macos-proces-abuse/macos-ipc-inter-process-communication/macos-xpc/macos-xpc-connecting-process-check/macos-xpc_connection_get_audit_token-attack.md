@@ -2,7 +2,7 @@
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
 
-**有关更多信息，请查看原始帖子：** [**https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/**](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)。这是一个总结：
+**有关更多信息，请查看原始帖子：** [**https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/**](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)。这是一个摘要：
 
 ## Mach 消息基本信息
 
@@ -23,9 +23,9 @@ Mach 消息通过 _mach 端口_ 发送，这是一个内置于 mach 内核的 **
 ../
 {{#endref}}
 
-## 漏洞总结
+## 漏洞摘要
 
-你需要知道的是 **XPC 的抽象是一个一对一的连接**，但它是基于一种 **可以有多个发送者的技术，因此：**
+你需要知道的是 **XPC 的抽象是一个一对一连接**，但它是基于一种 **可以有多个发送者的技术，因此：**
 
 - Mach 端口是单接收者，**多个发送者**。
 - XPC 连接的审计令牌是 **从最近接收到的消息中复制的审计令牌**。
@@ -41,7 +41,7 @@ Mach 消息通过 _mach 端口_ 发送，这是一个内置于 mach 内核的 **
 1. 变体1：
 - **利用** **连接** 到服务 **A** 和服务 **B**
 - 服务 **B** 可以调用服务 A 中用户无法调用的 **特权功能**
-- 服务 **A** 在 **`dispatch_async`** 中的 **事件处理程序** _**外部**_ 调用 **`xpc_connection_get_audit_token`**。
+- 服务 **A** 在 **`dispatch_async`** 中的连接 **事件处理程序** _**外部**_ 调用 **`xpc_connection_get_audit_token`**。
 - 因此，**不同** 的消息可能会 **覆盖审计令牌**，因为它在事件处理程序外部异步调度。
 - 利用将 **发送权** 传递给 **服务 B** 的服务 **A**。
 - 因此，服务 **B** 实际上将 **发送** 消息到服务 **A**。
@@ -50,7 +50,7 @@ Mach 消息通过 _mach 端口_ 发送，这是一个内置于 mach 内核的 **
 - 服务 **B** 可以调用服务 A 中用户无法调用的 **特权功能**
 - 利用与 **服务 A** 连接，**服务 A** 向利用发送一条 **期望回复** 的 **消息**，在特定的 **回复** **端口** 中。
 - 利用向 **服务** B 发送一条消息，传递 **该回复端口**。
-- 当服务 **B 回复** 时，它 **发送消息到服务 A**，**同时** **利用** 向服务 **A** 发送不同的 **消息**，试图 **达到特权功能**，并期望服务 B 的回复在完美时刻覆盖审计令牌（竞争条件）。
+- 当服务 **B 回复** 时，它将 **消息发送到服务 A**，**同时** 利用向服务 **A** 发送不同的 **消息**，试图 **达到特权功能**，并期望服务 B 的回复会在完美的时刻覆盖审计令牌（竞争条件）。
 
 ## 变体 1：在事件处理程序外部调用 xpc_connection_get_audit_token <a href="#variant-1-calling-xpc_connection_get_audit_token-outside-of-an-event-handler" id="variant-1-calling-xpc_connection_get_audit_token-outside-of-an-event-handler"></a>
 
@@ -72,7 +72,7 @@ Mach 消息通过 _mach 端口_ 发送，这是一个内置于 mach 内核的 **
 
 1. 使用标准 XPC 协议初始化与名为 `smd` 的服务的 **连接**。
 2. 形成与 `diagnosticd` 的二次 **连接**。与正常程序相反，而不是创建并发送两个新的 mach 端口，客户端端口发送权被替换为与 `smd` 连接相关联的 **发送权** 的副本。
-3. 结果，XPC 消息可以调度到 `diagnosticd`，但来自 `diagnosticd` 的响应被重定向到 `smd`。对 `smd` 来说，来自用户和 `diagnosticd` 的消息似乎来自同一连接。
+3. 结果，XPC 消息可以调度到 `diagnosticd`，但来自 `diagnosticd` 的回复被重定向到 `smd`。对于 `smd` 来说，来自用户和 `diagnosticd` 的消息似乎来自同一连接。
 
 ![描述利用过程的图像](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/exploit.png)
 
@@ -93,13 +93,13 @@ Mach 消息通过 _mach 端口_ 发送，这是一个内置于 mach 内核的 **
 - 两个 mach 服务，称为 **`A`** 和 **`B`**，都可以建立连接。
 - 服务 **`A`** 应包括对只有 **`B`** 可以执行的特定操作的授权检查（用户的应用程序无法）。
 - 服务 **`A`** 应发送一条期望回复的消息。
-- 用户可以向 **`B`** 发送一条消息，**B** 将对此作出回应。
+- 用户可以向 **`B`** 发送一条消息，**B** 将对此进行回复。
 
 利用过程涉及以下步骤：
 
 1. 等待服务 **`A`** 发送一条期望回复的消息。
-2. 不直接回复 **`A`**，而是劫持回复端口并用于向服务 **`B`** 发送消息。
-3. 随后，发送一条涉及禁止操作的消息，期望它与来自 **`B`** 的回复并发处理。
+2. 而不是直接回复 **`A`**，回复端口被劫持并用于向服务 **`B`** 发送消息。
+3. 随后，发送一条涉及禁止操作的消息，期望它将与来自 **`B`** 的回复并发处理。
 
 以下是所描述攻击场景的可视化表示：
 
@@ -110,7 +110,7 @@ Mach 消息通过 _mach 端口_ 发送，这是一个内置于 mach 内核的 **
 ## 发现问题
 
 - **定位实例的困难**：静态和动态搜索 `xpc_connection_get_audit_token` 使用实例都很具挑战性。
-- **方法论**：使用 Frida 钩住 `xpc_connection_get_audit_token` 函数，过滤不来自事件处理程序的调用。然而，这种方法仅限于被钩住的进程，并需要主动使用。
+- **方法论**：使用 Frida 钩住 `xpc_connection_get_audit_token` 函数，过滤不来自事件处理程序的调用。然而，这种方法仅限于被钩住的进程，并且需要主动使用。
 - **分析工具**：使用 IDA/Ghidra 等工具检查可达的 mach 服务，但该过程耗时，复杂性增加，涉及 dyld 共享缓存的调用。
 - **脚本限制**：尝试为从 `dispatch_async` 块调用 `xpc_connection_get_audit_token` 的分析编写脚本时，由于解析块和与 dyld 共享缓存的交互的复杂性而受到阻碍。
 
@@ -119,7 +119,7 @@ Mach 消息通过 _mach 端口_ 发送，这是一个内置于 mach 内核的 **
 - **报告问题**：向 Apple 提交了一份报告，详细说明了在 `smd` 中发现的一般和特定问题。
 - **Apple 的回应**：Apple 通过将 `xpc_connection_get_audit_token` 替换为 `xpc_dictionary_get_audit_token` 解决了 `smd` 中的问题。
 - **修复的性质**：`xpc_dictionary_get_audit_token` 函数被认为是安全的，因为它直接从与接收的 XPC 消息相关的 mach 消息中检索审计令牌。然而，它不是公共 API 的一部分，类似于 `xpc_connection_get_audit_token`。
-- **缺乏更广泛的修复**：尚不清楚为什么 Apple 没有实施更全面的修复，例如丢弃与连接的保存审计令牌不对齐的消息。在某些情况下（例如，使用 `setuid`）合法的审计令牌更改的可能性可能是一个因素。
+- **缺乏更广泛的修复**：尚不清楚为什么 Apple 没有实施更全面的修复，例如丢弃与连接的保存审计令牌不一致的消息。某些场景（例如 `setuid` 使用）中合法审计令牌更改的可能性可能是一个因素。
 - **当前状态**：该问题在 iOS 17 和 macOS 14 中仍然存在，给那些寻求识别和理解它的人带来了挑战。
 
 {{#include ../../../../../../banners/hacktricks-training.md}}

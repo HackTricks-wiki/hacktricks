@@ -48,7 +48,7 @@ DriverKit 是内核扩展的替代品，**提供硬件支持**。它允许设备
 
 <figure><img src="../../../images/image (1068).png" alt="https://www.youtube.com/watch?v=jaVkpM1UqOs"><figcaption></figcaption></figure>
 
-与端点安全框架的 **用户空间通信** 通过 IOUserClient 类进行。根据调用者的类型使用两种不同的子类：
+**与端点安全框架的用户空间通信** 通过 IOUserClient 类进行。根据调用者的类型使用两种不同的子类：
 
 - **EndpointSecurityDriverClient**：这需要 `com.apple.private.endpoint-security.manager` 权限，仅由系统进程 `endpointsecurityd` 持有。
 - **EndpointSecurityExternalClient**：这需要 `com.apple.developer.endpoint-security.client` 权限。通常由需要与端点安全框架交互的第三方安全软件使用。
@@ -57,11 +57,11 @@ DriverKit 是内核扩展的替代品，**提供硬件支持**。它允许设备
 
 **`endpointsecurityd`** 是一个关键的系统守护进程，负责管理和启动端点安全系统扩展，特别是在早期启动过程中。**只有标记为** **`NSEndpointSecurityEarlyBoot`** **的系统扩展** 在其 `Info.plist` 文件中接收这种早期启动处理。
 
-另一个系统守护进程 **`sysextd`** **验证系统扩展** 并将其移动到适当的系统位置。然后，它请求相关守护进程加载扩展。**`SystemExtensions.framework`** 负责激活和停用系统扩展。
+另一个系统守护进程，**`sysextd`**，**验证系统扩展** 并将其移动到适当的系统位置。然后，它请求相关守护进程加载扩展。**`SystemExtensions.framework`** 负责激活和停用系统扩展。
 
 ## 绕过 ESF
 
-ESF 被安全工具使用，这些工具会尝试检测红队，因此任何关于如何避免这一点的信息都很有趣。
+ESF 被安全工具使用，这些工具会尝试检测红队人员，因此任何关于如何避免这一点的信息都很有趣。
 
 ### CVE-2021-30965
 

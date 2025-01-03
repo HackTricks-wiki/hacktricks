@@ -36,7 +36,7 @@ LC 由**事实**和**逻辑操作**（与，或..）组成，结合事实。
 - 在 /System 内...
 - ...
 
-当 Apple 二进制文件被签名时，它**将其分配到信任缓存**中的 LC 类别。
+当 Apple 二进制文件被签名时，它会**将其分配到信任缓存**中的 LC 类别。
 
 - **iOS 16 LC 类别**已在此处[**反向工程并记录**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056)。
 - 当前的 **LC 类别（macOS 14 - Sonoma）**已被反向工程，其[**描述可以在这里找到**](https://gist.github.com/theevilbit/a6fef1e0397425a334d064f7b6e1be53)。
@@ -54,13 +54,13 @@ Parent Constraint: is-init-proc
 
 ### 反向工程 LC 类别
 
-您可以在这里找到更多信息 [**关于它**](https://theevilbit.github.io/posts/launch_constraints_deep_dive/#reversing-constraints)，但基本上，它们在 **AMFI (AppleMobileFileIntegrity)** 中定义，因此您需要下载内核开发工具包以获取 **KEXT**。以 **`kConstraintCategory`** 开头的符号是 **有趣** 的。提取它们后，您将获得一个 DER (ASN.1) 编码流，您需要使用 [ASN.1 解码器](https://holtstrom.com/michael/tools/asn1decoder.php) 或 python-asn1 库及其 `dump.py` 脚本 [andrivet/python-asn1](https://github.com/andrivet/python-asn1/tree/master) 进行解码，这将为您提供一个更易于理解的字符串。
+您可以在这里找到更多信息 [**关于它**](https://theevilbit.github.io/posts/launch_constraints_deep_dive/#reversing-constraints)，但基本上，它们在 **AMFI (AppleMobileFileIntegrity)** 中定义，因此您需要下载内核开发工具包以获取 **KEXT**。以 **`kConstraintCategory`** 开头的符号是 **有趣** 的。提取它们后，您将获得一个 DER (ASN.1) 编码流，您需要使用 [ASN.1 解码器](https://holtstrom.com/michael/tools/asn1decoder.php) 或 python-asn1 库及其 `dump.py` 脚本 [andrivet/python-asn1](https://github.com/andrivet/python-asn1/tree/master) 进行解码，这将为您提供一个更易理解的字符串。
 
 ## 环境约束
 
 这些是配置在 **第三方应用程序** 中的启动约束。开发人员可以选择在其应用程序中使用的 **事实** 和 **逻辑运算符** 来限制对自身的访问。
 
-可以使用以下命令枚举应用程序的环境约束：
+可以使用以下方法枚举应用程序的环境约束：
 ```bash
 codesign -d -vvvv app.app
 ```
@@ -143,7 +143,7 @@ uint8_t reserved0;
 
 此外，启动约束还**缓解降级攻击**。
 
-然而，它们**并不缓解常见的XPC**滥用、**Electron**代码注入或**dylib注入**，而不进行库验证（除非已知可以加载库的团队ID）。
+然而，它们**并不缓解常见的XPC**滥用、**Electron**代码注入或**dylib注入**，而不进行库验证（除非可以加载库的团队ID是已知的）。
 
 ### XPC守护进程保护
 
@@ -156,7 +156,7 @@ uint8_t reserved0;
 
 ### Electron保护
 
-即使要求应用程序必须由**LaunchService**打开（在父约束中）。这可以通过使用**`open`**（可以设置环境变量）或使用**Launch Services API**（可以指示环境变量）来实现。
+即使要求应用程序必须**通过LaunchService打开**（在父约束中）。这可以通过使用**`open`**（可以设置环境变量）或使用**Launch Services API**（可以指示环境变量）来实现。
 
 ## 参考文献
 

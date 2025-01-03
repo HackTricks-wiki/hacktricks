@@ -4,11 +4,11 @@
 
 ## 基本信息
 
-Mach-o 二进制文件包含一个加载命令 **`LC_CODE_SIGNATURE`**，指示二进制文件内部签名的 **偏移量** 和 **大小**。实际上，使用 GUI 工具 MachOView，可以在二进制文件的末尾找到一个名为 **Code Signature** 的部分，其中包含这些信息：
+Mach-o 二进制文件包含一个称为 **`LC_CODE_SIGNATURE`** 的加载命令，指示二进制文件内部签名的 **偏移量** 和 **大小**。实际上，使用 GUI 工具 MachOView，可以在二进制文件的末尾找到一个名为 **Code Signature** 的部分，其中包含这些信息：
 
 <figure><img src="../../../images/image (1) (1) (1) (1).png" alt="" width="431"><figcaption></figcaption></figure>
 
-代码签名的魔术头是 **`0xFADE0CC0`**。然后你会找到一些信息，例如 superBlob 的长度和 blob 的数量。\
+代码签名的魔术头是 **`0xFADE0CC0`**。然后你会得到一些信息，例如 superBlob 的长度和 blob 的数量。\
 可以在 [源代码这里](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L276) 找到这些信息：
 ```c
 /*
@@ -105,7 +105,7 @@ __attribute__ ((aligned(1)));
 
 ## 签名代码页面
 
-对完整二进制文件进行哈希会低效，甚至在其仅部分加载到内存时毫无意义。因此，代码签名实际上是哈希的哈希，其中每个二进制页面都是单独哈希的。\
+对整个二进制文件进行哈希计算效率低下，如果它仅部分加载到内存中甚至是无用的。因此，代码签名实际上是一个哈希的哈希，其中每个二进制页面都是单独哈希的。\
 实际上，在之前的 **Code Directory** 代码中，您可以看到 **页面大小在其字段中被指定**。此外，如果二进制文件的大小不是页面大小的倍数，字段 **CodeLimit** 指定了签名的结束位置。
 ```bash
 # Get all hashes of /bin/ps
@@ -144,7 +144,7 @@ openssl sha256 /tmp/*.page.*
 ```
 ## Entitlements Blob
 
-请注意，应用程序可能还包含一个**entitlement blob**，其中定义了所有的权限。此外，一些iOS二进制文件可能在特殊槽-7中具有其特定的权限（而不是在-5权限特殊槽中）。
+请注意，应用程序可能还包含一个**entitlement blob**，其中定义了所有的权限。此外，一些iOS二进制文件可能在特殊槽-7中具体定义其权限（而不是在-5权限特殊槽中）。
 
 ## Special Slots
 
@@ -154,7 +154,7 @@ MacOS应用程序并不具备执行所需的所有内容，而是还使用**外�
 
 - `info.plist`的哈希（或在`__TEXT.__info__plist`中的哈希）。
 - 需求的哈希
-- 资源目录的哈希（在bundle内`_CodeSignature/CodeResources`文件的哈希）。
+- 资源目录的哈希（在bundle内的`_CodeSignature/CodeResources`文件的哈希）。
 - 应用程序特定（未使用）
 - 权限的哈希
 - 仅DMG代码签名
@@ -211,11 +211,11 @@ CS_RESTRICT | CS_ENFORCEMENT | CS_REQUIRE_LV | CS_RUNTIME | CS_LINKER_SIGNED)
 
 ## 代码签名要求
 
-每个应用程序存储一些 **要求**，它必须 **满足** 以便能够执行。如果 **应用程序包含的要求未被应用程序满足**，则不会执行（因为它可能已被更改）。
+每个应用程序存储一些 **要求**，必须 **满足** 这些要求才能被执行。如果 **应用程序包含的要求未被应用程序满足**，则不会执行（因为它可能已被更改）。
 
-二进制文件的要求使用 **特殊语法**，这是一个 **表达式** 的流，并使用 `0xfade0c00` 作为魔法编码为 blobs，其 **哈希存储在一个特殊代码槽中**。
+二进制文件的要求使用 **特殊语法**，这是一个 **表达式** 的流，并使用 `0xfade0c00` 作为魔法编码为 blobs，其 **哈希存储在特殊代码槽中**。
 
-可以通过运行查看二进制文件的要求：
+可以通过运行来查看二进制文件的要求：
 ```bash
 codesign -d -r- /bin/ls
 Executable=/bin/ls
@@ -226,7 +226,7 @@ Executable=/Applications/Signal.app/Contents/MacOS/Signal
 designated => identifier "org.whispersystems.signal-desktop" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = U68MSDN6DR
 ```
 > [!NOTE]
-> 注意这些签名可以检查诸如认证信息、TeamID、ID、权限和许多其他数据。
+> 注意这些签名可以检查诸如认证信息、TeamID、ID、权限以及许多其他数据。
 
 此外，可以使用 `csreq` 工具生成一些编译的要求：
 ```bash
@@ -240,11 +240,11 @@ od -A x -t x1 /tmp/output.csreq
 0000020    00  00  00  21  6f  72  67  2e  77  68  69  73  70  65  72  73
 [...]
 ```
-可以通过 `Security.framework` 的一些 API 访问此信息并创建或修改要求，例如：
+可以通过 `Security.framework` 中的一些 API 访问此信息并创建或修改要求，例如：
 
 #### **检查有效性**
 
-- **`Sec[Static]CodeCheckValidity`**: 检查 SecCodeRef 是否符合要求的有效性。
+- **`Sec[Static]CodeCheckValidity`**: 根据要求检查 SecCodeRef 的有效性。
 - **`SecRequirementEvaluate`**: 在证书上下文中验证要求。
 - **`SecTaskValidateForRequirement`**: 验证正在运行的 SecTask 是否符合 `CFString` 要求。
 
@@ -273,7 +273,7 @@ od -A x -t x1 /tmp/output.csreq
 #### **其他有用的 API**
 
 - **`SecCodeCopy[Internal/Designated]Requirement`: 从 SecCodeRef 获取 SecRequirementRef**
-- **`SecCodeCopyGuestWithAttributes`**: 创建一个 `SecCodeRef`，表示基于特定属性的代码对象，适用于沙箱。
+- **`SecCodeCopyGuestWithAttributes`**: 创建一个基于特定属性的代码对象的 `SecCodeRef`，适用于沙箱。
 - **`SecCodeCopyPath`**: 检索与 `SecCodeRef` 关联的文件系统路径。
 - **`SecCodeCopySigningIdentifier`**: 从 `SecCodeRef` 获取签名标识符（例如，团队 ID）。
 - **`SecCodeGetTypeID`**: 返回 `SecCodeRef` 对象的类型标识符。
@@ -286,11 +286,11 @@ od -A x -t x1 /tmp/output.csreq
 
 ## 代码签名强制执行
 
-**内核**是在允许应用程序代码执行之前**检查代码签名**的。此外，能够在内存中写入和执行新代码的一种方法是利用 JIT，如果 `mprotect` 被调用时带有 `MAP_JIT` 标志。请注意，应用程序需要特殊的权限才能做到这一点。
+**内核**是在允许应用程序代码执行之前**检查代码签名**的。此外，能够在内存中写入和执行新代码的一种方法是滥用 JIT，如果 `mprotect` 被调用时带有 `MAP_JIT` 标志。请注意，应用程序需要特殊的权限才能做到这一点。
 
 ## `cs_blobs` & `cs_blob`
 
-[**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) 结构包含有关正在运行的进程的权限信息。 `csb_platform_binary` 还指示应用程序是否为平台二进制（操作系统在不同时间检查以应用安全机制，例如保护这些进程的任务端口的 SEND 权限）。
+[**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) 结构包含有关正在运行的进程的权限信息。 `csb_platform_binary` 还指示应用程序是否为平台二进制文件（操作系统在不同时间检查这一点，以应用安全机制，例如保护这些进程的任务端口的 SEND 权限）。
 ```c
 struct cs_blob {
 struct cs_blob  *csb_next;

@@ -10,7 +10,7 @@
 
 ### ShouldAcceptNewConnection 始终为 YES
 
-一个例子可以在 [EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample) 中找到。在 `App/AppDelegate.m` 中，它尝试 **连接** 到 **HelperTool**。而在 `HelperTool/HelperTool.m` 中，函数 **`shouldAcceptNewConnection`** **不会检查** 之前指示的任何要求。它将始终返回 YES：
+一个例子可以在 [EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample) 中找到。在 `App/AppDelegate.m` 中，它尝试 **连接** 到 **HelperTool**。而在 `HelperTool/HelperTool.m` 中，函数 **`shouldAcceptNewConnection`** **不会检查** 之前提到的任何要求。它将始终返回 YES：
 ```objectivec
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection
 // Called by our XPC listener when a new connection comes in.  We configure the connection
@@ -174,7 +174,7 @@ block(authRightName, authRightDefault, authRightDesc);
 ```
 这意味着在这个过程结束时，`commandInfo` 中声明的权限将存储在 `/var/db/auth.db` 中。请注意，您可以找到 **每种方法** 需要 **身份验证** 的 **权限名称** 和 **`kCommandKeyAuthRightDefault`**。后者 **指示谁可以获得此权限**。
 
-有不同的范围来指示谁可以访问某个权限。其中一些在 [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) 中定义（您可以在 [这里找到所有内容](https://www.dssw.co.uk/reference/authorization-rights/)），但总结如下：
+有不同的范围来指示谁可以访问某个权限。其中一些在 [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) 中定义（您可以在 [这里找到所有权限](https://www.dssw.co.uk/reference/authorization-rights/)），但总结如下：
 
 <table><thead><tr><th width="284.3333333333333">名称</th><th width="165">值</th><th>描述</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>任何人</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>没有人</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>当前用户需要是管理员（在管理员组内）</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>要求用户进行身份验证。</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>要求用户进行身份验证。他需要是管理员（在管理员组内）</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>指定规则</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>指定一些关于权限的额外评论</td></tr></tbody></table>
 
@@ -285,13 +285,13 @@ authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-se
 
 然后，你需要找到协议模式，以便能够与 XPC 服务建立通信。
 
-函数 **`shouldAcceptNewConnection`** 指示正在导出的协议：
+函数 **`shouldAcceptNewConnection`** 表示正在导出的协议：
 
 <figure><img src="../../../../../images/image (44).png" alt=""><figcaption></figcaption></figure>
 
-在这种情况下，我们与 EvenBetterAuthorizationSample 中的相同，[**检查这一行**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94)。
+在这种情况下，我们与 EvenBetterAuthorizationSample 中的相同，[**查看这一行**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94)。
 
-知道所使用的协议名称后，可以使用以下命令 **转储其头部定义**：
+知道所使用的协议名称后，可以使用以下命令 **转储其头文件定义**：
 ```bash
 class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
 

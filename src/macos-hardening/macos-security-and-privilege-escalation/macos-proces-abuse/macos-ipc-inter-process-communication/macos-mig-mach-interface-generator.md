@@ -40,7 +40,7 @@ server_port :  mach_port_t;
 n1          :  uint32_t;
 n2          :  uint32_t);
 ```
-请注意，第一个 **参数是要绑定的端口**，MIG 将 **自动处理回复端口**（除非在客户端代码中调用 `mig_get_reply_port()`）。此外，**操作的 ID** 将是 **顺序的**，从指定的子系统 ID 开始（因此，如果某个操作被弃用，它会被删除，并且使用 `skip` 仍然使用其 ID）。
+请注意，第一个 **参数是要绑定的端口**，MIG 将 **自动处理回复端口**（除非在客户端代码中调用 `mig_get_reply_port()`）。此外，**操作的 ID** 将是 **顺序的**，从指定的子系统 ID 开始（因此，如果某个操作被弃用，它会被删除，并使用 `skip` 以便仍然使用其 ID）。
 
 现在使用 MIG 生成能够相互通信以调用 Subtract 函数的服务器和客户端代码：
 ```bash
@@ -104,7 +104,7 @@ return 0;
 return SERVERPREFmyipc_subsystem.routine[msgh_id].stub_routine;
 }
 ```
-在这个例子中，我们只在定义中定义了 1 个函数，但如果我们定义了更多函数，它们将位于 **`SERVERPREFmyipc_subsystem`** 数组中，第一个将被分配给 ID **500**，第二个将被分配给 ID **501**...
+在这个例子中，我们只在定义中定义了 1 个函数，但如果我们定义了更多函数，它们将位于 **`SERVERPREFmyipc_subsystem`** 数组中，第一个将分配给 ID **500**，第二个将分配给 ID **501**...
 
 如果该函数预期发送一个 **reply**，则函数 `mig_internal kern_return_t __MIG_check__Reply__<name>` 也会存在。
 
@@ -132,7 +132,7 @@ mig_routine_t routine;
 
 OutHeadP->msgh_bits = MACH_MSGH_BITS(MACH_MSGH_BITS_REPLY(InHeadP->msgh_bits), 0);
 OutHeadP->msgh_remote_port = InHeadP->msgh_reply_port;
-/* 最小大小：routine() 如果不同将更新它 */
+/* 最小大小：routine() 如果不同会更新它 */
 OutHeadP->msgh_size = (mach_msg_size_t)sizeof(mig_reply_error_t);
 OutHeadP->msgh_local_port = MACH_PORT_NULL;
 OutHeadP->msgh_id = InHeadP->msgh_id + 100;
@@ -149,7 +149,7 @@ return FALSE;
 }
 </code></pre>
 
-检查之前突出显示的行，通过 ID 访问要调用的函数。
+检查之前突出显示的行，访问通过 ID 调用的函数。
 
 以下是创建一个简单的 **服务器** 和 **客户端** 的代码，其中客户端可以调用服务器的 Subtract 函数：
 
@@ -219,9 +219,9 @@ USERPREFSubtract(port, 40, 2);
 
 NDR_record 是由 `libsystem_kernel.dylib` 导出的，它是一个结构体，允许 MIG **转换数据，使其与所使用的系统无关**，因为 MIG 被认为是用于不同系统之间的（而不仅仅是在同一台机器上）。
 
-这很有趣，因为如果在二进制文件中找到 `_NDR_record` 作为依赖项（`jtool2 -S <binary> | grep NDR` 或 `nm`），这意味着该二进制文件是 MIG 客户端或服务器。
+这很有趣，因为如果在二进制文件中找到 `_NDR_record` 作为依赖项（`jtool2 -S <binary> | grep NDR` 或 `nm`），这意味着该二进制文件是一个 MIG 客户端或服务器。
 
-此外，**MIG 服务器**在 `__DATA.__const` 中有调度表（或在 macOS 内核中的 `__CONST.__constdata` 和其他 \*OS 内核中的 `__DATA_CONST.__const`）。这可以通过 **`jtool2`** 转储。
+此外，**MIG 服务器**在 `__DATA.__const` 中有调度表（在 macOS 内核中为 `__CONST.__constdata`，在其他 \*OS 内核中为 `__DATA_CONST.__const`）。这可以通过 **`jtool2`** 转储。
 
 而 **MIG 客户端**将使用 `__NDR_record` 通过 `__mach_msg` 发送给服务器。
 
@@ -239,9 +239,9 @@ jtool2 -d __DATA.__const myipc_server | grep MIG
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep BL
 ```
-### 汇编
+### Assembly
 
-之前提到过，负责**根据接收到的消息 ID 调用正确函数**的函数是 `myipc_server`。然而，通常你不会拥有二进制文件的符号（没有函数名称），因此检查**反编译后的样子**是很有趣的，因为它总是非常相似（此函数的代码与暴露的函数无关）：
+之前提到过，负责**根据接收到的消息 ID 调用正确函数**的函数是 `myipc_server`。然而，通常你不会拥有二进制文件的符号（没有函数名），因此检查**反编译后的样子**是很有趣的，因为它总是非常相似（此函数的代码与暴露的函数无关）：
 
 {{#tabs}}
 {{#tab name="myipc_server decompiled 1"}}
@@ -249,7 +249,7 @@ jtool2 -d __DATA.__const myipc_server | grep BL
 <pre class="language-c"><code class="lang-c">int _myipc_server(int arg0, int arg1) {
 var_10 = arg0;
 var_18 = arg1;
-// 初始指令以查找正确的函数指针
+// 初始指令以找到正确的函数指针
 *(int32_t *)var_18 = *(int32_t *)var_10 &#x26; 0x1f;
 *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
 *(int32_t *)(var_18 + 0x4) = 0x24;
@@ -297,7 +297,7 @@ saved_fp = r29;
 stack[-8] = r30;
 var_10 = arg0;
 var_18 = arg1;
-// 初始指令以查找正确的函数指针
+// 初始指令以找到正确的函数指针
 *(int32_t *)var_18 = *(int32_t *)var_10 &#x26; 0x1f | 0x0;
 *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
 *(int32_t *)(var_18 + 0x4) = 0x24;
@@ -332,7 +332,7 @@ if (CPU_FLAGS &#x26; NE) {
 r8 = 0x1;
 }
 }
-// 与之前版本相同的 if else
+// 与前一个版本相同的 if else
 // 检查地址 0x100004040 的使用（函数地址数组）
 <strong>                    if ((r8 &#x26; 0x1) == 0x0) {
 </strong><strong>                            *(var_18 + 0x18) = **0x100004000;
@@ -340,7 +340,7 @@ r8 = 0x1;
 var_4 = 0x0;
 }
 else {
-// 调用计算的地址，函数应该在此处
+// 调用计算的地址，函数应该在这里
 <strong>                            (var_20)(var_10, var_18);
 </strong>                            var_4 = 0x1;
 }
@@ -373,11 +373,11 @@ return r0;
 
 这些数据可以通过[**使用这个 Hopper 脚本**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py)提取。
 
-### 调试
+### Debug
 
 MIG 生成的代码还调用 `kernel_debug` 以生成有关进入和退出操作的日志。可以使用**`trace`**或**`kdv`**检查它们：`kdv all | grep MIG`
 
-## 参考
+## References
 
 - [\*OS Internals, Volume I, User Mode, Jonathan Levin](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
 

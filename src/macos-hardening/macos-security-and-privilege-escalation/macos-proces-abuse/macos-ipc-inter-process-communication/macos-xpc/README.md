@@ -6,11 +6,11 @@
 
 XPC，即 XNU（macOS 使用的内核）进程间通信，是一个用于 **macOS 和 iOS 上进程之间通信** 的框架。XPC 提供了一种机制，用于在系统上进行 **安全的、异步的方法调用**。它是苹果安全范式的一部分，允许 **创建特权分离的应用程序**，每个 **组件** 仅以 **执行其工作所需的权限** 运行，从而限制了被攻陷进程可能造成的损害。
 
-XPC 使用一种形式的进程间通信（IPC），这是一组方法，允许在同一系统上运行的不同程序相互发送数据。
+XPC 使用一种进程间通信（IPC）的形式，这是一组方法，允许在同一系统上运行的不同程序相互发送数据。
 
 XPC 的主要优点包括：
 
-1. **安全性**：通过将工作分离到不同的进程中，每个进程仅被授予其所需的权限。这意味着即使一个进程被攻陷，它的危害能力也有限。
+1. **安全性**：通过将工作分离到不同的进程中，每个进程仅被授予所需的权限。这意味着即使一个进程被攻陷，它的危害能力也有限。
 2. **稳定性**：XPC 有助于将崩溃隔离到发生崩溃的组件。如果一个进程崩溃，可以在不影响系统其余部分的情况下重新启动。
 3. **性能**：XPC 允许轻松的并发，因为不同的任务可以在不同的进程中同时运行。
 
@@ -20,7 +20,7 @@ XPC 的主要优点包括：
 
 应用程序的 XPC 组件是 **在应用程序内部**。例如，在 Safari 中，您可以在 **`/Applications/Safari.app/Contents/XPCServices`** 中找到它们。它们的扩展名为 **`.xpc`**（如 **`com.apple.Safari.SandboxBroker.xpc`**），并且 **也与主二进制文件捆绑** 在一起：`/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker` 和 `Info.plist: /Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`
 
-正如您可能想到的，**XPC 组件将具有不同的权限和特权**，与其他 XPC 组件或主应用程序二进制文件不同。除非 XPC 服务在其 **Info.plist** 文件中配置了 [**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information_property_list/xpcservice/joinexistingsession) 设置为“True”。在这种情况下，XPC 服务将在 **与调用它的应用程序相同的安全会话** 中运行。
+正如您可能想到的，**XPC 组件将具有不同的权限和特权**，与其他 XPC 组件或主应用程序二进制文件不同。除非 XPC 服务在其 **Info.plist** 文件中配置了 [**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information_property_list/xpcservice/joinexistingsession) 设置为“True”。在这种情况下，XPC 服务将在 **与调用它的应用程序相同的安全会话中** 运行。
 
 XPC 服务由 **launchd** 在需要时 **启动**，并在所有任务 **完成** 后 **关闭** 以释放系统资源。**应用程序特定的 XPC 组件只能由该应用程序使用**，从而降低了与潜在漏洞相关的风险。
 
@@ -70,7 +70,7 @@ cat /Library/LaunchDaemons/com.jamf.management.daemon.plist
 
 每个 XPC 消息都是一个字典对象，简化了序列化和反序列化。此外，`libxpc.dylib` 声明了大多数数据类型，因此可以确保接收到的数据是预期的类型。在 C API 中，每个对象都是 `xpc_object_t`（其类型可以使用 `xpc_get_type(object)` 检查）。\
 此外，函数 `xpc_copy_description(object)` 可用于获取对象的字符串表示，这对于调试非常有用。\
-这些对象还有一些可以调用的方法，如 `xpc_<object>_copy`、`xpc_<object>_equal`、`xpc_<object>_hash`、`xpc_<object>_serialize`、`xpc_<object>_deserialize`...
+这些对象还具有一些可调用的方法，如 `xpc_<object>_copy`、`xpc_<object>_equal`、`xpc_<object>_hash`、`xpc_<object>_serialize`、`xpc_<object>_deserialize`...
 
 `xpc_object_t` 是通过调用 `xpc_<objetType>_create` 函数创建的，该函数内部调用 `_xpc_base_create(Class, Size)`，其中指明了对象的类类型（`XPC_TYPE_*` 之一）和大小（额外的 40B 将被添加到大小以存储元数据）。这意味着对象的数据将从偏移量 40B 开始。\
 因此，`xpc_<objectType>_t` 是 `xpc_object_t` 的一种子类，而 `xpc_object_t` 则是 `os_object_t*` 的子类。
@@ -83,7 +83,7 @@ cat /Library/LaunchDaemons/com.jamf.management.daemon.plist
 **`xpc_pipe`** 是一个 FIFO 管道，进程可以用来进行通信（通信使用 Mach 消息）。\
 可以通过调用 `xpc_pipe_create()` 或 `xpc_pipe_create_from_port()` 创建 XPC 服务器，后者使用特定的 Mach 端口创建它。然后，可以调用 `xpc_pipe_receive` 和 `xpc_pipe_try_receive` 来接收消息。
 
-请注意，**`xpc_pipe`** 对象是一个 **`xpc_object_t`**，其结构中包含有关使用的两个 Mach 端口和名称（如果有的话）的信息。例如，守护进程 `secinitd` 在其 plist `/System/Library/LaunchDaemons/com.apple.secinitd.plist` 中配置了名为 `com.apple.secinitd` 的管道。
+请注意，**`xpc_pipe`** 对象是一个 **`xpc_object_t`**，其结构中包含有关使用的两个 Mach 端口和名称（如果有）的信息。例如，守护进程 `secinitd` 在其 plist `/System/Library/LaunchDaemons/com.apple.secinitd.plist` 中配置了名为 `com.apple.secinitd` 的管道。
 
 **`xpc_pipe`** 的一个示例是 **`launchd`** 创建的 **bootstrap pipe**，使得共享 Mach 端口成为可能。
 
@@ -92,14 +92,14 @@ cat /Library/LaunchDaemons/com.jamf.management.daemon.plist
 这些是 Objective-C 高级对象，允许对 XPC 连接进行抽象。\
 此外，使用 DTrace 调试这些对象比前面的对象更容易。
 
-- **`GCD Queues`**
+- **`GCD 队列`**
 
 XPC 使用 GCD 传递消息，此外它生成某些调度队列，如 `xpc.transactionq`、`xpc.io`、`xpc-events.add-listenerq`、`xpc.service-instance`...
 
 ## XPC 服务
 
 这些是位于其他项目的 **`XPCServices`** 文件夹中的 **`.xpc`** 扩展包，在 `Info.plist` 中，它们的 `CFBundlePackageType` 设置为 **`XPC!`**。\
-该文件还有其他配置键，如 `ServiceType`，可以是 Application、User、System 或 `_SandboxProfile`，可以定义沙箱或 `_AllowedClients`，可能指示与服务联系所需的权限或 ID。这些和其他配置选项在服务启动时将有助于配置服务。
+该文件具有其他配置键，如 `ServiceType`，可以是 Application、User、System 或 `_SandboxProfile`，可以定义沙箱或 `_AllowedClients`，可能指示与服务联系所需的权限或 ID。这些和其他配置选项在服务启动时将有助于配置服务。
 
 ### 启动服务
 
@@ -403,7 +403,7 @@ sudo launchctl load /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist
 sudo launchctl unload /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist
 sudo rm /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist /tmp/oc_xpc_server
 ```
-## 客户端内部的 Dylb 代码
+## 客户端在 Dylb 代码中
 ```objectivec
 // gcc -dynamiclib -framework Foundation oc_xpc_client.m -o oc_xpc_client.dylib
 // gcc injection example:
@@ -439,8 +439,8 @@ return;
 ```
 ## Remote XPC
 
-此功能由 `RemoteXPC.framework`（来自 `libxpc`）提供，允许通过不同主机之间的 XPC 进行通信。\
-支持远程 XPC 的服务在其 plist 中将具有键 UsesRemoteXPC，就像 `/System/Library/LaunchDaemons/com.apple.SubmitDiagInfo.plist` 的情况一样。然而，尽管该服务将与 `launchd` 注册，但提供该功能的是 `UserEventAgent`，其插件为 `com.apple.remoted.plugin` 和 `com.apple.remoteservicediscovery.events.plugin`。
+此功能由 `RemoteXPC.framework`（来自 `libxpc`）提供，允许通过不同主机进行 XPC 通信。\
+支持远程 XPC 的服务将在其 plist 中具有键 UsesRemoteXPC，就像 `/System/Library/LaunchDaemons/com.apple.SubmitDiagInfo.plist` 的情况一样。然而，尽管该服务将与 `launchd` 注册，但提供该功能的是 `UserEventAgent`，其插件为 `com.apple.remoted.plugin` 和 `com.apple.remoteservicediscovery.events.plugin`。
 
 此外，`RemoteServiceDiscovery.framework` 允许从 `com.apple.remoted.plugin` 获取信息，暴露出如 `get_device`、`get_unique_device`、`connect` 等函数...
 

@@ -21,7 +21,7 @@
 
 ### `com.apple.security.get-task-allow`
 
-此权限允许具有 **`com.apple.security.cs.debugger`** 权限的其他进程获取由具有此权限的二进制文件运行的进程的任务端口并 **注入代码**。查看 [**此处获取更多信息**](../macos-proces-abuse/macos-ipc-inter-process-communication/)。
+此权限允许其他具有 **`com.apple.security.cs.debugger`** 权限的进程获取由具有此权限的二进制文件运行的进程的任务端口并 **注入代码**。查看 [**此处获取更多信息**](../macos-proces-abuse/macos-ipc-inter-process-communication/)。
 
 ### `com.apple.security.cs.debugger`
 
@@ -29,7 +29,7 @@
 
 ### `com.apple.security.cs.disable-library-validation`
 
-此权限允许 **加载框架、插件或库，而不需要由 Apple 签名或与主可执行文件具有相同的团队 ID 签名**，因此攻击者可以利用某些任意库加载来注入代码。查看 [**此处获取更多信息**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation)。
+此权限允许 **加载框架、插件或库，而不需要由 Apple 签名或与主可执行文件具有相同的团队 ID**，因此攻击者可以利用某些任意库加载来注入代码。查看 [**此处获取更多信息**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation)。
 
 ### `com.apple.private.security.clear-library-validation`
 
@@ -58,7 +58,7 @@
 
 **iMovie** 和 **Garageband** 拥有此权限。
 
-有关利用此权限 **获取 iCloud 令牌** 的更多 **信息**，请查看演讲：[**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+有关 **从该权限获取 iCloud 令牌** 的漏洞的更多 **信息**，请查看演讲：[**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
 ### `com.apple.private.tcc.manager.check-by-audit-token`
 
@@ -101,15 +101,15 @@ osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to acti
 
 ### **`kTCCServiceEndpointSecurityClient`**
 
-允许在其他权限中 **写入用户的 TCC 数据库**。
+允许在其他权限中，**写入用户的 TCC 数据库**。
 
 ### **`kTCCServiceSystemPolicySysAdminFiles`**
 
-允许 **更改** 用户的 **`NFSHomeDirectory`** 属性，这会更改他的主文件夹路径，从而允许 **绕过 TCC**。
+允许**更改**用户的 **`NFSHomeDirectory`** 属性，从而更改其主文件夹路径，因此允许**绕过 TCC**。
 
 ### **`kTCCServiceSystemPolicyAppBundles`**
 
-允许修改应用程序包内的文件（在 app.app 内），这在 **默认情况下是不允许的**。
+允许修改应用程序包内的文件（在 app.app 内），这在默认情况下是**不允许的**。
 
 <figure><img src="../../../images/image (31).png" alt=""><figcaption></figcaption></figure>
 
@@ -117,24 +117,24 @@ osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to acti
 
 ### `kTCCServiceAccessibility`
 
-该进程将能够 **滥用 macOS 辅助功能**，这意味着例如它将能够按下按键。因此，它可以请求访问控制像 Finder 这样的应用程序，并批准具有此权限的对话框。
+该进程将能够**滥用 macOS 辅助功能**，这意味着例如它将能够按下按键。因此，它可以请求访问控制像 Finder 这样的应用程序，并批准具有此权限的对话框。
 
 ## 中等
 
 ### `com.apple.security.cs.allow-jit`
 
-此权限允许通过将 `MAP_JIT` 标志传递给 `mmap()` 系统函数来 **创建可写和可执行的内存**。查看 [**更多信息**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit)。
+此权限允许通过将 `MAP_JIT` 标志传递给 `mmap()` 系统函数来**创建可写和可执行的内存**。查看 [**更多信息**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit)。
 
 ### `com.apple.security.cs.allow-unsigned-executable-memory`
 
-此权限允许 **覆盖或修补 C 代码**，使用长期弃用的 **`NSCreateObjectFileImageFromMemory`**（这在根本上是不安全的），或使用 **DVDPlayback** 框架。查看 [**更多信息**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory)。
+此权限允许**覆盖或修补 C 代码**，使用长期弃用的 **`NSCreateObjectFileImageFromMemory`**（这在根本上是不安全的），或使用 **DVDPlayback** 框架。查看 [**更多信息**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory)。
 
 > [!CAUTION]
 > 包含此权限会使您的应用程序暴露于内存不安全代码语言中的常见漏洞。仔细考虑您的应用程序是否需要此例外。
 
 ### `com.apple.security.cs.disable-executable-page-protection`
 
-此权限允许 **修改其自身可执行文件** 在磁盘上的部分以强制退出。查看 [**更多信息**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection)。
+此权限允许**修改其自身可执行文件**在磁盘上的部分以强制退出。查看 [**更多信息**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection)。
 
 > [!CAUTION]
 > 禁用可执行内存保护权限是一种极端权限，它从您的应用程序中移除了基本的安全保护，使攻击者能够在不被检测的情况下重写您应用程序的可执行代码。如果可能，优先选择更窄的权限。

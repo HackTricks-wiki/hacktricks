@@ -42,7 +42,7 @@ sSendHeader.TypeSpecificData.VersionInfo.m_dwMajorVersion = kCurrentMajorVersion
 sSendHeader.TypeSpecificData.VersionInfo.m_dwMinorVersion = kCurrentMinorVersion;
 sSendHeader.m_cbDataBlock = sizeof(SessionRequestData);
 ```
-该头部随后通过 `write` 系统调用发送到目标，后面跟着包含会话 GUID 的 `sessionRequestData` 结构：
+该标题随后通过 `write` 系统调用发送到目标，后面是包含会话 GUID 的 `sessionRequestData` 结构：
 ```c
 write(wr, &sSendHeader, sizeof(MessageHeader));
 memset(&sDataBlock.m_sSessionID, 9, sizeof(SessionRequestData));
@@ -84,14 +84,14 @@ return true;
 ```
 相关的POC可以在[这里](https://gist.github.com/xpn/7c3040a7398808747e158a25745380a5)找到。
 
-## .NET Core 代码执行 <a href="#net-core-code-execution" id="net-core-code-execution"></a>
+## .NET Core代码执行 <a href="#net-core-code-execution" id="net-core-code-execution"></a>
 
 要执行代码，需要识别一个具有rwx权限的内存区域，这可以通过使用vmmap -pages:来完成。
 ```bash
 vmmap -pages [pid]
 vmmap -pages 35829 | grep "rwx/rwx"
 ```
-定位一个覆盖函数指针的位置是必要的，在 .NET Core 中，可以通过针对 **Dynamic Function Table (DFT)** 来实现。这个表在 [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h) 中有详细说明，运行时使用它来进行 JIT 编译辅助函数。
+定位一个覆盖函数指针的位置是必要的，在 .NET Core 中，可以通过针对 **Dynamic Function Table (DFT)** 来实现。这个表在 [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h) 中详细描述，是运行时用于 JIT 编译辅助函数的。
 
 对于 x64 系统，可以使用签名搜索来找到 `libcorclr.dll` 中符号 `_hlpDynamicFuncTable` 的引用。
 

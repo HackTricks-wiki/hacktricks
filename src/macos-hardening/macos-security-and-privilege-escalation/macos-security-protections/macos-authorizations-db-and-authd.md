@@ -77,7 +77,7 @@ security authorizationdb read com.apple.tcc.util.admin
 
 此外，使用安全工具可以测试许多 `Security.framework` API。例如，运行 `AuthorizationExecuteWithPrivileges`：`security execute-with-privileges /bin/ls`
 
-这将以 root 身份分叉并执行 `/usr/libexec/security_authtrampoline /bin/ls`，这将提示请求权限以以 root 身份执行 ls：
+这将以 root 身份分叉并执行 `/usr/libexec/security_authtrampoline /bin/ls`，这将提示请求权限以 root 身份执行 ls：
 
 <figure><img src="../../../images/image (10).png" alt=""><figcaption></figcaption></figure>
 

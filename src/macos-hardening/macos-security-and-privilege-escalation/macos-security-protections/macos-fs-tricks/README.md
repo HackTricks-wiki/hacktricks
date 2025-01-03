@@ -7,24 +7,24 @@
 **目录**中的权限：
 
 - **读取** - 你可以 **枚举** 目录条目
-- **写入** - 你可以 **删除/写入** **文件** 在目录中，并且你可以 **删除空文件夹**。
+- **写入** - 你可以 **删除/写入** 目录中的 **文件**，并且你可以 **删除空文件夹**。
 - 但你 **不能删除/修改非空文件夹**，除非你对其拥有写入权限。
 - 你 **不能修改文件夹的名称**，除非你拥有它。
 - **执行** - 你被 **允许遍历** 目录 - 如果你没有这个权限，你无法访问其中的任何文件或任何子目录。
 
 ### 危险组合
 
-**如何覆盖一个由 root 拥有的文件/文件夹**，但：
+**如何覆盖由 root 拥有的文件/文件夹**，但：
 
 - 路径中的一个父 **目录所有者** 是用户
-- 路径中的一个父 **目录所有者** 是一个具有 **写入访问** 的 **用户组**
-- 一个用户 **组** 对 **文件** 具有 **写入** 访问
+- 路径中的一个父 **目录所有者** 是具有 **写入访问权限** 的 **用户组**
+- 一个用户 **组** 对 **文件** 具有 **写入** 访问权限
 
-在任何之前的组合中，攻击者可以 **注入** 一个 **符号/硬链接** 到预期路径以获得特权任意写入。
+在任何上述组合中，攻击者可以 **注入** 一个 **符号/硬链接** 到预期路径，以获得特权的任意写入。
 
 ### 文件夹 root R+X 特殊情况
 
-如果在一个 **目录** 中有文件，**只有 root 拥有 R+X 访问权限**，那么这些文件对 **其他任何人都不可访问**。因此，允许 **将一个用户可读的文件** 移动的漏洞，因该 **限制** 而无法读取，从这个文件夹 **到另一个文件夹**，可能被滥用以读取这些文件。
+如果在一个 **目录** 中有文件，**只有 root 拥有 R+X 访问权限**，那么这些文件对 **其他任何人** 都是 **不可访问的**。因此，允许 **将用户可读的文件** 从此文件夹 **移动到另一个文件夹** 的漏洞，可能会被滥用以读取这些文件。
 
 示例在：[https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions)
 
@@ -32,13 +32,13 @@
 
 ### 宽松的文件/文件夹
 
-如果一个特权进程正在写入一个 **文件**，该文件可能被 **低特权用户控制**，或者可能是 **之前由低特权用户创建**。用户可以通过符号链接或硬链接 **指向另一个文件**，而特权进程将写入该文件。
+如果一个特权进程正在写入一个 **文件**，该文件可能被 **低特权用户控制**，或者可能是 **之前由低特权用户创建**。用户可以通过符号链接或硬链接 **指向另一个文件**，特权进程将会在该文件上写入。
 
-查看其他部分，攻击者可能 **滥用任意写入以提升特权**。
+查看其他部分，攻击者可能会 **滥用任意写入以提升特权**。
 
 ### 打开 `O_NOFOLLOW`
 
-当 `open` 函数使用标志 `O_NOFOLLOW` 时，不会跟随最后路径组件中的符号链接，但会跟随路径的其余部分。防止在路径中跟随符号链接的正确方法是使用标志 `O_NOFOLLOW_ANY`。
+当 `open` 函数使用标志 `O_NOFOLLOW` 时，它不会在最后路径组件中跟随符号链接，但会跟随路径的其余部分。防止在路径中跟随符号链接的正确方法是使用标志 `O_NOFOLLOW_ANY`。
 
 ## .fileloc
 
@@ -74,7 +74,7 @@ xattr -d com.apple.quarantine /path/to/file_or_app
 ```
 ### uchg / uchange / uimmutable 标志
 
-如果一个文件/文件夹具有此不可变属性，则无法在其上放置 xattr。
+如果一个文件/文件夹具有此不可变属性，则无法在其上设置 xattr。
 ```bash
 echo asd > /tmp/asd
 chflags uchg /tmp/asd # "chflags uchange /tmp/asd" or "chflags uimmutable /tmp/asd"
@@ -120,7 +120,7 @@ ls -le /tmp/test
 ```
 ### **com.apple.acl.text xattr + AppleDouble**
 
-**AppleDouble** 文件格式复制一个文件及其 ACEs。
+**AppleDouble** 文件格式复制一个文件及其 ACE。
 
 在 [**源代码**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) 中可以看到，存储在名为 **`com.apple.acl.text`** 的 xattr 中的 ACL 文本表示将被设置为解压缩文件中的 ACL。因此，如果你将一个应用程序压缩成一个带有 ACL 的 **AppleDouble** 文件格式的 zip 文件，该 ACL 阻止其他 xattrs 被写入... 那么隔离 xattr 并没有被设置到应用程序中：
 
@@ -248,7 +248,7 @@ hdiutil detach /private/tmp/mnt 1>/dev/null
 # You can also create a dmg from an app using:
 hdiutil create -srcfolder justsome.app justsome.dmg
 ```
-通常，macOS 通过 `com.apple.DiskArbitrarion.diskarbitrariond` Mach 服务（由 `/usr/libexec/diskarbitrationd` 提供）挂载磁盘。如果在 LaunchDaemons plist 文件中添加参数 `-d` 并重启，它将把日志存储在 `/var/log/diskarbitrationd.log` 中。\
+通常，macOS 通过与 `com.apple.DiskArbitrarion.diskarbitrariond` Mach 服务（由 `/usr/libexec/diskarbitrationd` 提供）进行通信来挂载磁盘。如果在 LaunchDaemons plist 文件中添加参数 `-d` 并重启，它将把日志存储在 `/var/log/diskarbitrationd.log` 中。\
 然而，可以使用像 `hdik` 和 `hdiutil` 这样的工具直接与 `com.apple.driver.DiskImages` kext 进行通信。
 
 ## 任意写入
@@ -261,7 +261,7 @@ hdiutil create -srcfolder justsome.app justsome.dmg
 
 ### 守护进程
 
-编写一个任意的 **LaunchDaemon**，如 **`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`**，其中 plist 执行一个任意脚本，如：
+编写一个任意的 **LaunchDaemon**，例如 **`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`**，其中 plist 执行一个任意脚本，如：
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -306,13 +306,13 @@ LogFilePerm 777
 
 然后，再次修改文件 `/etc/cups/cups-files.conf`，指示 `LogFilePerm 700`，以便新的 sudoers 文件在调用 `cupsctl` 时变得有效。
 
-### 沙箱逃逸
+### 沙盒逃逸
 
-可以通过 FS 任意写入来逃逸 macOS 沙箱。有关一些示例，请查看页面 [macOS Auto Start](../../../../macos-auto-start-locations.md)，但一个常见的例子是在 `~/Library/Preferences/com.apple.Terminal.plist` 中写入一个终端首选项文件，该文件在启动时执行一个命令，并使用 `open` 调用它。
+可以通过 FS 任意写入来逃逸 macOS 沙盒。有关一些示例，请查看页面 [macOS Auto Start](../../../../macos-auto-start-locations.md)，但一个常见的例子是在 `~/Library/Preferences/com.apple.Terminal.plist` 中写入一个终端首选项文件，该文件在启动时执行一个命令，并使用 `open` 调用它。
 
-## 生成可写文件作为其他用户
+## 生成其他用户可写的文件
 
-这将生成一个属于 root 的文件，我可以写入（[**代码来自这里**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)）。这也可能作为权限提升有效：
+这将生成一个属于 root 的文件，我可以写入（[**代码来自这里**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)）。这也可能作为权限提升的手段：
 ```bash
 DIRNAME=/usr/local/etc/periodic/daily
 

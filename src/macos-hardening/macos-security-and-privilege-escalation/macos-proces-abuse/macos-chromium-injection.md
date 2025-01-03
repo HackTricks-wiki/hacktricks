@@ -4,7 +4,7 @@
 
 ## 基本信息
 
-基于 Chromium 的浏览器，如 Google Chrome、Microsoft Edge、Brave 等。这些浏览器建立在 Chromium 开源项目上，这意味着它们共享一个共同的基础，因此具有相似的功能和开发选项。
+基于 Chromium 的浏览器，如 Google Chrome、Microsoft Edge、Brave 等。这些浏览器建立在 Chromium 开源项目上，这意味着它们共享一个共同的基础，因此具有类似的功能和开发者选项。
 
 #### `--load-extension` 标志
 

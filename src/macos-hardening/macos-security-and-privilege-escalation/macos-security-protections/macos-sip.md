@@ -4,7 +4,7 @@
 
 ## **基本信息**
 
-**系统完整性保护 (SIP)** 在 macOS 中是一种机制，旨在防止即使是最特权的用户也对关键系统文件夹进行未经授权的更改。此功能在通过限制在受保护区域内添加、修改或删除文件等操作来维护系统的完整性方面发挥着至关重要的作用。SIP 保护的主要文件夹包括：
+**系统完整性保护 (SIP)** 在 macOS 中是一种机制，旨在防止即使是最特权的用户也对关键系统文件夹进行未经授权的更改。此功能在维护系统完整性方面发挥着至关重要的作用，通过限制在受保护区域内添加、修改或删除文件等操作。SIP 保护的主要文件夹包括：
 
 - **/System**
 - **/bin**
@@ -13,14 +13,14 @@
 
 管理 SIP 行为的规则定义在位于 **`/System/Library/Sandbox/rootless.conf`** 的配置文件中。在此文件中，以星号 (\*) 开头的路径被视为对其他严格 SIP 限制的例外。
 
-考虑下面的示例：
+考虑以下示例：
 ```javascript
 /usr
 * /usr/libexec/cups
 * /usr/local
 * /usr/share/man
 ```
-这个片段暗示，虽然 SIP 通常保护 **`/usr`** 目录，但有特定的子目录（`/usr/libexec/cups`、`/usr/local` 和 `/usr/share/man`）可以进行修改，如路径前的星号（*）所示。
+这个片段暗示，虽然 SIP 通常保护 **`/usr`** 目录，但有一些特定的子目录（`/usr/libexec/cups`、`/usr/local` 和 `/usr/share/man`）是允许修改的，如其路径前的星号（\*）所示。
 
 要验证某个目录或文件是否受到 SIP 保护，可以使用 **`ls -lOd`** 命令检查是否存在 **`restricted`** 或 **`sunlnk`** 标志。例如：
 ```bash
@@ -36,7 +36,7 @@ drwxr-xr-x  338 root  wheel  restricted 10816 May 13 00:29 /usr/libexec
 ```
 这里，**`restricted`** 标志表示 `/usr/libexec` 目录受到 SIP 保护。在 SIP 保护的目录中，无法创建、修改或删除文件。
 
-此外，如果一个文件包含 **`com.apple.rootless`** 扩展 **属性**，该文件也将受到 **SIP 保护**。
+此外，如果一个文件包含属性 **`com.apple.rootless`** 扩展 **属性**，该文件也将 **受到 SIP 保护**。
 
 > [!TIP]
 > 请注意，**Sandbox** 钩子 **`hook_vnode_check_setextattr`** 阻止任何尝试修改扩展属性 **`com.apple.rootless`** 的行为。
@@ -48,7 +48,7 @@ drwxr-xr-x  338 root  wheel  restricted 10816 May 13 00:29 /usr/libexec
 - 修改 NVRAM 变量
 - 允许内核调试
 
-选项以位标志的形式保存在 nvram 变量中（在 Intel 上为 `csr-active-config`，在 ARM 上从启动的设备树读取 `lp-sip0`）。您可以在 `csr.sh` 中找到这些标志：
+选项以位标志的形式保存在 nvram 变量中（在 Intel 上为 `csr-active-config`，在 ARM 上从启动的设备树中读取 `lp-sip0`）。您可以在 `csr.sh` 中找到这些标志：
 
 <figure><img src="../../../images/image (1192).png" alt=""><figcaption></figcaption></figure>
 
@@ -94,7 +94,7 @@ csrutil enable --without debug
 
 - **访问用户数据**：读取所有用户帐户的敏感用户数据，如邮件、消息和 Safari 历史记录。
 - **TCC 绕过**：直接操纵 TCC（透明性、同意和控制）数据库，以授予对网络摄像头、麦克风和其他资源的未经授权访问。
-- **建立持久性**：在 SIP 保护的位置放置恶意软件，使其即使在 root 权限下也难以删除。这还包括篡改恶意软件删除工具（MRT）的潜在能力。
+- **建立持久性**：在 SIP 保护的位置放置恶意软件，使其即使在 root 权限下也难以删除。这还包括篡改恶意软件删除工具（MRT）的潜力。
 - **加载内核扩展**：尽管有额外的保护，绕过 SIP 简化了加载未签名内核扩展的过程。
 
 ### 安装包
@@ -103,7 +103,7 @@ csrutil enable --without debug
 
 ### 不存在的 SIP 文件
 
-一个潜在的漏洞是，如果在 **`rootless.conf` 中指定了一个文件但当前不存在**，则可以创建该文件。恶意软件可以利用这一点在系统上 **建立持久性**。例如，如果恶意程序在 `rootless.conf` 中列出但不存在，它可以在 `/System/Library/LaunchDaemons` 中创建一个 .plist 文件。
+一个潜在的漏洞是，如果在 **`rootless.conf` 中指定了一个文件但当前不存在**，则可以创建它。恶意软件可以利用这一点在系统上 **建立持久性**。例如，如果恶意程序在 `rootless.conf` 中列出但不存在，它可以在 `/System/Library/LaunchDaemons` 中创建一个 .plist 文件。
 
 ### com.apple.rootless.install.heritable
 
@@ -112,11 +112,11 @@ csrutil enable --without debug
 
 #### [CVE-2019-8561](https://objective-see.org/blog/blog_0x42.html) <a href="#cve" id="cve"></a>
 
-发现可以在 **系统验证其代码** 签名后 **交换安装包**，然后系统将安装恶意包而不是原始包。由于这些操作是由 **`system_installd`** 执行的，因此可以绕过 SIP。
+发现可以在系统验证其代码签名后 **交换安装包**，然后系统将安装恶意包而不是原始包。由于这些操作是由 **`system_installd`** 执行的，因此可以绕过 SIP。
 
 #### [CVE-2020–9854](https://objective-see.org/blog/blog_0x4D.html) <a href="#cve-unauthd-chain" id="cve-unauthd-chain"></a>
 
-如果从挂载的映像或外部驱动器安装包，**安装程序** 将 **执行** 来自 **该文件系统** 的二进制文件（而不是来自 SIP 保护的位置），使 **`system_installd`** 执行任意二进制文件。
+如果从挂载的映像或外部驱动器安装包，**安装程序**将 **执行** 来自 **该文件系统** 的二进制文件（而不是来自 SIP 保护的位置），使 **`system_installd`** 执行任意二进制文件。
 
 #### CVE-2021-30892 - Shrootless
 
@@ -130,11 +130,11 @@ csrutil enable --without debug
 
 #### [**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-2022-22583/)
 
-在 [**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-2022-22583/) 中发现同样的 **`system_installd`** 进程仍然可以被滥用，因为它将 **后安装脚本放在 SIP 保护的 `/tmp` 中的随机命名文件夹内**。问题在于 **`/tmp` 本身并不受 SIP 保护**，因此可以 **挂载** 一个 **虚拟映像**，然后 **安装程序** 会将 **后安装脚本** 放入其中，**卸载** 虚拟映像，**重新创建** 所有 **文件夹** 并 **添加** 带有 **有效负载** 的 **后安装** 脚本以执行。
+在 [**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-2022-22583/) 中发现同样的 **`system_installd`** 进程仍然可以被滥用，因为它将 **后安装脚本放在一个随机命名的文件夹中，该文件夹在 `/tmp` 中受 SIP 保护**。问题是 **`/tmp` 本身并不受 SIP 保护**，因此可以在其上 **挂载** 一个 **虚拟映像**，然后 **安装程序** 会将 **后安装脚本** 放入其中，**卸载** 虚拟映像，**重新创建** 所有 **文件夹** 并 **添加** 带有 **有效负载** 的 **后安装** 脚本以执行。
 
 #### [fsck_cs 工具](https://www.theregister.com/2016/03/30/apple_os_x_rootless/)
 
-发现了一个漏洞，其中 **`fsck_cs`** 被误导以破坏一个关键文件，因为它能够跟随 **符号链接**。具体来说，攻击者从 _`/dev/diskX`_ 创建了一个指向文件 `/System/Library/Extensions/AppleKextExcludeList.kext/Contents/Info.plist` 的链接。在 _`/dev/diskX`_ 上执行 **`fsck_cs`** 导致 `Info.plist` 的损坏。该文件的完整性对操作系统的 SIP（系统完整性保护）至关重要，SIP 控制内核扩展的加载。一旦损坏，SIP 管理内核排除的能力就会受到影响。
+发现了一个漏洞，其中 **`fsck_cs`** 被误导以损坏一个关键文件，因为它能够跟随 **符号链接**。具体来说，攻击者从 _`/dev/diskX`_ 创建了一个指向文件 `/System/Library/Extensions/AppleKextExcludeList.kext/Contents/Info.plist` 的链接。在 _`/dev/diskX`_ 上执行 **`fsck_cs`** 导致 `Info.plist` 的损坏。该文件的完整性对操作系统的 SIP（系统完整性保护）至关重要，SIP 控制内核扩展的加载。一旦损坏，SIP 管理内核排除的能力就会受到影响。
 
 利用此漏洞的命令是：
 ```bash
@@ -164,15 +164,15 @@ hdiutil attach -mountpoint /System/Library/Snadbox/ evil.dmg
 
 攻击者的代码在升级过程中获得控制权，利用系统对安装程序的信任。攻击通过通过方法调换更改`InstallESD.dmg`映像，特别针对`extractBootBits`方法。这允许在使用磁盘映像之前注入恶意代码。
 
-此外，在`InstallESD.dmg`中，有一个`BaseSystem.dmg`，它作为升级代码的根文件系统。将动态库注入其中使得恶意代码能够在能够更改操作系统级文件的进程中运行，显著增加了系统被攻陷的潜力。
+此外，在`InstallESD.dmg`中，有一个`BaseSystem.dmg`，它作为升级代码的根文件系统。将动态库注入其中允许恶意代码在能够更改操作系统级文件的进程中运行，显著增加了系统被攻陷的潜力。
 
 #### [systemmigrationd (2023)](https://www.youtube.com/watch?v=zxZesAN-TEk)
 
-在[**DEF CON 31**](https://www.youtube.com/watch?v=zxZesAN-TEk)的演讲中，展示了如何**`systemmigrationd`**（可以绕过SIP）执行**bash**和**perl**脚本，这可以通过环境变量**`BASH_ENV`**和**`PERL5OPT`**进行滥用。
+在[**DEF CON 31**](https://www.youtube.com/watch?v=zxZesAN-TEk)的演讲中，展示了如何**`systemmigrationd`**（可以绕过SIP）执行**bash**和**perl**脚本，这可以通过环境变量**`BASH_ENV`**和**`PERL5OPT`**被滥用。
 
 #### CVE-2023-42860 <a href="#cve-a-detailed-look" id="cve-a-detailed-look"></a>
 
-正如[**这篇博客文章中详细说明的**](https://blog.kandji.io/apple-mitigates-vulnerabilities-installer-scripts)，`InstallAssistant.pkg`包中的`postinstall`脚本允许执行：
+正如[**在这篇博客文章中详细说明的**](https://blog.kandji.io/apple-mitigates-vulnerabilities-installer-scripts)，`InstallAssistant.pkg`包中的`postinstall`脚本允许执行：
 ```bash
 /usr/bin/chflags -h norestricted "${SHARED_SUPPORT_PATH}/SharedSupport.dmg"
 ```
@@ -185,7 +185,7 @@ hdiutil attach -mountpoint /System/Library/Snadbox/ evil.dmg
 
 权限 `com.apple.rootless.install` 被认为可以绕过 macOS 的系统完整性保护 (SIP)。这在与 [**CVE-2022-26712**](https://jhftss.github.io/CVE-2022-26712-The-POC-For-SIP-Bypass-Is-Even-Tweetable/) 相关时特别提到。
 
-在这个特定情况下，位于 `/System/Library/PrivateFrameworks/ShoveService.framework/Versions/A/XPCServices/SystemShoveService.xpc` 的系统 XPC 服务拥有此权限。这使得相关进程能够规避 SIP 限制。此外，该服务显著提供了一种方法，允许在不执行任何安全措施的情况下移动文件。
+在这个特定情况下，位于 `/System/Library/PrivateFrameworks/ShoveService.framework/Versions/A/XPCServices/SystemShoveService.xpc` 的系统 XPC 服务拥有此权限。这使得相关进程能够绕过 SIP 限制。此外，该服务显著提供了一种方法，允许在不执行任何安全措施的情况下移动文件。
 
 ## 密封系统快照
 
@@ -193,11 +193,11 @@ hdiutil attach -mountpoint /System/Library/Snadbox/ evil.dmg
 
 以下是更详细的介绍：
 
-1. **不可变系统**：密封系统快照使 macOS 系统卷变为“不可变”，这意味着它无法被修改。这防止了任何未经授权或意外的更改，从而可能危及安全性或系统稳定性。
+1. **不可变系统**：密封系统快照使 macOS 系统卷变得“不可变”，这意味着它无法被修改。这防止了任何未经授权或意外的更改，从而可能危及安全性或系统稳定性。
 2. **系统软件更新**：当您安装 macOS 更新或升级时，macOS 会创建一个新的系统快照。macOS 启动卷随后使用 **APFS (Apple 文件系统)** 切换到这个新快照。应用更新的整个过程变得更安全、更可靠，因为系统始终可以在更新过程中出现问题时恢复到先前的快照。
 3. **数据分离**：结合在 macOS Catalina 中引入的数据和系统卷分离的概念，密封系统快照功能确保您的所有数据和设置存储在一个单独的“**数据**”卷上。这种分离使您的数据独立于系统，从而简化了系统更新的过程并增强了系统安全性。
 
-请记住，这些快照由 macOS 自动管理，并且由于 APFS 的空间共享能力，不会占用您磁盘上的额外空间。还需要注意的是，这些快照与 **时间机器快照** 不同，后者是用户可访问的整个系统的备份。
+请记住，这些快照由 macOS 自动管理，并且由于 APFS 的空间共享功能，不会占用您磁盘上的额外空间。还需要注意的是，这些快照与 **Time Machine 快照** 不同，后者是用户可访问的整个系统的备份。
 
 ### 检查快照
 
@@ -218,11 +218,11 @@ hdiutil attach -mountpoint /System/Library/Snadbox/ evil.dmg
 |   +-> Volume disk3s1 7A27E734-880F-4D91-A703-FB55861D49B7
 |   |   ---------------------------------------------------
 <strong>|   |   APFS Volume Disk (Role):   disk3s1 (System)
-</strong>|   |   Name:                      Macintosh HD (不区分大小写)
+</strong>|   |   Name:                      Macintosh HD (Case-insensitive)
 <strong>|   |   Mount Point:               /System/Volumes/Update/mnt1
 </strong>|   |   Capacity Consumed:         12819210240 B (12.8 GB)
 |   |   Sealed:                    Broken
-|   |   FileVault:                 Yes (解锁)
+|   |   FileVault:                 Yes (Unlocked)
 |   |   Encrypted:                 No
 |   |   |
 |   |   Snapshot:                  FAA23E0C-791C-43FF-B0E7-0E1C0810AC61
@@ -233,11 +233,11 @@ hdiutil attach -mountpoint /System/Library/Snadbox/ evil.dmg
 +-> Volume disk3s5 281959B7-07A1-4940-BDDF-6419360F3327
 |   ---------------------------------------------------
 |   APFS Volume Disk (Role):   disk3s5 (Data)
-|   Name:                      Macintosh HD - Data (不区分大小写)
+|   Name:                      Macintosh HD - Data (Case-insensitive)
 <strong>    |   Mount Point:               /System/Volumes/Data
 </strong><strong>    |   Capacity Consumed:         412071784448 B (412.1 GB)
 </strong>    |   Sealed:                    No
-|   FileVault:                 Yes (解锁)
+|   FileVault:                 Yes (Unlocked)
 </code></pre>
 
 在之前的输出中，可以看到 **用户可访问的位置** 被挂载在 `/System/Volumes/Data` 下。

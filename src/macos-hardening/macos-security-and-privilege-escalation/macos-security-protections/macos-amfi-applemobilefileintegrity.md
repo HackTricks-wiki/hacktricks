@@ -22,12 +22,12 @@ AMFI 使用 **MACF** 策略，并在启动时注册其钩子。此外，防止�
 - **`cred_label_associate`**: 用标签更新 AMFI 的 mac 标签槽
 - **`cred_label_destroy`**: 移除 AMFI 的 mac 标签槽
 - **`cred_label_init`**: 在 AMFI 的 mac 标签槽中移动 0
-- **`cred_label_update_execve`:** 它检查进程的权限，以查看是否允许修改标签。
+- **`cred_label_update_execve`:** 它检查进程的权限，以查看是否应允许修改标签。
 - **`file_check_mmap`:** 它检查 mmap 是否获取内存并将其设置为可执行。如果是这种情况，它会检查是否需要库验证，如果需要，则调用库验证函数。
 - **`file_check_library_validation`**: 调用库验证函数，该函数检查其他内容是否平台二进制文件正在加载另一个平台二进制文件，或者进程和新加载的文件是否具有相同的 TeamID。某些权限也将允许加载任何库。
 - **`policy_initbsd`**: 设置受信任的 NVRAM 密钥
 - **`policy_syscall`**: 它检查 DYLD 策略，例如二进制文件是否具有不受限制的段，是否应允许环境变量……当通过 `amfi_check_dyld_policy_self()` 启动进程时也会调用此函数。
-- **`proc_check_inherit_ipc_ports`**: 它检查当进程执行新二进制文件时，是否应保留其他具有发送权限的进程对该进程的任务端口。平台二进制文件被允许，`get-task-allow` 权限允许它，`task_for_pid-allow` 权限被允许，具有相同 TeamID 的二进制文件。
+- **`proc_check_inherit_ipc_ports`**: 它检查当进程执行新二进制文件时，是否应保留其他具有发送权限的进程对该进程的任务端口。平台二进制文件是允许的，`get-task-allow` 权限允许它，`task_for_pid-allow` 权限是允许的，具有相同 TeamID 的二进制文件。
 - **`proc_check_expose_task`**: 强制执行权限
 - **`amfi_exc_action_check_exception_send`**: 向调试器发送异常消息
 - **`amfi_exc_action_label_associate & amfi_exc_action_label_copy/populate & amfi_exc_action_label_destroy & amfi_exc_action_label_init & amfi_exc_action_label_update`**: 异常处理（调试）期间的标签生命周期

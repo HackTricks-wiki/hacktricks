@@ -19,7 +19,7 @@
 
 ## 2. 用于通信的 Mach 端口
 
-接下来的阶段涉及建立 Mach 端口，以促进与远程线程的通信。这些端口在任务之间传输任意的发送和接收权限中起着重要作用。
+接下来的阶段涉及建立 Mach 端口，以促进与远程线程的通信。这些端口在任务之间传输任意发送和接收权限方面至关重要。
 
 为了实现双向通信，创建两个 Mach 接收权限：一个在本地任务中，另一个在远程任务中。随后，将每个端口的发送权限转移到对应的任务，从而实现消息交换。
 
@@ -27,7 +27,7 @@
 
 一种策略是利用 `thread_set_special_port()` 将本地端口的发送权限放置在远程线程的 `THREAD_KERNEL_PORT` 中。然后，指示远程线程调用 `mach_thread_self()` 以检索发送权限。
 
-对于远程端口，过程基本上是反向的。指示远程线程通过 `mach_reply_port()` 生成一个 Mach 端口（因为 `mach_port_allocate()` 由于其返回机制不适用）。在端口创建后，在远程线程中调用 `mach_port_insert_right()` 来建立发送权限。然后使用 `thread_set_special_port()` 将该权限存储在内核中。在本地任务中，使用 `thread_get_special_port()` 在远程线程上获取对远程任务中新分配的 Mach 端口的发送权限。
+对于远程端口，过程基本上是反向的。指示远程线程通过 `mach_reply_port()` 生成一个 Mach 端口（因为 `mach_port_allocate()` 由于其返回机制不适用）。在端口创建后，在远程线程中调用 `mach_port_insert_right()` 以建立发送权限。然后，该权限通过 `thread_set_special_port()` 存储在内核中。在本地任务中，使用 `thread_get_special_port()` 在远程线程上获取对远程任务中新分配的 Mach 端口的发送权限。
 
 完成这些步骤后，建立了 Mach 端口，为双向通信奠定了基础。
 
@@ -82,7 +82,7 @@ ret
 ```c
 _xpc_int64_set_value(address - 0x18, value)
 ```
-通过建立这些原语，创建共享内存的阶段已经设定，这标志着对远程进程控制的重大进展。
+通过建立这些原语，创建共享内存的阶段已经设定，这标志着在控制远程进程方面的重大进展。
 
 ## 4. 共享内存设置
 
@@ -93,7 +93,7 @@ _xpc_int64_set_value(address - 0x18, value)
 1. **内存分配**：
 
 - 使用 `mach_vm_allocate()` 分配共享内存。
-- 使用 `xpc_shmem_create()` 为分配的内存区域创建一个 `OS_xpc_shmem` 对象。此函数将管理 Mach 内存条目的创建，并在 `OS_xpc_shmem` 对象的偏移量 `0x18` 存储 Mach 发送权限。
+- 使用 `xpc_shmem_create()` 为分配的内存区域创建一个 `OS_xpc_shmem` 对象。此函数将管理 Mach 内存条目的创建，并在 `OS_xpc_shmem` 对象的偏移量 `0x18` 处存储 Mach 发送权限。
 
 2. **在远程进程中创建共享内存**：
 
@@ -134,7 +134,7 @@ thread_set_special_port(); // for inserting send right
 - 通过调用`memcpy()`从共享区域复制数据，执行任意内存读取。
 - 通过使用`memcpy()`将数据传输到共享区域，执行任意内存写入。
 
-2. **处理多个参数的函数调用**：
+2. **处理具有多个参数的函数调用**：
 
 - 对于需要超过8个参数的函数，按照调用约定将额外参数安排在栈上。
 
@@ -145,7 +145,7 @@ thread_set_special_port(); // for inserting send right
 4. **文件描述符传输**：
 - 使用fileports在进程之间传输文件描述符，这一技术由Ian Beer在`triple_fetch`中强调。
 
-这种全面控制被封装在[threadexec](https://github.com/bazad/threadexec)库中，提供了详细的实现和用户友好的API，以便与受害进程进行交互。
+这种全面控制封装在[threadexec](https://github.com/bazad/threadexec)库中，提供了详细的实现和用户友好的API，以便与受害进程进行交互。
 
 ## 重要考虑事项：
 

