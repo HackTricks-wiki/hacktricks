@@ -2,72 +2,66 @@
 
 # ECB
 
-(ECB) Electronic Code Book - symmetric encryption scheme which **replaces each block of the clear text** by the **block of ciphertext**. It is the **simplest** encryption scheme. The main idea is to **split** the clear text into **blocks of N bits** (depends on the size of the block of input data, encryption algorithm) and then to encrypt (decrypt) each block of clear text using the only key.
+(ECB) Elektronik Kod Kitabı - her **açık metin bloğunu** **şifreli metin bloğu ile** değiştiren simetrik şifreleme şemasıdır. Bu, en **basit** şifreleme şemasınıdır. Ana fikir, açık metni **N bitlik bloklara** **bölmek** (giriş verisinin blok boyutuna, şifreleme algoritmasına bağlıdır) ve ardından her açık metin bloğunu yalnızca bir anahtar kullanarak şifrelemektir (şifre çözmektir).
 
 ![](https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/ECB_decryption.svg/601px-ECB_decryption.svg.png)
 
-Using ECB has multiple security implications:
+ECB kullanmanın birçok güvenlik etkisi vardır:
 
-- **Blocks from encrypted message can be removed**
-- **Blocks from encrypted message can be moved around**
+- **Şifreli mesajdan bloklar çıkarılabilir**
+- **Şifreli mesajdan bloklar yer değiştirebilir**
 
-# Detection of the vulnerability
+# Zafiyetin Tespiti
 
-Imagine you login into an application several times and you **always get the same cookie**. This is because the cookie of the application is **`<username>|<password>`**.\
-Then, you generate to new users, both of them with the **same long password** and **almost** the **same** **username**.\
-You find out that the **blocks of 8B** where the **info of both users** is the same are **equals**. Then, you imagine that this might be because **ECB is being used**.
+Bir uygulamaya birkaç kez giriş yaptığınızı ve **her zaman aynı çerezi** aldığınızı hayal edin. Bunun nedeni, uygulamanın çerezinin **`<kullanıcı_adı>|<şifre>`** olmasıdır.\
+Sonra, her ikisi de **aynı uzun şifreye** ve **neredeyse** **aynı** **kullanıcı adına** sahip yeni kullanıcılar oluşturursunuz.\
+Her iki kullanıcının **bilgilerinin** aynı olduğu **8B'lik blokların** **eşit** olduğunu keşfedersiniz. Sonra, bunun **ECB'nin kullanılıyor olabileceği** nedeniyle olabileceğini hayal edersiniz.
 
-Like in the following example. Observe how these** 2 decoded cookies** has several times the block **`\x23U\xE45K\xCB\x21\xC8`**
-
+Aşağıdaki örnekte olduğu gibi. Bu **2 çözülmüş çerezin** nasıl birkaç kez **`\x23U\xE45K\xCB\x21\xC8`** bloğunu içerdiğine dikkat edin.
 ```
 \x23U\xE45K\xCB\x21\xC8\x23U\xE45K\xCB\x21\xC8\x04\xB6\xE1H\xD1\x1E \xB6\x23U\xE45K\xCB\x21\xC8\x23U\xE45K\xCB\x21\xC8+=\xD4F\xF7\x99\xD9\xA9
 
 \x23U\xE45K\xCB\x21\xC8\x23U\xE45K\xCB\x21\xC8\x04\xB6\xE1H\xD1\x1E \xB6\x23U\xE45K\xCB\x21\xC8\x23U\xE45K\xCB\x21\xC8+=\xD4F\xF7\x99\xD9\xA9
 ```
+Bu, **bu çerezlerin kullanıcı adı ve şifresinin birkaç kez "a" harfini içermesinden** kaynaklanmaktadır (örneğin). **Farklı** olan **bloklar**, **en az 1 farklı karakter** içeren bloklardır (belki ayırıcı "|" veya kullanıcı adındaki bazı gerekli farklılık).
 
-This is because the **username and password of those cookies contained several times the letter "a"** (for example). The **blocks** that are **different** are blocks that contained **at least 1 different character** (maybe the delimiter "|" or some necessary difference in the username).
+Şimdi, saldırganın formatın `<username><delimiter><password>` mi yoksa `<password><delimiter><username>` mi olduğunu keşfetmesi gerekiyor. Bunu yapmak için, sadece **benzer ve uzun kullanıcı adları ve şifreler ile birkaç kullanıcı adı oluşturabilir** ve formatı ve ayırıcının uzunluğunu bulana kadar devam edebilir:
 
-Now, the attacker just need to discover if the format is `<username><delimiter><password>` or `<password><delimiter><username>`. For doing that, he can just **generate several usernames **with s**imilar and long usernames and passwords until he find the format and the length of the delimiter:**
+| Kullanıcı adı uzunluğu: | Şifre uzunluğu: | Kullanıcı adı+Şifre uzunluğu: | Çerezin uzunluğu (çözüldükten sonra): |
+| ----------------------- | ---------------- | ------------------------------ | ------------------------------------- |
+| 2                       | 2                | 4                              | 8                                     |
+| 3                       | 3                | 6                              | 8                                     |
+| 3                       | 4                | 7                              | 8                                     |
+| 4                       | 4                | 8                              | 16                                    |
+| 7                       | 7                | 14                             | 16                                    |
 
-| Username length: | Password length: | Username+Password length: | Cookie's length (after decoding): |
-| ---------------- | ---------------- | ------------------------- | --------------------------------- |
-| 2                | 2                | 4                         | 8                                 |
-| 3                | 3                | 6                         | 8                                 |
-| 3                | 4                | 7                         | 8                                 |
-| 4                | 4                | 8                         | 16                                |
-| 7                | 7                | 14                        | 16                                |
+# Açığın istismarı
 
-# Exploitation of the vulnerability
+## Tüm blokları kaldırma
 
-## Removing entire blocks
-
-Knowing the format of the cookie (`<username>|<password>`), in order to impersonate the username `admin` create a new user called `aaaaaaaaadmin` and get the cookie and decode it:
-
+Çerezin formatını bilerek (`<username>|<password>`), `admin` kullanıcı adını taklit etmek için `aaaaaaaaadmin` adında yeni bir kullanıcı oluşturun ve çerezi alın ve çözün:
 ```
 \x23U\xE45K\xCB\x21\xC8\xE0Vd8oE\x123\aO\x43T\x32\xD5U\xD4
 ```
-
-We can see the pattern `\x23U\xE45K\xCB\x21\xC8` created previously with the username that contained only `a`.\
-Then, you can remove the first block of 8B and you will et a valid cookie for the username `admin`:
-
+Önceden yalnızca `a` içeren kullanıcı adıyla oluşturulan `\x23U\xE45K\xCB\x21\xC8` desenini görebiliriz.\
+Ardından, 8B'nin ilk bloğunu kaldırabilir ve `admin` kullanıcı adı için geçerli bir çerez elde edersiniz:
 ```
 \xE0Vd8oE\x123\aO\x43T\x32\xD5U\xD4
 ```
+## Blokları Taşıma
 
-## Moving blocks
+Birçok veritabanında `WHERE username='admin';` veya `WHERE username='admin    ';` aramak aynı şeydir _(Ekstra boşluklara dikkat edin)_
 
-In many databases it is the same to search for `WHERE username='admin';` or for `WHERE username='admin    ';` _(Note the extra spaces)_
+Bu nedenle, `admin` kullanıcısını taklit etmenin başka bir yolu:
 
-So, another way to impersonate the user `admin` would be to:
+- `len(<username>) + len(<delimiter) % len(block)` olan bir kullanıcı adı oluşturmak. `8B` blok boyutuyla, `username       ` adında bir kullanıcı adı oluşturabilirsiniz; ayırıcı olarak `|` kullanıldığında `<username><delimiter>` parçası 2 adet 8B blok oluşturacaktır.
+- Ardından, taklit etmek istediğimiz kullanıcı adını ve boşlukları içeren tam sayıda blok dolduracak bir şifre oluşturmak, örneğin: `admin   `
 
-- Generate a username that: `len(<username>) + len(<delimiter) % len(block)`. With a block size of `8B` you can generate username called: `username       `, with the delimiter `|` the chunk `<username><delimiter>` will generate 2 blocks of 8Bs.
-- Then, generate a password that will fill an exact number of blocks containing the username we want to impersonate and spaces, like: `admin   `
+Bu kullanıcının çerezi 3 bloktan oluşacak: ilk 2 blok kullanıcı adı + ayırıcı blokları ve üçüncü blok şifre (kullanıcı adını taklit eden): `username       |admin   `
 
-The cookie of this user is going to be composed by 3 blocks: the first 2 is the blocks of the username + delimiter and the third one of the password (which is faking the username): `username       |admin   `
+**Sonra, sadece ilk bloğu son blokla değiştirin ve `admin` kullanıcısını taklit etmiş olacaksınız: `admin          |username`**
 
-**Then, just replace the first block with the last time and will be impersonating the user `admin`: `admin          |username`**
-
-## References
+## Referanslar
 
 - [http://cryptowiki.net/index.php?title=Electronic_Code_Book\_(ECB)](<http://cryptowiki.net/index.php?title=Electronic_Code_Book_(ECB)>)
 

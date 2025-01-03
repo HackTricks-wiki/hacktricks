@@ -4,9 +4,9 @@
 
 ## Function Interposing
 
-Bir **dylib** oluşturun ve içinde **`__interpose`** bölümü (veya **`S_INTERPOSING`** ile işaretlenmiş bir bölüm) bulunan, **orijinal** ve **yerine geçen** fonksiyonlara atıfta bulunan **fonksiyon işaretçileri** çiftleri içersin.
+Bir **dylib** oluşturun ve içinde **`__interpose`** bölümü (veya **`S_INTERPOSING`** ile işaretlenmiş bir bölüm) bulunan, **orijinal** ve **değiştirme** fonksiyonlarına atıfta bulunan **fonksiyon işaretçileri** çiftleri içersin.
 
-Ardından, **`DYLD_INSERT_LIBRARIES`** ile dylib'i **enjekte** edin (interposing, ana uygulama yüklenmeden önce gerçekleşmelidir). Açıkça, [**`DYLD_INSERT_LIBRARIES`** kullanımına uygulanan **kısıtlamalar** burada da geçerlidir](../macos-proces-abuse/macos-library-injection/#check-restrictions).&#x20;
+Sonra, **`DYLD_INSERT_LIBRARIES`** ile dylib'i **enjekte** edin (interposing, ana uygulama yüklenmeden önce gerçekleşmelidir). Açıkça, [**`DYLD_INSERT_LIBRARIES`** kullanımına uygulanan **kısıtlamalar** burada da geçerlidir](../macos-proces-abuse/macos-library-injection/#check-restrictions).&#x20;
 
 ### Interpose printf
 
@@ -85,14 +85,14 @@ ObjectiveC'de bir metod şu şekilde çağrılır: **`[myClassInstance nameOfThe
 
 Nesne **`someObject`**, metod **`@selector(method1p1:p2:)`** ve argümanlar **value1**, **value2**'dir.
 
-Nesne yapıları takip edilerek, **metodların** **isimleri** ve metod koduna **işaretçiler** içeren bir **metodlar dizisine** ulaşmak mümkündür.
+Nesne yapıları takip edilerek, **metodların** **isimlerinin** ve metod koduna ait **işaretçilerin** **bulunduğu** bir **metodlar dizisine** ulaşmak mümkündür.
 
 > [!CAUTION]
-> Metodlar ve sınıflar isimlerine göre erişildiğinden, bu bilginin ikili dosyada saklandığını unutmayın, bu nedenle `otool -ov </path/bin>` veya [`class-dump </path/bin>`](https://github.com/nygard/class-dump) ile geri alınması mümkündür.
+> Metodlar ve sınıflar isimlerine göre erişildiğinden, bu bilginin ikili dosyada saklandığını unutmayın, bu nedenle `otool -ov </path/bin>` veya [`class-dump </path/bin>`](https://github.com/nygard/class-dump) ile geri almak mümkündür.
 
 ### Ham metodlara erişim
 
-Aşağıdaki örnekte olduğu gibi metodların adı, parametre sayısı veya adresi gibi bilgilerine erişmek mümkündür:
+Metodların ismi, parametre sayısı veya adresi gibi bilgilerine aşağıdaki örnekte olduğu gibi erişmek mümkündür:
 ```objectivec
 // gcc -framework Foundation test.m -o test
 
@@ -160,7 +160,7 @@ return 0;
 ```
 ### Method Swizzling with method_exchangeImplementations
 
-Fonksiyon **`method_exchangeImplementations`**, **bir fonksiyonun** **uygulamasının** **adresini** **diğerine değiştirmeye** olanak tanır.
+Fonksiyon **`method_exchangeImplementations`**, **bir fonksiyonun** **uygulamasının adresini** **diğerine değiştirmeye** olanak tanır.
 
 > [!CAUTION]
 > Bu nedenle bir fonksiyon çağrıldığında **çalıştırılan diğeri**dir.
@@ -212,11 +212,11 @@ return 0;
 >
 > Aşağıdaki teknik bu kısıtlamaya sahip değildir.
 
-### Method Swizzling with method_setImplementation
+### method_setImplementation ile Metod Swizzling
 
-Önceki format garip çünkü bir metodun uygulamasını diğerinin üzerine değiştiriyorsunuz. **`method_setImplementation`** fonksiyonunu kullanarak bir **metodun uygulamasını diğerinin** uygulamasıyla **değiştirebilirsiniz**.
+Önceki format garip çünkü bir metodun uygulamasını diğerinin üzerine değiştiriyorsunuz. **`method_setImplementation`** fonksiyonunu kullanarak bir **metodun uygulamasını diğerinin** üzerine **değiştirebilirsiniz**.
 
-Sadece, **orijinalinin uygulama adresini saklamayı** unutmayın, eğer onu yeni uygulamadan çağıracaksanız, çünkü daha sonra o adresi bulmak çok daha karmaşık olacaktır.
+Sadece, **orijinal olanın uygulama adresini saklamayı** unutmayın, eğer onu yeni uygulamadan çağıracaksanız, çünkü daha sonra o adresi bulmak çok daha karmaşık olacaktır.
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
@@ -272,13 +272,13 @@ return 0;
 
 Bu sayfada fonksiyonları hooklamak için farklı yollar tartışıldı. Ancak, bunlar **saldırı için süreç içinde kod çalıştırmayı** içeriyordu.
 
-Bunu yapmak için en kolay teknik, bir [Dyld'yi ortam değişkenleri aracılığıyla veya kaçırarak](../macos-dyld-hijacking-and-dyld_insert_libraries.md) enjekte etmektir. Ancak, bunun [Dylib süreç enjeksiyonu](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port) aracılığıyla da yapılabileceğini düşünüyorum.
+Bunu yapmak için en kolay teknik, bir [Dyld'yi ortam değişkenleri aracılığıyla veya ele geçirerek](../macos-dyld-hijacking-and-dyld_insert_libraries.md) enjekte etmektir. Ancak, bunun [Dylib süreç enjeksiyonu](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port) aracılığıyla da yapılabileceğini düşünüyorum.
 
 Ancak, her iki seçenek de **korumasız** ikili/süreçlerle **sınırlıdır**. Sınırlamalar hakkında daha fazla bilgi edinmek için her tekniği kontrol edin.
 
 Ancak, bir fonksiyon hooklama saldırısı çok spesifiktir, bir saldırgan bunu **bir süreçten hassas bilgileri çalmak için** yapar (aksi takdirde sadece bir süreç enjeksiyonu saldırısı yapardınız). Ve bu hassas bilgiler, MacPass gibi kullanıcı tarafından indirilen uygulamalarda bulunabilir.
 
-Bu nedenle, saldırgan vektörü ya bir zafiyet bulmak ya da uygulamanın imzasını kaldırmak, uygulamanın Info.plist dosyasına **`DYLD_INSERT_LIBRARIES`** env değişkenini eklemek olacaktır.
+Bu nedenle, saldırgan vektörü ya bir zafiyet bulmak ya da uygulamanın imzasını kaldırmak, uygulamanın Info.plist dosyasına **`DYLD_INSERT_LIBRARIES`** env değişkenini eklemek gibi bir şey eklemektir:
 ```xml
 <key>LSEnvironment</key>
 <dict>
@@ -290,10 +290,10 @@ ve ardından **uygulamayı yeniden kaydet**:
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f /Applications/Application.app
 ```
-Bu kütüphaneye bilgileri dışa aktarmak için hooking kodunu ekleyin: Parolalar, mesajlar...
+Kütüphaneye bilgileri dışa aktarmak için hooking kodunu ekleyin: Parolalar, mesajlar...
 
 > [!CAUTION]
-> Daha yeni macOS sürümlerinde, eğer uygulama ikili dosyasının **imzasını kaldırırsanız** ve daha önce çalıştırılmışsa, macOS **uygulamayı artık çalıştırmayacaktır**.
+> Daha yeni macOS sürümlerinde, eğer uygulama ikili dosyasının **imzasını kaldırırsanız** ve daha önce çalıştırılmışsa, macOS **uygulamayı bir daha çalıştırmayacaktır**.
 
 #### Kütüphane örneği
 ```objectivec

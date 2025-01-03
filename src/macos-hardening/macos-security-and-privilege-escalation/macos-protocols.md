@@ -4,7 +4,7 @@
 
 ## Uzaktan Erişim Hizmetleri
 
-Bunlar, uzaktan erişim için yaygın macOS hizmetleridir.\
+Bunlar, macOS'ta uzaktan erişim için yaygın hizmetlerdir.\
 Bu hizmetleri `Sistem Ayarları` --> `Paylaşım` bölümünden etkinleştirebilir/devre dışı bırakabilirsiniz.
 
 - **VNC**, “Ekran Paylaşımı” olarak bilinir (tcp:5900)
@@ -24,33 +24,33 @@ printf "\nThe following services are OFF if '0', or ON otherwise:\nScreen Sharin
 ```
 ### Pentesting ARD
 
-Apple Remote Desktop (ARD), macOS için özel olarak tasarlanmış, ek özellikler sunan [Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing) 'nin geliştirilmiş bir versiyonudur. ARD'deki dikkat çekici bir zafiyet, kontrol ekranı şifresi için kullanılan kimlik doğrulama yöntemidir; bu yöntem yalnızca şifrenin ilk 8 karakterini kullanır, bu da onu [brute force attacks](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) gibi Hydra veya [GoRedShell](https://github.com/ahhh/GoRedShell/) gibi araçlarla saldırılara karşı savunmasız hale getirir, çünkü varsayılan hız sınırlamaları yoktur.
+Apple Remote Desktop (ARD), macOS için özel olarak tasarlanmış, ek özellikler sunan [Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing) 'nin geliştirilmiş bir versiyonudur. ARD'deki dikkat çekici bir zafiyet, kontrol ekranı şifresi için kimlik doğrulama yöntemidir; bu yöntem yalnızca şifrenin ilk 8 karakterini kullanır, bu da onu [brute force attacks](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) gibi Hydra veya [GoRedShell](https://github.com/ahhh/GoRedShell/) gibi araçlarla saldırılara karşı savunmasız hale getirir, çünkü varsayılan hız sınırlamaları yoktur.
 
-Zayıf noktaları olan örnekler, **nmap**'in `vnc-info` betiği kullanılarak tespit edilebilir. `VNC Authentication (2)`'yi destekleyen hizmetler, 8 karakterli şifre kısaltması nedeniyle brute force saldırılarına özellikle açıktır.
+Zayıf örnekler, **nmap**'in `vnc-info` betiği kullanılarak tanımlanabilir. `VNC Authentication (2)`'yi destekleyen hizmetler, 8 karakterli şifre kısaltması nedeniyle brute force saldırılarına özellikle açıktır.
 
 ARD'yi ayrıcalık yükseltme, GUI erişimi veya kullanıcı izleme gibi çeşitli yönetim görevleri için etkinleştirmek için aşağıdaki komutu kullanın:
 ```bash
 sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -allowAccessFor -allUsers -privs -all -clientopts -setmenuextra -menuextra yes
 ```
-ARD, gözlem, paylaşılan kontrol ve tam kontrol dahil olmak üzere çok yönlü kontrol seviyeleri sağlar ve oturumlar kullanıcı şifre değişikliklerinden sonra bile devam eder. Unix komutlarını doğrudan göndermeye ve bunları yönetici kullanıcılar için root olarak çalıştırmaya olanak tanır. Görev zamanlama ve Uzaktan Spotlight arama, birden fazla makine arasında hassas dosyalar için uzaktan, düşük etkili aramalar yapmayı kolaylaştıran dikkate değer özelliklerdir.
+ARD, gözlem, paylaşılan kontrol ve tam kontrol dahil olmak üzere çok yönlü kontrol seviyeleri sağlar ve oturumlar kullanıcı şifre değişikliklerinden sonra bile devam eder. Yönetici kullanıcılar için kök olarak Unix komutlarını doğrudan göndermeye ve çalıştırmaya olanak tanır. Görev zamanlama ve Uzaktan Spotlight arama, birden fazla makine arasında hassas dosyalar için uzaktan, düşük etkili aramalar yapmayı kolaylaştıran dikkate değer özelliklerdir.
 
 ## Bonjour Protokolü
 
-Apple tarafından tasarlanan Bonjour, **aynı ağdaki cihazların birbirlerinin sunduğu hizmetleri tespit etmesine olanak tanır**. Rendezvous, **Zero Configuration** veya Zeroconf olarak da bilinen bu teknoloji, bir cihazın TCP/IP ağına katılmasını, **otomatik olarak bir IP adresi seçmesini** ve hizmetlerini diğer ağ cihazlarına yayınlamasını sağlar.
+Bonjour, Apple tarafından tasarlanmış bir teknoloji olup, **aynı ağdaki cihazların birbirlerinin sunduğu hizmetleri tespit etmesine olanak tanır**. Rendezvous, **Sıfır Konfigürasyon** veya Zeroconf olarak da bilinir, bir cihazın TCP/IP ağına katılmasını, **otomatik olarak bir IP adresi seçmesini** ve hizmetlerini diğer ağ cihazlarına yayınlamasını sağlar.
 
-Bonjour tarafından sağlanan Zero Configuration Networking, cihazların:
+Bonjour tarafından sağlanan Sıfır Konfigürasyon Ağı, cihazların:
 
-- **Otomatik olarak bir IP Adresi almasını** sağlar, DHCP sunucusu yoksa bile.
+- **Bir IP Adresi otomatik olarak elde etmesini** sağlar, DHCP sunucusu yoksa bile.
 - **isimden-adrese çeviri** yapmasını, DNS sunucusu gerektirmeden gerçekleştirir.
 - Ağda mevcut olan **hizmetleri keşfetmesini** sağlar.
 
-Bonjour kullanan cihazlar, kendilerine **169.254/16 aralığından bir IP adresi atar** ve ağdaki benzersizliğini doğrular. Mac'ler, bu alt ağ için bir yönlendirme tablosu girişi tutar, bu giriş `netstat -rn | grep 169` ile doğrulanabilir.
+Bonjour kullanan cihazlar, kendilerine **169.254/16 aralığından bir IP adresi atar** ve ağdaki benzersizliğini doğrular. Mac'ler, bu alt ağ için bir yönlendirme tablosu girişi tutar, bu da `netstat -rn | grep 169` komutuyla doğrulanabilir.
 
 DNS için Bonjour, **Multicast DNS (mDNS) protokolünü** kullanır. mDNS, **port 5353/UDP** üzerinden çalışır ve **standart DNS sorgularını** kullanarak **multicast adresi 224.0.0.251**'yi hedef alır. Bu yaklaşım, ağdaki tüm dinleyen cihazların sorguları almasını ve yanıt vermesini sağlar, böylece kayıtlarını güncelleyebilirler.
 
-Ağa katıldığında, her cihaz kendine bir isim seçer, genellikle **.local** ile biter ve bu isim, ana bilgisayar adından türetilmiş veya rastgele oluşturulmuş olabilir.
+Ağa katıldığında, her cihaz kendine bir isim seçer, genellikle **.local** ile biter ve bu isim ana bilgisayardan türetilmiş veya rastgele oluşturulmuş olabilir.
 
-Ağ içindeki hizmet keşfi, **DNS Hizmet Keşfi (DNS-SD)** ile kolaylaştırılır. DNS SRV kayıtlarının formatını kullanan DNS-SD, birden fazla hizmetin listelenmesini sağlamak için **DNS PTR kayıtlarını** kullanır. Belirli bir hizmet arayan bir istemci, `<Service>.<Domain>` için bir PTR kaydı talep eder ve eğer hizmet birden fazla ana bilgisayardan mevcutsa, `<Instance>.<Service>.<Domain>` formatında bir dizi PTR kaydı alır.
+Ağ içindeki hizmet keşfi, **DNS Hizmet Keşfi (DNS-SD)** ile kolaylaştırılır. DNS SRV kayıtlarının formatını kullanan DNS-SD, birden fazla hizmetin listelenmesini sağlamak için **DNS PTR kayıtlarını** kullanır. Belirli bir hizmet arayan bir istemci, `<Service>.<Domain>` için bir PTR kaydı talep eder ve hizmet birden fazla ana bilgisayardan mevcutsa, `<Instance>.<Service>.<Domain>` formatında bir dizi PTR kaydı alır.
 
 `dns-sd` aracı, **ağ hizmetlerini keşfetmek ve tanıtmak için** kullanılabilir. İşte kullanımına dair bazı örnekler:
 

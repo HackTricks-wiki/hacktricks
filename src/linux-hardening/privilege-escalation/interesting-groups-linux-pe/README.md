@@ -31,7 +31,7 @@ Bu, genellikle bu grupların **polkit politikası** içinde yer alması nedeniyl
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
-Orada **pkexec** komutunu çalıştırmaya izin verilen grupları bulacaksınız ve bazı Linux dağıtımlarında **sudo** ve **admin** grupları **varsayılan olarak** görünmektedir.
+Orada **pkexec** komutunu çalıştırmaya izin verilen grupları bulacaksınız ve bazı Linux dağıtımlarında **sudo** ve **admin** grupları varsayılan olarak görünmektedir.
 
 **root olmak için şunu çalıştırabilirsiniz**:
 ```bash
@@ -72,7 +72,7 @@ sudo su
 ```
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
-So, dosyayı okuyun ve **bazı hash'leri kırmaya** çalışın.
+So, dosyayı okuyun ve bazı **hash'leri kırmaya** çalışın.
 
 ## Personel Grubu
 
@@ -146,7 +146,7 @@ Debugfs kullanarak **dosya yazma** işlemi de yapabileceğinizi unutmayın. Örn
 debugfs -w /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
-Ancak, **root'a ait dosyaları yazmaya** çalışırsanız (örneğin `/etc/shadow` veya `/etc/passwd`), "**İzin reddedildi**" hatası alırsınız.
+Ancak, **root tarafından sahip olunan dosyaları yazmaya** çalışırsanız (örneğin `/etc/shadow` veya `/etc/passwd`), "**İzin reddedildi**" hatası alırsınız.
 
 ## Video Grubu
 
@@ -163,11 +163,11 @@ moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-**Ham görüntüyü açmak için** **GIMP**'i kullanabilir, **`screen.raw`** dosyasını seçebilir ve dosya türü olarak **Ham görüntü verisi** seçebilirsiniz:
+**Ham görüntüyü** açmak için **GIMP** kullanabilir, **`screen.raw`** dosyasını seçebilir ve dosya türü olarak **Ham görüntü verisi** seçebilirsiniz:
 
 ![](<../../../images/image (463).png>)
 
-Ardından, Genişlik ve Yükseklik değerlerini ekranda kullanılanlarla değiştirin ve farklı Görüntü Türlerini kontrol edin (ve ekranı daha iyi gösterenini seçin):
+Sonra Genişlik ve Yükseklik değerlerini ekranda kullanılanlarla değiştirin ve farklı Görüntü Türlerini kontrol edin (ve ekranı daha iyi göstereni seçin):
 
 ![](<../../../images/image (317).png>)
 

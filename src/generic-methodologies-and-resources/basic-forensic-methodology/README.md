@@ -1,30 +1,30 @@
-# Basic Forensic Methodology
+# Temel Adli Metodoloji
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Creating and Mounting an Image
+## Bir Görüntü Oluşturma ve Bağlama
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/image-acquisition-and-mount.md
 {{#endref}}
 
-## Malware Analysis
+## Kötü Amaçlı Yazılım Analizi
 
-This **isn't necessary the first step to perform once you have the image**. But you can use this malware analysis techniques independently if you have a file, a file-system image, memory image, pcap... so it's good to **keep these actions in mind**:
+Bu **görüntüyü aldıktan sonra gerçekleştirilecek ilk adım olmak zorunda değil**. Ancak bir dosyanız, bir dosya sistemi görüntüsü, bellek görüntüsü, pcap... varsa bu kötü amaçlı yazılım analiz tekniklerini bağımsız olarak kullanabilirsiniz, bu yüzden **bu eylemleri aklınızda bulundurmak iyi**:
 
 {{#ref}}
 malware-analysis.md
 {{#endref}}
 
-## Inspecting an Image
+## Bir Görüntüyü İnceleme
 
-if you are given a **forensic image** of a device you can start **analyzing the partitions, file-system** used and **recovering** potentially **interesting files** (even deleted ones). Learn how in:
+Eğer size bir **adli görüntü** verilirse, **bölümleri, kullanılan dosya sistemini** **analiz etmeye** ve potansiyel olarak **ilginç dosyaları** (silinmiş olanlar dahil) **geri kazanmaya** başlayabilirsiniz. Bunu nasıl yapacağınızı öğrenin:
 
 {{#ref}}
 partitions-file-systems-carving/
 {{#endref}}
 
-Depending on the used OSs and even platform different interesting artifacts should be searched:
+Kullanılan işletim sistemlerine ve hatta platforma bağlı olarak farklı ilginç artefaktlar aranmalıdır:
 
 {{#ref}}
 windows-forensics/
@@ -38,42 +38,42 @@ linux-forensics.md
 docker-forensics.md
 {{#endref}}
 
-## Deep inspection of specific file-types and Software
+## Belirli Dosya Türleri ve Yazılımlarının Derin İncelemesi
 
-If you have very **suspicious** **file**, then **depending on the file-type and software** that created it several **tricks** may be useful.\
-Read the following page to learn some interesting tricks:
+Eğer çok **şüpheli** bir **dosyanız** varsa, o zaman **dosya türüne ve onu oluşturan yazılıma** bağlı olarak birkaç **numara** faydalı olabilir.\
+Bazı ilginç numaraları öğrenmek için aşağıdaki sayfayı okuyun:
 
 {{#ref}}
 specific-software-file-type-tricks/
 {{#endref}}
 
-I want to do a special mention to the page:
+Özel olarak şu sayfayı belirtmek istiyorum:
 
 {{#ref}}
 specific-software-file-type-tricks/browser-artifacts.md
 {{#endref}}
 
-## Memory Dump Inspection
+## Bellek Dökümü İncelemesi
 
 {{#ref}}
 memory-dump-analysis/
 {{#endref}}
 
-## Pcap Inspection
+## Pcap İncelemesi
 
 {{#ref}}
 pcap-inspection/
 {{#endref}}
 
-## **Anti-Forensic Techniques**
+## **Anti-Adli Teknikler**
 
-Keep in mind the possible use of anti-forensic techniques:
+Anti-adli tekniklerin olası kullanımını aklınızda bulundurun:
 
 {{#ref}}
 anti-forensic-techniques.md
 {{#endref}}
 
-## Threat Hunting
+## Tehdit Avı
 
 {{#ref}}
 file-integrity-monitoring.md

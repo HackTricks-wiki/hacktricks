@@ -18,7 +18,7 @@ path.config: "/etc/logstash/conf.d/*.conf"
 path.config: "/usr/share/logstash/pipeline/1*.conf"
 pipeline.workers: 6
 ```
-Bu dosya, **.conf** dosyalarının, pipeline yapılandırmalarını içeren yerlerini ortaya koymaktadır. **Elasticsearch output module** kullanıldığında, **pipelines**'in genellikle **Elasticsearch kimlik bilgilerini** içerdiği yaygındır; bu kimlik bilgileri, Logstash'ın Elasticsearch'e veri yazma gereksinimi nedeniyle genellikle geniş yetkilere sahiptir. Yapılandırma yollarındaki joker karakterler, Logstash'ın belirlenen dizindeki tüm eşleşen pipeline'ları çalıştırmasına olanak tanır.
+Bu dosya, **.conf** dosyalarının, pipeline yapılandırmalarını içeren yerini ortaya koymaktadır. **Elasticsearch output module** kullanıldığında, **pipelines**'in genellikle **Elasticsearch kimlik bilgilerini** içerdiği yaygındır; bu kimlik bilgileri, Logstash'ın Elasticsearch'e veri yazma gereksinimi nedeniyle genellikle geniş yetkilere sahiptir. Yapılandırma yollarındaki joker karakterler, Logstash'ın belirlenen dizindeki tüm eşleşen pipeline'ları çalıştırmasına olanak tanır.
 
 ### Yazılabilir Pipeline'lar ile Yetki Yükseltme
 
@@ -27,7 +27,7 @@ Yetki yükseltme girişiminde bulunmak için, öncelikle Logstash hizmetinin ça
 - Bir pipeline **.conf** dosyasına **yazma erişiminiz** var **veya**
 - **/etc/logstash/pipelines.yml** dosyası bir joker karakter kullanıyor ve hedef klasöre yazabiliyorsunuz
 
-Ayrıca, **birini** karşılamanız gereken bu koşullardan biri de olmalıdır:
+Ayrıca, **birini** karşılamanız gereken bu koşullardan biri de şudur:
 
 - Logstash hizmetini yeniden başlatma yeteneği **veya**
 - **/etc/logstash/logstash.yml** dosyasında **config.reload.automatic: true** ayarı var

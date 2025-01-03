@@ -38,9 +38,9 @@ Bu sayfada, **bir linux ana bilgisayarında kerberos biletlerini bulabileceğini
 
 ### /tmp'den CCACHE bilet yeniden kullanımı
 
-CCACHE dosyaları, **Kerberos kimlik bilgilerini** saklamak için kullanılan ikili formatlardır ve genellikle `/tmp` içinde 600 izinleriyle saklanır. Bu dosyalar, kullanıcının UID'sine karşılık gelen **isim formatı, `krb5cc_%{uid}`,** ile tanımlanabilir. Kimlik doğrulama biletinin doğrulanması için, **`KRB5CCNAME`** ortam değişkeni, istenen bilet dosyasının yoluna ayarlanmalıdır, bu da yeniden kullanımını sağlar.
+CCACHE dosyaları, **Kerberos kimlik bilgilerini** saklamak için kullanılan ikili formatlardır ve genellikle `/tmp` içinde 600 izinleriyle saklanır. Bu dosyalar, kullanıcının UID'sine karşılık gelen **isim formatlarıyla `krb5cc_%{uid}`** ile tanımlanabilir. Kimlik doğrulama biletinin doğrulanması için, **çevre değişkeni `KRB5CCNAME`** istenen bilet dosyasının yoluna ayarlanmalıdır, bu da yeniden kullanımını sağlar.
 
-Kimlik doğrulama için kullanılan mevcut bileti `env | grep KRB5CCNAME` ile listeleyin. Format taşınabilir ve bilet, **ortam değişkenini ayarlayarak** yeniden kullanılabilir: `export KRB5CCNAME=/tmp/ticket.ccache`. Kerberos bilet adı formatı `krb5cc_%{uid}` şeklindedir; burada uid, kullanıcının UID'sidir.
+Kimlik doğrulama için kullanılan mevcut bileti `env | grep KRB5CCNAME` ile listeleyin. Format taşınabilir ve bilet, **çevre değişkenini ayarlayarak** yeniden kullanılabilir: `export KRB5CCNAME=/tmp/ticket.ccache`. Kerberos bilet adı formatı `krb5cc_%{uid}` şeklindedir; burada uid, kullanıcının UID'sidir.
 ```bash
 # Find tickets
 ls /tmp/ | grep krb5cc
@@ -51,7 +51,7 @@ export KRB5CCNAME=/tmp/krb5cc_1000
 ```
 ### CCACHE bilet yeniden kullanımı anahtar halkasından
 
-**Bir işlemin belleğinde saklanan Kerberos biletleri çıkarılabilir**, özellikle makinenin ptrace koruması devre dışı bırakıldığında (`/proc/sys/kernel/yama/ptrace_scope`). Bu amaçla yararlı bir araç [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey) adresinde bulunur; bu araç, oturumlara enjekte ederek biletleri `/tmp` dizinine dökme işlemini kolaylaştırır.
+**Bir işlemin belleğinde saklanan Kerberos biletleri çıkarılabilir**, özellikle makinenin ptrace koruması devre dışı bırakıldığında (`/proc/sys/kernel/yama/ptrace_scope`). Bu amaçla yararlı bir araç [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey) adresinde bulunur; bu araç, oturumlara enjekte ederek ve biletleri `/tmp` dizinine dökerek çıkarımı kolaylaştırır.
 
 Bu aracı yapılandırmak ve kullanmak için aşağıdaki adımlar izlenir:
 ```bash
@@ -60,13 +60,13 @@ cd tickey/tickey
 make CONF=Release
 /tmp/tickey -i
 ```
-Bu prosedür, çeşitli oturumlara enjekte etmeyi deneyecek ve başarıyı `/tmp` dizininde `__krb_UID.ccache` adlandırma kuralıyla çıkarılan biletleri saklayarak gösterecektir.
+Bu prosedür, çeşitli oturumlara enjekte etmeyi deneyecek ve başarıyı, çıkarılan biletleri `/tmp` dizininde `__krb_UID.ccache` adlandırma kuralıyla saklayarak gösterecektir.
 
 ### SSSD KCM'den CCACHE bilet yeniden kullanımı
 
 SSSD, veritabanının bir kopyasını `/var/lib/sss/secrets/secrets.ldb` yolunda tutar. İlgili anahtar, `/var/lib/sss/secrets/.secrets.mkey` yolunda gizli bir dosya olarak saklanır. Varsayılan olarak, anahtar yalnızca **root** izinleriniz varsa okunabilir.
 
-\*\*`SSSDKCMExtractor` \*\* komutunu --database ve --key parametreleriyle çağırmak, veritabanını ayrıştıracak ve **gizli bilgileri şifre çözecektir**.
+\*\*`SSSDKCMExtractor` \*\*'ı --database ve --key parametreleriyle çağırmak, veritabanını ayrıştıracak ve **gizli bilgileri şifre çözecektir**.
 ```bash
 git clone https://github.com/fireeye/SSSDKCMExtractor
 python3 SSSDKCMExtractor.py --database secrets.ldb --key secrets.mkey
@@ -83,7 +83,7 @@ klist -k /etc/krb5.keytab
 
 Kök ayrıcalıklarıyla çalışan hizmetler için gerekli olan hizmet hesap anahtarları, **`/etc/krb5.keytab`** dosyalarında güvenli bir şekilde saklanır. Bu anahtarlar, hizmetler için şifreler gibi, sıkı bir gizlilik gerektirir.
 
-Keytab dosyasının içeriğini incelemek için **`klist`** kullanılabilir. Bu araç, anahtar türü 23 olarak belirlendiğinde, kullanıcı kimlik doğrulaması için **NT Hash** dahil olmak üzere anahtar ayrıntılarını görüntülemek üzere tasarlanmıştır.
+Keytab dosyasının içeriğini incelemek için **`klist`** kullanılabilir. Bu araç, anahtar türü 23 olarak tanımlandığında, kullanıcı kimlik doğrulaması için **NT Hash** dahil olmak üzere anahtar ayrıntılarını görüntülemek üzere tasarlanmıştır.
 ```bash
 klist.exe -t -K -e -k FILE:C:/Path/to/your/krb5.keytab
 # Output includes service principal details and the NT Hash

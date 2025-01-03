@@ -12,8 +12,8 @@ Mount namespace'leri, her bir konteynerin diğer konteynerlerden ve ana sistemde
 
 1. Yeni bir mount namespace oluşturulduğunda, **ebeveyn namespace'inden mount noktalarının bir kopyasıyla başlatılır**. Bu, oluşturulduğunda yeni namespace'in ebeveyn ile aynı dosya sistemi görünümünü paylaştığı anlamına gelir. Ancak, namespace içindeki mount noktalarındaki sonraki değişiklikler ebeveyni veya diğer namespace'leri etkilemeyecektir.
 2. Bir süreç, kendi namespace'i içinde bir mount noktasını değiştirdiğinde, örneğin bir dosya sistemini mount veya unmount ettiğinde, **değişiklik o namespace'e özeldir** ve diğer namespace'leri etkilemez. Bu, her namespace'in kendi bağımsız dosya sistemi hiyerarşisine sahip olmasını sağlar.
-3. Süreçler, `setns()` sistem çağrısını kullanarak namespace'ler arasında geçiş yapabilir veya `CLONE_NEWNS` bayrağı ile `unshare()` veya `clone()` sistem çağrılarını kullanarak yeni namespace'ler oluşturabilir. Bir süreç yeni bir namespace'e geçtiğinde veya oluşturduğunda, o namespace ile ilişkili mount noktalarını kullanmaya başlayacaktır.
-4. **Dosya tanımlayıcıları ve inode'lar namespace'ler arasında paylaşılır**, yani bir namespace'deki bir süreç, bir dosyaya işaret eden açık bir dosya tanımlayıcısına sahipse, bu dosya tanımlayıcısını başka bir namespace'deki bir sürece **geçirebilir** ve **her iki süreç de aynı dosyaya erişecektir**. Ancak, dosyanın yolu, mount noktalarındaki farklılıklar nedeniyle her iki namespace'de aynı olmayabilir.
+3. Süreçler, `setns()` sistem çağrısını kullanarak namespace'ler arasında geçiş yapabilir veya `CLONE_NEWNS` bayrağı ile `unshare()` veya `clone()` sistem çağrılarını kullanarak yeni namespace'ler oluşturabilir. Bir süreç yeni bir namespace'e geçtiğinde veya bir tane oluşturduğunda, o namespace ile ilişkili mount noktalarını kullanmaya başlayacaktır.
+4. **Dosya tanımlayıcıları ve inode'lar namespace'ler arasında paylaşılır**, yani bir namespace'deki bir süreç, bir dosyaya işaret eden açık bir dosya tanımlayıcısına sahipse, bu **dosya tanımlayıcısını** başka bir namespace'deki bir sürece **geçirebilir** ve **her iki süreç de aynı dosyaya erişecektir**. Ancak, dosyanın yolu, mount noktalarındaki farklılıklar nedeniyle her iki namespace'de aynı olmayabilir.
 
 ## Laboratuvar:
 
@@ -23,7 +23,7 @@ Mount namespace'leri, her bir konteynerin diğer konteynerlerden ve ana sistemde
 ```bash
 sudo unshare -m [--mount-proc] /bin/bash
 ```
-Yeni bir `/proc` dosya sisteminin örneğini `--mount-proc` parametresi ile monte ederek, yeni montaj ad alanının **o ad alanına özgü süreç bilgilerine doğru ve izole bir görünüm** sağladığınızı garanti edersiniz.
+Yeni bir `/proc` dosya sisteminin örneğini `--mount-proc` parametresi ile monte ederek, yeni montaj ad alanının **o ad alanına özgü süreç bilgilerini doğru ve izole bir şekilde görmesini** sağlarsınız.
 
 <details>
 
@@ -33,17 +33,17 @@ Yeni bir `/proc` dosya sisteminin örneğini `--mount-proc` parametresi ile mont
 
 1. **Problem Açıklaması**:
 
-- Linux çekirdeği, bir sürecin yeni ad alanları oluşturmasına `unshare` sistem çağrısı ile izin verir. Ancak, yeni bir PID ad alanı oluşturan süreç (bu süreç "unshare" süreci olarak adlandırılır) yeni ad alanına girmez; yalnızca onun çocuk süreçleri girer.
+- Linux çekirdeği, bir sürecin yeni ad alanları oluşturmasına `unshare` sistem çağrısı ile izin verir. Ancak, yeni bir PID ad alanı oluşturma işlemini başlatan süreç (bu süreç "unshare" süreci olarak adlandırılır) yeni ad alanına girmez; yalnızca onun çocuk süreçleri girer.
 - `%unshare -p /bin/bash%` komutu, `/bin/bash`'i `unshare` ile aynı süreçte başlatır. Sonuç olarak, `/bin/bash` ve onun çocuk süreçleri orijinal PID ad alanındadır.
 - Yeni ad alanındaki `/bin/bash`'in ilk çocuk süreci PID 1 olur. Bu süreç sona erdiğinde, başka süreç yoksa ad alanının temizlenmesini tetikler, çünkü PID 1, yetim süreçleri benimseme özel rolüne sahiptir. Linux çekirdeği, o ad alanında PID tahsisini devre dışı bırakır.
 
 2. **Sonuç**:
 
-- Yeni bir ad alanındaki PID 1'in çıkışı, `PIDNS_HASH_ADDING` bayrağının temizlenmesine yol açar. Bu, yeni bir süreç oluştururken `alloc_pid` fonksiyonunun yeni bir PID tahsis edememesine neden olur ve "Bellek tahsis edilemiyor" hatasını üretir.
+- Yeni bir ad alanındaki PID 1'in çıkışı, `PIDNS_HASH_ADDING` bayrağının temizlenmesine yol açar. Bu, yeni bir süreç oluştururken `alloc_pid` fonksiyonunun yeni bir PID tahsis etmesini engeller ve "Bellek tahsis edilemiyor" hatasını üretir.
 
 3. **Çözüm**:
 - Sorun, `unshare` ile `-f` seçeneğini kullanarak çözülebilir. Bu seçenek, `unshare`'in yeni PID ad alanını oluşturduktan sonra yeni bir süreç fork etmesini sağlar.
-- `%unshare -fp /bin/bash%` komutunu çalıştırmak, `unshare` komutunun kendisinin yeni ad alanında PID 1 olmasını garanti eder. `/bin/bash` ve onun çocuk süreçleri, bu yeni ad alanında güvenli bir şekilde yer alır, PID 1'in erken çıkışını önler ve normal PID tahsisine izin verir.
+- `%unshare -fp /bin/bash%` komutunu çalıştırmak, `unshare` komutunun kendisinin yeni ad alanında PID 1 olmasını garanti eder. `/bin/bash` ve onun çocuk süreçleri bu yeni ad alanında güvenli bir şekilde yer alır, PID 1'in erken çıkışını önler ve normal PID tahsisine izin verir.
 
 `unshare`'in `-f` bayrağı ile çalıştığından emin olarak, yeni PID ad alanı doğru bir şekilde korunur ve `/bin/bash` ile alt süreçlerinin bellek tahsis hatası ile karşılaşmadan çalışmasına olanak tanır.
 

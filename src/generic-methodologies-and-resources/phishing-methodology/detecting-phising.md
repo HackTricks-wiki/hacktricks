@@ -1,69 +1,69 @@
-# Detecting Phishing
+# Phishing Tespit Etme
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Introduction
+## Giriş
 
-To detect a phishing attempt it's important to **understand the phishing techniques that are being used nowadays**. On the parent page of this post, you can find this information, so if you aren't aware of which techniques are being used today I recommend you to go to the parent page and read at least that section.
+Bir phishing girişimini tespit etmek için **günümüzde kullanılan phishing tekniklerini anlamak önemlidir**. Bu gönderinin ana sayfasında bu bilgileri bulabilirsiniz, bu yüzden günümüzde hangi tekniklerin kullanıldığını bilmiyorsanız ana sayfaya gitmenizi ve en azından o bölümü okumanızı öneririm.
 
-This post is based on the idea that the **attackers will try to somehow mimic or use the victim's domain name**. If your domain is called `example.com` and you are phished using a completely different domain name for some reason like `youwonthelottery.com`, these techniques aren't going to uncover it.
+Bu gönderi, **saldırganların bir şekilde kurbanın alan adını taklit etmeye veya kullanmaya çalışacakları** fikrine dayanmaktadır. Eğer alan adınız `example.com` ise ve bir şekilde tamamen farklı bir alan adı olan `youwonthelottery.com` kullanılarak phishing yapılıyorsa, bu teknikler bunu açığa çıkarmayacaktır.
 
-## Domain name variations
+## Alan adı varyasyonları
 
-It's kind of **easy** to **uncover** those **phishing** attempts that will use a **similar domain** name inside the email.\
-It's enough to **generate a list of the most probable phishing names** that an attacker may use and **check** if it's **registered** or just check if there is any **IP** using it.
+E-posta içinde **benzer bir alan adı** kullanacak olan **phishing** girişimlerini **açığa çıkarmak** oldukça **kolaydır**.\
+Saldırganın kullanabileceği en olası phishing adlarının bir listesini **oluşturmak** ve bunun **kayıtlı olup olmadığını kontrol etmek** veya sadece herhangi bir **IP** kullanıp kullanmadığını kontrol etmek yeterlidir.
 
-### Finding suspicious domains
+### Şüpheli alanları bulma
 
-For this purpose, you can use any of the following tools. Note that these tolls will also perform DNS requests automatically to check if the domain has any IP assigned to it:
+Bu amaçla, aşağıdaki araçlardan herhangi birini kullanabilirsiniz. Bu araçların, alan adının herhangi bir IP ile ilişkilendirilip ilişkilendirilmediğini kontrol etmek için otomatik olarak DNS istekleri de gerçekleştireceğini unutmayın:
 
 - [**dnstwist**](https://github.com/elceef/dnstwist)
 - [**urlcrazy**](https://github.com/urbanadventurer/urlcrazy)
 
 ### Bitflipping
 
-**You can find a short the explanation of this technique in the parent page. Or read the original research in** [**https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/**](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
+**Bu tekniğin kısa bir açıklamasını ana sayfada bulabilirsiniz. Ya da orijinal araştırmayı** [**https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/**](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/) **okuyabilirsiniz.**
 
-For example, a 1 bit modification in the domain microsoft.com can transform it into _windnws.com._\
-**Attackers may register as many bit-flipping domains as possible related to the victim to redirect legitimate users to their infrastructure**.
+Örneğin, microsoft.com alan adında 1 bitlik bir değişiklik onu _windnws.com_ haline getirebilir.\
+**Saldırganlar, kurbanla ilgili mümkün olduğunca çok bit-flipping alan adı kaydedebilirler ve meşru kullanıcıları kendi altyapılarına yönlendirebilirler.**
 
-**All possible bit-flipping domain names should be also monitored.**
+**Tüm olası bit-flipping alan adları da izlenmelidir.**
 
-### Basic checks
+### Temel kontroller
 
-Once you have a list of potential suspicious domain names you should **check** them (mainly the ports HTTP and HTTPS) to **see if they are using some login form similar** to someone of the victim's domain.\
-You could also check port 3333 to see if it's open and running an instance of `gophish`.\
-It's also interesting to know **how old each discovered suspicions domain is**, the younger it's the riskier it is.\
-You can also get **screenshots** of the HTTP and/or HTTPS suspicious web page to see if it's suspicious and in that case **access it to take a deeper look**.
+Potansiyel şüpheli alan adları listesine sahip olduğunuzda, bunları (özellikle HTTP ve HTTPS portlarını) **kontrol etmelisiniz** ve **kurbanın alanına benzer bir giriş formu kullanıp kullanmadıklarını görmek için** kontrol etmelisiniz.\
+Ayrıca, port 3333'ü kontrol ederek açık olup olmadığını ve `gophish` örneğini çalıştırıp çalıştırmadığını görebilirsiniz.\
+Her keşfedilen şüpheli alanın **ne kadar eski olduğunu bilmek de ilginçtir**, ne kadar gençse o kadar risklidir.\
+Şüpheli web sayfasının HTTP ve/veya HTTPS ekran görüntülerini alabilir ve şüpheli olup olmadığını görmek için **erişim sağlayarak daha derin bir inceleme yapabilirsiniz.**
 
-### Advanced checks
+### Gelişmiş kontroller
 
-If you want to go one step further I would recommend you to **monitor those suspicious domains and search for more** once in a while (every day? it only takes a few seconds/minutes). You should also **check** the open **ports** of the related IPs and **search for instances of `gophish` or similar tools** (yes, attackers also make mistakes) and **monitor the HTTP and HTTPS web pages of the suspicious domains and subdomains** to see if they have copied any login form from the victim's web pages.\
-In order to **automate this** I would recommend having a list of login forms of the victim's domains, spider the suspicious web pages and comparing each login form found inside the suspicious domains with each login form of the victim's domain using something like `ssdeep`.\
-If you have located the login forms of the suspicious domains, you can try to **send junk credentials** and **check if it's redirecting you to the victim's domain**.
+Bir adım daha ileri gitmek istiyorsanız, **şüpheli alanları izlemeyi ve zaman zaman daha fazlasını aramayı** öneririm (her gün? sadece birkaç saniye/dakika alır). Ayrıca, ilgili IP'lerin açık **portlarını kontrol etmeli** ve **`gophish` veya benzeri araçların örneklerini aramalısınız** (evet, saldırganlar da hata yapar) ve **şüpheli alanların ve alt alanların HTTP ve HTTPS web sayfalarını izlemelisiniz** ve kurbanın web sayfalarından herhangi bir giriş formunu kopyalayıp kopyalamadıklarını görmek için.\
+Bunu **otomatikleştirmek** için, kurbanın alanlarının giriş formlarının bir listesini oluşturmayı, şüpheli web sayfalarını taramayı ve şüpheli alanlardaki her giriş formunu kurbanın alanındaki her giriş formu ile karşılaştırmayı öneririm, `ssdeep` gibi bir şey kullanarak.\
+Eğer şüpheli alanların giriş formlarını bulduysanız, **saçma kimlik bilgileri göndermeyi** ve **sizi kurbanın alanına yönlendirip yönlendirmediğini kontrol etmeyi** deneyebilirsiniz.
 
-## Domain names using keywords
+## Anahtar kelimeleri kullanan alan adları
 
-The parent page also mentions a domain name variation technique that consists of putting the **victim's domain name inside a bigger domain** (e.g. paypal-financial.com for paypal.com).
+Ana sayfa, **kurbanın alan adını daha büyük bir alan adı içinde yerleştirme** tekniğini de belirtmektedir (örneğin, paypal-financial.com için paypal.com).
 
-### Certificate Transparency
+### Sertifika Şeffaflığı
 
-It's not possible to take the previous "Brute-Force" approach but it's actually **possible to uncover such phishing attempts** also thanks to certificate transparency. Every time a certificate is emitted by a CA, the details are made public. This means that by reading the certificate transparency or even monitoring it, it's **possible to find domains that are using a keyword inside its name** For example, if an attacker generates a certificate of [https://paypal-financial.com](https://paypal-financial.com), seeing the certificate it's possible to find the keyword "paypal" and know that suspicious email is being used.
+Önceki "Brute-Force" yaklaşımını almak mümkün değil, ancak aslında **bu tür phishing girişimlerini açığa çıkarmak mümkündür** aynı zamanda sertifika şeffaflığı sayesinde. Her seferinde bir CA tarafından bir sertifika verildiğinde, detaylar kamuya açık hale gelir. Bu, sertifika şeffaflığını okuyarak veya hatta izleyerek, **adında bir anahtar kelime kullanan alanları bulmanın mümkün olduğu anlamına gelir.** Örneğin, bir saldırgan [https://paypal-financial.com](https://paypal-financial.com) için bir sertifika oluşturursa, sertifikayı görmek "paypal" anahtar kelimesini bulmak ve şüpheli e-postanın kullanıldığını bilmek mümkündür.
 
-The post [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/) suggests that you can use Censys to search for certificates affecting a specific keyword and filter by date (only "new" certificates) and by the CA issuer "Let's Encrypt":
+Gönderi [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/) Censys'i belirli bir anahtar kelimeyi etkileyen sertifikaları aramak ve tarih (sadece "yeni" sertifikalar) ve CA vereni "Let's Encrypt" ile filtrelemek için kullanabileceğinizi öneriyor:
 
 ![https://0xpatrik.com/content/images/2018/07/cert_listing.png](<../../images/image (1115).png>)
 
-However, you can do "the same" using the free web [**crt.sh**](https://crt.sh). You can **search for the keyword** and the **filter** the results **by date and CA** if you wish.
+Ancak, bunu ücretsiz web [**crt.sh**](https://crt.sh) kullanarak "aynısını" yapabilirsiniz. **Anahtar kelimeyi arayabilir** ve **sonuçları tarih ve CA ile filtreleyebilirsiniz**.
 
 ![](<../../images/image (519).png>)
 
-Using this last option you can even use the field Matching Identities to see if any identity from the real domain matches any of the suspicious domains (note that a suspicious domain can be a false positive).
+Bu son seçeneği kullanarak, gerçek alanın herhangi bir kimliğinin şüpheli alanlardan herhangi biriyle eşleşip eşleşmediğini görmek için Kimlikleri Eşleştirme alanını bile kullanabilirsiniz (şüpheli bir alanın yanlış pozitif olabileceğini unutmayın).
 
-**Another alternative** is the fantastic project called [**CertStream**](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067). CertStream provides a real-time stream of newly generated certificates which you can use to detect specified keywords in (near) real-time. In fact, there is a project called [**phishing_catcher**](https://github.com/x0rz/phishing_catcher) that does just that.
+**Bir diğer alternatif** ise [**CertStream**](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067) adlı harika projedir. CertStream, belirli anahtar kelimeleri (yaklaşık) gerçek zamanlı olarak tespit etmek için kullanabileceğiniz yeni oluşturulan sertifikaların gerçek zamanlı bir akışını sağlar. Aslında, tam olarak bunu yapan [**phishing_catcher**](https://github.com/x0rz/phishing_catcher) adlı bir proje bulunmaktadır.
 
-### **New domains**
+### **Yeni alanlar**
 
-**One last alternative** is to gather a list of **newly registered domains** for some TLDs ([Whoxy](https://www.whoxy.com/newly-registered-domains/) provides such service) and **check the keywords in these domains**. However, long domains usually use one or more subdomains, therefore the keyword won't appear inside the FLD and you won't be able to find the phishing subdomain.
+**Son bir alternatif**, bazı TLD'ler için **yeni kayıtlı alanların** bir listesini toplamak ([Whoxy](https://www.whoxy.com/newly-registered-domains/) bu hizmeti sağlar) ve **bu alanlardaki anahtar kelimeleri kontrol etmektir**. Ancak, uzun alan adları genellikle bir veya daha fazla alt alan adı kullanır, bu nedenle anahtar kelime FLD içinde görünmeyecek ve phishing alt alanını bulamayacaksınız.
 
 {{#include ../../banners/hacktricks-training.md}}

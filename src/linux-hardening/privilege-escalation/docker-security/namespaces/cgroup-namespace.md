@@ -4,14 +4,14 @@
 
 ## Temel Bilgiler
 
-Cgroup namespace, **bir namespace içinde çalışan süreçler için cgroup hiyerarşilerinin izolasyonunu sağlayan** bir Linux çekirdek özelliğidir. Cgroups, **kontrol grupları** için kısaltmadır ve süreçleri hiyerarşik gruplar halinde organize ederek **sistem kaynakları** üzerinde CPU, bellek ve I/O gibi **sınırlamalar** yönetmeyi ve uygulamayı sağlar.
+Cgroup namespace, **bir namespace içinde çalışan süreçler için cgroup hiyerarşilerinin izolasyonunu sağlayan** bir Linux çekirdek özelliğidir. Cgroups, **kontrol grupları** için kısaltmadır ve süreçleri hiyerarşik gruplar halinde organize ederek **sistem kaynakları** üzerinde (CPU, bellek ve I/O gibi) **sınırlamalar** yönetmeyi ve uygulamayı sağlar.
 
-Cgroup namespace'leri, daha önce tartıştığımız diğerleri gibi ayrı bir namespace türü olmasa da (PID, mount, network vb.), namespace izolasyonu kavramıyla ilişkilidir. **Cgroup namespace'leri cgroup hiyerarşisinin görünümünü sanallaştırır**, böylece bir cgroup namespace içinde çalışan süreçler, ana makinede veya diğer namespace'lerde çalışan süreçlere kıyasla hiyerarşinin farklı bir görünümüne sahip olur.
+Cgroup namespace'leri, daha önce tartıştığımız diğerleri gibi ayrı bir namespace türü olmasa da (PID, mount, network vb.), namespace izolasyonu kavramıyla ilişkilidir. **Cgroup namespace'leri cgroup hiyerarşisinin görünümünü sanallaştırır**, böylece bir cgroup namespace içinde çalışan süreçler, ana makinede veya diğer namespace'lerde çalışan süreçlere kıyasla hiyerarşinin farklı bir görünümüne sahip olurlar.
 
 ### Nasıl çalışır:
 
 1. Yeni bir cgroup namespace oluşturulduğunda, **oluşturan sürecin cgroup'una dayanan bir cgroup hiyerarşisi görünümü ile başlar**. Bu, yeni cgroup namespace içinde çalışan süreçlerin, yalnızca oluşturucu sürecin cgroup'unda köklenen cgroup alt ağacına sınırlı olarak, tüm cgroup hiyerarşisinin bir alt kümesini göreceği anlamına gelir.
-2. Bir cgroup namespace içindeki süreçler, **kendi cgroup'larını hiyerarşinin kökü olarak görecektir**. Bu, namespace içindeki süreçlerin bakış açısından, kendi cgroup'larının kök olarak göründüğü ve kendi alt ağaçlarının dışındaki cgroup'ları göremeyeceği veya erişemeyeceği anlamına gelir.
+2. Bir cgroup namespace içindeki süreçler, **kendi cgroup'larını hiyerarşinin kökü olarak göreceklerdir**. Bu, namespace içindeki süreçlerin bakış açısından, kendi cgroup'larının kök olarak göründüğü ve kendi alt ağaçlarının dışındaki cgroup'ları göremeyecekleri veya erişemeyecekleri anlamına gelir.
 3. Cgroup namespace'leri doğrudan kaynakların izolasyonunu sağlamaz; **yalnızca cgroup hiyerarşisi görünümünün izolasyonunu sağlar**. **Kaynak kontrolü ve izolasyonu hala cgroup** alt sistemleri (örneğin, cpu, bellek vb.) tarafından uygulanmaktadır.
 
 CGroups hakkında daha fazla bilgi için kontrol edin:
@@ -22,13 +22,13 @@ CGroups hakkında daha fazla bilgi için kontrol edin:
 
 ## Laboratuvar:
 
-### Farklı Namespace'ler Oluşturma
+### Farklı Namespace'ler Oluşturun
 
 #### CLI
 ```bash
 sudo unshare -C [--mount-proc] /bin/bash
 ```
-Yeni bir `/proc` dosya sisteminin örneğini `--mount-proc` parametresi ile monte ederek, yeni montaj ad alanının **o ad alanına özgü süreç bilgilerine doğru ve izole bir görünüm** sağladığınızı garanti edersiniz.
+Yeni bir `/proc` dosya sisteminin örneğini `--mount-proc` parametresi ile monte ederek, yeni montaj ad alanının **o ad alanına özgü süreç bilgilerini doğru ve izole bir şekilde görmesini** sağlarsınız.
 
 <details>
 
@@ -48,9 +48,9 @@ Yeni bir `/proc` dosya sisteminin örneğini `--mount-proc` parametresi ile mont
 
 3. **Çözüm**:
 - Sorun, `unshare` ile `-f` seçeneğini kullanarak çözülebilir. Bu seçenek, `unshare`'in yeni PID ad alanını oluşturduktan sonra yeni bir süreç fork etmesini sağlar.
-- `%unshare -fp /bin/bash%` komutunu çalıştırmak, `unshare` komutunun kendisinin yeni ad alanında PID 1 olmasını garanti eder. `/bin/bash` ve onun çocuk süreçleri, bu yeni ad alanında güvenli bir şekilde yer alır, PID 1'in erken çıkışını önler ve normal PID tahsisine izin verir.
+- `%unshare -fp /bin/bash%` komutunu çalıştırmak, `unshare` komutunun kendisinin yeni ad alanında PID 1 olmasını sağlar. `/bin/bash` ve onun çocuk süreçleri bu yeni ad alanında güvenli bir şekilde yer alır, PID 1'in erken çıkışını önler ve normal PID tahsisine izin verir.
 
-`unshare`'in `-f` bayrağı ile çalıştırıldığından emin olarak, yeni PID ad alanı doğru bir şekilde korunur ve `/bin/bash` ile alt süreçleri bellek tahsis hatası ile karşılaşmadan çalışabilir.
+`unshare`'in `-f` bayrağı ile çalıştığından emin olarak, yeni PID ad alanı doğru bir şekilde korunur ve `/bin/bash` ile alt süreçlerinin bellek tahsis hatası ile karşılaşmadan çalışmasına olanak tanır.
 
 </details>
 
@@ -73,7 +73,7 @@ sudo find /proc -maxdepth 3 -type l -name cgroup -exec ls -l  {} \; 2>/dev/null 
 ```bash
 nsenter -C TARGET_PID --pid /bin/bash
 ```
-Ayrıca, **başka bir işlem ad alanına yalnızca root iseniz girebilirsiniz**. Ve **başka bir ad alanına** **giremezsiniz** **ona işaret eden bir tanımlayıcı olmadan** (örneğin `/proc/self/ns/cgroup`).
+Ayrıca, **başka bir işlem ad alanına yalnızca root iseniz girebilirsiniz**. Ve **başka bir ad alanına** **giremezsiniz** **onu işaret eden bir tanımlayıcı olmadan** (örneğin `/proc/self/ns/cgroup`).
 
 ## Referanslar
 

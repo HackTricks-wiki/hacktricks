@@ -9,7 +9,7 @@ IPC (Inter-Process Communication) namespace, mesaj kuyrukları, paylaşılan bel
 ### Nasıl çalışır:
 
 1. Yeni bir IPC namespace oluşturulduğunda, **tamamen izole bir System V IPC nesne seti** ile başlar. Bu, yeni IPC namespace'inde çalışan süreçlerin varsayılan olarak diğer namespace'lerdeki veya ana sistemdeki IPC nesnelerine erişemeyeceği veya bunlarla etkileşime giremeyeceği anlamına gelir.
-2. Bir namespace içinde oluşturulan IPC nesneleri, **yalnızca o namespace içindeki süreçler tarafından görünür ve erişilebilir**. Her IPC nesnesi, kendi namespace'i içinde benzersiz bir anahtar ile tanımlanır. Anahtar farklı namespace'lerde aynı olabilir, ancak nesneler kendileri izole edilmiştir ve namespace'ler arasında erişilemez.
+2. Bir namespace içinde oluşturulan IPC nesneleri, **yalnızca o namespace içindeki süreçler tarafından görünür ve erişilebilir**. Her IPC nesnesi, kendi namespace'inde benzersiz bir anahtar ile tanımlanır. Anahtar farklı namespace'lerde aynı olabilir, ancak nesneler kendileri izole edilmiştir ve namespace'ler arasında erişilemez.
 3. Süreçler, `setns()` sistem çağrısını kullanarak namespace'ler arasında geçiş yapabilir veya `CLONE_NEWIPC` bayrağı ile `unshare()` veya `clone()` sistem çağrılarını kullanarak yeni namespace'ler oluşturabilir. Bir süreç yeni bir namespace'e geçtiğinde veya bir tane oluşturduğunda, o namespace ile ilişkili IPC nesnelerini kullanmaya başlayacaktır.
 
 ## Laboratuvar:
@@ -20,7 +20,7 @@ IPC (Inter-Process Communication) namespace, mesaj kuyrukları, paylaşılan bel
 ```bash
 sudo unshare -i [--mount-proc] /bin/bash
 ```
-Yeni bir `/proc` dosya sisteminin örneğini monte ederek `--mount-proc` parametresini kullanırsanız, yeni montaj ad alanının **o ad alanına özgü süreç bilgilerini doğru ve izole bir şekilde görmesini** sağlarsınız.
+Yeni bir `/proc` dosya sisteminin örneğini `--mount-proc` parametresi ile monte ederek, yeni montaj ad alanının **o ad alanına özgü süreç bilgilerini doğru ve izole bir şekilde görmesini** sağlarsınız.
 
 <details>
 
@@ -36,13 +36,13 @@ Yeni bir `/proc` dosya sisteminin örneğini monte ederek `--mount-proc` paramet
 
 2. **Sonuç**:
 
-- Yeni bir ad alanındaki PID 1'in çıkışı, `PIDNS_HASH_ADDING` bayrağının temizlenmesine yol açar. Bu, yeni bir süreç oluşturulurken `alloc_pid` fonksiyonunun yeni bir PID tahsis etmesini engeller ve "Bellek tahsis edilemiyor" hatasını üretir.
+- Yeni bir ad alanındaki PID 1'in çıkışı, `PIDNS_HASH_ADDING` bayrağının temizlenmesine yol açar. Bu, yeni bir süreç oluştururken `alloc_pid` fonksiyonunun yeni bir PID tahsis edememesine neden olur ve "Bellek tahsis edilemiyor" hatasını üretir.
 
 3. **Çözüm**:
 - Sorun, `unshare` ile `-f` seçeneğini kullanarak çözülebilir. Bu seçenek, `unshare`'in yeni PID ad alanını oluşturduktan sonra yeni bir süreç fork etmesini sağlar.
-- `%unshare -fp /bin/bash%` komutunu çalıştırmak, `unshare` komutunun kendisinin yeni ad alanında PID 1 olmasını sağlar. `/bin/bash` ve onun çocuk süreçleri, bu yeni ad alanında güvenli bir şekilde yer alır, PID 1'in erken çıkışını önler ve normal PID tahsisine izin verir.
+- `%unshare -fp /bin/bash%` komutunu çalıştırmak, `unshare` komutunun kendisinin yeni ad alanında PID 1 olmasını garanti eder. `/bin/bash` ve onun çocuk süreçleri, bu yeni ad alanında güvenli bir şekilde yer alır, PID 1'in erken çıkışını önler ve normal PID tahsisine izin verir.
 
-`unshare`'in `-f` bayrağı ile çalıştığından emin olarak, yeni PID ad alanı doğru bir şekilde korunur ve `/bin/bash` ile alt süreçleri bellek tahsis hatası ile karşılaşmadan çalışabilir.
+`unshare`'in `-f` bayrağı ile çalıştırılmasını sağlayarak, yeni PID ad alanının doğru bir şekilde korunmasını sağlarsınız, böylece `/bin/bash` ve alt süreçleri bellek tahsis hatası ile karşılaşmadan çalışabilir.
 
 </details>
 

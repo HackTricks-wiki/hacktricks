@@ -1,8 +1,8 @@
 {{#include ../banners/hacktricks-training.md}}
 
-If you can somehow encrypt a plaintext using RC4, you can decrypt any content encrypted by that RC4 (using the same password) just using the encryption function.
+Eğer bir şekilde bir düz metni RC4 kullanarak şifreleyebilirseniz, o RC4 ile şifrelenmiş herhangi bir içeriği (aynı şifreyi kullanarak) sadece şifreleme fonksiyonunu kullanarak çözebilirsiniz.
 
-If you can encrypt a known plaintext you can also extract the password. More references can be found in the HTB Kryptos machine:
+Eğer bilinen bir düz metni şifreleyebiliyorsanız, şifreyi de çıkarabilirsiniz. Daha fazla referans HTB Kryptos makinesinde bulunabilir:
 
 {% embed url="https://0xrick.github.io/hack-the-box/kryptos/" %}
 

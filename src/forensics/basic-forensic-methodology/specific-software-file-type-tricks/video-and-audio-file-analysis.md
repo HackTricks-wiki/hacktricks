@@ -1,29 +1,17 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
+**Ses ve video dosyası manipülasyonu**, **CTF adli bilişim zorlukları** için temel bir unsurdur ve gizli mesajları saklamak veya ortaya çıkarmak için **steganografi** ve meta veri analizinden yararlanır. **[mediainfo](https://mediaarea.net/en/MediaInfo)** ve **`exiftool`** gibi araçlar, dosya meta verilerini incelemek ve içerik türlerini tanımlamak için gereklidir.
 
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
+Ses zorlukları için, **[Audacity](http://www.audacityteam.org/)**, dalga formlarını görüntülemek ve ses spektrumlarını analiz etmek için öne çıkan bir araçtır; bu, ses içinde kodlanmış metni ortaya çıkarmak için gereklidir. **[Sonic Visualiser](http://www.sonicvisualiser.org/)**, detaylı spektrum analizi için şiddetle tavsiye edilir. **Audacity**, gizli mesajları tespit etmek için parçaları yavaşlatma veya tersine çevirme gibi ses manipülasyonlarına olanak tanır. **[Sox](http://sox.sourceforge.net/)**, ses dosyalarını dönüştürme ve düzenleme konusunda mükemmel bir komut satırı aracıdır.
 
-{% embed url="https://academy.8ksec.io/" %}
+**En Az Anlamlı Bitler (LSB)** manipülasyonu, ses ve video steganografisinde yaygın bir tekniktir ve medya dosyalarının sabit boyutlu parçalarını kullanarak verileri gizlice yerleştirir. **[Multimon-ng](http://tools.kali.org/wireless-attacks/multimon-ng)**, **DTMF tonları** veya **Morse kodu** olarak gizlenmiş mesajları çözmek için faydalıdır.
 
-**Audio and video file manipulation** is a staple in **CTF forensics challenges**, leveraging **steganography** and metadata analysis to hide or reveal secret messages. Tools such as **[mediainfo](https://mediaarea.net/en/MediaInfo)** and **`exiftool`** are essential for inspecting file metadata and identifying content types.
+Video zorlukları genellikle ses ve video akışlarını bir araya getiren konteyner formatlarını içerir. **[FFmpeg](http://ffmpeg.org/)**, bu formatları analiz etmek ve manipüle etmek için başvurulan araçtır; içeriği de-multiplexing yapabilir ve oynatabilir. Geliştiriciler için, **[ffmpy](http://ffmpy.readthedocs.io/en/latest/examples.html)**, FFmpeg'in yeteneklerini Python'a entegre ederek gelişmiş scriptable etkileşimler sağlar.
 
-For audio challenges, **[Audacity](http://www.audacityteam.org/)** stands out as a premier tool for viewing waveforms and analyzing spectrograms, essential for uncovering text encoded in audio. **[Sonic Visualiser](http://www.sonicvisualiser.org/)** is highly recommended for detailed spectrogram analysis. **Audacity** allows for audio manipulation like slowing down or reversing tracks to detect hidden messages. **[Sox](http://sox.sourceforge.net/)**, a command-line utility, excels in converting and editing audio files.
-
-**Least Significant Bits (LSB)** manipulation is a common technique in audio and video steganography, exploiting the fixed-size chunks of media files to embed data discreetly. **[Multimon-ng](http://tools.kali.org/wireless-attacks/multimon-ng)** is useful for decoding messages hidden as **DTMF tones** or **Morse code**.
-
-Video challenges often involve container formats that bundle audio and video streams. **[FFmpeg](http://ffmpeg.org/)** is the go-to for analyzing and manipulating these formats, capable of de-multiplexing and playing back content. For developers, **[ffmpy](http://ffmpy.readthedocs.io/en/latest/examples.html)** integrates FFmpeg's capabilities into Python for advanced scriptable interactions.
-
-This array of tools underscores the versatility required in CTF challenges, where participants must employ a broad spectrum of analysis and manipulation techniques to uncover hidden data within audio and video files.
+Bu araçlar dizisi, CTF zorluklarında gereken çok yönlülüğü vurgular; katılımcılar, ses ve video dosyalarında gizli verileri ortaya çıkarmak için geniş bir analiz ve manipülasyon teknikleri yelpazesini kullanmalıdır.
 
 ## References
 
 - [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/)
-
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
-
-{% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}

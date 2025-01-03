@@ -39,7 +39,7 @@ docker run -it -v /:/host/ --cap-add=ALL --security-opt apparmor=unconfined --se
 Docker daemon ayrıca [bir portta dinliyor olabilir (varsayılan olarak 2375, 2376)](../../../../network-services-pentesting/2375-pentesting-docker.md) veya Systemd tabanlı sistemlerde, Docker daemon ile iletişim Systemd soketi `fd://` üzerinden gerçekleşebilir.
 
 > [!NOTE]
-> Ayrıca, diğer yüksek seviyeli çalışma zamanlarının çalışma zamanı soketlerine dikkat edin:
+> Ayrıca, diğer yüksek seviyeli çalışma zamanlarının çalışma soketlerine dikkat edin:
 >
 > - dockershim: `unix:///var/run/dockershim.sock`
 > - containerd: `unix:///run/containerd/containerd.sock`
@@ -64,7 +64,7 @@ Aşağıdaki sayfada **linux yetenekleri hakkında daha fazla bilgi edinebilir**
 
 ## Yetkili Konteynerlerden Kaçış
 
-Yetkili bir konteyner `--privileged` bayrağı ile veya belirli savunmaları devre dışı bırakarak oluşturulabilir:
+Yetkili bir konteyner, `--privileged` bayrağı ile veya belirli savunmaları devre dışı bırakarak oluşturulabilir:
 
 - `--cap-add=ALL`
 - `--security-opt apparmor=unconfined`
@@ -76,7 +76,7 @@ Yetkili bir konteyner `--privileged` bayrağı ile veya belirli savunmaları dev
 - `--cgroupns=host`
 - `Mount /dev`
 
-`--privileged` bayrağı, konteyner güvenliğini önemli ölçüde azaltarak **kısıtlamasız cihaz erişimi** sağlar ve **birçok korumayı** atlatır. Detaylı bir inceleme için `--privileged`'in tam etkileri ile ilgili belgeleri inceleyin.
+`--privileged` bayrağı, konteyner güvenliğini önemli ölçüde azaltır, **kısıtlamasız cihaz erişimi** sunar ve **birçok korumayı** atlatır. Detaylı bir inceleme için `--privileged`'in tam etkileri ile ilgili belgeleri inceleyin.
 
 {{#ref}}
 ../docker-privileged.md
@@ -84,7 +84,7 @@ Yetkili bir konteyner `--privileged` bayrağı ile veya belirli savunmaları dev
 
 ### Yetkili + hostPID
 
-Bu izinlerle, sadece **host'ta root olarak çalışan bir sürecin ad alanına geçebilirsiniz**; örneğin init (pid:1) sadece şunu çalıştırarak: `nsenter --target 1 --mount --uts --ipc --net --pid -- bash`
+Bu izinlerle, sadece **root olarak ana makinede çalışan bir sürecin ad alanına geçebilirsiniz**; örneğin init (pid:1) sadece şunu çalıştırarak: `nsenter --target 1 --mount --uts --ipc --net --pid -- bash`
 
 Bunu bir konteynerde test edin:
 ```bash
@@ -98,9 +98,9 @@ Aşağıdaki atlatmaları bir konteynerde çalıştırarak test edin:
 ```bash
 docker run --rm -it --privileged ubuntu bash
 ```
-#### Diski Montajlama - Poc1
+#### Disk Bağlama - Poc1
 
-İyi yapılandırılmış docker konteynerleri **fdisk -l** gibi komutlara izin vermez. Ancak, `--privileged` veya `--device=/dev/sda1` bayrağı büyük harfle belirtilmiş yanlış yapılandırılmış docker komutlarında, ana makine sürücüsünü görme ayrıcalıklarını elde etmek mümkündür.
+İyi yapılandırılmış docker konteynerleri **fdisk -l** gibi komutlara izin vermez. Ancak, `--privileged` veya büyük harfle belirtilmiş `--device=/dev/sda1` bayrağı ile yanlış yapılandırılmış bir docker komutunda, ana makine sürücüsünü görme ayrıcalıklarını elde etmek mümkündür.
 
 ![](https://bestestredteam.com/content/images/2019/08/image-16.png)
 
@@ -109,7 +109,7 @@ Bu nedenle, ana makineyi ele geçirmek oldukça basittir:
 mkdir -p /mnt/hola
 mount /dev/sda1 /mnt/hola
 ```
-Ve işte! Artık ana bilgisayarın dosya sistemine erişebilirsiniz çünkü bu, `/mnt/hola` klasörüne monte edilmiştir.
+Ve işte! Artık ana makinenin dosya sistemine erişebilirsiniz çünkü `/mnt/hola` klasörüne monte edilmiştir.
 
 #### Disk Montajı - Poc2
 
@@ -310,7 +310,7 @@ root        10     2  0 11:25 ?        00:00:00 [ksoftirqd/0]
 ```
 #### Ayrıcalıklı Kaçış Hassas Montajların İstismarı
 
-Montaj yapılabilecek birkaç dosya vardır ki bunlar **altındaki ana makine hakkında bilgi verir**. Bunlardan bazıları, **bir şey olduğunda ana makine tarafından yürütülecek bir şeyi gösterebilir** (bu, bir saldırganın konteynerden kaçmasına izin verecektir).\
+Montaj yapılmış birkaç dosya vardır ki bunlar **altındaki ana makine hakkında bilgi verir**. Bunlardan bazıları, **bir şey olduğunda ana makine tarafından yürütülecek bir şeyi gösterebilir** (bu, bir saldırganın konteynerden kaçmasına izin verecektir).\
 Bu dosyaların istismarı şunları mümkün kılabilir:
 
 - release_agent (daha önce ele alındı)
@@ -342,12 +342,12 @@ chown root:root bash #From container as root inside mounted folder
 chmod 4777 bash #From container as root inside mounted folder
 bash -p #From non priv inside mounted folder
 ```
-### İki shell ile Yetki Yükseltme
+### İki Shell ile Yetki Yükseltme
 
-Eğer bir **konteyner içinde root olarak erişiminiz** varsa ve **host'a yetkisiz bir kullanıcı olarak kaçtıysanız**, her iki shell'i de **host içinde privesc için kullanabilirsiniz** eğer konteyner içinde MKNOD yeteneğine sahipseniz (varsayılan olarak vardır) [**bu yazıda açıklandığı gibi**](https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/).\
-Bu yetenekle konteyner içindeki root kullanıcısı **blok cihaz dosyaları oluşturma** iznine sahiptir. Cihaz dosyaları, **temel donanım ve çekirdek modüllerine erişmek için** kullanılan özel dosyalardır. Örneğin, /dev/sda blok cihaz dosyası, **sistem diskindeki ham verilere erişim sağlar**.
+Eğer bir **konteyner içinde root olarak erişiminiz** varsa ve **host'a yetkisiz bir kullanıcı olarak kaçtıysanız**, her iki shell'i de **host içinde privesc için kullanabilirsiniz** eğer konteyner içinde MKNOD yeteneğine sahipseniz (bu varsayılan olarak vardır) [**bu yazıda açıklandığı gibi**](https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/).\
+Bu yetenekle konteyner içindeki root kullanıcısı **blok cihaz dosyaları oluşturma** iznine sahiptir. Cihaz dosyaları, **altındaki donanım ve çekirdek modüllerine erişmek için** kullanılan özel dosyalardır. Örneğin, /dev/sda blok cihaz dosyası, **sistem diskindeki ham verilere erişim sağlar**.
 
-Docker, konteynerler içinde blok cihaz kötüye kullanımına karşı, **blok cihaz okuma/yazma işlemlerini engelleyen** bir cgroup politikası uygulayarak koruma sağlar. Ancak, eğer bir blok cihaz **konteyner içinde oluşturulursa**, bu cihaz konteyner dışından **/proc/PID/root/** dizini aracılığıyla erişilebilir hale gelir. Bu erişim, **işlem sahibinin hem konteyner içinde hem de dışında aynı olması** gerektirir.
+Docker, konteynerler içinde blok cihaz kötüye kullanımına karşı, **blok cihazı okuma/yazma işlemlerini engelleyen** bir cgroup politikası uygulayarak koruma sağlar. Ancak, eğer bir blok cihaz **konteyner içinde oluşturulursa**, bu cihaz konteyner dışından **/proc/PID/root/** dizini aracılığıyla erişilebilir hale gelir. Bu erişim, **işlem sahibinin hem konteyner içinde hem de dışında aynı olması** gerektirir.
 
 **Sömürü** örneği bu [**yazıdan**](https://radboudinstituteof.pwning.nl/posts/htbunictfquals2021/goodgames/):
 ```bash
@@ -393,7 +393,7 @@ docker run --rm -it --pid=host ubuntu bash
 ```
 Örneğin, `ps auxn` gibi bir şey kullanarak süreçleri listeleyebilir ve komutlarda hassas ayrıntıları arayabilirsiniz.
 
-Sonra, **/proc/ içindeki her bir host sürecine erişebildiğiniz için, sadece env gizli anahtarlarını çalabilirsiniz**:
+Daha sonra, **/proc/ içinde ana bilgisayarın her bir sürecine erişebildiğiniz için, sadece env gizli anahtarlarını çalabilirsiniz**:
 ```bash
 for e in `ls /proc/*/environ`; do echo; echo $e; xargs -0 -L1 -a $e; done
 /proc/988058/environ
@@ -415,7 +415,7 @@ cat /proc/635813/fd/4
 Ayrıca **işlemleri sonlandırabilir ve bir DoS oluşturabilirsiniz**.
 
 > [!WARNING]
-> Eğer bir şekilde **kapsayıcı dışındaki bir işleme ayrıcalıklı erişiminiz varsa**, `nsenter --target <pid> --all` veya `nsenter --target <pid> --mount --net --pid --cgroup` gibi bir şey çalıştırarak **o işlemin aynı ns kısıtlamalarıyla** (umarım hiç yok) **bir shell çalıştırabilirsiniz.**
+> Eğer bir şekilde **konteyner dışındaki bir işleme ayrıcalıklı erişiminiz varsa**, `nsenter --target <pid> --all` veya `nsenter --target <pid> --mount --net --pid --cgroup` gibi bir şey çalıştırarak **o işlemin aynı ns kısıtlamalarıyla** (umarım hiç yok) **bir shell çalıştırabilirsiniz.**
 
 ### hostNetwork
 ```
@@ -430,13 +430,13 @@ Aşağıdaki örneklerde olduğu gibi:
 - [Writeup: How to contact Google SRE: Dropping a shell in cloud SQL](https://offensi.com/2020/08/18/how-to-contact-google-sre-dropping-a-shell-in-cloud-sql/)
 - [Metadata service MITM allows root privilege escalation (EKS / GKE)](https://blog.champtar.fr/Metadata_MITM_root_EKS_GKE/)
 
-Ayrıca, ana bilgisayar içindeki **localhost'a bağlı ağ hizmetlerine** erişebilecek veya **düğümün metadata izinlerine** (bir konteynerin erişebileceğinden farklı olabilir) erişebileceksiniz.
+Ayrıca, ana bilgisayar içinde **localhost'a bağlı ağ hizmetlerine** erişebilecek veya hatta **düğümün metadata izinlerine** erişebileceksiniz (bu, bir konteynerin erişebileceğinden farklı olabilir).
 
 ### hostIPC
 ```bash
 docker run --rm -it --ipc=host ubuntu bash
 ```
-`hostIPC=true` ile, ana bilgisayarın süreçler arası iletişim (IPC) kaynaklarına, örneğin `/dev/shm` içindeki **paylaşılan bellek** erişimi kazanırsınız. Bu, aynı IPC kaynaklarının diğer ana bilgisayar veya pod süreçleri tarafından kullanıldığı yerlerde okuma/yazma yapmanıza olanak tanır. Bu IPC mekanizmalarını daha fazla incelemek için `ipcs` komutunu kullanın.
+`hostIPC=true` ile, ana bilgisayarın süreçler arası iletişim (IPC) kaynaklarına, örneğin `/dev/shm` içindeki **paylaşılan bellek** kaynaklarına erişim kazanırsınız. Bu, aynı IPC kaynaklarının diğer ana bilgisayar veya pod süreçleri tarafından kullanıldığı yerlerde okuma/yazma yapmanıza olanak tanır. Bu IPC mekanizmalarını daha fazla incelemek için `ipcs` komutunu kullanın.
 
 - **/dev/shm'yi incele** - Bu paylaşılan bellek konumundaki dosyaları kontrol edin: `ls -la /dev/shm`
 - **Mevcut IPC tesislerini incele** – Herhangi bir IPC tesisinin kullanılıp kullanılmadığını kontrol etmek için `/usr/bin/ipcs` komutunu kullanabilirsiniz. Bunu kontrol edin: `ipcs -a`
@@ -457,10 +457,10 @@ Gönderide açıklanan ikinci teknik [https://labs.withsecure.com/blog/abusing-t
 
 ### Runc istismarı (CVE-2019-5736)
 
-Eğer `docker exec` komutunu root olarak çalıştırabiliyorsanız (muhtemelen sudo ile), CVE-2019-5736'dan yararlanarak bir konteynerden kaçış yaparak ayrıcalıkları yükseltmeye çalışırsınız (istismar [burada](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)). Bu teknik temelde **/bin/sh** ikili dosyasını **host**'tan **bir konteynerden** **üstüne yazacaktır**, bu nedenle docker exec komutunu çalıştıran herkes yükü tetikleyebilir.
+Eğer `docker exec` komutunu root olarak çalıştırabiliyorsanız (muhtemelen sudo ile), CVE-2019-5736'dan yararlanarak bir konteynerden kaçış yaparak ayrıcalıkları yükseltmeye çalışırsınız (istismar [burada](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)). Bu teknik temelde **/bin/sh** ikili dosyasını **host**'tan **bir konteyner** aracılığıyla **üst üste yazacaktır**, bu nedenle docker exec komutunu çalıştıran herkes yükü tetikleyebilir.
 
 Yükü buna göre değiştirin ve `go build main.go` ile main.go dosyasını derleyin. Ortaya çıkan ikili dosya, yürütme için docker konteynerine yerleştirilmelidir.\
-Yürütme sırasında, `[+] Overwritten /bin/sh successfully` mesajını gösterdiği anda, host makinesinden aşağıdakini çalıştırmalısınız:
+Yürütme sırasında, `[+] /bin/sh başarıyla üst üste yazıldı` mesajını gösterdiği anda, host makinesinden aşağıdakini çalıştırmalısınız:
 
 `docker exec -it <container-name> /bin/sh`
 
@@ -478,7 +478,7 @@ Daha fazla bilgi için: [https://blog.dragonsector.pl/2019/02/cve-2019-5736-esca
 - **Ad Alanları:** Süreç, ad alanları aracılığıyla **diğer süreçlerden tamamen ayrılmış olmalıdır**, bu nedenle ad alanları nedeniyle diğer süreçlerle etkileşimde bulunarak kaçış yapamayız (varsayılan olarak IPC'ler, unix soketleri, ağ hizmetleri, D-Bus, diğer süreçlerin `/proc`'u aracılığıyla iletişim kuramaz).
 - **Root kullanıcı**: Varsayılan olarak süreci çalıştıran kullanıcı root kullanıcısıdır (ancak ayrıcalıkları sınırlıdır).
 - **Yetenekler**: Docker aşağıdaki yetenekleri bırakır: `cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap=ep`
-- **Syscalls**: Bu, **root kullanıcısının çağıramayacağı** syscalls'dır (yeteneklerin eksikliği + Seccomp nedeniyle). Diğer syscalls kaçış yapmaya çalışmak için kullanılabilir.
+- **Sistem çağrıları**: **Root kullanıcısının çağıramayacağı** sistem çağrılarıdır (yeteneklerin eksikliği + Seccomp nedeniyle). Diğer sistem çağrıları kaçış yapmaya çalışmak için kullanılabilir.
 
 {{#tabs}}
 {{#tab name="x64 syscalls"}}

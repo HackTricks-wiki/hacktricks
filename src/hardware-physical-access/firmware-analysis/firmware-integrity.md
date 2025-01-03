@@ -2,26 +2,26 @@
 
 ## Firmware Integrity
 
-The **custom firmware and/or compiled binaries can be uploaded to exploit integrity or signature verification flaws**. The following steps can be followed for backdoor bind shell compilation:
+**Özel firmware ve/veya derlenmiş ikili dosyalar, bütünlük veya imza doğrulama hatalarını istismar etmek için yüklenebilir.** Aşağıdaki adımlar arka kapı bind shell derlemesi için izlenebilir:
 
-1. The firmware can be extracted using firmware-mod-kit (FMK).
-2. The target firmware architecture and endianness should be identified.
-3. A cross compiler can be built using Buildroot or other suitable methods for the environment.
-4. The backdoor can be built using the cross compiler.
-5. The backdoor can be copied to the extracted firmware /usr/bin directory.
-6. The appropriate QEMU binary can be copied to the extracted firmware rootfs.
-7. The backdoor can be emulated using chroot and QEMU.
-8. The backdoor can be accessed via netcat.
-9. The QEMU binary should be removed from the extracted firmware rootfs.
-10. The modified firmware can be repackaged using FMK.
-11. The backdoored firmware can be tested by emulating it with firmware analysis toolkit (FAT) and connecting to the target backdoor IP and port using netcat.
+1. Firmware, firmware-mod-kit (FMK) kullanılarak çıkarılabilir.
+2. Hedef firmware mimarisi ve endianlık belirlenmelidir.
+3. Ortam için Buildroot veya diğer uygun yöntemler kullanılarak bir çapraz derleyici oluşturulabilir.
+4. Arka kapı çapraz derleyici kullanılarak oluşturulabilir.
+5. Arka kapı çıkarılan firmware /usr/bin dizinine kopyalanabilir.
+6. Uygun QEMU ikili dosyası çıkarılan firmware rootfs'ye kopyalanabilir.
+7. Arka kapı chroot ve QEMU kullanılarak taklit edilebilir.
+8. Arka kapıya netcat üzerinden erişilebilir.
+9. QEMU ikili dosyası çıkarılan firmware rootfs'den kaldırılmalıdır.
+10. Değiştirilen firmware FMK kullanılarak yeniden paketlenebilir.
+11. Arka kapılı firmware, firmware analysis toolkit (FAT) ile taklit edilerek ve hedef arka kapı IP'sine ve portuna netcat kullanarak bağlanarak test edilebilir.
 
-If a root shell has already been obtained through dynamic analysis, bootloader manipulation, or hardware security testing, precompiled malicious binaries such as implants or reverse shells can be executed. Automated payload/implant tools like the Metasploit framework and 'msfvenom' can be leveraged using the following steps:
+Eğer dinamik analiz, önyükleyici manipülasyonu veya donanım güvenlik testi yoluyla bir root shell elde edilmişse, implantlar veya ters shell gibi önceden derlenmiş kötü niyetli ikili dosyalar çalıştırılabilir. Metasploit framework ve 'msfvenom' gibi otomatik yük/implant araçları aşağıdaki adımlar kullanılarak kullanılabilir:
 
-1. The target firmware architecture and endianness should be identified.
-2. Msfvenom can be used to specify the target payload, attacker host IP, listening port number, filetype, architecture, platform, and the output file.
-3. The payload can be transferred to the compromised device and ensured that it has execution permissions.
-4. Metasploit can be prepared to handle incoming requests by starting msfconsole and configuring the settings according to the payload.
-5. The meterpreter reverse shell can be executed on the compromised device.
+1. Hedef firmware mimarisi ve endianlık belirlenmelidir.
+2. Msfvenom, hedef yükü, saldırgan ana bilgisayar IP'sini, dinleme port numarasını, dosya türünü, mimariyi, platformu ve çıktı dosyasını belirtmek için kullanılabilir.
+3. Yük, ele geçirilmiş cihaza aktarılabilir ve yürütme izinlerinin olduğu garanti edilmelidir.
+4. Metasploit, msfconsole başlatarak ve ayarları yükle göre yapılandırarak gelen istekleri işlemek için hazırlanabilir.
+5. Meterpreter ters shell, ele geçirilmiş cihazda çalıştırılabilir.
 
 {{#include ../../banners/hacktricks-training.md}}

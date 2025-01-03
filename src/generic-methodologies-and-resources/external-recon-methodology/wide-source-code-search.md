@@ -1,18 +1,18 @@
-# Wide Source Code Search
+# Geniş Kaynak Kodu Arama
 
 {{#include ../../banners/hacktricks-training.md}}
 
-The goal of this page is to enumerate **platforms that allow to search for code** (literal or regex) in across thousands/millions of repos in one or more platforms.
+Bu sayfanın amacı, bir veya daha fazla platformda binlerce/milyonlarca repoda **kod aramaya izin veren platformları** listelemektir (literal veya regex).
 
-This helps in several occasions to **search for leaked information** or for **vulnerabilities** patterns.
+Bu, **sızdırılmış bilgileri** veya **zafiyet** kalıplarını aramak için çeşitli durumlarda yardımcı olur.
 
-- [**SourceGraph**](https://sourcegraph.com/search): Search in millions of repos. There is a free version and an enterprise version (with 15 days free). It supports regexes.
-- [**Github Search**](https://github.com/search): Search across Github. It supports regexes.
-  - Maybe it's also useful to check also [**Github Code Search**](https://cs.github.com/).
-- [**Gitlab Advanced Search**](https://docs.gitlab.com/ee/user/search/advanced_search.html): Search across Gitlab projects. Support regexes.
-- [**SearchCode**](https://searchcode.com/): Search code in millions of projects.
+- [**SourceGraph**](https://sourcegraph.com/search): Milyonlarca repoda arama yapın. Ücretsiz bir sürümü ve 15 gün ücretsiz olan bir kurumsal sürümü vardır. Regex destekler.
+- [**Github Search**](https://github.com/search): Github üzerinde arama yapın. Regex destekler.
+- Belki de [**Github Code Search**](https://cs.github.com/) kontrol etmek de faydalı olabilir.
+- [**Gitlab Advanced Search**](https://docs.gitlab.com/ee/user/search/advanced_search.html): Gitlab projeleri arasında arama yapın. Regex destekler.
+- [**SearchCode**](https://searchcode.com/): Milyonlarca projede kod arayın.
 
 > [!WARNING]
-> When you look for leaks in a repo and run something like `git log -p` don't forget there might be **other branches with other commits** containing secrets!
+> Bir repoda sızıntılar ararken ve `git log -p` gibi bir şey çalıştırırken, **diğer gizli bilgileri içeren diğer commit'lerin bulunduğu diğer dallar** olabileceğini unutmayın!
 
 {{#include ../../banners/hacktricks-training.md}}

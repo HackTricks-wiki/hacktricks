@@ -1,14 +1,14 @@
-# Zaman Ad Alanı
+# Zaman Adnamesi
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
 ## Temel Bilgiler
 
-Linux'taki zaman ad alanı, sistemin monotonik ve önyükleme zamanı saatlerine göre ad alanı başına kaydırmalar sağlar. Genellikle Linux konteynerlerinde, bir konteyner içindeki tarih/saatin değiştirilmesi ve bir kontrol noktasından veya anlık görüntüden geri yüklendikten sonra saatlerin ayarlanması için kullanılır.
+Linux'taki zaman adnamesi, sistemin monotonik ve önyükleme zamanı saatlerine göre adname başına kaydırmalar sağlar. Genellikle Linux konteynerlerinde, bir konteyner içindeki tarih/saatin değiştirilmesi ve bir kontrol noktasından veya anlık görüntüden geri yüklendikten sonra saatlerin ayarlanması için kullanılır.
 
 ## Laboratuvar:
 
-### Farklı Ad Alanları Oluşturma
+### Farklı Adnameler Oluşturma
 
 #### CLI
 ```bash
@@ -30,7 +30,7 @@ Yeni bir `/proc` dosya sisteminin örneğini `--mount-proc` parametresi ile mont
 
 2. **Sonuç**:
 
-- Yeni bir ad alanındaki PID 1'in çıkışı, `PIDNS_HASH_ADDING` bayrağının temizlenmesine yol açar. Bu, yeni bir süreç oluşturulurken `alloc_pid` fonksiyonunun yeni bir PID tahsis edememesine neden olur ve "Bellek tahsis edilemiyor" hatasını üretir.
+- Yeni bir ad alanındaki PID 1'in çıkışı, `PIDNS_HASH_ADDING` bayrağının temizlenmesine yol açar. Bu, yeni bir süreç oluştururken `alloc_pid` fonksiyonunun yeni bir PID tahsis edememesine neden olur ve "Bellek tahsis edilemiyor" hatasını üretir.
 
 3. **Çözüm**:
 - Sorun, `unshare` ile `-f` seçeneğini kullanarak çözülebilir. Bu seçenek, `unshare`'in yeni PID ad alanını oluşturduktan sonra yeni bir süreç fork etmesini sağlar.

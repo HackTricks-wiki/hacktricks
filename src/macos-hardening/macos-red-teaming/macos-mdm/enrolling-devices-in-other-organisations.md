@@ -17,7 +17,7 @@ Bu araştırma, macOS'taki Cihaz Kaydı Programı (DEP) ve Mobil Cihaz Yönetimi
 - **`profiles`**: Yapılandırma Profillerini yönetir ve macOS 10.13.4 ve sonraki sürümlerde DEP kontrol noktalarını tetikler.
 - **`cloudconfigurationd`**: DEP API iletişimlerini yönetir ve Cihaz Kaydı profillerini alır.
 
-DEP kontrol noktaları, Aktivasyon Kaydını almak için özel Yapılandırma Profilleri çerçevesinden `CPFetchActivationRecord` ve `CPGetActivationRecord` işlevlerini kullanır; `CPFetchActivationRecord`, `cloudconfigurationd` ile XPC üzerinden koordine olur.
+DEP kontrol noktaları, Aktivasyon Kaydını almak için özel Yapılandırma Profilleri çerçevesinden `CPFetchActivationRecord` ve `CPGetActivationRecord` işlevlerini kullanır; `CPFetchActivationRecord`, `cloudconfigurationd` ile XPC üzerinden koordine eder.
 
 ## Tesla Protokolü ve Absinthe Şeması Ters Mühendislik
 
@@ -25,9 +25,9 @@ DEP kontrol noktası, `cloudconfigurationd`'nin _iprofiles.apple.com/macProfile_
 
 ## DEP İsteklerini Proxyleme
 
-_iprofiles.apple.com_ adresine giden DEP isteklerini Charles Proxy gibi araçlarla kesmeye ve değiştirmeye yönelik girişimler, yük şifrelemesi ve SSL/TLS güvenlik önlemleri nedeniyle engellenmiştir. Ancak, `MCCloudConfigAcceptAnyHTTPSCertificate` yapılandırmasını etkinleştirmek, sunucu sertifika doğrulamasını atlamaya olanak tanır; ancak yükün şifreli doğası, şifre çözme anahtarı olmadan seri numarasının değiştirilmesini engeller.
+_iprofiles.apple.com_ adresine giden DEP isteklerini Charles Proxy gibi araçlarla kesmeye ve değiştirmeye yönelik girişimler, yük şifrelemesi ve SSL/TLS güvenlik önlemleri nedeniyle engellenmiştir. Ancak, `MCCloudConfigAcceptAnyHTTPSCertificate` yapılandırmasını etkinleştirmek, sunucu sertifikası doğrulamasını atlamayı sağlar; ancak yükün şifreli doğası, şifre çözme anahtarı olmadan seri numarasının değiştirilmesini engeller.
 
-## DEP ile Etkileşimde Bulunan Sistem İkili Dosyalarını Enstrümante Etme
+## DEP ile Etkileşime Geçen Sistem İkili Dosyalarını Enstrümante Etme
 
 `cloudconfigurationd` gibi sistem ikili dosyalarını enstrümante etmek, macOS'ta Sistem Bütünlüğü Koruması'nın (SIP) devre dışı bırakılmasını gerektirir. SIP devre dışı bırakıldığında, LLDB gibi araçlar sistem süreçlerine bağlanmak ve DEP API etkileşimlerinde kullanılan seri numarasını potansiyel olarak değiştirmek için kullanılabilir. Bu yöntem, yetkilendirmeler ve kod imzalama karmaşıklıklarından kaçındığı için tercih edilmektedir.
 
@@ -46,7 +46,7 @@ Sömürü süreci, keyfi seri numaralarını programatik olarak enjekte etmek ve
 
 ### DEP ve MDM Zafiyetlerinin Potansiyel Etkileri
 
-Araştırma, önemli güvenlik endişelerini vurgulamıştır:
+Araştırma, önemli güvenlik endişelerini vurguladı:
 
 1. **Bilgi Sızdırma**: DEP'e kayıtlı bir seri numarası sağlayarak, DEP profilinde bulunan hassas kurumsal bilgilere erişim sağlanabilir.
 

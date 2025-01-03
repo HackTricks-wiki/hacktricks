@@ -2,54 +2,54 @@
 
 # CBC
 
-If the **cookie** is **only** the **username** (or the first part of the cookie is the username) and you want to impersonate the username "**admin**". Then, you can create the username **"bdmin"** and **bruteforce** the **first byte** of the cookie.
+Eğer **cookie** **sadece** **kullanıcı adı** ise (veya cookie'nin ilk kısmı kullanıcı adıysa) ve "**admin**" kullanıcı adını taklit etmek istiyorsanız. O zaman **"bdmin"** kullanıcı adını oluşturabilir ve **cookie'nin ilk baytını** **bruteforce** edebilirsiniz.
 
 # CBC-MAC
 
-**Cipher block chaining message authentication code** (**CBC-MAC**) is a method used in cryptography. It works by taking a message and encrypting it block by block, where each block's encryption is linked to the one before it. This process creates a **chain of blocks**, making sure that changing even a single bit of the original message will lead to an unpredictable change in the last block of encrypted data. To make or reverse such a change, the encryption key is required, ensuring security.
+**Şifre blok zinciri mesaj kimlik doğrulama kodu** (**CBC-MAC**), kriptografide kullanılan bir yöntemdir. Bu yöntem, bir mesajı alıp blok blok şifreleyerek çalışır; her bloğun şifrelemesi, bir önceki bloğa bağlıdır. Bu süreç, **blokların bir zincirini** oluşturur ve orijinal mesajın tek bir bitini değiştirmek bile, şifrelenmiş verinin son bloğunda öngörülemeyen bir değişikliğe yol açar. Böyle bir değişikliği yapmak veya geri almak için şifreleme anahtarı gereklidir, bu da güvenliği sağlar.
 
-To calculate the CBC-MAC of message m, one encrypts m in CBC mode with zero initialization vector and keeps the last block. The following figure sketches the computation of the CBC-MAC of a message comprising blocks![https://wikimedia.org/api/rest_v1/media/math/render/svg/bbafe7330a5e40a04f01cc776c9d94fe914b17f5](https://wikimedia.org/api/rest_v1/media/math/render/svg/bbafe7330a5e40a04f01cc776c9d94fe914b17f5) using a secret key k and a block cipher E:
+Mesaj m'nin CBC-MAC'ını hesaplamak için, m'yi sıfır başlangıç vektörü ile CBC modunda şifreler ve son bloğu saklarsınız. Aşağıdaki şekil, bir dizi bloktan oluşan bir mesajın CBC-MAC'ının hesaplanmasını tasvir etmektedir![https://wikimedia.org/api/rest_v1/media/math/render/svg/bbafe7330a5e40a04f01cc776c9d94fe914b17f5](https://wikimedia.org/api/rest_v1/media/math/render/svg/bbafe7330a5e40a04f01cc776c9d94fe914b17f5) gizli anahtar k ve bir blok şifre E kullanarak:
 
 ![https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/CBC-MAC_structure_(en).svg/570px-CBC-MAC_structure_(en).svg.png](<https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/CBC-MAC_structure_(en).svg/570px-CBC-MAC_structure_(en).svg.png>)
 
-# Vulnerability
+# Açıklık
 
-With CBC-MAC usually the **IV used is 0**.\
-This is a problem because 2 known messages (`m1` and `m2`) independently will generate 2 signatures (`s1` and `s2`). So:
+CBC-MAC ile genellikle **kullanılan IV 0'dır**.\
+Bu bir sorun çünkü 2 bilinen mesaj (`m1` ve `m2`) bağımsız olarak 2 imza (`s1` ve `s2`) üretecektir. Yani:
 
 - `E(m1 XOR 0) = s1`
 - `E(m2 XOR 0) = s2`
 
-Then a message composed by m1 and m2 concatenated (m3) will generate 2 signatures (s31 and s32):
+Sonra m1 ve m2'nin birleştirilmesiyle oluşan bir mesaj (m3) 2 imza (s31 ve s32) üretecektir:
 
 - `E(m1 XOR 0) = s31 = s1`
 - `E(m2 XOR s1) = s32`
 
-**Which is possible to calculate without knowing the key of the encryption.**
+**Bu, şifreleme anahtarını bilmeden hesaplanabilir.**
 
-Imagine you are encrypting the name **Administrator** in **8bytes** blocks:
+**Administrator** ismini **8bayt** bloklarda şifrelediğinizi hayal edin:
 
 - `Administ`
 - `rator\00\00\00`
 
-You can create a username called **Administ** (m1) and retrieve the signature (s1).\
-Then, you can create a username called the result of `rator\00\00\00 XOR s1`. This will generate `E(m2 XOR s1 XOR 0)` which is s32.\
-now, you can use s32 as the signature of the full name **Administrator**.
+**Administ** (m1) adında bir kullanıcı adı oluşturabilir ve imzayı (s1) alabilirsiniz.\
+Sonra, `rator\00\00\00 XOR s1` sonucunu kullanarak bir kullanıcı adı oluşturabilirsiniz. Bu, `E(m2 XOR s1 XOR 0)` üretecektir ki bu da s32'dir.\
+Artık s32'yi **Administrator** tam adı için imza olarak kullanabilirsiniz.
 
-### Summary
+### Özet
 
-1. Get the signature of username **Administ** (m1) which is s1
-2. Get the signature of username **rator\x00\x00\x00 XOR s1 XOR 0** is s32**.**
-3. Set the cookie to s32 and it will be a valid cookie for the user **Administrator**.
+1. **Administ** (m1) kullanıcı adının imzasını alın, bu s1'dir.
+2. **rator\x00\x00\x00 XOR s1 XOR 0** kullanıcı adının imzasını alın, bu s32'dir.
+3. Cookie'yi s32 olarak ayarlayın ve bu, **Administrator** kullanıcısı için geçerli bir cookie olacaktır.
 
-# Attack Controlling IV
+# IV'yi Kontrol Etme Saldırısı
 
-If you can control the used IV the attack could be very easy.\
-If the cookies is just the username encrypted, to impersonate the user "**administrator**" you can create the user "**Administrator**" and you will get it's cookie.\
-Now, if you can control the IV, you can change the first Byte of the IV so **IV\[0] XOR "A" == IV'\[0] XOR "a"** and regenerate the cookie for the user **Administrator.** This cookie will be valid to **impersonate** the user **administrator** with the initial **IV**.
+Kullanılan IV'yi kontrol edebiliyorsanız, saldırı çok kolay olabilir.\
+Eğer cookie sadece şifrelenmiş kullanıcı adıysa, "**administrator**" kullanıcısını taklit etmek için "**Administrator**" kullanıcısını oluşturabilir ve onun cookie'sini alabilirsiniz.\
+Şimdi, eğer IV'yi kontrol edebiliyorsanız, IV'nin ilk baytını değiştirebilirsiniz, böylece **IV\[0] XOR "A" == IV'\[0] XOR "a"** olur ve **Administrator** kullanıcısı için cookie'yi yeniden oluşturabilirsiniz. Bu cookie, başlangıç **IV** ile **administrator** kullanıcısını taklit etmek için geçerli olacaktır.
 
-## References
+## Referanslar
 
-More information in [https://en.wikipedia.org/wiki/CBC-MAC](https://en.wikipedia.org/wiki/CBC-MAC)
+Daha fazla bilgi için [https://en.wikipedia.org/wiki/CBC-MAC](https://en.wikipedia.org/wiki/CBC-MAC)
 
 {{#include ../banners/hacktricks-training.md}}

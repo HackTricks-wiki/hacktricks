@@ -1,114 +1,97 @@
-# Local Cloud Storage
+# Yerel Bulut Depolama
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="../../../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 ## OneDrive
 
-In Windows, you can find the OneDrive folder in `\Users\<username>\AppData\Local\Microsoft\OneDrive`. And inside `logs\Personal` it's possible to find the file `SyncDiagnostics.log` which contains some interesting data regarding the synchronized files:
+Windows'ta, OneDrive klasörünü `\Users\<username>\AppData\Local\Microsoft\OneDrive` içinde bulabilirsiniz. Ve `logs\Personal` içinde, senkronize edilmiş dosyalarla ilgili bazı ilginç verileri içeren `SyncDiagnostics.log` dosyasını bulmak mümkündür:
 
-- Size in bytes
-- Creation date
-- Modification date
-- Number of files in the cloud
-- Number of files in the folder
-- **CID**: Unique ID of the OneDrive user
-- Report generation time
-- Size of the HD of the OS
+- Boyut (bayt cinsinden)
+- Oluşturulma tarihi
+- Değiştirilme tarihi
+- Buluttaki dosya sayısı
+- Klasördeki dosya sayısı
+- **CID**: OneDrive kullanıcısının benzersiz kimliği
+- Rapor oluşturma zamanı
+- İşletim sisteminin HD boyutu
 
-Once you have found the CID it's recommended to **search files containing this ID**. You may be able to find files with the name: _**\<CID>.ini**_ and _**\<CID>.dat**_ that may contain interesting information like the names of files synchronized with OneDrive.
+CID'yi bulduktan sonra, **bu kimliği içeren dosyaları aramanız önerilir**. _**\<CID>.ini**_ ve _**\<CID>.dat**_ adında, OneDrive ile senkronize edilmiş dosyaların isimlerini içerebilecek dosyalar bulabilirsiniz.
 
 ## Google Drive
 
-In Windows, you can find the main Google Drive folder in `\Users\<username>\AppData\Local\Google\Drive\user_default`\
-This folder contains a file called Sync_log.log with information like the email address of the account, filenames, timestamps, MD5 hashes of the files, etc. Even deleted files appear in that log file with its corresponding MD5.
+Windows'ta, ana Google Drive klasörünü `\Users\<username>\AppData\Local\Google\Drive\user_default` içinde bulabilirsiniz.\
+Bu klasör, hesap e-posta adresi, dosya adları, zaman damgaları, dosyaların MD5 hash'leri vb. gibi bilgileri içeren Sync_log.log adında bir dosya içerir. Silinmiş dosyalar bile bu günlük dosyasında ilgili MD5 ile görünmektedir.
 
-The file **`Cloud_graph\Cloud_graph.db`** is a sqlite database which contains the table **`cloud_graph_entry`**. In this table you can find the **name** of the **synchronized** **files**, modified time, size, and the MD5 checksum of the files.
+**`Cloud_graph\Cloud_graph.db`** dosyası, **`cloud_graph_entry`** tablosunu içeren bir sqlite veritabanıdır. Bu tabloda, **senkronize** **dosyaların** **isimlerini**, değiştirilme zamanını, boyutunu ve dosyaların MD5 kontrol toplamını bulabilirsiniz.
 
-The table data of the database **`Sync_config.db`** contains the email address of the account, the path of the shared folders and the Google Drive version.
+**`Sync_config.db`** veritabanının tablo verileri, hesap e-posta adresini, paylaşılan klasörlerin yolunu ve Google Drive sürümünü içerir.
 
 ## Dropbox
 
-Dropbox uses **SQLite databases** to manage the files. In this\
-You can find the databases in the folders:
+Dropbox, dosyaları yönetmek için **SQLite veritabanları** kullanır. Bu\
+Veritabanlarını şu klasörlerde bulabilirsiniz:
 
 - `\Users\<username>\AppData\Local\Dropbox`
 - `\Users\<username>\AppData\Local\Dropbox\Instance1`
 - `\Users\<username>\AppData\Roaming\Dropbox`
 
-And the main databases are:
+Ve ana veritabanları şunlardır:
 
 - Sigstore.dbx
 - Filecache.dbx
 - Deleted.dbx
 - Config.dbx
 
-The ".dbx" extension means that the **databases** are **encrypted**. Dropbox uses **DPAPI** ([https://docs.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)?redirectedfrom=MSDN](<https://docs.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)?redirectedfrom=MSDN>))
+".dbx" uzantısı, **veritabanlarının** **şifreli** olduğunu gösterir. Dropbox, **DPAPI** kullanır ([https://docs.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)?redirectedfrom=MSDN](<https://docs.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)?redirectedfrom=MSDN>))
 
-To understand better the encryption that Dropbox uses you can read [https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html](https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html).
+Dropbox'un kullandığı şifrelemeyi daha iyi anlamak için [https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html](https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html) adresini okuyabilirsiniz.
 
-However, the main information is:
+Ancak, ana bilgiler şunlardır:
 
 - **Entropy**: d114a55212655f74bd772e37e64aee9b
 - **Salt**: 0D638C092E8B82FC452883F95F355B8E
 - **Algorithm**: PBKDF2
 - **Iterations**: 1066
 
-Apart from that information, to decrypt the databases you still need:
+Bu bilgilere ek olarak, veritabanlarını şifrelerini çözmek için hala şunlara ihtiyacınız var:
 
-- The **encrypted DPAPI key**: You can find it in the registry inside `NTUSER.DAT\Software\Dropbox\ks\client` (export this data as binary)
-- The **`SYSTEM`** and **`SECURITY`** hives
-- The **DPAPI master keys**: Which can be found in `\Users\<username>\AppData\Roaming\Microsoft\Protect`
-- The **username** and **password** of the Windows user
+- **şifreli DPAPI anahtarı**: Bunu `NTUSER.DAT\Software\Dropbox\ks\client` içinde kayıt defterinde bulabilirsiniz (bu veriyi ikili olarak dışa aktarın)
+- **`SYSTEM`** ve **`SECURITY`** hives
+- **DPAPI anahtarları**: `\Users\<username>\AppData\Roaming\Microsoft\Protect` içinde bulunabilir
+- Windows kullanıcısının **kullanıcı adı** ve **şifresi**
 
-Then you can use the tool [**DataProtectionDecryptor**](https://nirsoft.net/utils/dpapi_data_decryptor.html)**:**
+Sonra [**DataProtectionDecryptor**](https://nirsoft.net/utils/dpapi_data_decryptor.html)** aracını kullanabilirsiniz:**
 
 ![](<../../../images/image (448).png>)
 
-If everything goes as expected, the tool will indicate the **primary key** that you need to **use to recover the original one**. To recover the original one, just use this [cyber_chef receipt](<https://gchq.github.io/CyberChef/#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) putting the primary key as the "passphrase" inside the receipt.
+Her şey beklendiği gibi giderse, araç, **orijinalini geri kazanmak için kullanmanız gereken anahtarı** gösterecektir. Orijinalini geri kazanmak için, bu [cyber_chef tarifi](<https://gchq.github.io/CyberChef/#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) kullanarak anahtarı tarifin "şifre" kısmına koyun.
 
-The resulting hex is the final key used to encrypt the databases which can be decrypted with:
-
+Sonuçta elde edilen hex, şifrelenmiş veritabanlarını çözmek için kullanılan nihai anahtardır.
 ```bash
 sqlite -k <Obtained Key> config.dbx ".backup config.db" #This decompress the config.dbx and creates a clear text backup in config.db
 ```
+**`config.dbx`** veritabanı şunları içerir:
 
-The **`config.dbx`** database contains:
+- **Email**: Kullanıcının e-posta adresi
+- **usernamedisplayname**: Kullanıcının adı
+- **dropbox_path**: Dropbox klasörünün bulunduğu yol
+- **Host_id: Hash**: Buluta kimlik doğrulamak için kullanılan hash. Bu yalnızca web üzerinden iptal edilebilir.
+- **Root_ns**: Kullanıcı tanımlayıcısı
 
-- **Email**: The email of the user
-- **usernamedisplayname**: The name of the user
-- **dropbox_path**: Path where the dropbox folder is located
-- **Host_id: Hash** used to authenticate to the cloud. This can only be revoked from the web.
-- **Root_ns**: User identifier
+**`filecache.db`** veritabanı, Dropbox ile senkronize edilen tüm dosyalar ve klasörler hakkında bilgi içerir. `File_journal` tablosu daha fazla yararlı bilgiye sahiptir:
 
-The **`filecache.db`** database contains information about all the files and folders synchronized with Dropbox. The table `File_journal` is the one with more useful information:
+- **Server_path**: Dosyanın sunucu içindeki bulunduğu yol (bu yol, istemcinin `host_id` ile önceden gelir).
+- **local_sjid**: Dosyanın versiyonu
+- **local_mtime**: Değiştirilme tarihi
+- **local_ctime**: Oluşturulma tarihi
 
-- **Server_path**: Path where the file is located inside the server (this path is preceded by the `host_id` of the client).
-- **local_sjid**: Version of the file
-- **local_mtime**: Modification date
-- **local_ctime**: Creation date
+Bu veritabanındaki diğer tablolar daha ilginç bilgiler içerir:
 
-Other tables inside this database contain more interesting information:
-
-- **block_cache**: hash of all the files and folders of Dropbox
-- **block_ref**: Related the hash ID of the table `block_cache` with the file ID in the table `file_journal`
-- **mount_table**: Share folders of dropbox
-- **deleted_fields**: Dropbox deleted files
+- **block_cache**: Dropbox'ın tüm dosya ve klasörlerinin hash'i
+- **block_ref**: `block_cache` tablosundaki hash ID'sini `file_journal` tablosundaki dosya ID'si ile ilişkilendirir
+- **mount_table**: Dropbox'ın paylaşılan klasörleri
+- **deleted_fields**: Dropbox'tan silinmiş dosyalar
 - **date_added**
-
-<figure><img src="../../../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 {{#include ../../../banners/hacktricks-training.md}}

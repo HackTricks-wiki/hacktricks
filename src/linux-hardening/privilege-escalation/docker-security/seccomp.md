@@ -4,15 +4,15 @@
 
 ## Temel Bilgiler
 
-**Seccomp**, Güvenli Hesaplama modu anlamına gelir, **sistem çağrılarını filtrelemek için tasarlanmış bir Linux çekirdek güvenlik özelliğidir**. Bu, süreçleri sınırlı bir sistem çağrısı setiyle (`exit()`, `sigreturn()`, `read()`, ve `write()` için zaten açık dosya tanımlayıcıları) kısıtlar. Eğer bir süreç başka bir şeyi çağırmaya çalışırsa, çekirdek tarafından SIGKILL veya SIGSYS ile sonlandırılır. Bu mekanizma kaynakları sanallaştırmaz, ancak süreci onlardan izole eder.
+**Seccomp**, Güvenli Hesaplama modu anlamına gelir, **sistem çağrılarını filtrelemek için tasarlanmış bir Linux çekirdek güvenlik özelliğidir**. Süreçleri sınırlı bir sistem çağrısı setiyle (`exit()`, `sigreturn()`, `read()`, ve `write()` için zaten açık dosya tanımlayıcıları) kısıtlar. Eğer bir süreç başka bir şeyi çağırmaya çalışırsa, çekirdek tarafından SIGKILL veya SIGSYS ile sonlandırılır. Bu mekanizma kaynakları sanallaştırmaz, ancak süreci onlardan izole eder.
 
-Seccomp'ı etkinleştirmenin iki yolu vardır: `PR_SET_SECCOMP` ile `prctl(2)` sistem çağrısı veya Linux çekirdekleri 3.17 ve üzeri için `seccomp(2)` sistem çağrısı. `/proc/self/seccomp` dosyasına yazarak seccomp'ı etkinleştirmenin eski yöntemi, `prctl()` lehine kullanımdan kaldırılmıştır.
+Seccomp'u etkinleştirmenin iki yolu vardır: `PR_SET_SECCOMP` ile `prctl(2)` sistem çağrısı veya Linux çekirdekleri 3.17 ve üzeri için `seccomp(2)` sistem çağrısı. `/proc/self/seccomp` dosyasına yazarak seccomp'u etkinleştirmenin eski yöntemi, `prctl()` lehine kullanımdan kaldırılmıştır.
 
-Bir geliştirme olan **seccomp-bpf**, özelleştirilebilir bir politika ile sistem çağrılarını filtreleme yeteneği ekler ve Berkeley Paket Filtreleme (BPF) kurallarını kullanır. Bu uzantı, OpenSSH, vsftpd ve Chrome OS ile Linux'taki Chrome/Chromium tarayıcıları gibi yazılımlar tarafından esnek ve verimli syscall filtrelemesi için kullanılmaktadır ve artık desteklenmeyen systrace için bir alternatif sunmaktadır.
+Bir geliştirme olan **seccomp-bpf**, özelleştirilebilir bir politika ile sistem çağrılarını filtreleme yeteneği ekler ve Berkeley Paket Filtreleme (BPF) kurallarını kullanır. Bu uzantı, OpenSSH, vsftpd ve Chrome OS ile Linux'taki Chrome/Chromium tarayıcıları gibi yazılımlar tarafından esnek ve verimli sistem çağrısı filtrelemesi için kullanılmaktadır ve artık desteklenmeyen systrace için bir alternatif sunmaktadır.
 
 ### **Orijinal/Sıkı Mod**
 
-Bu modda Seccomp **yalnızca şu sistem çağrılarına izin verir**: `exit()`, `sigreturn()`, `read()` ve `write()` için zaten açık dosya tanımlayıcıları. Eğer başka bir sistem çağrısı yapılırsa, süreç SIGKILL ile öldürülür.
+Bu modda Seccomp **yalnızca sistem çağrılarına** `exit()`, `sigreturn()`, `read()` ve `write()` için zaten açık dosya tanımlayıcılarına izin verir. Eğer başka bir sistem çağrısı yapılırsa, süreç SIGKILL ile öldürülür.
 ```c:seccomp_strict.c
 #include <fcntl.h>
 #include <stdio.h>
@@ -104,14 +104,14 @@ docker run --rm \
 --security-opt seccomp=/path/to/seccomp/profile.json \
 hello-world
 ```
-Eğer bir konteynerin bazı **syscall**'leri, örneğin `uname`'i çalıştırmasını **yasaklamak** istiyorsanız, [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json) adresinden varsayılan profili indirebilir ve sadece **listeden `uname` dizesini kaldırabilirsiniz**.\
+Eğer bir konteynerin bazı **syscall**'leri, örneğin `uname`'i çalıştırmasını **yasaklamak** istiyorsanız, [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json) adresinden varsayılan profili indirebilir ve sadece **listeye `uname` dizesini kaldırabilirsiniz**.\
 Eğer **bir ikili dosyanın bir docker konteyneri içinde çalışmadığından emin olmak** istiyorsanız, ikili dosyanın kullandığı syscalls'ları listelemek için strace kullanabilir ve ardından bunları yasaklayabilirsiniz.\
-Aşağıdaki örnekte `uname`'in **syscall**'leri keşfedilmektedir:
+Aşağıdaki örnekte `uname`'in **syscalls**'ları keşfedilmektedir:
 ```bash
 docker run -it --security-opt seccomp=default.json modified-ubuntu strace uname
 ```
 > [!NOTE]
-> Eğer **Docker'ı sadece bir uygulamayı başlatmak için kullanıyorsanız**, onu **`strace`** ile **profil oluşturabilir** ve ihtiyaç duyduğu sistem çağrılarına **sadece izin verebilirsiniz.**
+> Eğer **Docker'ı sadece bir uygulamayı başlatmak için kullanıyorsanız**, onu **`strace`** ile **profilleyebilir** ve ihtiyaç duyduğu sistem çağrılarına **sadece izin verebilirsiniz.**
 
 ### Örnek Seccomp politikası
 
@@ -135,7 +135,7 @@ Aşağıdaki çıktı, "chmod" çağrısının, seccomp profilinde devre dışı
 $ docker run --rm -it --security-opt seccomp:/home/smakam14/seccomp/profile.json busybox chmod 400 /etc/hosts
 chmod: /etc/hosts: Operation not permitted
 ```
-Aşağıdaki çıktı, profilin görüntülenmesi için “docker inspect” komutunu göstermektedir:
+Aşağıdaki çıktı, profilin görüntülenmesini sağlayan “docker inspect” komutunu göstermektedir:
 ```json
 "SecurityOpt": [
 "seccomp:{\"defaultAction\":\"SCMP_ACT_ALLOW\",\"syscalls\":[{\"name\":\"chmod\",\"action\":\"SCMP_ACT_ERRNO\"}]}"

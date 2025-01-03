@@ -49,7 +49,7 @@ return 0;
 ### Yaygın Dosyalar
 
 - _/etc/passwd_ dosyasına şifreli kullanıcı ekleyin
-- _/etc/shadow_ dosyasında şifreyi değiştirin
+- _/etc/shadow_ dosyası içinde şifreyi değiştirin
 - _/etc/sudoers_ dosyasına kullanıcı ekleyin
 - Genellikle _/run/docker.sock_ veya _/var/run/docker.sock_ içinde bulunan docker soketini kötüye kullanın
 
@@ -76,7 +76,7 @@ objdump -T /bin/su | grep audit
 0000000000000000      DF *UND*  0000000000000000              audit_log_acct_message
 000000000020e968 g    DO .bss   0000000000000004  Base        audit_fd
 ```
-Semboller `audit_open`, `audit_log_acct_message`, `audit_log_acct_message` ve `audit_fd` muhtemelen libaudit.so.1 kütüphanesindendir. libaudit.so.1 kötü niyetli paylaşılan kütüphane tarafından üzerine yazılacağından, bu semboller yeni paylaşılan kütüphanede mevcut olmalıdır, aksi takdirde program sembolü bulamayacak ve çıkacaktır.
+`audit_open`, `audit_log_acct_message`, `audit_log_acct_message` ve `audit_fd` sembollerinin muhtemelen libaudit.so.1 kütüphanesinden olduğu düşünülmektedir. libaudit.so.1 kötü niyetli paylaşılan kütüphane tarafından üzerine yazılacağından, bu sembollerin yeni paylaşılan kütüphanede bulunması gerekir, aksi takdirde program sembolü bulamayacak ve çıkacaktır.
 ```c
 #include<stdio.h>
 #include<stdlib.h>

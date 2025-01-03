@@ -12,7 +12,7 @@
 
 ### Şifre Anahtarlığı Erişimi
 
-Bu dosyalar, doğrudan koruma içermemelerine rağmen **indirilebilir**, şifrelenmiştir ve **şifresinin çözülmesi için kullanıcının düz metin şifresini** gerektirir. Şifre çözme için [**Chainbreaker**](https://github.com/n0fate/chainbreaker) gibi bir araç kullanılabilir.
+Bu dosyalar, doğrudan koruma içermemelerine rağmen **indirilebilir**, şifrelenmiştir ve **şifresiz kullanıcı parolasının çözülmesi** gerekmektedir. [**Chainbreaker**](https://github.com/n0fate/chainbreaker) gibi bir araç şifre çözme için kullanılabilir.
 
 ## Anahtarlık Girişi Koruma
 
@@ -27,12 +27,12 @@ Anahtarlıkta her giriş, çeşitli eylemleri gerçekleştirebilecek kişileri b
 ACL'ler, bu eylemleri istem olmadan gerçekleştirebilecek **güvenilir uygulamalar listesi** ile birlikte gelir. Bu şunlar olabilir:
 
 - **N`il`** (yetki gerektirmeyen, **herkes güvenilir**)
-- **Boş** bir liste (**kimse** güvenilir değil)
+- **Boş** bir liste (**hiç kimse** güvenilir değil)
 - Belirli **uygulamaların** **listesi**.
 
 Ayrıca giriş, **`ACLAuthorizationPartitionID`** anahtarını içerebilir; bu, **teamid, apple** ve **cdhash**'i tanımlamak için kullanılır.
 
-- Eğer **teamid** belirtilmişse, **girişin** değerine **istem olmadan** erişmek için kullanılan uygulamanın **aynı teamid**'ye sahip olması gerekir.
+- Eğer **teamid** belirtilmişse, **giriş** değerine **istem olmadan** erişmek için kullanılan uygulamanın **aynı teamid**'ye sahip olması gerekir.
 - Eğer **apple** belirtilmişse, uygulamanın **Apple** tarafından **imzalanmış** olması gerekir.
 - Eğer **cdhash** belirtilmişse, **uygulama** belirli bir **cdhash**'e sahip olmalıdır.
 
@@ -73,14 +73,14 @@ security set-generic-password-parition-list -s "test service" -a "test acount" -
 # Dump specifically the user keychain
 security dump-keychain ~/Library/Keychains/login.keychain-db
 ```
-### API'ler
+### APIs
 
 > [!TIP]
 > **Anahtar zinciri numaralandırma ve gizli bilgilerin dökümü** için **uyarı oluşturmayacak** olanlar, [**LockSmith**](https://github.com/its-a-feature/LockSmith) aracıyla yapılabilir.
 >
 > Diğer API uç noktaları [**SecKeyChain.h**](https://opensource.apple.com/source/libsecurity_keychain/libsecurity_keychain-55017/lib/SecKeychain.h.auto.html) kaynak kodunda bulunabilir.
 
-Her anahtar zinciri girişi hakkında **bilgi** listeleyin ve alın, **Security Framework** kullanarak veya Apple'ın açık kaynak cli aracı [**security**](https://opensource.apple.com/source/Security/Security-59306.61.1/SecurityTool/macOS/security.c.auto.html)**'yi** kontrol edebilirsiniz. Bazı API örnekleri:
+Her anahtar zinciri girişi hakkında **bilgi** listeleyin ve alın, **Güvenlik Çerçevesi** kullanarak veya Apple'ın açık kaynaklı cli aracı [**security**](https://opensource.apple.com/source/Security/Security-59306.61.1/SecurityTool/macOS/security.c.auto.html)**'yi** kontrol edebilirsiniz. Bazı API örnekleri:
 
 - API **`SecItemCopyMatching`** her giriş hakkında bilgi verir ve kullanırken ayarlayabileceğiniz bazı özellikler vardır:
 - **`kSecReturnData`**: Eğer doğruysa, veriyi şifre çözmeye çalışır (potansiyel açılır pencereleri önlemek için yanlış olarak ayarlayın)
@@ -103,29 +103,29 @@ Verileri dışa aktarın:
 - API **`SecKeychainItemCopyContent`** düz metni alır
 - API **`SecItemExport`** anahtarları ve sertifikaları dışa aktarır ancak içeriği şifreli olarak dışa aktarmak için şifre ayarlamanız gerekebilir
 
-Ve bu, **uyarı olmadan bir gizli bilgiyi dışa aktarmak** için gereken **şartlardır**:
+Ve bu, **uyarı olmadan bir gizli bilgiyi dışa aktarabilmek için** gereken **şartlardır**:
 
 - Eğer **1+ güvenilir** uygulama listelenmişse:
-- Uygun **yetkilendirmelere** ihtiyaç vardır (**`Nil`**, veya gizli bilgiye erişim için yetkilendirme listesinde **yer almak**)
+- Uygun **yetkilere** ihtiyaç vardır (**`Nil`**, veya gizli bilgilere erişim için yetkilendirilmiş uygulama listesinde **yer almak**)
 - **PartitionID** ile eşleşen kod imzasına ihtiyaç vardır
 - Bir **güvenilir uygulama** ile eşleşen kod imzasına ihtiyaç vardır (veya doğru KeychainAccessGroup'un üyesi olmalısınız)
 - Eğer **tüm uygulamalar güvenilir** ise:
-- Uygun **yetkilendirmelere** ihtiyaç vardır
+- Uygun **yetkilere** ihtiyaç vardır
 - **PartitionID** ile eşleşen kod imzasına ihtiyaç vardır
 - Eğer **PartitionID** yoksa, bu gerekli değildir
 
 > [!CAUTION]
 > Bu nedenle, eğer **1 uygulama listelenmişse**, o uygulamaya **kod enjekte etmeniz** gerekir.
 >
-> Eğer **apple** **partitionID**'de belirtilmişse, **`osascript`** ile erişebilirsiniz, bu nedenle partitionID'de apple olan tüm uygulamalara güvenen herhangi bir şey. Bunun için **`Python`** da kullanılabilir.
+> Eğer **partitionID** içinde **apple** belirtilmişse, **`osascript`** ile erişebilirsiniz, bu nedenle partitionID içinde apple olan tüm uygulamalara güvenen herhangi bir şey. Bunun için **`Python`** da kullanılabilir.
 
 ### İki ek özellik
 
 - **Görünmez**: Bu, girişi **UI** Anahtar Zinciri uygulamasından **gizlemek** için bir boolean bayraktır
-- **Genel**: **Meta verileri** depolamak içindir (yani ŞİFRELİ DEĞİLDİR)
+- **Genel**: **meta verileri** depolamak içindir (yani ŞİFRELİ DEĞİLDİR)
 - Microsoft, hassas uç noktaya erişim için tüm yenileme jetonlarını düz metin olarak saklıyordu.
 
-## Referanslar
+## References
 
 - [**#OBTS v5.0: "Lock Picking the macOS Keychain" - Cody Thomas**](https://www.youtube.com/watch?v=jKE1ZW33JpY)
 

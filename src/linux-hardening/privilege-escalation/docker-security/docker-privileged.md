@@ -61,7 +61,7 @@ mount  | grep '(ro'
 
 **/proc** dosya sistemi seçici olarak yazılabilir, ancak güvenlik için, belirli kısımlar **tmpfs** ile örtülerek yazma ve okuma erişiminden korunur, bu da konteyner süreçlerinin hassas alanlara erişememesini sağlar.
 
-> [!NOTE] > **tmpfs**, tüm dosyaları sanal bellekte depolayan bir dosya sistemidir. tmpfs, sabit diskinizde herhangi bir dosya oluşturmaz. Bu nedenle, bir tmpfs dosya sistemini ayırırsanız, içinde bulunan tüm dosyalar sonsuza dek kaybolur.
+> [!NOTE] > **tmpfs**, tüm dosyaları sanal bellekte depolayan bir dosya sistemidir. tmpfs, sabit diskinizde herhangi bir dosya oluşturmaz. Bu nedenle, bir tmpfs dosya sistemini kaldırırsanız, içinde bulunan tüm dosyalar sonsuza dek kaybolur.
 
 {{#tabs}}
 {{#tab name="Inside default container"}}
@@ -84,14 +84,14 @@ mount  | grep /proc.*tmpfs
 
 ### Linux yetenekleri
 
-Konteyner motorları, konteynerin içinde neler olduğunu kontrol etmek için konteynerleri **sınırlı sayıda yetenekle** başlatır. **Ayrıcalıklı** olanlar **tüm** **yeteneklere** erişime sahiptir. Yetenekler hakkında bilgi edinmek için okuyun:
+Konteyner motorları, konteynerin içinde neler olduğunu kontrol etmek için konteynerleri **sınırlı sayıda yetenekle** başlatır. **Ayrıcalıklı** olanlar **tüm** **yeteneklere** erişim sağlar. Yetenekler hakkında bilgi edinmek için okuyun:
 
 {{#ref}}
 ../linux-capabilities.md
 {{#endref}}
 
 {{#tabs}}
-{{#tab name="Varsayılan konteynerin içinde"}}
+{{#tab name="Varsayılan konteyner içinde"}}
 ```bash
 # docker run --rm -it alpine sh
 apk add -U libcap; capsh --print
@@ -102,7 +102,7 @@ Bounding set =cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setg
 ```
 {{#endtab}}
 
-{{#tab name="İçeride Yetkili Konteyner"}}
+{{#tab name="İçinde Yetkili Konteyner"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 apk add -U libcap; capsh --print
@@ -114,7 +114,7 @@ Bounding set =cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fset
 {{#endtab}}
 {{#endtabs}}
 
-Bir konteynerin `--privileged` modunda çalışmadan mevcut yeteneklerini `--cap-add` ve `--cap-drop` bayraklarını kullanarak manipüle edebilirsiniz.
+Bir konteynerin kullanılabilir yeteneklerini `--privileged` modda çalıştırmadan `--cap-add` ve `--cap-drop` bayraklarını kullanarak manipüle edebilirsiniz.
 
 ### Seccomp
 

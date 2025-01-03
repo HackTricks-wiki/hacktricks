@@ -2,7 +2,7 @@
 
 ## Python ile Socket Bağlama Örneği
 
-Aşağıdaki örnekte bir **unix socket oluşturuluyor** (`/tmp/socket_test.s`) ve **alınan** her şey `os.system` tarafından **çalıştırılacak**. Bunun doğada bulunmayacağını biliyorum, ancak bu örneğin amacı, unix socket'leri kullanan bir kodun nasıl göründüğünü ve en kötü durumda girişi nasıl yöneteceğimizi görmektir.
+Aşağıdaki örnekte bir **unix socket oluşturuluyor** (`/tmp/socket_test.s`) ve **alınan her şey** `os.system` tarafından **çalıştırılacak**. Bunun doğada bulunmayacağını biliyorum, ancak bu örneğin amacı, unix socket'leri kullanan bir kodun nasıl göründüğünü ve en kötü durumda girişi nasıl yöneteceğimizi görmektir.
 ```python:s.py
 import socket
 import os, os.path

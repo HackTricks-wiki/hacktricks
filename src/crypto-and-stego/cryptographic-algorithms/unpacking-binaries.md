@@ -1,24 +1,24 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# Identifying packed binaries
+# Paketlenmiş ikililerin tanımlanması
 
-- **lack of strings**: It's common to find that packed binaries doesn't have almost any string
-- A lot of **unused strings**: Also, when a malware is using some kind of commercial packer it's common to find a lot of strings without cross-references. Even if these strings exist that doesn't mean that the binary isn't packed.
-- You can also use some tools to try to find which packer was used to pack a binary:
-  - [PEiD](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/PEiD-updated.shtml)
-  - [Exeinfo PE](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/ExEinfo-PE.shtml)
-  - [Language 2000](http://farrokhi.net/language/)
+- **string eksikliği**: Paketlenmiş ikililerde neredeyse hiç string bulunmaması yaygındır.
+- Birçok **kullanılmayan string**: Ayrıca, bir kötü amaçlı yazılım bazı ticari paketleyiciler kullanıyorsa, çapraz referanssız birçok string bulmak yaygındır. Bu stringler mevcut olsa bile, bu durum ikilinin paketlenmediği anlamına gelmez.
+- Bir ikilinin hangi paketleyici ile paketlendiğini bulmak için bazı araçlar da kullanabilirsiniz:
+- [PEiD](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/PEiD-updated.shtml)
+- [Exeinfo PE](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/ExEinfo-PE.shtml)
+- [Language 2000](http://farrokhi.net/language/)
 
-# Basic Recommendations
+# Temel Öneriler
 
-- **Start** analysing the packed binary **from the bottom in IDA and move up**. Unpackers exit once the unpacked code exit so it's unlikely that the unpacker passes execution to the unpacked code at the start.
-- Search for **JMP's** or **CALLs** to **registers** or **regions** of **memory**. Also search for **functions pushing arguments and an address direction and then calling `retn`**, because the return of the function in that case may call the address just pushed to the stack before calling it.
-- Put a **breakpoint** on `VirtualAlloc` as this allocates space in memory where the program can write unpacked code. The "run to user code" or use F8 to **get to value inside EAX** after executing the function and "**follow that address in dump**". You never know if that is the region where the unpacked code is going to be saved.
-  - **`VirtualAlloc`** with the value "**40**" as an argument means Read+Write+Execute (some code that needs execution is going to be copied here).
-- **While unpacking** code it's normal to find **several calls** to **arithmetic operations** and functions like **`memcopy`** or **`Virtual`**`Alloc`. If you find yourself in a function that apparently only perform arithmetic operations and maybe some `memcopy` , the recommendation is to try to **find the end of the function** (maybe a JMP or call to some register) **or** at least the **call to the last function** and run to then as the code isn't interesting.
-- While unpacking code **note** whenever you **change memory region** as a memory region change may indicate the **starting of the unpacking code**. You can easily dump a memory region using Process Hacker (process --> properties --> memory).
-- While trying to unpack code a good way to **know if you are already working with the unpacked code** (so you can just dump it) is to **check the strings of the binary**. If at some point you perform a jump (maybe changing the memory region) and you notice that **a lot more strings where added**, then you can know **you are working with the unpacked code**.\
-  However, if the packer already contains a lot of strings you can see how many strings contains the word "http" and see if this number increases.
-- When you dump an executable from a region of memory you can fix some headers using [PE-bear](https://github.com/hasherezade/pe-bear-releases/releases).
+- Paketlenmiş ikiliyi **IDA'da alttan başlayarak analiz etmeye** **başlayın** ve yukarı doğru ilerleyin. Paket açıcılar, açılmış kod çıkınca çıkar, bu nedenle paket açıcının başlangıçta açılmış koda yürütme geçirmesi olası değildir.
+- **Kayıtlar** veya **bellek** **bölgelerine** **JMP** veya **CALL** arayın. Ayrıca, **argümanlar ve bir adres yönlendirmesi iten fonksiyonlar arayın ve ardından `retn` çağırın**, çünkü bu durumda fonksiyonun dönüşü, yığına itilen adresi çağırabilir.
+- `VirtualAlloc` üzerinde bir **kesme noktası** koyun, çünkü bu, programın açılmış kod yazabileceği bellek alanı ayırır. "Kullanıcı koduna çalıştır" veya F8 kullanarak **fonksiyonu çalıştırdıktan sonra EAX içindeki değere ulaşın** ve "**dump'taki o adresi takip edin**". Açılmış kodun kaydedileceği bölge olup olmadığını asla bilemezsiniz.
+- **`VirtualAlloc`** ile "**40**" değeri bir argüman olarak, Okuma+Yazma+Çalıştırma anlamına gelir (çalıştırılması gereken bazı kod burada kopyalanacak).
+- **Kod açma** sırasında **birçok çağrı** ile **aritmetik işlemler** ve **`memcopy`** veya **`Virtual`**`Alloc` gibi fonksiyonlar bulmak normaldir. Eğer yalnızca aritmetik işlemler gerçekleştiren ve belki de bazı `memcopy` yapan bir fonksiyonda iseniz, öneri **fonksiyonun sonunu bulmaya çalışmaktır** (belki bir JMP veya bazı kayıtlarla çağrı) **veya** en azından **son fonksiyona yapılan çağrıya kadar ilerleyin** çünkü kod ilginç değildir.
+- Kod açma sırasında **bellek bölgesini değiştirdiğinizde** not alın, çünkü bir bellek bölgesi değişikliği **açma kodunun başlangıcını** gösterebilir. Process Hacker kullanarak bir bellek bölgesini kolayca dökebilirsiniz (işlem --> özellikler --> bellek).
+- Kod açmaya çalışırken, **açılmış kodla çalışıp çalışmadığınızı bilmenin** iyi bir yolu, **ikilinin stringlerini kontrol etmektir**. Eğer bir noktada bir atlama yaparsanız (belki bellek bölgesini değiştirerek) ve **çok daha fazla string eklendiğini** fark ederseniz, o zaman **açılmış kodla çalıştığınızı** bilebilirsiniz.\
+Ancak, eğer paketleyici zaten birçok string içeriyorsa, "http" kelimesini içeren string sayısını görebilir ve bu sayının artıp artmadığını kontrol edebilirsiniz.
+- Bir bellek bölgesinden bir yürütülebilir dosyayı dökerken, bazı başlıkları [PE-bear](https://github.com/hasherezade/pe-bear-releases/releases) kullanarak düzeltebilirsiniz.
 
 {{#include ../../banners/hacktricks-training.md}}

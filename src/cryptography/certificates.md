@@ -1,47 +1,38 @@
-# Certificates
+# Sertifikalar
 
 {{#include ../banners/hacktricks-training.md}}
 
-<figure><img src="../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+## Sertifika Nedir
 
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Bir **açık anahtar sertifikası**, birinin açık anahtara sahip olduğunu kanıtlamak için kriptografide kullanılan dijital bir kimliktir. Anahtarın detaylarını, sahibinin kimliğini (konu) ve güvenilir bir otoriteden (verici) dijital bir imzayı içerir. Yazılım vericiyi güvenilir bulursa ve imza geçerliyse, anahtarın sahibiyle güvenli iletişim mümkündür.
 
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+Sertifikalar genellikle [sertifika otoriteleri](https://en.wikipedia.org/wiki/Certificate_authority) (CA'lar) tarafından [açık anahtar altyapısı](https://en.wikipedia.org/wiki/Public-key_infrastructure) (PKI) kurulumunda verilir. Diğer bir yöntem ise [güven ağı](https://en.wikipedia.org/wiki/Web_of_trust)dır; burada kullanıcılar birbirlerinin anahtarlarını doğrudan doğrular. Sertifikalar için yaygın format [X.509](https://en.wikipedia.org/wiki/X.509) olup, RFC 5280'de belirtildiği gibi belirli ihtiyaçlara uyarlanabilir.
 
-## What is a Certificate
+## x509 Ortak Alanlar
 
-A **public key certificate** is a digital ID used in cryptography to prove someone owns a public key. It includes the key's details, the owner's identity (the subject), and a digital signature from a trusted authority (the issuer). If the software trusts the issuer and the signature is valid, secure communication with the key's owner is possible.
+### **x509 Sertifikalarında Ortak Alanlar**
 
-Certificates are mostly issued by [certificate authorities](https://en.wikipedia.org/wiki/Certificate_authority) (CAs) in a [public-key infrastructure](https://en.wikipedia.org/wiki/Public-key_infrastructure) (PKI) setup. Another method is the [web of trust](https://en.wikipedia.org/wiki/Web_of_trust), where users directly verify each other’s keys. The common format for certificates is [X.509](https://en.wikipedia.org/wiki/X.509), which can be adapted for specific needs as outlined in RFC 5280.
+x509 sertifikalarında, sertifikanın geçerliliğini ve güvenliğini sağlamak için birkaç **alan** kritik rol oynamaktadır. Bu alanların bir dökümü:
 
-## x509 Common Fields
+- **Sürüm Numarası**, x509 formatının sürümünü belirtir.
+- **Seri Numarası**, sertifikayı bir Sertifika Otoritesi (CA) sisteminde benzersiz olarak tanımlar, esasen iptal takibi için kullanılır.
+- **Konu** alanı, sertifikanın sahibini temsil eder; bu bir makine, birey veya organizasyon olabilir. Aşağıdaki gibi detaylı kimlik bilgilerini içerir:
+- **Ortak Ad (CN)**: Sertifika tarafından kapsanan alanlar.
+- **Ülke (C)**, **Yer (L)**, **Eyalet veya İl (ST, S veya P)**, **Organizasyon (O)** ve **Organizasyon Birimi (OU)** coğrafi ve organizasyonel detaylar sağlar.
+- **Ayrıcalıklı Ad (DN)**, tam konu kimliğini kapsar.
+- **Verici**, sertifikayı kimlerin doğruladığını ve imzaladığını detaylandırır; CA için Konu ile benzer alt alanlar içerir.
+- **Geçerlilik Süresi**, sertifikanın belirli bir tarihten önce veya sonra kullanılmadığını sağlamak için **Not Before** ve **Not After** zaman damgaları ile işaretlenir.
+- **Açık Anahtar** bölümü, sertifikanın güvenliği için kritik olup, açık anahtarın algoritmasını, boyutunu ve diğer teknik detaylarını belirtir.
+- **x509v3 uzantıları**, sertifikanın işlevselliğini artırır; **Anahtar Kullanımı**, **Genişletilmiş Anahtar Kullanımı**, **Konu Alternatif Adı** ve sertifikanın uygulamasını ince ayar yapmak için diğer özellikleri belirtir.
 
-### **Common Fields in x509 Certificates**
+#### **Anahtar Kullanımı ve Uzantılar**
 
-In x509 certificates, several **fields** play critical roles in ensuring the certificate's validity and security. Here's a breakdown of these fields:
-
-- **Version Number** signifies the x509 format's version.
-- **Serial Number** uniquely identifies the certificate within a Certificate Authority's (CA) system, mainly for revocation tracking.
-- The **Subject** field represents the certificate's owner, which could be a machine, an individual, or an organization. It includes detailed identification such as:
-  - **Common Name (CN)**: Domains covered by the certificate.
-  - **Country (C)**, **Locality (L)**, **State or Province (ST, S, or P)**, **Organization (O)**, and **Organizational Unit (OU)** provide geographical and organizational details.
-  - **Distinguished Name (DN)** encapsulates the full subject identification.
-- **Issuer** details who verified and signed the certificate, including similar subfields as the Subject for the CA.
-- **Validity Period** is marked by **Not Before** and **Not After** timestamps, ensuring the certificate is not used before or after a certain date.
-- The **Public Key** section, crucial for the certificate's security, specifies the algorithm, size, and other technical details of the public key.
-- **x509v3 extensions** enhance the certificate's functionality, specifying **Key Usage**, **Extended Key Usage**, **Subject Alternative Name**, and other properties to fine-tune the certificate's application.
-
-#### **Key Usage and Extensions**
-
-- **Key Usage** identifies cryptographic applications of the public key, like digital signature or key encipherment.
-- **Extended Key Usage** further narrows down the certificate's use cases, e.g., for TLS server authentication.
-- **Subject Alternative Name** and **Basic Constraint** define additional host names covered by the certificate and whether it's a CA or end-entity certificate, respectively.
-- Identifiers like **Subject Key Identifier** and **Authority Key Identifier** ensure uniqueness and traceability of keys.
-- **Authority Information Access** and **CRL Distribution Points** provide paths to verify the issuing CA and check certificate revocation status.
-- **CT Precertificate SCTs** offer transparency logs, crucial for public trust in the certificate.
-
+- **Anahtar Kullanımı**, açık anahtarın kriptografik uygulamalarını tanımlar; örneğin dijital imza veya anahtar şifreleme.
+- **Genişletilmiş Anahtar Kullanımı**, sertifikanın kullanım durumlarını daha da daraltır; örneğin, TLS sunucu kimlik doğrulaması için.
+- **Konu Alternatif Adı** ve **Temel Kısıtlama**, sertifika tarafından kapsanan ek ana bilgisayar adlarını ve bunun bir CA veya son varlık sertifikası olup olmadığını tanımlar.
+- **Konu Anahtar Tanımlayıcı** ve **Otorite Anahtar Tanımlayıcı** gibi tanımlayıcılar, anahtarların benzersizliğini ve izlenebilirliğini sağlar.
+- **Otorite Bilgi Erişimi** ve **CRL Dağıtım Noktaları**, verici CA'yı doğrulamak ve sertifika iptal durumunu kontrol etmek için yollar sağlar.
+- **CT Ön Sertifika SCT'leri**, sertifikaya kamu güveni için kritik olan şeffaflık günlükleri sunar.
 ```python
 # Example of accessing and using x509 certificate fields programmatically:
 from cryptography import x509
@@ -49,8 +40,8 @@ from cryptography.hazmat.backends import default_backend
 
 # Load an x509 certificate (assuming cert.pem is a certificate file)
 with open("cert.pem", "rb") as file:
-    cert_data = file.read()
-    certificate = x509.load_pem_x509_certificate(cert_data, default_backend())
+cert_data = file.read()
+certificate = x509.load_pem_x509_certificate(cert_data, default_backend())
 
 # Accessing fields
 serial_number = certificate.serial_number
@@ -63,133 +54,104 @@ print(f"Issuer: {issuer}")
 print(f"Subject: {subject}")
 print(f"Public Key: {public_key}")
 ```
+### **OCSP ve CRL Dağıtım Noktaları Arasındaki Fark**
 
-### **Difference between OCSP and CRL Distribution Points**
+**OCSP** (**RFC 2560**), bir istemci ve bir yanıtlayıcının, tam **CRL** indirmeye gerek kalmadan dijital kamu anahtar sertifikasının iptal edilip edilmediğini kontrol etmek için birlikte çalışmasını içerir. Bu yöntem, iptal edilen sertifika seri numaralarının bir listesini sağlayan ancak potansiyel olarak büyük bir dosyanın indirilmesini gerektiren geleneksel **CRL**'den daha verimlidir. CRL'ler en fazla 512 giriş içerebilir. Daha fazla ayrıntı [burada](https://www.arubanetworks.com/techdocs/ArubaOS%206_3_1_Web_Help/Content/ArubaFrameStyles/CertRevocation/About_OCSP_and_CRL.htm) mevcuttur.
 
-**OCSP** (**RFC 2560**) involves a client and a responder working together to check if a digital public-key certificate has been revoked, without needing to download the full **CRL**. This method is more efficient than the traditional **CRL**, which provides a list of revoked certificate serial numbers but requires downloading a potentially large file. CRLs can include up to 512 entries. More details are available [here](https://www.arubanetworks.com/techdocs/ArubaOS%206_3_1_Web_Help/Content/ArubaFrameStyles/CertRevocation/About_OCSP_and_CRL.htm).
+### **Sertifika Şeffaflığı Nedir**
 
-### **What is Certificate Transparency**
+Sertifika Şeffaflığı, SSL sertifikalarının verilmesi ve varlığının alan adı sahipleri, CA'lar ve kullanıcılar tarafından görünür olmasını sağlayarak sertifika ile ilgili tehditlerle mücadele etmeye yardımcı olur. Hedefleri şunlardır:
 
-Certificate Transparency helps combat certificate-related threats by ensuring the issuance and existence of SSL certificates are visible to domain owners, CAs, and users. Its objectives are:
+- CA'ların, alan adı sahibinin bilgisi olmadan bir alan için SSL sertifikası vermesini önlemek.
+- Yanlış veya kötü niyetle verilmiş sertifikaların izlenmesi için açık bir denetim sistemi kurmak.
+- Kullanıcıları sahte sertifikalardan korumak.
 
-- Preventing CAs from issuing SSL certificates for a domain without the domain owner's knowledge.
-- Establishing an open auditing system for tracking mistakenly or maliciously issued certificates.
-- Safeguarding users against fraudulent certificates.
+#### **Sertifika Kayıtları**
 
-#### **Certificate Logs**
+Sertifika kayıtları, ağ hizmetleri tarafından tutulan, kamuya açık denetlenebilir, yalnızca ekleme yapılabilen sertifika kayıtlarıdır. Bu kayıtlar, denetim amaçları için kriptografik kanıtlar sağlar. Hem verme otoriteleri hem de kamu, bu kayıtlara sertifika gönderebilir veya doğrulama için sorgulayabilir. Kayıt sunucularının kesin sayısı sabit olmamakla birlikte, dünya genelinde binin altında olması beklenmektedir. Bu sunucular, CA'lar, ISP'ler veya herhangi bir ilgilenen kuruluş tarafından bağımsız olarak yönetilebilir.
 
-Certificate logs are publicly auditable, append-only records of certificates, maintained by network services. These logs provide cryptographic proofs for auditing purposes. Both issuance authorities and the public can submit certificates to these logs or query them for verification. While the exact number of log servers is not fixed, it's expected to be less than a thousand globally. These servers can be independently managed by CAs, ISPs, or any interested entity.
+#### **Sorgu**
 
-#### **Query**
+Herhangi bir alan için Sertifika Şeffaflığı kayıtlarını keşfetmek için [https://crt.sh/](https://crt.sh) adresini ziyaret edin.
 
-To explore Certificate Transparency logs for any domain, visit [https://crt.sh/](https://crt.sh).
+Sertifikaları depolamak için farklı formatlar mevcuttur, her birinin kendi kullanım durumları ve uyumluluğu vardır. Bu özet, ana formatları kapsar ve bunlar arasında dönüştürme konusunda rehberlik sağlar.
 
-Different formats exist for storing certificates, each with its own use cases and compatibility. This summary covers the main formats and provides guidance on converting between them.
+## **Formatlar**
 
-## **Formats**
+### **PEM Formatı**
 
-### **PEM Format**
+- Sertifikalar için en yaygın kullanılan formattır.
+- Sertifikalar ve özel anahtarlar için ayrı dosyalar gerektirir, Base64 ASCII ile kodlanmıştır.
+- Yaygın uzantılar: .cer, .crt, .pem, .key.
+- Öncelikle Apache ve benzeri sunucular tarafından kullanılır.
 
-- Most widely used format for certificates.
-- Requires separate files for certificates and private keys, encoded in Base64 ASCII.
-- Common extensions: .cer, .crt, .pem, .key.
-- Primarily used by Apache and similar servers.
+### **DER Formatı**
 
-### **DER Format**
+- Sertifikaların ikili formatıdır.
+- PEM dosyalarında bulunan "BEGIN/END CERTIFICATE" ifadelerini içermez.
+- Yaygın uzantılar: .cer, .der.
+- Genellikle Java platformları ile kullanılır.
 
-- A binary format of certificates.
-- Lacks the "BEGIN/END CERTIFICATE" statements found in PEM files.
-- Common extensions: .cer, .der.
-- Often used with Java platforms.
+### **P7B/PKCS#7 Formatı**
 
-### **P7B/PKCS#7 Format**
+- Base64 ASCII formatında depolanır, uzantıları .p7b veya .p7c'dir.
+- Sadece sertifikaları ve zincir sertifikalarını içerir, özel anahtarı hariç tutar.
+- Microsoft Windows ve Java Tomcat tarafından desteklenir.
 
-- Stored in Base64 ASCII, with extensions .p7b or .p7c.
-- Contains only certificates and chain certificates, excluding the private key.
-- Supported by Microsoft Windows and Java Tomcat.
+### **PFX/P12/PKCS#12 Formatı**
 
-### **PFX/P12/PKCS#12 Format**
+- Sunucu sertifikalarını, ara sertifikaları ve özel anahtarları tek bir dosyada kapsayan ikili bir formattır.
+- Uzantılar: .pfx, .p12.
+- Sertifika içe aktarma ve dışa aktarma için genellikle Windows'ta kullanılır.
 
-- A binary format that encapsulates server certificates, intermediate certificates, and private keys in one file.
-- Extensions: .pfx, .p12.
-- Mainly used on Windows for certificate import and export.
+### **Format Dönüştürme**
 
-### **Converting Formats**
+**PEM dönüşümleri**, uyumluluk için gereklidir:
 
-**PEM conversions** are essential for compatibility:
-
-- **x509 to PEM**
-
+- **x509'dan PEM'e**
 ```bash
 openssl x509 -in certificatename.cer -outform PEM -out certificatename.pem
 ```
-
-- **PEM to DER**
-
+- **PEM'den DER'e**
 ```bash
 openssl x509 -outform der -in certificatename.pem -out certificatename.der
 ```
-
-- **DER to PEM**
-
+- **DER'den PEM'e**
 ```bash
 openssl x509 -inform der -in certificatename.der -out certificatename.pem
 ```
-
-- **PEM to P7B**
-
+- **PEM'den P7B'ye**
 ```bash
 openssl crl2pkcs7 -nocrl -certfile certificatename.pem -out certificatename.p7b -certfile CACert.cer
 ```
-
-- **PKCS7 to PEM**
-
+- **PKCS7'den PEM'e**
 ```bash
 openssl pkcs7 -print_certs -in certificatename.p7b -out certificatename.pem
 ```
+**PFX dönüşümleri**, Windows'ta sertifikaları yönetmek için çok önemlidir:
 
-**PFX conversions** are crucial for managing certificates on Windows:
-
-- **PFX to PEM**
-
+- **PFX'ten PEM'e**
 ```bash
 openssl pkcs12 -in certificatename.pfx -out certificatename.pem
 ```
-
-- **PFX to PKCS#8** involves two steps:
-  1. Convert PFX to PEM
-
+- **PFX'ten PKCS#8'e** iki adım içerir:
+1. PFX'i PEM'e dönüştür
 ```bash
 openssl pkcs12 -in certificatename.pfx -nocerts -nodes -out certificatename.pem
 ```
-
-2. Convert PEM to PKCS8
-
+2. PEM'i PKCS8'e Dönüştür
 ```bash
 openSSL pkcs8 -in certificatename.pem -topk8 -nocrypt -out certificatename.pk8
 ```
-
-- **P7B to PFX** also requires two commands:
-  1. Convert P7B to CER
-
+- **P7B'den PFX'e** geçmek için de iki komut gereklidir:
+1. P7B'yi CER'e dönüştür
 ```bash
 openssl pkcs7 -print_certs -in certificatename.p7b -out certificatename.cer
 ```
-
-2. Convert CER and Private Key to PFX
-
+2. CER ve Özel Anahtarı PFX'e Dönüştür
 ```bash
 openssl pkcs12 -export -in certificatename.cer -inkey privateKey.key -out certificatename.pfx -certfile cacert.cer
 ```
-
 ---
-
-<figure><img src="../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 {{#include ../banners/hacktricks-training.md}}

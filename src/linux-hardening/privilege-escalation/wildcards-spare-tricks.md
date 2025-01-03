@@ -2,7 +2,7 @@
 
 ## chown, chmod
 
-**Diğer dosyalar için hangi dosya sahibi ve izinlerini kopyalamak istediğinizi belirtebilirsiniz.**
+**Hangi dosya sahibi ve izinlerini diğer dosyalar için kopyalamak istediğinizi belirtebilirsiniz**
 ```bash
 touch "--reference=/my/own/path/filename"
 ```
@@ -37,7 +37,7 @@ Daha fazla bilgi için [https://www.exploit-db.com/papers/33930](https://www.exp
 
 ## 7z
 
-**7z** içinde `--` kullanarak `*`'dan önce (not: `--` sonraki girdinin parametre olarak işlenemeyeceği anlamına gelir, bu durumda sadece dosya yolları) rastgele bir hatanın bir dosyayı okumasına neden olabilirsiniz, bu nedenle aşağıdaki gibi bir komut root tarafından çalıştırılıyorsa:
+**7z** içinde `--` kullanarak `*`'dan önce (not: `--` sonraki girdinin parametre olarak işlenemeyeceği anlamına gelir, bu nedenle bu durumda yalnızca dosya yolları) rastgele bir hatanın bir dosyayı okumasına neden olabilirsiniz, bu nedenle aşağıdaki gibi bir komut root tarafından çalıştırılıyorsa:
 ```bash
 7za a /backup/$filename.zip -t7z -snl -p$pass -- *
 ```
@@ -53,7 +53,7 @@ _Daha fazla bilgi için HackTheBox'tan CTF kutusunun Yazılımlarında._
 
 ## Zip
 
-**Rasgele komutlar çalıştır:**
+**Rastgele komutlar çalıştır:**
 ```bash
 zip name.zip files -T --unzip-command "sh -c whoami"
 ```

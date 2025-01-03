@@ -1,101 +1,101 @@
-# Interesting Windows Registry Keys
+# İlginç Windows Kayıt Defteri Anahtarları
 
-### Interesting Windows Registry Keys
+### İlginç Windows Kayıt Defteri Anahtarları
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-### **Windows Version and Owner Info**
+### **Windows Sürümü ve Sahibi Bilgileri**
 
-- Located at **`Software\Microsoft\Windows NT\CurrentVersion`**, you'll find the Windows version, Service Pack, installation time, and the registered owner's name in a straightforward manner.
+- **`Software\Microsoft\Windows NT\CurrentVersion`** altında, Windows sürümünü, Servis Paketini, kurulum zamanını ve kayıtlı sahibin adını basit bir şekilde bulabilirsiniz.
 
-### **Computer Name**
+### **Bilgisayar Adı**
 
-- The hostname is found under **`System\ControlSet001\Control\ComputerName\ComputerName`**.
+- Ana bilgisayar adı **`System\ControlSet001\Control\ComputerName\ComputerName`** altında bulunur.
 
-### **Time Zone Setting**
+### **Saat Dilimi Ayarı**
 
-- The system's time zone is stored in **`System\ControlSet001\Control\TimeZoneInformation`**.
+- Sistem saat dilimi **`System\ControlSet001\Control\TimeZoneInformation`** içinde saklanır.
 
-### **Access Time Tracking**
+### **Erişim Zamanı Takibi**
 
-- By default, the last access time tracking is turned off (**`NtfsDisableLastAccessUpdate=1`**). To enable it, use:
-  `fsutil behavior set disablelastaccess 0`
+- Varsayılan olarak, son erişim zamanı takibi kapalıdır (**`NtfsDisableLastAccessUpdate=1`**). Bunu etkinleştirmek için:
+`fsutil behavior set disablelastaccess 0` kullanın.
 
-### Windows Versions and Service Packs
+### Windows Sürümleri ve Servis Paketleri
 
-- The **Windows version** indicates the edition (e.g., Home, Pro) and its release (e.g., Windows 10, Windows 11), while **Service Packs** are updates that include fixes and, sometimes, new features.
+- **Windows sürümü**, sürümü (örneğin, Home, Pro) ve sürümünü (örneğin, Windows 10, Windows 11) belirtirken, **Servis Paketleri** düzeltmeler ve bazen yeni özellikler içeren güncellemelerdir.
 
-### Enabling Last Access Time
+### Son Erişim Zamanını Etkinleştirme
 
-- Enabling last access time tracking allows you to see when files were last opened, which can be critical for forensic analysis or system monitoring.
+- Son erişim zamanı takibini etkinleştirmek, dosyaların en son ne zaman açıldığını görmenizi sağlar; bu, adli analiz veya sistem izleme için kritik olabilir.
 
-### Network Information Details
+### Ağ Bilgileri Detayları
 
-- The registry holds extensive data on network configurations, including **types of networks (wireless, cable, 3G)** and **network categories (Public, Private/Home, Domain/Work)**, which are vital for understanding network security settings and permissions.
+- Kayıt defteri, **ağ türleri (kablosuz, kablolu, 3G)** ve **ağ kategorileri (Genel, Özel/Ev, Alan/İş)** dahil olmak üzere ağ yapılandırmaları hakkında kapsamlı veriler tutar; bu, ağ güvenlik ayarlarını ve izinlerini anlamak için hayati öneme sahiptir.
 
-### Client Side Caching (CSC)
+### İstemci Tarafı Önbellekleme (CSC)
 
-- **CSC** enhances offline file access by caching copies of shared files. Different **CSCFlags** settings control how and what files are cached, affecting performance and user experience, especially in environments with intermittent connectivity.
+- **CSC**, paylaşılan dosyaların kopyalarını önbelleğe alarak çevrimdışı dosya erişimini artırır. Farklı **CSCFlags** ayarları, hangi dosyaların ve nasıl önbelleğe alınacağını kontrol eder, bu da performansı ve kullanıcı deneyimini etkiler, özellikle kesintili bağlantıların olduğu ortamlarda.
 
-### AutoStart Programs
+### Otomatik Başlatılan Programlar
 
-- Programs listed in various `Run` and `RunOnce` registry keys are automatically launched at startup, affecting system boot time and potentially being points of interest for identifying malware or unwanted software.
+- Çeşitli `Run` ve `RunOnce` kayıt defteri anahtarlarında listelenen programlar, başlangıçta otomatik olarak başlatılır, bu da sistemin önyükleme süresini etkiler ve kötü amaçlı yazılım veya istenmeyen yazılımları tanımlamak için ilgi noktaları olabilir.
 
 ### Shellbags
 
-- **Shellbags** not only store preferences for folder views but also provide forensic evidence of folder access even if the folder no longer exists. They are invaluable for investigations, revealing user activity that isn't obvious through other means.
+- **Shellbags**, yalnızca klasör görünüm tercihlerini saklamakla kalmaz, aynı zamanda klasör artık mevcut olmasa bile klasör erişiminin adli kanıtını sağlar. Diğer yollarla belirgin olmayan kullanıcı etkinliğini ortaya çıkardığı için soruşturmalar için değerlidir.
 
-### USB Information and Forensics
+### USB Bilgileri ve Adli Analiz
 
-- The details stored in the registry about USB devices can help trace which devices were connected to a computer, potentially linking a device to sensitive file transfers or unauthorized access incidents.
+- Kayıt defterinde saklanan USB cihazlarıyla ilgili detaylar, bir bilgisayara hangi cihazların bağlandığını izlemeye yardımcı olabilir ve potansiyel olarak bir cihazı hassas dosya transferleri veya yetkisiz erişim olaylarıyla ilişkilendirebilir.
 
-### Volume Serial Number
+### Hacim Seri Numarası
 
-- The **Volume Serial Number** can be crucial for tracking the specific instance of a file system, useful in forensic scenarios where file origin needs to be established across different devices.
+- **Hacim Seri Numarası**, dosya sisteminin belirli bir örneğini izlemek için kritik olabilir; bu, dosya kökeninin farklı cihazlar arasında belirlenmesi gereken adli senaryolar için yararlıdır.
 
-### **Shutdown Details**
+### **Kapatma Detayları**
 
-- Shutdown time and count (the latter only for XP) are kept in **`System\ControlSet001\Control\Windows`** and **`System\ControlSet001\Control\Watchdog\Display`**.
+- Kapatma zamanı ve sayısı (ikincisi yalnızca XP için) **`System\ControlSet001\Control\Windows`** ve **`System\ControlSet001\Control\Watchdog\Display`** içinde saklanır.
 
-### **Network Configuration**
+### **Ağ Yapılandırması**
 
-- For detailed network interface info, refer to **`System\ControlSet001\Services\Tcpip\Parameters\Interfaces{GUID_INTERFACE}`**.
-- First and last network connection times, including VPN connections, are logged under various paths in **`Software\Microsoft\Windows NT\CurrentVersion\NetworkList`**.
+- Ayrıntılı ağ arayüzü bilgileri için **`System\ControlSet001\Services\Tcpip\Parameters\Interfaces{GUID_INTERFACE}`**'e bakın.
+- İlk ve son ağ bağlantı zamanları, VPN bağlantıları dahil olmak üzere, **`Software\Microsoft\Windows NT\CurrentVersion\NetworkList`** altında çeşitli yollarla kaydedilir.
 
-### **Shared Folders**
+### **Paylaşılan Klasörler**
 
-- Shared folders and settings are under **`System\ControlSet001\Services\lanmanserver\Shares`**. The Client Side Caching (CSC) settings dictate offline file availability.
+- Paylaşılan klasörler ve ayarlar **`System\ControlSet001\Services\lanmanserver\Shares`** altında bulunur. İstemci Tarafı Önbellekleme (CSC) ayarları çevrimdışı dosya erişilebilirliğini belirler.
 
-### **Programs that Start Automatically**
+### **Otomatik Başlatılan Programlar**
 
-- Paths like **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run`** and similar entries under `Software\Microsoft\Windows\CurrentVersion` detail programs set to run at startup.
+- **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run`** gibi yollar ve `Software\Microsoft\Windows\CurrentVersion` altında benzer girişler, başlangıçta çalışacak şekilde ayarlanmış programları detaylandırır.
 
-### **Searches and Typed Paths**
+### **Aramalar ve Yazılan Yollar**
 
-- Explorer searches and typed paths are tracked in the registry under **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer`** for WordwheelQuery and TypedPaths, respectively.
+- Gezginde yapılan aramalar ve yazılan yollar, **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer`** altında WordwheelQuery ve TypedPaths için sırasıyla izlenir.
 
-### **Recent Documents and Office Files**
+### **Son Belgeler ve Ofis Dosyaları**
 
-- Recent documents and Office files accessed are noted in `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs` and specific Office version paths.
+- Erişilen son belgeler ve Ofis dosyaları, `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs` ve belirli Ofis sürüm yollarında not edilir.
 
-### **Most Recently Used (MRU) Items**
+### **En Son Kullanılan (MRU) Öğeler**
 
-- MRU lists, indicating recent file paths and commands, are stored in various `ComDlg32` and `Explorer` subkeys under `NTUSER.DAT`.
+- Son dosya yolları ve komutları gösteren MRU listeleri, `NTUSER.DAT` altında çeşitli `ComDlg32` ve `Explorer` alt anahtarlarında saklanır.
 
-### **User Activity Tracking**
+### **Kullanıcı Etkinliği Takibi**
 
-- The User Assist feature logs detailed application usage stats, including run count and last run time, at **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`**.
+- Kullanıcı Yardımcı özelliği, **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`** altında çalıştırma sayısı ve son çalıştırma zamanı dahil olmak üzere ayrıntılı uygulama kullanım istatistiklerini kaydeder.
 
-### **Shellbags Analysis**
+### **Shellbags Analizi**
 
-- Shellbags, revealing folder access details, are stored in `USRCLASS.DAT` and `NTUSER.DAT` under `Software\Microsoft\Windows\Shell`. Use **[Shellbag Explorer](https://ericzimmerman.github.io/#!index.md)** for analysis.
+- Klasör erişim detaylarını ortaya çıkaran Shellbags, `USRCLASS.DAT` ve `NTUSER.DAT` altında `Software\Microsoft\Windows\Shell` içinde saklanır. Analiz için **[Shellbag Explorer](https://ericzimmerman.github.io/#!index.md)** kullanın.
 
-### **USB Device History**
+### **USB Cihaz Geçmişi**
 
-- **`HKLM\SYSTEM\ControlSet001\Enum\USBSTOR`** and **`HKLM\SYSTEM\ControlSet001\Enum\USB`** contain rich details on connected USB devices, including manufacturer, product name, and connection timestamps.
-- The user associated with a specific USB device can be pinpointed by searching `NTUSER.DAT` hives for the device's **{GUID}**.
-- The last mounted device and its volume serial number can be traced through `System\MountedDevices` and `Software\Microsoft\Windows NT\CurrentVersion\EMDMgmt`, respectively.
+- **`HKLM\SYSTEM\ControlSet001\Enum\USBSTOR`** ve **`HKLM\SYSTEM\ControlSet001\Enum\USB`** bağlı USB cihazları hakkında zengin detaylar içerir; bunlar arasında üretici, ürün adı ve bağlantı zaman damgaları bulunur.
+- Belirli bir USB cihazıyla ilişkili kullanıcı, cihazın **{GUID}**'sini arayarak `NTUSER.DAT` hives'inde tespit edilebilir.
+- Son takılı cihaz ve hacim seri numarası, sırasıyla `System\MountedDevices` ve `Software\Microsoft\Windows NT\CurrentVersion\EMDMgmt` üzerinden izlenebilir.
 
-This guide condenses the crucial paths and methods for accessing detailed system, network, and user activity information on Windows systems, aiming for clarity and usability.
+Bu kılavuz, Windows sistemlerinde ayrıntılı sistem, ağ ve kullanıcı etkinliği bilgilerine erişim için kritik yolları ve yöntemleri özetlemektedir; açıklık ve kullanılabilirlik hedeflenmiştir.
 
 {{#include ../../../banners/hacktricks-training.md}}

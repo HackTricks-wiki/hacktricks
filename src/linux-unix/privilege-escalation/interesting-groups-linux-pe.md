@@ -25,7 +25,7 @@ Tüm suid ikili dosyalarını bulun ve **Pkexec** ikili dosyasının olup olmad�
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-Eğer pkexec ikili dosyasının SUID ikili dosyası olduğunu ve sudo veya admin grubuna ait olduğunuzu bulursanız, muhtemelen pkexec kullanarak ikili dosyaları sudo olarak çalıştırabilirsiniz. İçeriği kontrol edin:
+Eğer pkexec ikilisinin SUID ikilisi olduğunu ve sudo veya admin grubuna ait olduğunuzu bulursanız, muhtemelen pkexec kullanarak ikilileri sudo olarak çalıştırabilirsiniz. İçeriği kontrol edin:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
@@ -97,7 +97,7 @@ moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
 **tty1**, kullanıcının **yossi'nin makinedeki bir terminale fiziksel olarak giriş yaptığını** ifade eder.
 
-**video grubu**, ekran çıktısını görüntüleme erişimine sahiptir. Temelde ekranları gözlemleyebilirsiniz. Bunu yapmak için, ekranın **şu anki görüntüsünü** ham veri olarak almanız ve ekranın kullandığı çözünürlüğü öğrenmeniz gerekir. Ekran verileri `/dev/fb0`'da kaydedilebilir ve bu ekranın çözünürlüğünü `/sys/class/graphics/fb0/virtual_size`'da bulabilirsiniz.
+**video grubu**, ekran çıktısını görüntüleme erişimine sahiptir. Temelde ekranları gözlemleyebilirsiniz. Bunu yapmak için, ekranın **şu anki görüntüsünü** ham veri olarak almanız ve ekranın kullandığı çözünürlüğü öğrenmeniz gerekir. Ekran verileri `/dev/fb0`'da saklanabilir ve bu ekranın çözünürlüğünü `/sys/class/graphics/fb0/virtual_size`'da bulabilirsiniz.
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
@@ -106,7 +106,7 @@ cat /sys/class/graphics/fb0/virtual_size
 
 ![](../../images/image%20%28208%29.png)
 
-Sonra Genişlik ve Yüksekliği ekranda kullanılanlarla değiştirin ve farklı Görüntü Türlerini kontrol edin \(ve ekranı daha iyi göstereni seçin\):
+Sonra Genişlik ve Yükseklik değerlerini ekranda kullanılanlarla değiştirin ve farklı Görüntü Türlerini kontrol edin \(ve ekranı daha iyi göstereni seçin\):
 
 ![](../../images/image%20%28295%29.png)
 

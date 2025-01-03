@@ -1,40 +1,38 @@
-# Wifi Pcap Analysis
+# Wifi Pcap Analizi
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Check BSSIDs
+## BSSID'leri Kontrol Et
 
-When you receive a capture whose principal traffic is Wifi using WireShark you can start investigating all the SSIDs of the capture with _Wireless --> WLAN Traffic_:
+WireShark kullanarak Wifi'nın ana trafiği olan bir yakalama aldığınızda, _Wireless --> WLAN Traffic_ ile yakalamadaki tüm SSID'leri araştırmaya başlayabilirsiniz:
 
 ![](<../../../images/image (106).png>)
 
 ![](<../../../images/image (492).png>)
 
-### Brute Force
+### Kaba Kuvvet
 
-One of the columns of that screen indicates if **any authentication was found inside the pcap**. If that is the case you can try to Brute force it using `aircrack-ng`:
-
+O ekranın sütunlarından biri **pcap içinde herhangi bir kimlik doğrulama bulunup bulunmadığını** gösterir. Eğer durum böyleyse, `aircrack-ng` kullanarak kaba kuvvet denemesi yapabilirsiniz:
 ```bash
 aircrack-ng -w pwds-file.txt -b <BSSID> file.pcap
 ```
+Örneğin, daha sonra trafiği şifrelemek için gerekli olan bir PSK (önceden paylaşılan anahtar) koruyan WPA parolasını alacaktır.
 
-For example it will retrieve the WPA passphrase protecting a PSK (pre shared-key), that will be required to decrypt the trafic later.
+## Beacon'larda / Yan Kanalda Veri
 
-## Data in Beacons / Side Channel
+Eğer **bir Wifi ağının beacon'larında verinin sızdırıldığını düşünüyorsanız**, ağın beacon'larını aşağıdaki gibi bir filtre kullanarak kontrol edebilirsiniz: `wlan contains <NAMEofNETWORK>`, veya `wlan.ssid == "NAMEofNETWORK"` filtrelenmiş paketler içinde şüpheli dizeleri arayın.
 
-If you suspect that **data is being leaked inside beacons of a Wifi network** you can check the beacons of the network using a filter like the following one: `wlan contains <NAMEofNETWORK>`, or `wlan.ssid == "NAMEofNETWORK"` search inside the filtered packets for suspicious strings.
+## Bir Wifi Ağında Bilinmeyen MAC Adreslerini Bulma
 
-## Find Unknown MAC Addresses in A Wifi Network
-
-The following link will be useful to find the **machines sending data inside a Wifi Network**:
+Aşağıdaki bağlantı, **bir Wifi Ağı içinde veri gönderen makineleri bulmak için** faydalı olacaktır:
 
 - `((wlan.ta == e8:de:27:16:70:c9) && !(wlan.fc == 0x8000)) && !(wlan.fc.type_subtype == 0x0005) && !(wlan.fc.type_subtype ==0x0004) && !(wlan.addr==ff:ff:ff:ff:ff:ff) && wlan.fc.type==2`
 
-If you already know **MAC addresses you can remove them from the output** adding checks like this one: `&& !(wlan.addr==5c:51:88:31:a0:3b)`
+Eğer **MAC adreslerini zaten biliyorsanız, bunları çıktılardan çıkarabilirsiniz** bu gibi kontroller ekleyerek: `&& !(wlan.addr==5c:51:88:31:a0:3b)`
 
-Once you have detected **unknown MAC** addresses communicating inside the network you can use **filters** like the following one: `wlan.addr==<MAC address> && (ftp || http || ssh || telnet)` to filter its traffic. Note that ftp/http/ssh/telnet filters are useful if you have decrypted the traffic.
+Ağ içinde iletişim kuran **bilinmeyen MAC** adreslerini tespit ettikten sonra, trafiğini filtrelemek için **filtreler** kullanabilirsiniz, aşağıdaki gibi: `wlan.addr==<MAC address> && (ftp || http || ssh || telnet)`. ftp/http/ssh/telnet filtrelerinin, trafiği şifrelediyseniz faydalı olduğunu unutmayın.
 
-## Decrypt Traffic
+## Trafiği Şifre Çözme
 
 Edit --> Preferences --> Protocols --> IEEE 802.11--> Edit
 

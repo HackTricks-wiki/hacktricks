@@ -1,4 +1,4 @@
-# Android Adli Bilimi
+# Android Adli Tıp
 
 {{#include ./banners/hacktricks-training.md}}
 

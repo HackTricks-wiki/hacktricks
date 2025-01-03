@@ -2,121 +2,112 @@
 
 # [ProjectHoneypot](https://www.projecthoneypot.org/)
 
-You can ask if an IP is related to suspicious/malicious activities. Completely free.
+Bir IP'nin şüpheli/kötü niyetli faaliyetlerle ilişkili olup olmadığını sorabilirsiniz. Tamamen ücretsiz.
 
 # [**BotScout**](http://botscout.com/api.htm)
 
-Check if the IP address is related to a bot that register accounts. It can also check usernames and emails. Initially free.
+IP adresinin hesap kaydeden bir botla ilişkili olup olmadığını kontrol edin. Kullanıcı adları ve e-postaları da kontrol edebilir. Başlangıçta ücretsiz.
 
 # [Hunter](https://hunter.io/)
 
-Find and verify emails.  
-Some free API requests free, for more you need to pay.  
-Commercial?
+E-postaları bulun ve doğrulayın. Bazı ücretsiz API istekleri mevcut, daha fazlası için ödeme yapmanız gerekiyor. Ticari mi?
 
 # [AlientVault](https://otx.alienvault.com/api)
 
-Find Malicious activities related to IPs and Domains. Free.
+IP'ler ve Alan Adları ile ilgili kötü niyetli faaliyetleri bulun. Ücretsiz.
 
 # [Clearbit](https://dashboard.clearbit.com/)
 
-Find related personal data to a email \(profiles on other platforms\), domain \(basic company info ,mails and people working\) and companies \(get company info from mail\).  
-You need to pay to access all the possibilities.  
-Commercial?
+Bir e-posta ile ilgili kişisel verileri \(diğer platformlardaki profiller\), alan adı \(temel şirket bilgileri, e-postalar ve çalışanlar\) ve şirketler \(e-postadan şirket bilgisi alın\) bulun. Tüm olanaklara erişmek için ödeme yapmanız gerekiyor. Ticari mi?
 
 # [BuiltWith](https://builtwith.com/)
 
-Technologies used by webs. Expensive...  
-Commercial?
+Web siteleri tarafından kullanılan teknolojiler. Pahalı... Ticari mi?
 
 # [Fraudguard](https://fraudguard.io/)
 
-Check if a host \(domain or IP\) is related with suspicious/malicious activities. Have some free API access.  
-Commercial?
+Bir ana bilgisayarın \(alan adı veya IP\) şüpheli/kötü niyetli faaliyetlerle ilişkili olup olmadığını kontrol edin. Bazı ücretsiz API erişimi mevcut. Ticari mi?
 
 # [FortiGuard](https://fortiguard.com/)
 
-Check if a host \(domain or IP\) is related with suspicious/malicious activities. Have some free API access.
+Bir ana bilgisayarın \(alan adı veya IP\) şüpheli/kötü niyetli faaliyetlerle ilişkili olup olmadığını kontrol edin. Bazı ücretsiz API erişimi mevcut.
 
 # [SpamCop](https://www.spamcop.net/)
 
-Indicates if host is related to spam activity. Have some free API access.
+Ana bilgisayarın spam faaliyetleriyle ilişkili olup olmadığını belirtir. Bazı ücretsiz API erişimi mevcut.
 
 # [mywot](https://www.mywot.com/)
 
-Based on opinions and other metrics get if a domain is related with suspicious/malicious information.
+Görüşler ve diğer metriklere dayanarak bir alan adının şüpheli/kötü niyetli bilgilerle ilişkili olup olmadığını öğrenin.
 
 # [ipinfo](https://ipinfo.io/)
 
-Obtains basic info from an IP address. You can test up to 100K/month.
+Bir IP adresinden temel bilgileri elde edin. Aylık 100K'a kadar test edebilirsiniz.
 
 # [securitytrails](https://securitytrails.com/app/account)
 
-This platform give information about domains and IP addresses like domains inside an IP or inside a domain server, domains owned by an email \(find related domains\), IP history of domains \(find the host behind CloudFlare\), all domains using a nameserver....  
-You have some free access.
+Bu platform, bir IP içindeki veya bir alan adı sunucusundaki alan adları gibi alan adları ve IP adresleri hakkında bilgi verir, bir e-posta ile sahip olunan alan adlarını \(ilişkili alan adlarını bulun\), alanların IP geçmişini \(CloudFlare'ın arkasındaki ana bilgisayarı bulun\), bir nameserver kullanan tüm alan adlarını... Bazı ücretsiz erişiminiz var.
 
 # [fullcontact](https://www.fullcontact.com/)
 
-Allows to search by email, domain or company name and retrieve "personal" information related. It can also verify emails. There is some free access.
+E-posta, alan adı veya şirket adı ile arama yapmanıza ve ilgili "kişisel" bilgileri almanıza olanak tanır. E-postaları da doğrulayabilir. Bazı ücretsiz erişim mevcut.
 
 # [RiskIQ](https://www.spiderfoot.net/documentation/)
 
-A lot of information from domains and IPs even in the free/community version.
+Alan adları ve IP'ler hakkında çok fazla bilgi, hatta ücretsiz/topluluk sürümünde bile.
 
 # [\_IntelligenceX](https://intelx.io/)
 
-Search Domains, IPs and emails and get info from dumps. Have some free access.
+Alan adları, IP'ler ve e-postalar arayın ve dökümlerden bilgi alın. Bazı ücretsiz erişim mevcut.
 
 # [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
 
-Search by IP and gather information related to suspicions activities. There is some free access.
+IP ile arama yapın ve şüpheli faaliyetlerle ilgili bilgileri toplayın. Bazı ücretsiz erişim mevcut.
 
 # [Greynoise](https://viz.greynoise.io/)
 
-Search by IP or IP range and get information about IPs scanning the Internet. 15 days free access.
+IP veya IP aralığı ile arama yapın ve İnterneti tarayan IP'ler hakkında bilgi alın. 15 gün ücretsiz erişim.
 
 # [Shodan](https://www.shodan.io/)
 
-Get scan information of an IP address. Have some free api access.
+Bir IP adresinin tarama bilgilerini alın. Bazı ücretsiz API erişimi mevcut.
 
 # [Censys](https://censys.io/)
 
-Very similar to shodan
+Shodan'a çok benzer.
 
 # [buckets.grayhatwarfare.com](https://buckets.grayhatwarfare.com/)
 
-Find open S3 buckets searching by keyword.
+Anahtar kelime ile arama yaparak açık S3 bucket'ları bulun.
 
 # [Dehashed](https://www.dehashed.com/data)
 
-Find leaked credentials of emails and even domains  
-Commercial?
+Sızdırılmış e-posta ve hatta alan adlarının kimlik bilgilerini bulun. Ticari mi?
 
 # [psbdmp](https://psbdmp.ws/)
 
-Search pastebins where a email appeared. Commercial?
+Bir e-postanın göründüğü pastebin'leri arayın. Ticari mi?
 
 # [emailrep.io](https://emailrep.io/key)
 
-Get reputation of a mail. Commercial?
+Bir e-postanın itibarını alın. Ticari mi?
 
 # [ghostproject](https://ghostproject.fr/)
 
-Get passwords from leaked emails. Commercial?
+Sızdırılmış e-postalardan şifreleri alın. Ticari mi?
 
 # [Binaryedge](https://www.binaryedge.io/)
 
-Obtain interesting info from IPs
+IP'lerden ilginç bilgiler elde edin.
 
 # [haveibeenpwned](https://haveibeenpwned.com/)
 
-Search by domain and email and get if it was pwned and passwords. Commercial?
+Alan adı ve e-posta ile arama yapın ve pwned olup olmadığını ve şifreleri alın. Ticari mi?
 
-[https://dnsdumpster.com/](https://dnsdumpster.com/)\(in a commercial tool?\)
+[https://dnsdumpster.com/](https://dnsdumpster.com/)\(ticari bir araçta mı?\)
 
-[https://www.netcraft.com/](https://www.netcraft.com/) \(in a commercial tool?\)
+[https://www.netcraft.com/](https://www.netcraft.com/) \(ticari bir araçta mı?\)
 
-[https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/) \(in a commercial tool?\)
+[https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/) \(ticari bir araçta mı?\)
 
 {{#include ./banners/hacktricks-training.md}}
-

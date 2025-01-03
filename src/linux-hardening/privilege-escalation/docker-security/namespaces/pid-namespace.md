@@ -4,18 +4,18 @@
 
 ## Temel Bilgiler
 
-PID (Process IDentifier) namespace, Linux çekirdeğinde, bir grup sürecin kendi benzersiz PID setine sahip olmasını sağlayarak süreç izolasyonu sunan bir özelliktir; bu, diğer namespace'lerdeki PIDs'den ayrıdır. Bu, süreç izolasyonunun güvenlik ve kaynak yönetimi için hayati olduğu konteynerleştirme alanında özellikle faydalıdır.
+PID (Process IDentifier) namespace, Linux çekirdeğinde, bir grup sürecin diğer namespace'lerdeki PIDs'lerden ayrı olarak kendi benzersiz PID setine sahip olmasını sağlayarak süreç izolasyonu sunan bir özelliktir. Bu, süreç izolasyonunun güvenlik ve kaynak yönetimi için hayati olduğu konteynerleştirme alanında özellikle faydalıdır.
 
-Yeni bir PID namespace oluşturulduğunda, o namespace'deki ilk süreç PID 1 ile atanır. Bu süreç, yeni namespace'in "init" süreci haline gelir ve namespace içindeki diğer süreçleri yönetmekten sorumludur. Namespace içinde oluşturulan her bir sonraki süreç, o namespace içinde benzersiz bir PID alacak ve bu PIDs, diğer namespace'lerdeki PIDs'den bağımsız olacaktır.
+Yeni bir PID namespace oluşturulduğunda, o namespace içindeki ilk süreç PID 1 ile atanır. Bu süreç, yeni namespace'in "init" süreci haline gelir ve namespace içindeki diğer süreçleri yönetmekten sorumludur. Namespace içinde oluşturulan her bir sonraki süreç, o namespace içinde benzersiz bir PID alacak ve bu PIDs, diğer namespace'lerdeki PIDs'den bağımsız olacaktır.
 
-Bir PID namespace içindeki bir süreç açısından, yalnızca aynı namespace'deki diğer süreçleri görebilir. Diğer namespace'lerdeki süreçlerin farkında değildir ve geleneksel süreç yönetim araçları (örneğin, `kill`, `wait`, vb.) kullanarak onlarla etkileşimde bulunamaz. Bu, süreçlerin birbirine müdahale etmesini önlemeye yardımcı olan bir izolasyon seviyesi sağlar.
+Bir PID namespace içindeki bir süreç açısından, yalnızca aynı namespace içindeki diğer süreçleri görebilir. Diğer namespace'lerdeki süreçlerden haberdar değildir ve geleneksel süreç yönetim araçları (örneğin, `kill`, `wait`, vb.) kullanarak onlarla etkileşimde bulunamaz. Bu, süreçlerin birbirine müdahale etmesini önlemeye yardımcı olan bir izolasyon seviyesi sağlar.
 
 ### Nasıl çalışır:
 
 1. Yeni bir süreç oluşturulduğunda (örneğin, `clone()` sistem çağrısı kullanılarak), süreç yeni veya mevcut bir PID namespace'ine atanabilir. **Yeni bir namespace oluşturulursa, süreç o namespace'in "init" süreci haline gelir**.
-2. **Çekirdek**, yeni namespace'deki PIDs ile ana namespace'deki karşılık gelen PIDs arasında bir **eşleme** tutar (yani, yeni namespace'in oluşturulduğu namespace). Bu eşleme, **çekirdeğin gerekli olduğunda PIDs'yi çevirmesine olanak tanır**, örneğin, farklı namespace'lerdeki süreçler arasında sinyaller gönderirken.
-3. **PID namespace içindeki süreçler yalnızca aynı namespace'deki diğer süreçleri görebilir ve onlarla etkileşimde bulunabilir**. Diğer namespace'lerdeki süreçlerin farkında değillerdir ve PIDs'leri kendi namespace'lerinde benzersizdir.
-4. Bir **PID namespace yok edildiğinde** (örneğin, namespace'in "init" süreci çıktığında), **o namespace içindeki tüm süreçler sonlandırılır**. Bu, namespace ile ilişkili tüm kaynakların düzgün bir şekilde temizlenmesini sağlar.
+2. **Çekirdek**, **yeni namespace'deki PIDs ile ana namespace'deki karşılık gelen PIDs arasında bir eşleme** tutar (yani, yeni namespace'in oluşturulduğu namespace). Bu eşleme, **çekirdeğin gerekli olduğunda PIDs'leri çevirmesine olanak tanır**, örneğin, farklı namespace'lerdeki süreçler arasında sinyaller gönderirken.
+3. **Bir PID namespace içindeki süreçler yalnızca aynı namespace içindeki diğer süreçleri görebilir ve onlarla etkileşimde bulunabilir**. Diğer namespace'lerdeki süreçlerden haberdar değillerdir ve PIDs'leri kendi namespace'leri içinde benzersizdir.
+4. **Bir PID namespace yok edildiğinde** (örneğin, namespace'in "init" süreci çıktığında), **o namespace içindeki tüm süreçler sonlandırılır**. Bu, namespace ile ilişkili tüm kaynakların düzgün bir şekilde temizlenmesini sağlar.
 
 ## Laboratuvar:
 
@@ -29,17 +29,17 @@ sudo unshare -pf --mount-proc /bin/bash
 
 <summary>Hata: bash: fork: Bellek tahsis edilemiyor</summary>
 
-`unshare` komutu `-f` seçeneği olmadan çalıştırıldığında, Linux'un yeni PID (Process ID) ad alanlarını yönetme şekli nedeniyle bir hata ile karşılaşılır. Anahtar detaylar ve çözüm aşağıda özetlenmiştir:
+`unshare` komutu `-f` seçeneği olmadan çalıştırıldığında, Linux'un yeni PID (Process ID) ad alanlarını nasıl yönettiği nedeniyle bir hata ile karşılaşılır. Anahtar detaylar ve çözüm aşağıda özetlenmiştir:
 
 1. **Problem Açıklaması**:
 
 - Linux çekirdeği, bir sürecin yeni ad alanları oluşturmasına `unshare` sistem çağrısı ile izin verir. Ancak, yeni bir PID ad alanı oluşturma işlemini başlatan süreç (bu süreç "unshare" süreci olarak adlandırılır) yeni ad alanına girmez; yalnızca onun çocuk süreçleri girer.
 - `%unshare -p /bin/bash%` komutu, `/bin/bash`'i `unshare` ile aynı süreçte başlatır. Sonuç olarak, `/bin/bash` ve onun çocuk süreçleri orijinal PID ad alanındadır.
-- Yeni ad alanındaki `/bin/bash`'in ilk çocuk süreci PID 1 olur. Bu süreç sona erdiğinde, başka süreç yoksa ad alanının temizlenmesini tetikler, çünkü PID 1, yetim süreçleri benimseme özel rolüne sahiptir. Linux çekirdeği, o ad alanında PID tahsisini devre dışı bırakır.
+- Yeni ad alanındaki `/bin/bash`'in ilk çocuk süreci PID 1 olur. Bu süreç sona erdiğinde, başka süreç yoksa ad alanının temizlenmesini tetikler, çünkü PID 1, yetim süreçleri benimseme özel rolüne sahiptir. Linux çekirdeği, bu ad alanında PID tahsisini devre dışı bırakır.
 
 2. **Sonuç**:
 
-- Yeni bir ad alanındaki PID 1'in çıkışı, `PIDNS_HASH_ADDING` bayrağının temizlenmesine yol açar. Bu, yeni bir süreç oluşturulurken `alloc_pid` fonksiyonunun yeni bir PID tahsis edememesine neden olur ve "Bellek tahsis edilemiyor" hatasını üretir.
+- Yeni bir ad alanındaki PID 1'in çıkışı, `PIDNS_HASH_ADDING` bayrağının temizlenmesine yol açar. Bu, yeni bir süreç oluştururken `alloc_pid` fonksiyonunun yeni bir PID tahsis edememesine neden olur ve "Bellek tahsis edilemiyor" hatasını üretir.
 
 3. **Çözüm**:
 - Sorun, `unshare` ile `-f` seçeneğini kullanarak çözülebilir. Bu seçenek, `unshare`'in yeni PID ad alanını oluşturduktan sonra yeni bir süreç fork etmesini sağlar.
@@ -64,7 +64,7 @@ lrwxrwxrwx 1 root root 0 Apr  3 18:45 /proc/self/ns/pid -> 'pid:[4026532412]'
 ```bash
 sudo find /proc -maxdepth 3 -type l -name pid -exec readlink {} \; 2>/dev/null | sort -u
 ```
-Kök kullanıcısının başlangıç (varsayılan) PID ad alanından tüm süreçleri görebileceğini, hatta yeni PID ad alanlarındaki süreçleri bile görebileceğini unutmayın, bu yüzden tüm PID ad alanlarını görebiliyoruz.
+Kök kullanıcısının başlangıç (varsayılan) PID ad alanından tüm süreçleri görebildiğini, hatta yeni PID ad alanlarındaki süreçleri bile görebildiğini unutmayın, bu yüzden tüm PID ad alanlarını görebiliyoruz.
 
 ### Bir PID ad alanına girin
 ```bash

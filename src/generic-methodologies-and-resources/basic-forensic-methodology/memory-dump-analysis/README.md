@@ -1,49 +1,37 @@
-# Memory dump analysis
+# Bellek dökümü analizi
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
+## Başlangıç
 
-[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
-
-{% embed url="https://www.rootedcon.com/" %}
-
-## Start
-
-Start **searching** for **malware** inside the pcap. Use the **tools** mentioned in [**Malware Analysis**](../malware-analysis.md).
+**Kötü amaçlı yazılım** için **arama** yapmaya başlayın. [**Kötü Amaçlı Yazılım Analizi**](../malware-analysis.md) bölümünde belirtilen **araçları** kullanın.
 
 ## [Volatility](volatility-cheatsheet.md)
 
-**Volatility is the main open-source framework for memory dump analysis**. This Python tool analyzes dumps from external sources or VMware VMs, identifying data like processes and passwords based on the dump's OS profile. It's extensible with plugins, making it highly versatile for forensic investigations.
+**Volatility, bellek dökümü analizi için ana açık kaynak çerçevesidir**. Bu Python aracı, dış kaynaklardan veya VMware sanal makinelerinden gelen dökümleri analiz eder, dökümün işletim sistemi profiline dayalı olarak süreçler ve şifreler gibi verileri tanımlar. Eklentilerle genişletilebilir, bu da onu adli soruşturmalar için son derece çok yönlü hale getirir.
 
-[**Find here a cheatsheet**](volatility-cheatsheet.md)
+[**Burada bir kılavuz bulabilirsiniz**](volatility-cheatsheet.md)
 
-## Mini dump crash report
+## Mini döküm çökme raporu
 
-When the dump is small (just some KB, maybe a few MB) then it's probably a mini dump crash report and not a memory dump.
+Döküm küçükse (sadece birkaç KB, belki birkaç MB) muhtemelen bir mini döküm çökme raporudur ve bellek dökümü değildir.
 
 ![](<../../../images/image (532).png>)
 
-If you have Visual Studio installed, you can open this file and bind some basic information like process name, architecture, exception info and modules being executed:
+Eğer Visual Studio yüklüyse, bu dosyayı açabilir ve süreç adı, mimari, istisna bilgisi ve yürütülen modüller gibi bazı temel bilgileri bağlayabilirsiniz:
 
 ![](<../../../images/image (263).png>)
 
-You can also load the exception and see the decompiled instructions
+Ayrıca istisnayı yükleyebilir ve decompile edilmiş talimatları görebilirsiniz.
 
 ![](<../../../images/image (142).png>)
 
 ![](<../../../images/image (610).png>)
 
-Anyway, Visual Studio isn't the best tool to perform an analysis of the depth of the dump.
+Her neyse, Visual Studio, dökümün derinlemesine analizi için en iyi araç değildir.
 
-You should **open** it using **IDA** or **Radare** to inspection it in **depth**.
+Bunu **IDA** veya **Radare** kullanarak **derinlemesine** incelemek için **açmalısınız**.
 
 ​
-
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
-
-[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
-
-{% embed url="https://www.rootedcon.com/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}

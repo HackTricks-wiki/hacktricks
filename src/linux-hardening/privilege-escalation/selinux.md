@@ -6,7 +6,7 @@
 
 [SELinux](https://www.redhat.com/en/blog/latest-container-exploit-runc-can-be-blocked-selinux) bir **etiketleme** **sistemidir**. Her **işlem** ve her **dosya** sistemi nesnesinin bir **etiketi** vardır. SELinux politikaları, bir **işlem etiketinin sistemdeki diğer etiketlerle ne yapabileceğine dair kurallar tanımlar**.
 
-Konteyner motorları, genellikle `container_t` olan **tek bir sınırlı SELinux etiketiyle konteyner işlemleri başlatır** ve ardından konteynerin içindeki dosyaların `container_file_t` olarak etiketlenmesini sağlar. SELinux politika kuralları, **`container_t` işlemlerinin yalnızca `container_file_t` olarak etiketlenmiş dosyaları okuyup/yazabileceğini/çalıştırabileceğini** belirtir. Eğer bir konteyner işlemi konteynerden kaçarsa ve ana makinedeki içeriğe yazmaya çalışırsa, Linux çekirdeği erişimi reddeder ve yalnızca konteyner işleminin `container_file_t` olarak etiketlenmiş içeriğe yazmasına izin verir.
+Konteyner motorları, genellikle `container_t` olan **tek bir sınırlı SELinux etiketiyle konteyner işlemleri başlatır** ve ardından konteynerin içindeki dosyayı `container_file_t` olarak etiketler. SELinux politika kuralları, **`container_t` işlemlerinin yalnızca `container_file_t` olarak etiketlenmiş dosyaları okuyup/yazabileceğini/çalıştırabileceğini** belirtir. Eğer bir konteyner işlemi konteynerden kaçarsa ve ana makinedeki içeriğe yazmaya çalışırsa, Linux çekirdeği erişimi reddeder ve yalnızca konteyner işleminin `container_file_t` olarak etiketlenmiş içeriğe yazmasına izin verir.
 ```shell
 $ podman run -d fedora sleep 100
 d4194babf6b877c7100e79de92cd6717166f7302113018686cea650ea40bd7cb

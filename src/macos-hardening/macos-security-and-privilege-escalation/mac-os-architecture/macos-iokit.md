@@ -6,7 +6,7 @@
 
 I/O Kit, XNU çekirdeğinde açık kaynaklı, nesne yönelimli **cihaz sürücüsü çerçevesi**dir ve **dinamik olarak yüklenen cihaz sürücülerini** yönetir. Farklı donanımları destekleyerek çekirdeğe anında modüler kod eklenmesine olanak tanır.
 
-IOKit sürücüleri esasen **çekirdekten fonksiyonlar dışa aktarır**. Bu fonksiyon parametre **tipleri** **önceden tanımlıdır** ve doğrulanır. Ayrıca, XPC'ye benzer şekilde, IOKit sadece **Mach mesajlarının** üzerinde başka bir katmandır.
+IOKit sürücüleri esasen **çekirdekten fonksiyonlar dışa aktarır**. Bu fonksiyon parametre **tipleri** **önceden tanımlıdır** ve doğrulanır. Ayrıca, XPC'ye benzer şekilde, IOKit sadece **Mach mesajlarının** üstünde başka bir katmandır.
 
 **IOKit XNU çekirdek kodu**, Apple tarafından [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit) adresinde açık kaynak olarak yayınlanmıştır. Ayrıca, kullanıcı alanı IOKit bileşenleri de açık kaynaklıdır [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
 
@@ -82,9 +82,9 @@ ioreg -p <plane> #Check other plane
 
 IORegistryExplorer'da, "düzlemler" IORegistry'deki farklı nesneler arasındaki ilişkileri düzenlemek ve görüntülemek için kullanılır. Her düzlem, belirli bir ilişki türünü veya sistemin donanım ve sürücü yapılandırmasının belirli bir görünümünü temsil eder. IORegistryExplorer'da karşılaşabileceğiniz bazı yaygın düzlemler şunlardır:
 
-1. **IOService Düzlemi**: Bu, sürücüleri ve nubs'ları (sürücüler arasındaki iletişim kanalları) temsil eden hizmet nesnelerini gösteren en genel düzlemdir. Bu nesneler arasındaki sağlayıcı-müşteri ilişkilerini gösterir.
+1. **IOService Düzlemi**: Bu, sürücüleri ve nubs'ları (sürücüler arasındaki iletişim kanalları) temsil eden hizmet nesnelerini görüntüleyen en genel düzlemdir. Bu nesneler arasındaki sağlayıcı-müşteri ilişkilerini gösterir.
 2. **IODeviceTree Düzlemi**: Bu düzlem, cihazların sisteme bağlı olduğu fiziksel bağlantıları temsil eder. Genellikle USB veya PCI gibi bus'lar aracılığıyla bağlı cihazların hiyerarşisini görselleştirmek için kullanılır.
-3. **IOPower Düzlemi**: Güç yönetimi açısından nesneleri ve ilişkilerini gösterir. Diğerlerinin güç durumunu etkileyen nesneleri gösterebilir, güçle ilgili sorunları ayıklamak için yararlıdır.
+3. **IOPower Düzlemi**: Güç yönetimi açısından nesneleri ve ilişkilerini görüntüler. Diğerlerinin güç durumunu etkileyen nesneleri gösterebilir, güçle ilgili sorunları ayıklamak için faydalıdır.
 4. **IOUSB Düzlemi**: Özellikle USB cihazları ve bunların ilişkilerine odaklanır, USB hub'larının ve bağlı cihazların hiyerarşisini gösterir.
 5. **IOAudio Düzlemi**: Bu düzlem, ses cihazlarını ve bunların sistem içindeki ilişkilerini temsil etmek için kullanılır.
 6. ...
@@ -95,7 +95,7 @@ Aşağıdaki kod, IOKit hizmetine `"YourServiceNameHere"` bağlanır ve seçici 
 
 - Öncelikle **`IOServiceMatching`** ve **`IOServiceGetMatchingServices`** çağrılarak hizmet alınır.
 - Ardından **`IOServiceOpen`** çağrılarak bir bağlantı kurulur.
-- Ve nihayet **`IOConnectCallScalarMethod`** ile seçici 0'ı belirterek bir fonksiyon çağrılır (seçici, çağırmak istediğiniz fonksiyona atanan numaradır).
+- Ve nihayetinde, seçici 0'ı belirterek **`IOConnectCallScalarMethod`** ile bir fonksiyon çağrılır (seçici, çağırmak istediğiniz fonksiyona atanan numaradır).
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <IOKit/IOKitLib.h>
@@ -156,7 +156,7 @@ Diğer **`IOConnectCallScalarMethod`** gibi IOKit fonksiyonlarını çağırmak 
 
 Bunları örneğin bir [**firmware image (ipsw)**](./#ipsw) üzerinden elde edebilirsiniz. Ardından, bunu en sevdiğiniz dekompilerde yükleyin.
 
-**`externalMethod`** fonksiyonunu decompile etmeye başlayabilirsiniz çünkü bu, çağrıyı alacak ve doğru fonksiyonu çağıracak sürücü fonksiyonudur:
+**`externalMethod`** fonksiyonunu tersine mühendislik yapmaya başlayabilirsiniz çünkü bu, çağrıyı alacak ve doğru fonksiyonu çağıracak sürücü fonksiyonudur:
 
 <figure><img src="../../../images/image (1168).png" alt="" width="315"><figcaption></figcaption></figure>
 
@@ -166,7 +166,7 @@ O korkunç çağrı demagled, şunu ifade eder:
 ```cpp
 IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
-Önceki tanımda **`self`** parametresinin atlandığına dikkat edin, iyi bir tanım şöyle olmalıdır:
+Önceki tanımda **`self`** parametresinin atlandığını not edin, iyi bir tanım şöyle olmalıdır:
 ```cpp
 IOUserClient2022::dispatchExternalMethod(self, unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
@@ -176,7 +176,7 @@ IOUserClient2022::dispatchExternalMethod(uint32_t selector, IOExternalMethodArgu
 const IOExternalMethodDispatch2022 dispatchArray[], size_t dispatchArrayCount,
 OSObject * target, void * reference)
 ```
-Bu bilgilerle Ctrl+Right -> `Edit function signature` yazabilir ve bilinen türleri ayarlayabilirsiniz:
+Bu bilgiyle Ctrl+Right -> `Edit function signature` yazabilir ve bilinen türleri ayarlayabilirsiniz:
 
 <figure><img src="../../../images/image (1174).png" alt=""><figcaption></figcaption></figure>
 
@@ -184,7 +184,7 @@ Yeni decompile edilmiş kod şöyle görünecek:
 
 <figure><img src="../../../images/image (1175).png" alt=""><figcaption></figcaption></figure>
 
-Bir sonraki adımda **`IOExternalMethodDispatch2022`** yapısını tanımlamamız gerekiyor. Bu yapı açık kaynak olarak [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176) adresinde bulunmaktadır, bunu tanımlayabilirsiniz:
+Sonraki adımda **`IOExternalMethodDispatch2022`** yapısını tanımlamamız gerekiyor. Bu yapı [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176) adresinde açık kaynak olarak mevcuttur, bunu tanımlayabilirsiniz:
 
 <figure><img src="../../../images/image (1170).png" alt=""><figcaption></figcaption></figure>
 
@@ -196,7 +196,7 @@ Veri Türünü **`IOExternalMethodDispatch2022:`** olarak değiştirin:
 
 <figure><img src="../../../images/image (1177).png" alt="" width="375"><figcaption></figcaption></figure>
 
-değişiklikten sonra:
+Değişiklikten sonra:
 
 <figure><img src="../../../images/image (1179).png" alt="" width="563"><figcaption></figcaption></figure>
 
@@ -209,6 +209,6 @@ Dizi oluşturulduktan sonra, tüm dışa aktarılan fonksiyonları görebilirsin
 <figure><img src="../../../images/image (1181).png" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> Hatırlarsanız, kullanıcı alanından bir **dışa aktarılan** fonksiyonu **çağırmak** için fonksiyonun adını değil, **seçici numarasını** çağırmamız gerekiyor. Burada seçici **0** fonksiyonu **`initializeDecoder`**, seçici **1** **`startDecoder`**, seçici **2** **`initializeEncoder`** olduğunu görebilirsiniz...
+> Hatırlarsanız, kullanıcı alanından bir **dışa aktarılan** fonksiyonu **çağırmak** için fonksiyonun adını çağırmamıza gerek yoktur, ancak **seçici numarasını** çağırmamız gerekir. Burada seçici **0** fonksiyonu **`initializeDecoder`**, seçici **1** **`startDecoder`**, seçici **2** **`initializeEncoder`** olduğunu görebilirsiniz...
 
 {{#include ../../../banners/hacktricks-training.md}}

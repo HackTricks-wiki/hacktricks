@@ -66,7 +66,7 @@ MyVehicle *newVehicle = [MyVehicle new];
 ```
 ### **Sınıf Yöntemleri**
 
-Sınıf yöntemleri, örnek yöntemleriyle kullanılan eksi işareti (-) yerine **artı işareti** (+) ile tanımlanır. **NSString** sınıf yöntemi **`stringWithString`** gibi:
+Sınıf yöntemleri, örnek yöntemleriyle kullanılan **eksi işareti** (-) yerine **artı işareti** (+) ile tanımlanır. **NSString** sınıf yöntemi **`stringWithString`** gibi:
 ```objectivec
 + (id)stringWithString:(NSString *)aString;
 ```
@@ -82,9 +82,9 @@ newVehicle.numberOfWheels = 2;
 NSLog(@"Number of wheels: %i", newVehicle.numberOfWheels);
 NSLog(@"Number of wheels: %i", [newVehicle numberOfWheels]);
 ```
-### **Örnek Değişkenleri**
+### **Örnek Değişkenler**
 
-Setter ve getter yöntemlerine alternatif olarak örnek değişkenlerini kullanabilirsiniz. Bu değişkenler, özelliklerle aynı isme sahiptir ancak "\_" ile başlar:
+Setter ve getter yöntemlerine alternatif olarak, örnek değişkenleri kullanabilirsiniz. Bu değişkenler, özelliklerle aynı isme sahiptir ancak "\_" ile başlar:
 ```objectivec
 - (void)makeLongTruck {
 _numberOfWheels = +10000;
@@ -168,7 +168,7 @@ Temel sınıflar **değişmezdir**, bu nedenle mevcut bir dizeye bir dize ekleme
 ```objectivec
 NSString *bookDescription = [NSString stringWithFormat:@"%@ by %@ was published in %@", bookTitle, bookAuthor, bookPublicationYear];
 ```
-Ya da **değiştirilebilir** bir dize sınıfı da kullanabilirsiniz:
+Ya da **mutable** bir dize sınıfı da kullanabilirsiniz:
 ```objectivec
 NSMutableString *mutableString = [NSMutableString stringWithString:@"The book "];
 [mutableString appendString:bookTitle];
@@ -244,7 +244,7 @@ NSMutableDictionary *mutFruitColorsDictionary = [NSMutableDictionary dictionaryW
 ```
 ### Blocks
 
-Blocks, **nesne gibi davranan fonksiyonlardır** bu nedenle fonksiyonlara geçirilebilir veya **dizilerde** ya da **sözlüklerde** **saklanabilirler**. Ayrıca, **değerler verildiğinde bir değeri temsil edebilirler** bu nedenle lambdalara benzer.
+Blocks, **nesne gibi davranan fonksiyonlardır** bu nedenle fonksiyonlara geçirilebilir veya **dizilerde** ya da **sözlüklerde** **saklanabilirler**. Ayrıca, **değerler verildiğinde bir değeri temsil edebilirler** bu nedenle lambdalara benzerdir.
 ```objectivec
 returnType (^blockName)(argumentType1, argumentType2, ...) = ^(argumentType1 param1, argumentType2 param2, ...){
 //Perform operations here
@@ -304,7 +304,7 @@ if ([fileManager removeItemAtPath:@"/path/to/file1.txt" error:nil]) {
 NSLog(@"Removed successfully");
 }
 ```
-Ayrıca dosyaları **`NSString`** nesneleri yerine **`NSURL`** nesneleri kullanarak yönetmek de mümkündür. Metot adları benzer, ancak **`Path`** yerine **`URL`** ile.
+Ayrıca dosyaları **`NSString`** nesneleri yerine **`NSURL`** nesneleri kullanarak yönetmek de mümkündür. Metot adları benzerdir, ancak **`Path`** yerine **`URL`** ile birlikte kullanılır.
 ```objectivec
 
 

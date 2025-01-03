@@ -1,20 +1,20 @@
-# ZIPs tricks
+# ZIP'ler için hileler
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Command-line tools** for managing **zip files** are essential for diagnosing, repairing, and cracking zip files. Here are some key utilities:
+**Komut satırı araçları**, **zip dosyalarını** yönetmek için, zip dosyalarını teşhis etmek, onarmak ve kırmak için gereklidir. İşte bazı anahtar yardımcı programlar:
 
-- **`unzip`**: Reveals why a zip file may not decompress.
-- **`zipdetails -v`**: Offers detailed analysis of zip file format fields.
-- **`zipinfo`**: Lists contents of a zip file without extracting them.
-- **`zip -F input.zip --out output.zip`** and **`zip -FF input.zip --out output.zip`**: Try to repair corrupted zip files.
-- **[fcrackzip](https://github.com/hyc/fcrackzip)**: A tool for brute-force cracking of zip passwords, effective for passwords up to around 7 characters.
+- **`unzip`**: Bir zip dosyasının neden açılmadığını gösterir.
+- **`zipdetails -v`**: Zip dosyası format alanlarının ayrıntılı analizini sunar.
+- **`zipinfo`**: Bir zip dosyasının içeriğini çıkarmadan listeler.
+- **`zip -F input.zip --out output.zip`** ve **`zip -FF input.zip --out output.zip`**: Bozulmuş zip dosyalarını onarmaya çalışır.
+- **[fcrackzip](https://github.com/hyc/fcrackzip)**: Zip şifrelerini brute-force ile kırmak için bir araç, yaklaşık 7 karaktere kadar olan şifreler için etkilidir.
 
-The [Zip file format specification](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT) provides comprehensive details on the structure and standards of zip files.
+[Zip dosyası format spesifikasyonu](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT), zip dosyalarının yapısı ve standartları hakkında kapsamlı bilgiler sunar.
 
-It's crucial to note that password-protected zip files **do not encrypt filenames or file sizes** within, a security flaw not shared with RAR or 7z files which encrypt this information. Furthermore, zip files encrypted with the older ZipCrypto method are vulnerable to a **plaintext attack** if an unencrypted copy of a compressed file is available. This attack leverages the known content to crack the zip's password, a vulnerability detailed in [HackThis's article](https://www.hackthis.co.uk/articles/known-plaintext-attack-cracking-zip-files) and further explained in [this academic paper](https://www.cs.auckland.ac.nz/~mike/zipattacks.pdf). However, zip files secured with **AES-256** encryption are immune to this plaintext attack, showcasing the importance of choosing secure encryption methods for sensitive data.
+Şunu belirtmek önemlidir ki, şifre korumalı zip dosyaları **içindeki dosya adlarını veya dosya boyutlarını şifrelemez**, bu, RAR veya 7z dosyalarıyla paylaşılmayan bir güvenlik açığıdır; bu dosyalar bu bilgileri şifreler. Ayrıca, daha eski ZipCrypto yöntemiyle şifrelenmiş zip dosyaları, sıkıştırılmış bir dosyanın şifrelenmemiş bir kopyası mevcutsa **düz metin saldırısına** karşı savunmasızdır. Bu saldırı, zip'in şifresini kırmak için bilinen içeriği kullanır; bu zayıflık [HackThis'in makalesinde](https://www.hackthis.co.uk/articles/known-plaintext-attack-cracking-zip-files) ve [bu akademik çalışmada](https://www.cs.auckland.ac.nz/~mike/zipattacks.pdf) detaylandırılmıştır. Ancak, **AES-256** şifrelemesiyle güvence altına alınmış zip dosyaları bu düz metin saldırısına karşı bağışıklık gösterir, bu da hassas veriler için güvenli şifreleme yöntemlerinin seçilmesinin önemini vurgular.
 
-## References
+## Referanslar
 
 - [https://michael-myers.github.io/blog/categories/ctf/](https://michael-myers.github.io/blog/categories/ctf/)
 

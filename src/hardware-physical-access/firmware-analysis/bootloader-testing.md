@@ -1,51 +1,51 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-The following steps are recommended for modifying device startup configurations and bootloaders like U-boot:
+Aşağıdaki adımlar, U-boot gibi cihaz başlangıç yapılandırmalarını ve bootloader'ları değiştirmek için önerilmektedir:
 
-1. **Access Bootloader's Interpreter Shell**:
+1. **Bootloader'ın Yorumlayıcı Shell'ine Erişim**:
 
-   - During boot, press "0", space, or other identified "magic codes" to access the bootloader's interpreter shell.
+- Başlangıç sırasında, bootloader'ın yorumlayıcı shell'ine erişmek için "0", boşluk veya diğer tanımlanmış "sihirli kodlar" tuşlayın.
 
-2. **Modify Boot Arguments**:
+2. **Boot Argümanlarını Değiştirin**:
 
-   - Execute the following commands to append '`init=/bin/sh`' to the boot arguments, allowing execution of a shell command:
-     %%%
-     #printenv
-     #setenv bootargs=console=ttyS0,115200 mem=63M root=/dev/mtdblock3 mtdparts=sflash:<partitiionInfo> rootfstype=<fstype> hasEeprom=0 5srst=0 init=/bin/sh
-     #saveenv
-     #boot
-     %%%
+- Shell komutunun çalıştırılmasına izin vermek için boot argümanlarına '`init=/bin/sh`' eklemek için aşağıdaki komutları çalıştırın:
+%%%
+#printenv
+#setenv bootargs=console=ttyS0,115200 mem=63M root=/dev/mtdblock3 mtdparts=sflash:<partitiionInfo> rootfstype=<fstype> hasEeprom=0 5srst=0 init=/bin/sh
+#saveenv
+#boot
+%%%
 
-3. **Setup TFTP Server**:
+3. **TFTP Sunucusu Kurun**:
 
-   - Configure a TFTP server to load images over a local network:
-     %%%
-     #setenv ipaddr 192.168.2.2 #local IP of the device
-     #setenv serverip 192.168.2.1 #TFTP server IP
-     #saveenv
-     #reset
-     #ping 192.168.2.1 #check network access
-     #tftp ${loadaddr} uImage-3.6.35 #loadaddr takes the address to load the file into and the filename of the image on the TFTP server
-     %%%
+- Yerel bir ağ üzerinden görüntüleri yüklemek için bir TFTP sunucusu yapılandırın:
+%%%
+#setenv ipaddr 192.168.2.2 #cihazın yerel IP'si
+#setenv serverip 192.168.2.1 #TFTP sunucu IP'si
+#saveenv
+#reset
+#ping 192.168.2.1 #ağ erişimini kontrol et
+#tftp ${loadaddr} uImage-3.6.35 #loadaddr, dosyanın yükleneceği adresi ve TFTP sunucusundaki görüntü dosyasının adını alır
+%%%
 
-4. **Utilize `ubootwrite.py`**:
+4. **`ubootwrite.py` Kullanımı**:
 
-   - Use `ubootwrite.py` to write the U-boot image and push a modified firmware to gain root access.
+- Root erişimi kazanmak için U-boot görüntüsünü yazmak ve değiştirilmiş bir firmware yüklemek için `ubootwrite.py` kullanın.
 
-5. **Check Debug Features**:
+5. **Debug Özelliklerini Kontrol Edin**:
 
-   - Verify if debug features like verbose logging, loading arbitrary kernels, or booting from untrusted sources are enabled.
+- Ayrıntılı günlükleme, rastgele çekirdek yükleme veya güvenilmeyen kaynaklardan başlatma gibi debug özelliklerinin etkin olup olmadığını doğrulayın.
 
-6. **Cautionary Hardware Interference**:
+6. **Dikkatli Donanım Müdahalesi**:
 
-   - Be cautious when connecting one pin to ground and interacting with SPI or NAND flash chips during the device boot-up sequence, particularly before the kernel decompresses. Consult the NAND flash chip's datasheet before shorting pins.
+- Cihazın başlatma sırası sırasında bir pini toprağa bağlarken ve SPI veya NAND flash yongaları ile etkileşimde bulunurken dikkatli olun, özellikle çekirdek açılmadan önce. Pinleri kısaltmadan önce NAND flash yongasının veri sayfasını kontrol edin.
 
-7. **Configure Rogue DHCP Server**:
-   - Set up a rogue DHCP server with malicious parameters for a device to ingest during a PXE boot. Utilize tools like Metasploit's (MSF) DHCP auxiliary server. Modify the 'FILENAME' parameter with command injection commands such as `'a";/bin/sh;#'` to test input validation for device startup procedures.
+7. **Sahte DHCP Sunucusu Yapılandırın**:
+- PXE başlatma sırasında bir cihazın alması için kötü niyetli parametrelerle sahte bir DHCP sunucusu kurun. Metasploit'in (MSF) DHCP yardımcı sunucusu gibi araçları kullanın. Cihaz başlangıç prosedürleri için giriş doğrulamasını test etmek amacıyla 'FILENAME' parametresini `'a";/bin/sh;#'` gibi komut enjeksiyon komutları ile değiştirin.
 
-**Note**: The steps involving physical interaction with device pins (\*marked with asterisks) should be approached with extreme caution to avoid damaging the device.
+**Not**: Cihaz pinleri ile fiziksel etkileşim içeren adımlar (\* yıldız ile işaretlenmiş) cihazın zarar görmesini önlemek için son derece dikkatli bir şekilde yaklaşılmalıdır.
 
-## References
+## Referanslar
 
 - [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
 

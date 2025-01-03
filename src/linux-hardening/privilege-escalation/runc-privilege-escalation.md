@@ -37,6 +37,6 @@ mkdir rootfs
 runc run demo
 ```
 > [!CAUTION]
-> Bu her zaman çalışmayacaktır çünkü runc'ın varsayılan işlemi root olarak çalışmaktır, bu nedenle onu yetkisiz bir kullanıcı olarak çalıştırmak basitçe mümkün olamaz (rootless bir yapılandırmanız yoksa). Rootless bir yapılandırmayı varsayılan yapmak genellikle iyi bir fikir değildir çünkü rootless konteynerler içinde, rootless konteynerler dışında geçerli olmayan birçok kısıtlama vardır.
+> Bu her zaman çalışmayacaktır çünkü runc'ın varsayılan işlemi root olarak çalışmaktır, bu nedenle onu yetkisiz bir kullanıcı olarak çalıştırmak basitçe mümkün değildir (rootless bir yapılandırmanız yoksa). Rootless bir yapılandırmayı varsayılan yapmak genellikle iyi bir fikir değildir çünkü rootless konteynerler içinde, rootless konteynerler dışında geçerli olmayan birçok kısıtlama vardır.
 
 {{#include ../../banners/hacktricks-training.md}}

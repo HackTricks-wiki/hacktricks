@@ -2,7 +2,7 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-`/proc` ve `/sys` dizinlerinin uygun ad alanı izolasyonu olmadan açılması, saldırı yüzeyinin genişlemesi ve bilgi sızıntısı gibi önemli güvenlik riskleri oluşturur. Bu dizinler, yanlış yapılandırıldığında veya yetkisiz bir kullanıcı tarafından erişildiğinde, konteyner kaçışına, ana makine değişikliğine veya daha fazla saldırıyı destekleyen bilgilere yol açabilecek hassas dosyalar içerir. Örneğin, `-v /proc:/host/proc` yanlış bir şekilde monte edildiğinde, yol tabanlı doğası nedeniyle AppArmor korumasını atlayabilir ve `/host/proc`'u korumasız bırakabilir.
+`/proc` ve `/sys`'in uygun ad alanı izolasyonu olmadan açılması, saldırı yüzeyinin genişlemesi ve bilgi sızıntısı gibi önemli güvenlik riskleri oluşturur. Bu dizinler, yanlış yapılandırıldığında veya yetkisiz bir kullanıcı tarafından erişildiğinde, konteyner kaçışına, ana makine değişikliğine veya daha fazla saldırıyı destekleyen bilgilerin sağlanmasına yol açabilecek hassas dosyalar içerir. Örneğin, `-v /proc:/host/proc`'un yanlış bir şekilde montajı, yol tabanlı doğası nedeniyle AppArmor korumasını atlayabilir ve `/host/proc`'u korumasız bırakabilir.
 
 **Her potansiyel zafiyetin daha fazla detayını bulabilirsiniz** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**.**
 
@@ -10,12 +10,12 @@
 
 ### `/proc/sys`
 
-Bu dizin, genellikle `sysctl(2)` aracılığıyla çekirdek değişkenlerini değiştirme izni verir ve birkaç endişe verici alt dizin içerir:
+Bu dizin, genellikle `sysctl(2)` aracılığıyla çekirdek değişkenlerini değiştirme erişimi sağlar ve birkaç endişe verici alt dizin içerir:
 
 #### **`/proc/sys/kernel/core_pattern`**
 
 - [core(5)](https://man7.org/linux/man-pages/man5/core.5.html) içinde tanımlanmıştır.
-- Çekirdek dosyası oluşturulduğunda çalıştırılacak bir program tanımlamaya izin verir; ilk 128 bayt argüman olarak kullanılır. Dosya bir boru `|` ile başlarsa, kod yürütmeye yol açabilir.
+- Çekirdek dosyası oluşturulduğunda yürütülecek bir program tanımlamaya izin verir; ilk 128 bayt argüman olarak kullanılır. Dosya bir boru `|` ile başlarsa, kod yürütülmesine yol açabilir.
 - **Test ve Sömürü Örneği**:
 
 ```bash
@@ -38,7 +38,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # modprobe erişimini kontrol et
 #### **`/proc/sys/vm/panic_on_oom`**
 
 - [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html) içinde referans verilmiştir.
-- OOM durumu meydana geldiğinde çekirdeğin panik yapıp yapmayacağını kontrol eden bir global bayraktır.
+- OOM durumu meydana geldiğinde çekirdeğin panik yapıp yapmayacağını kontrol eden bir küresel bayraktır.
 
 #### **`/proc/sys/fs`**
 
@@ -78,7 +78,7 @@ echo b > /proc/sysrq-trigger # Ana makineyi yeniden başlatır
 
 - Çekirdek tarafından dışa aktarılan sembolleri ve adreslerini listeler.
 - Çekirdek sömürü geliştirme için önemlidir, özellikle KASLR'yi aşmak için.
-- Adres bilgileri `kptr_restrict` 1 veya 2 olarak ayarlandığında kısıtlanır.
+- Adres bilgileri `kptr_restrict` `1` veya `2` olarak ayarlandığında kısıtlanır.
 - Detaylar [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html) içinde.
 
 #### **`/proc/[pid]/mem`**
@@ -97,12 +97,12 @@ echo b > /proc/sysrq-trigger # Ana makineyi yeniden başlatır
 #### **`/proc/kmem`**
 
 - Çekirdek sanal belleğini temsil eden `/dev/kmem` için alternatif bir arayüzdür.
-- Okuma ve yazma izni verir, dolayısıyla çekirdek belleğini doğrudan değiştirmeye olanak tanır.
+- Okuma ve yazma işlemlerine izin verir, dolayısıyla çekirdek belleğini doğrudan değiştirebilir.
 
 #### **`/proc/mem`**
 
 - Fiziksel belleği temsil eden `/dev/mem` için alternatif bir arayüzdür.
-- Okuma ve yazma izni verir, tüm belleği değiştirmek için sanal adreslerin fiziksel adreslere çözülmesi gerekir.
+- Okuma ve yazma işlemlerine izin verir, tüm belleği değiştirmek sanal adresleri fiziksel adreslere çözmeyi gerektirir.
 
 #### **`/proc/sched_debug`**
 
@@ -118,7 +118,7 @@ echo b > /proc/sysrq-trigger # Ana makineyi yeniden başlatır
 
 #### **`/sys/kernel/uevent_helper`**
 
-- Çekirdek cihaz `uevents`'lerini işlemek için kullanılır.
+- Çekirdek cihaz `uevent`'lerini işlemek için kullanılır.
 - `/sys/kernel/uevent_helper`'a yazmak, `uevent` tetikleyicileri üzerine rastgele betikler çalıştırabilir.
 - **Sömürü Örneği**: %%%bash
 
@@ -157,7 +157,7 @@ cat /output %%%
 
 #### **`/sys/firmware/efi/vars` ve `/sys/firmware/efi/efivars`**
 
-- NVRAM'deki EFI değişkenleri ile etkileşim kurmak için arayüzler açığa çıkarır.
+- NVRAM'daki EFI değişkenleri ile etkileşim kurmak için arayüzler açığa çıkarır.
 - Yanlış yapılandırma veya sömürü, bozuk dizüstü bilgisayarlara veya başlatılamayan ana makinelerle sonuçlanabilir.
 
 #### **`/sys/kernel/debug`**
@@ -168,7 +168,7 @@ cat /output %%%
 ### Referanslar
 
 - [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)
-- [Understanding and Hardening Linux Containers](https://research.nccgroup.com/wp-content/uploads/2020/07/ncc_group_understanding_hardening_linux_containers-1-1.pdf)
-- [Abusing Privileged and Unprivileged Linux Containers](https://www.nccgroup.com/globalassets/our-research/us/whitepapers/2016/june/container_whitepaper.pdf)
+- [Linux Konteynerlerini Anlama ve Güçlendirme](https://research.nccgroup.com/wp-content/uploads/2020/07/ncc_group_understanding_hardening_linux_containers-1-1.pdf)
+- [Ayrıcalıklı ve Ayrıcalıksız Linux Konteynerlerini Kötüye Kullanma](https://www.nccgroup.com/globalassets/our-research/us/whitepapers/2016/june/container_whitepaper.pdf)
 
 {{#include ../../../../banners/hacktricks-training.md}}

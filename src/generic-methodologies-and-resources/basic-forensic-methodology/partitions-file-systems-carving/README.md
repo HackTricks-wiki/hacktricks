@@ -4,20 +4,20 @@
 
 ## Partitions
 
-A hard drive or an **SSD disk can contain different partitions** with the goal of separating data physically.\
-The **minimum** unit of a disk is the **sector** (normally composed of 512B). So, each partition size needs to be multiple of that size.
+Bir sabit disk veya bir **SSD disk farklı bölümler içerebilir** ve bu, verileri fiziksel olarak ayırma amacını taşır.\
+Diskin **minimum** birimi **sektördür** (normalde 512B'den oluşur). Bu nedenle, her bölüm boyutu bu boyutun katı olmalıdır.
 
 ### MBR (master Boot Record)
 
-It's allocated in the **first sector of the disk after the 446B of the boot code**. This sector is essential to indicate to the PC what and from where a partition should be mounted.\
-It allows up to **4 partitions** (at most **just 1** can be active/**bootable**). However, if you need more partitions you can use **extended partitions**. The **final byte** of this first sector is the boot record signature **0x55AA**. Only one partition can be marked as active.\
-MBR allows **max 2.2TB**.
+**446B boot kodundan sonra diskin ilk sektöründe** tahsis edilir. Bu sektör, PC'ye bir bölümün ne zaman ve nereden bağlanması gerektiğini belirtmek için gereklidir.\
+En fazla **4 bölüm** (en fazla **1** aktif/**bootable** olabilir) olmasına izin verir. Ancak daha fazla bölüme ihtiyacınız varsa **genişletilmiş bölümler** kullanabilirsiniz. Bu ilk sektörün **son baytı** boot kayıt imzası **0x55AA**'dır. Sadece bir bölüm aktif olarak işaretlenebilir.\
+MBR **maksimum 2.2TB**'ye izin verir.
 
 ![](<../../../images/image (350).png>)
 
 ![](<../../../images/image (304).png>)
 
-From the **bytes 440 to the 443** of the MBR you can find the **Windows Disk Signature** (if Windows is used). The logical drive letter of the hard disk depends on the Windows Disk Signature. Changing this signature could prevent Windows from booting (tool: [**Active Disk Editor**](https://www.disk-editor.org/index.html)**)**.
+MBR'nin **440 ile 443 baytları** arasında **Windows Disk İmzası** bulunabilir (Windows kullanılıyorsa). Sabit diskin mantıksal sürücü harfi, Windows Disk İmzasına bağlıdır. Bu imzanın değiştirilmesi, Windows'un başlatılmasını engelleyebilir (araç: [**Active Disk Editor**](https://www.disk-editor.org/index.html)**)**.
 
 ![](<../../../images/image (310).png>)
 
@@ -47,101 +47,99 @@ From the **bytes 440 to the 443** of the MBR you can find the **Windows Disk Sig
 | 8 (0x08)  | 4 (0x04) | Sectors preceding partition (little endian)            |
 | 12 (0x0C) | 4 (0x04) | Sectors in partition                                   |
 
-In order to mount an MBR in Linux you first need to get the start offset (you can use `fdisk` and the `p` command)
+Bir MBR'yi Linux'ta bağlamak için önce başlangıç ofsetini almanız gerekir (bunu `fdisk` ve `p` komutunu kullanarak yapabilirsiniz)
 
-![](<../../../images/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../../../images/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
-And then use the following code
-
+Ve ardından aşağıdaki kodu kullanın
 ```bash
 #Mount MBR in Linux
 mount -o ro,loop,offset=<Bytes>
 #63x512 = 32256Bytes
 mount -o ro,loop,offset=32256,noatime /path/to/image.dd /media/part/
 ```
+**LBA (Mantıksal blok adresleme)**
 
-**LBA (Logical block addressing)**
+**Mantıksal blok adresleme** (**LBA**), bilgisayar depolama cihazlarında saklanan veri bloklarının konumunu belirtmek için yaygın olarak kullanılan bir şemadır; genellikle sabit disk sürücüleri gibi ikincil depolama sistemleridir. LBA, özellikle basit bir doğrusal adresleme şemasına sahiptir; **bloklar bir tam sayı indeksi ile konumlandırılır**, ilk blok LBA 0, ikinci LBA 1 şeklindedir.
 
-**Logical block addressing** (**LBA**) is a common scheme used for **specifying the location of blocks** of data stored on computer storage devices, generally secondary storage systems such as hard disk drives. LBA is a particularly simple linear addressing scheme; **blocks are located by an integer index**, with the first block being LBA 0, the second LBA 1, and so on.
+### GPT (GUID Bölüm Tablosu)
 
-### GPT (GUID Partition Table)
+GUID Bölüm Tablosu, GPT olarak bilinir ve MBR (Ana Önyükleme Kaydı) ile karşılaştırıldığında geliştirilmiş yetenekleri nedeniyle tercih edilmektedir. Bölümler için **küresel benzersiz tanımlayıcı** ile ayırt edici olan GPT, birkaç yönden öne çıkmaktadır:
 
-The GUID Partition Table, known as GPT, is favored for its enhanced capabilities compared to MBR (Master Boot Record). Distinctive for its **globally unique identifier** for partitions, GPT stands out in several ways:
+- **Konum ve Boyut**: Hem GPT hem de MBR **sektör 0**'da başlar. Ancak, GPT **64 bit** üzerinde çalışırken, MBR **32 bit** kullanır.
+- **Bölüm Sınırları**: GPT, Windows sistemlerinde **128 bölüme** kadar destekler ve **9.4ZB**'a kadar veri depolayabilir.
+- **Bölüm İsimleri**: Bölümlere 36 Unicode karaktere kadar isim verme imkanı sunar.
 
-- **Location and Size**: Both GPT and MBR start at **sector 0**. However, GPT operates on **64bits**, contrasting with MBR's 32bits.
-- **Partition Limits**: GPT supports up to **128 partitions** on Windows systems and accommodates up to **9.4ZB** of data.
-- **Partition Names**: Offers the ability to name partitions with up to 36 Unicode characters.
+**Veri Dayanıklılığı ve Kurtarma**:
 
-**Data Resilience and Recovery**:
+- **Yedeklilik**: MBR'nin aksine, GPT bölümleme ve önyükleme verilerini tek bir yere hapsetmez. Bu verileri disk boyunca çoğaltarak veri bütünlüğünü ve dayanıklılığını artırır.
+- **Döngüsel Yedeklilik Kontrolü (CRC)**: GPT, veri bütünlüğünü sağlamak için CRC kullanır. Veri bozulmasını aktif olarak izler ve tespit edildiğinde, GPT bozulmuş veriyi başka bir disk konumundan kurtarmaya çalışır.
 
-- **Redundancy**: Unlike MBR, GPT doesn't confine partitioning and boot data to a single place. It replicates this data across the disk, enhancing data integrity and resilience.
-- **Cyclic Redundancy Check (CRC)**: GPT employs CRC to ensure data integrity. It actively monitors for data corruption, and when detected, GPT attempts to recover the corrupted data from another disk location.
+**Koruyucu MBR (LBA0)**:
 
-**Protective MBR (LBA0)**:
-
-- GPT maintains backward compatibility through a protective MBR. This feature resides in the legacy MBR space but is designed to prevent older MBR-based utilities from mistakenly overwriting GPT disks, hence safeguarding the data integrity on GPT-formatted disks.
+- GPT, koruyucu bir MBR aracılığıyla geriye dönük uyumluluğu sürdürmektedir. Bu özellik, eski MBR tabanlı yardımcı programların yanlışlıkla GPT disklerini üzerine yazmasını önlemek için tasarlanmıştır ve böylece GPT formatlı disklerde veri bütünlüğünü korur.
 
 ![https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/GUID_Partition_Table_Scheme.svg/800px-GUID_Partition_Table_Scheme.svg.png](<../../../images/image (1062).png>)
 
-**Hybrid MBR (LBA 0 + GPT)**
+**Hibrit MBR (LBA 0 + GPT)**
 
-[From Wikipedia](https://en.wikipedia.org/wiki/GUID_Partition_Table)
+[Wikipedia'dan](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 
-In operating systems that support **GPT-based boot through BIOS** services rather than EFI, the first sector may also still be used to store the first stage of the **bootloader** code, but **modified** to recognize **GPT** **partitions**. The bootloader in the MBR must not assume a sector size of 512 bytes.
+**EFI** yerine **BIOS** hizmetleri aracılığıyla **GPT tabanlı önyükleme** destekleyen işletim sistemlerinde, ilk sektör hala **önyükleyici** kodunun ilk aşamasını depolamak için kullanılabilir, ancak **değiştirilmiş** olarak **GPT** **bölümlerini** tanımak için. MBR'deki önyükleyici, 512 baytlık bir sektör boyutu varsaymamalıdır.
 
-**Partition table header (LBA 1)**
+**Bölüm tablosu başlığı (LBA 1)**
 
-[From Wikipedia](https://en.wikipedia.org/wiki/GUID_Partition_Table)
+[Wikipedia'dan](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 
-The partition table header defines the usable blocks on the disk. It also defines the number and size of the partition entries that make up the partition table (offsets 80 and 84 in the table).
+Bölüm tablosu başlığı, diskteki kullanılabilir blokları tanımlar. Ayrıca, bölüm tablosunu oluşturan bölüm girişlerinin sayısını ve boyutunu tanımlar (tablodaki 80 ve 84 ofsetleri).
 
-| Offset    | Length   | Contents                                                                                                                                                                     |
+| Ofset     | Uzunluk  | İçerik                                                                                                                                                                     |
 | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 0 (0x00)  | 8 bytes  | Signature ("EFI PART", 45h 46h 49h 20h 50h 41h 52h 54h or 0x5452415020494645ULL[ ](https://en.wikipedia.org/wiki/GUID_Partition_Table#cite_note-8)on little-endian machines) |
-| 8 (0x08)  | 4 bytes  | Revision 1.0 (00h 00h 01h 00h) for UEFI 2.8                                                                                                                                  |
-| 12 (0x0C) | 4 bytes  | Header size in little endian (in bytes, usually 5Ch 00h 00h 00h or 92 bytes)                                                                                                 |
-| 16 (0x10) | 4 bytes  | [CRC32](https://en.wikipedia.org/wiki/CRC32) of header (offset +0 up to header size) in little endian, with this field zeroed during calculation                             |
-| 20 (0x14) | 4 bytes  | Reserved; must be zero                                                                                                                                                       |
-| 24 (0x18) | 8 bytes  | Current LBA (location of this header copy)                                                                                                                                   |
-| 32 (0x20) | 8 bytes  | Backup LBA (location of the other header copy)                                                                                                                               |
-| 40 (0x28) | 8 bytes  | First usable LBA for partitions (primary partition table last LBA + 1)                                                                                                       |
-| 48 (0x30) | 8 bytes  | Last usable LBA (secondary partition table first LBA − 1)                                                                                                                    |
-| 56 (0x38) | 16 bytes | Disk GUID in mixed endian                                                                                                                                                    |
-| 72 (0x48) | 8 bytes  | Starting LBA of an array of partition entries (always 2 in primary copy)                                                                                                     |
-| 80 (0x50) | 4 bytes  | Number of partition entries in array                                                                                                                                         |
-| 84 (0x54) | 4 bytes  | Size of a single partition entry (usually 80h or 128)                                                                                                                        |
-| 88 (0x58) | 4 bytes  | CRC32 of partition entries array in little endian                                                                                                                            |
-| 92 (0x5C) | \*       | Reserved; must be zeroes for the rest of the block (420 bytes for a sector size of 512 bytes; but can be more with larger sector sizes)                                      |
+| 0 (0x00)  | 8 bayt   | İmza ("EFI PART", 45h 46h 49h 20h 50h 41h 52h 54h veya 0x5452415020494645ULL[ ](https://en.wikipedia.org/wiki/GUID_Partition_Table#cite_note-8)küçük sonlu makinelerde) |
+| 8 (0x08)  | 4 bayt   | UEFI 2.8 için Revizyon 1.0 (00h 00h 01h 00h)                                                                                                                                  |
+| 12 (0x0C) | 4 bayt   | Küçük sonlu (bayt cinsinden, genellikle 5Ch 00h 00h 00h veya 92 bayt) başlık boyutu                                                                                                 |
+| 16 (0x10) | 4 bayt   | [CRC32](https://en.wikipedia.org/wiki/CRC32) başlığın (ofset +0'dan başlık boyutuna kadar) küçük sonlu, bu alan hesaplama sırasında sıfırlanmıştır                             |
+| 20 (0x14) | 4 bayt   | Ayrılmış; sıfır olmalıdır                                                                                                                                                       |
+| 24 (0x18) | 8 bayt   | Mevcut LBA (bu başlık kopyasının konumu)                                                                                                                                   |
+| 32 (0x20) | 8 bayt   | Yedek LBA (diğer başlık kopyasının konumu)                                                                                                                               |
+| 40 (0x28) | 8 bayt   | Bölümler için ilk kullanılabilir LBA (birincil bölüm tablosunun son LBA'sı + 1)                                                                                                       |
+| 48 (0x30) | 8 bayt   | Son kullanılabilir LBA (ikincil bölüm tablosunun ilk LBA'sı − 1)                                                                                                                    |
+| 56 (0x38) | 16 bayt  | Disk GUID karışık sonlu                                                                                                                                                    |
+| 72 (0x48) | 8 bayt   | Bölüm girişlerinin bir dizisinin başlangıç LBA'sı (her zaman birincil kopyada 2)                                                                                                     |
+| 80 (0x50) | 4 bayt   | Dizideki bölüm girişlerinin sayısı                                                                                                                                         |
+| 84 (0x54) | 4 bayt   | Tek bir bölüm girişinin boyutu (genellikle 80h veya 128)                                                                                                                        |
+| 88 (0x58) | 4 bayt   | Bölüm girişleri dizisinin küçük sonlu CRC32'si                                                                                                                            |
+| 92 (0x5C) | \*       | Ayrılmış; geri kalan blok için sıfır olmalıdır (512 baytlık bir sektör boyutu için 420 bayt; ancak daha büyük sektör boyutları ile daha fazla olabilir)                                      |
 
-**Partition entries (LBA 2–33)**
+**Bölüm girişleri (LBA 2–33)**
 
-| GUID partition entry format |          |                                                                                                               |
-| --------------------------- | -------- | ------------------------------------------------------------------------------------------------------------- |
-| Offset                      | Length   | Contents                                                                                                      |
-| 0 (0x00)                    | 16 bytes | [Partition type GUID](https://en.wikipedia.org/wiki/GUID_Partition_Table#Partition_type_GUIDs) (mixed endian) |
-| 16 (0x10)                   | 16 bytes | Unique partition GUID (mixed endian)                                                                          |
-| 32 (0x20)                   | 8 bytes  | First LBA ([little endian](https://en.wikipedia.org/wiki/Little_endian))                                      |
-| 40 (0x28)                   | 8 bytes  | Last LBA (inclusive, usually odd)                                                                             |
-| 48 (0x30)                   | 8 bytes  | Attribute flags (e.g. bit 60 denotes read-only)                                                               |
-| 56 (0x38)                   | 72 bytes | Partition name (36 [UTF-16](https://en.wikipedia.org/wiki/UTF-16)LE code units)                               |
+| GUID bölüm giriş formatı |          |                                                                                                               |
+| ------------------------- | -------- | ------------------------------------------------------------------------------------------------------------- |
+| Ofset                     | Uzunluk  | İçerik                                                                                                      |
+| 0 (0x00)                  | 16 bayt  | [Bölüm türü GUID](https://en.wikipedia.org/wiki/GUID_Partition_Table#Partition_type_GUIDs) (karışık sonlu) |
+| 16 (0x10)                 | 16 bayt  | Benzersiz bölüm GUID (karışık sonlu)                                                                          |
+| 32 (0x20)                 | 8 bayt   | İlk LBA ([küçük sonlu](https://en.wikipedia.org/wiki/Little_endian))                                      |
+| 40 (0x28)                 | 8 bayt   | Son LBA (dahil, genellikle tek)                                                                             |
+| 48 (0x30)                 | 8 bayt   | Nitelik bayrakları (örneğin, bit 60 yalnızca okunur olduğunu belirtir)                                                               |
+| 56 (0x38)                 | 72 bayt  | Bölüm adı (36 [UTF-16](https://en.wikipedia.org/wiki/UTF-16)LE kod birimi)                               |
 
-**Partitions Types**
+**Bölüm Türleri**
 
 ![](<../../../images/image (83).png>)
 
-More partition types in [https://en.wikipedia.org/wiki/GUID_Partition_Table](https://en.wikipedia.org/wiki/GUID_Partition_Table)
+Daha fazla bölüm türü için [https://en.wikipedia.org/wiki/GUID_Partition_Table](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 
-### Inspecting
+### İnceleme
 
-After mounting the forensics image with [**ArsenalImageMounter**](https://arsenalrecon.com/downloads/), you can inspect the first sector using the Windows tool [**Active Disk Editor**](https://www.disk-editor.org/index.html)**.** In the following image an **MBR** was detected on the **sector 0** and interpreted:
+[**ArsenalImageMounter**](https://arsenalrecon.com/downloads/) ile adli görüntüyü monte ettikten sonra, Windows aracı [**Active Disk Editor**](https://www.disk-editor.org/index.html)**'ı** kullanarak ilk sektörü inceleyebilirsiniz. Aşağıdaki görüntüde **sektör 0**'da bir **MBR** tespit edilmiştir ve yorumlanmıştır:
 
 ![](<../../../images/image (354).png>)
 
-If it was a **GPT table instead of an MBR** it should appear the signature _EFI PART_ in the **sector 1** (which in the previous image is empty).
+Eğer bir **MBR yerine bir GPT tablosu** olsaydı, **sektör 1**'de _EFI PART_ imzası görünmelidir (önceki görüntüde bu alan boştur).
 
-## File-Systems
+## Dosya Sistemleri
 
-### Windows file-systems list
+### Windows dosya sistemleri listesi
 
 - **FAT12/16**: MSDOS, WIN95/98/NT/200
 - **FAT32**: 95/2000/XP/2003/VISTA/7/8/10
@@ -151,86 +149,86 @@ If it was a **GPT table instead of an MBR** it should appear the signature _EFI 
 
 ### FAT
 
-The **FAT (File Allocation Table)** file system is designed around its core component, the file allocation table, positioned at the volume's start. This system safeguards data by maintaining **two copies** of the table, ensuring data integrity even if one is corrupted. The table, along with the root folder, must be in a **fixed location**, crucial for the system's startup process.
+**FAT (Dosya Tahsis Tablosu)** dosya sistemi, hacmin başlangıcında yer alan dosya tahsis tablosu etrafında tasarlanmıştır. Bu sistem, verilerin bütünlüğünü sağlamak için tablonun **iki kopyasını** tutarak verileri korur; bu sayede bir kopyası bozulsa bile veri bütünlüğü sağlanır. Tablo, kök klasör ile birlikte **sabit bir konumda** olmalıdır; bu, sistemin başlatma süreci için kritik öneme sahiptir.
 
-The file system's basic unit of storage is a **cluster, usually 512B**, comprising multiple sectors. FAT has evolved through versions:
+Dosya sisteminin temel depolama birimi bir **küme, genellikle 512B**'dir ve birden fazla sektörden oluşur. FAT, sürümler boyunca evrim geçirmiştir:
 
-- **FAT12**, supporting 12-bit cluster addresses and handling up to 4078 clusters (4084 with UNIX).
-- **FAT16**, enhancing to 16-bit addresses, thereby accommodating up to 65,517 clusters.
-- **FAT32**, further advancing with 32-bit addresses, allowing an impressive 268,435,456 clusters per volume.
+- **FAT12**, 12 bit küme adreslerini destekler ve 4078 kümeye kadar (4084 UNIX ile) işleyebilir.
+- **FAT16**, 16 bit adreslere yükseltilerek 65,517 kümeye kadar destek sağlar.
+- **FAT32**, 32 bit adreslerle daha da ilerleyerek her hacim için 268,435,456 kümeye kadar izin verir.
 
-A significant limitation across FAT versions is the **4GB maximum file size**, imposed by the 32-bit field used for file size storage.
+FAT sürümleri arasında önemli bir sınırlama, **4GB maksimum dosya boyutu**'dur; bu, dosya boyutu depolamak için kullanılan 32 bit alan tarafından dayatılmaktadır.
 
-Key components of the root directory, particularly for FAT12 and FAT16, include:
+FAT12 ve FAT16 için kök dizininin ana bileşenleri şunlardır:
 
-- **File/Folder Name** (up to 8 characters)
-- **Attributes**
-- **Creation, Modification, and Last Access Dates**
-- **FAT Table Address** (indicating the start cluster of the file)
-- **File Size**
+- **Dosya/Klasör Adı** (en fazla 8 karakter)
+- **Nitelikler**
+- **Oluşturma, Değiştirme ve Son Erişim Tarihleri**
+- **FAT Tablosu Adresi** (dosyanın başlangıç kümesini gösterir)
+- **Dosya Boyutu**
 
 ### EXT
 
-**Ext2** is the most common file system for **not journaling** partitions (**partitions that don't change much**) like the boot partition. **Ext3/4** are **journaling** and are used usually for the **rest partitions**.
+**Ext2**, **günlük tutmayan** bölümler (**çok fazla değişmeyen bölümler**) için en yaygın dosya sistemidir; **Ext3/4** ise genellikle **diğer bölümler** için **günlük tutan** sistemlerdir.
 
-## **Metadata**
+## **Meta Veriler**
 
-Some files contain metadata. This information is about the content of the file which sometimes might be interesting to an analyst as depending on the file type, it might have information like:
+Bazı dosyalar meta veriler içerir. Bu bilgiler, dosyanın içeriği hakkında olup, bazen bir analist için ilginç olabilir; dosya türüne bağlı olarak, aşağıdaki bilgileri içerebilir:
 
-- Title
-- MS Office Version used
-- Author
-- Dates of creation and last modification
-- Model of the camera
-- GPS coordinates
-- Image information
+- Başlık
+- Kullanılan MS Office Versiyonu
+- Yazar
+- Oluşturma ve son değiştirme tarihleri
+- Kameranın modeli
+- GPS koordinatları
+- Görüntü bilgileri
 
-You can use tools like [**exiftool**](https://exiftool.org) and [**Metadiver**](https://www.easymetadata.com/metadiver-2/) to get the metadata of a file.
+Bir dosyanın meta verilerini almak için [**exiftool**](https://exiftool.org) ve [**Metadiver**](https://www.easymetadata.com/metadiver-2/) gibi araçları kullanabilirsiniz.
 
-## **Deleted Files Recovery**
+## **Silinmiş Dosyaların Kurtarılması**
 
-### Logged Deleted Files
+### Kaydedilen Silinmiş Dosyalar
 
-As was seen before there are several places where the file is still saved after it was "deleted". This is because usually the deletion of a file from a file system just marks it as deleted but the data isn't touched. Then, it's possible to inspect the registries of the files (like the MFT) and find the deleted files.
+Daha önce görüldüğü gibi, bir dosya "silindikten" sonra hala kaydedildiği birkaç yer vardır. Bunun nedeni, genellikle bir dosyanın dosya sisteminden silinmesinin sadece silindi olarak işaretlenmesidir; ancak veri dokunulmamıştır. Bu nedenle, dosyaların kayıtlarını (MFT gibi) incelemek ve silinmiş dosyaları bulmak mümkündür.
 
-Also, the OS usually saves a lot of information about file system changes and backups, so it's possible to try to use them to recover the file or as much information as possible.
-
-{{#ref}}
-file-data-carving-recovery-tools.md
-{{#endref}}
-
-### **File Carving**
-
-**File carving** is a technique that tries to **find files in the bulk of data**. There are 3 main ways tools like this work: **Based on file types headers and footers**, based on file types **structures** and based on the **content** itself.
-
-Note that this technique **doesn't work to retrieve fragmented files**. If a file **isn't stored in contiguous sectors**, then this technique won't be able to find it or at least part of it.
-
-There are several tools that you can use for file Carving indicating the file types you want to search for
+Ayrıca, işletim sistemi genellikle dosya sistemi değişiklikleri ve yedeklemeleri hakkında çok fazla bilgi kaydeder, bu nedenle dosyayı veya mümkün olduğunca fazla bilgiyi kurtarmak için bunları kullanmaya çalışmak mümkündür.
 
 {{#ref}}
 file-data-carving-recovery-tools.md
 {{#endref}}
 
-### Data Stream **C**arving
+### **Dosya Oymacılığı**
 
-Data Stream Carving is similar to File Carving but **instead of looking for complete files, it looks for interesting fragments** of information.\
-For example, instead of looking for a complete file containing logged URLs, this technique will search for URLs.
+**Dosya oymacılığı**, **veri yığınında dosyaları bulmaya çalışan** bir tekniktir. Bu tür araçların çalıştığı 3 ana yol vardır: **Dosya türü başlıkları ve alt başlıklarına dayalı**, dosya türü **yapılarına** dayalı ve **içerik**'e dayalı.
+
+Bu tekniğin **parçalanmış dosyaları geri almak için çalışmadığını** unutmayın. Eğer bir dosya **bitişik sektörlerde depolanmamışsa**, bu teknik onu veya en azından bir kısmını bulamayacaktır.
+
+Aradığınız dosya türlerini belirterek dosya oymacılığı için kullanabileceğiniz birkaç araç vardır.
 
 {{#ref}}
 file-data-carving-recovery-tools.md
 {{#endref}}
 
-### Secure Deletion
+### Veri Akışı **C**arving
 
-Obviously, there are ways to **"securely" delete files and part of logs about them**. For example, it's possible to **overwrite the content** of a file with junk data several times, and then **remove** the **logs** from the **$MFT** and **$LOGFILE** about the file, and **remove the Volume Shadow Copies**.\
-You may notice that even performing that action there might be **other parts where the existence of the file is still logged**, and that's true and part of the forensics professional job is to find them.
+Veri Akışı Oymacılığı, Dosya Oymacılığına benzer, ancak **tam dosyalar aramak yerine, ilginç bilgi parçalarını arar**.\
+Örneğin, kaydedilmiş URL'leri içeren bir tam dosya aramak yerine, bu teknik URL'leri arayacaktır.
 
-## References
+{{#ref}}
+file-data-carving-recovery-tools.md
+{{#endref}}
+
+### Güvenli Silme
+
+Açıkça, dosyaları ve bunlarla ilgili logların bir kısmını **"güvenli" bir şekilde silmenin** yolları vardır. Örneğin, bir dosyanın içeriğini birkaç kez gereksiz verilerle **üst üste yazmak** ve ardından dosya ile ilgili **$MFT** ve **$LOGFILE**'dan **logları kaldırmak** ve **Hacim Gölge Kopyalarını** **kaldırmak** mümkündür.\
+Bu işlemi gerçekleştirirken, dosyanın varlığının hala **diğer parçalarda kaydedilmiş olabileceğini** fark edebilirsiniz; bu doğrudur ve adli uzmanların işinin bir parçası da bunları bulmaktır.
+
+## Referanslar
 
 - [https://en.wikipedia.org/wiki/GUID_Partition_Table](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 - [http://ntfs.com/ntfs-permissions.htm](http://ntfs.com/ntfs-permissions.htm)
 - [https://www.osforensics.com/faqs-and-tutorials/how-to-scan-ntfs-i30-entries-deleted-files.html](https://www.osforensics.com/faqs-and-tutorials/how-to-scan-ntfs-i30-entries-deleted-files.html)
 - [https://docs.microsoft.com/en-us/windows-server/storage/file-server/volume-shadow-copy-service](https://docs.microsoft.com/en-us/windows-server/storage/file-server/volume-shadow-copy-service)
-- **iHackLabs Certified Digital Forensics Windows**
+- **iHackLabs Sertifikalı Dijital Adli Windows**
 
 {{#include ../../../banners/hacktricks-training.md}}

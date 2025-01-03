@@ -125,7 +125,7 @@ Sonunda bunu **ele geçirilmiş konuma** kopyalayın:
 ```bash
 cp lib.dylib "/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib"
 ```
-Ve **binary'yi çalıştırın** ve **kütüphanenin yüklendiğini kontrol edin**:
+Ve **binary'i çalıştırın** ve **kütüphanenin yüklendiğini kontrol edin**:
 
 <pre class="language-context"><code class="lang-context">"/Applications/VulnDyld.app/Contents/Resources/lib/binary"
 <strong>2023-05-15 15:20:36.677 binary[78809:21797902] [+] dylib hijacked in /Applications/VulnDyld.app/Contents/Resources/lib/binary
@@ -133,7 +133,7 @@ Ve **binary'yi çalıştırın** ve **kütüphanenin yüklendiğini kontrol edin
 </code></pre>
 
 > [!NOTE]
-> Bu güvenlik açığını kullanarak telegram'ın kamera izinlerini kötüye kullanma hakkında güzel bir yazı [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/) adresinde bulunabilir.
+> Telegram'ın kamera izinlerini kötüye kullanmak için bu güvenlik açığını nasıl kötüye kullanacağınıza dair güzel bir yazı [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/) adresinde bulunabilir.
 
 ## Daha Büyük Ölçek
 

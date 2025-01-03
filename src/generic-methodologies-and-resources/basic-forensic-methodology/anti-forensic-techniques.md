@@ -2,151 +2,151 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Timestamps
+## Zaman Damgaları
 
-An attacker may be interested in **changing the timestamps of files** to avoid being detected.\
-It's possible to find the timestamps inside the MFT in attributes `$STANDARD_INFORMATION` \_\_ and \_\_ `$FILE_NAME`.
+Bir saldırgan, **dosyaların zaman damgalarını değiştirmekle** ilgilenebilir.\
+Zaman damgalarını, MFT içinde `$STANDARD_INFORMATION` \_\_ ve \_\_ `$FILE_NAME` özniteliklerinde bulmak mümkündür.
 
-Both attributes have 4 timestamps: **Modification**, **access**, **creation**, and **MFT registry modification** (MACE or MACB).
+Her iki öznitelik de 4 zaman damgasına sahiptir: **Değiştirme**, **erişim**, **oluşturma** ve **MFT kayıt değişikliği** (MACE veya MACB).
 
-**Windows explorer** and other tools show the information from **`$STANDARD_INFORMATION`**.
+**Windows gezgini** ve diğer araçlar, **`$STANDARD_INFORMATION`** içindeki bilgileri gösterir.
 
 ### TimeStomp - Anti-forensic Tool
 
-This tool **modifies** the timestamp information inside **`$STANDARD_INFORMATION`** **but** **not** the information inside **`$FILE_NAME`**. Therefore, it's possible to **identify** **suspicious** **activity**.
+Bu araç, **`$STANDARD_INFORMATION`** içindeki zaman damgası bilgilerini **değiştirir** **ama** **`$FILE_NAME`** içindeki bilgileri **değiştirmez**. Bu nedenle, **şüpheli** **faaliyetleri** **belirlemek** mümkündür.
 
 ### Usnjrnl
 
-The **USN Journal** (Update Sequence Number Journal) is a feature of the NTFS (Windows NT file system) that keeps track of volume changes. The [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) tool allows for the examination of these changes.
+**USN Journal** (Güncelleme Sırası Numarası Günlüğü), NTFS (Windows NT dosya sistemi) özelliğidir ve hacim değişikliklerini takip eder. [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) aracı, bu değişikliklerin incelenmesini sağlar.
 
 ![](<../../images/image (801).png>)
 
-The previous image is the **output** shown by the **tool** where it can be observed that some **changes were performed** to the file.
+Önceki resim, dosya üzerinde bazı **değişikliklerin yapıldığını** gözlemleyebileceğimiz **araç** tarafından gösterilen **çıktıdır**.
 
 ### $LogFile
 
-**All metadata changes to a file system are logged** in a process known as [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging). The logged metadata is kept in a file named `**$LogFile**`, located in the root directory of an NTFS file system. Tools such as [LogFileParser](https://github.com/jschicht/LogFileParser) can be used to parse this file and identify changes.
+**Bir dosya sistemine yapılan tüm meta veri değişiklikleri**, [ön yazma günlüğü](https://en.wikipedia.org/wiki/Write-ahead_logging) olarak bilinen bir süreçte kaydedilir. Kaydedilen meta veriler, NTFS dosya sisteminin kök dizininde bulunan `**$LogFile**` adlı bir dosyada tutulur. [LogFileParser](https://github.com/jschicht/LogFileParser) gibi araçlar, bu dosyayı ayrıştırmak ve değişiklikleri belirlemek için kullanılabilir.
 
 ![](<../../images/image (137).png>)
 
-Again, in the output of the tool it's possible to see that **some changes were performed**.
+Yine, aracın çıktısında **bazı değişikliklerin yapıldığını** görmek mümkündür.
 
-Using the same tool it's possible to identify to **which time the timestamps were modified**:
+Aynı aracı kullanarak, **zaman damgalarının ne zaman değiştirildiğini** belirlemek mümkündür:
 
 ![](<../../images/image (1089).png>)
 
-- CTIME: File's creation time
-- ATIME: File's modification time
-- MTIME: File's MFT registry modification
-- RTIME: File's access time
+- CTIME: Dosyanın oluşturulma zamanı
+- ATIME: Dosyanın değiştirilme zamanı
+- MTIME: Dosyanın MFT kayıt değişikliği
+- RTIME: Dosyanın erişim zamanı
 
-### `$STANDARD_INFORMATION` and `$FILE_NAME` comparison
+### `$STANDARD_INFORMATION` ve `$FILE_NAME` karşılaştırması
 
-Another way to identify suspicious modified files would be to compare the time on both attributes looking for **mismatches**.
+Şüpheli değiştirilmiş dosyaları belirlemenin bir diğer yolu, her iki öznitelikteki zamanı karşılaştırarak **uyumsuzluklar** aramaktır.
 
-### Nanoseconds
+### Nanosecond
 
-**NTFS** timestamps have a **precision** of **100 nanoseconds**. Then, finding files with timestamps like 2010-10-10 10:10:**00.000:0000 is very suspicious**.
+**NTFS** zaman damgalarının **kesinliği** **100 nanosecond**'dir. Bu nedenle, 2010-10-10 10:10:**00.000:0000 gibi zaman damgalarına sahip dosyaları bulmak **çok şüphelidir**.
 
 ### SetMace - Anti-forensic Tool
 
-This tool can modify both attributes `$STARNDAR_INFORMATION` and `$FILE_NAME`. However, from Windows Vista, it's necessary for a live OS to modify this information.
+Bu araç, hem `$STARNDAR_INFORMATION` hem de `$FILE_NAME` özniteliklerini değiştirebilir. Ancak, Windows Vista'dan itibaren, bu bilgileri değiştirmek için canlı bir işletim sistemine ihtiyaç vardır.
 
-## Data Hiding
+## Veri Gizleme
 
-NFTS uses a cluster and the minimum information size. That means that if a file occupies uses and cluster and a half, the **reminding half is never going to be used** until the file is deleted. Then, it's possible to **hide data in this slack space**.
+NFTS, bir küme ve minimum bilgi boyutu kullanır. Bu, bir dosya bir küme ve yarım küme kapladığında, **geri kalan yarımın asla kullanılmayacağı** anlamına gelir. Bu nedenle, bu boş alanda **veri gizlemek mümkündür**.
 
-There are tools like slacker that allow hiding data in this "hidden" space. However, an analysis of the `$logfile` and `$usnjrnl` can show that some data was added:
+Slacker gibi, bu "gizli" alanda veri gizlemeye olanak tanıyan araçlar vardır. Ancak, `$logfile` ve `$usnjrnl` analizi, bazı verilerin eklendiğini gösterebilir:
 
 ![](<../../images/image (1060).png>)
 
-Then, it's possible to retrieve the slack space using tools like FTK Imager. Note that this kind of tool can save the content obfuscated or even encrypted.
+Bu nedenle, FTK Imager gibi araçlar kullanarak boş alanı geri almak mümkündür. Bu tür bir aracın içeriği obfuscate veya hatta şifreli olarak kaydedebileceğini unutmayın.
 
 ## UsbKill
 
-This is a tool that will **turn off the computer if any change in the USB** ports is detected.\
-A way to discover this would be to inspect the running processes and **review each python script running**.
+Bu, herhangi bir USB portunda değişiklik algılandığında bilgisayarı **kapatan** bir araçtır.\
+Bunu keşfetmenin bir yolu, çalışan süreçleri incelemek ve **her bir python betiğini gözden geçirmektir**.
 
-## Live Linux Distributions
+## Canlı Linux Dağıtımları
 
-These distros are **executed inside the RAM** memory. The only way to detect them is **in case the NTFS file-system is mounted with write permissions**. If it's mounted just with read permissions it won't be possible to detect the intrusion.
+Bu dağıtımlar, **RAM** belleği içinde **çalıştırılır**. Onları tespit etmenin tek yolu, **NTFS dosya sisteminin yazma izinleriyle monte edilmesidir**. Sadece okuma izinleriyle monte edilirse, ihlali tespit etmek mümkün olmayacaktır.
 
-## Secure Deletion
+## Güvenli Silme
 
 [https://github.com/Claudio-C/awesome-data-sanitization](https://github.com/Claudio-C/awesome-data-sanitization)
 
-## Windows Configuration
+## Windows Yapılandırması
 
-It's possible to disable several windows logging methods to make the forensics investigation much harder.
+Adli soruşturmayı çok daha zor hale getirmek için birçok Windows günlükleme yöntemini devre dışı bırakmak mümkündür.
 
-### Disable Timestamps - UserAssist
+### Zaman Damgalarını Devre Dışı Bırak - UserAssist
 
-This is a registry key that maintains dates and hours when each executable was run by the user.
+Bu, her yürütülebilir dosyanın kullanıcı tarafından ne zaman çalıştırıldığını koruyan bir kayıt anahtarıdır.
 
-Disabling UserAssist requires two steps:
+UserAssist'i devre dışı bırakmak iki adım gerektirir:
 
-1. Set two registry keys, `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` and `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled`, both to zero in order to signal that we want UserAssist disabled.
-2. Clear your registry subtrees that look like `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>`.
+1. UserAssist'i devre dışı bırakmak istediğimizi belirtmek için `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` ve `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled` anahtarlarını sıfıra ayarlayın.
+2. `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>` gibi görünen kayıt alt ağaçlarınızı temizleyin.
 
-### Disable Timestamps - Prefetch
+### Zaman Damgalarını Devre Dışı Bırak - Prefetch
 
-This will save information about the applications executed with the goal of improving the performance of the Windows system. However, this can also be useful for forensics practices.
+Bu, Windows sisteminin performansını artırmak amacıyla yürütülen uygulamalar hakkında bilgi kaydedecektir. Ancak, bu aynı zamanda adli uygulamalar için de faydalı olabilir.
 
-- Execute `regedit`
-- Select the file path `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters`
-- Right-click on both `EnablePrefetcher` and `EnableSuperfetch`
-- Select Modify on each of these to change the value from 1 (or 3) to 0
-- Restart
+- `regedit` çalıştırın
+- Dosya yolunu seçin `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters`
+- `EnablePrefetcher` ve `EnableSuperfetch` üzerinde sağ tıklayın
+- Her birinin değerini 1 (veya 3) yerine 0 olarak değiştirmek için Değiştir'i seçin
+- Yeniden başlatın
 
-### Disable Timestamps - Last Access Time
+### Zaman Damgalarını Devre Dışı Bırak - Son Erişim Zamanı
 
-Whenever a folder is opened from an NTFS volume on a Windows NT server, the system takes the time to **update a timestamp field on each listed folder**, called the last access time. On a heavily used NTFS volume, this can affect performance.
+Bir NTFS hacminden bir klasör açıldığında, sistem, listedeki her klasör için **bir zaman damgası alanını güncellemek için zamanı alır**, buna son erişim zamanı denir. Yoğun kullanılan bir NTFS hacminde, bu performansı etkileyebilir.
 
-1. Open the Registry Editor (Regedit.exe).
-2. Browse to `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`.
-3. Look for `NtfsDisableLastAccessUpdate`. If it doesn’t exist, add this DWORD and set its value to 1, which will disable the process.
-4. Close the Registry Editor, and reboot the server.
+1. Kayıt Defteri Düzenleyicisini (Regedit.exe) açın.
+2. `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem` yoluna gidin.
+3. `NtfsDisableLastAccessUpdate` anahtarını arayın. Eğer yoksa, bu DWORD'u ekleyin ve değerini 1 olarak ayarlayın, bu işlem devre dışı bırakılacaktır.
+4. Kayıt Defteri Düzenleyicisini kapatın ve sunucuyu yeniden başlatın.
 
-### Delete USB History
+### USB Geçmişini Sil
 
-All the **USB Device Entries** are stored in Windows Registry Under the **USBSTOR** registry key that contains sub keys which are created whenever you plug a USB Device into your PC or Laptop. You can find this key here H`KEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Deleting this** you will delete the USB history.\
-You may also use the tool [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) to be sure you have deleted them (and to delete them).
+Tüm **USB Aygıt Girişleri**, bir USB Aygıtını PC veya Dizüstü Bilgisayarınıza taktığınızda oluşturulan alt anahtarları içeren **USBSTOR** kayıt anahtarı altında Windows Kayıt Defteri'nde saklanır. Bu anahtarı burada bulabilirsiniz: `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Bunu silerek**, USB geçmişini sileceksiniz.\
+Ayrıca, silindiğinizden emin olmak için [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) aracını kullanabilirsiniz (ve silmek için).
 
-Another file that saves information about the USBs is the file `setupapi.dev.log` inside `C:\Windows\INF`. This should also be deleted.
+USB'ler hakkında bilgi kaydeden bir diğer dosya, `C:\Windows\INF` içindeki `setupapi.dev.log` dosyasıdır. Bu dosya da silinmelidir.
 
-### Disable Shadow Copies
+### Gölge Kopyalarını Devre Dışı Bırak
 
-**List** shadow copies with `vssadmin list shadowstorage`\
-**Delete** them running `vssadmin delete shadow`
+**Gölge kopyalarını listeleyin** `vssadmin list shadowstorage`\
+**Silin** `vssadmin delete shadow` komutunu çalıştırarak
 
-You can also delete them via GUI following the steps proposed in [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
+Ayrıca, [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html) adresinde önerilen adımları izleyerek GUI üzerinden de silebilirsiniz.
 
-To disable shadow copies [steps from here](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
+Gölge kopyalarını devre dışı bırakmak için [buradaki adımları](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows) izleyin:
 
-1. Open the Services program by typing "services" into the text search box after clicking the Windows start button.
-2. From the list, find "Volume Shadow Copy", select it, and then access Properties by right-clicking.
-3. Choose Disabled from the "Startup type" drop-down menu, and then confirm the change by clicking Apply and OK.
+1. Windows başlat düğmesine tıkladıktan sonra metin arama kutusuna "services" yazarak Hizmetler programını açın.
+2. Listeden "Volume Shadow Copy"yi bulun, seçin ve sağ tıklayarak Özellikler'e erişin.
+3. "Başlangıç türü" açılır menüsünden Devre Dışı seçeneğini seçin ve ardından değişikliği onaylamak için Uygula ve Tamam'a tıklayın.
 
-It's also possible to modify the configuration of which files are going to be copied in the shadow copy in the registry `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
+Hangi dosyaların gölge kopyasında kopyalanacağını kayıt defterinde `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot` ayarlarını değiştirerek de yapılandırmak mümkündür.
 
-### Overwrite deleted files
+### Silinmiş Dosyaları Üzerine Yaz
 
-- You can use a **Windows tool**: `cipher /w:C` This will indicate cipher to remove any data from the available unused disk space inside the C drive.
-- You can also use tools like [**Eraser**](https://eraser.heidi.ie)
+- **Windows aracı** kullanabilirsiniz: `cipher /w:C` Bu, şifreleme aracına C sürücüsündeki kullanılmayan disk alanından herhangi bir veriyi kaldırmasını belirtir.
+- Ayrıca, [**Eraser**](https://eraser.heidi.ie) gibi araçlar da kullanabilirsiniz.
 
-### Delete Windows event logs
+### Windows Olay Günlüklerini Sil
 
-- Windows + R --> eventvwr.msc --> Expand "Windows Logs" --> Right click each category and select "Clear Log"
+- Windows + R --> eventvwr.msc --> "Windows Günlükleri"ni genişletin --> Her kategoriye sağ tıklayın ve "Günlüğü Temizle"yi seçin
 - `for /F "tokens=*" %1 in ('wevtutil.exe el') DO wevtutil.exe cl "%1"`
 - `Get-EventLog -LogName * | ForEach { Clear-EventLog $_.Log }`
 
-### Disable Windows event logs
+### Windows Olay Günlüklerini Devre Dışı Bırak
 
 - `reg add 'HKLM\SYSTEM\CurrentControlSet\Services\eventlog' /v Start /t REG_DWORD /d 4 /f`
-- Inside the services section disable the service "Windows Event Log"
-- `WEvtUtil.exec clear-log` or `WEvtUtil.exe cl`
+- Hizmetler bölümünde "Windows Olay Günlüğü" hizmetini devre dışı bırakın
+- `WEvtUtil.exec clear-log` veya `WEvtUtil.exe cl`
 
-### Disable $UsnJrnl
+### $UsnJrnl'yi Devre Dışı Bırak
 
 - `fsutil usn deletejournal /d c:`
 

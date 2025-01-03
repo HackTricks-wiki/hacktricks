@@ -24,7 +24,7 @@ macos-users.md
 macos-applefs.md
 {{#endref}}
 
-- **kernel**'in **mimari**si
+- **kernel**'ın **mimari**si
 
 {{#ref}}
 mac-os-architecture/
@@ -37,7 +37,7 @@ macos-protocols.md
 {{#endref}}
 
 - **Açık kaynak** macOS: [https://opensource.apple.com/](https://opensource.apple.com/)
-- Bir `tar.gz` indirmek için, [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) gibi bir URL'yi [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) olarak değiştirin.
+- Bir `tar.gz` indirmek için bir URL'yi [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) gibi [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) şeklinde değiştirin.
 
 ### MacOS MDM
 
@@ -63,7 +63,7 @@ macos-security-protections/
 
 ### Dosya İzinleri
 
-Eğer bir **root olarak çalışan bir işlem** bir dosya yazıyorsa ve bu dosya bir kullanıcı tarafından kontrol edilebiliyorsa, kullanıcı bunu **yetkileri yükseltmek için** kötüye kullanabilir.\
+Eğer bir **root olarak çalışan bir süreç** bir dosya yazıyorsa ve bu dosya bir kullanıcı tarafından kontrol edilebiliyorsa, kullanıcı bunu **yetki yükseltmek için** kötüye kullanabilir.\
 Bu aşağıdaki durumlarda gerçekleşebilir:
 
 - Kullanılan dosya zaten bir kullanıcı tarafından oluşturulmuş (kullanıcıya ait)
@@ -93,9 +93,9 @@ macOS'ta **uygulamalar ve ikili dosyalar**, diğerlerinden daha ayrıcalıklı o
 
 Bu nedenle, bir macOS makinesini başarılı bir şekilde ele geçirmek isteyen bir saldırgan, **TCC ayrıcalıklarını yükseltmek** (veya ihtiyaçlarına bağlı olarak **SIP'yi atlamak**) zorundadır.
 
-Bu ayrıcalıklar genellikle uygulamanın imzalandığı **haklar** şeklinde verilir veya uygulama bazı erişimler talep edebilir ve **kullanıcı onayladıktan** sonra **TCC veritabanlarında** bulunabilir. Bir işlemin bu ayrıcalıkları elde etmenin bir diğer yolu, bu **ayrıcalıklara** sahip bir işlemin **çocuğu** olmaktır, çünkü genellikle **devralınır**.
+Bu ayrıcalıklar genellikle uygulamanın imzalandığı **haklar** şeklinde verilir veya uygulama bazı erişimler talep edebilir ve **kullanıcı onayladıktan** sonra **TCC veritabanlarında** bulunabilir. Bir sürecin bu ayrıcalıkları elde etmenin bir diğer yolu, bu **ayrıcalıklara** sahip bir sürecin **çocuğu** olmaktır, çünkü genellikle **devralınır**.
 
-Farklı yollar bulmak için bu bağlantılara göz atın [**TCC'de yetki yükseltme**](macos-security-protections/macos-tcc/#tcc-privesc-and-bypasses), [**TCC'yi atlamak**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) ve geçmişte [**SIP'nin nasıl atlandığı**](macos-security-protections/macos-sip.md#sip-bypasses).
+Farklı yolları bulmak için bu bağlantılara göz atın [**TCC'de yetki yükseltme**](macos-security-protections/macos-tcc/#tcc-privesc-and-bypasses), [**TCC'yi atlamak**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) ve geçmişte [**SIP'nin nasıl aşıldığı**](macos-security-protections/macos-sip.md#sip-bypasses).
 
 ## macOS Geleneksel Yetki Yükseltme
 

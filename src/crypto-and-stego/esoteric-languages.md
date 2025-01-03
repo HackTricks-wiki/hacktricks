@@ -1,18 +1,16 @@
-# Esoteric languages
+# Esoterik diller
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## [Esolangs Wiki](https://esolangs.org/wiki/Main_Page)
 
-Check that wiki to search more esotreic languages
+Daha fazla esoterik dil aramak için o wikiye göz atın
 
 ## Malbolge
-
 ```
 ('&%:9]!~}|z2Vxwv-,POqponl$Hjig%eB@@>}=<M:9wv6WsU2T|nm-,jcL(I&%$#"
 `CB]V?Tx<uVtT`Rpo3NlF.Jh++FdbCBA@?]!~|4XzyTT43Qsqq(Lnmkj"Fhg${z@>
 ```
-
 [http://malbolge.doleczek.pl/](http://malbolge.doleczek.pl)
 
 ## npiet
@@ -22,7 +20,6 @@ Check that wiki to search more esotreic languages
 [https://www.bertnase.de/npiet/npiet-execute.php](https://www.bertnase.de/npiet/npiet-execute.php)
 
 ## Rockstar
-
 ```
 Midnight takes your heart and your soul
 While your heart is as high as your soul
@@ -51,11 +48,9 @@ Take it to the top
 
 Whisper my world
 ```
-
 {% embed url="https://codewithrockstar.com/" %}
 
 ## PETOOH
-
 ```
 KoKoKoKoKoKoKoKoKoKo Kud-Kudah
 KoKoKoKoKoKoKoKo kudah kO kud-Kudah Kukarek kudah
@@ -65,5 +60,4 @@ KoKoKoKo Kud-Kudah KoKoKoKo kudah kO kud-Kudah kO Kukarek
 kOkOkOkOkO Kukarek Kukarek kOkOkOkOkOkOkO
 Kukarek
 ```
-
 {{#include ../banners/hacktricks-training.md}}

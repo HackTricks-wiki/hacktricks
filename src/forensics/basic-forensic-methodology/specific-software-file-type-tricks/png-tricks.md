@@ -1,9 +1,9 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-**PNG files** are highly regarded in **CTF challenges** for their **lossless compression**, making them ideal for embedding hidden data. Tools like **Wireshark** enable the analysis of PNG files by dissecting their data within network packets, revealing embedded information or anomalies.
+**PNG dosyaları**, **kaybı olmayan sıkıştırma** özellikleri nedeniyle **CTF zorlukları** için yüksek bir itibara sahiptir ve gizli verilerin gömülmesi için idealdir. **Wireshark** gibi araçlar, PNG dosyalarının verilerini ağ paketleri içinde analiz ederek, gömülü bilgileri veya anormallikleri ortaya çıkarmaya olanak tanır.
 
-For checking PNG file integrity and repairing corruption, **pngcheck** is a crucial tool, offering command-line functionality to validate and diagnose PNG files ([pngcheck](http://libpng.org/pub/png/apps/pngcheck.html)). When files are beyond simple fixes, online services like [OfficeRecovery's PixRecovery](https://online.officerecovery.com/pixrecovery/) provide a web-based solution for **repairing corrupted PNGs**, aiding in the recovery of crucial data for CTF participants.
+PNG dosyası bütünlüğünü kontrol etmek ve bozulmaları onarmak için **pngcheck** kritik bir araçtır; PNG dosyalarını doğrulamak ve teşhis etmek için komut satırı işlevselliği sunar ([pngcheck](http://libpng.org/pub/png/apps/pngcheck.html)). Dosyalar basit onarımların ötesindeyse, [OfficeRecovery'nin PixRecovery](https://online.officerecovery.com/pixrecovery/) gibi çevrimiçi hizmetler, **bozulmuş PNG'leri onarmak** için web tabanlı bir çözüm sunarak CTF katılımcıları için kritik verilerin kurtarılmasına yardımcı olur.
 
-These strategies underscore the importance of a comprehensive approach in CTFs, utilizing a blend of analytical tools and repair techniques to uncover and recover hidden or lost data.
+Bu stratejiler, CTF'lerde kapsamlı bir yaklaşımın önemini vurgular; gizli veya kaybolmuş verileri ortaya çıkarmak ve kurtarmak için analitik araçlar ve onarım tekniklerinin bir karışımını kullanır.
 
 {{#include ../../../banners/hacktricks-training.md}}

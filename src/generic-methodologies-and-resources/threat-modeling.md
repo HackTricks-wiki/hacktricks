@@ -1,111 +1,111 @@
-# Threat Modeling
+# Tehdit Modelleme
 
-## Threat Modeling
+## Tehdit Modelleme
 
-Welcome to HackTricks' comprehensive guide on Threat Modeling! Embark on an exploration of this critical aspect of cybersecurity, where we identify, understand, and strategize against potential vulnerabilities in a system. This thread serves as a step-by-step guide packed with real-world examples, helpful software, and easy-to-understand explanations. Ideal for both novices and experienced practitioners looking to fortify their cybersecurity defenses.
+HackTricks'in Tehdit Modelleme üzerine kapsamlı kılavuzuna hoş geldiniz! Bu kritik siber güvenlik alanını keşfetmeye başlayın; burada bir sistemdeki potansiyel zayıflıkları tanımlıyor, anlıyor ve bunlara karşı stratejiler geliştiriyoruz. Bu konu, gerçek dünya örnekleri, yararlı yazılımlar ve kolay anlaşılır açıklamalarla dolu adım adım bir kılavuz olarak hizmet vermektedir. Hem yeni başlayanlar hem de siber güvenlik savunmalarını güçlendirmek isteyen deneyimli uygulayıcılar için idealdir.
 
-### Commonly Used Scenarios
+### Yaygın Olarak Kullanılan Senaryolar
 
-1. **Software Development**: As part of the Secure Software Development Life Cycle (SSDLC), threat modeling helps in **identifying potential sources of vulnerabilities** in the early stages of development.
-2. **Penetration Testing**: The Penetration Testing Execution Standard (PTES) framework requires **threat modeling to understand the system's vulnerabilities** before carrying out the test.
+1. **Yazılım Geliştirme**: Güvenli Yazılım Geliştirme Yaşam Döngüsü (SSDLC) kapsamında, tehdit modelleme, geliştirme sürecinin erken aşamalarında **potansiyel zayıflık kaynaklarını tanımlamaya** yardımcı olur.
+2. **Sızma Testi**: Sızma Testi Uygulama Standardı (PTES) çerçevesi, testi gerçekleştirmeden önce **sistemin zayıflıklarını anlamak için tehdit modellemesi** gerektirir.
 
-### Threat Model in a Nutshell
+### Tehdit Modeli Kısaca
 
-A Threat Model is typically represented as a diagram, image, or some other form of visual illustration that depicts the planned architecture or existing build of an application. It bears resemblance to a **data flow diagram**, but the key distinction lies in its security-oriented design.
+Bir Tehdit Modeli genellikle bir diyagram, resim veya bir uygulamanın planlanan mimarisini veya mevcut yapısını gösteren başka bir görsel illüstrasyon olarak temsil edilir. Bu, bir **veri akış diyagramı** ile benzerlik gösterir, ancak ana fark güvenlik odaklı tasarımında yatmaktadır.
 
-Threat models often feature elements marked in red, symbolizing potential vulnerabilities, risks, or barriers. To streamline the process of risk identification, the CIA (Confidentiality, Integrity, Availability) triad is employed, forming the basis of many threat modeling methodologies, with STRIDE being one of the most common. However, the chosen methodology can vary depending on the specific context and requirements.
+Tehdit modelleri genellikle potansiyel zayıflıkları, riskleri veya engelleri simgeleyen kırmızı ile işaretlenmiş unsurlar içerir. Risk tanımlama sürecini kolaylaştırmak için CIA (Gizlilik, Bütünlük, Erişilebilirlik) üçlüsü kullanılır ve bu, birçok tehdit modelleme metodolojisinin temelini oluşturur; STRIDE en yaygın olanlardan biridir. Ancak, seçilen metodoloji belirli bağlama ve gereksinimlere bağlı olarak değişebilir.
 
-### The CIA Triad
+### CIA Üçlüsü
 
-The CIA Triad is a widely recognized model in the field of information security, standing for Confidentiality, Integrity, and Availability. These three pillars form the foundation upon which many security measures and policies are built, including threat modeling methodologies.
+CIA Üçlüsü, bilgi güvenliği alanında yaygın olarak tanınan bir modeldir ve Gizlilik, Bütünlük ve Erişilebilirlik anlamına gelir. Bu üç sütun, birçok güvenlik önlemi ve politikasının temelini oluşturur, bunlar arasında tehdit modelleme metodolojileri de bulunmaktadır.
 
-1. **Confidentiality**: Ensuring that the data or system is not accessed by unauthorized individuals. This is a central aspect of security, requiring appropriate access controls, encryption, and other measures to prevent data breaches.
-2. **Integrity**: The accuracy, consistency, and trustworthiness of the data over its lifecycle. This principle ensures that the data is not altered or tampered with by unauthorized parties. It often involves checksums, hashing, and other data verification methods.
-3. **Availability**: This ensures that data and services are accessible to authorized users when needed. This often involves redundancy, fault tolerance, and high-availability configurations to keep systems running even in the face of disruptions.
+1. **Gizlilik**: Verilerin veya sistemin yetkisiz kişiler tarafından erişilmemesini sağlamak. Bu, veri ihlallerini önlemek için uygun erişim kontrolleri, şifreleme ve diğer önlemleri gerektiren güvenliğin merkezi bir yönüdür.
+2. **Bütünlük**: Verilerin yaşam döngüsü boyunca doğruluğu, tutarlılığı ve güvenilirliği. Bu ilke, verilerin yetkisiz taraflarca değiştirilmediğini veya müdahale edilmediğini garanti eder. Genellikle kontrol toplamları, hashleme ve diğer veri doğrulama yöntemlerini içerir.
+3. **Erişilebilirlik**: Bu, verilerin ve hizmetlerin ihtiyaç duyulduğunda yetkili kullanıcılar tarafından erişilebilir olmasını sağlar. Bu genellikle sistemlerin kesintilere rağmen çalışmaya devam etmesi için yedeklilik, hata toleransı ve yüksek erişilebilirlik yapılandırmalarını içerir.
 
-### Threat Modeling Methodlogies
+### Tehdit Modelleme Metodolojileri
 
-1. **STRIDE**: Developed by Microsoft, STRIDE is an acronym for **Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, and Elevation of Privilege**. Each category represents a type of threat, and this methodology is commonly used in the design phase of a program or system to identify potential threats.
-2. **DREAD**: This is another methodology from Microsoft used for risk assessment of identified threats. DREAD stands for **Damage potential, Reproducibility, Exploitability, Affected users, and Discoverability**. Each of these factors is scored, and the result is used to prioritize identified threats.
-3. **PASTA** (Process for Attack Simulation and Threat Analysis): This is a seven-step, **risk-centric** methodology. It includes defining and identifying security objectives, creating a technical scope, application decomposition, threat analysis, vulnerability analysis, and risk/triage assessment.
-4. **Trike**: This is a risk-based methodology that focuses on defending assets. It starts from a **risk management** perspective and looks at threats and vulnerabilities in that context.
-5. **VAST** (Visual, Agile, and Simple Threat modeling): This approach aims to be more accessible and integrates into Agile development environments. It combines elements from the other methodologies and focuses on **visual representations of threats**.
-6. **OCTAVE** (Operationally Critical Threat, Asset, and Vulnerability Evaluation): Developed by the CERT Coordination Center, this framework is geared toward **organizational risk assessment rather than specific systems or software**.
+1. **STRIDE**: Microsoft tarafından geliştirilen STRIDE, **Sahtecilik, Manipülasyon, Reddetme, Bilgi Açıklaması, Hizmet Reddi ve Yetki Yükseltme** için bir kısaltmadır. Her kategori bir tehdit türünü temsil eder ve bu metodoloji, potansiyel tehditleri tanımlamak için bir program veya sistemin tasarım aşamasında yaygın olarak kullanılır.
+2. **DREAD**: Bu, tanımlanan tehditlerin risk değerlendirmesi için kullanılan başka bir Microsoft metodolojisidir. DREAD, **Zarar Potansiyeli, Yeniden Üretilebilirlik, Sömürülebilirlik, Etkilenen Kullanıcılar ve Keşfedilebilirlik** anlamına gelir. Bu faktörlerin her biri puanlanır ve sonuç, tanımlanan tehditlerin önceliklendirilmesinde kullanılır.
+3. **PASTA** (Saldırı Simülasyonu ve Tehdit Analizi Süreci): Bu, yedi adımlı, **risk merkezli** bir metodolojidir. Güvenlik hedeflerini tanımlama ve belirleme, teknik kapsam oluşturma, uygulama ayrıştırma, tehdit analizi, zayıflık analizi ve risk/triage değerlendirmesini içerir.
+4. **Trike**: Bu, varlıkları savunmaya odaklanan risk temelli bir metodolojidir. **Risk yönetimi** perspektifinden başlar ve tehditler ile zayıflıkları bu bağlamda inceler.
+5. **VAST** (Görsel, Çevik ve Basit Tehdit Modelleme): Bu yaklaşım, daha erişilebilir olmayı hedefler ve Çevik geliştirme ortamlarına entegre olur. Diğer metodolojilerden unsurlar birleştirir ve **tehditlerin görsel temsillerine** odaklanır.
+6. **OCTAVE** (Operasyonel Kritik Tehdit, Varlık ve Zayıflık Değerlendirmesi): CERT Koordinasyon Merkezi tarafından geliştirilen bu çerçeve, **belirli sistemler veya yazılımlar yerine kurumsal risk değerlendirmesine** yöneliktir.
 
-## Tools
+## Araçlar
 
-There are several tools and software solutions available that can **assist** with the creation and management of threat models. Here are a few you might consider.
+Tehdit modellerinin oluşturulması ve yönetilmesi konusunda **yardımcı** olabilecek birkaç araç ve yazılım çözümü mevcuttur. İşte dikkate alabileceğiniz bazıları.
 
 ### [SpiderSuite](https://github.com/3nock/SpiderSuite)
 
-An advance cross-platform and multi-feature GUI web spider/crawler for cyber security professionals. Spider Suite can be used for attack surface mapping and analysis.
+Siber güvenlik profesyonelleri için gelişmiş, çok platformlu ve çok özellikli bir GUI web örümceği/gezgini. Spider Suite, saldırı yüzeyi haritalama ve analiz için kullanılabilir.
 
-**Usage**
+**Kullanım**
 
-1. Pick a URL and Crawl
+1. Bir URL Seçin ve Tarayın
 
 <figure><img src="../images/threatmodel_spidersuite_1.png" alt=""><figcaption></figcaption></figure>
 
-2. View Graph
+2. Grafiği Görüntüleyin
 
 <figure><img src="../images/threatmodel_spidersuite_2.png" alt=""><figcaption></figcaption></figure>
 
 ### [OWASP Threat Dragon](https://github.com/OWASP/threat-dragon/releases)
 
-An open-source project from OWASP, Threat Dragon is both a web and desktop application that includes system diagramming as well as a rule engine to auto-generate threats/mitigations.
+OWASP'tan açık kaynak bir proje olan Threat Dragon, sistem diyagramları ile birlikte tehditleri/azaltmaları otomatik olarak oluşturmak için bir kural motoru içeren hem web hem de masaüstü uygulamasıdır.
 
-**Usage**
+**Kullanım**
 
-1. Create New Project
+1. Yeni Proje Oluşturun
 
 <figure><img src="../images/create_new_project_1.jpg" alt=""><figcaption></figcaption></figure>
 
-Sometimes it could look like this:
+Bazen şöyle görünebilir:
 
 <figure><img src="../images/1_threatmodel_create_project.jpg" alt=""><figcaption></figcaption></figure>
 
-2. Launch New Project
+2. Yeni Projeyi Başlatın
 
 <figure><img src="../images/launch_new_project_2.jpg" alt=""><figcaption></figcaption></figure>
 
-3. Save The New Project
+3. Yeni Projeyi Kaydedin
 
 <figure><img src="../images/save_new_project.jpg" alt=""><figcaption></figcaption></figure>
 
-4. Create your model
+4. Modelinizi Oluşturun
 
-You can use tools like SpiderSuite Crawler to give you inspiration, a basic model would look something like this
+İlham almak için SpiderSuite Crawler gibi araçlar kullanabilirsiniz, temel bir model şöyle görünebilir:
 
 <figure><img src="../images/0_basic_threat_model.jpg" alt=""><figcaption></figcaption></figure>
 
-Just a little bit of explanation about the entities:
+Varlıklar hakkında biraz açıklama:
 
-- Process (The entity itself such as Webserver or web functionality)
-- Actor (A Person such as a Website Visitor, User or Administrator)
-- Data Flow Line (Indicator of Interaction)
-- Trust Boundary (Different network segments or scopes.)
-- Store (Things where data are stored at such as Databases)
+- Süreç (Web sunucusu veya web işlevselliği gibi varlık)
+- Aktör (Bir Web Sitesi Ziyaretçisi, Kullanıcı veya Yönetici gibi bir kişi)
+- Veri Akış Hattı (Etkileşim Göstergesi)
+- Güven Sınırı (Farklı ağ segmentleri veya kapsamlar.)
+- Depolama (Verilerin depolandığı yerler, örneğin Veritabanları)
 
-5. Create a Threat (Step 1)
+5. Bir Tehdit Oluşturun (Adım 1)
 
-First you have to pick the layer you wish to add a threat to
+Öncelikle bir tehdidi eklemek istediğiniz katmanı seçmelisiniz.
 
 <figure><img src="../images/3_threatmodel_chose-threat-layer.jpg" alt=""><figcaption></figcaption></figure>
 
-Now you can create the threat
+Şimdi tehdidi oluşturabilirsiniz.
 
 <figure><img src="../images/4_threatmodel_create-threat.jpg" alt=""><figcaption></figcaption></figure>
 
-Keep in mind that there is a difference between Actor Threats and Process Threats. If you would add a threat to an Actor then you will only be able to choose "Spoofing" and "Repudiation. However in our example we add threat to a Process entity so we will see this in the threat creation box:
+Aktör Tehditleri ile Süreç Tehditleri arasında bir fark olduğunu unutmayın. Eğer bir Aktöre tehdit ekleyecekseniz, yalnızca "Sahtecilik" ve "Reddetme" seçeneklerini seçebileceksiniz. Ancak örneğimizde bir Süreç varlığına tehdit eklediğimiz için tehdit oluşturma kutusunda bunu göreceğiz:
 
 <figure><img src="../images/2_threatmodel_type-option.jpg" alt=""><figcaption></figcaption></figure>
 
-6. Done
+6. Tamam
 
-Now your finished model should look something like this. And this is how you make a simple threat model with OWASP Threat Dragon.
+Artık bitmiş modeliniz şöyle görünmelidir. Ve OWASP Threat Dragon ile basit bir tehdit modeli nasıl oluşturulur.
 
 <figure><img src="../images/threat_model_finished.jpg" alt=""><figcaption></figcaption></figure>
 
 ### [Microsoft Threat Modeling Tool](https://aka.ms/threatmodelingtool)
 
-This is a free tool from Microsoft that helps in finding threats in the design phase of software projects. It uses the STRIDE methodology and is particularly suitable for those developing on Microsoft's stack.
+Bu, yazılım projelerinin tasarım aşamasında tehditleri bulmaya yardımcı olan Microsoft'tan ücretsiz bir araçtır. STRIDE metodolojisini kullanır ve özellikle Microsoft'un yığını üzerinde geliştirme yapanlar için uygundur.
