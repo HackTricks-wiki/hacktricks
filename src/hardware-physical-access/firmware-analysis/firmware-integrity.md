@@ -1,27 +1,27 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-## Firmware Integrity
+## 펌웨어 무결성
 
-The **custom firmware and/or compiled binaries can be uploaded to exploit integrity or signature verification flaws**. The following steps can be followed for backdoor bind shell compilation:
+**사용자 정의 펌웨어 및/또는 컴파일된 바이너리는 무결성 또는 서명 검증 결함을 악용하기 위해 업로드될 수 있습니다**. 백도어 바인드 셸 컴파일을 위해 다음 단계를 따를 수 있습니다:
 
-1. The firmware can be extracted using firmware-mod-kit (FMK).
-2. The target firmware architecture and endianness should be identified.
-3. A cross compiler can be built using Buildroot or other suitable methods for the environment.
-4. The backdoor can be built using the cross compiler.
-5. The backdoor can be copied to the extracted firmware /usr/bin directory.
-6. The appropriate QEMU binary can be copied to the extracted firmware rootfs.
-7. The backdoor can be emulated using chroot and QEMU.
-8. The backdoor can be accessed via netcat.
-9. The QEMU binary should be removed from the extracted firmware rootfs.
-10. The modified firmware can be repackaged using FMK.
-11. The backdoored firmware can be tested by emulating it with firmware analysis toolkit (FAT) and connecting to the target backdoor IP and port using netcat.
+1. 펌웨어는 firmware-mod-kit (FMK)를 사용하여 추출할 수 있습니다.
+2. 대상 펌웨어 아키텍처와 엔디안 형식을 식별해야 합니다.
+3. Buildroot 또는 환경에 적합한 다른 방법을 사용하여 크로스 컴파일러를 구축할 수 있습니다.
+4. 크로스 컴파일러를 사용하여 백도어를 구축할 수 있습니다.
+5. 백도어는 추출된 펌웨어 /usr/bin 디렉토리에 복사할 수 있습니다.
+6. 적절한 QEMU 바이너리는 추출된 펌웨어 rootfs에 복사할 수 있습니다.
+7. chroot와 QEMU를 사용하여 백도어를 에뮬레이션할 수 있습니다.
+8. netcat을 통해 백도어에 접근할 수 있습니다.
+9. QEMU 바이너리는 추출된 펌웨어 rootfs에서 제거해야 합니다.
+10. 수정된 펌웨어는 FMK를 사용하여 재포장할 수 있습니다.
+11. 백도어가 있는 펌웨어는 펌웨어 분석 툴킷 (FAT)으로 에뮬레이션하고 netcat을 사용하여 대상 백도어 IP와 포트에 연결하여 테스트할 수 있습니다.
 
-If a root shell has already been obtained through dynamic analysis, bootloader manipulation, or hardware security testing, precompiled malicious binaries such as implants or reverse shells can be executed. Automated payload/implant tools like the Metasploit framework and 'msfvenom' can be leveraged using the following steps:
+동적 분석, 부트로더 조작 또는 하드웨어 보안 테스트를 통해 이미 루트 셸을 얻은 경우, 임플란트나 리버스 셸과 같은 미리 컴파일된 악성 바이너리를 실행할 수 있습니다. Metasploit 프레임워크와 'msfvenom'과 같은 자동화된 페이로드/임플란트 도구를 다음 단계에 따라 활용할 수 있습니다:
 
-1. The target firmware architecture and endianness should be identified.
-2. Msfvenom can be used to specify the target payload, attacker host IP, listening port number, filetype, architecture, platform, and the output file.
-3. The payload can be transferred to the compromised device and ensured that it has execution permissions.
-4. Metasploit can be prepared to handle incoming requests by starting msfconsole and configuring the settings according to the payload.
-5. The meterpreter reverse shell can be executed on the compromised device.
+1. 대상 펌웨어 아키텍처와 엔디안 형식을 식별해야 합니다.
+2. Msfvenom을 사용하여 대상 페이로드, 공격자 호스트 IP, 리스닝 포트 번호, 파일 유형, 아키텍처, 플랫폼 및 출력 파일을 지정할 수 있습니다.
+3. 페이로드는 손상된 장치로 전송되고 실행 권한이 있는지 확인해야 합니다.
+4. Metasploit은 msfconsole을 시작하고 페이로드에 따라 설정을 구성하여 들어오는 요청을 처리할 준비를 할 수 있습니다.
+5. 손상된 장치에서 meterpreter 리버스 셸을 실행할 수 있습니다.
 
 {{#include ../../banners/hacktricks-training.md}}

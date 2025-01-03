@@ -1,8 +1,8 @@
 {{#include ../banners/hacktricks-training.md}}
 
-If you can somehow encrypt a plaintext using RC4, you can decrypt any content encrypted by that RC4 (using the same password) just using the encryption function.
+RC4를 사용하여 평문을 암호화할 수 있다면, 동일한 비밀번호를 사용하여 해당 RC4로 암호화된 모든 콘텐츠를 암호화 함수만으로 복호화할 수 있습니다.
 
-If you can encrypt a known plaintext you can also extract the password. More references can be found in the HTB Kryptos machine:
+알려진 평문을 암호화할 수 있다면 비밀번호를 추출할 수도 있습니다. 더 많은 참고 자료는 HTB Kryptos 머신에서 찾을 수 있습니다:
 
 {% embed url="https://0xrick.github.io/hack-the-box/kryptos/" %}
 

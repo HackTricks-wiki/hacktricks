@@ -1,13 +1,13 @@
-# Stealing Sensitive Information Disclosure from a Web
+# 웹에서 민감한 정보 유출 도용
 
 {{#include ./banners/hacktricks-training.md}}
 
-If at some point you find a **web page that presents you sensitive information based on your session**: Maybe it's reflecting cookies, or printing or CC details or any other sensitive information, you may try to steal it.\
-Here I present you the main ways to can try to achieve it:
+어떤 시점에 **세션에 따라 민감한 정보를 제공하는 웹 페이지를 발견하면**: 쿠키를 반영하거나, 인쇄하거나, CC 세부정보 또는 기타 민감한 정보를 출력하는 경우, 이를 도용하려고 시도할 수 있습니다.\
+여기에서 이를 달성하기 위해 시도할 수 있는 주요 방법을 소개합니다:
 
-- [**CORS bypass**](pentesting-web/cors-bypass.md): If you can bypass CORS headers you will be able to steal the information performing Ajax request for a malicious page.
-- [**XSS**](pentesting-web/xss-cross-site-scripting/): If you find a XSS vulnerability on the page you may be able to abuse it to steal the information.
-- [**Danging Markup**](pentesting-web/dangling-markup-html-scriptless-injection/): If you cannot inject XSS tags you still may be able to steal the info using other regular HTML tags.
-- [**Clickjaking**](pentesting-web/clickjacking.md): If there is no protection against this attack, you may be able to trick the user into sending you the sensitive data (an example [here](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)).
+- [**CORS 우회**](pentesting-web/cors-bypass.md): CORS 헤더를 우회할 수 있다면 악성 페이지에 대한 Ajax 요청을 수행하여 정보를 도용할 수 있습니다.
+- [**XSS**](pentesting-web/xss-cross-site-scripting/): 페이지에서 XSS 취약점을 발견하면 이를 악용하여 정보를 도용할 수 있습니다.
+- [**Danging Markup**](pentesting-web/dangling-markup-html-scriptless-injection/): XSS 태그를 주입할 수 없다면 다른 일반 HTML 태그를 사용하여 여전히 정보를 도용할 수 있습니다.
+- [**Clickjaking**](pentesting-web/clickjacking.md): 이 공격에 대한 보호가 없다면 사용자를 속여 민감한 데이터를 보내도록 할 수 있습니다 (예시 [여기](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)).
 
 {{#include ./banners/hacktricks-training.md}}

@@ -4,16 +4,15 @@
 
 ## Context
 
-In Linux in order to run a program it must exist as a file, it must be accessible in some way through the file system hierarchy (this is just how `execve()` works). This file may reside on disk or in ram (tmpfs, memfd) but you need a filepath. This has made very easy to control what is run on a Linux system, it makes easy to detect threats and attacker's tools or to prevent them from trying to execute anything of theirs at all (_e. g._ not allowing unprivileged users to place executable files anywhere).
+리눅스에서 프로그램을 실행하려면 파일로 존재해야 하며, 파일 시스템 계층을 통해 어떤 방식으로든 접근 가능해야 합니다(이는 `execve()`가 작동하는 방식입니다). 이 파일은 디스크에 있거나 램(tmpfs, memfd)에 있을 수 있지만, 파일 경로가 필요합니다. 이로 인해 리눅스 시스템에서 실행되는 것을 쉽게 제어할 수 있으며, 위협 및 공격자의 도구를 감지하거나 그들이 아무것도 실행하지 못하도록 방지하는 것이 용이합니다(_예: 비특권 사용자가 실행 파일을 아무 곳에나 배치하는 것을 허용하지 않음).
 
-But this technique is here to change all of this. If you can not start the process you want... **then you hijack one already existing**.
+하지만 이 기술은 모든 것을 바꾸기 위해 존재합니다. 원하는 프로세스를 시작할 수 없다면... **이미 존재하는 프로세스를 탈취합니다**.
 
-This technique allows you to **bypass common protection techniques such as read-only, noexec, file-name whitelisting, hash whitelisting...**
+이 기술은 **읽기 전용, noexec, 파일 이름 화이트리스트, 해시 화이트리스트와 같은 일반적인 보호 기술을 우회할 수 있게 해줍니다**.
 
 ## Dependencies
 
-The final script depends on the following tools to work, they need to be accessible in the system you are attacking (by default you will find all of them everywhere):
-
+최종 스크립트는 작동하기 위해 다음 도구에 의존하며, 공격하는 시스템에서 접근 가능해야 합니다(기본적으로 모든 곳에서 이들을 찾을 수 있습니다):
 ```
 dd
 bash | zsh | ash (busybox)
@@ -27,68 +26,61 @@ wc
 tr
 base64
 ```
+## 기술
 
-## The technique
+프로세스의 메모리를 임의로 수정할 수 있다면, 해당 프로세스를 장악할 수 있습니다. 이는 이미 존재하는 프로세스를 가로채고 다른 프로그램으로 교체하는 데 사용될 수 있습니다. 우리는 `ptrace()` 시스템 호출을 사용하거나 (이는 시스템에서 시스템 호출을 실행할 수 있는 능력이나 gdb가 필요합니다) 더 흥미롭게도 `/proc/$pid/mem`에 쓰는 방법으로 이를 달성할 수 있습니다.
 
-If you are able to modify arbitrarily the memory of a process then you can take over it. This can be used to hijack an already existing process and replace it with another program. We can achieve this either by using the `ptrace()` syscall (which requires you to have the ability to execute syscalls or to have gdb available on the system) or, more interestingly, writing to `/proc/$pid/mem`.
+파일 `/proc/$pid/mem`은 프로세스의 전체 주소 공간의 1:1 매핑입니다 (_예: x86-64에서 `0x0000000000000000`에서 `0x7ffffffffffff000`까지). 이는 오프셋 `x`에서 이 파일을 읽거나 쓰는 것이 가상 주소 `x`에서 내용을 읽거나 수정하는 것과 동일하다는 것을 의미합니다.
 
-The file `/proc/$pid/mem` is a one-to-one mapping of the entire address space of a process (_e. g._ from `0x0000000000000000` to `0x7ffffffffffff000` in x86-64). This means that reading from or writing to this file at an offset `x` is the same as reading from or modifying the contents at the virtual address `x`.
+이제 우리는 네 가지 기본 문제에 직면하게 됩니다:
 
-Now, we have four basic problems to face:
-
-- In general, only root and the program owner of the file may modify it.
+- 일반적으로 루트와 파일의 프로그램 소유자만 수정할 수 있습니다.
 - ASLR.
-- If we try to read or write to an address not mapped in the address space of the program we will get an I/O error.
+- 프로그램의 주소 공간에 매핑되지 않은 주소를 읽거나 쓰려고 하면 I/O 오류가 발생합니다.
 
-This problems have solutions that, although they are not perfect, are good:
+이 문제들은 완벽하지는 않지만 좋은 해결책이 있습니다:
 
-- Most shell interpreters allow the creation of file descriptors that will then be inherited by child processes. We can create a fd pointing to the `mem` file of the sell with write permissions... so child processes that use that fd will be able to modify the shell's memory.
-- ASLR isn't even a problem, we can check the shell's `maps` file or any other from the procfs in order to gain information about the address space of the process.
-- So we need to `lseek()` over the file. From the shell this cannot be done unless using the infamous `dd`.
+- 대부분의 셸 인터프리터는 자식 프로세스가 상속받을 파일 설명자를 생성할 수 있도록 허용합니다. 우리는 쓰기 권한이 있는 셸의 `mem` 파일을 가리키는 fd를 생성할 수 있습니다... 따라서 해당 fd를 사용하는 자식 프로세스는 셸의 메모리를 수정할 수 있습니다.
+- ASLR은 문제도 아닙니다. 우리는 셸의 `maps` 파일이나 procfs의 다른 파일을 확인하여 프로세스의 주소 공간에 대한 정보를 얻을 수 있습니다.
+- 따라서 우리는 파일에서 `lseek()`를 수행해야 합니다. 셸에서는 악명 높은 `dd`를 사용하지 않고는 이를 수행할 수 없습니다.
 
-### In more detail
+### 더 자세히
 
-The steps are relatively easy and do not require any kind of expertise to understand them:
+단계는 상대적으로 쉽고 이해하는 데 어떤 전문 지식도 필요하지 않습니다:
 
-- Parse the binary we want to run and the loader to find out what mappings they need. Then craft a "shell"code that will perform, broadly speaking, the same steps that the kernel does upon each call to `execve()`:
-  - Create said mappings.
-  - Read the binaries into them.
-  - Set up permissions.
-  - Finally initialize the stack with the arguments for the program and place the auxiliary vector (needed by the loader).
-  - Jump into the loader and let it do the rest (load libraries needed by the program).
-- Obtain from the `syscall` file the address to which the process will return after the syscall it is executing.
-- Overwrite that place, which will be executable, with our shellcode (through `mem` we can modify unwritable pages).
-- Pass the program we want to run to the stdin of the process (will be `read()` by said "shell"code).
-- At this point it is up to the loader to load the necessary libraries for our program and jump into it.
+- 실행할 바이너리와 로더를 파싱하여 필요한 매핑을 찾습니다. 그런 다음, 대략적으로 커널이 `execve()`를 호출할 때 수행하는 것과 동일한 단계를 수행하는 "셸" 코드를 작성합니다:
+- 해당 매핑을 생성합니다.
+- 바이너리를 그 안으로 읽어들입니다.
+- 권한을 설정합니다.
+- 마지막으로 프로그램의 인수로 스택을 초기화하고 로더에 필요한 보조 벡터를 배치합니다.
+- 로더로 점프하여 나머지를 수행하게 합니다 (프로그램에 필요한 라이브러리를 로드합니다).
+- 실행 중인 시스템 호출 후 프로세스가 반환할 주소를 `syscall` 파일에서 가져옵니다.
+- 해당 위치를 덮어씌우고, 이는 실행 가능하며, 우리의 셸코드로 대체합니다 (우리는 `mem`을 통해 쓰기 불가능한 페이지를 수정할 수 있습니다).
+- 실행할 프로그램을 프로세스의 stdin으로 전달합니다 (해당 "셸" 코드에 의해 `read()`됩니다).
+- 이 시점에서 로더는 프로그램에 필요한 라이브러리를 로드하고 그 안으로 점프하는 역할을 합니다.
 
-**Check out the tool in** [**https://github.com/arget13/DDexec**](https://github.com/arget13/DDexec)
+**도구를 확인하세요** [**https://github.com/arget13/DDexec**](https://github.com/arget13/DDexec)
 
 ## EverythingExec
 
-There are several alternatives to `dd`, one of which, `tail`, is currently the default program used to `lseek()` through the `mem` file (which was the sole purpose for using `dd`). Said alternatives are:
-
+`dd`에 대한 여러 대안이 있으며, 그 중 하나인 `tail`은 현재 `mem` 파일을 통해 `lseek()`하는 데 사용되는 기본 프로그램입니다 (이는 `dd`를 사용하는 유일한 목적이었습니다). 이러한 대안은:
 ```bash
 tail
 hexdump
 cmp
 xxd
 ```
-
-Setting the variable `SEEKER` you may change the seeker used, _e. g._:
-
+변수 `SEEKER`를 설정하면 사용되는 seeker를 변경할 수 있습니다, _예:_:
 ```bash
 SEEKER=cmp bash ddexec.sh ls -l <<< $(base64 -w0 /bin/ls)
 ```
-
-If you find another valid seeker not implemented in the script you may still use it setting the `SEEKER_ARGS` variable:
-
+스크립트에 구현되지 않은 다른 유효한 seeker를 찾으면 `SEEKER_ARGS` 변수를 설정하여 여전히 사용할 수 있습니다:
 ```bash
 SEEKER=xxd SEEKER_ARGS='-s $offset' zsh ddexec.sh ls -l <<< $(base64 -w0 /bin/ls)
 ```
+이것을 차단하세요, EDRs.
 
-Block this, EDRs.
-
-## References
+## 참고문헌
 
 - [https://github.com/arget13/DDexec](https://github.com/arget13/DDexec)
 

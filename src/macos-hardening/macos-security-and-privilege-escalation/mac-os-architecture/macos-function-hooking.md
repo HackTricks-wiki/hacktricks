@@ -77,22 +77,22 @@ Hello from interpose
 DYLD_INSERT_LIBRARIES=./interpose2.dylib ./hello
 Hello from interpose
 ```
-## Method Swizzling
+## 메서드 스위즐링
 
-In ObjectiveC this is how a method is called like: **`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
+ObjectiveC에서 메서드는 다음과 같이 호출됩니다: **`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
 
 필요한 것은 **객체**, **메서드** 및 **매개변수**입니다. 메서드가 호출될 때 **msg가 전송**되며, 함수 **`objc_msgSend`**를 사용합니다: `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
 
 객체는 **`someObject`**, 메서드는 **`@selector(method1p1:p2:)`**이며, 인수는 **value1**, **value2**입니다.
 
-객체 구조를 따라 **메서드 배열**에 접근할 수 있으며, 여기에는 **이름**과 **메서드 코드에 대한 포인터**가 **위치**합니다.
+객체 구조를 따라가면 **메서드 배열**에 접근할 수 있으며, 여기에는 **이름**과 **메서드 코드에 대한 포인터**가 **위치**해 있습니다.
 
 > [!CAUTION]
-> 메서드와 클래스가 이름을 기반으로 접근되기 때문에 이 정보는 바이너리에 저장됩니다. 따라서 `otool -ov </path/bin>` 또는 [`class-dump </path/bin>`](https://github.com/nygard/class-dump)로 검색할 수 있습니다.
+> 메서드와 클래스가 이름을 기반으로 접근되기 때문에 이 정보는 바이너리에 저장됩니다. 따라서 `otool -ov </path/bin>` 또는 [`class-dump </path/bin>`](https://github.com/nygard/class-dump)로 이를 검색할 수 있습니다.
 
-### Accessing the raw methods
+### 원시 메서드 접근
 
-메서드의 이름, 매개변수 수 또는 주소와 같은 정보를 다음 예제와 같이 접근할 수 있습니다:
+다음 예와 같이 메서드의 이름, 매개변수 수 또는 주소와 같은 정보를 접근할 수 있습니다:
 ```objectivec
 // gcc -framework Foundation test.m -o test
 
@@ -212,11 +212,11 @@ return 0;
 >
 > 다음 기술은 이러한 제한이 없습니다.
 
-### method_setImplementation을 이용한 메서드 스위즐링
+### method_setImplementation을 사용한 메서드 스위즐링
 
-이전 형식은 서로 다른 두 메서드의 구현을 변경하기 때문에 이상합니다. **`method_setImplementation`** 함수를 사용하면 **다른 메서드의 구현**을 **변경**할 수 있습니다.
+이전 형식은 서로 다른 두 메서드의 구현을 변경하기 때문에 이상합니다. **`method_setImplementation`** 함수를 사용하면 **하나의 메서드의 구현을 다른 메서드로 변경**할 수 있습니다.
 
-새로운 구현에서 호출하기 전에 **원래 구현의 주소를 저장**하는 것을 잊지 마세요. 그렇지 않으면 나중에 그 주소를 찾기가 훨씬 복잡해질 것입니다.
+새로운 구현에서 호출하기 위해 원래 구현의 주소를 **저장하는 것을 잊지 마세요**. 나중에 그 주소를 찾는 것이 훨씬 복잡해질 것입니다.
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
@@ -278,7 +278,7 @@ return 0;
 
 그러나 함수 후킹 공격은 매우 구체적이며, 공격자는 **프로세스 내부에서 민감한 정보를 훔치기 위해** 이를 수행합니다(그렇지 않으면 프로세스 주입 공격을 수행할 것입니다). 이 민감한 정보는 MacPass와 같은 사용자 다운로드 앱에 위치할 수 있습니다.
 
-따라서 공격자 벡터는 취약점을 찾거나 애플리케이션의 서명을 제거하고, 애플리케이션의 Info.plist를 통해 **`DYLD_INSERT_LIBRARIES`** 환경 변수를 주입하여 다음과 같은 내용을 추가하는 것입니다:
+따라서 공격자의 벡터는 취약점을 찾거나 애플리케이션의 서명을 제거하고, 애플리케이션의 Info.plist를 통해 **`DYLD_INSERT_LIBRARIES`** 환경 변수를 주입하여 다음과 같은 것을 추가하는 것입니다:
 ```xml
 <key>LSEnvironment</key>
 <dict>
@@ -286,7 +286,7 @@ return 0;
 <string>/Applications/Application.app/Contents/malicious.dylib</string>
 </dict>
 ```
-그리고 **재등록** 애플리케이션:
+그리고 나서 **재등록** 애플리케이션:
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f /Applications/Application.app
 ```

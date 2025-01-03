@@ -1,10 +1,10 @@
-# Docker 보안
+# Docker Security
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## **기본 Docker 엔진 보안**
 
-**Docker 엔진**은 Linux 커널의 **네임스페이스**와 **Cgroups**를 사용하여 컨테이너를 격리하여 기본적인 보안 계층을 제공합니다. **Capabilities dropping**, **Seccomp**, 및 **SELinux/AppArmor**를 통해 추가적인 보호가 제공되어 컨테이너 격리가 강화됩니다. **auth 플러그인**은 사용자 작업을 추가로 제한할 수 있습니다.
+**Docker 엔진**은 Linux 커널의 **네임스페이스**와 **Cgroups**를 사용하여 컨테이너를 격리하여 기본적인 보안 계층을 제공합니다. **Capabilities dropping**, **Seccomp**, 및 **SELinux/AppArmor**를 통해 추가적인 보호가 제공되어 컨테이너 격리가 강화됩니다. **auth plugin**은 사용자 행동을 추가로 제한할 수 있습니다.
 
 ![Docker Security](https://sreeninet.files.wordpress.com/2016/03/dockersec1.png)
 
@@ -12,7 +12,7 @@
 
 Docker 엔진은 Unix 소켓을 통해 로컬에서 또는 HTTP를 사용하여 원격으로 접근할 수 있습니다. 원격 접근을 위해서는 HTTPS와 **TLS**를 사용하여 기밀성, 무결성 및 인증을 보장하는 것이 필수적입니다.
 
-Docker 엔진은 기본적으로 `unix:///var/run/docker.sock`에서 Unix 소켓을 수신 대기합니다. Ubuntu 시스템에서 Docker의 시작 옵션은 `/etc/default/docker`에 정의되어 있습니다. Docker API 및 클라이언트에 대한 원격 접근을 활성화하려면 다음 설정을 추가하여 Docker 데몬을 HTTP 소켓을 통해 노출하십시오:
+Docker 엔진은 기본적으로 `unix:///var/run/docker.sock`에서 Unix 소켓을 통해 수신 대기합니다. Ubuntu 시스템에서 Docker의 시작 옵션은 `/etc/default/docker`에 정의되어 있습니다. Docker API 및 클라이언트에 대한 원격 접근을 활성화하려면 다음 설정을 추가하여 Docker 데몬을 HTTP 소켓을 통해 노출하십시오:
 ```bash
 DOCKER_OPTS="-D -H unix:///var/run/docker.sock -H tcp://192.168.56.101:2376"
 sudo service docker restart
@@ -34,7 +34,7 @@ sudo service docker restart
 
 ### 이미지 스캔
 
-컨테이너는 기본 이미지 또는 기본 이미지 위에 설치된 소프트웨어로 인해 **보안 취약점**이 있을 수 있습니다. Docker는 컨테이너의 보안 스캔을 수행하고 취약점을 나열하는 **Nautilus**라는 프로젝트를 진행 중입니다. Nautilus는 각 컨테이너 이미지 레이어를 취약점 저장소와 비교하여 보안 구멍을 식별합니다.
+컨테이너는 기본 이미지 또는 기본 이미지 위에 설치된 소프트웨어로 인해 **보안 취약점**을 가질 수 있습니다. Docker는 컨테이너의 보안 스캔을 수행하고 취약점을 나열하는 **Nautilus**라는 프로젝트를 진행 중입니다. Nautilus는 각 컨테이너 이미지 레이어를 취약점 저장소와 비교하여 보안 구멍을 식별합니다.
 
 자세한 [**정보는 여기에서 읽어보세요**](https://docs.docker.com/engine/scan/) .
 
@@ -74,7 +74,7 @@ Docker 이미지 서명은 컨테이너에서 사용되는 이미지의 보안�
 
 - **Docker Content Trust**는 이미지 서명을 관리하기 위해 The Update Framework (TUF)를 기반으로 한 Notary 프로젝트를 활용합니다. 자세한 내용은 [Notary](https://github.com/docker/notary) 및 [TUF](https://theupdateframework.github.io)를 참조하세요.
 - Docker 콘텐츠 신뢰를 활성화하려면 `export DOCKER_CONTENT_TRUST=1`을 설정합니다. 이 기능은 Docker 버전 1.10 이상에서 기본적으로 꺼져 있습니다.
-- 이 기능이 활성화되면 서명된 이미지만 다운로드할 수 있습니다. 초기 이미지 푸시에는 루트 및 태깅 키에 대한 비밀번호를 설정해야 하며, Docker는 보안을 강화하기 위해 Yubikey도 지원합니다. 더 많은 세부정보는 [여기](https://blog.docker.com/2015/11/docker-content-trust-yubikey/)에서 확인할 수 있습니다.
+- 이 기능이 활성화되면 서명된 이미지만 다운로드할 수 있습니다. 초기 이미지 푸시에는 루트 및 태그 키에 대한 비밀번호를 설정해야 하며, Docker는 보안을 강화하기 위해 Yubikey도 지원합니다. 더 많은 세부정보는 [여기](https://blog.docker.com/2015/11/docker-content-trust-yubikey/)에서 확인할 수 있습니다.
 - 콘텐츠 신뢰가 활성화된 상태에서 서명되지 않은 이미지를 가져오려고 하면 "No trust data for latest" 오류가 발생합니다.
 - 첫 번째 이후의 이미지 푸시를 위해 Docker는 이미지를 서명하기 위해 리포지토리 키의 비밀번호를 요청합니다.
 
@@ -92,7 +92,7 @@ Docker 호스트를 전환할 때, 운영을 유지하기 위해 루트 및 리�
 
 **주요 프로세스 격리 기능**
 
-컨테이너화된 환경에서 프로젝트와 그 프로세스를 격리하는 것은 보안 및 자원 관리에 있어 매우 중요합니다. 주요 개념에 대한 간단한 설명은 다음과 같습니다:
+컨테이너화된 환경에서 프로젝트와 그 프로세스를 격리하는 것은 보안 및 자원 관리에 있어 매우 중요합니다. 다음은 주요 개념에 대한 간단한 설명입니다:
 
 **네임스페이스**
 
@@ -116,20 +116,20 @@ Current: cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,ca
 ```
 **Seccomp**
 
-Docker에서 기본적으로 활성화되어 있습니다. 이는 프로세스가 호출할 수 있는 **syscalls를 더욱 제한하는 데 도움을 줍니다**.\
+Docker에서 기본적으로 활성화되어 있습니다. 이는 **프로세스가 호출할 수 있는 syscalls를 더욱 제한하는 데 도움을 줍니다.**\
 **기본 Docker Seccomp 프로파일**은 [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json)에서 찾을 수 있습니다.
 
 **AppArmor**
 
 Docker에는 활성화할 수 있는 템플릿이 있습니다: [https://github.com/moby/moby/tree/master/profiles/apparmor](https://github.com/moby/moby/tree/master/profiles/apparmor)
 
-이를 통해 권한, syscalls, 파일 및 폴더에 대한 접근을 줄일 수 있습니다...
+이것은 권한, syscalls, 파일 및 폴더에 대한 접근을 줄이는 데 도움이 됩니다...
 
 </details>
 
 ### Namespaces
 
-**Namespaces**는 **커널 리소스를 분할**하여 한 집합의 **프로세스**가 한 집합의 **리소스**를 **보고**, **다른** 집합의 **프로세스**가 **다른** 집합의 리소스를 보도록 하는 Linux 커널의 기능입니다. 이 기능은 리소스와 프로세스의 집합에 대해 동일한 네임스페이스를 가지지만, 해당 네임스페이스는 서로 다른 리소스를 참조함으로써 작동합니다. 리소스는 여러 공간에 존재할 수 있습니다.
+**Namespaces**는 **커널 리소스를 분할**하여 한 집합의 **프로세스**가 한 집합의 **리소스**를 **보고**, **다른** 집합의 **프로세스**가 **다른** 집합의 리소스를 보는 Linux 커널의 기능입니다. 이 기능은 리소스와 프로세스의 집합에 대해 동일한 네임스페이스를 가지지만, 해당 네임스페이스는 서로 다른 리소스를 참조함으로써 작동합니다. 리소스는 여러 공간에 존재할 수 있습니다.
 
 Docker는 컨테이너 격리를 달성하기 위해 다음 Linux 커널 네임스페이스를 사용합니다:
 
@@ -147,7 +147,7 @@ namespaces/
 
 ### cgroups
 
-Linux 커널 기능 **cgroups**는 **cpu, memory, io, network bandwidth와 같은 리소스를** 프로세스 집합에 대해 **제한할 수 있는 기능**을 제공합니다. Docker는 특정 컨테이너에 대한 리소스 제어를 허용하는 cgroup 기능을 사용하여 컨테이너를 생성할 수 있습니다.\
+Linux 커널 기능 **cgroups**는 **일련의 프로세스 간에 cpu, memory, io, network bandwidth와 같은 리소스를 제한하는 기능을 제공합니다.** Docker는 특정 컨테이너에 대한 리소스 제어를 허용하는 cgroup 기능을 사용하여 컨테이너를 생성할 수 있습니다.\
 다음은 사용자 공간 메모리가 500m로 제한되고, 커널 메모리가 50m로 제한되며, cpu share가 512, blkioweight가 400인 컨테이너입니다. CPU share는 컨테이너의 CPU 사용량을 제어하는 비율입니다. 기본값은 1024이며 0에서 1024 사이의 범위를 가집니다. 세 개의 컨테이너가 동일한 CPU share 1024를 가지면, 각 컨테이너는 CPU 리소스 경합 시 최대 33%의 CPU를 사용할 수 있습니다. blkio-weight는 컨테이너의 IO를 제어하는 비율입니다. 기본값은 500이며 10에서 1000 사이의 범위를 가집니다.
 ```
 docker run -it -m 500M --kernel-memory 50M --cpu-shares 512 --blkio-weight 400 --name ubuntu1 ubuntu bash
@@ -158,7 +158,7 @@ docker run -dt --rm denial sleep 1234 #Run a large sleep inside a Debian contain
 ps -ef | grep 1234 #Get info about the sleep process
 ls -l /proc/<PID>/ns #Get the Group and the namespaces (some may be uniq to the hosts and some may be shred with it)
 ```
-더 많은 정보는 확인하세요:
+더 많은 정보는 다음을 확인하세요:
 
 {{#ref}}
 cgroups.md
@@ -166,7 +166,7 @@ cgroups.md
 
 ### 권한
 
-권한은 **루트 사용자에게 허용될 수 있는 권한에 대한 더 세밀한 제어를 가능하게 합니다**. Docker는 Linux 커널 권한 기능을 사용하여 **사용자 유형에 관계없이 컨테이너 내에서 수행할 수 있는 작업을 제한합니다**.
+권한은 **루트 사용자에게 허용될 수 있는 권한에 대한 더 세밀한 제어를 허용**합니다. Docker는 Linux 커널 권한 기능을 사용하여 **사용자 유형에 관계없이 컨테이너 내에서 수행할 수 있는 작업을 제한**합니다.
 
 Docker 컨테이너가 실행될 때, **프로세스는 격리에서 탈출하는 데 사용할 수 있는 민감한 권한을 포기합니다**. 이는 프로세스가 민감한 작업을 수행하고 탈출할 수 없도록 보장하려고 합니다:
 
@@ -176,7 +176,7 @@ Docker 컨테이너가 실행될 때, **프로세스는 격리에서 탈출하�
 
 ### Docker의 Seccomp
 
-이것은 Docker가 **컨테이너 내에서 사용할 수 있는 시스템 호출을 제한할 수 있게 해주는 보안 기능입니다**:
+이것은 Docker가 **컨테이너 내에서 사용할 수 있는 시스템 호출을 제한**할 수 있도록 하는 보안 기능입니다:
 
 {{#ref}}
 seccomp.md
@@ -184,7 +184,7 @@ seccomp.md
 
 ### Docker의 AppArmor
 
-**AppArmor**는 **컨테이너**를 **제한된** **리소스** 집합에 **프로그램별 프로필**로 제한하는 커널 향상 기능입니다.:
+**AppArmor**는 **컨테이너**를 **제한된** **자원** 집합에 **프로그램별 프로필**로 제한하는 커널 향상 기능입니다.:
 
 {{#ref}}
 apparmor.md
@@ -193,10 +193,10 @@ apparmor.md
 ### Docker의 SELinux
 
 - **레이블링 시스템**: SELinux는 모든 프로세스와 파일 시스템 객체에 고유한 레이블을 할당합니다.
-- **정책 집행**: 프로세스 레이블이 시스템 내 다른 레이블에 대해 수행할 수 있는 작업을 정의하는 보안 정책을 집행합니다.
+- **정책 집행**: 프로세스 레이블이 시스템 내 다른 레이블에서 수행할 수 있는 작업을 정의하는 보안 정책을 집행합니다.
 - **컨테이너 프로세스 레이블**: 컨테이너 엔진이 컨테이너 프로세스를 시작할 때, 일반적으로 제한된 SELinux 레이블인 `container_t`가 할당됩니다.
 - **컨테이너 내 파일 레이블링**: 컨테이너 내의 파일은 일반적으로 `container_file_t`로 레이블이 지정됩니다.
-- **정책 규칙**: SELinux 정책은 주로 `container_t` 레이블을 가진 프로세스가 `container_file_t`로 레이블이 지정된 파일과만 상호작용(읽기, 쓰기, 실행)할 수 있도록 보장합니다.
+- **정책 규칙**: SELinux 정책은 주로 `container_t` 레이블이 있는 프로세스가 `container_file_t`로 레이블이 지정된 파일과만 상호작용(읽기, 쓰기, 실행)할 수 있도록 보장합니다.
 
 이 메커니즘은 컨테이너 내의 프로세스가 손상되더라도 해당 레이블이 있는 객체와만 상호작용하도록 제한되어, 그러한 손상으로 인한 잠재적 피해를 크게 제한합니다.
 
@@ -219,7 +219,7 @@ authz-and-authn-docker-access-authorization-plugin.md
 
 ## 컨테이너에서의 DoS
 
-컨테이너가 사용할 수 있는 리소스를 적절히 제한하지 않으면, 손상된 컨테이너가 실행 중인 호스트에 DoS를 일으킬 수 있습니다.
+컨테이너가 사용할 수 있는 자원을 적절히 제한하지 않으면, 손상된 컨테이너가 실행 중인 호스트에 DoS를 일으킬 수 있습니다.
 
 - CPU DoS
 ```bash
@@ -276,9 +276,9 @@ docker run -it --security-opt=no-new-privileges:true nonewpriv
 
 비밀을 Docker 이미지에 직접 포함시키거나 환경 변수를 사용하는 것은 피하는 것이 중요합니다. 이러한 방법은 `docker inspect` 또는 `exec`와 같은 명령을 통해 컨테이너에 접근할 수 있는 모든 사람에게 민감한 정보를 노출합니다.
 
-**Docker 볼륨**은 민감한 정보에 접근하기 위한 더 안전한 대안으로 권장됩니다. 이는 메모리 내의 임시 파일 시스템으로 활용될 수 있어 `docker inspect` 및 로깅과 관련된 위험을 완화합니다. 그러나 루트 사용자와 컨테이너에 `exec` 접근 권한이 있는 사용자는 여전히 비밀에 접근할 수 있습니다.
+**Docker 볼륨**은 민감한 정보에 접근하기 위한 더 안전한 대안입니다. 이는 메모리 내에서 임시 파일 시스템으로 활용될 수 있어 `docker inspect` 및 로깅과 관련된 위험을 완화합니다. 그러나 루트 사용자와 컨테이너에 `exec` 접근 권한이 있는 사용자는 여전히 비밀에 접근할 수 있습니다.
 
-**Docker 비밀**은 민감한 정보를 처리하기 위한 더욱 안전한 방법을 제공합니다. 이미지 빌드 단계에서 비밀이 필요한 인스턴스의 경우, **BuildKit**은 빌드 시간 비밀을 지원하여 빌드 속도를 향상시키고 추가 기능을 제공합니다.
+**Docker 비밀**은 민감한 정보를 처리하는 데 있어 더욱 안전한 방법을 제공합니다. 이미지 빌드 단계에서 비밀이 필요한 인스턴스의 경우, **BuildKit**은 빌드 시간 비밀을 지원하여 빌드 속도를 향상시키고 추가 기능을 제공합니다.
 
 BuildKit을 활용하려면 세 가지 방법으로 활성화할 수 있습니다:
 
@@ -290,7 +290,7 @@ BuildKit은 `--secret` 옵션을 사용하여 빌드 시간 비밀을 사용할 
 ```bash
 docker build --secret my_key=my_value ,src=path/to/my_secret_file .
 ```
-실행 중인 컨테이너에서 필요한 비밀을 위해, **Docker Compose와 Kubernetes**는 강력한 솔루션을 제공합니다. Docker Compose는 비밀 파일을 지정하기 위해 서비스 정의에서 `secrets` 키를 사용합니다. 다음은 `docker-compose.yml` 예제입니다:
+실행 중인 컨테이너에서 필요한 비밀에 대해, **Docker Compose와 Kubernetes**는 강력한 솔루션을 제공합니다. Docker Compose는 비밀 파일을 지정하기 위해 서비스 정의에서 `secrets` 키를 사용합니다. 다음은 `docker-compose.yml` 예제입니다:
 ```yaml
 version: "3.7"
 services:
@@ -305,7 +305,7 @@ file: ./my_secret_file.txt
 ```
 이 구성은 Docker Compose로 서비스를 시작할 때 비밀을 사용할 수 있도록 허용합니다.
 
-Kubernetes 환경에서는 비밀이 기본적으로 지원되며 [Helm-Secrets](https://github.com/futuresimple/helm-secrets)와 같은 도구로 추가 관리할 수 있습니다. Kubernetes의 역할 기반 접근 제어(RBAC)는 Docker Enterprise와 유사하게 비밀 관리 보안을 강화합니다.
+Kubernetes 환경에서는 비밀이 기본적으로 지원되며, [Helm-Secrets](https://github.com/futuresimple/helm-secrets)와 같은 도구로 추가 관리할 수 있습니다. Kubernetes의 역할 기반 접근 제어(RBAC)는 Docker Enterprise와 유사하게 비밀 관리 보안을 강화합니다.
 
 ### gVisor
 
@@ -322,9 +322,9 @@ Kubernetes 환경에서는 비밀이 기본적으로 지원되며 [Helm-Secrets]
 ### 요약 팁
 
 - **`--privileged` 플래그를 사용하지 않거나** [**Docker 소켓을 컨테이너 내부에 마운트하지 마십시오**](https://raesene.github.io/blog/2016/03/06/The-Dangers-Of-Docker.sock/)**.** Docker 소켓은 컨테이너를 생성할 수 있게 하므로, 예를 들어 `--privileged` 플래그로 다른 컨테이너를 실행하여 호스트를 완전히 제어할 수 있는 쉬운 방법입니다.
-- **컨테이너 내부에서 root로 실행하지 마십시오.** [**다른 사용자**](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user) **를 사용하고** [**사용자 네임스페이스**](https://docs.docker.com/engine/security/userns-remap/)**를 사용하십시오.** 컨테이너의 root는 사용자 네임스페이스로 재매핑되지 않는 한 호스트의 root와 동일합니다. 이는 주로 Linux 네임스페이스, 기능 및 cgroups에 의해 약간 제한됩니다.
+- **컨테이너 내부에서 root로 실행하지 마십시오.** [**다른 사용자**](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user) **와** [**사용자 네임스페이스**](https://docs.docker.com/engine/security/userns-remap/)**를 사용하십시오.** 컨테이너의 root는 사용자 네임스페이스로 재매핑되지 않는 한 호스트의 root와 동일합니다. 이는 주로 Linux 네임스페이스, 기능 및 cgroups에 의해 약간 제한됩니다.
 - [**모든 기능을 제거하십시오**](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities) **(`--cap-drop=all`) 및 필요한 기능만 활성화하십시오** (`--cap-add=...`). 많은 작업 부하에는 기능이 필요하지 않으며, 이를 추가하면 잠재적인 공격 범위가 증가합니다.
-- [**“no-new-privileges” 보안 옵션을 사용하십시오**](https://raesene.github.io/blog/2019/06/01/docker-capabilities-and-no-new-privs/) **.** 이는 프로세스가 suid 바이너리를 통해 더 많은 권한을 얻지 못하도록 방지합니다.
+- [**“no-new-privileges” 보안 옵션을 사용하십시오**](https://raesene.github.io/blog/2019/06/01/docker-capabilities-and-no-new-privs/) **프로세스가 더 많은 권한을 얻지 못하도록 방지하십시오.** 예를 들어 suid 바이너리를 통해서입니다.
 - [**컨테이너에 사용할 수 있는 리소스를 제한하십시오**](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources)**.** 리소스 제한은 서비스 거부 공격으로부터 머신을 보호할 수 있습니다.
 - **seccomp** [**조정하십시오**](https://docs.docker.com/engine/security/seccomp/), **AppArmor** [**(또는 SELinux)**](https://docs.docker.com/engine/security/apparmor/) 프로파일을 조정하여 컨테이너에 필요한 최소한의 작업 및 시스템 호출만 허용하십시오.
 - **공식 Docker 이미지를 사용하고** [**서명을 요구하십시오**](https://docs.docker.com/docker-hub/official_images/) **또는 이를 기반으로 직접 빌드하십시오.** 백도어가 있는 이미지를 상속하거나 사용하지 마십시오. 또한 루트 키와 비밀번호를 안전한 장소에 보관하십시오. Docker는 UCP로 키를 관리할 계획이 있습니다.
@@ -338,7 +338,7 @@ Kubernetes 환경에서는 비밀이 기본적으로 지원되며 [Helm-Secrets]
 
 ## Docker 탈출 / 권한 상승
 
-당신이 **docker 컨테이너 내부에 있거나** **docker 그룹의 사용자에 접근할 수 있다면**, **탈출하고 권한을 상승시키려고 시도할 수 있습니다**:
+**Docker 컨테이너 내부에 있거나** **docker 그룹의 사용자에 대한 접근 권한이 있는 경우**, **탈출 및 권한 상승을 시도할 수 있습니다**:
 
 {{#ref}}
 docker-breakout-privilege-escalation/
@@ -346,7 +346,7 @@ docker-breakout-privilege-escalation/
 
 ## Docker 인증 플러그인 우회
 
-Docker 소켓에 접근하거나 **docker 그룹의 사용자에 접근할 수 있지만** Docker 인증 플러그인에 의해 행동이 제한되고 있다면, **우회할 수 있는지 확인하십시오**:
+Docker 소켓에 접근하거나 **docker 그룹의 사용자에 대한 접근 권한이 있지만 Docker 인증 플러그인에 의해 행동이 제한되는 경우**, **우회할 수 있는지 확인하십시오**:
 
 {{#ref}}
 authz-and-authn-docker-access-authorization-plugin.md
@@ -354,10 +354,10 @@ authz-and-authn-docker-access-authorization-plugin.md
 
 ## Docker 강화
 
-- 도구 [**docker-bench-security**](https://github.com/docker/docker-bench-security)는 프로덕션에서 Docker 컨테이너를 배포할 때의 수십 가지 일반적인 모범 사례를 확인하는 스크립트입니다. 테스트는 모두 자동화되어 있으며, [CIS Docker Benchmark v1.3.1](https://www.cisecurity.org/benchmark/docker/)을 기반으로 합니다.\
+- 도구 [**docker-bench-security**](https://github.com/docker/docker-bench-security)는 프로덕션에서 Docker 컨테이너를 배포할 때의 일반적인 모범 사례를 확인하는 스크립트입니다. 테스트는 모두 자동화되어 있으며, [CIS Docker Benchmark v1.3.1](https://www.cisecurity.org/benchmark/docker/)을 기반으로 합니다.\
 Docker를 실행하는 호스트 또는 충분한 권한이 있는 컨테이너에서 도구를 실행해야 합니다. **README에서 실행 방법을 확인하십시오:** [**https://github.com/docker/docker-bench-security**](https://github.com/docker/docker-bench-security).
 
-## 참고 문헌
+## 참고자료
 
 - [https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/](https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/)
 - [https://twitter.com/\_fel1x/status/1151487051986087936](https://twitter.com/_fel1x/status/1151487051986087936)

@@ -12,7 +12,7 @@
 
 ## PE
 
-호스트에 `runc`가 설치되어 있다면 **호스트의 루트 / 폴더를 마운트하는 컨테이너를 실행할 수 있을지도 모릅니다**.
+호스트에 `runc`가 설치되어 있다면 **호스트의 루트 / 폴더를 마운트하여 컨테이너를 실행할 수 있을지도 모릅니다**.
 ```bash
 runc -help #Get help and see if runc is intalled
 runc spec #This will create the config.json file in your current folder

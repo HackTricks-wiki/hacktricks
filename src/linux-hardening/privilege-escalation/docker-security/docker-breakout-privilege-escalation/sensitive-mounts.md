@@ -47,7 +47,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # modprobe 접근 확인
 
 #### **`/proc/sys/fs/binfmt_misc`**
 
-- 매직 넘버에 따라 비네이티브 이진 형식에 대한 인터프리터를 등록할 수 있습니다.
+- 매직 넘버에 따라 비네이티브 이진 형식에 대한 해석기를 등록할 수 있습니다.
 - `/proc/sys/fs/binfmt_misc/register`가 쓰기 가능할 경우 권한 상승 또는 루트 셸 접근으로 이어질 수 있습니다.
 - 관련된 악용 및 설명:
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
@@ -102,7 +102,7 @@ echo b > /proc/sysrq-trigger # 호스트 재부팅
 #### **`/proc/mem`**
 
 - 물리적 메모리를 나타내는 `/dev/mem`의 대체 인터페이스입니다.
-- 읽기 및 쓰기를 허용하며, 모든 메모리 수정을 위해 가상 주소를 물리적 주소로 변환해야 합니다.
+- 읽기 및 쓰기를 허용하며, 모든 메모리 수정을 위해서는 가상 주소를 물리적 주소로 변환해야 합니다.
 
 #### **`/proc/sched_debug`**
 
@@ -158,7 +158,7 @@ cat /output %%%
 #### **`/sys/firmware/efi/vars` 및 `/sys/firmware/efi/efivars`**
 
 - NVRAM에서 EFI 변수와 상호작용하기 위한 인터페이스를 노출합니다.
-- 잘못된 구성이나 악용은 브릭된 노트북이나 부팅 불가능한 호스트 머신으로 이어질 수 있습니다.
+- 잘못된 구성이나 악용은 브릭된 노트북이나 부팅할 수 없는 호스트 머신으로 이어질 수 있습니다.
 
 #### **`/sys/kernel/debug`**
 

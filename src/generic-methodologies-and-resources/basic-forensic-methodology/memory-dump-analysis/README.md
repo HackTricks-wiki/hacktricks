@@ -1,49 +1,37 @@
-# Memory dump analysis
+# 메모리 덤프 분석
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
+## 시작
 
-[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
-
-{% embed url="https://www.rootedcon.com/" %}
-
-## Start
-
-Start **searching** for **malware** inside the pcap. Use the **tools** mentioned in [**Malware Analysis**](../malware-analysis.md).
+**악성코드**를 찾기 위해 **검색**을 시작하세요. [**악성코드 분석**](../malware-analysis.md)에서 언급된 **도구**를 사용하세요.
 
 ## [Volatility](volatility-cheatsheet.md)
 
-**Volatility is the main open-source framework for memory dump analysis**. This Python tool analyzes dumps from external sources or VMware VMs, identifying data like processes and passwords based on the dump's OS profile. It's extensible with plugins, making it highly versatile for forensic investigations.
+**Volatility는 메모리 덤프 분석을 위한 주요 오픈 소스 프레임워크입니다**. 이 Python 도구는 외부 소스 또는 VMware VM에서 덤프를 분석하여 프로세스 및 비밀번호와 같은 데이터를 덤프의 OS 프로파일에 따라 식별합니다. 플러그인으로 확장 가능하여 포렌식 조사에 매우 유용합니다.
 
-[**Find here a cheatsheet**](volatility-cheatsheet.md)
+[**여기에서 치트시트를 찾으세요**](volatility-cheatsheet.md)
 
-## Mini dump crash report
+## 미니 덤프 크래시 보고서
 
-When the dump is small (just some KB, maybe a few MB) then it's probably a mini dump crash report and not a memory dump.
+덤프가 작을 경우(몇 KB 또는 몇 MB 정도) 이는 아마도 미니 덤프 크래시 보고서일 것이며 메모리 덤프가 아닙니다.
 
 ![](<../../../images/image (532).png>)
 
-If you have Visual Studio installed, you can open this file and bind some basic information like process name, architecture, exception info and modules being executed:
+Visual Studio가 설치되어 있다면 이 파일을 열고 프로세스 이름, 아키텍처, 예외 정보 및 실행 중인 모듈과 같은 기본 정보를 바인딩할 수 있습니다:
 
 ![](<../../../images/image (263).png>)
 
-You can also load the exception and see the decompiled instructions
+예외를 로드하고 디컴파일된 명령어를 볼 수도 있습니다.
 
 ![](<../../../images/image (142).png>)
 
 ![](<../../../images/image (610).png>)
 
-Anyway, Visual Studio isn't the best tool to perform an analysis of the depth of the dump.
+어쨌든, Visual Studio는 덤프의 깊이 있는 분석을 수행하기 위한 최상의 도구는 아닙니다.
 
-You should **open** it using **IDA** or **Radare** to inspection it in **depth**.
+**IDA** 또는 **Radare**를 사용하여 **심층적으로** 검사해야 합니다.
 
 ​
-
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
-
-[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
-
-{% embed url="https://www.rootedcon.com/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}

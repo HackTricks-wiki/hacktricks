@@ -10,9 +10,9 @@
 ```
 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -dump
 ```
-Or using the tool [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
+또한 도구 [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html)를 사용할 수 있습니다.
 
-**`/usr/libexec/lsd`**는 데이터베이스의 두뇌입니다. **여러 XPC 서비스**를 제공합니다. 예를 들어 `.lsd.installation`, `.lsd.open`, `.lsd.openurl` 등이 있습니다. 그러나 노출된 XPC 기능을 사용하기 위해서는 애플리케이션에 **일부 권한**이 필요합니다. 예를 들어 mime 유형이나 URL 스킴에 대한 기본 앱을 변경하기 위한 `.launchservices.changedefaulthandler` 또는 `.launchservices.changeurlschemehandler`와 같은 권한이 필요합니다.
+**`/usr/libexec/lsd`**는 데이터베이스의 두뇌입니다. **여러 XPC 서비스**를 제공합니다. 예를 들어 `.lsd.installation`, `.lsd.open`, `.lsd.openurl` 등이 있습니다. 그러나 노출된 XPC 기능을 사용하기 위해서는 애플리케이션에 대한 **일부 권한**이 필요합니다. 예를 들어 mime 유형이나 URL 스킴에 대한 기본 앱을 변경하기 위한 `.launchservices.changedefaulthandler` 또는 `.launchservices.changeurlschemehandler`와 같은 권한이 필요합니다.
 
 **`/System/Library/CoreServices/launchservicesd`**는 서비스 `com.apple.coreservices.launchservicesd`를 주장하며 실행 중인 애플리케이션에 대한 정보를 얻기 위해 쿼리할 수 있습니다. 시스템 도구 /**`usr/bin/lsappinfo`** 또는 [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html)로 쿼리할 수 있습니다.
 

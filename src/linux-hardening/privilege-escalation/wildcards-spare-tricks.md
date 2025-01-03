@@ -7,7 +7,7 @@
 touch "--reference=/my/own/path/filename"
 ```
 이것은 [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(결합 공격)_을 사용하여 악용할 수 있습니다.\
-자세한 정보는 [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)에서 확인하세요.
+자세한 내용은 [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)에서 확인하세요.
 
 ## Tar
 

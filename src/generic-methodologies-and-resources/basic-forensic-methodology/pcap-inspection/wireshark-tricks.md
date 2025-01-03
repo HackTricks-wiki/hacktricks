@@ -2,156 +2,154 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Improve your Wireshark skills
+## Wireshark 기술 향상
 
-### Tutorials
+### 튜토리얼
 
-The following tutorials are amazing to learn some cool basic tricks:
+다음 튜토리얼은 멋진 기본 기술을 배우기에 훌륭합니다:
 
 - [https://unit42.paloaltonetworks.com/unit42-customizing-wireshark-changing-column-display/](https://unit42.paloaltonetworks.com/unit42-customizing-wireshark-changing-column-display/)
 - [https://unit42.paloaltonetworks.com/using-wireshark-display-filter-expressions/](https://unit42.paloaltonetworks.com/using-wireshark-display-filter-expressions/)
 - [https://unit42.paloaltonetworks.com/using-wireshark-identifying-hosts-and-users/](https://unit42.paloaltonetworks.com/using-wireshark-identifying-hosts-and-users/)
 - [https://unit42.paloaltonetworks.com/using-wireshark-exporting-objects-from-a-pcap/](https://unit42.paloaltonetworks.com/using-wireshark-exporting-objects-from-a-pcap/)
 
-### Analysed Information
+### 분석된 정보
 
-**Expert Information**
+**전문가 정보**
 
-Clicking on _**Analyze** --> **Expert Information**_ you will have an **overview** of what is happening in the packets **analyzed**:
+_**Analyze** --> **Expert Information**_을 클릭하면 패킷 **분석**에서 발생하는 일에 대한 **개요**를 볼 수 있습니다:
 
 ![](<../../../images/image (256).png>)
 
-**Resolved Addresses**
+**해결된 주소**
 
-Under _**Statistics --> Resolved Addresses**_ you can find several **information** that was "**resolved**" by wireshark like port/transport to protocol, MAC to the manufacturer, etc. It is interesting to know what is implicated in the communication.
+_**Statistics --> Resolved Addresses**_ 아래에서 wireshark에 의해 "**해결된**" 여러 **정보**를 찾을 수 있습니다. 예를 들어 포트/전송 프로토콜, MAC에서 제조사 등입니다. 통신에 관련된 내용을 아는 것은 흥미롭습니다.
 
 ![](<../../../images/image (893).png>)
 
-**Protocol Hierarchy**
+**프로토콜 계층**
 
-Under _**Statistics --> Protocol Hierarchy**_ you can find the **protocols** **involved** in the communication and data about them.
+_**Statistics --> Protocol Hierarchy**_ 아래에서 통신에 **관련된** **프로토콜**과 그에 대한 데이터를 찾을 수 있습니다.
 
 ![](<../../../images/image (586).png>)
 
-**Conversations**
+**대화**
 
-Under _**Statistics --> Conversations**_ you can find a **summary of the conversations** in the communication and data about them.
+_**Statistics --> Conversations**_ 아래에서 통신의 **대화 요약**과 그에 대한 데이터를 찾을 수 있습니다.
 
 ![](<../../../images/image (453).png>)
 
-**Endpoints**
+**엔드포인트**
 
-Under _**Statistics --> Endpoints**_ you can find a **summary of the endpoints** in the communication and data about each of them.
+_**Statistics --> Endpoints**_ 아래에서 통신의 **엔드포인트 요약**과 각 엔드포인트에 대한 데이터를 찾을 수 있습니다.
 
 ![](<../../../images/image (896).png>)
 
-**DNS info**
+**DNS 정보**
 
-Under _**Statistics --> DNS**_ you can find statistics about the DNS request captured.
+_**Statistics --> DNS**_ 아래에서 캡처된 DNS 요청에 대한 통계를 찾을 수 있습니다.
 
 ![](<../../../images/image (1063).png>)
 
-**I/O Graph**
+**I/O 그래프**
 
-Under _**Statistics --> I/O Graph**_ you can find a **graph of the communication.**
+_**Statistics --> I/O Graph**_ 아래에서 **통신 그래프**를 찾을 수 있습니다.
 
 ![](<../../../images/image (992).png>)
 
-### Filters
+### 필터
 
-Here you can find wireshark filter depending on the protocol: [https://www.wireshark.org/docs/dfref/](https://www.wireshark.org/docs/dfref/)\
-Other interesting filters:
+여기에서 프로토콜에 따라 wireshark 필터를 찾을 수 있습니다: [https://www.wireshark.org/docs/dfref/](https://www.wireshark.org/docs/dfref/)\
+기타 흥미로운 필터:
 
 - `(http.request or ssl.handshake.type == 1) and !(udp.port eq 1900)`
-  - HTTP and initial HTTPS traffic
+- HTTP 및 초기 HTTPS 트래픽
 - `(http.request or ssl.handshake.type == 1 or tcp.flags eq 0x0002) and !(udp.port eq 1900)`
-  - HTTP and initial HTTPS traffic + TCP SYN
+- HTTP 및 초기 HTTPS 트래픽 + TCP SYN
 - `(http.request or ssl.handshake.type == 1 or tcp.flags eq 0x0002 or dns) and !(udp.port eq 1900)`
-  - HTTP and initial HTTPS traffic + TCP SYN + DNS requests
+- HTTP 및 초기 HTTPS 트래픽 + TCP SYN + DNS 요청
 
-### Search
+### 검색
 
-If you want to **search** for **content** inside the **packets** of the sessions press _CTRL+f_. You can add new layers to the main information bar (No., Time, Source, etc.) by pressing the right button and then the edit column.
+세션의 **패킷** 내에서 **내용**을 **검색**하려면 _CTRL+f_를 누르십시오. 오른쪽 버튼을 눌러 새 레이어를 주 정보 바(No., Time, Source 등)에 추가할 수 있습니다.
 
-### Free pcap labs
+### 무료 pcap 실습
 
-**Practice with the free challenges of:** [**https://www.malware-traffic-analysis.net/**](https://www.malware-traffic-analysis.net)
+**무료 챌린지로 연습하세요:** [**https://www.malware-traffic-analysis.net/**](https://www.malware-traffic-analysis.net)
 
-## Identifying Domains
+## 도메인 식별
 
-You can add a column that shows the Host HTTP header:
+Host HTTP 헤더를 보여주는 열을 추가할 수 있습니다:
 
 ![](<../../../images/image (639).png>)
 
-And a column that add the Server name from an initiating HTTPS connection (**ssl.handshake.type == 1**):
+그리고 시작 HTTPS 연결에서 서버 이름을 추가하는 열(**ssl.handshake.type == 1**)을 추가할 수 있습니다:
 
 ![](<../../../images/image (408) (1).png>)
 
-## Identifying local hostnames
+## 로컬 호스트 이름 식별
 
-### From DHCP
+### DHCP에서
 
-In current Wireshark instead of `bootp` you need to search for `DHCP`
+현재 Wireshark에서는 `bootp` 대신 `DHCP`를 검색해야 합니다.
 
 ![](<../../../images/image (1013).png>)
 
-### From NBNS
+### NBNS에서
 
 ![](<../../../images/image (1003).png>)
 
-## Decrypting TLS
+## TLS 복호화
 
-### Decrypting https traffic with server private key
+### 서버 개인 키로 https 트래픽 복호화
 
 _edit>preference>protocol>ssl>_
 
 ![](<../../../images/image (1103).png>)
 
-Press _Edit_ and add all the data of the server and the private key (_IP, Port, Protocol, Key file and password_)
+_서버와 개인 키의 모든 데이터를 추가하려면_ _Edit_를 누르십시오 (_IP, Port, Protocol, Key file 및 password_)
 
-### Decrypting https traffic with symmetric session keys
+### 대칭 세션 키로 https 트래픽 복호화
 
-Both Firefox and Chrome have the capability to log TLS session keys, which can be used with Wireshark to decrypt TLS traffic. This allows for in-depth analysis of secure communications. More details on how to perform this decryption can be found in a guide at [Red Flag Security](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/).
+Firefox와 Chrome 모두 TLS 세션 키를 기록할 수 있는 기능이 있으며, 이를 사용하여 Wireshark에서 TLS 트래픽을 복호화할 수 있습니다. 이를 통해 보안 통신에 대한 심층 분석이 가능합니다. 이 복호화를 수행하는 방법에 대한 자세한 내용은 [Red Flag Security](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/)의 가이드에서 확인할 수 있습니다.
 
-To detect this search inside the environment for to variable `SSLKEYLOGFILE`
+이를 감지하려면 환경 내에서 변수 `SSLKEYLOGFILE`을 검색하십시오.
 
-A file of shared keys will look like this:
+공유 키 파일은 다음과 같이 보일 것입니다:
 
 ![](<../../../images/image (820).png>)
 
-To import this in wireshark go to \_edit > preference > protocol > ssl > and import it in (Pre)-Master-Secret log filename:
+이 파일을 wireshark에 가져오려면 \_edit > preference > protocol > ssl > (Pre)-Master-Secret 로그 파일 이름에 가져오십시오:
 
 ![](<../../../images/image (989).png>)
 
-## ADB communication
+## ADB 통신
 
-Extract an APK from an ADB communication where the APK was sent:
-
+APK가 전송된 ADB 통신에서 APK를 추출합니다:
 ```python
 from scapy.all import *
 
 pcap = rdpcap("final2.pcapng")
 
 def rm_data(data):
-    splitted = data.split(b"DATA")
-    if len(splitted) == 1:
-        return data
-    else:
-        return splitted[0]+splitted[1][4:]
+splitted = data.split(b"DATA")
+if len(splitted) == 1:
+return data
+else:
+return splitted[0]+splitted[1][4:]
 
 all_bytes = b""
 for pkt in pcap:
-    if Raw in pkt:
-        a = pkt[Raw]
-        if b"WRTE" == bytes(a)[:4]:
-            all_bytes += rm_data(bytes(a)[24:])
-        else:
-            all_bytes += rm_data(bytes(a))
+if Raw in pkt:
+a = pkt[Raw]
+if b"WRTE" == bytes(a)[:4]:
+all_bytes += rm_data(bytes(a)[24:])
+else:
+all_bytes += rm_data(bytes(a))
 print(all_bytes)
 
 f = open('all_bytes.data', 'w+b')
 f.write(all_bytes)
 f.close()
 ```
-
 {{#include ../../../banners/hacktricks-training.md}}

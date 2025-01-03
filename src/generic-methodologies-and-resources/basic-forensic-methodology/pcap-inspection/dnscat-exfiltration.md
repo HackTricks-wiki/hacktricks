@@ -1,11 +1,10 @@
-# DNSCat pcap analysis
+# DNSCat pcap 분석
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-If you have pcap with data being **exfiltrated by DNSCat** (without using encryption), you can find the exfiltrated content.
+DNSCat에 의해 **유출된 데이터**가 포함된 pcap 파일이 있다면 (암호화를 사용하지 않고), 유출된 내용을 찾을 수 있습니다.
 
-You only need to know that the **first 9 bytes** are not real data but are related to the **C\&C communication**:
-
+**첫 9 바이트**는 실제 데이터가 아니라 **C\&C 통신**과 관련이 있다는 것만 알면 됩니다:
 ```python
 from scapy.all import rdpcap, DNSQR, DNSRR
 import struct
@@ -13,25 +12,22 @@ import struct
 f = ""
 last = ""
 for p in rdpcap('ch21.pcap'):
-	if p.haslayer(DNSQR) and not p.haslayer(DNSRR):
+if p.haslayer(DNSQR) and not p.haslayer(DNSRR):
 
-		qry = p[DNSQR].qname.replace(".jz-n-bs.local.","").strip().split(".")
-		qry = ''.join(_.decode('hex') for _ in qry)[9:]
-		if last != qry:
-			print(qry)
-			f += qry
-		last = qry
+qry = p[DNSQR].qname.replace(".jz-n-bs.local.","").strip().split(".")
+qry = ''.join(_.decode('hex') for _ in qry)[9:]
+if last != qry:
+print(qry)
+f += qry
+last = qry
 
 #print(f)
 ```
-
-For more information: [https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)\
+자세한 정보는 다음을 참조하세요: [https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)\
 [https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md](https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md)
 
-There is a script that works with Python3: [https://github.com/josemlwdf/DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder)
-
+Python3와 함께 작동하는 스크립트가 있습니다: [https://github.com/josemlwdf/DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder)
 ```
 python3 dnscat_decoder.py sample.pcap bad_domain
 ```
-
 {{#include ../../../banners/hacktricks-training.md}}

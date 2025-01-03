@@ -18,13 +18,13 @@
 
 ### ACLs
 
-키체인의 각 항목은 **액세스 제어 목록(ACLs)**에 의해 관리되며, 이는 키체인 항목에 대해 다양한 작업을 수행할 수 있는 사람을 규정합니다:
+키체인의 각 항목은 **액세스 제어 목록(ACLs)**에 의해 관리되며, 이는 키체인 항목에 대해 다양한 작업을 수행할 수 있는 사람을 규정합니다. 여기에는 다음이 포함됩니다:
 
 - **ACLAuhtorizationExportClear**: 보유자가 비밀의 평문을 가져올 수 있도록 허용합니다.
 - **ACLAuhtorizationExportWrapped**: 보유자가 다른 제공된 비밀번호로 암호화된 평문을 가져올 수 있도록 허용합니다.
 - **ACLAuhtorizationAny**: 보유자가 모든 작업을 수행할 수 있도록 허용합니다.
 
-ACLs는 이러한 작업을 사용자에게 요청 없이 수행할 수 있는 **신뢰할 수 있는 애플리케이션 목록**과 함께 제공됩니다. 이는 다음과 같을 수 있습니다:
+ACL은 이러한 작업을 수행할 수 있는 **신뢰할 수 있는 애플리케이션 목록**과 함께 제공됩니다. 이는 다음과 같을 수 있습니다:
 
 - **N`il`** (인증 필요 없음, **모두 신뢰됨**)
 - **빈** 목록 (**아무도** 신뢰되지 않음)
@@ -87,11 +87,11 @@ security dump-keychain ~/Library/Keychains/login.keychain-db
 - **`kSecReturnRef`**: 키체인 항목에 대한 참조도 가져옵니다(나중에 팝업 없이 복호화할 수 있는 경우 true로 설정).
 - **`kSecReturnAttributes`**: 항목에 대한 메타데이터를 가져옵니다.
 - **`kSecMatchLimit`**: 반환할 결과 수.
-- **`kSecClass`**: 어떤 종류의 키체인 항목인지.
+- **`kSecClass`**: 키체인 항목의 종류.
 
 각 항목의 **ACL**을 가져옵니다:
 
-- API **`SecAccessCopyACLList`**를 사용하여 **키체인 항목에 대한 ACL**을 가져올 수 있으며, 각 목록에는 다음과 같은 ACL 목록이 반환됩니다(예: `ACLAuhtorizationExportClear` 및 이전에 언급된 다른 항목들):
+- API **`SecAccessCopyACLList`**를 사용하여 **키체인 항목의 ACL**을 가져올 수 있으며, 각 목록에는 다음과 같은 ACL 목록이 반환됩니다(예: `ACLAuhtorizationExportClear` 및 이전에 언급된 다른 항목들):
 - 설명
 - **신뢰할 수 있는 애플리케이션 목록**. 이는 다음과 같을 수 있습니다:
 - 애플리케이션: /Applications/Slack.app
@@ -123,7 +123,7 @@ security dump-keychain ~/Library/Keychains/login.keychain-db
 
 - **Invisible**: UI 키체인 앱에서 항목을 **숨기기** 위한 부울 플래그입니다.
 - **General**: **메타데이터**를 저장하기 위한 것입니다(따라서 **암호화되지 않음**).
-- Microsoft는 민감한 엔드포인트에 접근하기 위해 모든 리프레시 토큰을 평문으로 저장하고 있었습니다.
+- Microsoft는 민감한 엔드포인트에 접근하기 위해 모든 새로 고침 토큰을 평문으로 저장하고 있었습니다.
 
 ## References
 

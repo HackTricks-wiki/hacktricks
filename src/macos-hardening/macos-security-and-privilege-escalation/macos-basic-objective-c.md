@@ -66,13 +66,13 @@ MyVehicle *newVehicle = [MyVehicle new];
 ```
 ### **클래스 메서드**
 
-클래스 메서드는 인스턴스 메서드에 사용되는 하이픈 (-)이 아닌 **플러스 기호** (+)로 정의됩니다. **NSString** 클래스 메서드 **`stringWithString`**와 같이:
+클래스 메서드는 인스턴스 메서드에 사용되는 하이픈 (-) 대신 **플러스 기호** (+)로 정의됩니다. **NSString** 클래스 메서드 **`stringWithString`**와 같이:
 ```objectivec
 + (id)stringWithString:(NSString *)aString;
 ```
 ### Setter & Getter
 
-속성을 **설정**하고 **가져오기** 위해, **점 표기법**을 사용하거나 **메서드를 호출하는 것처럼** 할 수 있습니다:
+속성을 **설정**하고 **가져오기** 위해, **점 표기법**을 사용하거나 **메서드를 호출**하는 것처럼 할 수 있습니다:
 ```objectivec
 // Set
 newVehicle.numberOfWheels = 2;
@@ -84,7 +84,7 @@ NSLog(@"Number of wheels: %i", [newVehicle numberOfWheels]);
 ```
 ### **인스턴스 변수**
 
-setter 및 getter 메서드 대신 인스턴스 변수를 사용할 수 있습니다. 이 변수들은 속성과 동일한 이름을 가지지만 "\_"로 시작합니다:
+setter 및 getter 메서드 대신 인스턴스 변수를 사용할 수 있습니다. 이러한 변수는 속성과 동일한 이름을 가지지만 "\_"로 시작합니다:
 ```objectivec
 - (void)makeLongTruck {
 _numberOfWheels = +10000;
@@ -95,7 +95,7 @@ NSLog(@"Number of wheels: %i", self.numberOfLeaves);
 
 프로토콜은 메서드 선언의 집합입니다(속성 없이). 프로토콜을 구현하는 클래스는 선언된 메서드를 구현합니다.
 
-메서드는 두 가지 유형이 있습니다: **필수** 및 **선택적**. **기본적으로** 메서드는 **필수**입니다(하지만 **`@required`** 태그로도 표시할 수 있습니다). 메서드가 선택적임을 나타내려면 **`@optional`**을 사용하십시오.
+메서드는 **필수**와 **선택적**의 2가지 유형이 있습니다. **기본적으로** 메서드는 **필수**입니다(하지만 **`@required`** 태그로도 표시할 수 있습니다). 메서드가 선택적임을 나타내려면 **`@optional`**을 사용하십시오.
 ```objectivec
 @protocol myNewProtocol
 - (void) method1; //mandatory

@@ -1,101 +1,101 @@
-# Interesting Windows Registry Keys
+# 흥미로운 Windows 레지스트리 키
 
-### Interesting Windows Registry Keys
+### 흥미로운 Windows 레지스트리 키
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-### **Windows Version and Owner Info**
+### **Windows 버전 및 소유자 정보**
 
-- Located at **`Software\Microsoft\Windows NT\CurrentVersion`**, you'll find the Windows version, Service Pack, installation time, and the registered owner's name in a straightforward manner.
+- **`Software\Microsoft\Windows NT\CurrentVersion`**에 위치하며, Windows 버전, 서비스 팩, 설치 시간 및 등록된 소유자의 이름을 간단하게 확인할 수 있습니다.
 
-### **Computer Name**
+### **컴퓨터 이름**
 
-- The hostname is found under **`System\ControlSet001\Control\ComputerName\ComputerName`**.
+- 호스트 이름은 **`System\ControlSet001\Control\ComputerName\ComputerName`** 아래에서 찾을 수 있습니다.
 
-### **Time Zone Setting**
+### **시간대 설정**
 
-- The system's time zone is stored in **`System\ControlSet001\Control\TimeZoneInformation`**.
+- 시스템의 시간대는 **`System\ControlSet001\Control\TimeZoneInformation`**에 저장됩니다.
 
-### **Access Time Tracking**
+### **접근 시간 추적**
 
-- By default, the last access time tracking is turned off (**`NtfsDisableLastAccessUpdate=1`**). To enable it, use:
-  `fsutil behavior set disablelastaccess 0`
+- 기본적으로 마지막 접근 시간 추적은 꺼져 있습니다 (**`NtfsDisableLastAccessUpdate=1`**). 이를 활성화하려면 다음을 사용하세요:
+`fsutil behavior set disablelastaccess 0`
 
-### Windows Versions and Service Packs
+### Windows 버전 및 서비스 팩
 
-- The **Windows version** indicates the edition (e.g., Home, Pro) and its release (e.g., Windows 10, Windows 11), while **Service Packs** are updates that include fixes and, sometimes, new features.
+- **Windows 버전**은 에디션(예: Home, Pro)과 릴리스를 나타내며(예: Windows 10, Windows 11), **서비스 팩**은 수정 사항과 때때로 새로운 기능을 포함하는 업데이트입니다.
 
-### Enabling Last Access Time
+### 마지막 접근 시간 활성화
 
-- Enabling last access time tracking allows you to see when files were last opened, which can be critical for forensic analysis or system monitoring.
+- 마지막 접근 시간 추적을 활성화하면 파일이 마지막으로 열렸던 시간을 확인할 수 있어, 포렌식 분석이나 시스템 모니터링에 중요할 수 있습니다.
 
-### Network Information Details
+### 네트워크 정보 세부사항
 
-- The registry holds extensive data on network configurations, including **types of networks (wireless, cable, 3G)** and **network categories (Public, Private/Home, Domain/Work)**, which are vital for understanding network security settings and permissions.
+- 레지스트리는 **네트워크 유형(무선, 유선, 3G)** 및 **네트워크 범주(공용, 개인/홈, 도메인/작업)**를 포함한 광범위한 네트워크 구성 데이터를 보유하고 있어, 네트워크 보안 설정 및 권한을 이해하는 데 필수적입니다.
 
-### Client Side Caching (CSC)
+### 클라이언트 측 캐싱 (CSC)
 
-- **CSC** enhances offline file access by caching copies of shared files. Different **CSCFlags** settings control how and what files are cached, affecting performance and user experience, especially in environments with intermittent connectivity.
+- **CSC**는 공유 파일의 복사본을 캐싱하여 오프라인 파일 접근을 향상시킵니다. 다양한 **CSCFlags** 설정은 어떤 파일이 어떻게 캐시되는지를 제어하여, 간헐적인 연결이 있는 환경에서 성능과 사용자 경험에 영향을 미칩니다.
 
-### AutoStart Programs
+### 자동 시작 프로그램
 
-- Programs listed in various `Run` and `RunOnce` registry keys are automatically launched at startup, affecting system boot time and potentially being points of interest for identifying malware or unwanted software.
+- 다양한 `Run` 및 `RunOnce` 레지스트리 키에 나열된 프로그램은 시작 시 자동으로 실행되며, 시스템 부팅 시간에 영향을 미치고 악성 소프트웨어나 원치 않는 소프트웨어를 식별하는 데 관심의 지점이 될 수 있습니다.
 
-### Shellbags
+### 셸백
 
-- **Shellbags** not only store preferences for folder views but also provide forensic evidence of folder access even if the folder no longer exists. They are invaluable for investigations, revealing user activity that isn't obvious through other means.
+- **셸백**은 폴더 보기 기본 설정을 저장할 뿐만 아니라, 폴더가 더 이상 존재하지 않더라도 폴더 접근에 대한 포렌식 증거를 제공합니다. 이는 다른 방법으로는 명백하지 않은 사용자 활동을 드러내는 데 매우 유용합니다.
 
-### USB Information and Forensics
+### USB 정보 및 포렌식
 
-- The details stored in the registry about USB devices can help trace which devices were connected to a computer, potentially linking a device to sensitive file transfers or unauthorized access incidents.
+- 레지스트리에 저장된 USB 장치에 대한 세부정보는 어떤 장치가 컴퓨터에 연결되었는지를 추적하는 데 도움이 되며, 이는 민감한 파일 전송이나 무단 접근 사건과 연결될 수 있습니다.
 
-### Volume Serial Number
+### 볼륨 일련 번호
 
-- The **Volume Serial Number** can be crucial for tracking the specific instance of a file system, useful in forensic scenarios where file origin needs to be established across different devices.
+- **볼륨 일련 번호**는 파일 시스템의 특정 인스턴스를 추적하는 데 중요할 수 있으며, 이는 다양한 장치 간에 파일 출처를 확립해야 하는 포렌식 시나리오에서 유용합니다.
 
-### **Shutdown Details**
+### **종료 세부정보**
 
-- Shutdown time and count (the latter only for XP) are kept in **`System\ControlSet001\Control\Windows`** and **`System\ControlSet001\Control\Watchdog\Display`**.
+- 종료 시간 및 횟수(후자는 XP에만 해당)는 **`System\ControlSet001\Control\Windows`** 및 **`System\ControlSet001\Control\Watchdog\Display`**에 저장됩니다.
 
-### **Network Configuration**
+### **네트워크 구성**
 
-- For detailed network interface info, refer to **`System\ControlSet001\Services\Tcpip\Parameters\Interfaces{GUID_INTERFACE}`**.
-- First and last network connection times, including VPN connections, are logged under various paths in **`Software\Microsoft\Windows NT\CurrentVersion\NetworkList`**.
+- 자세한 네트워크 인터페이스 정보는 **`System\ControlSet001\Services\Tcpip\Parameters\Interfaces{GUID_INTERFACE}`**를 참조하세요.
+- VPN 연결을 포함한 첫 번째 및 마지막 네트워크 연결 시간은 **`Software\Microsoft\Windows NT\CurrentVersion\NetworkList`**의 다양한 경로에 기록됩니다.
 
-### **Shared Folders**
+### **공유 폴더**
 
-- Shared folders and settings are under **`System\ControlSet001\Services\lanmanserver\Shares`**. The Client Side Caching (CSC) settings dictate offline file availability.
+- 공유 폴더 및 설정은 **`System\ControlSet001\Services\lanmanserver\Shares`** 아래에 있습니다. 클라이언트 측 캐싱(CSC) 설정은 오프라인 파일 가용성을 결정합니다.
 
-### **Programs that Start Automatically**
+### **자동으로 시작되는 프로그램**
 
-- Paths like **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run`** and similar entries under `Software\Microsoft\Windows\CurrentVersion` detail programs set to run at startup.
+- **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run`**와 `Software\Microsoft\Windows\CurrentVersion` 아래의 유사한 항목은 시작 시 실행되도록 설정된 프로그램을 자세히 설명합니다.
 
-### **Searches and Typed Paths**
+### **검색 및 입력된 경로**
 
-- Explorer searches and typed paths are tracked in the registry under **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer`** for WordwheelQuery and TypedPaths, respectively.
+- 탐색기 검색 및 입력된 경로는 **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer`**에서 WordwheelQuery 및 TypedPaths에 따라 추적됩니다.
 
-### **Recent Documents and Office Files**
+### **최근 문서 및 Office 파일**
 
-- Recent documents and Office files accessed are noted in `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs` and specific Office version paths.
+- 최근에 접근한 문서 및 Office 파일은 `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs` 및 특정 Office 버전 경로에 기록됩니다.
 
-### **Most Recently Used (MRU) Items**
+### **가장 최근에 사용된 (MRU) 항목**
 
-- MRU lists, indicating recent file paths and commands, are stored in various `ComDlg32` and `Explorer` subkeys under `NTUSER.DAT`.
+- 최근 파일 경로 및 명령을 나타내는 MRU 목록은 `NTUSER.DAT`의 다양한 `ComDlg32` 및 `Explorer` 하위 키에 저장됩니다.
 
-### **User Activity Tracking**
+### **사용자 활동 추적**
 
-- The User Assist feature logs detailed application usage stats, including run count and last run time, at **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`**.
+- 사용자 보조 기능은 실행 횟수 및 마지막 실행 시간을 포함한 애플리케이션 사용 통계를 **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`**에 기록합니다.
 
-### **Shellbags Analysis**
+### **셸백 분석**
 
-- Shellbags, revealing folder access details, are stored in `USRCLASS.DAT` and `NTUSER.DAT` under `Software\Microsoft\Windows\Shell`. Use **[Shellbag Explorer](https://ericzimmerman.github.io/#!index.md)** for analysis.
+- 폴더 접근 세부정보를 드러내는 셸백은 `Software\Microsoft\Windows\Shell`의 `USRCLASS.DAT` 및 `NTUSER.DAT`에 저장됩니다. 분석을 위해 **[Shellbag Explorer](https://ericzimmerman.github.io/#!index.md)**를 사용하세요.
 
-### **USB Device History**
+### **USB 장치 기록**
 
-- **`HKLM\SYSTEM\ControlSet001\Enum\USBSTOR`** and **`HKLM\SYSTEM\ControlSet001\Enum\USB`** contain rich details on connected USB devices, including manufacturer, product name, and connection timestamps.
-- The user associated with a specific USB device can be pinpointed by searching `NTUSER.DAT` hives for the device's **{GUID}**.
-- The last mounted device and its volume serial number can be traced through `System\MountedDevices` and `Software\Microsoft\Windows NT\CurrentVersion\EMDMgmt`, respectively.
+- **`HKLM\SYSTEM\ControlSet001\Enum\USBSTOR`** 및 **`HKLM\SYSTEM\ControlSet001\Enum\USB`**는 연결된 USB 장치에 대한 풍부한 세부정보를 포함하고 있으며, 여기에는 제조업체, 제품 이름 및 연결 타임스탬프가 포함됩니다.
+- 특정 USB 장치와 관련된 사용자는 장치의 **{GUID}**에 대해 `NTUSER.DAT` 하이브를 검색하여 확인할 수 있습니다.
+- 마지막으로 마운트된 장치와 그 볼륨 일련 번호는 각각 `System\MountedDevices` 및 `Software\Microsoft\Windows NT\CurrentVersion\EMDMgmt`를 통해 추적할 수 있습니다.
 
-This guide condenses the crucial paths and methods for accessing detailed system, network, and user activity information on Windows systems, aiming for clarity and usability.
+이 가이드는 Windows 시스템에서 상세한 시스템, 네트워크 및 사용자 활동 정보를 접근하기 위한 중요한 경로와 방법을 요약하여 명확성과 사용성을 목표로 합니다.
 
 {{#include ../../../banners/hacktricks-training.md}}

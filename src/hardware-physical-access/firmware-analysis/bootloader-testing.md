@@ -1,49 +1,49 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-The following steps are recommended for modifying device startup configurations and bootloaders like U-boot:
+다음 단계는 U-boot와 같은 장치 시작 구성 및 부트로더를 수정하는 데 권장됩니다:
 
-1. **Access Bootloader's Interpreter Shell**:
+1. **부트로더의 인터프리터 셸에 접근**:
 
-   - During boot, press "0", space, or other identified "magic codes" to access the bootloader's interpreter shell.
+- 부팅 중 "0", 스페이스 또는 다른 식별된 "매직 코드"를 눌러 부트로더의 인터프리터 셸에 접근합니다.
 
-2. **Modify Boot Arguments**:
+2. **부트 인수 수정**:
 
-   - Execute the following commands to append '`init=/bin/sh`' to the boot arguments, allowing execution of a shell command:
-     %%%
-     #printenv
-     #setenv bootargs=console=ttyS0,115200 mem=63M root=/dev/mtdblock3 mtdparts=sflash:<partitiionInfo> rootfstype=<fstype> hasEeprom=0 5srst=0 init=/bin/sh
-     #saveenv
-     #boot
-     %%%
+- 다음 명령을 실행하여 '`init=/bin/sh`'를 부트 인수에 추가하여 셸 명령을 실행할 수 있도록 합니다:
+%%%
+#printenv
+#setenv bootargs=console=ttyS0,115200 mem=63M root=/dev/mtdblock3 mtdparts=sflash:<partitiionInfo> rootfstype=<fstype> hasEeprom=0 5srst=0 init=/bin/sh
+#saveenv
+#boot
+%%%
 
-3. **Setup TFTP Server**:
+3. **TFTP 서버 설정**:
 
-   - Configure a TFTP server to load images over a local network:
-     %%%
-     #setenv ipaddr 192.168.2.2 #local IP of the device
-     #setenv serverip 192.168.2.1 #TFTP server IP
-     #saveenv
-     #reset
-     #ping 192.168.2.1 #check network access
-     #tftp ${loadaddr} uImage-3.6.35 #loadaddr takes the address to load the file into and the filename of the image on the TFTP server
-     %%%
+- 로컬 네트워크를 통해 이미지를 로드하기 위해 TFTP 서버를 구성합니다:
+%%%
+#setenv ipaddr 192.168.2.2 #장치의 로컬 IP
+#setenv serverip 192.168.2.1 #TFTP 서버 IP
+#saveenv
+#reset
+#ping 192.168.2.1 #네트워크 접근 확인
+#tftp ${loadaddr} uImage-3.6.35 #loadaddr는 파일을 로드할 주소와 TFTP 서버의 이미지 파일 이름을 가져옵니다
+%%%
 
-4. **Utilize `ubootwrite.py`**:
+4. **`ubootwrite.py` 사용**:
 
-   - Use `ubootwrite.py` to write the U-boot image and push a modified firmware to gain root access.
+- `ubootwrite.py`를 사용하여 U-boot 이미지를 쓰고 수정된 펌웨어를 푸시하여 루트 접근을 얻습니다.
 
-5. **Check Debug Features**:
+5. **디버그 기능 확인**:
 
-   - Verify if debug features like verbose logging, loading arbitrary kernels, or booting from untrusted sources are enabled.
+- 자세한 로깅, 임의 커널 로드 또는 신뢰할 수 없는 소스에서 부팅과 같은 디버그 기능이 활성화되어 있는지 확인합니다.
 
-6. **Cautionary Hardware Interference**:
+6. **주의할 하드웨어 간섭**:
 
-   - Be cautious when connecting one pin to ground and interacting with SPI or NAND flash chips during the device boot-up sequence, particularly before the kernel decompresses. Consult the NAND flash chip's datasheet before shorting pins.
+- 장치 부팅 시퀀스 중 하나의 핀을 접지에 연결하고 SPI 또는 NAND 플래시 칩과 상호작용할 때 주의하십시오, 특히 커널이 압축 해제되기 전에. 핀을 단락시키기 전에 NAND 플래시 칩의 데이터시트를 참조하십시오.
 
-7. **Configure Rogue DHCP Server**:
-   - Set up a rogue DHCP server with malicious parameters for a device to ingest during a PXE boot. Utilize tools like Metasploit's (MSF) DHCP auxiliary server. Modify the 'FILENAME' parameter with command injection commands such as `'a";/bin/sh;#'` to test input validation for device startup procedures.
+7. **악성 DHCP 서버 구성**:
+- PXE 부팅 중 장치가 수신하도록 악성 매개변수를 가진 악성 DHCP 서버를 설정합니다. Metasploit의 (MSF) DHCP 보조 서버와 같은 도구를 사용하십시오. 'FILENAME' 매개변수를 `'a";/bin/sh;#'`와 같은 명령 주입 명령으로 수정하여 장치 시작 절차에 대한 입력 유효성 검사를 테스트합니다.
 
-**Note**: The steps involving physical interaction with device pins (\*marked with asterisks) should be approached with extreme caution to avoid damaging the device.
+**참고**: 장치 핀과의 물리적 상호작용을 포함하는 단계(\*별표로 표시된)는 장치 손상을 피하기 위해 극도로 주의하여 접근해야 합니다.
 
 ## References
 

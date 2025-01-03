@@ -2,28 +2,28 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic Information
+## 기본 정보
 
-**Grand Central Dispatch (GCD)**, 또한 **libdispatch** (`libdispatch.dyld`)로 알려져 있으며, macOS와 iOS 모두에서 사용할 수 있습니다. 이는 Apple이 다중 코어 하드웨어에서 동시(멀티스레드) 실행을 최적화하기 위해 개발한 기술입니다.
+**Grand Central Dispatch (GCD)**, 또는 **libdispatch** (`libdispatch.dyld`)는 macOS와 iOS 모두에서 사용할 수 있습니다. 이는 Apple이 다중 코어 하드웨어에서 동시(멀티스레드) 실행을 최적화하기 위해 개발한 기술입니다.
 
-**GCD**는 애플리케이션이 **블록 객체** 형태로 **작업을 제출**할 수 있는 **FIFO 큐**를 제공하고 관리합니다. 디스패치 큐에 제출된 블록은 시스템에 의해 완전히 관리되는 **스레드 풀**에서 **실행됩니다**. GCD는 디스패치 큐에서 작업을 실행하기 위해 스레드를 자동으로 생성하고, 사용 가능한 코어에서 실행할 작업을 예약합니다.
+**GCD**는 애플리케이션이 **블록 객체** 형태로 **작업을 제출**할 수 있는 **FIFO 큐**를 제공하고 관리합니다. 디스패치 큐에 제출된 블록은 시스템에서 완전히 관리되는 스레드 풀에서 **실행됩니다**. GCD는 디스패치 큐에서 작업을 실행하기 위해 스레드를 자동으로 생성하고, 사용 가능한 코어에서 실행될 작업을 예약합니다.
 
 > [!TIP]
 > 요약하자면, **병렬**로 코드를 실행하기 위해 프로세스는 **GCD에 코드 블록을 전송**할 수 있으며, GCD가 실행을 처리합니다. 따라서 프로세스는 새로운 스레드를 생성하지 않으며, **GCD는 자체 스레드 풀을 사용하여 주어진 코드를 실행합니다**(필요에 따라 증가하거나 감소할 수 있습니다).
 
 이는 병렬 실행을 성공적으로 관리하는 데 매우 유용하며, 프로세스가 생성하는 스레드 수를 크게 줄이고 병렬 실행을 최적화합니다. 이는 **큰 병렬성**(무차별 대입?)이 필요한 작업이나 메인 스레드를 차단해서는 안 되는 작업에 이상적입니다: 예를 들어, iOS의 메인 스레드는 UI 상호작용을 처리하므로, 앱이 멈추게 할 수 있는 다른 기능(검색, 웹 접근, 파일 읽기 등)은 이 방식으로 관리됩니다.
 
-### Blocks
+### 블록
 
 블록은 **자체 포함된 코드 섹션**(값을 반환하는 인수가 있는 함수와 유사)이며, 바인드 변수를 지정할 수도 있습니다.\
-그러나 컴파일러 수준에서 블록은 존재하지 않으며, `os_object`입니다. 이러한 각 객체는 두 개의 구조체로 구성됩니다:
+그러나 컴파일러 수준에서는 블록이 존재하지 않으며, `os_object`입니다. 이러한 객체 각각은 두 개의 구조체로 구성됩니다:
 
 - **블록 리터럴**:&#x20;
 - 블록의 클래스에 포인팅하는 **`isa`** 필드로 시작합니다:
 - `NSConcreteGlobalBlock` ( `__DATA.__const`의 블록)
 - `NSConcreteMallocBlock` (힙의 블록)
 - `NSConcreateStackBlock` (스택의 블록)
-- **`flags`** (블록 설명자에 존재하는 필드를 나타냄) 및 일부 예약된 바이트가 있습니다.
+- **`flags`** (블록 설명자에 존재하는 필드를 나타냄)와 일부 예약된 바이트가 있습니다.
 - 호출할 함수 포인터
 - 블록 설명자에 대한 포인터
 - 가져온 블록 변수(있는 경우)
@@ -31,9 +31,9 @@
 - 일부 예약된 바이트가 있습니다.
 - 크기
 - 일반적으로 매개변수에 필요한 공간을 알기 위해 Objective-C 스타일 서명에 대한 포인터를 가집니다(플래그 `BLOCK_HAS_SIGNATURE`).
-- 변수가 참조되는 경우, 이 블록은 복사 도우미(시작 시 값을 복사) 및 해제 도우미(해제)를 가리키는 포인터도 가집니다.
+- 변수가 참조되는 경우, 이 블록은 복사 도우미(시작 시 값을 복사)와 해제 도우미(해제)를 가리키는 포인터도 가집니다.
 
-### Queues
+### 큐
 
 디스패치 큐는 실행을 위한 블록의 FIFO 순서를 제공하는 명명된 객체입니다.
 
@@ -59,11 +59,11 @@
 
 각 시점에서 **어떤 스레드가 어떤 큐를 처리할지** 결정하는 것은 시스템입니다(여러 스레드가 동일한 큐에서 작업할 수 있거나 동일한 스레드가 다른 큐에서 작업할 수 있습니다).
 
-#### Attributtes
+#### 속성
 
 **`dispatch_queue_create`**로 큐를 생성할 때 세 번째 인자는 `dispatch_queue_attr_t`로, 일반적으로 `DISPATCH_QUEUE_SERIAL`(실제로는 NULL) 또는 `DISPATCH_QUEUE_CONCURRENT`로, 큐의 일부 매개변수를 제어할 수 있는 `dispatch_queue_attr_t` 구조체에 대한 포인터입니다.
 
-### Dispatch objects
+### 디스패치 객체
 
 libdispatch가 사용하는 여러 객체가 있으며, 큐와 블록은 그 중 두 가지에 불과합니다. 이러한 객체는 `dispatch_object_create`로 생성할 수 있습니다:
 
@@ -87,7 +87,7 @@ Objective-C에서는 블록을 병렬로 실행하기 위해 전송하는 다양
 - [**dispatch_once**](https://developer.apple.com/documentation/dispatch/1447169-dispatch_once): 애플리케이션의 생애 동안 블록 객체를 한 번만 실행합니다.
 - [**dispatch_async_and_wait**](https://developer.apple.com/documentation/dispatch/3191901-dispatch_async_and_wait): 실행을 위해 작업 항목을 제출하고 실행이 완료된 후에만 반환합니다. [**`dispatch_sync`**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync)와 달리, 이 함수는 블록을 실행할 때 큐의 모든 속성을 존중합니다.
 
-이 함수들은 다음 매개변수를 기대합니다: [**`dispatch_queue_t`**](https://developer.apple.com/documentation/dispatch/dispatch_queue_t) **`queue,`** [**`dispatch_block_t`**](https://developer.apple.com/documentation/dispatch/dispatch_block_t) **`block`**
+이러한 함수는 다음 매개변수를 기대합니다: [**`dispatch_queue_t`**](https://developer.apple.com/documentation/dispatch/dispatch_queue_t) **`queue,`** [**`dispatch_block_t`**](https://developer.apple.com/documentation/dispatch/dispatch_block_t) **`block`**
 
 이것은 **블록의 구조체**입니다:
 ```c
@@ -198,7 +198,7 @@ Backtrace:
 그런 다음, 코드에서 이들이 **사용되는** 위치를 찾습니다:
 
 > [!TIP]
-> "block"에 대한 모든 참조를 기록하여 구조체가 사용되고 있음을 이해하는 방법을 알아보세요.
+> "block"에 대한 모든 참조를 기록하여 구조체가 사용되고 있음을 이해하는 방법을 파악하세요.
 
 <figure><img src="../../images/image (1164).png" alt="" width="563"><figcaption></figcaption></figure>
 

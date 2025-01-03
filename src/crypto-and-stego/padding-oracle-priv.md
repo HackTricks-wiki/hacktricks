@@ -1,27 +1,25 @@
-# Padding Oracle
+# 패딩 오라클
 
 {{#include ../banners/hacktricks-training.md}}
 
-{% embed url="https://websec.nl/" %}
+## CBC - 암호 블록 체인
 
-## CBC - Cipher Block Chaining
-
-In CBC mode the **previous encrypted block is used as IV** to XOR with the next block:
+CBC 모드에서는 **이전 암호화 블록이 IV로 사용되어** 다음 블록과 XOR 연산을 수행합니다:
 
 ![https://defuse.ca/images/cbc_encryption.png](https://defuse.ca/images/cbc_encryption.png)
 
-To decrypt CBC the **opposite** **operations** are done:
+CBC를 복호화하려면 **반대** **작업**을 수행합니다:
 
 ![https://defuse.ca/images/cbc_decryption.png](https://defuse.ca/images/cbc_decryption.png)
 
-Notice how it's needed to use an **encryption** **key** and an **IV**.
+**암호화** **키**와 **IV**를 사용하는 것이 필요함을 주목하세요.
 
-## Message Padding
+## 메시지 패딩
 
-As the encryption is performed in **fixed** **size** **blocks**, **padding** is usually needed in the **last** **block** to complete its length.\
-Usually **PKCS7** is used, which generates a padding **repeating** the **number** of **bytes** **needed** to **complete** the block. For example, if the last block is missing 3 bytes, the padding will be `\x03\x03\x03`.
+암호화가 **고정** **크기** **블록**으로 수행되기 때문에, **마지막** **블록**의 길이를 완성하기 위해 **패딩**이 일반적으로 필요합니다.\
+보통 **PKCS7**이 사용되며, 이는 블록을 완성하는 데 필요한 **바이트** **수**를 **반복**하여 패딩을 생성합니다. 예를 들어, 마지막 블록이 3 바이트가 부족하면 패딩은 `\x03\x03\x03`이 됩니다.
 
-Let's look at more examples with a **2 blocks of length 8bytes**:
+**8바이트 길이의 2 블록**에 대한 더 많은 예를 살펴보겠습니다:
 
 | byte #0 | byte #1 | byte #2 | byte #3 | byte #4 | byte #5 | byte #6 | byte #7 | byte #0  | byte #1  | byte #2  | byte #3  | byte #4  | byte #5  | byte #6  | byte #7  |
 | ------- | ------- | ------- | ------- | ------- | ------- | ------- | ------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- |
@@ -30,51 +28,43 @@ Let's look at more examples with a **2 blocks of length 8bytes**:
 | P       | A       | S       | S       | W       | O       | R       | D       | 1        | 2        | 3        | **0x05** | **0x05** | **0x05** | **0x05** | **0x05** |
 | P       | A       | S       | S       | W       | O       | R       | D       | **0x08** | **0x08** | **0x08** | **0x08** | **0x08** | **0x08** | **0x08** | **0x08** |
 
-Note how in the last example the **last block was full so another one was generated only with padding**.
+마지막 예에서 **마지막 블록이 가득 차 있었기 때문에 패딩만으로 생성된 또 다른 블록이 생성되었다는 점에 주목하세요**.
 
-## Padding Oracle
+## 패딩 오라클
 
-When an application decrypts encrypted data, it will first decrypt the data; then it will remove the padding. During the cleanup of the padding, if an **invalid padding triggers a detectable behaviour**, you have a **padding oracle vulnerability**. The detectable behaviour can be an **error**, a **lack of results**, or a **slower response**.
+애플리케이션이 암호화된 데이터를 복호화할 때, 먼저 데이터를 복호화한 후 패딩을 제거합니다. 패딩 정리 중에 **잘못된 패딩이 감지 가능한 동작을 유발하면**, **패딩 오라클 취약점**이 발생합니다. 감지 가능한 동작은 **오류**, **결과 부족**, 또는 **느린 응답**일 수 있습니다.
 
-If you detect this behaviour, you can **decrypt the encrypted data** and even **encrypt any cleartext**.
+이 동작을 감지하면 **암호화된 데이터를 복호화**하고 심지어 **어떤 평문도 암호화**할 수 있습니다.
 
-### How to exploit
+### 어떻게 악용할 것인가
 
-You could use [https://github.com/AonCyberLabs/PadBuster](https://github.com/AonCyberLabs/PadBuster) to exploit this kind of vulnerability or just do
-
+이러한 종류의 취약점을 악용하기 위해 [https://github.com/AonCyberLabs/PadBuster](https://github.com/AonCyberLabs/PadBuster)를 사용할 수 있거나 그냥 할 수 있습니다.
 ```
 sudo apt-get install padbuster
 ```
-
-In order to test if the cookie of a site is vulnerable you could try:
-
+사이트의 쿠키가 취약한지 테스트하기 위해 다음을 시도할 수 있습니다:
 ```bash
 perl ./padBuster.pl http://10.10.10.10/index.php "RVJDQrwUdTRWJUVUeBKkEA==" 8 -encoding 0 -cookies "login=RVJDQrwUdTRWJUVUeBKkEA=="
 ```
+**Encoding 0**는 **base64**가 사용된다는 것을 의미합니다(하지만 다른 인코딩도 사용 가능하니 도움말 메뉴를 확인하세요).
 
-**Encoding 0** means that **base64** is used (but others are available, check the help menu).
-
-You could also **abuse this vulnerability to encrypt new data. For example, imagine that the content of the cookie is "**_**user=MyUsername**_**", then you may change it to "\_user=administrator\_" and escalate privileges inside the application. You could also do it using `paduster`specifying the -plaintext** parameter:
-
+이 취약점을 **악용하여 새로운 데이터를 암호화할 수도 있습니다. 예를 들어, 쿠키의 내용이 "**_**user=MyUsername**_**"이라고 가정하면, 이를 "\_user=administrator\_"로 변경하여 애플리케이션 내에서 권한을 상승시킬 수 있습니다. `paduster`를 사용하여 -plaintext** 매개변수를 지정하여 이를 수행할 수도 있습니다:
 ```bash
 perl ./padBuster.pl http://10.10.10.10/index.php "RVJDQrwUdTRWJUVUeBKkEA==" 8 -encoding 0 -cookies "login=RVJDQrwUdTRWJUVUeBKkEA==" -plaintext "user=administrator"
 ```
-
-If the site is vulnerable `padbuster`will automatically try to find when the padding error occurs, but you can also indicating the error message it using the **-error** parameter.
-
+사이트가 취약한 경우 `padbuster`는 패딩 오류가 발생할 때를 자동으로 찾으려고 시도하지만, **-error** 매개변수를 사용하여 오류 메시지를 지정할 수도 있습니다.
 ```bash
 perl ./padBuster.pl http://10.10.10.10/index.php "" 8 -encoding 0 -cookies "hcon=RVJDQrwUdTRWJUVUeBKkEA==" -error "Invalid padding"
 ```
+### 이론
 
-### The theory
-
-In **summary**, you can start decrypting the encrypted data by guessing the correct values that can be used to create all the **different paddings**. Then, the padding oracle attack will start decrypting bytes from the end to the start by guessing which will be the correct value that **creates a padding of 1, 2, 3, etc**.
+**요약**하자면, 모든 **다양한 패딩**을 생성하는 데 사용할 수 있는 올바른 값을 추측하여 암호화된 데이터를 복호화하기 시작할 수 있습니다. 그런 다음, 패딩 오라클 공격은 끝에서 시작으로 바이트를 복호화하기 시작하며, **1, 2, 3 등의 패딩을 생성하는 올바른 값**이 무엇인지 추측합니다.
 
 ![](<../images/image (561).png>)
 
-Imagine you have some encrypted text that occupies **2 blocks** formed by the bytes from **E0 to E15**.\
-In order to **decrypt** the **last** **block** (**E8** to **E15**), the whole block passes through the "block cipher decryption" generating the **intermediary bytes I0 to I15**.\
-Finally, each intermediary byte is **XORed** with the previous encrypted bytes (E0 to E7). So:
+암호화된 텍스트가 **E0에서 E15**까지의 바이트로 형성된 **2 블록**을 차지한다고 가정해 보겠습니다.\
+**마지막** **블록**(**E8**에서 **E15**)을 **복호화**하기 위해 전체 블록은 "블록 암호 복호화"를 거쳐 **중간 바이트 I0에서 I15**를 생성합니다.\
+마지막으로, 각 중간 바이트는 이전의 암호화된 바이트(E0에서 E7)와 **XOR**됩니다. 따라서:
 
 - `C15 = D(E15) ^ E7 = I15 ^ E7`
 - `C14 = I14 ^ E6`
@@ -82,31 +72,30 @@ Finally, each intermediary byte is **XORed** with the previous encrypted bytes (
 - `C12 = I12 ^ E4`
 - ...
 
-Now, It's possible to **modify `E7` until `C15` is `0x01`**, which will also be a correct padding. So, in this case: `\x01 = I15 ^ E'7`
+이제 **`C15`가 `0x01`이 되도록 `E7`을 수정할 수 있습니다.** 이는 올바른 패딩이기도 합니다. 따라서 이 경우: `\x01 = I15 ^ E'7`
 
-So, finding E'7, it's **possible to calculate I15**: `I15 = 0x01 ^ E'7`
+따라서 E'7을 찾으면 **I15를 계산할 수 있습니다**: `I15 = 0x01 ^ E'7`
 
-Which allow us to **calculate C15**: `C15 = E7 ^ I15 = E7 ^ \x01 ^ E'7`
+이로 인해 **C15를 계산할 수 있습니다**: `C15 = E7 ^ I15 = E7 ^ \x01 ^ E'7`
 
-Knowing **C15**, now it's possible to **calculate C14**, but this time brute-forcing the padding `\x02\x02`.
+**C15**를 알면 이제 **C14를 계산할 수 있습니다**, 하지만 이번에는 패딩 `\x02\x02`를 브루트 포스해야 합니다.
 
-This BF is as complex as the previous one as it's possible to calculate the the `E''15` whose value is 0x02: `E''7 = \x02 ^ I15` so it's just needed to find the **`E'14`** that generates a **`C14` equals to `0x02`**.\
-Then, do the same steps to decrypt C14: **`C14 = E6 ^ I14 = E6 ^ \x02 ^ E''6`**
+이 BF는 이전 것만큼 복잡하며, 값이 0x02인 `E''15`를 계산할 수 있습니다: `E''7 = \x02 ^ I15` 따라서 **`C14`가 `0x02`가 되도록 하는 `E'14`**를 찾기만 하면 됩니다.\
+그런 다음 C14를 복호화하기 위해 동일한 단계를 수행합니다: **`C14 = E6 ^ I14 = E6 ^ \x02 ^ E''6`**
 
-**Follow this chain until you decrypt the whole encrypted text.**
+**이 체인을 따라 전체 암호화된 텍스트를 복호화할 때까지 진행하십시오.**
 
-### Detection of the vulnerability
+### 취약점 탐지
 
-Register and account and log in with this account .\
-If you **log in many times** and always get the **same cookie**, there is probably **something** **wrong** in the application. The **cookie sent back should be unique** each time you log in. If the cookie is **always** the **same**, it will probably always be valid and there **won't be anyway to invalidate i**t.
+계정을 등록하고 이 계정으로 로그인하십시오.\
+**여러 번 로그인**하고 항상 **같은 쿠키**를 받는다면, 애플리케이션에 **문제가 있을 가능성이 높습니다.** **전송된 쿠키는 매번 고유해야 합니다.** 쿠키가 **항상** **같다면**, 아마도 항상 유효할 것이며 이를 **무효화할 방법이 없을 것입니다.**
 
-Now, if you try to **modify** the **cookie**, you can see that you get an **error** from the application.\
-But if you BF the padding (using padbuster for example) you manage to get another cookie valid for a different user. This scenario is highly probably vulnerable to padbuster.
+이제 **쿠키를 수정**하려고 하면 애플리케이션에서 **오류**가 발생하는 것을 볼 수 있습니다.\
+하지만 패딩을 BF하면(예: padbuster 사용) 다른 사용자에게 유효한 또 다른 쿠키를 얻을 수 있습니다. 이 시나리오는 padbuster에 취약할 가능성이 매우 높습니다.
 
-### References
+### 참고 문헌
 
 - [https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation)
 
-{% embed url="https://websec.nl/" %}
 
 {{#include ../banners/hacktricks-training.md}}

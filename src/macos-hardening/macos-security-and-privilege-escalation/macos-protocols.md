@@ -24,9 +24,9 @@ printf "\nThe following services are OFF if '0', or ON otherwise:\nScreen Sharin
 ```
 ### Pentesting ARD
 
-Apple Remote Desktop (ARD)는 macOS에 맞게 조정된 [Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing)의 향상된 버전으로, 추가 기능을 제공합니다. ARD의 주목할 만한 취약점은 제어 화면 비밀번호의 인증 방법으로, 비밀번호의 처음 8자만 사용하여 [brute force attacks](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html)에 취약하게 만듭니다. Hydra 또는 [GoRedShell](https://github.com/ahhh/GoRedShell/)과 같은 도구를 사용하여 공격할 수 있으며, 기본 속도 제한이 없습니다.
+Apple Remote Desktop (ARD)는 macOS에 맞게 조정된 [Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing)의 향상된 버전으로, 추가 기능을 제공합니다. ARD의 주목할 만한 취약점은 제어 화면 비밀번호의 인증 방법으로, 비밀번호의 처음 8자만 사용하여 [무차별 대입 공격](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html)에 취약하게 만듭니다. Hydra 또는 [GoRedShell](https://github.com/ahhh/GoRedShell/)과 같은 도구를 사용하여 공격할 수 있으며, 기본 속도 제한이 없습니다.
 
-취약한 인스턴스는 **nmap**의 `vnc-info` 스크립트를 사용하여 식별할 수 있습니다. `VNC Authentication (2)`를 지원하는 서비스는 8자 비밀번호 잘림으로 인해 특히 brute force 공격에 취약합니다.
+취약한 인스턴스는 **nmap**의 `vnc-info` 스크립트를 사용하여 식별할 수 있습니다. `VNC Authentication (2)`를 지원하는 서비스는 8자 비밀번호 잘림으로 인해 무차별 대입 공격에 특히 취약합니다.
 
 권한 상승, GUI 접근 또는 사용자 모니터링과 같은 다양한 관리 작업을 위해 ARD를 활성화하려면 다음 명령을 사용하십시오:
 ```bash
@@ -36,23 +36,23 @@ ARD는 관찰, 공유 제어 및 전체 제어를 포함한 다양한 제어 수
 
 ## Bonjour 프로토콜
 
-Bonjour는 **같은 네트워크에 있는 장치들이 서로 제공하는 서비스를 감지할 수 있게 해주는 Apple 설계 기술**입니다. Rendezvous, **Zero Configuration** 또는 Zeroconf로도 알려져 있으며, 장치가 TCP/IP 네트워크에 가입하고, **자동으로 IP 주소를 선택**하며, 다른 네트워크 장치에 자신의 서비스를 브로드캐스트할 수 있게 합니다.
+Bonjour는 **같은 네트워크에 있는 장치들이 서로 제공하는 서비스를 감지할 수 있게 해주는 Apple 설계 기술**입니다. Rendezvous, **Zero Configuration** 또는 Zeroconf로도 알려져 있으며, 장치가 TCP/IP 네트워크에 가입하고, **자동으로 IP 주소를 선택**하며, 다른 네트워크 장치에 서비스를 브로드캐스트할 수 있게 합니다.
 
 Bonjour가 제공하는 Zero Configuration Networking은 장치가 다음을 보장합니다:
 
-- **DHCP 서버가 없는 경우에도 자동으로 IP 주소를 얻습니다.**
-- DNS 서버 없이 **이름-주소 변환**을 수행합니다.
-- 네트워크에서 사용 가능한 **서비스를 발견합니다.**
+- **DHCP 서버가 없는 경우에도 IP 주소를 자동으로 얻을 수 있습니다.**
+- DNS 서버 없이 **이름-주소 변환**을 수행할 수 있습니다.
+- 네트워크에서 사용 가능한 **서비스를 발견**할 수 있습니다.
 
-Bonjour를 사용하는 장치는 **169.254/16 범위의 IP 주소를 할당**하고 네트워크에서 그 고유성을 확인합니다. Macs는 이 서브넷에 대한 라우팅 테이블 항목을 유지하며, `netstat -rn | grep 169`를 통해 확인할 수 있습니다.
+Bonjour를 사용하는 장치는 **169.254/16 범위의 IP 주소를 할당**하고 네트워크에서 고유성을 확인합니다. Mac은 이 서브넷에 대한 라우팅 테이블 항목을 유지하며, `netstat -rn | grep 169`를 통해 확인할 수 있습니다.
 
 DNS의 경우, Bonjour는 **Multicast DNS (mDNS) 프로토콜**을 사용합니다. mDNS는 **포트 5353/UDP**를 통해 작동하며, **표준 DNS 쿼리**를 사용하지만 **멀티캐스트 주소 224.0.0.251**을 대상으로 합니다. 이 접근 방식은 네트워크의 모든 수신 장치가 쿼리를 수신하고 응답할 수 있도록 하여 기록 업데이트를 용이하게 합니다.
 
 네트워크에 가입할 때, 각 장치는 일반적으로 **.local**로 끝나는 이름을 자가 선택하며, 이는 호스트 이름에서 파생되거나 무작위로 생성될 수 있습니다.
 
-네트워크 내 서비스 발견은 **DNS 서비스 발견 (DNS-SD)**에 의해 촉진됩니다. DNS SRV 레코드의 형식을 활용하여, DNS-SD는 **DNS PTR 레코드**를 사용하여 여러 서비스의 목록을 가능하게 합니다. 특정 서비스를 찾는 클라이언트는 `<Service>.<Domain>`에 대한 PTR 레코드를 요청하며, 서비스가 여러 호스트에서 사용 가능한 경우 `<Instance>.<Service>.<Domain>` 형식의 PTR 레코드 목록을 반환받습니다.
+네트워크 내 서비스 발견은 **DNS 서비스 발견 (DNS-SD)**에 의해 촉진됩니다. DNS SRV 레코드의 형식을 활용하여, DNS-SD는 **DNS PTR 레코드**를 사용하여 여러 서비스를 나열할 수 있게 합니다. 특정 서비스를 찾는 클라이언트는 `<Service>.<Domain>`에 대한 PTR 레코드를 요청하며, 서비스가 여러 호스트에서 사용 가능한 경우 `<Instance>.<Service>.<Domain>` 형식의 PTR 레코드 목록을 반환받습니다.
 
-`dns-sd` 유틸리티는 **네트워크 서비스를 발견하고 광고하는 데 사용될 수 있습니다**. 다음은 그 사용 예시입니다:
+`dns-sd` 유틸리티는 **네트워크 서비스를 발견하고 광고하는 데 사용**될 수 있습니다. 다음은 사용 예시입니다:
 
 ### SSH 서비스 검색
 

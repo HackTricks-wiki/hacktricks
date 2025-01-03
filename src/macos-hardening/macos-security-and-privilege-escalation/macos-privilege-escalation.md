@@ -124,11 +124,11 @@ killall Dock
 {{#tab name="Finder Impersonation"}}
 몇 가지 제안:
 
-- 당신은 **Finder를 Dock에서 제거할 수 없으므로**, Dock에 추가할 경우 가짜 Finder를 실제 Finder 바로 옆에 두는 것이 좋습니다. 이를 위해 **Dock 배열의 시작 부분에 가짜 Finder 항목을 추가해야 합니다**.
+- 당신은 **Finder를 Dock에서 제거할 수 없으므로**, Dock에 추가할 경우 가짜 Finder를 실제 Finder 바로 옆에 두는 것이 좋습니다. 이를 위해서는 **Dock 배열의 시작 부분에 가짜 Finder 항목을 추가해야 합니다**.
 - 또 다른 옵션은 Dock에 배치하지 않고 그냥 여는 것입니다. "Finder가 Finder를 제어하도록 요청하고 있습니다"는 그리 이상하지 않습니다.
-- 또 다른 옵션은 **비밀번호를 묻지 않고 root로 상승**하는 것으로, 끔찍한 상자를 사용하는 대신 Finder가 특권 작업을 수행하기 위해 실제로 비밀번호를 요청하도록 만드는 것입니다:
-- Finder에게 **`/etc/pam.d`**에 새로운 **`sudo`** 파일을 복사하도록 요청합니다 (비밀번호를 요청하는 프롬프트는 "Finder가 sudo를 복사하고 싶어합니다"를 나타낼 것입니다).
-- Finder에게 새로운 **Authorization Plugin**을 복사하도록 요청합니다 (파일 이름을 제어할 수 있으므로 비밀번호를 요청하는 프롬프트는 "Finder가 Finder.bundle을 복사하고 싶어합니다"를 나타낼 것입니다).
+- 비밀번호를 묻는 끔찍한 상자 없이 **루트로 상승**하는 또 다른 옵션은 Finder가 실제로 권한 있는 작업을 수행하기 위해 비밀번호를 요청하도록 만드는 것입니다:
+- Finder에게 **`/etc/pam.d`**에 새로운 **`sudo`** 파일을 복사하도록 요청합니다 (비밀번호를 묻는 프롬프트는 "Finder가 sudo를 복사하려고 합니다"를 나타낼 것입니다).
+- Finder에게 새로운 **Authorization Plugin**을 복사하도록 요청합니다 (파일 이름을 제어할 수 있으므로 비밀번호를 묻는 프롬프트는 "Finder가 Finder.bundle을 복사하려고 합니다"를 나타낼 것입니다).
 ```bash
 #!/bin/sh
 
@@ -205,8 +205,8 @@ killall Dock
 
 ### CVE-2020-9771 - mount_apfs TCC 우회 및 권한 상승
 
-**모든 사용자** (특권이 없는 사용자 포함)는 타임 머신 스냅샷을 생성하고 마운트하여 해당 스냅샷의 **모든 파일에 접근**할 수 있습니다.\
-필요한 **유일한 특권**은 사용되는 애플리케이션(예: `Terminal`)이 **전체 디스크 접근**(FDA) 권한(`kTCCServiceSystemPolicyAllfiles`)을 가져야 하며, 이는 관리자가 부여해야 합니다.
+**모든 사용자** (특권이 없는 사용자 포함)는 타임 머신 스냅샷을 생성하고 마운트하여 **해당 스냅샷의 모든 파일에** 접근할 수 있습니다.\
+필요한 **유일한 특권**은 사용되는 애플리케이션(예: `Terminal`)이 **전체 디스크 접근** (FDA) 권한(`kTCCServiceSystemPolicyAllfiles`)을 가져야 하며, 이는 관리자가 부여해야 합니다.
 ```bash
 # Create snapshot
 tmutil localsnapshot

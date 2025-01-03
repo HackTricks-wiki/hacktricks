@@ -117,7 +117,7 @@ sudo killall -HUP mDNSResponder
 ```
 ### 설치된 소프트웨어 및 서비스
 
-설치된 **의심스러운** 애플리케이션과 설치된 리소스에 대한 **권한**을 확인하십시오:
+설치된 **의심스러운** 애플리케이션과 **권한**을 확인하십시오.
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework

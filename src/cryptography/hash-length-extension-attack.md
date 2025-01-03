@@ -1,36 +1,36 @@
 {{#include ../banners/hacktricks-training.md}}
 
-# Summary of the attack
+# 공격 요약
 
-Imagine a server which is **signing** some **data** by **appending** a **secret** to some known clear text data and then hashing that data. If you know:
+서버가 **데이터**에 **비밀**을 **추가**하여 **서명**하고 그 데이터를 해시한다고 상상해 보십시오. 다음을 알고 있다면:
 
-- **The length of the secret** (this can be also bruteforced from a given length range)
-- **The clear text data**
-- **The algorithm (and it's vulnerable to this attack)**
-- **The padding is known**
-  - Usually a default one is used, so if the other 3 requirements are met, this also is
-  - The padding vary depending on the length of the secret+data, that's why the length of the secret is needed
+- **비밀의 길이** (주어진 길이 범위에서 브루트포스할 수 있음)
+- **명확한 텍스트 데이터**
+- **알고리즘 (이 공격에 취약함)**
+- **패딩이 알려져 있음**
+- 일반적으로 기본값이 사용되므로 다른 3가지 요구 사항이 충족되면 이것도 해당됨
+- 패딩은 비밀 + 데이터의 길이에 따라 달라지므로 비밀의 길이가 필요함
 
-Then, it's possible for an **attacker** to **append** **data** and **generate** a valid **signature** for the **previous data + appended data**.
+그렇다면 **공격자**가 **데이터**를 **추가**하고 **이전 데이터 + 추가된 데이터**에 대한 유효한 **서명**을 **생성**하는 것이 가능합니다.
 
-## How?
+## 어떻게?
 
-Basically the vulnerable algorithms generate the hashes by firstly **hashing a block of data**, and then, **from** the **previously** created **hash** (state), they **add the next block of data** and **hash it**.
+기본적으로 취약한 알고리즘은 먼저 **데이터 블록을 해시**하여 해시를 생성한 다음, **이전**에 생성된 **해시**(상태)에서 **다음 데이터 블록을 추가**하고 **해시**합니다.
 
-Then, imagine that the secret is "secret" and the data is "data", the MD5 of "secretdata" is 6036708eba0d11f6ef52ad44e8b74d5b.\
-If an attacker wants to append the string "append" he can:
+그런 다음 비밀이 "secret"이고 데이터가 "data"라고 가정해 보십시오. "secretdata"의 MD5는 6036708eba0d11f6ef52ad44e8b74d5b입니다.\
+공격자가 "append" 문자열을 추가하고 싶다면 다음과 같이 할 수 있습니다:
 
-- Generate a MD5 of 64 "A"s
-- Change the state of the previously initialized hash to 6036708eba0d11f6ef52ad44e8b74d5b
-- Append the string "append"
-- Finish the hash and the resulting hash will be a **valid one for "secret" + "data" + "padding" + "append"**
+- 64개의 "A"로 MD5 생성
+- 이전에 초기화된 해시의 상태를 6036708eba0d11f6ef52ad44e8b74d5b로 변경
+- "append" 문자열 추가
+- 해시를 완료하면 결과 해시는 **"secret" + "data" + "padding" + "append"**에 대한 유효한 해시가 됩니다.
 
-## **Tool**
+## **도구**
 
 {% embed url="https://github.com/iagox86/hash_extender" %}
 
-## References
+## 참고문헌
 
-You can find this attack good explained in [https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
+이 공격에 대한 좋은 설명은 [https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)에서 찾을 수 있습니다.
 
 {{#include ../banners/hacktricks-training.md}}

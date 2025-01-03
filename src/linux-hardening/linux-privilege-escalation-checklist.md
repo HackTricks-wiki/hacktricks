@@ -1,173 +1,143 @@
-# Checklist - Linux Privilege Escalation
+# 체크리스트 - 리눅스 권한 상승
 
 {{#include ../banners/hacktricks-training.md}}
 
-<figure><img src="../images/image (3).png" alt=""><figcaption></figcaption></figure>
+### **리눅스 로컬 권한 상승 벡터를 찾기 위한 최고의 도구:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
 
-Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
+### [시스템 정보](privilege-escalation/#system-information)
 
-**Hacking Insights**\
-Engage with content that delves into the thrill and challenges of hacking
+- [ ] **OS 정보** 가져오기
+- [ ] [**PATH**](privilege-escalation/#path) 확인, **쓰기 가능한 폴더**가 있나요?
+- [ ] [**env 변수**](privilege-escalation/#env-info) 확인, 민감한 정보가 있나요?
+- [ ] [**커널 익스플로잇**](privilege-escalation/#kernel-exploits) **스크립트를 사용하여** 검색 (DirtyCow?)
+- [ ] [**sudo 버전**이 취약한지](privilege-escalation/#sudo-version) **확인**
+- [ ] [**Dmesg** 서명 검증 실패](privilege-escalation/#dmesg-signature-verification-failed)
+- [ ] 더 많은 시스템 열거 ([날짜, 시스템 통계, CPU 정보, 프린터](privilege-escalation/#more-system-enumeration))
+- [ ] [더 많은 방어 수단 열거](privilege-escalation/#enumerate-possible-defenses)
 
-**Real-Time Hack News**\
-Keep up-to-date with fast-paced hacking world through real-time news and insights
+### [드라이브](privilege-escalation/#drives)
 
-**Latest Announcements**\
-Stay informed with the newest bug bounties launching and crucial platform updates
+- [ ] **마운트된** 드라이브 목록
+- [ ] **마운트되지 않은 드라이브가 있나요?**
+- [ ] **fstab에 자격 증명**이 있나요?
 
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
+### [**설치된 소프트웨어**](privilege-escalation/#installed-software)
 
-### **Best tool to look for Linux local privilege escalation vectors:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
+- [ ] **설치된** [**유용한 소프트웨어**](privilege-escalation/#useful-software) **확인**
+- [ ] **설치된** [**취약한 소프트웨어**](privilege-escalation/#vulnerable-software-installed) **확인**
 
-### [System Information](privilege-escalation/#system-information)
+### [프로세스](privilege-escalation/#processes)
 
-- [ ] Get **OS information**
-- [ ] Check the [**PATH**](privilege-escalation/#path), any **writable folder**?
-- [ ] Check [**env variables**](privilege-escalation/#env-info), any sensitive detail?
-- [ ] Search for [**kernel exploits**](privilege-escalation/#kernel-exploits) **using scripts** (DirtyCow?)
-- [ ] **Check** if the [**sudo version** is vulnerable](privilege-escalation/#sudo-version)
-- [ ] [**Dmesg** signature verification failed](privilege-escalation/#dmesg-signature-verification-failed)
-- [ ] More system enum ([date, system stats, cpu info, printers](privilege-escalation/#more-system-enumeration))
-- [ ] [Enumerate more defenses](privilege-escalation/#enumerate-possible-defenses)
+- [ ] **알 수 없는 소프트웨어가 실행되고** 있나요?
+- [ ] **더 많은 권한을 가진** 소프트웨어가 실행되고 있나요?
+- [ ] **실행 중인 프로세스의 익스플로잇** 검색 (특히 실행 중인 버전).
+- [ ] **실행 중인 프로세스의 바이너리**를 **수정**할 수 있나요?
+- [ ] **프로세스 모니터링** 및 흥미로운 프로세스가 자주 실행되는지 확인.
+- [ ] **흥미로운 프로세스 메모리**를 **읽을 수** 있나요 (비밀번호가 저장될 수 있는 곳)?
 
-### [Drives](privilege-escalation/#drives)
+### [예약된/크론 작업?](privilege-escalation/#scheduled-jobs)
 
-- [ ] **List mounted** drives
-- [ ] **Any unmounted drive?**
-- [ ] **Any creds in fstab?**
+- [ ] [**PATH**](privilege-escalation/#cron-path)가 크론에 의해 수정되고 있으며, **쓰기**가 가능한가요?
+- [ ] 크론 작업에 [**와일드카드**](privilege-escalation/#cron-using-a-script-with-a-wildcard-wildcard-injection)가 있나요?
+- [ ] **수정 가능한 스크립트**가 **실행**되거나 **수정 가능한 폴더**에 있나요?
+- [ ] 어떤 **스크립트**가 [**매우 자주**](privilege-escalation/#frequent-cron-jobs) **실행되고** 있는지 감지했나요? (매 1, 2 또는 5분마다)
 
-### [**Installed Software**](privilege-escalation/#installed-software)
+### [서비스](privilege-escalation/#services)
 
-- [ ] **Check for**[ **useful software**](privilege-escalation/#useful-software) **installed**
-- [ ] **Check for** [**vulnerable software**](privilege-escalation/#vulnerable-software-installed) **installed**
+- [ ] **쓰기 가능한 .service** 파일이 있나요?
+- [ ] **서비스**에 의해 실행되는 **쓰기 가능한 바이너리**가 있나요?
+- [ ] **systemd PATH**에 **쓰기 가능한 폴더**가 있나요?
 
-### [Processes](privilege-escalation/#processes)
+### [타이머](privilege-escalation/#timers)
 
-- [ ] Is any **unknown software running**?
-- [ ] Is any software running with **more privileges than it should have**?
-- [ ] Search for **exploits of running processes** (especially the version running).
-- [ ] Can you **modify the binary** of any running process?
-- [ ] **Monitor processes** and check if any interesting process is running frequently.
-- [ ] Can you **read** some interesting **process memory** (where passwords could be saved)?
+- [ ] **쓰기 가능한 타이머**가 있나요?
 
-### [Scheduled/Cron jobs?](privilege-escalation/#scheduled-jobs)
+### [소켓](privilege-escalation/#sockets)
 
-- [ ] Is the [**PATH** ](privilege-escalation/#cron-path)being modified by some cron and you can **write** in it?
-- [ ] Any [**wildcard** ](privilege-escalation/#cron-using-a-script-with-a-wildcard-wildcard-injection)in a cron job?
-- [ ] Some [**modifiable script** ](privilege-escalation/#cron-script-overwriting-and-symlink)is being **executed** or is inside **modifiable folder**?
-- [ ] Have you detected that some **script** could be or are being [**executed** very **frequently**](privilege-escalation/#frequent-cron-jobs)? (every 1, 2 or 5 minutes)
-
-### [Services](privilege-escalation/#services)
-
-- [ ] Any **writable .service** file?
-- [ ] Any **writable binary** executed by a **service**?
-- [ ] Any **writable folder in systemd PATH**?
-
-### [Timers](privilege-escalation/#timers)
-
-- [ ] Any **writable timer**?
-
-### [Sockets](privilege-escalation/#sockets)
-
-- [ ] Any **writable .socket** file?
-- [ ] Can you **communicate with any socket**?
-- [ ] **HTTP sockets** with interesting info?
+- [ ] **쓰기 가능한 .socket** 파일이 있나요?
+- [ ] **어떤 소켓과 통신**할 수 있나요?
+- [ ] 흥미로운 정보가 있는 **HTTP 소켓**이 있나요?
 
 ### [D-Bus](privilege-escalation/#d-bus)
 
-- [ ] Can you **communicate with any D-Bus**?
+- [ ] **어떤 D-Bus와 통신**할 수 있나요?
 
-### [Network](privilege-escalation/#network)
+### [네트워크](privilege-escalation/#network)
 
-- [ ] Enumerate the network to know where you are
-- [ ] **Open ports you couldn't access before** getting a shell inside the machine?
-- [ ] Can you **sniff traffic** using `tcpdump`?
+- [ ] 네트워크를 열거하여 당신의 위치를 파악하세요
+- [ ] **이전에 접근할 수 없었던 열린 포트**가 있나요?
+- [ ] `tcpdump`를 사용하여 **트래픽을 스니핑**할 수 있나요?
 
-### [Users](privilege-escalation/#users)
+### [사용자](privilege-escalation/#users)
 
-- [ ] Generic users/groups **enumeration**
-- [ ] Do you have a **very big UID**? Is the **machine** **vulnerable**?
-- [ ] Can you [**escalate privileges thanks to a group**](privilege-escalation/interesting-groups-linux-pe/) you belong to?
-- [ ] **Clipboard** data?
-- [ ] Password Policy?
-- [ ] Try to **use** every **known password** that you have discovered previously to login **with each** possible **user**. Try to login also without a password.
+- [ ] 일반 사용자/그룹 **열거**
+- [ ] **매우 큰 UID**가 있나요? **기계**가 **취약한가요**?
+- [ ] 당신이 속한 [**그룹 덕분에 권한을 상승**](privilege-escalation/interesting-groups-linux-pe/)시킬 수 있나요?
+- [ ] **클립보드** 데이터?
+- [ ] 비밀번호 정책?
+- [ ] 이전에 발견한 **모든 알려진 비밀번호**를 사용하여 **각 사용자**로 로그인 시도. 비밀번호 없이도 로그인 시도.
 
-### [Writable PATH](privilege-escalation/#writable-path-abuses)
+### [쓰기 가능한 PATH](privilege-escalation/#writable-path-abuses)
 
-- [ ] If you have **write privileges over some folder in PATH** you may be able to escalate privileges
+- [ ] **PATH의 일부 폴더에 대한 쓰기 권한**이 있다면 권한을 상승시킬 수 있습니다.
 
-### [SUDO and SUID commands](privilege-escalation/#sudo-and-suid)
+### [SUDO 및 SUID 명령](privilege-escalation/#sudo-and-suid)
 
-- [ ] Can you execute **any command with sudo**? Can you use it to READ, WRITE or EXECUTE anything as root? ([**GTFOBins**](https://gtfobins.github.io))
-- [ ] Is any **exploitable SUID binary**? ([**GTFOBins**](https://gtfobins.github.io))
-- [ ] Are [**sudo** commands **limited** by **path**? can you **bypass** the restrictions](privilege-escalation/#sudo-execution-bypassing-paths)?
-- [ ] [**Sudo/SUID binary without path indicated**](privilege-escalation/#sudo-command-suid-binary-without-command-path)?
-- [ ] [**SUID binary specifying path**](privilege-escalation/#suid-binary-with-command-path)? Bypass
-- [ ] [**LD_PRELOAD vuln**](privilege-escalation/#ld_preload)
-- [ ] [**Lack of .so library in SUID binary**](privilege-escalation/#suid-binary-so-injection) from a writable folder?
-- [ ] [**SUDO tokens available**](privilege-escalation/#reusing-sudo-tokens)? [**Can you create a SUDO token**](privilege-escalation/#var-run-sudo-ts-less-than-username-greater-than)?
-- [ ] Can you [**read or modify sudoers files**](privilege-escalation/#etc-sudoers-etc-sudoers-d)?
-- [ ] Can you [**modify /etc/ld.so.conf.d/**](privilege-escalation/#etc-ld-so-conf-d)?
-- [ ] [**OpenBSD DOAS**](privilege-escalation/#doas) command
+- [ ] **sudo로 어떤 명령을 실행**할 수 있나요? 루트로 **READ, WRITE 또는 EXECUTE**할 수 있나요? ([**GTFOBins**](https://gtfobins.github.io))
+- [ ] **익스플로잇 가능한 SUID 바이너리**가 있나요? ([**GTFOBins**](https://gtfobins.github.io))
+- [ ] [**sudo** 명령이 **경로에 의해 제한**되어 있나요? 제한을 **우회**할 수 있나요](privilege-escalation/#sudo-execution-bypassing-paths)?
+- [ ] [**경로가 표시되지 않은 Sudo/SUID 바이너리**](privilege-escalation/#sudo-command-suid-binary-without-command-path)?
+- [ ] [**경로를 지정한 SUID 바이너리**](privilege-escalation/#suid-binary-with-command-path)? 우회
+- [ ] [**LD_PRELOAD 취약점**](privilege-escalation/#ld_preload)
+- [ ] **쓰기 가능한 폴더에서** [**SUID 바이너리에 .so 라이브러리 부족**](privilege-escalation/#suid-binary-so-injection)?
+- [ ] [**SUDO 토큰 사용 가능**](privilege-escalation/#reusing-sudo-tokens)? [**SUDO 토큰을 생성할 수 있나요**](privilege-escalation/#var-run-sudo-ts-less-than-username-greater-than)?
+- [ ] [**sudoers 파일을 읽거나 수정**](privilege-escalation/#etc-sudoers-etc-sudoers-d)할 수 있나요?
+- [ ] [**/etc/ld.so.conf.d/**를 **수정**할 수 있나요](privilege-escalation/#etc-ld-so-conf-d)?
+- [ ] [**OpenBSD DOAS**](privilege-escalation/#doas) 명령
 
-### [Capabilities](privilege-escalation/#capabilities)
+### [능력](privilege-escalation/#capabilities)
 
-- [ ] Has any binary any **unexpected capability**?
+- [ ] 어떤 바이너리에 **예상치 못한 능력**이 있나요?
 
 ### [ACLs](privilege-escalation/#acls)
 
-- [ ] Has any file any **unexpected ACL**?
+- [ ] 어떤 파일에 **예상치 못한 ACL**이 있나요?
 
-### [Open Shell sessions](privilege-escalation/#open-shell-sessions)
+### [열린 셸 세션](privilege-escalation/#open-shell-sessions)
 
 - [ ] **screen**
 - [ ] **tmux**
 
 ### [SSH](privilege-escalation/#ssh)
 
-- [ ] **Debian** [**OpenSSL Predictable PRNG - CVE-2008-0166**](privilege-escalation/#debian-openssl-predictable-prng-cve-2008-0166)
-- [ ] [**SSH Interesting configuration values**](privilege-escalation/#ssh-interesting-configuration-values)
+- [ ] **Debian** [**OpenSSL 예측 가능한 PRNG - CVE-2008-0166**](privilege-escalation/#debian-openssl-predictable-prng-cve-2008-0166)
+- [ ] [**SSH 흥미로운 구성 값**](privilege-escalation/#ssh-interesting-configuration-values)
 
-### [Interesting Files](privilege-escalation/#interesting-files)
+### [흥미로운 파일](privilege-escalation/#interesting-files)
 
-- [ ] **Profile files** - Read sensitive data? Write to privesc?
-- [ ] **passwd/shadow files** - Read sensitive data? Write to privesc?
-- [ ] **Check commonly interesting folders** for sensitive data
-- [ ] **Weird Location/Owned files,** you may have access to or alter executable files
-- [ ] **Modified** in last mins
-- [ ] **Sqlite DB files**
-- [ ] **Hidden files**
-- [ ] **Script/Binaries in PATH**
-- [ ] **Web files** (passwords?)
-- [ ] **Backups**?
-- [ ] **Known files that contains passwords**: Use **Linpeas** and **LaZagne**
-- [ ] **Generic search**
+- [ ] **프로파일 파일** - 민감한 데이터 읽기? privesc에 쓰기?
+- [ ] **passwd/shadow 파일** - 민감한 데이터 읽기? privesc에 쓰기?
+- [ ] 민감한 데이터를 위해 **일반적으로 흥미로운 폴더** 확인
+- [ ] **이상한 위치/소유 파일,** 접근하거나 실행 파일을 변경할 수 있습니다
+- [ ] **최근 몇 분 내에 수정됨**
+- [ ] **Sqlite DB 파일**
+- [ ] **숨겨진 파일**
+- [ ] **PATH의 스크립트/바이너리**
+- [ ] **웹 파일** (비밀번호?)
+- [ ] **백업**?
+- [ ] **비밀번호가 포함된 알려진 파일**: **Linpeas** 및 **LaZagne** 사용
+- [ ] **일반 검색**
 
-### [**Writable Files**](privilege-escalation/#writable-files)
+### [**쓰기 가능한 파일**](privilege-escalation/#writable-files)
 
-- [ ] **Modify python library** to execute arbitrary commands?
-- [ ] Can you **modify log files**? **Logtotten** exploit
-- [ ] Can you **modify /etc/sysconfig/network-scripts/**? Centos/Redhat exploit
-- [ ] Can you [**write in ini, int.d, systemd or rc.d files**](privilege-escalation/#init-init-d-systemd-and-rc-d)?
+- [ ] **임의의 명령을 실행하기 위해 파이썬 라이브러리 수정**?
+- [ ] **로그 파일을 수정**할 수 있나요? **Logtotten** 익스플로잇
+- [ ] **/etc/sysconfig/network-scripts/**를 **수정**할 수 있나요? Centos/Redhat 익스플로잇
+- [ ] [**ini, int.d, systemd 또는 rc.d 파일에 쓸 수 있나요**](privilege-escalation/#init-init-d-systemd-and-rc-d)?
 
-### [**Other tricks**](privilege-escalation/#other-tricks)
+### [**기타 트릭**](privilege-escalation/#other-tricks)
 
-- [ ] Can you [**abuse NFS to escalate privileges**](privilege-escalation/#nfs-privilege-escalation)?
-- [ ] Do you need to [**escape from a restrictive shell**](privilege-escalation/#escaping-from-restricted-shells)?
-
-<figure><img src="../images/image (3).png" alt=""><figcaption></figcaption></figure>
-
-Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
-
-**Hacking Insights**\
-Engage with content that delves into the thrill and challenges of hacking
-
-**Real-Time Hack News**\
-Keep up-to-date with fast-paced hacking world through real-time news and insights
-
-**Latest Announcements**\
-Stay informed with the newest bug bounties launching and crucial platform updates
-
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
+- [ ] [**NFS를 악용하여 권한을 상승**](privilege-escalation/#nfs-privilege-escalation)시킬 수 있나요?
+- [ ] [**제한된 셸에서 탈출**](privilege-escalation/#escaping-from-restricted-shells)해야 하나요?
 
 {{#include ../banners/hacktricks-training.md}}

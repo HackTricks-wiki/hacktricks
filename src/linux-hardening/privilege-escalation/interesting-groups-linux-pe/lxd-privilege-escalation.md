@@ -2,13 +2,13 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-_**lxd**_ **또는** _**lxc**_ **그룹**에 속하면, 루트가 될 수 있습니다.**
+_if you belong to_ _**lxd**_ **or** _**lxc**_ **group**, you can become root_
 
 ## 인터넷 없이 악용하기
 
 ### 방법 1
 
-이 배포판 빌더를 당신의 머신에 설치할 수 있습니다: [https://github.com/lxc/distrobuilder ](https://github.com/lxc/distrobuilder)(github의 지침을 따르세요):
+You can install in your machine this distro builder: [https://github.com/lxc/distrobuilder ](https://github.com/lxc/distrobuilder)(follow the instructions of the github):
 ```bash
 sudo su
 # Install requirements

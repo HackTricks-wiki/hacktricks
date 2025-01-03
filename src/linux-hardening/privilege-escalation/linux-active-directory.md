@@ -49,7 +49,7 @@ krb5cc_1000
 # Prepare to use it
 export KRB5CCNAME=/tmp/krb5cc_1000
 ```
-### CCACHE 티켓 재사용 키링에서
+### CCACHE 티켓 재사용 from keyring
 
 **프로세스의 메모리에 저장된 Kerberos 티켓은 추출될 수 있습니다**, 특히 머신의 ptrace 보호가 비활성화된 경우(`/proc/sys/kernel/yama/ptrace_scope`). 이 목적을 위한 유용한 도구는 [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey)에서 찾을 수 있으며, 세션에 주입하고 `/tmp`에 티켓을 덤프하여 추출을 용이하게 합니다.
 
@@ -88,7 +88,7 @@ keytab 파일의 내용을 검사하기 위해 **`klist`**를 사용할 수 있�
 klist.exe -t -K -e -k FILE:C:/Path/to/your/krb5.keytab
 # Output includes service principal details and the NT Hash
 ```
-Linux 사용자에게 **`KeyTabExtract`**는 NTLM 해시 재사용을 위해 활용할 수 있는 RC4 HMAC 해시를 추출하는 기능을 제공합니다.
+리눅스 사용자에게 **`KeyTabExtract`**는 NTLM 해시 재사용을 위해 활용할 수 있는 RC4 HMAC 해시를 추출하는 기능을 제공합니다.
 ```bash
 python3 keytabextract.py krb5.keytab
 # Expected output varies based on hash availability

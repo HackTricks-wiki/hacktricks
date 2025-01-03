@@ -2,28 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
+**확인할 흥미로운 페이지:**
 
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=python) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=python" %}
-
-**Interesting pages to check:**
-
-- [**Pyscript hacking tricks**](pyscript.md)
-- [**Python deserializations**](../../pentesting-web/deserialization/#python)
-- [**Tricks to bypass python sandboxes**](bypass-python-sandboxes/)
-- [**Basic python web requests syntax**](web-requests.md)
-- [**Basic python syntax and libraries**](basic-python.md)
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=python) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=python" %}
+- [**Pyscript 해킹 기법**](pyscript.md)
+- [**Python 역직렬화**](../../pentesting-web/deserialization/#python)
+- [**Python 샌드박스를 우회하는 기법**](bypass-python-sandboxes/)
+- [**기본 Python 웹 요청 구문**](web-requests.md)
+- [**기본 Python 구문 및 라이브러리**](basic-python.md)
 
 {{#include ../../banners/hacktricks-training.md}}

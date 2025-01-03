@@ -4,7 +4,7 @@
 
 ## 기본 정보
 
-**Seccomp**는 Secure Computing mode의 약자로, **시스템 호출을 필터링하기 위해 설계된 Linux 커널의 보안 기능**입니다. 이는 프로세스를 제한된 시스템 호출 집합(`exit()`, `sigreturn()`, `read()`, 및 `write()` 이미 열린 파일 설명자에 대해)으로 제한합니다. 프로세스가 다른 호출을 시도하면 커널에 의해 SIGKILL 또는 SIGSYS로 종료됩니다. 이 메커니즘은 리소스를 가상화하지 않고 프로세스를 이들로부터 격리합니다.
+**Seccomp**는 Secure Computing mode의 약자로, **시스템 호출을 필터링하기 위해 설계된 Linux 커널의 보안 기능**입니다. 이는 프로세스를 제한된 시스템 호출 집합(`exit()`, `sigreturn()`, `read()`, 및 `write()` 이미 열린 파일 설명자에 대해)으로 제한합니다. 프로세스가 다른 호출을 시도하면 커널에 의해 SIGKILL 또는 SIGSYS로 종료됩니다. 이 메커니즘은 리소스를 가상화하지 않고 프로세스를 이로부터 격리합니다.
 
 Seccomp를 활성화하는 방법은 두 가지가 있습니다: `PR_SET_SECCOMP`와 함께 `prctl(2)` 시스템 호출을 사용하거나, Linux 커널 3.17 이상에서는 `seccomp(2)` 시스템 호출을 사용하는 것입니다. `/proc/self/seccomp`에 쓰는 오래된 방법은 `prctl()`을 선호하여 더 이상 사용되지 않습니다.
 
@@ -96,7 +96,7 @@ printf("this process is %d\n", getpid());
 ```
 ## Docker에서의 Seccomp
 
-**Seccomp-bpf**는 **Docker**에서 **syscalls**를 제한하여 컨테이너의 표면적을 효과적으로 줄이는 것을 지원합니다. [https://docs.docker.com/engine/security/seccomp/](https://docs.docker.com/engine/security/seccomp/)에서 **기본적으로 차단된 syscalls**를 확인할 수 있으며, **기본 seccomp 프로필**은 [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json)에서 확인할 수 있습니다.\
+**Seccomp-bpf**는 **Docker**에서 **syscalls**를 제한하여 컨테이너의 공격 표면을 효과적으로 줄이는 것을 지원합니다. [https://docs.docker.com/engine/security/seccomp/](https://docs.docker.com/engine/security/seccomp/)에서 **기본적으로 차단된 syscalls**를 확인할 수 있으며, **기본 seccomp 프로필**은 [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json)에서 확인할 수 있습니다.\
 다음과 같이 **다른 seccomp** 정책으로 도커 컨테이너를 실행할 수 있습니다:
 ```bash
 docker run --rm \
@@ -104,7 +104,7 @@ docker run --rm \
 --security-opt seccomp=/path/to/seccomp/profile.json \
 hello-world
 ```
-컨테이너가 `uname`과 같은 **syscall**을 실행하는 것을 **금지**하려면 [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json)에서 기본 프로파일을 다운로드하고 **목록에서 `uname` 문자열을 제거**하면 됩니다.\
+컨테이너가 `uname`과 같은 **syscall**을 실행하는 것을 **금지**하려면 [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json)에서 기본 프로필을 다운로드하고 **목록에서 `uname` 문자열을 제거**하면 됩니다.\
 **어떤 바이너리가 도커 컨테이너 내에서 작동하지 않도록** 하려면 strace를 사용하여 바이너리가 사용하는 syscalls를 나열한 다음 이를 금지할 수 있습니다.\
 다음 예제에서는 `uname`의 **syscalls**가 발견됩니다:
 ```bash
@@ -117,7 +117,7 @@ docker run -it --security-opt seccomp=default.json modified-ubuntu strace uname
 
 [여기에서 예제](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-2docker-engine/) 
 
-Seccomp 기능을 설명하기 위해, 아래와 같이 “chmod” 시스템 호출을 비활성화하는 Seccomp 프로파일을 생성해 보겠습니다.
+Seccomp 기능을 설명하기 위해, 아래와 같이 "chmod" 시스템 호출을 비활성화하는 Seccomp 프로파일을 생성해 보겠습니다.
 ```json
 {
 "defaultAction": "SCMP_ACT_ALLOW",
@@ -135,7 +135,7 @@ Seccomp 기능을 설명하기 위해, 아래와 같이 “chmod” 시스템 �
 $ docker run --rm -it --security-opt seccomp:/home/smakam14/seccomp/profile.json busybox chmod 400 /etc/hosts
 chmod: /etc/hosts: Operation not permitted
 ```
-다음 출력은 프로필을 표시하는 "docker inspect"를 보여줍니다:
+다음 출력은 프로파일을 표시하는 "docker inspect"를 보여줍니다:
 ```json
 "SecurityOpt": [
 "seccomp:{\"defaultAction\":\"SCMP_ACT_ALLOW\",\"syscalls\":[{\"name\":\"chmod\",\"action\":\"SCMP_ACT_ERRNO\"}]}"

@@ -8,7 +8,7 @@ I/O Kit은 XNU 커널에서 **동적 로드된 장치 드라이버**를 처리�
 
 IOKit 드라이버는 기본적으로 **커널에서 함수를 내보냅니다**. 이 함수 매개변수 **유형**은 **미리 정의되어** 있으며 검증됩니다. 또한, XPC와 유사하게, IOKit은 **Mach 메시지** 위에 또 다른 레이어입니다.
 
-**IOKit XNU 커널 코드**는 Apple에 의해 [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit)에서 오픈 소스로 제공됩니다. 또한, 사용자 공간 IOKit 구성 요소도 오픈 소스입니다 [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
+**IOKit XNU 커널 코드**는 Apple에 의해 [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit)에서 오픈 소스화되었습니다. 또한, 사용자 공간 IOKit 구성 요소도 오픈 소스입니다 [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
 
 그러나 **IOKit 드라이버**는 오픈 소스가 아닙니다. 어쨌든, 때때로 드라이버의 릴리스가 디버깅을 쉽게 해주는 기호와 함께 제공될 수 있습니다. [**펌웨어에서 드라이버 확장을 가져오는 방법을 확인하세요**](./#ipsw)**.**
 
@@ -68,9 +68,9 @@ kextunload com.apple.iokit.IOReportFamily
 ```
 ## IORegistry
 
-**IORegistry**는 macOS 및 iOS의 IOKit 프레임워크에서 시스템의 하드웨어 구성 및 상태를 나타내는 데이터베이스 역할을 하는 중요한 부분입니다. **시스템에 로드된 모든 하드웨어 및 드라이버를 나타내는 객체의 계층적 컬렉션**이며, 이들 간의 관계를 나타냅니다.
+**IORegistry**는 macOS 및 iOS의 IOKit 프레임워크의 중요한 부분으로, 시스템의 하드웨어 구성 및 상태를 나타내는 데이터베이스 역할을 합니다. 이는 **시스템에 로드된 모든 하드웨어 및 드라이버를 나타내는 객체의 계층적 컬렉션**이며, 이들 간의 관계를 나타냅니다.
 
-콘솔에서 IORegistry를 검사하기 위해 cli **`ioreg`**를 사용하여 얻을 수 있습니다(특히 iOS에 유용합니다).
+콘솔에서 IORegistry를 검사하기 위해 cli **`ioreg`**를 사용하여 얻을 수 있습니다(특히 iOS에 유용함).
 ```bash
 ioreg -l #List all
 ioreg -w 0 #Not cut lines
@@ -162,7 +162,7 @@ return 0;
 
 <figure><img src="../../../images/image (1169).png" alt=""><figcaption></figcaption></figure>
 
-그 끔찍한 호출의 디매글은 다음을 의미합니다:
+그 끔찍한 호출의 디맥글된 의미는:
 ```cpp
 IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```

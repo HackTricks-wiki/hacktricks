@@ -1,69 +1,69 @@
-# Detecting Phishing
+# 피싱 탐지
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Introduction
+## 소개
 
-To detect a phishing attempt it's important to **understand the phishing techniques that are being used nowadays**. On the parent page of this post, you can find this information, so if you aren't aware of which techniques are being used today I recommend you to go to the parent page and read at least that section.
+피싱 시도를 탐지하기 위해서는 **현재 사용되고 있는 피싱 기술을 이해하는 것이 중요합니다**. 이 게시물의 상위 페이지에서 이 정보를 찾을 수 있으니, 현재 어떤 기술이 사용되고 있는지 모른다면 상위 페이지로 가서 최소한 그 섹션을 읽어보는 것을 추천합니다.
 
-This post is based on the idea that the **attackers will try to somehow mimic or use the victim's domain name**. If your domain is called `example.com` and you are phished using a completely different domain name for some reason like `youwonthelottery.com`, these techniques aren't going to uncover it.
+이 게시물은 **공격자가 피해자의 도메인 이름을 어떤 식으로든 모방하거나 사용할 것이라는 아이디어를 기반으로 합니다**. 만약 귀하의 도메인이 `example.com`이고, 어떤 이유로 `youwonthelottery.com`과 같은 완전히 다른 도메인 이름으로 피싱을 당한다면, 이러한 기술로는 이를 밝혀낼 수 없습니다.
 
-## Domain name variations
+## 도메인 이름 변형
 
-It's kind of **easy** to **uncover** those **phishing** attempts that will use a **similar domain** name inside the email.\
-It's enough to **generate a list of the most probable phishing names** that an attacker may use and **check** if it's **registered** or just check if there is any **IP** using it.
+이메일 내에서 **유사한 도메인** 이름을 사용하는 **피싱** 시도를 **발견하는 것은 꽤 쉽습니다**.\
+공격자가 사용할 수 있는 **가장 가능성이 높은 피싱 이름 목록을 생성하고** 그것이 **등록되었는지** 또는 **IP**가 사용되고 있는지 확인하는 것으로 충분합니다.
 
-### Finding suspicious domains
+### 의심스러운 도메인 찾기
 
-For this purpose, you can use any of the following tools. Note that these tolls will also perform DNS requests automatically to check if the domain has any IP assigned to it:
+이 목적을 위해 다음 도구 중 하나를 사용할 수 있습니다. 이 도구들은 도메인에 IP가 할당되어 있는지 확인하기 위해 DNS 요청을 자동으로 수행합니다:
 
 - [**dnstwist**](https://github.com/elceef/dnstwist)
 - [**urlcrazy**](https://github.com/urbanadventurer/urlcrazy)
 
-### Bitflipping
+### 비트플리핑
 
-**You can find a short the explanation of this technique in the parent page. Or read the original research in** [**https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/**](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
+**이 기술에 대한 간단한 설명은 상위 페이지에서 찾을 수 있습니다. 또는** [**https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/**](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/) **에서 원본 연구를 읽어보세요.**
 
-For example, a 1 bit modification in the domain microsoft.com can transform it into _windnws.com._\
-**Attackers may register as many bit-flipping domains as possible related to the victim to redirect legitimate users to their infrastructure**.
+예를 들어, 도메인 microsoft.com의 1비트 수정은 _windnws.com_으로 변환될 수 있습니다.\
+**공격자는 피해자와 관련된 비트플리핑 도메인을 가능한 한 많이 등록하여 합법적인 사용자를 자신의 인프라로 리디렉션할 수 있습니다**.
 
-**All possible bit-flipping domain names should be also monitored.**
+**모든 가능한 비트플리핑 도메인 이름도 모니터링해야 합니다.**
 
-### Basic checks
+### 기본 검사
 
-Once you have a list of potential suspicious domain names you should **check** them (mainly the ports HTTP and HTTPS) to **see if they are using some login form similar** to someone of the victim's domain.\
-You could also check port 3333 to see if it's open and running an instance of `gophish`.\
-It's also interesting to know **how old each discovered suspicions domain is**, the younger it's the riskier it is.\
-You can also get **screenshots** of the HTTP and/or HTTPS suspicious web page to see if it's suspicious and in that case **access it to take a deeper look**.
+잠재적인 의심스러운 도메인 이름 목록이 생기면 **이들을 확인해야 합니다** (주로 HTTP 및 HTTPS 포트) **피해자의 도메인과 유사한 로그인 양식을 사용하고 있는지 확인하기 위해**.\
+포트 3333이 열려 있고 `gophish` 인스턴스가 실행 중인지 확인할 수도 있습니다.\
+각 발견된 의심스러운 도메인이 **얼마나 오래되었는지** 아는 것도 흥미롭습니다. 젊을수록 위험이 더 큽니다.\
+의심스러운 웹 페이지의 **스크린샷**을 찍어 의심스러운지 확인하고, 그런 경우 **접속하여 더 자세히 살펴보세요**.
 
-### Advanced checks
+### 고급 검사
 
-If you want to go one step further I would recommend you to **monitor those suspicious domains and search for more** once in a while (every day? it only takes a few seconds/minutes). You should also **check** the open **ports** of the related IPs and **search for instances of `gophish` or similar tools** (yes, attackers also make mistakes) and **monitor the HTTP and HTTPS web pages of the suspicious domains and subdomains** to see if they have copied any login form from the victim's web pages.\
-In order to **automate this** I would recommend having a list of login forms of the victim's domains, spider the suspicious web pages and comparing each login form found inside the suspicious domains with each login form of the victim's domain using something like `ssdeep`.\
-If you have located the login forms of the suspicious domains, you can try to **send junk credentials** and **check if it's redirecting you to the victim's domain**.
+한 단계 더 나아가고 싶다면 **그 의심스러운 도메인을 모니터링하고 가끔 더 검색하는 것을 추천합니다** (매일? 몇 초/분밖에 걸리지 않습니다). 관련 IP의 열린 **포트**를 **확인하고 `gophish` 또는 유사한 도구의 인스턴스를 검색해야 합니다** (네, 공격자도 실수를 합니다) 그리고 **의심스러운 도메인 및 하위 도메인의 HTTP 및 HTTPS 웹 페이지를 모니터링하여 피해자의 웹 페이지에서 로그인 양식을 복사했는지 확인하세요**.\
+이 작업을 **자동화하기 위해** 피해자 도메인의 로그인 양식 목록을 가지고, 의심스러운 웹 페이지를 스파이더링하고, 의심스러운 도메인 내에서 발견된 각 로그인 양식을 피해자 도메인의 각 로그인 양식과 비교하는 것을 추천합니다. `ssdeep`과 같은 것을 사용하여.\
+의심스러운 도메인의 로그인 양식을 찾았다면 **쓰레기 자격 증명을 보내고** **피해자의 도메인으로 리디렉션되는지 확인할 수 있습니다**.
 
-## Domain names using keywords
+## 키워드를 사용하는 도메인 이름
 
-The parent page also mentions a domain name variation technique that consists of putting the **victim's domain name inside a bigger domain** (e.g. paypal-financial.com for paypal.com).
+상위 페이지에서는 **피해자의 도메인 이름을 더 큰 도메인 안에 넣는** 도메인 이름 변형 기술도 언급합니다 (예: paypal-financial.com은 paypal.com을 위한 것입니다).
 
-### Certificate Transparency
+### 인증서 투명성
 
-It's not possible to take the previous "Brute-Force" approach but it's actually **possible to uncover such phishing attempts** also thanks to certificate transparency. Every time a certificate is emitted by a CA, the details are made public. This means that by reading the certificate transparency or even monitoring it, it's **possible to find domains that are using a keyword inside its name** For example, if an attacker generates a certificate of [https://paypal-financial.com](https://paypal-financial.com), seeing the certificate it's possible to find the keyword "paypal" and know that suspicious email is being used.
+이전의 "무차별 대입" 접근 방식을 취할 수는 없지만, 실제로 **이러한 피싱 시도를 밝혀내는 것이 가능합니다**. 인증서 투명성 덕분입니다. CA에 의해 인증서가 발급될 때마다 세부 사항이 공개됩니다. 이는 인증서 투명성을 읽거나 모니터링함으로써 **이름에 키워드를 사용하는 도메인을 찾는 것이 가능하다는 것을 의미합니다**. 예를 들어, 공격자가 [https://paypal-financial.com](https://paypal-financial.com)의 인증서를 생성하면, 인증서를 보면 "paypal"이라는 키워드를 찾고 의심스러운 이메일이 사용되고 있음을 알 수 있습니다.
 
-The post [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/) suggests that you can use Censys to search for certificates affecting a specific keyword and filter by date (only "new" certificates) and by the CA issuer "Let's Encrypt":
+게시물 [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/)에서는 Censys를 사용하여 특정 키워드에 영향을 미치는 인증서를 검색하고 날짜(오직 "새로운" 인증서) 및 CA 발급자 "Let's Encrypt"로 필터링할 수 있다고 제안합니다:
 
 ![https://0xpatrik.com/content/images/2018/07/cert_listing.png](<../../images/image (1115).png>)
 
-However, you can do "the same" using the free web [**crt.sh**](https://crt.sh). You can **search for the keyword** and the **filter** the results **by date and CA** if you wish.
+그러나 무료 웹 [**crt.sh**](https://crt.sh)를 사용하여 "같은" 작업을 수행할 수 있습니다. **키워드를 검색하고** 원하시면 **날짜 및 CA로 결과를 필터링**할 수 있습니다.
 
 ![](<../../images/image (519).png>)
 
-Using this last option you can even use the field Matching Identities to see if any identity from the real domain matches any of the suspicious domains (note that a suspicious domain can be a false positive).
+이 마지막 옵션을 사용하면 Matching Identities 필드를 사용하여 실제 도메인의 어떤 아이덴티티가 의심스러운 도메인과 일치하는지 확인할 수 있습니다 (의심스러운 도메인이 잘못된 긍정일 수 있다는 점에 유의하세요).
 
-**Another alternative** is the fantastic project called [**CertStream**](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067). CertStream provides a real-time stream of newly generated certificates which you can use to detect specified keywords in (near) real-time. In fact, there is a project called [**phishing_catcher**](https://github.com/x0rz/phishing_catcher) that does just that.
+**또 다른 대안**은 [**CertStream**](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067)라는 환상적인 프로젝트입니다. CertStream은 새로 생성된 인증서의 실시간 스트림을 제공하며, 이를 사용하여 (근사) 실시간으로 지정된 키워드를 탐지할 수 있습니다. 실제로 [**phishing_catcher**](https://github.com/x0rz/phishing_catcher)라는 프로젝트가 바로 그것을 수행합니다.
 
-### **New domains**
+### **새로운 도메인**
 
-**One last alternative** is to gather a list of **newly registered domains** for some TLDs ([Whoxy](https://www.whoxy.com/newly-registered-domains/) provides such service) and **check the keywords in these domains**. However, long domains usually use one or more subdomains, therefore the keyword won't appear inside the FLD and you won't be able to find the phishing subdomain.
+**마지막 대안**은 일부 TLD에 대해 **새로 등록된 도메인 목록을 수집하는 것**입니다 ([Whoxy](https://www.whoxy.com/newly-registered-domains/)가 이러한 서비스를 제공합니다) 그리고 **이 도메인에서 키워드를 확인하는 것**입니다. 그러나 긴 도메인은 일반적으로 하나 이상의 하위 도메인을 사용하므로, 키워드는 FLD 내에 나타나지 않으며 피싱 하위 도메인을 찾을 수 없습니다.
 
 {{#include ../../banners/hacktricks-training.md}}

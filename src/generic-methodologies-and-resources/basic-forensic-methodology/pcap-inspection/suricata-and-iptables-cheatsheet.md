@@ -6,14 +6,13 @@
 
 ### Chains
 
-In iptables, lists of rules known as chains are processed sequentially. Among these, three primary chains are universally present, with additional ones like NAT being potentially supported depending on the system's capabilities.
+iptables에서 규칙 목록은 체인으로 알려져 있으며 순차적으로 처리됩니다. 이 중 세 가지 주요 체인은 보편적으로 존재하며, 시스템의 기능에 따라 NAT와 같은 추가 체인이 지원될 수 있습니다.
 
-- **Input Chain**: Utilized for managing the behavior of incoming connections.
-- **Forward Chain**: Employed for handling incoming connections that are not destined for the local system. This is typical for devices acting as routers, where the data received is meant to be forwarded to another destination. This chain is relevant primarily when the system is involved in routing, NATing, or similar activities.
-- **Output Chain**: Dedicated to the regulation of outgoing connections.
+- **Input Chain**: 들어오는 연결의 동작을 관리하는 데 사용됩니다.
+- **Forward Chain**: 로컬 시스템을 대상으로 하지 않는 들어오는 연결을 처리하는 데 사용됩니다. 이는 라우터 역할을 하는 장치에서 일반적이며, 수신된 데이터는 다른 목적지로 전달되도록 되어 있습니다. 이 체인은 시스템이 라우팅, NAT 또는 유사한 활동에 관여할 때 주로 관련이 있습니다.
+- **Output Chain**: 나가는 연결의 규제를 전담합니다.
 
-These chains ensure the orderly processing of network traffic, allowing for the specification of detailed rules governing the flow of data into, through, and out of a system.
-
+이러한 체인은 네트워크 트래픽의 질서 있는 처리를 보장하며, 시스템으로 들어오고, 통과하고, 나가는 데이터 흐름을 규제하는 세부 규칙을 지정할 수 있게 합니다.
 ```bash
 # Delete all rules
 iptables -F
@@ -50,11 +49,9 @@ iptables-save > /etc/sysconfig/iptables
 ip6tables-save > /etc/sysconfig/ip6tables
 iptables-restore < /etc/sysconfig/iptables
 ```
-
 ## Suricata
 
-### Install & Config
-
+### 설치 및 구성
 ```bash
 # Install details from: https://suricata.readthedocs.io/en/suricata-6.0.0/install.html#install-binary-packages
 # Ubuntu
@@ -64,7 +61,7 @@ apt-get install suricata
 
 # Debian
 echo "deb http://http.debian.net/debian buster-backports main" > \
-    /etc/apt/sources.list.d/backports.list
+/etc/apt/sources.list.d/backports.list
 apt-get update
 apt-get install suricata -t buster-backports
 
@@ -80,7 +77,7 @@ suricata-update
 ## To use the dowloaded rules update the following line in /etc/suricata/suricata.yaml
 default-rule-path: /var/lib/suricata/rules
 rule-files:
-  - suricata.rules
+- suricata.rules
 
 # Run
 ## Add rules in /etc/suricata/rules/suricata.rules
@@ -92,7 +89,7 @@ suricata -c /etc/suricata/suricata.yaml -i eth0
 suricatasc -c ruleset-reload-nonblocking
 ## or set the follogin in /etc/suricata/suricata.yaml
 detect-engine:
-  - rule-reload: true
+- rule-reload: true
 
 # Validate suricata config
 suricata -T -c /etc/suricata/suricata.yaml -v
@@ -101,8 +98,8 @@ suricata -T -c /etc/suricata/suricata.yaml -v
 ## Config drop to generate alerts
 ## Search for the following lines in /etc/suricata/suricata.yaml and remove comments:
 - drop:
-    alerts: yes
-    flows: all
+alerts: yes
+flows: all
 
 ## Forward all packages to the queue where suricata can act as IPS
 iptables -I INPUT -j NFQUEUE
@@ -120,76 +117,70 @@ Type=simple
 
 systemctl daemon-reload
 ```
+### 규칙 정의
 
-### Rules Definitions
+[문서에서:] (https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) 규칙/서명은 다음으로 구성됩니다:
 
-[From the docs:](https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) A rule/signature consists of the following:
-
-- The **action**, determines what happens when the signature matches.
-- The **header**, defines the protocol, IP addresses, ports and direction of the rule.
-- The **rule options**, define the specifics of the rule.
-
+- **작업**: 서명이 일치할 때 발생하는 일을 결정합니다.
+- **헤더**: 규칙의 프로토콜, IP 주소, 포트 및 방향을 정의합니다.
+- **규칙 옵션**: 규칙의 세부 사항을 정의합니다.
 ```bash
 alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing Rule in URI"; flow:established,to_server; http.method; content:"GET"; http.uri; content:"rule"; fast_pattern; classtype:bad-unknown; sid:123; rev:1;)
 ```
+#### **유효한 작업은**
 
-#### **Valid actions are**
+- alert - 경고 생성
+- pass - 패킷의 추가 검사를 중지
+- **drop** - 패킷을 드롭하고 경고 생성
+- **reject** - 일치하는 패킷의 발신자에게 RST/ICMP 도달 불가 오류 전송
+- rejectsrc - 단순히 _reject_와 동일
+- rejectdst - 일치하는 패킷의 수신자에게 RST/ICMP 오류 패킷 전송
+- rejectboth - 대화의 양쪽에 RST/ICMP 오류 패킷 전송
 
-- alert - generate an alert
-- pass - stop further inspection of the packet
-- **drop** - drop packet and generate alert
-- **reject** - send RST/ICMP unreachable error to the sender of the matching packet.
-- rejectsrc - same as just _reject_
-- rejectdst - send RST/ICMP error packet to the receiver of the matching packet.
-- rejectboth - send RST/ICMP error packets to both sides of the conversation.
+#### **프로토콜**
 
-#### **Protocols**
-
-- tcp (for tcp-traffic)
+- tcp (tcp 트래픽용)
 - udp
 - icmp
-- ip (ip stands for ‘all’ or ‘any’)
-- _layer7 protocols_: http, ftp, tls, smb, dns, ssh... (more in the [**docs**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html))
+- ip (ip는 '모든' 또는 '아무'를 의미)
+- _layer7 프로토콜_: http, ftp, tls, smb, dns, ssh... (자세한 내용은 [**docs**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html)에서 확인)
 
-#### Source and Destination Addresses
+#### 출발지 및 목적지 주소
 
-It supports IP ranges, negations and a list of addresses:
+IP 범위, 부정 및 주소 목록을 지원합니다:
 
-| Example                       | Meaning                                  |
-| ----------------------------- | ---------------------------------------- |
-| ! 1.1.1.1                     | Every IP address but 1.1.1.1             |
-| !\[1.1.1.1, 1.1.1.2]          | Every IP address but 1.1.1.1 and 1.1.1.2 |
-| $HOME_NET                     | Your setting of HOME_NET in yaml         |
-| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET and not HOME_NET            |
-| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24 except for 10.0.0.5          |
+| 예시                          | 의미                                   |
+| ----------------------------- | -------------------------------------- |
+| ! 1.1.1.1                     | 1.1.1.1을 제외한 모든 IP 주소         |
+| !\[1.1.1.1, 1.1.1.2]          | 1.1.1.1과 1.1.1.2를 제외한 모든 IP 주소 |
+| $HOME_NET                     | yaml에서 설정한 HOME_NET              |
+| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET 및 HOME_NET 제외          |
+| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24에서 10.0.0.5 제외         |
 
-#### Source and Destination Ports
+#### 출발지 및 목적지 포트
 
-It supports port ranges, negations and lists of ports
+포트 범위, 부정 및 포트 목록을 지원합니다:
 
-| Example         | Meaning                                |
+| 예시            | 의미                                   |
 | --------------- | -------------------------------------- |
-| any             | any address                            |
-| \[80, 81, 82]   | port 80, 81 and 82                     |
-| \[80: 82]       | Range from 80 till 82                  |
-| \[1024: ]       | From 1024 till the highest port-number |
-| !80             | Every port but 80                      |
-| \[80:100,!99]   | Range from 80 till 100 but 99 excluded |
-| \[1:80,!\[2,4]] | Range from 1-80, except ports 2 and 4  |
+| any             | 모든 주소                             |
+| \[80, 81, 82]   | 포트 80, 81 및 82                     |
+| \[80: 82]       | 80부터 82까지의 범위                  |
+| \[1024: ]       | 1024부터 가장 높은 포트 번호까지     |
+| !80             | 80을 제외한 모든 포트                 |
+| \[80:100,!99]   | 80부터 100까지의 범위에서 99 제외     |
+| \[1:80,!\[2,4]] | 1-80 범위에서 포트 2와 4 제외         |
 
-#### Direction
+#### 방향
 
-It's possible to indicate the direction of the communication rule being applied:
-
+적용되는 통신 규칙의 방향을 나타낼 수 있습니다:
 ```
 source -> destination
 source <> destination  (both directions)
 ```
+#### 키워드
 
-#### Keywords
-
-There are **hundreds of options** available in Suricata to search for the **specific packet** you are looking for, here it will be mentioned if something interesting is found. Check the [**documentation** ](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html)for more!
-
+Suricata에는 찾고 있는 **특정 패킷**을 검색할 수 있는 **수백 가지 옵션**이 있습니다. 흥미로운 것이 발견되면 여기에서 언급됩니다. 더 많은 정보는 [**문서**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html)를 확인하세요!
 ```bash
 # Meta Keywords
 msg: "description"; #Set a description to the rule
@@ -230,5 +221,4 @@ drop tcp any any -> any any (msg:"regex"; pcre:"/CTF\{[\w]{3}/i"; sid:10001;)
 ## Drop by port
 drop tcp any any -> any 8000 (msg:"8000 port"; sid:1000;)
 ```
-
 {{#include ../../../banners/hacktricks-training.md}}

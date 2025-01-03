@@ -64,7 +64,7 @@ plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
 <integer>4</integer>
 [...]
 ```
-따라서 공격자는 설치할 때 이 파일을 **덮어쓰는** 악성 패키지(`pkg`)를 배포하여 **Typhon 에이전트의 Mythic C2 리스너에 대한 URL을 설정**하여 JAMF를 C2로 악용할 수 있게 됩니다.
+그래서 공격자는 설치할 때 이 파일을 **덮어쓰는** 악성 패키지(`pkg`)를 배포할 수 있으며, 이제 **Typhon 에이전트의 Mythic C2 리스너에 대한 URL**을 설정하여 JAMF를 C2로 악용할 수 있습니다.
 ```bash
 # After changing the URL you could wait for it to be reloaded or execute:
 sudo jamf policy -id 0
@@ -78,13 +78,13 @@ sudo jamf policy -id 0
 - 장치의 **UUID**: `ioreg -d2 -c IOPlatformExpertDevice | awk -F" '/IOPlatformUUID/{print $(NF-1)}'`
 - 장치 인증서를 포함하는 **JAMF 키체인**: `/Library/Application\ Support/Jamf/JAMF.keychain`
 
-이 정보를 바탕으로, **도난당한** 하드웨어 **UUID**와 **SIP 비활성화**된 **VM**을 생성하고, **JAMF 키체인**을 드롭한 후, Jamf **에이전트를 훅**하여 정보를 훔치세요.
+이 정보를 바탕으로 **도난당한** 하드웨어 **UUID**와 **SIP 비활성화**된 **VM**을 생성하고, **JAMF 키체인**을 드롭한 후 Jamf **에이전트**를 **후킹**하여 정보를 훔치세요.
 
 #### 비밀 정보 훔치기
 
 <figure><img src="../../images/image (1025).png" alt=""><figcaption><p>a</p></figcaption></figure>
 
-관리자가 Jamf를 통해 실행하고자 할 **커스텀 스크립트**를 위해 `/Library/Application Support/Jamf/tmp/` 위치를 모니터링할 수도 있습니다. 이 스크립트는 **여기에 배치되고 실행된 후 제거됩니다.** 이 스크립트는 **자격 증명**을 포함할 수 있습니다.
+관리자가 Jamf를 통해 실행하고자 할 **커스텀 스크립트**를 위해 `/Library/Application Support/Jamf/tmp/` 위치를 모니터링할 수도 있습니다. 이 스크립트는 **여기에 배치되고 실행된 후 제거됩니다**. 이러한 스크립트는 **자격 증명**을 포함할 수 있습니다.
 
 그러나 **자격 증명**은 이러한 스크립트에 **매개변수**로 전달될 수 있으므로, `ps aux | grep -i jamf`를 모니터링해야 합니다 (루트 권한 없이도 가능합니다).
 
@@ -92,7 +92,7 @@ sudo jamf policy -id 0
 
 ### macOS 원격 접근
 
-또한 **MacOS** "특별한" **네트워크** **프로토콜**에 대해:
+또한 **MacOS**의 "특별한" **네트워크** **프로토콜**에 대해:
 
 {{#ref}}
 ../macos-security-and-privilege-escalation/macos-protocols.md
@@ -100,7 +100,7 @@ sudo jamf policy -id 0
 
 ## Active Directory
 
-일부 경우 **MacOS 컴퓨터가 AD에 연결되어 있는** 것을 발견할 수 있습니다. 이 시나리오에서는 익숙한 대로 **액티브 디렉토리**를 **열거**하려고 시도해야 합니다. 다음 페이지에서 **도움**을 찾으세요:
+일부 경우 **MacOS 컴퓨터가 AD에 연결되어 있는** 것을 발견할 수 있습니다. 이 시나리오에서는 익숙한 대로 **활성 디렉토리**를 **열거**하려고 시도해야 합니다. 다음 페이지에서 **도움**을 찾으세요:
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-ldap.md
@@ -118,7 +118,7 @@ sudo jamf policy -id 0
 ```bash
 dscl "/Active Directory/[Domain]/All Domains" ls /
 ```
-또한 MacOS에서 AD를 자동으로 열거하고 kerberos와 상호작용하기 위해 준비된 몇 가지 도구가 있습니다:
+또한 MacOS에서 AD를 자동으로 열거하고 kerberos와 상호작용할 수 있도록 준비된 도구들이 있습니다:
 
 - [**Machound**](https://github.com/XMCyber/MacHound): MacHound는 MacOS 호스트에서 Active Directory 관계를 수집하고 수집할 수 있도록 하는 Bloodhound 감사 도구의 확장입니다.
 - [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost는 macOS에서 Heimdal krb5 API와 상호작용하도록 설계된 Objective-C 프로젝트입니다. 이 프로젝트의 목표는 타겟에 다른 프레임워크나 패키지를 요구하지 않고 네이티브 API를 사용하여 macOS 장치에서 Kerberos에 대한 보안 테스트를 개선하는 것입니다.
@@ -136,13 +136,13 @@ MacOS 사용자 유형은 다음과 같습니다:
 - **네트워크 사용자** — DC 서버에 연결하여 인증을 요구하는 변동성 Active Directory 사용자입니다.
 - **모바일 사용자** — 자격 증명 및 파일에 대한 로컬 백업이 있는 Active Directory 사용자입니다.
 
-사용자 및 그룹에 대한 로컬 정보는 _/var/db/dslocal/nodes/Default._ 폴더에 저장됩니다.\
+사용자 및 그룹에 대한 로컬 정보는 _/var/db/dslocal/nodes/Default_ 폴더에 저장됩니다.\
 예를 들어, _mark_라는 사용자에 대한 정보는 _/var/db/dslocal/nodes/Default/users/mark.plist_에 저장되며, _admin_ 그룹에 대한 정보는 _/var/db/dslocal/nodes/Default/groups/admin.plist_에 있습니다.
 
 HasSession 및 AdminTo 엣지를 사용하는 것 외에도, **MacHound는 Bloodhound 데이터베이스에 세 가지 새로운 엣지를 추가합니다**:
 
-- **CanSSH** - 호스트에 SSH할 수 있는 엔티티
-- **CanVNC** - 호스트에 VNC할 수 있는 엔티티
+- **CanSSH** - 호스트에 SSH로 접속할 수 있는 엔티티
+- **CanVNC** - 호스트에 VNC로 접속할 수 있는 엔티티
 - **CanAE** - 호스트에서 AppleEvent 스크립트를 실행할 수 있는 엔티티
 ```bash
 #User enumeration
@@ -218,7 +218,7 @@ Safari에서 파일이 다운로드될 때, "안전한" 파일이라면 **자동
 
 <figure><img src="../../images/image (226).png" alt=""><figcaption></figcaption></figure>
 
-## 참고자료
+## 참고 문헌
 
 - [**https://www.youtube.com/watch?v=IiMladUbL6E**](https://www.youtube.com/watch?v=IiMladUbL6E)
 - [**https://medium.com/xm-cyber/introducing-machound-a-solution-to-macos-active-directory-based-attacks-2a425f0a22b6**](https://medium.com/xm-cyber/introducing-machound-a-solution-to-macos-active-directory-based-attacks-2a425f0a22b6)

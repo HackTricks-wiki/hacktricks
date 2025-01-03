@@ -42,7 +42,7 @@ chmod a+x /cmd
 ```
 5. **공격 시작:**
 - "x" 자식 cgroup 내에서 프로세스가 시작되고 즉시 종료됩니다.
-- 이로 인해 `release_agent`(즉, /cmd 스크립트)가 트리거되어 호스트에서 ps aux를 실행하고 출력을 컨테이너 내의 /output에 기록합니다.
+- 이로 인해 `release_agent`(the /cmd script)가 트리거되어 호스트에서 ps aux를 실행하고 출력을 컨테이너 내의 /output에 기록합니다.
 ```shell
 sh -c "echo \$\$ > /tmp/cgrp/x/cgroup.procs"
 ```

