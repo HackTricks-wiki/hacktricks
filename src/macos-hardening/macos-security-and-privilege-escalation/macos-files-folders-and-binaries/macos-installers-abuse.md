@@ -36,7 +36,7 @@ cpio -i < Scripts
 
 ## Βασικές Πληροφορίες DMG
 
-Τα αρχεία DMG, ή Apple Disk Images, είναι μια μορφή αρχείου που χρησιμοποιείται από το macOS της Apple για εικόνες δίσκων. Ένα αρχείο DMG είναι ουσιαστικά μια **εικόνα δίσκου που μπορεί να προσαρτηθεί** (περιέχει το δικό του σύστημα αρχείων) που περιέχει ακατέργωστα δεδομένα μπλοκ, συνήθως συμπιεσμένα και μερικές φορές κρυπτογραφημένα. Όταν ανοίγετε ένα αρχείο DMG, το macOS **το προσαρτά σαν να ήταν φυσικός δίσκος**, επιτρέποντάς σας να έχετε πρόσβαση στα περιεχόμενά του.
+Τα αρχεία DMG, ή Apple Disk Images, είναι μια μορφή αρχείου που χρησιμοποιείται από το macOS της Apple για εικόνες δίσκων. Ένα αρχείο DMG είναι ουσιαστικά μια **τοποθετήσιμη εικόνα δίσκου** (περιέχει το δικό του σύστημα αρχείων) που περιέχει ακατέργαστα δεδομένα μπλοκ που συνήθως είναι συμπιεσμένα και μερικές φορές κρυπτογραφημένα. Όταν ανοίγετε ένα αρχείο DMG, το macOS **το τοποθετεί σαν να ήταν φυσικός δίσκος**, επιτρέποντάς σας να έχετε πρόσβαση στα περιεχόμενά του.
 
 > [!CAUTION]
 > Σημειώστε ότι οι εγκαταστάτες **`.dmg`** υποστηρίζουν **τόσες πολλές μορφές** που στο παρελθόν μερικές από αυτές που περιείχαν ευπάθειες χρησιμοποιήθηκαν για να αποκτήσουν **εκτέλεση κώδικα πυρήνα**.
@@ -61,7 +61,7 @@ cpio -i < Scripts
 
 ### AuthorizationExecuteWithPrivileges
 
-Αυτή είναι μια [δημόσια συνάρτηση](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg) που θα καλέσουν αρκετοί εγκαταστάτες και ενημερωτές για να **εκτελέσουν κάτι ως root**. Αυτή η συνάρτηση δέχεται το **μονοπάτι** του **αρχείου** που θα **εκτελεστεί** ως παράμετρο, ωστόσο, αν ένας επιτιθέμενος μπορούσε να **τροποποιήσει** αυτό το αρχείο, θα μπορούσε να **καταχραστεί** την εκτέλεσή του με root για να **κλιμακώσει τα δικαιώματα**.
+Αυτή είναι μια [δημόσια συνάρτηση](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg) που θα καλέσουν αρκετοί εγκαταστάτες και ενημερωτές για να **εκτελέσουν κάτι ως root**. Αυτή η συνάρτηση δέχεται το **μονοπάτι** του **αρχείου** που θα **εκτελεστεί** ως παράμετρο, ωστόσο, εάν ένας επιτιθέμενος μπορούσε να **τροποποιήσει** αυτό το αρχείο, θα μπορούσε να **καταχραστεί** την εκτέλεσή του με root για να **κλιμακώσει τα δικαιώματα**.
 ```bash
 # Breakpoint in the function to check wich file is loaded
 (lldb) b AuthorizationExecuteWithPrivileges
@@ -152,9 +152,9 @@ productbuild --distribution dist.xml --package-path myapp.pkg final-installer.pk
 ```
 ## Αναφορές
 
-- [**DEF CON 27 - Αποσυμπίεση Πακέτων Μια Ματιά Μέσα στα Πακέτα Εγκατάστασης Macos και Κοινές Ασφαλιστικές Αδυναμίες**](https://www.youtube.com/watch?v=iASSG0_zobQ)
+- [**DEF CON 27 - Αποσυμπίεση Πακέτων Μια Ματιά Μέσα στα Πακέτα Εγκατάστασης macOS και Κοινές Ασφαλιστικές Αδυναμίες**](https://www.youtube.com/watch?v=iASSG0_zobQ)
 - [**OBTS v4.0: "Ο Άγριος Κόσμος των Εγκαταστάσεων macOS" - Tony Lambert**](https://www.youtube.com/watch?v=Eow5uNHtmIg)
-- [**DEF CON 27 - Αποσυμπίεση Πακέτων Μια Ματιά Μέσα στα Πακέτα Εγκατάστασης MacOS**](https://www.youtube.com/watch?v=kCXhIYtODBg)
+- [**DEF CON 27 - Αποσυμπίεση Πακέτων Μια Ματιά Μέσα στα Πακέτα Εγκατάστασης macOS**](https://www.youtube.com/watch?v=kCXhIYtODBg)
 - [https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages](https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages)
 
 {{#include ../../../banners/hacktricks-training.md}}

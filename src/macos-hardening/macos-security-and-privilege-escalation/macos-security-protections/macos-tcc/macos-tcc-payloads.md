@@ -9,7 +9,7 @@
 
 {{#tabs}}
 {{#tab name="ObjetiveC"}}
-Αντιγράψτε `$HOME/Desktop` στο `/tmp/desktop`.
+Αντιγράψτε το `$HOME/Desktop` στο `/tmp/desktop`.
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -205,7 +205,7 @@ cp -r "$HOME/Pictures/Photos Library.photoslibrary" "/tmp/photos"
 
 {{#tabs}}
 {{#tab name="ObjetiveC"}}
-Αντιγράψτε `$HOME/Library/Application Support/AddressBook` στο `/tmp/contacts`.
+Αντιγράψτε το `$HOME/Library/Application Support/AddressBook` στο `/tmp/contacts`.
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -560,7 +560,7 @@ static void telegram(int argc, const char **argv) {
 {{#endtab}}
 
 {{#tab name="Shell"}}
-Καταγράψτε ένα ήχο 5 δευτερολέπτων και αποθηκεύστε τον στο `/tmp/recording.wav`
+Καταγράψτε ένα ήχο 5 δευτερολέπτων και αποθηκεύστε το στο `/tmp/recording.wav`
 ```bash
 # Check the microphones
 ffmpeg -f avfoundation -list_devices true -i ""
@@ -573,7 +573,7 @@ ffmpeg -f avfoundation -i ":1" -t 5 /tmp/recording.wav
 ### Τοποθεσία
 
 > [!TIP]
-> Για να αποκτήσει μια εφαρμογή την τοποθεσία, **Υπηρεσίες Τοποθεσίας** (από Ιδιωτικότητα & Ασφάλεια) **πρέπει να είναι ενεργοποιημένες,** αλλιώς δεν θα μπορεί να έχει πρόσβαση σε αυτήν.
+> Για να αποκτήσει μια εφαρμογή την τοποθεσία, **Οι Υπηρεσίες Τοποθεσίας** (από Ιδιωτικότητα & Ασφάλεια) **πρέπει να είναι ενεργοποιημένες,** αλλιώς δεν θα μπορεί να έχει πρόσβαση σε αυτήν.
 
 - **Δικαιώματα**: `com.apple.security.personal-information.location`
 - **TCC**: Χορηγήθηκε στο `/var/db/locationd/clients.plist`
@@ -770,7 +770,7 @@ return 0;
 {{#endtab}}
 
 {{#tab name="Keylogger"}}
-Αποθηκεύστε τα πατημένα πλήκτρα στο **`/tmp/keystrokes.txt`**
+Αποθήκευση των πατημένων πλήκτρων στο **`/tmp/keystrokes.txt`**
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <ApplicationServices/ApplicationServices.h>
@@ -877,6 +877,6 @@ return 0;
 {{#endtab}}
 {{#endtabs}}
 
-> [!CAUTION] > **Η προσβασιμότητα είναι μια πολύ ισχυρή άδεια**, θα μπορούσατε να την καταχραστείτε με άλλους τρόπους, για παράδειγμα θα μπορούσατε να εκτελέσετε την **επίθεση πληκτρολογίων** μόνο από αυτήν χωρίς να χρειάζεται να καλέσετε τα System Events.
+> [!CAUTION] > **Η προσβασιμότητα είναι μια πολύ ισχυρή άδεια**, θα μπορούσατε να την καταχραστείτε με άλλους τρόπους, για παράδειγμα θα μπορούσατε να εκτελέσετε την **επίθεση πληκτρολογίου** μόνο από αυτήν χωρίς να χρειάζεται να καλέσετε τα System Events.
 
 {{#include ../../../../banners/hacktricks-training.md}}

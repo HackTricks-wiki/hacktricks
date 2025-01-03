@@ -11,9 +11,9 @@
 ```bash
 for l in /var/db/dslocal/nodes/Default/users/*; do if [ -r "$l" ];then echo "$l"; defaults read "$l"; fi; done
 ```
-[**Σενάρια όπως αυτό**](https://gist.github.com/teddziuba/3ff08bdda120d1f7822f3baf52e606c2) ή [**αυτό**](https://github.com/octomagon/davegrohl.git) μπορούν να χρησιμοποιηθούν για να μετατρέψουν το hash σε **μορφή hashcat**.
+[**Σενάρια όπως αυτό**](https://gist.github.com/teddziuba/3ff08bdda120d1f7822f3baf52e606c2) ή [**αυτό**](https://github.com/octomagon/davegrohl.git) μπορούν να χρησιμοποιηθούν για να μετατρέψουν το hash σε **μορφή** **hashcat**.
 
-Μια εναλλακτική one-liner που θα εκτυπώσει τα creds όλων των μη υπηρεσιακών λογαριασμών σε μορφή hashcat `-m 7100` (macOS PBKDF2-SHA512):
+Μια εναλλακτική one-liner που θα εξάγει τα creds όλων των μη υπηρεσιακών λογαριασμών σε μορφή hashcat `-m 7100` (macOS PBKDF2-SHA512):
 ```bash
 sudo bash -c 'for i in $(find /var/db/dslocal/nodes/Default/users -type f -regex "[^_]*"); do plutil -extract name.0 raw $i | awk "{printf \$0\":\$ml\$\"}"; for j in {iterations,salt,entropy}; do l=$(k=$(plutil -extract ShadowHashData.0 raw $i) && base64 -d <<< $k | plutil -extract SALTED-SHA512-PBKDF2.$j raw -); if [[ $j == iterations ]]; then echo -n $l; else base64 -d <<< $l | xxd -p -c 0 | awk "{printf \"$\"\$0}"; fi; done; echo ""; done'
 ```
@@ -21,7 +21,7 @@ sudo bash -c 'for i in $(find /var/db/dslocal/nodes/Default/users -type f -regex
 
 ### /etc/master.passwd
 
-Αυτό το αρχείο χρησιμοποιείται **μόνο** όταν το σύστημα εκτελείται σε **μοναδική λειτουργία χρήστη** (οπότε όχι πολύ συχνά).
+Αυτό το αρχείο χρησιμοποιείται **μόνο** όταν το σύστημα εκτελείται σε **λειτουργία ενός χρήστη** (οπότε όχι πολύ συχνά).
 
 ### Keychain Dump
 
@@ -43,7 +43,7 @@ security dump-keychain -d #Dump all the info, included secrets (the user will be
 
 Ένα εργαλείο που ονομάζεται **keychaindump** έχει αναπτυχθεί για να εξάγει κωδικούς πρόσβασης από τα keychains του macOS, αλλά αντιμετωπίζει περιορισμούς σε νεότερες εκδόσεις του macOS όπως το Big Sur, όπως αναφέρεται σε μια [συζήτηση](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760). Η χρήση του **keychaindump** απαιτεί από τον επιτιθέμενο να αποκτήσει πρόσβαση και να αναβαθμίσει τα δικαιώματα σε **root**. Το εργαλείο εκμεταλλεύεται το γεγονός ότι το keychain είναι ξεκλείδωτο από προεπιλογή κατά την είσοδο του χρήστη για ευκολία, επιτρέποντας στις εφαρμογές να έχουν πρόσβαση σε αυτό χωρίς να απαιτείται επανειλημμένα ο κωδικός πρόσβασης του χρήστη. Ωστόσο, αν ένας χρήστης επιλέξει να κλειδώσει το keychain του μετά από κάθε χρήση, το **keychaindump** καθίσταται αναποτελεσματικό.
 
-**Keychaindump** λειτουργεί στοχεύοντας μια συγκεκριμένη διαδικασία που ονομάζεται **securityd**, την οποία περιγράφει η Apple ως ένα daemon για εξουσιοδότηση και κρυπτογραφικές λειτουργίες, κρίσιμη για την πρόσβαση στο keychain. Η διαδικασία εξαγωγής περιλαμβάνει την αναγνώριση ενός **Master Key** που προέρχεται από τον κωδικό πρόσβασης του χρήστη. Αυτό το κλειδί είναι απαραίτητο για την ανάγνωση του αρχείου keychain. Για να εντοπίσει το **Master Key**, το **keychaindump** σ scans τη μνήμη του **securityd** χρησιμοποιώντας την εντολή `vmmap`, αναζητώντας πιθανά κλειδιά σε περιοχές που έχουν σημαδευτεί ως `MALLOC_TINY`. Η ακόλουθη εντολή χρησιμοποιείται για να επιθεωρήσει αυτές τις τοποθεσίες μνήμης:
+Το **keychaindump** λειτουργεί στοχεύοντας μια συγκεκριμένη διαδικασία που ονομάζεται **securityd**, την οποία περιγράφει η Apple ως ένα daemon για εξουσιοδότηση και κρυπτογραφικές λειτουργίες, κρίσιμη για την πρόσβαση στο keychain. Η διαδικασία εξαγωγής περιλαμβάνει την αναγνώριση ενός **Master Key** που προέρχεται από τον κωδικό πρόσβασης του χρήστη. Αυτό το κλειδί είναι απαραίτητο για την ανάγνωση του αρχείου keychain. Για να εντοπίσει το **Master Key**, το **keychaindump** σ scans τη μνήμη του **securityd** χρησιμοποιώντας την εντολή `vmmap`, αναζητώντας πιθανά κλειδιά σε περιοχές που έχουν σημαδευτεί ως `MALLOC_TINY`. Η ακόλουθη εντολή χρησιμοποιείται για να επιθεωρήσει αυτές τις τοποθεσίες μνήμης:
 ```bash
 sudo vmmap <securityd PID> | grep MALLOC_TINY
 ```
@@ -53,7 +53,7 @@ sudo ./keychaindump
 ```
 ### chainbreaker
 
-[**Chainbreaker**](https://github.com/n0fate/chainbreaker) μπορεί να χρησιμοποιηθεί για την εξαγωγή των παρακάτω τύπων πληροφοριών από ένα OSX keychain με τρόπο που είναι νομικά αποδεκτός:
+[**Chainbreaker**](https://github.com/n0fate/chainbreaker) μπορεί να χρησιμοποιηθεί για να εξάγει τους παρακάτω τύπους πληροφοριών από ένα OSX keychain με εγκληματολογικά σωστό τρόπο:
 
 - Hashed Keychain password, κατάλληλο για cracking με [hashcat](https://hashcat.net/hashcat/) ή [John the Ripper](https://www.openwall.com/john/)
 - Internet Passwords
@@ -145,7 +145,7 @@ for i in $(sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.s
 ```
 ## Προτιμήσεις
 
-Στις εφαρμογές macOS, οι προτιμήσεις βρίσκονται στο **`$HOME/Library/Preferences`** και στο iOS βρίσκονται στο `/var/mobile/Containers/Data/Application/<UUID>/Library/Preferences`.
+Στις εφαρμογές macOS, οι προτιμήσεις βρίσκονται στο **`$HOME/Library/Preferences`** και στο iOS είναι στο `/var/mobile/Containers/Data/Application/<UUID>/Library/Preferences`.
 
 Στο macOS, το εργαλείο cli **`defaults`** μπορεί να χρησιμοποιηθεί για **να τροποποιήσει το αρχείο Προτιμήσεων**.
 
@@ -154,7 +154,7 @@ for i in $(sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.s
 ## OpenDirectory permissions.plist
 
 Το αρχείο `/System/Library/OpenDirectory/permissions.plist` περιέχει δικαιώματα που εφαρμόζονται σε χαρακτηριστικά κόμβων και είναι προστατευμένο από το SIP.\
-Αυτό το αρχείο παραχωρεί δικαιώματα σε συγκεκριμένους χρήστες με UUID (και όχι uid) ώστε να μπορούν να έχουν πρόσβαση σε συγκεκριμένες ευαίσθητες πληροφορίες όπως `ShadowHashData`, `HeimdalSRPKey` και `KerberosKeys` μεταξύ άλλων:
+Αυτό το αρχείο παρέχει δικαιώματα σε συγκεκριμένους χρήστες με UUID (και όχι uid) ώστε να μπορούν να έχουν πρόσβαση σε συγκεκριμένες ευαίσθητες πληροφορίες όπως `ShadowHashData`, `HeimdalSRPKey` και `KerberosKeys` μεταξύ άλλων:
 ```xml
 [...]
 <key>dsRecTypeStandard:Computers</key>
@@ -217,8 +217,8 @@ common: com.apple.security.octagon.joined-with-bottle
 
 ### Ειδοποιήσεις Apple Push (APN)
 
-Σε αυτή την περίπτωση, οι εφαρμογές μπορούν να εγγραφούν για **θέματα**. Ο πελάτης θα δημιουργήσει ένα διακριτικό επικοινωνώντας με τους διακομιστές της Apple μέσω του **`apsd`**.\
-Στη συνέχεια, οι πάροχοι θα έχουν επίσης δημιουργήσει ένα διακριτικό και θα μπορούν να συνδεθούν με τους διακομιστές της Apple για να στείλουν μηνύματα στους πελάτες. Αυτά τα μηνύματα θα γίνονται τοπικά δεκτά από το **`apsd`** το οποίο θα προωθήσει την ειδοποίηση στην εφαρμογή που την περιμένει.
+Σε αυτή την περίπτωση, οι εφαρμογές μπορούν να εγγραφούν για **θέματα**. Ο πελάτης θα δημιουργήσει ένα token επικοινωνώντας με τους διακομιστές της Apple μέσω του **`apsd`**.\
+Στη συνέχεια, οι πάροχοι θα έχουν επίσης δημιουργήσει ένα token και θα μπορούν να συνδεθούν με τους διακομιστές της Apple για να στείλουν μηνύματα στους πελάτες. Αυτά τα μηνύματα θα γίνονται τοπικά δεκτά από το **`apsd`** το οποίο θα προωθήσει την ειδοποίηση στην εφαρμογή που την περιμένει.
 
 Οι προτιμήσεις βρίσκονται στο `/Library/Preferences/com.apple.apsd.plist`.
 
@@ -230,12 +230,12 @@ sudo sqlite3 /Library/Application\ Support/ApplePushService/aps.db
 ```bash
 /System/Library/PrivateFrameworks/ApplePushService.framework/apsctl status
 ```
-## User Notifications
+## Ειδοποιήσεις Χρήστη
 
 Αυτές είναι οι ειδοποιήσεις που θα πρέπει να βλέπει ο χρήστης στην οθόνη:
 
 - **`CFUserNotification`**: Αυτή η API παρέχει έναν τρόπο να εμφανίζεται στην οθόνη ένα αναδυόμενο παράθυρο με ένα μήνυμα.
-- **The Bulletin Board**: Αυτό εμφανίζει σε iOS μια διαφήμιση που εξαφανίζεται και θα αποθηκευτεί στο Κέντρο Ειδοποιήσεων.
-- **`NSUserNotificationCenter`**: Αυτό είναι το bulletin board του iOS στο MacOS. Η βάση δεδομένων με τις ειδοποιήσεις βρίσκεται στο `/var/folders/<user temp>/0/com.apple.notificationcenter/db2/db`
+- **Ο Πίνακας Ανακοινώσεων**: Αυτός εμφανίζει σε iOS μια διαφήμιση που εξαφανίζεται και θα αποθηκευτεί στο Κέντρο Ειδοποιήσεων.
+- **`NSUserNotificationCenter`**: Αυτός είναι ο πίνακας ανακοινώσεων iOS στο MacOS. Η βάση δεδομένων με τις ειδοποιήσεις βρίσκεται στο `/var/folders/<user temp>/0/com.apple.notificationcenter/db2/db`
 
 {{#include ../../../banners/hacktricks-training.md}}

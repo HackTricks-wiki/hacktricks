@@ -75,9 +75,9 @@ security authorizationdb read com.apple.tcc.util.admin
 
 Είναι ένας δαίμονας που θα λαμβάνει αιτήματα για να εξουσιοδοτήσει πελάτες να εκτελούν ευαίσθητες ενέργειες. Λειτουργεί ως υπηρεσία XPC που ορίζεται μέσα στον φάκελο `XPCServices/` και χρησιμοποιεί για να γράφει τα αρχεία καταγραφής του στο `/var/log/authd.log`.
 
-Επιπλέον, χρησιμοποιώντας το εργαλείο ασφαλείας, είναι δυνατόν να δοκιμάσετε πολλές APIs του `Security.framework`. Για παράδειγμα, η `AuthorizationExecuteWithPrivileges` εκτελώντας: `security execute-with-privileges /bin/ls`
+Επιπλέον, χρησιμοποιώντας το εργαλείο ασφαλείας, είναι δυνατόν να δοκιμάσετε πολλές APIs του `Security.framework`. Για παράδειγμα, το `AuthorizationExecuteWithPrivileges` εκτελώντας: `security execute-with-privileges /bin/ls`
 
-Αυτό θα δημιουργήσει και θα εκτελέσει το `/usr/libexec/security_authtrampoline /bin/ls` ως root, το οποίο θα ζητήσει άδειες σε ένα παράθυρο διαλόγου για να εκτελέσει το ls ως root:
+Αυτό θα δημιουργήσει ένα fork και θα εκτελέσει το `/usr/libexec/security_authtrampoline /bin/ls` ως root, το οποίο θα ζητήσει άδειες σε ένα παράθυρο διαλόγου για να εκτελέσει το ls ως root:
 
 <figure><img src="../../../images/image (10).png" alt=""><figcaption></figcaption></figure>
 

@@ -10,7 +10,7 @@
 
 Ο μεταγλωττιστής θα συνδέσει το `/usr/lib/libSystem.B.dylib` με το δυαδικό αρχείο.
 
-Στη συνέχεια, **`libSystem.B`** θα καλεί άλλες πολλές συναρτήσεις μέχρι να στείλει η **`xpc_pipe_routine`** τις εξουσιοδοτήσεις της εφαρμογής στο **`securityd`**. Το Securityd ελέγχει αν η διαδικασία θα πρέπει να είναι σε καραντίνα μέσα στο Sandbox, και αν ναι, θα μπει σε καραντίνα.\
+Στη συνέχεια, **`libSystem.B`** θα καλεί άλλες πολλές συναρτήσεις μέχρι να στείλει η **`xpc_pipe_routine`** τις εξουσιοδοτήσεις της εφαρμογής στο **`securityd`**. Ο Securityd ελέγχει αν η διαδικασία θα πρέπει να είναι σε καραντίνα μέσα στο Sandbox, και αν ναι, θα μπει σε καραντίνα.\
 Τέλος, το sandbox θα ενεργοποιηθεί με μια κλήση στο **`__sandbox_ms`** που θα καλέσει το **`__mac_syscall`**.
 
 ## Possible Bypasses
@@ -24,7 +24,7 @@
 > [!CAUTION]
 > Επομένως, αυτή τη στιγμή, αν είστε απλώς ικανοί να δημιουργήσετε έναν φάκελο με όνομα που τελειώνει σε **`.app`** χωρίς το quarantine attribute, μπορείτε να διαφύγετε από το sandbox γιατί το macOS μόνο **ελέγχει** το **quarantine** attribute στον **φάκελο `.app`** και στο **κύριο εκτελέσιμο** (και θα δείξουμε το κύριο εκτελέσιμο στο **`/bin/bash`**).
 >
-> Σημειώστε ότι αν ένα πακέτο .app έχει ήδη εξουσιοδοτηθεί να εκτελείται (έχει ένα quarantine xttr με την εξουσιοδότηση να εκτελείται), μπορείτε επίσης να το εκμεταλλευτείτε... εκτός αν τώρα δεν μπορείτε να γράψετε μέσα σε **`.app`** πακέτα εκτός αν έχετε κάποιες προνομιακές άδειες TCC (που δεν θα έχετε μέσα σε ένα sandbox υψηλής ασφάλειας).
+> Σημειώστε ότι αν ένα πακέτο .app έχει ήδη εξουσιοδοτηθεί να εκτελείται (έχει ένα quarantine xttr με την εξουσιοδότηση να εκτελείται), θα μπορούσατε επίσης να το εκμεταλλευτείτε... εκτός αν τώρα δεν μπορείτε να γράψετε μέσα σε **`.app`** πακέτα εκτός αν έχετε κάποιες προνομιακές άδειες TCC (που δεν θα έχετε μέσα σε ένα sandbox υψηλής ασφάλειας).
 
 ### Abusing Open functionality
 
@@ -37,7 +37,7 @@ macos-office-sandbox-bypasses.md
 ### Launch Agents/Daemons
 
 Ακόμα και αν μια εφαρμογή είναι **σχεδιασμένη να είναι σε sandbox** (`com.apple.security.app-sandbox`), είναι δυνατόν να παρακαμφθεί το sandbox αν εκτελείται από έναν LaunchAgent (`~/Library/LaunchAgents`) για παράδειγμα.\
-Όπως εξηγήθηκε σε [**αυτή την ανάρτηση**](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818), αν θέλετε να αποκτήσετε επιμονή με μια εφαρμογή που είναι σε sandbox μπορείτε να την κάνετε να εκτελείται αυτόματα ως LaunchAgent και ίσως να εισάγετε κακόβουλο κώδικα μέσω μεταβλητών περιβάλλοντος DyLib.
+Όπως εξηγήθηκε σε [**αυτή την ανάρτηση**](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818), αν θέλετε να αποκτήσετε επιμονή με μια εφαρμογή που είναι σε sandbox, θα μπορούσατε να την κάνετε να εκτελείται αυτόματα ως LaunchAgent και ίσως να εισάγετε κακόβουλο κώδικα μέσω μεταβλητών περιβάλλοντος DyLib.
 
 ### Abusing Auto Start Locations
 
@@ -103,7 +103,7 @@ checkService(serviceName.UTF8String);
 find /System/Library/Frameworks -name "*.xpc"
 find /System/Library/PrivateFrameworks -name "*.xpc"
 ```
-Μερικά παραδείγματα που εκμεταλλεύονται αυτή την τεχνική μπορούν να βρεθούν στην [**πρωτότυπη αναφορά**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), ωστόσο, τα παρακάτω είναι μερικά συνοπτικά παραδείγματα.
+Μερικά παραδείγματα κατάχρησης αυτής της τεχνικής μπορούν να βρεθούν στην [**αρχική αναφορά**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), ωστόσο, τα παρακάτω είναι μερικά συνοπτικά παραδείγματα.
 
 #### /System/Library/PrivateFrameworks/StorageKit.framework/XPCServices/storagekitfsrunner.xpc
 
@@ -130,7 +130,7 @@ NSLog(@"run task result:%@, error:%@", bSucc, error);
 ```
 #### /System/Library/PrivateFrameworks/AudioAnalyticsInternal.framework/XPCServices/AudioAnalyticsHelperService.xpc
 
-Αυτή η υπηρεσία XPC επέτρεπε σε κάθε πελάτη επιστρέφοντας πάντα ΝΑΙ και η μέθοδος `createZipAtPath:hourThreshold:withReply:` ουσιαστικά επέτρεπε να υποδειχθεί η διαδρομή σε έναν φάκελο προς συμπίεση και θα τον συμπίεζε σε ένα αρχείο ZIP.
+Αυτή η υπηρεσία XPC επέτρεπε σε κάθε πελάτη επιστρέφοντας πάντα ΝΑΙ και η μέθοδος `createZipAtPath:hourThreshold:withReply:` ουσιαστικά επέτρεπε να υποδείξει τη διαδρομή σε έναν φάκελο για συμπίεση και θα τον συμπίεζε σε ένα αρχείο ZIP.
 
 Επομένως, είναι δυνατό να δημιουργηθεί μια ψεύτικη δομή φακέλου εφαρμογής, να συμπιεστεί, στη συνέχεια να αποσυμπιεστεί και να εκτελεστεί για να ξεφύγει από το sandbox καθώς τα νέα αρχεία δεν θα έχουν το χαρακτηριστικό καραντίνας.
 
@@ -173,7 +173,7 @@ break;
 ```
 #### /System/Library/PrivateFrameworks/WorkflowKit.framework/XPCServices/ShortcutsFileAccessHelper.xpc
 
-Αυτή η υπηρεσία XPC επιτρέπει την παροχή δικαιωμάτων ανάγνωσης και εγγραφής σε μια αυθαίρετη διεύθυνση URL στον πελάτη XPC μέσω της μεθόδου `extendAccessToURL:completion:` που δέχεται οποιαδήποτε σύνδεση. Καθώς η υπηρεσία XPC έχει FDA, είναι δυνατόν να καταχραστούν αυτά τα δικαιώματα για να παρακαμφθεί εντελώς το TCC.
+Αυτή η υπηρεσία XPC επιτρέπει την παροχή πρόσβασης ανάγνωσης και εγγραφής σε μια αυθαίρετη διεύθυνση URL στον πελάτη XPC μέσω της μεθόδου `extendAccessToURL:completion:` που δέχεται οποιαδήποτε σύνδεση. Καθώς η υπηρεσία XPC έχει FDA, είναι δυνατόν να καταχραστούν αυτές οι άδειες για να παρακαμφθεί εντελώς το TCC.
 
 Η εκμετάλλευση ήταν:
 ```objectivec
@@ -219,7 +219,7 @@ ld: dynamic executables or dylibs must link with libSystem.dylib for architectur
 ```
 ### Όχι κληρονομούμενοι περιορισμοί
 
-Όπως εξηγείται στο **[bonus of this writeup](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)**, ένας περιορισμός sandbox όπως:
+Όπως εξηγήθηκε στο **[μπόνους αυτού του κειμένου](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)**, ένας περιορισμός sandbox όπως:
 ```
 (version 1)
 (allow default)
@@ -372,7 +372,7 @@ gcc -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __info_plist -Xlinker Info.pli
 codesign -s <cert-name> --entitlements entitlements.xml sand
 ```
 > [!CAUTION]
-> Η εφαρμογή θα προσπαθήσει να **διαβάσει** το αρχείο **`~/Desktop/del.txt`**, το οποίο **η Sandbox δεν θα επιτρέψει**.\
+> Η εφαρμογή θα προσπαθήσει να **διαβάσει** το αρχείο **`~/Desktop/del.txt`**, το οποίο η **Sandbox δεν θα επιτρέψει**.\
 > Δημιουργήστε ένα αρχείο εκεί καθώς μόλις παρακαμφθεί η Sandbox, θα μπορεί να το διαβάσει:
 >
 > ```bash

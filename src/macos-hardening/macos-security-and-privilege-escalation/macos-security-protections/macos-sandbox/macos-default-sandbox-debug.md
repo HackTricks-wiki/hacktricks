@@ -94,7 +94,7 @@ EOF
 {{#endtab}}
 {{#endtabs}}
 
-4. Υπογράψτε την εφαρμογή (χρειάζεται να δημιουργήσετε ένα πιστοποιητικό στο keychain)
+4. Υπογράψτε την εφαρμογή (πρέπει να δημιουργήσετε ένα πιστοποιητικό στο keychain)
 ```bash
 codesign --entitlements entitlements.plist -s "YourIdentity" SandboxedShellApp.app
 ./SandboxedShellApp.app/Contents/MacOS/SandboxedShellApp

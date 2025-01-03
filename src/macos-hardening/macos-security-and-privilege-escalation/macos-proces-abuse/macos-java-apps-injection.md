@@ -4,7 +4,7 @@
 
 ## Enumeration
 
-Βρείτε τις εγκατεστημένες εφαρμογές Java στο σύστημά σας. Παρατηρήθηκε ότι οι εφαρμογές Java στο **Info.plist** θα περιέχουν κάποιες παραμέτρους java που περιέχουν τη συμβολοσειρά **`java.`**, οπότε μπορείτε να αναζητήσετε αυτό:
+Βρείτε τις εφαρμογές Java που είναι εγκατεστημένες στο σύστημά σας. Παρατηρήθηκε ότι οι εφαρμογές Java στο **Info.plist** θα περιέχουν κάποιες παραμέτρους java που περιέχουν τη συμβολοσειρά **`java.`**, οπότε μπορείτε να αναζητήσετε αυτό:
 ```bash
 # Search only in /Applications folder
 sudo find /Applications -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
@@ -130,7 +130,7 @@ open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Profession
 
 Ακόμα περισσότερο, ορισμένες εφαρμογές Java θα **φορτώσουν περισσότερα από ένα `vmoptions`** αρχείο.
 
-Ορισμένες εφαρμογές όπως το Android Studio υποδεικνύουν στην **έξοδό τους πού κοιτάζουν** για αυτά τα αρχεία, όπως:
+Ορισμένες εφαρμογές όπως το Android Studio υποδεικνύουν στην **έξοδό τους πού ψάχνουν** για αυτά τα αρχεία, όπως:
 ```bash
 /Applications/Android\ Studio.app/Contents/MacOS/studio 2>&1 | grep vmoptions
 
