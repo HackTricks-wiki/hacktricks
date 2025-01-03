@@ -5,7 +5,7 @@
 ### Code
 
 Le code suivant provient de [ici](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962). Il permet de **spécifier un ID de processus comme argument** et un CMD **s'exécutant en tant qu'utilisateur** du processus indiqué sera exécuté.\
-En s'exécutant dans un processus à haute intégrité, vous pouvez **spécifier le PID d'un processus s'exécutant en tant que System** (comme winlogon, wininit) et exécuter un cmd.exe en tant que système.
+En s'exécutant dans un processus à haute intégrité, vous pouvez **indiquer le PID d'un processus s'exécutant en tant que System** (comme winlogon, wininit) et exécuter un cmd.exe en tant que system.
 ```cpp
 impersonateuser.exe 1234
 ```

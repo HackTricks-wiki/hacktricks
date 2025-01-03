@@ -16,7 +16,7 @@ Pour identifier les membres de ce groupe, la commande suivante est exécutée :
 ```powershell
 Get-NetGroupMember -Identity "Account Operators" -Recurse
 ```
-L'ajout de nouveaux utilisateurs est autorisé, ainsi que la connexion locale à DC01.
+Ajouter de nouveaux utilisateurs est autorisé, ainsi que la connexion locale à DC01.
 
 ## Groupe AdminSDHolder
 
@@ -126,7 +126,7 @@ wbadmin get versions
 echo "Y" | wbadmin start recovery -version:<date-time> -itemtype:file -items:c:\windows\ntds\ntds.dit -recoverytarget:C:\ -notrestoreacl
 ```
 
-Pour une démonstration pratique, voir [VIDÉO DE DÉMONSTRATION AVEC IPPSEC](https://www.youtube.com/watch?v=IfCysW0Od8w&t=2610s).
+Pour une démonstration pratique, voir [VIDÉO DE DÉMO AVEC IPPSEC](https://www.youtube.com/watch?v=IfCysW0Od8w&t=2610s).
 
 ## DnsAdmins
 
@@ -167,14 +167,14 @@ Pour plus de détails sur ce vecteur d'attaque, référez-vous à ired.team.
 
 #### Mimilib.dll
 
-Il est également possible d'utiliser mimilib.dll pour l'exécution de commandes, en le modifiant pour exécuter des commandes spécifiques ou des shells inversés. [Check this post](https://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html) pour plus d'informations.
+Il est également possible d'utiliser mimilib.dll pour l'exécution de commandes, en le modifiant pour exécuter des commandes spécifiques ou des shells inversés. [Consultez ce post](https://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html) pour plus d'informations.
 
 ### Enregistrement WPAD pour MitM
 
 Les DnsAdmins peuvent manipuler les enregistrements DNS pour effectuer des attaques Man-in-the-Middle (MitM) en créant un enregistrement WPAD après avoir désactivé la liste de blocage des requêtes globales. Des outils comme Responder ou Inveigh peuvent être utilisés pour usurper et capturer le trafic réseau.
 
 ### Lecteurs de journaux d'événements
-Les membres peuvent accéder aux journaux d'événements, trouvant potentiellement des informations sensibles telles que des mots de passe en texte clair ou des détails d'exécution de commandes :
+Les membres peuvent accéder aux journaux d'événements, trouvant potentiellement des informations sensibles telles que des mots de passe en clair ou des détails d'exécution de commandes :
 ```powershell
 # Get members and search logs for sensitive information
 Get-NetGroupMember -Identity "Event Log Readers" -Recurse
@@ -182,7 +182,7 @@ Get-WinEvent -LogName security | where { $_.ID -eq 4688 -and $_.Properties[8].Va
 ```
 ## Permissions Windows d'Exchange
 
-Ce groupe peut modifier les DACL sur l'objet de domaine, ce qui peut potentiellement accorder des privilèges DCSync. Les techniques d'escalade de privilèges exploitant ce groupe sont détaillées dans le dépôt GitHub Exchange-AD-Privesc.
+Ce groupe peut modifier les DACL sur l'objet de domaine, accordant potentiellement des privilèges DCSync. Les techniques d'escalade de privilèges exploitant ce groupe sont détaillées dans le dépôt GitHub Exchange-AD-Privesc.
 ```powershell
 # List members
 Get-NetGroupMember -Identity "Exchange Windows Permissions" -Recurse
@@ -203,7 +203,7 @@ Note : L'exploitation des liens durs a été atténuée dans les mises à jour r
 
 ## Gestion de l'organisation
 
-Dans les environnements où **Microsoft Exchange** est déployé, un groupe spécial connu sous le nom de **Gestion de l'organisation** détient des capacités significatives. Ce groupe a le privilège d'**accéder aux boîtes aux lettres de tous les utilisateurs du domaine** et maintient **un contrôle total sur l'Unité d'Organisation 'Groupes de sécurité Microsoft Exchange'**. Ce contrôle inclut le groupe **`Exchange Windows Permissions`**, qui peut être exploité pour l'escalade de privilèges.
+Dans les environnements où **Microsoft Exchange** est déployé, un groupe spécial connu sous le nom de **Gestion de l'organisation** détient des capacités significatives. Ce groupe a le privilège **d'accéder aux boîtes aux lettres de tous les utilisateurs du domaine** et maintient **un contrôle total sur l'Unité d'Organisation 'Groupes de sécurité Microsoft Exchange'**. Ce contrôle inclut le groupe **`Exchange Windows Permissions`**, qui peut être exploité pour l'escalade de privilèges.
 
 ### Exploitation des privilèges et commandes
 
@@ -219,7 +219,7 @@ Pour des techniques d'exploitation plus détaillées liées à **`SeLoadDriverPr
 
 #### Utilisateurs de Bureau à Distance
 
-Les membres de ce groupe ont accès aux PC via le protocole de bureau à distance (RDP). Pour énumérer ces membres, des commandes PowerShell sont disponibles :
+Les membres de ce groupe ont accès aux PC via le Protocole de Bureau à Distance (RDP). Pour énumérer ces membres, des commandes PowerShell sont disponibles :
 ```powershell
 Get-NetGroupMember -Identity "Remote Desktop Users" -Recurse
 Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Desktop Users"

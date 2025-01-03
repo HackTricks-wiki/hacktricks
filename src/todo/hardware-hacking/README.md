@@ -47,6 +47,6 @@ Une **troisième manière** d'identifier les broches JTAG est d'**inspecter le P
 
 SWD est un protocole spécifique à ARM conçu pour le débogage.
 
-L'interface SWD nécessite **deux broches** : un signal bidirectionnel **SWDIO**, qui est l'équivalent des broches **TDI et TDO de JTAG**, et une horloge, et **SWCLK**, qui est l'équivalent de **TCK** dans JTAG. De nombreux appareils prennent en charge le **Port de Débogage à Fil Série ou JTAG (SWJ-DP)**, une interface combinée JTAG et SWD qui vous permet de connecter soit une sonde SWD soit une sonde JTAG à la cible.
+L'interface SWD nécessite **deux broches** : un signal bidirectionnel **SWDIO**, qui est l'équivalent des broches **TDI et TDO de JTAG** et une horloge, et **SWCLK**, qui est l'équivalent de **TCK** dans JTAG. De nombreux appareils prennent en charge le **Port de Débogage à Fil Série ou JTAG (SWJ-DP)**, une interface combinée JTAG et SWD qui vous permet de connecter soit une sonde SWD soit une sonde JTAG à la cible.
 
 {{#include ../../banners/hacktricks-training.md}}

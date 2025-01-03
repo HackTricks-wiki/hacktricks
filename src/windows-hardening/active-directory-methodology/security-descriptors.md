@@ -26,7 +26,7 @@ Set-RemotePSRemoting -UserName student1 -ComputerName <remotehost> -Remove #Remo
 ```
 ### Accès à distance aux hachages
 
-Accédez au **registre** et **dump les hachages** en créant une **porte dérobée Reg** utilisant [**DAMP**](https://github.com/HarmJ0y/DAMP)**,** afin de pouvoir à tout moment récupérer le **hachage de l'ordinateur**, le **SAM** et toute **information d'identification AD mise en cache** sur l'ordinateur. Il est donc très utile de donner cette permission à un **utilisateur régulier contre un ordinateur de contrôleur de domaine** :
+Accédez au **registre** et **dump les hachages** en créant une **porte dérobée Reg en utilisant** [**DAMP**](https://github.com/HarmJ0y/DAMP)**,** afin que vous puissiez à tout moment récupérer le **hachage de l'ordinateur**, le **SAM** et tout **identifiant AD mis en cache** sur l'ordinateur. Il est donc très utile de donner cette permission à un **utilisateur régulier contre un ordinateur de contrôleur de domaine** :
 ```bash
 # allows for the remote retrieval of a system's machine and local account hashes, as well as its domain cached credentials.
 Add-RemoteRegBackdoor -ComputerName <remotehost> -Trustee student1 -Verbose

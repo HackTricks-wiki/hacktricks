@@ -30,7 +30,7 @@ Un avertissement important est partagé sur la façon dont cette technique, comb
 
 ## **Gagner une persistance machine avec des certificats - PERSIST2**
 
-Une autre méthode consiste à inscrire le compte machine d'un système compromis pour un certificat, en utilisant le modèle par défaut `Machine` qui permet de telles actions. Si un attaquant obtient des privilèges élevés sur un système, il peut utiliser le compte **SYSTEM** pour demander des certificats, fournissant une forme de **persistance** :
+Une autre méthode consiste à inscrire le compte machine d'un système compromis pour un certificat, en utilisant le modèle par défaut `Machine` qui permet de telles actions. Si un attaquant obtient des privilèges élevés sur un système, il peut utiliser le compte **SYSTEM** pour demander des certificats, fournissant une forme de **persistence** :
 ```bash
 Certify.exe request /ca:dc.theshire.local/theshire-DC-CA /template:Machine /machine
 ```
@@ -38,7 +38,7 @@ Cet accès permet à l'attaquant de s'authentifier à **Kerberos** en tant que c
 
 ## **Étendre la persistance par le renouvellement de certificat - PERSIST3**
 
-La dernière méthode discutée implique l'exploitation des **périodes de validité** et de **renouvellement** des modèles de certificat. En **renouvelant** un certificat avant son expiration, un attaquant peut maintenir l'authentification à Active Directory sans avoir besoin d'enrôlements de tickets supplémentaires, ce qui pourrait laisser des traces sur le serveur de l'Autorité de Certification (CA).
+La dernière méthode discutée implique de tirer parti de la **validité** et des **périodes de renouvellement** des modèles de certificat. En **renouvelant** un certificat avant son expiration, un attaquant peut maintenir l'authentification à Active Directory sans avoir besoin d'enrôlements de tickets supplémentaires, ce qui pourrait laisser des traces sur le serveur de l'Autorité de Certification (CA).
 
 Cette approche permet une méthode de **persistance étendue**, minimisant le risque de détection grâce à moins d'interactions avec le serveur CA et évitant la génération d'artefacts qui pourraient alerter les administrateurs de l'intrusion.
 

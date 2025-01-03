@@ -17,23 +17,23 @@ Pour plus d'informations sur ces types de tags [**lisez cette introduction**](..
 
 ### Read
 
-Essaye de **lire** les informations de la carte. Ensuite, il peut **l'imiter**.
+Essaye de **lire** les informations de la carte. Ensuite, il peut **émuler** celles-ci.
 
 > [!WARNING]
-> Notez que certains interphones essaient de se protéger contre la duplication de clés en envoyant une commande d'écriture avant de lire. Si l'écriture réussit, ce tag est considéré comme faux. Lorsque Flipper imite RFID, il n'y a aucun moyen pour le lecteur de le distinguer de l'original, donc aucun problème de ce type ne se produit.
+> Notez que certains interphones essaient de se protéger contre la duplication de clés en envoyant une commande d'écriture avant de lire. Si l'écriture réussit, ce tag est considéré comme faux. Lorsque Flipper émule RFID, il n'y a aucun moyen pour le lecteur de le distinguer de l'original, donc aucun problème de ce type ne se produit.
 
 ### Add Manually
 
-Vous pouvez créer des **cartes fausses dans Flipper Zero en indiquant les données** manuellement, puis les imiter.
+Vous pouvez créer des **cartes fausses dans Flipper Zero en indiquant les données** manuellement, puis les émuler.
 
 #### IDs on cards
 
-Parfois, lorsque vous obtenez une carte, vous trouverez l'ID (ou une partie) écrit sur la carte visible.
+Parfois, lorsque vous obtenez une carte, vous trouverez l'ID (ou une partie) écrit sur la carte de manière visible.
 
 - **EM Marin**
 
 Par exemple, dans cette carte EM-Marin, il est possible de **lire les 3 derniers des 5 octets en clair**.\
-Les 2 autres peuvent être brute-forcés si vous ne pouvez pas les lire sur la carte.
+Les 2 autres peuvent être brute-forcés si vous ne pouvez pas les lire depuis la carte.
 
 <figure><img src="../../../images/image (104).png" alt=""><figcaption></figcaption></figure>
 
@@ -45,7 +45,7 @@ Il en va de même pour cette carte HID où seulement 2 des 3 octets peuvent êtr
 
 ### Emulate/Write
 
-Après avoir **copié** une carte ou **saisi** l'ID **manuellement**, il est possible de **l'imiter** avec Flipper Zero ou de **l'écrire** sur une carte réelle.
+Après avoir **copié** une carte ou **saisi** l'ID **manuellement**, il est possible de **l'émuler** avec Flipper Zero ou de **l'écrire** sur une carte réelle.
 
 ## References
 

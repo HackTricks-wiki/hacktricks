@@ -1,6 +1,6 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-Très simplement, cet outil nous aidera à trouver des valeurs pour des variables qui doivent satisfaire certaines conditions, et les calculer à la main serait très ennuyeux. Par conséquent, vous pouvez indiquer à Z3 les conditions que les variables doivent satisfaire et il trouvera des valeurs (si possible).
+Très simplement, cet outil nous aidera à trouver des valeurs pour des variables qui doivent satisfaire certaines conditions, et les calculer à la main serait très ennuyeux. Par conséquent, vous pouvez indiquer à Z3 les conditions que les variables doivent satisfaire et il trouvera certaines valeurs (si possible).
 
 **Certains textes et exemples sont extraits de [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)**
 
@@ -74,7 +74,7 @@ print(simplify(a == b)) #This is False
 ```
 ## Nombres Signés/Non Signés
 
-Z3 fournit des versions signées spéciales des opérations arithmétiques où il est important de savoir si le **bit-vector est traité comme signé ou non signé**. Dans Z3Py, les opérateurs **<, <=, >, >=, /, % et >>** correspondent aux versions **signées**. Les opérateurs **non signés** correspondants sont **ULT, ULE, UGT, UGE, UDiv, URem et LShR.**
+Z3 fournit des versions spéciales signées des opérations arithmétiques où il est important de savoir si le **bit-vector est traité comme signé ou non signé**. Dans Z3Py, les opérateurs **<, <=, >, >=, /, % et >>** correspondent aux versions **signées**. Les opérateurs **non signés** correspondants sont **ULT, ULE, UGT, UGE, UDiv, URem et LShR.**
 ```python
 from z3 import *
 

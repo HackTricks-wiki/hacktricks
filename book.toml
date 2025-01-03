@@ -22,6 +22,7 @@ after = ["links"]
 
 [preprocessor.hacktricks]
 command = "python3 ./hacktricks-preprocessor.py"
+env = "prod"
 
 [output.html]
 additional-css = ["theme/pagetoc.css", "theme/tabs.css"]

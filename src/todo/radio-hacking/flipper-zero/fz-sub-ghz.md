@@ -68,29 +68,29 @@ Si vous connaissez le protocole utilisé par exemple par la porte de garage, il 
 #### Liste des [protocoles pris en charge](https://docs.flipperzero.one/sub-ghz/add-new-remote) <a href="#id-3iglu" id="id-3iglu"></a>
 
 | Princeton_433 (fonctionne avec la majorité des systèmes à code statique) | 433.92 | Statique  |
-| ------------------------------------------------------------------------- | ------ | -------- |
-| Nice Flo 12bit_433                                                       | 433.92 | Statique  |
-| Nice Flo 24bit_433                                                       | 433.92 | Statique  |
-| CAME 12bit_433                                                           | 433.92 | Statique  |
-| CAME 24bit_433                                                           | 433.92 | Statique  |
-| Linear_300                                                               | 300.00 | Statique  |
-| CAME TWEE                                                                | 433.92 | Statique  |
-| Gate TX_433                                                              | 433.92 | Statique  |
-| DoorHan_315                                                              | 315.00 | Dynamique |
-| DoorHan_433                                                              | 433.92 | Dynamique |
-| LiftMaster_315                                                           | 315.00 | Dynamique |
-| LiftMaster_390                                                           | 390.00 | Dynamique |
-| Security+2.0_310                                                         | 310.00 | Dynamique |
-| Security+2.0_315                                                         | 315.00 | Dynamique |
-| Security+2.0_390                                                         | 390.00 | Dynamique |
+| -------------------------------------------------------------- | ------ | ------- |
+| Nice Flo 12bit_433                                             | 433.92 | Statique  |
+| Nice Flo 24bit_433                                             | 433.92 | Statique  |
+| CAME 12bit_433                                                 | 433.92 | Statique  |
+| CAME 24bit_433                                                 | 433.92 | Statique  |
+| Linear_300                                                     | 300.00 | Statique  |
+| CAME TWEE                                                      | 433.92 | Statique  |
+| Gate TX_433                                                    | 433.92 | Statique  |
+| DoorHan_315                                                    | 315.00 | Dynamique |
+| DoorHan_433                                                    | 433.92 | Dynamique |
+| LiftMaster_315                                                 | 315.00 | Dynamique |
+| LiftMaster_390                                                 | 390.00 | Dynamique |
+| Security+2.0_310                                               | 310.00 | Dynamique |
+| Security+2.0_315                                               | 315.00 | Dynamique |
+| Security+2.0_390                                               | 390.00 | Dynamique |
 
 ### Fournisseurs Sub-GHz pris en charge
 
-Consultez la liste sur [https://docs.flipperzero.one/sub-ghz/supported-vendors](https://docs.flipperzero.one/sub-ghz/supported-vendors)
+Vérifiez la liste sur [https://docs.flipperzero.one/sub-ghz/supported-vendors](https://docs.flipperzero.one/sub-ghz/supported-vendors)
 
 ### Fréquences prises en charge par région
 
-Consultez la liste sur [https://docs.flipperzero.one/sub-ghz/frequencies](https://docs.flipperzero.one/sub-ghz/frequencies)
+Vérifiez la liste sur [https://docs.flipperzero.one/sub-ghz/frequencies](https://docs.flipperzero.one/sub-ghz/frequencies)
 
 ### Test
 

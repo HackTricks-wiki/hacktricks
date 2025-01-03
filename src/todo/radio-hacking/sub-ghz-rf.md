@@ -55,17 +55,17 @@ En gros, vous écoutez le bouton et **capturez le signal pendant que la téléco
 
 Un attaquant pourrait **brouiller le signal près du véhicule ou du récepteur** afin que le **récepteur ne puisse pas réellement ‘entendre’ le code**, et une fois que cela se produit, vous pouvez simplement **capturer et rejouer** le code lorsque vous avez arrêté le brouillage.
 
-La victime à un moment donné utilisera les **clés pour verrouiller la voiture**, mais ensuite l'attaque aura **enregistré suffisamment de "codes de fermeture de porte"** qui, espérons-le, pourraient être renvoyés pour ouvrir la porte (un **changement de fréquence pourrait être nécessaire** car il y a des voitures qui utilisent les mêmes codes pour ouvrir et fermer mais écoutent les deux commandes à des fréquences différentes).
+La victime à un moment donné utilisera les **clés pour verrouiller la voiture**, mais ensuite l'attaque aura **enregistré suffisamment de "codes de fermeture"** qui, espérons-le, pourraient être renvoyés pour ouvrir la porte (un **changement de fréquence pourrait être nécessaire** car il y a des voitures qui utilisent les mêmes codes pour ouvrir et fermer mais écoutent les deux commandes à des fréquences différentes).
 
 > [!WARNING]
 > **Le brouillage fonctionne**, mais c'est perceptible car si la **personne verrouillant la voiture teste simplement les portes** pour s'assurer qu'elles sont verrouillées, elle remarquerait que la voiture est déverrouillée. De plus, si elle était consciente de telles attaques, elle pourrait même écouter le fait que les portes n'ont jamais fait le **bruit** de verrouillage ou que les **lumières** de la voiture n'ont jamais clignoté lorsqu'elle a appuyé sur le bouton ‘verrouiller’.
 
-### **Attaque par capture de code (alias ‘RollJam’)**
+### **Attaque de capture de code (alias ‘RollJam’)**
 
 C'est une technique de **brouillage furtif**. L'attaquant va brouiller le signal, donc lorsque la victime essaie de verrouiller la porte, cela ne fonctionnera pas, mais l'attaquant va **enregistrer ce code**. Ensuite, la victime va **essayer de verrouiller la voiture à nouveau** en appuyant sur le bouton et la voiture va **enregistrer ce deuxième code**.\
 Instantanément après cela, l'**attaquant peut envoyer le premier code** et la **voiture se verrouillera** (la victime pensera que la deuxième pression l'a fermée). Ensuite, l'attaquant pourra **envoyer le deuxième code volé pour ouvrir** la voiture (supposant qu'un **code "fermer la voiture" peut également être utilisé pour l'ouvrir**). Un changement de fréquence pourrait être nécessaire (car il y a des voitures qui utilisent les mêmes codes pour ouvrir et fermer mais écoutent les deux commandes à des fréquences différentes).
 
-L'attaquant peut **brouiller le récepteur de la voiture et non son récepteur** car si le récepteur de la voiture écoute par exemple une bande passante de 1 MHz, l'attaquant ne **brouillera** pas la fréquence exacte utilisée par la télécommande mais **une proche dans ce spectre** tandis que le **récepteur de l'attaquant écoutera dans une plage plus petite** où il peut écouter le signal de la télécommande **sans le signal de brouillage**.
+L'attaquant peut **brouiller le récepteur de la voiture et non son récepteur** car si le récepteur de la voiture écoute par exemple une bande large de 1 MHz, l'attaquant ne **brouillera** pas la fréquence exacte utilisée par la télécommande mais **une proche dans ce spectre** tandis que le **récepteur de l'attaquant écoutera dans une plage plus petite** où il peut écouter le signal de la télécommande **sans le signal de brouillage**.
 
 > [!WARNING]
 > D'autres implémentations vues dans les spécifications montrent que le **code roulant est une portion** du code total envoyé. Par exemple, le code envoyé est une **clé de 24 bits** où les premiers **12 sont le code roulant**, les **8 suivants sont la commande** (comme verrouiller ou déverrouiller) et les 4 derniers sont le **checksum**. Les véhicules mettant en œuvre ce type sont également naturellement susceptibles car l'attaquant doit simplement remplacer le segment de code roulant pour pouvoir **utiliser n'importe quel code roulant sur les deux fréquences**.
@@ -73,9 +73,9 @@ L'attaquant peut **brouiller le récepteur de la voiture et non son récepteur**
 > [!CAUTION]
 > Notez que si la victime envoie un troisième code pendant que l'attaquant envoie le premier, le premier et le deuxième code seront invalidés.
 
-### Attaque par brouillage de son d'alarme
+### Attaque de brouillage de son d'alarme
 
-En testant un système de code roulant après-vente installé sur une voiture, **l'envoi du même code deux fois** a immédiatement **activé l'alarme** et l'immobilisateur, offrant une opportunité unique de **refus de service**. Ironiquement, le moyen de **désactiver l'alarme** et l'immobilisateur était de **presser** la **télécommande**, offrant à un attaquant la possibilité de **réaliser continuellement une attaque DoS**. Ou de mélanger cette attaque avec la **précédente pour obtenir plus de codes** alors que la victime voudrait arrêter l'attaque le plus rapidement possible.
+En testant un système de code roulant après-vente installé sur une voiture, **l'envoi du même code deux fois** a immédiatement **activé l'alarme** et l'immobilisateur, offrant une opportunité unique de **refus de service**. Ironiquement, le moyen de **désactiver l'alarme** et l'immobilisateur était de **presser** la **télécommande**, offrant à un attaquant la possibilité de **réaliser continuellement une attaque DoS**. Ou de mélanger cette attaque avec la **précédente pour obtenir plus de codes** car la victime aimerait arrêter l'attaque le plus rapidement possible.
 
 ## Références
 

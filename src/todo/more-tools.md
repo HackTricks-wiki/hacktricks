@@ -64,7 +64,7 @@
 - [https://gist.github.com/netbiosX/ee35fcd3722e401a38136cff7b751d79](https://gist.github.com/netbiosX/ee35fcd3722e401a38136cff7b751d79) ([https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/](https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/)): Persistance
 - [https://github.com/odzhan/injection](https://github.com/odzhan/injection) : Techniques d'injection de processus Windows
 - [https://github.com/BankSecurity/Red_Team](https://github.com/BankSecurity/Red_Team) : Scripts de l'équipe rouge
-- [https://github.com/l0ss/Grouper2](https://github.com/l0ss/Grouper2) : Trouver des configurations incorrectes liées à la sécurité dans la stratégie de groupe Active Directory.
+- [https://github.com/l0ss/Grouper2](https://github.com/l0ss/Grouper2) : trouver des configurations incorrectes liées à la sécurité dans la stratégie de groupe Active Directory.
 - [https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring](https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring) : Obfuscation de Securestring
 - [https://pentestlab.blog/2020/02/24/parent-pid-spoofing/](https://pentestlab.blog/2020/02/24/parent-pid-spoofing/) : Spoofing de PID parent
 - [https://github.com/the-xentropy/xencrypt](https://github.com/the-xentropy/xencrypt) : Chiffrer les charges utiles Powershell

@@ -107,9 +107,9 @@ Explorateur : [https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2
 
 ## Astuces Internet Explorer
 
-### 'Barre d'outils d'image'
+### 'Barre d'images'
 
-C'est une barre d'outils qui apparaît en haut à gauche de l'image lorsqu'elle est cliquée. Vous pourrez Enregistrer, Imprimer, Mailto, Ouvrir "Mes images" dans l'Explorateur. Le Kiosque doit utiliser Internet Explorer.
+C'est une barre d'outils qui apparaît en haut à gauche de l'image lorsqu'elle est cliquée. Vous pourrez Enregistrer, Imprimer, Mailto, Ouvrir "Mes images" dans l'Explorateur. Le Kiosk doit utiliser Internet Explorer.
 
 ### Protocole Shell
 
@@ -161,7 +161,7 @@ Source : https://medium.com/@Rend_/give-me-a-browser-ill-give-you-a-shell-de1981
 
 - Pincez l'écran avec cinq doigts / Touchez le bouton Accueil / Glissez vers le haut avec 1 doigt depuis le bas de l'écran en un mouvement rapide vers le haut : Pour accéder à l'accueil
 
-- Glissez un doigt depuis le bas de l'écran sur 1-2 pouces (lentement) : Le dock apparaîtra
+- Glissez un doigt depuis le bas de l'écran sur seulement 1-2 pouces (lentement) : Le dock apparaîtra
 
 - Glissez vers le bas depuis le haut de l'affichage avec 1 doigt : Pour voir vos notifications
 
@@ -171,11 +171,11 @@ Source : https://medium.com/@Rend_/give-me-a-browser-ill-give-you-a-shell-de1981
 
 - Glissez rapidement 1 doigt depuis le centre de l'écran vers la droite ou la gauche : Pour changer vers l'application suivante/précédente
 
-- Appuyez et maintenez le bouton On/**Off**/Veille en haut à droite de l'**iPad +** Déplacez le curseur de mise hors tension tout à fait à droite : Pour éteindre
+- Appuyez et maintenez le bouton On/**Off**/Veille en haut à droite de l'**iPad +** Déplacez le curseur pour **éteindre** complètement vers la droite : Pour éteindre
 
 - Appuyez sur le bouton On/**Off**/Veille en haut à droite de l'**iPad et le bouton Accueil pendant quelques secondes** : Pour forcer un arrêt complet
 
-- Appuyez sur le bouton On/**Off**/Veille en haut à droite de l'**iPad et le bouton Accueil rapidement** : Pour prendre une capture d'écran qui apparaîtra en bas à gauche de l'affichage. Appuyez sur les deux boutons en même temps très brièvement, car si vous les maintenez quelques secondes, un arrêt complet sera effectué.
+- Appuyez rapidement sur le bouton On/**Off**/Veille en haut à droite de l'**iPad et le bouton Accueil** : Pour prendre une capture d'écran qui apparaîtra en bas à gauche de l'affichage. Appuyez sur les deux boutons en même temps très brièvement, car si vous les maintenez quelques secondes, un arrêt complet sera effectué.
 
 ## Raccourcis
 
@@ -204,11 +204,11 @@ Ces raccourcis sont pour les paramètres visuels et sonores, selon l'utilisation
 | F2        | Augmenter l'écran                                                              |
 | F7        | Reculer d'une chanson                                                          |
 | F8        | Lecture/pause                                                                  |
-| F9        | Passer une chanson                                                             |
+| F9        | Passer à la chanson suivante                                                   |
 | F10       | Couper le son                                                                  |
 | F11       | Diminuer le volume                                                             |
 | F12       | Augmenter le volume                                                            |
-| ⌘ Espace  | Afficher une liste de langues disponibles ; pour en choisir une, appuyez à nouveau sur la barre d'espace. |
+| ⌘ Espace  | Afficher une liste des langues disponibles ; pour en choisir une, appuyez à nouveau sur la barre d'espace. |
 
 ### Navigation sur iPad
 
@@ -217,7 +217,7 @@ Ces raccourcis sont pour les paramètres visuels et sonores, selon l'utilisation
 | ⌘H                                                 | Aller à l'accueil                                       |
 | ⌘⇧H (Commande-Shift-H)                              | Aller à l'accueil                                       |
 | ⌘ (Espace)                                         | Ouvrir Spotlight                                       |
-| ⌘⇥ (Commande-Tab)                                   | Lister les dix dernières applications utilisées         |
+| ⌘⇥ (Commande-Tab)                                   | Lister les dix dernières applications utilisées          |
 | ⌘\~                                                | Aller à la dernière application                          |
 | ⌘⇧3 (Commande-Shift-3)                              | Capture d'écran (flotte en bas à gauche pour enregistrer ou agir dessus) |
 | ⌘⇧4                                                | Capture d'écran et l'ouvrir dans l'éditeur              |
@@ -230,9 +230,9 @@ Ces raccourcis sont pour les paramètres visuels et sonores, selon l'utilisation
 | → (Flèche droite)                                   | Élément suivant                                         |
 | ← (Flèche gauche)                                   | Élément précédent                                       |
 | ↑↓ (Flèche haut, Flèche bas)                        | Appuyez simultanément sur l'élément sélectionné        |
-| ⌥ ↓ (Flèche vers le bas Option)                     | Faire défiler vers le bas                               |
-| ⌥↑ (Flèche vers le haut Option)                     | Faire défiler vers le haut                              |
-| ⌥← ou ⌥→ (Flèche gauche Option ou Flèche droite Option) | Faire défiler à gauche ou à droite                      |
+| ⌥ ↓ (Option-Flèche bas)                             | Faire défiler vers le bas                               |
+| ⌥↑ (Option-Flèche haut)                             | Faire défiler vers le haut                              |
+| ⌥← ou ⌥→ (Option-Flèche gauche ou Option-Flèche droite) | Faire défiler à gauche ou à droite                      |
 | ^⌥S (Contrôle-Option-S)                             | Activer ou désactiver la synthèse vocale               |
 | ⌘⇧⇥ (Commande-Shift-Tab)                            | Passer à l'application précédente                       |
 | ⌘⇥ (Commande-Tab)                                   | Revenir à l'application d'origine                       |
@@ -241,7 +241,7 @@ Ces raccourcis sont pour les paramètres visuels et sonores, selon l'utilisation
 ### Raccourcis Safari
 
 | Raccourci                | Action                                           |
-| ------------------------ | ------------------------------------------------ |
+| ----------------------- | ------------------------------------------------ |
 | ⌘L (Commande-L)          | Ouvrir l'emplacement                             |
 | ⌘T                      | Ouvrir un nouvel onglet                          |
 | ⌘W                      | Fermer l'onglet actuel                           |
@@ -249,7 +249,7 @@ Ces raccourcis sont pour les paramètres visuels et sonores, selon l'utilisation
 | ⌘.                      | Arrêter le chargement de l'onglet actuel        |
 | ^⇥                      | Passer à l'onglet suivant                        |
 | ^⇧⇥ (Contrôle-Shift-Tab) | Passer à l'onglet précédent                      |
-| ⌘L                      | Sélectionner le champ de texte/URL pour le modifier |
+| ⌘L                      | Sélectionner le champ de saisie de texte/URL pour le modifier |
 | ⌘⇧T (Commande-Shift-T)   | Ouvrir le dernier onglet fermé (peut être utilisé plusieurs fois) |
 | ⌘\[                     | Reculer d'une page dans votre historique de navigation |
 | ⌘]                      | Avancer d'une page dans votre historique de navigation |
@@ -258,7 +258,7 @@ Ces raccourcis sont pour les paramètres visuels et sonores, selon l'utilisation
 ### Raccourcis Mail
 
 | Raccourci                   | Action                       |
-| --------------------------- | ---------------------------- |
+| -------------------------- | ---------------------------- |
 | ⌘L                         | Ouvrir l'emplacement         |
 | ⌘T                         | Ouvrir un nouvel onglet       |
 | ⌘W                         | Fermer l'onglet actuel       |

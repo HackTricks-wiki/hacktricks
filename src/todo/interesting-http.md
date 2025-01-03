@@ -6,7 +6,7 @@ Le référent est l'en-tête utilisé par les navigateurs pour indiquer quelle �
 
 ## Informations sensibles divulguées
 
-Si à un moment donné à l'intérieur d'une page web, des informations sensibles se trouvent dans les paramètres de la requête GET, si la page contient des liens vers des sources externes ou si un attaquant est capable de faire/suggérer (ingénierie sociale) à l'utilisateur de visiter une URL contrôlée par l'attaquant. Il pourrait être en mesure d'exfiltrer les informations sensibles à l'intérieur de la dernière requête GET.
+Si à un moment donné à l'intérieur d'une page web, des informations sensibles se trouvent dans les paramètres de la requête GET, si la page contient des liens vers des sources externes ou si un attaquant est capable de faire/suggérer (ingénierie sociale) à l'utilisateur de visiter une URL contrôlée par l'attaquant. Il pourrait être en mesure d'exfiltrer les informations sensibles contenues dans la dernière requête GET.
 
 ## Atténuation
 

@@ -21,7 +21,7 @@ Vous pouvez également sélectionner un objet "LDAP" : `/object:CN=Administrator
 Vous pouvez pousser les changements depuis un DA ou depuis un utilisateur avec ces permissions minimales :
 
 - Dans l'**objet de domaine** :
-- _DS-Install-Replica_ (Ajouter/Retirer un Réplica dans le Domaine)
+- _DS-Install-Replica_ (Ajouter/Retirer Réplica dans le Domaine)
 - _DS-Replication-Manage-Topology_ (Gérer la Topologie de Réplication)
 - _DS-Replication-Synchronize_ (Synchronisation de Réplication)
 - L'**objet Sites** (et ses enfants) dans le **conteneur de Configuration** :
@@ -61,7 +61,7 @@ Nous devons ajouter les ACE suivants avec le SID de notre utilisateur à la fin 
 - Sur l'objet utilisateur cible : `(A;;WP;;;UserSID)`
 - Sur l'objet Sites dans le conteneur Configuration : `(A;CI;CCDC;;;UserSID)`
 
-Pour obtenir l'ACE actuel d'un objet : `(New-Object System.DirectoryServices.DirectoryEntry("LDAP://DC=moneycorp,DC=local")).psbase.ObjectSecurity.sddl`
+Pour obtenir l'ACE actuel d'un objet : `(New-Object System.DirectoryServices.DirectoryEntry("LDAP://DC=moneycorp,DC=loca l")).psbase.ObjectSecurity.sddl`
 
 Remarquez que dans ce cas, vous devez faire **plusieurs changements,** pas juste un. Donc, dans la **session mimikatz1** (serveur RPC), utilisez le paramètre **`/stack` avec chaque changement** que vous souhaitez effectuer. De cette façon, vous n'aurez besoin de **`/push`** qu'une seule fois pour effectuer tous les changements empilés sur le serveur rogue.
 

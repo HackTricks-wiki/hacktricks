@@ -66,7 +66,7 @@ Access is denied.
 
 ### Niveaux d'intégrité dans les binaires
 
-J'ai fait une copie de `cmd.exe` dans `C:\Windows\System32\cmd-low.exe` et lui ai attribué un **niveau d'intégrité bas depuis une console administrateur :**
+J'ai fait une copie de `cmd.exe` dans `C:\Windows\System32\cmd-low.exe` et lui ai défini un **niveau d'intégrité bas depuis une console administrateur :**
 ```
 icacls C:\Windows\System32\cmd-low.exe
 C:\Windows\System32\cmd-low.exe NT AUTHORITY\SYSTEM:(I)(F)

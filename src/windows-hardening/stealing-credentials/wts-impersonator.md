@@ -1,6 +1,6 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-L'outil **WTS Impersonator** exploite le **"\\pipe\LSM_API_service"** RPC Named pipe pour énumérer discrètement les utilisateurs connectés et détourner leurs jetons, contournant ainsi les techniques traditionnelles d'imitation de jetons. Cette approche facilite des mouvements latéraux sans heurts au sein des réseaux. L'innovation derrière cette technique est attribuée à **Omri Baso, dont le travail est accessible sur [GitHub](https://github.com/OmriBaso/WTSImpersonator)**.
+L'outil **WTS Impersonator** exploite le **"\\pipe\LSM_API_service"** RPC Named pipe pour énumérer discrètement les utilisateurs connectés et détourner leurs jetons, contournant les techniques traditionnelles d'imitation de jetons. Cette approche facilite des mouvements latéraux sans heurts au sein des réseaux. L'innovation derrière cette technique est attribuée à **Omri Baso, dont le travail est accessible sur [GitHub](https://github.com/OmriBaso/WTSImpersonator)**.
 
 ### Fonctionnalité Principale
 

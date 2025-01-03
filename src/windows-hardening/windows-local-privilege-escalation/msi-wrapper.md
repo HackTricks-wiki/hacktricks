@@ -17,6 +17,6 @@ Et c'est la partie la plus importante de la configuration :
 
 (Veuillez noter que si vous essayez d'emballer votre propre binaire, vous pourrez modifier ces valeurs)
 
-À partir de là, cliquez simplement sur les **boutons suivants** et le dernier **bouton de construction et votre installateur/enveloppe sera généré.**
+À partir de là, il suffit de cliquer sur les **boutons suivants** et le dernier **bouton de construction et votre installateur/enveloppe sera généré.**
 
 {{#include ../../banners/hacktricks-training.md}}

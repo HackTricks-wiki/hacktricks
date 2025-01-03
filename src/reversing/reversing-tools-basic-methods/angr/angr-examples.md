@@ -201,7 +201,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-Dans ce scénario, l'entrée a été prise avec `scanf("%u %u")` et la valeur `"1 1"` a été donnée, donc les valeurs **`0x00000001`** de la pile proviennent de l'**entrée utilisateur**. Vous pouvez voir comment ces valeurs commencent à `$ebp - 8`. Par conséquent, dans le code, nous avons **soustrait 8 octets à `$esp` (car à ce moment-là, `$ebp` et `$esp` avaient la même valeur)** et ensuite nous avons poussé le BVS.
+Dans ce scénario, l'entrée a été prise avec `scanf("%u %u")` et la valeur `"1 1"` a été donnée, donc les valeurs **`0x00000001`** de la pile proviennent de **l'entrée utilisateur**. Vous pouvez voir comment ces valeurs commencent à `$ebp - 8`. Par conséquent, dans le code, nous avons **soustrait 8 octets à `$esp` (car à ce moment-là, `$ebp` et `$esp` avaient la même valeur)** et ensuite nous avons poussé le BVS.
 
 ![](<../../../images/image (136).png>)
 
@@ -387,7 +387,7 @@ main(sys.argv)
 >   # Hello world, my name is John.
 >   # ^                       ^
 >   # ^ adresse 0             ^ adresse 24 (comptez le nombre de caractères)
->   # Afin de représenter cela en mémoire, nous voudrions écrire la chaîne au
+>   # Pour représenter cela en mémoire, nous voudrions écrire la chaîne au
 >   # début du fichier :
 >   #
 >   # hello_txt_contents = claripy.BVV('Hello world, my name is John.', 30*8)
@@ -407,7 +407,7 @@ main(sys.argv)
 ### Application des contraintes
 
 > [!NOTE]
-> Parfois, des opérations humaines simples comme comparer 2 mots de longueur 16 **caractère par caractère** (boucle), **coûtent** beaucoup à **angr** car il doit générer des branches **exponentiellement** parce qu'il génère 1 branche par if : `2^16`\
+> Parfois, des opérations humaines simples comme comparer 2 mots de longueur 16 **caractère par caractère** (boucle), **coûtent** beaucoup à **angr** car cela nécessite de générer des branches **exponentiellement** parce qu'il génère 1 branche par if : `2^16`\
 > Par conséquent, il est plus facile de **demander à angr d'atteindre un point précédent** (où la partie vraiment difficile a déjà été faite) et **de définir ces contraintes manuellement**.
 ```python
 # After perform some complex poperations to the input the program checks
@@ -480,7 +480,7 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!CAUTION]
-> Dans certains scénarios, vous pouvez activer **veritesting**, qui fusionnera des états similaires, afin d'éliminer des branches inutiles et de trouver la solution : `simulation = project.factory.simgr(initial_state, veritesting=True)`
+> Dans certains scénarios, vous pouvez activer **veritesting**, qui fusionnera des états similaires, afin de supprimer des branches inutiles et de trouver la solution : `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
 > [!NOTE]
 > Une autre chose que vous pouvez faire dans ces scénarios est de **brancher la fonction en donnant à angr quelque chose qu'il peut comprendre** plus facilement.

@@ -21,6 +21,6 @@ Envoyez la commande s pour commencer le scan :
 
 ![](<../../images/image (774).png>)
 
-Si vous êtes en contact avec un JTAG, vous trouverez une ou plusieurs **lignes commençant par FOUND!** indiquant les broches de JTAG.
+Si vous contactez un JTAG, vous trouverez une ou plusieurs **lignes commençant par FOUND!** indiquant les broches de JTAG.
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -36,7 +36,7 @@ Vérifiez **d'autres façons de voler des sessions avec d'autres outils** [**sur
 
 Si un utilisateur accède via **RDP à une machine** où un **attaquant** l'attend, l'attaquant pourra **injecter un beacon dans la session RDP de l'utilisateur** et si la **victime a monté son disque** en accédant via RDP, l'**attaquant pourrait y accéder**.
 
-Dans ce cas, vous pourriez simplement **compromettre** l'**ordinateur** **original** de la **victime** en écrivant une **porte dérobée** dans le **dossier de démarrage**.
+Dans ce cas, vous pourriez simplement **compromettre** le **ordinateur original des victimes** en écrivant une **porte dérobée** dans le **dossier de démarrage**.
 ```powershell
 # Wait til someone logs in:
 net logons

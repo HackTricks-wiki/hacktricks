@@ -16,7 +16,7 @@ Outils matériels pour communiquer avec l'UART :
 
 - Adaptateur USB-série
 - Adaptateurs avec les puces CP2102 ou PL2303
-- Outil polyvalent tel que : Bus Pirate, l'Adafruit FT232H, le Shikra ou le Attify Badge
+- Outil polyvalent tel que : Bus Pirate, l'Adafruit FT232H, le Shikra ou le Badge Attify
 
 ### Identification des ports UART
 
@@ -25,8 +25,8 @@ L'UART a 4 ports : **TX**(Transmettre), **RX**(Recevoir), **Vcc**(Tension), et *
 Avec un **multimètre** et l'appareil éteint :
 
 - Pour identifier la broche **GND**, utilisez le mode **Test de continuité**, placez la sonde noire sur la masse et testez avec la rouge jusqu'à ce que vous entendiez un son du multimètre. Plusieurs broches GND peuvent être trouvées sur le PCB, donc vous avez peut-être trouvé ou non celle appartenant à l'UART.
-- Pour identifier le port **VCC**, réglez le **mode de tension DC** et configurez-le à 20 V de tension. Sonde noire sur la masse et sonde rouge sur la broche. Allumez l'appareil. Si le multimètre mesure une tension constante de 3,3 V ou 5 V, vous avez trouvé la broche Vcc. Si vous obtenez d'autres tensions, réessayez avec d'autres ports.
-- Pour identifier le port **TX**, réglez le **mode de tension DC** jusqu'à 20 V de tension, sonde noire sur la masse, et sonde rouge sur la broche, puis allumez l'appareil. Si vous constatez que la tension fluctue pendant quelques secondes puis se stabilise à la valeur Vcc, vous avez probablement trouvé le port TX. Cela est dû au fait qu'à l'allumage, il envoie des données de débogage.
+- Pour identifier le port **VCC**, réglez le mode **tension DC** et configurez-le à 20 V de tension. Sonde noire sur la masse et sonde rouge sur la broche. Allumez l'appareil. Si le multimètre mesure une tension constante de 3,3 V ou 5 V, vous avez trouvé la broche Vcc. Si vous obtenez d'autres tensions, réessayez avec d'autres ports.
+- Pour identifier le port **TX**, mode **tension DC** jusqu'à 20 V de tension, sonde noire sur la masse, et sonde rouge sur la broche, puis allumez l'appareil. Si vous constatez que la tension fluctue pendant quelques secondes puis se stabilise à la valeur Vcc, vous avez probablement trouvé le port TX. Cela est dû au fait qu'à l'allumage, il envoie des données de débogage.
 - Le port **RX** serait le plus proche des autres 3, il a la fluctuation de tension la plus faible et la valeur globale la plus basse de toutes les broches UART.
 
 Vous pouvez confondre les ports TX et RX et rien ne se passerait, mais si vous confondez le port GND et le port VCC, vous pourriez endommager le circuit.
@@ -35,7 +35,7 @@ Dans certains appareils cibles, le port UART est désactivé par le fabricant en
 
 ### Identification du débit en bauds UART
 
-La manière la plus simple d'identifier le bon débit en bauds est de regarder la **sortie de la broche TX et d'essayer de lire les données**. Si les données que vous recevez ne sont pas lisibles, passez au débit en bauds suivant possible jusqu'à ce que les données deviennent lisibles. Vous pouvez utiliser un adaptateur USB-série ou un appareil polyvalent comme Bus Pirate pour cela, associé à un script d'aide, tel que [baudrate.py](https://github.com/devttys0/baudrate/). Les débits en bauds les plus courants sont 9600, 38400, 19200, 57600 et 115200.
+Le moyen le plus simple d'identifier le bon débit en bauds est de regarder la **sortie de la broche TX et d'essayer de lire les données**. Si les données que vous recevez ne sont pas lisibles, passez au débit en bauds suivant possible jusqu'à ce que les données deviennent lisibles. Vous pouvez utiliser un adaptateur USB-série ou un appareil polyvalent comme Bus Pirate pour cela, associé à un script d'aide, tel que [baudrate.py](https://github.com/devttys0/baudrate/). Les débits en bauds les plus courants sont 9600, 38400, 19200, 57600 et 115200.
 
 > [!CAUTION]
 > Il est important de noter que dans ce protocole, vous devez connecter le TX d'un appareil au RX de l'autre !
@@ -44,7 +44,7 @@ La manière la plus simple d'identifier le bon débit en bauds est de regarder l
 
 La puce CP210X est utilisée dans de nombreuses cartes de prototypage comme NodeMCU (avec esp8266) pour la communication série. Ces adaptateurs sont relativement peu coûteux et peuvent être utilisés pour se connecter à l'interface UART de la cible. L'appareil a 5 broches : 5V, GND, RXD, TXD, 3.3V. Assurez-vous de connecter la tension comme supportée par la cible pour éviter tout dommage. Enfin, connectez la broche RXD de l'adaptateur à TXD de la cible et la broche TXD de l'adaptateur à RXD de la cible.
 
-Dans le cas où l'adaptateur n'est pas détecté, assurez-vous que les pilotes CP210X sont installés sur le système hôte. Une fois l'adaptateur détecté et connecté, des outils comme picocom, minicom ou screen peuvent être utilisés.
+En cas de non-détection de l'adaptateur, assurez-vous que les pilotes CP210X sont installés sur le système hôte. Une fois l'adaptateur détecté et connecté, des outils comme picocom, minicom ou screen peuvent être utilisés.
 
 Pour lister les appareils connectés aux systèmes Linux/MacOS :
 ```
@@ -146,9 +146,9 @@ waiting a few secs to repeat....
 ```
 ## Dumping Firmware with UART Console
 
-Le UART Console offre un excellent moyen de travailler avec le firmware sous-jacent dans un environnement d'exécution. Mais lorsque l'accès au UART Console est en lecture seule, cela peut introduire de nombreuses contraintes. Dans de nombreux dispositifs embarqués, le firmware est stocké dans des EEPROM et exécuté dans des processeurs ayant une mémoire volatile. Par conséquent, le firmware est maintenu en lecture seule puisque le firmware original lors de la fabrication est à l'intérieur de l'EEPROM lui-même et tout nouveau fichier serait perdu en raison de la mémoire volatile. Ainsi, le dumping de firmware est un effort précieux lors du travail avec des firmwares embarqués.
+Le UART Console offre un excellent moyen de travailler avec le firmware sous-jacent dans un environnement d'exécution. Mais lorsque l'accès au UART Console est en lecture seule, cela peut introduire de nombreuses contraintes. Dans de nombreux dispositifs embarqués, le firmware est stocké dans des EEPROM et exécuté dans des processeurs ayant une mémoire volatile. Par conséquent, le firmware est maintenu en lecture seule puisque le firmware original lors de la fabrication se trouve à l'intérieur de l'EEPROM lui-même et tout nouveau fichier serait perdu en raison de la mémoire volatile. Ainsi, le dumping du firmware est un effort précieux lors du travail avec des firmwares embarqués.
 
-Il existe de nombreuses façons de le faire et la section SPI couvre des méthodes pour extraire le firmware directement de l'EEPROM avec divers dispositifs. Cependant, il est recommandé d'essayer d'abord de dumper le firmware avec UART, car le dumping de firmware avec des dispositifs physiques et des interactions externes peut être risqué.
+Il existe de nombreuses façons de le faire et la section SPI couvre des méthodes pour extraire le firmware directement de l'EEPROM avec divers dispositifs. Cependant, il est recommandé d'essayer d'abord de dumper le firmware avec UART, car le dumping du firmware avec des dispositifs physiques et des interactions externes peut être risqué.
 
 Dumper le firmware depuis le UART Console nécessite d'abord d'accéder aux bootloaders. De nombreux fournisseurs populaires utilisent uboot (Universal Bootloader) comme leur bootloader pour charger Linux. Par conséquent, obtenir l'accès à uboot est nécessaire.
 
@@ -168,6 +168,6 @@ binwalk -e <filename.rom>
 ```
 Cela listera les contenus possibles de l'EEPROM selon les signatures trouvées dans le fichier hex.
 
-Cependant, il est nécessaire de noter qu'il n'est pas toujours vrai que le uboot est déverrouillé même s'il est utilisé. Si la touche Entrée ne fait rien, vérifiez d'autres touches comme la touche Espace, etc. Si le bootloader est verrouillé et n'est pas interrompu, cette méthode ne fonctionnerait pas. Pour vérifier si uboot est le bootloader de l'appareil, vérifiez la sortie sur la console UART pendant le démarrage de l'appareil. Il pourrait mentionner uboot pendant le démarrage.
+Cependant, il est nécessaire de noter qu'il n'est pas toujours vrai que le uboot est déverrouillé même s'il est utilisé. Si la touche Entrée ne fait rien, vérifiez d'autres touches comme la touche Espace, etc. Si le bootloader est verrouillé et n'est pas interrompu, cette méthode ne fonctionnera pas. Pour vérifier si uboot est le bootloader de l'appareil, vérifiez la sortie sur la console UART pendant le démarrage de l'appareil. Il pourrait mentionner uboot pendant le démarrage.
 
 {{#include ../../banners/hacktricks-training.md}}

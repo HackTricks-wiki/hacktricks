@@ -22,7 +22,7 @@ Si la **délégation non contrainte** est activée sur le PC, cela ne se produir
 
 ### CredSSP
 
-Une autre façon d'éviter ce problème qui est [**notablement peu sécurisé**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) est le **Fournisseur de Support de Sécurité des Identifiants**. De Microsoft :
+Une autre façon d'éviter ce problème qui est [**notablement peu sécurisé**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) est le **Fournisseur de Support de Sécurité des Identifiants**. D'après Microsoft :
 
 > L'authentification CredSSP délègue les identifiants de l'utilisateur de l'ordinateur local à un ordinateur distant. Cette pratique augmente le risque de sécurité de l'opération distante. Si l'ordinateur distant est compromis, lorsque les identifiants lui sont transmis, les identifiants peuvent être utilisés pour contrôler la session réseau.
 
@@ -36,7 +36,7 @@ Get-WSManCredSSP
 
 ### Invoke Command
 
-Pour résoudre le problème du double saut, une méthode impliquant un `Invoke-Command` imbriqué est présentée. Cela ne résout pas le problème directement mais offre une solution de contournement sans nécessiter de configurations spéciales. L'approche permet d'exécuter une commande (`hostname`) sur un serveur secondaire via une commande PowerShell exécutée depuis une machine d'attaque initiale ou à travers une PS-Session précédemment établie avec le premier serveur. Voici comment cela fonctionne :
+Pour résoudre le problème du double saut, une méthode impliquant un `Invoke-Command` imbriqué est présentée. Cela ne résout pas le problème directement mais offre une solution de contournement sans nécessiter de configurations spéciales. L'approche permet d'exécuter une commande (`hostname`) sur un serveur secondaire via une commande PowerShell exécutée depuis une machine d'attaque initiale ou à travers une PS-Session précédemment établie avec le premier serveur. Voici comment cela se fait :
 ```powershell
 $cred = Get-Credential ta\redsuit
 Invoke-Command -ComputerName bizintel -Credential $cred -ScriptBlock {
@@ -77,7 +77,7 @@ L'installation d'OpenSSH sur le premier serveur permet de contourner le problèm
 2. Décompressez et exécutez le script `Install-sshd.ps1`.
 3. Ajoutez une règle de pare-feu pour ouvrir le port 22 et vérifiez que les services SSH fonctionnent.
 
-Pour résoudre les erreurs `Connection reset`, les autorisations peuvent devoir être mises à jour pour permettre à tout le monde d'avoir un accès en lecture et en exécution sur le répertoire OpenSSH.
+Pour résoudre les erreurs `Connection reset`, les autorisations peuvent devoir être mises à jour pour permettre à tout le monde un accès en lecture et en exécution sur le répertoire OpenSSH.
 ```bash
 icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 ```

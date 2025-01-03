@@ -15,7 +15,7 @@ Cela signifie que si vous **compromettez le hash du service**, vous pouvez **vou
 
 De plus, vous **n'aurez pas seulement accès au service que l'utilisateur peut imiter, mais aussi à tout service** car le SPN (le nom du service demandé) n'est pas vérifié, seulement les privilèges. Par conséquent, si vous avez accès au **service CIFS**, vous pouvez également avoir accès au **service HOST** en utilisant le drapeau `/altservice` dans Rubeus.
 
-De plus, l'**accès au service LDAP sur DC** est ce qui est nécessaire pour exploiter un **DCSync**.
+De plus, **l'accès au service LDAP sur DC** est ce qui est nécessaire pour exploiter un **DCSync**.
 ```bash:Enumerate
 # Powerview
 Get-DomainUser -TrustedToAuth | select userprincipalname, name, msds-allowedtodelegateto

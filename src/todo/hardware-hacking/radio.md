@@ -32,7 +32,7 @@ Dans le comportement de l'interface graphique, il est recommandé d'activer quel
 
 ### Synchroniser avec le canal radio
 
-Avec [**SigDigger** ](https://github.com/BatchDrake/SigDigger), synchronisez-vous avec le canal que vous souhaitez écouter, configurez l'option "Aperçu audio de base", configurez la bande passante pour obtenir toutes les informations envoyées, puis réglez le Tuner au niveau avant que le bruit ne commence vraiment à augmenter :
+Avec [**SigDigger** ](https://github.com/BatchDrake/SigDigger), synchronisez-vous avec le canal que vous souhaitez écouter, configurez l'option "Aperçu audio de la bande de base", configurez la bande passante pour obtenir toutes les informations envoyées, puis réglez le Tuner au niveau avant que le bruit ne commence vraiment à augmenter :
 
 ![](<../../images/image (585).png>)
 
@@ -55,7 +55,7 @@ Si vous vérifiez un signal, il existe différentes façons d'essayer de déterm
 
 ![](<../../images/image (788).png>)
 
-- **Détection AM** : Si dans le graphique IQ apparaissent par exemple **2 cercles** (probablement un à 0 et un autre à une amplitude différente), cela pourrait signifier qu'il s'agit d'un signal AM. Cela est dû au fait que dans le graphique IQ, la distance entre le 0 et le cercle est l'amplitude du signal, donc il est facile de visualiser différentes amplitudes utilisées.
+- **Détection AM** : Si dans le graphique IQ apparaissent par exemple **2 cercles** (probablement un à 0 et l'autre à une amplitude différente), cela pourrait signifier qu'il s'agit d'un signal AM. Cela est dû au fait que dans le graphique IQ, la distance entre le 0 et le cercle est l'amplitude du signal, donc il est facile de visualiser différentes amplitudes utilisées.
 - **Détection PM** : Comme dans l'image précédente, si vous trouvez de petits cercles non liés entre eux, cela signifie probablement qu'une modulation de phase est utilisée. Cela est dû au fait que dans le graphique IQ, l'angle entre le point et le 0,0 est la phase du signal, ce qui signifie que 4 phases différentes sont utilisées.
 - Notez que si l'information est cachée dans le fait qu'une phase est changée et non dans la phase elle-même, vous ne verrez pas différentes phases clairement différenciées.
 - **Détection FM** : IQ n'a pas de champ pour identifier les fréquences (la distance au centre est l'amplitude et l'angle est la phase).\
@@ -100,7 +100,7 @@ Dans cet exemple, vous pouvez voir comment il y a un **grand cercle** mais aussi
 
 #### Avec un symbole
 
-Sélectionnez le plus petit symbole que vous pouvez trouver (pour être sûr qu'il ne s'agit que de 1) et vérifiez la "Fréquence de sélection". Dans ce cas, ce serait 1,013 kHz (donc 1 kHz).
+Sélectionnez le plus petit symbole que vous pouvez trouver (pour être sûr qu'il ne s'agit que d'un) et vérifiez la "Fréquence de sélection". Dans ce cas, ce serait 1,013 kHz (donc 1 kHz).
 
 ![](<../../images/image (78).png>)
 
@@ -135,7 +135,7 @@ Enfin, **en augmentant** le **Zoom** et **en changeant la taille de la ligne**, 
 
 ![](<../../images/image (276).png>)
 
-Si le signal a plus d'1 bit par symbole (par exemple 2), SigDigger n'a **aucune façon de savoir quel symbole est** 00, 01, 10, 11, donc il utilisera différentes **échelles de gris** pour représenter chacun (et si vous copiez les bits, il utilisera **des nombres de 0 à 3**, vous devrez les traiter).
+Si le signal a plus d'un bit par symbole (par exemple 2), SigDigger n'a **aucune façon de savoir quel symbole est** 00, 01, 10, 11, donc il utilisera différentes **échelles de gris** pour représenter chacun (et si vous copiez les bits, il utilisera **des nombres de 0 à 3**, vous devrez les traiter).
 
 De plus, utilisez des **codifications** telles que **Manchester**, et **up+down** peut être **1 ou 0** et un down+up peut être un 1 ou 0. Dans ces cas, vous devez **traiter les ups (1) et downs (0) obtenus** pour substituer les paires de 01 ou 10 par des 0s ou 1s.
 
@@ -171,7 +171,7 @@ En vérifiant l'histogramme de fréquence du signal avec des informations, vous 
 
 ![](<../../images/image (871).png>)
 
-Dans ce cas, si vous vérifiez l'**histogramme d'amplitude**, vous ne trouverez **qu'une seule amplitude**, donc cela **ne peut pas être de l'AM** (si vous trouvez beaucoup d'amplitudes, cela pourrait être parce que le signal a perdu de la puissance le long du canal) :
+Dans ce cas, si vous vérifiez l'**histogramme d'Amplitude**, vous ne trouverez **qu'une seule amplitude**, donc cela **ne peut pas être de l'AM** (si vous trouvez beaucoup d'amplitudes, cela pourrait être parce que le signal a perdu de la puissance le long du canal) :
 
 ![](<../../images/image (817).png>)
 

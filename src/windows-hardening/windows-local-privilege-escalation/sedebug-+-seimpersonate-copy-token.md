@@ -1,11 +1,11 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 Le code suivant **exploite les privilèges SeDebug et SeImpersonate** pour copier le jeton d'un **processus s'exécutant en tant que SYSTEM** et avec **tous les privilèges du jeton**. \
-Dans ce cas, ce code peut être compilé et utilisé comme un **binaire de service Windows** pour vérifier qu'il fonctionne.\
+Dans ce cas, ce code peut être compilé et utilisé comme un **binaire de service Windows** pour vérifier son fonctionnement.\
 Cependant, la partie principale du **code où l'élévation se produit** se trouve à l'intérieur de la **fonction** **`Exploit`**.\
 À l'intérieur de cette fonction, vous pouvez voir que le **processus **_**lsass.exe**_** est recherché**, puis son **jeton est copié**, et enfin ce jeton est utilisé pour lancer un nouveau _**cmd.exe**_ avec tous les privilèges du jeton copié.
 
-**D'autres processus** s'exécutant en tant que SYSTEM avec tous ou la plupart des privilèges du jeton sont : **services.exe**, **svhost.exe** (l'un des premiers), **wininit.exe**, **csrss.exe**... (_rappelez-vous que vous ne pourrez pas copier un jeton d'un processus protégé_). De plus, vous pouvez utiliser l'outil [Process Hacker](https://processhacker.sourceforge.io/downloads.php) s'exécutant en tant qu'administrateur pour voir les jetons d'un processus.
+**D'autres processus** s'exécutant en tant que SYSTEM avec tous ou la plupart des privilèges du jeton sont : **services.exe**, **svhost.exe** (l'un des premiers), **wininit.exe**, **csrss.exe**... (_rappelez-vous que vous ne pourrez pas copier un jeton d'un processus protégé_). De plus, vous pouvez utiliser l'outil [Process Hacker](https://processhacker.sourceforge.io/downloads.php) exécuté en tant qu'administrateur pour voir les jetons d'un processus.
 ```c
 // From https://cboard.cprogramming.com/windows-programming/106768-running-my-program-service.html
 #include <windows.h>

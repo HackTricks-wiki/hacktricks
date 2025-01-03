@@ -53,11 +53,11 @@ Cette capacité est particulièrement pertinente lorsqu'elle est utilisée en co
 
 Les opportunités de **persistance** à travers les **modifications de descripteurs de sécurité des composants AD CS** sont nombreuses. Les modifications décrites dans la section "[Domain Escalation](domain-escalation.md)" peuvent être mises en œuvre de manière malveillante par un attaquant ayant un accès élevé. Cela inclut l'ajout de "droits de contrôle" (par exemple, WriteOwner/WriteDACL/etc.) à des composants sensibles tels que :
 
-- L'objet ordinateur AD du **serveur CA**
+- L'objet **ordinateur AD du serveur CA**
 - Le **serveur RPC/DCOM du serveur CA**
 - Tout **objet ou conteneur AD descendant** dans **`CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>`** (par exemple, le conteneur des modèles de certificats, le conteneur des autorités de certification, l'objet NTAuthCertificates, etc.)
 - **Groupes AD déléguant des droits pour contrôler AD CS** par défaut ou par l'organisation (comme le groupe Cert Publishers intégré et tous ses membres)
 
-Un exemple de mise en œuvre malveillante impliquerait un attaquant, qui a des **permissions élevées** dans le domaine, ajoutant la permission **`WriteOwner`** au modèle de certificat **`User`** par défaut, l'attaquant étant le principal pour ce droit. Pour exploiter cela, l'attaquant changerait d'abord la propriété du modèle **`User`** à son nom. Ensuite, le **`mspki-certificate-name-flag`** serait défini sur **1** sur le modèle pour activer **`ENROLLEE_SUPPLIES_SUBJECT`**, permettant à un utilisateur de fournir un Nom Alternatif de Sujet dans la demande. Par la suite, l'attaquant pourrait **s'inscrire** en utilisant le **modèle**, choisissant un nom de **administrateur de domaine** comme nom alternatif, et utiliser le certificat acquis pour s'authentifier en tant que DA.
+Un exemple de mise en œuvre malveillante impliquerait un attaquant, qui a des **permissions élevées** dans le domaine, ajoutant la permission **`WriteOwner`** au modèle de certificat par défaut **`User`**, l'attaquant étant le principal pour ce droit. Pour exploiter cela, l'attaquant changerait d'abord la propriété du modèle **`User`** à son profit. Ensuite, le **`mspki-certificate-name-flag`** serait défini sur **1** sur le modèle pour activer **`ENROLLEE_SUPPLIES_SUBJECT`**, permettant à un utilisateur de fournir un Nom Alternatif de Sujet dans la demande. Par la suite, l'attaquant pourrait **s'inscrire** en utilisant le **modèle**, choisissant un nom de **administrateur de domaine** comme nom alternatif, et utiliser le certificat acquis pour s'authentifier en tant que DA.
 
 {{#include ../../../banners/hacktricks-training.md}}

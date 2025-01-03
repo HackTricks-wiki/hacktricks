@@ -57,14 +57,14 @@ Ces droits sont spécifiés par des Entrées de Contrôle d'Accès (ACEs), déta
 
 ### Enterprise CA Enrollment Rights
 
-Les droits de la CA sont décrits dans son descripteur de sécurité, accessible via la console de gestion de l'Autorité de Certification. Certains paramètres permettent même aux utilisateurs à faibles privilèges d'accéder à distance, ce qui pourrait poser un problème de sécurité.
+Les droits de la CA sont décrits dans son descripteur de sécurité, accessible via la console de gestion de l'Autorité de Certification. Certains paramètres permettent même aux utilisateurs à faibles privilèges un accès à distance, ce qui pourrait poser un problème de sécurité.
 
 ### Additional Issuance Controls
 
 Certaines contrôles peuvent s'appliquer, tels que :
 
-- **Approbation du Responsable** : Place les demandes dans un état en attente jusqu'à approbation par un gestionnaire de certificats.
-- **Agents d'Inscription et Signatures Autorisées** : Spécifient le nombre de signatures requises sur un CSR et les OIDs de Politique d'Application nécessaires.
+- **Manager Approval** : Place les demandes dans un état en attente jusqu'à approbation par un gestionnaire de certificats.
+- **Enrolment Agents and Authorized Signatures** : Spécifient le nombre de signatures requises sur un CSR et les OIDs de Politique d'Application nécessaires.
 
 ### Methods to Request Certificates
 
@@ -95,11 +95,11 @@ est central pour établir la confiance pour l'authentification par certificat.
 
 ### Authentification Secure Channel (Schannel)
 
-Schannel facilite les connexions TLS/SSL sécurisées, où lors d'une poignée de main, le client présente un certificat qui, s'il est validé avec succès, autorise l'accès. La correspondance d'un certificat à un compte AD peut impliquer la fonction **S4U2Self** de Kerberos ou le **Subject Alternative Name (SAN)** du certificat, entre autres méthodes.
+Schannel facilite les connexions TLS/SSL sécurisées, où lors d'une poignée de main, le client présente un certificat qui, s'il est validé avec succès, autorise l'accès. La correspondance d'un certificat à un compte AD peut impliquer la fonction **S4U2Self** de Kerberos ou le **Subject Alternative Name (SAN)** du certificat, parmi d'autres méthodes.
 
-### Énumération des Services de Certificat AD
+### Énumération des services de certificats AD
 
-Les services de certificat AD peuvent être énumérés via des requêtes LDAP, révélant des informations sur les **Autorités de Certification (CAs) d'Entreprise** et leurs configurations. Cela est accessible par tout utilisateur authentifié dans le domaine sans privilèges spéciaux. Des outils comme **[Certify](https://github.com/GhostPack/Certify)** et **[Certipy](https://github.com/ly4k/Certipy)** sont utilisés pour l'énumération et l'évaluation des vulnérabilités dans les environnements AD CS.
+Les services de certificats AD peuvent être énumérés via des requêtes LDAP, révélant des informations sur les **Enterprise Certificate Authorities (CAs)** et leurs configurations. Cela est accessible par tout utilisateur authentifié dans le domaine sans privilèges spéciaux. Des outils comme **[Certify](https://github.com/GhostPack/Certify)** et **[Certipy](https://github.com/ly4k/Certipy)** sont utilisés pour l'énumération et l'évaluation des vulnérabilités dans les environnements AD CS.
 
 Les commandes pour utiliser ces outils incluent :
 ```bash

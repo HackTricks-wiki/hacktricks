@@ -29,13 +29,13 @@ L'obtention du firmware peut être abordée par divers moyens, chacun ayant son 
 - **En le construisant** à partir des instructions fournies
 - **En le téléchargeant** depuis des sites de support officiels
 - En utilisant des requêtes **Google dork** pour trouver des fichiers de firmware hébergés
-- En accédant directement au **stockage cloud**, avec des outils comme [S3Scanner](https://github.com/sa7mon/S3Scanner)
-- En interceptant les **mises à jour** via des techniques de l'homme du milieu
-- **En extrayant** de l'appareil par des connexions comme **UART**, **JTAG** ou **PICit**
-- **En reniflant** les demandes de mise à jour dans la communication de l'appareil
-- En identifiant et en utilisant des **points de terminaison de mise à jour codés en dur**
-- **En dumpant** depuis le bootloader ou le réseau
-- **En retirant et en lisant** la puce de stockage, lorsque tout le reste échoue, en utilisant des outils matériels appropriés
+- Accéder directement au **stockage cloud**, avec des outils comme [S3Scanner](https://github.com/sa7mon/S3Scanner)
+- Intercepter les **mises à jour** via des techniques de l'homme du milieu
+- **Extraire** depuis l'appareil via des connexions comme **UART**, **JTAG** ou **PICit**
+- **Sniffer** les requêtes de mise à jour dans la communication de l'appareil
+- Identifier et utiliser des **points de terminaison de mise à jour codés en dur**
+- **Dumping** depuis le bootloader ou le réseau
+- **Retirer et lire** la puce de stockage, lorsque tout le reste échoue, en utilisant des outils matériels appropriés
 
 ## Analyser le firmware
 
@@ -77,7 +77,7 @@ DECIMAL HEXADECIMAL DESCRIPTION
 1704052 0x1A0074 PackImg section delimiter tag, little endian size: 32256 bytes; big endian size: 8257536 bytes
 1704084 0x1A0094 Squashfs filesystem, little endian, version 4.0, compression:lzma, size: 8256900 bytes, 2688 inodes, blocksize: 131072 bytes, created: 2016-07-12 02:28:41
 ```
-Exécutez la commande **dd** suivante pour extraire le système de fichiers Squashfs.
+Exécutez la commande **dd suivante** pour extraire le système de fichiers Squashfs.
 ```
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
@@ -126,9 +126,9 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head #useful for finding signatures in the header
 fdisk -lu <bin> #lists partitions and filesystems, if there are multiple
 ```
-Pour évaluer l'état de chiffrement de l'image, l'**entropie** est vérifiée avec `binwalk -E <bin>`. Une faible entropie suggère un manque de chiffrement, tandis qu'une haute entropie indique un possible chiffrement ou compression.
+Pour évaluer l'état de l'encryption de l'image, l'**entropie** est vérifiée avec `binwalk -E <bin>`. Une faible entropie suggère un manque d'encryption, tandis qu'une haute entropie indique une possible encryption ou compression.
 
-Pour extraire des **fichiers intégrés**, des outils et ressources comme la documentation des **file-data-carving-recovery-tools** et **binvis.io** pour l'inspection des fichiers sont recommandés.
+Pour extraire des **fichiers intégrés**, des outils et ressources comme la documentation **file-data-carving-recovery-tools** et **binvis.io** pour l'inspection des fichiers sont recommandés.
 
 ### Extraction du Système de Fichiers
 
@@ -192,7 +192,7 @@ Des outils comme [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware 
 
 ## Analyse dynamique en pratique
 
-À ce stade, un environnement de dispositif réel ou émulé est utilisé pour l'analyse. Il est essentiel de maintenir l'accès shell au système d'exploitation et au système de fichiers. L'émulation peut ne pas imiter parfaitement les interactions matérielles, nécessitant des redémarrages d'émulation occasionnels. L'analyse doit revisiter le système de fichiers, exploiter les pages web et services réseau exposés, et explorer les vulnérabilités du bootloader. Les tests d'intégrité du firmware sont critiques pour identifier les vulnérabilités potentielles de porte dérobée.
+À ce stade, un environnement de dispositif réel ou émulé est utilisé pour l'analyse. Il est essentiel de maintenir un accès shell au système d'exploitation et au système de fichiers. L'émulation peut ne pas imiter parfaitement les interactions matérielles, nécessitant des redémarrages d'émulation occasionnels. L'analyse doit revisiter le système de fichiers, exploiter les pages web et services réseau exposés, et explorer les vulnérabilités du bootloader. Les tests d'intégrité du firmware sont critiques pour identifier les vulnérabilités potentielles de porte dérobée.
 
 ## Techniques d'analyse à l'exécution
 

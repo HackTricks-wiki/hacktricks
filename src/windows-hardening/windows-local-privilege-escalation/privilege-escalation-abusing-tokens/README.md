@@ -10,7 +10,7 @@ Si vous **ne savez pas ce que sont les Windows Access Tokens**, lisez cette page
 ../access-tokens.md
 {{#endref}}
 
-**Peut-être que vous pourriez être en mesure d'escalader les privilèges en abusant des tokens que vous avez déjà**
+**Peut-être pourriez-vous être en mesure d'escalader les privilèges en abusant des tokens que vous avez déjà**
 
 ### SeImpersonatePrivilege
 
@@ -129,7 +129,7 @@ Si vous voulez obtenir un shell `NT SYSTEM`, vous pouvez utiliser :
 
 - \***\*[**SeDebugPrivilege-Exploit (C++)**](https://github.com/bruno-1337/SeDebugPrivilege-Exploit)\*\***
 - \***\*[**SeDebugPrivilegePoC (C#)**](https://github.com/daem0nc0re/PrivFu/tree/main/PrivilegedOperations/SeDebugPrivilegePoC)\*\***
-- \***\*[**psgetsys.ps1 (Script Powershell)**](https://raw.githubusercontent.com/decoder-it/psgetsystem/master/psgetsys.ps1)\*\***
+- \***\*[**psgetsys.ps1 (Powershell Script)**](https://raw.githubusercontent.com/decoder-it/psgetsystem/master/psgetsys.ps1)\*\***
 ```powershell
 # Get the PID of a process running as NT SYSTEM
 import-module psgetsys.ps1; [MyProcess]::CreateProcessFromParent(<system_pid>,<command_to_execute>)

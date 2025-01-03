@@ -24,7 +24,7 @@ Comme le **décodage du signal infrarouge** se fait du côté **logiciel**, Flip
 
 Flipper Zero peut être utilisé comme une **télécommande universelle pour contrôler n'importe quelle télévision, climatiseur ou centre multimédia**. Dans ce mode, Flipper **force par essais** tous les **codes connus** de tous les fabricants pris en charge **selon le dictionnaire de la carte SD**. Vous n'avez pas besoin de choisir une télécommande particulière pour éteindre une télévision de restaurant.
 
-Il suffit d'appuyer sur le bouton d'alimentation en mode Télécommande Universelle, et Flipper **enverra séquentiellement des commandes "Power Off"** de toutes les télévisions qu'il connaît : Sony, Samsung, Panasonic... et ainsi de suite. Lorsque la télévision reçoit son signal, elle réagira et s'éteindra.
+Il suffit d'appuyer sur le bouton d'alimentation en mode Télécommande Universelle, et Flipper **enverra séquentiellement les commandes "Power Off"** de toutes les télévisions qu'il connaît : Sony, Samsung, Panasonic... et ainsi de suite. Lorsque la télévision reçoit son signal, elle réagira et s'éteindra.
 
 Ce type de force brute prend du temps. Plus le dictionnaire est grand, plus cela prendra du temps pour finir. Il est impossible de savoir quel signal exactement la télévision a reconnu, car il n'y a pas de retour d'information de la télévision.
 

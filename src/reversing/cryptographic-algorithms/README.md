@@ -6,7 +6,7 @@
 
 ## Identification des Algorithmes
 
-Si vous terminez par un code **utilisant des décalages à droite et à gauche, des xors et plusieurs opérations arithmétiques**, il est très probable qu'il s'agisse de l'implémentation d'un **algorithme cryptographique**. Voici quelques façons de **identifier l'algorithme utilisé sans avoir besoin de décompiler chaque étape**.
+Si vous terminez dans un code **utilisant des décalages à droite et à gauche, des xors et plusieurs opérations arithmétiques**, il est très probable qu'il s'agisse de l'implémentation d'un **algorithme cryptographique**. Voici quelques façons de **identifier l'algorithme utilisé sans avoir besoin de renverser chaque étape**.
 
 ### Fonctions API
 
@@ -104,7 +104,7 @@ Il est composé de 3 parties principales :
 ### Identification
 
 Dans l'image suivante, notez comment la constante **0x9E3779B9** est utilisée (notez que cette constante est également utilisée par d'autres algorithmes cryptographiques comme **TEA** -Tiny Encryption Algorithm).\
-Notez également la **taille de la boucle** (**132**) et le **nombre d'opérations XOR** dans les **instructions de désassemblage** et dans l'exemple de **code** :
+Notez également la **taille de la boucle** (**132**) et le **nombre d'opérations XOR** dans les instructions de **désassemblage** et dans l'exemple de **code** :
 
 ![](<../../images/image (381).png>)
 

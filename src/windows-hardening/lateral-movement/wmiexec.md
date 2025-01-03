@@ -4,9 +4,9 @@
 
 ## Comment ça fonctionne
 
-Des processus peuvent être ouverts sur des hôtes où le nom d'utilisateur et soit le mot de passe soit le hash sont connus grâce à l'utilisation de WMI. Les commandes sont exécutées en utilisant WMI par Wmiexec, offrant une expérience de shell semi-interactive.
+Des processus peuvent être ouverts sur des hôtes où le nom d'utilisateur et soit le mot de passe soit le hash sont connus grâce à WMI. Les commandes sont exécutées en utilisant WMI par Wmiexec, offrant une expérience de shell semi-interactive.
 
-**dcomexec.py :** En utilisant différents points de terminaison DCOM, ce script offre un shell semi-interactif semblable à wmiexec.py, tirant spécifiquement parti de l'objet DCOM ShellBrowserWindow. Il prend actuellement en charge les objets Application MMC20, Shell Windows et Shell Browser Window. (source : [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
+**dcomexec.py :** En utilisant différents points de terminaison DCOM, ce script offre un shell semi-interactif semblable à wmiexec.py, exploitant spécifiquement l'objet DCOM ShellBrowserWindow. Il prend actuellement en charge les objets Application MMC20, Shell Windows et Shell Browser Window. (source : [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
 
 ## Fondamentaux de WMI
 
@@ -95,7 +95,7 @@ Pour exécuter à distance un processus via WMI, comme le déploiement d'un agen
 ```bash
 wmic /node:hostname /user:user path win32_process call create "empire launcher string here"
 ```
-Ce processus illustre la capacité de WMI pour l'exécution à distance et l'énumération du système, mettant en évidence son utilité tant pour l'administration système que pour le pentesting.
+Ce processus illustre la capacité de WMI pour l'exécution à distance et l'énumération des systèmes, mettant en évidence son utilité tant pour l'administration système que pour le pentesting.
 
 ## Références
 

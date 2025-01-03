@@ -6,7 +6,7 @@
 
 [AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) est issu de la Sysinternal Suite :
 
-> Un visualiseur et éditeur avancé d'Active Directory (AD). Vous pouvez utiliser AD Explorer pour naviguer facilement dans une base de données AD, définir des emplacements favoris, afficher les propriétés et attributs des objets sans ouvrir de boîtes de dialogue, modifier les autorisations, voir le schéma d'un objet et exécuter des recherches sophistiquées que vous pouvez enregistrer et réexécuter.
+> Un visualiseur et éditeur avancé d'Active Directory (AD). Vous pouvez utiliser AD Explorer pour naviguer facilement dans une base de données AD, définir des emplacements favoris, afficher les propriétés des objets et les attributs sans ouvrir de boîtes de dialogue, modifier les autorisations, afficher le schéma d'un objet et exécuter des recherches sophistiquées que vous pouvez enregistrer et réexécuter.
 
 ### Instantanés
 
@@ -30,9 +30,9 @@ From [https://github.com/BloodHoundAD/BloodHound](https://github.com/BloodHoundA
 
 > BloodHound est une application web Javascript à page unique, construite sur [Linkurious](http://linkurio.us/), compilée avec [Electron](http://electron.atom.io/), avec une base de données [Neo4j](https://neo4j.com/) alimentée par un collecteur de données C#.
 
-BloodHound utilise la théorie des graphes pour révéler les relations cachées et souvent non intentionnelles au sein d'un environnement Active Directory ou Azure. Les attaquants peuvent utiliser BloodHound pour identifier facilement des chemins d'attaque hautement complexes qui seraient autrement impossibles à identifier rapidement. Les défenseurs peuvent utiliser BloodHound pour identifier et éliminer ces mêmes chemins d'attaque. Les équipes bleues et rouges peuvent utiliser BloodHound pour acquérir facilement une compréhension plus approfondie des relations de privilège dans un environnement Active Directory ou Azure.
+BloodHound utilise la théorie des graphes pour révéler les relations cachées et souvent non intentionnelles au sein d'un environnement Active Directory ou Azure. Les attaquants peuvent utiliser BloodHound pour identifier facilement des chemins d'attaque très complexes qui seraient autrement impossibles à identifier rapidement. Les défenseurs peuvent utiliser BloodHound pour identifier et éliminer ces mêmes chemins d'attaque. Les équipes bleues et rouges peuvent utiliser BloodHound pour acquérir facilement une compréhension plus approfondie des relations de privilège dans un environnement Active Directory ou Azure.
 
-Ainsi, [Bloodhound ](https://github.com/BloodHoundAD/BloodHound) est un outil incroyable qui peut énumérer un domaine automatiquement, sauvegarder toutes les informations, trouver des chemins d'escalade de privilèges possibles et montrer toutes les informations à l'aide de graphes.
+Ainsi, [Bloodhound ](https://github.com/BloodHoundAD/BloodHound) est un outil incroyable qui peut énumérer un domaine automatiquement, sauvegarder toutes les informations, trouver des chemins d'escalade de privilèges possibles et afficher toutes les informations à l'aide de graphes.
 
 BloodHound est composé de 2 parties principales : **ingestors** et l'**application de visualisation**.
 
@@ -50,7 +50,7 @@ Après la création de BloodHound CE, l'ensemble du projet a été mis à jour p
 curl -L https://ghst.ly/getbhce | docker compose -f - up
 ```
 3. Localisez le mot de passe généré aléatoirement dans la sortie du terminal de Docker Compose.  
-4. Dans un navigateur, accédez à http://localhost:8080/ui/login. Connectez-vous avec un nom d'utilisateur admin et le mot de passe généré aléatoirement à partir des journaux.
+4. Dans un navigateur, accédez à http://localhost:8080/ui/login. Connectez-vous avec le nom d'utilisateur admin et le mot de passe généré aléatoirement à partir des journaux.
 
 Après cela, vous devrez changer le mot de passe généré aléatoirement et vous aurez la nouvelle interface prête, à partir de laquelle vous pouvez directement télécharger les ingestors.
 
@@ -82,6 +82,6 @@ group3r.exe -f <filepath-name.log>
 
 [**PingCastle**](https://www.pingcastle.com/documentation/) **évalue la posture de sécurité d'un environnement AD** et fournit un joli **rapport** avec des graphiques.
 
-Pour l'exécuter, vous pouvez exécuter le binaire `PingCastle.exe` et cela démarrera une **session interactive** présentant un menu d'options. L'option par défaut à utiliser est **`healthcheck`** qui établira un **aperçu** de base du **domaine**, et trouvera des **mauvais configurations** et des **vulnérabilités**.&#x20;
+Pour l'exécuter, vous pouvez exécuter le binaire `PingCastle.exe` et il démarrera une **session interactive** présentant un menu d'options. L'option par défaut à utiliser est **`healthcheck`** qui établira un **aperçu** de base du **domaine**, et trouvera des **mauvais configurations** et des **vulnérabilités**.&#x20;
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -13,7 +13,7 @@ Dans la méthode d'attaque **Pass The Ticket (PTT)**, les attaquants **volent le
 
 ### **Échange de tickets Linux et Windows entre plateformes**
 
-L'outil [**ticket_converter**](https://github.com/Zer1t0/ticket_converter) convertit les formats de tickets en utilisant simplement le ticket lui-même et un fichier de sortie.
+L'outil [**ticket_converter**](https://github.com/Zer1t0/ticket_converter) convertit les formats de ticket en utilisant simplement le ticket lui-même et un fichier de sortie.
 ```bash
 python ticket_converter.py velociraptor.ccache velociraptor.kirbi
 Converting ccache => kirbi

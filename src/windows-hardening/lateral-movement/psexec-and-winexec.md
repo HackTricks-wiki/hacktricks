@@ -13,7 +13,7 @@ Le processus est décrit dans les étapes ci-dessous, illustrant comment les bin
 
 ### **Processus d'exécution manuelle de PsExec**
 
-En supposant qu'il y ait un payload exécutable (créé avec msfvenom et obfusqué avec Veil pour échapper à la détection antivirus), nommé 'met8888.exe', représentant un payload meterpreter reverse_http, les étapes suivantes sont suivies :
+En supposant qu'il y ait une charge utile exécutable (créée avec msfvenom et obfusquée à l'aide de Veil pour échapper à la détection antivirus), nommée 'met8888.exe', représentant une charge utile meterpreter reverse_http, les étapes suivantes sont suivies :
 
 - **Copie du binaire** : L'exécutable est copié sur le partage ADMIN$ depuis une invite de commande, bien qu'il puisse être placé n'importe où sur le système de fichiers pour rester dissimulé.
 - **Création d'un service** : En utilisant la commande Windows `sc`, qui permet de requêter, créer et supprimer des services Windows à distance, un service nommé "meterpreter" est créé pour pointer vers le binaire téléchargé.

@@ -80,7 +80,7 @@ Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\admini
 ```
 ### Abus de l'historique SID
 
-Vous pouvez également abuser de [**l'historique SID**](sid-history-injection.md) à travers une confiance de forêt.
+Vous pouvez également abuser de [**l'historique SID**](sid-history-injection.md) à travers une relation de confiance entre forêts.
 
 Si un utilisateur est **migré d'une forêt à une autre** et que **le filtrage SID n'est pas activé**, il devient possible d'**ajouter un SID de l'autre forêt**, et ce **SID** sera **ajouté** au **jeton de l'utilisateur** lors de l'authentification **à travers la confiance**.
 

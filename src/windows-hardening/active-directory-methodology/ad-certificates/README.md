@@ -43,7 +43,7 @@ Définis dans AD, ces modèles décrivent les paramètres et les autorisations p
 
 ## Certificate Enrollment
 
-Le processus d'inscription pour les certificats est initié par un administrateur qui **crée un modèle de certificat**, qui est ensuite **publié** par une Autorité de Certification d'Entreprise (CA). Cela rend le modèle disponible pour l'inscription des clients, étape réalisée en ajoutant le nom du modèle au champ `certificatetemplates` d'un objet Active Directory.
+Le processus d'inscription pour les certificats est initié par un administrateur qui **crée un modèle de certificat**, qui est ensuite **publié** par une Autorité de Certification (CA) d'entreprise. Cela rend le modèle disponible pour l'inscription des clients, étape réalisée en ajoutant le nom du modèle au champ `certificatetemplates` d'un objet Active Directory.
 
 Pour qu'un client demande un certificat, des **droits d'inscription** doivent être accordés. Ces droits sont définis par des descripteurs de sécurité sur le modèle de certificat et la CA d'entreprise elle-même. Les autorisations doivent être accordées dans les deux emplacements pour qu'une demande soit réussie.
 
@@ -95,7 +95,7 @@ est central pour établir la confiance pour l'authentification par certificat.
 
 ### Authentification Secure Channel (Schannel)
 
-Schannel facilite les connexions TLS/SSL sécurisées, où lors d'une poignée de main, le client présente un certificat qui, s'il est validé avec succès, autorise l'accès. La correspondance d'un certificat à un compte AD peut impliquer la fonction **S4U2Self** de Kerberos ou le **Nom Alternatif du Sujet (SAN)** du certificat, entre autres méthodes.
+Schannel facilite les connexions TLS/SSL sécurisées, où lors d'une poignée de main, le client présente un certificat qui, s'il est validé avec succès, autorise l'accès. La correspondance d'un certificat à un compte AD peut impliquer la fonction **S4U2Self** de Kerberos ou le **Nom Alternatif du Sujet (SAN)** du certificat, parmi d'autres méthodes.
 
 ### Énumération des Services de Certificat AD
 

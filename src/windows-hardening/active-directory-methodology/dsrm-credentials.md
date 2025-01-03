@@ -1,8 +1,8 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# DSRM Credentials
+# Identifiants DSRM
 
-Il y a un compte **administrateur local** dans chaque **DC**. En ayant des privilèges d'administrateur sur cette machine, vous pouvez utiliser mimikatz pour **extraire le hash de l'administrateur local**. Ensuite, en modifiant un registre pour **activer ce mot de passe**, vous pouvez accéder à distance à cet utilisateur administrateur local.\
+Il y a un compte **administrateur local** dans chaque **DC**. En ayant des privilèges d'administrateur sur cette machine, vous pouvez utiliser mimikatz pour **extraire le hash de l'administrateur local**. Ensuite, en modifiant un registre pour **activer ce mot de passe** afin que vous puissiez accéder à distance à cet utilisateur administrateur local.\
 Tout d'abord, nous devons **extraire** le **hash** de l'utilisateur **administrateur local** à l'intérieur du DC :
 ```bash
 Invoke-Mimikatz -Command '"token::elevate" "lsadump::sam"'

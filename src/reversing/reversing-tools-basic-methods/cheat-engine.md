@@ -10,7 +10,7 @@ Lorsque vous le téléchargez et l'exécutez, vous êtes **présenté** avec un 
 ![](<../../images/image (762).png>)
 
 Cet outil est très utile pour trouver **où une certaine valeur** (généralement un nombre) **est stockée dans la mémoire** d'un programme.\
-**Généralement, les nombres** sont stockés sous forme de **4 octets**, mais vous pouvez également les trouver sous des formats **double** ou **float**, ou vous pouvez vouloir chercher quelque chose **de différent d'un nombre**. Pour cette raison, vous devez vous assurer de **sélectionner** ce que vous souhaitez **chercher** :
+**Généralement, les nombres** sont stockés sous forme de **4 octets**, mais vous pourriez également les trouver sous des formats **double** ou **float**, ou vous pourriez vouloir chercher quelque chose **de différent d'un nombre**. Pour cette raison, vous devez vous assurer de **sélectionner** ce que vous souhaitez **chercher** :
 
 ![](<../../images/image (324).png>)
 
@@ -131,14 +131,14 @@ Maintenant, chaque fois que vous modifiez cette valeur, vous **modifiez la valeu
 
 ### Injection de code
 
-L'injection de code est une technique où vous injectez un morceau de code dans le processus cible, puis redirigez l'exécution du code pour passer par votre propre code écrit (comme vous donner des points au lieu de les soustraire).
+L'injection de code est une technique où vous injectez un morceau de code dans le processus cible, puis redirigez l'exécution du code pour passer par votre propre code écrit (comme vous donner des points au lieu de les retirer).
 
 Donc, imaginez que vous avez trouvé l'adresse qui soustrait 1 à la vie de votre joueur :
 
 ![](<../../images/image (203).png>)
 
 Cliquez sur Afficher le désassembleur pour obtenir le **code désassemblé**.\
-Ensuite, cliquez sur **CTRL+a** pour invoquer la fenêtre d'Auto assemble et sélectionnez _**Modèle --> Injection de code**_
+Ensuite, cliquez sur **CTRL+a** pour invoquer la fenêtre d'assemblage automatique et sélectionnez _**Modèle --> Injection de code**_
 
 ![](<../../images/image (902).png>)
 
@@ -154,7 +154,7 @@ Ainsi, insérez votre nouveau code d'assemblage dans la section "**newmem**" et 
 
 ![](<../../images/image (521).png>)
 
-**Cliquez sur exécuter et ainsi de suite et votre code devrait être injecté dans le programme changeant le comportement de la fonctionnalité !**
+**Cliquez sur exécuter et ainsi de suite, votre code devrait être injecté dans le programme changeant le comportement de la fonctionnalité !**
 
 ## **Références**
 

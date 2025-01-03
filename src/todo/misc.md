@@ -20,8 +20,7 @@ Un paquet UDP vide est envoyé à un port spécifique. Si le port UDP est ouvert
 Le scan de ports UDP est souvent peu fiable, car les pare-feu et les routeurs peuvent ignorer les paquets ICMP.\
 Cela peut entraîner des faux positifs dans votre scan, et vous verrez régulièrement\
 des scans de ports UDP montrant tous les ports UDP ouverts sur une machine scannée.\
-La plupart des scanners de ports ne scannent pas tous les ports disponibles, et ont généralement une liste prédéfinie\
-de « ports intéressants » qui sont scannés.
+o La plupart des scanners de ports ne scannent pas tous les ports disponibles, et ont généralement une liste prédéfinie de “ports intéressants” qui sont scannés.
 
 # CTF - Astuces
 

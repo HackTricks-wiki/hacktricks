@@ -36,7 +36,7 @@ Flipper Zero ne peut lire qu'un UID, SAK, ATQA et les données stockées sur les
 
 Lorsque Flipper Zero est **incapable de déterminer le type de carte NFC**, alors seul un **UID, SAK et ATQA** peut être **lu et sauvegardé**.
 
-Écran de lecture de carte inconnuePour les cartes NFC inconnues, Flipper Zero ne peut émuler qu'un UID.
+Écran de lecture de carte inconnuePour les cartes NFC inconnues, Flipper Zero peut émuler uniquement un UID.
 
 <figure><img src="https://cdn.flipperzero.one/Monosnap_Miro_2022-08-17_12-27-53.png?auto=format&#x26;ixlib=react-9.1.1&#x26;h=932&#x26;w=2634" alt=""><figcaption></figcaption></figure>
 
@@ -52,15 +52,15 @@ Pour une introduction sur NFC [**lisez cette page**](../pentesting-rfid.md#high-
 
 ### Lire
 
-Flipper Zero peut **lire les cartes NFC**, cependant, il **ne comprend pas tous les protocoles** qui sont basés sur ISO 14443. Cependant, puisque **l'UID est un attribut de bas niveau**, vous pourriez vous retrouver dans une situation où **l'UID est déjà lu, mais le protocole de transfert de données de haut niveau est encore inconnu**. Vous pouvez lire, émuler et saisir manuellement l'UID en utilisant Flipper pour les lecteurs primitifs qui utilisent l'UID pour l'autorisation.
+Flipper Zero peut **lire des cartes NFC**, cependant, il **ne comprend pas tous les protocoles** qui sont basés sur ISO 14443. Cependant, puisque **l'UID est un attribut de bas niveau**, vous pourriez vous retrouver dans une situation où **l'UID est déjà lu, mais le protocole de transfert de données de haut niveau est encore inconnu**. Vous pouvez lire, émuler et saisir manuellement l'UID en utilisant Flipper pour les lecteurs primitifs qui utilisent l'UID pour l'autorisation.
 
-#### Lecture de l'UID VS Lecture des Données Internes <a href="#reading-the-uid-vs-reading-the-data-inside" id="reading-the-uid-vs-reading-the-data-inside"></a>
+#### Lecture de l'UID VS Lecture des données internes <a href="#reading-the-uid-vs-reading-the-data-inside" id="reading-the-uid-vs-reading-the-data-inside"></a>
 
 <figure><img src="../../../images/image (217).png" alt=""><figcaption></figcaption></figure>
 
 Dans Flipper, la lecture des étiquettes à 13,56 MHz peut être divisée en deux parties :
 
-- **Lecture de bas niveau** — lit uniquement l'UID, SAK et ATQA. Flipper essaie de deviner le protocole de haut niveau basé sur ces données lues depuis la carte. Vous ne pouvez pas être sûr à 100 % de cela, car c'est juste une supposition basée sur certains facteurs.
+- **Lecture de bas niveau** — lit uniquement l'UID, SAK et ATQA. Flipper essaie de deviner le protocole de haut niveau basé sur ces données lues à partir de la carte. Vous ne pouvez pas être sûr à 100 % de cela, car c'est juste une supposition basée sur certains facteurs.
 - **Lecture de haut niveau** — lit les données de la mémoire de la carte en utilisant un protocole de haut niveau spécifique. Cela consisterait à lire les données sur un Mifare Ultralight, lire les secteurs d'un Mifare Classic, ou lire les attributs de la carte depuis PayPass/Apple Pay.
 
 ### Lire Spécifique
@@ -69,7 +69,7 @@ Dans le cas où Flipper Zero n'est pas capable de trouver le type de carte à pa
 
 #### Cartes Bancaires EMV (PayPass, payWave, Apple Pay, Google Pay) <a href="#emv-bank-cards-paypass-paywave-apple-pay-google-pay" id="emv-bank-cards-paypass-paywave-apple-pay-google-pay"></a>
 
-En plus de simplement lire l'UID, vous pouvez extraire beaucoup plus de données d'une carte bancaire. Il est possible d'**obtenir le numéro de carte complet** (les 16 chiffres sur le devant de la carte), **date de validité**, et dans certains cas même le **nom du propriétaire** ainsi qu'une liste des **transactions les plus récentes**.\
+En plus de simplement lire l'UID, vous pouvez extraire beaucoup plus de données d'une carte bancaire. Il est possible d'**obtenir le numéro de carte complet** (les 16 chiffres à l'avant de la carte), **date de validité**, et dans certains cas même le **nom du propriétaire** ainsi qu'une liste des **transactions les plus récentes**.\
 Cependant, vous **ne pouvez pas lire le CVV de cette manière** (les 3 chiffres au dos de la carte). De plus, **les cartes bancaires sont protégées contre les attaques de rejeu**, donc les copier avec Flipper et ensuite essayer de l'émuler pour payer quelque chose ne fonctionnera pas.
 
 ## Références

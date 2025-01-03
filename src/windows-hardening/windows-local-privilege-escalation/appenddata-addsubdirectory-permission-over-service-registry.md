@@ -19,7 +19,7 @@ Malgré ces limitations, un potentiel d'escalade de privilèges a été identifi
 
 La documentation sur la sous-clé **Performance** et son utilisation pour la surveillance des performances a été consultée, conduisant au développement d'une DLL de preuve de concept. Cette DLL, démontrant l'implémentation des fonctions **OpenPerfData**, **CollectPerfData**, et **ClosePerfData**, a été testée via **rundll32**, confirmant son succès opérationnel.
 
-L'objectif était de contraindre le **service RPC Endpoint Mapper** à charger la DLL Performance conçue. Les observations ont révélé qu'exécuter des requêtes de classe WMI liées aux Données de Performance via PowerShell entraînait la création d'un fichier journal, permettant l'exécution de code arbitraire sous le contexte **SYSTEM LOCAL**, accordant ainsi des privilèges élevés.
+L'objectif était de contraindre le **service de mappage de points de terminaison RPC** à charger la DLL Performance conçue. Les observations ont révélé qu'exécuter des requêtes de classe WMI liées aux données de performance via PowerShell entraînait la création d'un fichier journal, permettant l'exécution de code arbitraire sous le contexte **SYSTEM LOCAL**, accordant ainsi des privilèges élevés.
 
 La persistance et les implications potentielles de cette vulnérabilité ont été soulignées, mettant en évidence sa pertinence pour les stratégies de post-exploitation, le mouvement latéral et l'évasion des systèmes antivirus/EDR.
 

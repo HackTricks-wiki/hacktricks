@@ -6,7 +6,7 @@
 
 ## Silver ticket
 
-L'attaque **Silver Ticket** implique l'exploitation des tickets de service dans les environnements Active Directory (AD). Cette méthode repose sur **l'acquisition du hachage NTLM d'un compte de service**, tel qu'un compte d'ordinateur, pour forger un ticket de service de délivrance de tickets (TGS). Avec ce ticket forgé, un attaquant peut accéder à des services spécifiques sur le réseau, **impostant n'importe quel utilisateur**, visant généralement des privilèges administratifs. Il est souligné que l'utilisation de clés AES pour forger des tickets est plus sécurisée et moins détectable.
+L'attaque **Silver Ticket** implique l'exploitation des tickets de service dans les environnements Active Directory (AD). Cette méthode repose sur **l'acquisition du hachage NTLM d'un compte de service**, tel qu'un compte d'ordinateur, pour forger un ticket de service de ticket granting (TGS). Avec ce ticket forgé, un attaquant peut accéder à des services spécifiques sur le réseau, **usurpant n'importe quel utilisateur**, visant généralement des privilèges administratifs. Il est souligné que l'utilisation de clés AES pour forger des tickets est plus sécurisée et moins détectable.
 
 Pour la création de tickets, différents outils sont utilisés en fonction du système d'exploitation :
 
@@ -32,22 +32,22 @@ Le service CIFS est mis en avant comme une cible courante pour accéder au syst�
 
 ## Services Disponibles
 
-| Type de Service                            | Tickets Silver de Service                                                |
-| ------------------------------------------ | ------------------------------------------------------------------------ |
-| WMI                                        | <p>HOST</p><p>RPCSS</p>                                                |
+| Type de Service                            | Tickets Argent Service                                                     |
+| ------------------------------------------ | -------------------------------------------------------------------------- |
+| WMI                                        | <p>HOST</p><p>RPCSS</p>                                                    |
 | PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Selon le système d'exploitation également :</p><p>WSMAN</p><p>RPCSS</p> |
 | WinRM                                      | <p>HOST</p><p>HTTP</p><p>Dans certaines occasions, vous pouvez simplement demander : WINRM</p> |
-| Tâches Planifiées                          | HOST                                                                   |
-| Partage de Fichiers Windows, aussi psexec | CIFS                                                                   |
-| Opérations LDAP, y compris DCSync         | LDAP                                                                   |
-| Outils d'Administration de Serveur à Distance Windows | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                   |
-| Golden Tickets                             | krbtgt                                                                 |
+| Tâches Planifiées                          | HOST                                                                       |
+| Partage de Fichiers Windows, aussi psexec | CIFS                                                                       |
+| Opérations LDAP, y compris DCSync         | LDAP                                                                       |
+| Outils d'Administration de Serveur à Distance Windows | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
+| Tickets en Or                              | krbtgt                                                                     |
 
 En utilisant **Rubeus**, vous pouvez **demander tous** ces tickets en utilisant le paramètre :
 
 - `/altservice:host,RPCSS,http,wsman,cifs,ldap,krbtgt,winrm`
 
-### IDs d'Événements des Tickets Silver
+### Identifiants d'Événements des Tickets Argent
 
 - 4624 : Connexion de Compte
 - 4634 : Déconnexion de Compte
@@ -59,7 +59,7 @@ Dans les exemples suivants, imaginons que le ticket est récupéré en usurpant 
 
 ### CIFS
 
-Avec ce ticket, vous serez en mesure d'accéder au dossier `C$` et `ADMIN$` via **SMB** (s'ils sont exposés) et de copier des fichiers vers une partie du système de fichiers distant juste en faisant quelque chose comme :
+Avec ce ticket, vous pourrez accéder au dossier `C$` et `ADMIN$` via **SMB** (s'ils sont exposés) et copier des fichiers vers une partie du système de fichiers distant juste en faisant quelque chose comme :
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$

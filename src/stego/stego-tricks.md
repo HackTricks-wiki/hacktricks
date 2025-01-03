@@ -68,7 +68,7 @@ Des caractères invisibles dans des espaces apparemment vides peuvent cacher des
 ```bash
 ./magick identify -verbose stego.jpg
 ```
-Pour tenter de réparer une image endommagée, ajouter un commentaire de métadonnées pourrait aider :
+Pour tenter de réparer une image endommagée, ajouter un commentaire dans les métadonnées pourrait aider :
 ```bash
 ./magick mogrify -set comment 'Extraneous bytes removed' stego.jpg
 ```
@@ -139,7 +139,7 @@ Pour une exploration plus approfondie, envisagez de visiter :
 
 ### **Steghide (JPEG, BMP, WAV, AU)**
 
-Steghide est un outil polyvalent conçu pour cacher des données dans des fichiers JPEG, BMP, WAV et AU. Des instructions détaillées sont fournies dans la [documentation des astuces de stéganographie](stego-tricks.md#steghide).
+Steghide est un outil polyvalent conçu pour cacher des données dans des fichiers JPEG, BMP, WAV et AU. Des instructions détaillées sont fournies dans la [documentation des astuces stego](stego-tricks.md#steghide).
 
 ### **Stegpy (PNG, BMP, GIF, WebP, WAV)**
 
@@ -147,7 +147,7 @@ Cet outil est compatible avec une variété de formats, y compris PNG, BMP, GIF,
 
 ### **ffmpeg**
 
-ffmpeg est crucial pour évaluer l'intégrité des fichiers audio, mettant en évidence des informations détaillées et identifiant d'éventuelles incohérences.
+ffmpeg est crucial pour évaluer l'intégrité des fichiers audio, mettant en évidence des informations détaillées et identifiant toute anomalie.
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
@@ -169,7 +169,7 @@ Un outil inestimable pour l'inspection visuelle et analytique des fichiers audio
 
 ### **DTMF Tones - Dial Tones**
 
-La détection des tons DTMF dans des fichiers audio peut être réalisée grâce à des outils en ligne tels que [ce détecteur DTMF](https://unframework.github.io/dtmf-detect/) et [DialABC](http://dialabc.com/sound/detect/index.html).
+La détection des tons DTMF dans les fichiers audio peut être réalisée grâce à des outils en ligne tels que [ce détecteur DTMF](https://unframework.github.io/dtmf-detect/) et [DialABC](http://dialabc.com/sound/detect/index.html).
 
 ## **Other Techniques**
 

@@ -13,9 +13,9 @@
 > - **STOCKER** des techniques de **hacking** incroyables que la communauté publie en donnant tous les **crédits** aux **AUTEURS ORIGINAUX**.
 >   - **Nous ne voulons pas le crédit des autres**, nous voulons juste stocker des astuces intéressantes pour tout le monde.
 >   - Nous écrivons également **nos propres recherches** dans HackTricks.
->   - Dans plusieurs cas, nous écrirons simplement **dans HackTricks un résumé des parties importantes** de la technique et **encouragerons le lecteur à visiter le post original** pour plus de détails.
+>   - Dans plusieurs cas, nous allons simplement écrire **dans HackTricks un résumé des parties importantes** de la technique et **encourager le lecteur à visiter le post original** pour plus de détails.
 > - **ORGANISER** toutes les techniques de hacking dans le livre afin qu'elles soient **PLUS ACCESSIBLES**
->   - L'équipe de HackTricks a consacré des milliers d'heures gratuitement **uniquement pour organiser le contenu** afin que les gens puissent **apprendre plus rapidement**.
+>   - L'équipe de HackTricks a consacré des milliers d'heures gratuitement **uniquement pour organiser le contenu** afin que les gens puissent **apprendre plus rapidement**
 
 <figure><img src="../images/hack tricks gif.gif" alt="" width="375"><figcaption></figcaption></figure>
 
@@ -96,7 +96,7 @@ Notez que le fait d'avoir des liens vers votre page dans HackTricks :
 - Le contenu est **traduit en plus de 15 langues**, permettant à plus de personnes d'accéder à ce contenu
 - **HackTricks encourage** les gens à **vérifier votre page** (plusieurs personnes nous ont mentionné que depuis qu'une de leurs pages est dans HackTricks, elles reçoivent plus de visites)
 
-Cependant, si vous souhaitez toujours que le contenu de votre blog soit retiré de HackTricks, faites-le nous savoir et nous **retirerons définitivement chaque lien vers votre blog**, ainsi que tout contenu basé sur celui-ci.
+Cependant, si vous souhaitez toujours que le contenu de votre blog soit retiré de HackTricks, faites-le nous savoir et nous **retirerons définitivement chaque lien vers votre blog**, ainsi que tout contenu basé dessus.
 
 > [!CAUTION]
 >

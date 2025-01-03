@@ -1,4 +1,4 @@
-# Élévation de privilèges avec Autoruns
+# Escalade de privilèges avec Autoruns
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -38,7 +38,7 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ## Registre
 
 > [!NOTE]
-> [Note from ici](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f) : L'entrée de registre **Wow6432Node** indique que vous exécutez une version 64 bits de Windows. Le système d'exploitation utilise cette clé pour afficher une vue séparée de HKEY_LOCAL_MACHINE\SOFTWARE pour les applications 32 bits qui s'exécutent sur des versions Windows 64 bits.
+> [Note from here](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f) : L'entrée de registre **Wow6432Node** indique que vous exécutez une version 64 bits de Windows. Le système d'exploitation utilise cette clé pour afficher une vue séparée de HKEY_LOCAL_MACHINE\SOFTWARE pour les applications 32 bits qui s'exécutent sur des versions Windows 64 bits.
 
 ### Exécutions
 
@@ -58,7 +58,7 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 
 Les clés de registre connues sous le nom de **Run** et **RunOnce** sont conçues pour exécuter automatiquement des programmes chaque fois qu'un utilisateur se connecte au système. La ligne de commande assignée en tant que valeur de données d'une clé est limitée à 260 caractères ou moins.
 
-**Exécutions de service** (peuvent contrôler le démarrage automatique des services lors du démarrage) :
+**Exécutions de service** (peut contrôler le démarrage automatique des services lors du démarrage) :
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
@@ -145,10 +145,10 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 
-Les raccourcis placés dans le dossier **Démarrage** déclencheront automatiquement des services ou des applications lors de la connexion de l'utilisateur ou du redémarrage du système. L'emplacement du dossier **Démarrage** est défini dans le registre pour les portées **Machine locale** et **Utilisateur actuel**. Cela signifie que tout raccourci ajouté à ces emplacements **Démarrage** spécifiés garantira que le service ou le programme lié démarre après le processus de connexion ou de redémarrage, ce qui en fait une méthode simple pour planifier l'exécution automatique des programmes.
+Les raccourcis placés dans le dossier **Démarrage** déclencheront automatiquement le lancement de services ou d'applications lors de la connexion de l'utilisateur ou du redémarrage du système. L'emplacement du dossier **Démarrage** est défini dans le registre pour les portées **Local Machine** et **Current User**. Cela signifie que tout raccourci ajouté à ces emplacements **Démarrage** spécifiés garantira que le service ou le programme lié démarre après le processus de connexion ou de redémarrage, ce qui en fait une méthode simple pour programmer des programmes à s'exécuter automatiquement.
 
 > [!NOTE]
-> Si vous pouvez écraser n'importe quel \[User] Shell Folder sous **HKLM**, vous pourrez le pointer vers un dossier contrôlé par vous et placer une porte dérobée qui sera exécutée chaque fois qu'un utilisateur se connecte au système, augmentant ainsi les privilèges.
+> Si vous pouvez écraser n'importe quel \[User] Shell Folder sous **HKLM**, vous pourrez le pointer vers un dossier contrôlé par vous et placer une porte dérobée qui sera exécutée chaque fois qu'un utilisateur se connecte au système, escaladant ainsi les privilèges.
 ```bash
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v "Common Startup"
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" /v "Common Startup"
@@ -190,7 +190,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 
 ### Changer l'invite de commande en mode sans échec
 
-Dans le Registre Windows sous `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, il y a une valeur **`AlternateShell`** définie par défaut sur `cmd.exe`. Cela signifie que lorsque vous choisissez "Mode sans échec avec invite de commande" au démarrage (en appuyant sur F8), `cmd.exe` est utilisé. Mais, il est possible de configurer votre ordinateur pour démarrer automatiquement en ce mode sans avoir besoin d'appuyer sur F8 et de le sélectionner manuellement.
+Dans le Registre Windows sous `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, il y a une valeur **`AlternateShell`** définie par défaut sur `cmd.exe`. Cela signifie que lorsque vous choisissez "Mode sans échec avec invite de commande" au démarrage (en appuyant sur F8), `cmd.exe` est utilisé. Cependant, il est possible de configurer votre ordinateur pour qu'il démarre automatiquement en mode sans échec sans avoir besoin d'appuyer sur F8 et de le sélectionner manuellement.
 
 Étapes pour créer une option de démarrage pour démarrer automatiquement en "Mode sans échec avec invite de commande" :
 
@@ -201,8 +201,8 @@ Dans le Registre Windows sous `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, 
 5. Réappliquez les attributs de fichier d'origine : `attrib c:\boot.ini +r +s +h`
 
 - **Exploit 1 :** Changer la clé de registre **AlternateShell** permet de configurer un shell de commande personnalisé, potentiellement pour un accès non autorisé.
-- **Exploit 2 (Permissions d'écriture sur PATH) :** Avoir des permissions d'écriture sur n'importe quelle partie de la variable **PATH** du système, surtout avant `C:\Windows\system32`, vous permet d'exécuter un `cmd.exe` personnalisé, qui pourrait être une porte dérobée si le système est démarré en mode sans échec.
-- **Exploit 3 (Permissions d'écriture sur PATH et boot.ini) :** L'accès en écriture à `boot.ini` permet un démarrage automatique en mode sans échec, facilitant l'accès non autorisé au prochain redémarrage.
+- **Exploit 2 (Permissions d'écriture PATH) :** Avoir des permissions d'écriture sur n'importe quelle partie de la variable **PATH** du système, en particulier avant `C:\Windows\system32`, vous permet d'exécuter un `cmd.exe` personnalisé, qui pourrait être une porte dérobée si le système est démarré en mode sans échec.
+- **Exploit 3 (Permissions d'écriture PATH et boot.ini) :** L'accès en écriture à `boot.ini` permet un démarrage automatique en mode sans échec, facilitant l'accès non autorisé au prochain redémarrage.
 
 Pour vérifier le paramètre **AlternateShell** actuel, utilisez ces commandes :
 ```bash
@@ -220,7 +220,7 @@ Active Setup est géré à travers les clés de registre suivantes :
 - `HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components`
 - `HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components`
 
-Au sein de ces clés, divers sous-clés existent, chacune correspondant à un composant spécifique. Les valeurs clés d'un intérêt particulier incluent :
+Dans ces clés, divers sous-clés existent, chacune correspondant à un composant spécifique. Les valeurs clés d'un intérêt particulier incluent :
 
 - **IsInstalled :**
 - `0` indique que la commande du composant ne s'exécutera pas.
@@ -243,9 +243,9 @@ reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components
 
 ### Aperçu des Objets d'Aide au Navigateur (BHO)
 
-Les Objets d'Aide au Navigateur (BHO) sont des modules DLL qui ajoutent des fonctionnalités supplémentaires à Internet Explorer de Microsoft. Ils se chargent dans Internet Explorer et Windows Explorer à chaque démarrage. Cependant, leur exécution peut être bloquée en définissant la clé **NoExplorer** à 1, les empêchant de se charger avec les instances de Windows Explorer.
+Les Objets d'Aide au Navigateur (BHO) sont des modules DLL qui ajoutent des fonctionnalités supplémentaires à Internet Explorer de Microsoft. Ils se chargent dans Internet Explorer et l'Explorateur Windows à chaque démarrage. Cependant, leur exécution peut être bloquée en définissant la clé **NoExplorer** à 1, les empêchant de se charger avec les instances de l'Explorateur Windows.
 
-Les BHO sont compatibles avec Windows 10 via Internet Explorer 11 mais ne sont pas pris en charge dans Microsoft Edge, le navigateur par défaut dans les versions plus récentes de Windows.
+Les BHO sont compatibles avec Windows 10 via Internet Explorer 11 mais ne sont pas pris en charge dans Microsoft Edge, le navigateur par défaut des versions plus récentes de Windows.
 
 Pour explorer les BHO enregistrés sur un système, vous pouvez inspecter les clés de registre suivantes :
 
@@ -293,13 +293,13 @@ HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Executi
 ```
 ## SysInternals
 
-Notez que tous les sites où vous pouvez trouver des autoruns sont **déjà recherchés par** [**winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Cependant, pour une **liste plus complète des fichiers auto-exécutés**, vous pourriez utiliser [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) de Sysinternals :
+Notez que tous les sites où vous pouvez trouver des autoruns ont **déjà été recherchés par** [**winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Cependant, pour une **liste plus complète des fichiers auto-exécutés**, vous pourriez utiliser [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) de Sysinternals :
 ```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```
 ## Plus
 
-**Trouvez plus d'Autoruns comme des enregistrements dans** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
+**Trouvez plus d'Autoruns comme les enregistrements dans** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
 
 ## Références
 

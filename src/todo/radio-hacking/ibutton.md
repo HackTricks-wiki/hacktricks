@@ -4,7 +4,7 @@
 
 ## Intro
 
-iButton est un nom générique pour une clé d'identification électronique emballée dans un **conteneur métallique en forme de pièce**. Il est également appelé **Dallas Touch** Memory ou mémoire de contact. Bien qu'il soit souvent mal appelé clé « magnétique », il n'y a **rien de magnétique** à l'intérieur. En fait, un **microchip** complet fonctionnant sur un protocole numérique est caché à l'intérieur.
+iButton est un nom générique pour une clé d'identification électronique emballée dans un **conteneur métallique en forme de pièce**. Elle est également appelée **Dallas Touch** Memory ou mémoire de contact. Bien qu'elle soit souvent mal appelée clé « magnétique », il n'y a **rien de magnétique** à l'intérieur. En fait, un **microchip** complet fonctionnant sur un protocole numérique est caché à l'intérieur.
 
 <figure><img src="../../images/image (915).png" alt=""><figcaption></figcaption></figure>
 

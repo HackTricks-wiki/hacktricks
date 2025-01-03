@@ -56,7 +56,7 @@ HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System
 ConsentPromptBehaviorAdmin    REG_DWORD    0x5
 ```
 - Si **`0`**, alors, UAC ne demandera pas (comme **désactivé**)
-- Si **`1`**, l'administrateur est **demandé pour le nom d'utilisateur et le mot de passe** pour exécuter le binaire avec des droits élevés (sur le Bureau Sécurisé)
+- Si **`1`**, l'admin est **demandé pour le nom d'utilisateur et le mot de passe** pour exécuter le binaire avec des droits élevés (sur le Bureau Sécurisé)
 - Si **`2`** (**Toujours me notifier**) UAC demandera toujours confirmation à l'administrateur lorsqu'il essaie d'exécuter quelque chose avec des privilèges élevés (sur le Bureau Sécurisé)
 - Si **`3`**, comme `1` mais pas nécessaire sur le Bureau Sécurisé
 - Si **`4`**, comme `2` mais pas nécessaire sur le Bureau Sécurisé
@@ -152,7 +152,7 @@ Major  Minor  Build  Revision
 ```
 Aussi, en utilisant [cette](https://en.wikipedia.org/wiki/Windows_10_version_history) page, vous obtenez la version de Windows `1607` à partir des versions de build.
 
-#### Plus de contournements UAC
+#### Plus de contournement UAC
 
 **Toutes** les techniques utilisées ici pour contourner l'AUC **nécessitent** un **shell interactif complet** avec la victime (un shell nc.exe commun n'est pas suffisant).
 
@@ -164,7 +164,7 @@ Vous pouvez obtenir cela en utilisant une session **meterpreter**. Migrez vers u
 
 ### Contournement UAC avec GUI
 
-Si vous avez accès à une **GUI, vous pouvez simplement accepter l'invite UAC** lorsque vous l'obtenez, vous n'avez pas vraiment besoin de le contourner. Donc, obtenir l'accès à une GUI vous permettra de contourner l'UAC.
+Si vous avez accès à une **GUI, vous pouvez simplement accepter l'invite UAC** lorsque vous l'obtenez, vous n'avez vraiment pas besoin d'un contournement. Donc, obtenir l'accès à une GUI vous permettra de contourner l'UAC.
 
 De plus, si vous obtenez une session GUI que quelqu'un utilisait (potentiellement via RDP), il y a **certains outils qui s'exécuteront en tant qu'administrateur** à partir desquels vous pourriez **exécuter** un **cmd** par exemple **en tant qu'admin** directement sans être à nouveau invité par l'UAC comme [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif). Cela pourrait être un peu plus **discret**.
 
@@ -177,7 +177,7 @@ Si vous ne vous souciez pas d'être bruyant, vous pourriez toujours **exécuter 
 Si vous jetez un œil à **UACME**, vous remarquerez que **la plupart des contournements UAC abusent d'une vulnérabilité de détournement de DLL** (principalement en écrivant la DLL malveillante sur _C:\Windows\System32_). [Lisez ceci pour apprendre comment trouver une vulnérabilité de détournement de DLL](../windows-local-privilege-escalation/dll-hijacking.md).
 
 1. Trouvez un binaire qui **s'auto-élève** (vérifiez que lorsqu'il est exécuté, il s'exécute à un niveau d'intégrité élevé).
-2. Avec procmon, trouvez des événements "**NAME NOT FOUND**" qui peuvent être vulnérables au **détournement de DLL**.
+2. Avec procmon, trouvez des événements "**NOM NON TROUVÉ**" qui peuvent être vulnérables au **détournement de DLL**.
 3. Vous aurez probablement besoin de **écrire** la DLL à l'intérieur de certains **chemins protégés** (comme C:\Windows\System32) où vous n'avez pas de permissions d'écriture. Vous pouvez contourner cela en utilisant :
    1. **wusa.exe** : Windows 7, 8 et 8.1. Cela permet d'extraire le contenu d'un fichier CAB à l'intérieur de chemins protégés (car cet outil est exécuté à partir d'un niveau d'intégrité élevé).
    2. **IFileOperation** : Windows 10.
@@ -185,6 +185,6 @@ Si vous jetez un œil à **UACME**, vous remarquerez que **la plupart des contou
 
 ### Une autre technique de contournement UAC
 
-Consiste à surveiller si un **binaire auto-élévé** essaie de **lire** dans le **registre** le **nom/chemin** d'un **binaire** ou **commande** à exécuter (c'est plus intéressant si le binaire recherche cette information à l'intérieur du **HKCU**).
+Consiste à surveiller si un **binaire auto-élévé** essaie de **lire** dans le **registre** le **nom/chemin** d'un **binaire** ou **commande** à **exécuter** (c'est plus intéressant si le binaire recherche cette information à l'intérieur du **HKCU**).
 
 {{#include ../../banners/hacktricks-training.md}}

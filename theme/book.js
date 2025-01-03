@@ -590,6 +590,61 @@ function playground_text(playground, hidden = true) {
     });
 })();
 
+
+(function menubarLanguage() {
+    var menubarLanguageToggleButton = document.getElementById('menubar-languages-toggle');
+    var menubarLanguagePopup = document.getElementById('menubar-languages-popup');
+    var languageButtons = menubarLanguagePopup.querySelectorAll('.menu-bar-link');
+
+    function showLanguage() {
+        menubarLanguagePopup.style.display = 'flex';
+        menubarLanguageToggleButton.setAttribute('aria-expanded', true);
+    }
+
+    function hideLanguage() {
+        menubarLanguagePopup.style.display = 'none';
+        menubarLanguageToggleButton.setAttribute('aria-expanded', false);
+        menubarLanguageToggleButton.focus();
+    }
+
+    menubarLanguageToggleButton.addEventListener('click', function () {
+        if (menubarLanguagePopup.style.display === 'flex') {
+            hideLanguage();
+        } else {
+            showLanguage();
+        }
+    });
+
+    menubarLanguagePopup.addEventListener('focusout', function(e) {
+        // e.relatedTarget is null in Safari and Firefox on macOS (see workaround below)
+        if (!!e.relatedTarget && !menubarLanguageToggleButton.contains(e.relatedTarget) && !menubarLanguagePopup.contains(e.relatedTarget)) {
+            hideLanguage();
+        }
+    });
+
+    // Should not be needed, but it works around an issue on macOS & iOS: https://github.com/rust-lang/mdBook/issues/628
+    document.addEventListener('click', function(e) {
+        if (menubarLanguagePopup.style.display === 'block' && !menubarLanguageToggleButton.contains(e.target) && !menubarLanguagePopup.contains(e.target)) {
+            hideLanguage();
+        }
+    });
+    
+    languageButtons.forEach((btn) => {
+        btn.addEventListener('click', function(e) {
+            const regex = /(?:(?:\/)+(?<lang>[a-z]{2}(?=\/|$)))?(?<path>(?:\/)*.*)?/g
+            var match = regex.exec(window.location.pathname)
+          
+            var path = match.groups.path
+            console.log(`Path: ${path} ${typeof path}`)
+          
+            const lang = match.groups.lang
+            console.log(`Lang: ${lang}`)
+            
+            window.location = `/${e.target.id}${path}${window.location.hash}`
+        });
+    })
+})();
+
 (function chapterNavigation() {
     document.addEventListener('keydown', function (e) {
         if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) { return; }

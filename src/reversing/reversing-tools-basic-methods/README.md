@@ -1,8 +1,8 @@
-# Outils de Reversing & Méthodes de Base
+# Outils de Reverse Engineering & Méthodes de Base
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Outils de Reversing Basés sur ImGui
+## Outils de Reverse Engineering Basés sur ImGui
 
 Logiciel :
 
@@ -27,7 +27,7 @@ Logiciel :
 
 dotPeek est un décompilateur qui **décompile et examine plusieurs formats**, y compris **bibliothèques** (.dll), **fichiers de métadonnées Windows** (.winmd), et **exécutables** (.exe). Une fois décompilé, un assembly peut être enregistré en tant que projet Visual Studio (.csproj).
 
-L'avantage ici est que si un code source perdu nécessite une restauration à partir d'un assembly hérité, cette action peut faire gagner du temps. De plus, dotPeek fournit une navigation pratique à travers le code décompilé, ce qui en fait l'un des outils parfaits pour **l'analyse d'algorithmes Xamarin.**
+L'avantage ici est que si un code source perdu nécessite une restauration à partir d'un assembly hérité, cette action peut faire gagner du temps. De plus, dotPeek fournit une navigation pratique à travers le code décompilé, en faisant l'un des outils parfaits pour **l'analyse d'algorithmes Xamarin.**
 
 ### [.NET Reflector](https://www.red-gate.com/products/reflector/)
 
@@ -134,13 +134,13 @@ Mais, comment pouvez-vous accéder au code de la DLL qui a été chargée ? En u
 - **Charger rundll32** (64 bits dans C:\Windows\System32\rundll32.exe et 32 bits dans C:\Windows\SysWOW64\rundll32.exe)
 - **Changer la ligne de commande** (_Fichier --> Changer la ligne de commande_) et définir le chemin de la dll et la fonction que vous souhaitez appeler, par exemple : "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
 - Changez _Options --> Paramètres_ et sélectionnez "**Entrée DLL**".
-- Ensuite, **démarrez l'exécution**, le débogueur s'arrêtera à chaque entrée principale de dll, à un moment donné vous **vous arrêterez dans l'entrée de votre dll**. À partir de là, il suffit de rechercher les points où vous souhaitez mettre un point d'arrêt.
+- Ensuite, **démarrez l'exécution**, le débogueur s'arrêtera à chaque entrée principale de DLL, à un moment donné vous **vous arrêterez dans l'entrée DLL de votre DLL**. À partir de là, il suffit de rechercher les points où vous souhaitez mettre un point d'arrêt.
 
 Remarquez que lorsque l'exécution est arrêtée pour une raison quelconque dans win64dbg, vous pouvez voir **dans quel code vous êtes** en regardant **en haut de la fenêtre win64dbg** :
 
 ![](<../../images/image (842).png>)
 
-Ensuite, en regardant cela, vous pouvez voir quand l'exécution a été arrêtée dans la dll que vous souhaitez déboguer.
+Ensuite, en regardant cela, vous pouvez voir quand l'exécution a été arrêtée dans la DLL que vous souhaitez déboguer.
 
 ## Applications GUI / Jeux vidéo
 
@@ -182,7 +182,7 @@ Vous pouvez télécharger une version compilée de [jmp2it sur la page des versi
 
 ### Débogage de shellcode avec Cutter
 
-[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) est l'interface graphique de radare. En utilisant Cutter, vous pouvez émuler le shellcode et l'inspecter dynamiquement.
+[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) est l'interface graphique de radare. Avec Cutter, vous pouvez émuler le shellcode et l'inspecter dynamiquement.
 
 Notez que Cutter vous permet d'"Ouvrir un fichier" et "Ouvrir un shellcode". Dans mon cas, lorsque j'ai ouvert le shellcode en tant que fichier, il l'a décompilé correctement, mais quand je l'ai ouvert en tant que shellcode, il ne l'a pas fait :
 
@@ -214,11 +214,11 @@ scDbg dispose également d'un lanceur graphique où vous pouvez sélectionner le
 
 ![](<../../images/image (258).png>)
 
-L'option **Create Dump** va dumper le shellcode final si des modifications sont apportées au shellcode dynamiquement en mémoire (utile pour télécharger le shellcode décodé). L'**offset de départ** peut être utile pour démarrer le shellcode à un offset spécifique. L'option **Debug Shell** est utile pour déboguer le shellcode en utilisant le terminal scDbg (cependant, je trouve que les options expliquées précédemment sont meilleures pour cela car vous pourrez utiliser Ida ou x64dbg).
+L'option **Create Dump** va dumper le shellcode final si des modifications sont apportées au shellcode dynamiquement en mémoire (utile pour télécharger le shellcode décodé). L'option **start offset** peut être utile pour démarrer le shellcode à un décalage spécifique. L'option **Debug Shell** est utile pour déboguer le shellcode en utilisant le terminal scDbg (cependant, je trouve que les options expliquées précédemment sont meilleures pour cela car vous pourrez utiliser Ida ou x64dbg).
 
 ### Désassemblage avec CyberChef
 
-Téléchargez votre fichier shellcode en tant qu'entrée et utilisez la recette suivante pour le décompiler : [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
+Téléchargez votre fichier shellcode en entrée et utilisez la recette suivante pour le décompiler : [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
 
 ## [Movfuscator](https://github.com/xoreaxeaxeax/movfuscator)
 
@@ -282,11 +282,11 @@ Si vous obtenez le **binaire** d'un jeu GBA, vous pouvez utiliser différents ou
 - [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Plugin Ghidra
 - [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Plugin Ghidra
 
-Dans [**no$gba**](https://problemkaputt.de/gba.htm), dans _**Options --> Configuration de l'émulation --> Contrôles**_\*\* \*\* vous pouvez voir comment appuyer sur les **boutons** de la Game Boy Advance
+Dans [**no$gba**](https://problemkaputt.de/gba.htm), dans _**Options --> Emulation Setup --> Controls**_\*\* \*\* vous pouvez voir comment appuyer sur les **boutons** de la Game Boy Advance
 
 ![](<../../images/image (581).png>)
 
-Lorsqu'ils sont pressés, chaque **touche a une valeur** pour l'identifier :
+Lorsqu'il est pressé, chaque **touche a une valeur** pour l'identifier :
 ```
 A = 1
 B = 2
