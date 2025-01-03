@@ -4,8 +4,12 @@
 
 यदि आप एक ज्ञात plaintext को एन्क्रिप्ट कर सकते हैं, तो आप पासवर्ड भी निकाल सकते हैं। अधिक संदर्भ HTB Kryptos मशीन में मिल सकते हैं:
 
-{% embed url="https://0xrick.github.io/hack-the-box/kryptos/" %}
+{{#ref}}
+https://0xrick.github.io/hack-the-box/kryptos/
+{{#endref}}
 
-{% embed url="https://0xrick.github.io/hack-the-box/kryptos/" %}
+{{#ref}}
+https://0xrick.github.io/hack-the-box/kryptos/
+{{#endref}}
 
 {{#include ../banners/hacktricks-training.md}}

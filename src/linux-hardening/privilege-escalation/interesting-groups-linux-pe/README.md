@@ -37,13 +37,13 @@ cat /etc/polkit-1/localauthority.conf.d/*
 ```bash
 pkexec "/bin/sh" #You will be prompted for your user password
 ```
-यदि आप **pkexec** निष्पादित करने की कोशिश करते हैं और आपको यह **त्रुटि** मिलती है:
+यदि आप **pkexec** को निष्पादित करने की कोशिश करते हैं और आपको यह **त्रुटि** मिलती है:
 ```bash
 polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freedesktop.PolicyKit1.Error.Failed: No session for cookie
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-**यह इसलिए नहीं है कि आपके पास अनुमतियाँ नहीं हैं, बल्कि इसलिए कि आप GUI के बिना जुड़े नहीं हैं**। और इस समस्या का एक समाधान यहाँ है: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903)। आपको **2 अलग-अलग ssh सत्र** की आवश्यकता है:
+**यह इसलिए नहीं है कि आपके पास अनुमतियाँ नहीं हैं, बल्कि इसलिए है कि आप GUI के बिना जुड़े नहीं हैं**। और इस समस्या का एक समाधान यहाँ है: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903)। आपको **2 अलग ssh सत्र** की आवश्यकता है:
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -68,17 +68,17 @@ sudo su
 ```
 ## Shadow Group
 
-**shadow** समूह के उपयोगकर्ता **/etc/shadow** फ़ाइल को **पढ़** सकते हैं:
+**शेडो** समूह के उपयोगकर्ता **/etc/shadow** फ़ाइल को **पढ़** सकते हैं:
 ```
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
-तो, फ़ाइल को पढ़ें और कुछ **हैश क्रैक** करने की कोशिश करें।
+सो, फ़ाइल को पढ़ें और कुछ **हैश क्रैक** करने की कोशिश करें।
 
 ## स्टाफ समूह
 
-**staff**: उपयोगकर्ताओं को सिस्टम में स्थानीय संशोधन जोड़ने की अनुमति देता है (`/usr/local`) बिना रूट विशेषाधिकार की आवश्यकता के (ध्यान दें कि `/usr/local/bin` में निष्पादन योग्य किसी भी उपयोगकर्ता के PATH वेरिएबल में होते हैं, और वे समान नाम के `/bin` और `/usr/bin` में निष्पादन योग्य को "ओवरराइड" कर सकते हैं)। "adm" समूह की तुलना करें, जो निगरानी/सुरक्षा से अधिक संबंधित है। [\[source\]](https://wiki.debian.org/SystemGroups)
+**staff**: उपयोगकर्ताओं को सिस्टम में स्थानीय संशोधन जोड़ने की अनुमति देता है (`/usr/local`) बिना रूट विशेषाधिकार की आवश्यकता के (ध्यान दें कि `/usr/local/bin` में निष्पादन योग्य फ़ाइलें किसी भी उपयोगकर्ता के PATH वेरिएबल में हैं, और वे समान नाम वाली `/bin` और `/usr/bin` में निष्पादन योग्य फ़ाइलों को "ओवरराइड" कर सकती हैं)। "adm" समूह की तुलना करें, जो निगरानी/सुरक्षा से अधिक संबंधित है। [\[source\]](https://wiki.debian.org/SystemGroups)
 
-डेबियन वितरण में, `$PATH` वेरिएबल दिखाता है कि `/usr/local/` उच्चतम प्राथमिकता के रूप में चलाया जाएगा, चाहे आप विशेषाधिकार प्राप्त उपयोगकर्ता हों या नहीं।
+डेबियन वितरणों में, `$PATH` वेरिएबल दिखाता है कि `/usr/local/` उच्चतम प्राथमिकता के रूप में चलाया जाएगा, चाहे आप विशेषाधिकार प्राप्त उपयोगकर्ता हों या नहीं।
 ```bash
 $ echo $PATH
 /usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
@@ -88,7 +88,7 @@ $ echo $PATH
 ```
 यदि हम `/usr/local` में कुछ प्रोग्रामों को हाईजैक कर सकते हैं, तो हम आसानी से रूट प्राप्त कर सकते हैं।
 
-`run-parts` प्रोग्राम को हाईजैक करना रूट प्राप्त करने का एक आसान तरीका है, क्योंकि अधिकांश प्रोग्राम `run-parts` को चलाएंगे जैसे (क्रॉनटैब, जब ssh लॉगिन होता है)।
+`run-parts` प्रोग्राम को हाईजैक करना रूट प्राप्त करने का एक आसान तरीका है, क्योंकि अधिकांश प्रोग्राम `run-parts` को चलाएंगे जैसे (क्रॉनटैब, जब ssh लॉगिन)।
 ```bash
 $ cat /etc/crontab | grep run-parts
 17 *    * * *   root    cd / && run-parts --report /etc/cron.hourly
@@ -167,7 +167,7 @@ cat /sys/class/graphics/fb0/virtual_size
 
 ![](<../../../images/image (463).png>)
 
-फिर चौड़ाई और ऊँचाई को स्क्रीन पर उपयोग की गई मापों के अनुसार संशोधित करें और विभिन्न छवि प्रकारों की जांच करें (और उस प्रकार का चयन करें जो स्क्रीन को बेहतर दिखाता है):
+फिर चौड़ाई और ऊँचाई को स्क्रीन पर उपयोग की गई मापों में संशोधित करें और विभिन्न छवि प्रकारों की जांच करें (और उस प्रकार का चयन करें जो स्क्रीन को बेहतर दिखाता है):
 
 ![](<../../../images/image (317).png>)
 
@@ -181,7 +181,7 @@ find / -group root -perm -g=w 2>/dev/null
 ```
 ## Docker Group
 
-आप **होस्ट मशीन के रूट फ़ाइल सिस्टम को एक इंस्टेंस के वॉल्यूम में माउंट कर सकते हैं**, इसलिए जब इंस्टेंस शुरू होता है, तो यह तुरंत उस वॉल्यूम में `chroot` लोड करता है। इससे आपको मशीन पर रूट मिल जाता है।
+आप **होस्ट मशीन के रूट फ़ाइल सिस्टम को एक इंस्टेंस के वॉल्यूम में माउंट कर सकते हैं**, इसलिए जब इंस्टेंस शुरू होता है, तो यह तुरंत उस वॉल्यूम में `chroot` लोड करता है। यह प्रभावी रूप से आपको मशीन पर रूट देता है।
 ```bash
 docker image #Get images from the docker service
 
@@ -201,9 +201,13 @@ docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chr
 
 यदि आपके पास docker socket पर लिखने की अनुमति है तो [**इस पोस्ट को पढ़ें कि कैसे docker socket का दुरुपयोग करके विशेषाधिकार बढ़ाएं**](../#writable-docker-socket)**.**
 
-{% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
+{{#ref}}
+https://github.com/KrustyHack/docker-privilege-escalation
+{{#endref}}
 
-{% embed url="https://fosterelli.co/privilege-escalation-via-docker.html" %}
+{{#ref}}
+https://fosterelli.co/privilege-escalation-via-docker.html
+{{#endref}}
 
 ## lxc/lxd समूह
 
