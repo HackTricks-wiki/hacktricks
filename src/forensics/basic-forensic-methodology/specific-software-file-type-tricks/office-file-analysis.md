@@ -1,36 +1,18 @@
-# Office file analysis
+# Análisis de archivos de Office
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="../../../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+Para más información, consulta [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/). Este es solo un resumen:
 
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Microsoft ha creado muchos formatos de documentos de Office, siendo los dos tipos principales **formatos OLE** (como RTF, DOC, XLS, PPT) y **formatos Office Open XML (OOXML)** (como DOCX, XLSX, PPTX). Estos formatos pueden incluir macros, lo que los convierte en objetivos para phishing y malware. Los archivos OOXML están estructurados como contenedores zip, lo que permite la inspección a través de la descompresión, revelando la jerarquía de archivos y carpetas y el contenido de archivos XML.
 
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+Para explorar las estructuras de archivos OOXML, se proporciona el comando para descomprimir un documento y la estructura de salida. Se han documentado técnicas para ocultar datos en estos archivos, lo que indica una innovación continua en la ocultación de datos dentro de los desafíos CTF.
 
-For further information check [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/). This is just a sumary:
+Para el análisis, **oletools** y **OfficeDissector** ofrecen conjuntos de herramientas completos para examinar tanto documentos OLE como OOXML. Estas herramientas ayudan a identificar y analizar macros incrustadas, que a menudo sirven como vectores para la entrega de malware, normalmente descargando y ejecutando cargas útiles maliciosas adicionales. El análisis de macros VBA se puede realizar sin Microsoft Office utilizando Libre Office, que permite la depuración con puntos de interrupción y variables de observación.
 
-Microsoft has created many office document formats, with two main types being **OLE formats** (like RTF, DOC, XLS, PPT) and **Office Open XML (OOXML) formats** (such as DOCX, XLSX, PPTX). These formats can include macros, making them targets for phishing and malware. OOXML files are structured as zip containers, allowing inspection through unzipping, revealing the file and folder hierarchy and XML file contents.
-
-To explore OOXML file structures, the command to unzip a document and the output structure are given. Techniques for hiding data in these files have been documented, indicating ongoing innovation in data concealment within CTF challenges.
-
-For analysis, **oletools** and **OfficeDissector** offer comprehensive toolsets for examining both OLE and OOXML documents. These tools help in identifying and analyzing embedded macros, which often serve as vectors for malware delivery, typically downloading and executing additional malicious payloads. Analysis of VBA macros can be conducted without Microsoft Office by utilizing Libre Office, which allows for debugging with breakpoints and watch variables.
-
-Installation and usage of **oletools** are straightforward, with commands provided for installing via pip and extracting macros from documents. Automatic execution of macros is triggered by functions like `AutoOpen`, `AutoExec`, or `Document_Open`.
-
+La instalación y el uso de **oletools** son sencillos, con comandos proporcionados para instalar a través de pip y extraer macros de documentos. La ejecución automática de macros se activa mediante funciones como `AutoOpen`, `AutoExec` o `Document_Open`.
 ```bash
 sudo pip3 install -U oletools
 olevba -c /path/to/document #Extract macros
 ```
-
-<figure><img src="../../../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-
 {{#include ../../../banners/hacktricks-training.md}}

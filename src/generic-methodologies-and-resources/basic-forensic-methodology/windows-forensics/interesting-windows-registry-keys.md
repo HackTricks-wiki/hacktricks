@@ -1,101 +1,101 @@
-# Interesting Windows Registry Keys
+# Claves de Registro de Windows Interesantes
 
-### Interesting Windows Registry Keys
+### Claves de Registro de Windows Interesantes
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-### **Windows Version and Owner Info**
+### **Información de Versión de Windows y Propietario**
 
-- Located at **`Software\Microsoft\Windows NT\CurrentVersion`**, you'll find the Windows version, Service Pack, installation time, and the registered owner's name in a straightforward manner.
+- Ubicado en **`Software\Microsoft\Windows NT\CurrentVersion`**, encontrarás la versión de Windows, el Service Pack, la hora de instalación y el nombre del propietario registrado de manera sencilla.
 
-### **Computer Name**
+### **Nombre del Computador**
 
-- The hostname is found under **`System\ControlSet001\Control\ComputerName\ComputerName`**.
+- El nombre del host se encuentra en **`System\ControlSet001\Control\ComputerName\ComputerName`**.
 
-### **Time Zone Setting**
+### **Configuración de Zona Horaria**
 
-- The system's time zone is stored in **`System\ControlSet001\Control\TimeZoneInformation`**.
+- La zona horaria del sistema se almacena en **`System\ControlSet001\Control\TimeZoneInformation`**.
 
-### **Access Time Tracking**
+### **Seguimiento del Tiempo de Acceso**
 
-- By default, the last access time tracking is turned off (**`NtfsDisableLastAccessUpdate=1`**). To enable it, use:
-  `fsutil behavior set disablelastaccess 0`
+- Por defecto, el seguimiento del último tiempo de acceso está desactivado (**`NtfsDisableLastAccessUpdate=1`**). Para habilitarlo, usa:
+`fsutil behavior set disablelastaccess 0`
 
-### Windows Versions and Service Packs
+### Versiones de Windows y Service Packs
 
-- The **Windows version** indicates the edition (e.g., Home, Pro) and its release (e.g., Windows 10, Windows 11), while **Service Packs** are updates that include fixes and, sometimes, new features.
+- La **versión de Windows** indica la edición (por ejemplo, Home, Pro) y su lanzamiento (por ejemplo, Windows 10, Windows 11), mientras que los **Service Packs** son actualizaciones que incluyen correcciones y, a veces, nuevas características.
 
-### Enabling Last Access Time
+### Habilitando el Tiempo de Último Acceso
 
-- Enabling last access time tracking allows you to see when files were last opened, which can be critical for forensic analysis or system monitoring.
+- Habilitar el seguimiento del último tiempo de acceso te permite ver cuándo se abrieron por última vez los archivos, lo que puede ser crítico para el análisis forense o la supervisión del sistema.
 
-### Network Information Details
+### Detalles de Información de Red
 
-- The registry holds extensive data on network configurations, including **types of networks (wireless, cable, 3G)** and **network categories (Public, Private/Home, Domain/Work)**, which are vital for understanding network security settings and permissions.
+- El registro contiene datos extensos sobre configuraciones de red, incluyendo **tipos de redes (inalámbrica, cable, 3G)** y **categorías de red (Pública, Privada/Hogar, Dominio/Trabajo)**, que son vitales para entender la configuración de seguridad de la red y los permisos.
 
-### Client Side Caching (CSC)
+### Caché del Lado del Cliente (CSC)
 
-- **CSC** enhances offline file access by caching copies of shared files. Different **CSCFlags** settings control how and what files are cached, affecting performance and user experience, especially in environments with intermittent connectivity.
+- **CSC** mejora el acceso a archivos sin conexión al almacenar copias de archivos compartidos. Diferentes configuraciones de **CSCFlags** controlan cómo y qué archivos se almacenan en caché, afectando el rendimiento y la experiencia del usuario, especialmente en entornos con conectividad intermitente.
 
-### AutoStart Programs
+### Programas de Inicio Automático
 
-- Programs listed in various `Run` and `RunOnce` registry keys are automatically launched at startup, affecting system boot time and potentially being points of interest for identifying malware or unwanted software.
+- Los programas listados en varias claves de registro `Run` y `RunOnce` se inician automáticamente al arrancar, afectando el tiempo de arranque del sistema y potencialmente siendo puntos de interés para identificar malware o software no deseado.
 
 ### Shellbags
 
-- **Shellbags** not only store preferences for folder views but also provide forensic evidence of folder access even if the folder no longer exists. They are invaluable for investigations, revealing user activity that isn't obvious through other means.
+- **Shellbags** no solo almacenan preferencias para vistas de carpetas, sino que también proporcionan evidencia forense de acceso a carpetas incluso si la carpeta ya no existe. Son invaluables para investigaciones, revelando la actividad del usuario que no es obvia a través de otros medios.
 
-### USB Information and Forensics
+### Información y Forense de USB
 
-- The details stored in the registry about USB devices can help trace which devices were connected to a computer, potentially linking a device to sensitive file transfers or unauthorized access incidents.
+- Los detalles almacenados en el registro sobre dispositivos USB pueden ayudar a rastrear qué dispositivos se conectaron a un computador, potencialmente vinculando un dispositivo a transferencias de archivos sensibles o incidentes de acceso no autorizado.
 
-### Volume Serial Number
+### Número de Serie del Volumen
 
-- The **Volume Serial Number** can be crucial for tracking the specific instance of a file system, useful in forensic scenarios where file origin needs to be established across different devices.
+- El **Número de Serie del Volumen** puede ser crucial para rastrear la instancia específica de un sistema de archivos, útil en escenarios forenses donde se necesita establecer el origen de un archivo a través de diferentes dispositivos.
 
-### **Shutdown Details**
+### **Detalles de Apagado**
 
-- Shutdown time and count (the latter only for XP) are kept in **`System\ControlSet001\Control\Windows`** and **`System\ControlSet001\Control\Watchdog\Display`**.
+- La hora de apagado y el conteo (este último solo para XP) se mantienen en **`System\ControlSet001\Control\Windows`** y **`System\ControlSet001\Control\Watchdog\Display`**.
 
-### **Network Configuration**
+### **Configuración de Red**
 
-- For detailed network interface info, refer to **`System\ControlSet001\Services\Tcpip\Parameters\Interfaces{GUID_INTERFACE}`**.
-- First and last network connection times, including VPN connections, are logged under various paths in **`Software\Microsoft\Windows NT\CurrentVersion\NetworkList`**.
+- Para información detallada de la interfaz de red, consulta **`System\ControlSet001\Services\Tcpip\Parameters\Interfaces{GUID_INTERFACE}`**.
+- Los tiempos de conexión de red primero y último, incluidas las conexiones VPN, se registran en varias rutas en **`Software\Microsoft\Windows NT\CurrentVersion\NetworkList`**.
 
-### **Shared Folders**
+### **Carpetas Compartidas**
 
-- Shared folders and settings are under **`System\ControlSet001\Services\lanmanserver\Shares`**. The Client Side Caching (CSC) settings dictate offline file availability.
+- Las carpetas compartidas y configuraciones están bajo **`System\ControlSet001\Services\lanmanserver\Shares`**. Las configuraciones de Caché del Lado del Cliente (CSC) dictan la disponibilidad de archivos sin conexión.
 
-### **Programs that Start Automatically**
+### **Programas que Inician Automáticamente**
 
-- Paths like **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run`** and similar entries under `Software\Microsoft\Windows\CurrentVersion` detail programs set to run at startup.
+- Rutas como **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run`** y entradas similares bajo `Software\Microsoft\Windows\CurrentVersion` detallan programas configurados para ejecutarse al inicio.
 
-### **Searches and Typed Paths**
+### **Búsquedas y Rutas Escritas**
 
-- Explorer searches and typed paths are tracked in the registry under **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer`** for WordwheelQuery and TypedPaths, respectively.
+- Las búsquedas de Explorer y las rutas escritas se rastrean en el registro bajo **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer`** para WordwheelQuery y TypedPaths, respectivamente.
 
-### **Recent Documents and Office Files**
+### **Documentos Recientes y Archivos de Office**
 
-- Recent documents and Office files accessed are noted in `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs` and specific Office version paths.
+- Los documentos recientes y los archivos de Office accedidos se anotan en `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs` y rutas específicas de versiones de Office.
 
-### **Most Recently Used (MRU) Items**
+### **Elementos Más Recientemente Usados (MRU)**
 
-- MRU lists, indicating recent file paths and commands, are stored in various `ComDlg32` and `Explorer` subkeys under `NTUSER.DAT`.
+- Las listas MRU, que indican rutas de archivos y comandos recientes, se almacenan en varias subclaves de `ComDlg32` y `Explorer` bajo `NTUSER.DAT`.
 
-### **User Activity Tracking**
+### **Seguimiento de Actividad del Usuario**
 
-- The User Assist feature logs detailed application usage stats, including run count and last run time, at **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`**.
+- La función User Assist registra estadísticas detalladas de uso de aplicaciones, incluyendo el conteo de ejecuciones y la última hora de ejecución, en **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`**.
 
-### **Shellbags Analysis**
+### **Análisis de Shellbags**
 
-- Shellbags, revealing folder access details, are stored in `USRCLASS.DAT` and `NTUSER.DAT` under `Software\Microsoft\Windows\Shell`. Use **[Shellbag Explorer](https://ericzimmerman.github.io/#!index.md)** for analysis.
+- Shellbags, que revelan detalles de acceso a carpetas, se almacenan en `USRCLASS.DAT` y `NTUSER.DAT` bajo `Software\Microsoft\Windows\Shell`. Usa **[Shellbag Explorer](https://ericzimmerman.github.io/#!index.md)** para el análisis.
 
-### **USB Device History**
+### **Historial de Dispositivos USB**
 
-- **`HKLM\SYSTEM\ControlSet001\Enum\USBSTOR`** and **`HKLM\SYSTEM\ControlSet001\Enum\USB`** contain rich details on connected USB devices, including manufacturer, product name, and connection timestamps.
-- The user associated with a specific USB device can be pinpointed by searching `NTUSER.DAT` hives for the device's **{GUID}**.
-- The last mounted device and its volume serial number can be traced through `System\MountedDevices` and `Software\Microsoft\Windows NT\CurrentVersion\EMDMgmt`, respectively.
+- **`HKLM\SYSTEM\ControlSet001\Enum\USBSTOR`** y **`HKLM\SYSTEM\ControlSet001\Enum\USB`** contienen detalles ricos sobre dispositivos USB conectados, incluyendo fabricante, nombre del producto y marcas de tiempo de conexión.
+- El usuario asociado con un dispositivo USB específico puede ser identificado buscando en los registros `NTUSER.DAT` el **{GUID}** del dispositivo.
+- El último dispositivo montado y su número de serie de volumen pueden ser rastreados a través de `System\MountedDevices` y `Software\Microsoft\Windows NT\CurrentVersion\EMDMgmt`, respectivamente.
 
-This guide condenses the crucial paths and methods for accessing detailed system, network, and user activity information on Windows systems, aiming for clarity and usability.
+Esta guía condensa las rutas y métodos cruciales para acceder a información detallada del sistema, red y actividad del usuario en sistemas Windows, buscando claridad y usabilidad.
 
 {{#include ../../../banners/hacktricks-training.md}}

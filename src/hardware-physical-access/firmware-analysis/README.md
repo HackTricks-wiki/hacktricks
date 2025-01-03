@@ -1,46 +1,45 @@
-# Firmware Analysis
+# Análisis de Firmware
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## **Introduction**
+## **Introducción**
 
-Firmware is essential software that enables devices to operate correctly by managing and facilitating communication between the hardware components and the software that users interact with. It's stored in permanent memory, ensuring the device can access vital instructions from the moment it's powered on, leading to the operating system's launch. Examining and potentially modifying firmware is a critical step in identifying security vulnerabilities.
+El firmware es un software esencial que permite a los dispositivos operar correctamente al gestionar y facilitar la comunicación entre los componentes de hardware y el software con el que los usuarios interactúan. Se almacena en memoria permanente, asegurando que el dispositivo pueda acceder a instrucciones vitales desde el momento en que se enciende, lo que lleva al lanzamiento del sistema operativo. Examinar y potencialmente modificar el firmware es un paso crítico para identificar vulnerabilidades de seguridad.
 
-## **Gathering Information**
+## **Recolección de Información**
 
-**Gathering information** is a critical initial step in understanding a device's makeup and the technologies it uses. This process involves collecting data on:
+**Recolección de información** es un paso inicial crítico para entender la composición de un dispositivo y las tecnologías que utiliza. Este proceso implica recopilar datos sobre:
 
-- The CPU architecture and operating system it runs
-- Bootloader specifics
-- Hardware layout and datasheets
-- Codebase metrics and source locations
-- External libraries and license types
-- Update histories and regulatory certifications
-- Architectural and flow diagrams
-- Security assessments and identified vulnerabilities
+- La arquitectura de la CPU y el sistema operativo que ejecuta
+- Especificaciones del bootloader
+- Diseño de hardware y hojas de datos
+- Métricas de la base de código y ubicaciones de origen
+- Bibliotecas externas y tipos de licencia
+- Historiales de actualizaciones y certificaciones regulatorias
+- Diagramas arquitectónicos y de flujo
+- Evaluaciones de seguridad y vulnerabilidades identificadas
 
-For this purpose, **open-source intelligence (OSINT)** tools are invaluable, as is the analysis of any available open-source software components through manual and automated review processes. Tools like [Coverity Scan](https://scan.coverity.com) and [Semmle’s LGTM](https://lgtm.com/#explore) offer free static analysis that can be leveraged to find potential issues.
+Para este propósito, las herramientas de **inteligencia de código abierto (OSINT)** son invaluables, al igual que el análisis de cualquier componente de software de código abierto disponible a través de procesos de revisión manual y automatizada. Herramientas como [Coverity Scan](https://scan.coverity.com) y [LGTM de Semmle](https://lgtm.com/#explore) ofrecen análisis estático gratuito que se puede aprovechar para encontrar problemas potenciales.
 
-## **Acquiring the Firmware**
+## **Adquisición del Firmware**
 
-Obtaining firmware can be approached through various means, each with its own level of complexity:
+Obtener firmware se puede abordar a través de varios medios, cada uno con su propio nivel de complejidad:
 
-- **Directly** from the source (developers, manufacturers)
-- **Building** it from provided instructions
-- **Downloading** from official support sites
-- Utilizing **Google dork** queries for finding hosted firmware files
-- Accessing **cloud storage** directly, with tools like [S3Scanner](https://github.com/sa7mon/S3Scanner)
-- Intercepting **updates** via man-in-the-middle techniques
-- **Extracting** from the device through connections like **UART**, **JTAG**, or **PICit**
-- **Sniffing** for update requests within device communication
-- Identifying and using **hardcoded update endpoints**
-- **Dumping** from the bootloader or network
-- **Removing and reading** the storage chip, when all else fails, using appropriate hardware tools
+- **Directamente** de la fuente (desarrolladores, fabricantes)
+- **Construyéndolo** a partir de instrucciones proporcionadas
+- **Descargando** de sitios de soporte oficiales
+- Utilizando consultas de **Google dork** para encontrar archivos de firmware alojados
+- Accediendo al **almacenamiento en la nube** directamente, con herramientas como [S3Scanner](https://github.com/sa7mon/S3Scanner)
+- Interceptando **actualizaciones** a través de técnicas de hombre en el medio
+- **Extrayendo** del dispositivo a través de conexiones como **UART**, **JTAG** o **PICit**
+- **Esnifando** solicitudes de actualización dentro de la comunicación del dispositivo
+- Identificando y utilizando **puntos finales de actualización codificados**
+- **Volcando** desde el bootloader o la red
+- **Retirando y leyendo** el chip de almacenamiento, cuando todo lo demás falla, utilizando herramientas de hardware apropiadas
 
-## Analyzing the firmware
+## Analizando el firmware
 
-Now that you **have the firmware**, you need to extract information about it to know how to treat it. Different tools you can use for that:
-
+Ahora que **tienes el firmware**, necesitas extraer información sobre él para saber cómo tratarlo. Diferentes herramientas que puedes usar para eso:
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -49,26 +48,24 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head # might find signatures in header
 fdisk -lu <bin> #lists a drives partition and filesystems if multiple
 ```
+Si no encuentras mucho con esas herramientas, verifica la **entropía** de la imagen con `binwalk -E <bin>`, si la entropía es baja, entonces es poco probable que esté encriptada. Si la entropía es alta, es probable que esté encriptada (o comprimida de alguna manera).
 
-If you don't find much with those tools check the **entropy** of the image with `binwalk -E <bin>`, if low entropy, then it's not likely to be encrypted. If high entropy, Its likely encrypted (or compressed in some way).
-
-Moreover, you can use these tools to extract **files embedded inside the firmware**:
+Además, puedes usar estas herramientas para extraer **archivos incrustados dentro del firmware**:
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/partitions-file-systems-carving/file-data-carving-recovery-tools.md
 {{#endref}}
 
-Or [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/p/binvis/)) to inspect the file.
+O [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/p/binvis/)) para inspeccionar el archivo.
 
-### Getting the Filesystem
+### Obtener el Sistema de Archivos
 
-With the previous commented tools like `binwalk -ev <bin>` you should have been able to **extract the filesystem**.\
-Binwalk usually extracts it inside a **folder named as the filesystem type**, which usually is one of the following: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
+Con las herramientas comentadas anteriormente como `binwalk -ev <bin>`, deberías haber podido **extraer el sistema de archivos**.\
+Binwalk generalmente lo extrae dentro de una **carpeta nombrada como el tipo de sistema de archivos**, que generalmente es uno de los siguientes: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
 
-#### Manual Filesystem Extraction
+#### Extracción Manual del Sistema de Archivos
 
-Sometimes, binwalk will **not have the magic byte of the filesystem in its signatures**. In these cases, use binwalk to **find the offset of the filesystem and carve the compressed filesystem** from the binary and **manually extract** the filesystem according to its type using the steps below.
-
+A veces, binwalk **no tendrá el byte mágico del sistema de archivos en sus firmas**. En estos casos, usa binwalk para **encontrar el desplazamiento del sistema de archivos y tallar el sistema de archivos comprimido** del binario y **extraer manualmente** el sistema de archivos de acuerdo a su tipo usando los pasos a continuación.
 ```
 $ binwalk DIR850L_REVB.bin
 
@@ -80,9 +77,7 @@ DECIMAL HEXADECIMAL DESCRIPTION
 1704052 0x1A0074 PackImg section delimiter tag, little endian size: 32256 bytes; big endian size: 8257536 bytes
 1704084 0x1A0094 Squashfs filesystem, little endian, version 4.0, compression:lzma, size: 8256900 bytes, 2688 inodes, blocksize: 131072 bytes, created: 2016-07-12 02:28:41
 ```
-
-Run the following **dd command** carving the Squashfs filesystem.
-
+Ejecuta el siguiente **comando dd** para extraer el sistema de archivos Squashfs.
 ```
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
@@ -92,39 +87,37 @@ $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
 8257536 bytes (8.3 MB, 7.9 MiB) copied, 12.5777 s, 657 kB/s
 ```
-
-Alternatively, the following command could also be run.
+Alternativamente, también se podría ejecutar el siguiente comando.
 
 `$ dd if=DIR850L_REVB.bin bs=1 skip=$((0x1A0094)) of=dir.squashfs`
 
-- For squashfs (used in the example above)
+- Para squashfs (utilizado en el ejemplo anterior)
 
 `$ unsquashfs dir.squashfs`
 
-Files will be in "`squashfs-root`" directory afterwards.
+Los archivos estarán en el directorio "`squashfs-root`" después.
 
-- CPIO archive files
+- Archivos de archivo CPIO
 
 `$ cpio -ivd --no-absolute-filenames -F <bin>`
 
-- For jffs2 filesystems
+- Para sistemas de archivos jffs2
 
 `$ jefferson rootfsfile.jffs2`
 
-- For ubifs filesystems with NAND flash
+- Para sistemas de archivos ubifs con NAND flash
 
 `$ ubireader_extract_images -u UBI -s <start_offset> <bin>`
 
 `$ ubidump.py <bin>`
 
-## Analyzing Firmware
+## Análisis de Firmware
 
-Once the firmware is obtained, it's essential to dissect it for understanding its structure and potential vulnerabilities. This process involves utilizing various tools to analyze and extract valuable data from the firmware image.
+Una vez que se obtiene el firmware, es esencial diseccionarlo para entender su estructura y posibles vulnerabilidades. Este proceso implica utilizar varias herramientas para analizar y extraer datos valiosos de la imagen del firmware.
 
-### Initial Analysis Tools
+### Herramientas de Análisis Inicial
 
-A set of commands is provided for initial inspection of the binary file (referred to as `<bin>`). These commands help in identifying file types, extracting strings, analyzing binary data, and understanding the partition and filesystem details:
-
+Se proporciona un conjunto de comandos para la inspección inicial del archivo binario (denominado `<bin>`). Estos comandos ayudan a identificar tipos de archivos, extraer cadenas, analizar datos binarios y comprender los detalles de partición y sistema de archivos:
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -133,121 +126,114 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head #useful for finding signatures in the header
 fdisk -lu <bin> #lists partitions and filesystems, if there are multiple
 ```
+Para evaluar el estado de cifrado de la imagen, se verifica la **entropía** con `binwalk -E <bin>`. Una baja entropía sugiere una falta de cifrado, mientras que una alta entropía indica posible cifrado o compresión.
 
-To assess the encryption status of the image, the **entropy** is checked with `binwalk -E <bin>`. Low entropy suggests a lack of encryption, while high entropy indicates possible encryption or compression.
+Para extraer **archivos incrustados**, se recomiendan herramientas y recursos como la documentación de **file-data-carving-recovery-tools** y **binvis.io** para la inspección de archivos.
 
-For extracting **embedded files**, tools and resources like the **file-data-carving-recovery-tools** documentation and **binvis.io** for file inspection are recommended.
+### Extracción del Sistema de Archivos
 
-### Extracting the Filesystem
-
-Using `binwalk -ev <bin>`, one can usually extract the filesystem, often into a directory named after the filesystem type (e.g., squashfs, ubifs). However, when **binwalk** fails to recognize the filesystem type due to missing magic bytes, manual extraction is necessary. This involves using `binwalk` to locate the filesystem's offset, followed by the `dd` command to carve out the filesystem:
-
+Usando `binwalk -ev <bin>`, generalmente se puede extraer el sistema de archivos, a menudo en un directorio nombrado según el tipo de sistema de archivos (por ejemplo, squashfs, ubifs). Sin embargo, cuando **binwalk** no puede reconocer el tipo de sistema de archivos debido a bytes mágicos faltantes, es necesaria la extracción manual. Esto implica usar `binwalk` para localizar el desplazamiento del sistema de archivos, seguido del comando `dd` para extraer el sistema de archivos:
 ```bash
 $ binwalk DIR850L_REVB.bin
 
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 ```
+Después, dependiendo del tipo de sistema de archivos (por ejemplo, squashfs, cpio, jffs2, ubifs), se utilizan diferentes comandos para extraer manualmente el contenido.
 
-Afterwards, depending on the filesystem type (e.g., squashfs, cpio, jffs2, ubifs), different commands are used to manually extract the contents.
+### Análisis del Sistema de Archivos
 
-### Filesystem Analysis
+Con el sistema de archivos extraído, comienza la búsqueda de fallos de seguridad. Se presta atención a demonios de red inseguros, credenciales codificadas, puntos finales de API, funcionalidades del servidor de actualizaciones, código no compilado, scripts de inicio y binarios compilados para análisis fuera de línea.
 
-With the filesystem extracted, the search for security flaws begins. Attention is paid to insecure network daemons, hardcoded credentials, API endpoints, update server functionalities, uncompiled code, startup scripts, and compiled binaries for offline analysis.
+**Ubicaciones clave** y **elementos** a inspeccionar incluyen:
 
-**Key locations** and **items** to inspect include:
+- **etc/shadow** y **etc/passwd** para credenciales de usuario
+- Certificados y claves SSL en **etc/ssl**
+- Archivos de configuración y scripts en busca de vulnerabilidades potenciales
+- Binarios incrustados para un análisis más profundo
+- Servidores web y binarios comunes de dispositivos IoT
 
-- **etc/shadow** and **etc/passwd** for user credentials
-- SSL certificates and keys in **etc/ssl**
-- Configuration and script files for potential vulnerabilities
-- Embedded binaries for further analysis
-- Common IoT device web servers and binaries
+Varias herramientas ayudan a descubrir información sensible y vulnerabilidades dentro del sistema de archivos:
 
-Several tools assist in uncovering sensitive information and vulnerabilities within the filesystem:
+- [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) y [**Firmwalker**](https://github.com/craigz28/firmwalker) para la búsqueda de información sensible
+- [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) para un análisis completo de firmware
+- [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer), [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep), [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go), y [**EMBA**](https://github.com/e-m-b-a/emba) para análisis estático y dinámico
 
-- [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) and [**Firmwalker**](https://github.com/craigz28/firmwalker) for sensitive information search
-- [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) for comprehensive firmware analysis
-- [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer), [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep), [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go), and [**EMBA**](https://github.com/e-m-b-a/emba) for static and dynamic analysis
+### Comprobaciones de Seguridad en Binarios Compilados
 
-### Security Checks on Compiled Binaries
+Tanto el código fuente como los binarios compilados encontrados en el sistema de archivos deben ser examinados en busca de vulnerabilidades. Herramientas como **checksec.sh** para binarios de Unix y **PESecurity** para binarios de Windows ayudan a identificar binarios no protegidos que podrían ser explotados.
 
-Both source code and compiled binaries found in the filesystem must be scrutinized for vulnerabilities. Tools like **checksec.sh** for Unix binaries and **PESecurity** for Windows binaries help identify unprotected binaries that could be exploited.
+## Emulando Firmware para Análisis Dinámico
 
-## Emulating Firmware for Dynamic Analysis
+El proceso de emular firmware permite un **análisis dinámico** ya sea del funcionamiento de un dispositivo o de un programa individual. Este enfoque puede encontrar desafíos con dependencias de hardware o arquitectura, pero transferir el sistema de archivos raíz o binarios específicos a un dispositivo con arquitectura y endianness coincidentes, como un Raspberry Pi, o a una máquina virtual preconstruida, puede facilitar pruebas adicionales.
 
-The process of emulating firmware enables **dynamic analysis** either of a device's operation or an individual program. This approach can encounter challenges with hardware or architecture dependencies, but transferring the root filesystem or specific binaries to a device with matching architecture and endianness, such as a Raspberry Pi, or to a pre-built virtual machine, can facilitate further testing.
+### Emulando Binarios Individuales
 
-### Emulating Individual Binaries
+Para examinar programas individuales, es crucial identificar el endianness y la arquitectura de CPU del programa.
 
-For examining single programs, identifying the program's endianness and CPU architecture is crucial.
+#### Ejemplo con Arquitectura MIPS
 
-#### Example with MIPS Architecture
-
-To emulate a MIPS architecture binary, one can use the command:
-
+Para emular un binario de arquitectura MIPS, se puede usar el comando:
 ```bash
 file ./squashfs-root/bin/busybox
 ```
-
-And to install the necessary emulation tools:
-
+Y para instalar las herramientas de emulación necesarias:
 ```bash
 sudo apt-get install qemu qemu-user qemu-user-static qemu-system-arm qemu-system-mips qemu-system-x86 qemu-utils
 ```
+Para MIPS (big-endian), se utiliza `qemu-mips`, y para binarios little-endian, `qemu-mipsel` sería la elección.
 
-For MIPS (big-endian), `qemu-mips` is used, and for little-endian binaries, `qemu-mipsel` would be the choice.
+#### Emulación de Arquitectura ARM
 
-#### ARM Architecture Emulation
+Para binarios ARM, el proceso es similar, utilizando el emulador `qemu-arm` para la emulación.
 
-For ARM binaries, the process is similar, with the `qemu-arm` emulator being utilized for emulation.
+### Emulación de Sistema Completo
 
-### Full System Emulation
+Herramientas como [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit) y otras, facilitan la emulación completa de firmware, automatizando el proceso y ayudando en el análisis dinámico.
 
-Tools like [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit), and others, facilitate full firmware emulation, automating the process and aiding in dynamic analysis.
+## Análisis Dinámico en Práctica
 
-## Dynamic Analysis in Practice
+En esta etapa, se utiliza un entorno de dispositivo real o emulado para el análisis. Es esencial mantener acceso a la shell del sistema operativo y al sistema de archivos. La emulación puede no imitar perfectamente las interacciones de hardware, lo que requiere reinicios ocasionales de la emulación. El análisis debe revisar el sistema de archivos, explotar páginas web expuestas y servicios de red, y explorar vulnerabilidades del bootloader. Las pruebas de integridad del firmware son críticas para identificar posibles vulnerabilidades de puerta trasera.
 
-At this stage, either a real or emulated device environment is used for analysis. It's essential to maintain shell access to the OS and filesystem. Emulation may not perfectly mimic hardware interactions, necessitating occasional emulation restarts. Analysis should revisit the filesystem, exploit exposed webpages and network services, and explore bootloader vulnerabilities. Firmware integrity tests are critical to identify potential backdoor vulnerabilities.
+## Técnicas de Análisis en Tiempo de Ejecución
 
-## Runtime Analysis Techniques
+El análisis en tiempo de ejecución implica interactuar con un proceso o binario en su entorno operativo, utilizando herramientas como gdb-multiarch, Frida y Ghidra para establecer puntos de interrupción e identificar vulnerabilidades a través de fuzzing y otras técnicas.
 
-Runtime analysis involves interacting with a process or binary in its operating environment, using tools like gdb-multiarch, Frida, and Ghidra for setting breakpoints and identifying vulnerabilities through fuzzing and other techniques.
+## Explotación Binaria y Prueba de Concepto
 
-## Binary Exploitation and Proof-of-Concept
+Desarrollar un PoC para vulnerabilidades identificadas requiere un profundo entendimiento de la arquitectura objetivo y programación en lenguajes de bajo nivel. Las protecciones de tiempo de ejecución en sistemas embebidos son raras, pero cuando están presentes, técnicas como Return Oriented Programming (ROP) pueden ser necesarias.
 
-Developing a PoC for identified vulnerabilities requires a deep understanding of the target architecture and programming in lower-level languages. Binary runtime protections in embedded systems are rare, but when present, techniques like Return Oriented Programming (ROP) may be necessary.
+## Sistemas Operativos Preparados para Análisis de Firmware
 
-## Prepared Operating Systems for Firmware Analysis
+Sistemas operativos como [AttifyOS](https://github.com/adi0x90/attifyos) y [EmbedOS](https://github.com/scriptingxss/EmbedOS) proporcionan entornos preconfigurados para pruebas de seguridad de firmware, equipados con las herramientas necesarias.
 
-Operating systems like [AttifyOS](https://github.com/adi0x90/attifyos) and [EmbedOS](https://github.com/scriptingxss/EmbedOS) provide pre-configured environments for firmware security testing, equipped with necessary tools.
+## Sistemas Operativos Preparados para Analizar Firmware
 
-## Prepared OSs to analyze Firmware
+- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS es una distribución destinada a ayudarte a realizar evaluaciones de seguridad y pruebas de penetración de dispositivos de Internet de las Cosas (IoT). Te ahorra mucho tiempo al proporcionar un entorno preconfigurado con todas las herramientas necesarias cargadas.
+- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Sistema operativo de pruebas de seguridad embebido basado en Ubuntu 18.04 precargado con herramientas de pruebas de seguridad de firmware.
 
-- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS is a distro intended to help you perform security assessment and penetration testing of Internet of Things (IoT) devices. It saves you a lot of time by providing a pre-configured environment with all the necessary tools loaded.
-- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Embedded security testing operating system based on Ubuntu 18.04 preloaded with firmware security testing tools.
+## Firmware Vulnerable para Practicar
 
-## Vulnerable firmware to practice
-
-To practice discovering vulnerabilities in firmware, use the following vulnerable firmware projects as a starting point.
+Para practicar el descubrimiento de vulnerabilidades en firmware, utiliza los siguientes proyectos de firmware vulnerables como punto de partida.
 
 - OWASP IoTGoat
-  - [https://github.com/OWASP/IoTGoat](https://github.com/OWASP/IoTGoat)
+- [https://github.com/OWASP/IoTGoat](https://github.com/OWASP/IoTGoat)
 - The Damn Vulnerable Router Firmware Project
-  - [https://github.com/praetorian-code/DVRF](https://github.com/praetorian-code/DVRF)
+- [https://github.com/praetorian-code/DVRF](https://github.com/praetorian-code/DVRF)
 - Damn Vulnerable ARM Router (DVAR)
-  - [https://blog.exploitlab.net/2018/01/dvar-damn-vulnerable-arm-router.html](https://blog.exploitlab.net/2018/01/dvar-damn-vulnerable-arm-router.html)
+- [https://blog.exploitlab.net/2018/01/dvar-damn-vulnerable-arm-router.html](https://blog.exploitlab.net/2018/01/dvar-damn-vulnerable-arm-router.html)
 - ARM-X
-  - [https://github.com/therealsaumil/armx#downloads](https://github.com/therealsaumil/armx#downloads)
+- [https://github.com/therealsaumil/armx#downloads](https://github.com/therealsaumil/armx#downloads)
 - Azeria Labs VM 2.0
-  - [https://azeria-labs.com/lab-vm-2-0/](https://azeria-labs.com/lab-vm-2-0/)
+- [https://azeria-labs.com/lab-vm-2-0/](https://azeria-labs.com/lab-vm-2-0/)
 - Damn Vulnerable IoT Device (DVID)
-  - [https://github.com/Vulcainreo/DVID](https://github.com/Vulcainreo/DVID)
+- [https://github.com/Vulcainreo/DVID](https://github.com/Vulcainreo/DVID)
 
-## References
+## Referencias
 
 - [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
 - [Practical IoT Hacking: The Definitive Guide to Attacking the Internet of Things](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
 
-## Trainning and Cert
+## Entrenamiento y Certificación
 
 - [https://www.attify-store.com/products/offensive-iot-exploitation](https://www.attify-store.com/products/offensive-iot-exploitation)
 

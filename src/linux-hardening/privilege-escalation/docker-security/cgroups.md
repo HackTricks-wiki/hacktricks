@@ -8,7 +8,7 @@
 
 Hay **dos versiones de cgroups**: versión 1 y versión 2. Ambas pueden ser utilizadas de manera concurrente en un sistema. La principal distinción es que **cgroups versión 2** introduce una **estructura jerárquica, en forma de árbol**, que permite una distribución de recursos más matizada y detallada entre grupos de procesos. Además, la versión 2 trae varias mejoras, incluyendo:
 
-Además de la nueva organización jerárquica, cgroups versión 2 también introdujo **cambios y mejoras adicionales**, como soporte para **nuevos controladores de recursos**, mejor soporte para aplicaciones heredadas y un rendimiento mejorado.
+Además de la nueva organización jerárquica, cgroups versión 2 también introdujo **varios otros cambios y mejoras**, como soporte para **nuevos controladores de recursos**, mejor soporte para aplicaciones heredadas y rendimiento mejorado.
 
 En general, cgroups **versión 2 ofrece más características y mejor rendimiento** que la versión 1, pero esta última aún puede ser utilizada en ciertos escenarios donde la compatibilidad con sistemas más antiguos es una preocupación.
 
@@ -31,9 +31,9 @@ La estructura de salida es la siguiente:
 
 - **Números 2–12**: cgroups v1, con cada línea representando un cgroup diferente. Los controladores para estos se especifican adyacentes al número.
 - **Número 1**: También cgroups v1, pero únicamente para fines de gestión (establecido por, por ejemplo, systemd), y carece de un controlador.
-- **Número 0**: Representa cgroups v2. No se enumeran controladores, y esta línea es exclusiva en sistemas que solo ejecutan cgroups v2.
+- **Número 0**: Representa cgroups v2. No se listan controladores, y esta línea es exclusiva en sistemas que solo ejecutan cgroups v2.
 - Los **nombres son jerárquicos**, asemejándose a rutas de archivos, indicando la estructura y relación entre diferentes cgroups.
-- **Nombres como /user.slice o /system.slice** especifican la categorización de cgroups, siendo user.slice típicamente para sesiones de inicio gestionadas por systemd y system.slice para servicios del sistema.
+- **Nombres como /user.slice o /system.slice** especifican la categorización de cgroups, con user.slice típicamente para sesiones de inicio gestionadas por systemd y system.slice para servicios del sistema.
 
 ### Visualizando cgroups
 
@@ -45,7 +45,7 @@ Los archivos de interfaz clave para cgroups están prefijados con **cgroup**. El
 
 ![Cgroup Procs](<../../../images/image (281).png>)
 
-Los cgroups que gestionan shells típicamente abarcan dos controladores que regulan el uso de memoria y el conteo de procesos. Para interactuar con un controlador, se deben consultar los archivos que llevan el prefijo del controlador. Por ejemplo, **pids.current** se referiría para determinar el conteo de hilos en el cgroup.
+Los cgroups que gestionan shells típicamente abarcan dos controladores que regulan el uso de memoria y el conteo de procesos. Para interactuar con un controlador, se deben consultar archivos que lleven el prefijo del controlador. Por ejemplo, **pids.current** se referiría para determinar el conteo de hilos en el cgroup.
 
 ![Cgroup Memory](<../../../images/image (677).png>)
 
@@ -69,7 +69,7 @@ echo 3000 > pids.max
 ```bash
 echo "+cpu +pids" > cgroup.subtree_control
 ```
-El **root cgroup** es una excepción a estas reglas, permitiendo la colocación directa de procesos. Esto se puede utilizar para eliminar procesos de la gestión de systemd.
+El **cgroup raíz** es una excepción a estas reglas, permitiendo la colocación directa de procesos. Esto se puede utilizar para eliminar procesos de la gestión de systemd.
 
 **Monitorear el uso de CPU** dentro de un cgroup es posible a través del archivo `cpu.stat`, que muestra el tiempo total de CPU consumido, útil para rastrear el uso a través de los subprocesos de un servicio:
 

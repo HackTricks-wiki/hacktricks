@@ -52,7 +52,7 @@ self.numberOfWheels += value;
 ```
 ### **Objeto y Llamar Método**
 
-Para crear una instancia de una clase se llama al método **`alloc`** que **asigna memoria** para cada **propiedad** y **pone a cero** esas asignaciones. Luego se llama a **`init`**, que **inicializa las propiedades** a los **valores requeridos**.
+Para crear una instancia de una clase se llama al método **`alloc`** que **asigna memoria** para cada **propiedad** y **cero** esas asignaciones. Luego se llama a **`init`**, que **inicializa las propiedades** a los **valores requeridos**.
 ```objectivec
 // Something like this:
 MyVehicle *newVehicle = [[MyVehicle alloc] init];

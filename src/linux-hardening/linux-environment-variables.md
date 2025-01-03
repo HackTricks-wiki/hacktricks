@@ -1,38 +1,31 @@
-# Linux Environment Variables
+# Variables de Entorno de Linux
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Global variables
+## Variables globales
 
-The global variables **will be** inherited by **child processes**.
+Las variables globales **serán** heredadas por **procesos hijos**.
 
-You can create a global variable for your current session doing:
-
+Puedes crear una variable global para tu sesión actual haciendo:
 ```bash
 export MYGLOBAL="hello world"
 echo $MYGLOBAL #Prints: hello world
 ```
+Esta variable será accesible por tus sesiones actuales y sus procesos hijos.
 
-This variable will be accessible by your current sessions and its child processes.
-
-You can **remove** a variable doing:
-
+Puedes **eliminar** una variable haciendo:
 ```bash
 unset MYGLOBAL
 ```
+## Variables locales
 
-## Local variables
-
-The **local variables** can only be **accessed** by the **current shell/script**.
-
+Las **variables locales** solo pueden ser **accedidas** por el **shell/script actual**.
 ```bash
 LOCAL="my local"
 echo $LOCAL
 unset LOCAL
 ```
-
-## List current variables
-
+## Listar variables actuales
 ```bash
 set
 env
@@ -40,84 +33,75 @@ printenv
 cat /proc/$$/environ
 cat /proc/`python -c "import os; print(os.getppid())"`/environ
 ```
-
-## Common variables
+## Variables comunes
 
 From: [https://geek-university.com/linux/common-environment-variables/](https://geek-university.com/linux/common-environment-variables/)
 
-- **DISPLAY** – the display used by **X**. This variable is usually set to **:0.0**, which means the first display on the current computer.
-- **EDITOR** – the user’s preferred text editor.
-- **HISTFILESIZE** – the maximum number of lines contained in the history file.
-- **HISTSIZE** – Number of lines added to the history file when the user finish his session
-- **HOME** – your home directory.
-- **HOSTNAME** – the hostname of the computer.
-- **LANG** – your current language.
-- **MAIL** – the location of the user’s mail spool. Usually **/var/spool/mail/USER**.
-- **MANPATH** – the list of directories to search for manual pages.
-- **OSTYPE** – the type of operating system.
-- **PS1** – the default prompt in bash.
-- **PATH** – stores the path of all the directories which holds binary files you want to execute just by specifying the name of the file and not by relative or absolute path.
-- **PWD** – the current working directory.
-- **SHELL** – the path to the current command shell (for example, **/bin/bash**).
-- **TERM** – the current terminal type (for example, **xterm**).
-- **TZ** – your time zone.
-- **USER** – your current username.
+- **DISPLAY** – la pantalla utilizada por **X**. Esta variable generalmente se establece en **:0.0**, lo que significa la primera pantalla en la computadora actual.
+- **EDITOR** – el editor de texto preferido del usuario.
+- **HISTFILESIZE** – el número máximo de líneas contenidas en el archivo de historial.
+- **HISTSIZE** – Número de líneas añadidas al archivo de historial cuando el usuario termina su sesión.
+- **HOME** – tu directorio personal.
+- **HOSTNAME** – el nombre del host de la computadora.
+- **LANG** – tu idioma actual.
+- **MAIL** – la ubicación de la cola de correo del usuario. Generalmente **/var/spool/mail/USER**.
+- **MANPATH** – la lista de directorios para buscar páginas de manual.
+- **OSTYPE** – el tipo de sistema operativo.
+- **PS1** – el aviso predeterminado en bash.
+- **PATH** – almacena la ruta de todos los directorios que contienen archivos binarios que deseas ejecutar solo especificando el nombre del archivo y no por ruta relativa o absoluta.
+- **PWD** – el directorio de trabajo actual.
+- **SHELL** – la ruta al shell de comandos actual (por ejemplo, **/bin/bash**).
+- **TERM** – el tipo de terminal actual (por ejemplo, **xterm**).
+- **TZ** – tu zona horaria.
+- **USER** – tu nombre de usuario actual.
 
-## Interesting variables for hacking
+## Variables interesantes para hacking
 
 ### **HISTFILESIZE**
 
-Change the **value of this variable to 0**, so when you **end your session** the **history file** (\~/.bash_history) **will be deleted**.
-
+Cambia el **valor de esta variable a 0**, para que cuando **termines tu sesión** el **archivo de historial** (\~/.bash_history) **sea eliminado**.
 ```bash
 export HISTFILESIZE=0
 ```
-
 ### **HISTSIZE**
 
-Change the **value of this variable to 0**, so when you **end your session** any command will be added to the **history file** (\~/.bash_history).
-
+Cambia el **valor de esta variable a 0**, para que cuando **termines tu sesión** cualquier comando se agregue al **archivo de historial** (\~/.bash_history).
 ```bash
 export HISTSIZE=0
 ```
-
 ### http_proxy & https_proxy
 
-The processes will use the **proxy** declared here to connect to internet through **http or https**.
-
+Los procesos utilizarán el **proxy** declarado aquí para conectarse a internet a través de **http o https**.
 ```bash
 export http_proxy="http://10.10.10.10:8080"
 export https_proxy="http://10.10.10.10:8080"
 ```
-
 ### SSL_CERT_FILE & SSL_CERT_DIR
 
-The processes will trust the certificates indicated in **these env variables**.
-
+Los procesos confiarán en los certificados indicados en **estas variables de entorno**.
 ```bash
 export SSL_CERT_FILE=/path/to/ca-bundle.pem
 export SSL_CERT_DIR=/path/to/ca-certificates
 ```
-
 ### PS1
 
-Change how your prompt looks.
+Cambia cómo se ve tu aviso.
 
-[**This is an example**](https://gist.github.com/carlospolop/43f7cd50f3deea972439af3222b68808)
+[**Este es un ejemplo**](https://gist.github.com/carlospolop/43f7cd50f3deea972439af3222b68808)
 
 Root:
 
 ![](<../images/image (897).png>)
 
-Regular user:
+Usuario regular:
 
 ![](<../images/image (740).png>)
 
-One, two and three backgrounded jobs:
+Uno, dos y tres trabajos en segundo plano:
 
 ![](<../images/image (145).png>)
 
-One background job, one stopped and last command didn't finish correctly:
+Un trabajo en segundo plano, uno detenido y el último comando no terminó correctamente:
 
 ![](<../images/image (715).png>)
 

@@ -347,9 +347,9 @@ bash -p #From non priv inside mounted folder
 ### Escalación de privilegios con 2 shells
 
 Si tienes acceso como **root dentro de un contenedor** y has **escapado como un usuario no privilegiado al host**, puedes abusar de ambas shells para **privesc dentro del host** si tienes la capacidad MKNOD dentro del contenedor (es por defecto) como [**se explica en esta publicación**](https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/).\
-Con tal capacidad, el usuario root dentro del contenedor puede **crear archivos de dispositivos de bloque**. Los archivos de dispositivos son archivos especiales que se utilizan para **acceder al hardware subyacente y a los módulos del kernel**. Por ejemplo, el archivo de dispositivo de bloque /dev/sda da acceso para **leer los datos en bruto en el disco del sistema**.
+Con tal capacidad, el usuario root dentro del contenedor puede **crear archivos de dispositivos de bloque**. Los archivos de dispositivos son archivos especiales que se utilizan para **acceder al hardware subyacente y a los módulos del kernel**. Por ejemplo, el archivo de dispositivo de bloque /dev/sda da acceso para **leer los datos en bruto del disco del sistema**.
 
-Docker protege contra el uso indebido de dispositivos de bloque dentro de los contenedores al hacer cumplir una política de cgroup que **bloquea las operaciones de lectura/escritura de dispositivos de bloque**. Sin embargo, si un dispositivo de bloque es **creado dentro del contenedor**, se vuelve accesible desde fuera del contenedor a través del directorio **/proc/PID/root/**. Este acceso requiere que el **propietario del proceso sea el mismo** tanto dentro como fuera del contenedor.
+Docker protege contra el uso indebido de dispositivos de bloque dentro de los contenedores al hacer cumplir una política de cgroup que **bloquea las operaciones de lectura/escritura de dispositivos de bloque**. Sin embargo, si un dispositivo de bloque es **creado dentro del contenedor**, se vuelve accesible desde fuera del contenedor a través del **/proc/PID/root/** directorio. Este acceso requiere que el **propietario del proceso sea el mismo** tanto dentro como fuera del contenedor.
 
 Ejemplo de **explotación** de este [**informe**](https://radboudinstituteof.pwning.nl/posts/htbunictfquals2021/goodgames/):
 ```bash
@@ -423,7 +423,7 @@ También puedes **matar procesos y causar un DoS**.
 ```
 docker run --rm -it --network=host ubuntu bash
 ```
-Si un contenedor fue configurado con el Docker [host networking driver (`--network=host`)](https://docs.docker.com/network/host/), la pila de red de ese contenedor no está aislada del host de Docker (el contenedor comparte el espacio de nombres de red del host), y el contenedor no recibe su propia dirección IP asignada. En otras palabras, el **contenedor vincula todos los servicios directamente a la IP del host**. Además, el contenedor puede **interceptar TODO el tráfico de red que el host** está enviando y recibiendo en la interfaz compartida `tcpdump -i eth0`.
+Si un contenedor fue configurado con el controlador de red de Docker [host networking driver (`--network=host`)](https://docs.docker.com/network/host/), la pila de red de ese contenedor no está aislada del host de Docker (el contenedor comparte el espacio de nombres de red del host), y el contenedor no recibe su propia dirección IP asignada. En otras palabras, el **contenedor vincula todos los servicios directamente a la IP del host**. Además, el contenedor puede **interceptar TODO el tráfico de red que el host** está enviando y recibiendo en la interfaz compartida `tcpdump -i eth0`.
 
 Por ejemplo, puedes usar esto para **esnifar e incluso suplantar tráfico** entre el host y la instancia de metadatos.
 

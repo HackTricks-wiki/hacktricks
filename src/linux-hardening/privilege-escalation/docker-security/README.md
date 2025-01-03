@@ -76,7 +76,7 @@ La firma de imágenes de Docker garantiza la seguridad e integridad de las imág
 - Para activar la confianza en el contenido de Docker, establece `export DOCKER_CONTENT_TRUST=1`. Esta función está desactivada por defecto en Docker versión 1.10 y posteriores.
 - Con esta función habilitada, solo se pueden descargar imágenes firmadas. El primer envío de imágenes requiere establecer frases de contraseña para las claves raíz y de etiquetado, con Docker también soportando Yubikey para una mayor seguridad. Más detalles se pueden encontrar [aquí](https://blog.docker.com/2015/11/docker-content-trust-yubikey/).
 - Intentar descargar una imagen no firmada con la confianza en el contenido habilitada resulta en un error "No trust data for latest".
-- Para los envíos de imágenes después del primero, Docker solicita la frase de contraseña de la clave del repositorio para firmar la imagen.
+- Para envíos de imágenes después del primero, Docker solicita la frase de contraseña de la clave del repositorio para firmar la imagen.
 
 Para respaldar tus claves privadas, utiliza el comando:
 ```bash
@@ -102,7 +102,7 @@ En entornos contenedorizados, aislar proyectos y sus procesos es fundamental par
 
 **Grupos de Control (CGroups)**
 
-- **Función**: Utilizados principalmente para asignar recursos entre procesos.
+- **Función**: Principalmente utilizados para asignar recursos entre procesos.
 - **Aspecto de Seguridad**: Los CGroups en sí no ofrecen seguridad de aislamiento, excepto por la característica `release_agent`, que, si está mal configurada, podría ser explotada para acceso no autorizado.
 
 **Caída de Capacidades**
@@ -166,7 +166,7 @@ cgroups.md
 
 ### Capacidades
 
-Las capacidades permiten **un control más fino sobre las capacidades que se pueden permitir** para el usuario root. Docker utiliza la función de capacidad del núcleo de Linux para **limitar las operaciones que se pueden realizar dentro de un contenedor** independientemente del tipo de usuario.
+Las capacidades permiten **un control más fino sobre las capacidades que se pueden permitir** para el usuario root. Docker utiliza la característica de capacidad del núcleo de Linux para **limitar las operaciones que se pueden realizar dentro de un contenedor** independientemente del tipo de usuario.
 
 Cuando se ejecuta un contenedor de Docker, el **proceso elimina capacidades sensibles que el proceso podría usar para escapar de la aislamiento**. Esto intenta asegurar que el proceso no podrá realizar acciones sensibles y escapar:
 
@@ -195,7 +195,7 @@ apparmor.md
 - **Sistema de Etiquetado**: SELinux asigna una etiqueta única a cada proceso y objeto del sistema de archivos.
 - **Aplicación de Políticas**: Aplica políticas de seguridad que definen qué acciones puede realizar una etiqueta de proceso sobre otras etiquetas dentro del sistema.
 - **Etiquetas de Proceso de Contenedor**: Cuando los motores de contenedores inician procesos de contenedor, generalmente se les asigna una etiqueta SELinux confinada, comúnmente `container_t`.
-- **Etiquetado de Archivos dentro de Contenedores**: Los archivos dentro del contenedor suelen etiquetarse como `container_file_t`.
+- **Etiquetado de Archivos dentro de Contenedores**: Los archivos dentro del contenedor suelen estar etiquetados como `container_file_t`.
 - **Reglas de Política**: La política de SELinux asegura principalmente que los procesos con la etiqueta `container_t` solo puedan interactuar (leer, escribir, ejecutar) con archivos etiquetados como `container_file_t`.
 
 Este mecanismo asegura que incluso si un proceso dentro de un contenedor se ve comprometido, está confinado a interactuar solo con objetos que tienen las etiquetas correspondientes, limitando significativamente el daño potencial de tales compromisos.
@@ -319,11 +319,11 @@ En entornos de Kubernetes, los secretos son compatibles de forma nativa y se pue
 
 {% embed url="https://katacontainers.io/" %}
 
-### Resumen de Consejos
+### Consejos Resumidos
 
-- **No utilice la bandera `--privileged` ni monte un** [**socket de Docker dentro del contenedor**](https://raesene.github.io/blog/2016/03/06/The-Dangers-Of-Docker.sock/)**.** El socket de Docker permite crear contenedores, por lo que es una forma fácil de tomar el control total del host, por ejemplo, ejecutando otro contenedor con la bandera `--privileged`.
+- **No use la bandera `--privileged` ni monte un** [**socket de Docker dentro del contenedor**](https://raesene.github.io/blog/2016/03/06/The-Dangers-Of-Docker.sock/)**.** El socket de Docker permite crear contenedores, por lo que es una forma fácil de tomar el control total del host, por ejemplo, ejecutando otro contenedor con la bandera `--privileged`.
 - **No ejecute como root dentro del contenedor. Use un** [**usuario diferente**](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user) **y** [**namespaces de usuario**](https://docs.docker.com/engine/security/userns-remap/)**.** El root en el contenedor es el mismo que en el host a menos que se remapee con namespaces de usuario. Está solo ligeramente restringido por, principalmente, namespaces de Linux, capacidades y cgroups.
-- [**Elimine todas las capacidades**](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities) **(`--cap-drop=all`) y habilite solo las que son necesarias** (`--cap-add=...`). Muchas cargas de trabajo no necesitan ninguna capacidad y agregarlas aumenta el alcance de un posible ataque.
+- [**Elimine todas las capacidades**](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities) **(`--cap-drop=all`) y habilite solo las que son necesarias** (`--cap-add=...`). Muchas cargas de trabajo no necesitan capacidades y agregarlas aumenta el alcance de un posible ataque.
 - [**Utilice la opción de seguridad “no-new-privileges”**](https://raesene.github.io/blog/2019/06/01/docker-capabilities-and-no-new-privs/) para evitar que los procesos obtengan más privilegios, por ejemplo, a través de binarios suid.
 - [**Limite los recursos disponibles para el contenedor**](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources)**.** Los límites de recursos pueden proteger la máquina de ataques de denegación de servicio.
 - **Ajuste** [**seccomp**](https://docs.docker.com/engine/security/seccomp/)**,** [**AppArmor**](https://docs.docker.com/engine/security/apparmor/) **(o SELinux)** perfiles para restringir las acciones y syscalls disponibles para el contenedor al mínimo requerido.
@@ -372,5 +372,6 @@ Necesita ejecutar la herramienta desde el host que ejecuta Docker o desde un con
 - [https://docs.docker.com/engine/extend/plugins_authorization](https://docs.docker.com/engine/extend/plugins_authorization)
 - [https://towardsdatascience.com/top-20-docker-security-tips-81c41dd06f57](https://towardsdatascience.com/top-20-docker-security-tips-81c41dd06f57)
 - [https://resources.experfy.com/bigdata-cloud/top-20-docker-security-tips/](https://resources.experfy.com/bigdata-cloud/top-20-docker-security-tips/)
+
 
 {{#include ../../../banners/hacktricks-training.md}}

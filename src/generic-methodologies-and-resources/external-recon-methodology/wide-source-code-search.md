@@ -1,18 +1,18 @@
-# Wide Source Code Search
+# Búsqueda Amplia de Código Fuente
 
 {{#include ../../banners/hacktricks-training.md}}
 
-The goal of this page is to enumerate **platforms that allow to search for code** (literal or regex) in across thousands/millions of repos in one or more platforms.
+El objetivo de esta página es enumerar **plataformas que permiten buscar código** (literal o regex) en miles/millones de repos en una o más plataformas.
 
-This helps in several occasions to **search for leaked information** or for **vulnerabilities** patterns.
+Esto ayuda en varias ocasiones a **buscar información filtrada** o patrones de **vulnerabilidades**.
 
-- [**SourceGraph**](https://sourcegraph.com/search): Search in millions of repos. There is a free version and an enterprise version (with 15 days free). It supports regexes.
-- [**Github Search**](https://github.com/search): Search across Github. It supports regexes.
-  - Maybe it's also useful to check also [**Github Code Search**](https://cs.github.com/).
-- [**Gitlab Advanced Search**](https://docs.gitlab.com/ee/user/search/advanced_search.html): Search across Gitlab projects. Support regexes.
-- [**SearchCode**](https://searchcode.com/): Search code in millions of projects.
+- [**SourceGraph**](https://sourcegraph.com/search): Busca en millones de repos. Hay una versión gratuita y una versión empresarial (con 15 días gratis). Soporta regex.
+- [**Github Search**](https://github.com/search): Busca en Github. Soporta regex.
+- Tal vez también sea útil revisar [**Github Code Search**](https://cs.github.com/).
+- [**Gitlab Advanced Search**](https://docs.gitlab.com/ee/user/search/advanced_search.html): Busca en proyectos de Gitlab. Soporta regex.
+- [**SearchCode**](https://searchcode.com/): Busca código en millones de proyectos.
 
 > [!WARNING]
-> When you look for leaks in a repo and run something like `git log -p` don't forget there might be **other branches with other commits** containing secrets!
+> Cuando busques filtraciones en un repo y ejecutes algo como `git log -p`, ¡no olvides que puede haber **otras ramas con otros commits** que contengan secretos!
 
 {{#include ../../banners/hacktricks-training.md}}

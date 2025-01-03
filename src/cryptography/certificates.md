@@ -1,47 +1,38 @@
-# Certificates
+# Certificados
 
 {{#include ../banners/hacktricks-training.md}}
 
-<figure><img src="../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+## Qué es un Certificado
 
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Un **certificado de clave pública** es una identificación digital utilizada en criptografía para probar que alguien posee una clave pública. Incluye los detalles de la clave, la identidad del propietario (el sujeto) y una firma digital de una autoridad de confianza (el emisor). Si el software confía en el emisor y la firma es válida, es posible la comunicación segura con el propietario de la clave.
 
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+Los certificados son emitidos principalmente por [autoridades de certificación](https://en.wikipedia.org/wiki/Certificate_authority) (CAs) en una [infraestructura de clave pública](https://en.wikipedia.org/wiki/Public-key_infrastructure) (PKI). Otro método es la [web de confianza](https://en.wikipedia.org/wiki/Web_of_trust), donde los usuarios verifican directamente las claves de los demás. El formato común para los certificados es [X.509](https://en.wikipedia.org/wiki/X.509), que puede adaptarse a necesidades específicas como se detalla en el RFC 5280.
 
-## What is a Certificate
+## Campos Comunes de x509
 
-A **public key certificate** is a digital ID used in cryptography to prove someone owns a public key. It includes the key's details, the owner's identity (the subject), and a digital signature from a trusted authority (the issuer). If the software trusts the issuer and the signature is valid, secure communication with the key's owner is possible.
+### **Campos Comunes en Certificados x509**
 
-Certificates are mostly issued by [certificate authorities](https://en.wikipedia.org/wiki/Certificate_authority) (CAs) in a [public-key infrastructure](https://en.wikipedia.org/wiki/Public-key_infrastructure) (PKI) setup. Another method is the [web of trust](https://en.wikipedia.org/wiki/Web_of_trust), where users directly verify each other’s keys. The common format for certificates is [X.509](https://en.wikipedia.org/wiki/X.509), which can be adapted for specific needs as outlined in RFC 5280.
+En los certificados x509, varios **campos** juegan roles críticos para asegurar la validez y seguridad del certificado. Aquí hay un desglose de estos campos:
 
-## x509 Common Fields
+- **Número de Versión** significa la versión del formato x509.
+- **Número de Serie** identifica de manera única el certificado dentro del sistema de una Autoridad de Certificación (CA), principalmente para el seguimiento de revocaciones.
+- El campo **Sujeto** representa al propietario del certificado, que podría ser una máquina, un individuo o una organización. Incluye identificación detallada como:
+- **Nombre Común (CN)**: Dominios cubiertos por el certificado.
+- **País (C)**, **Localidad (L)**, **Estado o Provincia (ST, S, o P)**, **Organización (O)** y **Unidad Organizativa (OU)** proporcionan detalles geográficos y organizativos.
+- **Nombre Distinguido (DN)** encapsula la identificación completa del sujeto.
+- **Emisor** detalla quién verificó y firmó el certificado, incluyendo subcampos similares al Sujeto para la CA.
+- El **Período de Validez** está marcado por las marcas de tiempo **No Antes** y **No Después**, asegurando que el certificado no se use antes o después de una cierta fecha.
+- La sección de **Clave Pública**, crucial para la seguridad del certificado, especifica el algoritmo, tamaño y otros detalles técnicos de la clave pública.
+- Las **extensiones x509v3** mejoran la funcionalidad del certificado, especificando **Uso de Clave**, **Uso de Clave Extendida**, **Nombre Alternativo del Sujeto** y otras propiedades para afinar la aplicación del certificado.
 
-### **Common Fields in x509 Certificates**
+#### **Uso de Clave y Extensiones**
 
-In x509 certificates, several **fields** play critical roles in ensuring the certificate's validity and security. Here's a breakdown of these fields:
-
-- **Version Number** signifies the x509 format's version.
-- **Serial Number** uniquely identifies the certificate within a Certificate Authority's (CA) system, mainly for revocation tracking.
-- The **Subject** field represents the certificate's owner, which could be a machine, an individual, or an organization. It includes detailed identification such as:
-  - **Common Name (CN)**: Domains covered by the certificate.
-  - **Country (C)**, **Locality (L)**, **State or Province (ST, S, or P)**, **Organization (O)**, and **Organizational Unit (OU)** provide geographical and organizational details.
-  - **Distinguished Name (DN)** encapsulates the full subject identification.
-- **Issuer** details who verified and signed the certificate, including similar subfields as the Subject for the CA.
-- **Validity Period** is marked by **Not Before** and **Not After** timestamps, ensuring the certificate is not used before or after a certain date.
-- The **Public Key** section, crucial for the certificate's security, specifies the algorithm, size, and other technical details of the public key.
-- **x509v3 extensions** enhance the certificate's functionality, specifying **Key Usage**, **Extended Key Usage**, **Subject Alternative Name**, and other properties to fine-tune the certificate's application.
-
-#### **Key Usage and Extensions**
-
-- **Key Usage** identifies cryptographic applications of the public key, like digital signature or key encipherment.
-- **Extended Key Usage** further narrows down the certificate's use cases, e.g., for TLS server authentication.
-- **Subject Alternative Name** and **Basic Constraint** define additional host names covered by the certificate and whether it's a CA or end-entity certificate, respectively.
-- Identifiers like **Subject Key Identifier** and **Authority Key Identifier** ensure uniqueness and traceability of keys.
-- **Authority Information Access** and **CRL Distribution Points** provide paths to verify the issuing CA and check certificate revocation status.
-- **CT Precertificate SCTs** offer transparency logs, crucial for public trust in the certificate.
-
+- **Uso de Clave** identifica las aplicaciones criptográficas de la clave pública, como la firma digital o el cifrado de clave.
+- **Uso de Clave Extendida** delimita aún más los casos de uso del certificado, por ejemplo, para la autenticación de servidores TLS.
+- **Nombre Alternativo del Sujeto** y **Restricción Básica** definen nombres de host adicionales cubiertos por el certificado y si es un certificado de CA o de entidad final, respectivamente.
+- Identificadores como **Identificador de Clave del Sujeto** y **Identificador de Clave de Autoridad** aseguran la unicidad y trazabilidad de las claves.
+- **Acceso a Información de Autoridad** y **Puntos de Distribución de CRL** proporcionan rutas para verificar la CA emisora y comprobar el estado de revocación del certificado.
+- **SCTs de Precertificado CT** ofrecen registros de transparencia, cruciales para la confianza pública en el certificado.
 ```python
 # Example of accessing and using x509 certificate fields programmatically:
 from cryptography import x509
@@ -49,8 +40,8 @@ from cryptography.hazmat.backends import default_backend
 
 # Load an x509 certificate (assuming cert.pem is a certificate file)
 with open("cert.pem", "rb") as file:
-    cert_data = file.read()
-    certificate = x509.load_pem_x509_certificate(cert_data, default_backend())
+cert_data = file.read()
+certificate = x509.load_pem_x509_certificate(cert_data, default_backend())
 
 # Accessing fields
 serial_number = certificate.serial_number
@@ -63,133 +54,104 @@ print(f"Issuer: {issuer}")
 print(f"Subject: {subject}")
 print(f"Public Key: {public_key}")
 ```
+### **Diferencia entre OCSP y Puntos de Distribución de CRL**
 
-### **Difference between OCSP and CRL Distribution Points**
+**OCSP** (**RFC 2560**) implica que un cliente y un respondedor trabajen juntos para verificar si un certificado digital de clave pública ha sido revocado, sin necesidad de descargar el **CRL** completo. Este método es más eficiente que el **CRL** tradicional, que proporciona una lista de números de serie de certificados revocados pero requiere descargar un archivo potencialmente grande. Los CRLs pueden incluir hasta 512 entradas. Más detalles están disponibles [aquí](https://www.arubanetworks.com/techdocs/ArubaOS%206_3_1_Web_Help/Content/ArubaFrameStyles/CertRevocation/About_OCSP_and_CRL.htm).
 
-**OCSP** (**RFC 2560**) involves a client and a responder working together to check if a digital public-key certificate has been revoked, without needing to download the full **CRL**. This method is more efficient than the traditional **CRL**, which provides a list of revoked certificate serial numbers but requires downloading a potentially large file. CRLs can include up to 512 entries. More details are available [here](https://www.arubanetworks.com/techdocs/ArubaOS%206_3_1_Web_Help/Content/ArubaFrameStyles/CertRevocation/About_OCSP_and_CRL.htm).
+### **Qué es la Transparencia de Certificados**
 
-### **What is Certificate Transparency**
+La Transparencia de Certificados ayuda a combatir amenazas relacionadas con certificados al garantizar que la emisión y existencia de certificados SSL sean visibles para los propietarios de dominios, CAs y usuarios. Sus objetivos son:
 
-Certificate Transparency helps combat certificate-related threats by ensuring the issuance and existence of SSL certificates are visible to domain owners, CAs, and users. Its objectives are:
+- Prevenir que las CAs emitan certificados SSL para un dominio sin el conocimiento del propietario del dominio.
+- Establecer un sistema de auditoría abierto para rastrear certificados emitidos por error o de manera maliciosa.
+- Proteger a los usuarios contra certificados fraudulentos.
 
-- Preventing CAs from issuing SSL certificates for a domain without the domain owner's knowledge.
-- Establishing an open auditing system for tracking mistakenly or maliciously issued certificates.
-- Safeguarding users against fraudulent certificates.
+#### **Registros de Certificados**
 
-#### **Certificate Logs**
+Los registros de certificados son registros auditables públicamente, de solo adición, de certificados, mantenidos por servicios de red. Estos registros proporcionan pruebas criptográficas para fines de auditoría. Tanto las autoridades de emisión como el público pueden enviar certificados a estos registros o consultarlos para verificación. Si bien el número exacto de servidores de registro no es fijo, se espera que sea menos de mil a nivel mundial. Estos servidores pueden ser gestionados de manera independiente por CAs, ISPs o cualquier entidad interesada.
 
-Certificate logs are publicly auditable, append-only records of certificates, maintained by network services. These logs provide cryptographic proofs for auditing purposes. Both issuance authorities and the public can submit certificates to these logs or query them for verification. While the exact number of log servers is not fixed, it's expected to be less than a thousand globally. These servers can be independently managed by CAs, ISPs, or any interested entity.
+#### **Consulta**
 
-#### **Query**
+Para explorar los registros de Transparencia de Certificados para cualquier dominio, visita [https://crt.sh/](https://crt.sh).
 
-To explore Certificate Transparency logs for any domain, visit [https://crt.sh/](https://crt.sh).
+Existen diferentes formatos para almacenar certificados, cada uno con sus propios casos de uso y compatibilidad. Este resumen cubre los formatos principales y proporciona orientación sobre la conversión entre ellos.
 
-Different formats exist for storing certificates, each with its own use cases and compatibility. This summary covers the main formats and provides guidance on converting between them.
+## **Formatos**
 
-## **Formats**
+### **Formato PEM**
 
-### **PEM Format**
+- Formato más utilizado para certificados.
+- Requiere archivos separados para certificados y claves privadas, codificados en Base64 ASCII.
+- Extensiones comunes: .cer, .crt, .pem, .key.
+- Utilizado principalmente por Apache y servidores similares.
 
-- Most widely used format for certificates.
-- Requires separate files for certificates and private keys, encoded in Base64 ASCII.
-- Common extensions: .cer, .crt, .pem, .key.
-- Primarily used by Apache and similar servers.
+### **Formato DER**
 
-### **DER Format**
+- Un formato binario de certificados.
+- Carece de las declaraciones "BEGIN/END CERTIFICATE" que se encuentran en los archivos PEM.
+- Extensiones comunes: .cer, .der.
+- A menudo utilizado con plataformas Java.
 
-- A binary format of certificates.
-- Lacks the "BEGIN/END CERTIFICATE" statements found in PEM files.
-- Common extensions: .cer, .der.
-- Often used with Java platforms.
+### **Formato P7B/PKCS#7**
 
-### **P7B/PKCS#7 Format**
+- Almacenado en Base64 ASCII, con extensiones .p7b o .p7c.
+- Contiene solo certificados y certificados de cadena, excluyendo la clave privada.
+- Soportado por Microsoft Windows y Java Tomcat.
 
-- Stored in Base64 ASCII, with extensions .p7b or .p7c.
-- Contains only certificates and chain certificates, excluding the private key.
-- Supported by Microsoft Windows and Java Tomcat.
+### **Formato PFX/P12/PKCS#12**
 
-### **PFX/P12/PKCS#12 Format**
+- Un formato binario que encapsula certificados de servidor, certificados intermedios y claves privadas en un solo archivo.
+- Extensiones: .pfx, .p12.
+- Utilizado principalmente en Windows para la importación y exportación de certificados.
 
-- A binary format that encapsulates server certificates, intermediate certificates, and private keys in one file.
-- Extensions: .pfx, .p12.
-- Mainly used on Windows for certificate import and export.
+### **Conversión de Formatos**
 
-### **Converting Formats**
+**Las conversiones PEM** son esenciales para la compatibilidad:
 
-**PEM conversions** are essential for compatibility:
-
-- **x509 to PEM**
-
+- **x509 a PEM**
 ```bash
 openssl x509 -in certificatename.cer -outform PEM -out certificatename.pem
 ```
-
-- **PEM to DER**
-
+- **PEM a DER**
 ```bash
 openssl x509 -outform der -in certificatename.pem -out certificatename.der
 ```
-
-- **DER to PEM**
-
+- **DER a PEM**
 ```bash
 openssl x509 -inform der -in certificatename.der -out certificatename.pem
 ```
-
-- **PEM to P7B**
-
+- **PEM a P7B**
 ```bash
 openssl crl2pkcs7 -nocrl -certfile certificatename.pem -out certificatename.p7b -certfile CACert.cer
 ```
-
-- **PKCS7 to PEM**
-
+- **PKCS7 a PEM**
 ```bash
 openssl pkcs7 -print_certs -in certificatename.p7b -out certificatename.pem
 ```
+**Las conversiones PFX** son cruciales para gestionar certificados en Windows:
 
-**PFX conversions** are crucial for managing certificates on Windows:
-
-- **PFX to PEM**
-
+- **PFX a PEM**
 ```bash
 openssl pkcs12 -in certificatename.pfx -out certificatename.pem
 ```
-
-- **PFX to PKCS#8** involves two steps:
-  1. Convert PFX to PEM
-
+- **PFX a PKCS#8** implica dos pasos:
+1. Convertir PFX a PEM
 ```bash
 openssl pkcs12 -in certificatename.pfx -nocerts -nodes -out certificatename.pem
 ```
-
-2. Convert PEM to PKCS8
-
+2. Convertir PEM a PKCS8
 ```bash
 openSSL pkcs8 -in certificatename.pem -topk8 -nocrypt -out certificatename.pk8
 ```
-
-- **P7B to PFX** also requires two commands:
-  1. Convert P7B to CER
-
+- **P7B a PFX** también requiere dos comandos:
+1. Convertir P7B a CER
 ```bash
 openssl pkcs7 -print_certs -in certificatename.p7b -out certificatename.cer
 ```
-
-2. Convert CER and Private Key to PFX
-
+2. Convertir CER y clave privada a PFX
 ```bash
 openssl pkcs12 -export -in certificatename.cer -inkey privateKey.key -out certificatename.pfx -certfile cacert.cer
 ```
-
----
-
-<figure><img src="../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+--- 
 
 {{#include ../banners/hacktricks-training.md}}

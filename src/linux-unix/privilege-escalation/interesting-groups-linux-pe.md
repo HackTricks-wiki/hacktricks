@@ -30,7 +30,7 @@ Verifica el contenido de:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
-Ahí encontrarás qué grupos tienen permiso para ejecutar **pkexec** y **por defecto** en algunas distribuciones de Linux pueden **aparecer** algunos de los grupos **sudo o admin**.
+Ahí encontrarás qué grupos tienen permiso para ejecutar **pkexec** y **por defecto** en algunos linux pueden **aparecer** algunos de los grupos **sudo o admin**.
 
 Para **convertirte en root puedes ejecutar**:
 ```bash
@@ -111,7 +111,7 @@ Para **abrir** la **imagen en bruto** puedes usar **GIMP**, seleccionar el archi
 
 ![](../../images/image%20%28208%29.png)
 
-Luego modifica el Ancho y Alto a los que se usaron en la pantalla y verifica diferentes Tipos de Imagen \(y selecciona el que muestre mejor la pantalla\):
+Luego modifica el Ancho y la Altura a los que se usaron en la pantalla y verifica diferentes Tipos de Imagen \(y selecciona el que muestre mejor la pantalla\):
 
 ![](../../images/image%20%28295%29.png)
 

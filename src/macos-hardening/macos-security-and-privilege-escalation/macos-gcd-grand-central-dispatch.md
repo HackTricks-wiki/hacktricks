@@ -61,7 +61,7 @@ Ten en cuenta que será el sistema quien decida **qué hilos manejan qué colas 
 
 #### Atributos
 
-Al crear una cola con **`dispatch_queue_create`**, el tercer argumento es un `dispatch_queue_attr_t`, que generalmente es `DISPATCH_QUEUE_SERIAL` (que en realidad es NULL) o `DISPATCH_QUEUE_CONCURRENT`, que es un puntero a una estructura `dispatch_queue_attr_t` que permite controlar algunos parámetros de la cola.
+Al crear una cola con **`dispatch_queue_create`** el tercer argumento es un `dispatch_queue_attr_t`, que generalmente es `DISPATCH_QUEUE_SERIAL` (que en realidad es NULL) o `DISPATCH_QUEUE_CONCURRENT`, que es un puntero a una estructura `dispatch_queue_attr_t` que permite controlar algunos parámetros de la cola.
 
 ### Objetos de Despacho
 
@@ -170,7 +170,7 @@ sleep(1)  // Simulate a long-running task
 ```
 ## Frida
 
-El siguiente script de Frida se puede utilizar para **interceptar varias funciones `dispatch`** y extraer el nombre de la cola, la traza de la pila y el bloque: [**https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js**](https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js)
+El siguiente script de Frida se puede utilizar para **interceptar varias funciones `dispatch`** y extraer el nombre de la cola, el backtrace y el bloque: [**https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js**](https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js)
 ```bash
 frida -U <prog_name> -l libdispatch.js
 
@@ -198,7 +198,7 @@ Así que si quieres que las entienda, podrías **declararlas**:
 Luego, encuentra un lugar en el código donde se **utilicen**:
 
 > [!TIP]
-> Nota todas las referencias hechas a "block" para entender cómo podrías deducir que se está utilizando la estructura.
+> Toma nota de todas las referencias hechas a "block" para entender cómo podrías deducir que se está utilizando la estructura.
 
 <figure><img src="../../images/image (1164).png" alt="" width="563"><figcaption></figcaption></figure>
 

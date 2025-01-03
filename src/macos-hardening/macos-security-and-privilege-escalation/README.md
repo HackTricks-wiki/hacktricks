@@ -89,11 +89,11 @@ macos-file-extension-apps.md
 
 ## Escalación de Privilegios TCC / SIP de macOS
 
-En macOS, **las aplicaciones y binarios pueden tener permisos** para acceder a carpetas o configuraciones que les otorgan más privilegios que a otros.
+En macOS, **las aplicaciones y binarios pueden tener permisos** para acceder a carpetas o configuraciones que los hacen más privilegiados que otros.
 
 Por lo tanto, un atacante que quiera comprometer con éxito una máquina macOS necesitará **escalar sus privilegios TCC** (o incluso **eludir SIP**, dependiendo de sus necesidades).
 
-Estos privilegios generalmente se otorgan en forma de **derechos** con los que la aplicación está firmada, o la aplicación podría solicitar algunos accesos y, después de que el **usuario los apruebe**, pueden encontrarse en las **bases de datos TCC**. Otra forma en que un proceso puede obtener estos privilegios es siendo un **hijo de un proceso** con esos **privilegios**, ya que generalmente son **heredados**.
+Estos privilegios generalmente se otorgan en forma de **derechos** con los que la aplicación está firmada, o la aplicación podría solicitar algunos accesos y después de que el **usuario los apruebe**, pueden encontrarse en las **bases de datos TCC**. Otra forma en que un proceso puede obtener estos privilegios es siendo un **hijo de un proceso** con esos **privilegios**, ya que generalmente son **heredados**.
 
 Sigue estos enlaces para encontrar diferentes formas de [**escalar privilegios en TCC**](macos-security-protections/macos-tcc/#tcc-privesc-and-bypasses), para [**eludir TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) y cómo en el pasado [**se ha eludido SIP**](macos-security-protections/macos-sip.md#sip-bypasses).
 

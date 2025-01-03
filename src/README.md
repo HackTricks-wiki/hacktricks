@@ -21,7 +21,7 @@ generic-methodologies-and-resources/pentesting-methodology.md
 
 <figure><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-[**STM Cyber**](https://www.stmcyber.com) es una gran empresa de ciberseguridad cuyo lema es **HACK THE UNHACKABLE**. Realizan su propia investigación y desarrollan sus propias herramientas de hacking para **ofrecer varios servicios valiosos de ciberseguridad** como pentesting, Red teams y capacitación.
+[**STM Cyber**](https://www.stmcyber.com) es una gran empresa de ciberseguridad cuyo lema es **HACK THE UNHACKABLE**. Realizan su propia investigación y desarrollan sus propias herramientas de hacking para **ofrecer varios servicios valiosos de ciberseguridad** como pentesting, equipos rojos y capacitación.
 
 Puedes consultar su **blog** en [**https://blog.stmcyber.com**](https://blog.stmcyber.com)
 
@@ -84,7 +84,7 @@ Accede hoy:
 
 **Obtén la perspectiva de un hacker sobre tus aplicaciones web, red y nube**
 
-**Encuentra e informa sobre vulnerabilidades críticas y explotables con un impacto real en los negocios.** Usa nuestras más de 20 herramientas personalizadas para mapear la superficie de ataque, encontrar problemas de seguridad que te permitan escalar privilegios, y usar exploits automatizados para recopilar evidencia esencial, convirtiendo tu arduo trabajo en informes persuasivos.
+**Encuentra y reporta vulnerabilidades críticas y explotables con un impacto real en los negocios.** Usa nuestras más de 20 herramientas personalizadas para mapear la superficie de ataque, encontrar problemas de seguridad que te permitan escalar privilegios, y usar exploits automatizados para recopilar evidencia esencial, convirtiendo tu arduo trabajo en informes persuasivos.
 
 {% embed url="https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons" %}
 
@@ -94,10 +94,10 @@ Accede hoy:
 
 <figure><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
-**SerpApi** ofrece APIs rápidas y fáciles en tiempo real para **acceder a resultados de motores de búsqueda**. Ellos scrapean motores de búsqueda, manejan proxies, resuelven captchas y analizan todos los datos estructurados ricos por ti.
+**SerpApi** ofrece APIs rápidas y fáciles en tiempo real para **acceder a resultados de motores de búsqueda**. Ellos extraen datos de motores de búsqueda, manejan proxies, resuelven captchas y analizan todos los datos estructurados ricos por ti.
 
-Una suscripción a uno de los planes de SerpApi incluye acceso a más de 50 APIs diferentes para scrapeo de diferentes motores de búsqueda, incluyendo Google, Bing, Baidu, Yahoo, Yandex, y más.\
-A diferencia de otros proveedores, **SerpApi no solo scrapea resultados orgánicos**. Las respuestas de SerpApi incluyen consistentemente todos los anuncios, imágenes y videos en línea, gráficos de conocimiento y otros elementos y características presentes en los resultados de búsqueda.
+Una suscripción a uno de los planes de SerpApi incluye acceso a más de 50 APIs diferentes para extraer datos de diferentes motores de búsqueda, incluyendo Google, Bing, Baidu, Yahoo, Yandex, y más.\
+A diferencia de otros proveedores, **SerpApi no solo extrae resultados orgánicos**. Las respuestas de SerpApi incluyen consistentemente todos los anuncios, imágenes y videos en línea, gráficos de conocimiento y otros elementos y características presentes en los resultados de búsqueda.
 
 Los clientes actuales de SerpApi incluyen **Apple, Shopify y GrubHub**.\
 Para más información, consulta su [**blog**](https://serpapi.com/blog/)**,** o prueba un ejemplo en su [**playground**](https://serpapi.com/playground)**.**\

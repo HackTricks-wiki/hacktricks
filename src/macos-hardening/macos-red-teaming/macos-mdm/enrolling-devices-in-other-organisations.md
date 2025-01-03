@@ -17,7 +17,7 @@ Esta investigación profundiza en los binarios asociados con el Programa de Insc
 - **`profiles`**: Gestiona los Perfiles de Configuración y activa los registros de DEP en versiones de macOS 10.13.4 y posteriores.
 - **`cloudconfigurationd`**: Gestiona las comunicaciones de la API de DEP y recupera los perfiles de Inscripción de Dispositivos.
 
-Los registros de DEP utilizan las funciones `CPFetchActivationRecord` y `CPGetActivationRecord` del marco privado de Perfiles de Configuración para obtener el Registro de Activación, siendo `CPFetchActivationRecord` el que coordina con `cloudconfigurationd` a través de XPC.
+Los registros de DEP utilizan las funciones `CPFetchActivationRecord` y `CPGetActivationRecord` del marco privado de Perfiles de Configuración para obtener el Registro de Activación, con `CPFetchActivationRecord` coordinándose con `cloudconfigurationd` a través de XPC.
 
 ## Ingeniería Inversa del Protocolo Tesla y Esquema Absinthe
 

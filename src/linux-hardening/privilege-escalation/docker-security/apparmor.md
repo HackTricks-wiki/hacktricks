@@ -37,8 +37,8 @@ aa-mergeprof  #used to merge the policies
 ```
 ## Creando un perfil
 
-- Para indicar el ejecutable afectado, se permiten **rutas absolutas y comodines** para especificar archivos.
-- Para indicar el acceso que tendrá el binario sobre **archivos**, se pueden utilizar los siguientes **controles de acceso**:
+- Para indicar el ejecutable afectado, se permiten **rutas absolutas y comodines** (para la coincidencia de archivos) para especificar archivos.
+- Para indicar el acceso que tendrá el binario sobre **archivos**, se pueden usar los siguientes **controles de acceso**:
 - **r** (leer)
 - **w** (escribir)
 - **m** (mapa de memoria como ejecutable)
@@ -108,7 +108,7 @@ La siguiente herramienta leerá los registros y preguntará al usuario si desea 
 sudo aa-logprof
 ```
 > [!NOTE]
-> Usando las teclas de flecha puedes seleccionar lo que deseas permitir/negar/o lo que sea
+> Usando las teclas de flecha puedes seleccionar lo que deseas permitir/negar/cualquier cosa
 
 ### Gestionando un Perfil
 ```bash
@@ -166,7 +166,7 @@ Por defecto, el **perfil docker-default de Apparmor** se genera a partir de [htt
 **Resumen del perfil docker-default**:
 
 - **Acceso** a toda la **red**
-- **No se define ninguna capacidad** (Sin embargo, algunas capacidades provendrán de incluir reglas base básicas es decir, #include \<abstractions/base>)
+- **No se define ninguna capacidad** (Sin embargo, algunas capacidades provendrán de incluir reglas básicas, es decir, #include \<abstractions/base>)
 - **Escribir** en cualquier archivo de **/proc** **no está permitido**
 - Otros **subdirectorios**/**archivos** de /**proc** y /**sys** tienen acceso de lectura/escritura/bloqueo/enlace/ejecución **denegado**
 - **Montar** **no está permitido**

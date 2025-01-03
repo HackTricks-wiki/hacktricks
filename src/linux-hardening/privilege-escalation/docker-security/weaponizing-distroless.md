@@ -4,7 +4,7 @@
 
 ## What is Distroless
 
-Un contenedor distroless es un tipo de contenedor que **contiene solo las dependencias necesarias para ejecutar una aplicación específica**, sin ningún software o herramienta adicional que no sea requerido. Estos contenedores están diseñados para ser lo más **ligeros** y **seguros** posible, y su objetivo es **minimizar la superficie de ataque** al eliminar cualquier componente innecesario.
+Un contenedor distroless es un tipo de contenedor que **contiene solo las dependencias necesarias para ejecutar una aplicación específica**, sin ningún software o herramienta adicional que no sea requerida. Estos contenedores están diseñados para ser lo más **ligeros** y **seguros** posible, y su objetivo es **minimizar la superficie de ataque** al eliminar cualquier componente innecesario.
 
 Los contenedores distroless se utilizan a menudo en **entornos de producción donde la seguridad y la fiabilidad son primordiales**.
 
@@ -19,7 +19,7 @@ El objetivo de armar un contenedor distroless es poder **ejecutar binarios y car
 
 ### Through memory
 
-Coming at some point of 2023...
+Llegando en algún momento de 2023...
 
 ### Via Existing binaries
 

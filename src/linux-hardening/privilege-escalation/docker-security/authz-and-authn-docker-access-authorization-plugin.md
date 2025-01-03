@@ -8,7 +8,7 @@ Los plugins de autenticación de Docker son **plugins externos** que puedes usar
 
 **[La siguiente información es de la documentación](https://docs.docker.com/engine/extend/plugins_authorization/#:~:text=If%20you%20require%20greater%20access,access%20to%20the%20Docker%20daemon)**
 
-Cuando se realiza una **solicitud HTTP** al **daemon** de Docker a través de la CLI o mediante la API del Engine, el **subsystema de autenticación** **pasa** la solicitud a los **plugins de autenticación** instalados. La solicitud contiene el usuario (llamador) y el contexto del comando. El **plugin** es responsable de decidir si **permitir** o **negar** la solicitud.
+Cuando se realiza una **solicitud HTTP** al **daemon** de Docker a través de la CLI o mediante la API del Engine, el **sub-sistema de autenticación** **pasa** la solicitud a los **plugins de autenticación** instalados. La solicitud contiene el usuario (llamador) y el contexto del comando. El **plugin** es responsable de decidir si **permitir** o **negar** la solicitud.
 
 Los diagramas de secuencia a continuación representan un flujo de autorización de permitir y negar:
 
@@ -30,7 +30,7 @@ Eres responsable de **registrar** tu **plugin** como parte del **inicio** del da
 
 ## Twistlock AuthZ Broker
 
-El plugin [**authz**](https://github.com/twistlock/authz) te permite crear un archivo **JSON** simple que el **plugin** estará **leyendo** para autorizar las solicitudes. Por lo tanto, te da la oportunidad de controlar muy fácilmente qué puntos finales de API pueden alcanzar a cada usuario.
+El plugin [**authz**](https://github.com/twistlock/authz) te permite crear un archivo **JSON** simple que el **plugin** estará **leyendo** para autorizar las solicitudes. Por lo tanto, te da la oportunidad de controlar muy fácilmente qué puntos finales de la API pueden alcanzar a cada usuario.
 
 Este es un ejemplo que permitirá a Alice y Bob crear nuevos contenedores: `{"name":"policy_3","users":["alice","bob"],"actions":["container_create"]}`
 
@@ -92,19 +92,19 @@ host> /tmp/bash
 > [!NOTE]
 > Tenga en cuenta que tal vez no pueda montar la carpeta `/tmp`, pero puede montar una **carpeta diferente y escribible**. Puede encontrar directorios escribibles usando: `find / -writable -type d 2>/dev/null`
 >
-> **¡Tenga en cuenta que no todos los directorios en una máquina linux admitirán el bit suid!** Para verificar qué directorios admiten el bit suid, ejecute `mount | grep -v "nosuid"` Por ejemplo, generalmente `/dev/shm`, `/run`, `/proc`, `/sys/fs/cgroup` y `/var/lib/lxcfs` no admiten el bit suid.
+> **¡Tenga en cuenta que no todos los directorios en una máquina linux soportarán el bit suid!** Para verificar qué directorios soportan el bit suid, ejecute `mount | grep -v "nosuid"` Por ejemplo, generalmente `/dev/shm`, `/run`, `/proc`, `/sys/fs/cgroup` y `/var/lib/lxcfs` no soportan el bit suid.
 >
 > También tenga en cuenta que si puede **montar `/etc`** o cualquier otra carpeta **que contenga archivos de configuración**, puede cambiarlos desde el contenedor de docker como root para **abusar de ellos en el host** y escalar privilegios (tal vez modificando `/etc/shadow`)
 
-## Endpoint de API no verificado
+## Unchecked API Endpoint
 
 La responsabilidad del sysadmin que configura este plugin sería controlar qué acciones y con qué privilegios cada usuario puede realizar. Por lo tanto, si el administrador adopta un enfoque de **lista negra** con los endpoints y los atributos, podría **olvidar algunos de ellos** que podrían permitir a un atacante **escalar privilegios.**
 
 Puede consultar la API de docker en [https://docs.docker.com/engine/api/v1.40/#](https://docs.docker.com/engine/api/v1.40/#)
 
-## Estructura JSON no verificada
+## Unchecked JSON Structure
 
-### Montajes en root
+### Binds in root
 
 Es posible que cuando el sysadmin configuró el firewall de docker, **olvidara algún parámetro importante** de la [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) como "**Binds**".\
 En el siguiente ejemplo, es posible abusar de esta mala configuración para crear y ejecutar un contenedor que monte la carpeta raíz (/) del host:
@@ -122,7 +122,7 @@ docker exec -it f6932bc153ad chroot /host bash #Get a shell inside of it
 
 ### Binds en HostConfig
 
-Sigue la misma instrucción que con **Binds en raíz** realizando esta **request** a la API de Docker:
+Sigue la misma instrucción que con **Binds en raíz** realizando esta **solicitud** a la API de Docker:
 ```bash
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu", "HostConfig":{"Binds":["/:/host"]}}' http:/v1.40/containers/create
 ```

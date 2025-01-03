@@ -39,7 +39,7 @@ Es crucial notar que la facilidad de inscripción proporcionada por DEP, aunque 
 
 ### ¿Qué son los Perfiles de Configuración (también conocidos como mobileconfigs)?
 
-- La forma oficial de Apple de **configurar/imponer la configuración del sistema.**
+- La forma oficial de Apple de **configurar/implementar la configuración del sistema.**
 - Formato de archivo que puede contener múltiples cargas útiles.
 - Basado en listas de propiedades (el tipo XML).
 - “pueden ser firmados y cifrados para validar su origen, asegurar su integridad y proteger su contenido.” Fundamentos — Página 70, Guía de Seguridad de iOS, enero de 2018.
@@ -58,7 +58,7 @@ Es crucial notar que la facilidad de inscripción proporcionada por DEP, aunque 
 
 - **3 APIs**: 1 para revendedores, 1 para proveedores de MDM, 1 para identidad de dispositivo (no documentada):
 - La llamada [API de "servicio en la nube" de DEP](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf). Esta es utilizada por los servidores MDM para asociar perfiles DEP con dispositivos específicos.
-- La [API de DEP utilizada por los Revendedores Autorizados de Apple](https://applecareconnect.apple.com/api-docs/depuat/html/WSImpManual.html) para inscribir dispositivos, verificar el estado de inscripción y verificar el estado de transacciones.
+- La [API de DEP utilizada por los Revendedores Autorizados de Apple](https://applecareconnect.apple.com/api-docs/depuat/html/WSImpManual.html) para inscribir dispositivos, verificar el estado de inscripción y verificar el estado de transacción.
 - La API privada de DEP no documentada. Esta es utilizada por los Dispositivos Apple para solicitar su perfil DEP. En macOS, el binario `cloudconfigurationd` es responsable de comunicarse a través de esta API.
 - Más moderna y basada en **JSON** (vs. plist)
 - Apple otorga un **token OAuth** al proveedor de MDM
@@ -139,7 +139,7 @@ La respuesta es un diccionario JSON con algunos datos importantes como:
 - **Certificados ancla** se utilizan para **evaluar la confianza** si se proporcionan.
 - Recordatorio: la propiedad **anchor_certs** del perfil DEP
 - **La solicitud es un simple .plist** con identificación del dispositivo
-- Ejemplos: **UDID, versión del SO**.
+- Ejemplos: **UDID, versión de OS**.
 - Firmado por CMS, codificado en DER
 - Firmado usando el **certificado de identidad del dispositivo (de APNS)**
 - **La cadena de certificados** incluye un **Apple iPhone Device CA** expirado
@@ -156,7 +156,7 @@ La respuesta es un diccionario JSON con algunos datos importantes como:
 - Los perfiles de configuración tienen múltiples cargas útiles para instalar
 - El marco tiene una arquitectura basada en plugins para instalar perfiles
 - Cada tipo de carga útil está asociado con un plugin
-- Puede ser XPC (en el marco) o Cocoa clásica (en ManagedClient.app)
+- Puede ser XPC (en el marco) o Cocoa clásico (en ManagedClient.app)
 - Ejemplo:
 - Las cargas útiles de certificados utilizan CertificateService.xpc
 
@@ -165,10 +165,10 @@ Típicamente, el **perfil de activación** proporcionado por un proveedor de MDM
 - `com.apple.mdm`: para **inscribir** el dispositivo en MDM
 - `com.apple.security.scep`: para proporcionar de forma segura un **certificado de cliente** al dispositivo.
 - `com.apple.security.pem`: para **instalar certificados CA de confianza** en el llavero del sistema del dispositivo.
-- La instalación de la carga útil de MDM es equivalente a **MDM check-in en la documentación**
+- La instalación de la carga útil de MDM es equivalente a **la inscripción en MDM en la documentación**
 - La carga útil **contiene propiedades clave**:
-- - URL de Check-In de MDM (**`CheckInURL`**)
-- URL de Polling de Comandos de MDM (**`ServerURL`**) + tema de APNs para activarlo
+- - URL de Inscripción MDM (**`CheckInURL`**)
+- URL de Sondeo de Comandos MDM (**`ServerURL`**) + tema de APNs para activarlo
 - Para instalar la carga útil de MDM, se envía una solicitud a **`CheckInURL`**
 - Implementado en **`mdmclient`**
 - La carga útil de MDM puede depender de otras cargas útiles
@@ -176,15 +176,15 @@ Típicamente, el **perfil de activación** proporcionado por un proveedor de MDM
 - Propiedad: **`CheckInURLPinningCertificateUUIDs`**
 - Propiedad: **`ServerURLPinningCertificateUUIDs`**
 - Entregado a través de la carga útil PEM
-- Permite que el dispositivo se atribuya un certificado de identidad:
+- Permite que el dispositivo sea atribuido con un certificado de identidad:
 - Propiedad: IdentityCertificateUUID
 - Entregado a través de la carga útil SCEP
 
 ### **Paso 7: Escuchando comandos MDM**
 
-- Después de que se complete el registro en MDM, el proveedor puede **emitir notificaciones push usando APNs**
+- Después de que la inscripción en MDM se complete, el proveedor puede **emitir notificaciones push usando APNs**
 - Al recibirlas, son manejadas por **`mdmclient`**
-- Para consultar comandos MDM, se envía una solicitud a ServerURL
+- Para sondear comandos MDM, se envía una solicitud a ServerURL
 - Utiliza la carga útil de MDM previamente instalada:
 - **`ServerURLPinningCertificateUUIDs`** para fijar la solicitud
 - **`IdentityCertificateUUID`** para el certificado de cliente TLS

@@ -1,51 +1,51 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-The following steps are recommended for modifying device startup configurations and bootloaders like U-boot:
+Los siguientes pasos se recomiendan para modificar las configuraciones de inicio del dispositivo y los bootloaders como U-boot:
 
-1. **Access Bootloader's Interpreter Shell**:
+1. **Acceder a la Shell del Intérprete del Bootloader**:
 
-   - During boot, press "0", space, or other identified "magic codes" to access the bootloader's interpreter shell.
+- Durante el arranque, presiona "0", espacio u otros "códigos mágicos" identificados para acceder a la shell del intérprete del bootloader.
 
-2. **Modify Boot Arguments**:
+2. **Modificar los Argumentos de Arranque**:
 
-   - Execute the following commands to append '`init=/bin/sh`' to the boot arguments, allowing execution of a shell command:
-     %%%
-     #printenv
-     #setenv bootargs=console=ttyS0,115200 mem=63M root=/dev/mtdblock3 mtdparts=sflash:<partitiionInfo> rootfstype=<fstype> hasEeprom=0 5srst=0 init=/bin/sh
-     #saveenv
-     #boot
-     %%%
+- Ejecuta los siguientes comandos para agregar '`init=/bin/sh`' a los argumentos de arranque, permitiendo la ejecución de un comando de shell:
+%%%
+#printenv
+#setenv bootargs=console=ttyS0,115200 mem=63M root=/dev/mtdblock3 mtdparts=sflash:<partitiionInfo> rootfstype=<fstype> hasEeprom=0 5srst=0 init=/bin/sh
+#saveenv
+#boot
+%%%
 
-3. **Setup TFTP Server**:
+3. **Configurar el Servidor TFTP**:
 
-   - Configure a TFTP server to load images over a local network:
-     %%%
-     #setenv ipaddr 192.168.2.2 #local IP of the device
-     #setenv serverip 192.168.2.1 #TFTP server IP
-     #saveenv
-     #reset
-     #ping 192.168.2.1 #check network access
-     #tftp ${loadaddr} uImage-3.6.35 #loadaddr takes the address to load the file into and the filename of the image on the TFTP server
-     %%%
+- Configura un servidor TFTP para cargar imágenes a través de una red local:
+%%%
+#setenv ipaddr 192.168.2.2 #IP local del dispositivo
+#setenv serverip 192.168.2.1 #IP del servidor TFTP
+#saveenv
+#reset
+#ping 192.168.2.1 #verificar acceso a la red
+#tftp ${loadaddr} uImage-3.6.35 #loadaddr toma la dirección para cargar el archivo y el nombre del archivo de la imagen en el servidor TFTP
+%%%
 
-4. **Utilize `ubootwrite.py`**:
+4. **Utilizar `ubootwrite.py`**:
 
-   - Use `ubootwrite.py` to write the U-boot image and push a modified firmware to gain root access.
+- Usa `ubootwrite.py` para escribir la imagen de U-boot y cargar un firmware modificado para obtener acceso root.
 
-5. **Check Debug Features**:
+5. **Verificar Características de Depuración**:
 
-   - Verify if debug features like verbose logging, loading arbitrary kernels, or booting from untrusted sources are enabled.
+- Verifica si las características de depuración como el registro detallado, la carga de núcleos arbitrarios o el arranque desde fuentes no confiables están habilitadas.
 
-6. **Cautionary Hardware Interference**:
+6. **Interferencia de Hardware Cautelosa**:
 
-   - Be cautious when connecting one pin to ground and interacting with SPI or NAND flash chips during the device boot-up sequence, particularly before the kernel decompresses. Consult the NAND flash chip's datasheet before shorting pins.
+- Ten cuidado al conectar un pin a tierra e interactuar con chips SPI o NAND flash durante la secuencia de arranque del dispositivo, particularmente antes de que el núcleo se descomprima. Consulta la hoja de datos del chip NAND flash antes de hacer cortocircuito en los pines.
 
-7. **Configure Rogue DHCP Server**:
-   - Set up a rogue DHCP server with malicious parameters for a device to ingest during a PXE boot. Utilize tools like Metasploit's (MSF) DHCP auxiliary server. Modify the 'FILENAME' parameter with command injection commands such as `'a";/bin/sh;#'` to test input validation for device startup procedures.
+7. **Configurar un Servidor DHCP Malicioso**:
+- Configura un servidor DHCP malicioso con parámetros dañinos para que un dispositivo los ingiera durante un arranque PXE. Utiliza herramientas como el servidor auxiliar DHCP de Metasploit (MSF). Modifica el parámetro 'FILENAME' con comandos de inyección de comandos como `'a";/bin/sh;#'` para probar la validación de entrada en los procedimientos de inicio del dispositivo.
 
-**Note**: The steps involving physical interaction with device pins (\*marked with asterisks) should be approached with extreme caution to avoid damaging the device.
+**Nota**: Los pasos que implican interacción física con los pines del dispositivo (\*marcados con asteriscos) deben abordarse con extrema precaución para evitar dañar el dispositivo.
 
-## References
+## Referencias
 
 - [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
 

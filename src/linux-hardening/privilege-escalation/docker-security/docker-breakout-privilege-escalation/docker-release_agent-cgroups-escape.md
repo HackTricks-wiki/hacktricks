@@ -2,7 +2,7 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-**Para más detalles, consulta el** [**post original del blog**](https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/)**.** Esto es solo un resumen:
+**Para más detalles, consulta el** [**artículo del blog original**](https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/)**.** Esto es solo un resumen:
 
 PoC original:
 ```shell

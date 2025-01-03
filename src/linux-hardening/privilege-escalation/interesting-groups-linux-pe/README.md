@@ -56,7 +56,7 @@ pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 ```
 ## Grupo Wheel
 
-**A veces**, **por defecto** dentro del **/etc/sudoers** archivo puedes encontrar esta línea:
+**A veces**, **por defecto** dentro del **/etc/sudoers** puedes encontrar esta línea:
 ```
 %wheel	ALL=(ALL:ALL) ALL
 ```
@@ -88,7 +88,7 @@ $ echo $PATH
 ```
 Si podemos secuestrar algunos programas en `/usr/local`, podemos obtener fácilmente acceso root.
 
-Secuestrar el programa `run-parts` es una forma fácil de obtener acceso root, porque la mayoría de los programas ejecutarán un `run-parts` como (crontab, al iniciar sesión por ssh).
+Secuestrar el programa `run-parts` es una forma fácil de obtener acceso root, porque la mayoría de los programas ejecutarán un `run-parts` como (crontab, cuando se inicia sesión por ssh).
 ```bash
 $ cat /etc/crontab | grep run-parts
 17 *    * * *   root    cd / && run-parts --report /etc/cron.hourly
@@ -163,11 +163,11 @@ El **grupo de video** tiene acceso para ver la salida de la pantalla. Básicamen
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-Para **abrir** la **imagen en bruto** puedes usar **GIMP**, seleccionar el \*\*`screen.raw`\*\* y seleccionar como tipo de archivo **Datos de imagen en bruto**:
+Para **abrir** la **imagen en bruto** puedes usar **GIMP**, seleccionar el archivo **`screen.raw`** y seleccionar como tipo de archivo **Datos de imagen en bruto**:
 
 ![](<../../../images/image (463).png>)
 
-Luego modifica el Ancho y Alto a los que se usaron en la pantalla y verifica diferentes Tipos de Imagen (y selecciona el que muestre mejor la pantalla):
+Luego modifica el Ancho y Alto a los que se usan en la pantalla y verifica diferentes Tipos de Imagen (y selecciona el que muestre mejor la pantalla):
 
 ![](<../../../images/image (317).png>)
 
@@ -213,7 +213,7 @@ Si tienes permisos de escritura sobre el socket de docker, lee [**esta publicaci
 
 ## Grupo Adm
 
-Por lo general, **los miembros** del grupo **`adm`** tienen permisos para **leer archivos de registro** ubicados dentro de _/var/log/_.\
+Por lo general, los **miembros** del grupo **`adm`** tienen permisos para **leer archivos de registro** ubicados dentro de _/var/log/_.\
 Por lo tanto, si has comprometido a un usuario dentro de este grupo, definitivamente deberías **mirar los registros**.
 
 ## Grupo Auth

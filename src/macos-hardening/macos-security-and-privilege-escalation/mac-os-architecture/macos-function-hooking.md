@@ -77,7 +77,7 @@ Hello from interpose
 DYLD_INSERT_LIBRARIES=./interpose2.dylib ./hello
 Hello from interpose
 ```
-## Método Swizzling
+## Method Swizzling
 
 En ObjectiveC, así es como se llama a un método: **`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
 
@@ -88,9 +88,9 @@ El objeto es **`someObject`**, el método es **`@selector(method1p1:p2:)`** y lo
 Siguiendo las estructuras de objetos, es posible acceder a un **array de métodos** donde se **ubican** los **nombres** y **punteros** al código del método.
 
 > [!CAUTION]
-> Tenga en cuenta que, dado que los métodos y clases se acceden en función de sus nombres, esta información se almacena en el binario, por lo que es posible recuperarla con `otool -ov </path/bin>` o [`class-dump </path/bin>`](https://github.com/nygard/class-dump)
+> Tenga en cuenta que, dado que los métodos y las clases se acceden en función de sus nombres, esta información se almacena en el binario, por lo que es posible recuperarla con `otool -ov </path/bin>` o [`class-dump </path/bin>`](https://github.com/nygard/class-dump)
 
-### Accediendo a los métodos en bruto
+### Accessing the raw methods
 
 Es posible acceder a la información de los métodos, como el nombre, el número de params o la dirección, como en el siguiente ejemplo:
 ```objectivec
@@ -268,15 +268,15 @@ return 0;
 }
 }
 ```
-## Metodología de Ataque de Hooking
+## Metodología de Ataque por Hooking
 
-En esta página se discutieron diferentes formas de enganchar funciones. Sin embargo, involucraron **ejecutar código dentro del proceso para atacar**.
+En esta página se discutieron diferentes formas de enganchar funciones. Sin embargo, implicaron **ejecutar código dentro del proceso para atacar**.
 
-Para hacer eso, la técnica más fácil de usar es inyectar un [Dyld a través de variables de entorno o secuestrando](../macos-dyld-hijacking-and-dyld_insert_libraries.md). Sin embargo, supongo que esto también podría hacerse a través de [inyección de proceso Dylib](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port).
+Para hacer eso, la técnica más fácil de usar es inyectar un [Dyld a través de variables de entorno o secuestrando](../macos-dyld-hijacking-and-dyld_insert_libraries.md). Sin embargo, supongo que esto también podría hacerse a través de [inyección de procesos Dylib](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port).
 
 Sin embargo, ambas opciones están **limitadas** a binarios/procesos **no protegidos**. Consulta cada técnica para aprender más sobre las limitaciones.
 
-Sin embargo, un ataque de hooking de función es muy específico, un atacante hará esto para **robar información sensible desde dentro de un proceso** (si no, simplemente harías un ataque de inyección de proceso). Y esta información sensible podría estar ubicada en aplicaciones descargadas por el usuario, como MacPass.
+Sin embargo, un ataque de hooking de funciones es muy específico, un atacante hará esto para **robar información sensible desde dentro de un proceso** (si no, simplemente harías un ataque de inyección de procesos). Y esta información sensible podría estar ubicada en aplicaciones descargadas por el usuario, como MacPass.
 
 Así que el vector del atacante sería encontrar una vulnerabilidad o eliminar la firma de la aplicación, inyectar la variable de entorno **`DYLD_INSERT_LIBRARIES`** a través del Info.plist de la aplicación añadiendo algo como:
 ```xml

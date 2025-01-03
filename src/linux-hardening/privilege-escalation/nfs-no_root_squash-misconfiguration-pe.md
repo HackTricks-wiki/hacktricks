@@ -12,7 +12,7 @@ Lee el _ **/etc/exports** _ archivo, si encuentras algún directorio que esté c
 
 Si has encontrado esta vulnerabilidad, puedes explotarla:
 
-- **Montando ese directorio** en una máquina cliente, y **como root copiando** dentro de la carpeta montada el binario **/bin/bash** y dándole derechos **SUID**, y **ejecutando desde la máquina víctima** ese binario bash.
+- **Montando ese directorio** en una máquina cliente, y **como root copiando** dentro de la carpeta montada el **/bin/bash** binario y dándole derechos **SUID**, y **ejecutando desde la máquina víctima** ese binario bash.
 ```bash
 #Attacker, as root user
 mkdir /tmp/pe
@@ -43,8 +43,8 @@ cd <SHAREDD_FOLDER>
 
 > [!NOTE]
 > Tenga en cuenta que si puede crear un **túnel desde su máquina a la máquina víctima, aún puede usar la versión remota para explotar esta escalada de privilegios tunelizando los puertos requeridos**.\
-> El siguiente truco es en caso de que el archivo `/etc/exports` **indique una IP**. En este caso, **no podrá usar** en ningún caso la **explotación remota** y necesitará **abusar de este truco**.\
-> Otro requisito necesario para que la explotación funcione es que **la exportación dentro de `/etc/export`** **debe estar usando la bandera `insecure`**.\
+> El siguiente truco es en caso de que el archivo `/etc/exports` **indique una IP**. En este caso, **no podrá usar** en ningún caso el **exploit remoto** y necesitará **abusar de este truco**.\
+> Otro requisito necesario para que el exploit funcione es que **la exportación dentro de `/etc/export`** **debe estar usando la bandera `insecure`**.\
 > --_No estoy seguro de que si `/etc/export` está indicando una dirección IP, este truco funcionará_--
 
 ## Basic Information
@@ -62,7 +62,7 @@ gcc -fPIC -shared -o ld_nfs.so examples/ld_nfs.c -ldl -lnfs -I./include/ -L./lib
 ```
 ### Realizando el Explotación
 
-La explotación implica crear un programa simple en C (`pwn.c`) que eleva privilegios a root y luego ejecuta un shell. El programa se compila y el binario resultante (`a.out`) se coloca en el recurso compartido con suid root, utilizando `ld_nfs.so` para falsificar el uid en las llamadas RPC:
+La explotación implica crear un programa C simple (`pwn.c`) que eleva privilegios a root y luego ejecuta un shell. El programa se compila y el binario resultante (`a.out`) se coloca en el recurso compartido con suid root, utilizando `ld_nfs.so` para falsificar el uid en las llamadas RPC:
 
 1. **Compilar el código de explotación:**
 
@@ -89,7 +89,7 @@ LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod u+s nfs:/
 
 ## Bonificación: NFShell para Acceso a Archivos Sigiloso
 
-Una vez que se obtiene acceso root, para interactuar con el recurso compartido NFS sin cambiar la propiedad (para evitar dejar rastros), se utiliza un script de Python (nfsh.py). Este script ajusta el uid para que coincida con el del archivo al que se accede, permitiendo la interacción con archivos en el recurso compartido sin problemas de permisos:
+Una vez que se obtiene acceso root, para interactuar con el recurso compartido NFS sin cambiar la propiedad (para evitar dejar rastros), se utiliza un script de Python (nfsh.py). Este script ajusta el uid para que coincida con el del archivo que se está accediendo, permitiendo la interacción con archivos en el recurso compartido sin problemas de permisos:
 ```python
 #!/usr/bin/env python
 # script from https://www.errno.fr/nfs_privesc.html

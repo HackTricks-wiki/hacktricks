@@ -1,24 +1,23 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# Identifying packed binaries
+# Identificación de binarios empaquetados
 
-- **lack of strings**: It's common to find that packed binaries doesn't have almost any string
-- A lot of **unused strings**: Also, when a malware is using some kind of commercial packer it's common to find a lot of strings without cross-references. Even if these strings exist that doesn't mean that the binary isn't packed.
-- You can also use some tools to try to find which packer was used to pack a binary:
-  - [PEiD](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/PEiD-updated.shtml)
-  - [Exeinfo PE](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/ExEinfo-PE.shtml)
-  - [Language 2000](http://farrokhi.net/language/)
+- **falta de cadenas**: Es común encontrar que los binarios empaquetados no tienen casi ninguna cadena.
+- Muchas **cadenas no utilizadas**: Además, cuando un malware utiliza algún tipo de empaquetador comercial, es común encontrar muchas cadenas sin referencias cruzadas. Incluso si estas cadenas existen, eso no significa que el binario no esté empaquetado.
+- También puedes usar algunas herramientas para intentar encontrar qué empaquetador se utilizó para empaquetar un binario:
+- [PEiD](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/PEiD-updated.shtml)
+- [Exeinfo PE](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/ExEinfo-PE.shtml)
+- [Language 2000](http://farrokhi.net/language/)
 
-# Basic Recommendations
+# Recomendaciones Básicas
 
-- **Start** analysing the packed binary **from the bottom in IDA and move up**. Unpackers exit once the unpacked code exit so it's unlikely that the unpacker passes execution to the unpacked code at the start.
-- Search for **JMP's** or **CALLs** to **registers** or **regions** of **memory**. Also search for **functions pushing arguments and an address direction and then calling `retn`**, because the return of the function in that case may call the address just pushed to the stack before calling it.
-- Put a **breakpoint** on `VirtualAlloc` as this allocates space in memory where the program can write unpacked code. The "run to user code" or use F8 to **get to value inside EAX** after executing the function and "**follow that address in dump**". You never know if that is the region where the unpacked code is going to be saved.
-  - **`VirtualAlloc`** with the value "**40**" as an argument means Read+Write+Execute (some code that needs execution is going to be copied here).
-- **While unpacking** code it's normal to find **several calls** to **arithmetic operations** and functions like **`memcopy`** or **`Virtual`**`Alloc`. If you find yourself in a function that apparently only perform arithmetic operations and maybe some `memcopy` , the recommendation is to try to **find the end of the function** (maybe a JMP or call to some register) **or** at least the **call to the last function** and run to then as the code isn't interesting.
-- While unpacking code **note** whenever you **change memory region** as a memory region change may indicate the **starting of the unpacking code**. You can easily dump a memory region using Process Hacker (process --> properties --> memory).
-- While trying to unpack code a good way to **know if you are already working with the unpacked code** (so you can just dump it) is to **check the strings of the binary**. If at some point you perform a jump (maybe changing the memory region) and you notice that **a lot more strings where added**, then you can know **you are working with the unpacked code**.\
-  However, if the packer already contains a lot of strings you can see how many strings contains the word "http" and see if this number increases.
-- When you dump an executable from a region of memory you can fix some headers using [PE-bear](https://github.com/hasherezade/pe-bear-releases/releases).
+- **Comienza** a analizar el binario empaquetado **desde abajo en IDA y sube**. Los desempaquetadores salen una vez que el código desempaquetado sale, por lo que es poco probable que el desempaquetador pase la ejecución al código desempaquetado al principio.
+- Busca **JMP's** o **CALLs** a **registros** o **regiones** de **memoria**. También busca **funciones que empujan argumentos y una dirección de dirección y luego llaman a `retn`**, porque el retorno de la función en ese caso puede llamar a la dirección que se acaba de empujar a la pila antes de llamarla.
+- Coloca un **punto de interrupción** en `VirtualAlloc`, ya que esto asigna espacio en memoria donde el programa puede escribir código desempaquetado. "Ejecutar hasta el código de usuario" o usa F8 para **obtener el valor dentro de EAX** después de ejecutar la función y "**seguir esa dirección en el volcado**". Nunca sabes si esa es la región donde se va a guardar el código desempaquetado.
+- **`VirtualAlloc`** con el valor "**40**" como argumento significa Leer+Escribir+Ejecutar (algún código que necesita ejecución se va a copiar aquí).
+- **Mientras desempaquetas** código, es normal encontrar **varias llamadas** a **operaciones aritméticas** y funciones como **`memcopy`** o **`Virtual`**`Alloc`. Si te encuentras en una función que aparentemente solo realiza operaciones aritméticas y tal vez algún `memcopy`, la recomendación es intentar **encontrar el final de la función** (tal vez un JMP o llamada a algún registro) **o** al menos la **llamada a la última función** y ejecutarla, ya que el código no es interesante.
+- Mientras desempaquetas código, **nota** cada vez que **cambias la región de memoria**, ya que un cambio en la región de memoria puede indicar el **inicio del código desempaquetado**. Puedes volcar fácilmente una región de memoria usando Process Hacker (proceso --> propiedades --> memoria).
+- Mientras intentas desempaquetar código, una buena manera de **saber si ya estás trabajando con el código desempaquetado** (así que puedes simplemente volcarlo) es **verificar las cadenas del binario**. Si en algún momento realizas un salto (tal vez cambiando la región de memoria) y notas que **se añadieron muchas más cadenas**, entonces puedes saber **que estás trabajando con el código desempaquetado**. Sin embargo, si el empaquetador ya contiene muchas cadenas, puedes ver cuántas cadenas contienen la palabra "http" y ver si este número aumenta.
+- Cuando vuelcas un ejecutable desde una región de memoria, puedes corregir algunos encabezados usando [PE-bear](https://github.com/hasherezade/pe-bear-releases/releases).
 
 {{#include ../../banners/hacktricks-training.md}}

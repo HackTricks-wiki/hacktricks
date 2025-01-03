@@ -39,11 +39,11 @@ chmod +x /opt/homebrew/bin/ls
 # victim
 sudo ls
 ```
-Nota que un usuario que utiliza el terminal probablemente tendrá **Homebrew instalado**. Así que es posible secuestrar binarios en **`/opt/homebrew/bin`**.
+Tenga en cuenta que un usuario que utiliza el terminal probablemente tendrá **Homebrew instalado**. Por lo tanto, es posible secuestrar binarios en **`/opt/homebrew/bin`**.
 
 ### Suplantación del Dock
 
-Usando algo de **ingeniería social** podrías **suplantar por ejemplo Google Chrome** dentro del dock y ejecutar realmente tu propio script:
+Usando algo de **ingeniería social**, podrías **suplantar, por ejemplo, Google Chrome** dentro del dock y ejecutar realmente tu propio script:
 
 {{#tabs}}
 {{#tab name="Chrome Impersonation"}}

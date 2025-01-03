@@ -1,173 +1,143 @@
-# Checklist - Linux Privilege Escalation
+# Lista de verificación - Escalación de privilegios en Linux
 
 {{#include ../banners/hacktricks-training.md}}
 
-<figure><img src="../images/image (3).png" alt=""><figcaption></figcaption></figure>
+### **Mejor herramienta para buscar vectores de escalación de privilegios locales en Linux:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
 
-Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
+### [Información del sistema](privilege-escalation/#system-information)
 
-**Hacking Insights**\
-Engage with content that delves into the thrill and challenges of hacking
+- [ ] Obtener **información del SO**
+- [ ] Verificar el [**PATH**](privilege-escalation/#path), ¿hay alguna **carpeta escribible**?
+- [ ] Verificar [**variables de entorno**](privilege-escalation/#env-info), ¿hay algún detalle sensible?
+- [ ] Buscar [**exploits del kernel**](privilege-escalation/#kernel-exploits) **usando scripts** (¿DirtyCow?)
+- [ ] **Verificar** si la [**versión de sudo** es vulnerable](privilege-escalation/#sudo-version)
+- [ ] [**Dmesg** verificación de firma fallida](privilege-escalation/#dmesg-signature-verification-failed)
+- [ ] Más enumeración del sistema ([fecha, estadísticas del sistema, información de CPU, impresoras](privilege-escalation/#more-system-enumeration))
+- [ ] [**Enumerar más defensas**](privilege-escalation/#enumerate-possible-defenses)
 
-**Real-Time Hack News**\
-Keep up-to-date with fast-paced hacking world through real-time news and insights
+### [Unidades](privilege-escalation/#drives)
 
-**Latest Announcements**\
-Stay informed with the newest bug bounties launching and crucial platform updates
+- [ ] **Listar unidades** montadas
+- [ ] **¿Alguna unidad no montada?**
+- [ ] **¿Alguna credencial en fstab?**
 
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
+### [**Software instalado**](privilege-escalation/#installed-software)
 
-### **Best tool to look for Linux local privilege escalation vectors:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
+- [ ] **Verificar** [**software útil**](privilege-escalation/#useful-software) **instalado**
+- [ ] **Verificar** [**software vulnerable**](privilege-escalation/#vulnerable-software-installed) **instalado**
 
-### [System Information](privilege-escalation/#system-information)
+### [Procesos](privilege-escalation/#processes)
 
-- [ ] Get **OS information**
-- [ ] Check the [**PATH**](privilege-escalation/#path), any **writable folder**?
-- [ ] Check [**env variables**](privilege-escalation/#env-info), any sensitive detail?
-- [ ] Search for [**kernel exploits**](privilege-escalation/#kernel-exploits) **using scripts** (DirtyCow?)
-- [ ] **Check** if the [**sudo version** is vulnerable](privilege-escalation/#sudo-version)
-- [ ] [**Dmesg** signature verification failed](privilege-escalation/#dmesg-signature-verification-failed)
-- [ ] More system enum ([date, system stats, cpu info, printers](privilege-escalation/#more-system-enumeration))
-- [ ] [Enumerate more defenses](privilege-escalation/#enumerate-possible-defenses)
+- [ ] ¿Hay algún **software desconocido en ejecución**?
+- [ ] ¿Hay algún software en ejecución con **más privilegios de los que debería tener**?
+- [ ] Buscar **exploits de procesos en ejecución** (especialmente la versión en ejecución).
+- [ ] ¿Puedes **modificar el binario** de algún proceso en ejecución?
+- [ ] **Monitorear procesos** y verificar si algún proceso interesante se está ejecutando con frecuencia.
+- [ ] ¿Puedes **leer** alguna **memoria de proceso** interesante (donde podrían estar guardadas las contraseñas)?
 
-### [Drives](privilege-escalation/#drives)
+### [¿Tareas programadas/Cron?](privilege-escalation/#scheduled-jobs)
 
-- [ ] **List mounted** drives
-- [ ] **Any unmounted drive?**
-- [ ] **Any creds in fstab?**
+- [ ] ¿Se está modificando el [**PATH**](privilege-escalation/#cron-path) por algún cron y puedes **escribir** en él?
+- [ ] ¿Algún [**comodín**](privilege-escalation/#cron-using-a-script-with-a-wildcard-wildcard-injection) en un trabajo cron?
+- [ ] ¿Algún [**script modificable**](privilege-escalation/#cron-script-overwriting-and-symlink) está siendo **ejecutado** o está dentro de una **carpeta modificable**?
+- [ ] ¿Has detectado que algún **script** podría estar o está siendo [**ejecutado** muy **frecuentemente**](privilege-escalation/#frequent-cron-jobs)? (cada 1, 2 o 5 minutos)
 
-### [**Installed Software**](privilege-escalation/#installed-software)
+### [Servicios](privilege-escalation/#services)
 
-- [ ] **Check for**[ **useful software**](privilege-escalation/#useful-software) **installed**
-- [ ] **Check for** [**vulnerable software**](privilege-escalation/#vulnerable-software-installed) **installed**
+- [ ] ¿Algún archivo **.service** **escribible**?
+- [ ] ¿Algún **binario escribible** ejecutado por un **servicio**?
+- [ ] ¿Alguna **carpeta escribible en el PATH de systemd**?
 
-### [Processes](privilege-escalation/#processes)
+### [Temporizadores](privilege-escalation/#timers)
 
-- [ ] Is any **unknown software running**?
-- [ ] Is any software running with **more privileges than it should have**?
-- [ ] Search for **exploits of running processes** (especially the version running).
-- [ ] Can you **modify the binary** of any running process?
-- [ ] **Monitor processes** and check if any interesting process is running frequently.
-- [ ] Can you **read** some interesting **process memory** (where passwords could be saved)?
-
-### [Scheduled/Cron jobs?](privilege-escalation/#scheduled-jobs)
-
-- [ ] Is the [**PATH** ](privilege-escalation/#cron-path)being modified by some cron and you can **write** in it?
-- [ ] Any [**wildcard** ](privilege-escalation/#cron-using-a-script-with-a-wildcard-wildcard-injection)in a cron job?
-- [ ] Some [**modifiable script** ](privilege-escalation/#cron-script-overwriting-and-symlink)is being **executed** or is inside **modifiable folder**?
-- [ ] Have you detected that some **script** could be or are being [**executed** very **frequently**](privilege-escalation/#frequent-cron-jobs)? (every 1, 2 or 5 minutes)
-
-### [Services](privilege-escalation/#services)
-
-- [ ] Any **writable .service** file?
-- [ ] Any **writable binary** executed by a **service**?
-- [ ] Any **writable folder in systemd PATH**?
-
-### [Timers](privilege-escalation/#timers)
-
-- [ ] Any **writable timer**?
+- [ ] ¿Algún **temporizador escribible**?
 
 ### [Sockets](privilege-escalation/#sockets)
 
-- [ ] Any **writable .socket** file?
-- [ ] Can you **communicate with any socket**?
-- [ ] **HTTP sockets** with interesting info?
+- [ ] ¿Algún archivo **.socket** **escribible**?
+- [ ] ¿Puedes **comunicarte con algún socket**?
+- [ ] ¿**Sockets HTTP** con información interesante?
 
 ### [D-Bus](privilege-escalation/#d-bus)
 
-- [ ] Can you **communicate with any D-Bus**?
+- [ ] ¿Puedes **comunicarte con algún D-Bus**?
 
-### [Network](privilege-escalation/#network)
+### [Red](privilege-escalation/#network)
 
-- [ ] Enumerate the network to know where you are
-- [ ] **Open ports you couldn't access before** getting a shell inside the machine?
-- [ ] Can you **sniff traffic** using `tcpdump`?
+- [ ] Enumerar la red para saber dónde estás
+- [ ] **¿Puertos abiertos a los que no pudiste acceder antes** de obtener un shell dentro de la máquina?
+- [ ] ¿Puedes **capturar tráfico** usando `tcpdump`?
 
-### [Users](privilege-escalation/#users)
+### [Usuarios](privilege-escalation/#users)
 
-- [ ] Generic users/groups **enumeration**
-- [ ] Do you have a **very big UID**? Is the **machine** **vulnerable**?
-- [ ] Can you [**escalate privileges thanks to a group**](privilege-escalation/interesting-groups-linux-pe/) you belong to?
-- [ ] **Clipboard** data?
-- [ ] Password Policy?
-- [ ] Try to **use** every **known password** that you have discovered previously to login **with each** possible **user**. Try to login also without a password.
+- [ ] Enumeración de usuarios/grupos **genéricos**
+- [ ] ¿Tienes un **UID muy grande**? ¿Es la **máquina** **vulnerable**?
+- [ ] ¿Puedes [**escalar privilegios gracias a un grupo**](privilege-escalation/interesting-groups-linux-pe/) al que perteneces?
+- [ ] ¿Datos del **portapapeles**?
+- [ ] ¿Política de contraseñas?
+- [ ] Intenta **usar** cada **contraseña conocida** que hayas descubierto previamente para iniciar sesión **con cada** posible **usuario**. Intenta iniciar sesión también sin una contraseña.
 
-### [Writable PATH](privilege-escalation/#writable-path-abuses)
+### [PATH escribible](privilege-escalation/#writable-path-abuses)
 
-- [ ] If you have **write privileges over some folder in PATH** you may be able to escalate privileges
+- [ ] Si tienes **privilegios de escritura sobre alguna carpeta en PATH**, podrías ser capaz de escalar privilegios
 
-### [SUDO and SUID commands](privilege-escalation/#sudo-and-suid)
+### [Comandos SUDO y SUID](privilege-escalation/#sudo-and-suid)
 
-- [ ] Can you execute **any command with sudo**? Can you use it to READ, WRITE or EXECUTE anything as root? ([**GTFOBins**](https://gtfobins.github.io))
-- [ ] Is any **exploitable SUID binary**? ([**GTFOBins**](https://gtfobins.github.io))
-- [ ] Are [**sudo** commands **limited** by **path**? can you **bypass** the restrictions](privilege-escalation/#sudo-execution-bypassing-paths)?
-- [ ] [**Sudo/SUID binary without path indicated**](privilege-escalation/#sudo-command-suid-binary-without-command-path)?
-- [ ] [**SUID binary specifying path**](privilege-escalation/#suid-binary-with-command-path)? Bypass
-- [ ] [**LD_PRELOAD vuln**](privilege-escalation/#ld_preload)
-- [ ] [**Lack of .so library in SUID binary**](privilege-escalation/#suid-binary-so-injection) from a writable folder?
-- [ ] [**SUDO tokens available**](privilege-escalation/#reusing-sudo-tokens)? [**Can you create a SUDO token**](privilege-escalation/#var-run-sudo-ts-less-than-username-greater-than)?
-- [ ] Can you [**read or modify sudoers files**](privilege-escalation/#etc-sudoers-etc-sudoers-d)?
-- [ ] Can you [**modify /etc/ld.so.conf.d/**](privilege-escalation/#etc-ld-so-conf-d)?
-- [ ] [**OpenBSD DOAS**](privilege-escalation/#doas) command
+- [ ] ¿Puedes ejecutar **cualquier comando con sudo**? ¿Puedes usarlo para LEER, ESCRIBIR o EJECUTAR algo como root? ([**GTFOBins**](https://gtfobins.github.io))
+- [ ] ¿Hay algún **binario SUID explotable**? ([**GTFOBins**](https://gtfobins.github.io))
+- [ ] ¿Los [**comandos sudo** están **limitados** por **path**? ¿Puedes **eludir** las restricciones](privilege-escalation/#sudo-execution-bypassing-paths)?
+- [ ] [**Binario Sudo/SUID sin path indicado**](privilege-escalation/#sudo-command-suid-binary-without-command-path)?
+- [ ] [**Binario SUID especificando path**](privilege-escalation/#suid-binary-with-command-path)? Eludir
+- [ ] [**Vuln de LD_PRELOAD**](privilege-escalation/#ld_preload)
+- [ ] [**Falta de .so en binario SUID**](privilege-escalation/#suid-binary-so-injection) desde una carpeta escribible?
+- [ ] [**Tokens SUDO disponibles**](privilege-escalation/#reusing-sudo-tokens)? [**¿Puedes crear un token SUDO**](privilege-escalation/#var-run-sudo-ts-less-than-username-greater-than)?
+- [ ] ¿Puedes [**leer o modificar archivos sudoers**](privilege-escalation/#etc-sudoers-etc-sudoers-d)?
+- [ ] ¿Puedes [**modificar /etc/ld.so.conf.d/**](privilege-escalation/#etc-ld-so-conf-d)?
+- [ ] [**Comando OpenBSD DOAS**](privilege-escalation/#doas)
 
-### [Capabilities](privilege-escalation/#capabilities)
+### [Capacidades](privilege-escalation/#capabilities)
 
-- [ ] Has any binary any **unexpected capability**?
+- [ ] ¿Algún binario tiene alguna **capacidad inesperada**?
 
 ### [ACLs](privilege-escalation/#acls)
 
-- [ ] Has any file any **unexpected ACL**?
+- [ ] ¿Algún archivo tiene alguna **ACL inesperada**?
 
-### [Open Shell sessions](privilege-escalation/#open-shell-sessions)
+### [Sesiones de Shell abiertas](privilege-escalation/#open-shell-sessions)
 
 - [ ] **screen**
 - [ ] **tmux**
 
 ### [SSH](privilege-escalation/#ssh)
 
-- [ ] **Debian** [**OpenSSL Predictable PRNG - CVE-2008-0166**](privilege-escalation/#debian-openssl-predictable-prng-cve-2008-0166)
-- [ ] [**SSH Interesting configuration values**](privilege-escalation/#ssh-interesting-configuration-values)
+- [ ] **Debian** [**OpenSSL PRNG predecible - CVE-2008-0166**](privilege-escalation/#debian-openssl-predictable-prng-cve-2008-0166)
+- [ ] [**Valores de configuración interesantes de SSH**](privilege-escalation/#ssh-interesting-configuration-values)
 
-### [Interesting Files](privilege-escalation/#interesting-files)
+### [Archivos interesantes](privilege-escalation/#interesting-files)
 
-- [ ] **Profile files** - Read sensitive data? Write to privesc?
-- [ ] **passwd/shadow files** - Read sensitive data? Write to privesc?
-- [ ] **Check commonly interesting folders** for sensitive data
-- [ ] **Weird Location/Owned files,** you may have access to or alter executable files
-- [ ] **Modified** in last mins
-- [ ] **Sqlite DB files**
-- [ ] **Hidden files**
-- [ ] **Script/Binaries in PATH**
-- [ ] **Web files** (passwords?)
-- [ ] **Backups**?
-- [ ] **Known files that contains passwords**: Use **Linpeas** and **LaZagne**
-- [ ] **Generic search**
+- [ ] **Archivos de perfil** - ¿Leer datos sensibles? ¿Escribir para privesc?
+- [ ] **Archivos passwd/shadow** - ¿Leer datos sensibles? ¿Escribir para privesc?
+- [ ] **Verificar carpetas comúnmente interesantes** en busca de datos sensibles
+- [ ] **Ubicación extraña/Archivos propiedad,** a los que podrías tener acceso o alterar archivos ejecutables
+- [ ] **Modificados** en los últimos minutos
+- [ ] **Archivos de base de datos Sqlite**
+- [ ] **Archivos ocultos**
+- [ ] **Scripts/Binarios en PATH**
+- [ ] **Archivos web** (¿contraseñas?)
+- [ ] **¿Copias de seguridad?**
+- [ ] **Archivos conocidos que contienen contraseñas**: Usa **Linpeas** y **LaZagne**
+- [ ] **Búsqueda genérica**
 
-### [**Writable Files**](privilege-escalation/#writable-files)
+### [**Archivos escribibles**](privilege-escalation/#writable-files)
 
-- [ ] **Modify python library** to execute arbitrary commands?
-- [ ] Can you **modify log files**? **Logtotten** exploit
-- [ ] Can you **modify /etc/sysconfig/network-scripts/**? Centos/Redhat exploit
-- [ ] Can you [**write in ini, int.d, systemd or rc.d files**](privilege-escalation/#init-init-d-systemd-and-rc-d)?
+- [ ] **Modificar biblioteca de python** para ejecutar comandos arbitrarios?
+- [ ] ¿Puedes **modificar archivos de registro**? **Explotación Logtotten**
+- [ ] ¿Puedes **modificar /etc/sysconfig/network-scripts/**? Explotación Centos/Redhat
+- [ ] ¿Puedes [**escribir en archivos ini, int.d, systemd o rc.d**](privilege-escalation/#init-init-d-systemd-and-rc-d)?
 
-### [**Other tricks**](privilege-escalation/#other-tricks)
+### [**Otros trucos**](privilege-escalation/#other-tricks)
 
-- [ ] Can you [**abuse NFS to escalate privileges**](privilege-escalation/#nfs-privilege-escalation)?
-- [ ] Do you need to [**escape from a restrictive shell**](privilege-escalation/#escaping-from-restricted-shells)?
-
-<figure><img src="../images/image (3).png" alt=""><figcaption></figcaption></figure>
-
-Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
-
-**Hacking Insights**\
-Engage with content that delves into the thrill and challenges of hacking
-
-**Real-Time Hack News**\
-Keep up-to-date with fast-paced hacking world through real-time news and insights
-
-**Latest Announcements**\
-Stay informed with the newest bug bounties launching and crucial platform updates
-
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
+- [ ] ¿Puedes [**abusar de NFS para escalar privilegios**](privilege-escalation/#nfs-privilege-escalation)?
+- [ ] ¿Necesitas [**escapar de un shell restrictivo**](privilege-escalation/#escaping-from-restricted-shells)?
 
 {{#include ../banners/hacktricks-training.md}}

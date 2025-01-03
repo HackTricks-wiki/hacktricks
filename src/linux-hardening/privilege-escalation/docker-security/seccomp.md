@@ -8,7 +8,7 @@
 
 Hay dos formas de activar seccomp: a través de la llamada al sistema `prctl(2)` con `PR_SET_SECCOMP`, o para núcleos de Linux 3.17 y superiores, la llamada al sistema `seccomp(2)`. El método más antiguo de habilitar seccomp escribiendo en `/proc/self/seccomp` ha sido desaprobado a favor de `prctl()`.
 
-Una mejora, **seccomp-bpf**, añade la capacidad de filtrar llamadas al sistema con una política personalizable, utilizando reglas de Berkeley Packet Filter (BPF). Esta extensión es aprovechada por software como OpenSSH, vsftpd, y los navegadores Chrome/Chromium en Chrome OS y Linux para un filtrado de syscall flexible y eficiente, ofreciendo una alternativa a la ahora no soportada systrace para Linux.
+Una mejora, **seccomp-bpf**, añade la capacidad de filtrar llamadas al sistema con una política personalizable, utilizando reglas de Berkeley Packet Filter (BPF). Esta extensión es aprovechada por software como OpenSSH, vsftpd, y los navegadores Chrome/Chromium en Chrome OS y Linux para un filtrado de syscall flexible y eficiente, ofreciendo una alternativa al ahora no soportado systrace para Linux.
 
 ### **Modo Original/Estricto**
 
@@ -111,7 +111,7 @@ En el siguiente ejemplo se descubren las **syscalls** de `uname`:
 docker run -it --security-opt seccomp=default.json modified-ubuntu strace uname
 ```
 > [!NOTE]
-> Si estás usando **Docker solo para lanzar una aplicación**, puedes **perfilarla** con **`strace`** y **solo permitir las syscalls** que necesita
+> Si estás usando **Docker solo para lanzar una aplicación**, puedes **perfil**arla con **`strace`** y **solo permitir las syscalls** que necesita
 
 ### Ejemplo de política Seccomp
 
@@ -130,12 +130,12 @@ Para ilustrar la función Seccomp, creemos un perfil Seccomp deshabilitando la l
 }
 ```
 En el perfil anterior, hemos establecido la acción predeterminada en "permitir" y creado una lista negra para deshabilitar "chmod". Para ser más seguros, podemos establecer la acción predeterminada en "rechazar" y crear una lista blanca para habilitar selectivamente las llamadas al sistema.\
-La siguiente salida muestra la llamada "chmod" devolviendo un error porque está deshabilitada en el perfil seccomp.
+La siguiente salida muestra que la llamada "chmod" devuelve un error porque está deshabilitada en el perfil seccomp.
 ```bash
 $ docker run --rm -it --security-opt seccomp:/home/smakam14/seccomp/profile.json busybox chmod 400 /etc/hosts
 chmod: /etc/hosts: Operation not permitted
 ```
-La siguiente salida muestra el “docker inspect” mostrando el perfil:
+La siguiente salida muestra el "docker inspect" mostrando el perfil:
 ```json
 "SecurityOpt": [
 "seccomp:{\"defaultAction\":\"SCMP_ACT_ALLOW\",\"syscalls\":[{\"name\":\"chmod\",\"action\":\"SCMP_ACT_ERRNO\"}]}"

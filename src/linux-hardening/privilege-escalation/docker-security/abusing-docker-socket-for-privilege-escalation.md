@@ -1,16 +1,16 @@
-# Abusando del Socket de Docker para la Escalación de Privilegios
+# Abusing Docker Socket for Privilege Escalation
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 Hay algunas ocasiones en las que solo tienes **acceso al socket de docker** y quieres usarlo para **escalar privilegios**. Algunas acciones pueden ser muy sospechosas y es posible que desees evitarlas, así que aquí puedes encontrar diferentes flags que pueden ser útiles para escalar privilegios:
 
-### A través de mount
+### Via mount
 
 Puedes **montar** diferentes partes del **sistema de archivos** en un contenedor que se ejecuta como root y **acceder** a ellas.\
 También podrías **abusar de un mount para escalar privilegios** dentro del contenedor.
 
 - **`-v /:/host`** -> Monta el sistema de archivos del host en el contenedor para que puedas **leer el sistema de archivos del host.**
-- Si quieres **sentirte como si estuvieras en el host** pero estando en el contenedor, podrías deshabilitar otros mecanismos de defensa usando flags como:
+- Si quieres **sentirte como si estuvieras en el host** pero estando en el contenedor, podrías desactivar otros mecanismos de defensa usando flags como:
 - `--privileged`
 - `--cap-add=ALL`
 - `--security-opt apparmor=unconfined`
@@ -25,16 +25,16 @@ También podrías **abusar de un mount para escalar privilegios** dentro del con
 - **`-v /tmp:/host`** -> Si por alguna razón solo puedes **montar algún directorio** del host y tienes acceso dentro del host. Móntalo y crea un **`/bin/bash`** con **suid** en el directorio montado para que puedas **ejecutarlo desde el host y escalar a root**.
 
 > [!NOTE]
-> Ten en cuenta que tal vez no puedas montar la carpeta `/tmp` pero puedes montar una **carpeta escribible diferente**. Puedes encontrar directorios escribibles usando: `find / -writable -type d 2>/dev/null`
+> Ten en cuenta que tal vez no puedas montar la carpeta `/tmp` pero puedes montar una **carpeta diferente escribible**. Puedes encontrar directorios escribibles usando: `find / -writable -type d 2>/dev/null`
 >
 > **¡Ten en cuenta que no todos los directorios en una máquina linux soportarán el bit suid!** Para verificar qué directorios soportan el bit suid ejecuta `mount | grep -v "nosuid"` Por ejemplo, generalmente `/dev/shm`, `/run`, `/proc`, `/sys/fs/cgroup` y `/var/lib/lxcfs` no soportan el bit suid.
 >
 > También ten en cuenta que si puedes **montar `/etc`** o cualquier otra carpeta **que contenga archivos de configuración**, puedes cambiarlos desde el contenedor de docker como root para **abusar de ellos en el host** y escalar privilegios (quizás modificando `/etc/shadow`)
 
-### Escapando del contenedor
+### Escaping from the container
 
 - **`--privileged`** -> Con este flag [eliminamos toda la aislamiento del contenedor](docker-privileged.md#what-affects). Consulta técnicas para [escapar de contenedores privilegiados como root](docker-breakout-privilege-escalation/#automatic-enumeration-and-escape).
-- **`--cap-add=<CAPABILITY/ALL> [--security-opt apparmor=unconfined] [--security-opt seccomp=unconfined] [-security-opt label:disable]`** -> Para [escalar abusando de capacidades](../linux-capabilities.md), **concede esa capacidad al contenedor** y deshabilita otros métodos de protección que puedan impedir que el exploit funcione.
+- **`--cap-add=<CAPABILITY/ALL> [--security-opt apparmor=unconfined] [--security-opt seccomp=unconfined] [-security-opt label:disable]`** -> Para [escalar abusando de capacidades](../linux-capabilities.md), **concede esa capacidad al contenedor** y desactiva otros métodos de protección que puedan impedir que el exploit funcione.
 
 ### Curl
 

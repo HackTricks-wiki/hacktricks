@@ -1,8 +1,8 @@
 {{#include ../banners/hacktricks-training.md}}
 
-If you can somehow encrypt a plaintext using RC4, you can decrypt any content encrypted by that RC4 (using the same password) just using the encryption function.
+Si puedes de alguna manera cifrar un texto plano usando RC4, puedes descifrar cualquier contenido cifrado por ese RC4 (usando la misma contraseña) solo utilizando la función de cifrado.
 
-If you can encrypt a known plaintext you can also extract the password. More references can be found in the HTB Kryptos machine:
+Si puedes cifrar un texto plano conocido, también puedes extraer la contraseña. Más referencias se pueden encontrar en la máquina HTB Kryptos:
 
 {% embed url="https://0xrick.github.io/hack-the-box/kryptos/" %}
 

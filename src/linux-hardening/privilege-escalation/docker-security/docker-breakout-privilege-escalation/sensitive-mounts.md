@@ -97,21 +97,21 @@ echo b > /proc/sysrq-trigger # Reinicia el host
 #### **`/proc/kmem`**
 
 - Interfaz alternativa para `/dev/kmem`, representando la memoria virtual del kernel.
-- Permite la lectura y escritura, por lo tanto, la modificación directa de la memoria del kernel.
+- Permite lectura y escritura, por lo tanto, modificación directa de la memoria del kernel.
 
 #### **`/proc/mem`**
 
 - Interfaz alternativa para `/dev/mem`, representando la memoria física.
-- Permite la lectura y escritura, la modificación de toda la memoria requiere resolver direcciones virtuales a físicas.
+- Permite lectura y escritura, la modificación de toda la memoria requiere resolver direcciones virtuales a físicas.
 
 #### **`/proc/sched_debug`**
 
-- Devuelve información sobre la programación de procesos, eludiendo las protecciones del namespace PID.
+- Devuelve información de programación de procesos, eludiendo las protecciones del namespace PID.
 - Expone nombres de procesos, IDs e identificadores de cgroup.
 
 #### **`/proc/[pid]/mountinfo`**
 
-- Proporciona información sobre los puntos de montaje en el namespace de montaje del proceso.
+- Proporciona información sobre puntos de montaje en el namespace de montaje del proceso.
 - Expone la ubicación del `rootfs` o imagen del contenedor.
 
 ### Vulnerabilidades de `/sys`

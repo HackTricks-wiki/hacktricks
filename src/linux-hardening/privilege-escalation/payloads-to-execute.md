@@ -68,7 +68,7 @@ libcap-ng.so.0 => /lib/x86_64-linux-gnu/libcap-ng.so.0 (0x00007fe472a4f000)
 /lib64/ld-linux-x86-64.so.2 (0x00007fe473a93000)
 ```
 En este caso, intentemos suplantar `/lib/x86_64-linux-gnu/libaudit.so.1`.\
-Así que, verifique las funciones de esta biblioteca utilizadas por el **`su`** binario:
+Así que, verifiquemos las funciones de esta biblioteca utilizadas por el **`su`** binario:
 ```bash
 objdump -T /bin/su | grep audit
 0000000000000000      DF *UND*  0000000000000000              audit_open

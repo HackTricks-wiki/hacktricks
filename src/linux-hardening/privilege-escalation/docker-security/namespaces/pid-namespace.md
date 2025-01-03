@@ -70,9 +70,9 @@ Tenga en cuenta que el usuario root del espacio de nombres PID inicial (predeter
 ```bash
 nsenter -t TARGET_PID --pid /bin/bash
 ```
-Cuando entras dentro de un namespace PID desde el namespace por defecto, aún podrás ver todos los procesos. Y el proceso de ese namespace PID podrá ver el nuevo bash en el namespace PID.
+Cuando entras en un namespace de PID desde el namespace predeterminado, aún podrás ver todos los procesos. Y el proceso de ese namespace de PID podrá ver el nuevo bash en el namespace de PID.
 
-Además, solo puedes **entrar en otro namespace PID de proceso si eres root**. Y **no puedes** **entrar** en otro namespace **sin un descriptor** que apunte a él (como `/proc/self/ns/pid`)
+Además, solo puedes **entrar en otro namespace de PID de proceso si eres root**. Y **no puedes** **entrar** en otro namespace **sin un descriptor** que apunte a él (como `/proc/self/ns/pid`)
 
 ## Referencias
 

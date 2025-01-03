@@ -22,7 +22,7 @@ Un namespace de red es una característica del núcleo de Linux que proporciona 
 sudo unshare -n [--mount-proc] /bin/bash
 # Run ifconfig or ip -a
 ```
-Al montar una nueva instancia del sistema de archivos `/proc` si usas el parámetro `--mount-proc`, aseguras que el nuevo espacio de montaje tenga una **vista precisa y aislada de la información del proceso específica de ese espacio de nombres**.
+Al montar una nueva instancia del sistema de archivos `/proc` si usas el parámetro `--mount-proc`, aseguras que el nuevo espacio de montaje tenga una **vista precisa y aislada de la información del proceso específica para ese espacio de nombres**.
 
 <details>
 
@@ -53,7 +53,7 @@ Al asegurarte de que `unshare` se ejecute con la bandera `-f`, el nuevo espacio 
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 # Run ifconfig or ip -a
 ```
-### &#x20;Verifica en qué namespace está tu proceso
+### &#x20;Ver en qué namespace está tu proceso
 ```bash
 ls -l /proc/self/ns/net
 lrwxrwxrwx 1 root root 0 Apr  4 20:30 /proc/self/ns/net -> 'net:[4026531840]'

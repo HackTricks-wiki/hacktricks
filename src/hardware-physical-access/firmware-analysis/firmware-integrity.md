@@ -1,27 +1,27 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-## Firmware Integrity
+## Integridad del Firmware
 
-The **custom firmware and/or compiled binaries can be uploaded to exploit integrity or signature verification flaws**. The following steps can be followed for backdoor bind shell compilation:
+El **firmware personalizado y/o binarios compilados pueden ser subidos para explotar fallos de integridad o verificación de firma**. Se pueden seguir los siguientes pasos para la compilación de un shell de puerta trasera:
 
-1. The firmware can be extracted using firmware-mod-kit (FMK).
-2. The target firmware architecture and endianness should be identified.
-3. A cross compiler can be built using Buildroot or other suitable methods for the environment.
-4. The backdoor can be built using the cross compiler.
-5. The backdoor can be copied to the extracted firmware /usr/bin directory.
-6. The appropriate QEMU binary can be copied to the extracted firmware rootfs.
-7. The backdoor can be emulated using chroot and QEMU.
-8. The backdoor can be accessed via netcat.
-9. The QEMU binary should be removed from the extracted firmware rootfs.
-10. The modified firmware can be repackaged using FMK.
-11. The backdoored firmware can be tested by emulating it with firmware analysis toolkit (FAT) and connecting to the target backdoor IP and port using netcat.
+1. El firmware puede ser extraído usando firmware-mod-kit (FMK).
+2. Se debe identificar la arquitectura del firmware objetivo y el endianness.
+3. Se puede construir un compilador cruzado usando Buildroot u otros métodos adecuados para el entorno.
+4. La puerta trasera puede ser construida usando el compilador cruzado.
+5. La puerta trasera puede ser copiada al directorio /usr/bin del firmware extraído.
+6. El binario QEMU apropiado puede ser copiado al rootfs del firmware extraído.
+7. La puerta trasera puede ser emulada usando chroot y QEMU.
+8. La puerta trasera puede ser accedida a través de netcat.
+9. El binario QEMU debe ser eliminado del rootfs del firmware extraído.
+10. El firmware modificado puede ser reempaquetado usando FMK.
+11. El firmware con puerta trasera puede ser probado emulándolo con el kit de herramientas de análisis de firmware (FAT) y conectándose a la IP y puerto de la puerta trasera objetivo usando netcat.
 
-If a root shell has already been obtained through dynamic analysis, bootloader manipulation, or hardware security testing, precompiled malicious binaries such as implants or reverse shells can be executed. Automated payload/implant tools like the Metasploit framework and 'msfvenom' can be leveraged using the following steps:
+Si ya se ha obtenido un shell root a través de análisis dinámico, manipulación del bootloader o pruebas de seguridad de hardware, se pueden ejecutar binarios maliciosos precompilados como implantes o shells reversos. Herramientas automatizadas de carga útil/implante como el marco Metasploit y 'msfvenom' pueden ser aprovechadas usando los siguientes pasos:
 
-1. The target firmware architecture and endianness should be identified.
-2. Msfvenom can be used to specify the target payload, attacker host IP, listening port number, filetype, architecture, platform, and the output file.
-3. The payload can be transferred to the compromised device and ensured that it has execution permissions.
-4. Metasploit can be prepared to handle incoming requests by starting msfconsole and configuring the settings according to the payload.
-5. The meterpreter reverse shell can be executed on the compromised device.
+1. Se debe identificar la arquitectura del firmware objetivo y el endianness.
+2. Msfvenom puede ser utilizado para especificar la carga útil objetivo, la IP del host atacante, el número de puerto de escucha, el tipo de archivo, la arquitectura, la plataforma y el archivo de salida.
+3. La carga útil puede ser transferida al dispositivo comprometido y asegurarse de que tenga permisos de ejecución.
+4. Metasploit puede ser preparado para manejar solicitudes entrantes iniciando msfconsole y configurando los ajustes de acuerdo con la carga útil.
+5. El shell reverso meterpreter puede ser ejecutado en el dispositivo comprometido.
 
 {{#include ../../banners/hacktricks-training.md}}

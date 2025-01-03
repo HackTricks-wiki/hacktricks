@@ -4,13 +4,13 @@
 
 Si **enumerando** una máquina **internamente** o **externamente** encuentras **Splunk en ejecución** (puerto 8090), si tienes la suerte de conocer alguna **credencial válida** puedes **abusar del servicio de Splunk** para **ejecutar un shell** como el usuario que ejecuta Splunk. Si lo está ejecutando root, puedes escalar privilegios a root.
 
-Además, si ya eres **root y el servicio de Splunk no está escuchando solo en localhost**, puedes **robar** el archivo de **contraseña** **del** servicio de Splunk y **crackear** las contraseñas, o **agregar nuevas** credenciales a él. Y mantener persistencia en el host.
+Además, si ya eres root y el servicio de Splunk no está escuchando solo en localhost, puedes **robar** el archivo de **contraseña** **del** servicio de Splunk y **crackear** las contraseñas, o **agregar nuevas** credenciales a él. Y mantener persistencia en el host.
 
 En la primera imagen a continuación puedes ver cómo se ve una página web de Splunkd.
 
 ## Resumen de la Explotación del Agente Splunk Universal Forwarder
 
-Para más detalles, consulta la publicación [https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/). Este es solo un resumen:
+Para más detalles, consulta la publicación [https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/). Esto es solo un resumen:
 
 **Descripción de la Explotación:**
 Una explotación que apunta al Agente Splunk Universal Forwarder (UF) permite a los atacantes con la contraseña del agente ejecutar código arbitrario en sistemas que ejecutan el agente, comprometiendo potencialmente toda una red.
@@ -29,7 +29,7 @@ Una explotación que apunta al Agente Splunk Universal Forwarder (UF) permite a 
 
 **Impacto:**
 
-- Compromiso total de la red con permisos a nivel de SYSTEM/root en cada host.
+- Compromiso total de la red con permisos de nivel SYSTEM/root en cada host.
 - Potencial para deshabilitar el registro para evadir la detección.
 - Instalación de puertas traseras o ransomware.
 

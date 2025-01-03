@@ -1,147 +1,145 @@
-# Partitions/File Systems/Carving
+# Particiones/Sistemas de Archivos/Carving
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Partitions
+## Particiones
 
-A hard drive or an **SSD disk can contain different partitions** with the goal of separating data physically.\
-The **minimum** unit of a disk is the **sector** (normally composed of 512B). So, each partition size needs to be multiple of that size.
+Un disco duro o un **SSD puede contener diferentes particiones** con el objetivo de separar datos físicamente.\
+La **unidad mínima** de un disco es el **sector** (normalmente compuesto de 512B). Por lo tanto, el tamaño de cada partición debe ser un múltiplo de ese tamaño.
 
 ### MBR (master Boot Record)
 
-It's allocated in the **first sector of the disk after the 446B of the boot code**. This sector is essential to indicate to the PC what and from where a partition should be mounted.\
-It allows up to **4 partitions** (at most **just 1** can be active/**bootable**). However, if you need more partitions you can use **extended partitions**. The **final byte** of this first sector is the boot record signature **0x55AA**. Only one partition can be marked as active.\
-MBR allows **max 2.2TB**.
+Se asigna en el **primer sector del disco después de los 446B del código de arranque**. Este sector es esencial para indicar a la PC qué y desde dónde se debe montar una partición.\
+Permite hasta **4 particiones** (como máximo **solo 1** puede estar activa/**arrancable**). Sin embargo, si necesitas más particiones, puedes usar **particiones extendidas**. El **byte final** de este primer sector es la firma del registro de arranque **0x55AA**. Solo una partición puede ser marcada como activa.\
+MBR permite **máx 2.2TB**.
 
 ![](<../../../images/image (350).png>)
 
 ![](<../../../images/image (304).png>)
 
-From the **bytes 440 to the 443** of the MBR you can find the **Windows Disk Signature** (if Windows is used). The logical drive letter of the hard disk depends on the Windows Disk Signature. Changing this signature could prevent Windows from booting (tool: [**Active Disk Editor**](https://www.disk-editor.org/index.html)**)**.
+Desde los **bytes 440 a 443** del MBR puedes encontrar la **Firma de Disco de Windows** (si se utiliza Windows). La letra de unidad lógica del disco duro depende de la Firma de Disco de Windows. Cambiar esta firma podría impedir que Windows arranque (herramienta: [**Active Disk Editor**](https://www.disk-editor.org/index.html)**)**.
 
 ![](<../../../images/image (310).png>)
 
-**Format**
+**Formato**
 
-| Offset      | Length     | Item                |
+| Offset      | Longitud   | Elemento            |
 | ----------- | ---------- | ------------------- |
-| 0 (0x00)    | 446(0x1BE) | Boot code           |
-| 446 (0x1BE) | 16 (0x10)  | First Partition     |
-| 462 (0x1CE) | 16 (0x10)  | Second Partition    |
-| 478 (0x1DE) | 16 (0x10)  | Third Partition     |
-| 494 (0x1EE) | 16 (0x10)  | Fourth Partition    |
-| 510 (0x1FE) | 2 (0x2)    | Signature 0x55 0xAA |
+| 0 (0x00)    | 446(0x1BE) | Código de arranque   |
+| 446 (0x1BE) | 16 (0x10)  | Primera Partición    |
+| 462 (0x1CE) | 16 (0x10)  | Segunda Partición     |
+| 478 (0x1DE) | 16 (0x10)  | Tercera Partición     |
+| 494 (0x1EE) | 16 (0x10)  | Cuarta Partición      |
+| 510 (0x1FE) | 2 (0x2)    | Firma 0x55 0xAA      |
 
-**Partition Record Format**
+**Formato del Registro de Partición**
 
-| Offset    | Length   | Item                                                   |
+| Offset    | Longitud | Elemento                                               |
 | --------- | -------- | ------------------------------------------------------ |
-| 0 (0x00)  | 1 (0x01) | Active flag (0x80 = bootable)                          |
-| 1 (0x01)  | 1 (0x01) | Start head                                             |
-| 2 (0x02)  | 1 (0x01) | Start sector (bits 0-5); upper bits of cylinder (6- 7) |
-| 3 (0x03)  | 1 (0x01) | Start cylinder lowest 8 bits                           |
-| 4 (0x04)  | 1 (0x01) | Partition type code (0x83 = Linux)                     |
-| 5 (0x05)  | 1 (0x01) | End head                                               |
-| 6 (0x06)  | 1 (0x01) | End sector (bits 0-5); upper bits of cylinder (6- 7)   |
-| 7 (0x07)  | 1 (0x01) | End cylinder lowest 8 bits                             |
-| 8 (0x08)  | 4 (0x04) | Sectors preceding partition (little endian)            |
-| 12 (0x0C) | 4 (0x04) | Sectors in partition                                   |
+| 0 (0x00)  | 1 (0x01) | Bandera activa (0x80 = arrancable)                    |
+| 1 (0x01)  | 1 (0x01) | Cabeza de inicio                                       |
+| 2 (0x02)  | 1 (0x01) | Sector de inicio (bits 0-5); bits superiores del cilindro (6-7) |
+| 3 (0x03)  | 1 (0x01) | Cilindro de inicio, 8 bits más bajos                  |
+| 4 (0x04)  | 1 (0x01) | Código de tipo de partición (0x83 = Linux)            |
+| 5 (0x05)  | 1 (0x01) | Cabeza final                                           |
+| 6 (0x06)  | 1 (0x01) | Sector final (bits 0-5); bits superiores del cilindro (6-7) |
+| 7 (0x07)  | 1 (0x01) | Cilindro final, 8 bits más bajos                      |
+| 8 (0x08)  | 4 (0x04) | Sectores precedentes a la partición (little endian)   |
+| 12 (0x0C) | 4 (0x04) | Sectores en la partición                               |
 
-In order to mount an MBR in Linux you first need to get the start offset (you can use `fdisk` and the `p` command)
+Para montar un MBR en Linux, primero necesitas obtener el desplazamiento de inicio (puedes usar `fdisk` y el comando `p`)
 
-![](<../../../images/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../../../images/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
-And then use the following code
-
+Y luego usa el siguiente código
 ```bash
 #Mount MBR in Linux
 mount -o ro,loop,offset=<Bytes>
 #63x512 = 32256Bytes
 mount -o ro,loop,offset=32256,noatime /path/to/image.dd /media/part/
 ```
+**LBA (Dirección de bloque lógico)**
 
-**LBA (Logical block addressing)**
+**La dirección de bloque lógico** (**LBA**) es un esquema común utilizado para **especificar la ubicación de bloques** de datos almacenados en dispositivos de almacenamiento de computadoras, generalmente sistemas de almacenamiento secundario como discos duros. LBA es un esquema de direccionamiento lineal particularmente simple; **los bloques se localizan mediante un índice entero**, siendo el primer bloque LBA 0, el segundo LBA 1, y así sucesivamente.
 
-**Logical block addressing** (**LBA**) is a common scheme used for **specifying the location of blocks** of data stored on computer storage devices, generally secondary storage systems such as hard disk drives. LBA is a particularly simple linear addressing scheme; **blocks are located by an integer index**, with the first block being LBA 0, the second LBA 1, and so on.
+### GPT (Tabla de particiones GUID)
 
-### GPT (GUID Partition Table)
+La Tabla de Particiones GUID, conocida como GPT, es preferida por sus capacidades mejoradas en comparación con MBR (Registro de arranque maestro). Distintiva por su **identificador único global** para particiones, GPT se destaca en varios aspectos:
 
-The GUID Partition Table, known as GPT, is favored for its enhanced capabilities compared to MBR (Master Boot Record). Distinctive for its **globally unique identifier** for partitions, GPT stands out in several ways:
+- **Ubicación y tamaño**: Tanto GPT como MBR comienzan en **sector 0**. Sin embargo, GPT opera en **64 bits**, en contraste con los 32 bits de MBR.
+- **Límites de partición**: GPT admite hasta **128 particiones** en sistemas Windows y acomoda hasta **9.4ZB** de datos.
+- **Nombres de partición**: Ofrece la capacidad de nombrar particiones con hasta 36 caracteres Unicode.
 
-- **Location and Size**: Both GPT and MBR start at **sector 0**. However, GPT operates on **64bits**, contrasting with MBR's 32bits.
-- **Partition Limits**: GPT supports up to **128 partitions** on Windows systems and accommodates up to **9.4ZB** of data.
-- **Partition Names**: Offers the ability to name partitions with up to 36 Unicode characters.
+**Resiliencia y recuperación de datos**:
 
-**Data Resilience and Recovery**:
+- **Redundancia**: A diferencia de MBR, GPT no confina la partición y los datos de arranque a un solo lugar. Replica estos datos a lo largo del disco, mejorando la integridad y resiliencia de los datos.
+- **Verificación de redundancia cíclica (CRC)**: GPT emplea CRC para asegurar la integridad de los datos. Monitorea activamente la corrupción de datos y, cuando se detecta, GPT intenta recuperar los datos corruptos de otra ubicación del disco.
 
-- **Redundancy**: Unlike MBR, GPT doesn't confine partitioning and boot data to a single place. It replicates this data across the disk, enhancing data integrity and resilience.
-- **Cyclic Redundancy Check (CRC)**: GPT employs CRC to ensure data integrity. It actively monitors for data corruption, and when detected, GPT attempts to recover the corrupted data from another disk location.
+**MBR protector (LBA0)**:
 
-**Protective MBR (LBA0)**:
-
-- GPT maintains backward compatibility through a protective MBR. This feature resides in the legacy MBR space but is designed to prevent older MBR-based utilities from mistakenly overwriting GPT disks, hence safeguarding the data integrity on GPT-formatted disks.
+- GPT mantiene la compatibilidad hacia atrás a través de un MBR protector. Esta característica reside en el espacio MBR legado pero está diseñada para evitar que utilidades basadas en MBR más antiguas sobrescriban accidentalmente discos GPT, protegiendo así la integridad de los datos en discos formateados con GPT.
 
 ![https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/GUID_Partition_Table_Scheme.svg/800px-GUID_Partition_Table_Scheme.svg.png](<../../../images/image (1062).png>)
 
-**Hybrid MBR (LBA 0 + GPT)**
+**MBR híbrido (LBA 0 + GPT)**
 
-[From Wikipedia](https://en.wikipedia.org/wiki/GUID_Partition_Table)
+[Desde Wikipedia](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 
-In operating systems that support **GPT-based boot through BIOS** services rather than EFI, the first sector may also still be used to store the first stage of the **bootloader** code, but **modified** to recognize **GPT** **partitions**. The bootloader in the MBR must not assume a sector size of 512 bytes.
+En sistemas operativos que soportan **arranque basado en GPT a través de servicios BIOS** en lugar de EFI, el primer sector también puede seguir utilizándose para almacenar la primera etapa del código del **bootloader**, pero **modificado** para reconocer **particiones GPT**. El bootloader en el MBR no debe asumir un tamaño de sector de 512 bytes.
 
-**Partition table header (LBA 1)**
+**Encabezado de la tabla de particiones (LBA 1)**
 
-[From Wikipedia](https://en.wikipedia.org/wiki/GUID_Partition_Table)
+[Desde Wikipedia](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 
-The partition table header defines the usable blocks on the disk. It also defines the number and size of the partition entries that make up the partition table (offsets 80 and 84 in the table).
+El encabezado de la tabla de particiones define los bloques utilizables en el disco. También define el número y tamaño de las entradas de partición que componen la tabla de particiones (desplazamientos 80 y 84 en la tabla).
 
-| Offset    | Length   | Contents                                                                                                                                                                     |
-| --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 0 (0x00)  | 8 bytes  | Signature ("EFI PART", 45h 46h 49h 20h 50h 41h 52h 54h or 0x5452415020494645ULL[ ](https://en.wikipedia.org/wiki/GUID_Partition_Table#cite_note-8)on little-endian machines) |
-| 8 (0x08)  | 4 bytes  | Revision 1.0 (00h 00h 01h 00h) for UEFI 2.8                                                                                                                                  |
-| 12 (0x0C) | 4 bytes  | Header size in little endian (in bytes, usually 5Ch 00h 00h 00h or 92 bytes)                                                                                                 |
-| 16 (0x10) | 4 bytes  | [CRC32](https://en.wikipedia.org/wiki/CRC32) of header (offset +0 up to header size) in little endian, with this field zeroed during calculation                             |
-| 20 (0x14) | 4 bytes  | Reserved; must be zero                                                                                                                                                       |
-| 24 (0x18) | 8 bytes  | Current LBA (location of this header copy)                                                                                                                                   |
-| 32 (0x20) | 8 bytes  | Backup LBA (location of the other header copy)                                                                                                                               |
-| 40 (0x28) | 8 bytes  | First usable LBA for partitions (primary partition table last LBA + 1)                                                                                                       |
-| 48 (0x30) | 8 bytes  | Last usable LBA (secondary partition table first LBA − 1)                                                                                                                    |
-| 56 (0x38) | 16 bytes | Disk GUID in mixed endian                                                                                                                                                    |
-| 72 (0x48) | 8 bytes  | Starting LBA of an array of partition entries (always 2 in primary copy)                                                                                                     |
-| 80 (0x50) | 4 bytes  | Number of partition entries in array                                                                                                                                         |
-| 84 (0x54) | 4 bytes  | Size of a single partition entry (usually 80h or 128)                                                                                                                        |
-| 88 (0x58) | 4 bytes  | CRC32 of partition entries array in little endian                                                                                                                            |
-| 92 (0x5C) | \*       | Reserved; must be zeroes for the rest of the block (420 bytes for a sector size of 512 bytes; but can be more with larger sector sizes)                                      |
+| Desplazamiento | Longitud | Contenido                                                                                                                                                                     |
+| -------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0 (0x00)      | 8 bytes  | Firma ("EFI PART", 45h 46h 49h 20h 50h 41h 52h 54h o 0x5452415020494645ULL[ ](https://en.wikipedia.org/wiki/GUID_Partition_Table#cite_note-8)en máquinas little-endian) |
+| 8 (0x08)      | 4 bytes  | Revisión 1.0 (00h 00h 01h 00h) para UEFI 2.8                                                                                                                                  |
+| 12 (0x0C)     | 4 bytes  | Tamaño del encabezado en little endian (en bytes, generalmente 5Ch 00h 00h 00h o 92 bytes)                                                                                                 |
+| 16 (0x10)     | 4 bytes  | [CRC32](https://en.wikipedia.org/wiki/CRC32) del encabezado (desplazamiento +0 hasta el tamaño del encabezado) en little endian, con este campo en cero durante el cálculo                             |
+| 20 (0x14)     | 4 bytes  | Reservado; debe ser cero                                                                                                                                                       |
+| 24 (0x18)     | 8 bytes  | LBA actual (ubicación de esta copia del encabezado)                                                                                                                                   |
+| 32 (0x20)     | 8 bytes  | LBA de respaldo (ubicación de la otra copia del encabezado)                                                                                                                               |
+| 40 (0x28)     | 8 bytes  | Primer LBA utilizable para particiones (LBA del último de la tabla de particiones primaria + 1)                                                                                                       |
+| 48 (0x30)     | 8 bytes  | Último LBA utilizable (primer LBA de la tabla de particiones secundaria − 1)                                                                                                                    |
+| 56 (0x38)     | 16 bytes | GUID del disco en endian mixto                                                                                                                                                    |
+| 72 (0x48)     | 8 bytes  | LBA inicial de un array de entradas de partición (siempre 2 en la copia primaria)                                                                                                     |
+| 80 (0x50)     | 4 bytes  | Número de entradas de partición en el array                                                                                                                                         |
+| 84 (0x54)     | 4 bytes  | Tamaño de una única entrada de partición (generalmente 80h o 128)                                                                                                                        |
+| 88 (0x58)     | 4 bytes  | CRC32 del array de entradas de partición en little endian                                                                                                                            |
+| 92 (0x5C)     | \*       | Reservado; debe ser ceros para el resto del bloque (420 bytes para un tamaño de sector de 512 bytes; pero puede ser más con tamaños de sector más grandes)                                      |
 
-**Partition entries (LBA 2–33)**
+**Entradas de partición (LBA 2–33)**
 
-| GUID partition entry format |          |                                                                                                               |
-| --------------------------- | -------- | ------------------------------------------------------------------------------------------------------------- |
-| Offset                      | Length   | Contents                                                                                                      |
-| 0 (0x00)                    | 16 bytes | [Partition type GUID](https://en.wikipedia.org/wiki/GUID_Partition_Table#Partition_type_GUIDs) (mixed endian) |
-| 16 (0x10)                   | 16 bytes | Unique partition GUID (mixed endian)                                                                          |
-| 32 (0x20)                   | 8 bytes  | First LBA ([little endian](https://en.wikipedia.org/wiki/Little_endian))                                      |
-| 40 (0x28)                   | 8 bytes  | Last LBA (inclusive, usually odd)                                                                             |
-| 48 (0x30)                   | 8 bytes  | Attribute flags (e.g. bit 60 denotes read-only)                                                               |
-| 56 (0x38)                   | 72 bytes | Partition name (36 [UTF-16](https://en.wikipedia.org/wiki/UTF-16)LE code units)                               |
+| Formato de entrada de partición GUID |          |                                                                                                               |
+| ------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------- |
+| Desplazamiento                        | Longitud | Contenido                                                                                                      |
+| 0 (0x00)                              | 16 bytes | [Tipo de partición GUID](https://en.wikipedia.org/wiki/GUID_Partition_Table#Partition_type_GUIDs) (endian mixto) |
+| 16 (0x10)                             | 16 bytes | GUID de partición único (endian mixto)                                                                          |
+| 32 (0x20)                             | 8 bytes  | Primer LBA ([little endian](https://en.wikipedia.org/wiki/Little_endian))                                      |
+| 40 (0x28)                             | 8 bytes  | Último LBA (inclusive, generalmente impar)                                                                             |
+| 48 (0x30)                             | 8 bytes  | Banderas de atributos (por ejemplo, el bit 60 denota solo lectura)                                                               |
+| 56 (0x38)                             | 72 bytes | Nombre de la partición (36 [UTF-16](https://en.wikipedia.org/wiki/UTF-16)LE unidades de código)                               |
 
-**Partitions Types**
+**Tipos de particiones**
 
 ![](<../../../images/image (83).png>)
 
-More partition types in [https://en.wikipedia.org/wiki/GUID_Partition_Table](https://en.wikipedia.org/wiki/GUID_Partition_Table)
+Más tipos de particiones en [https://en.wikipedia.org/wiki/GUID_Partition_Table](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 
-### Inspecting
+### Inspección
 
-After mounting the forensics image with [**ArsenalImageMounter**](https://arsenalrecon.com/downloads/), you can inspect the first sector using the Windows tool [**Active Disk Editor**](https://www.disk-editor.org/index.html)**.** In the following image an **MBR** was detected on the **sector 0** and interpreted:
+Después de montar la imagen forense con [**ArsenalImageMounter**](https://arsenalrecon.com/downloads/), puedes inspeccionar el primer sector utilizando la herramienta de Windows [**Active Disk Editor**](https://www.disk-editor.org/index.html)**.** En la imagen siguiente se detectó un **MBR** en el **sector 0** e interpretado:
 
 ![](<../../../images/image (354).png>)
 
-If it was a **GPT table instead of an MBR** it should appear the signature _EFI PART_ in the **sector 1** (which in the previous image is empty).
+Si fuera una **tabla GPT en lugar de un MBR**, debería aparecer la firma _EFI PART_ en el **sector 1** (que en la imagen anterior está vacío).
 
-## File-Systems
+## Sistemas de archivos
 
-### Windows file-systems list
+### Lista de sistemas de archivos de Windows
 
 - **FAT12/16**: MSDOS, WIN95/98/NT/200
 - **FAT32**: 95/2000/XP/2003/VISTA/7/8/10
@@ -151,81 +149,81 @@ If it was a **GPT table instead of an MBR** it should appear the signature _EFI 
 
 ### FAT
 
-The **FAT (File Allocation Table)** file system is designed around its core component, the file allocation table, positioned at the volume's start. This system safeguards data by maintaining **two copies** of the table, ensuring data integrity even if one is corrupted. The table, along with the root folder, must be in a **fixed location**, crucial for the system's startup process.
+El sistema de archivos **FAT (Tabla de asignación de archivos)** está diseñado en torno a su componente central, la tabla de asignación de archivos, situada al inicio del volumen. Este sistema protege los datos manteniendo **dos copias** de la tabla, asegurando la integridad de los datos incluso si una se corrompe. La tabla, junto con la carpeta raíz, debe estar en una **ubicación fija**, crucial para el proceso de arranque del sistema.
 
-The file system's basic unit of storage is a **cluster, usually 512B**, comprising multiple sectors. FAT has evolved through versions:
+La unidad básica de almacenamiento del sistema de archivos es un **cluster, generalmente de 512B**, que comprende múltiples sectores. FAT ha evolucionado a través de versiones:
 
-- **FAT12**, supporting 12-bit cluster addresses and handling up to 4078 clusters (4084 with UNIX).
-- **FAT16**, enhancing to 16-bit addresses, thereby accommodating up to 65,517 clusters.
-- **FAT32**, further advancing with 32-bit addresses, allowing an impressive 268,435,456 clusters per volume.
+- **FAT12**, que admite direcciones de cluster de 12 bits y maneja hasta 4078 clusters (4084 con UNIX).
+- **FAT16**, mejorando a direcciones de 16 bits, permitiendo así hasta 65,517 clusters.
+- **FAT32**, avanzando aún más con direcciones de 32 bits, permitiendo un impresionante 268,435,456 clusters por volumen.
 
-A significant limitation across FAT versions is the **4GB maximum file size**, imposed by the 32-bit field used for file size storage.
+Una limitación significativa en todas las versiones de FAT es el **tamaño máximo de archivo de 4GB**, impuesto por el campo de 32 bits utilizado para el almacenamiento del tamaño del archivo.
 
-Key components of the root directory, particularly for FAT12 and FAT16, include:
+Los componentes clave del directorio raíz, particularmente para FAT12 y FAT16, incluyen:
 
-- **File/Folder Name** (up to 8 characters)
-- **Attributes**
-- **Creation, Modification, and Last Access Dates**
-- **FAT Table Address** (indicating the start cluster of the file)
-- **File Size**
+- **Nombre de archivo/carpeta** (hasta 8 caracteres)
+- **Atributos**
+- **Fechas de creación, modificación y último acceso**
+- **Dirección de la tabla FAT** (indicando el cluster inicial del archivo)
+- **Tamaño del archivo**
 
 ### EXT
 
-**Ext2** is the most common file system for **not journaling** partitions (**partitions that don't change much**) like the boot partition. **Ext3/4** are **journaling** and are used usually for the **rest partitions**.
+**Ext2** es el sistema de archivos más común para **particiones que no registran** (**particiones que no cambian mucho**) como la partición de arranque. **Ext3/4** son **registradores** y se utilizan generalmente para el **resto de las particiones**.
 
-## **Metadata**
+## **Metadatos**
 
-Some files contain metadata. This information is about the content of the file which sometimes might be interesting to an analyst as depending on the file type, it might have information like:
+Algunos archivos contienen metadatos. Esta información se refiere al contenido del archivo que a veces puede ser interesante para un analista, ya que dependiendo del tipo de archivo, puede tener información como:
 
-- Title
-- MS Office Version used
-- Author
-- Dates of creation and last modification
-- Model of the camera
-- GPS coordinates
-- Image information
+- Título
+- Versión de MS Office utilizada
+- Autor
+- Fechas de creación y última modificación
+- Modelo de la cámara
+- Coordenadas GPS
+- Información de la imagen
 
-You can use tools like [**exiftool**](https://exiftool.org) and [**Metadiver**](https://www.easymetadata.com/metadiver-2/) to get the metadata of a file.
+Puedes usar herramientas como [**exiftool**](https://exiftool.org) y [**Metadiver**](https://www.easymetadata.com/metadiver-2/) para obtener los metadatos de un archivo.
 
-## **Deleted Files Recovery**
+## **Recuperación de archivos eliminados**
 
-### Logged Deleted Files
+### Archivos eliminados registrados
 
-As was seen before there are several places where the file is still saved after it was "deleted". This is because usually the deletion of a file from a file system just marks it as deleted but the data isn't touched. Then, it's possible to inspect the registries of the files (like the MFT) and find the deleted files.
+Como se vio antes, hay varios lugares donde el archivo aún se guarda después de haber sido "eliminado". Esto se debe a que, generalmente, la eliminación de un archivo de un sistema de archivos simplemente lo marca como eliminado, pero los datos no se tocan. Entonces, es posible inspeccionar los registros de los archivos (como el MFT) y encontrar los archivos eliminados.
 
-Also, the OS usually saves a lot of information about file system changes and backups, so it's possible to try to use them to recover the file or as much information as possible.
-
-{{#ref}}
-file-data-carving-recovery-tools.md
-{{#endref}}
-
-### **File Carving**
-
-**File carving** is a technique that tries to **find files in the bulk of data**. There are 3 main ways tools like this work: **Based on file types headers and footers**, based on file types **structures** and based on the **content** itself.
-
-Note that this technique **doesn't work to retrieve fragmented files**. If a file **isn't stored in contiguous sectors**, then this technique won't be able to find it or at least part of it.
-
-There are several tools that you can use for file Carving indicating the file types you want to search for
+Además, el sistema operativo generalmente guarda mucha información sobre los cambios en el sistema de archivos y copias de seguridad, por lo que es posible intentar usarlos para recuperar el archivo o la mayor cantidad de información posible.
 
 {{#ref}}
 file-data-carving-recovery-tools.md
 {{#endref}}
 
-### Data Stream **C**arving
+### **Carving de archivos**
 
-Data Stream Carving is similar to File Carving but **instead of looking for complete files, it looks for interesting fragments** of information.\
-For example, instead of looking for a complete file containing logged URLs, this technique will search for URLs.
+**El carving de archivos** es una técnica que intenta **encontrar archivos en la gran cantidad de datos**. Hay 3 formas principales en que herramientas como esta funcionan: **Basado en encabezados y pies de tipos de archivos**, basado en **estructuras** de tipos de archivos y basado en el **contenido** mismo.
+
+Ten en cuenta que esta técnica **no funciona para recuperar archivos fragmentados**. Si un archivo **no está almacenado en sectores contiguos**, entonces esta técnica no podrá encontrarlo o al menos parte de él.
+
+Hay varias herramientas que puedes usar para el carving de archivos indicando los tipos de archivos que deseas buscar.
 
 {{#ref}}
 file-data-carving-recovery-tools.md
 {{#endref}}
 
-### Secure Deletion
+### Carving de flujo de datos
 
-Obviously, there are ways to **"securely" delete files and part of logs about them**. For example, it's possible to **overwrite the content** of a file with junk data several times, and then **remove** the **logs** from the **$MFT** and **$LOGFILE** about the file, and **remove the Volume Shadow Copies**.\
-You may notice that even performing that action there might be **other parts where the existence of the file is still logged**, and that's true and part of the forensics professional job is to find them.
+El carving de flujo de datos es similar al carving de archivos, pero **en lugar de buscar archivos completos, busca fragmentos interesantes** de información.\
+Por ejemplo, en lugar de buscar un archivo completo que contenga URLs registradas, esta técnica buscará URLs.
 
-## References
+{{#ref}}
+file-data-carving-recovery-tools.md
+{{#endref}}
+
+### Eliminación segura
+
+Obviamente, hay formas de **"eliminar de forma segura" archivos y parte de los registros sobre ellos**. Por ejemplo, es posible **sobrescribir el contenido** de un archivo con datos basura varias veces, y luego **eliminar** los **registros** del **$MFT** y **$LOGFILE** sobre el archivo, y **eliminar las copias de sombra del volumen**.\
+Puedes notar que incluso al realizar esa acción puede haber **otras partes donde la existencia del archivo aún está registrada**, y eso es cierto y parte del trabajo del profesional forense es encontrarlas.
+
+## Referencias
 
 - [https://en.wikipedia.org/wiki/GUID_Partition_Table](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 - [http://ntfs.com/ntfs-permissions.htm](http://ntfs.com/ntfs-permissions.htm)

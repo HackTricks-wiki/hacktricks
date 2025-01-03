@@ -33,7 +33,7 @@ Las ACLs están acompañadas por una **lista de aplicaciones de confianza** que 
 Además, la entrada podría contener la clave **`ACLAuthorizationPartitionID`,** que se utiliza para identificar el **teamid, apple,** y **cdhash.**
 
 - Si se especifica el **teamid**, entonces para **acceder al valor de la entrada** **sin** un **prompt**, la aplicación utilizada debe tener el **mismo teamid**.
-- Si se especifica el **apple**, entonces la aplicación necesita estar **firmada** por **Apple**.
+- Si se especifica el **apple**, entonces la aplicación debe estar **firmada** por **Apple**.
 - Si se indica el **cdhash**, entonces la **app** debe tener el **cdhash** específico.
 
 ### Creating a Keychain Entry
@@ -80,7 +80,7 @@ security dump-keychain ~/Library/Keychains/login.keychain-db
 >
 > Otros puntos finales de API se pueden encontrar en el código fuente de [**SecKeyChain.h**](https://opensource.apple.com/source/libsecurity_keychain/libsecurity_keychain-55017/lib/SecKeychain.h.auto.html).
 
-Lista y obtén **info** sobre cada entrada del keychain usando el **Security Framework** o también podrías revisar la herramienta de línea de comandos de código abierto de Apple [**security**](https://opensource.apple.com/source/Security/Security-59306.61.1/SecurityTool/macOS/security.c.auto.html)**.** Algunos ejemplos de API:
+Enumera y obtén **info** sobre cada entrada del keychain usando el **Security Framework** o también puedes verificar la herramienta de línea de comandos de código abierto de Apple [**security**](https://opensource.apple.com/source/Security/Security-59306.61.1/SecurityTool/macOS/security.c.auto.html)**.** Algunos ejemplos de API:
 
 - La API **`SecItemCopyMatching`** proporciona información sobre cada entrada y hay algunos atributos que puedes establecer al usarla:
 - **`kSecReturnData`**: Si es verdadero, intentará descifrar los datos (configúralo en falso para evitar posibles ventanas emergentes)

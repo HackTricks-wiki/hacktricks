@@ -105,13 +105,13 @@ ubuntu
 ### Otras malas configuraciones - Misma vulnerabilidad
 
 En el ejemplo anterior simulamos una mala configuración donde un administrador **estableció una carpeta no privilegiada dentro de un archivo de configuración dentro de `/etc/ld.so.conf.d/`**.\
-Pero hay otras malas configuraciones que pueden causar la misma vulnerabilidad, si tiene **permisos de escritura** en algún **archivo de configuración** dentro de `/etc/ld.so.conf.d`, en la carpeta `/etc/ld.so.conf.d` o en el archivo `/etc/ld.so.conf` puede configurar la misma vulnerabilidad y explotarla.
+Pero hay otras malas configuraciones que pueden causar la misma vulnerabilidad; si tiene **permisos de escritura** en algún **archivo de configuración** dentro de `/etc/ld.so.conf.d`, en la carpeta `/etc/ld.so.conf.d` o en el archivo `/etc/ld.so.conf`, puede configurar la misma vulnerabilidad y explotarla.
 
 ## Exploit 2
 
 **Suponga que tiene privilegios de sudo sobre `ldconfig`**.\
 Puede indicar a `ldconfig` **dónde cargar los archivos de configuración**, así que podemos aprovechar esto para hacer que `ldconfig` cargue carpetas arbitrarias.\
-Así que, vamos a crear los archivos y carpetas necesarios para cargar "/tmp":
+Entonces, vamos a crear los archivos y carpetas necesarios para cargar "/tmp":
 ```bash
 cd /tmp
 echo "include /tmp/conf/*" > fake.ld.so.conf

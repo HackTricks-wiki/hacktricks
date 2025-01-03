@@ -12,7 +12,7 @@ Para comenzar a extraer datos de un dispositivo Android, debe estar desbloqueado
 
 ## Adquisición de Datos
 
-Crea un [respaldo de android usando adb](mobile-pentesting/android-app-pentesting/adb-commands.md#backup) y extráelo usando [Android Backup Extractor](https://sourceforge.net/projects/adbextractor/): `java -jar abe.jar unpack file.backup file.tar`
+Crea un [android backup usando adb](mobile-pentesting/android-app-pentesting/adb-commands.md#backup) y extráelo usando [Android Backup Extractor](https://sourceforge.net/projects/adbextractor/): `java -jar abe.jar unpack file.backup file.tar`
 
 ### Si hay acceso root o conexión física a la interfaz JTAG
 

@@ -1,114 +1,97 @@
-# Local Cloud Storage
+# Almacenamiento en la Nube Local
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="../../../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 ## OneDrive
 
-In Windows, you can find the OneDrive folder in `\Users\<username>\AppData\Local\Microsoft\OneDrive`. And inside `logs\Personal` it's possible to find the file `SyncDiagnostics.log` which contains some interesting data regarding the synchronized files:
+En Windows, puedes encontrar la carpeta de OneDrive en `\Users\<username>\AppData\Local\Microsoft\OneDrive`. Y dentro de `logs\Personal` es posible encontrar el archivo `SyncDiagnostics.log` que contiene algunos datos interesantes sobre los archivos sincronizados:
 
-- Size in bytes
-- Creation date
-- Modification date
-- Number of files in the cloud
-- Number of files in the folder
-- **CID**: Unique ID of the OneDrive user
-- Report generation time
-- Size of the HD of the OS
+- Tamaño en bytes
+- Fecha de creación
+- Fecha de modificación
+- Número de archivos en la nube
+- Número de archivos en la carpeta
+- **CID**: ID único del usuario de OneDrive
+- Hora de generación del informe
+- Tamaño del HD del sistema operativo
 
-Once you have found the CID it's recommended to **search files containing this ID**. You may be able to find files with the name: _**\<CID>.ini**_ and _**\<CID>.dat**_ that may contain interesting information like the names of files synchronized with OneDrive.
+Una vez que hayas encontrado el CID, se recomienda **buscar archivos que contengan este ID**. Es posible que encuentres archivos con el nombre: _**\<CID>.ini**_ y _**\<CID>.dat**_ que pueden contener información interesante como los nombres de los archivos sincronizados con OneDrive.
 
 ## Google Drive
 
-In Windows, you can find the main Google Drive folder in `\Users\<username>\AppData\Local\Google\Drive\user_default`\
-This folder contains a file called Sync_log.log with information like the email address of the account, filenames, timestamps, MD5 hashes of the files, etc. Even deleted files appear in that log file with its corresponding MD5.
+En Windows, puedes encontrar la carpeta principal de Google Drive en `\Users\<username>\AppData\Local\Google\Drive\user_default`\
+Esta carpeta contiene un archivo llamado Sync_log.log con información como la dirección de correo electrónico de la cuenta, nombres de archivos, marcas de tiempo, hashes MD5 de los archivos, etc. Incluso los archivos eliminados aparecen en ese archivo de registro con su correspondiente MD5.
 
-The file **`Cloud_graph\Cloud_graph.db`** is a sqlite database which contains the table **`cloud_graph_entry`**. In this table you can find the **name** of the **synchronized** **files**, modified time, size, and the MD5 checksum of the files.
+El archivo **`Cloud_graph\Cloud_graph.db`** es una base de datos sqlite que contiene la tabla **`cloud_graph_entry`**. En esta tabla puedes encontrar el **nombre** de los **archivos sincronizados**, tiempo de modificación, tamaño y el checksum MD5 de los archivos.
 
-The table data of the database **`Sync_config.db`** contains the email address of the account, the path of the shared folders and the Google Drive version.
+Los datos de la tabla de la base de datos **`Sync_config.db`** contienen la dirección de correo electrónico de la cuenta, la ruta de las carpetas compartidas y la versión de Google Drive.
 
 ## Dropbox
 
-Dropbox uses **SQLite databases** to manage the files. In this\
-You can find the databases in the folders:
+Dropbox utiliza **bases de datos SQLite** para gestionar los archivos. En este\
+Puedes encontrar las bases de datos en las carpetas:
 
 - `\Users\<username>\AppData\Local\Dropbox`
 - `\Users\<username>\AppData\Local\Dropbox\Instance1`
 - `\Users\<username>\AppData\Roaming\Dropbox`
 
-And the main databases are:
+Y las bases de datos principales son:
 
 - Sigstore.dbx
 - Filecache.dbx
 - Deleted.dbx
 - Config.dbx
 
-The ".dbx" extension means that the **databases** are **encrypted**. Dropbox uses **DPAPI** ([https://docs.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)?redirectedfrom=MSDN](<https://docs.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)?redirectedfrom=MSDN>))
+La extensión ".dbx" significa que las **bases de datos** están **encriptadas**. Dropbox utiliza **DPAPI** ([https://docs.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)?redirectedfrom=MSDN](<https://docs.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)?redirectedfrom=MSDN>))
 
-To understand better the encryption that Dropbox uses you can read [https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html](https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html).
+Para entender mejor la encriptación que utiliza Dropbox, puedes leer [https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html](https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html).
 
-However, the main information is:
+Sin embargo, la información principal es:
 
-- **Entropy**: d114a55212655f74bd772e37e64aee9b
-- **Salt**: 0D638C092E8B82FC452883F95F355B8E
-- **Algorithm**: PBKDF2
-- **Iterations**: 1066
+- **Entropía**: d114a55212655f74bd772e37e64aee9b
+- **Sal**: 0D638C092E8B82FC452883F95F355B8E
+- **Algoritmo**: PBKDF2
+- **Iteraciones**: 1066
 
-Apart from that information, to decrypt the databases you still need:
+Aparte de esa información, para descifrar las bases de datos aún necesitas:
 
-- The **encrypted DPAPI key**: You can find it in the registry inside `NTUSER.DAT\Software\Dropbox\ks\client` (export this data as binary)
-- The **`SYSTEM`** and **`SECURITY`** hives
-- The **DPAPI master keys**: Which can be found in `\Users\<username>\AppData\Roaming\Microsoft\Protect`
-- The **username** and **password** of the Windows user
+- La **clave DPAPI encriptada**: Puedes encontrarla en el registro dentro de `NTUSER.DAT\Software\Dropbox\ks\client` (exporta estos datos como binarios)
+- Los **hives** de **`SYSTEM`** y **`SECURITY`**
+- Las **claves maestras DPAPI**: Que se pueden encontrar en `\Users\<username>\AppData\Roaming\Microsoft\Protect`
+- El **nombre de usuario** y **contraseña** del usuario de Windows
 
-Then you can use the tool [**DataProtectionDecryptor**](https://nirsoft.net/utils/dpapi_data_decryptor.html)**:**
+Luego puedes usar la herramienta [**DataProtectionDecryptor**](https://nirsoft.net/utils/dpapi_data_decryptor.html)**:**
 
 ![](<../../../images/image (448).png>)
 
-If everything goes as expected, the tool will indicate the **primary key** that you need to **use to recover the original one**. To recover the original one, just use this [cyber_chef receipt](<https://gchq.github.io/CyberChef/#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) putting the primary key as the "passphrase" inside the receipt.
+Si todo va como se espera, la herramienta indicará la **clave primaria** que necesitas **usar para recuperar la original**. Para recuperar la original, simplemente usa esta [receta de cyber_chef](<https://gchq.github.io/CyberChef/#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) poniendo la clave primaria como la "frase de paso" dentro de la receta.
 
-The resulting hex is the final key used to encrypt the databases which can be decrypted with:
-
+El hex resultante es la clave final utilizada para encriptar las bases de datos que se puede descifrar con:
 ```bash
 sqlite -k <Obtained Key> config.dbx ".backup config.db" #This decompress the config.dbx and creates a clear text backup in config.db
 ```
+La base de datos **`config.dbx`** contiene:
 
-The **`config.dbx`** database contains:
+- **Email**: El correo electrónico del usuario
+- **usernamedisplayname**: El nombre del usuario
+- **dropbox_path**: Ruta donde se encuentra la carpeta de Dropbox
+- **Host_id: Hash** utilizado para autenticarse en la nube. Esto solo se puede revocar desde la web.
+- **Root_ns**: Identificador del usuario
 
-- **Email**: The email of the user
-- **usernamedisplayname**: The name of the user
-- **dropbox_path**: Path where the dropbox folder is located
-- **Host_id: Hash** used to authenticate to the cloud. This can only be revoked from the web.
-- **Root_ns**: User identifier
+La base de datos **`filecache.db`** contiene información sobre todos los archivos y carpetas sincronizados con Dropbox. La tabla `File_journal` es la que tiene más información útil:
 
-The **`filecache.db`** database contains information about all the files and folders synchronized with Dropbox. The table `File_journal` is the one with more useful information:
+- **Server_path**: Ruta donde se encuentra el archivo dentro del servidor (esta ruta está precedida por el `host_id` del cliente).
+- **local_sjid**: Versión del archivo
+- **local_mtime**: Fecha de modificación
+- **local_ctime**: Fecha de creación
 
-- **Server_path**: Path where the file is located inside the server (this path is preceded by the `host_id` of the client).
-- **local_sjid**: Version of the file
-- **local_mtime**: Modification date
-- **local_ctime**: Creation date
+Otras tablas dentro de esta base de datos contienen información más interesante:
 
-Other tables inside this database contain more interesting information:
-
-- **block_cache**: hash of all the files and folders of Dropbox
-- **block_ref**: Related the hash ID of the table `block_cache` with the file ID in the table `file_journal`
-- **mount_table**: Share folders of dropbox
-- **deleted_fields**: Dropbox deleted files
+- **block_cache**: hash de todos los archivos y carpetas de Dropbox
+- **block_ref**: Relaciona el ID de hash de la tabla `block_cache` con el ID de archivo en la tabla `file_journal`
+- **mount_table**: Carpetas compartidas de Dropbox
+- **deleted_fields**: Archivos eliminados de Dropbox
 - **date_added**
-
-<figure><img src="../../../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 {{#include ../../../banners/hacktricks-training.md}}

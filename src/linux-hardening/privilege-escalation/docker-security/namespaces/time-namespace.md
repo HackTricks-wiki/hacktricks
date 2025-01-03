@@ -4,7 +4,7 @@
 
 ## Información Básica
 
-El espacio de nombres de tiempo en Linux permite desplazamientos por espacio de nombres a los relojes monótonos del sistema y de tiempo de arranque. Se utiliza comúnmente en contenedores de Linux para cambiar la fecha/hora dentro de un contenedor y ajustar los relojes después de restaurar desde un punto de control o instantánea.
+El espacio de nombres de tiempo en Linux permite desplazamientos por espacio de nombres a los relojes monótonos del sistema y al tiempo de arranque. Se utiliza comúnmente en contenedores de Linux para cambiar la fecha/hora dentro de un contenedor y ajustar los relojes después de restaurar desde un punto de control o una instantánea.
 
 ## Laboratorio:
 
@@ -24,7 +24,7 @@ Cuando se ejecuta `unshare` sin la opción `-f`, se encuentra un error debido a 
 
 1. **Explicación del Problema**:
 
-- El núcleo de Linux permite a un proceso crear nuevos espacios de nombres utilizando la llamada al sistema `unshare`. Sin embargo, el proceso que inicia la creación de un nuevo espacio de nombres de PID (denominado "proceso unshare") no entra en el nuevo espacio de nombres; solo lo hacen sus procesos hijos.
+- El núcleo de Linux permite a un proceso crear nuevos espacios de nombres utilizando la llamada al sistema `unshare`. Sin embargo, el proceso que inicia la creación de un nuevo espacio de nombres de PID (denominado proceso "unshare") no entra en el nuevo espacio de nombres; solo lo hacen sus procesos hijos.
 - Ejecutar `%unshare -p /bin/bash%` inicia `/bin/bash` en el mismo proceso que `unshare`. En consecuencia, `/bin/bash` y sus procesos hijos están en el espacio de nombres de PID original.
 - El primer proceso hijo de `/bin/bash` en el nuevo espacio de nombres se convierte en PID 1. Cuando este proceso sale, desencadena la limpieza del espacio de nombres si no hay otros procesos, ya que PID 1 tiene el papel especial de adoptar procesos huérfanos. El núcleo de Linux deshabilitará entonces la asignación de PID en ese espacio de nombres.
 
@@ -34,7 +34,7 @@ Cuando se ejecuta `unshare` sin la opción `-f`, se encuentra un error debido a 
 
 3. **Solución**:
 - El problema se puede resolver utilizando la opción `-f` con `unshare`. Esta opción hace que `unshare` cree un nuevo proceso después de crear el nuevo espacio de nombres de PID.
-- Ejecutar `%unshare -fp /bin/bash%` asegura que el comando `unshare` se convierta en PID 1 en el nuevo espacio de nombres. `/bin/bash` y sus procesos hijos están entonces contenidos de manera segura dentro de este nuevo espacio de nombres, previniendo la salida prematura de PID 1 y permitiendo la asignación normal de PID.
+- Ejecutar `%unshare -fp /bin/bash%` asegura que el comando `unshare` mismo se convierta en PID 1 en el nuevo espacio de nombres. `/bin/bash` y sus procesos hijos están entonces contenidos de manera segura dentro de este nuevo espacio de nombres, previniendo la salida prematura de PID 1 y permitiendo la asignación normal de PID.
 
 Al asegurarte de que `unshare` se ejecute con la bandera `-f`, el nuevo espacio de nombres de PID se mantiene correctamente, permitiendo que `/bin/bash` y sus subprocesos operen sin encontrar el error de asignación de memoria.
 

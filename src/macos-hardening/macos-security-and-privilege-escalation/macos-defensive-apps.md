@@ -10,10 +10,10 @@
 ## Detección de persistencia
 
 - [**KnockKnock**](https://objective-see.org/products/knockknock.html): Aplicación de Objective-See que buscará en varias ubicaciones donde **el malware podría estar persistiendo** (es una herramienta de un solo uso, no un servicio de monitoreo).
-- [**BlockBlock**](https://objective-see.org/products/blockblock.html): Como KnockKnock, monitoreando procesos que generan persistencia.
+- [**BlockBlock**](https://objective-see.org/products/blockblock.html): Al igual que KnockKnock, monitorea procesos que generan persistencia.
 
 ## Detección de keyloggers
 
-- [**ReiKey**](https://objective-see.org/products/reikey.html): Aplicación de Objective-See para encontrar **keyloggers** que instalan "event taps" de teclado.&#x20;
+- [**ReiKey**](https://objective-see.org/products/reikey.html): Aplicación de Objective-See para encontrar **keyloggers** que instalan "event taps" de teclado&#x20;
 
 {{#include ../../banners/hacktricks-training.md}}

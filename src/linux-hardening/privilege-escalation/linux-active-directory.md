@@ -20,7 +20,7 @@ También puedes consultar la siguiente página para aprender **otras formas de e
 
 ### FreeIPA
 
-FreeIPA es una **alternativa** de código abierto a **Active Directory** de Microsoft, principalmente para entornos **Unix**. Combina un **directorio LDAP** completo con un Centro de Distribución de Claves **Kerberos** de MIT para la gestión similar a Active Directory. Utiliza el **Sistema de Certificados** Dogtag para la gestión de certificados CA y RA, y soporta autenticación **multi-factor**, incluyendo tarjetas inteligentes. SSSD está integrado para procesos de autenticación Unix. Aprende más sobre ello en:
+FreeIPA es una **alternativa** de código abierto a Microsoft Windows **Active Directory**, principalmente para entornos **Unix**. Combina un **directorio LDAP** completo con un centro de distribución de claves **Kerberos** de MIT para la gestión similar a Active Directory. Utiliza el **Sistema de Certificados Dogtag** para la gestión de certificados CA y RA, y admite autenticación **multifactor**, incluyendo tarjetas inteligentes. SSSD está integrado para procesos de autenticación Unix. Aprende más sobre ello en:
 
 {{#ref}}
 ../freeipa-pentesting.md
@@ -38,7 +38,7 @@ En esta página encontrarás diferentes lugares donde podrías **encontrar ticke
 
 ### Reutilización de tickets CCACHE desde /tmp
 
-Los archivos CCACHE son formatos binarios para **almacenar credenciales Kerberos** que generalmente se almacenan con permisos 600 en `/tmp`. Estos archivos pueden ser identificados por su **formato de nombre, `krb5cc_%{uid}`,** que correlaciona con el UID del usuario. Para la verificación del ticket de autenticación, la **variable de entorno `KRB5CCNAME`** debe ser configurada con la ruta del archivo de ticket deseado, permitiendo su reutilización.
+Los archivos CCACHE son formatos binarios para **almacenar credenciales Kerberos** que generalmente se almacenan con permisos 600 en `/tmp`. Estos archivos pueden ser identificados por su **formato de nombre, `krb5cc_%{uid}`,** que corresponde al UID del usuario. Para la verificación del ticket de autenticación, la **variable de entorno `KRB5CCNAME`** debe establecerse en la ruta del archivo de ticket deseado, permitiendo su reutilización.
 
 Lista el ticket actual utilizado para la autenticación con `env | grep KRB5CCNAME`. El formato es portátil y el ticket puede ser **reutilizado configurando la variable de entorno** con `export KRB5CCNAME=/tmp/ticket.ccache`. El formato del nombre del ticket Kerberos es `krb5cc_%{uid}` donde uid es el UID del usuario.
 ```bash
@@ -81,7 +81,7 @@ klist -k /etc/krb5.keytab
 ```
 ### Extraer cuentas de /etc/krb5.keytab
 
-Las claves de cuentas de servicio, esenciales para los servicios que operan con privilegios de root, se almacenan de forma segura en los archivos **`/etc/krb5.keytab`**. Estas claves, similares a contraseñas para servicios, requieren estricta confidencialidad.
+Las claves de cuentas de servicio, esenciales para los servicios que operan con privilegios de root, se almacenan de forma segura en los archivos **`/etc/krb5.keytab`**. Estas claves, similares a contraseñas para servicios, exigen estricta confidencialidad.
 
 Para inspeccionar el contenido del archivo keytab, se puede emplear **`klist`**. La herramienta está diseñada para mostrar detalles de la clave, incluyendo el **NT Hash** para la autenticación de usuarios, particularmente cuando el tipo de clave se identifica como 23.
 ```bash

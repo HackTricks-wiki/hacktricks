@@ -22,9 +22,9 @@ Un MDM tendrá permiso para instalar, consultar o eliminar perfiles, instalar ap
 
 Para ejecutar tu propio MDM necesitas **que tu CSR sea firmado por un proveedor** que podrías intentar obtener con [**https://mdmcert.download/**](https://mdmcert.download/). Y para ejecutar tu propio MDM para dispositivos Apple podrías usar [**MicroMDM**](https://github.com/micromdm/micromdm).
 
-Sin embargo, para instalar una aplicación en un dispositivo inscrito, aún necesitas que esté firmada por una cuenta de desarrollador... sin embargo, al inscribir el MDM, el **dispositivo agrega el certificado SSL del MDM como una CA de confianza**, por lo que ahora puedes firmar cualquier cosa.
+Sin embargo, para instalar una aplicación en un dispositivo inscrito, aún necesitas que esté firmada por una cuenta de desarrollador... sin embargo, al inscribir el dispositivo en un MDM, el **dispositivo agrega el certificado SSL del MDM como una CA de confianza**, por lo que ahora puedes firmar cualquier cosa.
 
-Para inscribir el dispositivo en un MDM, necesitas instalar un **`mobileconfig`** como root, que podría ser entregado a través de un **pkg** (podrías comprimirlo en zip y cuando se descargue desde Safari se descomprimirá).
+Para inscribir el dispositivo en un MDM, necesitas instalar un **`mobileconfig`** como root, que podría ser entregado a través de un archivo **pkg** (podrías comprimirlo en zip y cuando se descargue desde Safari se descomprimirá).
 
 **Mythic agent Orthrus** utiliza esta técnica.
 
@@ -77,9 +77,9 @@ sudo jamf policy -id 0
 Para **suplantar la comunicación** entre un dispositivo y JMF necesitas:
 
 - El **UUID** del dispositivo: `ioreg -d2 -c IOPlatformExpertDevice | awk -F" '/IOPlatformUUID/{print $(NF-1)}'`
-- La **llave de cadena de JAMF** de: `/Library/Application\ Support/Jamf/JAMF.keychain` que contiene el certificado del dispositivo
+- El **llavero de JAMF** de: `/Library/Application\ Support/Jamf/JAMF.keychain` que contiene el certificado del dispositivo
 
-Con esta información, **crea una VM** con el **UUID** de Hardware **robado** y con **SIP deshabilitado**, coloca la **llave de cadena de JAMF,** **intercepta** el **agente** de Jamf y roba su información.
+Con esta información, **crea una VM** con el **UUID** de Hardware **robado** y con **SIP deshabilitado**, coloca el **llavero de JAMF,** **intercepta** el **agente** de Jamf y roba su información.
 
 #### Robo de secretos
 
@@ -93,7 +93,7 @@ El script [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-To
 
 ### Acceso Remoto a macOS
 
-Y también sobre los **protocolos** **de red** "especiales" de **MacOS**:
+Y también sobre los **protocolos** **"especiales"** de **red** de **MacOS**:
 
 {{#ref}}
 ../macos-security-and-privilege-escalation/macos-protocols.md
@@ -168,7 +168,7 @@ dsconfigad -show
 ```
 Más información en [https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/](https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/)
 
-### Computer$ password
+### Contraseña de Computer$
 
 Obtén contraseñas usando:
 ```bash
@@ -209,7 +209,7 @@ macos-keychain.md
 
 ## Servicios Externos
 
-El Red Teaming en MacOS es diferente del Red Teaming regular en Windows, ya que generalmente **MacOS está integrado con varias plataformas externas directamente**. Una configuración común de MacOS es acceder a la computadora utilizando **credenciales sincronizadas de OneLogin y accediendo a varios servicios externos** (como github, aws...) a través de OneLogin.
+El Red Teaming en MacOS es diferente del Red Teaming regular en Windows, ya que generalmente **MacOS está integrado con varias plataformas externas directamente**. Una configuración común de MacOS es acceder a la computadora usando **credenciales sincronizadas de OneLogin y acceder a varios servicios externos** (como github, aws...) a través de OneLogin.
 
 ## Técnicas Misceláneas de Red Team
 
