@@ -2,11 +2,11 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**तकनीक के बारे में अधिक जानकारी के लिए मूल पोस्ट देखें:** [**https://blog.xpnsec.com/dirtynib/**](https://blog.xpnsec.com/dirtynib/) और [**https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/**](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)** द्वारा निम्नलिखित पोस्ट।** यहाँ एक सारांश है:
+**तकनीक के बारे में अधिक जानकारी के लिए मूल पोस्ट देखें:** [**https://blog.xpnsec.com/dirtynib/**](https://blog.xpnsec.com/dirtynib/) और [**https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/**](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) **द्वारा निम्नलिखित पोस्ट।** यहाँ एक सारांश है:
 
 ### Nib फ़ाइलें क्या हैं
 
-Nib (NeXT Interface Builder के लिए संक्षिप्त) फ़ाइलें, Apple के विकास पारिस्थितिकी तंत्र का हिस्सा, अनुप्रयोगों में **UI तत्वों** और उनके इंटरैक्शन को परिभाषित करने के लिए बनाई गई हैं। इनमें विंडो और बटन जैसी अनुक्रमित वस्तुएं शामिल हैं, और इन्हें रनटाइम पर लोड किया जाता है। उनके निरंतर उपयोग के बावजूद, Apple अब अधिक व्यापक UI प्रवाह दृश्यता के लिए Storyboards की सिफारिश करता है।
+Nib (NeXT Interface Builder के लिए संक्षिप्त) फ़ाइलें, Apple के विकास पारिस्थितिकी तंत्र का हिस्सा, अनुप्रयोगों में **UI तत्वों** और उनके इंटरैक्शन को परिभाषित करने के लिए बनाई गई हैं। इनमें विंडो और बटन जैसी अनुक्रमित वस्तुएं शामिल होती हैं, और इन्हें रनटाइम पर लोड किया जाता है। उनके निरंतर उपयोग के बावजूद, Apple अब अधिक व्यापक UI प्रवाह दृश्यता के लिए Storyboards की सिफारिश करता है।
 
 मुख्य Nib फ़ाइल का संदर्भ **`NSMainNibFile`** के मान में `Info.plist` फ़ाइल के अंदर होता है और इसे **`NSApplicationMain`** फ़ंक्शन द्वारा लोड किया जाता है, जो अनुप्रयोग के `main` फ़ंक्शन में निष्पादित होता है।
 
@@ -32,12 +32,12 @@ display dialog theDialogText
 
 - XCode डिबगर में चलाकर और बटन पर क्लिक करके परीक्षण करें।
 
-#### एक अनुप्रयोग को लक्षित करना (उदाहरण: Pages)
+#### एक एप्लिकेशन को लक्षित करना (उदाहरण: Pages)
 
 1. **तैयारी**:
 - लक्षित ऐप (जैसे, Pages) को एक अलग निर्देशिका (जैसे, `/tmp/`) में कॉपी करें।
 - गेटकीपर समस्याओं से बचने के लिए ऐप को प्रारंभ करें और इसे कैश करें।
-2. **NIB फ़ाइल को अधिलेखित करना**:
+2. **NIB फ़ाइल को ओवरराइट करना**:
 - एक मौजूदा NIB फ़ाइल (जैसे, About Panel NIB) को तैयार की गई DirtyNIB फ़ाइल से बदलें।
 3. **निष्पादन**:
 - ऐप के साथ इंटरैक्ट करके निष्पादन को ट्रिगर करें (जैसे, `About` मेनू आइटम का चयन करना)।
@@ -52,7 +52,7 @@ display dialog theDialogText
 
 ### अन्य उदाहरण
 
-पोस्ट [https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) में आप एक गंदे nib बनाने के लिए ट्यूटोरियल पा सकते हैं।&#x20;
+पोस्ट [https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) में आप एक गंदे निब बनाने के लिए ट्यूटोरियल पा सकते हैं।&#x20;
 
 ### लॉन्च प्रतिबंधों का समाधान
 
@@ -61,13 +61,13 @@ display dialog theDialogText
 
 ### अतिरिक्त macOS सुरक्षा
 
-macOS Sonoma से आगे, ऐप बंडलों के अंदर संशोधन प्रतिबंधित हैं। हालाँकि, पहले के तरीकों में शामिल थे:
+macOS Sonoma से आगे, ऐप बंडल के अंदर संशोधन प्रतिबंधित हैं। हालाँकि, पहले के तरीकों में शामिल थे:
 
 1. ऐप को एक अलग स्थान (जैसे, `/tmp/`) में कॉपी करना।
 2. प्रारंभिक सुरक्षा को बायपास करने के लिए ऐप बंडल के भीतर निर्देशिकाओं का नाम बदलना।
 3. गेटकीपर के साथ पंजीकरण करने के लिए ऐप चलाने के बाद, ऐप बंडल में संशोधन करना (जैसे, MainMenu.nib को Dirty.nib से बदलना)।
 4. निर्देशिकाओं का नाम वापस बदलना और इंजेक्ट की गई NIB फ़ाइल को निष्पादित करने के लिए ऐप को फिर से चलाना।
 
-**नोट**: हाल के macOS अपडेट ने गेटकीपर कैशिंग के बाद ऐप बंडलों के भीतर फ़ाइल संशोधनों को रोककर इस शोषण को कम कर दिया है, जिससे यह शोषण अप्रभावी हो गया है।
+**नोट**: हाल के macOS अपडेट ने गेटकीपर कैशिंग के बाद ऐप बंडल के भीतर फ़ाइल संशोधनों को रोककर इस शोषण को कम कर दिया है, जिससे यह शोषण अप्रभावी हो गया है।
 
 {{#include ../../../banners/hacktricks-training.md}}

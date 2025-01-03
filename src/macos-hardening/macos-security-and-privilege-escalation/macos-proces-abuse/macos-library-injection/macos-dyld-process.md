@@ -61,7 +61,7 @@ int main (int argc, char **argv, char **envp, char **apple)
 printf("Hi\n");
 }
 ```
-दिलचस्प डिस्सेम्बली भाग:
+दिलचस्प डिसअस्सेम्बली भाग:
 ```armasm
 ; objdump -d ./load
 100003f7c: 90000000    	adrp	x0, 0x100003000 <_main+0x1c>
@@ -253,12 +253,12 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 ```
 ### अन्य
 
-- `DYLD_BIND_AT_LAUNCH`: लेज़ी बाइंडिंग को नॉन लेज़ी के साथ हल किया जाता है
+- `DYLD_BIND_AT_LAUNCH`: Lazy bindings को non lazy के साथ हल किया जाता है
 - `DYLD_DISABLE_PREFETCH`: \_\_DATA और \_\_LINKEDIT सामग्री की प्री-फेचिंग को निष्क्रिय करें
 - `DYLD_FORCE_FLAT_NAMESPACE`: एकल-स्तरीय बाइंडिंग
 - `DYLD_[FRAMEWORK/LIBRARY]_PATH | DYLD_FALLBACK_[FRAMEWORK/LIBRARY]_PATH | DYLD_VERSIONED_[FRAMEWORK/LIBRARY]_PATH`: समाधान पथ
 - `DYLD_INSERT_LIBRARIES`: एक विशिष्ट पुस्तकालय लोड करें
-- `DYLD_PRINT_TO_FILE`: एक फ़ाइल में dyld डिबग लिखें
+- `DYLD_PRINT_TO_FILE`: dyld डिबग को एक फ़ाइल में लिखें
 - `DYLD_PRINT_APIS`: libdyld API कॉल प्रिंट करें
 - `DYLD_PRINT_APIS_APP`: मुख्य द्वारा किए गए libdyld API कॉल प्रिंट करें
 - `DYLD_PRINT_BINDINGS`: बंधे होने पर प्रतीकों को प्रिंट करें
@@ -271,13 +271,13 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 - `DYLD_PRINT_OPTS`: लोड विकल्प प्रिंट करें
 - `DYLD_REBASING`: प्रतीक रीबेसिंग संचालन प्रिंट करें
 - `DYLD_RPATHS`: @rpath के विस्तार प्रिंट करें
-- `DYLD_PRINT_SEGMENTS`: Mach-O खंडों के मानचित्रण प्रिंट करें
+- `DYLD_PRINT_SEGMENTS`: Mach-O खंडों के मानचित्रण को प्रिंट करें
 - `DYLD_PRINT_STATISTICS`: समय सांख्यिकी प्रिंट करें
 - `DYLD_PRINT_STATISTICS_DETAILS`: विस्तृत समय सांख्यिकी प्रिंट करें
 - `DYLD_PRINT_WARNINGS`: चेतावनी संदेश प्रिंट करें
 - `DYLD_SHARED_CACHE_DIR`: साझा पुस्तकालय कैश के लिए उपयोग करने का पथ
 - `DYLD_SHARED_REGION`: "उपयोग", "निजी", "बचें"
-- `DYLD_USE_CLOSURES`: क्लोज़र सक्षम करें
+- `DYLD_USE_CLOSURES`: क्लोज़र्स सक्षम करें
 
 कुछ ऐसा करके और अधिक ढूंढना संभव है:
 ```bash

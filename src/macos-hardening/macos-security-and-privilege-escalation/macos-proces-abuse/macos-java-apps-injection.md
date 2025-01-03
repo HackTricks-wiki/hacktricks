@@ -85,7 +85,7 @@ open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Profession
 > [!CAUTION]
 > एजेंट को **विभिन्न Java संस्करण** के साथ बनाना एजेंट और एप्लिकेशन दोनों के निष्पादन को क्रैश कर सकता है
 
-जहाँ एजेंट हो सकता है:
+जहां एजेंट हो सकता है:
 ```java:Agent.java
 import java.io.*;
 import java.lang.instrument.*;
@@ -114,7 +114,7 @@ Agent-Class: Agent
 Can-Redefine-Classes: true
 Can-Retransform-Classes: true
 ```
-और फिर env वेरिएबल को एक्सपोर्ट करें और java एप्लिकेशन को इस तरह चलाएँ:
+और फिर env वेरिएबल को एक्सपोर्ट करें और जावा एप्लिकेशन को इस तरह चलाएँ:
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"

@@ -5,16 +5,16 @@
 ## Basic Information
 
 यदि आप नहीं जानते कि Electron क्या है, तो आप [**यहां बहुत सारी जानकारी पा सकते हैं**](https://book.hacktricks.xyz/network-services-pentesting/pentesting-web/xss-to-rce-electron-desktop-apps)। लेकिन अभी के लिए बस इतना जान लें कि Electron **node** चलाता है।\
-और node के कुछ **parameters** और **env variables** हैं जिन्हें **अन्य कोड निष्पादित करने** के लिए उपयोग किया जा सकता है, जो निर्दिष्ट फ़ाइल के अलावा हैं।
+और node के पास कुछ **parameters** और **env variables** हैं जिन्हें **अन्य कोड निष्पादित करने** के लिए उपयोग किया जा सकता है, जो निर्दिष्ट फ़ाइल के अलावा हैं।
 
 ### Electron Fuses
 
-इन तकनीकों पर अगली चर्चा की जाएगी, लेकिन हाल के समय में Electron ने कई **सुरक्षा ध्वज जोड़े हैं** ताकि उन्हें रोका जा सके। ये हैं [**Electron Fuses**](https://www.electronjs.org/docs/latest/tutorial/fuses) और ये वे हैं जो macOS में Electron ऐप्स को **मनमाने कोड** को **लोड करने** से **रोकने** के लिए उपयोग किए जाते हैं:
+इन तकनीकों पर अगली चर्चा की जाएगी, लेकिन हाल के समय में Electron ने कई **सुरक्षा ध्वज जोड़े हैं** ताकि उन्हें रोका जा सके। ये हैं [**Electron Fuses**](https://www.electronjs.org/docs/latest/tutorial/fuses) और ये वे हैं जो macOS में Electron ऐप्स को **मनमाने कोड लोड करने** से **रोकने** के लिए उपयोग किए जाते हैं:
 
 - **`RunAsNode`**: यदि अक्षम किया गया, तो यह कोड इंजेक्ट करने के लिए env var **`ELECTRON_RUN_AS_NODE`** के उपयोग को रोकता है।
 - **`EnableNodeCliInspectArguments`**: यदि अक्षम किया गया, तो `--inspect`, `--inspect-brk` जैसे params का सम्मान नहीं किया जाएगा। इस तरह कोड इंजेक्ट करने से बचना।
 - **`EnableEmbeddedAsarIntegrityValidation`**: यदि सक्षम किया गया, तो लोड किया गया **`asar`** **file** macOS द्वारा **मान्य** किया जाएगा। इस तरह **कोड इंजेक्शन** को इस फ़ाइल की सामग्री को संशोधित करके रोकना।
-- **`OnlyLoadAppFromAsar`**: यदि यह सक्षम है, तो यह निम्नलिखित क्रम में लोड करने के लिए खोजने के बजाय: **`app.asar`**, **`app`** और अंततः **`default_app.asar`**। यह केवल app.asar की जांच करेगा और इसका उपयोग करेगा, इस प्रकार यह सुनिश्चित करेगा कि जब **`embeddedAsarIntegrityValidation`** फ्यूज़ के साथ **संयुक्त** किया जाता है, तो **अमान्य कोड** को **लोड करना असंभव** है।
+- **`OnlyLoadAppFromAsar`**: यदि यह सक्षम है, तो यह निम्नलिखित क्रम में लोड करने की खोज करने के बजाय: **`app.asar`**, **`app`** और अंततः **`default_app.asar`**। यह केवल app.asar की जांच करेगा और इसका उपयोग करेगा, इस प्रकार यह सुनिश्चित करेगा कि जब **`embeddedAsarIntegrityValidation`** फ्यूज़ के साथ **संयुक्त** किया जाता है, तो **अमान्य कोड लोड करना** **असंभव** है।
 - **`LoadBrowserProcessSpecificV8Snapshot`**: यदि सक्षम किया गया, तो ब्राउज़र प्रक्रिया अपने V8 स्नैपशॉट के लिए `browser_v8_context_snapshot.bin` नामक फ़ाइल का उपयोग करती है।
 
 एक और दिलचस्प फ्यूज़ जो कोड इंजेक्शन को रोकने वाला नहीं है:
@@ -23,7 +23,7 @@
 
 ### Checking Electron Fuses
 
-आप एक एप्लिकेशन से **इन ध्वजों की जांच** कर सकते हैं:
+आप एक एप्लिकेशन से **इन ध्वजों की जांच कर सकते हैं**:
 ```bash
 npx @electron/fuses read --app /Applications/Slack.app
 
@@ -39,18 +39,18 @@ LoadBrowserProcessSpecificV8Snapshot is Disabled
 ```
 ### Electron फ्यूज़ को संशोधित करना
 
-जैसा कि [**दस्तावेज़ों में उल्लेख किया गया है**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode), **Electron फ्यूज़** की कॉन्फ़िगरेशन **Electron बाइनरी** के अंदर होती है जिसमें कहीं **`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`** स्ट्रिंग होती है।
+जैसा कि [**दस्तावेज़ में उल्लेख किया गया है**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode), **Electron Fuses** की कॉन्फ़िगरेशन **Electron बाइनरी** के अंदर कॉन्फ़िगर की जाती है जिसमें कहीं **`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`** स्ट्रिंग होती है।
 
 macOS अनुप्रयोगों में यह आमतौर पर `application.app/Contents/Frameworks/Electron Framework.framework/Electron Framework` में होता है।
 ```bash
 grep -R "dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX" Slack.app/
 Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework matches
 ```
-आप इस फ़ाइल को [https://hexed.it/](https://hexed.it/) में लोड कर सकते हैं और पिछले स्ट्रिंग के लिए खोज कर सकते हैं। इस स्ट्रिंग के बाद आप ASCII में "0" या "1" संख्या देख सकते हैं जो यह दर्शाती है कि प्रत्येक फ्यूज़ अक्षम या सक्षम है। बस हेक्स कोड (`0x30` का अर्थ `0` और `0x31` का अर्थ `1`) को **फ्यूज़ मानों को संशोधित करने** के लिए संशोधित करें।
+आप इस फ़ाइल को [https://hexed.it/](https://hexed.it/) में लोड कर सकते हैं और पिछले स्ट्रिंग के लिए खोज कर सकते हैं। इस स्ट्रिंग के बाद आप ASCII में एक संख्या "0" या "1" देख सकते हैं जो यह दर्शाती है कि प्रत्येक फ्यूज़ अक्षम या सक्षम है। बस हेक्स कोड (`0x30` का अर्थ `0` है और `0x31` का अर्थ `1`) को **फ्यूज़ मानों को संशोधित करने** के लिए संशोधित करें।
 
 <figure><img src="../../../images/image (34).png" alt=""><figcaption></figcaption></figure>
 
-ध्यान दें कि यदि आप इन बाइट्स को संशोधित करके **`Electron Framework` बाइनरी** को किसी एप्लिकेशन के अंदर **ओवरराइट** करने की कोशिश करते हैं, तो ऐप नहीं चलेगा।
+ध्यान दें कि यदि आप इन बाइट्स को संशोधित करके **`Electron Framework`** बाइनरी को किसी एप्लिकेशन के अंदर **ओवरराइट** करने की कोशिश करते हैं, तो ऐप नहीं चलेगा।
 
 ## RCE कोड को Electron एप्लिकेशनों में जोड़ना
 
@@ -66,7 +66,7 @@ Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions
 
 ध्यान दें कि **`kTCCServiceSystemPolicyAppBundles`** की आवश्यकता को दरकिनार करना संभव है, एप्लिकेशन को किसी अन्य निर्देशिका (जैसे **`/tmp`**) में कॉपी करके, फ़ोल्डर **`app.app/Contents`** का नाम बदलकर **`app.app/NotCon`** करना, अपने **दुष्ट** कोड के साथ **asar** फ़ाइल को **संशोधित** करना, इसे फिर से **`app.app/Contents`** नाम देना और इसे निष्पादित करना।
 
-आप asar फ़ाइल से कोड को अनपैक कर सकते हैं:
+आप asar फ़ाइल से कोड को निकालने के लिए:
 ```bash
 npx asar extract app.asar app-decomp
 ```
@@ -84,9 +84,9 @@ ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
 require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator')
 ```
 > [!CAUTION]
-> यदि फ्यूज़ **`RunAsNode`** अक्षम है तो env var **`ELECTRON_RUN_AS_NODE`** को अनदेखा किया जाएगा, और यह काम नहीं करेगा।
+> यदि फ्यूज़ **`RunAsNode`** बंद है तो env var **`ELECTRON_RUN_AS_NODE`** को नजरअंदाज किया जाएगा, और यह काम नहीं करेगा।
 
-### ऐप प्लिस्ट से इंजेक्शन
+### ऐप plist से इंजेक्शन
 
 जैसा कि [**यहां प्रस्तावित है**](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks/), आप इस env वेरिएबल का दुरुपयोग एक plist में स्थिरता बनाए रखने के लिए कर सकते हैं:
 ```xml
@@ -123,7 +123,7 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
 ```
 > [!CAUTION]
-> यदि फ्यूज़ **`EnableNodeOptionsEnvironmentVariable`** **अक्षम** है, तो ऐप लॉन्च करते समय env var **NODE_OPTIONS** को **अनदेखा** करेगा जब तक कि env वेरिएबल **`ELECTRON_RUN_AS_NODE`** सेट न हो, जिसे फ्यूज़ **`RunAsNode`** के अक्षम होने पर भी **अनदेखा** किया जाएगा।
+> यदि फ्यूज़ **`EnableNodeOptionsEnvironmentVariable`** **अक्षम** है, तो ऐप लॉन्च करते समय env var **NODE_OPTIONS** को **अनदेखा** करेगा जब तक कि env वेरिएबल **`ELECTRON_RUN_AS_NODE`** सेट न किया गया हो, जिसे फ्यूज़ **`RunAsNode`** के अक्षम होने पर भी **अनदेखा** किया जाएगा।
 >
 > यदि आप **`ELECTRON_RUN_AS_NODE`** सेट नहीं करते हैं, तो आपको **त्रुटि** मिलेगी: `Most NODE_OPTIONs are not supported in packaged apps. See documentation for more details.`
 
@@ -169,7 +169,7 @@ ws.connect("ws://localhost:9222/devtools/page/85976D59050BFEFDBA48204E3D865D00",
 ws.send('{\"id\": 1, \"method\": \"Network.getAllCookies\"}')
 print(ws.recv()
 ```
-इस [**ब्लॉगपोस्ट**](https://hackerone.com/reports/1274695) में, इस डिबगिंग का दुरुपयोग किया गया है ताकि एक हेडलेस क्रोम **मनमाने स्थानों में मनमाने फ़ाइलें डाउनलोड** कर सके।
+इस [**ब्लॉगपोस्ट**](https://hackerone.com/reports/1274695) में, इस डिबगिंग का दुरुपयोग किया जाता है ताकि एक हेडलेस क्रोम **मनमाने स्थानों में मनमाने फ़ाइलें डाउनलोड** कर सके।
 
 ### ऐप प्लिस्ट से इंजेक्शन
 
@@ -190,11 +190,11 @@ print(ws.recv()
 ## TCC Bypass पुराने संस्करणों का दुरुपयोग
 
 > [!TIP]
-> macOS का TCC डेमन एप्लिकेशन के निष्पादित संस्करण की जांच नहीं करता है। इसलिए यदि आप **Electron एप्लिकेशन में कोड इंजेक्ट नहीं कर सकते** किसी भी पिछले तकनीकों के साथ, तो आप APP का एक पिछला संस्करण डाउनलोड कर सकते हैं और उस पर कोड इंजेक्ट कर सकते हैं क्योंकि इसे अभी भी TCC विशेषाधिकार मिलेंगे (जब तक कि Trust Cache इसे रोक न दे)।
+> macOS का TCC डेमन निष्पादित एप्लिकेशन के संस्करण की जांच नहीं करता है। इसलिए यदि आप **Electron एप्लिकेशन में कोड इंजेक्ट नहीं कर सकते** किसी भी पिछले तकनीकों के साथ, तो आप APP का एक पिछला संस्करण डाउनलोड कर सकते हैं और उस पर कोड इंजेक्ट कर सकते हैं क्योंकि इसे अभी भी TCC विशेषाधिकार मिलेंगे (जब तक कि Trust Cache इसे रोक न दे)।
 
 ## गैर-JS कोड चलाना
 
-पिछली तकनीकें आपको **Electron एप्लिकेशन की प्रक्रिया के अंदर JS कोड चलाने** की अनुमति देंगी। हालाँकि, याद रखें कि **बच्चे की प्रक्रियाएँ माता-पिता एप्लिकेशन के समान सैंडबॉक्स प्रोफ़ाइल के तहत चलती हैं** और **उनकी TCC अनुमतियाँ विरासत में लेती हैं**।\
+पिछली तकनीकें आपको **Electron एप्लिकेशन की प्रक्रिया के अंदर JS कोड चलाने** की अनुमति देंगी। हालाँकि, याद रखें कि **बच्चे की प्रक्रियाएँ माता-पिता एप्लिकेशन के समान सैंडबॉक्स प्रोफ़ाइल के तहत चलती हैं** और **अपने TCC अनुमतियों को विरासत में लेती हैं**।\
 इसलिए, यदि आप कैमरा या माइक्रोफ़ोन तक पहुँचने के लिए विशेषाधिकारों का दुरुपयोग करना चाहते हैं, तो आप बस **प्रक्रिया से एक और बाइनरी चला सकते हैं**।
 
 ## स्वचालित इंजेक्शन

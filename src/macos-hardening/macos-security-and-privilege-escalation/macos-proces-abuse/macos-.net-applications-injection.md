@@ -66,11 +66,11 @@ bool readMemory(void *addr, int len, unsigned char **output) {
 return true;
 }
 ```
-पूर्ण प्रमाण अवधारणा (POC) [यहां](https://gist.github.com/xpn/95eefc14918998853f6e0ab48d9f7b0b) उपलब्ध है।
+पूर्ण प्रमाण अवधारणा (POC) [यहाँ](https://gist.github.com/xpn/95eefc14918998853f6e0ab48d9f7b0b) उपलब्ध है।
 
 ## मेमोरी लिखना
 
-इसी तरह, `writeMemory` फ़ंक्शन का उपयोग करके मेमोरी में लिखा जा सकता है। प्रक्रिया में संदेश प्रकार को `MT_WriteMemory` पर सेट करना, डेटा का पता और लंबाई निर्दिष्ट करना, और फिर डेटा भेजना शामिल है:
+इसी तरह, मेमोरी को `writeMemory` फ़ंक्शन का उपयोग करके लिखा जा सकता है। प्रक्रिया में संदेश प्रकार को `MT_WriteMemory` पर सेट करना, डेटा का पता और लंबाई निर्दिष्ट करना, और फिर डेटा भेजना शामिल है:
 ```c
 bool writeMemory(void *addr, int len, unsigned char *input) {
 // Increment IDs, set message type, and specify memory location
@@ -86,7 +86,7 @@ return true;
 
 ## .NET Core कोड निष्पादन <a href="#net-core-code-execution" id="net-core-code-execution"></a>
 
-कोड निष्पादित करने के लिए, एक को स्मृति क्षेत्र की पहचान करनी होती है जिसमें rwx अनुमतियाँ होती हैं, जिसे vmmap -pages: का उपयोग करके किया जा सकता है।
+कोड निष्पादित करने के लिए, एक को मेमोरी क्षेत्र की पहचान करनी होती है जिसमें rwx अनुमतियाँ होती हैं, जिसे vmmap -pages का उपयोग करके किया जा सकता है।
 ```bash
 vmmap -pages [pid]
 vmmap -pages 35829 | grep "rwx/rwx"

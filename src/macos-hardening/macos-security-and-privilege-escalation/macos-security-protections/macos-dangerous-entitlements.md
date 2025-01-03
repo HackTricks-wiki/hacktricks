@@ -21,7 +21,7 @@
 
 ### `com.apple.security.get-task-allow`
 
-यह अधिकार अन्य प्रक्रियाओं को **`com.apple.security.cs.debugger`** अधिकार के साथ उस प्रक्रिया के टास्क पोर्ट को प्राप्त करने की अनुमति देता है जो इस अधिकार के साथ बाइनरी द्वारा चलायी जाती है और **इस पर कोड इंजेक्ट** करने की अनुमति देता है। अधिक जानकारी के लिए [**यहाँ देखें**](../macos-proces-abuse/macos-ipc-inter-process-communication/).
+यह अधिकार अन्य प्रक्रियाओं को **`com.apple.security.cs.debugger`** अधिकार के साथ उस प्रक्रिया के टास्क पोर्ट को प्राप्त करने की अनुमति देता है जो इस अधिकार वाले बाइनरी द्वारा चलायी जाती है और **इस पर कोड इंजेक्ट** करने की अनुमति देता है। अधिक जानकारी के लिए [**यहाँ देखें**](../macos-proces-abuse/macos-ipc-inter-process-communication/).
 
 ### `com.apple.security.cs.debugger`
 
@@ -29,16 +29,16 @@
 
 ### `com.apple.security.cs.disable-library-validation`
 
-यह अधिकार **फ्रेमवर्क, प्लग-इन्स, या लाइब्रेरीज़ को लोड करने** की अनुमति देता है बिना Apple द्वारा साइन किए गए या मुख्य निष्पादन योग्य के समान टीम आईडी के साथ साइन किए गए, इसलिए एक हमलावर कुछ मनमानी लाइब्रेरी लोड का दुरुपयोग करके कोड इंजेक्ट कर सकता है। अधिक जानकारी के लिए [**यहाँ देखें**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
+यह अधिकार **Apple द्वारा साइन किए गए या मुख्य निष्पादन योग्य के समान टीम आईडी के साथ साइन किए गए** बिना फ्रेमवर्क, प्लग-इन या लाइब्रेरी को **लोड** करने की अनुमति देता है, इसलिए एक हमलावर कुछ मनमाने लाइब्रेरी लोड का दुरुपयोग करके कोड इंजेक्ट कर सकता है। अधिक जानकारी के लिए [**यहाँ देखें**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
 
 ### `com.apple.private.security.clear-library-validation`
 
-यह अधिकार **`com.apple.security.cs.disable-library-validation`** के बहुत समान है लेकिन **सीधे लाइब्रेरी वैलिडेशन को अक्षम करने** के बजाय, यह प्रक्रिया को **`csops` सिस्टम कॉल करने की अनुमति देता है ताकि इसे अक्षम किया जा सके**।\
+यह अधिकार **`com.apple.security.cs.disable-library-validation`** के समान है लेकिन **सीधे लाइब्रेरी मान्यता को अक्षम करने** के बजाय, यह प्रक्रिया को **इसे अक्षम करने के लिए `csops` सिस्टम कॉल करने** की अनुमति देता है।\
 अधिक जानकारी के लिए [**यहाँ देखें**](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/).
 
 ### `com.apple.security.cs.allow-dyld-environment-variables`
 
-यह अधिकार **DYLD पर्यावरण चर का उपयोग करने** की अनुमति देता है जो लाइब्रेरी और कोड इंजेक्ट करने के लिए उपयोग किया जा सकता है। अधिक जानकारी के लिए [**यहाँ देखें**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables).
+यह अधिकार **DYLD पर्यावरण चर** का उपयोग करने की अनुमति देता है जो लाइब्रेरी और कोड इंजेक्ट करने के लिए उपयोग किए जा सकते हैं। अधिक जानकारी के लिए [**यहाँ देखें**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables).
 
 ### `com.apple.private.tcc.manager` या `com.apple.rootless.storage`.`TCC`
 
@@ -46,7 +46,7 @@
 
 ### **`system.install.apple-software`** और **`system.install.apple-software.standar-user`**
 
-ये अधिकार **उपयोगकर्ता से अनुमति पूछे बिना सॉफ़्टवेयर स्थापित करने** की अनुमति देते हैं, जो **अधिकार वृद्धि** के लिए सहायक हो सकता है।
+ये अधिकार **उपयोगकर्ता से अनुमति पूछे बिना सॉफ़्टवेयर स्थापित** करने की अनुमति देते हैं, जो **अधिकार वृद्धि** के लिए सहायक हो सकता है।
 
 ### `com.apple.private.security.kext-management`
 
@@ -54,11 +54,11 @@
 
 ### **`com.apple.private.icloud-account-access`**
 
-अधिकार **`com.apple.private.icloud-account-access`** के साथ **`com.apple.iCloudHelper`** XPC सेवा के साथ संवाद करना संभव है जो **iCloud टोकन** प्रदान करेगा।
+अधिकार **`com.apple.private.icloud-account-access`** के माध्यम से **`com.apple.iCloudHelper`** XPC सेवा के साथ संवाद करना संभव है जो **iCloud टोकन** प्रदान करेगा।
 
 **iMovie** और **Garageband** के पास यह अधिकार था।
 
-इस अधिकार से **icloud टोकन प्राप्त करने** के लिए **शोषण** के बारे में अधिक जानकारी के लिए बात देखें: [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+इस अधिकार से **icloud टोकन** प्राप्त करने के लिए **जानकारी** के लिए बात देखें: [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
 ### `com.apple.private.tcc.manager.check-by-audit-token`
 
@@ -74,7 +74,7 @@ TODO: [**इस रिपोर्ट में**](https://jhftss.github.io/The-
 
 ### `keychain-access-groups`
 
-यह अधिकार **keychain** समूहों की सूची है जिनका ऐप्लिकेशन को एक्सेस है:
+यह अधिकार **keychain** समूहों की सूची है जिन तक एप्लिकेशन की पहुँच है:
 ```xml
 <key>keychain-access-groups</key>
 <array>
@@ -127,7 +127,7 @@ osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to acti
 
 ### `com.apple.security.cs.allow-unsigned-executable-memory`
 
-यह अधिकार **C कोड को ओवरराइड या पैच** करने की अनुमति देता है, लंबे समय से अप्रचलित **`NSCreateObjectFileImageFromMemory`** (जो मौलिक रूप से असुरक्षित है) का उपयोग करने की अनुमति देता है, या **DVDPlayback** फ्रेमवर्क का उपयोग करने की अनुमति देता है। अधिक जानकारी के लिए [**यह देखें**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory)।
+यह अधिकार **C कोड को ओवरराइड या पैच** करने की अनुमति देता है, लंबे समय से अप्रचलित **`NSCreateObjectFileImageFromMemory`** (जो मौलिक रूप से असुरक्षित है) का उपयोग करने की अनुमति देता है, या **DVDPlayback** फ्रेमवर्क का उपयोग करता है। अधिक जानकारी के लिए [**यह देखें**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory)।
 
 > [!CAUTION]
 > इस अधिकार को शामिल करने से आपका ऐप मेमोरी-खतरनाक कोड भाषाओं में सामान्य कमजोरियों के लिए उजागर होता है। सावधानी से विचार करें कि क्या आपके ऐप को इस अपवाद की आवश्यकता है।
@@ -156,7 +156,7 @@ TODO
 [Array]
 [String] kTCCServiceAll
 ```
-प्रक्रिया को **सभी TCC अनुमतियों के लिए पूछने** की अनुमति दें।
+प्रक्रिया को **सभी TCC अनुमतियों के लिए पूछने की अनुमति दें**।
 
 ### **`kTCCServicePostEvent`**
 

@@ -58,7 +58,7 @@ cp -r "$HOME/Desktop" "/tmp/desktop"
 
 {{#tabs}}
 {{#tab name="ObjetiveC"}}
-कॉपी करें `$HOME/Documents` को `/tmp/documents` में।
+`$HOME/Documents` को `/tmp/documents` में कॉपी करें।
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -93,7 +93,7 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="Shell"}}
-कॉपी करें `$HOME/`Documents को `/tmp/documents` में।
+`$HOME/`Documents को `/tmp/documents` में कॉपी करें।
 ```bash
 cp -r "$HOME/Documents" "/tmp/documents"
 ```
@@ -156,7 +156,7 @@ cp -r "$HOME/Downloads" "/tmp/downloads"
 
 {{#tabs}}
 {{#tab name="ObjetiveC"}}
-कॉपी करें `$HOME/Pictures/Photos Library.photoslibrary` को `/tmp/photos` में।
+कॉपी करें `$HOME/Pictures/Photos Library.photoslibrary` को `/tmp/photos` पर।
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -415,7 +415,7 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="Shell"}}
-कैमरे से एक फोटो लें
+कैमरे से फोटो लें
 ```bash
 ffmpeg -framerate 30 -f avfoundation -i "0" -frames:v 1 /tmp/capture.jpg
 ```
@@ -713,7 +713,7 @@ screencapture -V 5 /tmp/screen.mov
 - **अधिकार**: कोई नहीं
 - **TCC**: `kTCCServiceAccessibility`
 
-Finder के नियंत्रण को स्वीकार करने के लिए TCC विशेषाधिकार का उपयोग करें, एंटर दबाकर और इस तरह TCC को बायपास करें
+TCC विशेषाधिकार का उपयोग करें ताकि Finder के नियंत्रण को स्वीकार किया जा सके, एंटर दबाकर और इस तरह TCC को बायपास करें
 
 {{#tabs}}
 {{#tab name="TCC स्वीकार करें"}}
@@ -877,6 +877,6 @@ return 0;
 {{#endtab}}
 {{#endtabs}}
 
-> [!CAUTION] > **एक्सेसिबिलिटी एक बहुत शक्तिशाली अनुमति है**, आप इसे अन्य तरीकों से दुरुपयोग कर सकते हैं, उदाहरण के लिए आप **कीस्ट्रोक्स अटैक** केवल इससे कर सकते हैं बिना सिस्टम इवेंट्स को कॉल किए।
+> [!CAUTION] > **एक्सेसिबिलिटी एक बहुत शक्तिशाली अनुमति है**, आप इसे अन्य तरीकों से दुरुपयोग कर सकते हैं, उदाहरण के लिए आप **कीस्ट्रोक्स हमले** को केवल इससे कर सकते हैं बिना सिस्टम इवेंट्स को कॉल किए।
 
 {{#include ../../../../banners/hacktricks-training.md}}
