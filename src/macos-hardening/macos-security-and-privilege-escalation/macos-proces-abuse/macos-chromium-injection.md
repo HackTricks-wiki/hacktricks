@@ -1,4 +1,4 @@
-# macOS Chromium Injection
+# macOS Chromium Inspuiting
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -8,7 +8,7 @@ Chromium-gebaseerde blaaiers soos Google Chrome, Microsoft Edge, Brave, en ander
 
 #### `--load-extension` Vlag
 
-Die `--load-extension` vlag word gebruik wanneer 'n Chromium-gebaseerde blaier vanaf die opdraglyn of 'n skrif begin word. Hierdie vlag stel in staat om **een of meer uitbreidings outomaties in die blaier te laai** by opstart.
+Die `--load-extension` vlag word gebruik wanneer 'n Chromium-gebaseerde blaier vanaf die opdraglyn of 'n skrif begin word. Hierdie vlag stel in staat om **outomaties een of meer uitbreidings** in die blaier te laai by opstart.
 
 #### `--use-fake-ui-for-media-stream` Vlag
 

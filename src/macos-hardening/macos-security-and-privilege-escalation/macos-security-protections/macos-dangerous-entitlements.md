@@ -25,7 +25,7 @@ Hierdie toestemming maak dit moontlik vir ander prosesse met die **`com.apple.se
 
 ### `com.apple.security.cs.debugger`
 
-Toepassings met die Debugging Tool Toestemming kan `task_for_pid()` aanroep om 'n geldige taakpoort vir ongetekende en derdeparty toepassings met die `Get Task Allow` toestemming wat op `true` gestel is, te verkry. Maar, selfs met die debugging tool toestemming, kan 'n debugger **nie die taakpoorte** van prosesse wat **nie die `Get Task Allow` toestemming het nie**, en wat dus deur Stelselintegriteitbeskerming beskerm word, verkry nie. Kyk [**hier vir meer inligting**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
+Toepassings met die Debugging Tool Toestemming kan `task_for_pid()` aanroep om 'n geldige taakpoort vir ongetekende en derdeparty toepassings met die `Get Task Allow` toestemming wat op `true` gestel is, te verkry. Maar, selfs met die debugging tool toestemming, kan 'n debugger **nie die taakpoorte** van prosesse wat **nie die `Get Task Allow` toestemming het nie**, en wat dus deur Stelselintegriteitbeskerming beskerm word, verkry. Kyk [**hier vir meer inligting**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
 
 ### `com.apple.security.cs.disable-library-validation`
 
@@ -87,11 +87,11 @@ Hierdie toestemming lys **keychain** groepe waartoe die toepassing toegang het:
 ```
 ### **`kTCCServiceSystemPolicyAllFiles`**
 
-Gee **Volledige Skyf Toegang** regte, een van die TCC hoogste regte wat jy kan hê.
+Gee **Volledige Skyftoegang** regte, een van die hoogste TCC regte wat jy kan hê.
 
 ### **`kTCCServiceAppleEvents`**
 
-Laat die app toe om gebeurtenisse na ander toepassings te stuur wat algemeen gebruik word vir **outomatisering van take**. Deur ander toepassings te beheer, kan dit die regte wat aan hierdie ander toepassings gegee is, misbruik. 
+Laat die app toe om gebeurtenisse na ander toepassings te stuur wat algemeen gebruik word vir **outomatisering van take**. Deur ander apps te beheer, kan dit die regte wat aan hierdie ander apps toegeken is, misbruik.
 
 Soos om hulle te laat vra vir die gebruiker se wagwoord:
 ```bash
@@ -101,7 +101,7 @@ Of om hulle **arbitraire aksies** te laat uitvoer.
 
 ### **`kTCCServiceEndpointSecurityClient`**
 
-Laat, onder andere toestemmings, toe om die **gebruikers TCC-databasis** te **skryf**.
+Laat, onder andere toestemmings, toe om die **gebruikers TCC databasis** te **skryf**.
 
 ### **`kTCCServiceSystemPolicySysAdminFiles`**
 
@@ -117,27 +117,27 @@ Dit is moontlik om te kyk wie hierdie toegang het in _Stelselsinstellings_ > _Pr
 
 ### `kTCCServiceAccessibility`
 
-Die proses sal in staat wees om die **macOS toeganklikheidskenmerke** te **misbruik**, wat beteken dat hy byvoorbeeld in staat sal wees om sleuteldrukke te druk. SO hy kan toegang vra om 'n toepassing soos Finder te beheer en die dialoog met hierdie toestemming goed te keur.
+Die proses sal in staat wees om die **macOS toeganklikheidskenmerke** te **misbruik**, wat beteken dat hy byvoorbeeld sleutels kan druk. SO hy kan toegang vra om 'n toepassing soos Finder te beheer en die dialoog met hierdie toestemming goed te keur.
 
 ## Medium
 
 ### `com.apple.security.cs.allow-jit`
 
-Hierdie reg laat toe om **geheue te skep wat skryfbaar en uitvoerbaar is** deur die `MAP_JIT` vlag aan die `mmap()` stelselfunksie deur te gee. Kyk [**hierdie vir meer inligting**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit).
+Hierdie regte laat toe om **geheue te skep wat skryfbaar en uitvoerbaar is** deur die `MAP_JIT` vlag aan die `mmap()` stelselfunksie te gee. Kyk [**hier vir meer inligting**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit).
 
 ### `com.apple.security.cs.allow-unsigned-executable-memory`
 
-Hierdie reg laat toe om **C-kode te oorskry of te patch**, gebruik die lank-deprecated **`NSCreateObjectFileImageFromMemory`** (wat fundamenteel onveilig is), of gebruik die **DVDPlayback** raamwerk. Kyk [**hierdie vir meer inligting**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
+Hierdie regte laat toe om **C-kode te oorskry of te patch**, gebruik die lank-deprecated **`NSCreateObjectFileImageFromMemory`** (wat fundamenteel onveilig is), of gebruik die **DVDPlayback** raamwerk. Kyk [**hier vir meer inligting**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
 
 > [!CAUTION]
-> Om hierdie reg in te sluit stel jou toepassing bloot aan algemene kwesbaarhede in geheue-onveilige kode tale. Oorweeg sorgvuldig of jou toepassing hierdie uitsondering benodig.
+> Om hierdie regte in te sluit stel jou toepassing bloot aan algemene kwesbaarhede in geheue-onveilige kode tale. Oorweeg sorgvuldig of jou toepassing hierdie uitsondering benodig.
 
 ### `com.apple.security.cs.disable-executable-page-protection`
 
-Hierdie reg laat toe om **afdelings van sy eie uitvoerbare lêers** op skyf te **wysig** om gedwonge uitgang te dwing. Kyk [**hierdie vir meer inligting**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection).
+Hierdie regte laat toe om **afdelings van sy eie uitvoerbare lêers** op skyf te **wysig** om gedwonge uitgang te dwing. Kyk [**hier vir meer inligting**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection).
 
 > [!CAUTION]
-> Die Uitskakeling van Uitvoerbare Geheuebeskerming Reg is 'n uiterste reg wat 'n fundamentele sekuriteitsbeskerming van jou toepassing verwyder, wat dit moontlik maak vir 'n aanvaller om jou toepassing se uitvoerbare kode sonder opsporing te herskryf. Verkies nouer regte indien moontlik.
+> Die Disable Executable Memory Protection Entitlement is 'n uiterste regte wat 'n fundamentele sekuriteitsbeskerming van jou toepassing verwyder, wat dit moontlik maak vir 'n aanvaller om jou toepassing se uitvoerbare kode sonder opsporing te herskryf. Verkies nouer regte indien moontlik.
 
 ### `com.apple.security.cs.allow-relative-library-loads`
 
@@ -145,7 +145,7 @@ TODO
 
 ### `com.apple.private.nullfs_allow`
 
-Hierdie reg laat toe om 'n nullfs lêerstelsel te monteer (verbied deur standaard). Gereedskap: [**mount_nullfs**](https://github.com/JamaicanMoose/mount_nullfs/tree/master).
+Hierdie regte laat toe om 'n nullfs lêerstelsel te monteer (verbied deur standaard). Gereedskap: [**mount_nullfs**](https://github.com/JamaicanMoose/mount_nullfs/tree/master).
 
 ### `kTCCServiceAll`
 
@@ -156,7 +156,7 @@ Volgens hierdie blogpos, word hierdie TCC toestemming gewoonlik in die vorm gevi
 [Array]
 [String] kTCCServiceAll
 ```
-Laat die proses **vra vir al die TCC-toestemmings**.
+Laat die proses toe om **vir al die TCC-toestemmings te vra**.
 
 ### **`kTCCServicePostEvent`**
 

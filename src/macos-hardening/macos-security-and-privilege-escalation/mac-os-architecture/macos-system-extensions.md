@@ -4,7 +4,7 @@
 
 ## Stelselsuitbreidings / Eindpunt Sekuriteit Raamwerk
 
-Verskil van Kernel Uitbreidings, **Stelselsuitbreidings loop in gebruikersruimte** eerder as in kernruimte, wat die risiko van 'n stelselfout as gevolg van 'n uitbreidingsfout verminder.
+Verskil met Kernel Uitbreidings, **Stelselsuitbreidings loop in gebruikersruimte** eerder as in kernruimte, wat die risiko van 'n stelselfout as gevolg van 'n uitbreiding se wanfunksie verminder.
 
 <figure><img src="../../../images/image (606).png" alt="https://knight.sc/images/system-extension-internals-1.png"><figcaption></figcaption></figure>
 
@@ -22,7 +22,7 @@ Netwerk Uitbreidings bied die vermoë om netwerkgedrag aan te pas. Daar is versk
 - **Pakket Tunnel**: Dit word gebruik om 'n VPN-klient te skep wat 'n pakket-georiënteerde, pasgemaakte VPN-protokol implementeer. Dit beteken dit hanteer netwerkverkeer gebaseer op individuele pakkette.
 - **Filter Data**: Dit word gebruik om netwerk "vloei" te filter. Dit kan netwerkdata op vloei vlak monitor of wysig.
 - **Filter Pakket**: Dit word gebruik om individuele netwerkpakkette te filter. Dit kan netwerkdata op pakketvlak monitor of wysig.
-- **DNS Proxy**: Dit word gebruik om 'n pasgemaakte DNS-verskaffer te skep. Dit kan gebruik word om DNS-versoeke en -antwoorde te monitor of te wysig.
+- **DNS Proxy**: Dit word gebruik om 'n pasgemaakte DNS-verskaffer te skep. Dit kan gebruik word om DNS versoeke en antwoorde te monitor of te wysig.
 
 ## Eindpunt Sekuriteit Raamwerk
 
@@ -30,12 +30,12 @@ Eindpunt Sekuriteit is 'n raamwerk wat deur Apple in macOS verskaf word wat 'n s
 
 Hierdie raamwerk bied 'n **versameling API's om stelselsaktiwiteit te monitor en te beheer**, soos prosesuitvoerings, lêerstelselsgebeurtenisse, netwerk- en kerngebeurtenisse.
 
-Die kern van hierdie raamwerk is in die kern geïmplementeer, as 'n Kern Uitbreiding (KEXT) geleë by **`/System/Library/Extensions/EndpointSecurity.kext`**. Hierdie KEXT bestaan uit verskeie sleutelkomponente:
+Die kern van hierdie raamwerk is in die kern geïmplementeer, as 'n Kernel Uitbreiding (KEXT) geleë by **`/System/Library/Extensions/EndpointSecurity.kext`**. Hierdie KEXT bestaan uit verskeie sleutelkomponente:
 
 - **EndpointSecurityDriver**: Dit dien as die "toegangspunt" vir die kernuitbreiding. Dit is die hoofpunt van interaksie tussen die OS en die Eindpunt Sekuriteit raamwerk.
 - **EndpointSecurityEventManager**: Hierdie komponent is verantwoordelik vir die implementering van kernhake. Kernhake laat die raamwerk toe om stelselsgebeurtenisse te monitor deur stelselsoproepe te onderskep.
-- **EndpointSecurityClientManager**: Dit bestuur die kommunikasie met gebruikersruimte kliënte, en hou dop watter kliënte verbind is en gebeurteniskennisgewings moet ontvang.
-- **EndpointSecurityMessageManager**: Dit stuur boodskappe en gebeurteniskennisgewings na gebruikersruimte kliënte.
+- **EndpointSecurityClientManager**: Dit bestuur die kommunikasie met gebruikersruimte kliënte, en hou dop watter kliënte gekoppel is en gebeurtenis kennisgewings moet ontvang.
+- **EndpointSecurityMessageManager**: Dit stuur boodskappe en gebeurtenis kennisgewings na gebruikersruimte kliënte.
 
 Die gebeurtenisse wat die Eindpunt Sekuriteit raamwerk kan monitor, is gekategoriseer in:
 

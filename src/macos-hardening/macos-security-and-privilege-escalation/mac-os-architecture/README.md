@@ -25,7 +25,7 @@ Die XNU **kern** inkorporeer ook 'n beduidende hoeveelheid kode wat afkomstig is
 - Basiese sekuriteitsmeganismes, insluitend gebruiker en groep bestuur
 - Stelselskakel infrastruktuur
 - TCP/IP stapel en sokkies
-- Vuurmuur en pakket filtrering
+- Vuurmuur en pakketfiltrering
 
 Om die interaksie tussen BSD en Mach te verstaan, kan kompleks wees, as gevolg van hul verskillende konseptuele raamwerke. Byvoorbeeld, BSD gebruik prosesse as sy fundamentele uitvoerende eenheid, terwyl Mach werk op grond van drade. Hierdie verskil word in XNU versoen deur **elke BSD-proses te assosieer met 'n Mach-taak** wat presies een Mach-draad bevat. Wanneer BSD se fork() stelselskakel gebruik word, gebruik die BSD kode binne die kern Mach funksies om 'n taak en 'n draadstruktuur te skep.
 
@@ -47,7 +47,7 @@ macos-iokit.md
 
 ## macOS Kernel Extensions
 
-macOS is **super beperkend om Kernel Extensions** (.kext) te laai weens die hoë voorregte wat kode sal loop. Trouens, standaard is dit feitlik onmoontlik (tenzij 'n omseiling gevind word).
+macOS is **baie beperkend om Kernel Extensions** (.kext) te laai weens die hoë voorregte wat kode sal loop. Trouens, standaard is dit feitlik onmoontlik (tenzij 'n omseiling gevind word).
 
 Op die volgende bladsy kan jy ook sien hoe om die `.kext` te herstel wat macOS binne sy **kernelcache** laai:
 
@@ -57,7 +57,7 @@ macos-kernel-extensions.md
 
 ### macOS System Extensions
 
-In plaas daarvan om Kernel Extensions te gebruik, het macOS die System Extensions geskep, wat in gebruikersvlak API's bied om met die kern te kommunikeer. Op hierdie manier kan ontwikkelaars vermy om kern uitbreidings te gebruik.
+In plaas daarvan om Kernel Extensions te gebruik, het macOS die Stelsels Uitbreidings geskep, wat in gebruikersvlak API's bied om met die kern te kommunikeer. Op hierdie manier kan ontwikkelaars vermy om kern uitbreidings te gebruik.
 
 {{#ref}}
 macos-system-extensions.md

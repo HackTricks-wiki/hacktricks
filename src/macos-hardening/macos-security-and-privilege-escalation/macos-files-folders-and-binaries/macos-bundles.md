@@ -17,9 +17,9 @@ Binne 'n bundle, veral binne die `<application>.app/Contents/` gids, is 'n versk
 
 #### Belangrike Sleutels in Info.plist
 
-Die `Info.plist` lêer is 'n hoeksteen vir toepassing konfigurasie, wat sleutels soos die volgende bevat:
+Die `Info.plist` lêer is 'n hoeksteen vir toepassing konfigurasie, wat sleutels soos bevat:
 
-- **CFBundleExecutable**: Gee die naam van die hoof uitvoerbare lêer wat in die `Contents/MacOS` gids geleë is.
+- **CFBundleExecutable**: Gee die naam van die hoof uitvoerbare lêer geleë in die `Contents/MacOS` gids.
 - **CFBundleIdentifier**: Verskaf 'n globale identifiseerder vir die toepassing, wat wyd deur macOS vir toepassing bestuur gebruik word.
 - **LSMinimumSystemVersion**: Dui die minimum weergawe van macOS aan wat benodig word vir die toepassing om te loop.
 
@@ -37,7 +37,7 @@ Benewens die algemene gidse, kan bundles ook insluit:
 - **PlugIns**: 'n Gids vir plug-ins en uitbreidings wat die toepassing se vermoëns verbeter.
 - **XPCServices**: Hou XPC dienste wat deur die toepassing gebruik word vir buite-proses kommunikasie.
 
-Hierdie struktuur verseker dat alle nodige komponente binne die bundle ingesluit is, wat 'n modulaire en veilige toepassing omgewing fasiliteer.
+Hierdie struktuur verseker dat al die nodige komponente binne die bundle ingesluit is, wat 'n modulaire en veilige toepassing omgewing fasiliteer.
 
 Vir meer gedetailleerde inligting oor `Info.plist` sleutels en hul betekenisse, bied die Apple ontwikkelaar dokumentasie uitgebreide hulpbronne: [Apple Info.plist Key Reference](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html).
 

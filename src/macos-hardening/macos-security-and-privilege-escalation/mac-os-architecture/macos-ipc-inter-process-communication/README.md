@@ -18,13 +18,13 @@ Elke proses het 'n **IPC tabel**, waar dit moontlik is om die **mach poorte van 
 
 Poort regte, wat definieer watter operasies 'n taak kan uitvoer, is sleutel tot hierdie kommunikasie. Die moontlike **poort regte** is ([definisies hier](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)):
 
-- **Ontvang reg**, wat die ontvangs van boodskappe wat na die poort gestuur word, toelaat. Mach poorte is MPSC (meervoudige produsent, enkele verbruiker) rye, wat beteken dat daar slegs **een ontvang reg vir elke poort** in die hele stelsel mag wees (in teenstelling met pype, waar verskeie prosesse almal lêer beskrywings na die leeskant van een pyp kan hou).
-- 'n **taak met die Ontvang** reg kan boodskappe ontvang en **Stuur regte** skep, wat dit toelaat om boodskappe te stuur. Oorspronklik het slegs die **eie taak ontvang reg oor sy poort**.
+- **Ontvang reg**, wat die ontvangs van boodskappe wat na die poort gestuur word, toelaat. Mach poorte is MPSC (meerdere produsente, enkele verbruiker) rye, wat beteken dat daar slegs **een ontvang reg vir elke poort** in die hele stelsel mag wees (in teenstelling met pype, waar meerdere prosesse almal lêer beskrywings na die lees einde van een pyp kan hou).
+- 'n **taak met die Ontvang** reg kan boodskappe ontvang en **Stuur regte** skep, wat dit toelaat om boodskappe te stuur. Oorspronklik het slegs die **eie taak die Ontvang reg oor sy poort**.
 - **Stuur reg**, wat die stuur van boodskappe na die poort toelaat.
-- Die Stuur reg kan **gekloneer** word sodat 'n taak wat 'n Stuur reg besit, die reg kan kloneer en **aan 'n derde taak kan toeken**.
+- Die Stuur reg kan **gekloneer** word sodat 'n taak wat 'n Stuur reg besit die reg kan kloneer en **aan 'n derde taak kan toeken**.
 - **Stuur-eens reg**, wat die stuur van een boodskap na die poort toelaat en dan verdwyn.
-- **Poort stel reg**, wat 'n _poort stel_ aandui eerder as 'n enkele poort. Om 'n boodskap van 'n poort stel te verwyder, verwyder 'n boodskap van een van die poorte wat dit bevat. Poort stelle kan gebruik word om op verskeie poorte gelyktydig te luister, baie soos `select`/`poll`/`epoll`/`kqueue` in Unix.
-- **Dood naam**, wat nie 'n werklike poort reg is nie, maar bloot 'n plekhouer. Wanneer 'n poort vernietig word, draai al bestaande poort regte na die poort in dood name.
+- **Poort stel reg**, wat 'n _poort stel_ aandui eerder as 'n enkele poort. Dequeuing 'n boodskap van 'n poort stel dequeues 'n boodskap van een van die poorte wat dit bevat. Poort stelle kan gebruik word om op verskeie poorte gelyktydig te luister, baie soos `select`/`poll`/`epoll`/`kqueue` in Unix.
+- **Dood naam**, wat nie 'n werklike poort reg is nie, maar bloot 'n plekhouer. Wanneer 'n poort vernietig word, draai alle bestaande poort regte na die poort in dood name.
 
 **Take kan STUUR regte aan ander oordra**, wat hulle in staat stel om boodskappe terug te stuur. **STUUR regte kan ook geklonen word, sodat 'n taak die reg kan dupliceer en aan 'n derde taak kan gee**. Dit, saam met 'n intermediêre proses bekend as die **bootstrap bediener**, stel effektiewe kommunikasie tussen take in staat.
 
@@ -40,30 +40,16 @@ Soos genoem, om die kommunikasiekanaal te vestig, is die **bootstrap bediener** 
 
 1. Taak **A** begin 'n **nuwe poort**, en verkry 'n **ONTVAAG reg** in die proses.
 2. Taak **A**, as die houer van die ONTVANG reg, **genereer 'n STUUR reg vir die poort**.
-3. Taak **A** vestig 'n **verbinding** met die **bootstrap bediener**, en bied die **poort se diensnaam** en die **STUUR reg** deur 'n prosedure bekend as die bootstrap registrasie.
+3. Taak **A** vestig 'n **verbinding** met die **bootstrap bediener**, wat die **poort se diensnaam** en die **STUUR reg** deur 'n prosedure bekend as die bootstrap registrasie verskaf.
 4. Taak **B** interaksie met die **bootstrap bediener** om 'n bootstrap **soektog vir die diens** naam uit te voer. As dit suksesvol is, **dupliseer die bediener die STUUR reg** wat van Taak A ontvang is en **stuur dit na Taak B**.
 5. Na die verkryging van 'n STUUR reg, is Taak **B** in staat om 'n **boodskap** te **formuleer** en dit **na Taak A** te stuur.
 6. Vir 'n bi-rigting kommunikasie genereer taak **B** gewoonlik 'n nuwe poort met 'n **ONTVAAG** reg en 'n **STUUR** reg, en gee die **STUUR reg aan Taak A** sodat dit boodskappe na TAak B kan stuur (bi-rigting kommunikasie).
 
-Die bootstrap bediener **kan nie die diensnaam wat deur 'n taak geclaim word, verifieer nie**. Dit beteken 'n **taak** kan potensieel **enige stelseltaak naboots**, soos valslik **'n magtiging diensnaam te claim** en dan elke versoek goedkeur.
+Die bootstrap bediener **kan nie die diensnaam wat deur 'n taak geclaim word, verifieer nie**. Dit beteken 'n **taak** kan potensieel **enige stelsel taak naboots**, soos valslik **'n magtiging diensnaam te claim** en dan elke versoek goedkeur.
 
-Dan, Apple stoor die **name van stelsel-geleverde dienste** in veilige konfigurasie lêers, geleë in **SIP-beskermde** gidse: `/System/Library/LaunchDaemons` en `/System/Library/LaunchAgents`. Saam met elke diensnaam, word die **geassosieerde binêre ook gestoor**. Die bootstrap bediener sal 'n **ONTVAAG reg vir elkeen van hierdie diensname** skep en hou.
+Dan, stoor Apple die **name van stelsel-gelewerde dienste** in veilige konfigurasie lêers, geleë in **SIP-beskermde** gidse: `/System/Library/LaunchDaemons` en `/System/Library/LaunchAgents`. Saam met elke diensnaam, word die **geassosieerde binêre ook gestoor**. Die bootstrap bediener sal 'n **ONTVAAG reg vir elkeen van hierdie diensname** skep en hou.
 
-Vir hierdie vooraf gedefinieerde dienste, verskil die **soekproses effens**. Wanneer 'n diensnaam gesoek word, begin launchd die diens dinamies. Die nuwe werksvloei is soos volg:
-
-- Taak **B** begin 'n bootstrap **soektog** vir 'n diensnaam.
-- **launchd** kyk of die taak loop en as dit nie is nie, **begin** dit.
-- Taak **A** (die diens) voer 'n **bootstrap incheck** uit. Hier, die **bootstrap** bediener skep 'n STUUR reg, hou dit, en **oordra die ONTVANG reg aan Taak A**.
-- launchd dupliseer die **STUUR reg en stuur dit na Taak B**.
-- Taak **B** genereer 'n nuwe poort met 'n **ONTVAAG** reg en 'n **STUUR** reg, en gee die **STUUR reg aan Taak A** (die svc) sodat dit boodskappe na TAak B kan stuur (bi-rigting kommunikasie).
-
-Hierdie proses geld egter slegs vir vooraf gedefinieerde stelseltaake. Nie-stelseltaake werk steeds soos oorspronklik beskryf, wat potensieel nabootsing kan toelaat.
-
-### 'n Mach Boodskap
-
-[Vind meer inligting hier](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
-
-Die `mach_msg` funksie, wat essensieel 'n stelselaanroep is, word gebruik om Mach boodskappe te stuur en te ontvang. Die funksie vereis dat die boodskap wat gestuur moet word, as die aanvanklike argument. Hierdie boodskap moet begin met 'n `mach_msg_header_t` struktuur, gevolg deur die werklike boodskapinhoud. Die struktuur is soos volg gedefinieer:
+Vir hierdie vooraf gedefinieerde dienste, verskil die **soek proses effens**. Wanneer 'n diensnaam gesoek word, begin launchd
 ```c
 typedef struct {
 mach_msg_bits_t               msgh_bits;
@@ -76,7 +62,7 @@ mach_msg_id_t                 msgh_id;
 ```
 Proses wat 'n _**ontvangsreg**_ besit, kan boodskappe op 'n Mach-poort ontvang. Omgekeerd, die **stuurders** word 'n _**stuur**_ of 'n _**stuur-eens reg**_ toegeken. Die stuur-eens reg is uitsluitlik vir die stuur van 'n enkele boodskap, waarna dit ongeldig word.
 
-Om 'n maklike **tweeduidige kommunikasie** te bereik, kan 'n proses 'n **mach-poort** in die mach **boodskapkop** spesifiseer wat die _antwoordpoort_ (**`msgh_local_port`**) genoem word, waar die **ontvanger** van die boodskap 'n **antwoord** op hierdie boodskap kan **stuur**. Die bitvlagte in **`msgh_bits`** kan gebruik word om aan te dui dat 'n **stuur-eens** **reg** afgelei en oorgedra moet word vir hierdie poort (`MACH_MSG_TYPE_MAKE_SEND_ONCE`).
+Om 'n maklike **tweeduidige kommunikasie** te bereik, kan 'n proses 'n **mach-poort** in die mach **boodskapkop** spesifiseer wat die _antwoordpoort_ (**`msgh_local_port`**) genoem word, waar die **ontvanger** van die boodskap 'n **antwoord** op hierdie boodskap kan **stuur**. Die bitvlagte in **`msgh_bits`** kan gebruik word om aan te ** dui** dat 'n **stuur-eens** **reg** afgelei en oorgedra moet word vir hierdie poort (`MACH_MSG_TYPE_MAKE_SEND_ONCE`).
 
 > [!TIP]
 > Let daarop dat hierdie soort tweeduidige kommunikasie gebruik word in XPC-boodskappe wat 'n herhaling verwag (`xpc_connection_send_message_with_reply` en `xpc_connection_send_message_with_reply_sync`). Maar **gewoonlik word verskillende poorte geskep** soos voorheen verduidelik om die tweeduidige kommunikasie te skep.
@@ -89,9 +75,9 @@ Die ander velde van die boodskapkop is:
 - `msgh_id`: die ID van hierdie boodskap, wat deur die ontvanger geïnterpreteer word.
 
 > [!CAUTION]
-> Let daarop dat **mach-boodskappe oor 'n \_mach-poort\_** gestuur word, wat 'n **enkele ontvanger**, **meervoudige stuurder** kommunikasiekanaal is wat in die mach-kern ingebou is. **Meervoudige prosesse** kan **boodskappe** na 'n mach-poort stuur, maar op enige tydstip kan slegs **'n enkele proses lees** daarvan.
+> Let daarop dat **mach boodskappe oor 'n \_mach-poort**\_ gestuur word, wat 'n **enkele ontvanger**, **meervoudige stuurder** kommunikasiekanaal is wat in die mach-kern ingebou is. **Meervoudige prosesse** kan **boodskappe stuur** na 'n mach-poort, maar op enige tydstip kan slegs **'n enkele proses lees** daarvan.
 
-### Enumereer poorte
+### Tel poorte
 ```bash
 lsmp -p <pid>
 ```
@@ -227,16 +213,16 @@ printf("Sent a message\n");
 
 ### Bevoorregte Poorte
 
-- **Gashostpoort**: As 'n proses **Send** voorreg oor hierdie poort het, kan hy **inligting** oor die **stelsel** verkry (bv. `host_processor_info`).
-- **Gashostprivpoort**: 'n Proses met **Send** reg oor hierdie poort kan **bevoorregte aksies** uitvoer soos om 'n kernuitbreiding te laai. Die **proses moet root wees** om hierdie toestemming te verkry.
+- **Gashostpoort**: As 'n proses **Stuur** voorreg oor hierdie poort het, kan hy **inligting** oor die **stelsel** verkry (bv. `host_processor_info`).
+- **Gashostprivpoort**: 'n Proses met **Stuur** reg oor hierdie poort kan **bevoorregte aksies** uitvoer soos om 'n kernuitbreiding te laai. Die **proses moet root wees** om hierdie toestemming te verkry.
 - Boonop, om die **`kext_request`** API aan te roep, is dit nodig om ander regte **`com.apple.private.kext*`** te hê wat slegs aan Apple binêre gegee word.
 - **Taaknaampoort:** 'n Onbevoorregte weergawe van die _taakpoort_. Dit verwys na die taak, maar laat nie toe om dit te beheer nie. Die enigste ding wat blykbaar deur dit beskikbaar is, is `task_info()`.
-- **Taakpoort** (ook bekend as kernpoort)**:** Met Send toestemming oor hierdie poort is dit moontlik om die taak te beheer (lees/skryf geheue, skep drade...).
-- Roep `mach_task_self()` aan om die **naam** vir hierdie poort vir die oproeper taak te **kry**. Hierdie poort word slegs **geërf** oor **`exec()`**; 'n nuwe taak wat met `fork()` geskep word, kry 'n nuwe taakpoort (as 'n spesiale geval, kry 'n taak ook 'n nuwe taakpoort na `exec()` in 'n suid binêre). Die enigste manier om 'n taak te spawn en sy poort te kry, is om die ["poortruil dans"](https://robert.sesek.com/2014/1/changes_to_xnu_mach_ipc.html) uit te voer terwyl 'n `fork()` gedoen word.
+- **Taakpoort** (ook bekend as kernpoort)**:** Met Stuur toestemming oor hierdie poort is dit moontlik om die taak te beheer (lees/skryf geheue, skep drade...).
+- Roep `mach_task_self()` aan om die **naam** vir hierdie poort vir die oproeper taak te verkry. Hierdie poort word slegs **geërf** oor **`exec()`**; 'n nuwe taak wat met `fork()` geskep word, kry 'n nuwe taakpoort (as 'n spesiale geval, kry 'n taak ook 'n nuwe taakpoort na `exec()` in 'n suid binêre). Die enigste manier om 'n taak te spawn en sy poort te verkry, is om die ["poortruil dans"](https://robert.sesek.com/2014/1/changes_to_xnu_mach_ipc.html) uit te voer terwyl 'n `fork()` gedoen word.
 - Dit is die beperkings om toegang tot die poort te verkry (van `macos_task_policy` van die binêre `AppleMobileFileIntegrity`):
 - As die app die **`com.apple.security.get-task-allow` regte** het, kan prosesse van die **dieselfde gebruiker toegang tot die taakpoort** verkry (gewoonlik deur Xcode vir foutopsporing bygevoeg). Die **notariserings** proses sal dit nie toelaat vir produksievrystellings nie.
 - Apps met die **`com.apple.system-task-ports`** regte kan die **taakpoort vir enige** proses verkry, behalwe die kern. In ouer weergawes is dit **`task_for_pid-allow`** genoem. Dit word slegs aan Apple toepassings toegestaan.
-- **Root kan toegang tot taakpoorte** van toepassings **nie** saamgecompileer met 'n **versterkte** runtime (en nie van Apple) verkry nie.
+- **Root kan toegang tot taakpoorte** van toepassings **nie** saamgestel met 'n **versterkte** tydren (en nie van Apple) verkry nie.
 
 ### Shellcode Inspuiting in draad via Taakpoort
 
@@ -292,7 +278,7 @@ return 0;
 {{#endtab}}
 {{#endtabs}}
 
-**Compileer** die vorige program en voeg die **toelaes** by om kode met dieselfde gebruiker in te spuit (as nie, sal jy **sudo** moet gebruik).
+**Kompileer** die vorige program en voeg die **toelaes** by om kode met dieselfde gebruiker in te spuit (as nie, sal jy **sudo** moet gebruik).
 
 <details>
 
@@ -502,11 +488,11 @@ gcc -framework Foundation -framework Appkit sc_inject.m -o sc_inject
 
 In macOS **draad** kan gemanipuleer word via **Mach** of deur gebruik te maak van **posix `pthread` api**. Die draad wat ons in die vorige inspuiting gegenereer het, is gegenereer met die Mach api, so **dit is nie posix-konform nie**.
 
-Dit was moontlik om **'n eenvoudige shellcode** in te spuit om 'n opdrag uit te voer omdat dit **nie met posix** konforme apis hoef te werk nie, net met Mach. **Meer komplekse inspuitings** sou vereis dat die **draad** ook **posix-konform** moet wees.
+Dit was moontlik om **'n eenvoudige shellcode** in te spuit om 'n opdrag uit te voer omdat dit **nie met posix** konforme apis moes werk nie, net met Mach. **Meer komplekse inspuitings** sou vereis dat die **draad** ook **posix-konform** moet wees.
 
 Daarom, om die **draad** te **verbeter**, moet dit **`pthread_create_from_mach_thread`** aanroep wat **'n geldige pthread** sal skep. Dan kan hierdie nuwe pthread **dlopen** aanroep om **'n dylib** van die stelsel te laai, sodat dit in plaas daarvan om nuwe shellcode te skryf om verskillende aksies uit te voer, moontlik is om pasgemaakte biblioteke te laai.
 
-Jy kan **voorbeeld dylibs** vind in (byvoorbeeld die een wat 'n log genereer en dan kan jy daarna luister):
+Jy kan **voorbeeld dylibs** vind in (byvoorbeeld die een wat 'n log genereer en dan kan jy daarnaar luister):
 
 {{#ref}}
 ../../macos-dyld-hijacking-and-dyld_insert_libraries.md
@@ -802,7 +788,7 @@ In hierdie tegniek word 'n draad van die proses oor geneem:
 
 ### Basiese Inligting
 
-XPC, wat staan vir XNU (die kern wat deur macOS gebruik word) inter-Proses Kommunikasie, is 'n raamwerk vir **kommunikasie tussen prosesse** op macOS en iOS. XPC bied 'n mekanisme vir die maak van **veilige, asynchrone metode-oproepe tussen verskillende prosesse** op die stelsel. Dit is 'n deel van Apple se sekuriteitsparadigma, wat die **skepping van privilige-geskeide toepassings** moontlik maak waar elke **komponent** loop met **slegs die regte wat dit nodig het** om sy werk te doen, en so die potensiële skade van 'n gecompromitteerde proses beperk.
+XPC, wat staan vir XNU (die kern wat deur macOS gebruik word) inter-Proses Kommunikasie, is 'n raamwerk vir **kommunikasie tussen prosesse** op macOS en iOS. XPC bied 'n mekanisme vir die maak van **veilige, asynchrone metode-oproepe tussen verskillende prosesse** op die stelsel. Dit is 'n deel van Apple se sekuriteitsparadigma, wat die **skepping van privilige-geskeide toepassings** toelaat waar elke **komponent** loop met **slegs die regte wat dit nodig het** om sy werk te doen, en sodoende die potensiële skade van 'n gecompromitteerde proses beperk.
 
 Vir meer inligting oor hoe hierdie **kommunikasie werk** en hoe dit **kwulnerabel kan wees**, kyk:
 

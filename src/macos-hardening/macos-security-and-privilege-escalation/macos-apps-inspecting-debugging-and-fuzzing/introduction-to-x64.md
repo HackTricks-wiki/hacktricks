@@ -8,23 +8,23 @@ x64, ook bekend as x86-64, is 'n 64-bis verwerker argitektuur wat hoofsaaklik in
 
 ### **Registers**
 
-x64 brei op die x86 argitektuur uit, met **16 algemene doeleindes registers** gemerk as `rax`, `rbx`, `rcx`, `rdx`, `rbp`, `rsp`, `rsi`, `rdi`, en `r8` tot `r15`. Elke een van hierdie kan 'n **64-bis** (8-byte) waarde stoor. Hierdie registers het ook 32-bis, 16-bis, en 8-bis sub-registers vir kompatibiliteit en spesifieke take.
+x64 brei op die x86 argitektuur uit, met **16 algemene registers** gemerk as `rax`, `rbx`, `rcx`, `rdx`, `rbp`, `rsp`, `rsi`, `rdi`, en `r8` tot `r15`. Elke een van hierdie kan 'n **64-bis** (8-byte) waarde stoor. Hierdie registers het ook 32-bis, 16-bis, en 8-bis sub-registers vir kompatibiliteit en spesifieke take.
 
-1. **`rax`** - Tradisioneel gebruik vir **terugwaardes** van funksies.
+1. **`rax`** - Tradisioneel gebruik vir **terugkeerwaardes** van funksies.
 2. **`rbx`** - Gereeld gebruik as 'n **basisregister** vir geheue operasies.
 3. **`rcx`** - Gewoonlik gebruik vir **lus tellers**.
-4. **`rdx`** - Gebruik in verskeie rolle insluitend uitgebreide wiskundige operasies.
+4. **`rdx`** - Gebruik in verskeie rolle insluitend uitgebreide aritmetiese operasies.
 5. **`rbp`** - **Basisaanwyser** vir die stapelraam.
 6. **`rsp`** - **Stapelaanwyser**, wat die bokant van die stapel dop hou.
 7. **`rsi`** en **`rdi`** - Gebruik vir **bron** en **bestemming** indekse in string/geheue operasies.
-8. **`r8`** tot **`r15`** - Bykomende algemene doeleindes registers wat in x64 bekendgestel is.
+8. **`r8`** tot **`r15`** - Bykomende algemene registers wat in x64 bekendgestel is.
 
 ### **Aanroep Konvensie**
 
 Die x64 aanroep konvensie verskil tussen bedryfstelsels. Byvoorbeeld:
 
-- **Windows**: Die eerste **vier parameters** word in die registers **`rcx`**, **`rdx`**, **`r8`**, en **`r9`** oorgedra. Verdere parameters word op die stapel geplaas. Die terugwaarde is in **`rax`**.
-- **System V (gewoonlik gebruik in UNIX-agtige stelsels)**: Die eerste **ses heelgetal of aanwyser parameters** word in registers **`rdi`**, **`rsi`**, **`rdx`**, **`rcx`**, **`r8`**, en **`r9`** oorgedra. Die terugwaarde is ook in **`rax`**.
+- **Windows**: Die eerste **vier parameters** word in die registers **`rcx`**, **`rdx`**, **`r8`**, en **`r9`** oorgedra. Verdere parameters word op die stapel geplaas. Die terugkeerwaarde is in **`rax`**.
+- **System V (gewoonlik gebruik in UNIX-agtige stelsels)**: Die eerste **ses heelgetal of aanwyser parameters** word in registers **`rdi`**, **`rsi`**, **`rdx`**, **`rcx`**, **`r8`**, en **`r9`** oorgedra. Die terugkeerwaarde is ook in **`rax`**.
 
 As die funksie meer as ses invoere het, sal die **oorige op die stapel oorgedra word**. **RSP**, die stapelaanwyser, moet **16 bytes uitgelijnd** wees, wat beteken dat die adres waarheen dit wys, deelbaar moet wees deur 16 voordat enige aanroep plaasvind. Dit beteken dat ons normaalweg moet verseker dat RSP behoorlik uitgelijnd is in ons shellcode voordat ons 'n funksie aanroep. In praktyk werk stelselaanroepe egter baie keer selfs al word hierdie vereiste nie nagekom nie.
 
@@ -280,7 +280,7 @@ touch_command:  db "touch /tmp/lalala", 0
 ```
 #### Bind shell
 
-Bind shell van [https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html) in **port 4444**
+Bind shell van [https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html) in **poort 4444**
 ```armasm
 section .text
 global _main

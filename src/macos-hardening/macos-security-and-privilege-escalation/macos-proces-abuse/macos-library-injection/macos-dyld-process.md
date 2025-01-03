@@ -6,7 +6,7 @@
 
 Die werklike **toegangspunt** van 'n Mach-o binêre is die dinamies gekoppelde, gedefinieer in `LC_LOAD_DYLINKER` gewoonlik is `/usr/lib/dyld`.
 
-Hierdie skakelaar sal al die uitvoerbare biblioteke moet vind, hulle in geheue kaart en al die nie-lui biblioteke skakel. Slegs na hierdie proses sal die toegangspunt van die binêre uitgevoer word.
+Hierdie skakelaar sal al die uitvoerbare biblioteke moet vind, dit in geheue kaart en al die nie-lui biblioteke skakel. Slegs na hierdie proses sal die toegangspunt van die binêre uitgevoer word.
 
 Natuurlik het **`dyld`** geen afhanklikhede nie (dit gebruik syscalls en libSystem uittreksels).
 
@@ -23,7 +23,7 @@ Dyld sal gelaai word deur **`dyldboostrap::start`**, wat ook dinge soos die **st
 ./
 {{#endref}}
 
-Dan, dit kaart die dyld gedeelde kas wat al die belangrike stelselsbiblioteke vooraf verbind en dan kaart dit die biblioteke waarop die binêre afhanklik is en gaan voort om rekursief voort te gaan totdat al die nodige biblioteke gelaai is. Daarom:
+Dan, dit kaart die dyld gedeelde kas wat al die belangrike stelselsbiblioteke vooraf verbind en dan kaart dit die biblioteke waarop die binêre afhanklik is en gaan voort rekursief totdat al die nodige biblioteke gelaai is. Daarom:
 
 1. dit begin om ingevoegde biblioteke met `DYLD_INSERT_LIBRARIES` te laai (indien toegelaat)
 2. Dan die gedeelde kas biblioteke
@@ -36,12 +36,12 @@ Terminators is gekodeer met **`__attribute__((destructor))`** en is geleë in 'n
 
 ### Stubs
 
-Alle binêre in macOS is dinamies gekoppel. Daarom bevat hulle sommige stub afdelings wat die binêre help om na die korrekte kode in verskillende masjiene en kontekste te spring. Dit is dyld wanneer die binêre uitgevoer word die brein wat hierdie adresse moet oplos (ten minste die nie-luies).
+Alle binêre in macOS is dinamies gekoppel. Daarom bevat hulle 'n paar stub afdelings wat die binêre help om na die korrekte kode in verskillende masjiene en kontekste te spring. Dit is dyld wanneer die binêre uitgevoer word die brein wat hierdie adresse moet oplos (ten minste die nie-luies).
 
 Sommige stub afdelings in die binêre:
 
 - **`__TEXT.__[auth_]stubs`**: Pointers van `__DATA` afdelings
-- **`__TEXT.__stub_helper`**: Klein kode wat dinamiese koppeling aanroep met inligting oor die funksie om te bel
+- **`__TEXT.__stub_helper`**: Klein kode wat dinamiese skakeling aanroep met inligting oor die funksie om te bel
 - **`__DATA.__[auth_]got`**: Globale Offset Tabel (adresse na geïmporteerde funksies, wanneer opgelos, (gebind tydens laai tyd soos dit gemerk is met vlag `S_NON_LAZY_SYMBOL_POINTERS`)
 - **`__DATA.__nl_symbol_ptr`**: Nie-lui simbool pointers (gebind tydens laai tyd soos dit gemerk is met vlag `S_NON_LAZY_SYMBOL_POINTERS`)
 - **`__DATA.__la_symbol_ptr`**: Lui simbool pointers (gebind op eerste toegang)
@@ -68,7 +68,7 @@ Interessante ontbinding deel:
 100003f80: 913e9000    	add	x0, x0, #4004
 100003f84: 94000005    	bl	0x100003f98 <_printf+0x100003f98>
 ```
-Dit is moontlik om te sien dat die sprong na die oproep van printf gaan na **`__TEXT.__stubs`**:
+Dit is moontlik om te sien dat die sprong na die oproep van printf na **`__TEXT.__stubs`** gaan:
 ```bash
 objdump --section-headers ./load
 
@@ -97,7 +97,7 @@ Disassembly of section __TEXT,__stubs:
 ```
 jy kan sien dat ons **na die adres van die GOT spring**, wat in hierdie geval nie-lui opgelos word en die adres van die printf-funksie sal bevat.
 
-In ander situasies, in plaas daarvan om direk na die GOT te spring, kan dit spring na **`__DATA.__la_symbol_ptr`** wat 'n waarde sal laai wat die funksie verteenwoordig wat dit probeer laai, dan spring na **`__TEXT.__stub_helper`** wat na **`__DATA.__nl_symbol_ptr`** spring wat die adres van **`dyld_stub_binder`** bevat wat die nommer van die funksie en 'n adres as parameters neem.\
+In ander situasies, in plaas daarvan om direk na die GOT te spring, kan dit spring na **`__DATA.__la_symbol_ptr`** wat 'n waarde sal laai wat die funksie verteenwoordig wat dit probeer laai, dan spring na **`__TEXT.__stub_helper`** wat na die **`__DATA.__nl_symbol_ptr`** spring wat die adres van **`dyld_stub_binder`** bevat wat die nommer van die funksie en 'n adres as parameters neem.\
 Hierdie laaste funksie, nadat dit die adres van die gesoekte funksie gevind het, skryf dit in die ooreenstemmende plek in **`__TEXT.__stub_helper`** om te verhoed dat daar in die toekoms opsoekings gedoen word.
 
 > [!TIP]
@@ -109,7 +109,7 @@ Laastens, **`dyld_stub_binder`** moet die aangeduide funksie vind en dit in die 
 
 ## apple\[] argument vektor
 
-In macOS ontvang die hoof funksie eintlik 4 argumente in plaas van 3. Die vierde word appel genoem en elke invoer is in die vorm `key=value`. Byvoorbeeld:
+In macOS ontvang die hooffunksie eintlik 4 argumente in plaas van 3. Die vierde word appel genoem en elke invoer is in die vorm `key=value`. Byvoorbeeld:
 ```c
 // gcc apple.c -o apple
 #include <stdio.h>
@@ -135,7 +135,7 @@ Result:
 11: th_port=
 ```
 > [!TIP]
-> Teen die tyd dat hierdie waardes die hooffunksie bereik, is sensitiewe inligting reeds uit hulle verwyder of dit sou 'n datalek gewees het.
+> Teen die tyd dat hierdie waardes die hooffunksie bereik, is sensitiewe inligting reeds van hulle verwyder of dit sou 'n datalek gewees het.
 
 dit is moontlik om al hierdie interessante waardes te sien terwyl jy debugg voordat jy in die hooffunksie kom met:
 
@@ -180,9 +180,9 @@ dit is moontlik om al hierdie interessante waardes te sien terwyl jy debugg voor
 
 ## dyld_all_image_infos
 
-Dit is 'n struktuur wat deur dyld uitgevoer word met inligting oor die dyld toestand wat in die [**source code**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html) gevind kan word met inligting soos die weergawe, wysiger na dyld_image_info array, na dyld_image_notifier, of proc van die gedeelde kas afgehaal is, of libSystem inisialisator aangeroep is, wysiger na dyls se eie Mach kop, wysiger na dyld weergawe string...
+Dit is 'n struktuur wat deur dyld uitgevoer word met inligting oor die dyld toestand wat in die [**bron kode**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html) gevind kan word met inligting soos die weergawe, wysiger na dyld_image_info array, na dyld_image_notifier, of proc van die gedeelde kas afgehaal is, of libSystem inisialisator aangeroep is, wysiger na dyls se eie Mach kop, wysiger na dyld weergawe string...
 
-## dyld env variables
+## dyld omgewing veranderlikes
 
 ### debug dyld
 
@@ -253,7 +253,7 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 ```
 ### Ander
 
-- `DYLD_BIND_AT_LAUNCH`: Luie bindings word met nie-luie bindings opgelos
+- `DYLD_BIND_AT_LAUNCH`: Lui bindings word met nie-lui bindings opgelos
 - `DYLD_DISABLE_PREFETCH`: Deaktiveer pre-fetching van \_\_DATA en \_\_LINKEDIT inhoud
 - `DYLD_FORCE_FLAT_NAMESPACE`: Enkelvlak bindings
 - `DYLD_[FRAMEWORK/LIBRARY]_PATH | DYLD_FALLBACK_[FRAMEWORK/LIBRARY]_PATH | DYLD_VERSIONED_[FRAMEWORK/LIBRARY]_PATH`: Oplossingspade
@@ -267,7 +267,7 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 - `DYLD_PRINT_DOFS`: Druk D-Trace objekformaat afdelings soos gelaai
 - `DYLD_PRINT_ENV`: Druk omgewing gesien deur dyld
 - `DYLD_PRINT_INTERPOSTING`: Druk interposting operasies
-- `DYLD_PRINT_LIBRARIES`: Druk biblioteke gelaai
+- `DYLD_PRINT_LIBRARIES`: Druk gelaaide biblioteke
 - `DYLD_PRINT_OPTS`: Druk laai opsies
 - `DYLD_REBASING`: Druk simbool herbasering operasies
 - `DYLD_RPATHS`: Druk uitbreidings van @rpath
@@ -283,7 +283,7 @@ Dit is moontlik om meer te vind met iets soos:
 ```bash
 strings /usr/lib/dyld | grep "^DYLD_" | sort -u
 ```
-Of laai die dyld-projek af van [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) en voer dit binne die gids uit:
+Of om die dyld-projek af te laai van [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) en binne die vouer te loop:
 ```bash
 find . -type f | xargs grep strcmp| grep key,\ \" | cut -d'"' -f2 | sort -u
 ```

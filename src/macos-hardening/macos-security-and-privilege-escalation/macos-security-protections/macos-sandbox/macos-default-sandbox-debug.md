@@ -2,7 +2,7 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Op hierdie bladsy kan jy vind hoe om 'n toepassing te skep om arbitrêre opdragte vanuit die standaard macOS-sandbox te begin:
+Op hierdie bladsy kan jy vind hoe om 'n toepassing te skep om arbitrêre opdragte vanuit die standaard macOS sandbox te begin:
 
 1. Compileer die toepassing:
 ```objectivec:main.m
@@ -94,7 +94,7 @@ EOF
 {{#endtab}}
 {{#endtabs}}
 
-4. Teken die app (jy moet 'n sertifikaat in die sleutelsak skep)
+4. Teken die app (jy moet 'n sertifikaat in die sleutelkettie skep)
 ```bash
 codesign --entitlements entitlements.plist -s "YourIdentity" SandboxedShellApp.app
 ./SandboxedShellApp.app/Contents/MacOS/SandboxedShellApp

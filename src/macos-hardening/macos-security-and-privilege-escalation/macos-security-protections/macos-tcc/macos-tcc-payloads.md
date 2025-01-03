@@ -560,7 +560,7 @@ static void telegram(int argc, const char **argv) {
 {{#endtab}}
 
 {{#tab name="Shell"}}
-Neem 'n 5s klankopname en stoor dit in `/tmp/recording.wav`
+Neem 'n 5s klankopname op en stoor dit in `/tmp/recording.wav`
 ```bash
 # Check the microphones
 ffmpeg -f avfoundation -list_devices true -i ""
@@ -573,7 +573,7 @@ ffmpeg -f avfoundation -i ":1" -t 5 /tmp/recording.wav
 ### Ligging
 
 > [!TIP]
-> Vir 'n toepassing om die ligging te verkry, **Ligging Dienste** (van Privaatheid & Sekuriteit) **moet geaktiveer wees,** anders kan dit nie toegang daartoe verkry nie.
+> Vir 'n app om die ligging te verkry, **Ligging Dienste** (van Privaatheid & Sekuriteit) **moet geaktiveer wees,** anders kan dit nie toegang daartoe verkry nie.
 
 - **Regte**: `com.apple.security.personal-information.location`
 - **TCC**: Toegestaan in `/var/db/locationd/clients.plist`
@@ -713,7 +713,7 @@ screencapture -V 5 /tmp/screen.mov
 - **Regte**: Geen
 - **TCC**: `kTCCServiceAccessibility`
 
-Gebruik die TCC-privilege om die beheer van Finder te aanvaar deur enter te druk en TCC op daardie manier te omseil
+Gebruik die TCC-regte om die beheer van Finder te aanvaar deur enter te druk en TCC op daardie manier te omseil
 
 {{#tabs}}
 {{#tab name="Aanvaar TCC"}}

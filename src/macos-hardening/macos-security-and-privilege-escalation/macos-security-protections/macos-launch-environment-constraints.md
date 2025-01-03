@@ -4,22 +4,22 @@
 
 ## Basic Information
 
-Lanceringsbeperkings in macOS is ingestel om sekuriteit te verbeter deur **te reguleer hoe, wie, en van waar 'n proses geinitieer kan word**. Geïnisieer in macOS Ventura, bied dit 'n raamwerk wat **elke stelselbinarie in verskillende beperkingkategorieë kategoriseer**, wat gedefinieer word binne die **vertrou cache**, 'n lys wat stelselbinaries en hul onderskeie hashes bevat​. Hierdie beperkings strek uit na elke uitvoerbare binarie binne die stelsel, wat 'n stel **reëls** insluit wat die vereistes vir **die lansering van 'n spesifieke binarie** uiteensit. Die reëls sluit selfbeperkings in wat 'n binarie moet nakom, ouerbeperkings wat deur sy ouerproses nagekom moet word, en verantwoordelike beperkings wat deur ander relevante entiteite nagekom moet word​.
+Lanceringsbeperkings in macOS is ingestel om sekuriteit te verbeter deur **te reguleer hoe, wie, en van waar 'n proses geinitieer kan word**. Geïnisieer in macOS Ventura, bied dit 'n raamwerk wat **elke stelselbinarie in verskillende beperkingkategorieë kategoriseer**, wat gedefinieer is binne die **vertrou cache**, 'n lys wat stelselbinaries en hul onderskeie hashes bevat​. Hierdie beperkings strek uit na elke uitvoerbare binarie binne die stelsel, wat 'n stel **reëls** insluit wat die vereistes vir **die lancering van 'n spesifieke binarie** uiteensit. Die reëls sluit selfbeperkings in wat 'n binarie moet nakom, ouerbeperkings wat deur sy ouerproses nagekom moet word, en verantwoordelike beperkings wat deur ander relevante entiteite nagekom moet word​.
 
-Die meganisme strek uit na derdeparty-apps deur **Omgewingbeperkings**, wat begin vanaf macOS Sonoma, wat ontwikkelaars toelaat om hul apps te beskerm deur 'n **stel sleutels en waardes vir omgewingbeperkings te spesifiseer.**
+Die meganisme strek uit na derdeparty-apps deur middel van **Omgewingbeperkings**, wat begin vanaf macOS Sonoma, wat ontwikkelaars toelaat om hul apps te beskerm deur 'n **stel sleutels en waardes vir omgewingbeperkings te spesifiseer.**
 
-Jy definieer **lanceringsomgewing en biblioteekbeperkings** in beperkingwoordeboeke wat jy of in **`launchd` eiendomlys lêers** stoor, of in **afsonderlike eiendomlys** lêers wat jy in kodeondertekening gebruik.
+Jy definieer **lanceringsomgewing en biblioteekbeperkings** in beperkingwoordeboeke wat jy of in **`launchd` eiendomslys lêers** stoor, of in **afsonderlike eiendomslys** lêers wat jy in kodeondertekening gebruik.
 
 Daar is 4 tipes beperkings:
 
 - **Selfbeperkings**: Beperkings wat toegepas word op die **lopende** binarie.
 - **Ouerproses**: Beperkings wat toegepas word op die **ouer van die proses** (byvoorbeeld **`launchd`** wat 'n XP-diens uitvoer)
 - **Verantwoordelike Beperkings**: Beperkings wat toegepas word op die **proses wat die diens aanroep** in 'n XPC-kommunikasie
-- **Biblioteeklaaibeperkings**: Gebruik biblioteeklaaibeperkings om selektief kode te beskryf wat gelaai kan word
+- **Biblioteeklaai-beperkings**: Gebruik biblioteeklaai-beperkings om selektief kode te beskryf wat gelaai kan word
 
 So wanneer 'n proses probeer om 'n ander proses te lanseer — deur `execve(_:_:_:)` of `posix_spawn(_:_:_:_:_:_:)` aan te roep — kontroleer die bedryfstelsel dat die **uitvoerbare** lêer **voldoen** aan sy **eie selfbeperking**. Dit kontroleer ook dat die **ouer** **proses se** uitvoerbare **voldoen** aan die uitvoerbare se **ouerbeperking**, en dat die **verantwoordelike** **proses se** uitvoerbare **voldoen aan die uitvoerbare se verantwoordelike prosesbeperking**. As enige van hierdie lanceringsbeperkings nie nagekom word nie, sal die bedryfstelsel die program nie uitvoer nie.
 
-As enige deel van die **biblioteekbeperking nie waar is nie** wanneer 'n biblioteek gelaai word, **laai jou proses nie** die biblioteek nie.
+As enige deel van die **biblioteekbeperking nie waar is** wanneer 'n biblioteek gelaai word, **laai jou proses nie** die biblioteek nie.
 
 ## LC Categories
 
@@ -29,14 +29,14 @@ Die[ **feite wat 'n LC kan gebruik is gedokumenteer**](https://developer.apple.c
 
 - is-init-proc: 'n Booleaanse waarde wat aandui of die uitvoerbare die bedryfstelsel se inisialisasieproses (`launchd`) moet wees.
 - is-sip-beskerm: 'n Booleaanse waarde wat aandui of die uitvoerbare 'n lêer moet wees wat deur Stelselintegriteitsbeskerming (SIP) beskerm word.
-- `on-authorized-authapfs-volume:` 'n Booleaanse waarde wat aandui of die bedryfstelsel die uitvoerbare van 'n geautoriseerde, geverifieerde APFS-volume gelaai het.
-- `on-authorized-authapfs-volume`: 'n Booleaanse waarde wat aandui of die bedryfstelsel die uitvoerbare van 'n geautoriseerde, geverifieerde APFS-volume gelaai het.
+- `on-authorized-authapfs-volume:` 'n Booleaanse waarde wat aandui of die bedryfstelsel die uitvoerbare van 'n geverifieerde, geauthentiseerde APFS-volume gelaai het.
+- `on-authorized-authapfs-volume`: 'n Booleaanse waarde wat aandui of die bedryfstelsel die uitvoerbare van 'n geverifieerde, geauthentiseerde APFS-volume gelaai het.
 - Cryptexes volume
 - `on-system-volume:` 'n Booleaanse waarde wat aandui of die bedryfstelsel die uitvoerbare van die tans-gestarte stelselmengsel gelaai het.
 - Binne /System...
 - ...
 
-Wanneer 'n Apple binarie onderteken word, **ken dit dit aan 'n LC-kategorie toe** binne die **vertrou cache**.
+Wanneer 'n Apple binarie onderteken word, **ken dit dit aan 'n LC-kategorie** binne die **vertrou cache** toe.
 
 - **iOS 16 LC-kategorieë** is [**omgekeer en hier gedokumenteer**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056).
 - Huidige **LC-kategorieë (macOS 14** - Somona) is omgekeer en hul [**beskrywings kan hier gevind word**](https://gist.github.com/theevilbit/a6fef1e0397425a334d064f7b6e1be53).
@@ -54,13 +54,13 @@ Parent Constraint: is-init-proc
 
 ### Omgekeerde LC Kategoriewe
 
-Jy het meer inligting [**hieroor**](https://theevilbit.github.io/posts/launch_constraints_deep_dive/#reversing-constraints), maar basies, hulle is gedefinieer in **AMFI (AppleMobileFileIntegrity)**, so jy moet die Kernel Development Kit aflaai om die **KEXT** te verkry. Die simbole wat met **`kConstraintCategory`** begin, is die **interessante**. Deur hulle te onttrek, sal jy 'n DER (ASN.1) geënkodeerde stroom kry wat jy moet decodeer met [ASN.1 Decoder](https://holtstrom.com/michael/tools/asn1decoder.php) of die python-asn1 biblioteek en sy `dump.py` skrip, [andrivet/python-asn1](https://github.com/andrivet/python-asn1/tree/master) wat jou 'n meer verstaanbare string sal gee.
+Jy het meer inligting [**hieroor**](https://theevilbit.github.io/posts/launch_constraints_deep_dive/#reversing-constraints), maar basies, hulle is gedefinieer in **AMFI (AppleMobileFileIntegrity)**, so jy moet die Kernel Ontwikkelingskit aflaai om die **KEXT** te kry. Die simbole wat met **`kConstraintCategory`** begin, is die **interessante**. Deur hulle uit te trek, sal jy 'n DER (ASN.1) geënkodeerde stroom kry wat jy moet dekodeer met [ASN.1 Decoder](https://holtstrom.com/michael/tools/asn1decoder.php) of die python-asn1 biblioteek en sy `dump.py` skrip, [andrivet/python-asn1](https://github.com/andrivet/python-asn1/tree/master) wat jou 'n meer verstaanbare string sal gee.
 
 ## Omgewing Beperkings
 
-Dit is die Launch Beperkings wat in **derdeparty toepassings** geconfigureer is. Die ontwikkelaar kan die **feite** en **logiese operateurs wat gebruik moet word** in sy toepassing kies om die toegang tot homself te beperk.
+Dit is die Launch Beperkings wat in **derdeparty toepassings** ingestel is. Die ontwikkelaar kan die **feite** en **logiese operateurs om te gebruik** in sy toepassing kies om die toegang tot homself te beperk.
 
-Dit is moontlik om die Omgewing Beperkings van 'n toepassing te enumerate met:
+Dit is moontlik om die Omgewing Beperkings van 'n toepassing te enumereer met:
 ```bash
 codesign -d -vvvv app.app
 ```
@@ -77,7 +77,7 @@ En in iOS lyk dit of dit in **`/usr/standalone/firmware/FUD/StaticTrustCache.img
 > [!WARNING]
 > Op macOS wat op Apple Silicon toestelle loop, sal AMFI weier om 'n Apple-onderteken binêre te laai as dit nie in die vertroue kas is nie.
 
-### Opname van Vertroue Kaste
+### Opnoem van Vertroue Kaste
 
 Die vorige vertroue kas lêers is in die formaat **IMG4** en **IM4P**, met IM4P die payload gedeelte van 'n IMG4 formaat.
 
@@ -133,13 +133,13 @@ uint8_t constraintCategory;
 uint8_t reserved0;
 } __attribute__((__packed__));
 ```
-Dan kan jy 'n skrif soos [**hierdie een**](https://gist.github.com/xpn/66dc3597acd48a4c31f5f77c3cc62f30) gebruik om data te onttrek.
+Dan kan jy 'n skrip soos [**hierdie een**](https://gist.github.com/xpn/66dc3597acd48a4c31f5f77c3cc62f30) gebruik om data te onttrek.
 
 Van daardie data kan jy die Apps met 'n **launch constraints waarde van `0`** nagaan, wat diegene is wat nie beperk is nie ([**kyk hier**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056) vir wat elke waarde is).
 
 ## Aanval Mitigasies
 
-Launch Constrains sou verskeie ou aanvalle gemitigeer het deur **te verseker dat die proses nie in onverwagte toestande uitgevoer sal word nie:** Byvoorbeeld vanaf onverwagte plekke of deur 'n onverwagte ouer proses aangeroep word (as slegs launchd dit moet begin).
+Launch Constrains sou verskeie ou aanvalle gemitigeer het deur **te verseker dat die proses nie in onverwagte toestande uitgevoer sal word nie:** Byvoorbeeld van onverwagte plekke of deur 'n onverwagte ouer proses aangeroep word (as slegs launchd dit moet begin).
 
 Boonop **mitigeer Launch Constraints ook afgraderingsaanvalle.**
 
@@ -147,12 +147,12 @@ Egter, hulle **mitigeer nie algemene XPC** misbruik nie, **Electron** kode-inspu
 
 ### XPC Daemon Beskerming
 
-In die Sonoma vrystelling is 'n noemenswaardige punt die daemon XPC diens se **verantwoordelikheid konfigurasie**. Die XPC diens is verantwoordelik vir homself, in teenstelling met die verbindende kliënt wat verantwoordelik is. Dit is gedokumenteer in die terugvoer verslag FB13206884. Hierdie opstelling mag gebrekkig voorkom, aangesien dit sekere interaksies met die XPC diens toelaat:
+In die Sonoma vrystelling is 'n noemenswaardige punt die daemon XPC diens se **verantwoordelikheid konfigurasie**. Die XPC diens is verantwoordelik vir homself, in teenstelling met die verbindende kliënt wat verantwoordelik is. Dit is gedokumenteer in die terugvoer verslag FB13206884. Hierdie opstelling mag gebrekkig lyk, aangesien dit sekere interaksies met die XPC diens toelaat:
 
-- **Die XPC Diens Begin**: As dit as 'n fout beskou word, laat hierdie opstelling nie toe om die XPC diens deur aanvallerskode te begin nie.
-- **Verbinding met 'n Aktiewe Diens**: As die XPC diens reeds loop (moontlik geaktiveer deur sy oorspronklike toepassing), is daar geen hindernisse om met dit te verbind nie.
+- **Die XPC Diens Begin**: As dit as 'n fout beskou word, laat hierdie opstelling nie toe om die XPC diens deur aanvaller kode te begin nie.
+- **Verbinding met 'n Aktiewe Diens**: As die XPC diens reeds loop (miskien geaktiveer deur sy oorspronklike toepassing), is daar geen hindernisse om met dit te verbind nie.
 
-Terwyl die implementering van beperkings op die XPC diens voordelig mag wees deur **die venster vir potensiële aanvalle te vernou**, adres dit nie die primêre bekommernis nie. Om die sekuriteit van die XPC diens te verseker, vereis fundamenteel **dat die verbindende kliënt effektief geverifieer word**. Dit bly die enigste metode om die diens se sekuriteit te versterk. Dit is ook die moeite werd om op te let dat die genoemde verantwoordelikheid konfigurasie tans operasioneel is, wat dalk nie ooreenstem met die beoogde ontwerp nie.
+Terwyl die implementering van beperkings op die XPC diens voordelig mag wees deur **die venster vir potensiële aanvalle te vernou**, adres dit nie die primêre bekommernis nie. Om die sekuriteit van die XPC diens te verseker, vereis fundamenteel **om die verbindende kliënt effektief te valideer**. Dit bly die enigste metode om die diens se sekuriteit te versterk. Dit is ook die moeite werd om op te let dat die genoemde verantwoordelikheid konfigurasie tans operasioneel is, wat dalk nie ooreenstem met die beoogde ontwerp nie.
 
 ### Electron Beskerming
 

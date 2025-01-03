@@ -8,7 +8,7 @@
 
 ### **Oopstel van 'n Foutopsporing Sessie** <a href="#net-core-debugging" id="net-core-debugging"></a>
 
-Die hantering van kommunikasie tussen die foutopsporing en die foutopsporing doelwit in .NET word bestuur deur [**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp). Hierdie komponent stel twee benoemde pype per .NET proses op soos gesien in [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127), wat geinitieer word deur [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27). Hierdie pype is gesuffikseerd met **`-in`** en **`-out`**.
+Die hantering van kommunikasie tussen die foutopsporing en die foutopsporing doelwit in .NET word bestuur deur [**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp). Hierdie komponent stel twee benoemde pype per .NET proses op soos gesien in [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127), wat geinitieer word via [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27). Hierdie pype is gesuffikseerd met **`-in`** en **`-out`**.
 
 Deur die gebruiker se **`$TMPDIR`** te besoek, kan 'n mens foutopsporing FIFOs vind wat beskikbaar is vir die foutopsporing van .Net toepassings.
 
@@ -31,7 +31,7 @@ DWORD         m_dwMinorVersion;
 BYTE          m_sMustBeZero[8];
 }
 ```
-Om 'n nuwe sessie aan te vra, word hierdie struktuur soos volg ingevul, wat die boodskap tipe op `MT_SessionRequest` stel en die protokolweergawe op die huidige weergawe stel:
+Om 'n nuwe sessie aan te vra, word hierdie struktuur soos volg ingevul, wat die boodskap tipe op `MT_SessionRequest` stel en die protokol weergawe op die huidige weergawe:
 ```c
 static const DWORD kCurrentMajorVersion = 2;
 static const DWORD kCurrentMinorVersion = 0;
@@ -91,11 +91,11 @@ Om kode uit te voer, moet 'n geheuegebied met rwx-toestemmings geïdentifiseer w
 vmmap -pages [pid]
 vmmap -pages 35829 | grep "rwx/rwx"
 ```
-'n Plek om 'n funksie-aanwyser te oorskryf, is nodig, en in .NET Core kan dit gedoen word deur die **Dynamic Function Table (DFT)** te teiken. Hierdie tabel, wat in [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h) beskryf word, word deur die runtime gebruik vir JIT-kompilasie-hulpfunksies.
+'n Plek om 'n funksie-aanwyser te oorskryf, is nodig, en in .NET Core kan dit gedoen word deur die **Dynamiese Funksietabel (DFT)** te teiken. Hierdie tabel, wat in [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h) beskryf word, word deur die runtime gebruik vir JIT-kompilasie-hulpfunksies.
 
 Vir x64-stelsels kan handtekeningjag gebruik word om 'n verwysing na die simbool `_hlpDynamicFuncTable` in `libcorclr.dll` te vind.
 
-Die `MT_GetDCB` debuggersfunksie verskaf nuttige inligting, insluitend die adres van 'n hulpfunksie, `m_helperRemoteStartAddr`, wat die ligging van `libcorclr.dll` in die prosesgeheue aandui. Hierdie adres word dan gebruik om 'n soektog na die DFT te begin en 'n funksie-aanwyser met die adres van die shellcode te oorskryf.
+Die `MT_GetDCB` debuggingsfunksie verskaf nuttige inligting, insluitend die adres van 'n hulpfunksie, `m_helperRemoteStartAddr`, wat die ligging van `libcorclr.dll` in die prosesgeheue aandui. Hierdie adres word dan gebruik om 'n soektog na die DFT te begin en 'n funksie-aanwyser met die shellcode se adres te oorskryf.
 
 Die volledige POC-kode vir inspuiting in PowerShell is beskikbaar [hier](https://gist.github.com/xpn/b427998c8b3924ab1d63c89d273734b6).
 

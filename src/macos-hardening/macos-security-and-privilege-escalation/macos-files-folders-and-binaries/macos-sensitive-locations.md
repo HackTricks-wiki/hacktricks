@@ -25,7 +25,7 @@ Hierdie lêer word **slegs gebruik** wanneer die stelsel in **enkele-gebruiker m
 
 ### Sleutelhouer Dump
 
-Let daarop dat wanneer die sekuriteit binêre gebruik word om die **ontsleutelde wagwoorde** te **dump**, verskeie vrae die gebruiker sal vra om hierdie operasie toe te laat.
+Let daarop dat wanneer die sekuriteit binêre gebruik word om die **ontsleutelde wagwoorde te dump**, verskeie vrae die gebruiker sal vra om hierdie operasie toe te laat.
 ```bash
 #security
 security dump-trust-settings [-s] [-d] #List certificates
@@ -41,21 +41,21 @@ security dump-keychain -d #Dump all the info, included secrets (the user will be
 
 ### Keychaindump Oorsig
 
-'n Gereedskap genaamd **keychaindump** is ontwikkel om wagwoorde uit macOS sleutelhouers te onttrek, maar dit ondervind beperkings op nuwer macOS weergawes soos Big Sur, soos aangedui in 'n [diskussie](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760). Die gebruik van **keychaindump** vereis dat die aanvaller toegang verkry en voorregte tot **root** verhoog. Die gereedskap benut die feit dat die sleutelhouer standaard ontgrendel is by gebruikersaanmelding vir gerief, wat toelaat dat toepassings toegang daartoe verkry sonder om die gebruiker se wagwoord herhaaldelik te vereis. As 'n gebruiker egter kies om hul sleutelhouer na elke gebruik te vergrendel, word **keychaindump** ondoeltreffend.
+'n Gereedskap genaamd **keychaindump** is ontwikkel om wagwoorde uit macOS sleutelhouers te onttrek, maar dit ondervind beperkings op nuwer macOS weergawes soos Big Sur, soos aangedui in 'n [bespreking](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760). Die gebruik van **keychaindump** vereis dat die aanvaller toegang verkry en privaathede tot **root** verhoog. Die gereedskap benut die feit dat die sleutelhouer standaard ontgrendel is by gebruikersaanmelding vir gerief, wat toepassings toelaat om dit te benader sonder om die gebruiker se wagwoord herhaaldelik te vereis. As 'n gebruiker egter kies om hul sleutelhouer na elke gebruik te vergrendel, word **keychaindump** ondoeltreffend.
 
-**Keychaindump** werk deur 'n spesifieke proses genaamd **securityd** te teiken, wat deur Apple beskryf word as 'n daemon vir magtiging en kriptografiese operasies, wat noodsaaklik is vir toegang tot die sleutelhouer. Die onttrekkingsproses behels die identifisering van 'n **Master Key** wat afgelei is van die gebruiker se aanmeldwagwoord. Hierdie sleutel is noodsaaklik om die sleutelhouer lêer te lees. Om die **Master Key** te vind, skandeer **keychaindump** die geheuehoop van **securityd** met behulp van die `vmmap` opdrag, op soek na potensiële sleutels binne areas wat as `MALLOC_TINY` gemerk is. Die volgende opdrag word gebruik om hierdie geheue plekke te ondersoek:
+**Keychaindump** werk deur 'n spesifieke proses genaamd **securityd** te teiken, wat deur Apple beskryf word as 'n daemon vir magtiging en kriptografiese operasies, wat noodsaaklik is om toegang tot die sleutelhouer te verkry. Die onttrekkingsproses behels die identifisering van 'n **Master Key** wat afgelei is van die gebruiker se aanmeldwagwoord. Hierdie sleutel is noodsaaklik om die sleutelhouer lêer te lees. Om die **Master Key** te vind, skandeer **keychaindump** die geheuehoop van **securityd** met behulp van die `vmmap` opdrag, op soek na potensiële sleutels binne areas wat as `MALLOC_TINY` gemerk is. Die volgende opdrag word gebruik om hierdie geheue plekke te ondersoek:
 ```bash
 sudo vmmap <securityd PID> | grep MALLOC_TINY
 ```
-Na die identifisering van potensiële meester sleutels, **keychaindump** soek deur die hoop vir 'n spesifieke patroon (`0x0000000000000018`) wat 'n kandidaat vir die meester sleutel aandui. Verdere stappe, insluitend deobfuscation, is nodig om hierdie sleutel te benut, soos uiteengesit in **keychaindump** se bronkode. Ontleders wat op hierdie gebied fokus, moet oplet dat die belangrike data vir die ontsleuteling van die sleutelring binne die geheue van die **securityd** proses gestoor is. 'n Voorbeeldopdrag om **keychaindump** te loop is:
+Na die identifisering van potensiële meester sleutels, **keychaindump** soek deur die hoop vir 'n spesifieke patroon (`0x0000000000000018`) wat 'n kandidaat vir die meester sleutel aandui. Verdere stappe, insluitend deobfuscation, is nodig om hierdie sleutel te benut, soos uiteengesit in **keychaindump**'s bronkode. Ontleders wat op hierdie gebied fokus, moet oplet dat die belangrike data vir die ontsleuteling van die sleutelhouer binne die geheue van die **securityd** proses gestoor is. 'n Voorbeeldopdrag om **keychaindump** te loop is:
 ```bash
 sudo ./keychaindump
 ```
 ### chainbreaker
 
-[**Chainbreaker**](https://github.com/n0fate/chainbreaker) kan gebruik word om die volgende tipes inligting uit 'n OSX sleutelketting op 'n forensies-korrekte manier te onttrek:
+[**Chainbreaker**](https://github.com/n0fate/chainbreaker) kan gebruik word om die volgende tipes inligting uit 'n OSX sleutelring op 'n forensies-korrekte manier te onttrek:
 
-- Gehashde Sleutelkettingswagwoord, geskik vir kraken met [hashcat](https://hashcat.net/hashcat/) of [John the Ripper](https://www.openwall.com/john/)
+- Gehashde Sleutelring wagwoord, geskik vir kraken met [hashcat](https://hashcat.net/hashcat/) of [John the Ripper](https://www.openwall.com/john/)
 - Internet Wagwoorde
 - Generiese Wagwoorde
 - Privaat Sleutels
@@ -64,11 +64,11 @@ sudo ./keychaindump
 - Veilige Aantekeninge
 - Appleshare Wagwoorde
 
-Gegewe die sleutelkettingsontsluitwagwoord, 'n meester sleutel verkry met behulp van [volafox](https://github.com/n0fate/volafox) of [volatility](https://github.com/volatilityfoundation/volatility), of 'n ontsluitlêer soos SystemKey, sal Chainbreaker ook plattekswagwoorde verskaf.
+Gegewe die sleutelring ontgrendel wagwoord, 'n meester sleutel verkry deur [volafox](https://github.com/n0fate/volafox) of [volatility](https://github.com/volatilityfoundation/volatility), of 'n ontgrendel lêer soos SystemKey, sal Chainbreaker ook platte teks wagwoorde verskaf.
 
-Sonder een van hierdie metodes om die Sleutelketing te ontsluit, sal Chainbreaker al die ander beskikbare inligting vertoon.
+Sonder een van hierdie metodes om die Sleutelring te ontgrendel, sal Chainbreaker al die ander beskikbare inligting vertoon.
 
-#### **Dump sleutelkettingsleutels**
+#### **Dump sleutelring sleutels**
 ```bash
 #Dump all keys of the keychain (without the passwords)
 python2.7 chainbreaker.py --dump-all /Library/Keychains/System.keychain
@@ -189,7 +189,7 @@ Hierdie lêer verleen toestemmings aan spesifieke gebruikers deur UUID (en nie u
 ```
 ## Stelselskennisgewings
 
-### Darwin Kennisgewings
+### Darwin Kenner
 
 Die hoof daemon vir kennisgewings is **`/usr/sbin/notifyd`**. Om kennisgewings te ontvang, moet kliënte registreer deur die `com.apple.system.notification_center` Mach-poort (kontroleer dit met `sudo lsmp -p <pid notifyd>`). Die daemon is konfigureerbaar met die lêer `/etc/notify.conf`.
 
@@ -235,7 +235,7 @@ Dit is ook moontlik om inligting oor die daemon en verbindings te verkry met:
 Dit is kennisgewings wat die gebruiker op die skerm moet sien:
 
 - **`CFUserNotification`**: Hierdie API bied 'n manier om 'n pop-up met 'n boodskap op die skerm te wys.
-- **Die Bulletinbord**: Dit wys in iOS 'n banner wat verdwyn en in die Kennisgewing Sentrum gestoor sal word.
-- **`NSUserNotificationCenter`**: Dit is die iOS bulletinbord in MacOS. Die databasis met die kennisgewings is geleë in `/var/folders/<user temp>/0/com.apple.notificationcenter/db2/db`
+- **Die Bulletin Bord**: Dit wys in iOS 'n banner wat verdwyn en in die Kennisgewingsentrum gestoor sal word.
+- **`NSUserNotificationCenter`**: Dit is die iOS bulletin bord in MacOS. Die databasis met die kennisgewings is geleë in `/var/folders/<user temp>/0/com.apple.notificationcenter/db2/db`
 
 {{#include ../../../banners/hacktricks-training.md}}

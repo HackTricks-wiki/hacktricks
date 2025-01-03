@@ -4,7 +4,7 @@
 
 ## Basiese Inligting
 
-Mac OS binêre word gewoonlik saamgestel as **universele binêre**. 'n **universale binêre** kan **meerdere argitekture in dieselfde lêer ondersteun**.
+Mac OS binêre word gewoonlik saamgekompileer as **universele binêre**. 'n **universale binêre** kan **meerdere argitekture in dieselfde lêer ondersteun**.
 
 Hierdie binêre volg die **Mach-O struktuur** wat basies bestaan uit:
 
@@ -68,7 +68,7 @@ of deur die [Mach-O View](https://sourceforge.net/projects/machoview/) hulpmidde
 
 <figure><img src="../../../images/image (1094).png" alt=""><figcaption></figcaption></figure>
 
-Soos jy dalk dink, verdubbel 'n universele binêre wat vir 2 argitekture saamgestel is gewoonlik die grootte van een wat net vir 1 argitektuur saamgestel is.
+Soos jy dalk dink, verdubbel 'n universele binêre wat saamgekompileer is vir 2 argitekture gewoonlik die grootte van een wat net vir 1 argitektuur saamgekompileer is.
 
 ## **Mach-O Kop**
 
@@ -177,8 +177,8 @@ uint64_t	vmaddr;		/* geheueadres van hierdie segment */
 uint64_t	vmsize;		/* geheuegrootte van hierdie segment */
 uint64_t	fileoff;	/* lêer offset van hierdie segment */
 uint64_t	filesize;	/* hoeveelheid om van die lêer te map */
-int32_t		maxprot;	/* maksimum VM-beskerming */
-int32_t		initprot;	/* aanvanklike VM-beskerming */
+int32_t		maxprot;	/* maksimum VM beskerming */
+int32_t		initprot;	/* aanvanklike VM beskerming */
 <strong>	uint32_t	nsects;		/* aantal afdelings in segment */
 </strong>	uint32_t	flags;		/* vlae */
 };
@@ -209,7 +209,7 @@ Voorbeeld van **afdelingskop**:
 
 <figure><img src="../../../images/image (1108).png" alt=""><figcaption></figcaption></figure>
 
-As jy die **afdelingsoffset** (0x37DC) + die **offset** waar die **argitektuur begin**, in hierdie geval `0x18000` --> `0x37DC + 0x18000 = 0x1B7DC`
+As jy die **afdelingsoffset** (0x37DC) + die **offset** waar die **arch begin**, in hierdie geval `0x18000` --> `0x37DC + 0x18000 = 0x1B7DC`
 
 <figure><img src="../../../images/image (701).png" alt=""><figcaption></figcaption></figure>
 
@@ -219,7 +219,7 @@ otool -lv /bin/ls
 ```
 Algemene segmente wat deur hierdie cmd gelaai word:
 
-- **`__PAGEZERO`:** Dit gee die kernel opdrag om die **adres nul** te **kaart**, sodat dit **nie gelees, geskryf of uitgevoer kan word** nie. Die maxprot en minprot veranderlikes in die struktuur is op nul gestel om aan te dui dat daar **geen lees-skrif-uitvoer regte op hierdie bladsy is**.
+- **`__PAGEZERO`:** Dit gee die kernel opdrag om die **adres nul** te **kaart**, sodat dit **nie gelees, geskryf of uitgevoer kan word** nie. Die maxprot en minprot veranderlikes in die struktuur is op nul gestel om aan te dui dat daar **geen lees-skrif-uitvoer regte op hierdie bladsy is** nie.
 - Hierdie toewysing is belangrik om **NULL pointer dereference kwesbaarhede te verminder**. Dit is omdat XNU 'n harde bladsy nul afdwing wat verseker dat die eerste bladsy (slegs die eerste) van geheue ontoeganklik is (behalwe in i386). 'n Binêre kan aan hierdie vereistes voldoen deur 'n klein \_\_PAGEZERO te skep (met die `-pagezero_size`) om die eerste 4k te dek en die res van die 32-bit geheue in beide gebruiker- en kernelmodus toeganklik te hê.
 - **`__TEXT`**: Bevat **uitvoerbare** **kode** met **lees** en **uitvoer** toestemmings (geen skryfbare)**.** Algemene afdelings van hierdie segment:
 - `__text`: Gecompileerde binêre kode
@@ -232,17 +232,17 @@ Algemene segmente wat deur hierdie cmd gelaai word:
 - `__got:` Globale Offset Tabel
 - `__nl_symbol_ptr`: Nie lui (bind by laai) simbool pointer
 - `__la_symbol_ptr`: Lui (bind by gebruik) simbool pointer
-- `__const`: Moet lees-slegs data wees (nie regtig nie)
+- `__const`: Moet slegs leesbare data wees (nie regtig nie)
 - `__cfstring`: CoreFoundation strings
 - `__data`: Globale veranderlikes (wat geinitialiseer is)
 - `__bss`: Statiese veranderlikes (wat nie geinitialiseer is nie)
 - `__objc_*` (\_\_objc_classlist, \_\_objc_protolist, ens): Inligting wat deur die Objective-C runtime gebruik word
-- **`__DATA_CONST`**: \_\_DATA.\_\_const is nie gewaarborg om konstant te wees (skryf toestemmings) nie, en ander pointers en die GOT ook nie. Hierdie afdeling maak `__const`, sommige inisialisators en die GOT tabel (sodra dit opgelos is) **lees slegs** met behulp van `mprotect`.
+- **`__DATA_CONST`**: \_\_DATA.\_\_const is nie gewaarborg om konstant te wees nie (skryf toestemmings), en ander pointers en die GOT ook nie. Hierdie afdeling maak `__const`, sommige inisialisators en die GOT tabel (sodra dit opgelos is) **slegs lees** met behulp van `mprotect`.
 - **`__LINKEDIT`**: Bevat inligting vir die linker (dyld) soos simbool, string, en herlokasie tabel inskrywings. Dit is 'n generiese houer vir inhoud wat nie in `__TEXT` of `__DATA` is nie en sy inhoud word in ander laaiopdragte beskryf.
 - dyld inligting: Rebase, Nie-lui/lui/swak binding opcodes en uitvoer info
 - Funksies begin: Tabel van begin adresse van funksies
 - Data In Kode: Data-eilande in \_\_text
-- Simbool Tabel: Simbole in binêr
+- Simbool Tabel: Simbole in binêre
 - Indirekte Simbool Tabel: Pointer/stub simbole
 - String Tabel
 - Kode Handtekening
@@ -258,7 +258,7 @@ Soos dit moontlik was om in die kode te sien, **ondersteun segmente ook vlae** (
 
 ### **`LC_UNIXTHREAD/LC_MAIN`**
 
-**`LC_MAIN`** bevat die toegangspunt in die **entryoff attribuut.** Tydens laai, **dyld** voeg eenvoudig **hierdie waarde** by die (in-geheue) **basis van die binêre**, en dan **spring** dit na hierdie instruksie om die uitvoering van die binêre se kode te begin.
+**`LC_MAIN`** bevat die toegangspunt in die **entryoff attribuut.** Tydens laai, **dyld** voeg eenvoudig **hierdie waarde** by die (in-geheue) **basis van die binêre**, dan **spring** dit na hierdie instruksie om die uitvoering van die binêre se kode te begin.
 
 **`LC_UNIXTHREAD`** bevat die waardes wat die register moet hê wanneer die hoofdraad begin. Dit is reeds verouderd, maar **`dyld`** gebruik dit steeds. Dit is moontlik om die waardes van die registers wat deur hierdie gestel is, te sien met:
 ```bash
@@ -286,12 +286,12 @@ cpsr 0x00000000
 ```
 ### **`LC_CODE_SIGNATURE`**
 
-Bevat inligting oor die **kodehandtekening van die Macho-O-lêer**. Dit bevat slegs 'n **offset** wat na die **handtekening blob** **wys**. Dit is tipies aan die einde van die lêer.\
+Bevat inligting oor die **kodehandtekening van die Macho-O lêer**. Dit bevat slegs 'n **offset** wat na die **handtekening blob** **wys**. Dit is tipies aan die einde van die lêer.\
 U kan egter 'n paar inligting oor hierdie afdeling vind in [**hierdie blogpos**](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/) en hierdie [**gists**](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4).
 
 ### **`LC_ENCRYPTION_INFO[_64]`**
 
-Ondersteuning vir binêre versleuteling. Dit is egter, natuurlik, as 'n aanvaller daarin slaag om die proses te kompromitteer, sal hy in staat wees om die geheue onversleuteld te dump.
+Ondersteuning vir binêre versleuteling. Dit gesê, as 'n aanvaller daarin slaag om die proses te kompromitteer, sal hy in staat wees om die geheue onversleuteld te dump.
 
 ### **`LC_LOAD_DYLINKER`**
 
@@ -307,13 +307,13 @@ Ewekansige UUID. Dit is nuttig vir enigiets direk, maar XNU kas dit saam met die
 
 ### **`LC_DYLD_ENVIRONMENT`**
 
-Stel in staat om omgewingsveranderlikes aan die dyld aan te dui voordat die proses uitgevoer word. Dit kan baie gevaarlik wees aangesien dit die uitvoering van arbitrêre kode binne die proses kan toelaat, so hierdie laai-opdrag word slegs in dyld-bou met `#define SUPPORT_LC_DYLD_ENVIRONMENT` gebruik en beperk die verwerking verder slegs tot veranderlikes van die vorm `DYLD_..._PATH` wat laai-pade spesifiseer.
+Stel in staat om omgewingsveranderlikes aan die dyld aan te dui voordat die proses uitgevoer word. Dit kan baie gevaarlik wees aangesien dit die uitvoering van arbitrêre kode binne die proses kan toelaat, so hierdie laaiopdrag word slegs in dyld-bou met `#define SUPPORT_LC_DYLD_ENVIRONMENT` gebruik en beperk die verwerking verder slegs tot veranderlikes van die vorm `DYLD_..._PATH` wat laai-pade spesifiseer.
 
 ### **`LC_LOAD_DYLIB`**
 
-Hierdie laai-opdrag beskryf 'n **dinamiese** **biblioteek** afhanklikheid wat die **laaier** (dyld) **instruer** om die **gesê biblioteek te laai en te koppel**. Daar is 'n `LC_LOAD_DYLIB` laai-opdrag **vir elke biblioteek** wat die Mach-O binêre benodig.
+Hierdie laaiopdrag beskryf 'n **dinamiese** **biblioteek** afhanklikheid wat die **laaier** (dyld) **instrueer** om die **gesê biblioteek te laai en te koppel**. Daar is 'n `LC_LOAD_DYLIB` laaiopdrag **vir elke biblioteek** wat die Mach-O binêre benodig.
 
-- Hierdie laai-opdrag is 'n struktuur van tipe **`dylib_command`** (wat 'n struct dylib bevat, wat die werklike afhanklike dinamiese biblioteek beskryf):
+- Hierdie laaiopdrag is 'n struktuur van tipe **`dylib_command`** (wat 'n struktuur dylib bevat, wat die werklike afhanklike dinamiese biblioteek beskryf):
 ```objectivec
 struct dylib_command {
 uint32_t        cmd;            /* LC_LOAD_{,WEAK_}DYLIB */
@@ -340,13 +340,13 @@ otool -L /bin/ls
 ```
 Sommige potensiële malware-verwante biblioteke is:
 
-- **DiskArbitration**: Monitering van USB skyfies
+- **DiskArbitration**: Monitering van USB skywe
 - **AVFoundation:** Opname van audio en video
-- **CoreWLAN**: Wifi skandering.
+- **CoreWLAN**: Wifi skandeer.
 
 > [!NOTE]
-> 'n Mach-O binêre kan een of **meer** **konstruktors** bevat, wat **uitgevoer** sal word **voor** die adres wat in **LC_MAIN** gespesifiseer is.\
-> Die offsets van enige konstruktors word in die **\_\_mod_init_func** afdeling van die **\_\_DATA_CONST** segment gehou.
+> 'n Mach-O binêre kan een of **meer** **konstruktore** bevat, wat **uitgevoer** sal word **voor** die adres wat in **LC_MAIN** gespesifiseer is.\
+> Die offsets van enige konstruktore word in die **\_\_mod_init_func** afdeling van die **\_\_DATA_CONST** segment gehou.
 
 ## **Mach-O Data**
 

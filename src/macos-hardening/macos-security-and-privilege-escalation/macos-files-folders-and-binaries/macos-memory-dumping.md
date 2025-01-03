@@ -6,7 +6,7 @@
 
 ### Swap Lêers
 
-Swap lêers, soos `/private/var/vm/swapfile0`, dien as **kas wanneer die fisiese geheue vol is**. Wanneer daar nie meer plek in fisiese geheue is nie, word die data na 'n swap lêer oorgedra en dan terug na fisiese geheue gebring soos nodig. Meerdere swap lêers mag teenwoordig wees, met name soos swapfile0, swapfile1, en so aan.
+Swap lêers, soos `/private/var/vm/swapfile0`, dien as **kas wanneer die fisiese geheue vol is**. Wanneer daar nie meer plek in fisiese geheue is nie, word die data na 'n swap lêer oorgedra en dan weer na fisiese geheue gebring soos nodig. Meerdere swap lêers mag teenwoordig wees, met name soos swapfile0, swapfile1, en so aan.
 
 ### Hiberneer Beeld
 
@@ -24,7 +24,7 @@ Nog 'n belangrike geheue-verwante lêer in MacOS stelsels is die **geheue druk l
 
 Om die geheue in 'n MacOS masjien te dump, kan jy [**osxpmem**](https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-2.1.post4.zip) gebruik.
 
-**Let wel**: Die volgende instruksies sal slegs werk vir Macs met Intel argitektuur. Hierdie hulpmiddel is nou geargiveer en die laaste vrystelling was in 2017. Die binêre wat afgelaai is met die onderstaande instruksies teiken Intel skyfies aangesien Apple Silicon nie in 2017 beskikbaar was nie. Dit mag moontlik wees om die binêre vir arm64 argitektuur te compileer, maar jy sal self moet probeer.
+**Let wel**: Die volgende instruksies sal slegs werk vir Macs met Intel argitektuur. Hierdie hulpmiddel is nou geargiveer en die laaste vrystelling was in 2017. Die binêre wat afgelaai is met die instruksies hieronder, teiken Intel skyfies aangesien Apple Silicon nie in 2017 beskikbaar was nie. Dit mag moontlik wees om die binêre vir arm64 argitektuur te compileer, maar jy sal self moet probeer.
 ```bash
 #Dump raw format
 sudo osxpmem.app/osxpmem --format raw -o /tmp/dump_mem

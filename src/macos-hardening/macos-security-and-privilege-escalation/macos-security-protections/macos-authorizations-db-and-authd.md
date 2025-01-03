@@ -23,7 +23,7 @@ Die reëls word in die `rules` tabel binne die databasis gestoor en bevat die vo
 - **version**: Hou die weergawe van die reël dop vir weergawebeheer en opdaterings.
 - **created**: Registreer die tydstempel wanneer die reël geskep is vir ouditdoeleindes.
 - **modified**: Stoor die tydstempel van die laaste wysiging aan die reël.
-- **hash**: Hou 'n hash-waarde van die reël om sy integriteit te verseker en om te detecteer of daar gemanipuleer is.
+- **hash**: Hou 'n hash-waarde van die reël om sy integriteit te verseker en om vervalsing op te spoor.
 - **identifier**: Verskaf 'n unieke string identifiseerder, soos 'n UUID, vir eksterne verwysings na die reël.
 - **requirement**: Bevat geserialiseerde data wat die spesifieke autoriseringsvereistes en meganismes van die reël definieer.
 - **comment**: Bied 'n menslike leesbare beskrywing of opmerking oor die reël vir dokumentasie en duidelikheid.
@@ -75,7 +75,7 @@ Boonop in [https://www.dssw.co.uk/reference/authorization-rights/authenticate-ad
 
 Dit is 'n daemon wat versoeke sal ontvang om kliënte te autoriseer om sensitiewe aksies uit te voer. Dit werk as 'n XPC-diens wat binne die `XPCServices/`-map gedefinieer is en gebruik om sy logs in `/var/log/authd.log` te skryf.
 
-Boonop is dit moontlik om baie `Security.framework` API's te toets met die sekuriteitstoepassing. Byvoorbeeld, die `AuthorizationExecuteWithPrivileges` wat loop: `security execute-with-privileges /bin/ls`
+Boonop is dit moontlik om baie `Security.framework` API's te toets met die sekuriteitstoepassing. Byvoorbeeld die `AuthorizationExecuteWithPrivileges` wat loop: `security execute-with-privileges /bin/ls`
 
 Dit sal `/usr/libexec/security_authtrampoline /bin/ls` as root fork en exec, wat toestemming sal vra in 'n prompt om ls as root uit te voer:
 

@@ -4,13 +4,13 @@
 
 ## Basiese Inligting
 
-XPC, wat staan vir XNU (die kern wat deur macOS gebruik word) inter-Process Communication, is 'n raamwerk vir **kommunikasie tussen prosesse** op macOS en iOS. XPC bied 'n mekanisme vir die maak van **veilige, asynchrone metode-oproepe tussen verskillende prosesse** op die stelsel. Dit is 'n deel van Apple se sekuriteitsparadigma, wat die **skepping van privilige-geskeide toepassings** moontlik maak waar elke **komponent** loop met **slegs die regte wat dit nodig het** om sy werk te doen, en sodoende die potensiële skade van 'n gecompromitteerde proses te beperk.
+XPC, wat staan vir XNU (die kern wat deur macOS gebruik word) inter-Process Communication, is 'n raamwerk vir **kommunikasie tussen prosesse** op macOS en iOS. XPC bied 'n mekanisme vir die maak van **veilige, asynchrone metode-oproepe tussen verskillende prosesse** op die stelsel. Dit is 'n deel van Apple se sekuriteitsparadigma, wat die **skepping van privilige-geskeide toepassings** moontlik maak waar elke **komponent** loop met **slegs die regte wat dit nodig het** om sy werk te doen, en so die potensiële skade van 'n gecompromitteerde proses beperk.
 
 XPC gebruik 'n vorm van Inter-Process Communication (IPC), wat 'n stel metodes is vir verskillende programme wat op dieselfde stelsel loop om data heen en weer te stuur.
 
 Die primêre voordele van XPC sluit in:
 
-1. **Sekuriteit**: Deur werk in verskillende prosesse te skei, kan elke proses slegs die regte wat dit nodig het, toegeken word. Dit beteken dat selfs al is 'n proses gecompromitteer, dit 'n beperkte vermoë het om skade aan te rig.
+1. **Sekuriteit**: Deur werk in verskillende prosesse te skei, kan elke proses slegs die regte wat dit nodig het, toegeken word. Dit beteken dat selfs al is 'n proses gecompromitteer, dit beperkte vermoë het om skade aan te rig.
 2. **Stabiliteit**: XPC help om crashes te isoleer na die komponent waar hulle voorkom. As 'n proses crash, kan dit herbegin word sonder om die res van die stelsel te beïnvloed.
 3. **Prestasie**: XPC maak dit maklik om gelyktydigheid te hê, aangesien verskillende take gelyktydig in verskillende prosesse uitgevoer kan word.
 
@@ -18,17 +18,17 @@ Die enigste **nadeel** is dat **om 'n toepassing in verskeie prosesse te skei** 
 
 ## Toepassing Spesifieke XPC dienste
 
-Die XPC-komponente van 'n toepassing is **binne die toepassing self.** Byvoorbeeld, in Safari kan jy hulle vind in **`/Applications/Safari.app/Contents/XPCServices`**. Hulle het 'n uitbreiding **`.xpc`** (soos **`com.apple.Safari.SandboxBroker.xpc`**) en is **ook bundels** saam met die hoof-binary binne dit: `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker` en 'n `Info.plist: /Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`
+Die XPC-komponente van 'n toepassing is **binne die toepassing self.** Byvoorbeeld, in Safari kan jy hulle vind in **`/Applications/Safari.app/Contents/XPCServices`**. Hulle het 'n uitbreiding **`.xpc`** (soos **`com.apple.Safari.SandboxBroker.xpc`**) en is **ook bundels** saam met die hoof-binary binne-in: `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker` en 'n `Info.plist: /Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`
 
-Soos jy dalk dink, sal 'n **XPC-komponent verskillende regte en voorregte** hê as die ander XPC-komponente of die hoof-app binary. BEHALWE as 'n XPC-diens geconfigureer is met [**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information_property_list/xpcservice/joinexistingsession) wat op “True” in sy **Info.plist**-lêer gestel is. In hierdie geval sal die XPC-diens in die **dieselfde sekuriteitsessie as die toepassing** wat dit aangeroep het, loop.
+Soos jy dalk dink, sal 'n **XPC-komponent verskillende regte en voorregte hê** as die ander XPC-komponente of die hoof-app binary. BEHALWE as 'n XPC-diens geconfigureer is met [**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information_property_list/xpcservice/joinexistingsession) wat op “True” in sy **Info.plist**-lêer gestel is. In hierdie geval sal die XPC-diens in die **dieselfde sekuriteitsessie as die toepassing** wat dit aangeroep het, loop.
 
 XPC-dienste word **gestart** deur **launchd** wanneer nodig en **afgeskakel** sodra alle take **voltooi** is om stelselhulpbronne vry te maak. **Toepassing-spesifieke XPC-komponente kan slegs deur die toepassing gebruik word**, wat die risiko wat met potensiële kwesbaarhede geassosieer word, verminder.
 
 ## Stelsel Wye XPC dienste
 
-Stelsel-wye XPC-dienste is beskikbaar vir alle gebruikers. Hierdie dienste, hetsy launchd of Mach-tipe, moet **gedefinieer word in plist** lêers wat in gespesifiseerde gidse geleë is soos **`/System/Library/LaunchDaemons`**, **`/Library/LaunchDaemons`**, **`/System/Library/LaunchAgents`**, of **`/Library/LaunchAgents`**.
+Stelsel-wye XPC-dienste is beskikbaar vir alle gebruikers. Hierdie dienste, hetsy launchd of Mach-tipe, moet **in plist**-lêers gedefinieer word wat in gespesifiseerde gidse geleë is soos **`/System/Library/LaunchDaemons`**, **`/Library/LaunchDaemons`**, **`/System/Library/LaunchAgents`**, of **`/Library/LaunchAgents`**.
 
-Hierdie plists lêers sal 'n sleutel hê genaamd **`MachServices`** met die naam van die diens, en 'n sleutel genaamd **`Program`** met die pad na die binary:
+Hierdie plist-lêers sal 'n sleutel genaamd **`MachServices`** hê met die naam van die diens, en 'n sleutel genaamd **`Program`** met die pad na die binary:
 ```xml
 cat /Library/LaunchDaemons/com.jamf.management.daemon.plist
 
@@ -116,7 +116,7 @@ Die nut `xpcproxy` gebruik die voorvoegsel `0x22`, byvoorbeeld: `0x2200001c: xpc
 
 ## XPC Gebeurtenisboodskappe
 
-Toepassings kan **subskribere** op verskillende gebeurtenis **boodskappe**, wat hulle in staat stel om **op aanvraag geaktiveer** te word wanneer sulke gebeurtenisse plaasvind. Die **opstelling** vir hierdie dienste word in **launchd plist-lêers** gedoen, geleë in die **dieselfde gidse as die vorige** en bevat 'n ekstra **`LaunchEvent`** sleutel.
+Toepassings kan **subskribere** op verskillende gebeurtenis **boodskappe**, wat hulle in staat stel om **op aanvraag geaktiveer** te word wanneer sulke gebeurtenisse plaasvind. Die **opstelling** vir hierdie dienste word in **launchd plist-lêers** gedoen, geleë in die **dieselfde direkteure as die vorige** en bevat 'n ekstra **`LaunchEvent`** sleutel.
 
 ### XPC Verbinding Proses Kontrole
 

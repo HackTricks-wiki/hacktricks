@@ -55,7 +55,7 @@ uintptr_t requiredAlignment; // Or in _kCFRuntimeRequiresAlignment in the .versi
 ```
 ## Objective-C
 
-### Geheue seksies wat gebruik word
+### Geheue seksies gebruik
 
 Die meeste van die data wat deur die ObjectiveC runtime gebruik word, sal tydens die uitvoering verander, daarom gebruik dit 'n paar seksies van die **\_\_DATA** segment in geheue:
 
@@ -84,8 +84,8 @@ Dit gebruik ook 'n paar seksies in die **`__TEXT`** segment om konstante waardes
 
 Objective-C gebruik 'n paar mangeling om selektor en veranderlike tipes van eenvoudige en komplekse tipes te kodeer:
 
-- Primitive tipes gebruik die eerste letter van die tipe `i` vir `int`, `c` vir `char`, `l` vir `long`... en gebruik die hoofletter in die geval dit ongetekend is (`L` vir `unsigned Long`).
-- Ander datatipes waarvan die letters gebruik word of spesiaal is, gebruik ander letters of simbole soos `q` vir `long long`, `b` vir `bitfields`, `B` vir `booleans`, `#` vir `klas`, `@` vir `id`, `*` vir `char wysigers`, `^` vir generiese `wysigers` en `?` vir `onbepaald`.
+- Primitive tipes gebruik die eerste letter van die tipe `i` vir `int`, `c` vir `char`, `l` vir `long`... en gebruik die hoofletter in geval dit ongetekend is (`L` vir `unsigned Long`).
+- Ander datatipes waarvan die letters gebruik word of spesiaal is, gebruik ander letters of simbole soos `q` vir `long long`, `b` vir `bitfields`, `B` vir `booleans`, `#` vir `klas`, `@` vir `id`, `*` vir `char wysigers`, `^` vir generiese `wysigers` en `?` vir `onbepaalde`.
 - Arrays, strukture en unies gebruik `[`, `{` en `(`
 
 #### Voorbeeld Metode Deklarasie
@@ -116,7 +116,7 @@ Die volledige tipe kodering vir die metode is:
 
 ### **Klasse**
 
-Klasse in Objective-C is 'n struktuur met eienskappe, metode wysers... Dit is moontlik om die struktuur `objc_class` in die [**bron kode**](https://opensource.apple.com/source/objc4/objc4-756.2/runtime/objc-runtime-new.h.auto.html):
+Klasse in Objective-C is 'n struktuur met eienskappe, metode wysers... Dit is moontlik om die struktuur `objc_class` in die [**bron kode**](https://opensource.apple.com/source/objc4/objc4-756.2/runtime/objc-runtime-new.h.auto.html) te vind:
 ```objectivec
 struct objc_class : objc_object {
 // Class ISA;

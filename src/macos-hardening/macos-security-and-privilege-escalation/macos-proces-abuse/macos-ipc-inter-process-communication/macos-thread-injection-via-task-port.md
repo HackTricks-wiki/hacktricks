@@ -13,9 +13,9 @@ Aanvanklik word die **`task_threads()`** funksie op die taakpoort aangeroep om '
 
 Om die draad te beheer, word **`thread_suspend()`** aangeroep, wat die uitvoering stop.
 
-Die enigste operasies wat op die afstandlike draad toegelaat word, behels **stop** en **begin**, **herwin** en **wysig** sy registerwaardes. Afstandlike funksie-aanroepe word geïnisieer deur registers `x0` tot `x7` op die **argumente** in te stel, **`pc`** te konfigureer om die gewenste funksie te teiken, en die draad te aktiveer. Om te verseker dat die draad nie cras nadat die terugkeer plaasvind nie, is dit nodig om die terugkeer te detecteer.
+Die enigste operasies wat op die afstandlike draad toegelaat word, behels **stop** en **begin**, **herwin** en **wysig** sy registerwaardes. Afstandlike funksie-aanroepe word geïnisieer deur registers `x0` tot `x7` op die **argumente** in te stel, **`pc`** te konfigureer om die gewenste funksie te teiken, en die draad te aktiveer. Om te verseker dat die draad nie crasht na die terugkeer nie, is dit nodig om die terugkeer te detecteer.
 
-Een strategie behels **die registrasie van 'n uitsonderinghandler** vir die afstandlike draad met behulp van `thread_set_exception_ports()`, wat die `lr` register op 'n ongeldige adres stel voor die funksie-aanroep. Dit veroorsaak 'n uitsondering na die funksie-uitvoering, wat 'n boodskap na die uitsonderingpoort stuur, wat staatinspeksie van die draad moontlik maak om die terugkeerwaarde te herstel. Alternatiewelik, soos aangeneem van Ian Beer se triple_fetch exploit, word `lr` op oneindig gelus. Die draad se registers word dan deurlopend gemonitor totdat **`pc` na daardie instruksie wys**.
+Een strategie behels **die registrasie van 'n uitsonderinghandler** vir die afstandlike draad met behulp van `thread_set_exception_ports()`, wat die `lr` register op 'n ongeldige adres stel voor die funksie-aanroep. Dit veroorsaak 'n uitsondering na funksie-uitvoering, wat 'n boodskap na die uitsonderingpoort stuur, wat staatinspeksie van die draad moontlik maak om die terugkeerwaarde te herstel. Alternatiewelik, soos aangeneem van Ian Beer se triple_fetch exploit, word `lr` op oneindig gelus. Die draad se registers word dan deurlopend gemonitor totdat **`pc` na daardie instruksie wys**.
 
 ## 2. Mach ports for communication
 
@@ -27,7 +27,7 @@ Fokus op die plaaslike poort, die ontvangreg word deur die plaaslike taak gehou.
 
 'n Strategie behels die benutting van `thread_set_special_port()` om 'n stuurreg na die plaaslike poort in die afstandlike draad se `THREAD_KERNEL_PORT` te plaas. Dan word die afstandlike draad aangesê om `mach_thread_self()` aan te roep om die stuurreg te verkry.
 
-Vir die afstandlike poort is die proses basies omgekeerd. Die afstandlike draad word aangestuur om 'n Mach-poort te genereer via `mach_reply_port()` (aangesien `mach_port_allocate()` onvanpas is weens sy terugkeermeganisme). By poortskepping word `mach_port_insert_right()` in die afstandlike draad aangeroep om 'n stuurreg te vestig. Hierdie reg word dan in die kern gestoor met `thread_set_special_port()`. Terug in die plaaslike taak, word `thread_get_special_port()` op die afstandlike draad gebruik om 'n stuurreg na die nuut toegeken Mach-poort in die afstandlike taak te verkry.
+Vir die afstandlike poort is die proses basies omgekeerd. Die afstandlike draad word aangestuur om 'n Mach-poort te genereer via `mach_reply_port()` (aangesien `mach_port_allocate()` onvanpas is weens sy terugkeermeganisme). Na poortskepping word `mach_port_insert_right()` in die afstandlike draad aangeroep om 'n stuurreg te vestig. Hierdie reg word dan in die kernel gestoor met behulp van `thread_set_special_port()`. Terug in die plaaslike taak, word `thread_get_special_port()` op die afstandlike draad gebruik om 'n stuurreg na die nuut toegeken Mach-poort in die afstandlike taak te verkry.
 
 Die voltooiing van hierdie stappe lei tot die vestiging van Mach-poorte, wat die grondslag lê vir bidireksionele kommunikasie.
 
@@ -72,13 +72,13 @@ return prop->name;
 Hierdie funksie funksioneer effektief soos die `read_func` deur die eerste veld van `objc_property_t` terug te gee.
 
 2. **Skryf Geheue:**
-Om 'n voorafgeboude funksie vir die skryf van geheue te vind, is meer uitdagend. Tog is die `_xpc_int64_set_value()` funksie van libxpc 'n geskikte kandidaat met die volgende ontbinding:
+Om 'n voorafgeboude funksie vir die skryf van geheue te vind, is meer uitdagend. egter, die `_xpc_int64_set_value()` funksie van libxpc is 'n geskikte kandidaat met die volgende ontbinding:
 ```c
 __xpc_int64_set_value:
 str x1, [x0, #0x18]
 ret
 ```
-Om 'n 64-bis skrywe op 'n spesifieke adres uit te voer, is die afstandsoproep gestruktureer as:
+Om 'n 64-bis skrywe op 'n spesifieke adres uit te voer, is die afstandlike oproep gestruktureer as:
 ```c
 _xpc_int64_set_value(address - 0x18, value)
 ```
@@ -86,7 +86,7 @@ Met hierdie primitiewe gevestig, is die verhoog gereed om gedeelde geheue te ske
 
 ## 4. Gedeelde Geheue Instelling
 
-Die doel is om gedeelde geheue tussen plaaslike en afstands take te vestig, wat dataverskuiwing vereenvoudig en die oproep van funksies met meerdere argumente fasiliteer. Die benadering behels die benutting van `libxpc` en sy `OS_xpc_shmem` objektipe, wat gebou is op Mach geheue-invoere.
+Die doel is om gedeelde geheue tussen plaaslike en afstands take te vestig, wat data-oordrag vereenvoudig en die oproep van funksies met meerdere argumente fasiliteer. Die benadering behels die benutting van `libxpc` en sy `OS_xpc_shmem` objektipe, wat gebou is op Mach geheue-invoere.
 
 ### Proses Oorsig:
 
@@ -109,9 +109,9 @@ Die doel is om gedeelde geheue tussen plaaslike en afstands take te vestig, wat 
 - Valideer die afstands `OS_xpc_shmem` objek.
 - Vestig die gedeelde geheue kaart met 'n afstandsoproep na `xpc_shmem_remote()`.
 
-Deur hierdie stappe te volg, sal gedeelde geheue tussen die plaaslike en afstands take doeltreffend ingestel word, wat vir eenvoudige dataverskuiwings en die uitvoering van funksies wat meerdere argumente vereis, toelaat.
+Deur hierdie stappe te volg, sal gedeelde geheue tussen die plaaslike en afstands take doeltreffend ingestel word, wat vir eenvoudige data-oordragte en die uitvoering van funksies wat meerdere argumente vereis, toelaat.
 
-## Addisionele Kode Snippets
+## Bykomende Kode Snippets
 
 Vir geheue toewysing en gedeelde geheue objek skepping:
 ```c
@@ -131,8 +131,8 @@ Na suksesvolle vestiging van gedeelde geheue en verkryging van arbitrêre uitvoe
 
 1. **Arbitrêre Geheue Operasies**:
 
-- Voer arbitrêre geheue leeswerkzaamhede uit deur `memcpy()` aan te roep om data van die gedeelde streek te kopieer.
-- Voer arbitrêre geheue skryfwerkzaamhede uit deur `memcpy()` te gebruik om data na die gedeelde streek oor te dra.
+- Voer arbitrêre geheue leeswerk uit deur `memcpy()` aan te roep om data van die gedeelde streek te kopieer.
+- Voer arbitrêre geheue skrywe uit deur `memcpy()` te gebruik om data na die gedeelde streek oor te dra.
 
 2. **Hanteer Funksie-oproepe met Meerdere Argumente**:
 
@@ -140,16 +140,16 @@ Na suksesvolle vestiging van gedeelde geheue en verkryging van arbitrêre uitvoe
 
 3. **Mach Port Oordrag**:
 
-- Oordrag van Mach-poorte tussen take deur Mach-boodskappe via voorheen gevestigde poorte.
+- Oordrag Mach-poorte tussen take deur Mach-boodskappe via voorheen gevestigde poorte.
 
 4. **Lêer Descriptor Oordrag**:
-- Oordrag van lêer descriptors tussen prosesse met behulp van fileports, 'n tegniek wat deur Ian Beer in `triple_fetch` beklemtoon is.
+- Oordrag lêer descriptors tussen prosesse met behulp van fileports, 'n tegniek wat deur Ian Beer in `triple_fetch` beklemtoon is.
 
-Hierdie omvattende beheer is ingekapsuleer binne die [threadexec](https://github.com/bazad/threadexec) biblioteek, wat 'n gedetailleerde implementering en 'n gebruikersvriendelike API bied vir interaksie met die slagofferproses.
+Hierdie omvattende beheer is ingekapsuleer binne die [threadexec](https://github.com/bazad/threadexec) biblioteek, wat 'n gedetailleerde implementering en 'n gebruikersvriendelike API bied vir interaksie met die slagoffer proses.
 
 ## Belangrike Oorwegings:
 
-- Verseker behoorlike gebruik van `memcpy()` vir geheue lees/schryf operasies om stelsels stabiliteit en data integriteit te handhaaf.
+- Verseker behoorlike gebruik van `memcpy()` vir geheue lees/skrywe operasies om stelsels se stabiliteit en data-integriteit te handhaaf.
 - Wanneer Mach-poorte of lêer descriptors oorgedra word, volg behoorlike protokolle en hanteer hulpbronne verantwoordelik om lekkasies of onbedoelde toegang te voorkom.
 
 Deur hierdie riglyne na te kom en die `threadexec` biblioteek te benut, kan 'n mens doeltreffend prosesse op 'n fyn vlak bestuur en mee werk, wat volle beheer oor die teikenproses bereik.

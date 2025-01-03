@@ -4,7 +4,7 @@
 
 ## Basiese Inligting
 
-MIG is geskep om die **proses van Mach IPC** kode-ontwikkeling te **vereenvoudig**. Dit genereer basies die **nodige kode** vir bediener en kliënt om met 'n gegewe definisie te kommunikeer. Alhoewel die gegenereerde kode lelik is, sal 'n ontwikkelaar net dit moet invoer en sy kode sal baie eenvoudiger wees as voorheen.
+MIG is geskep om die **proses van Mach IPC** kode skep te **vereenvoudig**. Dit genereer basies die **nodige kode** vir bediener en kliënt om met 'n gegewe definisie te kommunikeer. Alhoewel die gegenereerde kode lelik is, sal 'n ontwikkelaar net dit moet invoer en sy kode sal baie eenvoudiger wees as voorheen.
 
 Die definisie word gespesifiseer in Interface Definition Language (IDL) met die `.defs` uitbreiding.
 
@@ -25,7 +25,7 @@ Hierdie definisies het 5 afdelings:
 
 ### Voorbeeld
 
-Skep 'n definisie-lêer, in hierdie geval met 'n baie eenvoudige funksie:
+Skep 'n definisie lêer, in hierdie geval met 'n baie eenvoudige funksie:
 ```cpp:myipc.defs
 subsystem myipc 500; // Arbitrary name and id
 
@@ -115,7 +115,7 @@ Werklik is dit moontlik om hierdie verhouding in die struktuur **`subsystem_to_n
 { "Subtract", 500 }
 #endif
 ```
-Uiteindelik, 'n ander belangrike funksie om die bediener te laat werk sal wees **`myipc_server`**, wat die een is wat werklik die **funksie** sal aanroep wat verband hou met die ontvangde id:
+Uiteindelik, 'n ander belangrike funksie om die bediener te laat werk sal **`myipc_server`** wees, wat die een is wat werklik die **funksie** sal aanroep wat verband hou met die ontvangde id:
 
 <pre class="language-c"><code class="lang-c">mig_external boolean_t myipc_server
 (mach_msg_header_t *InHeadP, mach_msg_header_t *OutHeadP)
@@ -231,7 +231,7 @@ En **MIG-kliënte** sal die `__NDR_record` gebruik om met `__mach_msg` na die be
 
 Aangesien baie binêre nou MIG gebruik om mach-poorte bloot te stel, is dit interessant om te weet hoe om **te identifiseer dat MIG gebruik is** en die **funksies wat MIG uitvoer** met elke boodskap-ID.
 
-[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/#jtool2) kan MIG-inligting uit 'n Mach-O binêre ontleed wat die boodskap-ID aandui en die funksie identifiseer om uit te voer:
+[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/#jtool2) kan MIG-inligting uit 'n Mach-O binêre ontleed wat die boodskap-ID aandui en die funksie identifiseer wat uitgevoer moet word:
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
@@ -241,7 +241,7 @@ jtool2 -d __DATA.__const myipc_server | grep BL
 ```
 ### Assembly
 
-Dit is voorheen genoem dat die funksie wat **die korrekte funksie sal aanroep afhangende van die ontvangde boodskap ID** `myipc_server` was. Dit is egter gewoonlik dat jy nie die simbole van die binêre (geen funksie name) sal hê nie, so dit is interessant om **te kyk hoe dit dekompilerend lyk** aangesien dit altyd baie soortgelyk sal wees (die kode van hierdie funksie is onafhanklik van die funksies wat blootgestel word):
+Daar is voorheen genoem dat die funksie wat **die korrekte funksie sal aanroep afhangende van die ontvangde boodskap ID** `myipc_server` was. Dit is egter gewoonlik dat jy nie die simbole van die binêre (geen funksie name) sal hê nie, so dit is interessant om **te kyk hoe dit dekompilleer lyk** aangesien dit altyd baie soortgelyk sal wees (die kode van hierdie funksie is onafhanklik van die funksies wat blootgestel is):
 
 {{#tabs}}
 {{#tab name="myipc_server decompiled 1"}}
@@ -249,7 +249,7 @@ Dit is voorheen genoem dat die funksie wat **die korrekte funksie sal aanroep af
 <pre class="language-c"><code class="lang-c">int _myipc_server(int arg0, int arg1) {
 var_10 = arg0;
 var_18 = arg1;
-// Begininstruksies om die regte funksie aanwysers te vind
+// Begin instruksies om die regte funksie aanwysers te vind
 *(int32_t *)var_18 = *(int32_t *)var_10 &#x26; 0x1f;
 *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
 *(int32_t *)(var_18 + 0x4) = 0x24;
@@ -258,7 +258,7 @@ var_18 = arg1;
 *(int32_t *)(var_18 + 0x10) = 0x0;
 if (*(int32_t *)(var_10 + 0x14) &#x3C;= 0x1f4 &#x26;&#x26; *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
 rax = *(int32_t *)(var_10 + 0x14);
-// Oproep na sign_extend_64 wat kan help om hierdie funksie te identifiseer
+// Aanroep na sign_extend_64 wat kan help om hierdie funksie te identifiseer
 // Dit stoor in rax die aanwyser na die oproep wat gemaak moet word
 // Kontroleer die gebruik van die adres 0x100004040 (funksies adresse array)
 // 0x1f4 = 500 (die begin ID)
@@ -289,7 +289,7 @@ return rax;
 {{#endtab}}
 
 {{#tab name="myipc_server decompiled 2"}}
-Dit is dieselfde funksie dekompilerend in 'n ander Hopper gratis weergawe:
+Dit is dieselfde funksie dekompilleer in 'n ander Hopper gratis weergawe:
 
 <pre class="language-c"><code class="lang-c">int _myipc_server(int arg0, int arg1) {
 r31 = r31 - 0x40;
@@ -297,7 +297,7 @@ saved_fp = r29;
 stack[-8] = r30;
 var_10 = arg0;
 var_18 = arg1;
-// Begininstruksies om die regte funksie aanwysers te vind
+// Begin instruksies om die regte funksie aanwysers te vind
 *(int32_t *)var_18 = *(int32_t *)var_10 &#x26; 0x1f | 0x0;
 *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
 *(int32_t *)(var_18 + 0x4) = 0x24;
@@ -340,7 +340,7 @@ r8 = 0x1;
 var_4 = 0x0;
 }
 else {
-// Oproep na die berekende adres waar die funksie moet wees
+// Aanroep na die berekende adres waar die funksie moet wees
 <strong>                            (var_20)(var_10, var_18);
 </strong>                            var_4 = 0x1;
 }

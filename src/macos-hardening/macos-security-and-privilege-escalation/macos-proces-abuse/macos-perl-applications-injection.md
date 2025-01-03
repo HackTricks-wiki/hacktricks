@@ -44,14 +44,14 @@ Wat iets soos die volgende sal teruggee:
 /System/Library/Perl/Extras/5.30/darwin-thread-multi-2level
 /System/Library/Perl/Extras/5.30
 ```
-Sommige van die teruggekeerde vouers bestaan selfs nie, egter, **`/Library/Perl/5.30`** bestaan **wel**, dit is **nie** **beskerm** deur **SIP** nie en dit is **voor** die vouers **beskerm** deur SIP. Daarom kan iemand daardie vouer misbruik om skripafhanklikhede daarby te voeg sodat 'n hoëprivilege Perl-skrip dit sal laai.
+Sommige van die teruggekeerde vouers bestaan selfs nie, egter, **`/Library/Perl/5.30`** **bestaan**, dit is **nie** **beskerm** deur **SIP** nie en dit is **voor** die vouers **beskerm deur SIP**. Daarom kan iemand daardie vouer misbruik om skripafhanklikhede daarby te voeg sodat 'n hoëprivilege Perl-skrip dit sal laai.
 
 > [!WARNING]
-> Let egter daarop dat jy **root moet wees om in daardie vouer te skryf** en vandag sal jy hierdie **TCC-prompt** kry:
+> Let egter daarop dat jy **root moet wees om in daardie vouer te skryf** en vandag sal jy hierdie **TCC prompt** kry:
 
 <figure><img src="../../../images/image (28).png" alt="" width="244"><figcaption></figcaption></figure>
 
-Byvoorbeeld, as 'n skrip **`use File::Basename;`** invoer, sal dit moontlik wees om `/Library/Perl/5.30/File/Basename.pm` te skep om dit te laat uitvoer willekeurige kode.
+Byvoorbeeld, as 'n skrip **`use File::Basename;`** invoer, sal dit moontlik wees om `/Library/Perl/5.30/File/Basename.pm` te skep om dit toe te laat om arbitrêre kode uit te voer.
 
 ## References
 

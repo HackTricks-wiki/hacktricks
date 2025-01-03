@@ -27,7 +27,7 @@ newConnection.exportedObject = self;
 return YES;
 }
 ```
-Vir meer inligting oor hoe om hierdie kontrole behoorlik te konfigureer, kyk:
+Vir meer inligting oor hoe om hierdie kontrole behoorlik te konfigureer:
 
 {{#ref}}
 macos-xpc-connecting-process-check/
@@ -35,10 +35,10 @@ macos-xpc-connecting-process-check/
 
 ### Aansoekregte
 
-Daar is egter 'n **outorisering wat plaasvind wanneer 'n metode van die HelperTool aangeroep word**.
+Daar is egter 'n **autorisering wat plaasvind wanneer 'n metode van die HelperTool aangeroep word**.
 
-Die funksie **`applicationDidFinishLaunching`** van `App/AppDelegate.m` sal 'n leë outoriseringverwysing skep nadat die aansoek begin het. Dit behoort altyd te werk.\
-Dan sal dit probeer om **'n paar regte** aan daardie outoriseringverwysing toe te voeg deur `setupAuthorizationRights` aan te roep:
+Die funksie **`applicationDidFinishLaunching`** van `App/AppDelegate.m` sal 'n leë autoriseringsverwysing skep nadat die aansoek begin het. Dit behoort altyd te werk.\
+Dan sal dit probeer om **'n paar regte** aan daardie autoriseringsverwysing toe te voeg deur `setupAuthorizationRights` aan te roep:
 ```objectivec
 - (void)applicationDidFinishLaunching:(NSNotification *)note
 {
@@ -62,7 +62,7 @@ if (self->_authRef) {
 [self.window makeKeyAndOrderFront:self];
 }
 ```
-Die funksie `setupAuthorizationRights` van `Common/Common.m` sal die regte van die aansoek in die auth databasis `/var/db/auth.db` stoor. Let op hoe dit slegs die regte sal byvoeg wat nog nie in die databasis is nie:
+Die funksie `setupAuthorizationRights` van `Common/Common.m` sal die regte van die aansoek in die auth-databasis `/var/db/auth.db` stoor. Let op hoe dit slegs die regte sal byvoeg wat nog nie in die databasis is nie:
 ```objectivec
 + (void)setupAuthorizationRights:(AuthorizationRef)authRef
 // See comment in header.
@@ -172,7 +172,7 @@ block(authRightName, authRightDefault, authRightDesc);
 }];
 }
 ```
-Dit beteken dat aan die einde van hierdie proses, die toestemmings wat binne `commandInfo` verklaar is, in `/var/db/auth.db` gestoor sal word. Let op hoe daar vir **elke metode** wat **verifikasie** benodig, **toestemming naam** en die **`kCommandKeyAuthRightDefault`** gevind kan word. Laasgenoemde **aandui wie hierdie reg kan verkry**.
+Dit beteken dat aan die einde van hierdie proses, die toestemmings wat binne `commandInfo` verklaar is, in `/var/db/auth.db` gestoor sal word. Let op hoe daar vir **elke metode** wat **verifikasie vereis**, **toestemming naam** en die **`kCommandKeyAuthRightDefault`** gevind kan word. Laasgenoemde **gee aan wie hierdie reg kan verkry**.
 
 Daar is verskillende skope om aan te dui wie toegang tot 'n reg kan hê. Sommige daarvan is gedefinieer in [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) (jy kan [almal daarvan hier vind](https://www.dssw.co.uk/reference/authorization-rights/)), maar as 'n opsomming:
 
@@ -180,7 +180,7 @@ Daar is verskillende skope om aan te dui wie toegang tot 'n reg kan hê. Sommige
 
 ### Regte Verifikasie
 
-In `HelperTool/HelperTool.m` kontroleer die funksie **`readLicenseKeyAuthorization`** of die oproeper gemagtig is om **so 'n metode** uit te voer deur die funksie **`checkAuthorization`** aan te roep. Hierdie funksie sal kontroleer of die **authData** wat deur die oproepende proses gestuur is, 'n **korrekte formaat** het en dan sal dit kontroleer **wat nodig is om die reg** te verkry om die spesifieke metode aan te roep. As alles goed gaan, sal die **teruggegee `error` `nil` wees**:
+In `HelperTool/HelperTool.m` kontroleer die funksie **`readLicenseKeyAuthorization`** of die oproeper gemagtig is om **so 'n metode uit te voer** deur die funksie **`checkAuthorization`** aan te roep. Hierdie funksie sal kontroleer of die **authData** wat deur die oproepende proses gestuur is, 'n **korrekte formaat** het en dan sal dit kontroleer **wat nodig is om die reg te verkry** om die spesifieke metode aan te roep. As alles goed gaan, sal die **teruggegee `error` `nil` wees**:
 ```objectivec
 - (NSError *)checkAuthorization:(NSData *)authData command:(SEL)command
 {
@@ -228,7 +228,7 @@ assert(junk == errAuthorizationSuccess);
 return error;
 }
 ```
-Let wel dat om die **vereistes te kontroleer om die reg** te hê om daardie metode aan te roep, die funksie `authorizationRightForCommand` net die voorheen kommentaar objek **`commandInfo`** sal kontroleer. Dan sal dit **`AuthorizationCopyRights`** aanroep om te kontroleer **of dit die regte het** om die funksie aan te roep (let daarop dat die vlae interaksie met die gebruiker toelaat).
+Let wel dat om die vereistes te **kontroleer om die regte** te verkry om daardie metode aan te roep, die funksie `authorizationRightForCommand` net die voorheen kommentaar objek **`commandInfo`** sal kontroleer. Dan sal dit **`AuthorizationCopyRights`** aanroep om te kontroleer **of dit die regte het** om die funksie aan te roep (let daarop dat die vlae interaksie met die gebruiker toelaat).
 
 In hierdie geval, om die funksie `readLicenseKeyAuthorization` aan te roep, is die `kCommandKeyAuthRightDefault` gedefinieer as `@kAuthorizationRuleClassAllow`. So **enige iemand kan dit aanroep**.
 
@@ -246,7 +246,7 @@ security authorizationdb read com.apple.safaridriver.allow
 ```
 ### Toegestane regte
 
-Jy kan **alle die toestemmingskonfigurasies** [**hier**](https://www.dssw.co.uk/reference/authorization-rights/) vind, maar die kombinasies wat nie gebruikersinteraksie sal vereis nie, sou wees:
+Jy kan **alle die toestemmingskonfigurasies** [**hier**](https://www.dssw.co.uk/reference/authorization-rights/) vind, maar die kombinasies wat nie gebruikersinteraksie vereis nie, sou wees:
 
 1. **'authenticate-user': 'false'**
 - Dit is die mees direkte sleutel. As dit op `false` gestel is, spesifiseer dit dat 'n gebruiker nie hoef te autentiseer om hierdie reg te verkry nie.
@@ -277,9 +277,9 @@ As jy die funksie: **`[HelperTool checkAuthorization:command:]`** vind, is dit w
 
 <figure><img src="../../../../../images/image (42).png" alt=""><figcaption></figcaption></figure>
 
-As hierdie funksie funksies soos `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights`, `AuhtorizationFree` aanroep, gebruik dit [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154).
+As hierdie funksie funksies aanroep soos `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights`, `AuhtorizationFree`, gebruik dit [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154).
 
-Kontroleer die **`/var/db/auth.db`** om te sien of dit moontlik is om toestemming te verkry om 'n sekere bevoorregte aksie aan te roep sonder gebruikersinteraksie.
+Kontroleer die **`/var/db/auth.db`** om te sien of dit moontlik is om toestemming te verkry om 'n sekere bevoorregte aksie te bel sonder gebruikersinteraksie.
 
 ### Protokol Kommunikasie
 

@@ -12,18 +12,18 @@ click button "Always Allow" of group 1
 end tell
 ```
 Hier is 'n paar voorbeelde: [https://github.com/abbeycode/AppleScripts](https://github.com/abbeycode/AppleScripts)\
-Vind meer inligting oor malware wat met applescripts gebruik word [**hier**](https://www.sentinelone.com/blog/how-offensive-actors-use-applescript-for-attacking-macos/).
+Vind meer inligting oor malware wat met applescripts werk [**hier**](https://www.sentinelone.com/blog/how-offensive-actors-use-applescript-for-attacking-macos/).
 
 Apple skripte kan maklik "**gecompileer**" word. Hierdie weergawes kan maklik "**gedecompileer**" word met `osadecompile`
 
-However, hierdie skripte kan ook **geëksporteer word as "Slegs lees"** (deur die "Eksporteer..." opsie): 
+However, this scripts can also be **exported as "Read only"** (via the "Export..." option):
 
 <figure><img src="https://github.com/carlospolop/hacktricks/raw/master/images/image%20(556).png" alt=""><figcaption></figcaption></figure>
 ```
 file mal.scpt
 mal.scpt: AppleScript compiled
 ```
-en in hierdie geval kan die inhoud nie gedecompileer word nie, selfs nie met `osadecompile` nie.
+en in hierdie geval kan die inhoud nie gedekompileer word nie, selfs nie met `osadecompile` nie.
 
 Daar is egter steeds 'n paar gereedskap wat gebruik kan word om hierdie soort uitvoerbare lêers te verstaan, [**lees hierdie navorsing vir meer inligting**](https://labs.sentinelone.com/fade-dead-adventures-in-reversing-malicious-run-only-applescripts/)). Die gereedskap [**applescript-disassembler**](https://github.com/Jinmo/applescript-disassembler) met [**aevt_decompile**](https://github.com/SentineLabs/aevt_decompile) sal baie nuttig wees om te verstaan hoe die skrip werk.
 

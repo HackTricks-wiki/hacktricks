@@ -8,13 +8,13 @@ Kernel uitbreidings (Kexts) is **pakkette** met 'n **`.kext`** uitbreiding wat *
 
 ### Vereistes
 
-Dit is duidelik dat dit so kragtig is dat dit **komplikasies met die laai van 'n kernuitbreiding** meebring. Dit is die **vereistes** waaraan 'n kernuitbreiding moet voldoen om gelaai te word:
+Dit is duidelik dat dit so kragtig is dat dit **komplikasies het om 'n kernuitbreiding te laai**. Dit is die **vereistes** waaraan 'n kernuitbreiding moet voldoen om gelaai te word:
 
-- Wanneer **jy herstelmodus binnegaan**, moet kern **uitbreidings toegelaat** word om gelaai te word:
+- Wanneer **jy herstelmodus binnegaan**, moet kern **uitbreidings toegelaat word** om gelaai te word:
 
 <figure><img src="../../../images/image (327).png" alt=""><figcaption></figcaption></figure>
 
-- Die kernuitbreiding moet **onderteken wees met 'n kernkode-ondertekeningsertifikaat**, wat slegs **deur Apple** toegestaan kan word. Wie die maatskappy en die redes waarom dit nodig is, in detail sal hersien.
+- Die kernuitbreiding moet **onderteken wees met 'n kernkode-ondertekeningssertifikaat**, wat slegs **deur Apple** toegestaan kan word. Wie die maatskappy en die redes waarom dit nodig is, in detail sal hersien.
 - Die kernuitbreiding moet ook **genotarieer wees**, Apple sal dit vir malware kan nagaan.
 - Dan is die **root** gebruiker die een wat die **kernuitbreiding kan laai** en die lêers binne die pakkie moet **aan root behoort**.
 - Tydens die oplaadproses moet die pakkie in 'n **beskermde nie-root ligging** voorberei word: `/Library/StagedExtensions` (vereis die `com.apple.rootless.storage.KernelExtensionManagement` toestemming).
@@ -30,7 +30,7 @@ In Catalina was dit soos volg: Dit is interessant om op te let dat die **verifik
 - Dit sal met **`syspolicyd`** praat om te **kontroleer** of die uitbreiding gelaai kan word.
 3. **`syspolicyd`** sal die **gebruiker** **vra** of die uitbreiding nie voorheen gelaai is nie.
 - **`syspolicyd`** sal die resultaat aan **`kextd`** rapporteer
-4. **`kextd`** sal uiteindelik in staat wees om die **kern te vertel om** die uitbreiding te laai
+4. **`kextd`** sal uiteindelik in staat wees om die **kern te sê om** die uitbreiding te laai
 
 As **`kextd`** nie beskikbaar is nie, kan **`kextutil`** dieselfde kontroles uitvoer.
 
@@ -58,7 +58,7 @@ In my geval in macOS het ek dit gevind in:
 
 #### IMG4
 
-Die IMG4 lêerformaat is 'n houerformaat wat deur Apple in sy iOS en macOS toestelle gebruik word om firmware komponente (soos **kernelcache**) veilig te **stoor en te verifieer**. Die IMG4 formaat sluit 'n kop en verskeie etikette in wat verskillende stukke data kapsuleer, insluitend die werklike payload (soos 'n kern of bootloader), 'n handtekening, en 'n stel manifest eienskappe. Die formaat ondersteun kriptografiese verifikasie, wat die toestel toelaat om die egtheid en integriteit van die firmware komponent te bevestig voordat dit uitgevoer word.
+Die IMG4 lêerformaat is 'n houerformaat wat deur Apple in sy iOS en macOS toestelle gebruik word om firmware komponente (soos **kernelcache**) veilig te **stoor en te verifieer**. Die IMG4 formaat sluit 'n kop en verskeie etikette in wat verskillende stukke data kapsuleer, insluitend die werklike payload (soos 'n kern of opstartlader), 'n handtekening, en 'n stel manifest eienskappe. Die formaat ondersteun kriptografiese verifikasie, wat die toestel toelaat om die egtheid en integriteit van die firmware komponent te bevestig voordat dit uitgevoer word.
 
 Dit bestaan gewoonlik uit die volgende komponente:
 
@@ -93,9 +93,9 @@ nm -a ~/Downloads/Sandbox.kext/Contents/MacOS/Sandbox | wc -l
 ```
 - [**theapplewiki.com**](https://theapplewiki.com/wiki/Firmware/Mac/14.x)**,** [**ipsw.me**](https://ipsw.me/)**,** [**theiphonewiki.com**](https://www.theiphonewiki.com/)
 
-Soms vry Apple **kernelcache** met **symbols**. Jy kan 'n paar firmware met symbols aflaai deur die skakels op daardie bladsye te volg. Die firmware sal die **kernelcache** saam met ander lêers bevat.
+Soms stel Apple **kernelcache** vry met **symbols**. Jy kan 'n paar firmware met symbols aflaai deur die skakels op daardie bladsye te volg. Die firmwares sal die **kernelcache** onder andere lêers bevat.
 
-Om die lêers te **onttrek**, begin deur die uitbreiding van `.ipsw` na `.zip` te verander en dit te **ontpak**.
+Om die lêers te **onttrek**, begin deur die uitbreiding van `.ipsw` na `.zip` te verander en dit te **ontzip**.
 
 Na die onttrekking van die firmware sal jy 'n lêer soos: **`kernelcache.release.iphone14`** kry. Dit is in **IMG4** formaat, jy kan die interessante inligting onttrek met:
 

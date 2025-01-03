@@ -8,7 +8,7 @@ Dit fokus op die afdwinging van die integriteit van die kode wat op die stelsel 
 
 Boonop verkies die kext om vir sommige operasies die gebruikersruimte wat die daemon `/usr/libexec/amfid` uitvoer, te kontak. Hierdie vertrouensverhouding is in verskeie jailbreaks misbruik.
 
-AMFI gebruik **MACF** beleide en registreer sy haakplekke die oomblik wat dit begin. Ook, om sy laai of ontlaai te verhoed, kan 'n kernpaniek veroorsaak. Daar is egter 'n paar opstartargumente wat AMFI kan verlam:
+AMFI gebruik **MACF** beleide en dit registreer sy haakplekke die oomblik wat dit begin. Ook, om sy laai of ontlaai te verhoed, kan 'n kernpaniek veroorsaak. Daar is egter 'n paar opstartargumente wat AMFI kan verlam:
 
 - `amfi_unrestricted_task_for_pid`: Laat task_for_pid toe sonder vereiste regte
 - `amfi_allow_any_signature`: Laat enige kodehandtekening toe
@@ -29,9 +29,9 @@ Hierdie is 'n paar van die MACF beleide wat dit registreer:
 - **`policy_syscall`**: Dit kontroleer DYLD-beleide soos of die binarie onbeperkte segmente het, of dit omgewingsveranderlikes moet toelaat... dit word ook genoem wanneer 'n proses via `amfi_check_dyld_policy_self()` begin word.
 - **`proc_check_inherit_ipc_ports`**: Dit kontroleer of wanneer 'n proses 'n nuwe binarie uitvoer, ander prosesse met SEND-regte oor die taakpoort van die proses dit moet hou of nie. Platformbinaries is toegelaat, `get-task-allow` regte laat dit toe, `task_for_pid-allow` regte is toegelaat en binaries met dieselfde TeamID.
 - **`proc_check_expose_task`**: afdwing regte
-- **`amfi_exc_action_check_exception_send`**: 'n Uitsonderingboodskap word na die foutopsporing gestuur
+- **`amfi_exc_action_check_exception_send`**: 'n Uitsonderingboodskap word na die foutopsporingstelsel gestuur
 - **`amfi_exc_action_label_associate & amfi_exc_action_label_copy/populate & amfi_exc_action_label_destroy & amfi_exc_action_label_init & amfi_exc_action_label_update`**: Etiketlewe tydens uitsonderinghantering (foutopsporing)
-- **`proc_check_get_task`**: Kontroleer regte soos `get-task-allow` wat ander prosesse toelaat om die taakpoort te verkry en `task_for_pid-allow`, wat die proses toelaat om ander prosesse se taakpoorte te verkry. As geen van daardie, roep dit `amfid permitunrestricteddebugging` aan om te kontroleer of dit toegelaat word.
+- **`proc_check_get_task`**: Kontroleer regte soos `get-task-allow` wat ander prosesse toelaat om die taakpoort te verkry en `task_for_pid-allow`, wat die proses toelaat om ander prosesse se taakpoorte te verkry. As geen van hierdie, roep dit `amfid permitunrestricteddebugging` aan om te kontroleer of dit toegelaat word.
 - **`proc_check_mprotect`**: Weier as `mprotect` met die vlag `VM_PROT_TRUSTED` aangeroep word wat aandui dat die streek asof dit 'n geldige kodehandtekening het, behandel moet word.
 - **`vnode_check_exec`**: Word aangeroep wanneer uitvoerbare lêers in geheue gelaai word en stel `cs_hard | cs_kill` wat die proses sal doodmaak as enige van die bladsye ongeldig word
 - **`vnode_check_getextattr`**: MacOS: Kontroleer `com.apple.root.installed` en `isVnodeQuarantined()`
@@ -108,7 +108,7 @@ Alhoewel dit soms as gesertifiseer verwys word, het hierdie voorsieningsprofiele
 
 Let daarop dat die regte inskrywing 'n beperkte stel regte sal bevat en die voorsieningsprofiel slegs daardie spesifieke regte kan gee om te voorkom dat Apple private regte gee.
 
-Let daarop dat profiele gewoonlik geleë is in `/var/MobileDeviceProvisioningProfiles` en dit moontlik is om dit te kontroleer met **`security cms -D -i /path/to/profile`**
+Let daarop dat profiele gewoonlik geleë is in `/var/MobileDeviceProvisioningProfiles` en dit moontlik is om hulle te kontroleer met **`security cms -D -i /path/to/profile`**
 
 ## **libmis.dyld**
 

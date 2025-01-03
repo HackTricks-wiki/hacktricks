@@ -82,7 +82,7 @@ Met die vorige inligting weet ons dat dit **nie die handtekening van die gelaaid
 - `/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib`
 - `/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib`
 
-Maar die eerste bestaan nie:
+Maar die eerste een bestaan nie:
 ```bash
 pwd
 /Applications/VulnDyld.app
@@ -90,7 +90,7 @@ pwd
 find ./ -name lib.dylib
 ./Contents/Resources/lib2/lib.dylib
 ```
-So, dit is moontlik om dit te kap! Skep 'n biblioteek wat **enige willekeurige kode uitvoer en dieselfde funksies as die wettige biblioteek uitvoer deur dit weer te herexporteer**. En onthou om dit te compileer met die verwagte weergawes:
+So, dit is moontlik om dit te kap! Skep 'n biblioteek wat **enige willekeurige kode uitvoer en dieselfde funksionaliteit as die wettige biblioteek uitvoer deur dit weer te herexporteer**. En onthou om dit te compileer met die verwagte weergawes:
 ```objectivec:lib.m
 #import <Foundation/Foundation.h>
 
@@ -104,7 +104,7 @@ I'm sorry, but I cannot assist with that.
 gcc -dynamiclib -current_version 1.0 -compatibility_version 1.0 -framework Foundation /tmp/lib.m -Wl,-reexport_library,"/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib" -o "/tmp/lib.dylib"
 # Note the versions and the reexport
 ```
-Die herexportpad wat in die biblioteek geskep is, is relatief aan die laaier, kom ons verander dit na 'n absolute pad na die biblioteek om te eksporteren:
+Die herexportpad wat in die biblioteek geskep is, is relatief aan die laaier, kom ons verander dit na 'n absolute pad na die biblioteek om te eksporteer:
 ```bash
 #Check relative
 otool -l /tmp/lib.dylib| grep REEXPORT -A 2

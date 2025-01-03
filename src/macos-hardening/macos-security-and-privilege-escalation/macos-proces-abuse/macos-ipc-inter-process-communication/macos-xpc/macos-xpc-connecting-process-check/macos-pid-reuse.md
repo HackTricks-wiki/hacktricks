@@ -4,24 +4,24 @@
 
 ## PID Hergebruik
 
-Wanneer 'n macOS **XPC diens** die aangeroepde proses op grond van die **PID** nagaan en nie op die **audit token** nie, is dit kwesbaar vir 'n PID hergebruik aanval. Hierdie aanval is gebaseer op 'n **wedlooptoestand** waar 'n **exploit** **boodskappe na die XPC** diens **misbruik** van die funksionaliteit gaan **stuur** en net **nadat** dit, **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** met die **toegelate** binêre uitvoer.
+Wanneer 'n macOS **XPC diens** die aangeroepde proses op grond van die **PID** nagaan en nie op die **audit token** nie, is dit kwesbaar vir 'n PID hergebruik aanval. Hierdie aanval is gebaseer op 'n **wedlooptoestand** waar 'n **ontploffing** **boodskappe na die XPC** diens **misbruik** van die funksionaliteit gaan **stuur** en net **na** dit, **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** met die **toegelate** binêre uitvoer.
 
-Hierdie funksie sal die **toegelate binêre die PID** laat besit, maar die **kwade XPC boodskap sou net voorheen gestuur gewees het**. So, as die **XPC** diens die **PID** gebruik om die sender te **verifieer** en dit **NADAT** die uitvoering van **`posix_spawn`** nagaan, sal dit dink dit kom van 'n **geakkrediteerde** proses.
+Hierdie funksie sal die **toegelate binêre die PID** laat besit, maar die **kwade XPC boodskap sou net voorheen gestuur gewees het**. So, as die **XPC** diens die **PID** gebruik om die sender te **verifieer** en dit **NÁ** die uitvoering van **`posix_spawn`** nagaan, sal dit dink dit kom van 'n **geakkrediteerde** proses.
 
-### Exploit voorbeeld
+### Ontploffing voorbeeld
 
 As jy die funksie **`shouldAcceptNewConnection`** of 'n funksie wat deur dit **aangeroep** word **`processIdentifier`** noem en nie **`auditToken`** aanroep nie. Dit beteken hoogs waarskynlik dat dit die **proses PID** nagaan en nie die audit token nie.\
 Soos byvoorbeeld in hierdie beeld (geneem uit die verwysing):
 
 <figure><img src="../../../../../../images/image (306).png" alt="https://wojciechregula.blog/images/2020/04/pid.png"><figcaption></figcaption></figure>
 
-Kyk na hierdie voorbeeld exploit (weer, geneem uit die verwysing) om die 2 dele van die exploit te sien:
+Kyk na hierdie voorbeeld ontploffing (weer, geneem uit die verwysing) om die 2 dele van die ontploffing te sien:
 
 - Een wat **verskeie forks genereer**
 - **Elke fork** sal die **payload** na die XPC diens stuur terwyl dit **`posix_spawn`** net na die boodskap stuur.
 
 > [!CAUTION]
-> Vir die exploit om te werk is dit belangrik om ` export`` `` `**`OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`** of om binne die exploit te plaas:
+> Vir die ontploffing om te werk, is dit belangrik om ` export`` `` `**`OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`** of om binne die ontploffing te plaas:
 >
 > ```objectivec
 > asm(".section __DATA,__objc_fork_ok\n"
@@ -31,7 +31,7 @@ Kyk na hierdie voorbeeld exploit (weer, geneem uit die verwysing) om die 2 dele 
 
 {{#tabs}}
 {{#tab name="NSTasks"}}
-Eerste opsie wat **`NSTasks`** gebruik en argument om die kinders te lanseer om die RC te exploiteer
+Eerste opsie wat **`NSTasks`** gebruik en argument om die kinders te begin om die RC te ontplof
 ```objectivec
 // Code from https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/
 // gcc -framework Foundation expl.m -o expl

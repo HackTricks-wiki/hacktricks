@@ -40,7 +40,7 @@ macos-tcc/
 
 ### Begin/Omgewing Beperkings & Vertroue Kas
 
-Begin beperkings in macOS is 'n sekuriteitskenmerk om **prosesinisiëring te reguleer** deur te definieer **wie 'n proses kan begin**, **hoe**, en **van waar**. Ingevoerd in macOS Ventura, kategoriseer dit stelselbinaries in beperkingkategorieë binne 'n **vertroue kas**. Elke uitvoerbare binêre het **reëls** vir sy **begin**, insluitend **self**, **ouer**, en **verantwoordelike** beperkings. Uitgebrei na derdeparty-apps as **Omgewing** Beperkings in macOS Sonoma, help hierdie kenmerke om potensiële stelselaanrandings te verminder deur prosesbeginvoorwaardes te regeer.
+Begin beperkings in macOS is 'n sekuriteitskenmerk om **prosesinisiëring te reguleer** deur te definieer **wie 'n proses kan begin**, **hoe**, en **van waar**. Ingevoerd in macOS Ventura, kategoriseer dit stelselbinaries in beperking kategorieë binne 'n **vertroue kas**. Elke uitvoerbare binêre het **reëls** vir sy **begin**, insluitend **self**, **ouer**, en **verantwoordelike** beperkings. Uitgebrei na derdeparty-apps as **Omgewing** Beperkings in macOS Sonoma, help hierdie kenmerke om potensiële stelselaanrandings te verminder deur prosesbeginvoorwaardes te regeer.
 
 {{#ref}}
 macos-launch-environment-constraints.md
@@ -69,7 +69,7 @@ Dit werk met 'n **daemon** geleë in `/System/Library/PrivateFrameworks/Backgrou
 
 Die manier waarop **`backgroundtaskmanagementd`** weet dat iets in 'n volhardende gids geïnstalleer is, is deur **die FSEvents te verkry** en 'n paar **handlers** daarvoor te skep.
 
-Boonop is daar 'n plist-lêer wat **bekende toepassings** bevat wat gereeld volhard, wat deur apple onderhou word, geleë in: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`
+Boonop is daar 'n plist-lêer wat **bekende toepassings** bevat wat gereeld volhard, wat deur apple onderhou word en geleë is in: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`
 ```json
 [...]
 "us.zoom.ZoomDaemon" => {
@@ -85,9 +85,9 @@ Boonop is daar 'n plist-lêer wat **bekende toepassings** bevat wat gereeld volh
 }
 [...]
 ```
-### Enumerasie
+### Opname
 
-Dit is moontlik om **alle** die geconfigureerde agtergronditems wat die Apple cli-gereedskap uitvoer, te **enumerate**:
+Dit is moontlik om **alle** die geconfigureerde agtergronditems wat die Apple cli-gereedskap uitvoer, op te som:
 ```bash
 # The tool will always ask for the users password
 sfltool dumpbtm
@@ -101,7 +101,7 @@ xattr -rc dumpBTM # Remove quarantine attr
 ```
 Hierdie inligting word gestoor in **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** en die Terminal benodig FDA.
 
-### Meng met BTM
+### Speel met BTM
 
 Wanneer 'n nuwe volharding gevind word, is daar 'n gebeurtenis van tipe **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`**. Dus, enige manier om hierdie **gebeurtenis** te **voorkom** of die **agent om die gebruiker te waarsku** sal 'n aanvaller help om _**te omseil**_ BTM.
 

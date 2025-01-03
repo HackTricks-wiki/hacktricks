@@ -48,7 +48,7 @@ Jy kan kontroleer of 'n binêre **hardened runtime** het met `codesign --display
 
 Jy kan ook 'n biblioteek laai as dit **onderteken is met dieselfde sertifikaat as die binêre**.
 
-Vind 'n voorbeeld van hoe om (ab) te gebruik en kontroleer die beperkings in:
+Vind 'n voorbeeld van hoe om dit te (mis)bruik en kontroleer die beperkings in:
 
 {{#ref}}
 macos-dyld-hijacking-and-dyld_insert_libraries.md
@@ -66,7 +66,7 @@ Eerstens, is dit **meer algemeen** om te vind dat **MacOS binêre die volle pad*
 
 Die **hoof** deel van die **kode** wat met hierdie funksionaliteit verband hou, is in **`ImageLoader::recursiveLoadLibraries`** in `ImageLoader.cpp`.
 
-Daar is **4 verskillende kop Commando's** wat 'n macho binêre kan gebruik om biblioteke te laai:
+Daar is **4 verskillende kopkommando's** wat 'n macho binêre kan gebruik om biblioteke te laai:
 
 - **`LC_LOAD_DYLIB`** opdrag is die algemene opdrag om 'n dylib te laai.
 - **`LC_LOAD_WEAK_DYLIB`** opdrag werk soos die vorige een, maar as die dylib nie gevind word nie, gaan die uitvoering voort sonder enige fout.
@@ -87,10 +87,10 @@ time stamp 2 Wed Jun 21 12:23:31 1969
 current version 1.0.0
 compatibility version 1.0.0
 ```
-- **Geconfigureer met @rpath**: Mach-O binêre kan die opdragte **`LC_RPATH`** en **`LC_LOAD_DYLIB`** hê. Gebaseer op die **waardes** van daardie opdragte, **biblioteke** gaan **gelaai** word van **verskillende gidse**.
+- **Geconfigureer met @rpath**: Mach-O binêre kan die opdragte **`LC_RPATH`** en **`LC_LOAD_DYLIB`** hê. Gebaseer op die **waardes** van daardie opdragte, sal **biblioteke** van **verskillende gidse** gelaai word.
 - **`LC_RPATH`** bevat die pades van sommige vouers wat gebruik word om biblioteke deur die binêre te laai.
 - **`LC_LOAD_DYLIB`** bevat die pad na spesifieke biblioteke om te laai. Hierdie pades kan **`@rpath`** bevat, wat deur die waardes in **`LC_RPATH`** vervang sal word. As daar verskeie pades in **`LC_RPATH`** is, sal almal gebruik word om die biblioteek te laai. Voorbeeld:
-- As **`LC_LOAD_DYLIB`** `@rpath/library.dylib` bevat en **`LC_RPATH`** `/application/app.app/Contents/Framework/v1/` en `/application/app.app/Contents/Framework/v2/` bevat. Beide vouers gaan gebruik word om `library.dylib` te laai. As die biblioteek nie in `[...]/v1/` bestaan nie, kan 'n aanvaller dit daar plaas om die laai van die biblioteek in `[...]/v2/` te hijack, aangesien die volgorde van pades in **`LC_LOAD_DYLIB`** gevolg word.
+- As **`LC_LOAD_DYLIB`** `@rpath/library.dylib` bevat en **`LC_RPATH`** `/application/app.app/Contents/Framework/v1/` en `/application/app.app/Contents/Framework/v2/` bevat. Beide vouers gaan gebruik word om `library.dylib` te laai.** As die biblioteek nie in `[...]/v1/` bestaan nie, kan 'n aanvaller dit daar plaas om die laai van die biblioteek in `[...]/v2/` te hijack, aangesien die volgorde van pades in **`LC_LOAD_DYLIB`** gevolg word.
 - **Vind rpath pades en biblioteke** in binêre met: `otool -l </path/to/binary> | grep -E "LC_RPATH|LC_LOAD_DYLIB" -A 5`
 
 > [!NOTE] > **`@executable_path`**: Is die **pad** na die gids wat die **hoofd uitvoerbare lêer** bevat.
@@ -119,7 +119,7 @@ macos-dyld-hijacking-and-dyld_insert_libraries.md
 
 Van **`man dlopen`**:
 
-- Wanneer die pad **nie 'n skuinsstreep bevat nie** (d.w.s. dit is net 'n blaarnaam), **sal dlopen() soek**. As **`$DYLD_LIBRARY_PATH`** by die bekendstelling gestel is, sal dyld eers **in daardie gids** kyk. Volgende, as die aanroepende mach-o lêer of die hoofd uitvoerbare 'n **`LC_RPATH`** spesifiseer, sal dyld dan **in daardie** gidse kyk. Volgende, as die proses **onbeperk** is, sal dyld in die **huidige werkgids** soek. Laastens, vir ou binêre, sal dyld 'n paar terugval probeer. As **`$DYLD_FALLBACK_LIBRARY_PATH`** by die bekendstelling gestel is, sal dyld in **daardie gidse** soek, anders sal dyld in **`/usr/local/lib/`** kyk (as die proses onbeperk is), en dan in **`/usr/lib/`** (hierdie inligting is geneem van **`man dlopen`**).
+- Wanneer die pad **nie 'n skuinsstreep bevat nie** (d.w.s. dit is net 'n blaarnaam), **sal dlopen() soek**. As **`$DYLD_LIBRARY_PATH`** by die bekendstelling gestel is, sal dyld eers **in daardie gids** kyk. Volgende, as die aanroepende mach-o lêer of die hoofd uitvoerbare 'n **`LC_RPATH`** spesifiseer, sal dyld dan **in daardie** gidse kyk. Volgende, as die proses **onbeperk** is, sal dyld in die **huidige werk gids** soek. Laastens, vir ou binêre, sal dyld 'n paar terugval probeer. As **`$DYLD_FALLBACK_LIBRARY_PATH`** by die bekendstelling gestel is, sal dyld in **daardie gidse** soek, anders sal dyld in **`/usr/local/lib/`** kyk (as die proses onbeperk is), en dan in **`/usr/lib/`** (hierdie inligting is geneem van **`man dlopen`**).
 1. `$DYLD_LIBRARY_PATH`
 2. `LC_RPATH`
 3. `CWD`(as onbeperk)
@@ -133,34 +133,34 @@ Van **`man dlopen`**:
 > - As enige **`LC_RPATH`** **skryfbaar** is (maar handtekening word gekontroleer, so hiervoor moet die binêre ook onbeperk wees)
 > - As die binêre **onbeperk** is en dan is dit moontlik om iets van die CWD te laai (of een van die genoemde omgewing veranderlikes te misbruik)
 
-- Wanneer die pad **soos 'n raamwerk** pad lyk (bv. `/stuff/foo.framework/foo`), as **`$DYLD_FRAMEWORK_PATH`** by die bekendstelling gestel is, sal dyld eers in daardie gids kyk vir die **raamwerk gedeeltelike pad** (bv. `foo.framework/foo`). Volgende, sal dyld die **verskafde pad soos dit is** probeer (met die huidige werkgids vir relatiewe pades). Laastens, vir ou binêre, sal dyld 'n paar terugval probeer. As **`$DYLD_FALLBACK_FRAMEWORK_PATH`** by die bekendstelling gestel is, sal dyld in daardie gidse soek. Andersins, sal dit in **`/Library/Frameworks`** soek (op macOS as die proses onbeperk is), dan **`/System/Library/Frameworks`**.
+- Wanneer die pad **soos 'n raamwerk** pad lyk (bv. `/stuff/foo.framework/foo`), as **`$DYLD_FRAMEWORK_PATH`** by die bekendstelling gestel is, sal dyld eers in daardie gids kyk vir die **raamwerk gedeeltelike pad** (bv. `foo.framework/foo`). Volgende, sal dyld die **verskafde pad soos dit is** probeer (met die huidige werk gids vir relatiewe pades). Laastens, vir ou binêre, sal dyld 'n paar terugval probeer. As **`$DYLD_FALLBACK_FRAMEWORK_PATH`** by die bekendstelling gestel is, sal dyld in daardie gidse soek. Anders sal dit **`/Library/Frameworks`** soek (op macOS as die proses onbeperk is), dan **`/System/Library/Frameworks`**.
 1. `$DYLD_FRAMEWORK_PATH`
-2. verskafde pad (met die huidige werkgids vir relatiewe pades as onbeperk)
+2. verskafde pad (met die huidige werk gids vir relatiewe pades as onbeperk)
 3. `$DYLD_FALLBACK_FRAMEWORK_PATH`
 4. `/Library/Frameworks` (as onbeperk)
 5. `/System/Library/Frameworks`
 
 > [!CAUTION]
-> As 'n raamwerk pad, sal die manier om dit te hijack:
+> As 'n raamwerk pad, sal die manier om dit te hijack wees:
 >
 > - As die proses **onbeperk** is, deur die **relatiewe pad van CWD** die genoemde omgewing veranderlikes te misbruik (selfs al word dit nie in die dokumentasie gesê nie, as die proses beperk is, word DYLD\_\* omgewing veranderlikes verwyder)
 
-- Wanneer die pad **'n skuinsstreep bevat maar nie 'n raamwerk pad is nie** (d.w.s. 'n volle pad of 'n gedeeltelike pad na 'n dylib), kyk dlopen() eers (as gestel) in **`$DYLD_LIBRARY_PATH`** (met die blaardeel van die pad). Volgende, probeer dyld **die verskafde pad** (met die huidige werkgids vir relatiewe pades (maar slegs vir onbeperkte prosesse)). Laastens, vir ouer binêre, sal dyld terugval probeer. As **`$DYLD_FALLBACK_LIBRARY_PATH`** by die bekendstelling gestel is, sal dyld in daardie gidse soek, anders sal dyld in **`/usr/local/lib/`** kyk (as die proses onbeperk is), en dan in **`/usr/lib/`**.
+- Wanneer die pad **'n skuinsstreep bevat maar nie 'n raamwerk pad is nie** (d.w.s. 'n volle pad of 'n gedeeltelike pad na 'n dylib), kyk dlopen() eers (as gestel) in **`$DYLD_LIBRARY_PATH`** (met die blaardeel van die pad). Volgende, probeer dyld **die verskafde pad** (met die huidige werk gids vir relatiewe pades (maar slegs vir onbeperkte prosesse)). Laastens, vir ouer binêre, sal dyld terugval probeer. As **`$DYLD_FALLBACK_LIBRARY_PATH`** by die bekendstelling gestel is, sal dyld in daardie gidse soek, anders sal dyld in **`/usr/local/lib/`** kyk (as die proses onbeperk is), en dan in **`/usr/lib/`**.
 1. `$DYLD_LIBRARY_PATH`
-2. verskafde pad (met die huidige werkgids vir relatiewe pades as onbeperk)
+2. verskafde pad (met die huidige werk gids vir relatiewe pades as onbeperk)
 3. `$DYLD_FALLBACK_LIBRARY_PATH`
 4. `/usr/local/lib/` (as onbeperk)
 5. `/usr/lib/`
 
 > [!CAUTION]
-> As skuinsstrepe in die naam en nie 'n raamwerk nie, sal die manier om dit te hijack:
+> As skuinsstrepe in die naam en nie 'n raamwerk is nie, sal die manier om dit te hijack wees:
 >
 > - As die binêre **onbeperk** is en dan is dit moontlik om iets van die CWD of `/usr/local/lib` te laai (of een van die genoemde omgewing veranderlikes te misbruik)
 
 > [!NOTE]
-> Nota: Daar is **geen** konfigurasielêers om **dlopen soek** te **beheer** nie.
+> Nota: Daar is **geen** konfigurasie lêers om **dlopen soek** te **beheer** nie.
 >
-> Nota: As die hoofd uitvoerbare 'n **set\[ug]id binêre of codesigned met regte** is, dan **word alle omgewing veranderlikes geïgnoreer**, en slegs 'n volle pad kan gebruik word ([kontroleer DYLD_INSERT_LIBRARIES beperkings](macos-dyld-hijacking-and-dyld_insert_libraries.md#check-dyld_insert_librery-restrictions) vir meer gedetailleerde inligting)
+> Nota: As die hoofd uitvoerbare 'n **set\[ug]id binêre of codesigned met regte** is, dan **word alle omgewing veranderlikes geïgnoreer**, en kan slegs 'n volle pad gebruik word ([kontroleer DYLD_INSERT_LIBRARIES beperkings](macos-dyld-hijacking-and-dyld_insert_libraries.md#check-dyld_insert_librery-restrictions) vir meer gedetailleerde inligting)
 >
 > Nota: Apple platforms gebruik "universele" lêers om 32-bis en 64-bis biblioteke te kombineer. Dit beteken daar is **geen aparte 32-bis en 64-bis soekpades** nie.
 >
@@ -217,7 +217,7 @@ sudo fs_usage | grep "dlopentest"
 ```
 ## Relatiewe Pad Hijacking
 
-As 'n **privileged binary/app** (soos 'n SUID of 'n binêre met kragtige regte) **'n relatiewe pad** biblioteek laai (byvoorbeeld deur `@executable_path` of `@loader_path` te gebruik) en **Biblioteekvalidasie gedeaktiveer** is, kan dit moontlik wees om die binêre na 'n plek te skuif waar die aanvaller die **relatiewe pad gelaaide biblioteek** kan **wysig**, en dit misbruik om kode in die proses in te spuit.
+As 'n **privileged binary/app** (soos 'n SUID of 'n binêre met kragtige regte) **'n relatiewe pad** biblioteek laai (byvoorbeeld deur `@executable_path` of `@loader_path` te gebruik) en **Biblioteekvalidasie gedeaktiveer** is, kan dit moontlik wees om die binêre na 'n plek te skuif waar die aanvaller die **relatiewe pad gelaaide biblioteek** kan **wysig**, en dit te misbruik om kode in die proses in te spuit.
 
 ## Snoei `DYLD_*` en `LD_LIBRARY_PATH` omgewingsveranderlikes
 

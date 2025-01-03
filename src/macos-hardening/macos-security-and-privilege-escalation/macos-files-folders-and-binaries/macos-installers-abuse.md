@@ -14,7 +14,7 @@ Die pakketlêer self is 'n argief wat 'n **hiërargie van lêers en gidse bevat 
 
 - **Verspreiding (xml)**: Aangepashede (titel, welkom teks…) en script/installasie kontroles
 - **PakketInligting (xml)**: Inligting, installasie vereistes, installasie ligging, paaie na scripts om uit te voer
-- **Rekening van materiale (bom)**: Lys van lêers om te installeer, op te dateer of te verwyder met lêer toestemmings
+- **Materiaalstaat (bom)**: Lys van lêers om te installeer, op te dateer of te verwyder met lêer toestemmings
 - **Payload (CPIO argief gzip gecomprimeer)**: Lêers om te installeer in die `install-location` van PakketInligting
 - **Scripts (CPIO argief gzip gecomprimeer)**: Voor- en na-installasie scripts en meer hulpbronne wat na 'n tydelike gids uitgehaal is vir uitvoering.
 
@@ -39,7 +39,7 @@ Om die inhoud van die installeerder te visualiseer sonder om dit handmatig te de
 DMG-lêers, of Apple Disk Images, is 'n lêerformaat wat deur Apple se macOS vir skyfbeelde gebruik word. 'n DMG-lêer is in wese 'n **aansluitbare skyfbeeld** (dit bevat sy eie lêerstelsel) wat rou blokdata bevat wat tipies gecomprimeer en soms versleuteld is. Wanneer jy 'n DMG-lêer oopmaak, **aansluit macOS dit asof dit 'n fisiese skyf is**, wat jou toelaat om toegang tot die inhoud te verkry.
 
 > [!CAUTION]
-> Let daarop dat **`.dmg`** installeerders **soveel formate** ondersteun dat sommige daarvan in die verlede wat kwesbaarhede bevat, misbruik is om **kernel kode-uitvoering** te verkry.
+> Let daarop dat **`.dmg`** installeerders **soveel formate** ondersteun dat sommige daarvan in die verlede wat kwesbaarhede bevat het, misbruik is om **kernel kode-uitvoering** te verkry.
 
 ### Hiërargie
 
@@ -61,7 +61,7 @@ As 'n vooraf of na-installasie skrip byvoorbeeld uitvoer vanaf **`/var/tmp/Insta
 
 ### AuthorizationExecuteWithPrivileges
 
-Dit is 'n [openbare funksie](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg) wat verskeie installeerders en opdaterings sal aanroep om **iets as root uit te voer**. Hierdie funksie aanvaar die **pad** van die **lêer** om **uit te voer** as parameter, egter, as 'n aanvaller hierdie lêer kan **wysig**, sal hy in staat wees om sy uitvoering met root te **misbruik** om **privilege te verhoog**.
+Dit is 'n [openbare funksie](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg) wat verskeie installeerders en opdaterings sal aanroep om **iets as root uit te voer**. Hierdie funksie aanvaar die **pad** van die **lêer** om te **uitvoer** as parameter, egter, as 'n aanvaller hierdie lêer kan **wysig**, sal hy in staat wees om sy uitvoering met root te **misbruik** om **privilege te verhoog**.
 ```bash
 # Breakpoint in the function to check wich file is loaded
 (lldb) b AuthorizationExecuteWithPrivileges
@@ -69,9 +69,9 @@ Dit is 'n [openbare funksie](https://developer.apple.com/documentation/security/
 ```
 For more info check this talk: [https://www.youtube.com/watch?v=lTOItyjTTkw](https://www.youtube.com/watch?v=lTOItyjTTkw)
 
-### Uitvoering deur montering
+### Uitvoering deur te monteer
 
-As 'n installer na `/tmp/fixedname/bla/bla` skryf, is dit moontlik om **'n montasie te skep** oor `/tmp/fixedname` sonder eienaars sodat jy **enige lêer tydens die installasie kan wysig** om die installasieproses te misbruik.
+As 'n installer na `/tmp/fixedname/bla/bla` skryf, is dit moontlik om **'n monteer** oor `/tmp/fixedname` te skep met geen eienaars sodat jy **enige lêer tydens die installasie kan wysig** om die installasieproses te misbruik.
 
 'n Voorbeeld hiervan is **CVE-2021-26089** wat daarin geslaag het om **'n periodieke skrip te oorskryf** om uitvoering as root te verkry. Vir meer inligting, kyk na die praatjie: [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)
 
@@ -79,7 +79,7 @@ As 'n installer na `/tmp/fixedname/bla/bla` skryf, is dit moontlik om **'n monta
 
 ### Leë Payload
 
-Dit is moontlik om net 'n **`.pkg`** lêer te genereer met **pre- en post-installasieskripte** sonder enige werklike payload behalwe die malware binne die skripte.
+Dit is moontlik om net 'n **`.pkg`** lêer te genereer met **pre- en post-install skripte** sonder enige werklike payload behalwe die malware binne die skripte.
 
 ### JS in Verspreiding xml
 
@@ -152,9 +152,9 @@ productbuild --distribution dist.xml --package-path myapp.pkg final-installer.pk
 ```
 ## Verwysings
 
-- [**DEF CON 27 - Ontsleuteling van Pkgs 'n Kyk Binne Macos Installer Pakkette en Algemene Sekuriteitsfoute**](https://www.youtube.com/watch?v=iASSG0_zobQ)
+- [**DEF CON 27 - Ontpakking van Pkgs 'n Kyk Binne Macos Installer Pakkette en Algemene Sekuriteitsfoute**](https://www.youtube.com/watch?v=iASSG0_zobQ)
 - [**OBTS v4.0: "Die Wilde Wêreld van macOS Installeerders" - Tony Lambert**](https://www.youtube.com/watch?v=Eow5uNHtmIg)
-- [**DEF CON 27 - Ontsleuteling van Pkgs 'n Kyk Binne MacOS Installer Pakkette**](https://www.youtube.com/watch?v=kCXhIYtODBg)
+- [**DEF CON 27 - Ontpakking van Pkgs 'n Kyk Binne MacOS Installer Pakkette**](https://www.youtube.com/watch?v=kCXhIYtODBg)
 - [https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages](https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages)
 
 {{#include ../../../banners/hacktricks-training.md}}
