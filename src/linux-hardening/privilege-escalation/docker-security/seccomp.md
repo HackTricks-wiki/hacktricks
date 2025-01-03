@@ -6,13 +6,13 @@
 
 **Seccomp**, que significa modo de Computação Segura, é um recurso de segurança do **kernel Linux projetado para filtrar chamadas de sistema**. Ele restringe processos a um conjunto limitado de chamadas de sistema (`exit()`, `sigreturn()`, `read()`, e `write()` para descritores de arquivo já abertos). Se um processo tentar chamar qualquer outra coisa, ele é terminado pelo kernel usando SIGKILL ou SIGSYS. Este mecanismo não virtualiza recursos, mas isola o processo deles.
 
-Existem duas maneiras de ativar o seccomp: através da chamada de sistema `prctl(2)` com `PR_SET_SECCOMP`, ou para kernels Linux 3.17 e superiores, a chamada de sistema `seccomp(2)`. O método mais antigo de habilitar seccomp escrevendo em `/proc/self/seccomp` foi descontinuado em favor do `prctl()`.
+Existem duas maneiras de ativar o seccomp: através da chamada de sistema `prctl(2)` com `PR_SET_SECCOMP`, ou para kernels Linux 3.17 e superiores, a chamada de sistema `seccomp(2)`. O método mais antigo de habilitar o seccomp escrevendo em `/proc/self/seccomp` foi descontinuado em favor do `prctl()`.
 
 Uma melhoria, **seccomp-bpf**, adiciona a capacidade de filtrar chamadas de sistema com uma política personalizável, usando regras do Berkeley Packet Filter (BPF). Esta extensão é utilizada por softwares como OpenSSH, vsftpd, e os navegadores Chrome/Chromium no Chrome OS e Linux para filtragem de chamadas de sistema flexível e eficiente, oferecendo uma alternativa ao systrace, que agora não é mais suportado para Linux.
 
-### **Modo Original/Estrito**
+### **Modo Original/Restrito**
 
-Neste modo, o Seccomp **somente permite as chamadas de sistema** `exit()`, `sigreturn()`, `read()` e `write()` para descritores de arquivo já abertos. Se qualquer outra chamada de sistema for feita, o processo é encerrado usando SIGKILL.
+Neste modo, o Seccomp **somente permite as chamadas de sistema** `exit()`, `sigreturn()`, `read()` e `write()` para descritores de arquivo já abertos. Se qualquer outra chamada de sistema for feita, o processo é finalizado usando SIGKILL.
 ```c:seccomp_strict.c
 #include <fcntl.h>
 #include <stdio.h>

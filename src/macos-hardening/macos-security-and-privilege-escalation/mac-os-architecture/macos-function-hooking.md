@@ -208,13 +208,13 @@ return 0;
 }
 ```
 > [!WARNING]
-> Neste caso, se o **código de implementação do método legit** **verificar** o **nome do método**, ele pode **detectar** esse swizzling e impedir que ele seja executado.
+> Neste caso, se o **código de implementação do método legítimo** **verificar** o **nome do método**, ele pode **detectar** essa troca e impedir que ela seja executada.
 >
 > A técnica a seguir não tem essa restrição.
 
-### Method Swizzling com method_setImplementation
+### Troca de Métodos com method_setImplementation
 
-O formato anterior é estranho porque você está mudando a implementação de 2 métodos um pelo outro. Usando a função **`method_setImplementation`**, você pode **mudar** a **implementação** de um **método para o outro**.
+O formato anterior é estranho porque você está trocando a implementação de 2 métodos um pelo outro. Usando a função **`method_setImplementation`**, você pode **mudar** a **implementação** de um **método para o outro**.
 
 Apenas lembre-se de **armazenar o endereço da implementação do original** se você for chamá-lo a partir da nova implementação antes de sobrescrevê-lo, porque depois será muito mais complicado localizar esse endereço.
 ```objectivec
@@ -274,7 +274,7 @@ Nesta página, diferentes maneiras de hookear funções foram discutidas. No ent
 
 Para fazer isso, a técnica mais fácil de usar é injetar um [Dyld via variáveis de ambiente ou sequestro](../macos-dyld-hijacking-and-dyld_insert_libraries.md). No entanto, eu acho que isso também poderia ser feito via [injeção de processo Dylib](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port).
 
-No entanto, ambas as opções são **limitadas** a binários/processos **não protegidos**. Verifique cada técnica para saber mais sobre as limitações.
+No entanto, ambas as opções são **limitadas** a binários/processos **não protegidos**. Verifique cada técnica para aprender mais sobre as limitações.
 
 No entanto, um ataque de hooking de função é muito específico, um atacante fará isso para **roubar informações sensíveis de dentro de um processo** (se não, você apenas faria um ataque de injeção de processo). E essas informações sensíveis podem estar localizadas em aplicativos baixados pelo usuário, como o MacPass.
 

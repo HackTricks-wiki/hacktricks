@@ -1,16 +1,16 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Audio and video file manipulation** is a staple in **CTF forensics challenges**, leveraging **steganography** and metadata analysis to hide or reveal secret messages. Tools such as **[mediainfo](https://mediaarea.net/en/MediaInfo)** and **`exiftool`** are essential for inspecting file metadata and identifying content types.
+**Manipulação de arquivos de áudio e vídeo** é um elemento básico em **desafios de forense CTF**, aproveitando **esteganografia** e análise de metadados para ocultar ou revelar mensagens secretas. Ferramentas como **[mediainfo](https://mediaarea.net/en/MediaInfo)** e **`exiftool`** são essenciais para inspecionar metadados de arquivos e identificar tipos de conteúdo.
 
-For audio challenges, **[Audacity](http://www.audacityteam.org/)** stands out as a premier tool for viewing waveforms and analyzing spectrograms, essential for uncovering text encoded in audio. **[Sonic Visualiser](http://www.sonicvisualiser.org/)** is highly recommended for detailed spectrogram analysis. **Audacity** allows for audio manipulation like slowing down or reversing tracks to detect hidden messages. **[Sox](http://sox.sourceforge.net/)**, a command-line utility, excels in converting and editing audio files.
+Para desafios de áudio, **[Audacity](http://www.audacityteam.org/)** se destaca como uma ferramenta de primeira linha para visualizar formas de onda e analisar espectrogramas, essenciais para descobrir texto codificado em áudio. **[Sonic Visualiser](http://www.sonicvisualiser.org/)** é altamente recomendado para análise detalhada de espectrogramas. **Audacity** permite manipulação de áudio, como desacelerar ou inverter faixas para detectar mensagens ocultas. **[Sox](http://sox.sourceforge.net/)**, uma utilidade de linha de comando, se destaca na conversão e edição de arquivos de áudio.
 
-**Least Significant Bits (LSB)** manipulation is a common technique in audio and video steganography, exploiting the fixed-size chunks of media files to embed data discreetly. **[Multimon-ng](http://tools.kali.org/wireless-attacks/multimon-ng)** is useful for decoding messages hidden as **DTMF tones** or **Morse code**.
+A manipulação de **Bits Menos Significativos (LSB)** é uma técnica comum em esteganografia de áudio e vídeo, explorando os blocos de tamanho fixo de arquivos de mídia para embutir dados discretamente. **[Multimon-ng](http://tools.kali.org/wireless-attacks/multimon-ng)** é útil para decodificar mensagens ocultas como **tons DTMF** ou **código Morse**.
 
-Video challenges often involve container formats that bundle audio and video streams. **[FFmpeg](http://ffmpeg.org/)** is the go-to for analyzing and manipulating these formats, capable of de-multiplexing and playing back content. For developers, **[ffmpy](http://ffmpy.readthedocs.io/en/latest/examples.html)** integrates FFmpeg's capabilities into Python for advanced scriptable interactions.
+Desafios de vídeo frequentemente envolvem formatos de contêiner que agrupam fluxos de áudio e vídeo. **[FFmpeg](http://ffmpeg.org/)** é a escolha ideal para analisar e manipular esses formatos, capaz de desmultiplexar e reproduzir conteúdo. Para desenvolvedores, **[ffmpy](http://ffmpy.readthedocs.io/en/latest/examples.html)** integra as capacidades do FFmpeg ao Python para interações avançadas e scriptáveis.
 
-This array of tools underscores the versatility required in CTF challenges, where participants must employ a broad spectrum of analysis and manipulation techniques to uncover hidden data within audio and video files.
+Essa variedade de ferramentas destaca a versatilidade necessária em desafios CTF, onde os participantes devem empregar um amplo espectro de técnicas de análise e manipulação para descobrir dados ocultos em arquivos de áudio e vídeo.
 
-## References
+## Referências
 
 - [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/)
 

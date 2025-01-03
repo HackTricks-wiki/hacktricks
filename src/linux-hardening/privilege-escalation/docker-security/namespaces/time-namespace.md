@@ -1,4 +1,4 @@
-# Namespace de Tempo
+# Time Namespace
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
@@ -20,7 +20,7 @@ Ao montar uma nova instância do sistema de arquivos `/proc` se você usar o par
 
 <summary>Erro: bash: fork: Não é possível alocar memória</summary>
 
-Quando `unshare` é executado sem a opção `-f`, um erro é encontrado devido à forma como o Linux lida com novos namespaces de PID (Identificação de Processo). Os detalhes principais e a solução estão descritos abaixo:
+Quando `unshare` é executado sem a opção `-f`, um erro é encontrado devido à forma como o Linux lida com novos namespaces de PID (ID do Processo). Os detalhes principais e a solução estão descritos abaixo:
 
 1. **Explicação do Problema**:
 

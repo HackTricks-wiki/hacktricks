@@ -1,4 +1,4 @@
-# Comandos Úteis do macOS
+# macOS Comandos Úteis
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -117,7 +117,7 @@ sudo killall -HUP mDNSResponder
 ```
 ### Software e Serviços Instalados
 
-Verifique se há aplicativos **suspeitos** instalados e **privilégios** sobre os recursos instalados:
+Verifique se há aplicações **suspeitas** instaladas e **privilégios** sobre os recursos instalados:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework

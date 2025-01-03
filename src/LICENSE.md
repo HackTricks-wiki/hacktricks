@@ -11,13 +11,13 @@ Formatação: https://github.com/jmatsushita/Creative-Commons-4.0-Markdown/blob/
 
 # Attribution-NonCommercial 4.0 International
 
-Creative Commons Corporation (“Creative Commons”) não é um escritório de advocacia e não fornece serviços ou conselhos legais. A distribuição de licenças públicas da Creative Commons não cria uma relação advogado-cliente ou outra relação. A Creative Commons disponibiliza suas licenças e informações relacionadas em uma base "como está". A Creative Commons não oferece garantias em relação às suas licenças, qualquer material licenciado sob seus termos e condições, ou qualquer informação relacionada. A Creative Commons renuncia a toda responsabilidade por danos resultantes de seu uso na máxima extensão possível.
+Creative Commons Corporation (“Creative Commons”) não é um escritório de advocacia e não fornece serviços jurídicos ou aconselhamento jurídico. A distribuição de licenças públicas da Creative Commons não cria uma relação advogado-cliente ou outra relação. A Creative Commons disponibiliza suas licenças e informações relacionadas em uma base "como está". A Creative Commons não oferece garantias em relação às suas licenças, qualquer material licenciado sob seus termos e condições, ou qualquer informação relacionada. A Creative Commons renuncia a toda responsabilidade por danos resultantes de seu uso na máxima extensão possível.
 
 ## Usando Licenças Públicas da Creative Commons
 
 As licenças públicas da Creative Commons fornecem um conjunto padrão de termos e condições que criadores e outros detentores de direitos podem usar para compartilhar obras originais de autoria e outros materiais sujeitos a direitos autorais e certos outros direitos especificados na licença pública abaixo. As seguintes considerações são apenas para fins informativos, não são exaustivas e não fazem parte de nossas licenças.
 
-- **Considerações para licenciadores:** Nossas licenças públicas são destinadas ao uso por aqueles autorizados a dar ao público permissão para usar material de maneiras que de outra forma seriam restritas por direitos autorais e certos outros direitos. Nossas licenças são irrevogáveis. Os licenciadores devem ler e entender os termos e condições da licença que escolhem antes de aplicá-la. Os licenciadores também devem garantir todos os direitos necessários antes de aplicar nossas licenças para que o público possa reutilizar o material conforme esperado. Os licenciadores devem marcar claramente qualquer material que não esteja sujeito à licença. Isso inclui outro material licenciado pela CC, ou material usado sob uma exceção ou limitação ao direito autoral. [Mais considerações para licenciadores](http://wiki.creativecommons.org/Considerations_for_licensors_and_licensees#Considerations_for_licensors).
+- **Considerações para licenciadores:** Nossas licenças públicas são destinadas ao uso por aqueles autorizados a dar ao público permissão para usar material de maneiras que de outra forma seriam restritas por direitos autorais e certos outros direitos. Nossas licenças são irrevogáveis. Os licenciadores devem ler e entender os termos e condições da licença que escolhem antes de aplicá-la. Os licenciadores também devem garantir todos os direitos necessários antes de aplicar nossas licenças para que o público possa reutilizar o material conforme esperado. Os licenciadores devem marcar claramente qualquer material não sujeito à licença. Isso inclui outro material licenciado pela CC, ou material usado sob uma exceção ou limitação ao direito autoral. [Mais considerações para licenciadores](http://wiki.creativecommons.org/Considerations_for_licensors_and_licensees#Considerations_for_licensors).
 
 - **Considerações para o público:** Ao usar uma de nossas licenças públicas, um licenciador concede ao público permissão para usar o material licenciado sob termos e condições especificados. Se a permissão do licenciador não for necessária por qualquer motivo – por exemplo, devido a qualquer exceção ou limitação aplicável ao direito autoral – então esse uso não é regulado pela licença. Nossas licenças concedem apenas permissões sob direitos autorais e certos outros direitos que um licenciador tem autoridade para conceder. O uso do material licenciado ainda pode ser restrito por outros motivos, incluindo porque outros têm direitos autorais ou outros direitos sobre o material. Um licenciador pode fazer solicitações especiais, como pedir que todas as alterações sejam marcadas ou descritas. Embora não seja exigido por nossas licenças, você é incentivado a respeitar essas solicitações quando razoável. [Mais considerações para o público](http://wiki.creativecommons.org/Considerations_for_licensors_and_licensees#Considerations_for_licensees).
 
@@ -71,7 +71,7 @@ A. **Oferta do Licenciador – Material Licenciado.** Cada destinatário do Mate
 
 B. **Sem restrições a jusante.** Você não pode oferecer ou impor quaisquer termos ou condições adicionais ou diferentes sobre, ou aplicar quaisquer Medidas Tecnológicas Eficazes ao, Material Licenciado se isso restringir o exercício dos Direitos Licenciados por qualquer destinatário do Material Licenciado.
 
-6.  **Nenhum endosse.** Nada nesta Licença Pública constitui ou pode ser interpretado como permissão para afirmar ou implicar que você está, ou que seu uso do Material Licenciado está, conectado com, ou patrocinado, endossado ou concedido status oficial pelo, Licenciador ou outros designados para receber atribuição conforme previsto na Seção 3(a)(1)(A)(i).
+6.  **Nenhum endosse.** Nada nesta Licença Pública constitui ou pode ser interpretado como permissão para afirmar ou implicar que você está, ou que seu uso do Material Licenciado está, conectado com, ou patrocinado, endossado ou concedido status oficial pelo, Licenciador ou outros designados para receber atribuição conforme fornecido na Seção 3(a)(1)(A)(i).
 
 b. **_Outros direitos._**
 
@@ -79,7 +79,7 @@ b. **_Outros direitos._**
 
 2.  Direitos de patente e marca registrada não são licenciados sob esta Licença Pública.
 
-3.  Na medida do possível, o Licenciador renuncia a qualquer direito de coletar royalties de você pelo exercício dos Direitos Licenciados, seja diretamente ou através de uma sociedade de cobrança sob qualquer esquema de licenciamento voluntário ou renunciável ou compulsório. Em todos os outros casos, o Licenciador reserva expressamente qualquer direito de coletar tais royalties, incluindo quando o Material Licenciado é usado de outra forma que não para fins Não Comerciais.
+3.  Na medida do possível, o Licenciador renuncia a qualquer direito de coletar royalties de você pelo exercício dos Direitos Licenciados, seja diretamente ou por meio de uma sociedade de cobrança sob qualquer esquema de licenciamento voluntário ou renunciável ou compulsório. Em todos os outros casos, o Licenciador reserva expressamente qualquer direito de coletar tais royalties, incluindo quando o Material Licenciado é usado de outra forma que não para fins Não Comerciais.
 
 ## Seção 3 – Condições da Licença.
 
@@ -109,7 +109,7 @@ C. indicar que o Material Licenciado é licenciado sob esta Licença Pública, e
 
 3.  Se solicitado pelo Licenciador, você deve remover qualquer uma das informações exigidas pela Seção 3(a)(1)(A) na medida razoavelmente prática.
 
-4.  Se você Compartilhar Material Adaptado que você produziu, a Licença do Adaptador que você aplica não deve impedir os destinatários do Material Adaptado de cumprir esta Licença Pública.
+4.  Se você Compartilhar Material Adaptado que produziu, a Licença do Adaptador que você aplica não deve impedir os destinatários do Material Adaptado de cumprir esta Licença Pública.
 
 ## Seção 4 – Direitos de Banco de Dados Sui Generis.
 
@@ -117,7 +117,7 @@ Onde os Direitos Licenciados incluem Direitos de Banco de Dados Sui Generis que 
 
 a. para evitar dúvidas, a Seção 2(a)(1) concede a você o direito de extrair, reutilizar, reproduzir e Compartilhar todo ou uma parte substancial do conteúdo do banco de dados apenas para fins Não Comerciais;
 
-b. se você incluir todo ou uma parte substancial do conteúdo do banco de dados em um banco de dados no qual você possui Direitos de Banco de Dados Sui Generis, então o banco de dados no qual você possui Direitos de Banco de Dados Sui Generis (mas não seus conteúdos individuais) é Material Adaptado; e
+b. se você incluir todo ou uma parte substancial do conteúdo do banco de dados em um banco de dados no qual você tem Direitos de Banco de Dados Sui Generis, então o banco de dados no qual você tem Direitos de Banco de Dados Sui Generis (mas não seu conteúdo individual) é Material Adaptado; e
 
 c. você deve cumprir as condições na Seção 3(a) se você Compartilhar todo ou uma parte substancial do conteúdo do banco de dados.
 
@@ -129,7 +129,7 @@ a. **A menos que de outra forma assumido separadamente pelo Licenciador, na medi
 
 b. **Na medida do possível, em nenhuma circunstância o Licenciador será responsável a você sob qualquer teoria legal (incluindo, sem limitação, negligência) ou de outra forma por quaisquer perdas, custos, despesas ou danos diretos, especiais, indiretos, incidentais, consequenciais, punitivos, exemplares ou outros decorrentes desta Licença Pública ou do uso do Material Licenciado, mesmo que o Licenciador tenha sido avisado da possibilidade de tais perdas, custos, despesas ou danos. Onde uma limitação de responsabilidade não é permitida total ou parcialmente, esta limitação pode não se aplicar a você.**
 
-c. A renúncia de garantias e a limitação de responsabilidade fornecidas acima serão interpretadas de uma maneira que, na medida do possível, mais se aproxima de uma renúncia absoluta e renúncia de toda responsabilidade.
+c. A renúncia de garantias e a limitação de responsabilidade fornecidas acima serão interpretadas de uma maneira que, na medida do possível, mais se aproxime de uma renúncia absoluta e renúncia de toda responsabilidade.
 
 ## Seção 6 – Prazo e Rescisão.
 
@@ -141,7 +141,7 @@ b. Onde seu direito de usar o Material Licenciado foi encerrado sob a Seção 6(
 
 2.  mediante restabelecimento expresso pelo Licenciador.
 
-Para evitar dúvidas, esta Seção 6(b) não afeta qualquer direito que o Licenciador possa ter de buscar remédios para suas violações desta Licença Pública.
+Para evitar dúvidas, esta Seção 6(b) não afeta qualquer direito que o Licenciador possa ter de buscar remédios por suas violações desta Licença Pública.
 
 c. Para evitar dúvidas, o Licenciador também pode oferecer o Material Licenciado sob termos ou condições separadas ou parar de distribuir o Material Licenciado a qualquer momento; no entanto, fazer isso não encerrará esta Licença Pública.
 

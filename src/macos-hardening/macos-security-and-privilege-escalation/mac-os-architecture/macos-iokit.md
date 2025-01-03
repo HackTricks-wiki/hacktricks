@@ -30,7 +30,7 @@ IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArguments
 No macOS, eles estão localizados em:
 
 - **`/System/Library/Extensions`**
-- Arquivos KEXT incorporados no sistema operacional OS X.
+- Arquivos KEXT integrados ao sistema operacional OS X.
 - **`/Library/Extensions`**
 - Arquivos KEXT instalados por software de terceiros
 
@@ -54,7 +54,7 @@ Index Refs Address            Size       Wired      Name (Version) UUID <Linked 
 9    2 0xffffff8003317000 0xe000     0xe000     com.apple.kec.Libm (1) 6C1342CC-1D74-3D0F-BC43-97D5AD38200A <5>
 10   12 0xffffff8003544000 0x92000    0x92000    com.apple.kec.corecrypto (11.1) F5F1255F-6552-3CF4-A9DB-D60EFDEB4A9A <8 7 6 5 3 1>
 ```
-Até o número 9, os drivers listados estão **carregados no endereço 0**. Isso significa que não são drivers reais, mas **parte do kernel e não podem ser descarregados**.
+Até o número 9, os drivers listados estão **carregados no endereço 0**. Isso significa que eles não são drivers reais, mas **parte do kernel e não podem ser descarregados**.
 
 Para encontrar extensões específicas, você pode usar:
 ```bash
@@ -154,7 +154,7 @@ Existem **outras** funções que podem ser usadas para chamar funções do IOKit
 
 ## Reversão do ponto de entrada do driver
 
-Você pode obter esses, por exemplo, de uma [**imagem de firmware (ipsw)**](./#ipsw). Em seguida, carregue-a em seu descompilador favorito.
+Você pode obter isso, por exemplo, de uma [**imagem de firmware (ipsw)**](./#ipsw). Em seguida, carregue-a em seu descompilador favorito.
 
 Você pode começar a descompilar a função **`externalMethod`**, pois esta é a função do driver que receberá a chamada e chamará a função correta:
 
@@ -162,7 +162,7 @@ Você pode começar a descompilar a função **`externalMethod`**, pois esta é 
 
 <figure><img src="../../../images/image (1169).png" alt=""><figcaption></figcaption></figure>
 
-Aquela chamada horrível demangled significa:
+Aquela chamada horrível demanglada significa:
 ```cpp
 IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
@@ -192,11 +192,11 @@ Agora, seguindo o `(IOExternalMethodDispatch2022 *)&sIOExternalMethodArray`, voc
 
 <figure><img src="../../../images/image (1176).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Mude o Tipo de Dados para **`IOExternalMethodDispatch2022:`**
+Altere o Tipo de Dados para **`IOExternalMethodDispatch2022:`**
 
 <figure><img src="../../../images/image (1177).png" alt="" width="375"><figcaption></figcaption></figure>
 
-após a mudança:
+após a alteração:
 
 <figure><img src="../../../images/image (1179).png" alt="" width="563"><figcaption></figcaption></figure>
 
@@ -209,6 +209,6 @@ Após o array ser criado, você pode ver todas as funções exportadas:
 <figure><img src="../../../images/image (1181).png" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> Se você se lembrar, para **chamar** uma função **exportada** do espaço do usuário, não precisamos chamar o nome da função, mas o **número do seletor**. Aqui você pode ver que o seletor **0** é a função **`initializeDecoder`**, o seletor **1** é **`startDecoder`**, o seletor **2** **`initializeEncoder`**...
+> Se você se lembra, para **chamar** uma função **exportada** do espaço do usuário, não precisamos chamar o nome da função, mas o **número do seletor**. Aqui você pode ver que o seletor **0** é a função **`initializeDecoder`**, o seletor **1** é **`startDecoder`**, o seletor **2** **`initializeEncoder`**...
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -162,7 +162,7 @@ apparmor.md
 ```
 ### SELinux
 
-Executar um contêiner com a flag `--privileged` desabilita os **rótulos SELinux**, fazendo com que ele herde o rótulo do mecanismo de contêiner, tipicamente `unconfined`, concedendo acesso total semelhante ao do mecanismo de contêiner. No modo sem root, utiliza `container_runtime_t`, enquanto no modo root, aplica-se `spc_t`.
+Executar um contêiner com a flag `--privileged` desabilita os **rótulos SELinux**, fazendo com que ele herde o rótulo do mecanismo de contêiner, tipicamente `unconfined`, concedendo acesso total semelhante ao do mecanismo de contêiner. No modo sem root, usa `container_runtime_t`, enquanto no modo root, `spc_t` é aplicado.
 
 {{#ref}}
 ../selinux.md

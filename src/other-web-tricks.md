@@ -1,52 +1,35 @@
-# Other Web Tricks
+# Outras Dicas da Web
 
 {{#include ./banners/hacktricks-training.md}}
 
-<figure><img src="/images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
+### Cabeçalho Host
 
-**Get a hacker's perspective on your web apps, network, and cloud**
-
-**Find and report critical, exploitable vulnerabilities with real business impact.** Use our 20+ custom tools to map the attack surface, find security issues that let you escalate privileges, and use automated exploits to collect essential evidence, turning your hard work into persuasive reports.
-
-{% embed url="https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons" %}
-
-### Host header
-
-Several times the back-end trust the **Host header** to perform some actions. For example, it could use its value as the **domain to send a password reset**. So when you receive an email with a link to reset your password, the domain being used is the one you put in the Host header.Then, you can request the password reset of other users and change the domain to one controlled by you to steal their password reset codes. [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).
+Várias vezes o back-end confia no **Cabeçalho Host** para realizar algumas ações. Por exemplo, ele pode usar seu valor como o **domínio para enviar um reset de senha**. Assim, quando você recebe um e-mail com um link para redefinir sua senha, o domínio utilizado é aquele que você colocou no Cabeçalho Host. Então, você pode solicitar o reset de senha de outros usuários e mudar o domínio para um controlado por você para roubar seus códigos de reset de senha. [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).
 
 > [!WARNING]
-> Note that it's possible that you don't even need to wait for the user to click on the reset password link to get the token, as maybe even **spam filters or other intermediary devices/bots will click on it to analyze it**.
+> Note que é possível que você não precise nem esperar o usuário clicar no link de redefinição de senha para obter o token, pois talvez até mesmo **filtros de spam ou outros dispositivos/bots intermediários cliquem nele para analisá-lo**.
 
+### Booleanos de Sessão
 
-### Session booleans
+Às vezes, quando você completa alguma verificação corretamente, o back-end **apenas adiciona um booleano com o valor "True" a um atributo de segurança da sua sessão**. Então, um endpoint diferente saberá se você passou com sucesso naquela verificação.\
+No entanto, se você **passar a verificação** e sua sessão receber aquele valor "True" no atributo de segurança, você pode tentar **acessar outros recursos** que **dependem do mesmo atributo** mas que você **não deveria ter permissões** para acessar. [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).
 
-Some times when you complete some verification correctly the back-end will **just add a boolean with the value "True" to a security attribute your session**. Then, a different endpoint will know if you successfully passed that check.\
-However, if you **pass the check** and your sessions is granted that "True" value in the security attribute, you can try to **access other resources** that **depends on the same attribute** but that you **shouldn't have permissions** to access. [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).
+### Funcionalidade de Registro
 
-### Register functionality
+Tente se registrar como um usuário já existente. Tente também usar caracteres equivalentes (pontos, muitos espaços e Unicode).
 
-Try to register as an already existent user. Try also using equivalent characters (dots, lots of spaces and Unicode).
+### Tomar Contas de E-mail
 
-### Takeover emails
+Registre um e-mail, antes de confirmá-lo, mude o e-mail, então, se o novo e-mail de confirmação for enviado para o primeiro e-mail registrado, você pode tomar qualquer e-mail. Ou se você puder habilitar o segundo e-mail confirmando o primeiro, você também pode tomar qualquer conta.
 
-Register an email, before confirming it change the email, then, if the new confirmation email is sent to the first registered email,you can takeover any email. Or if you can enable the second email confirming the firt one, you can also takeover any account.
-
-### Access Internal servicedesk of companies using atlassian
+### Acessar o Servicedesk Interno de Empresas Usando Atlassian
 
 {% embed url="https://yourcompanyname.atlassian.net/servicedesk/customer/user/login" %}
 
-### TRACE method
+### Método TRACE
 
-Developers might forget to disable various debugging options in the production environment. For example, the HTTP `TRACE` method is designed for diagnostic purposes. If enabled, the web server will respond to requests that use the `TRACE` method by echoing in the response the exact request that was received. This behaviour is often harmless, but occasionally leads to information disclosure, such as the name of internal authentication headers that may be appended to requests by reverse proxies.![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
+Os desenvolvedores podem esquecer de desativar várias opções de depuração no ambiente de produção. Por exemplo, o método HTTP `TRACE` é projetado para fins de diagnóstico. Se habilitado, o servidor web responderá a solicitações que usam o método `TRACE` ecoando na resposta a exata solicitação que foi recebida. Esse comportamento é frequentemente inofensivo, mas ocasionalmente leva à divulgação de informações, como o nome de cabeçalhos de autenticação internos que podem ser anexados a solicitações por proxies reversos. ![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
 
 ![Image for post](https://miro.medium.com/max/1330/1*wDFRADTOd9Tj63xucenvAA.png)
-
-<figure><img src="/images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
-
-**Get a hacker's perspective on your web apps, network, and cloud**
-
-**Find and report critical, exploitable vulnerabilities with real business impact.** Use our 20+ custom tools to map the attack surface, find security issues that let you escalate privileges, and use automated exploits to collect essential evidence, turning your hard work into persuasive reports.
-
-{% embed url="https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons" %}
 
 {{#include ./banners/hacktricks-training.md}}

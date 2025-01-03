@@ -4,15 +4,15 @@
 
 ## Principais Keychains
 
-- O **Keychain do Usuário** (`~/Library/Keychains/login.keychain-db`), que é usado para armazenar **credenciais específicas do usuário** como senhas de aplicativos, senhas da internet, certificados gerados pelo usuário, senhas de rede e chaves públicas/privadas geradas pelo usuário.
-- O **Keychain do Sistema** (`/Library/Keychains/System.keychain`), que armazena **credenciais em todo o sistema** como senhas de WiFi, certificados raiz do sistema, chaves privadas do sistema e senhas de aplicativos do sistema.
+- O **User Keychain** (`~/Library/Keychains/login.keychain-db`), que é usado para armazenar **credenciais específicas do usuário** como senhas de aplicativos, senhas da internet, certificados gerados pelo usuário, senhas de rede e chaves públicas/privadas geradas pelo usuário.
+- O **System Keychain** (`/Library/Keychains/System.keychain`), que armazena **credenciais de sistema** como senhas de WiFi, certificados raiz do sistema, chaves privadas do sistema e senhas de aplicativos do sistema.
 - É possível encontrar outros componentes como certificados em `/System/Library/Keychains/*`
-- No **iOS**, há apenas um **Keychain** localizado em `/private/var/Keychains/`. Esta pasta também contém bancos de dados para o `TrustStore`, autoridades certificadoras (`caissuercache`) e entradas OSCP (`ocspache`).
+- No **iOS** há apenas um **Keychain** localizado em `/private/var/Keychains/`. Esta pasta também contém bancos de dados para o `TrustStore`, autoridades certificadoras (`caissuercache`) e entradas OSCP (`ocspache`).
 - Os aplicativos serão restritos no keychain apenas à sua área privada com base em seu identificador de aplicativo.
 
 ### Acesso ao Keychain de Senhas
 
-Esses arquivos, embora não tenham proteção inerente e possam ser **baixados**, são criptografados e requerem a **senha em texto simples do usuário para serem descriptografados**. Uma ferramenta como [**Chainbreaker**](https://github.com/n0fate/chainbreaker) pode ser usada para a descriptografia.
+Esses arquivos, embora não tenham proteção inerente e possam ser **baixados**, são criptografados e requerem a **senha em texto simples do usuário para serem descriptografados**. Uma ferramenta como [**Chainbreaker**](https://github.com/n0fate/chainbreaker) pode ser usada para descriptografia.
 
 ## Proteções de Entradas do Keychain
 
@@ -49,7 +49,7 @@ Quando uma **nova** **entrada** é criada usando **`Keychain Access.app`**, as s
 Quando um **aplicativo cria uma entrada no keychain**, as regras são um pouco diferentes:
 
 - Todos os aplicativos podem criptografar.
-- Somente o **aplicativo criador** (ou qualquer outro aplicativo explicitamente adicionado) pode exportar/descriptografar (sem solicitar ao usuário).
+- Apenas o **aplicativo criador** (ou qualquer outro aplicativo explicitamente adicionado) pode exportar/descriptografar (sem solicitar ao usuário).
 - Todos os aplicativos podem ver a verificação de integridade.
 - Nenhum aplicativo pode alterar as ACLs.
 - O **partitionID** é definido como **`teamid:[teamID aqui]`**.
@@ -76,7 +76,7 @@ security dump-keychain ~/Library/Keychains/login.keychain-db
 ### APIs
 
 > [!TIP]
-> A **enumeração e extração** do keychain de segredos que **não gerarão um prompt** pode ser feita com a ferramenta [**LockSmith**](https://github.com/its-a-feature/LockSmith)
+> A **enumeração e despejo do keychain** de segredos que **não gerarão um prompt** podem ser feitos com a ferramenta [**LockSmith**](https://github.com/its-a-feature/LockSmith)
 >
 > Outros endpoints da API podem ser encontrados no código-fonte de [**SecKeyChain.h**](https://opensource.apple.com/source/libsecurity_keychain/libsecurity_keychain-55017/lib/SecKeychain.h.auto.html).
 
@@ -117,12 +117,12 @@ E estes são os **requisitos** para poder **exportar um segredo sem um prompt**:
 > [!CAUTION]
 > Portanto, se houver **1 aplicativo listado**, você precisa **injetar código nesse aplicativo**.
 >
-> Se **apple** estiver indicado no **partitionID**, você pode acessá-lo com **`osascript`** então qualquer coisa que confie em todos os aplicativos com apple no partitionID. **`Python`** também pode ser usado para isso.
+> Se **apple** estiver indicado no **partitionID**, você poderia acessá-lo com **`osascript`** então qualquer coisa que confie em todos os aplicativos com apple no partitionID. **`Python`** também poderia ser usado para isso.
 
 ### Dois atributos adicionais
 
 - **Invisible**: É um sinalizador booleano para **ocultar** a entrada do aplicativo **UI** do Keychain
-- **General**: É para armazenar **metadados** (portanto, NÃO É CRIPTOGRAFADO)
+- **General**: É para armazenar **metadados** (então NÃO está CRIPTOGRAFADO)
 - A Microsoft estava armazenando em texto claro todos os tokens de atualização para acessar endpoints sensíveis.
 
 ## Referências

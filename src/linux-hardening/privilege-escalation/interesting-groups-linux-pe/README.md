@@ -27,7 +27,7 @@ Encontre todos os binários suid e verifique se há o binário **Pkexec**:
 find / -perm -4000 2>/dev/null
 ```
 Se você descobrir que o binário **pkexec é um binário SUID** e você pertence ao **sudo** ou **admin**, você provavelmente poderá executar binários como sudo usando `pkexec`.\
-Isso ocorre porque, tipicamente, esses são os grupos dentro da **política do polkit**. Essa política basicamente identifica quais grupos podem usar `pkexec`. Verifique com:
+Isso ocorre porque, normalmente, esses são os grupos dentro da **política do polkit**. Essa política basicamente identifica quais grupos podem usar `pkexec`. Verifique com:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
@@ -68,7 +68,7 @@ sudo su
 ```
 ## Grupo Shadow
 
-Usuários do **grupo shadow** podem **ler** o arquivo **/etc/shadow**:
+Usuários do **grupo shadow** podem **ler** o **/etc/shadow** arquivo:
 ```
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
@@ -86,7 +86,7 @@ $ echo $PATH
 # echo $PATH
 /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ```
-Se conseguirmos sequestrar alguns programas em `/usr/local`, podemos facilmente obter acesso root.
+Se conseguirmos sequestrar alguns programas em `/usr/local`, podemos facilmente obter root.
 
 Sequestrar o programa `run-parts` é uma maneira fácil de obter root, porque a maioria dos programas executará um `run-parts`, como (crontab, quando o ssh faz login).
 ```bash
@@ -193,7 +193,7 @@ echo 'toor:$1$.ZcF5ts0$i4k6rQYzeegUkacRCvfxC0:0:0:root:/root:/bin/sh' >> /etc/pa
 #Ifyou just want filesystem and network access you can startthe following container:
 docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chroot /mnt bashbash
 ```
-Finalmente, se você não gosta de nenhuma das sugestões anteriores, ou elas não estão funcionando por algum motivo (firewall da API do docker?), você sempre pode tentar **executar um contêiner privilegiado e escapar dele** como explicado aqui:
+Finalmente, se você não gosta de nenhuma das sugestões anteriores, ou elas não estão funcionando por algum motivo (firewall da api do docker?), você sempre pode tentar **executar um contêiner privilegiado e escapar dele** como explicado aqui:
 
 {{#ref}}
 ../docker-security/
@@ -213,7 +213,7 @@ Se você tiver permissões de escrita sobre o socket do docker, leia [**este pos
 
 ## Grupo Adm
 
-Normalmente, **membros** do grupo **`adm`** têm permissões para **ler arquivos de log** localizados dentro de _/var/log/_.\
+Normalmente, **membros** do grupo **`adm`** têm permissões para **ler arquivos de log** localizados em _/var/log/_.\
 Portanto, se você comprometeu um usuário dentro deste grupo, você definitivamente deve dar uma **olhada nos logs**.
 
 ## Grupo Auth

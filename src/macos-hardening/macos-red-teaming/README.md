@@ -34,7 +34,7 @@ JAMF pode executar **scripts personalizados** (scripts desenvolvidos pelo sysadm
 
 #### Auto-inscrição do JAMF
 
-Vá para uma página como `https://<company-name>.jamfcloud.com/enroll/` para ver se eles têm **auto-inscrição habilitada**. Se tiver, pode **pedir credenciais para acesso**.
+Vá para uma página como `https://<company-name>.jamfcloud.com/enroll/` para ver se eles têm **auto-inscrição habilitada**. Se tiver, pode **pedir credenciais para acessar**.
 
 Você poderia usar o script [**JamfSniper.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfSniper.py) para realizar um ataque de password spraying.
 
@@ -74,7 +74,7 @@ sudo jamf policy -id 0
 ```
 #### Impersonação do JAMF
 
-Para **impersonar a comunicação** entre um dispositivo e o JMF, você precisa:
+Para **impersonar a comunicação** entre um dispositivo e o JAMF, você precisa:
 
 - O **UUID** do dispositivo: `ioreg -d2 -c IOPlatformExpertDevice | awk -F" '/IOPlatformUUID/{print $(NF-1)}'`
 - O **keychain do JAMF** de: `/Library/Application\ Support/Jamf/JAMF.keychain`, que contém o certificado do dispositivo
@@ -119,7 +119,7 @@ Alguma **ferramenta local do MacOS** que também pode ajudar é `dscl`:
 ```bash
 dscl "/Active Directory/[Domain]/All Domains" ls /
 ```
-Também existem algumas ferramentas preparadas para MacOS para enumerar automaticamente o AD e interagir com o kerberos:
+Além disso, existem algumas ferramentas preparadas para MacOS para enumerar automaticamente o AD e interagir com o kerberos:
 
 - [**Machound**](https://github.com/XMCyber/MacHound): MacHound é uma extensão da ferramenta de auditoria Bloodhound que permite coletar e ingerir relacionamentos do Active Directory em hosts MacOS.
 - [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost é um projeto em Objective-C projetado para interagir com as APIs Heimdal krb5 no macOS. O objetivo do projeto é permitir testes de segurança melhores em torno do Kerberos em dispositivos macOS usando APIs nativas, sem exigir nenhum outro framework ou pacotes no alvo.
@@ -133,8 +133,8 @@ echo show com.apple.opendirectoryd.ActiveDirectory | scutil
 
 Os três tipos de usuários do MacOS são:
 
-- **Usuários Locais** — Gerenciados pelo serviço local OpenDirectory, não estão conectados de nenhuma forma ao Active Directory.
-- **Usuários de Rede** — Usuários voláteis do Active Directory que requerem uma conexão com o servidor DC para autenticação.
+- **Usuários Locais** — Gerenciados pelo serviço OpenDirectory local, não estão conectados de nenhuma forma ao Active Directory.
+- **Usuários de Rede** — Usuários voláteis do Active Directory que requerem uma conexão com o servidor DC para autenticar.
 - **Usuários Móveis** — Usuários do Active Directory com um backup local para suas credenciais e arquivos.
 
 As informações locais sobre usuários e grupos são armazenadas na pasta _/var/db/dslocal/nodes/Default._\
@@ -168,13 +168,13 @@ dsconfigad -show
 ```
 Mais informações em [https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/](https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/)
 
-### Senha do Computer$
+### Computer$ senha
 
 Obtenha senhas usando:
 ```bash
 bifrost --action askhash --username [name] --password [password] --domain [domain]
 ```
-É possível acessar a **`Computer$`** senha dentro do chaveiro do Sistema.
+É possível acessar a senha **`Computer$`** dentro do chaveiro do Sistema.
 
 ### Over-Pass-The-Hash
 

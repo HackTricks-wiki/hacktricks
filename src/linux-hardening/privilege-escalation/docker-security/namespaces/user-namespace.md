@@ -4,16 +4,16 @@
 
 ## Informações Básicas
 
-Um namespace de usuário é um recurso do kernel Linux que **fornece isolamento de mapeamentos de IDs de usuário e grupo**, permitindo que cada namespace de usuário tenha seu **próprio conjunto de IDs de usuário e grupo**. Esse isolamento permite que processos em diferentes namespaces de usuário **tenham privilégios e propriedade diferentes**, mesmo que compartilhem os mesmos IDs de usuário e grupo numericamente.
+Um namespace de usuário é um recurso do kernel Linux que **fornece isolamento de mapeamentos de ID de usuário e grupo**, permitindo que cada namespace de usuário tenha seu **próprio conjunto de IDs de usuário e grupo**. Esse isolamento permite que processos em diferentes namespaces de usuário **tenham privilégios e propriedade diferentes**, mesmo que compartilhem os mesmos IDs de usuário e grupo numericamente.
 
 Namespaces de usuário são particularmente úteis na containerização, onde cada contêiner deve ter seu próprio conjunto independente de IDs de usuário e grupo, permitindo melhor segurança e isolamento entre contêineres e o sistema host.
 
 ### Como funciona:
 
-1. Quando um novo namespace de usuário é criado, ele **começa com um conjunto vazio de mapeamentos de IDs de usuário e grupo**. Isso significa que qualquer processo executando no novo namespace de usuário **inicialmente não terá privilégios fora do namespace**.
-2. Mapeamentos de IDs podem ser estabelecidos entre os IDs de usuário e grupo no novo namespace e aqueles no namespace pai (ou host). Isso **permite que processos no novo namespace tenham privilégios e propriedade correspondentes aos IDs de usuário e grupo no namespace pai**. No entanto, os mapeamentos de IDs podem ser restritos a intervalos e subconjuntos específicos de IDs, permitindo um controle mais detalhado sobre os privilégios concedidos aos processos no novo namespace.
+1. Quando um novo namespace de usuário é criado, ele **começa com um conjunto vazio de mapeamentos de ID de usuário e grupo**. Isso significa que qualquer processo executando no novo namespace de usuário **inicialmente não terá privilégios fora do namespace**.
+2. Mapeamentos de ID podem ser estabelecidos entre os IDs de usuário e grupo no novo namespace e aqueles no namespace pai (ou host). Isso **permite que processos no novo namespace tenham privilégios e propriedade correspondentes aos IDs de usuário e grupo no namespace pai**. No entanto, os mapeamentos de ID podem ser restritos a intervalos e subconjuntos específicos de IDs, permitindo um controle mais detalhado sobre os privilégios concedidos aos processos no novo namespace.
 3. Dentro de um namespace de usuário, **processos podem ter privilégios de root completos (UID 0) para operações dentro do namespace**, enquanto ainda têm privilégios limitados fora do namespace. Isso permite que **contêineres sejam executados com capacidades semelhantes a root dentro de seu próprio namespace sem ter privilégios de root completos no sistema host**.
-4. Processos podem se mover entre namespaces usando a chamada de sistema `setns()` ou criar novos namespaces usando as chamadas de sistema `unshare()` ou `clone()` com a flag `CLONE_NEWUSER`. Quando um processo se move para um novo namespace ou cria um, ele começará a usar os mapeamentos de IDs de usuário e grupo associados a esse namespace.
+4. Processos podem se mover entre namespaces usando a chamada de sistema `setns()` ou criar novos namespaces usando as chamadas de sistema `unshare()` ou `clone()` com a flag `CLONE_NEWUSER`. Quando um processo se move para um novo namespace ou cria um, ele começará a usar os mapeamentos de ID de usuário e grupo associados a esse namespace.
 
 ## Laboratório:
 
@@ -33,7 +33,7 @@ Quando `unshare` é executado sem a opção `-f`, um erro é encontrado devido �
 
 1. **Explicação do Problema**:
 
-- O kernel do Linux permite que um processo crie novos namespaces usando a chamada de sistema `unshare`. No entanto, o processo que inicia a criação de um novo namespace de PID (referido como o processo "unshare") não entra no novo namespace; apenas seus processos filhos o fazem.
+- O kernel do Linux permite que um processo crie novos namespaces usando a chamada de sistema `unshare`. No entanto, o processo que inicia a criação de um novo namespace de PID (referido como o processo "unshare") não entra no novo namespace; apenas seus processos filhos entram.
 - Executar `%unshare -p /bin/bash%` inicia `/bin/bash` no mesmo processo que `unshare`. Consequentemente, `/bin/bash` e seus processos filhos estão no namespace de PID original.
 - O primeiro processo filho de `/bin/bash` no novo namespace se torna PID 1. Quando esse processo sai, ele aciona a limpeza do namespace se não houver outros processos, já que PID 1 tem o papel especial de adotar processos órfãos. O kernel do Linux então desabilitará a alocação de PID nesse namespace.
 
@@ -43,7 +43,7 @@ Quando `unshare` é executado sem a opção `-f`, um erro é encontrado devido �
 
 3. **Solução**:
 - O problema pode ser resolvido usando a opção `-f` com `unshare`. Esta opção faz com que `unshare` fork um novo processo após criar o novo namespace de PID.
-- Executar `%unshare -fp /bin/bash%` garante que o comando `unshare` em si se torne PID 1 no novo namespace. `/bin/bash` e seus processos filhos são então contidos com segurança dentro deste novo namespace, prevenindo a saída prematura de PID 1 e permitindo a alocação normal de PID.
+- Executar `%unshare -fp /bin/bash%` garante que o comando `unshare` se torne PID 1 no novo namespace. `/bin/bash` e seus processos filhos são então contidos com segurança dentro deste novo namespace, prevenindo a saída prematura de PID 1 e permitindo a alocação normal de PID.
 
 Ao garantir que `unshare` seja executado com a flag `-f`, o novo namespace de PID é mantido corretamente, permitindo que `/bin/bash` e seus subprocessos operem sem encontrar o erro de alocação de memória.
 
@@ -76,7 +76,7 @@ sudo find /proc -maxdepth 3 -type l -name user -exec readlink {} \; 2>/dev/null 
 # Find the processes with an specific namespace
 sudo find /proc -maxdepth 3 -type l -name user -exec ls -l  {} \; 2>/dev/null | grep <ns-number>
 ```
-### Entrar dentro de um namespace de usuário
+### Entrar em um namespace de usuário
 ```bash
 nsenter -U TARGET_PID --pid /bin/bash
 ```

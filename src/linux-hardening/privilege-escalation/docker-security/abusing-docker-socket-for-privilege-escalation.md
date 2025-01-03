@@ -33,11 +33,11 @@ Você também pode **abusar de um mount para escalar privilégios** dentro do co
 
 ### Escapando do contêiner
 
-- **`--privileged`** -> Com essa flag você [remove toda a isolação do contêiner](docker-privileged.md#what-affects). Confira técnicas para [escapar de contêineres privilegiados como root](docker-breakout-privilege-escalation/#automatic-enumeration-and-escape).
+- **`--privileged`** -> Com esta flag você [remove toda a isolação do contêiner](docker-privileged.md#what-affects). Verifique técnicas para [escapar de contêineres privilegiados como root](docker-breakout-privilege-escalation/#automatic-enumeration-and-escape).
 - **`--cap-add=<CAPABILITY/ALL> [--security-opt apparmor=unconfined] [--security-opt seccomp=unconfined] [-security-opt label:disable]`** -> Para [escalar abusando de capacidades](../linux-capabilities.md), **conceda essa capacidade ao contêiner** e desative outros métodos de proteção que podem impedir a exploração de funcionar.
 
 ### Curl
 
-Nesta página, discutimos maneiras de escalar privilégios usando flags do docker, você pode encontrar **maneiras de abusar desses métodos usando o comando curl** na página:
+Nesta página discutimos maneiras de escalar privilégios usando flags do docker, você pode encontrar **maneiras de abusar desses métodos usando o comando curl** na página:
 
 {{#include ../../../banners/hacktricks-training.md}}

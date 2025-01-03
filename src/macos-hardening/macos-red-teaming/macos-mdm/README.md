@@ -19,7 +19,7 @@
 
 ### **Noções Básicas do DEP (Programa de Inscrição de Dispositivos)**
 
-O [Programa de Inscrição de Dispositivos](https://www.apple.com/business/site/docs/DEP_Guide.pdf) (DEP) oferecido pela Apple simplifica a integração do Gerenciamento de Dispositivos Móveis (MDM) ao facilitar a configuração sem toque para dispositivos iOS, macOS e tvOS. O DEP automatiza o processo de inscrição, permitindo que os dispositivos estejam operacionais assim que retirados da caixa, com mínima intervenção do usuário ou do administrador. Os aspectos essenciais incluem:
+O [Programa de Inscrição de Dispositivos](https://www.apple.com/business/site/docs/DEP_Guide.pdf) (DEP) oferecido pela Apple simplifica a integração do Gerenciamento de Dispositivos Móveis (MDM) ao facilitar a configuração sem toque para dispositivos iOS, macOS e tvOS. O DEP automatiza o processo de inscrição, permitindo que os dispositivos estejam operacionais assim que retirados da caixa, com mínima intervenção do usuário ou do administrador. Aspectos essenciais incluem:
 
 - Permite que os dispositivos se registrem autonomamente em um servidor MDM pré-definido na ativação inicial.
 - Principalmente benéfico para dispositivos novos, mas também aplicável a dispositivos que estão sendo reconfigurados.
@@ -67,7 +67,7 @@ O [Programa de Inscrição de Dispositivos](https://www.apple.com/business/site/
 
 - RESTful
 - sincroniza registros de dispositivos da Apple para o servidor MDM
-- sincroniza “perfis DEP” da Apple do servidor MDM (entregues pela Apple ao dispositivo posteriormente)
+- sincroniza “perfis DEP” da Apple para o servidor MDM (entregues pela Apple ao dispositivo posteriormente)
 - Um “perfil” DEP contém:
 - URL do servidor do fornecedor de MDM
 - Certificados confiáveis adicionais para a URL do servidor (fixação opcional)
@@ -75,7 +75,7 @@ O [Programa de Inscrição de Dispositivos](https://www.apple.com/business/site/
 
 ## Número de Série
 
-Dispositivos Apple fabricados após 2010 geralmente têm números de série alfanuméricos de **12 caracteres**, com os **primeiros três dígitos representando o local de fabricação**, os **dois** seguintes indicando o **ano** e a **semana** de fabricação, os próximos **três** dígitos fornecendo um **identificador único**, e os **últimos** **quatro** dígitos representando o **número do modelo**.
+Dispositivos Apple fabricados após 2010 geralmente têm números de série **alfanuméricos de 12 caracteres**, com os **três primeiros dígitos representando o local de fabricação**, os **dois** seguintes indicando o **ano** e a **semana** de fabricação, os próximos **três** dígitos fornecendo um **identificador único**, e os **últimos** **quatro** dígitos representando o **número do modelo**.
 
 {{#ref}}
 macos-serial-number.md
@@ -110,7 +110,7 @@ ou ao executar `sudo profiles show -type enrollment`
 - Implementado por **`cloudconfigurationd`** via XPC. O **"Assistente de Configuração"** (quando o dispositivo é inicializado pela primeira vez) ou o comando **`profiles`** irá **contatar este daemon** para recuperar o registro de ativação.
 - LaunchDaemon (sempre executa como root)
 
-Segue algumas etapas para obter o Registro de Ativação realizadas por **`MCTeslaConfigurationFetcher`**. Este processo utiliza uma criptografia chamada **Absinthe**
+Segue algumas etapas para obter o Registro de Ativação realizado por **`MCTeslaConfigurationFetcher`**. Este processo utiliza uma criptografia chamada **Absinthe**
 
 1. Recuperar **certificado**
 1. GET [https://iprofiles.apple.com/resource/certificate.cer](https://iprofiles.apple.com/resource/certificate.cer)
@@ -142,7 +142,7 @@ A resposta é um dicionário JSON com alguns dados importantes, como:
 - Exemplos: **UDID, versão do OS**.
 - Assinada por CMS, codificada em DER
 - Assinada usando o **certificado de identidade do dispositivo (do APNS)**
-- **A cadeia de certificados** inclui um **Apple iPhone Device CA** expirado
+- **A cadeia de certificados** inclui **Apple iPhone Device CA** expirado
 
 ![](<../../../images/image (567) (1) (2) (2) (2) (2) (2) (2) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (2) (2).png>)
 

@@ -1,4 +1,4 @@
-# Segurança do macOS e Escalação de Privilégios
+# Segurança e Escalação de Privilégios no macOS
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -6,7 +6,7 @@
 
 Se você não está familiarizado com o macOS, deve começar aprendendo o básico do macOS:
 
-- Arquivos e **permissões especiais do macOS:**
+- **Arquivos e permissões especiais do macOS:**
 
 {{#ref}}
 macos-files-folders-and-binaries/
@@ -30,13 +30,13 @@ macos-applefs.md
 mac-os-architecture/
 {{#endref}}
 
-- Serviços e **protocolos de rede comuns do macOS**
+- **Serviços e protocolos de rede comuns do macOS**
 
 {{#ref}}
 macos-protocols.md
 {{#endref}}
 
-- **Opensource** macOS: [https://opensource.apple.com/](https://opensource.apple.com/)
+- **Open source** macOS: [https://opensource.apple.com/](https://opensource.apple.com/)
 - Para baixar um `tar.gz`, mude uma URL como [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) para [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
 
 ### MDM do MacOS
@@ -63,7 +63,7 @@ macos-security-protections/
 
 ### Permissões de Arquivo
 
-Se um **processo em execução como root escreve** um arquivo que pode ser controlado por um usuário, o usuário pode abusar disso para **escalar privilégios**.\
+Se um **processo executado como root escreve** um arquivo que pode ser controlado por um usuário, o usuário pode abusar disso para **escalar privilégios**.\
 Isso pode ocorrer nas seguintes situações:
 
 - O arquivo usado já foi criado por um usuário (pertencente ao usuário)
@@ -79,7 +79,7 @@ Para esse tipo de vulnerabilidades, não se esqueça de **verificar instaladores
 macos-files-folders-and-binaries/macos-installers-abuse.md
 {{#endref}}
 
-### Manipuladores de Extensão de Arquivo e URL
+### Manipuladores de Aplicativos de Extensão de Arquivo e Esquema de URL
 
 Aplicativos estranhos registrados por extensões de arquivo podem ser abusados e diferentes aplicativos podem ser registrados para abrir protocolos específicos
 
@@ -97,7 +97,7 @@ Esses privilégios geralmente são concedidos na forma de **direitos** com os qu
 
 Siga esses links para encontrar diferentes maneiras de [**escalar privilégios no TCC**](macos-security-protections/macos-tcc/#tcc-privesc-and-bypasses), para [**burlar o TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) e como no passado [**o SIP foi burlado**](macos-security-protections/macos-sip.md#sip-bypasses).
 
-## Escalação Tradicional de Privilégios do macOS
+## Escalação de Privilégios Tradicional do macOS
 
 Claro, do ponto de vista de uma equipe vermelha, você também deve estar interessado em escalar para root. Confira o seguinte post para algumas dicas:
 
@@ -111,7 +111,7 @@ macos-privilege-escalation.md
 
 ## Referências
 
-- [**Resposta a Incidentes do OS X: Scripting e Análise**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
+- [**OS X Incident Response: Scripting and Analysis**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
 - [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
 - [**https://github.com/NicolasGrimonpont/Cheatsheet**](https://github.com/NicolasGrimonpont/Cheatsheet)
 - [**https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ**](https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ)

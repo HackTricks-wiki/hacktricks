@@ -6,7 +6,7 @@ Se **enumerando** uma máquina **internamente** ou **externamente** você encont
 
 Além disso, se você **já for root e o serviço Splunk não estiver ouvindo apenas no localhost**, você pode **roubar** o arquivo de **senha** **do** serviço Splunk e **quebrar** as senhas, ou **adicionar novas** credenciais a ele. E manter persistência no host.
 
-Na primeira imagem abaixo, você pode ver como uma página da web do Splunkd se parece.
+Na primeira imagem abaixo, você pode ver como uma página web do Splunkd se parece.
 
 ## Resumo da Exploração do Agente Splunk Universal Forwarder
 

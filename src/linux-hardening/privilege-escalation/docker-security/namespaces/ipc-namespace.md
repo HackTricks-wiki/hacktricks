@@ -61,7 +61,7 @@ sudo find /proc -maxdepth 3 -type l -name ipc -exec readlink {} \; 2>/dev/null |
 # Find the processes with an specific namespace
 sudo find /proc -maxdepth 3 -type l -name ipc -exec ls -l  {} \; 2>/dev/null | grep <ns-number>
 ```
-### Entrar dentro de um namespace IPC
+### Entrar em um namespace IPC
 ```bash
 nsenter -i TARGET_PID --pid /bin/bash
 ```

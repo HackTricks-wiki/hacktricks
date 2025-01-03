@@ -2,121 +2,120 @@
 
 # [ProjectHoneypot](https://www.projecthoneypot.org/)
 
-You can ask if an IP is related to suspicious/malicious activities. Completely free.
+Você pode perguntar se um IP está relacionado a atividades suspeitas/maliciosas. Totalmente gratuito.
 
 # [**BotScout**](http://botscout.com/api.htm)
 
-Check if the IP address is related to a bot that register accounts. It can also check usernames and emails. Initially free.
+Verifique se o endereço IP está relacionado a um bot que registra contas. Também pode verificar nomes de usuário e e-mails. Inicialmente gratuito.
 
 # [Hunter](https://hunter.io/)
 
-Find and verify emails.  
-Some free API requests free, for more you need to pay.  
-Commercial?
+Encontre e verifique e-mails.
+Algumas solicitações de API gratuitas, para mais você precisa pagar.
+Comercial?
 
 # [AlientVault](https://otx.alienvault.com/api)
 
-Find Malicious activities related to IPs and Domains. Free.
+Encontre atividades maliciosas relacionadas a IPs e Domínios. Gratuito.
 
 # [Clearbit](https://dashboard.clearbit.com/)
 
-Find related personal data to a email \(profiles on other platforms\), domain \(basic company info ,mails and people working\) and companies \(get company info from mail\).  
-You need to pay to access all the possibilities.  
-Commercial?
+Encontre dados pessoais relacionados a um e-mail \(perfis em outras plataformas\), domínio \(informações básicas da empresa, e-mails e pessoas que trabalham\) e empresas \(obtenha informações da empresa a partir do e-mail\).
+Você precisa pagar para acessar todas as possibilidades.
+Comercial?
 
 # [BuiltWith](https://builtwith.com/)
 
-Technologies used by webs. Expensive...  
-Commercial?
+Tecnologias usadas por sites. Caro...
+Comercial?
 
 # [Fraudguard](https://fraudguard.io/)
 
-Check if a host \(domain or IP\) is related with suspicious/malicious activities. Have some free API access.  
-Commercial?
+Verifique se um host \(domínio ou IP\) está relacionado a atividades suspeitas/maliciosas. Tem algum acesso gratuito à API.
+Comercial?
 
 # [FortiGuard](https://fortiguard.com/)
 
-Check if a host \(domain or IP\) is related with suspicious/malicious activities. Have some free API access.
+Verifique se um host \(domínio ou IP\) está relacionado a atividades suspeitas/maliciosas. Tem algum acesso gratuito à API.
 
 # [SpamCop](https://www.spamcop.net/)
 
-Indicates if host is related to spam activity. Have some free API access.
+Indica se o host está relacionado a atividades de spam. Tem algum acesso gratuito à API.
 
 # [mywot](https://www.mywot.com/)
 
-Based on opinions and other metrics get if a domain is related with suspicious/malicious information.
+Com base em opiniões e outras métricas, verifique se um domínio está relacionado a informações suspeitas/maliciosas.
 
 # [ipinfo](https://ipinfo.io/)
 
-Obtains basic info from an IP address. You can test up to 100K/month.
+Obtém informações básicas de um endereço IP. Você pode testar até 100K/mês.
 
 # [securitytrails](https://securitytrails.com/app/account)
 
-This platform give information about domains and IP addresses like domains inside an IP or inside a domain server, domains owned by an email \(find related domains\), IP history of domains \(find the host behind CloudFlare\), all domains using a nameserver....  
-You have some free access.
+Esta plataforma fornece informações sobre domínios e endereços IP, como domínios dentro de um IP ou dentro de um servidor de domínio, domínios possuídos por um e-mail \(encontrar domínios relacionados\), histórico de IP de domínios \(encontrar o host por trás do CloudFlare\), todos os domínios usando um nameserver....
+Você tem algum acesso gratuito.
 
 # [fullcontact](https://www.fullcontact.com/)
 
-Allows to search by email, domain or company name and retrieve "personal" information related. It can also verify emails. There is some free access.
+Permite pesquisar por e-mail, domínio ou nome da empresa e recuperar informações "pessoais" relacionadas. Também pode verificar e-mails. Há algum acesso gratuito.
 
 # [RiskIQ](https://www.spiderfoot.net/documentation/)
 
-A lot of information from domains and IPs even in the free/community version.
+Muita informação de domínios e IPs, mesmo na versão gratuita/comunitária.
 
 # [\_IntelligenceX](https://intelx.io/)
 
-Search Domains, IPs and emails and get info from dumps. Have some free access.
+Pesquise Domínios, IPs e e-mails e obtenha informações de dumps. Tem algum acesso gratuito.
 
 # [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
 
-Search by IP and gather information related to suspicions activities. There is some free access.
+Pesquise por IP e reúna informações relacionadas a atividades suspeitas. Há algum acesso gratuito.
 
 # [Greynoise](https://viz.greynoise.io/)
 
-Search by IP or IP range and get information about IPs scanning the Internet. 15 days free access.
+Pesquise por IP ou faixa de IP e obtenha informações sobre IPs que estão escaneando a Internet. 15 dias de acesso gratuito.
 
 # [Shodan](https://www.shodan.io/)
 
-Get scan information of an IP address. Have some free api access.
+Obtenha informações de escaneamento de um endereço IP. Tem algum acesso gratuito à API.
 
 # [Censys](https://censys.io/)
 
-Very similar to shodan
+Muito semelhante ao shodan.
 
 # [buckets.grayhatwarfare.com](https://buckets.grayhatwarfare.com/)
 
-Find open S3 buckets searching by keyword.
+Encontre buckets S3 abertos pesquisando por palavra-chave.
 
 # [Dehashed](https://www.dehashed.com/data)
 
-Find leaked credentials of emails and even domains  
-Commercial?
+Encontre credenciais vazadas de e-mails e até mesmo domínios.
+Comercial?
 
 # [psbdmp](https://psbdmp.ws/)
 
-Search pastebins where a email appeared. Commercial?
+Pesquise pastebins onde um e-mail apareceu. Comercial?
 
 # [emailrep.io](https://emailrep.io/key)
 
-Get reputation of a mail. Commercial?
+Obtenha a reputação de um e-mail. Comercial?
 
 # [ghostproject](https://ghostproject.fr/)
 
-Get passwords from leaked emails. Commercial?
+Obtenha senhas de e-mails vazados. Comercial?
 
 # [Binaryedge](https://www.binaryedge.io/)
 
-Obtain interesting info from IPs
+Obtenha informações interessantes de IPs.
 
 # [haveibeenpwned](https://haveibeenpwned.com/)
 
-Search by domain and email and get if it was pwned and passwords. Commercial?
+Pesquise por domínio e e-mail e verifique se foi comprometido e senhas. Comercial?
 
-[https://dnsdumpster.com/](https://dnsdumpster.com/)\(in a commercial tool?\)
+[https://dnsdumpster.com/](https://dnsdumpster.com/)\(em uma ferramenta comercial?\)
 
-[https://www.netcraft.com/](https://www.netcraft.com/) \(in a commercial tool?\)
+[https://www.netcraft.com/](https://www.netcraft.com/) \(em uma ferramenta comercial?\)
 
-[https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/) \(in a commercial tool?\)
+[https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/) \(em uma ferramenta comercial?\)
 
 {{#include ./banners/hacktricks-training.md}}
-

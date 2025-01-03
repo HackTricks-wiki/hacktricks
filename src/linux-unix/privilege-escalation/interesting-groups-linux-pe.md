@@ -25,12 +25,11 @@ Encontre todos os binários suid e verifique se há o binário **Pkexec**:
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-Se você descobrir que o binário pkexec é um binário SUID e você pertence ao sudo ou admin, provavelmente poderá executar binários como sudo usando pkexec.  
-Verifique o conteúdo de:
+Se você descobrir que o binário pkexec é um binário SUID e você pertence ao sudo ou admin, provavelmente poderá executar binários como sudo usando pkexec. Verifique o conteúdo de:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
-Lá você encontrará quais grupos têm permissão para executar **pkexec** e **por padrão** em algumas distribuições linux podem **aparecer** alguns dos grupos **sudo ou admin**.
+Lá você encontrará quais grupos têm permissão para executar **pkexec** e **por padrão** em alguns linux podem **aparecer** alguns dos grupos **sudo ou admin**.
 
 Para **se tornar root você pode executar**:
 ```bash
@@ -75,7 +74,7 @@ Então, leia o arquivo e tente **quebrar algumas hashes**.
 
 # Grupo de Disco
 
-Este privilégio é quase **equivalente ao acesso root** pois você pode acessar todos os dados dentro da máquina.
+Esse privilégio é quase **equivalente ao acesso root** pois você pode acessar todos os dados dentro da máquina.
 
 Arquivos:`/dev/sd[a-z][1-9]`
 ```text
@@ -134,6 +133,5 @@ Você pode montar o sistema de arquivos raiz da máquina host em um volume da in
 # Grupo lxc/lxd
 
 [lxc - Escalação de Privilégios](lxd-privilege-escalation.md)
-
 
 {{#include ../../banners/hacktricks-training.md}}

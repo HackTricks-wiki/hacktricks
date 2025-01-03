@@ -1,184 +1,184 @@
-# Cryptographic/Compression Algorithms
+# Algoritmos Criptográficos/Compressão
 
-## Cryptographic/Compression Algorithms
+## Algoritmos Criptográficos/Compressão
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Identifying Algorithms
+## Identificando Algoritmos
 
-If you ends in a code **using shift rights and lefts, xors and several arithmetic operations** it's highly possible that it's the implementation of a **cryptographic algorithm**. Here it's going to be showed some ways to **identify the algorithm that it's used without needing to reverse each step**.
+Se você terminar em um código **usando deslocamentos à direita e à esquerda, xors e várias operações aritméticas**, é altamente provável que seja a implementação de um **algoritmo criptográfico**. Aqui serão mostradas algumas maneiras de **identificar o algoritmo que está sendo usado sem precisar reverter cada passo**.
 
-### API functions
+### Funções da API
 
 **CryptDeriveKey**
 
-If this function is used, you can find which **algorithm is being used** checking the value of the second parameter:
+Se esta função for usada, você pode descobrir qual **algoritmo está sendo usado** verificando o valor do segundo parâmetro:
 
 ![](<../../images/image (156).png>)
 
-Check here the table of possible algorithms and their assigned values: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
+Verifique aqui a tabela de possíveis algoritmos e seus valores atribuídos: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
 
 **RtlCompressBuffer/RtlDecompressBuffer**
 
-Compresses and decompresses a given buffer of data.
+Comprime e descomprime um determinado buffer de dados.
 
 **CryptAcquireContext**
 
-From [the docs](https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecontexta): The **CryptAcquireContext** function is used to acquire a handle to a particular key container within a particular cryptographic service provider (CSP). **This returned handle is used in calls to CryptoAPI** functions that use the selected CSP.
+Dos [docs](https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecontexta): A função **CryptAcquireContext** é usada para adquirir um identificador para um determinado contêiner de chaves dentro de um determinado provedor de serviços criptográficos (CSP). **Este identificador retornado é usado em chamadas para funções da CryptoAPI** que utilizam o CSP selecionado.
 
 **CryptCreateHash**
 
-Initiates the hashing of a stream of data. If this function is used, you can find which **algorithm is being used** checking the value of the second parameter:
+Inicia a hash de um fluxo de dados. Se esta função for usada, você pode descobrir qual **algoritmo está sendo usado** verificando o valor do segundo parâmetro:
 
 ![](<../../images/image (549).png>)
 
 \
-Check here the table of possible algorithms and their assigned values: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
+Verifique aqui a tabela de possíveis algoritmos e seus valores atribuídos: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
 
-### Code constants
+### Constantes de código
 
-Sometimes it's really easy to identify an algorithm thanks to the fact that it needs to use a special and unique value.
+Às vezes, é realmente fácil identificar um algoritmo graças ao fato de que ele precisa usar um valor especial e único.
 
 ![](<../../images/image (833).png>)
 
-If you search for the first constant in Google this is what you get:
+Se você pesquisar a primeira constante no Google, isso é o que você obtém:
 
 ![](<../../images/image (529).png>)
 
-Therefore, you can assume that the decompiled function is a **sha256 calculator.**\
-You can search any of the other constants and you will obtain (probably) the same result.
+Portanto, você pode assumir que a função decompilada é um **calculador sha256.**\
+Você pode pesquisar qualquer uma das outras constantes e provavelmente obterá o mesmo resultado.
 
-### data info
+### informações de dados
 
-If the code doesn't have any significant constant it may be **loading information from the .data section**.\
-You can access that data, **group the first dword** and search for it in google as we have done in the section before:
+Se o código não tiver nenhuma constante significativa, pode estar **carregando informações da seção .data**.\
+Você pode acessar esses dados, **agrupar o primeiro dword** e pesquisar no Google como fizemos na seção anterior:
 
 ![](<../../images/image (531).png>)
 
-In this case, if you look for **0xA56363C6** you can find that it's related to the **tables of the AES algorithm**.
+Neste caso, se você procurar **0xA56363C6**, pode descobrir que está relacionado às **tabelas do algoritmo AES**.
 
-## RC4 **(Symmetric Crypt)**
+## RC4 **(Criptografia Simétrica)**
 
-### Characteristics
+### Características
 
-It's composed of 3 main parts:
+É composto por 3 partes principais:
 
-- **Initialization stage/**: Creates a **table of values from 0x00 to 0xFF** (256bytes in total, 0x100). This table is commonly call **Substitution Box** (or SBox).
-- **Scrambling stage**: Will **loop through the table** crated before (loop of 0x100 iterations, again) creating modifying each value with **semi-random** bytes. In order to create this semi-random bytes, the RC4 **key is used**. RC4 **keys** can be **between 1 and 256 bytes in length**, however it is usually recommended that it is above 5 bytes. Commonly, RC4 keys are 16 bytes in length.
-- **XOR stage**: Finally, the plain-text or cyphertext is **XORed with the values created before**. The function to encrypt and decrypt is the same. For this, a **loop through the created 256 bytes** will be performed as many times as necessary. This is usually recognized in a decompiled code with a **%256 (mod 256)**.
+- **Estágio de Inicialização/**: Cria uma **tabela de valores de 0x00 a 0xFF** (256bytes no total, 0x100). Esta tabela é comumente chamada de **Caixa de Substituição** (ou SBox).
+- **Estágio de Embaralhamento**: Irá **percorrer a tabela** criada anteriormente (loop de 0x100 iterações, novamente) modificando cada valor com bytes **semi-aleatórios**. Para criar esses bytes semi-aleatórios, a **chave RC4 é usada**. As **chaves RC4** podem ter **entre 1 e 256 bytes de comprimento**, no entanto, geralmente é recomendado que seja acima de 5 bytes. Comumente, as chaves RC4 têm 16 bytes de comprimento.
+- **Estágio XOR**: Finalmente, o texto simples ou o texto cifrado é **XORed com os valores criados anteriormente**. A função para criptografar e descriptografar é a mesma. Para isso, um **loop pelos 256 bytes criados** será realizado quantas vezes forem necessárias. Isso geralmente é reconhecido em um código decompilado com um **%256 (mod 256)**.
 
 > [!NOTE]
-> **In order to identify a RC4 in a disassembly/decompiled code you can check for 2 loops of size 0x100 (with the use of a key) and then a XOR of the input data with the 256 values created before in the 2 loops probably using a %256 (mod 256)**
+> **Para identificar um RC4 em um código desassemblado/decompilado, você pode verificar 2 loops de tamanho 0x100 (com o uso de uma chave) e, em seguida, um XOR dos dados de entrada com os 256 valores criados anteriormente nos 2 loops, provavelmente usando um %256 (mod 256)**
 
-### **Initialization stage/Substitution Box:** (Note the number 256 used as counter and how a 0 is written in each place of the 256 chars)
+### **Estágio de Inicialização/Caixa de Substituição:** (Note o número 256 usado como contador e como um 0 é escrito em cada lugar dos 256 chars)
 
 ![](<../../images/image (584).png>)
 
-### **Scrambling Stage:**
+### **Estágio de Embaralhamento:**
 
 ![](<../../images/image (835).png>)
 
-### **XOR Stage:**
+### **Estágio XOR:**
 
 ![](<../../images/image (904).png>)
 
-## **AES (Symmetric Crypt)**
+## **AES (Criptografia Simétrica)**
 
-### **Characteristics**
+### **Características**
 
-- Use of **substitution boxes and lookup tables**
-  - It's possible to **distinguish AES thanks to the use of specific lookup table values** (constants). _Note that the **constant** can be **stored** in the binary **or created**_ _**dynamically**._
-- The **encryption key** must be **divisible** by **16** (usually 32B) and usually an **IV** of 16B is used.
+- Uso de **caixas de substituição e tabelas de consulta**
+- É possível **distinguir o AES graças ao uso de valores específicos de tabelas de consulta** (constantes). _Note que a **constante** pode ser **armazenada** no binário **ou criada** _**dinamicamente**._
+- A **chave de criptografia** deve ser **divisível** por **16** (geralmente 32B) e geralmente um **IV** de 16B é usado.
 
-### SBox constants
+### Constantes SBox
 
 ![](<../../images/image (208).png>)
 
-## Serpent **(Symmetric Crypt)**
+## Serpent **(Criptografia Simétrica)**
 
-### Characteristics
+### Características
 
-- It's rare to find some malware using it but there are examples (Ursnif)
-- Simple to determine if an algorithm is Serpent or not based on it's length (extremely long function)
+- É raro encontrar algum malware usando, mas há exemplos (Ursnif)
+- Simples de determinar se um algoritmo é Serpent ou não com base em seu comprimento (função extremamente longa)
 
-### Identifying
+### Identificando
 
-In the following image notice how the constant **0x9E3779B9** is used (note that this constant is also used by other crypto algorithms like **TEA** -Tiny Encryption Algorithm).\
-Also note the **size of the loop** (**132**) and the **number of XOR operations** in the **disassembly** instructions and in the **code** example:
+Na imagem a seguir, note como a constante **0x9E3779B9** é usada (note que esta constante também é usada por outros algoritmos criptográficos como **TEA** -Tiny Encryption Algorithm).\
+Também note o **tamanho do loop** (**132**) e o **número de operações XOR** nas instruções de **desmontagem** e no exemplo de **código**:
 
 ![](<../../images/image (547).png>)
 
-As it was mentioned before, this code can be visualized inside any decompiler as a **very long function** as there **aren't jumps** inside of it. The decompiled code can look like the following:
+Como mencionado anteriormente, este código pode ser visualizado dentro de qualquer decompilador como uma **função muito longa**, pois **não há saltos** dentro dele. O código decompilado pode parecer o seguinte:
 
 ![](<../../images/image (513).png>)
 
-Therefore, it's possible to identify this algorithm checking the **magic number** and the **initial XORs**, seeing a **very long function** and **comparing** some **instructions** of the long function **with an implementation** (like the shift left by 7 and the rotate left by 22).
+Portanto, é possível identificar este algoritmo verificando o **número mágico** e os **XORs iniciais**, vendo uma **função muito longa** e **comparando** algumas **instruções** da longa função **com uma implementação** (como o deslocamento à esquerda por 7 e a rotação à esquerda por 22).
 
-## RSA **(Asymmetric Crypt)**
+## RSA **(Criptografia Assimétrica)**
 
-### Characteristics
+### Características
 
-- More complex than symmetric algorithms
-- There are no constants! (custom implementation are difficult to determine)
-- KANAL (a crypto analyzer) fails to show hints on RSA ad it relies on constants.
+- Mais complexo do que algoritmos simétricos
+- Não há constantes! (implementações personalizadas são difíceis de determinar)
+- KANAL (um analisador criptográfico) não consegue mostrar dicas sobre RSA, pois depende de constantes.
 
-### Identifying by comparisons
+### Identificando por comparações
 
 ![](<../../images/image (1113).png>)
 
-- In line 11 (left) there is a `+7) >> 3` which is the same as in line 35 (right): `+7) / 8`
-- Line 12 (left) is checking if `modulus_len < 0x040` and in line 36 (right) it's checking if `inputLen+11 > modulusLen`
+- Na linha 11 (esquerda) há um `+7) >> 3` que é o mesmo que na linha 35 (direita): `+7) / 8`
+- A linha 12 (esquerda) está verificando se `modulus_len < 0x040` e na linha 36 (direita) está verificando se `inputLen+11 > modulusLen`
 
 ## MD5 & SHA (hash)
 
-### Characteristics
+### Características
 
-- 3 functions: Init, Update, Final
-- Similar initialize functions
+- 3 funções: Init, Update, Final
+- Funções de inicialização semelhantes
 
-### Identify
+### Identificar
 
 **Init**
 
-You can identify both of them checking the constants. Note that the sha_init has 1 constant that MD5 doesn't have:
+Você pode identificar ambos verificando as constantes. Note que o sha_init tem 1 constante que o MD5 não tem:
 
 ![](<../../images/image (406).png>)
 
-**MD5 Transform**
+**Transformação MD5**
 
-Note the use of more constants
+Note o uso de mais constantes
 
 ![](<../../images/image (253) (1) (1).png>)
 
 ## CRC (hash)
 
-- Smaller and more efficient as it's function is to find accidental changes in data
-- Uses lookup tables (so you can identify constants)
+- Menor e mais eficiente, pois sua função é encontrar mudanças acidentais nos dados
+- Usa tabelas de consulta (então você pode identificar constantes)
 
-### Identify
+### Identificar
 
-Check **lookup table constants**:
+Verifique **constantes da tabela de consulta**:
 
 ![](<../../images/image (508).png>)
 
-A CRC hash algorithm looks like:
+Um algoritmo de hash CRC se parece com:
 
 ![](<../../images/image (391).png>)
 
-## APLib (Compression)
+## APLib (Compressão)
 
-### Characteristics
+### Características
 
-- Not recognizable constants
-- You can try to write the algorithm in python and search for similar things online
+- Constantes não reconhecíveis
+- Você pode tentar escrever o algoritmo em python e procurar por coisas semelhantes online
 
-### Identify
+### Identificar
 
-The graph is quiet large:
+O gráfico é bastante grande:
 
 ![](<../../images/image (207) (2) (1).png>)
 
-Check **3 comparisons to recognise it**:
+Verifique **3 comparações para reconhecê-lo**:
 
 ![](<../../images/image (430).png>)
 

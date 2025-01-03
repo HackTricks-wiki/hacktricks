@@ -1,4 +1,4 @@
-# lxd/lxc Group - Escalação de privilégios
+# lxd/lxc Grupo - Escalada de privilégios
 
 {{#include ../../../banners/hacktricks-training.md}}
 

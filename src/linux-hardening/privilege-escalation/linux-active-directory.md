@@ -12,7 +12,7 @@ Uma máquina linux em um AD pode estar **armazenando diferentes tickets CCACHE d
 
 Se você tiver acesso a um AD no linux (ou bash no Windows), pode tentar [https://github.com/lefayjey/linWinPwn](https://github.com/lefayjey/linWinPwn) para enumerar o AD.
 
-Você também pode verificar a seguinte página para aprender **outras maneiras de enumerar AD a partir do linux**:
+Você também pode verificar a página a seguir para aprender **outras maneiras de enumerar AD a partir do linux**:
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-ldap.md
@@ -20,7 +20,7 @@ Você também pode verificar a seguinte página para aprender **outras maneiras 
 
 ### FreeIPA
 
-FreeIPA é uma **alternativa** de código aberto ao **Active Directory** da Microsoft, principalmente para ambientes **Unix**. Ele combina um **diretório LDAP** completo com um Centro de Distribuição de Chaves **Kerberos** do MIT para gerenciamento semelhante ao Active Directory. Utilizando o Dogtag **Certificate System** para gerenciamento de certificados CA & RA, suporta autenticação **multifatorial**, incluindo smartcards. O SSSD está integrado para processos de autenticação Unix. Saiba mais sobre isso em:
+FreeIPA é uma **alternativa** de código aberto ao **Active Directory** da Microsoft, principalmente para ambientes **Unix**. Ele combina um **diretório LDAP** completo com um Centro de Distribuição de Chaves **Kerberos** do MIT para gerenciamento semelhante ao Active Directory. Utilizando o **Sistema de Certificados** Dogtag para gerenciamento de certificados CA e RA, suporta autenticação **multifatorial**, incluindo cartões inteligentes. O SSSD está integrado para processos de autenticação Unix. Saiba mais sobre isso em:
 
 {{#ref}}
 ../freeipa-pentesting.md
@@ -30,7 +30,7 @@ FreeIPA é uma **alternativa** de código aberto ao **Active Directory** da Micr
 
 ### Pass The Ticket
 
-Nesta página, você encontrará diferentes lugares onde pode **encontrar tickets kerberos dentro de um host linux**, na página seguinte você pode aprender como transformar esses formatos de tickets CCache para Kirbi (o formato que você precisa usar no Windows) e também como realizar um ataque PTT:
+Nesta página, você encontrará diferentes lugares onde pode **encontrar tickets kerberos dentro de um host linux**. Na página a seguir, você pode aprender como transformar esses formatos de tickets CCache para Kirbi (o formato que você precisa usar no Windows) e também como realizar um ataque PTT:
 
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/pass-the-ticket.md
@@ -71,7 +71,7 @@ Invocar \*\*`SSSDKCMExtractor` \*\* com os parâmetros --database e --key irá a
 git clone https://github.com/fireeye/SSSDKCMExtractor
 python3 SSSDKCMExtractor.py --database secrets.ldb --key secrets.mkey
 ```
-O **blob de cache de credenciais Kerberos pode ser convertido em um arquivo CCache Kerberos utilizável** que pode ser passado para Mimikatz/Rubeus.
+O **blob de cache de credenciais Kerberos pode ser convertido em um arquivo Kerberos CCache** utilizável que pode ser passado para Mimikatz/Rubeus.
 
 ### Reutilização de ticket CCACHE a partir do keytab
 ```bash
@@ -83,7 +83,7 @@ klist -k /etc/krb5.keytab
 
 As chaves de contas de serviço, essenciais para serviços que operam com privilégios de root, são armazenadas de forma segura nos arquivos **`/etc/krb5.keytab`**. Essas chaves, semelhantes a senhas para serviços, exigem estrita confidencialidade.
 
-Para inspecionar o conteúdo do arquivo keytab, pode-se empregar **`klist`**. A ferramenta é projetada para exibir detalhes da chave, incluindo o **NT Hash** para autenticação de usuários, particularmente quando o tipo de chave é identificado como 23.
+Para inspecionar o conteúdo do arquivo keytab, **`klist`** pode ser empregado. A ferramenta é projetada para exibir detalhes da chave, incluindo o **NT Hash** para autenticação de usuários, particularmente quando o tipo de chave é identificado como 23.
 ```bash
 klist.exe -t -K -e -k FILE:C:/Path/to/your/krb5.keytab
 # Output includes service principal details and the NT Hash

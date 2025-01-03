@@ -1,4 +1,4 @@
-# macOS Serviços de Rede & Protocolos
+# macOS Network Services & Protocols
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -24,11 +24,11 @@ printf "\nThe following services are OFF if '0', or ON otherwise:\nScreen Sharin
 ```
 ### Pentesting ARD
 
-Apple Remote Desktop (ARD) é uma versão aprimorada do [Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing) adaptada para macOS, oferecendo recursos adicionais. Uma vulnerabilidade notável no ARD é seu método de autenticação para a senha da tela de controle, que usa apenas os primeiros 8 caracteres da senha, tornando-o suscetível a [ataques de força bruta](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) com ferramentas como Hydra ou [GoRedShell](https://github.com/ahhh/GoRedShell/), já que não há limites de taxa padrão.
+Apple Remote Desktop (ARD) é uma versão aprimorada do [Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing) adaptada para macOS, oferecendo recursos adicionais. Uma vulnerabilidade notável no ARD é seu método de autenticação para a senha da tela de controle, que usa apenas os primeiros 8 caracteres da senha, tornando-o suscetível a [brute force attacks](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) com ferramentas como Hydra ou [GoRedShell](https://github.com/ahhh/GoRedShell/), já que não há limites de taxa padrão.
 
 Instâncias vulneráveis podem ser identificadas usando o script `vnc-info` do **nmap**. Serviços que suportam `VNC Authentication (2)` são especialmente suscetíveis a ataques de força bruta devido à truncagem da senha de 8 caracteres.
 
-Para habilitar o ARD para várias tarefas administrativas, como escalonamento de privilégios, acesso à GUI ou monitoramento de usuários, use o seguinte comando:
+Para habilitar o ARD para várias tarefas administrativas, como escalonamento de privilégios, acesso GUI ou monitoramento de usuários, use o seguinte comando:
 ```bash
 sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -allowAccessFor -allUsers -privs -all -clientopts -setmenuextra -menuextra yes
 ```
@@ -41,7 +41,7 @@ Bonjour, uma tecnologia projetada pela Apple, permite que **dispositivos na mesm
 A Rede de Zero Configuração, fornecida pelo Bonjour, garante que os dispositivos possam:
 
 - **Obter automaticamente um endereço IP** mesmo na ausência de um servidor DHCP.
-- Realizar **tradução de nome para endereço** sem a necessidade de um servidor DNS.
+- Realizar **tradução de nome para endereço** sem exigir um servidor DNS.
 - **Descobrir serviços** disponíveis na rede.
 
 Dispositivos que utilizam Bonjour atribuirão a si mesmos um **endereço IP da faixa 169.254/16** e verificarão sua exclusividade na rede. Macs mantêm uma entrada de tabela de roteamento para essa sub-rede, verificável via `netstat -rn | grep 169`.

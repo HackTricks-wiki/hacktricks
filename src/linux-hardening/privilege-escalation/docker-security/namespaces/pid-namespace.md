@@ -70,7 +70,7 @@ Observe que o usuário root do namespace PID inicial (padrão) pode ver todos os
 ```bash
 nsenter -t TARGET_PID --pid /bin/bash
 ```
-Quando você entra em um namespace PID a partir do namespace padrão, ainda será capaz de ver todos os processos. E o processo daquele namespace PID poderá ver o novo bash no namespace PID.
+Quando você entra em um namespace PID a partir do namespace padrão, ainda será capaz de ver todos os processos. E o processo desse namespace PID poderá ver o novo bash no namespace PID.
 
 Além disso, você só pode **entrar em outro namespace PID de processo se for root**. E você **não pode** **entrar** em outro namespace **sem um descritor** apontando para ele (como `/proc/self/ns/pid`)
 

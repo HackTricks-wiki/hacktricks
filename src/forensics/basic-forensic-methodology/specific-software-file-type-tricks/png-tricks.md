@@ -1,9 +1,9 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-**PNG files** are highly regarded in **CTF challenges** for their **lossless compression**, making them ideal for embedding hidden data. Tools like **Wireshark** enable the analysis of PNG files by dissecting their data within network packets, revealing embedded information or anomalies.
+**Arquivos PNG** são altamente valorizados em **desafios CTF** por sua **compressão sem perdas**, tornando-os ideais para embutir dados ocultos. Ferramentas como **Wireshark** permitem a análise de arquivos PNG ao dissecar seus dados dentro de pacotes de rede, revelando informações embutidas ou anomalias.
 
-For checking PNG file integrity and repairing corruption, **pngcheck** is a crucial tool, offering command-line functionality to validate and diagnose PNG files ([pngcheck](http://libpng.org/pub/png/apps/pngcheck.html)). When files are beyond simple fixes, online services like [OfficeRecovery's PixRecovery](https://online.officerecovery.com/pixrecovery/) provide a web-based solution for **repairing corrupted PNGs**, aiding in the recovery of crucial data for CTF participants.
+Para verificar a integridade de arquivos PNG e reparar corrupção, **pngcheck** é uma ferramenta crucial, oferecendo funcionalidade de linha de comando para validar e diagnosticar arquivos PNG ([pngcheck](http://libpng.org/pub/png/apps/pngcheck.html)). Quando os arquivos estão além de consertos simples, serviços online como [OfficeRecovery's PixRecovery](https://online.officerecovery.com/pixrecovery/) fornecem uma solução baseada na web para **reparar PNGs corrompidos**, ajudando na recuperação de dados cruciais para os participantes do CTF.
 
-These strategies underscore the importance of a comprehensive approach in CTFs, utilizing a blend of analytical tools and repair techniques to uncover and recover hidden or lost data.
+Essas estratégias ressaltam a importância de uma abordagem abrangente em CTFs, utilizando uma combinação de ferramentas analíticas e técnicas de reparo para descobrir e recuperar dados ocultos ou perdidos.
 
 {{#include ../../../banners/hacktricks-training.md}}

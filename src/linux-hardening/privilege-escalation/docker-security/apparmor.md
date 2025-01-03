@@ -69,7 +69,7 @@ Então, no primeiro console pressione "**s**" e depois nas ações gravadas indi
 
 ### aa-easyprof
 
-Você também pode criar um template de um perfil apparmor de um binário com:
+Você também pode criar um modelo de um perfil apparmor de um binário com:
 ```bash
 sudo aa-easyprof /path/to/binary
 # vim:syntax=apparmor
@@ -196,7 +196,7 @@ Note que você pode **adicionar/remover** **capacidades** ao contêiner docker (
 - `--cap-drop=ALL --cap-add=SYS_PTRACE` remove todas as capacidades e dá apenas `SYS_PTRACE`
 
 > [!NOTE]
-> Normalmente, quando você **descobre** que tem uma **capacidade privilegiada** disponível **dentro** de um **contêiner** **docker**, **mas** alguma parte da **exploração não está funcionando**, isso será porque o **apparmor do docker estará impedindo**.
+> Normalmente, quando você **descobre** que tem uma **capacidade privilegiada** disponível **dentro** de um **contêiner** **docker**, **mas** alguma parte do **exploit não está funcionando**, isso será porque o **apparmor do docker estará impedindo**.
 
 ### Exemplo
 
@@ -240,7 +240,7 @@ No caso estranho de você poder **modificar o perfil do docker do apparmor e rec
 
 ### Bypass Shebang do AppArmor
 
-Em [**este bug**](https://bugs.launchpad.net/apparmor/+bug/1911431) você pode ver um exemplo de como **mesmo que você esteja impedindo o perl de ser executado com certos recursos**, se você apenas criar um script shell **especificando** na primeira linha **`#!/usr/bin/perl`** e você **executar o arquivo diretamente**, você poderá executar o que quiser. Ex.:
+Em [**este bug**](https://bugs.launchpad.net/apparmor/+bug/1911431) você pode ver um exemplo de como **mesmo que você esteja impedindo que o perl seja executado com certos recursos**, se você apenas criar um script shell **especificando** na primeira linha **`#!/usr/bin/perl`** e você **executar o arquivo diretamente**, você poderá executar o que quiser. Ex.:
 ```perl
 echo '#!/usr/bin/perl
 use POSIX qw(strftime);

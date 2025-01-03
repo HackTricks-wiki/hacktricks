@@ -33,7 +33,7 @@ A estrutura de saída é a seguinte:
 - **Número 1**: Também cgroups v1, mas exclusivamente para fins de gerenciamento (definido por, por exemplo, systemd), e não possui um controlador.
 - **Número 0**: Representa cgroups v2. Nenhum controlador é listado, e esta linha é exclusiva em sistemas que executam apenas cgroups v2.
 - Os **nomes são hierárquicos**, assemelhando-se a caminhos de arquivos, indicando a estrutura e a relação entre diferentes cgroups.
-- **Nomes como /user.slice ou /system.slice** especificam a categorização dos cgroups, com user.slice tipicamente para sessões de login gerenciadas pelo systemd e system.slice para serviços do sistema.
+- **Nomes como /user.slice ou /system.slice** especificam a categorização de cgroups, com user.slice tipicamente para sessões de login gerenciadas pelo systemd e system.slice para serviços do sistema.
 
 ### Visualizando cgroups
 

