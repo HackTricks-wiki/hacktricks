@@ -6,12 +6,12 @@
 
 アプリケーションホワイトリストは、システム上で存在し実行されることが許可された承認済みのソフトウェアアプリケーションまたは実行可能ファイルのリストです。目的は、環境を有害なマルウェアや、組織の特定のビジネスニーズに合致しない未承認のソフトウェアから保護することです。
 
-[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) は、マイクロソフトの**アプリケーションホワイトリストソリューション**であり、システム管理者に**ユーザーが実行できるアプリケーションとファイルを制御する**機能を提供します。これは、実行可能ファイル、スクリプト、Windowsインストーラーファイル、DLL、パッケージアプリ、およびパックされたアプリインストーラーに対して**詳細な制御**を提供します。\
+[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) は、Microsoftの**アプリケーションホワイトリストソリューション**であり、システム管理者に**ユーザーが実行できるアプリケーションとファイルを制御する**権限を与えます。これは、実行可能ファイル、スクリプト、Windowsインストーラーファイル、DLL、パッケージアプリ、およびパックされたアプリインストーラーに対して**詳細な制御**を提供します。\
 組織が**cmd.exeとPowerShell.exe**をブロックし、特定のディレクトリへの書き込みアクセスを制限することは一般的ですが、**これらはすべて回避可能です**。
 
 ### Check
 
-どのファイル/拡張子がブラックリスト/ホワイトリストに登録されているかを確認します：
+ブラックリスト/ホワイトリストに登録されているファイル/拡張子を確認します:
 ```powershell
 Get-ApplockerPolicy -Effective -xml
 
@@ -26,7 +26,7 @@ $a.rulecollections
 
 ### バイパス
 
-- AppLockerポリシーをバイパスするための便利な**書き込み可能フォルダー**：AppLockerが`C:\Windows\System32`または`C:\Windows`内の任意のものを実行することを許可している場合、**このバイパスに使用できる書き込み可能フォルダー**があります。
+- AppLockerポリシーをバイパスするための便利な**書き込み可能フォルダー**：AppLockerが`C:\Windows\System32`または`C:\Windows`内の任意の実行を許可している場合、**このバイパスに使用できる書き込み可能フォルダー**があります。
 ```
 C:\Windows\System32\Microsoft\Crypto\RSA\MachineKeys
 C:\Windows\System32\spool\drivers\color
@@ -35,8 +35,8 @@ C:\windows\tracing
 ```
 - 一般的に**信頼された**[**"LOLBAS's"**](https://lolbas-project.github.io/)バイナリは、AppLockerを回避するのにも役立ちます。
 - **不適切に書かれたルールも回避される可能性があります**
-- 例えば、**`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**のように、**`allowed`**という**フォルダーを任意の場所に作成**すれば許可されます。
-- 組織はしばしば**`%System32%\WindowsPowerShell\v1.0\powershell.exe`**実行可能ファイルを**ブロックすることに焦点を当てますが、**他の**[**PowerShell実行可能ファイルの場所**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations)を忘れがちです。例えば、`%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe`や`PowerShell_ISE.exe`などです。
+- 例えば、**`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**のように、**`allowed`**という**フォルダーを任意の場所に作成**すると、それが許可されます。
+- 組織はしばしば**`%System32%\WindowsPowerShell\v1.0\powershell.exe`実行可能ファイルをブロックすることに焦点を当てますが、**他の**[**PowerShell実行可能ファイルの場所**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations)を忘れがちです。例えば、`%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe`や`PowerShell_ISE.exe`などです。
 - **DLLの強制は非常に稀に有効**であり、システムにかかる追加の負荷や、何も壊れないことを確認するために必要なテストの量が理由です。したがって、**DLLをバックドアとして使用することでAppLockerを回避するのに役立ちます**。
 - [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick)や[**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick)を使用して、**任意のプロセスでPowershell**コードを**実行し、AppLockerを回避する**ことができます。詳細については、[https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode)を確認してください。
 
@@ -69,11 +69,11 @@ LSAはディスクにいくつかの資格情報を保存することがあり�
 
 ## ディフェンダー
 
-[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender)は、Windows 10およびWindows 11、Windows Serverのバージョンで利用可能なアンチウイルスです。**一般的なペンテストツール**（例：**`WinPEAS`**）を**ブロック**します。しかし、これらの保護を**回避する方法**があります。
+[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender)は、Windows 10およびWindows 11、そしてWindows Serverのバージョンで利用可能なアンチウイルスです。**一般的なペンテストツール（例：**`WinPEAS`**）を**ブロック**します。しかし、これらの保護を**回避する方法**があります。
 
 ### チェック
 
-**Defender**の**ステータス**を確認するには、PSコマンドレット**`Get-MpComputerStatus`**を実行できます（**`RealTimeProtectionEnabled`**の値を確認して、アクティブかどうかを知る）：
+**Defender**の**ステータス**を確認するには、PSコマンドレット**`Get-MpComputerStatus`**を実行できます（**`RealTimeProtectionEnabled`**の値を確認して、アクティブかどうかを知ることができます）：
 
 <pre class="language-powershell"><code class="lang-powershell">PS C:\> Get-MpComputerStatus
 
@@ -103,27 +103,27 @@ sc query windefend
 ```
 ## Encrypted File System (EFS)
 
-EFSは、**対称鍵**である**ファイル暗号化鍵（FEK）**を使用してファイルを暗号化することで保護します。この鍵はユーザーの**公開鍵**で暗号化され、暗号化されたファイルの$EFS **代替データストリーム**内に保存されます。復号が必要な場合、ユーザーのデジタル証明書の対応する**秘密鍵**を使用して$EFSストリームからFEKを復号します。詳細は[こちら](https://en.wikipedia.org/wiki/Encrypting_File_System)で確認できます。
+EFSは、**対称鍵**である**ファイル暗号化鍵（FEK）**を使用してファイルを暗号化します。この鍵はユーザーの**公開鍵**で暗号化され、暗号化されたファイルの$EFS **代替データストリーム**内に保存されます。復号が必要な場合、ユーザーのデジタル証明書の対応する**秘密鍵**を使用して$EFSストリームからFEKを復号します。詳細は[こちら](https://en.wikipedia.org/wiki/Encrypting_File_System)で確認できます。
 
 **ユーザーの操作なしでの復号シナリオ**には以下が含まれます：
 
 - ファイルやフォルダーが[FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table)のような非EFSファイルシステムに移動されると、自動的に復号されます。
 - SMB/CIFSプロトコルを介してネットワーク上で送信された暗号化ファイルは、送信前に復号されます。
 
-この暗号化方法は、所有者に対して暗号化ファイルへの**透過的アクセス**を提供します。ただし、所有者のパスワードを変更してログインするだけでは復号は許可されません。
+この暗号化方法は、所有者に対して暗号化ファイルへの**透過的アクセス**を提供します。ただし、所有者のパスワードを単に変更してログインするだけでは復号は許可されません。
 
 **重要なポイント**：
 
 - EFSは、ユーザーの公開鍵で暗号化された対称FEKを使用します。
-- 復号にはユーザーの秘密鍵を使用してFEKにアクセスします。
-- FAT32へのコピーやネットワーク送信など、特定の条件下で自動的に復号が行われます。
+- 復号には、ユーザーの秘密鍵を使用してFEKにアクセスします。
+- FAT32へのコピーやネットワーク送信など、特定の条件下で自動復号が行われます。
 - 暗号化ファイルは、追加の手順なしで所有者がアクセスできます。
 
 ### EFS情報の確認
 
-この**サービス**を**使用**した**ユーザー**がいるか確認するには、このパスが存在するかチェックします：`C:\users\<username>\appdata\roaming\Microsoft\Protect`
+この**サービス**を**使用した**かどうかを確認するには、このパスが存在するか確認します：`C:\users\<username>\appdata\roaming\Microsoft\Protect`
 
-ファイルへの**アクセス**権を確認するには、cipher /c \<file>\を使用します。\
+ファイルへの**アクセス権**を確認するには、cipher /c \<file>\
 フォルダー内で`cipher /e`および`cipher /d`を使用して、すべてのファイルを**暗号化**および**復号**することもできます。
 
 ### EFSファイルの復号
@@ -134,33 +134,35 @@ EFSは、**対称鍵**である**ファイル暗号化鍵（FEK）**を使用し
 
 #### ユーザーのパスワードを知っていること
 
-{% embed url="https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files" %}
+{{#ref}}
+https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
+{{#endref}}
 
 ## Group Managed Service Accounts (gMSA)
 
-Microsoftは、ITインフラストラクチャにおけるサービスアカウントの管理を簡素化するために**グループ管理サービスアカウント（gMSA）**を開発しました。従来のサービスアカウントは「**パスワードは期限切れにならない**」設定が有効であることが多いですが、gMSAはより安全で管理しやすいソリューションを提供します：
+Microsoftは、ITインフラストラクチャにおけるサービスアカウントの管理を簡素化するために**グループ管理サービスアカウント（gMSA）**を開発しました。従来のサービスアカウントは「**パスワードは期限切れにならない**」設定が有効であることが多いのに対し、gMSAはより安全で管理しやすいソリューションを提供します：
 
-- **自動パスワード管理**：gMSAは、ドメインまたはコンピュータポリシーに従って自動的に変更される複雑な240文字のパスワードを使用します。このプロセスはMicrosoftのキー配布サービス（KDC）によって処理され、手動でのパスワード更新が不要になります。
+- **自動パスワード管理**：gMSAは、ドメインまたはコンピュータポリシーに従って自動的に変更される240文字の複雑なパスワードを使用します。このプロセスはMicrosoftのキー配布サービス（KDC）によって処理され、手動でのパスワード更新が不要になります。
 - **強化されたセキュリティ**：これらのアカウントはロックアウトに対して免疫があり、対話的ログインには使用できないため、セキュリティが向上します。
 - **複数ホストのサポート**：gMSAは複数のホストで共有できるため、複数のサーバーで実行されるサービスに最適です。
-- **スケジュールされたタスクの実行能力**：管理されたサービスアカウントとは異なり、gMSAはスケジュールされたタスクの実行をサポートします。
+- **スケジュールされたタスクの実行能力**：管理サービスアカウントとは異なり、gMSAはスケジュールされたタスクの実行をサポートします。
 - **簡素化されたSPN管理**：コンピュータのsAMaccountの詳細やDNS名に変更があった場合、システムは自動的にサービスプリンシパル名（SPN）を更新し、SPN管理を簡素化します。
 
-gMSAのパスワードはLDAPプロパティ_**msDS-ManagedPassword**_に保存され、ドメインコントローラー（DC）によって30日ごとに自動的にリセットされます。このパスワードは、[MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e)として知られる暗号化データブロブであり、認可された管理者とgMSAがインストールされているサーバーのみが取得できるため、安全な環境が確保されます。この情報にアクセスするには、LDAPSのような安全な接続が必要であるか、接続は「Sealing & Secure」で認証される必要があります。
+gMSAのパスワードはLDAPプロパティ_**msDS-ManagedPassword**_に保存され、ドメインコントローラー（DC）によって30日ごとに自動的にリセットされます。このパスワードは、[MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e)として知られる暗号化データブロブであり、認可された管理者とgMSAがインストールされているサーバーのみが取得できます。これにより、安全な環境が確保されます。この情報にアクセスするには、LDAPSのような安全な接続が必要であるか、接続は「Sealing & Secure」で認証されなければなりません。
 
 ![https://cube0x0.github.io/Relaying-for-gMSA/](../images/asd1.png)
 
-このパスワードは[**GMSAPasswordReader**](https://github.com/rvazarkar/GMSAPasswordReader)**で読み取ることができます：**
+このパスワードは[**GMSAPasswordReader**](https://github.com/rvazarkar/GMSAPasswordReader)**を使用して読み取ることができます：
 ```
 /GMSAPasswordReader --AccountName jkohler
 ```
-[**この投稿で詳細を確認してください**](https://cube0x0.github.io/Relaying-for-gMSA/)
+[**この投稿で詳細情報を見つける**](https://cube0x0.github.io/Relaying-for-gMSA/)
 
 また、**gMSA**の**パスワード**を**読み取る**ための**NTLMリレー攻撃**を実行する方法については、こちらの[ウェブページ](https://cube0x0.github.io/Relaying-for-gMSA/)を確認してください。
 
 ## LAPS
 
-**ローカル管理者パスワードソリューション (LAPS)**は、[Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899)からダウンロード可能で、ローカル管理者パスワードの管理を可能にします。これらのパスワードは**ランダム化**され、ユニークで、**定期的に変更**され、Active Directoryに中央集権的に保存されます。これらのパスワードへのアクセスは、ACLを通じて認可されたユーザーに制限されています。十分な権限が付与されると、ローカル管理者パスワードを読み取る能力が提供されます。
+**ローカル管理者パスワードソリューション (LAPS)**は、[Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899)からダウンロード可能で、ローカル管理者パスワードの管理を可能にします。これらのパスワードは**ランダム化**され、ユニークで、**定期的に変更**され、Active Directoryに中央集権的に保存されます。これらのパスワードへのアクセスは、ACLを通じて承認されたユーザーに制限されています。十分な権限が付与されると、ローカル管理者パスワードを読み取る能力が提供されます。
 
 {{#ref}}
 active-directory-methodology/laps.md
@@ -236,7 +238,7 @@ SSPIは、通信を希望する2台のマシンに適切なプロトコルを見
 - **Negotiate**: 使用するプロトコルを交渉するために使用されます（KerberosまたはNTLM、デフォルトはKerberos）
 - %windir%\Windows\System32\lsasrv.dll
 
-#### 交渉は複数の方法を提供することもあれば、1つだけを提供することもあります。
+#### 交渉は複数の方法を提供することも、1つだけを提供することもあります。
 
 ## UAC - ユーザーアカウント制御
 

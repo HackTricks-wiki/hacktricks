@@ -2,8 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-> [!WARNING]
-> **JuicyPotatoは** Windows Server 2019 および Windows 10 ビルド 1809 以降では動作しません。しかし、 [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**、** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**、** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato) を使用して **同じ特権を利用し、`NT AUTHORITY\SYSTEM`** レベルのアクセスを取得できます。 _**確認:**_
+> [!WARNING] > **JuicyPotatoは** Windows Server 2019 および Windows 10 ビルド 1809 以降では動作しません。しかし、[**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**、** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**、** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato) を使用して **同じ特権を利用し、`NT AUTHORITY\SYSTEM`** レベルのアクセスを取得できます。 _**確認:**_
 
 {{#ref}}
 roguepotato-and-printspoofer.md
@@ -19,13 +18,13 @@ _少しのジュースを加えた_ [_RottenPotatoNG_](https://github.com/breenm
 
 [**juicy-potato Readme から**](https://github.com/ohpe/juicy-potato/blob/master/README.md)**:**
 
-[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) とその [バリアント](https://github.com/decoder-it/lonelypotato) は、[`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [サービス](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) に基づく特権昇格チェーンを利用し、`127.0.0.1:6666` で MiTM リスナーを持ち、`SeImpersonate` または `SeAssignPrimaryToken` 特権を持っているときに機能します。Windows ビルドレビュー中に、`BITS` が意図的に無効にされ、ポート `6666` が使用されている設定を見つけました。
+[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) とその [バリアント](https://github.com/decoder-it/lonelypotato) は、[`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [サービス](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) に基づく特権昇格チェーンを利用し、`127.0.0.1:6666` で MiTM リスナーを持ち、`SeImpersonate` または `SeAssignPrimaryToken` 特権を持っている場合に機能します。Windows ビルドレビュー中に、`BITS` が意図的に無効にされ、ポート `6666` が使用されている設定を見つけました。
 
-私たちは [RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) を武器化することに決めました: **Juicy Potato にこんにちはを言いましょう**。
+私たちは [RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) を武器化することに決めました: **Juicy Potato にこんにちは。**
 
 > 理論については、[Rotten Potato - サービスアカウントから SYSTEM への特権昇格](https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/) を参照し、リンクと参照のチェーンをたどってください。
 
-私たちは、`BITS` 以外にも悪用できるいくつかの COM サーバーがあることを発見しました。これらは次の条件を満たす必要があります：
+私たちは、`BITS` 以外にも悪用できるいくつかの COM サーバーがあることを発見しました。これらは次の条件を満たす必要があります:
 
 1. 現在のユーザーによってインスタンス化可能であること、通常は偽装特権を持つ「サービスユーザー」
 2. `IMarshal` インターフェースを実装していること
@@ -35,12 +34,12 @@ _少しのジュースを加えた_ [_RottenPotatoNG_](https://github.com/breenm
 
 ### ジューシーな詳細 <a href="#juicy-details" id="juicy-details"></a>
 
-JuicyPotato を使用すると、次のことができます：
+JuicyPotato を使用すると:
 
 - **ターゲット CLSID** _任意の CLSID を選択できます。_ [_こちら_](http://ohpe.it/juicy-potato/CLSID/) _で OS ごとに整理されたリストを見つけることができます。_
 - **COM リスニングポート** _好みの COM リスニングポートを定義します (ハードコーディングされた 6666 の代わりに)_
 - **COM リスニング IP アドレス** _任意の IP にサーバーをバインドします_
-- **プロセス作成モード** _偽装されたユーザーの特権に応じて、次のいずれかを選択できます：_
+- **プロセス作成モード** _偽装されたユーザーの特権に応じて、次のいずれかを選択できます:_
 - `CreateProcessWithToken` (必要な特権: `SeImpersonate`)
 - `CreateProcessAsUser` (必要な特権: `SeAssignPrimaryToken`)
 - `両方`
@@ -81,7 +80,7 @@ Optional args:
 
 ## 例
 
-注意: CLSIDのリストを試すには、[このページ](https://ohpe.it/juicy-potato/CLSID/)を訪れてください。
+注意: CLSIDのリストについては [このページ](https://ohpe.it/juicy-potato/CLSID/) を訪れてください。
 
 ### nc.exeリバースシェルを取得する
 ```
@@ -108,7 +107,9 @@ c:\Users\Public>
 
 多くの場合、JuicyPotatoが使用するデフォルトのCLSIDは**機能しない**ため、エクスプロイトが失敗します。通常、**動作するCLSID**を見つけるには複数の試行が必要です。特定のオペレーティングシステムで試すためのCLSIDのリストを取得するには、このページを訪問してください：
 
-{% embed url="https://ohpe.it/juicy-potato/CLSID/" %}
+{{#ref}}
+https://ohpe.it/juicy-potato/CLSID/
+{{#endref}}
 
 ### **CLSIDの確認**
 
@@ -116,7 +117,7 @@ c:\Users\Public>
 
 [Join-Object.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/utils/Join-Object.ps1)をダウンロードしてPSセッションにロードし、[GetCLSID.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/GetCLSID.ps1)をダウンロードして実行します。そのスクリプトは、テストする可能性のあるCLSIDのリストを作成します。
 
-次に、[test_clsid.bat](https://github.com/ohpe/juicy-potato/blob/master/Test/test_clsid.bat)をダウンロードし（CLSIDリストとjuicypotato実行可能ファイルへのパスを変更）、実行します。これにより、すべてのCLSIDを試し始め、**ポート番号が変更されると、CLSIDが機能したことを意味します**。
+次に、[test_clsid.bat](https://github.com/ohpe/juicy-potato/blob/master/Test/test_clsid.bat)をダウンロードし（CLSIDリストとjuicypotato実行可能ファイルへのパスを変更）、実行します。すべてのCLSIDを試し始め、**ポート番号が変更されると、それはCLSIDが機能したことを意味します**。
 
 **-cパラメータを使用して**動作するCLSIDを**確認してください**
 

