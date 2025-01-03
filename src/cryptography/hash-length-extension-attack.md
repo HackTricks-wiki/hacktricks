@@ -2,7 +2,7 @@
 
 # Saldırının Özeti
 
-Bir sunucunun bazı bilinen açık metin verilerine bir **gizli** ekleyerek **imzaladığı** bazı **verileri** hayal edin ve ardından bu verileri hash'lediğini düşünün. Eğer şunları biliyorsanız:
+Bir sunucunun bazı bilinen açık metin verilerine bir **gizli** ekleyerek **imzaladığı** bazı **verileri** hayal edin ve ardından bu verileri hashlediğini düşünün. Eğer şunları biliyorsanız:
 
 - **Gizlinin uzunluğu** (bu, belirli bir uzunluk aralığından da brute force ile elde edilebilir)
 - **Açık metin verisi**
@@ -11,13 +11,13 @@ Bir sunucunun bazı bilinen açık metin verilerine bir **gizli** ekleyerek **im
 - Genellikle varsayılan bir padding kullanılır, bu nedenle diğer 3 gereklilik karşılandığında, bu da geçerlidir
 - Padding, gizli+veri uzunluğuna bağlı olarak değişir, bu yüzden gizlinin uzunluğu gereklidir
 
-O zaman, bir **saldırganın** **veri eklemesi** ve **önceki veri + eklenen veri** için geçerli bir **imza** **üretmesi** mümkündür.
+O zaman, bir **saldırgan** **veri ekleyip** **önceki veri + eklenen veri** için geçerli bir **imza** **üretebilir**.
 
 ## Nasıl?
 
-Temelde, savunmasız algoritmalar hash'leri önce bir **veri bloğunu hash'leyerek** oluşturur ve ardından, **önceden** oluşturulmuş **hash** (durum) üzerinden **bir sonraki veri bloğunu ekleyip** **hash'ler**.
+Temelde, savunmasız algoritmalar hash'leri önce bir **veri bloğunu hashleyerek** oluşturur ve ardından, **önceden** oluşturulmuş **hash** (durum) üzerinden **bir sonraki veri bloğunu ekleyip** **hashler**.
 
-O zaman, gizlinin "secret" ve verinin "data" olduğunu hayal edin, "secretdata"nın MD5'i 6036708eba0d11f6ef52ad44e8b74d5b'dir.\
+O zaman, gizli "secret" ve veri "data" ise, "secretdata"nın MD5'i 6036708eba0d11f6ef52ad44e8b74d5b'dir.\
 Eğer bir saldırgan "append" dizesini eklemek isterse, şunları yapabilir:
 
 - 64 "A"nın MD5'ini oluştur
@@ -27,10 +27,12 @@ Eğer bir saldırgan "append" dizesini eklemek isterse, şunları yapabilir:
 
 ## **Araç**
 
-{% embed url="https://github.com/iagox86/hash_extender" %}
+{{#ref}}
+https://github.com/iagox86/hash_extender
+{{#endref}}
 
 ## Referanslar
 
-Bu saldırıyı [https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks) adresinde iyi bir şekilde bulabilirsiniz.
+Bu saldırıyı iyi bir şekilde açıklanmış olarak [https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks) adresinde bulabilirsiniz.
 
 {{#include ../banners/hacktricks-training.md}}

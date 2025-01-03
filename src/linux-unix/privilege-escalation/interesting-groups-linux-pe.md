@@ -1,6 +1,5 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-
 # Sudo/Admin Grupları
 
 ## **PE - Yöntem 1**
@@ -21,7 +20,7 @@ sudo su
 ```
 ## PE - Yöntem 2
 
-Tüm suid ikili dosyalarını bulun ve **Pkexec** ikili dosyasının olup olmadığını kontrol edin:
+Tüm suid ikili dosyaları bulun ve **Pkexec** ikili dosyasının olup olmadığını kontrol edin:
 ```bash
 find / -perm -4000 2>/dev/null
 ```
@@ -58,7 +57,7 @@ pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 ```text
 %wheel	ALL=(ALL:ALL) ALL
 ```
-Bu, **wheel grubuna ait olan herhangi bir kullanıcının sudo ile her şeyi çalıştırabileceği** anlamına gelir.
+Bu, **wheel grubuna ait olan herhangi bir kullanıcının sudo olarak her şeyi çalıştırabileceği** anlamına gelir.
 
 Eğer durum böyleyse, **root olmak için sadece şunu çalıştırabilirsiniz**:
 ```text
@@ -89,7 +88,7 @@ Ancak, **root tarafından sahip olunan dosyaları yazmaya** çalışırsanız \(
 
 # Video Grubu
 
-`w` komutunu kullanarak **sistemde kimin oturum açtığını** bulabilirsiniz ve aşağıdaki gibi bir çıktı gösterecektir:
+`w` komutunu kullanarak **sistemde kimlerin oturum açtığını** bulabilirsiniz ve aşağıdaki gibi bir çıktı gösterecektir:
 ```bash
 USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
 yossi    tty1                      22:16    5:13m  0.05s  0.04s -bash
@@ -97,12 +96,12 @@ moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
 **tty1**, kullanıcının **yossi'nin makinedeki bir terminale fiziksel olarak giriş yaptığını** ifade eder.
 
-**video grubu**, ekran çıktısını görüntüleme erişimine sahiptir. Temelde ekranları gözlemleyebilirsiniz. Bunu yapmak için, ekranın **şu anki görüntüsünü** ham veri olarak almanız ve ekranın kullandığı çözünürlüğü öğrenmeniz gerekir. Ekran verileri `/dev/fb0`'da saklanabilir ve bu ekranın çözünürlüğünü `/sys/class/graphics/fb0/virtual_size`'da bulabilirsiniz.
+**video grubu**, ekran çıktısını görüntüleme erişimine sahiptir. Temelde ekranları gözlemleyebilirsiniz. Bunu yapmak için, ekranın üzerindeki **mevcut görüntüyü ham veri olarak yakalamanız** ve ekranın kullandığı çözünürlüğü almanız gerekir. Ekran verileri `/dev/fb0`'da kaydedilebilir ve bu ekranın çözünürlüğünü `/sys/class/graphics/fb0/virtual_size`'da bulabilirsiniz.
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-**Ham görüntüyü açmak için** **GIMP**'i kullanabilir, **`screen.raw`** dosyasını seçebilir ve dosya türü olarak **Ham görüntü verisi** seçebilirsiniz:
+**Ham görüntüyü açmak için** **GIMP**'i kullanabilir, **`screen.raw`** dosyasını seçebilir ve dosya türü olarak **Ham görüntü verisi**'ni seçebilirsiniz:
 
 ![](../../images/image%20%28208%29.png)
 
@@ -122,13 +121,16 @@ find / -group root -perm -g=w 2>/dev/null
 
 Ana makinenin kök dosya sistemini bir örneğin hacmine monte edebilirsiniz, böylece örnek başladığında hemen o hacme `chroot` yükler. Bu, makinede size kök erişimi sağlar.
 
-{% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
+{{#ref}}
+https://github.com/KrustyHack/docker-privilege-escalation
+{{#endref}}
 
-{% embed url="https://fosterelli.co/privilege-escalation-via-docker.html" %}
+{{#ref}}
+https://fosterelli.co/privilege-escalation-via-docker.html
+{{#endref}}
 
 # lxc/lxd Grubu
 
 [lxc - Yetki Yükseltme](lxd-privilege-escalation.md)
-
 
 {{#include ../../banners/hacktricks-training.md}}

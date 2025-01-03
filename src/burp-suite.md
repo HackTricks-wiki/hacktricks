@@ -1,16 +1,18 @@
 {{#include ./banners/hacktricks-training.md}}
 
-# Temel Payloadlar
+# Temel Yükler
 
 - **Basit Liste:** Her satırda bir giriş içeren bir liste
 - **Çalışma Zamanı Dosyası:** Çalışma zamanında okunan bir liste (belleğe yüklenmez). Büyük listeleri desteklemek için.
-- **Durum Değişikliği:** Bir dizi dizeye bazı değişiklikler uygulamak (değişiklik yok, küçük harfe, BÜYÜK HARFE, Doğru isim - İlk harf büyük ve geri kalan küçük-, Doğru İsim - İlk harf büyük ve geri kalan aynı kalır-).
-- **Sayılar:** X'den Y'ye Z adım kullanarak veya rastgele sayılar üretmek.
+- **Durum Değişikliği:** Bir dizi dize üzerinde bazı değişiklikler uygulama (değişiklik yok, küçük harfe çevir, BÜYÜK HARFE çevir, Özel isim - İlk harf büyük, geri kalanı küçük-, Özel İsim - İlk harf büyük ve geri kalanı aynı kalır-).
+- **Sayılar:** X'den Y'ye Z adım kullanarak veya rastgele sayılar oluşturma.
 - **Kaba Kuvvet:** Karakter seti, minimum & maksimum uzunluk.
 
-[https://github.com/0xC01DF00D/Collabfiltrator](https://github.com/0xC01DF00D/Collabfiltrator) : Komutları çalıştırmak ve çıktıyı DNS istekleri aracılığıyla burpcollab'a almak için payload.
+[https://github.com/0xC01DF00D/Collabfiltrator](https://github.com/0xC01DF00D/Collabfiltrator) : Komutları çalıştırmak ve çıktıyı burpcollab'a DNS istekleri aracılığıyla almak için yük.
 
-{% embed url="https://medium.com/@ArtsSEC/burp-suite-exporter-462531be24e" %}
+{{#ref}}
+https://medium.com/@ArtsSEC/burp-suite-exporter-462531be24e
+{{#endref}}
 
 [https://github.com/h3xstream/http-script-generator](https://github.com/h3xstream/http-script-generator)
 

@@ -12,7 +12,7 @@ Birçok kez arka uç, bazı işlemleri gerçekleştirmek için **Host başlığ�
 ### Oturum boolean'ları
 
 Bazen bazı doğrulamaları doğru bir şekilde tamamladığınızda arka uç, **oturumunuza bir güvenlik niteliğine "True" değeriyle bir boolean ekler**. Ardından, farklı bir uç nokta bu kontrolü başarıyla geçip geçmediğinizi bilecektir.\
-Ancak, eğer **kontrolü geçerseniz** ve oturumunuza güvenlik niteliğinde "True" değeri verilirse, **erişim izniniz olmaması gereken** ancak **aynı niteliğe bağlı olan diğer kaynaklara erişmeyi** deneyebilirsiniz. [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).
+Ancak, eğer **kontrolden geçerseniz** ve oturumunuza güvenlik niteliğinde "True" değeri verilirse, **erişim izniniz olmaması gereken** ancak **aynı niteliğe bağlı olan diğer kaynaklara erişmeyi** deneyebilirsiniz. [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).
 
 ### Kayıt işlevselliği
 
@@ -24,11 +24,13 @@ Bir e-posta kaydedin, onaylamadan önce e-postayı değiştirin, ardından, yeni
 
 ### Atlassian kullanarak şirketlerin İç Servis Masasına Erişim
 
-{% embed url="https://yourcompanyname.atlassian.net/servicedesk/customer/user/login" %}
+{{#ref}}
+https://yourcompanyname.atlassian.net/servicedesk/customer/user/login
+{{#endref}}
 
 ### TRACE yöntemi
 
-Geliştiriciler, üretim ortamında çeşitli hata ayıklama seçeneklerini devre dışı bırakmayı unutabilir. Örneğin, HTTP `TRACE` yöntemi tanısal amaçlar için tasarlanmıştır. Eğer etkinse, web sunucusu `TRACE` yöntemini kullanan isteklere, alınan isteği yanıtında yankılayarak yanıt verir. Bu davranış genellikle zararsızdır, ancak bazen, ters proxyler tarafından isteklere eklenebilecek dahili kimlik doğrulama başlıklarının adları gibi bilgi ifşasına yol açabilir.![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
+Geliştiriciler, üretim ortamında çeşitli hata ayıklama seçeneklerini devre dışı bırakmayı unutabilir. Örneğin, HTTP `TRACE` yöntemi tanısal amaçlar için tasarlanmıştır. Eğer etkinse, web sunucusu `TRACE` yöntemini kullanan isteklere, alınan isteği yanıtında yankılayarak yanıt verir. Bu davranış genellikle zararsızdır, ancak bazen, ters proxy'ler tarafından isteklere eklenebilecek dahili kimlik doğrulama başlıklarının adları gibi bilgi ifşasına yol açabilir.![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
 
 ![Image for post](https://miro.medium.com/max/1330/1*wDFRADTOd9Tj63xucenvAA.png)
 

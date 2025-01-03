@@ -6,7 +6,7 @@
 
 Bir uygulama beyaz listesi, bir sistemde bulunmasına ve çalıştırılmasına izin verilen onaylı yazılım uygulamaları veya çalıştırılabilir dosyaların listesidir. Amaç, ortamı zararlı kötü amaçlı yazılımlardan ve bir organizasyonun belirli iş ihtiyaçlarıyla uyumlu olmayan onaylanmamış yazılımlardan korumaktır.
 
-[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) Microsoft'un **uygulama beyaz listeleme çözümüdür** ve sistem yöneticilerine **kullanıcıların hangi uygulamaları ve dosyaları çalıştırabileceği üzerinde kontrol** sağlar. **Çalıştırılabilir dosyalar, betikler, Windows yükleyici dosyaları, DLL'ler, paketlenmiş uygulamalar ve paketlenmiş uygulama yükleyicileri** üzerinde **ince ayar kontrolü** sağlar.\
+[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) Microsoft'un **uygulama beyaz listeleme çözümüdür** ve sistem yöneticilerine **kullanıcıların hangi uygulamaları ve dosyaları çalıştırabileceği üzerinde kontrol sağlar**. **Çalıştırılabilir dosyalar, betikler, Windows yükleyici dosyaları, DLL'ler, paketlenmiş uygulamalar ve paketlenmiş uygulama yükleyicileri** üzerinde **ince ayar kontrolü** sağlar.\
 Organizasyonların genellikle **cmd.exe ve PowerShell.exe'yi engellemesi** ve belirli dizinlere yazma erişimini kısıtlaması yaygındır, **ancak bunların hepsi atlatılabilir**.
 
 ### Kontrol
@@ -20,7 +20,7 @@ Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections
 $a = Get-ApplockerPolicy -effective
 $a.rulecollections
 ```
-Bu kayıt defteri yolu, AppLocker tarafından uygulanan yapılandırmaları ve politikaları içerir ve sistemde uygulanan mevcut kural setini gözden geçirme imkanı sağlar:
+Bu kayıt defteri yolu, AppLocker tarafından uygulanan yapılandırmaları ve politikaları içerir ve sistemdeki mevcut kural setini gözden geçirme imkanı sağlar:
 
 - `HKLM\Software\Policies\Microsoft\Windows\SrpV2`
 
@@ -33,9 +33,9 @@ C:\Windows\System32\spool\drivers\color
 C:\Windows\Tasks
 C:\windows\tracing
 ```
-- Yaygın olarak **güvenilir** [**"LOLBAS's"**](https://lolbas-project.github.io/) ikili dosyaları, AppLocker'ı atlatmak için de yararlı olabilir.
+- Yaygın olarak **güvenilen** [**"LOLBAS's"**](https://lolbas-project.github.io/) ikili dosyaları, AppLocker'ı atlatmak için de yararlı olabilir.
 - **Kötü yazılmış kurallar da atlatılabilir**
-- Örneğin, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, istediğiniz herhangi bir yere **`allowed`** adında bir **klasör oluşturabilirsiniz** ve bu izin verilecektir.
+- Örneğin, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, istediğiniz herhangi bir yere **`allowed`** adında bir **klasör oluşturabilirsiniz** ve bu izinli olacaktır.
 - Kuruluşlar genellikle **`%System32%\WindowsPowerShell\v1.0\powershell.exe`** yürütülebilir dosyasını **engellemeye** odaklanır, ancak **diğer** [**PowerShell yürütülebilir konumlarını**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) unutur, örneğin `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` veya `PowerShell_ISE.exe`.
 - **DLL uygulaması çok nadiren etkinleştirilir** çünkü sistem üzerinde ek bir yük oluşturabilir ve hiçbir şeyin bozulmayacağından emin olmak için gereken test miktarı yüksektir. Bu nedenle, **DLL'leri arka kapı olarak kullanmak AppLocker'ı atlatmaya yardımcı olacaktır**.
 - Herhangi bir süreçte **Powershell** kodunu **çalıştırmak** ve AppLocker'ı atlatmak için [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) veya [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) kullanabilirsiniz. Daha fazla bilgi için kontrol edin: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
@@ -69,7 +69,7 @@ Bu, Aktif Dizin'in veritabanıdır. Sadece Alan Denetleyicileri'nde mevcuttur.
 
 ## Defender
 
-[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender), Windows 10 ve Windows 11'de ve Windows Server sürümlerinde mevcut olan bir antivirüstür. **Yaygın** pentesting araçlarını **engeller**, örneğin **`WinPEAS`**. Ancak, bu korumaları **atlatmanın yolları** vardır.
+[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender), Windows 10 ve Windows 11'de ve Windows Server sürümlerinde mevcut olan bir antivirüstür. **`WinPEAS`** gibi yaygın pentesting araçlarını **engeller**. Ancak, bu korumaları **atlatmanın yolları** vardır.
 
 ### Kontrol
 
@@ -103,7 +103,7 @@ sc query windefend
 ```
 ## Şifreli Dosya Sistemi (EFS)
 
-EFS, dosyaları **şifreleme** yoluyla güvence altına alır ve **Dosya Şifreleme Anahtarı (FEK)** olarak bilinen **simetrik anahtar** kullanır. Bu anahtar, kullanıcının **açık anahtarı** ile şifrelenir ve şifreli dosyanın $EFS **alternatif veri akışında** saklanır. Şifre çözme gerektiğinde, kullanıcının dijital sertifikasının karşılık gelen **özel anahtarı** $EFS akışından FEK'yi şifre çözmek için kullanılır. Daha fazla ayrıntı [burada](https://en.wikipedia.org/wiki/Encrypting_File_System) bulunabilir.
+EFS, dosyaları **simetrik anahtar** olan **Dosya Şifreleme Anahtarı (FEK)** ile şifreleyerek güvence altına alır. Bu anahtar, kullanıcının **açık anahtarı** ile şifrelenir ve şifrelenmiş dosyanın $EFS **alternatif veri akışında** saklanır. Şifre çözme gerektiğinde, kullanıcının dijital sertifikasının ilgili **özel anahtarı** $EFS akışından FEK'yi şifre çözmek için kullanılır. Daha fazla ayrıntı [burada](https://en.wikipedia.org/wiki/Encrypting_File_System) bulunabilir.
 
 **Kullanıcı başlatması olmadan şifre çözme senaryoları** şunları içerir:
 
@@ -134,7 +134,9 @@ Bu yöntem, **kurban kullanıcının** ana bilgisayar içinde bir **işlem** ça
 
 #### Kullanıcının şifresini bilmek
 
-{% embed url="https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files" %}
+{{#ref}}
+https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
+{{#endref}}
 
 ## Grup Yönetilen Hizmet Hesapları (gMSA)
 
@@ -146,7 +148,7 @@ Microsoft, IT altyapılarındaki hizmet hesaplarının yönetimini basitleştirm
 - **Zamanlanmış Görev Yeteneği**: Yönetilen hizmet hesaplarının aksine, gMSA'lar zamanlanmış görevlerin çalıştırılmasını destekler.
 - **Basitleştirilmiş SPN Yönetimi**: Sistem, bilgisayarın sAMaccount ayrıntıları veya DNS adı değiştiğinde Hizmet Prensip Adını (SPN) otomatik olarak güncelleyerek SPN yönetimini basitleştirir.
 
-gMSA'ların şifreleri, LDAP özelliği _**msDS-ManagedPassword**_ içinde saklanır ve Alan Denetleyicileri (DC'ler) tarafından her 30 günde bir otomatik olarak sıfırlanır. Bu şifre, [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e) olarak bilinen şifreli bir veri bloğudur ve yalnızca yetkili yöneticiler ve gMSA'ların kurulu olduğu sunucular tarafından alınabilir, böylece güvenli bir ortam sağlanır. Bu bilgilere erişmek için, LDAPS gibi güvenli bir bağlantı gereklidir veya bağlantı 'Sealing & Secure' ile kimlik doğrulaması yapılmalıdır.
+gMSA'ların şifreleri, LDAP özelliği _**msDS-ManagedPassword**_ içinde saklanır ve Alan Denetleyicileri (DC'ler) tarafından her 30 günde bir otomatik olarak sıfırlanır. Bu şifre, [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e) olarak bilinen şifrelenmiş bir veri bloğudur ve yalnızca yetkili yöneticiler ve gMSA'ların kurulu olduğu sunucular tarafından alınabilir, böylece güvenli bir ortam sağlanır. Bu bilgilere erişmek için, LDAPS gibi güvenli bir bağlantı gereklidir veya bağlantı 'Sealing & Secure' ile kimlik doğrulaması yapılmalıdır.
 
 ![https://cube0x0.github.io/Relaying-for-gMSA/](../../images/asd1.png)
 
@@ -160,15 +162,15 @@ Ayrıca, **gMSA**'nın **şifresini** **okumak** için **NTLM relay attack** nas
 
 ## LAPS
 
-**Yerel Yönetici Şifre Çözümü (LAPS)**, [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899) üzerinden indirilebilir, yerel Yönetici şifrelerinin yönetimini sağlar. Bu şifreler, **rastgele**, benzersiz ve **düzenli olarak değiştirilen** şifrelerdir ve merkezi olarak Active Directory'de saklanır. Bu şifrelere erişim, yetkili kullanıcılara ACL'ler aracılığıyla kısıtlanmıştır. Yeterli izinler verildiğinde, yerel yönetici şifrelerini okuma yeteneği sağlanır.
+**Local Administrator Password Solution (LAPS)**, [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899) üzerinden indirilebilir, yerel Yönetici şifrelerinin yönetimini sağlar. Bu şifreler, **rastgele**, benzersiz ve **düzenli olarak değiştirilen** şifrelerdir ve merkezi olarak Active Directory'de saklanır. Bu şifrelere erişim, yetkili kullanıcılara ACL'ler aracılığıyla kısıtlanmıştır. Yeterli izinler verildiğinde, yerel yönetici şifrelerini okuma yeteneği sağlanır.
 
 {{#ref}}
 ../active-directory-methodology/laps.md
 {{#endref}}
 
-## PS Kısıtlı Dil Modu
+## PS Constrained Language Mode
 
-PowerShell [**Kısıtlı Dil Modu**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **PowerShell'i etkili bir şekilde kullanmak için gereken birçok özelliği** kısıtlar, örneğin COM nesnelerini engelleme, yalnızca onaylı .NET türlerine, XAML tabanlı iş akışlarına, PowerShell sınıflarına ve daha fazlasına izin verme.
+PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **PowerShell'i etkili bir şekilde kullanmak için gereken birçok özelliği** kısıtlar, örneğin COM nesnelerini engelleme, yalnızca onaylı .NET türlerine, XAML tabanlı iş akışlarına, PowerShell sınıflarına ve daha fazlasına izin verme.
 
 ### **Kontrol Et**
 ```powershell
@@ -221,7 +223,7 @@ Daha fazlasını [buradan](https://blog.netspi.com/15-ways-to-bypass-the-powersh
 
 Kullanıcıları kimlik doğrulamak için kullanılabilecek API'dir.
 
-SSPI, iletişim kurmak isteyen iki makine için uygun protokolü bulmaktan sorumlu olacaktır. Bunun için tercih edilen yöntem Kerberos'tur. Ardından SSPI, hangi kimlik doğrulama protokolünün kullanılacağını müzakere edecektir; bu kimlik doğrulama protokolleri Güvenlik Destek Sağlayıcıları (SSP) olarak adlandırılır ve her Windows makinesinde DLL biçiminde bulunur ve her iki makinenin de iletişim kurabilmesi için aynı protokolleri desteklemesi gerekir.
+SSPI, iletişim kurmak isteyen iki makine için uygun protokolü bulmaktan sorumlu olacaktır. Bunun için tercih edilen yöntem Kerberos'tur. Ardından SSPI, hangi kimlik doğrulama protokolünün kullanılacağını müzakere edecektir; bu kimlik doğrulama protokolleri Güvenlik Destek Sağlayıcıları (SSP) olarak adlandırılır ve her Windows makinesinde bir DLL biçiminde bulunur ve her iki makinenin de iletişim kurabilmesi için aynı protokolü desteklemesi gerekir.
 
 ### Ana SSP'ler
 

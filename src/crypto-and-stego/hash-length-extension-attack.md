@@ -4,16 +4,16 @@
 
 ## Saldırının Özeti
 
-Bir sunucunun bazı bilinen düz metin verilerine bir **gizli** ekleyerek **imzaladığı** bazı **verileri** hayal edin ve ardından bu verileri hash'lediğini düşünün. Eğer şunları biliyorsanız:
+Bir sunucunun bazı bilinen düz metin verilerine bir **gizli** ekleyerek **imza** attığını ve ardından bu veriyi **hash**lediğini hayal edin. Eğer şunları biliyorsanız:
 
-- **Gizlinin uzunluğu** (bu, belirli bir uzunluk aralığından da brute force ile elde edilebilir)
-- **Düz metin verisi**
+- **Gizlinin uzunluğu** (bu, verilen bir uzunluk aralığından da brute force ile elde edilebilir)
+- **Düz metin veri**
 - **Algoritma (ve bu saldırıya karşı savunmasız)**
 - **Padding biliniyor**
 - Genellikle varsayılan bir padding kullanılır, bu nedenle diğer 3 gereklilik karşılandığında, bu da geçerlidir
 - Padding, gizli+veri uzunluğuna bağlı olarak değişir, bu yüzden gizlinin uzunluğu gereklidir
 
-O zaman, bir **saldırgan** **veri ekleyip** **önceki veri + eklenen veri** için geçerli bir **imza** **üretebilir**.
+O zaman, bir **saldırgan** **veri** ekleyip **önceki veri + eklenen veri** için geçerli bir **imza** **üretebilir**.
 
 ### Nasıl?
 
@@ -29,7 +29,9 @@ Eğer bir saldırgan "append" dizesini eklemek isterse, şunları yapabilir:
 
 ### **Araç**
 
-{% embed url="https://github.com/iagox86/hash_extender" %}
+{{#ref}}
+https://github.com/iagox86/hash_extender
+{{#endref}}
 
 ### Referanslar
 

@@ -4,8 +4,12 @@ Eğer bir şekilde bir düz metni RC4 kullanarak şifreleyebilirseniz, o RC4 ile
 
 Eğer bilinen bir düz metni şifreleyebiliyorsanız, şifreyi de çıkarabilirsiniz. Daha fazla referans HTB Kryptos makinesinde bulunabilir:
 
-{% embed url="https://0xrick.github.io/hack-the-box/kryptos/" %}
+{{#ref}}
+https://0xrick.github.io/hack-the-box/kryptos/
+{{#endref}}
 
-{% embed url="https://0xrick.github.io/hack-the-box/kryptos/" %}
+{{#ref}}
+https://0xrick.github.io/hack-the-box/kryptos/
+{{#endref}}
 
 {{#include ../banners/hacktricks-training.md}}

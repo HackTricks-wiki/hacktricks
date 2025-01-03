@@ -27,11 +27,11 @@ Tüm suid ikili dosyalarını bulun ve **Pkexec** ikili dosyasının olup olmad�
 find / -perm -4000 2>/dev/null
 ```
 Eğer **pkexec** ikilisinin **SUID ikilisi** olduğunu ve **sudo** veya **admin** grubuna ait olduğunuzu bulursanız, muhtemelen `pkexec` kullanarak ikilileri sudo olarak çalıştırabilirsiniz.\
-Bu, genellikle bu grupların **polkit politikası** içinde yer alması nedeniyledir. Bu politika, temelde hangi grupların `pkexec` kullanabileceğini belirler. Bunu kontrol etmek için:
+Bu, genellikle **polkit politikası** içindeki gruplardır. Bu politika, temelde hangi grupların `pkexec` kullanabileceğini belirler. Bunu kontrol etmek için:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
-Orada **pkexec** komutunu çalıştırmaya izin verilen grupları bulacaksınız ve bazı Linux dağıtımlarında **sudo** ve **admin** grupları varsayılan olarak görünmektedir.
+Orada **pkexec** komutunu çalıştırmaya izin verilen grupları bulacaksınız ve bazı Linux dağıtımlarında **sudo** ve **admin** grupları **varsayılan olarak** görünmektedir.
 
 **root olmak için şunu çalıştırabilirsiniz**:
 ```bash
@@ -76,7 +76,7 @@ So, dosyayı okuyun ve bazı **hash'leri kırmaya** çalışın.
 
 ## Personel Grubu
 
-**staff**: Kullanıcıların kök ayrıcalıkları olmadan sisteme yerel değişiklikler eklemelerine izin verir (`/usr/local`) (not: `/usr/local/bin` içindeki çalıştırılabilir dosyalar, herhangi bir kullanıcının PATH değişkenindedir ve aynı isimdeki `/bin` ve `/usr/bin` içindeki çalıştırılabilir dosyaların "üstüne yazabilir"). "adm" grubu ile karşılaştırın, bu grup daha çok izleme/güvenlik ile ilgilidir. [\[source\]](https://wiki.debian.org/SystemGroups)
+**staff**: Kullanıcıların kök ayrıcalıklarına ihtiyaç duymadan sisteme yerel değişiklikler eklemelerine izin verir (`/usr/local`) (not: `/usr/local/bin` içindeki çalıştırılabilir dosyalar, herhangi bir kullanıcının PATH değişkenindedir ve aynı isimdeki `/bin` ve `/usr/bin` içindeki çalıştırılabilir dosyaların "üstüne" yazabilir). "adm" grubu ile karşılaştırın, bu grup daha çok izleme/güvenlik ile ilgilidir. [\[source\]](https://wiki.debian.org/SystemGroups)
 
 Debian dağıtımlarında, `$PATH` değişkeni `/usr/local/`'un en yüksek öncelikle çalıştırılacağını gösterir, ayrıcalıklı bir kullanıcı olup olmadığınıza bakılmaksızın.
 ```bash
@@ -146,7 +146,7 @@ Debugfs kullanarak **dosya yazma** işlemi de yapabileceğinizi unutmayın. Örn
 debugfs -w /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
-Ancak, **root tarafından sahip olunan dosyaları yazmaya** çalışırsanız (örneğin `/etc/shadow` veya `/etc/passwd`), "**İzin reddedildi**" hatası alırsınız.
+Ancak, eğer **root'a ait dosyaları yazmaya** çalışırsanız (örneğin `/etc/shadow` veya `/etc/passwd`), "**İzin reddedildi**" hatası alırsınız.
 
 ## Video Grubu
 
@@ -158,16 +158,16 @@ moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
 **tty1**, kullanıcının **yossi'nin makinedeki bir terminale fiziksel olarak giriş yaptığını** ifade eder.
 
-**video grubu**, ekran çıktısını görüntüleme erişimine sahiptir. Temelde ekranları gözlemleyebilirsiniz. Bunu yapmak için, ekranın **şu anki görüntüsünü** ham veri olarak almanız ve ekranın kullandığı çözünürlüğü öğrenmeniz gerekir. Ekran verileri `/dev/fb0`'da saklanabilir ve bu ekranın çözünürlüğünü `/sys/class/graphics/fb0/virtual_size`'da bulabilirsiniz.
+**video grubu**, ekran çıktısını görüntüleme erişimine sahiptir. Temelde ekranları gözlemleyebilirsiniz. Bunu yapmak için, ekranın üzerindeki **mevcut görüntüyü ham veri olarak yakalamanız** ve ekranın kullandığı çözünürlüğü almanız gerekir. Ekran verileri `/dev/fb0`'da kaydedilebilir ve bu ekranın çözünürlüğünü `/sys/class/graphics/fb0/virtual_size`'da bulabilirsiniz.
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-**Ham görüntüyü** açmak için **GIMP** kullanabilir, **`screen.raw`** dosyasını seçebilir ve dosya türü olarak **Ham görüntü verisi** seçebilirsiniz:
+**Ham görüntüyü açmak için** **GIMP**'i kullanabilir, **`screen.raw`** dosyasını seçebilir ve dosya türü olarak **Ham görüntü verisi**'ni seçebilirsiniz:
 
 ![](<../../../images/image (463).png>)
 
-Sonra Genişlik ve Yükseklik değerlerini ekranda kullanılanlarla değiştirin ve farklı Görüntü Türlerini kontrol edin (ve ekranı daha iyi göstereni seçin):
+Ardından, Genişlik ve Yükseklik değerlerini ekranda kullanılanlarla değiştirin ve farklı Görüntü Türlerini kontrol edin (ve ekranı daha iyi gösterenini seçin):
 
 ![](<../../../images/image (317).png>)
 
@@ -201,9 +201,13 @@ Son olarak, eğer daha önceki önerilerden hiçbiri hoşunuza gitmiyorsa veya b
 
 Eğer docker soketi üzerinde yazma izinleriniz varsa [**docker soketini kötüye kullanarak yetki yükseltme hakkında bu yazıyı okuyun**](../#writable-docker-socket)**.**
 
-{% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
+{{#ref}}
+https://github.com/KrustyHack/docker-privilege-escalation
+{{#endref}}
 
-{% embed url="https://fosterelli.co/privilege-escalation-via-docker.html" %}
+{{#ref}}
+https://fosterelli.co/privilege-escalation-via-docker.html
+{{#endref}}
 
 ## lxc/lxd Grubu
 

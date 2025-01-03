@@ -12,9 +12,9 @@ Yazılım:
 
 Çevrimiçi:
 
-- **wasm** (ikili) formatından **wat** (düz metin) formatına **decompile** etmek için [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) kullanın
-- **wat** formatından **wasm** formatına **compile** etmek için [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/) kullanın
-- **decompile** etmek için [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/) kullanmayı da deneyebilirsiniz
+- wasm (ikili) formatından wat (düz metin) formatına **decompile** etmek için [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) kullanın
+- wat formatından wasm formatına **compile** etmek için [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/) kullanın
+- decompile etmek için [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/) kullanmayı da deneyebilirsiniz
 
 Yazılım:
 
@@ -25,7 +25,7 @@ Yazılım:
 
 ### [dotPeek](https://www.jetbrains.com/decompiler/)
 
-dotPeek, **kütüphaneler** (.dll), **Windows meta veri dosyaları** (.winmd) ve **çalıştırılabilir dosyalar** (.exe) dahil olmak üzere **birden fazla formatı decompile** eden ve inceleyen bir decompiler'dır. Decompile edildikten sonra, bir assembly Visual Studio projesi (.csproj) olarak kaydedilebilir.
+dotPeek, **kütüphaneler** (.dll), **Windows meta veri dosyaları** (.winmd) ve **çalıştırılabilir dosyalar** (.exe) dahil olmak üzere **birden fazla formatı decompile ve inceleyen** bir decompiler'dır. Decompile edildikten sonra, bir assembly Visual Studio projesi (.csproj) olarak kaydedilebilir.
 
 Buradaki avantaj, kaybolmuş bir kaynak kodunun eski bir assembly'den geri yüklenmesi gerektiğinde, bu işlemin zaman kazandırmasıdır. Ayrıca, dotPeek, decompile edilmiş kod boyunca kullanışlı bir navigasyon sağlar ve bu da onu **Xamarin algoritma analizi** için mükemmel araçlardan biri yapar.
 
@@ -35,7 +35,7 @@ Kapsamlı bir eklenti modeli ve aracı tam ihtiyaçlarınıza uyacak şekilde ge
 
 - Bir kütüphane veya bileşen içindeki veri akışının nasıl olduğunu anlamanızı sağlar
 - .NET dilleri ve çerçevelerinin uygulanması ve kullanımı hakkında bilgi verir
-- Kullanılan API'lerden ve teknolojilerden daha fazla yararlanmak için belgelenmemiş ve açığa çıkarılmamış işlevselliği bulur.
+- API'lerden ve kullanılan teknolojilerden daha fazla yararlanmak için belgelenmemiş ve açığa çıkarılmamış işlevselliği bulur.
 - Bağımlılıkları ve farklı assembly'leri bulur
 - Kodunuzdaki, üçüncü taraf bileşenlerdeki ve kütüphanelerdeki hataların tam yerini takip eder.
 - Çalıştığınız tüm .NET kodunun kaynağına hata ayıklama yapar.
@@ -43,7 +43,7 @@ Kapsamlı bir eklenti modeli ve aracı tam ihtiyaçlarınıza uyacak şekilde ge
 ### [ILSpy](https://github.com/icsharpcode/ILSpy) & [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
 [Visual Studio Code için ILSpy eklentisi](https://github.com/icsharpcode/ilspy-vscode): Herhangi bir işletim sisteminde kullanabilirsiniz (doğrudan VSCode'dan kurabilirsiniz, git indirmeye gerek yok. **Extensions**'a tıklayın ve **ILSpy**'yi arayın).\
-**decompile**, **modify** ve tekrar **recompile** etmeniz gerekiyorsa [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) veya aktif olarak bakımı yapılan bir çatalı, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases) kullanabilirsiniz. (**Sağ Tık -> Method'u Değiştir** ile bir fonksiyonun içindeki bir şeyi değiştirebilirsiniz).
+Eğer **decompile**, **modify** ve tekrar **recompile** etmeniz gerekiyorsa [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) veya aktif olarak bakımı yapılan bir fork'u, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases) kullanabilirsiniz. (**Sağ Tık -> Method'u Değiştir** ile bir fonksiyonun içindeki bir şeyi değiştirebilirsiniz).
 
 ### DNSpy Logging
 
@@ -63,7 +63,9 @@ DNSpy kullanarak kodu hata ayıklamak için şunları yapmalısınız:
 ```aspnet
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints)]
 ```
-Bu dosya, tersine mühendislik ve analiz için temel araçlar ve yöntemler hakkında bilgi sağlamaktadır. Aşağıda, bu araçların ve yöntemlerin nasıl kullanılacağına dair bazı temel bilgiler bulunmaktadır.
+Bu bölümde, tersine mühendislik için temel araçlar ve yöntemler hakkında bilgi verilecektir. Tersine mühendislik, yazılımın iç işleyişini anlamak ve analiz etmek için kullanılan bir tekniktir. Bu süreç, yazılımın nasıl çalıştığını anlamak, güvenlik açıklarını bulmak ve potansiyel olarak kötü niyetli kullanımları önlemek için önemlidir. 
+
+Tersine mühendislik araçları, genellikle yazılımın ikili dosyalarını analiz etmek için kullanılır. Bu araçlar, yazılımın işleyişini anlamak için çeşitli yöntemler sunar. Bu bölümde, bu araçların bazıları ve bunların nasıl kullanılacağı hakkında bilgi verilecektir.
 ```
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.Default |
 DebuggableAttribute.DebuggingModes.DisableOptimizations |
@@ -92,7 +94,7 @@ Ardından **IIS server**'a bağlanmak için **w3wp.exe**'yi seçin ve **attach**
 
 ![](<../../images/image (113).png>)
 
-Artık süreci hata ayıklıyorken, durdurma ve tüm modülleri yükleme zamanı. Önce _Debug >> Break All_ seçeneğine tıklayın ve ardından _**Debug >> Windows >> Modules**_ seçeneğine tıklayın:
+Artık süreci hata ayıklıyoruz, zamanı durdurup tüm modülleri yükleme zamanı. Önce _Debug >> Break All_ seçeneğine tıklayın ve ardından _**Debug >> Windows >> Modules**_ seçeneğine tıklayın:
 
 ![](<../../images/image (132).png>)
 
@@ -115,28 +117,28 @@ Artık süreci hata ayıklıyorken, durdurma ve tüm modülleri yükleme zamanı
 
 ### IDA Kullanarak
 
-- **rundll32**'yi yükleyin (64bit için C:\Windows\System32\rundll32.exe ve 32 bit için C:\Windows\SysWOW64\rundll32.exe)
+- **rundll32'yi yükleyin** (64bit için C:\Windows\System32\rundll32.exe ve 32 bit için C:\Windows\SysWOW64\rundll32.exe)
 - **Windbg** hata ayıklayıcısını seçin
-- "**Suspend on library load/unload**" seçeneğini seçin
+- "**Kütüphane yükleme/boşaltma sırasında askıya al**" seçeneğini seçin
 
 ![](<../../images/image (868).png>)
 
-- **DLL**'nin yolunu ve çağırmak istediğiniz fonksiyonu belirterek yürütme **parametrelerini** yapılandırın:
+- **DLL'nin yolunu** ve çağırmak istediğiniz fonksiyonu belirterek yürütme **parametrelerini** yapılandırın:
 
 ![](<../../images/image (704).png>)
 
-Ardından, hata ayıklamaya başladığınızda **her DLL yüklendiğinde yürütme durdurulacaktır**, daha sonra rundll32 DLL'nizi yüklediğinde yürütme durdurulacaktır.
+Ardından, hata ayıklamaya başladığınızda **her DLL yüklendiğinde yürütme durdurulacak**, sonra, rundll32 DLL'nizi yüklediğinde yürütme durdurulacak.
 
 Ama, yüklenen DLL'nin koduna nasıl ulaşabilirsiniz? Bu yöntemi kullanarak, nasıl olduğunu bilmiyorum.
 
 ### x64dbg/x32dbg Kullanarak
 
-- **rundll32**'yi yükleyin (64bit için C:\Windows\System32\rundll32.exe ve 32 bit için C:\Windows\SysWOW64\rundll32.exe)
-- **Command Line**'ı değiştirin (_File --> Change Command Line_) ve DLL'nin yolunu ve çağırmak istediğiniz fonksiyonu ayarlayın, örneğin: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
-- _Options --> Settings_ kısmını değiştirin ve "**DLL Entry**" seçeneğini seçin.
-- Ardından **yürütmeyi başlatın**, hata ayıklayıcı her DLL ana fonksiyonunda duracaktır, bir noktada **DLL'nizin girişinde duracaksınız**. Oradan, bir kesme noktası koymak istediğiniz yerleri arayın.
+- **rundll32'yi yükleyin** (64bit için C:\Windows\System32\rundll32.exe ve 32 bit için C:\Windows\SysWOW64\rundll32.exe)
+- **Komut Satırını Değiştirin** (_File --> Change Command Line_) ve DLL'nin yolunu ve çağırmak istediğiniz fonksiyonu ayarlayın, örneğin: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
+- _Options --> Settings_ kısmını değiştirin ve "**DLL Girişi**" seçeneğini seçin.
+- Ardından **yürütmeyi başlatın**, hata ayıklayıcı her DLL ana fonksiyonunda duracak, bir noktada **DLL'nizin girişinde duracaksınız**. Oradan, bir kesme noktası koymak istediğiniz yerleri arayın.
 
-Yürütme herhangi bir nedenle win64dbg'de durdurulduğunda, **nerede olduğunuzu** görebilirsiniz, **win64dbg penceresinin üst kısmında**:
+Yürütme herhangi bir nedenle win64dbg'de durdurulduğunda, **nerede olduğunuzu** win64dbg penceresinin **üst kısmında** görebilirsiniz:
 
 ![](<../../images/image (842).png>)
 
@@ -150,20 +152,22 @@ Sonra, yürütmenin durdurulduğu yeri görebilirsiniz, hata ayıklamak istediğ
 cheat-engine.md
 {{#endref}}
 
-[**PiNCE**](https://github.com/korcankaraokcu/PINCE) GNU Project Debugger (GDB) için bir ön yüz/ters mühendislik aracıdır ve oyunlara odaklanmıştır. Ancak, herhangi bir ters mühendislik ile ilgili şeyler için de kullanılabilir.
+[**PiNCE**](https://github.com/korcankaraokcu/PINCE) GNU Project Debugger (GDB) için bir ön yüz/ters mühendislik aracıdır, oyunlara odaklanmıştır. Ancak, herhangi bir ters mühendislik ile ilgili şeyler için de kullanılabilir.
 
 [**Decompiler Explorer**](https://dogbolt.org/) bir dizi decompiler için bir web ön yüzüdür. Bu web hizmeti, küçük yürütülebilir dosyalar üzerinde farklı decompiler'ların çıktısını karşılaştırmanıza olanak tanır.
 
 ## ARM & MIPS
 
-{% embed url="https://github.com/nongiach/arm_now" %}
+{{#ref}}
+https://github.com/nongiach/arm_now
+{{#endref}}
 
-## Shellcodes
+## Shellcode'lar
 
 ### Blobrunner ile bir shellcode'u hata ayıklama
 
-[**Blobrunner**](https://github.com/OALabs/BlobRunner) **shellcode**'u bir bellek alanında **ayıracak**, shellcode'un ayrıldığı **bellek adresini** size **gösterecek** ve yürütmeyi **durduracaktır**.\
-Ardından, bir **hata ayıklayıcıyı** (Ida veya x64dbg) sürece eklemeli ve belirtilen bellek adresinde bir **kesme noktası** koymalı ve yürütmeyi **devam ettirmelisiniz**. Bu şekilde shellcode'u hata ayıklayacaksınız.
+[**Blobrunner**](https://github.com/OALabs/BlobRunner) **shellcode'u** bir bellek alanında **ayıracak**, shellcode'un ayrıldığı **bellek adresini** size **gösterecek** ve yürütmeyi **durduracak**.\
+Ardından, bir **hata ayıklayıcıyı** (Ida veya x64dbg) sürece eklemeniz ve belirtilen bellek adresinde bir **kesme noktası** koyup yürütmeyi **devam ettirmeniz** gerekiyor. Bu şekilde shellcode'u hata ayıklayacaksınız.
 
 Yayınların github sayfası, derlenmiş sürümleri içeren zip dosyaları içerir: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
 Blobrunner'ın biraz değiştirilmiş bir versiyonunu aşağıdaki bağlantıda bulabilirsiniz. Derlemek için sadece **Visual Studio Code'da bir C/C++ projesi oluşturun, kodu kopyalayıp yapıştırın ve derleyin**.
@@ -174,7 +178,7 @@ blobrunner.md
 
 ### jmp2it ile bir shellcode'u hata ayıklama
 
-[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) blobrunner'a çok benzer. **Shellcode**'u bir bellek alanında **ayıracak** ve bir **sonsuz döngü** başlatacaktır. Ardından, **hata ayıklayıcıyı** sürece eklemeli, **başlat düğmesine basmalı, 2-5 saniye beklemeli ve durdurmalısınız** ve kendinizi **sonsuz döngüde** bulacaksınız. Sonsuz döngünün bir sonraki talimatına atlayın çünkü bu shellcode'a bir çağrı olacaktır ve sonunda shellcode'u yürütmeye başlayacaksınız.
+[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) blobrunner'a çok benzer. **shellcode'u** bir bellek alanında **ayıracak** ve bir **sonsuz döngü** başlatacaktır. Ardından, sürece **hata ayıklayıcıyı eklemeniz**, **oyunu başlatmanız, 2-5 saniye beklemeniz ve durdurmanız** gerekiyor ve kendinizi **sonsuz döngüde** bulacaksınız. Sonsuz döngünün bir sonraki talimatına atlayın çünkü bu shellcode'a bir çağrı olacaktır ve sonunda shellcode'u yürütmeye başlayacaksınız.
 
 ![](<../../images/image (509).png>)
 
@@ -184,11 +188,11 @@ Derlenmiş bir versiyonu [jmp2it'in yayınlar sayfasından](https://github.com/a
 
 [**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) radare'nin GUI'sidir. Cutter kullanarak shellcode'u emüle edebilir ve dinamik olarak inceleyebilirsiniz.
 
-Cutter'ın "Open File" ve "Open Shellcode" seçeneklerini sunduğunu unutmayın. Benim durumumda, shellcode'u dosya olarak açtığımda doğru bir şekilde decompile etti, ancak shellcode olarak açtığımda etmedi:
+Cutter'ın "Dosya Aç" ve "Shellcode Aç" seçeneklerini sunduğunu unutmayın. Benim durumumda shellcode'u dosya olarak açtığımda doğru bir şekilde decompile etti, ancak shellcode olarak açtığımda etmedi:
 
 ![](<../../images/image (562).png>)
 
-Emülasyonu istediğiniz yerden başlatmak için orada bir kesme noktası ayarlayın ve görünüşe göre cutter oradan emülasyonu otomatik olarak başlatacaktır:
+Emülasyonu başlatmak istediğiniz yerden başlatmak için oraya bir kesme noktası koyun ve görünüşe göre cutter oradan emülasyonu otomatik olarak başlatacaktır:
 
 ![](<../../images/image (589).png>)
 
@@ -214,7 +218,7 @@ scDbg ayrıca istediğiniz seçenekleri seçip shellcode'u çalıştırabileceğ
 
 ![](<../../images/image (258).png>)
 
-**Create Dump** seçeneği, shellcode'da dinamik olarak herhangi bir değişiklik yapıldığında son shellcode'u dökecektir (kodlanmış shellcode'u indirmek için faydalıdır). **start offset** shellcode'u belirli bir ofsetten başlatmak için faydalı olabilir. **Debug Shell** seçeneği, shellcode'u scDbg terminali kullanarak hata ayıklamak için faydalıdır (ancak bu konuda daha önce açıklanan seçeneklerin herhangi birinin daha iyi olduğunu düşünüyorum çünkü Ida veya x64dbg kullanabileceksiniz).
+**Create Dump** seçeneği, shellcode'da dinamik olarak herhangi bir değişiklik yapıldığında son shellcode'u dökecektir (kodlanmış shellcode'u indirmek için faydalıdır). **start offset** shellcode'u belirli bir ofsetten başlatmak için faydalı olabilir. **Debug Shell** seçeneği, scDbg terminalini kullanarak shellcode'u hata ayıklamak için faydalıdır (ancak bu konuda daha önce açıklanan seçeneklerin herhangi birinin daha iyi olduğunu düşünüyorum çünkü Ida veya x64dbg kullanabileceksiniz).
 
 ### CyberChef kullanarak ayrıştırma
 
@@ -238,7 +242,7 @@ Eğer bir **CTF oynuyorsanız, bayrağı bulmak için bu geçici çözüm** çok
 
 ## Rust
 
-**giriş noktası** bulmak için fonksiyonları `::main` ile arayın:
+**giriş noktası** bulmak için `::main` ile fonksiyonları arayın:
 
 ![](<../../images/image (1080).png>)
 
@@ -253,9 +257,9 @@ Eğer bir Delphi ikili dosyasını tersine mühendislik yapmanız gerekiyorsa, I
 
 Sadece **ATL+f7** tuşlarına basın (IDA'da python eklentisini içe aktarın) ve python eklentisini seçin.
 
-Bu eklenti, ikili dosyayı çalıştıracak ve hata ayıklamanın başlangıcında fonksiyon isimlerini dinamik olarak çözecektir. Hata ayıklamayı başlattıktan sonra tekrar Başlat butonuna (yeşil olan veya f9) basın ve gerçek kodun başlangıcında bir kesme noktası oluşacaktır.
+Bu eklenti, ikili dosyayı çalıştıracak ve hata ayıklamanın başlangıcında fonksiyon isimlerini dinamik olarak çözecektir. Hata ayıklamayı başlattıktan sonra tekrar Başlat butonuna (yeşil olan veya f9) basın ve gerçek kodun başında bir kesme noktası oluşacaktır.
 
-Ayrıca, grafik uygulamasında bir düğmeye bastığınızda, hata ayıklayıcı o düğme tarafından yürütülen fonksiyonda duracaktır.
+Ayrıca, grafik uygulamasında bir butona bastığınızda, hata ayıklayıcı o buton tarafından yürütülen fonksiyonda duracaktır.
 
 ## Golang
 
@@ -273,16 +277,16 @@ Bu sayfada bir ELF/EXE python derlenmiş ikili dosyasından python kodunu nasıl
 ../../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md
 {{#endref}}
 
-## GBA - Oyun Vücut İleri
+## GBA - Oyun Gövdesi İleri
 
 Eğer bir GBA oyununun **ikilisini** alırsanız, **emüle** etmek ve **hata ayıklamak** için farklı araçlar kullanabilirsiniz:
 
-- [**no$gba**](https://problemkaputt.de/gba.htm) (_Hata ayıklama sürümünü indirin_) - Arayüz ile birlikte bir hata ayıklayıcı içerir
+- [**no$gba**](https://problemkaputt.de/gba.htm) (_Hata ayıklama sürümünü indirin_) - Arayüz ile bir hata ayıklayıcı içerir
 - [**mgba** ](https://mgba.io)- CLI hata ayıklayıcı içerir
 - [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Ghidra eklentisi
 - [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Ghidra eklentisi
 
-[**no$gba**](https://problemkaputt.de/gba.htm) içinde, _**Seçenekler --> Emülasyon Ayarı --> Kontroller**_\*\* \*\* kısmında Game Boy Advance **düğmelerine** nasıl basılacağını görebilirsiniz.
+[**no$gba**](https://problemkaputt.de/gba.htm) içinde, _**Seçenekler --> Emülasyon Ayarı --> Kontroller**_\*\* \*\* Game Boy Advance **butonlarına** nasıl basılacağını görebilirsiniz.
 
 ![](<../../images/image (581).png>)
 
@@ -305,7 +309,7 @@ Bu tür bir programda, ilginç kısım **programın kullanıcı girdisini nasıl
 
 Önceki görüntüde, fonksiyonun **FUN_080015a8**'den çağrıldığını görebilirsiniz (adresler: _0x080015fa_ ve _0x080017ac_).
 
-O fonksiyonda, bazı başlangıç işlemlerinden sonra (önemsiz):
+Bu fonksiyonda, bazı başlangıç işlemlerinden sonra (önemsiz):
 ```c
 void FUN_080015a8(void)
 
@@ -366,21 +370,23 @@ FUN_08000864();
 if (uVar1 == 0x10) {
 DAT_030000d8 = DAT_030000d8 + 0x3a;
 ```
-Önceki kodda **uVar1**'in (**basılı düğmenin değeri**) bazı değerlerle karşılaştırıldığını görebilirsiniz:
+Önceki kodda **uVar1**'in (**basılı butonun değeri**) bazı değerlerle karşılaştırıldığını görebilirsiniz:
 
-- İlk olarak, **değer 4** ile karşılaştırılıyor (**SELECT** düğmesi): Bu düğme, meydan okumada ekranı temizliyor.
-- Sonra, **değer 8** ile karşılaştırılıyor (**START** düğmesi): Bu, meydan okumada kodun bayrağı almak için geçerli olup olmadığını kontrol ediyor.
+- İlk olarak, **değer 4** ile karşılaştırılıyor (**SELECT** butonu): Bu buton, bu görevde ekranı temizliyor.
+- Sonra, **değer 8** ile karşılaştırılıyor (**START** butonu): Bu görevde, kodun bayrağı almak için geçerli olup olmadığını kontrol ediyor.
 - Bu durumda **`DAT_030000d8`** değişkeni 0xf3 ile karşılaştırılıyor ve değer aynıysa bazı kodlar çalıştırılıyor.
 - Diğer durumlarda, bazı cont (`DAT_030000d4`) kontrol ediliyor. Bu bir cont çünkü koda girdikten hemen sonra 1 ekliyor.\
-**Eğer** 8'den küçükse, **`DAT_030000d8`**'e değerler **eklemek** ile ilgili bir işlem yapılıyor (temelde, cont 8'den küçük olduğu sürece, bu değişkende basılan tuşların değerlerini topluyor).
+**E**ğer 8'den küçükse, **`DAT_030000d8`**'e değerler **eklemek** ile ilgili bir işlem yapılıyor (temelde, cont 8'den küçük olduğu sürece bu değişkende basılan tuşların değerlerini topluyor).
 
-Bu meydan okumada, düğmelerin değerlerini bilerek, **sonuçta toplamı 0xf3 olan 8'den küçük bir uzunlukta bir kombinasyon basmanız gerekiyordu.**
+Bu nedenle, bu görevde butonların değerlerini bilerek, **sonuçta toplamı 0xf3 olan 8'den daha kısa bir kombinasyonu basmanız gerekiyordu.**
 
 **Bu eğitim için referans:** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)
 
 ## Game Boy
 
-{% embed url="https://www.youtube.com/watch?v=VVbRe7wr3G4" %}
+{{#ref}}
+https://www.youtube.com/watch?v=VVbRe7wr3G4
+{{#endref}}
 
 ## Kurslar
 

@@ -4,7 +4,7 @@
 
 ## AppLocker Politikası
 
-Bir uygulama beyaz listesi, bir sistemde bulunmasına ve çalıştırılmasına izin verilen onaylı yazılım uygulamaları veya çalıştırılabilir dosyaların bir listesidir. Amaç, ortamı zararlı kötü amaçlı yazılımlardan ve bir organizasyonun belirli iş ihtiyaçlarıyla uyumlu olmayan onaylanmamış yazılımlardan korumaktır.
+Bir uygulama beyaz listesi, bir sistemde bulunmasına ve çalıştırılmasına izin verilen onaylı yazılım uygulamaları veya çalıştırılabilir dosyaların listesidir. Amaç, ortamı zararlı kötü amaçlı yazılımlardan ve bir organizasyonun belirli iş ihtiyaçlarıyla uyumlu olmayan onaylanmamış yazılımlardan korumaktır.
 
 [AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) Microsoft'un **uygulama beyaz listeleme çözümüdür** ve sistem yöneticilerine **kullanıcıların hangi uygulamaları ve dosyaları çalıştırabileceği üzerinde kontrol sağlar**. **Çalıştırılabilir dosyalar, betikler, Windows yükleyici dosyaları, DLL'ler, paketlenmiş uygulamalar ve paketlenmiş uygulama yükleyicileri** üzerinde **ince ayar kontrolü** sağlar.\
 Organizasyonların **cmd.exe ve PowerShell.exe'yi engellemesi** ve belirli dizinlere yazma erişimi sağlaması yaygındır, **ancak bunların hepsi atlatılabilir**.
@@ -56,16 +56,16 @@ LSA, sağlanan kimlik bilgilerini **SAM** dosyasında (yerel giriş için) **kon
 
 ### LSA gizli bilgileri
 
-LSA, diske bazı kimlik bilgilerini kaydedebilir:
+LSA, diskte bazı kimlik bilgilerini kaydedebilir:
 
-- Aktif Dizin'in bilgisayar hesabının şifresi (ulaşılamayan alan denetleyicisi).
+- Etki Alanı Denetleyicisi'ne (ulaşılamayan) ait bilgisayar hesabının şifresi.
 - Windows hizmetlerinin hesaplarının şifreleri
 - Zamanlanmış görevler için şifreler
 - Daha fazlası (IIS uygulamalarının şifresi...)
 
 ### NTDS.dit
 
-Bu, Aktif Dizin'in veritabanıdır. Sadece Alan Denetleyicileri'nde mevcuttur.
+Bu, Active Directory'nin veritabanıdır. Sadece Alan Denetleyicileri'nde mevcuttur.
 
 ## Defender
 
@@ -103,14 +103,14 @@ sc query windefend
 ```
 ## Şifreli Dosya Sistemi (EFS)
 
-EFS, dosyaları **simetrik anahtar** olan **Dosya Şifreleme Anahtarı (FEK)** ile şifreleyerek güvence altına alır. Bu anahtar, kullanıcının **açık anahtarı** ile şifrelenir ve şifrelenmiş dosyanın $EFS **alternatif veri akışında** saklanır. Şifre çözme gerektiğinde, kullanıcının dijital sertifikasının ilgili **özel anahtarı** $EFS akışından FEK'yi şifre çözmek için kullanılır. Daha fazla ayrıntı [burada](https://en.wikipedia.org/wiki/Encrypting_File_System) bulunabilir.
+EFS, dosyaları **simetrik anahtar** olan **Dosya Şifreleme Anahtarı (FEK)** ile şifreleyerek güvence altına alır. Bu anahtar, kullanıcının **açık anahtarı** ile şifrelenir ve şifrelenmiş dosyanın $EFS **alternatif veri akışında** saklanır. Şifre çözme gerektiğinde, kullanıcının dijital sertifikasının ilgili **özel anahtarı** $EFS akışından FEK'yi çözmek için kullanılır. Daha fazla ayrıntı [burada](https://en.wikipedia.org/wiki/Encrypting_File_System) bulunabilir.
 
 **Kullanıcı başlatması olmadan şifre çözme senaryoları** şunları içerir:
 
-- Dosyalar veya klasörler, [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table) gibi bir EFS dosya sistemine taşındığında, otomatik olarak şifre çözülür.
-- SMB/CIFS protokolü üzerinden ağda gönderilen şifreli dosyalar, iletimden önce şifre çözülür.
+- Dosyalar veya klasörler, [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table) gibi bir EFS dosya sistemine taşındığında, otomatik olarak şifreleri çözülür.
+- SMB/CIFS protokolü üzerinden ağda gönderilen şifreli dosyalar, iletimden önce şifreleri çözülür.
 
-Bu şifreleme yöntemi, sahibi için şifreli dosyalara **şeffaf erişim** sağlar. Ancak, sahibin şifresini değiştirmek ve oturum açmak, şifre çözmeye izin vermez.
+Bu şifreleme yöntemi, sahibine şifreli dosyalara **şeffaf erişim** sağlar. Ancak, sahibin şifresini değiştirmek ve oturum açmak, şifre çözmeyi sağlamaz.
 
 **Ana Noktalar**:
 
@@ -121,7 +121,7 @@ Bu şifreleme yöntemi, sahibi için şifreli dosyalara **şeffaf erişim** sağ
 
 ### EFS bilgilerini kontrol et
 
-Bir **kullanıcının** bu **hizmeti** kullanıp kullanmadığını kontrol etmek için bu yolun var olup olmadığını kontrol edin:`C:\users\<username>\appdata\roaming\Microsoft\Protect`
+Bir **kullanıcının** bu **hizmeti** kullanıp kullanmadığını kontrol etmek için bu yolun var olup olmadığını kontrol edin: `C:\users\<username>\appdata\roaming\Microsoft\Protect`
 
 Dosyaya **kimlerin** **erişimi** olduğunu kontrol etmek için cipher /c \<file>\
 Ayrıca, bir klasör içinde `cipher /e` ve `cipher /d` komutlarını kullanarak tüm dosyaları **şifreleyebilir** ve **şifre çözebilirsiniz**.
@@ -134,13 +134,15 @@ Bu yöntem, **kurban kullanıcının** ana bilgisayar içinde bir **işlem** ça
 
 #### Kullanıcının şifresini bilmek
 
-{% embed url="https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files" %}
+{{#ref}}
+https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
+{{#endref}}
 
 ## Grup Yönetilen Hizmet Hesapları (gMSA)
 
 Microsoft, IT altyapılarındaki hizmet hesaplarının yönetimini basitleştirmek için **Grup Yönetilen Hizmet Hesapları (gMSA)** geliştirmiştir. Geleneksel hizmet hesaplarının genellikle "**Şifre asla süresi dolmaz**" ayarı etkinken, gMSA'lar daha güvenli ve yönetilebilir bir çözüm sunar:
 
-- **Otomatik Şifre Yönetimi**: gMSA'lar, alan veya bilgisayar politikasına göre otomatik olarak değişen karmaşık, 240 karakterli bir şifre kullanır. Bu süreç, Microsoft'un Anahtar Dağıtım Servisi (KDC) tarafından yönetilir ve manuel şifre güncellemelerine gerek kalmaz.
+- **Otomatik Şifre Yönetimi**: gMSA'lar, alan veya bilgisayar politikasına göre otomatik olarak değişen karmaşık, 240 karakterli bir şifre kullanır. Bu süreç, Microsoft'un Anahtar Dağıtım Servisi (KDC) tarafından yönetilir ve manuel şifre güncellemeleri gereksiz hale gelir.
 - **Geliştirilmiş Güvenlik**: Bu hesaplar kilitlenmelere karşı bağışık olup, etkileşimli oturum açmak için kullanılamaz, böylece güvenliklerini artırır.
 - **Birden Fazla Ana Bilgisayar Desteği**: gMSA'lar, birden fazla ana bilgisayar arasında paylaşılabilir, bu da onları birden fazla sunucuda çalışan hizmetler için ideal hale getirir.
 - **Zamanlanmış Görev Yeteneği**: Yönetilen hizmet hesaplarının aksine, gMSA'lar zamanlanmış görevlerin çalıştırılmasını destekler.
@@ -156,19 +158,19 @@ Bu şifreyi [**GMSAPasswordReader**](https://github.com/rvazarkar/GMSAPasswordRe
 ```
 [**Bu yazıda daha fazla bilgi bulun**](https://cube0x0.github.io/Relaying-for-gMSA/)
 
-Ayrıca, **gMSA**'nın **şifresini** **okumak** için bir **NTLM relay saldırısı** gerçekleştirme hakkında bu [web sayfasını](https://cube0x0.github.io/Relaying-for-gMSA/) kontrol edin.
+Ayrıca, **gMSA**'nın **şifresini** **okumak** için **NTLM relay attack** nasıl yapılacağı hakkında bu [web sayfasını](https://cube0x0.github.io/Relaying-for-gMSA/) kontrol edin.
 
 ## LAPS
 
-**Yerel Yönetici Şifre Çözümü (LAPS)**, [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899) üzerinden indirilebilir, yerel Yönetici şifrelerinin yönetimini sağlar. Bu şifreler, **rastgele**, benzersiz ve **düzenli olarak değiştirilen** şifrelerdir ve merkezi olarak Active Directory'de saklanır. Bu şifrelere erişim, yetkili kullanıcılara ACL'ler aracılığıyla kısıtlanmıştır. Yeterli izinler verildiğinde, yerel yönetici şifrelerini okuma yeteneği sağlanır.
+**Local Administrator Password Solution (LAPS)**, [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899) üzerinden indirilebilir, yerel Yönetici şifrelerinin yönetimini sağlar. Bu şifreler, **rastgele**, benzersiz ve **düzenli olarak değiştirilen** şifrelerdir ve merkezi olarak Active Directory'de saklanır. Bu şifrelere erişim, yetkili kullanıcılara ACL'ler aracılığıyla kısıtlanmıştır. Yeterli izinler verildiğinde, yerel yönetici şifrelerini okuma yeteneği sağlanır.
 
 {{#ref}}
 active-directory-methodology/laps.md
 {{#endref}}
 
-## PS Kısıtlı Dil Modu
+## PS Constrained Language Mode
 
-PowerShell [**Kısıtlı Dil Modu**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **PowerShell'i etkili bir şekilde kullanmak için gereken birçok özelliği** kısıtlar, örneğin COM nesnelerini engelleme, yalnızca onaylı .NET türlerine, XAML tabanlı iş akışlarına, PowerShell sınıflarına ve daha fazlasına izin verme.
+PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **PowerShell'i etkili bir şekilde kullanmak için gereken birçok özelliği** kısıtlar, örneğin COM nesnelerini engelleme, yalnızca onaylı .NET türlerine, XAML tabanlı iş akışlarına, PowerShell sınıflarına ve daha fazlasına izin verme.
 
 ### **Kontrol Et**
 ```powershell
@@ -215,13 +217,13 @@ Powershell -command "Write-Host 'My voice is my passport, verify me.'"
 9º Use EncodeCommand
 $command = "Write-Host 'My voice is my passport, verify me.'" $bytes = [System.Text.Encoding]::Unicode.GetBytes($command) $encodedCommand = [Convert]::ToBase64String($bytes) powershell.exe -EncodedCommand $encodedCommand
 ```
-Daha fazlasını [buradan](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/) bulabilirsiniz.
+Daha fazlasını [burada](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/) bulabilirsiniz.
 
 ## Güvenlik Destek Sağlayıcı Arayüzü (SSPI)
 
 Kullanıcıları kimlik doğrulamak için kullanılabilecek API'dir.
 
-SSPI, iletişim kurmak isteyen iki makine için uygun protokolü bulmaktan sorumlu olacaktır. Bunun için tercih edilen yöntem Kerberos'tur. Ardından SSPI, hangi kimlik doğrulama protokolünün kullanılacağını müzakere edecektir; bu kimlik doğrulama protokolleri Güvenlik Destek Sağlayıcı (SSP) olarak adlandırılır ve her Windows makinesinde DLL biçiminde bulunur ve her iki makinenin de iletişim kurabilmesi için aynı protokolü desteklemesi gerekir.
+SSPI, iletişim kurmak isteyen iki makine için uygun protokolü bulmaktan sorumlu olacaktır. Bunun için tercih edilen yöntem Kerberos'tur. Ardından SSPI, hangi kimlik doğrulama protokolünün kullanılacağını müzakere edecektir; bu kimlik doğrulama protokolleri Güvenlik Destek Sağlayıcı (SSP) olarak adlandırılır, her Windows makinesinde DLL biçiminde bulunur ve her iki makinenin de iletişim kurabilmesi için aynı protokolü desteklemesi gerekir.
 
 ### Ana SSP'ler
 
@@ -238,9 +240,9 @@ SSPI, iletişim kurmak isteyen iki makine için uygun protokolü bulmaktan sorum
 
 #### Müzakere birkaç yöntem veya yalnızca bir tane sunabilir.
 
-## UAC - Kullanıcı Hesabı Denetimi
+## UAC - Kullanıcı Hesabı Kontrolü
 
-[Kullanıcı Hesabı Denetimi (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works), **yükseltilmiş etkinlikler için onay istemi** sağlayan bir özelliktir.
+[Kullanıcı Hesabı Kontrolü (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works), **yükseltilmiş etkinlikler için onay istemi** sağlayan bir özelliktir.
 
 {{#ref}}
 windows-security-controls/uac-user-account-control.md
