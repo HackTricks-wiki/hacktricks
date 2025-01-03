@@ -70,7 +70,7 @@ def ref(matchobj):
 
 
 def add_read_time(content):
-    regex = r'(# .*(?=\n))'
+    regex = r'(<\/style>\n# .*(?=\n))'
     new_content = re.sub(regex, lambda x: x.group(0) + "\n\nReading time: {{ #reading_time }}", content)
     return new_content
 
