@@ -398,3 +398,4 @@ git diff --no-index --diff-filter=D path/to/old_version/ path/to/new_version/
 {{#include ../../banners/hacktricks-training.md}}
 
 
+

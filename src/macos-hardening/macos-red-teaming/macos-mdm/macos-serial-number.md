@@ -40,3 +40,4 @@ Digits 1-9 correspond to weeks 1-9. Letters C-Y (excluding vowels and 'S') repre
 {{#include ../../../banners/hacktricks-training.md}}
 
 
+

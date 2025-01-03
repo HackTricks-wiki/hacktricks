@@ -126,3 +126,4 @@ crackmapexec 10.XXX.XXX.XXX -u 'ServiceAccount$' -H "HashPlaceholder" -d "YourDO
 {{#include ../../banners/hacktricks-training.md}}
 
 
+

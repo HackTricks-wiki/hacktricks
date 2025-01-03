@@ -55,3 +55,4 @@ More information in [https://en.wikipedia.org/wiki/CBC-MAC](https://en.wikipedia
 {{#include ../banners/hacktricks-training.md}}
 
 
+

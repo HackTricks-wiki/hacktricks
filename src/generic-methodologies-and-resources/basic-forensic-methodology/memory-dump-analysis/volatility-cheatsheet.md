@@ -919,3 +919,4 @@ The **Master Boot Record (MBR)** plays a crucial role in managing the logical pa
 {{#include ../../../banners/hacktricks-training.md}}
 
 
+

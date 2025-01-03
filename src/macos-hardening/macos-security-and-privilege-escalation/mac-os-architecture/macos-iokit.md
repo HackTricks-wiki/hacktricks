@@ -232,3 +232,4 @@ After the array is created you can see all the exported functions:
 {{#include ../../../banners/hacktricks-training.md}}
 
 
+
