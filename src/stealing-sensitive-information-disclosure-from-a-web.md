@@ -1,13 +1,13 @@
-# Stealing Sensitive Information Disclosure from a Web
+# Stehlen von sensiblen Informationen durch Offenlegung von einer Webseite
 
 {{#include ./banners/hacktricks-training.md}}
 
-If at some point you find a **web page that presents you sensitive information based on your session**: Maybe it's reflecting cookies, or printing or CC details or any other sensitive information, you may try to steal it.\
-Here I present you the main ways to can try to achieve it:
+Wenn Sie irgendwann eine **Webseite finden, die Ihnen sensible Informationen basierend auf Ihrer Sitzung präsentiert**: Vielleicht spiegelt sie Cookies wider, oder druckt Kreditkarteninformationen oder andere sensible Daten aus, könnten Sie versuchen, diese zu stehlen.\
+Hier präsentiere ich Ihnen die Hauptmethoden, die Sie versuchen können, um dies zu erreichen:
 
-- [**CORS bypass**](pentesting-web/cors-bypass.md): If you can bypass CORS headers you will be able to steal the information performing Ajax request for a malicious page.
-- [**XSS**](pentesting-web/xss-cross-site-scripting/): If you find a XSS vulnerability on the page you may be able to abuse it to steal the information.
-- [**Danging Markup**](pentesting-web/dangling-markup-html-scriptless-injection/): If you cannot inject XSS tags you still may be able to steal the info using other regular HTML tags.
-- [**Clickjaking**](pentesting-web/clickjacking.md): If there is no protection against this attack, you may be able to trick the user into sending you the sensitive data (an example [here](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)).
+- [**CORS-Bypass**](pentesting-web/cors-bypass.md): Wenn Sie die CORS-Header umgehen können, werden Sie in der Lage sein, die Informationen durch eine Ajax-Anfrage an eine bösartige Seite zu stehlen.
+- [**XSS**](pentesting-web/xss-cross-site-scripting/): Wenn Sie eine XSS-Sicherheitsanfälligkeit auf der Seite finden, könnten Sie in der Lage sein, diese auszunutzen, um die Informationen zu stehlen.
+- [**Dangling Markup**](pentesting-web/dangling-markup-html-scriptless-injection/): Wenn Sie keine XSS-Tags injizieren können, könnten Sie dennoch in der Lage sein, die Informationen mit anderen regulären HTML-Tags zu stehlen.
+- [**Clickjacking**](pentesting-web/clickjacking.md): Wenn es keinen Schutz gegen diesen Angriff gibt, könnten Sie den Benutzer dazu bringen, Ihnen die sensiblen Daten zu senden (ein Beispiel [hier](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)).
 
 {{#include ./banners/hacktricks-training.md}}

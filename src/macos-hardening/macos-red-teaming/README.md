@@ -24,7 +24,7 @@ Um Ihr eigenes MDM zu betreiben, müssen Sie **Ihr CSR von einem Anbieter signie
 
 Um jedoch eine Anwendung auf einem registrierten Gerät zu installieren, muss sie weiterhin von einem Entwicklerkonto signiert sein... jedoch fügt das **Gerät bei der MDM-Registrierung das SSL-Zertifikat des MDM als vertrauenswürdige CA hinzu**, sodass Sie jetzt alles signieren können.
 
-Um das Gerät in ein MDM zu registrieren, müssen Sie eine **`mobileconfig`**-Datei als Root installieren, die über eine **pkg**-Datei bereitgestellt werden kann (Sie könnten sie in zip komprimieren und beim Herunterladen von Safari wird sie dekomprimiert).
+Um das Gerät in ein MDM zu registrieren, müssen Sie eine **`mobileconfig`**-Datei als Root installieren, die über eine **pkg**-Datei bereitgestellt werden kann (Sie könnten sie in zip komprimieren, und wenn sie von Safari heruntergeladen wird, wird sie dekomprimiert).
 
 **Mythic agent Orthrus** verwendet diese Technik.
 
@@ -46,7 +46,7 @@ Darüber hinaus könnten Sie nach dem Finden geeigneter Anmeldeinformationen in 
 
 <figure><img src="../../images/image (167).png" alt=""><figcaption></figcaption></figure>
 
-Die **`jamf`**-Binärdatei enthielt das Geheimnis, um den Schlüsselbund zu öffnen, das zum Zeitpunkt der Entdeckung unter allen geteilt wurde und war: **`jk23ucnq91jfu9aj`**.\
+Die **`jamf`**-Binärdatei enthielt das Geheimnis, um den Schlüsselbund zu öffnen, das zum Zeitpunkt der Entdeckung **unter allen geteilt** wurde und war: **`jk23ucnq91jfu9aj`**.\
 Darüber hinaus **persistiert** jamf als **LaunchDaemon** in **`/Library/LaunchAgents/com.jamf.management.agent.plist`**.
 
 #### JAMF Geräteübernahme
@@ -65,7 +65,7 @@ plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
 <integer>4</integer>
 [...]
 ```
-Ein Angreifer könnte ein bösartiges Paket (`pkg`) ablegen, das **diese Datei überschreibt**, wenn es installiert wird, und die **URL auf einen Mythic C2-Listener von einem Typhon-Agenten** setzt, um JAMF als C2 missbrauchen zu können.
+Ein Angreifer könnte ein bösartiges Paket (`pkg`) ablegen, das **diese Datei überschreibt**, wenn es installiert wird, und die **URL auf einen Mythic C2-Listener von einem Typhon-Agenten** setzt, um JAMF als C2 auszunutzen.
 ```bash
 # After changing the URL you could wait for it to be reloaded or execute:
 sudo jamf policy -id 0
@@ -119,7 +119,7 @@ Ein **lokales MacOS-Tool**, das Ihnen ebenfalls helfen kann, ist `dscl`:
 ```bash
 dscl "/Active Directory/[Domain]/All Domains" ls /
 ```
-Auch gibt es einige Tools, die für MacOS vorbereitet sind, um automatisch das AD zu enumerieren und mit Kerberos zu spielen:
+Außerdem gibt es einige Tools, die für MacOS vorbereitet sind, um automatisch das AD zu enumerieren und mit Kerberos zu spielen:
 
 - [**Machound**](https://github.com/XMCyber/MacHound): MacHound ist eine Erweiterung des Bloodhound-Audit-Tools, das das Sammeln und Verarbeiten von Active Directory-Beziehungen auf MacOS-Hosts ermöglicht.
 - [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost ist ein Objective-C-Projekt, das entwickelt wurde, um mit den Heimdal krb5 APIs auf macOS zu interagieren. Das Ziel des Projekts ist es, bessere Sicherheitstests rund um Kerberos auf macOS-Geräten unter Verwendung nativer APIs zu ermöglichen, ohne dass andere Frameworks oder Pakete auf dem Ziel erforderlich sind.
@@ -183,7 +183,7 @@ Holen Sie sich ein TGT für einen bestimmten Benutzer und Dienst:
 bifrost --action asktgt --username [user] --domain [domain.com] \
 --hash [hash] --enctype [enctype] --keytab [/path/to/keytab]
 ```
-Sobald das TGT gesammelt ist, kann es mit der aktuellen Sitzung injiziert werden mit:
+Sobald das TGT gesammelt ist, kann es mit folgender Methode in die aktuelle Sitzung injiziert werden:
 ```bash
 bifrost --action asktgt --username test_lab_admin \
 --hash CF59D3256B62EE655F6430B0F80701EE05A0885B8B52E9C2480154AFA62E78 \

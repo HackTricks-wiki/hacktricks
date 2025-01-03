@@ -12,7 +12,7 @@ Neben der neuen hierarchischen Organisation führte cgroups Version 2 auch **meh
 
 Insgesamt bietet cgroups **Version 2 mehr Funktionen und eine bessere Leistung** als Version 1, aber letztere kann in bestimmten Szenarien, in denen die Kompatibilität mit älteren Systemen ein Anliegen ist, weiterhin verwendet werden.
 
-Sie können die v1- und v2-cgroups für jeden Prozess auflisten, indem Sie die cgroup-Datei in /proc/\<pid> ansehen. Sie können damit beginnen, die cgroups Ihrer Shell mit diesem Befehl zu überprüfen:
+Sie können die v1- und v2-cgroups für jeden Prozess auflisten, indem Sie sich die cgroup-Datei in /proc/\<pid> ansehen. Sie können damit beginnen, sich die cgroups Ihrer Shell mit diesem Befehl anzusehen:
 ```shell-session
 $ cat /proc/self/cgroup
 12:rdma:/
@@ -30,7 +30,7 @@ $ cat /proc/self/cgroup
 Die Ausgabestruktur ist wie folgt:
 
 - **Zahlen 2–12**: cgroups v1, wobei jede Zeile ein anderes cgroup darstellt. Die Controller dafür sind neben der Zahl angegeben.
-- **Zahl 1**: Ebenfalls cgroups v1, jedoch ausschließlich für Verwaltungszwecke (gesetzt durch z.B. systemd) und ohne einen Controller.
+- **Zahl 1**: Ebenfalls cgroups v1, jedoch ausschließlich für Verwaltungszwecke (gesetzt von z.B. systemd) und ohne einen Controller.
 - **Zahl 0**: Stellt cgroups v2 dar. Es sind keine Controller aufgeführt, und diese Zeile ist ausschließlich auf Systemen, die nur cgroups v2 ausführen, vorhanden.
 - Die **Namen sind hierarchisch**, ähnlich wie Dateipfade, und zeigen die Struktur und Beziehung zwischen verschiedenen cgroups an.
 - **Namen wie /user.slice oder /system.slice** spezifizieren die Kategorisierung von cgroups, wobei user.slice typischerweise für von systemd verwaltete Anmeldesitzungen und system.slice für Systemdienste verwendet wird.
@@ -43,17 +43,17 @@ Das Dateisystem wird typischerweise verwendet, um auf **cgroups** zuzugreifen, a
 
 Die wichtigsten Schnittstellendateien für cgroups sind mit **cgroup** vorangestellt. Die **cgroup.procs**-Datei, die mit Standardbefehlen wie cat angezeigt werden kann, listet die Prozesse innerhalb der cgroup auf. Eine andere Datei, **cgroup.threads**, enthält Thread-Informationen.
 
-![Cgroup-Prozesse](<../../../images/image (281).png>)
+![Cgroup Procs](<../../../images/image (281).png>)
 
 Cgroups, die Shells verwalten, umfassen typischerweise zwei Controller, die den Speicherverbrauch und die Anzahl der Prozesse regulieren. Um mit einem Controller zu interagieren, sollten Dateien mit dem Präfix des Controllers konsultiert werden. Zum Beispiel würde **pids.current** herangezogen, um die Anzahl der Threads in der cgroup zu ermitteln.
 
-![Cgroup-Speicher](<../../../images/image (677).png>)
+![Cgroup Speicher](<../../../images/image (677).png>)
 
-Die Angabe von **max** in einem Wert deutet auf das Fehlen einer spezifischen Grenze für die cgroup hin. Aufgrund der hierarchischen Natur von cgroups können jedoch Grenzen von einer cgroup auf einer niedrigeren Ebene in der Verzeichnisstruktur auferlegt werden.
+Die Angabe von **max** in einem Wert deutet auf das Fehlen eines spezifischen Limits für die cgroup hin. Aufgrund der hierarchischen Natur von cgroups können jedoch Limits von einer cgroup auf einer niedrigeren Ebene in der Verzeichnisstruktur auferlegt werden.
 
 ### Manipulieren und Erstellen von cgroups
 
-Prozesse werden cgroups zugewiesen, indem **ihre Prozess-ID (PID) in die `cgroup.procs`-Datei geschrieben wird**. Dies erfordert Root-Rechte. Um beispielsweise einen Prozess hinzuzufügen:
+Prozesse werden cgroups zugewiesen, indem **ihre Prozess-ID (PID) in die `cgroup.procs`-Datei** geschrieben wird. Dies erfordert Root-Rechte. Um beispielsweise einen Prozess hinzuzufügen:
 ```bash
 echo [pid] > cgroup.procs
 ```
@@ -61,11 +61,11 @@ echo [pid] > cgroup.procs
 ```bash
 echo 3000 > pids.max
 ```
-**Das Erstellen neuer cgroups** beinhaltet das Anlegen eines neuen Unterverzeichnisses innerhalb der cgroup-Hierarchie, was den Kernel dazu veranlasst, automatisch die erforderlichen Schnittstellendateien zu generieren. Obwohl cgroups ohne aktive Prozesse mit `rmdir` entfernt werden können, sollten Sie sich bestimmter Einschränkungen bewusst sein:
+**Neue cgroups erstellen** beinhaltet das Erstellen eines neuen Unterverzeichnisses innerhalb der cgroup-Hierarchie, was den Kernel dazu veranlasst, automatisch die erforderlichen Schnittstellendateien zu generieren. Obwohl cgroups ohne aktive Prozesse mit `rmdir` entfernt werden können, sollten Sie sich bestimmter Einschränkungen bewusst sein:
 
-- **Prozesse können nur in Blatt-cgroups platziert werden** (d.h. in den am tiefsten geschachtelten in einer Hierarchie).
+- **Prozesse können nur in Blatt-cgroups platziert werden** (d.h. in den am tiefsten verschachtelten in einer Hierarchie).
 - **Eine cgroup kann keinen Controller besitzen, der in ihrem übergeordneten Element fehlt**.
-- **Controller für untergeordnete cgroups müssen ausdrücklich** in der Datei `cgroup.subtree_control` **deklariert werden**. Zum Beispiel, um CPU- und PID-Controller in einer untergeordneten cgroup zu aktivieren:
+- **Controller für untergeordnete cgroups müssen ausdrücklich** in der Datei `cgroup.subtree_control` deklariert werden. Zum Beispiel, um CPU- und PID-Controller in einer untergeordneten cgroup zu aktivieren:
 ```bash
 echo "+cpu +pids" > cgroup.subtree_control
 ```
@@ -73,7 +73,7 @@ Die **root cgroup** ist eine Ausnahme von diesen Regeln und ermöglicht die dire
 
 **Die Überwachung der CPU-Nutzung** innerhalb einer cgroup ist über die Datei `cpu.stat` möglich, die die insgesamt verbrauchte CPU-Zeit anzeigt, was hilfreich ist, um die Nutzung über die Unterprozesse eines Dienstes zu verfolgen:
 
-<figure><img src="../../../images/image (908).png" alt=""><figcaption><p>CPU-Nutzungsstatistiken, wie sie in der Datei cpu.stat angezeigt werden</p></figcaption></figure>
+<figure><img src="../../../images/image (908).png" alt=""><figcaption><p>CPU-Nutzungsstatistiken, wie sie in der cpu.stat-Datei angezeigt werden</p></figcaption></figure>
 
 ## Referenzen
 

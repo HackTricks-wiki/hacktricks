@@ -135,7 +135,7 @@ launchctl print system
 # will print detailed information about the specific launch agent. And if it’s not running or you’ve mistyped, you will get some output with a non-zero exit code: Could not find service “com.company.launchagent.label” in domain for login
 launchctl print gui/<user's UID>/com.company.launchagent.label
 ```
-### Einen Benutzer erstellen
+### Erstelle einen Benutzer
 
 Ohne Eingabeaufforderungen
 

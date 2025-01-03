@@ -10,7 +10,7 @@
 ## Persistence detection
 
 - [**KnockKnock**](https://objective-see.org/products/knockknock.html): Objective-See-Anwendung, die an mehreren Orten sucht, wo **Malware persistieren könnte** (es ist ein Einmal-Tool, kein Überwachungsdienst).
-- [**BlockBlock**](https://objective-see.org/products/blockblock.html): Wie KnockKnock, indem Prozesse überwacht werden, die Persistenz erzeugen.
+- [**BlockBlock**](https://objective-see.org/products/blockblock.html): Wie KnockKnock, indem es Prozesse überwacht, die Persistenz erzeugen.
 
 ## Keyloggers detection
 

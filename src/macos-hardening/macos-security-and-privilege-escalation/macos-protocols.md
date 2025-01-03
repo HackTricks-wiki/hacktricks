@@ -4,12 +4,12 @@
 
 ## Fernzugriffsservices
 
-Dies sind die gängigen macOS-Dienste, um sie aus der Ferne zuzugreifen.\
+Dies sind die gängigen macOS-Dienste, um sie remote zuzugreifen.\
 Sie können diese Dienste in `Systemeinstellungen` --> `Freigabe` aktivieren/deaktivieren.
 
 - **VNC**, bekannt als „Bildschirmfreigabe“ (tcp:5900)
-- **SSH**, genannt „Remote Login“ (tcp:22)
-- **Apple Remote Desktop** (ARD), oder „Remote Management“ (tcp:3283, tcp:5900)
+- **SSH**, genannt „Remote-Login“ (tcp:22)
+- **Apple Remote Desktop** (ARD), oder „Remote-Management“ (tcp:3283, tcp:5900)
 - **AppleEvent**, bekannt als „Remote Apple Event“ (tcp:3031)
 
 Überprüfen Sie, ob einer aktiviert ist, indem Sie Folgendes ausführen:
@@ -50,7 +50,7 @@ Für DNS verwendet Bonjour das **Multicast DNS (mDNS)-Protokoll**. mDNS arbeitet
 
 Beim Beitritt zum Netzwerk wählt sich jedes Gerät selbst einen Namen, der typischerweise mit **.local** endet und entweder vom Hostnamen abgeleitet oder zufällig generiert wird.
 
-Die Dienstentdeckung im Netzwerk wird durch **DNS Service Discovery (DNS-SD)** erleichtert. Unter Verwendung des Formats von DNS SRV-Einträgen nutzt DNS-SD **DNS PTR-Einträge**, um die Auflistung mehrerer Dienste zu ermöglichen. Ein Client, der einen bestimmten Dienst sucht, fordert einen PTR-Eintrag für `<Service>.<Domain>` an und erhält im Gegenzug eine Liste von PTR-Einträgen im Format `<Instance>.<Service>.<Domain>`, wenn der Dienst von mehreren Hosts verfügbar ist.
+Die Dienstentdeckung im Netzwerk wird durch **DNS Service Discovery (DNS-SD)** erleichtert. Unter Verwendung des Formats von DNS SRV-Einträgen verwendet DNS-SD **DNS PTR-Einträge**, um die Auflistung mehrerer Dienste zu ermöglichen. Ein Client, der einen bestimmten Dienst sucht, fordert einen PTR-Eintrag für `<Service>.<Domain>` an und erhält im Gegenzug eine Liste von PTR-Einträgen im Format `<Instance>.<Service>.<Domain>`, wenn der Dienst von mehreren Hosts verfügbar ist.
 
 Das `dns-sd`-Dienstprogramm kann verwendet werden, um **Netzwerkdienste zu entdecken und zu bewerben**. Hier sind einige Beispiele für seine Verwendung:
 
@@ -74,9 +74,9 @@ Um dann nach HTTP-Diensten im Netzwerk zu suchen:
 ```bash
 dns-sd -B _http._tcp
 ```
-Wenn ein Dienst startet, kündigt er seine Verfügbarkeit für alle Geräte im Subnetz an, indem er seine Präsenz multicastet. Geräte, die an diesen Diensten interessiert sind, müssen keine Anfragen senden, sondern einfach nur auf diese Ankündigungen hören.
+Wenn ein Dienst gestartet wird, kündigt er seine Verfügbarkeit für alle Geräte im Subnetz an, indem er seine Präsenz multicastet. Geräte, die an diesen Diensten interessiert sind, müssen keine Anfragen senden, sondern einfach nur auf diese Ankündigungen hören.
 
-Für eine benutzerfreundlichere Oberfläche kann die **Discovery - DNS-SD Browser** App, die im Apple App Store verfügbar ist, die angebotenen Dienste in Ihrem lokalen Netzwerk visualisieren.
+Für eine benutzerfreundlichere Oberfläche kann die **Discovery - DNS-SD Browser** App im Apple App Store die angebotenen Dienste in Ihrem lokalen Netzwerk visualisieren.
 
 Alternativ können benutzerdefinierte Skripte geschrieben werden, um Dienste mit der `python-zeroconf` Bibliothek zu durchsuchen und zu entdecken. Das [**python-zeroconf**](https://github.com/jstasiak/python-zeroconf) Skript demonstriert die Erstellung eines Dienstebrowsers für `_http._tcp.local.` Dienste, der hinzugefügte oder entfernte Dienste ausgibt:
 ```python

@@ -49,11 +49,11 @@ aa-mergeprof  #used to merge the policies
 - **Cx** (unter einem Kindprofil ausführen, nach Bereinigung der Umgebung)
 - **Ux** (unbeschränkt ausführen, nach Bereinigung der Umgebung)
 - **Variablen** können in den Profilen definiert und von außerhalb des Profils manipuliert werden. Zum Beispiel: @{PROC} und @{HOME} (füge #include \<tunables/global> zur Profil-Datei hinzu)
-- **Verweigerungsregeln werden unterstützt, um Erlaubensregeln zu überschreiben**.
+- **Deny-Regeln werden unterstützt, um Erlauben-Regeln zu überschreiben**.
 
 ### aa-genprof
 
-Um das Erstellen eines Profils zu erleichtern, kann apparmor Ihnen helfen. Es ist möglich, **apparmor die Aktionen, die von einer Binärdatei ausgeführt werden, inspizieren zu lassen und dann zu entscheiden, welche Aktionen Sie erlauben oder verweigern möchten**.\
+Um das Erstellen eines Profils zu erleichtern, kann apparmor Ihnen helfen. Es ist möglich, **apparmor die Aktionen, die von einer Binärdatei ausgeführt werden, untersuchen zu lassen und dann zu entscheiden, welche Aktionen Sie erlauben oder ablehnen möchten**.\
 Sie müssen nur Folgendes ausführen:
 ```bash
 sudo aa-genprof /path/to/binary
@@ -101,7 +101,7 @@ Sie können dann das neue Profil **durchsetzen** mit
 ```bash
 sudo apparmor_parser -a /etc/apparmor.d/path.to.binary
 ```
-### Modifizieren eines Profils aus Protokollen
+### Ändern eines Profils aus Protokollen
 
 Das folgende Tool liest die Protokolle und fragt den Benutzer, ob er einige der erkannten verbotenen Aktionen erlauben möchte:
 ```bash
@@ -166,8 +166,8 @@ Standardmäßig wird das **Apparmor docker-default Profil** von [https://github.
 **Zusammenfassung des docker-default Profils**:
 
 - **Zugriff** auf alle **Netzwerke**
-- **Keine Fähigkeit** ist definiert (Einige Fähigkeiten stammen jedoch aus der Einbeziehung grundlegender Basisregeln, d.h. #include \<abstractions/base>)
-- **Schreiben** in eine beliebige **/proc**-Datei ist **nicht erlaubt**
+- **Keine Berechtigung** ist definiert (Einige Berechtigungen stammen jedoch aus der Einbeziehung grundlegender Basisregeln, d.h. #include \<abstractions/base>)
+- **Schreiben** in eine **/proc**-Datei ist **nicht erlaubt**
 - Andere **Unterverzeichnisse**/**Dateien** von /**proc** und /**sys** haben **verweigerten** Lese-/Schreib-/Sperr-/Link-/Ausführungszugriff
 - **Mount** ist **nicht erlaubt**
 - **Ptrace** kann nur auf einem Prozess ausgeführt werden, der durch das **gleiche apparmor Profil** eingeschränkt ist
@@ -202,7 +202,7 @@ Beachten Sie, dass Sie **Berechtigungen** zum Docker-Container **hinzufügen/ent
 
 (Beispiel von [**hier**](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-2docker-engine/))
 
-Um die Funktionalität von AppArmor zu veranschaulichen, habe ich ein neues Docker-Profil „mydocker“ mit der folgenden Zeile erstellt:
+Um die Funktionalität von AppArmor zu veranschaulichen, habe ich ein neues Docker-Profil „mydocker“ mit der folgenden Zeile hinzugefügt:
 ```
 deny /etc/* w,   # deny write for all files directly in /etc (not in a subdir)
 ```
@@ -236,7 +236,7 @@ Im seltsamen Fall, dass Sie **das AppArmor-Docker-Profil ändern und neu laden k
 
 ### AppArmor Docker Bypass2
 
-**AppArmor ist pfadbasiert**, das bedeutet, dass selbst wenn es möglicherweise **Dateien** in einem Verzeichnis wie **`/proc`** **schützt**, wenn Sie **konfigurieren können, wie der Container ausgeführt werden soll**, könnten Sie das proc-Verzeichnis des Hosts innerhalb von **`/host/proc`** **einbinden** und es **wird nicht mehr von AppArmor geschützt**.
+**AppArmor ist pfadbasiert**, das bedeutet, dass selbst wenn es möglicherweise **Dateien** in einem Verzeichnis wie **`/proc`** **schützt**, wenn Sie **konfigurieren können, wie der Container ausgeführt wird**, könnten Sie das proc-Verzeichnis des Hosts innerhalb von **`/host/proc`** **einbinden** und es **wird nicht mehr von AppArmor geschützt**.
 
 ### AppArmor Shebang Bypass
 

@@ -27,7 +27,7 @@ Finde alle SUID-Binärdateien und überprüfe, ob die Binärdatei **Pkexec** vor
 find / -perm -4000 2>/dev/null
 ```
 Wenn Sie feststellen, dass die Binärdatei **pkexec eine SUID-Binärdatei ist** und Sie zu **sudo** oder **admin** gehören, könnten Sie wahrscheinlich Binärdateien als sudo mit `pkexec` ausführen.\
-Das liegt daran, dass dies typischerweise die Gruppen sind, die in der **polkit-Richtlinie** enthalten sind. Diese Richtlinie identifiziert im Grunde, welche Gruppen `pkexec` verwenden können. Überprüfen Sie es mit:
+Das liegt daran, dass dies typischerweise die Gruppen innerhalb der **polkit-Richtlinie** sind. Diese Richtlinie identifiziert im Grunde, welche Gruppen `pkexec` verwenden können. Überprüfen Sie es mit:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
@@ -96,7 +96,7 @@ $ cat /etc/crontab | grep run-parts
 47 6    * * 7   root    test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.weekly; }
 52 6    1 * *   root    test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.monthly; }
 ```
-oder Wenn ein neues SSH-Sitzungs-Login erfolgt.
+oder Wenn eine neue SSH-Sitzung angemeldet wird.
 ```bash
 $ pspy64
 2024/02/01 22:02:08 CMD: UID=0     PID=1      | init [2]
@@ -146,7 +146,7 @@ Beachten Sie, dass Sie mit debugfs auch **Dateien schreiben** können. Um beispi
 debugfs -w /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
-Wenn Sie jedoch versuchen, **Dateien, die root gehören** (wie `/etc/shadow` oder `/etc/passwd`), zu **schreiben**, erhalten Sie einen "**Zugriff verweigert**" Fehler.
+Wenn Sie jedoch versuchen, **Dateien, die root gehören, zu schreiben** (wie `/etc/shadow` oder `/etc/passwd`), erhalten Sie einen "**Zugriff verweigert**" Fehler.
 
 ## Video Gruppe
 
@@ -173,7 +173,7 @@ Um das **raw image** zu **öffnen**, können Sie **GIMP** verwenden, die **`scre
 
 ## Root-Gruppe
 
-Es scheint, dass standardmäßig **Mitglieder der Root-Gruppe** Zugriff auf die **Änderung** einiger **Service**-Konfigurationsdateien oder einiger **Bibliotheks**-Dateien oder **anderer interessanter Dinge** haben, die zur Eskalation von Rechten verwendet werden könnten...
+Es scheint, dass **Mitglieder der Root-Gruppe** standardmäßig Zugriff auf die **Änderung** einiger **Service**-Konfigurationsdateien oder einiger **Bibliotheks**-Dateien oder **anderer interessanter Dinge** haben, die zur Eskalation von Rechten verwendet werden könnten...
 
 **Überprüfen Sie, welche Dateien Root-Mitglieder ändern können**:
 ```bash

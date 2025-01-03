@@ -2,50 +2,41 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## **Extracting Data from Files**
+## **Daten aus Dateien extrahieren**
 
 ### **Binwalk**
 
-A tool for searching binary files for embedded hidden files and data. It's installed via `apt` and its source is available on [GitHub](https://github.com/ReFirmLabs/binwalk).
-
+Ein Tool zum Suchen von Binärdateien nach eingebetteten versteckten Dateien und Daten. Es wird über `apt` installiert und der Quellcode ist auf [GitHub](https://github.com/ReFirmLabs/binwalk) verfügbar.
 ```bash
 binwalk file # Displays the embedded data
 binwalk -e file # Extracts the data
 binwalk --dd ".*" file # Extracts all data
 ```
-
 ### **Foremost**
 
-Recovers files based on their headers and footers, useful for png images. Installed via `apt` with its source on [GitHub](https://github.com/korczis/foremost).
-
+Stellt Dateien basierend auf ihren Headern und Footern wieder her, nützlich für png-Bilder. Installiert über `apt` mit seiner Quelle auf [GitHub](https://github.com/korczis/foremost).
 ```bash
 foremost -i file # Extracts data
 ```
-
 ### **Exiftool**
 
-Helps to view file metadata, available [here](https://www.sno.phy.queensu.ca/~phil/exiftool/).
-
+Hilft dabei, Dateimetadaten anzuzeigen, verfügbar [hier](https://www.sno.phy.queensu.ca/~phil/exiftool/).
 ```bash
 exiftool file # Shows the metadata
 ```
-
 ### **Exiv2**
 
-Similar to exiftool, for metadata viewing. Installable via `apt`, source on [GitHub](https://github.com/Exiv2/exiv2), and has an [official website](http://www.exiv2.org/).
-
+Ähnlich wie exiftool, zum Anzeigen von Metadaten. Über `apt` installierbar, Quellcode auf [GitHub](https://github.com/Exiv2/exiv2) und hat eine [offizielle Website](http://www.exiv2.org/).
 ```bash
 exiv2 file # Shows the metadata
 ```
+### **Datei**
 
-### **File**
-
-Identify the type of file you're dealing with.
+Identifizieren Sie den Dateityp, mit dem Sie es zu tun haben.
 
 ### **Strings**
 
-Extracts readable strings from files, using various encoding settings to filter the output.
-
+Extrahiert lesbare Zeichenfolgen aus Dateien, indem verschiedene Kodierungseinstellungen verwendet werden, um die Ausgabe zu filtern.
 ```bash
 strings -n 6 file # Extracts strings with a minimum length of 6
 strings -n 6 file | head -n 20 # First 20 strings
@@ -57,95 +48,84 @@ strings -e b -n 6 file # 16bit strings (big-endian)
 strings -e L -n 6 file # 32bit strings (little-endian)
 strings -e B -n 6 file # 32bit strings (big-endian)
 ```
+### **Vergleich (cmp)**
 
-### **Comparison (cmp)**
-
-Useful for comparing a modified file with its original version found online.
-
+Nützlich, um eine modifizierte Datei mit ihrer Originalversion, die online gefunden wurde, zu vergleichen.
 ```bash
 cmp original.jpg stego.jpg -b -l
 ```
+## **Extrahieren von versteckten Daten in Text**
 
-## **Extracting Hidden Data in Text**
+### **Versteckte Daten in Leerzeichen**
 
-### **Hidden Data in Spaces**
+Unsichtbare Zeichen in scheinbar leeren Bereichen können Informationen verbergen. Um diese Daten zu extrahieren, besuchen Sie [https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder).
 
-Invisible characters in seemingly empty spaces may hide information. To extract this data, visit [https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder).
+## **Extrahieren von Daten aus Bildern**
 
-## **Extracting Data from Images**
+### **Identifizieren von Bilddetails mit GraphicMagick**
 
-### **Identifying Image Details with GraphicMagick**
-
-[GraphicMagick](https://imagemagick.org/script/download.php) serves to determine image file types and identify potential corruption. Execute the command below to inspect an image:
-
+[GraphicMagick](https://imagemagick.org/script/download.php) dient dazu, Bilddateitypen zu bestimmen und potenzielle Beschädigungen zu identifizieren. Führen Sie den folgenden Befehl aus, um ein Bild zu inspizieren:
 ```bash
 ./magick identify -verbose stego.jpg
 ```
-
-To attempt repair on a damaged image, adding a metadata comment might help:
-
+Um eine beschädigte Datei zu reparieren, kann das Hinzufügen eines Metadatenkommentars hilfreich sein:
 ```bash
 ./magick mogrify -set comment 'Extraneous bytes removed' stego.jpg
 ```
+### **Steghide zur Datenverbergung**
 
-### **Steghide for Data Concealment**
+Steghide ermöglicht das Verbergen von Daten in `JPEG, BMP, WAV und AU`-Dateien und kann verschlüsselte Daten einbetten und extrahieren. Die Installation ist einfach mit `apt`, und der [Quellcode ist auf GitHub verfügbar](https://github.com/StefanoDeVuono/steghide).
 
-Steghide facilitates hiding data within `JPEG, BMP, WAV, and AU` files, capable of embedding and extracting encrypted data. Installation is straightforward using `apt`, and its [source code is available on GitHub](https://github.com/StefanoDeVuono/steghide).
+**Befehle:**
 
-**Commands:**
+- `steghide info file` zeigt an, ob eine Datei versteckte Daten enthält.
+- `steghide extract -sf file [--passphrase password]` extrahiert die versteckten Daten, das Passwort ist optional.
 
-- `steghide info file` reveals if a file contains hidden data.
-- `steghide extract -sf file [--passphrase password]` extracts the hidden data, password optional.
+Für die webbasierte Extraktion besuchen Sie [diese Website](https://futureboy.us/stegano/decinput.html).
 
-For web-based extraction, visit [this website](https://futureboy.us/stegano/decinput.html).
+**Bruteforce-Angriff mit Stegcracker:**
 
-**Bruteforce Attack with Stegcracker:**
-
-- To attempt password cracking on Steghide, use [stegcracker](https://github.com/Paradoxis/StegCracker.git) as follows:
-
+- Um einen Passwort-Cracking-Versuch auf Steghide zu starten, verwenden Sie [stegcracker](https://github.com/Paradoxis/StegCracker.git) wie folgt:
 ```bash
 stegcracker <file> [<wordlist>]
 ```
+### **zsteg für PNG- und BMP-Dateien**
 
-### **zsteg for PNG and BMP Files**
+zsteg spezialisiert sich auf das Aufdecken versteckter Daten in PNG- und BMP-Dateien. Die Installation erfolgt über `gem install zsteg`, mit seinem [Quellcode auf GitHub](https://github.com/zed-0xff/zsteg).
 
-zsteg specializes in uncovering hidden data in PNG and BMP files. Installation is done via `gem install zsteg`, with its [source on GitHub](https://github.com/zed-0xff/zsteg).
+**Befehle:**
 
-**Commands:**
+- `zsteg -a datei` wendet alle Erkennungsmethoden auf eine Datei an.
+- `zsteg -E datei` gibt eine Nutzlast für die Datenextraktion an.
 
-- `zsteg -a file` applies all detection methods on a file.
-- `zsteg -E file` specifies a payload for data extraction.
+### **StegoVeritas und Stegsolve**
 
-### **StegoVeritas and Stegsolve**
+**stegoVeritas** überprüft Metadaten, führt Bildtransformationen durch und wendet LSB-Brute-Forcing unter anderem an. Verwenden Sie `stegoveritas.py -h` für eine vollständige Liste der Optionen und `stegoveritas.py stego.jpg`, um alle Überprüfungen auszuführen.
 
-**stegoVeritas** checks metadata, performs image transformations, and applies LSB brute forcing among other features. Use `stegoveritas.py -h` for a full list of options and `stegoveritas.py stego.jpg` to execute all checks.
+**Stegsolve** wendet verschiedene Farbfilter an, um versteckte Texte oder Nachrichten in Bildern zu enthüllen. Es ist auf [GitHub](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve) verfügbar.
 
-**Stegsolve** applies various color filters to reveal hidden texts or messages within images. It's available on [GitHub](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve).
+### **FFT zur Erkennung versteckter Inhalte**
 
-### **FFT for Hidden Content Detection**
-
-Fast Fourier Transform (FFT) techniques can unveil concealed content in images. Useful resources include:
+Fast Fourier Transform (FFT)-Techniken können verborgene Inhalte in Bildern aufdecken. Nützliche Ressourcen sind:
 
 - [EPFL Demo](http://bigwww.epfl.ch/demo/ip/demos/FFT/)
 - [Ejectamenta](https://www.ejectamenta.com/Fourifier-fullscreen/)
-- [FFTStegPic on GitHub](https://github.com/0xcomposure/FFTStegPic)
+- [FFTStegPic auf GitHub](https://github.com/0xcomposure/FFTStegPic)
 
-### **Stegpy for Audio and Image Files**
+### **Stegpy für Audio- und Bilddateien**
 
-Stegpy allows embedding information into image and audio files, supporting formats like PNG, BMP, GIF, WebP, and WAV. It's available on [GitHub](https://github.com/dhsdshdhk/stegpy).
+Stegpy ermöglicht das Einbetten von Informationen in Bild- und Audiodateien und unterstützt Formate wie PNG, BMP, GIF, WebP und WAV. Es ist auf [GitHub](https://github.com/dhsdshdhk/stegpy) verfügbar.
 
-### **Pngcheck for PNG File Analysis**
+### **Pngcheck zur Analyse von PNG-Dateien**
 
-To analyze PNG files or to validate their authenticity, use:
-
+Um PNG-Dateien zu analysieren oder ihre Authentizität zu überprüfen, verwenden Sie:
 ```bash
 apt-get install pngcheck
 pngcheck stego.png
 ```
+### **Zusätzliche Werkzeuge zur Bildanalyse**
 
-### **Additional Tools for Image Analysis**
-
-For further exploration, consider visiting:
+Für weitere Erkundungen ziehen Sie in Betracht, folgende Seiten zu besuchen:
 
 - [Magic Eye Solver](http://magiceye.ecksdee.co.uk/)
 - [Image Error Level Analysis](https://29a.ch/sandbox/2012/imageerrorlevelanalysis/)
@@ -153,66 +133,60 @@ For further exploration, consider visiting:
 - [OpenStego](https://www.openstego.com/)
 - [DIIT](https://diit.sourceforge.net/)
 
-## **Extracting Data from Audios**
+## **Daten aus Audios extrahieren**
 
-**Audio steganography** offers a unique method to conceal information within sound files. Different tools are utilized for embedding or retrieving hidden content.
+**Audio-Steganographie** bietet eine einzigartige Methode, Informationen in Audiodateien zu verbergen. Verschiedene Werkzeuge werden verwendet, um versteckte Inhalte einzubetten oder abzurufen.
 
 ### **Steghide (JPEG, BMP, WAV, AU)**
 
-Steghide is a versatile tool designed for hiding data in JPEG, BMP, WAV, and AU files. Detailed instructions are provided in the [stego tricks documentation](stego-tricks.md#steghide).
+Steghide ist ein vielseitiges Werkzeug, das zum Verstecken von Daten in JPEG-, BMP-, WAV- und AU-Dateien entwickelt wurde. Detaillierte Anweisungen finden Sie in der [Stego-Tricks-Dokumentation](stego-tricks.md#steghide).
 
 ### **Stegpy (PNG, BMP, GIF, WebP, WAV)**
 
-This tool is compatible with a variety of formats including PNG, BMP, GIF, WebP, and WAV. For more information, refer to [Stegpy's section](stego-tricks.md#stegpy-png-bmp-gif-webp-wav).
+Dieses Werkzeug ist mit einer Vielzahl von Formaten kompatibel, darunter PNG, BMP, GIF, WebP und WAV. Für weitere Informationen siehe [Stegpy's Abschnitt](stego-tricks.md#stegpy-png-bmp-gif-webp-wav).
 
 ### **ffmpeg**
 
-ffmpeg is crucial for assessing the integrity of audio files, highlighting detailed information and pinpointing any discrepancies.
-
+ffmpeg ist entscheidend für die Bewertung der Integrität von Audiodateien, hebt detaillierte Informationen hervor und identifiziert etwaige Abweichungen.
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
-
 ### **WavSteg (WAV)**
 
-WavSteg excels in concealing and extracting data within WAV files using the least significant bit strategy. It is accessible on [GitHub](https://github.com/ragibson/Steganography#WavSteg). Commands include:
-
+WavSteg zeichnet sich darin aus, Daten innerhalb von WAV-Dateien mithilfe der Strategie des am wenigsten signifikanten Bits zu verbergen und zu extrahieren. Es ist auf [GitHub](https://github.com/ragibson/Steganography#WavSteg) verfügbar. Die Befehle umfassen:
 ```bash
 python3 WavSteg.py -r -b 1 -s soundfile -o outputfile
 
 python3 WavSteg.py -r -b 2 -s soundfile -o outputfile
 ```
-
 ### **Deepsound**
 
-Deepsound allows for the encryption and detection of information within sound files using AES-256. It can be downloaded from [the official page](http://jpinsoft.net/deepsound/download.aspx).
+Deepsound ermöglicht die Verschlüsselung und Erkennung von Informationen in Audiodateien mithilfe von AES-256. Es kann von [der offiziellen Seite](http://jpinsoft.net/deepsound/download.aspx) heruntergeladen werden.
 
 ### **Sonic Visualizer**
 
-An invaluable tool for visual and analytical inspection of audio files, Sonic Visualizer can unveil hidden elements undetectable by other means. Visit the [official website](https://www.sonicvisualiser.org/) for more.
+Ein unschätzbares Werkzeug für die visuelle und analytische Inspektion von Audiodateien, Sonic Visualizer kann versteckte Elemente aufdecken, die mit anderen Mitteln nicht erkennbar sind. Besuchen Sie die [offizielle Website](https://www.sonicvisualiser.org/) für weitere Informationen.
 
-### **DTMF Tones - Dial Tones**
+### **DTMF Töne - Wähltöne**
 
-Detecting DTMF tones in audio files can be achieved through online tools such as [this DTMF detector](https://unframework.github.io/dtmf-detect/) and [DialABC](http://dialabc.com/sound/detect/index.html).
+Die Erkennung von DTMF-Tönen in Audiodateien kann durch Online-Tools wie [diesen DTMF-Detektor](https://unframework.github.io/dtmf-detect/) und [DialABC](http://dialabc.com/sound/detect/index.html) erreicht werden.
 
-## **Other Techniques**
+## **Andere Techniken**
 
-### **Binary Length SQRT - QR Code**
+### **Binäre Länge SQRT - QR-Code**
 
-Binary data that squares to a whole number might represent a QR code. Use this snippet to check:
-
+Binäre Daten, die zu einer ganzen Zahl quadriert werden, könnten einen QR-Code darstellen. Verwenden Sie diesen Code-Schnipsel zur Überprüfung:
 ```python
 import math
 math.sqrt(2500) #50
 ```
+Für die Umwandlung von Binärdaten in Bilder, überprüfen Sie [dcode](https://www.dcode.fr/binary-image). Um QR-Codes zu lesen, verwenden Sie [diesen Online-Barcode-Reader](https://online-barcode-reader.inliteresearch.com/).
 
-For binary to image conversion, check [dcode](https://www.dcode.fr/binary-image). To read QR codes, use [this online barcode reader](https://online-barcode-reader.inliteresearch.com/).
+### **Braille-Übersetzung**
 
-### **Braille Translation**
+Für die Übersetzung von Braille ist der [Branah Braille Translator](https://www.branah.com/braille-translator) eine ausgezeichnete Ressource.
 
-For translating Braille, the [Branah Braille Translator](https://www.branah.com/braille-translator) is an excellent resource.
-
-## **References**
+## **Referenzen**
 
 - [**https://0xrick.github.io/lists/stego/**](https://0xrick.github.io/lists/stego/)
 - [**https://github.com/DominicBreuker/stego-toolkit**](https://github.com/DominicBreuker/stego-toolkit)

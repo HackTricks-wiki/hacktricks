@@ -1,8 +1,8 @@
 {{#include ../banners/hacktricks-training.md}}
 
-If you can somehow encrypt a plaintext using RC4, you can decrypt any content encrypted by that RC4 (using the same password) just using the encryption function.
+Wenn Sie auf irgendeine Weise einen Klartext mit RC4 verschlüsseln können, können Sie jeden Inhalt, der mit diesem RC4 verschlüsselt wurde (unter Verwendung des gleichen Passworts), nur mit der Verschlüsselungsfunktion entschlüsseln.
 
-If you can encrypt a known plaintext you can also extract the password. More references can be found in the HTB Kryptos machine:
+Wenn Sie einen bekannten Klartext verschlüsseln können, können Sie auch das Passwort extrahieren. Weitere Referenzen finden Sie in der HTB Kryptos-Maschine:
 
 {% embed url="https://0xrick.github.io/hack-the-box/kryptos/" %}
 

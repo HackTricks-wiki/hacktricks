@@ -104,8 +104,8 @@ ubuntu
 
 ### Andere Fehlkonfigurationen - Dieselbe Verwundbarkeit
 
-Im vorherigen Beispiel haben wir eine Fehlkonfiguration vorgetäuscht, bei der ein Administrator **einen nicht privilegierten Ordner in einer Konfigurationsdatei in `/etc/ld.so.conf.d/` gesetzt hat**.\
-Es gibt jedoch andere Fehlkonfigurationen, die dieselbe Verwundbarkeit verursachen können. Wenn Sie **Schreibberechtigungen** in einer **Konfigurationsdatei** innerhalb von `/etc/ld.so.conf.d`, im Ordner `/etc/ld.so.conf.d` oder in der Datei `/etc/ld.so.conf` haben, können Sie dieselbe Verwundbarkeit konfigurieren und ausnutzen.
+Im vorherigen Beispiel haben wir eine Fehlkonfiguration vorgetäuscht, bei der ein Administrator **einen nicht privilegierten Ordner in einer Konfigurationsdatei innerhalb von `/etc/ld.so.conf.d/`** festgelegt hat.\
+Aber es gibt andere Fehlkonfigurationen, die dieselbe Verwundbarkeit verursachen können. Wenn Sie **Schreibberechtigungen** in einer **Konfigurationsdatei** innerhalb von `/etc/ld.so.conf.d`, im Ordner `/etc/ld.so.conf.d` oder in der Datei `/etc/ld.so.conf` haben, können Sie dieselbe Verwundbarkeit konfigurieren und ausnutzen.
 
 ## Exploit 2
 

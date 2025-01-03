@@ -19,12 +19,12 @@ Ein Exploit, der auf den Splunk Universal Forwarder Agent (UF) abzielt, ermögli
 
 - Der UF-Agent validiert keine eingehenden Verbindungen oder die Authentizität von Code, was ihn anfällig für unbefugte Codeausführung macht.
 - Häufige Methoden zur Passwortbeschaffung umfassen das Auffinden in Netzwerkverzeichnissen, Dateifreigaben oder interner Dokumentation.
-- Erfolgreiche Ausnutzung kann zu SYSTEM- oder root-Zugriff auf kompromittierte Hosts, Datenexfiltration und weiterer Netzwerk-Infiltration führen.
+- Erfolgreiche Ausnutzung kann zu SYSTEM- oder root-Zugriff auf kompromittierte Hosts, Datenexfiltration und weiterer Netzwerkpenetration führen.
 
 **Ausführung des Exploits:**
 
 1. Angreifer erhält das UF-Agentenpasswort.
-2. Nutzt die Splunk API, um Befehle oder Skripte an die Agenten zu senden.
+2. Nutzt die Splunk-API, um Befehle oder Skripte an die Agenten zu senden.
 3. Mögliche Aktionen umfassen Dateiextraktion, Manipulation von Benutzerkonten und Systemkompromittierung.
 
 **Auswirkungen:**

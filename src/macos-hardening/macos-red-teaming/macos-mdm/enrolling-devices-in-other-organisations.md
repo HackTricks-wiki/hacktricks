@@ -21,7 +21,7 @@ DEP-Check-ins nutzen die Funktionen `CPFetchActivationRecord` und `CPGetActivati
 
 ## Tesla-Protokoll und Absinthe-Schema Reverse Engineering
 
-Der DEP-Check-in umfasst, dass `cloudconfigurationd` eine verschlüsselte, signierte JSON-Nutzlast an _iprofiles.apple.com/macProfile_ sendet. Die Nutzlast enthält die Seriennummer des Geräts und die Aktion "RequestProfileConfiguration". Das verwendete Verschlüsselungsschema wird intern als "Absinthe" bezeichnet. Das Entschlüsseln dieses Schemas ist komplex und umfasst zahlreiche Schritte, was zur Erkundung alternativer Methoden führte, um beliebige Seriennummern in die Anfrage des Aktivierungsdatensatzes einzufügen.
+Der DEP-Check-in umfasst, dass `cloudconfigurationd` eine verschlüsselte, signierte JSON-Nutzlast an _iprofiles.apple.com/macProfile_ sendet. Die Nutzlast enthält die Seriennummer des Geräts und die Aktion "RequestProfileConfiguration". Das verwendete Verschlüsselungsschema wird intern als "Absinthe" bezeichnet. Das Entschlüsseln dieses Schemas ist komplex und umfasst zahlreiche Schritte, was zur Erkundung alternativer Methoden führte, um beliebige Seriennummern in die Aktivierungsdatensatzanfrage einzufügen.
 
 ## Proxying von DEP-Anfragen
 

@@ -14,7 +14,7 @@ Die folgenden Techniken wurden in einigen macOS-Firewall-Apps als funktionierend
 
 - Wenn die Firewall den Benutzer um Erlaubnis bittet, lasse die Malware **auf Erlauben klicken**.
 
-### **Verwendung von Apple-signierten Binärdateien**
+### **Verwende von Apple signierte Binaries**
 
 - Wie **`curl`**, aber auch andere wie **`whois`**.
 

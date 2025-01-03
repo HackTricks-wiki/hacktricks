@@ -1,6 +1,6 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-Here you can find interesting tricks for specific file-types and/or software:
+Hier finden Sie interessante Tricks für spezifische Dateitypen und/oder Software:
 
 {{#ref}}
 .pyc.md

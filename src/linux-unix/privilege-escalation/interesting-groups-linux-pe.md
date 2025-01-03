@@ -31,7 +31,7 @@ cat /etc/polkit-1/localauthority.conf.d/*
 ```
 Dort finden Sie, welche Gruppen berechtigt sind, **pkexec** auszuführen und **standardmäßig** können in einigen Linux-Systemen **einige der Gruppen sudo oder admin** **erscheinen**.
 
-Um **root zu werden, können Sie ausführen**:
+Um **root zu werden, können Sie** ausführen:
 ```bash
 pkexec "/bin/sh" #You will be prompted for your user password
 ```
@@ -60,13 +60,13 @@ pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 ```
 Das bedeutet, dass **jeder Benutzer, der zur Gruppe wheel gehört, alles als sudo ausführen kann**.
 
-Wenn dies der Fall ist, können Sie **zum Root werden, indem Sie einfach** ausführen:
+Wenn dies der Fall ist, um **root zu werden, können Sie einfach ausführen**:
 ```text
 sudo su
 ```
-# Shadow-Gruppe
+# Shadow Group
 
-Benutzer der **Gruppe shadow** können die **/etc/shadow**-Datei **lesen**:
+Benutzer der **Gruppe shadow** können die **/etc/shadow** Datei **lesen**:
 ```text
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
@@ -76,7 +76,7 @@ So, lesen Sie die Datei und versuchen Sie, **einige Hashes zu knacken**.
 
 Dieses Privileg ist fast **äquivalent zu Root-Zugriff**, da Sie auf alle Daten innerhalb der Maschine zugreifen können.
 
-Dateien: `/dev/sd[a-z][1-9]`
+Dateien:`/dev/sd[a-z][1-9]`
 ```text
 debugfs /dev/sda1
 debugfs: cd /root
@@ -101,7 +101,7 @@ moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
 Die **tty1** bedeutet, dass der Benutzer **yossi physisch** an einem Terminal auf der Maschine angemeldet ist.
 
-Die **Video-Gruppe** hat Zugriff auf die Anzeige der Bildschirmausgabe. Grundsätzlich können Sie die Bildschirme beobachten. Um dies zu tun, müssen Sie **das aktuelle Bild auf dem Bildschirm** in Rohdaten erfassen und die Auflösung ermitteln, die der Bildschirm verwendet. Die Bildschirmdaten können in `/dev/fb0` gespeichert werden, und Sie können die Auflösung dieses Bildschirms unter `/sys/class/graphics/fb0/virtual_size` finden.
+Die **video-Gruppe** hat Zugriff auf die Anzeige der Bildschirmausgabe. Grundsätzlich können Sie die Bildschirme beobachten. Um dies zu tun, müssen Sie **das aktuelle Bild auf dem Bildschirm** in Rohdaten erfassen und die Auflösung ermitteln, die der Bildschirm verwendet. Die Bildschirmdaten können in `/dev/fb0` gespeichert werden, und Sie können die Auflösung dieses Bildschirms unter `/sys/class/graphics/fb0/virtual_size` finden.
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
@@ -116,7 +116,7 @@ Um das **raw image** zu **öffnen**, können Sie **GIMP** verwenden, die **`scre
 
 # Root-Gruppe
 
-Es scheint, dass standardmäßig **Mitglieder der Root-Gruppe** Zugriff auf die **Änderung** einiger **Service**-Konfigurationsdateien oder einiger **Bibliotheks**-Dateien oder **anderer interessanter Dinge** haben, die zur Eskalation von Rechten verwendet werden könnten...
+Es scheint, dass standardmäßig **Mitglieder der Root-Gruppe** Zugriff haben könnten, um einige **Service**-Konfigurationsdateien oder einige **Bibliotheks**-Dateien oder **andere interessante Dinge** zu ändern, die zur Eskalation von Rechten verwendet werden könnten...
 
 **Überprüfen Sie, welche Dateien Root-Mitglieder ändern können**:
 ```bash
@@ -124,7 +124,7 @@ find / -group root -perm -g=w 2>/dev/null
 ```
 # Docker-Gruppe
 
-Sie können das Root-Dateisystem des Host-Systems in das Volume einer Instanz einhängen, sodass beim Start der Instanz sofort ein `chroot` in dieses Volume geladen wird. Dies gibt Ihnen effektiv Root-Zugriff auf die Maschine.
+Sie können das Root-Dateisystem des Host-Systems in das Volume einer Instanz einbinden, sodass beim Start der Instanz sofort ein `chroot` in dieses Volume geladen wird. Dies gibt Ihnen effektiv Root-Zugriff auf die Maschine.
 
 {% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
 

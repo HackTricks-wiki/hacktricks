@@ -76,7 +76,7 @@ security dump-keychain ~/Library/Keychains/login.keychain-db
 ### APIs
 
 > [!TIP]
-> Die **Aufzählung und das Dumping** von Geheimnissen, die **keine Eingabeaufforderung** erzeugen, kann mit dem Tool [**LockSmith**](https://github.com/its-a-feature/LockSmith) durchgeführt werden.
+> Die **Aufzählung und das Dumping** von Geheimnissen, die **keine Eingabeaufforderung erzeugen**, kann mit dem Tool [**LockSmith**](https://github.com/its-a-feature/LockSmith) durchgeführt werden.
 >
 > Weitere API-Endpunkte finden Sie im Quellcode von [**SecKeyChain.h**](https://opensource.apple.com/source/libsecurity_keychain/libsecurity_keychain-55017/lib/SecKeychain.h.auto.html).
 
@@ -91,7 +91,7 @@ Listen Sie die **Informationen** zu jedem Schlüsselbund-Eintrag mit dem **Secur
 
 Erhalten Sie die **ACLs** jedes Eintrags:
 
-- Mit der API **`SecAccessCopyACLList`** können Sie die **ACL für den Schlüsselbund-Eintrag** abrufen, und es wird eine Liste von ACLs zurückgegeben (wie `ACLAuhtorizationExportClear` und die zuvor genannten), wobei jede Liste Folgendes enthält:
+- Mit der API **`SecAccessCopyACLList`** können Sie die **ACL für den Schlüsselbund-Eintrag** abrufen, und es wird eine Liste von ACLs zurückgegeben (wie `ACLAuhtorizationExportClear` und die zuvor genannten), wobei jede Liste hat:
 - Beschreibung
 - **Vertrauenswürdige Anwendungs-Liste**. Dies könnte sein:
 - Eine App: /Applications/Slack.app
@@ -103,12 +103,12 @@ Exportieren Sie die Daten:
 - Die API **`SecKeychainItemCopyContent`** erhält den Klartext
 - Die API **`SecItemExport`** exportiert die Schlüssel und Zertifikate, könnte jedoch erforderlich sein, Passwörter festzulegen, um den Inhalt verschlüsselt zu exportieren
 
-Und dies sind die **Anforderungen**, um ein **Geheimnis ohne Eingabeaufforderung** zu **exportieren**:
+Und dies sind die **Anforderungen**, um ein **Geheimnis ohne Eingabeaufforderung zu exportieren**:
 
 - Wenn **1+ vertrauenswürdige** Apps aufgelistet sind:
 - Benötigen Sie die entsprechenden **Berechtigungen** (**`Nil`**, oder Teil der erlaubten Liste von Apps in der Berechtigung zum Zugriff auf die geheimen Informationen sein)
 - Benötigen Sie eine Codesignatur, die mit **PartitionID** übereinstimmt
-- Benötigen Sie eine Codesignatur, die mit der eines **vertrauenswürdigen App** übereinstimmt (oder Mitglied der richtigen KeychainAccessGroup sein)
+- Benötigen Sie eine Codesignatur, die mit der eines **vertrauenswürdigen Apps** übereinstimmt (oder Mitglied der richtigen KeychainAccessGroup sein)
 - Wenn **alle Anwendungen vertrauenswürdig** sind:
 - Benötigen Sie die entsprechenden **Berechtigungen**
 - Benötigen Sie eine Codesignatur, die mit **PartitionID** übereinstimmt
@@ -121,7 +121,7 @@ Und dies sind die **Anforderungen**, um ein **Geheimnis ohne Eingabeaufforderung
 
 ### Zwei zusätzliche Attribute
 
-- **Unsichtbar**: Es ist ein boolesches Flag, um den Eintrag in der **UI** Schlüsselbund-App zu **verstecken**
+- **Unsichtbar**: Es ist ein boolesches Flag, um den Eintrag aus der **UI** Schlüsselbund-App **zu verbergen**
 - **Allgemein**: Es dient zur Speicherung von **Metadaten** (es ist also NICHT VERSCHLÜSSELT)
 - Microsoft speicherte alle Refresh-Token im Klartext, um auf sensible Endpunkte zuzugreifen.
 

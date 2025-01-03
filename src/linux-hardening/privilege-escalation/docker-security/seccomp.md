@@ -6,9 +6,9 @@
 
 **Seccomp**, was für Secure Computing Mode steht, ist eine Sicherheitsfunktion des **Linux-Kernels, die dazu dient, Systemaufrufe zu filtern**. Es beschränkt Prozesse auf eine begrenzte Menge von Systemaufrufen (`exit()`, `sigreturn()`, `read()` und `write()` für bereits geöffnete Dateideskriptoren). Wenn ein Prozess versucht, etwas anderes aufzurufen, wird er vom Kernel mit SIGKILL oder SIGSYS beendet. Dieser Mechanismus virtualisiert keine Ressourcen, sondern isoliert den Prozess von ihnen.
 
-Es gibt zwei Möglichkeiten, seccomp zu aktivieren: über den `prctl(2)` Systemaufruf mit `PR_SET_SECCOMP` oder für Linux-Kernel 3.17 und höher den `seccomp(2)` Systemaufruf. Die ältere Methode zur Aktivierung von seccomp durch Schreiben in `/proc/self/seccomp` wurde zugunsten von `prctl()` eingestellt.
+Es gibt zwei Möglichkeiten, seccomp zu aktivieren: über den `prctl(2)`-Systemaufruf mit `PR_SET_SECCOMP` oder für Linux-Kernel 3.17 und höher den `seccomp(2)`-Systemaufruf. Die ältere Methode zur Aktivierung von seccomp durch Schreiben in `/proc/self/seccomp` wurde zugunsten von `prctl()` eingestellt.
 
-Eine Erweiterung, **seccomp-bpf**, fügt die Fähigkeit hinzu, Systemaufrufe mit einer anpassbaren Richtlinie zu filtern, die Berkeley Packet Filter (BPF) Regeln verwendet. Diese Erweiterung wird von Software wie OpenSSH, vsftpd und den Chrome/Chromium-Browsern auf Chrome OS und Linux für flexibles und effizientes Syscall-Filtering genutzt und bietet eine Alternative zu dem mittlerweile nicht mehr unterstützten systrace für Linux.
+Eine Erweiterung, **seccomp-bpf**, fügt die Fähigkeit hinzu, Systemaufrufe mit einer anpassbaren Richtlinie zu filtern, die Berkeley Packet Filter (BPF)-Regeln verwendet. Diese Erweiterung wird von Software wie OpenSSH, vsftpd und den Chrome/Chromium-Browsern auf Chrome OS und Linux für flexibles und effizientes Syscall-Filtering genutzt und bietet eine Alternative zu dem mittlerweile nicht mehr unterstützten systrace für Linux.
 
 ### **Original/Strikter Modus**
 
@@ -96,7 +96,7 @@ printf("this process is %d\n", getpid());
 ```
 ## Seccomp in Docker
 
-**Seccomp-bpf** wird von **Docker** unterstützt, um die **syscalls** der Container einzuschränken und somit die Angriffsfläche effektiv zu verringern. Die **syscalls, die standardmäßig blockiert sind**, finden Sie unter [https://docs.docker.com/engine/security/seccomp/](https://docs.docker.com/engine/security/seccomp/) und das **Standard-Seccomp-Profil** finden Sie hier [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json).\
+**Seccomp-bpf** wird von **Docker** unterstützt, um die **syscalls** der Container einzuschränken und somit die Angriffsfläche effektiv zu verringern. Die **syscalls**, die **standardmäßig blockiert** sind, finden Sie unter [https://docs.docker.com/engine/security/seccomp/](https://docs.docker.com/engine/security/seccomp/) und das **Standard-Seccomp-Profil** finden Sie hier [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json).\
 Sie können einen Docker-Container mit einer **anderen Seccomp**-Richtlinie ausführen mit:
 ```bash
 docker run --rm \
@@ -105,13 +105,13 @@ docker run --rm \
 hello-world
 ```
 Wenn Sie beispielsweise einen Container daran **hindern** möchten, einen bestimmten **syscall** wie `uname` auszuführen, könnten Sie das Standardprofil von [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json) herunterladen und einfach den **`uname`-String aus der Liste entfernen**.\
-Wenn Sie sicherstellen möchten, dass **einige Binärdateien nicht innerhalb eines Docker-Containers funktionieren**, könnten Sie strace verwenden, um die syscalls aufzulisten, die die Binärdatei verwendet, und diese dann verbieten.\
+Wenn Sie sicherstellen möchten, dass **einige Binaries nicht innerhalb eines Docker-Containers funktionieren**, könnten Sie strace verwenden, um die syscalls aufzulisten, die das Binary verwendet, und diese dann verbieten.\
 Im folgenden Beispiel werden die **syscalls** von `uname` entdeckt:
 ```bash
 docker run -it --security-opt seccomp=default.json modified-ubuntu strace uname
 ```
 > [!NOTE]
-> Wenn Sie **Docker nur zum Starten einer Anwendung verwenden**, können Sie es mit **`strace`** **profilieren** und nur die Syscalls **erlauben**, die es benötigt.
+> Wenn Sie **Docker nur zum Starten einer Anwendung verwenden**, können Sie es mit **`strace`** **profilieren** und **nur die benötigten Syscalls** zulassen.
 
 ### Beispiel Seccomp-Richtlinie
 

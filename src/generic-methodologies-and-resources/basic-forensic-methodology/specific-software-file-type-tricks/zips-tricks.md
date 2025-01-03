@@ -1,20 +1,20 @@
-# ZIPs tricks
+# ZIPs Tricks
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Command-line tools** for managing **zip files** are essential for diagnosing, repairing, and cracking zip files. Here are some key utilities:
+**Befehlszeilenwerkzeuge** zur Verwaltung von **Zip-Dateien** sind entscheidend für die Diagnose, Reparatur und das Knacken von Zip-Dateien. Hier sind einige wichtige Dienstprogramme:
 
-- **`unzip`**: Reveals why a zip file may not decompress.
-- **`zipdetails -v`**: Offers detailed analysis of zip file format fields.
-- **`zipinfo`**: Lists contents of a zip file without extracting them.
-- **`zip -F input.zip --out output.zip`** and **`zip -FF input.zip --out output.zip`**: Try to repair corrupted zip files.
-- **[fcrackzip](https://github.com/hyc/fcrackzip)**: A tool for brute-force cracking of zip passwords, effective for passwords up to around 7 characters.
+- **`unzip`**: Zeigt an, warum eine Zip-Datei möglicherweise nicht dekomprimiert werden kann.
+- **`zipdetails -v`**: Bietet eine detaillierte Analyse der Felder im Zip-Dateiformat.
+- **`zipinfo`**: Listet den Inhalt einer Zip-Datei auf, ohne sie zu extrahieren.
+- **`zip -F input.zip --out output.zip`** und **`zip -FF input.zip --out output.zip`**: Versuchen, beschädigte Zip-Dateien zu reparieren.
+- **[fcrackzip](https://github.com/hyc/fcrackzip)**: Ein Tool zum Brute-Force-Knacken von Zip-Passwörtern, effektiv für Passwörter von bis zu etwa 7 Zeichen.
 
-The [Zip file format specification](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT) provides comprehensive details on the structure and standards of zip files.
+Die [Zip-Dateiformatspezifikation](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT) bietet umfassende Details zur Struktur und zu den Standards von Zip-Dateien.
 
-It's crucial to note that password-protected zip files **do not encrypt filenames or file sizes** within, a security flaw not shared with RAR or 7z files which encrypt this information. Furthermore, zip files encrypted with the older ZipCrypto method are vulnerable to a **plaintext attack** if an unencrypted copy of a compressed file is available. This attack leverages the known content to crack the zip's password, a vulnerability detailed in [HackThis's article](https://www.hackthis.co.uk/articles/known-plaintext-attack-cracking-zip-files) and further explained in [this academic paper](https://www.cs.auckland.ac.nz/~mike/zipattacks.pdf). However, zip files secured with **AES-256** encryption are immune to this plaintext attack, showcasing the importance of choosing secure encryption methods for sensitive data.
+Es ist wichtig zu beachten, dass passwortgeschützte Zip-Dateien **keine Dateinamen oder Dateigrößen** innerhalb verschlüsseln, ein Sicherheitsmangel, der bei RAR- oder 7z-Dateien nicht auftritt, die diese Informationen verschlüsseln. Darüber hinaus sind Zip-Dateien, die mit der älteren ZipCrypto-Methode verschlüsselt sind, anfällig für einen **Plaintext-Angriff**, wenn eine unverschlüsselte Kopie einer komprimierten Datei verfügbar ist. Dieser Angriff nutzt den bekannten Inhalt, um das Passwort der Zip-Datei zu knacken, eine Schwachstelle, die in [HackThis's Artikel](https://www.hackthis.co.uk/articles/known-plaintext-attack-cracking-zip-files) und weiter in [diesem akademischen Papier](https://www.cs.auckland.ac.nz/~mike/zipattacks.pdf) erklärt wird. Zip-Dateien, die mit **AES-256**-Verschlüsselung gesichert sind, sind jedoch immun gegen diesen Plaintext-Angriff, was die Bedeutung der Wahl sicherer Verschlüsselungsmethoden für sensible Daten zeigt.
 
-## References
+## Referenzen
 
 - [https://michael-myers.github.io/blog/categories/ctf/](https://michael-myers.github.io/blog/categories/ctf/)
 

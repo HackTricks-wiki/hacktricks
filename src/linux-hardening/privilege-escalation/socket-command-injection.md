@@ -2,7 +2,7 @@
 
 ## Beispiel für Socket-Bindung mit Python
 
-Im folgenden Beispiel wird ein **Unix-Socket erstellt** (`/tmp/socket_test.s`), und alles, was **empfangen** wird, wird von `os.system` **ausgeführt**. Ich weiß, dass Sie dies nicht in der Wildnis finden werden, aber das Ziel dieses Beispiels ist es zu sehen, wie ein Code, der Unix-Sockets verwendet, aussieht und wie man die Eingabe im schlimmsten Fall verwaltet.
+Im folgenden Beispiel wird ein **Unix-Socket erstellt** (`/tmp/socket_test.s`), und alles, was **empfangen** wird, wird von `os.system` **ausgeführt**. Ich weiß, dass Sie dies nicht in der Wildnis finden werden, aber das Ziel dieses Beispiels ist es, zu sehen, wie ein Code, der Unix-Sockets verwendet, aussieht und wie man die Eingabe im schlimmsten Fall verwaltet.
 ```python:s.py
 import socket
 import os, os.path

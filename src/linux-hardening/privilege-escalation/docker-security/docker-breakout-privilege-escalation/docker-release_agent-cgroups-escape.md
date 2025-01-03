@@ -28,7 +28,7 @@ echo 1 > /tmp/cgrp/x/notify_on_release
 ```
 3. **Konfigurieren Sie den Release-Agent:**
 - Der Pfad des Containers auf dem Host wird aus der Datei /etc/mtab abgerufen.
-- Die release_agent-Datei der cgroup wird dann so konfiguriert, dass sie ein Skript mit dem Namen /cmd ausführt, das sich am erlangten Host-Pfad befindet.
+- Die release_agent-Datei der cgroup wird dann so konfiguriert, dass ein Skript mit dem Namen /cmd ausgeführt wird, das sich am erlangten Host-Pfad befindet.
 ```shell
 host_path=`sed -n 's/.*\perdir=\([^,]*\).*/\1/p' /etc/mtab`
 echo "$host_path/cmd" > /tmp/cgrp/release_agent

@@ -35,7 +35,7 @@ Auf Compiler-Ebene existieren Blöcke jedoch nicht, sie sind `os_object`s. Jedes
 
 ### Warteschlangen
 
-Eine Dispatch-Warteschlange ist ein benanntes Objekt, das FIFO-Reihenfolge von Blöcken für die Ausführung bereitstellt.
+Eine Dispatch-Warteschlange ist ein benanntes Objekt, das FIFO-Anordnung von Blöcken für die Ausführung bereitstellt.
 
 Blöcke werden in Warteschlangen gesetzt, um ausgeführt zu werden, und diese unterstützen 2 Modi: `DISPATCH_QUEUE_SERIAL` und `DISPATCH_QUEUE_CONCURRENT`. Natürlich hat die **serielle** Warteschlange **keine Probleme mit Race Conditions**, da ein Block nicht ausgeführt wird, bis der vorherige abgeschlossen ist. Aber **die andere Art von Warteschlange könnte dies haben**.
 

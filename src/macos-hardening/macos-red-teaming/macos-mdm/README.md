@@ -11,7 +11,7 @@
 
 ### **MDM (Mobile Device Management) Übersicht**
 
-[Mobile Device Management](https://en.wikipedia.org/wiki/Mobile_device_management) (MDM) wird verwendet, um verschiedene Endbenutzergeräte wie Smartphones, Laptops und Tablets zu verwalten. Insbesondere für Apples Plattformen (iOS, macOS, tvOS) umfasst es eine Reihe spezialisierter Funktionen, APIs und Praktiken. Der Betrieb von MDM hängt von einem kompatiblen MDM-Server ab, der entweder kommerziell erhältlich oder Open Source sein muss und das [MDM-Protokoll](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf) unterstützen muss. Wichtige Punkte sind:
+[Mobile Device Management](https://en.wikipedia.org/wiki/Mobile_device_management) (MDM) wird verwendet, um verschiedene Endbenutzergeräte wie Smartphones, Laptops und Tablets zu verwalten. Insbesondere für Apples Plattformen (iOS, macOS, tvOS) umfasst es eine Reihe spezialisierter Funktionen, APIs und Praktiken. Der Betrieb von MDM hängt von einem kompatiblen MDM-Server ab, der entweder kommerziell erhältlich oder Open Source ist und das [MDM-Protokoll](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf) unterstützen muss. Wichtige Punkte sind:
 
 - Zentralisierte Kontrolle über Geräte.
 - Abhängigkeit von einem MDM-Server, der dem MDM-Protokoll entspricht.
@@ -135,7 +135,7 @@ Die Antwort ist ein JSON-Dictionary mit einigen wichtigen Daten wie:
 
 ![](<../../../images/image (444).png>)
 
-- Anfrage wird an **url im DEP-Profil bereitgestellt** gesendet.
+- Anfrage gesendet an **url, die im DEP-Profil angegeben ist**.
 - **Ankerzertifikate** werden verwendet, um **Vertrauen zu bewerten**, falls bereitgestellt.
 - Erinnerung: die **anchor_certs**-Eigenschaft des DEP-Profils
 - **Anfrage ist ein einfaches .plist** mit Geräteidentifikation

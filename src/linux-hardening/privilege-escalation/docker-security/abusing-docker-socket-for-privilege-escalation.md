@@ -27,17 +27,17 @@ Sie könnten auch **einen Mount missbrauchen, um Privilegien** innerhalb des Con
 > [!NOTE]
 > Beachten Sie, dass Sie möglicherweise den Ordner `/tmp` nicht einbinden können, aber Sie können ein **anderes beschreibbares Verzeichnis** einbinden. Sie können beschreibbare Verzeichnisse mit `find / -writable -type d 2>/dev/null` finden.
 >
-> **Beachten Sie, dass nicht alle Verzeichnisse auf einem Linux-Rechner das suid-Bit unterstützen!** Um zu überprüfen, welche Verzeichnisse das suid-Bit unterstützen, führen Sie `mount | grep -v "nosuid"` aus. Zum Beispiel unterstützen normalerweise `/dev/shm`, `/run`, `/proc`, `/sys/fs/cgroup` und `/var/lib/lxcfs` nicht das suid-Bit.
+> **Beachten Sie, dass nicht alle Verzeichnisse auf einer Linux-Maschine das suid-Bit unterstützen!** Um zu überprüfen, welche Verzeichnisse das suid-Bit unterstützen, führen Sie `mount | grep -v "nosuid"` aus. Zum Beispiel unterstützen normalerweise `/dev/shm`, `/run`, `/proc`, `/sys/fs/cgroup` und `/var/lib/lxcfs` nicht das suid-Bit.
 >
 > Beachten Sie auch, dass Sie, wenn Sie **`/etc`** oder einen anderen Ordner **mit Konfigurationsdateien** einbinden können, diese vom Docker-Container aus als Root ändern können, um sie **im Host zu missbrauchen** und Privilegien zu eskalieren (vielleicht durch Modifikation von `/etc/shadow`).
 
 ### Aus dem Container entkommen
 
 - **`--privileged`** -> Mit diesem Flag [entfernen Sie alle Isolationen vom Container](docker-privileged.md#what-affects). Überprüfen Sie Techniken, um [aus privilegierten Containern als Root zu entkommen](docker-breakout-privilege-escalation/#automatic-enumeration-and-escape).
-- **`--cap-add=<CAPABILITY/ALL> [--security-opt apparmor=unconfined] [--security-opt seccomp=unconfined] [-security-opt label:disable]`** -> Um [Privilegien durch Missbrauch von Fähigkeiten zu eskalieren](../linux-capabilities.md), **gewähren Sie diese Fähigkeit dem Container** und deaktivieren Sie andere Schutzmethoden, die verhindern könnten, dass der Exploit funktioniert.
+- **`--cap-add=<CAPABILITY/ALL> [--security-opt apparmor=unconfined] [--security-opt seccomp=unconfined] [-security-opt label:disable]`** -> Um [Privilegien durch Missbrauch von Fähigkeiten zu eskalieren](../linux-capabilities.md), **gewähren Sie diese Fähigkeit dem Container** und deaktivieren Sie andere Schutzmethoden, die möglicherweise verhindern, dass der Exploit funktioniert.
 
 ### Curl
 
-Auf dieser Seite haben wir Möglichkeiten zur Eskalation von Privilegien unter Verwendung von Docker-Flags diskutiert. Sie finden **Möglichkeiten, diese Methoden mit dem curl**-Befehl zu missbrauchen, auf der Seite:
+Auf dieser Seite haben wir Möglichkeiten zur Eskalation von Privilegien unter Verwendung von Docker-Flags diskutiert. Sie können **Möglichkeiten finden, diese Methoden mit dem curl**-Befehl auf der Seite zu missbrauchen:
 
 {{#include ../../../banners/hacktricks-training.md}}

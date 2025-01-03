@@ -2,18 +2,17 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Context
+## Kontext
 
-In Linux in order to run a program it must exist as a file, it must be accessible in some way through the file system hierarchy (this is just how `execve()` works). This file may reside on disk or in ram (tmpfs, memfd) but you need a filepath. This has made very easy to control what is run on a Linux system, it makes easy to detect threats and attacker's tools or to prevent them from trying to execute anything of theirs at all (_e. g._ not allowing unprivileged users to place executable files anywhere).
+In Linux muss ein Programm, um ausgeführt zu werden, als Datei existieren und auf irgendeine Weise über die Dateisystemhierarchie zugänglich sein (so funktioniert `execve()`). Diese Datei kann sich auf der Festplatte oder im RAM (tmpfs, memfd) befinden, aber Sie benötigen einen Dateipfad. Dies hat es sehr einfach gemacht, zu kontrollieren, was auf einem Linux-System ausgeführt wird, es erleichtert die Erkennung von Bedrohungen und Werkzeugen von Angreifern oder verhindert, dass sie versuchen, irgendetwas von ihnen auszuführen (_z. B._ unprivilegierten Benutzern zu verbieten, ausführbare Dateien irgendwo abzulegen).
 
-But this technique is here to change all of this. If you can not start the process you want... **then you hijack one already existing**.
+Aber diese Technik ist hier, um all dies zu ändern. Wenn Sie den Prozess, den Sie möchten, nicht starten können... **dann übernehmen Sie einen bereits vorhandenen**.
 
-This technique allows you to **bypass common protection techniques such as read-only, noexec, file-name whitelisting, hash whitelisting...**
+Diese Technik ermöglicht es Ihnen, **häufige Schutztechniken wie schreibgeschützt, noexec, Dateinamen-Whitelisting, Hash-Whitelisting... zu umgehen**.
 
-## Dependencies
+## Abhängigkeiten
 
-The final script depends on the following tools to work, they need to be accessible in the system you are attacking (by default you will find all of them everywhere):
-
+Das endgültige Skript hängt von den folgenden Tools ab, die im System, das Sie angreifen, zugänglich sein müssen (standardmäßig finden Sie sie überall):
 ```
 dd
 bash | zsh | ash (busybox)
@@ -27,68 +26,61 @@ wc
 tr
 base64
 ```
+## Die Technik
 
-## The technique
+Wenn Sie in der Lage sind, den Speicher eines Prozesses beliebig zu modifizieren, können Sie ihn übernehmen. Dies kann verwendet werden, um einen bereits bestehenden Prozess zu übernehmen und ihn durch ein anderes Programm zu ersetzen. Wir können dies entweder durch die Verwendung des `ptrace()`-Syscalls erreichen (was erfordert, dass Sie die Fähigkeit haben, Syscalls auszuführen oder gdb auf dem System verfügbar ist) oder, interessanterweise, durch das Schreiben in `/proc/$pid/mem`.
 
-If you are able to modify arbitrarily the memory of a process then you can take over it. This can be used to hijack an already existing process and replace it with another program. We can achieve this either by using the `ptrace()` syscall (which requires you to have the ability to execute syscalls or to have gdb available on the system) or, more interestingly, writing to `/proc/$pid/mem`.
+Die Datei `/proc/$pid/mem` ist eine Eins-zu-eins-Abbildung des gesamten Adressraums eines Prozesses (_z. B._ von `0x0000000000000000` bis `0x7ffffffffffff000` in x86-64). Das bedeutet, dass das Lesen von oder Schreiben in diese Datei an einem Offset `x` dasselbe ist wie das Lesen von oder Modifizieren des Inhalts an der virtuellen Adresse `x`.
 
-The file `/proc/$pid/mem` is a one-to-one mapping of the entire address space of a process (_e. g._ from `0x0000000000000000` to `0x7ffffffffffff000` in x86-64). This means that reading from or writing to this file at an offset `x` is the same as reading from or modifying the contents at the virtual address `x`.
+Jetzt haben wir vier grundlegende Probleme zu bewältigen:
 
-Now, we have four basic problems to face:
-
-- In general, only root and the program owner of the file may modify it.
+- Im Allgemeinen dürfen nur root und der Programm-Eigentümer der Datei sie modifizieren.
 - ASLR.
-- If we try to read or write to an address not mapped in the address space of the program we will get an I/O error.
+- Wenn wir versuchen, an eine Adresse zu lesen oder zu schreiben, die im Adressraum des Programms nicht abgebildet ist, erhalten wir einen I/O-Fehler.
 
-This problems have solutions that, although they are not perfect, are good:
+Diese Probleme haben Lösungen, die, obwohl sie nicht perfekt sind, gut sind:
 
-- Most shell interpreters allow the creation of file descriptors that will then be inherited by child processes. We can create a fd pointing to the `mem` file of the sell with write permissions... so child processes that use that fd will be able to modify the shell's memory.
-- ASLR isn't even a problem, we can check the shell's `maps` file or any other from the procfs in order to gain information about the address space of the process.
-- So we need to `lseek()` over the file. From the shell this cannot be done unless using the infamous `dd`.
+- Die meisten Shell-Interpreter erlauben die Erstellung von Dateideskriptoren, die dann von Kindprozessen geerbt werden. Wir können einen fd erstellen, der auf die `mem`-Datei der Shell mit Schreibberechtigungen zeigt... sodass Kindprozesse, die diesen fd verwenden, in der Lage sind, den Speicher der Shell zu modifizieren.
+- ASLR ist nicht einmal ein Problem, wir können die `maps`-Datei der Shell oder eine andere aus dem procfs überprüfen, um Informationen über den Adressraum des Prozesses zu erhalten.
+- Daher müssen wir über die Datei `lseek()`. Dies kann von der Shell aus nicht getan werden, es sei denn, man verwendet das berüchtigte `dd`.
 
-### In more detail
+### Im Detail
 
-The steps are relatively easy and do not require any kind of expertise to understand them:
+Die Schritte sind relativ einfach und erfordern keine Art von Fachwissen, um sie zu verstehen:
 
-- Parse the binary we want to run and the loader to find out what mappings they need. Then craft a "shell"code that will perform, broadly speaking, the same steps that the kernel does upon each call to `execve()`:
-  - Create said mappings.
-  - Read the binaries into them.
-  - Set up permissions.
-  - Finally initialize the stack with the arguments for the program and place the auxiliary vector (needed by the loader).
-  - Jump into the loader and let it do the rest (load libraries needed by the program).
-- Obtain from the `syscall` file the address to which the process will return after the syscall it is executing.
-- Overwrite that place, which will be executable, with our shellcode (through `mem` we can modify unwritable pages).
-- Pass the program we want to run to the stdin of the process (will be `read()` by said "shell"code).
-- At this point it is up to the loader to load the necessary libraries for our program and jump into it.
+- Analysieren Sie die Binärdatei, die wir ausführen möchten, und den Loader, um herauszufinden, welche Abbildungen sie benötigen. Dann erstellen Sie einen "Shell"-Code, der, grob gesagt, die gleichen Schritte ausführt, die der Kernel bei jedem Aufruf von `execve()` durchführt:
+- Erstellen Sie die genannten Abbildungen.
+- Lesen Sie die Binärdateien in diese ein.
+- Richten Sie Berechtigungen ein.
+- Initialisieren Sie schließlich den Stack mit den Argumenten für das Programm und platzieren Sie den Hilfsvektor (benötigt vom Loader).
+- Springen Sie in den Loader und lassen Sie ihn den Rest erledigen (benötigte Bibliotheken für das Programm laden).
+- Erhalten Sie aus der `syscall`-Datei die Adresse, zu der der Prozess nach dem Ausführen des Syscalls zurückkehren wird.
+- Überschreiben Sie diesen Ort, der ausführbar sein wird, mit unserem Shellcode (durch `mem` können wir nicht beschreibbare Seiten modifizieren).
+- Übergeben Sie das Programm, das wir ausführen möchten, an den stdin des Prozesses (wird von said "Shell"-Code `read()`).
+- An diesem Punkt liegt es am Loader, die notwendigen Bibliotheken für unser Programm zu laden und in es zu springen.
 
-**Check out the tool in** [**https://github.com/arget13/DDexec**](https://github.com/arget13/DDexec)
+**Überprüfen Sie das Tool unter** [**https://github.com/arget13/DDexec**](https://github.com/arget13/DDexec)
 
 ## EverythingExec
 
-There are several alternatives to `dd`, one of which, `tail`, is currently the default program used to `lseek()` through the `mem` file (which was the sole purpose for using `dd`). Said alternatives are:
-
+Es gibt mehrere Alternativen zu `dd`, von denen eine, `tail`, derzeit das Standardprogramm ist, das verwendet wird, um durch die `mem`-Datei zu `lseek()` (was der einzige Zweck für die Verwendung von `dd` war). Diese Alternativen sind:
 ```bash
 tail
 hexdump
 cmp
 xxd
 ```
-
-Setting the variable `SEEKER` you may change the seeker used, _e. g._:
-
+Durch das Setzen der Variablen `SEEKER` können Sie den verwendeten Seeker ändern, _z. B._:
 ```bash
 SEEKER=cmp bash ddexec.sh ls -l <<< $(base64 -w0 /bin/ls)
 ```
-
-If you find another valid seeker not implemented in the script you may still use it setting the `SEEKER_ARGS` variable:
-
+Wenn Sie einen anderen gültigen Seeker finden, der im Skript nicht implementiert ist, können Sie ihn weiterhin verwenden, indem Sie die Variable `SEEKER_ARGS` festlegen:
 ```bash
 SEEKER=xxd SEEKER_ARGS='-s $offset' zsh ddexec.sh ls -l <<< $(base64 -w0 /bin/ls)
 ```
+Blockiere dies, EDRs.
 
-Block this, EDRs.
-
-## References
+## Referenzen
 
 - [https://github.com/arget13/DDexec](https://github.com/arget13/DDexec)
 

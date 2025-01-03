@@ -15,16 +15,16 @@ Einige **Beispiele** für **distroless Container** sind:
 
 ## Weaponizing Distroless
 
-Das Ziel, einen distroless Container zu weaponizen, besteht darin, **willkürliche Binaries und Payloads auszuführen, selbst mit den Einschränkungen**, die durch **distroless** (Fehlen gängiger Binaries im System) und auch durch Schutzmaßnahmen, die häufig in Containern zu finden sind, wie **schreibgeschützt** oder **nicht ausführbar** in `/dev/shm`, impliziert werden.
+Das Ziel, einen distroless Container zu waffen, besteht darin, **willkürliche Binärdateien und Payloads auszuführen, selbst mit den Einschränkungen**, die durch **distroless** (Fehlen gängiger Binärdateien im System) und auch durch Schutzmaßnahmen, die häufig in Containern zu finden sind, wie **schreibgeschützt** oder **nicht ausführbar** in `/dev/shm`, impliziert werden.
 
 ### Durch Speicher
 
 Kommt irgendwann im Jahr 2023...
 
-### Über vorhandene Binaries
+### Über vorhandene Binärdateien
 
 #### openssl
 
-\***\*[**In diesem Beitrag,**](https://www.form3.tech/engineering/content/exploiting-distroless-images) wird erklärt, dass die Binary **`openssl`** häufig in diesen Containern zu finden ist, möglicherweise weil sie **benötigt** wird von der Software, die im Container ausgeführt werden soll.
+\***\*[**In diesem Beitrag,**](https://www.form3.tech/engineering/content/exploiting-distroless-images) wird erklärt, dass die Binärdatei **`openssl`** häufig in diesen Containern zu finden ist, möglicherweise weil sie **benötigt** wird von der Software, die im Container ausgeführt werden soll.
 
 {{#include ../../../banners/hacktricks-training.md}}

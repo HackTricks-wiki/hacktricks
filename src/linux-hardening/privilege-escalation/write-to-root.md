@@ -1,4 +1,4 @@
-# Arbitrary File Write to Root
+# Arbiträre Dateischreibung auf Root
 
 {{#include ../../banners/hacktricks-training.md}}
 

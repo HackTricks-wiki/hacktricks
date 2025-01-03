@@ -4,7 +4,7 @@
 
 ## Grundlegende Informationen
 
-Der Zeit-Namespace in Linux ermöglicht offsets pro Namespace zu den systemeigenen monotonen und Boot-Zeituhren. Er wird häufig in Linux-Containern verwendet, um das Datum/die Uhrzeit innerhalb eines Containers zu ändern und Uhren nach der Wiederherstellung aus einem Checkpoint oder Snapshot anzupassen.
+Der Zeit-Namespace in Linux ermöglicht offsets pro Namespace zu den systemeigenen monotonen und Boot-Zeit-Uhren. Er wird häufig in Linux-Containern verwendet, um das Datum/Zeit innerhalb eines Containers zu ändern und Uhren nach der Wiederherstellung von einem Checkpoint oder Snapshot anzupassen.
 
 ## Labor:
 
@@ -20,7 +20,7 @@ Durch das Einhängen einer neuen Instanz des `/proc`-Dateisystems, wenn Sie den 
 
 <summary>Fehler: bash: fork: Kann Speicher nicht zuweisen</summary>
 
-Wenn `unshare` ohne die Option `-f` ausgeführt wird, tritt ein Fehler auf, der auf die Art und Weise zurückzuführen ist, wie Linux neue PID (Prozess-ID) Namespaces behandelt. Die wichtigsten Details und die Lösung sind unten aufgeführt:
+Wenn `unshare` ohne die Option `-f` ausgeführt wird, tritt ein Fehler auf, der auf die Art und Weise zurückzuführen ist, wie Linux neue PID (Process ID) Namespaces behandelt. Die wichtigsten Details und die Lösung sind unten aufgeführt:
 
 1. **Problemerklärung**:
 
@@ -30,13 +30,13 @@ Wenn `unshare` ohne die Option `-f` ausgeführt wird, tritt ein Fehler auf, der 
 
 2. **Folge**:
 
-- Das Verlassen von PID 1 in einem neuen Namespace führt zur Bereinigung des `PIDNS_HASH_ADDING`-Flags. Dies führt dazu, dass die Funktion `alloc_pid` fehlschlägt, um eine neue PID zuzuweisen, wenn ein neuer Prozess erstellt wird, was den Fehler "Kann Speicher nicht zuweisen" erzeugt.
+- Das Beenden von PID 1 in einem neuen Namespace führt zur Bereinigung des `PIDNS_HASH_ADDING`-Flags. Dies führt dazu, dass die Funktion `alloc_pid` fehlschlägt, um eine neue PID zuzuweisen, wenn ein neuer Prozess erstellt wird, was den Fehler "Kann Speicher nicht zuweisen" erzeugt.
 
 3. **Lösung**:
 - Das Problem kann gelöst werden, indem die Option `-f` mit `unshare` verwendet wird. Diese Option bewirkt, dass `unshare` einen neuen Prozess nach der Erstellung des neuen PID-Namespace forked.
-- Das Ausführen von `%unshare -fp /bin/bash%` stellt sicher, dass der `unshare`-Befehl selbst PID 1 im neuen Namespace wird. `/bin/bash` und seine Kindprozesse sind dann sicher in diesem neuen Namespace enthalten, wodurch der vorzeitige Austritt von PID 1 verhindert wird und eine normale PID-Zuweisung ermöglicht wird.
+- Das Ausführen von `%unshare -fp /bin/bash%` stellt sicher, dass der `unshare`-Befehl selbst PID 1 im neuen Namespace wird. `/bin/bash` und seine Kindprozesse sind dann sicher in diesem neuen Namespace enthalten, wodurch das vorzeitige Beenden von PID 1 verhindert wird und eine normale PID-Zuweisung ermöglicht wird.
 
-Indem sichergestellt wird, dass `unshare` mit dem `-f`-Flag ausgeführt wird, wird der neue PID-Namespace korrekt aufrechterhalten, sodass `/bin/bash` und seine Unterprozesse ohne den Speicherzuweisungsfehler arbeiten können.
+Durch die Sicherstellung, dass `unshare` mit dem `-f`-Flag ausgeführt wird, wird der neue PID-Namespace korrekt aufrechterhalten, sodass `/bin/bash` und seine Unterprozesse ohne den Speicherzuweisungsfehler arbeiten können.
 
 </details>
 

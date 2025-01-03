@@ -2,26 +2,24 @@
 
 <figure><img src="/..https:/pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
 
-{% embed url="https://websec.nl/" %}
-
 # CBC - Cipher Block Chaining
 
-In CBC mode the **previous encrypted block is used as IV** to XOR with the next block:
+Im CBC-Modus wird der **vorherige verschlüsselte Block als IV** verwendet, um mit dem nächsten Block zu XORen:
 
 ![https://defuse.ca/images/cbc_encryption.png](https://defuse.ca/images/cbc_encryption.png)
 
-To decrypt CBC the **opposite** **operations** are done:
+Um CBC zu entschlüsseln, werden die **entgegengesetzten** **Operationen** durchgeführt:
 
 ![https://defuse.ca/images/cbc_decryption.png](https://defuse.ca/images/cbc_decryption.png)
 
-Notice how it's needed to use an **encryption** **key** and an **IV**.
+Beachten Sie, dass es notwendig ist, einen **Verschlüsselungs** **schlüssel** und ein **IV** zu verwenden.
 
-# Message Padding
+# Nachrichten-Padding
 
-As the encryption is performed in **fixed** **size** **blocks**, **padding** is usually needed in the **last** **block** to complete its length.\
-Usually **PKCS7** is used, which generates a padding **repeating** the **number** of **bytes** **needed** to **complete** the block. For example, if the last block is missing 3 bytes, the padding will be `\x03\x03\x03`.
+Da die Verschlüsselung in **festen** **Größen** **Blöcken** erfolgt, ist in dem **letzten** **Block** normalerweise **Padding** erforderlich, um seine Länge zu vervollständigen.\
+In der Regel wird **PKCS7** verwendet, das ein Padding erzeugt, das die **Anzahl** der **Bytes** **wiederholt**, die benötigt werden, um den Block zu **vollenden**. Zum Beispiel, wenn im letzten Block 3 Bytes fehlen, wird das Padding `\x03\x03\x03` sein.
 
-Let's look at more examples with a **2 blocks of length 8bytes**:
+Sehen wir uns weitere Beispiele mit **2 Blöcken der Länge 8 Bytes** an:
 
 | byte #0 | byte #1 | byte #2 | byte #3 | byte #4 | byte #5 | byte #6 | byte #7 | byte #0  | byte #1  | byte #2  | byte #3  | byte #4  | byte #5  | byte #6  | byte #7  |
 | ------- | ------- | ------- | ------- | ------- | ------- | ------- | ------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- |
@@ -30,51 +28,43 @@ Let's look at more examples with a **2 blocks of length 8bytes**:
 | P       | A       | S       | S       | W       | O       | R       | D       | 1        | 2        | 3        | **0x05** | **0x05** | **0x05** | **0x05** | **0x05** |
 | P       | A       | S       | S       | W       | O       | R       | D       | **0x08** | **0x08** | **0x08** | **0x08** | **0x08** | **0x08** | **0x08** | **0x08** |
 
-Note how in the last example the **last block was full so another one was generated only with padding**.
+Beachten Sie, dass im letzten Beispiel der **letzte Block voll war, sodass ein weiterer nur mit Padding generiert wurde**.
 
 # Padding Oracle
 
-When an application decrypts encrypted data, it will first decrypt the data; then it will remove the padding. During the cleanup of the padding, if an **invalid padding triggers a detectable behaviour**, you have a **padding oracle vulnerability**. The detectable behaviour can be an **error**, a **lack of results**, or a **slower response**.
+Wenn eine Anwendung verschlüsselte Daten entschlüsselt, wird sie zuerst die Daten entschlüsseln; dann wird sie das Padding entfernen. Während der Bereinigung des Paddings, wenn ein **ungültiges Padding ein erkennbares Verhalten auslöst**, haben Sie eine **Padding-Oracle-Schwachstelle**. Das erkennbare Verhalten kann ein **Fehler**, ein **Mangel an Ergebnissen** oder eine **langsamere Antwort** sein.
 
-If you detect this behaviour, you can **decrypt the encrypted data** and even **encrypt any cleartext**.
+Wenn Sie dieses Verhalten erkennen, können Sie **die verschlüsselten Daten entschlüsseln** und sogar **beliebigen Klartext verschlüsseln**.
 
-## How to exploit
+## Wie man ausnutzt
 
-You could use [https://github.com/AonCyberLabs/PadBuster](https://github.com/AonCyberLabs/PadBuster) to exploit this kind of vulnerability or just do
-
+Sie könnten [https://github.com/AonCyberLabs/PadBuster](https://github.com/AonCyberLabs/PadBuster) verwenden, um diese Art von Schwachstelle auszunutzen oder einfach tun
 ```
 sudo apt-get install padbuster
 ```
-
-In order to test if the cookie of a site is vulnerable you could try:
-
+Um zu testen, ob das Cookie einer Seite anfällig ist, könnten Sie Folgendes versuchen:
 ```bash
 perl ./padBuster.pl http://10.10.10.10/index.php "RVJDQrwUdTRWJUVUeBKkEA==" 8 -encoding 0 -cookies "login=RVJDQrwUdTRWJUVUeBKkEA=="
 ```
+**Encoding 0** bedeutet, dass **base64** verwendet wird (aber es sind auch andere verfügbar, siehe das Hilfemenü).
 
-**Encoding 0** means that **base64** is used (but others are available, check the help menu).
-
-You could also **abuse this vulnerability to encrypt new data. For example, imagine that the content of the cookie is "**_**user=MyUsername**_**", then you may change it to "\_user=administrator\_" and escalate privileges inside the application. You could also do it using `paduster`specifying the -plaintext** parameter:
-
+Sie könnten diese Schwachstelle auch **ausnutzen, um neue Daten zu verschlüsseln. Zum Beispiel, stellen Sie sich vor, der Inhalt des Cookies ist "**_**user=MyUsername**_**", dann könnten Sie ihn in "\_user=administrator\_" ändern und die Berechtigungen innerhalb der Anwendung eskalieren. Sie könnten dies auch mit `paduster` tun, indem Sie den -plaintext** Parameter angeben:
 ```bash
 perl ./padBuster.pl http://10.10.10.10/index.php "RVJDQrwUdTRWJUVUeBKkEA==" 8 -encoding 0 -cookies "login=RVJDQrwUdTRWJUVUeBKkEA==" -plaintext "user=administrator"
 ```
-
-If the site is vulnerable `padbuster`will automatically try to find when the padding error occurs, but you can also indicating the error message it using the **-error** parameter.
-
+Wenn die Seite anfällig ist, wird `padbuster` automatisch versuchen herauszufinden, wann der Padding-Fehler auftritt, aber Sie können auch die Fehlermeldung mit dem **-error** Parameter angeben.
 ```bash
 perl ./padBuster.pl http://10.10.10.10/index.php "" 8 -encoding 0 -cookies "hcon=RVJDQrwUdTRWJUVUeBKkEA==" -error "Invalid padding"
 ```
+## Die Theorie
 
-## The theory
-
-In **summary**, you can start decrypting the encrypted data by guessing the correct values that can be used to create all the **different paddings**. Then, the padding oracle attack will start decrypting bytes from the end to the start by guessing which will be the correct value that **creates a padding of 1, 2, 3, etc**.
+In **Zusammenfassung** können Sie mit der Entschlüsselung der verschlüsselten Daten beginnen, indem Sie die richtigen Werte erraten, die verwendet werden können, um alle **verschiedenen Paddings** zu erstellen. Dann beginnt der Padding-Oracle-Angriff, Bytes vom Ende zum Anfang zu entschlüsseln, indem erraten wird, welcher der richtige Wert ist, der **ein Padding von 1, 2, 3 usw. erzeugt**.
 
 ![](<../images/image (629) (1) (1).png>)
 
-Imagine you have some encrypted text that occupies **2 blocks** formed by the bytes from **E0 to E15**.\
-In order to **decrypt** the **last** **block** (**E8** to **E15**), the whole block passes through the "block cipher decryption" generating the **intermediary bytes I0 to I15**.\
-Finally, each intermediary byte is **XORed** with the previous encrypted bytes (E0 to E7). So:
+Stellen Sie sich vor, Sie haben einen verschlüsselten Text, der **2 Blöcke** umfasst, die aus den Bytes von **E0 bis E15** bestehen.\
+Um den **letzten** **Block** (**E8** bis **E15**) zu **entschlüsseln**, durchläuft der gesamte Block die "Blockchiffre-Entschlüsselung", die die **Zwischenbytes I0 bis I15** erzeugt.\
+Schließlich wird jedes Zwischenbyte mit den vorherigen verschlüsselten Bytes (E0 bis E7) **XORed**. Also:
 
 - `C15 = D(E15) ^ E7 = I15 ^ E7`
 - `C14 = I14 ^ E6`
@@ -82,33 +72,31 @@ Finally, each intermediary byte is **XORed** with the previous encrypted bytes (
 - `C12 = I12 ^ E4`
 - ...
 
-Now, It's possible to **modify `E7` until `C15` is `0x01`**, which will also be a correct padding. So, in this case: `\x01 = I15 ^ E'7`
+Jetzt ist es möglich, `E7` so zu **modifizieren**, dass `C15` `0x01` ist, was ebenfalls ein korrektes Padding sein wird. In diesem Fall: `\x01 = I15 ^ E'7`
 
-So, finding E'7, it's **possible to calculate I15**: `I15 = 0x01 ^ E'7`
+Durch das Finden von E'7 ist es **möglich, I15 zu berechnen**: `I15 = 0x01 ^ E'7`
 
-Which allow us to **calculate C15**: `C15 = E7 ^ I15 = E7 ^ \x01 ^ E'7`
+Was es uns ermöglicht, **C15 zu berechnen**: `C15 = E7 ^ I15 = E7 ^ \x01 ^ E'7`
 
-Knowing **C15**, now it's possible to **calculate C14**, but this time brute-forcing the padding `\x02\x02`.
+Wenn wir **C15** kennen, ist es jetzt möglich, **C14 zu berechnen**, aber diesmal durch Brute-Forcing des Paddings `\x02\x02`.
 
-This BF is as complex as the previous one as it's possible to calculate the the `E''15` whose value is 0x02: `E''7 = \x02 ^ I15` so it's just needed to find the **`E'14`** that generates a **`C14` equals to `0x02`**.\
-Then, do the same steps to decrypt C14: **`C14 = E6 ^ I14 = E6 ^ \x02 ^ E''6`**
+Dieses BF ist so komplex wie das vorherige, da es möglich ist, das `E''15` zu berechnen, dessen Wert 0x02 ist: `E''7 = \x02 ^ I15`, sodass nur **`E'14`** gefunden werden muss, das ein **`C14` erzeugt, das gleich `0x02` ist**.\
+Dann die gleichen Schritte wiederholen, um C14 zu entschlüsseln: **`C14 = E6 ^ I14 = E6 ^ \x02 ^ E''6`**
 
-**Follow this chain until you decrypt the whole encrypted text.**
+**Folgen Sie dieser Kette, bis Sie den gesamten verschlüsselten Text entschlüsselt haben.**
 
-## Detection of the vulnerability
+## Erkennung der Schwachstelle
 
-Register and account and log in with this account .\
-If you **log in many times** and always get the **same cookie**, there is probably **something** **wrong** in the application. The **cookie sent back should be unique** each time you log in. If the cookie is **always** the **same**, it will probably always be valid and there **won't be anyway to invalidate i**t.
+Registrieren Sie sich und melden Sie sich mit diesem Konto an.\
+Wenn Sie **mehrmals einloggen** und immer dasselbe **Cookie** erhalten, gibt es wahrscheinlich **etwas** **Falsches** in der Anwendung. Das **zurückgesendete Cookie sollte jedes Mal einzigartig sein**, wenn Sie sich anmelden. Wenn das Cookie **immer** dasselbe ist, wird es wahrscheinlich immer gültig sein und es **wird keinen Weg geben, es zu ungültig zu machen**.
 
-Now, if you try to **modify** the **cookie**, you can see that you get an **error** from the application.\
-But if you BF the padding (using padbuster for example) you manage to get another cookie valid for a different user. This scenario is highly probably vulnerable to padbuster.
+Wenn Sie jetzt versuchen, das **Cookie zu modifizieren**, können Sie sehen, dass Sie einen **Fehler** von der Anwendung erhalten.\
+Aber wenn Sie das Padding brute-forcen (zum Beispiel mit Padbuster), schaffen Sie es, ein anderes Cookie zu erhalten, das für einen anderen Benutzer gültig ist. Dieses Szenario ist höchstwahrscheinlich anfällig für Padbuster.
 
-## References
+## Referenzen
 
 - [https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation)
 
 <figure><img src="/..https:/pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../banners/hacktricks-training.md}}

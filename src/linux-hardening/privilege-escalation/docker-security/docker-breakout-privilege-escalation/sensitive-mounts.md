@@ -15,7 +15,7 @@ Dieses Verzeichnis erlaubt den Zugriff zur Modifikation von Kernel-Variablen, no
 #### **`/proc/sys/kernel/core_pattern`**
 
 - Beschrieben in [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
-- Ermöglicht die Definition eines Programms, das bei der Erzeugung von Kern-Dateien mit den ersten 128 Bytes als Argumente ausgeführt wird. Dies kann zu Codeausführung führen, wenn die Datei mit einer Pipe `|` beginnt.
+- Ermöglicht die Definition eines Programms, das bei der Erzeugung von Kern-Dateien mit den ersten 128 Bytes als Argumente ausgeführt wird. Dies kann zu einer Codeausführung führen, wenn die Datei mit einer Pipe `|` beginnt.
 - **Test- und Ausbeutungsbeispiel**:
 
 ```bash
@@ -47,9 +47,9 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Zugriff auf modprobe überprüfen
 
 #### **`/proc/sys/fs/binfmt_misc`**
 
-- Ermöglicht die Registrierung von Interpretern für nicht-native Binärformate basierend auf ihrer magischen Zahl.
-- Kann zu Privilegieneskalation oder Root-Shell-Zugriff führen, wenn `/proc/sys/fs/binfmt_misc/register` beschreibbar ist.
-- Relevante Ausnutzung und Erklärung:
+- Ermöglicht die Registrierung von Interpretern für nicht-native Binärformate basierend auf ihrer Magic-Nummer.
+- Kann zu einer Privilegieneskalation oder Root-Shell-Zugriff führen, wenn `/proc/sys/fs/binfmt_misc/register` beschreibbar ist.
+- Relevante Exploit- und Erklärung:
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
 - Ausführliches Tutorial: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
 
@@ -63,7 +63,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Zugriff auf modprobe überprüfen
 #### **`/proc/sysrq-trigger`**
 
 - Ermöglicht das Auslösen von Sysrq-Befehlen, was möglicherweise sofortige Systemneustarts oder andere kritische Aktionen verursacht.
-- **Beispiel zum Neustarten des Hosts**:
+- **Beispiel für Neustart des Hosts**:
 
 ```bash
 echo b > /proc/sysrq-trigger # Neustart des Hosts
@@ -72,12 +72,12 @@ echo b > /proc/sysrq-trigger # Neustart des Hosts
 #### **`/proc/kmsg`**
 
 - Gibt Nachrichten des Kernel-Ringpuffers aus.
-- Kann bei Kernel-Ausnutzungen, Adresslecks und der Bereitstellung sensibler Systeminformationen helfen.
+- Kann bei Kernel-Exploits, Adresslecks helfen und sensible Systeminformationen bereitstellen.
 
 #### **`/proc/kallsyms`**
 
 - Listet vom Kernel exportierte Symbole und deren Adressen auf.
-- Essentiell für die Entwicklung von Kernel-Ausnutzungen, insbesondere zum Überwinden von KASLR.
+- Essentiell für die Entwicklung von Kernel-Exploits, insbesondere um KASLR zu überwinden.
 - Adressinformationen sind eingeschränkt, wenn `kptr_restrict` auf `1` oder `2` gesetzt ist.
 - Details in [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
@@ -89,7 +89,7 @@ echo b > /proc/sysrq-trigger # Neustart des Hosts
 
 #### **`/proc/kcore`**
 
-- Stellt den physischen Speicher des Systems im ELF-Kernformat dar.
+- Stellt den physischen Speicher des Systems im ELF-Core-Format dar.
 - Das Lesen kann Inhalte des Host-Systems und anderer Container offenbaren.
 - Große Dateigröße kann zu Leseproblemen oder Softwareabstürzen führen.
 - Detaillierte Nutzung in [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/).
@@ -119,8 +119,8 @@ echo b > /proc/sysrq-trigger # Neustart des Hosts
 #### **`/sys/kernel/uevent_helper`**
 
 - Wird zur Handhabung von Kernel-Gerät `uevents` verwendet.
-- Das Schreiben in `/sys/kernel/uevent_helper` kann beliebige Skripte bei `uevent`-Auslösern ausführen.
-- **Beispiel für die Ausnutzung**: %%%bash
+- Das Schreiben in `/sys/kernel/uevent_helper` kann beliebige Skripte bei `uevent`-Auslösungen ausführen.
+- **Beispiel für Ausbeutung**: %%%bash
 
 #### Erstellt eine Payload
 
@@ -158,7 +158,7 @@ cat /output %%%
 #### **`/sys/firmware/efi/vars` und `/sys/firmware/efi/efivars`**
 
 - Gibt Schnittstellen für die Interaktion mit EFI-Variablen im NVRAM preis.
-- Fehlkonfiguration oder Ausnutzung kann zu unbrauchbaren Laptops oder nicht bootfähigen Host-Maschinen führen.
+- Fehlkonfiguration oder Ausbeutung kann zu unbrauchbaren Laptops oder nicht bootfähigen Host-Maschinen führen.
 
 #### **`/sys/kernel/debug`**
 

@@ -61,7 +61,7 @@ macos-security-protections/
 
 ## Angriffsfläche
 
-### Datei Berechtigungen
+### Datei-Berechtigungen
 
 Wenn ein **Prozess, der als root läuft,** eine Datei schreibt, die von einem Benutzer kontrolliert werden kann, könnte der Benutzer dies missbrauchen, um **Privilegien zu eskalieren**.\
 Dies könnte in den folgenden Situationen auftreten:
@@ -71,9 +71,9 @@ Dies könnte in den folgenden Situationen auftreten:
 - Die verwendete Datei befindet sich in einem Verzeichnis, das dem Benutzer gehört (der Benutzer könnte die Datei erstellen)
 - Die verwendete Datei befindet sich in einem Verzeichnis, das root gehört, aber der Benutzer hat aufgrund einer Gruppe Schreibzugriff darauf (der Benutzer könnte die Datei erstellen)
 
-In der Lage zu sein, eine **Datei zu erstellen**, die von **root verwendet wird**, ermöglicht es einem Benutzer, **von ihrem Inhalt zu profitieren** oder sogar **Symlinks/Hardlinks** zu erstellen, um sie an einen anderen Ort zu verweisen.
+In der Lage zu sein, eine **Datei zu erstellen**, die von **root verwendet wird**, ermöglicht es einem Benutzer, **von ihrem Inhalt Gebrauch zu machen** oder sogar **Symlinks/Hardlinks** zu erstellen, um sie an einen anderen Ort zu verweisen.
 
-Für diese Art von Schwachstellen vergessen Sie nicht, **anfällige `.pkg` Installer** zu überprüfen:
+Für diese Art von Schwachstellen vergessen Sie nicht, **anfällige `.pkg`-Installer** zu überprüfen:
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-installers-abuse.md
@@ -95,7 +95,7 @@ Daher muss ein Angreifer, der eine macOS-Maschine erfolgreich kompromittieren m�
 
 Diese Berechtigungen werden normalerweise in Form von **Rechten** vergeben, mit denen die Anwendung signiert ist, oder die Anwendung könnte einige Zugriffe angefordert haben, und nachdem der **Benutzer diese genehmigt hat**, können sie in den **TCC-Datenbanken** gefunden werden. Eine andere Möglichkeit, wie ein Prozess diese Berechtigungen erhalten kann, besteht darin, ein **Kind eines Prozesses** mit diesen **Berechtigungen** zu sein, da sie normalerweise **vererbt** werden.
 
-Folgen Sie diesen Links, um verschiedene Möglichkeiten zu finden, um [**Berechtigungen in TCC zu eskalieren**](macos-security-protections/macos-tcc/#tcc-privesc-and-bypasses), um [**TCC zu umgehen**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) und wie in der Vergangenheit [**SIP umgangen wurde**](macos-security-protections/macos-sip.md#sip-bypasses).
+Folgen Sie diesen Links, um verschiedene Möglichkeiten zu finden, [**Berechtigungen in TCC zu eskalieren**](macos-security-protections/macos-tcc/#tcc-privesc-and-bypasses), um [**TCC zu umgehen**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) und wie in der Vergangenheit [**SIP umgangen wurde**](macos-security-protections/macos-sip.md#sip-bypasses).
 
 ## macOS Traditionelle Privilegieneskalation
 

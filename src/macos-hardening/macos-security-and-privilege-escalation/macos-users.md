@@ -15,19 +15,19 @@ _amavisd, _analyticsd, _appinstalld, _appleevents, _applepay, _appowner, _appser
 state=("automaticTime" "afpGuestAccess" "filesystem" "guestAccount" "smbGuestAccess")
 for i in "${state[@]}"; do sysadminctl -"${i}" status; done;
 ```
-- **Nobody**: Prozesse werden mit diesem Benutzer ausgeführt, wenn minimale Berechtigungen erforderlich sind.
+- **Niemand**: Prozesse werden mit diesem Benutzer ausgeführt, wenn minimale Berechtigungen erforderlich sind
 - **Root**
 
 ## Benutzerberechtigungen
 
-- **Standardbenutzer:** Der grundlegendste Benutzer. Dieser Benutzer benötigt Berechtigungen, die von einem Administrator gewährt werden, wenn er versucht, Software zu installieren oder andere erweiterte Aufgaben auszuführen. Er kann dies nicht selbst tun.
-- **Administratorbenutzer**: Ein Benutzer, der die meiste Zeit als Standardbenutzer arbeitet, aber auch berechtigt ist, Root-Aktionen wie die Installation von Software und andere administrative Aufgaben auszuführen. Alle Benutzer, die zur Administratorgruppe gehören, **erhalten über die sudoers-Datei Zugriff auf Root**.
+- **Standardbenutzer:** Der grundlegendste Benutzer. Dieser Benutzer benötigt Berechtigungen, die von einem Administrator gewährt werden, wenn er versucht, Software zu installieren oder andere fortgeschrittene Aufgaben auszuführen. Er kann dies nicht selbst tun.
+- **Administratorbenutzer**: Ein Benutzer, der die meiste Zeit als Standardbenutzer arbeitet, aber auch berechtigt ist, Root-Aktionen wie die Installation von Software und andere administrative Aufgaben auszuführen. Alle Benutzer, die zur Administratorgruppe gehören, **erhalten Zugriff auf Root über die sudoers-Datei**.
 - **Root**: Root ist ein Benutzer, der fast jede Aktion ausführen darf (es gibt Einschränkungen, die durch Schutzmaßnahmen wie den System Integrity Protection auferlegt werden).
 - Zum Beispiel kann Root keine Datei in `/System` ablegen.
 
 ## Externe Konten
 
-MacOS unterstützt auch die Anmeldung über externe Identitätsanbieter wie FaceBook, Google... Der Hauptdaemon, der diese Aufgabe ausführt, ist `accountsd` (`/System/Library/Frameworks/Accounts.framework//Versions/A/Support/accountsd`), und es ist möglich, Plugins für die externe Authentifizierung im Ordner `/System/Library/Accounts/Authentication/` zu finden.\
+MacOS unterstützt auch die Anmeldung über externe Identitätsanbieter wie FaceBook, Google... Der Hauptdaemon, der diese Aufgabe ausführt, ist `accountsd` (`/System/Library/Frameworks/Accounts.framework//Versions/A/Support/accountsd`) und es ist möglich, Plugins für die externe Authentifizierung im Ordner `/System/Library/Accounts/Authentication/` zu finden.\
 Darüber hinaus erhält `accountsd` die Liste der Kontotypen aus `/Library/Preferences/SystemConfiguration/com.apple.accounts.exists.plist`.
 
 {{#include ../../banners/hacktricks-training.md}}

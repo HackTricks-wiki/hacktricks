@@ -121,7 +121,7 @@ cmd LC_REEXPORT_DYLIB
 cmdsize 128
 name /Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/lib/libjli.dylib (offset 24)
 ```
-Kopiere es schließlich einfach an den **gehijackten Ort**:
+Kopiere es schließlich einfach an den **hijackten Ort**:
 ```bash
 cp lib.dylib "/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib"
 ```
@@ -137,7 +137,7 @@ Und **führen** Sie die Binärdatei aus und überprüfen Sie, ob die **Bibliothe
 
 ## Größere Skala
 
-Wenn Sie planen, Bibliotheken in unerwartete Binärdateien zu injizieren, könnten Sie die Ereignismeldungen überprüfen, um herauszufinden, wann die Bibliothek innerhalb eines Prozesses geladen wird (in diesem Fall entfernen Sie das printf und die Ausführung von `/bin/bash`).
+Wenn Sie planen, Bibliotheken in unerwartete Binärdateien zu injizieren, könnten Sie die Ereignisnachrichten überprüfen, um herauszufinden, wann die Bibliothek innerhalb eines Prozesses geladen wird (in diesem Fall entfernen Sie das printf und die Ausführung von `/bin/bash`).
 ```bash
 sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "[+] dylib"'
 ```

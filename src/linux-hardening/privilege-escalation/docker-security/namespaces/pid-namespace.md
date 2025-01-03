@@ -4,18 +4,18 @@
 
 ## Grundinformationen
 
-Der PID (Process IDentifier) Namespace ist ein Feature im Linux-Kernel, das Prozessisolation bietet, indem es einer Gruppe von Prozessen ermöglicht, ihren eigenen Satz von einzigartigen PIDs zu haben, getrennt von den PIDs in anderen Namespaces. Dies ist besonders nützlich in der Containerisierung, wo Prozessisolation für Sicherheit und Ressourcenmanagement entscheidend ist.
+Der PID (Process IDentifier) Namespace ist eine Funktion im Linux-Kernel, die Prozessisolierung bietet, indem sie einer Gruppe von Prozessen ermöglicht, ihren eigenen Satz von einzigartigen PIDs zu haben, getrennt von den PIDs in anderen Namespaces. Dies ist besonders nützlich in der Containerisierung, wo Prozessisolierung für Sicherheit und Ressourcenmanagement entscheidend ist.
 
 Wenn ein neuer PID-Namespace erstellt wird, erhält der erste Prozess in diesem Namespace die PID 1. Dieser Prozess wird zum "init"-Prozess des neuen Namespaces und ist verantwortlich für die Verwaltung anderer Prozesse innerhalb des Namespaces. Jeder nachfolgende Prozess, der innerhalb des Namespaces erstellt wird, hat eine einzigartige PID innerhalb dieses Namespaces, und diese PIDs sind unabhängig von PIDs in anderen Namespaces.
 
-Aus der Perspektive eines Prozesses innerhalb eines PID-Namespace kann dieser nur andere Prozesse im selben Namespace sehen. Er ist sich der Prozesse in anderen Namespaces nicht bewusst und kann nicht mit ihnen interagieren, indem er traditionelle Prozessmanagement-Tools (z. B. `kill`, `wait` usw.) verwendet. Dies bietet ein Maß an Isolation, das hilft, zu verhindern, dass Prozesse sich gegenseitig stören.
+Aus der Perspektive eines Prozesses innerhalb eines PID-Namespace kann er nur andere Prozesse im selben Namespace sehen. Er ist sich der Prozesse in anderen Namespaces nicht bewusst und kann nicht mit ihnen interagieren, indem er traditionelle Prozessmanagement-Tools (z. B. `kill`, `wait` usw.) verwendet. Dies bietet ein Maß an Isolation, das hilft, zu verhindern, dass Prozesse sich gegenseitig stören.
 
 ### So funktioniert es:
 
-1. Wenn ein neuer Prozess erstellt wird (z. B. durch die Verwendung des `clone()` Systemaufrufs), kann der Prozess einem neuen oder bestehenden PID-Namespace zugewiesen werden. **Wenn ein neuer Namespace erstellt wird, wird der Prozess zum "init"-Prozess dieses Namespaces**.
+1. Wenn ein neuer Prozess erstellt wird (z. B. durch Verwendung des `clone()`-Systemaufrufs), kann der Prozess einem neuen oder bestehenden PID-Namespace zugewiesen werden. **Wenn ein neuer Namespace erstellt wird, wird der Prozess zum "init"-Prozess dieses Namespaces**.
 2. Der **Kernel** verwaltet eine **Zuordnung zwischen den PIDs im neuen Namespace und den entsprechenden PIDs** im übergeordneten Namespace (d. h. dem Namespace, aus dem der neue Namespace erstellt wurde). Diese Zuordnung **ermöglicht es dem Kernel, PIDs bei Bedarf zu übersetzen**, z. B. beim Senden von Signalen zwischen Prozessen in verschiedenen Namespaces.
 3. **Prozesse innerhalb eines PID-Namespace können nur andere Prozesse im selben Namespace sehen und mit ihnen interagieren**. Sie sind sich der Prozesse in anderen Namespaces nicht bewusst, und ihre PIDs sind innerhalb ihres Namespaces einzigartig.
-4. Wenn ein **PID-Namespace zerstört wird** (z. B. wenn der "init"-Prozess des Namespaces beendet wird), **werden alle Prozesse innerhalb dieses Namespaces beendet**. Dies stellt sicher, dass alle mit dem Namespace verbundenen Ressourcen ordnungsgemäß bereinigt werden.
+4. Wenn ein **PID-Namespace zerstört wird** (z. B. wenn der "init"-Prozess des Namespaces beendet wird), **werden alle Prozesse innerhalb dieses Namespaces beendet**. Dies stellt sicher, dass alle Ressourcen, die mit dem Namespace verbunden sind, ordnungsgemäß bereinigt werden.
 
 ## Labor:
 
@@ -70,9 +70,9 @@ Beachten Sie, dass der Root-Benutzer aus dem ursprünglichen (Standard-)PID-Name
 ```bash
 nsenter -t TARGET_PID --pid /bin/bash
 ```
-Wenn Sie von dem Standard-Namespace in einen PID-Namespace eintreten, können Sie weiterhin alle Prozesse sehen. Und der Prozess aus diesem PID-Namespace kann die neue Bash im PID-Namespace sehen.
+Wenn Sie von dem Standard-Namespace in einen PID-Namespace eintreten, können Sie weiterhin alle Prozesse sehen. Und der Prozess aus diesem PID-Namespace wird in der Lage sein, die neue Bash im PID-Namespace zu sehen.
 
-Außerdem können Sie **nur in einen anderen Prozess-PID-Namespace eintreten, wenn Sie root sind**. Und Sie **können** **nicht** **in** einen anderen Namespace **ohne einen Deskriptor** eintreten, der darauf verweist (wie `/proc/self/ns/pid`)
+Außerdem können Sie **nur in einen anderen Prozess-PID-Namespace eintreten, wenn Sie root sind**. Und Sie **können nicht** **in einen anderen Namespace eintreten** **ohne einen Deskriptor**, der darauf verweist (wie `/proc/self/ns/pid`)
 
 ## References
 

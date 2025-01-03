@@ -25,7 +25,7 @@ chmod +s bash
 cd <SHAREDD_FOLDER>
 ./bash -p #ROOT shell
 ```
-- **Das Verzeichnis** auf einem Client-Rechner einbinden und **als root** den kompilierten Payload, der die SUID-Berechtigung ausnutzt, in den eingebundenen Ordner kopieren, ihm **SUID**-Rechte geben und **von der Opfermaschine** diese Binärdatei ausführen (hier finden Sie einige [C SUID-Payloads](payloads-to-execute.md#c)).
+- **Das Verzeichnis** auf einem Client-Rechner einbinden und **als root** den kompilierten Payload in den eingebundenen Ordner kopieren, der die SUID-Berechtigung ausnutzt, ihm **SUID**-Rechte geben und **von der Opfer**-Maschine diese Binärdatei ausführen (hier finden Sie einige [C SUID-Payloads](payloads-to-execute.md#c)).
 ```bash
 #Attacker, as root user
 gcc payload.c -o payload
@@ -42,7 +42,7 @@ cd <SHAREDD_FOLDER>
 ## Lokaler Exploit
 
 > [!NOTE]
-> Beachten Sie, dass Sie, wenn Sie einen **Tunnel von Ihrem Rechner zur Zielmaschine erstellen können, die Remote-Version weiterhin verwenden können, um diese Privilegieneskalation durch Tunneln der erforderlichen Ports auszunutzen**.\
+> Beachten Sie, dass Sie, wenn Sie einen **Tunnel von Ihrem Rechner zur Opfermaschine erstellen können, weiterhin die Remote-Version verwenden können, um diese Privilegieneskalation durch Tunneln der erforderlichen Ports auszunutzen**.\
 > Der folgende Trick gilt, falls die Datei `/etc/exports` **eine IP angibt**. In diesem Fall **werden Sie auf keinen Fall** die **Remote-Exploit** verwenden können und müssen **diesen Trick ausnutzen**.\
 > Eine weitere erforderliche Bedingung, damit der Exploit funktioniert, ist, dass **der Export in `/etc/export`** **das `insecure`-Flag verwenden muss**.\
 > --_Ich bin mir nicht sicher, ob dieser Trick funktioniert, wenn `/etc/export` eine IP-Adresse angibt_--
@@ -53,7 +53,7 @@ Das Szenario beinhaltet das Ausnutzen eines gemounteten NFS-Teils auf einem loka
 
 ### Kompilieren der Bibliothek
 
-Die Schritte zur Kompilierung der Bibliothek könnten Anpassungen basierend auf der Kernel-Version erfordern. In diesem speziellen Fall wurden die fallocate-Systemaufrufe auskommentiert. Der Kompilierungsprozess umfasst die folgenden Befehle:
+Die Schritte zur Bibliothekskompilierung können je nach Kernelversion Anpassungen erfordern. In diesem speziellen Fall wurden die fallocate-Systemaufrufe auskommentiert. Der Kompilierungsprozess umfasst die folgenden Befehle:
 ```bash
 ./bootstrap
 ./configure

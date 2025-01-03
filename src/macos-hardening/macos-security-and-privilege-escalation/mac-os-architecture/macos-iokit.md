@@ -8,11 +8,11 @@ Das I/O Kit ist ein Open-Source, objektorientiertes **Gerätetreiber-Framework**
 
 IOKit-Treiber **exportieren Funktionen aus dem Kernel**. Diese Funktionsparameter **typen** sind **vordefiniert** und werden überprüft. Darüber hinaus ist IOKit, ähnlich wie XPC, nur eine weitere Schicht **oberhalb von Mach-Nachrichten**.
 
-**IOKit XNU-Kernelcode** ist von Apple unter [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit) als Open Source veröffentlicht. Außerdem sind die IOKit-Komponenten im Benutzerspeicher ebenfalls Open Source [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
+**IOKit XNU-Kernelcode** ist von Apple unter [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit) als Open Source veröffentlicht. Darüber hinaus sind auch die IOKit-Komponenten im Benutzerspeicher Open Source [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
 
-Allerdings sind **keine IOKit-Treiber** Open Source. Dennoch kann es von Zeit zu Zeit eine Veröffentlichung eines Treibers geben, die mit Symbolen kommt, die das Debuggen erleichtern. Überprüfen Sie, wie Sie [**die Treibererweiterungen aus der Firmware hier erhalten**](./#ipsw)**.**
+Allerdings sind **keine IOKit-Treiber** Open Source. Dennoch kann von Zeit zu Zeit eine Veröffentlichung eines Treibers mit Symbolen kommen, die das Debuggen erleichtern. Überprüfen Sie, wie Sie [**die Treibererweiterungen aus der Firmware hier erhalten**](./#ipsw)**.**
 
-Es ist in **C++** geschrieben. Sie können demanglierte C++-Symbole mit:
+Es ist in **C++** geschrieben. Sie können demanglierte C++-Symbole mit folgendem Befehl erhalten:
 ```bash
 # Get demangled symbols
 nm -C com.apple.driver.AppleJPEGDriver
@@ -54,7 +54,7 @@ Index Refs Address            Size       Wired      Name (Version) UUID <Linked 
 9    2 0xffffff8003317000 0xe000     0xe000     com.apple.kec.Libm (1) 6C1342CC-1D74-3D0F-BC43-97D5AD38200A <5>
 10   12 0xffffff8003544000 0x92000    0x92000    com.apple.kec.corecrypto (11.1) F5F1255F-6552-3CF4-A9DB-D60EFDEB4A9A <8 7 6 5 3 1>
 ```
-Bis zur Nummer 9 sind die aufgeführten Treiber **an der Adresse 0 geladen**. Das bedeutet, dass es sich nicht um echte Treiber handelt, sondern **Teil des Kernels sind und sie nicht entladen werden können**.
+Bis zur Nummer 9 werden die aufgeführten Treiber **an der Adresse 0** geladen. Das bedeutet, dass es sich nicht um echte Treiber handelt, sondern **Teil des Kernels sind und sie nicht entladen werden können**.
 
 Um spezifische Erweiterungen zu finden, können Sie Folgendes verwenden:
 ```bash
@@ -68,7 +68,7 @@ kextunload com.apple.iokit.IOReportFamily
 ```
 ## IORegistry
 
-Der **IORegistry** ist ein entscheidender Teil des IOKit-Frameworks in macOS und iOS, der als Datenbank zur Darstellung der Hardwarekonfiguration und des Zustands des Systems dient. Es ist eine **hierarchische Sammlung von Objekten, die alle auf dem System geladenen Hardware und Treiber darstellen** und deren Beziehungen zueinander.
+Der **IORegistry** ist ein entscheidender Teil des IOKit-Frameworks in macOS und iOS, der als Datenbank zur Darstellung der Hardwarekonfiguration und des Zustands des Systems dient. Es ist eine **hierarchische Sammlung von Objekten, die alle Hardware und Treiber** darstellen, die auf dem System geladen sind, sowie deren Beziehungen zueinander.
 
 Sie können den IORegistry mit dem CLI **`ioreg`** abrufen, um ihn von der Konsole aus zu inspizieren (besonders nützlich für iOS).
 ```bash
@@ -80,13 +80,13 @@ Sie können **`IORegistryExplorer`** von **Xcode Additional Tools** von [**https
 
 <figure><img src="../../../images/image (1167).png" alt="" width="563"><figcaption></figcaption></figure>
 
-In IORegistryExplorer werden "Planes" verwendet, um die Beziehungen zwischen verschiedenen Objekten im IORegistry zu organisieren und darzustellen. Jeder Plane repräsentiert eine spezifische Art von Beziehung oder eine bestimmte Ansicht der Hardware- und Treiberkonfiguration des Systems. Hier sind einige der häufigsten Planes, die Sie in IORegistryExplorer antreffen könnten:
+In IORegistryExplorer werden "Planes" verwendet, um die Beziehungen zwischen verschiedenen Objekten im IORegistry zu organisieren und darzustellen. Jedes Plane repräsentiert eine spezifische Art von Beziehung oder eine bestimmte Ansicht der Hardware- und Treiberkonfiguration des Systems. Hier sind einige der gängigen Planes, die Sie in IORegistryExplorer antreffen könnten:
 
-1. **IOService Plane**: Dies ist der allgemeinste Plane, der die Dienstobjekte anzeigt, die Treiber und Nubs (Kommunikationskanäle zwischen Treibern) repräsentieren. Er zeigt die Anbieter-Kunden-Beziehungen zwischen diesen Objekten.
-2. **IODeviceTree Plane**: Dieser Plane repräsentiert die physischen Verbindungen zwischen Geräten, wie sie an das System angeschlossen sind. Er wird oft verwendet, um die Hierarchie der über Busse wie USB oder PCI verbundenen Geräte zu visualisieren.
-3. **IOPower Plane**: Zeigt Objekte und deren Beziehungen im Hinblick auf das Energiemanagement an. Er kann zeigen, welche Objekte den Energiezustand anderer beeinflussen, was nützlich ist, um energiebezogene Probleme zu debuggen.
+1. **IOService Plane**: Dies ist das allgemeinste Plane, das die Dienstobjekte anzeigt, die Treiber und Nubs (Kommunikationskanäle zwischen Treibern) repräsentieren. Es zeigt die Anbieter-Kunden-Beziehungen zwischen diesen Objekten.
+2. **IODeviceTree Plane**: Dieses Plane repräsentiert die physischen Verbindungen zwischen Geräten, während sie an das System angeschlossen sind. Es wird oft verwendet, um die Hierarchie der über Busse wie USB oder PCI verbundenen Geräte zu visualisieren.
+3. **IOPower Plane**: Zeigt Objekte und deren Beziehungen im Hinblick auf das Energiemanagement an. Es kann zeigen, welche Objekte den Energiezustand anderer beeinflussen, was nützlich ist, um energiebezogene Probleme zu debuggen.
 4. **IOUSB Plane**: Fokussiert sich speziell auf USB-Geräte und deren Beziehungen und zeigt die Hierarchie von USB-Hubs und angeschlossenen Geräten.
-5. **IOAudio Plane**: Dieser Plane dient der Darstellung von Audiogeräten und deren Beziehungen innerhalb des Systems.
+5. **IOAudio Plane**: Dieses Plane dient der Darstellung von Audiogeräten und deren Beziehungen innerhalb des Systems.
 6. ...
 
 ## Driver Comm Code Beispiel
@@ -176,11 +176,11 @@ IOUserClient2022::dispatchExternalMethod(uint32_t selector, IOExternalMethodArgu
 const IOExternalMethodDispatch2022 dispatchArray[], size_t dispatchArrayCount,
 OSObject * target, void * reference)
 ```
-Mit diesen Informationen können Sie Ctrl+Rechts -> `Edit function signature` verwenden und die bekannten Typen festlegen:
+Mit diesen Informationen können Sie Ctrl+Rechts -> `Edit function signature` umschreiben und die bekannten Typen festlegen:
 
 <figure><img src="../../../images/image (1174).png" alt=""><figcaption></figcaption></figure>
 
-Der neue dekompilierte Code wird folgendermaßen aussehen:
+Der neue dekompilierte Code sieht folgendermaßen aus:
 
 <figure><img src="../../../images/image (1175).png" alt=""><figcaption></figcaption></figure>
 
@@ -188,7 +188,7 @@ Für den nächsten Schritt müssen wir die **`IOExternalMethodDispatch2022`** St
 
 <figure><img src="../../../images/image (1170).png" alt=""><figcaption></figcaption></figure>
 
-Jetzt, folgend der `(IOExternalMethodDispatch2022 *)&sIOExternalMethodArray`, können Sie viele Daten sehen:
+Jetzt, folgend der `(IOExternalMethodDispatch2022 *)&sIOExternalMethodArray` können Sie viele Daten sehen:
 
 <figure><img src="../../../images/image (1176).png" alt="" width="563"><figcaption></figcaption></figure>
 

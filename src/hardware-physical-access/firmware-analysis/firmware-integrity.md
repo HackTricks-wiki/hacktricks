@@ -1,27 +1,27 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-## Firmware Integrity
+## Firmware-Integrität
 
-The **custom firmware and/or compiled binaries can be uploaded to exploit integrity or signature verification flaws**. The following steps can be followed for backdoor bind shell compilation:
+Die **benutzerdefinierte Firmware und/oder kompilierten Binärdateien können hochgeladen werden, um Integritäts- oder Signaturüberprüfungsfehler auszunutzen**. Die folgenden Schritte können für die Kompilierung eines Backdoor-Bind-Shells befolgt werden:
 
-1. The firmware can be extracted using firmware-mod-kit (FMK).
-2. The target firmware architecture and endianness should be identified.
-3. A cross compiler can be built using Buildroot or other suitable methods for the environment.
-4. The backdoor can be built using the cross compiler.
-5. The backdoor can be copied to the extracted firmware /usr/bin directory.
-6. The appropriate QEMU binary can be copied to the extracted firmware rootfs.
-7. The backdoor can be emulated using chroot and QEMU.
-8. The backdoor can be accessed via netcat.
-9. The QEMU binary should be removed from the extracted firmware rootfs.
-10. The modified firmware can be repackaged using FMK.
-11. The backdoored firmware can be tested by emulating it with firmware analysis toolkit (FAT) and connecting to the target backdoor IP and port using netcat.
+1. Die Firmware kann mit firmware-mod-kit (FMK) extrahiert werden.
+2. Die Ziel-Firmware-Architektur und Endianness sollten identifiziert werden.
+3. Ein Cross-Compiler kann mit Buildroot oder anderen geeigneten Methoden für die Umgebung erstellt werden.
+4. Die Backdoor kann mit dem Cross-Compiler erstellt werden.
+5. Die Backdoor kann in das extrahierte Firmware-Verzeichnis /usr/bin kopiert werden.
+6. Die geeignete QEMU-Binärdatei kann in das extrahierte Firmware-Rootfs kopiert werden.
+7. Die Backdoor kann mit chroot und QEMU emuliert werden.
+8. Die Backdoor kann über netcat erreicht werden.
+9. Die QEMU-Binärdatei sollte aus dem extrahierten Firmware-Rootfs entfernt werden.
+10. Die modifizierte Firmware kann mit FMK neu verpackt werden.
+11. Die mit einer Backdoor versehene Firmware kann getestet werden, indem sie mit dem Firmware-Analyse-Toolkit (FAT) emuliert und eine Verbindung zur Ziel-Backdoor-IP und dem Port über netcat hergestellt wird.
 
-If a root shell has already been obtained through dynamic analysis, bootloader manipulation, or hardware security testing, precompiled malicious binaries such as implants or reverse shells can be executed. Automated payload/implant tools like the Metasploit framework and 'msfvenom' can be leveraged using the following steps:
+Wenn bereits über dynamische Analyse, Bootloader-Manipulation oder Hardware-Sicherheitstests eine Root-Shell erlangt wurde, können vorkompilierte bösartige Binärdateien wie Implantate oder Reverse-Shells ausgeführt werden. Automatisierte Payload/Implant-Tools wie das Metasploit-Framework und 'msfvenom' können mit den folgenden Schritten genutzt werden:
 
-1. The target firmware architecture and endianness should be identified.
-2. Msfvenom can be used to specify the target payload, attacker host IP, listening port number, filetype, architecture, platform, and the output file.
-3. The payload can be transferred to the compromised device and ensured that it has execution permissions.
-4. Metasploit can be prepared to handle incoming requests by starting msfconsole and configuring the settings according to the payload.
-5. The meterpreter reverse shell can be executed on the compromised device.
+1. Die Ziel-Firmware-Architektur und Endianness sollten identifiziert werden.
+2. Msfvenom kann verwendet werden, um die Ziel-Payload, die IP des Angreifers, die hörende Portnummer, den Dateityp, die Architektur, die Plattform und die Ausgabedatei anzugeben.
+3. Die Payload kann auf das kompromittierte Gerät übertragen werden, und es sollte sichergestellt werden, dass sie Ausführungsberechtigungen hat.
+4. Metasploit kann vorbereitet werden, um eingehende Anfragen zu bearbeiten, indem msfconsole gestartet und die Einstellungen gemäß der Payload konfiguriert werden.
+5. Die Meterpreter-Reverse-Shell kann auf dem kompromittierten Gerät ausgeführt werden.
 
 {{#include ../../banners/hacktricks-training.md}}

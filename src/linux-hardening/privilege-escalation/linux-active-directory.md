@@ -8,7 +8,7 @@ Eine Linux-Maschine in einem AD könnte **verschiedene CCACHE-Tickets in Dateien
 
 ## Enumeration
 
-### AD-Enumeration von Linux
+### AD Enumeration von Linux
 
 Wenn Sie Zugriff auf ein AD in Linux (oder Bash in Windows) haben, können Sie [https://github.com/lefayjey/linWinPwn](https://github.com/lefayjey/linWinPwn) versuchen, um das AD zu enumerieren.
 
@@ -20,7 +20,7 @@ Sie können auch die folgende Seite überprüfen, um **andere Möglichkeiten zur
 
 ### FreeIPA
 
-FreeIPA ist eine Open-Source-**Alternative** zu Microsoft Windows **Active Directory**, hauptsächlich für **Unix**-Umgebungen. Es kombiniert ein vollständiges **LDAP-Verzeichnis** mit einem MIT **Kerberos** Key Distribution Center für die Verwaltung ähnlich wie Active Directory. Es nutzt das Dogtag **Zertifikatssystem** für CA- und RA-Zertifikatsmanagement und unterstützt **Multi-Faktor**-Authentifizierung, einschließlich Smartcards. SSSD ist für Unix-Authentifizierungsprozesse integriert. Erfahren Sie mehr darüber in:
+FreeIPA ist eine Open-Source-**Alternative** zu Microsoft Windows **Active Directory**, hauptsächlich für **Unix**-Umgebungen. Es kombiniert ein vollständiges **LDAP-Verzeichnis** mit einem MIT **Kerberos** Key Distribution Center für die Verwaltung, ähnlich wie Active Directory. Es nutzt das Dogtag **Zertifikatssystem** für CA- und RA-Zertifikatsmanagement und unterstützt **Multi-Faktor**-Authentifizierung, einschließlich Smartcards. SSSD ist für Unix-Authentifizierungsprozesse integriert. Erfahren Sie mehr darüber in:
 
 {{#ref}}
 ../freeipa-pentesting.md
@@ -38,7 +38,7 @@ Auf dieser Seite finden Sie verschiedene Orte, an denen Sie **Kerberos-Tickets a
 
 ### CCACHE-Ticket-Wiederverwendung aus /tmp
 
-CCACHE-Dateien sind binäre Formate zum **Speichern von Kerberos-Anmeldeinformationen**, die typischerweise mit 600 Berechtigungen in `/tmp` gespeichert werden. Diese Dateien können anhand ihres **Namensformats, `krb5cc_%{uid}`,** identifiziert werden, das mit der UID des Benutzers korreliert. Für die Überprüfung des Authentifizierungstickets sollte die **Umgebungsvariable `KRB5CCNAME`** auf den Pfad der gewünschten Ticketdatei gesetzt werden, um deren Wiederverwendung zu ermöglichen.
+CCACHE-Dateien sind binäre Formate zum **Speichern von Kerberos-Anmeldeinformationen**, die typischerweise mit 600 Berechtigungen in `/tmp` gespeichert werden. Diese Dateien können durch ihr **Namensformat, `krb5cc_%{uid}`,** identifiziert werden, das mit der UID des Benutzers korreliert. Für die Überprüfung des Authentifizierungstickets sollte die **Umgebungsvariable `KRB5CCNAME`** auf den Pfad der gewünschten Ticketdatei gesetzt werden, um deren Wiederverwendung zu ermöglichen.
 
 Listen Sie das aktuelle Ticket, das für die Authentifizierung verwendet wird, mit `env | grep KRB5CCNAME` auf. Das Format ist portabel und das Ticket kann **durch Setzen der Umgebungsvariable** mit `export KRB5CCNAME=/tmp/ticket.ccache` wiederverwendet werden. Das Kerberos-Ticket-Namensformat ist `krb5cc_%{uid}`, wobei uid die Benutzer-UID ist.
 ```bash
@@ -49,7 +49,7 @@ krb5cc_1000
 # Prepare to use it
 export KRB5CCNAME=/tmp/krb5cc_1000
 ```
-### CCACHE Ticket-Wiederverwendung aus dem Schlüsselbund
+### CCACHE Ticket-Wiederverwendung aus dem Keyring
 
 **Kerberos-Tickets, die im Speicher eines Prozesses gespeichert sind, können extrahiert werden**, insbesondere wenn der ptrace-Schutz der Maschine deaktiviert ist (`/proc/sys/kernel/yama/ptrace_scope`). Ein nützliches Tool für diesen Zweck ist unter [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey) zu finden, das die Extraktion erleichtert, indem es in Sitzungen injiziert und Tickets in `/tmp` dumpet.
 
@@ -71,7 +71,7 @@ Das Aufrufen von \*\*`SSSDKCMExtractor` \*\* mit den Parametern --database und -
 git clone https://github.com/fireeye/SSSDKCMExtractor
 python3 SSSDKCMExtractor.py --database secrets.ldb --key secrets.mkey
 ```
-Der **Credential-Cache-Kerberos-BLOB kann in eine verwendbare Kerberos-CCache**-Datei umgewandelt werden, die an Mimikatz/Rubeus übergeben werden kann.
+Der **Credential Cache Kerberos Blob kann in eine verwendbare Kerberos CCache**-Datei umgewandelt werden, die an Mimikatz/Rubeus übergeben werden kann.
 
 ### CCACHE-Ticket-Wiederverwendung aus Keytab
 ```bash

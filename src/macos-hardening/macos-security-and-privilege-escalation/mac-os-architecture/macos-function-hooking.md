@@ -85,14 +85,14 @@ Es werden das **Objekt**, die **Methode** und die **Parameter** benötigt. Und w
 
 Das Objekt ist **`someObject`**, die Methode ist **`@selector(method1p1:p2:)`** und die Argumente sind **value1**, **value2**.
 
-Folgend den Objektstrukturen ist es möglich, ein **Array von Methoden** zu erreichen, wo die **Namen** und **Zeiger** auf den Methodencode **lokalisiert** sind.
+Folgend den Objektstrukturen ist es möglich, auf ein **Array von Methoden** zuzugreifen, wo die **Namen** und **Zeiger** auf den Methodencode **lokalisiert** sind.
 
 > [!CAUTION]
-> Beachten Sie, dass Methoden und Klassen basierend auf ihren Namen zugegriffen werden, diese Informationen werden im Binärformat gespeichert, sodass sie mit `otool -ov </path/bin>` oder [`class-dump </path/bin>`](https://github.com/nygard/class-dump) abgerufen werden können.
+> Beachten Sie, dass Methoden und Klassen basierend auf ihren Namen zugegriffen werden, diese Informationen im Binärformat gespeichert sind, sodass sie mit `otool -ov </path/bin>` oder [`class-dump </path/bin>`](https://github.com/nygard/class-dump) abgerufen werden können.
 
 ### Zugriff auf die rohen Methoden
 
-Es ist möglich, Informationen über die Methoden wie Name, Anzahl der Parameter oder Adresse zuzugreifen, wie im folgenden Beispiel:
+Es ist möglich, auf die Informationen der Methoden wie Name, Anzahl der Parameter oder Adresse zuzugreifen, wie im folgenden Beispiel:
 ```objectivec
 // gcc -framework Foundation test.m -o test
 
@@ -208,7 +208,7 @@ return 0;
 }
 ```
 > [!WARNING]
-> In diesem Fall könnte der **Implementierungscode der legitimen** Methode **überprüfen**, ob der **Methodenname** **erkannt** wird, und dieses Swizzling daran hindern, ausgeführt zu werden.
+> In diesem Fall könnte der **Implementierungscode der legitimen** Methode **überprüfen**, ob der **Methodenname** **verifiziert** wird, und könnte dieses Swizzling **erkennen** und dessen Ausführung verhindern.
 >
 > Die folgende Technik hat diese Einschränkung nicht.
 
@@ -272,13 +272,13 @@ return 0;
 
 Auf dieser Seite wurden verschiedene Möglichkeiten zur Hooking von Funktionen diskutiert. Sie beinhalteten jedoch **das Ausführen von Code innerhalb des Prozesses, um anzugreifen**.
 
-Um dies zu tun, ist die einfachste Technik, die verwendet werden kann, das Injizieren eines [Dyld über Umgebungsvariablen oder Hijacking](../macos-dyld-hijacking-and-dyld_insert_libraries.md). Ich nehme jedoch an, dass dies auch über [Dylib-Prozessinjektion](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port) erfolgen könnte.
+Um dies zu tun, ist die einfachste Technik, die zu verwenden ist, das Injizieren eines [Dyld über Umgebungsvariablen oder Hijacking](../macos-dyld-hijacking-and-dyld_insert_libraries.md). Ich nehme jedoch an, dass dies auch über [Dylib-Prozessinjektion](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port) erfolgen könnte.
 
 Beide Optionen sind jedoch **begrenzt** auf **unprotected** Binaries/Prozesse. Überprüfen Sie jede Technik, um mehr über die Einschränkungen zu erfahren.
 
 Ein Funktion-Hooking-Angriff ist jedoch sehr spezifisch; ein Angreifer wird dies tun, um **sensible Informationen aus einem Prozess zu stehlen** (ansonsten würden Sie einfach einen Prozessinjektionsangriff durchführen). Und diese sensiblen Informationen könnten sich in von Benutzern heruntergeladenen Apps wie MacPass befinden.
 
-Der Angreifer-Vektor wäre also, entweder eine Schwachstelle zu finden oder die Signatur der Anwendung zu entfernen, die **`DYLD_INSERT_LIBRARIES`**-Umgebungsvariable über die Info.plist der Anwendung einzufügen und etwas hinzuzufügen wie:
+Der Angreifer-Vektor wäre also, entweder eine Schwachstelle zu finden oder die Signatur der Anwendung zu entfernen, und die **`DYLD_INSERT_LIBRARIES`**-Umgebungsvariable über die Info.plist der Anwendung einzufügen, indem man etwas hinzufügt wie:
 ```xml
 <key>LSEnvironment</key>
 <dict>
