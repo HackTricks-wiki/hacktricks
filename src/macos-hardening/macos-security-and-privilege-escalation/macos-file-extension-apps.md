@@ -1,10 +1,10 @@
-# Gestori di app per estensioni di file macOS e schemi URL
+# macOS File Extension & URL scheme app handlers
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Database LaunchServices
+## LaunchServices Database
 
-Questo è un database di tutte le applicazioni installate in macOS che può essere interrogato per ottenere informazioni su ciascuna applicazione installata, come i schemi URL che supporta e i tipi MIME.
+Questo è un database di tutte le applicazioni installate in macOS che può essere interrogato per ottenere informazioni su ciascuna applicazione installata, come gli URL scheme che supporta e i tipi MIME.
 
 È possibile eseguire il dump di questo database con:
 ```

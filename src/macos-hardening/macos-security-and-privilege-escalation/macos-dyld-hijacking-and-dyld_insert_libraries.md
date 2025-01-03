@@ -77,7 +77,7 @@ compatibility version 1.0.0
 {{#endtab}}
 {{#endtabs}}
 
-Con le informazioni precedenti sappiamo che **non sta controllando la firma delle librerie caricate** e **sta cercando di caricare una libreria da**:
+Con le informazioni precedenti sappiamo che **non controlla la firma delle librerie caricate** e **sta cercando di caricare una libreria da**:
 
 - `/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib`
 - `/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib`
@@ -90,7 +90,7 @@ pwd
 find ./ -name lib.dylib
 ./Contents/Resources/lib2/lib.dylib
 ```
-Quindi, è possibile effettuare il hijacking! Crea una libreria che **esegue del codice arbitrario ed esporta le stesse funzionalità** della libreria legittima riesportandola. E ricorda di compilarla con le versioni attese:
+Quindi, è possibile fare hijack! Crea una libreria che **esegue del codice arbitrario ed esporta le stesse funzionalità** della libreria legittima riesportandola. E ricorda di compilarla con le versioni attese:
 ```objectivec:lib.m
 #import <Foundation/Foundation.h>
 
@@ -121,7 +121,7 @@ cmd LC_REEXPORT_DYLIB
 cmdsize 128
 name /Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/lib/libjli.dylib (offset 24)
 ```
-Infine, copialo nella **posizione hijacked**:
+Infine, copialo semplicemente nella **posizione hijacked**:
 ```bash
 cp lib.dylib "/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib"
 ```

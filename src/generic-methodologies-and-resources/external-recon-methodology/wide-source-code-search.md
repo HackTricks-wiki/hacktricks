@@ -1,18 +1,18 @@
-# Wide Source Code Search
+# Ricerca Ampia del Codice Sorgente
 
 {{#include ../../banners/hacktricks-training.md}}
 
-The goal of this page is to enumerate **platforms that allow to search for code** (literal or regex) in across thousands/millions of repos in one or more platforms.
+L'obiettivo di questa pagina è enumerare **le piattaforme che consentono di cercare codice** (letterale o regex) in migliaia/milioni di repo su una o più piattaforme.
 
-This helps in several occasions to **search for leaked information** or for **vulnerabilities** patterns.
+Questo aiuta in diverse occasioni a **cercare informazioni trapelate** o per **modelli di vulnerabilità**.
 
-- [**SourceGraph**](https://sourcegraph.com/search): Search in millions of repos. There is a free version and an enterprise version (with 15 days free). It supports regexes.
-- [**Github Search**](https://github.com/search): Search across Github. It supports regexes.
-  - Maybe it's also useful to check also [**Github Code Search**](https://cs.github.com/).
-- [**Gitlab Advanced Search**](https://docs.gitlab.com/ee/user/search/advanced_search.html): Search across Gitlab projects. Support regexes.
-- [**SearchCode**](https://searchcode.com/): Search code in millions of projects.
+- [**SourceGraph**](https://sourcegraph.com/search): Cerca in milioni di repo. Esiste una versione gratuita e una versione enterprise (con 15 giorni gratuiti). Supporta le regex.
+- [**Github Search**](https://github.com/search): Cerca su Github. Supporta le regex.
+- Forse è anche utile controllare [**Github Code Search**](https://cs.github.com/).
+- [**Gitlab Advanced Search**](https://docs.gitlab.com/ee/user/search/advanced_search.html): Cerca tra i progetti Gitlab. Supporta le regex.
+- [**SearchCode**](https://searchcode.com/): Cerca codice in milioni di progetti.
 
 > [!WARNING]
-> When you look for leaks in a repo and run something like `git log -p` don't forget there might be **other branches with other commits** containing secrets!
+> Quando cerchi perdite in un repo e esegui qualcosa come `git log -p`, non dimenticare che potrebbero esserci **altre branche con altri commit** contenenti segreti!
 
 {{#include ../../banners/hacktricks-training.md}}

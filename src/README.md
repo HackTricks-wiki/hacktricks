@@ -7,7 +7,7 @@ Reading time: {{ #reading_time }}
 _I loghi e il design in movimento di Hacktricks sono di_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
 
 > [!TIP]
-> **Benvenuto nel wiki dove troverai ogni trucco/tecnica di hacking/qualunque cosa io abbia imparato da CTF, applicazioni della vita reale, lettura di ricerche e notizie.**
+> **Benvenuto nel wiki dove troverai ogni trucco/tecnica/hacking che ho imparato da CTF, applicazioni della vita reale, letture di ricerche e notizie.**
 
 Per iniziare, segui questa pagina dove troverai il **flusso tipico** che **dovresti seguire quando fai pentesting** su una o più **macchine:**
 
@@ -43,7 +43,7 @@ Puoi controllare il loro **blog** in [**https://blog.stmcyber.com**](https://blo
 
 <figure><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** è la **piattaforma di hacking etico e bug bounty numero 1 in Europa.**
+**Intigriti** è la **piattaforma di ethical hacking e bug bounty #1 in Europa.**
 
 **Suggerimento bug bounty**: **iscriviti** a **Intigriti**, una premium **piattaforma di bug bounty creata da hacker, per hacker**! Unisciti a noi su [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) oggi, e inizia a guadagnare bounty fino a **$100,000**!
 
@@ -70,9 +70,9 @@ Accedi oggi:
 
 Unisciti al server [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) per comunicare con hacker esperti e cacciatori di bug bounty!
 
-- **Approfondimenti sul hacking:** Interagisci con contenuti che approfondiscono l'emozione e le sfide dell'hacking
-- **Notizie di hacking in tempo reale:** Rimani aggiornato con il mondo frenetico dell'hacking attraverso notizie e approfondimenti in tempo reale
-- **Ultimi annunci:** Rimani informato sui nuovi bug bounty in arrivo e sugli aggiornamenti cruciali della piattaforma
+- **Hacking Insights:** Interagisci con contenuti che approfondiscono l'emozione e le sfide dell'hacking
+- **Notizie di hacking in tempo reale:** Rimani aggiornato con il mondo dell'hacking in rapida evoluzione attraverso notizie e approfondimenti in tempo reale
+- **Ultimi annunci:** Rimani informato sugli ultimi bug bounty in partenza e aggiornamenti cruciali della piattaforma
 
 **Unisciti a noi su** [**Discord**](https://discord.com/invite/N3FrSbmwdy) e inizia a collaborare con i migliori hacker oggi!
 
@@ -119,11 +119,11 @@ Impara le tecnologie e le competenze necessarie per eseguire ricerche sulle vuln
 
 <figure><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.nl) è un'azienda di cybersecurity professionale con sede ad **Amsterdam** che aiuta **a proteggere** le aziende **in tutto il mondo** contro le ultime minacce alla cybersecurity fornendo **servizi di sicurezza offensiva** con un **approccio moderno**.
+[**WebSec**](https://websec.nl) è un'azienda di cybersecurity professionale con sede ad **Amsterdam** che aiuta **a proteggere** le aziende **in tutto il mondo** contro le ultime minacce alla cybersecurity fornendo **servizi di sicurezza offensiva** con un approccio **moderno**.
 
 WebSec è un'**azienda di sicurezza all-in-one**, il che significa che fanno tutto; Pentesting, **Audit** di Sicurezza, Formazione sulla Consapevolezza, Campagne di Phishing, Revisione del Codice, Sviluppo di Exploit, Outsourcing di Esperti di Sicurezza e molto altro.
 
-Un'altra cosa interessante di WebSec è che, a differenza della media del settore, WebSec è **molto sicura delle proprie competenze**, tanto da **garantire i migliori risultati di qualità**, affermando sul loro sito web "**Se non possiamo hackarlo, non lo paghi!**". Per ulteriori informazioni, dai un'occhiata al loro [**sito web**](https://websec.nl/en/) e [**blog**](https://websec.nl/blog/)!
+Un'altra cosa interessante di WebSec è che, a differenza della media del settore, WebSec è **molto sicura delle proprie capacità**, tanto da **garantire i migliori risultati di qualità**, affermando sul loro sito web "**Se non possiamo hackarlo, non lo paghi!**". Per ulteriori informazioni, dai un'occhiata al loro [**sito web**](https://websec.nl/en/) e [**blog**](https://websec.nl/blog/)!
 
 In aggiunta a quanto sopra, WebSec è anche un **sostenitore impegnato di HackTricks.**
 

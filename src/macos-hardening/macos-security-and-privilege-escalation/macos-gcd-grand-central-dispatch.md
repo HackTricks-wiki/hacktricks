@@ -11,12 +11,12 @@
 > [!TIP]
 > In sintesi, per eseguire codice in **parallelo**, i processi possono inviare **blocchi di codice a GCD**, che si occuperà della loro esecuzione. Pertanto, i processi non creano nuovi thread; **GCD esegue il codice fornito con il proprio pool di thread** (che potrebbe aumentare o diminuire secondo necessità).
 
-Questo è molto utile per gestire con successo l'esecuzione parallela, riducendo notevolmente il numero di thread che i processi creano e ottimizzando l'esecuzione parallela. Questo è ideale per compiti che richiedono **grande parallelismo** (brute-forcing?) o per compiti che non dovrebbero bloccare il thread principale: ad esempio, il thread principale su iOS gestisce le interazioni dell'interfaccia utente, quindi qualsiasi altra funzionalità che potrebbe far bloccarsi l'app (ricerca, accesso a un web, lettura di un file...) è gestita in questo modo.
+Questo è molto utile per gestire con successo l'esecuzione parallela, riducendo notevolmente il numero di thread creati dai processi e ottimizzando l'esecuzione parallela. Questo è ideale per compiti che richiedono **grande parallelismo** (brute-forcing?) o per compiti che non dovrebbero bloccare il thread principale: ad esempio, il thread principale su iOS gestisce le interazioni UI, quindi qualsiasi altra funzionalità che potrebbe far bloccarsi l'app (ricerca, accesso a un web, lettura di un file...) è gestita in questo modo.
 
 ### Blocchi
 
 Un blocco è una **sezione di codice autonoma** (come una funzione con argomenti che restituisce un valore) e può anche specificare variabili vincolate.\
-Tuttavia, a livello di compilatore, i blocchi non esistono, sono `os_object`. Ognuno di questi oggetti è formato da due strutture:
+Tuttavia, a livello di compilatore i blocchi non esistono, sono `os_object`. Ognuno di questi oggetti è formato da due strutture:
 
 - **letterale di blocco**:&#x20;
 - Inizia con il campo **`isa`**, che punta alla classe del blocco:
@@ -30,7 +30,7 @@ Tuttavia, a livello di compilatore, i blocchi non esistono, sono `os_object`. Og
 - **descrittore del blocco**: La sua dimensione dipende dai dati presenti (come indicato nei flag precedenti)
 - Ha alcuni byte riservati
 - La sua dimensione
-- Avrà di solito un puntatore a una firma in stile Objective-C per sapere quanto spazio è necessario per i parametri (flag `BLOCK_HAS_SIGNATURE`)
+- Avrà solitamente un puntatore a una firma in stile Objective-C per sapere quanto spazio è necessario per i parametri (flag `BLOCK_HAS_SIGNATURE`)
 - Se le variabili sono referenziate, questo blocco avrà anche puntatori a un helper di copia (copia il valore all'inizio) e a un helper di eliminazione (liberandolo).
 
 ### Code
@@ -212,6 +212,6 @@ Ghidra riscriverà automaticamente tutto:
 
 ## Riferimenti
 
-- [**\*OS Internals, Volume I: User Mode. Di Jonathan Levin**](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
+- [**\*OS Internals, Volume I: User Mode. By Jonathan Levin**](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
 
 {{#include ../../banners/hacktricks-training.md}}

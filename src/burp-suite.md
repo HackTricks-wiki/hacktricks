@@ -5,7 +5,7 @@
 - **Elenco Semplice:** Solo un elenco contenente un'entrata in ogni riga
 - **File Runtime:** Un elenco letto in runtime (non caricato in memoria). Per supportare elenchi grandi.
 - **Modifica del Caso:** Applica alcune modifiche a un elenco di stringhe (Nessuna modifica, in minuscolo, in MAIUSCOLO, in Nome Proprio - Prima lettera maiuscola e il resto in minuscolo-, in Nome Proprio - Prima lettera maiuscola e il resto rimane lo stesso-).
-- **Numeri:** Genera numeri da X a Y usando Z passi o casualmente.
+- **Numeri:** Genera numeri da X a Y usando Z come passo o casualmente.
 - **Brute Forcer:** Insieme di caratteri, lunghezza minima e massima.
 
 [https://github.com/0xC01DF00D/Collabfiltrator](https://github.com/0xC01DF00D/Collabfiltrator) : Payload per eseguire comandi e catturare l'output tramite richieste DNS a burpcollab.

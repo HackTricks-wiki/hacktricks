@@ -1,4 +1,4 @@
-# Elevazione di privilegi di RunC
+# Elevazione dei privilegi di RunC
 
 {{#include ../../banners/hacktricks-training.md}}
 

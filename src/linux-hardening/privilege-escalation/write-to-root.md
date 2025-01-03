@@ -4,7 +4,7 @@
 
 ### /etc/ld.so.preload
 
-Questo file si comporta come la variabile d'ambiente **`LD_PRELOAD`** ma funziona anche nei **binaries SUID**.\
+Questo file si comporta come la variabile d'ambiente **`LD_PRELOAD`** ma funziona anche con i **binaries SUID**.\
 Se puoi crearlo o modificarlo, puoi semplicemente aggiungere un **percorso a una libreria che verrà caricata** con ogni binary eseguito.
 
 Ad esempio: `echo "/tmp/pe.so" > /etc/ld.so.preload`

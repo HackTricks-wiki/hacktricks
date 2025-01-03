@@ -11,7 +11,7 @@
 
 ### **Panoramica di MDM (Mobile Device Management)**
 
-[Mobile Device Management](https://en.wikipedia.org/wiki/Mobile_device_management) (MDM) è utilizzato per supervisionare vari dispositivi finali come smartphone, laptop e tablet. In particolare per le piattaforme Apple (iOS, macOS, tvOS), coinvolge un insieme di funzionalità specializzate, API e pratiche. Il funzionamento dell'MDM si basa su un server MDM compatibile, che è disponibile commercialmente o open-source, e deve supportare il [MDM Protocol](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf). I punti chiave includono:
+[Mobile Device Management](https://en.wikipedia.org/wiki/Mobile_device_management) (MDM) è utilizzato per supervisionare vari dispositivi finali come smartphone, laptop e tablet. In particolare per le piattaforme Apple (iOS, macOS, tvOS), coinvolge un insieme di funzionalità specializzate, API e pratiche. Il funzionamento di MDM si basa su un server MDM compatibile, che è disponibile commercialmente o open-source, e deve supportare il [MDM Protocol](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf). I punti chiave includono:
 
 - Controllo centralizzato sui dispositivi.
 - Dipendenza da un server MDM che aderisca al protocollo MDM.
@@ -49,8 +49,8 @@ Il [Device Enrollment Program](https://www.apple.com/business/site/docs/DEP_Guid
 ### MDM
 
 - Combinazione di APNs (**server Apple**) + API RESTful (**server fornitori MDM**)
-- **Comunicazione** avviene tra un **dispositivo** e un server associato a un **prodotto di gestione dei dispositivi**
-- **Comandi** inviati dall'MDM al dispositivo in **dizionari codificati plist**
+- **La comunicazione** avviene tra un **dispositivo** e un server associato a un **prodotto di gestione dei dispositivi**
+- **Comandi** inviati dal MDM al dispositivo in **dizionari codificati plist**
 - Tutto su **HTTPS**. I server MDM possono essere (e di solito sono) pinati.
 - Apple concede al fornitore MDM un **certificato APNs** per l'autenticazione
 
@@ -59,7 +59,7 @@ Il [Device Enrollment Program](https://www.apple.com/business/site/docs/DEP_Guid
 - **3 API**: 1 per rivenditori, 1 per fornitori MDM, 1 per identità del dispositivo (non documentata):
 - La cosiddetta [API "cloud service" DEP](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf). Questa è utilizzata dai server MDM per associare i profili DEP a dispositivi specifici.
 - L'[API DEP utilizzata dai Rivenditori Autorizzati Apple](https://applecareconnect.apple.com/api-docs/depuat/html/WSImpManual.html) per registrare dispositivi, controllare lo stato di registrazione e controllare lo stato delle transazioni.
-- L'API DEP privata non documentata. Questa è utilizzata dai dispositivi Apple per richiedere il proprio profilo DEP. Su macOS, il binario `cloudconfigurationd` è responsabile della comunicazione su questa API.
+- L'API privata DEP non documentata. Questa è utilizzata dai dispositivi Apple per richiedere il proprio profilo DEP. Su macOS, il binario `cloudconfigurationd` è responsabile della comunicazione su questa API.
 - Più moderna e basata su **JSON** (rispetto a plist)
 - Apple concede un **token OAuth** al fornitore MDM
 
@@ -162,7 +162,7 @@ La risposta è un dizionario JSON con alcuni dati importanti come:
 
 Tipicamente, il **profilo di attivazione** fornito da un fornitore MDM includerà i seguenti payload:
 
-- `com.apple.mdm`: per **registrare** il dispositivo nell'MDM
+- `com.apple.mdm`: per **registrare** il dispositivo in MDM
 - `com.apple.security.scep`: per fornire in modo sicuro un **certificato client** al dispositivo.
 - `com.apple.security.pem`: per **installare certificati CA fidati** nel portachiavi di sistema del dispositivo.
 - L'installazione del payload MDM è equivalente al **check-in MDM nella documentazione**

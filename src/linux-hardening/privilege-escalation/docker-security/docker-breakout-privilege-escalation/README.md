@@ -50,7 +50,7 @@ Il daemon Docker potrebbe anche [ascoltare su una porta (di default 2375, 2376)]
 
 ## Abuso delle Capacità per l'Evasione
 
-Dovresti controllare le capacità del container, se ha alcune delle seguenti, potresti essere in grado di evadere: **`CAP_SYS_ADMIN`**_,_ **`CAP_SYS_PTRACE`**, **`CAP_SYS_MODULE`**, **`DAC_READ_SEARCH`**, **`DAC_OVERRIDE, CAP_SYS_RAWIO`, `CAP_SYSLOG`, `CAP_NET_RAW`, `CAP_NET_ADMIN`**
+Dovresti controllare le capacità del container, se ha alcune delle seguenti, potresti essere in grado di evadere da esso: **`CAP_SYS_ADMIN`**_,_ **`CAP_SYS_PTRACE`**, **`CAP_SYS_MODULE`**, **`DAC_READ_SEARCH`**, **`DAC_OVERRIDE, CAP_SYS_RAWIO`, `CAP_SYSLOG`, `CAP_NET_RAW`, `CAP_NET_ADMIN`**
 
 Puoi controllare le capacità attuali del container utilizzando **strumenti automatici precedentemente menzionati** o:
 ```bash
@@ -84,7 +84,7 @@ Il flag `--privileged` riduce significativamente la sicurezza del contenitore, o
 
 ### Privilegiato + hostPID
 
-Con questi permessi puoi semplicemente **spostarti nello spazio dei nomi di un processo in esecuzione nell'host come root** come init (pid:1) eseguendo semplicemente: `nsenter --target 1 --mount --uts --ipc --net --pid -- bash`
+Con questi permessi puoi semplicemente **spostarti nello spazio dei nomi di un processo in esecuzione nel host come root** come init (pid:1) eseguendo semplicemente: `nsenter --target 1 --mount --uts --ipc --net --pid -- bash`
 
 Testalo in un contenitore eseguendo:
 ```bash
@@ -210,13 +210,13 @@ sh -c "echo \$\$ > /tmp/cgrp/x/cgroup.procs"
 # Reads the output
 cat /output
 ```
-Trova un **spiegazione della tecnica** in:
+Trova una **spiegazione della tecnica** in:
 
 {{#ref}}
 docker-release_agent-cgroups-escape.md
 {{#endref}}
 
-#### Privileged Escape Abusando di release_agent senza conoscere il percorso relativo - PoC3
+#### Privileged Escape Abusing release_agent senza conoscere il percorso relativo - PoC3
 
 Negli exploit precedenti, il **percorso assoluto del container all'interno del filesystem dell'host è rivelato**. Tuttavia, questo non è sempre il caso. Nei casi in cui **non conosci il percorso assoluto del container all'interno dell'host**, puoi utilizzare questa tecnica:
 
@@ -333,10 +333,10 @@ In diverse occasioni scoprirai che il **container ha qualche volume montato dall
 ```bash
 docker run --rm -it -v /:/host ubuntu bash
 ```
-### Privilege Escalation con 2 shell e montaggio host
+### Privilege Escalation con 2 shell e mount dell'host
 
-Se hai accesso come **root all'interno di un container** che ha una cartella del host montata e hai **escapato come utente non privilegiato al host** e hai accesso in lettura sulla cartella montata.\
-Puoi creare un **file bash suid** nella **cartella montata** all'interno del **container** e **eseguirlo dal host** per privesc.
+Se hai accesso come **root all'interno di un container** che ha una cartella dell'host montata e hai **escapato come utente non privilegiato nell'host** e hai accesso in lettura sulla cartella montata.\
+Puoi creare un **file bash suid** nella **cartella montata** all'interno del **container** e **eseguirlo dall'host** per privesc.
 ```bash
 cp /bin/bash . #From non priv inside mounted folder
 # You need to copy it from the host as the bash binaries might be diferent in the host and in the container
@@ -423,16 +423,16 @@ Puoi anche **terminare processi e causare un DoS**.
 ```
 docker run --rm -it --network=host ubuntu bash
 ```
-Se un contenitore è stato configurato con il Docker [host networking driver (`--network=host`)](https://docs.docker.com/network/host/), lo stack di rete di quel contenitore non è isolato dal host Docker (il contenitore condivide lo spazio dei nomi di rete dell'host) e il contenitore non riceve un proprio indirizzo IP allocato. In altre parole, il **contenitore lega tutti i servizi direttamente all'IP dell'host**. Inoltre, il contenitore può **intercettare TUTTO il traffico di rete che l'host** sta inviando e ricevendo sull'interfaccia condivisa `tcpdump -i eth0`.
+Se un container è stato configurato con il Docker [host networking driver (`--network=host`)](https://docs.docker.com/network/host/), lo stack di rete di quel container non è isolato dal host Docker (il container condivide lo spazio dei nomi di rete dell'host) e il container non riceve un proprio indirizzo IP. In altre parole, il **container lega tutti i servizi direttamente all'IP dell'host**. Inoltre, il container può **intercettare TUTTO il traffico di rete che l'host** sta inviando e ricevendo sull'interfaccia condivisa `tcpdump -i eth0`.
 
-Ad esempio, puoi utilizzare questo per **sniffare e persino spoofare il traffico** tra l'host e l'istanza di metadata.
+Ad esempio, puoi usare questo per **sniffare e persino spoofare il traffico** tra l'host e l'istanza di metadata.
 
 Come nei seguenti esempi:
 
 - [Writeup: How to contact Google SRE: Dropping a shell in cloud SQL](https://offensi.com/2020/08/18/how-to-contact-google-sre-dropping-a-shell-in-cloud-sql/)
 - [Metadata service MITM allows root privilege escalation (EKS / GKE)](https://blog.champtar.fr/Metadata_MITM_root_EKS_GKE/)
 
-Sarai anche in grado di accedere ai **servizi di rete legati a localhost** all'interno dell'host o persino accedere alle **permissive di metadata del nodo** (che potrebbero essere diverse da quelle a cui un contenitore può accedere).
+Sarai anche in grado di accedere ai **servizi di rete legati a localhost** all'interno dell'host o persino accedere alle **permissive di metadata del nodo** (che potrebbero essere diverse da quelle a cui un container può accedere).
 
 ### hostIPC
 ```bash
@@ -459,7 +459,7 @@ La seconda tecnica spiegata nel post [https://labs.withsecure.com/blog/abusing-t
 
 ### Exploit Runc (CVE-2019-5736)
 
-Nel caso tu possa eseguire `docker exec` come root (probabilmente con sudo), prova a elevare i privilegi fuggendo da un container abusando di CVE-2019-5736 (exploit [qui](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)). Questa tecnica **sovrascriverà** il binario _**/bin/sh**_ dell'**host** **da un container**, quindi chiunque esegua docker exec potrebbe attivare il payload.
+Nel caso tu possa eseguire `docker exec` come root (probabilmente con sudo), prova a elevare i privilegi fuggendo da un container abusando di CVE-2019-5736 (exploit [qui](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)). Questa tecnica **sovrascriverà** il binario _**/bin/sh**_ dell'**host** **da un container**, quindi chiunque esegua docker exec può attivare il payload.
 
 Modifica il payload di conseguenza e costruisci il main.go con `go build main.go`. Il binario risultante dovrebbe essere posizionato nel container docker per l'esecuzione.\
 All'esecuzione, non appena visualizza `[+] Overwritten /bin/sh successfully` devi eseguire il seguente comando dalla macchina host:
@@ -473,14 +473,14 @@ Per ulteriori informazioni: [https://blog.dragonsector.pl/2019/02/cve-2019-5736-
 > [!NOTE]
 > Ci sono altre CVE a cui il container può essere vulnerabile, puoi trovare un elenco in [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list)
 
-## Escape Personalizzato di Docker
+## Docker Custom Escape
 
-### Superficie di Escape di Docker
+### Superficie di fuga Docker
 
 - **Namespaces:** Il processo dovrebbe essere **completamente separato da altri processi** tramite namespaces, quindi non possiamo fuggire interagendo con altri procs a causa dei namespaces (per impostazione predefinita non possono comunicare tramite IPC, socket unix, servizi di rete, D-Bus, `/proc` di altri procs).
 - **Utente root**: Per impostazione predefinita, l'utente che esegue il processo è l'utente root (tuttavia i suoi privilegi sono limitati).
 - **Capabilities**: Docker lascia le seguenti capabilities: `cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap=ep`
-- **Syscalls**: Queste sono le syscalls che l'**utente root non potrà chiamare** (a causa della mancanza di capabilities + Seccomp). Le altre syscalls potrebbero essere utilizzate per cercare di fuggire.
+- **Syscalls**: Questi sono i syscalls che l'**utente root non sarà in grado di chiamare** (a causa della mancanza di capabilities + Seccomp). Gli altri syscalls potrebbero essere utilizzati per cercare di fuggire.
 
 {{#tabs}}
 {{#tab name="x64 syscalls"}}

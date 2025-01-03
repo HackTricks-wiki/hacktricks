@@ -24,7 +24,7 @@ Si prega di notare che **la maggior parte dei trucchi sull'escalation dei privil
 
 Puoi trovare la [tecnica originale di Sudo Hijacking all'interno del post sull'escalation dei privilegi di Linux](../../linux-hardening/privilege-escalation/#sudo-hijacking).
 
-Tuttavia, macOS **mantiene** il **`PATH`** dell'utente quando esegue **`sudo`**. Il che significa che un altro modo per realizzare questo attacco sarebbe **di dirottare altri binari** che la vittima eseguirà quando **esegue sudo:**
+Tuttavia, macOS **mantiene** il **`PATH`** dell'utente quando esegue **`sudo`**. Il che significa che un altro modo per ottenere questo attacco sarebbe **di dirottare altri binari** che la vittima eseguirà quando **esegue sudo:**
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
 cat > /opt/homebrew/bin/ls <<EOF
@@ -39,17 +39,17 @@ chmod +x /opt/homebrew/bin/ls
 # victim
 sudo ls
 ```
-Nota che un utente che utilizza il terminale avrà molto probabilmente **Homebrew installato**. Quindi è possibile hijackare i binari in **`/opt/homebrew/bin`**.
+Nota che un utente che utilizza il terminale avrà molto probabilmente **Homebrew installato**. Quindi è possibile dirottare i binari in **`/opt/homebrew/bin`**.
 
 ### Impersonificazione del Dock
 
-Utilizzando un po' di **social engineering** potresti **impersonare ad esempio Google Chrome** all'interno del dock ed eseguire effettivamente il tuo script:
+Utilizzando un po' di **ingegneria sociale** potresti **impersonare ad esempio Google Chrome** all'interno del dock ed eseguire effettivamente il tuo script:
 
 {{#tabs}}
 {{#tab name="Impersonificazione di Chrome"}}
 Alcuni suggerimenti:
 
-- Controlla nel Dock se c'è un Chrome, e in tal caso **rimuovi** quella voce e **aggiungi** la voce **falsa** **Chrome nella stessa posizione** nell'array del Dock.&#x20;
+- Controlla nel Dock se c'è un Chrome e, in tal caso, **rimuovi** quella voce e **aggiungi** la **voce falsa** **Chrome nella stessa posizione** nell'array del Dock.&#x20;
 ```bash
 #!/bin/sh
 
@@ -121,14 +121,14 @@ killall Dock
 ```
 {{#endtab}}
 
-{{#tab name="Finder Impersonation"}}
+{{#tab name="Impersonificazione del Finder"}}
 Alcuni suggerimenti:
 
-- Non **puoi rimuovere Finder dal Dock**, quindi se intendi aggiungerlo al Dock, potresti mettere il falso Finder proprio accanto a quello reale. Per questo devi **aggiungere l'entrata del falso Finder all'inizio dell'array del Dock**.
-- Un'altra opzione è non posizionarlo nel Dock e semplicemente aprirlo, "Finder che chiede di controllare Finder" non è così strano.
-- Un'altra opzione per **escalare a root senza chiedere** la password con una brutta finestra, è far sì che Finder chieda realmente la password per eseguire un'azione privilegiata:
-- Chiedi a Finder di copiare in **`/etc/pam.d`** un nuovo file **`sudo`** (Il prompt che chiede la password indicherà che "Finder vuole copiare sudo")
-- Chiedi a Finder di copiare un nuovo **Authorization Plugin** (Puoi controllare il nome del file in modo che il prompt che chiede la password indichi che "Finder vuole copiare Finder.bundle")
+- Non **puoi rimuovere il Finder dal Dock**, quindi se intendi aggiungerlo al Dock, potresti mettere il Finder falso proprio accanto a quello reale. Per questo devi **aggiungere l'entrata del Finder falso all'inizio dell'array del Dock**.
+- Un'altra opzione è non posizionarlo nel Dock e semplicemente aprirlo, "Finder che chiede di controllare il Finder" non è così strano.
+- Un'altra opzione per **escalare a root senza chiedere** la password con una brutta finestra, è far sì che il Finder chieda realmente la password per eseguire un'azione privilegiata:
+- Chiedi al Finder di copiare in **`/etc/pam.d`** un nuovo file **`sudo`** (Il prompt che chiede la password indicherà che "Finder vuole copiare sudo")
+- Chiedi al Finder di copiare un nuovo **Plugin di Autorizzazione** (Puoi controllare il nome del file in modo che il prompt che chiede la password indichi che "Finder vuole copiare Finder.bundle")
 ```bash
 #!/bin/sh
 
@@ -205,7 +205,7 @@ killall Dock
 
 ### CVE-2020-9771 - bypass TCC di mount_apfs e escalation dei privilegi
 
-**Qualsiasi utente** (anche quelli non privilegiati) può creare e montare uno snapshot di Time Machine e **accedere a TUTTI i file** di quello snapshot.\
+**Qualsiasi utente** (anche quelli non privilegiati) può creare e montare un'istantanea di Time Machine e **accedere a TUTTI i file** di quell'istantanea.\
 L'**unico privilegio** necessario è che l'applicazione utilizzata (come `Terminal`) abbia accesso **Full Disk Access** (FDA) (`kTCCServiceSystemPolicyAllfiles`), che deve essere concesso da un amministratore.
 ```bash
 # Create snapshot

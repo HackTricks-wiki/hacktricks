@@ -4,7 +4,7 @@
 
 ## Dispositivo Bloccato
 
-Per iniziare a estrarre dati da un dispositivo Android, deve essere sbloccato. Se è bloccato, puoi:
+Per iniziare a estrarre dati da un dispositivo Android, deve essere sbloccato. Se è bloccato puoi:
 
 - Controllare se il dispositivo ha attivato il debug via USB.
 - Controllare un possibile [smudge attack](https://www.usenix.org/legacy/event/woot10/tech/full_papers/Aviv.pdf)

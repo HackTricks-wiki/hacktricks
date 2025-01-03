@@ -15,7 +15,7 @@ Creative Commons Corporation (“Creative Commons”) non è uno studio legale e
 
 ## Utilizzo delle Licenze Pubbliche Creative Commons
 
-Le licenze pubbliche Creative Commons forniscono un insieme standard di termini e condizioni che i creatori e altri titolari di diritti possono utilizzare per condividere opere originali di autorialità e altro materiale soggetto a copyright e ad alcuni altri diritti specificati nella licenza pubblica sottostante. Le seguenti considerazioni sono solo a scopo informativo, non sono esaustive e non fanno parte delle nostre licenze.
+Le licenze pubbliche di Creative Commons forniscono un insieme standard di termini e condizioni che i creatori e altri titolari di diritti possono utilizzare per condividere opere originali di autorialità e altro materiale soggetto a copyright e ad alcuni altri diritti specificati nella licenza pubblica sottostante. Le seguenti considerazioni sono solo a scopo informativo, non sono esaustive e non fanno parte delle nostre licenze.
 
 - **Considerazioni per i licenziatari:** Le nostre licenze pubbliche sono destinate all'uso da parte di coloro che sono autorizzati a dare al pubblico il permesso di utilizzare materiale in modi altrimenti limitati dal copyright e da alcuni altri diritti. Le nostre licenze sono irrevocabili. I licenziatari devono leggere e comprendere i termini e le condizioni della licenza che scelgono prima di applicarla. I licenziatari devono anche garantire tutti i diritti necessari prima di applicare le nostre licenze affinché il pubblico possa riutilizzare il materiale come previsto. I licenziatari devono contrassegnare chiaramente qualsiasi materiale non soggetto alla licenza. Questo include altro materiale con licenza CC, o materiale utilizzato ai sensi di un'eccezione o limitazione al copyright. [Ulteriori considerazioni per i licenziatari](http://wiki.creativecommons.org/Considerations_for_licensors_and_licensees#Considerations_for_licensors).
 
@@ -27,7 +27,7 @@ Esercitando i Diritti Licenziati (definiti di seguito), accetti e ti impegni a r
 
 ## Sezione 1 – Definizioni.
 
-a. **Materiale Adattato** significa materiale soggetto a Copyright e Diritti Simili che è derivato o basato sul Materiale Licenziato e in cui il Materiale Licenziato è tradotto, alterato, disposto, trasformato o altrimenti modificato in un modo che richiede permesso ai sensi del Copyright e Diritti Simili detenuti dal Licenziante. Ai fini di questa Licenza Pubblica, quando il Materiale Licenziato è un'opera musicale, una performance o una registrazione sonora, il Materiale Adattato è sempre prodotto quando il Materiale Licenziato è sincronizzato in relazione temporale con un'immagine in movimento.
+a. **Materiale Adattato** significa materiale soggetto a Copyright e Diritti Simili che è derivato o basato sul Materiale Licenziato e in cui il Materiale Licenziato è tradotto, alterato, disposto, trasformato o altrimenti modificato in un modo che richiede permesso ai sensi del Copyright e dei Diritti Simili detenuti dal Licenziante. Ai fini di questa Licenza Pubblica, quando il Materiale Licenziato è un'opera musicale, una performance o una registrazione sonora, il Materiale Adattato è sempre prodotto quando il Materiale Licenziato è sincronizzato in relazione temporale con un'immagine in movimento.
 
 b. **Licenza dell'Adapter** significa la licenza che applichi ai tuoi Diritti di Copyright e Simili nelle tue contribuzioni al Materiale Adattato in conformità con i termini e le condizioni di questa Licenza Pubblica.
 
@@ -35,13 +35,13 @@ c. **Copyright e Diritti Simili** significa copyright e/o diritti simili stretta
 
 d. **Misure Tecnologiche Efficaci** significa quelle misure che, in assenza di una corretta autorità, non possono essere eluse ai sensi delle leggi che soddisfano gli obblighi ai sensi dell'Articolo 11 del Trattato sul Copyright dell'OMPI adottato il 20 dicembre 1996, e/o accordi internazionali simili.
 
-e. **Eccezioni e Limitazioni** significa uso equo, trattativa equa e/o qualsiasi altra eccezione o limitazione al Copyright e Diritti Simili che si applica al tuo uso del Materiale Licenziato.
+e. **Eccezioni e Limitazioni** significa uso equo, trattativa equa e/o qualsiasi altra eccezione o limitazione al Copyright e ai Diritti Simili che si applica al tuo uso del Materiale Licenziato.
 
 f. **Materiale Licenziato** significa l'opera artistica o letteraria, il database o altro materiale a cui il Licenziante ha applicato questa Licenza Pubblica.
 
 g. **Diritti Licenziati** significa i diritti concessi a te soggetti ai termini e alle condizioni di questa Licenza Pubblica, che sono limitati a tutti i Copyright e Diritti Simili che si applicano al tuo uso del Materiale Licenziato e che il Licenziante ha l'autorità di concedere in licenza.
 
-h. **Licenziante** significa l'individuo(i) o entità(e) che concedono diritti ai sensi di questa Licenza Pubblica.
+h. **Licenziante** significa l'individuo o gli enti che concedono diritti ai sensi di questa Licenza Pubblica.
 
 i. **NonCommerciale** significa non principalmente destinato a o diretto verso vantaggi commerciali o compensi monetari. Ai fini di questa Licenza Pubblica, lo scambio del Materiale Licenziato per altro materiale soggetto a Copyright e Diritti Simili tramite condivisione di file digitali o mezzi simili è NonCommerciale a condizione che non ci sia pagamento di compenso monetario in relazione allo scambio.
 
@@ -61,10 +61,10 @@ A. riprodurre e Condividere il Materiale Licenziato, in tutto o in parte, solo p
 
 B. produrre, riprodurre e Condividere Materiale Adattato solo per scopi NonCommerciali.
 
-2.  **Eccezioni e Limitazioni.** Per evitare dubbi, dove si applicano Eccezioni e Limitazioni al tuo uso, questa Licenza Pubblica non si applica e non devi rispettare i suoi termini e condizioni.
-3.  **Durata.** La durata di questa Licenza Pubblica è specificata nella Sezione 6(a).
+2.  **Eccezioni e Limitazioni.** Per evitare dubbi, dove si applicano Eccezioni e Limitazioni al tuo uso, questa Licenza Pubblica non si applica e non devi rispettarne i termini e le condizioni.
+3.  **Termine.** Il termine di questa Licenza Pubblica è specificato nella Sezione 6(a).
 
-4.  **Media e formati; modifiche tecniche consentite.** Il Licenziante ti autorizza a esercitare i Diritti Licenziati in tutti i media e formati, sia ora conosciuti che creati in seguito, e a fare modifiche tecniche necessarie per farlo. Il Licenziante rinuncia e/o concorda di non affermare alcun diritto o autorità per vietarti di fare modifiche tecniche necessarie per esercitare i Diritti Licenziati, comprese le modifiche tecniche necessarie per eludere Misure Tecnologiche Efficaci. Ai fini di questa Licenza Pubblica, semplicemente apportare modifiche autorizzate da questa Sezione 2(a)(4) non produce mai Materiale Adattato.
+4.  **Media e formati; modifiche tecniche consentite.** Il Licenziante ti autorizza a esercitare i Diritti Licenziati in tutti i media e formati, sia ora conosciuti che creati in seguito, e a fare modifiche tecniche necessarie per farlo. Il Licenziante rinuncia e/o concorda di non affermare alcun diritto o autorità di vietarti di fare modifiche tecniche necessarie per esercitare i Diritti Licenziati, comprese le modifiche tecniche necessarie per eludere Misure Tecnologiche Efficaci. Ai fini di questa Licenza Pubblica, semplicemente apportare modifiche autorizzate da questa Sezione 2(a)(4) non produce mai Materiale Adattato.
 5.  **Destinatari a valle.**
 
 A. **Offerta del Licenziante – Materiale Licenziato.** Ogni destinatario del Materiale Licenziato riceve automaticamente un'offerta dal Licenziante per esercitare i Diritti Licenziati ai sensi dei termini e delle condizioni di questa Licenza Pubblica.
@@ -91,7 +91,7 @@ a. **_Attribuzione._**
 
 A. mantenere quanto segue se fornito dal Licenziante con il Materiale Licenziato:
 
-i. identificazione del creatore(i) del Materiale Licenziato e di qualsiasi altro designato per ricevere attribuzione, in qualsiasi modo ragionevole richiesto dal Licenziante (incluso con pseudonimo se designato);
+i. identificazione del creatore o dei creatori del Materiale Licenziato e di qualsiasi altro designato per ricevere attribuzione, in qualsiasi modo ragionevole richiesto dal Licenziante (incluso con pseudonimo se designato);
 
 ii. un avviso di copyright;
 
@@ -99,15 +99,15 @@ iii. un avviso che si riferisce a questa Licenza Pubblica;
 
 iv. un avviso che si riferisce alla rinuncia alle garanzie;
 
-v. un URI o collegamento ipertestuale al Materiale Licenziato nella misura ragionevolmente praticabile;
+v. un URI o hyperlink al Materiale Licenziato nella misura ragionevolmente praticabile;
 
 B. indicare se hai modificato il Materiale Licenziato e mantenere un'indicazione di eventuali modifiche precedenti; e
 
-C. indicare che il Materiale Licenziato è concesso in licenza ai sensi di questa Licenza Pubblica, e includere il testo di, o l'URI o collegamento ipertestuale a, questa Licenza Pubblica.
+C. indicare che il Materiale Licenziato è concesso in licenza ai sensi di questa Licenza Pubblica, e includere il testo di, o l'URI o hyperlink a, questa Licenza Pubblica.
 
-2.  Puoi soddisfare le condizioni nella Sezione 3(a)(1) in qualsiasi modo ragionevole basato sul mezzo, i mezzi e il contesto in cui Condividi il Materiale Licenziato. Ad esempio, potrebbe essere ragionevole soddisfare le condizioni fornendo un URI o collegamento ipertestuale a una risorsa che include le informazioni richieste.
+2.  Puoi soddisfare le condizioni nella Sezione 3(a)(1) in qualsiasi modo ragionevole basato sul mezzo, sui mezzi e sul contesto in cui Condividi il Materiale Licenziato. Ad esempio, potrebbe essere ragionevole soddisfare le condizioni fornendo un URI o hyperlink a una risorsa che include le informazioni richieste.
 
-3.  Se richiesto dal Licenziante, devi rimuovere qualsiasi delle informazioni richieste dalla Sezione 3(a)(1)(A) nella misura ragionevolmente praticabile.
+3.  Se richiesto dal Licenziante, devi rimuovere qualsiasi informazione richiesta dalla Sezione 3(a)(1)(A) nella misura ragionevolmente praticabile.
 
 4.  Se Condividi Materiale Adattato che produci, la Licenza dell'Adapter che applichi non deve impedire ai destinatari del Materiale Adattato di rispettare questa Licenza Pubblica.
 
@@ -125,15 +125,15 @@ Per evitare dubbi, questa Sezione 4 integra e non sostituisce i tuoi obblighi ai
 
 ## Sezione 5 – Rinuncia alle Garanzie e Limitazione di Responsabilità.
 
-a. **Salvo diversa disposizione da parte del Licenziante, nella misura possibile, il Licenziante offre il Materiale Licenziato così com'è e così disponibile, e non fa dichiarazioni o garanzie di alcun tipo riguardo al Materiale Licenziato, siano esse esplicite, implicite, legali o altro. Questo include, senza limitazione, garanzie di titolo, commerciabilità, idoneità per uno scopo particolare, non violazione, assenza di difetti latenti o altri, accuratezza, o la presenza o assenza di errori, siano essi noti o scopribili. Dove le rinunce alle garanzie non sono consentite in tutto o in parte, questa rinuncia potrebbe non applicarsi a te.**
+a. **Salvo diversa disposizione da parte del Licenziante, nella misura possibile, il Licenziante offre il Materiale Licenziato così com'è e così disponibile, e non fa dichiarazioni o garanzie di alcun tipo riguardo al Materiale Licenziato, siano esse esplicite, implicite, legali o altro. Ciò include, senza limitazione, garanzie di titolo, commerciabilità, idoneità per uno scopo particolare, non violazione, assenza di difetti latenti o altri difetti, accuratezza, o la presenza o assenza di errori, siano essi noti o scopribili. Dove le rinunce alle garanzie non sono consentite in tutto o in parte, questa rinuncia potrebbe non applicarsi a te.**
 
-b. **Nella misura possibile, in nessun caso il Licenziante sarà responsabile nei tuoi confronti su qualsiasi teoria legale (inclusa, senza limitazione, negligenza) o altro per qualsiasi perdita, costo, spesa o danno diretto, speciale, indiretto, incidentale, consequenziale, punitivo, esemplare o altro derivante da questa Licenza Pubblica o dall'uso del Materiale Licenziato, anche se il Licenziante è stato avvisato della possibilità di tali perdite, costi, spese o danni. Dove una limitazione di responsabilità non è consentita in tutto o in parte, questa limitazione potrebbe non applicarsi a te.**
+b. **Nella misura possibile, in nessun caso il Licenziante sarà responsabile nei tuoi confronti su alcuna teoria legale (inclusa, senza limitazione, negligenza) o altro per qualsiasi perdita, costo, spesa o danno diretto, speciale, indiretto, incidentale, consequenziale, punitivo, esemplare o altro derivante da questa Licenza Pubblica o dall'uso del Materiale Licenziato, anche se il Licenziante è stato avvisato della possibilità di tali perdite, costi, spese o danni. Dove una limitazione di responsabilità non è consentita in tutto o in parte, questa limitazione potrebbe non applicarsi a te.**
 
 c. La rinuncia alle garanzie e la limitazione di responsabilità fornite sopra saranno interpretate in un modo che, nella misura possibile, si avvicina di più a una rinuncia assoluta e a una rinuncia di ogni responsabilità.
 
-## Sezione 6 – Durata e Risoluzione.
+## Sezione 6 – Termine e Risoluzione.
 
-a. Questa Licenza Pubblica si applica per la durata dei Copyright e Diritti Simili concessi qui. Tuttavia, se non rispetti questa Licenza Pubblica, allora i tuoi diritti ai sensi di questa Licenza Pubblica terminano automaticamente.
+a. Questa Licenza Pubblica si applica per il termine dei Copyright e Diritti Simili concessi qui. Tuttavia, se non rispetti questa Licenza Pubblica, i tuoi diritti ai sensi di questa Licenza Pubblica terminano automaticamente.
 
 b. Dove il tuo diritto di utilizzare il Materiale Licenziato è terminato ai sensi della Sezione 6(a), si ripristina:
 
@@ -143,13 +143,13 @@ b. Dove il tuo diritto di utilizzare il Materiale Licenziato è terminato ai sen
 
 Per evitare dubbi, questa Sezione 6(b) non influisce su alcun diritto che il Licenziante potrebbe avere di cercare rimedi per le tue violazioni di questa Licenza Pubblica.
 
-c. Per evitare dubbi, il Licenziante può anche offrire il Materiale Licenziato ai sensi di termini o condizioni separati o smettere di distribuire il Materiale Licenziato in qualsiasi momento; tuttavia, farlo non terminerà questa Licenza Pubblica.
+c. Per evitare dubbi, il Licenziante può anche offrire il Materiale Licenziato ai sensi di termini o condizioni separati o smettere di distribuire il Materiale Licenziato in qualsiasi momento; tuttavia, ciò non terminerà questa Licenza Pubblica.
 
 d. Le Sezioni 1, 5, 6, 7 e 8 sopravvivono alla risoluzione di questa Licenza Pubblica.
 
 ## Sezione 7 – Altri Termini e Condizioni.
 
-a. Il Licenziante non sarà vincolato da termini o condizioni aggiuntivi o diversi comunicati da te a meno che non concordato espressamente.
+a. Il Licenziante non sarà vincolato da termini o condizioni aggiuntivi o diversi comunicati da te, a meno che non sia espressamente concordato.
 
 b. Qualsiasi accordo, intesa o contratto riguardante il Materiale Licenziato non dichiarato qui è separato e indipendente dai termini e dalle condizioni di questa Licenza Pubblica.
 

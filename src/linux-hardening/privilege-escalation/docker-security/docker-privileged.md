@@ -11,7 +11,7 @@ Quando esegui un contenitore come privilegiato, queste sono le protezioni che st
 In un contenitore privilegiato, tutti i **dispositivi possono essere accessibili in `/dev/`**. Pertanto puoi **uscire** montando il disco dell'host.
 
 {{#tabs}}
-{{#tab name="Dentro il contenitore predefinito"}}
+{{#tab name="Inside default container"}}
 ```bash
 # docker run --rm -it alpine sh
 ls /dev
@@ -147,11 +147,11 @@ Seccomp_filters:	0
 # You can manually disable seccomp in docker with
 --security-opt seccomp=unconfined
 ```
-Inoltre, nota che quando Docker (o altri CRI) sono utilizzati in un **Kubernetes** cluster, il **filtro seccomp è disabilitato per impostazione predefinita**
+Inoltre, nota che quando Docker (o altri CRI) sono utilizzati in un cluster **Kubernetes**, il **filtraggio seccomp è disabilitato per impostazione predefinita**
 
 ### AppArmor
 
-**AppArmor** è un miglioramento del kernel per confinare i **container** a un **insieme limitato** di **risorse** con **profili per programma**. Quando esegui con il flag `--privileged`, questa protezione è disabilitata.
+**AppArmor** è un miglioramento del kernel per confinare i **container** a un insieme **limitato** di **risorse** con **profili per programma**. Quando esegui con il flag `--privileged`, questa protezione è disabilitata.
 
 {{#ref}}
 apparmor.md
@@ -188,7 +188,7 @@ PID   USER     TIME  COMMAND
 ```
 {{#endtab}}
 
-{{#tab name="Inside --pid=host Container"}}
+{{#tab name="Dentro --pid=host Container"}}
 ```bash
 # docker run --rm --privileged --pid=host -it alpine sh
 ps -ef
@@ -203,7 +203,7 @@ PID   USER     TIME  COMMAND
 
 ### Spazio dei nomi utente
 
-**Per impostazione predefinita, i motori dei container non utilizzano gli spazi dei nomi utente, tranne che per i container senza root**, che li richiedono per il montaggio del file system e l'uso di più UID. Gli spazi dei nomi utente, fondamentali per i container senza root, non possono essere disabilitati e migliorano significativamente la sicurezza limitando i privilegi.
+**Per impostazione predefinita, i motori dei container non utilizzano spazi dei nomi utente, tranne che per i container senza root**, che li richiedono per il montaggio del file system e l'uso di più UID. Gli spazi dei nomi utente, fondamentali per i container senza root, non possono essere disabilitati e migliorano significativamente la sicurezza limitando i privilegi.
 
 ## Riferimenti
 

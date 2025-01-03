@@ -89,7 +89,7 @@ Elenca e ottieni **info** su ciascun elemento del keychain utilizzando il **Secu
 - **`kSecMatchLimit`**: Quanti risultati restituire
 - **`kSecClass`**: Che tipo di elemento del keychain
 
-Ottieni **ACL** di ciascun elemento:
+Ottieni **ACLs** di ciascun elemento:
 
 - Con l'API **`SecAccessCopyACLList`** puoi ottenere l'**ACL per l'elemento del keychain**, e restituirà un elenco di ACL (come `ACLAuhtorizationExportClear` e gli altri precedentemente menzionati) dove ciascun elenco ha:
 - Descrizione
@@ -112,7 +112,7 @@ E questi sono i **requisiti** per poter **esportare un segreto senza un prompt**
 - Se **tutte le applicazioni sono affidabili**:
 - Necessita delle appropriate **autorizzazioni**
 - Necessita che la firma del codice corrisponda al **PartitionID**
-- Se **nessun PartitionID**, allora questo non è necessario
+- Se **non c'è PartitionID**, allora questo non è necessario
 
 > [!CAUTION]
 > Pertanto, se c'è **1 applicazione elencata**, è necessario **iniettare codice in quell'applicazione**.

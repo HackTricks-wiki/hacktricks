@@ -4,16 +4,16 @@
 
 ## Informazioni di base
 
-AppArmor è un **miglioramento del kernel progettato per limitare le risorse disponibili ai programmi attraverso profili per programma**, implementando efficacemente il Controllo di Accesso Obbligatorio (MAC) legando gli attributi di controllo accesso direttamente ai programmi invece che agli utenti. Questo sistema opera **caricando profili nel kernel**, di solito durante l'avvio, e questi profili determinano quali risorse un programma può accedere, come connessioni di rete, accesso a socket raw e permessi di file.
+AppArmor è un **miglioramento del kernel progettato per limitare le risorse disponibili ai programmi attraverso profili per programma**, implementando efficacemente il Controllo di Accesso Obbligatorio (MAC) legando gli attributi di controllo accesso direttamente ai programmi invece che agli utenti. Questo sistema opera **caricando profili nel kernel**, solitamente durante l'avvio, e questi profili determinano quali risorse un programma può accedere, come connessioni di rete, accesso a socket raw e permessi di file.
 
 Ci sono due modalità operative per i profili di AppArmor:
 
-- **Modalità di applicazione**: Questa modalità applica attivamente le politiche definite all'interno del profilo, bloccando le azioni che violano queste politiche e registrando eventuali tentativi di violazione attraverso sistemi come syslog o auditd.
-- **Modalità di segnalazione**: A differenza della modalità di applicazione, la modalità di segnalazione non blocca le azioni che vanno contro le politiche del profilo. Invece, registra questi tentativi come violazioni delle politiche senza applicare restrizioni.
+- **Modalità di Enforcement**: Questa modalità applica attivamente le politiche definite all'interno del profilo, bloccando le azioni che violano queste politiche e registrando eventuali tentativi di violazione attraverso sistemi come syslog o auditd.
+- **Modalità di Complain**: A differenza della modalità di enforcement, la modalità di complain non blocca le azioni che vanno contro le politiche del profilo. Invece, registra questi tentativi come violazioni delle politiche senza applicare restrizioni.
 
 ### Componenti di AppArmor
 
-- **Modulo del kernel**: Responsabile dell'applicazione delle politiche.
+- **Modulo del Kernel**: Responsabile dell'applicazione delle politiche.
 - **Politiche**: Specificano le regole e le restrizioni per il comportamento dei programmi e l'accesso alle risorse.
 - **Parser**: Carica le politiche nel kernel per l'applicazione o la segnalazione.
 - **Utilità**: Questi sono programmi in modalità utente che forniscono un'interfaccia per interagire e gestire AppArmor.
@@ -21,9 +21,9 @@ Ci sono due modalità operative per i profili di AppArmor:
 ### Percorso dei profili
 
 I profili di AppArmor sono solitamente salvati in _**/etc/apparmor.d/**_\
-Con `sudo aa-status` sarai in grado di elencare i binari che sono limitati da qualche profilo. Se puoi cambiare il carattere "/" con un punto nel percorso di ciascun binario elencato, otterrai il nome del profilo di AppArmor all'interno della cartella menzionata.
+Con `sudo aa-status` sarai in grado di elencare i binari che sono limitati da qualche profilo. Se puoi cambiare il carattere "/" con un punto nel percorso di ciascun binario elencato, otterrai il nome del profilo apparmor all'interno della cartella menzionata.
 
-Ad esempio, un **profilo di apparmor** per _/usr/bin/man_ si troverà in _/etc/apparmor.d/usr.bin.man_
+Ad esempio, un **profilo apparmor** per _/usr/bin/man_ si troverà in _/etc/apparmor.d/usr.bin.man_
 
 ### Comandi
 ```bash
@@ -41,13 +41,13 @@ aa-mergeprof  #used to merge the policies
 - Per indicare l'accesso che il binario avrà su **file** possono essere utilizzati i seguenti **controlli di accesso**:
 - **r** (lettura)
 - **w** (scrittura)
-- **m** (mappatura della memoria come eseguibile)
-- **k** (blocco del file)
+- **m** (mappa di memoria come eseguibile)
+- **k** (blocco file)
 - **l** (creazione di hard link)
-- **ix** (eseguire un altro programma con la nuova politica ereditata)
-- **Px** (eseguire sotto un altro profilo, dopo aver ripulito l'ambiente)
-- **Cx** (eseguire sotto un profilo figlio, dopo aver ripulito l'ambiente)
-- **Ux** (eseguire senza restrizioni, dopo aver ripulito l'ambiente)
+- **ix** (per eseguire un altro programma con la nuova politica che eredita)
+- **Px** (eseguire sotto un altro profilo, dopo aver pulito l'ambiente)
+- **Cx** (eseguire sotto un profilo figlio, dopo aver pulito l'ambiente)
+- **Ux** (eseguire senza restrizioni, dopo aver pulito l'ambiente)
 - **Le variabili** possono essere definite nei profili e possono essere manipolate dall'esterno del profilo. Ad esempio: @{PROC} e @{HOME} (aggiungere #include \<tunables/global> al file del profilo)
 - **Le regole di negazione sono supportate per sovrascrivere le regole di autorizzazione**.
 
@@ -103,7 +103,7 @@ sudo apparmor_parser -a /etc/apparmor.d/path.to.binary
 ```
 ### Modificare un profilo dai log
 
-Il seguente strumento leggerà i log e chiederà all'utente se desidera consentire alcune delle azioni vietate rilevate:
+Lo strumento seguente leggerà i log e chiederà all'utente se desidera consentire alcune delle azioni vietate rilevate:
 ```bash
 sudo aa-logprof
 ```
@@ -166,10 +166,10 @@ Per impostazione predefinita, il **profilo docker-default di Apparmor** è gener
 **Riepilogo del profilo docker-default**:
 
 - **Accesso** a tutta la **rete**
-- **Nessuna capacità** è definita (Tuttavia, alcune capacità verranno incluse dalle regole di base, ad es. #include \<abstractions/base>)
-- **Scrittura** su qualsiasi file di **/proc** è **non consentita**
+- **Nessuna capacità** è definita (Tuttavia, alcune capacità deriveranno dall'inclusione di regole di base, ad es. #include \<abstractions/base>)
+- **Scrivere** in qualsiasi file di **/proc** **non è consentito**
 - Altre **sottodirectory**/**file** di /**proc** e /**sys** hanno accesso in lettura/scrittura/blocco/link/esecuzione **negato**
-- **Montaggio** è **non consentito**
+- **Montaggio** **non è consentito**
 - **Ptrace** può essere eseguito solo su un processo che è confinato dallo **stesso profilo apparmor**
 
 Una volta che **esegui un container docker**, dovresti vedere il seguente output:
@@ -187,16 +187,16 @@ Devi **disabilitare apparmor** per bypassare le sue restrizioni:
 ```bash
 docker run -it --cap-add SYS_ADMIN --security-opt seccomp=unconfined --security-opt apparmor=unconfined ubuntu /bin/bash
 ```
-Nota che per impostazione predefinita **AppArmor** **vietera' al container di montare** cartelle dall'interno anche con la capacità SYS_ADMIN.
+Nota che per impostazione predefinita **AppArmor** **vietera' anche al container di montare** cartelle dall'interno anche con la capacità SYS_ADMIN.
 
 Nota che puoi **aggiungere/rimuovere** **capacità** al container docker (questo sarà comunque limitato da metodi di protezione come **AppArmor** e **Seccomp**):
 
-- `--cap-add=SYS_ADMIN` dà la capacità `SYS_ADMIN`
-- `--cap-add=ALL` dà tutte le capacità
-- `--cap-drop=ALL --cap-add=SYS_PTRACE` rimuove tutte le capacità e dà solo `SYS_PTRACE`
+- `--cap-add=SYS_ADMIN` aggiungi la capacità `SYS_ADMIN`
+- `--cap-add=ALL` aggiungi tutte le capacità
+- `--cap-drop=ALL --cap-add=SYS_PTRACE` rimuovi tutte le capacità e aggiungi solo `SYS_PTRACE`
 
 > [!NOTE]
-> Di solito, quando **scopri** di avere una **capacità privilegiata** disponibile **all'interno** di un **container** **docker** **ma** che una parte dell'**exploit non funziona**, questo sarà perché **apparmor di docker lo sta impedendo**.
+> Di solito, quando **scopri** di avere una **capacità privilegiata** disponibile **all'interno** di un **container** **docker** **ma** che una parte dell'**exploit non funziona**, questo sarà perché **apparmor di docker sta impedendo**.
 
 ### Esempio
 
@@ -222,23 +222,23 @@ chmod: /etc/hostname: Permission denied
 ```
 ### AppArmor Docker Bypass1
 
-Puoi scoprire quale **profilo apparmor sta eseguendo un container** usando:
+Puoi scoprire quale **profilo apparmor sta eseguendo un container** utilizzando:
 ```bash
 docker inspect 9d622d73a614 | grep lowpriv
 "AppArmorProfile": "lowpriv",
 "apparmor=lowpriv"
 ```
-Poi, puoi eseguire la seguente riga per **trovare il profilo esatto in uso**:
+Quindi, puoi eseguire la seguente riga per **trovare il profilo esatto in uso**:
 ```bash
 find /etc/apparmor.d/ -name "*lowpriv*" -maxdepth 1 2>/dev/null
 ```
 In un caso strano puoi **modificare il profilo docker di apparmor e ricaricarlo.** Potresti rimuovere le restrizioni e "bypassarle".
 
-### AppArmor Docker Bypass2
+### Bypass2 di AppArmor Docker
 
-**AppArmor è basato sui percorsi**, questo significa che anche se potrebbe essere **protetto** file all'interno di una directory come **`/proc`**, se puoi **configurare come il container verrà eseguito**, potresti **montare** la directory proc dell'host all'interno di **`/host/proc`** e non **sarà più protetta da AppArmor**.
+**AppArmor è basato su percorsi**, questo significa che anche se potrebbe essere **protetto** file all'interno di una directory come **`/proc`**, se puoi **configurare come il container verrà eseguito**, potresti **montare** la directory proc dell'host all'interno di **`/host/proc`** e non **sarà più protetta da AppArmor**.
 
-### AppArmor Shebang Bypass
+### Bypass Shebang di AppArmor
 
 In [**questo bug**](https://bugs.launchpad.net/apparmor/+bug/1911431) puoi vedere un esempio di come **anche se stai impedendo l'esecuzione di perl con determinate risorse**, se crei semplicemente uno script shell **specificando** nella prima riga **`#!/usr/bin/perl`** e **esegui il file direttamente**, sarai in grado di eseguire qualsiasi cosa tu voglia. E.g.:
 ```perl

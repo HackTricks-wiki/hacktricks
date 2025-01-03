@@ -4,7 +4,7 @@
 
 Se **enumerando** una macchina **internamente** o **esternamente** trovi **Splunk in esecuzione** (porta 8090), se per fortuna conosci delle **credenziali valide** puoi **sfruttare il servizio Splunk** per **eseguire una shell** come l'utente che esegue Splunk. Se è in esecuzione come root, puoi elevare i privilegi a root.
 
-Inoltre, se sei **già root e il servizio Splunk non ascolta solo su localhost**, puoi **rubare** il file **password** **dal** servizio Splunk e **crackare** le password, o **aggiungere nuove** credenziali. E mantenere la persistenza sull'host.
+Inoltre, se sei **già root e il servizio Splunk non ascolta solo su localhost**, puoi **rubare** il file **della password** **dal** servizio Splunk e **crackare** le password, o **aggiungere nuove** credenziali. E mantenere la persistenza sull'host.
 
 Nella prima immagine qui sotto puoi vedere come appare una pagina web di Splunkd.
 

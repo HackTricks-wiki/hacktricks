@@ -17,7 +17,7 @@ Ad esempio, il numero di serie **C02L13ECF8J2** segue questa struttura.
 
 Alcuni codici rappresentano fabbriche specifiche:
 
-- **FC, F, XA/XB/QP/G8**: Varie località negli USA.
+- **FC, F, XA/XB/QP/G8**: Vari luoghi negli USA.
 - **RN**: Messico.
 - **CK**: Cork, Irlanda.
 - **VM**: Foxconn, Repubblica Ceca.

@@ -15,7 +15,7 @@ Questa directory consente l'accesso per modificare le variabili del kernel, di s
 #### **`/proc/sys/kernel/core_pattern`**
 
 - Descritto in [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
-- Consente di definire un programma da eseguire alla generazione di un file core con i primi 128 byte come argomenti. Questo può portare all'esecuzione di codice se il file inizia con una pipe `|`.
+- Consente di definire un programma da eseguire alla generazione di un file di core con i primi 128 byte come argomenti. Questo può portare all'esecuzione di codice se il file inizia con una pipe `|`.
 - **Esempio di test e sfruttamento**:
 
 ```bash
@@ -148,7 +148,7 @@ cat /output %%%
 
 #### **`/sys/kernel/vmcoreinfo`**
 
-- Rivela indirizzi del kernel, potenzialmente compromettendo KASLR.
+- Rilascia indirizzi del kernel, potenzialmente compromettendo KASLR.
 
 #### **`/sys/kernel/security`**
 

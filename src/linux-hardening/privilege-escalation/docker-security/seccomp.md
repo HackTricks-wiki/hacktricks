@@ -46,7 +46,7 @@ printf("You will not see this message--the process will be killed first\n");
 ```
 ### Seccomp-bpf
 
-Questa modalità consente **il filtraggio delle chiamate di sistema utilizzando una politica configurabile** implementata tramite regole di Berkeley Packet Filter.
+Questa modalità consente **il filtraggio delle chiamate di sistema utilizzando una politica configurabile** implementata tramite regole del Berkeley Packet Filter.
 ```c:seccomp_bpf.c
 #include <seccomp.h>
 #include <unistd.h>
@@ -105,7 +105,7 @@ docker run --rm \
 hello-world
 ```
 Se vuoi, ad esempio, **vietare** a un container di eseguire alcune **syscall** come `uname`, puoi scaricare il profilo predefinito da [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json) e semplicemente **rimuovere la stringa `uname` dalla lista**.\
-Se vuoi assicurarti che **alcun binario non funzioni all'interno di un container docker**, puoi usare strace per elencare le syscall che il binario sta utilizzando e poi vietarle.\
+Se vuoi assicurarti che **alcuni binari non funzionino all'interno di un container docker**, puoi usare strace per elencare le syscall che il binario sta utilizzando e poi vietarle.\
 Nell'esempio seguente vengono scoperte le **syscall** di `uname`:
 ```bash
 docker run -it --security-opt seccomp=default.json modified-ubuntu strace uname

@@ -8,7 +8,7 @@ L'I/O Kit è un **framework per driver di dispositivo** open-source e orientato 
 
 I driver IOKit **esporteranno fondamentalmente funzioni dal kernel**. Questi parametri di funzione **tipi** sono **predefiniti** e vengono verificati. Inoltre, simile a XPC, IOKit è solo un altro strato **sopra i messaggi Mach**.
 
-Il **codice IOKit del kernel XNU** è open-source da Apple in [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit). Inoltre, i componenti IOKit dello spazio utente sono anch'essi open-source [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
+Il **codice del kernel IOKit XNU** è open-source da Apple in [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit). Inoltre, i componenti IOKit dello spazio utente sono anch'essi open-source [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
 
 Tuttavia, **nessun driver IOKit** è open-source. Comunque, di tanto in tanto, un rilascio di un driver potrebbe venire con simboli che rendono più facile il debug. Controlla come [**ottenere le estensioni del driver dal firmware qui**](./#ipsw)**.**
 
@@ -80,22 +80,22 @@ Puoi scaricare **`IORegistryExplorer`** da **Xcode Additional Tools** da [**http
 
 <figure><img src="../../../images/image (1167).png" alt="" width="563"><figcaption></figcaption></figure>
 
-In IORegistryExplorer, "piani" sono usati per organizzare e visualizzare le relazioni tra diversi oggetti nell'IORegistry. Ogni piano rappresenta un tipo specifico di relazione o una particolare vista della configurazione hardware e dei driver del sistema. Ecco alcuni dei piani comuni che potresti incontrare in IORegistryExplorer:
+In IORegistryExplorer, i "piani" sono utilizzati per organizzare e visualizzare le relazioni tra diversi oggetti nell'IORegistry. Ogni piano rappresenta un tipo specifico di relazione o una particolare vista della configurazione hardware e dei driver del sistema. Ecco alcuni dei piani comuni che potresti incontrare in IORegistryExplorer:
 
-1. **IOService Plane**: Questo è il piano più generale, che mostra gli oggetti di servizio che rappresentano driver e nubs (canali di comunicazione tra driver). Mostra le relazioni fornitore-cliente tra questi oggetti.
-2. **IODeviceTree Plane**: Questo piano rappresenta le connessioni fisiche tra i dispositivi mentre sono collegati al sistema. È spesso usato per visualizzare la gerarchia dei dispositivi connessi tramite bus come USB o PCI.
-3. **IOPower Plane**: Mostra oggetti e le loro relazioni in termini di gestione dell'energia. Può mostrare quali oggetti stanno influenzando lo stato di alimentazione di altri, utile per il debug di problemi legati all'energia.
+1. **IOService Plane**: Questo è il piano più generale, che visualizza gli oggetti di servizio che rappresentano driver e nubs (canali di comunicazione tra driver). Mostra le relazioni fornitore-cliente tra questi oggetti.
+2. **IODeviceTree Plane**: Questo piano rappresenta le connessioni fisiche tra i dispositivi man mano che sono collegati al sistema. Viene spesso utilizzato per visualizzare la gerarchia dei dispositivi collegati tramite bus come USB o PCI.
+3. **IOPower Plane**: Visualizza oggetti e le loro relazioni in termini di gestione dell'energia. Può mostrare quali oggetti stanno influenzando lo stato di alimentazione di altri, utile per il debug di problemi legati all'energia.
 4. **IOUSB Plane**: Focalizzato specificamente sui dispositivi USB e le loro relazioni, mostrando la gerarchia degli hub USB e dei dispositivi connessi.
 5. **IOAudio Plane**: Questo piano è per rappresentare i dispositivi audio e le loro relazioni all'interno del sistema.
 6. ...
 
-## Esempio di Codice per la Comunicazione del Driver
+## Esempio di Codice Driver Comm
 
 Il seguente codice si connette al servizio IOKit `"YourServiceNameHere"` e chiama la funzione all'interno del selettore 0. Per farlo:
 
 - prima chiama **`IOServiceMatching`** e **`IOServiceGetMatchingServices`** per ottenere il servizio.
 - Poi stabilisce una connessione chiamando **`IOServiceOpen`**.
-- E infine chiama una funzione con **`IOConnectCallScalarMethod`** indicando il selettore 0 (il selettore è il numero assegnato alla funzione che vuoi chiamare).
+- E infine chiama una funzione con **`IOConnectCallScalarMethod`** indicando il selettore 0 (il selettore è il numero assegnato alla funzione che desideri chiamare).
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <IOKit/IOKitLib.h>
@@ -166,7 +166,7 @@ Quella terribile chiamata demangled significa:
 ```cpp
 IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
-Nota come nella definizione precedente il parametro **`self`** è mancante, la buona definizione sarebbe:
+Nota come nel precedente definizione il parametro **`self`** è mancante, la buona definizione sarebbe:
 ```cpp
 IOUserClient2022::dispatchExternalMethod(self, unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```

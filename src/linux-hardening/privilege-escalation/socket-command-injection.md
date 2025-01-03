@@ -2,7 +2,7 @@
 
 ## Esempio di binding socket con Python
 
-Nell'esempio seguente viene **creato un socket unix** (`/tmp/socket_test.s`) e tutto ciò che viene **ricevuto** verrà **eseguito** da `os.system`. So che non troverai questo nella realtà, ma l'obiettivo di questo esempio è vedere come appare un codice che utilizza socket unix e come gestire l'input nel peggior caso possibile.
+In the following example a **unix socket is created** (`/tmp/socket_test.s`) and everything **received** is going to be **executed** by `os.system`. So che non troverai questo nella natura, ma l'obiettivo di questo esempio è vedere come appare un codice che utilizza socket unix e come gestire l'input nel peggior caso possibile.
 ```python:s.py
 import socket
 import os, os.path

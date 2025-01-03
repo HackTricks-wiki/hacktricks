@@ -1,40 +1,30 @@
-# Image Acquisition & Mount
+# Acquisizione e Montaggio
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
 
-{% embed url="https://websec.nl/" %}
-
-## Acquisition
+## Acquisizione
 
 ### DD
-
 ```bash
 #This will generate a raw copy of the disk
 dd if=/dev/sdb of=disk.img
 ```
-
 ### dcfldd
-
 ```bash
 #Raw copy with hashes along the way (more secur as it checks hashes while it's copying the data)
 dcfldd if=<subject device> of=<image file> bs=512 hash=<algorithm> hashwindow=<chunk size> hashlog=<hash file>
 dcfldd if=/dev/sdc of=/media/usb/pc.image hash=sha256 hashwindow=1M hashlog=/media/usb/pc.hashes
 ```
-
 ### FTK Imager
 
-You can [**download the FTK imager from here**](https://accessdata.com/product-download/debian-and-ubuntu-x64-3-1-1).
-
+Puoi [**scaricare l'FTK imager da qui**](https://accessdata.com/product-download/debian-and-ubuntu-x64-3-1-1).
 ```bash
 ftkimager /dev/sdb evidence --e01 --case-number 1 --evidence-number 1 --description 'A description' --examiner 'Your name'
 ```
-
 ### EWF
 
-You can generate a disk image using the[ **ewf tools**](https://github.com/libyal/libewf).
-
+Puoi generare un'immagine del disco utilizzando gli [**ewf tools**](https://github.com/libyal/libewf).
 ```bash
 ewfacquire /dev/sdb
 #Name: evidence
@@ -51,15 +41,13 @@ ewfacquire /dev/sdb
 #Then use default values
 #It will generate the disk image in the current directory
 ```
-
 ## Mount
 
-### Several types
+### Diversi tipi
 
-In **Windows** you can try to use the free version of Arsenal Image Mounter ([https://arsenalrecon.com/downloads/](https://arsenalrecon.com/downloads/)) to **mount the forensics image**.
+In **Windows** puoi provare a utilizzare la versione gratuita di Arsenal Image Mounter ([https://arsenalrecon.com/downloads/](https://arsenalrecon.com/downloads/)) per **montare l'immagine forense**.
 
 ### Raw
-
 ```bash
 #Get file type
 file evidence.img
@@ -68,9 +56,7 @@ evidence.img: Linux rev 1.0 ext4 filesystem data, UUID=1031571c-f398-4bfb-a414-b
 #Mount it
 mount evidence.img /mnt
 ```
-
 ### EWF
-
 ```bash
 #Get file type
 file evidence.E01
@@ -85,16 +71,14 @@ output/ewf1: Linux rev 1.0 ext4 filesystem data, UUID=05acca66-d042-4ab2-9e9c-be
 #Mount
 mount output/ewf1 -o ro,norecovery /mnt
 ```
-
 ### ArsenalImageMounter
 
-It's a Windows Application to mount volumes. You can download it here [https://arsenalrecon.com/downloads/](https://arsenalrecon.com/downloads/)
+È un'applicazione Windows per montare volumi. Puoi scaricarla qui [https://arsenalrecon.com/downloads/](https://arsenalrecon.com/downloads/)
 
-### Errors
+### Errori
 
-- **`cannot mount /dev/loop0 read-only`** in this case you need to use the flags **`-o ro,norecovery`**
-- **`wrong fs type, bad option, bad superblock on /dev/loop0, missing codepage or helper program, or other error.`** in this case the mount failed due as the offset of the filesystem is different than that of the disk image. You need to find the Sector size and the Start sector:
-
+- **`cannot mount /dev/loop0 read-only`** in questo caso è necessario utilizzare i flag **`-o ro,norecovery`**
+- **`wrong fs type, bad option, bad superblock on /dev/loop0, missing codepage or helper program, or other error.`** in questo caso il montaggio è fallito poiché l'offset del filesystem è diverso da quello dell'immagine del disco. È necessario trovare la dimensione del Settore e il Settore di avvio:
 ```bash
 fdisk -l disk.img
 Disk disk.img: 102 MiB, 106954648 bytes, 208896 sectors
@@ -107,15 +91,8 @@ Disk identifier: 0x00495395
 Device        Boot Start    End Sectors  Size Id Type
 disk.img1       2048 208895  206848  101M  1 FAT12
 ```
-
-Note that sector size is **512** and start is **2048**. Then mount the image like this:
-
+Nota che la dimensione del settore è **512** e l'inizio è **2048**. Quindi monta l'immagine in questo modo:
 ```bash
 mount disk.img /mnt -o ro,offset=$((2048*512))
 ```
-
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
-
 {{#include ../../banners/hacktricks-training.md}}

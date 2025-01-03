@@ -2,17 +2,17 @@
 
 # Baseline
 
-A baseline consists of taking a snapshot of certain parts of a system to **compare it with a future status to highlight changes**.
+Una baseline consiste nel prendere uno snapshot di alcune parti di un sistema per **confrontarlo con uno stato futuro per evidenziare le modifiche**.
 
-For example, you can calculate and store the hash of each file of the filesystem to be able to find out which files were modified.\
-This can also be done with the user accounts created, processes running, services running and any other thing that shouldn't change much, or at all.
+Ad esempio, puoi calcolare e memorizzare l'hash di ciascun file del filesystem per poter scoprire quali file sono stati modificati.\
+Questo può essere fatto anche con gli account utente creati, i processi in esecuzione, i servizi in esecuzione e qualsiasi altra cosa che non dovrebbe cambiare molto, o affatto.
 
 ## File Integrity Monitoring
 
-File Integrity Monitoring (FIM) is a critical security technique that protects IT environments and data by tracking changes in files. It involves two key steps:
+Il File Integrity Monitoring (FIM) è una tecnica di sicurezza critica che protegge gli ambienti IT e i dati tracciando le modifiche ai file. Comporta due passaggi chiave:
 
-1. **Baseline Comparison:** Establish a baseline using file attributes or cryptographic checksums (like MD5 or SHA-2) for future comparisons to detect modifications.
-2. **Real-Time Change Notification:** Get instant alerts when files are accessed or altered, typically through OS kernel extensions.
+1. **Baseline Comparison:** Stabilire una baseline utilizzando attributi dei file o checksum crittografici (come MD5 o SHA-2) per confronti futuri per rilevare modifiche.
+2. **Real-Time Change Notification:** Ricevere avvisi istantanei quando i file vengono accessi o modificati, tipicamente attraverso estensioni del kernel del sistema operativo.
 
 ## Tools
 

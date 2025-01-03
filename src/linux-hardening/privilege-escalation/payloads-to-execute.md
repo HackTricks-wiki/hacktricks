@@ -44,7 +44,7 @@ execve(paramList[0], paramList, NULL);
 return 0;
 }
 ```
-## Sovrascrivere un file per escalare i privilegi
+## Sovrascrivere un file per elevare i privilegi
 
 ### File comuni
 
@@ -76,7 +76,7 @@ objdump -T /bin/su | grep audit
 0000000000000000      DF *UND*  0000000000000000              audit_log_acct_message
 000000000020e968 g    DO .bss   0000000000000004  Base        audit_fd
 ```
-I simboli `audit_open`, `audit_log_acct_message`, `audit_log_acct_message` e `audit_fd` provengono probabilmente dalla libreria libaudit.so.1. Poiché la libaudit.so.1 sarà sovrascritta dalla libreria condivisa malevola, questi simboli dovrebbero essere presenti nella nuova libreria condivisa, altrimenti il programma non sarà in grado di trovare il simbolo e terminerà.
+I simboli `audit_open`, `audit_log_acct_message`, `audit_log_acct_message` e `audit_fd` provengono probabilmente dalla libreria libaudit.so.1. Poiché la libaudit.so.1 verrà sovrascritta dalla libreria condivisa malevola, questi simboli dovrebbero essere presenti nella nuova libreria condivisa, altrimenti il programma non sarà in grado di trovare il simbolo e terminerà.
 ```c
 #include<stdio.h>
 #include<stdlib.h>

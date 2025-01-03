@@ -81,7 +81,7 @@ printf("I'm the bad library\n");
 system("/bin/sh",NULL,NULL);
 }
 ```
-Ora che abbiamo **creato la libreria maligna libcustom all'interno del percorso mal configurato**, dobbiamo aspettare un **riavvio** o che l'utente root esegua **`ldconfig`** (_nel caso tu possa eseguire questo binario come **sudo** o abbia il **bit suid** potrai eseguirlo tu stesso_).
+Ora che abbiamo **creato la libreria maligna libcustom all'interno del percorso mal configurato**, dobbiamo aspettare un **riavvio** o che l'utente root esegua **`ldconfig`** (_nel caso tu possa eseguire questo binario come **sudo** o abbia il **suid bit** potrai eseguirlo tu stesso_).
 
 Una volta che ciò è accaduto, **ricontrolla** da dove l'eseguibile `sharevuln` sta caricando la libreria `libcustom.so`:
 ```c
@@ -91,7 +91,7 @@ libcustom.so => /home/ubuntu/lib/libcustom.so (0x00007f3f27c1a000)
 libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f3f27850000)
 /lib64/ld-linux-x86-64.so.2 (0x00007f3f27e1c000)
 ```
-Come puoi vedere, **lo sta caricando da `/home/ubuntu/lib`** e se un utente lo esegue, verrà eseguita una shell:
+Come puoi vedere, sta **caricando da `/home/ubuntu/lib`** e se un utente lo esegue, verrà eseguita una shell:
 ```c
 $ ./sharedvuln
 Welcome to my amazing application!
@@ -105,7 +105,7 @@ ubuntu
 ### Altre misconfigurazioni - Stessa vulnerabilità
 
 Nell'esempio precedente abbiamo simulato una misconfigurazione in cui un amministratore **ha impostato una cartella non privilegiata all'interno di un file di configurazione in `/etc/ld.so.conf.d/`**.\
-Ma ci sono altre misconfigurazioni che possono causare la stessa vulnerabilità; se hai **permessi di scrittura** in qualche **file di configurazione** all'interno di `/etc/ld.so.conf.d`, nella cartella `/etc/ld.so.conf.d` o nel file `/etc/ld.so.conf` puoi configurare la stessa vulnerabilità e sfruttarla.
+Ma ci sono altre misconfigurazioni che possono causare la stessa vulnerabilità; se hai **permessi di scrittura** in qualche **file di configurazione** all'interno di `/etc/ld.so.conf.d`, nella cartella `/etc/ld.so.conf.d` o nel file `/etc/ld.so.conf`, puoi configurare la stessa vulnerabilità e sfruttarla.
 
 ## Exploit 2
 
@@ -118,7 +118,7 @@ echo "include /tmp/conf/*" > fake.ld.so.conf
 echo "/tmp" > conf/evil.conf
 ```
 Ora, come indicato nel **precedente exploit**, **crea la libreria malevola all'interno di `/tmp`**.\
-E infine, carichiamo il percorso e controlliamo da dove il binario sta caricando la libreria:
+E infine, carichiamo il percorso e verifichiamo da dove il binario sta caricando la libreria:
 ```bash
 ldconfig -f fake.ld.so.conf
 

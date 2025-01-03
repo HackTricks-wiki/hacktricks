@@ -6,7 +6,7 @@
 
 Un mount namespace è una funzionalità del kernel Linux che fornisce isolamento dei punti di montaggio del file system visti da un gruppo di processi. Ogni mount namespace ha il proprio insieme di punti di montaggio del file system e **le modifiche ai punti di montaggio in un namespace non influenzano altri namespace**. Ciò significa che i processi in esecuzione in diversi mount namespace possono avere visioni diverse della gerarchia del file system.
 
-I mount namespace sono particolarmente utili nella containerizzazione, dove ogni container dovrebbe avere il proprio file system e configurazione, isolati da altri container e dal sistema host.
+I mount namespace sono particolarmente utili nella containerizzazione, dove ogni container dovrebbe avere il proprio file system e configurazione, isolati dagli altri container e dal sistema host.
 
 ### Come funziona:
 
@@ -31,9 +31,9 @@ Montando una nuova istanza del filesystem `/proc` se utilizzi il parametro `--mo
 
 Quando `unshare` viene eseguito senza l'opzione `-f`, si incontra un errore a causa del modo in cui Linux gestisce i nuovi namespace PID (Process ID). I dettagli chiave e la soluzione sono delineati di seguito:
 
-1. **Spiegazione del problema**:
+1. **Spiegazione del Problema**:
 
-- Il kernel Linux consente a un processo di creare nuovi namespace utilizzando la chiamata di sistema `unshare`. Tuttavia, il processo che avvia la creazione di un nuovo namespace PID (denominato processo "unshare") non entra nel nuovo namespace; solo i suoi processi figli lo fanno.
+- Il kernel Linux consente a un processo di creare nuovi namespace utilizzando la chiamata di sistema `unshare`. Tuttavia, il processo che avvia la creazione di un nuovo namespace PID (chiamato processo "unshare") non entra nel nuovo namespace; solo i suoi processi figli lo fanno.
 - Eseguire `%unshare -p /bin/bash%` avvia `/bin/bash` nello stesso processo di `unshare`. Di conseguenza, `/bin/bash` e i suoi processi figli si trovano nel namespace PID originale.
 - Il primo processo figlio di `/bin/bash` nel nuovo namespace diventa PID 1. Quando questo processo termina, attiva la pulizia del namespace se non ci sono altri processi, poiché PID 1 ha il ruolo speciale di adottare processi orfani. Il kernel Linux disabiliterà quindi l'allocazione PID in quel namespace.
 
@@ -43,7 +43,7 @@ Quando `unshare` viene eseguito senza l'opzione `-f`, si incontra un errore a ca
 
 3. **Soluzione**:
 - Il problema può essere risolto utilizzando l'opzione `-f` con `unshare`. Questa opzione fa sì che `unshare` fork un nuovo processo dopo aver creato il nuovo namespace PID.
-- Eseguire `%unshare -fp /bin/bash%` garantisce che il comando `unshare` stesso diventi PID 1 nel nuovo namespace. `/bin/bash` e i suoi processi figli sono quindi contenuti in modo sicuro all'interno di questo nuovo namespace, prevenendo l'uscita prematura di PID 1 e consentendo l'allocazione normale dei PID.
+- Eseguire `%unshare -fp /bin/bash%` garantisce che il comando `unshare` stesso diventi PID 1 nel nuovo namespace. `/bin/bash` e i suoi processi figli sono quindi contenuti in modo sicuro all'interno di questo nuovo namespace, prevenendo l'uscita prematura di PID 1 e consentendo una normale allocazione PID.
 
 Assicurandoti che `unshare` venga eseguito con il flag `-f`, il nuovo namespace PID viene mantenuto correttamente, consentendo a `/bin/bash` e ai suoi subprocessi di operare senza incontrare l'errore di allocazione della memoria.
 
@@ -68,7 +68,7 @@ sudo find /proc -maxdepth 3 -type l -name mnt -exec ls -l  {} \; 2>/dev/null | g
 ```bash
 findmnt
 ```
-### Entra in un Mount namespace
+### Entra all'interno di un Mount namespace
 ```bash
 nsenter -m TARGET_PID --pid /bin/bash
 ```

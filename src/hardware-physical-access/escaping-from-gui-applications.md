@@ -1,60 +1,60 @@
-# Escaping from KIOSKs
+# Uscire dai KIOSK
 
 {{#include ../banners/hacktricks-training.md}}
 
 ---
 
-## Check physical device
+## Controlla il dispositivo fisico
 
-| Component    | Action                                                             |
-| ------------ | ------------------------------------------------------------------ |
-| Power button | Turning the device off and on again may expose the start screen    |
-| Power cable  | Check whether the device reboots when the power is cut off briefly |
-| USB ports    | Connect physical keyboard with more shortcuts                      |
-| Ethernet     | Network scan or sniffing may enable further exploitation           |
+| Componente    | Azione                                                             |
+| ------------- | ------------------------------------------------------------------ |
+| Pulsante di accensione | Spegnere e riaccendere il dispositivo potrebbe esporre la schermata di avvio    |
+| Cavo di alimentazione  | Controlla se il dispositivo si riavvia quando l'alimentazione viene interrotta brevemente |
+| Porte USB    | Collega una tastiera fisica con più scorciatoie                      |
+| Ethernet     | La scansione della rete o il sniffing possono abilitare ulteriori sfruttamenti           |
 
-## Check for possible actions inside the GUI application
+## Controlla le possibili azioni all'interno dell'applicazione GUI
 
-**Common Dialogs** are those options of **saving a file**, **opening a file**, selecting a font, a color... Most of them will **offer a full Explorer functionality**. This means that you will be able to access Explorer functionalities if you can access these options:
+**Dialoghi comuni** sono quelle opzioni di **salvare un file**, **aprire un file**, selezionare un font, un colore... La maggior parte di essi **offrirà una funzionalità completa di Explorer**. Questo significa che sarai in grado di accedere alle funzionalità di Explorer se puoi accedere a queste opzioni:
 
-- Close/Close as
-- Open/Open with
-- Print
-- Export/Import
-- Search
-- Scan
+- Chiudi/Chiudi come
+- Apri/Apri con
+- Stampa
+- Esporta/Importa
+- Cerca
+- Scansiona
 
-You should check if you can:
+Dovresti controllare se puoi:
 
-- Modify or create new files
-- Create symbolic links
-- Get access to restricted areas
-- Execute other apps
+- Modificare o creare nuovi file
+- Creare collegamenti simbolici
+- Accedere ad aree riservate
+- Eseguire altre app
 
-### Command Execution
+### Esecuzione di comandi
 
-Maybe **using a `Open with`** option\*\* you can open/execute some kind of shell.
+Forse **utilizzando un'opzione `Apri con`** puoi aprire/eseguire qualche tipo di shell.
 
 #### Windows
 
-For example _cmd.exe, command.com, Powershell/Powershell ISE, mmc.exe, at.exe, taskschd.msc..._ find more binaries that can be used to execute commands (and perform unexpected actions) here: [https://lolbas-project.github.io/](https://lolbas-project.github.io)
+Ad esempio _cmd.exe, command.com, Powershell/Powershell ISE, mmc.exe, at.exe, taskschd.msc..._ trova più binari che possono essere utilizzati per eseguire comandi (e compiere azioni inaspettate) qui: [https://lolbas-project.github.io/](https://lolbas-project.github.io)
 
 #### \*NIX \_\_
 
-_bash, sh, zsh..._ More here: [https://gtfobins.github.io/](https://gtfobins.github.io)
+_bash, sh, zsh..._ Maggiori informazioni qui: [https://gtfobins.github.io/](https://gtfobins.github.io)
 
 ## Windows
 
-### Bypassing path restrictions
+### Bypassare le restrizioni del percorso
 
-- **Environment variables**: There are a lot of environment variables that are pointing to some path
-- **Other protocols**: _about:, data:, ftp:, file:, mailto:, news:, res:, telnet:, view-source:_
-- **Symbolic links**
-- **Shortcuts**: CTRL+N (open new session), CTRL+R (Execute Commands), CTRL+SHIFT+ESC (Task Manager), Windows+E (open explorer), CTRL-B, CTRL-I (Favourites), CTRL-H (History), CTRL-L, CTRL-O (File/Open Dialog), CTRL-P (Print Dialog), CTRL-S (Save As)
-  - Hidden Administrative menu: CTRL-ALT-F8, CTRL-ESC-F9
-- **Shell URIs**: _shell:Administrative Tools, shell:DocumentsLibrary, shell:Librariesshell:UserProfiles, shell:Personal, shell:SearchHomeFolder, shell:Systemshell:NetworkPlacesFolder, shell:SendTo, shell:UsersProfiles, shell:Common Administrative Tools, shell:MyComputerFolder, shell:InternetFolder_
-- **UNC paths**: Paths to connect to shared folders. You should try to connect to the C$ of the local machine ("\\\127.0.0.1\c$\Windows\System32")
-  - **More UNC paths:**
+- **Variabili di ambiente**: Ci sono molte variabili di ambiente che puntano a qualche percorso
+- **Altri protocolli**: _about:, data:, ftp:, file:, mailto:, news:, res:, telnet:, view-source:_
+- **Collegamenti simbolici**
+- **Scorciatoie**: CTRL+N (apri nuova sessione), CTRL+R (Esegui comandi), CTRL+SHIFT+ESC (Gestione attività), Windows+E (apri explorer), CTRL-B, CTRL-I (Preferiti), CTRL-H (Cronologia), CTRL-L, CTRL-O (File/Dialogo di apertura), CTRL-P (Dialogo di stampa), CTRL-S (Salva con nome)
+- Menu amministrativo nascosto: CTRL-ALT-F8, CTRL-ESC-F9
+- **Shell URIs**: _shell:Strumenti amministrativi, shell:Libreria documenti, shell:Librerie, shell:Profili utente, shell:Personale, shell:Cerca nella cartella home, shell:Sistema, shell:Cartella luoghi di rete, shell:Invia a, shell:Profili utenti, shell:Strumenti amministrativi comuni, shell:Cartella computer, shell:Cartella Internet_
+- **Percorsi UNC**: Percorsi per connettersi a cartelle condivise. Dovresti provare a connetterti al C$ della macchina locale ("\\\127.0.0.1\c$\Windows\System32")
+- **Altri percorsi UNC:**
 
 | UNC                       | UNC            | UNC                  |
 | ------------------------- | -------------- | -------------------- |
@@ -68,208 +68,208 @@ _bash, sh, zsh..._ More here: [https://gtfobins.github.io/](https://gtfobins.git
 | %TMP%                     | %USERDOMAIN%   | %USERNAME%           |
 | %USERPROFILE%             | %WINDIR%       |                      |
 
-### Download Your Binaries
+### Scarica i tuoi binari
 
 Console: [https://sourceforge.net/projects/console/](https://sourceforge.net/projects/console/)\
 Explorer: [https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/](https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/)\
-Registry editor: [https://sourceforge.net/projects/uberregedit/](https://sourceforge.net/projects/uberregedit/)
+Editor del registro: [https://sourceforge.net/projects/uberregedit/](https://sourceforge.net/projects/uberregedit/)
 
-### Accessing filesystem from the browser
+### Accesso al filesystem dal browser
 
-| PATH                | PATH              | PATH               | PATH                |
-| ------------------- | ----------------- | ------------------ | ------------------- |
-| File:/C:/windows    | File:/C:/windows/ | File:/C:/windows\\ | File:/C:\windows    |
-| File:/C:\windows\\  | File:/C:\windows/ | File://C:/windows  | File://C:/windows/  |
-| File://C:/windows\\ | File://C:\windows | File://C:\windows/ | File://C:\windows\\ |
-| C:/windows          | C:/windows/       | C:/windows\\       | C:\windows          |
-| C:\windows\\        | C:\windows/       | %WINDIR%           | %TMP%               |
-| %TEMP%              | %SYSTEMDRIVE%     | %SYSTEMROOT%       | %APPDATA%           |
-| %HOMEDRIVE%         | %HOMESHARE        |                    | <p><br></p>         |
+| PERCORSO                | PERCORSO              | PERCORSO               | PERCORSO                |
+| ----------------------- | --------------------- | ---------------------- | ----------------------- |
+| File:/C:/windows        | File:/C:/windows/     | File:/C:/windows\\     | File:/C:\windows        |
+| File:/C:\windows\\      | File:/C:\windows/     | File://C:/windows      | File://C:/windows/      |
+| File://C:/windows\\     | File://C:\windows     | File://C:\windows/     | File://C:\windows\\     |
+| C:/windows              | C:/windows/           | C:/windows\\           | C:\windows              |
+| C:\windows\\            | C:\windows/           | %WINDIR%               | %TMP%                   |
+| %TEMP%                  | %SYSTEMDRIVE%         | %SYSTEMROOT%           | %APPDATA%               |
+| %HOMEDRIVE%             | %HOMESHARE            |                        | <p><br></p>             |
 
-### ShortCuts
+### Scorciatoie
 
-- Sticky Keys – Press SHIFT 5 times
+- Sticky Keys – Premi SHIFT 5 volte
 - Mouse Keys – SHIFT+ALT+NUMLOCK
 - High Contrast – SHIFT+ALT+PRINTSCN
-- Toggle Keys – Hold NUMLOCK for 5 seconds
-- Filter Keys – Hold right SHIFT for 12 seconds
-- WINDOWS+F1 – Windows Search
-- WINDOWS+D – Show Desktop
-- WINDOWS+E – Launch Windows Explorer
-- WINDOWS+R – Run
-- WINDOWS+U – Ease of Access Centre
-- WINDOWS+F – Search
-- SHIFT+F10 – Context Menu
-- CTRL+SHIFT+ESC – Task Manager
-- CTRL+ALT+DEL – Splash screen on newer Windows versions
-- F1 – Help F3 – Search
-- F6 – Address Bar
-- F11 – Toggle full screen within Internet Explorer
-- CTRL+H – Internet Explorer History
-- CTRL+T – Internet Explorer – New Tab
-- CTRL+N – Internet Explorer – New Page
-- CTRL+O – Open File
-- CTRL+S – Save CTRL+N – New RDP / Citrix
+- Toggle Keys – Tieni premuto NUMLOCK per 5 secondi
+- Filter Keys – Tieni premuto SHIFT destro per 12 secondi
+- WINDOWS+F1 – Ricerca di Windows
+- WINDOWS+D – Mostra desktop
+- WINDOWS+E – Avvia Windows Explorer
+- WINDOWS+R – Esegui
+- WINDOWS+U – Centro accessibilità
+- WINDOWS+F – Cerca
+- SHIFT+F10 – Menu contestuale
+- CTRL+SHIFT+ESC – Gestione attività
+- CTRL+ALT+DEL – Schermata di avvio nelle versioni più recenti di Windows
+- F1 – Aiuto F3 – Cerca
+- F6 – Barra degli indirizzi
+- F11 – Attiva/disattiva schermo intero in Internet Explorer
+- CTRL+H – Cronologia di Internet Explorer
+- CTRL+T – Internet Explorer – Nuova scheda
+- CTRL+N – Internet Explorer – Nuova pagina
+- CTRL+O – Apri file
+- CTRL+S – Salva CTRL+N – Nuovo RDP / Citrix
 
-### Swipes
+### Swipe
 
-- Swipe from the left side to the right to see all open Windows, minimizing the KIOSK app and accessing the whole OS directly;
-- Swipe from the right side to the left to open Action Center, minimizing the KIOSK app and accessing the whole OS directly;
-- Swipe in from the top edge to make the title bar visible for an app opened in full screen mode;
-- Swipe up from the bottom to show the taskbar in a full screen app.
+- Scorri dal lato sinistro verso destra per vedere tutte le finestre aperte, minimizzando l'app KIOSK e accedendo direttamente all'intero sistema operativo;
+- Scorri dal lato destro verso sinistra per aprire il Centro operativo, minimizzando l'app KIOSK e accedendo direttamente all'intero sistema operativo;
+- Scorri dal bordo superiore per rendere visibile la barra del titolo per un'app aperta in modalità schermo intero;
+- Scorri verso l'alto dal basso per mostrare la barra delle applicazioni in un'app a schermo intero.
 
-### Internet Explorer Tricks
+### Trucchi di Internet Explorer
 
 #### 'Image Toolbar'
 
-It's a toolbar that appears on the top-left of image when it's clicked. You will be able to Save, Print, Mailto, Open "My Pictures" in Explorer. The Kiosk needs to be using Internet Explorer.
+È una barra degli strumenti che appare in alto a sinistra dell'immagine quando viene cliccata. Sarai in grado di Salvare, Stampare, Inviare per email, Aprire "Le mie immagini" in Explorer. Il Kiosk deve utilizzare Internet Explorer.
 
-#### Shell Protocol
+#### Protocollo Shell
 
-Type this URLs to obtain an Explorer view:
+Digita questi URL per ottenere una vista di Explorer:
 
-- `shell:Administrative Tools`
-- `shell:DocumentsLibrary`
-- `shell:Libraries`
-- `shell:UserProfiles`
-- `shell:Personal`
-- `shell:SearchHomeFolder`
-- `shell:NetworkPlacesFolder`
-- `shell:SendTo`
-- `shell:UserProfiles`
-- `shell:Common Administrative Tools`
-- `shell:MyComputerFolder`
-- `shell:InternetFolder`
-- `Shell:Profile`
-- `Shell:ProgramFiles`
-- `Shell:System`
-- `Shell:ControlPanelFolder`
+- `shell:Strumenti amministrativi`
+- `shell:Libreria documenti`
+- `shell:Librerie`
+- `shell:Profili utente`
+- `shell:Personale`
+- `shell:Cerca nella cartella home`
+- `shell:Cartella luoghi di rete`
+- `shell:Invia a`
+- `shell:Profili utenti`
+- `shell:Strumenti amministrativi comuni`
+- `shell:Cartella computer`
+- `shell:Cartella Internet`
+- `Shell:Profilo`
+- `Shell:Programmi`
+- `Shell:Sistema`
+- `Shell:Pannello di controllo`
 - `Shell:Windows`
-- `shell:::{21EC2020-3AEA-1069-A2DD-08002B30309D}` --> Control Panel
-- `shell:::{20D04FE0-3AEA-1069-A2D8-08002B30309D}` --> My Computer
-- `shell:::{{208D2C60-3AEA-1069-A2D7-08002B30309D}}` --> My Network Places
+- `shell:::{21EC2020-3AEA-1069-A2DD-08002B30309D}` --> Pannello di controllo
+- `shell:::{20D04FE0-3AEA-1069-A2D8-08002B30309D}` --> Il mio computer
+- `shell:::{{208D2C60-3AEA-1069-A2D7-08002B30309D}}` --> I miei luoghi di rete
 - `shell:::{871C5380-42A0-1069-A2EA-08002B30309D}` --> Internet Explorer
 
-### Show File Extensions
+### Mostra le estensioni dei file
 
-Check this page for more information: [https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)
+Controlla questa pagina per ulteriori informazioni: [https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)
 
-## Browsers tricks
+## Trucchi dei browser
 
-Backup iKat versions:
+Backup delle versioni iKat:
 
 [http://swin.es/k/](http://swin.es/k/)\
 [http://www.ikat.kronicd.net/](http://www.ikat.kronicd.net)\\
 
-Create a common dialog using JavaScript and access file explorer: `document.write('<input/type=file>')`\
-Source: https://medium.com/@Rend\_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
+Crea un dialogo comune utilizzando JavaScript e accedi all'esplora file: `document.write('<input/type=file>')`\
+Fonte: https://medium.com/@Rend\_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
 
 ## iPad
 
-### Gestures and bottoms
+### Gesture e pulsanti
 
-- Swipe up with four (or five) fingers / Double-tap Home button: To view the multitask view and change App
-- Swipe one way or another with four or five fingers: In order to change to the next/last App
-- Pinch the screen with five fingers / Touch Home button / Swipe up with 1 finger from the bottom of the screen in a quick motion to the up: To access Home
-- Swipe one finger from the bottom of the screen just 1-2 inches (slow): The dock will appear
-- Swipe down from the top of the display with 1 finger: To view your notifications
-- Swipe down with 1 finger the top-right corner of the screen: To see iPad Pro's control centre
-- Swipe 1 finger from the left of the screen 1-2 inches: To see Today view
-- Swipe fast 1 finger from the centre of the screen to the right or left: To change to next/last App
-- Press and hold the On/**Off**/Sleep button at the upper-right corner of the **iPad +** Move the Slide to **power off** slider all the way to the right: To power off
-- Press the On/**Off**/Sleep button at the upper-right corner of the **iPad and the Home button for a few second**: To force a hard power off
-- Press the On/**Off**/Sleep button at the upper-right corner of the **iPad and the Home button quickly**: To take a screenshot that will pop up in the lower left of the display. Press both buttons at the same time very briefly as if you hold them a few seconds a hard power off will be performed.
+- Scorri verso l'alto con quattro (o cinque) dita / Tocca due volte il pulsante Home: Per visualizzare la vista multitasking e cambiare app
+- Scorri in un modo o nell'altro con quattro o cinque dita: Per cambiare all'app successiva/precedente
+- Pizzica lo schermo con cinque dita / Tocca il pulsante Home / Scorri verso l'alto con 1 dito dal fondo dello schermo in un movimento rapido verso l'alto: Per accedere alla Home
+- Scorri un dito dal fondo dello schermo per solo 1-2 pollici (lento): Apparirà il dock
+- Scorri verso il basso dall'alto del display con 1 dito: Per visualizzare le tue notifiche
+- Scorri verso il basso con 1 dito nell'angolo in alto a destra dello schermo: Per vedere il centro di controllo dell'iPad Pro
+- Scorri 1 dito dal lato sinistro dello schermo per 1-2 pollici: Per vedere la vista Oggi
+- Scorri rapidamente 1 dito dal centro dello schermo verso destra o sinistra: Per cambiare all'app successiva/precedente
+- Tieni premuto il pulsante On/**Off**/Sleep nell'angolo in alto a destra dell'**iPad +** Sposta il cursore di **spegnimento** tutto a destra: Per spegnere
+- Tieni premuto il pulsante On/**Off**/Sleep nell'angolo in alto a destra dell'**iPad e il pulsante Home per alcuni secondi**: Per forzare uno spegnimento completo
+- Tieni premuto il pulsante On/**Off**/Sleep nell'angolo in alto a destra dell'**iPad e il pulsante Home rapidamente**: Per fare uno screenshot che apparirà in basso a sinistra del display. Premi entrambi i pulsanti contemporaneamente molto brevemente, poiché se li tieni premuti per alcuni secondi verrà eseguito uno spegnimento completo.
 
-### Shortcuts
+### Scorciatoie
 
-You should have an iPad keyboard or a USB keyboard adaptor. Only shortcuts that could help escaping from the application will be shown here.
+Dovresti avere una tastiera per iPad o un adattatore per tastiera USB. Solo le scorciatoie che potrebbero aiutare a uscire dall'applicazione saranno mostrate qui.
 
-| Key | Name         |
-| --- | ------------ |
-| ⌘   | Command      |
-| ⌥   | Option (Alt) |
+| Tasto | Nome         |
+| ----- | ------------ |
+| ⌘   | Comando      |
+| ⌥   | Opzione (Alt) |
 | ⇧   | Shift        |
-| ↩   | Return       |
+| ↩   | Ritorno      |
 | ⇥   | Tab          |
-| ^   | Control      |
-| ←   | Left Arrow   |
-| →   | Right Arrow  |
-| ↑   | Up Arrow     |
-| ↓   | Down Arrow   |
+| ^   | Controllo    |
+| ←   | Freccia sinistra   |
+| →   | Freccia destra  |
+| ↑   | Freccia su     |
+| ↓   | Freccia giù    |
 
-#### System shortcuts
+#### Scorciatoie di sistema
 
-These shortcuts are for the visual settings and sound settings, depending on the use of the iPad.
+Queste scorciatoie sono per le impostazioni visive e sonore, a seconda dell'uso dell'iPad.
 
-| Shortcut | Action                                                                         |
-| -------- | ------------------------------------------------------------------------------ |
-| F1       | Dim Sscreen                                                                    |
-| F2       | Brighten screen                                                                |
-| F7       | Back one song                                                                  |
-| F8       | Play/pause                                                                     |
-| F9       | Skip song                                                                      |
-| F10      | Mute                                                                           |
-| F11      | Decrease volume                                                                |
-| F12      | Increase volume                                                                |
-| ⌘ Space  | Display a list of available languages; to choose one, tap the space bar again. |
+| Scorciatoia | Azione                                                                         |
+| ----------- | ------------------------------------------------------------------------------ |
+| F1          | Abbassa la luminosità dello schermo                                            |
+| F2          | Aumenta la luminosità dello schermo                                            |
+| F7          | Torna indietro di una canzone                                                  |
+| F8          | Riproduci/metti in pausa                                                       |
+| F9          | Salta canzone                                                                  |
+| F10         | Mute                                                                           |
+| F11         | Diminuisci il volume                                                            |
+| F12         | Aumenta il volume                                                              |
+| ⌘ Spazio    | Visualizza un elenco delle lingue disponibili; per sceglierne una, tocca di nuovo la barra spaziatrice. |
 
-#### iPad navigation
+#### Navigazione su iPad
 
-| Shortcut                                           | Action                                                  |
-| -------------------------------------------------- | ------------------------------------------------------- |
-| ⌘H                                                 | Go to Home                                              |
-| ⌘⇧H (Command-Shift-H)                              | Go to Home                                              |
-| ⌘ (Space)                                          | Open Spotlight                                          |
-| ⌘⇥ (Command-Tab)                                   | List last ten used apps                                 |
-| ⌘\~                                                | Go t the last App                                       |
-| ⌘⇧3 (Command-Shift-3)                              | Screenshot (hovers in bottom left to save or act on it) |
-| ⌘⇧4                                                | Screenshot and open it in the editor                    |
-| Press and hold ⌘                                   | List of shortcuts available for the App                 |
-| ⌘⌥D (Command-Option/Alt-D)                         | Brings up the dock                                      |
-| ^⌥H (Control-Option-H)                             | Home button                                             |
-| ^⌥H H (Control-Option-H-H)                         | Show multitask bar                                      |
-| ^⌥I (Control-Option-i)                             | Item chooser                                            |
-| Escape                                             | Back button                                             |
-| → (Right arrow)                                    | Next item                                               |
-| ← (Left arrow)                                     | Previous item                                           |
-| ↑↓ (Up arrow, Down arrow)                          | Simultaneously tap selected item                        |
-| ⌥ ↓ (Option-Down arrow)                            | Scroll down                                             |
-| ⌥↑ (Option-Up arrow)                               | Scroll up                                               |
-| ⌥← or ⌥→ (Option-Left arrow or Option-Right arrow) | Scroll left or right                                    |
-| ^⌥S (Control-Option-S)                             | Turn VoiceOver speech on or off                         |
-| ⌘⇧⇥ (Command-Shift-Tab)                            | Switch to the previous app                              |
-| ⌘⇥ (Command-Tab)                                   | Switch back to the original app                         |
-| ←+→, then Option + ← or Option+→                   | Navigate through Dock                                   |
+| Scorciatoia                                           | Azione                                                  |
+| ----------------------------------------------------- | ------------------------------------------------------- |
+| ⌘H                                                  | Vai alla Home                                           |
+| ⌘⇧H (Comando-Shift-H)                               | Vai alla Home                                           |
+| ⌘ (Spazio)                                          | Apri Spotlight                                          |
+| ⌘⇥ (Comando-Tab)                                   | Elenca le ultime dieci app utilizzate                   |
+| ⌘\~                                                | Vai all'ultima app                                      |
+| ⌘⇧3 (Comando-Shift-3)                              | Screenshot (si ferma in basso a sinistra per salvare o agire su di esso) |
+| ⌘⇧4                                                | Screenshot e aprilo nell'editor                         |
+| Tieni premuto ⌘                                   | Elenco delle scorciatoie disponibili per l'app          |
+| ⌘⌥D (Comando-Opzione/Alt-D)                         | Mostra il dock                                          |
+| ^⌥H (Controllo-Opzione-H)                             | Pulsante Home                                           |
+| ^⌥H H (Controllo-Opzione-H-H)                         | Mostra la barra multitasking                             |
+| ^⌥I (Controllo-Opzione-i)                             | Selettore di elementi                                    |
+| Escape                                             | Pulsante Indietro                                       |
+| → (Freccia destra)                                    | Prossimo elemento                                        |
+| ← (Freccia sinistra)                                   | Elemento precedente                                      |
+| ↑↓ (Freccia su, Freccia giù)                          | Tocca simultaneamente l'elemento selezionato            |
+| ⌥ ↓ (Opzione-Freccia giù)                            | Scorri verso il basso                                   |
+| ⌥↑ (Opzione-Freccia su)                               | Scorri verso l'alto                                     |
+| ⌥← o ⌥→ (Opzione-Freccia sinistra o Opzione-Freccia destra) | Scorri a sinistra o a destra                           |
+| ^⌥S (Controllo-Opzione-S)                             | Attiva o disattiva la sintesi vocale                   |
+| ⌘⇧⇥ (Comando-Shift-Tab)                            | Passa all'app precedente                                 |
+| ⌘⇥ (Comando-Tab)                                   | Torna all'app originale                                  |
+| ←+→, poi Opzione + ← o Opzione+→                   | Naviga attraverso il Dock                                |
 
-#### Safari shortcuts
+#### Scorciatoie di Safari
 
-| Shortcut                | Action                                           |
-| ----------------------- | ------------------------------------------------ |
-| ⌘L (Command-L)          | Open Location                                    |
-| ⌘T                      | Open a new tab                                   |
-| ⌘W                      | Close the current tab                            |
-| ⌘R                      | Refresh the current tab                          |
-| ⌘.                      | Stop loading the current tab                     |
-| ^⇥                      | Switch to the next tab                           |
-| ^⇧⇥ (Control-Shift-Tab) | Move to the previous tab                         |
-| ⌘L                      | Select the text input/URL field to modify it     |
-| ⌘⇧T (Command-Shift-T)   | Open last closed tab (can be used several times) |
-| ⌘\[                     | Goes back one page in your browsing history      |
-| ⌘]                      | Goes forward one page in your browsing history   |
-| ⌘⇧R                     | Activate Reader Mode                             |
+| Scorciatoia                | Azione                                           |
+| -------------------------- | ------------------------------------------------ |
+| ⌘L (Comando-L)            | Apri posizione                                    |
+| ⌘T                        | Apri una nuova scheda                             |
+| ⌘W                        | Chiudi la scheda corrente                        |
+| ⌘R                        | Aggiorna la scheda corrente                      |
+| ⌘.                        | Ferma il caricamento della scheda corrente       |
+| ^⇥                        | Passa alla scheda successiva                     |
+| ^⇧⇥ (Controllo-Shift-Tab) | Passa alla scheda precedente                      |
+| ⌘L                        | Seleziona il campo di input/testo URL per modificarlo |
+| ⌘⇧T (Comando-Shift-T)    | Apri l'ultima scheda chiusa (può essere usata più volte) |
+| ⌘\[                       | Torna indietro di una pagina nella cronologia di navigazione |
+| ⌘]                        | Avanza di una pagina nella cronologia di navigazione |
+| ⌘⇧R                      | Attiva la modalità lettore                        |
 
-#### Mail shortcuts
+#### Scorciatoie di Mail
 
-| Shortcut                   | Action                       |
-| -------------------------- | ---------------------------- |
-| ⌘L                         | Open Location                |
-| ⌘T                         | Open a new tab               |
-| ⌘W                         | Close the current tab        |
-| ⌘R                         | Refresh the current tab      |
-| ⌘.                         | Stop loading the current tab |
-| ⌘⌥F (Command-Option/Alt-F) | Search in your mailbox       |
+| Scorciatoia               | Azione                       |
+| ------------------------- | ---------------------------- |
+| ⌘L                       | Apri posizione                |
+| ⌘T                       | Apri una nuova scheda         |
+| ⌘W                       | Chiudi la scheda corrente      |
+| ⌘R                       | Aggiorna la scheda corrente    |
+| ⌘.                       | Ferma il caricamento della scheda |
+| ⌘⌥F (Comando-Opzione/Alt-F) | Cerca nella tua casella di posta |
 
-## References
+## Riferimenti
 
 - [https://www.macworld.com/article/2975857/6-only-for-ipad-gestures-you-need-to-know.html](https://www.macworld.com/article/2975857/6-only-for-ipad-gestures-you-need-to-know.html)
 - [https://www.tomsguide.com/us/ipad-shortcuts,news-18205.html](https://www.tomsguide.com/us/ipad-shortcuts,news-18205.html)

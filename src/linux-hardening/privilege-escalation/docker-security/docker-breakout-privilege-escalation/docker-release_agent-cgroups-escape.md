@@ -28,13 +28,13 @@ echo 1 > /tmp/cgrp/x/notify_on_release
 ```
 3. **Configura il Release Agent:**
 - Il percorso del container sull'host è ottenuto dal file /etc/mtab.
-- Il file release_agent del cgroup viene quindi configurato per eseguire uno script chiamato /cmd situato nel percorso host acquisito.
+- Il file release_agent del cgroup è quindi configurato per eseguire uno script chiamato /cmd situato nel percorso host acquisito.
 ```shell
 host_path=`sed -n 's/.*\perdir=\([^,]*\).*/\1/p' /etc/mtab`
 echo "$host_path/cmd" > /tmp/cgrp/release_agent
 ```
 4. **Crea e Configura lo Script /cmd:**
-- Lo script /cmd viene creato all'interno del container ed è configurato per eseguire ps aux, reindirizzando l'output a un file chiamato /output nel container. Il percorso completo di /output sull'host è specificato.
+- Lo script /cmd viene creato all'interno del container e viene configurato per eseguire ps aux, reindirizzando l'output a un file chiamato /output nel container. Il percorso completo di /output sull'host è specificato.
 ```shell
 echo '#!/bin/sh' > /cmd
 echo "ps aux > $host_path/output" >> /cmd

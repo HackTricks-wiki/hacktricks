@@ -4,7 +4,7 @@
 
 ## Informazioni di base
 
-Un namespace cgroup è una funzionalità del kernel Linux che fornisce **isolamento delle gerarchie cgroup per i processi in esecuzione all'interno di un namespace**. I cgroup, abbreviazione di **control groups**, sono una funzionalità del kernel che consente di organizzare i processi in gruppi gerarchici per gestire e applicare **limiti sulle risorse di sistema** come CPU, memoria e I/O.
+Un namespace cgroup è una funzionalità del kernel Linux che fornisce **isolamento delle gerarchie cgroup per i processi in esecuzione all'interno di un namespace**. I cgroups, abbreviazione di **control groups**, sono una funzionalità del kernel che consente di organizzare i processi in gruppi gerarchici per gestire e applicare **limiti sulle risorse di sistema** come CPU, memoria e I/O.
 
 Sebbene i namespace cgroup non siano un tipo di namespace separato come gli altri di cui abbiamo discusso in precedenza (PID, mount, network, ecc.), sono correlati al concetto di isolamento dei namespace. **I namespace cgroup virtualizzano la vista della gerarchia cgroup**, in modo che i processi in esecuzione all'interno di un namespace cgroup abbiano una vista diversa della gerarchia rispetto ai processi in esecuzione nell'host o in altri namespace.
 
@@ -34,7 +34,7 @@ Montando una nuova istanza del filesystem `/proc` se utilizzi il parametro `--mo
 
 <summary>Errore: bash: fork: Impossibile allocare memoria</summary>
 
-Quando `unshare` viene eseguito senza l'opzione `-f`, si incontra un errore a causa del modo in cui Linux gestisce i nuovi namespace PID (Process ID). I dettagli chiave e la soluzione sono delineati di seguito:
+Quando `unshare` viene eseguito senza l'opzione `-f`, si verifica un errore a causa del modo in cui Linux gestisce i nuovi namespace PID (Process ID). I dettagli chiave e la soluzione sono delineati di seguito:
 
 1. **Spiegazione del Problema**:
 
@@ -44,7 +44,7 @@ Quando `unshare` viene eseguito senza l'opzione `-f`, si incontra un errore a ca
 
 2. **Conseguenza**:
 
-- L'uscita di PID 1 in un nuovo namespace porta alla pulizia del flag `PIDNS_HASH_ADDING`. Questo provoca il fallimento della funzione `alloc_pid` nell'allocare un nuovo PID durante la creazione di un nuovo processo, producendo l'errore "Impossibile allocare memoria".
+- L'uscita di PID 1 in un nuovo namespace porta alla pulizia del flag `PIDNS_HASH_ADDING`. Questo porta al fallimento della funzione `alloc_pid` nell'allocare un nuovo PID durante la creazione di un nuovo processo, producendo l'errore "Impossibile allocare memoria".
 
 3. **Soluzione**:
 - Il problema può essere risolto utilizzando l'opzione `-f` con `unshare`. Questa opzione fa sì che `unshare` fork un nuovo processo dopo aver creato il nuovo namespace PID.

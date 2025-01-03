@@ -25,7 +25,7 @@ chmod +s bash
 cd <SHAREDD_FOLDER>
 ./bash -p #ROOT shell
 ```
-- **Montare quella directory** in una macchina client e **come root copiare** all'interno della cartella montata il nostro payload compilato che sfrutterà il permesso SUID, dargli diritti **SUID** e **eseguire da** quella macchina vittima quel binario (puoi trovare qui alcuni [C SUID payloads](payloads-to-execute.md#c)).
+- **Montare quella directory** in una macchina client, e **come root copiare** all'interno della cartella montata il nostro payload compilato che sfrutterà il permesso SUID, dargli diritti **SUID**, e **eseguire da macchina vittima** quel binario (puoi trovare qui alcuni [C SUID payloads](payloads-to-execute.md#c)).
 ```bash
 #Attacker, as root user
 gcc payload.c -o payload
@@ -42,8 +42,8 @@ cd <SHAREDD_FOLDER>
 ## Local Exploit
 
 > [!NOTE]
-> Nota che se puoi creare un **tunnel dalla tua macchina alla macchina della vittima, puoi comunque utilizzare la versione Remota per sfruttare questa escalation di privilegi tunnelando le porte richieste**.\
-> Il seguente trucco è nel caso in cui il file `/etc/exports` **indichi un IP**. In questo caso **non sarai in grado di utilizzare** in nessun caso il **remote exploit** e dovrai **sfruttare questo trucco**.\
+> Nota che se puoi creare un **tunnel dalla tua macchina a quella della vittima, puoi comunque utilizzare la versione Remota per sfruttare questa escalation di privilegi tunnelando le porte richieste**.\
+> Il seguente trucco è nel caso in cui il file `/etc/exports` **indichi un IP**. In questo caso **non potrai utilizzare** in nessun caso il **remote exploit** e dovrai **sfruttare questo trucco**.\
 > Un altro requisito necessario affinché l'exploit funzioni è che **l'export all'interno di `/etc/export`** **deve utilizzare il flag `insecure`**.\
 > --_Non sono sicuro che se `/etc/export` indica un indirizzo IP questo trucco funzionerà_--
 

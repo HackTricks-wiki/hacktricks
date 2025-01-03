@@ -2,37 +2,37 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Summary of the attack
+## Riepilogo dell'attacco
 
-Imagine a server which is **signing** some **data** by **appending** a **secret** to some known clear text data and then hashing that data. If you know:
+Immagina un server che **firma** alcuni **dati** **aggiungendo** un **segreto** a dei dati di testo chiaro noti e poi hashando quei dati. Se conosci:
 
-- **The length of the secret** (this can be also bruteforced from a given length range)
-- **The clear text data**
-- **The algorithm (and it's vulnerable to this attack)**
-- **The padding is known**
-  - Usually a default one is used, so if the other 3 requirements are met, this also is
-  - The padding vary depending on the length of the secret+data, that's why the length of the secret is needed
+- **La lunghezza del segreto** (questo può essere anche forzato a bruteforce da un dato intervallo di lunghezza)
+- **I dati di testo chiaro**
+- **L'algoritmo (e è vulnerabile a questo attacco)**
+- **Il padding è noto**
+- Di solito viene utilizzato uno predefinito, quindi se gli altri 3 requisiti sono soddisfatti, anche questo lo è
+- Il padding varia a seconda della lunghezza del segreto + dati, ecco perché è necessaria la lunghezza del segreto
 
-Then, it's possible for an **attacker** to **append** **data** and **generate** a valid **signature** for the **previous data + appended data**.
+Allora, è possibile per un **attaccante** **aggiungere** **dati** e **generare** una **firma** valida per i **dati precedenti + dati aggiunti**.
 
-### How?
+### Come?
 
-Basically the vulnerable algorithms generate the hashes by firstly **hashing a block of data**, and then, **from** the **previously** created **hash** (state), they **add the next block of data** and **hash it**.
+Fondamentalmente, gli algoritmi vulnerabili generano gli hash prima **hashando un blocco di dati**, e poi, **dallo** **hash** **precedentemente** creato (stato), **aggiungono il prossimo blocco di dati** e **lo hashano**.
 
-Then, imagine that the secret is "secret" and the data is "data", the MD5 of "secretdata" is 6036708eba0d11f6ef52ad44e8b74d5b.\
-If an attacker wants to append the string "append" he can:
+Immagina che il segreto sia "secret" e i dati siano "data", l'MD5 di "secretdata" è 6036708eba0d11f6ef52ad44e8b74d5b.\
+Se un attaccante vuole aggiungere la stringa "append" può:
 
-- Generate a MD5 of 64 "A"s
-- Change the state of the previously initialized hash to 6036708eba0d11f6ef52ad44e8b74d5b
-- Append the string "append"
-- Finish the hash and the resulting hash will be a **valid one for "secret" + "data" + "padding" + "append"**
+- Generare un MD5 di 64 "A"
+- Cambiare lo stato dell'hash precedentemente inizializzato a 6036708eba0d11f6ef52ad44e8b74d5b
+- Aggiungere la stringa "append"
+- Completare l'hash e l'hash risultante sarà un **valido per "secret" + "data" + "padding" + "append"**
 
-### **Tool**
+### **Strumento**
 
 {% embed url="https://github.com/iagox86/hash_extender" %}
 
-### References
+### Riferimenti
 
-You can find this attack good explained in [https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
+Puoi trovare questo attacco ben spiegato in [https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
 
 {{#include ../banners/hacktricks-training.md}}

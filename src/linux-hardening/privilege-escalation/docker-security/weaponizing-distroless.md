@@ -19,7 +19,7 @@ L'obiettivo di armare un container distroless è essere in grado di **eseguire b
 
 ### Through memory
 
-In arrivo a un certo punto del 2023...
+In arrivo in un certo momento del 2023...
 
 ### Via Existing binaries
 

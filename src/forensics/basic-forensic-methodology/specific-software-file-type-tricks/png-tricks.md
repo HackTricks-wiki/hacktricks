@@ -1,9 +1,9 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-**PNG files** are highly regarded in **CTF challenges** for their **lossless compression**, making them ideal for embedding hidden data. Tools like **Wireshark** enable the analysis of PNG files by dissecting their data within network packets, revealing embedded information or anomalies.
+I file **PNG** sono molto apprezzati nelle **sfide CTF** per la loro **compressione senza perdita**, rendendoli ideali per incorporare dati nascosti. Strumenti come **Wireshark** consentono l'analisi dei file PNG dissecando i loro dati all'interno dei pacchetti di rete, rivelando informazioni incorporate o anomalie.
 
-For checking PNG file integrity and repairing corruption, **pngcheck** is a crucial tool, offering command-line functionality to validate and diagnose PNG files ([pngcheck](http://libpng.org/pub/png/apps/pngcheck.html)). When files are beyond simple fixes, online services like [OfficeRecovery's PixRecovery](https://online.officerecovery.com/pixrecovery/) provide a web-based solution for **repairing corrupted PNGs**, aiding in the recovery of crucial data for CTF participants.
+Per controllare l'integrità dei file PNG e riparare la corruzione, **pngcheck** è uno strumento cruciale, che offre funzionalità da riga di comando per convalidare e diagnosticare i file PNG ([pngcheck](http://libpng.org/pub/png/apps/pngcheck.html)). Quando i file sono oltre semplici riparazioni, servizi online come [OfficeRecovery's PixRecovery](https://online.officerecovery.com/pixrecovery/) forniscono una soluzione web per **riparare PNG corrotti**, aiutando nel recupero di dati cruciali per i partecipanti al CTF.
 
-These strategies underscore the importance of a comprehensive approach in CTFs, utilizing a blend of analytical tools and repair techniques to uncover and recover hidden or lost data.
+Queste strategie sottolineano l'importanza di un approccio completo nei CTF, utilizzando un mix di strumenti analitici e tecniche di riparazione per scoprire e recuperare dati nascosti o persi.
 
 {{#include ../../../banners/hacktricks-training.md}}

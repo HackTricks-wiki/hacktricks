@@ -88,7 +88,7 @@ L'oggetto è **`someObject`**, il metodo è **`@selector(method1p1:p2:)`** e gli
 Seguendo le strutture degli oggetti, è possibile raggiungere un'**array di metodi** dove i **nomi** e i **puntatori** al codice del metodo sono **localizzati**.
 
 > [!CAUTION]
-> Nota che poiché i metodi e le classi vengono accessi in base ai loro nomi, queste informazioni sono memorizzate nel binario, quindi è possibile recuperarle con `otool -ov </path/bin>` o [`class-dump </path/bin>`](https://github.com/nygard/class-dump)
+> Nota che poiché i metodi e le classi sono accessibili in base ai loro nomi, queste informazioni sono memorizzate nel binario, quindi è possibile recuperarle con `otool -ov </path/bin>` o [`class-dump </path/bin>`](https://github.com/nygard/class-dump)
 
 ### Accessing the raw methods
 
@@ -274,11 +274,11 @@ In questa pagina sono stati discussi diversi modi per agganciare funzioni. Tutta
 
 Per fare ciò, la tecnica più semplice da utilizzare è iniettare un [Dyld tramite variabili di ambiente o hijacking](../macos-dyld-hijacking-and-dyld_insert_libraries.md). Tuttavia, suppongo che questo possa essere fatto anche tramite [Dylib process injection](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port).
 
-Tuttavia, entrambe le opzioni sono **limitati** a **binarie/processi non protetti**. Controlla ciascuna tecnica per saperne di più sulle limitazioni.
+Tuttavia, entrambe le opzioni sono **limitati** a **binari/processi non protetti**. Controlla ciascuna tecnica per saperne di più sulle limitazioni.
 
-Tuttavia, un attacco di hooking di funzione è molto specifico, un attaccante lo farà per **rubare informazioni sensibili dall'interno di un processo** (se no faresti semplicemente un attacco di iniezione di processo). E queste informazioni sensibili potrebbero trovarsi in app scaricate dall'utente come MacPass.
+Tuttavia, un attacco di hooking di funzione è molto specifico, un attaccante lo farà per **rubare informazioni sensibili dall'interno di un processo** (se no, faresti semplicemente un attacco di iniezione di processo). E queste informazioni sensibili potrebbero trovarsi in app scaricate dall'utente come MacPass.
 
-Quindi il vettore dell'attaccante sarebbe quello di trovare una vulnerabilità o rimuovere la firma dell'applicazione, iniettare la variabile env **`DYLD_INSERT_LIBRARIES`** attraverso l'Info.plist dell'applicazione aggiungendo qualcosa come:
+Quindi il vettore dell'attaccante sarebbe quello di trovare una vulnerabilità o rimuovere la firma dell'applicazione, iniettare la variabile di ambiente **`DYLD_INSERT_LIBRARIES`** attraverso l'Info.plist dell'applicazione aggiungendo qualcosa come:
 ```xml
 <key>LSEnvironment</key>
 <dict>

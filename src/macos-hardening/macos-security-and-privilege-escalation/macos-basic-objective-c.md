@@ -52,7 +52,7 @@ self.numberOfWheels += value;
 ```
 ### **Oggetto e Chiamata del Metodo**
 
-Per creare un'istanza di una classe viene chiamato il metodo **`alloc`** che **alloca memoria** per ogni **proprietà** e **azzera** quelle allocazioni. Poi viene chiamato **`init`**, che **inizializza le proprietà** ai **valori richiesti**.
+Per creare un'istanza di una classe, viene chiamato il metodo **`alloc`** che **alloca memoria** per ogni **proprietà** e **azzera** quelle allocazioni. Poi viene chiamato **`init`**, che **inizializza le proprietà** ai **valori richiesti**.
 ```objectivec
 // Something like this:
 MyVehicle *newVehicle = [[MyVehicle alloc] init];
@@ -91,7 +91,7 @@ _numberOfWheels = +10000;
 NSLog(@"Number of wheels: %i", self.numberOfLeaves);
 }
 ```
-### Protocols
+### Protocolli
 
 I protocolli sono insiemi di dichiarazioni di metodo (senza proprietà). Una classe che implementa un protocollo implementa i metodi dichiarati.
 

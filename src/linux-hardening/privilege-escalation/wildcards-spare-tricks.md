@@ -41,7 +41,7 @@ In **7z** anche usando `--` prima di `*` (nota che `--` significa che l'input su
 ```bash
 7za a /backup/$filename.zip -t7z -snl -p$pass -- *
 ```
-E puoi creare file nella cartella in cui viene eseguito questo, potresti creare il file `@root.txt` e il file `root.txt` che è un **symlink** al file che vuoi leggere:
+E puoi creare file nella cartella in cui viene eseguito questo, potresti creare il file `@root.txt` e il file `root.txt` come un **symlink** al file che vuoi leggere:
 ```bash
 cd /path/to/7z/acting/folder
 touch @root.txt

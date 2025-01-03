@@ -15,9 +15,9 @@ Gli user namespace sono particolarmente utili nella containerizzazione, dove ogn
 3. All'interno di un user namespace, **i processi possono avere pieni privilegi di root (UID 0) per operazioni all'interno del namespace**, pur avendo privilegi limitati al di fuori del namespace. Questo consente **ai container di funzionare con capacità simili a quelle di root all'interno del proprio namespace senza avere pieni privilegi di root sul sistema host**.
 4. I processi possono spostarsi tra i namespace utilizzando la chiamata di sistema `setns()` o creare nuovi namespace utilizzando le chiamate di sistema `unshare()` o `clone()` con il flag `CLONE_NEWUSER`. Quando un processo si sposta in un nuovo namespace o ne crea uno, inizierà a utilizzare le mappature degli ID utente e gruppo associate a quel namespace.
 
-## Laboratorio:
+## Lab:
 
-### Crea diversi Namespace
+### Crea diversi Namespaces
 
 #### CLI
 ```bash
@@ -31,7 +31,7 @@ Montando una nuova istanza del filesystem `/proc` se utilizzi il parametro `--mo
 
 Quando `unshare` viene eseguito senza l'opzione `-f`, si incontra un errore a causa del modo in cui Linux gestisce i nuovi namespace PID (Process ID). I dettagli chiave e la soluzione sono delineati di seguito:
 
-1. **Spiegazione del problema**:
+1. **Spiegazione del Problema**:
 
 - Il kernel Linux consente a un processo di creare nuovi namespace utilizzando la chiamata di sistema `unshare`. Tuttavia, il processo che avvia la creazione di un nuovo namespace PID (denominato processo "unshare") non entra nel nuovo namespace; solo i suoi processi figli lo fanno.
 - Eseguire `%unshare -p /bin/bash%` avvia `/bin/bash` nello stesso processo di `unshare`. Di conseguenza, `/bin/bash` e i suoi processi figli si trovano nel namespace PID originale.
@@ -100,10 +100,10 @@ root       27756   27755  0 21:11 pts/10   00:00:00 /bin/bash
 
 Nel caso dei namespace utente, **quando viene creato un nuovo namespace utente, il processo che entra nel namespace riceve un insieme completo di capacità all'interno di quel namespace**. Queste capacità consentono al processo di eseguire operazioni privilegiate come **montare** **filesystem**, creare dispositivi o cambiare la proprietà dei file, ma **solo nel contesto del proprio namespace utente**.
 
-Ad esempio, quando hai la capacità `CAP_SYS_ADMIN` all'interno di un namespace utente, puoi eseguire operazioni che normalmente richiedono questa capacità, come montare filesystem, ma solo nel contesto del tuo namespace utente. Qualsiasi operazione eseguita con questa capacità non influenzerà il sistema host o altri namespace.
+Ad esempio, quando hai la capacità `CAP_SYS_ADMIN` all'interno di un namespace utente, puoi eseguire operazioni che normalmente richiedono questa capacità, come montare filesystem, ma solo nel contesto del tuo namespace utente. Qualsiasi operazione che esegui con questa capacità non influenzerà il sistema host o altri namespace.
 
 > [!WARNING]
-> Pertanto, anche se ottenere un nuovo processo all'interno di un nuovo namespace utente **ti restituirà tutte le capacità** (CapEff: 000001ffffffffff), in realtà puoi **utilizzare solo quelle relative al namespace** (montaggio ad esempio) ma non tutte. Quindi, questo da solo non è sufficiente per sfuggire a un contenitore Docker.
+> Pertanto, anche se ottenere un nuovo processo all'interno di un nuovo namespace utente **ti restituirà tutte le capacità** (CapEff: 000001ffffffffff), in realtà puoi **utilizzare solo quelle relative al namespace** (montaggio ad esempio) ma non tutte. Quindi, questo da solo non è sufficiente per sfuggire a un container Docker.
 ```bash
 # There are the syscalls that are filtered after changing User namespace with:
 unshare -UmCpf  bash

@@ -8,7 +8,7 @@
 
 Ci sono **due versioni di cgroups**: versione 1 e versione 2. Entrambe possono essere utilizzate contemporaneamente su un sistema. La principale distinzione è che **cgroups versione 2** introduce una **struttura gerarchica, simile a un albero**, che consente una distribuzione delle risorse più sfumata e dettagliata tra i gruppi di processi. Inoltre, la versione 2 porta vari miglioramenti, tra cui:
 
-Oltre alla nuova organizzazione gerarchica, cgroups versione 2 ha anche introdotto **diverse altre modifiche e miglioramenti**, come il supporto per **nuovi controller delle risorse**, un migliore supporto per le applicazioni legacy e prestazioni migliorate.
+Oltre alla nuova organizzazione gerarchica, la cgroups versione 2 ha anche introdotto **diverse altre modifiche e miglioramenti**, come il supporto per **nuovi controller delle risorse**, un migliore supporto per le applicazioni legacy e prestazioni migliorate.
 
 In generale, cgroups **versione 2 offre più funzionalità e migliori prestazioni** rispetto alla versione 1, ma quest'ultima può ancora essere utilizzata in determinate situazioni in cui la compatibilità con sistemi più vecchi è una preoccupazione.
 
@@ -57,7 +57,7 @@ I processi sono assegnati ai cgroups **scrivendo il loro ID di processo (PID) ne
 ```bash
 echo [pid] > cgroup.procs
 ```
-Allo stesso modo, **modificare gli attributi del cgroup, come impostare un limite di PID**, viene fatto scrivendo il valore desiderato nel file pertinente. Per impostare un massimo di 3.000 PID per un cgroup:
+Allo stesso modo, **modificare gli attributi del cgroup, come impostare un limite di PID**, si fa scrivendo il valore desiderato nel file pertinente. Per impostare un massimo di 3.000 PID per un cgroup:
 ```bash
 echo 3000 > pids.max
 ```

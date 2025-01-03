@@ -199,19 +199,19 @@ Con i ticket di servizio ottenuti è possibile provare ad accedere alle condivis
 smbutil view //computer.fqdn
 mount -t smbfs //server/folder /local/mount/point
 ```
-## Accesso al Portachiavi
+## Accessing the Keychain
 
-Il Portachiavi contiene probabilmente informazioni sensibili che, se accessibili senza generare un prompt, potrebbero aiutare a portare avanti un esercizio di red team:
+Il Keychain contiene molto probabilmente informazioni sensibili che, se accessibili senza generare un prompt, potrebbero aiutare a portare avanti un esercizio di red team:
 
 {{#ref}}
 macos-keychain.md
 {{#endref}}
 
-## Servizi Esterni
+## External Services
 
-Il Red Teaming su MacOS è diverso dal Red Teaming su Windows regolare poiché di solito **MacOS è integrato con diverse piattaforme esterne direttamente**. Una configurazione comune di MacOS è accedere al computer utilizzando **credenziali sincronizzate di OneLogin e accedere a diversi servizi esterni** (come github, aws...) tramite OneLogin.
+Il MacOS Red Teaming è diverso dal regolare Windows Red Teaming poiché di solito **MacOS è integrato con diverse piattaforme esterne direttamente**. Una configurazione comune di MacOS è accedere al computer utilizzando **credenziali sincronizzate OneLogin e accedere a diversi servizi esterni** (come github, aws...) tramite OneLogin.
 
-## Tecniche Misc del Red Team
+## Misc Red Team techniques
 
 ### Safari
 
@@ -219,7 +219,7 @@ Quando un file viene scaricato in Safari, se è un file "sicuro", verrà **apert
 
 <figure><img src="../../images/image (226).png" alt=""><figcaption></figcaption></figure>
 
-## Riferimenti
+## References
 
 - [**https://www.youtube.com/watch?v=IiMladUbL6E**](https://www.youtube.com/watch?v=IiMladUbL6E)
 - [**https://medium.com/xm-cyber/introducing-machound-a-solution-to-macos-active-directory-based-attacks-2a425f0a22b6**](https://medium.com/xm-cyber/introducing-machound-a-solution-to-macos-active-directory-based-attacks-2a425f0a22b6)

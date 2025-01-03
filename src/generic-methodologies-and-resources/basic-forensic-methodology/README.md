@@ -1,30 +1,30 @@
-# Basic Forensic Methodology
+# Metodologia Forense di Base
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Creating and Mounting an Image
+## Creazione e Montaggio di un'Immagine
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/image-acquisition-and-mount.md
 {{#endref}}
 
-## Malware Analysis
+## Analisi del Malware
 
-This **isn't necessary the first step to perform once you have the image**. But you can use this malware analysis techniques independently if you have a file, a file-system image, memory image, pcap... so it's good to **keep these actions in mind**:
+Questo **non è necessariamente il primo passo da eseguire una volta ottenuta l'immagine**. Ma puoi utilizzare queste tecniche di analisi del malware in modo indipendente se hai un file, un'immagine del file system, un'immagine della memoria, pcap... quindi è utile **tenere a mente queste azioni**:
 
 {{#ref}}
 malware-analysis.md
 {{#endref}}
 
-## Inspecting an Image
+## Ispezione di un'Immagine
 
-if you are given a **forensic image** of a device you can start **analyzing the partitions, file-system** used and **recovering** potentially **interesting files** (even deleted ones). Learn how in:
+Se ti viene fornita un'**immagine forense** di un dispositivo, puoi iniziare **ad analizzare le partizioni, il file-system** utilizzato e **recuperare** potenzialmente **file interessanti** (anche quelli eliminati). Scopri come in:
 
 {{#ref}}
 partitions-file-systems-carving/
 {{#endref}}
 
-Depending on the used OSs and even platform different interesting artifacts should be searched:
+A seconda dei sistemi operativi utilizzati e persino della piattaforma, dovrebbero essere cercati diversi artefatti interessanti:
 
 {{#ref}}
 windows-forensics/
@@ -38,42 +38,42 @@ linux-forensics.md
 docker-forensics.md
 {{#endref}}
 
-## Deep inspection of specific file-types and Software
+## Ispezione approfondita di tipi di file specifici e Software
 
-If you have very **suspicious** **file**, then **depending on the file-type and software** that created it several **tricks** may be useful.\
-Read the following page to learn some interesting tricks:
+Se hai un **file** molto **sospetto**, allora **a seconda del tipo di file e del software** che lo ha creato, potrebbero essere utili diversi **trucchi**.\
+Leggi la pagina seguente per scoprire alcuni trucchi interessanti:
 
 {{#ref}}
 specific-software-file-type-tricks/
 {{#endref}}
 
-I want to do a special mention to the page:
+Voglio fare una menzione speciale alla pagina:
 
 {{#ref}}
 specific-software-file-type-tricks/browser-artifacts.md
 {{#endref}}
 
-## Memory Dump Inspection
+## Ispezione del Dump di Memoria
 
 {{#ref}}
 memory-dump-analysis/
 {{#endref}}
 
-## Pcap Inspection
+## Ispezione Pcap
 
 {{#ref}}
 pcap-inspection/
 {{#endref}}
 
-## **Anti-Forensic Techniques**
+## **Tecniche Anti-Forensi**
 
-Keep in mind the possible use of anti-forensic techniques:
+Tieni a mente il possibile utilizzo di tecniche anti-forensi:
 
 {{#ref}}
 anti-forensic-techniques.md
 {{#endref}}
 
-## Threat Hunting
+## Ricerca di Minacce
 
 {{#ref}}
 file-integrity-monitoring.md
