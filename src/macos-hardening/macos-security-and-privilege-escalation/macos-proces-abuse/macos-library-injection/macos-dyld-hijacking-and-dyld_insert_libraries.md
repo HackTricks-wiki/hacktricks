@@ -22,7 +22,7 @@ execv("/bin/bash", 0);
 //system("cp -r ~/Library/Messages/ /tmp/Messages/");
 }
 ```
-Бінарний файл для атаки:
+Бінарний для атаки:
 ```c
 // gcc hello.c -o hello
 #include <stdio.h>

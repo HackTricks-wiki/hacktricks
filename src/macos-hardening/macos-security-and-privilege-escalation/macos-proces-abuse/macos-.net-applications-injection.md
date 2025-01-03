@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Це резюме посту [https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/](https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/). Перевірте його для отримання додаткових деталей!**
+**Це резюме поста [https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/](https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/). Перевірте його для отримання додаткових деталей!**
 
 ## .NET Core Debugging <a href="#net-core-debugging" id="net-core-debugging"></a>
 
@@ -54,7 +54,7 @@ read(rd, &sReceiveHeader, sizeof(MessageHeader));
 ```
 ## Читання пам'яті
 
-Once a debugging session is established, memory can be read using the [`MT_ReadMemory`](https://github.com/dotnet/runtime/blob/f3a45a91441cf938765bafc795cbf4885cad8800/src/coreclr/src/debug/shared/dbgtransportsession.cpp#L1896) message type. The function readMemory is detailed, performing the necessary steps to send a read request and retrieve the response:
+Як тільки сесія налагодження встановлена, пам'ять можна читати за допомогою типу повідомлення [`MT_ReadMemory`](https://github.com/dotnet/runtime/blob/f3a45a91441cf938765bafc795cbf4885cad8800/src/coreclr/src/debug/shared/dbgtransportsession.cpp#L1896). Функція readMemory детально описує необхідні кроки для відправки запиту на читання та отримання відповіді:
 ```c
 bool readMemory(void *addr, int len, unsigned char **output) {
 // Allocation and initialization
@@ -68,9 +68,9 @@ return true;
 ```
 Повний доказ концепції (POC) доступний [тут](https://gist.github.com/xpn/95eefc14918998853f6e0ab48d9f7b0b).
 
-## Запис пам'яті
+## Запис у пам'ять
 
-Аналогічно, пам'ять можна записувати за допомогою функції `writeMemory`. Процес включає встановлення типу повідомлення на `MT_WriteMemory`, вказівку адреси та довжини даних, а потім відправку даних:
+Аналогічно, пам'ять можна записати за допомогою функції `writeMemory`. Процес включає встановлення типу повідомлення на `MT_WriteMemory`, вказівку адреси та довжини даних, а потім відправку даних:
 ```c
 bool writeMemory(void *addr, int len, unsigned char *input) {
 // Increment IDs, set message type, and specify memory location
@@ -84,7 +84,7 @@ return true;
 ```
 Пов'язаний POC доступний [тут](https://gist.github.com/xpn/7c3040a7398808747e158a25745380a5).
 
-## .NET Core Code Execution <a href="#net-core-code-execution" id="net-core-code-execution"></a>
+## .NET Core Виконання Коду <a href="#net-core-code-execution" id="net-core-code-execution"></a>
 
 Щоб виконати код, потрібно визначити область пам'яті з правами rwx, що можна зробити за допомогою vmmap -pages:
 ```bash
@@ -93,13 +93,13 @@ vmmap -pages 35829 | grep "rwx/rwx"
 ```
 Знаходження місця для перезапису вказівника функції є необхідним, і в .NET Core це можна зробити, націлившись на **Dynamic Function Table (DFT)**. Ця таблиця, детально описана в [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h), використовується середовищем виконання для допоміжних функцій JIT-компіляції.
 
-Для систем x64 можна використовувати підхід підбору підписів для знаходження посилання на символ `_hlpDynamicFuncTable` у `libcorclr.dll`.
+Для систем x64 можна використовувати підхід підбору сигнатур для знаходження посилання на символ `_hlpDynamicFuncTable` у `libcorclr.dll`.
 
 Функція налагодження `MT_GetDCB` надає корисну інформацію, включаючи адресу допоміжної функції `m_helperRemoteStartAddr`, що вказує на місцезнаходження `libcorclr.dll` у пам'яті процесу. Ця адреса потім використовується для початку пошуку DFT і перезапису вказівника функції адресою shellcode.
 
 Повний код POC для ін'єкції в PowerShell доступний [тут](https://gist.github.com/xpn/b427998c8b3924ab1d63c89d273734b6).
 
-## Посилання
+## References
 
 - [https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/](https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/)
 

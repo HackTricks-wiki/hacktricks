@@ -27,7 +27,7 @@
 
 Щоб дослідити вміст бандла, такого як `Safari.app`, можна використовувати наступну команду: `bash ls -lR /Applications/Safari.app/Contents`
 
-Це дослідження виявляє каталоги, такі як `_CodeSignature`, `MacOS`, `Resources`, та файли, такі як `Info.plist`, кожен з яких виконує унікальну роль від забезпечення безпеки програми до визначення її інтерфейсу користувача та операційних параметрів.
+Це дослідження виявляє каталоги, такі як `_CodeSignature`, `MacOS`, `Resources`, та файли, такі як `Info.plist`, кожен з яких виконує унікальну роль, від забезпечення безпеки програми до визначення її інтерфейсу користувача та операційних параметрів.
 
 #### Additional Bundle Directories
 
@@ -39,6 +39,6 @@
 
 Ця структура забезпечує, що всі необхідні компоненти інкапсульовані в бандлі, що сприяє модульному та безпечному середовищу програми.
 
-Для отримання більш детальної інформації про ключі `Info.plist` та їх значення, документація розробника Apple надає обширні ресурси: [Apple Info.plist Key Reference](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html).
+Для отримання більш детальної інформації про ключі `Info.plist` та їх значення, документація для розробників Apple надає обширні ресурси: [Apple Info.plist Key Reference](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html).
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -14,12 +14,12 @@
 - **`RunAsNode`**: Якщо вимкнено, заважає використанню змінної середовища **`ELECTRON_RUN_AS_NODE`** для ін'єкції коду.
 - **`EnableNodeCliInspectArguments`**: Якщо вимкнено, параметри, такі як `--inspect`, `--inspect-brk`, не будуть враховані. Уникаючи таким чином ін'єкції коду.
 - **`EnableEmbeddedAsarIntegrityValidation`**: Якщо увімкнено, завантажений **`asar`** **файл** буде **перевірений** macOS. **Запобігаючи** таким чином **ін'єкції коду** шляхом модифікації вмісту цього файлу.
-- **`OnlyLoadAppFromAsar`**: Якщо це увімкнено, замість того, щоб шукати завантаження в наступному порядку: **`app.asar`**, **`app`** і нарешті **`default_app.asar`**. Він перевірятиме та використовуватиме лише app.asar, таким чином забезпечуючи, що при **поєднанні** з параметром **`embeddedAsarIntegrityValidation`** неможливо **завантажити неперевірений код**.
+- **`OnlyLoadAppFromAsar`**: Якщо це увімкнено, замість пошуку завантаження в наступному порядку: **`app.asar`**, **`app`** і нарешті **`default_app.asar`**. Він перевірятиме та використовуватиме лише app.asar, таким чином забезпечуючи, що при **поєднанні** з параметром **`embeddedAsarIntegrityValidation`** неможливо **завантажити неперевірений код**.
 - **`LoadBrowserProcessSpecificV8Snapshot`**: Якщо увімкнено, процес браузера використовує файл під назвою `browser_v8_context_snapshot.bin` для свого V8 знімка.
 
 Ще один цікавий параметр, який не запобігатиме ін'єкції коду:
 
-- **EnableCookieEncryption**: Якщо увімкнено, сховище куків на диску шифрується за допомогою криптографічних ключів на рівні ОС.
+- **EnableCookieEncryption**: Якщо увімкнено, сховище куків на диску шифрується за допомогою криптографічних ключів рівня ОС.
 
 ### Checking Electron Fuses
 
@@ -46,7 +46,7 @@ LoadBrowserProcessSpecificV8Snapshot is Disabled
 grep -R "dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX" Slack.app/
 Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework matches
 ```
-Ви можете завантажити цей файл на [https://hexed.it/](https://hexed.it/) і шукати попередній рядок. Після цього рядка ви можете побачити в ASCII число "0" або "1", що вказує, чи кожен запобіжник вимкнений чи увімкнений. Просто змініть шістнадцятковий код (`0x30` - це `0`, а `0x31` - це `1`), щоб **змінити значення запобіжників**.
+Ви можете завантажити цей файл на [https://hexed.it/](https://hexed.it/) і шукати попередній рядок. Після цього рядка ви можете побачити в ASCII число "0" або "1", що вказує, чи кожен запобіжник вимкнений або увімкнений. Просто змініть шістнадцятковий код (`0x30` - це `0`, а `0x31` - це `1`), щоб **змінити значення запобіжників**.
 
 <figure><img src="../../../images/image (34).png" alt=""><figcaption></figcaption></figure>
 
@@ -76,7 +76,7 @@ npx asar pack app-decomp app-new.asar
 ```
 ## RCE з `ELECTRON_RUN_AS_NODE` <a href="#electron_run_as_node" id="electron_run_as_node"></a>
 
-Згідно з [**документацією**](https://www.electronjs.org/docs/latest/api/environment-variables#electron_run_as_node), якщо ця змінна середовища встановлена, процес буде запущено як звичайний процес Node.js.
+Згідно з [**документацією**](https://www.electronjs.org/docs/latest/api/environment-variables#electron_run_as_node), якщо ця змінна середовища встановлена, вона запустить процес як звичайний процес Node.js.
 ```bash
 # Run this
 ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
@@ -147,7 +147,7 @@ NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Di
 ```
 ## RCE з інспекцією
 
-Згідно з [**цією**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f), якщо ви виконаєте додаток Electron з такими прапорами, як **`--inspect`**, **`--inspect-brk`** та **`--remote-debugging-port`**, **порт налагодження буде відкритий**, тому ви зможете підключитися до нього (наприклад, з Chrome у `chrome://inspect`) і ви зможете **впровадити код у нього** або навіть запустити нові процеси.\
+Згідно з [**цією**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f) інформацією, якщо ви виконаєте додаток Electron з такими прапорами, як **`--inspect`**, **`--inspect-brk`** та **`--remote-debugging-port`**, **порт налагодження буде відкритий**, тому ви зможете підключитися до нього (наприклад, з Chrome у `chrome://inspect`) і ви зможете **впроваджувати код у нього** або навіть запускати нові процеси.\
 Наприклад:
 ```bash
 /Applications/Signal.app/Contents/MacOS/Signal --inspect=9229
@@ -157,11 +157,11 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 > [!CAUTION]
 > Якщо запобіжник **`EnableNodeCliInspectArguments`** вимкнено, додаток **ігноруватиме параметри node** (такі як `--inspect`) під час запуску, якщо змінна середовища **`ELECTRON_RUN_AS_NODE`** не встановлена, яка також буде **ігноруватися**, якщо запобіжник **`RunAsNode`** вимкнено.
 >
-> Однак ви все ще можете використовувати **електронний параметр `--remote-debugging-port=9229`**, але попередній payload не спрацює для виконання інших процесів.
+> Однак ви все ще можете використовувати **електронний параметр `--remote-debugging-port=9229`**, але попереднє навантаження не спрацює для виконання інших процесів.
 
-Використовуючи параметр **`--remote-debugging-port=9222`**, можна вкрасти деяку інформацію з Electron App, таку як **історія** (з командами GET) або **куки** браузера (оскільки вони **дешифруються** всередині браузера і є **json endpoint**, який їх надасть).
+Використовуючи параметр **`--remote-debugging-port=9222`**, можна вкрасти деяку інформацію з Electron App, таку як **історія** (з командами GET) або **куки** браузера (оскільки вони **дешифруються** всередині браузера і є **json-інтерфейс**, який їх надає).
 
-Ви можете дізнатися, як це зробити [**тут**](https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e) і [**тут**](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f) та використовувати автоматичний інструмент [WhiteChocolateMacademiaNut](https://github.com/slyd0g/WhiteChocolateMacademiaNut) або простий скрипт, як:
+Ви можете дізнатися, як це зробити [**тут**](https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e) і [**тут**](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f) і використовувати автоматичний інструмент [WhiteChocolateMacademiaNut](https://github.com/slyd0g/WhiteChocolateMacademiaNut) або простий скрипт, як:
 ```python
 import websocket
 ws = websocket.WebSocket()
@@ -187,14 +187,14 @@ print(ws.recv()
 <true/>
 </dict>
 ```
-## TCC Bypass зловживаючи старими версіями
+## TCC Bypass зловживанням старими версіями
 
 > [!TIP]
 > Демон TCC з macOS не перевіряє виконувану версію програми. Тому, якщо ви **не можете інжектувати код в Electron додаток** за допомогою будь-якої з попередніх технік, ви можете завантажити попередню версію APP і інжектувати код в неї, оскільки вона все ще отримає привілеї TCC (якщо тільки Trust Cache не завадить цьому).
 
 ## Запуск не JS коду
 
-Попередні техніки дозволять вам запускати **JS код всередині процесу електронного додатку**. Однак пам'ятайте, що **дочірні процеси працюють під тим же профілем пісочниці**, що й батьківський додаток, і **успадковують їхні TCC дозволи**.\
+Попередні техніки дозволять вам запускати **JS код всередині процесу електронного додатку**. Однак пам'ятайте, що **дочірні процеси працюють під тим же профілем пісочниці**, що й батьківський додаток і **успадковують їх TCC дозволи**.\
 Отже, якщо ви хочете зловживати правами доступу до камери або мікрофона, наприклад, ви можете просто **запустити інший бінар з процесу**.
 
 ## Автоматичне інжектування

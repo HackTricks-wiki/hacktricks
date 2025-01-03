@@ -50,7 +50,7 @@ Swift має свою власну **конвенцію виклику**, яку
 - Приклад: `cmp rax, rdx` — Порівнює `rax` з `rdx`.
 - **`je`, `jne`, `jl`, `jge`, ...**: **Умовні стрибки**, які змінюють потік управління на основі результатів попереднього `cmp` або тесту.
 - Приклад: Після інструкції `cmp rax, rdx`, `je label` — Стрибає до `label`, якщо `rax` дорівнює `rdx`.
-- **`syscall`**: Використовується для **системних викликів** в деяких системах x64 (наприклад, в сучасному Unix).
+- **`syscall`**: Використовується для **системних викликів** в деяких системах x64 (наприклад, в сучасних Unix).
 - **`sysenter`**: Оптимізована інструкція **системного виклику** на деяких платформах.
 
 ### **Прокол функції**
@@ -78,7 +78,7 @@ Swift має свою власну **конвенцію виклику**, яку
 #define SYSCALL_CLASS_DIAG	4	/* Diagnostics */
 #define SYSCALL_CLASS_IPC	5	/* Mach IPC */
 ```
-Тоді ви можете знайти кожен номер системного виклику [**за цим посиланням**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)**:**
+Тоді ви можете знайти кожен номер системного виклику [**в цьому URL**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)**:**
 ```c
 0	AUE_NULL	ALL	{ int nosys(void); }   { indirect syscall }
 1	AUE_EXIT	ALL	{ void exit(int rval); }
@@ -171,7 +171,7 @@ return 0;
 Взято з [**тут**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s) та пояснено.
 
 {{#tabs}}
-{{#tab name="with adr"}}
+{{#tab name="з adr"}}
 ```armasm
 bits 64
 global _main
@@ -209,7 +209,7 @@ syscall
 
 #### Читати за допомогою cat
 
-Мета полягає в виконанні `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`, тому другим аргументом (x1) є масив параметрів (які в пам'яті означають стек адрес).
+Мета полягає в виконанні `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`, тому другий аргумент (x1) є масивом параметрів (які в пам'яті означають стек адрес).
 ```armasm
 bits 64
 section .text
@@ -280,7 +280,7 @@ touch_command:  db "touch /tmp/lalala", 0
 ```
 #### Bind shell
 
-Bind shell з [https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html) на **порті 4444**
+Bind shell з [https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html) на **порт 4444**
 ```armasm
 section .text
 global _main
