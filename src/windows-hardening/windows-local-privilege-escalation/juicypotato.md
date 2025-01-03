@@ -2,8 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-> [!WARNING]
-> **JuicyPotato ne radi** na Windows Server 2019 i Windows 10 verziji 1809 i novijim. Međutim, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato) mogu se koristiti za **iskorišćavanje istih privilegija i dobijanje `NT AUTHORITY\SYSTEM`** nivo pristupa. _**Proverite:**_
+> [!WARNING] > **JuicyPotato ne radi** na Windows Server 2019 i Windows 10 verziji 1809 i novijim. Međutim, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato) mogu se koristiti za **iskorišćavanje istih privilegija i dobijanje `NT AUTHORITY\SYSTEM`** nivo pristupa. _**Proverite:**_
 
 {{#ref}}
 roguepotato-and-printspoofer.md
@@ -46,8 +45,8 @@ JuicyPotato vam omogućava:
 - `oba`
 - **Proces za pokretanje** _pokrenite izvršni fajl ili skriptu ako eksploatacija uspe_
 - **Argument procesa** _prilagodite argumente pokrenutog procesa_
-- **RPC adresa servera** _za diskretniji pristup možete se autentifikovati na eksterni RPC server_
-- **RPC port servera** _korisno ako želite da se autentifikujete na eksterni server i vatrozid blokira port `135`…_
+- **RPC Server adresa** _za diskretniji pristup možete se autentifikovati na eksterni RPC server_
+- **RPC Server port** _korisno ako želite da se autentifikujete na eksterni server i vatrozid blokira port `135`…_
 - **TEST mod** _pretežno za testiranje, tj. testiranje CLSID-ova. Kreira DCOM i štampa korisnika tokena. Pogledajte_ [_ovde za testiranje_](http://ohpe.it/juicy-potato/Test/)
 
 ### Korišćenje <a href="#usage" id="usage"></a>
@@ -108,7 +107,9 @@ c:\Users\Public>
 
 Često, podrazumevani CLSID koji JuicyPotato koristi **ne funkcioniše** i eksploatacija ne uspeva. Obično je potrebno više pokušaja da se pronađe **funkcionalni CLSID**. Da biste dobili listu CLSID-ova koje treba isprobati za određeni operativni sistem, trebate posetiti ovu stranicu:
 
-{% embed url="https://ohpe.it/juicy-potato/CLSID/" %}
+{{#ref}}
+https://ohpe.it/juicy-potato/CLSID/
+{{#endref}}
 
 ### **Proveravanje CLSID-ova**
 

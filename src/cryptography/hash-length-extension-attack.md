@@ -8,8 +8,8 @@ Zamislite server koji **potpisuje** neke **podatke** tako što **dodaje** **tajn
 - **Čiste tekstualne podatke**
 - **Algoritam (i da je ranjiv na ovaj napad)**
 - **Padding je poznat**
-- Obično se koristi podrazumevani, tako da ako su ispunjena druga 3 zahteva, ovo takođe važi
-- Padding varira u zavisnosti od dužine tajne + podataka, zato je potrebna dužina tajne
+- Obično se koristi podrazumevani, tako da ako su ispunjena ostala 3 zahteva, ovo takođe važi
+- Padding varira u zavisnosti od dužine tajne + podataka, zato je dužina tajne potrebna
 
 Tada je moguće da **napadač** **doda** **podatke** i **generiše** važeći **potpis** za **prethodne podatke + dodate podatke**.
 
@@ -27,7 +27,9 @@ Ako napadač želi da doda string "append" može:
 
 ## **Alat**
 
-{% embed url="https://github.com/iagox86/hash_extender" %}
+{{#ref}}
+https://github.com/iagox86/hash_extender
+{{#endref}}
 
 ## Reference
 

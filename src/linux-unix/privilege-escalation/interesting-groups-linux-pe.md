@@ -1,11 +1,10 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-
 # Sudo/Admin Grupe
 
 ## **PE - Metod 1**
 
-**Ponekad**, **po defaultu \(ili zato što neka softverska rešenja to zahtevaju\)** unutar **/etc/sudoers** fajla možete pronaći neke od ovih linija:
+**Ponekad**, **po defaultu \(ili zato što neki softver to zahteva\)** unutar **/etc/sudoers** fajla možete pronaći neke od ovih linija:
 ```bash
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
@@ -30,7 +29,7 @@ Proverite sadržaj:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
-Tamo ćete pronaći koje grupe imaju dozvolu da izvrše **pkexec** i **po defaultu** u nekim linux distribucijama mogu **pojaviti** neke od grupa **sudo ili admin**.
+Tamo ćete pronaći koje grupe imaju dozvolu da izvrše **pkexec** i **po defaultu** u nekim linux sistemima mogu **pojaviti** neke od grupa **sudo ili admin**.
 
 Da **postanete root možete izvršiti**:
 ```bash
@@ -71,13 +70,13 @@ Korisnici iz **grupe shadow** mogu **čitati** **/etc/shadow** datoteku:
 ```text
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
-Dakle, pročitajte datoteku i pokušajte da **provalite neke hash-e**.
+Тако да, прочитајте датотеку и покушајте да **разбијете неке хешеве**.
 
-# Disk Grupa
+# Диск Група
 
-Ova privilegija je gotovo **ekvivalentna root pristupu** jer možete pristupiti svim podacima unutar mašine.
+Ова привилегија је скоро **еквивалентна root приступу** јер можете приступити свим подацима унутар машине.
 
-Datoteke: `/dev/sd[a-z][1-9]`
+Фајлови: `/dev/sd[a-z][1-9]`
 ```text
 debugfs /dev/sda1
 debugfs: cd /root
@@ -127,13 +126,16 @@ find / -group root -perm -g=w 2>/dev/null
 
 Možete montirati root datotečni sistem host mašine na volumen instance, tako da kada se instanca pokrene, odmah učitava `chroot` u taj volumen. Ovo vam efektivno daje root pristup na mašini.
 
-{% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
+{{#ref}}
+https://github.com/KrustyHack/docker-privilege-escalation
+{{#endref}}
 
-{% embed url="https://fosterelli.co/privilege-escalation-via-docker.html" %}
+{{#ref}}
+https://fosterelli.co/privilege-escalation-via-docker.html
+{{#endref}}
 
 # lxc/lxd Grupa
 
 [lxc - Eskalacija privilegija](lxd-privilege-escalation.md)
-
 
 {{#include ../../banners/hacktricks-training.md}}

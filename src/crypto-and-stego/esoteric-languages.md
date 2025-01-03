@@ -4,7 +4,7 @@
 
 ## [Esolangs Wiki](https://esolangs.org/wiki/Main_Page)
 
-Proverite tu viki da biste pronašli više esoteričnih jezika
+Proverite tu wiki da biste pronašli više esoteričnih jezika
 
 ## Malbolge
 ```
@@ -48,7 +48,9 @@ Take it to the top
 
 Whisper my world
 ```
-{% embed url="https://codewithrockstar.com/" %}
+{{#ref}}
+https://codewithrockstar.com/
+{{#endref}}
 
 ## PETOOH
 ```

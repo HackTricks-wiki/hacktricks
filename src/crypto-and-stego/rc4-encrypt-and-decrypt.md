@@ -1,11 +1,15 @@
 {{#include ../banners/hacktricks-training.md}}
 
-Ako možete na neki način enkriptovati običan tekst koristeći RC4, možete dekriptovati bilo koji sadržaj enkriptovan tim RC4 (koristeći istu lozinku) samo koristeći funkciju enkripcije.
+Ako na neki način možete enkriptovati običan tekst koristeći RC4, možete dekriptovati bilo koji sadržaj enkriptovan tim RC4 (koristeći istu lozinku) samo koristeći funkciju enkripcije.
 
-Ako možete enkriptovati poznati običan tekst, možete takođe izvući lozinku. Više referenci možete pronaći na HTB Kryptos mašini:
+Ako možete enkriptovati poznati običan tekst, takođe možete izvući lozinku. Više referenci možete pronaći na HTB Kryptos mašini:
 
-{% embed url="https://0xrick.github.io/hack-the-box/kryptos/" %}
+{{#ref}}
+https://0xrick.github.io/hack-the-box/kryptos/
+{{#endref}}
 
-{% embed url="https://0xrick.github.io/hack-the-box/kryptos/" %}
+{{#ref}}
+https://0xrick.github.io/hack-the-box/kryptos/
+{{#endref}}
 
 {{#include ../banners/hacktricks-training.md}}

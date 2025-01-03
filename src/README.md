@@ -1,13 +1,10 @@
 # HackTricks
 
-Reading time: {{ #reading_time }}
-
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
 _Hacktricks logotipi i animacija dizajnirani od_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
 
-> [!TIP]
-> **Dobrodošli u wiki gde ćete pronaći svaku hakersku trik/tehniku/šta god da sam naučio iz CTF-ova, aplikacija iz stvarnog života, čitajući istraživanja i vesti.**
+> [!TIP] > **Dobrodošli u wiki gde ćete pronaći svaku hakersku trik/tehniku/šta god da sam naučio iz CTF-ova, aplikacija iz stvarnog života, čitajući istraživanja i vesti.**
 
 Da biste započeli, pratite ovu stranicu gde ćete pronaći **tipičan tok** koji **treba da pratite kada radite pentesting** na jednoj ili više **mašina:**
 
@@ -35,7 +32,9 @@ Možete proveriti njihov **blog** na [**https://blog.stmcyber.com**](https://blo
 
 [**RootedCON**](https://www.rootedcon.com) je najrelevantnija sajber bezbednosna manifestacija u **Španiji** i jedna od najvažnijih u **Evropi**. Sa **misijom promovisanja tehničkog znanja**, ovaj kongres je vrelo mesto okupljanja za profesionalce u tehnologiji i sajber bezbednosti u svakoj disciplini.
 
-{% embed url="https://www.rootedcon.com/" %}
+{{#ref}}
+https://www.rootedcon.com/
+{{#endref}}
 
 ---
 
@@ -43,11 +42,13 @@ Možete proveriti njihov **blog** na [**https://blog.stmcyber.com**](https://blo
 
 <figure><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** je **Evropa #1** etička platforma za hakovanje i **bug bounty.**
+**Intigriti** je **broj 1** etička platforma za hakovanje i **bug bounty.**
 
 **Bug bounty savet**: **prijavite se** za **Intigriti**, premium **bug bounty platformu koju su kreirali hakeri, za hakere**! Pridružite nam se na [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) danas, i počnite da zarađujete nagrade do **$100,000**!
 
-{% embed url="https://go.intigriti.com/hacktricks" %}
+{{#ref}}
+https://go.intigriti.com/hacktricks
+{{#endref}}
 
 ---
 
@@ -60,7 +61,9 @@ Koristite [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium
 
 Pribavite pristup danas:
 
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+{{#ref}}
+https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks
+{{#endref}}
 
 ---
 
@@ -72,7 +75,7 @@ Pridružite se [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) 
 
 - **Hakerski uvidi:** Uključite se u sadržaj koji se bavi uzbuđenjem i izazovima hakovanja
 - **Vesti o hakovanju u realnom vremenu:** Budite u toku sa brzim svetom hakovanja kroz vesti i uvide u realnom vremenu
-- **Najnovija obaveštenja:** Budite informisani o najnovijim nagradama za bugove i važnim ažuriranjima platforme
+- **Najnovija obaveštenja:** Budite informisani o najnovijim bug bounty nagradama i važnim ažuriranjima platforme
 
 **Pridružite nam se na** [**Discord**](https://discord.com/invite/N3FrSbmwdy) i počnite da sarađujete sa vrhunskim hakerima danas!
 
@@ -82,11 +85,13 @@ Pridružite se [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) 
 
 <figure><img src="images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
 
-**Dobijte perspektivu hakera o vašim web aplikacijama, mreži i cloudu**
+**Dobijte perspektivu hakera na vaše web aplikacije, mrežu i oblak**
 
-**Pronađite i prijavite kritične, iskoristive ranjivosti sa stvarnim poslovnim uticajem.** Koristite naših 20+ prilagođenih alata za mapiranje napadačke površine, pronalaženje sigurnosnih problema koji vam omogućavaju da eskalirate privilegije, i koristite automatizovane eksploate za prikupljanje suštinskih dokaza, pretvarajući vaš trud u uverljive izveštaje.
+**Pronađite i prijavite kritične, iskoristive ranjivosti sa stvarnim poslovnim uticajem.** Koristite naših 20+ prilagođenih alata za mapiranje napadačke površine, pronalaženje sigurnosnih problema koji vam omogućavaju da eskalirate privilegije, i koristite automatizovane eksploate za prikupljanje bitnih dokaza, pretvarajući vaš trud u uverljive izveštaje.
 
-{% embed url="https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons" %}
+{{#ref}}
+https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons
+{{#endref}}
 
 ---
 
@@ -96,8 +101,8 @@ Pridružite se [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) 
 
 **SerpApi** nudi brze i lake API-je u realnom vremenu za **pristup rezultatima pretraživača**. Oni sakupljaju podatke sa pretraživača, upravljaju proxy-ima, rešavaju captcha izazove i analiziraju sve bogate strukturirane podatke za vas.
 
-Pretplata na jedan od planova SerpApi uključuje pristup više od 50 različitih API-ja za sakupljanje podataka sa različitih pretraživača, uključujući Google, Bing, Baidu, Yahoo, Yandex i druge.\
-Za razliku od drugih provajdera, **SerpApi ne sakuplja samo organske rezultate**. Odgovori SerpApi dosledno uključuju sve oglase, inline slike i video zapise, znanje grafove i druge elemente i funkcije prisutne u rezultatima pretrage.
+Pretplata na jedan od SerpApi planova uključuje pristup više od 50 različitih API-ja za sakupljanje podataka sa različitih pretraživača, uključujući Google, Bing, Baidu, Yahoo, Yandex i druge.\
+Za razliku od drugih provajdera, **SerpApi ne sakuplja samo organske rezultate**. SerpApi odgovori dosledno uključuju sve oglase, inline slike i video zapise, znanje grafove i druge elemente i funkcije prisutne u rezultatima pretrage.
 
 Trenutni klijenti SerpApi uključuju **Apple, Shopify i GrubHub**.\
 Za više informacija pogledajte njihov [**blog**](https://serpapi.com/blog/)**,** ili isprobajte primer u njihovom [**playground**](https://serpapi.com/playground)**.**\
@@ -111,7 +116,9 @@ Možete **napraviti besplatan nalog** [**ovde**](https://serpapi.com/users/sign_
 
 Naučite tehnologije i veštine potrebne za izvođenje istraživanja ranjivosti, penetracionog testiranja i obrnute inženjeringa kako biste zaštitili mobilne aplikacije i uređaje. **Savladajte iOS i Android bezbednost** kroz naše kurseve na zahtev i **dobijte sertifikat**:
 
-{% embed url="https://academy.8ksec.io/" %}
+{{#ref}}
+https://academy.8ksec.io/
+{{#endref}}
 
 ---
 
@@ -119,15 +126,17 @@ Naučite tehnologije i veštine potrebne za izvođenje istraživanja ranjivosti,
 
 <figure><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.nl) je profesionalna kompanija za sajber bezbednost sa sedištem u **Amsterdamu** koja pomaže **zaštiti** preduzeća **široko u svetu** od najnovijih pretnji u oblasti sajber bezbednosti pružajući **usluge ofanzivne bezbednosti** sa **modernim** pristupom.
+[**WebSec**](https://websec.nl) je profesionalna kompanija za sajber bezbednost sa sedištem u **Amsterdamu** koja pomaže **zaštiti** preduzeća **široko po svetu** od najnovijih pretnji u oblasti sajber bezbednosti pružajući **usluge ofanzivne bezbednosti** sa **modernim** pristupom.
 
 WebSec je **sve-u-jednom bezbednosna kompanija** što znači da rade sve; Pentesting, **Bezbednosne** revizije, Obuke o svesti, Phishing kampanje, Revizije koda, Razvoj eksploata, Outsourcing bezbednosnih stručnjaka i još mnogo toga.
 
-Još jedna zanimljiva stvar o WebSec-u je da, za razliku od industrijskog proseka, WebSec je **veoma siguran u svoje veštine**, do te mere da **garantuje najbolje kvalitetne rezultate**, kako stoji na njihovoj veb stranici "**Ako ne možemo da hakujemo, ne plaćate!**". Za više informacija pogledajte njihovu [**vеб страницу**](https://websec.nl/en/) i [**blog**](https://websec.nl/blog/)!
+Još jedna zanimljiva stvar o WebSec-u je da, za razliku od industrijskog proseka, WebSec je **veoma samouveren u svoje veštine**, do te mere da **garantuje najbolje kvalitetne rezultate**, kako stoji na njihovom sajtu "**Ako ne možemo da hakujemo, ne plaćate!**". Za više informacija pogledajte njihov [**sajt**](https://websec.nl/en/) i [**blog**](https://websec.nl/blog/)!
 
 Pored navedenog, WebSec je takođe **posvećen podržavalac HackTricks.**
 
-{% embed url="https://www.youtube.com/watch?v=Zq2JycGDCPM" %}
+{{#ref}}
+https://www.youtube.com/watch?v=Zq2JycGDCPM
+{{#endref}}
 
 ## License & Disclaimer
 

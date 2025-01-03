@@ -4,20 +4,20 @@
 
 ## Sažetak napada
 
-Zamislite server koji **potpisuje** neke **podatke** tako što **dodaje** **tajnu** nekim poznatim čistim tekstualnim podacima i zatim hešira te podatke. Ako znate:
+Zamislite server koji **potpisuje** neke **podatke** tako što **dodaje** **tajnu** na neke poznate podatke u čistom tekstu i zatim hešira te podatke. Ako znate:
 
-- **Dužinu tajne** (to se može takođe bruteforcovati iz datog opsega dužine)
-- **Čiste tekstualne podatke**
-- **Algoritam (i da je podložan ovom napadu)**
+- **Dužinu tajne** (to se može takođe bruteforce-ovati iz datog opsega dužine)
+- **Podatke u čistom tekstu**
+- **Algoritam (i da je ranjiv na ovaj napad)**
 - **Padding je poznat**
-- Obično se koristi podrazumevani, tako da ako su ispunjena druga 3 zahteva, ovo takođe važi
+- Obično se koristi podrazumevani, tako da ako su ispunjena druga 3 zahteva, ovo takođe jeste
 - Padding varira u zavisnosti od dužine tajne + podataka, zato je dužina tajne potrebna
 
 Tada je moguće da **napadač** **doda** **podatke** i **generiše** važeći **potpis** za **prethodne podatke + dodate podatke**.
 
 ### Kako?
 
-U suštini, ranjivi algoritmi generišu heš tako što prvo **heširaju blok podataka**, a zatim, **iz** **prethodno** kreiranog **heša** (stanja), **dodaju sledeći blok podataka** i **heširaju ga**.
+U suštini, ranjivi algoritmi generišu heševe tako što prvo **heširaju blok podataka**, a zatim, **iz** **prethodno** kreiranog **heša** (stanja), **dodaju sledeći blok podataka** i **heširaju ga**.
 
 Zamislite da je tajna "secret" a podaci su "data", MD5 od "secretdata" je 6036708eba0d11f6ef52ad44e8b74d5b.\
 Ako napadač želi da doda string "append" može:
@@ -29,7 +29,9 @@ Ako napadač želi da doda string "append" može:
 
 ### **Alat**
 
-{% embed url="https://github.com/iagox86/hash_extender" %}
+{{#ref}}
+https://github.com/iagox86/hash_extender
+{{#endref}}
 
 ### Reference
 

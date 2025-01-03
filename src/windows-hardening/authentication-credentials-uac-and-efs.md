@@ -65,7 +65,7 @@ LSA može sačuvati na disku neke kredencijale:
 
 ### NTDS.dit
 
-To je baza podataka Active Directory. Prisutna je samo u Kontrolerima domena.
+To je baza podataka Active Directory. Prisutna je samo na Kontrolerima domena.
 
 ## Defender
 
@@ -103,7 +103,7 @@ sc query windefend
 ```
 ## Encrypted File System (EFS)
 
-EFS osigurava datoteke putem enkripcije, koristeći **simetrični ključ** poznat kao **Ključ za enkripciju datoteka (FEK)**. Ovaj ključ je enkriptovan korisnikovim **javnim ključem** i smešten unutar $EFS **alternativnog toka podataka** enkriptovane datoteke. Kada je potrebna dekripcija, koristi se odgovarajući **privatni ključ** korisničkog digitalnog sertifikata za dekripciju FEK-a iz $EFS toka. Više detalja možete pronaći [ovde](https://en.wikipedia.org/wiki/Encrypting_File_System).
+EFS obezbeđuje datoteke putem enkripcije, koristeći **simetrični ključ** poznat kao **Ključ za enkripciju datoteka (FEK)**. Ovaj ključ je enkriptovan korisnikovim **javnim ključem** i smešten unutar $EFS **alternativnog toka podataka** enkriptovane datoteke. Kada je potrebna dekripcija, koristi se odgovarajući **privatni ključ** korisničkog digitalnog sertifikata za dekripciju FEK-a iz $EFS toka. Više detalja možete pronaći [ovde](https://en.wikipedia.org/wiki/Encrypting_File_System).
 
 **Scenariji dekripcije bez inicijacije korisnika** uključuju:
 
@@ -130,23 +130,25 @@ Takođe možete koristiti `cipher /e` i `cipher /d` unutar fascikle da **enkript
 
 #### Biti Autoritet Sistem
 
-Ovaj način zahteva da **žrtva korisnik** bude **pokrenut** u **procesu** unutar hosta. Ako je to slučaj, koristeći `meterpreter` sesije možete imitirati token procesa korisnika (`impersonate_token` iz `incognito`). Ili možete jednostavno `migrirati` u proces korisnika.
+Ovaj način zahteva da **žrtva korisnik** bude **pokrenut** u **procesu** unutar hosta. Ako je to slučaj, koristeći `meterpreter` sesije možete imitirati token procesa korisnika (`impersonate_token` iz `incognito`). Ili možete jednostavno `migrate` u proces korisnika.
 
 #### Poznavanje lozinke korisnika
 
-{% embed url="https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files" %}
+{{#ref}}
+https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
+{{#endref}}
 
 ## Group Managed Service Accounts (gMSA)
 
 Microsoft je razvio **Group Managed Service Accounts (gMSA)** kako bi pojednostavio upravljanje servisnim nalozima u IT infrastrukturnim sistemima. Za razliku od tradicionalnih servisnih naloga koji često imaju podešavanje "**Lozinka nikada ne ističe**" omogućeno, gMSA nude sigurnije i upravljivije rešenje:
 
-- **Automatsko upravljanje lozinkama**: gMSA koriste složenu, 240-karakternu lozinku koja se automatski menja prema politici domena ili računara. Ovaj proces se obavlja putem Microsoftove usluge za distribuciju ključeva (KDC), eliminišući potrebu za ručnim ažuriranjima lozinki.
+- **Automatsko upravljanje lozinkama**: gMSA koriste složenu, 240-karakternu lozinku koja se automatski menja u skladu sa politikom domena ili računara. Ovaj proces se obavlja putem Microsoftove usluge za distribuciju ključeva (KDC), eliminišući potrebu za ručnim ažuriranjima lozinki.
 - **Povećana sigurnost**: Ovi nalozi su imuni na zaključavanje i ne mogu se koristiti za interaktivna prijavljivanja, čime se povećava njihova sigurnost.
-- **Podrška za više hostova**: gMSA se mogu deliti između više hostova, što ih čini idealnim za usluge koje se pokreću na više servera.
+- **Podrška za više hostova**: gMSA se mogu deliti između više hostova, što ih čini idealnim za usluge koje se izvode na više servera.
 - **Mogućnost zakazanih zadataka**: Za razliku od upravljanih servisnih naloga, gMSA podržavaju pokretanje zakazanih zadataka.
-- **Pojednostavljeno upravljanje SPN-om**: Sistem automatski ažurira Ime servisnog glavnog imena (SPN) kada dođe do promena u detaljima sAMaccount-a računara ili DNS imenu, pojednostavljujući upravljanje SPN-om.
+- **Pojednostavljeno upravljanje SPN-om**: Sistem automatski ažurira Ime servisnog principala (SPN) kada dođe do promena u detaljima sAMaccount-a računara ili DNS imenu, pojednostavljujući upravljanje SPN-om.
 
-Lozinke za gMSA se čuvaju u LDAP svojstvu _**msDS-ManagedPassword**_ i automatski se resetuju svake 30 dana od strane kontrolera domena (DC). Ova lozinka, enkriptovani podatkovni blob poznat kao [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e), može se preuzeti samo od strane ovlašćenih administratora i servera na kojima su gMSA instalirani, osiguravajući sigurno okruženje. Da biste pristupili ovim informacijama, potrebna je sigurna veza kao što je LDAPS, ili veza mora biti autentifikovana sa 'Sealing & Secure'.
+Lozinke za gMSA se čuvaju u LDAP svojstvu _**msDS-ManagedPassword**_ i automatski se resetuju svake 30 dana od strane kontrolera domena (DC). Ova lozinka, enkriptovani podatkovni blob poznat kao [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e), može se dobiti samo od strane ovlašćenih administratora i servera na kojima su gMSA instalirani, obezbeđujući sigurno okruženje. Da biste pristupili ovim informacijama, potrebna je sigurna veza kao što je LDAPS, ili veza mora biti autentifikovana sa 'Sealing & Secure'.
 
 ![https://cube0x0.github.io/Relaying-for-gMSA/](../images/asd1.png)
 
@@ -160,7 +162,7 @@ Takođe, proverite ovu [web stranicu](https://cube0x0.github.io/Relaying-for-gMS
 
 ## LAPS
 
-**Rešenje za lozinku lokalnog administratora (LAPS)**, dostupno za preuzimanje sa [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), omogućava upravljanje lozinkama lokalnih administratora. Ove lozinke, koje su **nasumične**, jedinstvene i **redovno menjane**, čuvaju se centralno u Active Directory. Pristup ovim lozinkama je ograničen putem ACL-a na ovlašćene korisnike. Uz dodeljene dovoljne dozvole, omogućena je mogućnost čitanja lozinki lokalnih administratora.
+**Rešenje za lozinku lokalnog administratora (LAPS)**, dostupno za preuzimanje sa [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), omogućava upravljanje lozinkama lokalnog administratora. Ove lozinke, koje su **nasumične**, jedinstvene i **redovno menjane**, čuvaju se centralno u Active Directory. Pristup ovim lozinkama je ograničen putem ACL-a na ovlašćene korisnike. Uz dodeljene dovoljne dozvole, omogućena je mogućnost čitanja lozinki lokalnog administratora.
 
 {{#ref}}
 active-directory-methodology/laps.md
@@ -180,8 +182,8 @@ $ExecutionContext.SessionState.LanguageMode
 #Easy bypass
 Powershell -version 2
 ```
-U trenutnom Windows-u ta zaobilaženje neće raditi, ali možete koristiti [**PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM).\
-**Da biste ga kompajlirali, možda će vam biti potrebno** **da** _**dodate referencu**_ -> _Pretraži_ -> _Pretraži_ -> dodajte `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` i **promenite projekat na .Net4.5**.
+U trenutnom Windows-u ta zaobilaženja neće raditi, ali možete koristiti [**PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM).\
+**Da biste ga kompajlirali, možda ćete morati** **da** _**dodate referencu**_ -> _Pretraži_ -> _Pretraži_ -> dodajte `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` i **promenite projekat na .Net4.5**.
 
 #### Direktno zaobilaženje:
 ```bash
@@ -215,7 +217,7 @@ Powershell -command "Write-Host 'My voice is my passport, verify me.'"
 9º Use EncodeCommand
 $command = "Write-Host 'My voice is my passport, verify me.'" $bytes = [System.Text.Encoding]::Unicode.GetBytes($command) $encodedCommand = [Convert]::ToBase64String($bytes) powershell.exe -EncodedCommand $encodedCommand
 ```
-Više informacija se može naći [ovde](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/)
+Više informacija možete pronaći [ovde](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/)
 
 ## Interfejs za podršku bezbednosti (SSPI)
 
