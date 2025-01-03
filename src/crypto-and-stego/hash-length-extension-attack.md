@@ -2,7 +2,7 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Резюме атаки
+## Summary of the attack
 
 Уявіть собі сервер, який **підписує** деякі **дані**, **додаючи** **секрет** до відомих відкритих текстових даних, а потім хешуючи ці дані. Якщо ви знаєте:
 
@@ -15,7 +15,7 @@
 
 Тоді зловмисник може **додати** **дані** і **згенерувати** дійсну **підпис** для **попередніх даних + доданих даних**.
 
-### Як?
+### How?
 
 В основному, вразливі алгоритми генерують хеші, спочатку **хешуючи блок даних**, а потім, **з** **раніше** створеного **хешу** (стану), вони **додають наступний блок даних** і **хешують його**.
 
@@ -27,11 +27,13 @@
 - Додати рядок "append"
 - Завершити хеш, і отриманий хеш буде **дійсним для "secret" + "data" + "padding" + "append"**
 
-### **Інструмент**
+### **Tool**
 
-{% embed url="https://github.com/iagox86/hash_extender" %}
+{{#ref}}
+https://github.com/iagox86/hash_extender
+{{#endref}}
 
-### Посилання
+### References
 
 Ви можете знайти цю атаку добре поясненою в [https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
 

@@ -2,8 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-> [!WARNING]
-> **JuicyPotato не працює** на Windows Server 2019 та Windows 10 версії 1809 і новіших. Однак, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato) можуть бути використані для **отримання тих же привілеїв і доступу на рівні `NT AUTHORITY\SYSTEM`**. _**Перевірте:**_
+> [!WARNING] > **JuicyPotato не працює** на Windows Server 2019 та Windows 10 версії 1809 і новіших. Однак, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato) можуть бути використані для **отримання тих же привілеїв і доступу на рівні `NT AUTHORITY\SYSTEM`**. _**Перевірте:**_
 
 {{#ref}}
 roguepotato-and-printspoofer.md
@@ -11,7 +10,7 @@ roguepotato-and-printspoofer.md
 
 ## Juicy Potato (зловживання золотими привілеями) <a href="#juicy-potato-abusing-the-golden-privileges" id="juicy-potato-abusing-the-golden-privileges"></a>
 
-_Цукрова версія_ [_RottenPotatoNG_](https://github.com/breenmachine/RottenPotatoNG)_, з трохи соку, тобто **інший інструмент підвищення локальних привілеїв, з облікових записів служб Windows до NT AUTHORITY\SYSTEM**_
+_Солодка версія_ [_RottenPotatoNG_](https://github.com/breenmachine/RottenPotatoNG)_, з трохи соку, тобто **інший інструмент підвищення локальних привілеїв, з облікових записів служб Windows до NT AUTHORITY\SYSTEM**_
 
 #### Ви можете завантажити juicypotato з [https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts](https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts)
 
@@ -39,7 +38,7 @@ JuicyPotato дозволяє вам:
 
 - **Цільовий CLSID** _виберіть будь-який CLSID, який ви хочете._ [_Тут_](http://ohpe.it/juicy-potato/CLSID/) _ви можете знайти список, організований за ОС._
 - **COM порт прослуховування** _визначте COM порт прослуховування, який ви віддаєте перевагу (замість зашитого 6666)_
-- **IP-адреса прослуховування COM** _прив'яжіть сервер до будь-якої IP-адреси_
+- **COM IP-адреса прослуховування** _прив'яжіть сервер до будь-якої IP-адреси_
 - **Режим створення процесу** _в залежності від привілеїв імперсонованого користувача ви можете вибрати з:_
 - `CreateProcessWithToken` (потрібен `SeImpersonate`)
 - `CreateProcessAsUser` (потрібен `SeAssignPrimaryToken`)
@@ -108,13 +107,15 @@ c:\Users\Public>
 
 Часто стандартний CLSID, який використовує JuicyPotato, **не працює** і експлойт зазнає невдачі. Зазвичай, потрібно кілька спроб, щоб знайти **працюючий CLSID**. Щоб отримати список CLSID для конкретної операційної системи, вам слід відвідати цю сторінку:
 
-{% embed url="https://ohpe.it/juicy-potato/CLSID/" %}
+{{#ref}}
+https://ohpe.it/juicy-potato/CLSID/
+{{#endref}}
 
 ### **Перевірка CLSID**
 
 Спочатку вам знадобляться деякі виконувані файли, окрім juicypotato.exe.
 
-Завантажте [Join-Object.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/utils/Join-Object.ps1) і завантажте його у вашу сесію PS, а також завантажте та виконайте [GetCLSID.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/GetCLSID.ps1). Цей скрипт створить список можливих CLSID для тестування.
+Завантажте [Join-Object.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/utils/Join-Object.ps1) і завантажте його у вашу PS сесію, а також завантажте та виконайте [GetCLSID.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/GetCLSID.ps1). Цей скрипт створить список можливих CLSID для тестування.
 
 Потім завантажте [test_clsid.bat ](https://github.com/ohpe/juicy-potato/blob/master/Test/test_clsid.bat) (змініть шлях до списку CLSID та до виконуваного файлу juicypotato) і виконайте його. Він почне пробувати кожен CLSID, і **коли номер порту зміниться, це означатиме, що CLSID спрацював**.
 
