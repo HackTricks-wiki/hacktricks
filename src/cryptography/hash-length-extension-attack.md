@@ -2,13 +2,13 @@
 
 # 攻击总结
 
-想象一个服务器，它通过将一个**秘密**附加到一些已知的明文数据上并对该数据进行**签名**。如果你知道：
+想象一个服务器，它通过将一个**秘密**附加到一些已知的明文数据上并对该数据进行**签名**来**签名**一些**数据**。如果你知道：
 
-- **秘密的长度**（这也可以从给定的长度范围进行暴力破解）
+- **秘密的长度**（这也可以从给定的长度范围中暴力破解）
 - **明文数据**
 - **算法（并且它对这种攻击是脆弱的）**
 - **填充是已知的**
-- 通常使用默认填充，因此如果满足其他三个要求，这也是
+- 通常使用默认填充，因此如果满足其他3个要求，这也是
 - 填充根据秘密+数据的长度而变化，这就是为什么需要秘密的长度
 
 那么，**攻击者**可以**附加****数据**并为**之前的数据 + 附加的数据**生成一个有效的**签名**。
@@ -27,10 +27,12 @@
 
 ## **工具**
 
-{% embed url="https://github.com/iagox86/hash_extender" %}
+{{#ref}}
+https://github.com/iagox86/hash_extender
+{{#endref}}
 
 ## 参考
 
-你可以在[https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)找到对这个攻击的详细解释。
+你可以在[https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)找到对此攻击的详细解释。
 
 {{#include ../banners/hacktricks-training.md}}

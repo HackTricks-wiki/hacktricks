@@ -1,10 +1,10 @@
-# 神秘语言
+# 隐秘语言
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## [Esolangs Wiki](https://esolangs.org/wiki/Main_Page)
 
-查看该维基以搜索更多神秘语言
+查看该维基以搜索更多隐秘语言
 
 ## Malbolge
 ```
@@ -48,7 +48,9 @@ Take it to the top
 
 Whisper my world
 ```
-{% embed url="https://codewithrockstar.com/" %}
+{{#ref}}
+https://codewithrockstar.com/
+{{#endref}}
 
 ## PETOOH
 ```

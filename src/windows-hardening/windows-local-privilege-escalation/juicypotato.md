@@ -2,8 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-> [!WARNING]
-> **JuicyPotato在** Windows Server 2019 和 Windows 10 build 1809 及之后的版本上**无法工作**。然而， [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato) 可以用来 **利用相同的权限并获得 `NT AUTHORITY\SYSTEM`** 级别的访问权限。 _**检查：**_
+> [!WARNING] > **JuicyPotato在** Windows Server 2019 和 Windows 10 build 1809 及之后的版本上**无法工作**。然而， [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato) 可以用来 **利用相同的权限并获得 `NT AUTHORITY\SYSTEM`** 级别的访问权限。 _**检查：**_
 
 {{#ref}}
 roguepotato-and-printspoofer.md
@@ -19,7 +18,7 @@ _一个经过糖化的_ [_RottenPotatoNG_](https://github.com/breenmachine/Rotte
 
 [**来自 juicy-potato 的 Readme**](https://github.com/ohpe/juicy-potato/blob/master/README.md)**:**
 
-[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) 及其 [变种](https://github.com/decoder-it/lonelypotato) 利用基于 [`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [服务](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) 的权限提升链，具有在 `127.0.0.1:6666` 上的 MiTM 监听器，并且当你拥有 `SeImpersonate` 或 `SeAssignPrimaryToken` 权限时。在一次 Windows 构建审查中，我们发现了一个故意禁用 `BITS` 的设置，并且端口 `6666` 被占用。
+[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) 及其 [变体](https://github.com/decoder-it/lonelypotato) 利用基于 [`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [服务](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) 的权限提升链，具有在 `127.0.0.1:6666` 上的 MiTM 监听器，并且当你拥有 `SeImpersonate` 或 `SeAssignPrimaryToken` 权限时。在一次 Windows 构建审查中，我们发现一个设置，其中 `BITS` 被故意禁用，端口 `6666` 被占用。
 
 我们决定武器化 [RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG)：**向 Juicy Potato 打个招呼**。
 
@@ -27,11 +26,11 @@ _一个经过糖化的_ [_RottenPotatoNG_](https://github.com/breenmachine/Rotte
 
 我们发现，除了 `BITS` 之外，还有几个 COM 服务器可以被滥用。它们只需要：
 
-1. 由当前用户实例化，通常是具有模拟权限的“服务用户”
+1. 可由当前用户实例化，通常是具有模拟权限的“服务用户”
 2. 实现 `IMarshal` 接口
 3. 以提升的用户身份运行（SYSTEM，Administrator，…）
 
-经过一些测试，我们在多个 Windows 版本上获得并测试了一份广泛的 [有趣 CLSID 列表](http://ohpe.it/juicy-potato/CLSID/)。
+经过一些测试，我们获得并测试了一份在多个 Windows 版本上的 [有趣 CLSID 的广泛列表](http://ohpe.it/juicy-potato/CLSID/)。
 
 ### Juicy 细节 <a href="#juicy-details" id="juicy-details"></a>
 
@@ -108,7 +107,9 @@ c:\Users\Public>
 
 通常，JuicyPotato 使用的默认 CLSID **无法工作**，并且漏洞利用失败。通常，需要多次尝试才能找到一个 **有效的 CLSID**。要获取特定操作系统的 CLSID 列表，您应该访问此页面：
 
-{% embed url="https://ohpe.it/juicy-potato/CLSID/" %}
+{{#ref}}
+https://ohpe.it/juicy-potato/CLSID/
+{{#endref}}
 
 ### **检查 CLSID**
 
@@ -118,7 +119,7 @@ c:\Users\Public>
 
 然后下载 [test_clsid.bat ](https://github.com/ohpe/juicy-potato/blob/master/Test/test_clsid.bat)（更改 CLSID 列表和 juicypotato 可执行文件的路径）并执行它。它将开始尝试每个 CLSID，**当端口号改变时，这意味着 CLSID 有效**。
 
-**检查** 有效的 CLSID **使用参数 -c**
+**使用参数 -c 检查** 有效的 CLSID
 
 ## 参考
 

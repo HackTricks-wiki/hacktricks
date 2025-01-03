@@ -25,7 +25,7 @@
 
 ### [dotPeek](https://www.jetbrains.com/decompiler/)
 
-dotPeek 是一个反编译器，**反编译并检查多种格式**，包括 **库** (.dll)、**Windows 元数据文件** (.winmd) 和 **可执行文件** (.exe)。反编译后，程序集可以保存为 Visual Studio 项目 (.csproj)。
+dotPeek 是一个反编译器，**反编译并检查多种格式**，包括 **库** (.dll)、**Windows 元数据文件** (.winmd) 和 **可执行文件** (.exe)。一旦反编译，程序集可以保存为 Visual Studio 项目 (.csproj)。
 
 其优点在于，如果丢失的源代码需要从遗留程序集恢复，此操作可以节省时间。此外，dotPeek 提供了便捷的导航功能，使其成为 **Xamarin 算法分析** 的完美工具之一。
 
@@ -84,111 +84,113 @@ DebuggableAttribute.DebuggingModes.EnableEditAndContinue)]
 ```
 iisreset /noforce
 ```
-然后，为了开始调试，您应该关闭所有打开的文件，并在**调试选项卡**中选择**附加到进程...**：
+然后，为了开始调试，您应该关闭所有打开的文件，并在 **Debug Tab** 中选择 **Attach to Process...**：
 
 ![](<../../images/image (318).png>)
 
-然后选择**w3wp.exe**以附加到**IIS服务器**并点击**附加**：
+然后选择 **w3wp.exe** 以附加到 **IIS server** 并点击 **attach**：
 
 ![](<../../images/image (113).png>)
 
-现在我们正在调试该进程，是时候停止它并加载所有模块。首先点击_调试 >> 全部中断_，然后点击_**调试 >> 窗口 >> 模块**_：
+现在我们正在调试该进程，是时候停止它并加载所有模块。首先点击 _Debug >> Break All_，然后点击 _**Debug >> Windows >> Modules**_：
 
 ![](<../../images/image (132).png>)
 
 ![](<../../images/image (834).png>)
 
-在**模块**中点击任何模块并选择**打开所有模块**：
+在 **Modules** 中点击任何模块并选择 **Open All Modules**：
 
 ![](<../../images/image (922).png>)
 
-在**程序集资源管理器**中右键点击任何模块并点击**排序程序集**：
+在 **Assembly Explorer** 中右键点击任何模块并点击 **Sort Assemblies**：
 
 ![](<../../images/image (339).png>)
 
-## Java反编译器
+## Java 反编译器
 
 [https://github.com/skylot/jadx](https://github.com/skylot/jadx)\
 [https://github.com/java-decompiler/jd-gui/releases](https://github.com/java-decompiler/jd-gui/releases)
 
-## 调试DLL
+## 调试 DLL
 
-### 使用IDA
+### 使用 IDA
 
-- **加载rundll32**（64位在C:\Windows\System32\rundll32.exe，32位在C:\Windows\SysWOW64\rundll32.exe）
-- 选择**Windbg**调试器
-- 选择“**在库加载/卸载时挂起**”
+- **加载 rundll32**（64位在 C:\Windows\System32\rundll32.exe，32位在 C:\Windows\SysWOW64\rundll32.exe）
+- 选择 **Windbg** 调试器
+- 选择 "**Suspend on library load/unload**"
 
 ![](<../../images/image (868).png>)
 
-- 配置执行的**参数**，输入**DLL的路径**和您想要调用的函数：
+- 配置执行的 **参数**，输入 **DLL 的路径** 和您想要调用的函数：
 
 ![](<../../images/image (704).png>)
 
-然后，当您开始调试时，**每个DLL加载时执行将被停止**，然后，当rundll32加载您的DLL时，执行将被停止。
+然后，当您开始调试时，**每个 DLL 加载时执行将被停止**，然后，当 rundll32 加载您的 DLL 时，执行将被停止。
 
-但是，您如何才能到达已加载的DLL的代码呢？使用这种方法，我不知道怎么做。
+但是，您如何才能到达已加载的 DLL 的代码呢？使用这种方法，我不知道怎么做。
 
-### 使用x64dbg/x32dbg
+### 使用 x64dbg/x32dbg
 
-- **加载rundll32**（64位在C:\Windows\System32\rundll32.exe，32位在C:\Windows\SysWOW64\rundll32.exe）
-- **更改命令行**（_文件 --> 更改命令行_），并设置DLL的路径和您想要调用的函数，例如：“C:\Windows\SysWOW64\rundll32.exe” “Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll”,DLLMain
-- 更改_选项 --> 设置_并选择“**DLL入口**”。
-- 然后**开始执行**，调试器将在每个DLL主函数处停止，在某个时刻您将**停在您的DLL的DLL入口**。从那里，只需搜索您想要放置断点的点。
+- **加载 rundll32**（64位在 C:\Windows\System32\rundll32.exe，32位在 C:\Windows\SysWOW64\rundll32.exe）
+- **更改命令行**（ _File --> Change Command Line_ ）并设置 DLL 的路径和您想要调用的函数，例如："C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
+- 更改 _Options --> Settings_ 并选择 "**DLL Entry**"。
+- 然后 **开始执行**，调试器将在每个 DLL 主函数处停止，在某个时刻您将 **停在您的 DLL 的 DLL Entry**。从那里，只需搜索您想要放置断点的点。
 
-请注意，当执行因任何原因在win64dbg中停止时，您可以在**win64dbg窗口顶部**查看**您正在查看的代码**：
+请注意，当执行因任何原因在 win64dbg 中停止时，您可以在 **win64dbg 窗口顶部** 查看 **您正在查看的代码**：
 
 ![](<../../images/image (842).png>)
 
-然后，查看此处可以看到执行在您想要调试的DLL中停止。
+然后，查看此处可以看到执行在您想要调试的 DLL 中停止。
 
-## GUI应用程序 / 视频游戏
+## GUI 应用程序 / 视频游戏
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php)是一个有用的程序，可以找到在运行游戏的内存中保存的重要值并更改它们。更多信息请参见：
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php) 是一个有用的程序，可以找到在运行游戏的内存中保存的重要值并更改它们。更多信息请参见：
 
 {{#ref}}
 cheat-engine.md
 {{#endref}}
 
-[**PiNCE**](https://github.com/korcankaraokcu/PINCE)是GNU项目调试器（GDB）的前端/逆向工程工具，专注于游戏。然而，它可以用于任何与逆向工程相关的内容。
+[**PiNCE**](https://github.com/korcankaraokcu/PINCE) 是一个针对 GNU Project Debugger (GDB) 的前端/逆向工程工具，专注于游戏。然而，它可以用于任何与逆向工程相关的内容。
 
-[**Decompiler Explorer**](https://dogbolt.org/)是多个反编译器的网页前端。该网络服务允许您比较不同反编译器在小型可执行文件上的输出。
+[**Decompiler Explorer**](https://dogbolt.org/) 是多个反编译器的网页前端。该网络服务允许您比较不同反编译器在小型可执行文件上的输出。
 
 ## ARM & MIPS
 
-{% embed url="https://github.com/nongiach/arm_now" %}
+{{#ref}}
+https://github.com/nongiach/arm_now
+{{#endref}}
 
 ## Shellcodes
 
-### 使用blobrunner调试shellcode
+### 使用 blobrunner 调试 shellcode
 
-[**Blobrunner**](https://github.com/OALabs/BlobRunner)将**分配**shellcode到内存空间中，**指示**您shellcode被分配的**内存地址**并将**停止**执行。\
-然后，您需要**附加调试器**（Ida或x64dbg）到该进程，并在**指示的内存地址**上放置一个**断点**并**恢复**执行。这样您将调试shellcode。
+[**Blobrunner**](https://github.com/OALabs/BlobRunner) 将 **分配** shellcode 到内存空间，将 **指示** 您 shellcode 被分配的 **内存地址** 并将 **停止** 执行。\
+然后，您需要 **附加调试器**（Ida 或 x64dbg）到该进程，并在 **指示的内存地址** 设置一个 **断点** 并 **恢复** 执行。这样您将调试 shellcode。
 
-发布的github页面包含包含已编译版本的zip文件：[https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
-您可以在以下链接找到稍微修改过的Blobrunner版本。为了编译它，只需**在Visual Studio Code中创建一个C/C++项目，复制并粘贴代码并构建它**。
+发布的 GitHub 页面包含包含已编译版本的 zip 文件：[https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
+您可以在以下链接找到稍微修改过的 Blobrunner 版本。为了编译它，只需 **在 Visual Studio Code 中创建一个 C/C++ 项目，复制并粘贴代码并构建**。
 
 {{#ref}}
 blobrunner.md
 {{#endref}}
 
-### 使用jmp2it调试shellcode
+### 使用 jmp2it 调试 shellcode
 
-[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4)与blobrunner非常相似。它将**分配**shellcode到内存空间中，并启动一个**无限循环**。然后，您需要**附加调试器**到该进程，**播放开始等待2-5秒并按停止**，您将发现自己处于**无限循环**中。跳到无限循环的下一条指令，因为它将是对shellcode的调用，最后您将发现自己正在执行shellcode。
+[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) 与 blobrunner 非常相似。它将 **分配** shellcode 到内存空间，并启动一个 **无限循环**。然后您需要 **附加调试器** 到该进程，**播放开始等待 2-5 秒并按停止**，您将发现自己处于 **无限循环** 中。跳到无限循环的下一条指令，因为它将是对 shellcode 的调用，最后您将发现自己正在执行 shellcode。
 
 ![](<../../images/image (509).png>)
 
-您可以在[发布页面](https://github.com/adamkramer/jmp2it/releases/)下载已编译版本的jmp2it。
+您可以在 [jmp2it 的发布页面](https://github.com/adamkramer/jmp2it/releases/) 下载已编译版本。
 
-### 使用Cutter调试shellcode
+### 使用 Cutter 调试 shellcode
 
-[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0)是radare的GUI。使用Cutter，您可以模拟shellcode并动态检查它。
+[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) 是 radare 的 GUI。使用 cutter，您可以模拟 shellcode 并动态检查它。
 
-请注意，Cutter允许您“打开文件”和“打开shellcode”。在我的情况下，当我将shellcode作为文件打开时，它正确反编译，但当我将其作为shellcode打开时却没有：
+请注意，Cutter 允许您 "Open File" 和 "Open Shellcode"。在我的情况下，当我将 shellcode 作为文件打开时，它正确反编译，但当我将其作为 shellcode 打开时却没有：
 
 ![](<../../images/image (562).png>)
 
-为了在您想要的地方开始模拟，请在那里设置一个bp，显然Cutter将自动从那里开始模拟：
+为了在您想要的地方开始模拟，请在那里设置一个 bp，显然 cutter 将自动从那里开始模拟：
 
 ![](<../../images/image (589).png>)
 
@@ -198,10 +200,10 @@ blobrunner.md
 
 ![](<../../images/image (186).png>)
 
-### 反混淆shellcode并获取执行的函数
+### 反混淆 shellcode 并获取执行的函数
 
-您应该尝试[**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152)。\
-它将告诉您shellcode使用的**哪些函数**以及shellcode是否在内存中**解码**自己。
+您应该尝试 [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152)。\
+它将告诉您 shellcode 使用了 **哪些函数**，以及 shellcode 是否在内存中 **解码** 自身。
 ```bash
 scdbg.exe -f shellcode # Get info
 scdbg.exe -f shellcode -r #show analysis report at end of run
@@ -338,7 +340,7 @@ uVar2 = DAT_030004dc;
 uVar1 = *puVar6;
 if ((uVar1 & DAT_030004da & ~uVar4) != 0) {
 ```
-最后的 if 检查 **`uVar4`** 是否在 **最后的 Keys** 中，并且不是当前键，也称为放开一个按钮（当前键存储在 **`uVar1`** 中）。
+最后的 if 检查 **`uVar4`** 是否在 **最后的 Keys** 中，而不是当前键，也称为放开一个按钮（当前键存储在 **`uVar1`** 中）。
 ```c
 if (uVar1 == 4) {
 DAT_030000d4 = 0;
@@ -366,21 +368,23 @@ FUN_08000864();
 if (uVar1 == 0x10) {
 DAT_030000d8 = DAT_030000d8 + 0x3a;
 ```
-在前面的代码中，你可以看到我们正在将 **uVar1**（**按下按钮的值**所在的位置）与一些值进行比较：
+在前面的代码中，您可以看到我们正在将 **uVar1**（按下按钮的 **值** 所在的位置）与一些值进行比较：
 
-- 首先，它与 **值 4**（**选择**按钮）进行比较：在这个挑战中，这个按钮清除屏幕。
-- 然后，它与 **值 8**（**开始**按钮）进行比较：在这个挑战中，这检查代码是否有效以获取标志。
+- 首先，它与 **值 4**（**SELECT** 按钮）进行比较：在这个挑战中，这个按钮清除屏幕
+- 然后，它与 **值 8**（**START** 按钮）进行比较：在这个挑战中，这检查代码是否有效以获取标志。
 - 在这种情况下，变量 **`DAT_030000d8`** 与 0xf3 进行比较，如果值相同，则执行某些代码。
-- 在其他情况下，检查某个 cont（`DAT_030000d4`）。这是一个 cont，因为在进入代码后会加 1。\
-**如果** 小于 8，则会进行一些涉及 **添加** 值到 **`DAT_030000d8`** 的操作（基本上是将按下的键的值添加到这个变量中，只要 cont 小于 8）。
+- 在其他情况下，检查某个 cont（`DAT_030000d4`）。这是一个 cont，因为在进入代码后立即加 1。\
+**如果** 小于 8，则执行涉及 **添加** 值到 **`DAT_030000d8`** 的操作（基本上是将按下的键的值添加到这个变量中，只要 cont 小于 8）。
 
-因此，在这个挑战中，知道按钮的值，你需要 **按下一个长度小于 8 的组合，使得结果的和为 0xf3。**
+因此，在这个挑战中，知道按钮的值，您需要 **按下一个长度小于 8 的组合，使得结果的和为 0xf3。**
 
 **本教程的参考：** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)
 
 ## Game Boy
 
-{% embed url="https://www.youtube.com/watch?v=VVbRe7wr3G4" %}
+{{#ref}}
+https://www.youtube.com/watch?v=VVbRe7wr3G4
+{{#endref}}
 
 ## 课程
 

@@ -1,6 +1,5 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-
 # Sudo/Admin Groups
 
 ## **PE - 方法 1**
@@ -25,7 +24,7 @@ sudo su
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-如果你发现二进制文件 pkexec 是一个 SUID 二进制文件，并且你属于 sudo 或 admin 组，你可能可以使用 pkexec 作为 sudo 执行二进制文件。检查以下内容：
+如果您发现二进制文件 pkexec 是一个 SUID 二进制文件，并且您属于 sudo 或 admin，您可能可以使用 pkexec 作为 sudo 执行二进制文件。检查以下内容：
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
@@ -41,7 +40,7 @@ polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freed
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-**这不是因为你没有权限，而是因为你没有通过 GUI 连接**。对此问题有一个解决方法在这里: [https://github.com/NixOS/nixpkgs/issues/18012\#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903)。你需要 **2 个不同的 ssh 会话**：
+**这不是因为你没有权限，而是因为你没有通过 GUI 连接**。对此问题有一个解决方法在这里: [https://github.com/NixOS/nixpkgs/issues/18012\#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903)。你需要 **2 个不同的 ssh 会话**:
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -101,7 +100,7 @@ moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
 **tty1** 表示用户 **yossi 物理上登录** 到机器上的一个终端。
 
-**video group** 有权限查看屏幕输出。基本上，你可以观察屏幕。为了做到这一点，你需要 **抓取当前屏幕上的图像** 的原始数据，并获取屏幕使用的分辨率。屏幕数据可以保存在 `/dev/fb0`，你可以在 `/sys/class/graphics/fb0/virtual_size` 找到该屏幕的分辨率。
+**video group** 有权限查看屏幕输出。基本上，你可以观察屏幕。为了做到这一点，你需要 **抓取当前屏幕上的图像** 的原始数据，并获取屏幕使用的分辨率。屏幕数据可以保存在 `/dev/fb0` 中，你可以在 `/sys/class/graphics/fb0/virtual_size` 找到该屏幕的分辨率。
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
@@ -116,7 +115,7 @@ cat /sys/class/graphics/fb0/virtual_size
 
 # Root Group
 
-看起来默认情况下**root组的成员**可以访问**修改**一些**服务**配置文件或一些**库**文件或**其他有趣的东西**，这些都可以用来提升权限...
+看起来默认情况下**root组的成员**可以访问**修改**某些**服务**配置文件或某些**库**文件或**其他有趣的东西**，这些都可以用来提升权限...
 
 **检查root成员可以修改哪些文件**：
 ```bash
@@ -126,9 +125,13 @@ find / -group root -perm -g=w 2>/dev/null
 
 您可以将主机的根文件系统挂载到实例的卷中，因此当实例启动时，它会立即加载一个 `chroot` 到该卷。这实际上使您在机器上获得了 root 权限。
 
-{% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
+{{#ref}}
+https://github.com/KrustyHack/docker-privilege-escalation
+{{#endref}}
 
-{% embed url="https://fosterelli.co/privilege-escalation-via-docker.html" %}
+{{#ref}}
+https://fosterelli.co/privilege-escalation-via-docker.html
+{{#endref}}
 
 # lxc/lxd 组
 

@@ -10,7 +10,9 @@
 
 [https://github.com/0xC01DF00D/Collabfiltrator](https://github.com/0xC01DF00D/Collabfiltrator) : 用于执行命令并通过 DNS 请求获取输出的有效载荷到 burpcollab。
 
-{% embed url="https://medium.com/@ArtsSEC/burp-suite-exporter-462531be24e" %}
+{{#ref}}
+https://medium.com/@ArtsSEC/burp-suite-exporter-462531be24e
+{{#endref}}
 
 [https://github.com/h3xstream/http-script-generator](https://github.com/h3xstream/http-script-generator)
 
