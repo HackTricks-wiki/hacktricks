@@ -10,11 +10,11 @@
 ```
 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -dump
 ```
-या उपकरण का उपयोग करते हुए [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html)।
+या उपकरण का उपयोग करके [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html)।
 
-**`/usr/libexec/lsd`** डेटाबेस का मस्तिष्क है। यह **कई XPC सेवाएँ** प्रदान करता है जैसे कि `.lsd.installation`, `.lsd.open`, `.lsd.openurl`, और अधिक। लेकिन इसे एक्सपोज़ किए गए XPC कार्यात्मकताओं का उपयोग करने के लिए अनुप्रयोगों के लिए **कुछ अधिकारों** की आवश्यकता होती है, जैसे कि `.launchservices.changedefaulthandler` या `.launchservices.changeurlschemehandler` ताकि MIME प्रकारों या URL स्कीमों के लिए डिफ़ॉल्ट ऐप्स को बदल सकें और अन्य।
+**`/usr/libexec/lsd`** डेटाबेस का मस्तिष्क है। यह **कई XPC सेवाएँ** प्रदान करता है जैसे कि `.lsd.installation`, `.lsd.open`, `.lsd.openurl`, और अधिक। लेकिन इसे एक्सपोज़ किए गए XPC कार्यक्षमताओं का उपयोग करने के लिए अनुप्रयोगों के लिए **कुछ अधिकारों** की आवश्यकता होती है, जैसे कि `.launchservices.changedefaulthandler` या `.launchservices.changeurlschemehandler` ताकि MIME प्रकारों या URL स्कीमों के लिए डिफ़ॉल्ट ऐप्स को बदल सकें और अन्य।
 
-**`/System/Library/CoreServices/launchservicesd`** सेवा `com.apple.coreservices.launchservicesd` का दावा करता है और चल रहे अनुप्रयोगों के बारे में जानकारी प्राप्त करने के लिए क्वेरी किया जा सकता है। इसे सिस्टम उपकरण /**`usr/bin/lsappinfo`** के साथ या [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html) के साथ क्वेरी किया जा सकता है।
+**`/System/Library/CoreServices/launchservicesd`** सेवा `com.apple.coreservices.launchservicesd` का दावा करता है और चल रहे अनुप्रयोगों के बारे में जानकारी प्राप्त करने के लिए क्वेरी किया जा सकता है। इसे सिस्टम उपकरण /**`usr/bin/lsappinfo`** या [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html) के साथ क्वेरी किया जा सकता है।
 
 ## फ़ाइल एक्सटेंशन और URL स्कीम ऐप हैंडलर
 

@@ -1,74 +1,65 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-# Carving tools
+# कार्विंग उपकरण
 
-## Autopsy
+## ऑटोप्सी
 
-The most common tool used in forensics to extract files from images is [**Autopsy**](https://www.autopsy.com/download/). Download it, install it and make it ingest the file to find "hidden" files. Note that Autopsy is built to support disk images and other kind of images, but not simple files.
+फोरेंसिक्स में छवियों से फ़ाइलें निकालने के लिए सबसे सामान्य उपकरण [**ऑटोप्सी**](https://www.autopsy.com/download/) है। इसे डाउनलोड करें, इंस्टॉल करें और "छिपी" फ़ाइलें खोजने के लिए फ़ाइल को इनजेस्ट करें। ध्यान दें कि ऑटोप्सी डिस्क इमेज और अन्य प्रकार की इमेज का समर्थन करने के लिए बनाई गई है, लेकिन साधारण फ़ाइलों के लिए नहीं।
 
-## Binwalk <a id="binwalk"></a>
+## बिनवॉक <a id="binwalk"></a>
 
-**Binwalk** is a tool for searching binary files like images and audio files for embedded files and data.  
-It can be installed with `apt` however the [source](https://github.com/ReFirmLabs/binwalk) can be found on github.  
-**Useful commands**:
-
+**बिनवॉक** एक उपकरण है जो बाइनरी फ़ाइलों जैसे छवियों और ऑडियो फ़ाइलों में एम्बेडेड फ़ाइलों और डेटा की खोज के लिए है। इसे `apt` के साथ इंस्टॉल किया जा सकता है, हालाँकि [स्रोत](https://github.com/ReFirmLabs/binwalk) github पर पाया जा सकता है।  
+**उपयोगी कमांड**:
 ```bash
 sudo apt install binwalk #Insllation
 binwalk file #Displays the embedded data in the given file
 binwalk -e file #Displays and extracts some files from the given file
 binwalk --dd ".*" file #Displays and extracts all files from the given file
 ```
-
 ## Foremost
 
-Another common tool to find hidden files is **foremost**. You can find the configuration file of foremost in `/etc/foremost.conf`. If you just want to search for some specific files uncomment them. If you don't uncomment anything foremost will search for it's default configured file types.
-
+एक और सामान्य उपकरण जो छिपी हुई फ़ाइलों को खोजने के लिए है वह है **foremost**। आप foremost की कॉन्फ़िगरेशन फ़ाइल `/etc/foremost.conf` में पा सकते हैं। यदि आप केवल कुछ विशिष्ट फ़ाइलों के लिए खोज करना चाहते हैं, तो उन्हें अनकमेंट करें। यदि आप कुछ भी अनकमेंट नहीं करते हैं, तो foremost अपनी डिफ़ॉल्ट कॉन्फ़िगर की गई फ़ाइल प्रकारों के लिए खोज करेगा।
 ```bash
 sudo apt-get install foremost
 foremost -v -i file.img -o output
 #Discovered files will appear inside the folder "output"
 ```
-
 ## **Scalpel**
 
-**Scalpel** is another tool that can be use to find and extract **files embedded in a file**. In this case you will need to uncomment from the configuration file \(_/etc/scalpel/scalpel.conf_\) the file types you want it to extract.
-
+**Scalpel** एक और उपकरण है जिसका उपयोग **फाइल में एम्बेडेड फाइलों** को खोजने और निकालने के लिए किया जा सकता है। इस मामले में, आपको कॉन्फ़िगरेशन फ़ाइल \(_/etc/scalpel/scalpel.conf_\) से उन फ़ाइल प्रकारों को अनकमेंट करना होगा जिन्हें आप निकालना चाहते हैं।
 ```bash
 sudo apt-get install scalpel
 scalpel file.img -o output
 ```
-
 ## Bulk Extractor
 
-This tool comes inside kali but you can find it here: [https://github.com/simsong/bulk_extractor](https://github.com/simsong/bulk_extractor)
+यह उपकरण काली के अंदर आता है लेकिन आप इसे यहाँ पा सकते हैं: [https://github.com/simsong/bulk_extractor](https://github.com/simsong/bulk_extractor)
 
-This tool can scan an image and will **extract pcaps** inside it, **network information\(URLs, domains, IPs, MACs, mails\)** and more **files**. You only have to do:
-
+यह उपकरण एक इमेज को स्कैन कर सकता है और इसके अंदर **pcaps** को **निकालेगा**, **नेटवर्क जानकारी\(URLs, domains, IPs, MACs, mails\)** और अधिक **फाइलें**। आपको केवल यह करना है:
 ```text
 bulk_extractor memory.img -o out_folder
 ```
-
-Navigate through **all the information** that the tool has gathered \(passwords?\), **analyse** the **packets** \(read[ **Pcaps analysis**](../pcap-inspection/)\), search for **weird domains** \(domains related to **malware** or **non-existent**\).
+**सभी जानकारी** के माध्यम से नेविगेट करें जो उपकरण ने एकत्र की है \(पासवर्ड?\), **विश्लेषण** करें **पैकेट्स** का \(पढ़ें [ **Pcaps विश्लेषण**](../pcap-inspection/)\), **अजीब डोमेन** की खोज करें \(डोमेन जो **मैलवेयर** या **अवास्तविक** से संबंधित हैं\).
 
 ## PhotoRec
 
-You can find it in [https://www.cgsecurity.org/wiki/TestDisk_Download](https://www.cgsecurity.org/wiki/TestDisk_Download)
+आप इसे [https://www.cgsecurity.org/wiki/TestDisk_Download](https://www.cgsecurity.org/wiki/TestDisk_Download) पर पा सकते हैं।
 
-It comes with GUI and CLI version. You can select the **file-types** you want PhotoRec to search for.
+यह GUI और CLI संस्करण के साथ आता है। आप उन **फाइल-प्रकारों** का चयन कर सकते हैं जिन्हें आप PhotoRec से खोजने के लिए चाहते हैं।
 
 ![](../../../images/image%20%28524%29.png)
 
-# Specific Data Carving Tools
+# विशिष्ट डेटा कार्विंग उपकरण
 
 ## FindAES
 
-Searches for AES keys by searching for their key schedules. Able to find 128. 192, and 256 bit keys, such as those used by TrueCrypt and BitLocker.
+AES कुंजियों की खोज उनके कुंजी कार्यक्रमों की खोज करके करता है। 128, 192, और 256 बिट कुंजियों को खोजने में सक्षम, जैसे कि TrueCrypt और BitLocker द्वारा उपयोग की जाने वाली।
 
-Download [here](https://sourceforge.net/projects/findaes/).
+[यहाँ डाउनलोड करें](https://sourceforge.net/projects/findaes/)।
 
-# Complementary tools
+# पूरक उपकरण
 
-You can use [**viu** ](https://github.com/atanunq/viu)to see images form the terminal.  
-You can use the linux command line tool **pdftotext** to transform a pdf into text and read it.
+आप [**viu** ](https://github.com/atanunq/viu) का उपयोग करके टर्मिनल से चित्र देख सकते हैं।
+आप **pdftotext** लिनक्स कमांड लाइन उपकरण का उपयोग करके एक पीडीएफ को टेक्स्ट में बदल सकते हैं और इसे पढ़ सकते हैं।
 
 {{#include ../../../banners/hacktricks-training.md}}

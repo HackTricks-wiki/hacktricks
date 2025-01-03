@@ -2,32 +2,26 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
-
-[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
-
-{% embed url="https://www.rootedcon.com/" %}
-
 > [!NOTE]
-> A note about **PCAP** vs **PCAPNG**: there are two versions of the PCAP file format; **PCAPNG is newer and not supported by all tools**. You may need to convert a file from PCAPNG to PCAP using Wireshark or another compatible tool, in order to work with it in some other tools.
+> **PCAP** और **PCAPNG** के बारे में एक नोट: PCAP फ़ाइल प्रारूप के दो संस्करण हैं; **PCAPNG नया है और सभी उपकरणों द्वारा समर्थित नहीं है**। आपको कुछ अन्य उपकरणों में इसके साथ काम करने के लिए Wireshark या किसी अन्य संगत उपकरण का उपयोग करके PCAPNG से PCAP में फ़ाइल को परिवर्तित करने की आवश्यकता हो सकती है।
 
 ## Online tools for pcaps
 
-- If the header of your pcap is **broken** you should try to **fix** it using: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)
-- Extract **information** and search for **malware** inside a pcap in [**PacketTotal**](https://packettotal.com)
-- Search for **malicious activity** using [**www.virustotal.com**](https://www.virustotal.com) and [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com)
-- **Full pcap analysis from the browser in** [**https://apackets.com/**](https://apackets.com/)
+- यदि आपके pcap का हेडर **टूट गया** है, तो आपको इसे **सुधारने** का प्रयास करना चाहिए: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)
+- एक pcap के अंदर **सूचना** निकालें और **malware** के लिए खोजें [**PacketTotal**](https://packettotal.com)
+- [**www.virustotal.com**](https://www.virustotal.com) और [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com) का उपयोग करके **malicious activity** के लिए खोजें
+- **ब्राउज़र से पूर्ण pcap विश्लेषण** [**https://apackets.com/**](https://apackets.com/)
 
 ## Extract Information
 
-The following tools are useful to extract statistics, files, etc.
+निम्नलिखित उपकरण आँकड़े, फ़ाइलें आदि निकालने के लिए उपयोगी हैं।
 
 ### Wireshark
 
 > [!NOTE]
-> **If you are going to analyze a PCAP you basically must to know how to use Wireshark**
+> **यदि आप एक PCAP का विश्लेषण करने जा रहे हैं, तो आपको मूल रूप से Wireshark का उपयोग करना आना चाहिए**
 
-You can find some Wireshark tricks in:
+आप कुछ Wireshark ट्रिक्स यहाँ पा सकते हैं:
 
 {{#ref}}
 wireshark-tricks.md
@@ -35,68 +29,60 @@ wireshark-tricks.md
 
 ### [**https://apackets.com/**](https://apackets.com/)
 
-Pcap analysis from the browser.
+ब्राउज़र से Pcap विश्लेषण।
 
 ### Xplico Framework
 
-[**Xplico** ](https://github.com/xplico/xplico)_(only linux)_ can **analyze** a **pcap** and extract information from it. For example, from a pcap file Xplico, extracts each email (POP, IMAP, and SMTP protocols), all HTTP contents, each VoIP call (SIP), FTP, TFTP, and so on.
+[**Xplico** ](https://github.com/xplico/xplico)_(केवल लिनक्स)_ एक **pcap** का **विश्लेषण** कर सकता है और इससे जानकारी निकाल सकता है। उदाहरण के लिए, एक pcap फ़ाइल से Xplico, प्रत्येक ईमेल (POP, IMAP, और SMTP प्रोटोकॉल), सभी HTTP सामग्री, प्रत्येक VoIP कॉल (SIP), FTP, TFTP, आदि निकालता है।
 
 **Install**
-
 ```bash
 sudo bash -c 'echo "deb http://repo.xplico.org/ $(lsb_release -s -c) main" /etc/apt/sources.list'
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 791C25CE
 sudo apt-get update
 sudo apt-get install xplico
 ```
-
-**Run**
-
+**चलाएँ**
 ```
 /etc/init.d/apache2 restart
 /etc/init.d/xplico start
 ```
+_**127.0.0.1:9876**_ पर _**xplico:xplico**_ क्रेडेंशियल्स के साथ पहुँचें।
 
-Access to _**127.0.0.1:9876**_ with credentials _**xplico:xplico**_
-
-Then create a **new case**, create a **new session** inside the case and **upload the pcap** file.
+फिर एक **नया केस** बनाएं, केस के अंदर एक **नया सत्र** बनाएं और **pcap** फ़ाइल **अपलोड** करें।
 
 ### NetworkMiner
 
-Like Xplico it is a tool to **analyze and extract objects from pcaps**. It has a free edition that you can **download** [**here**](https://www.netresec.com/?page=NetworkMiner). It works with **Windows**.\
-This tool is also useful to get **other information analysed** from the packets in order to be able to know what was happening in a **quicker** way.
+Xplico की तरह, यह एक उपकरण है जो **pcaps से वस्तुओं का विश्लेषण और निकालने** के लिए है। इसका एक मुफ्त संस्करण है जिसे आप **यहां** [**डाउनलोड**](https://www.netresec.com/?page=NetworkMiner) कर सकते हैं। यह **Windows** पर काम करता है।\
+यह उपकरण पैकेट्स से **अन्य जानकारी का विश्लेषण** करने के लिए भी उपयोगी है ताकि आप जान सकें कि **तेजी से** क्या हो रहा था।
 
 ### NetWitness Investigator
 
-You can download [**NetWitness Investigator from here**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **(It works in Windows)**.\
-This is another useful tool that **analyses the packets** and sorts the information in a useful way to **know what is happening inside**.
+आप [**NetWitness Investigator यहाँ से डाउनलोड**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) कर सकते हैं **(यह Windows पर काम करता है)**।\
+यह एक और उपयोगी उपकरण है जो **पैकेट्स का विश्लेषण** करता है और जानकारी को एक उपयोगी तरीके से क्रमबद्ध करता है ताकि आप **जान सकें कि अंदर क्या हो रहा है**।
 
 ### [BruteShark](https://github.com/odedshimon/BruteShark)
 
-- Extracting and encoding usernames and passwords (HTTP, FTP, Telnet, IMAP, SMTP...)
-- Extract authentication hashes and crack them using Hashcat (Kerberos, NTLM, CRAM-MD5, HTTP-Digest...)
-- Build a visual network diagram (Network nodes & users)
-- Extract DNS queries
-- Reconstruct all TCP & UDP Sessions
-- File Carving
+- उपयोगकर्ता नाम और पासवर्ड निकालना और एन्कोड करना (HTTP, FTP, Telnet, IMAP, SMTP...)
+- प्रमाणीकरण हैश निकालें और Hashcat का उपयोग करके उन्हें क्रैक करें (Kerberos, NTLM, CRAM-MD5, HTTP-Digest...)
+- एक दृश्य नेटवर्क आरेख बनाएं (नेटवर्क नोड्स और उपयोगकर्ता)
+- DNS क्वेरी निकालें
+- सभी TCP और UDP सत्रों का पुनर्निर्माण करें
+- फ़ाइल कार्विंग
 
 ### Capinfos
-
 ```
 capinfos capture.pcap
 ```
-
 ### Ngrep
 
-If you are **looking** for **something** inside the pcap you can use **ngrep**. Here is an example using the main filters:
-
+यदि आप pcap के अंदर **कुछ** **खोज** रहे हैं तो आप **ngrep** का उपयोग कर सकते हैं। यहाँ मुख्य फ़िल्टर का उपयोग करते हुए एक उदाहरण है:
 ```bash
 ngrep -I packets.pcap "^GET" "port 80 and tcp and host 192.168 and dst host 192.168 and src host 192.168"
 ```
-
 ### Carving
 
-Using common carving techniques can be useful to extract files and information from the pcap:
+सामान्य carving तकनीकों का उपयोग pcap से फ़ाइलों और जानकारी निकालने के लिए उपयोगी हो सकता है:
 
 {{#ref}}
 ../partitions-file-systems-carving/file-data-carving-recovery-tools.md
@@ -104,46 +90,36 @@ Using common carving techniques can be useful to extract files and information f
 
 ### Capturing credentials
 
-You can use tools like [https://github.com/lgandx/PCredz](https://github.com/lgandx/PCredz) to parse credentials from a pcap or a live interface.
-
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
-
-[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
-
-{% embed url="https://www.rootedcon.com/" %}
+आप pcap या एक लाइव इंटरफ़ेस से क्रेडेंशियल्स को पार्स करने के लिए [https://github.com/lgandx/PCredz](https://github.com/lgandx/PCredz) जैसे उपकरणों का उपयोग कर सकते हैं।
 
 ## Check Exploits/Malware
 
 ### Suricata
 
 **Install and setup**
-
 ```
 apt-get install suricata
 apt-get install oinkmaster
 echo "url = http://rules.emergingthreats.net/open/suricata/emerging.rules.tar.gz" >> /etc/oinkmaster.conf
 oinkmaster -C /etc/oinkmaster.conf -o /etc/suricata/rules
 ```
-
-**Check pcap**
-
+**pcap की जांच करें**
 ```
 suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 ```
-
 ### YaraPcap
 
-[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) is a tool that
+[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) एक उपकरण है जो
 
-- Reads a PCAP File and Extracts Http Streams.
-- gzip deflates any compressed streams
-- Scans every file with yara
-- Writes a report.txt
-- Optionally saves matching files to a Dir
+- एक PCAP फ़ाइल पढ़ता है और Http स्ट्रीम निकालता है।
+- gzip किसी भी संकुचित स्ट्रीम को डिफ्लेट करता है
+- हर फ़ाइल को yara के साथ स्कैन करता है
+- एक report.txt लिखता है
+- वैकल्पिक रूप से मेल खाने वाली फ़ाइलों को एक Dir में सहेजता है
 
 ### Malware Analysis
 
-Check if you can find any fingerprint of a known malware:
+जांचें कि क्या आप किसी ज्ञात मैलवेयर का कोई फिंगरप्रिंट ढूंढ सकते हैं:
 
 {{#ref}}
 ../malware-analysis.md
@@ -151,12 +127,11 @@ Check if you can find any fingerprint of a known malware:
 
 ## Zeek
 
-> [Zeek](https://docs.zeek.org/en/master/about.html) is a passive, open-source network traffic analyzer. Many operators use Zeek as a Network Security Monitor (NSM) to support investigations of suspicious or malicious activity. Zeek also supports a wide range of traffic analysis tasks beyond the security domain, including performance measurement and troubleshooting.
+> [Zeek](https://docs.zeek.org/en/master/about.html) एक पैसिव, ओपन-सोर्स नेटवर्क ट्रैफ़िक विश्लेषक है। कई ऑपरेटर संदिग्ध या दुर्भावनापूर्ण गतिविधियों की जांच का समर्थन करने के लिए Zeek का उपयोग नेटवर्क सुरक्षा मॉनिटर (NSM) के रूप में करते हैं। Zeek सुरक्षा डोमेन के अलावा प्रदर्शन माप और समस्या निवारण सहित ट्रैफ़िक विश्लेषण कार्यों की एक विस्तृत श्रृंखला का समर्थन करता है।
 
-Basically, logs created by `zeek` aren't **pcaps**. Therefore you will need to use **other tools** to analyse the logs where the **information** about the pcaps are.
+बुनियादी रूप से, `zeek` द्वारा बनाए गए लॉग **pcaps** नहीं होते हैं। इसलिए आपको उन लॉग का विश्लेषण करने के लिए **अन्य उपकरणों** का उपयोग करने की आवश्यकता होगी जहाँ **pcaps** के बारे में **जानकारी** होती है।
 
 ### Connections Info
-
 ```bash
 #Get info about longest connections (add "grep udp" to see only udp traffic)
 #The longest connection might be of malware (constant reverse shell?)
@@ -206,9 +181,7 @@ Score,Source IP,Destination IP,Connections,Avg Bytes,Intvl Range,Size Range,Top 
 1,10.55.100.111,165.227.216.194,20054,92,29,52,1,52,7774,20053,0,0,0,0
 0.838,10.55.200.10,205.251.194.64,210,69,29398,4,300,70,109,205,0,0,0,0
 ```
-
-### DNS info
-
+### DNS जानकारी
 ```bash
 #Get info about each DNS request performed
 cat dns.log | zeek-cut -c id.orig_h query qtype_name answers
@@ -225,8 +198,7 @@ cat dns.log | zeek-cut qtype_name | sort | uniq -c | sort -nr
 #See top DNS domain requested with rita
 rita show-exploded-dns -H --limit 10 zeek_logs
 ```
-
-## Other pcap analysis tricks
+## अन्य pcap विश्लेषण तकनीकें
 
 {{#ref}}
 dnscat-exfiltration.md
@@ -241,11 +213,5 @@ usb-keystrokes.md
 {{#endref}}
 
 ​
-
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
-
-[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
-
-{% embed url="https://www.rootedcon.com/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}

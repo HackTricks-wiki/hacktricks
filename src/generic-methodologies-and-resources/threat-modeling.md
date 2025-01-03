@@ -2,110 +2,110 @@
 
 ## Threat Modeling
 
-Welcome to HackTricks' comprehensive guide on Threat Modeling! Embark on an exploration of this critical aspect of cybersecurity, where we identify, understand, and strategize against potential vulnerabilities in a system. This thread serves as a step-by-step guide packed with real-world examples, helpful software, and easy-to-understand explanations. Ideal for both novices and experienced practitioners looking to fortify their cybersecurity defenses.
+HackTricks के Threat Modeling पर व्यापक गाइड में आपका स्वागत है! साइबर सुरक्षा के इस महत्वपूर्ण पहलू की खोज करें, जहां हम एक प्रणाली में संभावित कमजोरियों की पहचान, समझ और रणनीति बनाते हैं। यह थ्रेड वास्तविक दुनिया के उदाहरणों, सहायक सॉफ़्टवेयर और समझने में आसान व्याख्याओं के साथ एक चरण-दर-चरण गाइड के रूप में कार्य करता है। यह नवागंतुकों और अनुभवी प्रैक्टिशनरों के लिए आदर्श है जो अपनी साइबर सुरक्षा रक्षा को मजबूत करना चाहते हैं।
 
 ### Commonly Used Scenarios
 
-1. **Software Development**: As part of the Secure Software Development Life Cycle (SSDLC), threat modeling helps in **identifying potential sources of vulnerabilities** in the early stages of development.
-2. **Penetration Testing**: The Penetration Testing Execution Standard (PTES) framework requires **threat modeling to understand the system's vulnerabilities** before carrying out the test.
+1. **Software Development**: Secure Software Development Life Cycle (SSDLC) के हिस्से के रूप में, थ्रेट मॉडलिंग विकास के प्रारंभिक चरणों में **संभावित कमजोरियों के स्रोतों की पहचान** करने में मदद करती है।
+2. **Penetration Testing**: Penetration Testing Execution Standard (PTES) ढांचा **थ्रेट मॉडलिंग की आवश्यकता करता है ताकि प्रणाली की कमजोरियों को समझा जा सके** परीक्षण करने से पहले।
 
 ### Threat Model in a Nutshell
 
-A Threat Model is typically represented as a diagram, image, or some other form of visual illustration that depicts the planned architecture or existing build of an application. It bears resemblance to a **data flow diagram**, but the key distinction lies in its security-oriented design.
+एक थ्रेट मॉडल आमतौर पर एक आरेख, छवि, या किसी अन्य प्रकार की दृश्य चित्रण के रूप में प्रस्तुत किया जाता है जो एक एप्लिकेशन की योजनाबद्ध आर्किटेक्चर या मौजूदा निर्माण को दर्शाता है। यह **डेटा फ्लो आरेख** के समान होता है, लेकिन इसकी सुरक्षा-उन्मुख डिज़ाइन में मुख्य अंतर होता है।
 
-Threat models often feature elements marked in red, symbolizing potential vulnerabilities, risks, or barriers. To streamline the process of risk identification, the CIA (Confidentiality, Integrity, Availability) triad is employed, forming the basis of many threat modeling methodologies, with STRIDE being one of the most common. However, the chosen methodology can vary depending on the specific context and requirements.
+थ्रेट मॉडल अक्सर लाल रंग में चिह्नित तत्वों को प्रदर्शित करते हैं, जो संभावित कमजोरियों, जोखिमों, या बाधाओं का प्रतीक होते हैं। जोखिम पहचान की प्रक्रिया को सरल बनाने के लिए, CIA (Confidentiality, Integrity, Availability) त्रिकोण का उपयोग किया जाता है, जो कई थ्रेट मॉडलिंग पद्धतियों का आधार बनाता है, जिसमें STRIDE सबसे सामान्य है। हालांकि, चुनी गई पद्धति विशिष्ट संदर्भ और आवश्यकताओं के आधार पर भिन्न हो सकती है।
 
 ### The CIA Triad
 
-The CIA Triad is a widely recognized model in the field of information security, standing for Confidentiality, Integrity, and Availability. These three pillars form the foundation upon which many security measures and policies are built, including threat modeling methodologies.
+CIA त्रिकोण सूचना सुरक्षा के क्षेत्र में एक व्यापक रूप से मान्यता प्राप्त मॉडल है, जो Confidentiality, Integrity, और Availability के लिए खड़ा है। ये तीन स्तंभ उन सुरक्षा उपायों और नीतियों की नींव बनाते हैं जिन पर कई थ्रेट मॉडलिंग पद्धतियाँ आधारित होती हैं।
 
-1. **Confidentiality**: Ensuring that the data or system is not accessed by unauthorized individuals. This is a central aspect of security, requiring appropriate access controls, encryption, and other measures to prevent data breaches.
-2. **Integrity**: The accuracy, consistency, and trustworthiness of the data over its lifecycle. This principle ensures that the data is not altered or tampered with by unauthorized parties. It often involves checksums, hashing, and other data verification methods.
-3. **Availability**: This ensures that data and services are accessible to authorized users when needed. This often involves redundancy, fault tolerance, and high-availability configurations to keep systems running even in the face of disruptions.
+1. **Confidentiality**: यह सुनिश्चित करना कि डेटा या प्रणाली को अनधिकृत व्यक्तियों द्वारा एक्सेस नहीं किया जा सके। यह सुरक्षा का एक केंद्रीय पहलू है, जिसमें डेटा उल्लंघनों को रोकने के लिए उचित एक्सेस नियंत्रण, एन्क्रिप्शन, और अन्य उपायों की आवश्यकता होती है।
+2. **Integrity**: डेटा के जीवन चक्र के दौरान सटीकता, स्थिरता, और विश्वसनीयता। यह सिद्धांत सुनिश्चित करता है कि डेटा को अनधिकृत पक्षों द्वारा परिवर्तित या छेड़छाड़ नहीं किया गया है। इसमें अक्सर चेकसम, हैशिंग, और अन्य डेटा सत्यापन विधियाँ शामिल होती हैं।
+3. **Availability**: यह सुनिश्चित करता है कि डेटा और सेवाएँ आवश्यकतानुसार अधिकृत उपयोगकर्ताओं के लिए उपलब्ध हैं। इसमें अक्सर प्रणाली को बाधाओं के बावजूद चलाने के लिए पुनरावृत्ति, दोष सहिष्णुता, और उच्च उपलब्धता कॉन्फ़िगरेशन शामिल होते हैं।
 
 ### Threat Modeling Methodlogies
 
-1. **STRIDE**: Developed by Microsoft, STRIDE is an acronym for **Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, and Elevation of Privilege**. Each category represents a type of threat, and this methodology is commonly used in the design phase of a program or system to identify potential threats.
-2. **DREAD**: This is another methodology from Microsoft used for risk assessment of identified threats. DREAD stands for **Damage potential, Reproducibility, Exploitability, Affected users, and Discoverability**. Each of these factors is scored, and the result is used to prioritize identified threats.
-3. **PASTA** (Process for Attack Simulation and Threat Analysis): This is a seven-step, **risk-centric** methodology. It includes defining and identifying security objectives, creating a technical scope, application decomposition, threat analysis, vulnerability analysis, and risk/triage assessment.
-4. **Trike**: This is a risk-based methodology that focuses on defending assets. It starts from a **risk management** perspective and looks at threats and vulnerabilities in that context.
-5. **VAST** (Visual, Agile, and Simple Threat modeling): This approach aims to be more accessible and integrates into Agile development environments. It combines elements from the other methodologies and focuses on **visual representations of threats**.
-6. **OCTAVE** (Operationally Critical Threat, Asset, and Vulnerability Evaluation): Developed by the CERT Coordination Center, this framework is geared toward **organizational risk assessment rather than specific systems or software**.
+1. **STRIDE**: Microsoft द्वारा विकसित, STRIDE **Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, और Elevation of Privilege** के लिए एक संक्षिप्त नाम है। प्रत्येक श्रेणी एक प्रकार के खतरे का प्रतिनिधित्व करती है, और यह पद्धति आमतौर पर एक कार्यक्रम या प्रणाली के डिज़ाइन चरण में संभावित खतरों की पहचान के लिए उपयोग की जाती है।
+2. **DREAD**: यह Microsoft से एक और पद्धति है जो पहचाने गए खतरों के जोखिम मूल्यांकन के लिए उपयोग की जाती है। DREAD का अर्थ है **Damage potential, Reproducibility, Exploitability, Affected users, और Discoverability**। इनमें से प्रत्येक कारक को स्कोर किया जाता है, और परिणाम का उपयोग पहचाने गए खतरों को प्राथमिकता देने के लिए किया जाता है।
+3. **PASTA** (Process for Attack Simulation and Threat Analysis): यह एक सात-चरणीय, **जोखिम-केंद्रित** पद्धति है। इसमें सुरक्षा उद्देश्यों को परिभाषित और पहचानना, तकनीकी दायरा बनाना, एप्लिकेशन विघटन, खतरे का विश्लेषण, कमजोरियों का विश्लेषण, और जोखिम/ट्रायज मूल्यांकन शामिल है।
+4. **Trike**: यह एक जोखिम-आधारित पद्धति है जो संपत्तियों की रक्षा पर केंद्रित है। यह **जोखिम प्रबंधन** के दृष्टिकोण से शुरू होती है और उस संदर्भ में खतरों और कमजोरियों को देखती है।
+5. **VAST** (Visual, Agile, and Simple Threat modeling): यह दृष्टिकोण अधिक सुलभ होने का लक्ष्य रखता है और एगाइल विकास वातावरण में एकीकृत होता है। यह अन्य पद्धतियों के तत्वों को जोड़ता है और **खतरों के दृश्य प्रतिनिधित्व** पर ध्यान केंद्रित करता है।
+6. **OCTAVE** (Operationally Critical Threat, Asset, and Vulnerability Evaluation): CERT Coordination Center द्वारा विकसित, यह ढांचा **विशिष्ट प्रणालियों या सॉफ़्टवेयर के बजाय संगठनात्मक जोखिम मूल्यांकन** की ओर केंद्रित है।
 
 ## Tools
 
-There are several tools and software solutions available that can **assist** with the creation and management of threat models. Here are a few you might consider.
+थ्रेट मॉडल बनाने और प्रबंधित करने में **सहायता** करने के लिए कई उपकरण और सॉफ़्टवेयर समाधान उपलब्ध हैं। यहां कुछ हैं जिन्हें आप विचार कर सकते हैं।
 
 ### [SpiderSuite](https://github.com/3nock/SpiderSuite)
 
-An advance cross-platform and multi-feature GUI web spider/crawler for cyber security professionals. Spider Suite can be used for attack surface mapping and analysis.
+साइबर सुरक्षा पेशेवरों के लिए एक उन्नत क्रॉस-प्लेटफ़ॉर्म और मल्टी-फीचर GUI वेब स्पाइडर/क्रॉलर। Spider Suite का उपयोग हमले की सतह के मानचित्रण और विश्लेषण के लिए किया जा सकता है।
 
 **Usage**
 
-1. Pick a URL and Crawl
+1. एक URL चुनें और क्रॉल करें
 
 <figure><img src="../images/threatmodel_spidersuite_1.png" alt=""><figcaption></figcaption></figure>
 
-2. View Graph
+2. ग्राफ़ देखें
 
 <figure><img src="../images/threatmodel_spidersuite_2.png" alt=""><figcaption></figcaption></figure>
 
 ### [OWASP Threat Dragon](https://github.com/OWASP/threat-dragon/releases)
 
-An open-source project from OWASP, Threat Dragon is both a web and desktop application that includes system diagramming as well as a rule engine to auto-generate threats/mitigations.
+OWASP से एक ओपन-सोर्स प्रोजेक्ट, Threat Dragon एक वेब और डेस्कटॉप एप्लिकेशन है जिसमें सिस्टम आरेखण के साथ-साथ स्वचालित रूप से खतरों/निवारणों को उत्पन्न करने के लिए एक नियम इंजन शामिल है।
 
 **Usage**
 
-1. Create New Project
+1. नया प्रोजेक्ट बनाएं
 
 <figure><img src="../images/create_new_project_1.jpg" alt=""><figcaption></figcaption></figure>
 
-Sometimes it could look like this:
+कभी-कभी यह इस तरह दिख सकता है:
 
 <figure><img src="../images/1_threatmodel_create_project.jpg" alt=""><figcaption></figcaption></figure>
 
-2. Launch New Project
+2. नया प्रोजेक्ट लॉन्च करें
 
 <figure><img src="../images/launch_new_project_2.jpg" alt=""><figcaption></figcaption></figure>
 
-3. Save The New Project
+3. नए प्रोजेक्ट को सहेजें
 
 <figure><img src="../images/save_new_project.jpg" alt=""><figcaption></figcaption></figure>
 
-4. Create your model
+4. अपना मॉडल बनाएं
 
-You can use tools like SpiderSuite Crawler to give you inspiration, a basic model would look something like this
+आप SpiderSuite Crawler जैसे उपकरणों का उपयोग कर सकते हैं ताकि आपको प्रेरणा मिल सके, एक बुनियादी मॉडल कुछ इस तरह दिखेगा
 
 <figure><img src="../images/0_basic_threat_model.jpg" alt=""><figcaption></figcaption></figure>
 
-Just a little bit of explanation about the entities:
+संस्थाओं के बारे में थोड़ी व्याख्या:
 
-- Process (The entity itself such as Webserver or web functionality)
-- Actor (A Person such as a Website Visitor, User or Administrator)
-- Data Flow Line (Indicator of Interaction)
-- Trust Boundary (Different network segments or scopes.)
-- Store (Things where data are stored at such as Databases)
+- Process (स्वयं की संस्था जैसे Webserver या वेब कार्यक्षमता)
+- Actor (एक व्यक्ति जैसे वेबसाइट विज़िटर, उपयोगकर्ता या प्रशासक)
+- Data Flow Line (इंटरएक्शन का संकेत)
+- Trust Boundary (विभिन्न नेटवर्क खंड या दायरे।)
+- Store (वे चीजें जहां डेटा संग्रहीत होते हैं जैसे Databases)
 
-5. Create a Threat (Step 1)
+5. एक खतरा बनाएं (चरण 1)
 
-First you have to pick the layer you wish to add a threat to
+पहले आपको उस परत को चुनना होगा जिसमें आप एक खतरा जोड़ना चाहते हैं
 
 <figure><img src="../images/3_threatmodel_chose-threat-layer.jpg" alt=""><figcaption></figcaption></figure>
 
-Now you can create the threat
+अब आप खतरा बना सकते हैं
 
 <figure><img src="../images/4_threatmodel_create-threat.jpg" alt=""><figcaption></figcaption></figure>
 
-Keep in mind that there is a difference between Actor Threats and Process Threats. If you would add a threat to an Actor then you will only be able to choose "Spoofing" and "Repudiation. However in our example we add threat to a Process entity so we will see this in the threat creation box:
+ध्यान रखें कि Actor Threats और Process Threats के बीच एक अंतर है। यदि आप एक Actor में खतरा जोड़ते हैं तो आप केवल "Spoofing" और "Repudiation" चुन सकेंगे। हालांकि, हमारे उदाहरण में हम एक Process संस्था में खतरा जोड़ते हैं इसलिए हम खतरा निर्माण बॉक्स में यह देखेंगे:
 
 <figure><img src="../images/2_threatmodel_type-option.jpg" alt=""><figcaption></figcaption></figure>
 
-6. Done
+6. पूरा
 
-Now your finished model should look something like this. And this is how you make a simple threat model with OWASP Threat Dragon.
+अब आपका पूरा मॉडल कुछ इस तरह दिखना चाहिए। और इस तरह आप OWASP Threat Dragon के साथ एक सरल खतरा मॉडल बनाते हैं।
 
 <figure><img src="../images/threat_model_finished.jpg" alt=""><figcaption></figcaption></figure>
 
 ### [Microsoft Threat Modeling Tool](https://aka.ms/threatmodelingtool)
 
-This is a free tool from Microsoft that helps in finding threats in the design phase of software projects. It uses the STRIDE methodology and is particularly suitable for those developing on Microsoft's stack.
+यह Microsoft से एक मुफ्त उपकरण है जो सॉफ़्टवेयर परियोजनाओं के डिज़ाइन चरण में खतरों को खोजने में मदद करता है। यह STRIDE पद्धति का उपयोग करता है और विशेष रूप से उन लोगों के लिए उपयुक्त है जो Microsoft के स्टैक पर विकास कर रहे हैं।

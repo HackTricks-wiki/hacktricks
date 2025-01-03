@@ -2,35 +2,17 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="../../../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+अधिक जानकारी के लिए देखें [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/). यह केवल एक संक्षेप है:
 
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Microsoft ने कई ऑफिस दस्तावेज़ प्रारूप बनाए हैं, जिनमें दो मुख्य प्रकार **OLE प्रारूप** (जैसे RTF, DOC, XLS, PPT) और **Office Open XML (OOXML) प्रारूप** (जैसे DOCX, XLSX, PPTX) हैं। ये प्रारूप मैक्रोज़ को शामिल कर सकते हैं, जिससे ये फ़िशिंग और मैलवेयर के लक्ष्यों बन जाते हैं। OOXML फ़ाइलें ज़िप कंटेनरों के रूप में संरचित होती हैं, जो अनज़िपिंग के माध्यम से निरीक्षण की अनुमति देती हैं, फ़ाइल और फ़ोल्डर पदानुक्रम और XML फ़ाइल सामग्री को प्रकट करती हैं।
 
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+OOXML फ़ाइल संरचनाओं का अन्वेषण करने के लिए, एक दस्तावेज़ को अनज़िप करने के लिए कमांड और आउटपुट संरचना दी गई है। इन फ़ाइलों में डेटा छिपाने की तकनीकों का दस्तावेजीकरण किया गया है, जो CTF चुनौतियों के भीतर डेटा छिपाने में निरंतर नवाचार को दर्शाता है।
 
-For further information check [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/). This is just a sumary:
+विश्लेषण के लिए, **oletools** और **OfficeDissector** OLE और OOXML दस्तावेज़ों की जांच के लिए व्यापक टूलसेट प्रदान करते हैं। ये उपकरण एम्बेडेड मैक्रोज़ की पहचान और विश्लेषण में मदद करते हैं, जो अक्सर मैलवेयर वितरण के लिए वेक्टर के रूप में कार्य करते हैं, आमतौर पर अतिरिक्त दुर्भावनापूर्ण पेलोड डाउनलोड और निष्पादित करते हैं। VBA मैक्रोज़ का विश्लेषण Microsoft Office के बिना Libre Office का उपयोग करके किया जा सकता है, जो ब्रेकपॉइंट और वॉच वेरिएबल के साथ डिबगिंग की अनुमति देता है।
 
-Microsoft has created many office document formats, with two main types being **OLE formats** (like RTF, DOC, XLS, PPT) and **Office Open XML (OOXML) formats** (such as DOCX, XLSX, PPTX). These formats can include macros, making them targets for phishing and malware. OOXML files are structured as zip containers, allowing inspection through unzipping, revealing the file and folder hierarchy and XML file contents.
-
-To explore OOXML file structures, the command to unzip a document and the output structure are given. Techniques for hiding data in these files have been documented, indicating ongoing innovation in data concealment within CTF challenges.
-
-For analysis, **oletools** and **OfficeDissector** offer comprehensive toolsets for examining both OLE and OOXML documents. These tools help in identifying and analyzing embedded macros, which often serve as vectors for malware delivery, typically downloading and executing additional malicious payloads. Analysis of VBA macros can be conducted without Microsoft Office by utilizing Libre Office, which allows for debugging with breakpoints and watch variables.
-
-Installation and usage of **oletools** are straightforward, with commands provided for installing via pip and extracting macros from documents. Automatic execution of macros is triggered by functions like `AutoOpen`, `AutoExec`, or `Document_Open`.
-
+**oletools** की स्थापना और उपयोग सरल है, जिसमें pip के माध्यम से स्थापित करने और दस्तावेज़ों से मैक्रोज़ निकालने के लिए कमांड प्रदान किए गए हैं। मैक्रोज़ का स्वचालित निष्पादन `AutoOpen`, `AutoExec`, या `Document_Open` जैसी कार्यों द्वारा ट्रिगर किया जाता है।
 ```bash
 sudo pip3 install -U oletools
 olevba -c /path/to/document #Extract macros
 ```
-
-<figure><img src="../../../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-
 {{#include ../../../banners/hacktricks-training.md}}

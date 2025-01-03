@@ -1,180 +1,176 @@
 {{#include ../banners/hacktricks-training.md}}
 
-## Basic Concepts
+## मूल अवधारणाएँ
 
-- **Smart Contracts** are defined as programs that execute on a blockchain when certain conditions are met, automating agreement executions without intermediaries.
-- **Decentralized Applications (dApps)** build upon smart contracts, featuring a user-friendly front-end and a transparent, auditable back-end.
-- **Tokens & Coins** differentiate where coins serve as digital money, while tokens represent value or ownership in specific contexts.
-  - **Utility Tokens** grant access to services, and **Security Tokens** signify asset ownership.
-- **DeFi** stands for Decentralized Finance, offering financial services without central authorities.
-- **DEX** and **DAOs** refer to Decentralized Exchange Platforms and Decentralized Autonomous Organizations, respectively.
+- **स्मार्ट कॉन्ट्रैक्ट्स** को उन प्रोग्रामों के रूप में परिभाषित किया जाता है जो एक ब्लॉकचेन पर तब निष्पादित होते हैं जब कुछ शर्तें पूरी होती हैं, मध्यस्थों के बिना समझौतों के निष्पादन को स्वचालित करते हैं।
+- **विकेंद्रीकृत अनुप्रयोग (dApps)** स्मार्ट कॉन्ट्रैक्ट्स पर आधारित होते हैं, जिनमें उपयोगकर्ता के अनुकूल फ्रंट-एंड और पारदर्शी, ऑडिट करने योग्य बैक-एंड होता है।
+- **टोकन और सिक्के** में अंतर होता है, जहाँ सिक्के डिजिटल पैसे के रूप में कार्य करते हैं, जबकि टोकन विशिष्ट संदर्भों में मूल्य या स्वामित्व का प्रतिनिधित्व करते हैं।
+- **यूटिलिटी टोकन** सेवाओं तक पहुँच प्रदान करते हैं, और **सिक्योरिटी टोकन** संपत्ति के स्वामित्व का संकेत देते हैं।
+- **DeFi** का अर्थ विकेंद्रीकृत वित्त है, जो केंद्रीय प्राधिकरणों के बिना वित्तीय सेवाएँ प्रदान करता है।
+- **DEX** और **DAOs** क्रमशः विकेंद्रीकृत एक्सचेंज प्लेटफार्मों और विकेंद्रीकृत स्वायत्त संगठनों को संदर्भित करते हैं।
 
-## Consensus Mechanisms
+## सहमति तंत्र
 
-Consensus mechanisms ensure secure and agreed transaction validations on the blockchain:
+सहमति तंत्र ब्लॉकचेन पर सुरक्षित और सहमति से लेनदेन की मान्यता सुनिश्चित करते हैं:
 
-- **Proof of Work (PoW)** relies on computational power for transaction verification.
-- **Proof of Stake (PoS)** demands validators to hold a certain amount of tokens, reducing energy consumption compared to PoW.
+- **प्रूफ ऑफ वर्क (PoW)** लेनदेन की सत्यापन के लिए कंप्यूटेशनल शक्ति पर निर्भर करता है।
+- **प्रूफ ऑफ स्टेक (PoS)** सत्यापनकर्ताओं से एक निश्चित मात्रा में टोकन रखने की मांग करता है, जो PoW की तुलना में ऊर्जा की खपत को कम करता है।
 
-## Bitcoin Essentials
+## बिटकॉइन आवश्यकताएँ
 
-### Transactions
+### लेनदेन
 
-Bitcoin transactions involve transferring funds between addresses. Transactions are validated through digital signatures, ensuring only the owner of the private key can initiate transfers.
+बिटकॉइन लेनदेन में पते के बीच धन का हस्तांतरण शामिल होता है। लेनदेन को डिजिटल हस्ताक्षरों के माध्यम से मान्य किया जाता है, यह सुनिश्चित करते हुए कि केवल निजी कुंजी का मालिक ही हस्तांतरण शुरू कर सकता है।
 
-#### Key Components:
+#### प्रमुख घटक:
 
-- **Multisignature Transactions** require multiple signatures to authorize a transaction.
-- Transactions consist of **inputs** (source of funds), **outputs** (destination), **fees** (paid to miners), and **scripts** (transaction rules).
+- **मल्टीसिग्नेचर लेनदेन** को एक लेनदेन को अधिकृत करने के लिए कई हस्ताक्षरों की आवश्यकता होती है।
+- लेनदेन में **इनपुट** (धन का स्रोत), **आउटपुट** (गंतव्य), **शुल्क** (खननकर्ताओं को भुगतान किया गया), और **स्क्रिप्ट** (लेनदेन के नियम) शामिल होते हैं।
 
-### Lightning Network
+### लाइटनिंग नेटवर्क
 
-Aims to enhance Bitcoin's scalability by allowing multiple transactions within a channel, only broadcasting the final state to the blockchain.
+बिटकॉइन की स्केलेबिलिटी को बढ़ाने का लक्ष्य है, जिससे एक चैनल के भीतर कई लेनदेन किए जा सकें, केवल अंतिम स्थिति को ब्लॉकचेन पर प्रसारित किया जाए।
 
-## Bitcoin Privacy Concerns
+## बिटकॉइन गोपनीयता चिंताएँ
 
-Privacy attacks, such as **Common Input Ownership** and **UTXO Change Address Detection**, exploit transaction patterns. Strategies like **Mixers** and **CoinJoin** improve anonymity by obscuring transaction links between users.
+गोपनीयता हमले, जैसे **कॉमन इनपुट ओनरशिप** और **UTXO चेंज एड्रेस डिटेक्शन**, लेनदेन के पैटर्न का लाभ उठाते हैं। **मिक्सर्स** और **कोइनजॉइन** जैसी रणनीतियाँ उपयोगकर्ताओं के बीच लेनदेन के लिंक को अस्पष्ट करके गुमनामी में सुधार करती हैं।
 
-## Acquiring Bitcoins Anonymously
+## बिटकॉइन को गुमनाम रूप से प्राप्त करना
 
-Methods include cash trades, mining, and using mixers. **CoinJoin** mixes multiple transactions to complicate traceability, while **PayJoin** disguises CoinJoins as regular transactions for heightened privacy.
+विधियों में नकद व्यापार, खनन, और मिक्सर्स का उपयोग शामिल है। **कोइनजॉइन** कई लेनदेन को मिलाकर ट्रेसबिलिटी को जटिल बनाता है, जबकि **पे-जॉइन** कोइनजॉइन को नियमित लेनदेन के रूप में छिपाता है ताकि गोपनीयता बढ़ सके।
 
-# Bitcoin Privacy Atacks
+# बिटकॉइन गोपनीयता हमले
 
-# Summary of Bitcoin Privacy Attacks
+# बिटकॉइन गोपनीयता हमलों का सारांश
 
-In the world of Bitcoin, the privacy of transactions and the anonymity of users are often subjects of concern. Here's a simplified overview of several common methods through which attackers can compromise Bitcoin privacy.
+बिटकॉइन की दुनिया में, लेनदेन की गोपनीयता और उपयोगकर्ताओं की गुमनामी अक्सर चिंता का विषय होती है। यहाँ कुछ सामान्य तरीकों का सरल अवलोकन है जिनके माध्यम से हमलावर बिटकॉइन की गोपनीयता को खतरे में डाल सकते हैं।
 
-## **Common Input Ownership Assumption**
+## **कॉमन इनपुट ओनरशिप अनुमान**
 
-It is generally rare for inputs from different users to be combined in a single transaction due to the complexity involved. Thus, **two input addresses in the same transaction are often assumed to belong to the same owner**.
+यह सामान्यतः दुर्लभ है कि विभिन्न उपयोगकर्ताओं के इनपुट को एक ही लेनदेन में जोड़ा जाए क्योंकि इसमें जटिलता होती है। इसलिए, **एक ही लेनदेन में दो इनपुट पते अक्सर एक ही मालिक के होने का अनुमान लगाया जाता है**।
 
-## **UTXO Change Address Detection**
+## **UTXO चेंज एड्रेस डिटेक्शन**
 
-A UTXO, or **Unspent Transaction Output**, must be entirely spent in a transaction. If only a part of it is sent to another address, the remainder goes to a new change address. Observers can assume this new address belongs to the sender, compromising privacy.
+एक UTXO, या **अनस्पेंट ट्रांजैक्शन आउटपुट**, को एक लेनदेन में पूरी तरह से खर्च किया जाना चाहिए। यदि इसका केवल एक भाग किसी अन्य पते पर भेजा जाता है, तो शेष एक नए चेंज पते पर जाता है। पर्यवेक्षक यह मान सकते हैं कि यह नया पता भेजने वाले का है, जिससे गोपनीयता का उल्लंघन होता है।
 
-### Example
+### उदाहरण
 
-To mitigate this, mixing services or using multiple addresses can help obscure ownership.
+इससे बचने के लिए, मिक्सिंग सेवाएँ या कई पते का उपयोग स्वामित्व को अस्पष्ट करने में मदद कर सकते हैं।
 
-## **Social Networks & Forums Exposure**
+## **सोशल नेटवर्क और फोरम का प्रदर्शन**
 
-Users sometimes share their Bitcoin addresses online, making it **easy to link the address to its owner**.
+उपयोगकर्ता कभी-कभी अपने बिटकॉइन पते को ऑनलाइन साझा करते हैं, जिससे **पते को उसके मालिक से जोड़ना आसान हो जाता है**।
 
-## **Transaction Graph Analysis**
+## **लेनदेन ग्राफ विश्लेषण**
 
-Transactions can be visualized as graphs, revealing potential connections between users based on the flow of funds.
+लेनदेन को ग्राफ के रूप में दृश्य रूप में प्रस्तुत किया जा सकता है, जो उपयोगकर्ताओं के बीच संभावित संबंधों को धन के प्रवाह के आधार पर प्रकट करता है।
 
-## **Unnecessary Input Heuristic (Optimal Change Heuristic)**
+## **अनावश्यक इनपुट ह्यूरिस्टिक (ऑप्टिमल चेंज ह्यूरिस्टिक)**
 
-This heuristic is based on analyzing transactions with multiple inputs and outputs to guess which output is the change returning to the sender.
+यह ह्यूरिस्टिक कई इनपुट और आउटपुट वाले लेनदेन का विश्लेषण करके अनुमान लगाने पर आधारित है कि कौन सा आउटपुट भेजने वाले को वापस लौटने वाला परिवर्तन है।
 
-### Example
-
+### उदाहरण
 ```bash
 2 btc --> 4 btc
 3 btc     1 btc
 ```
+यदि अधिक इनपुट जोड़ने से आउटपुट किसी एकल इनपुट से बड़ा हो जाता है, तो यह ह्यूरिस्टिक को भ्रमित कर सकता है।
 
-If adding more inputs makes the change output larger than any single input, it can confuse the heuristic.
+## **फोर्स्ड एड्रेस रीयूज**
 
-## **Forced Address Reuse**
+हमलावर पहले से उपयोग किए गए पते पर छोटे-छोटे अमाउंट भेज सकते हैं, यह उम्मीद करते हुए कि प्राप्तकर्ता भविष्य के लेनदेन में इन्हें अन्य इनपुट के साथ मिलाएगा, जिससे पते आपस में जुड़े रहेंगे।
 
-Attackers may send small amounts to previously used addresses, hoping the recipient combines these with other inputs in future transactions, thereby linking addresses together.
+### सही वॉलेट व्यवहार
 
-### Correct Wallet Behavior
+वॉलेट को पहले से उपयोग किए गए, खाली पते पर प्राप्त किए गए सिक्कों का उपयोग करने से बचना चाहिए ताकि इस गोपनीयता लीक को रोका जा सके।
 
-Wallets should avoid using coins received on already used, empty addresses to prevent this privacy leak.
+## **अन्य ब्लॉकचेन विश्लेषण तकनीकें**
 
-## **Other Blockchain Analysis Techniques**
+- **सटीक भुगतान राशि:** बिना परिवर्तन के लेनदेन संभवतः एक ही उपयोगकर्ता के दो पते के बीच होते हैं।
+- **गोल नंबर:** लेनदेन में गोल संख्या यह सुझाव देती है कि यह एक भुगतान है, जिसमें गैर-गोल आउटपुट संभवतः परिवर्तन है।
+- **वॉलेट फिंगरप्रिंटिंग:** विभिन्न वॉलेट के पास लेनदेन निर्माण के अद्वितीय पैटर्न होते हैं, जिससे विश्लेषकों को उपयोग किए गए सॉफ़्टवेयर और संभावित रूप से परिवर्तन पते की पहचान करने की अनुमति मिलती है।
+- **राशि और समय संबंध:** लेनदेन के समय या राशियों का खुलासा लेनदेन को ट्रेस करने योग्य बना सकता है।
 
-- **Exact Payment Amounts:** Transactions without change are likely between two addresses owned by the same user.
-- **Round Numbers:** A round number in a transaction suggests it's a payment, with the non-round output likely being the change.
-- **Wallet Fingerprinting:** Different wallets have unique transaction creation patterns, allowing analysts to identify the software used and potentially the change address.
-- **Amount & Timing Correlations:** Disclosing transaction times or amounts can make transactions traceable.
+## **ट्रैफिक विश्लेषण**
 
-## **Traffic Analysis**
+नेटवर्क ट्रैफिक की निगरानी करके, हमलावर संभावित रूप से लेनदेन या ब्लॉकों को आईपी पते से जोड़ सकते हैं, जिससे उपयोगकर्ता की गोपनीयता से समझौता हो सकता है। यह विशेष रूप से सच है यदि कोई इकाई कई बिटकॉइन नोड्स संचालित करती है, जिससे उनके लेनदेन की निगरानी करने की क्षमता बढ़ जाती है।
 
-By monitoring network traffic, attackers can potentially link transactions or blocks to IP addresses, compromising user privacy. This is especially true if an entity operates many Bitcoin nodes, enhancing their ability to monitor transactions.
+## अधिक
 
-## More
+गोपनीयता हमलों और रक्षा के लिए एक व्यापक सूची के लिए, [Bitcoin Wiki पर Bitcoin Privacy](https://en.bitcoin.it/wiki/Privacy) पर जाएं।
 
-For a comprehensive list of privacy attacks and defenses, visit [Bitcoin Privacy on Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy).
+# गुमनाम बिटकॉइन लेनदेन
 
-# Anonymous Bitcoin Transactions
+## गुमनाम रूप से बिटकॉइन प्राप्त करने के तरीके
 
-## Ways to Get Bitcoins Anonymously
+- **नकद लेनदेन**: नकद के माध्यम से बिटकॉइन प्राप्त करना।
+- **नकद विकल्प**: उपहार कार्ड खरीदना और उन्हें ऑनलाइन बिटकॉइन के लिए बदलना।
+- **माइनिंग**: बिटकॉइन कमाने का सबसे निजी तरीका माइनिंग है, विशेष रूप से जब इसे अकेले किया जाता है क्योंकि माइनिंग पूल माइनर के आईपी पते को जान सकते हैं। [Mining Pools Information](https://en.bitcoin.it/wiki/Pooled_mining)
+- **चोरी**: सिद्धांत रूप से, बिटकॉइन चुराना गुमनाम रूप से इसे प्राप्त करने का एक और तरीका हो सकता है, हालांकि यह अवैध है और अनुशंसित नहीं है।
 
-- **Cash Transactions**: Acquiring bitcoin through cash.
-- **Cash Alternatives**: Purchasing gift cards and exchanging them online for bitcoin.
-- **Mining**: The most private method to earn bitcoins is through mining, especially when done alone because mining pools may know the miner's IP address. [Mining Pools Information](https://en.bitcoin.it/wiki/Pooled_mining)
-- **Theft**: Theoretically, stealing bitcoin could be another method to acquire it anonymously, although it's illegal and not recommended.
+## मिक्सिंग सेवाएँ
 
-## Mixing Services
-
-By using a mixing service, a user can **send bitcoins** and receive **different bitcoins in return**, which makes tracing the original owner difficult. Yet, this requires trust in the service not to keep logs and to actually return the bitcoins. Alternative mixing options include Bitcoin casinos.
+मिक्सिंग सेवा का उपयोग करके, एक उपयोगकर्ता **बिटकॉइन भेज सकता है** और **वापस में विभिन्न बिटकॉइन प्राप्त कर सकता है**, जिससे मूल मालिक को ट्रेस करना कठिन हो जाता है। फिर भी, यह सेवा पर भरोसा करने की आवश्यकता होती है कि यह लॉग नहीं रखेगी और वास्तव में बिटकॉइन वापस करेगी। वैकल्पिक मिक्सिंग विकल्पों में बिटकॉइन कैसीनो शामिल हैं।
 
 ## CoinJoin
 
-**CoinJoin** merges multiple transactions from different users into one, complicating the process for anyone trying to match inputs with outputs. Despite its effectiveness, transactions with unique input and output sizes can still potentially be traced.
+**CoinJoin** विभिन्न उपयोगकर्ताओं के कई लेनदेन को एक में मिलाता है, जिससे किसी के लिए इनपुट को आउटपुट से मिलाना जटिल हो जाता है। इसके प्रभावी होने के बावजूद, अद्वितीय इनपुट और आउटपुट आकार वाले लेनदेन को अभी भी संभावित रूप से ट्रेस किया जा सकता है।
 
-Example transactions that may have used CoinJoin include `402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a` and `85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238`.
+उदाहरण लेनदेन जो CoinJoin का उपयोग कर सकते हैं उनमें `402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a` और `85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238` शामिल हैं।
 
-For more information, visit [CoinJoin](https://coinjoin.io/en). For a similar service on Ethereum, check out [Tornado Cash](https://tornado.cash), which anonymizes transactions with funds from miners.
+अधिक जानकारी के लिए, [CoinJoin](https://coinjoin.io/en) पर जाएं। एथेरियम पर समान सेवा के लिए, [Tornado Cash](https://tornado.cash) देखें, जो खनिकों के फंड से लेनदेन को गुमनाम बनाता है।
 
 ## PayJoin
 
-A variant of CoinJoin, **PayJoin** (or P2EP), disguises the transaction among two parties (e.g., a customer and a merchant) as a regular transaction, without the distinctive equal outputs characteristic of CoinJoin. This makes it extremely hard to detect and could invalidate the common-input-ownership heuristic used by transaction surveillance entities.
-
+CoinJoin का एक रूप, **PayJoin** (या P2EP), दो पक्षों (जैसे, एक ग्राहक और एक व्यापारी) के बीच लेनदेन को एक सामान्य लेनदेन के रूप में छुपाता है, बिना CoinJoin की विशिष्ट समान आउटपुट विशेषता के। यह इसे पहचानना अत्यंत कठिन बनाता है और लेनदेन निगरानी संस्थाओं द्वारा उपयोग की जाने वाली सामान्य-इनपुट-स्वामित्व ह्यूरिस्टिक को अमान्य कर सकता है।
 ```plaintext
 2 btc --> 3 btc
 5 btc     4 btc
 ```
+उपरोक्त जैसी लेनदेन PayJoin हो सकते हैं, जो गोपनीयता को बढ़ाते हैं जबकि मानक बिटकॉइन लेनदेन से भिन्न नहीं होते।
 
-Transactions like the above could be PayJoin, enhancing privacy while remaining indistinguishable from standard bitcoin transactions.
+**PayJoin का उपयोग पारंपरिक निगरानी विधियों को महत्वपूर्ण रूप से बाधित कर सकता है**, जो लेनदेन की गोपनीयता की खोज में एक आशाजनक विकास है।
 
-**The utilization of PayJoin could significantly disrupt traditional surveillance methods**, making it a promising development in the pursuit of transactional privacy.
+# क्रिप्टोक्यूरेंसी में गोपनीयता के लिए सर्वोत्तम प्रथाएँ
 
-# Best Practices for Privacy in Cryptocurrencies
+## **वॉलेट समन्वय तकनीकें**
 
-## **Wallet Synchronization Techniques**
+गोपनीयता और सुरक्षा बनाए रखने के लिए, ब्लॉकचेन के साथ वॉलेट का समन्वय करना महत्वपूर्ण है। दो विधियाँ प्रमुख हैं:
 
-To maintain privacy and security, synchronizing wallets with the blockchain is crucial. Two methods stand out:
+- **पूर्ण नोड**: पूरे ब्लॉकचेन को डाउनलोड करके, एक पूर्ण नोड अधिकतम गोपनीयता सुनिश्चित करता है। सभी लेनदेन जो कभी किए गए हैं, स्थानीय रूप से संग्रहीत होते हैं, जिससे प्रतिकूलों के लिए यह पहचानना असंभव हो जाता है कि उपयोगकर्ता किस लेनदेन या पते में रुचि रखता है।
+- **क्लाइंट-साइड ब्लॉक फ़िल्टरिंग**: यह विधि ब्लॉकचेन में प्रत्येक ब्लॉक के लिए फ़िल्टर बनाने में शामिल होती है, जिससे वॉलेट्स को नेटवर्क पर्यवेक्षकों के लिए विशिष्ट रुचियों को उजागर किए बिना प्रासंगिक लेनदेन की पहचान करने की अनुमति मिलती है। हल्के वॉलेट्स इन फ़िल्टरों को डाउनलोड करते हैं, केवल तब पूर्ण ब्लॉक लाते हैं जब उपयोगकर्ता के पते के साथ मेल मिलता है।
 
-- **Full node**: By downloading the entire blockchain, a full node ensures maximum privacy. All transactions ever made are stored locally, making it impossible for adversaries to identify which transactions or addresses the user is interested in.
-- **Client-side block filtering**: This method involves creating filters for every block in the blockchain, allowing wallets to identify relevant transactions without exposing specific interests to network observers. Lightweight wallets download these filters, only fetching full blocks when a match with the user's addresses is found.
+## **गोपनीयता के लिए टोर का उपयोग करना**
 
-## **Utilizing Tor for Anonymity**
+चूंकि बिटकॉइन एक पीयर-टू-पीयर नेटवर्क पर काम करता है, अपने आईपी पते को छिपाने के लिए टोर का उपयोग करने की सिफारिश की जाती है, जिससे नेटवर्क के साथ बातचीत करते समय गोपनीयता बढ़ती है।
 
-Given that Bitcoin operates on a peer-to-peer network, using Tor is recommended to mask your IP address, enhancing privacy when interacting with the network.
+## **पते के पुन: उपयोग को रोकना**
 
-## **Preventing Address Reuse**
+गोपनीयता की सुरक्षा के लिए, हर लेनदेन के लिए एक नया पता उपयोग करना महत्वपूर्ण है। पते का पुन: उपयोग गोपनीयता को खतरे में डाल सकता है क्योंकि यह लेनदेन को एक ही इकाई से जोड़ता है। आधुनिक वॉलेट्स अपने डिज़ाइन के माध्यम से पते के पुन: उपयोग को हतोत्साहित करते हैं।
 
-To safeguard privacy, it's vital to use a new address for every transaction. Reusing addresses can compromise privacy by linking transactions to the same entity. Modern wallets discourage address reuse through their design.
+## **लेनदेन की गोपनीयता के लिए रणनीतियाँ**
 
-## **Strategies for Transaction Privacy**
+- **कई लेनदेन**: एक भुगतान को कई लेनदेन में विभाजित करना लेनदेन की राशि को अस्पष्ट कर सकता है, गोपनीयता हमलों को विफल कर सकता है।
+- **परिवर्तन से बचना**: ऐसे लेनदेन का चयन करना जो परिवर्तन आउटपुट की आवश्यकता नहीं रखते हैं, गोपनीयता को बढ़ाता है क्योंकि यह परिवर्तन पहचान विधियों को बाधित करता है।
+- **कई परिवर्तन आउटपुट**: यदि परिवर्तन से बचना संभव नहीं है, तो कई परिवर्तन आउटपुट उत्पन्न करना भी गोपनीयता में सुधार कर सकता है।
 
-- **Multiple transactions**: Splitting a payment into several transactions can obscure the transaction amount, thwarting privacy attacks.
-- **Change avoidance**: Opting for transactions that don't require change outputs enhances privacy by disrupting change detection methods.
-- **Multiple change outputs**: If avoiding change isn't feasible, generating multiple change outputs can still improve privacy.
+# **मोनरो: एक गोपनीयता का प्रकाशस्तंभ**
 
-# **Monero: A Beacon of Anonymity**
+मोनरो डिजिटल लेनदेन में पूर्ण गोपनीयता की आवश्यकता को संबोधित करता है, जो गोपनीयता के लिए एक उच्च मानक स्थापित करता है।
 
-Monero addresses the need for absolute anonymity in digital transactions, setting a high standard for privacy.
+# **एथेरियम: गैस और लेनदेन**
 
-# **Ethereum: Gas and Transactions**
+## **गैस को समझना**
 
-## **Understanding Gas**
+गैस एथेरियम पर संचालन को निष्पादित करने के लिए आवश्यक गणनात्मक प्रयास को मापता है, जिसे **ग्वेई** में मूल्यांकित किया जाता है। उदाहरण के लिए, 2,310,000 ग्वेई (या 0.00231 ETH) की लागत वाला एक लेनदेन गैस सीमा और एक आधार शुल्क शामिल करता है, जिसमें खनिकों को प्रोत्साहित करने के लिए एक टिप होती है। उपयोगकर्ता अधिक भुगतान न करने के लिए अधिकतम शुल्क निर्धारित कर सकते हैं, और अतिरिक्त राशि वापस की जाती है।
 
-Gas measures the computational effort needed to execute operations on Ethereum, priced in **gwei**. For example, a transaction costing 2,310,000 gwei (or 0.00231 ETH) involves a gas limit and a base fee, with a tip to incentivize miners. Users can set a max fee to ensure they don't overpay, with the excess refunded.
+## **लेनदेन निष्पादित करना**
 
-## **Executing Transactions**
+एथेरियम में लेनदेन में एक प्रेषक और एक प्राप्तकर्ता शामिल होते हैं, जो या तो उपयोगकर्ता या स्मार्ट अनुबंध पते हो सकते हैं। इन्हें एक शुल्क की आवश्यकता होती है और इन्हें खनन किया जाना चाहिए। लेनदेन में आवश्यक जानकारी में प्राप्तकर्ता, प्रेषक का हस्ताक्षर, मूल्य, वैकल्पिक डेटा, गैस सीमा, और शुल्क शामिल होते हैं। विशेष रूप से, प्रेषक का पता हस्ताक्षर से निकाला जाता है, जिससे लेनदेन डेटा में इसकी आवश्यकता समाप्त हो जाती है।
 
-Transactions in Ethereum involve a sender and a recipient, which can be either user or smart contract addresses. They require a fee and must be mined. Essential information in a transaction includes the recipient, sender's signature, value, optional data, gas limit, and fees. Notably, the sender's address is deduced from the signature, eliminating the need for it in the transaction data.
+ये प्रथाएँ और तंत्र उन सभी के लिए मौलिक हैं जो गोपनीयता और सुरक्षा को प्राथमिकता देते हुए क्रिप्टोक्यूरेंसी के साथ संलग्न होना चाहते हैं।
 
-These practices and mechanisms are foundational for anyone looking to engage with cryptocurrencies while prioritizing privacy and security.
-
-## References
+## संदर्भ
 
 - [https://en.wikipedia.org/wiki/Proof_of_stake](https://en.wikipedia.org/wiki/Proof_of_stake)
 - [https://www.mycryptopedia.com/public-key-private-key-explained/](https://www.mycryptopedia.com/public-key-private-key-explained/)

@@ -4,96 +4,94 @@
 
 ## Partitions
 
-A hard drive or an **SSD disk can contain different partitions** with the goal of separating data physically.\
-The **minimum** unit of a disk is the **sector** (normally composed of 512B). So, each partition size needs to be multiple of that size.
+एक हार्ड ड्राइव या **SSD डिस्क में विभिन्न विभाजन हो सकते हैं** जिनका उद्देश्य डेटा को भौतिक रूप से अलग करना है।\
+डिस्क की **न्यूनतम** इकाई **क्षेत्र** है (सामान्यतः 512B से बनी होती है)। इसलिए, प्रत्येक विभाजन का आकार उस आकार का गुणांक होना चाहिए।
 
-### MBR (master Boot Record)
+### MBR (मास्टर बूट रिकॉर्ड)
 
-It's allocated in the **first sector of the disk after the 446B of the boot code**. This sector is essential to indicate to the PC what and from where a partition should be mounted.\
-It allows up to **4 partitions** (at most **just 1** can be active/**bootable**). However, if you need more partitions you can use **extended partitions**. The **final byte** of this first sector is the boot record signature **0x55AA**. Only one partition can be marked as active.\
-MBR allows **max 2.2TB**.
+यह **446B बूट कोड के बाद डिस्क के पहले क्षेत्र में आवंटित** होता है। यह क्षेत्र पीसी को यह संकेत देने के लिए आवश्यक है कि एक विभाजन को क्या और कहाँ माउंट किया जाना चाहिए।\
+यह **4 विभाजनों** तक की अनुमति देता है (अधिकतम **केवल 1** सक्रिय/**बूट करने योग्य** हो सकता है)। हालाँकि, यदि आपको अधिक विभाजन की आवश्यकता है, तो आप **विस्तारित विभाजन** का उपयोग कर सकते हैं। इस पहले क्षेत्र का **अंतिम बाइट** बूट रिकॉर्ड सिग्नेचर **0x55AA** है। केवल एक विभाजन को सक्रिय के रूप में चिह्नित किया जा सकता है।\
+MBR **अधिकतम 2.2TB** की अनुमति देता है।
 
 ![](<../../../images/image (350).png>)
 
 ![](<../../../images/image (304).png>)
 
-From the **bytes 440 to the 443** of the MBR you can find the **Windows Disk Signature** (if Windows is used). The logical drive letter of the hard disk depends on the Windows Disk Signature. Changing this signature could prevent Windows from booting (tool: [**Active Disk Editor**](https://www.disk-editor.org/index.html)**)**.
+**MBR के 440 से 443 बाइट्स** में आप **Windows डिस्क सिग्नेचर** पा सकते हैं (यदि Windows का उपयोग किया गया है)। हार्ड डिस्क का तार्किक ड्राइव लेटर Windows डिस्क सिग्नेचर पर निर्भर करता है। इस सिग्नेचर को बदलने से Windows बूट करने में विफल हो सकता है (उपकरण: [**Active Disk Editor**](https://www.disk-editor.org/index.html)**)**।
 
 ![](<../../../images/image (310).png>)
 
-**Format**
+**फॉर्मेट**
 
-| Offset      | Length     | Item                |
+| ऑफसेट      | लंबाई     | आइटम                |
 | ----------- | ---------- | ------------------- |
-| 0 (0x00)    | 446(0x1BE) | Boot code           |
-| 446 (0x1BE) | 16 (0x10)  | First Partition     |
-| 462 (0x1CE) | 16 (0x10)  | Second Partition    |
-| 478 (0x1DE) | 16 (0x10)  | Third Partition     |
-| 494 (0x1EE) | 16 (0x10)  | Fourth Partition    |
-| 510 (0x1FE) | 2 (0x2)    | Signature 0x55 0xAA |
+| 0 (0x00)    | 446(0x1BE) | बूट कोड           |
+| 446 (0x1BE) | 16 (0x10)  | पहला विभाजन     |
+| 462 (0x1CE) | 16 (0x10)  | दूसरा विभाजन    |
+| 478 (0x1DE) | 16 (0x10)  | तीसरा विभाजन     |
+| 494 (0x1EE) | 16 (0x10)  | चौथा विभाजन    |
+| 510 (0x1FE) | 2 (0x2)    | सिग्नेचर 0x55 0xAA |
 
-**Partition Record Format**
+**विभाजन रिकॉर्ड फॉर्मेट**
 
-| Offset    | Length   | Item                                                   |
+| ऑफसेट    | लंबाई   | आइटम                                                   |
 | --------- | -------- | ------------------------------------------------------ |
-| 0 (0x00)  | 1 (0x01) | Active flag (0x80 = bootable)                          |
-| 1 (0x01)  | 1 (0x01) | Start head                                             |
-| 2 (0x02)  | 1 (0x01) | Start sector (bits 0-5); upper bits of cylinder (6- 7) |
-| 3 (0x03)  | 1 (0x01) | Start cylinder lowest 8 bits                           |
-| 4 (0x04)  | 1 (0x01) | Partition type code (0x83 = Linux)                     |
-| 5 (0x05)  | 1 (0x01) | End head                                               |
-| 6 (0x06)  | 1 (0x01) | End sector (bits 0-5); upper bits of cylinder (6- 7)   |
-| 7 (0x07)  | 1 (0x01) | End cylinder lowest 8 bits                             |
-| 8 (0x08)  | 4 (0x04) | Sectors preceding partition (little endian)            |
-| 12 (0x0C) | 4 (0x04) | Sectors in partition                                   |
+| 0 (0x00)  | 1 (0x01) | सक्रिय ध्वज (0x80 = बूट करने योग्य)                          |
+| 1 (0x01)  | 1 (0x01) | प्रारंभिक सिर                                             |
+| 2 (0x02)  | 1 (0x01) | प्रारंभिक क्षेत्र (बिट 0-5); सिलेंडर के ऊपरी बिट (6- 7) |
+| 3 (0x03)  | 1 (0x01) | प्रारंभिक सिलेंडर के सबसे कम 8 बिट                           |
+| 4 (0x04)  | 1 (0x01) | विभाजन प्रकार कोड (0x83 = Linux)                     |
+| 5 (0x05)  | 1 (0x01) | अंतिम सिर                                               |
+| 6 (0x06)  | 1 (0x01) | अंतिम क्षेत्र (बिट 0-5); सिलेंडर के ऊपरी बिट (6- 7)   |
+| 7 (0x07)  | 1 (0x01) | अंतिम सिलेंडर के सबसे कम 8 बिट                             |
+| 8 (0x08)  | 4 (0x04) | विभाजन से पहले के क्षेत्र (लिटिल एंडियन)            |
+| 12 (0x0C) | 4 (0x04) | विभाजन में क्षेत्र                                   |
 
-In order to mount an MBR in Linux you first need to get the start offset (you can use `fdisk` and the `p` command)
+Linux में MBR को माउंट करने के लिए आपको पहले प्रारंभिक ऑफसेट प्राप्त करने की आवश्यकता है (आप `fdisk` और `p` कमांड का उपयोग कर सकते हैं)
 
 ![](<../../../images/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
-And then use the following code
-
+और फिर निम्नलिखित कोड का उपयोग करें
 ```bash
 #Mount MBR in Linux
 mount -o ro,loop,offset=<Bytes>
 #63x512 = 32256Bytes
 mount -o ro,loop,offset=32256,noatime /path/to/image.dd /media/part/
 ```
-
 **LBA (Logical block addressing)**
 
-**Logical block addressing** (**LBA**) is a common scheme used for **specifying the location of blocks** of data stored on computer storage devices, generally secondary storage systems such as hard disk drives. LBA is a particularly simple linear addressing scheme; **blocks are located by an integer index**, with the first block being LBA 0, the second LBA 1, and so on.
+**Logical block addressing** (**LBA**) एक सामान्य योजना है जो **कंप्यूटर स्टोरेज डिवाइसों** पर संग्रहीत डेटा के ब्लॉकों के स्थान को निर्दिष्ट करने के लिए उपयोग की जाती है, आमतौर पर हार्ड डिस्क ड्राइव जैसे द्वितीयक स्टोरेज सिस्टम। LBA एक विशेष रूप से सरल रैखिक एड्रेसिंग योजना है; **ब्लॉक एक पूर्णांक अनुक्रमांक द्वारा स्थित होते हैं**, पहले ब्लॉक को LBA 0, दूसरे को LBA 1, और इसी तरह।
 
 ### GPT (GUID Partition Table)
 
-The GUID Partition Table, known as GPT, is favored for its enhanced capabilities compared to MBR (Master Boot Record). Distinctive for its **globally unique identifier** for partitions, GPT stands out in several ways:
+GUID Partition Table, जिसे GPT के नाम से जाना जाता है, MBR (Master Boot Record) की तुलना में इसकी उन्नत क्षमताओं के लिए पसंद किया जाता है। विभाजन के लिए **वैश्विक अद्वितीय पहचानकर्ता** के लिए विशिष्ट, GPT कई तरीकों से अलग है:
 
-- **Location and Size**: Both GPT and MBR start at **sector 0**. However, GPT operates on **64bits**, contrasting with MBR's 32bits.
-- **Partition Limits**: GPT supports up to **128 partitions** on Windows systems and accommodates up to **9.4ZB** of data.
-- **Partition Names**: Offers the ability to name partitions with up to 36 Unicode characters.
+- **स्थान और आकार**: GPT और MBR दोनों **सेक्टर 0** से शुरू होते हैं। हालाँकि, GPT **64बिट** पर कार्य करता है, जबकि MBR का 32बिट है।
+- **विभाजन सीमाएँ**: GPT Windows सिस्टम पर **128 विभाजनों** तक का समर्थन करता है और **9.4ZB** डेटा को समायोजित करता है।
+- **विभाजन नाम**: विभाजनों को 36 Unicode वर्णों तक नाम देने की क्षमता प्रदान करता है।
 
-**Data Resilience and Recovery**:
+**डेटा स्थिरता और पुनर्प्राप्ति**:
 
-- **Redundancy**: Unlike MBR, GPT doesn't confine partitioning and boot data to a single place. It replicates this data across the disk, enhancing data integrity and resilience.
-- **Cyclic Redundancy Check (CRC)**: GPT employs CRC to ensure data integrity. It actively monitors for data corruption, and when detected, GPT attempts to recover the corrupted data from another disk location.
+- **अतिरिक्तता**: MBR के विपरीत, GPT विभाजन और बूट डेटा को एक ही स्थान पर सीमित नहीं करता है। यह डेटा को डिस्क पर पुनरावृत्त करता है, डेटा की अखंडता और स्थिरता को बढ़ाता है।
+- **साइक्लिक रेडंडेंसी चेक (CRC)**: GPT डेटा की अखंडता सुनिश्चित करने के लिए CRC का उपयोग करता है। यह डेटा भ्रष्टाचार की सक्रिय रूप से निगरानी करता है, और जब पता चलता है, तो GPT दूसरे डिस्क स्थान से भ्रष्ट डेटा को पुनर्प्राप्त करने का प्रयास करता है।
 
-**Protective MBR (LBA0)**:
+**सुरक्षात्मक MBR (LBA0)**:
 
-- GPT maintains backward compatibility through a protective MBR. This feature resides in the legacy MBR space but is designed to prevent older MBR-based utilities from mistakenly overwriting GPT disks, hence safeguarding the data integrity on GPT-formatted disks.
+- GPT एक सुरक्षात्मक MBR के माध्यम से पीछे की संगतता बनाए रखता है। यह सुविधा विरासत MBR स्थान में स्थित है लेकिन इसे पुराने MBR-आधारित उपयोगिताओं को गलती से GPT डिस्क को अधिलेखित करने से रोकने के लिए डिज़ाइन किया गया है, इस प्रकार GPT-फॉर्मेटेड डिस्क पर डेटा की अखंडता की रक्षा करता है।
 
 ![https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/GUID_Partition_Table_Scheme.svg/800px-GUID_Partition_Table_Scheme.svg.png](<../../../images/image (1062).png>)
 
-**Hybrid MBR (LBA 0 + GPT)**
+**हाइब्रिड MBR (LBA 0 + GPT)**
 
 [From Wikipedia](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 
-In operating systems that support **GPT-based boot through BIOS** services rather than EFI, the first sector may also still be used to store the first stage of the **bootloader** code, but **modified** to recognize **GPT** **partitions**. The bootloader in the MBR must not assume a sector size of 512 bytes.
+उन ऑपरेटिंग सिस्टम में जो **BIOS** सेवाओं के माध्यम से **GPT-आधारित बूट** का समर्थन करते हैं, पहले सेक्टर का उपयोग **बूटलोडर** कोड के पहले चरण को संग्रहीत करने के लिए भी किया जा सकता है, लेकिन **संशोधित** किया गया है ताकि **GPT** **विभाजनों** को पहचान सके। MBR में बूटलोडर को 512 बाइट्स के सेक्टर आकार का अनुमान नहीं लगाना चाहिए।
 
-**Partition table header (LBA 1)**
+**विभाजन तालिका शीर्षक (LBA 1)**
 
 [From Wikipedia](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 
-The partition table header defines the usable blocks on the disk. It also defines the number and size of the partition entries that make up the partition table (offsets 80 and 84 in the table).
+विभाजन तालिका शीर्षक डिस्क पर उपयोगी ब्लॉकों को परिभाषित करता है। यह विभाजन तालिका (तालिका में ऑफसेट 80 और 84) का निर्माण करने वाले विभाजन प्रविष्टियों की संख्या और आकार को भी परिभाषित करता है।
 
 | Offset    | Length   | Contents                                                                                                                                                                     |
 | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -113,7 +111,7 @@ The partition table header defines the usable blocks on the disk. It also define
 | 88 (0x58) | 4 bytes  | CRC32 of partition entries array in little endian                                                                                                                            |
 | 92 (0x5C) | \*       | Reserved; must be zeroes for the rest of the block (420 bytes for a sector size of 512 bytes; but can be more with larger sector sizes)                                      |
 
-**Partition entries (LBA 2–33)**
+**विभाजन प्रविष्टियाँ (LBA 2–33)**
 
 | GUID partition entry format |          |                                                                                                               |
 | --------------------------- | -------- | ------------------------------------------------------------------------------------------------------------- |
@@ -125,23 +123,23 @@ The partition table header defines the usable blocks on the disk. It also define
 | 48 (0x30)                   | 8 bytes  | Attribute flags (e.g. bit 60 denotes read-only)                                                               |
 | 56 (0x38)                   | 72 bytes | Partition name (36 [UTF-16](https://en.wikipedia.org/wiki/UTF-16)LE code units)                               |
 
-**Partitions Types**
+**विभाजन प्रकार**
 
 ![](<../../../images/image (83).png>)
 
 More partition types in [https://en.wikipedia.org/wiki/GUID_Partition_Table](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 
-### Inspecting
+### निरीक्षण
 
-After mounting the forensics image with [**ArsenalImageMounter**](https://arsenalrecon.com/downloads/), you can inspect the first sector using the Windows tool [**Active Disk Editor**](https://www.disk-editor.org/index.html)**.** In the following image an **MBR** was detected on the **sector 0** and interpreted:
+[**ArsenalImageMounter**](https://arsenalrecon.com/downloads/) के साथ फॉरेंसिक इमेज को माउंट करने के बाद, आप Windows टूल [**Active Disk Editor**](https://www.disk-editor.org/index.html)** का उपयोग करके पहले सेक्टर का निरीक्षण कर सकते हैं।** निम्नलिखित छवि में **सेक्टर 0** पर एक **MBR** का पता लगाया गया और व्याख्या की गई:
 
 ![](<../../../images/image (354).png>)
 
-If it was a **GPT table instead of an MBR** it should appear the signature _EFI PART_ in the **sector 1** (which in the previous image is empty).
+यदि यह **MBR के बजाय एक GPT तालिका** होती, तो इसे **सेक्टर 1** में _EFI PART_ का हस्ताक्षर दिखाई देना चाहिए (जो पिछले छवि में खाली है)।
 
-## File-Systems
+## फ़ाइल-प्रणालियाँ
 
-### Windows file-systems list
+### Windows फ़ाइल-प्रणालियों की सूची
 
 - **FAT12/16**: MSDOS, WIN95/98/NT/200
 - **FAT32**: 95/2000/XP/2003/VISTA/7/8/10
@@ -151,81 +149,81 @@ If it was a **GPT table instead of an MBR** it should appear the signature _EFI 
 
 ### FAT
 
-The **FAT (File Allocation Table)** file system is designed around its core component, the file allocation table, positioned at the volume's start. This system safeguards data by maintaining **two copies** of the table, ensuring data integrity even if one is corrupted. The table, along with the root folder, must be in a **fixed location**, crucial for the system's startup process.
+**FAT (File Allocation Table)** फ़ाइल प्रणाली अपने मुख्य घटक, फ़ाइल आवंटन तालिका के चारों ओर डिज़ाइन की गई है, जो वॉल्यूम की शुरुआत में स्थित है। यह प्रणाली डेटा की सुरक्षा करती है **दो प्रतियों** को बनाए रखकर, यह सुनिश्चित करती है कि यदि एक भ्रष्ट हो जाए तो भी डेटा की अखंडता बनी रहे। तालिका, साथ ही रूट फ़ोल्डर, एक **स्थिर स्थान** में होनी चाहिए, जो प्रणाली के स्टार्टअप प्रक्रिया के लिए महत्वपूर्ण है।
 
-The file system's basic unit of storage is a **cluster, usually 512B**, comprising multiple sectors. FAT has evolved through versions:
+फ़ाइल प्रणाली की मूल भंडारण इकाई एक **क्लस्टर, आमतौर पर 512B** है, जिसमें कई सेक्टर शामिल होते हैं। FAT ने संस्करणों के माध्यम से विकास किया है:
 
-- **FAT12**, supporting 12-bit cluster addresses and handling up to 4078 clusters (4084 with UNIX).
-- **FAT16**, enhancing to 16-bit addresses, thereby accommodating up to 65,517 clusters.
-- **FAT32**, further advancing with 32-bit addresses, allowing an impressive 268,435,456 clusters per volume.
+- **FAT12**, 12-बिट क्लस्टर पते का समर्थन करता है और 4078 क्लस्टर (4084 UNIX के साथ) को संभालता है।
+- **FAT16**, 16-बिट पते में सुधार करता है, जिससे 65,517 क्लस्टर तक का समर्थन होता है।
+- **FAT32**, 32-बिट पते के साथ आगे बढ़ता है, जिससे प्रति वॉल्यूम 268,435,456 क्लस्टर की प्रभावशाली संख्या की अनुमति मिलती है।
 
-A significant limitation across FAT versions is the **4GB maximum file size**, imposed by the 32-bit field used for file size storage.
+FAT संस्करणों में एक महत्वपूर्ण सीमा **4GB अधिकतम फ़ाइल आकार** है, जो फ़ाइल आकार भंडारण के लिए उपयोग किए गए 32-बिट क्षेत्र द्वारा निर्धारित है।
 
-Key components of the root directory, particularly for FAT12 and FAT16, include:
+FAT12 और FAT16 के लिए रूट निर्देशिका के प्रमुख घटक हैं:
 
-- **File/Folder Name** (up to 8 characters)
-- **Attributes**
-- **Creation, Modification, and Last Access Dates**
-- **FAT Table Address** (indicating the start cluster of the file)
-- **File Size**
+- **फ़ाइल/फ़ोल्डर नाम** (8 वर्णों तक)
+- **गुण**
+- **निर्माण, संशोधन, और अंतिम पहुँच तिथियाँ**
+- **FAT तालिका पता** (फ़ाइल के प्रारंभ क्लस्टर को इंगित करता है)
+- **फ़ाइल आकार**
 
 ### EXT
 
-**Ext2** is the most common file system for **not journaling** partitions (**partitions that don't change much**) like the boot partition. **Ext3/4** are **journaling** and are used usually for the **rest partitions**.
+**Ext2** सबसे सामान्य फ़ाइल प्रणाली है जो **जर्नलिंग** विभाजनों (**विभाजन जो ज्यादा नहीं बदलते**) के लिए है जैसे बूट विभाजन। **Ext3/4** **जर्नलिंग** हैं और आमतौर पर **बाकी विभाजनों** के लिए उपयोग की जाती हैं।
 
-## **Metadata**
+## **मेटाडेटा**
 
-Some files contain metadata. This information is about the content of the file which sometimes might be interesting to an analyst as depending on the file type, it might have information like:
+कुछ फ़ाइलों में मेटाडेटा होता है। यह जानकारी फ़ाइल की सामग्री के बारे में होती है जो कभी-कभी विश्लेषक के लिए दिलचस्प हो सकती है क्योंकि फ़ाइल के प्रकार के आधार पर, इसमें जानकारी हो सकती है जैसे:
 
-- Title
-- MS Office Version used
-- Author
-- Dates of creation and last modification
-- Model of the camera
-- GPS coordinates
-- Image information
+- शीर्षक
+- MS Office संस्करण का उपयोग किया गया
+- लेखक
+- निर्माण और अंतिम संशोधन की तिथियाँ
+- कैमरे का मॉडल
+- GPS निर्देशांक
+- छवि जानकारी
 
-You can use tools like [**exiftool**](https://exiftool.org) and [**Metadiver**](https://www.easymetadata.com/metadiver-2/) to get the metadata of a file.
+आप फ़ाइल के मेटाडेटा प्राप्त करने के लिए [**exiftool**](https://exiftool.org) और [**Metadiver**](https://www.easymetadata.com/metadiver-2/) जैसे उपकरणों का उपयोग कर सकते हैं।
 
-## **Deleted Files Recovery**
+## **हटाई गई फ़ाइलों की पुनर्प्राप्ति**
 
-### Logged Deleted Files
+### लॉग की गई हटाई गई फ़ाइलें
 
-As was seen before there are several places where the file is still saved after it was "deleted". This is because usually the deletion of a file from a file system just marks it as deleted but the data isn't touched. Then, it's possible to inspect the registries of the files (like the MFT) and find the deleted files.
+जैसा कि पहले देखा गया है, कई स्थान हैं जहाँ फ़ाइल "हटाई गई" होने के बाद भी अभी भी सहेजी गई है। इसका कारण यह है कि आमतौर पर फ़ाइल सिस्टम से फ़ाइल को हटाने से इसे केवल हटाए गए के रूप में चिह्नित किया जाता है लेकिन डेटा को छुआ नहीं जाता। फिर, फ़ाइलों के रजिस्ट्रियों (जैसे MFT) का निरीक्षण करना और हटाई गई फ़ाइलों को खोजना संभव है।
 
-Also, the OS usually saves a lot of information about file system changes and backups, so it's possible to try to use them to recover the file or as much information as possible.
-
-{{#ref}}
-file-data-carving-recovery-tools.md
-{{#endref}}
-
-### **File Carving**
-
-**File carving** is a technique that tries to **find files in the bulk of data**. There are 3 main ways tools like this work: **Based on file types headers and footers**, based on file types **structures** and based on the **content** itself.
-
-Note that this technique **doesn't work to retrieve fragmented files**. If a file **isn't stored in contiguous sectors**, then this technique won't be able to find it or at least part of it.
-
-There are several tools that you can use for file Carving indicating the file types you want to search for
+इसके अलावा, OS आमतौर पर फ़ाइल सिस्टम परिवर्तनों और बैकअप के बारे में बहुत सारी जानकारी सहेजता है, इसलिए फ़ाइल को पुनर्प्राप्त करने या यथासंभव अधिक जानकारी प्राप्त करने के लिए उनका उपयोग करने का प्रयास करना संभव है।
 
 {{#ref}}
 file-data-carving-recovery-tools.md
 {{#endref}}
 
-### Data Stream **C**arving
+### **फ़ाइल कार्विंग**
 
-Data Stream Carving is similar to File Carving but **instead of looking for complete files, it looks for interesting fragments** of information.\
-For example, instead of looking for a complete file containing logged URLs, this technique will search for URLs.
+**फ़ाइल कार्विंग** एक तकनीक है जो **डेटा के बड़े हिस्से में फ़ाइलों को खोजने की कोशिश करती है**। इस तरह के उपकरणों के काम करने के 3 मुख्य तरीके हैं: **फ़ाइल प्रकार के शीर्षकों और फुटर्स के आधार पर**, फ़ाइल प्रकार की **संरचनाओं** के आधार पर और **सामग्री** के आधार पर।
+
+ध्यान दें कि यह तकनीक **खंडित फ़ाइलों को पुनर्प्राप्त करने के लिए काम नहीं करती**। यदि एक फ़ाइल **सन्निहित सेक्टरों में संग्रहीत नहीं है**, तो यह तकनीक इसे या कम से कम इसके एक भाग को खोजने में असमर्थ होगी।
+
+आप फ़ाइल कार्विंग के लिए कई उपकरणों का उपयोग कर सकते हैं जो आप जिन फ़ाइल प्रकारों को खोजने के लिए संकेत देते हैं।
 
 {{#ref}}
 file-data-carving-recovery-tools.md
 {{#endref}}
 
-### Secure Deletion
+### डेटा स्ट्रीम **C**arving
 
-Obviously, there are ways to **"securely" delete files and part of logs about them**. For example, it's possible to **overwrite the content** of a file with junk data several times, and then **remove** the **logs** from the **$MFT** and **$LOGFILE** about the file, and **remove the Volume Shadow Copies**.\
-You may notice that even performing that action there might be **other parts where the existence of the file is still logged**, and that's true and part of the forensics professional job is to find them.
+डेटा स्ट्रीम कार्विंग फ़ाइल कार्विंग के समान है लेकिन **पूर्ण फ़ाइलों की तलाश करने के बजाय, यह जानकारी के दिलचस्प टुकड़ों की तलाश करता है**।\
+उदाहरण के लिए, लॉग की गई URL को शामिल करने वाली एक पूर्ण फ़ाइल की तलाश करने के बजाय, यह तकनीक URL की खोज करेगी।
 
-## References
+{{#ref}}
+file-data-carving-recovery-tools.md
+{{#endref}}
+
+### सुरक्षित हटाना
+
+स्पष्ट रूप से, फ़ाइलों और उनके बारे में लॉग के एक भाग को **"सुरक्षित" हटाने** के तरीके हैं। उदाहरण के लिए, एक फ़ाइल की सामग्री को कई बार बेकार डेटा के साथ **ओवरराइट** करना संभव है, और फिर फ़ाइल के बारे में **$MFT** और **$LOGFILE** से **लॉग** को **हटाना**, और **वॉल्यूम शैडो कॉपीज़** को **हटाना**।\
+आप देख सकते हैं कि इस क्रिया को करने पर भी फ़ाइल के अस्तित्व को लॉग करने के लिए **अन्य भाग हो सकते हैं**, और यह सच है और फॉरेंसिक पेशेवर का काम उन्हें खोजना है।
+
+## संदर्भ
 
 - [https://en.wikipedia.org/wiki/GUID_Partition_Table](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 - [http://ntfs.com/ntfs-permissions.htm](http://ntfs.com/ntfs-permissions.htm)

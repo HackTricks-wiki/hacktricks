@@ -2,105 +2,105 @@
 
 ## smss.exe
 
-**Session Manager**.\
-Session 0 starts **csrss.exe** and **wininit.exe** (**OS** **services**) while Session 1 starts **csrss.exe** and **winlogon.exe** (**User** **session**). However, you should see **only one process** of that **binary** without children in the processes tree.
+**सत्र प्रबंधक**।\
+सत्र 0 **csrss.exe** और **wininit.exe** (**OS** **सेवाएँ**) शुरू करता है जबकि सत्र 1 **csrss.exe** और **winlogon.exe** (**उपयोगकर्ता** **सत्र**) शुरू करता है। हालाँकि, आपको प्रक्रियाओं के पेड़ में उस **बाइनरी** की **केवल एक प्रक्रिया** देखनी चाहिए जिसमें बच्चे न हों।
 
-Also, sessions apart from 0 and 1 may mean that RDP sessions are occurring.
+इसके अलावा, 0 और 1 के अलावा सत्र का मतलब हो सकता है कि RDP सत्र हो रहे हैं।
 
 ## csrss.exe
 
-**Client/Server Run Subsystem Process**.\
-It manages **processes** and **threads**, makes the **Windows** **API** available for other processes and also **maps drive letters**, create **temp files**, and handles the **shutdown** **process**.
+**क्लाइंट/सर्वर रन सबसिस्टम प्रक्रिया**।\
+यह **प्रक्रियाओं** और **थ्रेड्स** का प्रबंधन करता है, अन्य प्रक्रियाओं के लिए **Windows** **API** उपलब्ध कराता है और **ड्राइव लेटर** मैप करता है, **टेम्प फ़ाइलें** बनाता है, और **शटडाउन** **प्रक्रिया** को संभालता है।
 
-There is one **running in Session 0 and another one in Session 1** (so **2 processes** in the processes tree). Another one is created **per new Session**.
+सत्र 0 में एक **चल रही है और सत्र 1 में एक और** (तो प्रक्रियाओं के पेड़ में **2 प्रक्रियाएँ**) हैं। एक और **नए सत्र** के लिए बनाई जाती है।
 
 ## winlogon.exe
 
-**Windows Logon Process**.\
-It's responsible for user **logon**/**logoffs**. It launches **logonui.exe** to ask for username and password and then calls **lsass.exe** to verify them.
+**Windows लॉगिन प्रक्रिया**।\
+यह उपयोगकर्ता **लॉगिन**/**लॉगऑफ** के लिए जिम्मेदार है। यह उपयोगकर्ता नाम और पासवर्ड के लिए पूछने के लिए **logonui.exe** लॉन्च करता है और फिर उन्हें सत्यापित करने के लिए **lsass.exe** को कॉल करता है।
 
-Then it launches **userinit.exe** which is specified in **`HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`** with key **Userinit**.
+फिर यह **userinit.exe** लॉन्च करता है जो **`HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`** में **Userinit** कुंजी के साथ निर्दिष्ट है।
 
-Mover over, the previous registry should have **explorer.exe** in the **Shell key** or it might be abused as a **malware persistence method**.
+इसके अलावा, पिछले रजिस्ट्री में **explorer.exe** **शेल कुंजी** में होना चाहिए या इसे **मैलवेयर स्थिरता विधि** के रूप में दुरुपयोग किया जा सकता है।
 
 ## wininit.exe
 
-**Windows Initialization Process**. \
-It launches **services.exe**, **lsass.exe**, and **lsm.exe** in Session 0. There should only be 1 process.
+**Windows प्रारंभिक प्रक्रिया**। \
+यह सत्र 0 में **services.exe**, **lsass.exe**, और **lsm.exe** लॉन्च करता है। केवल 1 प्रक्रिया होनी चाहिए।
 
 ## userinit.exe
 
-**Userinit Logon Application**.\
-Loads the **ntduser.dat in HKCU** and initialises the **user** **environment** and runs **logon** **scripts** and **GPO**.
+**Userinit लॉगिन एप्लिकेशन**।\
+**HKCU** में **ntduser.dat** लोड करता है और **उपयोगकर्ता** **पर्यावरण** को प्रारंभ करता है और **लॉगिन** **स्क्रिप्ट** और **GPO** चलाता है।
 
-It launches **explorer.exe**.
+यह **explorer.exe** लॉन्च करता है।
 
 ## lsm.exe
 
-**Local Session Manager**.\
-It works with smss.exe to manipulate user sessions: Logon/logoff, shell start, lock/unlock desktop, etc.
+**स्थानीय सत्र प्रबंधक**।\
+यह उपयोगकर्ता सत्रों को प्रबंधित करने के लिए smss.exe के साथ काम करता है: लॉगिन/लॉगऑफ, शेल प्रारंभ, लॉक/अनलॉक डेस्कटॉप, आदि।
 
-After W7 lsm.exe was transformed into a service (lsm.dll).
+W7 के बाद lsm.exe को एक सेवा (lsm.dll) में बदल दिया गया था।
 
-There should only be 1 process in W7 and from them a service running the DLL.
+W7 में केवल 1 प्रक्रिया होनी चाहिए और उनमें से एक सेवा जो DLL चला रही है।
 
 ## services.exe
 
-**Service Control Manager**.\
-It **loads** **services** configured as **auto-start** and **drivers**.
+**सेवा नियंत्रण प्रबंधक**।\
+यह **सेवाओं** को **ऑटो-स्टार्ट** और **ड्राइवरों** के रूप में **लोड** करता है।
 
-It's the parent process of **svchost.exe**, **dllhost.exe**, **taskhost.exe**, **spoolsv.exe** and many more.
+यह **svchost.exe**, **dllhost.exe**, **taskhost.exe**, **spoolsv.exe** और कई अन्य का मूल प्रक्रिया है।
 
-Services are defined in `HKLM\SYSTEM\CurrentControlSet\Services` and this process maintains a DB in memory of service info that can be queried by sc.exe.
+सेवाएँ `HKLM\SYSTEM\CurrentControlSet\Services` में परिभाषित हैं और यह प्रक्रिया सेवा जानकारी का एक DB मेमोरी में बनाए रखती है जिसे sc.exe द्वारा क्वेरी किया जा सकता है।
 
-Note how **some** **services** are going to be running in a **process of their own** and others are going to be **sharing a svchost.exe process**.
+ध्यान दें कि **कुछ** **सेवाएँ** एक **अपनी प्रक्रिया में** चल रही होंगी और अन्य **svchost.exe प्रक्रिया** साझा कर रही होंगी।
 
-There should only be 1 process.
+केवल 1 प्रक्रिया होनी चाहिए।
 
 ## lsass.exe
 
-**Local Security Authority Subsystem**.\
-It's responsible for the user **authentication** and create the **security** **tokens**. It uses authentication packages located in `HKLM\System\CurrentControlSet\Control\Lsa`.
+**स्थानीय सुरक्षा प्राधिकरण सबसिस्टम**।\
+यह उपयोगकर्ता **प्रमाणीकरण** के लिए जिम्मेदार है और **सुरक्षा** **टोकन** बनाता है। यह `HKLM\System\CurrentControlSet\Control\Lsa` में स्थित प्रमाणीकरण पैकेज का उपयोग करता है।
 
-It writes to the **Security** **event** **log** and there should only be 1 process.
+यह **सुरक्षा** **इवेंट** **लॉग** में लिखता है और केवल 1 प्रक्रिया होनी चाहिए।
 
-Keep in mind that this process is highly attacked to dump passwords.
+ध्यान रखें कि इस प्रक्रिया पर पासवर्ड डंप करने के लिए उच्च हमले होते हैं।
 
 ## svchost.exe
 
-**Generic Service Host Process**.\
-It hosts multiple DLL services in one shared process.
+**सामान्य सेवा होस्ट प्रक्रिया**।\
+यह एक साझा प्रक्रिया में कई DLL सेवाओं की मेज़बानी करता है।
 
-Usually, you will find that **svchost.exe** is launched with the `-k` flag. This will launch a query to the registry **HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Svchost** where there will be a key with the argument mentioned in -k that will contain the services to launch in the same process.
+आमतौर पर, आप पाएंगे कि **svchost.exe** `-k` ध्वज के साथ लॉन्च किया गया है। यह रजिस्ट्री **HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Svchost** में एक क्वेरी लॉन्च करेगा जहाँ -k में उल्लेखित तर्क के साथ एक कुंजी होगी जो उसी प्रक्रिया में लॉन्च करने के लिए सेवाओं को शामिल करेगी।
 
-For example: `-k UnistackSvcGroup` will launch: `PimIndexMaintenanceSvc MessagingService WpnUserService CDPUserSvc UnistoreSvc UserDataSvc OneSyncSvc`
+उदाहरण: `-k UnistackSvcGroup` लॉन्च करेगा: `PimIndexMaintenanceSvc MessagingService WpnUserService CDPUserSvc UnistoreSvc UserDataSvc OneSyncSvc`
 
-If the **flag `-s`** is also used with an argument, then svchost is asked to **only launch the specified service** in this argument.
+यदि **ध्वज `-s`** भी एक तर्क के साथ उपयोग किया जाता है, तो svchost से **केवल निर्दिष्ट सेवा** को इस तर्क में लॉन्च करने के लिए कहा जाता है।
 
-There will be several processes of `svchost.exe`. If any of them is **not using the `-k` flag**, then that's very suspicious. If you find that **services.exe is not the parent**, that's also very suspicious.
+`svchost.exe` की कई प्रक्रियाएँ होंगी। यदि इनमें से कोई भी **`-k` ध्वज** का उपयोग नहीं कर रहा है, तो यह बहुत संदिग्ध है। यदि आप पाते हैं कि **services.exe मूल प्रक्रिया नहीं है**, तो यह भी बहुत संदिग्ध है।
 
 ## taskhost.exe
 
-This process act as a host for processes running from DLLs. It also loads the services that are running from DLLs.
+यह प्रक्रिया DLLs से चलने वाली प्रक्रियाओं के लिए एक होस्ट के रूप में कार्य करती है। यह DLLs से चलने वाली सेवाओं को भी लोड करती है।
 
-In W8 this is called taskhostex.exe and in W10 taskhostw.exe.
+W8 में इसे taskhostex.exe कहा जाता है और W10 में taskhostw.exe।
 
 ## explorer.exe
 
-This is the process responsible for the **user's desktop** and launching files via file extensions.
+यह प्रक्रिया **उपयोगकर्ता के डेस्कटॉप** और फ़ाइल एक्सटेंशन के माध्यम से फ़ाइलें लॉन्च करने के लिए जिम्मेदार है।
 
-**Only 1** process should be spawned **per logged on user.**
+**केवल 1** प्रक्रिया को **लॉग इन किए गए उपयोगकर्ता** के लिए **स्पॉन** किया जाना चाहिए।
 
-This is run from **userinit.exe** which should be terminated, so **no parent** should appear for this process.
+यह **userinit.exe** से चलाया जाता है जिसे समाप्त किया जाना चाहिए, इसलिए इस प्रक्रिया के लिए **कोई मूल** नहीं होना चाहिए।
 
-# Catching Malicious Processes
+# दुर्भावनापूर्ण प्रक्रियाओं को पकड़ना
 
-- Is it running from the expected path? (No Windows binaries run from temp location)
-- Is it communicating with weird IPs?
-- Check digital signatures (Microsoft artifacts should be signed)
-- Is it spelled correctly?
-- Is running under the expected SID?
-- Is the parent process the expected one (if any)?
-- Are the children processes the expecting ones? (no cmd.exe, wscript.exe, powershell.exe..?)
+- क्या यह अपेक्षित पथ से चल रहा है? (कोई Windows बाइनरी टेम्प स्थान से नहीं चलती)
+- क्या यह अजीब IPs के साथ संचार कर रहा है?
+- डिजिटल हस्ताक्षरों की जांच करें (Microsoft के आर्टिफैक्ट्स पर हस्ताक्षर होना चाहिए)
+- क्या यह सही ढंग से लिखा गया है?
+- क्या यह अपेक्षित SID के तहत चल रहा है?
+- क्या मूल प्रक्रिया अपेक्षित है (यदि कोई हो)?
+- क्या बच्चे प्रक्रियाएँ अपेक्षित हैं? (कोई cmd.exe, wscript.exe, powershell.exe..?)
 
 {{#include ../../../banners/hacktricks-training.md}}

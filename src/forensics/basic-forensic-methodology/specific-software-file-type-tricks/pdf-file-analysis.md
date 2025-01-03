@@ -1,28 +1,20 @@
-# PDF File analysis
+# PDF फ़ाइल विश्लेषण
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="../../../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+**अधिक जानकारी के लिए देखें:** [**https://trailofbits.github.io/ctf/forensics/**](https://trailofbits.github.io/ctf/forensics/)
 
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+PDF प्रारूप अपनी जटिलता और डेटा को छिपाने की क्षमता के लिए जाना जाता है, जो इसे CTF फॉरेंसिक्स चुनौतियों के लिए एक केंद्र बिंदु बनाता है। यह सामान्य पाठ तत्वों को बाइनरी ऑब्जेक्ट्स के साथ मिलाता है, जो संकुचित या एन्क्रिप्टेड हो सकते हैं, और इसमें JavaScript या Flash जैसी भाषाओं में स्क्रिप्ट शामिल हो सकती हैं। PDF संरचना को समझने के लिए, कोई Didier Stevens के [परिचयात्मक सामग्री](https://blog.didierstevens.com/2008/04/09/quickpost-about-the-physical-and-logical-structure-of-pdf-files/) का संदर्भ ले सकता है, या टेक्स्ट संपादक या Origami जैसे PDF-विशिष्ट संपादक का उपयोग कर सकता है।
 
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+PDFs के गहन अन्वेषण या हेरफेर के लिए, [qpdf](https://github.com/qpdf/qpdf) और [Origami](https://github.com/mobmewireless/origami-pdf) जैसे उपकरण उपलब्ध हैं। PDFs के भीतर छिपा डेटा निम्नलिखित में छिपा हो सकता है:
 
-**For further details check:** [**https://trailofbits.github.io/ctf/forensics/**](https://trailofbits.github.io/ctf/forensics/)
+- अदृश्य परतें
+- Adobe द्वारा XMP मेटाडेटा प्रारूप
+- वृद्धिशील पीढ़ियाँ
+- पृष्ठभूमि के समान रंग का पाठ
+- छवियों के पीछे का पाठ या ओवरलैपिंग छवियाँ
+- गैर-प्रदर्शित टिप्पणियाँ
 
-The PDF format is known for its complexity and potential for concealing data, making it a focal point for CTF forensics challenges. It combines plain-text elements with binary objects, which might be compressed or encrypted, and can include scripts in languages like JavaScript or Flash. To understand PDF structure, one can refer to Didier Stevens's [introductory material](https://blog.didierstevens.com/2008/04/09/quickpost-about-the-physical-and-logical-structure-of-pdf-files/), or use tools like a text editor or a PDF-specific editor such as Origami.
-
-For in-depth exploration or manipulation of PDFs, tools like [qpdf](https://github.com/qpdf/qpdf) and [Origami](https://github.com/mobmewireless/origami-pdf) are available. Hidden data within PDFs might be concealed in:
-
-- Invisible layers
-- XMP metadata format by Adobe
-- Incremental generations
-- Text with the same color as the background
-- Text behind images or overlapping images
-- Non-displayed comments
-
-For custom PDF analysis, Python libraries like [PeepDF](https://github.com/jesparza/peepdf) can be used to craft bespoke parsing scripts. Further, the PDF's potential for hidden data storage is so vast that resources like the NSA guide on PDF risks and countermeasures, though no longer hosted at its original location, still offer valuable insights. A [copy of the guide](http://www.itsecure.hu/library/file/Biztons%C3%A1gi%20%C3%BAtmutat%C3%B3k/Alkalmaz%C3%A1sok/Hidden%20Data%20and%20Metadata%20in%20Adobe%20PDF%20Files.pdf) and a collection of [PDF format tricks](https://github.com/corkami/docs/blob/master/PDF/PDF.md) by Ange Albertini can provide further reading on the subject.
+कस्टम PDF विश्लेषण के लिए, Python पुस्तकालय जैसे [PeepDF](https://github.com/jesparza/peepdf) का उपयोग करके विशेष पार्सिंग स्क्रिप्ट बनाई जा सकती हैं। इसके अलावा, PDF के छिपे हुए डेटा भंडारण की क्षमता इतनी विशाल है कि NSA द्वारा PDF जोखिमों और प्रतिकृतियों पर गाइड जैसे संसाधन, हालांकि अब इसके मूल स्थान पर होस्ट नहीं किए गए हैं, फिर भी मूल्यवान अंतर्दृष्टि प्रदान करते हैं। [गाइड की एक प्रति](http://www.itsecure.hu/library/file/Biztons%C3%A1gi%20%C3%Bútmutat%C3%B3k/Alkalmaz%C3%A1sok/Hidden%20Data%20and%20Metadata%20in%20Adobe%20PDF%20Files.pdf) और Ange Albertini द्वारा [PDF प्रारूप ट्रिक्स](https://github.com/corkami/docs/blob/master/PDF/PDF.md) का एक संग्रह इस विषय पर आगे पढ़ने के लिए प्रदान कर सकता है।
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,30 +1,30 @@
-# Basic Forensic Methodology
+# बेसिक फॉरेंसिक मेथोडोलॉजी
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Creating and Mounting an Image
+## इमेज बनाना और माउंट करना
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/image-acquisition-and-mount.md
 {{#endref}}
 
-## Malware Analysis
+## मैलवेयर विश्लेषण
 
-This **isn't necessary the first step to perform once you have the image**. But you can use this malware analysis techniques independently if you have a file, a file-system image, memory image, pcap... so it's good to **keep these actions in mind**:
+यह **छवि प्राप्त करने के बाद करने के लिए पहला कदम जरूरी नहीं है**। लेकिन आप इस मैलवेयर विश्लेषण तकनीकों का स्वतंत्र रूप से उपयोग कर सकते हैं यदि आपके पास एक फ़ाइल, एक फ़ाइल-प्रणाली छवि, मेमोरी छवि, pcap... है, इसलिए यह **इन क्रियाओं को ध्यान में रखना अच्छा है**:
 
 {{#ref}}
 malware-analysis.md
 {{#endref}}
 
-## Inspecting an Image
+## इमेज का निरीक्षण करना
 
-if you are given a **forensic image** of a device you can start **analyzing the partitions, file-system** used and **recovering** potentially **interesting files** (even deleted ones). Learn how in:
+यदि आपको एक **फॉरेंसिक इमेज** दी गई है, तो आप **पार्टीशनों, फ़ाइल-प्रणाली** का विश्लेषण करना शुरू कर सकते हैं और **संभावित रूप से** **दिलचस्प फ़ाइलों** (यहां तक कि हटाई गई फ़ाइलों) को **पुनर्प्राप्त** कर सकते हैं। जानें कैसे:
 
 {{#ref}}
 partitions-file-systems-carving/
 {{#endref}}
 
-Depending on the used OSs and even platform different interesting artifacts should be searched:
+उपयोग किए गए OSs और यहां तक कि प्लेटफ़ॉर्म के आधार पर विभिन्न दिलचस्प कलाकृतियों की खोज की जानी चाहिए:
 
 {{#ref}}
 windows-forensics/
@@ -38,42 +38,42 @@ linux-forensics.md
 docker-forensics.md
 {{#endref}}
 
-## Deep inspection of specific file-types and Software
+## विशिष्ट फ़ाइल-प्रकारों और सॉफ़्टवेयर की गहरी जांच
 
-If you have very **suspicious** **file**, then **depending on the file-type and software** that created it several **tricks** may be useful.\
-Read the following page to learn some interesting tricks:
+यदि आपके पास बहुत **संदिग्ध** **फ़ाइल** है, तो **फ़ाइल-प्रकार और सॉफ़्टवेयर** के आधार पर जो इसे बनाया है, कई **तरकीबें** उपयोगी हो सकती हैं।\
+कुछ दिलचस्प तरकीबें जानने के लिए निम्नलिखित पृष्ठ पढ़ें:
 
 {{#ref}}
 specific-software-file-type-tricks/
 {{#endref}}
 
-I want to do a special mention to the page:
+मैं पृष्ठ का विशेष उल्लेख करना चाहता हूं:
 
 {{#ref}}
 specific-software-file-type-tricks/browser-artifacts.md
 {{#endref}}
 
-## Memory Dump Inspection
+## मेमोरी डंप निरीक्षण
 
 {{#ref}}
 memory-dump-analysis/
 {{#endref}}
 
-## Pcap Inspection
+## Pcap निरीक्षण
 
 {{#ref}}
 pcap-inspection/
 {{#endref}}
 
-## **Anti-Forensic Techniques**
+## **एंटी-फॉरेंसिक तकनीकें**
 
-Keep in mind the possible use of anti-forensic techniques:
+एंटी-फॉरेंसिक तकनीकों के संभावित उपयोग को ध्यान में रखें:
 
 {{#ref}}
 anti-forensic-techniques.md
 {{#endref}}
 
-## Threat Hunting
+## खतरे की खोज
 
 {{#ref}}
 file-integrity-monitoring.md

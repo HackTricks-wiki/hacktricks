@@ -2,17 +2,17 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-The goal of this page is to enumerate **platforms that allow to search for code** (literal or regex) in across thousands/millions of repos in one or more platforms.
+इस पृष्ठ का लक्ष्य **प्लेटफार्मों की गणना करना है जो कोड** (शाब्दिक या regex) को हजारों/लाखों रिपोजिटरी में एक या एक से अधिक प्लेटफार्मों में खोजने की अनुमति देते हैं।
 
-This helps in several occasions to **search for leaked information** or for **vulnerabilities** patterns.
+यह कई अवसरों पर **लीक की गई जानकारी** या **कमजोरियों** के पैटर्न खोजने में मदद करता है।
 
-- [**SourceGraph**](https://sourcegraph.com/search): Search in millions of repos. There is a free version and an enterprise version (with 15 days free). It supports regexes.
-- [**Github Search**](https://github.com/search): Search across Github. It supports regexes.
-  - Maybe it's also useful to check also [**Github Code Search**](https://cs.github.com/).
-- [**Gitlab Advanced Search**](https://docs.gitlab.com/ee/user/search/advanced_search.html): Search across Gitlab projects. Support regexes.
-- [**SearchCode**](https://searchcode.com/): Search code in millions of projects.
+- [**SourceGraph**](https://sourcegraph.com/search): लाखों रिपोजिटरी में खोजें। इसमें एक मुफ्त संस्करण और एक एंटरप्राइज संस्करण है (15 दिन मुफ्त)। यह regex का समर्थन करता है।
+- [**Github Search**](https://github.com/search): Github में खोजें। यह regex का समर्थन करता है।
+- शायद [**Github Code Search**](https://cs.github.com/) की जांच करना भी उपयोगी हो।
+- [**Gitlab Advanced Search**](https://docs.gitlab.com/ee/user/search/advanced_search.html): Gitlab परियोजनाओं में खोजें। regex का समर्थन करता है।
+- [**SearchCode**](https://searchcode.com/): लाखों परियोजनाओं में कोड खोजें।
 
 > [!WARNING]
-> When you look for leaks in a repo and run something like `git log -p` don't forget there might be **other branches with other commits** containing secrets!
+> जब आप किसी रिपोजिटरी में लीक की तलाश कर रहे हों और कुछ ऐसा चलाते हैं जैसे `git log -p` तो न भूलें कि वहाँ **अन्य शाखाएँ हो सकती हैं जिनमें अन्य कमिट्स** हो सकते हैं जिनमें रहस्य हो सकते हैं!
 
 {{#include ../../banners/hacktricks-training.md}}

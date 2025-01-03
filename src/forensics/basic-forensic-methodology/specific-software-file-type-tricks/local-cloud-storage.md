@@ -1,114 +1,96 @@
-# Local Cloud Storage
+# स्थानीय क्लाउड स्टोरेज
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="../../../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-
 ## OneDrive
 
-In Windows, you can find the OneDrive folder in `\Users\<username>\AppData\Local\Microsoft\OneDrive`. And inside `logs\Personal` it's possible to find the file `SyncDiagnostics.log` which contains some interesting data regarding the synchronized files:
+Windows में, आप OneDrive फ़ोल्डर को `\Users\<username>\AppData\Local\Microsoft\OneDrive` में पा सकते हैं। और `logs\Personal` के अंदर, आप फ़ाइल `SyncDiagnostics.log` पा सकते हैं जिसमें समन्वयित फ़ाइलों के बारे में कुछ दिलचस्प डेटा होता है:
 
-- Size in bytes
-- Creation date
-- Modification date
-- Number of files in the cloud
-- Number of files in the folder
-- **CID**: Unique ID of the OneDrive user
-- Report generation time
-- Size of the HD of the OS
+- बाइट्स में आकार
+- निर्माण तिथि
+- संशोधन तिथि
+- क्लाउड में फ़ाइलों की संख्या
+- फ़ोल्डर में फ़ाइलों की संख्या
+- **CID**: OneDrive उपयोगकर्ता का अद्वितीय आईडी
+- रिपोर्ट निर्माण समय
+- OS का HD का आकार
 
-Once you have found the CID it's recommended to **search files containing this ID**. You may be able to find files with the name: _**\<CID>.ini**_ and _**\<CID>.dat**_ that may contain interesting information like the names of files synchronized with OneDrive.
+एक बार जब आप CID पा लेते हैं, तो **इस ID वाले फ़ाइलों की खोज करना** अनुशंसित है। आप _**\<CID>.ini**_ और _**\<CID>.dat**_ नाम की फ़ाइलें पा सकते हैं जो OneDrive के साथ समन्वयित फ़ाइलों के नाम जैसी दिलचस्प जानकारी रख सकती हैं।
 
 ## Google Drive
 
-In Windows, you can find the main Google Drive folder in `\Users\<username>\AppData\Local\Google\Drive\user_default`\
-This folder contains a file called Sync_log.log with information like the email address of the account, filenames, timestamps, MD5 hashes of the files, etc. Even deleted files appear in that log file with its corresponding MD5.
+Windows में, आप मुख्य Google Drive फ़ोल्डर को `\Users\<username>\AppData\Local\Google\Drive\user_default` में पा सकते हैं।\
+यह फ़ोल्डर Sync_log.log नामक फ़ाइल को रखता है जिसमें खाते का ईमेल पता, फ़ाइल नाम, टाइमस्टैम्प, फ़ाइलों के MD5 हैश आदि जैसी जानकारी होती है। यहां तक कि हटाई गई फ़ाइलें भी उस लॉग फ़ाइल में अपने संबंधित MD5 के साथ दिखाई देती हैं।
 
-The file **`Cloud_graph\Cloud_graph.db`** is a sqlite database which contains the table **`cloud_graph_entry`**. In this table you can find the **name** of the **synchronized** **files**, modified time, size, and the MD5 checksum of the files.
+फ़ाइल **`Cloud_graph\Cloud_graph.db`** एक sqlite डेटाबेस है जिसमें तालिका **`cloud_graph_entry`** होती है। इस तालिका में आप **समन्वयित** **फ़ाइलों** का **नाम**, संशोधित समय, आकार, और फ़ाइलों का MD5 चेकसम पा सकते हैं।
 
-The table data of the database **`Sync_config.db`** contains the email address of the account, the path of the shared folders and the Google Drive version.
+डेटाबेस **`Sync_config.db`** की तालिका डेटा में खाते का ईमेल पता, साझा फ़ोल्डरों का पथ और Google Drive का संस्करण होता है।
 
 ## Dropbox
 
-Dropbox uses **SQLite databases** to manage the files. In this\
-You can find the databases in the folders:
+Dropbox फ़ाइलों को प्रबंधित करने के लिए **SQLite डेटाबेस** का उपयोग करता है। इसमें\
+आप डेटाबेस को निम्नलिखित फ़ोल्डरों में पा सकते हैं:
 
 - `\Users\<username>\AppData\Local\Dropbox`
 - `\Users\<username>\AppData\Local\Dropbox\Instance1`
 - `\Users\<username>\AppData\Roaming\Dropbox`
 
-And the main databases are:
+और मुख्य डेटाबेस हैं:
 
 - Sigstore.dbx
 - Filecache.dbx
 - Deleted.dbx
 - Config.dbx
 
-The ".dbx" extension means that the **databases** are **encrypted**. Dropbox uses **DPAPI** ([https://docs.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)?redirectedfrom=MSDN](<https://docs.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)?redirectedfrom=MSDN>))
+".dbx" एक्सटेंशन का अर्थ है कि **डेटाबेस** **एन्क्रिप्टेड** हैं। Dropbox **DPAPI** का उपयोग करता है ([https://docs.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)?redirectedfrom=MSDN](<https://docs.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)?redirectedfrom=MSDN>))
 
-To understand better the encryption that Dropbox uses you can read [https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html](https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html).
+Dropbox द्वारा उपयोग की जाने वाली एन्क्रिप्शन को बेहतर ढंग से समझने के लिए आप पढ़ सकते हैं [https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html](https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html)।
 
-However, the main information is:
+हालांकि, मुख्य जानकारी है:
 
 - **Entropy**: d114a55212655f74bd772e37e64aee9b
 - **Salt**: 0D638C092E8B82FC452883F95F355B8E
 - **Algorithm**: PBKDF2
 - **Iterations**: 1066
 
-Apart from that information, to decrypt the databases you still need:
+इसके अलावा, डेटाबेस को डिक्रिप्ट करने के लिए आपको अभी भी आवश्यकता है:
 
-- The **encrypted DPAPI key**: You can find it in the registry inside `NTUSER.DAT\Software\Dropbox\ks\client` (export this data as binary)
-- The **`SYSTEM`** and **`SECURITY`** hives
-- The **DPAPI master keys**: Which can be found in `\Users\<username>\AppData\Roaming\Microsoft\Protect`
-- The **username** and **password** of the Windows user
+- **एन्क्रिप्टेड DPAPI कुंजी**: आप इसे रजिस्ट्री में `NTUSER.DAT\Software\Dropbox\ks\client` के अंदर पा सकते हैं (इस डेटा को बाइनरी के रूप में निर्यात करें)
+- **`SYSTEM`** और **`SECURITY`** हाइव
+- **DPAPI मास्टर कुंजी**: जो `\Users\<username>\AppData\Roaming\Microsoft\Protect` में पाई जा सकती हैं
+- Windows उपयोगकर्ता का **उपयोगकर्ता नाम** और **पासवर्ड**
 
-Then you can use the tool [**DataProtectionDecryptor**](https://nirsoft.net/utils/dpapi_data_decryptor.html)**:**
+फिर आप टूल [**DataProtectionDecryptor**](https://nirsoft.net/utils/dpapi_data_decryptor.html)** का उपयोग कर सकते हैं:**
 
 ![](<../../../images/image (448).png>)
 
-If everything goes as expected, the tool will indicate the **primary key** that you need to **use to recover the original one**. To recover the original one, just use this [cyber_chef receipt](<https://gchq.github.io/CyberChef/#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) putting the primary key as the "passphrase" inside the receipt.
+यदि सब कुछ अपेक्षित रूप से चलता है, तो टूल आपको **प्राथमिक कुंजी** बताएगा जिसका आपको **मूल कुंजी को पुनर्प्राप्त करने के लिए उपयोग करना है**। मूल कुंजी को पुनर्प्राप्त करने के लिए, बस इस [cyber_chef रेसिपी](<https://gchq.github.io/CyberChef/#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) का उपयोग करें, जिसमें प्राथमिक कुंजी को रेसिपी के "पासफ़्रेज़" के रूप में डालें।
 
-The resulting hex is the final key used to encrypt the databases which can be decrypted with:
-
+परिणामी हेक्स अंतिम कुंजी है जिसका उपयोग डेटाबेस को एन्क्रिप्ट करने के लिए किया गया है जिसे डिक्रिप्ट किया जा सकता है:
 ```bash
 sqlite -k <Obtained Key> config.dbx ".backup config.db" #This decompress the config.dbx and creates a clear text backup in config.db
 ```
+**`config.dbx`** डेटाबेस में शामिल हैं:
 
-The **`config.dbx`** database contains:
+- **Email**: उपयोगकर्ता का ईमेल
+- **usernamedisplayname**: उपयोगकर्ता का नाम
+- **dropbox_path**: वह पथ जहाँ ड्रॉपबॉक्स फ़ोल्डर स्थित है
+- **Host_id: Hash** जो क्लाउड में प्रमाणीकरण के लिए उपयोग किया जाता है। इसे केवल वेब से रद्द किया जा सकता है।
+- **Root_ns**: उपयोगकर्ता पहचानकर्ता
 
-- **Email**: The email of the user
-- **usernamedisplayname**: The name of the user
-- **dropbox_path**: Path where the dropbox folder is located
-- **Host_id: Hash** used to authenticate to the cloud. This can only be revoked from the web.
-- **Root_ns**: User identifier
+**`filecache.db`** डेटाबेस में ड्रॉपबॉक्स के साथ समन्वयित सभी फ़ाइलों और फ़ोल्डरों के बारे में जानकारी होती है। तालिका `File_journal` वह है जिसमें अधिक उपयोगी जानकारी होती है:
 
-The **`filecache.db`** database contains information about all the files and folders synchronized with Dropbox. The table `File_journal` is the one with more useful information:
+- **Server_path**: वह पथ जहाँ फ़ाइल सर्वर के अंदर स्थित है (यह पथ क्लाइंट के `host_id` द्वारा पूर्ववत होता है)।
+- **local_sjid**: फ़ाइल का संस्करण
+- **local_mtime**: संशोधन तिथि
+- **local_ctime**: निर्माण तिथि
 
-- **Server_path**: Path where the file is located inside the server (this path is preceded by the `host_id` of the client).
-- **local_sjid**: Version of the file
-- **local_mtime**: Modification date
-- **local_ctime**: Creation date
+इस डेटाबेस के अंदर अन्य तालिकाएँ अधिक दिलचस्प जानकारी प्रदान करती हैं:
 
-Other tables inside this database contain more interesting information:
-
-- **block_cache**: hash of all the files and folders of Dropbox
-- **block_ref**: Related the hash ID of the table `block_cache` with the file ID in the table `file_journal`
-- **mount_table**: Share folders of dropbox
-- **deleted_fields**: Dropbox deleted files
+- **block_cache**: ड्रॉपबॉक्स की सभी फ़ाइलों और फ़ोल्डरों का हैश
+- **block_ref**: तालिका `block_cache` के हैश आईडी को तालिका `file_journal` में फ़ाइल आईडी से संबंधित करता है
+- **mount_table**: ड्रॉपबॉक्स के साझा फ़ोल्डर
+- **deleted_fields**: ड्रॉपबॉक्स द्वारा हटाई गई फ़ाइलें
 - **date_added**
-
-<figure><img src="../../../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 {{#include ../../../banners/hacktricks-training.md}}

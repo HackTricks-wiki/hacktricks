@@ -1,16 +1,16 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Audio and video file manipulation** is a staple in **CTF forensics challenges**, leveraging **steganography** and metadata analysis to hide or reveal secret messages. Tools such as **[mediainfo](https://mediaarea.net/en/MediaInfo)** and **`exiftool`** are essential for inspecting file metadata and identifying content types.
+**ऑडियो और वीडियो फ़ाइल हेरफेर** **CTF फॉरेंसिक्स चुनौतियों** में एक मुख्य तत्व है, जो **स्टेगनोग्राफी** और मेटाडेटा विश्लेषण का उपयोग करके गुप्त संदेशों को छिपाने या प्रकट करने के लिए किया जाता है। फ़ाइल मेटाडेटा की जांच और सामग्री प्रकारों की पहचान के लिए **[mediainfo](https://mediaarea.net/en/MediaInfo)** और **`exiftool`** जैसे उपकरण आवश्यक हैं।
 
-For audio challenges, **[Audacity](http://www.audacityteam.org/)** stands out as a premier tool for viewing waveforms and analyzing spectrograms, essential for uncovering text encoded in audio. **[Sonic Visualiser](http://www.sonicvisualiser.org/)** is highly recommended for detailed spectrogram analysis. **Audacity** allows for audio manipulation like slowing down or reversing tracks to detect hidden messages. **[Sox](http://sox.sourceforge.net/)**, a command-line utility, excels in converting and editing audio files.
+ऑडियो चुनौतियों के लिए, **[Audacity](http://www.audacityteam.org/)** तरंग रूपों को देखने और स्पेक्ट्रोग्राम का विश्लेषण करने के लिए एक प्रमुख उपकरण है, जो ऑडियो में एन्कोडेड पाठ को उजागर करने के लिए आवश्यक है। **[Sonic Visualiser](http://www.sonicvisualiser.org/)** विस्तृत स्पेक्ट्रोग्राम विश्लेषण के लिए अत्यधिक अनुशंसित है। **Audacity** ऑडियो हेरफेर की अनुमति देता है जैसे ट्रैकों को धीमा करना या उलटना ताकि छिपे हुए संदेशों का पता लगाया जा सके। **[Sox](http://sox.sourceforge.net/)**, एक कमांड-लाइन उपयोगिता, ऑडियो फ़ाइलों को परिवर्तित और संपादित करने में उत्कृष्ट है।
 
-**Least Significant Bits (LSB)** manipulation is a common technique in audio and video steganography, exploiting the fixed-size chunks of media files to embed data discreetly. **[Multimon-ng](http://tools.kali.org/wireless-attacks/multimon-ng)** is useful for decoding messages hidden as **DTMF tones** or **Morse code**.
+**लीस्ट सिग्निफिकेंट बिट्स (LSB)** हेरफेर ऑडियो और वीडियो स्टेगनोग्राफी में एक सामान्य तकनीक है, जो मीडिया फ़ाइलों के निश्चित आकार के टुकड़ों का उपयोग करके डेटा को छिपाने के लिए किया जाता है। **[Multimon-ng](http://tools.kali.org/wireless-attacks/multimon-ng)** **DTMF टोन** या **मॉर्स कोड** के रूप में छिपे संदेशों को डिकोड करने के लिए उपयोगी है।
 
-Video challenges often involve container formats that bundle audio and video streams. **[FFmpeg](http://ffmpeg.org/)** is the go-to for analyzing and manipulating these formats, capable of de-multiplexing and playing back content. For developers, **[ffmpy](http://ffmpy.readthedocs.io/en/latest/examples.html)** integrates FFmpeg's capabilities into Python for advanced scriptable interactions.
+वीडियो चुनौतियाँ अक्सर कंटेनर फ़ॉर्मेट्स को शामिल करती हैं जो ऑडियो और वीडियो स्ट्रीम को बंडल करती हैं। **[FFmpeg](http://ffmpeg.org/)** इन फ़ॉर्मेट्स का विश्लेषण और हेरफेर करने के लिए जाना जाता है, जो सामग्री को डिमल्टिप्लेक्सिंग और प्लेबैक करने में सक्षम है। डेवलपर्स के लिए, **[ffmpy](http://ffmpy.readthedocs.io/en/latest/examples.html)** FFmpeg की क्षमताओं को Python में उन्नत स्क्रिप्टेबल इंटरैक्शन के लिए एकीकृत करता है।
 
-This array of tools underscores the versatility required in CTF challenges, where participants must employ a broad spectrum of analysis and manipulation techniques to uncover hidden data within audio and video files.
+इन उपकरणों की श्रृंखला CTF चुनौतियों में आवश्यक बहुपरकारीता को उजागर करती है, जहाँ प्रतिभागियों को ऑडियो और वीडियो फ़ाइलों के भीतर छिपे डेटा को उजागर करने के लिए विश्लेषण और हेरफेर तकनीकों का एक विस्तृत स्पेक्ट्रम लागू करना होता है।
 
-## References
+## संदर्भ
 
 - [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/)
 

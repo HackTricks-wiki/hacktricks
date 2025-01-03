@@ -24,7 +24,7 @@ print(datagram)
 os.system(datagram)
 conn.close()
 ```
-**कोड को चलाएँ** python का उपयोग करते हुए: `python s.py` और **जाँच करें कि सॉकेट कैसे सुन रहा है**:
+**कोड को चलाएँ** python का उपयोग करके: `python s.py` और **जाँच करें कि सॉकेट कैसे सुन रहा है**:
 ```python
 netstat -a -p --unix | grep "socket_test"
 (Not all processes could be identified, non-owned process info

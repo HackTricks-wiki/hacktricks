@@ -1,52 +1,38 @@
-# Other Web Tricks
+# अन्य वेब ट्रिक्स
 
 {{#include ./banners/hacktricks-training.md}}
 
-<figure><img src="/images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
 
-**Get a hacker's perspective on your web apps, network, and cloud**
+### होस्ट हेडर
 
-**Find and report critical, exploitable vulnerabilities with real business impact.** Use our 20+ custom tools to map the attack surface, find security issues that let you escalate privileges, and use automated exploits to collect essential evidence, turning your hard work into persuasive reports.
-
-{% embed url="https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons" %}
-
-### Host header
-
-Several times the back-end trust the **Host header** to perform some actions. For example, it could use its value as the **domain to send a password reset**. So when you receive an email with a link to reset your password, the domain being used is the one you put in the Host header.Then, you can request the password reset of other users and change the domain to one controlled by you to steal their password reset codes. [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).
+कई बार बैक-एंड **होस्ट हेडर** पर कुछ क्रियाएँ करने के लिए भरोसा करता है। उदाहरण के लिए, यह इसके मान का उपयोग **पासवर्ड रीसेट भेजने के लिए डोमेन के रूप में** कर सकता है। इसलिए जब आपको पासवर्ड रीसेट के लिए लिंक के साथ एक ईमेल प्राप्त होता है, तो उपयोग किया जाने वाला डोमेन वही होता है जो आपने होस्ट हेडर में डाला है। फिर, आप अन्य उपयोगकर्ताओं के पासवर्ड रीसेट का अनुरोध कर सकते हैं और डोमेन को अपने द्वारा नियंत्रित एक में बदल सकते हैं ताकि उनके पासवर्ड रीसेट कोड चुरा सकें। [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).
 
 > [!WARNING]
-> Note that it's possible that you don't even need to wait for the user to click on the reset password link to get the token, as maybe even **spam filters or other intermediary devices/bots will click on it to analyze it**.
+> ध्यान दें कि यह संभव है कि आपको टोकन प्राप्त करने के लिए उपयोगकर्ता के पासवर्ड रीसेट लिंक पर क्लिक करने का इंतजार करने की आवश्यकता नहीं है, क्योंकि शायद **स्पैम फ़िल्टर या अन्य मध्यवर्ती उपकरण/बॉट इसे विश्लेषण करने के लिए क्लिक करेंगे**।
 
 
-### Session booleans
+### सत्र बूलियन
 
-Some times when you complete some verification correctly the back-end will **just add a boolean with the value "True" to a security attribute your session**. Then, a different endpoint will know if you successfully passed that check.\
-However, if you **pass the check** and your sessions is granted that "True" value in the security attribute, you can try to **access other resources** that **depends on the same attribute** but that you **shouldn't have permissions** to access. [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).
+कुछ समय जब आप कुछ सत्यापन को सही ढंग से पूरा करते हैं, तो बैक-एंड **बस आपके सत्र के सुरक्षा विशेषता में "True" मान के साथ एक बूलियन जोड़ता है**। फिर, एक अलग एंडपॉइंट जानता है कि क्या आपने उस जांच को सफलतापूर्वक पास किया।\
+हालांकि, यदि आप **जांच पास करते हैं** और आपके सत्र को सुरक्षा विशेषता में "True" मान दिया जाता है, तो आप **अन्य संसाधनों तक पहुँचने की कोशिश कर सकते हैं** जो **उसी विशेषता पर निर्भर करते हैं** लेकिन जिन तक आपकी **अनुमति नहीं होनी चाहिए**। [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).
 
-### Register functionality
+### पंजीकरण कार्यक्षमता
 
-Try to register as an already existent user. Try also using equivalent characters (dots, lots of spaces and Unicode).
+कोशिश करें कि आप पहले से मौजूद उपयोगकर्ता के रूप में पंजीकरण करें। समकक्ष वर्णों (बिंदु, बहुत सारे स्थान और यूनिकोड) का उपयोग करने की भी कोशिश करें।
 
-### Takeover emails
+### ईमेल अधिग्रहण
 
-Register an email, before confirming it change the email, then, if the new confirmation email is sent to the first registered email,you can takeover any email. Or if you can enable the second email confirming the firt one, you can also takeover any account.
+एक ईमेल पंजीकरण करें, इसे पुष्टि करने से पहले ईमेल बदलें, फिर, यदि नया पुष्टि ईमेल पहले पंजीकृत ईमेल पर भेजा जाता है, तो आप किसी भी ईमेल का अधिग्रहण कर सकते हैं। या यदि आप पहले वाले को पुष्टि करने के लिए दूसरे ईमेल को सक्षम कर सकते हैं, तो आप किसी भी खाते का भी अधिग्रहण कर सकते हैं।
 
-### Access Internal servicedesk of companies using atlassian
+### कंपनियों के आंतरिक सर्विसडेस्क तक पहुँचें जो एटलसियन का उपयोग कर रहे हैं
 
 {% embed url="https://yourcompanyname.atlassian.net/servicedesk/customer/user/login" %}
 
-### TRACE method
+### TRACE विधि
 
-Developers might forget to disable various debugging options in the production environment. For example, the HTTP `TRACE` method is designed for diagnostic purposes. If enabled, the web server will respond to requests that use the `TRACE` method by echoing in the response the exact request that was received. This behaviour is often harmless, but occasionally leads to information disclosure, such as the name of internal authentication headers that may be appended to requests by reverse proxies.![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
+डेवलपर्स उत्पादन वातावरण में विभिन्न डिबगिंग विकल्पों को बंद करना भूल सकते हैं। उदाहरण के लिए, HTTP `TRACE` विधि का उपयोग निदान उद्देश्यों के लिए किया जाता है। यदि सक्षम है, तो वेब सर्वर `TRACE` विधि का उपयोग करने वाले अनुरोधों का उत्तर देगा, जो प्राप्त अनुरोध को प्रतिक्रिया में प्रतिध्वनित करेगा। यह व्यवहार अक्सर हानिरहित होता है, लेकिन कभी-कभी जानकारी के खुलासे का कारण बनता है, जैसे कि आंतरिक प्रमाणीकरण हेडर का नाम जो रिवर्स प्रॉक्सी द्वारा अनुरोधों में जोड़ा जा सकता है।![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
 
 ![Image for post](https://miro.medium.com/max/1330/1*wDFRADTOd9Tj63xucenvAA.png)
 
-<figure><img src="/images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
-
-**Get a hacker's perspective on your web apps, network, and cloud**
-
-**Find and report critical, exploitable vulnerabilities with real business impact.** Use our 20+ custom tools to map the attack surface, find security issues that let you escalate privileges, and use automated exploits to collect essential evidence, turning your hard work into persuasive reports.
-
-{% embed url="https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons" %}
 
 {{#include ./banners/hacktricks-training.md}}

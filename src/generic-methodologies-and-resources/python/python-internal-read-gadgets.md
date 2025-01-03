@@ -4,41 +4,35 @@
 
 ## Basic Information
 
-Different vulnerabilities such as [**Python Format Strings**](bypass-python-sandboxes/#python-format-string) or [**Class Pollution**](class-pollution-pythons-prototype-pollution.md) might allow you to **read python internal data but won't allow you to execute code**. Therefore, a pentester will need to make the most of these read permissions to **obtain sensitive privileges and escalate the vulnerability**.
+विभिन्न कमजोरियाँ जैसे कि [**Python Format Strings**](bypass-python-sandboxes/#python-format-string) या [**Class Pollution**](class-pollution-pythons-prototype-pollution.md) आपको **python आंतरिक डेटा पढ़ने की अनुमति दे सकती हैं लेकिन कोड निष्पादित करने की अनुमति नहीं देंगी**। इसलिए, एक pentester को **संवेदनशील विशेषाधिकार प्राप्त करने और कमजोरियों को बढ़ाने के लिए इन पढ़ने की अनुमतियों का अधिकतम लाभ उठाना होगा**।
 
 ### Flask - Read secret key
 
-The main page of a Flask application will probably have the **`app`** global object where this **secret is configured**.
-
+एक Flask एप्लिकेशन का मुख्य पृष्ठ शायद **`app`** वैश्विक ऑब्जेक्ट होगा जहाँ यह **गुप्त कुंजी कॉन्फ़िगर की गई है**।
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
+इस मामले में, किसी भी गैजेट का उपयोग करके इस ऑब्जेक्ट तक पहुंचना संभव है ताकि **वैश्विक ऑब्जेक्ट्स तक पहुंच** प्राप्त की जा सके [**Python सैंडबॉक्स को बायपास करने के पृष्ठ**](bypass-python-sandboxes/) से।
 
-In this case it's possible to access this object just using any gadget to **access global objects** from the [**Bypass Python sandboxes page**](bypass-python-sandboxes/).
+उस मामले में जहां **कमजोरी एक अलग पायथन फ़ाइल में है**, आपको फ़ाइलों को पार करने के लिए एक गैजेट की आवश्यकता है ताकि मुख्य फ़ाइल तक पहुंचा जा सके और **वैश्विक ऑब्जेक्ट `app.secret_key`** तक पहुंच प्राप्त की जा सके ताकि Flask गुप्त कुंजी को बदल सकें और इस कुंजी को जानकर [**अधिकार बढ़ा सकें**](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign)।
 
-In the case where **the vulnerability is in a different python file**, you need a gadget to traverse files to get to the main one to **access the global object `app.secret_key`** to change the Flask secret key and be able to [**escalate privileges** knowing this key](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
-
-A payload like this one [from this writeup](https://ctftime.org/writeup/36082):
-
+इस तरह का एक पेलोड [इस लेख से](https://ctftime.org/writeup/36082):
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
+इस payload का उपयोग करें **`app.secret_key`** को **बदलने** के लिए (आपके ऐप में नाम अलग हो सकता है) ताकि आप नए और अधिक विशेषाधिकार प्राप्त flask कुकीज़ पर हस्ताक्षर कर सकें।
 
-Use this payload to **change `app.secret_key`** (the name in your app might be different) to be able to sign new and more privileges flask cookies.
+### Werkzeug - machine_id और node uuid
 
-### Werkzeug - machine_id and node uuid
-
-[**Using these payload from this writeup**](https://vozec.fr/writeups/tweedle-dum-dee/) you will be able to access the **machine_id** and the **uuid** node, which are the **main secrets** you need to [**generate the Werkzeug pin**](../../network-services-pentesting/pentesting-web/werkzeug.md) you can use to access the python console in `/console` if the **debug mode is enabled:**
-
+[**इस लेख से इन payload का उपयोग करते हुए**](https://vozec.fr/writeups/tweedle-dum-dee/) आप **machine_id** और **uuid** node तक पहुँच सकते हैं, जो कि **मुख्य रहस्य** हैं जिनकी आपको [**Werkzeug पिन उत्पन्न करने**](../../network-services-pentesting/pentesting-web/werkzeug.md) की आवश्यकता है जिसे आप `/console` में python कंसोल तक पहुँचने के लिए उपयोग कर सकते हैं यदि **debug mode सक्षम है:**
 ```python
 {ua.__class__.__init__.__globals__[t].sys.modules[werkzeug.debug]._machine_id}
 {ua.__class__.__init__.__globals__[t].sys.modules[werkzeug.debug].uuid._node}
 ```
-
 > [!WARNING]
-> Note that you can get the **servers local path to the `app.py`** generating some **error** in the web page which will **give you the path**.
+> ध्यान दें कि आप **`app.py`** के लिए **सर्वर के स्थानीय पथ** को प्राप्त कर सकते हैं, जो वेब पृष्ठ पर कुछ **त्रुटि** उत्पन्न करेगा, जो **आपको पथ देगा**।
 
-If the vulnerability is in a different python file, check the previous Flask trick to access the objects from the main python file.
+यदि कमजोरियां किसी अन्य पायथन फ़ाइल में हैं, तो मुख्य पायथन फ़ाइल से वस्तुओं तक पहुँचने के लिए पिछले Flask ट्रिक की जाँच करें।
 
 {{#include ../../banners/hacktricks-training.md}}

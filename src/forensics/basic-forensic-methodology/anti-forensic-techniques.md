@@ -1,159 +1,151 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
+# टाइमस्टैम्प
 
-{% embed url="https://websec.nl/" %}
+एक हमलावर **फाइलों के टाइमस्टैम्प को बदलने** में रुचि रख सकता है ताकि उसे पकड़ा न जा सके।\
+MFT के अंदर `$STANDARD_INFORMATION` ** और ** `$FILE_NAME` में टाइमस्टैम्प मिलना संभव है।
 
-# Timestamps
+दोनों विशेषताओं में 4 टाइमस्टैम्प होते हैं: **संशोधन**, **पहुँच**, **निर्माण**, और **MFT रजिस्ट्रि संशोधन** (MACE या MACB)।
 
-An attacker may be interested in **changing the timestamps of files** to avoid being detected.\
-It's possible to find the timestamps inside the MFT in attributes `$STANDARD_INFORMATION` ** and ** `$FILE_NAME`.
+**Windows explorer** और अन्य उपकरण **`$STANDARD_INFORMATION`** से जानकारी दिखाते हैं।
 
-Both attributes have 4 timestamps: **Modification**, **access**, **creation**, and **MFT registry modification** (MACE or MACB).
+## TimeStomp - एंटी-फॉरेंसिक टूल
 
-**Windows explorer** and other tools show the information from **`$STANDARD_INFORMATION`**.
-
-## TimeStomp - Anti-forensic Tool
-
-This tool **modifies** the timestamp information inside **`$STANDARD_INFORMATION`** **but** **not** the information inside **`$FILE_NAME`**. Therefore, it's possible to **identify** **suspicious** **activity**.
+यह उपकरण **`$STANDARD_INFORMATION`** के अंदर टाइमस्टैम्प जानकारी को **संशोधित** करता है **लेकिन** **`$FILE_NAME`** के अंदर की जानकारी को **नहीं**। इसलिए, **संदिग्ध** **गतिविधि** को **पहचानना** संभव है।
 
 ## Usnjrnl
 
-The **USN Journal** (Update Sequence Number Journal) is a feature of the NTFS (Windows NT file system) that keeps track of volume changes. The [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) tool allows for the examination of these changes.
+**USN जर्नल** (अपडेट अनुक्रम संख्या जर्नल) NTFS (Windows NT फ़ाइल प्रणाली) की एक विशेषता है जो वॉल्यूम परिवर्तनों का ट्रैक रखती है। [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) उपकरण इन परिवर्तनों की जांच करने की अनुमति देता है।
 
 ![](<../../images/image (449).png>)
 
-The previous image is the **output** shown by the **tool** where it can be observed that some **changes were performed** to the file.
+पिछली छवि **उपकरण** द्वारा दिखाया गया **आउटपुट** है जहाँ देखा जा सकता है कि कुछ **परिवर्तन किए गए** थे।
 
 ## $LogFile
 
-**All metadata changes to a file system are logged** in a process known as [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging). The logged metadata is kept in a file named `**$LogFile**`, located in the root directory of an NTFS file system. Tools such as [LogFileParser](https://github.com/jschicht/LogFileParser) can be used to parse this file and identify changes.
+**फाइल सिस्टम में सभी मेटाडेटा परिवर्तनों को लॉग किया जाता है** जिसे [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging) के रूप में जाना जाता है। लॉग की गई मेटाडेटा एक फ़ाइल में रखी जाती है जिसका नाम `**$LogFile**` है, जो NTFS फ़ाइल प्रणाली के रूट निर्देशिका में स्थित है। [LogFileParser](https://github.com/jschicht/LogFileParser) जैसे उपकरण का उपयोग इस फ़ाइल को पार्स करने और परिवर्तनों की पहचान करने के लिए किया जा सकता है।
 
 ![](<../../images/image (450).png>)
 
-Again, in the output of the tool it's possible to see that **some changes were performed**.
+फिर से, उपकरण के आउटपुट में यह देखना संभव है कि **कुछ परिवर्तन किए गए** थे।
 
-Using the same tool it's possible to identify to **which time the timestamps were modified**:
+उसी उपकरण का उपयोग करके यह पहचानना संभव है कि **कब टाइमस्टैम्प संशोधित किए गए** थे:
 
 ![](<../../images/image (451).png>)
 
-- CTIME: File's creation time
-- ATIME: File's modification time
-- MTIME: File's MFT registry modification
-- RTIME: File's access time
+- CTIME: फ़ाइल का निर्माण समय
+- ATIME: फ़ाइल का संशोधन समय
+- MTIME: फ़ाइल का MFT रजिस्ट्रि संशोधन
+- RTIME: फ़ाइल का पहुँच समय
 
-## `$STANDARD_INFORMATION` and `$FILE_NAME` comparison
+## `$STANDARD_INFORMATION` और `$FILE_NAME` तुलना
 
-Another way to identify suspicious modified files would be to compare the time on both attributes looking for **mismatches**.
+संदिग्ध संशोधित फ़ाइलों की पहचान करने का एक और तरीका दोनों विशेषताओं पर समय की तुलना करना है और **असंगतियों** की तलाश करना है।
 
-## Nanoseconds
+## नैनोसेकंड
 
-**NTFS** timestamps have a **precision** of **100 nanoseconds**. Then, finding files with timestamps like 2010-10-10 10:10:**00.000:0000 is very suspicious**.
+**NTFS** टाइमस्टैम्प की **सटीकता** **100 नैनोसेकंड** है। इसलिए, 2010-10-10 10:10:**00.000:0000 जैसे टाइमस्टैम्प वाली फ़ाइलें **बहुत संदिग्ध** हैं।
 
-## SetMace - Anti-forensic Tool
+## SetMace - एंटी-फॉरेंसिक टूल
 
-This tool can modify both attributes `$STARNDAR_INFORMATION` and `$FILE_NAME`. However, from Windows Vista, it's necessary for a live OS to modify this information.
+यह उपकरण दोनों विशेषताओं `$STARNDAR_INFORMATION` और `$FILE_NAME` को संशोधित कर सकता है। हालाँकि, Windows Vista से, इस जानकारी को संशोधित करने के लिए एक लाइव OS की आवश्यकता होती है।
 
-# Data Hiding
+# डेटा छिपाना
 
-NFTS uses a cluster and the minimum information size. That means that if a file occupies uses and cluster and a half, the **reminding half is never going to be used** until the file is deleted. Then, it's possible to **hide data in this slack space**.
+NFTS एक क्लस्टर और न्यूनतम जानकारी के आकार का उपयोग करता है। इसका मतलब है कि यदि एक फ़ाइल एक और आधे क्लस्टर का उपयोग करती है, तो **बचा हुआ आधा कभी उपयोग नहीं होगा** जब तक फ़ाइल को हटाया नहीं जाता। फिर, इस **स्लैक स्पेस** में डेटा को **छिपाना** संभव है।
 
-There are tools like slacker that allow hiding data in this "hidden" space. However, an analysis of the `$logfile` and `$usnjrnl` can show that some data was added:
+ऐसे उपकरण हैं जैसे slacker जो इस "छिपे हुए" स्थान में डेटा छिपाने की अनुमति देते हैं। हालाँकि, `$logfile` और `$usnjrnl` का विश्लेषण दिखा सकता है कि कुछ डेटा जोड़ा गया था:
 
 ![](<../../images/image (452).png>)
 
-Then, it's possible to retrieve the slack space using tools like FTK Imager. Note that this kind of tool can save the content obfuscated or even encrypted.
+फिर, FTK Imager जैसे उपकरणों का उपयोग करके स्लैक स्पेस को पुनर्प्राप्त करना संभव है। ध्यान दें कि इस प्रकार के उपकरण सामग्री को ओब्स्क्यूरेट या यहां तक कि एन्क्रिप्टेड रूप में सहेज सकते हैं।
 
 # UsbKill
 
-This is a tool that will **turn off the computer if any change in the USB** ports is detected.\
-A way to discover this would be to inspect the running processes and **review each python script running**.
+यह एक उपकरण है जो **USB** पोर्ट में किसी भी परिवर्तन का पता लगाने पर कंप्यूटर को **बंद** कर देगा।\
+इसका पता लगाने का एक तरीका चल रहे प्रक्रियाओं की जांच करना और **प्रत्येक चल रहे पायथन स्क्रिप्ट की समीक्षा करना** है।
 
-# Live Linux Distributions
+# लाइव लिनक्स वितरण
 
-These distros are **executed inside the RAM** memory. The only way to detect them is **in case the NTFS file-system is mounted with write permissions**. If it's mounted just with read permissions it won't be possible to detect the intrusion.
+ये डिस्ट्रीब्यूशन **RAM** मेमोरी के अंदर **चलाए जाते हैं**। इन्हें केवल तभी पहचानना संभव है जब **NTFS फ़ाइल सिस्टम को लिखने की अनुमति के साथ माउंट किया गया हो**। यदि इसे केवल पढ़ने की अनुमति के साथ माउंट किया गया है, तो घुसपैठ का पता लगाना संभव नहीं होगा।
 
-# Secure Deletion
+# सुरक्षित विलोपन
 
 [https://github.com/Claudio-C/awesome-data-sanitization](https://github.com/Claudio-C/awesome-data-sanitization)
 
-# Windows Configuration
+# Windows कॉन्फ़िगरेशन
 
-It's possible to disable several windows logging methods to make the forensics investigation much harder.
+फॉरेंसिक जांच को बहुत कठिन बनाने के लिए कई Windows लॉगिंग विधियों को अक्षम करना संभव है।
 
-## Disable Timestamps - UserAssist
+## टाइमस्टैम्प अक्षम करें - UserAssist
 
-This is a registry key that maintains dates and hours when each executable was run by the user.
+यह एक रजिस्ट्री कुंजी है जो उपयोगकर्ता द्वारा चलाए गए प्रत्येक निष्पादन योग्य के लिए दिनांक और समय बनाए रखती है।
 
-Disabling UserAssist requires two steps:
+UserAssist को अक्षम करने के लिए दो चरणों की आवश्यकता होती है:
 
-1. Set two registry keys, `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` and `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled`, both to zero in order to signal that we want UserAssist disabled.
-2. Clear your registry subtrees that look like `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>`.
+1. दो रजिस्ट्री कुंजी सेट करें, `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` और `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled`, दोनों को शून्य पर सेट करें ताकि संकेत मिले कि हम UserAssist को अक्षम करना चाहते हैं।
+2. अपने रजिस्ट्री उप-ट्री को साफ करें जो `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>` की तरह दिखते हैं।
 
-## Disable Timestamps - Prefetch
+## टाइमस्टैम्प अक्षम करें - Prefetch
 
-This will save information about the applications executed with the goal of improving the performance of the Windows system. However, this can also be useful for forensics practices.
+यह उन अनुप्रयोगों के बारे में जानकारी सहेजता है जो Windows सिस्टम के प्रदर्शन में सुधार के लक्ष्य के साथ चलाए जाते हैं। हालाँकि, यह फॉरेंसिक प्रथाओं के लिए भी उपयोगी हो सकता है।
 
-- Execute `regedit`
-- Select the file path `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters`
-- Right-click on both `EnablePrefetcher` and `EnableSuperfetch`
-- Select Modify on each of these to change the value from 1 (or 3) to 0
-- Restart
+- `regedit` चलाएँ
+- फ़ाइल पथ का चयन करें `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters`
+- `EnablePrefetcher` और `EnableSuperfetch` पर राइट-क्लिक करें
+- प्रत्येक पर संशोधित करें ताकि मान 1 (या 3) से 0 में बदल जाए
+- पुनरारंभ करें
 
-## Disable Timestamps - Last Access Time
+## टाइमस्टैम्प अक्षम करें - अंतिम पहुँच समय
 
-Whenever a folder is opened from an NTFS volume on a Windows NT server, the system takes the time to **update a timestamp field on each listed folder**, called the last access time. On a heavily used NTFS volume, this can affect performance.
+जब भी एक फ़ोल्डर NTFS वॉल्यूम से Windows NT सर्वर पर खोला जाता है, तो सिस्टम प्रत्येक सूचीबद्ध फ़ोल्डर पर **एक टाइमस्टैम्प फ़ील्ड को अपडेट करने के लिए समय लेता है**, जिसे अंतिम पहुँच समय कहा जाता है। एक भारी उपयोग किए गए NTFS वॉल्यूम पर, यह प्रदर्शन को प्रभावित कर सकता है।
 
-1. Open the Registry Editor (Regedit.exe).
-2. Browse to `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`.
-3. Look for `NtfsDisableLastAccessUpdate`. If it doesn’t exist, add this DWORD and set its value to 1, which will disable the process.
-4. Close the Registry Editor, and reboot the server.
+1. रजिस्ट्री संपादक (Regedit.exe) खोलें।
+2. `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem` पर जाएँ।
+3. `NtfsDisableLastAccessUpdate` की तलाश करें। यदि यह मौजूद नहीं है, तो इस DWORD को जोड़ें और इसका मान 1 पर सेट करें, जो प्रक्रिया को अक्षम कर देगा।
+4. रजिस्ट्री संपादक को बंद करें, और सर्वर को पुनरारंभ करें।
 
-## Delete USB History
+## USB इतिहास हटाएँ
 
-All the **USB Device Entries** are stored in Windows Registry Under the **USBSTOR** registry key that contains sub keys which are created whenever you plug a USB Device into your PC or Laptop. You can find this key here H`KEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Deleting this** you will delete the USB history.\
-You may also use the tool [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) to be sure you have deleted them (and to delete them).
+सभी **USB डिवाइस प्रविष्टियाँ** Windows रजिस्ट्री में **USBSTOR** रजिस्ट्री कुंजी के तहत संग्रहीत होती हैं जिसमें उप कुंजियाँ होती हैं जो तब बनाई जाती हैं जब आप अपने पीसी या लैपटॉप में USB डिवाइस लगाते हैं। आप इस कुंजी को यहाँ पा सकते हैं `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`। **इसे हटाने से** आप USB इतिहास को हटा देंगे।\
+आप यह सुनिश्चित करने के लिए [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) उपकरण का भी उपयोग कर सकते हैं कि आपने उन्हें हटा दिया है (और उन्हें हटाने के लिए)।
 
-Another file that saves information about the USBs is the file `setupapi.dev.log` inside `C:\Windows\INF`. This should also be deleted.
+एक और फ़ाइल जो USB के बारे में जानकारी सहेजती है वह है फ़ाइल `setupapi.dev.log` जो `C:\Windows\INF` के अंदर है। इसे भी हटाया जाना चाहिए।
 
-## Disable Shadow Copies
+## शैडो कॉपीज़ अक्षम करें
 
-**List** shadow copies with `vssadmin list shadowstorage`\
-**Delete** them running `vssadmin delete shadow`
+**शैडो कॉपीज़** की सूची बनाएं `vssadmin list shadowstorage`\
+**उन्हें हटाएँ** `vssadmin delete shadow` चलाकर
 
-You can also delete them via GUI following the steps proposed in [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
+आप GUI के माध्यम से भी उन्हें हटा सकते हैं [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html) में प्रस्तावित चरणों का पालन करके।
 
-To disable shadow copies [steps from here](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
+शैडो कॉपीज़ को अक्षम करने के लिए [यहाँ से चरण](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
 
-1. Open the Services program by typing "services" into the text search box after clicking the Windows start button.
-2. From the list, find "Volume Shadow Copy", select it, and then access Properties by right-clicking.
-3. Choose Disabled from the "Startup type" drop-down menu, and then confirm the change by clicking Apply and OK.
+1. Windows स्टार्ट बटन पर क्लिक करने के बाद टेक्स्ट सर्च बॉक्स में "services" टाइप करके सेवाएँ प्रोग्राम खोलें।
+2. सूची में "Volume Shadow Copy" खोजें, इसे चुनें, और फिर राइट-क्लिक करके प्रॉपर्टीज़ पर जाएँ।
+3. "Startup type" ड्रॉप-डाउन मेनू से Disabled चुनें, और फिर Apply और OK पर क्लिक करके परिवर्तन की पुष्टि करें।
 
-It's also possible to modify the configuration of which files are going to be copied in the shadow copy in the registry `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
+यह भी संभव है कि रजिस्ट्री `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot` में उन फ़ाइलों की कॉन्फ़िगरेशन को संशोधित किया जाए जिन्हें शैडो कॉपी में कॉपी किया जाएगा।
 
-## Overwrite deleted files
+## हटाई गई फ़ाइलों को ओवरराइट करें
 
-- You can use a **Windows tool**: `cipher /w:C` This will indicate cipher to remove any data from the available unused disk space inside the C drive.
-- You can also use tools like [**Eraser**](https://eraser.heidi.ie)
+- आप एक **Windows उपकरण** का उपयोग कर सकते हैं: `cipher /w:C` यह संकेत देगा कि सिफर C ड्राइव के अंदर उपलब्ध अप्रयुक्त डिस्क स्थान से किसी भी डेटा को हटा दे।
+- आप [**Eraser**](https://eraser.heidi.ie) जैसे उपकरणों का भी उपयोग कर सकते हैं।
 
-## Delete Windows event logs
+## Windows इवेंट लॉग हटाएँ
 
-- Windows + R --> eventvwr.msc --> Expand "Windows Logs" --> Right click each category and select "Clear Log"
+- Windows + R --> eventvwr.msc --> "Windows Logs" का विस्तार करें --> प्रत्येक श्रेणी पर राइट-क्लिक करें और "Clear Log" चुनें
 - `for /F "tokens=*" %1 in ('wevtutil.exe el') DO wevtutil.exe cl "%1"`
 - `Get-EventLog -LogName * | ForEach { Clear-EventLog $_.Log }`
 
-## Disable Windows event logs
+## Windows इवेंट लॉग अक्षम करें
 
 - `reg add 'HKLM\SYSTEM\CurrentControlSet\Services\eventlog' /v Start /t REG_DWORD /d 4 /f`
-- Inside the services section disable the service "Windows Event Log"
-- `WEvtUtil.exec clear-log` or `WEvtUtil.exe cl`
+- सेवाओं के अनुभाग के अंदर "Windows Event Log" सेवा को अक्षम करें
+- `WEvtUtil.exec clear-log` या `WEvtUtil.exe cl`
 
-## Disable $UsnJrnl
+## $UsnJrnl अक्षम करें
 
 - `fsutil usn deletejournal /d c:`
-
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

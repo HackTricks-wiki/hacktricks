@@ -134,7 +134,7 @@ cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 ```bash
 time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 ```
-### Env Variables से अक्षर प्राप्त करना
+### Env वेरिएबल्स से कैरेक्टर्स प्राप्त करना
 ```bash
 echo ${LS_COLORS:10:1} #;
 echo ${PATH:0:1} #/

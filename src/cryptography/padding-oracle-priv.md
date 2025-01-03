@@ -2,26 +2,24 @@
 
 <figure><img src="/..https:/pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
 
-{% embed url="https://websec.nl/" %}
-
 # CBC - Cipher Block Chaining
 
-In CBC mode the **previous encrypted block is used as IV** to XOR with the next block:
+CBC मोड में **पिछला एन्क्रिप्टेड ब्लॉक IV के रूप में उपयोग किया जाता है** अगले ब्लॉक के साथ XOR करने के लिए:
 
 ![https://defuse.ca/images/cbc_encryption.png](https://defuse.ca/images/cbc_encryption.png)
 
-To decrypt CBC the **opposite** **operations** are done:
+CBC को डिक्रिप्ट करने के लिए **विपरीत** **ऑपरेशंस** किए जाते हैं:
 
 ![https://defuse.ca/images/cbc_decryption.png](https://defuse.ca/images/cbc_decryption.png)
 
-Notice how it's needed to use an **encryption** **key** and an **IV**.
+ध्यान दें कि **एन्क्रिप्शन** **की** और **IV** का उपयोग करना आवश्यक है।
 
 # Message Padding
 
-As the encryption is performed in **fixed** **size** **blocks**, **padding** is usually needed in the **last** **block** to complete its length.\
-Usually **PKCS7** is used, which generates a padding **repeating** the **number** of **bytes** **needed** to **complete** the block. For example, if the last block is missing 3 bytes, the padding will be `\x03\x03\x03`.
+चूंकि एन्क्रिप्शन **फिक्स्ड** **साइज** **ब्लॉक्स** में किया जाता है, **पैडिंग** आमतौर पर **अंतिम** **ब्लॉक** में इसकी लंबाई को पूरा करने के लिए आवश्यक होती है।\
+आम तौर पर **PKCS7** का उपयोग किया जाता है, जो पैडिंग **जेनरेट** करता है **ब्लॉक** को पूरा करने के लिए **आवश्यक** **बाइट्स** की **संख्या** को **दोहराते** हुए। उदाहरण के लिए, यदि अंतिम ब्लॉक में 3 बाइट्स की कमी है, तो पैडिंग `\x03\x03\x03` होगी।
 
-Let's look at more examples with a **2 blocks of length 8bytes**:
+आइए **8 बाइट्स की 2 ब्लॉक्स** के साथ और उदाहरण देखें:
 
 | byte #0 | byte #1 | byte #2 | byte #3 | byte #4 | byte #5 | byte #6 | byte #7 | byte #0  | byte #1  | byte #2  | byte #3  | byte #4  | byte #5  | byte #6  | byte #7  |
 | ------- | ------- | ------- | ------- | ------- | ------- | ------- | ------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- |
@@ -30,51 +28,43 @@ Let's look at more examples with a **2 blocks of length 8bytes**:
 | P       | A       | S       | S       | W       | O       | R       | D       | 1        | 2        | 3        | **0x05** | **0x05** | **0x05** | **0x05** | **0x05** |
 | P       | A       | S       | S       | W       | O       | R       | D       | **0x08** | **0x08** | **0x08** | **0x08** | **0x08** | **0x08** | **0x08** | **0x08** |
 
-Note how in the last example the **last block was full so another one was generated only with padding**.
+ध्यान दें कि अंतिम उदाहरण में **अंतिम ब्लॉक पूरा था इसलिए केवल पैडिंग के साथ एक और उत्पन्न किया गया**।
 
 # Padding Oracle
 
-When an application decrypts encrypted data, it will first decrypt the data; then it will remove the padding. During the cleanup of the padding, if an **invalid padding triggers a detectable behaviour**, you have a **padding oracle vulnerability**. The detectable behaviour can be an **error**, a **lack of results**, or a **slower response**.
+जब एक एप्लिकेशन एन्क्रिप्टेड डेटा को डिक्रिप्ट करता है, तो यह पहले डेटा को डिक्रिप्ट करेगा; फिर यह पैडिंग को हटा देगा। पैडिंग की सफाई के दौरान, यदि **अमान्य पैडिंग एक पहचानने योग्य व्यवहार को ट्रिगर करती है**, तो आपके पास **पैडिंग ओरेकल भेद्यता** है। पहचानने योग्य व्यवहार एक **त्रुटि**, **परिणामों की कमी**, या **धीमी प्रतिक्रिया** हो सकती है।
 
-If you detect this behaviour, you can **decrypt the encrypted data** and even **encrypt any cleartext**.
+यदि आप इस व्यवहार का पता लगाते हैं, तो आप **एन्क्रिप्टेड डेटा को डिक्रिप्ट** कर सकते हैं और यहां तक कि **किसी भी क्लियरटेक्स्ट को एन्क्रिप्ट** कर सकते हैं।
 
 ## How to exploit
 
-You could use [https://github.com/AonCyberLabs/PadBuster](https://github.com/AonCyberLabs/PadBuster) to exploit this kind of vulnerability or just do
-
+आप इस प्रकार की भेद्यता का शोषण करने के लिए [https://github.com/AonCyberLabs/PadBuster](https://github.com/AonCyberLabs/PadBuster) का उपयोग कर सकते हैं या बस करें
 ```
 sudo apt-get install padbuster
 ```
-
-In order to test if the cookie of a site is vulnerable you could try:
-
+किसी साइट के कुकी की संवेदनशीलता का परीक्षण करने के लिए आप कोशिश कर सकते हैं:
 ```bash
 perl ./padBuster.pl http://10.10.10.10/index.php "RVJDQrwUdTRWJUVUeBKkEA==" 8 -encoding 0 -cookies "login=RVJDQrwUdTRWJUVUeBKkEA=="
 ```
+**Encoding 0** का मतलब है कि **base64** का उपयोग किया गया है (लेकिन अन्य उपलब्ध हैं, मदद मेनू की जांच करें)।
 
-**Encoding 0** means that **base64** is used (but others are available, check the help menu).
-
-You could also **abuse this vulnerability to encrypt new data. For example, imagine that the content of the cookie is "**_**user=MyUsername**_**", then you may change it to "\_user=administrator\_" and escalate privileges inside the application. You could also do it using `paduster`specifying the -plaintext** parameter:
-
+आप इस कमजोरियों का **दुरुपयोग करके नए डेटा को एन्क्रिप्ट कर सकते हैं। उदाहरण के लिए, कल्पना करें कि कुकी की सामग्री "**_**user=MyUsername**_**" है, तो आप इसे "\_user=administrator\_" में बदल सकते हैं और एप्लिकेशन के अंदर विशेषाधिकार बढ़ा सकते हैं। आप इसे `paduster` का उपयोग करके -plaintext** पैरामीटर निर्दिष्ट करके भी कर सकते हैं:
 ```bash
 perl ./padBuster.pl http://10.10.10.10/index.php "RVJDQrwUdTRWJUVUeBKkEA==" 8 -encoding 0 -cookies "login=RVJDQrwUdTRWJUVUeBKkEA==" -plaintext "user=administrator"
 ```
-
-If the site is vulnerable `padbuster`will automatically try to find when the padding error occurs, but you can also indicating the error message it using the **-error** parameter.
-
+यदि साइट कमजोर है `padbuster` स्वचालित रूप से यह पता लगाने की कोशिश करेगा कि पैडिंग त्रुटि कब होती है, लेकिन आप **-error** पैरामीटर का उपयोग करके त्रुटि संदेश को भी इंगित कर सकते हैं।
 ```bash
 perl ./padBuster.pl http://10.10.10.10/index.php "" 8 -encoding 0 -cookies "hcon=RVJDQrwUdTRWJUVUeBKkEA==" -error "Invalid padding"
 ```
+## सिद्धांत
 
-## The theory
-
-In **summary**, you can start decrypting the encrypted data by guessing the correct values that can be used to create all the **different paddings**. Then, the padding oracle attack will start decrypting bytes from the end to the start by guessing which will be the correct value that **creates a padding of 1, 2, 3, etc**.
+**सारांश** में, आप सभी **विभिन्न पैडिंग** बनाने के लिए उपयोग किए जा सकने वाले सही मानों का अनुमान लगाकर एन्क्रिप्टेड डेटा को डिक्रिप्ट करना शुरू कर सकते हैं। फिर, पैडिंग ऑरेकल अटैक अंत से शुरू होकर सही मान का अनुमान लगाते हुए बाइट्स को डिक्रिप्ट करना शुरू करेगा जो **1, 2, 3, आदि** की पैडिंग बनाता है।
 
 ![](<../images/image (629) (1) (1).png>)
 
-Imagine you have some encrypted text that occupies **2 blocks** formed by the bytes from **E0 to E15**.\
-In order to **decrypt** the **last** **block** (**E8** to **E15**), the whole block passes through the "block cipher decryption" generating the **intermediary bytes I0 to I15**.\
-Finally, each intermediary byte is **XORed** with the previous encrypted bytes (E0 to E7). So:
+कल्पना करें कि आपके पास कुछ एन्क्रिप्टेड टेक्स्ट है जो **2 ब्लॉक्स** में फैला हुआ है जो **E0 से E15** तक के बाइट्स से बना है।\
+**अंतिम** **ब्लॉक** (**E8** से **E15**) को **डिक्रिप्ट** करने के लिए, पूरा ब्लॉक "ब्लॉक सिफर डिक्रिप्शन" के माध्यम से जाता है जिससे **मध्यवर्ती बाइट्स I0 से I15** उत्पन्न होते हैं।\
+अंत में, प्रत्येक मध्यवर्ती बाइट को पिछले एन्क्रिप्टेड बाइट्स (E0 से E7) के साथ **XOR** किया जाता है। तो:
 
 - `C15 = D(E15) ^ E7 = I15 ^ E7`
 - `C14 = I14 ^ E6`
@@ -82,33 +72,31 @@ Finally, each intermediary byte is **XORed** with the previous encrypted bytes (
 - `C12 = I12 ^ E4`
 - ...
 
-Now, It's possible to **modify `E7` until `C15` is `0x01`**, which will also be a correct padding. So, in this case: `\x01 = I15 ^ E'7`
+अब, यह संभव है कि **`E7` को इस तरह से संशोधित करें कि `C15` `0x01` हो**, जो एक सही पैडिंग भी होगी। तो, इस मामले में: `\x01 = I15 ^ E'7`
 
-So, finding E'7, it's **possible to calculate I15**: `I15 = 0x01 ^ E'7`
+तो, E'7 को खोजकर, **I15** की गणना करना संभव है: `I15 = 0x01 ^ E'7`
 
-Which allow us to **calculate C15**: `C15 = E7 ^ I15 = E7 ^ \x01 ^ E'7`
+जो हमें **C15** की गणना करने की अनुमति देता है: `C15 = E7 ^ I15 = E7 ^ \x01 ^ E'7`
 
-Knowing **C15**, now it's possible to **calculate C14**, but this time brute-forcing the padding `\x02\x02`.
+**C15** को जानकर, अब **C14** की गणना करना संभव है, लेकिन इस बार पैडिंग `\x02\x02` को ब्रूट-फोर्स करते हुए।
 
-This BF is as complex as the previous one as it's possible to calculate the the `E''15` whose value is 0x02: `E''7 = \x02 ^ I15` so it's just needed to find the **`E'14`** that generates a **`C14` equals to `0x02`**.\
-Then, do the same steps to decrypt C14: **`C14 = E6 ^ I14 = E6 ^ \x02 ^ E''6`**
+यह BF पिछले एक के रूप में जटिल है क्योंकि यह `E''15` की गणना करना संभव है जिसका मान 0x02 है: `E''7 = \x02 ^ I15` इसलिए केवल **`E'14`** को खोजने की आवश्यकता है जो **`C14` को `0x02` के बराबर बनाता है**।\
+फिर, C14 को डिक्रिप्ट करने के लिए वही कदम उठाएं: **`C14 = E6 ^ I14 = E6 ^ \x02 ^ E''6`**
 
-**Follow this chain until you decrypt the whole encrypted text.**
+**इस श्रृंखला का पालन करें जब तक आप पूरे एन्क्रिप्टेड टेक्स्ट को डिक्रिप्ट न कर लें।**
 
-## Detection of the vulnerability
+## भेद्यता का पता लगाना
 
-Register and account and log in with this account .\
-If you **log in many times** and always get the **same cookie**, there is probably **something** **wrong** in the application. The **cookie sent back should be unique** each time you log in. If the cookie is **always** the **same**, it will probably always be valid and there **won't be anyway to invalidate i**t.
+एक रजिस्टर और खाता बनाएं और इस खाते से लॉग इन करें।\
+यदि आप **कई बार लॉग इन करते हैं** और हमेशा **एक ही कुकी** प्राप्त करते हैं, तो संभवतः एप्लिकेशन में **कुछ** **गलत** है। **कुकी** हर बार लॉग इन करने पर अद्वितीय होनी चाहिए। यदि कुकी **हमेशा** **एक ही** है, तो यह संभवतः हमेशा मान्य होगी और इसे अमान्य करने का कोई तरीका नहीं होगा।
 
-Now, if you try to **modify** the **cookie**, you can see that you get an **error** from the application.\
-But if you BF the padding (using padbuster for example) you manage to get another cookie valid for a different user. This scenario is highly probably vulnerable to padbuster.
+अब, यदि आप **कुकी** को **संशोधित** करने की कोशिश करते हैं, तो आप देख सकते हैं कि आपको एप्लिकेशन से एक **त्रुटि** मिलती है।\
+लेकिन यदि आप पैडिंग को BF करते हैं (उदाहरण के लिए padbuster का उपयोग करते हुए) तो आप एक अन्य उपयोगकर्ता के लिए मान्य कुकी प्राप्त करने में सफल होते हैं। यह परिदृश्य padbuster के लिए अत्यधिक संभावित रूप से संवेदनशील है।
 
-## References
+## संदर्भ
 
 - [https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation)
 
 <figure><img src="/..https:/pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../banners/hacktricks-training.md}}

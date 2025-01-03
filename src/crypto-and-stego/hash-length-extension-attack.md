@@ -4,28 +4,28 @@
 
 ## Summary of the attack
 
-Imagine a server which is **signing** some **data** by **appending** a **secret** to some known clear text data and then hashing that data. If you know:
+कल्पना कीजिए एक सर्वर जो कुछ डेटा को एक ज्ञात स्पष्ट पाठ डेटा के साथ एक गुप्त को जोड़कर और फिर उस डेटा को हैश करके **साइन** कर रहा है। यदि आप जानते हैं:
 
-- **The length of the secret** (this can be also bruteforced from a given length range)
-- **The clear text data**
-- **The algorithm (and it's vulnerable to this attack)**
-- **The padding is known**
-  - Usually a default one is used, so if the other 3 requirements are met, this also is
-  - The padding vary depending on the length of the secret+data, that's why the length of the secret is needed
+- **गुप्त की लंबाई** (इसे एक दिए गए लंबाई रेंज से भी ब्रूटफोर्स किया जा सकता है)
+- **स्पष्ट पाठ डेटा**
+- **एल्गोरिदम (और यह इस हमले के प्रति संवेदनशील है)**
+- **पैडिंग ज्ञात है**
+- आमतौर पर एक डिफ़ॉल्ट का उपयोग किया जाता है, इसलिए यदि अन्य 3 आवश्यकताएँ पूरी होती हैं, तो यह भी है
+- पैडिंग गुप्त + डेटा की लंबाई के आधार पर भिन्न होती है, यही कारण है कि गुप्त की लंबाई की आवश्यकता है
 
-Then, it's possible for an **attacker** to **append** **data** and **generate** a valid **signature** for the **previous data + appended data**.
+तो, एक **हमलावर** के लिए **डेटा** को **जोड़ना** और **पिछले डेटा + जोड़ा गया डेटा** के लिए एक वैध **हस्ताक्षर** **जनरेट** करना संभव है।
 
 ### How?
 
-Basically the vulnerable algorithms generate the hashes by firstly **hashing a block of data**, and then, **from** the **previously** created **hash** (state), they **add the next block of data** and **hash it**.
+बुनियादी रूप से संवेदनशील एल्गोरिदम पहले **डेटा के एक ब्लॉक को हैश करके** हैश उत्पन्न करते हैं, और फिर, **पिछले** बनाए गए **हैश** (राज्य) से, वे **अगले डेटा के ब्लॉक को जोड़ते हैं** और **इसे हैश करते हैं**।
 
-Then, imagine that the secret is "secret" and the data is "data", the MD5 of "secretdata" is 6036708eba0d11f6ef52ad44e8b74d5b.\
-If an attacker wants to append the string "append" he can:
+फिर, कल्पना कीजिए कि गुप्त "secret" है और डेटा "data" है, "secretdata" का MD5 6036708eba0d11f6ef52ad44e8b74d5b है।\
+यदि एक हमलावर "append" स्ट्रिंग को जोड़ना चाहता है, तो वह कर सकता है:
 
-- Generate a MD5 of 64 "A"s
-- Change the state of the previously initialized hash to 6036708eba0d11f6ef52ad44e8b74d5b
-- Append the string "append"
-- Finish the hash and the resulting hash will be a **valid one for "secret" + "data" + "padding" + "append"**
+- 64 "A"s का MD5 उत्पन्न करें
+- पहले से प्रारंभ किए गए हैश की स्थिति को 6036708eba0d11f6ef52ad44e8b74d5b में बदलें
+- "append" स्ट्रिंग को जोड़ें
+- हैश को समाप्त करें और परिणामी हैश "secret" + "data" + "padding" + "append" के लिए एक **वैध** होगा
 
 ### **Tool**
 
@@ -33,6 +33,6 @@ If an attacker wants to append the string "append" he can:
 
 ### References
 
-You can find this attack good explained in [https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
+आप इस हमले को अच्छी तरह से समझा हुआ [https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks) पर पा सकते हैं
 
 {{#include ../banners/hacktricks-training.md}}

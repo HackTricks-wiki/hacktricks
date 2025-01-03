@@ -1,69 +1,69 @@
-# Detecting Phishing
+# फ़िशिंग का पता लगाना
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Introduction
+## परिचय
 
-To detect a phishing attempt it's important to **understand the phishing techniques that are being used nowadays**. On the parent page of this post, you can find this information, so if you aren't aware of which techniques are being used today I recommend you to go to the parent page and read at least that section.
+फ़िशिंग प्रयास का पता लगाने के लिए यह महत्वपूर्ण है कि **आप समझें कि आजकल कौन सी फ़िशिंग तकनीकें उपयोग की जा रही हैं**। इस पोस्ट के मुख्य पृष्ठ पर, आप यह जानकारी पा सकते हैं, इसलिए यदि आप नहीं जानते कि आज कौन सी तकनीकें उपयोग की जा रही हैं, तो मैं आपको मुख्य पृष्ठ पर जाने और कम से कम उस अनुभाग को पढ़ने की सिफारिश करता हूँ।
 
-This post is based on the idea that the **attackers will try to somehow mimic or use the victim's domain name**. If your domain is called `example.com` and you are phished using a completely different domain name for some reason like `youwonthelottery.com`, these techniques aren't going to uncover it.
+यह पोस्ट इस विचार पर आधारित है कि **हमलावर किसी न किसी तरह से पीड़ित के डोमेन नाम की नकल करने या उसका उपयोग करने की कोशिश करेंगे**। यदि आपका डोमेन `example.com` है और आपको किसी कारण से एक पूरी तरह से अलग डोमेन नाम जैसे `youwonthelottery.com` का उपयोग करके फ़िश किया गया है, तो ये तकनीकें इसे उजागर नहीं करेंगी।
 
-## Domain name variations
+## डोमेन नाम भिन्नताएँ
 
-It's kind of **easy** to **uncover** those **phishing** attempts that will use a **similar domain** name inside the email.\
-It's enough to **generate a list of the most probable phishing names** that an attacker may use and **check** if it's **registered** or just check if there is any **IP** using it.
+ईमेल के अंदर **समान डोमेन** नाम का उपयोग करने वाले फ़िशिंग प्रयासों को **खोजना** काफी **आसान** है।\
+यह **हमलावर द्वारा उपयोग किए जाने वाले सबसे संभावित फ़िशिंग नामों की एक सूची बनाने** के लिए पर्याप्त है और **जांचें** कि क्या यह **पंजीकृत** है या बस यह जांचें कि क्या इसका कोई **IP** है।
 
-### Finding suspicious domains
+### संदिग्ध डोमेन खोजना
 
-For this purpose, you can use any of the following tools. Note that these tolls will also perform DNS requests automatically to check if the domain has any IP assigned to it:
+इसके लिए, आप निम्नलिखित उपकरणों में से किसी का उपयोग कर सकते हैं। ध्यान दें कि ये उपकरण स्वचालित रूप से DNS अनुरोध भी करेंगे यह जांचने के लिए कि क्या डोमेन का कोई IP असाइन किया गया है:
 
 - [**dnstwist**](https://github.com/elceef/dnstwist)
 - [**urlcrazy**](https://github.com/urbanadventurer/urlcrazy)
 
-### Bitflipping
+### बिटफ्लिपिंग
 
-**You can find a short the explanation of this technique in the parent page. Or read the original research in** [**https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/**](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
+**आप इस तकनीक का संक्षिप्त विवरण मुख्य पृष्ठ पर पा सकते हैं। या पढ़ें मूल शोध** [**https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/**](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
 
-For example, a 1 bit modification in the domain microsoft.com can transform it into _windnws.com._\
-**Attackers may register as many bit-flipping domains as possible related to the victim to redirect legitimate users to their infrastructure**.
+उदाहरण के लिए, डोमेन microsoft.com में 1 बिट संशोधन इसे _windnws.com_ में बदल सकता है।\
+**हमलावर पीड़ित से संबंधित जितने संभव हो सके बिट-फ्लिपिंग डोमेन पंजीकृत कर सकते हैं ताकि वैध उपयोगकर्ताओं को अपनी अवसंरचना की ओर पुनर्निर्देशित किया जा सके**।
 
-**All possible bit-flipping domain names should be also monitored.**
+**सभी संभावित बिट-फ्लिपिंग डोमेन नामों की भी निगरानी की जानी चाहिए।**
 
-### Basic checks
+### बुनियादी जांच
 
-Once you have a list of potential suspicious domain names you should **check** them (mainly the ports HTTP and HTTPS) to **see if they are using some login form similar** to someone of the victim's domain.\
-You could also check port 3333 to see if it's open and running an instance of `gophish`.\
-It's also interesting to know **how old each discovered suspicions domain is**, the younger it's the riskier it is.\
-You can also get **screenshots** of the HTTP and/or HTTPS suspicious web page to see if it's suspicious and in that case **access it to take a deeper look**.
+एक बार जब आपके पास संभावित संदिग्ध डोमेन नामों की एक सूची हो, तो आपको उन्हें **जांचना चाहिए** (मुख्य रूप से HTTP और HTTPS पोर्ट) यह देखने के लिए कि क्या वे पीड़ित के डोमेन के किसी लॉगिन फॉर्म का उपयोग कर रहे हैं।\
+आप पोर्ट 3333 की भी जांच कर सकते हैं यह देखने के लिए कि क्या यह खुला है और `gophish` का एक उदाहरण चला रहा है।\
+यह जानना भी दिलचस्प है कि **प्रत्येक खोजे गए संदिग्ध डोमेन की उम्र कितनी है**, जितना नया होगा उतना ही जोखिम भरा होगा।\
+आप संदिग्ध वेब पृष्ठ के HTTP और/या HTTPS के **स्क्रीनशॉट** भी ले सकते हैं यह देखने के लिए कि क्या यह संदिग्ध है और इस मामले में **गहराई से देखने के लिए इसे एक्सेस करें**।
 
-### Advanced checks
+### उन्नत जांच
 
-If you want to go one step further I would recommend you to **monitor those suspicious domains and search for more** once in a while (every day? it only takes a few seconds/minutes). You should also **check** the open **ports** of the related IPs and **search for instances of `gophish` or similar tools** (yes, attackers also make mistakes) and **monitor the HTTP and HTTPS web pages of the suspicious domains and subdomains** to see if they have copied any login form from the victim's web pages.\
-In order to **automate this** I would recommend having a list of login forms of the victim's domains, spider the suspicious web pages and comparing each login form found inside the suspicious domains with each login form of the victim's domain using something like `ssdeep`.\
-If you have located the login forms of the suspicious domains, you can try to **send junk credentials** and **check if it's redirecting you to the victim's domain**.
+यदि आप एक कदम और आगे बढ़ना चाहते हैं, तो मैं आपको **संदिग्ध डोमेन की निगरानी करने और समय-समय पर अधिक खोजने** की सिफारिश करूंगा (हर दिन? इसमें केवल कुछ सेकंड/मिनट लगते हैं)। आपको संबंधित IPs के खुले **पोर्ट्स** की भी **जांच करनी चाहिए** और **`gophish` या समान उपकरणों के उदाहरणों की खोज करनी चाहिए** (हाँ, हमलावर भी गलतियाँ करते हैं) और **संदिग्ध डोमेन और उपडोमेन के HTTP और HTTPS वेब पृष्ठों की निगरानी करनी चाहिए** यह देखने के लिए कि क्या उन्होंने पीड़ित के वेब पृष्ठों से कोई लॉगिन फॉर्म कॉपी किया है।\
+इसको **स्वचालित करने** के लिए, मैं आपको पीड़ित के डोमेन के लॉगिन फॉर्म की एक सूची रखने, संदिग्ध वेब पृष्ठों को स्पाइडर करने और संदिग्ध डोमेन के अंदर पाए गए प्रत्येक लॉगिन फॉर्म की तुलना पीड़ित के डोमेन के प्रत्येक लॉगिन फॉर्म के साथ करने की सिफारिश करूंगा, जैसे कि `ssdeep` का उपयोग करके।\
+यदि आपने संदिग्ध डोमेन के लॉगिन फॉर्म का पता लगा लिया है, तो आप **जंक क्रेडेंशियल्स भेजने** और **जांचने** की कोशिश कर सकते हैं कि क्या यह आपको पीड़ित के डोमेन की ओर पुनर्निर्देशित कर रहा है।
 
-## Domain names using keywords
+## कीवर्ड का उपयोग करने वाले डोमेन नाम
 
-The parent page also mentions a domain name variation technique that consists of putting the **victim's domain name inside a bigger domain** (e.g. paypal-financial.com for paypal.com).
+मुख्य पृष्ठ पर एक डोमेन नाम भिन्नता तकनीक का भी उल्लेख किया गया है जिसमें **पीड़ित के डोमेन नाम को एक बड़े डोमेन के अंदर रखा जाता है** (जैसे paypal-financial.com के लिए paypal.com)।
 
-### Certificate Transparency
+### प्रमाणपत्र पारदर्शिता
 
-It's not possible to take the previous "Brute-Force" approach but it's actually **possible to uncover such phishing attempts** also thanks to certificate transparency. Every time a certificate is emitted by a CA, the details are made public. This means that by reading the certificate transparency or even monitoring it, it's **possible to find domains that are using a keyword inside its name** For example, if an attacker generates a certificate of [https://paypal-financial.com](https://paypal-financial.com), seeing the certificate it's possible to find the keyword "paypal" and know that suspicious email is being used.
+पिछले "ब्रूट-फोर्स" दृष्टिकोण को अपनाना संभव नहीं है, लेकिन वास्तव में **ऐसे फ़िशिंग प्रयासों का पता लगाना संभव है** प्रमाणपत्र पारदर्शिता के कारण। हर बार जब एक प्रमाणपत्र CA द्वारा जारी किया जाता है, तो विवरण सार्वजनिक कर दिए जाते हैं। इसका मतलब है कि प्रमाणपत्र पारदर्शिता को पढ़कर या यहां तक कि इसकी निगरानी करके, **ऐसे डोमेन खोजे जा सकते हैं जो अपने नाम के अंदर एक कीवर्ड का उपयोग कर रहे हैं**। उदाहरण के लिए, यदि एक हमलावर [https://paypal-financial.com](https://paypal-financial.com) का एक प्रमाणपत्र उत्पन्न करता है, तो प्रमाणपत्र को देखकर "paypal" कीवर्ड पाया जा सकता है और यह पता लगाया जा सकता है कि संदिग्ध ईमेल का उपयोग किया जा रहा है।
 
-The post [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/) suggests that you can use Censys to search for certificates affecting a specific keyword and filter by date (only "new" certificates) and by the CA issuer "Let's Encrypt":
+पोस्ट [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/) सुझाव देती है कि आप Censys का उपयोग करके एक विशिष्ट कीवर्ड को प्रभावित करने वाले प्रमाणपत्रों की खोज कर सकते हैं और तिथि (केवल "नए" प्रमाणपत्र) और CA जारीकर्ता "Let's Encrypt" द्वारा फ़िल्टर कर सकते हैं:
 
 ![https://0xpatrik.com/content/images/2018/07/cert_listing.png](<../../images/image (1115).png>)
 
-However, you can do "the same" using the free web [**crt.sh**](https://crt.sh). You can **search for the keyword** and the **filter** the results **by date and CA** if you wish.
+हालांकि, आप मुफ्त वेब [**crt.sh**](https://crt.sh) का उपयोग करके "वही" कर सकते हैं। आप **कीवर्ड** के लिए **खोज** कर सकते हैं और यदि आप चाहें तो **तारीख और CA द्वारा** परिणामों को **फ़िल्टर** कर सकते हैं।
 
 ![](<../../images/image (519).png>)
 
-Using this last option you can even use the field Matching Identities to see if any identity from the real domain matches any of the suspicious domains (note that a suspicious domain can be a false positive).
+इस अंतिम विकल्प का उपयोग करते हुए, आप यहां तक कि फ़ील्ड मिलान पहचान का उपयोग कर सकते हैं यह देखने के लिए कि क्या वास्तविक डोमेन की कोई पहचान संदिग्ध डोमेन में से किसी से मेल खाती है (ध्यान दें कि एक संदिग्ध डोमेन एक झूठी सकारात्मक हो सकती है)।
 
-**Another alternative** is the fantastic project called [**CertStream**](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067). CertStream provides a real-time stream of newly generated certificates which you can use to detect specified keywords in (near) real-time. In fact, there is a project called [**phishing_catcher**](https://github.com/x0rz/phishing_catcher) that does just that.
+**एक और विकल्प** शानदार प्रोजेक्ट [**CertStream**](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067) है। CertStream नए उत्पन्न प्रमाणपत्रों का एक वास्तविक समय का प्रवाह प्रदान करता है जिसका उपयोग आप (नज़दीकी) वास्तविक समय में निर्दिष्ट कीवर्ड का पता लगाने के लिए कर सकते हैं। वास्तव में, एक प्रोजेक्ट है [**phishing_catcher**](https://github.com/x0rz/phishing_catcher) जो यही करता है।
 
-### **New domains**
+### **नए डोमेन**
 
-**One last alternative** is to gather a list of **newly registered domains** for some TLDs ([Whoxy](https://www.whoxy.com/newly-registered-domains/) provides such service) and **check the keywords in these domains**. However, long domains usually use one or more subdomains, therefore the keyword won't appear inside the FLD and you won't be able to find the phishing subdomain.
+**एक अंतिम विकल्प** कुछ TLDs के लिए **नए पंजीकृत डोमेन** की एक सूची एकत्र करना है ([Whoxy](https://www.whoxy.com/newly-registered-domains/) ऐसी सेवा प्रदान करता है) और **इन डोमेन में कीवर्ड की जांच करना**। हालाँकि, लंबे डोमेन आमतौर पर एक या अधिक उपडोमेन का उपयोग करते हैं, इसलिए कीवर्ड FLD के अंदर नहीं दिखाई देगा और आप फ़िशिंग उपडोमेन नहीं खोज पाएंगे।
 
 {{#include ../../banners/hacktricks-training.md}}

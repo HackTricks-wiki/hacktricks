@@ -2,54 +2,54 @@
 
 # CBC
 
-If the **cookie** is **only** the **username** (or the first part of the cookie is the username) and you want to impersonate the username "**admin**". Then, you can create the username **"bdmin"** and **bruteforce** the **first byte** of the cookie.
+यदि **कुकी** केवल **उपयोगकर्ता नाम** है (या कुकी का पहला भाग उपयोगकर्ता नाम है) और आप उपयोगकर्ता नाम "**admin**" का अनुकरण करना चाहते हैं। तो, आप उपयोगकर्ता नाम **"bdmin"** बना सकते हैं और कुकी के **पहले बाइट** को **ब्रूटफोर्स** कर सकते हैं।
 
 # CBC-MAC
 
-**Cipher block chaining message authentication code** (**CBC-MAC**) is a method used in cryptography. It works by taking a message and encrypting it block by block, where each block's encryption is linked to the one before it. This process creates a **chain of blocks**, making sure that changing even a single bit of the original message will lead to an unpredictable change in the last block of encrypted data. To make or reverse such a change, the encryption key is required, ensuring security.
+**साइफर ब्लॉक चेनिंग मैसेज ऑथेंटिकेशन कोड** (**CBC-MAC**) एक विधि है जो क्रिप्टोग्राफी में उपयोग की जाती है। यह एक संदेश को लेती है और इसे ब्लॉक दर ब्लॉक एन्क्रिप्ट करती है, जहां प्रत्येक ब्लॉक का एन्क्रिप्शन पिछले ब्लॉक से जुड़ा होता है। यह प्रक्रिया एक **ब्लॉकों की श्रृंखला** बनाती है, यह सुनिश्चित करते हुए कि मूल संदेश के एक भी बिट को बदलने से एन्क्रिप्टेड डेटा के अंतिम ब्लॉक में अप्रत्याशित परिवर्तन होगा। ऐसा परिवर्तन करने या उलटने के लिए एन्क्रिप्शन कुंजी की आवश्यकता होती है, जो सुरक्षा सुनिश्चित करती है।
 
-To calculate the CBC-MAC of message m, one encrypts m in CBC mode with zero initialization vector and keeps the last block. The following figure sketches the computation of the CBC-MAC of a message comprising blocks![https://wikimedia.org/api/rest_v1/media/math/render/svg/bbafe7330a5e40a04f01cc776c9d94fe914b17f5](https://wikimedia.org/api/rest_v1/media/math/render/svg/bbafe7330a5e40a04f01cc776c9d94fe914b17f5) using a secret key k and a block cipher E:
+संदेश m का CBC-MAC निकालने के लिए, m को शून्य प्रारंभिक वेक्टर के साथ CBC मोड में एन्क्रिप्ट किया जाता है और अंतिम ब्लॉक को रखा जाता है। निम्नलिखित चित्र एक संदेश के CBC-MAC की गणना को दर्शाता है जिसमें ब्लॉक शामिल हैं![https://wikimedia.org/api/rest_v1/media/math/render/svg/bbafe7330a5e40a04f01cc776c9d94fe914b17f5](https://wikimedia.org/api/rest_v1/media/math/render/svg/bbafe7330a5e40a04f01cc776c9d94fe914b17f5) एक गुप्त कुंजी k और एक ब्लॉक साइफर E का उपयोग करते हुए:
 
 ![https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/CBC-MAC_structure_(en).svg/570px-CBC-MAC_structure_(en).svg.png](<https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/CBC-MAC_structure_(en).svg/570px-CBC-MAC_structure_(en).svg.png>)
 
 # Vulnerability
 
-With CBC-MAC usually the **IV used is 0**.\
-This is a problem because 2 known messages (`m1` and `m2`) independently will generate 2 signatures (`s1` and `s2`). So:
+CBC-MAC के साथ आमतौर पर **IV 0** होता है।\
+यह एक समस्या है क्योंकि 2 ज्ञात संदेश (`m1` और `m2`) स्वतंत्र रूप से 2 हस्ताक्षर (`s1` और `s2`) उत्पन्न करेंगे। तो:
 
 - `E(m1 XOR 0) = s1`
 - `E(m2 XOR 0) = s2`
 
-Then a message composed by m1 and m2 concatenated (m3) will generate 2 signatures (s31 and s32):
+फिर m1 और m2 के संयोजन से बना एक संदेश (m3) 2 हस्ताक्षर (s31 और s32) उत्पन्न करेगा:
 
 - `E(m1 XOR 0) = s31 = s1`
 - `E(m2 XOR s1) = s32`
 
-**Which is possible to calculate without knowing the key of the encryption.**
+**जिसे एन्क्रिप्शन की कुंजी को जाने बिना गणना करना संभव है।**
 
-Imagine you are encrypting the name **Administrator** in **8bytes** blocks:
+कल्पना करें कि आप नाम **Administrator** को **8bytes** ब्लॉकों में एन्क्रिप्ट कर रहे हैं:
 
 - `Administ`
 - `rator\00\00\00`
 
-You can create a username called **Administ** (m1) and retrieve the signature (s1).\
-Then, you can create a username called the result of `rator\00\00\00 XOR s1`. This will generate `E(m2 XOR s1 XOR 0)` which is s32.\
-now, you can use s32 as the signature of the full name **Administrator**.
+आप एक उपयोगकर्ता नाम **Administ** (m1) बना सकते हैं और हस्ताक्षर (s1) प्राप्त कर सकते हैं।\
+फिर, आप एक उपयोगकर्ता नाम बना सकते हैं जो `rator\00\00\00 XOR s1` का परिणाम है। यह `E(m2 XOR s1 XOR 0)` उत्पन्न करेगा जो s32 है।\
+अब, आप s32 को पूर्ण नाम **Administrator** के हस्ताक्षर के रूप में उपयोग कर सकते हैं।
 
 ### Summary
 
-1. Get the signature of username **Administ** (m1) which is s1
-2. Get the signature of username **rator\x00\x00\x00 XOR s1 XOR 0** is s32**.**
-3. Set the cookie to s32 and it will be a valid cookie for the user **Administrator**.
+1. उपयोगकर्ता नाम **Administ** (m1) का हस्ताक्षर प्राप्त करें जो s1 है
+2. उपयोगकर्ता नाम **rator\x00\x00\x00 XOR s1 XOR 0** का हस्ताक्षर प्राप्त करें जो s32 है।
+3. कुकी को s32 पर सेट करें और यह उपयोगकर्ता **Administrator** के लिए एक मान्य कुकी होगी।
 
 # Attack Controlling IV
 
-If you can control the used IV the attack could be very easy.\
-If the cookies is just the username encrypted, to impersonate the user "**administrator**" you can create the user "**Administrator**" and you will get it's cookie.\
-Now, if you can control the IV, you can change the first Byte of the IV so **IV\[0] XOR "A" == IV'\[0] XOR "a"** and regenerate the cookie for the user **Administrator.** This cookie will be valid to **impersonate** the user **administrator** with the initial **IV**.
+यदि आप उपयोग किए गए IV को नियंत्रित कर सकते हैं तो हमला बहुत आसान हो सकता है।\
+यदि कुकी केवल उपयोगकर्ता नाम एन्क्रिप्टेड है, तो उपयोगकर्ता "**administrator**" का अनुकरण करने के लिए आप उपयोगकर्ता "**Administrator**" बना सकते हैं और आपको इसकी कुकी मिल जाएगी।\
+अब, यदि आप IV को नियंत्रित कर सकते हैं, तो आप IV के पहले बाइट को बदल सकते हैं ताकि **IV\[0] XOR "A" == IV'\[0] XOR "a"** और उपयोगकर्ता **Administrator** के लिए कुकी को फिर से उत्पन्न कर सकें। यह कुकी **administrator** उपयोगकर्ता का अनुकरण करने के लिए मान्य होगी, प्रारंभिक **IV** के साथ।
 
 ## References
 
-More information in [https://en.wikipedia.org/wiki/CBC-MAC](https://en.wikipedia.org/wiki/CBC-MAC)
+अधिक जानकारी के लिए [https://en.wikipedia.org/wiki/CBC-MAC](https://en.wikipedia.org/wiki/CBC-MAC)
 
 {{#include ../banners/hacktricks-training.md}}

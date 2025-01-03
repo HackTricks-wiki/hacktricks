@@ -2,18 +2,13 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<img src="../../images/i3.png" alt="" data-size="original">\
-**Bug bounty tip**: **sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
+अब जब हमने अपने दायरे के संपत्तियों की सूची बना ली है, तो कुछ OSINT कम-से-कम फलों की खोज करने का समय है।
 
-{% embed url="https://go.intigriti.com/hacktricks" %}
-
-Now that we have built the list of assets of our scope it's time to search for some OSINT low-hanging fruits.
-
-### Platforms that already searched for leaks
+### पहले से लीक के लिए खोजी गई प्लेटफार्म
 
 - [https://trufflesecurity.com/blog/introducing-forager/](https://trufflesecurity.com/blog/introducing-forager/)
 
-### Api keys leaks in github
+### Github में Api keys लीक
 
 - [https://github.com/dxa4481/truffleHog](https://github.com/dxa4481/truffleHog)
 - [https://github.com/gitleaks/gitleaks](https://github.com/gitleaks/gitleaks)
@@ -28,7 +23,6 @@ Now that we have built the list of assets of our scope it's time to search for s
 - [https://github.com/obheda12/GitDorker](https://github.com/obheda12/GitDorker)
 
 ### **Dorks**
-
 ```bash
 ".mlab.com password"
 "access_key"
@@ -310,5 +304,4 @@ GCP SECRET
 AWS SECRET
 "private" extension:pgp
 ```
-
 {{#include ../../banners/hacktricks-training.md}}

