@@ -1,13 +1,10 @@
 # HackTricks
 
-Reading time: {{ #reading_time }}
-
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
 _Hacktricks logos & motion design by_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
 
-> [!TIP]
-> **Welcome to the wiki where you will find each hacking trick/technique/whatever I have learnt from CTFs, real life apps, reading researches, and news.**
+> [!TIP] > **Welcome to the wiki where you will find each hacking trick/technique/whatever I have learnt from CTFs, real life apps, reading researches, and news.**
 
 To get started follow this page where you will find the **typical flow** that **you should follow when pentesting** one or more **machines:**
 
@@ -35,7 +32,9 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 [**RootedCON**](https://www.rootedcon.com) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
 
-{% embed url="https://www.rootedcon.com/" %}
+{{#ref}}
+https://www.rootedcon.com/
+{{#endref}}
 
 ---
 
@@ -47,7 +46,9 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 **Bug bounty tip**: **sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
 
-{% embed url="https://go.intigriti.com/hacktricks" %}
+{{#ref}}
+https://go.intigriti.com/hacktricks
+{{#endref}}
 
 ---
 
@@ -60,7 +61,9 @@ Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banne
 
 Get Access Today:
 
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+{{#ref}}
+https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks
+{{#endref}}
 
 ---
 
@@ -86,7 +89,9 @@ Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to 
 
 **Find and report critical, exploitable vulnerabilities with real business impact.** Use our 20+ custom tools to map the attack surface, find security issues that let you escalate privileges, and use automated exploits to collect essential evidence, turning your hard work into persuasive reports.
 
-{% embed url="https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons" %}
+{{#ref}}
+https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons
+{{#endref}}
 
 ---
 
@@ -111,7 +116,9 @@ You can **create a free account** [**here**](https://serpapi.com/users/sign_up)*
 
 Learn the technologies and skills required to perform vulnerability research, penetration testing, and reverse engineering to protect mobile applications and devices. **Master iOS and Android security** through our on-demand courses and **get certified**:
 
-{% embed url="https://academy.8ksec.io/" %}
+{{#ref}}
+https://academy.8ksec.io/
+{{#endref}}
 
 ---
 
@@ -127,7 +134,9 @@ Another cool thing about WebSec is that unlike the industry average WebSec is **
 
 In addition to the above WebSec is also a **committed supporter of HackTricks.**
 
-{% embed url="https://www.youtube.com/watch?v=Zq2JycGDCPM" %}
+{{#ref}}
+https://www.youtube.com/watch?v=Zq2JycGDCPM
+{{#endref}}
 
 ## License & Disclaimer
 
@@ -142,6 +151,4 @@ welcome/hacktricks-values-and-faq.md
 ![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
 
 {{#include ./banners/hacktricks-training.md}}
-
-
 

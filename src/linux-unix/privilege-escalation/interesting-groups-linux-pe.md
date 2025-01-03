@@ -1,6 +1,4 @@
-
 {{#include ../../banners/hacktricks-training.md}}
-
 
 # Sudo/Admin Groups
 
@@ -158,16 +156,17 @@ find / -group root -perm -g=w 2>/dev/null
 
 You can mount the root filesystem of the host machine to an instance’s volume, so when the instance starts it immediately loads a `chroot` into that volume. This effectively gives you root on the machine.
 
-{% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
+{{#ref}}
+https://github.com/KrustyHack/docker-privilege-escalation
+{{#endref}}
 
-{% embed url="https://fosterelli.co/privilege-escalation-via-docker.html" %}
+{{#ref}}
+https://fosterelli.co/privilege-escalation-via-docker.html
+{{#endref}}
 
 # lxc/lxd Group
 
 [lxc - Privilege Escalation](lxd-privilege-escalation.md)
 
-
 {{#include ../../banners/hacktricks-training.md}}
-
-
 

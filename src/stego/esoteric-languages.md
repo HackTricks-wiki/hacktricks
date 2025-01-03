@@ -52,7 +52,9 @@ Take it to the top
 Whisper my world
 ```
 
-{% embed url="https://codewithrockstar.com/" %}
+{{#ref}}
+https://codewithrockstar.com/
+{{#endref}}
 
 ## PETOOH
 
@@ -67,6 +69,3 @@ Kukarek
 ```
 
 {{#include ../banners/hacktricks-training.md}}
-
-
-

@@ -1544,7 +1544,9 @@ If you manages to **hijack a dll** being **loaded** by a **process** running as 
 
 ### **From Administrator or Network Service to System**
 
-{% embed url="https://github.com/sailay1996/RpcSsImpersonator" %}
+{{#ref}}
+https://github.com/sailay1996/RpcSsImpersonator
+{{#endref}}
 
 ### From LOCAL SERVICE or NETWORK SERVICE to full privs
 
@@ -1618,6 +1620,3 @@ C:\Windows\microsoft.net\framework\v4.0.30319\MSBuild.exe -version #Compile the 
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Windows%20-%20Privilege%20Escalation.md#antivirus--detections](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Windows%20-%20Privilege%20Escalation.md#antivirus--detections)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

