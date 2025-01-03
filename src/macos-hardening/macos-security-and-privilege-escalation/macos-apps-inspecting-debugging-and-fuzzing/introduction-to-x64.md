@@ -4,11 +4,11 @@
 
 ## **Utangulizi wa x64**
 
-x64, pia inajulikana kama x86-64, ni usanifu wa processor wa bit 64 unaotumika hasa katika kompyuta za mezani na seva. Inatokana na usanifu wa x86 ulioandaliwa na Intel na baadaye kukubaliwa na AMD kwa jina AMD64, ni usanifu unaotumika sana katika kompyuta binafsi na seva leo.
+x64, pia inajulikana kama x86-64, ni usanifu wa processor wa 64-bit unaotumika hasa katika kompyuta za mezani na seva. Inatokana na usanifu wa x86 ulioandaliwa na Intel na baadaye kukubaliwa na AMD kwa jina AMD64, ni usanifu unaotumika sana katika kompyuta binafsi na seva leo.
 
 ### **Registers**
 
-x64 inapanua usanifu wa x86, ikiwa na **registers 16 za matumizi ya jumla** zilizo na lebo `rax`, `rbx`, `rcx`, `rdx`, `rbp`, `rsp`, `rsi`, `rdi`, na `r8` hadi `r15`. Kila moja ya hizi inaweza kuhifadhi **thamani ya bit 64** (byte 8). Registers hizi pia zina sub-registers za bit 32, 16, na 8 kwa ajili ya ufanisi na kazi maalum.
+x64 inapanua usanifu wa x86, ikiwa na **registers 16 za matumizi ya jumla** zilizo na lebo `rax`, `rbx`, `rcx`, `rdx`, `rbp`, `rsp`, `rsi`, `rdi`, na `r8` hadi `r15`. Kila moja ya hizi inaweza kuhifadhi **thamani ya 64-bit** (byte 8). Registers hizi pia zina sub-registers za 32-bit, 16-bit, na 8-bit kwa ajili ya ufanisi na kazi maalum.
 
 1. **`rax`** - Kawaida hutumika kwa **thamani za kurudi** kutoka kwa kazi.
 2. **`rbx`** - Mara nyingi hutumika kama **register ya msingi** kwa operesheni za kumbukumbu.
@@ -16,17 +16,17 @@ x64 inapanua usanifu wa x86, ikiwa na **registers 16 za matumizi ya jumla** zili
 4. **`rdx`** - Hutumika katika majukumu mbalimbali ikiwa ni pamoja na operesheni za hesabu za ziada.
 5. **`rbp`** - **Pointer ya msingi** kwa fremu ya stack.
 6. **`rsp`** - **Pointer ya stack**, ikifuatilia kilele cha stack.
-7. **`rsi`** na **`rdi`** - Hutumika kwa **vyanzo** na **malengo** katika operesheni za nyuzi/kumbukumbu.
+7. **`rsi`** na **`rdi`** - Hutumika kwa **vigezo vya chanzo** na **kikundi** katika operesheni za nyuzi/kumbukumbu.
 8. **`r8`** hadi **`r15`** - Registers za ziada za matumizi ya jumla zilizoanzishwa katika x64.
 
 ### **Mkataba wa Kuita**
 
 Mkataba wa kuita wa x64 unatofautiana kati ya mifumo ya uendeshaji. Kwa mfano:
 
-- **Windows**: Parameta **nne za kwanza** hupitishwa katika registers **`rcx`**, **`rdx`**, **`r8`**, na **`r9`**. Parameta zaidi zinakatwa kwenye stack. Thamani ya kurudi iko katika **`rax`**.
-- **System V (inayotumika sana katika mifumo kama UNIX)**: Parameta **sita za kwanza za nambari au pointer** hupitishwa katika registers **`rdi`**, **`rsi`**, **`rdx`**, **`rcx`**, **`r8`**, na **`r9`**. Thamani ya kurudi pia iko katika **`rax`**.
+- **Windows**: Vigezo **vinne vya kwanza** vinapitishwa katika registers **`rcx`**, **`rdx`**, **`r8`**, na **`r9`**. Vigezo zaidi vinakatwa kwenye stack. Thamani ya kurudi iko katika **`rax`**.
+- **System V (inayotumika sana katika mifumo kama UNIX)**: Vigezo **sita vya kwanza vya nambari au pointer** vinapitishwa katika registers **`rdi`**, **`rsi`**, **`rdx`**, **`rcx`**, **`r8`**, na **`r9`**. Thamani ya kurudi pia iko katika **`rax`**.
 
-Ikiwa kazi ina ingizo zaidi ya sita, **zingine zitapitishwa kwenye stack**. **RSP**, pointer ya stack, inapaswa kuwa **imepangwa kwa byte 16**, ambayo inamaanisha kwamba anwani inayoelekeza inapaswa kugawanywa kwa 16 kabla ya wito wowote kutokea. Hii inamaanisha kwamba kawaida tunahitaji kuhakikisha kuwa RSP imepangwa ipasavyo katika shellcode yetu kabla ya kufanya wito wa kazi. Hata hivyo, katika mazoezi, wito wa mfumo unafanya kazi mara nyingi hata kama hitaji hili halijakidhiwa.
+Ikiwa kazi ina zaidi ya ingizo sita, **zingine zitapitishwa kwenye stack**. **RSP**, pointer ya stack, inapaswa kuwa **imepangwa kwa byte 16**, ambayo inamaanisha kwamba anwani inayoelekeza inapaswa kugawanywa kwa 16 kabla ya wito wowote kutokea. Hii inamaanisha kwamba kawaida tunahitaji kuhakikisha kuwa RSP imepangwa ipasavyo katika shellcode yetu kabla ya kufanya wito wa kazi. Hata hivyo, katika mazoezi, wito wa mfumo unafanya kazi mara nyingi hata kama hitaji hili halijakidhi.
 
 ### Mkataba wa Kuita katika Swift
 
@@ -43,27 +43,27 @@ Maagizo ya x64 yana seti tajiri, yakihifadhi ufanisi na maagizo ya awali ya x86 
 - Mfano: `pop rax` — Inachukua thamani ya juu kutoka kwenye stack hadi `rax`.
 - **`add`** na **`sub`**: Operesheni za **kujumlisha** na **kuondoa**.
 - Mfano: `add rax, rcx` — Inajumlisha thamani katika `rax` na `rcx` ikihifadhi matokeo katika `rax`.
-- **`mul`** na **`div`**: Operesheni za **kuzaa** na **ugawaji**. Kumbuka: hizi zina tabia maalum kuhusu matumizi ya operandi.
-- **`call`** na **`ret`**: Inatumika ku **ita** na **kurudi kutoka kwa kazi**.
-- **`int`**: Inatumika kuanzisha **interrupt** ya programu. Mfano: `int 0x80` ilitumika kwa wito wa mfumo katika 32-bit x86 Linux.
+- **`mul`** na **`div`**: Operesheni za **kuongeza** na **kugawanya**. Kumbuka: hizi zina tabia maalum kuhusu matumizi ya operand.
+- **`call`** na **`ret`**: Hutumika ku **ita** na **kurudi kutoka kwa kazi**.
+- **`int`**: Hutumika kuanzisha **interrupt** ya programu. Mfano, `int 0x80` ilitumika kwa wito wa mfumo katika 32-bit x86 Linux.
 - **`cmp`**: **Linganisha** thamani mbili na kuweka bendera za CPU kulingana na matokeo.
 - Mfano: `cmp rax, rdx` — Linganisha `rax` na `rdx`.
 - **`je`, `jne`, `jl`, `jge`, ...**: Maagizo ya **kuruka kwa masharti** yanayobadilisha mtiririko wa udhibiti kulingana na matokeo ya `cmp` au jaribio la awali.
 - Mfano: Baada ya maagizo ya `cmp rax, rdx`, `je label` — Inaruka hadi `label` ikiwa `rax` ni sawa na `rdx`.
-- **`syscall`**: Inatumika kwa **wito wa mfumo** katika mifumo mingine ya x64 (kama Unix za kisasa).
-- **`sysenter`**: Amri ya **wito wa mfumo** iliyoboreshwa kwenye baadhi ya majukwaa.
+- **`syscall`**: Hutumika kwa **wito wa mfumo** katika mifumo mingine ya x64 (kama Unix za kisasa).
+- **`sysenter`**: Maagizo ya **wito wa mfumo** yaliyoboreshwa kwenye baadhi ya majukwaa.
 
 ### **Prologue ya Kazi**
 
-1. **Sukuma pointer ya msingi ya zamani**: `push rbp` (huhifadhi pointer ya msingi ya mwitishaji)
+1. **Push pointer ya msingi ya zamani**: `push rbp` (huhifadhi pointer ya msingi ya mwituni)
 2. **Hamisha pointer ya sasa ya stack hadi pointer ya msingi**: `mov rbp, rsp` (inasanifisha pointer mpya ya msingi kwa kazi ya sasa)
-3. **Panga nafasi kwenye stack kwa ajili ya mabadiliko ya ndani**: `sub rsp, <size>` (ambapo `<size>` ni idadi ya bytes zinazohitajika)
+3. **Panga nafasi kwenye stack kwa ajili ya vigezo vya ndani**: `sub rsp, <size>` (ambapo `<size>` ni idadi ya bytes zinazohitajika)
 
 ### **Epilogue ya Kazi**
 
-1. **Hamisha pointer ya sasa ya msingi hadi pointer ya stack**: `mov rsp, rbp` (ondoa mabadiliko ya ndani)
-2. **Pop pointer ya msingi ya zamani kutoka kwenye stack**: `pop rbp` (rejesha pointer ya msingi ya mwitishaji)
-3. **Rudi**: `ret` (rejesha udhibiti kwa mwitishaji)
+1. **Hamisha pointer ya sasa ya msingi hadi pointer ya stack**: `mov rsp, rbp` (ondoa vigezo vya ndani)
+2. **Pop pointer ya msingi ya zamani kutoka kwenye stack**: `pop rbp` (rejesha pointer ya msingi ya mwituni)
+3. **Rudi**: `ret` (rejesha udhibiti kwa mwituni)
 
 ## macOS
 
@@ -209,7 +209,7 @@ syscall
 
 #### Soma na cat
 
-Lengo ni kutekeleza `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`, hivyo hoja ya pili (x1) ni array ya paramu (ambayo katika kumbukumbu inamaanisha stack ya anwani).
+Lengo ni kutekeleza `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`, hivyo hoja ya pili (x1) ni array ya param (ambayo katika kumbukumbu inamaanisha stack ya anwani).
 ```armasm
 bits 64
 section .text

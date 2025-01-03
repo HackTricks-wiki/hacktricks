@@ -23,7 +23,7 @@ Kisha **`posix_spawn`** ilianzishwa ikichanganya **`vfork`** na **`execve`** kat
 
 Zaidi ya hayo, `posix_spawn` inaruhusu kufafanua array ya **`posix_spawnattr`** inayodhibiti baadhi ya vipengele vya mchakato ulioanzishwa, na **`posix_spawn_file_actions`** kubadilisha hali ya maelezo.
 
-Wakati mchakato unakufa unatumia **kodikodi ya kurudi kwa mchakato mzazi** (ikiwa mzazi alikufa, mzazi mpya ni PID 1) kwa ishara `SIGCHLD`. Mzazi anahitaji kupata thamani hii kwa kuita `wait4()` au `waitid()` na hadi hiyo itokee mtoto unabaki katika hali ya zombie ambapo bado inatajwa lakini haiwezi kutumia rasilimali.
+Wakati mchakato unakufa unatumia **kodikodi ya kurudi kwa mchakato mzazi** (ikiwa mzazi amekufa, mzazi mpya ni PID 1) kwa ishara `SIGCHLD`. Mzazi anahitaji kupata thamani hii kwa kuita `wait4()` au `waitid()` na hadi hiyo itokee mtoto unabaki katika hali ya zombie ambapo bado inatajwa lakini haiwezi kutumia rasilimali.
 
 ### PIDs
 
@@ -32,17 +32,17 @@ PIDs, vitambulisho vya mchakato, vinatambulisha mchakato wa kipekee. Katika XNU 
 ### Process Groups, Sessions & Coalations
 
 **Michakato** inaweza kuingizwa katika **makundi** ili iwe rahisi kuzishughulikia. Kwa mfano, amri katika skripti ya shell zitakuwa katika kundi moja la mchakato hivyo inawezekana **kuziashiria pamoja** kwa kutumia kill kwa mfano.\
-Pia inawezekana **kundi michakato katika vikao**. Wakati mchakato unaanzisha kikao (`setsid(2)`), michakato ya watoto inawekwa ndani ya kikao, isipokuwa wanapoanzisha kikao chao wenyewe.
+Pia inawezekana **kundi michakato katika vikao**. Wakati mchakato unaanzisha kikao (`setsid(2)`), michakato ya watoto inawekwa ndani ya kikao, isipokuwa waanzishe kikao chao wenyewe.
 
 Coalition ni njia nyingine ya kuunganisha michakato katika Darwin. Mchakato unaojiunga na coalation unaruhusu kufikia rasilimali za pool, kushiriki ledger au kukabiliana na Jetsam. Coalations zina majukumu tofauti: Kiongozi, huduma ya XPC, Kiongezi.
 
 ### Credentials & Personae
 
 Kila mchakato una **credentials** ambazo **zinatambulisha ruhusa zake** katika mfumo. Kila mchakato utakuwa na `uid` moja ya msingi na `gid` moja ya msingi (ingawa inaweza kuwa katika makundi kadhaa).\
-Pia inawezekana kubadilisha kitambulisho cha mtumiaji na kikundi ikiwa binary ina **`setuid/setgid`** bit.\
+Pia inawezekana kubadilisha kitambulisho cha mtumiaji na kikundi ikiwa binary ina `setuid/setgid` bit.\
 Kuna kazi kadhaa za **kweka uids/gids mpya**.
 
-Syscall **`persona`** inatoa seti ya **credentials** **mbadala**. Kupitisha persona kunachukua uid yake, gid na uanachama wa kikundi **kwa pamoja**. Katika [**source code**](https://github.com/apple/darwin-xnu/blob/main/bsd/sys/persona.h) inawezekana kupata struct:
+Syscall **`persona`** inatoa seti **mbadala** ya **credentials**. Kupitisha persona kunachukua uid yake, gid na ushirikiano wa makundi **kwa pamoja**. Katika [**source code**](https://github.com/apple/darwin-xnu/blob/main/bsd/sys/persona.h) inawezekana kupata struct:
 ```c
 struct kpersona_info { uint32_t persona_info_version;
 uid_t    persona_id; /* overlaps with UID */
@@ -65,7 +65,7 @@ char     persona_name[MAXLOGNAME + 1];
 
 #### Thread Termination in macOS
 
-1. **Exiting Threads:** Nyuzi kwa kawaida zinamalizika kwa kuita `pthread_exit()`. Kazi hii inaruhusu nyuzi kutoka kwa usafi, ikifanya usafi unaohitajika na kuruhusu nyuzi kutuma thamani ya kurudi kwa wanachama wowote.
+1. **Exiting Threads:** Nyuzi kwa kawaida zinamalizika kwa kuita `pthread_exit()`. Kazi hii inaruhusu nyuzi kutoka kwa usafi, ikifanya usafi unaohitajika na kuruhusu nyuzi kutuma thamani ya kurudi kwa waunganishaji wowote.
 2. **Thread Cleanup:** Wakati wa kuita `pthread_exit()`, kazi ya `pthread_terminate()` inaitwa, ambayo inashughulikia kuondoa muundo wote wa nyuzi zinazohusiana. Inafuta bandari za nyuzi za Mach (Mach ni mfumo wa mawasiliano katika kernel ya XNU) na inaita `bsdthread_terminate`, wito wa mfumo unaondoa muundo wa kiwango cha kernel unaohusiana na nyuzi.
 
 #### Synchronization Mechanisms
@@ -100,7 +100,7 @@ void main (int argc, char **argv){
 tlv_var = 10;
 }
 ```
-Hii sehemu inaelezea `tlv_var` kama variable ya thread-local. Kila thread inayotumia hii code itakuwa na `tlv_var` yake mwenyewe, na mabadiliko ambayo thread moja inafanya kwa `tlv_var` hayataathiri `tlv_var` katika thread nyingine.
+Hii sehemu inaelezea `tlv_var` kama variable ya thread-local. Kila thread inayokimbia msimbo huu itakuwa na `tlv_var` yake mwenyewe, na mabadiliko ambayo thread moja inafanya kwa `tlv_var` hayataathiri `tlv_var` katika thread nyingine.
 
 Katika binary ya Mach-O, data inayohusiana na variable za thread-local imepangwa katika sehemu maalum:
 
@@ -127,113 +127,113 @@ Kuelewa kipaumbele cha thread kunahusisha kuangalia jinsi mfumo wa uendeshaji un
 Daraja la QoS ni njia ya kisasa zaidi ya kushughulikia kipaumbele cha thread, hasa katika mifumo kama macOS inayounga mkono **Grand Central Dispatch (GCD)**. Daraja la QoS linawawezesha waendelezaji **kugawanya** kazi katika viwango tofauti kulingana na umuhimu au dharura yao. macOS inasimamia kipaumbele cha thread kiotomatiki kulingana na daraja hizi za QoS:
 
 1. **Mtu Anayeingiliana:**
-- Daraja hili ni kwa kazi ambazo kwa sasa zinaingiliana na mtumiaji au zinahitaji matokeo ya haraka ili kutoa uzoefu mzuri wa mtumiaji. Kazi hizi zinapewa kipaumbele cha juu ili kuweka kiolesura kuwa na majibu (mfano, michoro au usimamizi wa matukio).
+- Daraja hili ni kwa kazi ambazo kwa sasa zinaingiliana na mtumiaji au zinahitaji matokeo ya haraka ili kutoa uzoefu mzuri wa mtumiaji. Kazi hizi zinapewa kipaumbele cha juu ili kuweka kiolesura kuwa na majibu (kwa mfano, michoro au usimamizi wa matukio).
 2. **Mtu Aliyeanzisha:**
 - Kazi ambazo mtumiaji anazianzisha na anatarajia matokeo ya haraka, kama kufungua hati au kubonyeza kitufe kinachohitaji hesabu. Hizi ni za kipaumbele cha juu lakini chini ya mtu anayeingiliana.
 3. **Huduma:**
-- Kazi hizi ni za muda mrefu na kwa kawaida zinaonyesha kiashiria cha maendeleo (mfano, kupakua faili, kuingiza data). Ziko chini ya kipaumbele kuliko kazi zilizozinduliwa na mtumiaji na hazihitaji kumalizika mara moja.
+- Kazi hizi ni za muda mrefu na kwa kawaida zinaonyesha kiashiria cha maendeleo (kwa mfano, kupakua faili, kuingiza data). Ziko chini ya kipaumbele kuliko kazi zilizozinduliwa na mtumiaji na hazihitaji kumalizika mara moja.
 4. **Nyuma:**
 - Daraja hili ni kwa kazi zinazofanya kazi nyuma na hazionekani kwa mtumiaji. Hizi zinaweza kuwa kazi kama kuorodhesha, kusawazisha, au nakala za akiba. Zina kipaumbele cha chini na athari ndogo kwenye utendaji wa mfumo.
 
-Kwa kutumia daraja la QoS, waendelezaji hawahitaji kusimamia nambari za kipaumbele sahihi bali wanazingatia asili ya kazi, na mfumo unaboresha rasilimali za CPU ipasavyo.
+Kwa kutumia daraja la QoS, waendelezaji hawahitaji kusimamia nambari za kipaumbele sahihi bali badala yake wanazingatia asili ya kazi, na mfumo unaboresha rasilimali za CPU ipasavyo.
 
-Zaidi ya hayo, kuna **sera tofauti za kupanga thread** ambazo zinaelekeza kuweka seti ya vigezo vya kupanga ambavyo mpangaji utachukua katika kuzingatia. Hii inaweza kufanywa kwa kutumia `thread_policy_[set/get]`. Hii inaweza kuwa na manufaa katika mashambulizi ya hali ya mbio.
+Zaidi ya hayo, kuna sera tofauti za **ratiba za thread** ambazo zinaelekeza kuweka seti ya vigezo vya ratiba ambavyo ratibu itachukua katika kuzingatia. Hii inaweza kufanywa kwa kutumia `thread_policy_[set/get]`. Hii inaweza kuwa na manufaa katika mashambulizi ya hali ya mbio.
 
-## MacOS Process Abuse
+## Unyanyasaji wa Mchakato wa MacOS
 
-MacOS, kama mfumo mwingine wowote wa uendeshaji, inatoa mbinu na mitambo mbalimbali kwa **michakato kuingiliana, kuwasiliana, na kushiriki data**. Ingawa mbinu hizi ni muhimu kwa utendaji mzuri wa mfumo, zinaweza pia kutumiwa vibaya na wahalifu kufanya **shughuli mbaya**.
+MacOS, kama mfumo mwingine wowote wa uendeshaji, inatoa njia na mitambo mbalimbali kwa **michakato kuingiliana, kuwasiliana, na kushiriki data**. Ingawa mbinu hizi ni muhimu kwa utendaji mzuri wa mfumo, zinaweza pia kutumiwa vibaya na wahalifu wa mtandao ili **kufanya shughuli mbaya**.
 
-### Library Injection
+### Uingizaji wa Maktaba
 
-Library Injection ni mbinu ambapo mshambuliaji **anamlazimisha mchakato kupakia maktaba mbaya**. Mara tu inapowekwa, maktaba inafanya kazi katika muktadha wa mchakato wa lengo, ikimpa mshambuliaji ruhusa na ufikiaji sawa na mchakato huo.
+Uingizaji wa Maktaba ni mbinu ambapo mshambuliaji **anamlazimisha mchakato kupakia maktaba mbaya**. Mara tu inapowekwa, maktaba inakimbia katika muktadha wa mchakato wa lengo, ikimpa mshambuliaji ruhusa na ufikiaji sawa na mchakato huo.
 
 {{#ref}}
 macos-library-injection/
 {{#endref}}
 
-### Function Hooking
+### Kuingilia Kazi
 
-Function Hooking inahusisha **kuingilia simu za kazi** au ujumbe ndani ya msimbo wa programu. Kwa kuingilia kazi, mshambuliaji anaweza **kubadilisha tabia** ya mchakato, kuangalia data nyeti, au hata kupata udhibiti juu ya mtiririko wa utekelezaji.
+Kuingilia Kazi kunahusisha **kuingilia simu za kazi** au ujumbe ndani ya msimbo wa programu. Kwa kuingilia kazi, mshambuliaji anaweza **kubadilisha tabia** ya mchakato, kuangalia data nyeti, au hata kupata udhibiti juu ya mtiririko wa utekelezaji.
 
 {{#ref}}
 macos-function-hooking.md
 {{#endref}}
 
-### Inter Process Communication
+### Mawasiliano ya Kati ya Mchakato
 
-Inter Process Communication (IPC) inarejelea mbinu tofauti ambazo michakato tofauti **zinashiriki na kubadilishana data**. Ingawa IPC ni muhimu kwa maombi mengi halali, inaweza pia kutumiwa vibaya kuondoa kutengwa kwa mchakato, kuvuja taarifa nyeti, au kufanya vitendo visivyoidhinishwa.
+Mawasiliano ya Kati ya Mchakato (IPC) inarejelea mbinu tofauti ambazo michakato tofauti **zinashiriki na kubadilishana data**. Ingawa IPC ni muhimu kwa programu nyingi halali, inaweza pia kutumiwa vibaya kuharibu kutengwa kwa mchakato, kuvuja taarifa nyeti, au kufanya vitendo visivyoidhinishwa.
 
 {{#ref}}
 macos-ipc-inter-process-communication/
 {{#endref}}
 
-### Electron Applications Injection
+### Uingizaji wa Maombi ya Electron
 
-Electron applications zinazotekelezwa na variables maalum za env zinaweza kuwa hatarini kwa mchakato wa kuingiza:
+Maombi ya Electron yanayoendeshwa na vigezo maalum vya mazingira yanaweza kuwa hatarini kwa uingizaji wa mchakato:
 
 {{#ref}}
 macos-electron-applications-injection.md
 {{#endref}}
 
-### Chromium Injection
+### Uingizaji wa Chromium
 
-Inawezekana kutumia bendera `--load-extension` na `--use-fake-ui-for-media-stream` kufanya **shambulio la mtu katikati ya kivinjari** linaloruhusu kuiba funguo za kuandika, trafiki, cookies, kuingiza scripts kwenye kurasa...:
+Inawezekana kutumia bendera `--load-extension` na `--use-fake-ui-for-media-stream` kufanya **shambulio la mtu katikati ya kivinjari** linaloruhusu kuiba funguo za kuandika, trafiki, vidakuzi, kuingiza skripti kwenye kurasa...:
 
 {{#ref}}
 macos-chromium-injection.md
 {{#endref}}
 
-### Dirty NIB
+### NIB Chafu
 
-NIB files **zinaelezea vipengele vya kiolesura cha mtumiaji (UI)** na mwingiliano wao ndani ya programu. Hata hivyo, zinaweza **kutekeleza amri zisizo na mipaka** na **Gatekeeper haizuii** programu iliyotekelezwa tayari kutekelezwa ikiwa **faili ya NIB imebadilishwa**. Kwa hivyo, zinaweza kutumika kufanya programu zisizo na mipaka kutekeleza amri zisizo na mipaka:
+Faili za NIB **zinaelezea vipengele vya kiolesura cha mtumiaji (UI)** na mwingiliano wao ndani ya programu. Hata hivyo, zinaweza **kutekeleza amri zisizo na mipaka** na **Gatekeeper haizuii** programu iliyotekelezwa tayari kutekelezwa ikiwa **faili ya NIB imebadilishwa**. Kwa hivyo, zinaweza kutumika kufanya programu zisizo na mipaka kutekeleza amri zisizo na mipaka:
 
 {{#ref}}
 macos-dirty-nib.md
 {{#endref}}
 
-### Java Applications Injection
+### Uingizaji wa Maombi ya Java
 
-Inawezekana kutumia uwezo fulani wa java (kama vile **`_JAVA_OPTS`** env variable) kufanya programu ya java kutekeleza **msimbo/amri zisizo na mipaka**.
+Inawezekana kutumia uwezo fulani wa java (kama vile **`_JAVA_OPTS`** vigezo vya mazingira) kufanya programu ya java kutekeleza **amri/msimbo zisizo na mipaka**.
 
 {{#ref}}
 macos-java-apps-injection.md
 {{#endref}}
 
-### .Net Applications Injection
+### Uingizaji wa Maombi ya .Net
 
-Inawezekana kuingiza msimbo katika programu za .Net kwa **kuitumia kazi ya ufuatiliaji wa .Net** (siyo iliyo na ulinzi wa ulinzi wa macOS kama vile kuimarisha wakati wa utekelezaji).
+Inawezekana kuingiza msimbo katika maombi ya .Net kwa **kuitumia kazi ya ufuatiliaji wa .Net** (siyo iliyo na ulinzi wa ulinzi wa macOS kama vile kuimarisha wakati wa utekelezaji).
 
 {{#ref}}
 macos-.net-applications-injection.md
 {{#endref}}
 
-### Perl Injection
+### Uingizaji wa Perl
 
-Angalia chaguzi tofauti za kufanya script ya Perl kutekeleza msimbo zisizo na mipaka katika:
+Angalia chaguzi tofauti za kufanya skripti za Perl kutekeleza msimbo usio na mipaka katika:
 
 {{#ref}}
 macos-perl-applications-injection.md
 {{#endref}}
 
-### Ruby Injection
+### Uingizaji wa Ruby
 
-Pia inawezekana kutumia variables za env za ruby kufanya scripts zisizo na mipaka kutekeleza msimbo zisizo na mipaka:
+Pia inawezekana kutumia vigezo vya mazingira vya ruby kufanya skripti zisizo na mipaka kutekeleza msimbo usio na mipaka:
 
 {{#ref}}
 macos-ruby-applications-injection.md
 {{#endref}}
 
-### Python Injection
+### Uingizaji wa Python
 
-Ikiwa variable ya mazingira **`PYTHONINSPECT`** imewekwa, mchakato wa python utaingia kwenye cli ya python mara tu unapomaliza. Pia inawezekana kutumia **`PYTHONSTARTUP`** kuashiria script ya python kutekelezwa mwanzoni mwa kikao cha mwingiliano.\
-Hata hivyo, kumbuka kwamba script ya **`PYTHONSTARTUP`** haitatekelezwa wakati **`PYTHONINSPECT`** inaunda kikao cha mwingiliano.
+Ikiwa vigezo vya mazingira **`PYTHONINSPECT`** vimewekwa, mchakato wa python utaingia kwenye cli ya python mara tu unapomaliza. Pia inawezekana kutumia **`PYTHONSTARTUP`** kuashiria skripti ya python kutekelezwa mwanzoni mwa kikao cha mwingiliano.\
+Hata hivyo, kumbuka kwamba skripti ya **`PYTHONSTARTUP`** haitatekelezwa wakati **`PYTHONINSPECT`** inaunda kikao cha mwingiliano.
 
-Variables nyingine za mazingira kama **`PYTHONPATH`** na **`PYTHONHOME`** pia zinaweza kuwa na manufaa kufanya amri ya python kutekeleza msimbo zisizo na mipaka.
+Vigezo vingine vya mazingira kama **`PYTHONPATH`** na **`PYTHONHOME`** vinaweza pia kuwa na manufaa kufanya amri ya python kutekeleza msimbo usio na mipaka.
 
-Kumbuka kwamba executable zilizokusanywa na **`pyinstaller`** hazitatumia hizi variables za mazingira hata kama zinakimbia kwa kutumia python iliyojumuishwa.
+Kumbuka kwamba executable zilizokusanywa na **`pyinstaller`** hazitatumia vigezo hivi vya mazingira hata kama zinakimbia kwa kutumia python iliyojumuishwa.
 
 > [!CAUTION]
-> Kwa ujumla sikuweza kupata njia ya kufanya python kutekeleza msimbo zisizo na mipaka kwa kutumia variables za mazingira.\
+> Kwa ujumla, sikuweza kupata njia ya kufanya python itekeleze msimbo usio na mipaka kwa kutumia vigezo vya mazingira.\
 > Hata hivyo, watu wengi huweka python kwa kutumia **Hombrew**, ambayo itainstall python katika **mahali pa kuandika** kwa mtumiaji wa kawaida wa admin. Unaweza kuiteka nyara kwa kitu kama:
 >
 > ```bash
@@ -252,12 +252,12 @@ Kumbuka kwamba executable zilizokusanywa na **`pyinstaller`** hazitatumia hizi v
 
 ### Shield
 
-[**Shield**](https://theevilbit.github.io/shield/) ([**Github**](https://github.com/theevilbit/Shield)) ni programu ya chanzo wazi ambayo inaweza **gundua na kuzuia vitendo vya kuingiza mchakato**:
+[**Shield**](https://theevilbit.github.io/shield/) ([**Github**](https://github.com/theevilbit/Shield)) ni programu ya chanzo wazi inayoweza **gundua na kuzuia uingizaji wa mchakato**:
 
-- Kutumia **Variables za Mazingira**: Itasimamia uwepo wa yoyote ya variables za mazingira zifuatazo: **`DYLD_INSERT_LIBRARIES`**, **`CFNETWORK_LIBRARY_PATH`**, **`RAWCAMERA_BUNDLE_PATH`** na **`ELECTRON_RUN_AS_NODE`**
-- Kutumia **`task_for_pid`** calls: Ili kupata wakati mchakato mmoja unataka kupata **task port ya mwingine** ambayo inaruhusu kuingiza msimbo katika mchakato.
-- **Paramu za programu za Electron**: Mtu anaweza kutumia **`--inspect`**, **`--inspect-brk`** na **`--remote-debugging-port`** kama hoja za mstari wa amri kuanzisha programu ya Electron katika hali ya ufuatiliaji, na hivyo kuingiza msimbo ndani yake.
-- Kutumia **symlinks** au **hardlinks**: Kwa kawaida, matumizi mabaya ya kawaida ni **kweka kiungo na ruhusa zetu za mtumiaji**, na **kuashiria mahali pa juu ya ruhusa**. Ugunduzi ni rahisi sana kwa hardlink na symlinks. Ikiwa mchakato unaounda kiungo una **kiwango tofauti cha ruhusa** na faili ya lengo, tunaunda **onyo**. Kwa bahati mbaya katika kesi ya symlinks kuzuia haiwezekani, kwani hatuna taarifa kuhusu marudio ya kiungo kabla ya kuundwa. Hii ni kikomo cha mfumo wa EndpointSecurity wa Apple.
+- Kutumia **Vigezo vya Mazingira**: Itasimamia uwepo wa yoyote ya vigezo vya mazingira vifuatavyo: **`DYLD_INSERT_LIBRARIES`**, **`CFNETWORK_LIBRARY_PATH`**, **`RAWCAMERA_BUNDLE_PATH`** na **`ELECTRON_RUN_AS_NODE`**
+- Kutumia **`task_for_pid`** simu: Ili kupata wakati mchakato mmoja unataka kupata **bandari ya kazi ya mwingine** ambayo inaruhusu kuingiza msimbo katika mchakato.
+- **Paramu za maombi ya Electron**: Mtu anaweza kutumia **`--inspect`**, **`--inspect-brk`** na **`--remote-debugging-port`** hoja za mstari wa amri kuanzisha programu ya Electron katika hali ya ufuatiliaji, na hivyo kuingiza msimbo ndani yake.
+- Kutumia **symlinks** au **hardlinks**: Kwa kawaida, unyanyasaji wa kawaida ni **kweka kiungo na ruhusa zetu za mtumiaji**, na **kuashiria mahali pa juu ya ruhusa**. Ugunduzi ni rahisi sana kwa hardlink na symlinks. Ikiwa mchakato unaounda kiungo una **kiwango tofauti cha ruhusa** na faili lengwa, tunaunda **onyo**. Kwa bahati mbaya katika kesi ya symlinks, kuzuia haiwezekani, kwani hatuna taarifa kuhusu marudio ya kiungo kabla ya kuundwa. Hii ni kikomo cha mfumo wa EndpointSecurity wa Apple.
 
 ### Simu zinazofanywa na michakato mingine
 

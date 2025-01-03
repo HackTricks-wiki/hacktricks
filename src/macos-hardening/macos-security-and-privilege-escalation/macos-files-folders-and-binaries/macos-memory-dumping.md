@@ -10,7 +10,7 @@ Faili za kubadilishana, kama `/private/var/vm/swapfile0`, hutumikia kama **cache
 
 ### Hibernate Image
 
-Faili iliyoko kwenye `/private/var/vm/sleepimage` ni muhimu wakati wa **hali ya hibernation**. **Data kutoka kwenye kumbukumbu huhifadhiwa katika faili hii wakati OS X inahibernation**. Wakati kompyuta inapoamka, mfumo unapata data ya kumbukumbu kutoka faili hii, ikiruhusu mtumiaji kuendelea mahali alipoacha.
+Faili iliyoko kwenye `/private/var/vm/sleepimage` ni muhimu wakati wa **hali ya kulala**. **Data kutoka kwenye kumbukumbu huhifadhiwa katika faili hii wakati OS X inalala**. Wakati kompyuta inapoamka, mfumo unapata data ya kumbukumbu kutoka faili hii, ikiruhusu mtumiaji kuendelea mahali alipoacha.
 
 Inafaa kutaja kwamba kwenye mifumo ya kisasa ya MacOS, faili hii kwa kawaida imefungwa kwa sababu za usalama, na kufanya urejeleaji kuwa mgumu.
 
@@ -18,13 +18,13 @@ Inafaa kutaja kwamba kwenye mifumo ya kisasa ya MacOS, faili hii kwa kawaida ime
 
 ### Memory Pressure Logs
 
-Faili nyingine muhimu inayohusiana na kumbukumbu katika mifumo ya MacOS ni **kumbukumbu ya shinikizo la kumbukumbu**. Kumbukumbu hizi ziko katika `/var/log` na zina maelezo ya kina kuhusu matumizi ya kumbukumbu ya mfumo na matukio ya shinikizo. Zinweza kuwa na manufaa hasa katika kutambua matatizo yanayohusiana na kumbukumbu au kuelewa jinsi mfumo unavyosimamia kumbukumbu kwa muda.
+Faili nyingine muhimu inayohusiana na kumbukumbu katika mifumo ya MacOS ni **kumbukumbu za shinikizo la kumbukumbu**. Kumbukumbu hizi ziko katika `/var/log` na zina maelezo ya kina kuhusu matumizi ya kumbukumbu ya mfumo na matukio ya shinikizo. Zinweza kuwa na manufaa hasa kwa kutambua matatizo yanayohusiana na kumbukumbu au kuelewa jinsi mfumo unavyosimamia kumbukumbu kwa muda.
 
 ## Dumping memory with osxpmem
 
 Ili kutupa kumbukumbu katika mashine ya MacOS unaweza kutumia [**osxpmem**](https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-2.1.post4.zip).
 
-**Kumbuka**: Maagizo yafuatayo yatatumika tu kwa Macs zenye usanifu wa Intel. Chombo hiki sasa kimehifadhiwa na toleo la mwisho lilikuwa mwaka wa 2017. Binary iliyopakuliwa kwa kutumia maagizo hapa chini inalenga chips za Intel kwani Apple Silicon haikuwapo mwaka wa 2017. Inaweza kuwa inawezekana kukusanya binary kwa usanifu wa arm64 lakini itabidi ujaribu mwenyewe.
+**Kumbuka**: Maagizo yafuatayo yatatumika tu kwa Macs zenye usanifu wa Intel. Chombo hiki sasa kimehifadhiwa na toleo la mwisho lilikuwa mwaka 2017. Binary iliyopakuliwa kwa kutumia maagizo hapa chini inalenga chips za Intel kwani Apple Silicon haikuwapo mwaka 2017. Inaweza kuwa inawezekana kukusanya binary kwa usanifu wa arm64 lakini itabidi ujaribu mwenyewe.
 ```bash
 #Dump raw format
 sudo osxpmem.app/osxpmem --format raw -o /tmp/dump_mem

@@ -17,7 +17,7 @@ Katika usanifu wa ARMv8, viwango vya utekelezaji, vinavyojulikana kama Viwango v
 - EL2 inatoa vipengele vya kutenganisha na kudhibiti mazingira yaliyohalalishwa.
 4. **EL3 - Hali ya Msimamizi Salama**:
 - Hiki ndicho kiwango chenye ruhusa kubwa zaidi na mara nyingi kinatumika kwa kuanzisha salama na mazingira ya utekelezaji yaliyoaminika.
-- EL3 inaweza kusimamia na kudhibiti ufikiaji kati ya hali salama na zisizo salama (kama vile kuanzisha salama, OS iliyoaminika, n.k.).
+- EL3 inaweza kusimamia na kudhibiti ufikiaji kati ya hali salama na zisizo salama (kama kuanzisha salama, OS iliyoaminika, n.k.).
 
 Matumizi ya viwango hivi yanaruhusu njia iliyopangwa na salama ya kusimamia vipengele tofauti vya mfumo, kutoka kwa programu za mtumiaji hadi programu za mfumo zenye ruhusa kubwa zaidi. Mbinu ya ARMv8 kuhusu viwango vya ruhusa inasaidia katika kutenganisha kwa ufanisi vipengele tofauti vya mfumo, hivyo kuimarisha usalama na uimara wa mfumo.
 
@@ -31,19 +31,19 @@ ARM64 ina **register 31 za matumizi ya jumla**, zilizoandikwa `x0` hadi `x30`. K
 3. **`x9`** hadi **`x15`** - Register zaidi za muda, mara nyingi hutumiwa kwa mabadiliko ya ndani.
 4. **`x16`** na **`x17`** - **Register za Wito wa Ndani**. Register za muda kwa thamani za papo hapo. Pia zinatumika kwa wito wa kazi zisizo za moja kwa moja na PLT (Jedwali la Uunganishaji wa Utaratibu).
 - **`x16`** inatumika kama **nambari ya wito wa mfumo** kwa amri ya **`svc`** katika **macOS**.
-5. **`x18`** - **Register ya Jukwaa**. Inaweza kutumika kama register ya matumizi ya jumla, lakini kwenye majukwaa mengine, register hii imehifadhiwa kwa matumizi maalum ya jukwaa: Kielelezo cha block ya mazingira ya thread ya sasa katika Windows, au kuonyesha muundo wa kazi inayotekelezwa sasa katika kernel ya linux.
-6. **`x19`** hadi **`x28`** - Hizi ni register zilizohifadhiwa na mteja. Kazi lazima ihifadhi thamani za register hizi kwa mwito wake, hivyo zinahifadhiwa kwenye stack na kurejeshwa kabla ya kurudi kwa mwito.
-7. **`x29`** - **Kielelezo cha fremu** ili kufuatilia fremu ya stack. Wakati fremu mpya ya stack inaundwa kwa sababu kazi inaitwa, register ya **`x29`** inahifadhiwa kwenye **stack** na anwani ya **fremu mpya** (anwani ya **`sp`**) inahifadhiwa katika register hii.
+5. **`x18`** - **Register ya Jukwaa**. Inaweza kutumika kama register ya matumizi ya jumla, lakini kwenye majukwaa mengine, register hii imehifadhiwa kwa matumizi maalum ya jukwaa: Kielelezo cha block ya mazingira ya thread ya sasa katika Windows, au kuonyesha muundo wa kazi inayotekelezwa kwa sasa katika kernel ya linux.
+6. **`x19`** hadi **`x28`** - Hizi ni register zilizohifadhiwa na mpokeaji. Kazi lazima ihifadhi thamani za register hizi kwa mpokeaji wake, hivyo zinahifadhiwa kwenye stack na kurejeshwa kabla ya kurudi kwa mpokeaji.
+7. **`x29`** - **Kielelezo cha fremu** ili kufuatilia fremu ya stack. Wakati fremu mpya ya stack inaundwa kwa sababu kazi inaitwa, register ya **`x29`** inahifadhiwa kwenye **stack** na anwani ya **fremu mpya** ni (**`sp`** anwani) inahifadhiwa katika register hii.
 - Register hii inaweza pia kutumika kama **register ya matumizi ya jumla** ingawa kawaida hutumiwa kama rejeleo kwa **mabadiliko ya ndani**.
 8. **`x30`** au **`lr`**- **Register ya Kiungo**. Inashikilia **anwani ya kurudi** wakati amri ya `BL` (Tawi na Kiungo) au `BLR` (Tawi na Kiungo kwa Register) inatekelezwa kwa kuhifadhi thamani ya **`pc`** katika register hii.
 - Inaweza pia kutumika kama register nyingine yoyote.
-- Ikiwa kazi ya sasa inakusudia kuita kazi mpya na hivyo kuandika `lr`, itahifadhiwa kwenye stack mwanzoni, hii ni epilogue (`stp x29, x30 , [sp, #-48]; mov x29, sp` -> Hifadhi `fp` na `lr`, tengeneza nafasi na pata `fp` mpya) na kurejeshwa mwishoni, hii ni prologue (`ldp x29, x30, [sp], #48; ret` -> Rejesha `fp` na `lr` na urudi).
-9. **`sp`** - **Kielelezo cha Stack**, kinatumika kufuatilia kilele cha stack.
+- Ikiwa kazi ya sasa inakusudia kuita kazi mpya na hivyo kuandika `lr`, itahifadhiwa kwenye stack mwanzoni, hii ni epilogue (`stp x29, x30 , [sp, #-48]; mov x29, sp` -> Hifadhi `fp` na `lr`, tengeneza nafasi na pata `fp` mpya) na kurejeshwa mwishoni, hii ni prologue (`ldp x29, x30, [sp], #48; ret` -> Rejesha `fp` na `lr` na rudi).
+9. **`sp`** - **Kielelezo cha Stack**, kinachotumika kufuatilia kilele cha stack.
 - thamani ya **`sp`** inapaswa kudumishwa kuwa angalau **quadword** **mwelekeo** au mwelekeo wa makosa unaweza kutokea.
-10. **`pc`** - **Kikokotoo cha Programu**, ambacho kinaelekeza kwenye amri inayofuata. Register hii inaweza kusasishwa tu kupitia uzalishaji wa makosa, marejesho ya makosa, na matawi. Amri za kawaida pekee zinazoweza kusoma register hii ni amri za tawi na kiungo (BL, BLR) kuhifadhi anwani ya **`pc`** katika **`lr`** (Register ya Kiungo).
+10. **`pc`** - **Kikokotoo cha Programu**, ambacho kinaelekeza kwenye amri inayofuata. Register hii inaweza kusasishwa tu kupitia uzalishaji wa makosa, marejesho ya makosa, na matawi. Amri pekee za kawaida zinazoweza kusoma register hii ni amri za tawi na kiungo (BL, BLR) kuhifadhi anwani ya **`pc`** katika **`lr`** (Register ya Kiungo).
 11. **`xzr`** - **Register ya Sifuri**. Pia inaitwa **`wzr`** katika fomu yake ya register **32**-bit. Inaweza kutumika kupata thamani ya sifuri kwa urahisi (operesheni ya kawaida) au kufanya kulinganisha kwa kutumia **`subs`** kama **`subs XZR, Xn, #10`** ikihifadhi data inayotokana mahali popote (katika **`xzr`**).
 
-Register za **`Wn`** ni toleo la **32bit** la register za **`Xn`**.
+Register za **`Wn`** ni toleo la **32bit** la register **`Xn`**.
 
 ### SIMD na Register za Pointi za Kuogelea
 
@@ -51,10 +51,10 @@ Zaidi ya hayo, kuna register nyingine **32 za urefu wa 128bit** ambazo zinaweza 
 
 ### Register za Mfumo
 
-**Kuna mamia ya register za mfumo**, pia zinazoitwa register za matumizi maalum (SPRs), zinatumika kwa **kuangalia** na **kudhibiti** tabia za **processors**.\
+**Kuna mamia ya register za mfumo**, pia zinajulikana kama register za matumizi maalum (SPRs), zinatumika kwa **kuangalia** na **kudhibiti** tabia za **processors**.\
 Zinaweza kusomwa au kuwekwa tu kwa kutumia amri maalum zilizotengwa **`mrs`** na **`msr`**.
 
-Register maalum **`TPIDR_EL0`** na **`TPIDDR_EL0`** mara nyingi hupatikana wakati wa uhandisi wa kurudi. Kiambishi cha `EL0` kinaonyesha **kigezo kidogo** ambacho register inaweza kufikiwa (katika kesi hii EL0 ni kiwango cha kawaida cha kigezo (ruhusa) ambacho programu za kawaida zinakimbia).\
+Register maalum **`TPIDR_EL0`** na **`TPIDDR_EL0`** mara nyingi hupatikana wakati wa uhandisi wa kurudi. Kiambatisho cha `EL0` kinaonyesha **kigezo kidogo** ambacho register inaweza kufikiwa (katika kesi hii EL0 ni kiwango cha kawaida cha kigezo (ruhusa) ambacho programu za kawaida zinakimbia).\
 Mara nyingi hutumiwa kuhifadhi **anwani ya msingi ya eneo la uhifadhi wa thread-local** la kumbukumbu. Kawaida ya kwanza inasomeka na kuandikwa kwa programu zinazokimbia katika EL0, lakini ya pili inaweza kusomwa kutoka EL0 na kuandikwa kutoka EL1 (kama kernel).
 
 - `mrs x0, TPIDR_EL0 ; Soma TPIDR_EL0 ndani ya x0`
@@ -83,14 +83,14 @@ Hizi ndizo sehemu zinazoweza kufikiwa:
 - Bendera ya **upana wa register wa sasa (`nRW`)**: Ikiwa bendera ina thamani 0, programu itakimbia katika hali ya utekelezaji ya AArch64 mara itakaporejeshwa.
 - **Kiwango cha Kigezo** (**`EL`**): Programu ya kawaida inayokimbia katika EL0 itakuwa na thamani 0
 - Bendera ya **kuangalia moja** (**`SS`**): Inatumika na debuggers kuangalia moja kwa moja kwa kuweka bendera ya SS kuwa 1 ndani ya **`SPSR_ELx`** kupitia kigezo. Programu itakimbia hatua moja na kutoa kigezo cha hatua moja.
-- Bendera ya hali ya **kigezo kisicho halali** (**`IL`**): Inatumika kuashiria wakati programu yenye ruhusa inafanya uhamisho wa kiwango cha kigezo kisicho halali, bendera hii inawekwa kuwa 1 na processor inasababisha kigezo cha hali isiyo halali.
+- Bendera ya hali ya **kigezo kisichofaa** (**`IL`**): Inatumika kuashiria wakati programu yenye ruhusa inafanya uhamisho wa kiwango cha kigezo kisichofaa, bendera hii inawekwa kuwa 1 na processor inasababisha kigezo kisichofaa.
 - Bendera za **`DAIF`**: Bendera hizi zinaruhusu programu yenye ruhusa kuchuja kwa hiari kigezo fulani za nje.
-- Ikiwa **`A`** ni 1 inamaanisha **kuanzishwa kwa asynchronous** kutasababisha. **`I`** inasanidiwa kujibu **Maombi ya Interrupt za vifaa vya nje** (IRQs). na F inahusiana na **Maombi ya Interrupt za Haraka** (FIRs).
-- Bendera za **uchaguzi wa kielelezo cha stack** (**`SPS`**): Programu zenye ruhusa zinazokimbia katika EL1 na juu zinaweza kubadilisha kati ya kutumia register yao ya kielelezo cha stack na ile ya mtumiaji (kwa mfano, kati ya `SP_EL1` na `EL0`). Kubadilisha hii inafanywa kwa kuandika kwenye register maalum ya **`SPSel`**. Hii haiwezi kufanywa kutoka EL0.
+- Ikiwa **`A`** ni 1 inamaanisha **kuanzishwa kwa asynchronous** kutasababisha. **`I`** inasanidiwa kujibu **Maombi ya Interrupt ya vifaa vya nje** (IRQs). na F inahusiana na **Maombi ya Interrupt ya Haraka** (FIRs).
+- Bendera za **uchaguzi wa kielelezo cha stack** (**`SPS`**): Programu zenye ruhusa zinazokimbia katika EL1 na zaidi zinaweza kubadilisha kati ya kutumia register yao ya kielelezo cha stack na ile ya mtumiaji (k.m. kati ya `SP_EL1` na `EL0`). Kubadilisha hii inafanywa kwa kuandika kwenye register maalum ya **`SPSel`**. Hii haiwezi kufanywa kutoka EL0.
 
 ## **Mkataba wa Wito (ARM64v8)**
 
-Mkataba wa wito wa ARM64 unasisitiza kwamba **vigezo vinane vya kwanza** kwa kazi vinapitishwa katika register **`x0` hadi `x7`**. **Vigezo** vya ziada vinapitishwa kwenye **stack**. Thamani ya **kurudi** inarudishwa katika register **`x0`**, au katika **`x1`** pia **ikiwa ni 128 bits ndefu**. Register za **`x19`** hadi **`x30`** na **`sp`** lazima **zihifadhiwe** wakati wa wito wa kazi.
+Mkataba wa wito wa ARM64 unasisitiza kwamba **vigezo vinane vya kwanza** kwa kazi vinapitishwa katika register **`x0` hadi `x7`**. **Vigezo vya ziada** vinapitishwa kwenye **stack**. Thamani ya **kurudi** inarudishwa katika register **`x0`**, au katika **`x1`** pia **ikiwa ni 128 bits ndefu**. Register za **`x19`** hadi **`x30`** na **`sp`** lazima **zihifadhiwe** wakati wa wito wa kazi.
 
 Wakati wa kusoma kazi katika assembly, angalia **prologue na epilogue ya kazi**. **Prologue** kawaida inahusisha **kuhifadhi kielelezo cha fremu (`x29`)**, **kuweka** kielelezo **kipya cha fremu**, na **kuandaa nafasi ya stack**. **Epilogue** kawaida inahusisha **kurejesha kielelezo cha fremu kilichohifadhiwa** na **kurudi** kutoka kwa kazi.
 
@@ -109,28 +109,28 @@ Amri za ARM64 kwa ujumla zina **muundo `opcode dst, src1, src2`**, ambapo **`opc
 - **Njia ya Offset**: Offset inayohusiana na kiashiria cha asili inaonyeshwa, kwa mfano:
 - `ldr x2, [x1, #8]`, hii itapakia x2 thamani kutoka x1 + 8
 - `ldr x2, [x0, x1, lsl #2]`, hii itapakia x2 kitu kutoka kwenye array x0, kutoka kwenye nafasi x1 (index) \* 4
-- **Njia ya Pre-indexed**: Hii itatumika kufanya hesabu kwa asili, kupata matokeo na pia kuhifadhi asili mpya katika asili.
+- **Njia ya Pre-indexed**: Hii itatumika kwa hesabu kwenye asili, kupata matokeo na pia kuhifadhi asili mpya kwenye asili.
 - `ldr x2, [x1, #8]!`, hii itapakia `x1 + 8` ndani ya `x2` na kuhifadhi katika x1 matokeo ya `x1 + 8`
 - `str lr, [sp, #-4]!`, Hifadhi register ya kiungo katika sp na sasisha register sp
 - **Njia ya Post-index**: Hii ni kama ile ya awali lakini anwani ya kumbukumbu inafikiwa na kisha offset inakokotwa na kuhifadhiwa.
 - `ldr x0, [x1], #8`, pakia `x1` ndani ya `x0` na sasisha x1 na `x1 + 8`
 - **Kuhusisha anwani ya PC**: Katika kesi hii anwani ya kupakia inakokotwa kulingana na register ya PC
-- `ldr x1, =_start`, Hii itapakia anwani ambapo alama ya `_start` inaanza ndani ya x1 inayohusiana na PC ya sasa.
+- `ldr x1, =_start`, Hii itapakia anwani ambapo alama ya `_start` inaanzia ndani ya x1 inayohusiana na PC ya sasa.
 - **`str`**: **Hifadhi** thamani kutoka **register** hadi **kumbukumbu**.
-- Mfano: `str x0, [x1]` — Hii inahifadhi thamani katika `x0` ndani ya eneo la kumbukumbu lililoonyeshwa na `x1`.
-- **`ldp`**: **Pakia Jozi za Register**. Amri hii **inapakia register mbili** kutoka **maeneo ya kumbukumbu** yanayofuatana. Anwani ya kumbukumbu kawaida huundwa kwa kuongeza offset kwa thamani katika register nyingine.
+- Mfano: `str x0, [x1]` — Hii inahifadhi thamani katika `x0` kwenye eneo la kumbukumbu lililoonyeshwa na `x1`.
+- **`ldp`**: **Pakia Jozi za Register**. Amri hii **inapakia register mbili** kutoka **sehemu za mfululizo za kumbukumbu**. Anwani ya kumbukumbu kawaida huundwa kwa kuongeza offset kwa thamani katika register nyingine.
 - Mfano: `ldp x0, x1, [x2]` — Hii inapakua `x0` na `x1` kutoka maeneo ya kumbukumbu katika `x2` na `x2 + 8`, mtawalia.
-- **`stp`**: **Hifadhi Jozi za Register**. Amri hii **inahifadhi register mbili** kwenye **maeneo ya kumbukumbu** yanayofuatana. Anwani ya kumbukumbu kawaida huundwa kwa kuongeza offset kwa thamani katika register nyingine.
+- **`stp`**: **Hifadhi Jozi za Register**. Amri hii **inahifadhi register mbili** kwenye **sehemu za mfululizo za kumbukumbu**. Anwani ya kumbukumbu kawaida huundwa kwa kuongeza offset kwa thamani katika register nyingine.
 - Mfano: `stp x0, x1, [sp]` — Hii inahifadhi `x0` na `x1` kwenye maeneo ya kumbukumbu katika `sp` na `sp + 8`, mtawalia.
 - `stp x0, x1, [sp, #16]!` — Hii inahifadhi `x0` na `x1` kwenye maeneo ya kumbukumbu katika `sp+16` na `sp + 24`, mtawalia, na sasisha `sp` na `sp+16`.
 - **`add`**: **Ongeza** thamani za register mbili na uhifadhi matokeo katika register.
 - Sintaksia: add(s) Xn1, Xn2, Xn3 | #imm, \[shift #N | RRX]
-- Xn1 -> Marudio
+- Xn1 -> Malengo
 - Xn2 -> Operandi 1
 - Xn3 | #imm -> Operandi 2 (register au papo hapo)
 - \[shift #N | RRX] -> Fanya shift au piga RRX
 - Mfano: `add x0, x1, x2` — Hii inaongeza thamani katika `x1` na `x2` pamoja na kuhifadhi matokeo katika `x0`.
-- `add x5, x5, #1, lsl #12` — Hii inalingana na 4096 (1 ikihamishwa mara 12) -> 1 0000 0000 0000 0000
+- `add x5, x5, #1, lsl #12` — Hii inalingana na 4096 (1 shifter mara 12) -> 1 0000 0000 0000 0000
 - **`adds`** Hii inafanya `add` na inasasisha bendera
 - **`sub`**: **Punguza** thamani za register mbili na uhifadhi matokeo katika register.
 - Angalia **`add`** **sintaksia**.
@@ -146,31 +146,31 @@ Amri za ARM64 kwa ujumla zina **muundo `opcode dst, src1, src2`**, ambapo **`opc
 - **Shift ya Kihisia Kulia**: Kama **`lsr`**, lakini badala ya kuongeza 0s ikiwa bit muhimu zaidi ni 1, **1s zinaongezwa** (gawanya kwa n-mara 2 katika saini)
 - **Pindua Kulia**: Kama **`lsr`** lakini chochote kinachondolewa kutoka kulia kinajumuishwa kushoto
 - **Pindua Kulia na Kuongeza**: Kama **`ror`**, lakini na bendera ya kubeba kama "bit muhimu zaidi". Hivyo bendera ya kubeba inahamishwa kwa bit 31 na bit iliyondolewa kwa bendera ya kubeba.
-- **`bfm`**: **Hamisha Uwanja wa Bit**, operesheni hizi **nakala bits `0...n`** kutoka thamani na kuziweka katika nafasi **`m..m+n`**. **`#s`** inaonyesha **nafasi ya bit ya kushoto** na **`#r`** ni **kiasi cha kuhamasisha kulia**.
+- **`bfm`**: **Hamisha Uwanja wa Bit**, operesheni hizi **nakala bits `0...n`** kutoka thamani na kuziweka katika nafasi **`m..m+n`**. **`#s`** inaonyesha **nafasi ya bit ya kushoto** na **`#r`** kiwango cha **kuhamasisha kulia**.
 - Hamisha uwanja wa bit: `BFM Xd, Xn, #r`
-- Hamisha uwanja wa bit wa Saini: `SBFM Xd, Xn, #r, #s`
+- Hamisha uwanja wa bit wenye saini: `SBFM Xd, Xn, #r, #s`
 - Hamisha uwanja wa bit usio na saini: `UBFM Xd, Xn, #r, #s`
-- **Kutoa na Kuingiza Uwanja wa Bit:** Nakala uwanja wa bit kutoka register moja na kuhamasisha kwa register nyingine.
+- **Kutoa na Kuingiza Uwanja wa Bit:** Nakala uwanja wa bit kutoka register moja na kuhamasisha kwenye register nyingine.
 - **`BFI X1, X2, #3, #4`** Ingiza bits 4 kutoka X2 kutoka bit ya 3 ya X1
-- **`BFXIL X1, X2, #3, #4`** Toa kutoka bit ya 3 ya X2 bits nne na kuhamasisha kwa X1
-- **`SBFIZ X1, X2, #3, #4`** Ongeza saini bits 4 kutoka X2 na kuhamasisha kwa X1 kuanzia kwenye nafasi ya bit 3 ikizima bits za kulia
-- **`SBFX X1, X2, #3, #4`** Inatoa bits 4 kuanzia bit ya 3 kutoka X2, inaongeza saini, na kuweka matokeo katika X1
-- **`UBFIZ X1, X2, #3, #4`** Ongeza sifuri bits 4 kutoka X2 na kuhamasisha kwa X1 kuanzia kwenye nafasi ya bit 3 ikizima bits za kulia
-- **`UBFX X1, X2, #3, #4`** Inatoa bits 4 kuanzia bit ya 3 kutoka X2 na kuweka matokeo yaliyoongezwa sifuri katika X1.
+- **`BFXIL X1, X2, #3, #4`** Toa kutoka bit ya 3 ya X2 bits nne na kuhamasisha kwenye X1
+- **`SBFIZ X1, X2, #3, #4`** Ongeza saini bits 4 kutoka X2 na kuhamasisha kwenye X1 kuanzia kwenye nafasi ya bit 3 ikizima bits za kulia
+- **`SBFX X1, X2, #3, #4`** Inatoa bits 4 kuanzia bit 3 kutoka X2, inaongeza saini, na kuweka matokeo katika X1
+- **`UBFIZ X1, X2, #3, #4`** Ongeza sifuri bits 4 kutoka X2 na kuhamasisha kwenye X1 kuanzia kwenye nafasi ya bit 3 ikizima bits za kulia
+- **`UBFX X1, X2, #3, #4`** Inatoa bits 4 kuanzia bit 3 kutoka X2 na kuweka matokeo yaliyoongezwa sifuri katika X1.
 - **Ongeza Saini kwa X:** Ongeza saini (au ongeza tu 0s katika toleo lisilo na saini) ya thamani ili uweze kufanya operesheni nayo:
 - **`SXTB X1, W2`** Ongeza saini ya byte **kutoka W2 hadi X1** (`W2` ni nusu ya `X2`) ili kujaza 64bits
 - **`SXTH X1, W2`** Ongeza saini ya nambari ya 16bit **kutoka W2 hadi X1** ili kujaza 64bits
 - **`SXTW X1, W2`** Ongeza saini ya byte **kutoka W2 hadi X1** ili kujaza 64bits
 - **`UXTB X1, W2`** Ongeza 0s (isiyo na saini) kwa byte **kutoka W2 hadi X1** ili kujaza 64bits
-- **`extr`:** Inatoa bits kutoka **pair ya register zilizounganishwa**.
+- **`extr`:** Inatoa bits kutoka **jozi maalum za register zilizounganishwa**.
 - Mfano: `EXTR W3, W2, W1, #3` Hii itajumuisha **W1+W2** na kupata **kuanzia bit 3 ya W2 hadi bit 3 ya W1** na kuhifadhi katika W3.
-- **`cmp`**: **Linganisha** register mbili na kuweka bendera za hali. Ni **alias ya `subs`** ikiseti register ya marudio kuwa register ya sifuri. Inafaida kujua ikiwa `m == n`.
+- **`cmp`**: **Linganisha** register mbili na kuweka bendera za hali. Ni **alias ya `subs`** ikiseti register ya malengo kuwa register ya sifuri. Inafaida kujua ikiwa `m == n`.
 - Inasaidia **sintaksia sawa na `subs`**
 - Mfano: `cmp x0, x1` — Hii inalinganisha thamani katika `x0` na `x1` na kuweka bendera za hali ipasavyo.
-- **`cmn`**: **Linganishi operandi hasi**. Katika kesi hii ni **alias ya `adds`** na inasaidia sintaksia sawa. Inafaida kujua ikiwa `m == -n`.
-- **`ccmp`**: Linganisha kwa masharti, ni kulinganisha ambayo itafanywa tu ikiwa kulinganisha ya awali ilikuwa kweli na itaseti bit za nzcv kwa usahihi.
+- **`cmn`**: **Linganishi operand hasi**. Katika kesi hii ni **alias ya `adds`** na inasaidia sintaksia sawa. Inafaida kujua ikiwa `m == -n`.
+- **`ccmp`**: Linganisha kwa masharti, ni kulinganisha ambayo itafanywa tu ikiwa kulinganisha ya awali ilikuwa kweli na itaseti bits za nzcv kwa usahihi.
 - `cmp x1, x2; ccmp x3, x4, 0, NE; blt _func` -> ikiwa x1 != x2 na x3 < x4, ruka kwa func
-- Hii ni kwa sababu **`ccmp`** itatekelezwa tu ikiwa **`cmp` ya awali ilikuwa `NE`**, ikiwa haikuwa bit `nzcv` zitakuwa zimewekwa kuwa 0 (ambayo haitaridhisha kulinganisha `blt`).
+- Hii ni kwa sababu **`ccmp`** itatekelezwa tu ikiwa **`cmp` ya awali ilikuwa `NE`**, ikiwa haikuwa bits `nzcv` zitawekwa kuwa 0 (ambayo haitaridhisha kulinganisha `blt`).
 - Hii pia inaweza kutumika kama `ccmn` (sawa lakini hasi, kama `cmp` dhidi ya `cmn`).
 - **`tst`**: Inakagua ikiwa yoyote ya thamani za kulinganisha ni 1 (inafanya kazi kama ANDS bila kuhifadhi matokeo mahali popote). Inafaida kuangalia register na thamani na kuangalia ikiwa yoyote ya bits za register iliyoonyeshwa katika thamani ni 1.
 - Mfano: `tst X1, #7` Angalia ikiwa yoyote ya bits tatu za mwisho za X1 ni 1
@@ -192,9 +192,9 @@ Amri za ARM64 kwa ujumla zina **muundo `opcode dst, src1, src2`**, ambapo **`opc
 - Mfano: Baada ya amri ya `cmp x0, x1`, `b.ne label` — Ikiwa thamani katika `x0` na `x1` hazikuwa sawa, hii inaruka kwa `label`.
 - **`cbz`**: **Linganishi na Tawi kwenye Sifuri**. Amri hii inalinganisha register na sifuri, na ikiwa sawa, inatunga kwa lebo au anwani.
 - Mfano: `cbz x0, label` — Ikiwa thamani katika `x0` ni sifuri, hii inaruka kwa `label`.
-- **`cbnz`**: **Linganishi na Tawi kwenye Sio Sifuri**. Amri hii inalinganisha register na sifuri, na ikiwa hazikuwa sawa, inatunga kwa lebo au anwani.
-- Mfano: `cbnz x0, label` — Ikiwa thamani katika `x0` sio sifuri, hii inaruka kwa `label`.
-- **`tbnz`**: Jaribu bit na tawi kwenye sio sifuri
+- **`cbnz`**: **Linganishi na Tawi kwenye Siyo Sifuri**. Amri hii inalinganisha register na sifuri, na ikiwa hazikuwa sawa, inatunga kwa lebo au anwani.
+- Mfano: `cbnz x0, label` — Ikiwa thamani katika `x0` si sifuri, hii inaruka kwa `label`.
+- **`tbnz`**: Jaribu bit na tawi kwenye si sifuri
 - Mfano: `tbnz x0, #8, label`
 - **`tbz`**: Jaribu bit na tawi kwenye sifuri
 - Mfano: `tbz x0, #8, label`
@@ -213,15 +213,15 @@ Amri za ARM64 kwa ujumla zina **muundo `opcode dst, src1, src2`**, ambapo **`opc
 - **`ldrsw`**: **Pakia** thamani ya saini **32-bit** kutoka kumbukumbu na **ongeza saini hadi 64** bits.
 - Mfano: `ldrsw x0, [x1]` — Hii inapakua thamani ya saini ya 32-bit kutoka eneo la kumbukumbu lililoonyeshwa na `x1`, inaongeza saini hadi 64 bits, na kuihifadhi katika `x0`.
 - **`stur`**: **Hifadhi thamani ya register kwenye eneo la kumbukumbu**, kwa kutumia offset kutoka register nyingine.
-- Mfano: `stur x0, [x1, #4]` — Hii inahifadhi thamani katika `x0` ndani ya anwani ya kumbukumbu ambayo ni bytes 4 zaidi kuliko anwani iliyopo katika `x1`.
-- **`svc`** : Fanya **wito wa mfumo**. Inasimama kwa "Wito wa Msimamizi". Wakati processor inatekeleza amri hii, inabadilisha kutoka hali ya mtumiaji hadi hali ya kernel na kuruka kwenye eneo maalum la kumbukumbu ambapo **msimbo wa kushughulikia wito wa mfumo wa kernel** unapatikana.
+- Mfano: `stur x0, [x1, #4]` — Hii inahifadhi thamani katika `x0` kwenye anwani ya kumbukumbu ambayo ni bytes 4 zaidi kuliko anwani iliyopo katika `x1`.
+- **`svc`** : Fanya **wito wa mfumo**. Inasimama kwa "Wito wa Msimamizi". Wakati processor inatekeleza amri hii, inabadilisha kutoka hali ya mtumiaji hadi hali ya kernel na kuruka kwenye eneo maalum la kumbukumbu ambapo **kanuni ya kushughulikia wito wa mfumo wa kernel** inapatikana.
 
 - Mfano:
 
 ```armasm
-mov x8, 93  ; Pakia nambari ya wito wa mfumo kwa kutoka (93) ndani ya register x8.
-mov x0, 0   ; Pakia msimamo wa kutoka (0) ndani ya register x0.
-svc 0       ; Fanya wito wa mfumo.
+mov x8, 93  ; Load the system call number for exit (93) into register x8.
+mov x0, 0   ; Load the exit status code (0) into register x0.
+svc 0       ; Make the system call.
 ```
 
 ### **Prologue ya Kazi**
@@ -235,7 +235,7 @@ stp x29, x30, [sp, #-16]!  ; store pair x29 and x30 to the stack and decrement t
 
 ### **Hitimisho la Kazi**
 
-1. **Ondoa mabadiliko ya ndani (ikiwa yoyote ilipangwa)**: `add sp, sp, <size>`
+1. **Ondoa mabadiliko ya ndani (ikiwa yoyote yalipangwa)**: `add sp, sp, <size>`
 2. **Rejesha kiashiria cha kiungo na kiashiria cha fremu**:
 ```armasm
 ldp x29, x30, [sp], #16  ; load pair x29 and x30 from the stack and increment the stack pointer
@@ -264,7 +264,7 @@ mov r0, #8
 ```
 ### Registers
 
-Kuna register 16 za 32-bit (r0-r15). **Kuanzia r0 hadi r14** zinaweza kutumika kwa **operesheni yoyote**, hata hivyo baadhi yao mara nyingi huhifadhiwa:
+Kuna register 16 za 32-bit (r0-r15). **Kuanzia r0 hadi r14** zinaweza kutumika kwa **operesheni yoyote**, hata hivyo baadhi yao mara nyingi zimehifadhiwa:
 
 - **`r15`**: Program counter (daima). Inashikilia anwani ya amri inayofuata. Katika A32 sasa + 8, katika T32, sasa + 4.
 - **`r11`**: Frame Pointer
@@ -292,7 +292,7 @@ Sehemu zimegawanywa katika makundi kadhaa:
 - Bendera **`Q`**: Inapangwa kuwa 1 kila wakati **saturation ya integer inapotokea** wakati wa utekelezaji wa amri maalum ya hesabu inayoshikilia. Mara inapowekwa kuwa **`1`**, itahifadhi thamani hiyo hadi iwekwe kwa mikono kuwa 0. Zaidi ya hayo, hakuna amri inayokagua thamani yake kwa njia isiyo ya moja kwa moja, inapaswa kufanywa kwa kusoma kwa mikono.
 - Bendera **`GE`** (Kubwa kuliko au sawa): Inatumika katika operesheni za SIMD (Single Instruction, Multiple Data), kama vile "kuongeza kwa pamoja" na "kupunguza kwa pamoja". Operesheni hizi zinaruhusu kusindika vidokezo vingi vya data katika amri moja.
 
-Kwa mfano, amri **`UADD8`** **inaongeza jozi nne za bytes** (kutoka kwa operandi mbili za 32-bit) kwa pamoja na kuhifadhi matokeo katika register ya 32-bit. Kisha **inaweka bendera `GE` katika `APSR`** kulingana na matokeo haya. Kila bendera ya GE inahusiana na moja ya nyongeza za byte, ikionyesha ikiwa nyongeza ya jozi hiyo ya byte **ilivuka**.
+Kwa mfano, amri **`UADD8`** **inaongeza jozi nne za bytes** (kutoka kwa operandi mbili za 32-bit) kwa pamoja na kuhifadhi matokeo katika register ya 32-bit. Kisha **inaweka bendera `GE` katika `APSR`** kulingana na matokeo haya. Kila bendera ya GE inahusiana na moja ya nyongeza za byte, ikionyesha ikiwa nyongeza ya jozi hiyo ya byte **ilivuka mipaka**.
 
 Amri **`SEL`** inatumia bendera hizi za GE kufanya vitendo vya masharti.
 
@@ -301,7 +301,7 @@ Amri **`SEL`** inatumia bendera hizi za GE kufanya vitendo vya masharti.
 - Bits **`J`** na **`T`**: **`J`** inapaswa kuwa 0 na ikiwa **`T`** ni 0 seti ya amri A32 inatumika, na ikiwa ni 1, T32 inatumika.
 - **IT Block State Register** (`ITSTATE`): Hizi ni bits kutoka 10-15 na 25-26. Zinahifadhi hali za masharti kwa amri ndani ya kundi lililo na **`IT`**.
 - Bit **`E`**: Inaonyesha **endianness**.
-- **Mode and Exception Mask Bits** (0-4): Zinabainisha hali ya sasa ya utekelezaji. **Ya 5** inaonyesha ikiwa programu inafanya kazi kama 32bit (1) au 64bit (0). Nyingine 4 zinaonyesha **hali ya kosa inayotumika sasa** (wakati kosa linapotokea na linashughulikiwa). Nambari iliyowekwa **inaonyesha kipaumbele cha sasa** ikiwa kosa lingine litachochewa wakati huu unashughulikiwa.
+- **Mode and Exception Mask Bits** (0-4): Zinabainisha hali ya sasa ya utekelezaji. **Ya 5** inaonyesha ikiwa programu inafanya kazi kama 32bit (1) au 64bit (0). Nyingine 4 zinaonyesha **hali ya kosa inayotumika sasa** (wakati kosa linapotokea na linashughulikiwa). Nambari iliyowekwa **inaonyesha kipaumbele cha sasa** endapo kosa lingine litachochewa wakati huu unashughulikiwa.
 
 <figure><img src="../../../images/image (1200).png" alt=""><figcaption></figcaption></figure>
 
@@ -328,15 +328,15 @@ dyldex -e libsystem_kernel.dylib /System/Library/Caches/com.apple.dyld/dyld_shar
 Kumbuka kwamba **Ida** na **Ghidra** zinaweza pia ku-decompile **dylibs maalum** kutoka kwenye cache kwa kupitisha tu cache.
 
 > [!TIP]
-> Wakati mwingine ni rahisi kuangalia **code iliyodecompiled** kutoka **`libsystem_kernel.dylib`** **kuliko** kuangalia **source code** kwa sababu code ya syscalls kadhaa (BSD na Mach) inazalishwa kupitia scripts (angalia maoni katika source code) wakati katika dylib unaweza kupata kile kinachoitwa.
+> Wakati mwingine ni rahisi kuangalia **decompiled** code kutoka **`libsystem_kernel.dylib`** **kuliko** kuangalia **source code** kwa sababu code ya syscalls kadhaa (BSD na Mach) inazalishwa kupitia scripts (angalia maoni katika source code) wakati katika dylib unaweza kupata kile kinachoitwa.
 
 ### machdep calls
 
-XNU inasaidia aina nyingine ya calls inayoitwa machine dependent. Idadi ya calls hizi inategemea usanifu na wala calls wala idadi hazihakikishiwi kubaki kuwa thabiti.
+XNU inasaidia aina nyingine ya calls inayoitwa machine dependent. Nambari za calls hizi zinategemea usanifu na wala calls au nambari hazihakikishiwi kubaki kuwa thabiti.
 
 ### comm page
 
-Hii ni ukurasa wa kumbukumbu wa mmiliki wa kernel ambao umewekwa kwenye anwani ya kila mchakato wa mtumiaji. Imepangwa kufanya mpito kutoka kwa hali ya mtumiaji hadi nafasi ya kernel kuwa haraka zaidi kuliko kutumia syscalls kwa huduma za kernel ambazo zinatumika sana kwamba mpito huu ungekuwa usio na ufanisi.
+Hii ni ukurasa wa kumbukumbu wa mmiliki wa kernel ambao umewekwa kwenye anwani ya kila mchakato wa mtumiaji. Imepangwa kufanya mpito kutoka kwa hali ya mtumiaji hadi nafasi ya kernel kuwa haraka kuliko kutumia syscalls kwa huduma za kernel ambazo zinatumika sana kwamba mpito huu ungekuwa usio na ufanisi.
 
 Kwa mfano, wito wa `gettimeofdate` unasoma thamani ya `timeval` moja kwa moja kutoka kwenye comm page.
 
@@ -350,7 +350,7 @@ Parameta ([maelezo zaidi katika docs](https://developer.apple.com/documentation/
 - x1: op -> Mchaguo wa njia
 - x2... -> Mabaki ya hoja za njia iliyoitwa
 
-Hivyo, ikiwa utaweka breakpoint kabla ya tawi la kazi hii, unaweza kwa urahisi kupata kile kinachoitwa katika lldb (katika mfano huu, kitu kinaita kitu kutoka `NSConcreteTask` ambacho kitakimbiza amri):
+Hivyo, ikiwa utaweka breakpoint kabla ya tawi la kazi hii, unaweza kwa urahisi kupata kile kinachoitwa katika lldb (katika mfano huu, kitu kinaita kitu kutoka `NSConcreteTask` ambacho kitakimbia amri):
 ```bash
 # Right in the line were objc_msgSend will be called
 (lldb) po $x0
@@ -369,17 +369,17 @@ whoami
 )
 ```
 > [!TIP]
-> Kuweka mabadiliko ya mazingira **`NSObjCMessageLoggingEnabled=1`** inawezekana kurekodi wakati kazi hii inaitwa katika faili kama `/tmp/msgSends-pid`.
+> Kuweka variable ya env **`NSObjCMessageLoggingEnabled=1`** inawezekana kuandika wakati kazi hii inaitwa katika faili kama `/tmp/msgSends-pid`.
 >
-> Zaidi ya hayo, kuweka **`OBJC_HELP=1`** na kuita binary yoyote unaweza kuona mabadiliko mengine ya mazingira ambayo unaweza kutumia ili **log** wakati vitendo fulani vya Objc-C vinapotokea.
+> Zaidi ya hayo, kuweka **`OBJC_HELP=1`** na kuita binary yoyote unaweza kuona variable nyingine za mazingira ambazo unaweza kutumia ku **log** wakati vitendo fulani vya Objc-C vinatokea.
 
 Wakati kazi hii inaitwa, inahitajika kupata njia iliyoitwa ya mfano ulioonyeshwa, kwa hili utafutaji tofauti hufanywa:
 
 - Fanya utafutaji wa cache wa matumaini:
 - Ikiwa ni mafanikio, imekamilika
-- Pata runtimeLock (soma)
-- Ikiwa (realize && !cls->realized) tambua darasa
-- Ikiwa (initialize && !cls->initialized) anza darasa
+- Pata runtimeLock (kusoma)
+- Ikiwa (realize && !cls->realized) realize darasa
+- Ikiwa (initialize && !cls->initialized) initialize darasa
 - Jaribu cache ya darasa lenyewe:
 - Ikiwa ni mafanikio, imekamilika
 - Jaribu orodha ya mbinu za darasa:
@@ -388,8 +388,8 @@ Wakati kazi hii inaitwa, inahitajika kupata njia iliyoitwa ya mfano ulioonyeshwa
 - Ikiwa ni mafanikio, imekamilika
 - Jaribu orodha ya mbinu za darasa la juu:
 - Ikiwa imepatikana, jaza cache na umalize
-- Ikiwa (resolver) jaribu mtafutaji wa mbinu, na rudia kutoka kwa utafutaji wa darasa
-- Ikiwa bado hapa (= kila kitu kingine kimefeli) jaribu mpelelezi
+- Ikiwa (resolver) jaribu mtafutaji wa mbinu, na rudia kutoka utafutaji wa darasa
+- Ikiwa bado hapa (= kila kitu kingine kimefeli) jaribu forwarder
 
 ### Shellcodes
 
@@ -537,9 +537,9 @@ sh_path: .asciz "/bin/sh"
 {{#endtab}}
 {{#endtabs}}
 
-#### Soma kwa cat
+#### Soma na cat
 
-Lengo ni kutekeleza `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`, hivyo hoja ya pili (x1) ni array ya param (ambayo katika kumbukumbu inamaanisha stack ya anwani).
+Lengo ni kutekeleza `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`, hivyo hoja ya pili (x1) ni array ya params (ambayo katika kumbukumbu inamaanisha stack ya anwani).
 ```armasm
 .section __TEXT,__text     ; Begin a new section of type __TEXT and name __text
 .global _main              ; Declare a global symbol _main

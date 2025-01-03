@@ -2,22 +2,22 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Kwa maelezo zaidi kuhusu mbinu hii angalia chapisho la asili kutoka:** [**https://blog.xpnsec.com/dirtynib/**](https://blog.xpnsec.com/dirtynib/) na chapisho linalofuata na [**https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/**](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)**.** Hapa kuna muhtasari:
+**Kwa maelezo zaidi kuhusu mbinu hii angalia chapisho la asili kutoka:** [**https://blog.xpnsec.com/dirtynib/**](https://blog.xpnsec.com/dirtynib/) na chapisho linalofuata kutoka [**https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/**](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)**.** Hapa kuna muhtasari:
 
 ### Nini Nib files
 
-Nib (fupi kwa NeXT Interface Builder) files, sehemu ya mfumo wa maendeleo wa Apple, zinakusudia kufafanua **vipengele vya UI** na mwingiliano wao katika programu. Zinajumuisha vitu vilivyopangwa kama vile madirisha na vifungo, na hupakuliwa wakati wa wakati wa utekelezaji. Licha ya matumizi yao yaendelea, Apple sasa inashauri Storyboards kwa ajili ya uonyeshaji wa mtiririko wa UI wa kina zaidi.
+Nib (fupi kwa NeXT Interface Builder) files, sehemu ya mfumo wa maendeleo wa Apple, zinakusudia kufafanua **vipengele vya UI** na mwingiliano wao katika programu. Zinajumuisha vitu vilivyopangwa kama vile madirisha na vifungo, na hupakiwa wakati wa utendaji. Licha ya matumizi yao yaendelea, Apple sasa inapendekeza Storyboards kwa ajili ya uonyeshaji wa mtiririko wa UI wa kina zaidi.
 
-Faili kuu ya Nib inarejelea katika thamani **`NSMainNibFile`** ndani ya faili ya `Info.plist` ya programu na inapakuliwa na kazi **`NSApplicationMain`** inayotekelezwa katika kazi ya `main` ya programu.
+Faili kuu ya Nib inarejelea katika thamani **`NSMainNibFile`** ndani ya faili ya `Info.plist` ya programu na hupakiwa na kazi **`NSApplicationMain`** inayotekelezwa katika kazi ya `main` ya programu.
 
 ### Mchakato wa Uingizaji wa Dirty Nib
 
-#### Kuunda na Kuweka Faili ya NIB
+#### Kuunda na Kuweka NIB File
 
 1. **Mipangilio ya Awali**:
 - Unda faili mpya ya NIB kwa kutumia XCode.
 - Ongeza Kitu kwenye interface, ukipanga darasa lake kuwa `NSAppleScript`.
-- Sanidi mali ya awali ya `source` kupitia Sifa za Wakati wa Uendeshaji Zilizofanywa na Mtumiaji.
+- Sanidi mali ya awali ya `source` kupitia Sifa za Runtime Zilizofafanuliwa na Mtumiaji.
 2. **Gadget ya Utekelezaji wa Kanuni**:
 - Mipangilio inarahisisha kuendesha AppleScript kwa mahitaji.
 - Jumuisha kifungo ili kuamsha kitu cha `Apple Script`, hasa kuanzisha mteule wa `executeAndReturnError:`.
@@ -48,13 +48,13 @@ display dialog theDialogText
 
 ### Mfano wa Kanuni: Faili ya .xib Mbaya
 
-- Fikia na kagua [**mfano wa faili mbaya ya .xib**](https://gist.github.com/xpn/16bfbe5a3f64fedfcc1822d0562636b4) inayodhihirisha kuendesha kanuni zisizo na mipaka.
+- Fikia na kagua [**mfano wa faili ya .xib mbaya**](https://gist.github.com/xpn/16bfbe5a3f64fedfcc1822d0562636b4) inayodhihirisha utekelezaji wa kanuni zisizo na mipaka.
 
 ### Mfano Mwingine
 
 Katika chapisho [https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) unaweza kupata mafunzo juu ya jinsi ya kuunda nib mbaya.&#x20;
 
-### Kushughulikia Vikwazo vya Uzinduzi
+### Kukabiliana na Vikwazo vya Uzinduzi
 
 - Vikwazo vya Uzinduzi vinakwamisha utekelezaji wa programu kutoka maeneo yasiyotarajiwa (mfano, `/tmp`).
 - Inawezekana kubaini programu ambazo hazijalindwa na Vikwazo vya Uzinduzi na kuzilenga kwa ajili ya uingizaji wa faili ya NIB.

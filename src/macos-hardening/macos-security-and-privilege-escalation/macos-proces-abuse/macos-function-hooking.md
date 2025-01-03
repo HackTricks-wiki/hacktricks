@@ -78,11 +78,11 @@ DYLD_INSERT_LIBRARIES=./interpose2.dylib ./hello
 Hello from interpose
 ```
 > [!WARNING]
-> Kigezo cha mazingira **`DYLD_PRINT_INTERPOSTING`** kinaweza kutumika kutatua matatizo ya interposing na kitaandika mchakato wa interpose.
+> The **`DYLD_PRINT_INTERPOSTING`** env variable inaweza kutumika kutatua matatizo ya interposing na itachapisha mchakato wa interpose.
 
-Pia kumbuka kwamba **interposing inatokea kati ya mchakato na maktaba zilizopakiwa**, haifanyi kazi na cache ya maktaba ya pamoja.
+Pia kumbuka kwamba **interposing inatokea kati ya mchakato na maktaba zilizoloadiwa**, haifanyi kazi na cache ya maktaba ya pamoja.
 
-### Interposing ya Kijani
+### Dynamic Interposing
 
 Sasa pia inawezekana kuingiza kazi kwa njia ya dynamic kwa kutumia kazi **`dyld_dynamic_interpose`**. Hii inaruhusu kuingiza kazi kwa programu wakati wa utekelezaji badala ya kufanya hivyo tu kutoka mwanzoni.
 
@@ -106,7 +106,7 @@ Kitu ni **`someObject`**, njia ni **`@selector(method1p1:p2:)`** na hoja ni **va
 Kufuata muundo wa vitu, inawezekana kufikia **array ya njia** ambapo **majina** na **viashiria** vya msimbo wa njia viko **pamoja**.
 
 > [!CAUTION]
-> Kumbuka kwamba kwa sababu njia na madarasa yanapatikana kulingana na majina yao, taarifa hii inahifadhiwa katika binary, hivyo inawezekana kuipata kwa `otool -ov </path/bin>` au [`class-dump </path/bin>`](https://github.com/nygard/class-dump)
+> Kumbuka kwamba kwa sababu njia na madarasa yanaccessiwa kulingana na majina yao, taarifa hii inahifadhiwa katika binary, hivyo inawezekana kuipata kwa `otool -ov </path/bin>` au [`class-dump </path/bin>`](https://github.com/nygard/class-dump)
 
 ### Accessing the raw methods
 
@@ -176,12 +176,12 @@ NSLog(@"Uppercase string: %@", uppercaseString3);
 return 0;
 }
 ```
-### Method Swizzling na method_exchangeImplementations
+### Method Swizzling with method_exchangeImplementations
 
 Kazi **`method_exchangeImplementations`** inaruhusu **kubadilisha** **anwani** ya **utekelezaji** wa **kazi moja kwa nyingine**.
 
 > [!CAUTION]
-> Hivyo wakati kazi inaitwa kile kinachofanywa ni **kingine**.
+> Hivyo wakati kazi inaitwa kile kinachokuwa **kinatekelezwa ni nyingine**.
 ```objectivec
 //gcc -framework Foundation swizzle_str.m -o swizzle_str
 
@@ -226,7 +226,7 @@ return 0;
 }
 ```
 > [!WARNING]
-> Katika kesi hii ikiwa **kanuni ya utekelezaji ya halali** inachunguza **jina la mbinu** inaweza **gundua** hii swizzling na kuzuia isifanye kazi.
+> Katika kesi hii ikiwa **kanuni ya utekelezaji ya halali** inakagua **jina la mbinu** inaweza **gundua** hii swizzling na kuzuia isifanye kazi.
 >
 > Mbinu ifuatayo haina kizuizi hiki.
 
@@ -234,7 +234,7 @@ return 0;
 
 Muundo wa awali ni wa ajabu kwa sababu unabadilisha utekelezaji wa mbinu 2 kutoka kwa nyingine. Kwa kutumia kazi **`method_setImplementation`** unaweza **kubadilisha** **utekelezaji** wa **mbinu kwa nyingine**.
 
-Kumbuka tu **kuhifadhi anwani ya utekelezaji wa ile ya awali** ikiwa unakusudia kuitwa kutoka kwa utekelezaji mpya kabla ya kuandika tena kwa sababu baadaye itakuwa ngumu zaidi kupata anwani hiyo.
+Kumbuka tu **kuhifadhi anwani ya utekelezaji wa ile ya asili** ikiwa unakusudia kuitwa kutoka kwa utekelezaji mpya kabla ya kuandika juu yake kwa sababu baadaye itakuwa ngumu zaidi kupata anwani hiyo.
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
@@ -290,13 +290,13 @@ return 0;
 
 Katika ukurasa huu njia tofauti za kuhooki kazi zilijadiliwa. Hata hivyo, zilihusisha **kukimbia msimbo ndani ya mchakato ili kushambulia**.
 
-Ili kufanya hivyo, mbinu rahisi zaidi ya kutumia ni kuingiza [Dyld kupitia mabadiliko ya mazingira au kuhamasisha](macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md). Hata hivyo, nadhani hii inaweza pia kufanywa kupitia [Dylib process injection](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port).
+Ili kufanya hivyo, mbinu rahisi zaidi ya kutumia ni kuingiza [Dyld kupitia mabadiliko ya mazingira au hijacking](macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md). Hata hivyo, nadhani hii inaweza pia kufanywa kupitia [Dylib process injection](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port).
 
 Hata hivyo, chaguo zote mbili ni **za mipaka** kwa **binaries/mchakato zisizo na ulinzi**. Angalia kila mbinu ili kujifunza zaidi kuhusu mipaka.
 
-Hata hivyo, shambulio la kuhooki kazi ni maalum sana, mshambuliaji atafanya hivi ili **kuchukua taarifa nyeti kutoka ndani ya mchakato** (ikiwa sivyo ungeweza tu kufanya shambulio la kuingiza mchakato). Na taarifa hii nyeti inaweza kuwa katika programu zilizopakuliwa na mtumiaji kama MacPass.
+Hata hivyo, shambulio la hooking la kazi ni maalum sana, mshambuliaji atafanya hivi ili **kuchukua taarifa nyeti kutoka ndani ya mchakato** (ikiwa sivyo ungeweza tu kufanya shambulio la kuingiza mchakato). Na taarifa hii nyeti inaweza kuwa katika programu zilizopakuliwa na mtumiaji kama MacPass.
 
-Hivyo, njia ya mshambuliaji itakuwa ama kupata udhaifu au kuondoa saini ya programu, kuingiza **`DYLD_INSERT_LIBRARIES`** mabadiliko ya mazingira kupitia Info.plist ya programu kwa kuongeza kitu kama:
+Hivyo, njia ya mshambuliaji itakuwa ama kupata udhaifu au kuondoa saini ya programu, kuingiza **`DYLD_INSERT_LIBRARIES`** env variable kupitia Info.plist ya programu kwa kuongeza kitu kama:
 ```xml
 <key>LSEnvironment</key>
 <dict>
@@ -308,10 +308,10 @@ na kisha **re-register** programu hiyo:
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f /Applications/Application.app
 ```
-Ongeza katika maktaba hiyo msimbo wa hooking ili kutoa taarifa: Nywila, ujumbe...
+Ongeza katika maktaba hiyo msimbo wa hooking ili kuhamasisha taarifa: Nywila, ujumbe...
 
 > [!CAUTION]
-> Kumbuka kwamba katika matoleo mapya ya macOS ikiwa **unafuta saini** ya binary ya programu na ilikuwa imefanywa kazi hapo awali, macOS **haitakuwa ikifanya kazi programu hiyo** tena.
+> Kumbuka kwamba katika matoleo mapya ya macOS ikiwa **unafuta saini** ya binary ya programu na ilikuwa imefanywa awali, macOS **haitakuwa ikitekeleza programu** tena.
 
 #### Mfano wa maktaba
 ```objectivec
@@ -349,7 +349,7 @@ IMP fake_IMP = (IMP)custom_setPassword;
 real_setPassword = method_setImplementation(real_Method, fake_IMP);
 }
 ```
-## Marejeleo
+## Marejeo
 
 - [https://nshipster.com/method-swizzling/](https://nshipster.com/method-swizzling/)
 

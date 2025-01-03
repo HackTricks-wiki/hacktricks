@@ -10,11 +10,11 @@ Ufafanuzi umeainishwa katika Lugha ya Ufafanuzi wa Kiolesura (IDL) kwa kutumia k
 
 Mfafanuzi hawa wana sehemu 5:
 
-- **Tangazo la Subsystem**: Neno muhimu la subsystem linatumika kuashiria **jina** na **kitambulisho**. Pia inawezekana kuashiria kama **`KernelServer`** ikiwa server inapaswa kukimbia katika kernel.
+- **Tangazo la subsistem**: Neno muhimu subsistem linatumika kuashiria **jina** na **id**. Pia inawezekana kuashiria kama **`KernelServer`** ikiwa server inapaswa kukimbia katika kernel.
 - **Injilizi na uagizaji**: MIG inatumia C-preprocessor, hivyo ina uwezo wa kutumia uagizaji. Aidha, inawezekana kutumia `uimport` na `simport` kwa msimbo ulioandikwa na mtumiaji au server.
-- **Matangazo ya Aina**: Inawezekana kufafanua aina za data ingawa kwa kawaida itauagiza `mach_types.defs` na `std_types.defs`. Kwa zile za kawaida baadhi ya sintaks inaweza kutumika:
-- \[i`n/out]tran`: Kazi inayohitaji kutafsiriwa kutoka ujumbe unaoingia au kwenda nje
-- `c[user/server]type`: Mchoro wa aina nyingine ya C.
+- **Matangazo ya aina**: Inawezekana kufafanua aina za data ingawa kawaida itauagiza `mach_types.defs` na `std_types.defs`. Kwa aina za kawaida baadhi ya sintaks inaweza kutumika:
+- \[i`n/out]tran`: Kazi inayohitaji kutafsiriwa kutoka ujumbe unaoingia au kwenda ujumbe unaotoka
+- `c[user/server]type`: Ramani kwa aina nyingine ya C.
 - `destructor`: Piga simu kazi hii wakati aina inachukuliwa.
 - **Operesheni**: Hizi ni ufafanuzi wa mbinu za RPC. Kuna aina 5 tofauti:
 - `routine`: Inatarajia jibu
@@ -25,7 +25,7 @@ Mfafanuzi hawa wana sehemu 5:
 
 ### Example
 
-Unda faili ya ufafanuzi, katika kesi hii na kazi rahisi sana:
+Create a definition file, in this case with a very simple function:
 ```cpp:myipc.defs
 subsystem myipc 500; // Arbitrary name and id
 
@@ -104,7 +104,7 @@ return 0;
 return SERVERPREFmyipc_subsystem.routine[msgh_id].stub_routine;
 }
 ```
-Katika mfano huu tumefafanua tu kazi 1 katika maelezo, lakini kama tungeweza kufafanua kazi zaidi, zingekuwa ndani ya array ya **`SERVERPREFmyipc_subsystem`** na ya kwanza ingekuwa imepewa ID **500**, ya pili ingekuwa na ID **501**...
+Katika mfano huu tumefafanua tu kazi 1 katika ufafanuzi, lakini kama tungeweza kufafanua kazi zaidi, zingekuwa ndani ya array ya **`SERVERPREFmyipc_subsystem`** na ya kwanza ingekuwa imepewa ID **500**, ya pili ingekuwa na ID **501**...
 
 Ikiwa kazi ilitarajiwa kutuma **reply** kazi `mig_internal kern_return_t __MIG_check__Reply__<name>` pia ingekuwepo.
 
@@ -149,7 +149,7 @@ return FALSE;
 }
 </code></pre>
 
-Angalia mistari iliyosisitizwa hapo awali inayofikia kazi ya kuita kwa ID.
+Angalia mistari iliyosisitizwa hapo awali inayoingia kwenye kazi ya kuita kwa ID.
 
 Ifuatayo ni msimbo wa kuunda **seva** na **mteja** ambapo mteja anaweza kuita kazi ya Kupunguza kutoka kwa seva:
 
@@ -235,13 +235,13 @@ Kama binaries nyingi sasa zinatumia MIG kufichua mach ports, ni ya kuvutia kujua
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
-Zaidi ya hayo, kazi za MIG ni vifungashio vya kazi halisi inayoitwa, ambayo inamaanisha kwamba kupata usambazaji wake na kutafuta BL unaweza kukusaidia kupata kazi halisi inayoitwa:
+Zaidi ya hayo, kazi za MIG ni vifungashio vya kazi halisi inayoitwa, ambayo inamaanisha kwamba kupata usambazaji wake na kutafuta BL unaweza kukuwezesha kupata kazi halisi inayoitwa:
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep BL
 ```
 ### Assembly
 
-Ilielezwa awali kwamba kazi ambayo itashughulikia **kuita kazi sahihi kulingana na kitambulisho cha ujumbe kilichopokelewa** ilikuwa `myipc_server`. Hata hivyo, kwa kawaida hutakuwa na alama za binary (hakuna majina ya kazi), hivyo ni ya kuvutia **kuangalia jinsi inavyoonekana baada ya kutafsiriwa** kwani itakuwa karibu sawa kila wakati (kanuni ya kazi hii ni huru kutoka kwa kazi zilizowekwa):
+Ilielezwa awali kwamba kazi ambayo itashughulikia **kuita kazi sahihi kulingana na kitambulisho cha ujumbe kilichopokelewa** ilikuwa `myipc_server`. Hata hivyo, kwa kawaida hutakuwa na alama za binary (hakuna majina ya kazi), hivyo ni ya kuvutia **kuangalia jinsi inavyoonekana baada ya kutafsiriwa** kwani itakuwa karibu sana (kanuni ya kazi hii ni huru kutoka kwa kazi zilizowekwa):
 
 {{#tabs}}
 {{#tab name="myipc_server decompiled 1"}}
@@ -259,7 +259,7 @@ var_18 = arg1;
 if (*(int32_t *)(var_10 + 0x14) &#x3C;= 0x1f4 &#x26;&#x26; *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
 rax = *(int32_t *)(var_10 + 0x14);
 // Kuitisha sign_extend_64 ambayo inaweza kusaidia kutambua kazi hii
-// Hii inahifadhi katika rax kiashiria cha wito ambacho kinahitaji kuitwa
+// Hii inahifadhi katika rax kiashiria cha simu ambacho kinahitaji kuitwa
 // Angalia matumizi ya anwani 0x100004040 (array ya anwani za kazi)
 // 0x1f4 = 500 (kitambulisho cha kuanzia)
 <strong>            rax = *(sign_extend_64(rax - 0x1f4) * 0x28 + 0x100004040);
@@ -271,7 +271,7 @@ rax = *(int32_t *)(var_10 + 0x14);
 var_4 = 0x0;
 }
 else {
-// Anwani iliyokadiriwa inayoiita kazi sahihi na hoja 2
+// Anwani iliyohesabiwa inayoiita kazi sahihi na hoja 2
 <strong>                    (var_20)(var_10, var_18);
 </strong>                    var_4 = 0x1;
 }
@@ -340,7 +340,7 @@ r8 = 0x1;
 var_4 = 0x0;
 }
 else {
-// Wito kwa anwani iliyokadiriwa ambapo kazi inapaswa kuwa
+// Kuitisha anwani iliyohesabiwa ambapo kazi inapaswa kuwa
 <strong>                            (var_20)(var_10, var_18);
 </strong>                            var_4 = 0x1;
 }

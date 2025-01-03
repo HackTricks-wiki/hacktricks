@@ -9,8 +9,8 @@ Ruhusa katika **directory**:
 - **kusoma** - unaweza **kuorodhesha** entries za directory
 - **kuandika** - unaweza **kufuta/kuandika** **files** katika directory na unaweza **kufuta folda tupu**.
 - Lakini huwezi **kufuta/kubadilisha folda zisizo tupu** isipokuwa una ruhusa za kuandika juu yake.
-- Huwezi **kubadilisha jina la folda** isipokuwa umiliki.
-- **kutekeleza** - ume **ruhusiwa kupita** directory - ikiwa huna haki hii, huwezi kufikia files zozote ndani yake, au katika subdirectories zozote.
+- Huwezi **kubadilisha jina la folda** isipokuwa unamiliki.
+- **kutekeleza** - ume **ruhusiwa kupita** katika directory - ikiwa huna haki hii, huwezi kufikia files zozote ndani yake, au katika subdirectories zozote.
 
 ### Mchanganyiko Hatari
 
@@ -20,29 +20,29 @@ Ruhusa katika **directory**:
 - Mmiliki mmoja wa **directory** katika njia ni **kikundi cha watumiaji** chenye **ruhusa za kuandika**
 - Kikundi cha watumiaji kina **ruhusa za kuandika** kwa **file**
 
-Kwa mchanganyiko wowote wa hapo juu, mshambuliaji anaweza **kuingiza** **sym/hard link** kwenye njia inayotarajiwa ili kupata kuandika kwa kibali bila mipaka.
+Kwa mchanganyiko wowote wa hapo juu, mshambuliaji anaweza **kuingiza** **sym/hard link** kwenye njia inayotarajiwa ili kupata kuandika kwa kibali bila kikomo.
 
-### Kesi Maalum ya Folder root R+X
+### Kesi Maalum ya Folda root R+X
 
 Ikiwa kuna files katika **directory** ambapo **ni root pekee mwenye R+X access**, hizo **hazipatikani kwa mtu mwingine yeyote**. Hivyo, udhaifu unaoruhusu **kuhamasisha file inayoweza kusomwa na mtumiaji**, ambayo haiwezi kusomwa kwa sababu ya **kizuizi** hicho, kutoka folda hii **kwenda nyingine**, unaweza kutumiwa kusoma files hizi.
 
 Mfano katika: [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions)
 
-## Link ya Alama / Link ngumu
+## Link ya Alama / Link ya Ngumu
 
 ### File/folda yenye ruhusa
 
-Ikiwa mchakato wenye kibali unaandika data katika **file** ambayo inaweza **kudhibitiwa** na **mtumiaji mwenye ruhusa ya chini**, au ambayo inaweza **kuundwa awali** na mtumiaji mwenye ruhusa ya chini. Mtumiaji anaweza tu **kuielekeza kwa file nyingine** kupitia Link ya Alama au Link ngumu, na mchakato wenye kibali utaandika kwenye file hiyo.
+Ikiwa mchakato wenye kibali unaandika data katika **file** ambayo inaweza **kudhibitiwa** na **mtumiaji mwenye ruhusa ya chini**, au ambayo inaweza **kuundwa awali** na mtumiaji mwenye ruhusa ya chini. Mtumiaji anaweza tu **kuielekeza kwenye file nyingine** kupitia Link ya Alama au Link ya Ngumu, na mchakato wenye kibali utaandika kwenye file hiyo.
 
-Angalia katika sehemu nyingine ambapo mshambuliaji anaweza **kutilia shaka kuandika bila mipaka ili kupandisha ruhusa**.
+Angalia katika sehemu nyingine ambapo mshambuliaji anaweza **kutilia shaka kuandika bila kikomo ili kupandisha ruhusa**.
 
-### Fungua `O_NOFOLLOW`
+### Funguo `O_NOFOLLOW`
 
-Bendera `O_NOFOLLOW` inapokuwa inatumika na kazi `open` haitafuata symlink katika kipengele cha mwisho cha njia, lakini itafuata sehemu nyingine za njia. Njia sahihi ya kuzuia kufuata symlinks katika njia ni kwa kutumia bendera `O_NOFOLLOW_ANY`.
+Funguo `O_NOFOLLOW` inapokuwa inatumika na kazi `open` haitafuata symlink katika kipengele cha mwisho cha njia, lakini itafuata sehemu nyingine za njia. Njia sahihi ya kuzuia kufuata symlinks katika njia ni kwa kutumia funguo `O_NOFOLLOW_ANY`.
 
 ## .fileloc
 
-Files zenye kiambatisho **`.fileloc`** zinaweza kuelekeza kwenye programu nyingine au binaries hivyo wakati zinapofunguliwa, programu/binary itakuwa ndiyo itakayotekelezwa.\
+Files zenye kiambishi **`.fileloc`** zinaweza kuelekeza kwenye programu nyingine au binaries hivyo wakati zinapofunguliwa, programu/binary itakuwa ndiyo itakayotekelezwa.\
 Mfano:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -60,9 +60,9 @@ Mfano:
 
 ### Leak FD (no `O_CLOEXEC`)
 
-Ikiwa wito wa `open` haina bendera `O_CLOEXEC`, file descriptor itarithiwa na mchakato wa mtoto. Hivyo, ikiwa mchakato wenye mamlaka unafungua faili yenye mamlaka na kutekeleza mchakato unaodhibitiwa na mshambuliaji, mshambuliaji atakuwa **na FD juu ya faili yenye mamlaka**.
+Ikiwa wito wa `open` haina bendera `O_CLOEXEC`, desktop ya faili itarithiwa na mchakato wa mtoto. Hivyo, ikiwa mchakato wenye mamlaka unafungua faili yenye mamlaka na kutekeleza mchakato unaodhibitiwa na mshambuliaji, mshambuliaji atakuwa **na FD juu ya faili yenye mamlaka**.
 
-Ikiwa unaweza kufanya **mchakato ufungue faili au folda yenye mamlaka ya juu**, unaweza kutumia **`crontab`** kufungua faili katika `/etc/sudoers.d` na **`EDITOR=exploit.py`**, hivyo `exploit.py` itapata FD kwa faili ndani ya `/etc/sudoers` na kuifanya iweze kutumika.
+Ikiwa unaweza kufanya **mchakato ufungue faili au folda zenye mamlaka ya juu**, unaweza kutumia **`crontab`** kufungua faili katika `/etc/sudoers.d` na **`EDITOR=exploit.py`**, hivyo `exploit.py` itapata FD kwa faili ndani ya `/etc/sudoers` na kuifanya.
 
 Kwa mfano: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098), code: https://github.com/gergelykalman/CVE-2023-32428-a-macOS-LPE-via-MallocStackLogging
 
@@ -156,7 +156,7 @@ macos-xattr-acls-extra-stuff.md
 
 ### Kupita ukaguzi wa binaries za jukwaa
 
-Baadhi ya ukaguzi wa usalama huangalia kama binary ni **binary ya jukwaa**, kwa mfano kuruhusu kuungana na huduma ya XPC. Hata hivyo, kama ilivyoonyeshwa katika kupita kwenye https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/, inawezekana kupita ukaguzi huu kwa kupata binary ya jukwaa (kama /bin/ls) na kuingiza exploit kupitia dyld kwa kutumia variable ya mazingira `DYLD_INSERT_LIBRARIES`.
+Baadhi ya ukaguzi wa usalama huangalia kama binary ni **binary ya jukwaa**, kwa mfano kuruhusu kuungana na huduma ya XPC. Hata hivyo, kama ilivyoelezwa katika kupita kwenye https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/, inawezekana kupita ukaguzi huu kwa kupata binary ya jukwaa (kama /bin/ls) na kuingiza exploit kupitia dyld kwa kutumia variable ya mazingira `DYLD_INSERT_LIBRARIES`.
 
 ### Kupita bendera `CS_REQUIRE_LV` na `CS_FORCED_LV`
 
@@ -278,23 +278,23 @@ Andika **LaunchDaemon** ya kiholela kama **`/Library/LaunchDaemons/xyz.hacktrick
 </dict>
 </plist>
 ```
-Tuunda tu skripti `/Applications/Scripts/privesc.sh` na **amri** unazotaka kuendesha kama root.
+Just generate the script `/Applications/Scripts/privesc.sh` with the **commands** you would like to run as root.
 
-### Faili la Sudoers
+### Sudoers File
 
-Ikiwa una **kuandika bila mipaka**, unaweza kuunda faili ndani ya folda **`/etc/sudoers.d/`** ukijipa **mamlaka ya sudo**.
+If you have **arbitrary write**, you could create a file inside the folder **`/etc/sudoers.d/`** granting yourself **sudo** privileges.
 
-### Faili za PATH
+### PATH files
 
-Faili **`/etc/paths`** ni moja ya maeneo makuu yanayojaza variable ya mazingira ya PATH. Lazima uwe root ili kuandika tena, lakini ikiwa skripti kutoka **mchakato wenye mamlaka** inatekeleza **amri bila njia kamili**, unaweza kuwa na uwezo wa **kudhibiti** kwa kubadilisha faili hili.
+The file **`/etc/paths`** is one of the main places that populates the PATH env variable. You must be root to overwrite it, but if a script from **privileged process** is executing some **command without the full path**, you might be able to **hijack** it modifying this file.
 
-Pia unaweza kuandika faili katika **`/etc/paths.d`** ili kupakia folda mpya kwenye variable ya mazingira ya `PATH`.
+You can also write files in **`/etc/paths.d`** to load new folders into the `PATH` env variable.
 
 ### cups-files.conf
 
-Teknolojia hii ilitumika katika [hiki andiko](https://www.kandji.io/blog/macos-audit-story-part1).
+Hii mbinu ilitumika katika [this writeup](https://www.kandji.io/blog/macos-audit-story-part1).
 
-Unda faili `/etc/cups/cups-files.conf` na maudhui yafuatayo:
+Create the file `/etc/cups/cups-files.conf` with the following content:
 ```
 ErrorLog /etc/sudoers.d/lpe
 LogFilePerm 777
@@ -326,7 +326,7 @@ echo $FILENAME
 ```
 ## POSIX Shared Memory
 
-**POSIX shared memory** inaruhusu michakato katika mifumo ya uendeshaji inayokubaliana na POSIX kufikia eneo la kawaida la kumbukumbu, ikirahisisha mawasiliano ya haraka ikilinganishwa na mbinu nyingine za mawasiliano kati ya michakato. Inahusisha kuunda au kufungua kitu cha kumbukumbu ya pamoja kwa kutumia `shm_open()`, kuweka ukubwa wake kwa `ftruncate()`, na kuunganisha katika nafasi ya anwani ya mchakato kwa kutumia `mmap()`. Michakato inaweza kisha kusoma moja kwa moja kutoka na kuandika kwenye eneo hili la kumbukumbu. Ili kudhibiti ufikiaji wa pamoja na kuzuia uharibifu wa data, mitambo ya usawazishaji kama vile mutexes au semaphores mara nyingi hutumiwa. Hatimaye, michakato inafuta na kufunga kumbukumbu ya pamoja kwa kutumia `munmap()` na `close()`, na kwa hiari kuondoa kitu cha kumbukumbu kwa kutumia `shm_unlink()`. Mfumo huu ni wa ufanisi hasa kwa IPC ya haraka na yenye ufanisi katika mazingira ambapo michakato mingi inahitaji kufikia data ya pamoja kwa haraka.
+**POSIX shared memory** inaruhusu michakato katika mifumo ya uendeshaji inayokubaliana na POSIX kufikia eneo la kawaida la kumbukumbu, ikirahisisha mawasiliano ya haraka ikilinganishwa na mbinu nyingine za mawasiliano kati ya michakato. Inahusisha kuunda au kufungua kitu cha kumbukumbu ya pamoja kwa kutumia `shm_open()`, kuweka ukubwa wake kwa `ftruncate()`, na kuunganisha katika nafasi ya anwani ya mchakato kwa kutumia `mmap()`. Michakato inaweza kisha kusoma moja kwa moja kutoka na kuandika kwenye eneo hili la kumbukumbu. Ili kudhibiti ufikiaji wa pamoja na kuzuia uharibifu wa data, mitambo ya usawazishaji kama vile mutexes au semaphores mara nyingi hutumiwa. Hatimaye, michakato inafuta na kufunga kumbukumbu ya pamoja kwa kutumia `munmap()` na `close()`, na kwa hiari kuondoa kitu cha kumbukumbu kwa kutumia `shm_unlink()`. Mfumo huu ni wa ufanisi hasa kwa IPC yenye ufanisi na haraka katika mazingira ambapo michakato mingi inahitaji kufikia data ya pamoja kwa haraka.
 
 <details>
 

@@ -6,7 +6,7 @@
 
 Kifurushi cha **installer** cha macOS (pia kinachojulikana kama faili `.pkg`) ni muundo wa faili unaotumiwa na macOS ku **distribute software**. Faili hizi ni kama **sanduku linaloshikilia kila kitu ambacho kipande cha software** kinahitaji ili kufunga na kufanya kazi ipasavyo.
 
-Faili la kifurushi lenyewe ni archive inayoshikilia **hifadhi ya faili na directories ambazo zitawekwa kwenye kompyuta ya lengo**. Inaweza pia kujumuisha **scripts** za kutekeleza kazi kabla na baada ya ufungaji, kama vile kuandaa faili za usanidi au kusafisha toleo za zamani za software.
+Faili la kifurushi lenyewe ni archive inayoshikilia **hifadhi ya faili na directories ambazo zitawekwa kwenye kompyuta ya lengo**. Pia linaweza kujumuisha **scripts** za kutekeleza kazi kabla na baada ya ufungaji, kama vile kuandaa faili za usanidi au kusafisha toleo za zamani za software.
 
 ### Hierarchy
 
@@ -32,14 +32,14 @@ xar -xf "/path/to/package.pkg"
 cat Scripts | gzip -dc | cpio -i
 cpio -i < Scripts
 ```
-Ili kuona maudhui ya installer bila kuyakandamiza kwa mikono, unaweza pia kutumia zana ya bure [**Suspicious Package**](https://mothersruin.com/software/SuspiciousPackage/).
+Ili kuona maudhui ya mfunguo bila kuyakandamiza kwa mikono, unaweza pia kutumia zana ya bure [**Suspicious Package**](https://mothersruin.com/software/SuspiciousPackage/).
 
 ## Taarifa za Msingi za DMG
 
 Faili za DMG, au Picha za Disk za Apple, ni muundo wa faili unaotumiwa na macOS ya Apple kwa picha za diski. Faili ya DMG kimsingi ni **picha ya diski inayoweza kuunganishwa** (ina mfumo wake wa faili) ambayo ina data ya block mbichi ambayo mara nyingi imepandishwa na wakati mwingine imefungwa. Unapofungua faili ya DMG, macOS **inaunganisha kama vile ilikuwa diski halisi**, ikikuruhusu kufikia maudhui yake.
 
 > [!CAUTION]
-> Kumbuka kwamba **`.dmg`** installers zinasaidia **format nyingi sana** kwamba katika siku za nyuma baadhi yao zikiwa na udhaifu zilikuwa zikitumiwa kupata **utendaji wa msimbo wa kernel**.
+> Kumbuka kwamba **`.dmg`** waunganishaji wanaunga mkono **format nyingi sana** kwamba katika siku za nyuma baadhi yao walikuwa na udhaifu na kutumiwa kupata **utendaji wa msimbo wa kernel**.
 
 ### Hifadhi
 
@@ -49,7 +49,7 @@ Hifadhi ya faili ya DMG inaweza kuwa tofauti kulingana na maudhui. Hata hivyo, k
 
 - Kiwango cha Juu: Hii ni mzizi wa picha ya diski. Mara nyingi ina programu na labda kiungo kwa folda ya Maombi.
 - Programu (.app): Hii ni programu halisi. Katika macOS, programu kawaida ni kifurushi kinachojumuisha faili na folda nyingi zinazounda programu hiyo.
-- Kiungo cha Maombi: Hii ni njia fupi kwa folda ya Maombi katika macOS. Kusudi la hii ni kukurahisishia kufunga programu. Unaweza kuvuta faili ya .app kwenye njia fupi hii ili kufunga programu.
+- Kiungo cha Maombi: Hii ni njia fupi kwa folda ya Maombi katika macOS. Kusudi la hii ni kurahisisha wewe kufunga programu. Unaweza kuvuta faili ya .app kwenye njia fupi hii ili kufunga programu.
 
 ## Privesc kupitia matumizi ya pkg
 
@@ -61,7 +61,7 @@ Ikiwa skripti ya kabla au baada ya ufungaji inatekelezwa kutoka **`/var/tmp/Inst
 
 ### AuthorizationExecuteWithPrivileges
 
-Hii ni [kazi ya umma](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg) ambayo waunganishaji na wasasishaji wengi wataita ili **kutekeleza kitu kama root**. Kazi hii inakubali **njia** ya **faili** ya **kutekeleza** kama parameter, hata hivyo, ikiwa mshambuliaji anaweza **kubadilisha** faili hii, ataweza **kutumia** utekelezaji wake na root ili **kupandisha mamlaka**.
+Hii ni [kazi ya umma](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg) ambayo waunganishaji na wasasishaji kadhaa wataita ili **kutekeleza kitu kama root**. Kazi hii inakubali **njia** ya **faili** ya **kutekeleza** kama parameter, hata hivyo, ikiwa mshambuliaji anaweza **kubadilisha** faili hii, ataweza **kutumia** utekelezaji wake na root ili **kupandisha mamlaka**.
 ```bash
 # Breakpoint in the function to check wich file is loaded
 (lldb) b AuthorizationExecuteWithPrivileges
@@ -71,7 +71,7 @@ Kwa maelezo zaidi angalia hii hotuba: [https://www.youtube.com/watch?v=lTOItyjTT
 
 ### Utekelezaji kwa kupandisha
 
-Ikiwa mfunguo unandika kwenye `/tmp/fixedname/bla/bla`, inawezekana **kuunda mount** juu ya `/tmp/fixedname` bila wamiliki ili uweze **kubadilisha faili yoyote wakati wa ufungaji** ili kutumia mchakato wa ufungaji.
+Ikiwa mfunguo wa programu unaandika kwenye `/tmp/fixedname/bla/bla`, inawezekana **kuunda mount** juu ya `/tmp/fixedname` bila wamiliki ili uweze **kubadilisha faili yoyote wakati wa usakinishaji** ili kutumia mchakato wa usakinishaji.
 
 Mfano wa hili ni **CVE-2021-26089** ambayo ilifanikiwa **kufuta script ya kawaida** ili kupata utekelezaji kama root. Kwa maelezo zaidi angalia hotuba: [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)
 
@@ -79,15 +79,15 @@ Mfano wa hili ni **CVE-2021-26089** ambayo ilifanikiwa **kufuta script ya kawaid
 
 ### Payload Tupu
 
-Inawezekana tu kuzalisha faili **`.pkg`** yenye **pre and post-install scripts** bila payload halisi isipokuwa malware ndani ya scripts.
+Inawezekana tu kuzalisha faili **`.pkg`** yenye **scripts za kabla na baada ya usakinishaji** bila payload halisi isipokuwa malware ndani ya scripts.
 
-### JS katika distribution xml
+### JS katika xml ya Usambazaji
 
-Inawezekana kuongeza **`<script>`** tags katika faili **distribution xml** ya kifurushi na hiyo code itatekelezwa na inaweza **kutekeleza amri** kwa kutumia **`system.run`**:
+Inawezekana kuongeza **`<script>`** tags katika faili **xml ya usambazaji** ya kifurushi na hiyo code itatekelezwa na inaweza **kutekeleza amri** kwa kutumia **`system.run`**:
 
 <figure><img src="../../../images/image (1043).png" alt=""><figcaption></figcaption></figure>
 
-### Mfunguo wa Nyuma
+### Mfunguo wa Programu wa Nyuma
 
 Mfunguo mbaya ukitumia script na JS code ndani ya dist.xml
 ```bash
@@ -152,7 +152,7 @@ productbuild --distribution dist.xml --package-path myapp.pkg final-installer.pk
 ```
 ## Marejeo
 
-- [**DEF CON 27 - Kufungua Pkgs Kuangalia Ndani ya Macos Installer Packages na Mapungufu ya Usalama ya Kawaida**](https://www.youtube.com/watch?v=iASSG0_zobQ)
+- [**DEF CON 27 - Kufungua Pkgs Kuangalia Ndani ya Macos Installer Packages na Mapungufu ya Kawaida ya Usalama**](https://www.youtube.com/watch?v=iASSG0_zobQ)
 - [**OBTS v4.0: "Ulimwengu wa Kijani wa macOS Installers" - Tony Lambert**](https://www.youtube.com/watch?v=Eow5uNHtmIg)
 - [**DEF CON 27 - Kufungua Pkgs Kuangalia Ndani ya MacOS Installer Packages**](https://www.youtube.com/watch?v=kCXhIYtODBg)
 - [https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages](https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages)

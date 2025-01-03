@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Hii ni muhtasari wa posti [https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/](https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/). Angalia kwa maelezo zaidi!**
+**Hii ni muhtasari wa chapisho [https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/](https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/). Angalia kwa maelezo zaidi!**
 
 ## .NET Core Debugging <a href="#net-core-debugging" id="net-core-debugging"></a>
 
@@ -54,7 +54,7 @@ read(rd, &sReceiveHeader, sizeof(MessageHeader));
 ```
 ## Kusoma Kumbukumbu
 
-Mara tu kikao cha ufuatiliaji kimeanzishwa, kumbukumbu inaweza kusomwa kwa kutumia aina ya ujumbe [`MT_ReadMemory`](https://github.com/dotnet/runtime/blob/f3a45a91441cf938765bafc795cbf4885cad8800/src/coreclr/src/debug/shared/dbgtransportsession.cpp#L1896). Kazi readMemory inaelezewa kwa undani, ikifanya hatua zinazohitajika kutuma ombi la kusoma na kupata jibu:
+Mara tu kikao cha ufuatiliaji kimeanzishwa, kumbukumbu inaweza kusomwa kwa kutumia ujumbe wa [`MT_ReadMemory`](https://github.com/dotnet/runtime/blob/f3a45a91441cf938765bafc795cbf4885cad8800/src/coreclr/src/debug/shared/dbgtransportsession.cpp#L1896) aina. Kazi readMemory inaelezewa kwa undani, ikifanya hatua zinazohitajika kutuma ombi la kusoma na kupata jibu:
 ```c
 bool readMemory(void *addr, int len, unsigned char **output) {
 // Allocation and initialization
@@ -66,7 +66,7 @@ bool readMemory(void *addr, int len, unsigned char **output) {
 return true;
 }
 ```
-Dhibitisho kamili la dhana (POC) linapatikana [hapa](https://gist.github.com/xpn/95eefc14918998853f6e0ab48d9f7b0b).
+Uthibitisho kamili wa dhana (POC) upo [hapa](https://gist.github.com/xpn/95eefc14918998853f6e0ab48d9f7b0b).
 
 ## Kuandika Kumbukumbu
 
@@ -91,11 +91,11 @@ Ili kutekeleza msimbo, mtu anahitaji kubaini eneo la kumbukumbu lenye ruhusa za 
 vmmap -pages [pid]
 vmmap -pages 35829 | grep "rwx/rwx"
 ```
-Kupata mahali pa kubadilisha kiashiria cha kazi ni muhimu, na katika .NET Core, hii inaweza kufanywa kwa kulenga **Dynamic Function Table (DFT)**. Meza hii, iliyoelezewa katika [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h), inatumika na runtime kwa kazi za msaada wa JIT compilation.
+Kupata mahali pa kubadilisha kiashiria cha kazi ni muhimu, na katika .NET Core, hii inaweza kufanywa kwa kulenga **Dynamic Function Table (DFT)**. Meza hii, iliyoelezwa katika [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h), inatumika na runtime kwa kazi za msaada wa JIT compilation.
 
 Kwa mifumo ya x64, utafutaji wa saini unaweza kutumika kupata rejeleo kwa alama `_hlpDynamicFuncTable` katika `libcorclr.dll`.
 
-Kazi ya debugger `MT_GetDCB` inatoa taarifa muhimu, ikiwa ni pamoja na anwani ya kazi ya msaada, `m_helperRemoteStartAddr`, ikionyesha mahali pa `libcorclr.dll` katika kumbukumbu ya mchakato. Anwani hii kisha inatumika kuanza utafutaji wa DFT na kubadilisha kiashiria cha kazi na anwani ya shellcode.
+Kazi ya debuggger `MT_GetDCB` inatoa taarifa muhimu, ikiwa ni pamoja na anwani ya kazi ya msaada, `m_helperRemoteStartAddr`, ikionyesha mahali pa `libcorclr.dll` katika kumbukumbu ya mchakato. Anwani hii kisha inatumika kuanza utafutaji wa DFT na kubadilisha kiashiria cha kazi na anwani ya shellcode.
 
 Msimbo kamili wa POC kwa sindano katika PowerShell unapatikana [hapa](https://gist.github.com/xpn/b427998c8b3924ab1d63c89d273734b6).
 

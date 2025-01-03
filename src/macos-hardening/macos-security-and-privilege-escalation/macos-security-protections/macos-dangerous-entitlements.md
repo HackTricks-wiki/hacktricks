@@ -9,11 +9,11 @@
 
 ### `com.apple.rootless.install.heritable`
 
-Entitlement **`com.apple.rootless.install.heritable`** inaruhusu **kupita SIP**. Angalia [hii kwa maelezo zaidi](macos-sip.md#com.apple.rootless.install.heritable).
+Entitlement **`com.apple.rootless.install.heritable`** inaruhusu **kuzidi SIP**. Angalia [hii kwa maelezo zaidi](macos-sip.md#com.apple.rootless.install.heritable).
 
 ### **`com.apple.rootless.install`**
 
-Entitlement **`com.apple.rootless.install`** inaruhusu **kupita SIP**. Angalia [hii kwa maelezo zaidi](macos-sip.md#com.apple.rootless.install).
+Entitlement **`com.apple.rootless.install`** inaruhusu **kuzidi SIP**. Angalia [hii kwa maelezo zaidi](macos-sip.md#com.apple.rootless.install).
 
 ### **`com.apple.system-task-ports` (iliyokuwa inaitwa `task_for_pid-allow`)**
 
@@ -21,11 +21,11 @@ Entitlement hii inaruhusu kupata **task port kwa mchakato wowote**, isipokuwa ke
 
 ### `com.apple.security.get-task-allow`
 
-Entitlement hii inaruhusu michakato mingine yenye entitlement **`com.apple.security.cs.debugger`** kupata task port ya mchakato unaotendwa na binary yenye entitlement hii na **kuingiza msimbo ndani yake**. Angalia [**hii kwa maelezo zaidi**](../macos-proces-abuse/macos-ipc-inter-process-communication/).
+Entitlement hii inaruhusu michakato mingine yenye entitlement **`com.apple.security.cs.debugger`** kupata task port ya mchakato unaotendewa na binary yenye entitlement hii na **kuingiza msimbo ndani yake**. Angalia [**hii kwa maelezo zaidi**](../macos-proces-abuse/macos-ipc-inter-process-communication/).
 
 ### `com.apple.security.cs.debugger`
 
-Apps zenye Entitlement ya Zana za Ufuatiliaji zinaweza kuita `task_for_pid()` ili kupata task port halali kwa apps zisizosainiwa na wahusika wengine zenye entitlement ya `Get Task Allow` iliyowekwa kuwa `true`. Hata hivyo, hata na entitlement ya zana za ufuatiliaji, debuggers **haziwezi kupata task ports** za michakato ambazo **hazina entitlement ya `Get Task Allow`**, na hivyo kulindwa na Ulinzi wa Uthibitisho wa Mfumo. Angalia [**hii kwa maelezo zaidi**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
+Apps zenye Entitlement ya Zana za Ufuatiliaji zinaweza kuita `task_for_pid()` ili kupata task port halali kwa apps zisizosainiwa na wahusika wengine zenye entitlement ya `Get Task Allow` iliyowekwa kuwa `true`. Hata hivyo, hata na entitlement ya zana za ufuatiliaji, debuggers **haziwezi kupata task ports** za michakato ambazo **hazina entitlement ya `Get Task Allow`**, na hivyo kulindwa na Ulinzi wa Uadilifu wa Mfumo. Angalia [**hii kwa maelezo zaidi**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
 
 ### `com.apple.security.cs.disable-library-validation`
 
@@ -33,7 +33,7 @@ Entitlement hii inaruhusu **kupakia frameworks, plug-ins, au maktaba bila kusain
 
 ### `com.apple.private.security.clear-library-validation`
 
-Entitlement hii ni sawa sana na **`com.apple.security.cs.disable-library-validation`** lakini **badala** ya **kuondoa** uthibitisho wa maktaba moja kwa moja, inaruhusu mchakato **kuita `csops` system call kuondoa**.\
+Entitlement hii ni sawa sana na **`com.apple.security.cs.disable-library-validation`** lakini **badala** ya **kuondoa** uthibitishaji wa maktaba moja kwa moja, inaruhusu mchakato **kuita `csops` system call kuondoa**.\
 Angalia [**hii kwa maelezo zaidi**](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/).
 
 ### `com.apple.security.cs.allow-dyld-environment-variables`
@@ -50,7 +50,7 @@ Entitlements hizi zinaruhusu **kufunga programu bila kuomba ruhusa** kwa mtumiaj
 
 ### `com.apple.private.security.kext-management`
 
-Entitlement inayohitajika kuomba **kernel kupakia nyongeza ya kernel**.
+Entitlement inayohitajika kuomba **kernel kupakia kiendelezi cha kernel**.
 
 ### **`com.apple.private.icloud-account-access`**
 
@@ -74,7 +74,7 @@ TODO: Katika [**ripoti hii**](https://jhftss.github.io/The-Nightmare-of-Apple-OT
 
 ### `keychain-access-groups`
 
-Entitlement hii inaorodhesha **makundi ya keychain** ambayo programu ina ufikiaji nayo:
+Entitlement hii inaorodhesha **makundi ya keychain** ambayo programu ina ufikiaji:
 ```xml
 <key>keychain-access-groups</key>
 <array>
@@ -109,7 +109,7 @@ Inaruhusu **kubadilisha** sifa ya **`NFSHomeDirectory`** ya mtumiaji ambayo inab
 
 ### **`kTCCServiceSystemPolicyAppBundles`**
 
-Inaruhusu kubadilisha faili ndani ya pakiti za programu (ndani ya app.app), ambayo **imezuiliwa kwa msingi**.
+Inaruhusu kubadilisha faili ndani ya pakiti za programu (ndani ya app.app), ambayo **imezuiliwa kwa chaguo-msingi**.
 
 <figure><img src="../../../images/image (31).png" alt=""><figcaption></figcaption></figure>
 
@@ -145,7 +145,7 @@ TODO
 
 ### `com.apple.private.nullfs_allow`
 
-Ruhusa hii inaruhusu kuunganisha mfumo wa faili wa nullfs (uliokatazwa kwa msingi). Chombo: [**mount_nullfs**](https://github.com/JamaicanMoose/mount_nullfs/tree/master).
+Ruhusa hii inaruhusu kuunganisha mfumo wa faili wa nullfs (uliokatazwa kwa chaguo-msingi). Chombo: [**mount_nullfs**](https://github.com/JamaicanMoose/mount_nullfs/tree/master).
 
 ### `kTCCServiceAll`
 
@@ -161,5 +161,3 @@ Ruhusu mchakato **kuomba ruhusa zote za TCC**.
 ### **`kTCCServicePostEvent`**
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-</details>

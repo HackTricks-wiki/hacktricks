@@ -125,10 +125,10 @@ open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Profession
 ```
 ## vmoptions file
 
-Fail hii inasaidia kufafanua **Java params** wakati Java inatekelezwa. Unaweza kutumia baadhi ya hila za awali kubadilisha java params na **kufanya mchakato utekeleze amri zisizo za kawaida**.\
+Fail hii inasaidia kufafanua **Java params** wakati Java inatekelezwa. Unaweza kutumia baadhi ya hila za awali kubadilisha java params na **kufanya mchakato utekeleze amri zisizo na mipaka**.\
 Zaidi ya hayo, faili hii pia inaweza **kujumuisha nyingine** na saraka ya `include`, hivyo unaweza pia kubadilisha faili iliyojumuishwa.
 
-Zaidi ya hayo, baadhi ya programu za Java zitakuwa **zinapakia zaidi ya moja `vmoptions`** faili.
+Zaidi ya hayo, baadhi ya programu za Java zitakuwa **zinaweza kupakia zaidi ya moja `vmoptions`** faili.
 
 Baadhi ya programu kama Android Studio zinaonyesha katika **matokeo yao ambapo wanatafuta** faili hizi, kama:
 ```bash

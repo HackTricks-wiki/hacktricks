@@ -4,7 +4,7 @@
 
 ## Basic Information
 
-Mac OS binaries kwa kawaida zinakusanywa kama **universal binaries**. **Universal binary** inaweza **kuunga mkono usanifu nyingi katika faili moja**.
+Mac OS binaries kawaida huandaliwa kama **universal binaries**. **Universal binary** inaweza **kuunga mkono usanifu nyingi katika faili moja**.
 
 Binaries hizi zinafuata **Mach-O structure** ambayo kimsingi inajumuisha:
 
@@ -22,7 +22,7 @@ Tafuta faili kwa: `mdfind fat.h | grep -i mach-o | grep -E "fat.h$"`
 </strong><strong>#define FAT_CIGAM	0xbebafeca	/* NXSwapLong(FAT_MAGIC) */
 </strong>
 struct fat_header {
-<strong>	uint32_t	magic;		/* FAT_MAGIC or FAT_MAGIC_64 */
+<strong>	uint32_t	magic;		/* FAT_MAGIC au FAT_MAGIC_64 */
 </strong><strong>	uint32_t	nfat_arch;	/* idadi ya structs zinazofuata */
 </strong>};
 
@@ -68,7 +68,7 @@ au kwa kutumia zana ya [Mach-O View](https://sourceforge.net/projects/machoview/
 
 <figure><img src="../../../images/image (1094).png" alt=""><figcaption></figcaption></figure>
 
-Kama unavyoweza kufikiria, kawaida **universal binary** iliyokusanywa kwa usanifu 2 **inaongeza ukubwa** wa moja iliyokusanywa kwa usanifu 1 tu.
+Kama unavyoweza kufikiria, kawaida **universal binary** iliyoundwa kwa usanifu 2 **inaongeza ukubwa** wa moja iliyoundwa kwa usanifu 1 tu.
 
 ## **Mach-O Header**
 
@@ -103,7 +103,7 @@ uint32_t	reserved;	/* reserved */
 
 Kuna aina tofauti za faili, unaweza kuziona zikifafanuliwa katika [**kanuni ya chanzo kwa mfano hapa**](https://opensource.apple.com/source/xnu/xnu-2050.18.24/EXTERNAL_HEADERS/mach-o/loader.h). Aina muhimu zaidi ni:
 
-- `MH_OBJECT`: Faili ya kitu inayoweza kuhamishwa (bidhaa za kati za uundaji, sio executable bado).
+- `MH_OBJECT`: Faili ya kitu inayoweza kuhamishwa (bidhaa za kati za uundaji, bado si executable).
 - `MH_EXECUTE`: Faili zinazoweza kutekelezwa.
 - `MH_FVMLIB`: Faili ya maktaba ya VM iliyowekwa.
 - `MH_CORE`: Mifumo ya Kanuni
@@ -128,16 +128,16 @@ Au kutumia [Mach-O View](https://sourceforge.net/projects/machoview/):
 
 Msimbo wa chanzo pia unafafanua bendera kadhaa muhimu kwa ajili ya kupakia maktaba:
 
-- `MH_NOUNDEFS`: Hakuna marejeleo yasiyo na ufafanuzi (imeunganishwa kikamilifu)
+- `MH_NOUNDEFS`: Hakuna marejeo yasiyo na ufafanuzi (imeunganishwa kikamilifu)
 - `MH_DYLDLINK`: Kuunganisha Dyld
-- `MH_PREBOUND`: Marejeleo ya dinamik yanayofungwa mapema.
+- `MH_PREBOUND`: Marejeo ya dinamik yanayofungwa mapema.
 - `MH_SPLIT_SEGS`: Faili inagawanya sehemu r/o na r/w.
 - `MH_WEAK_DEFINES`: Binary ina alama dhaifu zilizofafanuliwa
 - `MH_BINDS_TO_WEAK`: Binary inatumia alama dhaifu
 - `MH_ALLOW_STACK_EXECUTION`: Fanya stack iweze kutekelezwa
 - `MH_NO_REEXPORTED_DYLIBS`: Maktaba haina amri za LC_REEXPORT
 - `MH_PIE`: Mtendaji Huru wa Nafasi
-- `MH_HAS_TLV_DESCRIPTORS`: Kuna sehemu yenye vigezo vya nyuzi za ndani
+- `MH_HAS_TLV_DESCRIPTORS`: Kuna sehemu yenye mabadiliko ya nyuzi za ndani
 - `MH_NO_HEAP_EXECUTION`: Hakuna utekelezaji kwa kurasa za heap/data
 - `MH_HAS_OBJC`: Binary ina sehemu za oBject-C
 - `MH_SIM_SUPPORT`: Msaada wa simulator
@@ -145,7 +145,7 @@ Msimbo wa chanzo pia unafafanua bendera kadhaa muhimu kwa ajili ya kupakia makta
 
 ## **Mach-O Load commands**
 
-Muundo wa **faili katika kumbukumbu** umefafanuliwa hapa, ukielezea **mahali pa jedwali la alama**, muktadha wa nyuzi kuu wakati wa kuanza utekelezaji, na **maktaba zinazohitajika**. Maagizo yanatolewa kwa mzigo wa dinamik **(dyld)** kuhusu mchakato wa kupakia binary katika kumbukumbu.
+Muundo wa **faili katika kumbukumbu** umeelezwa hapa, ukifafanua **mahali pa jedwali la alama**, muktadha wa nyuzi kuu wakati wa kuanza utekelezaji, na **maktaba zinazohitajika**. Maagizo yanatolewa kwa mzigo wa dinamik **(dyld)** kuhusu mchakato wa kupakia binary katika kumbukumbu.
 
 Inatumia muundo wa **load_command**, uliofafanuliwa katika **`loader.h`**:
 ```objectivec
@@ -159,13 +159,13 @@ Kuna aina **aina 50 tofauti za amri za kupakia** ambazo mfumo unashughulikia kwa
 ### **LC_SEGMENT/LC_SEGMENT_64**
 
 > [!TIP]
-> Kimsingi, aina hii ya Amri ya Kupakia inaelezea **jinsi ya kupakia \_\_TEXT** (kanuni inayoweza kutekelezwa) **na \_\_DATA** (data kwa ajili ya mchakato) **sehemu** kulingana na **offsets zilizotajwa katika sehemu ya Data** wakati faili ya binary inatekelezwa.
+> Kimsingi, aina hii ya Amri ya Kupakia inaelezea **jinsi ya kupakia \_\_TEXT** (kanuni inayotekelezeka) **na \_\_DATA** (data kwa ajili ya mchakato) **sehemu** kulingana na **offsets zilizoonyeshwa katika sehemu ya Data** wakati binary inatekelezwa.
 
 Amri hizi **zinaelezea sehemu** ambazo **zinapangwa** katika **nafasi ya kumbukumbu ya virtual** ya mchakato wakati inatekelezwa.
 
-Kuna **aina tofauti** za sehemu, kama vile sehemu ya **\_\_TEXT**, ambayo ina kanuni inayoweza kutekelezwa ya programu, na sehemu ya **\_\_DATA**, ambayo ina data inayotumiwa na mchakato. Sehemu hizi **ziko katika sehemu ya data** ya faili la Mach-O.
+Kuna **aina tofauti** za sehemu, kama vile **\_\_TEXT** sehemu, ambayo ina kanuni inayotekelezeka ya programu, na **\_\_DATA** sehemu, ambayo ina data inayotumiwa na mchakato. **Sehemu hizi ziko katika sehemu ya data** ya faili la Mach-O.
 
-**Kila sehemu** inaweza kugawanywa zaidi katika **sehemu nyingi**. Muundo wa **amri ya kupakia** una **habari** kuhusu **sehemu hizi** ndani ya sehemu husika.
+**Kila sehemu** inaweza kugawanywa zaidi katika **sehemu nyingi**. **Muundo wa amri ya kupakia** una **taarifa** kuhusu **sehemu hizi** ndani ya sehemu husika.
 
 Katika kichwa kwanza unapata **kichwa cha sehemu**:
 
@@ -188,7 +188,7 @@ Mfano wa kichwa cha sehemu:
 
 <figure><img src="../../../images/image (1126).png" alt=""><figcaption></figcaption></figure>
 
-Kichwa hiki kinaelezea **idadi ya sehemu ambazo vichwa vyake vinatokea baada** yake:
+Kichwa hiki kinaelezea **idadi ya sehemu ambazo vichwa vyao vinatokea baada** yake:
 ```c
 struct section_64 { /* for 64-bit architectures */
 char		sectname[16];	/* name of this section */
@@ -219,16 +219,16 @@ otool -lv /bin/ls
 ```
 Sehemu za kawaida zinazopakiwa na cmd hii:
 
-- **`__PAGEZERO`:** Inamwambia kernel **kuweka** **anwani sifuri** ili **isiweze kusomwa, kuandikwa, au kutekelezwa**. Vigezo vya maxprot na minprot katika muundo vimewekwa kuwa sifuri kuashiria kuwa **hakuna haki za kusoma-kuandika-kutekeleza kwenye ukurasa huu**.
-- Ugawaji huu ni muhimu ili **kupunguza hatari za dereference ya pointer ya NULL**. Hii ni kwa sababu XNU inatekeleza ukurasa sifuri mgumu ambao unahakikisha ukurasa wa kwanza (tu wa kwanza) wa kumbukumbu haupatikani (isipokuwa katika i386). Binafsi inaweza kutimiza mahitaji haya kwa kutengeneza kidogo \_\_PAGEZERO (kwa kutumia `-pagezero_size`) kufunika 4k za kwanza na kuwa na kumbukumbu ya 32bit iliyobaki inapatikana katika hali ya mtumiaji na kernel.
-- **`__TEXT`**: Inashikilia **kanuni** **inayotekelezeka** yenye ruhusa za **kusoma** na **kutekeleza** (hakuna ya kuandika)**.** Sehemu za kawaida za segment hii:
+- **`__PAGEZERO`:** Inamwambia kernel **kuweka** **anwani sifuri** ili **haiwezi kusomwa, kuandikwa, au kutekelezwa**. Vigezo vya maxprot na minprot katika muundo vimewekwa kuwa sifuri kuonyesha kuwa hakuna **haki za kusoma-kuandika-kutekeleza kwenye ukurasa huu**.
+- Usambazaji huu ni muhimu ili **kupunguza hatari za dereference ya pointer ya NULL**. Hii ni kwa sababu XNU inatekeleza ukurasa sifuri mgumu ambao unahakikisha ukurasa wa kwanza (tu wa kwanza) wa kumbukumbu haupatikani (isipokuwa katika i386). Binafsi inaweza kutimiza mahitaji haya kwa kutengeneza kidogo \_\_PAGEZERO (kwa kutumia `-pagezero_size`) kufunika 4k za kwanza na kuwa na kumbukumbu ya 32bit iliyobaki inapatikana katika hali ya mtumiaji na kernel.
+- **`__TEXT`**: Inashikilia **kanuni** **zinazotekelezwa** zikiwa na ruhusa za **kusoma** na **kutekeleza** (hakuna ya kuandika)**.** Sehemu za kawaida za segment hii:
 - `__text`: Kanuni ya binary iliyokusanywa
 - `__const`: Takwimu za kudumu (kusoma tu)
 - `__[c/u/os_log]string`: C, Unicode au os logs string constants
 - `__stubs` na `__stubs_helper`: Zina ushirika wakati wa mchakato wa upakiaji wa maktaba ya dynamic
 - `__unwind_info`: Takwimu za kuondoa stack.
-- Kumbuka kwamba maudhui haya yote yameandikwa lakini pia yamewekwa kama yanayoweza kutekelezwa (kuunda chaguzi zaidi za unyakuzi wa sehemu ambazo hazihitaji ruhusa hii, kama sehemu za maandiko).
-- **`__DATA`**: Inashikilia data ambayo ni **inasomwa** na **inaweza kuandikwa** (hakuna inayoweza kutekelezwa)**.**
+- Kumbuka kwamba maudhui haya yote yameandikwa lakini pia yamewekwa kama yanayotekelezwa (kuunda chaguzi zaidi za unyakuzi wa sehemu ambazo hazihitaji ruhusa hii, kama sehemu za maandiko).
+- **`__DATA`**: Inashikilia data ambayo ni **inasomwa** na **inaandikwa** (hakuna inayotekelezwa)**.**
 - `__got:` Meza ya Uhamisho wa Kimataifa
 - `__nl_symbol_ptr`: Pointer ya alama isiyo lazi (bind wakati wa upakiaji)
 - `__la_symbol_ptr`: Pointer ya alama ya lazi (bind wakati wa matumizi)
@@ -238,10 +238,10 @@ Sehemu za kawaida zinazopakiwa na cmd hii:
 - `__bss`: Vigezo vya kudumu (ambavyo havijaanzishwa)
 - `__objc_*` (\_\_objc_classlist, \_\_objc_protolist, nk): Taarifa inayotumiwa na wakati wa Objective-C
 - **`__DATA_CONST`**: \_\_DATA.\_\_const haikuhakikishiwa kuwa ya kudumu (ruhusa za kuandika), wala pointers nyingine na GOT. Sehemu hii inafanya `__const`, baadhi ya waanzilishi na meza ya GOT (mara tu inapohakikishwa) **kuwa ya kusoma tu** kwa kutumia `mprotect`.
-- **`__LINKEDIT`**: Inashikilia taarifa kwa ajili ya linker (dyld) kama vile, alama, maandiko, na entries za meza ya uhamisho. Ni chombo cha jumla kwa maudhui ambayo hayapo katika `__TEXT` au `__DATA` na maudhui yake yanaelezewa katika amri nyingine za upakiaji.
+- **`__LINKEDIT`**: Inashikilia taarifa kwa linker (dyld) kama vile, alama, maandiko, na entries za meza ya uhamisho. Ni chombo cha jumla kwa maudhui ambayo hayapo katika `__TEXT` au `__DATA` na maudhui yake yanaelezewa katika amri nyingine za upakiaji.
 - taarifa za dyld: Rebase, Non-lazy/lazy/weak binding opcodes na taarifa za usafirishaji
 - Kazi za kuanza: Meza ya anwani za kuanza za kazi
-- Takwimu Katika Kanuni: Visiwa vya takwimu katika \_\_text
+- Data Katika Kanuni: Visiwa vya data katika \_\_text
 - Meza ya Alama: Alama katika binary
 - Meza ya Alama ya Kando: Pointer/stub symbols
 - Meza ya Mwandiko
@@ -258,7 +258,7 @@ Kama ilivyokuwa inawezekana kuona katika kanuni, **sehemu pia zinaunga mkono ben
 
 ### **`LC_UNIXTHREAD/LC_MAIN`**
 
-**`LC_MAIN`** ina kiingilio katika **sifa ya entryoff.** Wakati wa upakiaji, **dyld** kwa urahisi **inaongeza** thamani hii kwenye (katika kumbukumbu) **misingi ya binary**, kisha **inaenda** kwenye maagizo haya kuanza kutekeleza kanuni ya binary.
+**`LC_MAIN`** ina kiingilio katika **sifa ya entryoff.** Wakati wa upakiaji, **dyld** kwa urahisi **inaongeza** thamani hii kwenye (katika kumbukumbu) **msingi wa binary**, kisha **inaenda** kwenye maagizo haya kuanza kutekeleza kanuni ya binary.
 
 **`LC_UNIXTHREAD`** ina thamani ambazo register lazima iwe nazo wakati wa kuanzisha thread kuu. Hii tayari imeondolewa lakini **`dyld`** bado inaitumia. Inawezekana kuona thamani za register zilizowekwa na hii kwa:
 ```bash
@@ -291,11 +291,11 @@ Hata hivyo, unaweza kupata taarifa fulani kuhusu sehemu hii katika [**hiki blogu
 
 ### **`LC_ENCRYPTION_INFO[_64]`**
 
-Msaada wa usimbuaji wa binary. Hata hivyo, bila shaka, ikiwa mshambuliaji atafanikiwa kuathiri mchakato, ataweza kutupa kumbukumbu bila usimbuaji.
+Msaada wa usimbaji wa binary. Hata hivyo, bila shaka, ikiwa mshambuliaji atafanikiwa kuathiri mchakato, ataweza kutoa kumbukumbu bila usimbaji.
 
 ### **`LC_LOAD_DYLINKER`**
 
-Inashikilia **njia ya executable ya dynamic linker** inayopanga maktaba za pamoja katika nafasi ya anwani ya mchakato. **Thamani kila wakati imewekwa kwenye `/usr/lib/dyld`**. Ni muhimu kutambua kwamba katika macOS, ramani ya dylib inafanyika katika **mode ya mtumiaji**, si katika mode ya kernel.
+Inashikilia **njia ya executable ya dynamic linker** inayopanga maktaba za pamoja katika nafasi ya anwani ya mchakato. **Thamani kila wakati imewekwa kwenye `/usr/lib/dyld`**. Ni muhimu kutambua kwamba katika macOS, uhamasishaji wa dylib unafanyika katika **mode ya mtumiaji**, si katika mode ya kernel.
 
 ### **`LC_IDENT`**
 
@@ -303,7 +303,7 @@ Imepitwa na wakati lakini wakati imewekwa ili kuunda dumps wakati wa panic, dump
 
 ### **`LC_UUID`**
 
-UUID ya nasibu. Ni muhimu kwa chochote moja kwa moja lakini XNU inahifadhi kwa pamoja na taarifa nyingine za mchakato. Inaweza kutumika katika ripoti za ajali.
+UUID ya nasibu. Ni muhimu kwa chochote moja kwa moja lakini XNU inahifadhi pamoja na taarifa nyingine za mchakato. Inaweza kutumika katika ripoti za ajali.
 
 ### **`LC_DYLD_ENVIRONMENT`**
 
@@ -350,7 +350,7 @@ Baadhi ya maktaba zinazohusiana na malware ni:
 
 ## **Data ya Mach-O**
 
-Katika msingi wa faili kuna eneo la data, ambalo linajumuisha segment kadhaa kama ilivyoainishwa katika eneo la amri za kupakia. **Aina mbalimbali za sehemu za data zinaweza kuhifadhiwa ndani ya kila segment**, ambapo kila sehemu **inaweka msimbo au data** maalum kwa aina fulani.
+Katika msingi wa faili kuna eneo la data, ambalo linajumuisha segment kadhaa kama ilivyoainishwa katika eneo la amri za kupakia. **Aina mbalimbali za sehemu za data zinaweza kuhifadhiwa ndani ya kila segment**, huku kila sehemu **ikiweka msimbo au data** maalum kwa aina fulani.
 
 > [!TIP]
 > Data kimsingi ni sehemu inayoshikilia **taarifa** zote zinazopakiwa na amri za kupakia **LC_SEGMENTS_64**
@@ -373,19 +373,19 @@ size -m /bin/ls
 ```
 ## Sehemu za Kawaida za Objetive-C
 
-Katika sehemu ya `__TEXT` (r-x):
+Katika segmenti ya `__TEXT` (r-x):
 
 - `__objc_classname`: Majina ya darasa (nyuzi)
 - `__objc_methname`: Majina ya mbinu (nyuzi)
 - `__objc_methtype`: Aina za mbinu (nyuzi)
 
-Katika sehemu ya `__DATA` (rw-):
+Katika segmenti ya `__DATA` (rw-):
 
 - `__objc_classlist`: Viashiria kwa madarasa yote ya Objetive-C
-- `__objc_nlclslist`: Viashiria kwa madarasa ya Objective-C yasiyo la Lazy
+- `__objc_nlclslist`: Viashiria kwa madarasa ya Objective-C yasiyo na uvivu
 - `__objc_catlist`: Kiashiria kwa Kategoria
-- `__objc_nlcatlist`: Kiashiria kwa Kategoria zisizo la Lazy
-- `__objc_protolist`: Orodha ya Protokali
+- `__objc_nlcatlist`: Kiashiria kwa Kategoria zisizo na uvivu
+- `__objc_protolist`: Orodha ya protokali
 - `__objc_const`: Takwimu za kudumu
 - `__objc_imageinfo`, `__objc_selrefs`, `objc__protorefs`...
 

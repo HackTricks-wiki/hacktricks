@@ -38,14 +38,14 @@ char data[];
 } CS_GenericBlob
 __attribute__ ((aligned(1)));
 ```
-Vikundi vya kawaida vilivyomo ni Mkurugenzi wa Kanuni, Mahitaji na Haki na Mfumo wa Ujumbe wa Kijadi (CMS).\
-Zaidi ya hayo, kumbuka jinsi data iliyowekwa kwenye vikundi inavyowekwa kwa **Big Endian.**
+Blobs za kawaida zinazopatikana ni Directory ya Kanuni, Mahitaji na Haki na Syntax ya Ujumbe wa Kijadi (CMS).\
+Zaidi ya hayo, kumbuka jinsi data iliyowekwa kwenye blobs inavyowekwa kwa **Big Endian.**
 
 Zaidi ya hayo, saini zinaweza kutengwa kutoka kwa binaries na kuhifadhiwa katika `/var/db/DetachedSignatures` (inayotumiwa na iOS).
 
-## Mkurugenzi wa Kanuni Blob
+## Blob ya Directory ya Kanuni
 
-Inawezekana kupata tangazo la [Mkurugenzi wa Kanuni Blob katika msimbo](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L104):
+Inawezekana kupata tangazo la [Blob ya Directory ya Kanuni katika msimbo](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L104):
 ```c
 typedef struct __CodeDirectory {
 uint32_t magic;                                 /* magic number (CSMAGIC_CODEDIRECTORY) */
@@ -105,8 +105,8 @@ Kumbuka kwamba kuna toleo tofauti za hii struct ambapo za zamani zinaweza kuwa n
 
 ## Signing Code Pages
 
-Kuhesabu hash ya binary kamili ingekuwa isiyo na ufanisi na hata isiyo na maana ikiwa inapo load tu kwa sehemu katika kumbukumbu. Kwa hivyo, saini ya msimbo kwa kweli ni hash ya hashes ambapo kila ukurasa wa binary unahesabiwa hash kivyake.\
-Kwa kweli, katika **Code Directory** ya awali unaweza kuona kwamba **ukubwa wa ukurasa umeainishwa** katika moja ya mashamba yake. Zaidi ya hayo, ikiwa ukubwa wa binary si kipande cha ukubwa wa ukurasa, shamba la **CodeLimit** linaeleza wapi mwisho wa saini uko.
+Kuhesabu hash ya binary kamili kutakuwa na ufanisi mdogo na hata kutokuwa na maana ikiwa inapo load tu sehemu yake kwenye kumbukumbu. Kwa hivyo, saini ya msimbo kwa kweli ni hash ya hashes ambapo kila ukurasa wa binary unahesabiwa hash kivyake.\
+Kwa kweli, katika **Code Directory** ya awali unaweza kuona kwamba **ukubwa wa ukurasa umeainishwa** katika moja ya maeneo yake. Zaidi ya hayo, ikiwa ukubwa wa binary si kipande cha ukubwa wa ukurasa, eneo la **CodeLimit** linaeleza ambapo mwisho wa saini uko.
 ```bash
 # Get all hashes of /bin/ps
 codesign -d -vvvvvv /bin/ps
@@ -144,13 +144,13 @@ openssl sha256 /tmp/*.page.*
 ```
 ## Entitlements Blob
 
-Kumbuka kwamba programu zinaweza pia kuwa na **entitlement blob** ambapo haki zote zimefafanuliwa. Zaidi ya hayo, baadhi ya binaries za iOS zinaweza kuwa na haki zao maalum katika sloti maalum -7 (badala ya katika sloti maalum -5 za haki).
+Kumbuka kwamba programu zinaweza pia kuwa na **entitlement blob** ambapo haki zote zinafafanuliwa. Zaidi ya hayo, baadhi ya binaries za iOS zinaweza kuwa na haki zao maalum katika sloti maalum -7 (badala ya katika sloti maalum -5 za haki).
 
 ## Special Slots
 
 Programu za MacOS hazina kila kitu wanachohitaji kutekeleza ndani ya binary lakini pia zinatumia **vyanzo vya nje** (kawaida ndani ya **bundle** za programu). Hivyo, kuna baadhi ya sloti ndani ya binary ambazo zitakuwa na hash za baadhi ya vyanzo vya nje vya kuvutia ili kuangalia kwamba havijabadilishwa.
 
-Kwa kweli, inawezekana kuona katika muundo wa Code Directory parameter inayoitwa **`nSpecialSlots`** ikionyesha idadi ya sloti maalum. Hakuna sloti maalum 0 na zile zinazotumika zaidi (kutoka -1 hadi -6 ni):
+Kwa kweli, inawezekana kuona katika muundo wa Code Directory parameter inayoitwa **`nSpecialSlots`** ikionyesha idadi ya sloti maalum. Hakuna sloti maalum 0 na zile za kawaida zaidi (kutoka -1 hadi -6 ni):
 
 - Hash ya `info.plist` (au ile ndani ya `__TEXT.__info__plist`).
 - Hash ya Mahitaji
@@ -158,11 +158,11 @@ Kwa kweli, inawezekana kuona katika muundo wa Code Directory parameter inayoitwa
 - Maalum kwa programu (isiyotumika)
 - Hash ya haki
 - Saini za msimbo wa DMG pekee
-- DER Entitlements
+- Haki za DER
 
 ## Code Signing Flags
 
-Kila mchakato una bitmask inayohusiana inayojulikana kama `status` ambayo inaanzishwa na kernel na baadhi yao zinaweza kubadilishwa na **saini ya msimbo**. Bendera hizi ambazo zinaweza kujumuishwa katika saini ya msimbo zimeelezwa [katika msimbo](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L36):
+Kila mchakato una bitmask inayohusiana inayojulikana kama `status` ambayo inaanzishwa na kernel na baadhi yao zinaweza kubadilishwa na **saini ya msimbo**. Bendera hizi ambazo zinaweza kujumuishwa katika saini ya msimbo zina [fafanuliwa katika msimbo](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L36):
 ```c
 /* code signing attributes of a process */
 #define CS_VALID                    0x00000001  /* dynamically valid */
@@ -207,13 +207,13 @@ CS_RESTRICT | CS_ENFORCEMENT | CS_REQUIRE_LV | CS_RUNTIME | CS_LINKER_SIGNED)
 
 #define CS_ENTITLEMENT_FLAGS        (CS_GET_TASK_ALLOW | CS_INSTALLER | CS_DATAVAULT_CONTROLLER | CS_NVRAM_UNRESTRICTED)
 ```
-Kumbuka kwamba kazi [**exec_mach_imgact**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_exec.c#L1420) inaweza pia kuongeza bendera za `CS_EXEC_*` kwa njia ya kidinamik wakati wa kuanza utekelezaji.
+Kumbuka kwamba kazi [**exec_mach_imgact**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_exec.c#L1420) inaweza pia kuongeza bendera `CS_EXEC_*` kwa njia ya kidinamik wakati wa kuanza utekelezaji.
 
 ## Mahitaji ya Saini ya Kanuni
 
 Kila programu ina **mahitaji** ambayo lazima **yatimizwe** ili iweze kutekelezwa. Ikiwa **programu ina mahitaji ambayo hayajatimizwa na programu**, haitatekelezwa (kama imebadilishwa).
 
-Mahitaji ya binary hutumia **sarufi maalum** ambayo ni mtiririko wa **maelezo** na yanaandikwa kama blobs kwa kutumia `0xfade0c00` kama uchawi ambao **hash yake inahifadhiwa katika sloti maalum ya kanuni**.
+Mahitaji ya binary hutumia **sarufi maalum** ambayo ni mtiririko wa **maelezo** na yanakodishwa kama blobs kwa kutumia `0xfade0c00` kama uchawi ambao **hash yake inahifadhiwa katika sloti maalum ya kanuni**.
 
 Mahitaji ya binary yanaweza kuonekana kwa kukimbia:
 ```bash
@@ -226,7 +226,7 @@ Executable=/Applications/Signal.app/Contents/MacOS/Signal
 designated => identifier "org.whispersystems.signal-desktop" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = U68MSDN6DR
 ```
 > [!NOTE]
-> Kumbuka jinsi saini hizi zinaweza kuangalia mambo kama taarifa za uthibitisho, TeamID, IDs, haki na data nyingine nyingi.
+> Kumbuka jinsi saini hizi zinaweza kuangalia mambo kama taarifa za uthibitisho, TeamID, IDs, ruhusa na data nyingine nyingi.
 
 Zaidi ya hayo, inawezekana kuzalisha baadhi ya mahitaji yaliyokusanywa kwa kutumia zana ya `csreq`:
 ```bash
@@ -244,14 +244,14 @@ od -A x -t x1 /tmp/output.csreq
 
 - **`Sec[Static]CodeCheckValidity`**: Angalia uhalali wa SecCodeRef kwa Kihitaji.
 - **`SecRequirementEvaluate`**: Thibitisha hitaji katika muktadha wa cheti.
-- **`SecTaskValidateForRequirement`**: Thibitisha SecTask inayotembea dhidi ya hitaji la `CFString`.
+- **`SecTaskValidateForRequirement`**: Thibitisha SecTask inayokimbia dhidi ya hitaji la `CFString`.
 
 #### **Kuunda na Kusimamia Mahitaji ya Nambari**
 
 - **`SecRequirementCreateWithData`:** Inaunda `SecRequirementRef` kutoka kwa data ya binary inayowakilisha hitaji.
 - **`SecRequirementCreateWithString`:** Inaunda `SecRequirementRef` kutoka kwa usemi wa maandiko wa hitaji.
 - **`SecRequirementCopy[Data/String]`**: Inapata uwakilishi wa data ya binary wa `SecRequirementRef`.
-- **`SecRequirementCreateGroup`**: Unda hitaji kwa ushirika wa programu.
+- **`SecRequirementCreateGroup`**: Unda hitaji la uanachama wa kundi la programu.
 
 #### **Kupata Taarifa za Kusaini Nambari**
 
@@ -261,20 +261,20 @@ od -A x -t x1 /tmp/output.csreq
 #### **Kubadilisha Mahitaji ya Nambari**
 
 - **`SecCodeSignerCreate`**: Inaunda kipande cha `SecCodeSignerRef` kwa ajili ya kufanya operesheni za kusaini nambari.
-- **`SecCodeSignerSetRequirement`**: Inaweka hitaji jipya kwa ajili ya msaini wa nambari kutekeleza wakati wa kusaini.
-- **`SecCodeSignerAddSignature`**: Inaongeza saini kwa nambari inayosainiwa na msaini aliyeainishwa.
+- **`SecCodeSignerSetRequirement`**: Inaweka hitaji jipya kwa ajili ya kusaini nambari wakati wa kusaini.
+- **`SecCodeSignerAddSignature`**: Inaongeza saini kwa nambari inayosainiwa na saini iliyotolewa.
 
 #### **Kuthibitisha Nambari kwa Mahitaji**
 
-- **`SecStaticCodeCheckValidity`**: Inathibitisha kipande cha nambari ya static dhidi ya mahitaji yaliyoainishwa.
+- **`SecStaticCodeCheckValidity`**: Inathibitisha kipande cha nambari ya static dhidi ya mahitaji yaliyotolewa.
 
 #### **APIs za Ziada za Faida**
 
 - **`SecCodeCopy[Internal/Designated]Requirement`: Pata SecRequirementRef kutoka SecCodeRef**
 - **`SecCodeCopyGuestWithAttributes`**: Inaunda `SecCodeRef` inayowakilisha kipande cha nambari kulingana na sifa maalum, muhimu kwa sandboxing.
 - **`SecCodeCopyPath`**: Inapata njia ya mfumo wa faili inayohusiana na `SecCodeRef`.
-- **`SecCodeCopySigningIdentifier`**: Inapata kitambulisho cha kusaini (mfano, Timu ID) kutoka kwa `SecCodeRef`.
-- **`SecCodeGetTypeID`**: Inarudisha kitambulisho cha aina kwa ajili ya `SecCodeRef` vitu.
+- **`SecCodeCopySigningIdentifier`**: Inapata kitambulisho cha kusaini (mfano, Kitambulisho cha Timu) kutoka kwa `SecCodeRef`.
+- **`SecCodeGetTypeID`**: Inarudisha kitambulisho cha aina kwa ajili ya vitu vya `SecCodeRef`.
 - **`SecRequirementGetTypeID`**: Inapata CFTypeID ya `SecRequirementRef`.
 
 #### **Bendera na Misingi ya Kusaini Nambari**
@@ -284,11 +284,11 @@ od -A x -t x1 /tmp/output.csreq
 
 ## Utekelezaji wa Saini ya Nambari
 
-**kernel** ndiye anayechunguza **saini ya nambari** kabla ya kuruhusu nambari ya programu kutekelezwa. Aidha, njia moja ya kuwa na uwezo wa kuandika na kutekeleza nambari mpya katika kumbukumbu ni kutumia JIT ikiwa `mprotect` inaitwa na bendera ya `MAP_JIT`. Kumbuka kwamba programu inahitaji haki maalum ili iweze kufanya hivi.
+**kernel** ndiye anayechunguza **saini ya nambari** kabla ya kuruhusu nambari ya programu kutekelezwa. Aidha, njia moja ya kuweza kuandika na kutekeleza nambari mpya katika kumbukumbu ni kutumia JIT ikiwa `mprotect` inaitwa na bendera ya `MAP_JIT`. Kumbuka kwamba programu inahitaji ruhusa maalum ili iweze kufanya hivi.
 
 ## `cs_blobs` & `cs_blob`
 
-[**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) muundo unashikilia taarifa kuhusu haki ya mchakato unaotembea juu yake. `csb_platform_binary` pia inaarifu ikiwa programu ni binary ya jukwaa (ambayo inakaguliwa katika nyakati tofauti na OS ili kutekeleza mitambo ya usalama kama kulinda haki za SEND kwa bandari za kazi za mchakato haya).
+[**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) muundo unashikilia taarifa kuhusu ruhusa ya mchakato unaokimbia juu yake. `csb_platform_binary` pia inaarifu ikiwa programu ni binary ya jukwaa (ambayo inakaguliwa katika nyakati tofauti na OS ili kutekeleza mitambo ya usalama kama kulinda haki za SEND kwa bandari za kazi za mchakato haya).
 ```c
 struct cs_blob {
 struct cs_blob  *csb_next;

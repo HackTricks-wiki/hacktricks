@@ -6,7 +6,7 @@
 
 Hifadhidata iliyoko katika `/var/db/auth.db` ni hifadhidata inayotumika kuhifadhi ruhusa za kufanya operesheni nyeti. Operesheni hizi zinafanywa kabisa katika **nafasi ya mtumiaji** na kwa kawaida hutumiwa na **XPC services** ambazo zinahitaji kuangalia **kama mteja anayepiga simu ameidhinishwa** kufanya kitendo fulani kwa kuangalia hifadhidata hii.
 
-Kwanza, hifadhidata hii inaundwa kutoka kwa maudhui ya `/System/Library/Security/authorization.plist`. Kisha, baadhi ya huduma zinaweza kuongeza au kubadilisha hifadhidata hii ili kuongeza ruhusa nyingine.
+Kwanza, hifadhidata hii inaundwa kutoka kwa maudhui ya `/System/Library/Security/authorization.plist`. Kisha, huduma zingine zinaweza kuongeza au kubadilisha hifadhidata hii ili kuongeza ruhusa nyingine.
 
 Sheria zinaifadhiwa katika jedwali la `rules` ndani ya hifadhidata na zina nguzo zifuatazo:
 
@@ -15,17 +15,17 @@ Sheria zinaifadhiwa katika jedwali la `rules` ndani ya hifadhidata na zina nguzo
 - **type**: Inaelezea aina ya sheria, iliyozuiliwa kwa thamani 1 au 2 ili kufafanua mantiki yake ya idhini.
 - **class**: Inagawanya sheria katika darasa maalum, kuhakikisha ni nambari chanya.
 - "allow" kwa ruhusu, "deny" kwa kataa, "user" ikiwa mali ya kundi inaonyesha kundi ambalo uanachama wake unaruhusu ufikiaji, "rule" inaonyesha katika orodha sheria inayopaswa kutimizwa, "evaluate-mechanisms" ikifuatwa na orodha ya `mechanisms` ambazo ni ama za ndani au jina la kifurushi ndani ya `/System/Library/CoreServices/SecurityAgentPlugins/` au /Library/Security//SecurityAgentPlugins
-- **group**: Inaonyesha kundi la mtumiaji lililohusishwa na sheria kwa ajili ya idhini ya msingi ya kundi.
-- **kofn**: Inawakilisha parameter ya "k-of-n", ikiamua ni subrules ngapi zinapaswa kutimizwa kutoka kwa jumla.
+- **group**: Inaonyesha kundi la mtumiaji linalohusishwa na sheria kwa ajili ya idhini ya msingi ya kundi.
+- **kofn**: Inaonyesha parameter ya "k-of-n", ikiamua ni subrules ngapi zinapaswa kutimizwa kutoka kwa jumla.
 - **timeout**: Inaelezea muda kwa sekunde kabla ya idhini iliyotolewa na sheria kuisha.
-- **flags**: Inashikilia bendera mbalimbali zinazobadilisha tabia na sifa za sheria.
+- **flags**: Ina vitu mbalimbali vinavyobadilisha tabia na sifa za sheria.
 - **tries**: Inapunguza idadi ya majaribio ya idhini yanayoruhusiwa ili kuongeza usalama.
 - **version**: Inafuatilia toleo la sheria kwa ajili ya udhibiti wa toleo na masasisho.
-- **created**: Inarekodi muda wa kuunda sheria kwa ajili ya madhumuni ya ukaguzi.
-- **modified**: Inahifadhi muda wa marekebisho ya mwisho yaliyofanywa kwa sheria.
+- **created**: Inarekodi alama ya wakati wakati sheria ilipoundwa kwa ajili ya ukaguzi.
+- **modified**: Inahifadhi alama ya wakati wa marekebisho ya mwisho yaliyofanywa kwa sheria.
 - **hash**: Inashikilia thamani ya hash ya sheria ili kuhakikisha uaminifu wake na kugundua udanganyifu.
 - **identifier**: Inatoa kitambulisho cha kipekee cha mfuatano, kama UUID, kwa marejeleo ya nje kwa sheria.
-- **requirement**: Inashikilia data iliyosawazishwa inayofafanua mahitaji maalum ya idhini ya sheria na mitambo.
+- **requirement**: Ina data iliyosimbwa ikielezea mahitaji maalum ya idhini ya sheria na mitambo.
 - **comment**: Inatoa maelezo yanayoweza kusomeka na binadamu au maoni kuhusu sheria kwa ajili ya nyaraka na uwazi.
 
 ### Example

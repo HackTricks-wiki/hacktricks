@@ -573,7 +573,7 @@ ffmpeg -f avfoundation -i ":1" -t 5 /tmp/recording.wav
 ### Mahali
 
 > [!TIP]
-> Ili programu iweze kupata mahali, **Huduma za Mahali** (kutoka kwa Faragha & Usalama) **zinapaswa kuwa zimewezeshwa,** vinginevyo haitakuwa na uwezo wa kuzipata.
+> Ili programu iweze kupata mahali, **Huduma za Mahali** (kutoka kwa Faragha & Usalama) **zinapaswa kuwezeshwa,** vinginevyo haitakuwa na uwezo wa kuzipata.
 
 - **Ruhusa**: `com.apple.security.personal-information.location`
 - **TCC**: Imepewa katika `/var/db/locationd/clients.plist`
@@ -637,7 +637,7 @@ Pata ufikiaji wa eneo
 {{#endtab}}
 {{#endtabs}}
 
-### Kurekodi ya Skrini
+### Kurekodi Skrini
 
 - **Haki**: Hakuna
 - **TCC**: `kTCCServiceScreenCapture`
@@ -877,6 +877,6 @@ return 0;
 {{#endtab}}
 {{#endtabs}}
 
-> [!CAUTION] > **Upatikanaji ni ruhusa yenye nguvu sana**, unaweza kuitumia vibaya kwa njia nyingine, kwa mfano unaweza kufanya **shambulio la kubonyeza funguo** moja kwa moja kutoka hapo bila kuhitaji kuita Matukio ya Mfumo.
+> [!CAUTION] > **Upatikanaji ni ruhusa yenye nguvu sana**, unaweza kuitumia vibaya kwa njia nyingine, kwa mfano unaweza kufanya **shambulio la funguo** moja kwa moja kutoka hapo bila kuhitaji kuita Matukio ya Mfumo.
 
 {{#include ../../../../banners/hacktricks-training.md}}

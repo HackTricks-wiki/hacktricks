@@ -72,12 +72,12 @@ Sehemu nyingi za data zinazotumiwa na ObjectiveC runtime zitabadilika wakati wa 
 - **`__objc_nlcatlist`** (`category_t`): Kielelezo cha Jamii zisizo za Lazy zilizofafanuliwa katika hii binary
 - **`__objc_catlist`** (`category_t`): Kielelezo cha Jamii zilizofafanuliwa katika hii binary
 - **`__objc_nlclslist`** (`classref_t`): Kielelezo cha Darasa zisizo za Lazy zilizofafanuliwa katika hii binary
-- **`__objc_classlist`** (`classref_t`): Viashiria vya darasa zote za Objective-C zilizofafanuliwa katika hii binary
+- **`__objc_classlist`** (`classref_t`): Viashiria vya madarasa yote ya Objective-C yaliyofafanuliwa katika hii binary
 
 Inatumia pia sehemu chache katika **`__TEXT`** segment kuhifadhi thamani thabiti ikiwa haiwezekani kuandika katika sehemu hii:
 
 - **`__objc_methname`** (C-String): Majina ya mbinu
-- **`__objc_classname`** (C-String): Majina ya darasa
+- **`__objc_classname`** (C-String): Majina ya madarasa
 - **`__objc_methtype`** (C-String): Aina za mbinu
 
 ### Uandishi wa Aina
@@ -112,7 +112,7 @@ Uandishi kamili wa aina kwa njia ni:
 5. **Kigezo cha pili (`NSDictionary * options`)**: Imeandikwa kama `@`, kwenye ofset 20
 6. **Kigezo cha tatu (`NSError ** error`)**: Imeandikwa kama `^@`, kwenye ofset 24
 
-**Kwa mchaguzi + uandishi unaweza kujenga upya njia.**
+**Pamoja na mchaguzi + uandishi unaweza kujenga upya njia hiyo.**
 
 ### **Darasa**
 
@@ -140,6 +140,6 @@ data()->setFlags(set);
 Darasa hili linatumia baadhi ya bits za uwanja wa isa kuonyesha taarifa fulani kuhusu darasa hilo.
 
 Kisha, struct ina kiashiria kwa struct `class_ro_t` kilichohifadhiwa kwenye diski ambacho kina sifa za darasa kama jina lake, mbinu za msingi, mali na mabadiliko ya mfano.\
-Wakati wa wakati wa kukimbia, muundo wa ziada `class_rw_t` unatumika ukiwa na viashiria ambavyo vinaweza kubadilishwa kama mbinu, itifaki, mali... 
+Wakati wa wakati wa kukimbia, muundo wa ziada `class_rw_t` unatumika unao na viashiria ambavyo vinaweza kubadilishwa kama mbinu, itifaki, mali... 
 
 {{#include ../../../banners/hacktricks-training.md}}

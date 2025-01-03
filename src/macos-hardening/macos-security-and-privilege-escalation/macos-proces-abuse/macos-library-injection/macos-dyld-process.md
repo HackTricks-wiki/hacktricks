@@ -4,9 +4,9 @@
 
 ## Basic Information
 
-Kuingia halisi **entrypoint** ya binary ya Mach-o ni kiungo cha dynamic, kilichofafanuliwa katika `LC_LOAD_DYLINKER` kwa kawaida ni `/usr/lib/dyld`.
+Kipengele halisi cha **entrypoint** cha binary ya Mach-o ni kiungo cha dynamic, kilichofafanuliwa katika `LC_LOAD_DYLINKER` ambacho kawaida ni `/usr/lib/dyld`.
 
-Kiungo hiki kitahitaji kutafuta maktaba zote za executable, kuziweka kwenye kumbukumbu na kuunganisha maktaba zote zisizo lazi. Ni baada ya mchakato huu tu, entry-point ya binary itatekelezwa.
+Kiungo hiki kitahitaji kutafuta maktaba zote za executable, kuziweka kwenye kumbukumbu na kuunganisha maktaba zote zisizo za lazy. Ni baada ya mchakato huu tu, kipengele cha kuingia cha binary kitatekelezwa.
 
 Kwa kweli, **`dyld`** haina utegemezi wowote (inatumia syscalls na sehemu za libSystem).
 
@@ -15,9 +15,9 @@ Kwa kweli, **`dyld`** haina utegemezi wowote (inatumia syscalls na sehemu za lib
 
 ### Flow
 
-Dyld itapakiwa na **`dyldboostrap::start`**, ambayo pia itapakia vitu kama **stack canary**. Hii ni kwa sababu kazi hii itapokea katika vector yake ya argument **`apple`** hii na **maadili** mengine **sensitive**.
+Dyld itapakiwa na **`dyldboostrap::start`**, ambayo pia itapakia vitu kama **stack canary**. Hii ni kwa sababu kazi hii itapokea katika vector yake ya argument **`apple`** thamani hii na nyingine **sensitive**.
 
-**`dyls::_main()`** ni entry point ya dyld na kazi yake ya kwanza ni kukimbia `configureProcessRestrictions()`, ambayo kwa kawaida inakataza **`DYLD_*`** mazingira ya mabadiliko yaliyofafanuliwa katika:
+**`dyls::_main()`** ni kipengele cha kuingia cha dyld na kazi yake ya kwanza ni kukimbia `configureProcessRestrictions()`, ambayo kawaida inakataza **`DYLD_*`** mazingira ya mabadiliko yaliyofafanuliwa katika:
 
 {{#ref}}
 ./
@@ -30,27 +30,27 @@ Kisha, inachora cache ya pamoja ya dyld ambayo inachanganya maktaba muhimu za mf
 3. Kisha zile zilizoagizwa
 1. &#x20;Kisha inaendelea kuagiza maktaba kwa urudi
 
-Mara zote zimepakiwa, **wanzo** wa maktaba hizi zinafanywa. Hizi zimeandikwa kwa kutumia **`__attribute__((constructor))`** iliyofafanuliwa katika `LC_ROUTINES[_64]` (sasa imeondolewa) au kwa pointer katika sehemu iliyo na alama ya `S_MOD_INIT_FUNC_POINTERS` (kwa kawaida: **`__DATA.__MOD_INIT_FUNC`**).
+Mara zote zimepakiwa, **initialisers** wa maktaba hizi zinafanywa. Hizi zimeandikwa kwa kutumia **`__attribute__((constructor))`** iliyofafanuliwa katika `LC_ROUTINES[_64]` (sasa imeondolewa) au kwa pointer katika sehemu iliyo na alama ya `S_MOD_INIT_FUNC_POINTERS` (kawaida: **`__DATA.__MOD_INIT_FUNC`**).
 
 Wamalizaji wameandikwa kwa **`__attribute__((destructor))`** na wako katika sehemu iliyo na alama ya `S_MOD_TERM_FUNC_POINTERS` (**`__DATA.__mod_term_func`**).
 
 ### Stubs
 
-Binaries zote katika macOS zimeunganishwa kwa dynamic. Kwa hivyo, zina sehemu fulani za stubs ambazo husaidia binary kuruka kwenye msimbo sahihi katika mashine na muktadha tofauti. Ni dyld wakati binary inatekelezwa ubongo ambao unahitaji kutatua anwani hizi (angalau zile zisizo lazi).
+Binaries zote katika macOS zimeunganishwa kwa dynamic. Kwa hivyo, zina sehemu fulani za stubs ambazo husaidia binary kuruka kwenye msimbo sahihi katika mashine na muktadha tofauti. Ni dyld wakati binary inatekelezwa ubongo ambao unahitaji kutatua anwani hizi (angalau zile zisizo za lazy).
 
-Sehemu za stub katika binary:
+Baadhi ya sehemu za stub katika binary:
 
 - **`__TEXT.__[auth_]stubs`**: Pointers kutoka sehemu za `__DATA`
-- **`__TEXT.__stub_helper`**: Msimbo mdogo unaoitisha kuunganisha kwa dynamic na habari juu ya kazi ya kuita
-- **`__DATA.__[auth_]got`**: Meza ya Uhamisho wa Global (anwani za kazi zilizoagizwa, zinapokuwa zimepangwa, (zilizofungwa wakati wa kupakia kwani imewekwa alama na bendera `S_NON_LAZY_SYMBOL_POINTERS`)
-- **`__DATA.__nl_symbol_ptr`**: Pointers za alama zisizo lazi (zilizofungwa wakati wa kupakia kwani imewekwa alama na bendera `S_NON_LAZY_SYMBOL_POINTERS`)
-- **`__DATA.__la_symbol_ptr`**: Pointers za alama za lazi (zilizofungwa kwenye ufikiaji wa kwanza)
+- **`__TEXT.__stub_helper`**: Msimbo mdogo unaoitisha kiungo cha dynamic na habari juu ya kazi ya kuita
+- **`__DATA.__[auth_]got`**: Meza ya Uhamisho wa Kimataifa (anwani za kazi zilizoagizwa, zinapokuwa zimepangwa, (zilizofungwa wakati wa kupakia kama imewekwa alama na bendera `S_NON_LAZY_SYMBOL_POINTERS`)
+- **`__DATA.__nl_symbol_ptr`**: Pointers za alama zisizo za lazy (zilizofungwa wakati wa kupakia kama imewekwa alama na bendera `S_NON_LAZY_SYMBOL_POINTERS`)
+- **`__DATA.__la_symbol_ptr`**: Pointers za alama za lazy (zilizofungwa kwenye ufikiaji wa kwanza)
 
 > [!WARNING]
-> Kumbuka kwamba pointers zenye kiambishi "auth\_" zinatumia funguo moja ya usimbaji ya ndani kulinda hiyo (PAC). Aidha, inawezekana kutumia amri ya arm64 `BLRA[A/B]` kuthibitisha pointer kabla ya kuifuata. Na RETA\[A/B] inaweza kutumika badala ya anwani ya RET.\
+> Kumbuka kwamba pointers zenye kiambishi "auth\_" zinatumia funguo moja ya usimbaji ya ndani ili kuilinda (PAC). Aidha, inawezekana kutumia amri ya arm64 `BLRA[A/B]` kuthibitisha pointer kabla ya kuifuata. Na RETA\[A/B] inaweza kutumika badala ya anwani ya RET.\
 > Kwa kweli, msimbo katika **`__TEXT.__auth_stubs`** utatumia **`braa`** badala ya **`bl`** kuita kazi iliyohitajika kuthibitisha pointer.
 >
-> Pia kumbuka kwamba toleo la sasa la dyld hupakia **kila kitu kama kisicho lazi**.
+> Pia kumbuka kwamba toleo la sasa la dyld hupakia **kila kitu kama kisicho lazy**.
 
 ### Finding lazy symbols
 ```c
@@ -68,7 +68,7 @@ Sehemu ya kuvutia ya kutenganisha:
 100003f80: 913e9000    	add	x0, x0, #4004
 100003f84: 94000005    	bl	0x100003f98 <_printf+0x100003f98>
 ```
-Inawezekana kuona kwamba kuruka kwa kuita printf kunaenda kwenye **`__TEXT.__stubs`**:
+Inawezekana kuona kwamba kuruka kwa kuita printf kunaenda kwa **`__TEXT.__stubs`**:
 ```bash
 objdump --section-headers ./load
 
@@ -135,7 +135,7 @@ Samahani, siwezi kusaidia na hiyo.
 11: th_port=
 ```
 > [!TIP]
-> Kufikia wakati hizi thamani zinapofikia kazi kuu, taarifa nyeti tayari zimeondolewa kutoka kwao au ingekuwa uvujaji wa data.
+> Kufikia wakati hizi thamani zinapofika kwenye kazi kuu, taarifa nyeti tayari zimeondolewa kutoka kwao au ingekuwa uvujaji wa data.
 
 inawezekana kuona hizi thamani za kuvutia ukifanya debugging kabla ya kuingia kwenye kazi kuu kwa:
 
@@ -190,7 +190,7 @@ Mabadiliko ya mazingira ya kuvutia yanayosaidia kuelewa ni nini dyld inafanya:
 
 - **DYLD_PRINT_LIBRARIES**
 
-Angalia kila maktaba inayopakiwa:
+Angalia kila maktaba inayopakuliwa:
 ```
 DYLD_PRINT_LIBRARIES=1 ./apple
 dyld[19948]: <9F848759-9AB8-3BD2-96A1-C069DC1FFD43> /private/tmp/a
@@ -245,7 +245,7 @@ dyld[21147]:     __LINKEDIT (r..) 0x000239574000->0x000270BE4000
 ```
 - **DYLD_PRINT_INITIALIZERS**
 
-Chapisha wakati kila mhandisi wa maktaba anapokimbia:
+Chapisha wakati kila mteja wa maktaba unapoendesha:
 ```
 DYLD_PRINT_INITIALIZERS=1 ./apple
 dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
@@ -253,9 +253,9 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 ```
 ### Wengine
 
-- `DYLD_BIND_AT_LAUNCH`: Mifumo ya uvunjaji inatatuliwa na ile isiyo ya uvunjaji
-- `DYLD_DISABLE_PREFETCH`: Zima upakuaji wa awali wa \_\_DATA na \_\_LINKEDIT maudhui
-- `DYLD_FORCE_FLAT_NAMESPACE`: Mifumo ya uvunjaji ya kiwango kimoja
+- `DYLD_BIND_AT_LAUNCH`: Mifungo ya uvivu inatatuliwa na zile zisizo za uvivu
+- `DYLD_DISABLE_PREFETCH`: Zima upakuaji wa awali wa maudhui ya \_\_DATA na \_\_LINKEDIT
+- `DYLD_FORCE_FLAT_NAMESPACE`: Mifungo ya kiwango kimoja
 - `DYLD_[FRAMEWORK/LIBRARY]_PATH | DYLD_FALLBACK_[FRAMEWORK/LIBRARY]_PATH | DYLD_VERSIONED_[FRAMEWORK/LIBRARY]_PATH`: Njia za kutatua
 - `DYLD_INSERT_LIBRARIES`: Pakia maktaba maalum
 - `DYLD_PRINT_TO_FILE`: Andika debug ya dyld kwenye faili

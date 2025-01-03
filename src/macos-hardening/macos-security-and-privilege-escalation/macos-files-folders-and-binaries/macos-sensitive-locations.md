@@ -7,13 +7,13 @@
 ### Shadow Passwords
 
 Shadow password inahifadhiwa pamoja na usanidi wa mtumiaji katika plists zilizoko **`/var/db/dslocal/nodes/Default/users/`**.\
-Mfuatano ufuatao unaweza kutumika kutoa **maelezo yote kuhusu watumiaji** (ikiwemo taarifa za hash):
+Mfuatano huu wa moja unaweza kutumika kutoa **habari zote kuhusu watumiaji** (ikiwemo taarifa za hash):
 ```bash
 for l in /var/db/dslocal/nodes/Default/users/*; do if [ -r "$l" ];then echo "$l"; defaults read "$l"; fi; done
 ```
 [**Scripts kama hii**](https://gist.github.com/teddziuba/3ff08bdda120d1f7822f3baf52e606c2) au [**hii**](https://github.com/octomagon/davegrohl.git) zinaweza kutumika kubadilisha hash kuwa **hashcat** **format**.
 
-Mstari mbadala mmoja ambao utaondoa creds za akaunti zote zisizo za huduma katika format ya hashcat `-m 7100` (macOS PBKDF2-SHA512):
+Mstari mbadala mmoja ambao utatoa creds za akaunti zote zisizo za huduma katika format ya hashcat `-m 7100` (macOS PBKDF2-SHA512):
 ```bash
 sudo bash -c 'for i in $(find /var/db/dslocal/nodes/Default/users -type f -regex "[^_]*"); do plutil -extract name.0 raw $i | awk "{printf \$0\":\$ml\$\"}"; for j in {iterations,salt,entropy}; do l=$(k=$(plutil -extract ShadowHashData.0 raw $i) && base64 -d <<< $k | plutil -extract SALTED-SHA512-PBKDF2.$j raw -); if [[ $j == iterations ]]; then echo -n $l; else base64 -d <<< $l | xxd -p -c 0 | awk "{printf \"$\"\$0}"; fi; done; echo ""; done'
 ```
@@ -25,7 +25,7 @@ Faili hii inatumika **tu** wakati mfumo unafanya kazi katika **mode ya mtumiaji 
 
 ### Keychain Dump
 
-Kumbuka kwamba unapokuwa unatumia binary ya usalama ili **kutoa nywila zilizotafsiriwa**, maelekezo kadhaa yatauliza mtumiaji kuruhusu operesheni hii.
+Kumbuka kwamba unapokuwa unatumia binary ya usalama **kudondosha nywila zilizotafsiriwa**, maelekezo kadhaa yatauliza mtumiaji kuruhusu operesheni hii.
 ```bash
 #security
 security dump-trust-settings [-s] [-d] #List certificates
@@ -43,28 +43,28 @@ security dump-keychain -d #Dump all the info, included secrets (the user will be
 
 Zana inayoitwa **keychaindump** imeandaliwa kutoa nywila kutoka kwa keychains za macOS, lakini inakabiliwa na vikwazo katika matoleo mapya ya macOS kama Big Sur, kama ilivyoelezwa katika [majadiliano](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760). Matumizi ya **keychaindump** yanahitaji mshambuliaji kupata ufikiaji na kupandisha mamlaka hadi **root**. Zana hii inatumia ukweli kwamba keychain imefunguliwa kwa default wakati wa kuingia kwa mtumiaji kwa urahisi, ikiruhusu programu kufikia bila kuhitaji nywila ya mtumiaji mara kwa mara. Hata hivyo, ikiwa mtumiaji atachagua kufunga keychain yao baada ya kila matumizi, **keychaindump** inakuwa isiyo na ufanisi.
 
-**Keychaindump** inafanya kazi kwa kulenga mchakato maalum unaoitwa **securityd**, ambao Apple inaelezea kama daemon wa idhini na operesheni za kificho, muhimu kwa kufikia keychain. Mchakato wa kutoa unajumuisha kutambua **Master Key** inayotokana na nywila ya kuingia ya mtumiaji. Key hii ni muhimu kwa kusoma faili ya keychain. Ili kupata **Master Key**, **keychaindump** inachanganua heap ya kumbukumbu ya **securityd** kwa kutumia amri ya `vmmap`, ikitafuta funguo zinazoweza kuwa ndani ya maeneo yaliyoashiriwa kama `MALLOC_TINY`. Amri ifuatayo inatumika kukagua maeneo haya ya kumbukumbu:
+**Keychaindump** inafanya kazi kwa kulenga mchakato maalum unaoitwa **securityd**, ambayo Apple inaelezea kama daemon kwa ajili ya mamlaka na operesheni za kificho, muhimu kwa ufikiaji wa keychain. Mchakato wa kutoa nywila unahusisha kutambua **Master Key** inayotokana na nywila ya kuingia ya mtumiaji. Key hii ni muhimu kwa kusoma faili ya keychain. Ili kupata **Master Key**, **keychaindump** inachanganua kumbukumbu ya **securityd** kwa kutumia amri ya `vmmap`, ikitafuta funguo zinazoweza kuwa ndani ya maeneo yaliyoashiriwa kama `MALLOC_TINY`. Amri ifuatayo inatumika kukagua maeneo haya ya kumbukumbu:
 ```bash
 sudo vmmap <securityd PID> | grep MALLOC_TINY
 ```
-Baada ya kubaini funguo kuu zinazoweza kuwa, **keychaindump** inatafuta kupitia makundi kwa mfano maalum (`0x0000000000000018`) unaoashiria mgombea wa funguo kuu. Hatua zaidi, ikiwa ni pamoja na kuondoa ufichuzi, zinahitajika ili kutumia funguo hii, kama ilivyoelezwa katika ms source code wa **keychaindump**. Wachambuzi wanaolenga eneo hili wanapaswa kuzingatia kwamba data muhimu ya kufichua funguo za keychain inahifadhiwa ndani ya kumbukumbu ya mchakato wa **securityd**. Mfano wa amri ya kuendesha **keychaindump** ni:
+Baada ya kubaini funguo kuu zinazoweza, **keychaindump** inatafuta kupitia makundi kwa mfano maalum (`0x0000000000000018`) unaoashiria mgombea wa funguo kuu. Hatua zaidi, ikiwa ni pamoja na kuondoa ufichaji, zinahitajika kutumia funguo hii, kama ilivyoelezwa katika msimbo wa chanzo wa **keychaindump**. Wachambuzi wanaolenga eneo hili wanapaswa kuzingatia kwamba data muhimu ya kufichua funguo za keychain inahifadhiwa ndani ya kumbukumbu ya mchakato wa **securityd**. Mfano wa amri ya kuendesha **keychaindump** ni:
 ```bash
 sudo ./keychaindump
 ```
 ### chainbreaker
 
-[**Chainbreaker**](https://github.com/n0fate/chainbreaker) inaweza kutumika kutoa aina zifuatazo za taarifa kutoka kwa keychain ya OSX kwa njia ya forensically sound:
+[**Chainbreaker**](https://github.com/n0fate/chainbreaker) inaweza kutumika kutoa aina zifuatazo za taarifa kutoka kwa OSX keychain kwa njia ya forensically sound:
 
-- Nywila ya Keychain iliyohashwa, inayofaa kwa ajili ya kuvunja kwa kutumia [hashcat](https://hashcat.net/hashcat/) au [John the Ripper](https://www.openwall.com/john/)
-- Nywila za Mtandao
-- Nywila za Kawaida
+- Nenosiri la Keychain lililohashwa, linalofaa kwa ajili ya kuvunja kwa kutumia [hashcat](https://hashcat.net/hashcat/) au [John the Ripper](https://www.openwall.com/john/)
+- Nenosiri za Mtandao
+- Nenosiri za Kawaida
 - Funguo Binafsi
 - Funguo za Umma
 - Vyeti vya X509
 - Maelezo Salama
-- Nywila za Appleshare
+- Nenosiri za Appleshare
 
-Ikiwa kuna nywila ya kufungua keychain, funguo kuu iliyopatikana kwa kutumia [volafox](https://github.com/n0fate/volafox) au [volatility](https://github.com/volatilityfoundation/volatility), au faili ya kufungua kama SystemKey, Chainbreaker pia itatoa nywila za maandiko.
+Ikiwa kuna nenosiri la kufungua keychain, funguo kuu iliyopatikana kwa kutumia [volafox](https://github.com/n0fate/volafox) au [volatility](https://github.com/volatilityfoundation/volatility), au faili ya kufungua kama SystemKey, Chainbreaker pia itatoa nenosiri za maandiko.
 
 Bila moja ya hizi mbinu za kufungua Keychain, Chainbreaker itaonyesha taarifa nyingine zote zinazopatikana.
 
@@ -129,7 +129,7 @@ sqlite3 $HOME/Suggestions/snippets.db 'select * from emailSnippets'
 
 Unaweza kupata data za Notifications katika `$(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/`
 
-Mengi ya habari za kuvutia yatakuwa katika **blob**. Hivyo utahitaji **kuchota** yaliyomo na **kubadilisha** kuwa **yanayoweza** **kusomwa** na binadamu au tumia **`strings`**. Ili kuyafikia unaweza kufanya:
+Mengi ya habari za kuvutia yatakuwa katika **blob**. Hivyo utahitaji **kutoa** yaliyomo hayo na **kubadilisha** kuwa **yanayoweza** **kusomwa** na binadamu au tumia **`strings`**. Ili kuyafikia unaweza kufanya:
 ```bash
 cd $(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/
 strings $(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/db2/db | grep -i -A4 slack
@@ -145,7 +145,7 @@ for i in $(sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.s
 ```
 ## Preferences
 
-Katika programu za macOS, mapendeleo yako katika **`$HOME/Library/Preferences`** na katika iOS yako katika `/var/mobile/Containers/Data/Application/<UUID>/Library/Preferences`.
+Katika programu za macOS, mapendeleo yanapatikana katika **`$HOME/Library/Preferences`** na katika iOS yanapatikana katika `/var/mobile/Containers/Data/Application/<UUID>/Library/Preferences`.
 
 Katika macOS, zana ya cli **`defaults`** inaweza kutumika kubadilisha **faili za Mapendeleo**.
 
@@ -191,11 +191,11 @@ Faili hii inatoa ruhusa kwa watumiaji maalum kwa UUID (na si uid) ili waweze kuf
 
 ### Notifications za Darwin
 
-Daemoni kuu wa notifications ni **`/usr/sbin/notifyd`**. Ili kupokea notifications, wateja lazima wajisajili kupitia `com.apple.system.notification_center` Mach port (angalia kwa `sudo lsmp -p <pid notifyd>`). Daemoni inaweza kubadilishwa kwa kutumia faili `/etc/notify.conf`.
+Daemoni kuu wa notifications ni **`/usr/sbin/notifyd`**. Ili kupokea notifications, wateja lazima wajisajili kupitia bandari ya Mach `com.apple.system.notification_center` (angalia kwa `sudo lsmp -p <pid notifyd>`). Daemoni inaweza kuundwa kwa kutumia faili `/etc/notify.conf`.
 
 Majina yanayotumika kwa notifications ni alama za kipekee za DNS za kinyume na wakati notification inatumwa kwa moja yao, mteja(wateja) ambao wameonyesha wanaweza kushughulikia hiyo watapokea.
 
-Inawezekana kutoa hali ya sasa (na kuona majina yote) kwa kutuma ishara SIGUSR2 kwa mchakato wa notifyd na kusoma faili iliyozalishwa: `/var/run/notifyd_<pid>.status`:
+Inawezekana kutoa hali ya sasa (na kuona majina yote) kwa kutuma ishara SIGUSR2 kwa mchakato wa notifyd na kusoma faili lililotengenezwa: `/var/run/notifyd_<pid>.status`:
 ```bash
 ps -ef | grep -i notifyd
 0   376     1   0 15Mar24 ??        27:40.97 /usr/sbin/notifyd
@@ -213,11 +213,11 @@ common: com.apple.security.octagon.joined-with-bottle
 ```
 ### Kituo cha Arifa Kilichosambazwa
 
-Kituo cha **Distributed Notification Center** ambacho faili lake kuu ni **`/usr/sbin/distnoted`**, ni njia nyingine ya kutuma arifa. Kinatoa huduma kadhaa za XPC na hufanya baadhi ya ukaguzi ili kujaribu kuthibitisha wateja.
+**Kituo cha Arifa Kilichosambazwa** ambacho faili lake kuu ni **`/usr/sbin/distnoted`**, ni njia nyingine ya kutuma arifa. Kinatoa huduma kadhaa za XPC na hufanya baadhi ya ukaguzi kujaribu kuthibitisha wateja.
 
 ### Arifa za Apple Push (APN)
 
-Katika kesi hii, programu zinaweza kujiandikisha kwa **topics**. Mteja atazalisha token kwa kuwasiliana na seva za Apple kupitia **`apsd`**.\
+Katika kesi hii, programu zinaweza kujiandikisha kwa **mada**. Mteja atazalisha token kwa kuwasiliana na seva za Apple kupitia **`apsd`**.\
 Kisha, watoa huduma, pia watakuwa wamezalisha token na wataweza kuungana na seva za Apple kutuma ujumbe kwa wateja. Ujumbe huu utapokelewa kwa ndani na **`apsd`** ambayo itapeleka arifa kwa programu inayosubiri hiyo.
 
 Mipangilio iko katika `/Library/Preferences/com.apple.apsd.plist`.

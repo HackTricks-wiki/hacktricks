@@ -25,9 +25,9 @@ Kwa mawasiliano ya pande mbili, haki mbili za kupokea Mach zinaundwa: moja katik
 
 Kuzingatia bandari ya ndani, haki ya kupokea inashikiliwa na kazi ya ndani. Bandari inaundwa kwa `mach_port_allocate()`. Changamoto iko katika kuhamasisha haki ya kutuma kwa bandari hii kwenye kazi ya mbali.
 
-Stratejia moja inahusisha kutumia `thread_set_special_port()` kuweka haki ya kutuma kwa bandari ya ndani kwenye `THREAD_KERNEL_PORT` ya nyuzi ya mbali. Kisha, nyuzi ya mbali inaelekezwa kuita `mach_thread_self()` ili kupata haki ya kutuma.
+Stratejia moja inahusisha kutumia `thread_set_special_port()` kuweka haki ya kutuma kwa bandari ya ndani katika `THREAD_KERNEL_PORT` ya nyuzi ya mbali. Kisha, nyuzi ya mbali inaelekezwa kuita `mach_thread_self()` ili kupata haki ya kutuma.
 
-Kwa bandari ya mbali, mchakato kimsingi unarudiwa. Nyuzi ya mbali inaelekezwa kuunda bandari ya Mach kupitia `mach_reply_port()` (kama `mach_port_allocate()` haiwezi kutumika kutokana na mfumo wake wa kurudi). Baada ya kuundwa kwa bandari, `mach_port_insert_right()` inaitwa kwenye nyuzi ya mbali ili kuanzisha haki ya kutuma. Haki hii kisha inahifadhiwa kwenye kernel kwa kutumia `thread_set_special_port()`. Kurudi kwenye kazi ya ndani, `thread_get_special_port()` inatumika kwenye nyuzi ya mbali ili kupata haki ya kutuma kwa bandari mpya iliyotolewa katika kazi ya mbali.
+Kwa bandari ya mbali, mchakato kimsingi unabadilishwa. Nyuzi ya mbali inaelekezwa kuunda bandari ya Mach kupitia `mach_reply_port()` (kama `mach_port_allocate()` haiwezi kutumika kutokana na mfumo wake wa kurudi). Baada ya kuundwa kwa bandari, `mach_port_insert_right()` inaitwa katika nyuzi ya mbali ili kuanzisha haki ya kutuma. Haki hii kisha inahifadhiwa kwenye kernel kwa kutumia `thread_set_special_port()`. Kurudi kwenye kazi ya ndani, `thread_get_special_port()` inatumika kwenye nyuzi ya mbali ili kupata haki ya kutuma kwa bandari mpya iliyotolewa katika kazi ya mbali.
 
 Kukamilika kwa hatua hizi kunasababisha kuanzishwa kwa Mach ports, kuweka msingi wa mawasiliano ya pande mbili.
 
@@ -63,7 +63,7 @@ ret
 Kuchunguza maktaba za kawaida kumefichua wagombea wanaofaa kwa ajili ya operesheni hizi:
 
 1. **Kusoma Kumbukumbu:**
-Funguo `property_getName()` kutoka kwa [maktaba ya wakati wa kukimbia ya Objective-C](https://opensource.apple.com/source/objc4/objc4-723/runtime/objc-runtime-new.mm.auto.html) inatambuliwa kama kazi inayofaa kwa kusoma kumbukumbu. Kazi hiyo imeelezwa hapa chini:
+Funguo `property_getName()` kutoka kwa [maktaba ya wakati wa Objective-C](https://opensource.apple.com/source/objc4/objc4-723/runtime/objc-runtime-new.mm.auto.html) inatambuliwa kama kazi inayofaa kwa kusoma kumbukumbu. Kazi hiyo imeelezwa hapa chini:
 ```c
 const char *property_getName(objc_property_t prop) {
 return prop->name;
@@ -111,7 +111,7 @@ Lengo ni kuanzisha kumbukumbu ya pamoja kati ya kazi za ndani na za mbali, kuifa
 
 Kwa kufuata hatua hizi, kumbukumbu ya pamoja kati ya kazi za ndani na za mbali itakuwa imewekwa kwa ufanisi, ikiruhusu uhamasishaji wa data kwa urahisi na utekelezaji wa kazi zinazohitaji hoja nyingi.
 
-## Vipande vya Kodi vya Ziada
+## Nambari za Ziada
 
 Kwa usambazaji wa kumbukumbu na uundaji wa kitu cha kumbukumbu ya pamoja:
 ```c
@@ -127,12 +127,12 @@ Kumbuka kushughulikia maelezo ya Mach ports na majina ya kuingia kwenye kumbukum
 
 ## 5. Kufikia Udhibiti Kamili
 
-Baada ya kufanikiwa kuanzisha kumbukumbu ya pamoja na kupata uwezo wa kutekeleza bila kikomo, tumepata udhibiti kamili juu ya mchakato wa lengo. Kazi muhimu zinazowezesha udhibiti huu ni:
+Baada ya kufanikiwa kuanzisha kumbukumbu ya pamoja na kupata uwezo wa kutekeleza bila kikomo, kwa kweli tumepata udhibiti kamili juu ya mchakato wa lengo. Kazi muhimu zinazowezesha udhibiti huu ni:
 
 1. **Operesheni za Kumbukumbu za Kijumla**:
 
-- Fanya usomaji wa kumbukumbu za kijumla kwa kuita `memcpy()` ili nakala data kutoka eneo la pamoja.
-- Fanya uandishi wa kumbukumbu za kijumla kwa kutumia `memcpy()` kuhamasisha data kwenye eneo la pamoja.
+- Fanya usomaji wa kumbukumbu wa kijumla kwa kuita `memcpy()` ili kunakili data kutoka kwenye eneo la pamoja.
+- Tekeleza uandishi wa kumbukumbu wa kijumla kwa kutumia `memcpy()` kuhamasisha data kwenye eneo la pamoja.
 
 2. **Kushughulikia Kuitwa kwa Kazi zenye Hoja Nyingi**:
 

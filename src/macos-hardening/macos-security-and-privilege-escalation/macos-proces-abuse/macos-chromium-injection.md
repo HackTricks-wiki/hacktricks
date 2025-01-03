@@ -8,7 +8,7 @@ Vivinjari vinavyotegemea Chromium kama Google Chrome, Microsoft Edge, Brave, na 
 
 #### `--load-extension` Flag
 
-Lipu la `--load-extension` linatumika wakati wa kuanzisha kivinjari kinachotegemea Chromium kutoka kwa mstari wa amri au skripti. Lipu hili linaruhusu **kuongeza moja au zaidi ya nyongeza** kwenye kivinjari wakati wa kuanzishwa.
+Lipu la `--load-extension` linatumika wakati wa kuanzisha kivinjari kinachotegemea Chromium kutoka kwa mstari wa amri au skripti. Lipu hili linaruhusu **kuongeza moja au zaidi ya nyongeza** kwenye kivinjari wakati wa kuanzisha.
 
 #### `--use-fake-ui-for-media-stream` Flag
 

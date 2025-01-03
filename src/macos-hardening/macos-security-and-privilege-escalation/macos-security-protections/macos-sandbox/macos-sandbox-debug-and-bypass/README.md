@@ -6,7 +6,7 @@
 
 <figure><img src="../../../../../images/image (901).png" alt=""><figcaption><p>Picha kutoka <a href="http://newosxbook.com/files/HITSB.pdf">http://newosxbook.com/files/HITSB.pdf</a></p></figcaption></figure>
 
-Katika picha iliyopita inawezekana kuona **jinsi sandbox itakavyopakiwa** wakati programu yenye haki **`com.apple.security.app-sandbox`** inapoendeshwa.
+Katika picha iliyopita inawezekana kuona **jinsi sandbox itakavyopakiwa** wakati programu yenye haki **`com.apple.security.app-sandbox`** inatekelezwa.
 
 Mwandiko utaunganisha `/usr/lib/libSystem.B.dylib` na binary.
 
@@ -22,7 +22,7 @@ Hatimaye, sandbox itakamilishwa kwa wito wa **`__sandbox_ms`** ambayo itaita **`
 Hii ndiyo iliyofanywa katika [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)**.**
 
 > [!CAUTION]
-> Hivyo, kwa sasa, ikiwa unaweza tu kuunda folda yenye jina linalomalizika na **`.app`** bila sifa ya karantini, unaweza kutoroka sandbox kwa sababu macOS inachunguza tu **sifa ya karantini** katika **folda ya `.app`** na katika **kifurushi kikuu** (na tutaanika kifurushi kikuu kwa **`/bin/bash`**).
+> Hivyo, kwa sasa, ikiwa unaweza tu kuunda folda yenye jina linalomalizika na **`.app`** bila sifa ya karantini, unaweza kutoroka sandbox kwa sababu macOS inachunguza tu **sifa ya karantini** katika **folda ya `.app`** na katika **kifurushi kikuu** (na tutafanya kifurushi kikuu kiangalie **`/bin/bash`**).
 >
 > Kumbuka kwamba ikiwa kifurushi cha .app tayari kimeidhinishwa kuendesha (kimekuwa na xttr ya karantini yenye bendera ya kuidhinishwa kuendesha), unaweza pia kutumia... isipokuwa sasa huwezi kuandika ndani ya **`.app`** bundles isipokuwa una baadhi ya ruhusa za TCC zenye mamlaka (ambazo huna ndani ya sandbox ya juu).
 
@@ -41,7 +41,7 @@ Kama ilivyoelezwa katika [**hiki chapisho**](https://www.vicarius.io/vsociety/po
 
 ### Abusing Auto Start Locations
 
-Ikiwa mchakato wa sandboxed unaweza **kuandika** mahali ambapo **baadaye programu isiyo na sandbox itakapoendesha binary**, itakuwa na uwezo wa **kutoroka kwa kuweka** hapo binary. Mfano mzuri wa aina hii ya maeneo ni `~/Library/LaunchAgents` au `/System/Library/LaunchDaemons`.
+Ikiwa mchakato wa sandboxed unaweza **kuandika** mahali ambapo **baadaye programu isiyo na sandbox itakimbia binary**, itakuwa na uwezo wa **kutoroka kwa kuweka** hapo binary. Mfano mzuri wa aina hii ya maeneo ni `~/Library/LaunchAgents` au `/System/Library/LaunchDaemons`.
 
 Kwa hili unaweza hata kuhitaji **hatua 2**: Kufanya mchakato wenye **sandbox yenye ruhusa zaidi** (`file-read*`, `file-write*`) kutekeleza msimbo wako ambao kwa kweli utaandika mahali ambapo itatekelezwa **bila sandbox**.
 
@@ -53,7 +53,7 @@ Angalia ukurasa huu kuhusu **Auto Start locations**:
 
 ### Abusing other processes
 
-Ikiwa kutoka kwa mchakato wa sandbox unaweza **kuathiri michakato mingine** inayofanya kazi katika sandboxes zenye vizuizi vidogo (au hakuna), utaweza kutoroka kwenye sandboxes zao:
+Ikiwa kutoka kwa mchakato wa sandbox unaweza **kuathiri michakato mingine** inayokimbia katika sandboxes zenye vizuizi vidogo (au hakuna), utaweza kutoroka kwenye sandboxes zao:
 
 {{#ref}}
 ../../../macos-proces-abuse/
@@ -63,7 +63,7 @@ Ikiwa kutoka kwa mchakato wa sandbox unaweza **kuathiri michakato mingine** inay
 
 Sandbox pia inaruhusu kuwasiliana na **Huduma za Mach** fulani kupitia XPC zilizofafanuliwa katika profaili `application.sb`. Ikiwa utaweza **kutumia** moja ya hizi huduma unaweza kuwa na uwezo wa **kutoroka sandbox**.
 
-Kama ilivyoonyeshwa katika [hiki andiko](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), taarifa kuhusu huduma za Mach inahifadhiwa katika `/System/Library/xpc/launchd.plist`. Inawezekana kupata huduma zote za System na User Mach kwa kutafuta ndani ya faili hiyo kwa `<string>System</string>` na `<string>User</string>`.
+Kama ilivyoonyeshwa katika [hiki andiko](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), taarifa kuhusu huduma za Mach zimehifadhiwa katika `/System/Library/xpc/launchd.plist`. Inawezekana kupata huduma zote za System na User Mach kwa kutafuta ndani ya faili hiyo kwa `<string>System</string>` na `<string>User</string>`.
 
 Zaidi ya hayo, inawezekana kuangalia ikiwa huduma ya Mach inapatikana kwa programu ya sandboxed kwa kuita `bootstrap_look_up`:
 ```objectivec
@@ -103,7 +103,7 @@ Njia nyingine ya kupata huduma halali za xpc ni kuangalia zile katika:
 find /System/Library/Frameworks -name "*.xpc"
 find /System/Library/PrivateFrameworks -name "*.xpc"
 ```
-Kadhaa ya mifano inayotumia mbinu hii yanaweza kupatikana katika [**andiko la awali**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), hata hivyo, yafuatayo ni baadhi ya mifano iliyofupishwa.
+Kadhaa ya mifano ya kutumia mbinu hii yanaweza kupatikana katika [**andiko la awali**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), hata hivyo, yafuatayo ni baadhi ya mifano iliyofupishwa.
 
 #### /System/Library/PrivateFrameworks/StorageKit.framework/XPCServices/storagekitfsrunner.xpc
 
@@ -173,7 +173,7 @@ break;
 ```
 #### /System/Library/PrivateFrameworks/WorkflowKit.framework/XPCServices/ShortcutsFileAccessHelper.xpc
 
-Huduma hii ya XPC inaruhusu kutoa ufikiaji wa kusoma na kuandika kwa URL yoyote kwa mteja wa XPC kupitia njia `extendAccessToURL:completion:` ambayo inakubali muunganisho wowote. Kwa kuwa huduma ya XPC ina FDA, inawezekana kutumia ruhusa hizi kukwepa TCC kabisa.
+Huduma hii ya XPC inaruhusu kutoa ufikiaji wa kusoma na kuandika kwa URL yoyote kwa mteja wa XPC kupitia njia `extendAccessToURL:completion:` ambayo inakubali muunganisho wowote. Kwa kuwa huduma ya XPC ina FDA, inawezekana kutumia ruhusa hizi kuzunguka TCC kabisa.
 
 Ushambuliaji ulikuwa:
 ```objectivec
@@ -205,9 +205,9 @@ NSLog(@"Read the target content:%@", [NSData dataWithContentsOfURL:targetURL]);
 ```
 ### Static Compiling & Dynamically linking
 
-[**Utafiti huu**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) uligundua njia 2 za kupita Sandbox. Kwa sababu sandbox inatumika kutoka userland wakati maktaba ya **libSystem** inapoloadiwa. Ikiwa binary inaweza kuepuka kuiload, haitapata sandbox kamwe:
+[**Utafiti huu**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) uligundua njia 2 za kupita Sandbox. Kwa sababu sandbox inatumika kutoka userland wakati maktaba ya **libSystem** inapoload. Ikiwa binary inaweza kuepuka kuiload, haitapata sandboxed kamwe:
 
-- Ikiwa binary ilikuwa **imeundwa kabisa kwa statically**, inaweza kuepuka kuiload maktaba hiyo.
+- Ikiwa binary ilikuwa **imeundwa kwa njia ya statically kabisa**, inaweza kuepuka kuiload maktaba hiyo.
 - Ikiwa **binary haitahitaji kuiload maktaba yoyote** (kwa sababu linker pia iko katika libSystem), haitahitaji kuiload libSystem.
 
 ### Shellcodes
@@ -225,7 +225,7 @@ Kama ilivyoelezwa katika **[bonus of this writeup](https://jhftss.github.io/A-Ne
 (allow default)
 (deny file-write* (literal "/private/tmp/sbx"))
 ```
-inaweza kupuuziliwa mbali na mchakato mpya ukitekeleza kwa mfano:
+inaweza kupuuziliwa mbali na mchakato mpya unaotekeleza kwa mfano:
 ```bash
 mkdir -p /tmp/poc.app/Contents/MacOS
 echo '#!/bin/sh\n touch /tmp/sbx' > /tmp/poc.app/Contents/MacOS/poc
@@ -324,7 +324,7 @@ Sandbox Bypassed!
 ```
 ### Debug & bypass Sandbox with lldb
 
-Tukutane na programu ambayo inapaswa kuwekwa kwenye sandbox:
+Tuchakue programu ambayo inapaswa kuwekwa kwenye sandbox:
 
 {{#tabs}}
 {{#tab name="sand.c"}}
@@ -361,7 +361,7 @@ system("cat ~/Desktop/del.txt");
 {{#endtab}}
 {{#endtabs}}
 
-Kisha jenga programu:
+Kisha jumuisha programu:
 ```bash
 # Compile it
 gcc -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __info_plist -Xlinker Info.plist sand.c -o sand
@@ -456,7 +456,7 @@ Process 2517 resuming
 Sandbox Bypassed!
 Process 2517 exited with status = 0 (0x00000000)
 ```
-> [!WARNING] > **Hata kama Sandbox imeepukwa TCC** itauliza mtumiaji kama anataka kuruhusu mchakato kusoma faili kutoka kwenye desktop
+> [!WARNING] > **Hata kama Sandbox imepita TCC** itauliza mtumiaji kama anataka kuruhusu mchakato kusoma faili kutoka desktop
 
 ## References
 

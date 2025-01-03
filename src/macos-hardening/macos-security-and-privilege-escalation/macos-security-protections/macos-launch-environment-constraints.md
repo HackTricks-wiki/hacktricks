@@ -4,11 +4,11 @@
 
 ## Basic Information
 
-Kikomo cha uzinduzi katika macOS kilianzishwa ili kuboresha usalama kwa **kudhibiti jinsi, nani, na kutoka wapi mchakato unaweza kuanzishwa**. Kilianza katika macOS Ventura, kinatoa mfumo unaopanga **kila binary ya mfumo katika makundi tofauti ya vizuizi**, ambavyo vin defined ndani ya **trust cache**, orodha inayojumuisha binaries za mfumo na hash zao husika​. Vizuizi hivi vinapanuka kwa kila binary inayoweza kutekelezwa ndani ya mfumo, vinavyohusisha seti ya **kanuni** zinazoelezea mahitaji ya **kuanzisha binary maalum**. Kanuni hizo zinajumuisha vizuizi vya kujitegemea ambavyo binary lazima ikidhi, vizuizi vya mzazi vinavyohitajika kukidhi na mchakato wake wa mzazi, na vizuizi vya kuwajibika vinavyopaswa kufuatwa na vyombo vingine husika​.
+Kikomo cha uzinduzi katika macOS kilianzishwa ili kuboresha usalama kwa **kudhibiti jinsi, nani, na kutoka wapi mchakato unaweza kuanzishwa**. Kilianza katika macOS Ventura, kinatoa mfumo unaopanga **kila binary ya mfumo katika makundi tofauti ya vizuizi**, ambayo yamefafanuliwa ndani ya **cache ya kuaminika**, orodha inayojumuisha binaries za mfumo na hash zao husika​. Vizuizi hivi vinapanuka kwa kila binary inayoweza kutekelezwa ndani ya mfumo, ikihusisha seti ya **kanuni** zinazofafanua mahitaji ya **kuanzisha binary maalum**. Kanuni hizo zinajumuisha vizuizi vya kujitegemea ambavyo binary lazima ikidhi, vizuizi vya mzazi vinavyohitajika kukidhi na mchakato wake wa mzazi, na vizuizi vya kuwajibika vinavyopaswa kufuatwa na vyombo vingine husika​.
 
 Mekaniki hii inapanuka kwa programu za wahusika wengine kupitia **Vizuizi vya Mazingira**, kuanzia macOS Sonoma, ikiruhusu wabunifu kulinda programu zao kwa kubainisha **seti ya funguo na thamani za vizuizi vya mazingira.**
 
-Unapofafanua **vizuizi vya mazingira na maktaba** katika kamusi za vizuizi ambazo unaziokoa katika **faili za orodha ya mali za `launchd`**, au katika **faili za orodha za mali za tofauti** ambazo unazitumia katika saini ya msimbo.
+Unapofafanua **vizuizi vya mazingira na maktaba** katika kamusi za vizuizi ambazo unaziokoa katika **faili za orodha ya mali za `launchd`**, au katika **faili za orodha za mali za kando** ambazo unazitumia katika saini ya msimbo.
 
 Kuna aina 4 za vizuizi:
 
@@ -25,21 +25,21 @@ Ikiwa wakati wa kupakia maktaba sehemu yoyote ya **vizuizi vya maktaba haviko kw
 
 LC inaundwa na **fact** na **operesheni za kimantiki** (na, au..) zinazounganisha ukweli.
 
-[ **Ukweli ambao LC inaweza kutumia umeandikwa**](https://developer.apple.com/documentation/security/defining_launch_environment_and_library_constraints). Kwa mfano:
+[ **Facts ambazo LC inaweza kutumia zimeandikwa**](https://developer.apple.com/documentation/security/defining_launch_environment_and_library_constraints). Kwa mfano:
 
 - is-init-proc: Thamani ya Boolean inayonyesha ikiwa executable lazima iwe mchakato wa kuanzisha wa mfumo wa uendeshaji (`launchd`).
-- is-sip-protected: Thamani ya Boolean inayonyesha ikiwa executable lazima iwe faili iliyopewa ulinzi na Mfumo wa Uthibitisho wa Usalama (SIP).
-- `on-authorized-authapfs-volume:` Thamani ya Boolean inayonyesha ikiwa mfumo wa uendeshaji ulipakia executable kutoka kwenye kiasi cha APFS kilichothibitishwa.
-- `on-authorized-authapfs-volume`: Thamani ya Boolean inayonyesha ikiwa mfumo wa uendeshaji ulipakia executable kutoka kwenye kiasi cha APFS kilichothibitishwa.
+- is-sip-protected: Thamani ya Boolean inayonyesha ikiwa executable lazima iwe faili iliyopewa ulinzi na Mfumo wa Uaminifu wa Mfumo (SIP).
+- `on-authorized-authapfs-volume:` Thamani ya Boolean inayonyesha ikiwa mfumo wa uendeshaji ulipakia executable kutoka kwenye kiasi cha APFS kilichothibitishwa, kilichothibitishwa.
+- `on-authorized-authapfs-volume`: Thamani ya Boolean inayonyesha ikiwa mfumo wa uendeshaji ulipakia executable kutoka kwenye kiasi cha APFS kilichothibitishwa, kilichothibitishwa.
 - Kiasi cha Cryptexes
 - `on-system-volume:` Thamani ya Boolean inayonyesha ikiwa mfumo wa uendeshaji ulipakia executable kutoka kwenye kiasi cha mfumo kilichozinduliwa kwa sasa.
 - Ndani ya /System...
 - ...
 
-Wakati binary ya Apple imesainiwa in **itapewa LC category** ndani ya **trust cache**.
+Wakati binary ya Apple imesainiwa in **itapewa LC category** ndani ya **cache ya kuaminika**.
 
-- **iOS 16 LC categories** zilikuwa [**zimegeuzwa na kuandikwa hapa**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056).
-- **LC categories za sasa (macOS 14** - Somona) zimegeuzwa na [**maelezo yao yanaweza kupatikana hapa**](https://gist.github.com/theevilbit/a6fef1e0397425a334d064f7b6e1be53).
+- **iOS 16 LC categories** zilirejelewa na kuandikwa hapa [**hapa**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056).
+- **LC categories za sasa (macOS 14** - Somona) zimekaguliwa na [**maelezo yao yanaweza kupatikana hapa**](https://gist.github.com/theevilbit/a6fef1e0397425a334d064f7b6e1be53).
 
 Kwa mfano, Kategoria 1 ni:
 ```
@@ -54,11 +54,11 @@ Parent Constraint: is-init-proc
 
 ### Kurejesha LC Categories
 
-Una habari zaidi [**kuhusu hii hapa**](https://theevilbit.github.io/posts/launch_constraints_deep_dive/#reversing-constraints), lakini kimsingi, Zimewekwa katika **AMFI (AppleMobileFileIntegrity)**, hivyo unahitaji kupakua Kernel Development Kit ili kupata **KEXT**. Alama zinazohusiana na **`kConstraintCategory`** ndizo **za kuvutia**. Ukizitoa utapata mstream wa DER (ASN.1) uliokodishwa ambao utahitaji kufasiriwa na [ASN.1 Decoder](https://holtstrom.com/michael/tools/asn1decoder.php) au maktaba ya python-asn1 na skripti yake ya `dump.py`, [andrivet/python-asn1](https://github.com/andrivet/python-asn1/tree/master) ambayo itakupa mfuatano unaoeleweka zaidi.
+Una habari zaidi [**kuhusu hii hapa**](https://theevilbit.github.io/posts/launch_constraints_deep_dive/#reversing-constraints), lakini kimsingi, Zimewekwa katika **AMFI (AppleMobileFileIntegrity)**, hivyo unahitaji kupakua Kernel Development Kit ili kupata **KEXT**. Alama zinazohusiana na **`kConstraintCategory`** ndizo **za kuvutia**. Ukizitoa utapata mstream wa DER (ASN.1) uliokodishwa ambao utahitaji kufasiriwa kwa [ASN.1 Decoder](https://holtstrom.com/michael/tools/asn1decoder.php) au maktaba ya python-asn1 na skripti yake ya `dump.py`, [andrivet/python-asn1](https://github.com/andrivet/python-asn1/tree/master) ambayo itakupa mfuatano unaoeleweka zaidi.
 
 ## Mipaka ya Mazingira
 
-Hizi ni Mipaka ya Uzinduzi zilizowekwa katika **maombi ya wahusika wengine**. Mwandishi anaweza kuchagua **ukweli** na **operands za kimantiki kutumia** katika maombi yake ili kuzuia ufikiaji kwake mwenyewe.
+Hizi ni Mipaka za Uzinduzi zilizowekwa katika **maombi ya wahusika wengine**. Mwandishi anaweza kuchagua **ukweli** na **operands za kimantiki kutumia** katika maombi yake ili kuzuia ufikiaji kwake mwenyewe.
 
 Inawezekana kuhesabu Mipaka ya Mazingira ya programu kwa:
 ```bash
@@ -81,7 +81,7 @@ Na katika iOS inaonekana kama iko katika **`/usr/standalone/firmware/FUD/StaticT
 
 Faili za awali za hifadhi za kuaminika ziko katika muundo **IMG4** na **IM4P**, ambapo IM4P ni sehemu ya mzigo ya muundo wa IMG4.
 
-Unaweza kutumia [**pyimg4**](https://github.com/m1stadev/PyIMG4) kutoa mzigo wa hifadhidata:
+Unaweza kutumia [**pyimg4**](https://github.com/m1stadev/PyIMG4) kutoa mzigo wa databasi:
 ```bash
 # Installation
 python3 -m pip install pyimg4
@@ -150,7 +150,7 @@ Hata hivyo, havipunguzi matumizi ya kawaida ya XPC, **Electron** kuingiza msimbo
 Katika toleo la Sonoma, jambo muhimu ni **mipangilio ya wajibu** ya huduma ya XPC daemon. Huduma ya XPC inawajibika kwa ajili yake mwenyewe, tofauti na mteja anayounganisha kuwa na wajibu. Hii imeandikwa katika ripoti ya maoni FB13206884. Mpangilio huu unaweza kuonekana kuwa na kasoro, kwani unaruhusu mwingiliano fulani na huduma ya XPC:
 
 - **Kuzindua Huduma ya XPC**: Ikiwa inachukuliwa kuwa hitilafu, mpangilio huu haukuruhusu kuanzisha huduma ya XPC kupitia msimbo wa mshambuliaji.
-- **Kuungana na Huduma Inayoendelea**: Ikiwa huduma ya XPC tayari inaendesha (inaweza kuwa imeanzishwa na programu yake ya asili), hakuna vizuizi vya kuungana nayo.
+- **Kuungana na Huduma Inayoendelea**: Ikiwa huduma ya XPC tayari inaendesha (inaweza kuwa imewezeshwa na programu yake ya asili), hakuna vizuizi vya kuungana nayo.
 
 Wakati wa kutekeleza vizuizi kwenye huduma ya XPC kunaweza kuwa na manufaa kwa **kupunguza dirisha la mashambulizi yanayoweza kutokea**, haishughuliki wasiwasi wa msingi. Kuthibitisha usalama wa huduma ya XPC kimsingi kunahitaji **kuthibitisha mteja anayounganisha kwa ufanisi**. Hii inabaki kuwa njia pekee ya kuimarisha usalama wa huduma hiyo. Pia, inafaa kutaja kwamba mpangilio wa wajibu ulioelezwa kwa sasa unafanya kazi, ambayo huenda isiendane na muundo ulio kusudiwa.
 

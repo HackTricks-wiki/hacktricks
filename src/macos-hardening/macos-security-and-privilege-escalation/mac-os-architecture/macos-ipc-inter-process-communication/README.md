@@ -18,12 +18,12 @@ Mchakato pia unaweza kutuma jina la bandari pamoja na haki fulani **kwa kazi tof
 
 Haki za bandari, ambazo zinaelezea ni shughuli zipi kazi inaweza kufanya, ni muhimu kwa mawasiliano haya. Haki zinazowezekana za **bandari** ni ([mafafanuo kutoka hapa](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)):
 
-- **Haki ya Kupokea**, ambayo inaruhusu kupokea ujumbe uliopelekwa kwa bandari. Bandari za Mach ni MPSC (mzalishaji-mwingi, mtumiaji-mmoja) foleni, ambayo ina maana kwamba kunaweza kuwa na **haki moja tu ya kupokea kwa kila bandari** katika mfumo mzima (kinyume na mabomba, ambapo michakato mingi inaweza kuwa na viashiria vya faili kwa mwisho wa kusoma wa bomba moja).
+- **Haki ya Kupokea**, ambayo inaruhusu kupokea ujumbe uliopelekwa kwa bandari. Bandari za Mach ni MPSC (mzalishaji-mwingi, mtumiaji-mmoja) foleni, ambayo inamaanisha kuwa kunaweza kuwa na **haki moja ya kupokea kwa kila bandari** katika mfumo mzima (kinyume na mabomba, ambapo michakato mingi inaweza kushikilia viashiria vya faili kwa mwisho wa kusoma wa bomba moja).
 - **Kazi yenye Haki ya Kupokea** inaweza kupokea ujumbe na **kuunda Haki za Kutuma**, ikiruhusu kutuma ujumbe. Awali, tu **kazi yake mwenyewe ina Haki ya Kupokea juu ya bandari yake**.
 - **Haki ya Kutuma**, ambayo inaruhusu kutuma ujumbe kwa bandari.
 - Haki ya Kutuma inaweza **kuigwa** hivyo kazi inayomiliki Haki ya Kutuma inaweza kuiga haki hiyo na **kuipatia kazi ya tatu**.
 - **Haki ya Kutuma-mara moja**, ambayo inaruhusu kutuma ujumbe mmoja kwa bandari na kisha inatoweka.
-- **Haki ya Seti ya Bandari**, ambayo inaashiria _seti ya bandari_ badala ya bandari moja. Kuondoa ujumbe kutoka kwa seti ya bandari kunamaanisha kuondoa ujumbe kutoka kwa moja ya bandari inazozishikilia. Seti za bandari zinaweza kutumika kusikiliza kwenye bandari kadhaa kwa wakati mmoja, kama vile `select`/`poll`/`epoll`/`kqueue` katika Unix.
+- **Haki ya Seti ya Bandari**, ambayo inaashiria _seti ya bandari_ badala ya bandari moja. Kuondoa ujumbe kutoka kwa seti ya bandari kunamaanisha kuondoa ujumbe kutoka kwa moja ya bandari inazozishikilia. Seti za bandari zinaweza kutumika kusikiliza kwenye bandari kadhaa kwa wakati mmoja, kama `select`/`poll`/`epoll`/`kqueue` katika Unix.
 - **Jina la Kufa**, ambalo si haki halisi ya bandari, bali ni tu nafasi ya kuweka. Wakati bandari inaharibiwa, haki zote zilizopo za bandari kwa bandari hiyo zinageuka kuwa majina ya kufa.
 
 **Kazi zinaweza kuhamasisha Haki za KUTUMA kwa wengine**, na kuwapa uwezo wa kutuma ujumbe nyuma. **Haki za KUTUMA pia zinaweza kuigwa, hivyo kazi inaweza kuiga na kutoa haki hiyo kwa kazi ya tatu**. Hii, pamoja na mchakato wa kati unaojulikana kama **seva ya bootstrap**, inaruhusu mawasiliano bora kati ya kazi.
@@ -41,29 +41,29 @@ Kama ilivyotajwa, ili kuanzisha njia ya mawasiliano, **seva ya bootstrap** (**la
 1. Kazi **A** inaanzisha **bandari mpya**, ikipata **haki ya KUPOKEA** katika mchakato.
 2. Kazi **A**, ikiwa ni mmiliki wa haki ya KUPOKEA, **inazalisha haki ya KUTUMA kwa bandari**.
 3. Kazi **A** inaweka **kiunganishi** na **seva ya bootstrap**, ikitoa **jina la huduma ya bandari** na **haki ya KUTUMA** kupitia utaratibu unaojulikana kama usajili wa bootstrap.
-4. Kazi **B** inashirikiana na **seva ya bootstrap** ili kutekeleza **kuangalia huduma** kwa jina. Ikiwa inafanikiwa, **seva inakopya haki ya KUTUMA** iliyopokelewa kutoka Kazi A na **kupeleka kwa Kazi B**.
-5. Baada ya kupata haki ya KUTUMA, Kazi **B** inaweza **kuunda** ujumbe na kupeleka **kwa Kazi A**.
+4. Kazi **B** inashirikiana na **seva ya bootstrap** ili kutekeleza **kuangalia huduma** kwa jina. Ikiwa inafanikiwa, **seva inakopi haki ya KUTUMA** iliyopokelewa kutoka Kazi A na **kuhamasisha kwa Kazi B**.
+5. Baada ya kupata haki ya KUTUMA, Kazi **B** ina uwezo wa **kuunda** ujumbe na kuutuma **kwa Kazi A**.
 6. Kwa mawasiliano ya pande mbili, kawaida kazi **B** inaunda bandari mpya yenye haki ya **KUPOKEA** na haki ya **KUTUMA**, na inampa **haki ya KUTUMA kwa Kazi A** ili iweze kutuma ujumbe kwa KAZI B (mawasiliano ya pande mbili).
 
-Seva ya bootstrap **haiwezi kuthibitisha** jina la huduma linalodaiwa na kazi. Hii ina maana kwamba **kazi** inaweza kwa urahisi **kujifanya kama kazi yoyote ya mfumo**, kama vile kudai kwa uwongo jina la huduma ya idhini na kisha kuidhinisha kila ombi.
+Seva ya bootstrap **haiwezi kuthibitisha** jina la huduma linalodaiwa na kazi. Hii inamaanisha kuwa **kazi** inaweza kuweza **kujifanya kuwa kazi yoyote ya mfumo**, kama kudai kwa uwongo jina la huduma ya idhini na kisha kuidhinisha kila ombi.
 
-Kisha, Apple inahifadhi **majina ya huduma zinazotolewa na mfumo** katika faili za usanidi salama, zilizoko katika **directories zilizolindwa na SIP**: `/System/Library/LaunchDaemons` na `/System/Library/LaunchAgents`. Pamoja na kila jina la huduma, **binary inayohusiana pia huhifadhiwa**. Seva ya bootstrap, itaunda na kushikilia **haki ya KUPOKEA kwa kila moja ya majina haya ya huduma**.
+Kisha, Apple inahifadhi **majina ya huduma zinazotolewa na mfumo** katika faili za usanidi salama, zilizoko katika **directories zilizolindwa na SIP**: `/System/Library/LaunchDaemons` na `/System/Library/LaunchAgents`. Pamoja na kila jina la huduma, **binary inayohusiana pia inahifadhiwa**. Seva ya bootstrap, itaunda na kushikilia **haki ya KUPOKEA kwa kila moja ya majina haya ya huduma**.
 
-Kwa huduma hizi zilizowekwa awali, **mchakato wa kuangalia unabadilika kidogo**. Wakati jina la huduma linatafutwa, launchd inaanzisha huduma hiyo kwa njia ya kidinamik. Mchakato mpya ni kama ifuatavyo:
+Kwa huduma hizi zilizopangwa, **mchakato wa kuangalia unabadilika kidogo**. Wakati jina la huduma linatafutwa, launchd inaanzisha huduma hiyo kwa njia ya kidinari. Mchakato mpya ni kama ifuatavyo:
 
 - Kazi **B** inaanzisha **kuangalia** kwa jina la huduma.
 - **launchd** inakagua ikiwa kazi inafanya kazi na ikiwa haifanyi, **inaanzisha**.
-- Kazi **A** (huduma) inafanya **kujiandikisha kwa bootstrap**. Hapa, seva ya **bootstrap** inaunda haki ya KUTUMA, inashikilia hiyo, na **inapeleka haki ya KUPOKEA kwa Kazi A**.
-- launchd inakopya **haki ya KUTUMA na kupeleka kwa Kazi B**.
+- Kazi **A** (huduma) inafanya **kuangalia kwa bootstrap**. Hapa, seva ya **bootstrap** inaunda haki ya KUTUMA, inashikilia, na **kuhamasisha haki ya KUPOKEA kwa Kazi A**.
+- launchd inakopi **haki ya KUTUMA na kuhamasisha kwa Kazi B**.
 - Kazi **B** inaunda bandari mpya yenye haki ya **KUPOKEA** na haki ya **KUTUMA**, na inampa **haki ya KUTUMA kwa Kazi A** (huduma) ili iweze kutuma ujumbe kwa KAZI B (mawasiliano ya pande mbili).
 
-Hata hivyo, mchakato huu unatumika tu kwa kazi za mfumo zilizowekwa awali. Kazi zisizo za mfumo bado zinafanya kazi kama ilivyoelezwa awali, ambayo inaweza kuruhusu kujifanya.
+Hata hivyo, mchakato huu unatumika tu kwa kazi za mfumo zilizopangwa. Kazi zisizo za mfumo bado zinafanya kazi kama ilivyoelezwa awali, ambayo inaweza kuruhusu kujifanya. 
 
 ### Ujumbe wa Mach
 
 [Find more info here](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
 
-Kazi ya `mach_msg`, kimsingi ni wito wa mfumo, inatumika kwa kutuma na kupokea ujumbe wa Mach. Kazi hii inahitaji ujumbe utakaotumwa kama hoja ya awali. Ujumbe huu lazima uanze na muundo wa `mach_msg_header_t`, ukifuatwa na maudhui halisi ya ujumbe. Muundo umefafanuliwa kama ifuatavyo:
+Kazi ya `mach_msg`, kimsingi ni wito wa mfumo, inatumika kutuma na kupokea ujumbe wa Mach. Kazi hii inahitaji ujumbe utakaotumwa kama hoja ya awali. Ujumbe huu lazima uanze na muundo wa `mach_msg_header_t`, ukifuatwa na maudhui halisi ya ujumbe. Muundo umefafanuliwa kama ifuatavyo:
 ```c
 typedef struct {
 mach_msg_bits_t               msgh_bits;
@@ -79,7 +79,7 @@ Mchakato unaomiliki _**kupokea haki**_ unaweza kupokea ujumbe kwenye bandari ya 
 Ili kufikia **mawasiliano ya pande mbili** kwa urahisi, mchakato unaweza kubainisha **bandari ya mach** katika **kichwa cha ujumbe** kinachoitwa _bandari ya majibu_ (**`msgh_local_port`**) ambapo **mpokeaji** wa ujumbe anaweza **kutuma jibu** kwa ujumbe huu. Bitflags katika **`msgh_bits`** zinaweza kutumika ku **onyesha** kwamba **haki ya tuma-mara-moja** inapaswa kutolewa na kuhamishwa kwa bandari hii (`MACH_MSG_TYPE_MAKE_SEND_ONCE`).
 
 > [!TIP]
-> Kumbuka kwamba aina hii ya mawasiliano ya pande mbili inatumika katika ujumbe wa XPC ambao unatarajia replay (`xpc_connection_send_message_with_reply` na `xpc_connection_send_message_with_reply_sync`). Lakini **kwa kawaida bandari tofauti zinaundwa** kama ilivyoelezwa hapo awali ili kuunda mawasiliano ya pande mbili.
+> Kumbuka kwamba aina hii ya mawasiliano ya pande mbili inatumika katika ujumbe za XPC zinazotarajia jibu (`xpc_connection_send_message_with_reply` na `xpc_connection_send_message_with_reply_sync`). Lakini **kwa kawaida bandari tofauti zinaanzishwa** kama ilivyoelezwa hapo awali ili kuunda mawasiliano ya pande mbili.
 
 Sehemu nyingine za kichwa cha ujumbe ni:
 
@@ -89,7 +89,7 @@ Sehemu nyingine za kichwa cha ujumbe ni:
 - `msgh_id`: ID ya ujumbe huu, ambayo inatafsiriwa na mpokeaji.
 
 > [!CAUTION]
-> Kumbuka kwamba **ujumbe wa mach unatumwa kupitia \_bandari ya mach**\_, ambayo ni **mpokeaji mmoja**, **watumaji wengi** njia ya mawasiliano iliyojengwa ndani ya kernel ya mach. **Mchakato wengi** wanaweza **kutuma ujumbe** kwa bandari ya mach, lakini kwa wakati wowote mchakato mmoja tu unaweza **kusoma** kutoka kwake.
+> Kumbuka kwamba **ujumbe za mach zinatumwa kupitia \_bandari ya mach**\_, ambayo ni **mpokeaji mmoja**, **watumaji wengi** njia ya mawasiliano iliyojengwa ndani ya kernel ya mach. **Mchakato wengi** wanaweza **kutuma ujumbe** kwa bandari ya mach, lakini wakati wowote mchakato mmoja tu unaweza **kusoma** kutoka kwake.
 
 ### Orodhesha bandari
 ```bash
@@ -227,16 +227,16 @@ printf("Sent a message\n");
 
 ### Bandari za Kipekee
 
-- **Bandari ya mwenyeji**: Ikiwa mchakato una **Haki ya Kutuma** juu ya bandari hii anaweza kupata **taarifa** kuhusu **mfumo** (mfano `host_processor_info`).
-- **Bandari ya haki ya mwenyeji**: Mchakato wenye **Haki ya Kutuma** juu ya bandari hii unaweza kufanya **vitendo vya kipekee** kama kupakia nyongeza ya kernel. **Mchakato unahitaji kuwa mzizi** ili kupata ruhusa hii.
+- **Bandari ya mwenyeji**: Ikiwa mchakato una **Send** ruhusa juu ya bandari hii anaweza kupata **habari** kuhusu **mfumo** (mfano `host_processor_info`).
+- **Bandari ya ruhusa ya mwenyeji**: Mchakato wenye **Send** haki juu ya bandari hii unaweza kufanya **vitendo vya kipekee** kama kupakia nyongeza ya kernel. **Mchakato unahitaji kuwa root** ili kupata ruhusa hii.
 - Zaidi ya hayo, ili kuita **`kext_request`** API inahitajika kuwa na haki nyingine **`com.apple.private.kext*`** ambazo zinatolewa tu kwa binaries za Apple.
 - **Bandari ya jina la kazi:** Toleo lisilo na haki la _bandari ya kazi_. Inarejelea kazi, lakini haiwezeshi kudhibiti. Kitu pekee kinachonekana kupatikana kupitia hiyo ni `task_info()`.
-- **Bandari ya kazi** (pia inajulikana kama bandari ya kernel)**:** Kwa ruhusa ya Kutuma juu ya bandari hii inawezekana kudhibiti kazi (kusoma/kandika kumbukumbu, kuunda nyuzi...).
-- Piga `mach_task_self()` ili **kupata jina** la bandari hii kwa kazi ya mpiga simu. Bandari hii ni **inas inherit** kupitia **`exec()`**; kazi mpya iliyoundwa kwa `fork()` inapata bandari mpya ya kazi (kama kesi maalum, kazi pia inapata bandari mpya ya kazi baada ya `exec()` katika binary ya suid). Njia pekee ya kuanzisha kazi na kupata bandari yake ni kufanya ["port swap dance"](https://robert.sesek.com/2014/1/changes_to_xnu_mach_ipc.html) wakati wa kufanya `fork()`.
+- **Bandari ya kazi** (pia inajulikana kama bandari ya kernel)**:** Kwa ruhusa ya Send juu ya bandari hii inawezekana kudhibiti kazi (kusoma/kandika kumbukumbu, kuunda nyuzi...).
+- Piga `mach_task_self()` ili **kupata jina** la bandari hii kwa kazi ya mpiga simu. Bandari hii ni **inherited** tu kupitia **`exec()`**; kazi mpya iliyoundwa kwa `fork()` inapata bandari mpya ya kazi (kama kesi maalum, kazi pia inapata bandari mpya ya kazi baada ya `exec()` katika binary ya suid). Njia pekee ya kuanzisha kazi na kupata bandari yake ni kufanya ["port swap dance"](https://robert.sesek.com/2014/1/changes_to_xnu_mach_ipc.html) wakati wa kufanya `fork()`.
 - Hizi ndizo vizuizi vya kufikia bandari (kutoka `macos_task_policy` kutoka binary `AppleMobileFileIntegrity`):
-- Ikiwa programu ina **`com.apple.security.get-task-allow` entitlement** mchakato kutoka **mtumiaji yule yule wanaweza kufikia bandari ya kazi** (kawaida huongezwa na Xcode kwa ajili ya ufuatiliaji). Mchakato wa **notarization** hautaruhusu kwa toleo la uzalishaji.
-- Programu zenye **`com.apple.system-task-ports`** entitlement zinaweza kupata **bandari ya kazi kwa mchakato wowote**, isipokuwa kernel. Katika toleo za zamani ilijulikana kama **`task_for_pid-allow`**. Hii inatolewa tu kwa programu za Apple.
-- **Mzizi anaweza kufikia bandari za kazi** za programu **zisizokamilishwa** na **runtime iliyoimarishwa** (na sio kutoka Apple).
+- Ikiwa programu ina **`com.apple.security.get-task-allow` ruhusa** mchakato kutoka **mtumiaji yule yule wanaweza kufikia bandari ya kazi** (kawaida huongezwa na Xcode kwa ajili ya ufuatiliaji). Mchakato wa **notarization** hautaruhusu kwa toleo la uzalishaji.
+- Programu zenye **`com.apple.system-task-ports`** ruhusa zinaweza kupata **bandari ya kazi kwa mchakato wowote**, isipokuwa kernel. Katika toleo za zamani ilijulikana kama **`task_for_pid-allow`**. Hii inatolewa tu kwa programu za Apple.
+- **Root anaweza kufikia bandari za kazi** za programu **zisizokamilishwa** na **runtime iliyoimarishwa** (na sio kutoka Apple).
 
 ### Uingizaji wa Shellcode katika nyuzi kupitia Bandari ya Kazi
 
@@ -500,13 +500,13 @@ gcc -framework Foundation -framework Appkit sc_inject.m -o sc_inject
 ```
 ### Dylib Injection katika thread kupitia Task port
 
-Katika macOS **threads** zinaweza kudhibitiwa kupitia **Mach** au kutumia **posix `pthread` api**. Thread tuliyoitengeneza katika sindano ya awali, ilitengenezwa kwa kutumia Mach api, hivyo **siyo ya posix compliant**.
+Katika macOS **threads** zinaweza kudhibitiwa kupitia **Mach** au kutumia **posix `pthread` api**. Thread tuliyoitengeneza katika sindano ya awali, ilitengenezwa kwa kutumia Mach api, hivyo **siyo ya posix**.
 
-Ilikuwa inawezekana **kuiingiza shellcode rahisi** ili kutekeleza amri kwa sababu **haikuhitaji kufanya kazi na apis za posix** zinazokubalika, bali tu na Mach. **Mingine ya kuingiza** itahitaji **thread** pia iwe **posix compliant**.
+Ilikuwa inawezekana **kuiingiza shellcode rahisi** ili kutekeleza amri kwa sababu **haikuhitaji kufanya kazi na posix** zinazokubalika, bali tu na Mach. **Kuingiza kwa hali ngumu zaidi** kutahitaji **thread** pia iwe **ya posix**.
 
 Hivyo, ili **kuboresha thread** inapaswa kuita **`pthread_create_from_mach_thread`** ambayo itaunda **pthread halali**. Kisha, hii pthread mpya inaweza **kuita dlopen** ili **kupakia dylib** kutoka mfumo, hivyo badala ya kuandika shellcode mpya ili kutekeleza vitendo tofauti, inawezekana kupakia maktaba maalum.
 
-Unaweza kupata **esempe dylibs** katika (kwa mfano ile inayozalisha log na kisha unaweza kuisikiliza):
+Unaweza kupata **esemble dylibs** katika (kwa mfano ile inayozalisha log na kisha unaweza kuisikiliza):
 
 {{#ref}}
 ../../macos-dyld-hijacking-and-dyld_insert_libraries.md
@@ -802,9 +802,9 @@ Katika mbinu hii, nyuzi ya mchakato inatekwa:
 
 ### Taarifa za Msingi
 
-XPC, ambayo inasimama kwa XNU (kernel inayotumiwa na macOS) mawasiliano kati ya Mchakato, ni mfumo wa **mawasiliano kati ya michakato** kwenye macOS na iOS. XPC inatoa mekanizma ya kufanya **kuitana kwa njia salama, zisizo za kawaida kati ya michakato tofauti** kwenye mfumo. Ni sehemu ya mtindo wa usalama wa Apple, ikiruhusu **kuundwa kwa programu zenye ruhusa tofauti** ambapo kila **kipengele** kinakimbia na **ruhusa pekee inayoihitaji** kufanya kazi yake, hivyo kupunguza uharibifu unaoweza kutokea kutokana na mchakato ulioathirika.
+XPC, ambayo inasimama kwa XNU (kernel inayotumiwa na macOS) mawasiliano kati ya Mchakato, ni mfumo wa **mawasiliano kati ya michakato** kwenye macOS na iOS. XPC inatoa mekanizma ya kufanya **kuitana kwa njia salama, zisizo za wakati mmoja kati ya michakato tofauti** kwenye mfumo. Ni sehemu ya mtindo wa usalama wa Apple, ikiruhusu **kuundwa kwa programu zenye ruhusa tofauti** ambapo kila **kipengele** kinakimbia na **ruhusa pekee inayoihitaji** kufanya kazi yake, hivyo kupunguza uharibifu unaoweza kutokea kutokana na mchakato ulioathirika.
 
-Kwa maelezo zaidi kuhusu jinsi **mawasiliano haya yanavyofanya kazi** na jinsi **yanavyoweza kuwa na udhaifu**, angalia:
+Kwa maelezo zaidi kuhusu jinsi **mawasiliano haya yanavyofanya kazi** na jinsi **yanavyoweza kuwa na udhaifu** angalia:
 
 {{#ref}}
 ../../macos-proces-abuse/macos-ipc-inter-process-communication/macos-xpc/

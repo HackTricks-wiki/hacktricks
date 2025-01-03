@@ -13,13 +13,13 @@ Mbinu hizi zitaongelewa baadaye, lakini katika nyakati za hivi karibuni Electron
 
 - **`RunAsNode`**: Ikiwa imezimwa, inazuia matumizi ya env var **`ELECTRON_RUN_AS_NODE`** kuingiza nambari.
 - **`EnableNodeCliInspectArguments`**: Ikiwa imezimwa, parameta kama `--inspect`, `--inspect-brk` hazitazingatiwa. Kuepusha njia hii ya kuingiza nambari.
-- **`EnableEmbeddedAsarIntegrityValidation`**: Ikiwa imewezeshwa, **`asar`** **faili** iliyoloadi itathibitishwa na macOS. **Kuzuia** njia hii **kuingiza nambari** kwa kubadilisha maudhui ya faili hii.
-- **`OnlyLoadAppFromAsar`**: Ikiwa hii imewezeshwa, badala ya kutafuta ku-load kwa mpangilio ufuatao: **`app.asar`**, **`app`** na hatimaye **`default_app.asar`**. Itakagua tu na kutumia app.asar, hivyo kuhakikisha kwamba wakati **imeunganishwa** na **`embeddedAsarIntegrityValidation`** fuse haiwezekani **kudhani nambari zisizo thibitishwa**.
-- **`LoadBrowserProcessSpecificV8Snapshot`**: Ikiwa imewezeshwa, mchakato wa kivinjari unatumia faili inayoitwa `browser_v8_context_snapshot.bin` kwa snapshot yake ya V8.
+- **`EnableEmbeddedAsarIntegrityValidation`**: Ikiwa imewezeshwa, **`asar`** **faili** iliyopakiwa itathibitishwa na macOS. **Kuzuia** njia hii **kuingiza nambari** kwa kubadilisha maudhui ya faili hii.
+- **`OnlyLoadAppFromAsar`**: Ikiwa hii imewezeshwa, badala ya kutafuta kupakia kwa mpangilio ufuatao: **`app.asar`**, **`app`** na hatimaye **`default_app.asar`**. Itakagua na kutumia tu app.asar, hivyo kuhakikisha kwamba wakati **imeunganishwa** na **`embeddedAsarIntegrityValidation`** fuse haiwezekani **kudhani nambari zisizo thibitishwa**.
+- **`LoadBrowserProcessSpecificV8Snapshot`**: Ikiwa imewezeshwa, mchakato wa kivinjari unatumia faili inayoitwa `browser_v8_context_snapshot.bin` kwa ajili ya snapshot yake ya V8.
 
 Fuse nyingine ya kuvutia ambayo haitazuia kuingiza nambari ni:
 
-- **EnableCookieEncryption**: Ikiwa imewezeshwa, duka la cookie kwenye diski linachakatwa kwa kutumia funguo za cryptography za kiwango cha OS.
+- **EnableCookieEncryption**: Ikiwa imewezeshwa, duka la kuki kwenye diski linachakatwa kwa kutumia funguo za cryptography za kiwango cha OS.
 
 ### Checking Electron Fuses
 
@@ -39,7 +39,7 @@ LoadBrowserProcessSpecificV8Snapshot is Disabled
 ```
 ### Kubadilisha Fuse za Electron
 
-Kama [**nyaraka zinavyosema**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode), usanidi wa **Fuse za Electron** umewekwa ndani ya **binary ya Electron** ambayo ina mahali fulani mfuatano wa **`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`**.
+Kama [**nyaraka zinavyosema**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode), usanidi wa **Fuse za Electron** umewekwa ndani ya **binary ya Electron** ambayo ina mahali fulani mfuatano wa herufi **`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`**.
 
 Katika programu za macOS hii kwa kawaida iko katika `application.app/Contents/Frameworks/Electron Framework.framework/Electron Framework`
 ```bash
@@ -52,7 +52,7 @@ Unaweza kupakia faili hii katika [https://hexed.it/](https://hexed.it/) na kutaf
 
 Kumbuka kwamba ukijaribu **kuandika upya** **`Electron Framework` binary** ndani ya programu kwa kutumia bytes hizi zilizobadilishwa, programu hiyo haitafanya kazi.
 
-## RCE kuongeza msimbo kwenye Programu za Electron
+## RCE kuongeza msimbo kwa Programu za Electron
 
 Kunaweza kuwa na **faili za nje za JS/HTML** ambazo Programu ya Electron inatumia, hivyo mshambuliaji anaweza kuingiza msimbo katika faili hizi ambazo saini yake haitakaguliwa na kutekeleza msimbo wa kiholela katika muktadha wa programu.
 
@@ -194,7 +194,7 @@ Unaweza kutumia vibaya hii env variable katika plist ili kudumisha kudumu kwa ku
 
 ## Run non JS Code
 
-Mbinu za awali zitakuruhusu kuendesha **msimbo wa JS ndani ya mchakato wa programu ya electron**. Hata hivyo, kumbuka kwamba **mchakato wa watoto unakimbia chini ya wasifu sawa wa sandbox** kama programu ya mzazi na **urithi wa ruhusa zao za TCC**.\
+Mbinu za awali zitakuruhusu kuendesha **msimbo wa JS ndani ya mchakato wa programu ya electron**. Hata hivyo, kumbuka kwamba **mchakato wa watoto unakimbia chini ya wasifu sawa wa sandbox** kama programu ya mzazi na **unapata ruhusa zao za TCC**.\
 Hivyo, ikiwa unataka kutumia haki za kuingia ili kufikia kamera au kipaza sauti kwa mfano, unaweza tu **kuendesha binary nyingine kutoka kwa mchakato**.
 
 ## Automatic Injection
