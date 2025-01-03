@@ -150,19 +150,19 @@ Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResu
 ```
 Перевірте на сторінці, згаданій у **наступному розділі, як зробити це вручну.**
 
-### Основні трюки хакінгу MSSQL
+### MSSQL Основні Хакерські Трюки
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-mssql-microsoft-sql-server/
 {{#endref}}
 
-## Довірені посилання MSSQL
+## MSSQL Довірені Посилання
 
 Якщо екземпляр MSSQL є довіреним (посилання на базу даних) іншим екземпляром MSSQL. Якщо у користувача є привілеї над довіреною базою даних, він зможе **використовувати довірчі відносини для виконання запитів також в іншому екземплярі**. Ці довіри можуть бути з'єднані, і в якийсь момент користувач може знайти неправильно налаштовану базу даних, де він може виконувати команди.
 
 **Посилання між базами даних працюють навіть через довіри лісу.**
 
-### Зловживання PowerShell
+### Зловживання Powershell
 ```powershell
 #Look for MSSQL links of an accessible instance
 Get-SQLServerLink -Instance dcorp-mssql -Verbose #Check for DatabaseLinkd > 0

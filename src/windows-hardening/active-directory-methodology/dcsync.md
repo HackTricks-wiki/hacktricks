@@ -45,7 +45,7 @@ Get-DomainUser -Identity * | ? {$_.useraccountcontrol -like '*ENCRYPTED_TEXT_PWD
 ```powershell
 Add-ObjectAcl -TargetDistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -PrincipalSamAccountName username -Rights DCSync -Verbose
 ```
-Тоді ви можете **перевірити, чи були правильно призначені** 3 привілеї, шукаючи їх у виході (ви повинні бачити назви привілеїв у полі "ObjectType"):
+Тоді ви можете **перевірити, чи правильно користувачу були призначені** 3 привілеї, шукаючи їх у виході (ви повинні бачити назви привілеїв у полі "ObjectType"):
 ```powershell
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{$_.IdentityReference -match "student114"}
 ```

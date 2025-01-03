@@ -43,23 +43,23 @@
 - [https://github.com/aboul3la/Sublist3r](https://github.com/aboul3la/Sublist3r) : Виявлення піддоменів
 - [https://github.com/gwen001/github-search/blob/master/github-subdomains.py](https://github.com/gwen001/github-search/blob/master/github-subdomains.py) : Виявлення піддоменів у github
 - [https://github.com/robertdavidgraham/masscan](https://github.com/robertdavidgraham/masscan) : Швидке сканування портів
-- [https://github.com/Threezh1/JSFinder](https://github.com/Threezh1/JSFinder) : Піддомени та URL-адреси з JS-файлів на веб-сайті
+- [https://github.com/Threezh1/JSFinder](https://github.com/Threezh1/JSFinder) : Піддомени та URL-адреси з JS-файлів на веб-сторінці
 - [https://github.com/C1h2e1/MyFuzzingDict](https://github.com/C1h2e1/MyFuzzingDict) : Словник веб-файлів
 - [https://github.com/TypeError/Bookmarks/blob/master/README.md](https://github.com/TypeError/Bookmarks/blob/master/README.md) : BurpExtension для уникнення десятків вкладок повторювача
 - [https://github.com/hakluke/hakrawler](https://github.com/hakluke/hakrawler) : Отримання активів
 - [https://github.com/izo30/google-dorker](https://github.com/izo30/google-dorker) : Google dorks
-- [https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md](https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md) : Чек-лист веб BugBounty
+- [https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md](https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md) : Чек-лист для веб BugBounty
 - [https://github.com/Naategh/dom-red](https://github.com/Naategh/dom-red) : Перевірка списку доменів на відкриту редирекцію
 - [https://github.com/prodigysml/Dr.-Watson](https://github.com/prodigysml/Dr.-Watson) : Плагін Burp, офлайн-аналіз для виявлення доменів, піддоменів та IP-адрес
 - [https://github.com/hahwul/WebHackersWeapons](https://github.com/hahwul/WebHackersWeapons): Список різних інструментів
 - [https://github.com/gauravnarwani97/Trishul](https://github.com/gauravnarwani97/Trishul) : Плагін BurpSuite для виявлення вразливостей (SQLi, XSS, SSTI)
 - [https://github.com/fransr/postMessage-tracker](https://github.com/fransr/postMessage-tracker) : Розширення Chrome для відстеження функцій пост-повідомлень
-- [https://github.com/Quitten/Autorize](https://github.com/Quitten/Autorize) : Автоматичні тести аутентифікації (видалити куки та спробувати надіслати запит)
+- [https://github.com/Quitten/Autorize](https://github.com/Quitten/Autorize) : Автоматичні тести аутентифікації (видалення куків і спроба надіслати запит)
 - [https://github.com/pikpikcu/xrcross](https://github.com/pikpikcu/xrcross): XRCross - це реконструкція, сканер і інструмент для тестування проникнення / BugBounty. Цей інструмент був створений для тестування вразливостей (XSS|SSRF|CORS|SSTI|IDOR|RCE|LFI|SQLI)
 
 # Windows
 
-- [https://github.com/Mr-Un1k0d3r/PoisonHandler](https://github.com/Mr-Un1k0d3r/PoisonHandler) : Бічні переміщення
+- [https://github.com/Mr-Un1k0d3r/PoisonHandler](https://github.com/Mr-Un1k0d3r/PoisonHandler) : Латеральні переміщення
 - [https://freddiebarrsmith.com/trix/trix.html](https://freddiebarrsmith.com/trix/trix.html) : LOL bins
 - [https://gist.github.com/netbiosX/ee35fcd3722e401a38136cff7b751d79](https://gist.github.com/netbiosX/ee35fcd3722e401a38136cff7b751d79) ([https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/](https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/)): Персистентність
 - [https://github.com/odzhan/injection](https://github.com/odzhan/injection) : Техніки ін'єкції процесів Windows

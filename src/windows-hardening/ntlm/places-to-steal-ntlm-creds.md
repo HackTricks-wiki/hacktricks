@@ -1,4 +1,4 @@
-# Місця для крадіжки NTLM облікових даних
+# Місця для викрадення NTLM облікових даних
 
 {{#include ../../banners/hacktricks-training.md}}
 

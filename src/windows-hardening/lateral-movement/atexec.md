@@ -22,6 +22,6 @@ schtasks /run /tn "MyNewtask" /S dcorp-dc.domain.local
 ```bash
 SharpLateral schedule HOSTNAME C:\Users\Administrator\Desktop\malware.exe TaskName
 ```
-Більше інформації про [**використання schtasks з срібними квитками тут**](../active-directory-methodology/silver-ticket.md#host).
+Більше інформації про [**використання schtasks з silver tickets тут**](../active-directory-methodology/silver-ticket.md#host).
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -2,10 +2,10 @@
 
 # DCShadow
 
-Він реєструє **новий контролер домену** в AD і використовує його для **поштовху атрибутів** (SIDHistory, SPNs...) на вказані об'єкти **без** залишення будь-яких **логів** щодо **модифікацій**. Вам **потрібні DA** привілеї і бути всередині **кореневого домену**.\
+Він реєструє **новий контролер домену** в AD і використовує його для **поширення атрибутів** (SIDHistory, SPNs...) на вказаних об'єктах **без** залишення будь-яких **логів** щодо **модифікацій**. Вам **потрібні DA** привілеї і ви повинні бути в **кореневому домені**.\
 Зверніть увагу, що якщо ви використовуєте неправильні дані, з'являться досить неприємні логи.
 
-Щоб виконати атаку, вам потрібно 2 екземпляри mimikatz. Один з них запустить RPC-сервери з привілеями SYSTEM (тут потрібно вказати зміни, які ви хочете виконати), а інший екземпляр буде використовуватися для поштовху значень:
+Для виконання атаки вам потрібно 2 екземпляри mimikatz. Один з них запустить RPC-сервери з привілеями SYSTEM (тут ви повинні вказати зміни, які хочете виконати), а інший екземпляр буде використовуватися для поширення значень:
 ```bash:mimikatz1 (RPC servers)
 !+
 !processtoken
@@ -31,8 +31,8 @@ lsadump::dcshadow /push
 - **Цільовий об'єкт**:
 - _WriteProperty_ (Не записувати)
 
-Ви можете використовувати [**Set-DCShadowPermissions**](https://github.com/samratashok/nishang/blob/master/ActiveDirectory/Set-DCShadowPermissions.ps1), щоб надати ці привілеї непривілейованому користувачу (зверніть увагу, що це залишить деякі журнали). Це набагато більш обмежувально, ніж мати привілеї DA.\
-Наприклад: `Set-DCShadowPermissions -FakeDC mcorp-student1 SAMAccountName root1user -Username student1 -Verbose` Це означає, що ім'я користувача _**student1**_ при вході в систему на машині _**mcorp-student1**_ має права DCShadow над об'єктом _**root1user**_.
+Ви можете використовувати [**Set-DCShadowPermissions**](https://github.com/samratashok/nishang/blob/master/ActiveDirectory/Set-DCShadowPermissions.ps1), щоб надати ці привілеї непривабливому користувачу (зверніть увагу, що це залишить деякі журнали). Це набагато більш обмежувально, ніж мати привілеї DA.\
+Наприклад: `Set-DCShadowPermissions -FakeDC mcorp-student1 SAMAccountName root1user -Username student1 -Verbose` Це означає, що ім'я користувача _**student1**_ при вході в систему на машині _**mcorp-student1**_ має права DCShadow на об'єкт _**root1user**_.
 
 ## Використання DCShadow для створення бекдорів
 ```bash:Set Enterprise Admins in SIDHistory to a user
@@ -63,7 +63,7 @@ lsadump::dcshadow /object:CN=AdminSDHolder,CN=System,DC=moneycorp,DC=local /attr
 
 Щоб отримати поточний ACE об'єкта: `(New-Object System.DirectoryServices.DirectoryEntry("LDAP://DC=moneycorp,DC=loca l")).psbase.ObjectSecurity.sddl`
 
-Зверніть увагу, що в цьому випадку вам потрібно зробити **кілька змін,** а не лише одну. Тому, в **сесії mimikatz1** (RPC сервер) використовуйте параметр **`/stack` з кожною зміною,** яку ви хочете внести. Таким чином, вам потрібно буде **`/push`** лише один раз, щоб виконати всі накопичені зміни на ружому сервері.
+Зверніть увагу, що в цьому випадку вам потрібно зробити **кілька змін,** а не лише одну. Тому, в **сесії mimikatz1** (RPC сервер) використовуйте параметр **`/stack` з кожною зміною,** яку ви хочете внести. Таким чином, вам потрібно буде **`/push`** лише один раз, щоб виконати всі накопичені зміни на роговому сервері.
 
 [**Більше інформації про DCShadow на ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)
 

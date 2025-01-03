@@ -17,7 +17,7 @@ _Цукрова версія_ [_RottenPotatoNG_](https://github.com/breenmachine
 
 ### Резюме <a href="#summary" id="summary"></a>
 
-[**З juicy-potato Readme**](https://github.com/ohpe/juicy-potato/blob/master/README.md)**:**
+[**З читання juicy-potato**](https://github.com/ohpe/juicy-potato/blob/master/README.md)**:**
 
 [RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) та його [варіанти](https://github.com/decoder-it/lonelypotato) використовують ланцюг підвищення привілеїв на основі [`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [сервісу](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126), що має MiTM слухача на `127.0.0.1:6666`, і коли у вас є привілеї `SeImpersonate` або `SeAssignPrimaryToken`. Під час огляду збірки Windows ми виявили налаштування, де `BITS` був навмисно вимкнений, а порт `6666` був зайнятий.
 
@@ -25,11 +25,11 @@ _Цукрова версія_ [_RottenPotatoNG_](https://github.com/breenmachine
 
 > Для теорії дивіться [Rotten Potato - Підвищення привілеїв з облікових записів служб до SYSTEM](https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/) і слідкуйте за ланцюгом посилань і посилань.
 
-Ми виявили, що, окрім `BITS`, є кілька COM-серверів, які ми можемо зловживати. Вони просто повинні:
+Ми виявили, що, крім `BITS`, є кілька COM-серверів, які ми можемо зловживати. Вони просто повинні:
 
 1. бути інстанційованими поточним користувачем, зазвичай "службовим користувачем", який має привілеї імперсонації
 2. реалізовувати інтерфейс `IMarshal`
-3. працювати як підвищений користувач (SYSTEM, Administrator, …)
+3. працювати як підвищений користувач (SYSTEM, Адміністратор, …)
 
 Після деяких тестувань ми отримали та протестували розширений список [цікавих CLSID](http://ohpe.it/juicy-potato/CLSID/) на кількох версіях Windows.
 
@@ -40,7 +40,7 @@ JuicyPotato дозволяє вам:
 - **Цільовий CLSID** _виберіть будь-який CLSID, який ви хочете._ [_Тут_](http://ohpe.it/juicy-potato/CLSID/) _ви можете знайти список, організований за ОС._
 - **COM порт прослуховування** _визначте COM порт прослуховування, який ви віддаєте перевагу (замість зашитого 6666)_
 - **IP-адреса прослуховування COM** _прив'яжіть сервер до будь-якої IP-адреси_
-- **Режим створення процесу** _в залежності від привілеїв імперсованого користувача ви можете вибрати з:_
+- **Режим створення процесу** _в залежності від привілеїв імперсонованого користувача ви можете вибрати з:_
 - `CreateProcessWithToken` (потрібен `SeImpersonate`)
 - `CreateProcessAsUser` (потрібен `SeAssignPrimaryToken`)
 - `обидва`
@@ -114,7 +114,7 @@ c:\Users\Public>
 
 Спочатку вам знадобляться деякі виконувані файли, окрім juicypotato.exe.
 
-Завантажте [Join-Object.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/utils/Join-Object.ps1) і завантажте його у вашу PS сесію, а також завантажте та виконайте [GetCLSID.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/GetCLSID.ps1). Цей скрипт створить список можливих CLSID для тестування.
+Завантажте [Join-Object.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/utils/Join-Object.ps1) і завантажте його у вашу сесію PS, а також завантажте та виконайте [GetCLSID.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/GetCLSID.ps1). Цей скрипт створить список можливих CLSID для тестування.
 
 Потім завантажте [test_clsid.bat ](https://github.com/ohpe/juicy-potato/blob/master/Test/test_clsid.bat) (змініть шлях до списку CLSID та до виконуваного файлу juicypotato) і виконайте його. Він почне пробувати кожен CLSID, і **коли номер порту зміниться, це означатиме, що CLSID спрацював**.
 

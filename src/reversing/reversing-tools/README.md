@@ -4,23 +4,23 @@
 
 У сфері **WebAssembly** інструменти для **декомпіляції** та **компіляції** є необхідними для розробників. Цей посібник представляє деякі онлайн-ресурси та програмне забезпечення для роботи з **Wasm (бінарний формат WebAssembly)** та **Wat (текстовий формат WebAssembly)** файлами.
 
-## Онлайн інструменти
+## Онлайн-інструменти
 
-- Для **декомпіляції** Wasm у Wat, корисним є інструмент, доступний на [демо wasm2wat від Wabt](https://webassembly.github.io/wabt/demo/wasm2wat/index.html).
-- Для **компіляції** Wat назад у Wasm, [демо wat2wasm від Wabt](https://webassembly.github.io/wabt/demo/wat2wasm/) виконує цю функцію.
+- Для **декомпіляції** Wasm у Wat зручно використовувати інструмент на [демо wasm2wat від Wabt](https://webassembly.github.io/wabt/demo/wasm2wat/index.html).
+- Для **компіляції** Wat назад у Wasm підходить [демо wat2wasm від Wabt](https://webassembly.github.io/wabt/demo/wat2wasm/).
 - Інший варіант декомпіляції можна знайти на [web-wasmdec](https://wwwg.github.io/web-wasmdec/).
 
 ## Програмні рішення
 
-- Для більш надійного рішення, [JEB від PNF Software](https://www.pnfsoftware.com/jeb/demo) пропонує розширені функції.
+- Для більш надійного рішення [JEB від PNF Software](https://www.pnfsoftware.com/jeb/demo) пропонує розширені функції.
 - Відкритий проект [wasmdec](https://github.com/wwwg/wasmdec) також доступний для завдань декомпіляції.
 
 # Ресурси для декомпіляції .Net
 
 Декомпіляцію .Net збірок можна виконати за допомогою таких інструментів:
 
-- [ILSpy](https://github.com/icsharpcode/ILSpy), який також пропонує [плагін для Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode), що дозволяє крос-платформене використання.
-- Для завдань, що включають **декомпіляцію**, **модифікацію** та **рекомпіляцію**, [dnSpy](https://github.com/0xd4d/dnSpy/releases) настійно рекомендується. **Клацання правою кнопкою** на методі та вибір **Modify Method** дозволяє вносити зміни в код.
+- [ILSpy](https://github.com/icsharpcode/ILSpy), який також пропонує [плагін для Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode), що дозволяє крос-платформне використання.
+- Для завдань, пов'язаних з **декомпіляцією**, **модифікацією** та **рекомпіляцією**, рекомендується [dnSpy](https://github.com/0xd4d/dnSpy/releases). **Клацання правою кнопкою** на методі та вибір **Modify Method** дозволяє вносити зміни в код.
 - [dotPeek від JetBrains](https://www.jetbrains.com/es-es/decompiler/) є ще одним альтернативним інструментом для декомпіляції .Net збірок.
 
 ## Покращення налагодження та ведення журналів з DNSpy
@@ -37,7 +37,7 @@ File.AppendAllText(path, "Password: " + password + "\n");
 
 ### Налагодження DNSpy
 
-Для ефективного налагодження з DNSpy рекомендується виконати послідовність кроків для налаштування **атрибутів збірки** для налагодження, забезпечуючи, щоб оптимізації, які можуть заважати налагодженню, були вимкнені. Цей процес включає зміну налаштувань `DebuggableAttribute`, рекомпіляцію збірки та збереження змін.
+Для ефективного налагодження з DNSpy рекомендується виконати ряд кроків для налаштування **атрибутів збірки** для налагодження, щоб оптимізації, які можуть заважати налагодженню, були вимкнені. Цей процес включає зміну налаштувань `DebuggableAttribute`, рекомпіляцію збірки та збереження змін.
 
 Крім того, щоб налагодити .Net додаток, запущений через **IIS**, виконання `iisreset /noforce` перезапускає IIS. Щоб приєднати DNSpy до процесу IIS для налагодження, посібник інструктує про вибір процесу **w3wp.exe** в DNSpy та початок сесії налагодження.
 
@@ -71,13 +71,13 @@ File.AppendAllText(path, "Password: " + password + "\n");
 
 ## **ARM & MIPS**
 
-- Для емуляції, [arm_now](https://github.com/nongiach/arm_now) є корисним ресурсом.
+- Для емуляції [arm_now](https://github.com/nongiach/arm_now) є корисним ресурсом.
 
 ## **Shellcodes**
 
 ### Техніки налагодження
 
-- **Blobrunner** та **jmp2it** є інструментами для виділення shellcode в пам'яті та налагодження їх за допомогою Ida або x64dbg.
+- **Blobrunner** та **jmp2it** є інструментами для виділення shellcodes в пам'яті та їх налагодження з Ida або x64dbg.
 - Blobrunner [випуски](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)
 - jmp2it [скомпільована версія](https://github.com/adamkramer/jmp2it/releases/)
 - **Cutter** пропонує емуляцію shellcode на основі GUI та інспекцію, підкреслюючи відмінності в обробці shellcode як файлу в порівнянні з прямим shellcode.
@@ -104,11 +104,11 @@ scdbg.exe -f shellcode /foff 0x0000004D # Виконати з зсуву
 
 ## **Delphi**
 
-- Для бінарних файлів Delphi рекомендується [IDR](https://github.com/crypto2011/IDR).
+- Для Delphi бінарників рекомендується [IDR](https://github.com/crypto2011/IDR).
 
 # Курси
 
 - [https://github.com/0xZ0F/Z0FCourse_ReverseEngineering](https://github.com/0xZ0F/Z0FCourse_ReverseEngineering)
-- [https://github.com/malrev/ABD](https://github.com/malrev/ABD) \(Деобфускація бінарних файлів\)
+- [https://github.com/malrev/ABD](https://github.com/malrev/ABD) \(Деобфускація бінарників\)
 
 {{#include ../../banners/hacktricks-training.md}}

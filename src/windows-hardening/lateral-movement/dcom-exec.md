@@ -16,7 +16,7 @@ COM об'єкт, [MMC Application Class (MMC20.Application)](https://technet.mic
 ```powershell
 [activator]::CreateInstance([type]::GetTypeFromProgID("<DCOM_ProgID>", "<IP_Address>"))
 ```
-Ця команда підключається до DCOM-додатку та повертає екземпляр COM-об'єкта. Метод ExecuteShellCommand може бути викликаний для виконання процесу на віддаленому хості. Процес включає наступні кроки:
+Ця команда підключається до DCOM-додатку та повертає екземпляр COM-об'єкта. Потім можна викликати метод ExecuteShellCommand для виконання процесу на віддаленому хості. Процес включає наступні кроки:
 
 Перевірте методи:
 ```powershell
@@ -42,9 +42,9 @@ ls \\10.10.10.10\c$\Users
 
 ### ShellWindows
 
-Для `ShellWindows`, який не має ProgID, методи .NET `Type.GetTypeFromCLSID` і `Activator.CreateInstance` полегшують створення об'єкта, використовуючи його AppID. Цей процес використовує OleView .NET для отримання CLSID для `ShellWindows`. Після створення об'єкта можливе взаємодія через метод `WindowsShell.Item`, що призводить до виклику методів, таких як `Document.Application.ShellExecute`.
+Для `ShellWindows`, який не має ProgID, методи .NET `Type.GetTypeFromCLSID` і `Activator.CreateInstance` полегшують інстанціювання об'єкта, використовуючи його AppID. Цей процес використовує OleView .NET для отримання CLSID для `ShellWindows`. Після інстанціювання можливе взаємодія через метод `WindowsShell.Item`, що призводить до виклику методів, таких як `Document.Application.ShellExecute`.
 
-Приклади команд PowerShell були надані для створення об'єкта та виконання команд віддалено:
+Були надані приклади команд PowerShell для інстанціювання об'єкта та виконання команд віддалено:
 ```powershell
 $com = [Type]::GetTypeFromCLSID("<clsid>", "<IP>")
 $obj = [System.Activator]::CreateInstance($com)

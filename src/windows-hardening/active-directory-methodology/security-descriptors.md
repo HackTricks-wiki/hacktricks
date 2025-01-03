@@ -4,13 +4,13 @@
 
 ## Security Descriptors
 
-[З документації](https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language): Мова визначення дескриптора безпеки (SDDL) визначає формат, який використовується для опису дескриптора безпеки. SDDL використовує рядки ACE для DACL і SACL: `ace_type;ace_flags;rights;object_guid;inherit_object_guid;account_sid;`
+[From the docs](https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language): Мова визначення дескриптора безпеки (SDDL) визначає формат, який використовується для опису дескриптора безпеки. SDDL використовує рядки ACE для DACL і SACL: `ace_type;ace_flags;rights;object_guid;inherit_object_guid;account_sid;`
 
 **Дескриптори безпеки** використовуються для **зберігання** **дозволів**, які **об'єкт** має **на** **інший об'єкт**. Якщо ви зможете **внести** **невелику зміну** в **дескриптор безпеки** об'єкта, ви зможете отримати дуже цікаві привілеї над цим об'єктом без необхідності бути членом привілейованої групи.
 
 Отже, ця техніка постійності базується на здатності отримати всі необхідні привілеї щодо певних об'єктів, щоб мати можливість виконати завдання, яке зазвичай вимагає адміністративних привілеїв, але без необхідності бути адміністратором.
 
-### Доступ до WMI
+### Access to WMI
 
 Ви можете надати користувачу доступ до **віддаленого виконання WMI** [**використовуючи це**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1):
 ```bash
@@ -26,7 +26,7 @@ Set-RemotePSRemoting -UserName student1 -ComputerName <remotehost> -Remove #Remo
 ```
 ### Дистанційний доступ до хешів
 
-Отримайте доступ до **реєстру** та **вивантажте хеші**, створюючи **реєстраційний бекдор за допомогою** [**DAMP**](https://github.com/HarmJ0y/DAMP)**,** щоб ви могли в будь-який момент отримати **хеш комп'ютера**, **SAM** та будь-які **кешовані облікові дані AD** на комп'ютері. Тому дуже корисно надати цей дозвіл **звичайному користувачу на комп'ютері контролера домену**:
+Доступ до **реєстру** та **вивантаження хешів**, створюючи **реєстраційний бекдор за допомогою** [**DAMP**](https://github.com/HarmJ0y/DAMP)**,** щоб ви могли в будь-який момент отримати **хеш комп'ютера**, **SAM** та будь-які **кешовані облікові дані AD** на комп'ютері. Тому дуже корисно надати цей дозвіл **звичайному користувачу на комп'ютері контролера домену**:
 ```bash
 # allows for the remote retrieval of a system's machine and local account hashes, as well as its domain cached credentials.
 Add-RemoteRegBackdoor -ComputerName <remotehost> -Trustee student1 -Verbose
