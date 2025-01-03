@@ -140,7 +140,9 @@ This way requires the **victim user** to be **running** a **process** inside the
 
 #### Knowing the users password
 
-{% embed url="https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files" %}
+{{#ref}}
+https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
+{{#endref}}
 
 ## Group Managed Service Accounts (gMSA)
 
@@ -264,8 +266,4 @@ The SSPI will be in charge of finding the adequate protocol for two machines tha
 windows-security-controls/uac-user-account-control.md
 {{#endref}}
 
-
 {{#include ../banners/hacktricks-training.md}}
-
-
-

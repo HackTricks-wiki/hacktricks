@@ -1049,9 +1049,13 @@ The project collects legitimate functions of Unix binaries that can be abused to
 > strace -o /dev/null /bin/sh\
 > sudo awk 'BEGIN {system("/bin/sh")}'
 
-{% embed url="https://gtfobins.github.io/" %}
+{{#ref}}
+https://gtfobins.github.io/
+{{#endref}}
 
-{% embed url="https://gtfoargs.github.io/" %}
+{{#ref}}
+https://gtfoargs.github.io/
+{{#endref}}
 
 ### FallOfSudo
 
@@ -1655,6 +1659,4 @@ cisco-vmanage.md
 - [https://www.linode.com/docs/guides/what-is-systemd/](https://www.linode.com/docs/guides/what-is-systemd/)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
 

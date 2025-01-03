@@ -166,7 +166,9 @@ cheat-engine.md
 
 ## ARM & MIPS
 
-{% embed url="https://github.com/nongiach/arm_now" %}
+{{#ref}}
+https://github.com/nongiach/arm_now
+{{#endref}}
 
 ## Shellcodes
 
@@ -402,7 +404,9 @@ So, in this challenge, knowing the values of the buttons, you needed to **press 
 
 ## Game Boy
 
-{% embed url="https://www.youtube.com/watch?v=VVbRe7wr3G4" %}
+{{#ref}}
+https://www.youtube.com/watch?v=VVbRe7wr3G4
+{{#endref}}
 
 ## Courses
 
@@ -410,6 +414,3 @@ So, in this challenge, knowing the values of the buttons, you needed to **press 
 - [https://github.com/malrev/ABD](https://github.com/malrev/ABD) (Binary deobfuscation)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

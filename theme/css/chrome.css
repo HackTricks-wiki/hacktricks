@@ -852,7 +852,7 @@ html:not(.sidebar-resizing) .sidebar {
     border-top: 1px solid var(--table-border-color);
     margin-top: 1rem;
     align-content: center;
-    z-index: 101;
+    z-index: 106;
 }
 .footer .theme-wrapper {
     max-width: var(--container-max-width);
