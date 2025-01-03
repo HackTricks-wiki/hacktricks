@@ -1,13 +1,13 @@
-# Stealing Sensitive Information Disclosure from a Web
+# Kradzież ujawnienia wrażliwych informacji z sieci
 
 {{#include ./banners/hacktricks-training.md}}
 
-If at some point you find a **web page that presents you sensitive information based on your session**: Maybe it's reflecting cookies, or printing or CC details or any other sensitive information, you may try to steal it.\
-Here I present you the main ways to can try to achieve it:
+Jeśli w pewnym momencie znajdziesz **stronę internetową, która prezentuje ci wrażliwe informacje na podstawie twojej sesji**: Może odzwierciedla ciasteczka, lub drukuje dane karty kredytowej lub inne wrażliwe informacje, możesz spróbować je ukraść.\
+Oto główne sposoby, które możesz spróbować osiągnąć:
 
-- [**CORS bypass**](pentesting-web/cors-bypass.md): If you can bypass CORS headers you will be able to steal the information performing Ajax request for a malicious page.
-- [**XSS**](pentesting-web/xss-cross-site-scripting/): If you find a XSS vulnerability on the page you may be able to abuse it to steal the information.
-- [**Danging Markup**](pentesting-web/dangling-markup-html-scriptless-injection/): If you cannot inject XSS tags you still may be able to steal the info using other regular HTML tags.
-- [**Clickjaking**](pentesting-web/clickjacking.md): If there is no protection against this attack, you may be able to trick the user into sending you the sensitive data (an example [here](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)).
+- [**CORS bypass**](pentesting-web/cors-bypass.md): Jeśli możesz obejść nagłówki CORS, będziesz w stanie ukraść informacje, wykonując żądanie Ajax do złośliwej strony.
+- [**XSS**](pentesting-web/xss-cross-site-scripting/): Jeśli znajdziesz lukę XSS na stronie, możesz być w stanie ją wykorzystać do kradzieży informacji.
+- [**Danging Markup**](pentesting-web/dangling-markup-html-scriptless-injection/): Jeśli nie możesz wstrzyknąć tagów XSS, nadal możesz być w stanie ukraść informacje, używając innych standardowych tagów HTML.
+- [**Clickjaking**](pentesting-web/clickjacking.md): Jeśli nie ma ochrony przed tym atakiem, możesz być w stanie oszukać użytkownika, aby wysłał ci wrażliwe dane (przykład [tutaj](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)).
 
 {{#include ./banners/hacktricks-training.md}}

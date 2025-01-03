@@ -24,7 +24,7 @@ macos-users.md
 macos-applefs.md
 {{#endref}}
 
-- **Architektura** jądra
+- **architektura** jądra
 
 {{#ref}}
 mac-os-architecture/
@@ -71,7 +71,7 @@ Może to wystąpić w następujących sytuacjach:
 - Plik użyty znajduje się w katalogu należącym do użytkownika (użytkownik mógłby utworzyć plik)
 - Plik użyty znajduje się w katalogu należącym do roota, ale użytkownik ma do niego dostęp do zapisu z powodu grupy (użytkownik mógłby utworzyć plik)
 
-Możliwość **utworzenia pliku**, który będzie **używany przez roota**, pozwala użytkownikowi **wykorzystać jego zawartość** lub nawet utworzyć **symlinki/hardlinki**, aby wskazać go w inne miejsce.
+Możliwość **utworzenia pliku**, który będzie **używany przez roota**, pozwala użytkownikowi **wykorzystać jego zawartość** lub nawet utworzyć **symlinki/twarde linki**, aby wskazać go w inne miejsce.
 
 W przypadku tego rodzaju luk nie zapomnij **sprawdzić podatnych instalatorów `.pkg`**:
 
@@ -93,13 +93,13 @@ W macOS **aplikacje i pliki binarne mogą mieć uprawnienia** do dostępu do fol
 
 Dlatego atakujący, który chce skutecznie skompromitować maszynę macOS, będzie musiał **eskalować swoje uprawnienia TCC** (lub nawet **obejść SIP**, w zależności od jego potrzeb).
 
-Te uprawnienia są zazwyczaj przyznawane w formie **uprawnień**, z którymi aplikacja jest podpisana, lub aplikacja może poprosić o pewne dostępy, a po **zatwierdzeniu ich przez użytkownika** mogą być znalezione w **bazach danych TCC**. Innym sposobem, w jaki proces może uzyskać te uprawnienia, jest bycie **dzieckiem procesu** z tymi **uprawnieniami**, ponieważ są one zazwyczaj **dziedziczone**.
+Te uprawnienia są zazwyczaj przyznawane w formie **uprawnień**, z którymi aplikacja jest podpisana, lub aplikacja może poprosić o dostęp, a po **zatwierdzeniu ich przez użytkownika** mogą być znalezione w **bazach danych TCC**. Innym sposobem, w jaki proces może uzyskać te uprawnienia, jest bycie **dzieckiem procesu** z tymi **uprawnieniami**, ponieważ są one zazwyczaj **dziedziczone**.
 
 Śledź te linki, aby znaleźć różne sposoby [**eskalacji uprawnień w TCC**](macos-security-protections/macos-tcc/#tcc-privesc-and-bypasses), aby [**obejść TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) i jak w przeszłości [**SIP został ominięty**](macos-security-protections/macos-sip.md#sip-bypasses).
 
 ## macOS Tradycyjna Eskalacja Uprawnień
 
-Oczywiście z perspektywy zespołów red team również powinieneś być zainteresowany eskalacją do roota. Sprawdź następujący post, aby uzyskać kilka wskazówek:
+Oczywiście z perspektywy zespołu red, powinieneś być również zainteresowany eskalacją do roota. Sprawdź następujący post, aby uzyskać kilka wskazówek:
 
 {{#ref}}
 macos-privilege-escalation.md
@@ -109,7 +109,7 @@ macos-privilege-escalation.md
 
 - [https://github.com/usnistgov/macos_security](https://github.com/usnistgov/macos_security)
 
-## Odnośniki
+## Odniesienia
 
 - [**OS X Incident Response: Scripting and Analysis**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
 - [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)

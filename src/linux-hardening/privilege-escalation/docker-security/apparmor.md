@@ -37,7 +37,7 @@ aa-mergeprof  #used to merge the policies
 ```
 ## Tworzenie profilu
 
-- Aby wskazać dotknięty plik wykonywalny, **dozwolone są ścieżki bezwzględne i znaki wieloznaczne** do określania plików.
+- Aby wskazać dotknięty plik wykonywalny, **dozwolone są ścieżki bezwzględne i znaki wieloznaczne** do określenia plików.
 - Aby wskazać dostęp, jaki binarny plik będzie miał do **plików**, można użyć następujących **kontroli dostępu**:
 - **r** (odczyt)
 - **w** (zapis)
@@ -103,7 +103,7 @@ sudo apparmor_parser -a /etc/apparmor.d/path.to.binary
 ```
 ### Modyfikowanie profilu z logów
 
-Narzędzie to odczyta logi i zapyta użytkownika, czy chce zezwolić na niektóre z wykrytych zabronionych działań:
+Następujące narzędzie odczyta logi i zapyta użytkownika, czy chce zezwolić na niektóre z wykrytych zabronionych działań:
 ```bash
 sudo aa-logprof
 ```
@@ -177,7 +177,7 @@ Gdy **uruchomisz kontener docker**, powinieneś zobaczyć następujący wynik:
 1 processes are in enforce mode.
 docker-default (825)
 ```
-Zauważ, że **apparmor nawet zablokuje przywileje możliwości** przyznane kontenerowi domyślnie. Na przykład, będzie w stanie **zablokować uprawnienia do zapisu w /proc, nawet jeśli przyznana jest możliwość SYS_ADMIN**, ponieważ domyślny profil apparmor dla dockera odmawia tego dostępu:
+Zauważ, że **apparmor nawet zablokuje uprawnienia do możliwości** przyznane kontenerowi domyślnie. Na przykład, będzie w stanie **zablokować pozwolenie na zapis w /proc, nawet jeśli przyznana jest możliwość SYS_ADMIN**, ponieważ domyślny profil apparmor dla dockera odmawia tego dostępu:
 ```bash
 docker run -it --cap-add SYS_ADMIN --security-opt seccomp=unconfined ubuntu /bin/bash
 echo "" > /proc/stat
@@ -196,7 +196,7 @@ Zauważ, że możesz **dodać/usunąć** **uprawnienia** do kontenera docker (b�
 - `--cap-drop=ALL --cap-add=SYS_PTRACE` usuwa wszystkie uprawnienia i nadaje tylko `SYS_PTRACE`
 
 > [!NOTE]
-> Zwykle, gdy **znajdziesz**, że masz **uprzywilejowane uprawnienie** dostępne **wewnątrz** kontenera **docker**, **ale** jakaś część **eksploatu nie działa**, to będzie dlatego, że docker **apparmor to uniemożliwia**.
+> Zwykle, gdy **znajdziesz**, że masz **uprzywilejowane uprawnienie** dostępne **wewnątrz** kontenera **docker**, **ale** jakaś część **eksploatu nie działa**, będzie to spowodowane tym, że docker **apparmor to uniemożliwia**.
 
 ### Przykład
 

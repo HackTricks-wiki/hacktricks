@@ -24,9 +24,9 @@ printf "\nThe following services are OFF if '0', or ON otherwise:\nScreen Sharin
 ```
 ### Pentesting ARD
 
-Apple Remote Desktop (ARD) to ulepszona wersja [Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing) dostosowana do macOS, oferująca dodatkowe funkcje. Znaczną podatnością w ARD jest metoda uwierzytelniania dla hasła ekranu kontrolnego, która wykorzystuje tylko pierwsze 8 znaków hasła, co czyni ją podatną na [atak siłowy](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) za pomocą narzędzi takich jak Hydra lub [GoRedShell](https://github.com/ahhh/GoRedShell/), ponieważ nie ma domyślnych limitów szybkości.
+Apple Remote Desktop (ARD) to ulepszona wersja [Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing) dostosowana do macOS, oferująca dodatkowe funkcje. Znaczną podatnością w ARD jest metoda uwierzytelniania dla hasła ekranu kontrolnego, która wykorzystuje tylko pierwsze 8 znaków hasła, co czyni ją podatną na [atak siłowy](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) za pomocą narzędzi takich jak Hydra lub [GoRedShell](https://github.com/ahhh/GoRedShell/), ponieważ nie ma domyślnych limitów prędkości.
 
-Podatne instancje można zidentyfikować za pomocą skryptu `vnc-info` w **nmap**. Usługi obsługujące `VNC Authentication (2)` są szczególnie podatne na ataki siłowe z powodu skrócenia hasła do 8 znaków.
+Podatne instancje można zidentyfikować za pomocą skryptu `vnc-info` w **nmap**. Usługi wspierające `VNC Authentication (2)` są szczególnie podatne na ataki siłowe z powodu skrócenia hasła do 8 znaków.
 
 Aby włączyć ARD do różnych zadań administracyjnych, takich jak eskalacja uprawnień, dostęp GUI lub monitorowanie użytkowników, użyj następującego polecenia:
 ```bash
@@ -41,7 +41,7 @@ Bonjour, technologia zaprojektowana przez Apple, umożliwia **urządzeniom w tej
 Zero Configuration Networking, zapewniane przez Bonjour, gwarantuje, że urządzenia mogą:
 
 - **Automatycznie uzyskiwać adres IP** nawet w przypadku braku serwera DHCP.
-- Wykonywać **tłumaczenie nazwy na adres** bez potrzeby korzystania z serwera DNS.
+- Wykonywać **tłumaczenie nazwy na adres** bez potrzeby posiadania serwera DNS.
 - **Odkrywać usługi** dostępne w sieci.
 
 Urządzenia korzystające z Bonjour przypisują sobie **adres IP z zakresu 169.254/16** i weryfikują jego unikalność w sieci. Maci utrzymują wpis w tabeli routingu dla tej podsieci, co można zweryfikować za pomocą `netstat -rn | grep 169`.

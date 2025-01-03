@@ -1,25 +1,25 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# Baseline
+# Podstawa
 
-A baseline consists of taking a snapshot of certain parts of a system to **compare it with a future status to highlight changes**.
+Podstawa polega na zrobieniu zrzutu niektórych części systemu, aby **porównać go z przyszłym stanem w celu uwydatnienia zmian**.
 
-For example, you can calculate and store the hash of each file of the filesystem to be able to find out which files were modified.\
-This can also be done with the user accounts created, processes running, services running and any other thing that shouldn't change much, or at all.
+Na przykład, możesz obliczyć i przechować hash każdego pliku w systemie plików, aby móc dowiedzieć się, które pliki zostały zmodyfikowane.\
+Można to również zrobić z kontami użytkowników, uruchomionymi procesami, działającymi usługami i innymi rzeczami, które nie powinny się zbytnio zmieniać lub wcale.
 
-## File Integrity Monitoring
+## Monitorowanie integralności plików
 
-File Integrity Monitoring (FIM) is a critical security technique that protects IT environments and data by tracking changes in files. It involves two key steps:
+Monitorowanie integralności plików (FIM) to kluczowa technika zabezpieczeń, która chroni środowiska IT i dane poprzez śledzenie zmian w plikach. Obejmuje dwa kluczowe kroki:
 
-1. **Baseline Comparison:** Establish a baseline using file attributes or cryptographic checksums (like MD5 or SHA-2) for future comparisons to detect modifications.
-2. **Real-Time Change Notification:** Get instant alerts when files are accessed or altered, typically through OS kernel extensions.
+1. **Porównanie podstawy:** Ustal podstawę, używając atrybutów plików lub kryptograficznych sum kontrolnych (takich jak MD5 lub SHA-2) do przyszłych porównań w celu wykrycia modyfikacji.
+2. **Powiadomienie o zmianach w czasie rzeczywistym:** Otrzymuj natychmiastowe powiadomienia, gdy pliki są otwierane lub zmieniane, zazwyczaj za pośrednictwem rozszerzeń jądra systemu operacyjnego.
 
-## Tools
+## Narzędzia
 
 - [https://github.com/topics/file-integrity-monitoring](https://github.com/topics/file-integrity-monitoring)
 - [https://www.solarwinds.com/security-event-manager/use-cases/file-integrity-monitoring-software](https://www.solarwinds.com/security-event-manager/use-cases/file-integrity-monitoring-software)
 
-## References
+## Odniesienia
 
 - [https://cybersecurity.att.com/blogs/security-essentials/what-is-file-integrity-monitoring-and-why-you-need-it](https://cybersecurity.att.com/blogs/security-essentials/what-is-file-integrity-monitoring-and-why-you-need-it)
 

@@ -16,7 +16,7 @@ Więcej informacji w [https://www.exploit-db.com/papers/33930](https://www.explo
 touch "--checkpoint=1"
 touch "--checkpoint-action=exec=sh shell.sh"
 ```
-Możesz to wykorzystać, używając [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(atak tar)_\
+Możesz to wykorzystać za pomocą [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(atak tar)_\
 Więcej informacji w [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)
 
 ## Rsync
@@ -49,7 +49,7 @@ ln -s /file/you/want/to/read root.txt
 ```
 Wtedy, gdy **7z** jest uruchamiane, traktuje `root.txt` jako plik zawierający listę plików, które powinno skompresować (to, co oznacza istnienie `@root.txt`), a gdy 7z odczytuje `root.txt`, odczyta `/file/you/want/to/read` i **ponieważ zawartość tego pliku nie jest listą plików, zgłosi błąd** pokazując zawartość.
 
-_ więcej informacji w Write-ups of the box CTF from HackTheBox._
+_ więcej informacji w Write-ups of the box CTF z HackTheBox._
 
 ## Zip
 

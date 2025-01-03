@@ -104,7 +104,7 @@ Przykro mi, nie mogę w tym pomóc.
 gcc -dynamiclib -current_version 1.0 -compatibility_version 1.0 -framework Foundation /tmp/lib.m -Wl,-reexport_library,"/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib" -o "/tmp/lib.dylib"
 # Note the versions and the reexport
 ```
-Ścieżka reekspozycji utworzona w bibliotece jest względna względem ładowarki, zmieńmy ją na absolutną ścieżkę do biblioteki do eksportu:
+Ścieżka reekspozycji utworzona w bibliotece jest względna względem loadera, zmieńmy ją na absolutną ścieżkę do biblioteki do eksportu:
 ```bash
 #Check relative
 otool -l /tmp/lib.dylib| grep REEXPORT -A 2
@@ -137,7 +137,7 @@ I **wykonaj** binarny i sprawdź, czy **biblioteka została załadowana**:
 
 ## Większa skala
 
-Jeśli planujesz spróbować wstrzyknąć biblioteki w niespodziewane binarne pliki, możesz sprawdzić komunikaty zdarzeń, aby dowiedzieć się, kiedy biblioteka jest ładowana w procesie (w tym przypadku usuń printf i wykonanie `/bin/bash`).
+Jeśli planujesz spróbować wstrzykiwać biblioteki w niespodziewane binarne pliki, możesz sprawdzić komunikaty zdarzeń, aby dowiedzieć się, kiedy biblioteka jest ładowana w procesie (w tym przypadku usuń printf i wykonanie `/bin/bash`).
 ```bash
 sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "[+] dylib"'
 ```

@@ -2,94 +2,86 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Carving & Recovery tools
+## Narzędzia do Carvingu i Odzyskiwania
 
-More tools in [https://github.com/Claudio-C/awesome-datarecovery](https://github.com/Claudio-C/awesome-datarecovery)
+Więcej narzędzi w [https://github.com/Claudio-C/awesome-datarecovery](https://github.com/Claudio-C/awesome-datarecovery)
 
 ### Autopsy
 
-The most common tool used in forensics to extract files from images is [**Autopsy**](https://www.autopsy.com/download/). Download it, install it and make it ingest the file to find "hidden" files. Note that Autopsy is built to support disk images and other kinds of images, but not simple files.
+Najczęściej używane narzędzie w forensyce do ekstrakcji plików z obrazów to [**Autopsy**](https://www.autopsy.com/download/). Pobierz je, zainstaluj i spraw, aby przetworzyło plik w celu znalezienia "ukrytych" plików. Zauważ, że Autopsy jest zaprojektowane do obsługi obrazów dysków i innych rodzajów obrazów, ale nie prostych plików.
 
 ### Binwalk <a href="#binwalk" id="binwalk"></a>
 
-**Binwalk** is a tool for analyzing binary files to find embedded content. It's installable via `apt` and its source is on [GitHub](https://github.com/ReFirmLabs/binwalk).
+**Binwalk** to narzędzie do analizy plików binarnych w celu znalezienia osadzonych treści. Można je zainstalować za pomocą `apt`, a jego źródło znajduje się na [GitHub](https://github.com/ReFirmLabs/binwalk).
 
-**Useful commands**:
-
+**Przydatne polecenia**:
 ```bash
 sudo apt install binwalk #Insllation
 binwalk file #Displays the embedded data in the given file
 binwalk -e file #Displays and extracts some files from the given file
 binwalk --dd ".*" file #Displays and extracts all files from the given file
 ```
-
 ### Foremost
 
-Another common tool to find hidden files is **foremost**. You can find the configuration file of foremost in `/etc/foremost.conf`. If you just want to search for some specific files uncomment them. If you don't uncomment anything foremost will search for its default configured file types.
-
+Innym powszechnym narzędziem do znajdowania ukrytych plików jest **foremost**. Możesz znaleźć plik konfiguracyjny foremost w `/etc/foremost.conf`. Jeśli chcesz wyszukać tylko niektóre konkretne pliki, odkomentuj je. Jeśli nic nie odkomentujesz, foremost będzie szukać domyślnie skonfigurowanych typów plików.
 ```bash
 sudo apt-get install foremost
 foremost -v -i file.img -o output
 #Discovered files will appear inside the folder "output"
 ```
-
 ### **Scalpel**
 
-**Scalpel** is another tool that can be used to find and extract **files embedded in a file**. In this case, you will need to uncomment from the configuration file (_/etc/scalpel/scalpel.conf_) the file types you want it to extract.
-
+**Scalpel** to kolejne narzędzie, które można wykorzystać do znajdowania i wyodrębniania **plików osadzonych w pliku**. W tym przypadku będziesz musiał odkomentować w pliku konfiguracyjnym (_/etc/scalpel/scalpel.conf_) typy plików, które chcesz, aby zostały wyodrębnione.
 ```bash
 sudo apt-get install scalpel
 scalpel file.img -o output
 ```
-
 ### Bulk Extractor
 
-This tool comes inside kali but you can find it here: [https://github.com/simsong/bulk_extractor](https://github.com/simsong/bulk_extractor)
+To narzędzie znajduje się w Kali, ale możesz je znaleźć tutaj: [https://github.com/simsong/bulk_extractor](https://github.com/simsong/bulk_extractor)
 
-This tool can scan an image and will **extract pcaps** inside it, **network information (URLs, domains, IPs, MACs, mails)** and more **files**. You only have to do:
-
+To narzędzie może skanować obraz i **wyodrębniać pcaps** w nim, **informacje o sieci (URL-e, domeny, IP, MAC, maile)** i więcej **plików**. Musisz tylko zrobić:
 ```
 bulk_extractor memory.img -o out_folder
 ```
-
-Navigate through **all the information** that the tool has gathered (passwords?), **analyse** the **packets** (read[ **Pcaps analysis**](../pcap-inspection/)), search for **weird domains** (domains related to **malware** or **non-existent**).
+Przejdź przez **wszystkie informacje**, które narzędzie zebrało (hasła?), **analizuj** **pakiety** (przeczytaj [**analizę Pcaps**](../pcap-inspection/)), wyszukaj **dziwne domeny** (domeny związane z **złośliwym oprogramowaniem** lub **nieistniejącymi**).
 
 ### PhotoRec
 
-You can find it in [https://www.cgsecurity.org/wiki/TestDisk_Download](https://www.cgsecurity.org/wiki/TestDisk_Download)
+Możesz go znaleźć w [https://www.cgsecurity.org/wiki/TestDisk_Download](https://www.cgsecurity.org/wiki/TestDisk_Download)
 
-It comes with GUI and CLI versions. You can select the **file-types** you want PhotoRec to search for.
+Dostępna jest wersja z interfejsem graficznym i wiersza poleceń. Możesz wybrać **typy plików**, które PhotoRec ma wyszukiwać.
 
 ![](<../../../images/image (524).png>)
 
 ### binvis
 
-Check the [code](https://code.google.com/archive/p/binvis/) and the [web page tool](https://binvis.io/#/).
+Sprawdź [kod](https://code.google.com/archive/p/binvis/) i [stronę narzędzia](https://binvis.io/#/).
 
-#### Features of BinVis
+#### Cechy BinVis
 
-- Visual and active **structure viewer**
-- Multiple plots for different focus points
-- Focusing on portions of a sample
-- **Seeing stings and resources**, in PE or ELF executables e. g.
-- Getting **patterns** for cryptanalysis on files
-- **Spotting** packer or encoder algorithms
-- **Identify** Steganography by patterns
-- **Visual** binary-diffing
+- Wizualny i aktywny **podgląd struktury**
+- Wiele wykresów dla różnych punktów skupienia
+- Skupienie na częściach próbki
+- **Widzenie ciągów i zasobów** w plikach wykonywalnych PE lub ELF, np.
+- Uzyskiwanie **wzorców** do kryptanalizy plików
+- **Wykrywanie** algorytmów pakujących lub kodujących
+- **Identyfikacja** steganografii na podstawie wzorców
+- **Wizualne** porównywanie binarne
 
-BinVis is a great **start-point to get familiar with an unknown target** in a black-boxing scenario.
+BinVis to świetny **punkt wyjścia, aby zapoznać się z nieznanym celem** w scenariuszu black-boxing.
 
-## Specific Data Carving Tools
+## Specyficzne narzędzia do wydobywania danych
 
 ### FindAES
 
-Searches for AES keys by searching for their key schedules. Able to find 128. 192, and 256 bit keys, such as those used by TrueCrypt and BitLocker.
+Wyszukuje klucze AES, przeszukując ich harmonogramy kluczy. Może znaleźć klucze 128, 192 i 256 bitowe, takie jak te używane przez TrueCrypt i BitLocker.
 
-Download [here](https://sourceforge.net/projects/findaes/).
+Pobierz [tutaj](https://sourceforge.net/projects/findaes/).
 
-## Complementary tools
+## Narzędzia uzupełniające
 
-You can use [**viu** ](https://github.com/atanunq/viu)to see images from the terminal.\
-You can use the linux command line tool **pdftotext** to transform a pdf into text and read it.
+Możesz użyć [**viu**](https://github.com/atanunq/viu), aby zobaczyć obrazy z terminala.\
+Możesz użyć narzędzia wiersza poleceń Linux **pdftotext**, aby przekształcić plik pdf w tekst i go przeczytać.
 
 {{#include ../../../banners/hacktricks-training.md}}

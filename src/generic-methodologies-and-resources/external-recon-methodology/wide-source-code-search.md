@@ -2,17 +2,17 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-The goal of this page is to enumerate **platforms that allow to search for code** (literal or regex) in across thousands/millions of repos in one or more platforms.
+Celem tej strony jest enumeracja **platform, które pozwalają na wyszukiwanie kodu** (literalnego lub regex) w tysiącach/milionach repozytoriów na jednej lub więcej platformach.
 
-This helps in several occasions to **search for leaked information** or for **vulnerabilities** patterns.
+Pomaga to w kilku sytuacjach w **wyszukiwaniu wycieków informacji** lub wzorców **vulnerabilities**.
 
-- [**SourceGraph**](https://sourcegraph.com/search): Search in millions of repos. There is a free version and an enterprise version (with 15 days free). It supports regexes.
-- [**Github Search**](https://github.com/search): Search across Github. It supports regexes.
-  - Maybe it's also useful to check also [**Github Code Search**](https://cs.github.com/).
-- [**Gitlab Advanced Search**](https://docs.gitlab.com/ee/user/search/advanced_search.html): Search across Gitlab projects. Support regexes.
-- [**SearchCode**](https://searchcode.com/): Search code in millions of projects.
+- [**SourceGraph**](https://sourcegraph.com/search): Wyszukiwanie w milionach repozytoriów. Istnieje wersja darmowa i wersja enterprise (z 15 dniami za darmo). Obsługuje regexy.
+- [**Github Search**](https://github.com/search): Wyszukiwanie w całym Githubie. Obsługuje regexy.
+- Może warto również sprawdzić [**Github Code Search**](https://cs.github.com/).
+- [**Gitlab Advanced Search**](https://docs.gitlab.com/ee/user/search/advanced_search.html): Wyszukiwanie w projektach Gitlab. Obsługuje regexy.
+- [**SearchCode**](https://searchcode.com/): Wyszukiwanie kodu w milionach projektów.
 
 > [!WARNING]
-> When you look for leaks in a repo and run something like `git log -p` don't forget there might be **other branches with other commits** containing secrets!
+> Kiedy szukasz wycieków w repozytorium i uruchamiasz coś takiego jak `git log -p`, nie zapomnij, że mogą istnieć **inne gałęzie z innymi commitami** zawierającymi sekrety!
 
 {{#include ../../banners/hacktricks-training.md}}

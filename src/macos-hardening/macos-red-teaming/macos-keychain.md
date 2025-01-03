@@ -22,7 +22,7 @@ Każdy wpis w keychainie jest regulowany przez **Listy Kontroli Dostępu (ACL)**
 
 - **ACLAuhtorizationExportClear**: Pozwala posiadaczowi uzyskać czysty tekst sekretu.
 - **ACLAuhtorizationExportWrapped**: Pozwala posiadaczowi uzyskać czysty tekst zaszyfrowany innym podanym hasłem.
-- **ACLAuhtorizationAny**: Pozwala posiadaczowi wykonać dowolne działanie.
+- **ACLAuhtorizationAny**: Pozwala posiadaczowi na wykonanie dowolnej akcji.
 
 ACL są dodatkowo wspierane przez **listę zaufanych aplikacji**, które mogą wykonywać te działania bez pytania. Może to być:
 
@@ -30,7 +30,7 @@ ACL są dodatkowo wspierane przez **listę zaufanych aplikacji**, które mogą w
 - **Pusta** lista (**nikt** nie jest zaufany)
 - **Lista** konkretnych **aplikacji**.
 
-Wpis może również zawierać klucz **`ACLAuthorizationPartitionID`,** który służy do identyfikacji **teamid, apple,** i **cdhash.**
+Wpis może również zawierać klucz **`ACLAuthorizationPartitionID`,** który służy do identyfikacji **teamid, apple** i **cdhash.**
 
 - Jeśli **teamid** jest określony, to aby **uzyskać dostęp do wartości wpisu** **bez** **monitu**, używana aplikacja musi mieć **to samo teamid**.
 - Jeśli **apple** jest określone, to aplikacja musi być **podpisana** przez **Apple**.
@@ -80,20 +80,20 @@ security dump-keychain ~/Library/Keychains/login.keychain-db
 >
 > Inne punkty końcowe API można znaleźć w kodzie źródłowym [**SecKeyChain.h**](https://opensource.apple.com/source/libsecurity_keychain/libsecurity_keychain-55017/lib/SecKeychain.h.auto.html).
 
-Wypisz i uzyskaj **informacje** o każdym wpisie w **keychain** za pomocą **Security Framework** lub możesz również sprawdzić narzędzie CLI open source Apple [**security**](https://opensource.apple.com/source/Security/Security-59306.61.1/SecurityTool/macOS/security.c.auto.html)**.** Oto kilka przykładów API:
+Wymień i uzyskaj **informacje** o każdym wpisie w **keychain** za pomocą **Security Framework** lub możesz również sprawdzić narzędzie CLI open source Apple [**security**](https://opensource.apple.com/source/Security/Security-59306.61.1/SecurityTool/macOS/security.c.auto.html)**.** Oto kilka przykładów API:
 
-- API **`SecItemCopyMatching`** daje informacje o każdym wpisie i są pewne atrybuty, które możesz ustawić podczas jego używania:
+- API **`SecItemCopyMatching`** daje informacje o każdym wpisie, a niektóre atrybuty, które możesz ustawić podczas jego używania:
 - **`kSecReturnData`**: Jeśli prawda, spróbuje odszyfrować dane (ustaw na fałsz, aby uniknąć potencjalnych wyskakujących okienek)
-- **`kSecReturnRef`**: Uzyskaj również odniesienie do elementu **keychain** (ustaw na prawda, jeśli później zobaczysz, że możesz odszyfrować bez wyskakującego okienka)
+- **`kSecReturnRef`**: Uzyskaj również odniesienie do elementu **keychain** (ustaw na prawda, jeśli później zobaczysz, że możesz odszyfrować bez wyskakującego okna)
 - **`kSecReturnAttributes`**: Uzyskaj metadane o wpisach
 - **`kSecMatchLimit`**: Ile wyników zwrócić
 - **`kSecClass`**: Jaki rodzaj wpisu w **keychain**
 
 Uzyskaj **ACL** każdego wpisu:
 
-- Za pomocą API **`SecAccessCopyACLList`** możesz uzyskać **ACL dla elementu keychain**, a zwróci to listę ACL (takich jak `ACLAuhtorizationExportClear` i inne wcześniej wspomniane), gdzie każda lista ma:
+- Za pomocą API **`SecAccessCopyACLList`** możesz uzyskać **ACL dla elementu keychain**, a zwróci listę ACL (takich jak `ACLAuhtorizationExportClear` i inne wcześniej wspomniane), gdzie każda lista ma:
 - Opis
-- **Lista Zaufanych Aplikacji**. To może być:
+- **Lista Zaufanych Aplikacji**. Może to być:
 - Aplikacja: /Applications/Slack.app
 - Binarny: /usr/libexec/airportd
 - Grupa: group://AirPort
@@ -106,12 +106,12 @@ Eksportuj dane:
 A oto **wymagania**, aby móc **eksportować sekret bez powiadomienia**:
 
 - Jeśli **1+ zaufane** aplikacje są wymienione:
-- Potrzebne są odpowiednie **autoryzacje** (**`Nil`**, lub być **częścią** dozwolonej listy aplikacji w autoryzacji do uzyskania dostępu do informacji o sekrecie)
-- Potrzebny jest podpis kodu, aby pasował do **PartitionID**
-- Potrzebny jest podpis kodu, aby pasował do jednego **zaufanego programu** (lub być członkiem odpowiedniej grupy KeychainAccessGroup)
+- Potrzebne odpowiednie **autoryzacje** (**`Nil`**, lub być **częścią** dozwolonej listy aplikacji w autoryzacji do uzyskania dostępu do informacji o sekrecie)
+- Potrzebny podpis kodu, aby pasował do **PartitionID**
+- Potrzebny podpis kodu, aby pasował do jednego **zaufanego programu** (lub być członkiem odpowiedniej grupy KeychainAccessGroup)
 - Jeśli **wszystkie aplikacje zaufane**:
-- Potrzebne są odpowiednie **autoryzacje**
-- Potrzebny jest podpis kodu, aby pasował do **PartitionID**
+- Potrzebne odpowiednie **autoryzacje**
+- Potrzebny podpis kodu, aby pasował do **PartitionID**
 - Jeśli **brak PartitionID**, to nie jest potrzebne
 
 > [!CAUTION]

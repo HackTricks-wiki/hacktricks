@@ -19,7 +19,7 @@ Zwykle zdarza się to w kontenerach docker, które z jakiegoś powodu muszą ł�
 find / -name docker.sock 2>/dev/null
 #It's usually in /run/docker.sock
 ```
-W tym przypadku możesz używać standardowych poleceń docker do komunikacji z demonem dockera:
+W tym przypadku możesz używać standardowych poleceń docker do komunikacji z demonem docker:
 ```bash
 #List images to use one
 docker images
@@ -34,12 +34,12 @@ nsenter --target 1 --mount --uts --ipc --net --pid -- bash
 docker run -it -v /:/host/ --cap-add=ALL --security-opt apparmor=unconfined --security-opt seccomp=unconfined --security-opt label:disable --pid=host --userns=host --uts=host --cgroupns=host ubuntu chroot /host/ bash
 ```
 > [!NOTE]
-> W przypadku gdy **gniazdo dockera znajduje się w nieoczekiwanym miejscu**, nadal możesz się z nim komunikować, używając polecenia **`docker`** z parametrem **`-H unix:///path/to/docker.sock`**
+> W przypadku gdy **gniazdo docker jest w nieoczekiwanym miejscu**, nadal możesz się z nim komunikować, używając polecenia **`docker`** z parametrem **`-H unix:///path/to/docker.sock`**
 
-Demon Dockera może również [nasłuchiwać na porcie (domyślnie 2375, 2376)](../../../../network-services-pentesting/2375-pentesting-docker.md) lub w systemach opartych na Systemd, komunikacja z demonem Dockera może odbywać się przez gniazdo Systemd `fd://`.
+Demon Docker może również [nasłuchiwać na porcie (domyślnie 2375, 2376)](../../../../network-services-pentesting/2375-pentesting-docker.md) lub w systemach opartych na Systemd, komunikacja z demonem Docker może odbywać się przez gniazdo Systemd `fd://`.
 
 > [!NOTE]
-> Dodatkowo, zwróć uwagę na gniazda uruchomieniowe innych wysokopoziomowych środowisk:
+> Dodatkowo zwróć uwagę na gniazda uruchomieniowe innych wysokopoziomowych środowisk:
 >
 > - dockershim: `unix:///var/run/dockershim.sock`
 > - containerd: `unix:///run/containerd/containerd.sock`
@@ -64,7 +64,7 @@ Na poniższej stronie możesz **dowiedzieć się więcej o możliwościach linux
 
 ## Ucieczka z uprzywilejowanych kontenerów
 
-Uprzywilejowany kontener może być stworzony z flagą `--privileged` lub poprzez wyłączenie konkretnych zabezpieczeń:
+Uprzywilejowany kontener może być utworzony z flagą `--privileged` lub poprzez wyłączenie konkretnych zabezpieczeń:
 
 - `--cap-add=ALL`
 - `--security-opt apparmor=unconfined`
@@ -92,7 +92,7 @@ docker run --rm -it --pid=host --privileged ubuntu bash
 ```
 ### Privileged
 
-Tylko z flagą privileged możesz spróbować **uzyskać dostęp do dysku hosta** lub spróbować **uciec, wykorzystując release_agent lub inne ucieczki**.
+Tylko z flagą privileged możesz spróbować **uzyskać dostęp do dysku hosta** lub spróbować **uciec, nadużywając release_agent lub innych ucieczek**.
 
 Przetestuj następujące obejścia w kontenerze, wykonując:
 ```bash
@@ -329,14 +329,14 @@ sensitive-mounts.md
 
 ### Dowolne montaże
 
-W wielu przypadkach odkryjesz, że **kontener ma zamontowany jakiś wolumin z hosta**. Jeśli ten wolumin nie został poprawnie skonfigurowany, możesz być w stanie **uzyskać dostęp/modyfikować wrażliwe dane**: Czytać sekrety, zmieniać ssh authorized_keys…
+W wielu przypadkach zauważysz, że **kontener ma zamontowany jakiś wolumin z hosta**. Jeśli ten wolumin nie został poprawnie skonfigurowany, możesz być w stanie **uzyskać dostęp/modyfikować wrażliwe dane**: Czytać sekrety, zmieniać ssh authorized_keys…
 ```bash
 docker run --rm -it -v /:/host ubuntu bash
 ```
 ### Eskalacja uprawnień z 2 powłokami i montowaniem hosta
 
 Jeśli masz dostęp jako **root wewnątrz kontenera**, który ma zamontowany jakiś folder z hosta i udało ci się **uciec jako użytkownik bez uprawnień do hosta** oraz masz dostęp do odczytu zamontowanego folderu.\
-Możesz stworzyć **plik bash suid** w **zamontowanym folderze** wewnątrz **kontenera** i **wykonać go z hosta**, aby uzyskać wyższe uprawnienia.
+Możesz stworzyć **plik bash suid** w **zamontowanym folderze** wewnątrz **kontenera** i **wykonać go z hosta**, aby uzyskać eskalację uprawnień.
 ```bash
 cp /bin/bash . #From non priv inside mounted folder
 # You need to copy it from the host as the bash binaries might be diferent in the host and in the container
@@ -425,7 +425,7 @@ docker run --rm -it --network=host ubuntu bash
 ```
 Jeśli kontener został skonfigurowany z użyciem Docker [host networking driver (`--network=host`)](https://docs.docker.com/network/host/), stos sieciowy tego kontenera nie jest izolowany od hosta Docker (kontener dzieli przestrzeń nazw sieci hosta) i kontener nie otrzymuje przydzielonego własnego adresu IP. Innymi słowy, **kontener wiąże wszystkie usługi bezpośrednio z adresem IP hosta**. Ponadto kontener może **przechwytywać WSZYSTKI ruch sieciowy, który host** wysyła i odbiera na współdzielonym interfejsie `tcpdump -i eth0`.
 
-Na przykład, możesz to wykorzystać do **podsłuchiwania i nawet fałszowania ruchu** między hostem a instancją metadanych.
+Na przykład, możesz to wykorzystać do **podsłuchiwania, a nawet fałszowania ruchu** między hostem a instancją metadanych.
 
 Jak w poniższych przykładach:
 
@@ -440,8 +440,8 @@ docker run --rm -it --ipc=host ubuntu bash
 ```
 Z `hostIPC=true` zyskujesz dostęp do zasobów komunikacji międzyprocesowej (IPC) hosta, takich jak **pamięć dzielona** w `/dev/shm`. Umożliwia to odczyt/zapis, gdzie te same zasoby IPC są używane przez inne procesy hosta lub pod. Użyj `ipcs`, aby dokładniej zbadać te mechanizmy IPC.
 
-- **Sprawdź /dev/shm** - Szukaj plików w tej lokalizacji pamięci dzielonej: `ls -la /dev/shm`
-- **Sprawdź istniejące obiekty IPC** – Możesz sprawdzić, czy jakieś obiekty IPC są używane za pomocą `/usr/bin/ipcs`. Sprawdź to za pomocą: `ipcs -a`
+- **Zbadaj /dev/shm** - Sprawdź, czy w tej lokalizacji pamięci dzielonej znajdują się jakiekolwiek pliki: `ls -la /dev/shm`
+- **Zbadaj istniejące obiekty IPC** – Możesz sprawdzić, czy jakiekolwiek obiekty IPC są używane za pomocą `/usr/bin/ipcs`. Sprawdź to za pomocą: `ipcs -a`
 
 ### Przywróć uprawnienia
 
@@ -479,8 +479,8 @@ Aby uzyskać więcej informacji: [https://blog.dragonsector.pl/2019/02/cve-2019-
 
 - **Przestrzenie nazw:** Proces powinien być **całkowicie oddzielony od innych procesów** za pomocą przestrzeni nazw, więc nie możemy uciec, wchodząc w interakcję z innymi procesami z powodu przestrzeni nazw (domyślnie nie mogą komunikować się za pomocą IPC, gniazd unixowych, usług sieciowych, D-Bus, `/proc` innych procesów).
 - **Użytkownik root**: Domyślnie użytkownik uruchamiający proces to użytkownik root (jednak jego uprawnienia są ograniczone).
-- **Uprawnienia**: Docker pozostawia następujące uprawnienia: `cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap=ep`
-- **Syscall**: To są syscally, które **użytkownik root nie będzie mógł wywołać** (z powodu braku uprawnień + Seccomp). Inne syscally mogą być użyte do próby ucieczki.
+- **Możliwości**: Docker pozostawia następujące możliwości: `cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap=ep`
+- **Syscalls**: To są syscalls, które **użytkownik root nie będzie mógł wywołać** (z powodu braku możliwości + Seccomp). Inne syscalls mogą być użyte do próby ucieczki.
 
 {{#tabs}}
 {{#tab name="x64 syscalls"}}

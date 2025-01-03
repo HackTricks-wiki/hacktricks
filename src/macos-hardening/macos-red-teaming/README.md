@@ -30,13 +30,13 @@ Aby zarejestrować urządzenie w MDM, musisz zainstalować plik **`mobileconfig`
 
 ### Wykorzystywanie JAMF PRO
 
-JAMF może uruchamiać **niestandardowe skrypty** (skrypty opracowane przez sysadmina), **natywne ładunki** (tworzenie lokalnych kont, ustawianie hasła EFI, monitorowanie plików/procesów...) oraz **MDM** (konfiguracje urządzeń, certyfikaty urządzeń...).
+JAMF może uruchamiać **niestandardowe skrypty** (skrypty opracowane przez sysadmina), **natywne payloady** (tworzenie lokalnych kont, ustawianie hasła EFI, monitorowanie plików/procesów...) oraz **MDM** (konfiguracje urządzeń, certyfikaty urządzeń...).
 
 #### Samo-rejestracja JAMF
 
 Przejdź do strony takiej jak `https://<company-name>.jamfcloud.com/enroll/`, aby sprawdzić, czy mają **włączoną samo-rejestrację**. Jeśli tak, może **poprosić o dane logowania**.
 
-Możesz użyć skryptu [**JamfSniper.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfSniper.py), aby przeprowadzić atak na hasła.
+Możesz użyć skryptu [**JamfSniper.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfSniper.py), aby przeprowadzić atak password spraying.
 
 Ponadto, po znalezieniu odpowiednich danych logowania, możesz być w stanie przeprowadzić brute-force na innych nazwach użytkowników za pomocą następnej formy:
 
@@ -46,12 +46,12 @@ Ponadto, po znalezieniu odpowiednich danych logowania, możesz być w stanie prz
 
 <figure><img src="../../images/image (167).png" alt=""><figcaption></figcaption></figure>
 
-Binarne **`jamf`** zawierało sekret do otwarcia pęku kluczy, który w momencie odkrycia był **dzielony** wśród wszystkich i był to: **`jk23ucnq91jfu9aj`**.\
+Binarne **`jamf`** zawierało sekret do otwarcia pęku kluczy, który w momencie odkrycia był **dzielony** wśród wszystkich i wynosił: **`jk23ucnq91jfu9aj`**.\
 Ponadto, jamf **utrzymuje się** jako **LaunchDaemon** w **`/Library/LaunchAgents/com.jamf.management.agent.plist`**.
 
 #### Przejęcie urządzenia JAMF
 
-URL **JSS** (Jamf Software Server), który **`jamf`** będzie używać, znajduje się w **`/Library/Preferences/com.jamfsoftware.jamf.plist`**.\
+**JSS** (Jamf Software Server) **URL**, który **`jamf`** będzie używać, znajduje się w **`/Library/Preferences/com.jamfsoftware.jamf.plist`**.\
 Ten plik zasadniczo zawiera URL:
 ```bash
 plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
@@ -65,7 +65,7 @@ plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
 <integer>4</integer>
 [...]
 ```
-Więc atakujący mógłby zainstalować złośliwy pakiet (`pkg`), który **nadpisuje ten plik**, ustawiając **URL do nasłuchiwacza Mythic C2 z agenta Typhon**, aby móc teraz nadużywać JAMF jako C2.
+Więc atakujący mógłby zainstalować złośliwy pakiet (`pkg`), który **nadpisuje ten plik**, ustawiając **URL do słuchacza Mythic C2 z agenta Typhon**, aby móc nadużywać JAMF jako C2.
 ```bash
 # After changing the URL you could wait for it to be reloaded or execute:
 sudo jamf policy -id 0
@@ -74,7 +74,7 @@ sudo jamf policy -id 0
 ```
 #### Impersonacja JAMF
 
-Aby **imić komunikację** między urządzeniem a JMF, potrzebujesz:
+Aby **podszyć się pod komunikację** między urządzeniem a JMF, potrzebujesz:
 
 - **UUID** urządzenia: `ioreg -d2 -c IOPlatformExpertDevice | awk -F" '/IOPlatformUUID/{print $(NF-1)}'`
 - **Zaufanej puli JAMF** z: `/Library/Application\ Support/Jamf/JAMF.keychain`, która zawiera certyfikat urządzenia
@@ -89,11 +89,11 @@ Możesz również monitorować lokalizację `/Library/Application Support/Jamf/t
 
 Jednakże, **poświadczenia** mogą być przekazywane do tych skryptów jako **parametry**, więc musisz monitorować `ps aux | grep -i jamf` (nawet nie będąc rootem).
 
-Skrypt [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfExplorer.py) może nasłuchiwać na nowe pliki dodawane i nowe argumenty procesów.
+Skrypt [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfExplorer.py) może nasłuchiwać nowych plików dodawanych i nowych argumentów procesów.
 
 ### Zdalny dostęp do macOS
 
-A także o **specjalnych** **protokółach** **sieciowych** **MacOS**:
+A także o **"specjalnych" protokołach** **sieciowych** **MacOS**:
 
 {{#ref}}
 ../macos-security-and-privilege-escalation/macos-protocols.md
@@ -122,7 +122,7 @@ dscl "/Active Directory/[Domain]/All Domains" ls /
 Również istnieją narzędzia przygotowane dla MacOS do automatycznego enumerowania AD i zabawy z Kerberosem:
 
 - [**Machound**](https://github.com/XMCyber/MacHound): MacHound to rozszerzenie narzędzia audytowego Bloodhound, które umożliwia zbieranie i przetwarzanie relacji Active Directory na hostach MacOS.
-- [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost to projekt w Objective-C zaprojektowany do interakcji z API Heimdal krb5 na macOS. Celem projektu jest umożliwienie lepszego testowania bezpieczeństwa związane z Kerberosem na urządzeniach macOS przy użyciu natywnych API bez potrzeby korzystania z innych frameworków lub pakietów na docelowym systemie.
+- [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost to projekt w Objective-C zaprojektowany do interakcji z API Heimdal krb5 na macOS. Celem projektu jest umożliwienie lepszego testowania bezpieczeństwa wokół Kerberosa na urządzeniach macOS przy użyciu natywnych API bez potrzeby używania innych frameworków lub pakietów na docelowym systemie.
 - [**Orchard**](https://github.com/its-a-feature/Orchard): Narzędzie JavaScript for Automation (JXA) do enumeracji Active Directory.
 
 ### Informacje o domenie
@@ -135,7 +135,7 @@ Trzy typy użytkowników MacOS to:
 
 - **Użytkownicy lokalni** — Zarządzani przez lokalną usługę OpenDirectory, nie są w żaden sposób połączeni z Active Directory.
 - **Użytkownicy sieciowi** — Zmienni użytkownicy Active Directory, którzy wymagają połączenia z serwerem DC w celu uwierzytelnienia.
-- **Użytkownicy mobilni** — Użytkownicy Active Directory z lokalnym zapasowym kopią swoich poświadczeń i plików.
+- **Użytkownicy mobilni** — Użytkownicy Active Directory z lokalnym kopią zapasową swoich poświadczeń i plików.
 
 Lokalne informacje o użytkownikach i grupach są przechowywane w folderze _/var/db/dslocal/nodes/Default._\
 Na przykład, informacje o użytkowniku o nazwie _mark_ są przechowywane w _/var/db/dslocal/nodes/Default/users/mark.plist_, a informacje o grupie _admin_ znajdują się w _/var/db/dslocal/nodes/Default/groups/admin.plist_.
@@ -174,7 +174,7 @@ Uzyskaj hasła za pomocą:
 ```bash
 bifrost --action askhash --username [name] --password [password] --domain [domain]
 ```
-Możliwe jest uzyskanie hasła **`Computer$`** w systemowym pęku kluczy.
+Możliwe jest uzyskanie hasła **`Computer$`** w obrębie systemowego pęku kluczy.
 
 ### Over-Pass-The-Hash
 
@@ -183,7 +183,7 @@ Uzyskaj TGT dla konkretnego użytkownika i usługi:
 bifrost --action asktgt --username [user] --domain [domain.com] \
 --hash [hash] --enctype [enctype] --keytab [/path/to/keytab]
 ```
-Gdy TGT zostanie zebrany, możliwe jest wstrzyknięcie go w bieżącej sesji za pomocą:
+Gdy TGT zostanie zebrany, możliwe jest wstrzyknięcie go w bieżącą sesję za pomocą:
 ```bash
 bifrost --action asktgt --username test_lab_admin \
 --hash CF59D3256B62EE655F6430B0F80701EE05A0885B8B52E9C2480154AFA62E78 \

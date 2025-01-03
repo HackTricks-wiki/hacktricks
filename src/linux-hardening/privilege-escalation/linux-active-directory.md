@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Maszyna linuxowa może być również obecna w środowisku Active Directory.
+Maszyna linuxowa może również być obecna w środowisku Active Directory.
 
 Maszyna linuxowa w AD może **przechowywać różne bilety CCACHE w plikach. Te bilety mogą być używane i nadużywane jak każdy inny bilet kerberos**. Aby odczytać te bilety, musisz być właścicielem biletu lub **rootem** na maszynie.
 
@@ -20,7 +20,7 @@ Możesz również sprawdzić następującą stronę, aby dowiedzieć się o **in
 
 ### FreeIPA
 
-FreeIPA to otwarte źródło **alternatywa** dla Microsoft Windows **Active Directory**, głównie dla środowisk **Unix**. Łączy kompletny **katalog LDAP** z MIT **Kerberos** Key Distribution Center do zarządzania podobnego do Active Directory. Wykorzystując system **Certyfikatów Dogtag** do zarządzania certyfikatami CA i RA, wspiera **uwierzytelnianie wieloskładnikowe**, w tym karty inteligentne. SSSD jest zintegrowany z procesami uwierzytelniania Unix. Dowiedz się więcej o tym w:
+FreeIPA to otwarte źródło **alternatywa** dla Microsoft Windows **Active Directory**, głównie dla środowisk **Unix**. Łączy kompletny **katalog LDAP** z centrum dystrybucji kluczy MIT **Kerberos** do zarządzania podobnego do Active Directory. Wykorzystując system certyfikatów Dogtag do zarządzania certyfikatami CA i RA, wspiera **uwierzytelnianie wieloskładnikowe**, w tym karty inteligentne. SSSD jest zintegrowany z procesami uwierzytelniania Unix. Dowiedz się więcej o tym w:
 
 {{#ref}}
 ../freeipa-pentesting.md
@@ -51,7 +51,7 @@ export KRB5CCNAME=/tmp/krb5cc_1000
 ```
 ### CCACHE ticket reuse from keyring
 
-**Bilety Kerberos przechowywane w pamięci procesu mogą być wyodrębnione**, szczególnie gdy ochrona ptrace maszyny jest wyłączona (`/proc/sys/kernel/yama/ptrace_scope`). Przydatne narzędzie do tego celu znajduje się pod adresem [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey), które ułatwia wyodrębnianie poprzez wstrzykiwanie do sesji i zrzucanie biletów do `/tmp`.
+**Bilety Kerberos przechowywane w pamięci procesu mogą być wyodrębnione**, szczególnie gdy ochrona ptrace maszyny jest wyłączona (`/proc/sys/kernel/yama/ptrace_scope`). Przydatnym narzędziem do tego celu jest dostępne pod adresem [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey), które ułatwia wyodrębnianie poprzez wstrzykiwanie do sesji i zrzucanie biletów do `/tmp`.
 
 Aby skonfigurować i używać tego narzędzia, należy postępować zgodnie z poniższymi krokami:
 ```bash
@@ -66,7 +66,7 @@ Ta procedura spróbuje wstrzyknąć do różnych sesji, wskazując na sukces pop
 
 SSSD utrzymuje kopię bazy danych pod ścieżką `/var/lib/sss/secrets/secrets.ldb`. Odpowiedni klucz jest przechowywany jako ukryty plik pod ścieżką `/var/lib/sss/secrets/.secrets.mkey`. Domyślnie klucz jest czytelny tylko, jeśli masz uprawnienia **root**.
 
-Wywołanie \*\*`SSSDKCMExtractor` \*\* z parametrami --database i --key zanalizuje bazę danych i **odszyfruje sekrety**.
+Wywołanie \*\*`SSSDKCMExtractor` \*\* z parametrami --database i --key przeanalizuje bazę danych i **odszyfruje sekrety**.
 ```bash
 git clone https://github.com/fireeye/SSSDKCMExtractor
 python3 SSSDKCMExtractor.py --database secrets.ldb --key secrets.mkey
@@ -79,9 +79,9 @@ git clone https://github.com/its-a-feature/KeytabParser
 python KeytabParser.py /etc/krb5.keytab
 klist -k /etc/krb5.keytab
 ```
-### Ekstrakcja kont z /etc/krb5.keytab
+### Wyciągnij konta z /etc/krb5.keytab
 
-Klucze kont serwisowych, niezbędne dla usług działających z uprawnieniami roota, są bezpiecznie przechowywane w plikach **`/etc/krb5.keytab`**. Klucze te, podobnie jak hasła dla usług, wymagają ścisłej poufności.
+Klucze kont serwisowych, niezbędne dla usług działających z uprawnieniami roota, są bezpiecznie przechowywane w plikach **`/etc/krb5.keytab`**. Te klucze, podobnie jak hasła dla usług, wymagają ścisłej poufności.
 
 Aby sprawdzić zawartość pliku keytab, można użyć **`klist`**. Narzędzie to jest zaprojektowane do wyświetlania szczegółów kluczy, w tym **NT Hash** dla uwierzytelniania użytkowników, szczególnie gdy typ klucza jest identyfikowany jako 23.
 ```bash
@@ -93,7 +93,7 @@ Dla użytkowników Linuxa, **`KeyTabExtract`** oferuje funkcjonalność do ekstr
 python3 keytabextract.py krb5.keytab
 # Expected output varies based on hash availability
 ```
-Na macOS, **`bifrost`** służy jako narzędzie do analizy plików keytab.
+Na macOS **`bifrost`** służy jako narzędzie do analizy plików keytab.
 ```bash
 ./bifrost -action dump -source keytab -path /path/to/your/file
 ```

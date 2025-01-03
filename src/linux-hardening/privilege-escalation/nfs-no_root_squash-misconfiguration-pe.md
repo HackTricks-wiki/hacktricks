@@ -39,19 +39,19 @@ chmod +s payload
 cd <SHAREDD_FOLDER>
 ./payload #ROOT shell
 ```
-## Local Exploit
+## Lokalny Eksploit
 
 > [!NOTE]
-> Zauważ, że jeśli możesz stworzyć **tunel z twojej maszyny do maszyny ofiary, nadal możesz użyć wersji zdalnej, aby wykorzystać tę eskalację uprawnień, tunelując wymagane porty**.\
-> Następujący trik dotyczy sytuacji, gdy plik `/etc/exports` **wskazuje na adres IP**. W takim przypadku **nie będziesz mógł użyć** w żadnym przypadku **eksploatu zdalnego** i będziesz musiał **wykorzystać ten trik**.\
+> Zauważ, że jeśli możesz stworzyć **tunel z twojej maszyny do maszyny ofiary, nadal możesz użyć wersji zdalnej, aby wykorzystać to podnoszenie uprawnień, tunelując wymagane porty**.\
+> Następujący trik dotyczy sytuacji, gdy plik `/etc/exports` **wskazuje na adres IP**. W takim przypadku **nie będziesz mógł użyć** w żadnym przypadku **eksploitu zdalnego** i będziesz musiał **nadużyć tego triku**.\
 > Innym wymaganym warunkiem, aby eksploatacja działała, jest to, że **eksport w `/etc/export`** **musi używać flagi `insecure`**.\
 > --_Nie jestem pewien, czy jeśli `/etc/export` wskazuje na adres IP, ten trik zadziała_--
 
-## Basic Information
+## Podstawowe Informacje
 
-Scenariusz polega na wykorzystaniu zamontowanego udziału NFS na lokalnej maszynie, wykorzystując lukę w specyfikacji NFSv3, która pozwala klientowi określić swój uid/gid, co potencjalnie umożliwia nieautoryzowany dostęp. Eksploatacja polega na użyciu [libnfs](https://github.com/sahlberg/libnfs), biblioteki, która umożliwia fałszowanie wywołań RPC NFS.
+Scenariusz polega na wykorzystaniu zamontowanego udziału NFS na lokalnej maszynie, wykorzystując błąd w specyfikacji NFSv3, który pozwala klientowi określić swoje uid/gid, co potencjalnie umożliwia nieautoryzowany dostęp. Eksploatacja polega na użyciu [libnfs](https://github.com/sahlberg/libnfs), biblioteki, która umożliwia fałszowanie wywołań RPC NFS.
 
-### Compiling the Library
+### Kompilacja Biblioteki
 
 Kroki kompilacji biblioteki mogą wymagać dostosowań w zależności od wersji jądra. W tym konkretnym przypadku wywołania syscalls fallocate zostały zakomentowane. Proces kompilacji obejmuje następujące polecenia:
 ```bash
@@ -87,9 +87,9 @@ LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod u+s nfs:/
 #root
 ```
 
-## Bonus: NFShell dla Dyskretnego Dostępu do Plików
+## Bonus: NFShell do Dyskretnego Dostępu do Plików
 
-Po uzyskaniu dostępu roota, aby interagować z udostępnionym zasobem NFS bez zmiany właściciela (aby uniknąć pozostawiania śladów), używany jest skrypt Pythona (nfsh.py). Skrypt ten dostosowuje uid, aby odpowiadał uid pliku, do którego uzyskuje się dostęp, co pozwala na interakcję z plikami na udostępnionym zasobie bez problemów z uprawnieniami:
+Gdy uzyskano dostęp roota, aby interagować z udostępnionym zasobem NFS bez zmiany właściciela (aby uniknąć pozostawiania śladów), używany jest skrypt Pythona (nfsh.py). Skrypt ten dostosowuje uid, aby odpowiadał uid pliku, do którego uzyskuje się dostęp, co pozwala na interakcję z plikami na udostępnionym zasobie bez problemów z uprawnieniami:
 ```python
 #!/usr/bin/env python
 # script from https://www.errno.fr/nfs_privesc.html

@@ -2,31 +2,31 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Found techniques
+## Znalezione techniki
 
-Następujące techniki zostały znalezione jako działające w niektórych aplikacjach zapory macOS.
+Poniższe techniki zostały znalezione jako działające w niektórych aplikacjach zapory macOS.
 
-### Abusing whitelist names
+### Wykorzystywanie nazw na białej liście
 
-- Na przykład nazywając złośliwe oprogramowanie nazwami dobrze znanych procesów macOS, takich jak **`launchd`**
+- Na przykład wywołując złośliwe oprogramowanie nazwami dobrze znanych procesów macOS, takich jak **`launchd`**
 
-### Synthetic Click
+### Syntetyczne kliknięcie
 
 - Jeśli zapora prosi użytkownika o pozwolenie, spraw, aby złośliwe oprogramowanie **kliknęło na zezwól**
 
-### **Use Apple signed binaries**
+### **Użyj podpisanych binarek Apple**
 
-- Takie jak **`curl`**, ale także inne, takie jak **`whois`**
+- Takich jak **`curl`**, ale także innych, jak **`whois`**
 
-### Well known apple domains
+### Znane domeny Apple
 
 Zapora może zezwalać na połączenia z dobrze znanymi domenami Apple, takimi jak **`apple.com`** lub **`icloud.com`**. A iCloud może być używany jako C2.
 
-### Generic Bypass
+### Ogólny bypass
 
 Kilka pomysłów na próbę obejścia zapór
 
-### Check allowed traffic
+### Sprawdź dozwolony ruch
 
 Znajomość dozwolonego ruchu pomoże zidentyfikować potencjalnie białe listy domen lub które aplikacje mają dostęp do nich.
 ```bash
@@ -34,7 +34,7 @@ lsof -i TCP -sTCP:ESTABLISHED
 ```
 ### Wykorzystywanie DNS
 
-Rozwiązania DNS są realizowane za pomocą **`mdnsreponder`**, podpisanej aplikacji, która prawdopodobnie będzie miała pozwolenie na kontakt z serwerami DNS.
+Rozwiązywanie DNS odbywa się za pomocą **`mdnsreponder`** podpisanej aplikacji, która prawdopodobnie będzie miała pozwolenie na kontakt z serwerami DNS.
 
 <figure><img src="../../images/image (468).png" alt="https://www.youtube.com/watch?v=UlT5KFTMn2k"><figcaption></figcaption></figure>
 

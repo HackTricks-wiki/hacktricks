@@ -1,36 +1,22 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
+Aby przeprowadzić ocenę phishingową, czasami może być przydatne całkowite **sklonowanie strony internetowej**.
 
-{% embed url="https://websec.nl/" %}
+Zauważ, że możesz również dodać do sklonowanej strony pewne ładunki, takie jak hak BeEF, aby "kontrolować" kartę użytkownika.
 
-For a phishing assessment sometimes it might be useful to completely **clone a website**.
-
-Note that you can add also some payloads to the cloned website like a BeEF hook to "control" the tab of the user.
-
-There are different tools you can use for this purpose:
+Istnieją różne narzędzia, które możesz wykorzystać do tego celu:
 
 ## wget
-
 ```text
 wget -mk -nH
 ```
-
 ## goclone
-
 ```bash
 #https://github.com/imthaghost/goclone
 goclone <url>
 ```
-
-## Social Engineering Toolit
-
+## Narzędzie inżynierii społecznej
 ```bash
 #https://github.com/trustedsec/social-engineer-toolkit
 ```
-
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
-
 {{#include ../../banners/hacktricks-training.md}}

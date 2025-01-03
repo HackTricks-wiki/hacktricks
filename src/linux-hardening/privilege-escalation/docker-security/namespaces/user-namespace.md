@@ -10,7 +10,7 @@ User namespaces są szczególnie przydatne w konteneryzacji, gdzie każdy konten
 
 ### Jak to działa:
 
-1. Gdy nowy user namespace jest tworzony, **zaczyna się od pustego zestawu mapowań identyfikatorów użytkowników i grup**. Oznacza to, że każdy proces działający w nowym user namespace **początkowo nie będzie miał uprawnień poza namespace**.
+1. Gdy nowy user namespace jest tworzony, **zaczyna się od pustego zestawu mapowań identyfikatorów użytkowników i grup**. Oznacza to, że każdy proces działający w nowym user namespace **początkowo nie będzie miał uprawnień poza tym namespace**.
 2. Mapowania identyfikatorów mogą być ustalane między identyfikatorami użytkowników i grup w nowym namespace a tymi w namespace nadrzędnym (lub gospodarzu). To **pozwala procesom w nowym namespace na posiadanie uprawnień i własności odpowiadających identyfikatorom użytkowników i grup w namespace nadrzędnym**. Jednak mapowania identyfikatorów mogą być ograniczone do określonych zakresów i podzbiorów identyfikatorów, co pozwala na precyzyjną kontrolę nad uprawnieniami przyznawanymi procesom w nowym namespace.
 3. W obrębie user namespace, **procesy mogą mieć pełne uprawnienia roota (UID 0) do operacji wewnątrz namespace**, jednocześnie mając ograniczone uprawnienia poza namespace. To pozwala **kontenerom działać z możliwościami podobnymi do roota w swoim własnym namespace bez posiadania pełnych uprawnień roota w systemie gospodarza**.
 4. Procesy mogą przemieszczać się między namespaces za pomocą wywołania systemowego `setns()` lub tworzyć nowe namespaces za pomocą wywołań systemowych `unshare()` lub `clone()` z flagą `CLONE_NEWUSER`. Gdy proces przemieszcza się do nowego namespace lub go tworzy, zacznie używać mapowań identyfikatorów użytkowników i grup związanych z tym namespace.
@@ -35,11 +35,11 @@ Gdy `unshare` jest wykonywane bez opcji `-f`, napotykany jest błąd z powodu sp
 
 - Jądro Linuxa pozwala procesowi na tworzenie nowych przestrzeni nazw za pomocą wywołania systemowego `unshare`. Jednak proces, który inicjuje tworzenie nowej przestrzeni nazw PID (nazywany "procesem unshare"), nie wchodzi do nowej przestrzeni; tylko jego procesy potomne to robią.
 - Uruchomienie `%unshare -p /bin/bash%` uruchamia `/bin/bash` w tym samym procesie co `unshare`. W konsekwencji, `/bin/bash` i jego procesy potomne znajdują się w oryginalnej przestrzeni nazw PID.
-- Pierwszy proces potomny `/bin/bash` w nowej przestrzeni staje się PID 1. Gdy ten proces kończy działanie, uruchamia czyszczenie przestrzeni nazw, jeśli nie ma innych procesów, ponieważ PID 1 ma specjalną rolę przyjmowania procesów osieroconych. Jądro Linuxa wyłączy wtedy przydzielanie PID w tej przestrzeni.
+- Pierwszy proces potomny `/bin/bash` w nowej przestrzeni staje się PID 1. Gdy ten proces kończy działanie, uruchamia sprzątanie przestrzeni nazw, jeśli nie ma innych procesów, ponieważ PID 1 ma specjalną rolę przyjmowania procesów osieroconych. Jądro Linuxa wyłączy wtedy przydzielanie PID w tej przestrzeni.
 
 2. **Konsekwencja**:
 
-- Zakończenie PID 1 w nowej przestrzeni prowadzi do wyczyszczenia flagi `PIDNS_HASH_ADDING`. Skutkuje to niepowodzeniem funkcji `alloc_pid` w przydzieleniu nowego PID podczas tworzenia nowego procesu, co skutkuje błędem "Nie można przydzielić pamięci".
+- Zakończenie PID 1 w nowej przestrzeni prowadzi do usunięcia flagi `PIDNS_HASH_ADDING`. Skutkuje to niepowodzeniem funkcji `alloc_pid` w przydzieleniu nowego PID podczas tworzenia nowego procesu, co skutkuje błędem "Nie można przydzielić pamięci".
 
 3. **Rozwiązanie**:
 - Problem można rozwiązać, używając opcji `-f` z `unshare`. Ta opcja sprawia, że `unshare` fork'uje nowy proces po utworzeniu nowej przestrzeni nazw PID.
@@ -53,7 +53,7 @@ Zapewniając, że `unshare` działa z flagą `-f`, nowa przestrzeń nazw PID jes
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-Aby używać przestrzeni nazw użytkownika, demon Dockera musi być uruchomiony z **`--userns-remap=default`** (W Ubuntu 14.04 można to zrobić, modyfikując `/etc/default/docker`, a następnie wykonując `sudo service docker restart`)
+Aby użyć przestrzeni nazw użytkownika, demon Dockera musi być uruchomiony z **`--userns-remap=default`** (W ubuntu 14.04 można to zrobić, modyfikując `/etc/default/docker`, a następnie wykonując `sudo service docker restart`)
 
 ### &#x20;Sprawdź, w której przestrzeni nazw znajduje się twój proces
 ```bash

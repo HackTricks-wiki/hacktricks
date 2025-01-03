@@ -12,7 +12,7 @@ Możliwe jest zrzucenie tej bazy danych za pomocą:
 ```
 Lub używając narzędzia [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
 
-**`/usr/libexec/lsd`** jest mózgiem bazy danych. Zapewnia **kilka usług XPC** takich jak `.lsd.installation`, `.lsd.open`, `.lsd.openurl` i inne. Ale wymaga również **pewnych uprawnień** dla aplikacji, aby mogły korzystać z udostępnionych funkcji XPC, takich jak `.launchservices.changedefaulthandler` lub `.launchservices.changeurlschemehandler`, aby zmienić domyślne aplikacje dla typów mime lub schematów url i inne.
+**`/usr/libexec/lsd`** jest mózgiem bazy danych. Zapewnia **kilka usług XPC** takich jak `.lsd.installation`, `.lsd.open`, `.lsd.openurl` i inne. Ale również **wymaga pewnych uprawnień** dla aplikacji, aby mogły korzystać z udostępnionych funkcji XPC, takich jak `.launchservices.changedefaulthandler` lub `.launchservices.changeurlschemehandler`, aby zmienić domyślne aplikacje dla typów mime lub schematów url i inne.
 
 **`/System/Library/CoreServices/launchservicesd`** rości sobie prawo do usługi `com.apple.coreservices.launchservicesd` i można go zapytać, aby uzyskać informacje o uruchomionych aplikacjach. Można go zapytać za pomocą narzędzia systemowego /**`usr/bin/lsappinfo`** lub za pomocą [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
 

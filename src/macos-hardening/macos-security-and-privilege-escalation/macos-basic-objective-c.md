@@ -164,7 +164,7 @@ NSString *bookTitle = @"The Catcher in the Rye";
 NSString *bookAuthor = [[NSString alloc] initWithCString:"J.D. Salinger" encoding:NSUTF8StringEncoding];
 NSString *bookPublicationYear = [NSString stringWithCString:"1951" encoding:NSUTF8StringEncoding];
 ```
-Podstawowe klasy są **niemutowalne**, więc aby dodać ciąg do istniejącego, **należy utworzyć nowy NSString**.
+Podstawowe klasy są **niemutowalne**, więc aby dodać ciąg do istniejącego, należy **utworzyć nowy NSString**.
 ```objectivec
 NSString *bookDescription = [NSString stringWithFormat:@"%@ by %@ was published in %@", bookTitle, bookAuthor, bookPublicationYear];
 ```
@@ -244,7 +244,7 @@ NSMutableDictionary *mutFruitColorsDictionary = [NSMutableDictionary dictionaryW
 ```
 ### Bloki
 
-Bloki to **funkcje, które zachowują się jak obiekty**, więc mogą być przekazywane do funkcji lub **przechowywane** w **tablicach** lub **słownikach**. Ponadto mogą **reprezentować wartość, jeśli otrzymają wartości**, więc jest to podobne do lambd.
+Bloki to **funkcje, które zachowują się jak obiekty**, więc mogą być przekazywane do funkcji lub **przechowywane** w **tablicach** lub **słownikach**. Mogą również **reprezentować wartość, jeśli są im przypisane wartości**, więc jest to podobne do lambd.
 ```objectivec
 returnType (^blockName)(argumentType1, argumentType2, ...) = ^(argumentType1 param1, argumentType2 param2, ...){
 //Perform operations here

@@ -6,14 +6,14 @@ Jeśli **enumerując** maszynę **wewnętrznie** lub **zewnętrznie** znajdziesz
 
 Jeśli jesteś **już rootem i usługa Splunk nie nasłuchuje tylko na localhost**, możesz **ukraść** plik **hasła** **z** usługi Splunk i **złamać** hasła lub **dodać nowe** dane logowania. I utrzymać trwałość na hoście.
 
-Na pierwszym obrazie poniżej możesz zobaczyć, jak wygląda strona internetowa Splunkd.
+Na pierwszym obrazku poniżej możesz zobaczyć, jak wygląda strona internetowa Splunkd.
 
 ## Podsumowanie Eksploatacji Agenta Splunk Universal Forwarder
 
-Aby uzyskać więcej szczegółów, sprawdź post [https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/). To jest tylko podsumowanie:
+Aby uzyskać więcej szczegółów, sprawdź post [https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/). To tylko podsumowanie:
 
 **Przegląd Eksploatacji:**
-Eksploatacja celująca w Agenta Splunk Universal Forwarder (UF) pozwala atakującym z hasłem agenta na wykonywanie dowolnego kodu na systemach uruchamiających agenta, co potencjalnie może skompromitować całą sieć.
+Eksploatacja celująca w Agenta Splunk Universal Forwarder (UF) pozwala atakującym z hasłem agenta na wykonywanie dowolnego kodu na systemach uruchamiających agenta, co może zagrozić całej sieci.
 
 **Kluczowe Punkty:**
 

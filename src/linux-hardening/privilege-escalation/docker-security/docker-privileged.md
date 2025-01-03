@@ -57,9 +57,9 @@ mount  | grep '(ro'
 {{#endtab}}
 {{#endtabs}}
 
-### Maskowanie systemów plików jądra
+### Maskowanie nad systemami plików jądra
 
-System plików **/proc** jest selektywnie zapisywalny, ale dla bezpieczeństwa niektóre części są chronione przed dostępem do zapisu i odczytu poprzez nałożenie na nie **tmpfs**, co zapewnia, że procesy kontenera nie mogą uzyskać dostępu do wrażliwych obszarów.
+System plików **/proc** jest selektywnie zapisywalny, ale dla bezpieczeństwa, niektóre części są chronione przed dostępem do zapisu i odczytu poprzez nałożenie na nie **tmpfs**, co zapewnia, że procesy kontenera nie mogą uzyskać dostępu do wrażliwych obszarów.
 
 > [!NOTE] > **tmpfs** to system plików, który przechowuje wszystkie pliki w pamięci wirtualnej. tmpfs nie tworzy żadnych plików na twoim dysku twardym. Więc jeśli odmontujesz system plików tmpfs, wszystkie pliki w nim zawarte zostaną na zawsze utracone.
 
@@ -151,7 +151,7 @@ Również zauważ, że gdy Docker (lub inne CRI) są używane w klastrze **Kuber
 
 ### AppArmor
 
-**AppArmor** to ulepszenie jądra, które ogranicza **kontenery** do **ograniczonego** zestawu **zasobów** z **profilami per-program**. Gdy uruchamiasz z flagą `--privileged`, ta ochrona jest wyłączona.
+**AppArmor** to ulepszenie jądra, które ogranicza **kontenery** do **ograniczonego** zestawu **zasobów** z **profilami per program**. Gdy uruchamiasz z flagą `--privileged`, ta ochrona jest wyłączona.
 
 {{#ref}}
 apparmor.md
@@ -175,10 +175,10 @@ Uruchomienie kontenera z flagą `--privileged` wyłącza **etykiety SELinux**, p
 
 ### Przestrzenie nazw
 
-Przestrzenie nazw **NIE są dotknięte** flagą `--privileged`. Mimo że nie mają włączonych ograniczeń bezpieczeństwa, **nie widzą wszystkich procesów w systemie ani sieci hosta, na przykład**. Użytkownicy mogą wyłączyć poszczególne przestrzenie nazw, używając flag silnika kontenerów **`--pid=host`, `--net=host`, `--ipc=host`, `--uts=host`**.
+Przestrzenie nazw **NIE są dotknięte** flagą `--privileged`. Chociaż nie mają włączonych ograniczeń bezpieczeństwa, **nie widzą wszystkich procesów w systemie ani sieci hosta, na przykład**. Użytkownicy mogą wyłączyć poszczególne przestrzenie nazw, używając flag silnika kontenerów **`--pid=host`, `--net=host`, `--ipc=host`, `--uts=host`**.
 
 {{#tabs}}
-{{#tab name="Wewnątrz domyślnego uprzywilejowanego kontenera"}}
+{{#tab name="Inside default privileged container"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 ps -ef
@@ -203,7 +203,7 @@ PID   USER     TIME  COMMAND
 
 ### Przestrzeń użytkownika
 
-**Domyślnie silniki kontenerów nie wykorzystują przestrzeni użytkownika, z wyjątkiem kontenerów bezrootowych**, które wymagają ich do montowania systemu plików i używania wielu UID. Przestrzenie użytkownika, niezbędne dla kontenerów bezrootowych, nie mogą być wyłączane i znacznie zwiększają bezpieczeństwo poprzez ograniczenie uprawnień.
+**Domyślnie silniki kontenerów nie wykorzystują przestrzeni użytkownika, z wyjątkiem kontenerów bezrootowych**, które wymagają ich do montowania systemu plików i używania wielu UID. Przestrzenie użytkownika, niezbędne dla kontenerów bezrootowych, nie mogą być wyłączane i znacznie zwiększają bezpieczeństwo, ograniczając uprawnienia.
 
 ## Odniesienia
 

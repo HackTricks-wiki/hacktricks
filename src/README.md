@@ -9,7 +9,7 @@ _Logotypy i animacje Hacktricks autorstwa_ [_@ppiernacho_](https://www.instagram
 > [!TIP]
 > **Witamy w wiki, gdzie znajdziesz każdą sztuczkę/technikę/hacking, której nauczyłem się z CTF, aplikacji w rzeczywistym życiu, badań i wiadomości.**
 
-Aby rozpocząć, śledź tę stronę, gdzie znajdziesz **typowy przebieg**, który **powinieneś śledzić podczas pentestingu** jednej lub więcej **maszyn:**
+Aby rozpocząć, przejdź do tej strony, gdzie znajdziesz **typowy przebieg**, który **powinieneś śledzić podczas pentestingu** jednej lub więcej **maszyn:**
 
 {{#ref}}
 generic-methodologies-and-resources/pentesting-methodology.md
@@ -21,7 +21,7 @@ generic-methodologies-and-resources/pentesting-methodology.md
 
 <figure><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-[**STM Cyber**](https://www.stmcyber.com) to świetna firma zajmująca się cyberbezpieczeństwem, której hasło to **HACK THE UNHACKABLE**. Prowadzą własne badania i rozwijają własne narzędzia hackingowe, aby **oferować szereg cennych usług w zakresie cyberbezpieczeństwa**, takich jak pentesting, zespoły Red i szkolenia.
+[**STM Cyber**](https://www.stmcyber.com) to świetna firma zajmująca się cyberbezpieczeństwem, której hasło brzmi **HACK THE UNHACKABLE**. Prowadzą własne badania i opracowują własne narzędzia hackingowe, aby **oferować szereg cennych usług w zakresie cyberbezpieczeństwa**, takich jak pentesting, zespoły Red i szkolenia.
 
 Możesz sprawdzić ich **blog** pod adresem [**https://blog.stmcyber.com**](https://blog.stmcyber.com)
 
@@ -68,7 +68,7 @@ Uzyskaj dostęp już dziś:
 
 <figure><img src="images/image (3).png" alt=""><figcaption></figcaption></figure>
 
-Dołącz do serwera [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy), aby komunikować się z doświadczonymi hackerami i łowcami bugów!
+Dołącz do serwera [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy), aby komunikować się z doświadczonymi hackerami i łowcami bug bounty!
 
 - **Wgląd w hacking:** Angażuj się w treści, które zagłębiają się w emocje i wyzwania związane z hackingiem
 - **Aktualności o hackingu w czasie rzeczywistym:** Bądź na bieżąco z dynamicznym światem hackingu dzięki aktualnym wiadomościom i wglądom
@@ -121,11 +121,11 @@ Poznaj technologie i umiejętności potrzebne do przeprowadzania badań nad luka
 
 [**WebSec**](https://websec.nl) to profesjonalna firma zajmująca się cyberbezpieczeństwem z siedzibą w **Amsterdamie**, która pomaga **chronić** firmy **na całym świecie** przed najnowszymi zagrożeniami w dziedzinie cyberbezpieczeństwa, oferując **usługi ofensywne** z **nowoczesnym** podejściem.
 
-WebSec to **wszystko w jednym** firma zajmująca się bezpieczeństwem, co oznacza, że robią wszystko; Pentesting, **Audyty** Bezpieczeństwa, Szkolenia w zakresie Świadomości, Kampanie Phishingowe, Przegląd Kodów, Rozwój Exploitów, Outsourcing Ekspertów ds. Bezpieczeństwa i wiele więcej.
+WebSec to **wszystko w jednym** firma zabezpieczeń, co oznacza, że robią wszystko; Pentesting, **Audyty** Bezpieczeństwa, Szkolenia w zakresie Świadomości, Kampanie Phishingowe, Przegląd Kodów, Rozwój Exploitów, Outsourcing Ekspertów ds. Bezpieczeństwa i wiele więcej.
 
 Kolejną fajną rzeczą w WebSec jest to, że w przeciwieństwie do średniej w branży, WebSec jest **bardzo pewny swoich umiejętności**, do tego stopnia, że **gwarantują najlepsze wyniki jakościowe**, jak stwierdzają na swojej stronie "**Jeśli nie możemy tego zhakować, nie płacisz!**". Aby uzyskać więcej informacji, zajrzyj na ich [**stronę**](https://websec.nl/en/) i [**blog**](https://websec.nl/blog/)!
 
-Oprócz powyższego, WebSec jest również **zaangażowanym wsparciem dla HackTricks.**
+Oprócz powyższego, WebSec jest również **zaangażowanym wsparciem HackTricks.**
 
 {% embed url="https://www.youtube.com/watch?v=Zq2JycGDCPM" %}
 

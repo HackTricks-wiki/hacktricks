@@ -50,7 +50,7 @@ codec => rubydebug
 ```
 Tutaj **interval** określa częstotliwość wykonywania w sekundach. W podanym przykładzie polecenie **whoami** jest uruchamiane co 120 sekund, a jego wyjście jest kierowane do **/tmp/output.log**.
 
-Dzięki **config.reload.automatic: true** w **/etc/logstash/logstash.yml**, Logstash automatycznie wykryje i zastosuje nowe lub zmodyfikowane konfiguracje potoków bez potrzeby ponownego uruchamiania. Jeśli nie ma znaku wieloznacznego, modyfikacje mogą być nadal wprowadzane do istniejących konfiguracji, ale zaleca się ostrożność, aby uniknąć zakłóceń.
+Dzięki **config.reload.automatic: true** w **/etc/logstash/logstash.yml**, Logstash automatycznie wykryje i zastosuje nowe lub zmodyfikowane konfiguracje potoków bez potrzeby ponownego uruchamiania. Jeśli nie ma znaku wieloznacznego, modyfikacje można nadal wprowadzać w istniejących konfiguracjach, ale zaleca się ostrożność, aby uniknąć zakłóceń.
 
 ## References
 

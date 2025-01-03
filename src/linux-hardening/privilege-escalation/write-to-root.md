@@ -24,7 +24,7 @@ system("/bin/bash");
 ```
 ### Git hooks
 
-[**Git hooks**](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) to **skrypty**, które są **uruchamiane** przy różnych **zdarzeniach** w repozytorium git, takich jak tworzenie commita, scalanie... Jeśli więc **skrypt z uprawnieniami lub użytkownik** wykonuje te działania często i możliwe jest **zapisywanie w folderze `.git`**, można to wykorzystać do **privesc**.
+[**Git hooks**](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) to **skrypty**, które są **uruchamiane** przy różnych **zdarzeniach** w repozytorium git, takich jak tworzenie commita, merge... Jeśli więc **skrypt z uprawnieniami** lub **użytkownik** wykonuje te akcje często i możliwe jest **zapisywanie w folderze `.git`**, można to wykorzystać do **privesc**.
 
 Na przykład, możliwe jest **generowanie skryptu** w repozytorium git w **`.git/hooks`**, aby był zawsze wykonywany, gdy tworzony jest nowy commit:
 ```bash
@@ -41,6 +41,6 @@ TODO
 
 ### binfmt_misc
 
-Plik znajdujący się w `/proc/sys/fs/binfmt_misc` wskazuje, który plik binarny powinien wykonywać jaki typ plików. TODO: sprawdź wymagania, aby wykorzystać to do uruchomienia rev shell, gdy otwarty jest typ pliku. 
+Plik znajdujący się w `/proc/sys/fs/binfmt_misc` wskazuje, który plik binarny powinien wykonywać jaki typ plików. TODO: sprawdź wymagania, aby nadużyć tego do wykonania rev shell, gdy otwarty jest typ pliku. 
 
 {{#include ../../banners/hacktricks-training.md}}

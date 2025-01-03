@@ -43,7 +43,7 @@ Zauważ, że użytkownik korzystający z terminala prawdopodobnie ma **zainstalo
 
 ### Podszywanie się pod Dock
 
-Używając pewnych **techniki inżynierii społecznej**, możesz **podszyć się na przykład pod Google Chrome** w docku i faktycznie wykonać swój własny skrypt:
+Używając pewnych **techniki społecznego inżynierii**, możesz **podszyć się na przykład pod Google Chrome** w docku i faktycznie wykonać swój własny skrypt:
 
 {{#tabs}}
 {{#tab name="Chrome Impersonation"}}
@@ -126,9 +126,9 @@ Kilka sugestii:
 
 - Nie **możesz usunąć Findera z Docka**, więc jeśli zamierzasz dodać go do Docka, możesz umieścić fałszywego Findera tuż obok prawdziwego. W tym celu musisz **dodać fałszywy wpis Findera na początku tablicy Docka**.
 - Inną opcją jest nie umieszczanie go w Docku i po prostu otwarcie go, "Finder prosi o kontrolę Findera" nie jest takie dziwne.
-- Inną opcją na **eskalację do roota bez pytania** o hasło z oknem, które wygląda strasznie, jest sprawienie, by Finder naprawdę poprosił o hasło do wykonania uprzywilejowanej akcji:
-- Poproś Findera o skopiowanie do **`/etc/pam.d`** nowego pliku **`sudo`** (Okno proszące o hasło wskaże, że "Finder chce skopiować sudo")
-- Poproś Findera o skopiowanie nowego **Pluginu Autoryzacji** (Możesz kontrolować nazwę pliku, aby okno proszące o hasło wskazało, że "Finder chce skopiować Finder.bundle")
+- Inną opcją na **eskalację do roota bez pytania** o hasło z oknem dialogowym, jest sprawienie, by Finder naprawdę poprosił o hasło do wykonania uprzywilejowanej akcji:
+- Poproś Findera o skopiowanie do **`/etc/pam.d`** nowego pliku **`sudo`** (Okno dialogowe pytające o hasło wskaże, że "Finder chce skopiować sudo")
+- Poproś Findera o skopiowanie nowego **Pluginu Autoryzacji** (Możesz kontrolować nazwę pliku, aby okno dialogowe pytające o hasło wskazywało, że "Finder chce skopiować Finder.bundle")
 ```bash
 #!/bin/sh
 
@@ -206,7 +206,7 @@ killall Dock
 ### CVE-2020-9771 - obejście TCC mount_apfs i eskalacja uprawnień
 
 **Każdy użytkownik** (nawet nieuprzywilejowany) może utworzyć i zamontować migawkę Time Machine oraz **uzyskać dostęp do WSZYSTKICH plików** tej migawki.\
-**Jedynym wymaganym** przywilejem jest to, aby aplikacja używana (taka jak `Terminal`) miała dostęp **Full Disk Access** (FDA) (`kTCCServiceSystemPolicyAllfiles`), który musi być przyznany przez administratora.
+**Jedynym wymaganym uprawnieniem** jest to, aby aplikacja używana (jak `Terminal`) miała dostęp **Full Disk Access** (FDA) (`kTCCServiceSystemPolicyAllfiles`), co musi być przyznane przez administratora.
 ```bash
 # Create snapshot
 tmutil localsnapshot

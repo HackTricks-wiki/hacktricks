@@ -27,7 +27,7 @@ sleep 5 && ./crash & # Wywołaj handler
 
 #### **`/proc/sys/kernel/modprobe`**
 
-- Szczegółowo opisany w [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- Szczegóły w [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 - Zawiera ścieżkę do ładowarki modułów jądra, wywoływanej do ładowania modułów jądra.
 - **Przykład sprawdzania dostępu**:
 
@@ -37,7 +37,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # Sprawdź dostęp do modprobe
 
 #### **`/proc/sys/vm/panic_on_oom`**
 
-- Wspomniane w [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- Odniesienie w [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 - Globalny flag, który kontroluje, czy jądro panikuje, czy wywołuje OOM killera, gdy występuje warunek OOM.
 
 #### **`/proc/sys/fs`**
@@ -72,7 +72,7 @@ echo b > /proc/sysrq-trigger # Ponownie uruchamia hosta
 #### **`/proc/kmsg`**
 
 - Ujawnia komunikaty z bufora pierścieniowego jądra.
-- Może pomóc w exploitach jądra, wyciekach adresów i dostarczyć wrażliwych informacji o systemie.
+- Może wspierać exploity jądra, wycieki adresów i dostarczać wrażliwe informacje o systemie.
 
 #### **`/proc/kallsyms`**
 
@@ -85,7 +85,7 @@ echo b > /proc/sysrq-trigger # Ponownie uruchamia hosta
 
 - Interfejs z urządzeniem pamięci jądra `/dev/mem`.
 - Historycznie podatny na ataki eskalacji uprawnień.
-- Więcej na [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- Więcej w [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
 #### **`/proc/kcore`**
 
@@ -111,7 +111,7 @@ echo b > /proc/sysrq-trigger # Ponownie uruchamia hosta
 
 #### **`/proc/[pid]/mountinfo`**
 
-- Dostarcza informacji o punktach montowania w przestrzeni nazw montowania procesu.
+- Dostarcza informacje o punktach montowania w przestrzeni nazw montowania procesu.
 - Ujawnia lokalizację `rootfs` kontenera lub obrazu.
 
 ### Luki w `/sys`
@@ -119,7 +119,7 @@ echo b > /proc/sysrq-trigger # Ponownie uruchamia hosta
 #### **`/sys/kernel/uevent_helper`**
 
 - Używane do obsługi `uevent` urządzeń jądra.
-- Zapis do `/sys/kernel/uevent_helper` może wykonać dowolne skrypty po wyzwoleniu `uevent`.
+- Zapis do `/sys/kernel/uevent_helper` może wykonywać dowolne skrypty po wyzwoleniu `uevent`.
 - **Przykład eksploatacji**: %%%bash
 
 #### Tworzy ładunek
@@ -158,7 +158,7 @@ cat /output %%%
 #### **`/sys/firmware/efi/vars` i `/sys/firmware/efi/efivars`**
 
 - Ujawnia interfejsy do interakcji z zmiennymi EFI w NVRAM.
-- Błędna konfiguracja lub eksploatacja może prowadzić do zablokowanych laptopów lub nieuruchamialnych maszyn hosta.
+- Błędna konfiguracja lub eksploatacja mogą prowadzić do zablokowanych laptopów lub nieuruchamialnych maszyn hosta.
 
 #### **`/sys/kernel/debug`**
 

@@ -117,7 +117,7 @@ docker run -it --security-opt seccomp=default.json modified-ubuntu strace uname
 
 [Przykład stąd](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-2docker-engine/)
 
-Aby zilustrować funkcję Seccomp, stwórzmy profil Seccomp, który wyłącza wywołanie systemowe „chmod” jak poniżej.
+Aby zilustrować funkcję Seccomp, stwórzmy profil Seccomp, który wyłącza wywołanie systemowe „chmod”, jak poniżej.
 ```json
 {
 "defaultAction": "SCMP_ACT_ALLOW",

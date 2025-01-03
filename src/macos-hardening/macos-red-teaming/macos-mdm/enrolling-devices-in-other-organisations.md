@@ -25,7 +25,7 @@ Rejestracja DEP polega na tym, że `cloudconfigurationd` wysyła zaszyfrowany, p
 
 ## Proxying żądań DEP
 
-Próby przechwycenia i modyfikacji żądań DEP do _iprofiles.apple.com_ za pomocą narzędzi takich jak Charles Proxy były utrudnione przez szyfrowanie ładunku i środki bezpieczeństwa SSL/TLS. Jednak włączenie konfiguracji `MCCloudConfigAcceptAnyHTTPSCertificate` pozwala na ominięcie walidacji certyfikatu serwera, chociaż zaszyfrowana natura ładunku nadal uniemożliwia modyfikację numeru seryjnego bez klucza deszyfrującego.
+Próby przechwycenia i modyfikacji żądań DEP do _iprofiles.apple.com_ przy użyciu narzędzi takich jak Charles Proxy były utrudnione przez szyfrowanie ładunku i środki bezpieczeństwa SSL/TLS. Jednak włączenie konfiguracji `MCCloudConfigAcceptAnyHTTPSCertificate` pozwala na ominięcie walidacji certyfikatu serwera, chociaż zaszyfrowana natura ładunku nadal uniemożliwia modyfikację numeru seryjnego bez klucza deszyfrującego.
 
 ## Instrumentacja binariów systemowych współpracujących z DEP
 
@@ -42,7 +42,7 @@ Ta metoda pozwoliła na pobranie pełnych profili DEP dla dowolnych numerów ser
 
 ### Automatyzacja instrumentacji za pomocą Pythona
 
-Proces eksploatacji został zautomatyzowany za pomocą Pythona z użyciem API LLDB, co umożliwiło programowe wstrzykiwanie dowolnych numerów seryjnych i pobieranie odpowiadających im profili DEP.
+Proces eksploatacji został zautomatyzowany przy użyciu Pythona z API LLDB, co umożliwiło programowe wstrzykiwanie dowolnych numerów seryjnych i pobieranie odpowiadających im profili DEP.
 
 ### Potencjalne skutki luk w DEP i MDM
 

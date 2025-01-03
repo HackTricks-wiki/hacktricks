@@ -6,7 +6,7 @@
 
 I/O Kit to otwartoźródłowy, obiektowy **framework sterowników urządzeń** w jądrze XNU, obsługujący **dynamicznie ładowane sterowniki urządzeń**. Umożliwia dodawanie modularnego kodu do jądra w locie, wspierając różnorodny sprzęt.
 
-Sterowniki IOKit zasadniczo **eksportują funkcje z jądra**. Typy **parametrów** tych funkcji są **zdefiniowane z góry** i są weryfikowane. Ponadto, podobnie jak XPC, IOKit jest po prostu kolejną warstwą na **szczycie komunikatów Mach**.
+Sterowniki IOKit zasadniczo **eksportują funkcje z jądra**. Typy **parametrów** tych funkcji są **zdefiniowane z góry** i są weryfikowane. Ponadto, podobnie jak XPC, IOKit jest po prostu kolejną warstwą **na Mach messages**.
 
 **Kod jądra IOKit XNU** jest otwartoźródłowy i udostępniony przez Apple w [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit). Ponadto, komponenty IOKit w przestrzeni użytkownika są również otwartoźródłowe [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
 
@@ -70,13 +70,13 @@ kextunload com.apple.iokit.IOReportFamily
 
 **IORegistry** jest kluczową częścią frameworka IOKit w macOS i iOS, który służy jako baza danych do reprezentowania konfiguracji sprzętowej i stanu systemu. To **hierarchiczna kolekcja obiektów, które reprezentują cały sprzęt i sterowniki** załadowane w systemie oraz ich wzajemne relacje.
 
-Możesz uzyskać dostęp do IORegistry za pomocą cli **`ioreg`**, aby go zbadać z konsoli (szczególnie przydatne dla iOS).
+Możesz uzyskać IORegistry za pomocą cli **`ioreg`**, aby go zbadać z konsoli (szczególnie przydatne dla iOS).
 ```bash
 ioreg -l #List all
 ioreg -w 0 #Not cut lines
 ioreg -p <plane> #Check other plane
 ```
-Możesz pobrać **`IORegistryExplorer`** z **Xcode Additional Tools** z [**https://developer.apple.com/download/all/**](https://developer.apple.com/download/all/) i zbadać **macOS IORegistry** za pomocą **interfejsu graficznego**.
+Możesz pobrać **`IORegistryExplorer`** z **Xcode Additional Tools** z [**https://developer.apple.com/download/all/**](https://developer.apple.com/download/all/) i zbadać **macOS IORegistry** za pomocą **graficznego** interfejsu.
 
 <figure><img src="../../../images/image (1167).png" alt="" width="563"><figcaption></figcaption></figure>
 
@@ -89,7 +89,7 @@ W IORegistryExplorer "płaszczyzny" są używane do organizowania i wyświetlani
 5. **IOAudio Plane**: Ta płaszczyzna jest przeznaczona do reprezentowania urządzeń audio i ich relacji w systemie.
 6. ...
 
-## Przykład kodu komunikacji sterownika
+## Przykład kodu Comm Driver
 
 Poniższy kod łączy się z usługą IOKit `"YourServiceNameHere"` i wywołuje funkcję wewnątrz selektora 0. W tym celu:
 
@@ -184,11 +184,11 @@ Nowy dekompilowany kod będzie wyglądać następująco:
 
 <figure><img src="../../../images/image (1175).png" alt=""><figcaption></figcaption></figure>
 
-Na następnym etapie musimy zdefiniować strukturę **`IOExternalMethodDispatch2022`**. Jest to open source w [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176), możesz ją zdefiniować:
+Na następnym kroku musimy zdefiniować strukturę **`IOExternalMethodDispatch2022`**. Jest to open source w [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176), możesz ją zdefiniować:
 
 <figure><img src="../../../images/image (1170).png" alt=""><figcaption></figcaption></figure>
 
-Teraz, podążając za `(IOExternalMethodDispatch2022 *)&sIOExternalMethodArray`, możesz zobaczyć wiele danych:
+Teraz, podążając za `(IOExternalMethodDispatch2022 *)&sIOExternalMethodArray` możesz zobaczyć wiele danych:
 
 <figure><img src="../../../images/image (1176).png" alt="" width="563"><figcaption></figcaption></figure>
 

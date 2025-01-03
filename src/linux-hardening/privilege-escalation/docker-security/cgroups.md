@@ -4,7 +4,7 @@
 
 ## Podstawowe informacje
 
-**Linux Control Groups**, czyli **cgroups**, to funkcja jądra Linux, która umożliwia alokację, ograniczenie i priorytetyzację zasobów systemowych, takich jak CPU, pamięć i I/O dysku, wśród grup procesów. Oferują mechanizm do **zarządzania i izolowania wykorzystania zasobów** przez kolekcje procesów, co jest korzystne w takich celach jak ograniczenie zasobów, izolacja obciążenia i priorytetyzacja zasobów wśród różnych grup procesów.
+**Linux Control Groups**, czyli **cgroups**, to funkcja jądra Linux, która umożliwia alokację, ograniczenie i priorytetyzację zasobów systemowych, takich jak CPU, pamięć i I/O dysku, wśród grup procesów. Oferują mechanizm do **zarządzania i izolowania wykorzystania zasobów** przez zbiory procesów, co jest korzystne w takich celach jak ograniczenie zasobów, izolacja obciążenia i priorytetyzacja zasobów wśród różnych grup procesów.
 
 Istnieją **dwie wersje cgroups**: wersja 1 i wersja 2. Obie mogą być używane jednocześnie w systemie. Główna różnica polega na tym, że **cgroups wersja 2** wprowadza **hierarchiczną, drzewiastą strukturę**, umożliwiając bardziej zniuansowaną i szczegółową dystrybucję zasobów wśród grup procesów. Dodatkowo, wersja 2 wprowadza różne ulepszenia, w tym:
 
@@ -31,9 +31,9 @@ Struktura wyjścia jest następująca:
 
 - **Numery 2–12**: cgroups v1, z każdą linią reprezentującą inny cgroup. Kontrolery dla nich są określone obok numeru.
 - **Numer 1**: Również cgroups v1, ale wyłącznie do celów zarządzania (ustawione przez np. systemd) i nie ma kontrolera.
-- **Numer 0**: Reprezentuje cgroups v2. Żadne kontrolery nie są wymienione, a ta linia jest wyłączna dla systemów działających tylko na cgroups v2.
-- **Nazwy są hierarchiczne**, przypominające ścieżki plików, wskazując na strukturę i relacje między różnymi cgroups.
-- **Nazwy takie jak /user.slice lub /system.slice** określają kategoryzację cgroups, przy czym user.slice zazwyczaj dotyczy sesji logowania zarządzanych przez systemd, a system.slice dotyczy usług systemowych.
+- **Numer 0**: Reprezentuje cgroups v2. Nie wymieniono kontrolerów, a ta linia jest wyłączna dla systemów działających tylko na cgroups v2.
+- **Nazwy są hierarchiczne**, przypominające ścieżki plików, wskazujące na strukturę i relacje między różnymi cgroups.
+- **Nazwy takie jak /user.slice lub /system.slice** określają kategoryzację cgroups, przy czym user.slice zazwyczaj dotyczy sesji logowania zarządzanych przez systemd, a system.slice dla usług systemowych.
 
 ### Wyświetlanie cgroups
 
@@ -57,7 +57,7 @@ Procesy są przypisywane do cgroups przez **zapisanie ich identyfikatora procesu
 ```bash
 echo [pid] > cgroup.procs
 ```
-Podobnie, **modyfikacja atrybutów cgroup, takich jak ustawienie limitu PID**, odbywa się poprzez zapisanie żądanej wartości do odpowiedniego pliku. Aby ustawić maksymalnie 3 000 PID-ów dla cgroup:
+Podobnie, **modyfikacja atrybutów cgroup, takich jak ustawienie limitu PID**, odbywa się poprzez zapisanie żądanej wartości do odpowiedniego pliku. Aby ustawić maksymalnie 3,000 PID dla cgroup:
 ```bash
 echo 3000 > pids.max
 ```

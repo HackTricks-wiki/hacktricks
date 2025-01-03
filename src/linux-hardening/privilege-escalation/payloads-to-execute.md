@@ -46,7 +46,7 @@ return 0;
 ```
 ## Nadpisywanie pliku w celu eskalacji uprawnień
 
-### Wspólne pliki
+### Typowe pliki
 
 - Dodaj użytkownika z hasłem do _/etc/passwd_
 - Zmień hasło w _/etc/shadow_

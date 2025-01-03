@@ -2,24 +2,16 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
+## Modyfikacja kontenera
 
-{% embed url="https://academy.8ksec.io/" %}
-
-## Container modification
-
-There are suspicions that some docker container was compromised:
-
+Istnieją podejrzenia, że niektóry kontener docker został skompromitowany:
 ```bash
 docker ps
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
 cc03e43a052a        lamp-wordpress      "./run.sh"          2 minutes ago       Up 2 minutes        80/tcp              wordpress
 ```
-
-You can easily **find the modifications done to this container with regards to the image** with:
-
+Możesz łatwo **znaleźć modyfikacje wprowadzone do tego kontenera w odniesieniu do obrazu** za pomocą:
 ```bash
 docker diff wordpress
 C /var
@@ -33,70 +25,52 @@ A /var/lib/mysql/mysql/time_zone_leap_second.MYI
 A /var/lib/mysql/mysql/general_log.CSV
 ...
 ```
-
-In the previous command **C** means **Changed** and **A,** **Added**.\
-If you find that some interesting file like `/etc/shadow` was modified you can download it from the container to check for malicious activity with:
-
+W poprzednim poleceniu **C** oznacza **Zmienione**, a **A** oznacza **Dodane**.\
+Jeśli odkryjesz, że jakiś interesujący plik, taki jak `/etc/shadow`, został zmodyfikowany, możesz go pobrać z kontenera, aby sprawdzić aktywność złośliwą za pomocą:
 ```bash
 docker cp wordpress:/etc/shadow.
 ```
-
-You can also **compare it with the original one** running a new container and extracting the file from it:
-
+Możesz również **porównać to z oryginałem**, uruchamiając nowy kontener i wyodrębniając z niego plik:
 ```bash
 docker run -d lamp-wordpress
 docker cp b5d53e8b468e:/etc/shadow original_shadow #Get the file from the newly created container
 diff original_shadow shadow
 ```
-
-If you find that **some suspicious file was added** you can access the container and check it:
-
+Jeśli odkryjesz, że **dodano jakiś podejrzany plik**, możesz uzyskać dostęp do kontenera i go sprawdzić:
 ```bash
 docker exec -it wordpress bash
 ```
+## Modyfikacje obrazów
 
-## Images modifications
-
-When you are given an exported docker image (probably in `.tar` format) you can use [**container-diff**](https://github.com/GoogleContainerTools/container-diff/releases) to **extract a summary of the modifications**:
-
+Kiedy otrzymasz wyeksportowany obraz dockera (prawdopodobnie w formacie `.tar`), możesz użyć [**container-diff**](https://github.com/GoogleContainerTools/container-diff/releases), aby **wyodrębnić podsumowanie modyfikacji**:
 ```bash
 docker save <image> > image.tar #Export the image to a .tar file
 container-diff analyze -t sizelayer image.tar
 container-diff analyze -t history image.tar
 container-diff analyze -t metadata image.tar
 ```
-
-Then, you can **decompress** the image and **access the blobs** to search for suspicious files you may have found in the changes history:
-
+Następnie możesz **rozpakować** obraz i **uzyskać dostęp do blobów**, aby przeszukać podejrzane pliki, które mogłeś znaleźć w historii zmian:
 ```bash
 tar -xf image.tar
 ```
+### Podstawowa analiza
 
-### Basic Analysis
-
-You can get **basic information** from the image running:
-
+Możesz uzyskać **podstawowe informacje** z obrazu, uruchamiając:
 ```bash
 docker inspect <image>
 ```
-
-You can also get a summary **history of changes** with:
-
+Możesz również uzyskać podsumowanie **historii zmian** za pomocą:
 ```bash
 docker history --no-trunc <image>
 ```
-
-You can also generate a **dockerfile from an image** with:
-
+Możesz również wygenerować **dockerfile z obrazu** za pomocą:
 ```bash
 alias dfimage="docker run -v /var/run/docker.sock:/var/run/docker.sock --rm alpine/dfimage"
 dfimage -sV=1.36 madhuakula/k8s-goat-hidden-in-layers>
 ```
-
 ### Dive
 
-In order to find added/modified files in docker images you can also use the [**dive**](https://github.com/wagoodman/dive) (download it from [**releases**](https://github.com/wagoodman/dive/releases/tag/v0.10.0)) utility:
-
+Aby znaleźć dodane/zmodyfikowane pliki w obrazach docker, możesz również użyć [**dive**](https://github.com/wagoodman/dive) (pobierz z [**releases**](https://github.com/wagoodman/dive/releases/tag/v0.10.0)) narzędzia:
 ```bash
 #First you need to load the image in your docker repo
 sudo docker load < image.tar                                                                                                                                                                                                         1 ⨯
@@ -105,27 +79,18 @@ Loaded image: flask:latest
 #And then open it with dive:
 sudo dive flask:latest
 ```
+To pozwala na **nawigację przez różne bloby obrazów dockera** i sprawdzenie, które pliki zostały zmodyfikowane/dodane. **Czerwony** oznacza dodany, a **żółty** oznacza zmodyfikowany. Użyj **tab** aby przejść do innego widoku i **spacji** aby zwinąć/otworzyć foldery.
 
-This allows you to **navigate through the different blobs of docker images** and check which files were modified/added. **Red** means added and **yellow** means modified. Use **tab** to move to the other view and **space** to collapse/open folders.
-
-With die you won't be able to access the content of the different stages of the image. To do so you will need to **decompress each layer and access it**.\
-You can decompress all the layers from an image from the directory where the image was decompressed executing:
-
+Z die nie będziesz w stanie uzyskać dostępu do zawartości różnych etapów obrazu. Aby to zrobić, musisz **dekompresować każdą warstwę i uzyskać do niej dostęp**.\
+Możesz zdekompresować wszystkie warstwy z obrazu z katalogu, w którym obraz został zdekompresowany, wykonując:
 ```bash
 tar -xf image.tar
 for d in `find * -maxdepth 0 -type d`; do cd $d; tar -xf ./layer.tar; cd ..; done
 ```
+## Poświadczenia z pamięci
 
-## Credentials from memory
+Zauważ, że gdy uruchamiasz kontener docker na hoście **możesz zobaczyć procesy działające w kontenerze z poziomu hosta** po prostu uruchamiając `ps -ef`
 
-Note that when you run a docker container inside a host **you can see the processes running on the container from the host** just running `ps -ef`
-
-Therefore (as root) you can **dump the memory of the processes** from the host and search for **credentials** just [**like in the following example**](../../linux-hardening/privilege-escalation/#process-memory).
-
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
-
-{% embed url="https://academy.8ksec.io/" %}
+Dlatego (jako root) możesz **zrzucić pamięć procesów** z hosta i wyszukiwać **poświadczenia** po prostu [**jak w następującym przykładzie**](../../linux-hardening/privilege-escalation/#process-memory).
 
 {{#include ../../banners/hacktricks-training.md}}

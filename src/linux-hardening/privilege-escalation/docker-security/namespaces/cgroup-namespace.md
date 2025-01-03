@@ -12,7 +12,7 @@ Chociaż cgroup namespaces nie są oddzielnym typem namespace, jak inne, o któr
 
 1. Gdy tworzony jest nowy cgroup namespace, **zaczyna się od widoku hierarchii cgroup opartego na cgroup procesu tworzącego**. Oznacza to, że procesy działające w nowym cgroup namespace będą widziały tylko podzbiór całej hierarchii cgroup, ograniczony do poddrzewa cgroup zakorzenionego w cgroup procesu tworzącego.
 2. Procesy w obrębie cgroup namespace **widzą swoją własną cgroup jako korzeń hierarchii**. Oznacza to, że z perspektywy procesów wewnątrz namespace, ich własna cgroup pojawia się jako korzeń, a one nie mogą widzieć ani uzyskiwać dostępu do cgroups poza swoim własnym poddrzewem.
-3. Cgroup namespaces nie zapewniają bezpośrednio izolacji zasobów; **zapewniają tylko izolację widoku hierarchii cgroup**. **Kontrola i izolacja zasobów są nadal egzekwowane przez subsystemy cgroup** (np. cpu, pamięć itp.) same w sobie.
+3. Cgroup namespaces nie zapewniają bezpośrednio izolacji zasobów; **zapewniają jedynie izolację widoku hierarchii cgroup**. **Kontrola i izolacja zasobów są nadal egzekwowane przez subsystemy cgroup** (np. cpu, pamięć itp.) same w sobie.
 
 Aby uzyskać więcej informacji na temat CGroups, sprawdź:
 
@@ -39,12 +39,12 @@ Gdy `unshare` jest wykonywane bez opcji `-f`, napotykany jest błąd z powodu sp
 1. **Wyjaśnienie problemu**:
 
 - Jądro Linuxa pozwala procesowi na tworzenie nowych przestrzeni nazw za pomocą wywołania systemowego `unshare`. Jednak proces, który inicjuje tworzenie nowej przestrzeni nazw PID (nazywany "procesem unshare"), nie wchodzi do nowej przestrzeni nazw; tylko jego procesy potomne to robią.
-- Uruchomienie `%unshare -p /bin/bash%` uruchamia `/bin/bash` w tym samym procesie co `unshare`. W konsekwencji `/bin/bash` i jego procesy potomne znajdują się w oryginalnej przestrzeni nazw PID.
+- Uruchomienie `%unshare -p /bin/bash%` uruchamia `/bin/bash` w tym samym procesie co `unshare`. W konsekwencji, `/bin/bash` i jego procesy potomne znajdują się w oryginalnej przestrzeni nazw PID.
 - Pierwszy proces potomny `/bin/bash` w nowej przestrzeni nazw staje się PID 1. Gdy ten proces kończy działanie, uruchamia czyszczenie przestrzeni nazw, jeśli nie ma innych procesów, ponieważ PID 1 ma specjalną rolę przyjmowania procesów osieroconych. Jądro Linuxa wyłączy wtedy przydzielanie PID w tej przestrzeni nazw.
 
 2. **Konsekwencja**:
 
-- Zakończenie PID 1 w nowej przestrzeni nazw prowadzi do wyczyszczenia flagi `PIDNS_HASH_ADDING`. Skutkuje to niepowodzeniem funkcji `alloc_pid` w przydzieleniu nowego PID podczas tworzenia nowego procesu, co skutkuje błędem "Nie można przydzielić pamięci".
+- Zakończenie PID 1 w nowej przestrzeni nazw prowadzi do usunięcia flagi `PIDNS_HASH_ADDING`. Skutkuje to niepowodzeniem funkcji `alloc_pid` w przydzieleniu nowego PID podczas tworzenia nowego procesu, co skutkuje błędem "Nie można przydzielić pamięci".
 
 3. **Rozwiązanie**:
 - Problem można rozwiązać, używając opcji `-f` z `unshare`. Ta opcja sprawia, że `unshare` fork'uje nowy proces po utworzeniu nowej przestrzeni nazw PID.

@@ -1,9 +1,9 @@
-# Przydatne polecenia Linuxa
+# Przydatne polecenia Linux
 
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Typowe Bash
+## Powszechny Bash
 ```bash
 #Exfiltration using Base64
 base64 -w 0 file

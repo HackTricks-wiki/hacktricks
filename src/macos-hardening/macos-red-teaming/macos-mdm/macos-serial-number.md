@@ -35,6 +35,6 @@ Ten znak zmienia się od 'C' (reprezentujący pierwszą połowę 2010 roku) do '
 
 ### **Tydzień produkcji (5. znak)**
 
-Cyfry 1-9 odpowiadają tygodniom 1-9. Litery C-Y (z wyjątkiem samogłosk i 'S') reprezentują tygodnie 10-27. Dla drugiej połowy roku dodaje się 26 do tej liczby.
+Cyfry 1-9 odpowiadają tygodniom 1-9. Litery C-Y (z wyjątkiem samogłosków i 'S') reprezentują tygodnie 10-27. Dla drugiej połowy roku dodaje się 26 do tej liczby.
 
 {{#include ../../../banners/hacktricks-training.md}}

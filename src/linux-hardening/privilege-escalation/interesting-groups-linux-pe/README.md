@@ -60,7 +60,7 @@ pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 ```
 %wheel	ALL=(ALL:ALL) ALL
 ```
-To oznacza, że **każdy użytkownik, który należy do grupy wheel, może wykonywać cokolwiek jako sudo**.
+To oznacza, że **każdy użytkownik, który należy do grupy wheel, może wykonywać wszystko jako sudo**.
 
 Jeśli tak jest, aby **stać się rootem, wystarczy wykonać**:
 ```
@@ -130,7 +130,7 @@ $ /bin/bash -p
 ```
 ## Grupa dysków
 
-To uprawnienie jest prawie **równoważne z dostępem root** ponieważ możesz uzyskać dostęp do wszystkich danych wewnątrz maszyny.
+To uprawnienie jest prawie **równoważne z dostępem root**, ponieważ możesz uzyskać dostęp do wszystkich danych wewnątrz maszyny.
 
 Pliki:`/dev/sd[a-z][1-9]`
 ```bash

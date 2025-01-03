@@ -12,7 +12,7 @@ Z perspektywy procesu w namespace PID, może on widzieć tylko inne procesy w ty
 
 ### Jak to działa:
 
-1. Gdy nowy proces jest tworzony (np. za pomocą wywołania systemowego `clone()`), proces może być przypisany do nowego lub istniejącego namespace PID. **Jeśli tworzony jest nowy namespace, proces staje się procesem "init" tego namespace**.
+1. Gdy tworzony jest nowy proces (np. za pomocą wywołania systemowego `clone()`), proces może być przypisany do nowego lub istniejącego namespace PID. **Jeśli tworzony jest nowy namespace, proces staje się procesem "init" tego namespace**.
 2. **Jądro** utrzymuje **mapowanie między PID-ami w nowym namespace a odpowiadającymi PID-ami** w namespace rodzicu (tj. namespace, z którego utworzono nowy namespace). To mapowanie **pozwala jądru na tłumaczenie PID-ów w razie potrzeby**, na przykład podczas wysyłania sygnałów między procesami w różnych namespace'ach.
 3. **Procesy w namespace PID mogą widzieć i interagować tylko z innymi procesami w tym samym namespace**. Nie są świadome procesów w innych namespace'ach, a ich PID-y są unikalne w obrębie ich namespace.
 4. Gdy **namespace PID jest niszczony** (np. gdy proces "init" namespace kończy działanie), **wszystkie procesy w tym namespace są kończone**. Zapewnia to, że wszystkie zasoby związane z namespace są odpowiednio sprzątane.
@@ -66,7 +66,7 @@ sudo find /proc -maxdepth 3 -type l -name pid -exec readlink {} \; 2>/dev/null |
 ```
 Zauważ, że użytkownik root z początkowej (domyślnej) przestrzeni nazw PID może widzieć wszystkie procesy, nawet te w nowych przestrzeniach nazw PID, dlatego możemy zobaczyć wszystkie przestrzenie nazw PID.
 
-### Wejdź do przestrzeni nazw PID
+### Wejście do przestrzeni nazw PID
 ```bash
 nsenter -t TARGET_PID --pid /bin/bash
 ```

@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## What is Distroless
+## Czym jest Distroless
 
 Kontener distroless to rodzaj kontenera, który **zawiera tylko niezbędne zależności do uruchomienia konkretnej aplikacji**, bez dodatkowego oprogramowania lub narzędzi, które nie są wymagane. Te kontenery są zaprojektowane, aby być jak **najlżejsze** i **najbezpieczniejsze** możliwe, a ich celem jest **minimalizacja powierzchni ataku** poprzez usunięcie wszelkich zbędnych komponentów.
 
@@ -17,14 +17,14 @@ Niektóre **przykłady** **kontenerów distroless** to:
 
 Celem uzbrojenia kontenera distroless jest możliwość **wykonywania dowolnych binarek i ładunków, nawet z ograniczeniami** narzuconymi przez **distroless** (brak powszechnych binarek w systemie) oraz ochronami powszechnie spotykanymi w kontenerach, takimi jak **tylko do odczytu** lub **brak wykonania** w `/dev/shm`.
 
-### Through memory
+### Przez pamięć
 
 Nadchodzi w pewnym momencie 2023...
 
-### Via Existing binaries
+### Poprzez istniejące binarki
 
 #### openssl
 
-\***\*[**W tym poście,**](https://www.form3.tech/engineering/content/exploiting-distroless-images) wyjaśniono, że binarka **`openssl`** jest często znajdowana w tych kontenerach, potencjalnie dlatego, że jest **potrzebna\*\* przez oprogramowanie, które ma działać wewnątrz kontenera.
+\***\*[**W tym poście,**](https://www.form3.tech/engineering/content/exploiting-distroless-images) wyjaśniono, że binarka **`openssl`** jest często spotykana w tych kontenerach, potencjalnie dlatego, że jest **potrzebna\*\* przez oprogramowanie, które ma działać wewnątrz kontenera.
 
 {{#include ../../../banners/hacktricks-training.md}}

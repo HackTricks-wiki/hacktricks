@@ -2,13 +2,13 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Interpozycja funkcji
+## Function Interposing
 
 Utwórz **dylib** z sekcją **`__interpose`** (lub sekcją oznaczoną jako **`S_INTERPOSING`**) zawierającą krotki **wskaźników funkcji**, które odnoszą się do **oryginalnych** i **zamiennych** funkcji.
 
 Następnie **wstrzyknij** dylib za pomocą **`DYLD_INSERT_LIBRARIES`** (interpozycja musi nastąpić przed załadowaniem głównej aplikacji). Oczywiście [**ograniczenia** dotyczące użycia **`DYLD_INSERT_LIBRARIES`** mają tu również zastosowanie](../macos-proces-abuse/macos-library-injection/#check-restrictions).&#x20;
 
-### Interpozycja printf
+### Interpose printf
 
 {{#tabs}}
 {{#tab name="interpose.c"}}
@@ -79,16 +79,16 @@ Hello from interpose
 ```
 ## Method Swizzling
 
-W ObjectiveC metoda jest wywoływana w następujący sposób: **`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
+W ObjectiveC wywołanie metody wygląda tak: **`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
 
 Potrzebny jest **obiekt**, **metoda** i **parametry**. A gdy metoda jest wywoływana, **msg jest wysyłany** za pomocą funkcji **`objc_msgSend`**: `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
 
 Obiekt to **`someObject`**, metoda to **`@selector(method1p1:p2:)`**, a argumenty to **value1**, **value2**.
 
-Podążając za strukturami obiektów, możliwe jest dotarcie do **tablicy metod**, gdzie **nazwy** i **wskaźniki** do kodu metod są **zlokalizowane**.
+Śledząc struktury obiektów, możliwe jest dotarcie do **tablicy metod**, w której **nazwy** i **wskaźniki** do kodu metod są **zlokalizowane**.
 
 > [!CAUTION]
-> Zauważ, że ponieważ metody i klasy są dostępne na podstawie ich nazw, te informacje są przechowywane w binarnym pliku, więc możliwe jest ich odzyskanie za pomocą `otool -ov </path/bin>` lub [`class-dump </path/bin>`](https://github.com/nygard/class-dump)
+> Zauważ, że ponieważ metody i klasy są dostępne na podstawie ich nazw, te informacje są przechowywane w binarnym pliku, więc można je odzyskać za pomocą `otool -ov </path/bin>` lub [`class-dump </path/bin>`](https://github.com/nygard/class-dump)
 
 ### Accessing the raw methods
 
@@ -276,7 +276,7 @@ Aby to zrobić, najłatwiejszą techniką do użycia jest wstrzyknięcie [Dyld z
 
 Jednak obie opcje są **ograniczone** do **niechronionych** binarek/procesów. Sprawdź każdą technikę, aby dowiedzieć się więcej o ograniczeniach.
 
-Jednak atak hookowania funkcji jest bardzo specyficzny, atakujący zrobi to, aby **ukraść wrażliwe informacje z wnętrza procesu** (gdyby nie, po prostu przeprowadziłby atak wstrzykiwania procesu). A te wrażliwe informacje mogą znajdować się w aplikacjach pobranych przez użytkownika, takich jak MacPass.
+Jednak atak hookowania funkcji jest bardzo specyficzny, atakujący zrobi to, aby **ukraść wrażliwe informacje z wnętrza procesu** (w przeciwnym razie po prostu przeprowadziłby atak wstrzykiwania procesu). A te wrażliwe informacje mogą znajdować się w aplikacjach pobranych przez użytkownika, takich jak MacPass.
 
 Zatem wektorem ataku byłoby znalezienie luki lub usunięcie podpisu aplikacji, wstrzyknięcie zmiennej środowiskowej **`DYLD_INSERT_LIBRARIES`** przez Info.plist aplikacji, dodając coś takiego:
 ```xml
@@ -286,7 +286,7 @@ Zatem wektorem ataku byłoby znalezienie luki lub usunięcie podpisu aplikacji, 
 <string>/Applications/Application.app/Contents/malicious.dylib</string>
 </dict>
 ```
-a następnie **zarejestruj ponownie** aplikację:
+a następnie **ponownie zarejestrować** aplikację:
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f /Applications/Application.app
 ```

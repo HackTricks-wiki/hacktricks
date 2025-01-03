@@ -2,105 +2,105 @@
 
 ## smss.exe
 
-**Session Manager**.\
-Session 0 starts **csrss.exe** and **wininit.exe** (**OS** **services**) while Session 1 starts **csrss.exe** and **winlogon.exe** (**User** **session**). However, you should see **only one process** of that **binary** without children in the processes tree.
+**Menadżer sesji**.\
+Sesja 0 uruchamia **csrss.exe** i **wininit.exe** (**usługi** **OS**), podczas gdy Sesja 1 uruchamia **csrss.exe** i **winlogon.exe** (**sesja** **użytkownika**). Jednak powinieneś zobaczyć **tylko jeden proces** tego **binarnego** bez dzieci w drzewie procesów.
 
-Also, sessions apart from 0 and 1 may mean that RDP sessions are occurring.
+Ponadto, sesje inne niż 0 i 1 mogą oznaczać, że występują sesje RDP.
 
 ## csrss.exe
 
-**Client/Server Run Subsystem Process**.\
-It manages **processes** and **threads**, makes the **Windows** **API** available for other processes and also **maps drive letters**, create **temp files**, and handles the **shutdown** **process**.
+**Proces podsystemu klienta/serwera**.\
+Zarządza **procesami** i **wątkami**, udostępnia **API** **Windows** dla innych procesów oraz **mapuje litery dysków**, tworzy **pliki tymczasowe** i obsługuje **proces** **zamknięcia**.
 
-There is one **running in Session 0 and another one in Session 1** (so **2 processes** in the processes tree). Another one is created **per new Session**.
+Jest jeden **uruchomiony w Sesji 0 i drugi w Sesji 1** (więc **2 procesy** w drzewie procesów). Inny jest tworzony **na każdą nową sesję**.
 
 ## winlogon.exe
 
-**Windows Logon Process**.\
-It's responsible for user **logon**/**logoffs**. It launches **logonui.exe** to ask for username and password and then calls **lsass.exe** to verify them.
+**Proces logowania Windows**.\
+Odpowiada za **logowanie**/**wylogowywanie** użytkowników. Uruchamia **logonui.exe**, aby poprosić o nazwę użytkownika i hasło, a następnie wywołuje **lsass.exe**, aby je zweryfikować.
 
-Then it launches **userinit.exe** which is specified in **`HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`** with key **Userinit**.
+Następnie uruchamia **userinit.exe**, który jest określony w **`HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`** z kluczem **Userinit**.
 
-Mover over, the previous registry should have **explorer.exe** in the **Shell key** or it might be abused as a **malware persistence method**.
+Ponadto, poprzedni rejestr powinien mieć **explorer.exe** w kluczu **Shell**, w przeciwnym razie może być nadużyty jako **metoda utrzymywania złośliwego oprogramowania**.
 
 ## wininit.exe
 
-**Windows Initialization Process**. \
-It launches **services.exe**, **lsass.exe**, and **lsm.exe** in Session 0. There should only be 1 process.
+**Proces inicjalizacji Windows**. \
+Uruchamia **services.exe**, **lsass.exe** i **lsm.exe** w Sesji 0. Powinien być tylko 1 proces.
 
 ## userinit.exe
 
-**Userinit Logon Application**.\
-Loads the **ntduser.dat in HKCU** and initialises the **user** **environment** and runs **logon** **scripts** and **GPO**.
+**Aplikacja logowania Userinit**.\
+Ładuje **ntduser.dat w HKCU** i inicjalizuje **środowisko** **użytkownika** oraz uruchamia **skrypty logowania** i **GPO**.
 
-It launches **explorer.exe**.
+Uruchamia **explorer.exe**.
 
 ## lsm.exe
 
-**Local Session Manager**.\
-It works with smss.exe to manipulate user sessions: Logon/logoff, shell start, lock/unlock desktop, etc.
+**Menadżer sesji lokalnej**.\
+Współpracuje z smss.exe, aby manipulować sesjami użytkowników: logowanie/wylogowanie, uruchamianie powłoki, blokowanie/odblokowywanie pulpitu itp.
 
-After W7 lsm.exe was transformed into a service (lsm.dll).
+Po W7 lsm.exe został przekształcony w usługę (lsm.dll).
 
-There should only be 1 process in W7 and from them a service running the DLL.
+Powinien być tylko 1 proces w W7, a z nich usługa uruchamiająca DLL.
 
 ## services.exe
 
-**Service Control Manager**.\
-It **loads** **services** configured as **auto-start** and **drivers**.
+**Menadżer kontroli usług**.\
+**Ładuje** **usługi** skonfigurowane jako **auto-start** oraz **sterowniki**.
 
-It's the parent process of **svchost.exe**, **dllhost.exe**, **taskhost.exe**, **spoolsv.exe** and many more.
+Jest procesem nadrzędnym dla **svchost.exe**, **dllhost.exe**, **taskhost.exe**, **spoolsv.exe** i wielu innych.
 
-Services are defined in `HKLM\SYSTEM\CurrentControlSet\Services` and this process maintains a DB in memory of service info that can be queried by sc.exe.
+Usługi są definiowane w `HKLM\SYSTEM\CurrentControlSet\Services`, a ten proces utrzymuje bazę danych w pamięci z informacjami o usługach, które można zapytać za pomocą sc.exe.
 
-Note how **some** **services** are going to be running in a **process of their own** and others are going to be **sharing a svchost.exe process**.
+Zauważ, że **niektóre** **usługi** będą działać w **własnym procesie**, a inne będą **dzielić proces svchost.exe**.
 
-There should only be 1 process.
+Powinien być tylko 1 proces.
 
 ## lsass.exe
 
-**Local Security Authority Subsystem**.\
-It's responsible for the user **authentication** and create the **security** **tokens**. It uses authentication packages located in `HKLM\System\CurrentControlSet\Control\Lsa`.
+**Podsystem lokalnej autoryzacji bezpieczeństwa**.\
+Odpowiada za **uwierzytelnianie** użytkowników i tworzenie **tokenów** **bezpieczeństwa**. Używa pakietów uwierzytelniających znajdujących się w `HKLM\System\CurrentControlSet\Control\Lsa`.
 
-It writes to the **Security** **event** **log** and there should only be 1 process.
+Zapisuje do **dziennika** **zdarzeń** **bezpieczeństwa** i powinien być tylko 1 proces.
 
-Keep in mind that this process is highly attacked to dump passwords.
+Pamiętaj, że ten proces jest często atakowany w celu zrzutu haseł.
 
 ## svchost.exe
 
-**Generic Service Host Process**.\
-It hosts multiple DLL services in one shared process.
+**Ogólny proces hosta usług**.\
+Hostuje wiele usług DLL w jednym wspólnym procesie.
 
-Usually, you will find that **svchost.exe** is launched with the `-k` flag. This will launch a query to the registry **HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Svchost** where there will be a key with the argument mentioned in -k that will contain the services to launch in the same process.
+Zazwyczaj znajdziesz, że **svchost.exe** jest uruchamiany z flagą `-k`. To uruchomi zapytanie do rejestru **HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Svchost**, gdzie będzie klucz z argumentem wspomnianym w -k, który będzie zawierał usługi do uruchomienia w tym samym procesie.
 
-For example: `-k UnistackSvcGroup` will launch: `PimIndexMaintenanceSvc MessagingService WpnUserService CDPUserSvc UnistoreSvc UserDataSvc OneSyncSvc`
+Na przykład: `-k UnistackSvcGroup` uruchomi: `PimIndexMaintenanceSvc MessagingService WpnUserService CDPUserSvc UnistoreSvc UserDataSvc OneSyncSvc`
 
-If the **flag `-s`** is also used with an argument, then svchost is asked to **only launch the specified service** in this argument.
+Jeśli również użyta jest **flaga `-s`** z argumentem, to svchost jest proszony o **uruchomienie tylko określonej usługi** w tym argumencie.
 
-There will be several processes of `svchost.exe`. If any of them is **not using the `-k` flag**, then that's very suspicious. If you find that **services.exe is not the parent**, that's also very suspicious.
+Będzie kilka procesów `svchost.exe`. Jeśli którykolwiek z nich **nie używa flagi `-k`**, to jest to bardzo podejrzane. Jeśli odkryjesz, że **services.exe nie jest procesem nadrzędnym**, to również jest bardzo podejrzane.
 
 ## taskhost.exe
 
-This process act as a host for processes running from DLLs. It also loads the services that are running from DLLs.
+Ten proces działa jako host dla procesów uruchamianych z DLL. Ładuje również usługi, które działają z DLL.
 
-In W8 this is called taskhostex.exe and in W10 taskhostw.exe.
+W W8 nazywa się to taskhostex.exe, a w W10 taskhostw.exe.
 
 ## explorer.exe
 
-This is the process responsible for the **user's desktop** and launching files via file extensions.
+To jest proces odpowiedzialny za **pulpit użytkownika** i uruchamianie plików za pomocą rozszerzeń plików.
 
-**Only 1** process should be spawned **per logged on user.**
+**Tylko 1** proces powinien być uruchomiony **na każdego zalogowanego użytkownika.**
 
-This is run from **userinit.exe** which should be terminated, so **no parent** should appear for this process.
+Jest uruchamiany z **userinit.exe**, który powinien być zakończony, więc **żaden proces nadrzędny** nie powinien pojawić się dla tego procesu.
 
-# Catching Malicious Processes
+# Wykrywanie złośliwych procesów
 
-- Is it running from the expected path? (No Windows binaries run from temp location)
-- Is it communicating with weird IPs?
-- Check digital signatures (Microsoft artifacts should be signed)
-- Is it spelled correctly?
-- Is running under the expected SID?
-- Is the parent process the expected one (if any)?
-- Are the children processes the expecting ones? (no cmd.exe, wscript.exe, powershell.exe..?)
+- Czy działa z oczekiwaną ścieżki? (Żadne binaria Windows nie działają z lokalizacji tymczasowej)
+- Czy komunikuje się z dziwnymi adresami IP?
+- Sprawdź podpisy cyfrowe (artefakty Microsoftu powinny być podpisane)
+- Czy jest poprawnie napisane?
+- Czy działa pod oczekiwanym SID?
+- Czy proces nadrzędny jest oczekiwany (jeśli w ogóle)?
+- Czy procesy potomne są tymi oczekiwanymi? (żadne cmd.exe, wscript.exe, powershell.exe..?)
 
 {{#include ../../../banners/hacktricks-training.md}}

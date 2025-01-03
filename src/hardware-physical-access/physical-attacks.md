@@ -1,56 +1,56 @@
-# Physical Attacks
+# Ataki Fizyczne
 
 {{#include ../banners/hacktricks-training.md}}
 
-## BIOS Password Recovery and System Security
+## Odzyskiwanie Hasła BIOS i Bezpieczeństwo Systemu
 
-**Resetting the BIOS** can be achieved in several ways. Most motherboards include a **battery** that, when removed for around **30 minutes**, will reset the BIOS settings, including the password. Alternatively, a **jumper on the motherboard** can be adjusted to reset these settings by connecting specific pins.
+**Resetowanie BIOS** można osiągnąć na kilka sposobów. Większość płyt głównych zawiera **baterię**, która, gdy zostanie usunięta na około **30 minut**, zresetuje ustawienia BIOS, w tym hasło. Alternatywnie, można dostosować **jumper na płycie głównej**, aby zresetować te ustawienia, łącząc określone piny.
 
-For situations where hardware adjustments are not possible or practical, **software tools** offer a solution. Running a system from a **Live CD/USB** with distributions like **Kali Linux** provides access to tools like **_killCmos_** and **_CmosPWD_**, which can assist in BIOS password recovery.
+W sytuacjach, gdy dostosowania sprzętowe nie są możliwe lub praktyczne, **narzędzia programowe** oferują rozwiązanie. Uruchomienie systemu z **Live CD/USB** z dystrybucjami takimi jak **Kali Linux** zapewnia dostęp do narzędzi takich jak **_killCmos_** i **_CmosPWD_**, które mogą pomóc w odzyskiwaniu hasła BIOS.
 
-In cases where the BIOS password is unknown, entering it incorrectly **three times** will typically result in an error code. This code can be used on websites like [https://bios-pw.org](https://bios-pw.org) to potentially retrieve a usable password.
+W przypadkach, gdy hasło BIOS jest nieznane, wprowadzenie go błędnie **trzy razy** zazwyczaj skutkuje kodem błędu. Ten kod można wykorzystać na stronach takich jak [https://bios-pw.org](https://bios-pw.org), aby potencjalnie odzyskać użyteczne hasło.
 
-### UEFI Security
+### Bezpieczeństwo UEFI
 
-For modern systems using **UEFI** instead of traditional BIOS, the tool **chipsec** can be utilized to analyze and modify UEFI settings, including the disabling of **Secure Boot**. This can be accomplished with the following command:
+Dla nowoczesnych systemów używających **UEFI** zamiast tradycyjnego BIOS, narzędzie **chipsec** może być wykorzystane do analizy i modyfikacji ustawień UEFI, w tym wyłączania **Secure Boot**. Można to osiągnąć za pomocą następującego polecenia:
 
 `python chipsec_main.py -module exploits.secure.boot.pk`
 
-### RAM Analysis and Cold Boot Attacks
+### Analiza RAM i Ataki Cold Boot
 
-RAM retains data briefly after power is cut, usually for **1 to 2 minutes**. This persistence can be extended to **10 minutes** by applying cold substances, such as liquid nitrogen. During this extended period, a **memory dump** can be created using tools like **dd.exe** and **volatility** for analysis.
+RAM przechowuje dane przez krótki czas po odcięciu zasilania, zazwyczaj przez **1 do 2 minut**. Ta trwałość może być wydłużona do **10 minut** poprzez zastosowanie zimnych substancji, takich jak ciekły azot. W tym wydłużonym okresie można stworzyć **zrzut pamięci** za pomocą narzędzi takich jak **dd.exe** i **volatility** do analizy.
 
-### Direct Memory Access (DMA) Attacks
+### Ataki Direct Memory Access (DMA)
 
-**INCEPTION** is a tool designed for **physical memory manipulation** through DMA, compatible with interfaces like **FireWire** and **Thunderbolt**. It allows for bypassing login procedures by patching memory to accept any password. However, it's ineffective against **Windows 10** systems.
+**INCEPTION** to narzędzie zaprojektowane do **manipulacji pamięcią fizyczną** przez DMA, kompatybilne z interfejsami takimi jak **FireWire** i **Thunderbolt**. Umożliwia ominięcie procedur logowania poprzez patchowanie pamięci, aby akceptowała dowolne hasło. Jednak jest nieskuteczne przeciwko systemom **Windows 10**.
 
-### Live CD/USB for System Access
+### Live CD/USB do Dostępu do Systemu
 
-Changing system binaries like **_sethc.exe_** or **_Utilman.exe_** with a copy of **_cmd.exe_** can provide a command prompt with system privileges. Tools such as **chntpw** can be used to edit the **SAM** file of a Windows installation, allowing password changes.
+Zmiana binarnych plików systemowych, takich jak **_sethc.exe_** lub **_Utilman.exe_**, na kopię **_cmd.exe_** może zapewnić dostęp do wiersza poleceń z uprawnieniami systemowymi. Narzędzia takie jak **chntpw** mogą być używane do edytowania pliku **SAM** instalacji Windows, umożliwiając zmiany hasła.
 
-**Kon-Boot** is a tool that facilitates logging into Windows systems without knowing the password by temporarily modifying the Windows kernel or UEFI. More information can be found at [https://www.raymond.cc](https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/).
+**Kon-Boot** to narzędzie, które ułatwia logowanie do systemów Windows bez znajomości hasła, tymczasowo modyfikując jądro Windows lub UEFI. Więcej informacji można znaleźć na [https://www.raymond.cc](https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/).
 
-### Handling Windows Security Features
+### Obsługa Funkcji Bezpieczeństwa Windows
 
-#### Boot and Recovery Shortcuts
+#### Skróty do Rozruchu i Odzyskiwania
 
-- **Supr**: Access BIOS settings.
-- **F8**: Enter Recovery mode.
-- Pressing **Shift** after the Windows banner can bypass autologon.
+- **Supr**: Dostęp do ustawień BIOS.
+- **F8**: Wejście w tryb odzyskiwania.
+- Naciśnięcie **Shift** po banerze Windows może ominąć autologowanie.
 
-#### BAD USB Devices
+#### Urządzenia BAD USB
 
-Devices like **Rubber Ducky** and **Teensyduino** serve as platforms for creating **bad USB** devices, capable of executing predefined payloads when connected to a target computer.
+Urządzenia takie jak **Rubber Ducky** i **Teensyduino** służą jako platformy do tworzenia urządzeń **bad USB**, zdolnych do wykonywania zdefiniowanych ładunków po podłączeniu do docelowego komputera.
 
-#### Volume Shadow Copy
+#### Kopia Cieniowa Woluminu
 
-Administrator privileges allow for the creation of copies of sensitive files, including the **SAM** file, through PowerShell.
+Uprawnienia administratora pozwalają na tworzenie kopii wrażliwych plików, w tym pliku **SAM**, za pomocą PowerShell.
 
-### Bypassing BitLocker Encryption
+### Ominięcie Szyfrowania BitLocker
 
-BitLocker encryption can potentially be bypassed if the **recovery password** is found within a memory dump file (**MEMORY.DMP**). Tools like **Elcomsoft Forensic Disk Decryptor** or **Passware Kit Forensic** can be utilized for this purpose.
+Szyfrowanie BitLocker można potencjalnie obejść, jeśli **hasło odzyskiwania** zostanie znalezione w pliku zrzutu pamięci (**MEMORY.DMP**). Narzędzia takie jak **Elcomsoft Forensic Disk Decryptor** lub **Passware Kit Forensic** mogą być wykorzystane w tym celu.
 
-### Social Engineering for Recovery Key Addition
+### Inżynieria Społeczna w Celu Dodania Klucza Odzyskiwania
 
-A new BitLocker recovery key can be added through social engineering tactics, convincing a user to execute a command that adds a new recovery key composed of zeros, thereby simplifying the decryption process.
+Nowy klucz odzyskiwania BitLocker można dodać za pomocą taktyk inżynierii społecznej, przekonując użytkownika do wykonania polecenia, które dodaje nowy klucz odzyskiwania składający się z zer, co upraszcza proces deszyfrowania.
 {{#include ../banners/hacktricks-training.md}}

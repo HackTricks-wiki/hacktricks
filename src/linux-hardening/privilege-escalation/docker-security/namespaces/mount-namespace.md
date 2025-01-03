@@ -58,7 +58,7 @@ docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ls -l /proc/self/ns/mnt
 lrwxrwxrwx 1 root root 0 Apr  4 20:30 /proc/self/ns/mnt -> 'mnt:[4026531841]'
 ```
-### Znajdź wszystkie przestrzenie montowania
+### Znajdź wszystkie przestrzenie nazw montowania
 ```bash
 sudo find /proc -maxdepth 3 -type l -name mnt -exec readlink {} \; 2>/dev/null | sort -u
 # Find the processes with an specific namespace
@@ -72,7 +72,7 @@ findmnt
 ```bash
 nsenter -m TARGET_PID --pid /bin/bash
 ```
-Możesz **wejść do innej przestrzeni nazw procesów tylko jako root**. I **nie możesz** **wejść** do innej przestrzeni nazw **bez deskryptora** wskazującego na nią (jak `/proc/self/ns/mnt`).
+Możesz **wejść do innej przestrzeni nazw tylko jeśli jesteś root**. I **nie możesz** **wejść** do innej przestrzeni nazw **bez deskryptora** wskazującego na nią (jak `/proc/self/ns/mnt`).
 
 Ponieważ nowe montowania są dostępne tylko w obrębie przestrzeni nazw, możliwe jest, że przestrzeń nazw zawiera wrażliwe informacje, które mogą być dostępne tylko z niej.
 

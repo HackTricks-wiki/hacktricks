@@ -9,7 +9,7 @@
 **GCD** zapewnia i zarządza **kolejkami FIFO**, do których Twoja aplikacja może **przesyłać zadania** w postaci **obiektów blokowych**. Bloki przesyłane do kolejek dispatch są **wykonywane na puli wątków** w pełni zarządzanej przez system. GCD automatycznie tworzy wątki do wykonywania zadań w kolejkach dispatch i planuje te zadania do uruchomienia na dostępnych rdzeniach.
 
 > [!TIP]
-> Podsumowując, aby wykonać kod w **równolegle**, procesy mogą wysyłać **bloki kodu do GCD**, który zajmie się ich wykonaniem. Dlatego procesy nie tworzą nowych wątków; **GCD wykonuje dany kod za pomocą własnej puli wątków** (która może się zwiększać lub zmniejszać w razie potrzeby).
+> Podsumowując, aby wykonać kod w **równoległości**, procesy mogą wysyłać **bloki kodu do GCD**, który zajmie się ich wykonaniem. Dlatego procesy nie tworzą nowych wątków; **GCD wykonuje dany kod za pomocą własnej puli wątków** (która może się zwiększać lub zmniejszać w razie potrzeby).
 
 To jest bardzo pomocne w skutecznym zarządzaniu równoległym wykonywaniem, znacznie redukując liczbę wątków tworzonych przez procesy i optymalizując równoległe wykonanie. To jest idealne dla zadań, które wymagają **dużego równoległości** (brute-forcing?) lub dla zadań, które nie powinny blokować głównego wątku: Na przykład, główny wątek w iOS obsługuje interakcje z UI, więc wszelkie inne funkcjonalności, które mogłyby spowodować zawieszenie aplikacji (wyszukiwanie, dostęp do sieci, odczyt pliku...) są zarządzane w ten sposób.
 
@@ -37,7 +37,7 @@ Jednak na poziomie kompilatora bloki nie istnieją, są `os_object`s. Każdy z t
 
 Kolejka dispatch to nazwany obiekt zapewniający FIFO porządek bloków do wykonania.
 
-Bloki są ustawiane w kolejkach do wykonania, a te wspierają 2 tryby: `DISPATCH_QUEUE_SERIAL` i `DISPATCH_QUEUE_CONCURRENT`. Oczywiście **kolejka szeregowa** **nie będzie miała problemów z warunkami wyścigu**, ponieważ blok nie zostanie wykonany, dopóki poprzedni nie zakończy się. Ale **drugi typ kolejki może je mieć**.
+Bloki są ustawiane w kolejkach do wykonania, a te wspierają 2 tryby: `DISPATCH_QUEUE_SERIAL` i `DISPATCH_QUEUE_CONCURRENT`. Oczywiście **tryb szeregowy** **nie będzie miał problemów z warunkami wyścigu**, ponieważ blok nie zostanie wykonany, dopóki poprzedni nie zakończy się. Ale **drugi typ kolejki może je mieć**.
 
 Domyślne kolejki:
 
@@ -57,7 +57,7 @@ Domyślne kolejki:
 - `.root.user-interactive-qos`: Najwyższy priorytet
 - `.root.background-qos.overcommit`
 
-Zauważ, że to system zdecyduje **które wątki obsługują które kolejki w danym momencie** (wiele wątków może pracować w tej samej kolejce lub ten sam wątek może pracować w różnych kolejkach w pewnym momencie)
+Zauważ, że to system zdecyduje **które wątki obsługują które kolejki w danym czasie** (wiele wątków może pracować w tej samej kolejce lub ten sam wątek może pracować w różnych kolejkach w pewnym momencie)
 
 #### Atrybuty
 
@@ -80,7 +80,7 @@ Istnieje kilka obiektów, które wykorzystuje libdispatch, a kolejki i bloki to 
 
 ## Objective-C
 
-W Objective-C istnieją różne funkcje do wysyłania bloku do wykonania równolegle:
+W Objective-C istnieją różne funkcje do wysyłania bloku do wykonania w równoległości:
 
 - [**dispatch_async**](https://developer.apple.com/documentation/dispatch/1453057-dispatch_async): Przesyła blok do asynchronicznego wykonania w kolejce dispatch i natychmiast zwraca.
 - [**dispatch_sync**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync): Przesyła obiekt bloku do wykonania i zwraca po zakończeniu jego wykonania.
