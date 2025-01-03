@@ -1,11 +1,10 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-
 # Groupes Sudo/Admin
 
 ## **PE - Méthode 1**
 
-**Parfois**, **par défaut \(ou parce que certains logiciels en ont besoin\)**, vous pouvez trouver certaines de ces lignes dans le fichier **/etc/sudoers** :
+**Parfois**, **par défaut \(ou parce que certains logiciels en ont besoin\)**, dans le fichier **/etc/sudoers**, vous pouvez trouver certaines de ces lignes :
 ```bash
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
@@ -71,9 +70,9 @@ Les utilisateurs du **groupe shadow** peuvent **lire** le fichier **/etc/shadow*
 ```text
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
-Alors, lisez le fichier et essayez de **craquer quelques hashes**.
+Alors, lisez le fichier et essayez de **craquer quelques hachages**.
 
-# Groupe de Disque
+# Groupe de disque
 
 Ce privilège est presque **équivalent à un accès root** car vous pouvez accéder à toutes les données à l'intérieur de la machine.
 
@@ -102,7 +101,7 @@ moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
 Le **tty1** signifie que l'utilisateur **yossi est connecté physiquement** à un terminal sur la machine.
 
-Le **groupe vidéo** a accès pour voir la sortie de l'écran. En gros, vous pouvez observer les écrans. Pour ce faire, vous devez **capturer l'image actuelle à l'écran** en données brutes et obtenir la résolution que l'écran utilise. Les données de l'écran peuvent être enregistrées dans `/dev/fb0` et vous pouvez trouver la résolution de cet écran dans `/sys/class/graphics/fb0/virtual_size`
+Le **groupe vidéo** a accès à l'affichage de la sortie écran. En gros, vous pouvez observer les écrans. Pour ce faire, vous devez **capturer l'image actuelle à l'écran** en données brutes et obtenir la résolution que l'écran utilise. Les données de l'écran peuvent être enregistrées dans `/dev/fb0` et vous pouvez trouver la résolution de cet écran dans `/sys/class/graphics/fb0/virtual_size`
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
@@ -127,13 +126,16 @@ find / -group root -perm -g=w 2>/dev/null
 
 Vous pouvez monter le système de fichiers racine de la machine hôte sur le volume d'une instance, de sorte que lorsque l'instance démarre, elle charge immédiatement un `chroot` dans ce volume. Cela vous donne effectivement un accès root sur la machine.
 
-{% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
+{{#ref}}
+https://github.com/KrustyHack/docker-privilege-escalation
+{{#endref}}
 
-{% embed url="https://fosterelli.co/privilege-escalation-via-docker.html" %}
+{{#ref}}
+https://fosterelli.co/privilege-escalation-via-docker.html
+{{#endref}}
 
 # Groupe lxc/lxd
 
 [lxc - Escalade de privilèges](lxd-privilege-escalation.md)
-
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -156,13 +156,15 @@ cheat-engine.md
 
 ## ARM & MIPS
 
-{% embed url="https://github.com/nongiach/arm_now" %}
+{{#ref}}
+https://github.com/nongiach/arm_now
+{{#endref}}
 
 ## Shellcodes
 
 ### Débogage d'un shellcode avec blobrunner
 
-[**Blobrunner**](https://github.com/OALabs/BlobRunner) va **allouer** le **shellcode** dans un espace de mémoire, va **vous indiquer** l'**adresse mémoire** où le shellcode a été alloué et va **arrêter** l'exécution.\
+[**Blobrunner**](https://github.com/OALabs/BlobRunner) va **allouer** le **shellcode** dans un espace de mémoire, vous **indiquer** l'**adresse mémoire** où le shellcode a été alloué et va **arrêter** l'exécution.\
 Ensuite, vous devez **attacher un débogueur** (Ida ou x64dbg) au processus et mettre un **point d'arrêt à l'adresse mémoire indiquée** et **reprendre** l'exécution. De cette façon, vous déboguerez le shellcode.
 
 La page des versions github contient des zips contenant les versions compilées : [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
@@ -182,9 +184,9 @@ Vous pouvez télécharger une version compilée de [jmp2it sur la page des versi
 
 ### Débogage de shellcode avec Cutter
 
-[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) est l'interface graphique de radare. Avec Cutter, vous pouvez émuler le shellcode et l'inspecter dynamiquement.
+[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) est l'interface graphique de radare. En utilisant Cutter, vous pouvez émuler le shellcode et l'inspecter dynamiquement.
 
-Notez que Cutter vous permet d'"Ouvrir un fichier" et "Ouvrir un shellcode". Dans mon cas, lorsque j'ai ouvert le shellcode en tant que fichier, il l'a décompilé correctement, mais quand je l'ai ouvert en tant que shellcode, il ne l'a pas fait :
+Notez que Cutter vous permet d'"Ouvrir un fichier" et "Ouvrir un shellcode". Dans mon cas, lorsque j'ai ouvert le shellcode en tant que fichier, il l'a décompilé correctement, mais quand je l'ai ouvert en tant que shellcode, ce n'était pas le cas :
 
 ![](<../../images/image (562).png>)
 
@@ -194,7 +196,7 @@ Pour commencer l'émulation à l'endroit que vous souhaitez, définissez un poin
 
 ![](<../../images/image (387).png>)
 
-Vous pouvez voir la pile par exemple à l'intérieur d'un dump hexadécimal :
+Vous pouvez voir la pile par exemple dans un dump hexadécimal :
 
 ![](<../../images/image (186).png>)
 
@@ -214,11 +216,11 @@ scDbg dispose également d'un lanceur graphique où vous pouvez sélectionner le
 
 ![](<../../images/image (258).png>)
 
-L'option **Create Dump** va dumper le shellcode final si des modifications sont apportées au shellcode dynamiquement en mémoire (utile pour télécharger le shellcode décodé). L'option **start offset** peut être utile pour démarrer le shellcode à un décalage spécifique. L'option **Debug Shell** est utile pour déboguer le shellcode en utilisant le terminal scDbg (cependant, je trouve que les options expliquées précédemment sont meilleures pour cela car vous pourrez utiliser Ida ou x64dbg).
+L'option **Create Dump** va dumper le shellcode final si des modifications sont apportées au shellcode dynamiquement en mémoire (utile pour télécharger le shellcode décodé). L'**offset de départ** peut être utile pour démarrer le shellcode à un offset spécifique. L'option **Debug Shell** est utile pour déboguer le shellcode en utilisant le terminal scDbg (cependant, je trouve que les options expliquées précédemment sont meilleures pour cela car vous pourrez utiliser Ida ou x64dbg).
 
 ### Désassemblage avec CyberChef
 
-Téléchargez votre fichier shellcode en entrée et utilisez la recette suivante pour le décompiler : [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
+Téléchargez votre fichier shellcode en tant qu'entrée et utilisez la recette suivante pour le décompiler : [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
 
 ## [Movfuscator](https://github.com/xoreaxeaxeax/movfuscator)
 
@@ -243,7 +245,7 @@ Pour trouver le **point d'entrée**, recherchez les fonctions par `::main` comme
 ![](<../../images/image (1080).png>)
 
 Dans ce cas, le binaire s'appelait authenticator, donc il est assez évident que c'est la fonction principale intéressante.\
-Ayant le **nom** des **fonctions** appelées, recherchez-les sur **Internet** pour en apprendre davantage sur leurs **entrées** et **sorties**.
+Ayant le **nom** des **fonctions** appelées, recherchez-les sur **Internet** pour en savoir plus sur leurs **entrées** et **sorties**.
 
 ## **Delphi**
 
@@ -282,7 +284,7 @@ Si vous obtenez le **binaire** d'un jeu GBA, vous pouvez utiliser différents ou
 - [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Plugin Ghidra
 - [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Plugin Ghidra
 
-Dans [**no$gba**](https://problemkaputt.de/gba.htm), dans _**Options --> Emulation Setup --> Controls**_\*\* \*\* vous pouvez voir comment appuyer sur les **boutons** de la Game Boy Advance
+Dans [**no$gba**](https://problemkaputt.de/gba.htm), dans _**Options --> Configuration de l'émulation --> Contrôles**_\*\* \*\* vous pouvez voir comment appuyer sur les **boutons** de la Game Boy Advance
 
 ![](<../../images/image (581).png>)
 
@@ -368,11 +370,11 @@ DAT_030000d8 = DAT_030000d8 + 0x3a;
 ```
 Dans le code précédent, vous pouvez voir que nous comparons **uVar1** (l'endroit où se trouve **la valeur du bouton pressé**) avec certaines valeurs :
 
-- Tout d'abord, il est comparé avec la **valeur 4** (bouton **SELECT**) : Dans le défi, ce bouton efface l'écran.
-- Ensuite, il est comparé avec la **valeur 8** (bouton **START**) : Dans le défi, cela vérifie si le code est valide pour obtenir le drapeau.
-- Dans ce cas, la var **`DAT_030000d8`** est comparée à 0xf3 et si la valeur est la même, un certain code est exécuté.
+- D'abord, il est comparé avec la **valeur 4** (**bouton SELECT**) : Dans le défi, ce bouton efface l'écran.
+- Ensuite, il est comparé avec la **valeur 8** (**bouton START**) : Dans le défi, cela vérifie si le code est valide pour obtenir le drapeau.
+- Dans ce cas, la var **`DAT_030000d8`** est comparée avec 0xf3 et si la valeur est la même, un certain code est exécuté.
 - Dans tous les autres cas, un cont (`DAT_030000d4`) est vérifié. C'est un cont car il ajoute 1 juste après être entré dans le code.\
-**Si** moins de 8, quelque chose qui implique **d'ajouter** des valeurs à **`DAT_030000d8`** est fait (en gros, cela ajoute les valeurs des touches pressées dans cette variable tant que le cont est inférieur à 8).
+**Si** moins de 8, quelque chose qui implique **d'ajouter** des valeurs à \*\*`DAT_030000d8` \*\* est fait (en gros, cela ajoute les valeurs des touches pressées dans cette variable tant que le cont est inférieur à 8).
 
 Donc, dans ce défi, en connaissant les valeurs des boutons, vous deviez **appuyer sur une combinaison d'une longueur inférieure à 8 dont l'addition résultante est 0xf3.**
 
@@ -380,7 +382,9 @@ Donc, dans ce défi, en connaissant les valeurs des boutons, vous deviez **appuy
 
 ## Game Boy
 
-{% embed url="https://www.youtube.com/watch?v=VVbRe7wr3G4" %}
+{{#ref}}
+https://www.youtube.com/watch?v=VVbRe7wr3G4
+{{#endref}}
 
 ## Cours
 

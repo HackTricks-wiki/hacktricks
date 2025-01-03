@@ -1,7 +1,6 @@
-# Autres astuces Web
+# Autres astuces web
 
 {{#include ./banners/hacktricks-training.md}}
-
 
 ### En-tête d'hôte
 
@@ -9,7 +8,6 @@ Plusieurs fois, le back-end fait confiance à l'**en-tête d'hôte** pour effect
 
 > [!WARNING]
 > Notez qu'il est possible que vous n'ayez même pas besoin d'attendre que l'utilisateur clique sur le lien de réinitialisation du mot de passe pour obtenir le jeton, car peut-être même **les filtres anti-spam ou d'autres dispositifs/bots intermédiaires cliqueront dessus pour l'analyser**.
-
 
 ### Booléens de session
 
@@ -26,13 +24,14 @@ Enregistrez un e-mail, avant de le confirmer, changez l'e-mail, puis, si le nouv
 
 ### Accéder au service desk interne des entreprises utilisant Atlassian
 
-{% embed url="https://yourcompanyname.atlassian.net/servicedesk/customer/user/login" %}
+{{#ref}}
+https://yourcompanyname.atlassian.net/servicedesk/customer/user/login
+{{#endref}}
 
 ### Méthode TRACE
 
-Les développeurs peuvent oublier de désactiver diverses options de débogage dans l'environnement de production. Par exemple, la méthode HTTP `TRACE` est conçue à des fins de diagnostic. Si elle est activée, le serveur web répondra aux requêtes utilisant la méthode `TRACE` en écho dans la réponse la requête exacte qui a été reçue. Ce comportement est souvent inoffensif, mais conduit parfois à une divulgation d'informations, comme le nom des en-têtes d'authentification internes qui peuvent être ajoutés aux requêtes par des proxies inverses.![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
+Les développeurs peuvent oublier de désactiver diverses options de débogage dans l'environnement de production. Par exemple, la méthode HTTP `TRACE` est conçue à des fins de diagnostic. Si elle est activée, le serveur web répondra aux requêtes utilisant la méthode `TRACE` en écho dans la réponse de la requête exacte qui a été reçue. Ce comportement est souvent inoffensif, mais conduit parfois à une divulgation d'informations, comme le nom des en-têtes d'authentification internes qui peuvent être ajoutés aux requêtes par des proxys inverses.![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
 
 ![Image for post](https://miro.medium.com/max/1330/1*wDFRADTOd9Tj63xucenvAA.png)
-
 
 {{#include ./banners/hacktricks-training.md}}

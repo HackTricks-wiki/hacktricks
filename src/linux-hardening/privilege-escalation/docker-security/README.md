@@ -193,9 +193,9 @@ apparmor.md
 ### SELinux dans Docker
 
 - **Système de Labeling** : SELinux attribue un label unique à chaque processus et objet de système de fichiers.
-- **Application des Politiques** : Il applique des politiques de sécurité qui définissent quelles actions un label de processus peut effectuer sur d'autres labels au sein du système.
-- **Labels des Processus de Conteneur** : Lorsque les moteurs de conteneur initient des processus de conteneur, ils se voient généralement attribuer un label SELinux confiné, communément `container_t`.
-- **Labeling des Fichiers au sein des Conteneurs** : Les fichiers à l'intérieur du conteneur sont généralement étiquetés comme `container_file_t`.
+- **Application de Politique** : Il applique des politiques de sécurité qui définissent quelles actions un label de processus peut effectuer sur d'autres labels au sein du système.
+- **Labels de Processus de Conteneur** : Lorsque les moteurs de conteneur initient des processus de conteneur, ils se voient généralement attribuer un label SELinux confiné, communément `container_t`.
+- **Labeling de Fichiers au sein des Conteneurs** : Les fichiers à l'intérieur du conteneur sont généralement étiquetés comme `container_file_t`.
 - **Règles de Politique** : La politique SELinux garantit principalement que les processus avec le label `container_t` ne peuvent interagir (lire, écrire, exécuter) qu'avec des fichiers étiquetés comme `container_file_t`.
 
 Ce mécanisme garantit que même si un processus à l'intérieur d'un conteneur est compromis, il est confiné à interagir uniquement avec des objets ayant les labels correspondants, limitant considérablement les dommages potentiels résultant de tels compromis.
@@ -290,7 +290,7 @@ BuildKit permet l'utilisation de secrets au moment de la construction avec l'opt
 ```bash
 docker build --secret my_key=my_value ,src=path/to/my_secret_file .
 ```
-Pour les secrets nécessaires dans un conteneur en cours d'exécution, **Docker Compose et Kubernetes** offrent des solutions robustes. Docker Compose utilise une clé `secrets` dans la définition du service pour spécifier des fichiers secrets, comme montré dans un exemple de `docker-compose.yml` :
+Pour les secrets nécessaires dans un conteneur en cours d'exécution, **Docker Compose et Kubernetes** offrent des solutions robustes. Docker Compose utilise une clé `secrets` dans la définition du service pour spécifier les fichiers secrets, comme montré dans un exemple de `docker-compose.yml` :
 ```yaml
 version: "3.7"
 services:
@@ -309,15 +309,19 @@ Dans les environnements Kubernetes, les secrets sont pris en charge nativement e
 
 ### gVisor
 
-**gVisor** est un noyau d'application, écrit en Go, qui implémente une partie substantielle de la surface système Linux. Il inclut un runtime [Open Container Initiative (OCI)](https://www.opencontainers.org) appelé `runsc` qui fournit une **barrière d'isolation entre l'application et le noyau hôte**. Le runtime `runsc` s'intègre avec Docker et Kubernetes, facilitant l'exécution de conteneurs en bac à sable.
+**gVisor** est un noyau d'application, écrit en Go, qui implémente une partie substantielle de la surface système Linux. Il comprend un runtime [Open Container Initiative (OCI)](https://www.opencontainers.org) appelé `runsc` qui fournit une **barrière d'isolation entre l'application et le noyau hôte**. Le runtime `runsc` s'intègre avec Docker et Kubernetes, facilitant l'exécution de conteneurs en bac à sable.
 
-{% embed url="https://github.com/google/gvisor" %}
+{{#ref}}
+https://github.com/google/gvisor
+{{#endref}}
 
 ### Kata Containers
 
 **Kata Containers** est une communauté open source travaillant à construire un runtime de conteneur sécurisé avec des machines virtuelles légères qui se comportent et fonctionnent comme des conteneurs, mais fournissent une **isolation de charge de travail plus forte utilisant la technologie de virtualisation matérielle** comme deuxième couche de défense.
 
-{% embed url="https://katacontainers.io/" %}
+{{#ref}}
+https://katacontainers.io/
+{{#endref}}
 
 ### Résumé des conseils
 
@@ -326,11 +330,11 @@ Dans les environnements Kubernetes, les secrets sont pris en charge nativement e
 - [**Supprimez toutes les capacités**](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities) **(`--cap-drop=all`) et activez uniquement celles qui sont nécessaires** (`--cap-add=...`). Beaucoup de charges de travail n'ont pas besoin de capacités et les ajouter augmente le champ d'une attaque potentielle.
 - [**Utilisez l'option de sécurité “no-new-privileges”**](https://raesene.github.io/blog/2019/06/01/docker-capabilities-and-no-new-privs/) pour empêcher les processus d'acquérir plus de privilèges, par exemple via des binaires suid.
 - [**Limitez les ressources disponibles pour le conteneur**](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources)**.** Les limites de ressources peuvent protéger la machine contre les attaques par déni de service.
-- **Ajustez** [**seccomp**](https://docs.docker.com/engine/security/seccomp/)**,** [**AppArmor**](https://docs.docker.com/engine/security/apparmor/) **(ou SELinux)** les profils pour restreindre les actions et les appels système disponibles pour le conteneur au minimum requis.
-- **Utilisez** [**des images Docker officielles**](https://docs.docker.com/docker-hub/official_images/) **et exigez des signatures** ou construisez les vôtres à partir de celles-ci. Ne pas hériter ou utiliser des images [backdoored](https://arstechnica.com/information-technology/2018/06/backdoored-images-downloaded-5-million-times-finally-removed-from-docker-hub/). Conservez également les clés root et les phrases de passe dans un endroit sûr. Docker prévoit de gérer les clés avec UCP.
+- **Ajustez** [**seccomp**](https://docs.docker.com/engine/security/seccomp/)**,** [**AppArmor**](https://docs.docker.com/engine/security/apparmor/) **(ou SELinux)** profils pour restreindre les actions et les appels système disponibles pour le conteneur au minimum requis.
+- **Utilisez** [**des images Docker officielles**](https://docs.docker.com/docker-hub/official_images/) **et exigez des signatures** ou construisez les vôtres basées sur elles. Ne pas hériter ou utiliser des images [backdoored](https://arstechnica.com/information-technology/2018/06/backdoored-images-downloaded-5-million-times-finally-removed-from-docker-hub/). Stockez également les clés root et les phrases de passe dans un endroit sûr. Docker prévoit de gérer les clés avec UCP.
 - **Reconstruisez régulièrement** vos images pour **appliquer des correctifs de sécurité à l'hôte et aux images.**
 - Gérez vos **secrets avec sagesse** afin qu'il soit difficile pour l'attaquant d'y accéder.
-- Si vous **exposez le démon Docker, utilisez HTTPS** avec authentification client et serveur.
+- Si vous **exposez le démon docker, utilisez HTTPS** avec authentification client et serveur.
 - Dans votre Dockerfile, **privilégiez COPY au lieu de ADD**. ADD extrait automatiquement les fichiers compressés et peut copier des fichiers à partir d'URLs. COPY n'a pas ces capacités. Évitez d'utiliser ADD autant que possible pour ne pas être vulnérable aux attaques via des URLs distantes et des fichiers Zip.
 - Ayez **des conteneurs séparés pour chaque micro-s**ervice.
 - **Ne mettez pas ssh** à l'intérieur du conteneur, “docker exec” peut être utilisé pour ssh au conteneur.
@@ -338,7 +342,7 @@ Dans les environnements Kubernetes, les secrets sont pris en charge nativement e
 
 ## Docker Breakout / Escalade de privilèges
 
-Si vous êtes **à l'intérieur d'un conteneur Docker** ou si vous avez accès à un utilisateur dans le **groupe docker**, vous pourriez essayer de **vous échapper et d'escalader les privilèges** :
+Si vous êtes **à l'intérieur d'un conteneur docker** ou si vous avez accès à un utilisateur dans le **groupe docker**, vous pourriez essayer de **vous échapper et d'escalader les privilèges** :
 
 {{#ref}}
 docker-breakout-privilege-escalation/
@@ -346,7 +350,7 @@ docker-breakout-privilege-escalation/
 
 ## Contournement du plugin d'authentification Docker
 
-Si vous avez accès au socket Docker ou si vous avez accès à un utilisateur dans le **groupe docker mais que vos actions sont limitées par un plugin d'authentification Docker**, vérifiez si vous pouvez **le contourner :**
+Si vous avez accès au socket docker ou si vous avez accès à un utilisateur dans le **groupe docker mais que vos actions sont limitées par un plugin d'authentification docker**, vérifiez si vous pouvez **le contourner :**
 
 {{#ref}}
 authz-and-authn-docker-access-authorization-plugin.md
@@ -355,7 +359,7 @@ authz-and-authn-docker-access-authorization-plugin.md
 ## Renforcement de Docker
 
 - L'outil [**docker-bench-security**](https://github.com/docker/docker-bench-security) est un script qui vérifie des dizaines de meilleures pratiques courantes autour du déploiement de conteneurs Docker en production. Les tests sont tous automatisés et sont basés sur le [CIS Docker Benchmark v1.3.1](https://www.cisecurity.org/benchmark/docker/).\
-Vous devez exécuter l'outil depuis l'hôte exécutant Docker ou depuis un conteneur avec suffisamment de privilèges. Découvrez **comment l'exécuter dans le README :** [**https://github.com/docker/docker-bench-security**](https://github.com/docker/docker-bench-security).
+Vous devez exécuter l'outil depuis l'hôte exécutant docker ou depuis un conteneur avec suffisamment de privilèges. Découvrez **comment l'exécuter dans le README :** [**https://github.com/docker/docker-bench-security**](https://github.com/docker/docker-bench-security).
 
 ## Références
 

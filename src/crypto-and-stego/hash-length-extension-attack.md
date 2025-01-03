@@ -1,4 +1,4 @@
-# Hash Length Extension Attack
+# Attaque par extension de longueur de hachage
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -29,7 +29,9 @@ Si un attaquant veut ajouter la chaîne "append", il peut :
 
 ### **Outil**
 
-{% embed url="https://github.com/iagox86/hash_extender" %}
+{{#ref}}
+https://github.com/iagox86/hash_extender
+{{#endref}}
 
 ### Références
 

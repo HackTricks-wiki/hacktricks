@@ -6,7 +6,7 @@
 
 ### **PE - Méthode 1**
 
-**Parfois**, **par défaut (ou parce que certains logiciels en ont besoin)**, à l'intérieur du **/etc/sudoers** fichier, vous pouvez trouver certaines de ces lignes :
+**Parfois**, **par défaut (ou parce que certains logiciels en ont besoin)**, à l'intérieur du fichier **/etc/sudoers**, vous pouvez trouver certaines de ces lignes :
 ```bash
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
@@ -27,7 +27,7 @@ Trouvez tous les binaires suid et vérifiez s'il y a le binaire **Pkexec** :
 find / -perm -4000 2>/dev/null
 ```
 Si vous constatez que le binaire **pkexec est un binaire SUID** et que vous appartenez à **sudo** ou **admin**, vous pourriez probablement exécuter des binaires en tant que sudo en utilisant `pkexec`.\
-C'est parce que typiquement, ce sont les groupes à l'intérieur de la **politique polkit**. Cette politique identifie essentiellement quels groupes peuvent utiliser `pkexec`. Vérifiez-le avec :
+Ceci est dû au fait que typiquement, ce sont les groupes à l'intérieur de la **politique polkit**. Cette politique identifie essentiellement quels groupes peuvent utiliser `pkexec`. Vérifiez-le avec :
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
@@ -43,7 +43,7 @@ polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freed
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-**Ce n'est pas parce que vous n'avez pas de permissions mais parce que vous n'êtes pas connecté sans une interface graphique**. Et il existe une solution à ce problème ici : [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Vous avez besoin de **2 sessions ssh différentes** :
+**Ce n'est pas parce que vous n'avez pas les autorisations, mais parce que vous n'êtes pas connecté sans interface graphique**. Et il existe une solution à ce problème ici : [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Vous avez besoin de **2 sessions ssh différentes** :
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -158,7 +158,7 @@ moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
 Le **tty1** signifie que l'utilisateur **yossi est connecté physiquement** à un terminal sur la machine.
 
-Le **groupe vidéo** a accès à l'affichage de la sortie de l'écran. En gros, vous pouvez observer les écrans. Pour ce faire, vous devez **capturer l'image actuelle à l'écran** en données brutes et obtenir la résolution que l'écran utilise. Les données de l'écran peuvent être enregistrées dans `/dev/fb0` et vous pouvez trouver la résolution de cet écran dans `/sys/class/graphics/fb0/virtual_size`
+Le **groupe vidéo** a accès à l'affichage de la sortie écran. En gros, vous pouvez observer les écrans. Pour ce faire, vous devez **capturer l'image actuelle à l'écran** en données brutes et obtenir la résolution que l'écran utilise. Les données de l'écran peuvent être enregistrées dans `/dev/fb0` et vous pouvez trouver la résolution de cet écran dans `/sys/class/graphics/fb0/virtual_size`
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
@@ -167,7 +167,7 @@ Pour **ouvrir** l'**image brute**, vous pouvez utiliser **GIMP**, sélectionner 
 
 ![](<../../../images/image (463).png>)
 
-Ensuite, modifiez la largeur et la hauteur pour celles utilisées sur l'écran et vérifiez différents types d'images (et sélectionnez celui qui montre mieux l'écran) :
+Ensuite, modifiez la largeur et la hauteur pour celles utilisées sur l'écran et vérifiez différents types d'image (et sélectionnez celui qui montre le mieux l'écran) :
 
 ![](<../../../images/image (317).png>)
 
@@ -201,9 +201,13 @@ Enfin, si vous n'aimez aucune des suggestions précédentes, ou si elles ne fonc
 
 Si vous avez des permissions d'écriture sur le socket docker, lisez [**ce post sur la façon d'escalader les privilèges en abusant du socket docker**](../#writable-docker-socket)**.**
 
-{% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
+{{#ref}}
+https://github.com/KrustyHack/docker-privilege-escalation
+{{#endref}}
 
-{% embed url="https://fosterelli.co/privilege-escalation-via-docker.html" %}
+{{#ref}}
+https://fosterelli.co/privilege-escalation-via-docker.html
+{{#endref}}
 
 ## Groupe lxc/lxd
 

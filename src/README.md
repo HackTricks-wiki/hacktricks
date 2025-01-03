@@ -1,13 +1,10 @@
 # HackTricks
 
-Reading time: {{ #reading_time }}
-
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
 _Hacktricks logos & motion design par_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
 
-> [!TIP]
-> **Bienvenue dans le wiki où vous trouverez chaque astuce/technique de hacking que j'ai apprise lors de CTF, d'applications réelles, de lectures de recherches et d'actualités.**
+> [!TIP] > **Bienvenue dans le wiki où vous trouverez chaque astuce/technique de hacking/quoi que ce soit que j'ai appris des CTF, des applications de la vie réelle, en lisant des recherches et des nouvelles.**
 
 Pour commencer, suivez cette page où vous trouverez le **flux typique** que **vous devriez suivre lors de pentesting** d'une ou plusieurs **machines :**
 
@@ -35,7 +32,9 @@ Vous pouvez consulter leur **blog** à [**https://blog.stmcyber.com**](https://b
 
 [**RootedCON**](https://www.rootedcon.com) est l'événement de cybersécurité le plus pertinent en **Espagne** et l'un des plus importants en **Europe**. Avec **la mission de promouvoir les connaissances techniques**, ce congrès est un point de rencontre bouillonnant pour les professionnels de la technologie et de la cybersécurité dans chaque discipline.
 
-{% embed url="https://www.rootedcon.com/" %}
+{{#ref}}
+https://www.rootedcon.com/
+{{#endref}}
 
 ---
 
@@ -47,7 +46,9 @@ Vous pouvez consulter leur **blog** à [**https://blog.stmcyber.com**](https://b
 
 **Astuce bug bounty** : **inscrivez-vous** sur **Intigriti**, une plateforme de **bug bounty premium créée par des hackers, pour des hackers** ! Rejoignez-nous sur [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) aujourd'hui, et commencez à gagner des primes allant jusqu'à **100 000 $** !
 
-{% embed url="https://go.intigriti.com/hacktricks" %}
+{{#ref}}
+https://go.intigriti.com/hacktricks
+{{#endref}}
 
 ---
 
@@ -56,11 +57,13 @@ Vous pouvez consulter leur **blog** à [**https://blog.stmcyber.com**](https://b
 <figure><img src="images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utilisez [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) pour créer et **automatiser des flux de travail** alimentés par les **outils communautaires les plus avancés** au monde.
+Utilisez [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) pour créer et **automatiser facilement des flux de travail** alimentés par les **outils communautaires les plus avancés** au monde.
 
 Accédez dès aujourd'hui :
 
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+{{#ref}}
+https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks
+{{#endref}}
 
 ---
 
@@ -78,7 +81,7 @@ Rejoignez le serveur [**HackenProof Discord**](https://discord.com/invite/N3FrSb
 
 ---
 
-### [Pentest-Tools.com](https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons) - L'outil essentiel pour le test de pénétration
+### [Pentest-Tools.com](https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons) - L'outil essentiel pour le pentesting
 
 <figure><img src="images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
 
@@ -86,7 +89,9 @@ Rejoignez le serveur [**HackenProof Discord**](https://discord.com/invite/N3FrSb
 
 **Trouvez et signalez des vulnérabilités critiques et exploitables ayant un impact commercial réel.** Utilisez nos 20+ outils personnalisés pour cartographier la surface d'attaque, trouver des problèmes de sécurité qui vous permettent d'escalader les privilèges, et utilisez des exploits automatisés pour collecter des preuves essentielles, transformant votre travail acharné en rapports convaincants.
 
-{% embed url="https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons" %}
+{{#ref}}
+https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons
+{{#endref}}
 
 ---
 
@@ -97,9 +102,9 @@ Rejoignez le serveur [**HackenProof Discord**](https://discord.com/invite/N3FrSb
 **SerpApi** propose des API en temps réel rapides et faciles pour **accéder aux résultats des moteurs de recherche**. Ils extraient des moteurs de recherche, gèrent des proxies, résolvent des captchas et analysent toutes les données structurées riches pour vous.
 
 Un abonnement à l'un des plans de SerpApi inclut l'accès à plus de 50 API différentes pour extraire différents moteurs de recherche, y compris Google, Bing, Baidu, Yahoo, Yandex, et plus encore.\
-Contrairement à d'autres fournisseurs, **SerpApi ne se contente pas d'extraire des résultats organiques**. Les réponses de SerpApi incluent systématiquement toutes les annonces, images et vidéos en ligne, graphiques de connaissances et autres éléments et fonctionnalités présents dans les résultats de recherche.
+Contrairement à d'autres fournisseurs, **SerpApi ne se contente pas d'extraire des résultats organiques**. Les réponses de SerpApi incluent systématiquement toutes les annonces, images et vidéos en ligne, graphiques de connaissances, et d'autres éléments et fonctionnalités présents dans les résultats de recherche.
 
-Les clients actuels de SerpApi incluent **Apple, Shopify et GrubHub**.\
+Les clients actuels de SerpApi incluent **Apple, Shopify, et GrubHub**.\
 Pour plus d'informations, consultez leur [**blog**](https://serpapi.com/blog/)**,** ou essayez un exemple dans leur [**playground**](https://serpapi.com/playground)**.**\
 Vous pouvez **créer un compte gratuit** [**ici**](https://serpapi.com/users/sign_up)**.**
 
@@ -111,7 +116,9 @@ Vous pouvez **créer un compte gratuit** [**ici**](https://serpapi.com/users/sig
 
 Apprenez les technologies et compétences nécessaires pour effectuer des recherches sur les vulnérabilités, des tests de pénétration et de l'ingénierie inverse pour protéger les applications et appareils mobiles. **Maîtrisez la sécurité iOS et Android** grâce à nos cours à la demande et **obtenez une certification** :
 
-{% embed url="https://academy.8ksec.io/" %}
+{{#ref}}
+https://academy.8ksec.io/
+{{#endref}}
 
 ---
 
@@ -125,13 +132,15 @@ WebSec est une **entreprise de sécurité tout-en-un**, ce qui signifie qu'ils f
 
 Une autre chose intéressante à propos de WebSec est qu'à la différence de la moyenne de l'industrie, WebSec est **très confiant dans ses compétences**, à tel point qu'ils **garantissent les meilleurs résultats de qualité**, il est indiqué sur leur site web "**Si nous ne pouvons pas le hacker, vous ne le payez pas !**". Pour plus d'infos, jetez un œil à leur [**site web**](https://websec.nl/en/) et [**blog**](https://websec.nl/blog/) !
 
-En plus de ce qui précède, WebSec est également un **soutien engagé de HackTricks.**
+En plus de cela, WebSec est également un **soutien engagé de HackTricks.**
 
-{% embed url="https://www.youtube.com/watch?v=Zq2JycGDCPM" %}
+{{#ref}}
+https://www.youtube.com/watch?v=Zq2JycGDCPM
+{{#endref}}
 
 ## License & Disclaimer
 
-Consultez-les dans :
+Vérifiez-les dans :
 
 {{#ref}}
 welcome/hacktricks-values-and-faq.md
