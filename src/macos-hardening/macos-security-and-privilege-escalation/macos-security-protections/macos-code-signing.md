@@ -8,7 +8,7 @@ Mach-o バイナリには、バイナリ内の署名の **オフセット** と 
 
 <figure><img src="../../../images/image (1) (1) (1) (1).png" alt="" width="431"><figcaption></figcaption></figure>
 
-コード署名のマジックヘッダーは **`0xFADE0CC0`** です。その後、これらを含むスーパーブロブの長さやブロブの数などの情報があります。\
+コード署名のマジックヘッダーは **`0xFADE0CC0`** です。その後、長さやそれらを含む superBlob のブロブの数などの情報があります。\
 この情報は [こちらのソースコード](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L276) で見つけることができます：
 ```c
 /*
@@ -105,8 +105,8 @@ __attribute__ ((aligned(1)));
 
 ## コード署名ページ
 
-フルバイナリのハッシュを計算することは、メモリに部分的にしかロードされていない場合には非効率的であり、無意味です。したがって、コード署名は実際にはハッシュのハッシュであり、各バイナリページが個別にハッシュ化されます。\
-実際、前の**コードディレクトリ**コードでは、**ページサイズが指定されている**ことがそのフィールドの1つに示されています。さらに、バイナリのサイズがページのサイズの倍数でない場合、フィールド**CodeLimit**は署名の終わりがどこにあるかを指定します。
+完全なバイナリをハッシュ化することは非効率的であり、部分的にメモリにロードされている場合には無意味です。したがって、コード署名は実際にはハッシュのハッシュであり、各バイナリページが個別にハッシュ化されます。\
+実際、前の**コードディレクトリ**コードでは、**ページサイズが指定されている**のがわかります。さらに、バイナリのサイズがページのサイズの倍数でない場合、フィールド**CodeLimit**は署名の終わりがどこにあるかを指定します。
 ```bash
 # Get all hashes of /bin/ps
 codesign -d -vvvvvv /bin/ps
@@ -207,13 +207,13 @@ CS_RESTRICT | CS_ENFORCEMENT | CS_REQUIRE_LV | CS_RUNTIME | CS_LINKER_SIGNED)
 
 #define CS_ENTITLEMENT_FLAGS        (CS_GET_TASK_ALLOW | CS_INSTALLER | CS_DATAVAULT_CONTROLLER | CS_NVRAM_UNRESTRICTED)
 ```
-注意すべきは、関数 [**exec_mach_imgact**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_exec.c#L1420) は、実行を開始する際に `CS_EXEC_*` フラグを動的に追加することもできるということです。
+注意すべきは、関数 [**exec_mach_imgact**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_exec.c#L1420) が実行を開始する際に `CS_EXEC_*` フラグを動的に追加できることです。
 
 ## コード署名要件
 
-各アプリケーションは、実行可能であるために満たさなければならない **要件** をいくつか **持っています**。もし **アプリケーションに満たされていない要件が含まれている場合**、それは実行されません（おそらく変更されているためです）。
+各アプリケーションは、実行可能であるために満たさなければならない **要件** をいくつか **保持** しています。もし **アプリケーションに満たされていない要件が含まれている場合**、それは実行されません（おそらく変更されているためです）。
 
-バイナリの要件は、**特別な文法** を使用し、**式** のストリームであり、`0xfade0c00` をマジックとしてエンコードされたブロブとして表現されます。その **ハッシュは特別なコードスロットに保存されます**。
+バイナリの要件は **特別な文法** を使用し、**式** のストリームとして表現され、`0xfade0c00` をマジックとして使用してバイナリとしてエンコードされ、その **ハッシュは特別なコードスロットに保存** されます。
 
 バイナリの要件は、次のコマンドを実行することで確認できます：
 ```bash
@@ -228,7 +228,7 @@ designated => identifier "org.whispersystems.signal-desktop" and anchor apple ge
 > [!NOTE]
 > この署名が認証情報、TeamID、ID、権限、その他多くのデータを確認できることに注意してください。
 
-さらに、`csreq`ツールを使用していくつかのコンパイルされた要件を生成することが可能です：
+さらに、`csreq`ツールを使用していくつかのコンパイルされた要件を生成することが可能です:
 ```bash
 # Generate compiled requirements
 csreq -b /tmp/output.csreq -r='identifier "org.whispersystems.signal-desktop" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = U68MSDN6DR'
@@ -240,11 +240,9 @@ od -A x -t x1 /tmp/output.csreq
 0000020    00  00  00  21  6f  72  67  2e  77  68  69  73  70  65  72  73
 [...]
 ```
-情報にアクセスし、`Security.framework`のいくつかのAPIを使用して要件を作成または変更することが可能です：
-
 #### **有効性の確認**
 
-- **`Sec[Static]CodeCheckValidity`**: 要件ごとにSecCodeRefの有効性を確認します。
+- **`Sec[Static]CodeCheckValidity`**: 要件ごとのSecCodeRefの有効性を確認します。
 - **`SecRequirementEvaluate`**: 証明書コンテキスト内の要件を検証します。
 - **`SecTaskValidateForRequirement`**: 実行中のSecTaskを`CFString`要件に対して検証します。
 
@@ -272,8 +270,8 @@ od -A x -t x1 /tmp/output.csreq
 
 #### **追加の便利なAPI**
 
-- **`SecCodeCopy[Internal/Designated]Requirement`: Get SecRequirementRef from SecCodeRef**
-- **`SecCodeCopyGuestWithAttributes`**: 特定の属性に基づいてコードオブジェクトを表す`SecCodeRef`を作成します。サンドボックスに便利です。
+- **`SecCodeCopy[Internal/Designated]Requirement`: SecCodeRefからSecRequirementRefを取得**
+- **`SecCodeCopyGuestWithAttributes`**: 特定の属性に基づいてコードオブジェクトを表す`SecCodeRef`を作成し、サンドボックスに便利です。
 - **`SecCodeCopyPath`**: `SecCodeRef`に関連付けられたファイルシステムパスを取得します。
 - **`SecCodeCopySigningIdentifier`**: `SecCodeRef`から署名識別子（例：チームID）を取得します。
 - **`SecCodeGetTypeID`**: `SecCodeRef`オブジェクトのタイプ識別子を返します。
@@ -281,16 +279,16 @@ od -A x -t x1 /tmp/output.csreq
 
 #### **コード署名フラグと定数**
 
-- **`kSecCSDefaultFlags`**: コード署名操作のために多くのSecurity.framework関数で使用されるデフォルトフラグです。
+- **`kSecCSDefaultFlags`**: コード署名操作のための多くのSecurity.framework関数で使用されるデフォルトフラグです。
 - **`kSecCSSigningInformation`**: 署名情報を取得する必要があることを指定するために使用されるフラグです。
 
 ## コード署名の強制
 
-**カーネル**は、アプリのコードが実行される前に**コード署名を確認**します。さらに、新しいコードをメモリに書き込み、実行するための一つの方法は、`mprotect`が`MAP_JIT`フラグで呼び出される場合にJITを悪用することです。アプリケーションはこれを行うために特別な権限が必要であることに注意してください。
+**カーネル**は、アプリのコードが実行される前に**コード署名を確認**します。さらに、新しいコードをメモリに書き込み実行する方法の一つは、`mprotect`が`MAP_JIT`フラグで呼び出される場合にJITを悪用することです。この操作を行うには、アプリケーションに特別な権限が必要です。
 
 ## `cs_blobs` & `cs_blob`
 
-[**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106)構造体は、実行中のプロセスの権限に関する情報を含んでいます。`csb_platform_binary`は、アプリケーションがプラットフォームバイナリであるかどうかも通知します（これは、これらのプロセスのタスクポートへのSEND権を保護するためのセキュリティメカニズムを適用するためにOSによって異なるタイミングでチェックされます）。
+[**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106)構造体は、実行中のプロセスの権限に関する情報を含んでいます。`csb_platform_binary`は、アプリケーションがプラットフォームバイナリであるかどうかも通知します（これは、これらのプロセスのタスクポートへのSEND権限を保護するためのセキュリティメカニズムを適用するためにOSによって異なるタイミングでチェックされます）。
 ```c
 struct cs_blob {
 struct cs_blob  *csb_next;

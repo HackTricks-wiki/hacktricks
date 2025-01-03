@@ -4,21 +4,21 @@
 
 ## PID Reuse
 
-macOSの**XPCサービス**が**PID**に基づいて呼び出されたプロセスをチェックし、**監査トークン**に基づいていない場合、PID再利用攻撃に対して脆弱です。この攻撃は**レースコンディション**に基づいており、**エクスプロイト**が**XPC**サービスにメッセージを**送信し**、その後に**`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`**を**許可された**バイナリで実行します。
+macOSの**XPCサービス**が**PID**に基づいて呼び出されたプロセスをチェックし、**監査トークン**ではない場合、PID再利用攻撃に対して脆弱です。この攻撃は**レースコンディション**に基づいており、**エクスプロイト**が**XPC**サービスにメッセージを**送信し**、その後に**`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`**を**許可された**バイナリで実行します。
 
 この関数は**許可されたバイナリがPIDを所有する**ようにしますが、**悪意のあるXPCメッセージはその直前に送信されます**。したがって、**XPC**サービスが**PID**を使用して送信者を**認証**し、**`posix_spawn`**の実行**後**にそれをチェックすると、それが**認可された**プロセスからのものであると考えます。
 
 ### Exploit example
 
-**`shouldAcceptNewConnection`**という関数や、それを呼び出す関数が**`processIdentifier`**を呼び出し、**`auditToken`**を呼び出していない場合、それは**プロセスPIDを検証している**可能性が高いです。\
+もし**`shouldAcceptNewConnection`**関数やそれを呼び出す関数が**`processIdentifier`**を呼び出し、**`auditToken`**を呼び出していない場合、それは**プロセスPIDを検証している**可能性が高いです。\
 例えば、以下の画像のように（参照から取得）：
 
 <figure><img src="../../../../../../images/image (306).png" alt="https://wojciechregula.blog/images/2020/04/pid.png"><figcaption></figcaption></figure>
 
 このエクスプロイトの例を確認してください（再び、参照から取得）して、エクスプロイトの2つの部分を見てください：
 
-- **いくつかのフォークを生成する**もの
-- **各フォーク**は**メッセージを送信した後に**XPCサービスに**ペイロードを送信**します。
+- 複数のフォークを**生成する**もの
+- **各フォーク**は**メッセージを送信した後に`posix_spawn`を実行しながら、XPCサービスにペイロードを送信します**。
 
 > [!CAUTION]
 > エクスプロイトが機能するためには、` export`` `` `**`OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`**を設定するか、エクスプロイト内に次のように記述することが重要です：
@@ -31,7 +31,7 @@ macOSの**XPCサービス**が**PID**に基づいて呼び出されたプロセ�
 
 {{#tabs}}
 {{#tab name="NSTasks"}}
-最初のオプションは、**`NSTasks`**を使用し、子プロセスを起動するための引数を指定してRCをエクスプロイトします。
+最初のオプションは**`NSTasks`**を使用し、子プロセスを起動するための引数を指定してRCをエクスプロイトします。
 ```objectivec
 // Code from https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/
 // gcc -framework Foundation expl.m -o expl
@@ -140,7 +140,7 @@ return 0;
 {{#endtab}}
 
 {{#tab name="fork"}}
-この例では、生の **`fork`** を使用して **PIDレース条件を悪用する子プロセスを起動し、次にハードリンクを介して別のレース条件を悪用します:**
+この例では、生の **`fork`** を使用して **PID レースコンディションを悪用する子プロセスを起動し、次にハードリンクを介して別のレースコンディションを悪用します:**
 ```objectivec
 // export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 // gcc -framework Foundation expl.m -o expl

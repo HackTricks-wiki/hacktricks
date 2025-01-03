@@ -11,7 +11,7 @@ MIGは**Mach IPC**コード作成のプロセスを**簡素化するために作
 これらの定義には5つのセクションがあります：
 
 - **サブシステム宣言**：キーワードsubsystemは**名前**と**ID**を示すために使用されます。また、サーバーがカーネルで実行されるべき場合は**`KernelServer`**としてマークすることも可能です。
-- **インクルードとインポート**：MIGはCプリプロセッサを使用しているため、インポートを使用できます。さらに、ユーザーまたはサーバー生成コードのために`uimport`および`simport`を使用することも可能です。
+- **インクルージョンとインポート**：MIGはCプリプロセッサを使用しているため、インポートを使用できます。さらに、ユーザーまたはサーバー生成コードのために`uimport`および`simport`を使用することも可能です。
 - **型宣言**：データ型を定義することが可能ですが、通常は`mach_types.defs`および`std_types.defs`をインポートします。カスタムのものにはいくつかの構文を使用できます：
 - \[i`n/out]tran`：受信メッセージまたは送信メッセージから翻訳する必要がある関数
 - `c[user/server]type`：別のC型へのマッピング。
@@ -50,9 +50,9 @@ mig -header myipcUser.h -sheader myipcServer.h myipc.defs
 
 > [!TIP]
 > より複雑な例は、システムで `mdfind mach_port.defs` を使用して見つけることができます。\
-> また、ファイルと同じフォルダーから `mig -DLIBSYSCALL_INTERFACE mach_ports.defs` を使用してコンパイルできます。
+> また、ファイルと同じフォルダから `mig -DLIBSYSCALL_INTERFACE mach_ports.defs` を使用してコンパイルできます。
 
-ファイル **`myipcServer.c`** と **`myipcServer.h`** には、受信したメッセージIDに基づいて呼び出す関数を定義する構造体 **`SERVERPREFmyipc_subsystem`** の宣言と定義があります（開始番号は500と指定しました）。
+ファイル **`myipcServer.c`** と **`myipcServer.h`** には、受信したメッセージIDに基づいて呼び出す関数を基本的に定義する構造体 **`SERVERPREFmyipc_subsystem`** の宣言と定義があります（開始番号として500を指定しました）。
 
 {{#tabs}}
 {{#tab name="myipcServer.c"}}
@@ -217,7 +217,7 @@ USERPREFSubtract(port, 40, 2);
 
 ### NDR_record
 
-NDR_recordは`libsystem_kernel.dylib`によってエクスポートされる構造体で、MIGが**システムに依存しないデータに変換する**ことを可能にします。MIGは異なるシステム間で使用されることを想定して設計されているため（同じマシン内だけではなく）。
+NDR_recordは`libsystem_kernel.dylib`によってエクスポートされる構造体で、MIGが**データを変換できるようにする**ためのもので、異なるシステム間で使用されることを想定しています（同じマシン内だけではなく）。
 
 これは興味深いことで、バイナリ内に依存関係として`_NDR_record`が見つかると（`jtool2 -S <binary> | grep NDR`または`nm`）、そのバイナリがMIGクライアントまたはサーバーであることを意味します。
 
@@ -229,7 +229,7 @@ NDR_recordは`libsystem_kernel.dylib`によってエクスポートされる構�
 
 ### jtool
 
-多くのバイナリが現在MIGを使用してマッチポートを公開しているため、**MIGが使用されたことを特定する方法**と**各メッセージIDでMIGが実行する関数**を知ることは興味深いです。
+多くのバイナリがMIGを使用してマシンポートを公開しているため、**MIGが使用されたことを特定する方法**と、**各メッセージIDでMIGが実行する関数**を知ることは興味深いです。
 
 [**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/#jtool2)は、Mach-OバイナリからMIG情報を解析し、メッセージIDを示し、実行する関数を特定できます：
 ```bash
@@ -239,9 +239,9 @@ jtool2 -d __DATA.__const myipc_server | grep MIG
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep BL
 ```
-### アセンブリ
+### Assembly
 
-受信したメッセージIDに応じて**正しい関数を呼び出す**役割を果たす関数は`myipc_server`であることが前述されました。しかし、通常はバイナリのシンボル（関数名がない）を持っていないため、**逆コンパイルされたときの見た目を確認することが興味深い**です。この関数のコードは、公開されている関数とは独立しています。
+以前、受信したメッセージIDに応じて**正しい関数を呼び出す**役割を果たす関数は`myipc_server`であると述べました。しかし、通常はバイナリのシンボル（関数名がない）を持っていないため、**逆コンパイルされたときの見た目を確認することが興味深い**です。この関数のコードは、公開されている関数とは独立しています。
 
 {{#tabs}}
 {{#tab name="myipc_server decompiled 1"}}
@@ -373,11 +373,11 @@ return r0;
 
 このデータは[**このHopperスクリプトを使用して**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py)抽出できます。
 
-### デバッグ
+### Debug
 
-MIGによって生成されたコードは、`kernel_debug`を呼び出して、エントリおよびエグジットの操作に関するログを生成します。これらは**`trace`**または**`kdv`**を使用して確認できます：`kdv all | grep MIG`
+MIGによって生成されたコードは、`kernel_debug`を呼び出して、エントリおよびエグジットに関する操作のログを生成します。これらは**`trace`**または**`kdv`**を使用して確認できます：`kdv all | grep MIG`
 
-## 参考文献
+## References
 
 - [\*OS Internals, Volume I, User Mode, Jonathan Levin](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
 

@@ -12,9 +12,9 @@ Electronが何か知らない場合は、[**こちらにたくさんの情報が
 これらの技術については次に説明しますが、最近Electronはそれらを防ぐためにいくつかの**セキュリティフラグ**を追加しました。これらは[**Electron Fuses**](https://www.electronjs.org/docs/latest/tutorial/fuses)であり、macOSのElectronアプリが**任意のコードを読み込むのを防ぐために使用されるものです**：
 
 - **`RunAsNode`**: 無効にすると、コードを注入するための環境変数**`ELECTRON_RUN_AS_NODE`**の使用が防止されます。
-- **`EnableNodeCliInspectArguments`**: 無効にすると、`--inspect`や`--inspect-brk`のようなパラメータは尊重されません。この方法でコードを注入するのを避けます。
-- **`EnableEmbeddedAsarIntegrityValidation`**: 有効にすると、読み込まれた**`asar`** **ファイル**はmacOSによって**検証されます**。これにより、このファイルの内容を変更することによる**コード注入を防ぎます**。
-- **`OnlyLoadAppFromAsar`**: これが有効になっている場合、次の順序で読み込むのではなく：**`app.asar`**、**`app`**、そして最後に**`default_app.asar`**。app.asarのみをチェックして使用するため、**`embeddedAsarIntegrityValidation`**フューズと組み合わせることで**検証されていないコードを読み込むことが不可能になります**。
+- **`EnableNodeCliInspectArguments`**: 無効にすると、`--inspect`や`--inspect-brk`のようなパラメータが尊重されません。この方法でコードを注入するのを避けます。
+- **`EnableEmbeddedAsarIntegrityValidation`**: 有効にすると、読み込まれた**`asar`** **ファイル**がmacOSによって**検証されます**。これにより、このファイルの内容を変更することによる**コード注入**が防止されます。
+- **`OnlyLoadAppFromAsar`**: これが有効になっている場合、次の順序で読み込むのではなく：**`app.asar`**、**`app`**、そして最後に**`default_app.asar`**。app.asarのみをチェックして使用するため、**`embeddedAsarIntegrityValidation`**フューズと組み合わせることで**検証されていないコードを読み込むことが不可能**になります。
 - **`LoadBrowserProcessSpecificV8Snapshot`**: 有効にすると、ブラウザプロセスは`browser_v8_context_snapshot.bin`というファイルをV8スナップショットに使用します。
 
 コード注入を防がないもう一つの興味深いフューズは：
@@ -50,27 +50,27 @@ Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions
 
 <figure><img src="../../../images/image (34).png" alt=""><figcaption></figcaption></figure>
 
-**`Electron Framework`**バイナリをこれらのバイトを変更してアプリケーション内に**上書き**しようとすると、アプリは実行されません。
+**`Electron Framework`**バイナリをこれらのバイトを変更してアプリケーション内に**上書き**しようとすると、アプリは実行されないことに注意してください。
 
-## RCEをElectronアプリケーションにコードを追加する
+## RCEコードをElectronアプリケーションに追加する
 
-Electronアプリが使用している**外部JS/HTMLファイル**がある可能性があるため、攻撃者はこれらのファイルにコードを注入し、その署名がチェックされずにアプリのコンテキストで任意のコードを実行できます。
+Electronアプリが使用している**外部JS/HTMLファイル**がある可能性があるため、攻撃者はこれらのファイルにコードを注入し、その署名がチェックされないため、アプリのコンテキストで任意のコードを実行できます。
 
 > [!CAUTION]
 > ただし、現時点では2つの制限があります：
 >
 > - アプリを変更するには**`kTCCServiceSystemPolicyAppBundles`**権限が**必要**であり、デフォルトではこれがもはや可能ではありません。
-> - コンパイルされた**`asap`**ファイルは通常、ヒューズ**`embeddedAsarIntegrityValidation`** `と` **`onlyLoadAppFromAsar`** `が`有効です。
+> - コンパイルされた**`asap`**ファイルは通常、ヒューズ**`embeddedAsarIntegrityValidation`** `と` **`onlyLoadAppFromAsar`**が`有効`です。
 >
 > この攻撃経路をより複雑（または不可能）にします。
 
-**`kTCCServiceSystemPolicyAppBundles`**の要件を回避することは可能で、アプリケーションを別のディレクトリ（例えば**`/tmp`**）にコピーし、フォルダー**`app.app/Contents`**の名前を**`app.app/NotCon`**に変更し、**悪意のある**コードで**asar**ファイルを**変更**し、再び**`app.app/Contents`**に名前を戻して実行することができます。
+**`kTCCServiceSystemPolicyAppBundles`**の要件を回避することは可能で、アプリケーションを別のディレクトリ（例えば**`/tmp`**）にコピーし、フォルダ**`app.app/Contents`**の名前を**`app.app/NotCon`**に変更し、**悪意のある**コードで**asar**ファイルを**変更**し、再び**`app.app/Contents`**に名前を戻して実行することができます。
 
 asarファイルからコードを展開するには、次のコマンドを使用できます：
 ```bash
 npx asar extract app.asar app-decomp
 ```
-そして、次のように修正した後に再パッケージ化します：
+そして、次のように修正した後に再パッケージ化します:
 ```bash
 npx asar pack app-decomp app-new.asar
 ```
@@ -88,7 +88,7 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 
 ### アプリのPlistからのインジェクション
 
-[**ここで提案されているように**](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks/)、この環境変数をplistで悪用して持続性を維持することができます：
+[**ここで提案されているように**](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks/)、この環境変数をplistで悪用して永続性を維持することができます：
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -129,7 +129,7 @@ NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Di
 
 ### アプリのPlistからのインジェクション
 
-この環境変数をplistで悪用して、持続性を維持するためにこれらのキーを追加できます:
+これらのキーを追加することで、plist内のこの環境変数を悪用して永続性を維持できます:
 ```xml
 <dict>
 <key>EnvironmentVariables</key>
@@ -147,7 +147,7 @@ NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Di
 ```
 ## RCE with inspecting
 
-According to [**this**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f), **`--inspect`**、**`--inspect-brk`**、および **`--remote-debugging-port`** のようなフラグを使用してElectronアプリケーションを実行すると、**デバッグポートが開かれ**、それに接続できるようになります（例えば、`chrome://inspect`のChromeから）し、**コードを注入したり**、新しいプロセスを起動したりすることができます。\
+According to [**this**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f), if you execute an Electron application with flags such as **`--inspect`**, **`--inspect-brk`** and **`--remote-debugging-port`**, a **debug port will be open** so you can connect to it (for example from Chrome in `chrome://inspect`) and you will be able to **inject code on it** or even launch new processes.\
 例えば:
 ```bash
 /Applications/Signal.app/Contents/MacOS/Signal --inspect=9229
@@ -157,11 +157,11 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 > [!CAUTION]
 > フューズ **`EnableNodeCliInspectArguments`** が無効になっている場合、アプリは起動時にノードパラメータ（`--inspect` など）を **無視**します。ただし、環境変数 **`ELECTRON_RUN_AS_NODE`** が設定されている場合は、これもフューズ **`RunAsNode`** が無効になっていると **無視**されます。
 >
-> しかし、**electron パラメータ `--remote-debugging-port=9229`** を使用することで、Electronアプリから**履歴**（GETコマンドを使用）や**クッキー**の情報を盗むことが可能ですが、前のペイロードは他のプロセスを実行するためには機能しません。
+> しかし、**electron パラメータ `--remote-debugging-port=9229`** を使用することで、Electronアプリから**履歴**（GETコマンドを使用）やブラウザの**クッキー**を盗むことが可能ですが、前のペイロードは他のプロセスを実行するためには機能しません。
 
-パラメータ **`--remote-debugging-port=9222`** を使用することで、Electronアプリから**履歴**（GETコマンドを使用）や**クッキー**の情報を盗むことが可能です（クッキーはブラウザ内で**復号化**され、**jsonエンドポイント**がそれらを提供します）。
+パラメータ **`--remote-debugging-port=9222`** を使用することで、Electronアプリから**履歴**（GETコマンドを使用）やブラウザの**クッキー**を盗むことが可能です（クッキーはブラウザ内で**復号化**され、クッキーを提供する**jsonエンドポイント**があります）。
 
-その方法については[**こちら**](https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e)と[**こちら**](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f)で学ぶことができ、ツール[WhiteChocolateMacademiaNut](https://github.com/slyd0g/WhiteChocolateMacademiaNut)や、次のようなシンプルなスクリプトを使用できます:
+その方法については[**こちら**](https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e)と[**こちら**](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f)で学ぶことができ、自動ツール[WhiteChocolateMacademiaNut](https://github.com/slyd0g/WhiteChocolateMacademiaNut)や次のようなシンプルなスクリプトを使用できます:
 ```python
 import websocket
 ws = websocket.WebSocket()
@@ -169,7 +169,7 @@ ws.connect("ws://localhost:9222/devtools/page/85976D59050BFEFDBA48204E3D865D00",
 ws.send('{\"id\": 1, \"method\": \"Network.getAllCookies\"}')
 print(ws.recv()
 ```
-[**このブログ投稿**](https://hackerone.com/reports/1274695)では、このデバッグが悪用されて、ヘッドレスChromeが**任意のファイルを任意の場所にダウンロード**します。
+[**このブログ投稿**](https://hackerone.com/reports/1274695)では、このデバッグが悪用されて、ヘッドレスChromeが**任意の場所に任意のファイルをダウンロード**します。
 
 ### アプリのPlistからのインジェクション
 
@@ -187,19 +187,19 @@ print(ws.recv()
 <true/>
 </dict>
 ```
-## TCC バイパス 古いバージョンの悪用
+## TCCバイパス：古いバージョンの悪用
 
 > [!TIP]
-> macOS の TCC デーモンは、実行されているアプリケーションのバージョンをチェックしません。したがって、**以前の技術を使用して Electron アプリケーションにコードを注入できない場合**、アプリの以前のバージョンをダウンロードしてコードを注入することができます。そうすれば、TCC 権限を取得します（Trust Cache がそれを防がない限り）。
+> macOSのTCCデーモンは、実行されているアプリケーションのバージョンをチェックしません。したがって、**以前の技術を使用してElectronアプリケーションにコードを注入できない場合**、アプリの以前のバージョンをダウンロードしてコードを注入することができます。そうすれば、TCCの権限を取得します（Trust Cacheがそれを防がない限り）。
 
-## 非 JS コードの実行
+## 非JSコードの実行
 
-前述の技術を使用すると、**Electron アプリケーションのプロセス内で JS コードを実行**できます。ただし、**子プロセスは親アプリケーションと同じサンドボックスプロファイルの下で実行され**、**TCC 権限を継承します**。\
+前述の技術を使用すると、**Electronアプリケーションのプロセス内でJSコードを実行する**ことができます。ただし、**子プロセスは親アプリケーションと同じサンドボックスプロファイルの下で実行され**、**TCCの権限を継承します**。\
 したがって、カメラやマイクにアクセスするために権限を悪用したい場合は、**プロセスから別のバイナリを実行するだけで済みます**。
 
 ## 自動注入
 
-ツール [**electroniz3r**](https://github.com/r3ggi/electroniz3r) は、**脆弱な Electron アプリケーション**を見つけてそれにコードを注入するために簡単に使用できます。このツールは、**`--inspect`** 技術を使用しようとします：
+ツール[**electroniz3r**](https://github.com/r3ggi/electroniz3r)は、**脆弱なElectronアプリケーション**を見つけてそれにコードを注入するために簡単に使用できます。このツールは、**`--inspect`**技術を使用しようとします：
 
 自分でコンパイルする必要があり、次のように使用できます：
 ```bash

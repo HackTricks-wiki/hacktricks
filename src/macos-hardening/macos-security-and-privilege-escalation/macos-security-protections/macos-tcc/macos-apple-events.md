@@ -13,7 +13,7 @@ mina デーモンは `/System/Library/CoreServices/appleeventsd` で、サービ
 サンドボックス化されたアプリケーションは、イベントを送信できるようにするために `allow appleevent-send` や `(allow mach-lookup (global-name "com.apple.coreservices.appleevents))` のような権限が必要です。`com.apple.security.temporary-exception.apple-events` のような権限は、イベントを送信するアクセスを制限する可能性があり、`com.apple.private.appleevents` のような権限が必要になります。
 
 > [!TIP]
-> メッセージ送信に関する情報をログに記録するために、env 変数 **`AEDebugSends`** を使用することが可能です：
+> 送信されたメッセージに関する情報をログに記録するために、env 変数 **`AEDebugSends`** を使用することが可能です：
 >
 > ```bash
 > AEDebugSends=1 osascript -e 'tell application "iTerm" to activate'

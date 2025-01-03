@@ -10,7 +10,7 @@
 
 .NETにおけるデバッガとデバッグ対象間の通信の処理は、[**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp)によって管理されています。このコンポーネントは、[dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127)に見られるように、各.NETプロセスごとに2つの名前付きパイプを設定します。これらは[twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27)を介して開始されます。これらのパイプは**`-in`**および**`-out`**で接尾辞が付けられています。
 
-ユーザーの**`$TMPDIR`**を訪れることで、.Netアプリケーションのデバッグ用のFIFOが見つかります。
+ユーザーの**`$TMPDIR`**を訪れることで、.Netアプリケーションのデバッグに利用可能なFIFOを見つけることができます。
 
 [**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259)は、デバッガからの通信を管理する責任があります。新しいデバッグセッションを開始するには、デバッガは`out`パイプを介して`MessageHeader`構造体で始まるメッセージを送信する必要があります。この構造体の詳細は.NETのソースコードに記載されています。
 ```c
@@ -42,13 +42,13 @@ sSendHeader.TypeSpecificData.VersionInfo.m_dwMajorVersion = kCurrentMajorVersion
 sSendHeader.TypeSpecificData.VersionInfo.m_dwMinorVersion = kCurrentMinorVersion;
 sSendHeader.m_cbDataBlock = sizeof(SessionRequestData);
 ```
-このヘッダーは、その後、`write` syscallを使用してターゲットに送信され、セッションのGUIDを含む`sessionRequestData`構造体が続きます：
+このヘッダーは、その後、`write` システムコールを使用してターゲットに送信され、セッションの GUID を含む `sessionRequestData` 構造体が続きます：
 ```c
 write(wr, &sSendHeader, sizeof(MessageHeader));
 memset(&sDataBlock.m_sSessionID, 9, sizeof(SessionRequestData));
 write(wr, &sDataBlock, sizeof(SessionRequestData));
 ```
-`out` パイプでの読み取り操作は、デバッグセッションの確立の成功または失敗を確認します:
+`out` パイプの読み取り操作は、デバッグセッションの確立の成功または失敗を確認します:
 ```c
 read(rd, &sReceiveHeader, sizeof(MessageHeader));
 ```
@@ -97,7 +97,7 @@ x64システムでは、シグネチャハンティングを使用して`libcorc
 
 `MT_GetDCB`デバッガ関数は、ヘルパー関数のアドレス`m_helperRemoteStartAddr`を含む有用な情報を提供し、プロセスメモリ内の`libcorclr.dll`の位置を示します。このアドレスは、その後DFTの検索を開始し、関数ポインタをシェルコードのアドレスで上書きするために使用されます。
 
-PowerShellへの注入のための完全なPOCコードは[こちら](https://gist.github.com/xpn/b427998c8b3924ab1d63c89d273734b6)からアクセスできます。
+PowerShellへの注入のための完全なPOCコードは[こちら](https://gist.github.com/xpn/b427998c8b3924ab1d63c89d273734b6)でアクセス可能です。
 
 ## 参考文献
 

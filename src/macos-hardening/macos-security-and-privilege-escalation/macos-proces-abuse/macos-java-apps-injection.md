@@ -14,7 +14,7 @@ sudo find / -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
 ```
 ## \_JAVA_OPTIONS
 
-環境変数 **`_JAVA_OPTIONS`** は、Javaコンパイルされたアプリの実行に任意のJavaパラメータを注入するために使用できます：
+環境変数 **`_JAVA_OPTIONS`** は、Javaコンパイルされたアプリの実行時に任意のJavaパラメータを注入するために使用できます:
 ```bash
 # Write your payload in a script called /tmp/payload.sh
 export _JAVA_OPTIONS='-Xms2m -Xmx5m -XX:OnOutOfMemoryError="/tmp/payload.sh"'
@@ -73,7 +73,7 @@ NSMutableDictionary *environment = [NSMutableDictionary dictionaryWithDictionary
 return 0;
 }
 ```
-しかし、これにより実行されたアプリでエラーが発生します。別のよりステルスな方法は、Javaエージェントを作成し、次を使用することです：
+しかし、それは実行されたアプリでエラーを引き起こします。よりステルスな方法は、Javaエージェントを作成し、次を使用することです：
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -125,7 +125,7 @@ open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Profession
 ```
 ## vmoptionsファイル
 
-このファイルは、Javaが実行されるときの**Javaパラメータ**の指定をサポートします。以前のトリックのいくつかを使用して、Javaパラメータを変更し、**プロセスが任意のコマンドを実行する**ようにすることができます。\
+このファイルは、Javaが実行されるときに**Javaパラメータ**の指定をサポートします。以前のいくつかのトリックを使用して、Javaパラメータを変更し、**プロセスが任意のコマンドを実行する**ようにすることができます。\
 さらに、このファイルは`include`ディレクトリを使用して**他のファイルを含む**こともできるため、含まれているファイルを変更することもできます。
 
 さらに、一部のJavaアプリは**複数の`vmoptions`**ファイルを**ロード**します。
@@ -141,7 +141,7 @@ Android Studioのような一部のアプリケーションは、これらのフ
 2023-12-13 19:53:23.922 studio[74913:581359] parseVMOptions: /Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 2023-12-13 19:53:23.923 studio[74913:581359] parseVMOptions: platform=20 user=1 file=/Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 ```
-それがない場合は、次のコマンドで簡単に確認できます:
+それがない場合は、次のコマンドで簡単に確認できます：
 ```bash
 # Monitor
 sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
@@ -149,6 +149,6 @@ sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
 # Launch the Java app
 /Applications/Android\ Studio.app/Contents/MacOS/studio
 ```
-この例では、Android Studioがファイル**`/Applications/Android Studio.app.vmoptions`**を読み込もうとしていることが興味深いことに注意してください。この場所は、**`admin`グループ**の任意のユーザーが書き込みアクセスを持っています。 
+この例では、Android Studioがファイル **`/Applications/Android Studio.app.vmoptions`** を読み込もうとしていることがどれほど興味深いかに注意してください。これは、**`admin` グループ** の任意のユーザーが書き込みアクセスを持つ場所です。
 
 {{#include ../../../banners/hacktricks-training.md}}

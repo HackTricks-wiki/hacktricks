@@ -20,10 +20,10 @@
 - **timeout**: ルールによって付与された認可が期限切れになるまでの秒数を定義します。
 - **flags**: ルールの動作と特性を変更するさまざまなフラグを含みます。
 - **tries**: セキュリティを強化するために許可される認可試行の回数を制限します。
-- **version**: バージョン管理と更新のためにルールのバージョンを追跡します。
+- **version**: ルールのバージョンを追跡し、バージョン管理と更新を行います。
 - **created**: 監査目的のためにルールが作成されたタイムスタンプを記録します。
 - **modified**: ルールに対して行われた最後の変更のタイムスタンプを保存します。
-- **hash**: ルールの整合性を確保し、改ざんを検出するためのハッシュ値を保持します。
+- **hash**: ルールのハッシュ値を保持し、その整合性を確保し、改ざんを検出します。
 - **identifier**: ルールへの外部参照のための一意の文字列識別子（UUIDなど）を提供します。
 - **requirement**: ルールの特定の認可要件とメカニズムを定義するシリアライズされたデータを含みます。
 - **comment**: ドキュメントと明確さのためにルールに関する人間が読める説明またはコメントを提供します。
@@ -73,9 +73,9 @@ security authorizationdb read com.apple.tcc.util.admin
 ```
 ## Authd
 
-これは、クライアントが機密操作を実行するための承認要求を受け取るデーモンです。これは、`XPCServices/`フォルダー内に定義されたXPCサービスとして機能し、ログを`/var/log/authd.log`に書き込みます。
+これは、クライアントが機密アクションを実行するための承認要求を受け取るデーモンです。これは、`XPCServices/`フォルダー内に定義されたXPCサービスとして機能し、ログを`/var/log/authd.log`に書き込みます。
 
-さらに、セキュリティツールを使用すると、多くの`Security.framework` APIをテストすることが可能です。例えば、`AuthorizationExecuteWithPrivileges`を実行するには、次のようにします: `security execute-with-privileges /bin/ls`
+さらに、セキュリティツールを使用すると、多くの`Security.framework` APIをテストすることができます。例えば、`AuthorizationExecuteWithPrivileges`を実行するには、次のようにします: `security execute-with-privileges /bin/ls`
 
 これにより、`/usr/libexec/security_authtrampoline /bin/ls`がrootとしてフォークされ、lsをrootとして実行するための権限を求めるプロンプトが表示されます:
 

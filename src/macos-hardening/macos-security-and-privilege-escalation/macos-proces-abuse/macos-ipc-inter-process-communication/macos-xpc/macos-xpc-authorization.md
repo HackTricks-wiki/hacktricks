@@ -6,11 +6,11 @@
 
 Appleは、接続プロセスが**公開されたXPCメソッドを呼び出す権限を持っているかどうかを認証する**別の方法を提案しています。
 
-アプリケーションが**特権ユーザーとしてアクションを実行する**必要がある場合、通常は特権ユーザーとしてアプリを実行するのではなく、アプリから呼び出してそのアクションを実行できるXPCサービスとしてHelperToolをルートとしてインストールします。ただし、サービスを呼び出すアプリは十分な認可を持っている必要があります。
+アプリケーションが**特権ユーザーとしてアクションを実行する必要がある**場合、通常は特権ユーザーとしてアプリを実行するのではなく、アプリから呼び出してそのアクションを実行できるXPCサービスとしてHelperToolをルートとしてインストールします。ただし、サービスを呼び出すアプリは十分な認可を持っている必要があります。
 
 ### ShouldAcceptNewConnectionは常にYES
 
-例として、[EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample)を見つけることができます。`App/AppDelegate.m`では、**HelperTool**に**接続**しようとします。そして、`HelperTool/HelperTool.m`では、関数**`shouldAcceptNewConnection`**は、前述の要件のいずれも**チェックしません**。常にYESを返します:
+例として、[EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample)を見つけることができます。`App/AppDelegate.m`では、**HelperTool**に**接続**しようとします。そして、`HelperTool/HelperTool.m`では、関数**`shouldAcceptNewConnection`**は、前述の要件を**チェックしません**。常にYESを返します:
 ```objectivec
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection
 // Called by our XPC listener when a new connection comes in.  We configure the connection
@@ -27,7 +27,7 @@ newConnection.exportedObject = self;
 return YES;
 }
 ```
-詳細な設定方法については、次を確認してください：
+詳細な設定方法については、次のチェックを参照してください：
 
 {{#ref}}
 macos-xpc-connecting-process-check/
@@ -62,7 +62,7 @@ if (self->_authRef) {
 [self.window makeKeyAndOrderFront:self];
 }
 ```
-`Common/Common.m`の`setupAuthorizationRights`関数は、アプリケーションの権限を`/var/db/auth.db`の認証データベースに保存します。データベースにまだ存在しない権限のみを追加することに注意してください。
+`Common/Common.m`の`setupAuthorizationRights`関数は、アプリケーションの権限を`/var/db/auth.db`の認証データベースに保存します。データベースにまだ存在しない権限のみを追加することに注意してください:
 ```objectivec
 + (void)setupAuthorizationRights:(AuthorizationRef)authRef
 // See comment in header.
@@ -174,7 +174,7 @@ block(authRightName, authRightDefault, authRightDesc);
 ```
 このプロセスの最後に、`commandInfo`内で宣言された権限は`/var/db/auth.db`に保存されます。ここでは、**各メソッド**が**認証を必要とする**こと、**権限名**、および**`kCommandKeyAuthRightDefault`**が見つかります。後者は**誰がこの権利を取得できるか**を示します。
 
-権利にアクセスできる人を示すための異なるスコープがあります。それらのいくつかは[AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h)で定義されています（[ここで全てを見つけることができます](https://www.dssw.co.uk/reference/authorization-rights/)）、要約すると：
+権利にアクセスできる人を示すための異なるスコープがあります。それらのいくつかは[AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h)で定義されています（[ここにすべてあります](https://www.dssw.co.uk/reference/authorization-rights/)が、要約すると：
 
 <table><thead><tr><th width="284.3333333333333">名前</th><th width="165">値</th><th>説明</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>誰でも</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>誰も</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>現在のユーザーは管理者である必要があります（管理者グループ内）</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>ユーザーに認証を求めます。</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>ユーザーに認証を求めます。彼は管理者である必要があります（管理者グループ内）</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>ルールを指定します</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>権利に関する追加のコメントを指定します</td></tr></tbody></table>
 
@@ -228,13 +228,13 @@ assert(junk == errAuthorizationSuccess);
 return error;
 }
 ```
-注意してください、**そのメソッドを呼び出す権利を確認するために**、関数 `authorizationRightForCommand` は以前のコメントオブジェクト **`commandInfo`** をチェックします。次に、**`AuthorizationCopyRights`** を呼び出して、関数を呼び出す**権利があるかどうか**を確認します（フラグはユーザーとの対話を許可することに注意してください）。
+注意すべきは、**そのメソッドを呼び出す権利を確認するために**、関数 `authorizationRightForCommand` は以前のコメントオブジェクト **`commandInfo`** をチェックするだけです。次に、**`AuthorizationCopyRights`** を呼び出して、関数を呼び出す**権利があるかどうか**を確認します（フラグはユーザーとの対話を許可することに注意してください）。
 
 この場合、関数 `readLicenseKeyAuthorization` を呼び出すために、`kCommandKeyAuthRightDefault` は `@kAuthorizationRuleClassAllow` に定義されています。したがって、**誰でも呼び出すことができます**。
 
 ### DB 情報
 
-この情報は `/var/db/auth.db` に保存されていると述べられました。保存されたすべてのルールをリストするには、次のコマンドを使用します:
+この情報は `/var/db/auth.db` に保存されていると述べられました。保存されているすべてのルールをリストするには、次のコマンドを使用します:
 ```sql
 sudo sqlite3 /var/db/auth.db
 SELECT name FROM rules;
@@ -246,19 +246,19 @@ security authorizationdb read com.apple.safaridriver.allow
 ```
 ### 許可権限
 
-**すべての権限設定**は[**こちら**](https://www.dssw.co.uk/reference/authorization-rights/)で確認できますが、ユーザーの操作を必要としない組み合わせは以下の通りです：
+**すべての権限設定** [**こちら**](https://www.dssw.co.uk/reference/authorization-rights/) で見つけることができますが、ユーザーの操作を必要としない組み合わせは次のとおりです。
 
 1. **'authenticate-user': 'false'**
 - これは最も直接的なキーです。`false`に設定されている場合、ユーザーがこの権利を得るために認証を提供する必要がないことを指定します。
-- これは、以下の2つのいずれかと組み合わせて使用されるか、ユーザーが属する必要があるグループを示します。
+- これは、以下の2つのいずれかと組み合わせて使用するか、ユーザーが属する必要があるグループを示すために使用されます。
 2. **'allow-root': 'true'**
 - ユーザーがルートユーザー（昇格された権限を持つ）として操作している場合、このキーが`true`に設定されていると、ルートユーザーは追加の認証なしにこの権利を得る可能性があります。ただし、通常、ルートユーザーの状態に到達するにはすでに認証が必要であるため、これはほとんどのユーザーにとって「認証なし」のシナリオではありません。
 3. **'session-owner': 'true'**
 - `true`に設定されている場合、セッションの所有者（現在ログインしているユーザー）は自動的にこの権利を得ます。ユーザーがすでにログインしている場合、追加の認証をバイパスする可能性があります。
 4. **'shared': 'true'**
-- このキーは認証なしに権利を付与しません。代わりに、`true`に設定されている場合、権利が認証された後は、各プロセスが再認証を必要とせずに複数のプロセス間で共有できることを意味します。しかし、権利の最初の付与は、`'authenticate-user': 'false'`のような他のキーと組み合わせない限り、認証を必要とします。
+- このキーは、認証なしに権利を付与するものではありません。代わりに、`true`に設定されている場合、権利が認証された後は、各プロセスが再認証を必要とせずに複数のプロセス間で共有できることを意味します。しかし、権利の最初の付与は、`'authenticate-user': 'false'`のような他のキーと組み合わせない限り、認証を必要とします。
 
-興味深い権利を取得するために[**このスクリプト**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9)を使用できます：
+興味深い権利を取得するために、[**このスクリプト**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9)を使用できます。
 ```bash
 Rights with 'authenticate-user': 'false':
 is-admin (admin), is-admin-nonshared (admin), is-appstore (_appstore), is-developer (_developer), is-lpadmin (_lpadmin), is-root (run as root), is-session-owner (session owner), is-webdeveloper (_webdeveloper), system-identity-write-self (session owner), system-install-iap-software (run as root), system-install-software-iap (run as root)
@@ -289,7 +289,7 @@ authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-se
 
 <figure><img src="../../../../../images/image (44).png" alt=""><figcaption></figcaption></figure>
 
-この場合、EvenBetterAuthorizationSampleと同じものであり、[**この行を確認してください**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94)。
+この場合、EvenBetterAuthorizationSampleと同じものがあり、[**この行を確認してください**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94)。
 
 使用されているプロトコルの名前が分かれば、**そのヘッダー定義をダンプする**ことが可能です：
 ```bash
@@ -305,9 +305,9 @@ class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
 @end
 [...]
 ```
-最後に、通信を確立するために**公開されたMachサービスの名前**を知る必要があります。これを見つける方法はいくつかあります：
+最後に、**公開されたMachサービスの名前**を知る必要があります。これと通信を確立するための方法はいくつかあります：
 
-- **`[HelperTool init]`**で使用されているMachサービスを見ることができます：
+- **`[HelperTool init]`** で使用されているMachサービスを見ることができます：
 
 <figure><img src="../../../../../images/image (41).png" alt=""><figcaption></figcaption></figure>
 
@@ -326,7 +326,7 @@ cat /Library/LaunchDaemons/com.example.HelperTool.plist
 ```
 ### エクスプロイトの例
 
-この例では、以下が作成されます：
+この例では次のものが作成されます：
 
 - 関数を持つプロトコルの定義
 - アクセスを要求するために使用する空の認証

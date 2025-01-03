@@ -21,9 +21,9 @@ sudo bash -c 'for i in $(find /var/db/dslocal/nodes/Default/users -type f -regex
 
 ### /etc/master.passwd
 
-このファイルは **単一ユーザーモード** でシステムが実行されているときに **のみ使用されます**（したがって、あまり頻繁にはありません）。
+このファイルは **単一ユーザーモード** でシステムが実行されているときに **のみ使用されます**（そのため、あまり頻繁にはありません）。
 
-### キーチェーンダンプ
+### Keychain Dump
 
 セキュリティバイナリを使用して **復号化されたパスワードをダンプ** する際、いくつかのプロンプトがユーザーにこの操作を許可するように求めます。
 ```bash
@@ -41,13 +41,13 @@ security dump-keychain -d #Dump all the info, included secrets (the user will be
 
 ### Keychaindumpの概要
 
-**keychaindump**という名前のツールは、macOSのキーチェーンからパスワードを抽出するために開発されましたが、Big Surのような新しいmacOSバージョンでは制限があります [discussion](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760) に示されているように。**keychaindump**の使用には、攻撃者がアクセスを得て**root**権限を昇格させる必要があります。このツールは、ユーザーのログイン時にキーチェーンがデフォルトでロック解除されるという事実を利用しており、アプリケーションがユーザーのパスワードを繰り返し要求することなくアクセスできるようにしています。しかし、ユーザーが使用後にキーチェーンをロックすることを選択した場合、**keychaindump**は無効になります。
+**keychaindump**という名前のツールは、macOSのキーチェーンからパスワードを抽出するために開発されましたが、Big Surのような新しいmacOSバージョンでは制限があります。**keychaindump**の使用には、攻撃者がアクセスを得て**root**権限を昇格させる必要があります。このツールは、ユーザーのログイン時にキーチェーンがデフォルトでロック解除されるという事実を利用しており、アプリケーションがユーザーのパスワードを繰り返し要求することなくアクセスできるようにしています。ただし、ユーザーが使用後にキーチェーンをロックすることを選択した場合、**keychaindump**は無効になります。
 
-**Keychaindump**は、Appleによって認証および暗号操作のためのデーモンとして説明されている特定のプロセス**securityd**をターゲットにして動作します。これはキーチェーンにアクセスするために重要です。抽出プロセスは、ユーザーのログインパスワードから派生した**マスターキー**を特定することを含みます。このキーはキーチェーンファイルを読み取るために不可欠です。**マスターキー**を見つけるために、**keychaindump**は`vmmap`コマンドを使用して**securityd**のメモリヒープをスキャンし、`MALLOC_TINY`としてフラグ付けされた領域内の潜在的なキーを探します。これらのメモリ位置を検査するために使用されるコマンドは次のとおりです：
+**Keychaindump**は、Appleによって認証および暗号操作のためのデーモンとして説明されている特定のプロセス**securityd**をターゲットにして動作します。抽出プロセスは、ユーザーのログインパスワードから派生した**マスターキー**を特定することを含みます。このキーはキーチェーンファイルを読み取るために不可欠です。**マスターキー**を見つけるために、**keychaindump**は`vmmap`コマンドを使用して**securityd**のメモリヒープをスキャンし、`MALLOC_TINY`としてフラグ付けされた領域内の潜在的なキーを探します。これらのメモリ位置を検査するために使用されるコマンドは次のとおりです：
 ```bash
 sudo vmmap <securityd PID> | grep MALLOC_TINY
 ```
-潜在的なマスターキーを特定した後、**keychaindump**はヒープ内で特定のパターン（`0x0000000000000018`）を検索し、マスターキーの候補を示します。このキーを利用するには、**keychaindump**のソースコードに記載されているように、さらなる手順としてデオブフスケーションが必要です。この分野に焦点を当てるアナリストは、キーを復号化するための重要なデータが**securityd**プロセスのメモリ内に保存されていることに注意する必要があります。**keychaindump**を実行するためのコマンドの例は次のとおりです：
+潜在的なマスターキーを特定した後、**keychaindump**はヒープ内で特定のパターン（`0x0000000000000018`）を検索し、マスターキーの候補を示します。このキーを利用するためには、**keychaindump**のソースコードに記載されているように、さらなる手順としてデオブフスケーションが必要です。この分野に焦点を当てるアナリストは、キーを復号化するための重要なデータが**securityd**プロセスのメモリ内に保存されていることに注意する必要があります。**keychaindump**を実行するためのコマンドの例は次のとおりです：
 ```bash
 sudo ./keychaindump
 ```
@@ -112,7 +112,7 @@ python2.7 chainbreaker.py --dump-all --password-prompt /Users/<username>/Library
 
 **kcpassword**ファイルは、**ユーザーのログインパスワード**を保持するファイルですが、システムの所有者が**自動ログイン**を**有効にしている**場合のみです。したがって、ユーザーはパスワードを求められることなく自動的にログインされます（これはあまり安全ではありません）。
 
-パスワードは、ファイル**`/etc/kcpassword`**に**`0x7D 0x89 0x52 0x23 0xD2 0xBC 0xDD 0xEA 0xA3 0xB9 0x1F`**というキーでXORされて保存されています。ユーザーのパスワードがキーよりも長い場合、キーは再利用されます。\
+パスワードはファイル**`/etc/kcpassword`**に、キー**`0x7D 0x89 0x52 0x23 0xD2 0xBC 0xDD 0xEA 0xA3 0xB9 0x1F`**でXORされて保存されています。ユーザーのパスワードがキーよりも長い場合、キーは再利用されます。\
 これにより、パスワードは比較的簡単に復元できます。たとえば、[**このスクリプト**](https://gist.github.com/opshope/32f65875d45215c3677d)を使用することができます。
 
 ## データベース内の興味深い情報
@@ -193,7 +193,7 @@ macOSでは、cliツール**`defaults`**を使用して**Preferencesファイル
 
 通知の主なデーモンは **`/usr/sbin/notifyd`** です。通知を受け取るためには、クライアントは `com.apple.system.notification_center` Machポートを通じて登録する必要があります（`sudo lsmp -p <pid notifyd>` で確認できます）。デーモンはファイル `/etc/notify.conf` で設定可能です。
 
-通知に使用される名前はユニークな逆DNS表記であり、通知がその一つに送信されると、それを処理できると示したクライアントが受け取ります。
+通知に使用される名前はユニークな逆DNS表記であり、通知がそのうちの1つに送信されると、それを処理できると示したクライアントが受け取ります。
 
 現在のステータスをダンプし（すべての名前を確認する）、notifydプロセスにSIGUSR2信号を送信し、生成されたファイル `/var/run/notifyd_<pid>.status` を読み取ることが可能です。
 ```bash
@@ -218,11 +218,11 @@ common: com.apple.security.octagon.joined-with-bottle
 ### Apple Push Notifications (APN)
 
 この場合、アプリケーションは**トピック**に登録できます。クライアントは**`apsd`**を介してAppleのサーバーに連絡し、トークンを生成します。\
-その後、プロバイダーもトークンを生成し、Appleのサーバーに接続してクライアントにメッセージを送信できるようになります。これらのメッセージは**`apsd`**によってローカルで受信され、通知が待機しているアプリケーションに中継されます。
+その後、プロバイダーもトークンを生成し、Appleのサーバーに接続してクライアントにメッセージを送信できるようになります。これらのメッセージは、**`apsd`**によってローカルで受信され、通知が待機しているアプリケーションに中継されます。
 
 設定は`/Library/Preferences/com.apple.apsd.plist`にあります。
 
-macOSのメッセージのローカルデータベースは`/Library/Application\ Support/ApplePushService/aps.db`にあり、iOSでは`/var/mobile/Library/ApplePushService`にあります。3つのテーブルがあります：`incoming_messages`、`outgoing_messages`、および`channel`。
+macOSのメッセージのローカルデータベースは`/Library/Application\ Support/ApplePushService/aps.db`にあり、iOSでは`/var/mobile/Library/ApplePushService`にあります。これには3つのテーブルがあります：`incoming_messages`、`outgoing_messages`、および`channel`。
 ```bash
 sudo sqlite3 /Library/Application\ Support/ApplePushService/aps.db
 ```
@@ -235,7 +235,7 @@ sudo sqlite3 /Library/Application\ Support/ApplePushService/aps.db
 これらはユーザーが画面で見るべき通知です：
 
 - **`CFUserNotification`**: このAPIは、メッセージを表示するポップアップを画面に表示する方法を提供します。
-- **掲示板**: これはiOSでバナーを表示し、消え、通知センターに保存されます。
+- **掲示板**: これはiOSで消えるバナーを表示し、通知センターに保存されます。
 - **`NSUserNotificationCenter`**: これはMacOSのiOS掲示板です。通知のデータベースは`/var/folders/<user temp>/0/com.apple.notificationcenter/db2/db`にあります。
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -240,7 +240,7 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="Shell"}}
-`$HOME/Library/Application Support/AddressBook`を`/tmp/contacts`にコピーします。
+`$HOME/Library/Application Support/AddressBook` を `/tmp/contacts` にコピーします。
 ```bash
 cp -r "$HOME/Library/Application Support/AddressBook" "/tmp/contacts"
 ```
@@ -713,7 +713,7 @@ screencapture -V 5 /tmp/screen.mov
 - **権限**: なし
 - **TCC**: `kTCCServiceAccessibility`
 
-TCCの特権を使用して、Finderの制御を受け入れ、Enterを押してその方法でTCCをバイパスします
+TCCの特権を使用して、Finderの制御を受け入れ、Enterを押してその方法でTCCをバイパスします。
 
 {{#tabs}}
 {{#tab name="TCCを受け入れる"}}
@@ -877,6 +877,6 @@ return 0;
 {{#endtab}}
 {{#endtabs}}
 
-> [!CAUTION] > **アクセシビリティは非常に強力な権限です**。他の方法で悪用することができ、例えば、**キーストローク攻撃**を行うことができます。System Eventsを呼び出す必要はありません。
+> [!CAUTION] > **アクセシビリティは非常に強力な権限です**。これを他の方法で悪用することができます。例えば、**キーストローク攻撃**を行うことができ、System Eventsを呼び出す必要はありません。
 
 {{#include ../../../../banners/hacktricks-training.md}}

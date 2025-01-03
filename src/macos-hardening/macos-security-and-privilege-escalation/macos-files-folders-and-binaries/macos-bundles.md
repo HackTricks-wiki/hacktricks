@@ -21,7 +21,7 @@ macOSのバンドルは、アプリケーション、ライブラリ、その他
 
 - **CFBundleExecutable**: `Contents/MacOS`ディレクトリにある主要な実行可能ファイルの名前を指定します。
 - **CFBundleIdentifier**: アプリケーションのグローバル識別子を提供し、macOSによるアプリケーション管理で広く使用されます。
-- **LSMinimumSystemVersion**: アプリケーションが実行されるために必要なmacOSの最小バージョンを示します。
+- **LSMinimumSystemVersion**: アプリケーションを実行するために必要なmacOSの最小バージョンを示します。
 
 ### バンドルの探索
 
@@ -37,7 +37,7 @@ macOSのバンドルは、アプリケーション、ライブラリ、その他
 - **PlugIns**: アプリケーションの機能を強化するプラグインや拡張のためのディレクトリです。
 - **XPCServices**: アプリケーションがプロセス外通信のために使用するXPCサービスを保持します。
 
-この構造により、すべての必要なコンポーネントがバンドル内にカプセル化され、モジュール式で安全なアプリケーション環境が促進されます。
+この構造により、すべての必要なコンポーネントがバンドル内にカプセル化され、モジュラーで安全なアプリケーション環境が促進されます。
 
 `Info.plist`キーとその意味に関する詳細情報については、Appleの開発者ドキュメントが豊富なリソースを提供しています： [Apple Info.plist Key Reference](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html)。
 

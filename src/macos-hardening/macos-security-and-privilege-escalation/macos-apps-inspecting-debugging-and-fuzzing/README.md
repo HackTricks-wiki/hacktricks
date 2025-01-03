@@ -98,7 +98,7 @@ hdiutil attach ~/Downloads/Firefox\ 58.0.2.dmg
 
 - 高エントロピーをチェック
 - 文字列をチェック（理解できる文字列がほとんどない場合、パックされています）
-- MacOS用のUPXパッカーは、"\_\_XHDR"というセクションを生成します。
+- MacOS用のUPXパッカーは、"\_\_XHDR"というセクションを生成します
 
 ## 静的Objective-C分析
 
@@ -122,11 +122,11 @@ Objective-Cを使用するバイナリで関数が呼び出されると、コン
 
 この関数が期待するパラメータは次のとおりです：
 
-- 最初のパラメータ（**self**）は「**メッセージを受け取るクラスのインスタンスを指すポインタ**」です。より簡単に言えば、これはメソッドが呼び出されるオブジェクトです。メソッドがクラスメソッドである場合、これはクラスオブジェクトのインスタンス（全体）になりますが、インスタンスメソッドの場合、selfはクラスのインスタンス化されたオブジェクトを指します。
+- 最初のパラメータ（**self**）は「**メッセージを受け取るクラスのインスタンスを指すポインタ**」です。より簡単に言えば、これはメソッドが呼び出されるオブジェクトです。メソッドがクラスメソッドである場合、これはクラスオブジェクトのインスタンス（全体）になりますが、インスタンスメソッドの場合、selfはクラスのインスタンス化されたインスタンスをオブジェクトとして指します。
 - 2番目のパラメータ（**op**）は「メッセージを処理するメソッドのセレクタ」です。再度、より簡単に言えば、これは単に**メソッドの名前**です。
-- 残りのパラメータは、メソッドに必要な**値**（op）です。
+- 残りのパラメータは、メソッド（op）によって必要とされる**値**です。
 
-この情報を**ARM64で`lldb`を使って簡単に取得する方法**については、このページを参照してください：
+この情報を**ARM64で`lldb`を使って簡単に取得する方法**をこのページで確認してください：
 
 {{#ref}}
 arm64-basic-assembly.md
@@ -134,21 +134,21 @@ arm64-basic-assembly.md
 
 x64:
 
-| **引数**         | **レジスタ**                                                    | **(for) objc_msgSend**                                 |
-| ----------------- | --------------------------------------------------------------- | ------------------------------------------------------ |
-| **1番目の引数**  | **rdi**                                                         | **self: メソッドが呼び出されるオブジェクト**         |
-| **2番目の引数**  | **rsi**                                                         | **op: メソッドの名前**                               |
-| **3番目の引数**  | **rdx**                                                         | **メソッドへの1番目の引数**                           |
-| **4番目の引数**  | **rcx**                                                         | **メソッドへの2番目の引数**                           |
-| **5番目の引数**  | **r8**                                                          | **メソッドへの3番目の引数**                           |
-| **6番目の引数**  | **r9**                                                          | **メソッドへの4番目の引数**                           |
+| **引数**         | **レジスタ**                                                  | **(for) objc_msgSend**                                 |
+| ---------------- | ------------------------------------------------------------- | ------------------------------------------------------ |
+| **1番目の引数**  | **rdi**                                                       | **self: メソッドが呼び出されるオブジェクト**         |
+| **2番目の引数**  | **rsi**                                                       | **op: メソッドの名前**                               |
+| **3番目の引数**  | **rdx**                                                       | **メソッドへの1番目の引数**                           |
+| **4番目の引数**  | **rcx**                                                       | **メソッドへの2番目の引数**                           |
+| **5番目の引数**  | **r8**                                                        | **メソッドへの3番目の引数**                           |
+| **6番目の引数**  | **r9**                                                        | **メソッドへの4番目の引数**                           |
 | **7番目以降の引数** | <p><strong>rsp+</strong><br><strong>(スタック上)</strong></p> | **メソッドへの5番目以降の引数**                       |
 
 ### ObjectiveCメタデータのダンプ
 
 ### Dynadump
 
-[**Dynadump**](https://github.com/DerekSelander/dynadump)は、Objective-Cバイナリをクラスダンプするためのツールです。GitHubではdylibsが指定されていますが、これは実行可能ファイルでも機能します。
+[**Dynadump**](https://github.com/DerekSelander/dynadump)は、Objective-Cバイナリをクラスダンプするためのツールです。GitHubではdylibsが指定されていますが、実行可能ファイルでも機能します。
 ```bash
 ./dynadump dump /path/to/bin
 ```
@@ -191,9 +191,9 @@ Mem: 0x100027064-0x1000274cc        __TEXT.__swift5_fieldmd
 Mem: 0x1000274cc-0x100027608        __TEXT.__swift5_capture
 [...]
 ```
-これらのセクションに保存されている情報についてのさらなる情報は、[**このブログ投稿**](https://knight.sc/reverse%20engineering/2019/07/17/swift-metadata.html)で見つけることができます。
+これらのセクションに保存されている[**情報についての詳細はこのブログ投稿で見つけることができます**](https://knight.sc/reverse%20engineering/2019/07/17/swift-metadata.html)。
 
-さらに、**Swiftバイナリにはシンボルが含まれている可能性があります**（たとえば、ライブラリはその関数を呼び出すためにシンボルを保存する必要があります）。**シンボルには通常、関数名と属性に関する情報が含まれています**が、見栄えが悪いため非常に便利であり、元の名前を取得できる「**デマンガラー**」があります。
+さらに、**Swiftバイナリにはシンボルが含まれている可能性があります**（例えば、ライブラリはその関数を呼び出すためにシンボルを保存する必要があります）。**シンボルには通常、関数名と属性に関する情報が含まれています**が、見栄えが悪いため非常に便利であり、元の名前を取得できる「**デマンガラー**」があります。
 ```bash
 # Ghidra plugin
 https://github.com/ghidraninja/ghidra_scripts/blob/master/swift_demangler.py
@@ -204,10 +204,10 @@ swift demangle
 ## ダイナミック分析
 
 > [!WARNING]
-> バイナリをデバッグするには、**SIPを無効にする必要があります**（`csrutil disable`または`csrutil enable --without debug`）またはバイナリを一時フォルダにコピーし、`codesign --remove-signature <binary-path>`で**署名を削除する**か、バイナリのデバッグを許可する必要があります（[このスクリプト](https://gist.github.com/carlospolop/a66b8d72bb8f43913c4b5ae45672578b)を使用できます）。
+> バイナリをデバッグするには、**SIPを無効にする必要があります**（`csrutil disable`または`csrutil enable --without debug`）またはバイナリを一時フォルダにコピーして**署名を削除**する必要があります（`codesign --remove-signature <binary-path>`）またはバイナリのデバッグを許可する必要があります（[このスクリプト](https://gist.github.com/carlospolop/a66b8d72bb8f43913c4b5ae45672578b)を使用できます）。
 
 > [!WARNING]
-> macOSで**システムバイナリをインスツルメント**（例えば`cloudconfigurationd`）するには、**SIPを無効にする必要があります**（署名を削除するだけでは機能しません）。
+> macOSで**システムバイナリをインストゥルメント**するには（例えば`cloudconfigurationd`）、**SIPを無効にする必要があります**（署名を削除するだけでは機能しません）。
 
 ### APIs
 
@@ -218,7 +218,7 @@ macOSはプロセスに関する情報を提供するいくつかの興味深い
 
 ### Stackshot & microstackshots
 
-**Stackshotting**は、プロセスの状態をキャプチャするために使用される技術で、すべての実行中のスレッドのコールスタックを含みます。これは、デバッグ、パフォーマンス分析、および特定の時点でのシステムの動作を理解するために特に便利です。iOSおよびmacOSでは、**`sample`**や**`spindump`**などのツールや方法を使用してstackshottingを実行できます。
+**Stackshotting**は、プロセスの状態をキャプチャするための技術で、すべての実行中のスレッドのコールスタックを含みます。これは、デバッグ、パフォーマンス分析、特定の時点でのシステムの動作を理解するために特に便利です。iOSおよびmacOSでは、**`sample`**や**`spindump`**などのツールや方法を使用してstackshottingを実行できます。
 
 ### Sysdiagnose
 
@@ -232,33 +232,33 @@ macOSはプロセスに関する情報を提供するいくつかの興味深い
 - `com.apple.sysdiagnose.kernel.ipc`: 特殊ポート23（カーネル）
 - `com.apple.sysdiagnose.service.xpc`: `Libsysdiagnose` Obj-Cクラスを介したユーザーモードインターフェース。辞書内に3つの引数を渡すことができます（`compress`、`display`、`run`）
 
-### 統一ログ
+### 統合ログ
 
 MacOSは、アプリケーションを実行して**何をしているのか**を理解する際に非常に役立つ多くのログを生成します。
 
-さらに、いくつかのログには`<private>`タグが含まれ、**ユーザー**または**コンピュータ**の**識別可能な**情報を**隠す**ために使用されます。ただし、**この情報を開示するための証明書をインストールすることが可能です**。 [**こちら**](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log)の説明に従ってください。
+さらに、いくつかのログには`<private>`タグが含まれており、**ユーザー**または**コンピュータ**の**識別可能**な情報を**隠す**ために使用されます。ただし、この情報を開示するための**証明書をインストールすることが可能です**。 [**こちら**](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log)の説明に従ってください。
 
 ### Hopper
 
 #### 左パネル
 
-Hopperの左パネルでは、バイナリのシンボル（**Labels**）、手続きと関数のリスト（**Proc**）、および文字列（**Str**）を見ることができます。これらはすべての文字列ではなく、Mac-Oファイルのいくつかの部分（_cstringや`objc_methname`など）で定義されたものです。
+Hopperの左パネルでは、バイナリのシンボル（**Labels**）、手続きと関数のリスト（**Proc**）、および文字列（**Str**）を見ることができます。これらはすべての文字列ではなく、Mac-Oファイルのいくつかの部分で定義されたもの（_cstringや`objc_methname`など）です。
 
 #### 中央パネル
 
-中央パネルでは、**逆アセンブルされたコード**を見ることができます。また、**生の**逆アセンブル、**グラフ**、**デコンパイルされた**もの、**バイナリ**としてそれぞれのアイコンをクリックすることで表示できます：
+中央パネルでは、**逆アセンブルされたコード**を見ることができます。また、**生**の逆アセンブル、**グラフ**、**デコンパイルされた**もの、**バイナリ**としてそれぞれのアイコンをクリックすることで表示できます：
 
 <figure><img src="../../../images/image (343).png" alt=""><figcaption></figcaption></figure>
 
-コードオブジェクトを右クリックすると、そのオブジェクトへの**参照**や**その名前を変更**することができます（これはデコンパイルされた擬似コードでは機能しません）：
+コードオブジェクトを右クリックすると、そのオブジェクトへの**参照**や**参照元**を見ることができ、名前を変更することもできます（これはデコンパイルされた擬似コードでは機能しません）：
 
 <figure><img src="../../../images/image (1117).png" alt=""><figcaption></figcaption></figure>
 
-さらに、**中央下部ではPythonコマンドを記述**できます。
+さらに、**中央下部ではPythonコマンドを入力できます**。
 
 #### 右パネル
 
-右パネルでは、**ナビゲーション履歴**（現在の状況にどのように到達したかを知るため）、**コールグラフ**（この関数を呼び出すすべての**関数**とこの関数が呼び出すすべての関数を見ることができる）、および**ローカル変数**の情報など、興味深い情報を見ることができます。
+右パネルでは、**ナビゲーション履歴**（現在の状況に到達した方法を知るため）、**コールグラフ**（この関数を呼び出すすべての**関数**とこの関数が呼び出すすべての関数を見ることができる）、および**ローカル変数**の情報など、興味深い情報を見ることができます。
 
 ### dtrace
 
@@ -269,7 +269,7 @@ DTraceは、各システムコールのプローブを作成するために**`dt
 > [!TIP]
 > SIP保護を完全に無効にせずにDtraceを有効にするには、リカバリモードで次のコマンドを実行できます：`csrutil enable --without dtrace`
 >
-> また、**`dtrace`**または**`dtruss`**のバイナリを**コンパイルしたもの**を使用することもできます。
+> また、**`dtrace`**または**`dtruss`**バイナリを**コンパイルしたもの**を使用することもできます。
 
 dtraceの利用可能なプローブは次のコマンドで取得できます：
 ```bash
@@ -343,7 +343,7 @@ dtruss -c -p 1000 #get syscalls of PID 1000
 
 `latency`、`sc_usage`、`fs_usage`、および `trace` などのツールは内部でこれを使用します。
 
-`kdebug` とインターフェースするには、`sysctl` が `kern.kdebug` 名前空間を介して使用され、使用する MIB は `sys/sysctl.h` にあり、関数は `bsd/kern/kdebug.c` に実装されています。
+`kdebug` とインターフェースするには、`kern.kdebug` 名前空間を介して `sysctl` が使用され、使用する MIB は `sys/sysctl.h` にあり、関数は `bsd/kern/kdebug.c` に実装されています。
 
 カスタムクライアントで kdebug と対話するための一般的な手順は次のとおりです：
 
@@ -361,7 +361,7 @@ dtruss -c -p 1000 #get syscalls of PID 1000
 
 ### ktrace
 
-`ktrace_*` API は `libktrace.dylib` から来ており、これが `Kdebug` のラッパーです。クライアントは `ktrace_session_create` と `ktrace_events_[single/class]` を呼び出して特定のコードにコールバックを設定し、`ktrace_start` で開始できます。
+`ktrace_*` API は `libktrace.dylib` から来ており、これらは `Kdebug` のラッパーです。クライアントは `ktrace_session_create` と `ktrace_events_[single/class]` を呼び出して特定のコードにコールバックを設定し、`ktrace_start` で開始できます。
 
 これは **SIP が有効な状態でも使用できます。**
 
@@ -387,7 +387,7 @@ Kperf には sysctl MIB テーブルもあります：（root として）`sysct
 
 ### SpriteTree
 
-[**SpriteTree**](https://themittenmac.com/tools/) は、プロセス間の関係を印刷するツールです。\
+[**SpriteTree**](https://themittenmac.com/tools/) は、プロセス間の関係を表示するツールです。\
 **`sudo eslogger fork exec rename create > cap.json`** のようなコマンドで Mac を監視する必要があります（このターミナルを起動するには FDA が必要です）。その後、このツールに json を読み込んで、すべての関係を表示できます：
 
 <figure><img src="../../../images/image (1182).png" alt="" width="375"><figcaption></figcaption></figure>
@@ -420,7 +420,7 @@ fs_usage -w -f network curl #This tracks network actions
 
 ## PT_DENY_ATTACH <a href="#page-title" id="page-title"></a>
 
-[**このブログ記事**](https://knight.sc/debugging/2019/06/03/debugging-apple-binaries-that-use-pt-deny-attach.html) では、SIP が無効になっていてもデバッグを防ぐために **`PT_DENY_ATTACH`** を使用した **実行中のデーモンをデバッグする** 方法の例を見つけることができます。
+[**このブログ投稿**](https://knight.sc/debugging/2019/06/03/debugging-apple-binaries-that-use-pt-deny-attach.html) では、SIP が無効になっていてもデバッグを防ぐために **`PT_DENY_ATTACH`** を使用した **実行中のデーモンをデバッグする** 方法の例を見つけることができます。
 
 ### lldb
 
@@ -459,20 +459,20 @@ settings set target.x86-disassembly-flavor intel
 - 一部のマルウェアは、MACアドレス（00:50:56）に基づいて**VMware**であるかどうかを**検出**することもできます。
 - 簡単なコードを使用して、**プロセスがデバッグされているかどうかを確認することも可能です**：
 - `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //プロセスがデバッグされています }`
-- **`ptrace`**システムコールを**`PT_DENY_ATTACH`**フラグで呼び出すこともできます。これにより、デバッガがアタッチしてトレースするのを**防ぎます**。
+- **`ptrace`**システムコールを**`PT_DENY_ATTACH`**フラグで呼び出すこともできます。これにより、デバッガがアタッチしてトレースするのを防ぎます。
 - **`sysctl`**または**`ptrace`**関数が**インポートされているかどうかを確認できます**（ただし、マルウェアは動的にインポートする可能性があります）。
 - この書き込みで指摘されているように、「[デバッグ防止技術の克服：macOS ptraceバリアント](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)」：\
 “_メッセージProcess # exited with **status = 45 (0x0000002d)**は、デバッグターゲットが**PT_DENY_ATTACH**を使用していることを示す兆候です_”
 
 ## コアダンプ
 
-コアダンプは次の場合に作成されます：
+コアダンプは以下の場合に作成されます：
 
 - `kern.coredump` sysctlが1に設定されている（デフォルト）
 - プロセスがsuid/sgidでない場合、または`kern.sugid_coredump`が1である（デフォルトは0）
 - `AS_CORE`制限が操作を許可します。`ulimit -c 0`を呼び出すことでコアダンプの作成を抑制でき、`ulimit -c unlimited`で再度有効にできます。
 
-これらの場合、コアダンプは`kern.corefile` sysctlに従って生成され、通常は`/cores/core/.%P`に保存されます。
+これらのケースでは、コアダンプは`kern.corefile` sysctlに従って生成され、通常は`/cores/core/.%P`に保存されます。
 
 ## ファジング
 
@@ -482,7 +482,7 @@ ReportCrashは**クラッシュしたプロセスを分析し、クラッシュ�
 ユーザーごとのlaunchdコンテキストで**実行されているアプリケーションや他のプロセス**の場合、ReportCrashはLaunchAgentとして実行され、ユーザーの`~/Library/Logs/DiagnosticReports/`にクラッシュレポートを保存します。\
 デーモン、システムlaunchdコンテキストで**実行されている他のプロセス**および他の特権プロセスの場合、ReportCrashはLaunchDaemonとして実行され、システムの`/Library/Logs/DiagnosticReports`にクラッシュレポートを保存します。
 
-クラッシュレポートが**Appleに送信されることを心配している場合**は、それらを無効にできます。そうでない場合、クラッシュレポートは**サーバーがどのようにクラッシュしたかを理解するのに役立ちます**。
+クラッシュレポートが**Appleに送信されることを心配している場合**は、それを無効にできます。そうでない場合、クラッシュレポートは**サーバーがどのようにクラッシュしたかを理解するのに役立ちます**。
 ```bash
 #To disable crash reporting:
 launchctl unload -w /System/Library/LaunchAgents/com.apple.ReportCrash.plist
@@ -536,11 +536,11 @@ cat procs.txt
 ```bash
 lldb -o "target create `which some-binary`" -o "settings set target.env-vars DYLD_INSERT_LIBRARIES=/usr/lib/libgmalloc.dylib" -o "run arg1 arg2" -o "bt" -o "reg read" -o "dis -s \$pc-32 -c 24 -m -F intel" -o "quit"
 ```
-### Fuzzers
+### ファジングツール
 
 #### [AFL++](https://github.com/AFLplusplus/AFLplusplus)
 
-CLIツールで動作します。
+CLIツールに対応
 
 #### [Litefuzz](https://github.com/sec-tools/litefuzz)
 

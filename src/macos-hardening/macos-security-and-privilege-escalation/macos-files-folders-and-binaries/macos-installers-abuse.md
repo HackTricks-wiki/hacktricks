@@ -4,9 +4,9 @@
 
 ## Pkg 基本情報
 
-macOS **インストーラーパッケージ**（.pkgファイルとも呼ばれる）は、macOSが**ソフトウェアを配布するために使用するファイル形式**です。これらのファイルは、ソフトウェアが正しくインストールおよび実行するために必要なすべてを含む**箱のようなもの**です。
+macOS **インストーラーパッケージ**（.pkgファイルとも呼ばれる）は、macOSが**ソフトウェアを配布するために使用するファイル形式**です。これらのファイルは、**ソフトウェアが正しくインストールおよび実行するために必要なすべてを含む箱のようなもの**です。
 
-パッケージファイル自体は、ターゲットコンピュータにインストールされる**ファイルとディレクトリの階層を保持するアーカイブ**です。また、インストール前後にタスクを実行するための**スクリプト**を含むこともでき、設定ファイルのセットアップやソフトウェアの古いバージョンのクリーンアップなどを行います。
+パッケージファイル自体は、ターゲットコンピュータにインストールされる**ファイルとディレクトリの階層を保持するアーカイブ**です。また、インストール前後にタスクを実行するための**スクリプト**を含むこともでき、設定ファイルのセットアップや古いバージョンのソフトウェアのクリーンアップなどを行います。
 
 ### 階層
 
@@ -36,7 +36,7 @@ cpio -i < Scripts
 
 ## DMG基本情報
 
-DMGファイル、またはAppleディスクイメージは、AppleのmacOSでディスクイメージに使用されるファイル形式です。DMGファイルは本質的に**マウント可能なディスクイメージ**（独自のファイルシステムを含む）であり、通常は圧縮され、時には暗号化された生のブロックデータを含んでいます。DMGファイルを開くと、macOSはそれを**物理ディスクのようにマウント**し、その内容にアクセスできるようにします。
+DMGファイル、またはApple Disk Imagesは、AppleのmacOSでディスクイメージに使用されるファイル形式です。DMGファイルは本質的に**マウント可能なディスクイメージ**（独自のファイルシステムを含む）であり、通常は圧縮され、時には暗号化された生のブロックデータを含んでいます。DMGファイルを開くと、macOSはそれを**物理ディスクのようにマウント**し、その内容にアクセスできるようにします。
 
 > [!CAUTION]
 > **`.dmg`**インストーラーは**非常に多くの形式**をサポートしているため、過去には脆弱性を含むものが悪用されて**カーネルコード実行**を取得されることがありました。
@@ -47,9 +47,9 @@ DMGファイル、またはAppleディスクイメージは、AppleのmacOSで�
 
 DMGファイルの階層は、内容に基づいて異なる場合があります。ただし、アプリケーションDMGの場合、通常は次の構造に従います：
 
-- トップレベル：これはディスクイメージのルートです。通常、アプリケーションと、場合によってはアプリケーションフォルダへのリンクが含まれています。
+- トップレベル：これはディスクイメージのルートです。通常、アプリケーションと、場合によってはApplicationsフォルダへのリンクが含まれています。
 - アプリケーション（.app）：これは実際のアプリケーションです。macOSでは、アプリケーションは通常、アプリケーションを構成する多くの個別のファイルとフォルダを含むパッケージです。
-- アプリケーションリンク：これはmacOSのアプリケーションフォルダへのショートカットです。これにより、アプリケーションを簡単にインストールできるようになります。このショートカットに.appファイルをドラッグすることで、アプリをインストールできます。
+- Applicationsリンク：これはmacOSのApplicationsフォルダへのショートカットです。これにより、アプリケーションを簡単にインストールできるようになります。このショートカットに.appファイルをドラッグすることで、アプリをインストールできます。
 
 ## pkg悪用による特権昇格
 
@@ -61,7 +61,7 @@ DMGファイルの階層は、内容に基づいて異なる場合がありま�
 
 ### AuthorizationExecuteWithPrivileges
 
-これは、いくつかのインストーラーやアップデーターが**rootとして何かを実行するために呼び出す**[公開関数](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg)です。この関数は、**実行する**ための**ファイルの** **パス**をパラメータとして受け取りますが、攻撃者がこのファイルを**変更**できる場合、彼は**特権を昇格させるために**rootでの実行を**悪用**できるようになります。
+これは、いくつかのインストーラーやアップデーターが**rootとして何かを実行するために呼び出す**[公開関数](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg)です。この関数は、**実行する**ための**ファイル**の**パス**をパラメータとして受け取りますが、攻撃者がこのファイルを**変更**できれば、特権を**昇格**させるためにrootでの実行を**悪用**できるようになります。
 ```bash
 # Breakpoint in the function to check wich file is loaded
 (lldb) b AuthorizationExecuteWithPrivileges
@@ -79,7 +79,7 @@ For more info check this talk: [https://www.youtube.com/watch?v=lTOItyjTTkw](htt
 
 ### 空のペイロード
 
-実際のペイロードはなく、スクリプト内のマルウェアを除いて、**プレインストールおよびポストインストールスクリプト**を持つ **`.pkg`** ファイルを生成することが可能です。
+実際のペイロードはなく、スクリプト内のマルウェアを除いて **プレインストールおよびポストインストールスクリプト** を持つ **`.pkg`** ファイルを生成することが可能です。
 
 ### 配布xml内のJS
 
@@ -89,7 +89,7 @@ For more info check this talk: [https://www.youtube.com/watch?v=lTOItyjTTkw](htt
 
 ### バックドア付きインストーラー
 
-dist.xml内にスクリプトとJSコードを使用した悪意のあるインストーラー
+dist.xml 内のスクリプトとJSコードを使用した悪意のあるインストーラー
 ```bash
 # Package structure
 mkdir -p pkgroot/root/Applications/MyApp
@@ -152,9 +152,9 @@ productbuild --distribution dist.xml --package-path myapp.pkg final-installer.pk
 ```
 ## 参考文献
 
-- [**DEF CON 27 - Pkgsの展開 macOSインストーラーパッケージと一般的なセキュリティの欠陥の内部を見てみる**](https://www.youtube.com/watch?v=iASSG0_zobQ)
+- [**DEF CON 27 - Pkgsの展開 Macosインストーラーパッケージと一般的なセキュリティの欠陥の内部を見てみる**](https://www.youtube.com/watch?v=iASSG0_zobQ)
 - [**OBTS v4.0: "macOSインストーラーのワイルドな世界" - トニー・ランバート**](https://www.youtube.com/watch?v=Eow5uNHtmIg)
-- [**DEF CON 27 - Pkgsの展開 macOSインストーラーパッケージの内部を見てみる**](https://www.youtube.com/watch?v=kCXhIYtODBg)
+- [**DEF CON 27 - Pkgsの展開 MacOSインストーラーパッケージの内部を見てみる**](https://www.youtube.com/watch?v=kCXhIYtODBg)
 - [https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages](https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages)
 
 {{#include ../../../banners/hacktricks-training.md}}

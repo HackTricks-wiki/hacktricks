@@ -32,7 +32,7 @@ Endpoint Securityは、AppleがmacOSで提供するフレームワークで、�
 
 このフレームワークのコアはカーネルに実装されており、**`/System/Library/Extensions/EndpointSecurity.kext`**にあるカーネル拡張（KEXT）です。このKEXTは、いくつかの重要なコンポーネントで構成されています：
 
-- **EndpointSecurityDriver**: これはカーネル拡張の「エントリーポイント」として機能します。OSとEndpoint Securityフレームワークの主な相互作用のポイントです。
+- **EndpointSecurityDriver**: これはカーネル拡張の「エントリーポイント」として機能します。OSとEndpoint Securityフレームワークの間の主な相互作用のポイントです。
 - **EndpointSecurityEventManager**: このコンポーネントはカーネルフックを実装する責任があります。カーネルフックにより、フレームワークはシステムコールを傍受することでシステムイベントを監視できます。
 - **EndpointSecurityClientManager**: これはユーザースペースクライアントとの通信を管理し、どのクライアントが接続されていてイベント通知を受け取る必要があるかを追跡します。
 - **EndpointSecurityMessageManager**: これはメッセージとイベント通知をユーザースペースクライアントに送信します。
@@ -55,9 +55,9 @@ Endpoint Securityフレームワークが監視できるイベントは以下に
 
 Endpoint Security Extensions:**`libEndpointSecurity.dylib`**は、システム拡張がカーネルと通信するために使用するCライブラリです。このライブラリは、I/O Kit（`IOKit`）を使用してEndpoint Security KEXTと通信します。
 
-**`endpointsecurityd`**は、特に初期ブートプロセス中にエンドポイントセキュリティシステム拡張を管理および起動するために関与する重要なシステムデーモンです。**`Info.plist`**ファイルに**`NSEndpointSecurityEarlyBoot`**としてマークされた**システム拡張のみ**がこの初期ブート処理を受けます。
+**`endpointsecurityd`**は、特に初期ブートプロセス中にエンドポイントセキュリティシステム拡張を管理および起動するために関与する重要なシステムデーモンです。**`NSEndpointSecurityEarlyBoot`**でマークされた**のみ**のシステム拡張がこの初期ブート処理を受けます。
 
-別のシステムデーモン、**`sysextd`**は、**システム拡張を検証し**、それらを適切なシステム場所に移動します。その後、関連するデーモンに拡張をロードするように要求します。**`SystemExtensions.framework`**は、システム拡張をアクティブ化および非アクティブ化する責任があります。
+別のシステムデーモン、**`sysextd`**は、**システム拡張を検証し**、それらを適切なシステム位置に移動します。その後、関連するデーモンに拡張をロードするように要求します。**`SystemExtensions.framework`**は、システム拡張をアクティブ化および非アクティブ化する責任があります。
 
 ## Bypassing ESF
 

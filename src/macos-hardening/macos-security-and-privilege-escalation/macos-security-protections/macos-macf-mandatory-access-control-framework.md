@@ -4,18 +4,18 @@
 
 ## 基本情報
 
-**MACF**は**Mandatory Access Control Framework**の略で、コンピュータを保護するためにオペレーティングシステムに組み込まれたセキュリティシステムです。これは、**特定のシステムの部分にアクセスできる人や物について厳格なルールを設定することによって機能します**。これらのルールを自動的に施行することで、MACFは認可されたユーザーとプロセスのみが特定のアクションを実行できるようにし、不正アクセスや悪意のある活動のリスクを減少させます。
+**MACF**は**Mandatory Access Control Framework**の略で、コンピュータを保護するためにオペレーティングシステムに組み込まれたセキュリティシステムです。これは、**特定のシステムの部分にアクセスできるのは誰または何かに関する厳格なルールを設定することによって機能します**。これらのルールを自動的に強制することにより、MACFは認可されたユーザーとプロセスのみが特定のアクションを実行できるようにし、不正アクセスや悪意のある活動のリスクを減少させます。
 
-MACFは実際には決定を下すわけではなく、**アクションを傍受する**だけであり、決定は呼び出す**ポリシーモジュール**（カーネル拡張）に委ねられます。例えば、`AppleMobileFileIntegrity.kext`、`Quarantine.kext`、`Sandbox.kext`、`TMSafetyNet.kext`、`mcxalr.kext`などです。
+MACFは実際には決定を下さず、**アクションを傍受する**だけであり、`AppleMobileFileIntegrity.kext`、`Quarantine.kext`、`Sandbox.kext`、`TMSafetyNet.kext`、および`mcxalr.kext`のような**ポリシーモジュール**（カーネル拡張）に決定を委ねています。
 
 ### フロー
 
-1. プロセスがsyscall/machトラップを実行する
-2. 関連する関数がカーネル内で呼び出される
-3. 関数がMACFを呼び出す
-4. MACFはその関数をフックするように要求したポリシーモジュールをチェックする
-5. MACFは関連するポリシーを呼び出す
-6. ポリシーはアクションを許可するか拒否するかを示す
+1. プロセスがsyscall/machトラップを実行します
+2. 関連する関数がカーネル内で呼び出されます
+3. 関数がMACFを呼び出します
+4. MACFはその関数をフックするように要求したポリシーモジュールをチェックします
+5. MACFは関連するポリシーを呼び出します
+6. ポリシーはアクションを許可するか拒否するかを示します
 
 > [!CAUTION]
 > AppleだけがMAC Framework KPIを使用できます。
@@ -28,7 +28,7 @@ MACFは**ラベル**を使用し、その後ポリシーがアクセスを許可
 
 MACFポリシーは**特定のカーネル操作に適用されるルールと条件を定義します**。&#x20;
 
-カーネル拡張は`mac_policy_conf`構造体を設定し、次に`mac_policy_register`を呼び出して登録することができます。[こちら](https://opensource.apple.com/source/xnu/xnu-2050.18.24/security/mac_policy.h.auto.html)から。
+カーネル拡張は`mac_policy_conf`構造体を構成し、次に`mac_policy_register`を呼び出して登録できます。ここから[こちら](https://opensource.apple.com/source/xnu/xnu-2050.18.24/security/mac_policy.h.auto.html):
 ```c
 #define mpc_t	struct mac_policy_conf *
 
@@ -69,7 +69,7 @@ void			*mpc_data;		/** module data */
 
 MACFポリシーは**動的に**登録および登録解除することもできることに注意してください。
 
-`mac_policy_conf`の主なフィールドの1つは**`mpc_ops`**です。このフィールドは、ポリシーが関心を持つ操作を指定します。数百の操作があるため、すべてをゼロに設定し、ポリシーが関心を持つものだけを選択することが可能です。[こちら](https://opensource.apple.com/source/xnu/xnu-2050.18.24/security/mac_policy.h.auto.html)から：
+`mac_policy_conf`の主なフィールドの1つは**`mpc_ops`**です。このフィールドは、ポリシーが関心を持つ操作を指定します。数百の操作があるため、すべてをゼロに設定し、ポリシーが関心を持つものだけを選択することが可能です。 [ここ](https://opensource.apple.com/source/xnu/xnu-2050.18.24/security/mac_policy.h.auto.html)から:
 ```c
 struct mac_policy_ops {
 mpo_audit_check_postselect_t		*mpo_audit_check_postselect;
@@ -82,27 +82,27 @@ mpo_cred_check_label_update_execve_t	*mpo_cred_check_label_update_execve;
 mpo_cred_check_label_update_t		*mpo_cred_check_label_update;
 [...]
 ```
-ほとんどすべてのフックは、これらの操作がインターセプトされるときにMACFによってコールバックされます。しかし、**`mpo_policy_*`** フックは例外であり、`mpo_hook_policy_init()` は登録時に呼び出されるコールバックです（したがって、`mac_policy_register()` の後）であり、`mpo_hook_policy_initbsd()` はBSDサブシステムが適切に初期化された後の遅延登録中に呼び出されます。
+ほとんどすべてのフックは、これらの操作がインターセプトされるときにMACFによってコールバックされます。しかし、**`mpo_policy_*`** フックは例外であり、`mpo_hook_policy_init()`は登録時に呼び出されるコールバックであり（したがって、`mac_policy_register()`の後）、`mpo_hook_policy_initbsd()`はBSDサブシステムが適切に初期化された後の遅延登録中に呼び出されます。
 
-さらに、**`mpo_policy_syscall`** フックは、プライベートな **ioctl** スタイルの呼び出し **インターフェース** を公開するために任意のkextによって登録できます。これにより、ユーザクライアントは、整数 **コード** とオプションの **引数** を指定して **ポリシー名** をパラメータとして `mac_syscall` (#381) を呼び出すことができます。\
-例えば、**`Sandbox.kext`** はこれを多く使用します。
+さらに、**`mpo_policy_syscall`** フックは、プライベートな**ioctl**スタイルの呼び出し**インターフェース**を公開するために任意のkextによって登録できます。これにより、ユーザクライアントは、整数の**コード**とオプションの**引数**を指定して**ポリシー名**をパラメータとして`mac_syscall` (#381)を呼び出すことができます。\
+例えば、**`Sandbox.kext`**はこれを多く使用します。
 
-kextの **`__DATA.__const*`** をチェックすることで、ポリシーを登録する際に使用される `mac_policy_ops` 構造体を特定することが可能です。そのポインタは `mpo_policy_conf` 内のオフセットにあり、その領域にNULLポインタが多数存在するため、見つけることができます。
+kextの**`__DATA.__const*`**をチェックすることで、ポリシーを登録する際に使用される`mac_policy_ops`構造体を特定することが可能です。そのポインタは`mpo_policy_conf`内のオフセットにあり、その領域にNULLポインタが多数存在するため、見つけることができます。
 
-さらに、登録されたポリシーごとに更新される構造体 **`_mac_policy_list`** からメモリをダンプすることで、ポリシーを構成したkextのリストを取得することも可能です。
+さらに、登録されたポリシーごとに更新される構造体**`_mac_policy_list`**からメモリをダンプすることで、ポリシーを構成したkextのリストを取得することも可能です。
 
 ## MACFの初期化
 
-MACFは非常に早く初期化されます。XNUの `bootstrap_thread` でセットアップされ、`ipc_bootstrap` の後に `mac_policy_init()` が呼び出され、`mac_policy_list` が初期化され、その後すぐに `mac_policy_initmach()` が呼び出されます。この関数は、`Info.plist` に `AppleSecurityExtension` キーを持つすべてのApple kext（`ALF.kext`、`AppleMobileFileIntegrity.kext`、`Quarantine.kext`、`Sandbox.kext`、`TMSafetyNet.kext` など）を取得してロードします。
+MACFは非常に早く初期化されます。XNUの`bootstrap_thread`で設定され、`ipc_bootstrap`の後に`mac_policy_init()`が呼び出され、`mac_policy_list`が初期化され、その後すぐに`mac_policy_initmach()`が呼び出されます。この関数は、`Info.plist`に`AppleSecurityExtension`キーを持つすべてのApple kext（`ALF.kext`、`AppleMobileFileIntegrity.kext`、`Quarantine.kext`、`Sandbox.kext`、`TMSafetyNet.kext`など）を取得してロードします。
 
 ## MACFコールアウト
 
-コード内で **`#if CONFIG_MAC`** 条件ブロックのように定義されたMACFへのコールアウトを見つけることは一般的です。さらに、これらのブロック内では、特定のアクションを実行するための **権限を確認する** ためにMACFを呼び出す `mac_proc_check*` への呼び出しを見つけることができます。さらに、MACFコールアウトの形式は **`mac_<object>_<opType>_opName`** です。
+コード内で**`#if CONFIG_MAC`**条件ブロックのように定義されたMACFへのコールアウトを見つけることは一般的です。さらに、これらのブロック内では、特定のアクションを実行するための**権限を確認する**ためにMACFを呼び出す`mac_proc_check*`への呼び出しを見つけることができます。さらに、MACFコールアウトの形式は**`mac_<object>_<opType>_opName`**です。
 
 オブジェクトは次のいずれかです：`bpfdesc`、`cred`、`file`、`proc`、`vnode`、`mount`、`devfs`、`ifnet`、`inpcb`、`mbuf`、`ipq`、`pipe`、`sysv[msg/msq/shm/sem]`、`posix[shm/sem]`、`socket`、`kext`。\
-`opType` は通常、アクションを許可または拒否するために使用されるチェックです。ただし、与えられたアクションに反応するためにkextを許可する `notify` を見つけることも可能です。
+`opType`は通常、アクションを許可または拒否するために使用されるcheckです。ただし、与えられたアクションに反応するためにkextを許可するnotifyを見つけることも可能です。
 
-[https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_mman.c#L621](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_mman.c#L621) で例を見つけることができます：
+[https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_mman.c#L621](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_mman.c#L621)に例があります：
 
 <pre class="language-c"><code class="lang-c">int
 mmap(proc_t p, struct mmap_args *uap, user_addr_t *retval)
@@ -120,7 +120,7 @@ goto bad;
 [...]
 </code></pre>
 
-次に、[https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_file.c#L174](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_file.c#L174) で `mac_file_check_mmap` のコードを見つけることができます。
+次に、[https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_file.c#L174](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_file.c#L174)で`mac_file_check_mmap`のコードを見つけることができます。
 ```c
 mac_file_check_mmap(struct ucred *cred, struct fileglob *fg, int prot,
 int flags, uint64_t offset, int *maxprot)
@@ -164,13 +164,12 @@ error = mac_error_select(__step_err, error);         \
 >
 > ```c
 > /*
->  * MAC_GRANTは、ポリシー
->  * モジュールリストを歩き、各ポリシーが
->  * リクエストについてどう感じているかを確認することによって
+>  * MAC_GRANTは、ポリシーモジュールリストを歩きながら
+>  * 各ポリシーがリクエストについてどう感じているかを確認することによって
 >  * 指定されたチェックを実行します。MAC_CHECKとは異なり、
 >  * いずれかのポリシーが'0'を返す場合は付与し、
->  * そうでない場合はEPERMを返します。呼び出し元の
->  * スコープ内で'error'を介してその値を返すことに注意してください。
+>  * そうでない場合はEPERMを返します。呼び出し元のスコープ内で
+>  * 'error'を介してその値を返すことに注意してください。
 >  */
 > #define MAC_GRANT(check, args...) do {                              \
 >     error = EPERM;                                                  \
@@ -190,7 +189,7 @@ error = mac_error_select(__step_err, error);         \
 ### priv_check & priv_grant
 
 これらの呼び出しは、[**bsd/sys/priv.h**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/priv.h)で定義された（数十の）**特権**をチェックし、提供することを目的としています。\
-一部のカーネルコードは、プロセスのKAuth資格情報と特権コードのいずれかを使用して、[**bsd/kern/kern_priv.c**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_priv.c)から`priv_check_cred()`を呼び出し、ポリシーが特権を付与することを**拒否**するかどうかを確認するために`mac_priv_check`を呼び出し、その後`mac_priv_grant`を呼び出して、ポリシーが`privilege`を付与するかどうかを確認します。
+一部のカーネルコードは、プロセスのKAuth資格情報と特権コードのいずれかを使用して、[**bsd/kern/kern_priv.c**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_priv.c)から`priv_check_cred()`を呼び出し、ポリシーが特権を付与することを**拒否**しているかどうかを確認するために`mac_priv_check`を呼び出し、その後`mac_priv_grant`を呼び出して、ポリシーが`privilege`を付与するかどうかを確認します。
 
 ### proc_check_syscall_unix
 

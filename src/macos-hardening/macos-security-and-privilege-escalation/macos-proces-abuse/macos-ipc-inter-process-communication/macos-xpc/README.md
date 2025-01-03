@@ -4,31 +4,31 @@
 
 ## 基本情報
 
-XPCは、macOSで使用されるカーネルであるXNUのプロセス間通信のフレームワークで、macOSおよびiOS上の**プロセス間の通信**を提供します。XPCは、システム上の異なるプロセス間で**安全で非同期のメソッド呼び出し**を行うためのメカニズムを提供します。これはAppleのセキュリティパラダイムの一部であり、各**コンポーネント**がその仕事を行うために必要な**権限のみ**で実行される**特権分離アプリケーション**の**作成**を可能にします。これにより、侵害されたプロセスからの潜在的な損害を制限します。
+XPCは、macOSで使用されるカーネルであるXNUのプロセス間通信の略で、macOSおよびiOS上の**プロセス間の通信**のためのフレームワークです。XPCは、システム上の異なるプロセス間で**安全で非同期のメソッド呼び出し**を行うためのメカニズムを提供します。これはAppleのセキュリティパラダイムの一部であり、各**コンポーネント**がその仕事を行うために必要な**権限のみ**で実行される**特権分離アプリケーション**の**作成**を可能にします。これにより、侵害されたプロセスからの潜在的な損害を制限します。
 
 XPCは、同じシステム上で実行されている異なるプログラムがデータを送受信するための一連のメソッドであるプロセス間通信（IPC）の一形態を使用します。
 
-XPCの主な利点は次のとおりです。
+XPCの主な利点は以下の通りです：
 
-1. **セキュリティ**: 作業を異なるプロセスに分離することで、各プロセスには必要な権限のみが付与されます。これにより、プロセスが侵害されても、害を及ぼす能力は制限されます。
-2. **安定性**: XPCは、クラッシュを発生したコンポーネントに隔離するのに役立ちます。プロセスがクラッシュした場合、システムの他の部分に影響を与えることなく再起動できます。
-3. **パフォーマンス**: XPCは、異なるタスクを異なるプロセスで同時に実行できるため、簡単な同時実行を可能にします。
+1. **セキュリティ**：作業を異なるプロセスに分離することで、各プロセスには必要な権限のみが付与されます。これにより、プロセスが侵害されても、害を及ぼす能力は制限されます。
+2. **安定性**：XPCは、クラッシュを発生したコンポーネントに隔離するのに役立ちます。プロセスがクラッシュした場合、システムの他の部分に影響を与えることなく再起動できます。
+3. **パフォーマンス**：XPCは、異なるタスクを異なるプロセスで同時に実行できるため、簡単な同時実行を可能にします。
 
 唯一の**欠点**は、**アプリケーションを複数のプロセスに分離**し、それらがXPCを介して通信することが**効率が低い**ことです。しかし、今日のシステムではほとんど目立たず、利点の方が大きいです。
 
-## アプリケーション固有のXPCサービス
+## アプリケーション特有のXPCサービス
 
-アプリケーションのXPCコンポーネントは**アプリケーション自体の内部**にあります。たとえば、Safariでは**`/Applications/Safari.app/Contents/XPCServices`**に見つけることができます。これらは**`.xpc`**拡張子を持ち（例: **`com.apple.Safari.SandboxBroker.xpc`**）、メインバイナリの内部に**バンドル**されています: `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker`および`Info.plist: /Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`
+アプリケーションのXPCコンポーネントは**アプリケーション自体の内部**にあります。たとえば、Safariでは**`/Applications/Safari.app/Contents/XPCServices`**に見つけることができます。これらは**`.xpc`**拡張子を持ち（例：**`com.apple.Safari.SandboxBroker.xpc`**）、メインバイナリの内部に**バンドル**されています：`/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker`および`Info.plist: /Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`
 
-あなたが考えているように、**XPCコンポーネントは他のXPCコンポーネントやメインアプリバイナリとは異なる権限と特権を持つ**ことになります。ただし、XPCサービスが**Info.plist**ファイルで[**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information_property_list/xpcservice/joinexistingsession)を“True”に設定されている場合を除きます。この場合、XPCサービスは呼び出したアプリケーションと**同じセキュリティセッション**で実行されます。
+あなたが考えているように、**XPCコンポーネントは他のXPCコンポーネントやメインアプリバイナリとは異なる権限と特権を持つ**ことになります。ただし、XPCサービスが**Info.plist**ファイルで**JoinExistingSession**を“True”に設定されている場合を除きます。この場合、XPCサービスは呼び出したアプリケーションと**同じセキュリティセッション**で実行されます。
 
-XPCサービスは、必要に応じて**launchd**によって**開始され**、すべてのタスクが**完了**するとシステムリソースを解放するために**シャットダウン**されます。**アプリケーション固有のXPCコンポーネントはアプリケーションによってのみ利用可能**であり、潜在的な脆弱性に関連するリスクを低減します。
+XPCサービスは**launchd**によって必要に応じて**開始**され、すべてのタスクが**完了**するとシステムリソースを解放するために**シャットダウン**されます。**アプリケーション特有のXPCコンポーネントはアプリケーションによってのみ利用可能**であり、潜在的な脆弱性に関連するリスクを低減します。
 
 ## システム全体のXPCサービス
 
-システム全体のXPCサービスはすべてのユーザーがアクセス可能です。これらのサービスは、launchdまたはMachタイプであり、**`/System/Library/LaunchDaemons`**、**`/Library/LaunchDaemons`**、**`/System/Library/LaunchAgents`**、または**`/Library/LaunchAgents`**などの指定されたディレクトリにあるplistファイルで**定義する必要があります**。
+システム全体のXPCサービスはすべてのユーザーがアクセス可能です。これらのサービスは、launchdまたはMachタイプであり、**`/System/Library/LaunchDaemons`**、**`/Library/LaunchDaemons`**、**`/System/Library/LaunchAgents`**、または**`/Library/LaunchAgents`**などの指定されたディレクトリにあるplistファイルで**定義**する必要があります。
 
-これらのplistファイルには、サービスの名前を持つ**`MachServices`**というキーと、バイナリへのパスを持つ**`Program`**というキーがあります:
+これらのplistファイルには、サービスの名前を持つ**`MachServices`**というキーと、バイナリへのパスを持つ**`Program`**というキーがあります：
 ```xml
 cat /Library/LaunchDaemons/com.jamf.management.daemon.plist
 
@@ -107,12 +107,12 @@ XPCはメッセージを渡すためにGCDを使用し、さらに`xpc.transacti
 
 XPCサービスの検索速度を向上させるために、キャッシュが使用されます。
 
-`xpcproxy`のアクションをトレースすることができます:
+`xpcproxy`のアクションをトレースすることができます：
 ```bash
 supraudit S -C -o /tmp/output /dev/auditpipe
 ```
-XPCライブラリは、`kdebug`を使用して、`xpc_ktrace_pid0`および`xpc_ktrace_pid1`を呼び出すアクションをログに記録します。使用されるコードは文書化されていないため、これらを`/usr/share/misc/trace.codes`に追加する必要があります。これらのコードはプレフィックス`0x29`を持ち、例えば`0x29000004`: `XPC_serializer_pack`のようになります。\
-ユーティリティ`xpcproxy`はプレフィックス`0x22`を使用し、例えば`0x2200001c: xpcproxy:will_do_preexec`のようになります。
+XPCライブラリは、`xpc_ktrace_pid0`および`xpc_ktrace_pid1`を呼び出すアクションをログするために`kdebug`を使用します。使用されるコードは文書化されていないため、`/usr/share/misc/trace.codes`に追加する必要があります。これらのコードは`0x29`のプレフィックスを持ち、例えば`0x29000004`: `XPC_serializer_pack`があります。\
+ユーティリティ`xpcproxy`は`0x22`のプレフィックスを使用し、例えば`0x2200001c: xpcproxy:will_do_preexec`があります。
 
 ## XPCイベントメッセージ
 
@@ -120,7 +120,7 @@ XPCライブラリは、`kdebug`を使用して、`xpc_ktrace_pid0`および`xpc
 
 ### XPC接続プロセスチェック
 
-プロセスがXPC接続を介してメソッドを呼び出そうとするとき、**XPCサービスはそのプロセスが接続を許可されているかどうかを確認する必要があります**。以下は、その確認方法と一般的な落とし穴です：
+プロセスがXPC接続を介してメソッドを呼び出そうとすると、**XPCサービスはそのプロセスが接続を許可されているかどうかを確認する必要があります**。以下は、一般的な確認方法と一般的な落とし穴です：
 
 {{#ref}}
 macos-xpc-connecting-process-check/
@@ -440,7 +440,7 @@ return;
 ## Remote XPC
 
 この機能は `RemoteXPC.framework`（`libxpc`から）によって提供され、異なるホスト間でXPCを介して通信することができます。\
-リモートXPCをサポートするサービスは、plistにUsesRemoteXPCキーを持っており、これは`/System/Library/LaunchDaemons/com.apple.SubmitDiagInfo.plist`のようなケースです。しかし、サービスは`launchd`に登録されますが、機能を提供するのは`UserEventAgent`であり、プラグイン`com.apple.remoted.plugin`と`com.apple.remoteservicediscovery.events.plugin`です。
+リモートXPCをサポートするサービスは、plistにUsesRemoteXPCキーを持っており、これは`/System/Library/LaunchDaemons/com.apple.SubmitDiagInfo.plist`のケースのようです。しかし、サービスは`launchd`で登録されますが、機能を提供するのは`UserEventAgent`で、プラグイン`com.apple.remoted.plugin`と`com.apple.remoteservicediscovery.events.plugin`です。
 
 さらに、`RemoteServiceDiscovery.framework`は、`com.apple.remoted.plugin`から情報を取得することを可能にし、`get_device`、`get_unique_device`、`connect`などの関数を公開しています。
 

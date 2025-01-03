@@ -10,7 +10,7 @@ Nib（NeXT Interface Builderの略）ファイルは、Appleの開発エコシ�
 
 主要なNibファイルは、アプリケーションの`Info.plist`ファイル内の**`NSMainNibFile`**の値で参照され、アプリケーションの`main`関数で実行される**`NSApplicationMain`**関数によって読み込まれます。
 
-### Dirty Nibインジェクションプロセス
+### ダーティNibインジェクションプロセス
 
 #### NIBファイルの作成と設定
 
@@ -36,7 +36,7 @@ display dialog theDialogText
 
 1. **準備**:
 - ターゲットアプリ（例：Pages）を別のディレクトリ（例：`/tmp/`）にコピーします。
-- Gatekeeperの問題を回避し、アプリをキャッシュするために起動します。
+- Gatekeeperの問題を回避し、アプリをキャッシュするためにアプリを起動します。
 2. **NIBファイルの上書き**:
 - 既存のNIBファイル（例：About Panel NIB）を作成したDirtyNIBファイルで置き換えます。
 3. **実行**:
@@ -44,7 +44,7 @@ display dialog theDialogText
 
 #### 概念実証：ユーザーデータへのアクセス
 
-- AppleScriptを修正して、ユーザーの同意なしに写真などのユーザーデータにアクセスし、抽出します。
+- ユーザーの同意なしに、AppleScriptを修正してユーザーデータ（写真など）にアクセスし、抽出します。
 
 ### コードサンプル：悪意のある .xib ファイル
 
@@ -52,7 +52,7 @@ display dialog theDialogText
 
 ### その他の例
 
-投稿[https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)では、ダーティニブの作成方法に関するチュートリアルを見つけることができます。&#x20;
+投稿[https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)では、ダーティNibの作成方法に関するチュートリアルを見つけることができます。&#x20;
 
 ### 起動制約への対処
 
@@ -68,6 +68,6 @@ macOS Sonoma以降、アプリバンドル内の変更が制限されていま�
 3. Gatekeeperに登録するためにアプリを実行した後、アプリバンドルを変更します（例：MainMenu.nibをDirty.nibに置き換えます）。
 4. ディレクトリの名前を元に戻し、アプリを再実行してインジェクトされたNIBファイルを実行します。
 
-**注意**: 最近のmacOSの更新により、Gatekeeperキャッシュ後にアプリバンドル内のファイル変更が防止され、この脆弱性が無効化されました。
+**注意**: 最近のmacOSのアップデートにより、Gatekeeperキャッシュ後にアプリバンドル内のファイルの変更が防止され、この脆弱性が無効化されました。
 
 {{#include ../../../banners/hacktricks-training.md}}

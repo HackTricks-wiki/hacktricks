@@ -2,9 +2,9 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## DYLD_INSERT_LIBRARIES 基本的な例
+## DYLD_INSERT_LIBRARIES 基本例
 
-**注入するライブラリ** シェルを実行するため:
+**注入するライブラリ** シェルを実行するため：
 ```c
 // gcc -dynamiclib -o inject.dylib inject.c
 
@@ -37,9 +37,9 @@ return 0;
 ```bash
 DYLD_INSERT_LIBRARIES=inject.dylib ./hello
 ```
-## Dyld Hijacking Example
+## Dyld Hijackingの例
 
-ターゲットとなる脆弱なバイナリは `/Applications/VulnDyld.app/Contents/Resources/lib/binary` です。
+ターゲットとなる脆弱なバイナリは`/Applications/VulnDyld.app/Contents/Resources/lib/binary`です。
 
 {{#tabs}}
 {{#tab name="entitlements"}}
@@ -77,7 +77,7 @@ compatibility version 1.0.0
 {{#endtab}}
 {{#endtabs}}
 
-以前の情報から、**読み込まれたライブラリの署名をチェックしていない**ことと、**次のライブラリを読み込もうとしている**ことがわかります：
+前の情報から、**読み込まれたライブラリの署名をチェックしていない**ことと、**次のライブラリを読み込もうとしている**ことがわかります：
 
 - `/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib`
 - `/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib`
@@ -137,7 +137,7 @@ cp lib.dylib "/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib"
 
 ## 大規模
 
-予期しないバイナリにライブラリを注入しようと計画している場合は、イベントメッセージを確認して、プロセス内でライブラリが読み込まれるタイミングを見つけることができます（この場合、printfと`/bin/bash`の実行を削除します）。
+予期しないバイナリにライブラリを注入しようと計画している場合は、プロセス内でライブラリが読み込まれるタイミングを確認するためにイベントメッセージをチェックできます（この場合、printfと`/bin/bash`の実行を削除します）。
 ```bash
 sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "[+] dylib"'
 ```

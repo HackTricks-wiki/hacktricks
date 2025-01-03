@@ -11,7 +11,7 @@ Mach-o バイナリの実際の **entrypoint** は動的リンクされており
 もちろん、**`dyld`** には依存関係はありません（syscalls と libSystem の抜粋を使用します）。
 
 > [!CAUTION]
-> このリンカーに脆弱性が含まれている場合、バイナリ（特権の高いものも含む）を実行する前に実行されるため、**特権昇格**が可能になります。
+> このリンカーに脆弱性が含まれている場合、バイナリ（特権の高いものも含む）を実行する前に実行されるため、**特権昇格**が可能です。
 
 ### フロー
 
@@ -68,7 +68,7 @@ printf("Hi\n");
 100003f80: 913e9000    	add	x0, x0, #4004
 100003f84: 94000005    	bl	0x100003f98 <_printf+0x100003f98>
 ```
-`printf`を呼び出すためのジャンプが**`__TEXT.__stubs`**に向かっていることがわかります。
+`printf`へのジャンプが**`__TEXT.__stubs`**に向かっていることがわかります:
 ```bash
 objdump --section-headers ./load
 
@@ -95,15 +95,15 @@ Disassembly of section __TEXT,__stubs:
 100003f9c: f9400210    	ldr	x16, [x16]
 100003fa0: d61f0200    	br	x16
 ```
-あなたは**GOTのアドレスにジャンプしている**ことがわかります。この場合、非遅延で解決され、printf関数のアドレスが含まれます。
+あなたは、**GOTのアドレスにジャンプしている**ことがわかります。この場合、非遅延で解決され、printf関数のアドレスが含まれます。
 
-他の状況では、直接GOTにジャンプする代わりに、**`__DATA.__la_symbol_ptr`**にジャンプすることがあり、これは読み込もうとしている関数を表す値をロードし、その後**`__TEXT.__stub_helper`**にジャンプします。これが**`__DATA.__nl_symbol_ptr`**にジャンプし、**`dyld_stub_binder`**のアドレスを含みます。この関数は、関数の番号とアドレスをパラメータとして受け取ります。\
-この最後の関数は、検索された関数のアドレスを見つけた後、それを**`__TEXT.__stub_helper`**の対応する場所に書き込み、将来のルックアップを避けます。
+他の状況では、直接GOTにジャンプする代わりに、**`__DATA.__la_symbol_ptr`**にジャンプすることがあり、これは読み込もうとしている関数を表す値をロードし、その後**`__TEXT.__stub_helper`**にジャンプします。これが**`__DATA.__nl_symbol_ptr`**にジャンプし、**`dyld_stub_binder`**のアドレスを含んでいます。この関数は、関数の番号とアドレスをパラメータとして受け取ります。\
+この最後の関数は、検索された関数のアドレスを見つけた後、将来のルックアップを避けるために**`__TEXT.__stub_helper`**の対応する場所に書き込みます。
 
 > [!TIP]
 > ただし、現在のdyldバージョンはすべてを非遅延でロードすることに注意してください。
 
-#### Dyldオペコード
+#### Dyld opcodes
 
 最後に、**`dyld_stub_binder`**は指定された関数を見つけて、再度検索しないように適切なアドレスに書き込む必要があります。そのために、dyld内でオペコード（有限状態機械）を使用します。
 
@@ -119,7 +119,7 @@ for (int i=0; apple[i]; i++)
 printf("%d: %s\n", i, apple[i])
 }
 ```
-結果:
+申し訳ありませんが、翻訳する内容が提供されていません。翻訳したいテキストを提供してください。
 ```
 0: executable_path=./a
 1:
@@ -180,13 +180,13 @@ printf("%d: %s\n", i, apple[i])
 
 ## dyld_all_image_infos
 
-これは、dyldの状態に関する情報を持つ構造体で、[**ソースコード**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html)で見つけることができ、バージョン、dyld_image_info配列へのポインタ、dyld_image_notifier、プロセスが共有キャッシュから切り離されているかどうか、libSystem初期化子が呼び出されたかどうか、dyls自身のMachヘッダーへのポインタ、dyldバージョン文字列へのポインタなどの情報が含まれています...
+これは、バージョン、dyld_image_info 配列へのポインタ、dyld_image_notifier、プロセスが共有キャッシュから切り離されているかどうか、libSystem 初期化子が呼び出されたかどうか、dyls の Mach ヘッダーへのポインタ、dyld バージョン文字列へのポインタなどの情報を含む、dyld によってエクスポートされた構造体です。
 
-## dyld env variables
+## dyld 環境変数
 
 ### debug dyld
 
-dyldが何をしているのかを理解するのに役立つ興味深い環境変数：
+dyld が何をしているのかを理解するのに役立つ興味深い環境変数：
 
 - **DYLD_PRINT_LIBRARIES**
 
@@ -245,7 +245,7 @@ dyld[21147]:     __LINKEDIT (r..) 0x000239574000->0x000270BE4000
 ```
 - **DYLD_PRINT_INITIALIZERS**
 
-各ライブラリの初期化子が実行されるときに印刷します:
+各ライブラリの初期化子が実行されるときに印刷します：
 ```
 DYLD_PRINT_INITIALIZERS=1 ./apple
 dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
@@ -253,7 +253,7 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 ```
 ### その他
 
-- `DYLD_BIND_AT_LAUNCH`: レイジーバインディングが非レイジーなものと解決される
+- `DYLD_BIND_AT_LAUNCH`: レイジーバインディングは非レイジーなものと解決される
 - `DYLD_DISABLE_PREFETCH`: \_\_DATA と \_\_LINKEDIT コンテンツのプリフェッチを無効にする
 - `DYLD_FORCE_FLAT_NAMESPACE`: 単一レベルのバインディング
 - `DYLD_[FRAMEWORK/LIBRARY]_PATH | DYLD_FALLBACK_[FRAMEWORK/LIBRARY]_PATH | DYLD_VERSIONED_[FRAMEWORK/LIBRARY]_PATH`: 解決パス
@@ -279,7 +279,7 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 - `DYLD_SHARED_REGION`: "use", "private", "avoid"
 - `DYLD_USE_CLOSURES`: クロージャを有効にする
 
-何かを使ってさらに見つけることができます:
+他にも何かを使って見つけることができます:
 ```bash
 strings /usr/lib/dyld | grep "^DYLD_" | sort -u
 ```
