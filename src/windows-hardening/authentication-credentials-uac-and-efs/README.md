@@ -140,7 +140,9 @@ This way requires the **victim user** to be **running** a **process** inside the
 
 #### Knowing the users password
 
-{% embed url="https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files" %}
+{{#ref}}
+https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
+{{#endref}}
 
 ## Group Managed Service Accounts (gMSA)
 
@@ -265,6 +267,3 @@ uac-user-account-control.md
 {{#endref}}
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

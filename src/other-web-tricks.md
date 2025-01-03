@@ -2,14 +2,12 @@
 
 {{#include ./banners/hacktricks-training.md}}
 
-
 ### Host header
 
 Several times the back-end trust the **Host header** to perform some actions. For example, it could use its value as the **domain to send a password reset**. So when you receive an email with a link to reset your password, the domain being used is the one you put in the Host header.Then, you can request the password reset of other users and change the domain to one controlled by you to steal their password reset codes. [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).
 
 > [!WARNING]
 > Note that it's possible that you don't even need to wait for the user to click on the reset password link to get the token, as maybe even **spam filters or other intermediary devices/bots will click on it to analyze it**.
-
 
 ### Session booleans
 
@@ -26,7 +24,9 @@ Register an email, before confirming it change the email, then, if the new confi
 
 ### Access Internal servicedesk of companies using atlassian
 
-{% embed url="https://yourcompanyname.atlassian.net/servicedesk/customer/user/login" %}
+{{#ref}}
+https://yourcompanyname.atlassian.net/servicedesk/customer/user/login
+{{#endref}}
 
 ### TRACE method
 
@@ -34,7 +34,4 @@ Developers might forget to disable various debugging options in the production e
 
 ![Image for post](https://miro.medium.com/max/1330/1*wDFRADTOd9Tj63xucenvAA.png)
 
-
 {{#include ./banners/hacktricks-training.md}}
-
-

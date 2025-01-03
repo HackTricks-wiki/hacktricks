@@ -684,7 +684,9 @@ rdp-sessions-abuse.md
 
 ## AD -> Azure & Azure -> AD
 
-{% embed url="https://cloud.hacktricks.xyz/pentesting-cloud/azure-security/az-lateral-movements/azure-ad-connect-hybrid-identity" %}
+{{#ref}}
+https://cloud.hacktricks.xyz/pentesting-cloud/azure-security/az-lateral-movements/azure-ad-connect-hybrid-identity
+{{#endref}}
 
 ## Some General Defenses
 
@@ -721,6 +723,3 @@ rdp-sessions-abuse.md
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

@@ -24,7 +24,9 @@ Register an email, before confirming it change the email, then, if the new confi
 
 ### Access Internal servicedesk of companies using atlassian
 
-{% embed url="https://yourcompanyname.atlassian.net/servicedesk/customer/user/login" %}
+{{#ref}}
+https://yourcompanyname.atlassian.net/servicedesk/customer/user/login
+{{#endref}}
 
 ### TRACE method
 
@@ -33,6 +35,3 @@ Developers might forget to disable various debugging options in the production e
 ![Image for post](https://miro.medium.com/max/1330/1*wDFRADTOd9Tj63xucenvAA.png)
 
 {{#include ../banners/hacktricks-training.md}}
-
-
-
