@@ -2,54 +2,54 @@
 
 # CBC
 
-If the **cookie** is **only** the **username** (or the first part of the cookie is the username) and you want to impersonate the username "**admin**". Then, you can create the username **"bdmin"** and **bruteforce** the **first byte** of the cookie.
+如果**cookie**仅仅是**用户名**（或者cookie的第一部分是用户名），并且你想要冒充用户名“**admin**”。那么，你可以创建用户名**"bdmin"**并**暴力破解**cookie的**第一个字节**。
 
 # CBC-MAC
 
-**Cipher block chaining message authentication code** (**CBC-MAC**) is a method used in cryptography. It works by taking a message and encrypting it block by block, where each block's encryption is linked to the one before it. This process creates a **chain of blocks**, making sure that changing even a single bit of the original message will lead to an unpredictable change in the last block of encrypted data. To make or reverse such a change, the encryption key is required, ensuring security.
+**密码块链消息认证码**（**CBC-MAC**）是一种用于密码学的方法。它通过逐块加密消息来工作，每个块的加密与前一个块相链接。这个过程创建了一个**块链**，确保即使改变原始消息的一个比特，也会导致最后一个加密数据块的不可预测变化。要进行或逆转这样的变化，需要加密密钥，以确保安全性。
 
-To calculate the CBC-MAC of message m, one encrypts m in CBC mode with zero initialization vector and keeps the last block. The following figure sketches the computation of the CBC-MAC of a message comprising blocks![https://wikimedia.org/api/rest_v1/media/math/render/svg/bbafe7330a5e40a04f01cc776c9d94fe914b17f5](https://wikimedia.org/api/rest_v1/media/math/render/svg/bbafe7330a5e40a04f01cc776c9d94fe914b17f5) using a secret key k and a block cipher E:
+要计算消息m的CBC-MAC，可以在零初始化向量下以CBC模式加密m，并保留最后一个块。下图勾勒了使用秘密密钥k和块密码E计算由块组成的消息的CBC-MAC的过程![https://wikimedia.org/api/rest_v1/media/math/render/svg/bbafe7330a5e40a04f01cc776c9d94fe914b17f5](https://wikimedia.org/api/rest_v1/media/math/render/svg/bbafe7330a5e40a04f01cc776c9d94fe914b17f5)：
 
 ![https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/CBC-MAC_structure_(en).svg/570px-CBC-MAC_structure_(en).svg.png](<https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/CBC-MAC_structure_(en).svg/570px-CBC-MAC_structure_(en).svg.png>)
 
 # Vulnerability
 
-With CBC-MAC usually the **IV used is 0**.\
-This is a problem because 2 known messages (`m1` and `m2`) independently will generate 2 signatures (`s1` and `s2`). So:
+在CBC-MAC中，通常**使用的IV是0**。\
+这是一个问题，因为两个已知消息（`m1`和`m2`）独立生成两个签名（`s1`和`s2`）。所以：
 
 - `E(m1 XOR 0) = s1`
 - `E(m2 XOR 0) = s2`
 
-Then a message composed by m1 and m2 concatenated (m3) will generate 2 signatures (s31 and s32):
+然后，由m1和m2连接而成的消息（m3）将生成两个签名（s31和s32）：
 
 - `E(m1 XOR 0) = s31 = s1`
 - `E(m2 XOR s1) = s32`
 
-**Which is possible to calculate without knowing the key of the encryption.**
+**这可以在不知道加密密钥的情况下计算。**
 
-Imagine you are encrypting the name **Administrator** in **8bytes** blocks:
+想象一下你在**8字节**块中加密名称**Administrator**：
 
 - `Administ`
 - `rator\00\00\00`
 
-You can create a username called **Administ** (m1) and retrieve the signature (s1).\
-Then, you can create a username called the result of `rator\00\00\00 XOR s1`. This will generate `E(m2 XOR s1 XOR 0)` which is s32.\
-now, you can use s32 as the signature of the full name **Administrator**.
+你可以创建一个名为**Administ**（m1）的用户名并获取签名（s1）。\
+然后，你可以创建一个用户名，称为`rator\00\00\00 XOR s1`的结果。这将生成`E(m2 XOR s1 XOR 0)`，即s32。\
+现在，你可以将s32用作完整名称**Administrator**的签名。
 
 ### Summary
 
-1. Get the signature of username **Administ** (m1) which is s1
-2. Get the signature of username **rator\x00\x00\x00 XOR s1 XOR 0** is s32**.**
-3. Set the cookie to s32 and it will be a valid cookie for the user **Administrator**.
+1. 获取用户名**Administ**（m1）的签名，即s1
+2. 获取用户名**rator\x00\x00\x00 XOR s1 XOR 0**的签名，即s32**。**
+3. 将cookie设置为s32，它将是用户**Administrator**的有效cookie。
 
 # Attack Controlling IV
 
-If you can control the used IV the attack could be very easy.\
-If the cookies is just the username encrypted, to impersonate the user "**administrator**" you can create the user "**Administrator**" and you will get it's cookie.\
-Now, if you can control the IV, you can change the first Byte of the IV so **IV\[0] XOR "A" == IV'\[0] XOR "a"** and regenerate the cookie for the user **Administrator.** This cookie will be valid to **impersonate** the user **administrator** with the initial **IV**.
+如果你可以控制使用的IV，攻击可能会非常简单。\
+如果cookie仅仅是加密的用户名，要冒充用户“**administrator**”，你可以创建用户“**Administrator**”，你将获得它的cookie。\
+现在，如果你可以控制IV，你可以改变IV的第一个字节，使得**IV\[0] XOR "A" == IV'\[0] XOR "a"**，并为用户**Administrator**重新生成cookie。这个cookie将有效地**冒充**用户**administrator**，使用初始**IV**。
 
 ## References
 
-More information in [https://en.wikipedia.org/wiki/CBC-MAC](https://en.wikipedia.org/wiki/CBC-MAC)
+更多信息请参见[https://en.wikipedia.org/wiki/CBC-MAC](https://en.wikipedia.org/wiki/CBC-MAC)
 
 {{#include ../banners/hacktricks-training.md}}

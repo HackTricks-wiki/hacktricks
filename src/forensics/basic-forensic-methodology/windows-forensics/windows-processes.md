@@ -2,105 +2,105 @@
 
 ## smss.exe
 
-**Session Manager**.\
-Session 0 starts **csrss.exe** and **wininit.exe** (**OS** **services**) while Session 1 starts **csrss.exe** and **winlogon.exe** (**User** **session**). However, you should see **only one process** of that **binary** without children in the processes tree.
+**会话管理器**。\
+会话 0 启动 **csrss.exe** 和 **wininit.exe** (**操作系统** **服务**)，而会话 1 启动 **csrss.exe** 和 **winlogon.exe** (**用户** **会话**)。然而，您应该在进程树中只看到该 **二进制文件** 的 **一个进程**，且没有子进程。
 
-Also, sessions apart from 0 and 1 may mean that RDP sessions are occurring.
+此外，除了 0 和 1 的会话可能意味着正在发生 RDP 会话。
 
 ## csrss.exe
 
-**Client/Server Run Subsystem Process**.\
-It manages **processes** and **threads**, makes the **Windows** **API** available for other processes and also **maps drive letters**, create **temp files**, and handles the **shutdown** **process**.
+**客户端/服务器运行子系统进程**。\
+它管理 **进程** 和 **线程**，使 **Windows** **API** 可供其他进程使用，并且还 **映射驱动器字母**，创建 **临时文件**，并处理 **关机** **过程**。
 
-There is one **running in Session 0 and another one in Session 1** (so **2 processes** in the processes tree). Another one is created **per new Session**.
+在会话 0 中有一个 **正在运行的进程，另一个在会话 1 中**（因此在进程树中有 **2 个进程**）。每个新会话会创建一个新的进程。
 
 ## winlogon.exe
 
-**Windows Logon Process**.\
-It's responsible for user **logon**/**logoffs**. It launches **logonui.exe** to ask for username and password and then calls **lsass.exe** to verify them.
+**Windows 登录进程**。\
+它负责用户 **登录**/**注销**。它启动 **logonui.exe** 以请求用户名和密码，然后调用 **lsass.exe** 进行验证。
 
-Then it launches **userinit.exe** which is specified in **`HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`** with key **Userinit**.
+然后它启动 **userinit.exe**，该程序在 **`HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`** 中指定，键为 **Userinit**。
 
-Mover over, the previous registry should have **explorer.exe** in the **Shell key** or it might be abused as a **malware persistence method**.
+此外，之前的注册表应在 **Shell 键** 中有 **explorer.exe**，否则可能会被滥用作为 **恶意软件持久性方法**。
 
 ## wininit.exe
 
-**Windows Initialization Process**. \
-It launches **services.exe**, **lsass.exe**, and **lsm.exe** in Session 0. There should only be 1 process.
+**Windows 初始化进程**。 \
+它在会话 0 中启动 **services.exe**、**lsass.exe** 和 **lsm.exe**。应该只有 1 个进程。
 
 ## userinit.exe
 
-**Userinit Logon Application**.\
-Loads the **ntduser.dat in HKCU** and initialises the **user** **environment** and runs **logon** **scripts** and **GPO**.
+**Userinit 登录应用程序**。\
+加载 **HKCU 中的 ntduser.dat**，初始化 **用户** **环境**，并运行 **登录** **脚本** 和 **GPO**。
 
-It launches **explorer.exe**.
+它启动 **explorer.exe**。
 
 ## lsm.exe
 
-**Local Session Manager**.\
-It works with smss.exe to manipulate user sessions: Logon/logoff, shell start, lock/unlock desktop, etc.
+**本地会话管理器**。\
+它与 smss.exe 一起工作以操纵用户会话：登录/注销、启动 shell、锁定/解锁桌面等。
 
-After W7 lsm.exe was transformed into a service (lsm.dll).
+在 W7 之后，lsm.exe 被转变为服务 (lsm.dll)。
 
-There should only be 1 process in W7 and from them a service running the DLL.
+在 W7 中应该只有 1 个进程，并且其中一个是运行 DLL 的服务。
 
 ## services.exe
 
-**Service Control Manager**.\
-It **loads** **services** configured as **auto-start** and **drivers**.
+**服务控制管理器**。\
+它 **加载** 配置为 **自动启动** 的 **服务** 和 **驱动程序**。
 
-It's the parent process of **svchost.exe**, **dllhost.exe**, **taskhost.exe**, **spoolsv.exe** and many more.
+它是 **svchost.exe**、**dllhost.exe**、**taskhost.exe**、**spoolsv.exe** 等的父进程。
 
-Services are defined in `HKLM\SYSTEM\CurrentControlSet\Services` and this process maintains a DB in memory of service info that can be queried by sc.exe.
+服务在 `HKLM\SYSTEM\CurrentControlSet\Services` 中定义，该进程在内存中维护一个服务信息的数据库，可以通过 sc.exe 查询。
 
-Note how **some** **services** are going to be running in a **process of their own** and others are going to be **sharing a svchost.exe process**.
+注意 **某些** **服务** 将在 **自己的进程中运行**，而其他服务将 **共享一个 svchost.exe 进程**。
 
-There should only be 1 process.
+应该只有 1 个进程。
 
 ## lsass.exe
 
-**Local Security Authority Subsystem**.\
-It's responsible for the user **authentication** and create the **security** **tokens**. It uses authentication packages located in `HKLM\System\CurrentControlSet\Control\Lsa`.
+**本地安全授权子系统**。\
+它负责用户 **身份验证** 并创建 **安全** **令牌**。它使用位于 `HKLM\System\CurrentControlSet\Control\Lsa` 的身份验证包。
 
-It writes to the **Security** **event** **log** and there should only be 1 process.
+它写入 **安全** **事件** **日志**，并且应该只有 1 个进程。
 
-Keep in mind that this process is highly attacked to dump passwords.
+请记住，该进程是高度攻击的目标，用于提取密码。
 
 ## svchost.exe
 
-**Generic Service Host Process**.\
-It hosts multiple DLL services in one shared process.
+**通用服务主机进程**。\
+它在一个共享进程中托管多个 DLL 服务。
 
-Usually, you will find that **svchost.exe** is launched with the `-k` flag. This will launch a query to the registry **HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Svchost** where there will be a key with the argument mentioned in -k that will contain the services to launch in the same process.
+通常，您会发现 **svchost.exe** 是使用 `-k` 标志启动的。这将查询注册表 **HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Svchost**，其中将有一个带有 -k 中提到的参数的键，该键将包含在同一进程中启动的服务。
 
-For example: `-k UnistackSvcGroup` will launch: `PimIndexMaintenanceSvc MessagingService WpnUserService CDPUserSvc UnistoreSvc UserDataSvc OneSyncSvc`
+例如：`-k UnistackSvcGroup` 将启动：`PimIndexMaintenanceSvc MessagingService WpnUserService CDPUserSvc UnistoreSvc UserDataSvc OneSyncSvc`
 
-If the **flag `-s`** is also used with an argument, then svchost is asked to **only launch the specified service** in this argument.
+如果 **标志 `-s`** 也与参数一起使用，则 svchost 被要求 **仅启动指定的服务**。
 
-There will be several processes of `svchost.exe`. If any of them is **not using the `-k` flag**, then that's very suspicious. If you find that **services.exe is not the parent**, that's also very suspicious.
+将会有多个 `svchost.exe` 进程。如果其中任何一个 **没有使用 `-k` 标志**，那么这非常可疑。如果您发现 **services.exe 不是父进程**，那也是非常可疑的。
 
 ## taskhost.exe
 
-This process act as a host for processes running from DLLs. It also loads the services that are running from DLLs.
+该进程充当从 DLL 运行的进程的主机。它还加载从 DLL 运行的服务。
 
-In W8 this is called taskhostex.exe and in W10 taskhostw.exe.
+在 W8 中称为 taskhostex.exe，在 W10 中称为 taskhostw.exe。
 
 ## explorer.exe
 
-This is the process responsible for the **user's desktop** and launching files via file extensions.
+这是负责 **用户桌面** 和通过文件扩展名启动文件的进程。
 
-**Only 1** process should be spawned **per logged on user.**
+**每个登录用户应该只生成 1 个** 进程。
 
-This is run from **userinit.exe** which should be terminated, so **no parent** should appear for this process.
+这是从 **userinit.exe** 运行的，应该被终止，因此 **该进程不应有父进程**。
 
-# Catching Malicious Processes
+# 捕获恶意进程
 
-- Is it running from the expected path? (No Windows binaries run from temp location)
-- Is it communicating with weird IPs?
-- Check digital signatures (Microsoft artifacts should be signed)
-- Is it spelled correctly?
-- Is running under the expected SID?
-- Is the parent process the expected one (if any)?
-- Are the children processes the expecting ones? (no cmd.exe, wscript.exe, powershell.exe..?)
+- 它是否从预期路径运行？（没有 Windows 二进制文件从临时位置运行）
+- 它是否与奇怪的 IP 通信？
+- 检查数字签名（Microsoft 伪造物应已签名）
+- 拼写是否正确？
+- 是否在预期的 SID 下运行？
+- 父进程是否是预期的进程（如果有的话）？
+- 子进程是否是预期的进程？（没有 cmd.exe、wscript.exe、powershell.exe..？）
 
 {{#include ../../../banners/hacktricks-training.md}}

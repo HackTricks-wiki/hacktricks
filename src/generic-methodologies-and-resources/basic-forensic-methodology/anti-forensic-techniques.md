@@ -1,152 +1,152 @@
-# Anti-Forensic Techniques
+# 反取证技术
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Timestamps
+## 时间戳
 
-An attacker may be interested in **changing the timestamps of files** to avoid being detected.\
-It's possible to find the timestamps inside the MFT in attributes `$STANDARD_INFORMATION` \_\_ and \_\_ `$FILE_NAME`.
+攻击者可能会对**文件的时间戳进行更改**以避免被检测。\
+可以在MFT中的属性`$STANDARD_INFORMATION` \_\_ 和 \_\_ `$FILE_NAME`中找到时间戳。
 
-Both attributes have 4 timestamps: **Modification**, **access**, **creation**, and **MFT registry modification** (MACE or MACB).
+这两个属性都有4个时间戳：**修改**、**访问**、**创建**和**MFT注册修改**（MACE或MACB）。
 
-**Windows explorer** and other tools show the information from **`$STANDARD_INFORMATION`**.
+**Windows资源管理器**和其他工具显示来自**`$STANDARD_INFORMATION`**的信息。
 
-### TimeStomp - Anti-forensic Tool
+### TimeStomp - 反取证工具
 
-This tool **modifies** the timestamp information inside **`$STANDARD_INFORMATION`** **but** **not** the information inside **`$FILE_NAME`**. Therefore, it's possible to **identify** **suspicious** **activity**.
+该工具**修改****`$STANDARD_INFORMATION`**中的时间戳信息**但**不修改****`$FILE_NAME`**中的信息。因此，可以**识别****可疑****活动**。
 
 ### Usnjrnl
 
-The **USN Journal** (Update Sequence Number Journal) is a feature of the NTFS (Windows NT file system) that keeps track of volume changes. The [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) tool allows for the examination of these changes.
+**USN日志**（更新序列号日志）是NTFS（Windows NT文件系统）的一个特性，用于跟踪卷的更改。[**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv)工具允许检查这些更改。
 
 ![](<../../images/image (801).png>)
 
-The previous image is the **output** shown by the **tool** where it can be observed that some **changes were performed** to the file.
+上图是**工具**显示的**输出**，可以观察到对文件进行了**某些更改**。
 
 ### $LogFile
 
-**All metadata changes to a file system are logged** in a process known as [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging). The logged metadata is kept in a file named `**$LogFile**`, located in the root directory of an NTFS file system. Tools such as [LogFileParser](https://github.com/jschicht/LogFileParser) can be used to parse this file and identify changes.
+**对文件系统的所有元数据更改都会被记录**，这一过程称为[写前日志](https://en.wikipedia.org/wiki/Write-ahead_logging)。记录的元数据保存在名为`**$LogFile**`的文件中，该文件位于NTFS文件系统的根目录。可以使用[LogFileParser](https://github.com/jschicht/LogFileParser)等工具解析此文件并识别更改。
 
 ![](<../../images/image (137).png>)
 
-Again, in the output of the tool it's possible to see that **some changes were performed**.
+再次，在工具的输出中可以看到**进行了某些更改**。
 
-Using the same tool it's possible to identify to **which time the timestamps were modified**:
+使用同一工具可以识别**时间戳被修改到哪个时间**：
 
 ![](<../../images/image (1089).png>)
 
-- CTIME: File's creation time
-- ATIME: File's modification time
-- MTIME: File's MFT registry modification
-- RTIME: File's access time
+- CTIME: 文件创建时间
+- ATIME: 文件修改时间
+- MTIME: 文件的MFT注册修改
+- RTIME: 文件访问时间
 
-### `$STANDARD_INFORMATION` and `$FILE_NAME` comparison
+### `$STANDARD_INFORMATION`和`$FILE_NAME`比较
 
-Another way to identify suspicious modified files would be to compare the time on both attributes looking for **mismatches**.
+识别可疑修改文件的另一种方法是比较两个属性上的时间，寻找**不匹配**。
 
-### Nanoseconds
+### 纳秒
 
-**NTFS** timestamps have a **precision** of **100 nanoseconds**. Then, finding files with timestamps like 2010-10-10 10:10:**00.000:0000 is very suspicious**.
+**NTFS**时间戳的**精度**为**100纳秒**。因此，找到时间戳为2010-10-10 10:10:**00.000:0000的文件是非常可疑的**。
 
-### SetMace - Anti-forensic Tool
+### SetMace - 反取证工具
 
-This tool can modify both attributes `$STARNDAR_INFORMATION` and `$FILE_NAME`. However, from Windows Vista, it's necessary for a live OS to modify this information.
+该工具可以修改两个属性`$STARNDAR_INFORMATION`和`$FILE_NAME`。然而，从Windows Vista开始，必须在活动操作系统中修改此信息。
 
-## Data Hiding
+## 数据隐藏
 
-NFTS uses a cluster and the minimum information size. That means that if a file occupies uses and cluster and a half, the **reminding half is never going to be used** until the file is deleted. Then, it's possible to **hide data in this slack space**.
+NFTS使用集群和最小信息大小。这意味着如果一个文件占用一个半集群，**剩下的半个集群将永远不会被使用**，直到文件被删除。因此，可以在这个松弛空间中**隐藏数据**。
 
-There are tools like slacker that allow hiding data in this "hidden" space. However, an analysis of the `$logfile` and `$usnjrnl` can show that some data was added:
+有像slacker这样的工具可以在这个“隐藏”空间中隐藏数据。然而，对`$logfile`和`$usnjrnl`的分析可以显示某些数据被添加：
 
 ![](<../../images/image (1060).png>)
 
-Then, it's possible to retrieve the slack space using tools like FTK Imager. Note that this kind of tool can save the content obfuscated or even encrypted.
+然后，可以使用像FTK Imager这样的工具检索松弛空间。请注意，这种工具可以保存内容为模糊或甚至加密的形式。
 
 ## UsbKill
 
-This is a tool that will **turn off the computer if any change in the USB** ports is detected.\
-A way to discover this would be to inspect the running processes and **review each python script running**.
+这是一个工具，如果检测到USB端口的任何更改，将**关闭计算机**。\
+发现这一点的一种方法是检查正在运行的进程并**审查每个正在运行的python脚本**。
 
-## Live Linux Distributions
+## 实时Linux发行版
 
-These distros are **executed inside the RAM** memory. The only way to detect them is **in case the NTFS file-system is mounted with write permissions**. If it's mounted just with read permissions it won't be possible to detect the intrusion.
+这些发行版在**RAM**内存中**执行**。检测它们的唯一方法是**在NTFS文件系统以写入权限挂载的情况下**。如果仅以读取权限挂载，则无法检测到入侵。
 
-## Secure Deletion
+## 安全删除
 
 [https://github.com/Claudio-C/awesome-data-sanitization](https://github.com/Claudio-C/awesome-data-sanitization)
 
-## Windows Configuration
+## Windows配置
 
-It's possible to disable several windows logging methods to make the forensics investigation much harder.
+可以禁用多种Windows日志记录方法，以使取证调查变得更加困难。
 
-### Disable Timestamps - UserAssist
+### 禁用时间戳 - UserAssist
 
-This is a registry key that maintains dates and hours when each executable was run by the user.
+这是一个注册表项，维护用户运行每个可执行文件的日期和时间。
 
-Disabling UserAssist requires two steps:
+禁用UserAssist需要两个步骤：
 
-1. Set two registry keys, `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` and `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled`, both to zero in order to signal that we want UserAssist disabled.
-2. Clear your registry subtrees that look like `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>`.
+1. 设置两个注册表项，`HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs`和`HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled`，都设置为零，以表示我们希望禁用UserAssist。
+2. 清除看起来像`HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>`的注册表子树。
 
-### Disable Timestamps - Prefetch
+### 禁用时间戳 - Prefetch
 
-This will save information about the applications executed with the goal of improving the performance of the Windows system. However, this can also be useful for forensics practices.
+这将保存有关执行的应用程序的信息，目的是提高Windows系统的性能。然而，这对于取证实践也可能有用。
 
-- Execute `regedit`
-- Select the file path `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters`
-- Right-click on both `EnablePrefetcher` and `EnableSuperfetch`
-- Select Modify on each of these to change the value from 1 (or 3) to 0
-- Restart
+- 执行`regedit`
+- 选择文件路径`HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters`
+- 右键单击`EnablePrefetcher`和`EnableSuperfetch`
+- 选择修改，将每个值从1（或3）更改为0
+- 重启
 
-### Disable Timestamps - Last Access Time
+### 禁用时间戳 - 最后访问时间
 
-Whenever a folder is opened from an NTFS volume on a Windows NT server, the system takes the time to **update a timestamp field on each listed folder**, called the last access time. On a heavily used NTFS volume, this can affect performance.
+每当从Windows NT服务器上的NTFS卷打开文件夹时，系统会花时间**更新每个列出文件夹的时间戳字段**，称为最后访问时间。在使用频繁的NTFS卷上，这可能会影响性能。
 
-1. Open the Registry Editor (Regedit.exe).
-2. Browse to `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`.
-3. Look for `NtfsDisableLastAccessUpdate`. If it doesn’t exist, add this DWORD and set its value to 1, which will disable the process.
-4. Close the Registry Editor, and reboot the server.
+1. 打开注册表编辑器（Regedit.exe）。
+2. 浏览到`HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`。
+3. 查找`NtfsDisableLastAccessUpdate`。如果不存在，请添加此DWORD并将其值设置为1，这将禁用该过程。
+4. 关闭注册表编辑器，并重启服务器。
 
-### Delete USB History
+### 删除USB历史
 
-All the **USB Device Entries** are stored in Windows Registry Under the **USBSTOR** registry key that contains sub keys which are created whenever you plug a USB Device into your PC or Laptop. You can find this key here H`KEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Deleting this** you will delete the USB history.\
-You may also use the tool [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) to be sure you have deleted them (and to delete them).
+所有**USB设备条目**都存储在Windows注册表中的**USBSTOR**注册表项下，该项包含在您将USB设备插入PC或笔记本电脑时创建的子键。您可以在这里找到此键`HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`。**删除此项**将删除USB历史。\
+您还可以使用工具[**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html)确保您已删除它们（并删除它们）。
 
-Another file that saves information about the USBs is the file `setupapi.dev.log` inside `C:\Windows\INF`. This should also be deleted.
+另一个保存USB信息的文件是`C:\Windows\INF`中的文件`setupapi.dev.log`。这也应该被删除。
 
-### Disable Shadow Copies
+### 禁用影子副本
 
-**List** shadow copies with `vssadmin list shadowstorage`\
-**Delete** them running `vssadmin delete shadow`
+**列出**影子副本使用`vssadmin list shadowstorage`\
+**删除**它们运行`vssadmin delete shadow`
 
-You can also delete them via GUI following the steps proposed in [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
+您还可以通过GUI删除它们，按照[https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)中提出的步骤进行操作。
 
-To disable shadow copies [steps from here](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
+要禁用影子副本，请参见[此处的步骤](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows)：
 
-1. Open the Services program by typing "services" into the text search box after clicking the Windows start button.
-2. From the list, find "Volume Shadow Copy", select it, and then access Properties by right-clicking.
-3. Choose Disabled from the "Startup type" drop-down menu, and then confirm the change by clicking Apply and OK.
+1. 通过在点击Windows开始按钮后在文本搜索框中输入“services”打开服务程序。
+2. 从列表中找到“卷影复制”，选择它，然后右键单击访问属性。
+3. 从“启动类型”下拉菜单中选择禁用，然后通过单击应用和确定确认更改。
 
-It's also possible to modify the configuration of which files are going to be copied in the shadow copy in the registry `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
+还可以在注册表`HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`中修改将要在影子副本中复制的文件的配置。
 
-### Overwrite deleted files
+### 覆盖已删除文件
 
-- You can use a **Windows tool**: `cipher /w:C` This will indicate cipher to remove any data from the available unused disk space inside the C drive.
-- You can also use tools like [**Eraser**](https://eraser.heidi.ie)
+- 您可以使用**Windows工具**：`cipher /w:C`这将指示cipher从C驱动器的可用未使用磁盘空间中删除任何数据。
+- 您还可以使用像[**Eraser**](https://eraser.heidi.ie)这样的工具。
 
-### Delete Windows event logs
+### 删除Windows事件日志
 
-- Windows + R --> eventvwr.msc --> Expand "Windows Logs" --> Right click each category and select "Clear Log"
+- Windows + R --> eventvwr.msc --> 展开“Windows日志” --> 右键单击每个类别并选择“清除日志”
 - `for /F "tokens=*" %1 in ('wevtutil.exe el') DO wevtutil.exe cl "%1"`
 - `Get-EventLog -LogName * | ForEach { Clear-EventLog $_.Log }`
 
-### Disable Windows event logs
+### 禁用Windows事件日志
 
 - `reg add 'HKLM\SYSTEM\CurrentControlSet\Services\eventlog' /v Start /t REG_DWORD /d 4 /f`
-- Inside the services section disable the service "Windows Event Log"
-- `WEvtUtil.exec clear-log` or `WEvtUtil.exe cl`
+- 在服务部分禁用“Windows事件日志”服务
+- `WEvtUtil.exec clear-log`或`WEvtUtil.exe cl`
 
-### Disable $UsnJrnl
+### 禁用$UsnJrnl
 
 - `fsutil usn deletejournal /d c:`
 

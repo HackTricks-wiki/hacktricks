@@ -21,13 +21,13 @@ for i in "${state[@]}"; do sysadminctl -"${i}" status; done;
 ## 用户权限
 
 - **标准用户**：最基本的用户。此用户在尝试安装软件或执行其他高级任务时需要管理员用户授予的权限。他们无法独立完成这些操作。
-- **管理员用户**：大多数时候作为标准用户操作，但也被允许执行根操作，例如安装软件和其他管理任务。所有属于管理员组的用户**通过sudoers文件获得root访问权限**。
+- **管理员用户**：大多数时候作为标准用户操作，但也被允许执行根操作，如安装软件和其他管理任务。所有属于管理员组的用户**通过sudoers文件获得root访问权限**。
 - **Root**：Root是一个被允许执行几乎任何操作的用户（受系统完整性保护等保护措施的限制）。
 - 例如，root无法将文件放置在`/System`内
 
 ## 外部账户
 
-MacOS还支持通过外部身份提供者登录，例如FaceBook、Google... 执行此工作的主要守护进程是`accountsd`（`/System/Library/Frameworks/Accounts.framework//Versions/A/Support/accountsd`），可以在文件夹`/System/Library/Accounts/Authentication/`中找到用于外部身份验证的插件。\
+MacOS还支持通过外部身份提供者登录，如FaceBook、Google等。执行此工作的主要守护进程是`accountsd`（`/System/Library/Frameworks/Accounts.framework//Versions/A/Support/accountsd`），可以在文件夹`/System/Library/Accounts/Authentication/`中找到用于外部身份验证的插件。\
 此外，`accountsd`从`/Library/Preferences/SystemConfiguration/com.apple.accounts.exists.plist`获取账户类型列表。
 
 {{#include ../../banners/hacktricks-training.md}}

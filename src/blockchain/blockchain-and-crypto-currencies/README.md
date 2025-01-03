@@ -1,180 +1,176 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic Concepts
+## 基本概念
 
-- **Smart Contracts** are defined as programs that execute on a blockchain when certain conditions are met, automating agreement executions without intermediaries.
-- **Decentralized Applications (dApps)** build upon smart contracts, featuring a user-friendly front-end and a transparent, auditable back-end.
-- **Tokens & Coins** differentiate where coins serve as digital money, while tokens represent value or ownership in specific contexts.
-  - **Utility Tokens** grant access to services, and **Security Tokens** signify asset ownership.
-- **DeFi** stands for Decentralized Finance, offering financial services without central authorities.
-- **DEX** and **DAOs** refer to Decentralized Exchange Platforms and Decentralized Autonomous Organizations, respectively.
+- **智能合约** 被定义为在区块链上执行的程序，当满足特定条件时，自动化协议执行，无需中介。
+- **去中心化应用（dApps）** 基于智能合约，具有用户友好的前端和透明、可审计的后端。
+- **代币与币** 的区别在于，币作为数字货币，而代币在特定上下文中代表价值或所有权。
+- **实用代币** 授予对服务的访问权限，而 **安全代币** 表示资产所有权。
+- **DeFi** 代表去中心化金融，提供无中央权威的金融服务。
+- **DEX** 和 **DAO** 分别指去中心化交易平台和去中心化自治组织。
 
-## Consensus Mechanisms
+## 共识机制
 
-Consensus mechanisms ensure secure and agreed transaction validations on the blockchain:
+共识机制确保区块链上安全和一致的交易验证：
 
-- **Proof of Work (PoW)** relies on computational power for transaction verification.
-- **Proof of Stake (PoS)** demands validators to hold a certain amount of tokens, reducing energy consumption compared to PoW.
+- **工作量证明（PoW）** 依赖计算能力进行交易验证。
+- **权益证明（PoS）** 要求验证者持有一定数量的代币，相比于PoW减少能耗。
 
-## Bitcoin Essentials
+## 比特币基础知识
 
-### Transactions
+### 交易
 
-Bitcoin transactions involve transferring funds between addresses. Transactions are validated through digital signatures, ensuring only the owner of the private key can initiate transfers.
+比特币交易涉及在地址之间转移资金。交易通过数字签名进行验证，确保只有私钥的所有者可以发起转账。
 
-#### Key Components:
+#### 关键组成部分：
 
-- **Multisignature Transactions** require multiple signatures to authorize a transaction.
-- Transactions consist of **inputs** (source of funds), **outputs** (destination), **fees** (paid to miners), and **scripts** (transaction rules).
+- **多重签名交易** 需要多个签名来授权交易。
+- 交易由 **输入**（资金来源）、**输出**（目的地）、**费用**（支付给矿工）和 **脚本**（交易规则）组成。
 
-### Lightning Network
+### 闪电网络
 
-Aims to enhance Bitcoin's scalability by allowing multiple transactions within a channel, only broadcasting the final state to the blockchain.
+旨在通过允许在一个通道内进行多笔交易来增强比特币的可扩展性，仅将最终状态广播到区块链。
 
-## Bitcoin Privacy Concerns
+## 比特币隐私问题
 
-Privacy attacks, such as **Common Input Ownership** and **UTXO Change Address Detection**, exploit transaction patterns. Strategies like **Mixers** and **CoinJoin** improve anonymity by obscuring transaction links between users.
+隐私攻击，如 **共同输入所有权** 和 **UTXO找零地址检测**，利用交易模式。策略如 **混合器** 和 **CoinJoin** 通过模糊用户之间的交易链接来提高匿名性。
 
-## Acquiring Bitcoins Anonymously
+## 匿名获取比特币
 
-Methods include cash trades, mining, and using mixers. **CoinJoin** mixes multiple transactions to complicate traceability, while **PayJoin** disguises CoinJoins as regular transactions for heightened privacy.
+方法包括现金交易、挖矿和使用混合器。**CoinJoin** 混合多笔交易以复杂化可追溯性，而 **PayJoin** 将CoinJoins伪装成常规交易以提高隐私。
 
-# Bitcoin Privacy Atacks
+# 比特币隐私攻击
 
-# Summary of Bitcoin Privacy Attacks
+# 比特币隐私攻击总结
 
-In the world of Bitcoin, the privacy of transactions and the anonymity of users are often subjects of concern. Here's a simplified overview of several common methods through which attackers can compromise Bitcoin privacy.
+在比特币的世界中，交易的隐私和用户的匿名性常常是关注的主题。以下是攻击者可能通过几种常见方法破坏比特币隐私的简化概述。
 
-## **Common Input Ownership Assumption**
+## **共同输入所有权假设**
 
-It is generally rare for inputs from different users to be combined in a single transaction due to the complexity involved. Thus, **two input addresses in the same transaction are often assumed to belong to the same owner**.
+由于涉及的复杂性，来自不同用户的输入在单笔交易中组合的情况通常很少。因此，**同一交易中的两个输入地址通常被假定属于同一所有者**。
 
-## **UTXO Change Address Detection**
+## **UTXO找零地址检测**
 
-A UTXO, or **Unspent Transaction Output**, must be entirely spent in a transaction. If only a part of it is sent to another address, the remainder goes to a new change address. Observers can assume this new address belongs to the sender, compromising privacy.
+UTXO，或 **未花费交易输出**，必须在交易中完全花费。如果只有一部分发送到另一个地址，剩余部分将转到新的找零地址。观察者可以假设这个新地址属于发送者，从而损害隐私。
 
-### Example
+### 示例
 
-To mitigate this, mixing services or using multiple addresses can help obscure ownership.
+为了解决这个问题，混合服务或使用多个地址可以帮助模糊所有权。
 
-## **Social Networks & Forums Exposure**
+## **社交网络与论坛曝光**
 
-Users sometimes share their Bitcoin addresses online, making it **easy to link the address to its owner**.
+用户有时在网上分享他们的比特币地址，使得 **很容易将地址与其所有者关联**。
 
-## **Transaction Graph Analysis**
+## **交易图分析**
 
-Transactions can be visualized as graphs, revealing potential connections between users based on the flow of funds.
+交易可以被可视化为图形，揭示基于资金流动的用户之间的潜在连接。
 
-## **Unnecessary Input Heuristic (Optimal Change Heuristic)**
+## **不必要输入启发式（最优找零启发式）**
 
-This heuristic is based on analyzing transactions with multiple inputs and outputs to guess which output is the change returning to the sender.
+该启发式基于分析具有多个输入和输出的交易，以猜测哪个输出是返回给发送者的找零。
 
-### Example
-
+### 示例
 ```bash
 2 btc --> 4 btc
 3 btc     1 btc
 ```
+如果添加更多输入使得变化输出大于任何单一输入，它可能会混淆启发式分析。
 
-If adding more inputs makes the change output larger than any single input, it can confuse the heuristic.
+## **强制地址重用**
 
-## **Forced Address Reuse**
+攻击者可能会向之前使用过的地址发送少量资金，希望收款人将这些资金与未来交易中的其他输入结合，从而将地址链接在一起。
 
-Attackers may send small amounts to previously used addresses, hoping the recipient combines these with other inputs in future transactions, thereby linking addresses together.
+### 正确的钱包行为
 
-### Correct Wallet Behavior
+钱包应避免使用在已经使用过的空地址上收到的币，以防止这种隐私泄露。
 
-Wallets should avoid using coins received on already used, empty addresses to prevent this privacy leak.
+## **其他区块链分析技术**
 
-## **Other Blockchain Analysis Techniques**
+- **确切的支付金额：** 没有找零的交易很可能是在两个由同一用户拥有的地址之间进行的。
+- **整数金额：** 交易中的整数金额表明这是一次支付，而非整数输出很可能是找零。
+- **钱包指纹识别：** 不同的钱包具有独特的交易创建模式，允许分析师识别所使用的软件以及可能的找零地址。
+- **金额与时间相关性：** 公开交易时间或金额可能使交易可追踪。
 
-- **Exact Payment Amounts:** Transactions without change are likely between two addresses owned by the same user.
-- **Round Numbers:** A round number in a transaction suggests it's a payment, with the non-round output likely being the change.
-- **Wallet Fingerprinting:** Different wallets have unique transaction creation patterns, allowing analysts to identify the software used and potentially the change address.
-- **Amount & Timing Correlations:** Disclosing transaction times or amounts can make transactions traceable.
+## **流量分析**
 
-## **Traffic Analysis**
+通过监控网络流量，攻击者可能将交易或区块与IP地址关联，从而危及用户隐私。如果一个实体运营多个比特币节点，这种情况尤其明显，因为这增强了他们监控交易的能力。
 
-By monitoring network traffic, attackers can potentially link transactions or blocks to IP addresses, compromising user privacy. This is especially true if an entity operates many Bitcoin nodes, enhancing their ability to monitor transactions.
+## 更多
 
-## More
+有关隐私攻击和防御的全面列表，请访问 [Bitcoin Privacy on Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy)。
 
-For a comprehensive list of privacy attacks and defenses, visit [Bitcoin Privacy on Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy).
+# 匿名比特币交易
 
-# Anonymous Bitcoin Transactions
+## 匿名获取比特币的方法
 
-## Ways to Get Bitcoins Anonymously
+- **现金交易：** 通过现金获取比特币。
+- **现金替代品：** 购买礼品卡并在线兑换比特币。
+- **挖矿：** 通过挖矿获得比特币是最私密的方法，尤其是单独进行时，因为挖矿池可能知道矿工的IP地址。 [Mining Pools Information](https://en.bitcoin.it/wiki/Pooled_mining)
+- **盗窃：** 理论上，盗窃比特币可能是另一种匿名获取比特币的方法，尽管这是非法的且不推荐。
 
-- **Cash Transactions**: Acquiring bitcoin through cash.
-- **Cash Alternatives**: Purchasing gift cards and exchanging them online for bitcoin.
-- **Mining**: The most private method to earn bitcoins is through mining, especially when done alone because mining pools may know the miner's IP address. [Mining Pools Information](https://en.bitcoin.it/wiki/Pooled_mining)
-- **Theft**: Theoretically, stealing bitcoin could be another method to acquire it anonymously, although it's illegal and not recommended.
+## 混合服务
 
-## Mixing Services
-
-By using a mixing service, a user can **send bitcoins** and receive **different bitcoins in return**, which makes tracing the original owner difficult. Yet, this requires trust in the service not to keep logs and to actually return the bitcoins. Alternative mixing options include Bitcoin casinos.
+通过使用混合服务，用户可以**发送比特币**并接收**不同的比特币作为回报**，这使得追踪原始所有者变得困难。然而，这需要对服务的信任，以确保其不保留日志并实际返回比特币。替代的混合选项包括比特币赌场。
 
 ## CoinJoin
 
-**CoinJoin** merges multiple transactions from different users into one, complicating the process for anyone trying to match inputs with outputs. Despite its effectiveness, transactions with unique input and output sizes can still potentially be traced.
+**CoinJoin** 将来自不同用户的多个交易合并为一个，复杂化了任何试图将输入与输出匹配的过程。尽管其有效性，具有独特输入和输出大小的交易仍然可能被追踪。
 
-Example transactions that may have used CoinJoin include `402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a` and `85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238`.
+可能使用CoinJoin的示例交易包括 `402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a` 和 `85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238`。
 
-For more information, visit [CoinJoin](https://coinjoin.io/en). For a similar service on Ethereum, check out [Tornado Cash](https://tornado.cash), which anonymizes transactions with funds from miners.
+有关更多信息，请访问 [CoinJoin](https://coinjoin.io/en)。有关以太坊上的类似服务，请查看 [Tornado Cash](https://tornado.cash)，它通过矿工的资金匿名化交易。
 
 ## PayJoin
 
-A variant of CoinJoin, **PayJoin** (or P2EP), disguises the transaction among two parties (e.g., a customer and a merchant) as a regular transaction, without the distinctive equal outputs characteristic of CoinJoin. This makes it extremely hard to detect and could invalidate the common-input-ownership heuristic used by transaction surveillance entities.
-
+**PayJoin**（或P2EP）是CoinJoin的一种变体，在两个参与方（例如，客户和商家）之间伪装交易为常规交易，而没有CoinJoin特有的相等输出特征。这使得检测变得极其困难，并可能使交易监控实体使用的共同输入所有权启发式失效。
 ```plaintext
 2 btc --> 3 btc
 5 btc     4 btc
 ```
+像上面这样的交易可能是 PayJoin，增强隐私，同时与标准比特币交易无异。
 
-Transactions like the above could be PayJoin, enhancing privacy while remaining indistinguishable from standard bitcoin transactions.
+**PayJoin 的使用可能会显著破坏传统监控方法**，使其在追求交易隐私方面成为一个有前景的发展。
 
-**The utilization of PayJoin could significantly disrupt traditional surveillance methods**, making it a promising development in the pursuit of transactional privacy.
+# 加密货币隐私的最佳实践
 
-# Best Practices for Privacy in Cryptocurrencies
+## **钱包同步技术**
 
-## **Wallet Synchronization Techniques**
+为了维护隐私和安全，与区块链同步钱包至关重要。有两种方法脱颖而出：
 
-To maintain privacy and security, synchronizing wallets with the blockchain is crucial. Two methods stand out:
+- **全节点**：通过下载整个区块链，全节点确保最大隐私。所有曾经进行的交易都存储在本地，使对手无法识别用户感兴趣的交易或地址。
+- **客户端区块过滤**：此方法涉及为区块链中的每个区块创建过滤器，使钱包能够识别相关交易，而不向网络观察者暴露特定兴趣。轻量级钱包下载这些过滤器，仅在找到与用户地址匹配时才获取完整区块。
 
-- **Full node**: By downloading the entire blockchain, a full node ensures maximum privacy. All transactions ever made are stored locally, making it impossible for adversaries to identify which transactions or addresses the user is interested in.
-- **Client-side block filtering**: This method involves creating filters for every block in the blockchain, allowing wallets to identify relevant transactions without exposing specific interests to network observers. Lightweight wallets download these filters, only fetching full blocks when a match with the user's addresses is found.
+## **利用 Tor 实现匿名性**
 
-## **Utilizing Tor for Anonymity**
+鉴于比特币在点对点网络上运行，建议使用 Tor 来掩盖您的 IP 地址，在与网络交互时增强隐私。
 
-Given that Bitcoin operates on a peer-to-peer network, using Tor is recommended to mask your IP address, enhancing privacy when interacting with the network.
+## **防止地址重用**
 
-## **Preventing Address Reuse**
+为了保护隐私，使用新地址进行每笔交易至关重要。重用地址可能会通过将交易链接到同一实体而危及隐私。现代钱包通过其设计来阻止地址重用。
 
-To safeguard privacy, it's vital to use a new address for every transaction. Reusing addresses can compromise privacy by linking transactions to the same entity. Modern wallets discourage address reuse through their design.
+## **交易隐私策略**
 
-## **Strategies for Transaction Privacy**
+- **多笔交易**：将支付拆分为几笔交易可以模糊交易金额，从而阻止隐私攻击。
+- **避免找零**：选择不需要找零输出的交易可以通过破坏找零检测方法来增强隐私。
+- **多个找零输出**：如果无法避免找零，生成多个找零输出仍然可以改善隐私。
 
-- **Multiple transactions**: Splitting a payment into several transactions can obscure the transaction amount, thwarting privacy attacks.
-- **Change avoidance**: Opting for transactions that don't require change outputs enhances privacy by disrupting change detection methods.
-- **Multiple change outputs**: If avoiding change isn't feasible, generating multiple change outputs can still improve privacy.
+# **门罗币：匿名性的灯塔**
 
-# **Monero: A Beacon of Anonymity**
+门罗币满足数字交易中对绝对匿名性的需求，为隐私设定了高标准。
 
-Monero addresses the need for absolute anonymity in digital transactions, setting a high standard for privacy.
+# **以太坊：燃料费和交易**
 
-# **Ethereum: Gas and Transactions**
+## **理解燃料费**
 
-## **Understanding Gas**
+燃料费衡量在以太坊上执行操作所需的计算工作量，以 **gwei** 计价。例如，一笔交易的费用为 2,310,000 gwei（或 0.00231 ETH），涉及燃料限制和基本费用，并向矿工提供小费以激励他们。用户可以设置最高费用，以确保他们不会支付过多，超出部分会被退还。
 
-Gas measures the computational effort needed to execute operations on Ethereum, priced in **gwei**. For example, a transaction costing 2,310,000 gwei (or 0.00231 ETH) involves a gas limit and a base fee, with a tip to incentivize miners. Users can set a max fee to ensure they don't overpay, with the excess refunded.
+## **执行交易**
 
-## **Executing Transactions**
+以太坊中的交易涉及发送者和接收者，可以是用户或智能合约地址。它们需要支付费用并且必须被挖掘。交易中的关键信息包括接收者、发送者的签名、价值、可选数据、燃料限制和费用。值得注意的是，发送者的地址是从签名中推导出来的，因此在交易数据中不需要它。
 
-Transactions in Ethereum involve a sender and a recipient, which can be either user or smart contract addresses. They require a fee and must be mined. Essential information in a transaction includes the recipient, sender's signature, value, optional data, gas limit, and fees. Notably, the sender's address is deduced from the signature, eliminating the need for it in the transaction data.
+这些实践和机制是任何希望参与加密货币，同时优先考虑隐私和安全的人的基础。
 
-These practices and mechanisms are foundational for anyone looking to engage with cryptocurrencies while prioritizing privacy and security.
-
-## References
+## 参考文献
 
 - [https://en.wikipedia.org/wiki/Proof_of_stake](https://en.wikipedia.org/wiki/Proof_of_stake)
 - [https://www.mycryptopedia.com/public-key-private-key-explained/](https://www.mycryptopedia.com/public-key-private-key-explained/)

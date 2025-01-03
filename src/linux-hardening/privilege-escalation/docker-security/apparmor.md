@@ -39,22 +39,22 @@ aa-mergeprof  #used to merge the policies
 
 - 为了指示受影响的可执行文件，**绝对路径和通配符**被允许用于指定文件。
 - 要指示二进制文件对**文件**的访问，可以使用以下**访问控制**：
-- **r** (读取)
-- **w** (写入)
-- **m** (将内存映射为可执行)
-- **k** (文件锁定)
-- **l** (创建硬链接)
-- **ix** (执行另一个程序，新程序继承策略)
-- **Px** (在另一个配置文件下执行，清理环境后)
-- **Cx** (在子配置文件下执行，清理环境后)
-- **Ux** (在无约束下执行，清理环境后)
-- **变量**可以在配置文件中定义，并可以从配置文件外部进行操作。例如：@{PROC} 和 @{HOME} (将 #include \<tunables/global> 添加到配置文件)
+- **r**（读取）
+- **w**（写入）
+- **m**（将内存映射为可执行）
+- **k**（文件锁定）
+- **l**（创建硬链接）
+- **ix**（执行另一个程序，新程序继承策略）
+- **Px**（在另一个配置文件下执行，清理环境后）
+- **Cx**（在子配置文件下执行，清理环境后）
+- **Ux**（在无约束下执行，清理环境后）
+- **变量**可以在配置文件中定义，并可以从配置文件外部进行操作。例如：@{PROC} 和 @{HOME}（将 #include \<tunables/global> 添加到配置文件中）
 - **支持拒绝规则以覆盖允许规则**。
 
 ### aa-genprof
 
-要轻松开始创建配置文件，apparmor 可以帮助您。可以让**apparmor 检查二进制文件执行的操作，然后让您决定要允许或拒绝哪些操作**。\
-您只需运行：
+为了轻松开始创建配置文件，apparmor 可以帮助你。可以让**apparmor 检查二进制文件执行的操作，然后让你决定要允许或拒绝哪些操作**。\
+你只需运行：
 ```bash
 sudo aa-genprof /path/to/binary
 ```
@@ -95,7 +95,7 @@ sudo aa-easyprof /path/to/binary
 }
 ```
 > [!NOTE]
-> 请注意，在创建的配置文件中，默认情况下不允许任何操作，因此所有操作都被拒绝。您需要添加类似 `/etc/passwd r,` 的行，以允许二进制文件读取 `/etc/passwd`，例如。
+> 请注意，默认情况下，在创建的配置文件中没有任何内容被允许，因此所有内容都被拒绝。您需要添加类似 `/etc/passwd r,` 的行，以允许二进制文件读取 `/etc/passwd`，例如。
 
 您可以然后 **enforce** 新的配置文件，使用
 ```bash
@@ -103,7 +103,7 @@ sudo apparmor_parser -a /etc/apparmor.d/path.to.binary
 ```
 ### 从日志修改配置文件
 
-以下工具将读取日志并询问用户是否要允许某些检测到的禁止操作：
+以下工具将读取日志并询问用户是否希望允许某些检测到的禁止操作：
 ```bash
 sudo aa-logprof
 ```
@@ -120,7 +120,7 @@ apparmor_parser -R /etc/apparmor.d/profile.name #Remove profile
 ```
 ## 日志
 
-示例 **AUDIT** 和 **DENIED** 日志来自 _/var/log/audit/audit.log_ 的可执行文件 **`service_bin`**：
+来自 _/var/log/audit/audit.log_ 的可执行文件 **`service_bin`** 的 **AUDIT** 和 **DENIED** 日志示例：
 ```bash
 type=AVC msg=audit(1610061880.392:286): apparmor="AUDIT" operation="getattr" profile="/bin/rcat" name="/dev/pts/1" pid=954 comm="service_bin" requested_mask="r" fsuid=1000 ouid=1000
 type=AVC msg=audit(1610061880.392:287): apparmor="DENIED" operation="open" profile="/bin/rcat" name="/etc/hosts" pid=954 comm="service_bin" requested_mask="r" denied_mask="r" fsuid=1000 ouid=0
@@ -168,9 +168,9 @@ docker-default
 - **访问**所有**网络**
 - **未定义能力**（但是，一些能力将来自包含基本基础规则，即 #include \<abstractions/base>）
 - **写入**任何**/proc** 文件**不允许**
-- 其他**/proc**和**/sys**的**子目录**/**文件**被**拒绝**读/写/锁/链接/执行访问
+- 其他/**proc** 和/**sys** 的**子目录**/**文件**被**拒绝**读/写/锁/链接/执行访问
 - **挂载****不允许**
-- **Ptrace**只能在被**相同 apparmor 配置文件**限制的进程上运行
+- **Ptrace** 只能在被**相同 apparmor 配置文件**限制的进程上运行
 
 一旦你**运行一个 docker 容器**，你应该看到以下输出：
 ```bash
@@ -200,7 +200,7 @@ docker run -it --cap-add SYS_ADMIN --security-opt seccomp=unconfined --security-
 
 ### 示例
 
-（示例来自 [**这里**](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-2docker-engine/)）
+（示例来自 [**这里**](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-2docker-engine/))
 
 为了说明 AppArmor 的功能，我创建了一个新的 Docker 配置文件 “mydocker”，并添加了以下行：
 ```
@@ -210,7 +210,7 @@ deny /etc/* w,   # deny write for all files directly in /etc (not in a subdir)
 ```
 sudo apparmor_parser -r -W mydocker
 ```
-要列出配置文件，我们可以执行以下命令。下面的命令列出了我新的 AppArmor 配置文件。
+要列出配置文件，我们可以执行以下命令。下面的命令列出了我的新 AppArmor 配置文件。
 ```
 $ sudo apparmor_status  | grep mydocker
 mydocker

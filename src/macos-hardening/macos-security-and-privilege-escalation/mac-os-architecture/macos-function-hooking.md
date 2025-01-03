@@ -4,9 +4,9 @@
 
 ## Function Interposing
 
-创建一个带有 **`__interpose`** 部分（或标记为 **`S_INTERPOSING`** 的部分）的 **dylib**，其中包含指向 **原始** 和 **替代** 函数的 **函数指针** 元组。
+创建一个 **dylib**，其中包含一个 **`__interpose`** 部分（或一个标记为 **`S_INTERPOSING`** 的部分），该部分包含指向 **原始** 和 **替代** 函数的 **函数指针** 元组。
 
-然后，使用 **`DYLD_INSERT_LIBRARIES`** 注入 dylib（插入需要在主应用加载之前发生）。显然，适用于 **`DYLD_INSERT_LIBRARIES`** 使用的 [**限制** 在这里也适用](../macos-proces-abuse/macos-library-injection/#check-restrictions)。&#x20;
+然后，使用 **`DYLD_INSERT_LIBRARIES`** 注入 dylib（插入需要在主应用程序加载之前发生）。显然，适用于 **`DYLD_INSERT_LIBRARIES`** 使用的 [**限制** 在这里也适用](../macos-proces-abuse/macos-library-injection/#check-restrictions)。&#x20;
 
 ### Interpose printf
 
@@ -81,14 +81,14 @@ Hello from interpose
 
 在 ObjectiveC 中，方法调用的方式是：**`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
 
-需要 **对象**、**方法**和 **参数**。当调用一个方法时，使用函数 **`objc_msgSend`** 发送 **msg**：`int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
+需要 **对象**、**方法**和 **参数**。当调用一个方法时，会使用函数 **`objc_msgSend`** 发送 **msg**：`int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
 
 对象是 **`someObject`**，方法是 **`@selector(method1p1:p2:)`**，参数是 **value1**，**value2**。
 
 根据对象结构，可以访问一个 **方法数组**，其中 **名称** 和 **指向方法代码的指针** 被 **存放**。
 
 > [!CAUTION]
-> 请注意，由于方法和类是根据其名称访问的，因此这些信息存储在二进制文件中，因此可以使用 `otool -ov </path/bin>` 或 [`class-dump </path/bin>`](https://github.com/nygard/class-dump) 检索它。
+> 请注意，由于方法和类是基于其名称访问的，因此这些信息存储在二进制文件中，因此可以使用 `otool -ov </path/bin>` 或 [`class-dump </path/bin>`](https://github.com/nygard/class-dump) 来检索。
 
 ### 访问原始方法
 
@@ -160,7 +160,7 @@ return 0;
 ```
 ### 方法交换与 method_exchangeImplementations
 
-函数 **`method_exchangeImplementations`** 允许 **更改** **一个函数的实现地址为另一个函数的实现**。
+函数 **`method_exchangeImplementations`** 允许 **更改** **一个函数的实现地址为另一个函数**。
 
 > [!CAUTION]
 > 因此，当调用一个函数时，**执行的是另一个函数**。
@@ -214,7 +214,7 @@ return 0;
 
 ### 使用 method_setImplementation 进行方法交换
 
-之前的格式很奇怪，因为你正在将两个方法的实现互相更改。使用函数 **`method_setImplementation`**，你可以**更改**一个**方法的实现为另一个**。
+之前的格式很奇怪，因为你正在将两个方法的实现互换。使用函数 **`method_setImplementation`**，你可以**更改**一个**方法**的**实现**为另一个**方法**的实现。
 
 只需记住，如果你打算在覆盖之前从新实现中调用原始实现，请**存储原始实现的地址**，因为稍后定位该地址会更加复杂。
 ```objectivec
@@ -272,13 +272,13 @@ return 0;
 
 在本页中讨论了不同的函数钩取方法。然而，它们涉及到**在进程内部运行代码进行攻击**。
 
-为了做到这一点，最简单的技术是通过环境变量或劫持来注入一个[Dyld](../macos-dyld-hijacking-and-dyld_insert_libraries.md)。不过，我想这也可以通过[Dylib 进程注入](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port)来完成。
+为了做到这一点，最简单的技术是通过环境变量或劫持注入一个[Dyld](../macos-dyld-hijacking-and-dyld_insert_libraries.md)。不过，我想这也可以通过[Dylib 进程注入](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port)来完成。
 
 然而，这两种选项都**限制**于**未保护**的二进制文件/进程。检查每种技术以了解更多关于限制的信息。
 
-然而，函数钩取攻击是非常具体的，攻击者会这样做以**从进程内部窃取敏感信息**（否则你只会进行进程注入攻击）。这些敏感信息可能位于用户下载的应用程序中，例如 MacPass。
+然而，函数钩取攻击是非常具体的，攻击者这样做是为了**从进程内部窃取敏感信息**（否则你只会进行进程注入攻击）。而这些敏感信息可能位于用户下载的应用程序中，例如 MacPass。
 
-因此，攻击者的途径是找到一个漏洞或去掉应用程序的签名，通过应用程序的 Info.plist 注入**`DYLD_INSERT_LIBRARIES`**环境变量，添加类似于：
+因此，攻击者的途径是找到一个漏洞或去掉应用程序的签名，通过应用程序的 Info.plist 注入**`DYLD_INSERT_LIBRARIES`** 环境变量，添加类似于：
 ```xml
 <key>LSEnvironment</key>
 <dict>
@@ -293,7 +293,7 @@ return 0;
 在该库中添加钩子代码以提取信息：密码、消息...
 
 > [!CAUTION]
-> 请注意，在较新版本的 macOS 中，如果您 **剥离应用程序二进制文件的签名** 并且它之前已被执行，macOS **将不再执行该应用程序**。
+> 请注意，在较新版本的 macOS 中，如果您 **去除应用程序二进制文件的签名** 并且它之前已被执行，macOS **将不再执行该应用程序**。
 
 #### 库示例
 ```objectivec

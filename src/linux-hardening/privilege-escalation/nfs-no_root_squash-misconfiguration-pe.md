@@ -1,10 +1,10 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-阅读 _ **/etc/exports** _ 文件，如果你发现某个目录被配置为 **no_root_squash**，那么你可以 **作为客户端访问** 该目录，并 **像本地的根用户** 一样 **在里面写入**。
+阅读 _ **/etc/exports** _ 文件，如果你发现某个目录被配置为 **no_root_squash**，那么你可以 **作为客户端访问** 该目录，并 **像本地机器的 root 一样** 在该目录中 **写入**。
 
-**no_root_squash**：这个选项基本上赋予客户端的根用户以根身份访问 NFS 服务器上的文件的权限。这可能导致严重的安全隐患。
+**no_root_squash**：此选项基本上允许客户端的 root 用户以 root 身份访问 NFS 服务器上的文件。这可能导致严重的安全隐患。
 
-**no_all_squash**：这与 **no_root_squash** 选项类似，但适用于 **非根用户**。想象一下，你以 nobody 用户的身份获得一个 shell；检查 /etc/exports 文件；存在 no_all_squash 选项；检查 /etc/passwd 文件；模拟一个非根用户；以该用户创建一个 suid 文件（通过使用 nfs 挂载）。以 nobody 用户身份执行该 suid 文件并成为不同的用户。
+**no_all_squash**：这与 **no_root_squash** 选项类似，但适用于 **非 root 用户**。想象一下，你以 nobody 用户的身份获得一个 shell；检查 /etc/exports 文件；存在 no_all_squash 选项；检查 /etc/passwd 文件；模拟一个非 root 用户；作为该用户创建一个 suid 文件（通过使用 nfs 挂载）。以 nobody 用户身份执行该 suid 文件并成为不同的用户。
 
 # 权限提升
 
@@ -12,7 +12,7 @@
 
 如果你发现了这个漏洞，你可以利用它：
 
-- **在客户端机器上挂载该目录**，并 **以根身份复制** /bin/bash 二进制文件到挂载文件夹中，并赋予其 **SUID** 权限，然后 **从受害者** 机器执行该 bash 二进制文件。
+- **在客户端机器上挂载该目录**，并 **以 root 身份复制** /bin/bash 二进制文件到挂载文件夹中，并赋予其 **SUID** 权限，然后 **从受害者** 机器执行该 bash 二进制文件。
 ```bash
 #Attacker, as root user
 mkdir /tmp/pe
@@ -42,14 +42,14 @@ cd <SHAREDD_FOLDER>
 ## 本地利用
 
 > [!NOTE]
-> 请注意，如果您可以从您的机器创建一个**到受害者机器的隧道，您仍然可以使用远程版本来利用此权限提升，隧道所需的端口**。\
+> 请注意，如果您可以从您的机器创建一个**到受害者机器的隧道，您仍然可以使用远程版本来利用这种权限提升，隧道所需的端口**。\
 > 以下技巧适用于文件`/etc/exports`**指示一个IP**的情况。在这种情况下，您**将无法使用**任何情况下的**远程利用**，您需要**利用这个技巧**。\
-> 另一个利用成功的必要条件是**`/etc/export`中的导出****必须使用`insecure`标志**。\
+> 另一个使利用有效的必要条件是**`/etc/export`中的导出****必须使用`insecure`标志**。\
 > --_我不确定如果`/etc/export`指示一个IP地址，这个技巧是否有效_--
 
 ## 基本信息
 
-该场景涉及利用本地机器上挂载的NFS共享，利用NFSv3规范中的一个缺陷，该缺陷允许客户端指定其uid/gid，可能导致未经授权的访问。利用过程涉及使用[libnfs](https://github.com/sahlberg/libnfs)，这是一个允许伪造NFS RPC调用的库。
+该场景涉及利用本地机器上挂载的NFS共享，利用NFSv3规范中的一个缺陷，该缺陷允许客户端指定其uid/gid，可能导致未经授权的访问。利用涉及使用[libnfs](https://github.com/sahlberg/libnfs)，这是一个允许伪造NFS RPC调用的库。
 
 ### 编译库
 
@@ -87,9 +87,9 @@ LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod u+s nfs:/
 #root
 ```
 
-## 额外：NFShell 用于隐秘文件访问
+## 额外内容：NFShell 用于隐秘文件访问
 
-一旦获得 root 访问权限，为了在不更改所有权的情况下与 NFS 共享进行交互（以避免留下痕迹），使用一个 Python 脚本 (nfsh.py)。该脚本调整 uid 以匹配被访问文件的 uid，从而允许在共享上与文件进行交互而不出现权限问题：
+一旦获得 root 访问权限，为了在不更改所有权的情况下与 NFS 共享进行交互（以避免留下痕迹），使用一个 Python 脚本 (nfsh.py)。该脚本调整 uid 以匹配被访问文件的 uid，从而允许与共享上的文件进行交互而不出现权限问题：
 ```python
 #!/usr/bin/env python
 # script from https://www.errno.fr/nfs_privesc.html

@@ -1,40 +1,38 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-# Check BSSIDs
+# 检查 BSSID
 
-When you receive a capture whose principal traffic is Wifi using WireShark you can start investigating all the SSIDs of the capture with _Wireless --> WLAN Traffic_:
+当你收到一个主要流量为 Wifi 的捕获文件时，可以使用 WireShark 开始调查捕获中的所有 SSID，方法是选择 _Wireless --> WLAN Traffic_：
 
 ![](<../../../images/image (424).png>)
 
 ![](<../../../images/image (425).png>)
 
-## Brute Force
+## 暴力破解
 
-One of the columns of that screen indicates if **any authentication was found inside the pcap**. If that is the case you can try to Brute force it using `aircrack-ng`:
-
+该屏幕的其中一列指示是否在 pcap 中**发现了任何认证**。如果是这种情况，你可以尝试使用 `aircrack-ng` 进行暴力破解：
 ```bash
 aircrack-ng -w pwds-file.txt -b <BSSID> file.pcap
 ```
+例如，它将检索保护 PSK（预共享密钥）的 WPA 密码，这将在稍后解密流量时需要。
 
-For example it will retrieve the WPA passphrase protecting a PSK (pre shared-key), that will be required to decrypt the trafic later.
+# 信标中的数据 / 侧信道
 
-# Data in Beacons / Side Channel
+如果您怀疑 **数据在 Wifi 网络的信标中泄露**，可以使用以下过滤器检查网络的信标：`wlan contains <NAMEofNETWORK>`，或 `wlan.ssid == "NAMEofNETWORK"` 在过滤后的数据包中搜索可疑字符串。
 
-If you suspect that **data is being leaked inside beacons of a Wifi network** you can check the beacons of the network using a filter like the following one: `wlan contains <NAMEofNETWORK>`, or `wlan.ssid == "NAMEofNETWORK"` search inside the filtered packets for suspicious strings.
+# 在 Wifi 网络中查找未知 MAC 地址
 
-# Find Unknown MAC Addresses in A Wifi Network
-
-The following link will be useful to find the **machines sending data inside a Wifi Network**:
+以下链接将有助于查找 **在 Wifi 网络中发送数据的机器**：
 
 - `((wlan.ta == e8:de:27:16:70:c9) && !(wlan.fc == 0x8000)) && !(wlan.fc.type_subtype == 0x0005) && !(wlan.fc.type_subtype ==0x0004) && !(wlan.addr==ff:ff:ff:ff:ff:ff) && wlan.fc.type==2`
 
-If you already know **MAC addresses you can remove them from the output** adding checks like this one: `&& !(wlan.addr==5c:51:88:31:a0:3b)`
+如果您已经知道 **MAC 地址，可以通过添加检查将其从输出中移除**，例如：`&& !(wlan.addr==5c:51:88:31:a0:3b)`
 
-Once you have detected **unknown MAC** addresses communicating inside the network you can use **filters** like the following one: `wlan.addr==<MAC address> && (ftp || http || ssh || telnet)` to filter its traffic. Note that ftp/http/ssh/telnet filters are useful if you have decrypted the traffic.
+一旦您检测到 **在网络中通信的未知 MAC** 地址，可以使用 **过滤器**，例如：`wlan.addr==<MAC address> && (ftp || http || ssh || telnet)` 来过滤其流量。请注意，ftp/http/ssh/telnet 过滤器在您解密流量后非常有用。
 
-# Decrypt Traffic
+# 解密流量
 
-Edit --> Preferences --> Protocols --> IEEE 802.11--> Edit
+编辑 --> 首选项 --> 协议 --> IEEE 802.11 --> 编辑
 
 ![](<../../../images/image (426).png>)
 

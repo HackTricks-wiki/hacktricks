@@ -1,5 +1,6 @@
 {{#include ../../banners/hacktricks-training.md}}
 
+
 # Sudo/Admin Groups
 
 ## **PE - 方法 1**
@@ -34,13 +35,13 @@ cat /etc/polkit-1/localauthority.conf.d/*
 ```bash
 pkexec "/bin/sh" #You will be prompted for your user password
 ```
-如果您尝试执行 **pkexec** 并且收到此 **错误**：
+如果你尝试执行 **pkexec** 并且收到这个 **错误**：
 ```bash
 polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freedesktop.PolicyKit1.Error.Failed: No session for cookie
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-**这不是因为你没有权限，而是因为你没有通过 GUI 连接**。对此问题有一个解决方法在这里: [https://github.com/NixOS/nixpkgs/issues/18012\#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903)。你需要 **2 个不同的 ssh 会话**:
+**这不是因为你没有权限，而是因为你没有通过 GUI 连接**。对此问题有一个解决方法在这里: [https://github.com/NixOS/nixpkgs/issues/18012\#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903)。你需要 **2 个不同的 ssh 会话**：
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -57,7 +58,7 @@ pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 ```text
 %wheel	ALL=(ALL:ALL) ALL
 ```
-这意味着 **任何属于 wheel 组的用户都可以以 sudo 身份执行任何操作**。
+这意味着 **任何属于 wheel 组的用户都可以以 sudo 执行任何操作**。
 
 如果是这样，要 **成为 root，你只需执行**：
 ```text

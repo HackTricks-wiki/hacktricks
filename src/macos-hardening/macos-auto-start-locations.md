@@ -17,24 +17,24 @@
 #### 位置
 
 - **`/Library/LaunchAgents`**
-- **触发**: 重启
+- **触发器**: 重启
 - 需要根权限
 - **`/Library/LaunchDaemons`**
-- **触发**: 重启
+- **触发器**: 重启
 - 需要根权限
 - **`/System/Library/LaunchAgents`**
-- **触发**: 重启
+- **触发器**: 重启
 - 需要根权限
 - **`/System/Library/LaunchDaemons`**
-- **触发**: 重启
+- **触发器**: 重启
 - 需要根权限
 - **`~/Library/LaunchAgents`**
-- **触发**: 重新登录
+- **触发器**: 重新登录
 - **`~/Library/LaunchDemons`**
-- **触发**: 重新登录
+- **触发器**: 重新登录
 
 > [!TIP]
-> 有趣的是，**`launchd`** 在 Mach-o 部分 `__Text.__config` 中嵌入了一个属性列表，其中包含其他必须启动的知名服务。此外，这些服务可以包含 `RequireSuccess`、`RequireRun` 和 `RebootOnSuccess`，这意味着它们必须运行并成功完成。
+> 有趣的是，**`launchd`** 在 Mach-o 部分 `__Text.__config` 中嵌入了一个属性列表，其中包含 launchd 必须启动的其他知名服务。此外，这些服务可以包含 `RequireSuccess`、`RequireRun` 和 `RebootOnSuccess`，这意味着它们必须运行并成功完成。
 >
 > 当然，由于代码签名，它无法被修改。
 
@@ -42,8 +42,8 @@
 
 **`launchd`** 是 OX S 内核在启动时执行的 **第一个** **进程**，并且在关机时是最后一个完成的进程。它应该始终具有 **PID 1**。该进程将 **读取并执行** 在以下 **ASEP** **plist** 中指示的配置：
 
-- `/Library/LaunchAgents`: 管理员安装的每用户代理
-- `/Library/LaunchDaemons`: 管理员安装的系统范围守护进程
+- `/Library/LaunchAgents`: 由管理员安装的每用户代理
+- `/Library/LaunchDaemons`: 由管理员安装的系统范围守护进程
 - `/System/Library/LaunchAgents`: Apple 提供的每用户代理。
 - `/System/Library/LaunchDaemons`: Apple 提供的系统范围守护进程。
 
@@ -75,10 +75,10 @@
 在某些情况下，**代理需要在用户登录之前执行**，这些被称为**PreLoginAgents**。例如，这在登录时提供辅助技术是有用的。它们也可以在`/Library/LaunchAgents`中找到（请参见[**这里**](https://github.com/HelmutJ/CocoaSampleCode/tree/master/PreLoginAgents)的示例）。
 
 > [!NOTE]
-> 新的守护进程或代理配置文件将在**下次重启后或使用**`launchctl load <target.plist>`**加载**。也可以使用`launchctl -F <file>`加载没有该扩展名的.plist文件（但是这些plist文件在重启后不会自动加载）。\
+> 新的守护进程或代理配置文件将在**下次重启后或使用** `launchctl load <target.plist>` **加载**。也可以使用`launchctl -F <file>`加载没有该扩展名的.plist文件（但是这些plist文件在重启后不会自动加载）。\
 > 也可以使用`launchctl unload <target.plist>`进行**卸载**（指向的进程将被终止），
 >
-> 要**确保**没有**任何**（如覆盖）**阻止**代理或守护进程**运行**，请运行：`sudo launchctl load -w /System/Library/LaunchDaemos/com.apple.smdb.plist`
+> 为了**确保**没有**任何**（如覆盖）**阻止**代理或守护进程**运行**，请运行：`sudo launchctl load -w /System/Library/LaunchDaemos/com.apple.smdb.plist`
 
 列出当前用户加载的所有代理和守护进程：
 ```bash
@@ -150,7 +150,7 @@ echo "touch /tmp/hacktricks" >> ~/.zshrc
 ### 重新打开的应用程序
 
 > [!CAUTION]
-> 配置所指示的利用和注销再登录或甚至重启对我执行应用程序没有效果。（应用程序没有被执行，也许在执行这些操作时需要它正在运行）
+> 配置所指示的利用和注销再登录或甚至重启对我执行应用程序没有效果。（应用程序没有被执行，也许在执行这些操作时需要保持运行）
 
 **写作**: [https://theevilbit.github.io/beyond/beyond_0021/](https://theevilbit.github.io/beyond/beyond_0021/)
 
@@ -160,7 +160,7 @@ echo "touch /tmp/hacktricks" >> ~/.zshrc
 #### 位置
 
 - **`~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist`**
-- **触发**: 重启重新打开应用程序
+- **触发器**: 重启重新打开应用程序
 
 #### 描述与利用
 
@@ -221,9 +221,9 @@ plutil -p ~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist
 }
 [...]
 ```
-所以，如果系统中终端的偏好设置的plist可以被覆盖，那么**`open`**功能可以用来**打开终端并执行该命令**。
+因此，如果系统中终端的首选项 plist 可以被覆盖，那么 **`open`** 功能可以用来 **打开终端并执行该命令**。
 
-你可以通过cli添加这个：
+您可以通过 CLI 添加此内容：
 ```bash
 # Add
 /usr/libexec/PlistBuddy -c "Set :\"Window Settings\":\"Basic\":\"CommandString\" 'touch /tmp/terminal-start-command'" $HOME/Library/Preferences/com.apple.Terminal.plist
@@ -327,7 +327,7 @@ open /tmp/test.terminal
 
 当您 **触发文件的预览**（在 Finder 中选择文件后按空格键）并且安装了 **支持该文件类型的插件** 时，可以执行 QuickLook 插件。
 
-可以编译您自己的 QuickLook 插件，将其放置在上述位置之一以加载，然后转到支持的文件并按空格键以触发它。
+可以编译自己的 QuickLook 插件，将其放置在上述位置之一以加载，然后转到支持的文件并按空格键以触发它。
 
 ### ~~登录/注销钩子~~
 
@@ -376,7 +376,7 @@ defaults delete com.apple.loginwindow LogoutHook
 ## 条件沙箱绕过
 
 > [!TIP]
-> 在这里您可以找到对 **沙箱绕过** 有用的启动位置，允许您通过 **将其写入文件** 并 **期望不太常见的条件**，如特定的 **已安装程序**、"不常见" 用户 **操作** 或环境，简单地执行某些内容。
+> 在这里您可以找到对 **沙箱绕过** 有用的启动位置，允许您通过 **将其写入文件** 并 **期望不太常见的条件**（如特定的 **已安装程序**、"不常见" 用户 **操作** 或环境）来简单地执行某些操作。
 
 ### Cron
 
@@ -390,7 +390,7 @@ defaults delete com.apple.loginwindow LogoutHook
 #### 位置
 
 - **`/usr/lib/cron/tabs/`, `/private/var/at/tabs`, `/private/var/at/jobs`, `/etc/periodic/`**
-- 直接写入访问需要根权限。如果您可以执行 `crontab <file>`，则不需要根权限
+- 直接写入访问需要根权限。如果您可以执行 `crontab <file>` 则不需要根权限
 - **触发**: 取决于 cron 作业
 
 #### 描述与利用
@@ -406,7 +406,7 @@ crontab -l
 # The one with the cron jobs is /usr/lib/cron/tabs/
 ls -lR /usr/lib/cron/tabs/ /private/var/at/jobs /etc/periodic/
 ```
-您可以找到常规的 **cron** **作业**、**at** **作业**（不常用）和 **周期性** **作业**（主要用于清理临时文件）。每日周期性作业可以通过以下方式执行，例如：`periodic daily`。
+您可以找到常规的 **cron** **作业**、**at** **作业**（不常用）和 **周期性** **作业**（主要用于清理临时文件）。每日周期性作业可以通过以下方式执行：`periodic daily`。
 
 要以编程方式添加 **用户 cronjob**，可以使用：
 ```bash
@@ -421,7 +421,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0002/](https://theevilbit.g
 - TCC 绕过: [✅](https://emojipedia.org/check-mark-button)
 - iTerm2 曾经拥有授予的 TCC 权限
 
-#### 位置
+#### Locations
 
 - **`~/Library/Application Support/iTerm2/Scripts/AutoLaunch`**
 - **触发器**: 打开 iTerm
@@ -430,7 +430,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0002/](https://theevilbit.g
 - **`~/Library/Preferences/com.googlecode.iterm2.plist`**
 - **触发器**: 打开 iTerm
 
-#### 描述与利用
+#### Description & Exploitation
 
 存储在 **`~/Library/Application Support/iTerm2/Scripts/AutoLaunch`** 中的脚本将被执行。例如:
 ```bash
@@ -525,12 +525,12 @@ chmod +x "$HOME/Library/Application Support/xbar/plugins/a.sh"
 - TCC 绕过: [✅](https://emojipedia.org/check-mark-button)
 - 它请求辅助功能权限
 
-#### Location
+#### 位置
 
 - **`~/.hammerspoon/init.lua`**
-- **Trigger**: 一旦执行 hammerspoon
+- **触发**: 一旦执行 hammerspoon
 
-#### Description
+#### 描述
 
 [**Hammerspoon**](https://github.com/Hammerspoon/hammerspoon) 作为 **macOS** 的自动化平台，利用 **LUA 脚本语言** 进行操作。值得注意的是，它支持完整的 AppleScript 代码集成和 shell 脚本的执行，显著增强了其脚本能力。
 
@@ -585,7 +585,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0006/](https://theevilbit.g
 - **触发器**: 通过 ssh 登录
 
 > [!CAUTION]
-> 启用 ssh 需要完全磁盘访问:
+> 启用 ssh 需要完全磁盘访问权限:
 >
 > ```bash
 > sudo systemsetup -setremotelogin on
@@ -628,13 +628,13 @@ osascript -e 'tell application "System Events" to delete login item "itemname"'
 ```
 这些项目存储在文件 **`~/Library/Application Support/com.apple.backgroundtaskmanagementagent`**
 
-**登录项** 也可以通过 API [SMLoginItemSetEnabled](https://developer.apple.com/documentation/servicemanagement/1501557-smloginitemsetenabled?language=objc) 指示，该配置将存储在 **`/var/db/com.apple.xpc.launchd/loginitems.501.plist`**
+**登录项** 也可以通过使用 API [SMLoginItemSetEnabled](https://developer.apple.com/documentation/servicemanagement/1501557-smloginitemsetenabled?language=objc) 来指示，这将把配置存储在 **`/var/db/com.apple.xpc.launchd/loginitems.501.plist`**
 
 ### ZIP 作为登录项
 
 （查看关于登录项的前一部分，这是一个扩展）
 
-如果将 **ZIP** 文件存储为 **登录项**，则 **`Archive Utility`** 将打开它，如果该 zip 例如存储在 **`~/Library`** 中并包含文件夹 **`LaunchAgents/file.plist`** 及后门，则该文件夹将被创建（默认情况下并不存在），plist 将被添加，因此下次用户再次登录时，**plist 中指示的后门将被执行**。
+如果将 **ZIP** 文件存储为 **登录项**，则 **`Archive Utility`** 将打开它，如果该 zip 例如存储在 **`~/Library`** 中并包含文件夹 **`LaunchAgents/file.plist`** 以及一个后门，则该文件夹将被创建（默认情况下并不存在），plist 将被添加，因此下次用户再次登录时，**plist 中指示的后门将被执行**。
 
 另一个选项是在用户 HOME 中创建文件 **`.bash_profile`** 和 **`.zshenv**，这样如果文件夹 LaunchAgents 已经存在，这种技术仍然有效。
 
@@ -721,21 +721,21 @@ total 32
 
 ### 文件夹操作
 
-写作: [https://theevilbit.github.io/beyond/beyond_0024/](https://theevilbit.github.io/beyond/beyond_0024/)\
-写作: [https://posts.specterops.io/folder-actions-for-persistence-on-macos-8923f222343d](https://posts.specterops.io/folder-actions-for-persistence-on-macos-8923f222343d)
+写作：[https://theevilbit.github.io/beyond/beyond_0024/](https://theevilbit.github.io/beyond/beyond_0024/)\
+写作：[https://posts.specterops.io/folder-actions-for-persistence-on-macos-8923f222343d](https://posts.specterops.io/folder-actions-for-persistence-on-macos-8923f222343d)
 
-- 有助于绕过沙盒: [✅](https://emojipedia.org/check-mark-button)
-- 但你需要能够调用 `osascript` 并带有参数以联系 **`System Events`** 来配置文件夹操作
-- TCC 绕过: [🟠](https://emojipedia.org/large-orange-circle)
+- 有助于绕过沙盒：[✅](https://emojipedia.org/check-mark-button)
+- 但你需要能够带参数调用 `osascript` 来联系 **`System Events`** 以配置文件夹操作
+- TCC 绕过：[🟠](https://emojipedia.org/large-orange-circle)
 - 它具有一些基本的 TCC 权限，如桌面、文档和下载
 
 #### 位置
 
 - **`/Library/Scripts/Folder Action Scripts`**
 - 需要 root 权限
-- **触发**: 访问指定文件夹
+- **触发**：访问指定文件夹
 - **`~/Library/Scripts/Folder Action Scripts`**
-- **触发**: 访问指定文件夹
+- **触发**：访问指定文件夹
 
 #### 描述与利用
 
@@ -744,7 +744,7 @@ total 32
 要设置文件夹操作，你可以选择：
 
 1. 使用 [Automator](https://support.apple.com/guide/automator/welcome/mac) 创建文件夹操作工作流并将其安装为服务。
-2. 通过文件夹的上下文菜单中的文件夹操作设置手动附加脚本。
+2. 通过文件夹的上下文菜单手动附加脚本。
 3. 利用 OSAScript 向 `System Events.app` 发送 Apple Event 消息，以编程方式设置文件夹操作。
 - 这种方法特别适合将操作嵌入系统，提供一定程度的持久性。
 
@@ -772,7 +772,7 @@ var fa = se.FolderAction({ name: "Desktop", path: "/Users/username/Desktop" })
 se.folderActions.push(fa)
 fa.scripts.push(myScript)
 ```
-运行设置脚本：
+使用以下命令运行设置脚本：
 ```bash
 osascript -l JavaScript /Users/username/attach.scpt
 ```
@@ -802,9 +802,9 @@ mv /tmp/folder.scpt "$HOME/Library/Scripts/Folder Action Scripts"
 
 现在，让我们尝试在没有 GUI 访问的情况下准备这个持久性：
 
-1. **复制 `~/Library/Preferences/com.apple.FolderActionsDispatcher.plist`** 到 `/tmp` 进行备份：
+1. **将 `~/Library/Preferences/com.apple.FolderActionsDispatcher.plist`** 复制到 `/tmp` 以备份：
 - `cp ~/Library/Preferences/com.apple.FolderActionsDispatcher.plist /tmp`
-2. **移除** 您刚设置的文件夹操作：
+2. **删除** 您刚刚设置的文件夹操作：
 
 <figure><img src="../images/image (40).png" alt=""><figcaption></figcaption></figure>
 
@@ -818,11 +818,11 @@ mv /tmp/folder.scpt "$HOME/Library/Scripts/Folder Action Scripts"
 
 ### Dock 快捷方式
 
-写作： [https://theevilbit.github.io/beyond/beyond_0027/](https://theevilbit.github.io/beyond/beyond_0027/)
+写作：[https://theevilbit.github.io/beyond/beyond_0027/](https://theevilbit.github.io/beyond/beyond_0027/)
 
-- 有助于绕过沙盒： [✅](https://emojipedia.org/check-mark-button)
-- 但您需要在系统中安装恶意应用程序
-- TCC 绕过： [🔴](https://emojipedia.org/large-red-circle)
+- 有助于绕过沙盒：[✅](https://emojipedia.org/check-mark-button)
+- 但您需要在系统内安装恶意应用程序
+- TCC 绕过：[🔴](https://emojipedia.org/large-red-circle)
 
 #### 位置
 
@@ -831,7 +831,7 @@ mv /tmp/folder.scpt "$HOME/Library/Scripts/Folder Action Scripts"
 
 #### 描述与利用
 
-所有出现在 Dock 中的应用程序都在 plist 中指定： **`~/Library/Preferences/com.apple.dock.plist`**
+所有出现在 Dock 中的应用程序都在 plist 中指定：**`~/Library/Preferences/com.apple.dock.plist`**
 
 只需通过以下方式即可 **添加应用程序**：
 ```bash
@@ -913,7 +913,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0017](https://theevilbit.gi
 
 #### 描述与利用
 
-**编译一个颜色选择器** 包含你的代码（你可以使用 [**这个例子**](https://github.com/viktorstrate/color-picker-plus)）并添加一个构造函数（如在 [屏幕保护程序部分](macos-auto-start-locations.md#screen-saver) 中）并将包复制到 `~/Library/ColorPickers`。
+**编译一个颜色选择器** 包含你的代码（你可以使用 [**这个作为例子**](https://github.com/viktorstrate/color-picker-plus)）并添加一个构造函数（如在 [屏幕保护程序部分](macos-auto-start-locations.md#screen-saver) 中）并将包复制到 `~/Library/ColorPickers`。
 
 然后，当颜色选择器被触发时，你的代码也应该被触发。
 
@@ -942,7 +942,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0017](https://theevilbit.gi
 
 一个带有 Finder Sync 扩展的应用程序示例 [**可以在这里找到**](https://github.com/D00MFist/InSync)。
 
-应用程序可以拥有 `Finder Sync Extensions`。这个扩展将嵌入到将要执行的应用程序中。此外，为了使扩展能够执行其代码，它 **必须被签名**，并且必须拥有有效的 Apple 开发者证书，它必须是 **沙盒化的**（尽管可以添加放宽的例外），并且必须注册为类似于:
+应用程序可以具有 `Finder Sync Extensions`。此扩展将嵌入到将要执行的应用程序中。此外，为了使扩展能够执行其代码，它 **必须被签名**，并且必须具有有效的 Apple 开发者证书，它必须是 **沙盒化的**（尽管可以添加放宽的例外），并且必须注册为类似于：
 ```bash
 pluginkit -a /Applications/FindIt.app/Contents/PlugIns/FindItSync.appex
 pluginkit -e use -i com.example.InSync.InSync
@@ -952,8 +952,8 @@ pluginkit -e use -i com.example.InSync.InSync
 Writeup: [https://theevilbit.github.io/beyond/beyond_0016/](https://theevilbit.github.io/beyond/beyond_0016/)\
 Writeup: [https://posts.specterops.io/saving-your-access-d562bf5bf90b](https://posts.specterops.io/saving-your-access-d562bf5bf90b)
 
-- 有助于绕过沙箱: [🟠](https://emojipedia.org/large-orange-circle)
-- 但你将进入一个常见的应用程序沙箱
+- 有助于绕过沙盒: [🟠](https://emojipedia.org/large-orange-circle)
+- 但你将进入一个常见的应用程序沙盒
 - TCC 绕过: [🔴](https://emojipedia.org/large-red-circle)
 
 #### 位置
@@ -971,9 +971,9 @@ Writeup: [https://posts.specterops.io/saving-your-access-d562bf5bf90b](https://p
 
 #### 描述与利用
 
-在 Xcode 中创建一个新项目，并选择模板以生成新的 **屏幕保护程序**。然后，将你的代码添加到其中，例如以下代码以生成日志。
+在 Xcode 中创建一个新项目，并选择模板以生成新的 **Screen Saver**。然后，将你的代码添加到其中，例如以下代码以生成日志。
 
-**构建**它，并将 `.saver` 包复制到 **`~/Library/Screen Savers`**。然后，打开屏幕保护程序 GUI，点击它，它应该会生成大量日志：
+**构建**它，并将 `.saver` 包复制到 **`~/Library/Screen Savers`**。然后，打开屏幕保护程序 GUI，点击它，应该会生成大量日志：
 ```bash
 sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "hello_screensaver"'
 
@@ -1081,9 +1081,9 @@ Spotlight 是 macOS 内置的搜索功能，旨在为用户提供 **快速而全
 
 Spotlight 的基本机制涉及一个名为 'mds' 的中央进程，代表 **'metadata server'**。该进程协调整个 Spotlight 服务。与此相辅相成的是多个 'mdworker' 守护进程，它们执行各种维护任务，例如索引不同类型的文件 (`ps -ef | grep mdworker`)。这些任务通过 Spotlight 导入插件或 **".mdimporter bundles"** 实现，使 Spotlight 能够理解和索引各种文件格式的内容。
 
-插件或 **`.mdimporter`** 包位于前面提到的位置，如果出现新的包，它会在一分钟内加载（无需重启任何服务）。这些包需要指明它们可以管理的 **文件类型和扩展名**，这样，当创建具有指定扩展名的新文件时，Spotlight 将使用它们。
+插件或 **`.mdimporter`** 包位于前面提到的位置，如果出现新的包，它会在一分钟内加载（无需重启任何服务）。这些包需要指明它们可以管理的 **文件类型和扩展名**，这样，Spotlight 在创建具有指定扩展名的新文件时将使用它们。
 
-可以通过运行 **find all the `mdimporters`** 来找到所有加载的内容:
+可以通过运行 **find all the `mdimporters`** 来找到所有已加载的内容:
 ```bash
 mdimport -L
 Paths: id(501) (
@@ -1133,21 +1133,21 @@ plutil -p /Library/Spotlight/iBooksAuthor.mdimporter/Contents/Info.plist
 >
 > 此外，系统默认插件总是优先，因此攻击者只能访问未被苹果自己的 `mdimporters` 索引的文件。
 
-要创建你自己的导入器，你可以从这个项目开始：[https://github.com/megrimm/pd-spotlight-importer](https://github.com/megrimm/pd-spotlight-importer)，然后更改名称、**`CFBundleDocumentTypes`** 并添加 **`UTImportedTypeDeclarations`**，以便支持你想要支持的扩展，并在 **`schema.xml`** 中反映它们。\
-然后 **更改** 函数 **`GetMetadataForFile`** 的代码，以便在创建具有处理扩展名的文件时执行你的有效载荷。
+要创建你自己的导入器，你可以从这个项目开始：[https://github.com/megrimm/pd-spotlight-importer](https://github.com/megrimm/pd-spotlight-importer)，然后更改名称、**`CFBundleDocumentTypes`** 并添加 **`UTImportedTypeDeclarations`**，以便支持你希望支持的扩展，并在 **`schema.xml`** 中反映它们。\
+然后 **更改** 函数 **`GetMetadataForFile`** 的代码，以在创建具有处理扩展名的文件时执行你的有效载荷。
 
-最后 **构建并复制你的新 `.mdimporter`** 到之前的某个位置，你可以通过 **监控日志** 或检查 **`mdimport -L.`** 来查看它是否被加载。
+最后 **构建并复制你的新 `.mdimporter`** 到之前的一个位置，你可以通过 **监控日志** 或检查 **`mdimport -L.`** 来查看它是否被加载。
 
-### ~~偏好面板~~
+### ~~偏好设置面板~~
 
 > [!CAUTION]
-> 这似乎不再有效。
+> 看起来这不再有效。
 
 写作： [https://theevilbit.github.io/beyond/beyond_0009/](https://theevilbit.github.io/beyond/beyond_0009/)
 
-- 有助于绕过沙箱：[🟠](https://emojipedia.org/large-orange-circle)
-- 需要特定用户操作
-- TCC 绕过：[🔴](https://emojipedia.org/large-red-circle)
+- 有助于绕过沙盒： [🟠](https://emojipedia.org/large-orange-circle)
+- 需要特定的用户操作
+- TCC 绕过： [🔴](https://emojipedia.org/large-red-circle)
 
 #### 位置
 
@@ -1157,29 +1157,29 @@ plutil -p /Library/Spotlight/iBooksAuthor.mdimporter/Contents/Info.plist
 
 #### 描述
 
-这似乎不再有效。
+看起来这不再有效。
 
-## 根沙箱绕过
+## 根沙盒绕过
 
 > [!TIP]
-> 在这里你可以找到有用的启动位置，用于 **沙箱绕过**，允许你通过 **写入文件** 以 **root** 身份简单地执行某些操作，和/或需要其他 **奇怪的条件**。
+> 在这里你可以找到有用的启动位置，用于 **沙盒绕过**，允许你通过 **写入文件** 以 **root** 身份简单地执行某些操作，和/或需要其他 **奇怪的条件**。
 
 ### 定期
 
-写作：[https://theevilbit.github.io/beyond/beyond_0019/](https://theevilbit.github.io/beyond/beyond_0019/)
+写作： [https://theevilbit.github.io/beyond/beyond_0019/](https://theevilbit.github.io/beyond/beyond_0019/)
 
-- 有助于绕过沙箱：[🟠](https://emojipedia.org/large-orange-circle)
+- 有助于绕过沙盒： [🟠](https://emojipedia.org/large-orange-circle)
 - 但你需要是 root
-- TCC 绕过：[🔴](https://emojipedia.org/large-red-circle)
+- TCC 绕过： [🔴](https://emojipedia.org/large-red-circle)
 
 #### 位置
 
 - `/etc/periodic/daily`, `/etc/periodic/weekly`, `/etc/periodic/monthly`, `/usr/local/etc/periodic`
 - 需要 root
-- **触发**：当时间到来时
+- **触发**： 当时间到来时
 - `/etc/daily.local`, `/etc/weekly.local` 或 `/etc/monthly.local`
 - 需要 root
-- **触发**：当时间到来时
+- **触发**： 当时间到来时
 
 #### 描述与利用
 
@@ -1224,7 +1224,7 @@ monthly_local="/etc/monthly.local"			# Local scripts
 如果您成功写入任何文件 `/etc/daily.local`、`/etc/weekly.local` 或 `/etc/monthly.local`，它将会 **迟早被执行**。
 
 > [!WARNING]
-> 请注意，周期性脚本将会 **以脚本的所有者身份执行**。因此，如果常规用户拥有该脚本，它将以该用户身份执行（这可能会防止特权升级攻击）。
+> 请注意，周期性脚本将以 **脚本的所有者身份执行**。因此，如果常规用户拥有该脚本，它将以该用户身份执行（这可能会防止特权升级攻击）。
 
 ### PAM
 
@@ -1247,11 +1247,11 @@ monthly_local="/etc/monthly.local"			# Local scripts
 ```bash
 ls -l /etc/pam.d
 ```
-一种利用PAM的持久性/特权提升技术，修改模块/etc/pam.d/sudo，在开头添加以下行：
+一种利用PAM的持久性/特权提升技术就像修改模块 /etc/pam.d/sudo 在开头添加以下行一样简单：
 ```bash
 auth       sufficient     pam_permit.so
 ```
-所以它看起来像这样：
+所以它将**看起来**像这样：
 ```bash
 # sudo: auth account password session
 auth       sufficient     pam_permit.so
@@ -1284,18 +1284,18 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0028/](https://theevilbit.g
 Writeup: [https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65](https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65)
 
 - 有助于绕过沙盒: [🟠](https://emojipedia.org/large-orange-circle)
-- 但你需要是root并进行额外配置
+- 但你需要是 root 并进行额外配置
 - TCC 绕过: ???
 
 #### 位置
 
 - `/Library/Security/SecurityAgentPlugins/`
-- 需要root权限
+- 需要 root 权限
 - 还需要配置授权数据库以使用该插件
 
 #### 描述与利用
 
-你可以创建一个授权插件，当用户登录时执行以保持持久性。有关如何创建这些插件的更多信息，请查看之前的写作（并且要小心，写得不好的插件可能会锁定你，你需要从恢复模式清理你的mac）。
+你可以创建一个授权插件，当用户登录时执行以保持持久性。有关如何创建这些插件的更多信息，请查看之前的写作（并且要小心，写得不好的插件可能会锁定你，你需要从恢复模式清理你的 Mac）。
 ```objectivec
 // Compile the code and create a real bundle
 // gcc -bundle -framework Foundation main.m -o CustomAuth
@@ -1339,27 +1339,27 @@ security authorizationdb write com.asdf.asdf < /tmp/rule.plist
 ```bash
 security authorize com.asdf.asdf
 ```
-然后 **staff 组应该具有 sudo** 访问权限（阅读 `/etc/sudoers` 以确认）。
+然后**staff组应该具有sudo**访问权限（阅读`/etc/sudoers`以确认）。
 
 ### Man.conf
 
 写作：[https://theevilbit.github.io/beyond/beyond_0030/](https://theevilbit.github.io/beyond/beyond_0030/)
 
 - 有助于绕过沙箱：[🟠](https://emojipedia.org/large-orange-circle)
-- 但你需要是 root，用户必须使用 man
-- TCC 绕过：[🔴](https://emojipedia.org/large-red-circle)
+- 但你需要是root，用户必须使用man
+- TCC绕过：[🔴](https://emojipedia.org/large-red-circle)
 
 #### 位置
 
 - **`/private/etc/man.conf`**
-- 需要 root
-- **`/private/etc/man.conf`**：每当使用 man 时
+- 需要root权限
+- **`/private/etc/man.conf`**：每当使用man时
 
 #### 描述与利用
 
-配置文件 **`/private/etc/man.conf`** 指定在打开 man 文档文件时使用的二进制文件/脚本。因此，可以修改可执行文件的路径，以便每当用户使用 man 阅读文档时，都会执行一个后门。
+配置文件**`/private/etc/man.conf`**指示在打开man文档文件时使用的二进制文件/脚本。因此，可以修改可执行文件的路径，以便每当用户使用man阅读文档时，都会执行一个后门。
 
-例如设置在 **`/private/etc/man.conf`**：
+例如在**`/private/etc/man.conf`**中设置：
 ```
 MANPAGER /tmp/view
 ```
@@ -1392,7 +1392,7 @@ touch /tmp/manconf
 ```bash
 LoadModule my_custom_module /Users/Shared/example.dylib "My Signature Authority"
 ```
-这样，您的编译模块将由 Apache 加载。唯一的要求是您需要 **用有效的 Apple 证书签名**，或者您需要 **在系统中添加一个新的受信任证书** 并 **用它签名**。
+这样，您的编译模块将由 Apache 加载。唯一需要注意的是，您要么需要 **用有效的 Apple 证书签名**，要么需要 **在系统中添加一个新的受信任证书** 并 **用它签名**。
 
 然后，如果需要，您可以执行以下操作以确保服务器启动：
 ```bash
@@ -1426,7 +1426,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0031/](https://theevilbit.g
 
 #### 描述与利用
 
-每当auditd检测到警告时，脚本**`/etc/security/audit_warn`**会被**执行**。所以你可以在其中添加你的有效载荷。
+每当auditd检测到警告时，脚本**`/etc/security/audit_warn`**会被**执行**。因此你可以在其中添加你的有效载荷。
 ```bash
 echo "touch /tmp/auditd_warn" >> /etc/security/audit_warn
 ```
@@ -1492,7 +1492,7 @@ RunService "$1"
 
 写作: [https://theevilbit.github.io/beyond/beyond_0023/](https://theevilbit.github.io/beyond/beyond_0023/)
 
-由苹果引入，**emond** 是一种日志记录机制，似乎尚未开发或可能被遗弃，但仍然可以访问。虽然对 Mac 管理员并没有特别的好处，但这个晦涩的服务可能作为威胁行为者的微妙持久性方法，可能不会被大多数 macOS 管理员注意到。
+由苹果引入，**emond** 是一种日志记录机制，似乎尚未开发或可能被遗弃，但仍然可以访问。虽然对 Mac 管理员并没有特别的好处，但这个模糊的服务可能作为威胁行为者的微妙持久性方法，可能不会被大多数 macOS 管理员注意到。
 
 对于那些知道其存在的人，识别 **emond** 的任何恶意使用是简单的。该服务的系统 LaunchDaemon 在一个目录中寻找要执行的脚本。要检查这一点，可以使用以下命令：
 ```bash
@@ -1510,12 +1510,12 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0018/](https://theevilbit.g
 
 #### 描述与利用
 
-XQuartz在**macOS中不再安装**，所以如果你想要更多信息，请查看写作。
+XQuartz **不再安装在macOS中**，所以如果你想要更多信息，请查看写作。
 
 ### ~~kext~~
 
 > [!CAUTION]
-> 即使作为root安装kext也非常复杂，因此我不会考虑这作为逃避沙箱或持久性的手段（除非你有一个漏洞）
+> 即使作为root安装kext也非常复杂，因此我不会考虑这作为逃避沙箱或持久性的方法（除非你有一个漏洞）
 
 #### 位置
 
@@ -1534,7 +1534,7 @@ kextload -b com.apple.driver.ExampleBundle #Load a new one based on path
 kextunload /path/to/kext.kext
 kextunload -b com.apple.driver.ExampleBundle
 ```
-有关[**内核扩展的更多信息，请查看本节**](macos-security-and-privilege-escalation/mac-os-architecture/#i-o-kit-drivers)。
+有关更多信息，请查看[**内核扩展，请查看此部分**](macos-security-and-privilege-escalation/mac-os-architecture/#i-o-kit-drivers)。
 
 ### ~~amstoold~~
 
@@ -1547,7 +1547,7 @@ kextunload -b com.apple.driver.ExampleBundle
 
 #### 描述与利用
 
-显然，来自`/System/Library/LaunchAgents/com.apple.amstoold.plist`的`plist`在暴露XPC服务时使用了这个二进制文件……问题是这个二进制文件并不存在，因此你可以在这里放置一些东西，当XPC服务被调用时，你的二进制文件将被调用。
+显然，来自`/System/Library/LaunchAgents/com.apple.amstoold.plist`的`plist`正在使用这个二进制文件，同时暴露了一个XPC服务……问题是这个二进制文件并不存在，因此你可以在这里放置一些东西，当XPC服务被调用时，你的二进制文件将被调用。
 
 我在我的macOS中找不到这个。
 
@@ -1563,11 +1563,11 @@ kextunload -b com.apple.driver.ExampleBundle
 
 #### 描述与利用
 
-显然，运行这个脚本并不常见，我甚至在我的macOS中找不到它，所以如果你想要更多信息，请查看写作。
+显然，运行这个脚本并不常见，我甚至在我的macOS中找不到它，因此如果你想要更多信息，请查看写作。
 
 ### ~~/etc/rc.common~~
 
-> [!CAUTION] > **这在现代MacOS版本中不起作用**
+> [!CAUTION] > **在现代MacOS版本中不起作用**
 
 在这里也可以放置**将在启动时执行的命令。** 示例是常规的rc.common脚本:
 ```bash

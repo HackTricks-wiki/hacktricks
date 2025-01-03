@@ -24,7 +24,7 @@ macos-security-protections/macos-tcc/
 
 你可以在 Linux 提权帖子中找到原始的 [Sudo 劫持技巧](../../linux-hardening/privilege-escalation/#sudo-hijacking)。
 
-然而，macOS **维护** 用户的 **`PATH`** 当他执行 **`sudo`** 时。这意味着实现此攻击的另一种方法是 **劫持其他二进制文件**，这些文件在 **运行 sudo** 时受害者仍会执行：
+然而，macOS **保持** 用户的 **`PATH`** 当他执行 **`sudo`** 时。这意味着实现此攻击的另一种方法是 **劫持其他二进制文件**，这些文件在受害者 **运行 sudo** 时仍会被执行：
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
 cat > /opt/homebrew/bin/ls <<EOF
@@ -126,9 +126,9 @@ killall Dock
 
 - 你**无法从 Dock 中移除 Finder**，所以如果你要将其添加到 Dock 中，可以将假 Finder 放在真实 Finder 的旁边。为此，你需要**将假 Finder 条目添加到 Dock 数组的开头**。
 - 另一个选项是不要将其放在 Dock 中，只需打开它，“Finder 请求控制 Finder”并不奇怪。
-- 另一个选项是**在不询问**密码的情况下提升到 root 权限，使用一个可怕的框，实际上让 Finder 请求密码以执行特权操作：
-- 请求 Finder 将一个新的 **`sudo`** 文件复制到 **`/etc/pam.d`**（提示请求密码将表明“Finder 想要复制 sudo”）
-- 请求 Finder 复制一个新的 **Authorization Plugin**（你可以控制文件名，以便提示请求密码将表明“Finder 想要复制 Finder.bundle”）
+- 另一个选项是**在不询问**密码的情况下提升到 root 权限，使用一个可怕的框，要求 Finder 真的询问密码以执行特权操作：
+- 要求 Finder 将一个新的 **`sudo`** 文件复制到 **`/etc/pam.d`**（提示要求密码将指示“Finder 想要复制 sudo”）
+- 要求 Finder 复制一个新的 **Authorization Plugin**（你可以控制文件名，以便提示要求密码将指示“Finder 想要复制 Finder.bundle”）
 ```bash
 #!/bin/sh
 
@@ -230,7 +230,7 @@ ls /tmp/snap/Users/admin_user # This will work
 
 ## 敏感信息
 
-这可以用于提升权限：
+这对于提升权限可能很有用：
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-sensitive-locations.md

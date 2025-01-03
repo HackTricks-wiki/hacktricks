@@ -1,139 +1,129 @@
-# Browser Artifacts
+# 浏览器伪影
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="../../../images/image (48).png" alt=""><figcaption></figcaption></figure>
+## 浏览器伪影 <a href="#id-3def" id="id-3def"></a>
 
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=browser-artifacts) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+浏览器伪影包括由网络浏览器存储的各种类型的数据，例如导航历史、书签和缓存数据。这些伪影保存在操作系统中的特定文件夹中，不同浏览器的存储位置和名称各异，但通常存储相似类型的数据。
 
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=browser-artifacts" %}
+以下是最常见的浏览器伪影的总结：
 
-## Browsers Artifacts <a href="#id-3def" id="id-3def"></a>
-
-Browser artifacts include various types of data stored by web browsers, such as navigation history, bookmarks, and cache data. These artifacts are kept in specific folders within the operating system, differing in location and name across browsers, yet generally storing similar data types.
-
-Here's a summary of the most common browser artifacts:
-
-- **Navigation History**: Tracks user visits to websites, useful for identifying visits to malicious sites.
-- **Autocomplete Data**: Suggestions based on frequent searches, offering insights when combined with navigation history.
-- **Bookmarks**: Sites saved by the user for quick access.
-- **Extensions and Add-ons**: Browser extensions or add-ons installed by the user.
-- **Cache**: Stores web content (e.g., images, JavaScript files) to improve website loading times, valuable for forensic analysis.
-- **Logins**: Stored login credentials.
-- **Favicons**: Icons associated with websites, appearing in tabs and bookmarks, useful for additional information on user visits.
-- **Browser Sessions**: Data related to open browser sessions.
-- **Downloads**: Records of files downloaded through the browser.
-- **Form Data**: Information entered in web forms, saved for future autofill suggestions.
-- **Thumbnails**: Preview images of websites.
-- **Custom Dictionary.txt**: Words added by the user to the browser's dictionary.
+- **导航历史**：跟踪用户访问的网站，识别访问恶意网站的情况。
+- **自动完成数据**：基于频繁搜索的建议，与导航历史结合时提供洞察。
+- **书签**：用户保存以便快速访问的网站。
+- **扩展和附加组件**：用户安装的浏览器扩展或附加组件。
+- **缓存**：存储网页内容（例如，图像、JavaScript 文件），以提高网站加载速度，对取证分析有价值。
+- **登录信息**：存储的登录凭据。
+- **网站图标**：与网站相关的图标，出现在标签和书签中，有助于提供用户访问的额外信息。
+- **浏览器会话**：与打开的浏览器会话相关的数据。
+- **下载**：通过浏览器下载的文件记录。
+- **表单数据**：在网页表单中输入的信息，保存以供将来的自动填充建议。
+- **缩略图**：网站的预览图像。
+- **自定义字典.txt**：用户添加到浏览器字典中的单词。
 
 ## Firefox
 
-Firefox organizes user data within profiles, stored in specific locations based on the operating system:
+Firefox 在用户数据中组织配置文件，存储在基于操作系统的特定位置：
 
 - **Linux**: `~/.mozilla/firefox/`
 - **MacOS**: `/Users/$USER/Library/Application Support/Firefox/Profiles/`
 - **Windows**: `%userprofile%\AppData\Roaming\Mozilla\Firefox\Profiles\`
 
-A `profiles.ini` file within these directories lists the user profiles. Each profile's data is stored in a folder named in the `Path` variable within `profiles.ini`, located in the same directory as `profiles.ini` itself. If a profile's folder is missing, it may have been deleted.
+这些目录中的 `profiles.ini` 文件列出了用户配置文件。每个配置文件的数据存储在 `profiles.ini` 中 `Path` 变量命名的文件夹中，位于与 `profiles.ini` 本身相同的目录中。如果配置文件的文件夹缺失，可能已被删除。
 
-Within each profile folder, you can find several important files:
+在每个配置文件文件夹中，您可以找到几个重要文件：
 
-- **places.sqlite**: Stores history, bookmarks, and downloads. Tools like [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing_history_view.html) on Windows can access the history data.
-  - Use specific SQL queries to extract history and downloads information.
-- **bookmarkbackups**: Contains backups of bookmarks.
-- **formhistory.sqlite**: Stores web form data.
-- **handlers.json**: Manages protocol handlers.
-- **persdict.dat**: Custom dictionary words.
-- **addons.json** and **extensions.sqlite**: Information on installed add-ons and extensions.
-- **cookies.sqlite**: Cookie storage, with [MZCookiesView](https://www.nirsoft.net/utils/mzcv.html) available for inspection on Windows.
-- **cache2/entries** or **startupCache**: Cache data, accessible through tools like [MozillaCacheView](https://www.nirsoft.net/utils/mozilla_cache_viewer.html).
-- **favicons.sqlite**: Stores favicons.
-- **prefs.js**: User settings and preferences.
-- **downloads.sqlite**: Older downloads database, now integrated into places.sqlite.
-- **thumbnails**: Website thumbnails.
-- **logins.json**: Encrypted login information.
-- **key4.db** or **key3.db**: Stores encryption keys for securing sensitive information.
+- **places.sqlite**: 存储历史、书签和下载。像 [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing_history_view.html) 这样的工具可以在 Windows 上访问历史数据。
+- 使用特定的 SQL 查询提取历史和下载信息。
+- **bookmarkbackups**: 包含书签的备份。
+- **formhistory.sqlite**: 存储网页表单数据。
+- **handlers.json**: 管理协议处理程序。
+- **persdict.dat**: 自定义字典单词。
+- **addons.json** 和 **extensions.sqlite**: 有关已安装的附加组件和扩展的信息。
+- **cookies.sqlite**: Cookie 存储，Windows 上可以使用 [MZCookiesView](https://www.nirsoft.net/utils/mzcv.html) 进行检查。
+- **cache2/entries** 或 **startupCache**: 缓存数据，可以通过像 [MozillaCacheView](https://www.nirsoft.net/utils/mozilla_cache_viewer.html) 这样的工具访问。
+- **favicons.sqlite**: 存储网站图标。
+- **prefs.js**: 用户设置和偏好。
+- **downloads.sqlite**: 较旧的下载数据库，现在已集成到 places.sqlite 中。
+- **thumbnails**: 网站缩略图。
+- **logins.json**: 加密的登录信息。
+- **key4.db** 或 **key3.db**: 存储用于保护敏感信息的加密密钥。
 
-Additionally, checking the browser’s anti-phishing settings can be done by searching for `browser.safebrowsing` entries in `prefs.js`, indicating whether safe browsing features are enabled or disabled.
+此外，可以通过在 `prefs.js` 中搜索 `browser.safebrowsing` 条目来检查浏览器的反钓鱼设置，以指示安全浏览功能是否启用或禁用。
 
-To try to decrypt the master password, you can use [https://github.com/unode/firefox_decrypt](https://github.com/unode/firefox_decrypt)\
-With the following script and call you can specify a password file to brute force:
-
+要尝试解密主密码，可以使用 [https://github.com/unode/firefox_decrypt](https://github.com/unode/firefox_decrypt)\
+使用以下脚本和调用，您可以指定一个密码文件进行暴力破解：
 ```bash:brute.sh
 #!/bin/bash
 
 #./brute.sh top-passwords.txt 2>/dev/null | grep -A2 -B2 "chrome:"
 passfile=$1
 while read pass; do
-  echo "Trying $pass"
-  echo "$pass" | python firefox_decrypt.py
+echo "Trying $pass"
+echo "$pass" | python firefox_decrypt.py
 done < $passfile
 ```
-
 ![](<../../../images/image (692).png>)
 
 ## Google Chrome
 
-Google Chrome stores user profiles in specific locations based on the operating system:
+Google Chrome 根据操作系统将用户配置文件存储在特定位置：
 
 - **Linux**: `~/.config/google-chrome/`
 - **Windows**: `C:\Users\XXX\AppData\Local\Google\Chrome\User Data\`
 - **MacOS**: `/Users/$USER/Library/Application Support/Google/Chrome/`
 
-Within these directories, most user data can be found in the **Default/** or **ChromeDefaultData/** folders. The following files hold significant data:
+在这些目录中，大多数用户数据可以在 **Default/** 或 **ChromeDefaultData/** 文件夹中找到。以下文件包含重要数据：
 
-- **History**: Contains URLs, downloads, and search keywords. On Windows, [ChromeHistoryView](https://www.nirsoft.net/utils/chrome_history_view.html) can be used to read the history. The "Transition Type" column has various meanings, including user clicks on links, typed URLs, form submissions, and page reloads.
-- **Cookies**: Stores cookies. For inspection, [ChromeCookiesView](https://www.nirsoft.net/utils/chrome_cookies_view.html) is available.
-- **Cache**: Holds cached data. To inspect, Windows users can utilize [ChromeCacheView](https://www.nirsoft.net/utils/chrome_cache_view.html).
-- **Bookmarks**: User bookmarks.
-- **Web Data**: Contains form history.
-- **Favicons**: Stores website favicons.
-- **Login Data**: Includes login credentials like usernames and passwords.
-- **Current Session**/**Current Tabs**: Data about the current browsing session and open tabs.
-- **Last Session**/**Last Tabs**: Information about the sites active during the last session before Chrome was closed.
-- **Extensions**: Directories for browser extensions and addons.
-- **Thumbnails**: Stores website thumbnails.
-- **Preferences**: A file rich in information, including settings for plugins, extensions, pop-ups, notifications, and more.
-- **Browser’s built-in anti-phishing**: To check if anti-phishing and malware protection are enabled, run `grep 'safebrowsing' ~/Library/Application Support/Google/Chrome/Default/Preferences`. Look for `{"enabled: true,"}` in the output.
+- **History**: 包含 URL、下载和搜索关键字。在 Windows 上，可以使用 [ChromeHistoryView](https://www.nirsoft.net/utils/chrome_history_view.html) 来读取历史记录。“Transition Type” 列有多种含义，包括用户点击链接、输入的 URL、表单提交和页面重新加载。
+- **Cookies**: 存储 cookies。可以使用 [ChromeCookiesView](https://www.nirsoft.net/utils/chrome_cookies_view.html) 进行检查。
+- **Cache**: 存储缓存数据。要检查，Windows 用户可以使用 [ChromeCacheView](https://www.nirsoft.net/utils/chrome_cache_view.html)。
+- **Bookmarks**: 用户书签。
+- **Web Data**: 包含表单历史。
+- **Favicons**: 存储网站图标。
+- **Login Data**: 包含登录凭据，如用户名和密码。
+- **Current Session**/**Current Tabs**: 当前浏览会话和打开标签的数据。
+- **Last Session**/**Last Tabs**: Chrome 关闭前最后会话期间活动网站的信息。
+- **Extensions**: 浏览器扩展和附加组件的目录。
+- **Thumbnails**: 存储网站缩略图。
+- **Preferences**: 一个信息丰富的文件，包括插件、扩展、弹出窗口、通知等的设置。
+- **Browser’s built-in anti-phishing**: 要检查反钓鱼和恶意软件保护是否启用，请运行 `grep 'safebrowsing' ~/Library/Application Support/Google/Chrome/Default/Preferences`。在输出中查找 `{"enabled: true,"}`。
 
 ## **SQLite DB Data Recovery**
 
-As you can observe in the previous sections, both Chrome and Firefox use **SQLite** databases to store the data. It's possible to **recover deleted entries using the tool** [**sqlparse**](https://github.com/padfoot999/sqlparse) **or** [**sqlparse_gui**](https://github.com/mdegrazia/SQLite-Deleted-Records-Parser/releases).
+如前所述，Chrome 和 Firefox 使用 **SQLite** 数据库存储数据。可以使用工具 [**sqlparse**](https://github.com/padfoot999/sqlparse) **或** [**sqlparse_gui**](https://github.com/mdegrazia/SQLite-Deleted-Records-Parser/releases) **恢复已删除的条目**。
 
 ## **Internet Explorer 11**
 
-Internet Explorer 11 manages its data and metadata across various locations, aiding in separating stored information and its corresponding details for easy access and management.
+Internet Explorer 11 在多个位置管理其数据和元数据，帮助分离存储的信息及其对应的详细信息，以便于访问和管理。
 
 ### Metadata Storage
 
-Metadata for Internet Explorer is stored in `%userprofile%\Appdata\Local\Microsoft\Windows\WebCache\WebcacheVX.data` (with VX being V01, V16, or V24). Accompanying this, the `V01.log` file might show modification time discrepancies with `WebcacheVX.data`, indicating a need for repair using `esentutl /r V01 /d`. This metadata, housed in an ESE database, can be recovered and inspected using tools like photorec and [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html), respectively. Within the **Containers** table, one can discern the specific tables or containers where each data segment is stored, including cache details for other Microsoft tools such as Skype.
+Internet Explorer 的元数据存储在 `%userprofile%\Appdata\Local\Microsoft\Windows\WebCache\WebcacheVX.data`（VX 为 V01、V16 或 V24）。此外，`V01.log` 文件可能显示与 `WebcacheVX.data` 的修改时间差异，表明需要使用 `esentutl /r V01 /d` 进行修复。此元数据存储在 ESE 数据库中，可以使用 photorec 和 [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html) 等工具进行恢复和检查。在 **Containers** 表中，可以辨别每个数据段存储的特定表或容器，包括其他 Microsoft 工具（如 Skype）的缓存详细信息。
 
 ### Cache Inspection
 
-The [IECacheView](https://www.nirsoft.net/utils/ie_cache_viewer.html) tool allows for cache inspection, requiring the cache data extraction folder location. Metadata for cache includes filename, directory, access count, URL origin, and timestamps indicating cache creation, access, modification, and expiry times.
+[IECacheView](https://www.nirsoft.net/utils/ie_cache_viewer.html) 工具允许检查缓存，需要缓存数据提取文件夹位置。缓存的元数据包括文件名、目录、访问计数、URL 来源和指示缓存创建、访问、修改和过期时间的时间戳。
 
 ### Cookies Management
 
-Cookies can be explored using [IECookiesView](https://www.nirsoft.net/utils/iecookies.html), with metadata encompassing names, URLs, access counts, and various time-related details. Persistent cookies are stored in `%userprofile%\Appdata\Roaming\Microsoft\Windows\Cookies`, with session cookies residing in memory.
+可以使用 [IECookiesView](https://www.nirsoft.net/utils/iecookies.html) 探索 cookies，元数据包括名称、URL、访问计数和各种时间相关的详细信息。持久性 cookies 存储在 `%userprofile%\Appdata\Roaming\Microsoft\Windows\Cookies` 中，会话 cookies 存储在内存中。
 
 ### Download Details
 
-Downloads metadata is accessible via [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html), with specific containers holding data like URL, file type, and download location. Physical files can be found under `%userprofile%\Appdata\Roaming\Microsoft\Windows\IEDownloadHistory`.
+下载元数据可以通过 [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html) 访问，特定容器中保存 URL、文件类型和下载位置等数据。物理文件可以在 `%userprofile%\Appdata\Roaming\Microsoft\Windows\IEDownloadHistory` 下找到。
 
 ### Browsing History
 
-To review browsing history, [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing_history_view.html) can be used, requiring the location of extracted history files and configuration for Internet Explorer. Metadata here includes modification and access times, along with access counts. History files are located in `%userprofile%\Appdata\Local\Microsoft\Windows\History`.
+要查看浏览历史，可以使用 [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing_history_view.html)，需要提取的历史文件位置和 Internet Explorer 的配置。这里的元数据包括修改和访问时间，以及访问计数。历史文件位于 `%userprofile%\Appdata\Local\Microsoft\Windows\History`。
 
 ### Typed URLs
 
-Typed URLs and their usage timings are stored within the registry under `NTUSER.DAT` at `Software\Microsoft\InternetExplorer\TypedURLs` and `Software\Microsoft\InternetExplorer\TypedURLsTime`, tracking the last 50 URLs entered by the user and their last input times.
+输入的 URL 及其使用时间存储在注册表中的 `NTUSER.DAT` 下的 `Software\Microsoft\InternetExplorer\TypedURLs` 和 `Software\Microsoft\InternetExplorer\TypedURLsTime`，跟踪用户输入的最后 50 个 URL 及其最后输入时间。
 
 ## Microsoft Edge
 
-Microsoft Edge stores user data in `%userprofile%\Appdata\Local\Packages`. The paths for various data types are:
+Microsoft Edge 将用户数据存储在 `%userprofile%\Appdata\Local\Packages` 中。各种数据类型的路径如下：
 
 - **Profile Path**: `C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge_XXX\AC`
 - **History, Cookies, and Downloads**: `C:\Users\XX\AppData\Local\Microsoft\Windows\WebCache\WebCacheV01.dat`
@@ -143,24 +133,24 @@ Microsoft Edge stores user data in `%userprofile%\Appdata\Local\Packages`. The p
 
 ## Safari
 
-Safari data is stored at `/Users/$User/Library/Safari`. Key files include:
+Safari 数据存储在 `/Users/$User/Library/Safari`。关键文件包括：
 
-- **History.db**: Contains `history_visits` and `history_items` tables with URLs and visit timestamps. Use `sqlite3` to query.
-- **Downloads.plist**: Information about downloaded files.
-- **Bookmarks.plist**: Stores bookmarked URLs.
-- **TopSites.plist**: Most frequently visited sites.
-- **Extensions.plist**: List of Safari browser extensions. Use `plutil` or `pluginkit` to retrieve.
-- **UserNotificationPermissions.plist**: Domains permitted to push notifications. Use `plutil` to parse.
-- **LastSession.plist**: Tabs from the last session. Use `plutil` to parse.
-- **Browser’s built-in anti-phishing**: Check using `defaults read com.apple.Safari WarnAboutFraudulentWebsites`. A response of 1 indicates the feature is active.
+- **History.db**: 包含 `history_visits` 和 `history_items` 表，存储 URL 和访问时间戳。使用 `sqlite3` 查询。
+- **Downloads.plist**: 有关下载文件的信息。
+- **Bookmarks.plist**: 存储书签的 URL。
+- **TopSites.plist**: 最常访问的网站。
+- **Extensions.plist**: Safari 浏览器扩展的列表。使用 `plutil` 或 `pluginkit` 检索。
+- **UserNotificationPermissions.plist**: 允许推送通知的域。使用 `plutil` 进行解析。
+- **LastSession.plist**: 上一会话的标签。使用 `plutil` 进行解析。
+- **Browser’s built-in anti-phishing**: 使用 `defaults read com.apple.Safari WarnAboutFraudulentWebsites` 检查。响应为 1 表示该功能已启用。
 
 ## Opera
 
-Opera's data resides in `/Users/$USER/Library/Application Support/com.operasoftware.Opera` and shares Chrome's format for history and downloads.
+Opera 的数据位于 `/Users/$USER/Library/Application Support/com.operasoftware.Opera`，并与 Chrome 的历史和下载格式相同。
 
-- **Browser’s built-in anti-phishing**: Verify by checking if `fraud_protection_enabled` in the Preferences file is set to `true` using `grep`.
+- **Browser’s built-in anti-phishing**: 通过检查 Preferences 文件中的 `fraud_protection_enabled` 是否设置为 `true` 来验证，使用 `grep`。
 
-These paths and commands are crucial for accessing and understanding the browsing data stored by different web browsers.
+这些路径和命令对于访问和理解不同网络浏览器存储的浏览数据至关重要。
 
 ## References
 
@@ -169,12 +159,5 @@ These paths and commands are crucial for accessing and understanding the browsin
 - [https://books.google.com/books?id=jfMqCgAAQBAJ\&pg=PA128\&lpg=PA128\&dq=%22This+file](https://books.google.com/books?id=jfMqCgAAQBAJ&pg=PA128&lpg=PA128&dq=%22This+file)
 - **Book: OS X Incident Response: Scripting and Analysis By Jaron Bradley pag 123**
 
-<figure><img src="../../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=browser-artifacts) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=browser-artifacts" %}
 
 {{#include ../../../banners/hacktricks-training.md}}

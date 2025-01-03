@@ -1,28 +1,20 @@
-# PDF File analysis
+# PDF 文件分析
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="../../../images/image (48).png" alt=""><figcaption></figcaption></figure>
+**有关更多详细信息，请查看：** [**https://trailofbits.github.io/ctf/forensics/**](https://trailofbits.github.io/ctf/forensics/)
 
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=pdf-file-analysis) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+PDF 格式因其复杂性和潜在的数据隐藏能力而闻名，使其成为 CTF 取证挑战的焦点。它结合了纯文本元素和二进制对象，这些对象可能被压缩或加密，并且可以包含 JavaScript 或 Flash 等语言的脚本。要理解 PDF 结构，可以参考 Didier Stevens 的 [入门材料](https://blog.didierstevens.com/2008/04/09/quickpost-about-the-physical-and-logical-structure-of-pdf-files/)，或使用文本编辑器或 PDF 专用编辑器如 Origami。
 
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=pdf-file-analysis" %}
+对于 PDF 的深入探索或操作，可以使用 [qpdf](https://github.com/qpdf/qpdf) 和 [Origami](https://github.com/mobmewireless/origami-pdf) 等工具。PDF 中的隐藏数据可能隐藏在：
 
-**For further details check:** [**https://trailofbits.github.io/ctf/forensics/**](https://trailofbits.github.io/ctf/forensics/)
+- 隐形图层
+- Adobe 的 XMP 元数据格式
+- 增量生成
+- 与背景颜色相同的文本
+- 图像后面的文本或重叠的图像
+- 不显示的评论
 
-The PDF format is known for its complexity and potential for concealing data, making it a focal point for CTF forensics challenges. It combines plain-text elements with binary objects, which might be compressed or encrypted, and can include scripts in languages like JavaScript or Flash. To understand PDF structure, one can refer to Didier Stevens's [introductory material](https://blog.didierstevens.com/2008/04/09/quickpost-about-the-physical-and-logical-structure-of-pdf-files/), or use tools like a text editor or a PDF-specific editor such as Origami.
-
-For in-depth exploration or manipulation of PDFs, tools like [qpdf](https://github.com/qpdf/qpdf) and [Origami](https://github.com/mobmewireless/origami-pdf) are available. Hidden data within PDFs might be concealed in:
-
-- Invisible layers
-- XMP metadata format by Adobe
-- Incremental generations
-- Text with the same color as the background
-- Text behind images or overlapping images
-- Non-displayed comments
-
-For custom PDF analysis, Python libraries like [PeepDF](https://github.com/jesparza/peepdf) can be used to craft bespoke parsing scripts. Further, the PDF's potential for hidden data storage is so vast that resources like the NSA guide on PDF risks and countermeasures, though no longer hosted at its original location, still offer valuable insights. A [copy of the guide](http://www.itsecure.hu/library/file/Biztons%C3%A1gi%20%C3%BAtmutat%C3%B3k/Alkalmaz%C3%A1sok/Hidden%20Data%20and%20Metadata%20in%20Adobe%20PDF%20Files.pdf) and a collection of [PDF format tricks](https://github.com/corkami/docs/blob/master/PDF/PDF.md) by Ange Albertini can provide further reading on the subject.
+对于自定义 PDF 分析，可以使用 Python 库如 [PeepDF](https://github.com/jesparza/peepdf) 来制作定制的解析脚本。此外，PDF 隐藏数据存储的潜力非常巨大，以至于像 NSA 关于 PDF 风险和对策的指南，尽管不再托管在其原始位置，但仍提供了有价值的见解。可以参考 [该指南的副本](http://www.itsecure.hu/library/file/Biztons%C3%A1gi%20%C3%Bútmutat%C3%B3k/Alkalmaz%C3%A1sok/Hidden%20Data%20and%20Metadata%20in%20Adobe%20PDF%20Files.pdf) 和 Ange Albertini 的 [PDF 格式技巧集合](https://github.com/corkami/docs/blob/master/PDF/PDF.md) 以获取更多阅读材料。
 
 {{#include ../../../banners/hacktricks-training.md}}

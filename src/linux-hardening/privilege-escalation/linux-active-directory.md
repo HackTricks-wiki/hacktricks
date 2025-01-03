@@ -4,7 +4,7 @@
 
 一台 Linux 机器也可以存在于 Active Directory 环境中。
 
-在 AD 中的 Linux 机器可能会 **在文件中存储不同的 CCACHE 票证。这些票证可以像其他 kerberos 票证一样被使用和滥用**。为了读取这些票证，您需要是票证的用户所有者或 **root** 用户。
+在 AD 中的 Linux 机器可能会 **在文件中存储不同的 CCACHE 票证。这些票证可以像其他任何 kerberos 票证一样被使用和滥用**。要读取这些票证，您需要是票证的用户所有者或 **root** 用户。
 
 ## 枚举
 
@@ -20,7 +20,7 @@
 
 ### FreeIPA
 
-FreeIPA 是一个开源的 **替代方案**，用于 Microsoft Windows **Active Directory**，主要针对 **Unix** 环境。它结合了一个完整的 **LDAP 目录** 和一个 MIT **Kerberos** 密钥分发中心，管理方式类似于 Active Directory。利用 Dogtag **证书系统**进行 CA 和 RA 证书管理，支持 **多因素** 身份验证，包括智能卡。集成了 SSSD 以支持 Unix 身份验证过程。了解更多信息：
+FreeIPA 是一个开源的 **替代方案**，用于 Microsoft Windows **Active Directory**，主要针对 **Unix** 环境。它结合了完整的 **LDAP 目录** 和 MIT **Kerberos** 密钥分发中心，管理方式类似于 Active Directory。利用 Dogtag **证书系统**进行 CA 和 RA 证书管理，支持 **多因素** 身份验证，包括智能卡。集成了 SSSD 以支持 Unix 身份验证过程。了解更多信息：
 
 {{#ref}}
 ../freeipa-pentesting.md
@@ -38,7 +38,7 @@ FreeIPA 是一个开源的 **替代方案**，用于 Microsoft Windows **Active 
 
 ### 从 /tmp 重用 CCACHE 票证
 
-CCACHE 文件是用于 **存储 Kerberos 凭据** 的二进制格式，通常以 600 权限存储在 `/tmp` 中。这些文件可以通过其 **名称格式 `krb5cc_%{uid}`** 进行识别，与用户的 UID 相关联。为了验证身份验证票证，**环境变量 `KRB5CCNAME`** 应设置为所需票证文件的路径，以便启用其重用。
+CCACHE 文件是用于 **存储 Kerberos 凭据** 的二进制格式，通常以 600 权限存储在 `/tmp` 中。这些文件可以通过其 **名称格式 `krb5cc_%{uid}`** 进行识别，与用户的 UID 相关联。要验证身份验证票证，**环境变量 `KRB5CCNAME`** 应设置为所需票证文件的路径，以便重用。
 
 使用 `env | grep KRB5CCNAME` 列出当前用于身份验证的票证。该格式是可移植的，票证可以通过设置环境变量 **重用**，使用 `export KRB5CCNAME=/tmp/ticket.ccache`。Kerberos 票证名称格式为 `krb5cc_%{uid}`，其中 uid 是用户 UID。
 ```bash
@@ -66,7 +66,7 @@ make CONF=Release
 
 SSSD在路径 `/var/lib/sss/secrets/secrets.ldb` 处维护数据库的副本。相应的密钥存储为隐藏文件，路径为 `/var/lib/sss/secrets/.secrets.mkey`。默认情况下，只有在您具有 **root** 权限时，才能读取该密钥。
 
-使用 **`SSSDKCMExtractor`** 及 --database 和 --key 参数将解析数据库并 **解密秘密**。
+使用 **`SSSDKCMExtractor`** 及其 --database 和 --key 参数将解析数据库并 **解密秘密**。
 ```bash
 git clone https://github.com/fireeye/SSSDKCMExtractor
 python3 SSSDKCMExtractor.py --database secrets.ldb --key secrets.mkey
@@ -93,7 +93,7 @@ klist.exe -t -K -e -k FILE:C:/Path/to/your/krb5.keytab
 python3 keytabextract.py krb5.keytab
 # Expected output varies based on hash availability
 ```
-在 macOS 上，**`bifrost`** 作为一个工具用于 keytab 文件分析。
+在macOS上，**`bifrost`** 用作密钥表文件分析工具。
 ```bash
 ./bifrost -action dump -source keytab -path /path/to/your/file
 ```
@@ -101,7 +101,7 @@ python3 keytabextract.py krb5.keytab
 ```bash
 crackmapexec 10.XXX.XXX.XXX -u 'ServiceAccount$' -H "HashPlaceholder" -d "YourDOMAIN"
 ```
-## 参考
+## 参考文献
 
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
 - [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey)

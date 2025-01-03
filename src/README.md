@@ -7,7 +7,7 @@
 _Hacktricks 标志和动态设计由_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._ 
 
 > [!TIP]
-> **欢迎来到这个维基，在这里你将找到我从CTF、现实生活应用、阅读研究和新闻中学到的每一个黑客技巧/技术/无论是什么。**
+> **欢迎来到这个维基，在这里你将找到我从CTF、现实应用、阅读研究和新闻中学到的每一个黑客技巧/技术/无论是什么。**
 
 要开始，请遵循此页面，在这里你将找到**你在进行一个或多个机器的渗透测试时应该遵循的典型流程：**
 
@@ -33,7 +33,7 @@ generic-methodologies-and-resources/pentesting-methodology.md
 
 <figure><img src="images/image (45).png" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com) 是**西班牙**最相关的网络安全事件，也是**欧洲**最重要的事件之一。这个大会的**使命是促进技术知识**，是各个学科的技术和网络安全专业人士的一个热闹的交流点。
+[**RootedCON**](https://www.rootedcon.com) 是**西班牙**最重要的网络安全事件之一，也是**欧洲**最重要的活动之一。这个大会的**使命是促进技术知识**，是技术和网络安全专业人士在各个学科的一个热闹的交流点。
 
 {% embed url="https://www.rootedcon.com/" %}
 
@@ -71,7 +71,7 @@ generic-methodologies-and-resources/pentesting-methodology.md
 加入 [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) 服务器，与经验丰富的黑客和漏洞赏金猎人交流！
 
 - **黑客见解**：参与深入探讨黑客的刺激和挑战的内容
-- **实时黑客新闻**：通过实时新闻和见解跟上快速变化的黑客世界
+- **实时黑客新闻**：通过实时新闻和见解，跟上快速变化的黑客世界
 - **最新公告**：了解最新的漏洞赏金发布和重要平台更新
 
 **今天就加入我们** [**Discord**](https://discord.com/invite/N3FrSbmwdy)，开始与顶级黑客合作！
@@ -96,11 +96,11 @@ generic-methodologies-and-resources/pentesting-methodology.md
 
 **SerpApi** 提供快速且简单的实时API，以**访问搜索引擎结果**。他们抓取搜索引擎，处理代理，解决验证码，并为你解析所有丰富的结构化数据。
 
-订阅SerpApi的计划之一包括访问50多个不同的API，用于抓取不同的搜索引擎，包括Google、Bing、百度、Yahoo、Yandex等。\
+订阅SerpApi的计划之一包括访问超过50个不同的API，用于抓取不同的搜索引擎，包括Google、Bing、百度、Yahoo、Yandex等。\
 与其他提供商不同，**SerpApi不仅仅抓取自然结果**。SerpApi的响应始终包括所有广告、内联图像和视频、知识图谱以及搜索结果中存在的其他元素和功能。
 
 当前的SerpApi客户包括**Apple、Shopify和GrubHub**。\
-有关更多信息，请查看他们的[**博客**](https://serpapi.com/blog/)**，**或在他们的[**游乐场**](https://serpapi.com/playground)**中尝试示例。**\
+有关更多信息，请查看他们的[**博客**](https://serpapi.com/blog/)**，**或在他们的[**游乐场**](https://serpapi.com/playground)**中尝试一个示例。**\
 你可以在[**这里**](https://serpapi.com/users/sign_up)**创建一个免费账户。**
 
 ---

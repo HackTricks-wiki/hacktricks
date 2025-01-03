@@ -2,26 +2,24 @@
 
 <figure><img src="/..https:/pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
 
-{% embed url="https://websec.nl/" %}
+# CBC - 密码块链接
 
-# CBC - Cipher Block Chaining
-
-In CBC mode the **previous encrypted block is used as IV** to XOR with the next block:
+在 CBC 模式下，**前一个加密块用作 IV**，与下一个块进行异或操作：
 
 ![https://defuse.ca/images/cbc_encryption.png](https://defuse.ca/images/cbc_encryption.png)
 
-To decrypt CBC the **opposite** **operations** are done:
+要解密 CBC，需进行**相反的** **操作**：
 
 ![https://defuse.ca/images/cbc_decryption.png](https://defuse.ca/images/cbc_decryption.png)
 
-Notice how it's needed to use an **encryption** **key** and an **IV**.
+注意需要使用**加密** **密钥**和**IV**。
 
-# Message Padding
+# 消息填充
 
-As the encryption is performed in **fixed** **size** **blocks**, **padding** is usually needed in the **last** **block** to complete its length.\
-Usually **PKCS7** is used, which generates a padding **repeating** the **number** of **bytes** **needed** to **complete** the block. For example, if the last block is missing 3 bytes, the padding will be `\x03\x03\x03`.
+由于加密是在**固定** **大小** **块**中进行的，通常需要在**最后** **块**中进行**填充**以完成其长度。\
+通常使用**PKCS7**，它生成的填充**重复**所需的**字节** **数**以**完成**块。例如，如果最后一个块缺少 3 个字节，填充将是 `\x03\x03\x03`。
 
-Let's look at more examples with a **2 blocks of length 8bytes**:
+让我们看更多的例子，使用**2 个长度为 8 字节的块**：
 
 | byte #0 | byte #1 | byte #2 | byte #3 | byte #4 | byte #5 | byte #6 | byte #7 | byte #0  | byte #1  | byte #2  | byte #3  | byte #4  | byte #5  | byte #6  | byte #7  |
 | ------- | ------- | ------- | ------- | ------- | ------- | ------- | ------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- |
@@ -30,51 +28,43 @@ Let's look at more examples with a **2 blocks of length 8bytes**:
 | P       | A       | S       | S       | W       | O       | R       | D       | 1        | 2        | 3        | **0x05** | **0x05** | **0x05** | **0x05** | **0x05** |
 | P       | A       | S       | S       | W       | O       | R       | D       | **0x08** | **0x08** | **0x08** | **0x08** | **0x08** | **0x08** | **0x08** | **0x08** |
 
-Note how in the last example the **last block was full so another one was generated only with padding**.
+注意在最后一个例子中，**最后一个块是满的，因此只生成了一个填充块**。
 
-# Padding Oracle
+# 填充 oracle
 
-When an application decrypts encrypted data, it will first decrypt the data; then it will remove the padding. During the cleanup of the padding, if an **invalid padding triggers a detectable behaviour**, you have a **padding oracle vulnerability**. The detectable behaviour can be an **error**, a **lack of results**, or a **slower response**.
+当应用程序解密加密数据时，它会首先解密数据；然后会移除填充。在清理填充的过程中，如果**无效填充触发可检测的行为**，则存在**填充 oracle 漏洞**。可检测的行为可以是**错误**、**缺少结果**或**响应变慢**。
 
-If you detect this behaviour, you can **decrypt the encrypted data** and even **encrypt any cleartext**.
+如果你检测到这种行为，你可以**解密加密数据**，甚至**加密任何明文**。
 
-## How to exploit
+## 如何利用
 
-You could use [https://github.com/AonCyberLabs/PadBuster](https://github.com/AonCyberLabs/PadBuster) to exploit this kind of vulnerability or just do
-
+你可以使用 [https://github.com/AonCyberLabs/PadBuster](https://github.com/AonCyberLabs/PadBuster) 来利用这种漏洞，或者直接进行
 ```
 sudo apt-get install padbuster
 ```
-
-In order to test if the cookie of a site is vulnerable you could try:
-
+为了测试一个网站的cookie是否存在漏洞，你可以尝试：
 ```bash
 perl ./padBuster.pl http://10.10.10.10/index.php "RVJDQrwUdTRWJUVUeBKkEA==" 8 -encoding 0 -cookies "login=RVJDQrwUdTRWJUVUeBKkEA=="
 ```
+**编码 0** 意味着使用 **base64**（但还有其他可用的编码，请查看帮助菜单）。
 
-**Encoding 0** means that **base64** is used (but others are available, check the help menu).
-
-You could also **abuse this vulnerability to encrypt new data. For example, imagine that the content of the cookie is "**_**user=MyUsername**_**", then you may change it to "\_user=administrator\_" and escalate privileges inside the application. You could also do it using `paduster`specifying the -plaintext** parameter:
-
+您还可以 **利用此漏洞加密新数据。例如，假设 cookie 的内容是 "**_**user=MyUsername**_**"，那么您可以将其更改为 "\_user=administrator\_"，并在应用程序中提升权限。您还可以使用 `paduster` 指定 -plaintext** 参数来实现这一点：
 ```bash
 perl ./padBuster.pl http://10.10.10.10/index.php "RVJDQrwUdTRWJUVUeBKkEA==" 8 -encoding 0 -cookies "login=RVJDQrwUdTRWJUVUeBKkEA==" -plaintext "user=administrator"
 ```
-
-If the site is vulnerable `padbuster`will automatically try to find when the padding error occurs, but you can also indicating the error message it using the **-error** parameter.
-
+如果网站存在漏洞，`padbuster`将自动尝试查找何时发生填充错误，但您也可以使用**-error**参数指示错误消息。
 ```bash
 perl ./padBuster.pl http://10.10.10.10/index.php "" 8 -encoding 0 -cookies "hcon=RVJDQrwUdTRWJUVUeBKkEA==" -error "Invalid padding"
 ```
+## 理论
 
-## The theory
-
-In **summary**, you can start decrypting the encrypted data by guessing the correct values that can be used to create all the **different paddings**. Then, the padding oracle attack will start decrypting bytes from the end to the start by guessing which will be the correct value that **creates a padding of 1, 2, 3, etc**.
+**总结**来说，您可以通过猜测可以用于创建所有**不同填充**的正确值来开始解密加密数据。然后，填充oracle攻击将从末尾到开头解密字节，猜测哪个将是**创建1、2、3等填充的正确值**。
 
 ![](<../images/image (629) (1) (1).png>)
 
-Imagine you have some encrypted text that occupies **2 blocks** formed by the bytes from **E0 to E15**.\
-In order to **decrypt** the **last** **block** (**E8** to **E15**), the whole block passes through the "block cipher decryption" generating the **intermediary bytes I0 to I15**.\
-Finally, each intermediary byte is **XORed** with the previous encrypted bytes (E0 to E7). So:
+想象一下，您有一些加密文本，占据**2个块**，由**E0到E15**的字节组成。\
+为了**解密**最后一个**块**（**E8**到**E15**），整个块通过“块密码解密”，生成**中间字节I0到I15**。\
+最后，每个中间字节与之前的加密字节（E0到E7）进行**异或**运算。因此：
 
 - `C15 = D(E15) ^ E7 = I15 ^ E7`
 - `C14 = I14 ^ E6`
@@ -82,33 +72,31 @@ Finally, each intermediary byte is **XORed** with the previous encrypted bytes (
 - `C12 = I12 ^ E4`
 - ...
 
-Now, It's possible to **modify `E7` until `C15` is `0x01`**, which will also be a correct padding. So, in this case: `\x01 = I15 ^ E'7`
+现在，可以**修改`E7`直到`C15`为`0x01`**，这也将是一个正确的填充。因此，在这种情况下：`\x01 = I15 ^ E'7`
 
-So, finding E'7, it's **possible to calculate I15**: `I15 = 0x01 ^ E'7`
+因此，找到E'7后，可以**计算I15**：`I15 = 0x01 ^ E'7`
 
-Which allow us to **calculate C15**: `C15 = E7 ^ I15 = E7 ^ \x01 ^ E'7`
+这使我们能够**计算C15**：`C15 = E7 ^ I15 = E7 ^ \x01 ^ E'7`
 
-Knowing **C15**, now it's possible to **calculate C14**, but this time brute-forcing the padding `\x02\x02`.
+知道**C15**后，现在可以**计算C14**，但这次是通过暴力破解填充`\x02\x02`。
 
-This BF is as complex as the previous one as it's possible to calculate the the `E''15` whose value is 0x02: `E''7 = \x02 ^ I15` so it's just needed to find the **`E'14`** that generates a **`C14` equals to `0x02`**.\
-Then, do the same steps to decrypt C14: **`C14 = E6 ^ I14 = E6 ^ \x02 ^ E''6`**
+这个暴力破解与之前的复杂度相同，因为可以计算出值为0x02的`E''15`：`E''7 = \x02 ^ I15`，因此只需找到生成**`C14`等于`0x02`的**`E'14`。\
+然后，按照相同的步骤解密C14：**`C14 = E6 ^ I14 = E6 ^ \x02 ^ E''6`**
 
-**Follow this chain until you decrypt the whole encrypted text.**
+**按照这个链条，直到您解密整个加密文本。**
 
-## Detection of the vulnerability
+## 漏洞检测
 
-Register and account and log in with this account .\
-If you **log in many times** and always get the **same cookie**, there is probably **something** **wrong** in the application. The **cookie sent back should be unique** each time you log in. If the cookie is **always** the **same**, it will probably always be valid and there **won't be anyway to invalidate i**t.
+注册一个账户并使用该账户登录。\
+如果您**多次登录**并始终获得**相同的cookie**，那么应用程序中可能**存在问题**。每次登录时**返回的cookie应该是唯一的**。如果cookie**总是**相同的，它可能始终有效，并且**无法使其失效**。
 
-Now, if you try to **modify** the **cookie**, you can see that you get an **error** from the application.\
-But if you BF the padding (using padbuster for example) you manage to get another cookie valid for a different user. This scenario is highly probably vulnerable to padbuster.
+现在，如果您尝试**修改**该**cookie**，您会看到应用程序返回一个**错误**。\
+但是，如果您暴力破解填充（例如使用padbuster），您可以获得另一个有效的cookie，适用于不同的用户。这个场景很可能对padbuster存在漏洞。
 
-## References
+## 参考
 
 - [https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation)
 
 <figure><img src="/..https:/pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../banners/hacktricks-training.md}}

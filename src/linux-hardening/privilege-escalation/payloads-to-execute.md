@@ -98,7 +98,7 @@ setgid(0);
 system("/bin/bash");
 }
 ```
-现在，只需调用 **`/bin/su`** 您将获得一个以 root 身份运行的 shell。
+现在，只需调用 **`/bin/su`**，您将获得一个以 root 身份运行的 shell。
 
 ## 脚本
 

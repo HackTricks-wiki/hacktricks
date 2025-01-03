@@ -2,17 +2,17 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-The goal of this page is to enumerate **platforms that allow to search for code** (literal or regex) in across thousands/millions of repos in one or more platforms.
+本页面的目标是列举**允许在一个或多个平台上搜索代码**（字面或正则表达式）的平台，这些平台可以在成千上万或数百万个代码库中进行搜索。
 
-This helps in several occasions to **search for leaked information** or for **vulnerabilities** patterns.
+这在多个场合有助于**搜索泄露的信息**或**漏洞**模式。
 
-- [**SourceGraph**](https://sourcegraph.com/search): Search in millions of repos. There is a free version and an enterprise version (with 15 days free). It supports regexes.
-- [**Github Search**](https://github.com/search): Search across Github. It supports regexes.
-  - Maybe it's also useful to check also [**Github Code Search**](https://cs.github.com/).
-- [**Gitlab Advanced Search**](https://docs.gitlab.com/ee/user/search/advanced_search.html): Search across Gitlab projects. Support regexes.
-- [**SearchCode**](https://searchcode.com/): Search code in millions of projects.
+- [**SourceGraph**](https://sourcegraph.com/search): 在数百万个代码库中搜索。提供免费版本和企业版本（15天免费）。支持正则表达式。
+- [**Github Search**](https://github.com/search): 在Github上搜索。支持正则表达式。
+- 也许检查一下[**Github Code Search**](https://cs.github.com/)也很有用。
+- [**Gitlab Advanced Search**](https://docs.gitlab.com/ee/user/search/advanced_search.html): 在Gitlab项目中搜索。支持正则表达式。
+- [**SearchCode**](https://searchcode.com/): 在数百万个项目中搜索代码。
 
 > [!WARNING]
-> When you look for leaks in a repo and run something like `git log -p` don't forget there might be **other branches with other commits** containing secrets!
+> 当你在一个代码库中寻找泄露信息并运行类似`git log -p`的命令时，不要忘记可能还有**其他分支和其他提交**包含秘密！
 
 {{#include ../../banners/hacktricks-training.md}}

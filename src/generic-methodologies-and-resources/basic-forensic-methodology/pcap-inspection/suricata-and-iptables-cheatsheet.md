@@ -6,14 +6,13 @@
 
 ### Chains
 
-In iptables, lists of rules known as chains are processed sequentially. Among these, three primary chains are universally present, with additional ones like NAT being potentially supported depending on the system's capabilities.
+在iptables中，称为链的规则列表是按顺序处理的。在这些链中，三条主要链是普遍存在的，额外的链如NAT可能会根据系统的能力得到支持。
 
-- **Input Chain**: Utilized for managing the behavior of incoming connections.
-- **Forward Chain**: Employed for handling incoming connections that are not destined for the local system. This is typical for devices acting as routers, where the data received is meant to be forwarded to another destination. This chain is relevant primarily when the system is involved in routing, NATing, or similar activities.
-- **Output Chain**: Dedicated to the regulation of outgoing connections.
+- **Input Chain**: 用于管理传入连接的行为。
+- **Forward Chain**: 用于处理不指向本地系统的传入连接。这对于充当路由器的设备是典型的，其中接收到的数据旨在转发到另一个目的地。当系统参与路由、NAT或类似活动时，这条链是相关的。
+- **Output Chain**: 专用于调节传出连接。
 
-These chains ensure the orderly processing of network traffic, allowing for the specification of detailed rules governing the flow of data into, through, and out of a system.
-
+这些链确保网络流量的有序处理，允许指定详细规则来管理数据流入、流经和流出系统的方式。
 ```bash
 # Delete all rules
 iptables -F
@@ -50,11 +49,9 @@ iptables-save > /etc/sysconfig/iptables
 ip6tables-save > /etc/sysconfig/ip6tables
 iptables-restore < /etc/sysconfig/iptables
 ```
-
 ## Suricata
 
-### Install & Config
-
+### 安装与配置
 ```bash
 # Install details from: https://suricata.readthedocs.io/en/suricata-6.0.0/install.html#install-binary-packages
 # Ubuntu
@@ -64,7 +61,7 @@ apt-get install suricata
 
 # Debian
 echo "deb http://http.debian.net/debian buster-backports main" > \
-    /etc/apt/sources.list.d/backports.list
+/etc/apt/sources.list.d/backports.list
 apt-get update
 apt-get install suricata -t buster-backports
 
@@ -80,7 +77,7 @@ suricata-update
 ## To use the dowloaded rules update the following line in /etc/suricata/suricata.yaml
 default-rule-path: /var/lib/suricata/rules
 rule-files:
-  - suricata.rules
+- suricata.rules
 
 # Run
 ## Add rules in /etc/suricata/rules/suricata.rules
@@ -92,7 +89,7 @@ suricata -c /etc/suricata/suricata.yaml -i eth0
 suricatasc -c ruleset-reload-nonblocking
 ## or set the follogin in /etc/suricata/suricata.yaml
 detect-engine:
-  - rule-reload: true
+- rule-reload: true
 
 # Validate suricata config
 suricata -T -c /etc/suricata/suricata.yaml -v
@@ -101,8 +98,8 @@ suricata -T -c /etc/suricata/suricata.yaml -v
 ## Config drop to generate alerts
 ## Search for the following lines in /etc/suricata/suricata.yaml and remove comments:
 - drop:
-    alerts: yes
-    flows: all
+alerts: yes
+flows: all
 
 ## Forward all packages to the queue where suricata can act as IPS
 iptables -I INPUT -j NFQUEUE
@@ -120,76 +117,70 @@ Type=simple
 
 systemctl daemon-reload
 ```
+### 规则定义
 
-### Rules Definitions
+[来自文档：](https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) 一条规则/签名由以下部分组成：
 
-[From the docs:](https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) A rule/signature consists of the following:
-
-- The **action**, determines what happens when the signature matches.
-- The **header**, defines the protocol, IP addresses, ports and direction of the rule.
-- The **rule options**, define the specifics of the rule.
-
+- **动作**，决定当签名匹配时发生什么。
+- **头部**，定义规则的协议、IP地址、端口和方向。
+- **规则选项**，定义规则的具体细节。
 ```bash
 alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing Rule in URI"; flow:established,to_server; http.method; content:"GET"; http.uri; content:"rule"; fast_pattern; classtype:bad-unknown; sid:123; rev:1;)
 ```
+#### **有效的操作是**
 
-#### **Valid actions are**
+- alert - 生成警报
+- pass - 停止对数据包的进一步检查
+- **drop** - 丢弃数据包并生成警报
+- **reject** - 向匹配数据包的发送者发送 RST/ICMP 不可达错误。
+- rejectsrc - 与 _reject_ 相同
+- rejectdst - 向匹配数据包的接收者发送 RST/ICMP 错误数据包。
+- rejectboth - 向对话的双方发送 RST/ICMP 错误数据包。
 
-- alert - generate an alert
-- pass - stop further inspection of the packet
-- **drop** - drop packet and generate alert
-- **reject** - send RST/ICMP unreachable error to the sender of the matching packet.
-- rejectsrc - same as just _reject_
-- rejectdst - send RST/ICMP error packet to the receiver of the matching packet.
-- rejectboth - send RST/ICMP error packets to both sides of the conversation.
+#### **协议**
 
-#### **Protocols**
-
-- tcp (for tcp-traffic)
+- tcp (用于 tcp 流量)
 - udp
 - icmp
-- ip (ip stands for ‘all’ or ‘any’)
-- _layer7 protocols_: http, ftp, tls, smb, dns, ssh... (more in the [**docs**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html))
+- ip (ip 代表“所有”或“任何”)
+- _layer7 协议_: http, ftp, tls, smb, dns, ssh... (更多内容见 [**docs**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html))
 
-#### Source and Destination Addresses
+#### 源地址和目标地址
 
-It supports IP ranges, negations and a list of addresses:
+它支持 IP 范围、否定和地址列表：
 
-| Example                       | Meaning                                  |
-| ----------------------------- | ---------------------------------------- |
-| ! 1.1.1.1                     | Every IP address but 1.1.1.1             |
-| !\[1.1.1.1, 1.1.1.2]          | Every IP address but 1.1.1.1 and 1.1.1.2 |
-| $HOME_NET                     | Your setting of HOME_NET in yaml         |
-| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET and not HOME_NET            |
-| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24 except for 10.0.0.5          |
+| 示例                         | 意义                                    |
+| ---------------------------- | --------------------------------------- |
+| ! 1.1.1.1                    | 除 1.1.1.1 以外的所有 IP 地址            |
+| !\[1.1.1.1, 1.1.1.2]         | 除 1.1.1.1 和 1.1.1.2 以外的所有 IP 地址 |
+| $HOME_NET                    | 您在 yaml 中设置的 HOME_NET             |
+| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET 和非 HOME_NET              |
+| \[10.0.0.0/24, !10.0.0.5]    | 10.0.0.0/24，除了 10.0.0.5              |
 
-#### Source and Destination Ports
+#### 源端口和目标端口
 
-It supports port ranges, negations and lists of ports
+它支持端口范围、否定和端口列表
 
-| Example         | Meaning                                |
-| --------------- | -------------------------------------- |
-| any             | any address                            |
-| \[80, 81, 82]   | port 80, 81 and 82                     |
-| \[80: 82]       | Range from 80 till 82                  |
-| \[1024: ]       | From 1024 till the highest port-number |
-| !80             | Every port but 80                      |
-| \[80:100,!99]   | Range from 80 till 100 but 99 excluded |
-| \[1:80,!\[2,4]] | Range from 1-80, except ports 2 and 4  |
+| 示例           | 意义                                  |
+| -------------- | ------------------------------------- |
+| any            | 任何地址                              |
+| \[80, 81, 82]  | 端口 80、81 和 82                     |
+| \[80: 82]      | 从 80 到 82 的范围                    |
+| \[1024: ]      | 从 1024 到最高端口号                  |
+| !80            | 除 80 以外的所有端口                  |
+| \[80:100,!99]  | 从 80 到 100 的范围，但排除 99       |
+| \[1:80,!\[2,4]] | 从 1 到 80 的范围，除了端口 2 和 4    |
 
-#### Direction
+#### 方向
 
-It's possible to indicate the direction of the communication rule being applied:
-
+可以指示所应用的通信规则的方向：
 ```
 source -> destination
 source <> destination  (both directions)
 ```
+#### 关键词
 
-#### Keywords
-
-There are **hundreds of options** available in Suricata to search for the **specific packet** you are looking for, here it will be mentioned if something interesting is found. Check the [**documentation** ](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html)for more!
-
+在 Suricata 中有 **数百种选项** 可用于搜索您所寻找的 **特定数据包**，如果发现有趣的内容，这里会提到。请查看 [**文档**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html)以获取更多信息！
 ```bash
 # Meta Keywords
 msg: "description"; #Set a description to the rule
@@ -230,5 +221,4 @@ drop tcp any any -> any any (msg:"regex"; pcre:"/CTF\{[\w]{3}/i"; sid:10001;)
 ## Drop by port
 drop tcp any any -> any 8000 (msg:"8000 port"; sid:1000;)
 ```
-
 {{#include ../../../banners/hacktricks-training.md}}

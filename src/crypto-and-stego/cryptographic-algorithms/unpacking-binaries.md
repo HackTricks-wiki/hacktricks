@@ -1,24 +1,24 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# Identifying packed binaries
+# 识别打包的二进制文件
 
-- **lack of strings**: It's common to find that packed binaries doesn't have almost any string
-- A lot of **unused strings**: Also, when a malware is using some kind of commercial packer it's common to find a lot of strings without cross-references. Even if these strings exist that doesn't mean that the binary isn't packed.
-- You can also use some tools to try to find which packer was used to pack a binary:
-  - [PEiD](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/PEiD-updated.shtml)
-  - [Exeinfo PE](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/ExEinfo-PE.shtml)
-  - [Language 2000](http://farrokhi.net/language/)
+- **缺乏字符串**：常见的情况是打包的二进制文件几乎没有任何字符串
+- 很多 **未使用的字符串**：此外，当恶意软件使用某种商业打包工具时，常常会发现很多没有交叉引用的字符串。即使这些字符串存在，也并不意味着二进制文件没有被打包。
+- 你还可以使用一些工具来尝试找出用于打包二进制文件的打包工具：
+- [PEiD](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/PEiD-updated.shtml)
+- [Exeinfo PE](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/ExEinfo-PE.shtml)
+- [Language 2000](http://farrokhi.net/language/)
 
-# Basic Recommendations
+# 基本建议
 
-- **Start** analysing the packed binary **from the bottom in IDA and move up**. Unpackers exit once the unpacked code exit so it's unlikely that the unpacker passes execution to the unpacked code at the start.
-- Search for **JMP's** or **CALLs** to **registers** or **regions** of **memory**. Also search for **functions pushing arguments and an address direction and then calling `retn`**, because the return of the function in that case may call the address just pushed to the stack before calling it.
-- Put a **breakpoint** on `VirtualAlloc` as this allocates space in memory where the program can write unpacked code. The "run to user code" or use F8 to **get to value inside EAX** after executing the function and "**follow that address in dump**". You never know if that is the region where the unpacked code is going to be saved.
-  - **`VirtualAlloc`** with the value "**40**" as an argument means Read+Write+Execute (some code that needs execution is going to be copied here).
-- **While unpacking** code it's normal to find **several calls** to **arithmetic operations** and functions like **`memcopy`** or **`Virtual`**`Alloc`. If you find yourself in a function that apparently only perform arithmetic operations and maybe some `memcopy` , the recommendation is to try to **find the end of the function** (maybe a JMP or call to some register) **or** at least the **call to the last function** and run to then as the code isn't interesting.
-- While unpacking code **note** whenever you **change memory region** as a memory region change may indicate the **starting of the unpacking code**. You can easily dump a memory region using Process Hacker (process --> properties --> memory).
-- While trying to unpack code a good way to **know if you are already working with the unpacked code** (so you can just dump it) is to **check the strings of the binary**. If at some point you perform a jump (maybe changing the memory region) and you notice that **a lot more strings where added**, then you can know **you are working with the unpacked code**.\
-  However, if the packer already contains a lot of strings you can see how many strings contains the word "http" and see if this number increases.
-- When you dump an executable from a region of memory you can fix some headers using [PE-bear](https://github.com/hasherezade/pe-bear-releases/releases).
+- **从底部开始**分析打包的二进制文件**在 IDA 中向上移动**。解包器在解包代码退出时退出，因此解包器不太可能在开始时将执行传递给解包的代码。
+- 搜索 **JMP** 或 **CALL** 到 **寄存器** 或 **内存区域**。还要搜索 **推送参数和地址方向的函数，然后调用 `retn`**，因为在这种情况下，函数的返回可能会调用在调用之前刚推送到堆栈的地址。
+- 在 `VirtualAlloc` 上设置 **断点**，因为这会在内存中分配程序可以写入解包代码的空间。使用“运行到用户代码”或使用 F8 **获取执行函数后 EAX 中的值**，然后“**跟踪转储中的地址**”。你永远不知道这是否是解包代码将要保存的区域。
+- **`VirtualAlloc`** 的值 "**40**" 作为参数意味着可读+可写+可执行（一些需要执行的代码将被复制到这里）。
+- **在解包**代码时，通常会发现 **多个调用** 到 **算术操作** 和像 **`memcopy`** 或 **`Virtual`**`Alloc` 这样的函数。如果你发现自己在一个显然只执行算术操作的函数中，可能还有一些 `memcopy`，建议尝试 **找到函数的结束**（可能是 JMP 或调用某个寄存器）**或**至少找到 **最后一个函数的调用**，然后运行到那里，因为代码并不有趣。
+- 在解包代码时 **注意** 每当你 **更改内存区域**，因为内存区域的变化可能表示 **解包代码的开始**。你可以使用 Process Hacker 轻松转储内存区域（进程 --> 属性 --> 内存）。
+- 在尝试解包代码时，知道你是否已经在处理解包代码的好方法（这样你可以直接转储它）是 **检查二进制文件的字符串**。如果在某个时刻你执行了跳转（可能更改了内存区域），并且你注意到 **添加了更多字符串**，那么你可以知道 **你正在处理解包的代码**。\
+然而，如果打包工具已经包含了很多字符串，你可以查看包含“http”这个词的字符串数量，看看这个数字是否增加。
+- 当你从内存区域转储可执行文件时，可以使用 [PE-bear](https://github.com/hasherezade/pe-bear-releases/releases) 修复一些头部。
 
 {{#include ../../banners/hacktricks-training.md}}

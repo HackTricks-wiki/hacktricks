@@ -1,25 +1,25 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# Baseline
+# 基线
 
-A baseline consists of taking a snapshot of certain parts of a system to **compare it with a future status to highlight changes**.
+基线是对系统某些部分进行快照，以**与未来状态进行比较以突出变化**。
 
-For example, you can calculate and store the hash of each file of the filesystem to be able to find out which files were modified.\
-This can also be done with the user accounts created, processes running, services running and any other thing that shouldn't change much, or at all.
+例如，您可以计算并存储文件系统中每个文件的哈希值，以便找出哪些文件被修改。\
+这也可以应用于创建的用户帐户、正在运行的进程、正在运行的服务以及任何其他不应有太大变化的事物。
 
-## File Integrity Monitoring
+## 文件完整性监控
 
-File Integrity Monitoring (FIM) is a critical security technique that protects IT environments and data by tracking changes in files. It involves two key steps:
+文件完整性监控 (FIM) 是一种关键的安全技术，通过跟踪文件中的变化来保护 IT 环境和数据。它涉及两个关键步骤：
 
-1. **Baseline Comparison:** Establish a baseline using file attributes or cryptographic checksums (like MD5 or SHA-2) for future comparisons to detect modifications.
-2. **Real-Time Change Notification:** Get instant alerts when files are accessed or altered, typically through OS kernel extensions.
+1. **基线比较：** 使用文件属性或加密校验和（如 MD5 或 SHA-2）建立基线，以便进行未来的比较以检测修改。
+2. **实时变更通知：** 当文件被访问或更改时，立即获得警报，通常通过操作系统内核扩展实现。
 
-## Tools
+## 工具
 
 - [https://github.com/topics/file-integrity-monitoring](https://github.com/topics/file-integrity-monitoring)
 - [https://www.solarwinds.com/security-event-manager/use-cases/file-integrity-monitoring-software](https://www.solarwinds.com/security-event-manager/use-cases/file-integrity-monitoring-software)
 
-## References
+## 参考
 
 - [https://cybersecurity.att.com/blogs/security-essentials/what-is-file-integrity-monitoring-and-why-you-need-it](https://cybersecurity.att.com/blogs/security-essentials/what-is-file-integrity-monitoring-and-why-you-need-it)
 

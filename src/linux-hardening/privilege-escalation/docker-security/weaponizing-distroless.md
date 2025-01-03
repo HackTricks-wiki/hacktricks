@@ -19,12 +19,12 @@ Distroless 容器通常用于 **安全性和可靠性至关重要的生产环境
 
 ### 通过内存
 
-将在 2023 年的某个时候...
+将在 2023 年的某个时候发布...
 
 ### 通过现有二进制文件
 
 #### openssl
 
-\***\*[**在这篇文章中，**](https://www.form3.tech/engineering/content/exploiting-distroless-images) 解释了二进制文件 **`openssl`** 经常出现在这些容器中，可能是因为它是 **软件所需的**，该软件将在容器内运行。
+\***\*[**在这篇文章中，**](https://www.form3.tech/engineering/content/exploiting-distroless-images) 解释了二进制文件 **`openssl`** 经常出现在这些容器中，可能是因为它是 **所需的\*\* 由将在容器内运行的软件。 
 
 {{#include ../../../banners/hacktricks-training.md}}

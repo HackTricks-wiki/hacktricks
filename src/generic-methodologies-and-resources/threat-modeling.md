@@ -1,111 +1,111 @@
-# Threat Modeling
+# 威胁建模
 
-## Threat Modeling
+## 威胁建模
 
-Welcome to HackTricks' comprehensive guide on Threat Modeling! Embark on an exploration of this critical aspect of cybersecurity, where we identify, understand, and strategize against potential vulnerabilities in a system. This thread serves as a step-by-step guide packed with real-world examples, helpful software, and easy-to-understand explanations. Ideal for both novices and experienced practitioners looking to fortify their cybersecurity defenses.
+欢迎来到 HackTricks 的全面威胁建模指南！开始探索网络安全这一关键方面，在这里我们识别、理解并制定针对系统潜在漏洞的策略。此线程作为逐步指南，包含真实案例、有用的软件和易于理解的解释。非常适合希望加强网络安全防御的新手和经验丰富的从业者。
 
-### Commonly Used Scenarios
+### 常用场景
 
-1. **Software Development**: As part of the Secure Software Development Life Cycle (SSDLC), threat modeling helps in **identifying potential sources of vulnerabilities** in the early stages of development.
-2. **Penetration Testing**: The Penetration Testing Execution Standard (PTES) framework requires **threat modeling to understand the system's vulnerabilities** before carrying out the test.
+1. **软件开发**：作为安全软件开发生命周期（SSDLC）的一部分，威胁建模有助于**在开发早期识别潜在漏洞来源**。
+2. **渗透测试**：渗透测试执行标准（PTES）框架要求**进行威胁建模以了解系统的漏洞**，然后再进行测试。
 
-### Threat Model in a Nutshell
+### 威胁模型概述
 
-A Threat Model is typically represented as a diagram, image, or some other form of visual illustration that depicts the planned architecture or existing build of an application. It bears resemblance to a **data flow diagram**, but the key distinction lies in its security-oriented design.
+威胁模型通常以图表、图像或其他形式的可视化插图表示，描绘应用程序的计划架构或现有构建。它类似于**数据流图**，但关键区别在于其安全导向的设计。
 
-Threat models often feature elements marked in red, symbolizing potential vulnerabilities, risks, or barriers. To streamline the process of risk identification, the CIA (Confidentiality, Integrity, Availability) triad is employed, forming the basis of many threat modeling methodologies, with STRIDE being one of the most common. However, the chosen methodology can vary depending on the specific context and requirements.
+威胁模型通常包含用红色标记的元素，象征潜在的漏洞、风险或障碍。为了简化风险识别过程，采用 CIA（机密性、完整性、可用性）三元组，构成许多威胁建模方法的基础，其中 STRIDE 是最常见的之一。然而，所选方法可能会根据特定上下文和要求而有所不同。
 
-### The CIA Triad
+### CIA 三元组
 
-The CIA Triad is a widely recognized model in the field of information security, standing for Confidentiality, Integrity, and Availability. These three pillars form the foundation upon which many security measures and policies are built, including threat modeling methodologies.
+CIA 三元组是信息安全领域广泛认可的模型，代表机密性、完整性和可用性。这三大支柱构成了许多安全措施和政策的基础，包括威胁建模方法。
 
-1. **Confidentiality**: Ensuring that the data or system is not accessed by unauthorized individuals. This is a central aspect of security, requiring appropriate access controls, encryption, and other measures to prevent data breaches.
-2. **Integrity**: The accuracy, consistency, and trustworthiness of the data over its lifecycle. This principle ensures that the data is not altered or tampered with by unauthorized parties. It often involves checksums, hashing, and other data verification methods.
-3. **Availability**: This ensures that data and services are accessible to authorized users when needed. This often involves redundancy, fault tolerance, and high-availability configurations to keep systems running even in the face of disruptions.
+1. **机密性**：确保数据或系统不被未经授权的个人访问。这是安全的核心方面，需要适当的访问控制、加密和其他措施以防止数据泄露。
+2. **完整性**：数据在其生命周期内的准确性、一致性和可信度。该原则确保数据不被未经授权的方更改或篡改。通常涉及校验和、哈希和其他数据验证方法。
+3. **可用性**：确保数据和服务在需要时可供授权用户访问。这通常涉及冗余、容错和高可用性配置，以保持系统在中断情况下的运行。
 
-### Threat Modeling Methodlogies
+### 威胁建模方法
 
-1. **STRIDE**: Developed by Microsoft, STRIDE is an acronym for **Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, and Elevation of Privilege**. Each category represents a type of threat, and this methodology is commonly used in the design phase of a program or system to identify potential threats.
-2. **DREAD**: This is another methodology from Microsoft used for risk assessment of identified threats. DREAD stands for **Damage potential, Reproducibility, Exploitability, Affected users, and Discoverability**. Each of these factors is scored, and the result is used to prioritize identified threats.
-3. **PASTA** (Process for Attack Simulation and Threat Analysis): This is a seven-step, **risk-centric** methodology. It includes defining and identifying security objectives, creating a technical scope, application decomposition, threat analysis, vulnerability analysis, and risk/triage assessment.
-4. **Trike**: This is a risk-based methodology that focuses on defending assets. It starts from a **risk management** perspective and looks at threats and vulnerabilities in that context.
-5. **VAST** (Visual, Agile, and Simple Threat modeling): This approach aims to be more accessible and integrates into Agile development environments. It combines elements from the other methodologies and focuses on **visual representations of threats**.
-6. **OCTAVE** (Operationally Critical Threat, Asset, and Vulnerability Evaluation): Developed by the CERT Coordination Center, this framework is geared toward **organizational risk assessment rather than specific systems or software**.
+1. **STRIDE**：由微软开发，STRIDE 是**欺骗、篡改、否认、信息泄露、拒绝服务和特权提升**的首字母缩略词。每个类别代表一种威胁，这种方法通常用于程序或系统的设计阶段，以识别潜在威胁。
+2. **DREAD**：这是微软用于已识别威胁风险评估的另一种方法。DREAD 代表**损害潜力、可重现性、可利用性、受影响用户和可发现性**。这些因素中的每一个都被评分，结果用于优先处理已识别的威胁。
+3. **PASTA**（攻击模拟和威胁分析过程）：这是一种七步的**风险中心**方法。它包括定义和识别安全目标、创建技术范围、应用程序分解、威胁分析、漏洞分析和风险/分流评估。
+4. **Trike**：这是一种基于风险的方法，专注于保护资产。它从**风险管理**的角度出发，关注威胁和漏洞。
+5. **VAST**（可视化、敏捷和简单的威胁建模）：这种方法旨在更易于访问，并集成到敏捷开发环境中。它结合了其他方法的元素，专注于**威胁的可视化表示**。
+6. **OCTAVE**（操作关键威胁、资产和漏洞评估）：由 CERT 协调中心开发，该框架旨在**进行组织风险评估，而不是特定系统或软件**。
 
-## Tools
+## 工具
 
-There are several tools and software solutions available that can **assist** with the creation and management of threat models. Here are a few you might consider.
+有几种工具和软件解决方案可用，以**协助**创建和管理威胁模型。以下是您可能考虑的一些工具。
 
 ### [SpiderSuite](https://github.com/3nock/SpiderSuite)
 
-An advance cross-platform and multi-feature GUI web spider/crawler for cyber security professionals. Spider Suite can be used for attack surface mapping and analysis.
+一个先进的跨平台和多功能 GUI 网络爬虫/蜘蛛，适用于网络安全专业人员。Spider Suite 可用于攻击面映射和分析。
 
-**Usage**
+**使用方法**
 
-1. Pick a URL and Crawl
+1. 选择一个 URL 并爬取
 
 <figure><img src="../images/threatmodel_spidersuite_1.png" alt=""><figcaption></figcaption></figure>
 
-2. View Graph
+2. 查看图表
 
 <figure><img src="../images/threatmodel_spidersuite_2.png" alt=""><figcaption></figcaption></figure>
 
 ### [OWASP Threat Dragon](https://github.com/OWASP/threat-dragon/releases)
 
-An open-source project from OWASP, Threat Dragon is both a web and desktop application that includes system diagramming as well as a rule engine to auto-generate threats/mitigations.
+OWASP 的一个开源项目，Threat Dragon 是一个包括系统图示和规则引擎以自动生成威胁/缓解措施的网络和桌面应用程序。
 
-**Usage**
+**使用方法**
 
-1. Create New Project
+1. 创建新项目
 
 <figure><img src="../images/create_new_project_1.jpg" alt=""><figcaption></figcaption></figure>
 
-Sometimes it could look like this:
+有时它可能看起来像这样：
 
 <figure><img src="../images/1_threatmodel_create_project.jpg" alt=""><figcaption></figcaption></figure>
 
-2. Launch New Project
+2. 启动新项目
 
 <figure><img src="../images/launch_new_project_2.jpg" alt=""><figcaption></figcaption></figure>
 
-3. Save The New Project
+3. 保存新项目
 
 <figure><img src="../images/save_new_project.jpg" alt=""><figcaption></figcaption></figure>
 
-4. Create your model
+4. 创建您的模型
 
-You can use tools like SpiderSuite Crawler to give you inspiration, a basic model would look something like this
+您可以使用像 SpiderSuite Crawler 这样的工具来获得灵感，基本模型可能看起来像这样
 
 <figure><img src="../images/0_basic_threat_model.jpg" alt=""><figcaption></figcaption></figure>
 
-Just a little bit of explanation about the entities:
+关于实体的简要说明：
 
-- Process (The entity itself such as Webserver or web functionality)
-- Actor (A Person such as a Website Visitor, User or Administrator)
-- Data Flow Line (Indicator of Interaction)
-- Trust Boundary (Different network segments or scopes.)
-- Store (Things where data are stored at such as Databases)
+- 过程（实体本身，如 Web 服务器或 Web 功能）
+- 参与者（如网站访客、用户或管理员的人）
+- 数据流线（交互的指示）
+- 信任边界（不同的网络段或范围。）
+- 存储（数据存储的地方，如数据库）
 
-5. Create a Threat (Step 1)
+5. 创建威胁（步骤 1）
 
-First you have to pick the layer you wish to add a threat to
+首先，您必须选择要添加威胁的层
 
 <figure><img src="../images/3_threatmodel_chose-threat-layer.jpg" alt=""><figcaption></figcaption></figure>
 
-Now you can create the threat
+现在您可以创建威胁
 
 <figure><img src="../images/4_threatmodel_create-threat.jpg" alt=""><figcaption></figcaption></figure>
 
-Keep in mind that there is a difference between Actor Threats and Process Threats. If you would add a threat to an Actor then you will only be able to choose "Spoofing" and "Repudiation. However in our example we add threat to a Process entity so we will see this in the threat creation box:
+请记住，参与者威胁和过程威胁之间是有区别的。如果您要向参与者添加威胁，则只能选择“欺骗”和“否认”。然而在我们的示例中，我们将威胁添加到过程实体，因此我们将在威胁创建框中看到：
 
 <figure><img src="../images/2_threatmodel_type-option.jpg" alt=""><figcaption></figcaption></figure>
 
-6. Done
+6. 完成
 
-Now your finished model should look something like this. And this is how you make a simple threat model with OWASP Threat Dragon.
+现在您完成的模型应该看起来像这样。这就是您如何使用 OWASP Threat Dragon 制作简单的威胁模型。
 
 <figure><img src="../images/threat_model_finished.jpg" alt=""><figcaption></figcaption></figure>
 
 ### [Microsoft Threat Modeling Tool](https://aka.ms/threatmodelingtool)
 
-This is a free tool from Microsoft that helps in finding threats in the design phase of software projects. It uses the STRIDE methodology and is particularly suitable for those developing on Microsoft's stack.
+这是微软提供的免费工具，帮助在软件项目的设计阶段发现威胁。它使用 STRIDE 方法，特别适合在微软技术栈上开发的人员。

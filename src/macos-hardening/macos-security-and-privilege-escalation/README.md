@@ -37,7 +37,7 @@ macos-protocols.md
 {{#endref}}
 
 - **开源** macOS: [https://opensource.apple.com/](https://opensource.apple.com/)
-- 要下载 `tar.gz`，将 URL 更改为 [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) 到 [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
+- 要下载 `tar.gz`，请将 URL 更改为 [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) 到 [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
 
 ### MacOS MDM
 
@@ -71,7 +71,7 @@ macos-security-protections/
 - 使用的文件位于用户拥有的目录中（用户可以创建该文件）
 - 使用的文件位于 root 拥有的目录中，但用户因组而具有写入权限（用户可以创建该文件）
 
-能够 **创建一个将被 root 使用的文件**，允许用户 **利用其内容**，甚至创建 **符号链接/硬链接** 指向另一个位置。
+能够 **创建一个将被 root 使用的文件**，允许用户 **利用其内容**，甚至创建 **符号链接/硬链接** 指向其他位置。
 
 对于这种漏洞，不要忘记 **检查易受攻击的 `.pkg` 安装程序**：
 
@@ -99,7 +99,7 @@ macos-file-extension-apps.md
 
 ## macOS 传统权限提升
 
-当然，从红队的角度来看，您也应该对提升到 root 感兴趣。查看以下帖子以获取一些提示：
+当然，从红队的角度来看，您也应该对提升到 root 感兴趣。请查看以下帖子以获取一些提示：
 
 {{#ref}}
 macos-privilege-escalation.md

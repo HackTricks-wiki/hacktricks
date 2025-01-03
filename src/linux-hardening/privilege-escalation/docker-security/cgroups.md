@@ -6,7 +6,7 @@
 
 **Linux 控制组**，或称 **cgroups**，是 Linux 内核的一个特性，允许在进程组之间分配、限制和优先处理系统资源，如 CPU、内存和磁盘 I/O。它们提供了一种 **管理和隔离资源使用** 的机制，适用于资源限制、工作负载隔离和不同进程组之间的资源优先级等目的。
 
-**cgroups 有两个版本**：版本 1 和版本 2。两者可以在系统上同时使用。主要区别在于 **cgroups 版本 2** 引入了 **层次化的树状结构**，使得在进程组之间进行更细致和详细的资源分配成为可能。此外，版本 2 还带来了各种增强功能，包括：
+有 **两个版本的 cgroups**：版本 1 和版本 2。两者可以在系统上同时使用。主要区别在于 **cgroups 版本 2** 引入了 **层次化的树状结构**，使得在进程组之间进行更细致和详细的资源分配成为可能。此外，版本 2 还带来了各种增强功能，包括：
 
 除了新的层次化组织，cgroups 版本 2 还引入了 **其他几个变化和改进**，例如对 **新资源控制器** 的支持、更好的遗留应用程序支持和性能提升。
 
@@ -33,21 +33,21 @@ $ cat /proc/self/cgroup
 - **数字 1**：也是 cgroups v1，但仅用于管理目的（由例如 systemd 设置），并且没有控制器。
 - **数字 0**：表示 cgroups v2。没有列出控制器，这一行仅在仅运行 cgroups v2 的系统上存在。
 - **名称是层次结构的**，类似于文件路径，指示不同 cgroups 之间的结构和关系。
-- **像 /user.slice 或 /system.slice 的名称** 指定 cgroups 的分类，user.slice 通常用于由 systemd 管理的登录会话，而 system.slice 用于系统服务。
+- **像 /user.slice 或 /system.slice 的名称** 指定了 cgroups 的分类，user.slice 通常用于由 systemd 管理的登录会话，而 system.slice 用于系统服务。
 
 ### 查看 cgroups
 
 文件系统通常用于访问 **cgroups**，与传统用于内核交互的 Unix 系统调用接口不同。要调查 shell 的 cgroup 配置，应检查 **/proc/self/cgroup** 文件，该文件显示 shell 的 cgroup。然后，通过导航到 **/sys/fs/cgroup**（或 **`/sys/fs/cgroup/unified`**）目录并找到一个与 cgroup 名称相同的目录，可以观察与 cgroup 相关的各种设置和资源使用信息。
 
-![Cgroup 文件系统](<../../../images/image (1128).png>)
+![Cgroup Filesystem](<../../../images/image (1128).png>)
 
 cgroups 的关键接口文件以 **cgroup** 为前缀。**cgroup.procs** 文件可以使用标准命令如 cat 查看，列出 cgroup 中的进程。另一个文件 **cgroup.threads** 包含线程信息。
 
-![Cgroup 进程](<../../../images/image (281).png>)
+![Cgroup Procs](<../../../images/image (281).png>)
 
 管理 shell 的 cgroups 通常包含两个控制器，用于调节内存使用和进程数量。要与控制器交互，应参考带有控制器前缀的文件。例如，**pids.current** 将被引用以确定 cgroup 中的线程数量。
 
-![Cgroup 内存](<../../../images/image (677).png>)
+![Cgroup Memory](<../../../images/image (677).png>)
 
 值中 **max** 的指示表明 cgroup 没有特定限制。然而，由于 cgroups 的层次结构，限制可能由目录层次结构中较低级别的 cgroup 强加。
 
@@ -71,12 +71,12 @@ echo "+cpu +pids" > cgroup.subtree_control
 ```
 **root cgroup** 是这些规则的一个例外，允许直接放置进程。这可以用来将进程从 systemd 管理中移除。
 
-在 cgroup 中 **监控 CPU 使用情况** 可以通过 `cpu.stat` 文件实现，该文件显示总的 CPU 时间消耗，有助于跟踪服务的子进程的使用情况：
+**监控 cgroup 内的 CPU 使用情况** 可以通过 `cpu.stat` 文件实现，该文件显示总的 CPU 时间消耗，有助于跟踪服务的子进程的使用情况：
 
 <figure><img src="../../../images/image (908).png" alt=""><figcaption><p>cpu.stat 文件中显示的 CPU 使用统计信息</p></figcaption></figure>
 
 ## References
 
-- **Book: How Linux Works, 3rd Edition: What Every Superuser Should Know By Brian Ward**
+- **书籍：Linux 工作原理，第 3 版：每个超级用户应该知道的内容，作者：Brian Ward**
 
 {{#include ../../../banners/hacktricks-training.md}}

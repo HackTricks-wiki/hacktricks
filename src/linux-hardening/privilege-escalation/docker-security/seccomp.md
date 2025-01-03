@@ -46,7 +46,7 @@ printf("You will not see this message--the process will be killed first\n");
 ```
 ### Seccomp-bpf
 
-此模式允许**使用可配置策略过滤系统调用**，该策略使用伯克利数据包过滤器规则实现。
+此模式允许**使用可配置策略过滤系统调用**，该策略是通过伯克利数据包过滤器规则实现的。
 ```c:seccomp_bpf.c
 #include <seccomp.h>
 #include <unistd.h>
@@ -111,7 +111,7 @@ hello-world
 docker run -it --security-opt seccomp=default.json modified-ubuntu strace uname
 ```
 > [!NOTE]
-> 如果您仅仅是使用 **Docker 启动一个应用程序**，您可以使用 **`strace`** 对其进行 **分析**，并 **仅允许** 它所需的系统调用
+> 如果您仅仅是使用 **Docker 启动一个应用程序**，您可以使用 **`strace`** 对其进行 **分析**，并 **仅允许它所需的系统调用**
 
 ### 示例 Seccomp 策略
 

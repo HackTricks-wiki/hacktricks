@@ -25,18 +25,18 @@ DEP 检查涉及 `cloudconfigurationd` 向 _iprofiles.apple.com/macProfile_ 发�
 
 ## 代理 DEP 请求
 
-使用 Charles Proxy 等工具拦截和修改对 _iprofiles.apple.com_ 的 DEP 请求的尝试受到负载加密和 SSL/TLS 安全措施的阻碍。然而，启用 `MCCloudConfigAcceptAnyHTTPSCertificate` 配置可以绕过服务器证书验证，尽管负载的加密性质仍然阻止在没有解密密钥的情况下修改序列号。
+使用 Charles Proxy 等工具拦截和修改对 _iprofiles.apple.com_ 的 DEP 请求的尝试受到负载加密和 SSL/TLS 安全措施的阻碍。然而，启用 `MCCloudConfigAcceptAnyHTTPSCertificate` 配置可以绕过服务器证书验证，尽管负载的加密特性仍然阻止在没有解密密钥的情况下修改序列号。
 
 ## 对与 DEP 交互的系统二进制文件进行插桩
 
 对系统二进制文件如 `cloudconfigurationd` 进行插桩需要在 macOS 上禁用系统完整性保护（SIP）。禁用 SIP 后，可以使用 LLDB 等工具附加到系统进程，并可能修改在 DEP API 交互中使用的序列号。这种方法更可取，因为它避免了权限和代码签名的复杂性。
 
 **利用二进制插桩：**
-在 `cloudconfigurationd` 中 JSON 序列化之前修改 DEP 请求负载被证明是有效的。该过程涉及：
+在 `cloudconfigurationd` 中 JSON 序列化之前修改 DEP 请求负载被证明是有效的。该过程包括：
 
 1. 将 LLDB 附加到 `cloudconfigurationd`。
 2. 找到获取系统序列号的点。
-3. 在负载被加密并发送之前，将任意序列号注入内存中。
+3. 在负载加密并发送之前将任意序列号注入内存中。
 
 这种方法允许检索任意序列号的完整 DEP 配置文件，展示了潜在的漏洞。
 

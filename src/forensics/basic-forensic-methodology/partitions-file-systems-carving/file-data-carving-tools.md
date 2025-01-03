@@ -1,74 +1,65 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-# Carving tools
+# 切割工具
 
 ## Autopsy
 
-The most common tool used in forensics to extract files from images is [**Autopsy**](https://www.autopsy.com/download/). Download it, install it and make it ingest the file to find "hidden" files. Note that Autopsy is built to support disk images and other kind of images, but not simple files.
+在取证中，最常用的工具是 [**Autopsy**](https://www.autopsy.com/download/)，用于从镜像中提取文件。下载并安装它，然后让它处理文件以查找“隐藏”文件。请注意，Autopsy 是为支持磁盘镜像和其他类型的镜像而构建的，但不支持简单文件。
 
 ## Binwalk <a id="binwalk"></a>
 
-**Binwalk** is a tool for searching binary files like images and audio files for embedded files and data.  
-It can be installed with `apt` however the [source](https://github.com/ReFirmLabs/binwalk) can be found on github.  
-**Useful commands**:
-
+**Binwalk** 是一个用于搜索二进制文件（如图像和音频文件）中嵌入文件和数据的工具。它可以通过 `apt` 安装，但 [源代码](https://github.com/ReFirmLabs/binwalk) 可以在 github 上找到。  
+**有用的命令**：
 ```bash
 sudo apt install binwalk #Insllation
 binwalk file #Displays the embedded data in the given file
 binwalk -e file #Displays and extracts some files from the given file
 binwalk --dd ".*" file #Displays and extracts all files from the given file
 ```
-
 ## Foremost
 
-Another common tool to find hidden files is **foremost**. You can find the configuration file of foremost in `/etc/foremost.conf`. If you just want to search for some specific files uncomment them. If you don't uncomment anything foremost will search for it's default configured file types.
-
+另一个常用的查找隐藏文件的工具是 **foremost**。您可以在 `/etc/foremost.conf` 中找到 foremost 的配置文件。如果您只想搜索某些特定文件，请取消注释它们。如果您不取消注释任何内容，foremost 将搜索其默认配置的文件类型。
 ```bash
 sudo apt-get install foremost
 foremost -v -i file.img -o output
 #Discovered files will appear inside the folder "output"
 ```
-
 ## **Scalpel**
 
-**Scalpel** is another tool that can be use to find and extract **files embedded in a file**. In this case you will need to uncomment from the configuration file \(_/etc/scalpel/scalpel.conf_\) the file types you want it to extract.
-
+**Scalpel** 是另一个可以用来查找和提取 **嵌入在文件中的文件** 的工具。在这种情况下，您需要从配置文件 \(_/etc/scalpel/scalpel.conf_\) 中取消注释您希望提取的文件类型。
 ```bash
 sudo apt-get install scalpel
 scalpel file.img -o output
 ```
-
 ## Bulk Extractor
 
-This tool comes inside kali but you can find it here: [https://github.com/simsong/bulk_extractor](https://github.com/simsong/bulk_extractor)
+这个工具包含在kali中，但你可以在这里找到它: [https://github.com/simsong/bulk_extractor](https://github.com/simsong/bulk_extractor)
 
-This tool can scan an image and will **extract pcaps** inside it, **network information\(URLs, domains, IPs, MACs, mails\)** and more **files**. You only have to do:
-
+这个工具可以扫描一个镜像并将**提取pcaps**，**网络信息（URLs，域名，IPs，MACs，邮件）**和更多**文件**。你只需执行：
 ```text
 bulk_extractor memory.img -o out_folder
 ```
-
-Navigate through **all the information** that the tool has gathered \(passwords?\), **analyse** the **packets** \(read[ **Pcaps analysis**](../pcap-inspection/)\), search for **weird domains** \(domains related to **malware** or **non-existent**\).
+导航通过工具收集的**所有信息**（密码？），**分析** **数据包**（阅读[ **Pcaps分析**](../pcap-inspection/)），搜索**奇怪的域名**（与**恶意软件**或**不存在的**域名相关）。
 
 ## PhotoRec
 
-You can find it in [https://www.cgsecurity.org/wiki/TestDisk_Download](https://www.cgsecurity.org/wiki/TestDisk_Download)
+您可以在[https://www.cgsecurity.org/wiki/TestDisk_Download](https://www.cgsecurity.org/wiki/TestDisk_Download)找到它。
 
-It comes with GUI and CLI version. You can select the **file-types** you want PhotoRec to search for.
+它提供GUI和CLI版本。您可以选择要让PhotoRec搜索的**文件类型**。
 
 ![](../../../images/image%20%28524%29.png)
 
-# Specific Data Carving Tools
+# 特定数据雕刻工具
 
 ## FindAES
 
-Searches for AES keys by searching for their key schedules. Able to find 128. 192, and 256 bit keys, such as those used by TrueCrypt and BitLocker.
+通过搜索其密钥调度来搜索AES密钥。能够找到128、192和256位密钥，例如TrueCrypt和BitLocker使用的密钥。
 
-Download [here](https://sourceforge.net/projects/findaes/).
+在[这里下载](https://sourceforge.net/projects/findaes/)。
 
-# Complementary tools
+# 补充工具
 
-You can use [**viu** ](https://github.com/atanunq/viu)to see images form the terminal.  
-You can use the linux command line tool **pdftotext** to transform a pdf into text and read it.
+您可以使用[**viu**](https://github.com/atanunq/viu)从终端查看图像。
+您可以使用Linux命令行工具**pdftotext**将pdf转换为文本并进行阅读。
 
 {{#include ../../../banners/hacktricks-training.md}}

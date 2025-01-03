@@ -104,7 +104,7 @@ NSLog(@"[+] dylib hijacked in %s", argv[0]);
 gcc -dynamiclib -current_version 1.0 -compatibility_version 1.0 -framework Foundation /tmp/lib.m -Wl,-reexport_library,"/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib" -o "/tmp/lib.dylib"
 # Note the versions and the reexport
 ```
-在库中创建的重新导出路径是相对于加载器的，让我们将其更改为库的绝对路径以进行导出：
+库中创建的重新导出路径是相对于加载器的，让我们将其更改为库的绝对路径以进行导出：
 ```bash
 #Check relative
 otool -l /tmp/lib.dylib| grep REEXPORT -A 2

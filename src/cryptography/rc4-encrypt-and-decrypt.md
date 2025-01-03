@@ -1,8 +1,8 @@
 {{#include ../banners/hacktricks-training.md}}
 
-If you can somehow encrypt a plaintext using RC4, you can decrypt any content encrypted by that RC4 (using the same password) just using the encryption function.
+如果你能以某种方式使用 RC4 加密明文，你可以仅使用加密函数解密任何使用相同密码加密的内容。
 
-If you can encrypt a known plaintext you can also extract the password. More references can be found in the HTB Kryptos machine:
+如果你能加密已知的明文，你也可以提取密码。更多参考资料可以在 HTB Kryptos 机器中找到：
 
 {% embed url="https://0xrick.github.io/hack-the-box/kryptos/" %}
 

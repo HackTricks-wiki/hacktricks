@@ -65,7 +65,7 @@ plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
 <integer>4</integer>
 [...]
 ```
-因此，攻击者可以放置一个恶意包（`pkg`），在安装时**覆盖此文件**，将**URL设置为来自Typhon代理的Mythic C2监听器**，从而能够滥用JAMF作为C2。
+因此，攻击者可以放置一个恶意包（`pkg`），在安装时**覆盖此文件**，将**URL设置为来自Typhon代理的Mythic C2监听器**，以便能够滥用JAMF作为C2。
 ```bash
 # After changing the URL you could wait for it to be reloaded or execute:
 sudo jamf policy -id 0
@@ -79,15 +79,15 @@ sudo jamf policy -id 0
 - 设备的 **UUID**: `ioreg -d2 -c IOPlatformExpertDevice | awk -F" '/IOPlatformUUID/{print $(NF-1)}'`
 - **JAMF 密钥链**来自: `/Library/Application\ Support/Jamf/JAMF.keychain`，其中包含设备证书
 
-有了这些信息，**创建一个虚拟机**，使用**被盗**的硬件 **UUID** 并且**禁用 SIP**，放置 **JAMF 密钥链，** **hook** Jamf **代理**并窃取其信息。
+有了这些信息，**创建一个虚拟机**，使用**被盗**的硬件**UUID**，并且**禁用 SIP**，放置**JAMF 密钥链，** **hook** Jamf **代理**并窃取其信息。
 
 #### 秘密窃取
 
 <figure><img src="../../images/image (1025).png" alt=""><figcaption><p>a</p></figcaption></figure>
 
-你还可以监控位置 `/Library/Application Support/Jamf/tmp/`，以获取管理员可能希望通过 Jamf 执行的 **自定义脚本**，因为它们**在这里放置、执行并移除**。这些脚本**可能包含凭据**。
+你还可以监控位置 `/Library/Application Support/Jamf/tmp/`，以获取管理员可能希望通过 Jamf 执行的**自定义脚本**，因为它们**在这里放置、执行并移除**。这些脚本**可能包含凭据**。
 
-然而，**凭据**可能作为**参数**传递给这些脚本，因此你需要监控 `ps aux | grep -i jamf`（甚至不需要是 root）。
+然而，**凭据**可能作为**参数**传递给这些脚本，因此你需要监控 `ps aux | grep -i jamf`（甚至不需要 root 权限）。
 
 脚本 [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfExplorer.py) 可以监听新文件的添加和新进程参数。
 
@@ -101,7 +101,7 @@ sudo jamf policy -id 0
 
 ## Active Directory
 
-在某些情况下，你会发现 **MacOS 计算机连接到 AD**。在这种情况下，你应该尝试**枚举**活动目录，就像你习惯的那样。在以下页面中找到一些**帮助**：
+在某些情况下，你会发现**MacOS 计算机连接到 AD**。在这种情况下，你应该尝试**枚举**活动目录，就像你习惯的那样。在以下页面中找到一些**帮助**：
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-ldap.md
@@ -166,11 +166,7 @@ dscl "/Active Directory/TEST/All Domains" read "/Groups/[groupname]"
 #Domain Information
 dsconfigad -show
 ```
-更多信息请访问 [https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/](https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/)
-
-### Computer$ 密码
-
-使用以下方法获取密码：
+更多信息请访问 [https://its-a-feature.github.io/posts/2018/
 ```bash
 bifrost --action askhash --username [name] --password [password] --domain [domain]
 ```
@@ -215,11 +211,11 @@ MacOS 红队与常规 Windows 红队不同，因为通常 **MacOS 直接与多�
 
 ### Safari
 
-当在 Safari 中下载文件时，如果是“安全”文件，它将 **自动打开**。例如，如果你 **下载一个 zip 文件**，它将自动解压缩：
+当在 Safari 中下载文件时，如果是“安全”文件，它将 **自动打开**。例如，如果您 **下载一个 zip 文件**，它将自动解压缩：
 
 <figure><img src="../../images/image (226).png" alt=""><figcaption></figcaption></figure>
 
-## 参考文献
+## 参考
 
 - [**https://www.youtube.com/watch?v=IiMladUbL6E**](https://www.youtube.com/watch?v=IiMladUbL6E)
 - [**https://medium.com/xm-cyber/introducing-machound-a-solution-to-macos-active-directory-based-attacks-2a425f0a22b6**](https://medium.com/xm-cyber/introducing-machound-a-solution-to-macos-active-directory-based-attacks-2a425f0a22b6)

@@ -1,44 +1,44 @@
-# 名称空间
+# Namespaces
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-### **PID 名称空间**
+### **PID namespace**
 
 {{#ref}}
 pid-namespace.md
 {{#endref}}
 
-### **挂载名称空间**
+### **Mount namespace**
 
 {{#ref}}
 mount-namespace.md
 {{#endref}}
 
-### **网络名称空间**
+### **Network namespace**
 
 {{#ref}}
 network-namespace.md
 {{#endref}}
 
-### **IPC 名称空间**
+### **IPC Namespace**
 
 {{#ref}}
 ipc-namespace.md
 {{#endref}}
 
-### **UTS 名称空间**
+### **UTS namespace**
 
 {{#ref}}
 uts-namespace.md
 {{#endref}}
 
-### 时间名称空间
+### Time Namespace
 
 {{#ref}}
 time-namespace.md
 {{#endref}}
 
-### 用户名称空间
+### User namespace
 
 {{#ref}}
 user-namespace.md

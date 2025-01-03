@@ -141,12 +141,12 @@ echo ${PATH:0:1} #/
 ```
 ### DNS 数据外泄
 
-你可以使用 **burpcollab** 或 [**pingb**](http://pingb.in) 作为例子。
+您可以使用 **burpcollab** 或 [**pingb**](http://pingb.in) 作为例子。
 
 ### 内置命令
 
-如果你无法执行外部函数，并且只能访问 **有限的内置命令以获得 RCE**，有一些方便的技巧可以做到这一点。通常你 **无法使用所有** 的 **内置命令**，所以你应该 **了解所有选项** 以尝试绕过监狱。这个想法来自 [**devploit**](https://twitter.com/devploit)。\
-首先检查所有的 [**shell 内置命令**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** 然后这里有一些 **建议**：
+如果您无法执行外部函数，并且只能访问 **有限的内置命令以获得 RCE**，那么有一些方便的技巧可以做到这一点。通常您 **无法使用所有** 的 **内置命令**，因此您应该 **了解所有选项** 以尝试绕过监狱。灵感来自 [**devploit**](https://twitter.com/devploit)。\
+首先检查所有的 [**shell 内置命令**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**。** 然后这里有一些 **建议**：
 ```bash
 # Get list of builtins
 declare builtins

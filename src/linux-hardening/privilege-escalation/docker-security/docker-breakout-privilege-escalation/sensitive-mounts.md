@@ -53,7 +53,7 @@ ls -l $(cat /proc/sys/kernel/modprobe) # 检查对 modprobe 的访问
 - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
 - 深入教程：[视频链接](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
 
-### `/proc` 中的其他内容
+### 其他 `/proc` 中的内容
 
 #### **`/proc/config.gz`**
 
@@ -77,7 +77,7 @@ echo b > /proc/sysrq-trigger # 重启主机
 #### **`/proc/kallsyms`**
 
 - 列出内核导出的符号及其地址。
-- 对于内核利用开发至关重要，特别是克服 KASLR。
+- 对于内核利用开发至关重要，尤其是在克服 KASLR 时。
 - 地址信息在 `kptr_restrict` 设置为 `1` 或 `2` 时受到限制。
 - 详细信息见 [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)。
 
@@ -162,7 +162,7 @@ cat /output %%%
 
 #### **`/sys/kernel/debug`**
 
-- `debugfs` 提供了一个“无规则”的内核调试接口。
+- `debugfs` 提供了一个“无规则”的调试接口给内核。
 - 由于其不受限制的特性，历史上存在安全问题。
 
 ### 参考文献

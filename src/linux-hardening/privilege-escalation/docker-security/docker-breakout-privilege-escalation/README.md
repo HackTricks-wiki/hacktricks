@@ -5,8 +5,8 @@
 ## 自动枚举与逃逸
 
 - [**linpeas**](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS): 它也可以 **枚举容器**
-- [**CDK**](https://github.com/cdk-team/CDK#installationdelivery): 这个工具非常 **有用来枚举你所在的容器，甚至尝试自动逃逸**
-- [**amicontained**](https://github.com/genuinetools/amicontained): 有用的工具来获取容器的权限，以便找到逃逸的方法
+- [**CDK**](https://github.com/cdk-team/CDK#installationdelivery): 这个工具对于枚举你所在的容器非常 **有用，甚至尝试自动逃逸**
+- [**amicontained**](https://github.com/genuinetools/amicontained): 有用的工具，用于获取容器的权限，以便找到逃逸的方法
 - [**deepce**](https://github.com/stealthcopter/deepce): 用于枚举和逃逸容器的工具
 - [**grype**](https://github.com/anchore/grype): 获取镜像中安装的软件所包含的 CVE
 
@@ -50,7 +50,7 @@ Docker 守护进程也可能 [在端口上监听 (默认 2375, 2376)](../../../.
 
 ## 能力滥用逃逸
 
-您应该检查容器的能力，如果它具有以下任何一种，您可能能够逃离它： **`CAP_SYS_ADMIN`**、**`CAP_SYS_PTRACE`**、**`CAP_SYS_MODULE`**、**`DAC_READ_SEARCH`**、**`DAC_OVERRIDE`、`CAP_SYS_RAWIO`、`CAP_SYSLOG`、`CAP_NET_RAW`、`CAP_NET_ADMIN`**
+您应该检查容器的能力，如果它具有以下任何一种，您可能能够逃离它：**`CAP_SYS_ADMIN`**、**`CAP_SYS_PTRACE`**、**`CAP_SYS_MODULE`**、**`DAC_READ_SEARCH`**、**`DAC_OVERRIDE`、`CAP_SYS_RAWIO`、`CAP_SYSLOG`、`CAP_NET_RAW`、`CAP_NET_ADMIN`**
 
 您可以使用 **之前提到的自动工具** 或：
 ```bash
@@ -76,7 +76,7 @@ capsh --print
 - `--cgroupns=host`
 - `Mount /dev`
 
-`--privileged` 标志显著降低了容器安全性，提供**无限制的设备访问**并绕过**多个保护**。有关详细信息，请参阅 `--privileged` 的完整影响文档。
+`--privileged` 标志显著降低容器安全性，提供**无限制的设备访问**并绕过**多个保护**。有关详细信息，请参阅 `--privileged` 的完整影响文档。
 
 {{#ref}}
 ../docker-privileged.md
@@ -84,7 +84,7 @@ capsh --print
 
 ### 特权 + hostPID
 
-使用这些权限，您可以简单地**移动到作为 root 运行的主机中的进程的命名空间**，例如 init (pid:1)，只需运行：`nsenter --target 1 --mount --uts --ipc --net --pid -- bash`
+拥有这些权限后，您可以**像 init（pid:1）一样移动到主机上以 root 身份运行的进程的命名空间**，只需运行：`nsenter --target 1 --mount --uts --ipc --net --pid -- bash`
 
 在容器中执行测试：
 ```bash
@@ -92,7 +92,7 @@ docker run --rm -it --pid=host --privileged ubuntu bash
 ```
 ### 特权
 
-仅凭特权标志，您可以尝试 **访问主机的磁盘** 或尝试 **通过 release_agent 或其他逃逸进行逃逸**。
+仅凭特权标志，您可以尝试 **访问主机的磁盘** 或尝试 **通过释放代理或其他逃逸进行逃逸**。
 
 在容器中执行以下绕过测试：
 ```bash
@@ -168,7 +168,7 @@ sh -c "echo 0 > $d/w/cgroup.procs"; sleep 1
 # Reads the output
 cat /o
 ```
-#### 特权逃逸 利用创建的 release_agent ([cve-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)) - PoC2
+#### 特权逃逸滥用创建的 release_agent ([cve-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)) - PoC2
 ```bash:Second PoC
 # On the host
 docker run --rm -it --cap-add=SYS_ADMIN --security-opt apparmor=unconfined ubuntu bash
@@ -312,7 +312,7 @@ root        10     2  0 11:25 ?        00:00:00 [ksoftirqd/0]
 ```
 #### 特权逃逸滥用敏感挂载
 
-有几个文件可能被挂载，这些文件提供了**关于底层主机的信息**。其中一些文件甚至可能指示**当发生某些事情时由主机执行的内容**（这将允许攻击者逃离容器）。\
+有几个文件可能被挂载，这些文件提供了**关于底层主机的信息**。其中一些甚至可能指示**当发生某些事情时由主机执行的内容**（这将允许攻击者逃离容器）。\
 滥用这些文件可能允许：
 
 - release_agent（之前已经讨论过）
@@ -347,11 +347,7 @@ bash -p #From non priv inside mounted folder
 ### Privilege Escalation with 2 shells
 
 如果您在**容器内以root身份访问**并且已经**以非特权用户身份逃逸到主机**，您可以利用两个shell来**在主机内进行特权升级**，前提是您在容器内具有MKNOD能力（默认情况下是这样的），如[**在这篇文章中所述**](https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/)。\
-拥有这样的能力，容器内的root用户被允许**创建块设备文件**。设备文件是用于**访问底层硬件和内核模块**的特殊文件。例如，/dev/sda块设备文件提供了**读取系统磁盘上原始数据的访问权限**。
-
-Docker通过强制执行cgroup策略来防止容器内的块设备滥用，**阻止块设备的读/写操作**。然而，如果在容器内**创建了块设备**，则可以通过**/proc/PID/root/**目录从容器外部访问。此访问要求**进程所有者在容器内外相同**。
-
-**利用**示例来自这篇[**文章**](https://radboudinstituteof.pwning.nl/posts/htbunictfquals2021/goodgames/):
+拥有这样的能力，容器内的root用户被允许**创建块设备文件**。设备文件是用于**访问底层硬件和内核模块**的特殊文件。例如
 ```bash
 # On the container as root
 cd /
@@ -395,7 +391,7 @@ docker run --rm -it --pid=host ubuntu bash
 ```
 例如，您将能够使用类似 `ps auxn` 的命令列出进程，并在命令中搜索敏感细节。
 
-然后，正如您可以 **访问 /proc/ 中主机的每个进程，您可以通过运行以下命令直接窃取它们的环境秘密**：
+然后，您可以 **访问 /proc/ 中主机的每个进程，您可以通过运行来窃取它们的环境秘密：**
 ```bash
 for e in `ls /proc/*/environ`; do echo; echo $e; xargs -0 -L1 -a $e; done
 /proc/988058/environ
@@ -417,13 +413,13 @@ cat /proc/635813/fd/4
 您还可以**终止进程并导致 DoS**。
 
 > [!WARNING]
-> 如果您以某种方式拥有**对容器外部进程的特权访问权限**，您可以运行类似 `nsenter --target <pid> --all` 或 `nsenter --target <pid> --mount --net --pid --cgroup` 的命令，以**在与该进程相同的 ns 限制下运行 shell**（希望没有限制）。
+> 如果您以某种方式拥有**对容器外部进程的特权访问权限**，您可以运行类似 `nsenter --target <pid> --all` 或 `nsenter --target <pid> --mount --net --pid --cgroup` 的命令，以**在与该进程相同的 ns 限制**（希望没有）下**运行一个 shell**。
 
 ### hostNetwork
 ```
 docker run --rm -it --network=host ubuntu bash
 ```
-如果一个容器使用 Docker [主机网络驱动程序 (`--network=host`)](https://docs.docker.com/network/host/) 配置，则该容器的网络栈与 Docker 主机不隔离（容器共享主机的网络命名空间），并且容器不会分配自己的 IP 地址。换句话说，**容器将所有服务直接绑定到主机的 IP**。此外，容器可以**拦截主机在共享接口上发送和接收的所有网络流量** `tcpdump -i eth0`。
+如果一个容器使用 Docker [主机网络驱动程序 (`--network=host`)](https://docs.docker.com/network/host/) 配置，那么该容器的网络栈就不会与 Docker 主机隔离（容器共享主机的网络命名空间），并且容器不会分配自己的 IP 地址。换句话说，**容器将所有服务直接绑定到主机的 IP**。此外，容器可以**拦截主机在共享接口上发送和接收的所有网络流量** `tcpdump -i eth0`。
 
 例如，您可以使用此方法**嗅探甚至伪造主机与元数据实例之间的流量**。
 
@@ -438,14 +434,14 @@ docker run --rm -it --network=host ubuntu bash
 ```bash
 docker run --rm -it --ipc=host ubuntu bash
 ```
-通过设置 `hostIPC=true`，您可以访问主机的进程间通信（IPC）资源，例如 `/dev/shm` 中的 **共享内存**。这允许读取/写入其他主机或 pod 进程使用的相同 IPC 资源。使用 `ipcs` 进一步检查这些 IPC 机制。
+使用 `hostIPC=true`，您可以访问主机的进程间通信（IPC）资源，例如 `/dev/shm` 中的 **共享内存**。这允许读取/写入其他主机或 pod 进程使用的相同 IPC 资源。使用 `ipcs` 进一步检查这些 IPC 机制。
 
 - **检查 /dev/shm** - 查找此共享内存位置中的任何文件： `ls -la /dev/shm`
-- **检查现有的 IPC 设施** – 您可以检查是否正在使用任何 IPC 设施，使用 `/usr/bin/ipcs`。检查命令为： `ipcs -a`
+- **检查现有 IPC 设施** – 您可以检查是否正在使用任何 IPC 设施，使用 `/usr/bin/ipcs`。检查命令为： `ipcs -a`
 
 ### 恢复能力
 
-如果系统调用 **`unshare`** 没有被禁止，您可以通过运行来恢复所有能力：
+如果系统调用 **`unshare`** 没有被禁止，您可以恢复所有能力：
 ```bash
 unshare -UrmCpf bash
 # Check them with
@@ -453,13 +449,13 @@ cat /proc/self/status | grep CapEff
 ```
 ### 用户命名空间滥用通过符号链接
 
-帖子中解释的第二种技术 [https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/](https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/) 指出如何利用用户命名空间滥用绑定挂载，以影响主机内部的文件（在特定情况下，删除文件）。
+帖子中解释的第二种技术 [https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/](https://labs.withsecure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/) 指出如何滥用绑定挂载与用户命名空间，以影响主机内部的文件（在特定情况下，删除文件）。
 
 ## CVEs
 
 ### Runc 漏洞 (CVE-2019-5736)
 
-如果您可以以 root 身份执行 `docker exec`（可能使用 sudo），您可以尝试通过利用 CVE-2019-5736 来提升权限（漏洞 [在这里](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)）。该技术基本上会 **覆盖** **主机** 的 _**/bin/sh**_ 二进制文件 **从容器中**，因此任何执行 docker exec 的人都可能触发有效载荷。
+如果您可以以 root 身份执行 `docker exec`（可能使用 sudo），您可以尝试通过滥用 CVE-2019-5736 来提升权限（漏洞 [在这里](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)）。该技术基本上会 **覆盖** **主机** 的 _**/bin/sh**_ 二进制文件 **从容器中**，因此任何执行 docker exec 的人都可能触发有效载荷。
 
 相应地更改有效载荷，并使用 `go build main.go` 构建 main.go。生成的二进制文件应放置在 docker 容器中以供执行。\
 执行时，一旦显示 `[+] Overwritten /bin/sh successfully`，您需要从主机机器执行以下命令：
@@ -468,7 +464,7 @@ cat /proc/self/status | grep CapEff
 
 这将触发 main.go 文件中存在的有效载荷。
 
-更多信息： [https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html](https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html)
+更多信息请参见：[https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html](https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html)
 
 > [!NOTE]
 > 容器可能还会受到其他 CVE 的影响，您可以在 [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list) 找到列表。
@@ -477,7 +473,7 @@ cat /proc/self/status | grep CapEff
 
 ### Docker 逃逸表面
 
-- **命名空间：** 进程应该通过命名空间与其他进程 **完全隔离**，因此我们无法通过命名空间与其他进程交互（默认情况下无法通过 IPC、Unix 套接字、网络服务、D-Bus、其他进程的 `/proc` 进行通信）。
+- **命名空间**：进程应该通过命名空间与其他进程 **完全隔离**，因此我们无法通过命名空间与其他进程交互（默认情况下无法通过 IPC、unix 套接字、网络服务、D-Bus、其他进程的 `/proc` 进行通信）。
 - **根用户**：默认情况下，运行进程的用户是根用户（但其权限是有限的）。
 - **能力**：Docker 保留以下能力：`cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap=ep`
 - **系统调用**：这些是 **根用户无法调用** 的系统调用（因为缺乏能力 + Seccomp）。其他系统调用可以用来尝试逃逸。

@@ -4,11 +4,11 @@
 
 ## 影响
 
-当你以特权模式运行容器时，你正在禁用以下保护：
+当您以特权模式运行容器时，您正在禁用以下保护：
 
 ### 挂载 /dev
 
-在特权容器中，所有的 **设备可以在 `/dev/` 中访问**。因此，你可以通过 **挂载** 主机的磁盘来 **逃逸**。
+在特权容器中，所有的 **设备可以在 `/dev/` 中访问**。因此，您可以通过 **挂载** 主机的磁盘来 **逃逸**。
 
 {{#tabs}}
 {{#tab name="Inside default container"}}
@@ -20,7 +20,7 @@ core     full     null     pts      shm      stdin    tty      zero
 ```
 {{#endtab}}
 
-{{#tab name="内部特权容器"}}
+{{#tab name="Inside Privileged Container"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 ls /dev
@@ -102,7 +102,7 @@ Bounding set =cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setg
 ```
 {{#endtab}}
 
-{{#tab name="Inside Privileged Container"}}
+{{#tab name="内部特权容器"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 apk add -U libcap; capsh --print
@@ -114,11 +114,11 @@ Bounding set =cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fset
 {{#endtab}}
 {{#endtabs}}
 
-您可以通过使用 `--cap-add` 和 `--cap-drop` 标志来操控容器可用的能力，而无需以 `--privileged` 模式运行。
+您可以通过使用 `--cap-add` 和 `--cap-drop` 标志来操纵容器可用的能力，而无需以 `--privileged` 模式运行。
 
 ### Seccomp
 
-**Seccomp** 对于 **限制** 容器可以调用的 **syscalls** 非常有用。默认情况下，在运行 docker 容器时启用默认的 seccomp 配置文件，但在特权模式下它是禁用的。有关 Seccomp 的更多信息，请查看：
+**Seccomp** 对于 **限制** 容器可以调用的 **syscalls** 非常有用。默认情况下，在运行 docker 容器时启用默认的 seccomp 配置文件，但在特权模式下它是禁用的。有关 Seccomp 的更多信息，请访问：
 
 {{#ref}}
 seccomp.md
@@ -134,7 +134,7 @@ Seccomp_filters:	1
 ```
 {{#endtab}}
 
-{{#tab name="Inside Privileged Container"}}
+{{#tab name="内部特权容器"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 grep Seccomp /proc/1/status

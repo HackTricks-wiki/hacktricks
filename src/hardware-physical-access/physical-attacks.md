@@ -1,56 +1,56 @@
-# Physical Attacks
+# 物理攻击
 
 {{#include ../banners/hacktricks-training.md}}
 
-## BIOS Password Recovery and System Security
+## BIOS 密码恢复和系统安全
 
-**Resetting the BIOS** can be achieved in several ways. Most motherboards include a **battery** that, when removed for around **30 minutes**, will reset the BIOS settings, including the password. Alternatively, a **jumper on the motherboard** can be adjusted to reset these settings by connecting specific pins.
+**重置 BIOS** 可以通过几种方式实现。大多数主板都包含一个 **电池**，当移除约 **30 分钟** 后，将重置 BIOS 设置，包括密码。或者，可以通过调整 **主板上的跳线** 来重置这些设置，方法是连接特定的引脚。
 
-For situations where hardware adjustments are not possible or practical, **software tools** offer a solution. Running a system from a **Live CD/USB** with distributions like **Kali Linux** provides access to tools like **_killCmos_** and **_CmosPWD_**, which can assist in BIOS password recovery.
+对于无法或不实用进行硬件调整的情况，**软件工具** 提供了解决方案。使用 **Kali Linux** 等发行版从 **Live CD/USB** 运行系统，可以访问像 **_killCmos_** 和 **_CmosPWD_** 这样的工具，帮助进行 BIOS 密码恢复。
 
-In cases where the BIOS password is unknown, entering it incorrectly **three times** will typically result in an error code. This code can be used on websites like [https://bios-pw.org](https://bios-pw.org) to potentially retrieve a usable password.
+在 BIOS 密码未知的情况下，错误输入 **三次** 通常会导致错误代码。可以在像 [https://bios-pw.org](https://bios-pw.org) 这样的网站上使用此代码，可能会检索到可用的密码。
 
-### UEFI Security
+### UEFI 安全
 
-For modern systems using **UEFI** instead of traditional BIOS, the tool **chipsec** can be utilized to analyze and modify UEFI settings, including the disabling of **Secure Boot**. This can be accomplished with the following command:
+对于使用 **UEFI** 而非传统 BIOS 的现代系统，可以利用工具 **chipsec** 来分析和修改 UEFI 设置，包括禁用 **安全启动**。可以使用以下命令完成此操作：
 
 `python chipsec_main.py -module exploits.secure.boot.pk`
 
-### RAM Analysis and Cold Boot Attacks
+### RAM 分析和冷启动攻击
 
-RAM retains data briefly after power is cut, usually for **1 to 2 minutes**. This persistence can be extended to **10 minutes** by applying cold substances, such as liquid nitrogen. During this extended period, a **memory dump** can be created using tools like **dd.exe** and **volatility** for analysis.
+在断电后，RAM 会短暂保留数据，通常为 **1 到 2 分钟**。通过施加冷物质，如液氮，可以将这种持续时间延长至 **10 分钟**。在此延长期间，可以使用像 **dd.exe** 和 **volatility** 这样的工具创建 **内存转储** 以进行分析。
 
-### Direct Memory Access (DMA) Attacks
+### 直接内存访问 (DMA) 攻击
 
-**INCEPTION** is a tool designed for **physical memory manipulation** through DMA, compatible with interfaces like **FireWire** and **Thunderbolt**. It allows for bypassing login procedures by patching memory to accept any password. However, it's ineffective against **Windows 10** systems.
+**INCEPTION** 是一个旨在通过 DMA 进行 **物理内存操作** 的工具，兼容 **FireWire** 和 **Thunderbolt** 等接口。它允许通过修补内存以接受任何密码来绕过登录程序。然而，它对 **Windows 10** 系统无效。
 
-### Live CD/USB for System Access
+### 使用 Live CD/USB 进行系统访问
 
-Changing system binaries like **_sethc.exe_** or **_Utilman.exe_** with a copy of **_cmd.exe_** can provide a command prompt with system privileges. Tools such as **chntpw** can be used to edit the **SAM** file of a Windows installation, allowing password changes.
+用 **_cmd.exe_** 替换系统二进制文件如 **_sethc.exe_** 或 **_Utilman.exe_** 可以提供具有系统权限的命令提示符。可以使用 **chntpw** 等工具编辑 Windows 安装的 **SAM** 文件，从而允许更改密码。
 
-**Kon-Boot** is a tool that facilitates logging into Windows systems without knowing the password by temporarily modifying the Windows kernel or UEFI. More information can be found at [https://www.raymond.cc](https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/).
+**Kon-Boot** 是一个工具，可以在不知道密码的情况下登录 Windows 系统，通过临时修改 Windows 内核或 UEFI。更多信息可以在 [https://www.raymond.cc](https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/) 找到。
 
-### Handling Windows Security Features
+### 处理 Windows 安全功能
 
-#### Boot and Recovery Shortcuts
+#### 启动和恢复快捷键
 
-- **Supr**: Access BIOS settings.
-- **F8**: Enter Recovery mode.
-- Pressing **Shift** after the Windows banner can bypass autologon.
+- **Supr**: 访问 BIOS 设置。
+- **F8**: 进入恢复模式。
+- 在 Windows 横幅后按 **Shift** 可以绕过自动登录。
 
-#### BAD USB Devices
+#### BAD USB 设备
 
-Devices like **Rubber Ducky** and **Teensyduino** serve as platforms for creating **bad USB** devices, capable of executing predefined payloads when connected to a target computer.
+像 **Rubber Ducky** 和 **Teensyduino** 这样的设备作为创建 **坏 USB** 设备的平台，能够在连接到目标计算机时执行预定义的有效载荷。
 
-#### Volume Shadow Copy
+#### 卷影副本
 
-Administrator privileges allow for the creation of copies of sensitive files, including the **SAM** file, through PowerShell.
+管理员权限允许通过 PowerShell 创建敏感文件的副本，包括 **SAM** 文件。
 
-### Bypassing BitLocker Encryption
+### 绕过 BitLocker 加密
 
-BitLocker encryption can potentially be bypassed if the **recovery password** is found within a memory dump file (**MEMORY.DMP**). Tools like **Elcomsoft Forensic Disk Decryptor** or **Passware Kit Forensic** can be utilized for this purpose.
+如果在内存转储文件 (**MEMORY.DMP**) 中找到 **恢复密码**，则可能绕过 BitLocker 加密。可以使用像 **Elcomsoft Forensic Disk Decryptor** 或 **Passware Kit Forensic** 这样的工具来实现。
 
-### Social Engineering for Recovery Key Addition
+### 社会工程学用于恢复密钥添加
 
-A new BitLocker recovery key can be added through social engineering tactics, convincing a user to execute a command that adds a new recovery key composed of zeros, thereby simplifying the decryption process.
+可以通过社会工程学策略添加新的 BitLocker 恢复密钥，说服用户执行一个命令，添加一个由零组成的新恢复密钥，从而简化解密过程。
 {{#include ../banners/hacktricks-training.md}}

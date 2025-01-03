@@ -2,7 +2,7 @@
 
 ## 使用 Python 的 Socket 绑定示例
 
-在以下示例中，**创建了一个 unix socket** (`/tmp/socket_test.s`)，并且所有**接收到的内容**都将由 `os.system` **执行**。我知道你在现实中不会找到这个，但这个示例的目的是展示使用 unix sockets 的代码是如何的，以及在最糟糕的情况下如何处理输入。
+在以下示例中，**创建了一个 unix socket** (`/tmp/socket_test.s`)，并且所有**接收到的内容**都将由 `os.system` **执行**。我知道你在现实中不会找到这个，但这个示例的目的是看看使用 unix sockets 的代码是怎样的，以及如何在最糟糕的情况下管理输入。
 ```python:s.py
 import socket
 import os, os.path

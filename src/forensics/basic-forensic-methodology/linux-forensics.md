@@ -1,28 +1,17 @@
 # Linux Forensics
 
-<figure><img src="../../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-
 {{#include ../../banners/hacktricks-training.md}}
 
-## Initial Information Gathering
+## 初始信息收集
 
-### Basic Information
+### 基本信息
 
-First of all, it's recommended to have some **USB** with **good known binaries and libraries on it** (you can just get ubuntu and copy the folders _/bin_, _/sbin_, _/lib,_ and _/lib64_), then mount the USB, and modify the env variables to use those binaries:
-
+首先，建议准备一个**USB**，上面有**已知良好的二进制文件和库**（你可以直接获取ubuntu并复制文件夹 _/bin_, _/sbin_, _/lib,_ 和 _/lib64_），然后挂载USB，并修改环境变量以使用这些二进制文件：
 ```bash
 export PATH=/mnt/usb/bin:/mnt/usb/sbin
 export LD_LIBRARY_PATH=/mnt/usb/lib:/mnt/usb/lib64
 ```
-
-Once you have configured the system to use good and known binaries you can start **extracting some basic information**:
-
+一旦您配置系统以使用良好且已知的二进制文件，您就可以开始**提取一些基本信息**：
 ```bash
 date #Date and time (Clock may be skewed, Might be at a different timezone)
 uname -a #OS info
@@ -40,50 +29,46 @@ cat /etc/passwd #Unexpected data?
 cat /etc/shadow #Unexpected data?
 find /directory -type f -mtime -1 -print #Find modified files during the last minute in the directory
 ```
+#### 可疑信息
 
-#### Suspicious information
+在获取基本信息时，您应该检查一些奇怪的事情，例如：
 
-While obtaining the basic information you should check for weird things like:
+- **Root 进程** 通常运行在低 PIDS，因此如果您发现一个大 PID 的 root 进程，您可能会怀疑
+- 检查 **没有 shell 的用户的注册登录** 在 `/etc/passwd` 中
+- 检查 **没有 shell 的用户的密码哈希** 在 `/etc/shadow` 中
 
-- **Root processes** usually run with low PIDS, so if you find a root process with a big PID you may suspect
-- Check **registered logins** of users without a shell inside `/etc/passwd`
-- Check for **password hashes** inside `/etc/shadow` for users without a shell
+### 内存转储
 
-### Memory Dump
-
-To obtain the memory of the running system, it's recommended to use [**LiME**](https://github.com/504ensicsLabs/LiME).\
-To **compile** it, you need to use the **same kernel** that the victim machine is using.
+要获取运行系统的内存，建议使用 [**LiME**](https://github.com/504ensicsLabs/LiME)。\
+要 **编译** 它，您需要使用受害者机器正在使用的 **相同内核**。
 
 > [!NOTE]
-> Remember that you **cannot install LiME or any other thing** in the victim machine as it will make several changes to it
+> 请记住，您 **不能在受害者机器上安装 LiME 或其他任何东西**，因为这会对其进行多次更改
 
-So, if you have an identical version of Ubuntu you can use `apt-get install lime-forensics-dkms`\
-In other cases, you need to download [**LiME**](https://github.com/504ensicsLabs/LiME) from github and compile it with correct kernel headers. To **obtain the exact kernel headers** of the victim machine, you can just **copy the directory** `/lib/modules/<kernel version>` to your machine, and then **compile** LiME using them:
-
+因此，如果您有一个相同版本的 Ubuntu，您可以使用 `apt-get install lime-forensics-dkms`\
+在其他情况下，您需要从 github 下载 [**LiME**](https://github.com/504ensicsLabs/LiME) 并使用正确的内核头文件进行编译。要 **获取受害者机器的确切内核头文件**，您可以直接 **复制目录** `/lib/modules/<kernel version>` 到您的机器，然后使用它们 **编译** LiME：
 ```bash
 make -C /lib/modules/<kernel version>/build M=$PWD
 sudo insmod lime.ko "path=/home/sansforensics/Desktop/mem_dump.bin format=lime"
 ```
+LiME 支持 3 种 **格式**：
 
-LiME supports 3 **formats**:
+- 原始（每个段连接在一起）
+- 填充（与原始相同，但右侧位用零填充）
+- Lime（推荐格式，带有元数据）
 
-- Raw (every segment concatenated together)
-- Padded (same as raw, but with zeroes in right bits)
-- Lime (recommended format with metadata
+LiME 还可以用于 **通过网络发送转储**，而不是使用类似 `path=tcp:4444` 的方式将其存储在系统上。
 
-LiME can also be used to **send the dump via network** instead of storing it on the system using something like: `path=tcp:4444`
+### 磁盘成像
 
-### Disk Imaging
+#### 关机
 
-#### Shutting down
+首先，您需要 **关闭系统**。这并不总是一个选项，因为有时系统可能是公司无法承受关闭的生产服务器。\
+有 **2 种** 关闭系统的方法，**正常关机** 和 **“拔掉插头”关机**。第一种方法将允许 **进程正常终止**，并使 **文件系统** **同步**，但这也可能允许潜在的 **恶意软件** **破坏证据**。“拔掉插头”方法可能会带来 **一些信息丢失**（由于我们已经获取了内存的镜像，丢失的信息不会太多），并且 **恶意软件将没有机会** 采取任何行动。因此，如果您 **怀疑** 可能存在 **恶意软件**，请在系统上执行 **`sync`** **命令** 然后拔掉插头。
 
-First of all, you will need to **shut down the system**. This isn't always an option as some times system will be a production server that the company cannot afford to shut down.\
-There are **2 ways** of shutting down the system, a **normal shutdown** and a **"plug the plug" shutdown**. The first one will allow the **processes to terminate as usual** and the **filesystem** to be **synchronized**, but it will also allow the possible **malware** to **destroy evidence**. The "pull the plug" approach may carry **some information loss** (not much of the info is going to be lost as we already took an image of the memory ) and the **malware won't have any opportunity** to do anything about it. Therefore, if you **suspect** that there may be a **malware**, just execute the **`sync`** **command** on the system and pull the plug.
+#### 获取磁盘镜像
 
-#### Taking an image of the disk
-
-It's important to note that **before connecting your computer to anything related to the case**, you need to be sure that it's going to be **mounted as read only** to avoid modifying any information.
-
+重要的是要注意，在 **将计算机连接到与案件相关的任何设备之前**，您需要确保它将以 **只读方式挂载**，以避免修改任何信息。
 ```bash
 #Create a raw copy of the disk
 dd if=<subject device> of=<image file> bs=512
@@ -92,11 +77,9 @@ dd if=<subject device> of=<image file> bs=512
 dcfldd if=<subject device> of=<image file> bs=512 hash=<algorithm> hashwindow=<chunk size> hashlog=<hash file>
 dcfldd if=/dev/sdc of=/media/usb/pc.image hash=sha256 hashwindow=1M hashlog=/media/usb/pc.hashes
 ```
+### 磁盘映像预分析
 
-### Disk Image pre-analysis
-
-Imaging a disk image with no more data.
-
+对没有更多数据的磁盘映像进行成像。
 ```bash
 #Find out if it's a disk image using "file" command
 file disk.img
@@ -108,12 +91,12 @@ raw
 #You can list supported types with
 img_stat -i list
 Supported image format types:
-        raw (Single or split raw file (dd))
-        aff (Advanced Forensic Format)
-        afd (AFF Multiple File)
-        afm (AFF with external metadata)
-        afflib (All AFFLIB image formats (including beta ones))
-        ewf (Expert Witness Format (EnCase))
+raw (Single or split raw file (dd))
+aff (Advanced Forensic Format)
+afd (AFF Multiple File)
+afm (AFF with external metadata)
+afflib (All AFFLIB image formats (including beta ones))
+ewf (Expert Witness Format (EnCase))
 
 #Data of the image
 fsstat -i raw -f ext4 disk.img
@@ -149,41 +132,31 @@ r/r 16: secret.txt
 icat -i raw -f ext4 disk.img 16
 ThisisTheMasterSecret
 ```
+## 搜索已知恶意软件
 
-<figure><img src="../../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+### 修改过的系统文件
 
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Linux 提供了确保系统组件完整性的工具，这对于发现潜在问题文件至关重要。
 
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+- **基于 RedHat 的系统**：使用 `rpm -Va` 进行全面检查。
+- **基于 Debian 的系统**：使用 `dpkg --verify` 进行初步验证，然后使用 `debsums | grep -v "OK$"`（在使用 `apt-get install debsums` 安装 `debsums` 后）来识别任何问题。
 
-## Search for known Malware
+### 恶意软件/根套件检测器
 
-### Modified System Files
-
-Linux offers tools for ensuring the integrity of system components, crucial for spotting potentially problematic files.
-
-- **RedHat-based systems**: Use `rpm -Va` for a comprehensive check.
-- **Debian-based systems**: `dpkg --verify` for initial verification, followed by `debsums | grep -v "OK$"` (after installing `debsums` with `apt-get install debsums`) to identify any issues.
-
-### Malware/Rootkit Detectors
-
-Read the following page to learn about tools that can be useful to find malware:
+阅读以下页面以了解可以帮助查找恶意软件的工具：
 
 {{#ref}}
 malware-analysis.md
 {{#endref}}
 
-## Search installed programs
+## 搜索已安装程序
 
-To effectively search for installed programs on both Debian and RedHat systems, consider leveraging system logs and databases alongside manual checks in common directories.
+为了有效搜索 Debian 和 RedHat 系统上已安装的程序，可以考虑利用系统日志和数据库，同时在常见目录中进行手动检查。
 
-- For Debian, inspect _**`/var/lib/dpkg/status`**_ and _**`/var/log/dpkg.log`**_ to fetch details about package installations, using `grep` to filter for specific information.
-- RedHat users can query the RPM database with `rpm -qa --root=/mntpath/var/lib/rpm` to list installed packages.
+- 对于 Debian，检查 _**`/var/lib/dpkg/status`**_ 和 _**`/var/log/dpkg.log`**_ 以获取有关软件包安装的详细信息，使用 `grep` 过滤特定信息。
+- RedHat 用户可以使用 `rpm -qa --root=/mntpath/var/lib/rpm` 查询 RPM 数据库以列出已安装的软件包。
 
-To uncover software installed manually or outside of these package managers, explore directories like _**`/usr/local`**_, _**`/opt`**_, _**`/usr/sbin`**_, _**`/usr/bin`**_, _**`/bin`**_, and _**`/sbin`**_. Combine directory listings with system-specific commands to identify executables not associated with known packages, enhancing your search for all installed programs.
-
+要发现手动安装或在这些软件包管理器之外安装的软件，探索像 _**`/usr/local`**_、_**`/opt`**_、_**`/usr/sbin`**_、_**`/usr/bin`**_、_**`/bin`**_ 和 _**`/sbin`**_ 等目录。将目录列表与特定于系统的命令结合使用，以识别与已知软件包无关的可执行文件，从而增强您对所有已安装程序的搜索。
 ```bash
 # Debian package and log details
 cat /var/lib/dpkg/status | grep -E "Package:|Status:"
@@ -199,29 +172,17 @@ find /sbin/ –exec rpm -qf {} \; | grep "is not"
 # Find exacuable files
 find / -type f -executable | grep <something>
 ```
+## 恢复已删除的运行二进制文件
 
-<figure><img src="../../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-
-## Recover Deleted Running Binaries
-
-Imagine a process that was executed from /tmp/exec and then deleted. It's possible to extract it
-
+想象一个从 /tmp/exec 执行并随后被删除的进程。可以提取它。
 ```bash
 cd /proc/3746/ #PID with the exec file deleted
 head -1 maps #Get address of the file. It was 08048000-08049000
 dd if=mem bs=1 skip=08048000 count=1000 of=/tmp/exec2 #Recorver it
 ```
+## 检查自启动位置
 
-## Inspect Autostart locations
-
-### Scheduled Tasks
-
+### 计划任务
 ```bash
 cat /var/spool/cron/crontabs/*  \
 /var/spool/cron/atjobs \
@@ -235,61 +196,60 @@ cat /var/spool/cron/crontabs/*  \
 #MacOS
 ls -l /usr/lib/cron/tabs/ /Library/LaunchAgents/ /Library/LaunchDaemons/ ~/Library/LaunchAgents/
 ```
+### 服务
 
-### Services
+恶意软件可以作为服务安装的路径：
 
-Paths where a malware could be installed as a service:
+- **/etc/inittab**: 调用初始化脚本，如 rc.sysinit，进一步指向启动脚本。
+- **/etc/rc.d/** 和 **/etc/rc.boot/**: 包含服务启动的脚本，后者在较旧的 Linux 版本中找到。
+- **/etc/init.d/**: 在某些 Linux 版本中（如 Debian）用于存储启动脚本。
+- 服务也可以通过 **/etc/inetd.conf** 或 **/etc/xinetd/** 激活，具体取决于 Linux 变体。
+- **/etc/systemd/system**: 系统和服务管理器脚本的目录。
+- **/etc/systemd/system/multi-user.target.wants/**: 包含应在多用户运行级别启动的服务的链接。
+- **/usr/local/etc/rc.d/**: 用于自定义或第三方服务。
+- **\~/.config/autostart/**: 用户特定的自动启动应用程序，可以是针对用户的恶意软件的隐藏地点。
+- **/lib/systemd/system/**: 安装包提供的系统范围的默认单元文件。
 
-- **/etc/inittab**: Calls initialization scripts like rc.sysinit, directing further to startup scripts.
-- **/etc/rc.d/** and **/etc/rc.boot/**: Contain scripts for service startup, the latter being found in older Linux versions.
-- **/etc/init.d/**: Used in certain Linux versions like Debian for storing startup scripts.
-- Services may also be activated via **/etc/inetd.conf** or **/etc/xinetd/**, depending on the Linux variant.
-- **/etc/systemd/system**: A directory for system and service manager scripts.
-- **/etc/systemd/system/multi-user.target.wants/**: Contains links to services that should be started in a multi-user runlevel.
-- **/usr/local/etc/rc.d/**: For custom or third-party services.
-- **\~/.config/autostart/**: For user-specific automatic startup applications, which can be a hiding spot for user-targeted malware.
-- **/lib/systemd/system/**: System-wide default unit files provided by installed packages.
+### 内核模块
 
-### Kernel Modules
+Linux 内核模块，通常被恶意软件作为 rootkit 组件使用，在系统启动时加载。与这些模块相关的关键目录和文件包括：
 
-Linux kernel modules, often utilized by malware as rootkit components, are loaded at system boot. The directories and files critical for these modules include:
+- **/lib/modules/$(uname -r)**: 存放正在运行的内核版本的模块。
+- **/etc/modprobe.d**: 包含控制模块加载的配置文件。
+- **/etc/modprobe** 和 **/etc/modprobe.conf**: 全局模块设置的文件。
 
-- **/lib/modules/$(uname -r)**: Holds modules for the running kernel version.
-- **/etc/modprobe.d**: Contains configuration files to control module loading.
-- **/etc/modprobe** and **/etc/modprobe.conf**: Files for global module settings.
+### 其他自动启动位置
 
-### Other Autostart Locations
+Linux 使用各种文件在用户登录时自动执行程序，可能隐藏恶意软件：
 
-Linux employs various files for automatically executing programs upon user login, potentially harboring malware:
+- **/etc/profile.d/**\*, **/etc/profile** 和 **/etc/bash.bashrc**: 针对任何用户登录执行。
+- **\~/.bashrc**, **\~/.bash_profile**, **\~/.profile** 和 **\~/.config/autostart**: 用户特定的文件，在他们登录时运行。
+- **/etc/rc.local**: 在所有系统服务启动后运行，标志着过渡到多用户环境的结束。
 
-- **/etc/profile.d/**\*, **/etc/profile**, and **/etc/bash.bashrc**: Executed for any user login.
-- **\~/.bashrc**, **\~/.bash_profile**, **\~/.profile**, and **\~/.config/autostart**: User-specific files that run upon their login.
-- **/etc/rc.local**: Runs after all system services have started, marking the end of the transition to a multiuser environment.
+## 检查日志
 
-## Examine Logs
+Linux 系统通过各种日志文件跟踪用户活动和系统事件。这些日志对于识别未经授权的访问、恶意软件感染和其他安全事件至关重要。关键日志文件包括：
 
-Linux systems track user activities and system events through various log files. These logs are pivotal for identifying unauthorized access, malware infections, and other security incidents. Key log files include:
-
-- **/var/log/syslog** (Debian) or **/var/log/messages** (RedHat): Capture system-wide messages and activities.
-- **/var/log/auth.log** (Debian) or **/var/log/secure** (RedHat): Record authentication attempts, successful and failed logins.
-  - Use `grep -iE "session opened for|accepted password|new session|not in sudoers" /var/log/auth.log` to filter relevant authentication events.
-- **/var/log/boot.log**: Contains system startup messages.
-- **/var/log/maillog** or **/var/log/mail.log**: Logs email server activities, useful for tracking email-related services.
-- **/var/log/kern.log**: Stores kernel messages, including errors and warnings.
-- **/var/log/dmesg**: Holds device driver messages.
-- **/var/log/faillog**: Records failed login attempts, aiding in security breach investigations.
-- **/var/log/cron**: Logs cron job executions.
-- **/var/log/daemon.log**: Tracks background service activities.
-- **/var/log/btmp**: Documents failed login attempts.
-- **/var/log/httpd/**: Contains Apache HTTPD error and access logs.
-- **/var/log/mysqld.log** or **/var/log/mysql.log**: Logs MySQL database activities.
-- **/var/log/xferlog**: Records FTP file transfers.
-- **/var/log/**: Always check for unexpected logs here.
+- **/var/log/syslog** (Debian) 或 **/var/log/messages** (RedHat): 捕获系统范围的消息和活动。
+- **/var/log/auth.log** (Debian) 或 **/var/log/secure** (RedHat): 记录身份验证尝试、成功和失败的登录。
+- 使用 `grep -iE "session opened for|accepted password|new session|not in sudoers" /var/log/auth.log` 过滤相关的身份验证事件。
+- **/var/log/boot.log**: 包含系统启动消息。
+- **/var/log/maillog** 或 **/var/log/mail.log**: 记录邮件服务器活动，有助于跟踪与邮件相关的服务。
+- **/var/log/kern.log**: 存储内核消息，包括错误和警告。
+- **/var/log/dmesg**: 保存设备驱动程序消息。
+- **/var/log/faillog**: 记录失败的登录尝试，有助于安全漏洞调查。
+- **/var/log/cron**: 记录 cron 作业执行。
+- **/var/log/daemon.log**: 跟踪后台服务活动。
+- **/var/log/btmp**: 记录失败的登录尝试。
+- **/var/log/httpd/**: 包含 Apache HTTPD 错误和访问日志。
+- **/var/log/mysqld.log** 或 **/var/log/mysql.log**: 记录 MySQL 数据库活动。
+- **/var/log/xferlog**: 记录 FTP 文件传输。
+- **/var/log/**: 始终检查此处是否有意外日志。
 
 > [!NOTE]
-> Linux system logs and audit subsystems may be disabled or deleted in an intrusion or malware incident. Because logs on Linux systems generally contain some of the most useful information about malicious activities, intruders routinely delete them. Therefore, when examining available log files, it is important to look for gaps or out of order entries that might be an indication of deletion or tampering.
+> Linux 系统日志和审计子系统可能在入侵或恶意软件事件中被禁用或删除。因为 Linux 系统上的日志通常包含有关恶意活动的一些最有用的信息，入侵者经常删除它们。因此，在检查可用日志文件时，重要的是查找可能表明删除或篡改的间隙或无序条目。
 
-**Linux maintains a command history for each user**, stored in:
+**Linux 为每个用户维护命令历史**，存储在：
 
 - \~/.bash_history
 - \~/.zsh_history
@@ -297,42 +257,39 @@ Linux systems track user activities and system events through various log files.
 - \~/.python_history
 - \~/.\*\_history
 
-Moreover, the `last -Faiwx` command provides a list of user logins. Check it for unknown or unexpected logins.
+此外，`last -Faiwx` 命令提供用户登录的列表。检查是否有未知或意外的登录。
 
-Check files that can grant extra rprivileges:
+检查可以授予额外权限的文件：
 
-- Review `/etc/sudoers` for unanticipated user privileges that may have been granted.
-- Review `/etc/sudoers.d/` for unanticipated user privileges that may have been granted.
-- Examine `/etc/groups` to identify any unusual group memberships or permissions.
-- Examine `/etc/passwd` to identify any unusual group memberships or permissions.
+- 审查 `/etc/sudoers` 以查找可能被授予的意外用户权限。
+- 审查 `/etc/sudoers.d/` 以查找可能被授予的意外用户权限。
+- 检查 `/etc/groups` 以识别任何异常的组成员资格或权限。
+- 检查 `/etc/passwd` 以识别任何异常的组成员资格或权限。
 
-Some apps alse generates its own logs:
+一些应用程序也会生成自己的日志：
 
-- **SSH**: Examine _\~/.ssh/authorized_keys_ and _\~/.ssh/known_hosts_ for unauthorized remote connections.
-- **Gnome Desktop**: Look into _\~/.recently-used.xbel_ for recently accessed files via Gnome applications.
-- **Firefox/Chrome**: Check browser history and downloads in _\~/.mozilla/firefox_ or _\~/.config/google-chrome_ for suspicious activities.
-- **VIM**: Review _\~/.viminfo_ for usage details, such as accessed file paths and search history.
-- **Open Office**: Check for recent document access that may indicate compromised files.
-- **FTP/SFTP**: Review logs in _\~/.ftp_history_ or _\~/.sftp_history_ for file transfers that might be unauthorized.
-- **MySQL**: Investigate _\~/.mysql_history_ for executed MySQL queries, potentially revealing unauthorized database activities.
-- **Less**: Analyze _\~/.lesshst_ for usage history, including viewed files and commands executed.
-- **Git**: Examine _\~/.gitconfig_ and project _.git/logs_ for changes to repositories.
+- **SSH**: 检查 _\~/.ssh/authorized_keys_ 和 _\~/.ssh/known_hosts_ 以查找未经授权的远程连接。
+- **Gnome 桌面**: 查看 _\~/.recently-used.xbel_ 以查找通过 Gnome 应用程序访问的最近文件。
+- **Firefox/Chrome**: 检查 _\~/.mozilla/firefox_ 或 _\~/.config/google-chrome_ 中的浏览器历史和下载，以查找可疑活动。
+- **VIM**: 检查 _\~/.viminfo_ 以获取使用详情，例如访问的文件路径和搜索历史。
+- **Open Office**: 检查最近的文档访问，以指示可能被破坏的文件。
+- **FTP/SFTP**: 检查 _\~/.ftp_history_ 或 _\~/.sftp_history_ 中的日志，以查找可能未经授权的文件传输。
+- **MySQL**: 检查 _\~/.mysql_history_ 以调查执行的 MySQL 查询，可能揭示未经授权的数据库活动。
+- **Less**: 分析 _\~/.lesshst_ 以获取使用历史，包括查看的文件和执行的命令。
+- **Git**: 检查 _\~/.gitconfig_ 和项目 _.git/logs_ 以查找对存储库的更改。
 
-### USB Logs
+### USB 日志
 
-[**usbrip**](https://github.com/snovvcrash/usbrip) is a small piece of software written in pure Python 3 which parses Linux log files (`/var/log/syslog*` or `/var/log/messages*` depending on the distro) for constructing USB event history tables.
+[**usbrip**](https://github.com/snovvcrash/usbrip) 是一个用纯 Python 3 编写的小软件，它解析 Linux 日志文件（`/var/log/syslog*` 或 `/var/log/messages*`，具体取决于发行版），以构建 USB 事件历史表。
 
-It is interesting to **know all the USBs that have been used** and it will be more useful if you have an authorized list of USBs to find "violation events" (the use of USBs that aren't inside that list).
+了解**所有使用过的 USB** 是很有趣的，如果你有一个授权的 USB 列表来查找“违规事件”（使用不在该列表中的 USB），将更有用。
 
-### Installation
-
+### 安装
 ```bash
 pip3 install usbrip
 usbrip ids download #Download USB ID database
 ```
-
-### Examples
-
+### 示例
 ```bash
 usbrip events history #Get USB history of your curent linux machine
 usbrip events history --pid 0002 --vid 0e0f --user kali #Search by pid OR vid OR user
@@ -340,40 +297,30 @@ usbrip events history --pid 0002 --vid 0e0f --user kali #Search by pid OR vid OR
 usbrip ids download #Downlaod database
 usbrip ids search --pid 0002 --vid 0e0f #Search for pid AND vid
 ```
+更多示例和信息请查看 GitHub: [https://github.com/snovvcrash/usbrip](https://github.com/snovvcrash/usbrip)
 
-More examples and info inside the github: [https://github.com/snovvcrash/usbrip](https://github.com/snovvcrash/usbrip)
+## 审查用户账户和登录活动
 
-<figure><img src="../../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+检查 _**/etc/passwd**_、_**/etc/shadow**_ 和 **安全日志**，寻找不寻常的名称或在已知未授权事件附近创建和使用的账户。同时，检查可能的 sudo 暴力攻击。\
+此外，检查像 _**/etc/sudoers**_ 和 _**/etc/groups**_ 这样的文件，查看是否有意外的权限授予给用户。\
+最后，查找 **没有密码** 或 **容易猜测** 的密码的账户。
 
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+## 检查文件系统
 
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+### 在恶意软件调查中分析文件系统结构
 
-## Review User Accounts and Logon Activities
+在调查恶意软件事件时，文件系统的结构是一个重要的信息来源，揭示事件的顺序和恶意软件的内容。然而，恶意软件作者正在开发技术来阻碍这种分析，例如修改文件时间戳或避免使用文件系统进行数据存储。
 
-Examine the _**/etc/passwd**_, _**/etc/shadow**_ and **security logs** for unusual names or accounts created and or used in close proximity to known unauthorized events. Also, check possible sudo brute-force attacks.\
-Moreover, check files like _**/etc/sudoers**_ and _**/etc/groups**_ for unexpected privileges given to users.\
-Finally, look for accounts with **no passwords** or **easily guessed** passwords.
+为了对抗这些反取证方法，至关重要的是：
 
-## Examine File System
-
-### Analyzing File System Structures in Malware Investigation
-
-When investigating malware incidents, the structure of the file system is a crucial source of information, revealing both the sequence of events and the malware's content. However, malware authors are developing techniques to hinder this analysis, such as modifying file timestamps or avoiding the file system for data storage.
-
-To counter these anti-forensic methods, it's essential to:
-
-- **Conduct a thorough timeline analysis** using tools like **Autopsy** for visualizing event timelines or **Sleuth Kit's** `mactime` for detailed timeline data.
-- **Investigate unexpected scripts** in the system's $PATH, which might include shell or PHP scripts used by attackers.
-- **Examine `/dev` for atypical files**, as it traditionally contains special files, but may house malware-related files.
-- **Search for hidden files or directories** with names like ".. " (dot dot space) or "..^G" (dot dot control-G), which could conceal malicious content.
-- **Identify setuid root files** using the command: `find / -user root -perm -04000 -print` This finds files with elevated permissions, which could be abused by attackers.
-- **Review deletion timestamps** in inode tables to spot mass file deletions, possibly indicating the presence of rootkits or trojans.
-- **Inspect consecutive inodes** for nearby malicious files after identifying one, as they may have been placed together.
-- **Check common binary directories** (_/bin_, _/sbin_) for recently modified files, as these could be altered by malware.
-
+- **进行彻底的时间线分析**，使用像 **Autopsy** 这样的工具可视化事件时间线，或使用 **Sleuth Kit** 的 `mactime` 获取详细的时间线数据。
+- **调查系统 $PATH 中的意外脚本**，这些脚本可能包括攻击者使用的 shell 或 PHP 脚本。
+- **检查 `/dev` 中的非典型文件**，因为它通常包含特殊文件，但可能包含与恶意软件相关的文件。
+- **搜索隐藏的文件或目录**，名称可能像 ".. "（点点空格）或 "..^G"（点点控制-G），这些可能隐藏恶意内容。
+- **识别 setuid root 文件**，使用命令：`find / -user root -perm -04000 -print` 这将找到具有提升权限的文件，可能被攻击者滥用。
+- **检查 inode 表中的删除时间戳**，以发现大规模文件删除，可能表明存在 rootkit 或木马。
+- **在识别到一个恶意文件后，检查连续的 inode**，因为它们可能被放置在一起。
+- **检查常见的二进制目录** (_/bin_、_/sbin_) 中最近修改的文件，因为这些可能被恶意软件更改。
 ````bash
 # List recent files in a directory:
 ls -laR --sort=time /bin```
@@ -381,58 +328,43 @@ ls -laR --sort=time /bin```
 # Sort files in a directory by inode:
 ls -lai /bin | sort -n```
 ````
-
 > [!NOTE]
-> Note that an **attacker** can **modify** the **time** to make **files appear** **legitimate**, but he **cannot** modify the **inode**. If you find that a **file** indicates that it was created and modified at the **same time** as the rest of the files in the same folder, but the **inode** is **unexpectedly bigger**, then the **timestamps of that file were modified**.
+> 请注意，**攻击者**可以**修改**时间以使**文件看起来**是**合法的**，但他**无法**修改**inode**。如果你发现一个**文件**显示它在与同一文件夹中其他文件**相同的时间**被创建和修改，但**inode**却**意外地更大**，那么该**文件的时间戳被修改**了。
 
-## Compare files of different filesystem versions
+## 比较不同文件系统版本的文件
 
-### Filesystem Version Comparison Summary
+### 文件系统版本比较摘要
 
-To compare filesystem versions and pinpoint changes, we use simplified `git diff` commands:
+要比较文件系统版本并确定更改，我们使用简化的`git diff`命令：
 
-- **To find new files**, compare two directories:
-
+- **要查找新文件**，比较两个目录：
 ```bash
 git diff --no-index --diff-filter=A path/to/old_version/ path/to/new_version/
 ```
-
-- **For modified content**, list changes while ignoring specific lines:
-
+- **对于修改过的内容**，列出更改，同时忽略特定行：
 ```bash
 git diff --no-index --diff-filter=M path/to/old_version/ path/to/new_version/ | grep -E "^\+" | grep -v "Installed-Time"
 ```
-
-- **To detect deleted files**:
-
+- **检测已删除文件**:
 ```bash
 git diff --no-index --diff-filter=D path/to/old_version/ path/to/new_version/
 ```
+- **过滤选项** (`--diff-filter`) 有助于缩小到特定的更改，如添加的 (`A`)、删除的 (`D`) 或修改的 (`M`) 文件。
+- `A`: 添加的文件
+- `C`: 复制的文件
+- `D`: 删除的文件
+- `M`: 修改的文件
+- `R`: 重命名的文件
+- `T`: 类型更改（例如，从文件到符号链接）
+- `U`: 未合并的文件
+- `X`: 未知的文件
+- `B`: 损坏的文件
 
-- **Filter options** (`--diff-filter`) help narrow down to specific changes like added (`A`), deleted (`D`), or modified (`M`) files.
-  - `A`: Added files
-  - `C`: Copied files
-  - `D`: Deleted files
-  - `M`: Modified files
-  - `R`: Renamed files
-  - `T`: Type changes (e.g., file to symlink)
-  - `U`: Unmerged files
-  - `X`: Unknown files
-  - `B`: Broken files
-
-## References
+## 参考文献
 
 - [https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems_Ch3.pdf](https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems_Ch3.pdf)
 - [https://www.plesk.com/blog/featured/linux-logs-explained/](https://www.plesk.com/blog/featured/linux-logs-explained/)
 - [https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203](https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203)
-- **Book: Malware Forensics Field Guide for Linux Systems: Digital Forensics Field Guides**
+- **书籍：Linux系统的恶意软件取证实用指南：数字取证实用指南**
 
 {{#include ../../banners/hacktricks-training.md}}
-
-<figure><img src="../../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}

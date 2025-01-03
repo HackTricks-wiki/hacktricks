@@ -10,7 +10,7 @@ IOKit 驱动程序基本上会 **从内核导出函数**。这些函数参数的
 
 **IOKit XNU 内核代码** 由 Apple 在 [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit) 开源。此外，用户空间的 IOKit 组件也开源 [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser)。
 
-然而，**没有 IOKit 驱动程序** 是开源的。无论如何，偶尔会发布带有符号的驱动程序，这使得调试变得更容易。查看如何 [**从固件获取驱动程序扩展这里**](./#ipsw)**。**
+然而，**没有 IOKit 驱动程序** 是开源的。无论如何，驱动程序的发布有时可能会附带符号，使其更容易调试。查看如何 [**从固件获取驱动程序扩展这里**](./#ipsw)**。**
 
 它是用 **C++** 编写的。您可以使用以下命令获取去除修饰的 C++ 符号：
 ```bash
@@ -23,7 +23,7 @@ __ZN16IOUserClient202222dispatchExternalMethodEjP31IOExternalMethodArgumentsOpaq
 IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
 > [!CAUTION]
-> IOKit **暴露的函数** 可能在客户端尝试调用函数时执行 **额外的安全检查**，但请注意，应用程序通常受到 **沙箱** 的 **限制**，只能与特定的 IOKit 函数进行交互。
+> IOKit **暴露的函数** 在客户端尝试调用函数时可能会执行 **额外的安全检查**，但请注意，应用程序通常受到 **沙箱** 的 **限制**，只能与特定的 IOKit 函数进行交互。
 
 ## 驱动程序
 
@@ -68,7 +68,7 @@ kextunload com.apple.iokit.IOReportFamily
 ```
 ## IORegistry
 
-**IORegistry** 是 macOS 和 iOS 中 IOKit 框架的一个关键部分，作为表示系统硬件配置和状态的数据库。它是一个 **层次化的对象集合，代表系统上加载的所有硬件和驱动程序**，以及它们之间的关系。
+**IORegistry** 是 macOS 和 iOS 中 IOKit 框架的一个关键部分，作为表示系统硬件配置和状态的数据库。它是一个 **层次化的对象集合，表示系统上加载的所有硬件和驱动程序** 及其相互关系。
 
 您可以使用 cli **`ioreg`** 从控制台检查 IORegistry（对 iOS 特别有用）。
 ```bash
@@ -84,7 +84,7 @@ ioreg -p <plane> #Check other plane
 
 1. **IOService 平面**：这是最通用的平面，显示代表驱动程序和 nubs（驱动程序之间的通信通道）的服务对象。它显示这些对象之间的提供者-客户端关系。
 2. **IODeviceTree 平面**：该平面表示设备与系统之间的物理连接。它通常用于可视化通过 USB 或 PCI 等总线连接的设备层次结构。
-3. **IOPower 平面**：以电源管理的方式显示对象及其关系。它可以显示哪些对象影响其他对象的电源状态，便于调试与电源相关的问题。
+3. **IOPower 平面**：以电源管理的方式显示对象及其关系。它可以显示哪些对象影响其他对象的电源状态，对于调试与电源相关的问题非常有用。
 4. **IOUSB 平面**：专注于 USB 设备及其关系，显示 USB 集线器和连接设备的层次结构。
 5. **IOAudio 平面**：该平面用于表示音频设备及其在系统中的关系。
 6. ...
@@ -95,7 +95,7 @@ ioreg -p <plane> #Check other plane
 
 - 首先调用 **`IOServiceMatching`** 和 **`IOServiceGetMatchingServices`** 来获取服务。
 - 然后通过调用 **`IOServiceOpen`** 建立连接。
-- 最后调用 **`IOConnectCallScalarMethod`** 函数，指示选择器 0（选择器是您要调用的函数分配的数字）。
+- 最后调用一个函数，使用 **`IOConnectCallScalarMethod`** 指定选择器 0（选择器是您要调用的函数分配的数字）。
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <IOKit/IOKitLib.h>
@@ -154,7 +154,7 @@ return 0;
 
 ## 反向工程驱动入口点
 
-您可以从 [**固件镜像 (ipsw)**](./#ipsw) 中获取这些。例如，将其加载到您喜欢的反编译器中。
+您可以从 [**固件镜像 (ipsw)**](./#ipsw) 中获取这些。例如，将其加载到您最喜欢的反编译器中。
 
 您可以开始反编译 **`externalMethod`** 函数，因为这是接收调用并调用正确函数的驱动函数：
 

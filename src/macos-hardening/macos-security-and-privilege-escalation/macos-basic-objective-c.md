@@ -66,13 +66,13 @@ MyVehicle *newVehicle = [MyVehicle new];
 ```
 ### **类方法**
 
-类方法是用 **加号** (+) 定义的，而不是用于实例方法的连字符 (-)。例如 **NSString** 类方法 **`stringWithString`**:
+类方法是用 **加号** (+) 定义的，而不是用于实例方法的 **减号** (-)。例如 **NSString** 类方法 **`stringWithString`**:
 ```objectivec
 + (id)stringWithString:(NSString *)aString;
 ```
 ### Setter & Getter
 
-要**设置**和**获取**属性，您可以使用**点表示法**或像**调用方法**一样：
+要**设置**和**获取**属性，您可以使用**点表示法**或像**调用方法**一样进行：
 ```objectivec
 // Set
 newVehicle.numberOfWheels = 2;
@@ -164,7 +164,7 @@ NSString *bookTitle = @"The Catcher in the Rye";
 NSString *bookAuthor = [[NSString alloc] initWithCString:"J.D. Salinger" encoding:NSUTF8StringEncoding];
 NSString *bookPublicationYear = [NSString stringWithCString:"1951" encoding:NSUTF8StringEncoding];
 ```
-基本类是**不可变的**，因此要将一个字符串附加到现有字符串上，**需要创建一个新的 NSString**。
+基本类是**不可变的**，因此要将一个字符串附加到现有字符串上，**需要创建一个新的NSString**。
 ```objectivec
 NSString *bookDescription = [NSString stringWithFormat:@"%@ by %@ was published in %@", bookTitle, bookAuthor, bookPublicationYear];
 ```
