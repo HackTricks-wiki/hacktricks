@@ -2,43 +2,37 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Основна інформація
 
-Different vulnerabilities such as [**Python Format Strings**](bypass-python-sandboxes/#python-format-string) or [**Class Pollution**](class-pollution-pythons-prototype-pollution.md) might allow you to **read python internal data but won't allow you to execute code**. Therefore, a pentester will need to make the most of these read permissions to **obtain sensitive privileges and escalate the vulnerability**.
+Різні вразливості, такі як [**Python Format Strings**](bypass-python-sandboxes/#python-format-string) або [**Class Pollution**](class-pollution-pythons-prototype-pollution.md), можуть дозволити вам **читати внутрішні дані python, але не дозволять виконувати код**. Тому, пентестер повинен максимально використати ці дозволи на читання, щоб **отримати чутливі привілеї та ескалувати вразливість**.
 
-### Flask - Read secret key
+### Flask - Читання секретного ключа
 
-The main page of a Flask application will probably have the **`app`** global object where this **secret is configured**.
-
+Головна сторінка додатку Flask, ймовірно, міститиме глобальний об'єкт **`app`**, де цей **секрет налаштовано**.
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
+У цьому випадку можливо отримати доступ до цього об'єкта, просто використовуючи будь-який гаджет для **доступу до глобальних об'єктів** з [**сторінки обходу пісочниць Python**](bypass-python-sandboxes/).
 
-In this case it's possible to access this object just using any gadget to **access global objects** from the [**Bypass Python sandboxes page**](bypass-python-sandboxes/).
+У випадку, коли **вразливість знаходиться в іншому файлі python**, вам потрібен гаджет для переходу між файлами, щоб дістатися до основного, щоб **отримати доступ до глобального об'єкта `app.secret_key`**, щоб змінити секретний ключ Flask і мати можливість [**підвищити привілеї**, знаючи цей ключ](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
 
-In the case where **the vulnerability is in a different python file**, you need a gadget to traverse files to get to the main one to **access the global object `app.secret_key`** to change the Flask secret key and be able to [**escalate privileges** knowing this key](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
-
-A payload like this one [from this writeup](https://ctftime.org/writeup/36082):
-
+Пейлоад, подібний до цього [з цього опису](https://ctftime.org/writeup/36082):
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
+Використовуйте цей payload, щоб **змінити `app.secret_key`** (ім'я у вашому додатку може бути іншим), щоб мати можливість підписувати нові та більш привілейовані flask cookies.
 
-Use this payload to **change `app.secret_key`** (the name in your app might be different) to be able to sign new and more privileges flask cookies.
+### Werkzeug - machine_id та node uuid
 
-### Werkzeug - machine_id and node uuid
-
-[**Using these payload from this writeup**](https://vozec.fr/writeups/tweedle-dum-dee/) you will be able to access the **machine_id** and the **uuid** node, which are the **main secrets** you need to [**generate the Werkzeug pin**](../../network-services-pentesting/pentesting-web/werkzeug.md) you can use to access the python console in `/console` if the **debug mode is enabled:**
-
+[**Використовуючи ці payload з цього опису**](https://vozec.fr/writeups/tweedle-dum-dee/) ви зможете отримати доступ до **machine_id** та **uuid** node, які є **основними секретами**, необхідними для [**генерації Werkzeug pin**](../../network-services-pentesting/pentesting-web/werkzeug.md), який ви можете використовувати для доступу до python консолі в `/console`, якщо **режим налагодження увімкнено:**
 ```python
 {ua.__class__.__init__.__globals__[t].sys.modules[werkzeug.debug]._machine_id}
 {ua.__class__.__init__.__globals__[t].sys.modules[werkzeug.debug].uuid._node}
 ```
-
 > [!WARNING]
-> Note that you can get the **servers local path to the `app.py`** generating some **error** in the web page which will **give you the path**.
+> Зверніть увагу, що ви можете отримати **локальний шлях сервера до `app.py`**, викликавши деякі **помилки** на веб-сторінці, які **нададуть вам шлях**.
 
-If the vulnerability is in a different python file, check the previous Flask trick to access the objects from the main python file.
+Якщо вразливість знаходиться в іншому файлі python, перевірте попередній трюк Flask для доступу до об'єктів з основного файлу python.
 
 {{#include ../../banners/hacktricks-training.md}}

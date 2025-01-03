@@ -1,147 +1,145 @@
-# Partitions/File Systems/Carving
+# Розділи/Файлові системи/Карвінг
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Partitions
+## Розділи
 
-A hard drive or an **SSD disk can contain different partitions** with the goal of separating data physically.\
-The **minimum** unit of a disk is the **sector** (normally composed of 512B). So, each partition size needs to be multiple of that size.
+Жорсткий диск або **SSD диск можуть містити різні розділи** з метою фізичного розділення даних.\
+**Мінімальна** одиниця диска - це **сектор** (зазвичай складається з 512B). Отже, розмір кожного розділу повинен бути кратним цьому розміру.
 
-### MBR (master Boot Record)
+### MBR (майстер завантажувальний запис)
 
-It's allocated in the **first sector of the disk after the 446B of the boot code**. This sector is essential to indicate to the PC what and from where a partition should be mounted.\
-It allows up to **4 partitions** (at most **just 1** can be active/**bootable**). However, if you need more partitions you can use **extended partitions**. The **final byte** of this first sector is the boot record signature **0x55AA**. Only one partition can be marked as active.\
-MBR allows **max 2.2TB**.
+Він розміщується в **першому секторі диска після 446B завантажувального коду**. Цей сектор є важливим для вказівки ПК, що і звідки має бути змонтовано розділ.\
+Він дозволяє до **4 розділів** (максимум **лише 1** може бути активним/**завантажувальним**). Однак, якщо вам потрібно більше розділів, ви можете використовувати **розширені розділи**. **Останній байт** цього першого сектора - це підпис завантажувального запису **0x55AA**. Лише один розділ може бути позначений як активний.\
+MBR дозволяє **макс 2.2TB**.
 
 ![](<../../../images/image (350).png>)
 
 ![](<../../../images/image (304).png>)
 
-From the **bytes 440 to the 443** of the MBR you can find the **Windows Disk Signature** (if Windows is used). The logical drive letter of the hard disk depends on the Windows Disk Signature. Changing this signature could prevent Windows from booting (tool: [**Active Disk Editor**](https://www.disk-editor.org/index.html)**)**.
+З **байтів 440 до 443** MBR ви можете знайти **Windows Disk Signature** (якщо використовується Windows). Логічна буква диска жорсткого диска залежить від Windows Disk Signature. Зміна цього підпису може завадити Windows завантажитися (інструмент: [**Active Disk Editor**](https://www.disk-editor.org/index.html)**)**.
 
 ![](<../../../images/image (310).png>)
 
-**Format**
+**Формат**
 
-| Offset      | Length     | Item                |
+| Зсув        | Довжина    | Елемент              |
 | ----------- | ---------- | ------------------- |
-| 0 (0x00)    | 446(0x1BE) | Boot code           |
-| 446 (0x1BE) | 16 (0x10)  | First Partition     |
-| 462 (0x1CE) | 16 (0x10)  | Second Partition    |
-| 478 (0x1DE) | 16 (0x10)  | Third Partition     |
-| 494 (0x1EE) | 16 (0x10)  | Fourth Partition    |
-| 510 (0x1FE) | 2 (0x2)    | Signature 0x55 0xAA |
+| 0 (0x00)    | 446(0x1BE) | Завантажувальний код |
+| 446 (0x1BE) | 16 (0x10)  | Перший розділ       |
+| 462 (0x1CE) | 16 (0x10)  | Другий розділ       |
+| 478 (0x1DE) | 16 (0x10)  | Третій розділ       |
+| 494 (0x1EE) | 16 (0x10)  | Четвертий розділ    |
+| 510 (0x1FE) | 2 (0x2)    | Підпис 0x55 0xAA    |
 
-**Partition Record Format**
+**Формат запису розділу**
 
-| Offset    | Length   | Item                                                   |
+| Зсув      | Довжина   | Елемент                                                 |
 | --------- | -------- | ------------------------------------------------------ |
-| 0 (0x00)  | 1 (0x01) | Active flag (0x80 = bootable)                          |
-| 1 (0x01)  | 1 (0x01) | Start head                                             |
-| 2 (0x02)  | 1 (0x01) | Start sector (bits 0-5); upper bits of cylinder (6- 7) |
-| 3 (0x03)  | 1 (0x01) | Start cylinder lowest 8 bits                           |
-| 4 (0x04)  | 1 (0x01) | Partition type code (0x83 = Linux)                     |
-| 5 (0x05)  | 1 (0x01) | End head                                               |
-| 6 (0x06)  | 1 (0x01) | End sector (bits 0-5); upper bits of cylinder (6- 7)   |
-| 7 (0x07)  | 1 (0x01) | End cylinder lowest 8 bits                             |
-| 8 (0x08)  | 4 (0x04) | Sectors preceding partition (little endian)            |
-| 12 (0x0C) | 4 (0x04) | Sectors in partition                                   |
+| 0 (0x00)  | 1 (0x01) | Активний прапор (0x80 = завантажувальний)             |
+| 1 (0x01)  | 1 (0x01) | Початкова голівка                                      |
+| 2 (0x02)  | 1 (0x01) | Початковий сектор (біти 0-5); верхні біти циліндра (6-7) |
+| 3 (0x03)  | 1 (0x01) | Початковий циліндр найнижчі 8 біт                      |
+| 4 (0x04)  | 1 (0x01) | Код типу розділу (0x83 = Linux)                        |
+| 5 (0x05)  | 1 (0x01) | Кінцева голівка                                        |
+| 6 (0x06)  | 1 (0x01) | Кінцевий сектор (біти 0-5); верхні біти циліндра (6-7) |
+| 7 (0x07)  | 1 (0x01) | Кінцевий циліндр найнижчі 8 біт                        |
+| 8 (0x08)  | 4 (0x04) | Сектори перед розділом (little endian)                |
+| 12 (0x0C) | 4 (0x04) | Сектори в розділі                                      |
 
-In order to mount an MBR in Linux you first need to get the start offset (you can use `fdisk` and the `p` command)
+Щоб змонтувати MBR в Linux, спочатку потрібно отримати початковий зсув (ви можете використовувати `fdisk` і команду `p`)
 
 ![](<../../../images/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
-And then use the following code
-
+А потім використовуйте наступний код
 ```bash
 #Mount MBR in Linux
 mount -o ro,loop,offset=<Bytes>
 #63x512 = 32256Bytes
 mount -o ro,loop,offset=32256,noatime /path/to/image.dd /media/part/
 ```
+**LBA (Логічне блочне адресування)**
 
-**LBA (Logical block addressing)**
+**Логічне блочне адресування** (**LBA**) є поширеною схемою, що використовується для **вказівки місця розташування блоків** даних, збережених на комп'ютерних носіях, зазвичай на вторинних системах зберігання, таких як жорсткі диски. LBA є особливо простим лінійним адресним методом; **блоки розташовані за цілим індексом**, при цьому перший блок має LBA 0, другий LBA 1 і так далі.
 
-**Logical block addressing** (**LBA**) is a common scheme used for **specifying the location of blocks** of data stored on computer storage devices, generally secondary storage systems such as hard disk drives. LBA is a particularly simple linear addressing scheme; **blocks are located by an integer index**, with the first block being LBA 0, the second LBA 1, and so on.
+### GPT (GUID Таблиця Розділів)
 
-### GPT (GUID Partition Table)
+GUID Таблиця Розділів, відома як GPT, віддається перевага за її покращені можливості в порівнянні з MBR (Основний Завантажувальний Запис). Вона відрізняється своїм **глобально унікальним ідентифікатором** для розділів, GPT виділяється кількома способами:
 
-The GUID Partition Table, known as GPT, is favored for its enhanced capabilities compared to MBR (Master Boot Record). Distinctive for its **globally unique identifier** for partitions, GPT stands out in several ways:
+- **Місцезнаходження та Розмір**: Як GPT, так і MBR починаються з **сектора 0**. Однак GPT працює на **64 бітах**, на відміну від 32 біт MBR.
+- **Обмеження Розділів**: GPT підтримує до **128 розділів** на системах Windows і може вміщувати до **9.4ZB** даних.
+- **Назви Розділів**: Пропонує можливість називати розділи до 36 символів Unicode.
 
-- **Location and Size**: Both GPT and MBR start at **sector 0**. However, GPT operates on **64bits**, contrasting with MBR's 32bits.
-- **Partition Limits**: GPT supports up to **128 partitions** on Windows systems and accommodates up to **9.4ZB** of data.
-- **Partition Names**: Offers the ability to name partitions with up to 36 Unicode characters.
+**Стійкість Даних та Відновлення**:
 
-**Data Resilience and Recovery**:
+- **Резервування**: На відміну від MBR, GPT не обмежує дані про розділи та завантаження в одному місці. Вона реплікує ці дані по всьому диску, підвищуючи цілісність даних та стійкість.
+- **Циклічна Контрольна Сума (CRC)**: GPT використовує CRC для забезпечення цілісності даних. Вона активно контролює наявність пошкоджень даних, і при виявленні GPT намагається відновити пошкоджені дані з іншого місця на диску.
 
-- **Redundancy**: Unlike MBR, GPT doesn't confine partitioning and boot data to a single place. It replicates this data across the disk, enhancing data integrity and resilience.
-- **Cyclic Redundancy Check (CRC)**: GPT employs CRC to ensure data integrity. It actively monitors for data corruption, and when detected, GPT attempts to recover the corrupted data from another disk location.
+**Захисний MBR (LBA0)**:
 
-**Protective MBR (LBA0)**:
-
-- GPT maintains backward compatibility through a protective MBR. This feature resides in the legacy MBR space but is designed to prevent older MBR-based utilities from mistakenly overwriting GPT disks, hence safeguarding the data integrity on GPT-formatted disks.
+- GPT підтримує зворотну сумісність через захисний MBR. Ця функція розташована в спадковому просторі MBR, але призначена для запобігання випадковому перезапису дисків GPT старими утилітами на основі MBR, тим самим захищаючи цілісність даних на дисках формату GPT.
 
 ![https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/GUID_Partition_Table_Scheme.svg/800px-GUID_Partition_Table_Scheme.svg.png](<../../../images/image (1062).png>)
 
-**Hybrid MBR (LBA 0 + GPT)**
+**Гібридний MBR (LBA 0 + GPT)**
 
-[From Wikipedia](https://en.wikipedia.org/wiki/GUID_Partition_Table)
+[З Вікіпедії](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 
-In operating systems that support **GPT-based boot through BIOS** services rather than EFI, the first sector may also still be used to store the first stage of the **bootloader** code, but **modified** to recognize **GPT** **partitions**. The bootloader in the MBR must not assume a sector size of 512 bytes.
+В операційних системах, які підтримують **завантаження на основі GPT через BIOS** замість EFI, перший сектор також може використовуватися для зберігання першої стадії коду **завантажувача**. Але **модифікований** для розпізнавання **GPT** **розділів**. Завантажувач у MBR не повинен припускати розмір сектора 512 байт.
 
-**Partition table header (LBA 1)**
+**Заголовок таблиці розділів (LBA 1)**
 
-[From Wikipedia](https://en.wikipedia.org/wiki/GUID_Partition_Table)
+[З Вікіпедії](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 
-The partition table header defines the usable blocks on the disk. It also defines the number and size of the partition entries that make up the partition table (offsets 80 and 84 in the table).
+Заголовок таблиці розділів визначає використовувані блоки на диску. Він також визначає кількість і розмір записів розділів, які складають таблицю розділів (зсуви 80 і 84 в таблиці).
 
-| Offset    | Length   | Contents                                                                                                                                                                     |
+| Зсув      | Довжина  | Зміст                                                                                                                                                                     |
 | --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 0 (0x00)  | 8 bytes  | Signature ("EFI PART", 45h 46h 49h 20h 50h 41h 52h 54h or 0x5452415020494645ULL[ ](https://en.wikipedia.org/wiki/GUID_Partition_Table#cite_note-8)on little-endian machines) |
-| 8 (0x08)  | 4 bytes  | Revision 1.0 (00h 00h 01h 00h) for UEFI 2.8                                                                                                                                  |
-| 12 (0x0C) | 4 bytes  | Header size in little endian (in bytes, usually 5Ch 00h 00h 00h or 92 bytes)                                                                                                 |
-| 16 (0x10) | 4 bytes  | [CRC32](https://en.wikipedia.org/wiki/CRC32) of header (offset +0 up to header size) in little endian, with this field zeroed during calculation                             |
-| 20 (0x14) | 4 bytes  | Reserved; must be zero                                                                                                                                                       |
-| 24 (0x18) | 8 bytes  | Current LBA (location of this header copy)                                                                                                                                   |
-| 32 (0x20) | 8 bytes  | Backup LBA (location of the other header copy)                                                                                                                               |
-| 40 (0x28) | 8 bytes  | First usable LBA for partitions (primary partition table last LBA + 1)                                                                                                       |
-| 48 (0x30) | 8 bytes  | Last usable LBA (secondary partition table first LBA − 1)                                                                                                                    |
-| 56 (0x38) | 16 bytes | Disk GUID in mixed endian                                                                                                                                                    |
-| 72 (0x48) | 8 bytes  | Starting LBA of an array of partition entries (always 2 in primary copy)                                                                                                     |
-| 80 (0x50) | 4 bytes  | Number of partition entries in array                                                                                                                                         |
-| 84 (0x54) | 4 bytes  | Size of a single partition entry (usually 80h or 128)                                                                                                                        |
-| 88 (0x58) | 4 bytes  | CRC32 of partition entries array in little endian                                                                                                                            |
-| 92 (0x5C) | \*       | Reserved; must be zeroes for the rest of the block (420 bytes for a sector size of 512 bytes; but can be more with larger sector sizes)                                      |
+| 0 (0x00)  | 8 байт   | Підпис ("EFI PART", 45h 46h 49h 20h 50h 41h 52h 54h або 0x5452415020494645ULL[ ](https://en.wikipedia.org/wiki/GUID_Partition_Table#cite_note-8)на машинах з малим порядком байтів) |
+| 8 (0x08)  | 4 байти  | Версія 1.0 (00h 00h 01h 00h) для UEFI 2.8                                                                                                                                  |
+| 12 (0x0C) | 4 байти  | Розмір заголовка в малому порядку байтів (в байтах, зазвичай 5Ch 00h 00h 00h або 92 байти)                                                                                                 |
+| 16 (0x10) | 4 байти  | [CRC32](https://en.wikipedia.org/wiki/CRC32) заголовка (зсув +0 до розміру заголовка) в малому порядку байтів, з цим полем, обнуленим під час обчислення                             |
+| 20 (0x14) | 4 байти  | Зарезервовано; має бути нулем                                                                                                                                                       |
+| 24 (0x18) | 8 байт   | Поточний LBA (місцезнаходження цієї копії заголовка)                                                                                                                                   |
+| 32 (0x20) | 8 байт   | Резервний LBA (місцезнаходження іншої копії заголовка)                                                                                                                               |
+| 40 (0x28) | 8 байт   | Перший використовуваний LBA для розділів (остання LBA основної таблиці розділів + 1)                                                                                                       |
+| 48 (0x30) | 8 байт   | Останній використовуваний LBA (перша LBA вторинної таблиці розділів − 1)                                                                                                                    |
+| 56 (0x38) | 16 байт  | GUID диска в змішаному порядку байтів                                                                                                                                                    |
+| 72 (0x48) | 8 байт   | Початковий LBA масиву записів розділів (завжди 2 в основній копії)                                                                                                     |
+| 80 (0x50) | 4 байти  | Кількість записів розділів у масиві                                                                                                                                         |
+| 84 (0x54) | 4 байти  | Розмір одного запису розділу (зазвичай 80h або 128)                                                                                                                        |
+| 88 (0x58) | 4 байти  | CRC32 масиву записів розділів у малому порядку байтів                                                                                                                            |
+| 92 (0x5C) | \*       | Зарезервовано; має бути нулями для решти блоку (420 байт для розміру сектора 512 байт; але може бути більше з більшими розмірами секторів)                                      |
 
-**Partition entries (LBA 2–33)**
+**Записи розділів (LBA 2–33)**
 
-| GUID partition entry format |          |                                                                                                               |
+| Формат запису розділу GUID |          |                                                                                                               |
 | --------------------------- | -------- | ------------------------------------------------------------------------------------------------------------- |
-| Offset                      | Length   | Contents                                                                                                      |
-| 0 (0x00)                    | 16 bytes | [Partition type GUID](https://en.wikipedia.org/wiki/GUID_Partition_Table#Partition_type_GUIDs) (mixed endian) |
-| 16 (0x10)                   | 16 bytes | Unique partition GUID (mixed endian)                                                                          |
-| 32 (0x20)                   | 8 bytes  | First LBA ([little endian](https://en.wikipedia.org/wiki/Little_endian))                                      |
-| 40 (0x28)                   | 8 bytes  | Last LBA (inclusive, usually odd)                                                                             |
-| 48 (0x30)                   | 8 bytes  | Attribute flags (e.g. bit 60 denotes read-only)                                                               |
-| 56 (0x38)                   | 72 bytes | Partition name (36 [UTF-16](https://en.wikipedia.org/wiki/UTF-16)LE code units)                               |
+| Зсув                        | Довжина  | Зміст                                                                                                      |
+| 0 (0x00)                    | 16 байт  | [GUID типу розділу](https://en.wikipedia.org/wiki/GUID_Partition_Table#Partition_type_GUIDs) (змішаний порядок байтів) |
+| 16 (0x10)                   | 16 байт  | Унікальний GUID розділу (змішаний порядок байтів)                                                                          |
+| 32 (0x20)                   | 8 байт   | Перший LBA ([малий порядок байтів](https://en.wikipedia.org/wiki/Little_endian))                                      |
+| 40 (0x28)                   | 8 байт   | Останній LBA (включно, зазвичай непарний)                                                                             |
+| 48 (0x30)                   | 8 байт   | Атрибути (наприклад, біт 60 позначає тільки для читання)                                                               |
+| 56 (0x38)                   | 72 байти | Назва розділу (36 [UTF-16](https://en.wikipedia.org/wiki/UTF-16)LE кодових одиниць)                               |
 
-**Partitions Types**
+**Типи Розділів**
 
 ![](<../../../images/image (83).png>)
 
-More partition types in [https://en.wikipedia.org/wiki/GUID_Partition_Table](https://en.wikipedia.org/wiki/GUID_Partition_Table)
+Більше типів розділів на [https://en.wikipedia.org/wiki/GUID_Partition_Table](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 
-### Inspecting
+### Інспекція
 
-After mounting the forensics image with [**ArsenalImageMounter**](https://arsenalrecon.com/downloads/), you can inspect the first sector using the Windows tool [**Active Disk Editor**](https://www.disk-editor.org/index.html)**.** In the following image an **MBR** was detected on the **sector 0** and interpreted:
+Після монтування образу дляensics за допомогою [**ArsenalImageMounter**](https://arsenalrecon.com/downloads/), ви можете перевірити перший сектор за допомогою інструменту Windows [**Active Disk Editor**](https://www.disk-editor.org/index.html)**.** На наступному зображенні було виявлено **MBR** на **секторі 0** та інтерпретовано:
 
 ![](<../../../images/image (354).png>)
 
-If it was a **GPT table instead of an MBR** it should appear the signature _EFI PART_ in the **sector 1** (which in the previous image is empty).
+Якщо це була **таблиця GPT замість MBR**, то підпис _EFI PART_ має з'явитися в **секторі 1** (який на попередньому зображенні порожній).
 
-## File-Systems
+## Файлові Системи
 
-### Windows file-systems list
+### Список файлових систем Windows
 
 - **FAT12/16**: MSDOS, WIN95/98/NT/200
 - **FAT32**: 95/2000/XP/2003/VISTA/7/8/10
@@ -151,86 +149,86 @@ If it was a **GPT table instead of an MBR** it should appear the signature _EFI 
 
 ### FAT
 
-The **FAT (File Allocation Table)** file system is designed around its core component, the file allocation table, positioned at the volume's start. This system safeguards data by maintaining **two copies** of the table, ensuring data integrity even if one is corrupted. The table, along with the root folder, must be in a **fixed location**, crucial for the system's startup process.
+Файлова система **FAT (Таблиця Розподілу Файлів)** спроектована навколо свого основного компонента, таблиці розподілу файлів, розташованої на початку тому. Ця система захищає дані, зберігаючи **дві копії** таблиці, забезпечуючи цілісність даних, навіть якщо одна з них пошкоджена. Таблиця, разом з кореневою папкою, повинна бути в **фіксованому місці**, що є критично важливим для процесу запуску системи.
 
-The file system's basic unit of storage is a **cluster, usually 512B**, comprising multiple sectors. FAT has evolved through versions:
+Основною одиницею зберігання файлової системи є **кластер, зазвичай 512B**, що складається з кількох секторів. FAT еволюціонувала через версії:
 
-- **FAT12**, supporting 12-bit cluster addresses and handling up to 4078 clusters (4084 with UNIX).
-- **FAT16**, enhancing to 16-bit addresses, thereby accommodating up to 65,517 clusters.
-- **FAT32**, further advancing with 32-bit addresses, allowing an impressive 268,435,456 clusters per volume.
+- **FAT12**, що підтримує 12-бітні адреси кластерів і обробляє до 4078 кластерів (4084 з UNIX).
+- **FAT16**, що покращує до 16-бітних адрес, тим самим вміщуючи до 65,517 кластерів.
+- **FAT32**, що далі розвивається з 32-бітними адресами, дозволяючи вражаючі 268,435,456 кластерів на том.
 
-A significant limitation across FAT versions is the **4GB maximum file size**, imposed by the 32-bit field used for file size storage.
+Значним обмеженням для всіх версій FAT є **максимальний розмір файлу 4 ГБ**, накладений 32-бітним полем, що використовується для зберігання розміру файлу.
 
-Key components of the root directory, particularly for FAT12 and FAT16, include:
+Ключові компоненти кореневої директорії, особливо для FAT12 і FAT16, включають:
 
-- **File/Folder Name** (up to 8 characters)
-- **Attributes**
-- **Creation, Modification, and Last Access Dates**
-- **FAT Table Address** (indicating the start cluster of the file)
-- **File Size**
+- **Ім'я Файлу/Папки** (до 8 символів)
+- **Атрибути**
+- **Дати створення, модифікації та останнього доступу**
+- **Адреса FAT таблиці** (що вказує на початковий кластер файлу)
+- **Розмір Файлу**
 
 ### EXT
 
-**Ext2** is the most common file system for **not journaling** partitions (**partitions that don't change much**) like the boot partition. **Ext3/4** are **journaling** and are used usually for the **rest partitions**.
+**Ext2** є найпоширенішою файловою системою для **не журналюючих** розділів (**розділів, які не змінюються часто**) таких як розділ завантаження. **Ext3/4** є **журналюючими** і зазвичай використовуються для **інших розділів**.
 
-## **Metadata**
+## **Метадані**
 
-Some files contain metadata. This information is about the content of the file which sometimes might be interesting to an analyst as depending on the file type, it might have information like:
+Деякі файли містять метадані. Ця інформація стосується вмісту файлу, що іноді може бути цікаво аналітику, оскільки в залежності від типу файлу, вона може містити інформацію, таку як:
 
-- Title
-- MS Office Version used
-- Author
-- Dates of creation and last modification
-- Model of the camera
-- GPS coordinates
-- Image information
+- Заголовок
+- Версія MS Office, що використовується
+- Автор
+- Дати створення та останньої модифікації
+- Модель камери
+- GPS координати
+- Інформація про зображення
 
-You can use tools like [**exiftool**](https://exiftool.org) and [**Metadiver**](https://www.easymetadata.com/metadiver-2/) to get the metadata of a file.
+Ви можете використовувати інструменти, такі як [**exiftool**](https://exiftool.org) та [**Metadiver**](https://www.easymetadata.com/metadiver-2/) для отримання метаданих файлу.
 
-## **Deleted Files Recovery**
+## **Відновлення Видалених Файлів**
 
-### Logged Deleted Files
+### Логічно Видалені Файли
 
-As was seen before there are several places where the file is still saved after it was "deleted". This is because usually the deletion of a file from a file system just marks it as deleted but the data isn't touched. Then, it's possible to inspect the registries of the files (like the MFT) and find the deleted files.
+Як було зазначено раніше, є кілька місць, де файл все ще зберігається після того, як він був "видалений". Це тому, що зазвичай видалення файлу з файлової системи просто позначає його як видалений, але дані не торкаються. Тоді можливо перевірити реєстри файлів (такі як MFT) і знайти видалені файли.
 
-Also, the OS usually saves a lot of information about file system changes and backups, so it's possible to try to use them to recover the file or as much information as possible.
-
-{{#ref}}
-file-data-carving-recovery-tools.md
-{{#endref}}
-
-### **File Carving**
-
-**File carving** is a technique that tries to **find files in the bulk of data**. There are 3 main ways tools like this work: **Based on file types headers and footers**, based on file types **structures** and based on the **content** itself.
-
-Note that this technique **doesn't work to retrieve fragmented files**. If a file **isn't stored in contiguous sectors**, then this technique won't be able to find it or at least part of it.
-
-There are several tools that you can use for file Carving indicating the file types you want to search for
+Крім того, ОС зазвичай зберігає багато інформації про зміни файлової системи та резервні копії, тому можливо спробувати використовувати їх для відновлення файлу або якомога більшої кількості інформації.
 
 {{#ref}}
 file-data-carving-recovery-tools.md
 {{#endref}}
 
-### Data Stream **C**arving
+### **Файлове Вирізання**
 
-Data Stream Carving is similar to File Carving but **instead of looking for complete files, it looks for interesting fragments** of information.\
-For example, instead of looking for a complete file containing logged URLs, this technique will search for URLs.
+**Файлове вирізання** є технікою, яка намагається **знайти файли в масиві даних**. Є 3 основні способи, якими працюють такі інструменти: **На основі заголовків і футерів типів файлів**, на основі **структур** типів файлів і на основі **вмісту** самого файлу.
+
+Зверніть увагу, що ця техніка **не працює для відновлення фрагментованих файлів**. Якщо файл **не зберігається в сусідніх секторах**, тоді ця техніка не зможе його знайти або, принаймні, частину з нього.
+
+Є кілька інструментів, які ви можете використовувати для файлового вирізання, вказуючи типи файлів, які ви хочете шукати.
 
 {{#ref}}
 file-data-carving-recovery-tools.md
 {{#endref}}
 
-### Secure Deletion
+### Вирізання Потоку Даних **C**
 
-Obviously, there are ways to **"securely" delete files and part of logs about them**. For example, it's possible to **overwrite the content** of a file with junk data several times, and then **remove** the **logs** from the **$MFT** and **$LOGFILE** about the file, and **remove the Volume Shadow Copies**.\
-You may notice that even performing that action there might be **other parts where the existence of the file is still logged**, and that's true and part of the forensics professional job is to find them.
+Вирізання потоку даних подібне до файлового вирізання, але **замість того, щоб шукати цілі файли, воно шукає цікаві фрагменти** інформації.\
+Наприклад, замість того, щоб шукати повний файл, що містить зафіксовані URL-адреси, ця техніка шукатиме URL-адреси.
 
-## References
+{{#ref}}
+file-data-carving-recovery-tools.md
+{{#endref}}
+
+### Безпечне Видалення
+
+Очевидно, що існують способи **"надійно" видалити файли та частину журналів про них**. Наприклад, можливо **перезаписати вміст** файлу сміттєвими даними кілька разів, а потім **видалити** **журнали** з **$MFT** та **$LOGFILE** про файл, і **видалити Копії Тіней Томів**.\
+Ви можете помітити, що навіть виконуючи цю дію, можуть бути **інші частини, де існування файлу все ще зафіксовано**, і це правда, і частина роботи фахівця з судової експертизи полягає в тому, щоб їх знайти.
+
+## Посилання
 
 - [https://en.wikipedia.org/wiki/GUID_Partition_Table](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 - [http://ntfs.com/ntfs-permissions.htm](http://ntfs.com/ntfs-permissions.htm)
 - [https://www.osforensics.com/faqs-and-tutorials/how-to-scan-ntfs-i30-entries-deleted-files.html](https://www.osforensics.com/faqs-and-tutorials/how-to-scan-ntfs-i30-entries-deleted-files.html)
 - [https://docs.microsoft.com/en-us/windows-server/storage/file-server/volume-shadow-copy-service](https://docs.microsoft.com/en-us/windows-server/storage/file-server/volume-shadow-copy-service)
-- **iHackLabs Certified Digital Forensics Windows**
+- **iHackLabs Сертифікований Цифровий Судовий Експерт Windows**
 
 {{#include ../../../banners/hacktricks-training.md}}

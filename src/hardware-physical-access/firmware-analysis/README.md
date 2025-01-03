@@ -1,46 +1,45 @@
-# Firmware Analysis
+# Аналіз ПЗП
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## **Introduction**
+## **Вступ**
 
-Firmware is essential software that enables devices to operate correctly by managing and facilitating communication between the hardware components and the software that users interact with. It's stored in permanent memory, ensuring the device can access vital instructions from the moment it's powered on, leading to the operating system's launch. Examining and potentially modifying firmware is a critical step in identifying security vulnerabilities.
+ПЗП є основним програмним забезпеченням, яке дозволяє пристроям працювати правильно, керуючи та полегшуючи зв'язок між апаратними компонентами та програмним забезпеченням, з яким взаємодіють користувачі. Воно зберігається в постійній пам'яті, що забезпечує доступ пристрою до важливих інструкцій з моменту його ввімкнення, що призводить до запуску операційної системи. Аналіз та потенційне модифікування ПЗП є критичним кроком у виявленні вразливостей безпеки.
 
-## **Gathering Information**
+## **Збір інформації**
 
-**Gathering information** is a critical initial step in understanding a device's makeup and the technologies it uses. This process involves collecting data on:
+**Збір інформації** є критично важливим початковим кроком у розумінні складу пристрою та технологій, які він використовує. Цей процес включає збір даних про:
 
-- The CPU architecture and operating system it runs
-- Bootloader specifics
-- Hardware layout and datasheets
-- Codebase metrics and source locations
-- External libraries and license types
-- Update histories and regulatory certifications
-- Architectural and flow diagrams
-- Security assessments and identified vulnerabilities
+- Архітектуру ЦП та операційну систему, на якій він працює
+- Специфікації завантажувача
+- Схему апаратного забезпечення та технічні характеристики
+- Метрики кодової бази та місця розташування виходу
+- Зовнішні бібліотеки та типи ліцензій
+- Історії оновлень та регуляторні сертифікації
+- Архітектурні та потокові діаграми
+- Оцінки безпеки та виявлені вразливості
 
-For this purpose, **open-source intelligence (OSINT)** tools are invaluable, as is the analysis of any available open-source software components through manual and automated review processes. Tools like [Coverity Scan](https://scan.coverity.com) and [Semmle’s LGTM](https://lgtm.com/#explore) offer free static analysis that can be leveraged to find potential issues.
+Для цієї мети **інструменти відкритих даних (OSINT)** є безцінними, як і аналіз будь-яких доступних компонентів відкритого програмного забезпечення через ручні та автоматизовані процеси перевірки. Інструменти, такі як [Coverity Scan](https://scan.coverity.com) та [Semmle’s LGTM](https://lgtm.com/#explore), пропонують безкоштовний статичний аналіз, який можна використовувати для виявлення потенційних проблем.
 
-## **Acquiring the Firmware**
+## **Отримання ПЗП**
 
-Obtaining firmware can be approached through various means, each with its own level of complexity:
+Отримання ПЗП можна здійснити різними способами, кожен з яких має свій рівень складності:
 
-- **Directly** from the source (developers, manufacturers)
-- **Building** it from provided instructions
-- **Downloading** from official support sites
-- Utilizing **Google dork** queries for finding hosted firmware files
-- Accessing **cloud storage** directly, with tools like [S3Scanner](https://github.com/sa7mon/S3Scanner)
-- Intercepting **updates** via man-in-the-middle techniques
-- **Extracting** from the device through connections like **UART**, **JTAG**, or **PICit**
-- **Sniffing** for update requests within device communication
-- Identifying and using **hardcoded update endpoints**
-- **Dumping** from the bootloader or network
-- **Removing and reading** the storage chip, when all else fails, using appropriate hardware tools
+- **Безпосередньо** від джерела (розробників, виробників)
+- **Створення** його з наданих інструкцій
+- **Завантаження** з офіційних сайтів підтримки
+- Використання **Google dork** запитів для знаходження розміщених файлів ПЗП
+- Доступ до **хмарного сховища** безпосередньо, за допомогою інструментів, таких як [S3Scanner](https://github.com/sa7mon/S3Scanner)
+- Перехоплення **оновлень** за допомогою технік "людина посередині"
+- **Витягування** з пристрою через з'єднання, такі як **UART**, **JTAG** або **PICit**
+- **Сниффінг** запитів на оновлення в межах зв'язку пристрою
+- Виявлення та використання **жорстко закодованих кінцевих точок оновлення**
+- **Скидання** з завантажувача або мережі
+- **Видалення та читання** чіпа пам'яті, коли всі інші способи не спрацювали, використовуючи відповідні апаратні інструменти
 
-## Analyzing the firmware
+## Аналіз ПЗП
 
-Now that you **have the firmware**, you need to extract information about it to know how to treat it. Different tools you can use for that:
-
+Тепер, коли ви **отримали ПЗП**, вам потрібно витягти інформацію про нього, щоб знати, як з ним працювати. Різні інструменти, які ви можете використовувати для цього:
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -49,26 +48,24 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head # might find signatures in header
 fdisk -lu <bin> #lists a drives partition and filesystems if multiple
 ```
+Якщо ви не знайдете багато з цими інструментами, перевірте **ентропію** зображення за допомогою `binwalk -E <bin>`, якщо ентропія низька, то, ймовірно, воно не зашифроване. Якщо ентропія висока, ймовірно, воно зашифроване (або стиснуте якимось чином).
 
-If you don't find much with those tools check the **entropy** of the image with `binwalk -E <bin>`, if low entropy, then it's not likely to be encrypted. If high entropy, Its likely encrypted (or compressed in some way).
-
-Moreover, you can use these tools to extract **files embedded inside the firmware**:
+Крім того, ви можете використовувати ці інструменти для витягнення **файлів, вбудованих у прошивку**:
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/partitions-file-systems-carving/file-data-carving-recovery-tools.md
 {{#endref}}
 
-Or [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/p/binvis/)) to inspect the file.
+Або [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/p/binvis/)), щоб перевірити файл.
 
-### Getting the Filesystem
+### Отримання файлової системи
 
-With the previous commented tools like `binwalk -ev <bin>` you should have been able to **extract the filesystem**.\
-Binwalk usually extracts it inside a **folder named as the filesystem type**, which usually is one of the following: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
+З попередніми коментованими інструментами, такими як `binwalk -ev <bin>`, ви повинні були змогти **витягти файлову систему**.\
+Binwalk зазвичай витягує її в **папку, названу на честь типу файлової системи**, яка зазвичай є однією з наступних: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
 
-#### Manual Filesystem Extraction
+#### Ручне витягнення файлової системи
 
-Sometimes, binwalk will **not have the magic byte of the filesystem in its signatures**. In these cases, use binwalk to **find the offset of the filesystem and carve the compressed filesystem** from the binary and **manually extract** the filesystem according to its type using the steps below.
-
+Іноді binwalk **не має магічного байта файлової системи у своїх сигнатурах**. У цих випадках використовуйте binwalk, щоб **знайти зсув файлової системи та вирізати стиснуту файлову систему** з бінарного файлу та **вручну витягти** файлову систему відповідно до її типу, використовуючи наведені нижче кроки.
 ```
 $ binwalk DIR850L_REVB.bin
 
@@ -80,9 +77,7 @@ DECIMAL HEXADECIMAL DESCRIPTION
 1704052 0x1A0074 PackImg section delimiter tag, little endian size: 32256 bytes; big endian size: 8257536 bytes
 1704084 0x1A0094 Squashfs filesystem, little endian, version 4.0, compression:lzma, size: 8256900 bytes, 2688 inodes, blocksize: 131072 bytes, created: 2016-07-12 02:28:41
 ```
-
-Run the following **dd command** carving the Squashfs filesystem.
-
+Запустіть наступну **dd команду**, щоб вирізати файлову систему Squashfs.
 ```
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
@@ -92,39 +87,37 @@ $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
 8257536 bytes (8.3 MB, 7.9 MiB) copied, 12.5777 s, 657 kB/s
 ```
-
-Alternatively, the following command could also be run.
+Альтернативно, також можна виконати наступну команду.
 
 `$ dd if=DIR850L_REVB.bin bs=1 skip=$((0x1A0094)) of=dir.squashfs`
 
-- For squashfs (used in the example above)
+- Для squashfs (використовується в наведеному вище прикладі)
 
 `$ unsquashfs dir.squashfs`
 
-Files will be in "`squashfs-root`" directory afterwards.
+Файли будуть у директорії "`squashfs-root`" після цього.
 
-- CPIO archive files
+- Файли архіву CPIO
 
 `$ cpio -ivd --no-absolute-filenames -F <bin>`
 
-- For jffs2 filesystems
+- Для файлових систем jffs2
 
 `$ jefferson rootfsfile.jffs2`
 
-- For ubifs filesystems with NAND flash
+- Для файлових систем ubifs з NAND flash
 
 `$ ubireader_extract_images -u UBI -s <start_offset> <bin>`
 
 `$ ubidump.py <bin>`
 
-## Analyzing Firmware
+## Аналіз ПЗ
 
-Once the firmware is obtained, it's essential to dissect it for understanding its structure and potential vulnerabilities. This process involves utilizing various tools to analyze and extract valuable data from the firmware image.
+Після отримання ПЗ важливо розібрати його для розуміння його структури та потенційних вразливостей. Цей процес передбачає використання різних інструментів для аналізу та витягування цінних даних з образу ПЗ.
 
-### Initial Analysis Tools
+### Інструменти початкового аналізу
 
-A set of commands is provided for initial inspection of the binary file (referred to as `<bin>`). These commands help in identifying file types, extracting strings, analyzing binary data, and understanding the partition and filesystem details:
-
+Набір команд надається для початкової перевірки бінарного файлу (який називається `<bin>`). Ці команди допомагають у визначенні типів файлів, витягуванні рядків, аналізі бінарних даних та розумінні деталей розділів і файлової системи:
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -133,121 +126,114 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head #useful for finding signatures in the header
 fdisk -lu <bin> #lists partitions and filesystems, if there are multiple
 ```
+Щоб оцінити статус шифрування зображення, перевіряється **ентропія** за допомогою `binwalk -E <bin>`. Низька ентропія вказує на відсутність шифрування, тоді як висока ентропія свідчить про можливе шифрування або стиснення.
 
-To assess the encryption status of the image, the **entropy** is checked with `binwalk -E <bin>`. Low entropy suggests a lack of encryption, while high entropy indicates possible encryption or compression.
+Для витягування **вбудованих файлів** рекомендуються інструменти та ресурси, такі як документація **file-data-carving-recovery-tools** та **binvis.io** для перевірки файлів.
 
-For extracting **embedded files**, tools and resources like the **file-data-carving-recovery-tools** documentation and **binvis.io** for file inspection are recommended.
+### Витягування файлової системи
 
-### Extracting the Filesystem
-
-Using `binwalk -ev <bin>`, one can usually extract the filesystem, often into a directory named after the filesystem type (e.g., squashfs, ubifs). However, when **binwalk** fails to recognize the filesystem type due to missing magic bytes, manual extraction is necessary. This involves using `binwalk` to locate the filesystem's offset, followed by the `dd` command to carve out the filesystem:
-
+Використовуючи `binwalk -ev <bin>`, зазвичай можна витягнути файлову систему, часто в каталог, названий на честь типу файлової системи (наприклад, squashfs, ubifs). Однак, коли **binwalk** не може розпізнати тип файлової системи через відсутні магічні байти, необхідно виконати ручне витягування. Це передбачає використання `binwalk` для визначення зсуву файлової системи, після чого використовується команда `dd` для вирізання файлової системи:
 ```bash
 $ binwalk DIR850L_REVB.bin
 
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 ```
+Після цього, в залежності від типу файлової системи (наприклад, squashfs, cpio, jffs2, ubifs), використовуються різні команди для ручного витягування вмісту.
 
-Afterwards, depending on the filesystem type (e.g., squashfs, cpio, jffs2, ubifs), different commands are used to manually extract the contents.
+### Аналіз файлової системи
 
-### Filesystem Analysis
+Після витягування файлової системи починається пошук вразливостей безпеки. Увага приділяється небезпечним мережевим демонів, жорстко закодованим обліковим даним, API-інтерфейсам, функціональності серверів оновлень, некомпільованому коду, скриптам запуску та скомпільованим двійковим файлам для офлайн-аналізу.
 
-With the filesystem extracted, the search for security flaws begins. Attention is paid to insecure network daemons, hardcoded credentials, API endpoints, update server functionalities, uncompiled code, startup scripts, and compiled binaries for offline analysis.
+**Ключові місця** та **елементи** для перевірки включають:
 
-**Key locations** and **items** to inspect include:
+- **etc/shadow** та **etc/passwd** для облікових даних користувачів
+- SSL сертифікати та ключі в **etc/ssl**
+- Конфігураційні та скриптові файли на предмет потенційних вразливостей
+- Вбудовані двійкові файли для подальшого аналізу
+- Загальні веб-сервери та двійкові файли IoT пристроїв
 
-- **etc/shadow** and **etc/passwd** for user credentials
-- SSL certificates and keys in **etc/ssl**
-- Configuration and script files for potential vulnerabilities
-- Embedded binaries for further analysis
-- Common IoT device web servers and binaries
+Кілька інструментів допомагають виявити чутливу інформацію та вразливості в файловій системі:
 
-Several tools assist in uncovering sensitive information and vulnerabilities within the filesystem:
+- [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) та [**Firmwalker**](https://github.com/craigz28/firmwalker) для пошуку чутливої інформації
+- [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) для комплексного аналізу прошивок
+- [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer), [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep), [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go) та [**EMBA**](https://github.com/e-m-b-a/emba) для статичного та динамічного аналізу
 
-- [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) and [**Firmwalker**](https://github.com/craigz28/firmwalker) for sensitive information search
-- [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) for comprehensive firmware analysis
-- [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer), [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep), [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go), and [**EMBA**](https://github.com/e-m-b-a/emba) for static and dynamic analysis
+### Перевірки безпеки скомпільованих двійкових файлів
 
-### Security Checks on Compiled Binaries
+Як вихідний код, так і скомпільовані двійкові файли, знайдені у файловій системі, повинні бути ретельно перевірені на вразливості. Інструменти, такі як **checksec.sh** для двійкових файлів Unix та **PESecurity** для двійкових файлів Windows, допомагають виявити незахищені двійкові файли, які можуть бути використані в атаках.
 
-Both source code and compiled binaries found in the filesystem must be scrutinized for vulnerabilities. Tools like **checksec.sh** for Unix binaries and **PESecurity** for Windows binaries help identify unprotected binaries that could be exploited.
+## Емуляція прошивки для динамічного аналізу
 
-## Emulating Firmware for Dynamic Analysis
+Процес емулювання прошивки дозволяє **динамічний аналіз** або роботи пристрою, або окремої програми. Цей підхід може стикатися з проблемами залежностей апаратного забезпечення або архітектури, але перенесення кореневої файлової системи або конкретних двійкових файлів на пристрій з відповідною архітектурою та порядком байтів, наприклад, Raspberry Pi, або на попередньо зібрану віртуальну машину, може полегшити подальше тестування.
 
-The process of emulating firmware enables **dynamic analysis** either of a device's operation or an individual program. This approach can encounter challenges with hardware or architecture dependencies, but transferring the root filesystem or specific binaries to a device with matching architecture and endianness, such as a Raspberry Pi, or to a pre-built virtual machine, can facilitate further testing.
+### Емуляція окремих двійкових файлів
 
-### Emulating Individual Binaries
+Для перевірки окремих програм важливо визначити порядок байтів програми та архітектуру ЦП.
 
-For examining single programs, identifying the program's endianness and CPU architecture is crucial.
+#### Приклад з архітектурою MIPS
 
-#### Example with MIPS Architecture
-
-To emulate a MIPS architecture binary, one can use the command:
-
+Щоб емулювати двійковий файл архітектури MIPS, можна використовувати команду:
 ```bash
 file ./squashfs-root/bin/busybox
 ```
-
-And to install the necessary emulation tools:
-
+І щоб встановити необхідні інструменти емуляції:
 ```bash
 sudo apt-get install qemu qemu-user qemu-user-static qemu-system-arm qemu-system-mips qemu-system-x86 qemu-utils
 ```
+Для MIPS (big-endian) використовується `qemu-mips`, а для little-endian бінарних файлів вибір буде `qemu-mipsel`.
 
-For MIPS (big-endian), `qemu-mips` is used, and for little-endian binaries, `qemu-mipsel` would be the choice.
+#### Емуляція архітектури ARM
 
-#### ARM Architecture Emulation
+Для бінарних файлів ARM процес подібний, з використанням емулятора `qemu-arm`.
 
-For ARM binaries, the process is similar, with the `qemu-arm` emulator being utilized for emulation.
+### Емуляція повної системи
 
-### Full System Emulation
+Інструменти, такі як [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit) та інші, полегшують повну емуляцію прошивки, автоматизуючи процес і допомагаючи в динамічному аналізі.
 
-Tools like [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit), and others, facilitate full firmware emulation, automating the process and aiding in dynamic analysis.
+## Динамічний аналіз на практиці
 
-## Dynamic Analysis in Practice
+На цьому етапі використовується реальне або емульоване середовище пристрою для аналізу. Важливо підтримувати доступ до оболонки ОС та файлової системи. Емуляція може не ідеально відтворювати взаємодію з апаратним забезпеченням, що потребує періодичних перезапусків емуляції. Аналіз повинен повторно перевіряти файлову систему, експлуатувати відкриті веб-сторінки та мережеві сервіси, а також досліджувати вразливості завантажувача. Тести цілісності прошивки є критично важливими для виявлення потенційних вразливостей бекдора.
 
-At this stage, either a real or emulated device environment is used for analysis. It's essential to maintain shell access to the OS and filesystem. Emulation may not perfectly mimic hardware interactions, necessitating occasional emulation restarts. Analysis should revisit the filesystem, exploit exposed webpages and network services, and explore bootloader vulnerabilities. Firmware integrity tests are critical to identify potential backdoor vulnerabilities.
+## Техніки аналізу в реальному часі
 
-## Runtime Analysis Techniques
+Аналіз в реальному часі передбачає взаємодію з процесом або бінарним файлом у його операційному середовищі, використовуючи інструменти, такі як gdb-multiarch, Frida та Ghidra для встановлення точок зупинки та виявлення вразливостей через фуззинг та інші техніки.
 
-Runtime analysis involves interacting with a process or binary in its operating environment, using tools like gdb-multiarch, Frida, and Ghidra for setting breakpoints and identifying vulnerabilities through fuzzing and other techniques.
+## Експлуатація бінарних файлів та доказ концепції
 
-## Binary Exploitation and Proof-of-Concept
+Розробка PoC для виявлених вразливостей вимагає глибокого розуміння цільової архітектури та програмування на мовах нижчого рівня. Захисти бінарного виконання в вбудованих системах рідкісні, але коли вони присутні, можуть знадобитися такі техніки, як Return Oriented Programming (ROP).
 
-Developing a PoC for identified vulnerabilities requires a deep understanding of the target architecture and programming in lower-level languages. Binary runtime protections in embedded systems are rare, but when present, techniques like Return Oriented Programming (ROP) may be necessary.
+## Підготовлені операційні системи для аналізу прошивки
 
-## Prepared Operating Systems for Firmware Analysis
+Операційні системи, такі як [AttifyOS](https://github.com/adi0x90/attifyos) та [EmbedOS](https://github.com/scriptingxss/EmbedOS), надають попередньо налаштовані середовища для тестування безпеки прошивки, оснащені необхідними інструментами.
 
-Operating systems like [AttifyOS](https://github.com/adi0x90/attifyos) and [EmbedOS](https://github.com/scriptingxss/EmbedOS) provide pre-configured environments for firmware security testing, equipped with necessary tools.
+## Підготовлені ОС для аналізу прошивки
 
-## Prepared OSs to analyze Firmware
+- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS - це дистрибутив, призначений для допомоги у проведенні оцінки безпеки та тестування на проникнення пристроїв Інтернету речей (IoT). Він економить ваш час, надаючи попередньо налаштоване середовище з усіма необхідними інструментами.
+- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Операційна система для тестування безпеки вбудованих систем на базі Ubuntu 18.04, попередньо завантажена інструментами для тестування безпеки прошивки.
 
-- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS is a distro intended to help you perform security assessment and penetration testing of Internet of Things (IoT) devices. It saves you a lot of time by providing a pre-configured environment with all the necessary tools loaded.
-- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Embedded security testing operating system based on Ubuntu 18.04 preloaded with firmware security testing tools.
+## Вразлива прошивка для практики
 
-## Vulnerable firmware to practice
-
-To practice discovering vulnerabilities in firmware, use the following vulnerable firmware projects as a starting point.
+Щоб практикувати виявлення вразливостей у прошивці, використовуйте наступні вразливі проекти прошивки як відправну точку.
 
 - OWASP IoTGoat
-  - [https://github.com/OWASP/IoTGoat](https://github.com/OWASP/IoTGoat)
-- The Damn Vulnerable Router Firmware Project
-  - [https://github.com/praetorian-code/DVRF](https://github.com/praetorian-code/DVRF)
+- [https://github.com/OWASP/IoTGoat](https://github.com/OWASP/IoTGoat)
+- Проект Damn Vulnerable Router Firmware
+- [https://github.com/praetorian-code/DVRF](https://github.com/praetorian-code/DVRF)
 - Damn Vulnerable ARM Router (DVAR)
-  - [https://blog.exploitlab.net/2018/01/dvar-damn-vulnerable-arm-router.html](https://blog.exploitlab.net/2018/01/dvar-damn-vulnerable-arm-router.html)
+- [https://blog.exploitlab.net/2018/01/dvar-damn-vulnerable-arm-router.html](https://blog.exploitlab.net/2018/01/dvar-damn-vulnerable-arm-router.html)
 - ARM-X
-  - [https://github.com/therealsaumil/armx#downloads](https://github.com/therealsaumil/armx#downloads)
+- [https://github.com/therealsaumil/armx#downloads](https://github.com/therealsaumil/armx#downloads)
 - Azeria Labs VM 2.0
-  - [https://azeria-labs.com/lab-vm-2-0/](https://azeria-labs.com/lab-vm-2-0/)
+- [https://azeria-labs.com/lab-vm-2-0/](https://azeria-labs.com/lab-vm-2-0/)
 - Damn Vulnerable IoT Device (DVID)
-  - [https://github.com/Vulcainreo/DVID](https://github.com/Vulcainreo/DVID)
+- [https://github.com/Vulcainreo/DVID](https://github.com/Vulcainreo/DVID)
 
-## References
+## Посилання
 
 - [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
 - [Practical IoT Hacking: The Definitive Guide to Attacking the Internet of Things](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
 
-## Trainning and Cert
+## Тренінг та сертифікація
 
 - [https://www.attify-store.com/products/offensive-iot-exploitation](https://www.attify-store.com/products/offensive-iot-exploitation)
 

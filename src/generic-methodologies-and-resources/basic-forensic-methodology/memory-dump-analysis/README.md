@@ -1,49 +1,37 @@
-# Memory dump analysis
+# Аналіз дампа пам'яті
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
+## Початок
 
-[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
-
-{% embed url="https://www.rootedcon.com/" %}
-
-## Start
-
-Start **searching** for **malware** inside the pcap. Use the **tools** mentioned in [**Malware Analysis**](../malware-analysis.md).
+Почніть **шукати** **шкідливе ПЗ** всередині pcap. Використовуйте **інструменти**, згадані в [**Аналізі шкідливого ПЗ**](../malware-analysis.md).
 
 ## [Volatility](volatility-cheatsheet.md)
 
-**Volatility is the main open-source framework for memory dump analysis**. This Python tool analyzes dumps from external sources or VMware VMs, identifying data like processes and passwords based on the dump's OS profile. It's extensible with plugins, making it highly versatile for forensic investigations.
+**Volatility є основною відкритою платформою для аналізу дампів пам'яті**. Цей інструмент на Python аналізує дампи з зовнішніх джерел або віртуальних машин VMware, ідентифікуючи дані, такі як процеси та паролі, на основі профілю ОС дампа. Він розширюється за допомогою плагінів, що робить його дуже універсальним для судово-медичних розслідувань.
 
-[**Find here a cheatsheet**](volatility-cheatsheet.md)
+[**Знайдіть тут шпаргалку**](volatility-cheatsheet.md)
 
-## Mini dump crash report
+## Звіт про аварійний міні-дамп
 
-When the dump is small (just some KB, maybe a few MB) then it's probably a mini dump crash report and not a memory dump.
+Коли дамп малий (всього кілька КБ, можливо, кілька МБ), то це, ймовірно, звіт про аварійний міні-дамп, а не дамп пам'яті.
 
 ![](<../../../images/image (532).png>)
 
-If you have Visual Studio installed, you can open this file and bind some basic information like process name, architecture, exception info and modules being executed:
+Якщо у вас встановлений Visual Studio, ви можете відкрити цей файл і прив'язати деяку базову інформацію, таку як назва процесу, архітектура, інформація про виключення та модулі, що виконуються:
 
 ![](<../../../images/image (263).png>)
 
-You can also load the exception and see the decompiled instructions
+Ви також можете завантажити виключення та переглянути декомпільовані інструкції
 
 ![](<../../../images/image (142).png>)
 
 ![](<../../../images/image (610).png>)
 
-Anyway, Visual Studio isn't the best tool to perform an analysis of the depth of the dump.
+У будь-якому випадку, Visual Studio не є найкращим інструментом для проведення глибокого аналізу дампа.
 
-You should **open** it using **IDA** or **Radare** to inspection it in **depth**.
+Вам слід **відкрити** його за допомогою **IDA** або **Radare** для детального огляду.
 
 ​
-
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
-
-[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
-
-{% embed url="https://www.rootedcon.com/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,27 +1,27 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-## Firmware Integrity
+## Цілісність ПЗ
 
-The **custom firmware and/or compiled binaries can be uploaded to exploit integrity or signature verification flaws**. The following steps can be followed for backdoor bind shell compilation:
+**Користувацьке ПЗ та/або скомпільовані двійкові файли можуть бути завантажені для використання вразливостей перевірки цілісності або підпису**. Наступні кроки можна виконати для компіляції бекдор бінд шелу:
 
-1. The firmware can be extracted using firmware-mod-kit (FMK).
-2. The target firmware architecture and endianness should be identified.
-3. A cross compiler can be built using Buildroot or other suitable methods for the environment.
-4. The backdoor can be built using the cross compiler.
-5. The backdoor can be copied to the extracted firmware /usr/bin directory.
-6. The appropriate QEMU binary can be copied to the extracted firmware rootfs.
-7. The backdoor can be emulated using chroot and QEMU.
-8. The backdoor can be accessed via netcat.
-9. The QEMU binary should be removed from the extracted firmware rootfs.
-10. The modified firmware can be repackaged using FMK.
-11. The backdoored firmware can be tested by emulating it with firmware analysis toolkit (FAT) and connecting to the target backdoor IP and port using netcat.
+1. ПЗ можна витягти за допомогою firmware-mod-kit (FMK).
+2. Слід визначити архітектуру цільового ПЗ та порядок байтів.
+3. Можна створити крос-компілятор за допомогою Buildroot або інших відповідних методів для середовища.
+4. Бекдор можна створити за допомогою крос-компілятора.
+5. Бекдор можна скопіювати до витягнутого ПЗ в директорію /usr/bin.
+6. Відповідний двійковий файл QEMU можна скопіювати до кореневої файлової системи витягнутого ПЗ.
+7. Бекдор можна емуляувати за допомогою chroot та QEMU.
+8. До бекдору можна отримати доступ через netcat.
+9. Двійковий файл QEMU слід видалити з кореневої файлової системи витягнутого ПЗ.
+10. Модифіковане ПЗ можна повторно упакувати за допомогою FMK.
+11. Бекдоре ПЗ можна протестувати, емуляуючи його за допомогою інструменту аналізу ПЗ (FAT) та підключаючись до цільової IP-адреси та порту бекдору за допомогою netcat.
 
-If a root shell has already been obtained through dynamic analysis, bootloader manipulation, or hardware security testing, precompiled malicious binaries such as implants or reverse shells can be executed. Automated payload/implant tools like the Metasploit framework and 'msfvenom' can be leveraged using the following steps:
+Якщо кореневий шел вже був отриманий через динамічний аналіз, маніпуляції з завантажувачем або тестування безпеки апаратного забезпечення, можна виконати попередньо скомпільовані шкідливі двійкові файли, такі як імпланти або реверс шелли. Автоматизовані інструменти для завантаження/імплантації, такі як фреймворк Metasploit та 'msfvenom', можна використовувати за наступними кроками:
 
-1. The target firmware architecture and endianness should be identified.
-2. Msfvenom can be used to specify the target payload, attacker host IP, listening port number, filetype, architecture, platform, and the output file.
-3. The payload can be transferred to the compromised device and ensured that it has execution permissions.
-4. Metasploit can be prepared to handle incoming requests by starting msfconsole and configuring the settings according to the payload.
-5. The meterpreter reverse shell can be executed on the compromised device.
+1. Слід визначити архітектуру цільового ПЗ та порядок байтів.
+2. Msfvenom можна використовувати для вказівки цільового корисного навантаження, IP-адреси атакуючого хоста, номера порту для прослуховування, типу файлу, архітектури, платформи та вихідного файлу.
+3. Корисне навантаження можна передати на скомпрометований пристрій та переконатися, що воно має права на виконання.
+4. Metasploit можна підготувати для обробки вхідних запитів, запустивши msfconsole та налаштувавши параметри відповідно до корисного навантаження.
+5. Реверсний шел meterpreter можна виконати на скомпрометованому пристрої.
 
 {{#include ../../banners/hacktricks-training.md}}

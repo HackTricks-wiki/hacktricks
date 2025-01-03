@@ -2,54 +2,54 @@
 
 # CBC
 
-If the **cookie** is **only** the **username** (or the first part of the cookie is the username) and you want to impersonate the username "**admin**". Then, you can create the username **"bdmin"** and **bruteforce** the **first byte** of the cookie.
+Якщо **cookie** є **тільки** **іменем користувача** (або перша частина cookie є іменем користувача) і ви хочете видати себе за користувача "**admin**". Тоді ви можете створити ім'я користувача **"bdmin"** і **bruteforce** **перший байт** cookie.
 
 # CBC-MAC
 
-**Cipher block chaining message authentication code** (**CBC-MAC**) is a method used in cryptography. It works by taking a message and encrypting it block by block, where each block's encryption is linked to the one before it. This process creates a **chain of blocks**, making sure that changing even a single bit of the original message will lead to an unpredictable change in the last block of encrypted data. To make or reverse such a change, the encryption key is required, ensuring security.
+**Код автентифікації повідомлень з використанням блочного шифрування** (**CBC-MAC**) є методом, що використовується в криптографії. Він працює, беручи повідомлення і шифруючи його блоками, де шифрування кожного блоку пов'язане з попереднім. Цей процес створює **ланцюг блоків**, що забезпечує, що зміна навіть одного біта оригінального повідомлення призведе до непередбачуваної зміни в останньому блоці зашифрованих даних. Щоб внести або скасувати таку зміну, потрібен ключ шифрування, що забезпечує безпеку.
 
-To calculate the CBC-MAC of message m, one encrypts m in CBC mode with zero initialization vector and keeps the last block. The following figure sketches the computation of the CBC-MAC of a message comprising blocks![https://wikimedia.org/api/rest_v1/media/math/render/svg/bbafe7330a5e40a04f01cc776c9d94fe914b17f5](https://wikimedia.org/api/rest_v1/media/math/render/svg/bbafe7330a5e40a04f01cc776c9d94fe914b17f5) using a secret key k and a block cipher E:
+Щоб обчислити CBC-MAC повідомлення m, шифрують m в режимі CBC з нульовим вектором ініціалізації і зберігають останній блок. Наступна фігура ілюструє обчислення CBC-MAC повідомлення, що складається з блоків![https://wikimedia.org/api/rest_v1/media/math/render/svg/bbafe7330a5e40a04f01cc776c9d94fe914b17f5](https://wikimedia.org/api/rest_v1/media/math/render/svg/bbafe7330a5e40a04f01cc776c9d94fe914b17f5) з використанням секретного ключа k і блочного шифру E:
 
 ![https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/CBC-MAC_structure_(en).svg/570px-CBC-MAC_structure_(en).svg.png](<https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/CBC-MAC_structure_(en).svg/570px-CBC-MAC_structure_(en).svg.png>)
 
-# Vulnerability
+# Уразливість
 
-With CBC-MAC usually the **IV used is 0**.\
-This is a problem because 2 known messages (`m1` and `m2`) independently will generate 2 signatures (`s1` and `s2`). So:
+Зазвичай **IV використовується 0**.\
+Це проблема, оскільки 2 відомі повідомлення (`m1` і `m2`) незалежно генерують 2 підписи (`s1` і `s2`). Отже:
 
 - `E(m1 XOR 0) = s1`
 - `E(m2 XOR 0) = s2`
 
-Then a message composed by m1 and m2 concatenated (m3) will generate 2 signatures (s31 and s32):
+Тоді повідомлення, що складається з m1 і m2, конкатенованих (m3), генеруватиме 2 підписи (s31 і s32):
 
 - `E(m1 XOR 0) = s31 = s1`
 - `E(m2 XOR s1) = s32`
 
-**Which is possible to calculate without knowing the key of the encryption.**
+**Що можна обчислити, не знаючи ключа шифрування.**
 
-Imagine you are encrypting the name **Administrator** in **8bytes** blocks:
+Уявіть, що ви шифруєте ім'я **Administrator** в **8байтових** блоках:
 
 - `Administ`
 - `rator\00\00\00`
 
-You can create a username called **Administ** (m1) and retrieve the signature (s1).\
-Then, you can create a username called the result of `rator\00\00\00 XOR s1`. This will generate `E(m2 XOR s1 XOR 0)` which is s32.\
-now, you can use s32 as the signature of the full name **Administrator**.
+Ви можете створити ім'я користувача **Administ** (m1) і отримати підпис (s1).\
+Потім ви можете створити ім'я користувача, яке є результатом `rator\00\00\00 XOR s1`. Це згенерує `E(m2 XOR s1 XOR 0)`, що є s32.\
+Тепер ви можете використовувати s32 як підпис повного імені **Administrator**.
 
-### Summary
+### Резюме
 
-1. Get the signature of username **Administ** (m1) which is s1
-2. Get the signature of username **rator\x00\x00\x00 XOR s1 XOR 0** is s32**.**
-3. Set the cookie to s32 and it will be a valid cookie for the user **Administrator**.
+1. Отримайте підпис імені користувача **Administ** (m1), який є s1
+2. Отримайте підпис імені користувача **rator\x00\x00\x00 XOR s1 XOR 0**, що є s32**.**
+3. Встановіть cookie на s32, і це буде дійсний cookie для користувача **Administrator**.
 
-# Attack Controlling IV
+# Атака на контроль IV
 
-If you can control the used IV the attack could be very easy.\
-If the cookies is just the username encrypted, to impersonate the user "**administrator**" you can create the user "**Administrator**" and you will get it's cookie.\
-Now, if you can control the IV, you can change the first Byte of the IV so **IV\[0] XOR "A" == IV'\[0] XOR "a"** and regenerate the cookie for the user **Administrator.** This cookie will be valid to **impersonate** the user **administrator** with the initial **IV**.
+Якщо ви можете контролювати використовуваний IV, атака може бути дуже простою.\
+Якщо cookie є просто зашифрованим іменем користувача, щоб видати себе за користувача "**administrator**", ви можете створити користувача "**Administrator**" і отримати його cookie.\
+Тепер, якщо ви можете контролювати IV, ви можете змінити перший байт IV так, щоб **IV\[0] XOR "A" == IV'\[0] XOR "a"** і відновити cookie для користувача **Administrator.** Цей cookie буде дійсним для **імітування** користувача **administrator** з початковим **IV**.
 
-## References
+## Посилання
 
-More information in [https://en.wikipedia.org/wiki/CBC-MAC](https://en.wikipedia.org/wiki/CBC-MAC)
+Більше інформації на [https://en.wikipedia.org/wiki/CBC-MAC](https://en.wikipedia.org/wiki/CBC-MAC)
 
 {{#include ../banners/hacktricks-training.md}}

@@ -1,30 +1,30 @@
-# Basic Forensic Methodology
+# Основна Судово-Медична Методологія
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Creating and Mounting an Image
+## Створення та Монтування Зображення
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/image-acquisition-and-mount.md
 {{#endref}}
 
-## Malware Analysis
+## Аналіз Шкідливого ПЗ
 
-This **isn't necessary the first step to perform once you have the image**. But you can use this malware analysis techniques independently if you have a file, a file-system image, memory image, pcap... so it's good to **keep these actions in mind**:
+Це **не обов'язково перший крок, який потрібно виконати після отримання зображення**. Але ви можете використовувати ці техніки аналізу шкідливого ПЗ незалежно, якщо у вас є файл, образ файлової системи, образ пам'яті, pcap... тому добре **тримати ці дії в пам'яті**:
 
 {{#ref}}
 malware-analysis.md
 {{#endref}}
 
-## Inspecting an Image
+## Інспекція Зображення
 
-if you are given a **forensic image** of a device you can start **analyzing the partitions, file-system** used and **recovering** potentially **interesting files** (even deleted ones). Learn how in:
+Якщо вам надано **судово-медичне зображення** пристрою, ви можете почати **аналізувати розділи, файлову систему** та **відновлювати** потенційно **цікаві файли** (навіть видалені). Дізнайтеся як у:
 
 {{#ref}}
 partitions-file-systems-carving/
 {{#endref}}
 
-Depending on the used OSs and even platform different interesting artifacts should be searched:
+В залежності від використовуваних ОС та навіть платформи слід шукати різні цікаві артефакти:
 
 {{#ref}}
 windows-forensics/
@@ -38,42 +38,42 @@ linux-forensics.md
 docker-forensics.md
 {{#endref}}
 
-## Deep inspection of specific file-types and Software
+## Глибока інспекція специфічних типів файлів та ПЗ
 
-If you have very **suspicious** **file**, then **depending on the file-type and software** that created it several **tricks** may be useful.\
-Read the following page to learn some interesting tricks:
+Якщо у вас є дуже **підозрілий** **файл**, тоді **в залежності від типу файлу та програмного забезпечення**, яке його створило, можуть бути корисні кілька **трюків**.\
+Прочитайте наступну сторінку, щоб дізнатися деякі цікаві трюки:
 
 {{#ref}}
 specific-software-file-type-tricks/
 {{#endref}}
 
-I want to do a special mention to the page:
+Я хочу особливо згадати сторінку:
 
 {{#ref}}
 specific-software-file-type-tricks/browser-artifacts.md
 {{#endref}}
 
-## Memory Dump Inspection
+## Інспекція Дампів Пам'яті
 
 {{#ref}}
 memory-dump-analysis/
 {{#endref}}
 
-## Pcap Inspection
+## Інспекція Pcap
 
 {{#ref}}
 pcap-inspection/
 {{#endref}}
 
-## **Anti-Forensic Techniques**
+## **Анти-Судово-Медичні Техніки**
 
-Keep in mind the possible use of anti-forensic techniques:
+Майте на увазі можливе використання анти-судово-медичних технік:
 
 {{#ref}}
 anti-forensic-techniques.md
 {{#endref}}
 
-## Threat Hunting
+## Полювання на Загрози
 
 {{#ref}}
 file-integrity-monitoring.md

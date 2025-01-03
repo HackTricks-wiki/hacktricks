@@ -76,7 +76,7 @@ objdump -T /bin/su | grep audit
 0000000000000000      DF *UND*  0000000000000000              audit_log_acct_message
 000000000020e968 g    DO .bss   0000000000000004  Base        audit_fd
 ```
-Символи `audit_open`, `audit_log_acct_message`, `audit_log_acct_message` та `audit_fd` ймовірно походять з бібліотеки libaudit.so.1. Оскільки libaudit.so.1 буде перезаписано зловмисною спільною бібліотекою, ці символи повинні бути присутніми в новій спільній бібліотеці, інакше програма не зможе знайти символ і завершить роботу.
+Символи `audit_open`, `audit_log_acct_message`, `audit_log_acct_message` та `audit_fd` ймовірно походять з бібліотеки libaudit.so.1. Оскільки libaudit.so.1 буде перезаписано шкідливою спільною бібліотекою, ці символи повинні бути присутніми в новій спільній бібліотеці, інакше програма не зможе знайти символ і завершить роботу.
 ```c
 #include<stdio.h>
 #include<stdlib.h>

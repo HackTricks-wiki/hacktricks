@@ -10,7 +10,7 @@
 - Перевірити можливу [smudge attack](https://www.usenix.org/legacy/event/woot10/tech/full_papers/Aviv.pdf)
 - Спробувати [Brute-force](https://www.cultofmac.com/316532/this-brute-force-device-can-crack-any-iphones-pin-code/)
 
-## Отримання даних
+## Збір даних
 
 Створіть [android backup using adb](mobile-pentesting/android-app-pentesting/adb-commands.md#backup) і витягніть його за допомогою [Android Backup Extractor](https://sourceforge.net/projects/adbextractor/): `java -jar abe.jar unpack file.backup file.tar`
 

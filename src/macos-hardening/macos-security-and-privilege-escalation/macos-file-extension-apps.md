@@ -12,13 +12,13 @@
 ```
 Або використовуючи інструмент [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
 
-**`/usr/libexec/lsd`** є мозком бази даних. Він надає **кілька XPC сервісів** таких як `.lsd.installation`, `.lsd.open`, `.lsd.openurl` та інші. Але він також **вимагає деяких прав** для застосунків, щоб мати можливість використовувати відкриті XPC функціональності, такі як `.launchservices.changedefaulthandler` або `.launchservices.changeurlschemehandler`, щоб змінити стандартні програми для mime-типів або схем URL та інші.
+**`/usr/libexec/lsd`** є мозком бази даних. Він надає **кілька XPC сервісів** таких як `.lsd.installation`, `.lsd.open`, `.lsd.openurl` та інші. Але він також **вимагає деяких прав** для застосунків, щоб мати можливість використовувати відкриті XPC функціональності, такі як `.launchservices.changedefaulthandler` або `.launchservices.changeurlschemehandler` для зміни стандартних застосунків для mime-типів або схем URL та інших.
 
-**`/System/Library/CoreServices/launchservicesd`** заявляє про сервіс `com.apple.coreservices.launchservicesd` і може бути запитаний для отримання інформації про запущені програми. Його можна запитати за допомогою системного інструменту /**`usr/bin/lsappinfo`** або з [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
+**`/System/Library/CoreServices/launchservicesd`** заявляє про сервіс `com.apple.coreservices.launchservicesd` і може бути запитаний для отримання інформації про запущені застосунки. Його можна запитати за допомогою системного інструменту /**`usr/bin/lsappinfo`** або з [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
 
-## Обробники додатків для розширень файлів та схем URL
+## Обробники застосунків для розширень файлів та схем URL
 
-Наступний рядок може бути корисним для знаходження програм, які можуть відкривати файли в залежності від розширення:
+Наступний рядок може бути корисним для знаходження застосунків, які можуть відкривати файли в залежності від розширення:
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -dump | grep -E "path:|bindings:|name:"
 ```

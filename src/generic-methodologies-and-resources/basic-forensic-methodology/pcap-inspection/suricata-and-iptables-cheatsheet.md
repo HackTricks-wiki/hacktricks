@@ -6,14 +6,13 @@
 
 ### Chains
 
-In iptables, lists of rules known as chains are processed sequentially. Among these, three primary chains are universally present, with additional ones like NAT being potentially supported depending on the system's capabilities.
+В iptables списки правил, відомі як ланцюги, обробляються послідовно. Серед них три основні ланцюги є універсально присутніми, з додатковими, такими як NAT, які можуть підтримуватися в залежності від можливостей системи.
 
-- **Input Chain**: Utilized for managing the behavior of incoming connections.
-- **Forward Chain**: Employed for handling incoming connections that are not destined for the local system. This is typical for devices acting as routers, where the data received is meant to be forwarded to another destination. This chain is relevant primarily when the system is involved in routing, NATing, or similar activities.
-- **Output Chain**: Dedicated to the regulation of outgoing connections.
+- **Input Chain**: Використовується для управління поведінкою вхідних з'єднань.
+- **Forward Chain**: Використовується для обробки вхідних з'єднань, які не призначені для локальної системи. Це типово для пристроїв, що діють як маршрутизатори, де отримані дані призначені для пересилання в інше місце. Цей ланцюг є актуальним переважно тоді, коли система бере участь у маршрутизації, NAT-уванні або подібних діяльностях.
+- **Output Chain**: Призначений для регулювання вихідних з'єднань.
 
-These chains ensure the orderly processing of network traffic, allowing for the specification of detailed rules governing the flow of data into, through, and out of a system.
-
+Ці ланцюги забезпечують впорядковану обробку мережевого трафіку, дозволяючи визначати детальні правила, що регулюють потік даних у систему, через неї та з неї.
 ```bash
 # Delete all rules
 iptables -F
@@ -50,11 +49,9 @@ iptables-save > /etc/sysconfig/iptables
 ip6tables-save > /etc/sysconfig/ip6tables
 iptables-restore < /etc/sysconfig/iptables
 ```
-
 ## Suricata
 
-### Install & Config
-
+### Встановлення та налаштування
 ```bash
 # Install details from: https://suricata.readthedocs.io/en/suricata-6.0.0/install.html#install-binary-packages
 # Ubuntu
@@ -64,7 +61,7 @@ apt-get install suricata
 
 # Debian
 echo "deb http://http.debian.net/debian buster-backports main" > \
-    /etc/apt/sources.list.d/backports.list
+/etc/apt/sources.list.d/backports.list
 apt-get update
 apt-get install suricata -t buster-backports
 
@@ -80,7 +77,7 @@ suricata-update
 ## To use the dowloaded rules update the following line in /etc/suricata/suricata.yaml
 default-rule-path: /var/lib/suricata/rules
 rule-files:
-  - suricata.rules
+- suricata.rules
 
 # Run
 ## Add rules in /etc/suricata/rules/suricata.rules
@@ -92,7 +89,7 @@ suricata -c /etc/suricata/suricata.yaml -i eth0
 suricatasc -c ruleset-reload-nonblocking
 ## or set the follogin in /etc/suricata/suricata.yaml
 detect-engine:
-  - rule-reload: true
+- rule-reload: true
 
 # Validate suricata config
 suricata -T -c /etc/suricata/suricata.yaml -v
@@ -101,8 +98,8 @@ suricata -T -c /etc/suricata/suricata.yaml -v
 ## Config drop to generate alerts
 ## Search for the following lines in /etc/suricata/suricata.yaml and remove comments:
 - drop:
-    alerts: yes
-    flows: all
+alerts: yes
+flows: all
 
 ## Forward all packages to the queue where suricata can act as IPS
 iptables -I INPUT -j NFQUEUE
@@ -120,76 +117,70 @@ Type=simple
 
 systemctl daemon-reload
 ```
+### Визначення правил
 
-### Rules Definitions
+[З документації:](https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) Правило/підпис складається з наступного:
 
-[From the docs:](https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) A rule/signature consists of the following:
-
-- The **action**, determines what happens when the signature matches.
-- The **header**, defines the protocol, IP addresses, ports and direction of the rule.
-- The **rule options**, define the specifics of the rule.
-
+- **дія**, визначає, що відбувається, коли підпис збігається.
+- **заголовок**, визначає протокол, IP-адреси, порти та напрямок правила.
+- **опції правила**, визначають специфіку правила.
 ```bash
 alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing Rule in URI"; flow:established,to_server; http.method; content:"GET"; http.uri; content:"rule"; fast_pattern; classtype:bad-unknown; sid:123; rev:1;)
 ```
+#### **Дійсні дії**
 
-#### **Valid actions are**
+- alert - згенерувати сповіщення
+- pass - зупинити подальшу перевірку пакета
+- **drop** - скинути пакет і згенерувати сповіщення
+- **reject** - надіслати RST/ICMP помилку недоступності відправнику відповідного пакета.
+- rejectsrc - те ж саме, що й _reject_
+- rejectdst - надіслати RST/ICMP помилку пакета отримувачу відповідного пакета.
+- rejectboth - надіслати RST/ICMP помилки пакетів обом сторонам розмови.
 
-- alert - generate an alert
-- pass - stop further inspection of the packet
-- **drop** - drop packet and generate alert
-- **reject** - send RST/ICMP unreachable error to the sender of the matching packet.
-- rejectsrc - same as just _reject_
-- rejectdst - send RST/ICMP error packet to the receiver of the matching packet.
-- rejectboth - send RST/ICMP error packets to both sides of the conversation.
+#### **Протоколи**
 
-#### **Protocols**
-
-- tcp (for tcp-traffic)
+- tcp (для tcp-трафіку)
 - udp
 - icmp
-- ip (ip stands for ‘all’ or ‘any’)
-- _layer7 protocols_: http, ftp, tls, smb, dns, ssh... (more in the [**docs**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html))
+- ip (ip означає 'всі' або 'будь-які')
+- _протоколи рівня 7_: http, ftp, tls, smb, dns, ssh... (більше в [**документації**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html))
 
-#### Source and Destination Addresses
+#### Джерела та адреси призначення
 
-It supports IP ranges, negations and a list of addresses:
+Підтримує діапазони IP, заперечення та список адрес:
 
-| Example                       | Meaning                                  |
+| Приклад                       | Значення                                  |
 | ----------------------------- | ---------------------------------------- |
-| ! 1.1.1.1                     | Every IP address but 1.1.1.1             |
-| !\[1.1.1.1, 1.1.1.2]          | Every IP address but 1.1.1.1 and 1.1.1.2 |
-| $HOME_NET                     | Your setting of HOME_NET in yaml         |
-| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET and not HOME_NET            |
-| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24 except for 10.0.0.5          |
+| ! 1.1.1.1                     | Кожна IP-адреса, крім 1.1.1.1             |
+| !\[1.1.1.1, 1.1.1.2]          | Кожна IP-адреса, крім 1.1.1.1 та 1.1.1.2 |
+| $HOME_NET                     | Ваша настройка HOME_NET у yaml           |
+| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET і не HOME_NET                |
+| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24, за винятком 10.0.0.5        |
 
-#### Source and Destination Ports
+#### Порти джерела та призначення
 
-It supports port ranges, negations and lists of ports
+Підтримує діапазони портів, заперечення та списки портів
 
-| Example         | Meaning                                |
+| Приклад         | Значення                                |
 | --------------- | -------------------------------------- |
-| any             | any address                            |
-| \[80, 81, 82]   | port 80, 81 and 82                     |
-| \[80: 82]       | Range from 80 till 82                  |
-| \[1024: ]       | From 1024 till the highest port-number |
-| !80             | Every port but 80                      |
-| \[80:100,!99]   | Range from 80 till 100 but 99 excluded |
-| \[1:80,!\[2,4]] | Range from 1-80, except ports 2 and 4  |
+| any             | будь-яка адреса                        |
+| \[80, 81, 82]   | порт 80, 81 і 82                       |
+| \[80: 82]       | Діапазон від 80 до 82                  |
+| \[1024: ]       | Від 1024 до найвищого номера порту     |
+| !80             | Кожен порт, крім 80                    |
+| \[80:100,!99]   | Діапазон від 80 до 100, але 99 виключено |
+| \[1:80,!\[2,4]] | Діапазон від 1 до 80, за винятком портів 2 і 4 |
 
-#### Direction
+#### Напрямок
 
-It's possible to indicate the direction of the communication rule being applied:
-
+Можна вказати напрямок правила комунікації, що застосовується:
 ```
 source -> destination
 source <> destination  (both directions)
 ```
+#### Ключові слова
 
-#### Keywords
-
-There are **hundreds of options** available in Suricata to search for the **specific packet** you are looking for, here it will be mentioned if something interesting is found. Check the [**documentation** ](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html)for more!
-
+Є **сотні варіантів** доступних у Suricata для пошуку **конкретного пакету**, який ви шукаєте, тут буде зазначено, якщо знайдено щось цікаве. Перевірте [**документацію**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html) для отримання додаткової інформації!
 ```bash
 # Meta Keywords
 msg: "description"; #Set a description to the rule
@@ -230,5 +221,4 @@ drop tcp any any -> any any (msg:"regex"; pcre:"/CTF\{[\w]{3}/i"; sid:10001;)
 ## Drop by port
 drop tcp any any -> any 8000 (msg:"8000 port"; sid:1000;)
 ```
-
 {{#include ../../../banners/hacktricks-training.md}}

@@ -2,88 +2,80 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
+### Змінні ідентифікації користувача
 
-{% embed url="https://academy.8ksec.io/" %}
+- **`ruid`**: **реальний ідентифікатор користувача**, що позначає користувача, який ініціював процес.
+- **`euid`**: Відомий як **ефективний ідентифікатор користувача**, він представляє ідентичність користувача, яку система використовує для визначення привілеїв процесу. Зазвичай `euid` відображає `ruid`, за винятком випадків, таких як виконання бінарного файлу з SetUID, коли `euid` приймає ідентичність власника файлу, надаючи таким чином певні операційні дозволи.
+- **`suid`**: Цей **збережений ідентифікатор користувача** є важливим, коли процес з високими привілеями (зазвичай працює як root) тимчасово повинен відмовитися від своїх привілеїв для виконання певних завдань, а потім знову відновити свій початковий підвищений статус.
 
-### User Identification Variables
+#### Важлива примітка
 
-- **`ruid`**: The **real user ID** denotes the user who initiated the process.
-- **`euid`**: Known as the **effective user ID**, it represents the user identity utilized by the system to ascertain process privileges. Generally, `euid` mirrors `ruid`, barring instances like a SetUID binary execution, where `euid` assumes the file owner's identity, thus granting specific operational permissions.
-- **`suid`**: This **saved user ID** is pivotal when a high-privilege process (typically running as root) needs to temporarily relinquish its privileges to perform certain tasks, only to later reclaim its initial elevated status.
+Процес, що не працює під root, може змінювати свій `euid` лише для того, щоб відповідати поточному `ruid`, `euid` або `suid`.
 
-#### Important Note
+### Розуміння функцій set\*uid
 
-A process not operating under root can only modify its `euid` to match the current `ruid`, `euid`, or `suid`.
+- **`setuid`**: На відміну від початкових припущень, `setuid` в основному змінює `euid`, а не `ruid`. Конкретно, для привілейованих процесів він вирівнює `ruid`, `euid` і `suid` з вказаним користувачем, часто root, ефективно закріплюючи ці ідентифікатори через переважаючий `suid`. Детальну інформацію можна знайти на [setuid man page](https://man7.org/linux/man-pages/man2/setuid.2.html).
+- **`setreuid`** та **`setresuid`**: Ці функції дозволяють тонке налаштування `ruid`, `euid` і `suid`. Однак їх можливості залежать від рівня привілеїв процесу. Для процесів, що не є root, зміни обмежуються поточними значеннями `ruid`, `euid` і `suid`. Натомість, процеси root або ті, що мають можливість `CAP_SETUID`, можуть призначати довільні значення цим ідентифікаторам. Більше інформації можна отримати з [setresuid man page](https://man7.org/linux/man-pages/man2/setresuid.2.html) та [setreuid man page](https://man7.org/linux/man-pages/man2/setreuid.2.html).
 
-### Understanding set\*uid Functions
+Ці функціональні можливості не призначені як механізм безпеки, а для полегшення запланованого операційного потоку, наприклад, коли програма приймає ідентичність іншого користувача, змінюючи свій ефективний ідентифікатор користувача.
 
-- **`setuid`**: Contrary to initial assumptions, `setuid` primarily modifies `euid` rather than `ruid`. Specifically, for privileged processes, it aligns `ruid`, `euid`, and `suid` with the specified user, often root, effectively solidifying these IDs due to the overriding `suid`. Detailed insights can be found in the [setuid man page](https://man7.org/linux/man-pages/man2/setuid.2.html).
-- **`setreuid`** and **`setresuid`**: These functions allow for the nuanced adjustment of `ruid`, `euid`, and `suid`. However, their capabilities are contingent on the process's privilege level. For non-root processes, modifications are restricted to the current values of `ruid`, `euid`, and `suid`. In contrast, root processes or those with `CAP_SETUID` capability can assign arbitrary values to these IDs. More information can be gleaned from the [setresuid man page](https://man7.org/linux/man-pages/man2/setresuid.2.html) and the [setreuid man page](https://man7.org/linux/man-pages/man2/setreuid.2.html).
+Варто зазначити, що хоча `setuid` може бути звичайним способом підвищення привілеїв до root (оскільки він вирівнює всі ідентифікатори до root), важливо розрізняти ці функції для розуміння та маніпулювання поведінкою ідентифікаторів користувача в різних сценаріях.
 
-These functionalities are designed not as a security mechanism but to facilitate the intended operational flow, such as when a program adopts another user's identity by altering its effective user ID.
+### Механізми виконання програм у Linux
 
-Notably, while `setuid` might be a common go-to for privilege elevation to root (since it aligns all IDs to root), differentiating between these functions is crucial for understanding and manipulating user ID behaviors in varying scenarios.
+#### **`execve` Системний виклик**
 
-### Program Execution Mechanisms in Linux
+- **Функціональність**: `execve` ініціює програму, визначену першим аргументом. Він приймає два масиви аргументів, `argv` для аргументів і `envp` для середовища.
+- **Поведение**: Він зберігає простір пам'яті виклику, але оновлює стек, купу та сегменти даних. Код програми замінюється новою програмою.
+- **Збереження ідентифікатора користувача**:
+- `ruid`, `euid` та додаткові групові ідентифікатори залишаються незмінними.
+- `euid` може мати тонкі зміни, якщо нова програма має встановлений біт SetUID.
+- `suid` оновлюється з `euid` після виконання.
+- **Документація**: Детальну інформацію можна знайти на [`execve` man page](https://man7.org/linux/man-pages/man2/execve.2.html).
 
-#### **`execve` System Call**
+#### **`system` Функція**
 
-- **Functionality**: `execve` initiates a program, determined by the first argument. It takes two array arguments, `argv` for arguments and `envp` for the environment.
-- **Behavior**: It retains the memory space of the caller but refreshes the stack, heap, and data segments. The program's code is replaced by the new program.
-- **User ID Preservation**:
-  - `ruid`, `euid`, and supplementary group IDs remain unaltered.
-  - `euid` might have nuanced changes if the new program has the SetUID bit set.
-  - `suid` gets updated from `euid` post-execution.
-- **Documentation**: Detailed information can be found on the [`execve` man page](https://man7.org/linux/man-pages/man2/execve.2.html).
+- **Функціональність**: На відміну від `execve`, `system` створює дочірній процес за допомогою `fork` і виконує команду в цьому дочірньому процесі за допомогою `execl`.
+- **Виконання команди**: Виконує команду через `sh` з `execl("/bin/sh", "sh", "-c", command, (char *) NULL);`.
+- **Поведение**: Оскільки `execl` є формою `execve`, він працює подібно, але в контексті нового дочірнього процесу.
+- **Документація**: Додаткову інформацію можна отримати з [`system` man page](https://man7.org/linux/man-pages/man3/system.3.html).
 
-#### **`system` Function**
-
-- **Functionality**: Unlike `execve`, `system` creates a child process using `fork` and executes a command within that child process using `execl`.
-- **Command Execution**: Executes the command via `sh` with `execl("/bin/sh", "sh", "-c", command, (char *) NULL);`.
-- **Behavior**: As `execl` is a form of `execve`, it operates similarly but in the context of a new child process.
-- **Documentation**: Further insights can be obtained from the [`system` man page](https://man7.org/linux/man-pages/man3/system.3.html).
-
-#### **Behavior of `bash` and `sh` with SUID**
+#### **Поведение `bash` та `sh` з SUID**
 
 - **`bash`**:
-  - Has a `-p` option influencing how `euid` and `ruid` are treated.
-  - Without `-p`, `bash` sets `euid` to `ruid` if they initially differ.
-  - With `-p`, the initial `euid` is preserved.
-  - More details can be found on the [`bash` man page](https://linux.die.net/man/1/bash).
+- Має опцію `-p`, що впливає на те, як обробляються `euid` та `ruid`.
+- Без `-p` `bash` встановлює `euid` на `ruid`, якщо вони спочатку відрізняються.
+- З `-p` початковий `euid` зберігається.
+- Більше деталей можна знайти на [`bash` man page](https://linux.die.net/man/1/bash).
 - **`sh`**:
-  - Does not possess a mechanism similar to `-p` in `bash`.
-  - The behavior concerning user IDs is not explicitly mentioned, except under the `-i` option, emphasizing the preservation of `euid` and `ruid` equality.
-  - Additional information is available on the [`sh` man page](https://man7.org/linux/man-pages/man1/sh.1p.html).
+- Не має механізму, подібного до `-p` в `bash`.
+- Поведінка щодо ідентифікаторів користувача не згадується явно, за винятком опції `-i`, що підкреслює збереження рівності `euid` та `ruid`.
+- Додаткова інформація доступна на [`sh` man page](https://man7.org/linux/man-pages/man1/sh.1p.html).
 
-These mechanisms, distinct in their operation, offer a versatile range of options for executing and transitioning between programs, with specific nuances in how user IDs are managed and preserved.
+Ці механізми, які відрізняються за своєю роботою, пропонують різноманітні варіанти для виконання та переходу між програмами, з конкретними нюансами в тому, як управляються та зберігаються ідентифікатори користувача.
 
-### Testing User ID Behaviors in Executions
+### Тестування поведінки ідентифікаторів користувача в виконаннях
 
-Examples taken from https://0xdf.gitlab.io/2022/05/31/setuid-rabbithole.html#testing-on-jail, check it for further information
+Приклади взято з https://0xdf.gitlab.io/2022/05/31/setuid-rabbithole.html#testing-on-jail, перевірте його для отримання додаткової інформації
 
-#### Case 1: Using `setuid` with `system`
+#### Випадок 1: Використання `setuid` з `system`
 
-**Objective**: Understanding the effect of `setuid` in combination with `system` and `bash` as `sh`.
+**Мета**: Розуміння впливу `setuid` у поєднанні з `system` та `bash` як `sh`.
 
-**C Code**:
-
+**C Код**:
 ```c
 #define _GNU_SOURCE
 #include <stdlib.h>
 #include <unistd.h>
 
 int main(void) {
-    setuid(1000);
-    system("id");
-    return 0;
+setuid(1000);
+system("id");
+return 0;
 }
 ```
-
-**Compilation and Permissions:**
-
+**Компиляція та дозволи:**
 ```bash
 oxdf@hacky$ gcc a.c -o /mnt/nfsshare/a;
 oxdf@hacky$ chmod 4755 /mnt/nfsshare/a
@@ -93,132 +85,108 @@ oxdf@hacky$ chmod 4755 /mnt/nfsshare/a
 bash-4.2$ $ ./a
 uid=99(nobody) gid=99(nobody) groups=99(nobody) context=system_u:system_r:unconfined_service_t:s0
 ```
+**Аналіз:**
 
-**Analysis:**
+- `ruid` та `euid` починають з 99 (nobody) та 1000 (frank) відповідно.
+- `setuid` вирівнює обидва до 1000.
+- `system` виконує `/bin/bash -c id` через символічне посилання з sh на bash.
+- `bash`, без `-p`, коригує `euid`, щоб відповідати `ruid`, в результаті чого обидва стають 99 (nobody).
 
-- `ruid` and `euid` start as 99 (nobody) and 1000 (frank) respectively.
-- `setuid` aligns both to 1000.
-- `system` executes `/bin/bash -c id` due to the symlink from sh to bash.
-- `bash`, without `-p`, adjusts `euid` to match `ruid`, resulting in both being 99 (nobody).
-
-#### Case 2: Using setreuid with system
+#### Випадок 2: Використання setreuid з system
 
 **C Code**:
-
 ```c
 #define _GNU_SOURCE
 #include <stdlib.h>
 #include <unistd.h>
 
 int main(void) {
-    setreuid(1000, 1000);
-    system("id");
-    return 0;
+setreuid(1000, 1000);
+system("id");
+return 0;
 }
 ```
-
-**Compilation and Permissions:**
-
+**Компиляція та дозволи:**
 ```bash
 oxdf@hacky$ gcc b.c -o /mnt/nfsshare/b; chmod 4755 /mnt/nfsshare/b
 ```
-
-**Execution and Result:**
-
+**Виконання та Результат:**
 ```bash
 bash-4.2$ $ ./b
 uid=1000(frank) gid=99(nobody) groups=99(nobody) context=system_u:system_r:unconfined_service_t:s0
 ```
+**Аналіз:**
 
-**Analysis:**
+- `setreuid` встановлює як ruid, так і euid на 1000.
+- `system` викликає bash, який підтримує ідентифікатори користувачів через їхню рівність, фактично діючи як frank.
 
-- `setreuid` sets both ruid and euid to 1000.
-- `system` invokes bash, which maintains the user IDs due to their equality, effectively operating as frank.
+#### Випадок 3: Використання setuid з execve
 
-#### Case 3: Using setuid with execve
-
-Objective: Exploring the interaction between setuid and execve.
-
+Мета: Дослідження взаємодії між setuid та execve.
 ```bash
 #define _GNU_SOURCE
 #include <stdlib.h>
 #include <unistd.h>
 
 int main(void) {
-    setuid(1000);
-    execve("/usr/bin/id", NULL, NULL);
-    return 0;
+setuid(1000);
+execve("/usr/bin/id", NULL, NULL);
+return 0;
 }
 ```
-
-**Execution and Result:**
-
+**Виконання та Результат:**
 ```bash
 bash-4.2$ $ ./c
 uid=99(nobody) gid=99(nobody) euid=1000(frank) groups=99(nobody) context=system_u:system_r:unconfined_service_t:s0
 ```
+**Аналіз:**
 
-**Analysis:**
+- `ruid` залишається 99, але euid встановлено на 1000, відповідно до ефекту setuid.
 
-- `ruid` remains 99, but euid is set to 1000, in line with setuid's effect.
-
-**C Code Example 2 (Calling Bash):**
-
+**C Код Приклад 2 (Виклик Bash):**
 ```bash
 #define _GNU_SOURCE
 #include <stdlib.h>
 #include <unistd.h>
 
 int main(void) {
-    setuid(1000);
-    execve("/bin/bash", NULL, NULL);
-    return 0;
+setuid(1000);
+execve("/bin/bash", NULL, NULL);
+return 0;
 }
 ```
-
-**Execution and Result:**
-
+**Виконання та Результат:**
 ```bash
 bash-4.2$ $ ./d
 bash-4.2$ $ id
 uid=99(nobody) gid=99(nobody) groups=99(nobody) context=system_u:system_r:unconfined_service_t:s0
 ```
+**Аналіз:**
 
-**Analysis:**
-
-- Although `euid` is set to 1000 by `setuid`, `bash` resets euid to `ruid` (99) due to the absence of `-p`.
+- Хоча `euid` встановлено на 1000 за допомогою `setuid`, `bash` скидає euid на `ruid` (99) через відсутність `-p`.
 
 **C Code Example 3 (Using bash -p):**
-
 ```bash
 #define _GNU_SOURCE
 #include <stdlib.h>
 #include <unistd.h>
 
 int main(void) {
-    char *const paramList[10] = {"/bin/bash", "-p", NULL};
-    setuid(1000);
-    execve(paramList[0], paramList, NULL);
-    return 0;
+char *const paramList[10] = {"/bin/bash", "-p", NULL};
+setuid(1000);
+execve(paramList[0], paramList, NULL);
+return 0;
 }
 ```
-
-**Execution and Result:**
-
+**Виконання та Результат:**
 ```bash
 bash-4.2$ $ ./e
 bash-4.2$ $ id
 uid=99(nobody) gid=99(nobody) euid=100
 ```
-
-## References
+## Посилання
 
 - [https://0xdf.gitlab.io/2022/05/31/setuid-rabbithole.html#testing-on-jail](https://0xdf.gitlab.io/2022/05/31/setuid-rabbithole.html#testing-on-jail)
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
-
-{% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,51 +1,51 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-The following steps are recommended for modifying device startup configurations and bootloaders like U-boot:
+Рекомендується виконати наступні кроки для модифікації конфігурацій запуску пристроїв та завантажувачів, таких як U-boot:
 
-1. **Access Bootloader's Interpreter Shell**:
+1. **Доступ до інтерпретатора завантажувача**:
 
-   - During boot, press "0", space, or other identified "magic codes" to access the bootloader's interpreter shell.
+- Під час завантаження натисніть "0", пробіл або інші виявлені "магічні коди", щоб отримати доступ до інтерпретатора завантажувача.
 
-2. **Modify Boot Arguments**:
+2. **Модифікація аргументів завантаження**:
 
-   - Execute the following commands to append '`init=/bin/sh`' to the boot arguments, allowing execution of a shell command:
-     %%%
-     #printenv
-     #setenv bootargs=console=ttyS0,115200 mem=63M root=/dev/mtdblock3 mtdparts=sflash:<partitiionInfo> rootfstype=<fstype> hasEeprom=0 5srst=0 init=/bin/sh
-     #saveenv
-     #boot
-     %%%
+- Виконайте наступні команди, щоб додати '`init=/bin/sh`' до аргументів завантаження, що дозволить виконання команди оболонки:
+%%%
+#printenv
+#setenv bootargs=console=ttyS0,115200 mem=63M root=/dev/mtdblock3 mtdparts=sflash:<partitiionInfo> rootfstype=<fstype> hasEeprom=0 5srst=0 init=/bin/sh
+#saveenv
+#boot
+%%%
 
-3. **Setup TFTP Server**:
+3. **Налаштування TFTP сервера**:
 
-   - Configure a TFTP server to load images over a local network:
-     %%%
-     #setenv ipaddr 192.168.2.2 #local IP of the device
-     #setenv serverip 192.168.2.1 #TFTP server IP
-     #saveenv
-     #reset
-     #ping 192.168.2.1 #check network access
-     #tftp ${loadaddr} uImage-3.6.35 #loadaddr takes the address to load the file into and the filename of the image on the TFTP server
-     %%%
+- Налаштуйте TFTP сервер для завантаження образів через локальну мережу:
+%%%
+#setenv ipaddr 192.168.2.2 #локальна IP адреса пристрою
+#setenv serverip 192.168.2.1 #IP адреса TFTP сервера
+#saveenv
+#reset
+#ping 192.168.2.1 #перевірка доступу до мережі
+#tftp ${loadaddr} uImage-3.6.35 #loadaddr приймає адресу для завантаження файлу та ім'я файлу образу на TFTP сервері
+%%%
 
-4. **Utilize `ubootwrite.py`**:
+4. **Використання `ubootwrite.py`**:
 
-   - Use `ubootwrite.py` to write the U-boot image and push a modified firmware to gain root access.
+- Використовуйте `ubootwrite.py` для запису образу U-boot і завантаження модифікованого прошивки для отримання root доступу.
 
-5. **Check Debug Features**:
+5. **Перевірка функцій налагодження**:
 
-   - Verify if debug features like verbose logging, loading arbitrary kernels, or booting from untrusted sources are enabled.
+- Перевірте, чи активовані функції налагодження, такі як детальне ведення журналу, завантаження довільних ядер або завантаження з ненадійних джерел.
 
-6. **Cautionary Hardware Interference**:
+6. **Обережність при фізичному втручанні**:
 
-   - Be cautious when connecting one pin to ground and interacting with SPI or NAND flash chips during the device boot-up sequence, particularly before the kernel decompresses. Consult the NAND flash chip's datasheet before shorting pins.
+- Будьте обережні при підключенні одного контакту до землі та взаємодії з чіпами SPI або NAND flash під час послідовності завантаження пристрою, особливо до розпакування ядра. Консультуйтеся з технічним описом чіпа NAND flash перед коротким замиканням контактів.
 
-7. **Configure Rogue DHCP Server**:
-   - Set up a rogue DHCP server with malicious parameters for a device to ingest during a PXE boot. Utilize tools like Metasploit's (MSF) DHCP auxiliary server. Modify the 'FILENAME' parameter with command injection commands such as `'a";/bin/sh;#'` to test input validation for device startup procedures.
+7. **Налаштування підробленого DHCP сервера**:
+- Налаштуйте підроблений DHCP сервер з шкідливими параметрами для пристрою, щоб він споживав їх під час PXE завантаження. Використовуйте інструменти, такі як допоміжний сервер DHCP Metasploit (MSF). Змініть параметр 'FILENAME' на команди ін'єкції, такі як `'a";/bin/sh;#'`, щоб перевірити валідацію введення для процедур запуску пристрою.
 
-**Note**: The steps involving physical interaction with device pins (\*marked with asterisks) should be approached with extreme caution to avoid damaging the device.
+**Примітка**: Кроки, що передбачають фізичну взаємодію з контактами пристрою (\*позначені зірочками), слід виконувати з великою обережністю, щоб уникнути пошкодження пристрою.
 
-## References
+## Посилання
 
 - [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
 

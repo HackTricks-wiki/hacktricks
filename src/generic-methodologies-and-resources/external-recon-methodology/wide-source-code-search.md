@@ -2,17 +2,17 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-The goal of this page is to enumerate **platforms that allow to search for code** (literal or regex) in across thousands/millions of repos in one or more platforms.
+Мета цієї сторінки - перерахувати **платформи, які дозволяють шукати код** (літерний або regex) у тисячах/мільйонах репозиторіїв на одній або кількох платформах.
 
-This helps in several occasions to **search for leaked information** or for **vulnerabilities** patterns.
+Це допомагає в кількох випадках **шукати витоку інформації** або **вразливості**.
 
-- [**SourceGraph**](https://sourcegraph.com/search): Search in millions of repos. There is a free version and an enterprise version (with 15 days free). It supports regexes.
-- [**Github Search**](https://github.com/search): Search across Github. It supports regexes.
-  - Maybe it's also useful to check also [**Github Code Search**](https://cs.github.com/).
-- [**Gitlab Advanced Search**](https://docs.gitlab.com/ee/user/search/advanced_search.html): Search across Gitlab projects. Support regexes.
-- [**SearchCode**](https://searchcode.com/): Search code in millions of projects.
+- [**SourceGraph**](https://sourcegraph.com/search): Пошук у мільйонах репозиторіїв. Є безкоштовна версія та версія для підприємств (з 15 днями безкоштовно). Підтримує regex.
+- [**Github Search**](https://github.com/search): Пошук по Github. Підтримує regex.
+- Можливо, також корисно перевірити [**Github Code Search**](https://cs.github.com/).
+- [**Gitlab Advanced Search**](https://docs.gitlab.com/ee/user/search/advanced_search.html): Пошук по проектам Gitlab. Підтримує regex.
+- [**SearchCode**](https://searchcode.com/): Пошук коду у мільйонах проектів.
 
 > [!WARNING]
-> When you look for leaks in a repo and run something like `git log -p` don't forget there might be **other branches with other commits** containing secrets!
+> Коли ви шукаєте витоки в репозиторії та запускаєте щось на кшталт `git log -p`, не забувайте, що можуть бути **інші гілки з іншими комітами**, що містять секрети!
 
 {{#include ../../banners/hacktricks-training.md}}

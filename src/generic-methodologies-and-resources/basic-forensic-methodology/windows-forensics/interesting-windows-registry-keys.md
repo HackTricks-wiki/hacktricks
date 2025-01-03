@@ -1,101 +1,101 @@
-# Interesting Windows Registry Keys
+# Цікаві ключі реєстру Windows
 
-### Interesting Windows Registry Keys
+### Цікаві ключі реєстру Windows
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-### **Windows Version and Owner Info**
+### **Інформація про версію Windows та власника**
 
-- Located at **`Software\Microsoft\Windows NT\CurrentVersion`**, you'll find the Windows version, Service Pack, installation time, and the registered owner's name in a straightforward manner.
+- Розташована за адресою **`Software\Microsoft\Windows NT\CurrentVersion`**, ви знайдете версію Windows, Service Pack, час установки та ім'я зареєстрованого власника у зрозумілій формі.
 
-### **Computer Name**
+### **Ім'я комп'ютера**
 
-- The hostname is found under **`System\ControlSet001\Control\ComputerName\ComputerName`**.
+- Ім'я хоста знаходиться під **`System\ControlSet001\Control\ComputerName\ComputerName`**.
 
-### **Time Zone Setting**
+### **Налаштування часового поясу**
 
-- The system's time zone is stored in **`System\ControlSet001\Control\TimeZoneInformation`**.
+- Часовий пояс системи зберігається в **`System\ControlSet001\Control\TimeZoneInformation`**.
 
-### **Access Time Tracking**
+### **Відстеження часу доступу**
 
-- By default, the last access time tracking is turned off (**`NtfsDisableLastAccessUpdate=1`**). To enable it, use:
-  `fsutil behavior set disablelastaccess 0`
+- За замовчуванням, відстеження останнього часу доступу вимкнено (**`NtfsDisableLastAccessUpdate=1`**). Щоб увімкнути його, використовуйте:
+`fsutil behavior set disablelastaccess 0`
 
-### Windows Versions and Service Packs
+### Версії Windows та Service Packs
 
-- The **Windows version** indicates the edition (e.g., Home, Pro) and its release (e.g., Windows 10, Windows 11), while **Service Packs** are updates that include fixes and, sometimes, new features.
+- **Версія Windows** вказує на вид (наприклад, Home, Pro) та його випуск (наприклад, Windows 10, Windows 11), тоді як **Service Packs** є оновленнями, які включають виправлення та, іноді, нові функції.
 
-### Enabling Last Access Time
+### Увімкнення часу останнього доступу
 
-- Enabling last access time tracking allows you to see when files were last opened, which can be critical for forensic analysis or system monitoring.
+- Увімкнення відстеження часу останнього доступу дозволяє бачити, коли файли були востаннє відкриті, що може бути критично важливим для судової експертизи або моніторингу системи.
 
-### Network Information Details
+### Деталі інформації про мережу
 
-- The registry holds extensive data on network configurations, including **types of networks (wireless, cable, 3G)** and **network categories (Public, Private/Home, Domain/Work)**, which are vital for understanding network security settings and permissions.
+- Реєстр містить обширні дані про мережеві конфігурації, включаючи **типи мереж (бездротові, кабельні, 3G)** та **категорії мереж (Публічна, Приватна/Домашня, Доменна/Робоча)**, які є важливими для розуміння налаштувань безпеки мережі та дозволів.
 
-### Client Side Caching (CSC)
+### Кешування на стороні клієнта (CSC)
 
-- **CSC** enhances offline file access by caching copies of shared files. Different **CSCFlags** settings control how and what files are cached, affecting performance and user experience, especially in environments with intermittent connectivity.
+- **CSC** покращує доступ до офлайн-файлів, кешуючи копії спільних файлів. Різні налаштування **CSCFlags** контролюють, як і які файли кешуються, впливаючи на продуктивність та досвід користувача, особливо в середовищах з переривчастим з'єднанням.
 
-### AutoStart Programs
+### Програми автозапуску
 
-- Programs listed in various `Run` and `RunOnce` registry keys are automatically launched at startup, affecting system boot time and potentially being points of interest for identifying malware or unwanted software.
+- Програми, перераховані в різних ключах реєстру `Run` та `RunOnce`, автоматично запускаються під час завантаження, впливаючи на час завантаження системи та потенційно будучи точками інтересу для виявлення шкідливого ПЗ або небажаного програмного забезпечення.
 
 ### Shellbags
 
-- **Shellbags** not only store preferences for folder views but also provide forensic evidence of folder access even if the folder no longer exists. They are invaluable for investigations, revealing user activity that isn't obvious through other means.
+- **Shellbags** не лише зберігають налаштування для перегляду папок, але й надають судову доказову інформацію про доступ до папок, навіть якщо папка більше не існує. Вони є безцінними для розслідувань, виявляючи активність користувача, яка не є очевидною через інші засоби.
 
-### USB Information and Forensics
+### Інформація про USB та судова експертиза
 
-- The details stored in the registry about USB devices can help trace which devices were connected to a computer, potentially linking a device to sensitive file transfers or unauthorized access incidents.
+- Деталі, збережені в реєстрі про USB-пристрої, можуть допомогти відстежити, які пристрої були підключені до комп'ютера, потенційно пов'язуючи пристрій з чутливими передачами файлів або інцидентами несанкціонованого доступу.
 
-### Volume Serial Number
+### Серійний номер тому
 
-- The **Volume Serial Number** can be crucial for tracking the specific instance of a file system, useful in forensic scenarios where file origin needs to be established across different devices.
+- **Серійний номер тому** може бути критично важливим для відстеження конкретного екземпляра файлової системи, корисним у судових сценаріях, де потрібно встановити походження файлу на різних пристроях.
 
-### **Shutdown Details**
+### **Деталі завершення роботи**
 
-- Shutdown time and count (the latter only for XP) are kept in **`System\ControlSet001\Control\Windows`** and **`System\ControlSet001\Control\Watchdog\Display`**.
+- Час завершення роботи та кількість (остання лише для XP) зберігаються в **`System\ControlSet001\Control\Windows`** та **`System\ControlSet001\Control\Watchdog\Display`**.
 
-### **Network Configuration**
+### **Конфігурація мережі**
 
-- For detailed network interface info, refer to **`System\ControlSet001\Services\Tcpip\Parameters\Interfaces{GUID_INTERFACE}`**.
-- First and last network connection times, including VPN connections, are logged under various paths in **`Software\Microsoft\Windows NT\CurrentVersion\NetworkList`**.
+- Для детальної інформації про мережеві інтерфейси зверніться до **`System\ControlSet001\Services\Tcpip\Parameters\Interfaces{GUID_INTERFACE}`**.
+- Перші та останні часи підключення до мережі, включаючи VPN-з'єднання, реєструються під різними шляхами в **`Software\Microsoft\Windows NT\CurrentVersion\NetworkList`**.
 
-### **Shared Folders**
+### **Спільні папки**
 
-- Shared folders and settings are under **`System\ControlSet001\Services\lanmanserver\Shares`**. The Client Side Caching (CSC) settings dictate offline file availability.
+- Спільні папки та налаштування знаходяться під **`System\ControlSet001\Services\lanmanserver\Shares`**. Налаштування кешування на стороні клієнта (CSC) визначають доступність офлайн-файлів.
 
-### **Programs that Start Automatically**
+### **Програми, які запускаються автоматично**
 
-- Paths like **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run`** and similar entries under `Software\Microsoft\Windows\CurrentVersion` detail programs set to run at startup.
+- Шляхи, такі як **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run`** та подібні записи під `Software\Microsoft\Windows\CurrentVersion`, детально описують програми, які налаштовані на запуск під час завантаження.
 
-### **Searches and Typed Paths**
+### **Пошуки та введені шляхи**
 
-- Explorer searches and typed paths are tracked in the registry under **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer`** for WordwheelQuery and TypedPaths, respectively.
+- Пошуки в Провіднику та введені шляхи відстежуються в реєстрі під **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer`** для WordwheelQuery та TypedPaths відповідно.
 
-### **Recent Documents and Office Files**
+### **Недавні документи та файли Office**
 
-- Recent documents and Office files accessed are noted in `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs` and specific Office version paths.
+- Недавні документи та файли Office, до яких було отримано доступ, зазначені в `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs` та специфічних шляхах версії Office.
 
-### **Most Recently Used (MRU) Items**
+### **Найбільш нещодавно використані (MRU) елементи**
 
-- MRU lists, indicating recent file paths and commands, are stored in various `ComDlg32` and `Explorer` subkeys under `NTUSER.DAT`.
+- Списки MRU, що вказують на нещодавні шляхи файлів та команди, зберігаються в різних підключах `ComDlg32` та `Explorer` під `NTUSER.DAT`.
 
-### **User Activity Tracking**
+### **Відстеження активності користувача**
 
-- The User Assist feature logs detailed application usage stats, including run count and last run time, at **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`**.
+- Функція User Assist реєструє детальну статистику використання програм, включаючи кількість запусків та час останнього запуску, за адресою **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`**.
 
-### **Shellbags Analysis**
+### **Аналіз Shellbags**
 
-- Shellbags, revealing folder access details, are stored in `USRCLASS.DAT` and `NTUSER.DAT` under `Software\Microsoft\Windows\Shell`. Use **[Shellbag Explorer](https://ericzimmerman.github.io/#!index.md)** for analysis.
+- Shellbags, що розкривають деталі доступу до папок, зберігаються в `USRCLASS.DAT` та `NTUSER.DAT` під `Software\Microsoft\Windows\Shell`. Використовуйте **[Shellbag Explorer](https://ericzimmerman.github.io/#!index.md)** для аналізу.
 
-### **USB Device History**
+### **Історія USB-пристроїв**
 
-- **`HKLM\SYSTEM\ControlSet001\Enum\USBSTOR`** and **`HKLM\SYSTEM\ControlSet001\Enum\USB`** contain rich details on connected USB devices, including manufacturer, product name, and connection timestamps.
-- The user associated with a specific USB device can be pinpointed by searching `NTUSER.DAT` hives for the device's **{GUID}**.
-- The last mounted device and its volume serial number can be traced through `System\MountedDevices` and `Software\Microsoft\Windows NT\CurrentVersion\EMDMgmt`, respectively.
+- **`HKLM\SYSTEM\ControlSet001\Enum\USBSTOR`** та **`HKLM\SYSTEM\ControlSet001\Enum\USB`** містять багаті деталі про підключені USB-пристрої, включаючи виробника, назву продукту та часові мітки підключення.
+- Користувача, пов'язаного з конкретним USB-пристроєм, можна визначити, шукаючи в хівах `NTUSER.DAT` для **{GUID}** пристрою.
+- Останній змонтований пристрій та його серійний номер тому можна відстежити через `System\MountedDevices` та `Software\Microsoft\Windows NT\CurrentVersion\EMDMgmt` відповідно.
 
-This guide condenses the crucial paths and methods for accessing detailed system, network, and user activity information on Windows systems, aiming for clarity and usability.
+Цей посібник узагальнює ключові шляхи та методи для доступу до детальної інформації про систему, мережу та активність користувачів на системах Windows, прагнучи до ясності та зручності використання.
 
 {{#include ../../../banners/hacktricks-training.md}}

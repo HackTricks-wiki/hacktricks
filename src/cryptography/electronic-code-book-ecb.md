@@ -2,72 +2,66 @@
 
 # ECB
 
-(ECB) Electronic Code Book - symmetric encryption scheme which **replaces each block of the clear text** by the **block of ciphertext**. It is the **simplest** encryption scheme. The main idea is to **split** the clear text into **blocks of N bits** (depends on the size of the block of input data, encryption algorithm) and then to encrypt (decrypt) each block of clear text using the only key.
+(ECB) Електронна кодова книга - симетрична схема шифрування, яка **замінює кожен блок відкритого тексту** на **блок шифротексту**. Це **найпростіша** схема шифрування. Основна ідея полягає в тому, щоб **розділити** відкритий текст на **блоки по N біт** (залежить від розміру блоку вхідних даних, алгоритму шифрування) і потім зашифрувати (розшифрувати) кожен блок відкритого тексту, використовуючи єдиний ключ.
 
 ![](https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/ECB_decryption.svg/601px-ECB_decryption.svg.png)
 
-Using ECB has multiple security implications:
+Використання ECB має кілька наслідків для безпеки:
 
-- **Blocks from encrypted message can be removed**
-- **Blocks from encrypted message can be moved around**
+- **Блоки з зашифрованого повідомлення можуть бути видалені**
+- **Блоки з зашифрованого повідомлення можуть бути переміщені**
 
-# Detection of the vulnerability
+# Виявлення вразливості
 
-Imagine you login into an application several times and you **always get the same cookie**. This is because the cookie of the application is **`<username>|<password>`**.\
-Then, you generate to new users, both of them with the **same long password** and **almost** the **same** **username**.\
-You find out that the **blocks of 8B** where the **info of both users** is the same are **equals**. Then, you imagine that this might be because **ECB is being used**.
+Уявіть, що ви кілька разів входите в додаток і **завжди отримуєте один і той же cookie**. Це тому, що cookie додатка є **`<username>|<password>`**.\
+Потім ви генеруєте нових користувачів, обидва з **однаковим довгим паролем** і **майже** **однаковим** **іменем користувача**.\
+Ви виявляєте, що **блоки по 8B**, де **інформація обох користувачів** однакова, є **однаковими**. Тоді ви уявляєте, що це може бути через те, що **використовується ECB**.
 
-Like in the following example. Observe how these** 2 decoded cookies** has several times the block **`\x23U\xE45K\xCB\x21\xC8`**
-
+Як у наступному прикладі. Зверніть увагу, як ці **2 декодовані cookie** мають кілька разів блок **`\x23U\xE45K\xCB\x21\xC8`**.
 ```
 \x23U\xE45K\xCB\x21\xC8\x23U\xE45K\xCB\x21\xC8\x04\xB6\xE1H\xD1\x1E \xB6\x23U\xE45K\xCB\x21\xC8\x23U\xE45K\xCB\x21\xC8+=\xD4F\xF7\x99\xD9\xA9
 
 \x23U\xE45K\xCB\x21\xC8\x23U\xE45K\xCB\x21\xC8\x04\xB6\xE1H\xD1\x1E \xB6\x23U\xE45K\xCB\x21\xC8\x23U\xE45K\xCB\x21\xC8+=\xD4F\xF7\x99\xD9\xA9
 ```
+Це пов'язано з тим, що **ім'я користувача та пароль цих куків містили кілька разів літеру "a"** (наприклад). **Блоки**, які є **різними**, - це блоки, які містили **принаймні 1 різний символ** (можливо, роздільник "|" або якусь необхідну різницю в імені користувача).
 
-This is because the **username and password of those cookies contained several times the letter "a"** (for example). The **blocks** that are **different** are blocks that contained **at least 1 different character** (maybe the delimiter "|" or some necessary difference in the username).
+Тепер зловмиснику потрібно лише виявити, чи формат є `<username><delimiter><password>` або `<password><delimiter><username>`. Для цього він може просто **згенерувати кілька імен користувачів** з **схожими та довгими іменами користувачів і паролями, поки не знайде формат і довжину роздільника:**
 
-Now, the attacker just need to discover if the format is `<username><delimiter><password>` or `<password><delimiter><username>`. For doing that, he can just **generate several usernames **with s**imilar and long usernames and passwords until he find the format and the length of the delimiter:**
+| Довжина імені користувача: | Довжина пароля: | Довжина імені користувача + пароля: | Довжина кука (після декодування): |
+| --------------------------- | ---------------- | ----------------------------------- | --------------------------------- |
+| 2                           | 2                | 4                                   | 8                                 |
+| 3                           | 3                | 6                                   | 8                                 |
+| 3                           | 4                | 7                                   | 8                                 |
+| 4                           | 4                | 8                                   | 16                                |
+| 7                           | 7                | 14                                  | 16                                |
 
-| Username length: | Password length: | Username+Password length: | Cookie's length (after decoding): |
-| ---------------- | ---------------- | ------------------------- | --------------------------------- |
-| 2                | 2                | 4                         | 8                                 |
-| 3                | 3                | 6                         | 8                                 |
-| 3                | 4                | 7                         | 8                                 |
-| 4                | 4                | 8                         | 16                                |
-| 7                | 7                | 14                        | 16                                |
+# Використання вразливості
 
-# Exploitation of the vulnerability
+## Видалення цілих блоків
 
-## Removing entire blocks
-
-Knowing the format of the cookie (`<username>|<password>`), in order to impersonate the username `admin` create a new user called `aaaaaaaaadmin` and get the cookie and decode it:
-
+Знаючи формат кука (`<username>|<password>`), щоб видати себе за ім'я користувача `admin`, створіть нового користувача з ім'ям `aaaaaaaaadmin` і отримайте куки та декодуйте їх:
 ```
 \x23U\xE45K\xCB\x21\xC8\xE0Vd8oE\x123\aO\x43T\x32\xD5U\xD4
 ```
-
-We can see the pattern `\x23U\xE45K\xCB\x21\xC8` created previously with the username that contained only `a`.\
-Then, you can remove the first block of 8B and you will et a valid cookie for the username `admin`:
-
+Ми можемо побачити шаблон `\x23U\xE45K\xCB\x21\xC8`, створений раніше з ім'ям користувача, яке містило лише `a`.\
+Тоді ви можете видалити перший блок 8B, і ви отримаєте дійсний cookie для імені користувача `admin`:
 ```
 \xE0Vd8oE\x123\aO\x43T\x32\xD5U\xD4
 ```
+## Переміщення блоків
 
-## Moving blocks
+У багатьох базах даних шукати `WHERE username='admin';` або `WHERE username='admin    ';` _(Зверніть увагу на додаткові пробіли)_
 
-In many databases it is the same to search for `WHERE username='admin';` or for `WHERE username='admin    ';` _(Note the extra spaces)_
+Отже, ще один спосіб видати себе за користувача `admin` полягає в тому, щоб:
 
-So, another way to impersonate the user `admin` would be to:
+- Згенерувати ім'я користувача, яке: `len(<username>) + len(<delimiter) % len(block)`. З розміром блоку `8B` ви можете згенерувати ім'я користувача, яке називається: `username       `, з роздільником `|` частина `<username><delimiter>` створить 2 блоки по 8B.
+- Потім згенерувати пароль, який заповнить точну кількість блоків, що містять ім'я користувача, за яким ми хочемо видати себе, і пробіли, наприклад: `admin   `
 
-- Generate a username that: `len(<username>) + len(<delimiter) % len(block)`. With a block size of `8B` you can generate username called: `username       `, with the delimiter `|` the chunk `<username><delimiter>` will generate 2 blocks of 8Bs.
-- Then, generate a password that will fill an exact number of blocks containing the username we want to impersonate and spaces, like: `admin   `
+Кука цього користувача буде складатися з 3 блоків: перші 2 - це блоки імені користувача + роздільник, а третій - це пароль (який підробляє ім'я користувача): `username       |admin   `
 
-The cookie of this user is going to be composed by 3 blocks: the first 2 is the blocks of the username + delimiter and the third one of the password (which is faking the username): `username       |admin   `
+**Тоді просто замініть перший блок на останній, і ви будете видавати себе за користувача `admin`: `admin          |username`**
 
-**Then, just replace the first block with the last time and will be impersonating the user `admin`: `admin          |username`**
-
-## References
+## Посилання
 
 - [http://cryptowiki.net/index.php?title=Electronic_Code_Book\_(ECB)](<http://cryptowiki.net/index.php?title=Electronic_Code_Book_(ECB)>)
 

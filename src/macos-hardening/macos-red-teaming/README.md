@@ -10,7 +10,7 @@
 
 Якщо вам вдасться **компрометувати облікові дані адміністратора** для доступу до платформи управління, ви можете **потенційно скомпрометувати всі комп'ютери**, розповсюджуючи своє шкідливе ПЗ на машинах.
 
-Для red teaming в MacOS середовищах настійно рекомендується мати певне розуміння того, як працюють MDM:
+Для red teaming в середовищах MacOS настійно рекомендується мати певне розуміння того, як працюють MDM:
 
 {{#ref}}
 macos-mdm/
@@ -20,7 +20,7 @@ macos-mdm/
 
 MDM матиме дозвіл на встановлення, запит або видалення профілів, встановлення додатків, створення локальних облікових записів адміністратора, встановлення пароля firmware, зміну ключа FileVault...
 
-Щоб запустити свій власний MDM, вам потрібно **підписати свій CSR у постачальника**, що ви можете спробувати отримати з [**https://mdmcert.download/**](https://mdmcert.download/). А для запуску свого власного MDM для пристроїв Apple ви можете використовувати [**MicroMDM**](https://github.com/micromdm/micromdm).
+Щоб запустити свій власний MDM, вам потрібно **підписати свій CSR постачальником**, що ви можете спробувати отримати з [**https://mdmcert.download/**](https://mdmcert.download/). А для запуску свого власного MDM для пристроїв Apple ви можете використовувати [**MicroMDM**](https://github.com/micromdm/micromdm).
 
 Однак, щоб встановити додаток на зареєстрованому пристрої, вам все ще потрібно, щоб він був підписаний обліковим записом розробника... однак, під час реєстрації в MDM **пристрій додає SSL сертифікат MDM як довірений CA**, тому ви тепер можете підписувати що завгодно.
 
@@ -65,7 +65,7 @@ plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
 <integer>4</integer>
 [...]
 ```
-Отже, зловмисник може скинути шкідливий пакет (`pkg`), який **перезаписує цей файл** під час встановлення, встановлюючи **URL на Mythic C2 слухача з агента Typhon**, щоб тепер мати можливість зловживати JAMF як C2.
+Отже, зловмисник може встановити шкідливий пакет (`pkg`), який **перезаписує цей файл**, налаштовуючи **URL на Mythic C2 слухача з агента Typhon**, щоб тепер мати можливість зловживати JAMF як C2.
 ```bash
 # After changing the URL you could wait for it to be reloaded or execute:
 sudo jamf policy -id 0
@@ -89,7 +89,7 @@ sudo jamf policy -id 0
 
 Однак, **облікові дані** можуть передаватися цим скриптам як **параметри**, тому вам потрібно буде моніторити `ps aux | grep -i jamf` (навіть не будучи root).
 
-Скрипт [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfExplorer.py) може слухати нові файли, які додаються, і нові аргументи процесу.
+Скрипт [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfExplorer.py) може слухати нові файли, що додаються, і нові аргументи процесу.
 
 ### macOS Віддалений доступ
 
@@ -121,9 +121,9 @@ dscl "/Active Directory/[Domain]/All Domains" ls /
 ```
 Також є кілька інструментів, підготовлених для MacOS, щоб автоматично перераховувати AD та працювати з kerberos:
 
-- [**Machound**](https://github.com/XMCyber/MacHound): MacHound - це розширення до інструменту аудиту Bloodhound, що дозволяє збирати та імплементувати відносини Active Directory на MacOS хостах.
+- [**Machound**](https://github.com/XMCyber/MacHound): MacHound - це розширення до інструменту аудиту Bloodhound, що дозволяє збирати та імпортувати відносини Active Directory на MacOS хостах.
 - [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost - це проект на Objective-C, призначений для взаємодії з API Heimdal krb5 на macOS. Мета проекту - забезпечити кращий тестування безпеки навколо Kerberos на пристроях macOS, використовуючи рідні API без необхідності в інших фреймворках або пакетах на цілі.
-- [**Orchard**](https://github.com/its-a-feature/Orchard): Інструмент JavaScript для автоматизації (JXA) для перерахунку Active Directory.
+- [**Orchard**](https://github.com/its-a-feature/Orchard): Інструмент JavaScript для автоматизації (JXA) для виконання перерахунку Active Directory.
 
 ### Інформація про домен
 ```bash
@@ -137,8 +137,8 @@ echo show com.apple.opendirectoryd.ActiveDirectory | scutil
 - **Мережеві користувачі** — Вольатильні користувачі Active Directory, які потребують з'єднання з сервером DC для аутентифікації.
 - **Мобільні користувачі** — Користувачі Active Directory з локальною резервною копією своїх облікових даних та файлів.
 
-Локальна інформація про користувачів та групи зберігається в папці _/var/db/dslocal/nodes/Default._\
-Наприклад, інформація про користувача з ім'ям _mark_ зберігається в _/var/db/dslocal/nodes/Default/users/mark.plist_, а інформація про групу _admin_ — в _/var/db/dslocal/nodes/Default/groups/admin.plist_.
+Локальна інформація про користувачів та групи зберігається у папці _/var/db/dslocal/nodes/Default._\
+Наприклад, інформація про користувача з ім'ям _mark_ зберігається у _/var/db/dslocal/nodes/Default/users/mark.plist_, а інформація про групу _admin_ — у _/var/db/dslocal/nodes/Default/groups/admin.plist_.
 
 На додаток до використання країв HasSession та AdminTo, **MacHound додає три нові краї** до бази даних Bloodhound:
 
@@ -194,7 +194,7 @@ bifrost --action asktgt --username test_lab_admin \
 bifrost --action asktgs --spn [service] --domain [domain.com] \
 --username [user] --hash [hash] --enctype [enctype]
 ```
-З отриманими сервісними квитками можна спробувати отримати доступ до спільних ресурсів на інших комп'ютерах:
+З отриманими квитками сервісу можна спробувати отримати доступ до загальних папок на інших комп'ютерах:
 ```bash
 smbutil view //computer.fqdn
 mount -t smbfs //server/folder /local/mount/point

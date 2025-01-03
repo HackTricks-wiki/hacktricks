@@ -1,114 +1,96 @@
-# Local Cloud Storage
+# Локальне хмарне сховище
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="../../../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-
 ## OneDrive
 
-In Windows, you can find the OneDrive folder in `\Users\<username>\AppData\Local\Microsoft\OneDrive`. And inside `logs\Personal` it's possible to find the file `SyncDiagnostics.log` which contains some interesting data regarding the synchronized files:
+У Windows ви можете знайти папку OneDrive за адресою `\Users\<username>\AppData\Local\Microsoft\OneDrive`. А всередині `logs\Personal` можна знайти файл `SyncDiagnostics.log`, який містить цікаві дані щодо синхронізованих файлів:
 
-- Size in bytes
-- Creation date
-- Modification date
-- Number of files in the cloud
-- Number of files in the folder
-- **CID**: Unique ID of the OneDrive user
-- Report generation time
-- Size of the HD of the OS
+- Розмір у байтах
+- Дата створення
+- Дата модифікації
+- Кількість файлів у хмарі
+- Кількість файлів у папці
+- **CID**: Унікальний ID користувача OneDrive
+- Час генерації звіту
+- Розмір жорсткого диска ОС
 
-Once you have found the CID it's recommended to **search files containing this ID**. You may be able to find files with the name: _**\<CID>.ini**_ and _**\<CID>.dat**_ that may contain interesting information like the names of files synchronized with OneDrive.
+Після того, як ви знайдете CID, рекомендується **шукати файли, що містять цей ID**. Ви можете знайти файли з іменами: _**\<CID>.ini**_ та _**\<CID>.dat**_, які можуть містити цікаву інформацію, таку як назви файлів, синхронізованих з OneDrive.
 
 ## Google Drive
 
-In Windows, you can find the main Google Drive folder in `\Users\<username>\AppData\Local\Google\Drive\user_default`\
-This folder contains a file called Sync_log.log with information like the email address of the account, filenames, timestamps, MD5 hashes of the files, etc. Even deleted files appear in that log file with its corresponding MD5.
+У Windows ви можете знайти основну папку Google Drive за адресою `\Users\<username>\AppData\Local\Google\Drive\user_default`\
+Ця папка містить файл під назвою Sync_log.log з інформацією, такою як адреса електронної пошти облікового запису, імена файлів, часові мітки, MD5 хеші файлів тощо. Навіть видалені файли з'являються в цьому файлі журналу з відповідним MD5.
 
-The file **`Cloud_graph\Cloud_graph.db`** is a sqlite database which contains the table **`cloud_graph_entry`**. In this table you can find the **name** of the **synchronized** **files**, modified time, size, and the MD5 checksum of the files.
+Файл **`Cloud_graph\Cloud_graph.db`** є базою даних sqlite, яка містить таблицю **`cloud_graph_entry`**. У цій таблиці ви можете знайти **ім'я** **синхронізованих** **файлів**, час модифікації, розмір та MD5 контрольну суму файлів.
 
-The table data of the database **`Sync_config.db`** contains the email address of the account, the path of the shared folders and the Google Drive version.
+Дані таблиці бази даних **`Sync_config.db`** містять адресу електронної пошти облікового запису, шлях до спільних папок та версію Google Drive.
 
 ## Dropbox
 
-Dropbox uses **SQLite databases** to manage the files. In this\
-You can find the databases in the folders:
+Dropbox використовує **бази даних SQLite** для управління файлами. У цьому\
+Ви можете знайти бази даних у папках:
 
 - `\Users\<username>\AppData\Local\Dropbox`
 - `\Users\<username>\AppData\Local\Dropbox\Instance1`
 - `\Users\<username>\AppData\Roaming\Dropbox`
 
-And the main databases are:
+А основні бази даних:
 
 - Sigstore.dbx
 - Filecache.dbx
 - Deleted.dbx
 - Config.dbx
 
-The ".dbx" extension means that the **databases** are **encrypted**. Dropbox uses **DPAPI** ([https://docs.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)?redirectedfrom=MSDN](<https://docs.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)?redirectedfrom=MSDN>))
+Розширення ".dbx" означає, що **бази даних** є **зашифрованими**. Dropbox використовує **DPAPI** ([https://docs.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)?redirectedfrom=MSDN](<https://docs.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)?redirectedfrom=MSDN>))
 
-To understand better the encryption that Dropbox uses you can read [https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html](https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html).
+Щоб краще зрозуміти шифрування, яке використовує Dropbox, ви можете прочитати [https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html](https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html).
 
-However, the main information is:
+Однак основна інформація:
 
-- **Entropy**: d114a55212655f74bd772e37e64aee9b
-- **Salt**: 0D638C092E8B82FC452883F95F355B8E
-- **Algorithm**: PBKDF2
-- **Iterations**: 1066
+- **Ентропія**: d114a55212655f74bd772e37e64aee9b
+- **Сіль**: 0D638C092E8B82FC452883F95F355B8E
+- **Алгоритм**: PBKDF2
+- **Ітерації**: 1066
 
-Apart from that information, to decrypt the databases you still need:
+Окрім цієї інформації, для розшифрування баз даних вам також знадобиться:
 
-- The **encrypted DPAPI key**: You can find it in the registry inside `NTUSER.DAT\Software\Dropbox\ks\client` (export this data as binary)
-- The **`SYSTEM`** and **`SECURITY`** hives
-- The **DPAPI master keys**: Which can be found in `\Users\<username>\AppData\Roaming\Microsoft\Protect`
-- The **username** and **password** of the Windows user
+- **зашифрований ключ DPAPI**: Ви можете знайти його в реєстрі за адресою `NTUSER.DAT\Software\Dropbox\ks\client` (експортуйте ці дані у бінарному вигляді)
+- **`SYSTEM`** та **`SECURITY`** хіви
+- **майстер-ключі DPAPI**: які можна знайти за адресою `\Users\<username>\AppData\Roaming\Microsoft\Protect`
+- **ім'я користувача** та **пароль** користувача Windows
 
-Then you can use the tool [**DataProtectionDecryptor**](https://nirsoft.net/utils/dpapi_data_decryptor.html)**:**
+Тоді ви можете використовувати інструмент [**DataProtectionDecryptor**](https://nirsoft.net/utils/dpapi_data_decryptor.html)**:**
 
 ![](<../../../images/image (448).png>)
 
-If everything goes as expected, the tool will indicate the **primary key** that you need to **use to recover the original one**. To recover the original one, just use this [cyber_chef receipt](<https://gchq.github.io/CyberChef/#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) putting the primary key as the "passphrase" inside the receipt.
+Якщо все пройде як очікувалося, інструмент вкаже на **основний ключ**, який вам потрібно **використати для відновлення оригінального**. Щоб відновити оригінал, просто використайте цей [рецепт cyber_chef](<https://gchq.github.io/CyberChef/#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) вставивши основний ключ як "пароль" у рецепті.
 
-The resulting hex is the final key used to encrypt the databases which can be decrypted with:
-
+Отриманий hex є фінальним ключем, використаним для шифрування баз даних, які можна розшифрувати за допомогою:
 ```bash
 sqlite -k <Obtained Key> config.dbx ".backup config.db" #This decompress the config.dbx and creates a clear text backup in config.db
 ```
+База даних **`config.dbx`** містить:
 
-The **`config.dbx`** database contains:
+- **Email**: Електронна пошта користувача
+- **usernamedisplayname**: Ім'я користувача
+- **dropbox_path**: Шлях, де розташована папка dropbox
+- **Host_id: Hash** використовується для аутентифікації в хмарі. Його можна відкликати лише з вебу.
+- **Root_ns**: Ідентифікатор користувача
 
-- **Email**: The email of the user
-- **usernamedisplayname**: The name of the user
-- **dropbox_path**: Path where the dropbox folder is located
-- **Host_id: Hash** used to authenticate to the cloud. This can only be revoked from the web.
-- **Root_ns**: User identifier
+База даних **`filecache.db`** містить інформацію про всі файли та папки, синхронізовані з Dropbox. Таблиця `File_journal` містить найбільше корисної інформації:
 
-The **`filecache.db`** database contains information about all the files and folders synchronized with Dropbox. The table `File_journal` is the one with more useful information:
+- **Server_path**: Шлях, де файл розташований на сервері (цей шлях передує `host_id` клієнта).
+- **local_sjid**: Версія файлу
+- **local_mtime**: Дата модифікації
+- **local_ctime**: Дата створення
 
-- **Server_path**: Path where the file is located inside the server (this path is preceded by the `host_id` of the client).
-- **local_sjid**: Version of the file
-- **local_mtime**: Modification date
-- **local_ctime**: Creation date
+Інші таблиці в цій базі даних містять більш цікаву інформацію:
 
-Other tables inside this database contain more interesting information:
-
-- **block_cache**: hash of all the files and folders of Dropbox
-- **block_ref**: Related the hash ID of the table `block_cache` with the file ID in the table `file_journal`
-- **mount_table**: Share folders of dropbox
-- **deleted_fields**: Dropbox deleted files
+- **block_cache**: хеш усіх файлів і папок Dropbox
+- **block_ref**: Зв'язує хеш ID таблиці `block_cache` з ID файлу в таблиці `file_journal`
+- **mount_table**: Спільні папки Dropbox
+- **deleted_fields**: Видалені файли Dropbox
 - **date_added**
-
-<figure><img src="../../../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 {{#include ../../../banners/hacktricks-training.md}}

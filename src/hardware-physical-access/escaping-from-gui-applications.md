@@ -1,60 +1,60 @@
-# Escaping from KIOSKs
+# Вихід з KIOSKів
 
 {{#include ../banners/hacktricks-training.md}}
 
 ---
 
-## Check physical device
+## Перевірка фізичного пристрою
 
-| Component    | Action                                                             |
-| ------------ | ------------------------------------------------------------------ |
-| Power button | Turning the device off and on again may expose the start screen    |
-| Power cable  | Check whether the device reboots when the power is cut off briefly |
-| USB ports    | Connect physical keyboard with more shortcuts                      |
-| Ethernet     | Network scan or sniffing may enable further exploitation           |
+| Компонент     | Дія                                                               |
+| ------------- | ------------------------------------------------------------------ |
+| Кнопка живлення | Вимкнення та повторне вмикнення пристрою може відкрити стартовий екран |
+| Кабель живлення | Перевірте, чи перезавантажується пристрій, коли живлення короткочасно вимкнено |
+| USB порти     | Підключіть фізичну клавіатуру з додатковими комбінаціями          |
+| Ethernet      | Сканування мережі або перехоплення може дозволити подальшу експлуатацію |
 
-## Check for possible actions inside the GUI application
+## Перевірка можливих дій у GUI-додатку
 
-**Common Dialogs** are those options of **saving a file**, **opening a file**, selecting a font, a color... Most of them will **offer a full Explorer functionality**. This means that you will be able to access Explorer functionalities if you can access these options:
+**Звичайні діалоги** - це ті опції **збереження файлу**, **відкриття файлу**, вибір шрифту, кольору... Більшість з них **пропонують повну функціональність Провідника**. Це означає, що ви зможете отримати доступ до функцій Провідника, якщо зможете отримати доступ до цих опцій:
 
-- Close/Close as
-- Open/Open with
-- Print
-- Export/Import
-- Search
-- Scan
+- Закрити/Закрити як
+- Відкрити/Відкрити з
+- Друк
+- Експорт/Імпорт
+- Пошук
+- Сканування
 
-You should check if you can:
+Вам слід перевірити, чи можете ви:
 
-- Modify or create new files
-- Create symbolic links
-- Get access to restricted areas
-- Execute other apps
+- Модифікувати або створювати нові файли
+- Створювати символічні посилання
+- Отримати доступ до обмежених областей
+- Виконувати інші додатки
 
-### Command Execution
+### Виконання команд
 
-Maybe **using a `Open with`** option\*\* you can open/execute some kind of shell.
+Можливо, **використовуючи опцію `Відкрити з`** ви зможете відкрити/виконати якийсь вид оболонки.
 
 #### Windows
 
-For example _cmd.exe, command.com, Powershell/Powershell ISE, mmc.exe, at.exe, taskschd.msc..._ find more binaries that can be used to execute commands (and perform unexpected actions) here: [https://lolbas-project.github.io/](https://lolbas-project.github.io)
+Наприклад _cmd.exe, command.com, Powershell/Powershell ISE, mmc.exe, at.exe, taskschd.msc..._ знайдіть більше бінарних файлів, які можна використовувати для виконання команд (і виконання несподіваних дій) тут: [https://lolbas-project.github.io/](https://lolbas-project.github.io)
 
 #### \*NIX \_\_
 
-_bash, sh, zsh..._ More here: [https://gtfobins.github.io/](https://gtfobins.github.io)
+_bash, sh, zsh..._ Більше тут: [https://gtfobins.github.io/](https://gtfobins.github.io)
 
 ## Windows
 
-### Bypassing path restrictions
+### Обхід обмежень шляху
 
-- **Environment variables**: There are a lot of environment variables that are pointing to some path
-- **Other protocols**: _about:, data:, ftp:, file:, mailto:, news:, res:, telnet:, view-source:_
-- **Symbolic links**
-- **Shortcuts**: CTRL+N (open new session), CTRL+R (Execute Commands), CTRL+SHIFT+ESC (Task Manager), Windows+E (open explorer), CTRL-B, CTRL-I (Favourites), CTRL-H (History), CTRL-L, CTRL-O (File/Open Dialog), CTRL-P (Print Dialog), CTRL-S (Save As)
-  - Hidden Administrative menu: CTRL-ALT-F8, CTRL-ESC-F9
+- **Змінні середовища**: Існує багато змінних середовища, які вказують на певний шлях
+- **Інші протоколи**: _about:, data:, ftp:, file:, mailto:, news:, res:, telnet:, view-source:_
+- **Символічні посилання**
+- **Ярлики**: CTRL+N (відкрити нову сесію), CTRL+R (виконати команди), CTRL+SHIFT+ESC (Диспетчер завдань), Windows+E (відкрити провідник), CTRL-B, CTRL-I (Улюблені), CTRL-H (Історія), CTRL-L, CTRL-O (Файл/Діалог відкриття), CTRL-P (Діалог друку), CTRL-S (Зберегти як)
+- Схований адміністративний меню: CTRL-ALT-F8, CTRL-ESC-F9
 - **Shell URIs**: _shell:Administrative Tools, shell:DocumentsLibrary, shell:Librariesshell:UserProfiles, shell:Personal, shell:SearchHomeFolder, shell:Systemshell:NetworkPlacesFolder, shell:SendTo, shell:UsersProfiles, shell:Common Administrative Tools, shell:MyComputerFolder, shell:InternetFolder_
-- **UNC paths**: Paths to connect to shared folders. You should try to connect to the C$ of the local machine ("\\\127.0.0.1\c$\Windows\System32")
-  - **More UNC paths:**
+- **UNC шляхи**: Шляхи для підключення до спільних папок. Вам слід спробувати підключитися до C$ локального комп'ютера ("\\\127.0.0.1\c$\Windows\System32")
+- **Більше UNC шляхів:**
 
 | UNC                       | UNC            | UNC                  |
 | ------------------------- | -------------- | -------------------- |
@@ -68,15 +68,15 @@ _bash, sh, zsh..._ More here: [https://gtfobins.github.io/](https://gtfobins.git
 | %TMP%                     | %USERDOMAIN%   | %USERNAME%           |
 | %USERPROFILE%             | %WINDIR%       |                      |
 
-### Download Your Binaries
+### Завантажте свої бінарні файли
 
-Console: [https://sourceforge.net/projects/console/](https://sourceforge.net/projects/console/)\
-Explorer: [https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/](https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/)\
-Registry editor: [https://sourceforge.net/projects/uberregedit/](https://sourceforge.net/projects/uberregedit/)
+Консоль: [https://sourceforge.net/projects/console/](https://sourceforge.net/projects/console/)\
+Провідник: [https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/](https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/)\
+Редактор реєстру: [https://sourceforge.net/projects/uberregedit/](https://sourceforge.net/projects/uberregedit/)
 
-### Accessing filesystem from the browser
+### Доступ до файлової системи з браузера
 
-| PATH                | PATH              | PATH               | PATH                |
+| ШЛЯХ                | ШЛЯХ              | ШЛЯХ               | ШЛЯХ                |
 | ------------------- | ----------------- | ------------------ | ------------------- |
 | File:/C:/windows    | File:/C:/windows/ | File:/C:/windows\\ | File:/C:\windows    |
 | File:/C:\windows\\  | File:/C:\windows/ | File://C:/windows  | File://C:/windows/  |
@@ -86,47 +86,47 @@ Registry editor: [https://sourceforge.net/projects/uberregedit/](https://sourcef
 | %TEMP%              | %SYSTEMDRIVE%     | %SYSTEMROOT%       | %APPDATA%           |
 | %HOMEDRIVE%         | %HOMESHARE        |                    | <p><br></p>         |
 
-### ShortCuts
+### Комбінації клавіш
 
-- Sticky Keys – Press SHIFT 5 times
+- Sticky Keys – натисніть SHIFT 5 разів
 - Mouse Keys – SHIFT+ALT+NUMLOCK
 - High Contrast – SHIFT+ALT+PRINTSCN
-- Toggle Keys – Hold NUMLOCK for 5 seconds
-- Filter Keys – Hold right SHIFT for 12 seconds
-- WINDOWS+F1 – Windows Search
-- WINDOWS+D – Show Desktop
-- WINDOWS+E – Launch Windows Explorer
-- WINDOWS+R – Run
-- WINDOWS+U – Ease of Access Centre
-- WINDOWS+F – Search
-- SHIFT+F10 – Context Menu
-- CTRL+SHIFT+ESC – Task Manager
-- CTRL+ALT+DEL – Splash screen on newer Windows versions
-- F1 – Help F3 – Search
-- F6 – Address Bar
-- F11 – Toggle full screen within Internet Explorer
-- CTRL+H – Internet Explorer History
-- CTRL+T – Internet Explorer – New Tab
-- CTRL+N – Internet Explorer – New Page
-- CTRL+O – Open File
-- CTRL+S – Save CTRL+N – New RDP / Citrix
+- Toggle Keys – утримуйте NUMLOCK протягом 5 секунд
+- Filter Keys – утримуйте правий SHIFT протягом 12 секунд
+- WINDOWS+F1 – Пошук Windows
+- WINDOWS+D – Показати робочий стіл
+- WINDOWS+E – Запустити Провідник Windows
+- WINDOWS+R – Виконати
+- WINDOWS+U – Центр доступності
+- WINDOWS+F – Пошук
+- SHIFT+F10 – Контекстне меню
+- CTRL+SHIFT+ESC – Диспетчер завдань
+- CTRL+ALT+DEL – Екран привітання на новіших версіях Windows
+- F1 – Допомога F3 – Пошук
+- F6 – Адресний рядок
+- F11 – Перемикання на повний екран у Internet Explorer
+- CTRL+H – Історія Internet Explorer
+- CTRL+T – Internet Explorer – Нова вкладка
+- CTRL+N – Internet Explorer – Нова сторінка
+- CTRL+O – Відкрити файл
+- CTRL+S – Зберегти CTRL+N – Нова RDP / Citrix
 
-### Swipes
+### Проведення
 
-- Swipe from the left side to the right to see all open Windows, minimizing the KIOSK app and accessing the whole OS directly;
-- Swipe from the right side to the left to open Action Center, minimizing the KIOSK app and accessing the whole OS directly;
-- Swipe in from the top edge to make the title bar visible for an app opened in full screen mode;
-- Swipe up from the bottom to show the taskbar in a full screen app.
+- Проведіть з лівого боку вправо, щоб побачити всі відкриті вікна, зменшивши додаток KIOSK і отримавши доступ до всієї ОС безпосередньо;
+- Проведіть з правого боку вліво, щоб відкрити Центр дій, зменшивши додаток KIOSK і отримавши доступ до всієї ОС безпосередньо;
+- Проведіть з верхнього краю, щоб зробити заголовок видимим для програми, відкритої в повноекранному режимі;
+- Проведіть вгору знизу, щоб показати панель завдань у повноекранному додатку.
 
-### Internet Explorer Tricks
+### Трюки Internet Explorer
 
-#### 'Image Toolbar'
+#### 'Панель інструментів зображень'
 
-It's a toolbar that appears on the top-left of image when it's clicked. You will be able to Save, Print, Mailto, Open "My Pictures" in Explorer. The Kiosk needs to be using Internet Explorer.
+Це панель інструментів, яка з'являється у верхньому лівому куті зображення, коли на нього натискають. Ви зможете зберегти, надрукувати, надіслати поштою, відкрити "Мої зображення" в Провіднику. Kiosk повинен використовувати Internet Explorer.
 
-#### Shell Protocol
+#### Протокол оболонки
 
-Type this URLs to obtain an Explorer view:
+Введіть ці URL-адреси, щоб отримати вигляд Провідника:
 
 - `shell:Administrative Tools`
 - `shell:DocumentsLibrary`
@@ -145,131 +145,131 @@ Type this URLs to obtain an Explorer view:
 - `Shell:System`
 - `Shell:ControlPanelFolder`
 - `Shell:Windows`
-- `shell:::{21EC2020-3AEA-1069-A2DD-08002B30309D}` --> Control Panel
-- `shell:::{20D04FE0-3AEA-1069-A2D8-08002B30309D}` --> My Computer
-- `shell:::{{208D2C60-3AEA-1069-A2D7-08002B30309D}}` --> My Network Places
+- `shell:::{21EC2020-3AEA-1069-A2DD-08002B30309D}` --> Панель управління
+- `shell:::{20D04FE0-3AEA-1069-A2D8-08002B30309D}` --> Мій комп'ютер
+- `shell:::{{208D2C60-3AEA-1069-A2D7-08002B30309D}}` --> Мої мережеві місця
 - `shell:::{871C5380-42A0-1069-A2EA-08002B30309D}` --> Internet Explorer
 
-### Show File Extensions
+### Показати розширення файлів
 
-Check this page for more information: [https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)
+Перевірте цю сторінку для отримання додаткової інформації: [https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)
 
-## Browsers tricks
+## Трюки браузерів
 
-Backup iKat versions:
+Резервні версії iKat:
 
 [http://swin.es/k/](http://swin.es/k/)\
 [http://www.ikat.kronicd.net/](http://www.ikat.kronicd.net)\\
 
-Create a common dialog using JavaScript and access file explorer: `document.write('<input/type=file>')`\
-Source: https://medium.com/@Rend\_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
+Створіть загальний діалог, використовуючи JavaScript, і отримайте доступ до провідника файлів: `document.write('<input/type=file>')`\
+Джерело: https://medium.com/@Rend\_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
 
 ## iPad
 
-### Gestures and bottoms
+### Жести та кнопки
 
-- Swipe up with four (or five) fingers / Double-tap Home button: To view the multitask view and change App
-- Swipe one way or another with four or five fingers: In order to change to the next/last App
-- Pinch the screen with five fingers / Touch Home button / Swipe up with 1 finger from the bottom of the screen in a quick motion to the up: To access Home
-- Swipe one finger from the bottom of the screen just 1-2 inches (slow): The dock will appear
-- Swipe down from the top of the display with 1 finger: To view your notifications
-- Swipe down with 1 finger the top-right corner of the screen: To see iPad Pro's control centre
-- Swipe 1 finger from the left of the screen 1-2 inches: To see Today view
-- Swipe fast 1 finger from the centre of the screen to the right or left: To change to next/last App
-- Press and hold the On/**Off**/Sleep button at the upper-right corner of the **iPad +** Move the Slide to **power off** slider all the way to the right: To power off
-- Press the On/**Off**/Sleep button at the upper-right corner of the **iPad and the Home button for a few second**: To force a hard power off
-- Press the On/**Off**/Sleep button at the upper-right corner of the **iPad and the Home button quickly**: To take a screenshot that will pop up in the lower left of the display. Press both buttons at the same time very briefly as if you hold them a few seconds a hard power off will be performed.
+- Проведіть вгору чотирма (або п'ятьма) пальцями / Подвійне натискання кнопки Home: Щоб переглянути вид багатозадачності та змінити додаток
+- Проведіть в один бік або інший чотирма або п'ятьма пальцями: Щоб змінити на наступний/останній додаток
+- Зімніть екран п'ятьма пальцями / Натисніть кнопку Home / Проведіть вгору одним пальцем знизу екрану швидким рухом вгору: Щоб отримати доступ до Home
+- Проведіть одним пальцем знизу екрану всього на 1-2 дюйми (повільно): Появиться док
+- Проведіть вниз з верхньої частини дисплея одним пальцем: Щоб переглянути ваші сповіщення
+- Проведіть вниз одним пальцем у верхньому правому куті екрану: Щоб побачити центр управління iPad Pro
+- Проведіть одним пальцем зліва від екрану на 1-2 дюйми: Щоб побачити вид Сьогодні
+- Проведіть швидко одним пальцем з центру екрану вправо або вліво: Щоб змінити на наступний/останній додаток
+- Натисніть і утримуйте кнопку Увімкнення/**Вимкнення**/Сну в верхньому правому куті **iPad +** Перемістіть повзунок Вимкнути **вимкнення** до правого краю: Щоб вимкнути
+- Натисніть кнопку Увімкнення/**Вимкнення**/Сну в верхньому правому куті **iPad і кнопку Home на кілька секунд**: Щоб примусово вимкнути
+- Натисніть кнопку Увімкнення/**Вимкнення**/Сну в верхньому правому куті **iPad і кнопку Home швидко**: Щоб зробити знімок екрану, який з'явиться в нижньому лівому куті дисплея. Натискайте обидві кнопки одночасно дуже коротко, оскільки якщо ви утримаєте їх кілька секунд, буде виконано жорстке вимкнення.
 
-### Shortcuts
+### Комбінації клавіш
 
-You should have an iPad keyboard or a USB keyboard adaptor. Only shortcuts that could help escaping from the application will be shown here.
+Вам слід мати клавіатуру iPad або адаптер USB для клавіатури. Тут будуть показані лише комбінації клавіш, які можуть допомогти вийти з програми.
 
-| Key | Name         |
-| --- | ------------ |
-| ⌘   | Command      |
-| ⌥   | Option (Alt) |
-| ⇧   | Shift        |
-| ↩   | Return       |
-| ⇥   | Tab          |
-| ^   | Control      |
-| ←   | Left Arrow   |
-| →   | Right Arrow  |
-| ↑   | Up Arrow     |
-| ↓   | Down Arrow   |
+| Клавіша | Назва         |
+| ------- | ------------ |
+| ⌘       | Команда      |
+| ⌥       | Опція (Alt)  |
+| ⇧       | Shift        |
+| ↩       | Повернення   |
+| ⇥       | Табуляція    |
+| ^       | Контроль     |
+| ←       | Ліва стрілка |
+| →       | Права стрілка|
+| ↑       | Вверх        |
+| ↓       | Вниз         |
 
-#### System shortcuts
+#### Системні комбінації клавіш
 
-These shortcuts are for the visual settings and sound settings, depending on the use of the iPad.
+Ці комбінації клавіш призначені для візуальних налаштувань та налаштувань звуку, залежно від використання iPad.
 
-| Shortcut | Action                                                                         |
-| -------- | ------------------------------------------------------------------------------ |
-| F1       | Dim Sscreen                                                                    |
-| F2       | Brighten screen                                                                |
-| F7       | Back one song                                                                  |
-| F8       | Play/pause                                                                     |
-| F9       | Skip song                                                                      |
-| F10      | Mute                                                                           |
-| F11      | Decrease volume                                                                |
-| F12      | Increase volume                                                                |
-| ⌘ Space  | Display a list of available languages; to choose one, tap the space bar again. |
+| Комбінація клавіш | Дія                                                                         |
+| ------------------ | -------------------------------------------------------------------------- |
+| F1                 | Зменшити яскравість екрана                                                |
+| F2                 | Збільшити яскравість екрана                                               |
+| F7                 | Назад на одну пісню                                                       |
+| F8                 | Відтворити/пауза                                                          |
+| F9                 | Пропустити пісню                                                          |
+| F10                | Вимкнути звук                                                             |
+| F11                | Зменшити гучність                                                         |
+| F12                | Збільшити гучність                                                         |
+| ⌘ Space            | Відобразити список доступних мов; щоб вибрати одну, натисніть пробіл ще раз. |
 
-#### iPad navigation
+#### Навігація iPad
 
-| Shortcut                                           | Action                                                  |
-| -------------------------------------------------- | ------------------------------------------------------- |
-| ⌘H                                                 | Go to Home                                              |
-| ⌘⇧H (Command-Shift-H)                              | Go to Home                                              |
-| ⌘ (Space)                                          | Open Spotlight                                          |
-| ⌘⇥ (Command-Tab)                                   | List last ten used apps                                 |
-| ⌘\~                                                | Go t the last App                                       |
-| ⌘⇧3 (Command-Shift-3)                              | Screenshot (hovers in bottom left to save or act on it) |
-| ⌘⇧4                                                | Screenshot and open it in the editor                    |
-| Press and hold ⌘                                   | List of shortcuts available for the App                 |
-| ⌘⌥D (Command-Option/Alt-D)                         | Brings up the dock                                      |
-| ^⌥H (Control-Option-H)                             | Home button                                             |
-| ^⌥H H (Control-Option-H-H)                         | Show multitask bar                                      |
-| ^⌥I (Control-Option-i)                             | Item chooser                                            |
-| Escape                                             | Back button                                             |
-| → (Right arrow)                                    | Next item                                               |
-| ← (Left arrow)                                     | Previous item                                           |
-| ↑↓ (Up arrow, Down arrow)                          | Simultaneously tap selected item                        |
-| ⌥ ↓ (Option-Down arrow)                            | Scroll down                                             |
-| ⌥↑ (Option-Up arrow)                               | Scroll up                                               |
-| ⌥← or ⌥→ (Option-Left arrow or Option-Right arrow) | Scroll left or right                                    |
-| ^⌥S (Control-Option-S)                             | Turn VoiceOver speech on or off                         |
-| ⌘⇧⇥ (Command-Shift-Tab)                            | Switch to the previous app                              |
-| ⌘⇥ (Command-Tab)                                   | Switch back to the original app                         |
-| ←+→, then Option + ← or Option+→                   | Navigate through Dock                                   |
+| Комбінація клавіш                                   | Дія                                                  |
+| ---------------------------------------------------- | --------------------------------------------------- |
+| ⌘H                                                  | Перейти на головний екран                           |
+| ⌘⇧H (Command-Shift-H)                               | Перейти на головний екран                           |
+| ⌘ (Space)                                          | Відкрити Spotlight                                   |
+| ⌘⇥ (Command-Tab)                                   | Список останніх десяти використаних додатків        |
+| ⌘\~                                                | Перейти до останнього додатку                        |
+| ⌘⇧3 (Command-Shift-3)                              | Знімок екрану (з'являється в нижньому лівому куті для збереження або дій) |
+| ⌘⇧4                                                | Знімок екрану та відкриття його в редакторі        |
+| Натисніть і утримуйте ⌘                             | Список доступних комбінацій клавіш для програми     |
+| ⌘⌥D (Command-Option/Alt-D)                         | Відкриває док                                       |
+| ^⌥H (Control-Option-H)                             | Кнопка Home                                         |
+| ^⌥H H (Control-Option-H-H)                         | Показати панель багатозадачності                     |
+| ^⌥I (Control-Option-i)                             | Вибір елемента                                      |
+| Escape                                             | Кнопка назад                                        |
+| → (Права стрілка)                                  | Наступний елемент                                    |
+| ← (Ліва стрілка)                                   | Попередній елемент                                   |
+| ↑↓ (Вверх, Вниз)                                   | Одночасно натискайте вибраний елемент               |
+| ⌥ ↓ (Option-Down arrow)                            | Прокрутити вниз                                     |
+| ⌥↑ (Option-Up arrow)                               | Прокрутити вгору                                    |
+| ⌥← або ⌥→ (Option-Left arrow або Option-Right arrow) | Прокрутити вліво або вправо                          |
+| ^⌥S (Control-Option-S)                             | Увімкнути або вимкнути голосовий супровід           |
+| ⌘⇧⇥ (Command-Shift-Tab)                            | Перемикання на попередній додаток                   |
+| ⌘⇥ (Command-Tab)                                   | Повернутися до оригінального додатку                |
+| ←+→, потім Option + ← або Option+→                 | Навігація через док                                  |
 
-#### Safari shortcuts
+#### Комбінації клавіш Safari
 
-| Shortcut                | Action                                           |
-| ----------------------- | ------------------------------------------------ |
-| ⌘L (Command-L)          | Open Location                                    |
-| ⌘T                      | Open a new tab                                   |
-| ⌘W                      | Close the current tab                            |
-| ⌘R                      | Refresh the current tab                          |
-| ⌘.                      | Stop loading the current tab                     |
-| ^⇥                      | Switch to the next tab                           |
-| ^⇧⇥ (Control-Shift-Tab) | Move to the previous tab                         |
-| ⌘L                      | Select the text input/URL field to modify it     |
-| ⌘⇧T (Command-Shift-T)   | Open last closed tab (can be used several times) |
-| ⌘\[                     | Goes back one page in your browsing history      |
-| ⌘]                      | Goes forward one page in your browsing history   |
-| ⌘⇧R                     | Activate Reader Mode                             |
+| Комбінація клавіш         | Дія                                           |
+| -------------------------- | --------------------------------------------- |
+| ⌘L (Command-L)            | Відкрити місцезнаходження                    |
+| ⌘T                        | Відкрити нову вкладку                         |
+| ⌘W                        | Закрити поточну вкладку                       |
+| ⌘R                        | Оновити поточну вкладку                       |
+| ⌘.                        | Зупинити завантаження поточної вкладки       |
+| ^⇥                        | Перемикання на наступну вкладку               |
+| ^⇧⇥ (Control-Shift-Tab)   | Переміститися на попередню вкладку            |
+| ⌘L                        | Вибрати текстове поле/URL для редагування     |
+| ⌘⇧T (Command-Shift-T)     | Відкрити останню закриту вкладку (можна використовувати кілька разів) |
+| ⌘\[                       | Повернутися на одну сторінку в історії перегляду |
+| ⌘]                        | Перейти вперед на одну сторінку в історії перегляду |
+| ⌘⇧R                       | Активувати режим читання                       |
 
-#### Mail shortcuts
+#### Комбінації клавіш Mail
 
-| Shortcut                   | Action                       |
-| -------------------------- | ---------------------------- |
-| ⌘L                         | Open Location                |
-| ⌘T                         | Open a new tab               |
-| ⌘W                         | Close the current tab        |
-| ⌘R                         | Refresh the current tab      |
-| ⌘.                         | Stop loading the current tab |
-| ⌘⌥F (Command-Option/Alt-F) | Search in your mailbox       |
+| Комбінація клавіш         | Дія                       |
+| -------------------------- | ------------------------- |
+| ⌘L                        | Відкрити місцезнаходження |
+| ⌘T                        | Відкрити нову вкладку     |
+| ⌘W                        | Закрити поточну вкладку   |
+| ⌘R                        | Оновити поточну вкладку   |
+| ⌘.                        | Зупинити завантаження поточної вкладки |
+| ⌘⌥F (Command-Option/Alt-F) | Пошук у вашій поштовій скриньці |
 
-## References
+## Посилання
 
 - [https://www.macworld.com/article/2975857/6-only-for-ipad-gestures-you-need-to-know.html](https://www.macworld.com/article/2975857/6-only-for-ipad-gestures-you-need-to-know.html)
 - [https://www.tomsguide.com/us/ipad-shortcuts,news-18205.html](https://www.tomsguide.com/us/ipad-shortcuts,news-18205.html)

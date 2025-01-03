@@ -111,7 +111,7 @@ uname!-1\-a # This equals to uname -a
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```
-### Обхід трубок
+### Обхід труб
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
@@ -297,7 +297,7 @@ ln /f*
 ```
 ## Обхід обмежень Read-Only/Noexec/Distroless
 
-Якщо ви знаходитесь у файловій системі з **захистами read-only та noexec** або навіть у контейнері без дистрибутива, все ще існують способи **виконати довільні бінарні файли, навіть оболонку!:**
+Якщо ви знаходитесь у файловій системі з **захистами read-only та noexec** або навіть у контейнері без дистрибутива, все ще є способи **виконати довільні бінарні файли, навіть оболонку!:**
 
 {{#ref}}
 ../bypass-bash-restrictions/bypass-fs-protections-read-only-no-exec-distroless/

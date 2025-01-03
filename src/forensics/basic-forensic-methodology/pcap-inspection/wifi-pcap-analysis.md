@@ -1,38 +1,36 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-# Check BSSIDs
+# Перевірка BSSID
 
-When you receive a capture whose principal traffic is Wifi using WireShark you can start investigating all the SSIDs of the capture with _Wireless --> WLAN Traffic_:
+Коли ви отримуєте захоплення, основний трафік якого - Wifi, використовуючи WireShark, ви можете почати досліджувати всі SSID захоплення за допомогою _Wireless --> WLAN Traffic_:
 
 ![](<../../../images/image (424).png>)
 
 ![](<../../../images/image (425).png>)
 
-## Brute Force
+## Брутфорс
 
-One of the columns of that screen indicates if **any authentication was found inside the pcap**. If that is the case you can try to Brute force it using `aircrack-ng`:
-
+Одна з колонок цього екрану вказує, чи **була знайдена будь-яка аутентифікація всередині pcap**. Якщо це так, ви можете спробувати брутфорсити його, використовуючи `aircrack-ng`:
 ```bash
 aircrack-ng -w pwds-file.txt -b <BSSID> file.pcap
 ```
+Наприклад, він отримає WPA пароль, що захищає PSK (попередньо поділений ключ), який буде потрібен для розшифровки трафіку пізніше.
 
-For example it will retrieve the WPA passphrase protecting a PSK (pre shared-key), that will be required to decrypt the trafic later.
+# Дані в Beacon'ах / Бічний канал
 
-# Data in Beacons / Side Channel
+Якщо ви підозрюєте, що **дані витікають у beacon'ах Wifi мережі**, ви можете перевірити beacon'и мережі, використовуючи фільтр, подібний до наступного: `wlan contains <NAMEofNETWORK>`, або `wlan.ssid == "NAMEofNETWORK"` шукайте в відфільтрованих пакетах підозрілі рядки.
 
-If you suspect that **data is being leaked inside beacons of a Wifi network** you can check the beacons of the network using a filter like the following one: `wlan contains <NAMEofNETWORK>`, or `wlan.ssid == "NAMEofNETWORK"` search inside the filtered packets for suspicious strings.
+# Знайти невідомі MAC адреси в Wifi мережі
 
-# Find Unknown MAC Addresses in A Wifi Network
-
-The following link will be useful to find the **machines sending data inside a Wifi Network**:
+Наступне посилання буде корисним для знаходження **машин, що надсилають дані в Wifi мережі**:
 
 - `((wlan.ta == e8:de:27:16:70:c9) && !(wlan.fc == 0x8000)) && !(wlan.fc.type_subtype == 0x0005) && !(wlan.fc.type_subtype ==0x0004) && !(wlan.addr==ff:ff:ff:ff:ff:ff) && wlan.fc.type==2`
 
-If you already know **MAC addresses you can remove them from the output** adding checks like this one: `&& !(wlan.addr==5c:51:88:31:a0:3b)`
+Якщо ви вже знаєте **MAC адреси, ви можете видалити їх з виходу**, додавши перевірки, подібні до цієї: `&& !(wlan.addr==5c:51:88:31:a0:3b)`
 
-Once you have detected **unknown MAC** addresses communicating inside the network you can use **filters** like the following one: `wlan.addr==<MAC address> && (ftp || http || ssh || telnet)` to filter its traffic. Note that ftp/http/ssh/telnet filters are useful if you have decrypted the traffic.
+Якщо ви виявили **невідомі MAC** адреси, що спілкуються в мережі, ви можете використовувати **фільтри**, подібні до наступного: `wlan.addr==<MAC address> && (ftp || http || ssh || telnet)`, щоб відфільтрувати їх трафік. Зверніть увагу, що фільтри ftp/http/ssh/telnet корисні, якщо ви розшифрували трафік.
 
-# Decrypt Traffic
+# Розшифрувати трафік
 
 Edit --> Preferences --> Protocols --> IEEE 802.11--> Edit
 

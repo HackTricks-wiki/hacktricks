@@ -2,121 +2,120 @@
 
 # [ProjectHoneypot](https://www.projecthoneypot.org/)
 
-You can ask if an IP is related to suspicious/malicious activities. Completely free.
+Ви можете запитати, чи пов'язана IP-адреса з підозрілою/шкідливою діяльністю. Абсолютно безкоштовно.
 
 # [**BotScout**](http://botscout.com/api.htm)
 
-Check if the IP address is related to a bot that register accounts. It can also check usernames and emails. Initially free.
+Перевірте, чи пов'язана IP-адреса з ботом, який реєструє облікові записи. Також може перевіряти імена користувачів та електронні адреси. Спочатку безкоштовно.
 
 # [Hunter](https://hunter.io/)
 
-Find and verify emails.  
-Some free API requests free, for more you need to pay.  
-Commercial?
+Знайдіть та перевірте електронні адреси.
+Деякі безкоштовні запити API, за більше потрібно платити.
+Комерційний?
 
 # [AlientVault](https://otx.alienvault.com/api)
 
-Find Malicious activities related to IPs and Domains. Free.
+Знайдіть шкідливу діяльність, пов'язану з IP-адресами та доменами. Безкоштовно.
 
 # [Clearbit](https://dashboard.clearbit.com/)
 
-Find related personal data to a email \(profiles on other platforms\), domain \(basic company info ,mails and people working\) and companies \(get company info from mail\).  
-You need to pay to access all the possibilities.  
-Commercial?
+Знайдіть пов'язані особисті дані з електронною адресою \(профілі на інших платформах\), доменом \(основна інформація про компанію, електронні адреси та людей, які працюють\) та компаніями \(отримати інформацію про компанію з електронної адреси\).
+Вам потрібно платити, щоб отримати доступ до всіх можливостей.
+Комерційний?
 
 # [BuiltWith](https://builtwith.com/)
 
-Technologies used by webs. Expensive...  
-Commercial?
+Технології, що використовуються веб-сайтами. Дорого...
+Комерційний?
 
 # [Fraudguard](https://fraudguard.io/)
 
-Check if a host \(domain or IP\) is related with suspicious/malicious activities. Have some free API access.  
-Commercial?
+Перевірте, чи пов'язаний хост \(домен або IP\) з підозрілою/шкідливою діяльністю. Має деякий безкоштовний доступ до API.
+Комерційний?
 
 # [FortiGuard](https://fortiguard.com/)
 
-Check if a host \(domain or IP\) is related with suspicious/malicious activities. Have some free API access.
+Перевірте, чи пов'язаний хост \(домен або IP\) з підозрілою/шкідливою діяльністю. Має деякий безкоштовний доступ до API.
 
 # [SpamCop](https://www.spamcop.net/)
 
-Indicates if host is related to spam activity. Have some free API access.
+Вказує, чи пов'язаний хост з діяльністю спаму. Має деякий безкоштовний доступ до API.
 
 # [mywot](https://www.mywot.com/)
 
-Based on opinions and other metrics get if a domain is related with suspicious/malicious information.
+На основі думок та інших метрик дізнайтеся, чи пов'язаний домен з підозрілою/шкідливою інформацією.
 
 # [ipinfo](https://ipinfo.io/)
 
-Obtains basic info from an IP address. You can test up to 100K/month.
+Отримує основну інформацію з IP-адреси. Ви можете тестувати до 100K/місяць.
 
 # [securitytrails](https://securitytrails.com/app/account)
 
-This platform give information about domains and IP addresses like domains inside an IP or inside a domain server, domains owned by an email \(find related domains\), IP history of domains \(find the host behind CloudFlare\), all domains using a nameserver....  
-You have some free access.
+Ця платформа надає інформацію про домени та IP-адреси, такі як домени всередині IP або всередині доменного сервера, домени, що належать електронній адресі \(знайти пов'язані домени\), історія IP доменів \(знайти хост за CloudFlare\), всі домени, що використовують nameserver....
+У вас є деякий безкоштовний доступ.
 
 # [fullcontact](https://www.fullcontact.com/)
 
-Allows to search by email, domain or company name and retrieve "personal" information related. It can also verify emails. There is some free access.
+Дозволяє шукати за електронною адресою, доменом або назвою компанії та отримувати пов'язані "особисті" дані. Також може перевіряти електронні адреси. Є деякий безкоштовний доступ.
 
 # [RiskIQ](https://www.spiderfoot.net/documentation/)
 
-A lot of information from domains and IPs even in the free/community version.
+Багато інформації про домени та IP, навіть у безкоштовній/комунітетній версії.
 
 # [\_IntelligenceX](https://intelx.io/)
 
-Search Domains, IPs and emails and get info from dumps. Have some free access.
+Шукайте домени, IP та електронні адреси та отримуйте інформацію з витоків. Має деякий безкоштовний доступ.
 
 # [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
 
-Search by IP and gather information related to suspicions activities. There is some free access.
+Шукайте за IP та збирайте інформацію, пов'язану з підозрілою діяльністю. Є деякий безкоштовний доступ.
 
 # [Greynoise](https://viz.greynoise.io/)
 
-Search by IP or IP range and get information about IPs scanning the Internet. 15 days free access.
+Шукайте за IP або діапазоном IP та отримуйте інформацію про IP, що сканують Інтернет. 15 днів безкоштовного доступу.
 
 # [Shodan](https://www.shodan.io/)
 
-Get scan information of an IP address. Have some free api access.
+Отримайте інформацію про сканування IP-адреси. Має деякий безкоштовний доступ до API.
 
 # [Censys](https://censys.io/)
 
-Very similar to shodan
+Дуже схожий на shodan
 
 # [buckets.grayhatwarfare.com](https://buckets.grayhatwarfare.com/)
 
-Find open S3 buckets searching by keyword.
+Знайдіть відкриті S3 бакети, шукаючи за ключовим словом.
 
 # [Dehashed](https://www.dehashed.com/data)
 
-Find leaked credentials of emails and even domains  
-Commercial?
+Знайдіть витіклі облікові дані електронних адрес і навіть доменів
+Комерційний?
 
 # [psbdmp](https://psbdmp.ws/)
 
-Search pastebins where a email appeared. Commercial?
+Шукайте pastebins, де з'явилася електронна адреса. Комерційний?
 
 # [emailrep.io](https://emailrep.io/key)
 
-Get reputation of a mail. Commercial?
+Отримайте репутацію електронної адреси. Комерційний?
 
 # [ghostproject](https://ghostproject.fr/)
 
-Get passwords from leaked emails. Commercial?
+Отримайте паролі з витіклих електронних адрес. Комерційний?
 
 # [Binaryedge](https://www.binaryedge.io/)
 
-Obtain interesting info from IPs
+Отримайте цікаву інформацію з IP
 
 # [haveibeenpwned](https://haveibeenpwned.com/)
 
-Search by domain and email and get if it was pwned and passwords. Commercial?
+Шукайте за доменом та електронною адресою та дізнайтеся, чи була вона зламаною, і паролі. Комерційний?
 
-[https://dnsdumpster.com/](https://dnsdumpster.com/)\(in a commercial tool?\)
+[https://dnsdumpster.com/](https://dnsdumpster.com/)\(в комерційному інструменті?\)
 
-[https://www.netcraft.com/](https://www.netcraft.com/) \(in a commercial tool?\)
+[https://www.netcraft.com/](https://www.netcraft.com/) \(в комерційному інструменті?\)
 
-[https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/) \(in a commercial tool?\)
+[https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/) \(в комерційному інструменті?\)
 
 {{#include ./banners/hacktricks-training.md}}
-

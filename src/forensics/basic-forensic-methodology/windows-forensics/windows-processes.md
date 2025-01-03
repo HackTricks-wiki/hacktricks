@@ -2,105 +2,105 @@
 
 ## smss.exe
 
-**Session Manager**.\
-Session 0 starts **csrss.exe** and **wininit.exe** (**OS** **services**) while Session 1 starts **csrss.exe** and **winlogon.exe** (**User** **session**). However, you should see **only one process** of that **binary** without children in the processes tree.
+**Менеджер сесій**.\
+Сесія 0 запускає **csrss.exe** та **wininit.exe** (**сервіси ОС**), тоді як Сесія 1 запускає **csrss.exe** та **winlogon.exe** (**сесія користувача**). Однак ви повинні бачити **лише один процес** цього **бінарного файлу** без дочірніх у дереві процесів.
 
-Also, sessions apart from 0 and 1 may mean that RDP sessions are occurring.
+Також сесії, окрім 0 та 1, можуть означати, що відбуваються RDP сесії.
 
 ## csrss.exe
 
-**Client/Server Run Subsystem Process**.\
-It manages **processes** and **threads**, makes the **Windows** **API** available for other processes and also **maps drive letters**, create **temp files**, and handles the **shutdown** **process**.
+**Процес підсистеми клієнт/сервер**.\
+Він управляє **процесами** та **потоками**, робить **API Windows** доступним для інших процесів, а також **відображає літери дисків**, створює **тимчасові файли** та обробляє **процес завершення роботи**.
 
-There is one **running in Session 0 and another one in Session 1** (so **2 processes** in the processes tree). Another one is created **per new Session**.
+Є один **запущений у Сесії 0 та інший у Сесії 1** (тобто **2 процеси** в дереві процесів). Інший створюється **для нової сесії**.
 
 ## winlogon.exe
 
-**Windows Logon Process**.\
-It's responsible for user **logon**/**logoffs**. It launches **logonui.exe** to ask for username and password and then calls **lsass.exe** to verify them.
+**Процес входу в Windows**.\
+Він відповідає за **вхід**/**вихід** користувача. Він запускає **logonui.exe** для запиту імені користувача та пароля, а потім викликає **lsass.exe** для їх перевірки.
 
-Then it launches **userinit.exe** which is specified in **`HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`** with key **Userinit**.
+Потім він запускає **userinit.exe**, який вказаний у **`HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`** з ключем **Userinit**.
 
-Mover over, the previous registry should have **explorer.exe** in the **Shell key** or it might be abused as a **malware persistence method**.
+Крім того, попередній реєстр повинен містити **explorer.exe** в ключі **Shell**, інакше це може бути використано як **метод збереження шкідливого ПЗ**.
 
 ## wininit.exe
 
-**Windows Initialization Process**. \
-It launches **services.exe**, **lsass.exe**, and **lsm.exe** in Session 0. There should only be 1 process.
+**Процес ініціалізації Windows**. \
+Він запускає **services.exe**, **lsass.exe** та **lsm.exe** у Сесії 0. Має бути лише 1 процес.
 
 ## userinit.exe
 
-**Userinit Logon Application**.\
-Loads the **ntduser.dat in HKCU** and initialises the **user** **environment** and runs **logon** **scripts** and **GPO**.
+**Додаток входу Userinit**.\
+Завантажує **ntduser.dat в HKCU** та ініціалізує **середовище** **користувача**, запускає **скрипти входу** та **GPO**.
 
-It launches **explorer.exe**.
+Він запускає **explorer.exe**.
 
 ## lsm.exe
 
-**Local Session Manager**.\
-It works with smss.exe to manipulate user sessions: Logon/logoff, shell start, lock/unlock desktop, etc.
+**Менеджер локальних сесій**.\
+Він працює з smss.exe для маніпуляції сесіями користувачів: вхід/вихід, запуск оболонки, блокування/розблокування робочого столу тощо.
 
-After W7 lsm.exe was transformed into a service (lsm.dll).
+Після W7 lsm.exe був перетворений на сервіс (lsm.dll).
 
-There should only be 1 process in W7 and from them a service running the DLL.
+Має бути лише 1 процес у W7, і з них сервіс, що виконує DLL.
 
 ## services.exe
 
-**Service Control Manager**.\
-It **loads** **services** configured as **auto-start** and **drivers**.
+**Менеджер контролю сервісів**.\
+Він **завантажує** **сервіси**, налаштовані на **автозапуск**, та **драйвери**.
 
-It's the parent process of **svchost.exe**, **dllhost.exe**, **taskhost.exe**, **spoolsv.exe** and many more.
+Це батьківський процес для **svchost.exe**, **dllhost.exe**, **taskhost.exe**, **spoolsv.exe** та багатьох інших.
 
-Services are defined in `HKLM\SYSTEM\CurrentControlSet\Services` and this process maintains a DB in memory of service info that can be queried by sc.exe.
+Сервіси визначені в `HKLM\SYSTEM\CurrentControlSet\Services`, і цей процес підтримує базу даних у пам'яті з інформацією про сервіси, яку можна запитати за допомогою sc.exe.
 
-Note how **some** **services** are going to be running in a **process of their own** and others are going to be **sharing a svchost.exe process**.
+Зверніть увагу, що **деякі** **сервіси** будуть працювати в **процесі самостійно**, а інші будуть **ділити процес svchost.exe**.
 
-There should only be 1 process.
+Має бути лише 1 процес.
 
 ## lsass.exe
 
-**Local Security Authority Subsystem**.\
-It's responsible for the user **authentication** and create the **security** **tokens**. It uses authentication packages located in `HKLM\System\CurrentControlSet\Control\Lsa`.
+**Підсистема локальної безпеки**.\
+Він відповідає за **автентифікацію** користувача та створення **токенів безпеки**. Він використовує пакети автентифікації, розташовані в `HKLM\System\CurrentControlSet\Control\Lsa`.
 
-It writes to the **Security** **event** **log** and there should only be 1 process.
+Він записує в **журнал подій безпеки**, і має бути лише 1 процес.
 
-Keep in mind that this process is highly attacked to dump passwords.
+Майте на увазі, що цей процес часто атакують для скидання паролів.
 
 ## svchost.exe
 
-**Generic Service Host Process**.\
-It hosts multiple DLL services in one shared process.
+**Універсальний процес хостингу сервісів**.\
+Він хостить кілька DLL-сервісів в одному спільному процесі.
 
-Usually, you will find that **svchost.exe** is launched with the `-k` flag. This will launch a query to the registry **HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Svchost** where there will be a key with the argument mentioned in -k that will contain the services to launch in the same process.
+Зазвичай ви знайдете, що **svchost.exe** запускається з прапором `-k`. Це запустить запит до реєстру **HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Svchost**, де буде ключ з аргументом, згаданим у -k, який міститиме сервіси для запуску в тому ж процесі.
 
-For example: `-k UnistackSvcGroup` will launch: `PimIndexMaintenanceSvc MessagingService WpnUserService CDPUserSvc UnistoreSvc UserDataSvc OneSyncSvc`
+Наприклад: `-k UnistackSvcGroup` запустить: `PimIndexMaintenanceSvc MessagingService WpnUserService CDPUserSvc UnistoreSvc UserDataSvc OneSyncSvc`
 
-If the **flag `-s`** is also used with an argument, then svchost is asked to **only launch the specified service** in this argument.
+Якщо також використовується **прапор `-s`** з аргументом, тоді svchost запитується, щоб **запустити лише вказаний сервіс** в цьому аргументі.
 
-There will be several processes of `svchost.exe`. If any of them is **not using the `-k` flag**, then that's very suspicious. If you find that **services.exe is not the parent**, that's also very suspicious.
+Будуть кілька процесів `svchost.exe`. Якщо жоден з них **не використовує прапор `-k`**, це дуже підозріло. Якщо ви виявите, що **services.exe не є батьківським**, це також дуже підозріло.
 
 ## taskhost.exe
 
-This process act as a host for processes running from DLLs. It also loads the services that are running from DLLs.
+Цей процес діє як хост для процесів, що виконуються з DLL. Він також завантажує сервіси, які працюють з DLL.
 
-In W8 this is called taskhostex.exe and in W10 taskhostw.exe.
+У W8 це називається taskhostex.exe, а в W10 taskhostw.exe.
 
 ## explorer.exe
 
-This is the process responsible for the **user's desktop** and launching files via file extensions.
+Це процес, відповідальний за **робочий стіл користувача** та запуск файлів через розширення файлів.
 
-**Only 1** process should be spawned **per logged on user.**
+**Лише 1** процес має бути запущений **для кожного увійшовшого користувача.**
 
-This is run from **userinit.exe** which should be terminated, so **no parent** should appear for this process.
+Це запускається з **userinit.exe**, який має бути завершений, тому **жоден батьківський** процес не повинен з'являтися для цього процесу.
 
-# Catching Malicious Processes
+# Виявлення шкідливих процесів
 
-- Is it running from the expected path? (No Windows binaries run from temp location)
-- Is it communicating with weird IPs?
-- Check digital signatures (Microsoft artifacts should be signed)
-- Is it spelled correctly?
-- Is running under the expected SID?
-- Is the parent process the expected one (if any)?
-- Are the children processes the expecting ones? (no cmd.exe, wscript.exe, powershell.exe..?)
+- Чи працює він з очікуваного шляху? (Жодні бінарні файли Windows не працюють з тимчасового розташування)
+- Чи спілкується він з дивними IP-адресами?
+- Перевірте цифрові підписи (артефакти Microsoft повинні бути підписані)
+- Чи правильно написано?
+- Чи працює під очікуваним SID?
+- Чи є батьківський процес очікуваним (якщо є)?
+- Чи є дочірні процеси тими, що очікуються? (жодного cmd.exe, wscript.exe, powershell.exe..?)
 
 {{#include ../../../banners/hacktricks-training.md}}

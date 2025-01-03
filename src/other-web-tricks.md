@@ -1,52 +1,38 @@
-# Other Web Tricks
+# Інші веб-трюки
 
 {{#include ./banners/hacktricks-training.md}}
 
-<figure><img src="/images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
 
-**Get a hacker's perspective on your web apps, network, and cloud**
+### Заголовок Host
 
-**Find and report critical, exploitable vulnerabilities with real business impact.** Use our 20+ custom tools to map the attack surface, find security issues that let you escalate privileges, and use automated exploits to collect essential evidence, turning your hard work into persuasive reports.
-
-{% embed url="https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons" %}
-
-### Host header
-
-Several times the back-end trust the **Host header** to perform some actions. For example, it could use its value as the **domain to send a password reset**. So when you receive an email with a link to reset your password, the domain being used is the one you put in the Host header.Then, you can request the password reset of other users and change the domain to one controlled by you to steal their password reset codes. [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).
+Декілька разів бекенд довіряє **заголовку Host** для виконання деяких дій. Наприклад, він може використовувати його значення як **домен для відправки скидання пароля**. Тож, коли ви отримуєте електронний лист з посиланням для скидання пароля, домен, що використовується, є тим, що ви вказали в заголовку Host. Тоді ви можете запросити скидання пароля інших користувачів і змінити домен на той, що контролюється вами, щоб вкрасти їхні коди скидання пароля. [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).
 
 > [!WARNING]
-> Note that it's possible that you don't even need to wait for the user to click on the reset password link to get the token, as maybe even **spam filters or other intermediary devices/bots will click on it to analyze it**.
+> Зверніть увагу, що можливо, вам навіть не потрібно чекати, поки користувач натисне на посилання для скидання пароля, щоб отримати токен, оскільки, можливо, навіть **фільтри спаму або інші проміжні пристрої/боти натиснуть на нього для аналізу**.
 
 
-### Session booleans
+### Булеві значення сесії
 
-Some times when you complete some verification correctly the back-end will **just add a boolean with the value "True" to a security attribute your session**. Then, a different endpoint will know if you successfully passed that check.\
-However, if you **pass the check** and your sessions is granted that "True" value in the security attribute, you can try to **access other resources** that **depends on the same attribute** but that you **shouldn't have permissions** to access. [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).
+Іноді, коли ви правильно проходите деяку перевірку, бекенд **просто додає булеве значення "True" до атрибута безпеки вашої сесії**. Тоді інша точка доступу знатиме, чи успішно ви пройшли цю перевірку.\
+Однак, якщо ви **пройшли перевірку** і ваша сесія отримала це значення "True" в атрибуті безпеки, ви можете спробувати **доступитися до інших ресурсів**, які **залежать від того ж атрибута**, але до яких ви **не повинні мати доступу**. [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).
 
-### Register functionality
+### Функціональність реєстрації
 
-Try to register as an already existent user. Try also using equivalent characters (dots, lots of spaces and Unicode).
+Спробуйте зареєструватися як вже існуючий користувач. Спробуйте також використовувати еквівалентні символи (крапки, багато пробілів і Unicode).
 
-### Takeover emails
+### Перехоплення електронних листів
 
-Register an email, before confirming it change the email, then, if the new confirmation email is sent to the first registered email,you can takeover any email. Or if you can enable the second email confirming the firt one, you can also takeover any account.
+Зареєструйте електронну пошту, перед підтвердженням змініть електронну пошту, тоді, якщо новий електронний лист для підтвердження буде надіслано на першу зареєстровану електронну пошту, ви зможете перехопити будь-яку електронну пошту. Або, якщо ви можете активувати другу електронну пошту, підтверджуючи першу, ви також зможете перехопити будь-який обліковий запис.
 
-### Access Internal servicedesk of companies using atlassian
+### Доступ до внутрішнього сервісного столу компаній, використовуючи Atlassian
 
 {% embed url="https://yourcompanyname.atlassian.net/servicedesk/customer/user/login" %}
 
-### TRACE method
+### Метод TRACE
 
-Developers might forget to disable various debugging options in the production environment. For example, the HTTP `TRACE` method is designed for diagnostic purposes. If enabled, the web server will respond to requests that use the `TRACE` method by echoing in the response the exact request that was received. This behaviour is often harmless, but occasionally leads to information disclosure, such as the name of internal authentication headers that may be appended to requests by reverse proxies.![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
+Розробники можуть забути вимкнути різні параметри налагодження в продуктивному середовищі. Наприклад, HTTP `TRACE` метод призначений для діагностичних цілей. Якщо він увімкнений, веб-сервер відповість на запити, які використовують метод `TRACE`, відображаючи у відповіді точний запит, що був отриманий. Ця поведінка часто безпечна, але іноді призводить до розкриття інформації, такої як назва внутрішніх заголовків аутентифікації, які можуть бути додані до запитів зворотними проксі.![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
 
 ![Image for post](https://miro.medium.com/max/1330/1*wDFRADTOd9Tj63xucenvAA.png)
 
-<figure><img src="/images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
-
-**Get a hacker's perspective on your web apps, network, and cloud**
-
-**Find and report critical, exploitable vulnerabilities with real business impact.** Use our 20+ custom tools to map the attack surface, find security issues that let you escalate privileges, and use automated exploits to collect essential evidence, turning your hard work into persuasive reports.
-
-{% embed url="https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons" %}
 
 {{#include ./banners/hacktricks-training.md}}

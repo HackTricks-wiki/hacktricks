@@ -2,31 +2,25 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
-
-[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
-
-{% embed url="https://www.rootedcon.com/" %}
-
 > [!NOTE]
-> A note about **PCAP** vs **PCAPNG**: there are two versions of the PCAP file format; **PCAPNG is newer and not supported by all tools**. You may need to convert a file from PCAPNG to PCAP using Wireshark or another compatible tool, in order to work with it in some other tools.
+> Примітка про **PCAP** та **PCAPNG**: існує дві версії формату файлів PCAP; **PCAPNG є новішим і не підтримується всіма інструментами**. Вам може знадобитися конвертувати файл з PCAPNG в PCAP за допомогою Wireshark або іншого сумісного інструменту, щоб працювати з ним в деяких інших інструментах.
 
-## Online tools for pcaps
+## Онлайн-інструменти для pcaps
 
-- If the header of your pcap is **broken** you should try to **fix** it using: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)
-- Extract **information** and search for **malware** inside a pcap in [**PacketTotal**](https://packettotal.com)
-- Search for **malicious activity** using [**www.virustotal.com**](https://www.virustotal.com) and [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com)
+- Якщо заголовок вашого pcap **пошкоджений**, ви повинні спробувати **виправити** його за допомогою: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)
+- Витягніть **інформацію** та шукайте **шкідливе ПЗ** всередині pcap в [**PacketTotal**](https://packettotal.com)
+- Шукайте **зловмисну активність** за допомогою [**www.virustotal.com**](https://www.virustotal.com) та [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com)
 
-## Extract Information
+## Витяг інформації
 
-The following tools are useful to extract statistics, files, etc.
+Наступні інструменти корисні для витягування статистики, файлів тощо.
 
 ### Wireshark
 
 > [!NOTE]
-> **If you are going to analyze a PCAP you basically must to know how to use Wireshark**
+> **Якщо ви збираєтеся аналізувати PCAP, ви в основному повинні знати, як користуватися Wireshark**
 
-You can find some Wireshark tricks in:
+Ви можете знайти деякі трюки Wireshark у:
 
 {{#ref}}
 wireshark-tricks.md
@@ -34,111 +28,93 @@ wireshark-tricks.md
 
 ### Xplico Framework
 
-[**Xplico** ](https://github.com/xplico/xplico)_(only linux)_ can **analyze** a **pcap** and extract information from it. For example, from a pcap file Xplico, extracts each email (POP, IMAP, and SMTP protocols), all HTTP contents, each VoIP call (SIP), FTP, TFTP, and so on.
+[**Xplico** ](https://github.com/xplico/xplico)_(тільки linux)_ може **аналізувати** **pcap** та витягувати інформацію з нього. Наприклад, з файлу pcap Xplico витягує кожен електронний лист (протоколи POP, IMAP та SMTP), весь HTTP контент, кожен VoIP дзвінок (SIP), FTP, TFTP тощо.
 
-**Install**
-
+**Встановіть**
 ```bash
 sudo bash -c 'echo "deb http://repo.xplico.org/ $(lsb_release -s -c) main" /etc/apt/sources.list'
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 791C25CE
 sudo apt-get update
 sudo apt-get install xplico
 ```
-
-**Run**
-
+**Запустити**
 ```
 /etc/init.d/apache2 restart
 /etc/init.d/xplico start
 ```
+Доступ до _**127.0.0.1:9876**_ з обліковими даними _**xplico:xplico**_
 
-Access to _**127.0.0.1:9876**_ with credentials _**xplico:xplico**_
-
-Then create a **new case**, create a **new session** inside the case and **upload the pcap** file.
+Потім створіть **нову справу**, створіть **нову сесію** всередині справи та **завантажте pcap** файл.
 
 ### NetworkMiner
 
-Like Xplico it is a tool to **analyze and extract objects from pcaps**. It has a free edition that you can **download** [**here**](https://www.netresec.com/?page=NetworkMiner). It works with **Windows**.\
-This tool is also useful to get **other information analysed** from the packets in order to be able to know what was happening in a **quicker** way.
+Як і Xplico, це інструмент для **аналізу та витягування об'єктів з pcaps**. Він має безкоштовну версію, яку ви можете **завантажити** [**тут**](https://www.netresec.com/?page=NetworkMiner). Він працює з **Windows**.\
+Цей інструмент також корисний для отримання **іншої інформації, проаналізованої** з пакетів, щоб мати можливість швидше зрозуміти, що відбувалося.
 
 ### NetWitness Investigator
 
-You can download [**NetWitness Investigator from here**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **(It works in Windows)**.\
-This is another useful tool that **analyses the packets** and sorts the information in a useful way to **know what is happening inside**.
+Ви можете завантажити [**NetWitness Investigator звідси**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **(Працює в Windows)**.\
+Це ще один корисний інструмент, який **аналізує пакети** та сортує інформацію у зручний спосіб, щоб **знати, що відбувається всередині**.
 
 ### [BruteShark](https://github.com/odedshimon/BruteShark)
 
-- Extracting and encoding usernames and passwords (HTTP, FTP, Telnet, IMAP, SMTP...)
-- Extract authentication hashes and crack them using Hashcat (Kerberos, NTLM, CRAM-MD5, HTTP-Digest...)
-- Build a visual network diagram (Network nodes & users)
-- Extract DNS queries
-- Reconstruct all TCP & UDP Sessions
-- File Carving
+- Витягування та кодування імен користувачів і паролів (HTTP, FTP, Telnet, IMAP, SMTP...)
+- Витягування хешів аутентифікації та їх злом за допомогою Hashcat (Kerberos, NTLM, CRAM-MD5, HTTP-Digest...)
+- Створення візуальної мережевої діаграми (мережеві вузли та користувачі)
+- Витягування DNS запитів
+- Відновлення всіх TCP та UDP сесій
+- Файловий карвінг
 
 ### Capinfos
-
 ```
 capinfos capture.pcap
 ```
-
 ### Ngrep
 
-If you are **looking** for **something** inside the pcap you can use **ngrep**. Here is an example using the main filters:
-
+Якщо ви **шукаєте** **щось** всередині pcap, ви можете використовувати **ngrep**. Ось приклад з використанням основних фільтрів:
 ```bash
 ngrep -I packets.pcap "^GET" "port 80 and tcp and host 192.168 and dst host 192.168 and src host 192.168"
 ```
+### Витягування
 
-### Carving
-
-Using common carving techniques can be useful to extract files and information from the pcap:
+Використання загальних технік витягування може бути корисним для вилучення файлів та інформації з pcap:
 
 {{#ref}}
 ../partitions-file-systems-carving/file-data-carving-recovery-tools.md
 {{#endref}}
 
-### Capturing credentials
+### Захоплення облікових даних
 
-You can use tools like [https://github.com/lgandx/PCredz](https://github.com/lgandx/PCredz) to parse credentials from a pcap or a live interface.
+Ви можете використовувати інструменти, такі як [https://github.com/lgandx/PCredz](https://github.com/lgandx/PCredz), для парсингу облікових даних з pcap або живого інтерфейсу.
 
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
-
-[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
-
-{% embed url="https://www.rootedcon.com/" %}
-
-## Check Exploits/Malware
+## Перевірка експлойтів/Шкідливого ПЗ
 
 ### Suricata
 
-**Install and setup**
-
+**Встановлення та налаштування**
 ```
 apt-get install suricata
 apt-get install oinkmaster
 echo "url = http://rules.emergingthreats.net/open/suricata/emerging.rules.tar.gz" >> /etc/oinkmaster.conf
 oinkmaster -C /etc/oinkmaster.conf -o /etc/suricata/rules
 ```
-
-**Check pcap**
-
+**Перевірте pcap**
 ```
 suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 ```
-
 ### YaraPcap
 
-[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) is a tool that
+[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) - це інструмент, який
 
-- Reads a PCAP File and Extracts Http Streams.
-- gzip deflates any compressed streams
-- Scans every file with yara
-- Writes a report.txt
-- Optionally saves matching files to a Dir
+- Читає файл PCAP та витягує Http потоки.
+- gzip розпаковує будь-які стиснуті потоки
+- Сканує кожен файл за допомогою yara
+- Пише report.txt
+- За бажанням зберігає відповідні файли в директорію
 
 ### Malware Analysis
 
-Check if you can find any fingerprint of a known malware:
+Перевірте, чи можете ви знайти будь-які відбитки відомого шкідливого ПЗ:
 
 {{#ref}}
 ../malware-analysis.md
@@ -146,12 +122,11 @@ Check if you can find any fingerprint of a known malware:
 
 ## Zeek
 
-> [Zeek](https://docs.zeek.org/en/master/about.html) is a passive, open-source network traffic analyzer. Many operators use Zeek as a Network Security Monitor (NSM) to support investigations of suspicious or malicious activity. Zeek also supports a wide range of traffic analysis tasks beyond the security domain, including performance measurement and troubleshooting.
+> [Zeek](https://docs.zeek.org/en/master/about.html) - це пасивний, з відкритим вихідним кодом аналізатор мережевого трафіку. Багато операторів використовують Zeek як монітор безпеки мережі (NSM) для підтримки розслідувань підозрілої або шкідливої діяльності. Zeek також підтримує широкий спектр завдань аналізу трафіку, які виходять за межі безпеки, включаючи вимірювання продуктивності та усунення неполадок.
 
-Basically, logs created by `zeek` aren't **pcaps**. Therefore you will need to use **other tools** to analyse the logs where the **information** about the pcaps are.
+В основному, журнали, створені `zeek`, не є **pcaps**. Тому вам потрібно буде використовувати **інші інструменти** для аналізу журналів, де міститься **інформація** про pcaps.
 
 ### Connections Info
-
 ```bash
 #Get info about longest connections (add "grep udp" to see only udp traffic)
 #The longest connection might be of malware (constant reverse shell?)
@@ -201,9 +176,7 @@ Score,Source IP,Destination IP,Connections,Avg Bytes,Intvl Range,Size Range,Top 
 1,10.55.100.111,165.227.216.194,20054,92,29,52,1,52,7774,20053,0,0,0,0
 0.838,10.55.200.10,205.251.194.64,210,69,29398,4,300,70,109,205,0,0,0,0
 ```
-
-### DNS info
-
+### Інформація про DNS
 ```bash
 #Get info about each DNS request performed
 cat dns.log | zeek-cut -c id.orig_h query qtype_name answers
@@ -220,8 +193,7 @@ cat dns.log | zeek-cut qtype_name | sort | uniq -c | sort -nr
 #See top DNS domain requested with rita
 rita show-exploded-dns -H --limit 10 zeek_logs
 ```
-
-## Other pcap analysis tricks
+## Інші трюки аналізу pcap
 
 {{#ref}}
 dnscat-exfiltration.md
@@ -236,11 +208,5 @@ usb-keystrokes.md
 {{#endref}}
 
 ​
-
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
-
-[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
-
-{% embed url="https://www.rootedcon.com/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}

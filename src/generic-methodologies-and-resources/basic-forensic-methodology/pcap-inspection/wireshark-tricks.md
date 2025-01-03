@@ -2,156 +2,154 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Improve your Wireshark skills
+## Покращте свої навички Wireshark
 
-### Tutorials
+### Підручники
 
-The following tutorials are amazing to learn some cool basic tricks:
+Наступні підручники чудові для вивчення деяких класних базових трюків:
 
 - [https://unit42.paloaltonetworks.com/unit42-customizing-wireshark-changing-column-display/](https://unit42.paloaltonetworks.com/unit42-customizing-wireshark-changing-column-display/)
 - [https://unit42.paloaltonetworks.com/using-wireshark-display-filter-expressions/](https://unit42.paloaltonetworks.com/using-wireshark-display-filter-expressions/)
 - [https://unit42.paloaltonetworks.com/using-wireshark-identifying-hosts-and-users/](https://unit42.paloaltonetworks.com/using-wireshark-identifying-hosts-and-users/)
 - [https://unit42.paloaltonetworks.com/using-wireshark-exporting-objects-from-a-pcap/](https://unit42.paloaltonetworks.com/using-wireshark-exporting-objects-from-a-pcap/)
 
-### Analysed Information
+### Проаналізована інформація
 
-**Expert Information**
+**Експертна інформація**
 
-Clicking on _**Analyze** --> **Expert Information**_ you will have an **overview** of what is happening in the packets **analyzed**:
+Натискаючи на _**Analyze** --> **Expert Information**_, ви отримаєте **огляд** того, що відбувається в **аналізованих** пакетах:
 
 ![](<../../../images/image (256).png>)
 
-**Resolved Addresses**
+**Вирішені адреси**
 
-Under _**Statistics --> Resolved Addresses**_ you can find several **information** that was "**resolved**" by wireshark like port/transport to protocol, MAC to the manufacturer, etc. It is interesting to know what is implicated in the communication.
+У _**Statistics --> Resolved Addresses**_ ви можете знайти кілька **інформації**, яка була "**вирішена**" Wireshark, наприклад, порт/транспорт до протоколу, MAC до виробника тощо. Цікаво знати, що залучено в комунікацію.
 
 ![](<../../../images/image (893).png>)
 
-**Protocol Hierarchy**
+**Ієрархія протоколів**
 
-Under _**Statistics --> Protocol Hierarchy**_ you can find the **protocols** **involved** in the communication and data about them.
+У _**Statistics --> Protocol Hierarchy**_ ви можете знайти **протоколи**, **залучені** в комунікацію, та дані про них.
 
 ![](<../../../images/image (586).png>)
 
-**Conversations**
+**Розмови**
 
-Under _**Statistics --> Conversations**_ you can find a **summary of the conversations** in the communication and data about them.
+У _**Statistics --> Conversations**_ ви можете знайти **резюме розмов** у комунікації та дані про них.
 
 ![](<../../../images/image (453).png>)
 
-**Endpoints**
+**Точки доступу**
 
-Under _**Statistics --> Endpoints**_ you can find a **summary of the endpoints** in the communication and data about each of them.
+У _**Statistics --> Endpoints**_ ви можете знайти **резюме точок доступу** в комунікації та дані про кожну з них.
 
 ![](<../../../images/image (896).png>)
 
-**DNS info**
+**DNS інформація**
 
-Under _**Statistics --> DNS**_ you can find statistics about the DNS request captured.
+У _**Statistics --> DNS**_ ви можете знайти статистику про захоплені DNS запити.
 
 ![](<../../../images/image (1063).png>)
 
-**I/O Graph**
+**I/O графік**
 
-Under _**Statistics --> I/O Graph**_ you can find a **graph of the communication.**
+У _**Statistics --> I/O Graph**_ ви можете знайти **графік комунікації.**
 
 ![](<../../../images/image (992).png>)
 
-### Filters
+### Фільтри
 
-Here you can find wireshark filter depending on the protocol: [https://www.wireshark.org/docs/dfref/](https://www.wireshark.org/docs/dfref/)\
-Other interesting filters:
+Тут ви можете знайти фільтри Wireshark в залежності від протоколу: [https://www.wireshark.org/docs/dfref/](https://www.wireshark.org/docs/dfref/)\
+Інші цікаві фільтри:
 
 - `(http.request or ssl.handshake.type == 1) and !(udp.port eq 1900)`
-  - HTTP and initial HTTPS traffic
+- HTTP та початковий HTTPS трафік
 - `(http.request or ssl.handshake.type == 1 or tcp.flags eq 0x0002) and !(udp.port eq 1900)`
-  - HTTP and initial HTTPS traffic + TCP SYN
+- HTTP та початковий HTTPS трафік + TCP SYN
 - `(http.request or ssl.handshake.type == 1 or tcp.flags eq 0x0002 or dns) and !(udp.port eq 1900)`
-  - HTTP and initial HTTPS traffic + TCP SYN + DNS requests
+- HTTP та початковий HTTPS трафік + TCP SYN + DNS запити
 
-### Search
+### Пошук
 
-If you want to **search** for **content** inside the **packets** of the sessions press _CTRL+f_. You can add new layers to the main information bar (No., Time, Source, etc.) by pressing the right button and then the edit column.
+Якщо ви хочете **шукати** **вміст** всередині **пакетів** сесій, натисніть _CTRL+f_. Ви можете додати нові шари до основної інформаційної панелі (No., Time, Source тощо), натиснувши праву кнопку миші, а потім редагуючи стовпець.
 
-### Free pcap labs
+### Безкоштовні лабораторії pcap
 
-**Practice with the free challenges of:** [**https://www.malware-traffic-analysis.net/**](https://www.malware-traffic-analysis.net)
+**Практикуйтеся з безкоштовними викликами на:** [**https://www.malware-traffic-analysis.net/**](https://www.malware-traffic-analysis.net)
 
-## Identifying Domains
+## Ідентифікація доменів
 
-You can add a column that shows the Host HTTP header:
+Ви можете додати стовпець, який показує заголовок Host HTTP:
 
 ![](<../../../images/image (639).png>)
 
-And a column that add the Server name from an initiating HTTPS connection (**ssl.handshake.type == 1**):
+І стовпець, який додає ім'я сервера з ініціюючого HTTPS з'єднання (**ssl.handshake.type == 1**):
 
 ![](<../../../images/image (408) (1).png>)
 
-## Identifying local hostnames
+## Ідентифікація локальних імен хостів
 
-### From DHCP
+### З DHCP
 
-In current Wireshark instead of `bootp` you need to search for `DHCP`
+У сучасному Wireshark замість `bootp` вам потрібно шукати `DHCP`
 
 ![](<../../../images/image (1013).png>)
 
-### From NBNS
+### З NBNS
 
 ![](<../../../images/image (1003).png>)
 
-## Decrypting TLS
+## Дешифрування TLS
 
-### Decrypting https traffic with server private key
+### Дешифрування HTTPS трафіку з приватним ключем сервера
 
 _edit>preference>protocol>ssl>_
 
 ![](<../../../images/image (1103).png>)
 
-Press _Edit_ and add all the data of the server and the private key (_IP, Port, Protocol, Key file and password_)
+Натисніть _Edit_ і додайте всі дані сервера та приватний ключ (_IP, Port, Protocol, Key file and password_)
 
-### Decrypting https traffic with symmetric session keys
+### Дешифрування HTTPS трафіку з симетричними сесійними ключами
 
-Both Firefox and Chrome have the capability to log TLS session keys, which can be used with Wireshark to decrypt TLS traffic. This allows for in-depth analysis of secure communications. More details on how to perform this decryption can be found in a guide at [Red Flag Security](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/).
+Як Firefox, так і Chrome мають можливість записувати сесійні ключі TLS, які можна використовувати з Wireshark для дешифрування TLS трафіку. Це дозволяє проводити детальний аналіз захищених комунікацій. Більше деталей про те, як виконати це дешифрування, можна знайти в посібнику на [Red Flag Security](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/).
 
-To detect this search inside the environment for to variable `SSLKEYLOGFILE`
+Щоб виявити це, шукайте в середовищі змінну `SSLKEYLOGFILE`
 
-A file of shared keys will look like this:
+Файл спільних ключів виглядатиме так:
 
 ![](<../../../images/image (820).png>)
 
-To import this in wireshark go to \_edit > preference > protocol > ssl > and import it in (Pre)-Master-Secret log filename:
+Щоб імпортувати це в Wireshark, перейдіть до \_edit > preference > protocol > ssl > і імпортуйте його в (Pre)-Master-Secret log filename:
 
 ![](<../../../images/image (989).png>)
 
-## ADB communication
+## ADB комунікація
 
-Extract an APK from an ADB communication where the APK was sent:
-
+Витягніть APK з ADB комунікації, де APK був надісланий:
 ```python
 from scapy.all import *
 
 pcap = rdpcap("final2.pcapng")
 
 def rm_data(data):
-    splitted = data.split(b"DATA")
-    if len(splitted) == 1:
-        return data
-    else:
-        return splitted[0]+splitted[1][4:]
+splitted = data.split(b"DATA")
+if len(splitted) == 1:
+return data
+else:
+return splitted[0]+splitted[1][4:]
 
 all_bytes = b""
 for pkt in pcap:
-    if Raw in pkt:
-        a = pkt[Raw]
-        if b"WRTE" == bytes(a)[:4]:
-            all_bytes += rm_data(bytes(a)[24:])
-        else:
-            all_bytes += rm_data(bytes(a))
+if Raw in pkt:
+a = pkt[Raw]
+if b"WRTE" == bytes(a)[:4]:
+all_bytes += rm_data(bytes(a)[24:])
+else:
+all_bytes += rm_data(bytes(a))
 print(all_bytes)
 
 f = open('all_bytes.data', 'w+b')
 f.write(all_bytes)
 f.close()
 ```
-
 {{#include ../../../banners/hacktricks-training.md}}
