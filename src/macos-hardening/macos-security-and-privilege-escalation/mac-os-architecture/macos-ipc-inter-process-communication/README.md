@@ -8,7 +8,7 @@
 
 Mach utilizza **compiti** come la **più piccola unità** per la condivisione delle risorse, e ogni compito può contenere **più thread**. Questi **compiti e thread sono mappati 1:1 a processi e thread POSIX**.
 
-La comunicazione tra compiti avviene tramite la Comunicazione Inter-Processo Mach (IPC), utilizzando canali di comunicazione unidirezionali. **I messaggi vengono trasferiti tra porte**, che fungono da **code di messaggi** gestite dal kernel.
+La comunicazione tra compiti avviene tramite la Comunicazione Inter-Processo Mach (IPC), utilizzando canali di comunicazione unidirezionali. **I messaggi vengono trasferiti tra porte**, che agiscono come **code di messaggi** gestite dal kernel.
 
 Ogni processo ha una **tabella IPC**, in cui è possibile trovare le **porte mach del processo**. Il nome di una porta mach è in realtà un numero (un puntatore all'oggetto kernel).
 
@@ -55,7 +55,7 @@ Per questi servizi predefiniti, il **processo di ricerca differisce leggermente*
 - **launchd** verifica se il compito è in esecuzione e, se non lo è, **lo avvia**.
 - Il compito **A** (il servizio) esegue un **check-in bootstrap**. Qui, il **bootstrap** server crea un diritto di INVIO, lo trattiene e **trasferisce il diritto di RICEZIONE al Compito A**.
 - launchd duplica il **diritto di INVIO e lo invia al Compito B**.
-- Il Compito **B** genera una nuova porta con un **diritto di RICEZIONE** e un **diritto di INVIO**, e concede il **diritto di INVIO al Compito A** (il svc) in modo che possa inviare messaggi al COMPITO B (comunicazione bidirezionale).
+- Il compito **B** genera una nuova porta con un **diritto di RICEZIONE** e un **diritto di INVIO**, e concede il **diritto di INVIO al Compito A** (il svc) in modo che possa inviare messaggi al COMPITO B (comunicazione bidirezionale).
 
 Tuttavia, questo processo si applica solo ai compiti di sistema predefiniti. I compiti non di sistema operano ancora come descritto originariamente, il che potrebbe potenzialmente consentire l'impersonificazione.
 
@@ -74,22 +74,22 @@ mach_port_name_t              msgh_voucher_port;
 mach_msg_id_t                 msgh_id;
 } mach_msg_header_t;
 ```
-I process che possiedono un _**diritto di ricezione**_ possono ricevere messaggi su una porta Mach. Al contrario, ai **mittenti** viene concesso un _**diritto di invio**_ o un _**diritto di invio-una-volta**_. Il diritto di invio-una-volta è esclusivamente per l'invio di un singolo messaggio, dopo il quale diventa invalido.
+I process che possiedono un _**diritto di ricezione**_ possono ricevere messaggi su una porta Mach. Al contrario, ai **mittenti** viene concesso un _**diritto di invio**_ o un _**diritto di invio una sola volta**_. Il diritto di invio una sola volta è esclusivamente per inviare un singolo messaggio, dopo di che diventa invalido.
 
-Per ottenere una facile **comunicazione bi-direzionale**, un processo può specificare una **porta mach** nell'**intestazione del messaggio** chiamata _porta di risposta_ (**`msgh_local_port`**) dove il **ricevente** del messaggio può **inviare una risposta** a questo messaggio. I bitflags in **`msgh_bits`** possono essere utilizzati per **indicare** che un **diritto di invio-una-volta** dovrebbe essere derivato e trasferito per questa porta (`MACH_MSG_TYPE_MAKE_SEND_ONCE`).
+Per ottenere una facile **comunicazione bidirezionale**, un processo può specificare una **porta mach** nell'**intestazione del messaggio** chiamata _porta di risposta_ (**`msgh_local_port`**) dove il **ricevente** del messaggio può **inviare una risposta** a questo messaggio. I bitflags in **`msgh_bits`** possono essere utilizzati per **indicare** che un **diritto di invio una sola volta** dovrebbe essere derivato e trasferito per questa porta (`MACH_MSG_TYPE_MAKE_SEND_ONCE`).
 
 > [!TIP]
-> Nota che questo tipo di comunicazione bi-direzionale è utilizzato nei messaggi XPC che si aspettano una risposta (`xpc_connection_send_message_with_reply` e `xpc_connection_send_message_with_reply_sync`). Ma **di solito vengono create porte diverse** come spiegato in precedenza per creare la comunicazione bi-direzionale.
+> Nota che questo tipo di comunicazione bidirezionale è utilizzato nei messaggi XPC che si aspettano una risposta (`xpc_connection_send_message_with_reply` e `xpc_connection_send_message_with_reply_sync`). Ma **di solito vengono create porte diverse** come spiegato in precedenza per creare la comunicazione bidirezionale.
 
 Gli altri campi dell'intestazione del messaggio sono:
 
 - `msgh_size`: la dimensione dell'intero pacchetto.
-- `msgh_remote_port`: la porta su cui questo messaggio viene inviato.
+- `msgh_remote_port`: la porta su cui questo messaggio è inviato.
 - `msgh_voucher_port`: [mach vouchers](https://robert.sesek.com/2023/6/mach_vouchers.html).
 - `msgh_id`: l'ID di questo messaggio, che è interpretato dal ricevente.
 
 > [!CAUTION]
-> Nota che **i messaggi mach vengono inviati su una \_porta mach\_**, che è un canale di comunicazione **a singolo ricevente**, **multipli mittenti** integrato nel kernel mach. **Più processi** possono **inviare messaggi** a una porta mach, ma in qualsiasi momento solo **un singolo processo può leggere** da essa.
+> Nota che **i messaggi mach vengono inviati su una \_porta mach**\_, che è un canale di comunicazione **a singolo ricevente**, **multipli mittenti** integrato nel kernel mach. **Più processi** possono **inviare messaggi** a una porta mach, ma in qualsiasi momento solo **un singolo processo può leggere** da essa.
 
 ### Enumerare porte
 ```bash
@@ -240,7 +240,7 @@ printf("Sent a message\n");
 
 ### Iniezione di Shellcode in thread tramite Porta task
 
-Puoi ottenere uno shellcode da:
+Puoi prendere un shellcode da:
 
 {{#ref}}
 ../../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md
@@ -292,7 +292,7 @@ return 0;
 {{#endtab}}
 {{#endtabs}}
 
-**Compila** il programma precedente e aggiungi i **diritti** per poter iniettare codice con lo stesso utente (altrimenti dovrai usare **sudo**).
+**Compila** il programma precedente e aggiungi le **entitlements** per poter iniettare codice con lo stesso utente (altrimenti dovrai usare **sudo**).
 
 <details>
 
@@ -504,9 +504,9 @@ In macOS **i thread** possono essere manipolati tramite **Mach** o utilizzando *
 
 È stato possibile **iniettare un semplice shellcode** per eseguire un comando perché **non doveva funzionare con api** conformi a posix, solo con Mach. **Iniezioni più complesse** richiederebbero che il **thread** fosse anche **conforme a posix**.
 
-Pertanto, per **migliorare il thread** dovrebbe chiamare **`pthread_create_from_mach_thread`** che **creerà un pthread valido**. Poi, questo nuovo pthread potrebbe **chiamare dlopen** per **caricare un dylib** dal sistema, quindi invece di scrivere nuovo shellcode per eseguire azioni diverse è possibile caricare librerie personalizzate.
+Pertanto, per **migliorare il thread** dovrebbe chiamare **`pthread_create_from_mach_thread`** che **creerà un pthread valido**. Poi, questo nuovo pthread potrebbe **chiamare dlopen** per **caricare una dylib** dal sistema, quindi invece di scrivere nuovo shellcode per eseguire diverse azioni è possibile caricare librerie personalizzate.
 
-Puoi trovare **dylibs di esempio** in (ad esempio quello che genera un log e poi puoi ascoltarlo):
+Puoi trovare **dylibs di esempio** in (ad esempio quella che genera un log e poi puoi ascoltarlo):
 
 {{#ref}}
 ../../macos-dyld-hijacking-and-dyld_insert_libraries.md
@@ -802,9 +802,9 @@ In questa tecnica un thread del processo viene hijacked:
 
 ### Informazioni di base
 
-XPC, che sta per XNU (il kernel utilizzato da macOS) inter-Process Communication, è un framework per **la comunicazione tra processi** su macOS e iOS. XPC fornisce un meccanismo per effettuare **chiamate di metodo sicure e asincrone tra diversi processi** sul sistema. Fa parte del paradigma di sicurezza di Apple, consentendo la **creazione di applicazioni separate per privilegi** in cui ogni **componente** funziona con **solo i permessi necessari** per svolgere il proprio lavoro, limitando così il potenziale danno derivante da un processo compromesso.
+XPC, che sta per XNU (il kernel utilizzato da macOS) inter-Process Communication, è un framework per **la comunicazione tra processi** su macOS e iOS. XPC fornisce un meccanismo per effettuare **chiamate di metodo sicure e asincrone tra diversi processi** sul sistema. Fa parte del paradigma di sicurezza di Apple, consentendo la **creazione di applicazioni separate per privilegi** in cui ogni **componente** viene eseguito con **solo i permessi necessari** per svolgere il proprio lavoro, limitando così il potenziale danno derivante da un processo compromesso.
 
-Per ulteriori informazioni su come questa **comunicazione funziona** e su come potrebbe **essere vulnerabile** controlla:
+Per ulteriori informazioni su come questa **comunicazione funziona** e su come potrebbe **essere vulnerabile**, controlla:
 
 {{#ref}}
 ../../macos-proces-abuse/macos-ipc-inter-process-communication/macos-xpc/
@@ -812,9 +812,9 @@ Per ulteriori informazioni su come questa **comunicazione funziona** e su come p
 
 ## MIG - Mach Interface Generator
 
-MIG è stato creato per **semplificare il processo di creazione del codice Mach IPC**. Fondamentalmente **genera il codice necessario** per il server e il client per comunicare con una definizione data. Anche se il codice generato è brutto, un sviluppatore dovrà solo importarlo e il suo codice sarà molto più semplice di prima.
+MIG è stato creato per **semplificare il processo di creazione del codice Mach IPC**. Fondamentalmente **genera il codice necessario** affinché server e client comunichino con una definizione data. Anche se il codice generato è brutto, un sviluppatore dovrà solo importarlo e il suo codice sarà molto più semplice di prima.
 
-Per ulteriori informazioni controlla:
+Per ulteriori informazioni, controlla:
 
 {{#ref}}
 ../../macos-proces-abuse/macos-ipc-inter-process-communication/macos-mig-mach-interface-generator.md

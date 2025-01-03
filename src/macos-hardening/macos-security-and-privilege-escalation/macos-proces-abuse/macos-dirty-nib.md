@@ -61,13 +61,13 @@ Nel post [https://sector7.computest.nl/post/2024-04-bringing-process-injection-i
 
 ### Ulteriori Protezioni di macOS
 
-Dalla versione macOS Sonoma in poi, le modifiche all'interno dei pacchetti delle app sono limitate. Tuttavia, i metodi precedenti prevedevano:
+Dalla versione macOS Sonoma in poi, le modifiche all'interno dei pacchetti App sono limitate. Tuttavia, i metodi precedenti prevedevano:
 
 1. Copiare l'app in un'altra posizione (ad es., `/tmp/`).
 2. Rinominare le directory all'interno del pacchetto dell'app per bypassare le protezioni iniziali.
 3. Dopo aver eseguito l'app per registrarsi con Gatekeeper, modificare il pacchetto dell'app (ad es., sostituendo MainMenu.nib con Dirty.nib).
 4. Rinominare di nuovo le directory e rieseguire l'app per eseguire il file NIB iniettato.
 
-**Nota**: Gli aggiornamenti recenti di macOS hanno mitigato questo exploit impedendo le modifiche ai file all'interno dei pacchetti delle app dopo la memorizzazione nella cache di Gatekeeper, rendendo l'exploit inefficace.
+**Nota**: Gli aggiornamenti recenti di macOS hanno mitigato questo exploit impedendo le modifiche ai file all'interno dei pacchetti app dopo la memorizzazione nella cache di Gatekeeper, rendendo l'exploit inefficace.
 
 {{#include ../../../banners/hacktricks-training.md}}

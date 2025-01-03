@@ -20,7 +20,7 @@ La variabile di ambiente **`_JAVA_OPTIONS`** può essere utilizzata per iniettar
 export _JAVA_OPTIONS='-Xms2m -Xmx5m -XX:OnOutOfMemoryError="/tmp/payload.sh"'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
 ```
-Per eseguirlo come un nuovo processo e non come un figlio del terminale corrente, puoi usare:
+Per eseguirlo come un nuovo processo e non come un figlio del terminale attuale, puoi usare:
 ```objectivec
 #import <Foundation/Foundation.h>
 // clang -fobjc-arc -framework Foundation invoker.m -o invoker
@@ -114,7 +114,7 @@ Agent-Class: Agent
 Can-Redefine-Classes: true
 Can-Retransform-Classes: true
 ```
-E poi esporta la variabile env ed esegui l'applicazione java come:
+E poi esporta la variabile env ed esegui l'applicazione java così:
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -141,7 +141,7 @@ Alcune applicazioni come Android Studio indicano nel loro **output dove stanno c
 2023-12-13 19:53:23.922 studio[74913:581359] parseVMOptions: /Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 2023-12-13 19:53:23.923 studio[74913:581359] parseVMOptions: platform=20 user=1 file=/Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 ```
-Se non lo fanno, puoi facilmente controllare con:
+Se non lo fanno, puoi facilmente controllarlo con:
 ```bash
 # Monitor
 sudo eslogger lookup | grep vmoption # Give FDA to the Terminal

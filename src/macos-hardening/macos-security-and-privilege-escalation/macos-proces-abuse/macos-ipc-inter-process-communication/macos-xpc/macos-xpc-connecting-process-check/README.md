@@ -6,19 +6,19 @@
 
 Quando viene stabilita una connessione a un servizio XPC, il server verificherà se la connessione è consentita. Questi sono i controlli che di solito esegue:
 
-1. Controlla se il **processo in connessione è firmato con un certificato firmato da Apple** (rilasciato solo da Apple).
+1. Controlla se il **processo di connessione è firmato con un certificato firmato da Apple** (rilasciato solo da Apple).
 - Se questo **non è verificato**, un attaccante potrebbe creare un **certificato falso** per soddisfare qualsiasi altro controllo.
-2. Controlla se il processo in connessione è firmato con il **certificato dell'organizzazione** (verifica dell'ID del team).
+2. Controlla se il processo di connessione è firmato con il **certificato dell'organizzazione** (verifica dell'ID del team).
 - Se questo **non è verificato**, **qualsiasi certificato di sviluppatore** di Apple può essere utilizzato per la firma e connettersi al servizio.
-3. Controlla se il processo in connessione **contiene un ID bundle appropriato**.
+3. Controlla se il processo di connessione **contiene un ID bundle appropriato**.
 - Se questo **non è verificato**, qualsiasi strumento **firmato dalla stessa org** potrebbe essere utilizzato per interagire con il servizio XPC.
-4. (4 o 5) Controlla se il processo in connessione ha un **numero di versione software appropriato**.
+4. (4 o 5) Controlla se il processo di connessione ha un **numero di versione software appropriato**.
 - Se questo **non è verificato**, un vecchio client insicuro, vulnerabile all'iniezione di processi, potrebbe essere utilizzato per connettersi al servizio XPC anche con gli altri controlli in atto.
-5. (4 o 5) Controlla se il processo in connessione ha un runtime rinforzato senza diritti pericolosi (come quelli che consentono di caricare librerie arbitrarie o utilizzare variabili d'ambiente DYLD).
+5. (4 o 5) Controlla se il processo di connessione ha un runtime rinforzato senza diritti pericolosi (come quelli che consentono di caricare librerie arbitrarie o utilizzare variabili d'ambiente DYLD).
 1. Se questo **non è verificato**, il client potrebbe essere **vulnerabile all'iniezione di codice**.
-6. Controlla se il processo in connessione ha un **diritto** che gli consente di connettersi al servizio. Questo è applicabile per i binari Apple.
-7. La **verifica** deve essere **basata** sul **token di audit del client in connessione** **anziché** sul suo ID processo (**PID**) poiché il primo previene **attacchi di riutilizzo del PID**.
-- Gli sviluppatori **raramente utilizzano la chiamata API del token di audit** poiché è **privata**, quindi Apple potrebbe **cambiarla** in qualsiasi momento. Inoltre, l'uso di API private non è consentito nelle app del Mac App Store.
+6. Controlla se il processo di connessione ha un **diritto** che gli consente di connettersi al servizio. Questo è applicabile per i binari Apple.
+7. La **verifica** deve essere **basata** sul **token di audit del client di connessione** **invece** che sul suo ID processo (**PID**) poiché il primo previene **attacchi di riutilizzo del PID**.
+- Gli sviluppatori **raramente utilizzano l'API del token di audit** poiché è **privata**, quindi Apple potrebbe **cambiarla** in qualsiasi momento. Inoltre, l'uso di API private non è consentito nelle app del Mac App Store.
 - Se viene utilizzato il metodo **`processIdentifier`**, potrebbe essere vulnerabile.
 - **`xpc_dictionary_get_audit_token`** dovrebbe essere utilizzato invece di **`xpc_connection_get_audit_token`**, poiché quest'ultimo potrebbe anche essere [vulnerabile in determinate situazioni](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/).
 

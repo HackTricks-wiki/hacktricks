@@ -21,7 +21,7 @@ Le regole sono memorizzate nella tabella `rules` all'interno del database e cont
 - **flags**: Contiene vari flag che modificano il comportamento e le caratteristiche della regola.
 - **tries**: Limita il numero di tentativi di autorizzazione consentiti per migliorare la sicurezza.
 - **version**: Tiene traccia della versione della regola per il controllo delle versioni e gli aggiornamenti.
-- **created**: Registra il timestamp quando la regola è stata creata per scopi di auditing.
+- **created**: Registra il timestamp quando la regola è stata creata per scopi di audit.
 - **modified**: Memorizza il timestamp dell'ultima modifica apportata alla regola.
 - **hash**: Contiene un valore hash della regola per garantire la sua integrità e rilevare manomissioni.
 - **identifier**: Fornisce un identificatore stringa unico, come un UUID, per riferimenti esterni alla regola.

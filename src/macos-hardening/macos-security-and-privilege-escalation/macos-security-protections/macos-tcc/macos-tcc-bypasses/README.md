@@ -52,7 +52,7 @@ Qui puoi trovare esempi di come alcuni **malware siano stati in grado di bypassa
 
 ### Gestione delle estensioni - CVE-2022-26767
 
-L'attributo **`com.apple.macl`** viene dato ai file per dare a **una certa applicazione i permessi per leggerlo.** Questo attributo viene impostato quando si **trascina** un file su un'app, o quando un utente **fa doppio clic** su un file per aprirlo con l'**applicazione predefinita**.
+L'attributo **`com.apple.macl`** viene dato ai file per dare a una **certa applicazione i permessi per leggerlo.** Questo attributo viene impostato quando si **trascina** un file su un'app, o quando un utente **fa doppio clic** su un file per aprirlo con l'**applicazione predefinita**.
 
 Pertanto, un utente potrebbe **registrare un'app malevola** per gestire tutte le estensioni e chiamare i Servizi di avvio per **aprire** qualsiasi file (quindi il file malevolo avrà accesso per leggerlo).
 
@@ -112,10 +112,10 @@ do shell script "rm " & POSIX path of (copyFile as alias)
 
 ### CVE-2020–9934 - TCC <a href="#c19b" id="c19b"></a>
 
-Il **daemon tccd** in userland utilizzava la variabile **`HOME`** **env** per accedere al database utenti TCC da: **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**
+Il **daemon tccd** in userland utilizzava la variabile di ambiente **`HOME`** per accedere al database utenti TCC da: **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**
 
-Secondo [questo post di Stack Exchange](https://stackoverflow.com/questions/135688/setting-environment-variables-on-os-x/3756686#3756686) e poiché il daemon TCC viene eseguito tramite `launchd` all'interno del dominio dell'utente corrente, è possibile **controllare tutte le variabili ambientali** passate ad esso.\
-Pertanto, un **attaccante potrebbe impostare la variabile ambientale `$HOME`** in **`launchctl`** per puntare a una **directory controllata**, **riavviare** il **daemon TCC** e poi **modificare direttamente il database TCC** per concedersi **tutti i diritti TCC disponibili** senza mai richiedere all'utente finale.\
+Secondo [questo post di Stack Exchange](https://stackoverflow.com/questions/135688/setting-environment-variables-on-os-x/3756686#3756686) e poiché il daemon TCC viene eseguito tramite `launchd` all'interno del dominio dell'utente corrente, è possibile **controllare tutte le variabili di ambiente** passate ad esso.\
+Pertanto, un **attaccante potrebbe impostare la variabile di ambiente `$HOME`** in **`launchctl`** per puntare a una **directory controllata**, **riavviare** il **daemon TCC** e poi **modificare direttamente il database TCC** per concedersi **tutti i diritti TCC disponibili** senza mai richiedere all'utente finale.\
 PoC:
 ```bash
 # reset database just in case (no cheating!)
@@ -184,13 +184,13 @@ Questa **variabile di ambiente è utilizzata dal framework `Metal`** che è una 
 
 Impostando quanto segue: `MTL_DUMP_PIPELINES_TO_JSON_FILE="path/name"`. Se `path` è una directory valida, il bug verrà attivato e possiamo usare `fs_usage` per vedere cosa sta succedendo nel programma:
 
-- un file sarà `open()`ed, chiamato `path/.dat.nosyncXXXX.XXXXXX` (X è casuale)
+- un file verrà `open()`ato, chiamato `path/.dat.nosyncXXXX.XXXXXX` (X è casuale)
 - uno o più `write()` scriveranno i contenuti nel file (non controlliamo questo)
-- `path/.dat.nosyncXXXX.XXXXXX` sarà `renamed()` a `path/name`
+- `path/.dat.nosyncXXXX.XXXXXX` verrà `renamed()` a `path/name`
 
 È una scrittura temporanea di file, seguita da un **`rename(old, new)`** **che non è sicuro.**
 
-Non è sicuro perché deve **risolvere i vecchi e nuovi percorsi separatamente**, il che può richiedere del tempo e può essere vulnerabile a una Condizione di Gara. Per ulteriori informazioni, puoi controllare la funzione `xnu` `renameat_internal()`.
+Non è sicuro perché deve **risolvere i vecchi e nuovi percorsi separatamente**, il che può richiedere del tempo e può essere vulnerabile a una Condizione di Gara. Per ulteriori informazioni puoi controllare la funzione `xnu` `renameat_internal()`.
 
 > [!CAUTION]
 > Quindi, fondamentalmente, se un processo privilegiato sta rinominando da una cartella che controlli, potresti ottenere un RCE e farlo accedere a un file diverso o, come in questo CVE, aprire il file creato dall'app privilegiata e memorizzare un FD.
@@ -206,7 +206,7 @@ Questo era l'attacco nel CVE: Ad esempio, per sovrascrivere il `TCC.db` dell'ute
 - catturare l'`open()` di `/Users/hacker/tmp/.dat.nosyncXXXX.XXXXXX` (X è casuale)
 - qui apriamo anche questo file per scrivere e teniamo il descrittore di file
 - scambiare in modo atomico `/Users/hacker/tmp` con `/Users/hacker/ourlink` **in un ciclo**
-- facciamo questo per massimizzare le nostre possibilità di successo poiché la finestra di gara è piuttosto ristretta, ma perdere la gara ha un impatto trascurabile
+- lo facciamo per massimizzare le nostre possibilità di successo poiché la finestra di gara è piuttosto ristretta, ma perdere la gara ha un impatto trascurabile
 - aspetta un po'
 - verifica se abbiamo avuto fortuna
 - se no, ripeti dall'inizio
@@ -246,7 +246,7 @@ Il **primo POC** utilizza [**dsexport**](https://www.unix.com/man-page/osx/1/dse
 Il secondo POC ha utilizzato **`/usr/libexec/configd`** che aveva `com.apple.private.tcc.allow` con il valore `kTCCServiceSystemPolicySysAdminFiles`.\
 Era possibile eseguire **`configd`** con l'opzione **`-t`**, un attaccante poteva specificare un **Bundle personalizzato da caricare**. Pertanto, l'exploit **sostituisce** il metodo **`dsexport`** e **`dsimport`** di cambiamento della home directory dell'utente con un **iniezione di codice configd**.
 
-Per ulteriori informazioni, controlla il [**report originale**](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/).
+Per ulteriori informazioni controlla il [**report originale**](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/).
 
 ## Per iniezione di processo
 
@@ -265,7 +265,7 @@ L'applicazione `/System/Library/CoreServices/Applications/Directory Utility.app`
 
 Per armare questo CVE, il **`NFSHomeDirectory`** è **cambiato** (abusando del diritto precedente) per poter **prendere il controllo del database TCC degli utenti** per bypassare TCC.
 
-Per ulteriori informazioni, controlla il [**report originale**](https://wojciechregula.blog/post/change-home-directory-and-bypass-tcc-aka-cve-2020-27937/).
+Per ulteriori informazioni controlla il [**report originale**](https://wojciechregula.blog/post/change-home-directory-and-bypass-tcc-aka-cve-2020-27937/).
 
 ### CVE-2020-29621 - Coreaudiod
 
@@ -477,34 +477,34 @@ Questo ha permesso a un attaccante di eseguire mount arbitrari in qualsiasi posi
 
 Lo strumento **`/usr/sbin/asr`** consentiva di copiare l'intero disco e montarlo in un'altra posizione bypassando le protezioni TCC.
 
-### Servizi di localizzazione
+### Location Services
 
 C'è un terzo database TCC in **`/var/db/locationd/clients.plist`** per indicare i client autorizzati ad **accedere ai servizi di localizzazione**.\
 La cartella **`/var/db/locationd/` non era protetta dal montaggio DMG** quindi era possibile montare il nostro plist.
 
-## Attraverso app di avvio
+## By startup apps
 
 {{#ref}}
 ../../../../macos-auto-start-locations.md
 {{#endref}}
 
-## Attraverso grep
+## By grep
 
 In diverse occasioni, i file memorizzeranno informazioni sensibili come email, numeri di telefono, messaggi... in posizioni non protette (che contano come una vulnerabilità in Apple).
 
 <figure><img src="../../../../../images/image (474).png" alt=""><figcaption></figcaption></figure>
 
-## Click sintetici
+## Synthetic Clicks
 
 Questo non funziona più, ma [**funzionava in passato**](https://twitter.com/noarfromspace/status/639125916233416704/photo/1)**:**
 
 <figure><img src="../../../../../images/image (29).png" alt=""><figcaption></figcaption></figure>
 
-Un altro modo utilizzando [**eventi CoreGraphics**](https://objectivebythesea.org/v2/talks/OBTS_v2_Wardle.pdf):
+Un altro modo utilizzando [**CoreGraphics events**](https://objectivebythesea.org/v2/talks/OBTS_v2_Wardle.pdf):
 
 <figure><img src="../../../../../images/image (30).png" alt="" width="563"><figcaption></figcaption></figure>
 
-## Riferimenti
+## Reference
 
 - [**https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8**](https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8)
 - [**https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/**](https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/)

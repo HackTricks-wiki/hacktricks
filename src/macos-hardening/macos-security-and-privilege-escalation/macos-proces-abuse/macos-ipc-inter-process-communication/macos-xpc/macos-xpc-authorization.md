@@ -10,7 +10,7 @@ Quando un'applicazione ha bisogno di **eseguire azioni come un utente privilegia
 
 ### ShouldAcceptNewConnection sempre YES
 
-Un esempio può essere trovato in [EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample). In `App/AppDelegate.m` cerca di **connettersi** al **HelperTool**. E in `HelperTool/HelperTool.m` la funzione **`shouldAcceptNewConnection`** **non controllerà** nessuno dei requisiti indicati in precedenza. Restituirà sempre YES:
+Un esempio può essere trovato in [EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample). In `App/AppDelegate.m` prova a **connettersi** al **HelperTool**. E in `HelperTool/HelperTool.m` la funzione **`shouldAcceptNewConnection`** **non controllerà** nessuno dei requisiti indicati in precedenza. Restituirà sempre YES:
 ```objectivec
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection
 // Called by our XPC listener when a new connection comes in.  We configure the connection
@@ -228,7 +228,7 @@ assert(junk == errAuthorizationSuccess);
 return error;
 }
 ```
-Nota che per **controllare i requisiti per ottenere il diritto** di chiamare quel metodo, la funzione `authorizationRightForCommand` controllerà semplicemente l'oggetto commentato in precedenza **`commandInfo`**. Poi, chiamerà **`AuthorizationCopyRights`** per verificare **se ha i diritti** di chiamare la funzione (nota che i flag consentono l'interazione con l'utente).
+Nota che per **controllare i requisiti per ottenere il diritto** di chiamare quel metodo, la funzione `authorizationRightForCommand` controllerà solo l'oggetto commentato in precedenza **`commandInfo`**. Poi, chiamerà **`AuthorizationCopyRights`** per verificare **se ha i diritti** di chiamare la funzione (nota che i flag consentono l'interazione con l'utente).
 
 In questo caso, per chiamare la funzione `readLicenseKeyAuthorization`, il `kCommandKeyAuthRightDefault` è definito come `@kAuthorizationRuleClassAllow`. Quindi **chiunque può chiamarlo**.
 
@@ -281,7 +281,7 @@ Se questa funzione chiama funzioni come `AuthorizationCreateFromExternalForm`, `
 
 Controlla il **`/var/db/auth.db`** per vedere se è possibile ottenere permessi per chiamare alcune azioni privilegiate senza interazione dell'utente.
 
-### Comunicazione del Protocollo
+### Protocol Communication
 
 Poi, devi trovare lo schema del protocollo per poter stabilire una comunicazione con il servizio XPC.
 
@@ -329,7 +329,7 @@ cat /Library/LaunchDaemons/com.example.HelperTool.plist
 In questo esempio viene creato:
 
 - La definizione del protocollo con le funzioni
-- Un'autenticazione vuota da utilizzare per richiedere accesso
+- Un'autenticazione vuota da utilizzare per richiedere l'accesso
 - Una connessione al servizio XPC
 - Una chiamata alla funzione se la connessione è stata effettuata con successo
 ```objectivec

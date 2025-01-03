@@ -11,7 +11,7 @@
 
 Inizialmente, la funzione **`task_threads()`** viene invocata sulla porta del task per ottenere un elenco di thread dal task remoto. Un thread viene selezionato per l'hijacking. Questo approccio si discosta dai metodi convenzionali di iniezione di codice poiché la creazione di un nuovo thread remoto è vietata a causa della nuova mitigazione che blocca `thread_create_running()`.
 
-Per controllare il thread, viene chiamato **`thread_suspend()`**, fermando la sua esecuzione.
+Per controllare il thread, viene chiamato **`thread_suspend()`**, interrompendo la sua esecuzione.
 
 Le uniche operazioni consentite sul thread remoto riguardano **fermare** e **avviare** il thread, **recuperare** e **modificare** i valori dei registri. Le chiamate a funzioni remote vengono avviate impostando i registri `x0` a `x7` sugli **argomenti**, configurando **`pc`** per mirare alla funzione desiderata e attivando il thread. Assicurarsi che il thread non si blocchi dopo il ritorno richiede la rilevazione del ritorno.
 
@@ -21,7 +21,7 @@ Una strategia prevede **la registrazione di un gestore di eccezioni** per il thr
 
 La fase successiva prevede l'istituzione di porte Mach per facilitare la comunicazione con il thread remoto. Queste porte sono strumentali nel trasferire diritti di invio e ricezione arbitrari tra i task.
 
-Per la comunicazione bidirezionale, vengono create due autorizzazioni di ricezione Mach: una nel task locale e l'altra nel task remoto. Successivamente, un diritto di invio per ciascuna porta viene trasferito al task corrispondente, consentendo lo scambio di messaggi.
+Per la comunicazione bidirezionale, vengono create due porte di ricezione Mach: una nel task locale e l'altra nel task remoto. Successivamente, un diritto di invio per ciascuna porta viene trasferito al task corrispondente, consentendo lo scambio di messaggi.
 
 Concentrandosi sulla porta locale, il diritto di ricezione è detenuto dal task locale. La porta viene creata con `mach_port_allocate()`. La sfida consiste nel trasferire un diritto di invio a questa porta nel task remoto.
 
@@ -71,8 +71,8 @@ return prop->name;
 ```
 Questa funzione agisce efficacemente come il `read_func` restituendo il primo campo di `objc_property_t`.
 
-2. **Scrittura della Memoria:**
-Trovare una funzione predefinita per la scrittura della memoria è più difficile. Tuttavia, la funzione `_xpc_int64_set_value()` di libxpc è un candidato adatto con il seguente disassemblaggio:
+2. **Scrittura della memoria:**
+Trovare una funzione predefinita per scrivere in memoria è più difficile. Tuttavia, la funzione `_xpc_int64_set_value()` di libxpc è un candidato adatto con il seguente disassemblaggio:
 ```c
 __xpc_int64_set_value:
 str x1, [x0, #0x18]
@@ -98,7 +98,7 @@ L'obiettivo è stabilire memoria condivisa tra compiti locali e remoti, semplifi
 2. **Creazione della Memoria Condivisa nel Processo Remoto**:
 
 - Allocare memoria per l'oggetto `OS_xpc_shmem` nel processo remoto con una chiamata remota a `malloc()`.
-- Copiare il contenuto dell'oggetto locale `OS_xpc_shmem` nel processo remoto. Tuttavia, questa copia iniziale avrà nomi di voci di memoria Mach errati all'offset `0x18`.
+- Copiare il contenuto dell'oggetto `OS_xpc_shmem` locale nel processo remoto. Tuttavia, questa copia iniziale avrà nomi di voci di memoria Mach errati all'offset `0x18`.
 
 3. **Correzione della Voce di Memoria Mach**:
 
@@ -106,7 +106,7 @@ L'obiettivo è stabilire memoria condivisa tra compiti locali e remoti, semplifi
 - Correggere il campo della voce di memoria Mach all'offset `0x18` sovrascrivendolo con il nome della voce di memoria remota.
 
 4. **Finalizzazione della Configurazione della Memoria Condivisa**:
-- Validare l'oggetto remoto `OS_xpc_shmem`.
+- Validare l'oggetto `OS_xpc_shmem` remoto.
 - Stabilire la mappatura della memoria condivisa con una chiamata remota a `xpc_shmem_remote()`.
 
 Seguendo questi passaggi, la memoria condivisa tra i compiti locali e remoti sarà configurata in modo efficiente, consentendo trasferimenti di dati semplici e l'esecuzione di funzioni che richiedono più argomenti.

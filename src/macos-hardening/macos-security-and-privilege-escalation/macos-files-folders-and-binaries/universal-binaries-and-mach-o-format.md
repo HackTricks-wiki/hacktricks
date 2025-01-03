@@ -111,7 +111,7 @@ Ci sono diversi tipi di file, puoi trovarli definiti nel [**codice sorgente per 
 - `MH_DYLIB`: Librerie dinamiche
 - `MH_DYLINKER`: Linker dinamico
 - `MH_BUNDLE`: "File plugin". Generati utilizzando -bundle in gcc e caricati esplicitamente da `NSBundle` o `dlopen`.
-- `MH_DYSM`: File companion `.dSym` (file con simboli per il debug).
+- `MH_DYSM`: File `.dSym` companion (file con simboli per il debug).
 - `MH_KEXT_BUNDLE`: Estensioni del kernel.
 ```bash
 # Checking the mac header of a binary
@@ -159,7 +159,7 @@ Ci sono circa **50 diversi tipi di comandi di caricamento** che il sistema gesti
 ### **LC_SEGMENT/LC_SEGMENT_64**
 
 > [!TIP]
-> Fondamentalmente, questo tipo di comando di caricamento definisce **come caricare il \_\_TEXT** (codice eseguibile) **e \_\_DATA** (dati per il processo) **segmenti** secondo gli **offset indicati nella sezione Dati** quando il binario viene eseguito.
+> Fondamentalmente, questo tipo di comando di caricamento definisce **come caricare il \_\_TEXT** (codice eseguibile) **e il \_\_DATA** (dati per il processo) **segmenti** secondo gli **offset indicati nella sezione Dati** quando il binario viene eseguito.
 
 Questi comandi **definiscono segmenti** che sono **mappati** nello **spazio di memoria virtuale** di un processo quando viene eseguito.
 
@@ -167,28 +167,28 @@ Ci sono **diversi tipi** di segmenti, come il **\_\_TEXT** segmento, che contien
 
 **Ogni segmento** può essere ulteriormente **diviso** in più **sezioni**. La **struttura del comando di caricamento** contiene **informazioni** su **queste sezioni** all'interno del rispettivo segmento.
 
-Nell'intestazione prima trovi il **segment header**:
+Nell'intestazione prima trovi l'**intestazione del segmento**:
 
 <pre class="language-c"><code class="lang-c">struct segment_command_64 { /* for 64-bit architectures */
 uint32_t	cmd;		/* LC_SEGMENT_64 */
 uint32_t	cmdsize;	/* includes sizeof section_64 structs */
-char		segname[16];	/* segment name */
-uint64_t	vmaddr;		/* memory address of this segment */
-uint64_t	vmsize;		/* memory size of this segment */
-uint64_t	fileoff;	/* file offset of this segment */
-uint64_t	filesize;	/* amount to map from the file */
-int32_t		maxprot;	/* maximum VM protection */
-int32_t		initprot;	/* initial VM protection */
-<strong>	uint32_t	nsects;		/* number of sections in segment */
-</strong>	uint32_t	flags;		/* flags */
+char		segname[16];	/* nome del segmento */
+uint64_t	vmaddr;		/* indirizzo di memoria di questo segmento */
+uint64_t	vmsize;		/* dimensione della memoria di questo segmento */
+uint64_t	fileoff;	/* offset del file di questo segmento */
+uint64_t	filesize;	/* quantità da mappare dal file */
+int32_t		maxprot;	/* protezione VM massima */
+int32_t		initprot;	/* protezione VM iniziale */
+<strong>	uint32_t	nsects;		/* numero di sezioni nel segmento */
+</strong>	uint32_t	flags;		/* flag */
 };
 </code></pre>
 
-Esempio di segment header:
+Esempio di intestazione del segmento:
 
 <figure><img src="../../../images/image (1126).png" alt=""><figcaption></figcaption></figure>
 
-Questa intestazione definisce il **numero di sezioni i cui header appaiono dopo** di essa:
+Questa intestazione definisce il **numero di sezioni i cui intestazioni appaiono dopo** di essa:
 ```c
 struct section_64 { /* for 64-bit architectures */
 char		sectname[16];	/* name of this section */
@@ -249,7 +249,7 @@ Segmenti comuni caricati da questo cmd:
 - **`__OBJC`**: Contiene informazioni utilizzate dal runtime Objective-C. Anche se queste informazioni potrebbero essere trovate anche nel segmento \_\_DATA, all'interno di varie sezioni in \_\_objc\_\*.
 - **`__RESTRICT`**: Un segmento senza contenuto con una singola sezione chiamata **`__restrict`** (anch'essa vuota) che garantisce che quando si esegue il binario, ignorerà le variabili ambientali DYLD.
 
-Come era possibile vedere nel codice, **i segmenti supportano anche flag** (anche se non sono molto utilizzati):
+Come è stato possibile vedere nel codice, **i segmenti supportano anche flag** (anche se non sono molto utilizzati):
 
 - `SG_HIGHVM`: Solo core (non utilizzato)
 - `SG_FVMLIB`: Non utilizzato
@@ -258,7 +258,7 @@ Come era possibile vedere nel codice, **i segmenti supportano anche flag** (anch
 
 ### **`LC_UNIXTHREAD/LC_MAIN`**
 
-**`LC_MAIN`** contiene il punto di ingresso nell'**attributo entryoff.** Al momento del caricamento, **dyld** semplicemente **aggiunge** questo valore alla (in memoria) **base del binario**, poi **salta** a questa istruzione per avviare l'esecuzione del codice del binario.
+**`LC_MAIN`** contiene il punto di ingresso nell'**attributo entryoff.** Al momento del caricamento, **dyld** semplicemente **aggiunge** questo valore alla **base del binario** (in memoria), poi **salta** a questa istruzione per avviare l'esecuzione del codice del binario.
 
 **`LC_UNIXTHREAD`** contiene i valori che il registro deve avere quando si avvia il thread principale. Questo era già deprecato ma **`dyld`** lo utilizza ancora. È possibile vedere i valori dei registri impostati da questo con:
 ```bash
@@ -353,7 +353,7 @@ Alcune librerie potenzialmente correlate al malware sono:
 Al centro del file si trova la regione dati, che è composta da diversi segmenti come definiti nella regione dei comandi di caricamento. **Una varietà di sezioni dati può essere ospitata all'interno di ciascun segmento**, con ciascuna sezione **che contiene codice o dati** specifici per un tipo.
 
 > [!TIP]
-> I dati sono fondamentalmente la parte che contiene tutte le **informazioni** che vengono caricate dai comandi di caricamento **LC_SEGMENTS_64**
+> I dati sono fondamentalmente la parte che contiene tutte le **informazioni** caricate dai comandi di caricamento **LC_SEGMENTS_64**
 
 ![https://www.oreilly.com/api/v2/epubs/9781785883378/files/graphics/B05055_02_38.jpg](<../../../images/image (507) (3).png>)
 

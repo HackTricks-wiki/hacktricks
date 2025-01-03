@@ -10,19 +10,19 @@ XPC utilizza una forma di comunicazione inter-processo (IPC), che è un insieme 
 
 I principali vantaggi di XPC includono:
 
-1. **Sicurezza**: Separando il lavoro in diversi processi, a ciascun processo possono essere concessi solo i permessi necessari. Ciò significa che anche se un processo viene compromesso, ha una capacità limitata di fare danni.
+1. **Sicurezza**: Separando il lavoro in diversi processi, a ciascun processo possono essere concessi solo i permessi necessari. Ciò significa che anche se un processo è compromesso, ha una capacità limitata di fare danni.
 2. **Stabilità**: XPC aiuta a isolare i crash al componente in cui si verificano. Se un processo si blocca, può essere riavviato senza influenzare il resto del sistema.
 3. **Prestazioni**: XPC consente una facile concorrenza, poiché diversi compiti possono essere eseguiti simultaneamente in processi diversi.
 
-L'unico **svantaggio** è che **separare un'applicazione in più processi** facendoli comunicare tramite XPC è **meno efficiente**. Ma nei sistemi odierni questo non è quasi percepibile e i benefici sono maggiori.
+L'unico **svantaggio** è che **separare un'applicazione in più processi** facendoli comunicare tramite XPC è **meno efficiente**. Ma nei sistemi odierni questo non è quasi percepibile e i benefici sono migliori.
 
 ## Servizi XPC specifici per l'applicazione
 
-I componenti XPC di un'applicazione sono **all'interno dell'applicazione stessa.** Ad esempio, in Safari puoi trovarli in **`/Applications/Safari.app/Contents/XPCServices`**. Hanno estensione **`.xpc`** (come **`com.apple.Safari.SandboxBroker.xpc`**) e sono **anche pacchetti** con il binario principale all'interno: `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker` e un `Info.plist: /Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`
+I componenti XPC di un'applicazione sono **all'interno dell'applicazione stessa.** Ad esempio, in Safari puoi trovarli in **`/Applications/Safari.app/Contents/XPCServices`**. Hanno estensione **`.xpc`** (come **`com.apple.Safari.SandboxBroker.xpc`**) e sono **anche bundle** con il binario principale al suo interno: `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker` e un `Info.plist: /Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`
 
 Come potresti pensare, un **componente XPC avrà diritti e privilegi diversi** rispetto agli altri componenti XPC o al binario principale dell'app. ECCETTO se un servizio XPC è configurato con [**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information_property_list/xpcservice/joinexistingsession) impostato su “True” nel suo **Info.plist**. In questo caso, il servizio XPC verrà eseguito nella **stessa sessione di sicurezza dell'applicazione** che lo ha chiamato.
 
-I servizi XPC vengono **avviati** da **launchd** quando necessario e **chiusi** una volta completati tutti i compiti per liberare risorse di sistema. **I componenti XPC specifici per l'applicazione possono essere utilizzati solo dall'applicazione**, riducendo così il rischio associato a potenziali vulnerabilità.
+I servizi XPC sono **avviati** da **launchd** quando necessario e **chiusi** una volta completati tutti i compiti per liberare risorse di sistema. **I componenti XPC specifici per l'applicazione possono essere utilizzati solo dall'applicazione**, riducendo così il rischio associato a potenziali vulnerabilità.
 
 ## Servizi XPC a livello di sistema
 
@@ -68,7 +68,7 @@ Quelli in **`LaunchDameons`** vengono eseguiti da root. Quindi, se un processo n
 
 - **`xpc_object_t`**
 
-Ogni messaggio XPC è un oggetto dizionario che semplifica la serializzazione e deserializzazione. Inoltre, `libxpc.dylib` dichiara la maggior parte dei tipi di dati, quindi è possibile garantire che i dati ricevuti siano del tipo previsto. Nell'API C, ogni oggetto è un `xpc_object_t` (e il suo tipo può essere verificato utilizzando `xpc_get_type(object)`).\
+Ogni messaggio XPC è un oggetto dizionario che semplifica la serializzazione e deserializzazione. Inoltre, `libxpc.dylib` dichiara la maggior parte dei tipi di dati, quindi è possibile garantire che i dati ricevuti siano del tipo previsto. Nell'API C, ogni oggetto è un `xpc_object_t` (e il suo tipo può essere verificato usando `xpc_get_type(object)`).\
 Inoltre, la funzione `xpc_copy_description(object)` può essere utilizzata per ottenere una rappresentazione stringa dell'oggetto che può essere utile per scopi di debug.\
 Questi oggetti hanno anche alcuni metodi da chiamare come `xpc_<object>_copy`, `xpc_<object>_equal`, `xpc_<object>_hash`, `xpc_<object>_serialize`, `xpc_<object>_deserialize`...
 
@@ -85,7 +85,7 @@ Un **`xpc_pipe`** è un tubo FIFO che i processi possono utilizzare per comunica
 
 Nota che l'oggetto **`xpc_pipe`** è un **`xpc_object_t`** con informazioni nella sua struct riguardo le due porte Mach utilizzate e il nome (se presente). Il nome, ad esempio, il demone `secinitd` nel suo plist `/System/Library/LaunchDaemons/com.apple.secinitd.plist` configura il tubo chiamato `com.apple.secinitd`.
 
-Un esempio di un **`xpc_pipe`** è il **bootstrap pipe** creato da **`launchd`** che rende possibile la condivisione delle porte Mach.
+Un esempio di **`xpc_pipe`** è il **bootstrap pipe** creato da **`launchd`** che rende possibile la condivisione delle porte Mach.
 
 - **`NSXPC*`**
 
@@ -103,9 +103,9 @@ Questo file ha altre chiavi di configurazione come `ServiceType` che può essere
 
 ### Avviare un Servizio
 
-L'app tenta di **connettersi** a un servizio XPC utilizzando `xpc_connection_create_mach_service`, quindi launchd localizza il demone e avvia **`xpcproxy`**. **`xpcproxy`** applica le restrizioni configurate e genera il servizio con i FD e le porte Mach forniti.
+L'app tenta di **connettersi** a un servizio XPC utilizzando `xpc_connection_create_mach_service`, quindi launchd localizza il demone e avvia **`xpcproxy`**. **`xpcproxy`** applica le restrizioni configurate e genera il servizio con i FDs e le porte Mach forniti.
 
-Per migliorare la velocità della ricerca del servizio XPC, viene utilizzata una cache.
+Per migliorare la velocità di ricerca del servizio XPC, viene utilizzata una cache.
 
 È possibile tracciare le azioni di `xpcproxy` utilizzando:
 ```bash
@@ -446,7 +446,7 @@ Inoltre, il `RemoteServiceDiscovery.framework` consente di ottenere informazioni
 
 Una volta utilizzato connect e raccolto il socket `fd` del servizio, è possibile utilizzare la classe `remote_xpc_connection_*`.
 
-È possibile ottenere informazioni sui servizi remoti utilizzando lo strumento cli `/usr/libexec/remotectl` con parametri come:
+È possibile ottenere informazioni sui servizi remoti utilizzando lo strumento cli `/usr/libexec/remotectl` utilizzando parametri come:
 ```bash
 /usr/libexec/remotectl list # Get bridge devices
 /usr/libexec/remotectl show ...# Get device properties and services

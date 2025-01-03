@@ -106,7 +106,7 @@ Nota che ci sono diverse versioni di questa struttura in cui quelle vecchie potr
 ## Pagine di Firma del Codice
 
 Hashare l'intero binario sarebbe inefficiente e persino inutile se viene caricato in memoria solo parzialmente. Pertanto, la firma del codice è in realtà un hash di hash in cui ogni pagina binaria è hashata individualmente.\
-In effetti, nel precedente codice **Code Directory** puoi vedere che la **dimensione della pagina è specificata** in uno dei suoi campi. Inoltre, se la dimensione del binario non è un multiplo della dimensione di una pagina, il campo **CodeLimit** specifica dove si trova la fine della firma.
+In effetti, nel precedente codice **Code Directory** puoi vedere che **la dimensione della pagina è specificata** in uno dei suoi campi. Inoltre, se la dimensione del binario non è un multiplo della dimensione di una pagina, il campo **CodeLimit** specifica dove si trova la fine della firma.
 ```bash
 # Get all hashes of /bin/ps
 codesign -d -vvvvvv /bin/ps
@@ -286,11 +286,11 @@ od -A x -t x1 /tmp/output.csreq
 
 ## Applicazione della Firma del Codice
 
-Il **kernel** è quello che **controlla la firma del codice** prima di consentire l'esecuzione del codice dell'app. Inoltre, un modo per poter scrivere ed eseguire nuovo codice in memoria è abusare di JIT se `mprotect` viene chiamato con il flag `MAP_JIT`. Nota che l'applicazione ha bisogno di un diritto speciale per poter fare questo.
+Il **kernel** è quello che **controlla la firma del codice** prima di consentire l'esecuzione del codice dell'app. Inoltre, un modo per poter scrivere ed eseguire in memoria nuovo codice è abusare di JIT se `mprotect` viene chiamato con il flag `MAP_JIT`. Nota che l'applicazione ha bisogno di un diritto speciale per poter fare questo.
 
 ## `cs_blobs` & `cs_blob`
 
-[**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) struct contiene le informazioni sui diritti dell'entitlement del processo in esecuzione su di esso. `csb_platform_binary` informa anche se l'applicazione è un binario di piattaforma (che viene controllato in momenti diversi dal sistema operativo per applicare meccanismi di sicurezza come proteggere i diritti SEND ai porti di task di questi processi).
+[**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) la struct contiene le informazioni sui diritti dell'entitlement del processo in esecuzione su di esso. `csb_platform_binary` informa anche se l'applicazione è un binario di piattaforma (che viene controllato in momenti diversi dal sistema operativo per applicare meccanismi di sicurezza come proteggere i diritti SEND ai porti di task di questi processi).
 ```c
 struct cs_blob {
 struct cs_blob  *csb_next;

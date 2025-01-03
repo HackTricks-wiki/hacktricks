@@ -85,10 +85,10 @@ Utilizza anche alcune sezioni nel segmento **`__TEXT`** per memorizzare valori c
 Objective-C utilizza alcune mangling per codificare i selettori e i tipi di variabili di tipi semplici e complessi:
 
 - I tipi primitivi usano la prima lettera del tipo `i` per `int`, `c` per `char`, `l` per `long`... e usano la lettera maiuscola nel caso sia senza segno (`L` per `unsigned Long`).
-- Altri tipi di dati le cui lettere sono utilizzate o sono speciali, usano altre lettere o simboli come `q` per `long long`, `b` per `bitfields`, `B` per `booleans`, `#` per `classi`, `@` per `id`, `*` per `char pointers`, `^` per `pointers` generici e `?` per `undefined`.
+- Altri tipi di dati le cui lettere sono utilizzate o sono speciali, usano altre lettere o simboli come `q` per `long long`, `b` per `bitfields`, `B` per `booleans`, `#` per `classi`, `@` per `id`, `*` per `puntatori char`, `^` per `puntatori` generici e `?` per `indefiniti`.
 - Array, strutture e unioni usano `[`, `{` e `(`
 
-#### Dichiarazione di esempio del metodo
+#### Dichiarazione del metodo di esempio
 ```objectivec
 - (NSString *)processString:(id)input withOptions:(char *)options andError:(id)error;
 ```
@@ -140,6 +140,6 @@ data()->setFlags(set);
 Questa classe utilizza alcuni bit del campo isa per indicare alcune informazioni sulla classe.
 
 Poi, la struct ha un puntatore alla struct `class_ro_t` memorizzata su disco che contiene attributi della classe come il suo nome, metodi di base, proprietà e variabili di istanza.\
-Durante l'esecuzione, viene utilizzata una struttura aggiuntiva `class_rw_t` che contiene puntatori che possono essere modificati come metodi, protocolli, proprietà... 
+Durante l'esecuzione, viene utilizzata una struttura aggiuntiva `class_rw_t` che contiene puntatori che possono essere modificati come metodi, protocolli, proprietà...
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -8,8 +8,8 @@ Permessi in una **directory**:
 
 - **read** - puoi **enumerare** le voci della directory
 - **write** - puoi **eliminare/scrivere** **file** nella directory e puoi **eliminare cartelle vuote**.
-- Ma **non puoi eliminare/modificare cartelle non vuote** a meno che tu non abbia permessi di scrittura su di essa.
-- **Non puoi modificare il nome di una cartella** a meno che tu non sia il proprietario.
+- Ma non puoi **eliminare/modificare cartelle non vuote** a meno che tu non abbia permessi di scrittura su di essa.
+- Non puoi **modificare il nome di una cartella** a meno che tu non sia il proprietario.
 - **execute** - ti è **consentito di attraversare** la directory - se non hai questo diritto, non puoi accedere a nessun file al suo interno, né in alcuna sottodirectory.
 
 ### Combinazioni Pericolose
@@ -18,7 +18,7 @@ Permessi in una **directory**:
 
 - Un **proprietario della directory** genitore nel percorso è l'utente
 - Un **proprietario della directory** genitore nel percorso è un **gruppo di utenti** con **accesso in scrittura**
-- Un **gruppo di utenti** ha **accesso in scrittura** al **file**
+- Un **gruppo di utenti** ha accesso **in scrittura** al **file**
 
 Con una delle combinazioni precedenti, un attaccante potrebbe **iniettare** un **link simbolico/duro** nel percorso previsto per ottenere una scrittura arbitraria privilegiata.
 
@@ -28,7 +28,7 @@ Se ci sono file in una **directory** dove **solo root ha accesso R+X**, questi *
 
 Esempio in: [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions)
 
-## Link Simbolico / Link Duro
+## Link simbolico / Link duro
 
 ### File/cartella permissivi
 
@@ -38,7 +38,7 @@ Controlla nelle altre sezioni dove un attaccante potrebbe **sfruttare una scritt
 
 ### Open `O_NOFOLLOW`
 
-Il flag `O_NOFOLLOW` quando utilizzato dalla funzione `open` non seguirà un symlink nell'ultimo componente del percorso, ma seguirà il resto del percorso. Il modo corretto per prevenire il seguire symlink nel percorso è utilizzare il flag `O_NOFOLLOW_ANY`.
+Il flag `O_NOFOLLOW` quando utilizzato dalla funzione `open` non seguirà un symlink nell'ultimo componente del percorso, ma seguirà il resto del percorso. Il modo corretto per prevenire il seguire i symlink nel percorso è utilizzare il flag `O_NOFOLLOW_ANY`.
 
 ## .fileloc
 
@@ -86,7 +86,7 @@ ls -lO /tmp/asd
 ```
 ### defvfs mount
 
-Un **devfs** mount **non supporta xattr**, maggiori informazioni in [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)
+Un **devfs** mount **non supporta xattr**, ulteriori informazioni in [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)
 ```bash
 mkdir /tmp/mnt
 mount_devfs -o noowners none "/tmp/mnt"
@@ -124,7 +124,7 @@ Il formato di file **AppleDouble** copia un file inclusi i suoi ACE.
 
 Nel [**codice sorgente**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) è possibile vedere che la rappresentazione testuale dell'ACL memorizzata all'interno dell'xattr chiamato **`com.apple.acl.text`** verrà impostata come ACL nel file decompresso. Quindi, se hai compresso un'applicazione in un file zip con formato di file **AppleDouble** con un ACL che impedisce ad altri xattrs di essere scritti... l'xattr di quarantena non è stato impostato nell'applicazione:
 
-Controlla il [**rapporto originale**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) per ulteriori informazioni.
+Controlla il [**report originale**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) per ulteriori informazioni.
 
 Per replicare questo, dobbiamo prima ottenere la stringa acl corretta:
 ```bash
@@ -144,7 +144,7 @@ ditto -c -k del test.zip
 ditto -x -k --rsrc test.zip .
 ls -le test
 ```
-(Note that even if this works the sandbox write the quarantine xattr before)
+(Note che anche se questo funziona, la sandbox scrive l'attributo xattr di quarantena prima)
 
 Non è davvero necessario, ma lo lascio lì giusto in caso:
 
@@ -156,11 +156,11 @@ macos-xattr-acls-extra-stuff.md
 
 ### Bypass dei controlli dei binari di piattaforma
 
-Al alcuni controlli di sicurezza verificano se il binario è un **binario di piattaforma**, ad esempio per consentire la connessione a un servizio XPC. Tuttavia, come esposto in un bypass in https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/, è possibile aggirare questo controllo ottenendo un binario di piattaforma (come /bin/ls) e iniettando l'exploit tramite dyld utilizzando una variabile d'ambiente `DYLD_INSERT_LIBRARIES`.
+Al alcuni controlli di sicurezza verificano se il binario è un **binario di piattaforma**, ad esempio per consentire la connessione a un servizio XPC. Tuttavia, come esposto in un bypass in https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/, è possibile bypassare questo controllo ottenendo un binario di piattaforma (come /bin/ls) e iniettando l'exploit tramite dyld utilizzando una variabile d'ambiente `DYLD_INSERT_LIBRARIES`.
 
 ### Bypass dei flag `CS_REQUIRE_LV` e `CS_FORCED_LV`
 
-È possibile per un binario in esecuzione modificare i propri flag per aggirare i controlli con un codice come:
+È possibile per un binario in esecuzione modificare i propri flag per bypassare i controlli con un codice come:
 ```c
 // Code from https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/
 int pid = getpid();
@@ -312,7 +312,7 @@ Poi, modifica di nuovo il file `/etc/cups/cups-files.conf` indicando `LogFilePer
 
 ## Genera file scrivibili come altri utenti
 
-Questo genererà un file che appartiene a root e che è scrivibile da me ([**codice da qui**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Questo potrebbe funzionare anche come privesc:
+Questo genererà un file che appartiene a root e che è scrivibile da me ([**code from here**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Questo potrebbe funzionare anche come privesc:
 ```bash
 DIRNAME=/usr/local/etc/periodic/daily
 

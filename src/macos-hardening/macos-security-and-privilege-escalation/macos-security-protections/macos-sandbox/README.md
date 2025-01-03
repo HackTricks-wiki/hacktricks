@@ -54,7 +54,7 @@ drwx------   2 username  staff    64 Mar 24 18:02 SystemData
 drwx------   2 username  staff    64 Mar 24 18:02 tmp
 ```
 > [!CAUTION]
-> Nota che anche se i symlink sono presenti per "uscire" dal Sandbox e accedere ad altre cartelle, l'App deve comunque **avere i permessi** per accedervi. Questi permessi si trovano all'interno del **`.plist`** in `RedirectablePaths`.
+> Nota che anche se i symlink sono presenti per "uscire" dal Sandbox e accedere ad altre cartelle, l'App deve comunque **avere permessi** per accedervi. Questi permessi sono all'interno del **`.plist`** in `RedirectablePaths`.
 
 Il **`SandboxProfileData`** è il profilo sandbox compilato CFData codificato in B64.
 ```bash
@@ -106,7 +106,7 @@ AAAhAboBAAAAAAgAAABZAO4B5AHjBMkEQAUPBSsGPwsgASABHgEgASABHwEf...
 [...]
 ```
 > [!WARNING]
-> Tutto ciò che viene creato/modificato da un'applicazione in Sandbox riceverà l'**attributo di quarantena**. Questo impedirà a uno spazio sandbox di attivare Gatekeeper se l'app sandbox tenta di eseguire qualcosa con **`open`**.
+> Tutto ciò che viene creato/modificato da un'applicazione Sandboxed riceverà l'**attributo di quarantena**. Questo impedirà a uno spazio sandbox di attivare Gatekeeper se l'app sandbox tenta di eseguire qualcosa con **`open`**.
 
 ## Profili Sandbox
 
@@ -133,7 +133,7 @@ Qui puoi trovare un esempio:
 > [!TIP]
 > Controlla questa [**ricerca**](https://reverse.put.as/2011/09/14/apple-sandbox-guide-v1-0/) **per verificare ulteriori azioni che potrebbero essere consentite o negate.**
 >
-> Nota che nella versione compilata di un profilo, il nome delle operazioni è sostituito dalle loro voci in un array conosciuto dalla dylib e dal kext, rendendo la versione compilata più corta e più difficile da leggere.
+> Nota che nella versione compilata di un profilo i nomi delle operazioni sono sostituiti dalle loro voci in un array conosciuto dalla dylib e dal kext, rendendo la versione compilata più corta e più difficile da leggere.
 
 Importanti **servizi di sistema** vengono eseguiti all'interno del loro **sandbox** personalizzato, come il servizio `mdnsresponder`. Puoi visualizzare questi **profili sandbox** personalizzati all'interno di:
 
@@ -227,7 +227,7 @@ In `/tmp/trace.out` potrai vedere ogni controllo della sandbox eseguito ogni vol
 #### Via API
 
 La funzione `sandbox_set_trace_path` esportata da `libsystem_sandbox.dylib` consente di specificare un nome file di traccia in cui verranno scritti i controlli della sandbox.\
-È anche possibile fare qualcosa di simile chiamando `sandbox_vtrace_enable()` e poi ottenendo i log degli errori dal buffer chiamando `sandbox_vtrace_report()`.
+È anche possibile fare qualcosa di simile chiamando `sandbox_vtrace_enable()` e poi ottenendo i log di errore dal buffer chiamando `sandbox_vtrace_report()`.
 
 ### Ispezione della Sandbox
 
@@ -267,7 +267,7 @@ Inoltre, per confinare un processo all'interno di un contenitore, potrebbe chiam
 
 Su macOS, a differenza di iOS dove i processi sono sandboxati fin dall'inizio dal kernel, **i processi devono optare per la sandbox da soli**. Ciò significa che su macOS, un processo non è limitato dalla sandbox fino a quando non decide attivamente di entrarvi, anche se le app dell'App Store sono sempre sandboxate.
 
-I processi sono automaticamente sandboxati dal userland quando iniziano se hanno il diritto: `com.apple.security.app-sandbox`. Per una spiegazione dettagliata di questo processo controlla:
+I processi vengono automaticamente sandboxati dal userland quando iniziano se hanno il diritto: `com.apple.security.app-sandbox`. Per una spiegazione dettagliata di questo processo controlla:
 
 {{#ref}}
 macos-sandbox-debug-and-bypass/
@@ -343,8 +343,8 @@ La chiamata della funzione `___sandbox_ms` avvolge `mac_syscall` indicando nel p
 - **reference_retain_by_audit_token (#28)**: Crea un riferimento per un token di audit da utilizzare nei controlli del sandbox.
 - **reference_release (#29)**: Rilascia un riferimento a un token di audit precedentemente mantenuto.
 - **rootless_allows_task_for_pid (#30)**: Verifica se `task_for_pid` è consentito (simile ai controlli `csr`).
-- **rootless_whitelist_push (#31)**: (macOS) Applica un file manifesto di Protezione Integrità di Sistema (SIP).
-- **rootless_whitelist_check (preflight) (#32)**: Controlla il file manifesto SIP prima dell'esecuzione.
+- **rootless_whitelist_push (#31)**: (macOS) Applica un file di manifest di System Integrity Protection (SIP).
+- **rootless_whitelist_check (preflight) (#32)**: Controlla il file di manifest SIP prima dell'esecuzione.
 - **rootless_protected_volume (#33)**: (macOS) Applica protezioni SIP a un disco o partizione.
 - **rootless_mkdir_protected (#34)**: Applica protezione SIP/DataVault a un processo di creazione di directory.
 
@@ -360,7 +360,7 @@ Nota che in iOS l'estensione del kernel contiene **tutti i profili hardcoded** a
 
 **`Sandbox.kext`** utilizza più di un centinaio di hook tramite MACF. La maggior parte degli hook controllerà solo alcuni casi banali che consentono di eseguire l'azione, altrimenti chiameranno **`cred_sb_evalutate`** con le **credenziali** da MACF e un numero corrispondente all'**operazione** da eseguire e un **buffer** per l'output.
 
-Un buon esempio di ciò è la funzione **`_mpo_file_check_mmap`** che ha agganciato **`mmap`** e che inizierà a controllare se la nuova memoria sarà scrivibile (e se non lo è, consentirà l'esecuzione), poi controllerà se è utilizzata per la cache condivisa dyld e, se sì, consentirà l'esecuzione, e infine chiamerà **`sb_evaluate_internal`** (o uno dei suoi wrapper) per eseguire ulteriori controlli di autorizzazione.
+Un buon esempio di ciò è la funzione **`_mpo_file_check_mmap`** che ha collegato **`mmap`** e che inizierà a controllare se la nuova memoria sarà scrivibile (e se non lo è, consentirà l'esecuzione), poi controllerà se è utilizzata per la cache condivisa dyld e, se sì, consentirà l'esecuzione, e infine chiamerà **`sb_evaluate_internal`** (o uno dei suoi wrapper) per eseguire ulteriori controlli di autorizzazione.
 
 Inoltre, tra i centinaia di hook utilizzati da Sandbox, ce ne sono 3 in particolare che sono molto interessanti:
 

@@ -24,7 +24,7 @@ Un altro file importante relativo alla memoria nei sistemi MacOS è il **registr
 
 Per eseguire il dump della memoria in una macchina MacOS puoi usare [**osxpmem**](https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-2.1.post4.zip).
 
-**Nota**: Le seguenti istruzioni funzioneranno solo per i Mac con architettura Intel. Questo strumento è ora archiviato e l'ultima versione è stata rilasciata nel 2017. Il binario scaricato utilizzando le istruzioni qui sotto è destinato ai chip Intel poiché Apple Silicon non era disponibile nel 2017. Potrebbe essere possibile compilare il binario per l'architettura arm64, ma dovrai provare da solo.
+**Nota**: Le seguenti istruzioni funzioneranno solo per i Mac con architettura Intel. Questo strumento è ora archiviato e l'ultima versione è stata rilasciata nel 2017. Il binario scaricato utilizzando le istruzioni di seguito è destinato ai chip Intel poiché Apple Silicon non era disponibile nel 2017. Potrebbe essere possibile compilare il binario per l'architettura arm64, ma dovrai provare da solo.
 ```bash
 #Dump raw format
 sudo osxpmem.app/osxpmem --format raw -o /tmp/dump_mem

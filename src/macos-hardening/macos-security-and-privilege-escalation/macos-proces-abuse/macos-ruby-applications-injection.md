@@ -14,7 +14,7 @@ Crea ovunque uno script ruby come:
 ```ruby:hello.rb
 puts 'Hello, World!'
 ```
-Quindi fai caricare un arbitrario script ruby con:
+Poi fai caricare un arbitrario script ruby con:
 ```bash
 RUBYOPT="-I/tmp -rinject" ruby hello.rb
 ```

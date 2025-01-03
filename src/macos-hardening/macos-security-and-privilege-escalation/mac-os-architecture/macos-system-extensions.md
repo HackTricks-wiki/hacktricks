@@ -12,7 +12,7 @@ Ci sono tre tipi di system extensions: **DriverKit** Extensions, **Network** Ext
 
 ### **DriverKit Extensions**
 
-DriverKit è un sostituto delle kernel extensions che **forniscono supporto hardware**. Consente ai driver di dispositivo (come USB, Serial, NIC e HID drivers) di essere eseguiti nello spazio utente anziché nello spazio del kernel. Il framework DriverKit include **versioni nello spazio utente di alcune classi dell'I/O Kit**, e il kernel inoltra gli eventi normali dell'I/O Kit allo spazio utente, offrendo un ambiente più sicuro per l'esecuzione di questi driver.
+DriverKit è un sostituto delle kernel extensions che **forniscono supporto hardware**. Consente ai driver di dispositivo (come USB, Serial, NIC e HID drivers) di essere eseguiti nello spazio utente piuttosto che nello spazio del kernel. Il framework DriverKit include **versioni nello spazio utente di alcune classi dell'I/O Kit**, e il kernel inoltra gli eventi normali dell'I/O Kit allo spazio utente, offrendo un ambiente più sicuro per l'esecuzione di questi driver.
 
 ### **Network Extensions**
 
@@ -59,9 +59,9 @@ Le Endpoint Security Extensions:**`libEndpointSecurity.dylib`** è la libreria C
 
 Un altro demone di sistema, **`sysextd`**, **valida le system extensions** e le sposta nelle posizioni di sistema appropriate. Poi chiede al demone pertinente di caricare l'estensione. Il **`SystemExtensions.framework`** è responsabile dell'attivazione e disattivazione delle system extensions.
 
-## Bypassare ESF
+## Bypassare l'ESF
 
-ESF è utilizzato da strumenti di sicurezza che cercheranno di rilevare un red teamer, quindi qualsiasi informazione su come questo potrebbe essere evitato suona interessante.
+L'ESF è utilizzato da strumenti di sicurezza che cercheranno di rilevare un red teamer, quindi qualsiasi informazione su come questo potrebbe essere evitato suona interessante.
 
 ### CVE-2021-30965
 

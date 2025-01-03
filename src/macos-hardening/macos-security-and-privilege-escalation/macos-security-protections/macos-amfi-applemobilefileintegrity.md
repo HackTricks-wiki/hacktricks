@@ -76,9 +76,9 @@ Una volta ricevuto un messaggio tramite la porta speciale, **MIG** viene utilizz
 
 ## Provisioning Profiles
 
-Un profilo di provisioning può essere utilizzato per firmare il codice. Ci sono profili **Developer** che possono essere utilizzati per firmare il codice e testarlo, e profili **Enterprise** che possono essere utilizzati su tutti i dispositivi.
+Un provisioning profile può essere utilizzato per firmare il codice. Ci sono profili **Developer** che possono essere utilizzati per firmare il codice e testarlo, e profili **Enterprise** che possono essere utilizzati su tutti i dispositivi.
 
-Dopo che un'app è stata inviata all'Apple Store, se approvata, viene firmata da Apple e il profilo di provisioning non è più necessario.
+Dopo che un'app è stata inviata all'Apple Store, se approvata, viene firmata da Apple e il provisioning profile non è più necessario.
 
 Un profilo di solito utilizza l'estensione `.mobileprovision` o `.provisionprofile` e può essere estratto con:
 ```bash
@@ -92,7 +92,7 @@ Sebbene a volte siano chiamati certificati, questi profili di provisioning hanno
 
 - **AppIDName:** L'Identificatore dell'Applicazione
 - **AppleInternalProfile**: Designa questo come un profilo Interno Apple
-- **ApplicationIdentifierPrefix**: Preceduto da AppIDName (stesso del TeamIdentifier)
+- **ApplicationIdentifierPrefix**: Preceduto da AppIDName (stesso di TeamIdentifier)
 - **CreationDate**: Data nel formato `YYYY-MM-DDTHH:mm:ssZ`
 - **DeveloperCertificates**: Un array di certificato(i) (di solito uno), codificato come dati Base64
 - **Entitlements**: I diritti consentiti con i diritti per questo profilo
@@ -116,11 +116,11 @@ Questa è la libreria esterna che `amfid` chiama per chiedere se dovrebbe consen
 
 In macOS questo si trova all'interno di `MobileDevice.framework`.
 
-## Cache di Fiducia AMFI
+## AMFI Trust Caches
 
-iOS AMFI mantiene un elenco di hash noti che sono firmati ad-hoc, chiamato **Trust Cache** e trovato nella sezione `__TEXT.__const` del kext. Nota che in operazioni molto specifiche e sensibili è possibile estendere questa Trust Cache con un file esterno.
+iOS AMFI mantiene un elenco di hash noti che sono firmati ad-hoc, chiamato **Trust Cache** e trovato nella sezione `__TEXT.__const` del kext. Nota che in operazioni molto specifiche e sensibili è possibile estendere questo Trust Cache con un file esterno.
 
-## Riferimenti
+## References
 
 - [**\*OS Internals Volume III**](https://newosxbook.com/home.html)
 

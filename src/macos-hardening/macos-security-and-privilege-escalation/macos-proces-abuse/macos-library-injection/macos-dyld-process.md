@@ -82,7 +82,7 @@ Idx Name          Size     VMA              Type
 3 __unwind_info 00000058 0000000100003fa8 DATA
 4 __got         00000008 0000000100004000 DATA
 ```
-Nell'assemblaggio della sezione **`__stubs`**:
+Nella disassemblaggio della sezione **`__stubs`**:
 ```bash
 objdump -d --section=__stubs ./load
 
@@ -182,7 +182,7 @@ Risultato:
 
 Questa è una struttura esportata da dyld con informazioni sullo stato di dyld che può essere trovata nel [**codice sorgente**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html) con informazioni come la versione, puntatore all'array dyld_image_info, a dyld_image_notifier, se il processo è staccato dalla cache condivisa, se l'inizializzatore di libSystem è stato chiamato, puntatore all'intestazione Mach di dyls, puntatore alla stringa di versione di dyld...
 
-## variabili d'ambiente dyld
+## dyld env variables
 
 ### debug dyld
 
@@ -254,7 +254,7 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 ### Altri
 
 - `DYLD_BIND_AT_LAUNCH`: I legami pigri vengono risolti con quelli non pigri
-- `DYLD_DISABLE_PREFETCH`: Disabilita il pre-caricamento dei contenuti \_\_DATA e \_\_LINKEDIT
+- `DYLD_DISABLE_PREFETCH`: Disabilita il pre-fetching del contenuto \_\_DATA e \_\_LINKEDIT
 - `DYLD_FORCE_FLAT_NAMESPACE`: Legami a livello singolo
 - `DYLD_[FRAMEWORK/LIBRARY]_PATH | DYLD_FALLBACK_[FRAMEWORK/LIBRARY]_PATH | DYLD_VERSIONED_[FRAMEWORK/LIBRARY]_PATH`: Percorsi di risoluzione
 - `DYLD_INSERT_LIBRARIES`: Carica una libreria specifica
@@ -264,12 +264,12 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 - `DYLD_PRINT_BINDINGS`: Stampa i simboli quando sono legati
 - `DYLD_WEAK_BINDINGS`: Stampa solo simboli deboli quando sono legati
 - `DYLD_PRINT_CODE_SIGNATURES`: Stampa le operazioni di registrazione della firma del codice
-- `DYLD_PRINT_DOFS`: Stampa le sezioni del formato oggetto D-Trace come caricate
+- `DYLD_PRINT_DOFS`: Stampa le sezioni del formato oggetto D-Trace caricate
 - `DYLD_PRINT_ENV`: Stampa l'ambiente visto da dyld
-- `DYLD_PRINT_INTERPOSTING`: Stampa le operazioni di interposizione
+- `DYLD_PRINT_INTERPOSTING`: Stampa le operazioni di interposting
 - `DYLD_PRINT_LIBRARIES`: Stampa le librerie caricate
 - `DYLD_PRINT_OPTS`: Stampa le opzioni di caricamento
-- `DYLD_REBASING`: Stampa le operazioni di riassegnazione dei simboli
+- `DYLD_REBASING`: Stampa le operazioni di ribasamento dei simboli
 - `DYLD_RPATHS`: Stampa le espansioni di @rpath
 - `DYLD_PRINT_SEGMENTS`: Stampa le mappature dei segmenti Mach-O
 - `DYLD_PRINT_STATISTICS`: Stampa le statistiche temporali

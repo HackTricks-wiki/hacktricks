@@ -84,7 +84,7 @@ Si noti inoltre che **l'interposizione avviene tra il processo e le librerie car
 
 ### Interposizione Dinamica
 
-Ora è anche possibile interporre una funzione dinamicamente utilizzando la funzione **`dyld_dynamic_interpose`**. Questo consente di interporre programmaticamente una funzione in tempo reale invece di farlo solo dall'inizio.
+Ora è anche possibile interporre una funzione dinamicamente utilizzando la funzione **`dyld_dynamic_interpose`**. Questo consente di interporre programmaticamente una funzione in tempo di esecuzione invece di farlo solo dall'inizio.
 
 È sufficiente indicare i **tuples** della **funzione da sostituire e la funzione di sostituzione**.
 ```c
@@ -226,7 +226,7 @@ return 0;
 }
 ```
 > [!WARNING]
-> In questo caso, se il **codice di implementazione del metodo legittimo** **verifica** il **nome** del **metodo**, potrebbe **rilevare** questo swizzling e impedirne l'esecuzione.
+> In questo caso, se il **codice di implementazione del metodo legittimo** **verifica** il **nome del metodo**, potrebbe **rilevare** questo swizzling e impedirne l'esecuzione.
 >
 > La seguente tecnica non ha questa restrizione.
 
@@ -290,11 +290,11 @@ return 0;
 
 In questa pagina sono stati discussi diversi modi per agganciare funzioni. Tuttavia, comportavano **l'esecuzione di codice all'interno del processo per attaccare**.
 
-Per fare ciò, la tecnica più semplice da utilizzare è iniettare un [Dyld tramite variabili di ambiente o dirottamento](macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md). Tuttavia, suppongo che questo possa essere fatto anche tramite [Dylib process injection](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port).
+Per fare ciò, la tecnica più semplice da utilizzare è iniettare un [Dyld tramite variabili di ambiente o dirottamento](macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md). Tuttavia, suppongo che questo possa essere fatto anche tramite [iniezione di processo Dylib](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port).
 
 Tuttavia, entrambe le opzioni sono **limitati** a binari/processi **non protetti**. Controlla ciascuna tecnica per saperne di più sulle limitazioni.
 
-Tuttavia, un attacco di hooking di funzione è molto specifico, un attaccante lo farà per **rubare informazioni sensibili dall'interno di un processo** (altrimenti faresti semplicemente un attacco di iniezione di processo). E queste informazioni sensibili potrebbero trovarsi in app scaricate dall'utente come MacPass.
+Tuttavia, un attacco di hooking di funzione è molto specifico, un attaccante lo farà per **rubare informazioni sensibili dall'interno di un processo** (se no faresti semplicemente un attacco di iniezione di processo). E queste informazioni sensibili potrebbero trovarsi in app scaricate dall'utente come MacPass.
 
 Quindi il vettore dell'attaccante sarebbe quello di trovare una vulnerabilità o rimuovere la firma dell'applicazione, iniettare la variabile di ambiente **`DYLD_INSERT_LIBRARIES`** attraverso l'Info.plist dell'applicazione aggiungendo qualcosa come:
 ```xml

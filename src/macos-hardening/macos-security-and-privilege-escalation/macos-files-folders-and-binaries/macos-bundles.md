@@ -11,7 +11,7 @@ I bundle in macOS fungono da contenitori per una varietà di risorse, tra cui ap
 All'interno di un bundle, in particolare nella directory `<application>.app/Contents/`, si trovano una varietà di risorse importanti:
 
 - **\_CodeSignature**: Questa directory memorizza i dettagli della firma del codice, vitali per verificare l'integrità dell'applicazione. Puoi ispezionare le informazioni sulla firma del codice utilizzando comandi come: %%%bash openssl dgst -binary -sha1 /Applications/Safari.app/Contents/Resources/Assets.car | openssl base64 %%%
-- **MacOS**: Contiene il binario eseguibile dell'applicazione che viene eseguito al momento dell'interazione dell'utente.
+- **MacOS**: Contiene il binario eseguibile dell'applicazione che viene eseguito all'interazione dell'utente.
 - **Resources**: Un repository per i componenti dell'interfaccia utente dell'applicazione, inclusi immagini, documenti e descrizioni dell'interfaccia (file nib/xib).
 - **Info.plist**: Funziona come il file di configurazione principale dell'applicazione, cruciale per il sistema per riconoscere e interagire correttamente con l'applicazione.
 

@@ -68,13 +68,13 @@ csrutil enable --without debug
 ```
 ### Altre Restrizioni
 
-- **Disabilita il caricamento di estensioni del kernel non firmate** (kexts), garantendo che solo le estensioni verificate interagiscano con il kernel di sistema.
+- **Non consente il caricamento di estensioni del kernel non firmate** (kexts), garantendo che solo le estensioni verificate interagiscano con il kernel di sistema.
 - **Previene il debugging** dei processi di sistema macOS, proteggendo i componenti core del sistema da accessi e modifiche non autorizzate.
 - **Inibisce strumenti** come dtrace dall'ispezionare i processi di sistema, proteggendo ulteriormente l'integrità del funzionamento del sistema.
 
 [**Scopri di più sulle informazioni SIP in questo talk**](https://www.slideshare.net/i0n1c/syscan360-stefan-esser-os-x-el-capitan-sinking-the-ship)**.**
 
-### **Autorizzazioni relative a SIP**
+### **Diritti relativi a SIP**
 
 - `com.apple.rootless.xpc.bootstrap`: Controlla launchd
 - `com.apple.rootless.install[.heritable]`: Accesso al file system
@@ -99,7 +99,7 @@ Il bypass di SIP consente a un attaccante di:
 
 ### Pacchetti di Installazione
 
-**I pacchetti di installazione firmati con il certificato di Apple** possono bypassare le sue protezioni. Ciò significa che anche i pacchetti firmati da sviluppatori standard verranno bloccati se tentano di modificare directory protette da SIP.
+**I pacchetti di installazione firmati con il certificato di Apple** possono bypassare le sue protezioni. Ciò significa che anche i pacchetti firmati da sviluppatori standard verranno bloccati se tentano di modificare le directory protette da SIP.
 
 ### File SIP inesistente
 
@@ -108,7 +108,7 @@ Una potenziale falla è che se un file è specificato in **`rootless.conf` ma at
 ### com.apple.rootless.install.heritable
 
 > [!CAUTION]
-> L'autorizzazione **`com.apple.rootless.install.heritable`** consente di bypassare SIP
+> Il diritto **`com.apple.rootless.install.heritable`** consente di bypassare SIP
 
 #### [CVE-2019-8561](https://objective-see.org/blog/blog_0x42.html) <a href="#cve" id="cve"></a>
 
@@ -116,21 +116,21 @@ Una potenziale falla è che se un file è specificato in **`rootless.conf` ma at
 
 #### [CVE-2020–9854](https://objective-see.org/blog/blog_0x4D.html) <a href="#cve-unauthd-chain" id="cve-unauthd-chain"></a>
 
-Se un pacchetto veniva installato da un'immagine montata o da un'unità esterna, l'**installer** avrebbe **eseguito** il binario da **quella file system** (invece che da una posizione protetta da SIP), facendo eseguire a **`system_installd`** un binario arbitrario.
+Se un pacchetto veniva installato da un'immagine montata o da un'unità esterna, l'**installer** **eseguiva** il binario da **quella file system** (invece che da una posizione protetta da SIP), facendo eseguire a **`system_installd`** un binario arbitrario.
 
 #### CVE-2021-30892 - Shrootless
 
-[**I ricercatori di questo post del blog**](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/) hanno scoperto una vulnerabilità nel meccanismo di Protezione dell'Integrità di Sistema (SIP) di macOS, soprannominata vulnerabilità 'Shrootless'. Questa vulnerabilità si concentra sul demone **`system_installd`**, che ha un'autorizzazione, **`com.apple.rootless.install.heritable`**, che consente a qualsiasi dei suoi processi figli di bypassare le restrizioni del file system di SIP.
+[**I ricercatori di questo post del blog**](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/) hanno scoperto una vulnerabilità nel meccanismo di Protezione dell'Integrità di Sistema (SIP) di macOS, soprannominata vulnerabilità 'Shrootless'. Questa vulnerabilità si concentra sul demone **`system_installd`**, che ha un diritto, **`com.apple.rootless.install.heritable`**, che consente a qualsiasi dei suoi processi figli di bypassare le restrizioni del file system di SIP.
 
 Il demone **`system_installd`** installerà pacchetti che sono stati firmati da **Apple**.
 
-I ricercatori hanno scoperto che durante l'installazione di un pacchetto firmato da Apple (.pkg), **`system_installd`** **esegue** qualsiasi **script post-installazione** incluso nel pacchetto. Questi script vengono eseguiti dalla shell predefinita, **`zsh`**, che esegue automaticamente **comandi dal file** **`/etc/zshenv`**, se esiste, anche in modalità non interattiva. Questo comportamento potrebbe essere sfruttato dagli attaccanti: creando un file `/etc/zshenv` malevolo e aspettando che **`system_installd` invochi `zsh`**, potrebbero eseguire operazioni arbitrarie sul dispositivo.
+I ricercatori hanno scoperto che durante l'installazione di un pacchetto firmato da Apple (.pkg file), **`system_installd`** **esegue** qualsiasi **script post-install** incluso nel pacchetto. Questi script vengono eseguiti dalla shell predefinita, **`zsh`**, che esegue automaticamente **comandi dal file** **`/etc/zshenv`**, se esiste, anche in modalità non interattiva. Questo comportamento potrebbe essere sfruttato dagli attaccanti: creando un file `/etc/zshenv` malevolo e aspettando che **`system_installd` invochi `zsh`**, potrebbero eseguire operazioni arbitrarie sul dispositivo.
 
-Inoltre, è stato scoperto che **`/etc/zshenv` potrebbe essere utilizzato come una tecnica di attacco generale**, non solo per un bypass di SIP. Ogni profilo utente ha un file `~/.zshenv`, che si comporta allo stesso modo di `/etc/zshenv` ma non richiede permessi di root. Questo file potrebbe essere utilizzato come meccanismo di persistenza, attivandosi ogni volta che `zsh` si avvia, o come meccanismo di elevazione dei privilegi. Se un utente admin si eleva a root usando `sudo -s` o `sudo <comando>`, il file `~/.zshenv` verrebbe attivato, elevando effettivamente a root.
+Inoltre, è stato scoperto che **`/etc/zshenv` potrebbe essere utilizzato come una tecnica di attacco generale**, non solo per un bypass di SIP. Ogni profilo utente ha un file `~/.zshenv`, che si comporta allo stesso modo di `/etc/zshenv` ma non richiede permessi di root. Questo file potrebbe essere utilizzato come meccanismo di persistenza, attivandosi ogni volta che `zsh` si avvia, o come meccanismo di elevazione dei privilegi. Se un utente admin si eleva a root usando `sudo -s` o `sudo <command>`, il file `~/.zshenv` verrebbe attivato, elevando effettivamente a root.
 
 #### [**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-2022-22583/)
 
-In [**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-2022-22583/) è stato scoperto che lo stesso processo **`system_installd`** poteva ancora essere abusato perché stava mettendo lo **script post-installazione all'interno di una cartella con nome casuale protetta da SIP all'interno di `/tmp`**. Il fatto è che **`/tmp` stesso non è protetto da SIP**, quindi era possibile **montare** un **immagine virtuale su di esso**, poi l'**installer** avrebbe messo lì lo **script post-installazione**, **smontato** l'immagine virtuale, **ricreato** tutte le **cartelle** e **aggiunto** lo **script di post installazione** con il **payload** da eseguire.
+In [**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-2022-22583/) è stato scoperto che lo stesso processo **`system_installd`** poteva ancora essere abusato perché stava mettendo lo **script post-install in una cartella con nome casuale protetta da SIP all'interno di `/tmp`**. Il fatto è che **`/tmp` stesso non è protetto da SIP**, quindi era possibile **montare** un **immagine virtuale su di esso**, poi l'**installer** avrebbe messo lì lo **script post-install**, **smontato** l'immagine virtuale, **ricreato** tutte le **cartelle** e **aggiunto** lo **script di post installazione** con il **payload** da eseguire.
 
 #### [fsck_cs utility](https://www.theregister.com/2016/03/30/apple_os_x_rootless/)
 
@@ -164,7 +164,7 @@ La sicurezza di questo processo può essere compromessa se un attaccante altera 
 
 Il codice dell'attaccante guadagna il controllo durante il processo di aggiornamento, sfruttando la fiducia del sistema nell'installer. L'attacco procede alterando l'immagine `InstallESD.dmg` tramite method swizzling, mirando in particolare al metodo `extractBootBits`. Questo consente l'iniezione di codice malevolo prima che l'immagine del disco venga utilizzata.
 
-Inoltre, all'interno di `InstallESD.dmg`, c'è un `BaseSystem.dmg`, che funge da file system radice del codice di aggiornamento. Iniettare una libreria dinamica in questo consente al codice malevolo di operare all'interno di un processo in grado di alterare file a livello di OS, aumentando significativamente il potenziale di compromissione del sistema.
+Inoltre, all'interno di `InstallESD.dmg`, c'è un `BaseSystem.dmg`, che funge da file system radice per il codice di aggiornamento. Iniettare una libreria dinamica in questo consente al codice malevolo di operare all'interno di un processo in grado di alterare file a livello di OS, aumentando significativamente il potenziale di compromissione del sistema.
 
 #### [systemmigrationd (2023)](https://www.youtube.com/watch?v=zxZesAN-TEk)
 

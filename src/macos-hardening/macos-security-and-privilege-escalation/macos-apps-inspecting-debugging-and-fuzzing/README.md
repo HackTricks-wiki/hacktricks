@@ -97,7 +97,7 @@ Sarà montato in `/Volumes`
 ### Binarie impacchettate
 
 - Controlla l'alta entropia
-- Controlla le stringhe (se non ci sono stringhe comprensibili, è impacchettato)
+- Controlla le stringhe (se non ci sono stringhe comprensibili, impacchettato)
 - Il pacchetto UPX per MacOS genera una sezione chiamata "\_\_XHDR"
 
 ## Analisi statica di Objective-C
@@ -242,7 +242,7 @@ Inoltre, ci sono alcuni log che conterranno il tag `<private>` per **nascondere*
 
 #### Pannello sinistro
 
-Nel pannello sinistro di hopper è possibile vedere i simboli (**Labels**) del binario, l'elenco delle procedure e delle funzioni (**Proc**) e le stringhe (**Str**). Queste non sono tutte le stringhe ma quelle definite in diverse parti del file Mac-O (come _cstring o_ `objc_methname`).
+Nel pannello sinistro di Hopper è possibile vedere i simboli (**Labels**) del binario, l'elenco delle procedure e delle funzioni (**Proc**) e le stringhe (**Str**). Queste non sono tutte le stringhe, ma quelle definite in diverse parti del file Mac-O (come _cstring o_ `objc_methname`).
 
 #### Pannello centrale
 
@@ -289,7 +289,7 @@ Una spiegazione più dettagliata e ulteriori esempi possono essere trovati in [h
 
 #### Esempi
 
-Esegui `man -k dtrace` per elencare gli **script DTrace disponibili**. Esempio: `sudo dtruss -
+Esegui `man -k dtrace` per elencare gli **script DTrace disponibili**. Esempio: `sudo dtruss -n binary`
 ```bash
 #Count the number of syscalls of each running process
 sudo dtrace -n 'syscall:::entry {@[execname] = count()}'
@@ -343,7 +343,7 @@ dtruss -c -p 1000 #get syscalls of PID 1000
 
 Strumenti come `latency`, `sc_usage`, `fs_usage` e `trace` lo utilizzano internamente.
 
-Per interfacciarsi con `kdebug` si utilizza `sysctl` sul namespace `kern.kdebug` e i MIB da utilizzare possono essere trovati in `sys/sysctl.h`, con le funzioni implementate in `bsd/kern/kdebug.c`.
+Per interfacciarsi con `kdebug` si utilizza `sysctl` sul namespace `kern.kdebug` e i MIB da utilizzare possono essere trovati in `sys/sysctl.h` con le funzioni implementate in `bsd/kern/kdebug.c`.
 
 Per interagire con kdebug con un client personalizzato, questi sono solitamente i passaggi:
 
@@ -375,7 +375,7 @@ Or `tailspin`.
 
 Questo è usato per fare un profiling a livello di kernel ed è costruito utilizzando le chiamate `Kdebug`.
 
-Fondamentalmente, la variabile globale `kernel_debug_active` viene controllata e se è impostata chiama `kperf_kdebug_handler` con il codice `Kdebug` e l'indirizzo del frame del kernel chiamante. Se il codice `Kdebug` corrisponde a uno selezionato, ottiene le "azioni" configurate come bitmap (controlla `osfmk/kperf/action.h` per le opzioni).
+Fondamentalmente, la variabile globale `kernel_debug_active` viene controllata e se è impostata chiama `kperf_kdebug_handler` con il codice `Kdebug` e l'indirizzo del frame del kernel chiamante. Se il codice `Kdebug` corrisponde a uno selezionato, ottiene le "azioni" configurate come un bitmap (controlla `osfmk/kperf/action.h` per le opzioni).
 
 Kperf ha anche una tabella MIB sysctl: (come root) `sysctl kperf`. Questi codici possono essere trovati in `osfmk/kperf/kperfbsd.c`.
 
@@ -398,7 +398,7 @@ Devi monitorare il tuo mac con un comando come **`sudo eslogger fork exec rename
 
 ### Crescendo
 
-[**Crescendo**](https://github.com/SuprHackerSteve/Crescendo) è uno strumento GUI con l'aspetto e la sensazione che gli utenti Windows potrebbero conoscere da _Procmon_ di Microsoft Sysinternal. Questo strumento consente di avviare e fermare la registrazione di vari tipi di eventi, consente il filtraggio di questi eventi per categorie come file, processo, rete, ecc., e fornisce la funzionalità di salvare gli eventi registrati in formato json.
+[**Crescendo**](https://github.com/SuprHackerSteve/Crescendo) è uno strumento GUI con l'aspetto e la sensazione che gli utenti Windows potrebbero conoscere da _Procmon_ di Microsoft Sysinternal. Questo strumento consente di registrare vari tipi di eventi da avviare e fermare, consente il filtraggio di questi eventi per categorie come file, processo, rete, ecc., e fornisce la funzionalità di salvare gli eventi registrati in formato json.
 
 ### Apple Instruments
 
@@ -436,9 +436,9 @@ Puoi impostare il sapore intel quando usi lldb creando un file chiamato **`.lldb
 settings set target.x86-disassembly-flavor intel
 ```
 > [!WARNING]
-> All'interno di lldb, esegui il dump di un processo con `process save-core`
+> All'interno di lldb, dump un processo con `process save-core`
 
-<table data-header-hidden><thead><tr><th width="225"></th><th></th></tr></thead><tbody><tr><td><strong>(lldb) Comando</strong></td><td><strong>Descrizione</strong></td></tr><tr><td><strong>run (r)</strong></td><td>Inizia l'esecuzione, che continuerà senza interruzioni fino a quando non viene colpito un breakpoint o il processo termina.</td></tr><tr><td><strong>process launch --stop-at-entry</strong></td><td>Inizia l'esecuzione fermandosi al punto di ingresso</td></tr><tr><td><strong>continue (c)</strong></td><td>Continua l'esecuzione del processo in debug.</td></tr><tr><td><strong>nexti (n / ni)</strong></td><td>Esegui la prossima istruzione. Questo comando salterà le chiamate di funzione.</td></tr><tr><td><strong>stepi (s / si)</strong></td><td>Esegui la prossima istruzione. A differenza del comando nexti, questo comando entrerà nelle chiamate di funzione.</td></tr><tr><td><strong>finish (f)</strong></td><td>Esegui il resto delle istruzioni nella funzione corrente (“frame”) restituisci e ferma.</td></tr><tr><td><strong>control + c</strong></td><td>Metti in pausa l'esecuzione. Se il processo è stato eseguito (r) o continuato (c), questo causerà l'arresto del processo ...dove si trova attualmente in esecuzione.</td></tr><tr><td><strong>breakpoint (b)</strong></td><td><p><code>b main</code> #Qualsiasi funzione chiamata main</p><p><code>b &#x3C;binname>`main</code> #Funzione principale del bin</p><p><code>b set -n main --shlib &#x3C;lib_name></code> #Funzione principale del bin indicato</p><p><code>breakpoint set -r '\[NSFileManager .*\]$'</code> #Qualsiasi metodo NSFileManager</p><p><code>breakpoint set -r '\[NSFileManager contentsOfDirectoryAtPath:.*\]$'</code></p><p><code>break set -r . -s libobjc.A.dylib</code> # Interrompi in tutte le funzioni di quella libreria</p><p><code>b -a 0x0000000100004bd9</code></p><p><code>br l</code> #Elenco dei breakpoint</p><p><code>br e/dis &#x3C;num></code> #Abilita/Disabilita il breakpoint</p><p>breakpoint delete &#x3C;num></p></td></tr><tr><td><strong>help</strong></td><td><p>help breakpoint #Ottieni aiuto sul comando breakpoint</p><p>help memory write #Ottieni aiuto per scrivere nella memoria</p></td></tr><tr><td><strong>reg</strong></td><td><p>reg read</p><p>reg read $rax</p><p>reg read $rax --format &#x3C;<a href="https://lldb.llvm.org/use/variable.html#type-format">format</a>></p><p>reg write $rip 0x100035cc0</p></td></tr><tr><td><strong>x/s &#x3C;reg/memory address></strong></td><td>Visualizza la memoria come una stringa terminata da null.</td></tr><tr><td><strong>x/i &#x3C;reg/memory address></strong></td><td>Visualizza la memoria come istruzione assembly.</td></tr><tr><td><strong>x/b &#x3C;reg/memory address></strong></td><td>Visualizza la memoria come byte.</td></tr><tr><td><strong>print object (po)</strong></td><td><p>Questo stamperà l'oggetto referenziato dal parametro</p><p>po $raw</p><p><code>{</code></p><p><code>dnsChanger = {</code></p><p><code>"affiliate" = "";</code></p><p><code>"blacklist_dns" = ();</code></p><p>Nota che la maggior parte delle API o dei metodi Objective-C di Apple restituiscono oggetti, e quindi dovrebbero essere visualizzati tramite il comando “print object” (po). Se po non produce un output significativo, usa <code>x/b</code></p></td></tr><tr><td><strong>memory</strong></td><td>memory read 0x000....<br>memory read $x0+0xf2a<br>memory write 0x100600000 -s 4 0x41414141 #Scrivi AAAA in quell'indirizzo<br>memory write -f s $rip+0x11f+7 "AAAA" #Scrivi AAAA nell'indirizzo</td></tr><tr><td><strong>disassembly</strong></td><td><p>dis #Disassembla la funzione corrente</p><p>dis -n &#x3C;funcname> #Disassembla la funzione</p><p>dis -n &#x3C;funcname> -b &#x3C;basename> #Disassembla la funzione<br>dis -c 6 #Disassembla 6 righe<br>dis -c 0x100003764 -e 0x100003768 # Da un add fino all'altro<br>dis -p -c 4 # Inizia nell'indirizzo corrente disassemblando</p></td></tr><tr><td><strong>parray</strong></td><td>parray 3 (char **)$x1 # Controlla l'array di 3 componenti nel registro x1</td></tr><tr><td><strong>image dump sections</strong></td><td>Stampa la mappa della memoria del processo corrente</td></tr><tr><td><strong>image dump symtab &#x3C;library></strong></td><td><code>image dump symtab CoreNLP</code> #Ottieni l'indirizzo di tutti i simboli da CoreNLP</td></tr></tbody></table>
+<table data-header-hidden><thead><tr><th width="225"></th><th></th></tr></thead><tbody><tr><td><strong>(lldb) Comando</strong></td><td><strong>Descrizione</strong></td></tr><tr><td><strong>run (r)</strong></td><td>Inizia l'esecuzione, che continuerà senza interruzioni fino a quando non viene colpito un breakpoint o il processo termina.</td></tr><tr><td><strong>process launch --stop-at-entry</strong></td><td>Inizia l'esecuzione fermandosi al punto di ingresso</td></tr><tr><td><strong>continue (c)</strong></td><td>Continua l'esecuzione del processo in debug.</td></tr><tr><td><strong>nexti (n / ni)</strong></td><td>Esegui la prossima istruzione. Questo comando salterà le chiamate di funzione.</td></tr><tr><td><strong>stepi (s / si)</strong></td><td>Esegui la prossima istruzione. A differenza del comando nexti, questo comando entrerà nelle chiamate di funzione.</td></tr><tr><td><strong>finish (f)</strong></td><td>Esegui il resto delle istruzioni nella funzione corrente (“frame”) restituisci e ferma.</td></tr><tr><td><strong>control + c</strong></td><td>Metti in pausa l'esecuzione. Se il processo è stato eseguito (r) o continuato (c), questo causerà l'arresto del processo ...dove si trova attualmente in esecuzione.</td></tr><tr><td><strong>breakpoint (b)</strong></td><td><p><code>b main</code> #Qualsiasi funzione chiamata main</p><p><code>b &#x3C;binname>`main</code> #Funzione principale del bin</p><p><code>b set -n main --shlib &#x3C;lib_name></code> #Funzione principale del bin indicato</p><p><code>breakpoint set -r '\[NSFileManager .*\]$'</code> #Qualsiasi metodo NSFileManager</p><p><code>breakpoint set -r '\[NSFileManager contentsOfDirectoryAtPath:.*\]$'</code></p><p><code>break set -r . -s libobjc.A.dylib</code> # Interrompi in tutte le funzioni di quella libreria</p><p><code>b -a 0x0000000100004bd9</code></p><p><code>br l</code> #Elenco dei breakpoint</p><p><code>br e/dis &#x3C;num></code> #Abilita/Disabilita breakpoint</p><p>breakpoint delete &#x3C;num></p></td></tr><tr><td><strong>help</strong></td><td><p>help breakpoint #Ottieni aiuto sul comando breakpoint</p><p>help memory write #Ottieni aiuto per scrivere nella memoria</p></td></tr><tr><td><strong>reg</strong></td><td><p>reg read</p><p>reg read $rax</p><p>reg read $rax --format &#x3C;<a href="https://lldb.llvm.org/use/variable.html#type-format">format</a>></p><p>reg write $rip 0x100035cc0</p></td></tr><tr><td><strong>x/s &#x3C;reg/memory address></strong></td><td>Visualizza la memoria come una stringa terminata da null.</td></tr><tr><td><strong>x/i &#x3C;reg/memory address></strong></td><td>Visualizza la memoria come istruzione assembly.</td></tr><tr><td><strong>x/b &#x3C;reg/memory address></strong></td><td>Visualizza la memoria come byte.</td></tr><tr><td><strong>print object (po)</strong></td><td><p>Questo stamperà l'oggetto referenziato dal parametro</p><p>po $raw</p><p><code>{</code></p><p><code>dnsChanger = {</code></p><p><code>"affiliate" = "";</code></p><p><code>"blacklist_dns" = ();</code></p><p>Nota che la maggior parte delle API o dei metodi Objective-C di Apple restituiscono oggetti, e quindi dovrebbero essere visualizzati tramite il comando “print object” (po). Se po non produce un output significativo usa <code>x/b</code></p></td></tr><tr><td><strong>memory</strong></td><td>memory read 0x000....<br>memory read $x0+0xf2a<br>memory write 0x100600000 -s 4 0x41414141 #Scrivi AAAA in quell'indirizzo<br>memory write -f s $rip+0x11f+7 "AAAA" #Scrivi AAAA nell'indirizzo</td></tr><tr><td><strong>disassembly</strong></td><td><p>dis #Disassembla la funzione corrente</p><p>dis -n &#x3C;funcname> #Disassembla la funzione</p><p>dis -n &#x3C;funcname> -b &#x3C;basename> #Disassembla la funzione<br>dis -c 6 #Disassembla 6 righe<br>dis -c 0x100003764 -e 0x100003768 # Da un add fino all'altro<br>dis -p -c 4 # Inizia nell'indirizzo corrente disassemblando</p></td></tr><tr><td><strong>parray</strong></td><td>parray 3 (char **)$x1 # Controlla l'array di 3 componenti nel registro x1</td></tr><tr><td><strong>image dump sections</strong></td><td>Stampa la mappa della memoria del processo corrente</td></tr><tr><td><strong>image dump symtab &#x3C;library></strong></td><td><code>image dump symtab CoreNLP</code> #Ottieni l'indirizzo di tutti i simboli da CoreNLP</td></tr></tbody></table>
 
 > [!NOTE]
 > Quando si chiama la funzione **`objc_sendMsg`**, il registro **rsi** contiene il **nome del metodo** come stringa terminata da null (“C”). Per stampare il nome tramite lldb fare:
@@ -480,7 +480,7 @@ In questi casi il core dump viene generato secondo `kern.corefile` sysctl e soli
 
 ReportCrash **analizza i processi in crash e salva un rapporto di crash su disco**. Un rapporto di crash contiene informazioni che possono **aiutare uno sviluppatore a diagnosticare** la causa di un crash.\
 Per le applicazioni e altri processi **in esecuzione nel contesto di launchd per utente**, ReportCrash viene eseguito come un LaunchAgent e salva i rapporti di crash nella `~/Library/Logs/DiagnosticReports/` dell'utente.\
-Per i demoni, altri processi **in esecuzione nel contesto di launchd di sistema** e altri processi privilegiati, ReportCrash viene eseguito come un LaunchDaemon e salva i rapporti di crash nei `/Library/Logs/DiagnosticReports` del sistema.
+Per i demoni, altri processi **in esecuzione nel contesto di launchd di sistema** e altri processi privilegiati, ReportCrash viene eseguito come un LaunchDaemon e salva i rapporti di crash nei `/Library/Logs/DiagnosticReports` di sistema.
 
 Se sei preoccupato che i rapporti di crash **vengano inviati ad Apple**, puoi disabilitarli. In caso contrario, i rapporti di crash possono essere utili per **capire come è andato in crash un server**.
 ```bash
@@ -511,7 +511,7 @@ Se stai fuzzando tramite una connessione SSH, è importante assicurarsi che la s
 sudo launchctl unload /System/Library/LaunchDaemons/ssh.plist
 sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist
 ```
-### Gestori Interni
+### Internal Handlers
 
 **Controlla la seguente pagina** per scoprire come puoi trovare quale app è responsabile della **gestione dello schema o protocollo specificato:**
 
@@ -519,9 +519,9 @@ sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist
 ../macos-file-extension-apps.md
 {{#endref}}
 
-### Enumerazione dei Processi di Rete
+### Enumerating Network Processes
 
-Questo è interessante per trovare processi che gestiscono dati di rete:
+Questo è interessante per trovare i processi che gestiscono i dati di rete:
 ```bash
 dtrace -n 'syscall::recv*:entry { printf("-> %s (pid=%d)", execname, pid); }' >> recv.log
 #wait some time

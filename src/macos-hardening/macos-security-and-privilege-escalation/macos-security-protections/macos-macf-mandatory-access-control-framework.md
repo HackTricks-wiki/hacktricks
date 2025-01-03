@@ -18,7 +18,7 @@ Si noti che MACF non prende realmente decisioni, poiché **intercetta** solo le 
 6. Le policy indicano se consentono o negano l'azione
 
 > [!CAUTION]
-> Apple è l'unica che può utilizzare il KPI del MAC Framework.
+> Apple è l'unica in grado di utilizzare il KPI del MAC Framework.
 
 ### Etichette
 
@@ -157,17 +157,17 @@ error = mac_error_select(__step_err, error);         \
 });                                                             \
 } while (0)
 ```
-Quale passerà in rassegna tutte le politiche mac registrate chiamando le loro funzioni e memorizzando l'output all'interno della variabile di errore, che sarà sovrascrivibile solo da `mac_error_select` tramite codici di successo, quindi se un controllo fallisce, il controllo completo fallirà e l'azione non sarà consentita.
+Quale passerà in rassegna tutte le politiche mac registrate chiamando le loro funzioni e memorizzando l'output all'interno della variabile error, che sarà sovrascrivibile solo da `mac_error_select` tramite codici di successo, quindi se un controllo fallisce, il controllo completo fallirà e l'azione non sarà consentita.
 
 > [!TIP]
 > Tuttavia, ricorda che non tutte le chiamate MACF sono utilizzate solo per negare azioni. Ad esempio, `mac_priv_grant` chiama il macro [**MAC_GRANT**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_internal.h#L274), che concederà il privilegio richiesto se qualche politica risponde con un 0:
 >
 > ```c
 > /*
->  * MAC_GRANT esegue il controllo designato attraversando l'elenco dei moduli
+>  * MAC_GRANT esegue il controllo designato attraversando la lista dei moduli
 >  * di politica e controllando con ciascuno come si sente riguardo alla
->  * richiesta. A differenza di MAC_CHECK, concede se qualche politica restituisce '0',
->  * e altrimenti restituisce EPERM. Nota che restituisce il suo valore tramite
+>  * richiesta.  A differenza di MAC_CHECK, concede se qualche politica restituisce '0',
+>  * e altrimenti restituisce EPERM.  Nota che restituisce il suo valore tramite
 >  * 'error' nel contesto del chiamante.
 >  */
 > #define MAC_GRANT(check, args...) do {                              \

@@ -50,7 +50,7 @@ Puoi caricare questo file in [https://hexed.it/](https://hexed.it/) e cercare la
 
 <figure><img src="../../../images/image (34).png" alt=""><figcaption></figcaption></figure>
 
-Nota che se provi a **sovrascrivere** il **`Electron Framework` binary** all'interno di un'applicazione con questi byte modificati, l'app non verrà eseguita.
+Nota che se provi a **sovrascrivere** il **`Electron Framework`** binario all'interno di un'applicazione con questi byte modificati, l'app non verrà eseguita.
 
 ## RCE aggiungendo codice alle Applicazioni Electron
 
@@ -155,7 +155,7 @@ Ad esempio:
 require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator')
 ```
 > [!CAUTION]
-> Se il fuse **`EnableNodeCliInspectArguments`** è disabilitato, l'app **ignorerà i parametri node** (come `--inspect`) quando viene avviata, a meno che la variabile di ambiente **`ELECTRON_RUN_AS_NODE`** non sia impostata, che sarà anch'essa **ignorata** se il fuse **`RunAsNode`** è disabilitato.
+> Se il fuse **`EnableNodeCliInspectArguments`** è disabilitato, l'app **ignorerà i parametri node** (come `--inspect`) quando viene avviata, a meno che la variabile env **`ELECTRON_RUN_AS_NODE`** non sia impostata, che sarà anch'essa **ignorata** se il fuse **`RunAsNode`** è disabilitato.
 >
 > Tuttavia, puoi comunque utilizzare il **parametro electron `--remote-debugging-port=9229`** ma il payload precedente non funzionerà per eseguire altri processi.
 
@@ -169,7 +169,7 @@ ws.connect("ws://localhost:9222/devtools/page/85976D59050BFEFDBA48204E3D865D00",
 ws.send('{\"id\": 1, \"method\": \"Network.getAllCookies\"}')
 print(ws.recv()
 ```
-In [**questo blogpost**](https://hackerone.com/reports/1274695), questo debugging viene abusato per far sì che un chrome headless **scarichi file arbitrari in posizioni arbitrarie**.
+In [**questo post del blog**](https://hackerone.com/reports/1274695), questo debugging è abusato per far sì che un chrome headless **scarichi file arbitrari in posizioni arbitrarie**.
 
 ### Iniezione dal Plist dell'App
 
@@ -187,17 +187,17 @@ Potresti abusare di questa variabile d'ambiente in un plist per mantenere la per
 <true/>
 </dict>
 ```
-## TCC Bypass abusando di Versioni Più Vecchie
+## Bypass TCC abusando di versioni precedenti
 
 > [!TIP]
-> Il demone TCC di macOS non controlla la versione eseguita dell'applicazione. Quindi, se **non puoi iniettare codice in un'applicazione Electron** con nessuna delle tecniche precedenti, puoi scaricare una versione precedente dell'APP e iniettare codice su di essa poiché otterrà comunque i privilegi TCC (a meno che il Trust Cache non lo impedisca).
+> Il demone TCC di macOS non controlla la versione eseguita dell'applicazione. Quindi, se **non puoi iniettare codice in un'applicazione Electron** con nessuna delle tecniche precedenti, potresti scaricare una versione precedente dell'APP e iniettare codice su di essa poiché otterrà comunque i privilegi TCC (a meno che il Trust Cache non lo impedisca).
 
-## Eseguire codice non JS
+## Esegui codice non JS
 
 Le tecniche precedenti ti permetteranno di eseguire **codice JS all'interno del processo dell'applicazione electron**. Tuttavia, ricorda che i **processi figli vengono eseguiti sotto lo stesso profilo sandbox** dell'applicazione padre e **erediteranno i loro permessi TCC**.\
-Pertanto, se vuoi abusare dei diritti per accedere alla fotocamera o al microfono, ad esempio, puoi semplicemente **eseguire un altro binario dal processo**.
+Pertanto, se desideri abusare dei diritti per accedere alla fotocamera o al microfono, ad esempio, potresti semplicemente **eseguire un altro binario dal processo**.
 
-## Iniezione Automatica
+## Iniezione automatica
 
 Lo strumento [**electroniz3r**](https://github.com/r3ggi/electroniz3r) può essere facilmente utilizzato per **trovare applicazioni electron vulnerabili** installate e iniettare codice su di esse. Questo strumento cercherà di utilizzare la tecnica **`--inspect`**:
 

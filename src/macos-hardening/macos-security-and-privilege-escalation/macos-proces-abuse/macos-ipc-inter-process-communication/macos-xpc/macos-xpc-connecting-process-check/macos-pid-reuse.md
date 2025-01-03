@@ -6,7 +6,7 @@
 
 Quando un **servizio XPC** di macOS controlla il processo chiamato in base al **PID** e non al **token di audit**, è vulnerabile a un attacco di riutilizzo del PID. Questo attacco si basa su una **condizione di gara** in cui un **exploit** invierà messaggi al servizio **XPC** **abusando** della funzionalità e solo **dopo** eseguirà **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** con il **binary** **consentito**.
 
-Questa funzione farà in modo che il **binary** **consentito possieda il PID**, ma il **messaggio XPC malevolo sarebbe stato inviato** poco prima. Quindi, se il servizio **XPC** **usa** il **PID** per **autenticare** il mittente e lo controlla **DOPO** l'esecuzione di **`posix_spawn`**, penserà che provenga da un processo **autorizzato**.
+Questa funzione farà in modo che il **binary consentito possieda il PID**, ma il **messaggio XPC malevolo sarebbe stato inviato** poco prima. Quindi, se il servizio **XPC** **usa** il **PID** per **autenticare** il mittente e lo controlla **DOPO** l'esecuzione di **`posix_spawn`**, penserà che provenga da un processo **autorizzato**.
 
 ### Esempio di exploit
 
@@ -31,7 +31,7 @@ Controlla questo esempio di exploit (ancora, preso dalla referenza) per vedere l
 
 {{#tabs}}
 {{#tab name="NSTasks"}}
-Prima opzione utilizzando **`NSTasks`** e argomento per avviare i figli per sfruttare la RC
+Prima opzione utilizzando **`NSTasks`** e argomento per lanciare i figli per sfruttare la RC
 ```objectivec
 // Code from https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/
 // gcc -framework Foundation expl.m -o expl

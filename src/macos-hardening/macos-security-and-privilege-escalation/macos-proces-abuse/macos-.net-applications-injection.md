@@ -6,13 +6,13 @@
 
 ## .NET Core Debugging <a href="#net-core-debugging" id="net-core-debugging"></a>
 
-### **Stabilire una Sessione di Debugging** <a href="#net-core-debugging" id="net-core-debugging"></a>
+### **Stabilire una sessione di debug** <a href="#net-core-debugging" id="net-core-debugging"></a>
 
 La gestione della comunicazione tra debugger e debuggee in .NET è gestita da [**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp). Questo componente imposta due pipe nominate per ogni processo .NET come visto in [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127), che sono iniziate tramite [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27). Queste pipe sono suffisse con **`-in`** e **`-out`**.
 
-Visitando il **`$TMPDIR`** dell'utente, si possono trovare FIFO di debugging disponibili per il debugging delle applicazioni .Net.
+Visitando il **`$TMPDIR`** dell'utente, si possono trovare FIFO di debug disponibili per il debug delle applicazioni .Net.
 
-[**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259) è responsabile della gestione della comunicazione da un debugger. Per avviare una nuova sessione di debugging, un debugger deve inviare un messaggio tramite la pipe `out` che inizia con una struct `MessageHeader`, dettagliata nel codice sorgente di .NET:
+[**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259) è responsabile della gestione della comunicazione da un debugger. Per avviare una nuova sessione di debug, un debugger deve inviare un messaggio tramite la pipe `out` che inizia con una struct `MessageHeader`, dettagliata nel codice sorgente di .NET:
 ```c
 struct MessageHeader {
 MessageType   m_eType;        // Message type
@@ -91,11 +91,11 @@ Per eseguire codice, è necessario identificare una regione di memoria con perme
 vmmap -pages [pid]
 vmmap -pages 35829 | grep "rwx/rwx"
 ```
-Trovare un luogo per sovrascrivere un puntatore di funzione è necessario, e in .NET Core, questo può essere fatto mirando alla **Dynamic Function Table (DFT)**. Questa tabella, dettagliata in [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h), è utilizzata dal runtime per le funzioni di aiuto della compilazione JIT.
+Trovare un luogo per sovrascrivere un puntatore di funzione è necessario, e in .NET Core, questo può essere fatto mirato alla **Dynamic Function Table (DFT)**. Questa tabella, dettagliata in [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h), è utilizzata dal runtime per le funzioni helper di compilazione JIT.
 
-Per i sistemi x64, la ricerca delle firme può essere utilizzata per trovare un riferimento al simbolo `_hlpDynamicFuncTable` in `libcorclr.dll`.
+Per i sistemi x64, la ricerca di firme può essere utilizzata per trovare un riferimento al simbolo `_hlpDynamicFuncTable` in `libcorclr.dll`.
 
-La funzione del debugger `MT_GetDCB` fornisce informazioni utili, incluso l'indirizzo di una funzione di aiuto, `m_helperRemoteStartAddr`, che indica la posizione di `libcorclr.dll` nella memoria del processo. Questo indirizzo viene quindi utilizzato per avviare una ricerca per la DFT e sovrascrivere un puntatore di funzione con l'indirizzo del shellcode.
+La funzione del debugger `MT_GetDCB` fornisce informazioni utili, incluso l'indirizzo di una funzione helper, `m_helperRemoteStartAddr`, che indica la posizione di `libcorclr.dll` nella memoria del processo. Questo indirizzo viene poi utilizzato per avviare una ricerca per la DFT e sovrascrivere un puntatore di funzione con l'indirizzo del shellcode.
 
 Il codice POC completo per l'iniezione in PowerShell è accessibile [qui](https://gist.github.com/xpn/b427998c8b3924ab1d63c89d273734b6).
 

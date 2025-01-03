@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Via `PERL5OPT` & `PERL5LIB` env variable
+## Tramite la variabile d'ambiente `PERL5OPT` & `PERL5LIB`
 
 Utilizzando la variabile d'ambiente PERL5OPT è possibile far eseguire a perl comandi arbitrari.\
 Ad esempio, crea questo script:
@@ -10,12 +10,12 @@ Ad esempio, crea questo script:
 #!/usr/bin/perl
 print "Hello from the Perl script!\n";
 ```
-Ora **esporta la variabile env** ed esegui lo **script perl**:
+Ora **esporta la variabile di ambiente** ed esegui lo **script perl**:
 ```bash
 export PERL5OPT='-Mwarnings;system("whoami")'
 perl test.pl # This will execute "whoami"
 ```
-Un'altra opzione è creare un modulo Perl (ad esempio, `/tmp/pmod.pm`):
+Un'altra opzione è creare un modulo Perl (ad es. `/tmp/pmod.pm`):
 ```perl:/tmp/pmod.pm
 #!/usr/bin/perl
 package pmod;

@@ -69,7 +69,7 @@ Questo funziona con un **daemon** situato in `/System/Library/PrivateFrameworks/
 
 Il modo in cui **`backgroundtaskmanagementd`** sa che qualcosa è installato in una cartella persistente è **ottenendo gli FSEvents** e creando alcuni **handler** per questi.
 
-Inoltre, c'è un file plist che contiene **applicazioni ben note** che persistono frequentemente mantenuto da Apple situato in: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`
+Inoltre, c'è un file plist che contiene **applicazioni ben note** che persistono frequentemente mantenute da Apple situato in: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`
 ```json
 [...]
 "us.zoom.ZoomDaemon" => {
@@ -124,7 +124,7 @@ kill -SIGSTOP 1011
 ps -o state 1011
 T
 ```
-- **Bug**: Se il **processo che ha creato la persistenza esiste rapidamente dopo di esso**, il daemon cercherà di **ottenere informazioni** su di esso, **fallirà** e **non sarà in grado di inviare l'evento** che indica che una nuova cosa sta persistendo.
+- **Bug**: Se il **processo che ha creato la persistenza esiste rapidamente dopo di esso**, il demone cercherà di **ottenere informazioni** su di esso, **fallirà** e **non sarà in grado di inviare l'evento** che indica che una nuova cosa sta persistendo.
 
 Riferimenti e **ulteriori informazioni su BTM**:
 

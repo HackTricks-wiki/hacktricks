@@ -1,4 +1,4 @@
-# macOS Posizioni Sensibili & Demoni Interessanti
+# macOS Sensitive Locations & Interesting Daemons
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -6,8 +6,8 @@
 
 ### Shadow Passwords
 
-La password shadow è memorizzata con la configurazione dell'utente nei plists situati in **`/var/db/dslocal/nodes/Default/users/`**.\
-La seguente riga di comando può essere utilizzata per estrarre **tutte le informazioni sugli utenti** (inclusi i dati degli hash):
+La password shadow è memorizzata con la configurazione dell'utente in plists situati in **`/var/db/dslocal/nodes/Default/users/`**.\
+Il seguente oneliner può essere utilizzato per estrarre **tutte le informazioni sugli utenti** (inclusi i dati dell'hash):
 ```bash
 for l in /var/db/dslocal/nodes/Default/users/*; do if [ -r "$l" ];then echo "$l"; defaults read "$l"; fi; done
 ```
@@ -90,7 +90,7 @@ hashcat.exe -m 23100 --keep-guessing hashes.txt dictionary.txt
 # Use the key to decrypt the passwords
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
-#### **Dump delle chiavi del portachiavi (con password) tramite dump della memoria**
+#### **Dump delle chiavi del portachiavi (con password) con il dump della memoria**
 
 [Segui questi passaggi](../#dumping-memory-with-osxpmem) per eseguire un **dump della memoria**
 ```bash
@@ -103,7 +103,7 @@ python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d1
 ```
 #### **Dump delle chiavi del portachiavi (con password) utilizzando la password dell'utente**
 
-Se conosci la password dell'utente, puoi usarla per **dumpare e decriptare i portachiavi che appartengono all'utente**.
+Se conosci la password dell'utente, puoi usarla per **dumpare e decrittare i portachiavi che appartengono all'utente**.
 ```bash
 #Prompt to ask for the password
 python2.7 chainbreaker.py --dump-all --password-prompt /Users/<username>/Library/Keychains/login.keychain-db
@@ -149,7 +149,7 @@ In macOS, le preferenze delle app si trovano in **`$HOME/Library/Preferences`** 
 
 In macOS, lo strumento cli **`defaults`** può essere utilizzato per **modificare il file delle Preferenze**.
 
-**`/usr/sbin/cfprefsd`** gestisce i servizi XPC `com.apple.cfprefsd.daemon` e `com.apple.cfprefsd.agent` e può essere chiamato per eseguire azioni come modificare le preferenze.
+**`/usr/sbin/cfprefsd`** rivendica i servizi XPC `com.apple.cfprefsd.daemon` e `com.apple.cfprefsd.agent` e può essere chiamato per eseguire azioni come modificare le preferenze.
 
 ## OpenDirectory permissions.plist
 

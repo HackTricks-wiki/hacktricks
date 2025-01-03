@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Struttura gerarchica dei file
+## Layout gerarchico dei file
 
 - **/Applications**: Le app installate dovrebbero trovarsi qui. Tutti gli utenti potranno accedervi.
 - **/bin**: Binaries da linea di comando
@@ -17,7 +17,7 @@
 - **/Users**: Directory home per gli utenti.
 - **/usr**: Config e binaries di sistema
 - **/var**: File di log
-- **/Volumes**: I dischi montati appariranno qui.
+- **/Volumes**: Le unità montate appariranno qui.
 - **/.vol**: Eseguendo `stat a.txt` ottieni qualcosa come `16777223 7545753 -rw-r--r-- 1 username wheel ...` dove il primo numero è l'id del volume in cui esiste il file e il secondo è il numero inode. Puoi accedere al contenuto di questo file tramite /.vol/ con quelle informazioni eseguendo `cat /.vol/16777223/7545753`
 
 ### Cartelle delle Applicazioni
@@ -82,7 +82,7 @@ In iOS puoi trovarli in **`/System/Library/Caches/com.apple.dyld/`**.
 
 Simile alla cache condivisa dyld, il kernel e le estensioni del kernel sono anche compilati in una cache del kernel, che viene caricata all'avvio.
 
-Per estrarre le librerie dal file unico della cache condivisa dylib, era possibile utilizzare il binario [dyld_shared_cache_util](https://www.mbsplugins.de/files/dyld_shared_cache_util-dyld-733.8.zip) che potrebbe non funzionare al giorno d'oggi, ma puoi anche utilizzare [**dyldextractor**](https://github.com/arandomdev/dyldextractor):
+Per estrarre le librerie dal file unico della cache condivisa dylib, era possibile utilizzare il binario [dyld_shared_cache_util](https://www.mbsplugins.de/files/dyld_shared_cache_util-dyld-733.8.zip) che potrebbe non funzionare al giorno d'oggi, ma puoi anche usare [**dyldextractor**](https://github.com/arandomdev/dyldextractor):
 ```bash
 # dyld_shared_cache_util
 dyld_shared_cache_util -extract ~/shared_cache/ /System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e
@@ -100,13 +100,13 @@ dyldex_all [dyld_shared_cache_path] # Extract all
 Alcuni estrattori non funzioneranno poiché le dylibs sono precollegate con indirizzi hardcoded e quindi potrebbero saltare a indirizzi sconosciuti.
 
 > [!TIP]
-> È anche possibile scaricare la Cache della Libreria Condivisa di altri dispositivi \*OS in macos utilizzando un emulatore in Xcode. Saranno scaricati all'interno di: ls `$HOME/Library/Developer/Xcode/<*>OS\ DeviceSupport/<version>/Symbols/System/Library/Caches/com.apple.dyld/`, come: `$HOME/Library/Developer/Xcode/iOS\ DeviceSupport/14.1\ (18A8395)/Symbols/System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64`
+> È anche possibile scaricare la Cache delle Librerie Condivise di altri dispositivi \*OS in macos utilizzando un emulatore in Xcode. Saranno scaricati all'interno di: ls `$HOME/Library/Developer/Xcode/<*>OS\ DeviceSupport/<version>/Symbols/System/Library/Caches/com.apple.dyld/`, come: `$HOME/Library/Developer/Xcode/iOS\ DeviceSupport/14.1\ (18A8395)/Symbols/System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64`
 
 ### Mapping SLC
 
 **`dyld`** utilizza la syscall **`shared_region_check_np`** per sapere se l'SLC è stato mappato (che restituisce l'indirizzo) e **`shared_region_map_and_slide_np`** per mappare l'SLC.
 
-Nota che anche se l'SLC è scivolato al primo utilizzo, tutti i **processi** utilizzano la **stessa copia**, il che **elimina la protezione ASLR** se l'attaccante è stato in grado di eseguire processi nel sistema. Questo è stato effettivamente sfruttato in passato e corretto con il pager della regione condivisa.
+Nota che anche se l'SLC è scivolato al primo utilizzo, tutti i **processi** utilizzano la **stessa copia**, il che **elimina la protezione ASLR** se l'attaccante è in grado di eseguire processi nel sistema. Questo è stato effettivamente sfruttato in passato ed è stato corretto con il pager della regione condivisa.
 
 I branch pool sono piccole dylibs Mach-O che creano piccoli spazi tra le mappature delle immagini rendendo impossibile l'interposizione delle funzioni.
 
@@ -114,7 +114,7 @@ I branch pool sono piccole dylibs Mach-O che creano piccoli spazi tra le mappatu
 
 Utilizzando le variabili di ambiente:
 
-- **`DYLD_DHARED_REGION=private DYLD_SHARED_CACHE_DIR=</path/dir> DYLD_SHARED_CACHE_DONT_VALIDATE=1`** -> Questo permetterà di caricare una nuova cache di libreria condivisa.
+- **`DYLD_DHARED_REGION=private DYLD_SHARED_CACHE_DIR=</path/dir> DYLD_SHARED_CACHE_DONT_VALIDATE=1`** -> Questo permetterà di caricare una nuova cache di librerie condivise.
 - **`DYLD_SHARED_CACHE_DIR=avoid`** e sostituire manualmente le librerie con symlink alla cache condivisa con quelle reali (dovrai estrarle).
 
 ## Permessi Speciali dei File
@@ -130,7 +130,7 @@ Ci sono alcuni flag che possono essere impostati nei file che faranno comportare
 - **`uchg`**: Conosciuto come flag **uchange** impedirà **qualsiasi azione** di modifica o eliminazione del **file**. Per impostarlo fare: `chflags uchg file.txt`
 - L'utente root potrebbe **rimuovere il flag** e modificare il file.
 - **`restricted`**: Questo flag rende il file **protetto da SIP** (non puoi aggiungere questo flag a un file).
-- **`Sticky bit`**: Se una directory ha il bit sticky, **solo** il **proprietario della directory o root può rinominare o eliminare** file. Tipicamente questo è impostato sulla directory /tmp per impedire agli utenti ordinari di eliminare o spostare i file di altri utenti.
+- **`Sticky bit`**: Se una directory ha il bit sticky, **solo** il **proprietario della directory o root può rinominare o eliminare** file. Tipicamente questo è impostato sulla directory /tmp per impedire agli utenti normali di eliminare o spostare i file di altri utenti.
 
 Tutti i flag possono essere trovati nel file `sys/stat.h` (trovalo usando `mdfind stat.h | grep stat.h`) e sono:
 
@@ -190,8 +190,8 @@ Gli attributi estesi hanno un nome e un valore desiderato, e possono essere visu
 - `com.apple.genstore.*`: Archiviazione generazionale (`/.DocumentRevisions-V100` nella radice del filesystem)
 - `com.apple.rootless`: MacOS: Utilizzato da System Integrity Protection per etichettare il file (III/10)
 - `com.apple.uuidb.boot-uuid`: marcature logd delle epoche di avvio con UUID unici
-- `com.apple.decmpfs`: MacOS: Compressione trasparente dei file (II/7)
-- `com.apple.cprotect`: \*OS: Dati di crittografia per file (III/11)
+- `com.apple.decmpfs`: MacOS: compressione trasparente dei file (II/7)
+- `com.apple.cprotect`: \*OS: Dati di crittografia per file singoli (III/11)
 - `com.apple.installd.*`: \*OS: Metadati utilizzati da installd, ad es., `installType`, `uniqueInstallID`
 
 ### Fork delle Risorse | macOS ADS

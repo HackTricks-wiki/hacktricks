@@ -429,7 +429,7 @@ ffmpeg -framerate 30 -f avfoundation -i "0" -frames:v 1 /tmp/capture.jpg
 
 {{#tabs}}
 {{#tab name="ObjetiveC - Registra"}}
-Registra 5 secondi di audio e salvalo in `/tmp/recording.m4a`
+Registra 5s di audio e salvalo in `/tmp/recording.m4a`
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>

@@ -23,7 +23,7 @@ Successivamente, **`posix_spawn`** è stato introdotto combinando **`vfork`** e 
 
 Inoltre, `posix_spawn` consente di specificare un array di **`posix_spawnattr`** che controlla alcuni aspetti del processo generato, e **`posix_spawn_file_actions`** per modificare lo stato dei descrittori.
 
-Quando un processo muore, invia il **codice di ritorno al processo padre** (se il padre è morto, il nuovo padre è il PID 1) con il segnale `SIGCHLD`. Il padre deve ottenere questo valore chiamando `wait4()` o `waitid()` e fino a quando ciò non accade, il figlio rimane in uno stato zombie dove è ancora elencato ma non consuma risorse.
+Quando un processo muore, invia il **codice di ritorno al processo padre** (se il padre è morto, il nuovo padre è il PID 1) con il segnale `SIGCHLD`. Il padre deve ottenere questo valore chiamando `wait4()` o `waitid()` e fino a quel momento il figlio rimane in uno stato zombie dove è ancora elencato ma non consuma risorse.
 
 ### PIDs
 
@@ -39,7 +39,7 @@ La coalizione è un altro modo per raggruppare i processi in Darwin. Un processo
 ### Credenziali e Personae
 
 Ogni processo detiene **credenziali** che **identificano i suoi privilegi** nel sistema. Ogni processo avrà un `uid` primario e un `gid` primario (anche se potrebbe appartenere a più gruppi).\
-È anche possibile cambiare l'ID utente e l'ID gruppo se il binario ha il bit `setuid/setgid`.\
+È anche possibile cambiare l'ID utente e l'ID di gruppo se il binario ha il bit `setuid/setgid`.\
 Ci sono diverse funzioni per **impostare nuovi uids/gids**.
 
 La syscall **`persona`** fornisce un **insieme alternativo** di **credenziali**. Adottare una persona assume il suo uid, gid e le appartenenze ai gruppi **tutte insieme**. Nel [**codice sorgente**](https://github.com/apple/darwin-xnu/blob/main/bsd/sys/persona.h) è possibile trovare la struct:
@@ -73,8 +73,8 @@ char     persona_name[MAXLOGNAME + 1];
 Per gestire l'accesso alle risorse condivise e evitare condizioni di gara, macOS fornisce diversi primitivi di sincronizzazione. Questi sono critici negli ambienti multi-threading per garantire l'integrità dei dati e la stabilità del sistema:
 
 1. **Mutex:**
-- **Mutex Normale (Firma: 0x4D555458):** Mutex standard con un'impronta di memoria di 60 byte (56 byte per il mutex e 4 byte per la firma).
-- **Mutex Veloce (Firma: 0x4d55545A):** Simile a un mutex normale ma ottimizzato per operazioni più veloci, anch'esso di 60 byte.
+- **Mutex Regolare (Firma: 0x4D555458):** Mutex standard con un'impronta di memoria di 60 byte (56 byte per il mutex e 4 byte per la firma).
+- **Mutex Veloce (Firma: 0x4d55545A):** Simile a un mutex regolare ma ottimizzato per operazioni più veloci, anch'esso di 60 byte.
 2. **Variabili di Condizione:**
 - Utilizzate per attendere che si verifichino determinate condizioni, con una dimensione di 44 byte (40 byte più una firma di 4 byte).
 - **Attributi della Variabile di Condizione (Firma: 0x434e4441):** Attributi di configurazione per le variabili di condizione, dimensionati a 12 byte.
@@ -233,7 +233,7 @@ Altre variabili ambientali come **`PYTHONPATH`** e **`PYTHONHOME`** potrebbero e
 Nota che gli eseguibili compilati con **`pyinstaller`** non utilizzeranno queste variabili ambientali anche se vengono eseguiti utilizzando un python incorporato.
 
 > [!CAUTION]
-> In generale, non sono riuscito a trovare un modo per far eseguire a python codice arbitrario abusando delle variabili ambientali.\
+> In generale non sono riuscito a trovare un modo per far eseguire a python codice arbitrario abusando delle variabili ambientali.\
 > Tuttavia, la maggior parte delle persone installa python utilizzando **Homebrew**, che installerà python in una **posizione scrivibile** per l'utente admin predefinito. Puoi dirottarlo con qualcosa del tipo:
 >
 > ```bash
@@ -255,7 +255,7 @@ Nota che gli eseguibili compilati con **`pyinstaller`** non utilizzeranno queste
 [**Shield**](https://theevilbit.github.io/shield/) ([**Github**](https://github.com/theevilbit/Shield)) è un'applicazione open source che può **rilevare e bloccare le azioni di iniezione di processi**:
 
 - Utilizzando **Variabili Ambientali**: Monitorerà la presenza di una delle seguenti variabili ambientali: **`DYLD_INSERT_LIBRARIES`**, **`CFNETWORK_LIBRARY_PATH`**, **`RAWCAMERA_BUNDLE_PATH`** e **`ELECTRON_RUN_AS_NODE`**
-- Utilizzando chiamate **`task_for_pid`**: Per trovare quando un processo vuole ottenere il **port task di un altro** che consente di iniettare codice nel processo.
+- Utilizzando chiamate **`task_for_pid`**: Per scoprire quando un processo vuole ottenere il **port task di un altro** che consente di iniettare codice nel processo.
 - **Parametri delle app Electron**: Qualcuno può utilizzare l'argomento della riga di comando **`--inspect`**, **`--inspect-brk`** e **`--remote-debugging-port`** per avviare un'app Electron in modalità di debug, e quindi iniettare codice in essa.
 - Utilizzando **symlink** o **hardlink**: Tipicamente l'abuso più comune è **posizionare un link con i nostri privilegi utente**, e **puntarlo a una posizione con privilegi superiori**. La rilevazione è molto semplice sia per hardlink che per symlink. Se il processo che crea il link ha un **livello di privilegio diverso** rispetto al file di destinazione, creiamo un **alert**. Sfortunatamente, nel caso dei symlink, il blocco non è possibile, poiché non abbiamo informazioni sulla destinazione del link prima della creazione. Questa è una limitazione del framework EndpointSecurity di Apple.
 

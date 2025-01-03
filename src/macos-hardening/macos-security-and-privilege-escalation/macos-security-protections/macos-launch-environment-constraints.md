@@ -2,9 +2,9 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Informazioni di base
+## Basic Information
 
-I vincoli di avvio in macOS sono stati introdotti per migliorare la sicurezza **regolando come, chi e da dove un processo può essere avviato**. Iniziati in macOS Ventura, forniscono un framework che categorizza **ogni binario di sistema in distinte categorie di vincolo**, definite all'interno della **trust cache**, un elenco contenente i binari di sistema e i loro rispettivi hash​. Questi vincoli si estendono a ogni binario eseguibile all'interno del sistema, comportando un insieme di **regole** che delineano i requisiti per **lanciare un particolare binario**. Le regole comprendono vincoli autoimposti che un binario deve soddisfare, vincoli parentali che devono essere soddisfatti dal suo processo padre e vincoli di responsabilità a cui devono attenersi altre entità rilevanti​.
+I vincoli di avvio in macOS sono stati introdotti per migliorare la sicurezza **regolando come, chi e da dove un processo può essere avviato**. Iniziati in macOS Ventura, forniscono un framework che categorizza **ogni binario di sistema in distinte categorie di vincoli**, definiti all'interno della **trust cache**, un elenco contenente i binari di sistema e i loro rispettivi hash​. Questi vincoli si estendono a ogni binario eseguibile all'interno del sistema, comportando un insieme di **regole** che delineano i requisiti per **lanciare un particolare binario**. Le regole comprendono vincoli autoimposti che un binario deve soddisfare, vincoli parentali che devono essere soddisfatti dal suo processo padre e vincoli di responsabilità a cui devono attenersi altre entità rilevanti​.
 
 Il meccanismo si estende alle app di terze parti attraverso **Environment Constraints**, a partire da macOS Sonoma, consentendo agli sviluppatori di proteggere le loro app specificando un **insieme di chiavi e valori per i vincoli ambientali.**
 
@@ -21,7 +21,7 @@ Quindi, quando un processo cerca di avviare un altro processo — chiamando `exe
 
 Se durante il caricamento di una libreria qualsiasi parte del **vincolo della libreria non è vera**, il tuo processo **non carica** la libreria.
 
-## Categorie LC
+## LC Categories
 
 Un LC è composto da **fatti** e **operazioni logiche** (e, o..) che combinano fatti.
 
@@ -58,15 +58,15 @@ Hai più informazioni [**a riguardo qui**](https://theevilbit.github.io/posts/la
 
 ## Vincoli Ambientali
 
-Questi sono i Vincoli di Lancio impostati configurati in **applicazioni di terze parti**. Lo sviluppatore può selezionare i **fatti** e **gli operatori logici da utilizzare** nella sua applicazione per limitare l'accesso a se stesso.
+Questi sono i Vincoli di Lancio impostati nelle **applicazioni di terze parti**. Lo sviluppatore può selezionare i **fatti** e **gli operatori logici da utilizzare** nella sua applicazione per limitare l'accesso a se stesso.
 
 È possibile enumerare i Vincoli Ambientali di un'applicazione con:
 ```bash
 codesign -d -vvvv app.app
 ```
-## Trust Caches
+## Cache di Fiducia
 
-In **macOS** ci sono alcuni cache di fiducia:
+In **macOS** ci sono alcune cache di fiducia:
 
 - **`/System/Volumes/Preboot/*/boot/*/usr/standalone/firmware/FUD/BaseSystemTrustCache.img4`**
 - **`/System/Volumes/Preboot/*/boot/*/usr/standalone/firmware/FUD/StaticTrustCache.img4`**
@@ -75,11 +75,11 @@ In **macOS** ci sono alcuni cache di fiducia:
 E in iOS sembra che si trovi in **`/usr/standalone/firmware/FUD/StaticTrustCache.img4`**.
 
 > [!WARNING]
-> Su macOS che gira su dispositivi Apple Silicon, se un binario firmato da Apple non è nel cache di fiducia, AMFI rifiuterà di caricarlo.
+> Su macOS che gira su dispositivi Apple Silicon, se un binario firmato da Apple non è nella cache di fiducia, AMFI rifiuterà di caricarlo.
 
-### Enumerating Trust Caches
+### Enumerare le Cache di Fiducia
 
-I precedenti file di cache di fiducia sono nel formato **IMG4** e **IM4P**, essendo IM4P la sezione payload di un formato IMG4.
+I precedenti file di cache di fiducia sono nel formato **IMG4** e **IM4P**, con IM4P che rappresenta la sezione payload di un formato IMG4.
 
 Puoi usare [**pyimg4**](https://github.com/m1stadev/PyIMG4) per estrarre il payload dei database:
 ```bash
@@ -123,7 +123,7 @@ entry count = 969
 01e6934cb8833314ea29640c3f633d740fc187f2 [none] [2] [2]
 020bf8c388deaef2740d98223f3d2238b08bab56 [none] [2] [3]
 ```
-La cache di fiducia segue la seguente struttura, quindi **la categoria LC è la quarta colonna**
+La cache di fiducia segue la seguente struttura, quindi la **categoria LC è la 4ª colonna**
 ```c
 struct trust_cache_entry2 {
 uint8_t cdhash[CS_CDHASH_LEN];
@@ -135,11 +135,11 @@ uint8_t reserved0;
 ```
 Poi, puoi utilizzare uno script come [**questo**](https://gist.github.com/xpn/66dc3597acd48a4c31f5f77c3cc62f30) per estrarre dati.
 
-Da quei dati puoi controllare le App con un **valore di vincoli di avvio di `0`**, che sono quelle che non sono vincolate ([**controlla qui**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056) per cosa rappresenta ogni valore).
+Da quei dati puoi controllare le App con un **valore di vincoli di avvio di `0`**, che sono quelle che non sono vincolate ([**controlla qui**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056) per cosa rappresenta ciascun valore).
 
 ## Mitigazioni degli attacchi
 
-I vincoli di avvio avrebbero mitigato diversi attacchi vecchi **assicurandosi che il processo non venga eseguito in condizioni inaspettate:** Ad esempio, da posizioni inaspettate o invocato da un processo padre inaspettato (se solo launchd dovrebbe lanciarlo).
+I vincoli di avvio avrebbero mitigato diversi attacchi vecchi **assicurandosi che il processo non venga eseguito in condizioni inaspettate:** Ad esempio, da posizioni inaspettate o invocato da un processo padre inaspettato (se solo launchd dovrebbe avviarlo).
 
 Inoltre, i vincoli di avvio **mitigano anche gli attacchi di downgrade.**
 

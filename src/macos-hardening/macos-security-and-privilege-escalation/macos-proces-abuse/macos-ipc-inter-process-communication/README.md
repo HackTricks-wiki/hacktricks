@@ -21,7 +21,7 @@ Un processo può anche inviare un nome di porta con alcuni diritti **a un compit
 I diritti di porta, che definiscono quali operazioni un compito può eseguire, sono fondamentali per questa comunicazione. I possibili **diritti di porta** sono ([definizioni da qui](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)):
 
 - **Diritto di ricezione**, che consente di ricevere messaggi inviati alla porta. Le porte Mach sono code MPSC (produttore multiplo, consumatore singolo), il che significa che può esserci solo **un diritto di ricezione per ogni porta** nell'intero sistema (a differenza delle pipe, dove più processi possono detenere descrittori di file per l'estremità di lettura di una pipe).
-- Un **compito con il Diritto di Ricezione** può ricevere messaggi e **creare diritti di invio**, consentendogli di inviare messaggi. Inizialmente solo il **proprio compito ha il Diritto di Ricezione sulla sua porta**.
+- Un **compito con il Diritto di Ricezione** può ricevere messaggi e **creare diritti di Invio**, consentendogli di inviare messaggi. Inizialmente solo il **proprio compito ha il Diritto di Ricezione sulla sua porta**.
 - Se il proprietario del Diritto di Ricezione **muore** o lo termina, il **diritto di invio diventa inutile (nome morto)**.
 - **Diritto di invio**, che consente di inviare messaggi alla porta.
 - Il Diritto di invio può essere **clonato** in modo che un compito che possiede un Diritto di invio possa clonare il diritto e **concederlo a un terzo compito**.
@@ -35,7 +35,7 @@ I diritti di porta, che definiscono quali operazioni un compito può eseguire, s
 
 ### Porte di File
 
-Le porte di file consentono di incapsulare descrittori di file in porte Mac (utilizzando diritti di porta Mach). È possibile creare una `fileport` da un FD dato utilizzando `fileport_makeport` e creare un FD da una fileport utilizzando `fileport_makefd`.
+Le porte di file consentono di incapsulare descrittori di file in porte Mac (utilizzando diritti di porta Mach). È possibile creare un `fileport` da un FD dato utilizzando `fileport_makeport` e creare un FD da un fileport utilizzando `fileport_makefd`.
 
 ### Stabilire una comunicazione
 
@@ -53,7 +53,7 @@ Per questo, il **bootstrap server** (**launchd** in mac) è coinvolto, poiché *
 6. Con questo Diritto di INVIO, **il Compito B** è in grado di **inviare** un **messaggio** **al Compito A**.
 7. Per una comunicazione bidirezionale, di solito il compito **B** genera una nuova porta con un **DIRITTO DI RICEZIONE** e un **DIRITTO DI INVIO**, e dà il **DIRITTO DI INVIO al Compito A** in modo che possa inviare messaggi al COMPITO B (comunicazione bidirezionale).
 
-Il bootstrap server **non può autenticare** il nome del servizio rivendicato da un compito. Questo significa che un **compito** potrebbe potenzialmente **impersonare qualsiasi compito di sistema**, come rivendicare falsamente un nome di servizio di autorizzazione e poi approvare ogni richiesta.
+Il bootstrap server **non può autenticare** il nome del servizio rivendicato da un compito. Ciò significa che un **compito** potrebbe potenzialmente **impersonare qualsiasi compito di sistema**, come rivendicare falsamente un nome di servizio di autorizzazione e poi approvare ogni richiesta.
 
 Poi, Apple memorizza i **nomi dei servizi forniti dal sistema** in file di configurazione sicuri, situati in directory **protette da SIP**: `/System/Library/LaunchDaemons` e `/System/Library/LaunchAgents`. Accanto a ciascun nome di servizio, il **binario associato è anche memorizzato**. Il bootstrap server creerà e manterrà un **DIRITTO DI RICEZIONE per ciascuno di questi nomi di servizio**.
 
@@ -85,17 +85,17 @@ mach_port_name_t              msgh_voucher_port;
 mach_msg_id_t                 msgh_id;
 } mach_msg_header_t;
 ```
-I process che possiedono un _**diritto di ricezione**_ possono ricevere messaggi su un port Mach. Al contrario, ai **mittenti** viene concesso un _**diritto di invio**_ o un _**diritto di invio-una-volta**_. Il diritto di invio-una-volta è esclusivamente per l'invio di un singolo messaggio, dopo il quale diventa invalido.
+I process che possiedono un _**diritto di ricezione**_ possono ricevere messaggi su una porta Mach. Al contrario, ai **mittenti** viene concesso un _**diritto di invio**_ o un _**diritto di invio-una-volta**_. Il diritto di invio-una-volta è esclusivamente per l'invio di un singolo messaggio, dopo il quale diventa invalido.
 
 Il campo iniziale **`msgh_bits`** è un bitmap:
 
-- Il primo bit (il più significativo) è usato per indicare che un messaggio è complesso (ne parleremo più avanti)
-- Il 3° e il 4° sono usati dal kernel
-- I **5 bit meno significativi del 2° byte** possono essere usati per **voucher**: un altro tipo di port per inviare combinazioni chiave/valore.
-- I **5 bit meno significativi del 3° byte** possono essere usati per **port locale**
-- I **5 bit meno significativi del 4° byte** possono essere usati per **port remoto**
+- Il primo bit (il più significativo) è usato per indicare che un messaggio è complesso (ulteriori dettagli di seguito)
+- Il 3° e il 4° sono utilizzati dal kernel
+- I **5 bit meno significativi del 2° byte** possono essere utilizzati per **voucher**: un altro tipo di porta per inviare combinazioni chiave/valore.
+- I **5 bit meno significativi del 3° byte** possono essere utilizzati per **porta locale**
+- I **5 bit meno significativi del 4° byte** possono essere utilizzati per **porta remota**
 
-I tipi che possono essere specificati nel voucher, port locale e port remoto sono (da [**mach/message.h**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)):
+I tipi che possono essere specificati nel voucher, nelle porte locali e remote sono (da [**mach/message.h**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)):
 ```c
 #define MACH_MSG_TYPE_MOVE_RECEIVE      16      /* Must hold receive right */
 #define MACH_MSG_TYPE_MOVE_SEND         17      /* Must hold send right(s) */
@@ -108,30 +108,30 @@ I tipi che possono essere specificati nel voucher, port locale e port remoto son
 #define MACH_MSG_TYPE_DISPOSE_SEND      25      /* must hold send right(s) */
 #define MACH_MSG_TYPE_DISPOSE_SEND_ONCE 26      /* must hold sendonce right */
 ```
-Ad esempio, `MACH_MSG_TYPE_MAKE_SEND_ONCE` può essere utilizzato per **indicare** che un **diritto di invio una sola volta** dovrebbe essere derivato e trasferito per questo porto. Può anche essere specificato `MACH_PORT_NULL` per impedire al destinatario di poter rispondere.
+Ad esempio, `MACH_MSG_TYPE_MAKE_SEND_ONCE` può essere utilizzato per **indicare** che un **diritto di invio una sola volta** dovrebbe essere derivato e trasferito per questa porta. Può anche essere specificato `MACH_PORT_NULL` per impedire al destinatario di poter rispondere.
 
-Per ottenere una facile **comunicazione bidirezionale**, un processo può specificare un **porto mach** nell'**intestazione del messaggio mach** chiamato _porto di risposta_ (**`msgh_local_port`**) dove il **ricevitore** del messaggio può **inviare una risposta** a questo messaggio.
+Per ottenere una facile **comunicazione bidirezionale**, un processo può specificare una **porta mach** nell'**intestazione del messaggio mach** chiamata _porta di risposta_ (**`msgh_local_port`**) dove il **ricevitore** del messaggio può **inviare una risposta** a questo messaggio.
 
 > [!TIP]
-> Nota che questo tipo di comunicazione bidirezionale è utilizzato nei messaggi XPC che si aspettano una risposta (`xpc_connection_send_message_with_reply` e `xpc_connection_send_message_with_reply_sync`). Ma **di solito vengono creati porti diversi** come spiegato in precedenza per creare la comunicazione bidirezionale.
+> Nota che questo tipo di comunicazione bidirezionale è utilizzato nei messaggi XPC che si aspettano una risposta (`xpc_connection_send_message_with_reply` e `xpc_connection_send_message_with_reply_sync`). Ma **di solito vengono create porte diverse** come spiegato in precedenza per creare la comunicazione bidirezionale.
 
 Gli altri campi dell'intestazione del messaggio sono:
 
 - `msgh_size`: la dimensione dell'intero pacchetto.
-- `msgh_remote_port`: il porto su cui questo messaggio è inviato.
+- `msgh_remote_port`: la porta sulla quale questo messaggio è inviato.
 - `msgh_voucher_port`: [mach vouchers](https://robert.sesek.com/2023/6/mach_vouchers.html).
 - `msgh_id`: l'ID di questo messaggio, che è interpretato dal ricevitore.
 
 > [!CAUTION]
-> Nota che **i messaggi mach vengono inviati su un `mach port`**, che è un canale di comunicazione **a singolo ricevitore**, **a più mittenti** integrato nel kernel mach. **Più processi** possono **inviare messaggi** a un porto mach, ma in qualsiasi momento solo **un singolo processo può leggere** da esso.
+> Nota che **i messaggi mach vengono inviati su una `mach port`**, che è un canale di comunicazione **a singolo ricevitore**, **multi-inviatore** integrato nel kernel mach. **Più processi** possono **inviare messaggi** a una porta mach, ma in qualsiasi momento solo **un singolo processo può leggere** da essa.
 
-I messaggi sono quindi formati dall'**intestazione `mach_msg_header_t`** seguita dal **corpo** e dal **trailer** (se presente) e può concedere il permesso di rispondere. In questi casi, il kernel deve solo passare il messaggio da un'attività all'altra.
+I messaggi sono quindi formati dall'**intestazione `mach_msg_header_t`** seguita dal **corpo** e dal **trailer** (se presente) e possono concedere il permesso di rispondere. In questi casi, il kernel deve solo passare il messaggio da un'attività all'altra.
 
 Un **trailer** è **informazione aggiunta al messaggio dal kernel** (non può essere impostata dall'utente) che può essere richiesta nella ricezione del messaggio con i flag `MACH_RCV_TRAILER_<trailer_opt>` (ci sono diverse informazioni che possono essere richieste).
 
 #### Messaggi Complessi
 
-Tuttavia, ci sono altri messaggi più **complessi**, come quelli che passano diritti di porto aggiuntivi o condividono memoria, dove il kernel deve anche inviare questi oggetti al destinatario. In questi casi, il bit più significativo dell'intestazione `msgh_bits` è impostato.
+Tuttavia, ci sono altri messaggi più **complessi**, come quelli che passano diritti di porta aggiuntivi o condividono memoria, dove il kernel deve anche inviare questi oggetti al destinatario. In questi casi, il bit più significativo dell'intestazione `msgh_bits` è impostato.
 
 I possibili descrittori da passare sono definiti in [**`mach/message.h`**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html):
 ```c
@@ -423,13 +423,13 @@ Quelle che iniziano **dal** numero **8** sono **di proprietà dei demoni di sist
 - `host_info`: Ottieni informazioni sull'host
 - `host_virtual_physical_table_info`: Tabella delle pagine Virtuali/Fisiche (richiede MACH_VMDEBUG)
 - `host_statistics`: Ottieni statistiche dell'host
-- `mach_memory_info`: Ottieni layout della memoria del kernel
-- **Porte Privilege host**: Un processo con diritto **SEND** su questa porta può eseguire **azioni privilegiate** come mostrare dati di avvio o tentare di caricare un'estensione del kernel. Il **processo deve essere root** per ottenere questo permesso.
+- `mach_memory_info`: Ottieni la disposizione della memoria del kernel
+- **Porte Privilege host**: Un processo con diritto **SEND** su questa porta può eseguire **azioni privilegiate** come mostrare i dati di avvio o tentare di caricare un'estensione del kernel. Il **processo deve essere root** per ottenere questo permesso.
 - Inoltre, per chiamare l'API **`kext_request`** è necessario avere altri diritti **`com.apple.private.kext*`** che sono concessi solo ai binari Apple.
 - Altre routine che possono essere chiamate sono:
 - `host_get_boot_info`: Ottieni `machine_boot_info()`
 - `host_priv_statistics`: Ottieni statistiche privilegiate
-- `vm_allocate_cpm`: Alloca Memoria Fisica Contigua
+- `vm_allocate_cpm`: Alloca memoria fisica contigua
 - `host_processors`: Diritto di invio ai processori host
 - `mach_vm_wire`: Rendi la memoria residente
 - Poiché **root** può accedere a questo permesso, potrebbe chiamare `host_set_[special/exception]_port[s]` per **dirottare porte speciali o di eccezione host**.
@@ -774,7 +774,7 @@ gcc -framework Foundation -framework Appkit sc_inject.m -o sc_inject
 
 ### Iniezione di Dylib in thread tramite Task port
 
-In macOS **i thread** possono essere manipolati tramite **Mach** o utilizzando **l'api posix `pthread`**. Il thread che abbiamo generato nell'iniezione precedente è stato creato utilizzando l'api Mach, quindi **non è conforme a posix**.
+In macOS **i thread** possono essere manipolati tramite **Mach** o utilizzando **l'api posix `pthread`**. Il thread che abbiamo generato nell'iniezione precedente è stato generato utilizzando l'api Mach, quindi **non è conforme a posix**.
 
 È stato possibile **iniettare un semplice shellcode** per eseguire un comando perché **non aveva bisogno di lavorare con api** conformi a posix, solo con Mach. **Iniezioni più complesse** richiederebbero che il **thread** fosse anche **conforme a posix**.
 
@@ -1080,13 +1080,13 @@ Quando si chiama `task_for_pid` o `thread_create_*` si incrementa un contatore n
 
 Quando si verifica un'eccezione in un thread, questa eccezione viene inviata al porto di eccezione designato del thread. Se il thread non la gestisce, allora viene inviata ai porti di eccezione del task. Se il task non la gestisce, allora viene inviata al porto host che è gestito da launchd (dove verrà riconosciuta). Questo è chiamato triage delle eccezioni.
 
-Nota che alla fine, se non gestita correttamente, la segnalazione finirà per essere gestita dal demone ReportCrash. Tuttavia, è possibile che un altro thread nello stesso task gestisca l'eccezione, questo è ciò che fanno gli strumenti di reportistica degli arresti come `PLCreashReporter`.
+Nota che alla fine, di solito, se non gestita correttamente, il report finirà per essere gestito dal demone ReportCrash. Tuttavia, è possibile che un altro thread nello stesso task gestisca l'eccezione, questo è ciò che fanno gli strumenti di reportistica degli arresti come `PLCreashReporter`.
 
 ## Other Objects
 
 ### Clock
 
-Qualsiasi utente può accedere alle informazioni sul clock, tuttavia per impostare l'ora o modificare altre impostazioni è necessario essere root.
+Qualsiasi utente può accedere alle informazioni sull'orologio, tuttavia per impostare l'ora o modificare altre impostazioni è necessario essere root.
 
 Per ottenere informazioni è possibile chiamare funzioni dal sottosistema `clock` come: `clock_get_time`, `clock_get_attributtes` o `clock_alarm`\
 Per modificare i valori il sottosistema `clock_priv` può essere utilizzato con funzioni come `clock_set_time` e `clock_set_attributes`

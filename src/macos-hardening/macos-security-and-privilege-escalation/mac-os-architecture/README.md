@@ -18,7 +18,7 @@ In XNU, Mach è **responsabile di molte delle operazioni critiche a basso livell
 
 ### BSD
 
-Il **kernel** XNU **incorpora** anche una quantità significativa di codice derivato dal progetto **FreeBSD**. Questo codice **funziona come parte del kernel insieme a Mach**, nello stesso spazio di indirizzamento. Tuttavia, il codice FreeBSD all'interno di XNU può differire sostanzialmente dal codice FreeBSD originale perché sono state necessarie modifiche per garantire la sua compatibilità con Mach. FreeBSD contribuisce a molte operazioni del kernel, tra cui:
+Il **kernel** XNU **incorpora** anche una quantità significativa di codice derivato dal progetto **FreeBSD**. Questo codice **funziona come parte del kernel insieme a Mach**, nello stesso spazio di indirizzi. Tuttavia, il codice FreeBSD all'interno di XNU può differire sostanzialmente dal codice FreeBSD originale perché sono state necessarie modifiche per garantire la sua compatibilità con Mach. FreeBSD contribuisce a molte operazioni del kernel, tra cui:
 
 - Gestione dei processi
 - Gestione dei segnali
@@ -27,9 +27,9 @@ Il **kernel** XNU **incorpora** anche una quantità significativa di codice deri
 - Stack TCP/IP e socket
 - Firewall e filtraggio dei pacchetti
 
-Comprendere l'interazione tra BSD e Mach può essere complesso, a causa dei loro diversi quadri concettuali. Ad esempio, BSD utilizza i processi come unità fondamentale di esecuzione, mentre Mach opera basandosi sui thread. Questa discrepanza è riconciliata in XNU **associando ogni processo BSD a un'attività Mach** che contiene esattamente un thread Mach. Quando viene utilizzata la chiamata di sistema fork() di BSD, il codice BSD all'interno del kernel utilizza le funzioni Mach per creare una struttura di attività e thread.
+Comprendere l'interazione tra BSD e Mach può essere complesso, a causa dei loro diversi quadri concettuali. Ad esempio, BSD utilizza i processi come unità fondamentale di esecuzione, mentre Mach opera basandosi sui thread. Questa discrepanza è riconciliata in XNU **associando ogni processo BSD a un'attività Mach** che contiene esattamente un thread Mach. Quando viene utilizzata la chiamata di sistema fork() di BSD, il codice BSD all'interno del kernel utilizza le funzioni Mach per creare una struttura di attività e di thread.
 
-Inoltre, **Mach e BSD mantengono ciascuno modelli di sicurezza diversi**: il modello di sicurezza di **Mach** si basa sui **diritti di porta**, mentre il modello di sicurezza di BSD opera in base alla **proprietà del processo**. Le disparità tra questi due modelli hanno occasionalmente portato a vulnerabilità di escalation dei privilegi locali. Oltre alle chiamate di sistema tipiche, ci sono anche **trappole Mach che consentono ai programmi in spazio utente di interagire con il kernel**. Questi diversi elementi insieme formano l'architettura ibrida e multifaccettata del kernel macOS.
+Inoltre, **Mach e BSD mantengono ciascuno modelli di sicurezza diversi**: il modello di sicurezza di **Mach** si basa sui **diritti di porta**, mentre il modello di sicurezza di BSD opera sulla base della **proprietà del processo**. Le disparità tra questi due modelli hanno occasionalmente portato a vulnerabilità di escalation dei privilegi locali. Oltre alle chiamate di sistema tipiche, ci sono anche **trappole Mach che consentono ai programmi in spazio utente di interagire con il kernel**. Questi diversi elementi insieme formano l'architettura ibrida e multifaccettata del kernel macOS.
 
 ### I/O Kit - Drivers
 
@@ -47,7 +47,7 @@ macos-iokit.md
 
 ## macOS Kernel Extensions
 
-macOS è **super restrittivo nel caricare le Kernel Extensions** (.kext) a causa dei privilegi elevati con cui il codice verrà eseguito. In realtà, per impostazione predefinita è praticamente impossibile (a meno che non venga trovato un bypass).
+macOS è **super restrittivo nel caricare le Kernel Extensions** (.kext) a causa dei privilegi elevati con cui il codice verrà eseguito. In realtà, per impostazione predefinita è praticamente impossibile (a meno che non venga trovata una bypass).
 
 Nella pagina seguente puoi anche vedere come recuperare il `.kext` che macOS carica all'interno del suo **kernelcache**:
 

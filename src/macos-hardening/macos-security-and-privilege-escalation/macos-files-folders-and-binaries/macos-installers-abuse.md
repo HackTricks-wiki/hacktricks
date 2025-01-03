@@ -1,24 +1,24 @@
-# Abuso degli Installatori macOS
+# macOS Installers Abuse
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Informazioni di Base sul Pkg
+## Pkg Basic Information
 
-Un **pacchetto di installazione** macOS (noto anche come file `.pkg`) è un formato di file utilizzato da macOS per **distribuire software**. Questi file sono come una **scatola che contiene tutto ciò di cui un software** ha bisogno per essere installato e funzionare correttamente.
+Un **pacchetto di installazione** macOS (noto anche come file `.pkg`) è un formato di file utilizzato da macOS per **distribuire software**. Questi file sono come una **scatola che contiene tutto ciò di cui un software** ha bisogno per installarsi e funzionare correttamente.
 
-Il file del pacchetto stesso è un archivio che contiene una **gerarchia di file e directory che saranno installati sul computer** di destinazione. Può anche includere **script** per eseguire operazioni prima e dopo l'installazione, come la configurazione di file di configurazione o la pulizia di versioni precedenti del software.
+Il file del pacchetto stesso è un archivio che contiene una **gerarchia di file e directory che verranno installati sul computer** di destinazione. Può anche includere **script** per eseguire operazioni prima e dopo l'installazione, come la configurazione di file di configurazione o la pulizia di versioni precedenti del software.
 
-### Gerarchia
+### Hierarchy
 
 <figure><img src="../../../images/Pasted Graphic.png" alt="https://www.youtube.com/watch?v=iASSG0_zobQ"><figcaption></figcaption></figure>
 
-- **Distribuzione (xml)**: Personalizzazioni (titolo, testo di benvenuto…) e controlli di script/installazione
+- **Distribution (xml)**: Personalizzazioni (titolo, testo di benvenuto…) e controlli di script/installazione
 - **PackageInfo (xml)**: Info, requisiti di installazione, posizione di installazione, percorsi degli script da eseguire
 - **Bill of materials (bom)**: Elenco dei file da installare, aggiornare o rimuovere con permessi di file
-- **Payload (archivio CPIO compresso gzip)**: File da installare nella `install-location` da PackageInfo
-- **Scripts (archivio CPIO compresso gzip)**: Script di pre e post installazione e altre risorse estratte in una directory temporanea per l'esecuzione.
+- **Payload (CPIO archive gzip compresses)**: File da installare nella `install-location` da PackageInfo
+- **Scripts (CPIO archive gzip compressed)**: Script di pre e post installazione e altre risorse estratte in una directory temporanea per l'esecuzione.
 
-### Decomprimere
+### Decompress
 ```bash
 # Tool to directly get the files inside a package
 pkgutil —expand "/path/to/package.pkg" "/path/to/out/dir"
@@ -36,7 +36,7 @@ Per visualizzare i contenuti dell'installer senza decomprimerlo manualmente, puo
 
 ## Informazioni di base sui DMG
 
-I file DMG, o Apple Disk Images, sono un formato di file utilizzato da macOS di Apple per le immagini disco. Un file DMG è essenzialmente un **immagine disco montabile** (contiene il proprio filesystem) che contiene dati di blocco grezzi tipicamente compressi e a volte crittografati. Quando apri un file DMG, macOS **lo monta come se fosse un disco fisico**, permettendoti di accedere ai suoi contenuti.
+I file DMG, o Apple Disk Images, sono un formato di file utilizzato da macOS di Apple per le immagini disco. Un file DMG è essenzialmente un **immagine disco montabile** (contiene il proprio filesystem) che contiene dati di blocco grezzi tipicamente compressi e talvolta crittografati. Quando apri un file DMG, macOS **lo monta come se fosse un disco fisico**, permettendoti di accedere ai suoi contenuti.
 
 > [!CAUTION]
 > Nota che gli installer **`.dmg`** supportano **così tanti formati** che in passato alcuni di essi contenenti vulnerabilità sono stati abusati per ottenere **l'esecuzione di codice nel kernel**.
@@ -67,13 +67,13 @@ Questa è una [funzione pubblica](https://developer.apple.com/documentation/secu
 (lldb) b AuthorizationExecuteWithPrivileges
 # You could also check FS events to find this missconfig
 ```
-Per ulteriori informazioni, controlla questo intervento: [https://www.youtube.com/watch?v=lTOItyjTTkw](https://www.youtube.com/watch?v=lTOItyjTTkw)
+Per ulteriori informazioni, controlla questo talk: [https://www.youtube.com/watch?v=lTOItyjTTkw](https://www.youtube.com/watch?v=lTOItyjTTkw)
 
 ### Esecuzione tramite montaggio
 
 Se un installer scrive in `/tmp/fixedname/bla/bla`, è possibile **creare un mount** su `/tmp/fixedname` senza proprietari in modo da poter **modificare qualsiasi file durante l'installazione** per abusare del processo di installazione.
 
-Un esempio di questo è **CVE-2021-26089** che è riuscito a **sovrascrivere uno script periodico** per ottenere l'esecuzione come root. Per ulteriori informazioni, dai un'occhiata all'intervento: [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)
+Un esempio di questo è **CVE-2021-26089** che è riuscito a **sovrascrivere uno script periodico** per ottenere l'esecuzione come root. Per ulteriori informazioni, dai un'occhiata al talk: [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)
 
 ## pkg come malware
 
