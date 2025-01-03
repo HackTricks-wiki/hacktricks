@@ -2,8 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-> [!WARNING]
-> **Το JuicyPotato δεν λειτουργεί** σε Windows Server 2019 και Windows 10 build 1809 και μετά. Ωστόσο, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato) μπορούν να χρησιμοποιηθούν για να **εκμεταλλευτούν τα ίδια δικαιώματα και να αποκτήσουν πρόσβαση επιπέδου `NT AUTHORITY\SYSTEM`**. _**Έλεγχος:**_
+> [!WARNING] > **Το JuicyPotato δεν λειτουργεί** σε Windows Server 2019 και Windows 10 build 1809 και μετά. Ωστόσο, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato) μπορούν να χρησιμοποιηθούν για να **εκμεταλλευτούν τα ίδια δικαιώματα και να αποκτήσουν πρόσβαση επιπέδου `NT AUTHORITY\SYSTEM`**. _**Ελέγξτε:**_
 
 {{#ref}}
 roguepotato-and-printspoofer.md
@@ -19,7 +18,7 @@ _Μια γλυκιά έκδοση του_ [_RottenPotatoNG_](https://github.com/
 
 [**Από το juicy-potato Readme**](https://github.com/ohpe/juicy-potato/blob/master/README.md)**:**
 
-[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) και οι [παραλλαγές του](https://github.com/decoder-it/lonelypotato) εκμεταλλεύονται την αλυσίδα κατάχρησης δικαιωμάτων βασισμένη σε [`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [υπηρεσία](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) που έχει τον MiTM listener στο `127.0.0.1:6666` και όταν έχετε δικαιώματα `SeImpersonate` ή `SeAssignPrimaryToken`. Κατά τη διάρκεια μιας ανασκόπησης build Windows βρήκαμε μια ρύθμιση όπου το `BITS` είχε σκόπιμα απενεργοποιηθεί και η θύρα `6666` είχε καταληφθεί.
+[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) και οι [παραλλαγές του](https://github.com/decoder-it/lonelypotato) εκμεταλλεύονται την αλυσίδα κατάχρησης δικαιωμάτων βασισμένη σε [`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [υπηρεσία](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) έχοντας τον MiTM listener στο `127.0.0.1:6666` και όταν έχετε δικαιώματα `SeImpersonate` ή `SeAssignPrimaryToken`. Κατά τη διάρκεια μιας ανασκόπησης build Windows βρήκαμε μια ρύθμιση όπου το `BITS` είχε απενεργοποιηθεί σκόπιμα και η θύρα `6666` είχε καταληφθεί.
 
 Αποφασίσαμε να οπλοποιήσουμε [RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG): **Πείτε γεια στο Juicy Potato**.
 
@@ -29,23 +28,23 @@ _Μια γλυκιά έκδοση του_ [_RottenPotatoNG_](https://github.com/
 
 1. είναι δυνατό να δημιουργηθούν από τον τρέχοντα χρήστη, κανονικά έναν “χρήστη υπηρεσίας” που έχει δικαιώματα κατάχρησης
 2. να υλοποιούν τη διεπαφή `IMarshal`
-3. να εκτελούνται ως ανυψωμένος χρήστης (SYSTEM, Administrator, …)
+3. να εκτελούνται ως ανυψωμένος χρήστης (SYSTEM, Διαχειριστής, …)
 
-Μετά από κάποιες δοκιμές, αποκτήσαμε και δοκιμάσαμε μια εκτενή λίστα από [ενδιαφέροντα CLSID’s](http://ohpe.it/juicy-potato/CLSID/) σε πολλές εκδόσεις Windows.
+Μετά από κάποιες δοκιμές αποκτήσαμε και δοκιμάσαμε μια εκτενή λίστα από [ενδιαφέροντα CLSID’s](http://ohpe.it/juicy-potato/CLSID/) σε πολλές εκδόσεις Windows.
 
 ### Juicy λεπτομέρειες <a href="#juicy-details" id="juicy-details"></a>
 
 Το JuicyPotato σας επιτρέπει να:
 
-- **Στοχεύστε CLSID** _επιλέξτε οποιοδήποτε CLSID θέλετε._ [_Εδώ_](http://ohpe.it/juicy-potato/CLSID/) _μπορείτε να βρείτε τη λίστα οργανωμένη κατά OS._
+- **Στόχος CLSID** _επιλέξτε οποιοδήποτε CLSID θέλετε._ [_Εδώ_](http://ohpe.it/juicy-potato/CLSID/) _μπορείτε να βρείτε τη λίστα οργανωμένη κατά OS._
 - **Θύρα Listening COM** _ορίστε τη θύρα listening COM που προτιμάτε (αντί της σκληροκωδικοποιημένης 6666)_
 - **Διεύθυνση IP Listening COM** _δεσμεύστε τον server σε οποιαδήποτε IP_
-- **Λειτουργία δημιουργίας διαδικασίας** _ανάλογα με τα δικαιώματα του χρήστη που έχει καταχραστεί μπορείτε να επιλέξετε από:_
+- **Λειτουργία δημιουργίας διεργασίας** _ανάλογα με τα δικαιώματα του χρήστη που έχει καταχραστεί μπορείτε να επιλέξετε από:_
 - `CreateProcessWithToken` (χρειάζεται `SeImpersonate`)
 - `CreateProcessAsUser` (χρειάζεται `SeAssignPrimaryToken`)
 - `και τα δύο`
-- **Διαδικασία προς εκτέλεση** _εκκινήστε ένα εκτελέσιμο ή σενάριο αν η εκμετάλλευση είναι επιτυχής_
-- **Επιχείρημα διαδικασίας** _προσαρμόστε τα επιχειρήματα της εκτελούμενης διαδικασίας_
+- **Διεργασία προς εκκίνηση** _εκκινήστε ένα εκτελέσιμο ή σενάριο αν η εκμετάλλευση είναι επιτυχής_
+- **Επιχείρημα Διεργασίας** _προσαρμόστε τα επιχειρήματα της εκκινούμενης διεργασίας_
 - **Διεύθυνση RPC Server** _για μια κρυφή προσέγγιση μπορείτε να πιστοποιηθείτε σε έναν εξωτερικό RPC server_
 - **Θύρα RPC Server** _χρήσιμη αν θέλετε να πιστοποιηθείτε σε έναν εξωτερικό server και το firewall μπλοκάρει τη θύρα `135`…_
 - **ΛΕΙΤΟΥΡΓΙΑ ΔΟΚΙΜΗΣ** _κυρίως για δοκιμαστικούς σκοπούς, δηλαδή δοκιμή CLSIDs. Δημιουργεί το DCOM και εκτυπώνει τον χρήστη του token. Δείτε_ [_εδώ για δοκιμή_](http://ohpe.it/juicy-potato/Test/)
@@ -81,7 +80,7 @@ Optional args:
 
 ## Παραδείγματα
 
-Σημείωση: Επισκεφθείτε [αυτή τη σελίδα](https://ohpe.it/juicy-potato/CLSID/) για μια λίστα με CLSIDs που μπορείτε να δοκιμάσετε.
+Σημείωση: Επισκεφθείτε [αυτή τη σελίδα](https://ohpe.it/juicy-potato/CLSID/) για μια λίστα με CLSIDs που να δοκιμάσετε.
 
 ### Πάρτε ένα nc.exe reverse shell
 ```
@@ -108,7 +107,9 @@ c:\Users\Public>
 
 Συχνά, το προεπιλεγμένο CLSID που χρησιμοποιεί το JuicyPotato **δεν λειτουργεί** και η εκμετάλλευση αποτυγχάνει. Συνήθως, απαιτούνται πολλές προσπάθειες για να βρείτε ένα **λειτουργικό CLSID**. Για να αποκτήσετε μια λίστα με CLSIDs για να δοκιμάσετε για ένα συγκεκριμένο λειτουργικό σύστημα, θα πρέπει να επισκεφθείτε αυτή τη σελίδα:
 
-{% embed url="https://ohpe.it/juicy-potato/CLSID/" %}
+{{#ref}}
+https://ohpe.it/juicy-potato/CLSID/
+{{#endref}}
 
 ### **Έλεγχος CLSIDs**
 
@@ -116,7 +117,7 @@ c:\Users\Public>
 
 Κατεβάστε [Join-Object.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/utils/Join-Object.ps1) και φορτώστε το στη συνεδρία PS σας, και κατεβάστε και εκτελέστε [GetCLSID.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/GetCLSID.ps1). Αυτό το σενάριο θα δημιουργήσει μια λίστα με πιθανά CLSIDs για δοκιμή.
 
-Στη συνέχεια, κατεβάστε [test_clsid.bat ](https://github.com/ohpe/juicy-potato/blob/master/Test/test_clsid.bat)(αλλάξτε τη διαδρομή στη λίστα CLSID και στο εκτελέσιμο juicypotato) και εκτελέστε το. Θα αρχίσει να δοκιμάζει κάθε CLSID, και **όταν αλλάξει ο αριθμός θύρας, θα σημαίνει ότι το CLSID λειτούργησε**.
+Στη συνέχεια, κατεβάστε [test_clsid.bat ](https://github.com/ohpe/juicy-potato/blob/master/Test/test_clsid.bat) (αλλάξτε τη διαδρομή στη λίστα CLSID και στο εκτελέσιμο juicypotato) και εκτελέστε το. Θα αρχίσει να δοκιμάζει κάθε CLSID, και **όταν αλλάξει ο αριθμός θύρας, θα σημαίνει ότι το CLSID λειτούργησε**.
 
 **Ελέγξτε** τα λειτουργικά CLSIDs **χρησιμοποιώντας την παράμετρο -c**
 

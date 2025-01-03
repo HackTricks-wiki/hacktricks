@@ -22,9 +22,11 @@
 
 Εγγραφείτε σε ένα email, πριν το επιβεβαιώσετε αλλάξτε το email, στη συνέχεια, αν το νέο email επιβεβαίωσης σταλεί στο πρώτο εγγεγραμμένο email, μπορείτε να καταλάβετε οποιοδήποτε email. Ή αν μπορείτε να ενεργοποιήσετε το δεύτερο email επιβεβαιώνοντας το πρώτο, μπορείτε επίσης να καταλάβετε οποιονδήποτε λογαριασμό.
 
-### Πρόσβαση στο Εσωτερικό servicedesk εταιρειών χρησιμοποιώντας atlassian
+### Πρόσβαση στο Εσωτερικό servicedesk εταιρειών που χρησιμοποιούν atlassian
 
-{% embed url="https://yourcompanyname.atlassian.net/servicedesk/customer/user/login" %}
+{{#ref}}
+https://yourcompanyname.atlassian.net/servicedesk/customer/user/login
+{{#endref}}
 
 ### Μέθοδος TRACE
 

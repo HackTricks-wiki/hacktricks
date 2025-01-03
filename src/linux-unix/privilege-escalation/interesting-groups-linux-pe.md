@@ -1,6 +1,6 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# Sudo/Διαχειριστικά Γκρουπ
+# Sudo/Διαχειριστικές Ομάδες
 
 ## **PE - Μέθοδος 1**
 
@@ -40,7 +40,7 @@ polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freed
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-**Δεν είναι επειδή δεν έχετε άδειες, αλλά επειδή δεν είστε συνδεδεμένοι χωρίς GUI**. Και υπάρχει μια λύση για αυτό το πρόβλημα εδώ: [https://github.com/NixOS/nixpkgs/issues/18012\#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Χρειάζεστε **2 διαφορετικές ssh συνεδρίες**:
+**Δεν είναι επειδή δεν έχετε δικαιώματα αλλά επειδή δεν είστε συνδεδεμένοι χωρίς GUI**. Και υπάρχει μια λύση για αυτό το ζήτημα εδώ: [https://github.com/NixOS/nixpkgs/issues/18012\#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Χρειάζεστε **2 διαφορετικές ssh συνεδρίες**:
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -73,7 +73,7 @@ sudo su
 
 # Ομάδα Δίσκου
 
-Αυτή η προνομιακή πρόσβαση είναι σχεδόν **ισοδύναμη με την πρόσβαση root** καθώς μπορείτε να έχετε πρόσβαση σε όλα τα δεδομένα μέσα στη μηχανή.
+Αυτή η προνομία είναι σχεδόν **ισοδύναμη με την πρόσβαση root** καθώς μπορείτε να έχετε πρόσβαση σε όλα τα δεδομένα μέσα στη μηχανή.
 
 Αρχεία: `/dev/sd[a-z][1-9]`
 ```text
@@ -125,13 +125,16 @@ find / -group root -perm -g=w 2>/dev/null
 
 Μπορείτε να προσαρτήσετε το ριζικό σύστημα αρχείων της μηχανής-οικοδεσπότη σε έναν όγκο της παρουσίας, έτσι ώστε όταν η παρουσία ξεκινά, να φορτώνει αμέσως ένα `chroot` σε αυτόν τον όγκο. Αυτό σας δίνει ουσιαστικά δικαιώματα root στη μηχανή.
 
-{% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
+{{#ref}}
+https://github.com/KrustyHack/docker-privilege-escalation
+{{#endref}}
 
-{% embed url="https://fosterelli.co/privilege-escalation-via-docker.html" %}
+{{#ref}}
+https://fosterelli.co/privilege-escalation-via-docker.html
+{{#endref}}
 
 # lxc/lxd Group
 
 [lxc - Privilege Escalation](lxd-privilege-escalation.md)
-
 
 {{#include ../../banners/hacktricks-training.md}}

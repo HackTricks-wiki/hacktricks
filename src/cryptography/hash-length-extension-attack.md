@@ -27,7 +27,9 @@
 
 ## **Εργαλείο**
 
-{% embed url="https://github.com/iagox86/hash_extender" %}
+{{#ref}}
+https://github.com/iagox86/hash_extender
+{{#endref}}
 
 ## Αναφορές
 

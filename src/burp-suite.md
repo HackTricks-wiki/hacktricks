@@ -10,7 +10,9 @@
 
 [https://github.com/0xC01DF00D/Collabfiltrator](https://github.com/0xC01DF00D/Collabfiltrator) : Φορτωτής για εκτέλεση εντολών και λήψη εξόδου μέσω DNS αιτημάτων στο burpcollab.
 
-{% embed url="https://medium.com/@ArtsSEC/burp-suite-exporter-462531be24e" %}
+{{#ref}}
+https://medium.com/@ArtsSEC/burp-suite-exporter-462531be24e
+{{#endref}}
 
 [https://github.com/h3xstream/http-script-generator](https://github.com/h3xstream/http-script-generator)
 
