@@ -93,7 +93,7 @@ Le script [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-To
 
 ### Accès à distance macOS
 
-Et aussi sur les **protocoles** **réseau** **"spéciaux"** de **MacOS** :
+Et aussi sur les **protocoles** **réseau** "spéciaux" de **MacOS** :
 
 {{#ref}}
 ../macos-security-and-privilege-escalation/macos-protocols.md
@@ -209,7 +209,7 @@ macos-keychain.md
 
 ## Services Externes
 
-Le Red Teaming MacOS est différent d'un Red Teaming Windows classique car généralement **MacOS est intégré à plusieurs plateformes externes directement**. Une configuration courante de MacOS consiste à accéder à l'ordinateur en utilisant **des identifiants synchronisés OneLogin et à accéder à plusieurs services externes** (comme github, aws...) via OneLogin.
+Le Red Teaming MacOS est différent d'un Red Teaming Windows classique car généralement **MacOS est intégré à plusieurs plateformes externes directement**. Une configuration courante de MacOS consiste à accéder à l'ordinateur en utilisant **des identifiants synchronisés OneLogin, et à accéder à plusieurs services externes** (comme github, aws...) via OneLogin.
 
 ## Techniques Diverses de Red Team
 

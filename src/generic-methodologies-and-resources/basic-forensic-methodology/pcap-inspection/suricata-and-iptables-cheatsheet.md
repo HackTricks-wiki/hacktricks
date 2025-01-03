@@ -4,16 +4,15 @@
 
 ## Iptables
 
-### Chains
+### Chaînes
 
-In iptables, lists of rules known as chains are processed sequentially. Among these, three primary chains are universally present, with additional ones like NAT being potentially supported depending on the system's capabilities.
+Dans iptables, des listes de règles connues sous le nom de chaînes sont traitées séquentiellement. Parmi celles-ci, trois chaînes principales sont universellement présentes, avec d'autres comme NAT pouvant être prises en charge en fonction des capacités du système.
 
-- **Input Chain**: Utilized for managing the behavior of incoming connections.
-- **Forward Chain**: Employed for handling incoming connections that are not destined for the local system. This is typical for devices acting as routers, where the data received is meant to be forwarded to another destination. This chain is relevant primarily when the system is involved in routing, NATing, or similar activities.
-- **Output Chain**: Dedicated to the regulation of outgoing connections.
+- **Chaîne d'entrée** : Utilisée pour gérer le comportement des connexions entrantes.
+- **Chaîne de transfert** : Employée pour traiter les connexions entrantes qui ne sont pas destinées au système local. Cela est typique pour les appareils agissant en tant que routeurs, où les données reçues doivent être transférées vers une autre destination. Cette chaîne est pertinente principalement lorsque le système est impliqué dans le routage, le NAT ou des activités similaires.
+- **Chaîne de sortie** : Dédiée à la régulation des connexions sortantes.
 
-These chains ensure the orderly processing of network traffic, allowing for the specification of detailed rules governing the flow of data into, through, and out of a system.
-
+Ces chaînes garantissent le traitement ordonné du trafic réseau, permettant la spécification de règles détaillées régissant le flux de données dans, à travers et hors d'un système.
 ```bash
 # Delete all rules
 iptables -F
@@ -50,11 +49,9 @@ iptables-save > /etc/sysconfig/iptables
 ip6tables-save > /etc/sysconfig/ip6tables
 iptables-restore < /etc/sysconfig/iptables
 ```
-
 ## Suricata
 
-### Install & Config
-
+### Installer et configurer
 ```bash
 # Install details from: https://suricata.readthedocs.io/en/suricata-6.0.0/install.html#install-binary-packages
 # Ubuntu
@@ -64,7 +61,7 @@ apt-get install suricata
 
 # Debian
 echo "deb http://http.debian.net/debian buster-backports main" > \
-    /etc/apt/sources.list.d/backports.list
+/etc/apt/sources.list.d/backports.list
 apt-get update
 apt-get install suricata -t buster-backports
 
@@ -80,7 +77,7 @@ suricata-update
 ## To use the dowloaded rules update the following line in /etc/suricata/suricata.yaml
 default-rule-path: /var/lib/suricata/rules
 rule-files:
-  - suricata.rules
+- suricata.rules
 
 # Run
 ## Add rules in /etc/suricata/rules/suricata.rules
@@ -92,7 +89,7 @@ suricata -c /etc/suricata/suricata.yaml -i eth0
 suricatasc -c ruleset-reload-nonblocking
 ## or set the follogin in /etc/suricata/suricata.yaml
 detect-engine:
-  - rule-reload: true
+- rule-reload: true
 
 # Validate suricata config
 suricata -T -c /etc/suricata/suricata.yaml -v
@@ -101,8 +98,8 @@ suricata -T -c /etc/suricata/suricata.yaml -v
 ## Config drop to generate alerts
 ## Search for the following lines in /etc/suricata/suricata.yaml and remove comments:
 - drop:
-    alerts: yes
-    flows: all
+alerts: yes
+flows: all
 
 ## Forward all packages to the queue where suricata can act as IPS
 iptables -I INPUT -j NFQUEUE
@@ -120,76 +117,70 @@ Type=simple
 
 systemctl daemon-reload
 ```
+### Définitions des Règles
 
-### Rules Definitions
+[From the docs:](https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) Une règle/siganture se compose des éléments suivants :
 
-[From the docs:](https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) A rule/signature consists of the following:
-
-- The **action**, determines what happens when the signature matches.
-- The **header**, defines the protocol, IP addresses, ports and direction of the rule.
-- The **rule options**, define the specifics of the rule.
-
+- L'**action**, détermine ce qui se passe lorsque la signature correspond.
+- L'**en-tête**, définit le protocole, les adresses IP, les ports et la direction de la règle.
+- Les **options de règle**, définissent les spécificités de la règle.
 ```bash
 alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing Rule in URI"; flow:established,to_server; http.method; content:"GET"; http.uri; content:"rule"; fast_pattern; classtype:bad-unknown; sid:123; rev:1;)
 ```
+#### **Les actions valides sont**
 
-#### **Valid actions are**
+- alert - générer une alerte
+- pass - arrêter l'inspection supplémentaire du paquet
+- **drop** - supprimer le paquet et générer une alerte
+- **reject** - envoyer une erreur RST/ICMP injoignable à l'expéditeur du paquet correspondant.
+- rejectsrc - identique à _reject_
+- rejectdst - envoyer un paquet d'erreur RST/ICMP au destinataire du paquet correspondant.
+- rejectboth - envoyer des paquets d'erreur RST/ICMP aux deux côtés de la conversation.
 
-- alert - generate an alert
-- pass - stop further inspection of the packet
-- **drop** - drop packet and generate alert
-- **reject** - send RST/ICMP unreachable error to the sender of the matching packet.
-- rejectsrc - same as just _reject_
-- rejectdst - send RST/ICMP error packet to the receiver of the matching packet.
-- rejectboth - send RST/ICMP error packets to both sides of the conversation.
+#### **Protocoles**
 
-#### **Protocols**
-
-- tcp (for tcp-traffic)
+- tcp (pour le trafic tcp)
 - udp
 - icmp
-- ip (ip stands for ‘all’ or ‘any’)
-- _layer7 protocols_: http, ftp, tls, smb, dns, ssh... (more in the [**docs**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html))
+- ip (ip signifie 'tous' ou 'n'importe quel')
+- _protocoles de couche 7_: http, ftp, tls, smb, dns, ssh... (plus dans la [**docs**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html))
 
-#### Source and Destination Addresses
+#### Adresses Source et Destination
 
-It supports IP ranges, negations and a list of addresses:
+Il prend en charge les plages d'IP, les négations et une liste d'adresses :
 
-| Example                       | Meaning                                  |
-| ----------------------------- | ---------------------------------------- |
-| ! 1.1.1.1                     | Every IP address but 1.1.1.1             |
-| !\[1.1.1.1, 1.1.1.2]          | Every IP address but 1.1.1.1 and 1.1.1.2 |
-| $HOME_NET                     | Your setting of HOME_NET in yaml         |
-| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET and not HOME_NET            |
-| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24 except for 10.0.0.5          |
+| Exemple                       | Signification                                  |
+| ----------------------------- | ---------------------------------------------- |
+| ! 1.1.1.1                     | Chaque adresse IP sauf 1.1.1.1                 |
+| !\[1.1.1.1, 1.1.1.2]          | Chaque adresse IP sauf 1.1.1.1 et 1.1.1.2     |
+| $HOME_NET                     | Votre paramètre de HOME_NET dans yaml          |
+| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET et non HOME_NET                  |
+| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24 sauf pour 10.0.0.5                 |
 
-#### Source and Destination Ports
+#### Ports Source et Destination
 
-It supports port ranges, negations and lists of ports
+Il prend en charge les plages de ports, les négations et les listes de ports
 
-| Example         | Meaning                                |
-| --------------- | -------------------------------------- |
-| any             | any address                            |
-| \[80, 81, 82]   | port 80, 81 and 82                     |
-| \[80: 82]       | Range from 80 till 82                  |
-| \[1024: ]       | From 1024 till the highest port-number |
-| !80             | Every port but 80                      |
-| \[80:100,!99]   | Range from 80 till 100 but 99 excluded |
-| \[1:80,!\[2,4]] | Range from 1-80, except ports 2 and 4  |
+| Exemple         | Signification                                |
+| --------------- | -------------------------------------------- |
+| any             | n'importe quelle adresse                     |
+| \[80, 81, 82]   | port 80, 81 et 82                            |
+| \[80: 82]       | Plage de 80 à 82                             |
+| \[1024: ]       | De 1024 jusqu'au numéro de port le plus élevé |
+| !80             | Chaque port sauf 80                          |
+| \[80:100,!99]   | Plage de 80 à 100 mais 99 exclu             |
+| \[1:80,!\[2,4]] | Plage de 1 à 80, sauf les ports 2 et 4      |
 
 #### Direction
 
-It's possible to indicate the direction of the communication rule being applied:
-
+Il est possible d'indiquer la direction de la règle de communication appliquée :
 ```
 source -> destination
 source <> destination  (both directions)
 ```
+#### Mots-clés
 
-#### Keywords
-
-There are **hundreds of options** available in Suricata to search for the **specific packet** you are looking for, here it will be mentioned if something interesting is found. Check the [**documentation** ](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html)for more!
-
+Il y a **des centaines d'options** disponibles dans Suricata pour rechercher le **paquet spécifique** que vous recherchez, ici il sera mentionné si quelque chose d'intéressant est trouvé. Consultez la [**documentation** ](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html) pour plus d'informations !
 ```bash
 # Meta Keywords
 msg: "description"; #Set a description to the rule
@@ -230,5 +221,4 @@ drop tcp any any -> any any (msg:"regex"; pcre:"/CTF\{[\w]{3}/i"; sid:10001;)
 ## Drop by port
 drop tcp any any -> any 8000 (msg:"8000 port"; sid:1000;)
 ```
-
 {{#include ../../../banners/hacktricks-training.md}}

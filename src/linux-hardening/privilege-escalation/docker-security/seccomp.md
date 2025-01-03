@@ -111,13 +111,13 @@ Dans l'exemple suivant, les **syscalls** de `uname` sont découverts :
 docker run -it --security-opt seccomp=default.json modified-ubuntu strace uname
 ```
 > [!NOTE]
-> Si vous utilisez **Docker uniquement pour lancer une application**, vous pouvez **profiler** avec **`strace`** et **permettre uniquement les syscalls** nécessaires
+> Si vous utilisez **Docker uniquement pour lancer une application**, vous pouvez **profiler** avec **`strace`** et **permettre uniquement les syscalls** dont elle a besoin
 
 ### Exemple de politique Seccomp
 
 [Exemple ici](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-2docker-engine/)
 
-Pour illustrer la fonctionnalité Seccomp, créons un profil Seccomp désactivant l'appel système “chmod” comme ci-dessous.
+Pour illustrer la fonctionnalité Seccomp, créons un profil Seccomp désactivant l'appel système "chmod" comme ci-dessous.
 ```json
 {
 "defaultAction": "SCMP_ACT_ALLOW",
@@ -129,8 +129,8 @@ Pour illustrer la fonctionnalité Seccomp, créons un profil Seccomp désactivan
 ]
 }
 ```
-Dans le profil ci-dessus, nous avons défini l'action par défaut sur "allow" et créé une liste noire pour désactiver "chmod". Pour être plus sécurisé, nous pouvons définir l'action par défaut sur drop et créer une liste blanche pour activer sélectivement les appels système.\
-La sortie suivante montre que l'appel "chmod" renvoie une erreur car il est désactivé dans le profil seccomp.
+Dans le profil ci-dessus, nous avons défini l'action par défaut sur "allow" et créé une liste noire pour désactiver "chmod". Pour être plus sécurisé, nous pouvons définir l'action par défaut sur "drop" et créer une liste blanche pour activer sélectivement les appels système.\
+La sortie suivante montre l'appel "chmod" retournant une erreur car il est désactivé dans le profil seccomp.
 ```bash
 $ docker run --rm -it --security-opt seccomp:/home/smakam14/seccomp/profile.json busybox chmod 400 /etc/hosts
 chmod: /etc/hosts: Operation not permitted

@@ -19,7 +19,7 @@ Ce répertoire permet d'accéder à la modification des variables du noyau, gén
 - **Exemple de test et d'exploitation** :
 
 ```bash
-[ -w /proc/sys/kernel/core_pattern ] && echo Yes # Tester l'accès en écriture
+[ -w /proc/sys/kernel/core_pattern ] && echo Yes # Test d'accès en écriture
 cd /proc/sys/kernel
 echo "|$overlay/shell.sh" > core_pattern # Définir un gestionnaire personnalisé
 sleep 5 && ./crash & # Déclencher le gestionnaire
@@ -78,7 +78,7 @@ echo b > /proc/sysrq-trigger # Redémarre l'hôte
 
 - Liste les symboles exportés par le noyau et leurs adresses.
 - Essentiel pour le développement d'exploits du noyau, en particulier pour surmonter KASLR.
-- Les informations d'adresse sont restreintes avec `kptr_restrict` réglé sur `1` ou `2`.
+- Les informations d'adresse sont restreintes avec `kptr_restrict` défini sur `1` ou `2`.
 - Détails dans [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
 #### **`/proc/[pid]/mem`**
@@ -119,7 +119,7 @@ echo b > /proc/sysrq-trigger # Redémarre l'hôte
 #### **`/sys/kernel/uevent_helper`**
 
 - Utilisé pour gérer les `uevents` des périphériques du noyau.
-- Écrire dans `/sys/kernel/uevent_helper` peut exécuter des scripts arbitraires lors des déclenchements d'`uevent`.
+- Écrire dans `/sys/kernel/uevent_helper` peut exécuter des scripts arbitraires lors des déclenchements de `uevent`.
 - **Exemple d'exploitation** : %%%bash
 
 #### Crée une charge utile
@@ -163,7 +163,7 @@ cat /output %%%
 #### **`/sys/kernel/debug`**
 
 - `debugfs` offre une interface de débogage "sans règles" au noyau.
-- Historique de problèmes de sécurité en raison de sa nature non restreinte.
+- Historique de problèmes de sécurité en raison de sa nature sans restriction.
 
 ### Références
 

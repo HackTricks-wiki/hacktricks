@@ -244,7 +244,7 @@ NSMutableDictionary *mutFruitColorsDictionary = [NSMutableDictionary dictionaryW
 ```
 ### Blocs
 
-Les blocs sont **des fonctions qui se comportent comme des objets** afin qu'ils puissent être passés à des fonctions ou **stockés** dans des **tableaux** ou des **dictionnaires**. De plus, ils peuvent **représenter une valeur s'ils reçoivent des valeurs**, donc c'est similaire aux lambdas.
+Les blocs sont **des fonctions qui se comportent comme des objets** donc ils peuvent être passés à des fonctions ou **stockés** dans des **tableaux** ou des **dictionnaires**. De plus, ils peuvent **représenter une valeur s'ils reçoivent des valeurs** donc c'est similaire aux lambdas.
 ```objectivec
 returnType (^blockName)(argumentType1, argumentType2, ...) = ^(argumentType1 param1, argumentType2 param2, ...){
 //Perform operations here

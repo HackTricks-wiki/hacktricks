@@ -1,38 +1,31 @@
-# Linux Environment Variables
+# Variables d'environnement Linux
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Global variables
+## Variables globales
 
-The global variables **will be** inherited by **child processes**.
+Les variables globales **seront** héritées par **les processus enfants**.
 
-You can create a global variable for your current session doing:
-
+Vous pouvez créer une variable globale pour votre session actuelle en faisant :
 ```bash
 export MYGLOBAL="hello world"
 echo $MYGLOBAL #Prints: hello world
 ```
+Cette variable sera accessible par vos sessions actuelles et ses processus enfants.
 
-This variable will be accessible by your current sessions and its child processes.
-
-You can **remove** a variable doing:
-
+Vous pouvez **supprimer** une variable en faisant :
 ```bash
 unset MYGLOBAL
 ```
+## Variables locales
 
-## Local variables
-
-The **local variables** can only be **accessed** by the **current shell/script**.
-
+Les **variables locales** ne peuvent être **accessées** que par le **shell/script actuel**.
 ```bash
 LOCAL="my local"
 echo $LOCAL
 unset LOCAL
 ```
-
-## List current variables
-
+## Liste des variables actuelles
 ```bash
 set
 env
@@ -40,84 +33,75 @@ printenv
 cat /proc/$$/environ
 cat /proc/`python -c "import os; print(os.getppid())"`/environ
 ```
-
-## Common variables
+## Variables courantes
 
 From: [https://geek-university.com/linux/common-environment-variables/](https://geek-university.com/linux/common-environment-variables/)
 
-- **DISPLAY** – the display used by **X**. This variable is usually set to **:0.0**, which means the first display on the current computer.
-- **EDITOR** – the user’s preferred text editor.
-- **HISTFILESIZE** – the maximum number of lines contained in the history file.
-- **HISTSIZE** – Number of lines added to the history file when the user finish his session
-- **HOME** – your home directory.
-- **HOSTNAME** – the hostname of the computer.
-- **LANG** – your current language.
-- **MAIL** – the location of the user’s mail spool. Usually **/var/spool/mail/USER**.
-- **MANPATH** – the list of directories to search for manual pages.
-- **OSTYPE** – the type of operating system.
-- **PS1** – the default prompt in bash.
-- **PATH** – stores the path of all the directories which holds binary files you want to execute just by specifying the name of the file and not by relative or absolute path.
-- **PWD** – the current working directory.
-- **SHELL** – the path to the current command shell (for example, **/bin/bash**).
-- **TERM** – the current terminal type (for example, **xterm**).
-- **TZ** – your time zone.
-- **USER** – your current username.
+- **DISPLAY** – l'affichage utilisé par **X**. Cette variable est généralement définie sur **:0.0**, ce qui signifie le premier affichage sur l'ordinateur actuel.
+- **EDITOR** – l'éditeur de texte préféré de l'utilisateur.
+- **HISTFILESIZE** – le nombre maximum de lignes contenues dans le fichier d'historique.
+- **HISTSIZE** – Nombre de lignes ajoutées au fichier d'historique lorsque l'utilisateur termine sa session.
+- **HOME** – votre répertoire personnel.
+- **HOSTNAME** – le nom d'hôte de l'ordinateur.
+- **LANG** – votre langue actuelle.
+- **MAIL** – l'emplacement de la spool de mail de l'utilisateur. Généralement **/var/spool/mail/USER**.
+- **MANPATH** – la liste des répertoires à rechercher pour les pages de manuel.
+- **OSTYPE** – le type de système d'exploitation.
+- **PS1** – l'invite par défaut dans bash.
+- **PATH** – stocke le chemin de tous les répertoires contenant des fichiers binaires que vous souhaitez exécuter simplement en spécifiant le nom du fichier et non par un chemin relatif ou absolu.
+- **PWD** – le répertoire de travail actuel.
+- **SHELL** – le chemin vers le shell de commande actuel (par exemple, **/bin/bash**).
+- **TERM** – le type de terminal actuel (par exemple, **xterm**).
+- **TZ** – votre fuseau horaire.
+- **USER** – votre nom d'utilisateur actuel.
 
-## Interesting variables for hacking
+## Variables intéressantes pour le hacking
 
 ### **HISTFILESIZE**
 
-Change the **value of this variable to 0**, so when you **end your session** the **history file** (\~/.bash_history) **will be deleted**.
-
+Changez la **valeur de cette variable à 0**, afin que lorsque vous **mettez fin à votre session**, le **fichier d'historique** (\~/.bash_history) **soit supprimé**.
 ```bash
 export HISTFILESIZE=0
 ```
-
 ### **HISTSIZE**
 
-Change the **value of this variable to 0**, so when you **end your session** any command will be added to the **history file** (\~/.bash_history).
-
+Changez la **valeur de cette variable à 0**, afin que lorsque vous **mettez fin à votre session**, aucune commande ne soit ajoutée au **fichier d'historique** (\~/.bash_history).
 ```bash
 export HISTSIZE=0
 ```
-
 ### http_proxy & https_proxy
 
-The processes will use the **proxy** declared here to connect to internet through **http or https**.
-
+Les processus utiliseront le **proxy** déclaré ici pour se connecter à Internet via **http ou https**.
 ```bash
 export http_proxy="http://10.10.10.10:8080"
 export https_proxy="http://10.10.10.10:8080"
 ```
-
 ### SSL_CERT_FILE & SSL_CERT_DIR
 
-The processes will trust the certificates indicated in **these env variables**.
-
+Les processus feront confiance aux certificats indiqués dans **ces variables d'environnement**.
 ```bash
 export SSL_CERT_FILE=/path/to/ca-bundle.pem
 export SSL_CERT_DIR=/path/to/ca-certificates
 ```
-
 ### PS1
 
-Change how your prompt looks.
+Changez l'apparence de votre invite.
 
-[**This is an example**](https://gist.github.com/carlospolop/43f7cd50f3deea972439af3222b68808)
+[**Ceci est un exemple**](https://gist.github.com/carlospolop/43f7cd50f3deea972439af3222b68808)
 
 Root:
 
 ![](<../images/image (897).png>)
 
-Regular user:
+Utilisateur régulier:
 
 ![](<../images/image (740).png>)
 
-One, two and three backgrounded jobs:
+Un, deux et trois travaux en arrière-plan:
 
 ![](<../images/image (145).png>)
 
-One background job, one stopped and last command didn't finish correctly:
+Un travail en arrière-plan, un arrêté et la dernière commande ne s'est pas terminée correctement:
 
 ![](<../images/image (715).png>)
 

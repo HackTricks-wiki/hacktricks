@@ -33,11 +33,11 @@ La structure de sortie est la suivante :
 - **Numéro 1** : Également cgroups v1, mais uniquement à des fins de gestion (défini par, par exemple, systemd), et n'a pas de contrôleur.
 - **Numéro 0** : Représente cgroups v2. Aucun contrôleur n'est listé, et cette ligne est exclusive aux systèmes exécutant uniquement cgroups v2.
 - Les **noms sont hiérarchiques**, ressemblant à des chemins de fichiers, indiquant la structure et la relation entre différents cgroups.
-- **Des noms comme /user.slice ou /system.slice** spécifient la catégorisation des cgroups, avec user.slice généralement pour les sessions de connexion gérées par systemd et system.slice pour les services système.
+- Des **noms comme /user.slice ou /system.slice** spécifient la catégorisation des cgroups, avec user.slice généralement pour les sessions de connexion gérées par systemd et system.slice pour les services système.
 
 ### Visualiser les cgroups
 
-Le système de fichiers est généralement utilisé pour accéder aux **cgroups**, divergeant de l'interface d'appel système Unix traditionnellement utilisée pour les interactions avec le noyau. Pour enquêter sur la configuration du cgroup d'un shell, il convient d'examiner le fichier **/proc/self/cgroup**, qui révèle le cgroup du shell. Ensuite, en naviguant vers le répertoire **/sys/fs/cgroup** (ou **`/sys/fs/cgroup/unified`**) et en localisant un répertoire partageant le nom du cgroup, on peut observer divers paramètres et informations sur l'utilisation des ressources pertinentes au cgroup.
+Le système de fichiers est généralement utilisé pour accéder aux **cgroups**, s'écartant de l'interface d'appel système Unix traditionnellement utilisée pour les interactions avec le noyau. Pour enquêter sur la configuration du cgroup d'un shell, il convient d'examiner le fichier **/proc/self/cgroup**, qui révèle le cgroup du shell. Ensuite, en naviguant vers le répertoire **/sys/fs/cgroup** (ou **`/sys/fs/cgroup/unified`**) et en localisant un répertoire partageant le nom du cgroup, on peut observer divers paramètres et informations sur l'utilisation des ressources pertinentes au cgroup.
 
 ![Cgroup Filesystem](<../../../images/image (1128).png>)
 
@@ -57,7 +57,7 @@ Les processus sont assignés aux cgroups en **écrivant leur identifiant de proc
 ```bash
 echo [pid] > cgroup.procs
 ```
-De même, **modifier les attributs cgroup, comme définir une limite de PID**, se fait en écrivant la valeur souhaitée dans le fichier correspondant. Pour définir un maximum de 3 000 PIDs pour un cgroup :
+De même, **modifier les attributs de cgroup, comme définir une limite de PID**, se fait en écrivant la valeur souhaitée dans le fichier pertinent. Pour définir un maximum de 3 000 PIDs pour un cgroup :
 ```bash
 echo 3000 > pids.max
 ```

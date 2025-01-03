@@ -45,16 +45,16 @@ aa-mergeprof  #used to merge the policies
 - **k** (verrouillage de fichier)
 - **l** (création de liens durs)
 - **ix** (pour exécuter un autre programme avec la nouvelle politique héritée)
-- **Px** (exécuter sous un autre profil, après avoir nettoyé l'environnement)
-- **Cx** (exécuter sous un profil enfant, après avoir nettoyé l'environnement)
-- **Ux** (exécuter sans confinement, après avoir nettoyé l'environnement)
+- **Px** (exécuter sous un autre profil, après nettoyage de l'environnement)
+- **Cx** (exécuter sous un profil enfant, après nettoyage de l'environnement)
+- **Ux** (exécuter sans confinement, après nettoyage de l'environnement)
 - **Des variables** peuvent être définies dans les profils et peuvent être manipulées depuis l'extérieur du profil. Par exemple : @{PROC} et @{HOME} (ajoutez #include \<tunables/global> au fichier de profil)
 - **Les règles de refus sont prises en charge pour remplacer les règles d'autorisation**.
 
 ### aa-genprof
 
-Pour commencer facilement à créer un profil, apparmor peut vous aider. Il est possible de faire **apparmor inspecter les actions effectuées par un binaire et ensuite vous laisser décider quelles actions vous souhaitez autoriser ou refuser**.\
-Vous devez juste exécuter :
+Pour commencer facilement à créer un profil, apparmor peut vous aider. Il est possible de faire en sorte que **apparmor inspecte les actions effectuées par un binaire et vous laisse ensuite décider quelles actions vous souhaitez autoriser ou refuser**.\
+Il vous suffit d'exécuter :
 ```bash
 sudo aa-genprof /path/to/binary
 ```
@@ -95,7 +95,7 @@ sudo aa-easyprof /path/to/binary
 }
 ```
 > [!NOTE]
-> Notez qu'en mode par défaut dans un profil créé, rien n'est autorisé, donc tout est refusé. Vous devrez ajouter des lignes comme `/etc/passwd r,` pour autoriser la lecture binaire de `/etc/passwd`, par exemple.
+> Notez qu'en créant un profil, par défaut, rien n'est autorisé, donc tout est refusé. Vous devrez ajouter des lignes comme `/etc/passwd r,` pour autoriser la lecture binaire de `/etc/passwd`, par exemple.
 
 Vous pouvez ensuite **appliquer** le nouveau profil avec
 ```bash
@@ -108,7 +108,7 @@ L'outil suivant lira les journaux et demandera à l'utilisateur s'il souhaite au
 sudo aa-logprof
 ```
 > [!NOTE]
-> En utilisant les touches fléchées, vous pouvez sélectionner ce que vous souhaitez autoriser/refuser/autre
+> En utilisant les touches fléchées, vous pouvez sélectionner ce que vous souhaitez autoriser/refuser/quoi que ce soit
 
 ### Gestion d'un profil
 ```bash
@@ -177,7 +177,7 @@ Une fois que vous **exécutez un conteneur docker**, vous devriez voir la sortie
 1 processes are in enforce mode.
 docker-default (825)
 ```
-Notez que **apparmor bloquera même les privilèges de capacités** accordés au conteneur par défaut. Par exemple, il sera capable de **bloquer l'autorisation d'écrire dans /proc même si la capacité SYS_ADMIN est accordée** car par défaut, le profil apparmor de docker refuse cet accès :
+Notez que **apparmor bloquera même les privilèges de capacités** accordés au conteneur par défaut. Par exemple, il sera capable de **bloquer la permission d'écrire dans /proc même si la capacité SYS_ADMIN est accordée** car par défaut, le profil apparmor de docker refuse cet accès :
 ```bash
 docker run -it --cap-add SYS_ADMIN --security-opt seccomp=unconfined ubuntu /bin/bash
 echo "" > /proc/stat
@@ -187,7 +187,7 @@ Vous devez **désactiver apparmor** pour contourner ses restrictions :
 ```bash
 docker run -it --cap-add SYS_ADMIN --security-opt seccomp=unconfined --security-opt apparmor=unconfined ubuntu /bin/bash
 ```
-Notez qu'en par défaut, **AppArmor** **interdira également au conteneur de monter** des dossiers de l'intérieur même avec la capacité SYS_ADMIN.
+Notez qu'en par défaut, **AppArmor** va également **interdire au conteneur de monter** des dossiers de l'intérieur même avec la capacité SYS_ADMIN.
 
 Notez que vous pouvez **ajouter/enlever** des **capacités** au conteneur docker (cela sera toujours restreint par des méthodes de protection comme **AppArmor** et **Seccomp**):
 
@@ -232,7 +232,7 @@ Ensuite, vous pouvez exécuter la ligne suivante pour **trouver le profil exact 
 ```bash
 find /etc/apparmor.d/ -name "*lowpriv*" -maxdepth 1 2>/dev/null
 ```
-Dans le cas étrange où vous pouvez **modifier le profil docker apparmor et le recharger.** Vous pourriez supprimer les restrictions et les "contourner".
+Dans le cas étrange où vous pouvez **modifier le profil docker apparmor et le recharger.** Vous pourriez supprimer les restrictions et "les contourner".
 
 ### Contournement AppArmor Docker2
 

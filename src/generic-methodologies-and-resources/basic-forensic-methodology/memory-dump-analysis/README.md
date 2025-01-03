@@ -1,49 +1,37 @@
-# Memory dump analysis
+# Analyse de dump mémoire
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
+## Début
 
-[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
-
-{% embed url="https://www.rootedcon.com/" %}
-
-## Start
-
-Start **searching** for **malware** inside the pcap. Use the **tools** mentioned in [**Malware Analysis**](../malware-analysis.md).
+Commencez à **chercher** des **malwares** à l'intérieur du pcap. Utilisez les **outils** mentionnés dans [**Analyse de Malware**](../malware-analysis.md).
 
 ## [Volatility](volatility-cheatsheet.md)
 
-**Volatility is the main open-source framework for memory dump analysis**. This Python tool analyzes dumps from external sources or VMware VMs, identifying data like processes and passwords based on the dump's OS profile. It's extensible with plugins, making it highly versatile for forensic investigations.
+**Volatility est le principal cadre open-source pour l'analyse de dump mémoire**. Cet outil Python analyse les dumps provenant de sources externes ou de VMs VMware, identifiant des données telles que les processus et les mots de passe en fonction du profil OS du dump. Il est extensible avec des plugins, ce qui le rend très polyvalent pour les enquêtes judiciaires.
 
-[**Find here a cheatsheet**](volatility-cheatsheet.md)
+[**Trouvez ici une feuille de triche**](volatility-cheatsheet.md)
 
-## Mini dump crash report
+## Rapport de crash mini dump
 
-When the dump is small (just some KB, maybe a few MB) then it's probably a mini dump crash report and not a memory dump.
+Lorsque le dump est petit (juste quelques Ko, peut-être quelques Mo), alors c'est probablement un rapport de crash mini dump et non un dump mémoire.
 
 ![](<../../../images/image (532).png>)
 
-If you have Visual Studio installed, you can open this file and bind some basic information like process name, architecture, exception info and modules being executed:
+Si vous avez Visual Studio installé, vous pouvez ouvrir ce fichier et lier quelques informations de base comme le nom du processus, l'architecture, les informations d'exception et les modules en cours d'exécution :
 
 ![](<../../../images/image (263).png>)
 
-You can also load the exception and see the decompiled instructions
+Vous pouvez également charger l'exception et voir les instructions décompilées
 
 ![](<../../../images/image (142).png>)
 
 ![](<../../../images/image (610).png>)
 
-Anyway, Visual Studio isn't the best tool to perform an analysis of the depth of the dump.
+Quoi qu'il en soit, Visual Studio n'est pas le meilleur outil pour effectuer une analyse en profondeur du dump.
 
-You should **open** it using **IDA** or **Radare** to inspection it in **depth**.
+Vous devriez **l'ouvrir** en utilisant **IDA** ou **Radare** pour l'inspecter en **profondeur**.
 
 ​
-
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
-
-[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
-
-{% embed url="https://www.rootedcon.com/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}

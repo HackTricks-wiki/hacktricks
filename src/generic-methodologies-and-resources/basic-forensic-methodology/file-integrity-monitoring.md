@@ -2,17 +2,17 @@
 
 # Baseline
 
-A baseline consists of taking a snapshot of certain parts of a system to **compare it with a future status to highlight changes**.
+Une ligne de base consiste à prendre un instantané de certaines parties d'un système pour **le comparer avec un état futur afin de mettre en évidence les changements**.
 
-For example, you can calculate and store the hash of each file of the filesystem to be able to find out which files were modified.\
-This can also be done with the user accounts created, processes running, services running and any other thing that shouldn't change much, or at all.
+Par exemple, vous pouvez calculer et stocker le hachage de chaque fichier du système de fichiers pour pouvoir déterminer quels fichiers ont été modifiés.\
+Cela peut également être fait avec les comptes d'utilisateurs créés, les processus en cours d'exécution, les services en cours d'exécution et toute autre chose qui ne devrait pas changer beaucoup, ou pas du tout.
 
 ## File Integrity Monitoring
 
-File Integrity Monitoring (FIM) is a critical security technique that protects IT environments and data by tracking changes in files. It involves two key steps:
+Le File Integrity Monitoring (FIM) est une technique de sécurité critique qui protège les environnements informatiques et les données en suivant les changements dans les fichiers. Elle implique deux étapes clés :
 
-1. **Baseline Comparison:** Establish a baseline using file attributes or cryptographic checksums (like MD5 or SHA-2) for future comparisons to detect modifications.
-2. **Real-Time Change Notification:** Get instant alerts when files are accessed or altered, typically through OS kernel extensions.
+1. **Baseline Comparison :** Établir une ligne de base en utilisant des attributs de fichiers ou des sommes de contrôle cryptographiques (comme MD5 ou SHA-2) pour des comparaisons futures afin de détecter les modifications.
+2. **Real-Time Change Notification :** Recevoir des alertes instantanées lorsque des fichiers sont accédés ou modifiés, généralement par le biais d'extensions du noyau OS.
 
 ## Tools
 

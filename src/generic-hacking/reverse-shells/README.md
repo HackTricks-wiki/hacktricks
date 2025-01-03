@@ -8,7 +8,7 @@
 
 # [**Full TTYs**](full-ttys.md)
 
-# **Auto-generated shells**
+# **Coquilles générées automatiquement**
 
 - [**https://reverse-shell.sh/**](https://reverse-shell.sh/)
 - [**https://www.revshells.com/**](https://www.revshells.com/)

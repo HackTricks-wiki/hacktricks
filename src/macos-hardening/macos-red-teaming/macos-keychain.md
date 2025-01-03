@@ -38,7 +38,7 @@ De plus, l'entrée peut contenir la clé **`ACLAuthorizationPartitionID`,** qui 
 
 ### Creating a Keychain Entry
 
-Lorsque **une nouvelle** **entrée** est créée en utilisant **`Keychain Access.app`**, les règles suivantes s'appliquent :
+Lorsque une **nouvelle** **entrée** est créée en utilisant **`Keychain Access.app`**, les règles suivantes s'appliquent :
 
 - Toutes les applications peuvent chiffrer.
 - **Aucune application** ne peut exporter/déchiffrer (sans demander à l'utilisateur).
@@ -46,7 +46,7 @@ Lorsque **une nouvelle** **entrée** est créée en utilisant **`Keychain Access
 - Aucune application ne peut changer les ACLs.
 - Le **partitionID** est défini sur **`apple`**.
 
-Lorsque **une application crée une entrée dans le keychain**, les règles sont légèrement différentes :
+Lorsque une **application crée une entrée dans le keychain**, les règles sont légèrement différentes :
 
 - Toutes les applications peuvent chiffrer.
 - Seule l'**application créatrice** (ou toute autre application explicitement ajoutée) peut exporter/déchiffrer (sans demander à l'utilisateur).
@@ -121,7 +121,7 @@ Et voici les **exigences** pour pouvoir **exporter un secret sans invite** :
 
 ### Deux attributs supplémentaires
 
-- **Invisible** : C'est un drapeau booléen pour **cacher** l'entrée de l'application **UI** du trousseau
+- **Invisible** : C'est un indicateur booléen pour **cacher** l'entrée de l'application **UI** du trousseau
 - **General** : C'est pour stocker des **métadonnées** (donc ce n'est PAS CHIFFRÉ)
 - Microsoft stockait en texte clair tous les jetons de rafraîchissement pour accéder à des points de terminaison sensibles.
 

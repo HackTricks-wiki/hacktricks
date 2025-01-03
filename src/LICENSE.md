@@ -57,14 +57,14 @@ a. **_Octroi de licence._**
 
 1.  Sous réserve des termes et conditions de cette Licence publique, le Concédant de licence vous accorde par la présente une licence mondiale, sans redevance, non sous-licenciable, non exclusive, irrévocable pour exercer les Droits sous Licence dans le Matériel sous Licence pour :
 
-A. reproduire et partager le Matériel sous Licence, en tout ou en partie, uniquement à des fins NonCommerciales ; et
+A. reproduire et Partager le Matériel sous Licence, en tout ou en partie, uniquement à des fins NonCommerciales ; et
 
-B. produire, reproduire et partager du Matériel Adapté uniquement à des fins NonCommerciales.
+B. produire, reproduire et Partager du Matériel Adapté uniquement à des fins NonCommerciales.
 
 2.  **Exceptions et Limitations.** Pour éviter tout doute, lorsque des Exceptions et Limitations s'appliquent à votre utilisation, cette Licence publique ne s'applique pas, et vous n'avez pas besoin de vous conformer à ses termes et conditions.
 3.  **Durée.** La durée de cette Licence publique est spécifiée dans la Section 6(a).
 
-4.  **Médias et formats ; modifications techniques autorisées.** Le Concédant de licence vous autorise à exercer les Droits sous Licence dans tous les médias et formats, qu'ils soient connus maintenant ou créés ultérieurement, et à apporter les modifications techniques nécessaires pour ce faire. Le Concédant de licence renonce et/ou accepte de ne pas faire valoir tout droit ou autorité pour vous interdire d'apporter des modifications techniques nécessaires à l'exercice des Droits sous Licence, y compris les modifications techniques nécessaires pour contourner les Mesures Technologiques Efficaces. Aux fins de cette Licence publique, le simple fait d'apporter des modifications autorisées par cette Section 2(a)(4) ne produit jamais de Matériel Adapté.
+4.  **Médias et formats ; modifications techniques autorisées.** Le Concédant de licence vous autorise à exercer les Droits sous Licence dans tous les médias et formats, qu'ils soient connus maintenant ou créés par la suite, et à apporter les modifications techniques nécessaires pour ce faire. Le Concédant de licence renonce et/ou accepte de ne pas revendiquer tout droit ou autorité pour vous interdire de faire des modifications techniques nécessaires pour exercer les Droits sous Licence, y compris les modifications techniques nécessaires pour contourner les Mesures Technologiques Efficaces. Aux fins de cette Licence publique, le simple fait d'apporter des modifications autorisées par cette Section 2(a)(4) ne produit jamais de Matériel Adapté.
 5.  **Destinataires en aval.**
 
 A. **Offre du Concédant de licence – Matériel sous Licence.** Chaque destinataire du Matériel sous Licence reçoit automatiquement une offre du Concédant de licence pour exercer les Droits sous Licence selon les termes et conditions de cette Licence publique.
@@ -75,11 +75,11 @@ B. **Pas de restrictions en aval.** Vous ne pouvez pas offrir ou imposer des ter
 
 b. **_Autres droits._**
 
-1.  Les droits moraux, tels que le droit à l'intégrité, ne sont pas sous licence en vertu de cette Licence publique, ni la publicité, la vie privée et/ou d'autres droits de personnalité similaires ; cependant, dans la mesure du possible, le Concédant de licence renonce et/ou accepte de ne pas faire valoir de tels droits détenus par le Concédant de licence dans la mesure limitée nécessaire pour vous permettre d'exercer les Droits sous Licence, mais pas autrement.
+1.  Les droits moraux, tels que le droit à l'intégrité, ne sont pas sous licence en vertu de cette Licence publique, ni les droits de publicité, de confidentialité et/ou d'autres droits de personnalité similaires ; cependant, dans la mesure du possible, le Concédant de licence renonce et/ou accepte de ne pas revendiquer de tels droits détenus par le Concédant de licence dans la mesure limitée nécessaire pour vous permettre d'exercer les Droits sous Licence, mais pas autrement.
 
 2.  Les droits de brevet et de marque ne sont pas sous licence en vertu de cette Licence publique.
 
-3.  Dans la mesure du possible, le Concédant de licence renonce à tout droit de percevoir des redevances de votre part pour l'exercice des Droits sous Licence, que ce soit directement ou par l'intermédiaire d'une société de gestion dans le cadre de tout schéma de licence statutaire ou obligatoire volontaire ou renonçable. Dans tous les autres cas, le Concédant de licence se réserve expressément tout droit de percevoir de telles redevances, y compris lorsque le Matériel sous Licence est utilisé autrement qu'à des fins NonCommerciales.
+3.  Dans la mesure du possible, le Concédant de licence renonce à tout droit de percevoir des redevances de votre part pour l'exercice des Droits sous Licence, que ce soit directement ou par l'intermédiaire d'une société de perception dans le cadre de tout schéma de licence statutaire ou obligatoire volontaire ou renonçable. Dans tous les autres cas, le Concédant de licence se réserve expressément tout droit de percevoir de telles redevances, y compris lorsque le Matériel sous Licence est utilisé autrement qu'à des fins NonCommerciales.
 
 ## Section 3 – Conditions de la licence.
 
@@ -87,11 +87,11 @@ Votre exercice des Droits sous Licence est expressément soumis aux conditions s
 
 a. **_Attribution._**
 
-1.  Si vous partagez le Matériel sous Licence (y compris sous forme modifiée), vous devez :
+1.  Si vous Partagez le Matériel sous Licence (y compris sous forme modifiée), vous devez :
 
 A. conserver ce qui suit s'il est fourni par le Concédant de licence avec le Matériel sous Licence :
 
-i. identification du ou des créateurs du Matériel sous Licence et de toute autre personne désignée pour recevoir une attribution, de la manière raisonnable demandée par le Concédant de licence (y compris par pseudonyme si désigné) ;
+i. identification du ou des créateurs du Matériel sous Licence et de toute autre personne désignée pour recevoir une attribution, de toute manière raisonnable demandée par le Concédant de licence (y compris par pseudonyme si désigné) ;
 
 ii. un avis de droit d'auteur ;
 
@@ -105,31 +105,31 @@ B. indiquer si vous avez modifié le Matériel sous Licence et conserver une ind
 
 C. indiquer que le Matériel sous Licence est sous licence en vertu de cette Licence publique, et inclure le texte de, ou l'URI ou le lien hypertexte vers, cette Licence publique.
 
-2.  Vous pouvez satisfaire aux conditions de la Section 3(a)(1) de toute manière raisonnable en fonction du support, des moyens et du contexte dans lequel vous partagez le Matériel sous Licence. Par exemple, il peut être raisonnable de satisfaire aux conditions en fournissant un URI ou un lien hypertexte vers une ressource qui inclut les informations requises.
+2.  Vous pouvez satisfaire aux conditions de la Section 3(a)(1) de toute manière raisonnable en fonction du support, des moyens et du contexte dans lequel vous Partagez le Matériel sous Licence. Par exemple, il peut être raisonnable de satisfaire aux conditions en fournissant un URI ou un lien hypertexte vers une ressource qui inclut les informations requises.
 
 3.  Si demandé par le Concédant de licence, vous devez retirer toute information requise par la Section 3(a)(1)(A) dans la mesure raisonnablement praticable.
 
-4.  Si vous partagez du Matériel Adapté que vous produisez, la Licence de l'Adaptateur que vous appliquez ne doit pas empêcher les destinataires du Matériel Adapté de se conformer à cette Licence publique.
+4.  Si vous Partagez du Matériel Adapté que vous produisez, la Licence de l'Adaptateur que vous appliquez ne doit pas empêcher les destinataires du Matériel Adapté de se conformer à cette Licence publique.
 
 ## Section 4 – Droits de Base de Données Sui Generis.
 
 Lorsque les Droits sous Licence incluent des Droits de Base de Données Sui Generis qui s'appliquent à votre utilisation du Matériel sous Licence :
 
-a. pour éviter tout doute, la Section 2(a)(1) vous accorde le droit d'extraire, de réutiliser, de reproduire et de partager tout ou une partie substantielle du contenu de la base de données à des fins NonCommerciales uniquement ;
+a. pour éviter tout doute, la Section 2(a)(1) vous accorde le droit d'extraire, de réutiliser, de reproduire et de Partager tout ou une partie substantielle du contenu de la base de données à des fins NonCommerciales uniquement ;
 
 b. si vous incluez tout ou une partie substantielle du contenu de la base de données dans une base de données dans laquelle vous avez des Droits de Base de Données Sui Generis, alors la base de données dans laquelle vous avez des Droits de Base de Données Sui Generis (mais pas son contenu individuel) est du Matériel Adapté ; et
 
-c. vous devez vous conformer aux conditions de la Section 3(a) si vous partagez tout ou une partie substantielle du contenu de la base de données.
+c. vous devez vous conformer aux conditions de la Section 3(a) si vous Partagez tout ou une partie substantielle du contenu de la base de données.
 
 Pour éviter tout doute, cette Section 4 complète et ne remplace pas vos obligations en vertu de cette Licence publique lorsque les Droits sous Licence incluent d'autres Droits d'auteur et droits similaires.
 
 ## Section 5 – Clause de non-garantie et limitation de responsabilité.
 
-a. **À moins qu'il n'en soit autrement convenu séparément par le Concédant de licence, dans la mesure du possible, le Concédant de licence offre le Matériel sous Licence tel quel et tel qu'il est disponible, et ne fait aucune déclaration ou garantie de quelque nature que ce soit concernant le Matériel sous Licence, qu'elle soit expresse, implicite, statutaire ou autre. Cela inclut, sans limitation, les garanties de titre, de qualité marchande, d'adéquation à un usage particulier, de non-contrefaçon, d'absence de défauts latents ou autres, d'exactitude, ou de la présence ou de l'absence d'erreurs, qu'elles soient connues ou découvrables ou non. Lorsque les clauses de non-garantie ne sont pas autorisées en tout ou en partie, cette clause de non-garantie peut ne pas s'appliquer à vous.**
+a. **Sauf accord séparé du Concédant de licence, dans la mesure du possible, le Concédant de licence offre le Matériel sous Licence tel quel et tel que disponible, et ne fait aucune déclaration ou garantie de quelque nature que ce soit concernant le Matériel sous Licence, qu'elle soit expresse, implicite, statutaire ou autre. Cela inclut, sans limitation, les garanties de titre, de qualité marchande, d'adéquation à un usage particulier, de non-contrefaçon, d'absence de défauts latents ou autres, d'exactitude, ou de la présence ou de l'absence d'erreurs, qu'elles soient connues ou découvrables. Lorsque les clauses de non-garantie ne sont pas autorisées en tout ou en partie, cette clause de non-garantie peut ne pas s'appliquer à vous.**
 
-b. **Dans la mesure du possible, en aucun cas le Concédant de licence ne sera responsable envers vous sur la base de quelque théorie juridique que ce soit (y compris, sans limitation, la négligence) ou autrement pour toute perte, coût, dépense ou dommage direct, spécial, indirect, accessoire, consécutif, punitif, exemplaire ou autre découlant de cette Licence publique ou de l'utilisation du Matériel sous Licence, même si le Concédant de licence a été informé de la possibilité de telles pertes, coûts, dépenses ou dommages. Lorsque la limitation de responsabilité n'est pas autorisée en tout ou en partie, cette limitation peut ne pas s'appliquer à vous.**
+b. **Dans la mesure du possible, en aucun cas le Concédant de licence ne sera responsable envers vous sur une base légale (y compris, sans limitation, la négligence) ou autrement pour toute perte, coût, dépense ou dommage direct, spécial, indirect, accessoire, consécutif, punitif, exemplaire ou autre découlant de cette Licence publique ou de l'utilisation du Matériel sous Licence, même si le Concédant de licence a été informé de la possibilité de telles pertes, coûts, dépenses ou dommages. Lorsque la limitation de responsabilité n'est pas autorisée en tout ou en partie, cette limitation peut ne pas s'appliquer à vous.**
 
-c. La clause de non-garantie et la limitation de responsabilité fournies ci-dessus doivent être interprétées de manière à, dans la mesure du possible, se rapprocher le plus d'une clause de non-garantie absolue et d'une renonciation à toute responsabilité.
+c. La clause de non-garantie et la limitation de responsabilité fournies ci-dessus seront interprétées de manière à, dans la mesure du possible, se rapprocher le plus d'une clause de non-garantie absolue et d'une renonciation à toute responsabilité.
 
 ## Section 6 – Durée et résiliation.
 
@@ -155,7 +155,7 @@ b. Tout arrangement, compréhension ou accord concernant le Matériel sous Licen
 
 ## Section 8 – Interprétation.
 
-a. Pour éviter tout doute, cette Licence publique ne réduit, limite, restreint ni n'impose de conditions sur toute utilisation du Matériel sous Licence qui pourrait être légalement faite sans permission en vertu de cette Licence publique.
+a. Pour éviter tout doute, cette Licence publique ne réduit, limite, restreint ni n'impose de conditions sur toute utilisation du Matériel sous Licence qui pourrait légalement être faite sans permission en vertu de cette Licence publique.
 
 b. Dans la mesure du possible, si une disposition de cette Licence publique est jugée inapplicable, elle sera automatiquement reformée dans la mesure minimale nécessaire pour la rendre applicable. Si la disposition ne peut pas être reformée, elle sera séparée de cette Licence publique sans affecter l'applicabilité des termes et conditions restants.
 

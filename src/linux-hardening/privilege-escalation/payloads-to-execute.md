@@ -48,7 +48,7 @@ return 0;
 
 ### Fichiers courants
 
-- Ajouter un utilisateur avec un mot de passe à _/etc/passwd_
+- Ajouter un utilisateur avec mot de passe à _/etc/passwd_
 - Changer le mot de passe dans _/etc/shadow_
 - Ajouter un utilisateur aux sudoers dans _/etc/sudoers_
 - Abuser de docker via le socket docker, généralement dans _/run/docker.sock_ ou _/var/run/docker.sock_
@@ -76,7 +76,7 @@ objdump -T /bin/su | grep audit
 0000000000000000      DF *UND*  0000000000000000              audit_log_acct_message
 000000000020e968 g    DO .bss   0000000000000004  Base        audit_fd
 ```
-Les symboles `audit_open`, `audit_log_acct_message`, `audit_log_acct_message` et `audit_fd` proviennent probablement de la bibliothèque libaudit.so.1. Comme la libaudit.so.1 sera écrasée par la bibliothèque partagée malveillante, ces symboles doivent être présents dans la nouvelle bibliothèque partagée, sinon le programme ne pourra pas trouver le symbole et se fermera.
+Les symboles `audit_open`, `audit_log_acct_message`, `audit_log_acct_message` et `audit_fd` proviennent probablement de la bibliothèque libaudit.so.1. Comme la libaudit.so.1 sera écrasée par la bibliothèque partagée malveillante, ces symboles doivent être présents dans la nouvelle bibliothèque partagée, sinon le programme ne pourra pas trouver le symbole et se terminera.
 ```c
 #include<stdio.h>
 #include<stdlib.h>

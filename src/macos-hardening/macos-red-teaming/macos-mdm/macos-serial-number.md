@@ -31,7 +31,7 @@ Certains codes représentent des usines spécifiques :
 
 ### **Année de fabrication (4ème caractère)**
 
-Ce caractère varie de 'C' (représentant la première moitié de 2010) à 'Z' (deuxième moitié de 2019), avec différentes lettres indiquant différentes périodes de semestre.
+Ce caractère varie de 'C' (représentant la première moitié de 2010) à 'Z' (deuxième moitié de 2019), avec différentes lettres indiquant différentes périodes de six mois.
 
 ### **Semaine de fabrication (5ème caractère)**
 

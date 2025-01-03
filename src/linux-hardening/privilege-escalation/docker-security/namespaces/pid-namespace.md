@@ -13,7 +13,7 @@ Du point de vue d'un processus au sein d'un namespace PID, il ne peut voir que l
 ### Comment ça fonctionne :
 
 1. Lorsqu'un nouveau processus est créé (par exemple, en utilisant l'appel système `clone()`), le processus peut être assigné à un nouveau namespace PID ou à un namespace existant. **Si un nouveau namespace est créé, le processus devient le processus "init" de ce namespace**.
-2. Le **noyau** maintient une **correspondance entre les PIDs dans le nouveau namespace et les PIDs correspondants** dans le namespace parent (c'est-à-dire le namespace à partir duquel le nouveau namespace a été créé). Cette correspondance **permet au noyau de traduire les PIDs lorsque cela est nécessaire**, par exemple lors de l'envoi de signaux entre des processus dans différents namespaces.
+2. Le **noyau** maintient une **correspondance entre les PIDs dans le nouveau namespace et les PIDs correspondants** dans le namespace parent (c'est-à-dire, le namespace à partir duquel le nouveau namespace a été créé). Cette correspondance **permet au noyau de traduire les PIDs lorsque cela est nécessaire**, par exemple lors de l'envoi de signaux entre des processus dans différents namespaces.
 3. **Les processus au sein d'un namespace PID ne peuvent voir et interagir qu'avec d'autres processus dans le même namespace**. Ils ne sont pas conscients des processus dans d'autres namespaces, et leurs PIDs sont uniques dans leur namespace.
 4. Lorsqu'un **namespace PID est détruit** (par exemple, lorsque le processus "init" du namespace se termine), **tous les processus au sein de ce namespace sont terminés**. Cela garantit que toutes les ressources associées au namespace sont correctement nettoyées.
 
@@ -45,7 +45,7 @@ Lorsque `unshare` est exécuté sans l'option `-f`, une erreur est rencontrée e
 - Le problème peut être résolu en utilisant l'option `-f` avec `unshare`. Cette option permet à `unshare` de forker un nouveau processus après avoir créé le nouvel espace de noms PID.
 - L'exécution de `%unshare -fp /bin/bash%` garantit que la commande `unshare` elle-même devient PID 1 dans le nouvel espace de noms. `/bin/bash` et ses processus enfants sont alors en toute sécurité contenus dans ce nouvel espace de noms, empêchant la sortie prématurée de PID 1 et permettant une allocation normale de PID.
 
-En veillant à ce que `unshare` s'exécute avec le drapeau `-f`, le nouvel espace de noms PID est correctement maintenu, permettant à `/bin/bash` et à ses sous-processus de fonctionner sans rencontrer l'erreur d'allocation de mémoire.
+En s'assurant que `unshare` s'exécute avec le drapeau `-f`, le nouvel espace de noms PID est correctement maintenu, permettant à `/bin/bash` et à ses sous-processus de fonctionner sans rencontrer l'erreur d'allocation de mémoire.
 
 </details>
 
@@ -70,7 +70,7 @@ Notez que l'utilisateur root du namespace PID initial (par défaut) peut voir to
 ```bash
 nsenter -t TARGET_PID --pid /bin/bash
 ```
-Lorsque vous entrez dans un espace de noms PID à partir de l'espace de noms par défaut, vous pourrez toujours voir tous les processus. Et le processus de cet espace de noms PID pourra voir le nouveau bash dans l'espace de noms PID.
+Lorsque vous entrez dans un espace de noms PID depuis l'espace de noms par défaut, vous pourrez toujours voir tous les processus. Et le processus de cet espace de noms PID pourra voir le nouveau bash dans l'espace de noms PID.
 
 De plus, vous ne pouvez **entrer dans un autre espace de noms PID de processus que si vous êtes root**. Et vous **ne pouvez pas** **entrer** dans un autre espace de noms **sans un descripteur** pointant vers celui-ci (comme `/proc/self/ns/pid`)
 

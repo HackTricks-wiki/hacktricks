@@ -4,10 +4,10 @@ Reading time: {{ #reading_time }}
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Les logos et le design animé de Hacktricks par_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
+_Hacktricks logos & motion design par_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
 
 > [!TIP]
-> **Bienvenue dans le wiki où vous trouverez chaque astuce/technique de hacking/quoi que ce soit que j'ai appris des CTF, des applications de la vie réelle, des recherches et des actualités.**
+> **Bienvenue dans le wiki où vous trouverez chaque astuce/technique de hacking que j'ai apprise lors de CTF, d'applications réelles, de lectures de recherches et d'actualités.**
 
 Pour commencer, suivez cette page où vous trouverez le **flux typique** que **vous devriez suivre lors de pentesting** d'une ou plusieurs **machines :**
 
@@ -15,13 +15,13 @@ Pour commencer, suivez cette page où vous trouverez le **flux typique** que **v
 generic-methodologies-and-resources/pentesting-methodology.md
 {{#endref}}
 
-## Sponsors Corporatifs
+## Corporate Sponsors
 
 ### [STM Cyber](https://www.stmcyber.com)
 
 <figure><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-[**STM Cyber**](https://www.stmcyber.com) est une excellente entreprise de cybersécurité dont le slogan est **HACK THE UNHACKABLE**. Ils effectuent leurs propres recherches et développent leurs propres outils de hacking pour **offrir plusieurs services de cybersécurité précieux** comme le pentesting, les équipes rouges et la formation.
+[**STM Cyber**](https://www.stmcyber.com) est une excellente entreprise de cybersécurité dont le slogan est **HACK THE UNHACKABLE**. Ils effectuent leurs propres recherches et développent leurs propres outils de hacking pour **offrir plusieurs services de cybersécurité précieux** comme le pentesting, les Red teams et la formation.
 
 Vous pouvez consulter leur **blog** à [**https://blog.stmcyber.com**](https://blog.stmcyber.com)
 
@@ -78,7 +78,7 @@ Rejoignez le serveur [**HackenProof Discord**](https://discord.com/invite/N3FrSb
 
 ---
 
-### [Pentest-Tools.com](https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons) - L'outil essentiel pour le pentesting
+### [Pentest-Tools.com](https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons) - L'outil essentiel pour le test de pénétration
 
 <figure><img src="images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
 
@@ -109,7 +109,7 @@ Vous pouvez **créer un compte gratuit** [**ici**](https://serpapi.com/users/sig
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Apprenez les technologies et les compétences nécessaires pour effectuer des recherches sur les vulnérabilités, des tests de pénétration et de l'ingénierie inverse pour protéger les applications et les appareils mobiles. **Maîtrisez la sécurité iOS et Android** grâce à nos cours à la demande et **obtenez une certification** :
+Apprenez les technologies et compétences nécessaires pour effectuer des recherches sur les vulnérabilités, des tests de pénétration et de l'ingénierie inverse pour protéger les applications et appareils mobiles. **Maîtrisez la sécurité iOS et Android** grâce à nos cours à la demande et **obtenez une certification** :
 
 {% embed url="https://academy.8ksec.io/" %}
 
@@ -121,7 +121,7 @@ Apprenez les technologies et les compétences nécessaires pour effectuer des re
 
 [**WebSec**](https://websec.nl) est une entreprise professionnelle de cybersécurité basée à **Amsterdam** qui aide à **protéger** les entreprises **dans le monde entier** contre les dernières menaces de cybersécurité en fournissant des **services de sécurité offensive** avec une approche **moderne**.
 
-WebSec est une **entreprise de sécurité tout-en-un**, ce qui signifie qu'ils font tout ; Pentesting, **Audits** de Sécurité, Formations de Sensibilisation, Campagnes de Phishing, Revue de Code, Développement d'Exploits, Externalisation d'Experts en Sécurité et bien plus encore.
+WebSec est une **entreprise de sécurité tout-en-un**, ce qui signifie qu'ils font tout ; Pentesting, **Audits** de sécurité, Formations de sensibilisation, Campagnes de phishing, Revue de code, Développement d'exploits, Externalisation d'experts en sécurité et bien plus encore.
 
 Une autre chose intéressante à propos de WebSec est qu'à la différence de la moyenne de l'industrie, WebSec est **très confiant dans ses compétences**, à tel point qu'ils **garantissent les meilleurs résultats de qualité**, il est indiqué sur leur site web "**Si nous ne pouvons pas le hacker, vous ne le payez pas !**". Pour plus d'infos, jetez un œil à leur [**site web**](https://websec.nl/en/) et [**blog**](https://websec.nl/blog/) !
 

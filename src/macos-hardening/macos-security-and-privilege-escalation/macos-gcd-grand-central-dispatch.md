@@ -37,7 +37,7 @@ Cependant, au niveau du compilateur, les blocs n'existent pas, ce sont des `os_o
 
 Une queue de dispatch est un objet nommé fournissant un ordre FIFO des blocs pour les exécutions.
 
-Les blocs sont placés dans des queues pour être exécutés, et celles-ci supportent 2 modes : `DISPATCH_QUEUE_SERIAL` et `DISPATCH_QUEUE_CONCURRENT`. Bien sûr, la **série** ne **présentera pas de problèmes de conditions de course** car un bloc ne sera pas exécuté tant que le précédent n'est pas terminé. Mais **l'autre type de queue pourrait en avoir**.
+Les blocs sont mis dans des queues à exécuter, et celles-ci supportent 2 modes : `DISPATCH_QUEUE_SERIAL` et `DISPATCH_QUEUE_CONCURRENT`. Bien sûr, la **série** ne **présentera pas de problèmes de conditions de course** car un bloc ne sera pas exécuté tant que le précédent n'a pas terminé. Mais **l'autre type de queue pourrait en avoir**.
 
 Queues par défaut :
 
@@ -83,9 +83,9 @@ Il existe plusieurs objets que libdispatch utilise et les queues et blocs ne son
 En Objective-C, il existe différentes fonctions pour envoyer un bloc à exécuter en parallèle :
 
 - [**dispatch_async**](https://developer.apple.com/documentation/dispatch/1453057-dispatch_async): Soumet un bloc pour une exécution asynchrone sur une queue de dispatch et retourne immédiatement.
-- [**dispatch_sync**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync): Soumet un objet bloc pour exécution et retourne après que ce bloc ait fini d'exécuter.
+- [**dispatch_sync**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync): Soumet un objet bloc pour exécution et retourne après que ce bloc ait fini de s'exécuter.
 - [**dispatch_once**](https://developer.apple.com/documentation/dispatch/1447169-dispatch_once): Exécute un objet bloc une seule fois pour la durée de vie d'une application.
-- [**dispatch_async_and_wait**](https://developer.apple.com/documentation/dispatch/3191901-dispatch_async_and_wait): Soumet un élément de travail pour exécution et retourne uniquement après qu'il ait fini d'exécuter. Contrairement à [**`dispatch_sync`**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync), cette fonction respecte tous les attributs de la queue lorsqu'elle exécute le bloc.
+- [**dispatch_async_and_wait**](https://developer.apple.com/documentation/dispatch/3191901-dispatch_async_and_wait): Soumet un élément de travail pour exécution et retourne uniquement après qu'il ait fini de s'exécuter. Contrairement à [**`dispatch_sync`**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync), cette fonction respecte tous les attributs de la queue lorsqu'elle exécute le bloc.
 
 Ces fonctions attendent ces paramètres : [**`dispatch_queue_t`**](https://developer.apple.com/documentation/dispatch/dispatch_queue_t) **`queue,`** [**`dispatch_block_t`**](https://developer.apple.com/documentation/dispatch/dispatch_block_t) **`block`**
 
@@ -170,7 +170,7 @@ sleep(1)  // Simulate a long-running task
 ```
 ## Frida
 
-Le script Frida suivant peut être utilisé pour **s'accrocher à plusieurs fonctions `dispatch`** et extraire le nom de la file d'attente, la trace de retour et le bloc : [**https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js**](https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js)
+Le script Frida suivant peut être utilisé pour **intercepter plusieurs fonctions `dispatch`** et extraire le nom de la file d'attente, la trace de retour et le bloc : [**https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js**](https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js)
 ```bash
 frida -U <prog_name> -l libdispatch.js
 

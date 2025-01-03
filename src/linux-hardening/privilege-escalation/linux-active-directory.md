@@ -20,7 +20,7 @@ Vous pouvez également consulter la page suivante pour apprendre **d'autres faç
 
 ### FreeIPA
 
-FreeIPA est une **alternative** open-source à Microsoft Windows **Active Directory**, principalement pour les environnements **Unix**. Il combine un **annuaire LDAP** complet avec un Centre de Distribution de Clés **Kerberos** MIT pour une gestion similaire à Active Directory. Utilisant le **Système de Certificats** Dogtag pour la gestion des certificats CA & RA, il prend en charge l'authentification **multi-facteurs**, y compris les cartes à puce. SSSD est intégré pour les processus d'authentification Unix. En savoir plus à ce sujet dans :
+FreeIPA est une **alternative** open-source à Microsoft Windows **Active Directory**, principalement pour les environnements **Unix**. Il combine un **annuaire LDAP** complet avec un centre de distribution de clés **Kerberos** MIT pour une gestion similaire à Active Directory. Utilisant le système de certificats **Dogtag** pour la gestion des certificats CA et RA, il prend en charge l'authentification **multi-facteurs**, y compris les cartes intelligentes. SSSD est intégré pour les processus d'authentification Unix. En savoir plus à ce sujet dans :
 
 {{#ref}}
 ../freeipa-pentesting.md
@@ -36,7 +36,7 @@ Sur cette page, vous allez trouver différents endroits où vous pourriez **trou
 ../../windows-hardening/active-directory-methodology/pass-the-ticket.md
 {{#endref}}
 
-### Réutilisation des tickets CCACHE depuis /tmp
+### Réutilisation de tickets CCACHE depuis /tmp
 
 Les fichiers CCACHE sont des formats binaires pour **stocker des identifiants Kerberos** et sont généralement stockés avec des permissions 600 dans `/tmp`. Ces fichiers peuvent être identifiés par leur **format de nom, `krb5cc_%{uid}`,** correspondant à l'UID de l'utilisateur. Pour la vérification des tickets d'authentification, la **variable d'environnement `KRB5CCNAME`** doit être définie sur le chemin du fichier de ticket souhaité, permettant sa réutilisation.
 
@@ -66,7 +66,7 @@ Cette procédure tentera d'injecter dans diverses sessions, indiquant le succès
 
 SSSD maintient une copie de la base de données au chemin `/var/lib/sss/secrets/secrets.ldb`. La clé correspondante est stockée en tant que fichier caché au chemin `/var/lib/sss/secrets/.secrets.mkey`. Par défaut, la clé n'est lisible que si vous avez des permissions **root**.
 
-L'invocation de \*\*`SSSDKCMExtractor` \*\* avec les paramètres --database et --key analysera la base de données et **décryptera les secrets**.
+L'invocation de \*\*`SSSDKCMExtractor` \*\* avec les paramètres --database et --key analysera la base de données et **décrypta les secrets**.
 ```bash
 git clone https://github.com/fireeye/SSSDKCMExtractor
 python3 SSSDKCMExtractor.py --database secrets.ldb --key secrets.mkey

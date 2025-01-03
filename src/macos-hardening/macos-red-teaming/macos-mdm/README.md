@@ -17,9 +17,9 @@
 - Dépendance à un serveur MDM qui respecte le protocole MDM.
 - Capacité du serveur MDM à envoyer divers commandes aux appareils, par exemple, l'effacement à distance des données ou l'installation de configurations.
 
-### **Principes de base de DEP (Device Enrollment Program)**
+### **Principes de base du DEP (Device Enrollment Program)**
 
-Le [Device Enrollment Program](https://www.apple.com/business/site/docs/DEP_Guide.pdf) (DEP) proposé par Apple simplifie l'intégration de la gestion des appareils mobiles (MDM) en facilitant la configuration sans contact pour les appareils iOS, macOS et tvOS. DEP automatise le processus d'inscription, permettant aux appareils d'être opérationnels dès leur sortie de la boîte, avec un minimum d'intervention de l'utilisateur ou de l'administrateur. Les aspects essentiels incluent :
+Le [Device Enrollment Program](https://www.apple.com/business/site/docs/DEP_Guide.pdf) (DEP) proposé par Apple simplifie l'intégration de la gestion des appareils mobiles (MDM) en facilitant la configuration sans contact pour les appareils iOS, macOS et tvOS. Le DEP automatise le processus d'inscription, permettant aux appareils d'être opérationnels dès leur sortie de la boîte, avec un minimum d'intervention de l'utilisateur ou de l'administrateur. Les aspects essentiels incluent :
 
 - Permet aux appareils de s'enregistrer de manière autonome auprès d'un serveur MDM prédéfini lors de l'activation initiale.
 - Principalement bénéfique pour les appareils neufs, mais également applicable aux appareils en cours de reconfiguration.
@@ -27,17 +27,17 @@ Le [Device Enrollment Program](https://www.apple.com/business/site/docs/DEP_Guid
 
 ### **Considération de sécurité**
 
-Il est crucial de noter que la facilité d'inscription fournie par DEP, bien que bénéfique, peut également poser des risques de sécurité. Si les mesures de protection ne sont pas adéquatement appliquées pour l'inscription MDM, les attaquants pourraient exploiter ce processus simplifié pour enregistrer leur appareil sur le serveur MDM de l'organisation, se faisant passer pour un appareil d'entreprise.
+Il est crucial de noter que la facilité d'inscription fournie par le DEP, bien que bénéfique, peut également poser des risques de sécurité. Si des mesures de protection ne sont pas adéquatement appliquées pour l'inscription MDM, des attaquants pourraient exploiter ce processus simplifié pour enregistrer leur appareil sur le serveur MDM de l'organisation, se faisant passer pour un appareil d'entreprise.
 
 > [!CAUTION]
-> **Alerte de sécurité** : L'inscription simplifiée à DEP pourrait potentiellement permettre l'enregistrement non autorisé d'appareils sur le serveur MDM de l'organisation si des mesures de protection appropriées ne sont pas en place.
+> **Alerte de sécurité** : L'inscription simplifiée au DEP pourrait potentiellement permettre l'enregistrement non autorisé d'appareils sur le serveur MDM de l'organisation si des mesures de protection appropriées ne sont pas en place.
 
 ### Qu'est-ce que SCEP (Simple Certificate Enrollment Protocol) ?
 
 - Un protocole relativement ancien, créé avant que TLS et HTTPS ne soient répandus.
 - Donne aux clients un moyen standardisé d'envoyer une **demande de signature de certificat** (CSR) dans le but d'obtenir un certificat. Le client demandera au serveur de lui fournir un certificat signé.
 
-### Qu'est-ce que les profils de configuration (alias mobileconfigs) ?
+### Qu'est-ce que les profils de configuration (aka mobileconfigs) ?
 
 - La méthode officielle d'Apple pour **définir/appliquer la configuration système.**
 - Format de fichier pouvant contenir plusieurs charges utiles.
@@ -48,7 +48,7 @@ Il est crucial de noter que la facilité d'inscription fournie par DEP, bien que
 
 ### MDM
 
-- Combinaison de APNs (**serveurs Apple**) + API RESTful (**serveurs de fournisseur MDM**)
+- Combinaison de APNs (**serveurs Apple**) + API RESTful (**serveurs de fournisseurs MDM**)
 - **La communication** se produit entre un **appareil** et un serveur associé à un **produit de gestion des appareils**
 - **Commandes** livrées du MDM à l'appareil dans des **dictionnaires encodés en plist**
 - Tout cela via **HTTPS**. Les serveurs MDM peuvent être (et sont généralement) épinglés.
@@ -85,7 +85,7 @@ macos-serial-number.md
 
 1. Création de l'enregistrement de l'appareil (Revendeur, Apple) : L'enregistrement du nouvel appareil est créé
 2. Attribution de l'enregistrement de l'appareil (Client) : L'appareil est attribué à un serveur MDM
-3. Synchronisation de l'enregistrement de l'appareil (Fournisseur MDM) : MDM synchronise les enregistrements d'appareils et pousse les profils DEP vers Apple
+3. Synchronisation de l'enregistrement de l'appareil (fournisseur MDM) : MDM synchronise les enregistrements d'appareils et pousse les profils DEP vers Apple
 4. Enregistrement DEP (Appareil) : L'appareil obtient son profil DEP
 5. Récupération du profil (Appareil)
 6. Installation du profil (Appareil) a. incl. charges utiles MDM, SCEP et CA racine
@@ -107,7 +107,7 @@ ou lors de l'exécution de `sudo profiles show -type enrollment`
 - L'enregistrement d'activation est le nom interne pour le **profil DEP**
 - Commence dès que l'appareil est connecté à Internet
 - Piloté par **`CPFetchActivationRecord`**
-- Mis en œuvre par **`cloudconfigurationd`** via XPC. L'**"Assistant de configuration"** (lorsque l'appareil est démarré pour la première fois) ou la commande **`profiles`** contactera ce démon pour récupérer l'enregistrement d'activation.
+- Mis en œuvre par **`cloudconfigurationd`** via XPC. L'**"Assistant de configuration"** (lorsque l'appareil est démarré pour la première fois) ou la commande **`profiles`** contactera **ce démon** pour récupérer l'enregistrement d'activation.
 - LaunchDaemon (s'exécute toujours en tant que root)
 
 Il suit quelques étapes pour obtenir l'enregistrement d'activation effectué par **`MCTeslaConfigurationFetcher`**. Ce processus utilise un chiffrement appelé **Absinthe**
@@ -128,7 +128,7 @@ Il suit quelques étapes pour obtenir l'enregistrement d'activation effectué pa
 
 La réponse est un dictionnaire JSON contenant des données importantes telles que :
 
-- **url** : URL de l'hôte fournisseur MDM pour le profil d'activation
+- **url** : URL de l'hôte du fournisseur MDM pour le profil d'activation
 - **anchor-certs** : Tableau de certificats DER utilisés comme ancres de confiance
 
 ### **Étape 5 : Récupération du profil**

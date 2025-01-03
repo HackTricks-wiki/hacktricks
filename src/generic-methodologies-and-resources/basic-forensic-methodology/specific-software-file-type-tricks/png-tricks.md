@@ -1,9 +1,9 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-**PNG files** are highly regarded in **CTF challenges** for their **lossless compression**, making them ideal for embedding hidden data. Tools like **Wireshark** enable the analysis of PNG files by dissecting their data within network packets, revealing embedded information or anomalies.
+**Les fichiers PNG** sont très appréciés dans les **défis CTF** pour leur **compression sans perte**, ce qui les rend idéaux pour l'intégration de données cachées. Des outils comme **Wireshark** permettent l'analyse des fichiers PNG en disséquant leurs données au sein des paquets réseau, révélant des informations ou des anomalies intégrées.
 
-For checking PNG file integrity and repairing corruption, **pngcheck** is a crucial tool, offering command-line functionality to validate and diagnose PNG files ([pngcheck](http://libpng.org/pub/png/apps/pngcheck.html)). When files are beyond simple fixes, online services like [OfficeRecovery's PixRecovery](https://online.officerecovery.com/pixrecovery/) provide a web-based solution for **repairing corrupted PNGs**, aiding in the recovery of crucial data for CTF participants.
+Pour vérifier l'intégrité des fichiers PNG et réparer la corruption, **pngcheck** est un outil crucial, offrant une fonctionnalité en ligne de commande pour valider et diagnostiquer les fichiers PNG ([pngcheck](http://libpng.org/pub/png/apps/pngcheck.html)). Lorsque les fichiers sont au-delà de simples réparations, des services en ligne comme [OfficeRecovery's PixRecovery](https://online.officerecovery.com/pixrecovery/) fournissent une solution web pour **réparer les PNG corrompus**, aidant à la récupération de données cruciales pour les participants aux CTF.
 
-These strategies underscore the importance of a comprehensive approach in CTFs, utilizing a blend of analytical tools and repair techniques to uncover and recover hidden or lost data.
+Ces stratégies soulignent l'importance d'une approche globale dans les CTF, utilisant un mélange d'outils analytiques et de techniques de réparation pour découvrir et récupérer des données cachées ou perdues.
 
 {{#include ../../../banners/hacktricks-training.md}}

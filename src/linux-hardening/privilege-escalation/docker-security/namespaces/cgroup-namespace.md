@@ -12,7 +12,7 @@ Bien que les cgroup namespaces ne soient pas un type de namespace séparé comme
 
 1. Lorsqu'un nouveau cgroup namespace est créé, **il commence avec une vue de la hiérarchie cgroup basée sur le cgroup du processus créateur**. Cela signifie que les processus s'exécutant dans le nouveau cgroup namespace ne verront qu'un sous-ensemble de l'ensemble de la hiérarchie cgroup, limité à l'arborescence cgroup enracinée au cgroup du processus créateur.
 2. Les processus au sein d'un cgroup namespace **verront leur propre cgroup comme la racine de la hiérarchie**. Cela signifie que, du point de vue des processus à l'intérieur du namespace, leur propre cgroup apparaît comme la racine, et ils ne peuvent pas voir ou accéder aux cgroups en dehors de leur propre sous-arborescence.
-3. Les cgroup namespaces ne fournissent pas directement d'isolation des ressources ; **ils ne fournissent que l'isolation de la vue de la hiérarchie cgroup**. **Le contrôle et l'isolation des ressources sont toujours appliqués par les sous-systèmes cgroup** (par exemple, cpu, mémoire, etc.) eux-mêmes.
+3. Les cgroup namespaces ne fournissent pas directement l'isolation des ressources ; **ils ne fournissent que l'isolation de la vue de la hiérarchie cgroup**. **Le contrôle et l'isolation des ressources sont toujours appliqués par les** sous-systèmes cgroup (par exemple, cpu, mémoire, etc.) eux-mêmes.
 
 Pour plus d'informations sur les CGroups, consultez :
 
@@ -28,7 +28,7 @@ Pour plus d'informations sur les CGroups, consultez :
 ```bash
 sudo unshare -C [--mount-proc] /bin/bash
 ```
-En montant une nouvelle instance du système de fichiers `/proc` si vous utilisez le paramètre `--mount-proc`, vous vous assurez que le nouveau namespace de montage a une **vue précise et isolée des informations sur les processus spécifiques à ce namespace**.
+En montant une nouvelle instance du système de fichiers `/proc` si vous utilisez le paramètre `--mount-proc`, vous vous assurez que le nouveau namespace de montage a une **vue précise et isolée des informations de processus spécifiques à ce namespace**.
 
 <details>
 
@@ -39,7 +39,7 @@ Lorsque `unshare` est exécuté sans l'option `-f`, une erreur est rencontrée e
 1. **Explication du problème** :
 
 - Le noyau Linux permet à un processus de créer de nouveaux namespaces en utilisant l'appel système `unshare`. Cependant, le processus qui initie la création d'un nouveau namespace PID (appelé le processus "unshare") n'entre pas dans le nouveau namespace ; seuls ses processus enfants le font.
-- L'exécution de `%unshare -p /bin/bash%` démarre `/bin/bash` dans le même processus que `unshare`. Par conséquent, `/bin/bash` et ses processus enfants se trouvent dans l'espace de noms PID d'origine.
+- L'exécution de `%unshare -p /bin/bash%` démarre `/bin/bash` dans le même processus que `unshare`. Par conséquent, `/bin/bash` et ses processus enfants se trouvent dans le namespace PID d'origine.
 - Le premier processus enfant de `/bin/bash` dans le nouveau namespace devient PID 1. Lorsque ce processus se termine, il déclenche le nettoyage du namespace s'il n'y a pas d'autres processus, car PID 1 a le rôle spécial d'adopter les processus orphelins. Le noyau Linux désactivera alors l'allocation de PID dans ce namespace.
 
 2. **Conséquence** :

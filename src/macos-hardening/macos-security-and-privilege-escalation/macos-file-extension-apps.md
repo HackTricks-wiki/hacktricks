@@ -1,10 +1,10 @@
-# Gestionnaires d'applications pour les extensions de fichiers macOS et les schémas d'URL
+# Gestionnaires d'applications d'extension de fichier et de schéma d'URL macOS
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Base de données LaunchServices
 
-C'est une base de données de toutes les applications installées sur macOS qui peut être interrogée pour obtenir des informations sur chaque application installée, telles que les schémas d'URL qu'elle prend en charge et les types MIME.
+C'est une base de données de toutes les applications installées dans macOS qui peut être interrogée pour obtenir des informations sur chaque application installée, telles que les schémas d'URL qu'elle prend en charge et les types MIME.
 
 Il est possible d'extraire cette base de données avec :
 ```
@@ -12,7 +12,7 @@ Il est possible d'extraire cette base de données avec :
 ```
 Ou en utilisant l'outil [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
 
-**`/usr/libexec/lsd`** est le cerveau de la base de données. Il fournit **plusieurs services XPC** comme `.lsd.installation`, `.lsd.open`, `.lsd.openurl`, et plus encore. Mais il **nécessite également certaines attributions** aux applications pour pouvoir utiliser les fonctionnalités XPC exposées, comme `.launchservices.changedefaulthandler` ou `.launchservices.changeurlschemehandler` pour changer les applications par défaut pour les types mime ou les schémas d'url, et d'autres.
+**`/usr/libexec/lsd`** est le cerveau de la base de données. Il fournit **plusieurs services XPC** comme `.lsd.installation`, `.lsd.open`, `.lsd.openurl`, et plus encore. Mais il **nécessite également certaines autorisations** pour que les applications puissent utiliser les fonctionnalités XPC exposées, comme `.launchservices.changedefaulthandler` ou `.launchservices.changeurlschemehandler` pour changer les applications par défaut pour les types mime ou les schémas d'url, et d'autres.
 
 **`/System/Library/CoreServices/launchservicesd`** revendique le service `com.apple.coreservices.launchservicesd` et peut être interrogé pour obtenir des informations sur les applications en cours d'exécution. Il peut être interrogé avec l'outil système /**`usr/bin/lsappinfo`** ou avec [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
 

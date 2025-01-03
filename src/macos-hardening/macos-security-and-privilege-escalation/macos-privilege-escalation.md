@@ -49,7 +49,7 @@ En utilisant un peu de **ingénierie sociale**, vous pourriez **usurper par exem
 {{#tab name="Usurpation de Chrome"}}
 Quelques suggestions :
 
-- Vérifiez dans le Dock s'il y a un Chrome, et dans ce cas, **supprimez** cette entrée et **ajoutez** la **fausse** entrée **Chrome à la même position** dans le tableau du Dock.&#x20;
+- Vérifiez dans le Dock s'il y a un Chrome, et dans ce cas, **supprimez** cette entrée et **ajoutez** l'**entrée Chrome** **fausse** à la **même position** dans le tableau du Dock.&#x20;
 ```bash
 #!/bin/sh
 
@@ -206,7 +206,7 @@ killall Dock
 ### CVE-2020-9771 - contournement TCC de mount_apfs et élévation de privilèges
 
 **Tout utilisateur** (même ceux sans privilèges) peut créer et monter un instantané de Time Machine et **accéder à TOUS les fichiers** de cet instantané.\
-Le **seul privilège** nécessaire est que l'application utilisée (comme `Terminal`) ait accès **Full Disk Access** (FDA) (`kTCCServiceSystemPolicyAllfiles`), ce qui doit être accordé par un administrateur.
+Le **seul privilège** nécessaire est que l'application utilisée (comme `Terminal`) ait accès à **Full Disk Access** (FDA) (`kTCCServiceSystemPolicyAllfiles`), ce qui doit être accordé par un administrateur.
 ```bash
 # Create snapshot
 tmutil localsnapshot

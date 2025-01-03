@@ -4,7 +4,7 @@
 
 ## **Sécurité de base du moteur Docker**
 
-Le **moteur Docker** utilise les **Namespaces** et **Cgroups** du noyau Linux pour isoler les conteneurs, offrant une couche de sécurité de base. Une protection supplémentaire est fournie par le **dropping des capacités**, **Seccomp**, et **SELinux/AppArmor**, améliorant l'isolation des conteneurs. Un **plugin d'authentification** peut restreindre davantage les actions des utilisateurs.
+Le **moteur Docker** utilise les **Namespaces** et **Cgroups** du noyau Linux pour isoler les conteneurs, offrant une couche de sécurité de base. Une protection supplémentaire est fournie par le **dropping des Capabilities**, **Seccomp**, et **SELinux/AppArmor**, améliorant l'isolation des conteneurs. Un **plugin d'authentification** peut encore restreindre les actions des utilisateurs.
 
 ![Sécurité Docker](https://sreeninet.files.wordpress.com/2016/03/dockersec1.png)
 
@@ -12,7 +12,7 @@ Le **moteur Docker** utilise les **Namespaces** et **Cgroups** du noyau Linux po
 
 Le moteur Docker peut être accessible localement via un socket Unix ou à distance en utilisant HTTP. Pour un accès à distance, il est essentiel d'utiliser HTTPS et **TLS** pour garantir la confidentialité, l'intégrité et l'authentification.
 
-Le moteur Docker, par défaut, écoute sur le socket Unix à `unix:///var/run/docker.sock`. Sur les systèmes Ubuntu, les options de démarrage de Docker sont définies dans `/etc/default/docker`. Pour activer l'accès à distance à l'API Docker et au client, exposez le démon Docker via un socket HTTP en ajoutant les paramètres suivants :
+Le moteur Docker, par défaut, écoute sur le socket Unix à `unix:///var/run/docker.sock`. Sur les systèmes Ubuntu, les options de démarrage de Docker sont définies dans `/etc/default/docker`. Pour activer l'accès à distance à l'API et au client Docker, exposez le démon Docker via un socket HTTP en ajoutant les paramètres suivants :
 ```bash
 DOCKER_OPTS="-D -H unix:///var/run/docker.sock -H tcp://192.168.56.101:2376"
 sudo service docker restart
@@ -34,7 +34,7 @@ Les images de conteneurs peuvent être stockées dans des dépôts privés ou pu
 
 ### Analyse des images
 
-Les conteneurs peuvent avoir des **vulnérabilités de sécurité** soit à cause de l'image de base, soit à cause du logiciel installé sur l'image de base. Docker travaille sur un projet appelé **Nautilus** qui effectue une analyse de sécurité des conteneurs et répertorie les vulnérabilités. Nautilus fonctionne en comparant chaque couche d'image de conteneur avec un référentiel de vulnérabilités pour identifier les failles de sécurité.
+Les conteneurs peuvent avoir des **vulnérabilités de sécurité** soit à cause de l'image de base, soit à cause du logiciel installé sur l'image de base. Docker travaille sur un projet appelé **Nautilus** qui effectue une analyse de sécurité des conteneurs et répertorie les vulnérabilités. Nautilus fonctionne en comparant chaque couche d'image de conteneur avec un dépôt de vulnérabilités pour identifier les failles de sécurité.
 
 Pour plus [**d'informations, lisez ceci**](https://docs.docker.com/engine/scan/).
 
@@ -73,9 +73,9 @@ clair-scanner -w example-alpine.yaml --ip YOUR_LOCAL_IP alpine:3.5
 La signature d'image Docker garantit la sécurité et l'intégrité des images utilisées dans les conteneurs. Voici une explication condensée :
 
 - **Docker Content Trust** utilise le projet Notary, basé sur The Update Framework (TUF), pour gérer la signature des images. Pour plus d'infos, voir [Notary](https://github.com/docker/notary) et [TUF](https://theupdateframework.github.io).
-- Pour activer la confiance dans le contenu Docker, définissez `export DOCKER_CONTENT_TRUST=1`. Cette fonctionnalité est désactivée par défaut dans Docker version 1.10 et ultérieure.
+- Pour activer la confiance du contenu Docker, définissez `export DOCKER_CONTENT_TRUST=1`. Cette fonctionnalité est désactivée par défaut dans Docker version 1.10 et ultérieure.
 - Avec cette fonctionnalité activée, seules les images signées peuvent être téléchargées. La première poussée d'image nécessite de définir des phrases de passe pour les clés root et de balisage, Docker prenant également en charge Yubikey pour une sécurité renforcée. Plus de détails peuvent être trouvés [ici](https://blog.docker.com/2015/11/docker-content-trust-yubikey/).
-- Tenter de tirer une image non signée avec la confiance dans le contenu activée entraîne une erreur "No trust data for latest".
+- Tenter de tirer une image non signée avec la confiance du contenu activée entraîne une erreur "No trust data for latest".
 - Pour les poussées d'image après la première, Docker demande la phrase de passe de la clé du dépôt pour signer l'image.
 
 Pour sauvegarder vos clés privées, utilisez la commande :
@@ -96,7 +96,7 @@ Dans les environnements conteneurisés, l'isolation des projets et de leurs proc
 
 **Espaces de Noms**
 
-- **Objectif** : Assurer l'isolation des ressources telles que les processus, le réseau et les systèmes de fichiers. Particulièrement dans Docker, les espaces de noms maintiennent les processus d'un conteneur séparés de l'hôte et des autres conteneurs.
+- **Objectif** : Assurer l'isolation des ressources comme les processus, le réseau et les systèmes de fichiers. Particulièrement dans Docker, les espaces de noms maintiennent les processus d'un conteneur séparés de l'hôte et des autres conteneurs.
 - **Utilisation de `unshare`** : La commande `unshare` (ou l'appel système sous-jacent) est utilisée pour créer de nouveaux espaces de noms, fournissant une couche supplémentaire d'isolation. Cependant, bien que Kubernetes ne bloque pas cela par défaut, Docker le fait.
 - **Limitation** : La création de nouveaux espaces de noms ne permet pas à un processus de revenir aux espaces de noms par défaut de l'hôte. Pour pénétrer les espaces de noms de l'hôte, il faudrait généralement accéder au répertoire `/proc` de l'hôte, en utilisant `nsenter` pour l'entrée.
 
@@ -129,15 +129,15 @@ Cela permettra de réduire les capacités, les syscalls, l'accès aux fichiers e
 
 ### Namespaces
 
-Les **Namespaces** sont une fonctionnalité du noyau Linux qui **partitionne les ressources du noyau** de sorte qu'un ensemble de **processus** **voit** un ensemble de **ressources** tandis qu'un **autre** ensemble de **processus** voit un **ensemble différent** de ressources. La fonctionnalité fonctionne en ayant le même namespace pour un ensemble de ressources et de processus, mais ces namespaces se réfèrent à des ressources distinctes. Les ressources peuvent exister dans plusieurs espaces.
+**Namespaces** sont une fonctionnalité du noyau Linux qui **partitionne les ressources du noyau** de sorte qu'un ensemble de **processus** **voit** un ensemble de **ressources** tandis qu'un **autre** ensemble de **processus** voit un **ensemble différent** de ressources. La fonctionnalité fonctionne en ayant le même namespace pour un ensemble de ressources et de processus, mais ces namespaces se réfèrent à des ressources distinctes. Les ressources peuvent exister dans plusieurs espaces.
 
-Docker utilise les Namespaces du noyau Linux suivants pour atteindre l'isolation des Conteneurs :
+Docker utilise les **Namespaces** du noyau Linux suivants pour atteindre l'isolation des conteneurs :
 
-- namespace pid
-- namespace de montage
-- namespace réseau
-- namespace ipc
-- namespace UTS
+- pid namespace
+- mount namespace
+- network namespace
+- ipc namespace
+- UTS namespace
 
 Pour **plus d'informations sur les namespaces**, consultez la page suivante :
 
@@ -147,8 +147,8 @@ namespaces/
 
 ### cgroups
 
-La fonctionnalité du noyau Linux **cgroups** fournit la capacité de **restreindre les ressources comme le cpu, la mémoire, io, la bande passante réseau parmi** un ensemble de processus. Docker permet de créer des Conteneurs en utilisant la fonctionnalité cgroup qui permet le contrôle des ressources pour le Conteneur spécifique.\
-Voici un Conteneur créé avec une mémoire d'espace utilisateur limitée à 500m, une mémoire noyau limitée à 50m, une part de cpu à 512, un blkioweight à 400. La part de CPU est un ratio qui contrôle l'utilisation du CPU par le Conteneur. Il a une valeur par défaut de 1024 et une plage entre 0 et 1024. Si trois Conteneurs ont la même part de CPU de 1024, chaque Conteneur peut prendre jusqu'à 33 % du CPU en cas de contention des ressources CPU. Le blkio-weight est un ratio qui contrôle l'IO du Conteneur. Il a une valeur par défaut de 500 et une plage entre 10 et 1000.
+La fonctionnalité du noyau Linux **cgroups** fournit la capacité de **restreindre les ressources comme le cpu, la mémoire, io, la bande passante réseau parmi** un ensemble de processus. Docker permet de créer des conteneurs en utilisant la fonctionnalité cgroup qui permet le contrôle des ressources pour le conteneur spécifique.\
+Voici un conteneur créé avec une mémoire d'espace utilisateur limitée à 500m, une mémoire noyau limitée à 50m, une part de cpu à 512, un blkioweight à 400. La part de CPU est un ratio qui contrôle l'utilisation du CPU par le conteneur. Il a une valeur par défaut de 1024 et une plage entre 0 et 1024. Si trois conteneurs ont la même part de CPU de 1024, chaque conteneur peut prendre jusqu'à 33 % du CPU en cas de contention des ressources CPU. Le blkio-weight est un ratio qui contrôle l'IO du conteneur. Il a une valeur par défaut de 500 et une plage entre 10 et 1000.
 ```
 docker run -it -m 500M --kernel-memory 50M --cpu-shares 512 --blkio-weight 400 --name ubuntu1 ubuntu bash
 ```
@@ -194,8 +194,8 @@ apparmor.md
 
 - **Système de Labeling** : SELinux attribue un label unique à chaque processus et objet de système de fichiers.
 - **Application des Politiques** : Il applique des politiques de sécurité qui définissent quelles actions un label de processus peut effectuer sur d'autres labels au sein du système.
-- **Labels des Processus de Conteneur** : Lorsque les moteurs de conteneurs initient des processus de conteneur, ils se voient généralement attribuer un label SELinux confiné, communément `container_t`.
-- **Labeling des Fichiers dans les Conteneurs** : Les fichiers à l'intérieur du conteneur sont généralement étiquetés comme `container_file_t`.
+- **Labels des Processus de Conteneur** : Lorsque les moteurs de conteneur initient des processus de conteneur, ils se voient généralement attribuer un label SELinux confiné, communément `container_t`.
+- **Labeling des Fichiers au sein des Conteneurs** : Les fichiers à l'intérieur du conteneur sont généralement étiquetés comme `container_file_t`.
 - **Règles de Politique** : La politique SELinux garantit principalement que les processus avec le label `container_t` ne peuvent interagir (lire, écrire, exécuter) qu'avec des fichiers étiquetés comme `container_file_t`.
 
 Ce mécanisme garantit que même si un processus à l'intérieur d'un conteneur est compromis, il est confiné à interagir uniquement avec des objets ayant les labels correspondants, limitant considérablement les dommages potentiels résultant de tels compromis.
@@ -237,7 +237,7 @@ nc -lvp 4444 >/dev/null & while true; do cat /dev/urandom | nc <target IP> 4444;
 
 ### Drapeau --privileged
 
-Dans la page suivante, vous pouvez apprendre **ce que signifie le drapeau `--privileged`** :
+Dans la page suivante, vous pouvez apprendre **ce que le drapeau `--privileged` implique** :
 
 {{#ref}}
 docker-privileged.md
@@ -249,7 +249,7 @@ docker-privileged.md
 
 Si vous exécutez un conteneur où un attaquant parvient à accéder en tant qu'utilisateur à faible privilège. Si vous avez un **binaire suid mal configuré**, l'attaquant peut en abuser et **escalader les privilèges à l'intérieur** du conteneur. Ce qui peut lui permettre d'en sortir.
 
-Exécuter le conteneur avec l'option **`no-new-privileges`** activée **préventera ce type d'escalade de privilèges**.
+Exécuter le conteneur avec l'option **`no-new-privileges`** activée empêchera **ce type d'escalade de privilèges**.
 ```
 docker run -it --security-opt=no-new-privileges:true nonewpriv
 ```
@@ -326,8 +326,8 @@ Dans les environnements Kubernetes, les secrets sont pris en charge nativement e
 - [**Supprimez toutes les capacités**](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities) **(`--cap-drop=all`) et activez uniquement celles qui sont nécessaires** (`--cap-add=...`). Beaucoup de charges de travail n'ont pas besoin de capacités et les ajouter augmente le champ d'une attaque potentielle.
 - [**Utilisez l'option de sécurité “no-new-privileges”**](https://raesene.github.io/blog/2019/06/01/docker-capabilities-and-no-new-privs/) pour empêcher les processus d'acquérir plus de privilèges, par exemple via des binaires suid.
 - [**Limitez les ressources disponibles pour le conteneur**](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources)**.** Les limites de ressources peuvent protéger la machine contre les attaques par déni de service.
-- **Ajustez** [**seccomp**](https://docs.docker.com/engine/security/seccomp/)**,** [**AppArmor**](https://docs.docker.com/engine/security/apparmor/) **(ou SELinux)** profils pour restreindre les actions et les appels système disponibles pour le conteneur au minimum requis.
-- **Utilisez** [**des images Docker officielles**](https://docs.docker.com/docker-hub/official_images/) **et exigez des signatures** ou construisez les vôtres à partir de celles-ci. Ne pas hériter ou utiliser des images [backdoored](https://arstechnica.com/information-technology/2018/06/backdoored-images-downloaded-5-million-times-finally-removed-from-docker-hub/). Stockez également les clés root et les phrases de passe dans un endroit sûr. Docker prévoit de gérer les clés avec UCP.
+- **Ajustez** [**seccomp**](https://docs.docker.com/engine/security/seccomp/)**,** [**AppArmor**](https://docs.docker.com/engine/security/apparmor/) **(ou SELinux)** les profils pour restreindre les actions et les appels système disponibles pour le conteneur au minimum requis.
+- **Utilisez** [**des images Docker officielles**](https://docs.docker.com/docker-hub/official_images/) **et exigez des signatures** ou construisez les vôtres à partir de celles-ci. Ne pas hériter ou utiliser des images [backdoored](https://arstechnica.com/information-technology/2018/06/backdoored-images-downloaded-5-million-times-finally-removed-from-docker-hub/). Conservez également les clés root et les phrases de passe dans un endroit sûr. Docker prévoit de gérer les clés avec UCP.
 - **Reconstruisez régulièrement** vos images pour **appliquer des correctifs de sécurité à l'hôte et aux images.**
 - Gérez vos **secrets avec sagesse** afin qu'il soit difficile pour l'attaquant d'y accéder.
 - Si vous **exposez le démon Docker, utilisez HTTPS** avec authentification client et serveur.

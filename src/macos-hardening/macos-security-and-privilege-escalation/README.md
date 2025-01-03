@@ -12,7 +12,7 @@ Si vous n'êtes pas familier avec macOS, vous devriez commencer à apprendre les
 macos-files-folders-and-binaries/
 {{#endref}}
 
-- Utilisateurs **communs** de macOS
+- **Utilisateurs** macOS courants
 
 {{#ref}}
 macos-users.md
@@ -30,7 +30,7 @@ macos-applefs.md
 mac-os-architecture/
 {{#endref}}
 
-- Services et **protocoles** réseau macOS communs
+- Services et **protocoles** réseau macOS courants
 
 {{#ref}}
 macos-protocols.md
@@ -93,7 +93,7 @@ Dans macOS, les **applications et binaires peuvent avoir des permissions** pour 
 
 Par conséquent, un attaquant qui souhaite compromettre avec succès une machine macOS devra **escalader ses privilèges TCC** (ou même **contourner SIP**, selon ses besoins).
 
-Ces privilèges sont généralement accordés sous forme de **droits** avec lesquels l'application est signée, ou l'application peut avoir demandé certains accès et après que **l'utilisateur les ait approuvés**, ils peuvent être trouvés dans les **bases de données TCC**. Une autre façon pour un processus d'obtenir ces privilèges est d'être un **enfant d'un processus** ayant ces **privilèges** car ils sont généralement **hérités**.
+Ces privilèges sont généralement accordés sous forme de **droits** avec lesquels l'application est signée, ou l'application peut demander certains accès et après que **l'utilisateur les approuve**, ils peuvent être trouvés dans les **bases de données TCC**. Une autre façon pour un processus d'obtenir ces privilèges est d'être un **enfant d'un processus** ayant ces **privilèges** car ils sont généralement **hérités**.
 
 Suivez ces liens pour trouver différentes façons de [**escalader les privilèges dans TCC**](macos-security-protections/macos-tcc/#tcc-privesc-and-bypasses), pour [**contourner TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) et comment dans le passé [**SIP a été contourné**](macos-security-protections/macos-sip.md#sip-bypasses).
 

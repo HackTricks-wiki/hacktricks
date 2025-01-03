@@ -5,7 +5,7 @@
 
 ## **PE - Méthode 1**
 
-**Parfois**, **par défaut \(ou parce que certains logiciels en ont besoin\)** dans le fichier **/etc/sudoers**, vous pouvez trouver certaines de ces lignes :
+**Parfois**, **par défaut \(ou parce que certains logiciels en ont besoin\)**, vous pouvez trouver certaines de ces lignes dans le fichier **/etc/sudoers** :
 ```bash
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
@@ -42,7 +42,7 @@ polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freed
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-**Ce n'est pas parce que vous n'avez pas les autorisations, mais parce que vous n'êtes pas connecté sans interface graphique**. Et il existe une solution à ce problème ici : [https://github.com/NixOS/nixpkgs/issues/18012\#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Vous avez besoin de **2 sessions ssh différentes** :
+**Ce n'est pas parce que vous n'avez pas les permissions mais parce que vous n'êtes pas connecté sans une interface graphique**. Et il existe une solution à ce problème ici : [https://github.com/NixOS/nixpkgs/issues/18012\#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Vous avez besoin de **2 sessions ssh différentes** :
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -71,11 +71,11 @@ Les utilisateurs du **groupe shadow** peuvent **lire** le fichier **/etc/shadow*
 ```text
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
-Alors, lisez le fichier et essayez de **craquer quelques hachages**.
+Alors, lisez le fichier et essayez de **craquer quelques hashes**.
 
 # Groupe de Disque
 
-Ce privilège est presque **équivalent à l'accès root** car vous pouvez accéder à toutes les données à l'intérieur de la machine.
+Ce privilège est presque **équivalent à un accès root** car vous pouvez accéder à toutes les données à l'intérieur de la machine.
 
 Fichiers : `/dev/sd[a-z][1-9]`
 ```text
@@ -102,7 +102,7 @@ moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
 Le **tty1** signifie que l'utilisateur **yossi est connecté physiquement** à un terminal sur la machine.
 
-Le **groupe vidéo** a accès à l'affichage de la sortie écran. En gros, vous pouvez observer les écrans. Pour ce faire, vous devez **capturer l'image actuelle à l'écran** en données brutes et obtenir la résolution que l'écran utilise. Les données de l'écran peuvent être enregistrées dans `/dev/fb0` et vous pouvez trouver la résolution de cet écran dans `/sys/class/graphics/fb0/virtual_size`
+Le **groupe vidéo** a accès pour voir la sortie de l'écran. En gros, vous pouvez observer les écrans. Pour ce faire, vous devez **capturer l'image actuelle à l'écran** en données brutes et obtenir la résolution que l'écran utilise. Les données de l'écran peuvent être enregistrées dans `/dev/fb0` et vous pouvez trouver la résolution de cet écran dans `/sys/class/graphics/fb0/virtual_size`
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size

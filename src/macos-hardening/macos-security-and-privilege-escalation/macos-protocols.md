@@ -5,12 +5,12 @@
 ## Services d'Accès à Distance
 
 Ce sont les services macOS courants pour y accéder à distance.\
-Vous pouvez activer/désactiver ces services dans `Paramètres Système` --> `Partage`
+Vous pouvez activer/désactiver ces services dans `System Settings` --> `Sharing`
 
-- **VNC**, connu sous le nom de “Partage d'Écran” (tcp:5900)
-- **SSH**, appelé “Connexion à Distance” (tcp:22)
-- **Apple Remote Desktop** (ARD), ou “Gestion à Distance” (tcp:3283, tcp:5900)
-- **AppleEvent**, connu sous le nom de “Événement Apple à Distance” (tcp:3031)
+- **VNC**, connu sous le nom de “Screen Sharing” (tcp:5900)
+- **SSH**, appelé “Remote Login” (tcp:22)
+- **Apple Remote Desktop** (ARD), ou “Remote Management” (tcp:3283, tcp:5900)
+- **AppleEvent**, connu sous le nom de “Remote Apple Event” (tcp:3031)
 
 Vérifiez si l'un d'eux est activé en exécutant :
 ```bash
@@ -44,13 +44,13 @@ Le Zero Configuration Networking, fourni par Bonjour, garantit que les appareils
 - Effectuer une **traduction de nom en adresse** sans nécessiter de serveur DNS.
 - **Découvrir les services** disponibles sur le réseau.
 
-Les appareils utilisant Bonjour s'attribueront une **adresse IP de la plage 169.254/16** et vérifieront son unicité sur le réseau. Les Macs maintiennent une entrée de table de routage pour ce sous-réseau, vérifiable via `netstat -rn | grep 169`.
+Les appareils utilisant Bonjour s'attribueront une **adresse IP du range 169.254/16** et vérifieront son unicité sur le réseau. Les Macs maintiennent une entrée de table de routage pour ce sous-réseau, vérifiable via `netstat -rn | grep 169`.
 
-Pour le DNS, Bonjour utilise le **protocole Multicast DNS (mDNS)**. mDNS fonctionne sur **le port 5353/UDP**, utilisant **des requêtes DNS standard** mais ciblant **l'adresse multicast 224.0.0.251**. Cette approche garantit que tous les appareils à l'écoute sur le réseau peuvent recevoir et répondre aux requêtes, facilitant la mise à jour de leurs enregistrements.
+Pour le DNS, Bonjour utilise le **protocole Multicast DNS (mDNS)**. mDNS fonctionne sur le **port 5353/UDP**, utilisant des **requêtes DNS standard** mais ciblant l'**adresse multicast 224.0.0.251**. Cette approche garantit que tous les appareils à l'écoute sur le réseau peuvent recevoir et répondre aux requêtes, facilitant la mise à jour de leurs enregistrements.
 
 Lorsqu'un appareil rejoint le réseau, il se sélectionne un nom, se terminant généralement par **.local**, qui peut être dérivé du nom d'hôte ou généré aléatoirement.
 
-La découverte de services au sein du réseau est facilitée par **DNS Service Discovery (DNS-SD)**. Tirant parti du format des enregistrements DNS SRV, DNS-SD utilise **des enregistrements DNS PTR** pour permettre la liste de plusieurs services. Un client recherchant un service spécifique demandera un enregistrement PTR pour `<Service>.<Domain>`, recevant en retour une liste d'enregistrements PTR formatés comme `<Instance>.<Service>.<Domain>` si le service est disponible à partir de plusieurs hôtes.
+La découverte de services au sein du réseau est facilitée par **DNS Service Discovery (DNS-SD)**. Tirant parti du format des enregistrements DNS SRV, DNS-SD utilise des **enregistrements DNS PTR** pour permettre la liste de plusieurs services. Un client recherchant un service spécifique demandera un enregistrement PTR pour `<Service>.<Domain>`, recevant en retour une liste d'enregistrements PTR formatés comme `<Instance>.<Service>.<Domain>` si le service est disponible depuis plusieurs hôtes.
 
 L'utilitaire `dns-sd` peut être utilisé pour **découvrir et annoncer des services réseau**. Voici quelques exemples de son utilisation :
 

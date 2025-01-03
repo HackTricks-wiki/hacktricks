@@ -23,9 +23,9 @@ __ZN16IOUserClient202222dispatchExternalMethodEjP31IOExternalMethodArgumentsOpaq
 IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
 > [!CAUTION]
-> IOKit **exposed functions** pourraient effectuer des **vérifications de sécurité supplémentaires** lorsqu'un client essaie d'appeler une fonction, mais notez que les applications sont généralement **limitées** par le **sandbox** avec lequel les fonctions IOKit peuvent interagir.
+> Les **fonctions exposées** d'IOKit pourraient effectuer des **vérifications de sécurité supplémentaires** lorsqu'un client essaie d'appeler une fonction, mais notez que les applications sont généralement **limitées** par le **sandbox** avec lequel elles peuvent interagir.
 
-## Drivers
+## Pilotes
 
 Dans macOS, ils se trouvent dans :
 
@@ -68,7 +68,7 @@ kextunload com.apple.iokit.IOReportFamily
 ```
 ## IORegistry
 
-Le **IORegistry** est une partie cruciale du framework IOKit dans macOS et iOS qui sert de base de données pour représenter la configuration et l'état du matériel du système. C'est une **collection hiérarchique d'objets qui représente tout le matériel et les pilotes** chargés sur le système, et leurs relations entre eux.
+Le **IORegistry** est une partie cruciale du framework IOKit dans macOS et iOS qui sert de base de données pour représenter la configuration matérielle et l'état du système. C'est une **collection hiérarchique d'objets qui représente tout le matériel et les pilotes** chargés sur le système, et leurs relations entre eux.
 
 Vous pouvez obtenir l'IORegistry en utilisant le cli **`ioreg`** pour l'inspecter depuis la console (particulièrement utile pour iOS).
 ```bash
@@ -196,7 +196,7 @@ Changez le type de données en **`IOExternalMethodDispatch2022:`**
 
 <figure><img src="../../../images/image (1177).png" alt="" width="375"><figcaption></figcaption></figure>
 
-Après le changement :
+après le changement :
 
 <figure><img src="../../../images/image (1179).png" alt="" width="563"><figcaption></figcaption></figure>
 

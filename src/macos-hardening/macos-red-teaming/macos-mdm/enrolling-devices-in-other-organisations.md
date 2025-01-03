@@ -9,7 +9,7 @@ Par conséquent, cela pourrait être un point d'entrée dangereux pour les attaq
 
 **Ce qui suit est un résumé de la recherche [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe). Consultez-le pour plus de détails techniques !**
 
-## Aperçu de l'analyse binaire de DEP et MDM
+## Aperçu de l'analyse binaire DEP et MDM
 
 Cette recherche se penche sur les binaires associés au Programme d'Enrôlement des Appareils (DEP) et à la Gestion des Appareils Mobiles (MDM) sur macOS. Les composants clés incluent :
 
@@ -25,11 +25,11 @@ L'enregistrement DEP implique que `cloudconfigurationd` envoie une charge utile 
 
 ## Proxying des demandes DEP
 
-Les tentatives d'intercepter et de modifier les demandes DEP à _iprofiles.apple.com_ en utilisant des outils comme Charles Proxy ont été entravées par le chiffrement de la charge utile et les mesures de sécurité SSL/TLS. Cependant, l'activation de la configuration `MCCloudConfigAcceptAnyHTTPSCertificate` permet de contourner la validation du certificat du serveur, bien que la nature chiffrée de la charge utile empêche toujours la modification du numéro de série sans la clé de déchiffrement.
+Les tentatives d'interception et de modification des demandes DEP à _iprofiles.apple.com_ en utilisant des outils comme Charles Proxy ont été entravées par le chiffrement de la charge utile et les mesures de sécurité SSL/TLS. Cependant, l'activation de la configuration `MCCloudConfigAcceptAnyHTTPSCertificate` permet de contourner la validation du certificat du serveur, bien que la nature chiffrée de la charge utile empêche toujours la modification du numéro de série sans la clé de déchiffrement.
 
 ## Instrumentation des binaires système interagissant avec DEP
 
-L'instrumentation des binaires système comme `cloudconfigurationd` nécessite de désactiver la Protection de l'Intégrité du Système (SIP) sur macOS. Avec SIP désactivé, des outils comme LLDB peuvent être utilisés pour s'attacher aux processus système et potentiellement modifier le numéro de série utilisé dans les interactions API DEP. Cette méthode est préférable car elle évite les complexités des droits et de la signature de code.
+L'instrumentation des binaires système comme `cloudconfigurationd` nécessite de désactiver la Protection de l'Intégrité du Système (SIP) sur macOS. Avec le SIP désactivé, des outils comme LLDB peuvent être utilisés pour s'attacher aux processus système et potentiellement modifier le numéro de série utilisé dans les interactions API DEP. Cette méthode est préférable car elle évite les complexités des droits et de la signature de code.
 
 **Exploitation de l'instrumentation binaire :**
 Modifier la charge utile de la demande DEP avant la sérialisation JSON dans `cloudconfigurationd` s'est avéré efficace. Le processus impliquait :

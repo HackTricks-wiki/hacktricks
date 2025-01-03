@@ -25,6 +25,6 @@ L'objectif d'armer un conteneur distroless est de pouvoir **exécuter des binair
 
 #### openssl
 
-\***\*[**Dans cet article,**](https://www.form3.tech/engineering/content/exploiting-distroless-images) il est expliqué que le binaire **`openssl`** est fréquemment trouvé dans ces conteneurs, potentiellement parce qu'il est **nécessaire\*\* pour le logiciel qui va s'exécuter à l'intérieur du conteneur.
+\***\*[**Dans cet article,**](https://www.form3.tech/engineering/content/exploiting-distroless-images) il est expliqué que le binaire **`openssl`** est fréquemment trouvé dans ces conteneurs, potentiellement parce qu'il est **nécessaire\*\* par le logiciel qui va s'exécuter à l'intérieur du conteneur.
 
 {{#include ../../../banners/hacktricks-training.md}}

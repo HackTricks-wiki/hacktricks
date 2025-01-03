@@ -8,9 +8,9 @@ Un espace de noms réseau est une fonctionnalité du noyau Linux qui fournit une
 
 ### Comment ça fonctionne :
 
-1. Lorsqu'un nouvel espace de noms réseau est créé, il commence avec une **pile réseau complètement isolée**, sans **interfaces réseau** sauf pour l'interface de boucle (lo). Cela signifie que les processus s'exécutant dans le nouvel espace de noms réseau ne peuvent pas communiquer avec les processus dans d'autres espaces de noms ou le système hôte par défaut.
+1. Lorsqu'un nouvel espace de noms réseau est créé, il commence avec une **pile réseau complètement isolée**, sans **interfaces réseau** sauf pour l'interface de boucle (lo). Cela signifie que les processus s'exécutant dans le nouvel espace de noms réseau ne peuvent pas communiquer avec des processus dans d'autres espaces de noms ou le système hôte par défaut.
 2. **Interfaces réseau virtuelles**, telles que les paires veth, peuvent être créées et déplacées entre les espaces de noms réseau. Cela permet d'établir une connectivité réseau entre les espaces de noms ou entre un espace de noms et le système hôte. Par exemple, une extrémité d'une paire veth peut être placée dans l'espace de noms réseau d'un conteneur, et l'autre extrémité peut être connectée à un **pont** ou une autre interface réseau dans l'espace de noms hôte, fournissant une connectivité réseau au conteneur.
-3. Les interfaces réseau au sein d'un espace de noms peuvent avoir leurs **propres adresses IP, tables de routage et règles de pare-feu**, indépendamment des autres espaces de noms. Cela permet aux processus dans différents espaces de noms réseau d'avoir des configurations réseau différentes et de fonctionner comme s'ils s'exécutaient sur des systèmes réseau séparés.
+3. Les interfaces réseau au sein d'un espace de noms peuvent avoir leurs **propres adresses IP, tables de routage et règles de pare-feu**, indépendamment des autres espaces de noms. Cela permet aux processus dans différents espaces de noms réseau d'avoir différentes configurations réseau et de fonctionner comme s'ils s'exécutaient sur des systèmes réseau séparés.
 4. Les processus peuvent se déplacer entre les espaces de noms en utilisant l'appel système `setns()`, ou créer de nouveaux espaces de noms en utilisant les appels système `unshare()` ou `clone()` avec le drapeau `CLONE_NEWNET`. Lorsqu'un processus se déplace vers un nouvel espace de noms ou en crée un, il commencera à utiliser la configuration réseau et les interfaces associées à cet espace de noms.
 
 ## Laboratoire :
@@ -28,7 +28,7 @@ En montant une nouvelle instance du système de fichiers `/proc` si vous utilise
 
 <summary>Erreur : bash : fork : Impossible d'allouer de la mémoire</summary>
 
-Lorsque `unshare` est exécuté sans l'option `-f`, une erreur est rencontrée en raison de la façon dont Linux gère les nouveaux namespaces PID (Process ID). Les détails clés et la solution sont décrits ci-dessous :
+Lorsque `unshare` est exécuté sans l'option `-f`, une erreur est rencontrée en raison de la façon dont Linux gère les nouveaux namespaces PID (identifiant de processus). Les détails clés et la solution sont décrits ci-dessous :
 
 1. **Explication du problème** :
 

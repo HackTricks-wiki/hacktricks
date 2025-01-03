@@ -11,7 +11,7 @@ Lorsque vous exécutez un conteneur en mode privilégié, voici les protections 
 Dans un conteneur privilégié, tous les **dispositifs peuvent être accessibles dans `/dev/`**. Par conséquent, vous pouvez **échapper** en **montant** le disque de l'hôte.
 
 {{#tabs}}
-{{#tab name="Inside default container"}}
+{{#tab name="À l'intérieur du conteneur par défaut"}}
 ```bash
 # docker run --rm -it alpine sh
 ls /dev
@@ -64,7 +64,7 @@ Le système de fichiers **/proc** est sélectivement écrivable mais, pour des r
 > [!NOTE] > **tmpfs** est un système de fichiers qui stocke tous les fichiers dans la mémoire virtuelle. tmpfs ne crée aucun fichier sur votre disque dur. Donc, si vous démontez un système de fichiers tmpfs, tous les fichiers qui s'y trouvent sont perdus pour toujours.
 
 {{#tabs}}
-{{#tab name="À l'intérieur du conteneur par défaut"}}
+{{#tab name="Inside default container"}}
 ```bash
 # docker run --rm -it alpine sh
 mount  | grep /proc.*tmpfs
@@ -147,7 +147,7 @@ Seccomp_filters:	0
 # You can manually disable seccomp in docker with
 --security-opt seccomp=unconfined
 ```
-Aussi, notez que lorsque Docker (ou d'autres CRI) sont utilisés dans un **cluster Kubernetes**, le **filtre seccomp est désactivé par défaut**.
+Aussi, notez que lorsque Docker (ou d'autres CRI) sont utilisés dans un cluster **Kubernetes**, le **filtre seccomp est désactivé par défaut**.
 
 ### AppArmor
 

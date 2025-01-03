@@ -62,7 +62,7 @@ Sur la page suivante, vous pouvez **en savoir plus sur les capacités linux** et
 ../../linux-capabilities.md
 {{#endref}}
 
-## Échapper des Conteneurs Privilégiés
+## Échapper des conteneurs privilégiés
 
 Un conteneur privilégié peut être créé avec le drapeau `--privileged` ou en désactivant des défenses spécifiques :
 
@@ -329,13 +329,13 @@ sensitive-mounts.md
 
 ### Montages arbitraires
 
-À plusieurs occasions, vous constaterez que le **conteneur a un volume monté depuis l'hôte**. Si ce volume n'est pas correctement configuré, vous pourriez être en mesure de **accéder/modifier des données sensibles** : Lire des secrets, changer ssh authorized_keys…
+À plusieurs occasions, vous constaterez que le **conteneur a un volume monté depuis l'hôte**. Si ce volume n'est pas correctement configuré, vous pourriez être en mesure d'**accéder/modifier des données sensibles** : Lire des secrets, changer ssh authorized_keys…
 ```bash
 docker run --rm -it -v /:/host ubuntu bash
 ```
 ### Escalade de privilèges avec 2 shells et montage hôte
 
-Si vous avez accès en tant que **root à l'intérieur d'un conteneur** qui a un dossier de l'hôte monté et que vous avez **échappé en tant qu'utilisateur non privilégié sur l'hôte** et que vous avez un accès en lecture sur le dossier monté.\
+Si vous avez accès en tant que **root à l'intérieur d'un conteneur** qui a un dossier de l'hôte monté et que vous avez **échappé en tant qu'utilisateur non privilégié vers l'hôte** et que vous avez un accès en lecture sur le dossier monté.\
 Vous pouvez créer un **fichier bash suid** dans le **dossier monté** à l'intérieur du **conteneur** et **l'exécuter depuis l'hôte** pour escalader les privilèges.
 ```bash
 cp /bin/bash . #From non priv inside mounted folder
@@ -461,7 +461,7 @@ La deuxième technique expliquée dans le post [https://labs.withsecure.com/blog
 
 Dans le cas où vous pouvez exécuter `docker exec` en tant que root (probablement avec sudo), vous essayez d'escalader les privilèges en échappant d'un conteneur en abusant de CVE-2019-5736 (exploit [ici](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)). Cette technique va essentiellement **écraser** le binaire _**/bin/sh**_ de l'**hôte** **depuis un conteneur**, donc quiconque exécutant docker exec peut déclencher le payload.
 
-Changez le payload en conséquence et construisez le main.go avec `go build main.go`. Le binaire résultant doit être placé dans le conteneur docker pour exécution.\
+Modifiez le payload en conséquence et construisez le main.go avec `go build main.go`. Le binaire résultant doit être placé dans le conteneur docker pour exécution.\
 Lors de l'exécution, dès qu'il affiche `[+] /bin/sh écrasé avec succès` vous devez exécuter ce qui suit depuis la machine hôte :
 
 `docker exec -it <container-name> /bin/sh`

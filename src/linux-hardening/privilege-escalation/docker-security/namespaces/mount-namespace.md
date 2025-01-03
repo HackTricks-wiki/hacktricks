@@ -29,7 +29,7 @@ En montant une nouvelle instance du système de fichiers `/proc` si vous utilise
 
 <summary>Erreur : bash : fork : Impossible d'allouer de la mémoire</summary>
 
-Lorsque `unshare` est exécuté sans l'option `-f`, une erreur se produit en raison de la façon dont Linux gère les nouveaux namespaces PID (identifiant de processus). Les détails clés et la solution sont décrits ci-dessous :
+Lorsque `unshare` est exécuté sans l'option `-f`, une erreur est rencontrée en raison de la façon dont Linux gère les nouveaux namespaces PID (identifiant de processus). Les détails clés et la solution sont décrits ci-dessous :
 
 1. **Explication du problème** :
 
@@ -58,7 +58,7 @@ docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ls -l /proc/self/ns/mnt
 lrwxrwxrwx 1 root root 0 Apr  4 20:30 /proc/self/ns/mnt -> 'mnt:[4026531841]'
 ```
-### Trouver tous les espaces de noms de montage
+### Trouver tous les espaces de montage
 ```bash
 sudo find /proc -maxdepth 3 -type l -name mnt -exec readlink {} \; 2>/dev/null | sort -u
 # Find the processes with an specific namespace
@@ -74,7 +74,7 @@ nsenter -m TARGET_PID --pid /bin/bash
 ```
 Aussi, vous ne pouvez **entrer dans un autre espace de noms de processus que si vous êtes root**. Et vous **ne pouvez pas** **entrer** dans un autre espace de noms **sans un descripteur** pointant vers celui-ci (comme `/proc/self/ns/mnt`).
 
-Parce que de nouveaux montages ne sont accessibles que dans l'espace de noms, il est possible qu'un espace de noms contienne des informations sensibles qui ne peuvent être accessibles que depuis celui-ci.
+Parce que de nouveaux montages ne sont accessibles qu'au sein de l'espace de noms, il est possible qu'un espace de noms contienne des informations sensibles qui ne peuvent être accessibles que depuis celui-ci.
 
 ### Monter quelque chose
 ```bash

@@ -23,18 +23,18 @@ Les espaces utilisateurs sont particulièrement utiles dans la conteneurisation,
 ```bash
 sudo unshare -U [--mount-proc] /bin/bash
 ```
-En montant une nouvelle instance du système de fichiers `/proc` si vous utilisez le paramètre `--mount-proc`, vous vous assurez que le nouveau namespace de montage a une **vue précise et isolée des informations sur les processus spécifiques à ce namespace**.
+En montant une nouvelle instance du système de fichiers `/proc` si vous utilisez le paramètre `--mount-proc`, vous vous assurez que le nouveau namespace de montage a une **vue précise et isolée des informations de processus spécifiques à ce namespace**.
 
 <details>
 
 <summary>Erreur : bash : fork : Impossible d'allouer de la mémoire</summary>
 
-Lorsque `unshare` est exécuté sans l'option `-f`, une erreur est rencontrée en raison de la façon dont Linux gère les nouveaux namespaces PID (Process ID). Les détails clés et la solution sont décrits ci-dessous :
+Lorsque `unshare` est exécuté sans l'option `-f`, une erreur est rencontrée en raison de la façon dont Linux gère les nouveaux namespaces PID (identifiant de processus). Les détails clés et la solution sont décrits ci-dessous :
 
 1. **Explication du problème** :
 
 - Le noyau Linux permet à un processus de créer de nouveaux namespaces en utilisant l'appel système `unshare`. Cependant, le processus qui initie la création d'un nouveau namespace PID (appelé le processus "unshare") n'entre pas dans le nouveau namespace ; seuls ses processus enfants le font.
-- L'exécution de `%unshare -p /bin/bash%` démarre `/bin/bash` dans le même processus que `unshare`. Par conséquent, `/bin/bash` et ses processus enfants se trouvent dans l'espace de noms PID d'origine.
+- L'exécution de `%unshare -p /bin/bash%` démarre `/bin/bash` dans le même processus que `unshare`. Par conséquent, `/bin/bash` et ses processus enfants se trouvent dans le namespace PID d'origine.
 - Le premier processus enfant de `/bin/bash` dans le nouveau namespace devient PID 1. Lorsque ce processus se termine, il déclenche le nettoyage du namespace s'il n'y a pas d'autres processus, car PID 1 a le rôle spécial d'adopter les processus orphelins. Le noyau Linux désactivera alors l'allocation de PID dans ce namespace.
 
 2. **Conséquence** :
@@ -76,7 +76,7 @@ sudo find /proc -maxdepth 3 -type l -name user -exec readlink {} \; 2>/dev/null 
 # Find the processes with an specific namespace
 sudo find /proc -maxdepth 3 -type l -name user -exec ls -l  {} \; 2>/dev/null | grep <ns-number>
 ```
-### Entrez dans un espace de noms utilisateur
+### Entrer dans un espace de noms utilisateur
 ```bash
 nsenter -U TARGET_PID --pid /bin/bash
 ```
@@ -103,7 +103,7 @@ Dans le cas des espaces de noms utilisateurs, **lorsqu'un nouvel espace de noms 
 Par exemple, lorsque vous avez la capacité `CAP_SYS_ADMIN` au sein d'un espace de noms utilisateur, vous pouvez effectuer des opérations qui nécessitent généralement cette capacité, comme le montage de systèmes de fichiers, mais uniquement dans le contexte de votre espace de noms utilisateur. Toute opération que vous effectuez avec cette capacité n'affectera pas le système hôte ou d'autres espaces de noms.
 
 > [!WARNING]
-> Par conséquent, même si obtenir un nouveau processus à l'intérieur d'un nouvel espace de noms utilisateur **vous donnera toutes les capacités de retour** (CapEff: 000001ffffffffff), vous pouvez en réalité **utiliser uniquement celles liées à l'espace de noms** (montage par exemple) mais pas toutes. Donc, cela en soi n'est pas suffisant pour échapper à un conteneur Docker.
+> Par conséquent, même si obtenir un nouveau processus à l'intérieur d'un nouvel espace de noms utilisateur **vous donnera toutes les capacités de retour** (CapEff: 000001ffffffffff), vous pouvez en fait **uniquement utiliser celles liées à l'espace de noms** (montage par exemple) mais pas toutes. Donc, cela en soi n'est pas suffisant pour échapper à un conteneur Docker.
 ```bash
 # There are the syscalls that are filtered after changing User namespace with:
 unshare -UmCpf  bash

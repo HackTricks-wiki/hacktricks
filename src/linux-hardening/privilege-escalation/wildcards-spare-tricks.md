@@ -47,7 +47,7 @@ cd /path/to/7z/acting/folder
 touch @root.txt
 ln -s /file/you/want/to/read root.txt
 ```
-Alors, lorsque **7z** est exécuté, il traitera `root.txt` comme un fichier contenant la liste des fichiers qu'il doit compresser (c'est ce que l'existence de `@root.txt` indique) et lorsque 7z lira `root.txt`, il lira `/file/you/want/to/read` et **comme le contenu de ce fichier n'est pas une liste de fichiers, il renverra une erreur** affichant le contenu.
+Alors, lorsque **7z** est exécuté, il traitera `root.txt` comme un fichier contenant la liste des fichiers qu'il doit compresser (c'est ce que l'existence de `@root.txt` indique) et lorsque 7z lira `root.txt`, il lira `/file/you/want/to/read` et **comme le contenu de ce fichier n'est pas une liste de fichiers, il générera une erreur** affichant le contenu.
 
 _Davantage d'infos dans les Write-ups de la box CTF de HackTheBox._
 
