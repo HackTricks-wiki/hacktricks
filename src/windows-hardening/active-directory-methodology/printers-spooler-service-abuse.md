@@ -4,7 +4,7 @@
 
 ## SharpSystemTriggers
 
-[**SharpSystemTriggers**](https://github.com/cube0x0/SharpSystemTriggers) ist eine **Sammlung** von **Remote-Authentifizierungs-Triggern**, die in C# unter Verwendung des MIDL-Compilers codiert sind, um Abhängigkeiten von Drittanbietern zu vermeiden.
+[**SharpSystemTriggers**](https://github.com/cube0x0/SharpSystemTriggers) ist eine **Sammlung** von **Remote-Authentifizierungs-Triggern**, die in C# unter Verwendung des MIDL-Compilers codiert sind, um 3rd-Party-Abhängigkeiten zu vermeiden.
 
 ## Missbrauch des Spooler-Dienstes
 
@@ -104,7 +104,7 @@ Wenn Sie einen MitM-Angriff auf einen Computer durchführen und HTML in eine Sei
 ```
 ## NTLMv1 knacken
 
-Wenn Sie [NTLMv1-Herausforderungen erfassen können, lesen Sie hier, wie Sie sie knacken](../ntlm/#ntlmv1-attack).\
+Wenn Sie [NTLMv1-Herausforderungen erfassen können, lesen Sie hier, wie Sie sie knacken](../ntlm/index.html#ntlmv1-attack).\
 &#xNAN;_&#x52;emember, dass Sie, um NTLMv1 zu knacken, die Responder-Herausforderung auf "1122334455667788" setzen müssen._
 
 {{#include ../../banners/hacktricks-training.md}}

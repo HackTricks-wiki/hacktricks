@@ -4,13 +4,13 @@
 
 ### Custom SSP
 
-[Erfahren Sie hier, was ein SSP (Security Support Provider) ist.](../authentication-credentials-uac-and-efs/#security-support-provider-interface-sspi)\
+[Erfahren Sie hier, was ein SSP (Security Support Provider) ist.](../authentication-credentials-uac-and-efs/index.html#security-support-provider-interface-sspi)\
 Sie können Ihr **eigenes SSP** erstellen, um **Kredentiale** im **Klartext** zu **erfassen**, die zum Zugriff auf die Maschine verwendet werden.
 
 #### Mimilib
 
 Sie können die von Mimikatz bereitgestellte `mimilib.dll`-Binärdatei verwenden. **Dies wird alle Kredentiale im Klartext in einer Datei protokollieren.**\
-Legen Sie die dll in `C:\Windows\System32\` ab\
+Legen Sie die dll in `C:\Windows\System32\` ab.\
 Holen Sie sich eine Liste der vorhandenen LSA-Sicherheits-Pakete:
 ```bash:attacker@target
 PS C:\> reg query hklm\system\currentcontrolset\control\lsa\ /v "Security Packages"
@@ -26,15 +26,15 @@ Und nach einem Neustart können alle Anmeldeinformationen im Klartext in `C:\Win
 
 #### Im Speicher
 
-Sie können dies auch direkt im Speicher mit Mimikatz injizieren (beachten Sie, dass es etwas instabil/nicht funktionieren könnte):
+Sie können dies auch direkt im Speicher mit Mimikatz injizieren (beachten Sie, dass es ein wenig instabil/nicht funktionieren könnte):
 ```powershell
 privilege::debug
 misc::memssp
 ```
-Das übersteht keine Neustarts.
+Das wird Neustarts nicht überstehen.
 
 #### Minderung
 
-Ereignis-ID 4657 - Überprüfung der Erstellung/Änderung von `HKLM:\System\CurrentControlSet\Control\Lsa\SecurityPackages`
+Ereignis-ID 4657 - Überwachung der Erstellung/Änderung von `HKLM:\System\CurrentControlSet\Control\Lsa\SecurityPackages`
 
 {{#include ../../banners/hacktricks-training.md}}

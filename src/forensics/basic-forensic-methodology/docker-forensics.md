@@ -2,6 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+
 ## Container modification
 
 Es gibt Verdachtsmomente, dass ein bestimmter Docker-Container kompromittiert wurde:
@@ -10,7 +11,7 @@ docker ps
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
 cc03e43a052a        lamp-wordpress      "./run.sh"          2 minutes ago       Up 2 minutes        80/tcp              wordpress
 ```
-Sie können die **Änderungen, die an diesem Container im Hinblick auf das Image vorgenommen wurden**, leicht mit folgendem Befehl finden:
+Sie können die **Änderungen, die an diesem Container im Hinblick auf das Image vorgenommen wurden**, leicht finden mit:
 ```bash
 docker diff wordpress
 C /var
@@ -58,7 +59,7 @@ Sie können **grundlegende Informationen** aus dem Image erhalten, indem Sie Fol
 ```bash
 docker inspect <image>
 ```
-Sie können auch eine Zusammenfassung **der Änderungen** mit folgendem Befehl erhalten:
+Sie können auch eine Zusammenfassung **der Änderungen** mit:
 ```bash
 docker history --no-trunc <image>
 ```
@@ -69,7 +70,7 @@ dfimage -sV=1.36 madhuakula/k8s-goat-hidden-in-layers>
 ```
 ### Dive
 
-Um hinzugefügte/ändernde Dateien in Docker-Images zu finden, können Sie auch das [**dive**](https://github.com/wagoodman/dive) (laden Sie es von [**releases**](https://github.com/wagoodman/dive/releases/tag/v0.10.0))-Dienstprogramm verwenden:
+Um hinzugefügte/ändernde Dateien in Docker-Images zu finden, können Sie auch das [**dive**](https://github.com/wagoodman/dive) (laden Sie es von [**releases**](https://github.com/wagoodman/dive/releases/tag/v0.10.0))-Tool verwenden:
 ```bash
 #First you need to load the image in your docker repo
 sudo docker load < image.tar                                                                                                                                                                                                         1 ⨯
@@ -90,6 +91,7 @@ for d in `find * -maxdepth 0 -type d`; do cd $d; tar -xf ./layer.tar; cd ..; don
 
 Beachten Sie, dass Sie, wenn Sie einen Docker-Container auf einem Host ausführen, **die auf dem Container laufenden Prozesse vom Host aus sehen können**, indem Sie einfach `ps -ef` ausführen.
 
-Daher können Sie (als root) **den Speicher der Prozesse** vom Host aus dumpen und nach **Anmeldeinformationen** suchen, **genau wie im folgenden Beispiel** [**dargestellt**](../../linux-hardening/privilege-escalation/#process-memory). 
+Daher können Sie (als root) **den Speicher der Prozesse** vom Host aus dumpen und nach **Anmeldeinformationen** suchen, **genau wie im folgenden Beispiel** [**dargestellt**](../../linux-hardening/privilege-escalation/index.html#process-memory).
+
 
 {{#include ../../banners/hacktricks-training.md}}

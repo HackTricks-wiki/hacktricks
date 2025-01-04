@@ -56,8 +56,8 @@ oder mit _Process Explorer_ von Sysinternals (Prozess auswählen und den Tab "Si
 
 ### Lokaler Administrator
 
-Wenn sich ein lokaler Administrator anmeldet, **werden zwei Zugriffstoken erstellt**: Eines mit Administratorrechten und eines mit normalen Rechten. **Standardmäßig** wird, wenn dieser Benutzer einen Prozess ausführt, das mit **regulären** (nicht-Administrator) **Rechten verwendet**. Wenn dieser Benutzer versucht, etwas **als Administrator** auszuführen ("Als Administrator ausführen" zum Beispiel), wird die **UAC** verwendet, um um Erlaubnis zu bitten.\
-Wenn Sie [**mehr über die UAC erfahren möchten, lesen Sie diese Seite**](../authentication-credentials-uac-and-efs/#uac)**.**
+Wenn sich ein lokaler Administrator anmeldet, **werden zwei Zugriffstoken erstellt**: Eines mit Administratorrechten und eines mit normalen Rechten. **Standardmäßig** wird, wenn dieser Benutzer einen Prozess ausführt, das mit **regulären** (nicht-Administrator) **Rechten verwendet**. Wenn dieser Benutzer versucht, etwas **als Administrator** auszuführen ("Als Administrator ausführen" zum Beispiel), wird die **UAC** verwendet, um um Erlaubnis zu fragen.\
+Wenn Sie [**mehr über die UAC erfahren möchten, lesen Sie diese Seite**](../authentication-credentials-uac-and-efs/index.html#uac)**.**
 
 ### Benutzerimpersonation mit Anmeldeinformationen
 
@@ -65,7 +65,7 @@ Wenn Sie **gültige Anmeldeinformationen eines anderen Benutzers** haben, könne
 ```
 runas /user:domain\username cmd.exe
 ```
-Das **Zugriffstoken** hat auch eine **Referenz** der Anmeldesitzungen innerhalb des **LSASS**, dies ist nützlich, wenn der Prozess auf einige Objekte des Netzwerks zugreifen muss.\
+Das **Zugriffstoken** hat auch einen **Verweis** auf die Anmeldesitzungen innerhalb des **LSASS**, dies ist nützlich, wenn der Prozess auf einige Objekte des Netzwerks zugreifen muss.\
 Sie können einen Prozess starten, der **verschiedene Anmeldeinformationen für den Zugriff auf Netzwerkdienste verwendet** mit:
 ```
 runas /user:domain\username /netonly cmd.exe

@@ -5,7 +5,7 @@
 **Interessante Seiten zum Überprüfen:**
 
 - [**Pyscript-Hacking-Tricks**](pyscript.md)
-- [**Python-Deserialisierungen**](../../pentesting-web/deserialization/#python)
+- [**Python-Deserialisierungen**](../../pentesting-web/deserialization/index.html#python)
 - [**Tricks zum Umgehen von Python-Sandboxes**](bypass-python-sandboxes/)
 - [**Grundlegende Python-Webanfragesyntax**](web-requests.md)
 - [**Grundlegende Python-Syntax und Bibliotheken**](basic-python.md)

@@ -4,7 +4,8 @@
 
 ​
 
-Wenn Sie ein Tool benötigen, das die Speicheranalyse mit verschiedenen Scan-Ebenen automatisiert und mehrere Volatility3-Plugins parallel ausführt, können Sie autoVolatility3 verwenden:: [https://github.com/H3xKatana/autoVolatility3/](https://github.com/H3xKatana/autoVolatility3/)
+
+Wenn Sie ein Tool benötigen, das die Speicheranalyse mit verschiedenen Scan-Ebenen automatisiert und mehrere Volatility3-Plugins parallel ausführt, können Sie autoVolatility3 verwenden: [https://github.com/H3xKatana/autoVolatility3/](https://github.com/H3xKatana/autoVolatility3/)
 ```bash
 # Full scan (runs all plugins)
 python3 autovol3.py -f MEMFILE -o OUT_DIR -s full
@@ -49,15 +50,15 @@ python setup.py install
 
 ## Volatility-Befehle
 
-Greifen Sie auf die offizielle Dokumentation in [Volatility-Befehlsreferenz](https://github.com/volatilityfoundation/volatility/wiki/Command-Reference#kdbgscan)
+Greifen Sie auf die offizielle Dokumentation in [Volatility-Befehlsreferenz](https://github.com/volatilityfoundation/volatility/wiki/Command-Reference#kdbgscan) zu.
 
 ### Eine Anmerkung zu „list“ vs. „scan“ Plugins
 
-Volatility hat zwei Hauptansätze für Plugins, die sich manchmal in ihren Namen widerspiegeln. „list“-Plugins versuchen, durch die Windows-Kernel-Strukturen zu navigieren, um Informationen wie Prozesse abzurufen (lokalisieren und die verkettete Liste der `_EPROCESS`-Strukturen im Speicher durchlaufen), OS-Handles (lokalisieren und die Handle-Tabelle auflisten, alle gefundenen Zeiger dereferenzieren usw.). Sie verhalten sich mehr oder weniger so, wie die Windows-API es tun würde, wenn sie beispielsweise aufgefordert wird, Prozesse aufzulisten.
+Volatility hat zwei Hauptansätze für Plugins, die sich manchmal in ihren Namen widerspiegeln. „list“-Plugins versuchen, durch Windows-Kernel-Strukturen zu navigieren, um Informationen wie Prozesse abzurufen (lokalisieren und die verkettete Liste der `_EPROCESS`-Strukturen im Speicher durchlaufen), OS-Handles (lokalisieren und die Handle-Tabelle auflisten, alle gefundenen Zeiger dereferenzieren usw.). Sie verhalten sich mehr oder weniger so, wie die Windows-API es tun würde, wenn sie beispielsweise aufgefordert wird, Prozesse aufzulisten.
 
-Das macht „list“-Plugins ziemlich schnell, aber ebenso anfällig für Manipulationen durch Malware wie die Windows-API. Wenn Malware beispielsweise DKOM verwendet, um einen Prozess von der `_EPROCESS`-verketteten Liste zu trennen, wird er im Task-Manager nicht angezeigt und auch nicht in der pslist.
+Das macht „list“-Plugins ziemlich schnell, aber ebenso anfällig für Manipulationen durch Malware wie die Windows-API. Wenn beispielsweise Malware DKOM verwendet, um einen Prozess von der `_EPROCESS`-verketteten Liste zu trennen, wird er im Task-Manager nicht angezeigt und auch nicht in der pslist.
 
-„scan“-Plugins hingegen verfolgen einen Ansatz, der dem Carving des Speichers ähnelt, um Dinge zu finden, die sinnvoll erscheinen, wenn sie als spezifische Strukturen dereferenziert werden. `psscan` wird beispielsweise den Speicher lesen und versuchen, `_EPROCESS`-Objekte daraus zu erstellen (es verwendet Pool-Tag-Scanning, das nach 4-Byte-Strings sucht, die auf das Vorhandensein einer interessanten Struktur hinweisen). Der Vorteil ist, dass es Prozesse finden kann, die beendet wurden, und selbst wenn Malware mit der `_EPROCESS`-verketteten Liste manipuliert, wird das Plugin die Struktur, die im Speicher herumliegt, immer noch finden (da sie weiterhin existieren muss, damit der Prozess ausgeführt werden kann). Der Nachteil ist, dass „scan“-Plugins etwas langsamer sind als „list“-Plugins und manchmal falsch-positive Ergebnisse liefern können (ein Prozess, der zu lange beendet wurde und Teile seiner Struktur von anderen Operationen überschrieben wurden).
+„scan“-Plugins hingegen verfolgen einen Ansatz, der dem Carving des Speichers ähnelt, um Dinge zu finden, die sinnvoll erscheinen, wenn sie als spezifische Strukturen dereferenziert werden. `psscan` wird beispielsweise den Speicher lesen und versuchen, `_EPROCESS`-Objekte daraus zu erstellen (es verwendet Pool-Tag-Scanning, das nach 4-Byte-Strings sucht, die auf das Vorhandensein einer interessanten Struktur hinweisen). Der Vorteil ist, dass es Prozesse finden kann, die beendet wurden, und selbst wenn Malware mit der `_EPROCESS`-verketteten Liste manipuliert, wird das Plugin die Struktur, die im Speicher herumliegt, immer noch finden (da sie weiterhin existieren muss, damit der Prozess ausgeführt werden kann). Der Nachteil ist, dass „scan“-Plugins etwas langsamer sind als „list“-Plugins und manchmal falsche Positivmeldungen liefern können (ein Prozess, der zu lange beendet wurde und Teile seiner Struktur von anderen Operationen überschrieben wurden).
 
 Von: [http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
 
@@ -65,7 +66,7 @@ Von: [http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/
 
 ### Volatility3
 
-Wie im Readme erklärt, müssen Sie die **Symboltabelle des OS**, das Sie unterstützen möchten, in _volatility3/volatility/symbols_ einfügen.\
+Wie im Readme erklärt, müssen Sie die **Symboltabelle des OS**, das Sie unterstützen möchten, in _volatility3/volatility/symbols_ ablegen.\
 Symboltabellenpakete für die verschiedenen Betriebssysteme sind **zum Download** verfügbar unter:
 
 - [https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip](https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip)
@@ -80,7 +81,7 @@ Sie können die Liste der unterstützten Profile abrufen, indem Sie:
 ```bash
 ./volatility_2.6_lin64_standalone --info | grep "Profile"
 ```
-Wenn Sie ein **neues Profil, das Sie heruntergeladen haben** (zum Beispiel ein Linux-Profil) verwenden möchten, müssen Sie an einem Ort die folgende Ordnerstruktur erstellen: _plugins/overlays/linux_ und die ZIP-Datei, die das Profil enthält, in diesen Ordner legen. Dann erhalten Sie die Nummer der Profile mit:
+Wenn Sie ein **neues Profil, das Sie heruntergeladen haben** (zum Beispiel ein Linux-Profil) verwenden möchten, müssen Sie an einem Ort die folgende Ordnerstruktur erstellen: _plugins/overlays/linux_ und die ZIP-Datei, die das Profil enthält, in diesen Ordner legen. Holen Sie sich dann die Nummer der Profile mit:
 ```bash
 ./vol --plugins=/home/kali/Desktop/ctfs/final/plugins --info
 Volatility Foundation Volatility Framework 2.6
@@ -121,9 +122,9 @@ PsLoadedModuleList            : 0xfffff80001197ac0 (0 modules)
 ```
 #### KDBG
 
-Der **Kernel-Debugger-Block**, der von Volatility als **KDBG** bezeichnet wird, ist entscheidend für forensische Aufgaben, die von Volatility und verschiedenen Debuggern durchgeführt werden. Identifiziert als `KdDebuggerDataBlock` und vom Typ `_KDDEBUGGER_DATA64`, enthält er wesentliche Referenzen wie `PsActiveProcessHead`. Diese spezifische Referenz verweist auf den Kopf der Prozessliste und ermöglicht die Auflistung aller Prozesse, was für eine gründliche Speicheranalyse grundlegend ist.
+Der **Kernel-Debugger-Block**, der von Volatility als **KDBG** bezeichnet wird, ist entscheidend für forensische Aufgaben, die von Volatility und verschiedenen Debuggern durchgeführt werden. Identifiziert als `KdDebuggerDataBlock` und vom Typ `_KDDEBUGGER_DATA64`, enthält er wesentliche Referenzen wie `PsActiveProcessHead`. Diese spezifische Referenz verweist auf den Kopf der Prozessliste, was die Auflistung aller Prozesse ermöglicht, die für eine gründliche Analyse des Speichers grundlegend ist.
 
-## OS-Informationen
+## OS Information
 ```bash
 #vol3 has a plugin to give OS information (note that imageinfo from vol2 will give you OS info)
 ./vol.py -f file.dmp windows.info.Info
@@ -132,7 +133,7 @@ Das Plugin `banners.Banners` kann in **vol3 verwendet werden, um zu versuchen, L
 
 ## Hashes/Passwörter
 
-Extrahieren Sie SAM-Hashes, [domain cached credentials](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) und [lsa secrets](../../../windows-hardening/authentication-credentials-uac-and-efs/#lsa-secrets).
+Extrahiere SAM-Hashes, [domain cached credentials](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) und [lsa secrets](../../../windows-hardening/authentication-credentials-uac-and-efs/index.html#lsa-secrets).
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -286,7 +287,7 @@ volatility --profile=Win7SP1x86_23418 getservicesids -f file.dmp #Get the SID of
 
 ### Handles
 
-Nützlich zu wissen, auf welche anderen Dateien, Schlüssel, Threads, Prozesse... ein **Prozess einen Handle** hat (hat geöffnet)
+Nützlich zu wissen, auf welche anderen Dateien, Schlüssel, Threads, Prozesse... ein **Prozess einen Handle** hat (geöffnet hat)
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -303,6 +304,9 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp handles [--pid=<pid>]
 {{#endtabs}}
 
 ### DLLs
+
+{{#tabs}}
+{{#tab name="vol3"}}
 ```bash
 ./vol.py -f file.dmp windows.dlllist.DllList [--pid <pid>] #List dlls used by each
 ./vol.py -f file.dmp windows.dumpfiles.DumpFiles --pid <pid> #Dump the .exe and dlls of the process in the current directory process
@@ -359,7 +363,7 @@ volatility --profile=Win7SP1x86_23418 yarascan -Y "https://" -p 3692,3840,3976,3
 
 ### UserAssist
 
-**Windows** verfolgt die Programme, die Sie ausführen, mithilfe einer Funktion in der Registrierung, die als **UserAssist-Schlüssel** bezeichnet wird. Diese Schlüssel protokollieren, wie oft jedes Programm ausgeführt wird und wann es zuletzt gestartet wurde.
+**Windows** verfolgt die Programme, die Sie ausführen, mithilfe einer Funktion in der Registrierung, die als **UserAssist-Schlüssel** bezeichnet wird. Diese Schlüssel zeichnen auf, wie oft jedes Programm ausgeführt wird und wann es zuletzt gestartet wurde.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -487,7 +491,7 @@ volatility --profile=SomeLinux -f file.dmp linux_recover_filesystem #Dump the en
 {{#endtab}}
 {{#endtabs}}
 
-### Scannen/Dump
+### Scan/Dump
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -511,6 +515,9 @@ volatility --profile=SomeLinux -f file.dmp linux_find_file -i 0xINODENUMBER -O /
 {{#endtabs}}
 
 ### Master File Table
+
+{{#tabs}}
+{{#tab name="vol3"}}
 ```bash
 # I couldn't find any plugin to extract this information in volatility3
 ```
@@ -581,7 +588,7 @@ volatility --profile=SomeLinux -f file.dmp linux_keyboard_notifiers #Keyloggers
 
 ### Scannen mit yara
 
-Verwenden Sie dieses Skript, um alle yara-Malware-Regeln von GitHub herunterzuladen und zusammenzuführen: [https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9](https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9)\
+Verwenden Sie dieses Skript, um alle yara-Malware-Regeln von github herunterzuladen und zusammenzuführen: [https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9](https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9)\
 Erstellen Sie das _**rules**_ Verzeichnis und führen Sie es aus. Dies erstellt eine Datei namens _**malware_rules.yar**_, die alle yara-Regeln für Malware enthält.
 
 {{#tabs}}

@@ -20,7 +20,7 @@ Sobald Sie die CID gefunden haben, wird empfohlen, **Dateien mit dieser ID zu su
 ## Google Drive
 
 In Windows finden Sie den Hauptordner von Google Drive unter `\Users\<username>\AppData\Local\Google\Drive\user_default`\
-Dieser Ordner enthält eine Datei namens Sync_log.log mit Informationen wie der E-Mail-Adresse des Kontos, Dateinamen, Zeitstempeln, MD5-Hashes der Dateien usw. Selbst gelöschte Dateien erscheinen in dieser Protokolldatei mit ihrem entsprechenden MD5.
+Dieser Ordner enthält eine Datei namens Sync_log.log mit Informationen wie der E-Mail-Adresse des Kontos, Dateinamen, Zeitstempeln, MD5-Hashes der Dateien usw. Selbst gelöschte Dateien erscheinen in dieser Protokolldatei mit dem entsprechenden MD5.
 
 Die Datei **`Cloud_graph\Cloud_graph.db`** ist eine SQLite-Datenbank, die die Tabelle **`cloud_graph_entry`** enthält. In dieser Tabelle finden Sie den **Namen** der **synchronisierten** **Dateien**, das Änderungsdatum, die Größe und die MD5-Prüfziffer der Dateien.
 
@@ -48,7 +48,7 @@ Um die Verschlüsselung, die Dropbox verwendet, besser zu verstehen, können Sie
 
 Die wichtigsten Informationen sind jedoch:
 
-- **Entropy**: d114a55212655f74bd772e37e64aee9b
+- **Entropie**: d114a55212655f74bd772e37e64aee9b
 - **Salt**: 0D638C092E8B82FC452883F95F355B8E
 - **Algorithmus**: PBKDF2
 - **Iterationen**: 1066
@@ -64,7 +64,7 @@ Dann können Sie das Tool [**DataProtectionDecryptor**](https://nirsoft.net/util
 
 ![](<../../../images/image (443).png>)
 
-Wenn alles wie erwartet verläuft, zeigt das Tool den **primären Schlüssel** an, den Sie **verwenden müssen, um den ursprünglichen wiederherzustellen**. Um den ursprünglichen wiederherzustellen, verwenden Sie einfach dieses [cyber_chef-Rezept](<https://gchq.github.io/CyberChef/#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) und setzen den primären Schlüssel als "Passphrase" in das Rezept ein.
+Wenn alles wie erwartet verläuft, zeigt das Tool den **primären Schlüssel** an, den Sie **verwenden müssen, um den ursprünglichen wiederherzustellen**. Um den ursprünglichen wiederherzustellen, verwenden Sie einfach dieses [cyber_chef-Rezept](<https://gchq.github.io/CyberChef/index.html#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) und setzen den primären Schlüssel als "Passphrase" in das Rezept ein.
 
 Das resultierende Hex ist der endgültige Schlüssel, der zur Verschlüsselung der Datenbanken verwendet wird, die entschlüsselt werden können mit:
 ```bash
@@ -74,11 +74,11 @@ Die **`config.dbx`** Datenbank enthält:
 
 - **Email**: Die E-Mail des Benutzers
 - **usernamedisplayname**: Der Name des Benutzers
-- **dropbox_path**: Pfad, wo der Dropbox-Ordner sich befindet
+- **dropbox_path**: Pfad, wo der Dropbox-Ordner gespeichert ist
 - **Host_id: Hash** verwendet zur Authentifizierung in der Cloud. Dies kann nur über das Web widerrufen werden.
 - **Root_ns**: Benutzeridentifikator
 
-Die **`filecache.db`** Datenbank enthält Informationen über alle Dateien und Ordner, die mit Dropbox synchronisiert sind. Die Tabelle `File_journal` ist die mit den nützlichsten Informationen:
+Die **`filecache.db`** Datenbank enthält Informationen über alle Dateien und Ordner, die mit Dropbox synchronisiert sind. Die Tabelle `File_journal` enthält die nützlichsten Informationen:
 
 - **Server_path**: Pfad, wo die Datei auf dem Server gespeichert ist (dieser Pfad wird durch die `host_id` des Clients vorangestellt).
 - **local_sjid**: Version der Datei

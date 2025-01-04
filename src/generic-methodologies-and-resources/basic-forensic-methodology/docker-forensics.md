@@ -1,9 +1,9 @@
-# Docker Forensik
+# Docker Forensics
 
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## Containeränderung
+## Container modification
 
 Es gibt Verdachtsmomente, dass ein bestimmter Docker-Container kompromittiert wurde:
 ```bash
@@ -11,7 +11,7 @@ docker ps
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
 cc03e43a052a        lamp-wordpress      "./run.sh"          2 minutes ago       Up 2 minutes        80/tcp              wordpress
 ```
-Sie können die **Änderungen, die an diesem Container im Hinblick auf das Image vorgenommen wurden**, leicht mit folgendem Befehl finden:
+Sie können die **Änderungen, die an diesem Container im Hinblick auf das Image vorgenommen wurden**, ganz einfach mit folgendem Befehl finden:
 ```bash
 docker diff wordpress
 C /var
@@ -25,7 +25,7 @@ A /var/lib/mysql/mysql/time_zone_leap_second.MYI
 A /var/lib/mysql/mysql/general_log.CSV
 ...
 ```
-Im vorherigen Befehl bedeutet **C** **Geändert** und **A,** **Hinzugefügt**.\
+Im vorherigen Befehl bedeutet **C** **Changed** und **A,** **Added**.\
 Wenn Sie feststellen, dass eine interessante Datei wie `/etc/shadow` geändert wurde, können Sie sie aus dem Container herunterladen, um nach bösartiger Aktivität zu suchen mit:
 ```bash
 docker cp wordpress:/etc/shadow.
@@ -63,14 +63,14 @@ Sie können auch eine Zusammenfassung **der Änderungen** mit folgendem Befehl e
 ```bash
 docker history --no-trunc <image>
 ```
-Sie können auch ein **dockerfile aus einem Image** mit folgendem Befehl generieren:
+Sie können auch ein **Dockerfile aus einem Image** mit folgendem Befehl generieren:
 ```bash
 alias dfimage="docker run -v /var/run/docker.sock:/var/run/docker.sock --rm alpine/dfimage"
 dfimage -sV=1.36 madhuakula/k8s-goat-hidden-in-layers>
 ```
 ### Dive
 
-Um hinzugefügte/ändernde Dateien in Docker-Images zu finden, können Sie auch das [**dive**](https://github.com/wagoodman/dive) (laden Sie es von [**releases**](https://github.com/wagoodman/dive/releases/tag/v0.10.0))-Dienstprogramm verwenden:
+Um hinzugefügte/ändernde Dateien in Docker-Images zu finden, können Sie auch das [**dive**](https://github.com/wagoodman/dive) (laden Sie es von [**releases**](https://github.com/wagoodman/dive/releases/tag/v0.10.0))-Tool verwenden:
 ```bash
 #First you need to load the image in your docker repo
 sudo docker load < image.tar                                                                                                                                                                                                         1 ⨯
@@ -81,7 +81,7 @@ sudo dive flask:latest
 ```
 Dies ermöglicht es Ihnen, **durch die verschiedenen Blobs von Docker-Images zu navigieren** und zu überprüfen, welche Dateien geändert/hinzugefügt wurden. **Rot** bedeutet hinzugefügt und **gelb** bedeutet geändert. Verwenden Sie **Tab**, um zur anderen Ansicht zu wechseln, und **Leertaste**, um Ordner zu minimieren/öffnen.
 
-Mit dies können Sie nicht auf den Inhalt der verschiedenen Stufen des Images zugreifen. Um dies zu tun, müssen Sie **jede Schicht dekomprimieren und darauf zugreifen**.\
+Mit die können Sie nicht auf den Inhalt der verschiedenen Stufen des Images zugreifen. Um dies zu tun, müssen Sie **jede Schicht dekomprimieren und darauf zugreifen**.\
 Sie können alle Schichten eines Images aus dem Verzeichnis, in dem das Image dekomprimiert wurde, dekomprimieren, indem Sie Folgendes ausführen:
 ```bash
 tar -xf image.tar
@@ -91,6 +91,6 @@ for d in `find * -maxdepth 0 -type d`; do cd $d; tar -xf ./layer.tar; cd ..; don
 
 Beachten Sie, dass Sie, wenn Sie einen Docker-Container auf einem Host ausführen, **die auf dem Container laufenden Prozesse vom Host aus sehen können**, indem Sie einfach `ps -ef` ausführen.
 
-Daher können Sie (als root) **den Speicher der Prozesse** vom Host aus dumpen und nach **Anmeldeinformationen** suchen, **genau wie im folgenden Beispiel** [**dargestellt**](../../linux-hardening/privilege-escalation/#process-memory). 
+Daher können Sie (als root) **den Speicher der Prozesse** vom Host aus dumpen und nach **Anmeldeinformationen** suchen, **genau wie im folgenden Beispiel** [**dargestellt**](../../linux-hardening/privilege-escalation/index.html#process-memory).
 
 {{#include ../../banners/hacktricks-training.md}}

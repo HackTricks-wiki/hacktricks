@@ -4,111 +4,111 @@
 
 ### **Bestes Tool zur Suche nach Windows lokalen Privilegieneskalationsvektoren:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
 
-### [Systeminfo](windows-local-privilege-escalation/#system-info)
+### [Systeminfo](windows-local-privilege-escalation/index.html#system-info)
 
-- [ ] [**Systeminformationen**](windows-local-privilege-escalation/#system-info) abrufen
-- [ ] Nach **Kernel** [**Exploits mit Skripten**](windows-local-privilege-escalation/#version-exploits) suchen
-- [ ] **Google verwenden, um** nach Kernel **Exploits** zu suchen
-- [ ] **searchsploit verwenden, um** nach Kernel **Exploits** zu suchen
-- [ ] Interessante Informationen in [**Umgebungsvariablen**](windows-local-privilege-escalation/#environment)?
-- [ ] Passwörter im [**PowerShell-Verlauf**](windows-local-privilege-escalation/#powershell-history)?
-- [ ] Interessante Informationen in [**Internet-Einstellungen**](windows-local-privilege-escalation/#internet-settings)?
-- [ ] [**Laufwerke**](windows-local-privilege-escalation/#drives)?
-- [ ] [**WSUS-Exploit**](windows-local-privilege-escalation/#wsus)?
-- [ ] [**AlwaysInstallElevated**](windows-local-privilege-escalation/#alwaysinstallelevated)?
+- [ ] [**Systeminformationen**](windows-local-privilege-escalation/index.html#system-info) abrufen
+- [ ] Nach **Kernel** [**Exploits mit Skripten**](windows-local-privilege-escalation/index.html#version-exploits) suchen
+- [ ] **Google verwenden, um nach** Kernel **Exploits** zu suchen
+- [ ] **searchsploit verwenden, um nach** Kernel **Exploits** zu suchen
+- [ ] Interessante Informationen in [**Umgebungsvariablen**](windows-local-privilege-escalation/index.html#environment)?
+- [ ] Passwörter im [**PowerShell-Verlauf**](windows-local-privilege-escalation/index.html#powershell-history)?
+- [ ] Interessante Informationen in [**Internet-Einstellungen**](windows-local-privilege-escalation/index.html#internet-settings)?
+- [ ] [**Laufwerke**](windows-local-privilege-escalation/index.html#drives)?
+- [ ] [**WSUS-Exploit**](windows-local-privilege-escalation/index.html#wsus)?
+- [ ] [**AlwaysInstallElevated**](windows-local-privilege-escalation/index.html#alwaysinstallelevated)?
 
-### [Protokollierung/AV-Enumeration](windows-local-privilege-escalation/#enumeration)
+### [Protokollierung/AV-Enumeration](windows-local-privilege-escalation/index.html#enumeration)
 
-- [ ] [**Audit**](windows-local-privilege-escalation/#audit-settings) und [**WEF**](windows-local-privilege-escalation/#wef) Einstellungen überprüfen
-- [ ] [**LAPS**](windows-local-privilege-escalation/#laps) überprüfen
-- [ ] Überprüfen, ob [**WDigest**](windows-local-privilege-escalation/#wdigest) aktiv ist
-- [ ] [**LSA-Schutz**](windows-local-privilege-escalation/#lsa-protection)?
-- [ ] [**Credentials Guard**](windows-local-privilege-escalation/#credentials-guard)[?](windows-local-privilege-escalation/#cached-credentials)
-- [ ] [**Zwischengespeicherte Anmeldeinformationen**](windows-local-privilege-escalation/#cached-credentials)?
+- [ ] [**Audit**](windows-local-privilege-escalation/index.html#audit-settings) und [**WEF**](windows-local-privilege-escalation/index.html#wef) Einstellungen überprüfen
+- [ ] [**LAPS**](windows-local-privilege-escalation/index.html#laps) überprüfen
+- [ ] Überprüfen, ob [**WDigest**](windows-local-privilege-escalation/index.html#wdigest) aktiv ist
+- [ ] [**LSA-Schutz**](windows-local-privilege-escalation/index.html#lsa-protection)?
+- [ ] [**Credentials Guard**](windows-local-privilege-escalation/index.html#credentials-guard)[?](windows-local-privilege-escalation/index.html#cached-credentials)
+- [ ] [**Zwischengespeicherte Anmeldeinformationen**](windows-local-privilege-escalation/index.html#cached-credentials)?
 - [ ] Überprüfen, ob ein [**AV**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/windows-av-bypass/README.md) vorhanden ist
 - [ ] [**AppLocker-Richtlinie**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/authentication-credentials-uac-and-efs/README.md#applocker-policy)?
 - [ ] [**UAC**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/authentication-credentials-uac-and-efs/uac-user-account-control/README.md)
-- [ ] [**Benutzerprivilegien**](windows-local-privilege-escalation/#users-and-groups)
-- [ ] [**Aktuelle** Benutzer **privilegien**](windows-local-privilege-escalation/#users-and-groups) überprüfen
-- [ ] Bist du [**Mitglied einer privilegierten Gruppe**](windows-local-privilege-escalation/#privileged-groups)?
-- [ ] Überprüfen, ob du [eines dieser Tokens aktiviert hast](windows-local-privilege-escalation/#token-manipulation): **SeImpersonatePrivilege, SeAssignPrimaryPrivilege, SeTcbPrivilege, SeBackupPrivilege, SeRestorePrivilege, SeCreateTokenPrivilege, SeLoadDriverPrivilege, SeTakeOwnershipPrivilege, SeDebugPrivilege** ?
-- [ ] [**Benutzersitzungen**](windows-local-privilege-escalation/#logged-users-sessions)?
-- [ ] Überprüfen[ **Benutzerverzeichnisse**](windows-local-privilege-escalation/#home-folders) (Zugriff?)
-- [ ] [**Passwortrichtlinie**](windows-local-privilege-escalation/#password-policy) überprüfen
-- [ ] Was ist [**im Clipboard**](windows-local-privilege-escalation/#get-the-content-of-the-clipboard)?
+- [ ] [**Benutzerprivilegien**](windows-local-privilege-escalation/index.html#users-and-groups)
+- [ ] [**Aktuelle** Benutzer **privilegien**](windows-local-privilege-escalation/index.html#users-and-groups) überprüfen
+- [ ] Sind Sie [**Mitglied einer privilegierten Gruppe**](windows-local-privilege-escalation/index.html#privileged-groups)?
+- [ ] Überprüfen, ob Sie [eines dieser Tokens aktiviert haben](windows-local-privilege-escalation/index.html#token-manipulation): **SeImpersonatePrivilege, SeAssignPrimaryPrivilege, SeTcbPrivilege, SeBackupPrivilege, SeRestorePrivilege, SeCreateTokenPrivilege, SeLoadDriverPrivilege, SeTakeOwnershipPrivilege, SeDebugPrivilege** ?
+- [ ] [**Benutzersitzungen**](windows-local-privilege-escalation/index.html#logged-users-sessions)?
+- [ ] Überprüfen[ **Benutzerverzeichnisse**](windows-local-privilege-escalation/index.html#home-folders) (Zugriff?)
+- [ ] [**Passwortrichtlinie**](windows-local-privilege-escalation/index.html#password-policy) überprüfen
+- [ ] Was ist [**in der Zwischenablage**](windows-local-privilege-escalation/index.html#get-the-content-of-the-clipboard)?
 
-### [Netzwerk](windows-local-privilege-escalation/#network)
+### [Netzwerk](windows-local-privilege-escalation/index.html#network)
 
-- [ ] **Aktuelle** [**Netzwerkinformationen**](windows-local-privilege-escalation/#network) überprüfen
+- [ ] **Aktuelle** [**Netzwerkinformationen**](windows-local-privilege-escalation/index.html#network) überprüfen
 - [ ] **Versteckte lokale Dienste** überprüfen, die auf das Internet beschränkt sind
 
-### [Ausgeführte Prozesse](windows-local-privilege-escalation/#running-processes)
+### [Ausgeführte Prozesse](windows-local-privilege-escalation/index.html#running-processes)
 
-- [ ] Berechtigungen für Prozessbinärdateien [**Datei- und Ordnersicherheiten**](windows-local-privilege-escalation/#file-and-folder-permissions)
-- [ ] [**Speicherpasswort-Mining**](windows-local-privilege-escalation/#memory-password-mining)
-- [ ] [**Unsichere GUI-Apps**](windows-local-privilege-escalation/#insecure-gui-apps)
+- [ ] Prozesse Binärdateien [**Datei- und Ordnersicherheitsberechtigungen**](windows-local-privilege-escalation/index.html#file-and-folder-permissions)
+- [ ] [**Speicherpasswort-Mining**](windows-local-privilege-escalation/index.html#memory-password-mining)
+- [ ] [**Unsichere GUI-Apps**](windows-local-privilege-escalation/index.html#insecure-gui-apps)
 - [ ] Anmeldeinformationen mit **interessanten Prozessen** über `ProcDump.exe` stehlen? (firefox, chrome, usw...)
 
-### [Dienste](windows-local-privilege-escalation/#services)
+### [Dienste](windows-local-privilege-escalation/index.html#services)
 
-- [ ] [Kannst du **irgendeinen Dienst** **modifizieren**?](windows-local-privilege-escalation/#permissions)
-- [ ] [Kannst du **die Binärdatei** modifizieren, die von einem **Dienst** **ausgeführt** wird?](windows-local-privilege-escalation/#modify-service-binary-path)
-- [ ] [Kannst du **die Registrierung** eines **Dienstes** **modifizieren**?](windows-local-privilege-escalation/#services-registry-modify-permissions)
-- [ ] [Kannst du von einem **nicht zitierten Dienst** Binärdatei **Pfad** profitieren?](windows-local-privilege-escalation/#unquoted-service-paths)
+- [ ] [Können Sie **irgendeinen Dienst** ändern?](windows-local-privilege-escalation/index.html#permissions)
+- [ ] [Können Sie **die Binärdatei** ändern, die von einem **Dienst** **ausgeführt** wird?](windows-local-privilege-escalation/index.html#modify-service-binary-path)
+- [ ] [Können Sie **die Registrierung** eines **Dienstes** ändern?](windows-local-privilege-escalation/index.html#services-registry-modify-permissions)
+- [ ] [Können Sie von einem **nicht zitierten Dienst** Binärdateipfad profitieren?](windows-local-privilege-escalation/index.html#unquoted-service-paths)
 
-### [**Anwendungen**](windows-local-privilege-escalation/#applications)
+### [**Anwendungen**](windows-local-privilege-escalation/index.html#applications)
 
-- [ ] **Schreib** [**berechtigungen für installierte Anwendungen**](windows-local-privilege-escalation/#write-permissions)
-- [ ] [**Startup-Anwendungen**](windows-local-privilege-escalation/#run-at-startup)
-- [ ] **Verwundbare** [**Treiber**](windows-local-privilege-escalation/#drivers)
+- [ ] **Schreib** [**Berechtigungen für installierte Anwendungen**](windows-local-privilege-escalation/index.html#write-permissions)
+- [ ] [**Startup-Anwendungen**](windows-local-privilege-escalation/index.html#run-at-startup)
+- [ ] **Verwundbare** [**Treiber**](windows-local-privilege-escalation/index.html#drivers)
 
-### [DLL-Hijacking](windows-local-privilege-escalation/#path-dll-hijacking)
+### [DLL-Hijacking](windows-local-privilege-escalation/index.html#path-dll-hijacking)
 
-- [ ] Kannst du **in irgendeinen Ordner innerhalb von PATH** **schreiben**?
-- [ ] Gibt es eine bekannte Dienstbinärdatei, die **versucht, eine nicht existierende DLL** zu laden?
-- [ ] Kannst du **in irgendeinen** **Binärordner** **schreiben**?
+- [ ] Können Sie **in einen beliebigen Ordner im PATH schreiben**?
+- [ ] Gibt es eine bekannte Dienstbinärdatei, die **versucht, eine nicht existierende DLL zu laden**?
+- [ ] Können Sie **in einen beliebigen** Binärdateiordner **schreiben**?
 
-### [Netzwerk](windows-local-privilege-escalation/#network)
+### [Netzwerk](windows-local-privilege-escalation/index.html#network)
 
 - [ ] Das Netzwerk auflisten (Freigaben, Schnittstellen, Routen, Nachbarn, ...)
 - [ ] Besonders auf Netzwerkdienste achten, die auf localhost (127.0.0.1) hören
 
-### [Windows-Anmeldeinformationen](windows-local-privilege-escalation/#windows-credentials)
+### [Windows-Anmeldeinformationen](windows-local-privilege-escalation/index.html#windows-credentials)
 
-- [ ] [**Winlogon**](windows-local-privilege-escalation/#winlogon-credentials) Anmeldeinformationen
-- [ ] [**Windows Vault**](windows-local-privilege-escalation/#credentials-manager-windows-vault) Anmeldeinformationen, die du verwenden könntest?
-- [ ] Interessante [**DPAPI-Anmeldeinformationen**](windows-local-privilege-escalation/#dpapi)?
-- [ ] Passwörter von gespeicherten [**Wifi-Netzwerken**](windows-local-privilege-escalation/#wifi)?
-- [ ] Interessante Informationen in [**gespeicherten RDP-Verbindungen**](windows-local-privilege-escalation/#saved-rdp-connections)?
-- [ ] Passwörter in [**kürzlich ausgeführten Befehlen**](windows-local-privilege-escalation/#recently-run-commands)?
-- [ ] [**Remote Desktop Credential Manager**](windows-local-privilege-escalation/#remote-desktop-credential-manager) Passwörter?
-- [ ] Existiert [**AppCmd.exe**](windows-local-privilege-escalation/#appcmd-exe)? Anmeldeinformationen?
-- [ ] [**SCClient.exe**](windows-local-privilege-escalation/#scclient-sccm)? DLL-Seitenladung?
+- [ ] [**Winlogon**](windows-local-privilege-escalation/index.html#winlogon-credentials) Anmeldeinformationen
+- [ ] [**Windows Vault**](windows-local-privilege-escalation/index.html#credentials-manager-windows-vault) Anmeldeinformationen, die Sie verwenden könnten?
+- [ ] Interessante [**DPAPI-Anmeldeinformationen**](windows-local-privilege-escalation/index.html#dpapi)?
+- [ ] Passwörter von gespeicherten [**WLAN-Netzwerken**](windows-local-privilege-escalation/index.html#wifi)?
+- [ ] Interessante Informationen in [**gespeicherten RDP-Verbindungen**](windows-local-privilege-escalation/index.html#saved-rdp-connections)?
+- [ ] Passwörter in [**kürzlich ausgeführten Befehlen**](windows-local-privilege-escalation/index.html#recently-run-commands)?
+- [ ] [**Remote Desktop Credential Manager**](windows-local-privilege-escalation/index.html#remote-desktop-credential-manager) Passwörter?
+- [ ] [**AppCmd.exe** existiert](windows-local-privilege-escalation/index.html#appcmd-exe)? Anmeldeinformationen?
+- [ ] [**SCClient.exe**](windows-local-privilege-escalation/index.html#scclient-sccm)? DLL-Seitenladung?
 
-### [Dateien und Registrierung (Anmeldeinformationen)](windows-local-privilege-escalation/#files-and-registry-credentials)
+### [Dateien und Registrierung (Anmeldeinformationen)](windows-local-privilege-escalation/index.html#files-and-registry-credentials)
 
-- [ ] **Putty:** [**Anmeldeinformationen**](windows-local-privilege-escalation/#putty-creds) **und** [**SSH-Hostschlüssel**](windows-local-privilege-escalation/#putty-ssh-host-keys)
-- [ ] [**SSH-Schlüssel in der Registrierung**](windows-local-privilege-escalation/#ssh-keys-in-registry)?
-- [ ] Passwörter in [**unbeaufsichtigten Dateien**](windows-local-privilege-escalation/#unattended-files)?
-- [ ] Gibt es ein [**SAM & SYSTEM**](windows-local-privilege-escalation/#sam-and-system-backups) Backup?
-- [ ] [**Cloud-Anmeldeinformationen**](windows-local-privilege-escalation/#cloud-credentials)?
-- [ ] [**McAfee SiteList.xml**](windows-local-privilege-escalation/#mcafee-sitelist.xml) Datei?
-- [ ] [**Zwischengespeichertes GPP-Passwort**](windows-local-privilege-escalation/#cached-gpp-pasword)?
-- [ ] Passwort in [**IIS-Webkonfigurationsdatei**](windows-local-privilege-escalation/#iis-web-config)?
-- [ ] Interessante Informationen in [**Webprotokollen**](windows-local-privilege-escalation/#logs)?
-- [ ] Möchtest du [**den Benutzer nach Anmeldeinformationen fragen**](windows-local-privilege-escalation/#ask-for-credentials)?
-- [ ] Interessante [**Dateien im Papierkorb**](windows-local-privilege-escalation/#credentials-in-the-recyclebin)?
-- [ ] Andere [**Registrierungen mit Anmeldeinformationen**](windows-local-privilege-escalation/#inside-the-registry)?
-- [ ] Innerhalb [**von Browserdaten**](windows-local-privilege-escalation/#browsers-history) (Datenbanken, Verlauf, Lesezeichen, ...)?
-- [ ] [**Allgemeine Passwortsuche**](windows-local-privilege-escalation/#generic-password-search-in-files-and-registry) in Dateien und Registrierung
-- [ ] [**Tools**](windows-local-privilege-escalation/#tools-that-search-for-passwords) zur automatischen Suche nach Passwörtern
+- [ ] **Putty:** [**Anmeldeinformationen**](windows-local-privilege-escalation/index.html#putty-creds) **und** [**SSH-Hostschlüssel**](windows-local-privilege-escalation/index.html#putty-ssh-host-keys)
+- [ ] [**SSH-Schlüssel in der Registrierung**](windows-local-privilege-escalation/index.html#ssh-keys-in-registry)?
+- [ ] Passwörter in [**unbeaufsichtigten Dateien**](windows-local-privilege-escalation/index.html#unattended-files)?
+- [ ] Irgendein [**SAM & SYSTEM**](windows-local-privilege-escalation/index.html#sam-and-system-backups) Backup?
+- [ ] [**Cloud-Anmeldeinformationen**](windows-local-privilege-escalation/index.html#cloud-credentials)?
+- [ ] [**McAfee SiteList.xml**](windows-local-privilege-escalation/index.html#mcafee-sitelist.xml) Datei?
+- [ ] [**Zwischengespeichertes GPP-Passwort**](windows-local-privilege-escalation/index.html#cached-gpp-pasword)?
+- [ ] Passwort in [**IIS-Webkonfigurationsdatei**](windows-local-privilege-escalation/index.html#iis-web-config)?
+- [ ] Interessante Informationen in [**Webprotokollen**](windows-local-privilege-escalation/index.html#logs)?
+- [ ] Möchten Sie [**den Benutzer nach Anmeldeinformationen fragen**](windows-local-privilege-escalation/index.html#ask-for-credentials)?
+- [ ] Interessante [**Dateien im Papierkorb**](windows-local-privilege-escalation/index.html#credentials-in-the-recyclebin)?
+- [ ] Andere [**Registrierungen mit Anmeldeinformationen**](windows-local-privilege-escalation/index.html#inside-the-registry)?
+- [ ] In [**Browserdaten**](windows-local-privilege-escalation/index.html#browsers-history) (Datenbanken, Verlauf, Lesezeichen, ...)?
+- [ ] [**Allgemeine Passwortsuche**](windows-local-privilege-escalation/index.html#generic-password-search-in-files-and-registry) in Dateien und Registrierung
+- [ ] [**Tools**](windows-local-privilege-escalation/index.html#tools-that-search-for-passwords) zur automatischen Passwortsuche
 
-### [Leckende Handler](windows-local-privilege-escalation/#leaked-handlers)
+### [Leckende Handler](windows-local-privilege-escalation/index.html#leaked-handlers)
 
-- [ ] Hast du Zugriff auf einen Handler eines Prozesses, der von einem Administrator ausgeführt wird?
+- [ ] Haben Sie Zugriff auf einen Handler eines Prozesses, der von einem Administrator ausgeführt wird?
 
-### [Pipe-Client-Impersonation](windows-local-privilege-escalation/#named-pipe-client-impersonation)
+### [Pipe-Client-Impersonation](windows-local-privilege-escalation/index.html#named-pipe-client-impersonation)
 
-- [ ] Überprüfen, ob du es ausnutzen kannst
+- [ ] Überprüfen, ob Sie es ausnutzen können
 
 {{#include ../banners/hacktricks-training.md}}

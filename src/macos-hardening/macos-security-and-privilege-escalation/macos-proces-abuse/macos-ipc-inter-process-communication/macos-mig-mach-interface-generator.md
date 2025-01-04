@@ -4,7 +4,7 @@
 
 ## Grundinformationen
 
-MIG wurde erstellt, um den **Prozess der Mach IPC** Codeerstellung zu **vereinfachen**. Es **generiert den benötigten Code** für Server und Client, um mit einer gegebenen Definition zu kommunizieren. Auch wenn der generierte Code unordentlich ist, muss ein Entwickler ihn nur importieren und sein Code wird viel einfacher sein als zuvor.
+MIG wurde entwickelt, um den **Prozess der Mach IPC** Codeerstellung zu **vereinfachen**. Es **generiert den benötigten Code** für Server und Client, um mit einer gegebenen Definition zu kommunizieren. Auch wenn der generierte Code unansehnlich ist, muss ein Entwickler ihn nur importieren, und sein Code wird viel einfacher sein als zuvor.
 
 Die Definition wird in der Interface Definition Language (IDL) mit der Erweiterung `.defs` angegeben.
 
@@ -40,7 +40,7 @@ server_port :  mach_port_t;
 n1          :  uint32_t;
 n2          :  uint32_t);
 ```
-Beachten Sie, dass das erste **Argument der Port ist, an den gebunden werden soll** und MIG **automatisch den Antwortport verwaltet** (es sei denn, `mig_get_reply_port()` wird im Client-Code aufgerufen). Darüber hinaus wird die **ID der Operationen** **sequentiell** beginnend mit der angegebenen Subsystem-ID sein (wenn eine Operation veraltet ist, wird sie gelöscht und `skip` wird verwendet, um ihre ID weiterhin zu verwenden).
+Beachten Sie, dass das erste **Argument der Port ist, an den gebunden werden soll**, und MIG wird **automatisch den Antwortport verwalten** (es sei denn, `mig_get_reply_port()` wird im Client-Code aufgerufen). Darüber hinaus wird die **ID der Operationen** **sequentiell** beginnend mit der angegebenen Subsystem-ID sein (wenn eine Operation veraltet ist, wird sie gelöscht und `skip` wird verwendet, um ihre ID weiterhin zu verwenden).
 
 Verwenden Sie nun MIG, um den Server- und Client-Code zu generieren, der in der Lage ist, miteinander zu kommunizieren, um die Subtract-Funktion aufzurufen:
 ```bash
@@ -49,8 +49,8 @@ mig -header myipcUser.h -sheader myipcServer.h myipc.defs
 Mehrere neue Dateien werden im aktuellen Verzeichnis erstellt.
 
 > [!TIP]
-> Sie können ein komplexeres Beispiel in Ihrem System finden mit: `mdfind mach_port.defs`\
-> Und Sie können es aus demselben Ordner wie die Datei kompilieren mit: `mig -DLIBSYSCALL_INTERFACE mach_ports.defs`
+> Sie können ein komplexeres Beispiel in Ihrem System mit: `mdfind mach_port.defs` finden.\
+> Und Sie können es aus demselben Ordner wie die Datei mit: `mig -DLIBSYSCALL_INTERFACE mach_ports.defs` kompilieren.
 
 In den Dateien **`myipcServer.c`** und **`myipcServer.h`** finden Sie die Deklaration und Definition der Struktur **`SERVERPREFmyipc_subsystem`**, die im Grunde die Funktion definiert, die basierend auf der empfangenen Nachrichten-ID aufgerufen werden soll (wir haben eine Startnummer von 500 angegeben):
 
@@ -104,7 +104,7 @@ return 0;
 return SERVERPREFmyipc_subsystem.routine[msgh_id].stub_routine;
 }
 ```
-In diesem Beispiel haben wir nur 1 Funktion in den Definitionen definiert, aber wenn wir mehr Funktionen definiert hätten, wären sie im Array von **`SERVERPREFmyipc_subsystem`** enthalten, und die erste wäre der ID **500** zugewiesen worden, die zweite der ID **501**...
+In diesem Beispiel haben wir nur 1 Funktion in den Definitionen definiert, aber wenn wir mehr Funktionen definiert hätten, wären sie im Array von **`SERVERPREFmyipc_subsystem`** enthalten gewesen, und die erste wäre der ID **500** zugewiesen worden, die zweite der ID **501**...
 
 Wenn die Funktion eine **Antwort** senden sollte, würde die Funktion `mig_internal kern_return_t __MIG_check__Reply__<name>` ebenfalls existieren.
 
@@ -219,7 +219,7 @@ USERPREFSubtract(port, 40, 2);
 
 Der NDR_record wird von `libsystem_kernel.dylib` exportiert und ist eine Struktur, die es MIG ermöglicht, **Daten so zu transformieren, dass sie systemunabhängig sind**, da MIG ursprünglich für die Verwendung zwischen verschiedenen Systemen gedacht war (und nicht nur auf derselben Maschine).
 
-Das ist interessant, weil das Vorhandensein von `_NDR_record` in einer Binärdatei als Abhängigkeit (`jtool2 -S <binary> | grep NDR` oder `nm`) bedeutet, dass die Binärdatei ein MIG-Client oder -Server ist.
+Dies ist interessant, da das Vorhandensein von `_NDR_record` in einer Binärdatei als Abhängigkeit (`jtool2 -S <binary> | grep NDR` oder `nm`) bedeutet, dass die Binärdatei ein MIG-Client oder -Server ist.
 
 Darüber hinaus haben **MIG-Server** die Dispatch-Tabelle in `__DATA.__const` (oder in `__CONST.__constdata` im macOS-Kernel und `__DATA_CONST.__const` in anderen \*OS-Kernen). Dies kann mit **`jtool2`** ausgegeben werden.
 
@@ -229,9 +229,9 @@ Und **MIG-Clients** verwenden den `__NDR_record`, um mit `__mach_msg` an die Ser
 
 ### jtool
 
-Da viele Binärdateien jetzt MIG verwenden, um Mach-Ports bereitzustellen, ist es interessant zu wissen, wie man **erkennt, dass MIG verwendet wurde** und die **Funktionen, die MIG mit jeder Nachrichten-ID ausführt**.
+Da viele Binärdateien jetzt MIG verwenden, um Mach-Ports bereitzustellen, ist es interessant zu wissen, wie man **identifizieren kann, dass MIG verwendet wurde** und die **Funktionen, die MIG mit jeder Nachrichten-ID ausführt**.
 
-[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/#jtool2) kann MIG-Informationen aus einer Mach-O-Binärdatei analysieren, indem es die Nachrichten-ID angibt und die auszuführende Funktion identifiziert:
+[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/index.html#jtool2) kann MIG-Informationen aus einer Mach-O-Binärdatei parsen, die die Nachrichten-ID angibt und die auszuführende Funktion identifiziert:
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
@@ -260,7 +260,7 @@ if (*(int32_t *)(var_10 + 0x14) &#x3C;= 0x1f4 &#x26;&#x26; *(int32_t *)(var_10 +
 rax = *(int32_t *)(var_10 + 0x14);
 // Aufruf von sign_extend_64, der helfen kann, diese Funktion zu identifizieren
 // Dies speichert in rax den Zeiger auf den Aufruf, der aufgerufen werden muss
-// Überprüfen Sie die Verwendung der Adresse 0x100004040 (Funktionsadressenarray)
+// Überprüfen der Verwendung der Adresse 0x100004040 (Funktionsadressenarray)
 // 0x1f4 = 500 (die Start-ID)
 <strong>            rax = *(sign_extend_64(rax - 0x1f4) * 0x28 + 0x100004040);
 </strong>            var_20 = rax;
@@ -333,7 +333,7 @@ r8 = 0x1;
 }
 }
 // Dasselbe if-else wie in der vorherigen Version
-// Überprüfen Sie die Verwendung der Adresse 0x100004040 (Funktionsadressenarray)
+// Überprüfen der Verwendung der Adresse 0x100004040 (Funktionsadressenarray)
 <strong>                    if ((r8 &#x26; 0x1) == 0x0) {
 </strong><strong>                            *(var_18 + 0x18) = **0x100004000;
 </strong>                            *(int32_t *)(var_18 + 0x20) = 0xfffffed1;

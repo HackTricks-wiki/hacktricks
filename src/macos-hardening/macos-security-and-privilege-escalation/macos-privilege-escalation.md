@@ -4,7 +4,7 @@
 
 ## TCC Privilegieneskalation
 
-Wenn Sie hierher gekommen sind, um nach TCC-Privilegieneskalation zu suchen, gehen Sie zu:
+Wenn Sie hier sind, um nach TCC-Privilegieneskalation zu suchen, gehen Sie zu:
 
 {{#ref}}
 macos-security-protections/macos-tcc/
@@ -12,7 +12,7 @@ macos-security-protections/macos-tcc/
 
 ## Linux Privesc
 
-Bitte beachten Sie, dass **die meisten Tricks zur Privilegieneskalation, die Linux/Unix betreffen, auch MacOS**-Maschinen betreffen werden. Schauen Sie sich also an:
+Bitte beachten Sie, dass **die meisten Tricks zur Privilegieneskalation, die Linux/Unix betreffen, auch MacOS**-Maschinen betreffen werden. Sehen Sie sich also an:
 
 {{#ref}}
 ../../linux-hardening/privilege-escalation/
@@ -22,7 +22,7 @@ Bitte beachten Sie, dass **die meisten Tricks zur Privilegieneskalation, die Lin
 
 ### Sudo-Hijacking
 
-Sie finden die ursprüngliche [Sudo-Hijacking-Technik im Beitrag zur Linux-Privilegieneskalation](../../linux-hardening/privilege-escalation/#sudo-hijacking).
+Sie finden die ursprüngliche [Sudo-Hijacking-Technik im Beitrag zur Linux-Privilegieneskalation](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
 
 Allerdings **beibehält** macOS den **`PATH`** des Benutzers, wenn er **`sudo`** ausführt. Das bedeutet, dass ein anderer Weg, um diesen Angriff zu erreichen, darin bestehen würde, **andere Binärdateien zu hijacken**, die das Opfer weiterhin ausführen wird, wenn es **sudo** ausführt:
 ```bash
@@ -49,7 +49,7 @@ Mit etwas **Social Engineering** könnten Sie **zum Beispiel Google Chrome imiti
 {{#tab name="Chrome Impersonation"}}
 Einige Vorschläge:
 
-- Überprüfen Sie im Dock, ob es ein Chrome gibt, und entfernen Sie in diesem Fall diesen Eintrag und **fügen Sie** den **falschen** **Chrome-Eintrag an derselben Position** im Dock-Array hinzu.&#x20;
+- Überprüfen Sie im Dock, ob es ein Chrome gibt, und entfernen Sie in diesem Fall **diesen Eintrag** und **fügen Sie** den **falschen** **Chrome-Eintrag an derselben Stelle** im Dock-Array hinzu.&#x20;
 ```bash
 #!/bin/sh
 
@@ -125,8 +125,8 @@ killall Dock
 Einige Vorschläge:
 
 - Sie **können den Finder nicht aus dem Dock entfernen**, also wenn Sie ihn zum Dock hinzufügen möchten, könnten Sie den gefälschten Finder direkt neben den echten setzen. Dafür müssen Sie **den gefälschten Finder-Eintrag am Anfang des Dock-Arrays hinzufügen**.
-- Eine andere Möglichkeit ist, ihn nicht im Dock zu platzieren und ihn einfach zu öffnen, "Finder fragt, um den Finder zu steuern" ist nicht so seltsam.
-- Eine weitere Möglichkeit, um **ohne Passwortabfrage** auf Root zu eskalieren, ist, den Finder wirklich nach dem Passwort zu fragen, um eine privilegierte Aktion auszuführen:
+- Eine andere Möglichkeit ist, ihn nicht im Dock zu platzieren und ihn einfach zu öffnen, "Finder fragt, um Finder zu steuern" ist nicht so seltsam.
+- Eine weitere Möglichkeit, um **ohne Passwortabfrage** mit einem schrecklichen Fenster zu root zu eskalieren, ist, den Finder wirklich nach dem Passwort zu fragen, um eine privilegierte Aktion auszuführen:
 - Bitten Sie den Finder, eine neue **`sudo`**-Datei nach **`/etc/pam.d`** zu kopieren (Die Eingabeaufforderung, die nach dem Passwort fragt, wird anzeigen, dass "Finder sudo kopieren möchte")
 - Bitten Sie den Finder, ein neues **Authorization Plugin** zu kopieren (Sie könnten den Dateinamen kontrollieren, sodass die Eingabeaufforderung, die nach dem Passwort fragt, anzeigen wird, dass "Finder Finder.bundle kopieren möchte")
 ```bash
@@ -206,7 +206,7 @@ killall Dock
 ### CVE-2020-9771 - mount_apfs TCC-Umgehung und Rechteausweitung
 
 **Jeder Benutzer** (auch unprivilegierte) kann einen Time Machine-Snapshot erstellen und einbinden und **auf ALLE Dateien** dieses Snapshots zugreifen.\
-Die **einzige Berechtigung**, die benötigt wird, ist, dass die verwendete Anwendung (wie `Terminal`) **Vollzugriff auf die Festplatte** (FDA) hat (`kTCCServiceSystemPolicyAllfiles`), was von einem Administrator gewährt werden muss.
+Die **einzige Berechtigung**, die benötigt wird, ist, dass die verwendete Anwendung (wie `Terminal`) **Vollzugriff auf die Festplatte** (FDA) benötigt (`kTCCServiceSystemPolicyAllfiles`), was von einem Administrator gewährt werden muss.
 ```bash
 # Create snapshot
 tmutil localsnapshot

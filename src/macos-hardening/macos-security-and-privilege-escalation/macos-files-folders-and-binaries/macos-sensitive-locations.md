@@ -25,7 +25,7 @@ Diese Datei wird **nur verwendet**, wenn das System im **Einbenutzermodus** läu
 
 ### Keychain Dump
 
-Beachten Sie, dass beim Verwenden der Sicherheits-Binärdatei, um die **entschlüsselten Passwörter zu dumpen**, mehrere Aufforderungen den Benutzer bitten, diese Operation zuzulassen.
+Beachten Sie, dass beim Verwenden der Sicherheits-Binärdatei, um **die Passwörter entschlüsselt zu dumpen**, mehrere Aufforderungen den Benutzer bitten, diese Operation zuzulassen.
 ```bash
 #security
 security dump-trust-settings [-s] [-d] #List certificates
@@ -41,7 +41,7 @@ security dump-keychain -d #Dump all the info, included secrets (the user will be
 
 ### Keychaindump Übersicht
 
-Ein Tool namens **keychaindump** wurde entwickelt, um Passwörter aus macOS-Schlüsselbunden zu extrahieren, hat jedoch Einschränkungen bei neueren macOS-Versionen wie Big Sur, wie in einer [Diskussion](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760) angegeben. Die Verwendung von **keychaindump** erfordert, dass der Angreifer Zugriff erhält und die Berechtigungen auf **root** eskaliert. Das Tool nutzt die Tatsache aus, dass der Schlüsselbund standardmäßig beim Benutzer-Login zur Bequemlichkeit entsperrt ist, sodass Anwendungen darauf zugreifen können, ohne das Passwort des Benutzers wiederholt eingeben zu müssen. Wenn ein Benutzer jedoch beschließt, seinen Schlüsselbund nach jeder Verwendung zu sperren, wird **keychaindump** unwirksam.
+Ein Tool namens **keychaindump** wurde entwickelt, um Passwörter aus macOS-Schlüsselbunden zu extrahieren, hat jedoch Einschränkungen bei neueren macOS-Versionen wie Big Sur, wie in einer [Diskussion](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760) angegeben. Die Verwendung von **keychaindump** erfordert, dass der Angreifer Zugriff erlangt und die Berechtigungen auf **root** eskaliert. Das Tool nutzt die Tatsache aus, dass der Schlüsselbund standardmäßig beim Benutzer-Login zur Bequemlichkeit entsperrt ist, was Anwendungen den Zugriff darauf ermöglicht, ohne das Passwort des Benutzers wiederholt eingeben zu müssen. Wenn ein Benutzer jedoch beschließt, seinen Schlüsselbund nach jeder Verwendung zu sperren, wird **keychaindump** unwirksam.
 
 **Keychaindump** funktioniert, indem es einen bestimmten Prozess namens **securityd** anvisiert, der von Apple als Daemon für Autorisierungs- und kryptografische Operationen beschrieben wird und entscheidend für den Zugriff auf den Schlüsselbund ist. Der Extraktionsprozess umfasst die Identifizierung eines **Master Key**, der aus dem Login-Passwort des Benutzers abgeleitet ist. Dieser Schlüssel ist entscheidend für das Lesen der Schlüsselbunddatei. Um den **Master Key** zu finden, scannt **keychaindump** den Speicherheap von **securityd** mit dem Befehl `vmmap` und sucht nach potenziellen Schlüsseln in Bereichen, die als `MALLOC_TINY` gekennzeichnet sind. Der folgende Befehl wird verwendet, um diese Speicherorte zu inspizieren:
 ```bash
@@ -64,7 +64,7 @@ sudo ./keychaindump
 - Sichere Notizen
 - Appleshare-Passwörter
 
-Mit dem Schlüsselbund-Entsperrpasswort, einem Master-Schlüssel, der mit [volafox](https://github.com/n0fate/volafox) oder [volatility](https://github.com/volatilityfoundation/volatility) erhalten wurde, oder einer Entsperrdatei wie SystemKey, wird Chainbreaker auch Klartext-Passwörter bereitstellen.
+Wenn das Schlüsselbund-Entsperrpasswort, ein Master-Schlüssel, der mit [volafox](https://github.com/n0fate/volafox) oder [volatility](https://github.com/volatilityfoundation/volatility) erhalten wurde, oder eine Entsperrdatei wie SystemKey vorliegt, wird Chainbreaker auch Klartext-Passwörter bereitstellen.
 
 Ohne eine dieser Methoden zum Entsperren des Schlüsselbunds zeigt Chainbreaker alle anderen verfügbaren Informationen an.
 
@@ -92,7 +92,7 @@ python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d1
 ```
 #### **Dumpen von Schlüsselbundschlüsseln (mit Passwörtern) mit einem Speicherdump**
 
-[Folgen Sie diesen Schritten](../#dumping-memory-with-osxpmem), um einen **Speicherdump** durchzuführen.
+[Folgen Sie diesen Schritten](../index.html#dumping-memory-with-osxpmem), um einen **Speicherdump** durchzuführen.
 ```bash
 #Use volafox (https://github.com/n0fate/volafox) to extract possible keychain passwords
 # Unformtunately volafox isn't working with the latest versions of MacOS
@@ -112,7 +112,7 @@ python2.7 chainbreaker.py --dump-all --password-prompt /Users/<username>/Library
 
 Die **kcpassword**-Datei ist eine Datei, die das **Login-Passwort des Benutzers** enthält, jedoch nur, wenn der Systembesitzer die **automatische Anmeldung** aktiviert hat. Daher wird der Benutzer automatisch angemeldet, ohne nach einem Passwort gefragt zu werden (was nicht sehr sicher ist).
 
-Das Passwort wird in der Datei **`/etc/kcpassword`** xored mit dem Schlüssel **`0x7D 0x89 0x52 0x23 0xD2 0xBC 0xDD 0xEA 0xA3 0xB9 0x1F`** gespeichert. Wenn das Passwort des Benutzers länger als der Schlüssel ist, wird der Schlüssel wiederverwendet.\
+Das Passwort wird in der Datei **`/etc/kcpassword`** mit dem Schlüssel **`0x7D 0x89 0x52 0x23 0xD2 0xBC 0xDD 0xEA 0xA3 0xB9 0x1F`** xoriert. Wenn das Passwort des Benutzers länger als der Schlüssel ist, wird der Schlüssel wiederverwendet.\
 Dies macht das Passwort ziemlich einfach wiederherzustellen, zum Beispiel mit Skripten wie [**diesem**](https://gist.github.com/opshope/32f65875d45215c3677d).
 
 ## Interessante Informationen in Datenbanken
@@ -129,7 +129,7 @@ sqlite3 $HOME/Suggestions/snippets.db 'select * from emailSnippets'
 
 Sie finden die Benachrichtigungsdaten in `$(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/`
 
-Die meisten interessanten Informationen werden in **blob** zu finden sein. Sie müssen also diesen Inhalt **extrahieren** und ihn in **menschlich** **lesbare** Form **transformieren** oder **`strings`** verwenden. Um darauf zuzugreifen, können Sie Folgendes tun:
+Die meisten interessanten Informationen befinden sich in **blob**. Sie müssen also diesen Inhalt **extrahieren** und in **menschlich** **lesbare** Form **transformieren** oder **`strings`** verwenden. Um darauf zuzugreifen, können Sie Folgendes tun:
 ```bash
 cd $(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/
 strings $(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/db2/db | grep -i -A4 slack
@@ -213,7 +213,7 @@ common: com.apple.security.octagon.joined-with-bottle
 ```
 ### Distributed Notification Center
 
-Das **Distributed Notification Center**, dessen Hauptbinary **`/usr/sbin/distnoted`** ist, ist eine weitere Möglichkeit, Benachrichtigungen zu senden. Es stellt einige XPC-Dienste zur Verfügung und führt einige Überprüfungen durch, um zu versuchen, Clients zu verifizieren.
+Das **Distributed Notification Center**, dessen Hauptbinary **`/usr/sbin/distnoted`** ist, ist eine weitere Möglichkeit, Benachrichtigungen zu senden. Es stellt einige XPC-Dienste zur Verfügung und führt einige Überprüfungen durch, um zu versuchen, die Clients zu verifizieren.
 
 ### Apple Push Notifications (APN)
 
@@ -226,7 +226,7 @@ Es gibt eine lokale Datenbank von Nachrichten, die sich in macOS in `/Library/Ap
 ```bash
 sudo sqlite3 /Library/Application\ Support/ApplePushService/aps.db
 ```
-Es ist auch möglich, Informationen über den Daemon und die Verbindungen mit folgendem Befehl zu erhalten:
+Es ist auch möglich, Informationen über den Daemon und die Verbindungen zu erhalten, indem man:
 ```bash
 /System/Library/PrivateFrameworks/ApplePushService.framework/apsctl status
 ```
@@ -235,7 +235,7 @@ Es ist auch möglich, Informationen über den Daemon und die Verbindungen mit fo
 Dies sind Benachrichtigungen, die der Benutzer auf dem Bildschirm sehen sollte:
 
 - **`CFUserNotification`**: Diese API bietet eine Möglichkeit, ein Pop-up mit einer Nachricht auf dem Bildschirm anzuzeigen.
-- **Das Bulletin Board**: Dies zeigt in iOS ein Banner an, das verschwindet und im Benachrichtigungszentrum gespeichert wird.
+- **Das Bulletin Board**: Dies zeigt in iOS ein Banner, das verschwindet und im Benachrichtigungszentrum gespeichert wird.
 - **`NSUserNotificationCenter`**: Dies ist das iOS-Bulletin-Board in MacOS. Die Datenbank mit den Benachrichtigungen befindet sich in `/var/folders/<user temp>/0/com.apple.notificationcenter/db2/db`
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -2,13 +2,13 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Funktion Interposition
+## Funktionseinfügung
 
 Erstellen Sie eine **dylib** mit einem **`__interpose`** Abschnitt (oder einem Abschnitt, der mit **`S_INTERPOSING`** gekennzeichnet ist), der Tupel von **Funktionszeigern** enthält, die auf die **ursprünglichen** und die **Ersatz**-Funktionen verweisen.
 
-Dann **injektieren** Sie die dylib mit **`DYLD_INSERT_LIBRARIES`** (die Interposition muss erfolgen, bevor die Hauptanwendung geladen wird). Offensichtlich gelten die [**Einschränkungen** für die Verwendung von **`DYLD_INSERT_LIBRARIES`** auch hier](../macos-proces-abuse/macos-library-injection/#check-restrictions).&#x20;
+Dann **injektieren** Sie die dylib mit **`DYLD_INSERT_LIBRARIES`** (die Einfügung muss erfolgen, bevor die Hauptanwendung geladen wird). Offensichtlich gelten die [**Einschränkungen** für die Verwendung von **`DYLD_INSERT_LIBRARIES`** auch hier](../macos-proces-abuse/macos-library-injection/index.html#check-restrictions).&#x20;
 
-### Interpose printf
+### printf einfügen
 
 {{#tabs}}
 {{#tab name="interpose.c"}}
@@ -85,10 +85,10 @@ Es werden das **Objekt**, die **Methode** und die **Parameter** benötigt. Und w
 
 Das Objekt ist **`someObject`**, die Methode ist **`@selector(method1p1:p2:)`** und die Argumente sind **value1**, **value2**.
 
-Folgend den Objektstrukturen ist es möglich, auf ein **Array von Methoden** zuzugreifen, wo die **Namen** und **Zeiger** auf den Methodencode **lokalisiert** sind.
+Folgt man den Objektstrukturen, ist es möglich, ein **Array von Methoden** zu erreichen, wo die **Namen** und **Zeiger** auf den Methodencode **lokalisiert** sind.
 
 > [!CAUTION]
-> Beachten Sie, dass Methoden und Klassen basierend auf ihren Namen zugegriffen werden, diese Informationen im Binärformat gespeichert sind, sodass sie mit `otool -ov </path/bin>` oder [`class-dump </path/bin>`](https://github.com/nygard/class-dump) abgerufen werden können.
+> Beachten Sie, dass Methoden und Klassen basierend auf ihren Namen zugegriffen werden, diese Informationen werden im Binärformat gespeichert, sodass es möglich ist, sie mit `otool -ov </path/bin>` oder [`class-dump </path/bin>`](https://github.com/nygard/class-dump) abzurufen.
 
 ### Zugriff auf die rohen Methoden
 
@@ -272,11 +272,11 @@ return 0;
 
 Auf dieser Seite wurden verschiedene Möglichkeiten zur Hooking von Funktionen diskutiert. Sie beinhalteten jedoch **das Ausführen von Code innerhalb des Prozesses, um anzugreifen**.
 
-Um dies zu tun, ist die einfachste Technik, die zu verwenden ist, das Injizieren eines [Dyld über Umgebungsvariablen oder Hijacking](../macos-dyld-hijacking-and-dyld_insert_libraries.md). Ich nehme jedoch an, dass dies auch über [Dylib-Prozessinjektion](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port) erfolgen könnte.
+Um dies zu tun, ist die einfachste Technik, die verwendet werden kann, das Injizieren eines [Dyld über Umgebungsvariablen oder Hijacking](../macos-dyld-hijacking-and-dyld_insert_libraries.md). Ich nehme jedoch an, dass dies auch über [Dylib-Prozessinjektion](macos-ipc-inter-process-communication/index.html#dylib-process-injection-via-task-port) erfolgen könnte.
 
 Beide Optionen sind jedoch **begrenzt** auf **unprotected** Binaries/Prozesse. Überprüfen Sie jede Technik, um mehr über die Einschränkungen zu erfahren.
 
-Ein Funktion-Hooking-Angriff ist jedoch sehr spezifisch; ein Angreifer wird dies tun, um **sensible Informationen aus einem Prozess zu stehlen** (ansonsten würden Sie einfach einen Prozessinjektionsangriff durchführen). Und diese sensiblen Informationen könnten sich in von Benutzern heruntergeladenen Apps wie MacPass befinden.
+Ein Hooking-Angriff ist jedoch sehr spezifisch; ein Angreifer wird dies tun, um **sensible Informationen aus einem Prozess zu stehlen** (ansonsten würden Sie einfach einen Prozessinjektionsangriff durchführen). Und diese sensiblen Informationen könnten sich in heruntergeladenen Benutzer-Apps wie MacPass befinden.
 
 Der Angreifer-Vektor wäre also, entweder eine Schwachstelle zu finden oder die Signatur der Anwendung zu entfernen, und die **`DYLD_INSERT_LIBRARIES`**-Umgebungsvariable über die Info.plist der Anwendung einzufügen, indem man etwas hinzufügt wie:
 ```xml
@@ -286,7 +286,7 @@ Der Angreifer-Vektor wäre also, entweder eine Schwachstelle zu finden oder die 
 <string>/Applications/Application.app/Contents/malicious.dylib</string>
 </dict>
 ```
-und dann die Anwendung **neu registrieren**:
+und dann **erneut registrieren** Sie die Anwendung:
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f /Applications/Application.app
 ```

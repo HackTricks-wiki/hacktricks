@@ -6,7 +6,7 @@
 
 Erstellen Sie eine **dylib** mit einem **`__interpose` (`__DATA___interpose`)** Abschnitt (oder einem Abschnitt, der mit **`S_INTERPOSING`** gekennzeichnet ist), der Tupel von **Funktionszeigern** enthält, die auf die **ursprünglichen** und die **Ersatz**-Funktionen verweisen.
 
-Dann **injektieren** Sie die dylib mit **`DYLD_INSERT_LIBRARIES`** (die Einfügung muss erfolgen, bevor die Hauptanwendung geladen wird). Offensichtlich gelten die [**Einschränkungen** für die Verwendung von **`DYLD_INSERT_LIBRARIES`** auch hier](macos-library-injection/#check-restrictions).
+Dann **injektieren** Sie die dylib mit **`DYLD_INSERT_LIBRARIES`** (die Einfügung muss erfolgen, bevor die Hauptanwendung geladen wird). Offensichtlich gelten die [**Einschränkungen** für die Verwendung von **`DYLD_INSERT_LIBRARIES`** auch hier](macos-library-injection/index.html#check-restrictions).
 
 ### printf einfügen
 
@@ -80,13 +80,13 @@ Hello from interpose
 > [!WARNING]
 > Die **`DYLD_PRINT_INTERPOSTING`** Umgebungsvariable kann verwendet werden, um das Interposing zu debuggen und wird den Interpose-Prozess ausgeben.
 
-Beachten Sie auch, dass **Interposing zwischen dem Prozess und den geladenen Bibliotheken auftritt**, es funktioniert nicht mit dem Cache der gemeinsam genutzten Bibliotheken.
+Beachten Sie auch, dass **Interposing zwischen dem Prozess und den geladenen Bibliotheken** erfolgt, es funktioniert nicht mit dem Cache der gemeinsam genutzten Bibliotheken.
 
 ### Dynamisches Interposing
 
-Jetzt ist es auch möglich, eine Funktion dynamisch mit der Funktion **`dyld_dynamic_interpose`** zu interposen. Dies ermöglicht es, eine Funktion zur Laufzeit programmgesteuert zu interposen, anstatt dies nur zu Beginn zu tun.
+Jetzt ist es auch möglich, eine Funktion dynamisch mit der Funktion **`dyld_dynamic_interpose`** zu interposieren. Dies ermöglicht es, eine Funktion zur Laufzeit programmgesteuert zu interposieren, anstatt dies nur zu Beginn zu tun.
 
-Es muss nur die **Tupel** der **zu ersetzenden Funktion und der Ersatzfunktion** angegeben werden.
+Es muss lediglich die **Tupel** der **zu ersetzenden Funktion und der Ersatzfunktion** angegeben werden.
 ```c
 struct dyld_interpose_tuple {
 const void* replacement;
@@ -103,14 +103,14 @@ Es werden das **Objekt**, die **Methode** und die **Parameter** benötigt. Und w
 
 Das Objekt ist **`someObject`**, die Methode ist **`@selector(method1p1:p2:)`** und die Argumente sind **value1**, **value2**.
 
-Folgend den Objektstrukturen ist es möglich, ein **Array von Methoden** zu erreichen, wo die **Namen** und **Zeiger** auf den Methodencode **lokalisiert** sind.
+Folgend der Objektstrukturen ist es möglich, ein **Array von Methoden** zu erreichen, wo die **Namen** und **Zeiger** auf den Methodencode **lokalisiert** sind.
 
 > [!CAUTION]
-> Beachten Sie, dass Methoden und Klassen basierend auf ihren Namen zugegriffen werden, diese Informationen werden im Binärformat gespeichert, sodass sie mit `otool -ov </path/bin>` oder [`class-dump </path/bin>`](https://github.com/nygard/class-dump) abgerufen werden können.
+> Beachten Sie, dass Methoden und Klassen basierend auf ihren Namen zugegriffen werden, diese Informationen im Binärformat gespeichert sind, sodass sie mit `otool -ov </path/bin>` oder [`class-dump </path/bin>`](https://github.com/nygard/class-dump) abgerufen werden können.
 
 ### Zugriff auf die rohen Methoden
 
-Es ist möglich, auf die Informationen der Methoden wie Name, Anzahl der Parameter oder Adresse zuzugreifen, wie im folgenden Beispiel:
+Es ist möglich, Informationen über die Methoden wie Name, Anzahl der Parameter oder Adresse zuzugreifen, wie im folgenden Beispiel:
 ```objectivec
 // gcc -framework Foundation test.m -o test
 
@@ -226,13 +226,13 @@ return 0;
 }
 ```
 > [!WARNING]
-> In diesem Fall könnte der **Implementierungscode der legitimen** Methode **überprüfen**, ob der **Methodenname** **übereinstimmt**, und dieses Swizzling **erkennen** und dessen Ausführung verhindern.
+> In diesem Fall könnte der **Implementierungscode der legitimen** Methode **überprüfen**, ob der **Methodenname** **erkannt** wird, und dieses Swizzling daran hindern, ausgeführt zu werden.
 >
 > Die folgende Technik hat diese Einschränkung nicht.
 
 ### Method Swizzling mit method_setImplementation
 
-Das vorherige Format ist seltsam, da Sie die Implementierung von 2 Methoden gegeneinander ändern. Mit der Funktion **`method_setImplementation`** können Sie die **Implementierung** einer **Methode für die andere** **ändern**.
+Das vorherige Format ist seltsam, da Sie die Implementierung von 2 Methoden gegeneinander ändern. Mit der Funktion **`method_setImplementation`** können Sie die **Implementierung** einer **Methode für die andere** ändern.
 
 Denken Sie nur daran, die **Adresse der Implementierung der ursprünglichen** Methode zu **speichern**, wenn Sie sie aus der neuen Implementierung aufrufen möchten, bevor Sie sie überschreiben, da es später viel komplizierter sein wird, diese Adresse zu finden.
 ```objectivec
@@ -288,9 +288,9 @@ return 0;
 ```
 ## Hooking-Angriffsmethodik
 
-Auf dieser Seite wurden verschiedene Möglichkeiten zur Funktionshooking diskutiert. Sie beinhalteten jedoch **das Ausführen von Code innerhalb des Prozesses, um anzugreifen**.
+In diesem Abschnitt wurden verschiedene Möglichkeiten zur Funktionshooking diskutiert. Sie beinhalteten jedoch **das Ausführen von Code innerhalb des Prozesses, um anzugreifen**.
 
-Um dies zu tun, ist die einfachste Technik, die verwendet werden kann, das Injizieren eines [Dyld über Umgebungsvariablen oder Hijacking](macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md). Ich nehme jedoch an, dass dies auch über [Dylib-Prozessinjektion](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port) erfolgen könnte.
+Um dies zu tun, ist die einfachste Technik, die verwendet werden kann, das Injizieren eines [Dyld über Umgebungsvariablen oder Hijacking](macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md). Ich nehme jedoch an, dass dies auch über [Dylib-Prozessinjektion](macos-ipc-inter-process-communication/index.html#dylib-process-injection-via-task-port) erfolgen könnte.
 
 Beide Optionen sind jedoch **begrenzt** auf **unprotected** Binaries/Prozesse. Überprüfen Sie jede Technik, um mehr über die Einschränkungen zu erfahren.
 
@@ -304,14 +304,14 @@ Der Angreifer-Vektor wäre also, entweder eine Schwachstelle zu finden oder die 
 <string>/Applications/Application.app/Contents/malicious.dylib</string>
 </dict>
 ```
-und dann die Anwendung **neu registrieren**:
+und dann **erneut registrieren** Sie die Anwendung:
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f /Applications/Application.app
 ```
 Fügen Sie in dieser Bibliothek den Hooking-Code hinzu, um die Informationen zu exfiltrieren: Passwörter, Nachrichten...
 
 > [!CAUTION]
-> Beachten Sie, dass in neueren Versionen von macOS, wenn Sie die **Signatur** der Anwendungsbinärdatei entfernen und sie zuvor ausgeführt wurde, macOS die **Anwendung nicht mehr ausführen wird**.
+> Beachten Sie, dass in neueren Versionen von macOS, wenn Sie die **Signatur** der Anwendungsbinärdatei entfernen und sie zuvor ausgeführt wurde, macOS die Anwendung **nicht mehr ausführen wird**.
 
 #### Bibliotheksbeispiel
 ```objectivec

@@ -16,7 +16,7 @@
 ```
 Das bedeutet, dass **jeder Benutzer, der zur Gruppe sudo oder admin gehört, alles als sudo ausführen kann**.
 
-Wenn dies der Fall ist, können Sie **einfach ausführen, um root zu werden**:
+Wenn dies der Fall ist, um **root zu werden, können Sie einfach ausführen**:
 ```
 sudo su
 ```
@@ -43,7 +43,7 @@ polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freed
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-**Es liegt nicht daran, dass Sie keine Berechtigungen haben, sondern daran, dass Sie ohne eine GUI nicht verbunden sind**. Und es gibt eine Lösung für dieses Problem hier: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Sie benötigen **2 verschiedene SSH-Sitzungen**:
+**Es liegt nicht daran, dass Sie keine Berechtigungen haben, sondern weil Sie ohne eine GUI nicht verbunden sind**. Und es gibt eine Lösung für dieses Problem hier: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Sie benötigen **2 verschiedene SSH-Sitzungen**:
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -56,19 +56,19 @@ pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 ```
 ## Wheel-Gruppe
 
-**Manchmal** **findet man standardmäßig** in der **/etc/sudoers**-Datei diese Zeile:
+**Manchmal** finden Sie **standardmäßig** in der **/etc/sudoers**-Datei diese Zeile:
 ```
 %wheel	ALL=(ALL:ALL) ALL
 ```
 Das bedeutet, dass **jeder Benutzer, der zur Gruppe wheel gehört, alles als sudo ausführen kann**.
 
-Wenn dies der Fall ist, können Sie **zum Root werden, indem Sie einfach** ausführen:
+Wenn dies der Fall ist, um **root zu werden, können Sie einfach ausführen**:
 ```
 sudo su
 ```
-## Shadow-Gruppe
+## Shadow Group
 
-Benutzer der **Gruppe shadow** können die **/etc/shadow**-Datei **lesen**:
+Benutzer aus der **Gruppe shadow** können die **/etc/shadow** Datei **lesen**:
 ```
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
@@ -76,7 +76,7 @@ So, lesen Sie die Datei und versuchen Sie, **einige Hashes zu knacken**.
 
 ## Staff-Gruppe
 
-**staff**: Ermöglicht Benutzern, lokale Änderungen am System (`/usr/local`) vorzunehmen, ohne Root-Rechte zu benötigen (beachten Sie, dass ausführbare Dateien in `/usr/local/bin` im PATH-Variablen eines jeden Benutzers enthalten sind und sie die ausführbaren Dateien in `/bin` und `/usr/bin` mit demselben Namen "überschreiben" können). Vergleichen Sie mit der Gruppe "adm", die mehr mit Überwachung/Sicherheit zu tun hat. [\[source\]](https://wiki.debian.org/SystemGroups)
+**staff**: Ermöglicht Benutzern, lokale Änderungen am System (`/usr/local`) vorzunehmen, ohne Root-Rechte zu benötigen (beachten Sie, dass ausführbare Dateien in `/usr/local/bin` im PATH-Variablen jedes Benutzers enthalten sind und sie die ausführbaren Dateien in `/bin` und `/usr/bin` mit demselben Namen "überschreiben" können). Vergleichen Sie mit der Gruppe "adm", die mehr mit Überwachung/Sicherheit zu tun hat. [\[source\]](https://wiki.debian.org/SystemGroups)
 
 In Debian-Distributionen zeigt die `$PATH`-Variable, dass `/usr/local/` mit der höchsten Priorität ausgeführt wird, unabhängig davon, ob Sie ein privilegierter Benutzer sind oder nicht.
 ```bash
@@ -109,7 +109,7 @@ $ pspy64
 2024/02/01 22:02:14 CMD: UID=0     PID=17890  | sshd: mane [priv]
 2024/02/01 22:02:15 CMD: UID=0     PID=17891  | -bash
 ```
-**Ausnutzen**
+**Exploits**
 ```bash
 # 0x1 Add a run-parts script in /usr/local/bin/
 $ vi /usr/local/bin/run-parts
@@ -132,7 +132,7 @@ $ /bin/bash -p
 
 Dieses Privileg ist fast **äquivalent zu Root-Zugriff**, da Sie auf alle Daten innerhalb der Maschine zugreifen können.
 
-Dateien:`/dev/sd[a-z][1-9]`
+Files:`/dev/sd[a-z][1-9]`
 ```bash
 df -h #Find where "/" is mounted
 debugfs /dev/sda1
@@ -146,9 +146,9 @@ Beachten Sie, dass Sie mit debugfs auch **Dateien schreiben** können. Um beispi
 debugfs -w /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
-Wenn Sie jedoch versuchen, **Dateien, die root gehören**, zu **schreiben** (wie `/etc/shadow` oder `/etc/passwd`), erhalten Sie einen "**Zugriff verweigert**" Fehler.
+Wenn Sie jedoch versuchen, **Dateien, die dem Root-Benutzer gehören** (wie `/etc/shadow` oder `/etc/passwd`), zu **schreiben**, erhalten Sie einen "**Zugriff verweigert**"-Fehler.
 
-## Video Gruppe
+## Video-Gruppe
 
 Mit dem Befehl `w` können Sie **herausfinden, wer im System angemeldet ist**, und es wird eine Ausgabe wie die folgende angezeigt:
 ```bash
@@ -167,7 +167,7 @@ Um das **raw image** zu **öffnen**, können Sie **GIMP** verwenden, die **`scre
 
 ![](<../../../images/image (463).png>)
 
-Ändern Sie dann die Breite und Höhe auf die Werte, die auf dem Bildschirm verwendet werden, und überprüfen Sie verschiedene Bildtypen (und wählen Sie den aus, der den Bildschirm am besten darstellt):
+Ändern Sie dann die Breite und Höhe auf die Werte, die auf dem Bildschirm verwendet werden, und überprüfen Sie verschiedene Bildtypen (und wählen Sie denjenigen aus, der den Bildschirm am besten darstellt):
 
 ![](<../../../images/image (317).png>)
 
@@ -199,7 +199,7 @@ Schließlich, wenn Ihnen keine der vorherigen Vorschläge gefällt oder sie aus 
 ../docker-security/
 {{#endref}}
 
-Wenn Sie Schreibberechtigungen über den Docker-Socket haben, lesen Sie [**diesen Beitrag darüber, wie man Privilegien durch den Docker-Socket eskaliert**](../#writable-docker-socket)**.**
+Wenn Sie Schreibberechtigungen über den Docker-Socket haben, lesen Sie [**diesen Beitrag darüber, wie man Privilegien durch den Docker-Socket eskaliert**](../index.html#writable-docker-socket)**.**
 
 {{#ref}}
 https://github.com/KrustyHack/docker-privilege-escalation
@@ -223,6 +223,6 @@ Daher sollten Sie, wenn Sie einen Benutzer in dieser Gruppe kompromittiert haben
 ## Auth Gruppe
 
 Innerhalb von OpenBSD kann die **auth** Gruppe normalerweise in die Ordner _**/etc/skey**_ und _**/var/db/yubikey**_ schreiben, wenn sie verwendet werden.\
-Diese Berechtigungen können mit dem folgenden Exploit missbraucht werden, um **Privilegien** auf root zu eskalieren: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
+Diese Berechtigungen können mit dem folgenden Exploit missbraucht werden, um **Privilegien** auf root zu **eskalieren**: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
 
 {{#include ../../../banners/hacktricks-training.md}}

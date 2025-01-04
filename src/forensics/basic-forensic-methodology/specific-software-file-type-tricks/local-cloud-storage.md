@@ -12,15 +12,15 @@ In Windows finden Sie den OneDrive-Ordner unter `\Users\<username>\AppData\Local
 - Anzahl der Dateien in der Cloud
 - Anzahl der Dateien im Ordner
 - **CID**: Eindeutige ID des OneDrive-Benutzers
-- Zeit der Berichtserstellung
+- Berichtserstellungszeit
 - Größe der HD des Betriebssystems
 
-Sobald Sie die CID gefunden haben, wird empfohlen, **Dateien mit dieser ID zu suchen**. Möglicherweise finden Sie Dateien mit den Namen: _**\<CID>.ini**_ und _**\<CID>.dat**_, die interessante Informationen wie die Namen der mit OneDrive synchronisierten Dateien enthalten können.
+Sobald Sie die CID gefunden haben, wird empfohlen, **Dateien zu suchen, die diese ID enthalten**. Möglicherweise finden Sie Dateien mit den Namen: _**\<CID>.ini**_ und _**\<CID>.dat**_, die interessante Informationen wie die Namen der mit OneDrive synchronisierten Dateien enthalten können.
 
 ## Google Drive
 
 In Windows finden Sie den Hauptordner von Google Drive unter `\Users\<username>\AppData\Local\Google\Drive\user_default`\
-Dieser Ordner enthält eine Datei namens Sync_log.log mit Informationen wie der E-Mail-Adresse des Kontos, Dateinamen, Zeitstempeln, MD5-Hashes der Dateien usw. Selbst gelöschte Dateien erscheinen in dieser Protokolldatei mit ihrem entsprechenden MD5.
+Dieser Ordner enthält eine Datei namens Sync_log.log mit Informationen wie der E-Mail-Adresse des Kontos, Dateinamen, Zeitstempeln, MD5-Hashes der Dateien usw. Selbst gelöschte Dateien erscheinen in dieser Protokolldatei mit dem entsprechenden MD5.
 
 Die Datei **`Cloud_graph\Cloud_graph.db`** ist eine SQLite-Datenbank, die die Tabelle **`cloud_graph_entry`** enthält. In dieser Tabelle finden Sie den **Namen** der **synchronisierten** **Dateien**, das Änderungsdatum, die Größe und die MD5-Prüfziffer der Dateien.
 
@@ -64,9 +64,9 @@ Dann können Sie das Tool [**DataProtectionDecryptor**](https://nirsoft.net/util
 
 ![](<../../../images/image (448).png>)
 
-Wenn alles wie erwartet verläuft, zeigt das Tool den **primären Schlüssel** an, den Sie **verwenden müssen, um den ursprünglichen wiederherzustellen**. Um den ursprünglichen wiederherzustellen, verwenden Sie einfach dieses [cyber_chef Rezept](<https://gchq.github.io/CyberChef/#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) und setzen den primären Schlüssel als "Passphrase" in das Rezept ein.
+Wenn alles wie erwartet verläuft, zeigt das Tool den **primären Schlüssel** an, den Sie **verwenden müssen, um den ursprünglichen wiederherzustellen**. Um den ursprünglichen wiederherzustellen, verwenden Sie einfach dieses [cyber_chef Rezept](<https://gchq.github.io/CyberChef/index.html#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) und setzen den primären Schlüssel als "Passphrase" in das Rezept ein.
 
-Das resultierende Hex ist der endgültige Schlüssel, der zur Verschlüsselung der Datenbanken verwendet wird und mit folgendem entschlüsselt werden kann:
+Das resultierende Hex ist der endgültige Schlüssel, der zur Verschlüsselung der Datenbanken verwendet wird, die entschlüsselt werden können mit:
 ```bash
 sqlite -k <Obtained Key> config.dbx ".backup config.db" #This decompress the config.dbx and creates a clear text backup in config.db
 ```
@@ -85,11 +85,11 @@ Die **`filecache.db`** Datenbank enthält Informationen über alle Dateien und O
 - **local_mtime**: Änderungsdatum
 - **local_ctime**: Erstellungsdatum
 
-Andere Tabellen in dieser Datenbank enthalten weitere interessante Informationen:
+Andere Tabellen in dieser Datenbank enthalten interessantere Informationen:
 
 - **block_cache**: Hash aller Dateien und Ordner von Dropbox
 - **block_ref**: Verknüpft die Hash-ID der Tabelle `block_cache` mit der Datei-ID in der Tabelle `file_journal`
-- **mount_table**: Freigegebene Ordner von Dropbox
+- **mount_table**: Freigabeverzeichnisse von Dropbox
 - **deleted_fields**: Gelöschte Dateien von Dropbox
 - **date_added**
 
