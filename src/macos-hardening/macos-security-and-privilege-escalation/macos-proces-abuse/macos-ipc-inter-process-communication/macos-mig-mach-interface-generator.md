@@ -10,7 +10,7 @@ La definizione è specificata in Interface Definition Language (IDL) utilizzando
 
 Queste definizioni hanno 5 sezioni:
 
-- **Dichiarazione del sottosistema**: La parola chiave subsystem è usata per indicare il **nome** e l'**id**. È anche possibile marcarlo come **`KernelServer`** se il server deve essere eseguito nel kernel.
+- **Dichiarazione del sottosistema**: La parola chiave subsystem è usata per indicare il **nome** e l'**id**. È anche possibile contrassegnarlo come **`KernelServer`** se il server deve essere eseguito nel kernel.
 - **Inclusioni e importazioni**: MIG utilizza il preprocessore C, quindi è in grado di utilizzare importazioni. Inoltre, è possibile utilizzare `uimport` e `simport` per il codice generato dall'utente o dal server.
 - **Dichiarazioni di tipo**: È possibile definire tipi di dati anche se di solito importerà `mach_types.defs` e `std_types.defs`. Per quelli personalizzati si può utilizzare una certa sintassi:
 - \[i`n/out]tran`: Funzione che deve essere tradotta da un messaggio in arrivo o a un messaggio in uscita
@@ -106,7 +106,7 @@ return SERVERPREFmyipc_subsystem.routine[msgh_id].stub_routine;
 ```
 In questo esempio abbiamo definito solo 1 funzione nelle definizioni, ma se avessimo definito più funzioni, sarebbero state all'interno dell'array di **`SERVERPREFmyipc_subsystem`** e la prima sarebbe stata assegnata all'ID **500**, la seconda all'ID **501**...
 
-Se la funzione doveva inviare una **risposta**, la funzione `mig_internal kern_return_t __MIG_check__Reply__<name>` esisterebbe anche.
+Se la funzione doveva inviare una **reply**, la funzione `mig_internal kern_return_t __MIG_check__Reply__<name>` esisterebbe anche.
 
 In realtà è possibile identificare questa relazione nella struct **`subsystem_to_name_map_myipc`** da **`myipcServer.h`** (**`subsystem*to_name_map*\***`\*\* in altri file):
 ```c
@@ -217,7 +217,7 @@ USERPREFSubtract(port, 40, 2);
 
 ### Il NDR_record
 
-Il NDR_record è esportato da `libsystem_kernel.dylib`, ed è una struct che consente a MIG di **trasformare i dati in modo che siano agnostici rispetto al sistema** in cui viene utilizzato, poiché MIG è stato pensato per essere utilizzato tra diversi sistemi (e non solo nella stessa macchina).
+Il NDR_record è esportato da `libsystem_kernel.dylib`, ed è una struct che consente a MIG di **trasformare i dati in modo che siano agnostici rispetto al sistema** in cui viene utilizzato, poiché MIG è stato pensato per essere utilizzato tra diversi sistemi (e non solo sulla stessa macchina).
 
 Questo è interessante perché se `_NDR_record` viene trovato in un binario come dipendenza (`jtool2 -S <binary> | grep NDR` o `nm`), significa che il binario è un client o server MIG.
 
@@ -231,11 +231,11 @@ E i **client MIG** utilizzeranno il `__NDR_record` per inviare con `__mach_msg` 
 
 Poiché molti binari ora utilizzano MIG per esporre porte mach, è interessante sapere come **identificare che è stato utilizzato MIG** e le **funzioni che MIG esegue** con ciascun ID messaggio.
 
-[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/#jtool2) può analizzare le informazioni MIG da un binario Mach-O indicando l'ID messaggio e identificando la funzione da eseguire:
+[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/index.html#jtool2) può analizzare le informazioni MIG da un binario Mach-O indicando l'ID messaggio e identificando la funzione da eseguire:
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
-Inoltre, le funzioni MIG sono semplicemente dei wrapper della funzione reale che viene chiamata, il che significa che ottenendo la sua disassemblaggio e cercando BL potresti essere in grado di trovare la funzione effettiva che viene chiamata:
+Inoltre, le funzioni MIG sono semplicemente wrapper della funzione reale che viene chiamata, il che significa che ottenendo la sua disassemblaggio e cercando BL potresti essere in grado di trovare la funzione effettiva che viene chiamata:
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep BL
 ```
@@ -249,7 +249,7 @@ jtool2 -d __DATA.__const myipc_server | grep BL
 <pre class="language-c"><code class="lang-c">int _myipc_server(int arg0, int arg1) {
 var_10 = arg0;
 var_18 = arg1;
-// Istruzioni iniziali per trovare i puntatori di funzione appropriati
+// Istruzioni iniziali per trovare i puntatori delle funzioni appropriati
 *(int32_t *)var_18 = *(int32_t *)var_10 &#x26; 0x1f;
 *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
 *(int32_t *)(var_18 + 0x4) = 0x24;
@@ -264,7 +264,7 @@ rax = *(int32_t *)(var_10 + 0x14);
 // 0x1f4 = 500 (l'ID di partenza)
 <strong>            rax = *(sign_extend_64(rax - 0x1f4) * 0x28 + 0x100004040);
 </strong>            var_20 = rax;
-// Se - else, l'if restituisce falso, mentre l'else chiama la funzione corretta e restituisce vero
+// If - else, l'if restituisce falso, mentre l'else chiama la funzione corretta e restituisce vero
 <strong>            if (rax == 0x0) {
 </strong>                    *(var_18 + 0x18) = **_NDR_record;
 *(int32_t *)(var_18 + 0x20) = 0xfffffffffffffed1;
@@ -297,7 +297,7 @@ saved_fp = r29;
 stack[-8] = r30;
 var_10 = arg0;
 var_18 = arg1;
-// Istruzioni iniziali per trovare i puntatori di funzione appropriati
+// Istruzioni iniziali per trovare i puntatori delle funzioni appropriati
 *(int32_t *)var_18 = *(int32_t *)var_10 &#x26; 0x1f | 0x0;
 *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
 *(int32_t *)(var_18 + 0x4) = 0x24;
@@ -332,7 +332,7 @@ if (CPU_FLAGS &#x26; NE) {
 r8 = 0x1;
 }
 }
-// Stessa logica if else della versione precedente
+// Stessa logica if else come nella versione precedente
 // Controlla l'uso dell'indirizzo 0x100004040 (array degli indirizzi delle funzioni)
 <strong>                    if ((r8 &#x26; 0x1) == 0x0) {
 </strong><strong>                            *(var_18 + 0x18) = **0x100004000;

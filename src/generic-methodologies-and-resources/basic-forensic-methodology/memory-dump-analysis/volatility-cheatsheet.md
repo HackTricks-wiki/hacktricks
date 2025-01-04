@@ -5,7 +5,7 @@
 ​
 
 
-Se hai bisogno di uno strumento che automatizzi l'analisi della memoria con diversi livelli di scansione e esegua più plugin Volatility3 in parallelo, puoi usare autoVolatility3:: [https://github.com/H3xKatana/autoVolatility3/](https://github.com/H3xKatana/autoVolatility3/)
+Se hai bisogno di uno strumento che automatizzi l'analisi della memoria con diversi livelli di scansione e esegua più plugin Volatility3 in parallelo, puoi utilizzare autoVolatility3:: [https://github.com/H3xKatana/autoVolatility3/](https://github.com/H3xKatana/autoVolatility3/)
 ```bash
 # Full scan (runs all plugins)
 python3 autovol3.py -f MEMFILE -o OUT_DIR -s full
@@ -17,7 +17,7 @@ python3 autovol3.py -f MEMFILE -o OUT_DIR -s minimal
 python3 autovol3.py -f MEMFILE -o OUT_DIR -s normal
 
 ```
-Se vuoi qualcosa **veloce e folle** che lancerà diversi plugin di Volatility in parallelo, puoi usare: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
+Se vuoi qualcosa di **veloce e folle** che lancerà diversi plugin di Volatility in parallelo, puoi usare: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
 ```bash
 python autoVolatility.py -f MEMFILE -d OUT_DIRECTORY -e /home/user/tools/volatility/vol.py # It will use the most important plugins (could use a lot of space depending on the size of the memory)
 ```
@@ -54,11 +54,11 @@ Accedi alla documentazione ufficiale in [Volatility command reference](https://g
 
 ### Una nota sui plugin “list” vs. “scan”
 
-Volatility ha due approcci principali ai plugin, che a volte si riflettono nei loro nomi. I plugin “list” cercheranno di navigare attraverso le strutture del kernel di Windows per recuperare informazioni come i processi (localizzare e percorrere la lista collegata delle strutture `_EPROCESS` in memoria), gli handle del sistema operativo (localizzare e elencare la tabella degli handle, dereferenziare eventuali puntatori trovati, ecc.). Si comportano più o meno come farebbe l'API di Windows se richiesto di, ad esempio, elencare i processi.
+Volatility ha due approcci principali ai plugin, che a volte si riflettono nei loro nomi. I plugin “list” cercheranno di navigare attraverso le strutture del kernel di Windows per recuperare informazioni come i processi (localizzare e percorrere la lista collegata delle strutture `_EPROCESS` in memoria), gestori del sistema operativo (localizzare e elencare la tabella dei gestori, dereferenziare eventuali puntatori trovati, ecc.). Si comportano più o meno come farebbe l'API di Windows se richiesto di elencare i processi, ad esempio.
 
-Questo rende i plugin “list” piuttosto veloci, ma altrettanto vulnerabili alla manipolazione da parte di malware. Ad esempio, se un malware utilizza DKOM per scollegare un processo dalla lista collegata `_EPROCESS`, non apparirà nel Task Manager e nemmeno in pslist.
+Questo rende i plugin “list” piuttosto veloci, ma altrettanto vulnerabili all'interferenza da parte di malware. Ad esempio, se un malware utilizza DKOM per scollegare un processo dalla lista collegata `_EPROCESS`, non apparirà nel Task Manager e nemmeno in pslist.
 
-I plugin “scan”, d'altra parte, adotteranno un approccio simile al carving della memoria per cose che potrebbero avere senso quando dereferenziate come strutture specifiche. `psscan`, ad esempio, leggerà la memoria e cercherà di creare oggetti `_EPROCESS` da essa (utilizza la scansione dei pool-tag, che cerca stringhe di 4 byte che indicano la presenza di una struttura di interesse). Il vantaggio è che può recuperare processi che sono terminati, e anche se il malware manomette la lista collegata `_EPROCESS`, il plugin troverà comunque la struttura presente in memoria (poiché deve ancora esistere affinché il processo funzioni). Lo svantaggio è che i plugin “scan” sono un po' più lenti dei plugin “list” e possono talvolta restituire falsi positivi (un processo che è terminato troppo tempo fa e ha avuto parti della sua struttura sovrascritte da altre operazioni).
+I plugin “scan”, d'altra parte, adotteranno un approccio simile al carving della memoria per cose che potrebbero avere senso quando dereferenziate come strutture specifiche. `psscan`, ad esempio, leggerà la memoria e cercherà di creare oggetti `_EPROCESS` da essa (utilizza la scansione dei pool-tag, che cerca stringhe di 4 byte che indicano la presenza di una struttura di interesse). Il vantaggio è che può recuperare processi che sono terminati, e anche se il malware manomette la lista collegata `_EPROCESS`, il plugin troverà comunque la struttura presente in memoria (poiché deve ancora esistere affinché il processo funzioni). Lo svantaggio è che i plugin “scan” sono un po' più lenti dei plugin “list” e possono talvolta generare falsi positivi (un processo che è terminato troppo tempo fa e ha avuto parti della sua struttura sovrascritte da altre operazioni).
 
 Da: [http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
 
@@ -99,7 +99,7 @@ Nel blocco precedente puoi vedere che il profilo si chiama `LinuxCentOS7_3_10_0-
 ```bash
 ./vol -f file.dmp --plugins=. --profile=LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64 linux_netscan
 ```
-#### Scoprire Profilo
+#### Scopri Profilo
 ```
 volatility imageinfo -f file.dmp
 volatility kdbgscan -f file.dmp
@@ -108,7 +108,7 @@ volatility kdbgscan -f file.dmp
 
 [**Da qui**](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/): A differenza di imageinfo che fornisce semplicemente suggerimenti sul profilo, **kdbgscan** è progettato per identificare positivamente il profilo corretto e l'indirizzo KDBG corretto (se ce ne sono più di uno). Questo plugin cerca le firme KDBGHeader collegate ai profili di Volatility e applica controlli di sanità per ridurre i falsi positivi. La verbosità dell'output e il numero di controlli di sanità che possono essere eseguiti dipendono dal fatto che Volatility riesca a trovare un DTB, quindi se già conosci il profilo corretto (o se hai un suggerimento di profilo da imageinfo), assicurati di usarlo da .
 
-Dai sempre un'occhiata al **numero di processi che kdbgscan ha trovato**. A volte imageinfo e kdbgscan possono trovare **più di un** **profilo** adatto, ma solo il **valido avrà alcuni processi correlati** (Questo perché per estrarre i processi è necessario l'indirizzo KDBG corretto)
+Dai sempre un'occhiata al **numero di processi che kdbgscan ha trovato**. A volte imageinfo e kdbgscan possono trovare **più di un** profilo **adatto**, ma solo il **valido avrà alcuni processi correlati** (Questo perché per estrarre i processi è necessario l'indirizzo KDBG corretto).
 ```bash
 # GOOD
 PsActiveProcessHead           : 0xfffff800011977f0 (37 processes)
@@ -122,7 +122,7 @@ PsLoadedModuleList            : 0xfffff80001197ac0 (0 modules)
 ```
 #### KDBG
 
-Il **kernel debugger block**, noto come **KDBG** da Volatility, è cruciale per i compiti forensi eseguiti da Volatility e vari debugger. Identificato come `KdDebuggerDataBlock` e di tipo `_KDDEBUGGER_DATA64`, contiene riferimenti essenziali come `PsActiveProcessHead`. Questo riferimento specifico punta alla testa dell'elenco dei processi, consentendo l'elenco di tutti i processi, fondamentale per un'analisi approfondita della memoria.
+Il **kernel debugger block**, noto come **KDBG** da Volatility, è cruciale per i compiti forensi eseguiti da Volatility e vari debugger. Identificato come `KdDebuggerDataBlock` e di tipo `_KDDEBUGGER_DATA64`, contiene riferimenti essenziali come `PsActiveProcessHead`. Questo riferimento specifico punta alla testa della lista dei processi, consentendo l'elenco di tutti i processi, fondamentale per un'analisi approfondita della memoria.
 
 ## OS Information
 ```bash
@@ -133,7 +133,7 @@ Il plugin `banners.Banners` può essere utilizzato in **vol3 per cercare banner 
 
 ## Hash/Password
 
-Estrai gli hash SAM, [credenziali memorizzate nella cache del dominio](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) e [segreti lsa](../../../windows-hardening/authentication-credentials-uac-and-efs/#lsa-secrets).
+Estrai gli hash SAM, [credenziali memorizzate nella cache del dominio](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) e [segreti lsa](../../../windows-hardening/authentication-credentials-uac-and-efs/index.html#lsa-secrets).
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -153,9 +153,9 @@ volatility --profile=Win7SP1x86_23418 lsadump -f file.dmp #Grab lsa secrets
 {{#endtab}}
 {{#endtabs}}
 
-## Dump di Memoria
+## Memory Dump
 
-Il dump di memoria di un processo **estrarrà tutto** lo stato attuale del processo. Il modulo **procdump** **estrarrà** solo il **codice**.
+Il memory dump di un processo **estrarrà tutto** lo stato attuale del processo. Il modulo **procdump** estrarrà solo il **codice**.
 ```
 volatility -f file.dmp --profile=Win7SP1x86 memdump -p 2168 -D conhost/
 ```
@@ -163,7 +163,7 @@ volatility -f file.dmp --profile=Win7SP1x86 memdump -p 2168 -D conhost/
 
 ### Elenca i processi
 
-Cerca di trovare processi **sospetti** (per nome) o **inattesi** processi **figli** (ad esempio un cmd.exe come figlio di iexplorer.exe).\
+Cerca di trovare processi **sospetti** (per nome) o processi **figli** **inaspettati** (ad esempio un cmd.exe come figlio di iexplorer.exe).\
 Potrebbe essere interessante **confrontare** il risultato di pslist con quello di psscan per identificare processi nascosti.
 
 {{#tabs}}
@@ -220,7 +220,7 @@ volatility --profile=PROFILE consoles -f file.dmp #command history by scanning f
 {{#endtab}}
 {{#endtabs}}
 
-I comandi eseguiti in `cmd.exe` sono gestiti da **`conhost.exe`** (o `csrss.exe` sui sistemi precedenti a Windows 7). Ciò significa che se **`cmd.exe`** viene terminato da un attaccante prima che venga ottenuto un dump della memoria, è ancora possibile recuperare la cronologia dei comandi della sessione dalla memoria di **`conhost.exe`**. Per fare ciò, se viene rilevata un'attività insolita all'interno dei moduli della console, la memoria del processo associato **`conhost.exe`** dovrebbe essere dumpata. Quindi, cercando **stringhe** all'interno di questo dump, le righe di comando utilizzate nella sessione possono potenzialmente essere estratte.
+I comandi eseguiti in `cmd.exe` sono gestiti da **`conhost.exe`** (o `csrss.exe` sui sistemi precedenti a Windows 7). Questo significa che se **`cmd.exe`** viene terminato da un attaccante prima che venga ottenuto un dump della memoria, è ancora possibile recuperare la cronologia dei comandi della sessione dalla memoria di **`conhost.exe`**. Per fare ciò, se viene rilevata un'attività insolita all'interno dei moduli della console, la memoria del processo associato **`conhost.exe`** dovrebbe essere dumpata. Poi, cercando **stringhe** all'interno di questo dump, le righe di comando utilizzate nella sessione possono potenzialmente essere estratte.
 
 ### Ambiente
 
@@ -533,7 +533,7 @@ volatility --profile=Win7SP1x86_23418 mftparser -f file.dmp
 {{#endtab}}
 {{#endtabs}}
 
-Il **file system NTFS** utilizza un componente critico noto come _master file table_ (MFT). Questa tabella include almeno un'entrata per ogni file su un volume, coprendo anche la MFT stessa. Dettagli vitali su ogni file, come **dimensione, timestamp, permessi e dati effettivi**, sono racchiusi all'interno delle entrate MFT o in aree esterne alla MFT ma referenziate da queste entrate. Maggiori dettagli possono essere trovati nella [documentazione ufficiale](https://docs.microsoft.com/en-us/windows/win32/fileio/master-file-table).
+Il **file system NTFS** utilizza un componente critico noto come _master file table_ (MFT). Questa tabella include almeno un'entrata per ogni file su un volume, coprendo anche la MFT stessa. Dettagli vitali su ogni file, come **dimensione, timestamp, permessi e dati effettivi**, sono racchiusi all'interno delle voci MFT o in aree esterne alla MFT ma referenziate da queste voci. Maggiori dettagli possono essere trovati nella [documentazione ufficiale](https://docs.microsoft.com/en-us/windows/win32/fileio/master-file-table).
 
 ### Chiavi/Certificati SSL
 
@@ -589,7 +589,7 @@ volatility --profile=SomeLinux -f file.dmp linux_keyboard_notifiers #Keyloggers
 {{#endtab}}
 {{#endtabs}}
 
-### Scansione con yara
+### Scanning con yara
 
 Usa questo script per scaricare e unire tutte le regole yara per malware da github: [https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9](https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9)\
 Crea la directory _**rules**_ ed eseguila. Questo creerà un file chiamato _**malware_rules.yar**_ che contiene tutte le regole yara per malware.
@@ -621,7 +621,7 @@ volatility --profile=Win7SP1x86_23418 yarascan -y malware_rules.yar -f ch2.dmp |
 
 ### Plugin esterni
 
-Se desideri utilizzare plugin esterni assicurati che le cartelle relative ai plugin siano il primo parametro utilizzato.
+Se desideri utilizzare plugin esterni, assicurati che le cartelle relative ai plugin siano il primo parametro utilizzato.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -661,6 +661,9 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp handles -p <PID> -t mutant
 {{#endtabs}}
 
 ### Symlinks
+
+{{#tabs}}
+{{#tab name="vol3"}}
 ```bash
 ./vol.py -f file.dmp windows.symlinkscan.SymlinkScan
 ```

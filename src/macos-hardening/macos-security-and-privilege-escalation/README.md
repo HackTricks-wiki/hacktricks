@@ -69,9 +69,9 @@ Questo potrebbe verificarsi nelle seguenti situazioni:
 - Il file utilizzato era già stato creato da un utente (di proprietà dell'utente)
 - Il file utilizzato è scrivibile dall'utente a causa di un gruppo
 - Il file utilizzato si trova all'interno di una directory di proprietà dell'utente (l'utente potrebbe creare il file)
-- Il file utilizzato si trova all'interno di una directory di proprietà di root, ma l'utente ha accesso in scrittura su di essa a causa di un gruppo (l'utente potrebbe creare il file)
+- Il file utilizzato si trova all'interno di una directory di proprietà di root ma l'utente ha accesso in scrittura su di essa a causa di un gruppo (l'utente potrebbe creare il file)
 
-Essere in grado di **creare un file** che sarà **utilizzato da root** consente a un utente di **sfruttare il suo contenuto** o persino creare **symlink/hardlink** per puntarlo in un'altra posizione.
+Essere in grado di **creare un file** che sarà **utilizzato da root**, consente a un utente di **sfruttare il suo contenuto** o persino creare **symlink/hardlink** per puntarlo in un'altra posizione.
 
 Per questo tipo di vulnerabilità non dimenticare di **controllare gli installer `.pkg` vulnerabili**:
 
@@ -93,9 +93,9 @@ In macOS **le applicazioni e i binari possono avere permessi** per accedere a ca
 
 Pertanto, un attaccante che desidera compromettere con successo una macchina macOS dovrà **escalare i suoi privilegi TCC** (o persino **bypassare SIP**, a seconda delle sue necessità).
 
-Questi privilegi sono solitamente concessi sotto forma di **diritti** con cui l'applicazione è firmata, oppure l'applicazione potrebbe richiedere alcuni accessi e dopo che il **utente li approva**, possono essere trovati nei **database TCC**. Un altro modo in cui un processo può ottenere questi privilegi è essendo un **figlio di un processo** con quei **privilegi**, poiché di solito sono **ereditati**.
+Questi privilegi sono solitamente concessi sotto forma di **diritti** con cui l'applicazione è firmata, oppure l'applicazione potrebbe aver richiesto alcuni accessi e dopo che il **utente li approva** possono essere trovati nei **database TCC**. Un altro modo in cui un processo può ottenere questi privilegi è essendo un **figlio di un processo** con quei **privilegi**, poiché di solito sono **ereditati**.
 
-Segui questi link per trovare diversi modi per [**escalare i privilegi in TCC**](macos-security-protections/macos-tcc/#tcc-privesc-and-bypasses), per [**bypassare TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) e come in passato [**SIP è stato bypassato**](macos-security-protections/macos-sip.md#sip-bypasses).
+Segui questi link per trovare diversi modi per [**escalare i privilegi in TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), per [**bypassare TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) e come in passato [**SIP è stato bypassato**](macos-security-protections/macos-sip.md#sip-bypasses).
 
 ## Escalation Tradizionale dei Privilegi di macOS
 

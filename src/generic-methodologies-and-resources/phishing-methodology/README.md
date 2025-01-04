@@ -6,7 +6,7 @@
 
 1. Riconoscere la vittima
 1. Selezionare il **dominio della vittima**.
-2. Eseguire alcune enumerazioni web di base **cercando portali di accesso** utilizzati dalla vittima e **decidere** quale impersonare.
+2. Eseguire alcune basi di enumerazione web **cercando portali di accesso** utilizzati dalla vittima e **decidere** quale **fingere**.
 3. Utilizzare alcune **OSINT** per **trovare email**.
 2. Preparare l'ambiente
 1. **Acquistare il dominio** che si intende utilizzare per la valutazione di phishing
@@ -24,15 +24,15 @@
 - **Parola chiave**: Il nome di dominio **contiene** una **parola chiave** importante del dominio originale (es., zelster.com-management.com).
 - **sottodominio con trattino**: Cambiare il **punto in un trattino** di un sottodominio (es., www-zelster.com).
 - **Nuovo TLD**: Stesso dominio utilizzando un **nuovo TLD** (es., zelster.org)
-- **Omo-glyph**: **Sostituisce** una lettera nel nome di dominio con **lettere che sembrano simili** (es., zelfser.com).
-- **Trasposizione:** **Scambia due lettere** all'interno del nome di dominio (es., zelsetr.com).
+- **Omo-glyph**: **sostituisce** una lettera nel nome di dominio con **lettere che sembrano simili** (es., zelfser.com).
+- **Trasposizione:** **scambia due lettere** all'interno del nome di dominio (es., zelsetr.com).
 - **Singolarizzazione/Pluralizzazione**: Aggiunge o rimuove “s” alla fine del nome di dominio (es., zeltsers.com).
-- **Omissione**: **Rimuove una** delle lettere dal nome di dominio (es., zelser.com).
-- **Ripetizione:** **Ripete una** delle lettere nel nome di dominio (es., zeltsser.com).
+- **Omissione**: **rimuove una** delle lettere dal nome di dominio (es., zelser.com).
+- **Ripetizione:** **ripete una** delle lettere nel nome di dominio (es., zeltsser.com).
 - **Sostituzione**: Come l'omo-glyph ma meno furtivo. Sostituisce una delle lettere nel nome di dominio, forse con una lettera vicina alla lettera originale sulla tastiera (es., zektser.com).
 - **Sottodominio**: Introduce un **punto** all'interno del nome di dominio (es., ze.lster.com).
-- **Inserimento**: **Inserisce una lettera** nel nome di dominio (es., zerltser.com).
-- **Punto mancante**: Aggiunge il TLD al nome di dominio. (es., zelstercom.com)
+- **Inserimento**: **inserisce una lettera** nel nome di dominio (es., zerltser.com).
+- **Punto mancante**: Aggiungere il TLD al nome di dominio. (es., zelstercom.com)
 
 **Strumenti Automatici**
 
@@ -60,7 +60,7 @@ Per ulteriori informazioni leggi [https://www.bleepingcomputer.com/news/security
 ### Acquistare un dominio affidabile
 
 Puoi cercare in [https://www.expireddomains.net/](https://www.expireddomains.net) un dominio scaduto che potresti utilizzare.\
-Per assicurarti che il dominio scaduto che stai per acquistare **abbia già un buon SEO**, puoi cercare come è categorizzato in:
+Per assicurarti che il dominio scaduto che stai per acquistare **abbia già un buon SEO** puoi cercare come è categorizzato in:
 
 - [http://www.fortiguard.com/webfilter](http://www.fortiguard.com/webfilter)
 - [https://urlfiltering.paloaltonetworks.com/query/](https://urlfiltering.paloaltonetworks.com/query/)
@@ -73,7 +73,7 @@ Per assicurarti che il dominio scaduto che stai per acquistare **abbia già un b
 - [https://hunter.io/](https://hunter.io)
 - [https://anymailfinder.com/](https://anymailfinder.com)
 
-Per **scoprire di più** indirizzi email validi o **verificare quelli** che hai già scoperto, puoi controllare se puoi forzare in modo brutale i server smtp della vittima. [Scopri come verificare/scoprire indirizzi email qui](../../network-services-pentesting/pentesting-smtp/#username-bruteforce-enumeration).\
+Per **scoprire di più** indirizzi email validi o **verificare quelli** che hai già scoperto puoi controllare se puoi forzare in modo brutale i server smtp della vittima. [Scopri come verificare/scoprire indirizzi email qui](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
 Inoltre, non dimenticare che se gli utenti utilizzano **qualunque portale web per accedere alle loro email**, puoi controllare se è vulnerabile a **forza bruta del nome utente**, ed esplorare la vulnerabilità se possibile.
 
 ## Configurare GoPhish
@@ -91,7 +91,7 @@ ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 
 **Configurazione del certificato TLS**
 
-Prima di questo passaggio dovresti **aver già acquistato il dominio** che intendi utilizzare e deve **puntare** all'**IP del VPS** dove stai configurando **gophish**.
+Prima di questo passaggio, dovresti **aver già acquistato il dominio** che intendi utilizzare e deve **puntare** all'**IP del VPS** dove stai configurando **gophish**.
 ```bash
 DOMAIN="<domain>"
 wget https://dl.eff.org/certbot-auto
@@ -161,7 +161,7 @@ Modifica `/opt/gophish/config.json` come segue (nota l'uso di https):
 ```
 **Configura il servizio gophish**
 
-Per creare il servizio gophish in modo che possa essere avviato automaticamente e gestito come servizio, puoi creare il file `/etc/init.d/gophish` con il seguente contenuto:
+Per creare il servizio gophish in modo che possa essere avviato automaticamente e gestito come un servizio, puoi creare il file `/etc/init.d/gophish` con il seguente contenuto:
 ```bash
 #!/bin/bash
 # /etc/init.d/gophish
@@ -208,7 +208,7 @@ case $1 in
 start|stop|status) "$1" ;;
 esac
 ```
-Completa la configurazione del servizio e controllalo facendo:
+Completa la configurazione del servizio e controllalo eseguendo:
 ```bash
 mkdir /var/log/gophish
 chmod +x /etc/init.d/gophish
@@ -233,7 +233,7 @@ Imposta un record rDNS (PTR) che risolve l'indirizzo IP del VPS nel nome di domi
 
 ### Record Sender Policy Framework (SPF)
 
-Devi **configurare un record SPF per il nuovo dominio**. Se non sai cos'è un record SPF [**leggi questa pagina**](../../network-services-pentesting/pentesting-smtp/#spf).
+Devi **configurare un record SPF per il nuovo dominio**. Se non sai cos'è un record SPF [**leggi questa pagina**](../../network-services-pentesting/pentesting-smtp/index.html#spf).
 
 Puoi usare [https://www.spfwizard.net/](https://www.spfwizard.net) per generare la tua politica SPF (usa l'IP della macchina VPS)
 
@@ -243,9 +243,9 @@ Questo è il contenuto che deve essere impostato all'interno di un record TXT al
 ```bash
 v=spf1 mx a ip4:ip.ip.ip.ip ?all
 ```
-### Record di Autenticazione, Reporting e Conformità dei Messaggi Basato su Dominio (DMARC)
+### Domain-based Message Authentication, Reporting & Conformance (DMARC) Record
 
-Devi **configurare un record DMARC per il nuovo dominio**. Se non sai cos'è un record DMARC [**leggi questa pagina**](../../network-services-pentesting/pentesting-smtp/#dmarc).
+Devi **configurare un record DMARC per il nuovo dominio**. Se non sai cos'è un record DMARC [**leggi questa pagina**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc).
 
 Devi creare un nuovo record DNS TXT che punti al nome host `_dmarc.<domain>` con il seguente contenuto:
 ```bash
@@ -253,7 +253,7 @@ v=DMARC1; p=none
 ```
 ### DomainKeys Identified Mail (DKIM)
 
-Devi **configurare un DKIM per il nuovo dominio**. Se non sai cos'è un record DMARC [**leggi questa pagina**](../../network-services-pentesting/pentesting-smtp/#dkim).
+Devi **configurare un DKIM per il nuovo dominio**. Se non sai cos'è un record DMARC [**leggi questa pagina**](../../network-services-pentesting/pentesting-smtp/index.html#dkim).
 
 Questo tutorial si basa su: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
 
@@ -271,7 +271,7 @@ Basta accedere alla pagina e inviare un'email all'indirizzo che ti forniscono:
 ```bash
 echo "This is the body of the email" | mail -s "This is the subject line" test-iimosa79z@srv1.mail-tester.com
 ```
-Puoi anche **controllare la tua configurazione email** inviando un'email a `check-auth@verifier.port25.com` e **leggendo la risposta** (per questo dovrai **aprire** la porta **25** e vedere la risposta nel file _/var/mail/root_ se invii l'email come root).\
+Puoi anche **controllare la configurazione della tua email** inviando un'email a `check-auth@verifier.port25.com` e **leggendo la risposta** (per questo dovrai **aprire** la porta **25** e vedere la risposta nel file _/var/mail/root_ se invii l'email come root).\
 Controlla di superare tutti i test:
 ```bash
 ==========================================================
@@ -283,7 +283,7 @@ DKIM check:         pass
 Sender-ID check:    pass
 SpamAssassin check: ham
 ```
-Puoi anche inviare **un messaggio a un Gmail sotto il tuo controllo** e controllare le **intestazioni dell'email** nella tua casella di posta Gmail, `dkim=pass` dovrebbe essere presente nel campo di intestazione `Authentication-Results`.
+Puoi anche inviare un **messaggio a un Gmail sotto il tuo controllo** e controllare le **intestazioni dell'email** nella tua casella di posta Gmail, `dkim=pass` dovrebbe essere presente nel campo di intestazione `Authentication-Results`.
 ```
 Authentication-Results: mx.google.com;
 spf=pass (google.com: domain of contact@example.com designates --- as permitted sender) smtp.mail=contact@example.com;
@@ -303,9 +303,9 @@ Puoi richiedere la rimozione del tuo dominio/IP su [https://sender.office.com/](
 
 - Imposta un **nome per identificare** il profilo del mittente
 - Decidi da quale account invierai le email di phishing. Suggerimenti: _noreply, support, servicedesk, salesforce..._
-- Puoi lasciare vuoti il nome utente e la password, ma assicurati di selezionare Ignora Errori di Certificato
+- Puoi lasciare vuoti il nome utente e la password, ma assicurati di controllare Ignora Errori di Certificato
 
-![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
+![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
 > [!NOTE]
 > È consigliato utilizzare la funzionalità "**Invia Email di Test**" per verificare che tutto funzioni.\
@@ -346,7 +346,7 @@ Nota che **per aumentare la credibilità dell'email**, è consigliato utilizzare
 > [!NOTE]
 > Il Modello di Email consente anche di **allegare file da inviare**. Se desideri anche rubare le sfide NTLM utilizzando alcuni file/documenti appositamente creati [leggi questa pagina](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md).
 
-### Landing Page
+### Pagina di Atterraggio
 
 - Scrivi un **nome**
 - **Scrivi il codice HTML** della pagina web. Nota che puoi **importare** pagine web.
@@ -356,11 +356,11 @@ Nota che **per aumentare la credibilità dell'email**, è consigliato utilizzare
 ![](<../../images/image (826).png>)
 
 > [!NOTE]
-> Di solito dovrai modificare il codice HTML della pagina e fare alcuni test in locale (magari usando un server Apache) **fino a quando non ti piacciono i risultati.** Poi, scrivi quel codice HTML nella casella.\
+> Di solito dovrai modificare il codice HTML della pagina e fare alcuni test in locale (magari utilizzando un server Apache) **fino a quando non ti piacciono i risultati.** Poi, scrivi quel codice HTML nella casella.\
 > Nota che se hai bisogno di **utilizzare alcune risorse statiche** per l'HTML (magari alcune pagine CSS e JS) puoi salvarle in _**/opt/gophish/static/endpoint**_ e poi accedervi da _**/static/\<filename>**_
 
 > [!NOTE]
-> Per il reindirizzamento potresti **reindirizzare gli utenti alla legittima pagina principale** della vittima, o reindirizzarli a _/static/migration.html_ per esempio, mettere qualche **ruota che gira (**[**https://loading.io/**](https://loading.io)**) per 5 secondi e poi indicare che il processo è stato completato con successo**.
+> Per il reindirizzamento potresti **reindirizzare gli utenti alla legittima pagina web principale** della vittima, o reindirizzarli a _/static/migration.html_ per esempio, mettere qualche **ruota che gira (**[**https://loading.io/**](https://loading.io)**) per 5 secondi e poi indicare che il processo è stato completato con successo**.
 
 ### Utenti e Gruppi
 
@@ -371,7 +371,7 @@ Nota che **per aumentare la credibilità dell'email**, è consigliato utilizzare
 
 ### Campagna
 
-Infine, crea una campagna selezionando un nome, il modello di email, la landing page, l'URL, il profilo di invio e il gruppo. Nota che l'URL sarà il link inviato alle vittime.
+Infine, crea una campagna selezionando un nome, il modello di email, la pagina di atterraggio, l'URL, il profilo di invio e il gruppo. Nota che l'URL sarà il link inviato alle vittime.
 
 Nota che il **Profilo di Invio consente di inviare un'email di prova per vedere come apparirà l'email di phishing finale**:
 
@@ -405,7 +405,7 @@ phishing-documents.md
 
 L'attacco precedente è piuttosto astuto poiché stai falsificando un sito web reale e raccogliendo le informazioni fornite dall'utente. Sfortunatamente, se l'utente non ha inserito la password corretta o se l'applicazione che hai falsificato è configurata con 2FA, **queste informazioni non ti permetteranno di impersonare l'utente ingannato**.
 
-Qui è dove strumenti come [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) e [**muraena**](https://github.com/muraenateam/muraena) sono utili. Questo strumento ti permetterà di generare un attacco simile a MitM. Fondamentalmente, gli attacchi funzionano nel seguente modo:
+È qui che strumenti come [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) e [**muraena**](https://github.com/muraenateam/muraena) sono utili. Questo strumento ti permetterà di generare un attacco simile a MitM. Fondamentalmente, gli attacchi funzionano nel seguente modo:
 
 1. Tu **impersoni il modulo di accesso** della pagina web reale.
 2. L'utente **invia** le sue **credenziali** alla tua pagina falsa e lo strumento le invia alla pagina web reale, **controllando se le credenziali funzionano**.
@@ -414,7 +414,7 @@ Qui è dove strumenti come [**evilginx2**](https://github.com/kgretzky/evilginx2
 
 ### Via VNC
 
-E se invece di **inviare la vittima a una pagina malevola** con lo stesso aspetto di quella originale, la invii a una **sessione VNC con un browser connesso alla pagina web reale**? Sarai in grado di vedere cosa fa, rubare la password, il MFA utilizzato, i cookie...\
+E se invece di **inviare la vittima a una pagina malevola** con lo stesso aspetto di quella originale, lo invii a una **sessione VNC con un browser connesso alla pagina web reale**? Sarai in grado di vedere cosa fa, rubare la password, il MFA utilizzato, i cookie...\
 Puoi farlo con [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)
 
 ## Rilevare la rilevazione

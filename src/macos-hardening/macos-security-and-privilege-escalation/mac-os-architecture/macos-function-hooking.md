@@ -6,7 +6,7 @@
 
 Crea un **dylib** con una sezione **`__interpose`** (o una sezione contrassegnata con **`S_INTERPOSING`**) contenente tuple di **puntatori a funzioni** che si riferiscono alle funzioni **originali** e di **sostituzione**.
 
-Poi, **inietta** il dylib con **`DYLD_INSERT_LIBRARIES`** (l'interposizione deve avvenire prima che l'app principale si carichi). Ovviamente, le [**restrizioni** applicate all'uso di **`DYLD_INSERT_LIBRARIES`** si applicano anche qui](../macos-proces-abuse/macos-library-injection/#check-restrictions).&#x20;
+Poi, **inietta** il dylib con **`DYLD_INSERT_LIBRARIES`** (l'interposizione deve avvenire prima che l'app principale venga caricata). Ovviamente, le [**restrizioni** applicate all'uso di **`DYLD_INSERT_LIBRARIES`** si applicano anche qui](../macos-proces-abuse/macos-library-injection/index.html#check-restrictions).&#x20;
 
 ### Interponi printf
 
@@ -88,7 +88,7 @@ L'oggetto è **`someObject`**, il metodo è **`@selector(method1p1:p2:)`** e gli
 Seguendo le strutture degli oggetti, è possibile raggiungere un'**array di metodi** dove i **nomi** e i **puntatori** al codice del metodo sono **localizzati**.
 
 > [!CAUTION]
-> Nota che poiché i metodi e le classi sono accessibili in base ai loro nomi, queste informazioni sono memorizzate nel binario, quindi è possibile recuperarle con `otool -ov </path/bin>` o [`class-dump </path/bin>`](https://github.com/nygard/class-dump)
+> Nota che poiché i metodi e le classi vengono accessi in base ai loro nomi, queste informazioni sono memorizzate nel binario, quindi è possibile recuperarle con `otool -ov </path/bin>` o [`class-dump </path/bin>`](https://github.com/nygard/class-dump)
 
 ### Accessing the raw methods
 
@@ -272,9 +272,9 @@ return 0;
 
 In questa pagina sono stati discussi diversi modi per agganciare funzioni. Tuttavia, comportavano **l'esecuzione di codice all'interno del processo per attaccare**.
 
-Per fare ciò, la tecnica più semplice da utilizzare è iniettare un [Dyld tramite variabili di ambiente o hijacking](../macos-dyld-hijacking-and-dyld_insert_libraries.md). Tuttavia, suppongo che questo possa essere fatto anche tramite [Dylib process injection](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port).
+Per fare ciò, la tecnica più semplice da utilizzare è iniettare un [Dyld tramite variabili di ambiente o hijacking](../macos-dyld-hijacking-and-dyld_insert_libraries.md). Tuttavia, suppongo che questo possa essere fatto anche tramite [Dylib process injection](macos-ipc-inter-process-communication/index.html#dylib-process-injection-via-task-port).
 
-Tuttavia, entrambe le opzioni sono **limitati** a **binari/processi non protetti**. Controlla ciascuna tecnica per saperne di più sulle limitazioni.
+Tuttavia, entrambe le opzioni sono **limitate** a binari/processi **non protetti**. Controlla ciascuna tecnica per saperne di più sulle limitazioni.
 
 Tuttavia, un attacco di hooking di funzione è molto specifico, un attaccante lo farà per **rubare informazioni sensibili dall'interno di un processo** (se no, faresti semplicemente un attacco di iniezione di processo). E queste informazioni sensibili potrebbero trovarsi in app scaricate dall'utente come MacPass.
 

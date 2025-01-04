@@ -25,7 +25,7 @@ A /var/lib/mysql/mysql/time_zone_leap_second.MYI
 A /var/lib/mysql/mysql/general_log.CSV
 ...
 ```
-Nel comando precedente **C** significa **Cambiato** e **A,** **Aggiunto**.\
+Nel comando precedente, **C** significa **Cambiato** e **A** significa **Aggiunto**.\
 Se scopri che un file interessante come `/etc/shadow` è stato modificato, puoi scaricarlo dal container per controllare attività malevole con:
 ```bash
 docker cp wordpress:/etc/shadow.
@@ -49,7 +49,7 @@ container-diff analyze -t sizelayer image.tar
 container-diff analyze -t history image.tar
 container-diff analyze -t metadata image.tar
 ```
-Quindi, puoi **decomprimere** l'immagine e **accedere ai blob** per cercare file sospetti che potresti aver trovato nella cronologia delle modifiche:
+Poi, puoi **decomprimere** l'immagine e **accedere ai blob** per cercare file sospetti che potresti aver trovato nella cronologia delle modifiche:
 ```bash
 tar -xf image.tar
 ```
@@ -79,7 +79,7 @@ Loaded image: flask:latest
 #And then open it with dive:
 sudo dive flask:latest
 ```
-Questo ti consente di **navigare tra i diversi blob delle immagini docker** e controllare quali file sono stati modificati/aggiunti. **Rosso** significa aggiunto e **giallo** significa modificato. Usa **tab** per passare all'altra vista e **space** per comprimere/aprire le cartelle.
+Questo ti consente di **navigare attraverso i diversi blob delle immagini docker** e controllare quali file sono stati modificati/aggiunti. **Rosso** significa aggiunto e **giallo** significa modificato. Usa **tab** per passare alla vista successiva e **space** per comprimere/aprire le cartelle.
 
 Con die non sarai in grado di accedere al contenuto dei diversi stadi dell'immagine. Per farlo, dovrai **decomprimere ogni strato e accedervi**.\
 Puoi decomprimere tutti gli strati di un'immagine dalla directory in cui l'immagine è stata decompressa eseguendo:
@@ -91,7 +91,6 @@ for d in `find * -maxdepth 0 -type d`; do cd $d; tar -xf ./layer.tar; cd ..; don
 
 Nota che quando esegui un container docker all'interno di un host **puoi vedere i processi in esecuzione sul container dall'host** semplicemente eseguendo `ps -ef`
 
-Pertanto (come root) puoi **estrarre la memoria dei processi** dall'host e cercare **credenziali** proprio [**come nel seguente esempio**](../../linux-hardening/privilege-escalation/#process-memory).
-
+Pertanto (come root) puoi **dumpare la memoria dei processi** dall'host e cercare **credenziali** proprio [**come nel seguente esempio**](../../linux-hardening/privilege-escalation/index.html#process-memory).
 
 {{#include ../../banners/hacktricks-training.md}}

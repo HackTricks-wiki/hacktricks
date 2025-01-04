@@ -6,7 +6,7 @@
 
 Crea un **dylib** con una sezione **`__interpose` (`__DATA___interpose`)** (o una sezione contrassegnata con **`S_INTERPOSING`**) contenente tuple di **puntatori a funzioni** che si riferiscono alle funzioni **originali** e **sostitutive**.
 
-Poi, **inietta** il dylib con **`DYLD_INSERT_LIBRARIES`** (l'interposizione deve avvenire prima che l'app principale venga caricata). Ovviamente, le [**restrizioni** applicate all'uso di **`DYLD_INSERT_LIBRARIES`** si applicano anche qui](macos-library-injection/#check-restrictions).
+Poi, **inietta** il dylib con **`DYLD_INSERT_LIBRARIES`** (l'interposizione deve avvenire prima che l'app principale venga caricata). Ovviamente, le [**restrizioni** applicate all'uso di **`DYLD_INSERT_LIBRARIES`** si applicano anche qui](macos-library-injection/index.html#check-restrictions).
 
 ### Interponi printf
 
@@ -80,13 +80,13 @@ Hello from interpose
 > [!WARNING]
 > La variabile di ambiente **`DYLD_PRINT_INTERPOSTING`** può essere utilizzata per eseguire il debug dell'interposizione e stamperà il processo di interposizione.
 
-Si noti inoltre che **l'interposizione avviene tra il processo e le librerie caricate**, non funziona con la cache delle librerie condivise.
+Nota anche che **l'interposizione avviene tra il processo e le librerie caricate**, non funziona con la cache delle librerie condivise.
 
 ### Interposizione Dinamica
 
-Ora è anche possibile interporre una funzione dinamicamente utilizzando la funzione **`dyld_dynamic_interpose`**. Questo consente di interporre programmaticamente una funzione in tempo di esecuzione invece di farlo solo dall'inizio.
+Ora è anche possibile interporre una funzione dinamicamente utilizzando la funzione **`dyld_dynamic_interpose`**. Questo consente di interporre programmaticamente una funzione in tempo reale invece di farlo solo dall'inizio.
 
-È sufficiente indicare i **tuples** della **funzione da sostituire e la funzione di sostituzione**.
+È necessario solo indicare i **tuples** della **funzione da sostituire e la funzione di sostituzione**.
 ```c
 struct dyld_interpose_tuple {
 const void* replacement;
@@ -230,7 +230,7 @@ return 0;
 >
 > La seguente tecnica non ha questa restrizione.
 
-### Swizzling dei Metodi con method_setImplementation
+### Method Swizzling con method_setImplementation
 
 Il formato precedente è strano perché stai cambiando l'implementazione di 2 metodi l'uno con l'altro. Utilizzando la funzione **`method_setImplementation`**, puoi **cambiare** l'**implementazione** di un **metodo con l'altro**.
 
@@ -290,11 +290,11 @@ return 0;
 
 In questa pagina sono stati discussi diversi modi per agganciare funzioni. Tuttavia, comportavano **l'esecuzione di codice all'interno del processo per attaccare**.
 
-Per fare ciò, la tecnica più semplice da utilizzare è iniettare un [Dyld tramite variabili di ambiente o dirottamento](macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md). Tuttavia, suppongo che questo possa essere fatto anche tramite [iniezione di processo Dylib](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port).
+Per fare ciò, la tecnica più semplice da utilizzare è iniettare un [Dyld tramite variabili di ambiente o dirottamento](macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md). Tuttavia, suppongo che questo possa essere fatto anche tramite [iniezione di processo Dylib](macos-ipc-inter-process-communication/index.html#dylib-process-injection-via-task-port).
 
-Tuttavia, entrambe le opzioni sono **limitati** a binari/processi **non protetti**. Controlla ciascuna tecnica per saperne di più sulle limitazioni.
+Tuttavia, entrambe le opzioni sono **limitate** a binari/processi **non protetti**. Controlla ciascuna tecnica per saperne di più sulle limitazioni.
 
-Tuttavia, un attacco di hooking di funzione è molto specifico, un attaccante lo farà per **rubare informazioni sensibili dall'interno di un processo** (se no faresti semplicemente un attacco di iniezione di processo). E queste informazioni sensibili potrebbero trovarsi in app scaricate dall'utente come MacPass.
+Tuttavia, un attacco di hooking di funzione è molto specifico, un attaccante lo farà per **rubare informazioni sensibili dall'interno di un processo** (se no, faresti semplicemente un attacco di iniezione di processo). E queste informazioni sensibili potrebbero trovarsi in app scaricate dall'utente come MacPass.
 
 Quindi il vettore dell'attaccante sarebbe quello di trovare una vulnerabilità o rimuovere la firma dell'applicazione, iniettare la variabile di ambiente **`DYLD_INSERT_LIBRARIES`** attraverso l'Info.plist dell'applicazione aggiungendo qualcosa come:
 ```xml
@@ -311,7 +311,7 @@ e poi **ri-registrare** l'applicazione:
 Aggiungi in quella libreria il codice di hooking per esfiltrare le informazioni: Passwords, messages...
 
 > [!CAUTION]
-> Nota che nelle versioni più recenti di macOS se **rimuovi la firma** del binario dell'applicazione e questa è stata eseguita in precedenza, macOS **non eseguirà più l'applicazione**.
+> Nota che nelle versioni più recenti di macOS se **rimuovi la firma** del binario dell'applicazione e questo è stato eseguito in precedenza, macOS **non eseguirà più l'applicazione**.
 
 #### Esempio di libreria
 ```objectivec

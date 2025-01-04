@@ -65,13 +65,13 @@ Poi puoi usare lo strumento [**DataProtectionDecryptor**](https://nirsoft.net/ut
 
 ![](<../../../images/image (448).png>)
 
-Se tutto va come previsto, lo strumento indicherà la **chiave primaria** che devi **usare per recuperare quella originale**. Per recuperare quella originale, usa semplicemente questa [ricetta cyber_chef](<https://gchq.github.io/CyberChef/#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) mettendo la chiave primaria come "passphrase" all'interno della ricetta.
+Se tutto va come previsto, lo strumento indicherà la **chiave primaria** che devi **usare per recuperare quella originale**. Per recuperare quella originale, usa semplicemente questa [cyber_chef receipt](<https://gchq.github.io/CyberChef/index.html#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) mettendo la chiave primaria come "passphrase" all'interno della ricetta.
 
 L'hex risultante è la chiave finale utilizzata per criptare i database che può essere decriptata con:
 ```bash
 sqlite -k <Obtained Key> config.dbx ".backup config.db" #This decompress the config.dbx and creates a clear text backup in config.db
 ```
-Il database **`config.dbx`** contiene:
+Il **`config.dbx`** database contiene:
 
 - **Email**: L'email dell'utente
 - **usernamedisplayname**: Il nome dell'utente
@@ -79,9 +79,9 @@ Il database **`config.dbx`** contiene:
 - **Host_id: Hash** utilizzato per autenticarsi nel cloud. Questo può essere revocato solo dal web.
 - **Root_ns**: Identificatore dell'utente
 
-Il database **`filecache.db`** contiene informazioni su tutti i file e le cartelle sincronizzati con Dropbox. La tabella `File_journal` è quella con più informazioni utili:
+Il **`filecache.db`** database contiene informazioni su tutti i file e le cartelle sincronizzati con Dropbox. La tabella `File_journal` è quella con più informazioni utili:
 
-- **Server_path**: Percorso dove si trova il file all'interno del server (questo percorso è preceduto dall'`host_id` del client).
+- **Server_path**: Percorso dove si trova il file all'interno del server (questo percorso è preceduto dal `host_id` del client).
 - **local_sjid**: Versione del file
 - **local_mtime**: Data di modifica
 - **local_ctime**: Data di creazione

@@ -7,13 +7,13 @@
 ### Shadow Passwords
 
 La password shadow è memorizzata con la configurazione dell'utente in plists situati in **`/var/db/dslocal/nodes/Default/users/`**.\
-Il seguente oneliner può essere utilizzato per estrarre **tutte le informazioni sugli utenti** (inclusi i dati dell'hash):
+Il seguente oneliner può essere utilizzato per estrarre **tutte le informazioni sugli utenti** (inclusi i dati hash):
 ```bash
 for l in /var/db/dslocal/nodes/Default/users/*; do if [ -r "$l" ];then echo "$l"; defaults read "$l"; fi; done
 ```
 [**Script come questo**](https://gist.github.com/teddziuba/3ff08bdda120d1f7822f3baf52e606c2) o [**questo**](https://github.com/octomagon/davegrohl.git) possono essere utilizzati per trasformare l'hash in **formato** **hashcat**.
 
-Un'alternativa one-liner che eseguirà il dump delle credenziali di tutti gli account non di servizio in formato hashcat `-m 7100` (macOS PBKDF2-SHA512):
+Un'alternativa one-liner che esporterà le credenziali di tutti gli account non di servizio in formato hashcat `-m 7100` (macOS PBKDF2-SHA512):
 ```bash
 sudo bash -c 'for i in $(find /var/db/dslocal/nodes/Default/users -type f -regex "[^_]*"); do plutil -extract name.0 raw $i | awk "{printf \$0\":\$ml\$\"}"; for j in {iterations,salt,entropy}; do l=$(k=$(plutil -extract ShadowHashData.0 raw $i) && base64 -d <<< $k | plutil -extract SALTED-SHA512-PBKDF2.$j raw -); if [[ $j == iterations ]]; then echo -n $l; else base64 -d <<< $l | xxd -p -c 0 | awk "{printf \"$\"\$0}"; fi; done; echo ""; done'
 ```
@@ -90,9 +90,9 @@ hashcat.exe -m 23100 --keep-guessing hashes.txt dictionary.txt
 # Use the key to decrypt the passwords
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
-#### **Dump delle chiavi del portachiavi (con password) con il dump della memoria**
+#### **Dump delle chiavi del portachiavi (con password) tramite dump della memoria**
 
-[Segui questi passaggi](../#dumping-memory-with-osxpmem) per eseguire un **dump della memoria**
+[Segui questi passaggi](../index.html#dumping-memory-with-osxpmem) per eseguire un **dump della memoria**
 ```bash
 #Use volafox (https://github.com/n0fate/volafox) to extract possible keychain passwords
 # Unformtunately volafox isn't working with the latest versions of MacOS
@@ -129,7 +129,7 @@ sqlite3 $HOME/Suggestions/snippets.db 'select * from emailSnippets'
 
 Puoi trovare i dati delle Notifiche in `$(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/`
 
-La maggior parte delle informazioni interessanti si troverà in **blob**. Quindi dovrai **estrarre** quel contenuto e **trasformarlo** in un formato **leggibile** **dall'uomo** o utilizzare **`strings`**. Per accedervi puoi fare:
+La maggior parte delle informazioni interessanti si troverà in **blob**. Quindi dovrai **estrarre** quel contenuto e **trasformarlo** in **leggibile** **da** **umani** o usare **`strings`**. Per accedervi puoi fare:
 ```bash
 cd $(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/
 strings $(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/db2/db | grep -i -A4 slack
@@ -193,9 +193,9 @@ Questo file concede autorizzazioni a utenti specifici tramite UUID (e non uid) i
 
 Il demone principale per le notifiche è **`/usr/sbin/notifyd`**. Per ricevere notifiche, i client devono registrarsi attraverso il port Mach `com.apple.system.notification_center` (controllali con `sudo lsmp -p <pid notifyd>`). Il demone è configurabile con il file `/etc/notify.conf`.
 
-I nomi utilizzati per le notifiche sono notazioni DNS inverse uniche e quando una notifica viene inviata a uno di essi, il/i client che hanno indicato di poterla gestire la riceveranno.
+I nomi utilizzati per le notifiche sono notazioni DNS inverse uniche e quando una notifica viene inviata a uno di essi, il(i) client(i) che hanno indicato di poterla gestire la riceveranno.
 
-È possibile dumpare lo stato attuale (e vedere tutti i nomi) inviando il segnale SIGUSR2 al processo notifyd e leggendo il file generato: `/var/run/notifyd_<pid>.status`:
+È possibile scaricare lo stato attuale (e vedere tutti i nomi) inviando il segnale SIGUSR2 al processo notifyd e leggendo il file generato: `/var/run/notifyd_<pid>.status`:
 ```bash
 ps -ef | grep -i notifyd
 0   376     1   0 15Mar24 ??        27:40.97 /usr/sbin/notifyd
@@ -211,14 +211,14 @@ common: com.apple.CFPreferences._domainsChangedExternally
 common: com.apple.security.octagon.joined-with-bottle
 [...]
 ```
-### Centro Notifiche Distribuito
+### Distributed Notification Center
 
-Il **Centro Notifiche Distribuito** il cui binario principale è **`/usr/sbin/distnoted`**, è un altro modo per inviare notifiche. Espone alcuni servizi XPC e esegue alcuni controlli per cercare di verificare i client.
+Il **Distributed Notification Center** il cui binario principale è **`/usr/sbin/distnoted`**, è un altro modo per inviare notifiche. Espone alcuni servizi XPC e esegue alcuni controlli per cercare di verificare i client.
 
-### Notifiche Push di Apple (APN)
+### Apple Push Notifications (APN)
 
-In questo caso, le applicazioni possono registrarsi per **argomenti**. Il client genererà un token contattando i server di Apple tramite **`apsd`**.\
-Poi, i fornitori avranno anche generato un token e saranno in grado di connettersi ai server di Apple per inviare messaggi ai client. Questi messaggi saranno ricevuti localmente da **`apsd`** che inoltrerà la notifica all'applicazione in attesa.
+In questo caso, le applicazioni possono registrarsi per **topics**. Il client genererà un token contattando i server di Apple tramite **`apsd`**.\
+Poi, i provider avranno anche generato un token e saranno in grado di connettersi ai server di Apple per inviare messaggi ai client. Questi messaggi saranno ricevuti localmente da **`apsd`** che inoltrerà la notifica all'applicazione in attesa.
 
 Le preferenze si trovano in `/Library/Preferences/com.apple.apsd.plist`.
 

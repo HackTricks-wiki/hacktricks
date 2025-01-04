@@ -4,7 +4,7 @@
 
 ## TCC Privilege Escalation
 
-Se sei venuto qui cercando l'escalation dei privilegi TCC vai a:
+Se sei arrivato qui cercando l'escalation dei privilegi TCC vai a:
 
 {{#ref}}
 macos-security-protections/macos-tcc/
@@ -12,7 +12,7 @@ macos-security-protections/macos-tcc/
 
 ## Linux Privesc
 
-Si prega di notare che **la maggior parte dei trucchi sull'escalation dei privilegi che riguardano Linux/Unix influenzeranno anche le macchine MacOS**. Quindi vedi:
+Si prega di notare che **la maggior parte dei trucchi riguardanti l'escalation dei privilegi che influenzano Linux/Unix influenzeranno anche le macchine MacOS**. Quindi vedi:
 
 {{#ref}}
 ../../linux-hardening/privilege-escalation/
@@ -22,9 +22,9 @@ Si prega di notare che **la maggior parte dei trucchi sull'escalation dei privil
 
 ### Sudo Hijacking
 
-Puoi trovare la [tecnica originale di Sudo Hijacking all'interno del post sull'escalation dei privilegi di Linux](../../linux-hardening/privilege-escalation/#sudo-hijacking).
+Puoi trovare la [tecnica originale di Sudo Hijacking all'interno del post sull'escalation dei privilegi di Linux](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
 
-Tuttavia, macOS **mantiene** il **`PATH`** dell'utente quando esegue **`sudo`**. Il che significa che un altro modo per ottenere questo attacco sarebbe **di dirottare altri binari** che la vittima eseguirà quando **esegue sudo:**
+Tuttavia, macOS **mantiene** il **`PATH`** dell'utente quando esegue **`sudo`**. Il che significa che un altro modo per realizzare questo attacco sarebbe **di dirottare altri binari** che la vittima eseguirà quando **esegue sudo:**
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
 cat > /opt/homebrew/bin/ls <<EOF
@@ -49,7 +49,7 @@ Utilizzando un po' di **ingegneria sociale** potresti **impersonare ad esempio G
 {{#tab name="Impersonificazione di Chrome"}}
 Alcuni suggerimenti:
 
-- Controlla nel Dock se c'è un Chrome e, in tal caso, **rimuovi** quella voce e **aggiungi** la **voce falsa** **Chrome nella stessa posizione** nell'array del Dock.&#x20;
+- Controlla nel Dock se c'è un Chrome, e in tal caso **rimuovi** quella voce e **aggiungi** la **voce falsa** **Chrome nella stessa posizione** nell'array del Dock.&#x20;
 ```bash
 #!/bin/sh
 
@@ -121,14 +121,14 @@ killall Dock
 ```
 {{#endtab}}
 
-{{#tab name="Impersonificazione del Finder"}}
+{{#tab name="Finder Impersonation"}}
 Alcuni suggerimenti:
 
-- Non **puoi rimuovere il Finder dal Dock**, quindi se intendi aggiungerlo al Dock, potresti mettere il Finder falso proprio accanto a quello reale. Per questo devi **aggiungere l'entrata del Finder falso all'inizio dell'array del Dock**.
-- Un'altra opzione è non posizionarlo nel Dock e semplicemente aprirlo, "Finder che chiede di controllare il Finder" non è così strano.
-- Un'altra opzione per **escalare a root senza chiedere** la password con una brutta finestra, è far sì che il Finder chieda realmente la password per eseguire un'azione privilegiata:
-- Chiedi al Finder di copiare in **`/etc/pam.d`** un nuovo file **`sudo`** (Il prompt che chiede la password indicherà che "Finder vuole copiare sudo")
-- Chiedi al Finder di copiare un nuovo **Plugin di Autorizzazione** (Puoi controllare il nome del file in modo che il prompt che chiede la password indichi che "Finder vuole copiare Finder.bundle")
+- Non **puoi rimuovere Finder dal Dock**, quindi se intendi aggiungerlo al Dock, potresti mettere il Finder falso proprio accanto a quello reale. Per questo devi **aggiungere l'entrata del Finder falso all'inizio dell'array del Dock**.
+- Un'altra opzione è non posizionarlo nel Dock e semplicemente aprirlo, "Finder che chiede di controllare Finder" non è così strano.
+- Un'altra opzione per **escalare a root senza chiedere** la password con una brutta finestra, è far sì che Finder chieda realmente la password per eseguire un'azione privilegiata:
+- Chiedi a Finder di copiare in **`/etc/pam.d`** un nuovo file **`sudo`** (Il prompt che chiede la password indicherà che "Finder vuole copiare sudo")
+- Chiedi a Finder di copiare un nuovo **Authorization Plugin** (Puoi controllare il nome del file in modo che il prompt che chiede la password indichi che "Finder vuole copiare Finder.bundle")
 ```bash
 #!/bin/sh
 

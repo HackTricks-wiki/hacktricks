@@ -4,13 +4,13 @@
 
 ## Informazioni di base
 
-L'I/O Kit è un **framework per driver di dispositivo** open-source e orientato agli oggetti nel kernel XNU, gestisce **driver di dispositivo caricati dinamicamente**. Permette di aggiungere codice modulare al kernel al volo, supportando hardware diversificato.
+L'I/O Kit è un framework **per driver di dispositivo** open-source e orientato agli oggetti nel kernel XNU, gestisce **driver di dispositivo caricati dinamicamente**. Consente di aggiungere codice modulare al kernel al volo, supportando hardware diversificato.
 
 I driver IOKit **esporteranno fondamentalmente funzioni dal kernel**. Questi parametri di funzione **tipi** sono **predefiniti** e vengono verificati. Inoltre, simile a XPC, IOKit è solo un altro strato **sopra i messaggi Mach**.
 
-Il **codice del kernel IOKit XNU** è open-source da Apple in [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit). Inoltre, i componenti IOKit dello spazio utente sono anch'essi open-source [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
+Il **codice IOKit del kernel XNU** è open-source da Apple in [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit). Inoltre, i componenti IOKit dello spazio utente sono anch'essi open-source [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
 
-Tuttavia, **nessun driver IOKit** è open-source. Comunque, di tanto in tanto, un rilascio di un driver potrebbe venire con simboli che rendono più facile il debug. Controlla come [**ottenere le estensioni del driver dal firmware qui**](./#ipsw)**.**
+Tuttavia, **nessun driver IOKit** è open-source. Comunque, di tanto in tanto, un rilascio di un driver potrebbe venire con simboli che rendono più facile il debug. Controlla come [**ottenere le estensioni del driver dal firmware qui**](#ipsw)**.**
 
 È scritto in **C++**. Puoi ottenere simboli C++ demangled con:
 ```bash
@@ -68,7 +68,7 @@ kextunload com.apple.iokit.IOReportFamily
 ```
 ## IORegistry
 
-Il **IORegistry** è una parte cruciale del framework IOKit in macOS e iOS che funge da database per rappresentare la configurazione e lo stato dell'hardware del sistema. È una **collezione gerarchica di oggetti che rappresentano tutto l'hardware e i driver** caricati sul sistema e le loro relazioni tra di loro.
+Il **IORegistry** è una parte cruciale del framework IOKit in macOS e iOS che funge da database per rappresentare la configurazione hardware e lo stato del sistema. È una **collezione gerarchica di oggetti che rappresentano tutto l'hardware e i driver** caricati sul sistema e le loro relazioni tra di loro.
 
 Puoi ottenere l'IORegistry utilizzando il cli **`ioreg`** per ispezionarlo dalla console (particolarmente utile per iOS).
 ```bash
@@ -80,16 +80,16 @@ Puoi scaricare **`IORegistryExplorer`** da **Xcode Additional Tools** da [**http
 
 <figure><img src="../../../images/image (1167).png" alt="" width="563"><figcaption></figcaption></figure>
 
-In IORegistryExplorer, i "piani" sono utilizzati per organizzare e visualizzare le relazioni tra diversi oggetti nell'IORegistry. Ogni piano rappresenta un tipo specifico di relazione o una particolare vista della configurazione hardware e dei driver del sistema. Ecco alcuni dei piani comuni che potresti incontrare in IORegistryExplorer:
+In IORegistryExplorer, "planes" sono utilizzati per organizzare e visualizzare le relazioni tra diversi oggetti nell'IORegistry. Ogni piano rappresenta un tipo specifico di relazione o una particolare vista della configurazione hardware e dei driver del sistema. Ecco alcuni dei piani comuni che potresti incontrare in IORegistryExplorer:
 
-1. **IOService Plane**: Questo è il piano più generale, che visualizza gli oggetti di servizio che rappresentano driver e nubs (canali di comunicazione tra driver). Mostra le relazioni fornitore-cliente tra questi oggetti.
-2. **IODeviceTree Plane**: Questo piano rappresenta le connessioni fisiche tra i dispositivi man mano che sono collegati al sistema. Viene spesso utilizzato per visualizzare la gerarchia dei dispositivi collegati tramite bus come USB o PCI.
-3. **IOPower Plane**: Visualizza oggetti e le loro relazioni in termini di gestione dell'energia. Può mostrare quali oggetti stanno influenzando lo stato di alimentazione di altri, utile per il debug di problemi legati all'energia.
+1. **IOService Plane**: Questo è il piano più generale, che visualizza gli oggetti di servizio che rappresentano driver e nubs (canali di comunicazione tra driver). Mostra le relazioni provider-client tra questi oggetti.
+2. **IODeviceTree Plane**: Questo piano rappresenta le connessioni fisiche tra i dispositivi mentre sono collegati al sistema. Viene spesso utilizzato per visualizzare la gerarchia dei dispositivi connessi tramite bus come USB o PCI.
+3. **IOPower Plane**: Visualizza oggetti e le loro relazioni in termini di gestione dell'energia. Può mostrare quali oggetti stanno influenzando lo stato di alimentazione di altri, utile per il debug di problemi relativi all'energia.
 4. **IOUSB Plane**: Focalizzato specificamente sui dispositivi USB e le loro relazioni, mostrando la gerarchia degli hub USB e dei dispositivi connessi.
 5. **IOAudio Plane**: Questo piano è per rappresentare i dispositivi audio e le loro relazioni all'interno del sistema.
 6. ...
 
-## Esempio di Codice Driver Comm
+## Esempio di Codice di Comunicazione Driver
 
 Il seguente codice si connette al servizio IOKit `"YourServiceNameHere"` e chiama la funzione all'interno del selettore 0. Per farlo:
 
@@ -154,7 +154,7 @@ Ci sono **altre** funzioni che possono essere utilizzate per chiamare le funzion
 
 ## Inversione del punto di ingresso del driver
 
-Puoi ottenerli ad esempio da un [**firmware image (ipsw)**](./#ipsw). Poi, caricalo nel tuo decompilatore preferito.
+Puoi ottenere questi, ad esempio, da un [**firmware image (ipsw)**](#ipsw). Poi, caricalo nel tuo decompilatore preferito.
 
 Puoi iniziare a decompilare la funzione **`externalMethod`** poiché questa è la funzione del driver che riceverà la chiamata e chiamerà la funzione corretta:
 
@@ -166,7 +166,7 @@ Quella terribile chiamata demangled significa:
 ```cpp
 IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
-Nota come nel precedente definizione il parametro **`self`** è mancante, la buona definizione sarebbe:
+Nota come nella definizione precedente il parametro **`self`** è assente, la buona definizione sarebbe:
 ```cpp
 IOUserClient2022::dispatchExternalMethod(self, unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
@@ -200,7 +200,7 @@ dopo la modifica:
 
 <figure><img src="../../../images/image (1179).png" alt="" width="563"><figcaption></figcaption></figure>
 
-E come sappiamo lì abbiamo un **array di 7 elementi** (controlla il codice decompilato finale), clicca per creare un array di 7 elementi:
+E come sappiamo, qui abbiamo un **array di 7 elementi** (controlla il codice decompilato finale), clicca per creare un array di 7 elementi:
 
 <figure><img src="../../../images/image (1180).png" alt="" width="563"><figcaption></figcaption></figure>
 
