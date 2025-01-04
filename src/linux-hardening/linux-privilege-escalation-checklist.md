@@ -17,8 +17,8 @@
 
 ### [Drives](privilege-escalation/index.html#drives)
 
-- [ ] **Orodhesha** drives zilizowekwa
-- [ ] **Kuna drive isiyowekwa?**
+- [ ] **Orodhesha** diski zilizowekwa
+- [ ] **Kuna diski isiyowekwa?**
 - [ ] **Kuna creds katika fstab?**
 
 ### [**Installed Software**](privilege-escalation/index.html#installed-software)
@@ -29,7 +29,7 @@
 ### [Processes](privilege-escalation/index.html#processes)
 
 - [ ] Je, kuna **programu isiyojulikana inayoendesha**?
-- [ ] Je, kuna programu inayoendesha na **haki zaidi kuliko inavyopaswa kuwa**?
+- [ ] Je, kuna programu inayoendesha kwa **haki zaidi kuliko inavyopaswa kuwa**?
 - [ ] Tafuta **exploits za michakato inayoendesha** (hasa toleo linaloendesha).
 - [ ] Je, unaweza **kubadilisha binary** ya mchakato wowote unaoendesha?
 - [ ] **Fuatilia michakato** na angalia kama kuna mchakato wa kuvutia unaoendesha mara kwa mara.
@@ -40,7 +40,7 @@
 - [ ] Je, [**PATH**](privilege-escalation/index.html#cron-path) inabadilishwa na cron na unaweza **kuandika** ndani yake?
 - [ ] Kuna [**wildcard**](privilege-escalation/index.html#cron-using-a-script-with-a-wildcard-wildcard-injection) katika kazi ya cron?
 - [ ] Baadhi ya [**script inayoweza kubadilishwa**](privilege-escalation/index.html#cron-script-overwriting-and-symlink) inatekelezwa au iko ndani ya **folda inayoweza kubadilishwa**?
-- [ ] Je, umegundua kuwa baadhi ya **script** zinaweza au zina [**tekelezwa** mara **mara kwa mara**](privilege-escalation/index.html#frequent-cron-jobs)? (kila dakika 1, 2 au 5)
+- [ ] Je, umegundua kuwa baadhi ya **script** zinaweza au zina [**tekelezwa mara kwa mara**](privilege-escalation/index.html#frequent-cron-jobs)? (kila dakika 1, 2 au 5)
 
 ### [Services](privilege-escalation/index.html#services)
 
@@ -56,7 +56,7 @@
 
 - [ ] Kuna **faili ya .socket inayoweza kuandikwa**?
 - [ ] Je, unaweza **kuwasiliana na socket yoyote**?
-- [ ] **HTTP sockets** zikiwa na maelezo ya kuvutia?
+- [ ] **HTTP sockets** zikiwa na habari za kuvutia?
 
 ### [D-Bus](privilege-escalation/index.html#d-bus)
 
@@ -66,13 +66,13 @@
 
 - [ ] Tathmini mtandao ili kujua uko wapi
 - [ ] **Port zilizofunguliwa ambazo huwezi kufikia kabla** ya kupata shell ndani ya mashine?
-- [ ] Je, unaweza **kusniff traffic** ukitumia `tcpdump`?
+- [ ] Je, unaweza **kunusa trafiki** ukitumia `tcpdump`?
 
 ### [Users](privilege-escalation/index.html#users)
 
-- [ ] Orodha ya watumiaji/mikundi **ya jumla**
+- [ ] Orodha ya watumiaji/vikundi **kuhesabu**
 - [ ] Je, una **UID kubwa sana**? Je, **mashine** **inahatarishwa**?
-- [ ] Je, unaweza [**kuinua haki kwa sababu ya kundi**](privilege-escalation/interesting-groups-linux-pe/) unalotegemea?
+- [ ] Je, unaweza [**kuinua haki kwa sababu ya kundi**](privilege-escalation/interesting-groups-linux-pe/index.html) unalotegemea?
 - [ ] **Data za Clipboard**?
 - [ ] Sera ya Nywila?
 - [ ] Jaribu **kutumia** kila **nywila inayojulikana** uliyogundua awali kuingia **na kila** **mtumiaji** anayeweza. Jaribu kuingia pia bila nywila.
@@ -85,7 +85,7 @@
 
 - [ ] Je, unaweza kutekeleza **amri yoyote na sudo**? Je, unaweza kuitumia KUSOMA, KUANDIKA au KUTEKELEZA chochote kama root? ([**GTFOBins**](https://gtfobins.github.io))
 - [ ] Je, kuna **binary inayoweza kutumika ya SUID**? ([**GTFOBins**](https://gtfobins.github.io))
-- [ ] Je, [**amri za sudo** **zimepunguziliwa** na **path**? Je, unaweza **kuzidi** vizuizi](privilege-escalation/index.html#sudo-execution-bypassing-paths)?
+- [ ] Je, [**amri za sudo** **zimepunguzika** na **path**? Je, unaweza **kuzidi** vizuizi](privilege-escalation/index.html#sudo-execution-bypassing-paths)?
 - [ ] [**Sudo/SUID binary bila path iliyotajwa**](privilege-escalation/index.html#sudo-command-suid-binary-without-command-path)?
 - [ ] [**SUID binary ikitaja path**](privilege-escalation/index.html#suid-binary-with-command-path)? Pita
 - [ ] [**LD_PRELOAD vuln**](privilege-escalation/index.html#ld_preload)
@@ -124,9 +124,9 @@
 - [ ] **Faili zilizofichwa**
 - [ ] **Script/Binaries katika PATH**
 - [ ] **Faili za Mtandao** (nywila?)
-- [ ] **Nakala za akiba**?
+- [ ] **Nakala**?
 - [ ] **Faili zinazojulikana ambazo zina nywila**: Tumia **Linpeas** na **LaZagne**
-- [ ] **Utafutaji wa jumla**
+- [ ] **Utafutaji wa Kawaida**
 
 ### [**Writable Files**](privilege-escalation/index.html#writable-files)
 

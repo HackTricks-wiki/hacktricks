@@ -4,7 +4,7 @@
 
 ## Basic Information
 
-[From the docs](https://origin.nodejs.org/ru/docs/guides/debugging-getting-started): Wakati umeanzishwa na swichi `--inspect`, mchakato wa Node.js unasikiliza mteja wa ufuatiliaji. Kwa **kawaida**, itasikiliza kwenye mwenyeji na bandari **`127.0.0.1:9229`**. Kila mchakato pia umepewa **kipekee** **UUID**.
+[From the docs](https://origin.nodejs.org/ru/docs/guides/debugging-getting-started): Wakati umeanzishwa na swichi `--inspect`, mchakato wa Node.js unasikiliza mteja wa ufuatiliaji. Kwa **kawaida**, itasikiliza kwenye mwenyeji na bandari **`127.0.0.1:9229`**. Kila mchakato pia umepewa **UUID** **maalum**.
 
 Wateja wa mfuatiliaji lazima wajue na kubainisha anwani ya mwenyeji, bandari, na UUID ili kuungana. URL kamili itakuwa na muonekano kama `ws://127.0.0.1:9229/0f2c936f-b1cd-4ac9-aab3-f63b0f33d55e`.
 
@@ -22,37 +22,37 @@ node --inspect-brk=0.0.0.0:4444 app.js #Will run the inspector all ifaces and po
 node --inspect --inspect-port=0 app.js #Will run the inspector in a random port
 # Note that using "--inspect-port" without "--inspect" or "--inspect-brk" won't run the inspector
 ```
-Wakati unapoanza mchakato ulioangaliwa kitu kama hiki kitaonekana:
+Wakati unapoanza mchakato ulioangaziwa kitu kama hiki kitaonekana:
 ```
 Debugger ending on ws://127.0.0.1:9229/45ea962a-29dd-4cdd-be08-a6827840553d
 For help, see: https://nodejs.org/en/docs/inspector
 ```
-Mchakato unaotegemea **CEF** (**Chromium Embedded Framework**) kama unahitaji kutumia param: `--remote-debugging-port=9222` kufungua **debugger** (ulinzi wa SSRF unabaki kuwa sawa). Hata hivyo, wao **badala yake** ya kutoa kikao cha **NodeJS** **debug** kitawasiliana na kivinjari kwa kutumia [**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/), hii ni interface ya kudhibiti kivinjari, lakini hakuna RCE ya moja kwa moja.
+Mchakato unaotegemea **CEF** (**Chromium Embedded Framework**) kama unahitaji kutumia param: `--remote-debugging-port=9222` kufungua **debugger** (ulinzi wa SSRF unabaki kuwa sawa). Hata hivyo, badala ya kutoa kikao cha **NodeJS** **debug**, watCommunication na kivinjari kwa kutumia [**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/), hii ni interface ya kudhibiti kivinjari, lakini hakuna RCE ya moja kwa moja.
 
-Unapoanzisha kivinjari kilichokuwa na **debug** kitu kama hiki kitaonekana:
+Unapoanzisha kivinjari kilichosahihishwa kitu kama hiki kitaonekana:
 ```
 DevTools listening on ws://127.0.0.1:9222/devtools/browser/7d7aa9d9-7c61-4114-b4c6-fcf5c35b4369
 ```
 ### Browsers, WebSockets and same-origin policy <a href="#browsers-websockets-and-same-origin-policy" id="browsers-websockets-and-same-origin-policy"></a>
 
-Tovuti zinazofunguliwa kwenye kivinjari cha wavuti zinaweza kufanya maombi ya WebSocket na HTTP chini ya mfano wa usalama wa kivinjari. **Muunganisho wa awali wa HTTP** unahitajika ili **kupata kitambulisho cha kipekee cha kikao cha debugger**. **Sera ya same-origin** **inaepusha** tovuti kuwa na uwezo wa kufanya **muunganisho huu wa HTTP**. Kwa usalama wa ziada dhidi ya [**DNS rebinding attacks**](https://en.wikipedia.org/wiki/DNS_rebinding)**,** Node.js inathibitisha kwamba **'Host' headers** za muunganisho zinapaswa kuonyesha **anwani ya IP** au **`localhost`** au **`localhost6`** kwa usahihi.
+Tovuti zinazofunguliwa kwenye kivinjari cha wavuti zinaweza kufanya maombi ya WebSocket na HTTP chini ya mfano wa usalama wa kivinjari. **Muunganisho wa awali wa HTTP** unahitajika ili **kupata kitambulisho cha kipekee cha kikao cha debugger**. **Sera ya same-origin** **inazuia** tovuti kuwa na uwezo wa kufanya **muunganisho huu wa HTTP**. Kwa usalama wa ziada dhidi ya [**shambulio la DNS rebinding**](https://en.wikipedia.org/wiki/DNS_rebinding)**,** Node.js inathibitisha kwamba **'Host' headers** za muunganisho zinapaswa kuonyesha **anwani ya IP** au **`localhost`** au **`localhost6`** kwa usahihi.
 
 > [!NOTE]
 > Hizi **mbinu za usalama zinazuia kutumia inspector** kuendesha msimbo kwa **kupeleka tu ombi la HTTP** (ambalo linaweza kufanywa kwa kutumia udhaifu wa SSRF).
 
 ### Starting inspector in running processes
 
-Unaweza kutuma **ishara SIGUSR1** kwa mchakato wa nodejs unaoendelea ili kuufanya **uanze inspector** kwenye bandari ya kawaida. Hata hivyo, kumbuka kwamba unahitaji kuwa na ruhusa za kutosha, hivyo hii inaweza kukupa **ufikiaji wa ruhusa kwa habari ndani ya mchakato** lakini si kupanda moja kwa moja kwa ruhusa.
+Unaweza kutuma **ishara SIGUSR1** kwa mchakato wa nodejs unaoendelea ili kuifanya **ianza inspector** kwenye bandari ya kawaida. Hata hivyo, kumbuka kwamba unahitaji kuwa na ruhusa za kutosha, hivyo hii inaweza kukupa **ufikiaji wa haki za habari ndani ya mchakato** lakini si kupanda moja kwa moja kwa haki.
 ```bash
 kill -s SIGUSR1 <nodejs-ps>
 # After an URL to access the debugger will appear. e.g. ws://127.0.0.1:9229/45ea962a-29dd-4cdd-be08-a6827840553d
 ```
 > [!NOTE]
-> Hii ni muhimu katika kontena kwa sababu **kuzima mchakato na kuanzisha mpya** kwa `--inspect` **sio chaguo** kwa sababu **konteina** itauawa pamoja na mchakato.
+> Hii ni muhimu katika kontena kwa sababu **kuzima mchakato na kuanzisha mpya** kwa kutumia `--inspect` **sio chaguo** kwa sababu **konteina** itauawa pamoja na mchakato.
 
 ### Unganisha na mpelelezi/debugger
 
-Ili kuungana na **browsa inayotegemea Chromium**, URLs za `chrome://inspect` au `edge://inspect` zinaweza kufikiwa kwa Chrome au Edge, mtawalia. Kwa kubofya kitufe cha Configure, inapaswa kuhakikisha kuwa **mwenyeji wa lengo na bandari** zimeorodheshwa kwa usahihi. Picha inaonyesha mfano wa Utekelezaji wa Msimbo wa K remote (RCE):
+Ili kuungana na **browsa inayotegemea Chromium**, URLs `chrome://inspect` au `edge://inspect` zinaweza kufikiwa kwa Chrome au Edge, mtawalia. Kwa kubofya kitufe cha Configure, inapaswa kuhakikisha kuwa **mwenyeji wa lengo na bandari** zimeorodheshwa kwa usahihi. Picha inaonyesha mfano wa Utekelezaji wa Msimbo wa K remote (RCE):
 
 ![](<../../images/image (674).png>)
 
@@ -63,7 +63,7 @@ node inspect 127.0.0.1:9229
 # RCE example from debug console
 debug> exec("process.mainModule.require('child_process').exec('/Applications/iTerm.app/Contents/MacOS/iTerm2')")
 ```
-Chombo [**https://github.com/taviso/cefdebug**](https://github.com/taviso/cefdebug), kinaruhusu **kupata wakaguzi** wanaotembea kwa ndani na **kuiingiza msimbo** ndani yao.
+Chombo [**https://github.com/taviso/cefdebug**](https://github.com/taviso/cefdebug), kinaruhusu **kupata wakaguzi** wanaotembea kwa ndani na **kuingiza msimbo** ndani yao.
 ```bash
 #List possible vulnerable sockets
 ./cefdebug.exe
@@ -78,9 +78,9 @@ Chombo [**https://github.com/taviso/cefdebug**](https://github.com/taviso/cefdeb
 ## RCE katika NodeJS Debugger/Inspector
 
 > [!NOTE]
-> Ikiwa umekuja hapa kutafuta jinsi ya kupata [**RCE kutoka kwa XSS katika Electron tafadhali angalia ukurasa huu.**](../../network-services-pentesting/pentesting-web/electron-desktop-apps/)
+> Ikiwa umekuja hapa kutafuta jinsi ya kupata [**RCE kutoka kwa XSS katika Electron tafadhali angalia ukurasa huu.**](../../network-services-pentesting/pentesting-web/electron-desktop-apps/index.html)
 
-Njia kadhaa za kawaida za kupata **RCE** unapoweza **kuunganisha** na Node **inspector** ni kutumia kitu kama (inaonekana kwamba hii **haitafanya kazi katika muunganisho wa Chrome DevTools protocol**):
+Njia kadhaa za kawaida za kupata **RCE** unapoweza **kuunganisha** na **inspector** ya Node ni kutumia kitu kama (inaonekana kwamba hii **haitafanya kazi katika muunganisho na Chrome DevTools protocol**):
 ```javascript
 process.mainModule.require("child_process").exec("calc")
 window.appshell.app.openURLInDefaultBrowser("c:/windows/system32/calc.exe")
@@ -94,7 +94,7 @@ Katika sehemu hii nitataja tu mambo ya kuvutia ambayo nimeona watu wakitumia kut
 
 ### Parameter Injection via Deep Links
 
-Katika [**CVE-2021-38112**](https://rhinosecuritylabs.com/aws/cve-2021-38112-aws-workspaces-rce/) Rhino security iligundua kwamba programu inayotegemea CEF **iliandikisha URI maalum** katika mfumo (workspaces://) ambayo ilipokea URI kamili na kisha **ikaanzisha programu inayotegemea CEF** na usanidi ambao ulikuwa unajengwa kwa sehemu kutoka kwa URI hiyo.
+Katika [**CVE-2021-38112**](https://rhinosecuritylabs.com/aws/cve-2021-38112-aws-workspaces-rce/) Rhino security iligundua kwamba programu inayotegemea CEF **iliandikisha UR**I maalum katika mfumo (workspaces://index.html) ambayo ilipokea URI kamili na kisha **ikaanzisha programu inayotegemea CEF** na usanidi ambao ulikuwa unajengwa kwa sehemu kutoka kwa URI hiyo.
 
 Iligundulika kwamba vigezo vya URI vilikuwa vimefichuliwa URL na kutumika kuanzisha programu ya msingi ya CEF, ikiruhusu mtumiaji **kuingiza** bendera **`--gpu-launcher`** katika **mstari wa amri** na kutekeleza mambo yasiyo na mipaka.
 
@@ -126,13 +126,13 @@ Kulingana na chapisho hili: [https://medium.com/@knownsec404team/counter-webdriv
 
 ### Baada ya Utekelezaji
 
-Katika mazingira halisi na **baada ya kuathiri** PC ya mtumiaji anaye tumia kivinjari cha Chrome/Chromium unaweza kuzindua mchakato wa Chrome na **kuanzisha ufuatiliaji wa makosa na kuhamasisha bandari ya ufuatiliaji** ili uweze kuifikia. Kwa njia hii utaweza **kukagua kila kitu ambacho mwathirika anafanya na Chrome na kuiba taarifa nyeti**.
+Katika mazingira halisi na **baada ya kuathiri** PC ya mtumiaji anaye tumia kivinjari kinachotegemea Chrome/Chromium unaweza kuzindua mchakato wa Chrome na **kuanzisha ufuatiliaji wa mchakato na kuhamasisha bandari ya ufuatiliaji** ili uweze kuifikia. Kwa njia hii utaweza **kuangalia kila kitu ambacho mwathirika anafanya na Chrome na kuiba taarifa nyeti**.
 
 Njia ya siri ni **kuondoa kila mchakato wa Chrome** na kisha kuita kitu kama
 ```bash
 Start-Process "Chrome" "--remote-debugging-port=9222 --restore-last-session"
 ```
-## Marejeleo
+## References
 
 - [https://www.youtube.com/watch?v=iwR746pfTEc\&t=6345s](https://www.youtube.com/watch?v=iwR746pfTEc&t=6345s)
 - [https://github.com/taviso/cefdebug](https://github.com/taviso/cefdebug)

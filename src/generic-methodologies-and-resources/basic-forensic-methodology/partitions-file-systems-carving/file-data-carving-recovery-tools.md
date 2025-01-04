@@ -23,7 +23,7 @@ binwalk --dd ".*" file #Displays and extracts all files from the given file
 ```
 ### Foremost
 
-Zana lingine la kawaida la kutafuta faili zilizofichwa ni **foremost**. Unaweza kupata faili ya usanidi ya foremost katika `/etc/foremost.conf`. Ikiwa unataka tu kutafuta faili fulani, ondoa alama ya maoni. Ikiwa huondoi alama ya maoni, foremost itatafuta aina zake za faili zilizowekwa kama chaguo-msingi.
+Chombo kingine cha kawaida cha kutafuta faili zilizofichwa ni **foremost**. Unaweza kupata faili ya usanidi ya foremost katika `/etc/foremost.conf`. Ikiwa unataka tu kutafuta faili fulani, ondoa alama ya maoni. Ikiwa huondoi alama ya maoni, foremost itatafuta aina zake za faili zilizowekwa kama chaguo-msingi.
 ```bash
 sudo apt-get install foremost
 foremost -v -i file.img -o output
@@ -38,50 +38,50 @@ scalpel file.img -o output
 ```
 ### Bulk Extractor
 
-Zana hii inapatikana ndani ya kali lakini unaweza kuipata hapa: [https://github.com/simsong/bulk_extractor](https://github.com/simsong/bulk_extractor)
+Chombo hiki kinapatikana ndani ya kali lakini unaweza kukipata hapa: [https://github.com/simsong/bulk_extractor](https://github.com/simsong/bulk_extractor)
 
-Zana hii inaweza kuskan picha na itatoa **pcaps** ndani yake, **taarifa za mtandao (URLs, domains, IPs, MACs, mails)** na zaidi **faili**. Unachohitaji kufanya ni:
+Chombo hiki kinaweza kuskan picha na **kutoa pcaps** ndani yake, **taarifa za mtandao (URLs, domains, IPs, MACs, mails)** na zaidi **faili**. Unachohitaji kufanya ni:
 ```
 bulk_extractor memory.img -o out_folder
 ```
-Navigatia kupitia **maelezo yote** ambayo chombo kimekusanya (nywila?), **chambua** **paket** (soma [**Pcaps analysis**](../pcap-inspection/)), tafuta **domeni za ajabu** (domeni zinazohusiana na **malware** au **zisizokuwepo**).
+Navigate through **habari zote** that the tool has gathered (passwords?), **chambua** the **paket** (read[ **Pcaps analysis**](../pcap-inspection/index.html)), search for **domeni za ajabu** (domains related to **malware** or **zisizokuwepo**).
 
 ### PhotoRec
 
-Unaweza kuipata katika [https://www.cgsecurity.org/wiki/TestDisk_Download](https://www.cgsecurity.org/wiki/TestDisk_Download)
+You can find it in [https://www.cgsecurity.org/wiki/TestDisk_Download](https://www.cgsecurity.org/wiki/TestDisk_Download)
 
-Inakuja na toleo la GUI na CLI. Unaweza kuchagua **aina za faili** unazotaka PhotoRec itafute.
+It comes with GUI and CLI versions. You can select the **aina za faili** you want PhotoRec to search for.
 
 ![](<../../../images/image (242).png>)
 
 ### binvis
 
-Angalia [code](https://code.google.com/archive/p/binvis/) na [ukurasa wa chombo](https://binvis.io/#/).
+Check the [code](https://code.google.com/archive/p/binvis/) and the [web page tool](https://binvis.io/#/).
 
-#### Vipengele vya BinVis
+#### Features of BinVis
 
-- Muonekano wa **muundo** wa kuona na wa kazi
-- Mchoro mwingi kwa maeneo tofauti ya kuzingatia
-- Kuangazia sehemu za sampuli
-- **Kuona stings na rasilimali**, katika PE au ELF executable mfano
-- Kupata **mifumo** ya uchambuzi wa kificho kwenye faili
-- **Kugundua** algorithms za pakker au encoder
-- **Tambua** Steganography kwa mifumo
-- **Kuona** tofauti za binary
+- Visual and active **muonekano wa muundo**
+- Multiple plots for different focus points
+- Focusing on portions of a sample
+- **Kuona stings na rasilimali**, in PE or ELF executables e. g.
+- Getting **mifumo** for cryptanalysis on files
+- **Kugundua** packer or encoder algorithms
+- **Tambua** Steganography by patterns
+- **Visual** binary-diffing
 
-BinVis ni **nukta ya kuanzia nzuri ili kufahamiana na lengo lisilojulikana** katika hali ya black-boxing.
+BinVis is a great **nukta ya kuanzia kujifunza kuhusu lengo lisilojulikana** in a black-boxing scenario.
 
-## Zana Maalum za Data Carving
+## Specific Data Carving Tools
 
 ### FindAES
 
-Inatafuta funguo za AES kwa kutafuta ratiba zao za funguo. Inaweza kupata funguo za 128, 192, na 256 bit, kama zile zinazotumiwa na TrueCrypt na BitLocker.
+Searches for AES keys by searching for their key schedules. Able to find 128. 192, and 256 bit keys, such as those used by TrueCrypt and BitLocker.
 
-Pakua [hapa](https://sourceforge.net/projects/findaes/).
+Download [hapa](https://sourceforge.net/projects/findaes/).
 
-## Zana za Nyongeza
+## Complementary tools
 
-Unaweza kutumia [**viu**](https://github.com/atanunq/viu) kuona picha kutoka kwenye terminal.\
-Unaweza kutumia chombo cha mistari ya amri za linux **pdftotext** kubadilisha pdf kuwa maandiko na kuisoma.
+You can use [**viu** ](https://github.com/atanunq/viu)to see images from the terminal.\
+You can use the linux command line tool **pdftotext** to transform a pdf into text and read it.
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,6 +1,6 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-# Zana za kuchonga
+# Zana za kuchora
 
 ## Autopsy
 
@@ -19,7 +19,7 @@ binwalk --dd ".*" file #Displays and extracts all files from the given file
 ```
 ## Foremost
 
-Zana nyingine ya kawaida ya kutafuta faili zilizofichwa ni **foremost**. Unaweza kupata faili ya usanidi ya foremost katika `/etc/foremost.conf`. Ikiwa unataka tu kutafuta faili fulani, ondoa alama ya maoni. Ikiwa hutaondoa alama ya maoni, foremost itatafuta aina zake za faili zilizowekwa kama chaguo-msingi.
+Zana nyingine ya kawaida ya kutafuta faili zilizofichwa ni **foremost**. Unaweza kupata faili ya usanidi ya foremost katika `/etc/foremost.conf`. Ikiwa unataka tu kutafuta faili fulani, ondoa alama ya maoni. Ikiwa hutaondoa alama ya maoni, foremost itatafuta aina za faili zilizowekwa kama chaguo-msingi.
 ```bash
 sudo apt-get install foremost
 foremost -v -i file.img -o output
@@ -34,13 +34,13 @@ scalpel file.img -o output
 ```
 ## Bulk Extractor
 
-Zana hii inapatikana ndani ya kali lakini unaweza kuipata hapa: [https://github.com/simsong/bulk_extractor](https://github.com/simsong/bulk_extractor)
+Chombo hiki kinapatikana ndani ya kali lakini unaweza kukipata hapa: [https://github.com/simsong/bulk_extractor](https://github.com/simsong/bulk_extractor)
 
-Zana hii inaweza kuskan picha na itatoa **pcaps** ndani yake, **taarifa za mtandao (URLs, domains, IPs, MACs, mails)** na zaidi **faili**. Unachohitaji kufanya ni:
+Chombo hiki kinaweza kuskan picha na **kutoa pcaps** ndani yake, **taarifa za mtandao (URLs, domains, IPs, MACs, mails)** na zaidi **faili**. Unachohitaji kufanya ni:
 ```text
 bulk_extractor memory.img -o out_folder
 ```
-Navigatia kupitia **maelezo yote** ambayo chombo kimekusanya \(nywila?\), **chambua** **paket** \(soma [**Pcaps analysis**](../pcap-inspection/)\), tafuta **domeni za ajabu** \(domeni zinazohusiana na **malware** au **zisizokuwepo**\).
+Navigate through **maelezo yote** ambayo chombo kimekusanya \(nywila?\), **chambua** **paket** \(soma [**Pcaps analysis**](../pcap-inspection/index.html)\), tafuta **domeni za ajabu** \(domeni zinazohusiana na **malware** au **zisizokuwepo**\).
 
 ## PhotoRec
 
@@ -54,7 +54,7 @@ Inakuja na toleo la GUI na CLI. Unaweza kuchagua **aina za faili** unazotaka Pho
 
 ## FindAES
 
-Inatafuta funguo za AES kwa kutafuta ratiba zao za funguo. Inaweza kupata funguo za 128, 192, na 256 bit, kama zile zinazotumiwa na TrueCrypt na BitLocker.
+Inatafuta funguo za AES kwa kutafuta mipango yao ya funguo. Inaweza kupata funguo za 128, 192, na 256 bit, kama zile zinazotumiwa na TrueCrypt na BitLocker.
 
 Pakua [hapa](https://sourceforge.net/projects/findaes/).
 

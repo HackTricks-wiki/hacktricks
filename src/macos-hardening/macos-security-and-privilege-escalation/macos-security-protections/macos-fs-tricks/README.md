@@ -6,11 +6,11 @@
 
 Ruhusa katika **directory**:
 
-- **kusoma** - unaweza **kuorodhesha** entries za directory
+- **kusoma** - unaweza **kuhesabu** entries za directory
 - **kuandika** - unaweza **kufuta/kuandika** **files** katika directory na unaweza **kufuta folda tupu**.
 - Lakini huwezi **kufuta/kubadilisha folda zisizo tupu** isipokuwa una ruhusa za kuandika juu yake.
-- Huwezi **kubadilisha jina la folda** isipokuwa unamiliki.
-- **kutekeleza** - ume **ruhusiwa kupita** katika directory - ikiwa huna haki hii, huwezi kufikia files zozote ndani yake, au katika subdirectories zozote.
+- Huwezi **kubadilisha jina la folda** isipokuwa unamiliki hiyo.
+- **kutekeleza** - ume **ruhusiwa kupita** directory - ikiwa huna haki hii, huwezi kufikia files zozote ndani yake, au katika subdirectories zozote.
 
 ### Mchanganyiko Hatari
 
@@ -20,25 +20,25 @@ Ruhusa katika **directory**:
 - Mmiliki mmoja wa **directory** katika njia ni **kikundi cha watumiaji** chenye **ruhusa za kuandika**
 - Kikundi cha watumiaji kina **ruhusa za kuandika** kwa **file**
 
-Kwa mchanganyiko wowote wa hapo juu, mshambuliaji anaweza **kuingiza** **sym/hard link** kwenye njia inayotarajiwa ili kupata kuandika kwa kibali bila kikomo.
+Kwa mchanganyiko wowote wa hapo juu, mshambuliaji anaweza **kuingiza** **sym/hard link** kwenye njia inayotarajiwa ili kupata kuandika kwa kibali bila mipaka.
 
-### Kesi Maalum ya Folda root R+X
+### Kesi Maalum ya Folder root R+X
 
-Ikiwa kuna files katika **directory** ambapo **ni root pekee mwenye R+X access**, hizo **hazipatikani kwa mtu mwingine yeyote**. Hivyo, udhaifu unaoruhusu **kuhamasisha file inayoweza kusomwa na mtumiaji**, ambayo haiwezi kusomwa kwa sababu ya **kizuizi** hicho, kutoka folda hii **kwenda nyingine**, unaweza kutumiwa kusoma files hizi.
+Ikiwa kuna files katika **directory** ambapo **ni root pekee mwenye R+X access**, hizo **hazipatikani kwa mtu mwingine yeyote**. Hivyo, udhaifu unaoruhusu **kuhamasisha file inayoweza kusomwa na mtumiaji**, ambayo haiwezi kusomwa kwa sababu ya **kizuizi** hicho, kutoka folda hii **kwenda folda tofauti**, unaweza kutumiwa kusoma files hizi.
 
 Mfano katika: [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions)
 
-## Link ya Alama / Link ya Ngumu
+## Link ya Alama / Link Ngumu
 
 ### File/folda yenye ruhusa
 
-Ikiwa mchakato wenye kibali unaandika data katika **file** ambayo inaweza **kudhibitiwa** na **mtumiaji mwenye ruhusa ya chini**, au ambayo inaweza **kuundwa awali** na mtumiaji mwenye ruhusa ya chini. Mtumiaji anaweza tu **kuielekeza kwenye file nyingine** kupitia Link ya Alama au Link ya Ngumu, na mchakato wenye kibali utaandika kwenye file hiyo.
+Ikiwa mchakato wenye kibali unaandika data katika **file** ambayo inaweza **kudhibitiwa** na **mtumiaji mwenye ruhusa ndogo**, au ambayo inaweza **kuundwa awali** na mtumiaji mwenye ruhusa ndogo. Mtumiaji anaweza tu **kuielekeza kwenye file nyingine** kupitia Link ya Alama au Link Ngumu, na mchakato wenye kibali utaandika kwenye file hiyo.
 
-Angalia katika sehemu nyingine ambapo mshambuliaji anaweza **kutilia shaka kuandika bila kikomo ili kupandisha ruhusa**.
+Angalia katika sehemu nyingine ambapo mshambuliaji anaweza **kutitumia kuandika bila mipaka ili kupandisha ruhusa**.
 
-### Funguo `O_NOFOLLOW`
+### Fungua `O_NOFOLLOW`
 
-Funguo `O_NOFOLLOW` inapokuwa inatumika na kazi `open` haitafuata symlink katika kipengele cha mwisho cha njia, lakini itafuata sehemu nyingine za njia. Njia sahihi ya kuzuia kufuata symlinks katika njia ni kwa kutumia funguo `O_NOFOLLOW_ANY`.
+Bendera `O_NOFOLLOW` inapokuwa inatumika na kazi `open` haitafuata symlink katika kipengele cha mwisho cha njia, lakini itafuata sehemu nyingine za njia. Njia sahihi ya kuzuia kufuata symlinks katika njia ni kwa kutumia bendera `O_NOFOLLOW_ANY`.
 
 ## .fileloc
 
@@ -60,9 +60,9 @@ Mfano:
 
 ### Leak FD (no `O_CLOEXEC`)
 
-Ikiwa wito wa `open` haina bendera `O_CLOEXEC`, desktop ya faili itarithiwa na mchakato wa mtoto. Hivyo, ikiwa mchakato wenye mamlaka unafungua faili yenye mamlaka na kutekeleza mchakato unaodhibitiwa na mshambuliaji, mshambuliaji atakuwa **na FD juu ya faili yenye mamlaka**.
+Ikiwa wito wa `open` haina bendera `O_CLOEXEC`, desktopu la faili litakurudishwa na mchakato wa mtoto. Hivyo, ikiwa mchakato wenye mamlaka unafungua faili yenye mamlaka na kutekeleza mchakato unaodhibitiwa na mshambuliaji, mshambuliaji atakuwa **na FD juu ya faili yenye mamlaka**.
 
-Ikiwa unaweza kufanya **mchakato ufungue faili au folda zenye mamlaka ya juu**, unaweza kutumia **`crontab`** kufungua faili katika `/etc/sudoers.d` na **`EDITOR=exploit.py`**, hivyo `exploit.py` itapata FD kwa faili ndani ya `/etc/sudoers` na kuifanya.
+Ikiwa unaweza kufanya **mchakato ufungue faili au folda zenye mamlaka ya juu**, unaweza kutumia **`crontab`** kufungua faili katika `/etc/sudoers.d` na **`EDITOR=exploit.py`**, hivyo `exploit.py` itapata FD kwa faili ndani ya `/etc/sudoers` na kuifanya itumike vibaya.
 
 Kwa mfano: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098), code: https://github.com/gergelykalman/CVE-2023-32428-a-macOS-LPE-via-MallocStackLogging
 
@@ -74,7 +74,7 @@ xattr -d com.apple.quarantine /path/to/file_or_app
 ```
 ### uchg / uchange / uimmutable flag
 
-Ikiwa faili/folda ina sifa hii isiyoweza kubadilishwa, haitakuwa possible kuweka xattr juu yake.
+Ikiwa faili/folda ina sifa hii isiyoweza kubadilishwa haitakuwa na uwezo wa kuweka xattr juu yake.
 ```bash
 echo asd > /tmp/asd
 chflags uchg /tmp/asd # "chflags uchange /tmp/asd" or "chflags uimmutable /tmp/asd"
@@ -86,7 +86,7 @@ ls -lO /tmp/asd
 ```
 ### defvfs mount
 
-A **devfs** mount **haiungi xattr**, maelezo zaidi katika [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)
+A **devfs** mount **haina msaada wa xattr**, maelezo zaidi katika [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)
 ```bash
 mkdir /tmp/mnt
 mount_devfs -o noowners none "/tmp/mnt"
@@ -122,7 +122,7 @@ ls -le /tmp/test
 
 **AppleDouble** muundo wa faili unakopi faili pamoja na ACE zake.
 
-Katika [**kanuni ya chanzo**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) inawezekana kuona kwamba uwakilishi wa maandiko ya ACL ulihifadhiwa ndani ya xattr inayoitwa **`com.apple.acl.text`** utawekwa kama ACL katika faili lililoshughulikiwa. Hivyo, ikiwa umeweka programu katika faili la zip kwa muundo wa faili wa **AppleDouble** ukiwa na ACL inayozuia xattrs nyingine kuandikwa ndani yake... xattr ya karantini haikuwekwa katika programu:
+Katika [**kanuni ya chanzo**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) inawezekana kuona kwamba uwakilishi wa maandiko wa ACL ulihifadhiwa ndani ya xattr inayoitwa **`com.apple.acl.text`** utawekwa kama ACL katika faili lililoshughulikiwa. Hivyo, ikiwa umecompress programu ndani ya faili la zip lenye muundo wa **AppleDouble** ukiwa na ACL inayozuia xattrs nyingine kuandikwa ndani yake... xattr ya karantini haikuwekwa kwenye programu:
 
 Angalia [**ripoti ya asili**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) kwa maelezo zaidi.
 
@@ -146,19 +146,19 @@ ls -le test
 ```
 (Note that even if this works the sandbox write the quarantine xattr before)
 
-Sio muhimu sana lakini naiacha hapa tu kwa sababu:
+Not really needed but I leave it there just in case:
 
 {{#ref}}
 macos-xattr-acls-extra-stuff.md
 {{#endref}}
 
-## Kupita ukaguzi wa saini
+## Bypass signature checks
 
-### Kupita ukaguzi wa binaries za jukwaa
+### Bypass platform binaries checks
 
-Baadhi ya ukaguzi wa usalama huangalia kama binary ni **binary ya jukwaa**, kwa mfano kuruhusu kuungana na huduma ya XPC. Hata hivyo, kama ilivyoelezwa katika kupita kwenye https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/, inawezekana kupita ukaguzi huu kwa kupata binary ya jukwaa (kama /bin/ls) na kuingiza exploit kupitia dyld kwa kutumia variable ya mazingira `DYLD_INSERT_LIBRARIES`.
+Baadhi ya ukaguzi wa usalama huangalia ikiwa binary ni **platform binary**, kwa mfano kuruhusu kuungana na huduma ya XPC. Hata hivyo, kama ilivyoonyeshwa katika bypass kwenye https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/, inawezekana kupita ukaguzi huu kwa kupata platform binary (kama /bin/ls) na kuingiza exploit kupitia dyld kwa kutumia variable ya mazingira `DYLD_INSERT_LIBRARIES`.
 
-### Kupita bendera `CS_REQUIRE_LV` na `CS_FORCED_LV`
+### Bypass flags `CS_REQUIRE_LV` and `CS_FORCED_LV`
 
 Inawezekana kwa binary inayotekelezwa kubadilisha bendera zake mwenyewe ili kupita ukaguzi kwa kutumia msimbo kama:
 ```c
@@ -195,7 +195,7 @@ Hata hivyo, kuna baadhi ya faili ambazo saini yake haitakaguliwa, hizi zina ufun
 </dict>
 <key>rules2</key>
 ...
-<key>^(.*/)?\.DS_Store$</key>
+<key>^(.*/index.html)?\.DS_Store$</key>
 <dict>
 <key>omit</key>
 <true/>
@@ -261,7 +261,7 @@ Unaweza **kuigiza** utekelezaji wa skripti hii kwa: **`sudo periodic daily`**
 
 ### Daemons
 
-Andika **LaunchDaemon** ya kiholela kama **`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`** yenye plist inayotekeleza skripti ya kiholela kama:
+Andika **LaunchDaemon** ya huru kama **`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`** yenye plist inayotekeleza skripti ya huru kama:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -300,7 +300,7 @@ ErrorLog /etc/sudoers.d/lpe
 LogFilePerm 777
 <some junk>
 ```
-Hii itaunda faili `/etc/sudoers.d/lpe` yenye ruhusa 777. Takataka za ziada mwishoni ni kuanzisha uundaji wa kumbukumbu ya makosa.
+Hii itaunda faili `/etc/sudoers.d/lpe` yenye ruhusa 777. Takataka za ziada mwishoni ni kuanzisha uundaji wa kumbukumbu za makosa.
 
 Kisha, andika katika `/etc/sudoers.d/lpe` usanidi unaohitajika ili kupandisha mamlaka kama `%staff ALL=(ALL) NOPASSWD:ALL`.
 

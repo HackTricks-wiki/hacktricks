@@ -2,12 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**Kurasa za kuvutia za kuangalia:**
+**Kurasa za kuvutia kuangalia:**
 
 - [**Hacks za Pyscript**](pyscript.md)
-- [**Python deserializations**](../../pentesting-web/deserialization/index.html#python)
-- [**Njia za kupita python sandboxes**](bypass-python-sandboxes/)
-- [**Msingi wa sintaksia za maombi ya wavuti ya python**](web-requests.md)
-- [**Msingi wa sintaksia na maktaba za python**](basic-python.md)
+- [**Python deserialization**](../../pentesting-web/deserialization/index.html#python)
+- [**Njia za kupita sandboxes za python**](bypass-python-sandboxes/index.html)
+- [**Sintaksia ya maombi ya wavuti ya python ya msingi**](web-requests.md)
+- [**Sintaksia na maktaba za python za msingi**](basic-python.md)
 
 {{#include ../../banners/hacktricks-training.md}}

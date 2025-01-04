@@ -30,7 +30,7 @@ macos-applefs.md
 mac-os-architecture/
 {{#endref}}
 
-- Huduma za kawaida za mtandao wa macOS **na protokali**
+- Huduma za kawaida za mtandao wa macOS & **protokali**
 
 {{#ref}}
 macos-protocols.md
@@ -41,7 +41,7 @@ macos-protocols.md
 
 ### MacOS MDM
 
-Katika kampuni **sistimu za macOS** zina uwezekano mkubwa wa **kusimamiwa na MDM**. Hivyo, kutoka mtazamo wa mshambuliaji ni muhimu kujua **jinsi hiyo inavyofanya kazi**:
+Katika kampuni **sistimu za macOS** zina uwezekano mkubwa kuwa **zinadhibitiwa na MDM**. Hivyo, kutoka mtazamo wa mshambuliaji ni muhimu kujua **jinsi hiyo inavyofanya kazi**:
 
 {{#ref}}
 ../macos-red-teaming/macos-mdm/
@@ -63,7 +63,7 @@ macos-security-protections/
 
 ### Ruhusa za Faili
 
-Ikiwa **mchakato unaotembea kama root unaandika** faili ambayo inaweza kudhibitiwa na mtumiaji, mtumiaji anaweza kuitumia hii ili **kuinua ruhusa**.\
+Ikiwa **mchakato unaotendeka kama root unaandika** faili ambayo inaweza kudhibitiwa na mtumiaji, mtumiaji anaweza kuitumia hii ili **kuinua ruhusa**.\
 Hii inaweza kutokea katika hali zifuatazo:
 
 - Faili iliyotumika tayari iliumbwa na mtumiaji (inamilikiwa na mtumiaji)
@@ -93,11 +93,11 @@ Katika macOS **programu na binaries zinaweza kuwa na ruhusa** za kufikia folda a
 
 Hivyo, mshambuliaji anayetaka kufanikiwa kuathiri mashine ya macOS atahitaji **kuinua ruhusa zake za TCC** (au hata **kuzidi SIP**, kulingana na mahitaji yake).
 
-Ruhusa hizi kwa kawaida hutolewa kwa njia ya **entitlements** ambayo programu imeandikwa nayo, au programu inaweza kuomba baadhi ya ufaccess na baada ya **mtumiaji kuidhinisha** zinaweza kupatikana katika **maktaba za TCC**. Njia nyingine mchakato unaweza kupata ruhusa hizi ni kwa kuwa **mtoto wa mchakato** wenye hizo **ruhusa** kwani kwa kawaida **zinarithiwa**.
+Ruhusa hizi kwa kawaida hutolewa kwa njia ya **entitlements** ambayo programu imeandikwa nayo, au programu inaweza kuomba baadhi ya ufaccess na baada ya **mtumiaji kuidhinisha** zinaweza kupatikana katika **databases za TCC**. Njia nyingine mchakato unaweza kupata ruhusa hizi ni kwa kuwa **mtoto wa mchakato** wenye hizo **ruhusa** kwani kwa kawaida **zinarithiwa**.
 
-Fuata viungo hivi kupata njia tofauti za [**kuinua ruhusa katika TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), [**kuzidi TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) na jinsi katika siku za nyuma [**SIP imezidiwa**](macos-security-protections/macos-sip.md#sip-bypasses).
+Fuata viungo hivi kupata njia tofauti za [**kuinua ruhusa katika TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), [**kuzidi TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) na jinsi katika siku za nyuma [**SIP imezidiwa**](macos-security-protections/macos-sip.md#sip-bypasses).
 
-## macOS Kuinua Privilege Kawaida
+## Kuinua Privilege ya Kawaida ya macOS
 
 Bila shaka kutoka mtazamo wa timu nyekundu unapaswa pia kuwa na hamu ya kuinua hadi root. Angalia chapisho lifuatalo kwa vidokezo vingine:
 
