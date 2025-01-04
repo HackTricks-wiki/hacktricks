@@ -17,7 +17,7 @@ python3 autovol3.py -f MEMFILE -o OUT_DIR -s minimal
 python3 autovol3.py -f MEMFILE -o OUT_DIR -s normal
 
 ```
-Eğer birkaç Volatility eklentisini paralel olarak başlatacak **hızlı ve çılgın** bir şey istiyorsanız şunu kullanabilirsiniz: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
+Eğer birkaç Volatility eklentisini paralel olarak başlatacak **hızlı ve çılgın** bir şeye ihtiyacınız varsa şunu kullanabilirsiniz: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
 ```bash
 python autoVolatility.py -f MEMFILE -d OUT_DIRECTORY -e /home/user/tools/volatility/vol.py # It will use the most important plugins (could use a lot of space depending on the size of the memory)
 ```
@@ -54,11 +54,11 @@ Resmi belgeye [Volatility komut referansı](https://github.com/volatilityfoundat
 
 ### “list” ve “scan” eklentileri hakkında bir not
 
-Volatility, bazen isimlerinde yansıyan iki ana eklenti yaklaşımına sahiptir. “list” eklentileri, süreçler gibi bilgileri almak için Windows Kernel yapıları arasında gezinmeye çalışır (bellekteki `_EPROCESS` yapılarının bağlı listesini bulma ve yürütme), OS handle'ları (handle tablosunu bulma ve listeleme, bulunan herhangi bir işaretçiyi çözme vb.). Örneğin, süreçleri listelemesi istendiğinde Windows API'sinin davranışına benzer şekilde çalışırlar.
+Volatility, bazen isimlerinde yansıyan iki ana eklenti yaklaşımına sahiptir. “list” eklentileri, süreçler gibi bilgileri almak için Windows Kernel yapıları arasında gezinmeye çalışır (bellekteki `_EPROCESS` yapılarının bağlı listesini bulma ve yürütme), OS handle'ları (handle tablosunu bulma ve listeleme, bulunan herhangi bir işaretçiyi çözme vb.). İstenirse, örneğin, süreçleri listelemek için Windows API'sinin davranışına benzer şekilde çalışırlar.
 
-Bu, “list” eklentilerini oldukça hızlı hale getirir, ancak kötü amaçlı yazılımlar tarafından manipülasyona karşı Windows API'si kadar savunmasızdır. Örneğin, kötü amaçlı yazılım DKOM kullanarak bir süreci `_EPROCESS` bağlı listesinden ayırırsa, bu süreç Görev Yöneticisi'nde görünmeyecek ve pslist'te de görünmeyecektir.
+Bu, “list” eklentilerini oldukça hızlı hale getirir, ancak kötü amaçlı yazılımlar tarafından manipülasyona karşı Windows API'si kadar savunmasızdırlar. Örneğin, kötü amaçlı yazılım DKOM kullanarak bir süreci `_EPROCESS` bağlı listesinden ayırırsa, bu süreç Görev Yöneticisi'nde görünmeyecek ve pslist'te de görünmeyecektir.
 
-Diğer yandan, “scan” eklentileri, belirli yapılar olarak çözümlendiğinde anlamlı olabilecek şeyler için belleği kazıma yaklaşımını benimseyecektir. Örneğin, `psscan` belleği okuyacak ve ondan `_EPROCESS` nesneleri oluşturmaya çalışacaktır (ilgi çekici bir yapının varlığını gösteren 4 baytlık dizeleri arayan havuz etiketi taraması kullanır). Avantajı, çıkmış süreçleri bulabilmesidir ve kötü amaçlı yazılım `_EPROCESS` bağlı listesiyle oynasa bile, eklenti hala bellekte yatan yapıyı bulacaktır (çünkü sürecin çalışması için hala var olması gerekir). Dezavantajı ise, “scan” eklentilerinin “list” eklentilerinden biraz daha yavaş olması ve bazen yanlış pozitifler verebilmesidir (çok uzun süre önce çıkmış ve yapısının bazı kısımları diğer işlemler tarafından üzerine yazılmış bir süreç).
+Diğer yandan, “scan” eklentileri, bellekten belirli yapılar olarak çözümlendiğinde anlamlı olabilecek şeyleri kazıma yaklaşımını benimser. Örneğin, `psscan` bellek okur ve ondan `_EPROCESS` nesneleri oluşturmaya çalışır (ilgi çekici bir yapının varlığını gösteren 4 baytlık dizeleri arayan havuz etiketi taraması kullanır). Avantajı, çıkmış süreçleri bulabilmesidir ve kötü amaçlı yazılım `_EPROCESS` bağlı listesiyle oynasa bile, eklenti hala bellekte yatan yapıyı bulacaktır (çünkü sürecin çalışması için hala var olması gerekir). Dezavantajı ise, “scan” eklentilerinin “list” eklentilerinden biraz daha yavaş olması ve bazen yanlış pozitifler verebilmesidir (çok uzun süre önce çıkmış ve yapısının bazı kısımları diğer işlemler tarafından üzerine yazılmış bir süreç).
 
 Kaynak: [http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
 
@@ -66,7 +66,7 @@ Kaynak: [http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analys
 
 ### Volatility3
 
-Readme içinde açıklandığı gibi, desteklemek istediğiniz **işletim sisteminin sembol tablosunu** _volatility3/volatility/symbols_ içine koymanız gerekir.\
+Readme içinde açıklandığı gibi, desteklemek istediğiniz **OS'nin sembol tablosunu** _volatility3/volatility/symbols_ içine koymanız gerekir.\
 Çeşitli işletim sistemleri için sembol tablosu paketleri **indirilebilir** olarak mevcuttur:
 
 - [https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip](https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip)
@@ -106,7 +106,9 @@ volatility kdbgscan -f file.dmp
 ```
 #### **imageinfo ve kdbgscan arasındaki farklar**
 
-[**Buradan**](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/): imageinfo'nun yalnızca profil önerileri sağladığına karşılık, **k
+[**Buradan**](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/): Sadece profil önerileri sunan imageinfo'nun aksine, **kdbgscan** doğru profili ve doğru KDBG adresini (birden fazla varsa) kesin olarak tanımlamak için tasarlanmıştır. Bu eklenti, Volatility profilleriyle bağlantılı KDBGHeader imzalarını tarar ve yanlış pozitifleri azaltmak için mantık kontrolleri uygular. Çıktının ayrıntı seviyesi ve gerçekleştirilebilecek mantık kontrolü sayısı, Volatility'nin bir DTB bulup bulamamasına bağlıdır, bu nedenle doğru profili zaten biliyorsanız (veya imageinfo'dan bir profil öneriniz varsa), bunu kullanmayı unutmayın.
+
+Her zaman **kdbgscan'ın bulduğu süreç sayısına** bakın. Bazen imageinfo ve kdbgscan **birden fazla** uygun **profil** bulabilir, ancak yalnızca **geçerli olanın bazı süreçlerle ilişkili** olacaktır (Bu, süreçleri çıkarmak için doğru KDBG adresinin gerekli olmasından kaynaklanmaktadır).
 ```bash
 # GOOD
 PsActiveProcessHead           : 0xfffff800011977f0 (37 processes)
@@ -120,18 +122,18 @@ PsLoadedModuleList            : 0xfffff80001197ac0 (0 modules)
 ```
 #### KDBG
 
-**Kernel debugger block** olarak adlandırılan **KDBG**, Volatility tarafından yapılan adli görevler için kritik öneme sahiptir. `KdDebuggerDataBlock` olarak tanımlanan ve `_KDDEBUGGER_DATA64` türünde olan bu blok, `PsActiveProcessHead` gibi temel referanslar içerir. Bu özel referans, tüm süreçlerin listelenmesini sağlayarak, kapsamlı bellek analizi için temel olan süreç listesinin başına işaret eder.
+**KDBG** olarak adlandırılan **kernel debugger block**, Volatility ve çeşitli hata ayıklayıcılar tarafından gerçekleştirilen adli görevler için kritik öneme sahiptir. `KdDebuggerDataBlock` olarak tanımlanan ve `_KDDEBUGGER_DATA64` türünde olan bu blok, `PsActiveProcessHead` gibi temel referanslar içerir. Bu özel referans, tüm süreçlerin listelenmesini sağlayarak, kapsamlı bellek analizi için temel olan süreç listesinin başını işaret eder.
 
 ## OS Bilgisi
 ```bash
 #vol3 has a plugin to give OS information (note that imageinfo from vol2 will give you OS info)
 ./vol.py -f file.dmp windows.info.Info
 ```
-`banners.Banners` eklentisi, dump'ta **linux banner'larını bulmak için vol3'te** kullanılabilir.
+Eklenti `banners.Banners`, dökümde **linux banner'larını bulmak için vol3'te** kullanılabilir.
 
-## Hashler/Şifreler
+## Hashler/Parolalar
 
-SAM hash'lerini, [domain önbellekli kimlik bilgilerini](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) ve [lsa gizli anahtarlarını](../../../windows-hardening/authentication-credentials-uac-and-efs/#lsa-secrets) çıkarın.
+SAM hash'lerini, [alan önbellekli kimlik bilgilerini](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) ve [lsa sırlarını](../../../windows-hardening/authentication-credentials-uac-and-efs/index.html#lsa-secrets) çıkarın.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -159,9 +161,9 @@ volatility -f file.dmp --profile=Win7SP1x86 memdump -p 2168 -D conhost/
 ```
 ## Süreçler
 
-### Süreçleri Listele
+### Süreçleri listele
 
-**Şüpheli** süreçleri (isimle) veya **beklenmedik** çocuk **süreçleri** (örneğin, iexplorer.exe'nin bir çocuğu olarak cmd.exe) bulmaya çalışın.\
+**Şüpheli** süreçleri (isimle) veya **beklenmedik** çocuk **süreçleri** (örneğin, iexplorer.exe'nin bir çocuğu olarak bir cmd.exe) bulmaya çalışın.\
 Gizli süreçleri tanımlamak için pslist'in sonucunu psscan ile **karşılaştırmak** ilginç olabilir.
 
 {{#tabs}}
@@ -267,8 +269,8 @@ volatility --profile=Win7SP1x86_23418 privs -f file.dmp | grep "SeImpersonatePri
 
 ### SIDs
 
-Bir işlem tarafından sahip olunan her SSID'yi kontrol edin.\
-Bir ayrıcalık SID'si kullanan işlemleri (ve bazı hizmet SID'si kullanan işlemleri) listelemek ilginç olabilir.
+Bir süreç tarafından sahip olunan her SSID'yi kontrol edin.\
+Bir ayrıcalık SID'si kullanan süreçleri (ve bazı hizmet SID'si kullanan süreçleri) listelemek ilginç olabilir.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -286,9 +288,9 @@ volatility --profile=Win7SP1x86_23418 getservicesids -f file.dmp #Get the SID of
 {{#endtab}}
 {{#endtabs}}
 
-### Handles
+### Handle'lar
 
-Bir **işlemin hangi diğer dosyalara, anahtarlara, ipliklere, süreçlere...** bir **handle**'ı olduğunu bilmek faydalıdır (açılmıştır)
+Bir **işlemin bir handle'ı** olduğu (açtığı) diğer dosyalara, anahtarlara, iş parçacıklarına, süreçlere... hangi dosyaların olduğunu bilmek faydalıdır.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -345,7 +347,7 @@ strings 3532.dmp > strings_file
 {{#endtab}}
 {{#endtabs}}
 
-Ayrıca yarascan modülünü kullanarak bir süreç içinde dizeleri aramaya da olanak tanır:
+Ayrıca, yarascan modülünü kullanarak bir süreç içinde dizeleri aramayı da sağlar:
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -364,7 +366,7 @@ volatility --profile=Win7SP1x86_23418 yarascan -Y "https://" -p 3692,3840,3976,3
 
 ### UserAssist
 
-**Windows**, çalıştırdığınız programları **UserAssist anahtarları** adı verilen kayıt defteri özelliği ile takip eder. Bu anahtarlar, her programın ne kadar sıklıkla çalıştırıldığını ve en son ne zaman çalıştırıldığını kaydeder.
+**Windows**, çalıştırdığınız programları **UserAssist anahtarları** adı verilen kayıt defteri özelliği ile takip eder. Bu anahtarlar, her programın kaç kez çalıştırıldığını ve en son ne zaman çalıştırıldığını kaydeder.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -431,9 +433,9 @@ volatility --profile=SomeLinux -f file.dmp linux_route_cache
 {{#endtab}}
 {{#endtabs}}
 
-## Kayıt huni
+## Kayıt hives
 
-### Mevcut hunileri yazdır
+### Mevcut hives'ları yazdır
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -478,7 +480,7 @@ volatility --profile=Win7SP1x86_23418 hivedump -f file.dmp
 ```
 ## Dosya Sistemi
 
-### Bağla
+### Bağlama
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -534,7 +536,7 @@ volatility --profile=Win7SP1x86_23418 mftparser -f file.dmp
 {{#endtab}}
 {{#endtabs}}
 
-**NTFS dosya sistemi**, _master file table_ (MFT) olarak bilinen kritik bir bileşen kullanır. Bu tablo, bir hacimdeki her dosya için en az bir giriş içerir ve MFT'nin kendisini de kapsar. Her dosya hakkında **boyut, zaman damgaları, izinler ve gerçek veriler** gibi hayati bilgiler, MFT girişleri içinde veya bu girişler tarafından referans verilen MFT dışındaki alanlarda kapsüllenmiştir. Daha fazla bilgi [resmi belgede](https://docs.microsoft.com/en-us/windows/win32/fileio/master-file-table) bulunabilir.
+**NTFS dosya sistemi**, _master file table_ (MFT) olarak bilinen kritik bir bileşen kullanır. Bu tablo, bir hacimdeki her dosya için en az bir giriş içerir ve MFT'nin kendisini de kapsar. Her dosya hakkında **boyut, zaman damgaları, izinler ve gerçek veriler** gibi hayati bilgiler, MFT girişlerinde veya bu girişler tarafından referans verilen MFT dışındaki alanlarda kapsüllenmiştir. Daha fazla bilgi için [resmi belgeleri](https://docs.microsoft.com/en-us/windows/win32/fileio/master-file-table) inceleyebilirsiniz.
 
 ### SSL Anahtarları/Sertifikaları
 
@@ -556,9 +558,6 @@ volatility --profile=Win7SP1x86_23418 dumpcerts --dump-dir=. -f file.dmp
 {{#endtabs}}
 
 ## Kötü Amaçlı Yazılım
-
-{{#tabs}}
-{{#tab name="vol3"}}
 ```bash
 ./vol.py -f file.dmp windows.malfind.Malfind [--dump] #Find hidden and injected code, [dump each suspicious section]
 #Malfind will search for suspicious structures related to malware
@@ -625,7 +624,7 @@ volatility --profile=Win7SP1x86_23418 yarascan -y malware_rules.yar -f ch2.dmp |
 
 ### Dış eklentiler
 
-Dış eklentileri kullanmak istiyorsanız, eklentilerle ilgili klasörlerin ilk parametre olarak kullanıldığından emin olun. 
+Dış eklentileri kullanmak istiyorsanız, eklentilerle ilgili klasörlerin kullanılan ilk parametre olduğundan emin olun.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -647,7 +646,7 @@ volatilitye --plugins="/tmp/plugins/" [...]
 ```
 volatility --plugins=volatility-autoruns/ --profile=WinXPSP2x86 -f file.dmp autoruns
 ```
-### Mutexler
+### Mutexes
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -715,9 +714,6 @@ volatility --profile=Win7SP1x86_23418 -f timeliner
 {{#endtabs}}
 
 ### Sürücüler
-
-{{#tabs}}
-{{#tab name="vol3"}}
 ```
 ./vol.py -f file.dmp windows.driverscan.DriverScan
 ```
@@ -740,7 +736,7 @@ volatility --profile=Win7SP1x86_23418 clipboard -f file.dmp
 #Just vol2
 volatility --profile=Win7SP1x86_23418 iehistory -f file.dmp
 ```
-### Not Defteri metnini al
+### Not Defteri Metnini Alın
 ```bash
 #Just vol2
 volatility --profile=Win7SP1x86_23418 notepad -f file.dmp

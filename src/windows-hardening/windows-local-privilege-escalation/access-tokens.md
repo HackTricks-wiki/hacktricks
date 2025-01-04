@@ -1,10 +1,10 @@
-# Erişim Jetonları
+# Access Tokens
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Erişim Jetonları
+## Access Tokens
 
-Her **sisteme giriş yapmış kullanıcı**, o oturum için **güvenlik bilgileriyle bir erişim jetonu taşır**. Sistem, kullanıcı giriş yaptığında bir erişim jetonu oluşturur. **Kullanıcı adına yürütülen her işlem**, **erişim jetonunun bir kopyasına sahiptir**. Jeton, kullanıcıyı, kullanıcının gruplarını ve kullanıcının ayrıcalıklarını tanımlar. Bir jeton ayrıca, mevcut oturum açma işlemini tanımlayan bir oturum açma SID'si (Güvenlik Tanımlayıcısı) içerir.
+Her **sisteme giriş yapmış kullanıcı**, o oturum için **güvenlik bilgileriyle bir erişim belirteci** taşır. Sistem, kullanıcı giriş yaptığında bir erişim belirteci oluşturur. **Kullanıcı adına yürütülen her işlem**, **erişim belirtecinin bir kopyasına** sahiptir. Belirteç, kullanıcıyı, kullanıcının gruplarını ve kullanıcının ayrıcalıklarını tanımlar. Bir belirteç ayrıca, mevcut oturum açma işlemini tanımlayan bir oturum açma SID'si (Güvenlik Tanımlayıcısı) içerir.
 
 Bu bilgiyi `whoami /all` komutunu çalıştırarak görebilirsiniz.
 ```
@@ -50,14 +50,14 @@ SeUndockPrivilege             Remove computer from docking station Disabled
 SeIncreaseWorkingSetPrivilege Increase a process working set       Disabled
 SeTimeZonePrivilege           Change the time zone                 Disabled
 ```
-veya Sysinternals'tan _Process Explorer_ kullanarak (işlemi seçin ve "Security" sekmesine erişin):
+or using _Process Explorer_ from Sysinternals (select process and access"Security" tab):
 
 ![](<../../images/image (772).png>)
 
 ### Yerel yönetici
 
 Bir yerel yönetici oturum açtığında, **iki erişim belirteci oluşturulur**: Biri yönetici haklarıyla diğeri normal haklarla. **Varsayılan olarak**, bu kullanıcı bir işlem yürüttüğünde **normal** (yönetici olmayan) **haklara sahip olan** kullanılır. Bu kullanıcı **yönetici olarak** herhangi bir şeyi **çalıştırmaya** çalıştığında ("Yönetici olarak çalıştır" örneğin) **UAC** izin istemek için kullanılacaktır.\
-Eğer [**UAC hakkında daha fazla bilgi edinmek istiyorsanız bu sayfayı okuyun**](../authentication-credentials-uac-and-efs/#uac)**.**
+Eğer [**UAC hakkında daha fazla bilgi edinmek istiyorsanız bu sayfayı okuyun**](../authentication-credentials-uac-and-efs/index.html#uac)**.**
 
 ### Kimlik bilgileri kullanıcı taklidi
 
@@ -70,13 +70,13 @@ Ağ hizmetlerine erişmek için **farklı kimlik bilgileri kullanan** bir işlem
 ```
 runas /user:domain\username /netonly cmd.exe
 ```
-Bu, ağdaki nesnelere erişim için geçerli kimlik bilgilerine sahip olduğunuzda faydalıdır, ancak bu kimlik bilgileri mevcut ana bilgisayar içinde geçerli değildir çünkü yalnızca ağda kullanılacaktır (mevcut ana bilgisayarda mevcut kullanıcı ayrıcalıkları kullanılacaktır).
+Bu, ağdaki nesnelere erişim için geçerli kimlik bilgilerine sahip olduğunuzda faydalıdır, ancak bu kimlik bilgileri mevcut ana bilgisayar içinde geçerli değildir, çünkü yalnızca ağda kullanılacaktır (mevcut ana bilgisayarda mevcut kullanıcı ayrıcalıkları kullanılacaktır).
 
 ### Token Türleri
 
 İki tür token mevcuttur:
 
-- **Birincil Token**: Bir sürecin güvenlik kimlik bilgilerini temsil eder. Birincil tokenların oluşturulması ve süreçlerle ilişkilendirilmesi, ayrıcalık ayrımı ilkesini vurgulayan, yükseltilmiş ayrıcalıklar gerektiren eylemlerdir. Genellikle, token oluşturma işlemi bir kimlik doğrulama hizmeti tarafından gerçekleştirilirken, bir oturum açma hizmeti, tokenın kullanıcının işletim sistemi kabuğuyla ilişkilendirilmesinden sorumludur. Süreçlerin, oluşturulduklarında ebeveyn süreçlerinin birincil tokenını miras aldığını belirtmek gerekir.
+- **Birincil Token**: Bir sürecin güvenlik kimlik bilgilerini temsil eder. Birincil tokenların oluşturulması ve süreçlerle ilişkilendirilmesi, ayrıcalık ayrımını vurgulayan yükseltilmiş ayrıcalıklar gerektiren eylemlerdir. Genellikle, bir kimlik doğrulama hizmeti token oluşturma ile sorumluyken, bir oturum açma hizmeti bunun kullanıcı işletim sistemi kabuğu ile ilişkilendirilmesini yönetir. Süreçlerin, oluşturulduklarında ebeveyn süreçlerinin birincil tokenını miras aldığını belirtmekte fayda var.
 - **Taklit Token**: Bir sunucu uygulamasının, güvenli nesnelere erişim için istemcinin kimliğini geçici olarak benimsemesini sağlar. Bu mekanizma dört işlem seviyesine ayrılmıştır:
 - **Anonim**: Sunucuya, tanımlanamayan bir kullanıcınınki gibi erişim izni verir.
 - **Kimlik Doğrulama**: Sunucunun, nesne erişimi için kullanmadan istemcinin kimliğini doğrulamasına olanak tanır.
@@ -85,7 +85,7 @@ Bu, ağdaki nesnelere erişim için geçerli kimlik bilgilerine sahip olduğunuz
 
 #### Taklit Tokenlar
 
-Metasploit'in _**incognito**_ modülünü kullanarak yeterli ayrıcalıklara sahipseniz, diğer **tokenları** kolayca **listeleyebilir** ve **taklit edebilirsiniz**. Bu, **diğer kullanıcıymış gibi hareket etmenizi** sağlamak için faydalı olabilir. Bu teknikle **ayrıcalıkları yükseltebilirsiniz**.
+Metasploit'in _**incognito**_ modülünü kullanarak yeterli ayrıcalıklara sahipseniz, diğer **tokenları** kolayca **listeleyebilir** ve **taklit edebilirsiniz**. Bu, **diğer kullanıcıymış gibi eylemler gerçekleştirmek** için faydalı olabilir. Bu teknikle **ayrıcalıkları yükseltebilirsiniz**.
 
 ### Token Ayrıcalıkları
 
@@ -95,7 +95,7 @@ Hangi **token ayrıcalıklarının ayrıcalıkları yükseltmek için kötüye k
 privilege-escalation-abusing-tokens.md
 {{#endref}}
 
-[**Tüm olası token ayrıcalıklarına ve bu dış sayfadaki bazı tanımlara**](https://github.com/gtworek/Priv2Admin) göz atın.
+[**Tüm olası token ayrıcalıklarına ve bazı tanımlara bu dış sayfada göz atın**](https://github.com/gtworek/Priv2Admin).
 
 ## Referanslar
 

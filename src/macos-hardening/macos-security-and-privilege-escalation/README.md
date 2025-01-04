@@ -41,7 +41,7 @@ macos-protocols.md
 
 ### MacOS MDM
 
-Şirketlerde **macOS** sistemlerinin büyük olasılıkla **bir MDM ile yönetileceği** düşünülmektedir. Bu nedenle, bir saldırgan açısından **bu durumun nasıl çalıştığını** bilmek ilginçtir:
+Şirketlerde **macOS** sistemlerinin büyük olasılıkla **bir MDM ile yönetileceği** düşünülmektedir. Bu nedenle, bir saldırgan açısından **nasıl çalıştığını** bilmek ilginçtir:
 
 {{#ref}}
 ../macos-red-teaming/macos-mdm/
@@ -68,8 +68,8 @@ Bu aşağıdaki durumlarda gerçekleşebilir:
 
 - Kullanılan dosya zaten bir kullanıcı tarafından oluşturulmuş (kullanıcıya ait)
 - Kullanılan dosya, bir grup nedeniyle kullanıcı tarafından yazılabilir
-- Kullanılan dosya, kullanıcıya ait bir dizin içinde (kullanıcı dosyayı oluşturabilir)
-- Kullanılan dosya, root'a ait bir dizin içinde ancak kullanıcı bir grup nedeniyle üzerinde yazma erişimine sahip (kullanıcı dosyayı oluşturabilir)
+- Kullanılan dosya, kullanıcıya ait bir dizin içindedir (kullanıcı dosyayı oluşturabilir)
+- Kullanılan dosya, root'a ait bir dizin içindedir ancak kullanıcı bir grup nedeniyle üzerinde yazma erişimine sahiptir (kullanıcı dosyayı oluşturabilir)
 
 **root** tarafından **kullanılacak bir dosya** oluşturabilmek, bir kullanıcının **içeriğinden faydalanmasına** veya hatta başka bir yere işaret etmek için **sembolik/sert bağlantılar** oluşturmasına olanak tanır.
 
@@ -93,9 +93,9 @@ macOS'ta **uygulamalar ve ikili dosyalar**, diğerlerinden daha ayrıcalıklı o
 
 Bu nedenle, bir macOS makinesini başarılı bir şekilde ele geçirmek isteyen bir saldırgan, **TCC ayrıcalıklarını yükseltmek** (veya ihtiyaçlarına bağlı olarak **SIP'yi atlamak**) zorundadır.
 
-Bu ayrıcalıklar genellikle uygulamanın imzalandığı **haklar** şeklinde verilir veya uygulama bazı erişimler talep edebilir ve **kullanıcı onayladıktan** sonra **TCC veritabanlarında** bulunabilir. Bir sürecin bu ayrıcalıkları elde etmenin bir diğer yolu, bu **ayrıcalıklara** sahip bir sürecin **çocuğu** olmaktır, çünkü genellikle **devralınır**.
+Bu ayrıcalıklar genellikle uygulamanın imzalandığı **haklar** şeklinde verilir veya uygulama bazı erişimler talep edebilir ve **kullanıcı onayladıktan** sonra **TCC veritabanlarında** bulunabilir. Bir sürecin bu ayrıcalıkları elde etmenin bir diğer yolu, bu **ayrıcalıklara** sahip bir sürecin **çocuğu** olmaktır, çünkü genellikle **miras alınırlar**.
 
-Farklı yolları bulmak için bu bağlantılara göz atın [**TCC'de yetki yükseltme**](macos-security-protections/macos-tcc/#tcc-privesc-and-bypasses), [**TCC'yi atlamak**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) ve geçmişte [**SIP'nin nasıl aşıldığı**](macos-security-protections/macos-sip.md#sip-bypasses).
+Farklı yolları bulmak için bu bağlantılara göz atın [**TCC'de yetki yükseltme**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), [**TCC'yi atlamak**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) ve geçmişte [**SIP'nin nasıl atlandığı**](macos-security-protections/macos-sip.md#sip-bypasses).
 
 ## macOS Geleneksel Yetki Yükseltme
 

@@ -4,7 +4,7 @@
 
 ## TCC Yetki Yükseltme
 
-Eğer buraya TCC yetki yükseltme için geldiyseniz, şu adrese gidin:
+Eğer buraya TCC yetki yükseltme arayışıyla geldiyseniz, şu adrese gidin:
 
 {{#ref}}
 macos-security-protections/macos-tcc/
@@ -22,9 +22,9 @@ Lütfen unutmayın ki **Linux/Unix üzerinde yetki yükseltme ile ilgili olan ç
 
 ### Sudo Ele Geçirme
 
-Orijinal [Sudo Ele Geçirme tekniğini Linux Yetki Yükseltme yazısında bulabilirsiniz](../../linux-hardening/privilege-escalation/#sudo-hijacking).
+Orijinal [Sudo Ele Geçirme tekniğini Linux Yetki Yükseltme yazısında bulabilirsiniz](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
 
-Ancak, macOS **kullanıcının** **`PATH`**'ini **`sudo`** komutunu çalıştırdığında **korur**. Bu da, bu saldırıyı gerçekleştirmenin başka bir yolunun, mağdurun **sudo** çalıştırırken hala çalıştıracağı **diğer ikili dosyaları ele geçirmek** olacağı anlamına gelir:
+Ancak, macOS **kullanıcının** **`PATH`**'ini **`sudo`** komutunu çalıştırdığında **korur**. Bu da, bu saldırıyı gerçekleştirmenin başka bir yolunun, mağdurun **sudo** ile çalıştırdığı **diğer ikili dosyaları ele geçirmek** olacağı anlamına gelir:
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
 cat > /opt/homebrew/bin/ls <<EOF
@@ -39,17 +39,17 @@ chmod +x /opt/homebrew/bin/ls
 # victim
 sudo ls
 ```
-Not edin ki terminal kullanan bir kullanıcının büyük olasılıkla **Homebrew yüklü** olacaktır. Bu nedenle **`/opt/homebrew/bin`** içindeki ikili dosyaları ele geçirmek mümkündür.
+Not edin ki terminal kullanan bir kullanıcının **Homebrew yüklü olma olasılığı** yüksektir. Bu nedenle **`/opt/homebrew/bin`** içindeki ikili dosyaları ele geçirmek mümkündür.
 
 ### Dock Taklidi
 
-Bazı **sosyal mühendislik** kullanarak **örneğin Google Chrome**'u dock içinde taklit edebilir ve aslında kendi scriptinizi çalıştırabilirsiniz:
+Bazı **sosyal mühendislik** yöntemleri kullanarak dock içinde **örneğin Google Chrome'u taklit edebilir** ve aslında kendi scriptinizi çalıştırabilirsiniz:
 
 {{#tabs}}
-{{#tab name="Chrome Impersonation"}}
+{{#tab name="Chrome Taklidi"}}
 Bazı öneriler:
 
-- Dock'ta bir Chrome olup olmadığını kontrol edin, eğer varsa o girişi **kaldırın** ve Dock dizisinde **aynı konuma** **sahte** **Chrome girişini ekleyin.**&#x20;
+- Dock'ta bir Chrome olup olmadığını kontrol edin, bu durumda o girişi **kaldırın** ve Dock dizisinde **aynı konuma** **sahte** **Chrome girişini ekleyin.**&#x20;
 ```bash
 #!/bin/sh
 
@@ -124,9 +124,9 @@ killall Dock
 {{#tab name="Finder Impersonation"}}
 Bazı öneriler:
 
-- Dock'tan Finder'ı **kaldıramazsınız**, bu yüzden eğer Dock'a ekleyecekseniz, sahte Finder'ı gerçek Finder'ın hemen yanına koyabilirsiniz. Bunun için **sahte Finder girişini Dock dizisinin başına eklemeniz** gerekiyor.
-- Diğer bir seçenek, Dock'a yerleştirmemek ve sadece açmaktır; "Finder, Finder'ı kontrol etmek için izin istiyor" o kadar da garip değil.
-- Şifreyi korkunç bir kutu ile sormadan **root'a yükselmek** için başka bir seçenek, Finder'ın gerçekten bir ayrıcalıklı işlem gerçekleştirmek için şifre istemesini sağlamaktır:
+- **Finder'ı Dock'tan kaldıramazsınız**, bu yüzden eğer Dock'a ekleyecekseniz, sahte Finder'ı gerçek Finder'ın hemen yanına koyabilirsiniz. Bunun için **sahte Finder girişini Dock dizisinin başına eklemeniz** gerekiyor.
+- Diğer bir seçenek, onu Dock'a yerleştirmemek ve sadece açmaktır; "Finder, Finder'ı kontrol etmek için izin istiyor" o kadar da garip değil.
+- **Şifre sormadan root'a yükselmek** için başka bir seçenek, Finder'ın gerçekten bir ayrıcalıklı işlem gerçekleştirmek için şifre sormasını sağlamaktır:
 - Finder'dan **`/etc/pam.d`** dizinine yeni bir **`sudo`** dosyası kopyalamasını isteyin (Şifre isteyen istem, "Finder sudo'yu kopyalamak istiyor" diye belirtecektir)
 - Finder'dan yeni bir **Authorization Plugin** kopyalamasını isteyin (Dosya adını kontrol edebilirsiniz, böylece şifre isteyen istem "Finder Finder.bundle'ı kopyalamak istiyor" diye belirtecektir)
 ```bash
@@ -201,11 +201,11 @@ killall Dock
 {{#endtab}}
 {{#endtabs}}
 
-## TCC - Root Yetkisi Yükseltme
+## TCC - Root Yetki Yükseltme
 
 ### CVE-2020-9771 - mount_apfs TCC atlatma ve yetki yükseltme
 
-**Herhangi bir kullanıcı** (hatta yetkisiz olanlar bile) bir zaman makinesi anlık görüntüsü oluşturabilir ve monte edebilir ve bu anlık görüntünün **TÜM dosyalarına** erişebilir.\
+**Herhangi bir kullanıcı** (hatta yetkisiz olanlar bile) bir zaman makinesi anlık görüntüsü oluşturabilir ve bu anlık görüntünün **TÜM dosyalarına** erişebilir.\
 Gerekli olan **tek yetki**, kullanılan uygulamanın (örneğin `Terminal`) **Tam Disk Erişimi** (FDA) erişimine sahip olmasıdır (`kTCCServiceSystemPolicyAllfiles`), bu da bir yönetici tarafından verilmelidir.
 ```bash
 # Create snapshot
@@ -226,7 +226,7 @@ mkdir /tmp/snap
 # Access it
 ls /tmp/snap/Users/admin_user # This will work
 ```
-Daha ayrıntılı bir açıklama [**orijinal raporda**](https://theevilbit.github.io/posts/cve_2020_9771/)** bulunabilir.**
+Daha ayrıntılı bir açıklama [**orijinal raporda bulunabilir**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
 
 ## Hassas Bilgiler
 

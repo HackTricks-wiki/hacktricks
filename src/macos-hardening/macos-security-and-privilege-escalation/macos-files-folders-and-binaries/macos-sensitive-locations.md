@@ -6,26 +6,26 @@
 
 ### Gölge Parolalar
 
-Gölge parolası, **`/var/db/dslocal/nodes/Default/users/`** konumundaki plistlerde kullanıcının yapılandırması ile birlikte saklanır.\
+Gölge parola, kullanıcının yapılandırmasıyla birlikte **`/var/db/dslocal/nodes/Default/users/`** konumundaki plist'lerde saklanır.\
 Aşağıdaki tek satırlık komut, **kullanıcılar hakkında tüm bilgileri** (hash bilgileri dahil) dökmek için kullanılabilir:
 ```bash
 for l in /var/db/dslocal/nodes/Default/users/*; do if [ -r "$l" ];then echo "$l"; defaults read "$l"; fi; done
 ```
 [**Bu tür scriptler**](https://gist.github.com/teddziuba/3ff08bdda120d1f7822f3baf52e606c2) veya [**şu**](https://github.com/octomagon/davegrohl.git) **hashcat** **formatına** dönüştürmek için kullanılabilir.
 
-Hashcat formatında `-m 7100` (macOS PBKDF2-SHA512) tüm hizmet dışı hesapların kimlik bilgilerini dökecek alternatif bir tek satırlık komut:
+Tüm hizmet dışı hesapların kimlik bilgilerini hashcat formatında `-m 7100` (macOS PBKDF2-SHA512) dökecek alternatif bir tek satırlık komut:
 ```bash
 sudo bash -c 'for i in $(find /var/db/dslocal/nodes/Default/users -type f -regex "[^_]*"); do plutil -extract name.0 raw $i | awk "{printf \$0\":\$ml\$\"}"; for j in {iterations,salt,entropy}; do l=$(k=$(plutil -extract ShadowHashData.0 raw $i) && base64 -d <<< $k | plutil -extract SALTED-SHA512-PBKDF2.$j raw -); if [[ $j == iterations ]]; then echo -n $l; else base64 -d <<< $l | xxd -p -c 0 | awk "{printf \"$\"\$0}"; fi; done; echo ""; done'
 ```
-Başka bir kullanıcıya ait `ShadowHashData`'yı elde etmenin bir yolu `dscl` kullanmaktır: `` sudo dscl . -read /Users/`whoami` ShadowHashData ``
+Başka bir kullanıcının `ShadowHashData`sını elde etmenin bir yolu `dscl` kullanmaktır: `` sudo dscl . -read /Users/`whoami` ShadowHashData ``
 
 ### /etc/master.passwd
 
-Bu dosya **yalnızca** sistemin **tek kullanıcı modunda** çalıştığı zaman **kullanılır** (bu nedenle çok sık değildir).
+Bu dosya **yalnızca** sistem **tek kullanıcı modunda** çalıştığında kullanılır (bu nedenle çok sık değildir).
 
 ### Anahtar Zinciri Dökümü
 
-Şifrelerin şifresinin çözüldüğü **dökümü** almak için security ikili dosyasını kullanırken, kullanıcıdan bu işlemi onaylaması için birkaç istem geleceğini unutmayın.
+Şifrelerin şifresinin çözüldüğünü **dökme** işlemi için güvenlik ikili dosyasını kullanırken, kullanıcıdan bu işlemi onaylaması için birkaç istem olacaktır.
 ```bash
 #security
 security dump-trust-settings [-s] [-d] #List certificates
@@ -47,15 +47,15 @@ security dump-keychain -d #Dump all the info, included secrets (the user will be
 ```bash
 sudo vmmap <securityd PID> | grep MALLOC_TINY
 ```
-Potansiyel anahtarları belirledikten sonra, **keychaindump** belirli bir deseni (`0x0000000000000018`) göstermek için yığınlar arasında arama yapar; bu, anahtar için bir aday olduğunu gösterir. Bu anahtarı kullanmak için daha fazla adım, deşifre etme dahil, gereklidir; bu adımlar **keychaindump**'ın kaynak kodunda belirtilmiştir. Bu alana odaklanan analistler, anahtar zincirini şifrelemek için gerekli verilerin **securityd** sürecinin belleğinde saklandığını unutmamalıdır. **keychaindump**'ı çalıştırmak için bir örnek komut:
+Potansiyel anahtarları belirledikten sonra, **keychaindump** yığınlar arasında anahtar için bir aday olduğunu gösteren belirli bir deseni (`0x0000000000000018`) arar. Bu anahtarı kullanmak için daha fazla adım, deşifre etme dahil, gereklidir; bu adımlar **keychaindump**'ın kaynak kodunda belirtilmiştir. Bu alana odaklanan analistler, anahtar zincirini şifrelemek için gerekli verilerin **securityd** sürecinin belleğinde saklandığını unutmamalıdır. **keychaindump**'ı çalıştırmak için bir örnek komut:
 ```bash
 sudo ./keychaindump
 ```
 ### chainbreaker
 
-[**Chainbreaker**](https://github.com/n0fate/chainbreaker), adli olarak sağlam bir şekilde OSX anahtar zincirinden aşağıdaki türde bilgileri çıkarmak için kullanılabilir:
+[**Chainbreaker**](https://github.com/n0fate/chainbreaker), OSX anahtar zincirinden adli olarak sağlam bir şekilde aşağıdaki türde bilgileri çıkarmak için kullanılabilir:
 
-- Kırma için uygun olan Hashlenmiş Anahtar Zinciri şifresi [hashcat](https://hashcat.net/hashcat/) veya [John the Ripper](https://www.openwall.com/john/) ile
+- Hashlenmiş Anahtar Zinciri şifresi, [hashcat](https://hashcat.net/hashcat/) veya [John the Ripper](https://www.openwall.com/john/) ile kırmak için uygun
 - İnternet Şifreleri
 - Genel Şifreler
 - Özel Anahtarlar
@@ -92,7 +92,7 @@ python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d1
 ```
 #### **Anahtar zinciri anahtarlarını (şifrelerle birlikte) bellek dökümü ile dökme**
 
-[Bu adımları izleyin](../#dumping-memory-with-osxpmem) **bellek dökümü** gerçekleştirmek için
+[Bu adımları izleyin](../index.html#dumping-memory-with-osxpmem) **bellek dökümü** gerçekleştirmek için
 ```bash
 #Use volafox (https://github.com/n0fate/volafox) to extract possible keychain passwords
 # Unformtunately volafox isn't working with the latest versions of MacOS
@@ -127,9 +127,9 @@ sqlite3 $HOME/Suggestions/snippets.db 'select * from emailSnippets'
 ```
 ### Bildirimler
 
-Bildirim verilerini `$(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/` içinde bulabilirsiniz.
+Notifications verilerini `$(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/` içinde bulabilirsiniz.
 
-İlginç bilgilerin çoğu **blob** içinde olacak. Bu nedenle, o içeriği **çıkar**manız ve **insan** **okunabilir** hale **dönüştürmeniz** veya **`strings`** kullanmanız gerekecek. Erişmek için şunu yapabilirsiniz:
+En ilginç bilgiler **blob** içinde olacak. Bu nedenle, o içeriği **çıkar**manız ve **insan** **okunabilir** hale **dönüştürmeniz** veya **`strings`** kullanmanız gerekecek. Erişmek için şunu yapabilirsiniz:
 ```bash
 cd $(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/
 strings $(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/db2/db | grep -i -A4 slack
@@ -145,16 +145,16 @@ for i in $(sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.s
 ```
 ## Tercihler
 
-macOS uygulamalarında tercihler **`$HOME/Library/Preferences`** içinde bulunur ve iOS'ta `/var/mobile/Containers/Data/Application/<UUID>/Library/Preferences` içindedir.
+macOS uygulamalarında tercihler **`$HOME/Library/Preferences`** içinde bulunur ve iOS'ta ise `/var/mobile/Containers/Data/Application/<UUID>/Library/Preferences` içindedir.
 
-macOS'ta cli aracı **`defaults`** **Tercihler dosyasını değiştirmek** için kullanılabilir.
+macOS'ta cli aracı **`defaults`** **Tercihler dosyasını** **değiştirmek** için kullanılabilir.
 
-**`/usr/sbin/cfprefsd`** XPC hizmetlerini `com.apple.cfprefsd.daemon` ve `com.apple.cfprefsd.agent` talep eder ve tercihler gibi işlemleri gerçekleştirmek için çağrılabilir.
+**`/usr/sbin/cfprefsd`** XPC hizmetleri `com.apple.cfprefsd.daemon` ve `com.apple.cfprefsd.agent`'ı talep eder ve tercihler gibi işlemleri gerçekleştirmek için çağrılabilir.
 
 ## OpenDirectory permissions.plist
 
 Dosya `/System/Library/OpenDirectory/permissions.plist` düğüm niteliklerine uygulanan izinleri içerir ve SIP tarafından korunur.\
-Bu dosya, belirli kullanıcıların UUID (ve uid değil) ile belirli hassas bilgilere, örneğin `ShadowHashData`, `HeimdalSRPKey` ve `KerberosKeys` gibi bilgilere erişim izni verir.
+Bu dosya, belirli kullanıcıların UUID (ve uid değil) ile belirli hassas bilgilere, örneğin `ShadowHashData`, `HeimdalSRPKey` ve `KerberosKeys` gibi bilgilere erişim izni verir:
 ```xml
 [...]
 <key>dsRecTypeStandard:Computers</key>
@@ -213,20 +213,20 @@ common: com.apple.security.octagon.joined-with-bottle
 ```
 ### Dağıtılmış Bildirim Merkezi
 
-**Dağıtılmış Bildirim Merkezi** ana ikili dosyası **`/usr/sbin/distnoted`** olan, bildirim göndermenin bir başka yoludur. Bazı XPC hizmetlerini açığa çıkarır ve istemcileri doğrulamaya çalışmak için bazı kontroller yapar.
+**Dağıtılmış Bildirim Merkezi** ana ikili dosyası **`/usr/sbin/distnoted`** olan, bildirim göndermenin başka bir yoludur. Bazı XPC hizmetlerini açığa çıkarır ve istemcileri doğrulamaya çalışmak için bazı kontroller yapar.
 
 ### Apple Push Bildirimleri (APN)
 
 Bu durumda, uygulamalar **konular** için kaydolabilir. İstemci, **`apsd`** aracılığıyla Apple'ın sunucularıyla iletişim kurarak bir token oluşturacaktır.\
 Daha sonra, sağlayıcılar da bir token oluşturacak ve istemcilere mesaj göndermek için Apple'ın sunucularıyla bağlantı kurabilecektir. Bu mesajlar, bekleyen uygulamaya bildirimi iletecek olan **`apsd`** tarafından yerel olarak alınacaktır.
 
-Tercihler `/Library/Preferences/com.apple.apsd.plist` konumundadır.
+Tercihler `/Library/Preferences/com.apple.apsd.plist` konumunda bulunmaktadır.
 
 macOS'ta `/Library/Application\ Support/ApplePushService/aps.db` ve iOS'ta `/var/mobile/Library/ApplePushService` konumunda bulunan yerel bir mesaj veritabanı vardır. 3 tabloya sahiptir: `incoming_messages`, `outgoing_messages` ve `channel`.
 ```bash
 sudo sqlite3 /Library/Application\ Support/ApplePushService/aps.db
 ```
-Aynı zamanda daemon ve bağlantılar hakkında bilgi almak için de kullanılabilir:
+Aynı zamanda daemon ve bağlantılar hakkında bilgi almak da mümkündür:
 ```bash
 /System/Library/PrivateFrameworks/ApplePushService.framework/apsctl status
 ```

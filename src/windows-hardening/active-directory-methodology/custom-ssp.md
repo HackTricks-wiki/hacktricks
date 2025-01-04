@@ -1,16 +1,16 @@
-# Özel SSP
+# Custom SSP
 
 {{#include ../../banners/hacktricks-training.md}}
 
-### Özel SSP
+### Custom SSP
 
-[SSP (Güvenlik Destek Sağlayıcısı) nedir burada öğrenin.](../authentication-credentials-uac-and-efs/#security-support-provider-interface-sspi)\
+[SSP (Güvenlik Destek Sağlayıcısı) nedir burada öğrenin.](../authentication-credentials-uac-and-efs/index.html#security-support-provider-interface-sspi)\
 Kendi **SSP'nizi** oluşturabilirsiniz, böylece makineye erişim için kullanılan **kimlik bilgilerini** **düz metin** olarak **yakalayabilirsiniz**.
 
 #### Mimilib
 
 Mimikatz tarafından sağlanan `mimilib.dll` ikili dosyasını kullanabilirsiniz. **Bu, tüm kimlik bilgilerini düz metin olarak bir dosyaya kaydedecektir.**\
-Dll'yi `C:\Windows\System32\` dizinine bırakın.\
+Dll dosyasını `C:\Windows\System32\` dizinine bırakın.\
 Mevcut LSA Güvenlik Paketlerinin bir listesini alın:
 ```bash:attacker@target
 PS C:\> reg query hklm\system\currentcontrolset\control\lsa\ /v "Security Packages"

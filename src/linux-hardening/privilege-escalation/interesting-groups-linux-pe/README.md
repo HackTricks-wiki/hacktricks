@@ -27,7 +27,7 @@ Tüm suid ikili dosyalarını bulun ve **Pkexec** ikili dosyasının olup olmad�
 find / -perm -4000 2>/dev/null
 ```
 Eğer **pkexec** ikilisinin **SUID ikilisi** olduğunu ve **sudo** veya **admin** grubuna ait olduğunuzu bulursanız, muhtemelen `pkexec` kullanarak ikilileri sudo olarak çalıştırabilirsiniz.\
-Bu, genellikle **polkit politikası** içindeki gruplardır. Bu politika, temelde hangi grupların `pkexec` kullanabileceğini belirler. Bunu kontrol etmek için:
+Bu, genellikle bu grupların **polkit politikası** içinde yer alması nedeniyledir. Bu politika, temelde hangi grupların `pkexec` kullanabileceğini belirler. Bunu kontrol etmek için:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
@@ -43,7 +43,7 @@ polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freed
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-**İzinlerinizin olmaması nedeniyle değil, GUI olmadan bağlı olmadığınız için**. Bu sorun için bir çözüm burada: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). **2 farklı ssh oturumuna** ihtiyacınız var:
+**İzinlerinizin olmaması nedeniyle değil, bir GUI olmadan bağlı olmadığınız için**. Bu sorun için bir çözüm burada: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). **2 farklı ssh oturumuna** ihtiyacınız var:
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -60,7 +60,7 @@ pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 ```
 %wheel	ALL=(ALL:ALL) ALL
 ```
-Bu, **wheel grubuna ait olan herhangi bir kullanıcının sudo ile her şeyi çalıştırabileceği** anlamına gelir.
+Bu, **wheel grubuna ait olan herhangi bir kullanıcının sudo olarak her şeyi çalıştırabileceği** anlamına gelir.
 
 Eğer durum böyleyse, **root olmak için sadece şunu çalıştırabilirsiniz**:
 ```
@@ -72,13 +72,13 @@ sudo su
 ```
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
-So, dosyayı okuyun ve bazı **hash'leri kırmaya** çalışın.
+So, read the file and try to **crack some hashes**.
 
 ## Personel Grubu
 
-**staff**: Kullanıcıların kök ayrıcalıklarına ihtiyaç duymadan sisteme yerel değişiklikler eklemelerine izin verir (`/usr/local`) (not: `/usr/local/bin` içindeki çalıştırılabilir dosyalar, herhangi bir kullanıcının PATH değişkenindedir ve aynı isimdeki `/bin` ve `/usr/bin` içindeki çalıştırılabilir dosyaların "üstüne" yazabilir). "adm" grubu ile karşılaştırın, bu grup daha çok izleme/güvenlik ile ilgilidir. [\[source\]](https://wiki.debian.org/SystemGroups)
+**staff**: Kullanıcıların root ayrıcalıklarına ihtiyaç duymadan sisteme yerel değişiklikler eklemelerine olanak tanır (`/usr/local`) (not: `/usr/local/bin` içindeki çalıştırılabilir dosyalar, herhangi bir kullanıcının PATH değişkenindedir ve aynı isimdeki `/bin` ve `/usr/bin` içindeki çalıştırılabilir dosyaların "üstüne yazabilir"). "adm" grubu ile karşılaştırın, bu grup daha çok izleme/güvenlik ile ilgilidir. [\[source\]](https://wiki.debian.org/SystemGroups)
 
-Debian dağıtımlarında, `$PATH` değişkeni `/usr/local/`'un en yüksek öncelikle çalıştırılacağını gösterir, ayrıcalıklı bir kullanıcı olup olmadığınıza bakılmaksızın.
+Debian dağıtımlarında, `$PATH` değişkeni `/usr/local/`'un en yüksek öncelikle çalıştırılacağını gösterir, ayrıcalıklı bir kullanıcı olup olmadığınız önemli değildir.
 ```bash
 $ echo $PATH
 /usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
@@ -141,12 +141,12 @@ debugfs: ls
 debugfs: cat /root/.ssh/id_rsa
 debugfs: cat /etc/shadow
 ```
-Debugfs kullanarak **dosya yazma** işlemi de yapabileceğinizi unutmayın. Örneğin, `/tmp/asd1.txt` dosyasını `/tmp/asd2.txt` dosyasına kopyalamak için şunu yapabilirsiniz:
+Not edin ki debugfs kullanarak **dosya yazabilirsiniz**. Örneğin, `/tmp/asd1.txt` dosyasını `/tmp/asd2.txt` dosyasına kopyalamak için şunu yapabilirsiniz:
 ```bash
 debugfs -w /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
-Ancak, eğer **root'a ait dosyaları yazmaya** çalışırsanız (örneğin `/etc/shadow` veya `/etc/passwd`), "**İzin reddedildi**" hatası alırsınız.
+Ancak, **root tarafından sahip olunan dosyaları yazmaya** çalışırsanız (örneğin `/etc/shadow` veya `/etc/passwd`), "**İzin reddedildi**" hatası alırsınız.
 
 ## Video Grubu
 
@@ -156,7 +156,7 @@ USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
 yossi    tty1                      22:16    5:13m  0.05s  0.04s -bash
 moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
-**tty1**, kullanıcının **yossi'nin makinedeki bir terminale fiziksel olarak giriş yaptığını** ifade eder.
+**tty1**, kullanıcının **yossi'nin makinedeki bir terminale fiziksel olarak giriş yaptığını** gösterir.
 
 **video grubu**, ekran çıktısını görüntüleme erişimine sahiptir. Temelde ekranları gözlemleyebilirsiniz. Bunu yapmak için, ekranın üzerindeki **mevcut görüntüyü ham veri olarak yakalamanız** ve ekranın kullandığı çözünürlüğü almanız gerekir. Ekran verileri `/dev/fb0`'da kaydedilebilir ve bu ekranın çözünürlüğünü `/sys/class/graphics/fb0/virtual_size`'da bulabilirsiniz.
 ```bash
@@ -167,7 +167,7 @@ cat /sys/class/graphics/fb0/virtual_size
 
 ![](<../../../images/image (463).png>)
 
-Ardından, Genişlik ve Yükseklik değerlerini ekranda kullanılanlarla değiştirin ve farklı Görüntü Türlerini kontrol edin (ve ekranı daha iyi gösterenini seçin):
+Ardından, Genişlik ve Yükseklik değerlerini ekranda kullanılanlarla değiştirin ve farklı Görüntü Türlerini kontrol edin (ve ekranı daha iyi göstereni seçin):
 
 ![](<../../../images/image (317).png>)
 
@@ -181,7 +181,7 @@ find / -group root -perm -g=w 2>/dev/null
 ```
 ## Docker Grubu
 
-Ana makinenin kök dosya sistemini bir örneğin hacmine **monte edebilirsiniz**, böylece örnek başladığında hemen o hacme `chroot` yükler. Bu, makinede size kök erişimi sağlar.
+**Ana makinenin kök dosya sistemini bir örneğin hacmine bağlayabilirsiniz**, böylece örnek başladığında hemen o hacme `chroot` yükler. Bu, makinede size kök erişimi sağlar.
 ```bash
 docker image #Get images from the docker service
 
@@ -199,7 +199,7 @@ Son olarak, eğer daha önceki önerilerden hiçbiri hoşunuza gitmiyorsa veya b
 ../docker-security/
 {{#endref}}
 
-Eğer docker soketi üzerinde yazma izinleriniz varsa [**docker soketini kötüye kullanarak yetki yükseltme hakkında bu yazıyı okuyun**](../#writable-docker-socket)**.**
+Eğer docker soketi üzerinde yazma izinleriniz varsa [**docker soketini kötüye kullanarak nasıl yetki yükselteceğinizi anlatan bu yazıyı**](../index.html#writable-docker-socket)** okuyun.**
 
 {{#ref}}
 https://github.com/KrustyHack/docker-privilege-escalation

@@ -11,7 +11,7 @@ docker ps
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
 cc03e43a052a        lamp-wordpress      "./run.sh"          2 minutes ago       Up 2 minutes        80/tcp              wordpress
 ```
-Bu konteynerdeki **görüntü ile ilgili yapılan değişiklikleri kolayca bulabilirsiniz**:
+Bu konteynerde **görüntü ile ilgili yapılan değişiklikleri kolayca bulabilirsiniz**:
 ```bash
 docker diff wordpress
 C /var
@@ -30,7 +30,7 @@ Eğer `/etc/shadow` gibi ilginç bir dosyanın değiştirildiğini bulursanız, 
 ```bash
 docker cp wordpress:/etc/shadow.
 ```
-Aynı zamanda **bunu orijinal ile karşılaştırabilirsiniz** yeni bir konteyner çalıştırarak ve içinden dosyayı çıkararak:
+Aynı zamanda **orijinal olanla karşılaştırabilirsiniz** yeni bir konteyner çalıştırarak ve ondan dosyayı çıkararak:
 ```bash
 docker run -d lamp-wordpress
 docker cp b5d53e8b468e:/etc/shadow original_shadow #Get the file from the newly created container
@@ -40,7 +40,7 @@ Eğer **şüpheli bir dosyanın eklendiğini** bulursanız, konteynıra erişip 
 ```bash
 docker exec -it wordpress bash
 ```
-## Görüntü Modifikasyonları
+## Görüntü değişiklikleri
 
 Bir dışa aktarılmış docker görüntüsü (muhtemelen `.tar` formatında) verildiğinde, **değişikliklerin bir özetini çıkarmak için** [**container-diff**](https://github.com/GoogleContainerTools/container-diff/releases) kullanabilirsiniz:
 ```bash
@@ -49,7 +49,7 @@ container-diff analyze -t sizelayer image.tar
 container-diff analyze -t history image.tar
 container-diff analyze -t metadata image.tar
 ```
-Sonra, görüntüyü **açabilir** ve **blob'lara erişebilir** ve değişiklik geçmişinde bulmuş olabileceğiniz şüpheli dosyaları arayabilirsiniz:
+Ardından, görüntüyü **açabilir** ve **blob'lara erişebilirsiniz**; böylece değişiklik geçmişinde bulmuş olabileceğiniz şüpheli dosyaları arayabilirsiniz:
 ```bash
 tar -xf image.tar
 ```
@@ -79,9 +79,9 @@ Loaded image: flask:latest
 #And then open it with dive:
 sudo dive flask:latest
 ```
-Bu, **docker görüntülerinin farklı blob'ları arasında gezinmenizi** ve hangi dosyaların değiştirildiğini/eklendiğini kontrol etmenizi sağlar. **Kırmızı** eklenmiş anlamına gelir ve **sarı** değiştirilmiş anlamına gelir. Diğer görünüme geçmek için **tab** tuşunu ve klasörleri daraltmak/açmak için **space** tuşunu kullanın.
+Bu, **docker görüntülerinin farklı blob'ları arasında gezinmenizi** ve hangi dosyaların değiştirildiğini/eklendiğini kontrol etmenizi sağlar. **Kırmızı** eklenmiş anlamına gelir ve **sarı** değiştirilmiş anlamına gelir. Diğer görünüme geçmek için **tab** tuşunu kullanın ve klasörleri açmak/kapatmak için **space** tuşunu kullanın.
 
-Die ile görüntünün farklı aşamalarının içeriğine erişemezsiniz. Bunu yapmak için **her katmanı sıkıştırmanız ve erişmeniz** gerekecek.\
+Die ile görüntünün farklı aşamalarının içeriğine erişemeyeceksiniz. Bunu yapmak için **her katmanı sıkıştırmanız ve erişmeniz** gerekecek.\
 Bir görüntüden tüm katmanları, görüntünün sıkıştırıldığı dizinden şu komutu çalıştırarak sıkıştırabilirsiniz:
 ```bash
 tar -xf image.tar
@@ -91,6 +91,6 @@ for d in `find * -maxdepth 0 -type d`; do cd $d; tar -xf ./layer.tar; cd ..; don
 
 Bir docker konteynerini bir ana bilgisayar içinde çalıştırdığınızda **ana bilgisayardan konteynerde çalışan süreçleri görebileceğinizi** unutmayın, sadece `ps -ef` komutunu çalıştırarak.
 
-Bu nedenle (root olarak) **ana bilgisayardan süreçlerin belleğini dökebilir** ve **kimlik bilgilerini** arayabilirsiniz, tıpkı [**aşağıdaki örnekteki gibi**](../../linux-hardening/privilege-escalation/#process-memory). 
+Bu nedenle (root olarak) **ana bilgisayardan süreçlerin belleğini dökebilir** ve **kimlik bilgilerini** arayabilirsiniz, [**aşağıdaki örnekteki gibi**](../../linux-hardening/privilege-escalation/index.html#process-memory).
 
 {{#include ../../banners/hacktricks-training.md}}

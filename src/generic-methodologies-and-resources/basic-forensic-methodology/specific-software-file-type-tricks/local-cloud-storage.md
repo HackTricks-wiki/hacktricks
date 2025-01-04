@@ -2,7 +2,6 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-
 ## OneDrive
 
 Windows'ta, OneDrive klasörünü `\Users\<username>\AppData\Local\Microsoft\OneDrive` içinde bulabilirsiniz. Ve `logs\Personal` içinde, senkronize edilmiş dosyalarla ilgili bazı ilginç verileri içeren `SyncDiagnostics.log` dosyasını bulmak mümkündür:
@@ -16,14 +15,14 @@ Windows'ta, OneDrive klasörünü `\Users\<username>\AppData\Local\Microsoft\One
 - Rapor oluşturma zamanı
 - İşletim sisteminin HD boyutu
 
-CID'yi bulduktan sonra, **bu kimliği içeren dosyaları aramanız önerilir**. _**\<CID>.ini**_ ve _**\<CID>.dat**_ adında, OneDrive ile senkronize edilmiş dosyaların adlarını içerebilecek dosyalar bulabilirsiniz.
+CID'yi bulduktan sonra, **bu kimliği içeren dosyaları aramanız önerilir**. _**\<CID>.ini**_ ve _**\<CID>.dat**_ adında, OneDrive ile senkronize edilmiş dosyaların isimlerini içerebilecek dosyalar bulabilirsiniz.
 
 ## Google Drive
 
 Windows'ta, ana Google Drive klasörünü `\Users\<username>\AppData\Local\Google\Drive\user_default` içinde bulabilirsiniz.\
-Bu klasör, hesap e-posta adresi, dosya adları, zaman damgaları, dosyaların MD5 hash'leri vb. gibi bilgileri içeren Sync_log.log adında bir dosya içerir. Silinmiş dosyalar bile, ilgili MD5 ile birlikte bu günlük dosyasında görünür.
+Bu klasör, hesap e-posta adresi, dosya adları, zaman damgaları, dosyaların MD5 hash'leri gibi bilgileri içeren Sync_log.log adında bir dosya içerir. Hatta silinmiş dosyalar bile bu günlük dosyasında ilgili MD5 ile görünmektedir.
 
-**`Cloud_graph\Cloud_graph.db`** dosyası, **`cloud_graph_entry`** tablosunu içeren bir sqlite veritabanıdır. Bu tabloda, **senkronize** **dosyaların** **adını**, değiştirilme zamanını, boyutunu ve dosyaların MD5 kontrol toplamını bulabilirsiniz.
+**`Cloud_graph\Cloud_graph.db`** dosyası, **`cloud_graph_entry`** tablosunu içeren bir sqlite veritabanıdır. Bu tabloda, **senkronize** **dosyaların** **isimlerini**, değiştirilme zamanını, boyutunu ve dosyaların MD5 kontrol toplamını bulabilirsiniz.
 
 **`Sync_config.db`** veritabanının tablo verileri, hesap e-posta adresini, paylaşılan klasörlerin yolunu ve Google Drive sürümünü içerir.
 
@@ -65,9 +64,9 @@ Sonra [**DataProtectionDecryptor**](https://nirsoft.net/utils/dpapi_data_decrypt
 
 ![](<../../../images/image (443).png>)
 
-Her şey beklendiği gibi giderse, araç, **orijinalini kurtarmak için kullanmanız gereken anahtarı** gösterecektir. Orijinalini kurtarmak için, bu [cyber_chef tarifi](<https://gchq.github.io/CyberChef/#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) kullanarak, anahtarı tarifin "şifre" kısmına koyun.
+Her şey beklendiği gibi giderse, araç, **orijinalini geri almak için kullanmanız gereken anahtarı** gösterecektir. Orijinalini geri almak için, bu [cyber_chef tarifi](<https://gchq.github.io/CyberChef/index.html#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) kullanarak anahtarı tarifte "şifre" olarak kullanın.
 
-Sonuçta elde edilen hex, veritabanlarını şifrelemek için kullanılan son anahtardır ve şu şekilde şifresi çözülebilir:
+Sonuçta elde edilen hex, veritabanlarını şifrelemek için kullanılan nihai anahtardır ve şu şekilde şifresi çözülebilir:
 ```bash
 sqlite -k <Obtained Key> config.dbx ".backup config.db" #This decompress the config.dbx and creates a clear text backup in config.db
 ```
@@ -91,7 +90,7 @@ Bu veritabanındaki diğer tablolar daha ilginç bilgiler içerir:
 - **block_cache**: Dropbox'ın tüm dosya ve klasörlerinin hash'i
 - **block_ref**: `block_cache` tablosundaki hash ID'sini `file_journal` tablosundaki dosya ID'si ile ilişkilendirir
 - **mount_table**: Dropbox'ın paylaşılan klasörleri
-- **deleted_fields**: Dropbox'tan silinmiş dosyalar
+- **deleted_fields**: Dropbox'tan silinen dosyalar
 - **date_added**
 
 {{#include ../../../banners/hacktricks-training.md}}
