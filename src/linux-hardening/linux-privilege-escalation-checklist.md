@@ -28,8 +28,8 @@
 
 ### [Processus](privilege-escalation/index.html#processes)
 
-- [ ] Y a-t-il un **logiciel inconnu en cours d'exécution** ?
-- [ ] Y a-t-il un logiciel en cours d'exécution avec **plus de privilèges qu'il ne devrait** ?
+- [ ] Un **logiciel inconnu s'exécute-t-il** ?
+- [ ] Un logiciel s'exécute-t-il avec **plus de privilèges qu'il ne devrait** ?
 - [ ] Rechercher des **exploits de processus en cours d'exécution** (en particulier la version en cours d'exécution).
 - [ ] Pouvez-vous **modifier le binaire** de tout processus en cours d'exécution ?
 - [ ] **Surveiller les processus** et vérifier si un processus intéressant s'exécute fréquemment.
@@ -46,7 +46,7 @@
 
 - [ ] Un fichier **.service** **modifiable** ?
 - [ ] Un **binaire modifiable** exécuté par un **service** ?
-- [ ] Un **dossier modifiable dans le PATH de systemd** ?
+- [ ] Un **dossier modifiable dans le PATH systemd** ?
 
 ### [Timers](privilege-escalation/index.html#timers)
 
@@ -72,7 +72,7 @@
 
 - [ ] Énumération des utilisateurs/groupes **génériques**
 - [ ] Avez-vous un **UID très élevé** ? La **machine** est-elle **vulnérable** ?
-- [ ] Pouvez-vous [**escalader les privilèges grâce à un groupe**](privilege-escalation/interesting-groups-linux-pe/) auquel vous appartenez ?
+- [ ] Pouvez-vous [**escalader les privilèges grâce à un groupe**](privilege-escalation/interesting-groups-linux-pe/index.html) auquel vous appartenez ?
 - [ ] Données du **presse-papiers** ?
 - [ ] Politique de mot de passe ?
 - [ ] Essayez d'**utiliser** chaque **mot de passe connu** que vous avez découvert précédemment pour vous connecter **avec chaque** utilisateur possible. Essayez également de vous connecter sans mot de passe.
@@ -118,8 +118,8 @@
 - [ ] Fichiers de **profil** - Lire des données sensibles ? Écrire pour privesc ?
 - [ ] Fichiers **passwd/shadow** - Lire des données sensibles ? Écrire pour privesc ?
 - [ ] **Vérifier les dossiers couramment intéressants** pour des données sensibles
-- [ ] Fichiers **emplacement étrange/propriétés**, vous pourriez avoir accès ou modifier des fichiers exécutables
-- [ ] **Modifié** dans les dernières minutes
+- [ ] Fichiers **propriétaires/locaux étranges**, vous pourriez avoir accès ou modifier des fichiers exécutables
+- [ ] **Modifiés** dans les dernières minutes
 - [ ] Fichiers **Sqlite DB**
 - [ ] Fichiers **cachés**
 - [ ] **Script/Binaires dans le PATH**

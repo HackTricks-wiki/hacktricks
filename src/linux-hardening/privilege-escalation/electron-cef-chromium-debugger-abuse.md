@@ -9,7 +9,7 @@
 Les clients de l'inspecteur doivent connaître et spécifier l'adresse hôte, le port et l'UUID pour se connecter. Une URL complète ressemblera à `ws://127.0.0.1:9229/0f2c936f-b1cd-4ac9-aab3-f63b0f33d55e`.
 
 > [!WARNING]
-> Étant donné que **le débogueur a un accès complet à l'environnement d'exécution Node.js**, un acteur malveillant capable de se connecter à ce port peut être en mesure d'exécuter du code arbitraire au nom du processus Node.js (**escalade de privilèges potentielle**).
+> Étant donné que **le débogueur a un accès complet à l'environnement d'exécution Node.js**, un acteur malveillant capable de se connecter à ce port peut être en mesure d'exécuter du code arbitraire au nom du processus Node.js (**élévation de privilèges potentielle**).
 
 Il existe plusieurs façons de démarrer un inspecteur :
 ```bash
@@ -40,7 +40,7 @@ Les sites Web ouverts dans un navigateur peuvent effectuer des requêtes WebSock
 > [!NOTE]
 > Ces **mesures de sécurité empêchent l'exploitation de l'inspecteur** pour exécuter du code en **envoyant simplement une requête HTTP** (ce qui pourrait être fait en exploitant une vulnérabilité SSRF).
 
-### Démarrer l'inspecteur dans les processus en cours
+### Démarrer l'inspecteur dans les processus en cours d'exécution
 
 Vous pouvez envoyer le **signal SIGUSR1** à un processus nodejs en cours d'exécution pour le faire **démarrer l'inspecteur** sur le port par défaut. Cependant, notez que vous devez avoir suffisamment de privilèges, donc cela pourrait vous accorder **un accès privilégié à des informations à l'intérieur du processus** mais pas une élévation de privilèges directe.
 ```bash
@@ -50,13 +50,13 @@ kill -s SIGUSR1 <nodejs-ps>
 > [!NOTE]
 > Cela est utile dans les conteneurs car **arrêter le processus et en démarrer un nouveau** avec `--inspect` **n'est pas une option** car le **conteneur** sera **tué** avec le processus.
 
-### Se connecter à l'inspecteur/debugger
+### Connecter à l'inspecteur/debugger
 
 Pour se connecter à un **navigateur basé sur Chromium**, les URL `chrome://inspect` ou `edge://inspect` peuvent être accessibles pour Chrome ou Edge, respectivement. En cliquant sur le bouton Configurer, il faut s'assurer que le **hôte cible et le port** sont correctement listés. L'image montre un exemple d'Exécution de Code à Distance (RCE) :
 
 ![](<../../images/image (674).png>)
 
-En utilisant la **ligne de commande**, vous pouvez vous connecter à un debugger/inpecteur avec :
+En utilisant la **ligne de commande**, vous pouvez vous connecter à un debugger/inspecteur avec :
 ```bash
 node inspect <ip>:<port>
 node inspect 127.0.0.1:9229
@@ -78,9 +78,9 @@ L'outil [**https://github.com/taviso/cefdebug**](https://github.com/taviso/cefde
 ## RCE dans le Débogueur/Inspecteur NodeJS
 
 > [!NOTE]
-> Si vous êtes ici pour savoir comment obtenir [**RCE à partir d'un XSS dans Electron, veuillez consulter cette page.**](../../network-services-pentesting/pentesting-web/electron-desktop-apps/)
+> Si vous êtes ici pour savoir comment obtenir [**RCE à partir d'un XSS dans Electron, veuillez consulter cette page.**](../../network-services-pentesting/pentesting-web/electron-desktop-apps/index.html)
 
-Quelques façons courantes d'obtenir **RCE** lorsque vous pouvez **vous connecter** à un **inspecteur** Node sont d'utiliser quelque chose comme (il semble que cela **ne fonctionnera pas dans une connexion au protocole Chrome DevTools**):
+Certaines façons courantes d'obtenir **RCE** lorsque vous pouvez **vous connecter** à un **inspecteur** Node sont d'utiliser quelque chose comme (il semble que cela **ne fonctionnera pas dans une connexion au protocole Chrome DevTools**):
 ```javascript
 process.mainModule.require("child_process").exec("calc")
 window.appshell.app.openURLInDefaultBrowser("c:/windows/system32/calc.exe")
@@ -94,7 +94,7 @@ Dans cette section, je vais simplement lister des choses intéressantes que j'ai
 
 ### Injection de Paramètres via Deep Links
 
-Dans le [**CVE-2021-38112**](https://rhinosecuritylabs.com/aws/cve-2021-38112-aws-workspaces-rce/), Rhino security a découvert qu'une application basée sur CEF **avait enregistré un URI personnalisé** dans le système (workspaces://) qui recevait l'URI complet et ensuite **lancait l'application basée sur CEF** avec une configuration qui était partiellement construite à partir de cet URI.
+Dans le [**CVE-2021-38112**](https://rhinosecuritylabs.com/aws/cve-2021-38112-aws-workspaces-rce/), Rhino Security a découvert qu'une application basée sur CEF **avait enregistré un URI personnalisé** dans le système (workspaces://index.html) qui recevait l'URI complet et **lancait l'application basée sur CEF** avec une configuration partiellement construite à partir de cet URI.
 
 Il a été découvert que les paramètres URI étaient décodés en URL et utilisés pour lancer l'application de base CEF, permettant à un utilisateur d'**injecter** le drapeau **`--gpu-launcher`** dans la **ligne de commande** et d'exécuter des choses arbitraires.
 

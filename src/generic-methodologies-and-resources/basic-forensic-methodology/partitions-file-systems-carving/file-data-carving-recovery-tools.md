@@ -31,20 +31,20 @@ foremost -v -i file.img -o output
 ```
 ### **Scalpel**
 
-**Scalpel** est un autre outil qui peut être utilisé pour trouver et extraire **des fichiers intégrés dans un fichier**. Dans ce cas, vous devrez décommenter dans le fichier de configuration (_/etc/scalpel/scalpel.conf_) les types de fichiers que vous souhaitez extraire.
+**Scalpel** est un autre outil qui peut être utilisé pour trouver et extraire **des fichiers intégrés dans un fichier**. Dans ce cas, vous devrez décommenter dans le fichier de configuration (_/etc/scalpel/scalpel.conf_) les types de fichiers que vous souhaitez qu'il extraye.
 ```bash
 sudo apt-get install scalpel
 scalpel file.img -o output
 ```
 ### Bulk Extractor
 
-Cet outil est inclus dans Kali mais vous pouvez le trouver ici : [https://github.com/simsong/bulk_extractor](https://github.com/simsong/bulk_extractor)
+Cet outil est inclus dans Kali, mais vous pouvez le trouver ici : [https://github.com/simsong/bulk_extractor](https://github.com/simsong/bulk_extractor)
 
-Cet outil peut analyser une image et **extraire des pcaps** à l'intérieur, **des informations réseau (URLs, domaines, IPs, MACs, mails)** et plus **de fichiers**. Vous n'avez qu'à faire :
+Cet outil peut analyser une image et **extraire des pcaps** à l'intérieur, **des informations réseau (URLs, domaines, IPs, MACs, mails)** et d'autres **fichiers**. Vous n'avez qu'à faire :
 ```
 bulk_extractor memory.img -o out_folder
 ```
-Naviguez à travers **toutes les informations** que l'outil a rassemblées (mots de passe ?), **analysez** les **paquets** (lisez[ **Analyse des Pcaps**](../pcap-inspection/)), recherchez des **domaines étranges** (domaines liés à **malware** ou **inexistants**).
+Naviguez à travers **toutes les informations** que l'outil a rassemblées (mots de passe ?), **analysez** les **paquets** (lisez [**Analyse des Pcaps**](../pcap-inspection/index.html)), recherchez des **domaines étranges** (domaines liés à des **malwares** ou **inexistants**).
 
 ### PhotoRec
 
@@ -63,7 +63,7 @@ Vérifiez le [code](https://code.google.com/archive/p/binvis/) et la [page web d
 - Visualiseur de **structure** visuel et actif
 - Plusieurs graphiques pour différents points de focalisation
 - Focalisation sur des portions d'un échantillon
-- **Voir les chaînes et ressources**, dans des exécutables PE ou ELF par exemple
+- **Voir les chaînes et ressources**, dans des exécutables PE ou ELF, par exemple
 - Obtenir des **modèles** pour la cryptanalyse sur des fichiers
 - **Repérer** des algorithmes de packer ou d'encodeur
 - **Identifier** la stéganographie par des motifs
@@ -71,7 +71,7 @@ Vérifiez le [code](https://code.google.com/archive/p/binvis/) et la [page web d
 
 BinVis est un excellent **point de départ pour se familiariser avec une cible inconnue** dans un scénario de black-boxing.
 
-## Outils de Carving de Données Spécifiques
+## Outils de Data Carving spécifiques
 
 ### FindAES
 
@@ -79,7 +79,7 @@ Recherche des clés AES en cherchant leurs plannings de clés. Capable de trouve
 
 Téléchargez [ici](https://sourceforge.net/projects/findaes/).
 
-## Outils Complémentaires
+## Outils complémentaires
 
 Vous pouvez utiliser [**viu** ](https://github.com/atanunq/viu) pour voir des images depuis le terminal.\
 Vous pouvez utiliser l'outil en ligne de commande linux **pdftotext** pour transformer un pdf en texte et le lire.

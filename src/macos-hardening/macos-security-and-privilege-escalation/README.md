@@ -37,7 +37,7 @@ macos-protocols.md
 {{#endref}}
 
 - macOS **Open Source** : [https://opensource.apple.com/](https://opensource.apple.com/)
-- Pour télécharger un `tar.gz`, changez une URL telle que [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) en [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
+- Pour télécharger un `tar.gz`, changez une URL comme [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) en [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
 
 ### MDM MacOS
 
@@ -95,7 +95,7 @@ Par conséquent, un attaquant qui souhaite compromettre avec succès une machine
 
 Ces privilèges sont généralement accordés sous forme de **droits** avec lesquels l'application est signée, ou l'application peut avoir demandé certains accès et après que **l'utilisateur les ait approuvés**, ils peuvent être trouvés dans les **bases de données TCC**. Une autre façon pour un processus d'obtenir ces privilèges est d'être un **enfant d'un processus** ayant ces **privilèges**, car ils sont généralement **hérités**.
 
-Suivez ces liens pour trouver différentes façons de [**escalader les privilèges dans TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), pour [**contourner TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) et comment dans le passé [**SIP a été contourné**](macos-security-protections/macos-sip.md#sip-bypasses).
+Suivez ces liens pour trouver différentes façons de [**escalader les privilèges dans TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), pour [**contourner TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) et comment dans le passé [**SIP a été contourné**](macos-security-protections/macos-sip.md#sip-bypasses).
 
 ## Escalade de Privilèges Traditionnelle macOS
 

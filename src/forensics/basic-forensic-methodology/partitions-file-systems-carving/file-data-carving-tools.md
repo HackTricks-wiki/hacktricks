@@ -10,7 +10,7 @@ L'outil le plus couramment utilisé en criminalistique pour extraire des fichier
 
 **Binwalk** est un outil pour rechercher des fichiers binaires comme des images et des fichiers audio à la recherche de fichiers et de données intégrés.  
 Il peut être installé avec `apt`, cependant la [source](https://github.com/ReFirmLabs/binwalk) peut être trouvée sur github.  
-**Commandes utiles** :
+**Commandes utiles**:
 ```bash
 sudo apt install binwalk #Insllation
 binwalk file #Displays the embedded data in the given file
@@ -34,13 +34,13 @@ scalpel file.img -o output
 ```
 ## Bulk Extractor
 
-Cet outil est inclus dans Kali mais vous pouvez le trouver ici : [https://github.com/simsong/bulk_extractor](https://github.com/simsong/bulk_extractor)
+Cet outil est inclus dans Kali, mais vous pouvez le trouver ici : [https://github.com/simsong/bulk_extractor](https://github.com/simsong/bulk_extractor)
 
 Cet outil peut analyser une image et **extraire des pcaps** à l'intérieur, **des informations réseau (URLs, domaines, IPs, MACs, mails)** et plus **de fichiers**. Vous n'avez qu'à faire :
 ```text
 bulk_extractor memory.img -o out_folder
 ```
-Naviguez à travers **toutes les informations** que l'outil a rassemblées \(mots de passe ?\), **analysez** les **paquets** \(lisez [**Analyse des Pcaps**](../pcap-inspection/)\), recherchez des **domaines étranges** \(domaines liés à **malware** ou **inexistants**\).
+Naviguez à travers **toutes les informations** que l'outil a rassemblées \(mots de passe ?\), **analysez** les **paquets** \(lisez [ **Analyse des Pcaps**](../pcap-inspection/index.html)\), recherchez des **domaines étranges** \(domaines liés à **des logiciels malveillants** ou **inexistants**\).
 
 ## PhotoRec
 

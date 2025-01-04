@@ -10,17 +10,17 @@ Permissions dans un **répertoire** :
 - **écriture** - vous pouvez **supprimer/écrire** des **fichiers** dans le répertoire et vous pouvez **supprimer des dossiers vides**.
 - Mais vous **ne pouvez pas supprimer/modifier des dossiers non vides** à moins d'avoir des permissions d'écriture dessus.
 - Vous **ne pouvez pas modifier le nom d'un dossier** à moins de le posséder.
-- **exécution** - vous êtes **autorisé à traverser** le répertoire - si vous n'avez pas ce droit, vous ne pouvez accéder à aucun fichier à l'intérieur, ni dans aucun sous-répertoire.
+- **exécution** - vous êtes **autorisé à traverser** le répertoire - si vous n'avez pas ce droit, vous ne pouvez pas accéder à des fichiers à l'intérieur, ni dans des sous-répertoires.
 
 ### Combinaisons dangereuses
 
 **Comment écraser un fichier/dossier appartenant à root**, mais :
 
-- Un **propriétaire de répertoire parent** dans le chemin est l'utilisateur
-- Un **propriétaire de répertoire parent** dans le chemin est un **groupe d'utilisateurs** avec **accès en écriture**
+- Un parent **propriétaire de répertoire** dans le chemin est l'utilisateur
+- Un parent **propriétaire de répertoire** dans le chemin est un **groupe d'utilisateurs** avec **accès en écriture**
 - Un **groupe d'utilisateurs** a un accès **en écriture** au **fichier**
 
-Avec l'une des combinaisons précédentes, un attaquant pourrait **injecter** un **lien sym/hard** vers le chemin attendu pour obtenir une écriture arbitraire privilégiée.
+Avec l'une des combinaisons précédentes, un attaquant pourrait **injecter** un **lien sym/hard** vers le chemin attendu pour obtenir un écriture arbitraire privilégiée.
 
 ### Cas spécial du dossier root R+X
 
@@ -34,7 +34,7 @@ Exemple dans : [https://theevilbit.github.io/posts/exploiting_directory_permissi
 
 Si un processus privilégié écrit des données dans un **fichier** qui pourrait être **contrôlé** par un **utilisateur de moindre privilège**, ou qui pourrait avoir été **précédemment créé** par un utilisateur de moindre privilège. L'utilisateur pourrait simplement **le pointer vers un autre fichier** via un lien symbolique ou dur, et le processus privilégié écrira sur ce fichier.
 
-Vérifiez dans les autres sections où un attaquant pourrait **abuser d'une écriture arbitraire pour élever ses privilèges**.
+Vérifiez dans les autres sections où un attaquant pourrait **abuser d'une écriture arbitraire pour élever les privilèges**.
 
 ### Ouvert `O_NOFOLLOW`
 
@@ -62,7 +62,7 @@ Exemple :
 
 Si un appel à `open` n'a pas le drapeau `O_CLOEXEC`, le descripteur de fichier sera hérité par le processus enfant. Donc, si un processus privilégié ouvre un fichier privilégié et exécute un processus contrôlé par l'attaquant, l'attaquant **héritera le FD sur le fichier privilégié**.
 
-Si vous pouvez faire en sorte qu'un **processus ouvre un fichier ou un dossier avec des privilèges élevés**, vous pouvez abuser de **`crontab`** pour ouvrir un fichier dans `/etc/sudoers.d` avec **`EDITOR=exploit.py`**, de sorte que `exploit.py` obtiendra le FD vers le fichier à l'intérieur de `/etc/sudoers` et l'abusera.
+Si vous pouvez faire en sorte qu'un **processus ouvre un fichier ou un dossier avec des privilèges élevés**, vous pouvez abuser de **`crontab`** pour ouvrir un fichier dans `/etc/sudoers.d` avec **`EDITOR=exploit.py`**, de sorte que `exploit.py` obtiendra le FD vers le fichier à l'intérieur de `/etc/sudoers` et en abusant de celui-ci.
 
 Par exemple : [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098), code : https://github.com/gergelykalman/CVE-2023-32428-a-macOS-LPE-via-MallocStackLogging
 
@@ -97,7 +97,7 @@ xattr: [Errno 1] Operation not permitted: '/tmp/mnt/lol'
 ```
 ### writeextattr ACL
 
-Cette ACL empêche d'ajouter des `xattrs` au fichier.
+Cette ACL empêche l'ajout de `xattrs` au fichier.
 ```bash
 rm -rf /tmp/test*
 echo test >/tmp/test
@@ -195,7 +195,7 @@ Cependant, il existe certains fichiers dont la signature ne sera pas vérifiée,
 </dict>
 <key>rules2</key>
 ...
-<key>^(.*/)?\.DS_Store$</key>
+<key>^(.*/index.html)?\.DS_Store$</key>
 <dict>
 <key>omit</key>
 <true/>
@@ -221,7 +221,7 @@ Cependant, il existe certains fichiers dont la signature ne sera pas vérifiée,
 ...
 </dict>
 ```
-Il est possible de calculer la signature d'une ressource depuis la ligne de commande avec :
+Il est possible de calculer la signature d'une ressource depuis le cli avec :
 ```bash
 openssl dgst -binary -sha1 /System/Cryptexes/App/System/Applications/Safari.app/Contents/Resources/AppIcon.icns | openssl base64
 ```
@@ -248,7 +248,7 @@ hdiutil detach /private/tmp/mnt 1>/dev/null
 # You can also create a dmg from an app using:
 hdiutil create -srcfolder justsome.app justsome.dmg
 ```
-Habituellement, macOS monte le disque en communiquant avec le service Mach `com.apple.DiskArbitrarion.diskarbitrariond` (fourni par `/usr/libexec/diskarbitrationd`). Si vous ajoutez le paramètre `-d` au fichier plist des LaunchDaemons et redémarrez, il stockera les journaux dans `/var/log/diskarbitrationd.log`.\
+Habituellement, macOS monte le disque en communiquant avec le service Mach `com.apple.DiskArbitration.diskarbitrationd` (fourni par `/usr/libexec/diskarbitrationd`). Si vous ajoutez le paramètre `-d` au fichier plist des LaunchDaemons et redémarrez, il stockera les journaux dans `/var/log/diskarbitrationd.log`.\
 Cependant, il est possible d'utiliser des outils comme `hdik` et `hdiutil` pour communiquer directement avec le kext `com.apple.driver.DiskImages`.
 
 ## Écritures arbitraires
@@ -286,13 +286,13 @@ Si vous avez **écriture arbitraire**, vous pourriez créer un fichier dans le d
 
 ### Fichiers PATH
 
-Le fichier **`/etc/paths`** est l'un des principaux endroits qui peuplent la variable d'environnement PATH. Vous devez être root pour le remplacer, mais si un script d'un **processus privilégié** exécute une **commande sans le chemin complet**, vous pourriez être en mesure de **détourner** cela en modifiant ce fichier.
+Le fichier **`/etc/paths`** est l'un des principaux endroits qui remplit la variable d'environnement PATH. Vous devez être root pour le remplacer, mais si un script d'un **processus privilégié** exécute une **commande sans le chemin complet**, vous pourriez être en mesure de **détourner** cela en modifiant ce fichier.
 
 Vous pouvez également écrire des fichiers dans **`/etc/paths.d`** pour charger de nouveaux dossiers dans la variable d'environnement `PATH`.
 
 ### cups-files.conf
 
-Cette technique a été utilisée dans [ce rapport](https://www.kandji.io/blog/macos-audit-story-part1).
+Cette technique a été utilisée dans [cet article](https://www.kandji.io/blog/macos-audit-story-part1).
 
 Créez le fichier `/etc/cups/cups-files.conf` avec le contenu suivant :
 ```
@@ -304,11 +304,11 @@ Cela créera le fichier `/etc/sudoers.d/lpe` avec des permissions 777. Le surplu
 
 Ensuite, écrivez dans `/etc/sudoers.d/lpe` la configuration nécessaire pour escalader les privilèges comme `%staff ALL=(ALL) NOPASSWD:ALL`.
 
-Puis, modifiez à nouveau le fichier `/etc/cups/cups-files.conf` en indiquant `LogFilePerm 700` afin que le nouveau fichier sudoers devienne valide en invoquant `cupsctl`.
+Puis, modifiez le fichier `/etc/cups/cups-files.conf` en indiquant `LogFilePerm 700` afin que le nouveau fichier sudoers devienne valide en invoquant `cupsctl`.
 
 ### Évasion du Sandbox
 
-Il est possible d'échapper au sandbox macOS avec un écriture arbitraire sur le FS. Pour quelques exemples, consultez la page [macOS Auto Start](../../../../macos-auto-start-locations.md) mais un exemple courant est d'écrire un fichier de préférences Terminal dans `~/Library/Preferences/com.apple.Terminal.plist` qui exécute une commande au démarrage et de l'appeler en utilisant `open`.
+Il est possible d'échapper au sandbox macOS avec un écriture arbitraire sur le FS. Pour quelques exemples, consultez la page [macOS Auto Start](../../../../macos-auto-start-locations.md), mais un cas courant est d'écrire un fichier de préférences Terminal dans `~/Library/Preferences/com.apple.Terminal.plist` qui exécute une commande au démarrage et de l'appeler en utilisant `open`.
 
 ## Générer des fichiers écrits par d'autres utilisateurs
 
@@ -422,13 +422,13 @@ return 0;
 
 ## Descripteurs protégés macOS
 
-**Descripteurs protégés macOS** sont une fonctionnalité de sécurité introduite dans macOS pour améliorer la sécurité et la fiabilité des **opérations sur des descripteurs de fichiers** dans les applications utilisateur. Ces descripteurs protégés fournissent un moyen d'associer des restrictions spécifiques ou des "gardes" avec des descripteurs de fichiers, qui sont appliquées par le noyau.
+**Les descripteurs protégés macOS** sont une fonctionnalité de sécurité introduite dans macOS pour améliorer la sécurité et la fiabilité des **opérations sur des descripteurs de fichiers** dans les applications utilisateur. Ces descripteurs protégés fournissent un moyen d'associer des restrictions spécifiques ou des "gardes" avec des descripteurs de fichiers, qui sont appliquées par le noyau.
 
 Cette fonctionnalité est particulièrement utile pour prévenir certaines classes de vulnérabilités de sécurité telles que **l'accès non autorisé aux fichiers** ou **les conditions de concurrence**. Ces vulnérabilités se produisent par exemple lorsqu'un thread accède à une description de fichier donnant **à un autre thread vulnérable un accès dessus** ou lorsqu'un descripteur de fichier est **hérité** par un processus enfant vulnérable. Certaines fonctions liées à cette fonctionnalité sont :
 
 - `guarded_open_np`: Ouvre un FD avec une garde
 - `guarded_close_np`: Ferme-le
-- `change_fdguard_np`: Change les drapeaux de garde sur un descripteur (y compris la suppression de la protection de garde)
+- `change_fdguard_np`: Change les drapeaux de garde sur un descripteur (même en supprimant la protection de garde)
 
 ## Références
 

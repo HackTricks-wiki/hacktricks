@@ -1,4 +1,4 @@
-# Outils de Carving & de Récupération de Fichiers/Données
+# File/Data Carving & Recovery Tools
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -14,7 +14,7 @@ L'outil le plus couramment utilisé en criminalistique pour extraire des fichier
 
 **Binwalk** est un outil pour analyser des fichiers binaires afin de trouver du contenu intégré. Il est installable via `apt` et sa source est sur [GitHub](https://github.com/ReFirmLabs/binwalk).
 
-**Commandes utiles** :
+**Commandes utiles**:
 ```bash
 sudo apt install binwalk #Insllation
 binwalk file #Displays the embedded data in the given file
@@ -40,11 +40,11 @@ scalpel file.img -o output
 
 Cet outil est inclus dans Kali, mais vous pouvez le trouver ici : [https://github.com/simsong/bulk_extractor](https://github.com/simsong/bulk_extractor)
 
-Cet outil peut analyser une image et **extraire des pcaps** à l'intérieur, **des informations réseau (URLs, domaines, IPs, MACs, mails)** et plus de **fichiers**. Vous n'avez qu'à faire :
+Cet outil peut analyser une image et **extraire des pcaps** à l'intérieur, **des informations réseau (URLs, domaines, IPs, MACs, mails)** et d'autres **fichiers**. Vous n'avez qu'à faire :
 ```
 bulk_extractor memory.img -o out_folder
 ```
-Naviguez à travers **toutes les informations** que l'outil a rassemblées (mots de passe ?), **analysez** les **paquets** (lisez [**Analyse des Pcaps**](../pcap-inspection/)), recherchez des **domaines étranges** (domaines liés à **des logiciels malveillants** ou **inexistants**).
+Naviguez à travers **toutes les informations** que l'outil a rassemblées (mots de passe ?), **analysez** les **paquets** (lisez[ **Analyse des Pcaps**](../pcap-inspection/index.html)), recherchez des **domaines étranges** (domaines liés à des **malwares** ou **inexistants**).
 
 ### PhotoRec
 
@@ -63,15 +63,15 @@ Vérifiez le [code](https://code.google.com/archive/p/binvis/) et la [page web d
 - Visualiseur de **structure** visuel et actif
 - Plusieurs graphiques pour différents points de focalisation
 - Focalisation sur des portions d'un échantillon
-- **Voir les chaînes et les ressources**, dans des exécutables PE ou ELF, par exemple
+- **Voir les chaînes et ressources**, dans des exécutables PE ou ELF par exemple
 - Obtenir des **modèles** pour la cryptanalyse sur des fichiers
 - **Repérer** des algorithmes de packer ou d'encodeur
-- **Identifier** la stéganographie par des modèles
+- **Identifier** la stéganographie par des motifs
 - **Différenciation** binaire visuelle
 
-BinVis est un excellent **point de départ pour se familiariser avec une cible inconnue** dans un scénario de boîte noire.
+BinVis est un excellent **point de départ pour se familiariser avec une cible inconnue** dans un scénario de black-boxing.
 
-## Outils de Carving de Données Spécifiques
+## Outils de Data Carving spécifiques
 
 ### FindAES
 
@@ -79,9 +79,9 @@ Recherche des clés AES en cherchant leurs plannings de clés. Capable de trouve
 
 Téléchargez [ici](https://sourceforge.net/projects/findaes/).
 
-## Outils Complémentaires
+## Outils complémentaires
 
-Vous pouvez utiliser [**viu**](https://github.com/atanunq/viu) pour voir des images depuis le terminal.\
+Vous pouvez utiliser [**viu** ](https://github.com/atanunq/viu) pour voir des images depuis le terminal.\
 Vous pouvez utiliser l'outil en ligne de commande linux **pdftotext** pour transformer un pdf en texte et le lire.
 
 {{#include ../../../banners/hacktricks-training.md}}

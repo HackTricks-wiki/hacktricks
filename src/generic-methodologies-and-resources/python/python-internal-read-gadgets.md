@@ -13,7 +13,7 @@ La page principale d'une application Flask aura probablement l'objet global **`a
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-Dans ce cas, il est possible d'accéder à cet objet en utilisant simplement n'importe quel gadget pour **accéder aux objets globaux** depuis la [**page de contournement des sandboxes Python**](bypass-python-sandboxes/).
+Dans ce cas, il est possible d'accéder à cet objet en utilisant simplement n'importe quel gadget pour **accéder aux objets globaux** depuis la [**page de contournement des sandboxes Python**](bypass-python-sandboxes/index.html).
 
 Dans le cas où **la vulnérabilité se trouve dans un fichier python différent**, vous avez besoin d'un gadget pour traverser les fichiers afin d'atteindre le principal pour **accéder à l'objet global `app.secret_key`** afin de changer la clé secrète de Flask et pouvoir [**escalader les privilèges** en connaissant cette clé](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
 
