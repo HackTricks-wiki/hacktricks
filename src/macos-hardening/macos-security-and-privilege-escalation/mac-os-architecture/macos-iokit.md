@@ -10,7 +10,7 @@ IOKit drivers will basically **export functions from the kernel**. These functio
 
 **IOKit XNU kernel code** is opensourced by Apple in [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit). Moreover, the user space IOKit components are also opensource [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
 
-However, **no IOKit drivers** are opensource. Anyway, from time to time a release of a driver might come with symbols that makes it easier to debug it. Check how to [**get the driver extensions from the firmware here**](./#ipsw)**.**
+However, **no IOKit drivers** are opensource. Anyway, from time to time a release of a driver might come with symbols that makes it easier to debug it. Check how to [**get the driver extensions from the firmware here**](#ipsw)**.**
 
 It's written in **C++**. You can get demangled C++ symbols with:
 
@@ -166,7 +166,7 @@ There are **other** functions that can be used to call IOKit functions apart of 
 
 ## Reversing driver entrypoint
 
-You could obtain these for example from a [**firmware image (ipsw)**](./#ipsw). Then, load it into your favourite decompiler.
+You could obtain these for example from a [**firmware image (ipsw)**](#ipsw). Then, load it into your favourite decompiler.
 
 You could start decompiling the **`externalMethod`** function as this is the driver function that will be receiving the call and calling the correct function:
 

@@ -247,7 +247,7 @@ And **MIG clients** will use the `__NDR_record` to send with `__mach_msg` to the
 
 As many binaries now use MIG to expose mach ports, it's interesting to know how to **identify that MIG was used** and the **functions that MIG executes** with each message ID.
 
-[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/#jtool2) can parse MIG information from a Mach-O binary indicating the message ID and identifying the function to execute:
+[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/index.html#jtool2) can parse MIG information from a Mach-O binary indicating the message ID and identifying the function to execute:
 
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep MIG

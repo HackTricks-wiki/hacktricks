@@ -238,9 +238,9 @@ Therefore, if the user manages to restart TCC with a $HOME env variable pointing
 > [!TIP]
 > Note that Apple uses the setting stored within the user's profile in the **`NFSHomeDirectory`** attribute for the **value of `$HOME`**, so if you compromise an application with permissions to modify this value (**`kTCCServiceSystemPolicySysAdminFiles`**), you can **weaponize** this option with a TCC bypass.
 
-### [CVE-2020–9934 - TCC](./#c19b) <a href="#c19b" id="c19b"></a>
+### [CVE-2020–9934 - TCC](#c19b) <a href="#c19b" id="c19b"></a>
 
-### [CVE-2020-27937 - Directory Utility](./#cve-2020-27937-directory-utility-1)
+### [CVE-2020-27937 - Directory Utility](#cve-2020-27937-directory-utility-1)
 
 ### CVE-2021-30970 - Powerdir
 

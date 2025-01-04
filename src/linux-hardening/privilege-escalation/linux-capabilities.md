@@ -1305,7 +1305,7 @@ In this case the group shadow was impersonated so you can read the file `/etc/sh
 cat /etc/shadow
 ```
 
-If **docker** is installed you could **impersonate** the **docker group** and abuse it to communicate with the [**docker socket** and escalate privileges](./#writable-docker-socket).
+If **docker** is installed you could **impersonate** the **docker group** and abuse it to communicate with the [**docker socket** and escalate privileges](#writable-docker-socket).
 
 ## CAP_SETFCAP
 
