@@ -108,7 +108,7 @@ python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d1
 
 #### **Dump keychain keys (with passwords) with memory dump**
 
-[Follow these steps](../#dumping-memory-with-osxpmem) to perform a **memory dump**
+[Follow these steps](../index.html#dumping-memory-with-osxpmem) to perform a **memory dump**
 
 ```bash
 #Use volafox (https://github.com/n0fate/volafox) to extract possible keychain passwords

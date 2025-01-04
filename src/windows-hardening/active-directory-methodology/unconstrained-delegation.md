@@ -38,7 +38,7 @@ To make a print server login against any machine you can use [**SpoolSample**](h
 .\SpoolSample.exe <printmachine> <unconstrinedmachine>
 ```
 
-If the TGT if from a domain controller, you could perform a[ **DCSync attack**](acl-persistence-abuse/#dcsync) and obtain all the hashes from the DC.\
+If the TGT if from a domain controller, you could perform a[ **DCSync attack**](acl-persistence-abuse/index.html#dcsync) and obtain all the hashes from the DC.\
 [**More info about this attack in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-dc-print-server-and-kerberos-delegation)
 
 **Here are other ways to try to force an authentication:**

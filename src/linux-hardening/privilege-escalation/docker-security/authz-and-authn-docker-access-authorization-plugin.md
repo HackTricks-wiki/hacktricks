@@ -82,7 +82,7 @@ docker exec -it ---cap-add=ALL bb72293810b0f4ea65ee8fd200db418a48593c1a8a31407be
 docker exec -it ---cap-add=SYS_ADMIN bb72293810b0f4ea65ee8fd200db418a48593c1a8a31407be6fee0f9f3e4 bash
 ```
 
-Now, the user can escape from the container using any of the [**previously discussed techniques**](./#privileged-flag) and **escalate privileges** inside the host.
+Now, the user can escape from the container using any of the [**previously discussed techniques**](#privileged-flag) and **escalate privileges** inside the host.
 
 ## Mount Writable Folder
 
