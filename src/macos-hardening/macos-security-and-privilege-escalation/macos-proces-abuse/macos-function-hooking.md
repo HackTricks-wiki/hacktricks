@@ -6,7 +6,7 @@
 
 **`__interpose` (`__DATA___interpose`)** セクションを持つ **dylib** を作成します（または **`S_INTERPOSING`** フラグが付けられたセクション）。このセクションには、**元の** 関数と **置き換え** 関数を参照する **関数ポインタ** のタプルが含まれます。
 
-次に、**`DYLD_INSERT_LIBRARIES`** を使用して dylib を **注入** します（インターポジングはメインアプリがロードされる前に行う必要があります）。明らかに、[**`DYLD_INSERT_LIBRARIES`** の使用に適用される **制限** はここでも適用されます](macos-library-injection/#check-restrictions)。
+次に、**`DYLD_INSERT_LIBRARIES`** を使用して dylib を **注入** します（インターポジングはメインアプリがロードされる前に行う必要があります）。明らかに、[**`DYLD_INSERT_LIBRARIES`** の使用に適用される **制限** はここでも適用されます](macos-library-injection/index.html#check-restrictions)。
 
 ### Interpose printf
 
@@ -78,13 +78,13 @@ DYLD_INSERT_LIBRARIES=./interpose2.dylib ./hello
 Hello from interpose
 ```
 > [!WARNING]
-> **`DYLD_PRINT_INTERPOSTING`** 環境変数は、インターポジングをデバッグするために使用でき、インターポーズプロセスを出力します。
+> **`DYLD_PRINT_INTERPOSTING`** 環境変数は、インターポジションをデバッグするために使用でき、インターポーズプロセスを出力します。
 
-また、**インターポジングはプロセスとロードされたライブラリの間で発生する**ことに注意してください。共有ライブラリキャッシュでは機能しません。
+また、**インターポジションはプロセスとロードされたライブラリの間で発生し**、共有ライブラリキャッシュでは機能しないことに注意してください。
 
-### ダイナミックインターポジング
+### ダイナミックインターポジション
 
-現在、関数 **`dyld_dynamic_interpose`** を使用して動的に関数をインターポーズすることも可能です。これにより、最初からだけでなく、実行時にプログラム的に関数をインターポーズできます。
+現在、関数 **`dyld_dynamic_interpose`** を使用して関数を動的にインターポーズすることも可能です。これにより、最初からだけでなく、実行時にプログラム的に関数をインターポーズできます。
 
 **置き換える関数と置き換え関数のタプル**を指定するだけで済みます。
 ```c
@@ -99,7 +99,7 @@ const struct dyld_interpose_tuple array[], size_t count);
 
 ObjectiveCでは、メソッドは次のように呼び出されます: **`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
 
-**オブジェクト**、**メソッド**、および**パラメータ**が必要です。そして、メソッドが呼び出されると、**msgが送信されます**。関数**`objc_msgSend`**を使用します: `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
+**オブジェクト**、**メソッド**、および**パラメータ**が必要です。そして、メソッドが呼び出されると、**msgが送信されます**。これは関数**`objc_msgSend`**を使用します: `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
 
 オブジェクトは**`someObject`**、メソッドは**`@selector(method1p1:p2:)`**、引数は**value1**、**value2**です。
 
@@ -176,12 +176,12 @@ NSLog(@"Uppercase string: %@", uppercaseString3);
 return 0;
 }
 ```
-### メソッドスワッピングと method_exchangeImplementations
+### Method Swizzling with method_exchangeImplementations
 
 関数 **`method_exchangeImplementations`** は **一つの関数の実装のアドレスを他の関数に変更する** ことを可能にします。
 
 > [!CAUTION]
-> したがって、関数が呼び出されると **実行されるのは別の関数です**。
+> したがって、関数が呼び出されると **実行されるのは他の関数です**。
 ```objectivec
 //gcc -framework Foundation swizzle_str.m -o swizzle_str
 
@@ -226,15 +226,15 @@ return 0;
 }
 ```
 > [!WARNING]
-> この場合、**正当な**メソッドの**実装コード**が**メソッド**の**名前**を**検証**すると、このスウィズリングを**検出**し、実行を防ぐことができます。
+> この場合、**正当な**メソッドの**実装コード**が**メソッド名**を**検証**すると、このスウィズリングを**検出**し、実行を防ぐことができます。
 >
 > 次の技術にはこの制限はありません。
 
 ### method_setImplementationによるメソッドスウィズリング
 
-前の形式は奇妙です。なぜなら、2つのメソッドの実装を互いに変更しているからです。関数**`method_setImplementation`**を使用すると、**あるメソッドの実装を別のメソッドに**変更できます。
+前の形式は奇妙です。なぜなら、2つのメソッドの実装を互いに変更しているからです。**`method_setImplementation`**関数を使用すると、**あるメソッドの実装を別のメソッドに変更**できます。
 
-上書きする前に新しい実装から元の実装を呼び出すつもりなら、**元の実装のアドレスを保存する**ことを忘れないでください。後でそのアドレスを見つけるのは非常に複雑になります。
+新しい実装から元の実装を呼び出す予定がある場合は、上書きする前に**元の実装のアドレスを保存する**ことを忘れないでください。後でそのアドレスを見つけるのは非常に複雑になります。
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
@@ -290,13 +290,13 @@ return 0;
 
 このページでは、関数をフックするさまざまな方法について説明しました。しかし、これらは**攻撃のためにプロセス内でコードを実行する**ことを含んでいました。
 
-そのために、最も簡単な技術は、[環境変数を介してDyldを注入するか、ハイジャックすること](macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md)です。しかし、これも[Dylibプロセス注入](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port)を介して行うことができると思います。
+それを行うために、最も簡単な技術は、[環境変数を介してDyldを注入するか、ハイジャックすること](macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md)です。しかし、これも[Dylibプロセス注入](macos-ipc-inter-process-communication/index.html#dylib-process-injection-via-task-port)を介して行うことができると思います。
 
 ただし、両方のオプションは**保護されていない**バイナリ/プロセスに**制限**されています。各技術を確認して、制限について詳しく学んでください。
 
-ただし、関数フッキング攻撃は非常に特定的であり、攻撃者は**プロセス内から機密情報を盗む**ためにこれを行います（そうでなければ、単にプロセス注入攻撃を行うでしょう）。この機密情報は、MacPassなどのユーザーがダウンロードしたアプリに存在する可能性があります。
+ただし、関数フッキング攻撃は非常に特定的であり、攻撃者は**プロセス内から機密情報を盗む**ためにこれを行います（そうでなければ、プロセス注入攻撃を行うだけです）。この機密情報は、MacPassなどのユーザーがダウンロードしたアプリに存在する可能性があります。
 
-したがって、攻撃者のベクターは、脆弱性を見つけるか、アプリケーションの署名を剥がし、アプリケーションのInfo.plistを介して**`DYLD_INSERT_LIBRARIES`**環境変数を注入し、次のようなものを追加することになります：
+したがって、攻撃者のベクターは、脆弱性を見つけるか、アプリケーションの署名を剥がし、アプリケーションのInfo.plistを介して**`DYLD_INSERT_LIBRARIES`**環境変数を注入し、次のようなものを追加することになります:
 ```xml
 <key>LSEnvironment</key>
 <dict>
@@ -304,7 +304,7 @@ return 0;
 <string>/Applications/Application.app/Contents/malicious.dylib</string>
 </dict>
 ```
-そして、アプリケーションを**再登録**します：
+そして、**再登録**します。
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f /Applications/Application.app
 ```

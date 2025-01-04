@@ -4,15 +4,15 @@
 
 ## 基本情報
 
-I/O Kitは、XNUカーネル内のオープンソースのオブジェクト指向**デバイスドライバーフレームワーク**であり、**動的にロードされるデバイスドライバー**を処理します。これにより、さまざまなハードウェアをサポートするために、カーネルにモジュラーコードを動的に追加できます。
+I/O Kitは、XNUカーネル内のオープンソースのオブジェクト指向**デバイスドライバーフレームワーク**であり、**動的にロードされたデバイスドライバー**を処理します。これにより、さまざまなハードウェアをサポートするために、モジュラーコードをカーネルにオンザフライで追加できます。
 
 IOKitドライバーは基本的に**カーネルから関数をエクスポート**します。これらの関数パラメータの**型**は**事前定義**されており、検証されます。さらに、XPCと同様に、IOKitは**Machメッセージの上にある別のレイヤー**です。
 
 **IOKit XNUカーネルコード**は、Appleによって[https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit)でオープンソース化されています。さらに、ユーザースペースのIOKitコンポーネントもオープンソースです[https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser)。
 
-しかし、**IOKitドライバーは**オープンソースではありません。とはいえ、時折、ドライバーのリリースにはデバッグを容易にするシンボルが付属することがあります。ファームウェアから[**ドライバー拡張を取得する方法はこちら**](./#ipsw)**を確認してください。**
+しかし、**IOKitドライバーは**オープンソースではありません。とはいえ、時折、ドライバーのリリースにはデバッグを容易にするシンボルが付属することがあります。ファームウェアから[**ドライバー拡張を取得する方法はこちら**](#ipsw)**を確認してください。**
 
-これは**C++**で書かれています。デマングルされたC++シンボルを取得するには、次のコマンドを使用できます:
+これは**C++**で書かれています。デマングルされたC++シンボルを取得するには：
 ```bash
 # Get demangled symbols
 nm -C com.apple.driver.AppleJPEGDriver
@@ -23,7 +23,7 @@ __ZN16IOUserClient202222dispatchExternalMethodEjP31IOExternalMethodArgumentsOpaq
 IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
 > [!CAUTION]
-> IOKit **公開された関数**は、クライアントが関数を呼び出そうとする際に**追加のセキュリティチェック**を実行する可能性がありますが、アプリは通常、IOKit関数と対話できる**サンドボックス**によって**制限**されています。
+> IOKit **公開された関数**は、クライアントが関数を呼び出そうとする際に**追加のセキュリティチェック**を実行する可能性がありますが、アプリは通常、IOKit関数と相互作用できる**サンドボックス**によって**制限**されています。
 
 ## ドライバー
 
@@ -70,7 +70,7 @@ kextunload com.apple.iokit.IOReportFamily
 
 **IORegistry**は、macOSおよびiOSのIOKitフレームワークの重要な部分であり、システムのハードウェア構成と状態を表すデータベースとして機能します。これは、**システムにロードされたすべてのハードウェアとドライバを表すオブジェクトの階層的コレクション**であり、それらの相互関係を示しています。
 
-IORegistryは、cli **`ioreg`**を使用してコンソールから検査することができます（特にiOSに便利です）。
+CLI **`ioreg`**を使用してIORegistryを取得し、コンソールから検査することができます（特にiOSに便利です）。
 ```bash
 ioreg -l #List all
 ioreg -w 0 #Not cut lines
@@ -89,13 +89,13 @@ IORegistryExplorerでは、「プレーン」はIORegistry内の異なるオブ�
 5. **IOAudio Plane**: このプレーンは、システム内のオーディオデバイスとその関係を表すためのものです。
 6. ...
 
-## ドライバコミュニケーションコード例
+## ドライバ通信コード例
 
 以下のコードは、IOKitサービス`"YourServiceNameHere"`に接続し、セレクタ0内の関数を呼び出します。そのために：
 
 - まず**`IOServiceMatching`**と**`IOServiceGetMatchingServices`**を呼び出してサービスを取得します。
 - 次に、**`IOServiceOpen`**を呼び出して接続を確立します。
-- 最後に、セレクタ0を示す**`IOConnectCallScalarMethod`**を使用して関数を呼び出します（セレクタは呼び出したい関数に割り当てられた番号です）。
+- 最後に、セレクタ0を指定して**`IOConnectCallScalarMethod`**で関数を呼び出します（セレクタは呼び出したい関数に割り当てられた番号です）。
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <IOKit/IOKitLib.h>
@@ -150,13 +150,13 @@ IOObjectRelease(iter);
 return 0;
 }
 ```
-他にも **`IOConnectCallScalarMethod`** の他に **`IOConnectCallMethod`** や **`IOConnectCallStructMethod`** などの IOKit 関数を呼び出すために使用できる関数があります。
+他にも**`IOConnectCallScalarMethod`**の他に**`IOConnectCallMethod`**、**`IOConnectCallStructMethod`**などのIOKit関数を呼び出すために使用できる関数があります。
 
 ## ドライバエントリポイントのリバースエンジニアリング
 
-これらは例えば [**ファームウェアイメージ (ipsw)**](./#ipsw) から取得できます。その後、お気に入りのデコンパイラにロードします。
+これらは例えば[**ファームウェアイメージ (ipsw)**](#ipsw)から取得できます。それをお気に入りのデコンパイラにロードしてください。
 
-**`externalMethod`** 関数のデコンパイルを開始できます。これは呼び出しを受け取り、正しい関数を呼び出すドライバ関数です：
+**`externalMethod`**関数のデコンパイルを開始できます。これは呼び出しを受け取り、正しい関数を呼び出すドライバ関数です：
 
 <figure><img src="../../../images/image (1168).png" alt="" width="315"><figcaption></figcaption></figure>
 
@@ -166,7 +166,7 @@ return 0;
 ```cpp
 IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
-前の定義では **`self`** パラメータが欠けていることに注意してください。良い定義は次のようになります：
+前の定義では**`self`**パラメータが欠けていることに注意してください。良い定義は次のようになります：
 ```cpp
 IOUserClient2022::dispatchExternalMethod(self, unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
@@ -188,7 +188,7 @@ OSObject * target, void * reference)
 
 <figure><img src="../../../images/image (1170).png" alt=""><figcaption></figcaption></figure>
 
-次に、`(IOExternalMethodDispatch2022 *)&sIOExternalMethodArray` に従って、多くのデータが表示されます：
+次に、`(IOExternalMethodDispatch2022 *)&sIOExternalMethodArray` に従って、多くのデータが見えます：
 
 <figure><img src="../../../images/image (1176).png" alt="" width="563"><figcaption></figcaption></figure>
 
@@ -200,7 +200,7 @@ OSObject * target, void * reference)
 
 <figure><img src="../../../images/image (1179).png" alt="" width="563"><figcaption></figcaption></figure>
 
-ここに、**7要素の配列**があることがわかります（最終的なデコンパイルコードを確認してください）。7要素の配列を作成するためにクリックします：
+ここにいると、**7つの要素の配列**があることがわかります（最終的なデコンパイルコードを確認してください）。7つの要素の配列を作成するためにクリックします：
 
 <figure><img src="../../../images/image (1180).png" alt="" width="563"><figcaption></figcaption></figure>
 

@@ -4,7 +4,7 @@
 
 ## OneDrive
 
-Windowsでは、OneDriveフォルダーは `\Users\<username>\AppData\Local\Microsoft\OneDrive` にあります。そして、`logs\Personal` 内には、同期されたファイルに関する興味深いデータを含む `SyncDiagnostics.log` ファイルがあります：
+Windowsでは、OneDriveフォルダーは `\Users\<username>\AppData\Local\Microsoft\OneDrive` にあります。そして `logs\Personal` 内には、同期されたファイルに関する興味深いデータを含む `SyncDiagnostics.log` ファイルがあります：
 
 - バイト単位のサイズ
 - 作成日
@@ -27,8 +27,7 @@ Windowsでは、主要なGoogle Driveフォルダーは `\Users\<username>\AppDa
 
 ## Dropbox
 
-Dropboxは**SQLiteデータベース**を使用してファイルを管理しています。この\
-データベースは以下のフォルダーにあります：
+Dropboxは**SQLiteデータベース**を使用してファイルを管理しています。この中で、データベースは以下のフォルダーにあります：
 
 - `\Users\<username>\AppData\Local\Dropbox`
 - `\Users\<username>\AppData\Local\Dropbox\Instance1`
@@ -54,7 +53,7 @@ Dropboxが使用している暗号化をよりよく理解するには、[https:
 
 その情報に加えて、データベースを復号化するには、次のものが必要です：
 
-- **暗号化されたDPAPIキー**: `NTUSER.DAT\Software\Dropbox\ks\client` 内のレジストリで見つけることができます（このデータをバイナリとしてエクスポート）
+- **暗号化されたDPAPIキー**: レジストリ内の `NTUSER.DAT\Software\Dropbox\ks\client` で見つけることができます（このデータをバイナリとしてエクスポート）
 - **`SYSTEM`** および **`SECURITY`** ハイブ
 - **DPAPIマスタキー**: `\Users\<username>\AppData\Roaming\Microsoft\Protect` にあります
 - Windowsユーザーの**ユーザー名**と**パスワード**
@@ -63,7 +62,7 @@ Dropboxが使用している暗号化をよりよく理解するには、[https:
 
 ![](<../../../images/image (443).png>)
 
-すべてが期待通りに進めば、ツールは**元のものを復元するために使用する必要がある主キー**を示します。元のものを復元するには、この[cyber_chefレシピ](<https://gchq.github.io/CyberChef/#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>)を使用し、主キーをレシピ内の「パスフレーズ」として入力します。
+すべてが期待通りに進めば、ツールは**元のものを復元するために使用する必要がある主キー**を示します。元のものを復元するには、この[cyber_chefレシピ](<https://gchq.github.io/CyberChef/index.html#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>)を使用し、主キーをレシピ内の「パスフレーズ」として入力します。
 
 得られた16進数は、データベースを暗号化するために使用される最終キーであり、次のように復号化できます：
 ```bash
@@ -73,11 +72,11 @@ sqlite -k <Obtained Key> config.dbx ".backup config.db" #This decompress the con
 
 - **Email**: ユーザーのメール
 - **usernamedisplayname**: ユーザーの名前
-- **dropbox_path**: Dropboxフォルダーがあるパス
-- **Host_id: Hash**: クラウドへの認証に使用されます。これはウェブからのみ取り消すことができます。
+- **dropbox_path**: Dropboxフォルダがあるパス
+- **Host_id: Hash**: クラウドへの認証に使用されるハッシュ。このハッシュはウェブからのみ取り消すことができます。
 - **Root_ns**: ユーザー識別子
 
-**`filecache.db`** データベースには、Dropboxと同期されたすべてのファイルとフォルダーに関する情報が含まれています。`File_journal` テーブルが最も有用な情報を持っています：
+**`filecache.db`** データベースには、Dropboxと同期されたすべてのファイルとフォルダに関する情報が含まれています。`File_journal` テーブルが最も有用な情報を持っています：
 
 - **Server_path**: サーバー内のファイルがあるパス（このパスはクライアントの `host_id` によって前置されます）。
 - **local_sjid**: ファイルのバージョン
@@ -86,9 +85,9 @@ sqlite -k <Obtained Key> config.dbx ".backup config.db" #This decompress the con
 
 このデータベース内の他のテーブルには、さらに興味深い情報が含まれています：
 
-- **block_cache**: Dropboxのすべてのファイルとフォルダーのハッシュ
-- **block_ref**: `block_cache` テーブルのハッシュIDと `file_journal` テーブルのファイルIDを関連付けます
-- **mount_table**: Dropboxの共有フォルダー
+- **block_cache**: Dropboxのすべてのファイルとフォルダのハッシュ
+- **block_ref**: `block_cache` テーブルのハッシュIDと `file_journal` テーブルのファイルIDを関連付ける
+- **mount_table**: Dropboxの共有フォルダ
 - **deleted_fields**: Dropboxで削除されたファイル
 - **date_added**
 

@@ -2,7 +2,8 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## コンテナの改ざん
+
+## コンテナの変更
 
 いくつかのdockerコンテナが侵害された疑いがあります：
 ```bash
@@ -10,7 +11,7 @@ docker ps
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
 cc03e43a052a        lamp-wordpress      "./run.sh"          2 minutes ago       Up 2 minutes        80/tcp              wordpress
 ```
-このコンテナに対する**イメージに関する変更を簡単に見つけることができます**:
+このコンテナに対して行われた**イメージに関する変更を簡単に見つけることができます**:
 ```bash
 docker diff wordpress
 C /var
@@ -25,23 +26,23 @@ A /var/lib/mysql/mysql/general_log.CSV
 ...
 ```
 前のコマンドで **C** は **Changed** を意味し、**A** は **Added** を意味します。\
-もし `/etc/shadow` のような興味深いファイルが変更されたことがわかった場合、悪意のある活動を確認するためにコンテナからダウンロードすることができます：
+もし `/etc/shadow` のような興味深いファイルが変更されたことがわかった場合、悪意のある活動を確認するために、次のコマンドを使用してコンテナからダウンロードできます：
 ```bash
 docker cp wordpress:/etc/shadow.
 ```
-新しいコンテナを実行し、そこからファイルを抽出することで、**元のものと比較することもできます**。
+新しいコンテナを実行し、そこからファイルを抽出することで、**元のものと比較することもできます**:
 ```bash
 docker run -d lamp-wordpress
 docker cp b5d53e8b468e:/etc/shadow original_shadow #Get the file from the newly created container
 diff original_shadow shadow
 ```
-**いくつかの疑わしいファイルが追加された**場合は、コンテナにアクセスして確認できます：
+**いくつかの疑わしいファイルが追加された**場合は、コンテナにアクセスして確認できます:
 ```bash
 docker exec -it wordpress bash
 ```
 ## 画像の変更
 
-エクスポートされたDockerイメージ（おそらく`.tar`形式）を受け取った場合、[**container-diff**](https://github.com/GoogleContainerTools/container-diff/releases)を使用して**変更の概要を抽出**できます：
+エクスポートされたdockerイメージ（おそらく`.tar`形式）を受け取った場合、[**container-diff**](https://github.com/GoogleContainerTools/container-diff/releases)を使用して**変更の概要を抽出**できます：
 ```bash
 docker save <image> > image.tar #Export the image to a .tar file
 container-diff analyze -t sizelayer image.tar
@@ -54,7 +55,7 @@ tar -xf image.tar
 ```
 ### 基本分析
 
-イメージから**基本情報**を取得するには、次のコマンドを実行します:
+You can get **basic information** from the image running:
 ```bash
 docker inspect <image>
 ```
@@ -78,18 +79,18 @@ Loaded image: flask:latest
 #And then open it with dive:
 sudo dive flask:latest
 ```
-これにより、**Dockerイメージの異なるブロブをナビゲート**し、どのファイルが変更または追加されたかを確認できます。**赤**は追加されたことを意味し、**黄色**は変更されたことを意味します。**タブ**を使用して他のビューに移動し、**スペース**を使用してフォルダーを折りたたむ/開くことができます。
+これにより、**dockerイメージの異なるblobをナビゲート**し、どのファイルが変更または追加されたかを確認できます。**赤**は追加されたことを意味し、**黄色**は変更されたことを意味します。**タブ**を使用して他のビューに移動し、**スペース**を使用してフォルダーを折りたたむ/開くことができます。
 
-dieを使用すると、イメージの異なるステージの内容にアクセスすることはできません。そうするためには、**各レイヤーを解凍してアクセスする必要があります**。\
-イメージが解凍されたディレクトリから、イメージのすべてのレイヤーを解凍するには、次のコマンドを実行します:
+dieを使用すると、イメージの異なるステージの内容にアクセスすることはできません。そうするには、**各レイヤーを解凍してアクセスする必要があります**。\
+イメージが解凍されたディレクトリから、次のコマンドを実行してすべてのレイヤーを解凍できます:
 ```bash
 tar -xf image.tar
 for d in `find * -maxdepth 0 -type d`; do cd $d; tar -xf ./layer.tar; cd ..; done
 ```
 ## メモリからの資格情報
 
-ホスト内でdockerコンテナを実行するとき、**ホストからコンテナで実行されているプロセスを見ることができます**。単に`ps -ef`を実行するだけです。
+ホスト内でdockerコンテナを実行するとき、**ホストからコンテナ上で実行されているプロセスを見ることができます**。単に`ps -ef`を実行するだけです。
 
-したがって（rootとして）、**ホストからプロセスのメモリをダンプし**、**資格情報**を検索することができます。ちょうど[**次の例のように**](../../linux-hardening/privilege-escalation/#process-memory)。
+したがって（rootとして）、**ホストからプロセスのメモリをダンプし**、**資格情報**を検索することができます。ちょうど[**次の例のように**](../../linux-hardening/privilege-escalation/index.html#process-memory)。
 
 {{#include ../../banners/hacktricks-training.md}}

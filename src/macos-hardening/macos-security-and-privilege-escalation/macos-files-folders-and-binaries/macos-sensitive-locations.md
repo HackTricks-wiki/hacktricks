@@ -1,4 +1,4 @@
-# macOSの敏感な場所と興味深いデーモン
+# macOS Sensitive Locations & Interesting Daemons
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -6,12 +6,12 @@
 
 ### シャドウパスワード
 
-シャドウパスワードは、**`/var/db/dslocal/nodes/Default/users/`**にあるplistにユーザーの設定と共に保存されます。\
+シャドウパスワードは、**`/var/db/dslocal/nodes/Default/users/`** にあるplistにユーザーの設定と共に保存されます。\
 次のワンライナーを使用して、**ユーザーに関するすべての情報**（ハッシュ情報を含む）をダンプできます：
 ```bash
 for l in /var/db/dslocal/nodes/Default/users/*; do if [ -r "$l" ];then echo "$l"; defaults read "$l"; fi; done
 ```
-[**このようなスクリプト**](https://gist.github.com/teddziuba/3ff08bdda120d1f7822f3baf52e606c2)や[**こちらのスクリプト**](https://github.com/octomagon/davegrohl.git)は、ハッシュを**hashcat**の**フォーマット**に変換するために使用できます。
+[**このようなスクリプト**](https://gist.github.com/teddziuba/3ff08bdda120d1f7822f3baf52e606c2)や[**こちらのスクリプト**](https://github.com/octomagon/davegrohl.git)は、ハッシュを**hashcat** **フォーマット**に変換するために使用できます。
 
 非サービスアカウントのすべてのクレデンシャルをhashcatフォーマット`-m 7100`（macOS PBKDF2-SHA512）でダンプする代替のワンライナー：
 ```bash
@@ -21,9 +21,9 @@ sudo bash -c 'for i in $(find /var/db/dslocal/nodes/Default/users -type f -regex
 
 ### /etc/master.passwd
 
-このファイルは **単一ユーザーモード** でシステムが実行されているときに **のみ使用されます**（そのため、あまり頻繁にはありません）。
+このファイルは **単一ユーザーモード** でシステムが実行されているときに **のみ使用されます**（したがって、あまり頻繁にはありません）。
 
-### Keychain Dump
+### キーチェーンダンプ
 
 セキュリティバイナリを使用して **復号化されたパスワードをダンプ** する際、いくつかのプロンプトがユーザーにこの操作を許可するように求めます。
 ```bash
@@ -39,15 +39,15 @@ security dump-keychain -d #Dump all the info, included secrets (the user will be
 > [!CAUTION]
 > このコメントに基づくと [juuso/keychaindump#10 (comment)](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760)、これらのツールはBig Surではもう機能していないようです。
 
-### Keychaindumpの概要
+### Keychaindump 概要
 
-**keychaindump**という名前のツールは、macOSのキーチェーンからパスワードを抽出するために開発されましたが、Big Surのような新しいmacOSバージョンでは制限があります。**keychaindump**の使用には、攻撃者がアクセスを得て**root**権限を昇格させる必要があります。このツールは、ユーザーのログイン時にキーチェーンがデフォルトでロック解除されるという事実を利用しており、アプリケーションがユーザーのパスワードを繰り返し要求することなくアクセスできるようにしています。ただし、ユーザーが使用後にキーチェーンをロックすることを選択した場合、**keychaindump**は無効になります。
+**keychaindump**というツールは、macOSのキーチェーンからパスワードを抽出するために開発されましたが、Big Surのような新しいmacOSバージョンでは制限があります。**keychaindump**の使用には、攻撃者がアクセスを得て**root**権限を昇格させる必要があります。このツールは、ユーザーのログイン時にキーチェーンがデフォルトでロック解除されるという事実を利用しており、アプリケーションがユーザーのパスワードを繰り返し要求することなくアクセスできるようにしています。ただし、ユーザーが使用後にキーチェーンをロックすることを選択した場合、**keychaindump**は無効になります。
 
-**Keychaindump**は、Appleによって認証および暗号操作のためのデーモンとして説明されている特定のプロセス**securityd**をターゲットにして動作します。抽出プロセスは、ユーザーのログインパスワードから派生した**マスターキー**を特定することを含みます。このキーはキーチェーンファイルを読み取るために不可欠です。**マスターキー**を見つけるために、**keychaindump**は`vmmap`コマンドを使用して**securityd**のメモリヒープをスキャンし、`MALLOC_TINY`としてフラグ付けされた領域内の潜在的なキーを探します。これらのメモリ位置を検査するために使用されるコマンドは次のとおりです：
+**Keychaindump**は、Appleによって認証および暗号操作のためのデーモンとして説明されている特定のプロセス**securityd**をターゲットにして動作します。抽出プロセスは、ユーザーのログインパスワードから派生した**マスターキー**を特定することを含みます。このキーは、キーチェーンファイルを読み取るために不可欠です。**マスターキー**を見つけるために、**keychaindump**は`vmmap`コマンドを使用して**securityd**のメモリヒープをスキャンし、`MALLOC_TINY`としてフラグ付けされた領域内の潜在的なキーを探します。これらのメモリ位置を検査するために使用されるコマンドは次のとおりです:
 ```bash
 sudo vmmap <securityd PID> | grep MALLOC_TINY
 ```
-潜在的なマスターキーを特定した後、**keychaindump**はヒープ内で特定のパターン（`0x0000000000000018`）を検索し、マスターキーの候補を示します。このキーを利用するためには、**keychaindump**のソースコードに記載されているように、さらなる手順としてデオブフスケーションが必要です。この分野に焦点を当てるアナリストは、キーを復号化するための重要なデータが**securityd**プロセスのメモリ内に保存されていることに注意する必要があります。**keychaindump**を実行するためのコマンドの例は次のとおりです：
+潜在的なマスターキーを特定した後、**keychaindump**はヒープ内でマスターキーの候補を示す特定のパターン（`0x0000000000000018`）を検索します。このキーを利用するためには、**keychaindump**のソースコードに記載されているように、さらなる手順としてデオブフスケーションが必要です。この分野に焦点を当てるアナリストは、キーを復号化するための重要なデータが**securityd**プロセスのメモリ内に保存されていることに注意する必要があります。**keychaindump**を実行するためのコマンドの例は次のとおりです：
 ```bash
 sudo ./keychaindump
 ```
@@ -92,7 +92,7 @@ python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d1
 ```
 #### **メモリダンプを使用してキーチェーンキー（パスワード付き）をダンプする**
 
-[これらの手順に従ってください](../#dumping-memory-with-osxpmem) **メモリダンプ**を実行します
+[これらの手順に従ってください](../index.html#dumping-memory-with-osxpmem) **メモリダンプ**を実行します
 ```bash
 #Use volafox (https://github.com/n0fate/volafox) to extract possible keychain passwords
 # Unformtunately volafox isn't working with the latest versions of MacOS
@@ -110,14 +110,14 @@ python2.7 chainbreaker.py --dump-all --password-prompt /Users/<username>/Library
 ```
 ### kcpassword
 
-**kcpassword**ファイルは、**ユーザーのログインパスワード**を保持するファイルですが、システムの所有者が**自動ログイン**を**有効にしている**場合のみです。したがって、ユーザーはパスワードを求められることなく自動的にログインされます（これはあまり安全ではありません）。
+**kcpassword**ファイルは、**ユーザーのログインパスワード**を保持するファイルですが、システムの所有者が**自動ログインを有効にしている**場合のみです。したがって、ユーザーはパスワードを求められることなく自動的にログインされます（これはあまり安全ではありません）。
 
 パスワードはファイル**`/etc/kcpassword`**に、キー**`0x7D 0x89 0x52 0x23 0xD2 0xBC 0xDD 0xEA 0xA3 0xB9 0x1F`**でXORされて保存されています。ユーザーのパスワードがキーよりも長い場合、キーは再利用されます。\
 これにより、パスワードは比較的簡単に復元できます。たとえば、[**このスクリプト**](https://gist.github.com/opshope/32f65875d45215c3677d)を使用することができます。
 
-## データベース内の興味深い情報
+## Interesting Information in Databases
 
-### メッセージ
+### Messages
 ```bash
 sqlite3 $HOME/Library/Messages/chat.db .tables
 sqlite3 $HOME/Library/Messages/chat.db 'select * from message'
@@ -129,14 +129,14 @@ sqlite3 $HOME/Suggestions/snippets.db 'select * from emailSnippets'
 
 Notificationsデータは`$(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/`にあります。
 
-興味深い情報のほとんどは**blob**にあります。したがって、その内容を**抽出**し、**人間が読める**形式に**変換**するか、**`strings`**を使用する必要があります。アクセスするには、次のようにします：
+興味深い情報のほとんどは**blob**にあります。したがって、その内容を**抽出**し、**人間が読める**形式に**変換**するか、**`strings`**を使用する必要があります。アクセスするには、次のようにします:
 ```bash
 cd $(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/
 strings $(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/db2/db | grep -i -A4 slack
 ```
 ### ノート
 
-ユーザーの**ノート**は `~/Library/Group Containers/group.com.apple.notes/NoteStore.sqlite` にあります。
+ユーザーの**ノート**は`~/Library/Group Containers/group.com.apple.notes/NoteStore.sqlite`にあります。
 ```bash
 sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.sqlite .tables
 
@@ -191,9 +191,9 @@ macOSでは、cliツール**`defaults`**を使用して**Preferencesファイル
 
 ### Darwin通知
 
-通知の主なデーモンは **`/usr/sbin/notifyd`** です。通知を受け取るためには、クライアントは `com.apple.system.notification_center` Machポートを通じて登録する必要があります（`sudo lsmp -p <pid notifyd>` で確認できます）。デーモンはファイル `/etc/notify.conf` で設定可能です。
+通知の主なデーモンは **`/usr/sbin/notifyd`** です。通知を受け取るためには、クライアントは `com.apple.system.notification_center` Machポートを通じて登録する必要があります（`sudo lsmp -p <pid notifyd>` で確認できます）。デーモンは `/etc/notify.conf` ファイルで設定可能です。
 
-通知に使用される名前はユニークな逆DNS表記であり、通知がそのうちの1つに送信されると、それを処理できると示したクライアントが受け取ります。
+通知に使用される名前はユニークな逆DNS表記であり、これらのいずれかに通知が送信されると、それを処理できると示したクライアントが受け取ります。
 
 現在のステータスをダンプし（すべての名前を確認する）、notifydプロセスにSIGUSR2信号を送信し、生成されたファイル `/var/run/notifyd_<pid>.status` を読み取ることが可能です。
 ```bash
@@ -235,7 +235,7 @@ sudo sqlite3 /Library/Application\ Support/ApplePushService/aps.db
 これらはユーザーが画面で見るべき通知です：
 
 - **`CFUserNotification`**: このAPIは、メッセージを表示するポップアップを画面に表示する方法を提供します。
-- **掲示板**: これはiOSで消えるバナーを表示し、通知センターに保存されます。
+- **掲示板**: これはiOSでバナーを表示し、消え、通知センターに保存されます。
 - **`NSUserNotificationCenter`**: これはMacOSのiOS掲示板です。通知のデータベースは`/var/folders/<user temp>/0/com.apple.notificationcenter/db2/db`にあります。
 
 {{#include ../../../banners/hacktricks-training.md}}

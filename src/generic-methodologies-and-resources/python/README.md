@@ -5,9 +5,9 @@
 **チェックする興味深いページ:**
 
 - [**Pyscript hacking tricks**](pyscript.md)
-- [**Python deserializations**](../../pentesting-web/deserialization/#python)
-- [**Tricks to bypass python sandboxes**](bypass-python-sandboxes/)
-- [**Basic python web requests syntax**](web-requests.md)
-- [**Basic python syntax and libraries**](basic-python.md)
+- [**Python deserializations**](../../pentesting-web/deserialization/index.html#python)
+- [**Pythonサンドボックスをバイパスするためのトリック**](bypass-python-sandboxes/)
+- [**基本的なPythonウェブリクエストの構文**](web-requests.md)
+- [**基本的なPythonの構文とライブラリ**](basic-python.md)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -4,7 +4,7 @@
 
 ## はじめに
 
-[**以前にコメントしたように**](./#what-is-mdm-mobile-device-management)**、**デバイスを組織に登録するためには、**その組織に属するシリアル番号のみが必要です**。デバイスが登録されると、いくつかの組織が新しいデバイスに機密データをインストールします：証明書、アプリケーション、WiFiパスワード、VPN設定[など](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf)。\
+[**以前にコメントしたように**](#what-is-mdm-mobile-device-management)**、**デバイスを組織に登録するためには、**その組織に属するシリアル番号のみが必要です**。デバイスが登録されると、いくつかの組織が新しいデバイスに機密データをインストールします：証明書、アプリケーション、WiFiパスワード、VPN設定[など](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf)。\
 したがって、登録プロセスが適切に保護されていない場合、これは攻撃者にとって危険な入り口となる可能性があります。
 
 **以下は、研究の要約です[https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe)。さらなる技術的詳細については確認してください！**
@@ -17,22 +17,22 @@
 - **`profiles`**：構成プロファイルを管理し、macOSバージョン10.13.4以降でDEPチェックインをトリガーします。
 - **`cloudconfigurationd`**：DEP API通信を管理し、デバイス登録プロファイルを取得します。
 
-DEPチェックインは、プライベート構成プロファイルフレームワークからの`CPFetchActivationRecord`および`CPGetActivationRecord`関数を利用してアクティベーションレコードを取得し、`CPFetchActivationRecord`がXPCを介して`cloudconfigurationd`と調整します。
+DEPチェックインは、プライベート構成プロファイルフレームワークからの`CPFetchActivationRecord`および`CPGetActivationRecord`関数を利用して、アクティベーションレコードを取得します。`CPFetchActivationRecord`は、XPCを介して`cloudconfigurationd`と調整します。
 
-## TeslaプロトコルとAbsintheスキームのリバースエンジニアリング
+## テスラプロトコルとアブサンシスキームのリバースエンジニアリング
 
-DEPチェックインは、`cloudconfigurationd`が暗号化された署名付きJSONペイロードを_iprofiles.apple.com/macProfile_に送信することを含みます。ペイロードにはデバイスのシリアル番号と「RequestProfileConfiguration」というアクションが含まれています。使用される暗号化スキームは内部的に「Absinthe」と呼ばれています。このスキームを解明することは複雑で、多くのステップを含み、アクティベーションレコードリクエストに任意のシリアル番号を挿入するための代替手法を探ることにつながりました。
+DEPチェックインでは、`cloudconfigurationd`が暗号化された署名付きJSONペイロードを_iprofiles.apple.com/macProfile_に送信します。ペイロードにはデバイスのシリアル番号と「RequestProfileConfiguration」というアクションが含まれています。使用される暗号化スキームは内部的に「Absinthe」と呼ばれています。このスキームを解明することは複雑で、多くのステップを含み、アクティベーションレコードリクエストに任意のシリアル番号を挿入するための代替手法を探ることにつながりました。
 
 ## DEPリクエストのプロキシ
 
-Charles Proxyのようなツールを使用して_iprofiles.apple.com_へのDEPリクエストを傍受し、変更しようとする試みは、ペイロードの暗号化とSSL/TLSセキュリティ対策によって妨げられました。しかし、`MCCloudConfigAcceptAnyHTTPSCertificate`構成を有効にすることで、サーバー証明書の検証をバイパスすることができますが、ペイロードの暗号化された性質により、復号化キーなしでシリアル番号を変更することは依然として不可能です。
+Charles Proxyのようなツールを使用して_iprofiles.apple.com_へのDEPリクエストを傍受し、変更しようとする試みは、ペイロードの暗号化とSSL/TLSセキュリティ対策によって妨げられました。しかし、`MCCloudConfigAcceptAnyHTTPSCertificate`構成を有効にすることで、サーバー証明書の検証をバイパスすることができますが、ペイロードの暗号化された性質により、復号化キーなしでシリアル番号の変更は依然として不可能です。
 
 ## DEPと相互作用するシステムバイナリの計測
 
-`cloudconfigurationd`のようなシステムバイナリを計測するには、macOSでシステム整合性保護（SIP）を無効にする必要があります。SIPが無効になっている場合、LLDBのようなツールを使用してシステムプロセスにアタッチし、DEP APIとの相互作用で使用されるシリアル番号を変更する可能性があります。この方法は、権限やコード署名の複雑さを回避できるため、好ましいです。
+`cloudconfigurationd`のようなシステムバイナリを計測するには、macOSでシステム整合性保護（SIP）を無効にする必要があります。SIPが無効になっている場合、LLDBのようなツールを使用してシステムプロセスにアタッチし、DEP APIインタラクションで使用されるシリアル番号を変更する可能性があります。この方法は、権限やコード署名の複雑さを回避できるため、好ましいです。
 
 **バイナリ計測の悪用：**
-`cloudconfigurationd`でJSONシリアル化の前にDEPリクエストペイロードを変更することが効果的であることが証明されました。このプロセスは以下を含みます：
+`cloudconfigurationd`内でJSONシリアル化の前にDEPリクエストペイロードを変更することが効果的であることが証明されました。このプロセスには以下が含まれます：
 
 1. `cloudconfigurationd`にLLDBをアタッチします。
 2. システムシリアル番号が取得されるポイントを特定します。
@@ -46,7 +46,7 @@ Charles Proxyのようなツールを使用して_iprofiles.apple.com_へのDEP�
 
 ### DEPとMDMの脆弱性の潜在的影響
 
-この研究は、重要なセキュリティ上の懸念を浮き彫りにしました：
+この研究は、重大なセキュリティ上の懸念を浮き彫りにしました：
 
 1. **情報漏洩**：DEPに登録されたシリアル番号を提供することで、DEPプロファイルに含まれる機密の組織情報を取得できます。
 

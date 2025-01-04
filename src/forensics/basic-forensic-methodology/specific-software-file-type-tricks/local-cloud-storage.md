@@ -4,7 +4,7 @@
 
 ## OneDrive
 
-Windowsでは、OneDriveフォルダーは `\Users\<username>\AppData\Local\Microsoft\OneDrive` にあります。そして `logs\Personal` 内には、同期されたファイルに関する興味深いデータを含む `SyncDiagnostics.log` ファイルがあります：
+Windowsでは、OneDriveフォルダーは `\Users\<username>\AppData\Local\Microsoft\OneDrive` にあります。そして、`logs\Personal` 内には、同期されたファイルに関する興味深いデータを含む `SyncDiagnostics.log` ファイルがあります：
 
 - バイト単位のサイズ
 - 作成日
@@ -50,20 +50,20 @@ Dropboxが使用している暗号化をよりよく理解するには、[https:
 - **エントロピー**: d114a55212655f74bd772e37e64aee9b
 - **ソルト**: 0D638C092E8B82FC452883F95F355B8E
 - **アルゴリズム**: PBKDF2
-- **イテレーション**: 1066
+- **反復回数**: 1066
 
 その情報に加えて、データベースを復号化するには、次のものが必要です：
 
 - **暗号化されたDPAPIキー**: レジストリ内の `NTUSER.DAT\Software\Dropbox\ks\client` で見つけることができます（このデータをバイナリとしてエクスポート）
 - **`SYSTEM`** および **`SECURITY`** ハイブ
-- **DPAPIマスタキー**: `\Users\<username>\AppData\Roaming\Microsoft\Protect` にあります
+- **DPAPIマスターキー**: `\Users\<username>\AppData\Roaming\Microsoft\Protect` にあります
 - Windowsユーザーの**ユーザー名**と**パスワード**
 
 その後、ツール [**DataProtectionDecryptor**](https://nirsoft.net/utils/dpapi_data_decryptor.html)**を使用できます：**
 
 ![](<../../../images/image (448).png>)
 
-すべてが期待通りに進めば、ツールは**元のものを復元するために使用する必要がある主キー**を示します。元のものを復元するには、この[cyber_chefレシピ](<https://gchq.github.io/CyberChef/#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>)を使用し、主キーをレシピ内の「パスフレーズ」として入力します。
+すべてが期待通りに進めば、ツールは**元のものを復元するために使用する必要がある主キー**を示します。元のものを復元するには、この[cyber_chefレシピ](<https://gchq.github.io/CyberChef/index.html#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>)を使用し、主キーをレシピ内の「パスフレーズ」として入力します。
 
 得られた16進数は、データベースを暗号化するために使用される最終キーであり、次のように復号化できます：
 ```bash

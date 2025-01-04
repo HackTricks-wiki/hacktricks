@@ -16,7 +16,7 @@ python3 autovol3.py -f MEMFILE -o OUT_DIR -s minimal
 python3 autovol3.py -f MEMFILE -o OUT_DIR -s normal
 
 ```
-何か**速くてクレイジー**なものが必要で、複数のVolatilityプラグインを並行して起動したい場合は、次を使用できます: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
+もし**速くてクレイジー**なものが欲しいなら、いくつかのVolatilityプラグインを並行して起動するために次を使用できます: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
 ```bash
 python autoVolatility.py -f MEMFILE -d OUT_DIRECTORY -e /home/user/tools/volatility/vol.py # It will use the most important plugins (could use a lot of space depending on the size of the memory)
 ```
@@ -53,11 +53,11 @@ python setup.py install
 
 ### “list” プラグインと “scan” プラグインについての注意
 
-Volatility には、プラグインに対する2つの主要なアプローチがあり、時にはその名前に反映されています。“list” プラグインは、プロセス（メモリ内の `_EPROCESS` 構造のリンクリストを見つけて歩く）や OS ハンドル（ハンドルテーブルを見つけてリスト化し、見つかったポインタを解参照するなど）の情報を取得するために、Windows カーネル構造をナビゲートしようとします。これらは、例えばプロセスをリスト化するように要求された場合、Windows API のように振る舞います。
+Volatility にはプラグインに対する2つの主要なアプローチがあり、これは時々その名前に反映されます。“list” プラグインは、プロセス（メモリ内の `_EPROCESS` 構造のリンクリストを見つけて歩く）や OS ハンドル（ハンドルテーブルを見つけてリスト化し、見つかったポインタを解参照するなど）の情報を取得するために Windows カーネル構造をナビゲートしようとします。これらは、例えばプロセスをリスト化するように要求された場合、Windows API のように振る舞います。
 
-そのため、“list” プラグインは非常に速いですが、マルウェアによる操作に対して Windows API と同様に脆弱です。例えば、マルウェアが DKOM を使用してプロセスを `_EPROCESS` リンクリストからリンク解除すると、タスクマネージャーにも pslist にも表示されません。
+そのため、“list” プラグインは非常に速いですが、マルウェアによる操作に対して Windows API と同様に脆弱です。例えば、マルウェアが DKOM を使用してプロセスを `_EPROCESS` リンクリストから切り離すと、タスクマネージャーにも pslist にも表示されません。
 
-一方、“scan” プラグインは、特定の構造として解参照されたときに意味を持つ可能性のあるものをメモリから彫り出すアプローチを取ります。例えば `psscan` はメモリを読み取り、そこから `_EPROCESS` オブジェクトを作成しようとします（これは、関心のある構造の存在を示す4バイトの文字列を検索するプールタグスキャンを使用します）。利点は、終了したプロセスを掘り起こすことができ、マルウェアが `_EPROCESS` リンクリストを改ざんしても、プラグインはメモリ内に残っている構造を見つけることができることです（プロセスが実行されるためには、構造が存在する必要があります）。欠点は、“scan” プラグインは “list” プラグインよりも少し遅く、時には誤検知を引き起こすことがあることです（終了してから長い時間が経過し、他の操作によって構造の一部が上書きされたプロセス）。
+一方、“scan” プラグインは、特定の構造として解参照されたときに意味を持つ可能性のあるものをメモリから彫り出すアプローチを取ります。例えば `psscan` はメモリを読み取り、そこから `_EPROCESS` オブジェクトを作成しようとします（これは、関心のある構造の存在を示す4バイトの文字列を検索するプールタグスキャンを使用します）。利点は、終了したプロセスを掘り起こすことができ、マルウェアが `_EPROCESS` リンクリストを改ざんしても、プラグインはメモリ内に残っている構造を見つけることができることです（プロセスが実行されるためには、構造がまだ存在する必要があります）。欠点は、“scan” プラグインは “list” プラグインよりも少し遅く、時には誤検知を引き起こすことがあることです（終了してから長い時間が経過し、他の操作によってその構造の一部が上書きされたプロセス）。
 
 出典: [http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
 
@@ -66,7 +66,7 @@ Volatility には、プラグインに対する2つの主要なアプローチ�
 ### Volatility3
 
 readme 内で説明されているように、サポートしたい OS の **シンボルテーブル** を _volatility3/volatility/symbols_ 内に置く必要があります。\
-さまざまなオペレーティングシステムのシンボルテーブルパックは **ダウンロード** 可能です：
+さまざまなオペレーティングシステム用のシンボルテーブルパックは **ダウンロード** 可能です:
 
 - [https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip](https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip)
 - [https://downloads.volatilityfoundation.org/volatility3/symbols/mac.zip](https://downloads.volatilityfoundation.org/volatility3/symbols/mac.zip)
@@ -76,11 +76,11 @@ readme 内で説明されているように、サポートしたい OS の **シ
 
 #### 外部プロファイル
 
-サポートされているプロファイルのリストを取得するには、次のようにします：
+サポートされているプロファイルのリストを取得するには、次のようにします:
 ```bash
 ./volatility_2.6_lin64_standalone --info | grep "Profile"
 ```
-新しくダウンロードした**プロファイル**（例えば、Linux用のもの）を使用したい場合は、次のフォルダー構造を作成する必要があります: _plugins/overlays/linux_ そして、このフォルダーの中にプロファイルを含むzipファイルを置きます。次に、プロファイルの番号を取得するには、次のコマンドを使用します:
+新しくダウンロードした**プロファイル**（例えば、Linux用のもの）を使用したい場合は、次のフォルダー構造をどこかに作成する必要があります: _plugins/overlays/linux_ そして、このフォルダーの中にプロファイルを含むzipファイルを置きます。次に、次のコマンドを使用してプロファイルの番号を取得します:
 ```bash
 ./vol --plugins=/home/kali/Desktop/ctfs/final/plugins --info
 Volatility Foundation Volatility Framework 2.6
@@ -121,18 +121,18 @@ PsLoadedModuleList            : 0xfffff80001197ac0 (0 modules)
 ```
 #### KDBG
 
-**カーネルデバッガーブロック**は、Volatilityによって**KDBG**と呼ばれ、Volatilityやさまざまなデバッガーによって実行されるフォレンジックタスクにとって重要です。`KdDebuggerDataBlock`として識別され、タイプは`_KDDEBUGGER_DATA64`で、`PsActiveProcessHead`のような重要な参照を含んでいます。この特定の参照はプロセスリストの先頭を指し、すべてのプロセスのリストを作成することを可能にし、徹底的なメモリ分析にとって基本的です。
+**カーネルデバッガーブロック**（KDBG）は、Volatilityによって**KDBG**と呼ばれ、Volatilityやさまざまなデバッガーによって実行されるフォレンジックタスクにとって重要です。`KdDebuggerDataBlock`として特定され、タイプは`_KDDEBUGGER_DATA64`であり、`PsActiveProcessHead`のような重要な参照を含んでいます。この特定の参照はプロセスリストの先頭を指し、すべてのプロセスのリストを可能にし、徹底的なメモリ分析にとって基本的です。
 
 ## OS情報
 ```bash
 #vol3 has a plugin to give OS information (note that imageinfo from vol2 will give you OS info)
 ./vol.py -f file.dmp windows.info.Info
 ```
-プラグイン `banners.Banners` は、**vol3 でダンプ内の Linux バナーを探す**ために使用できます。
+プラグイン `banners.Banners` は、**vol3 でダンプ内の Linux バナーを探すために使用できます**。
 
 ## ハッシュ/パスワード
 
-SAM ハッシュ、[ドメインキャッシュ資格情報](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) および [lsa シークレット](../../../windows-hardening/authentication-credentials-uac-and-efs/#lsa-secrets) を抽出します。
+SAM ハッシュ、[ドメインキャッシュ資格情報](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) および [lsa シークレット](../../../windows-hardening/authentication-credentials-uac-and-efs/index.html#lsa-secrets) を抽出します。
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -289,7 +289,7 @@ volatility --profile=Win7SP1x86_23418 getservicesids -f file.dmp #Get the SID of
 
 ### ハンドル
 
-**プロセスがハンドル**を持っている（開いている）他のファイル、キー、スレッド、プロセスなどを知るのに役立ちます。
+**プロセスがハンドル**を持っている（オープンしている）他のファイル、キー、スレッド、プロセスなどを知るのに役立ちます。
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -365,7 +365,7 @@ volatility --profile=Win7SP1x86_23418 yarascan -Y "https://" -p 3692,3840,3976,3
 
 ### UserAssist
 
-**Windows**は、**UserAssistキー**と呼ばれるレジストリの機能を使用して、実行したプログラムを追跡します。これらのキーは、各プログラムが実行された回数と最後に実行された日時を記録します。
+**Windows**は、**UserAssist keys**と呼ばれるレジストリの機能を使用して、実行したプログラムを追跡します。これらのキーは、各プログラムが実行された回数と最後に実行された時刻を記録します。
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -626,7 +626,7 @@ volatility --profile=Win7SP1x86_23418 yarascan -y malware_rules.yar -f ch2.dmp |
 
 ### 外部プラグイン
 
-外部プラグインを使用したい場合は、プラグインに関連するフォルダが最初のパラメータとして使用されていることを確認してください。
+外部プラグインを使用したい場合は、プラグインに関連するフォルダが最初のパラメータとして使用されることを確認してください。
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -648,7 +648,7 @@ volatilitye --plugins="/tmp/plugins/" [...]
 ```
 volatility --plugins=volatility-autoruns/ --profile=WinXPSP2x86 -f file.dmp autoruns
 ```
-### ミューテックス
+### Mutexes
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -755,7 +755,7 @@ volatility --profile=Win7SP1x86_23418 screenshot -f file.dmp
 ```bash
 volatility --profile=Win7SP1x86_23418 mbrparser -f file.dmp
 ```
-**マスターブートレコード (MBR)** は、ストレージメディアの論理パーティションを管理する上で重要な役割を果たします。これらのパーティションは異なる [ファイルシステム](https://en.wikipedia.org/wiki/File_system) で構成されています。MBR はパーティションのレイアウト情報を保持するだけでなく、ブートローダーとして機能する実行可能コードも含まれています。このブートローダーは、OS の第二段階のロードプロセスを直接開始するか（[第二段階ブートローダー](https://en.wikipedia.org/wiki/Second-stage_boot_loader) を参照）、各パーティションの [ボリュームブートレコード](https://en.wikipedia.org/wiki/Volume_boot_record) (VBR) と連携して動作します。詳細については、[MBR Wikipedia ページ](https://en.wikipedia.org/wiki/Master_boot_record) を参照してください。
+**マスターブートレコード (MBR)** は、ストレージメディアの論理パーティションを管理する上で重要な役割を果たします。これらのパーティションは異なる [ファイルシステム](https://en.wikipedia.org/wiki/File_system) で構成されています。MBRはパーティションのレイアウト情報を保持するだけでなく、ブートローダーとして機能する実行可能コードも含まれています。このブートローダーは、OSのセカンドステージのロードプロセスを直接開始するか（[セカンドステージブートローダー](https://en.wikipedia.org/wiki/Second-stage_boot_loader) を参照）、各パーティションの [ボリュームブートレコード](https://en.wikipedia.org/wiki/Volume_boot_record) (VBR) と連携して動作します。詳細については、[MBRのWikipediaページ](https://en.wikipedia.org/wiki/Master_boot_record) を参照してください。
 
 ## 参考文献
 

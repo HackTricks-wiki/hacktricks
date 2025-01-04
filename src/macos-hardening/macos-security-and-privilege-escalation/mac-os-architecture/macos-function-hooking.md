@@ -4,9 +4,9 @@
 
 ## Function Interposing
 
-**`__interpose`** セクション（または **`S_INTERPOSING`** フラグが付けられたセクション）を含む **dylib** を作成し、**元の** 関数と **置き換え** 関数を参照する **関数ポインタ** のタプルを含めます。
+**`__interpose`** セクション（または **`S_INTERPOSING`** フラグが付けられたセクション）を持つ **dylib** を作成し、**元の** 関数と **置き換え** 関数を参照する **関数ポインタ** のタプルを含めます。
 
-次に、**`DYLD_INSERT_LIBRARIES`** を使用して dylib を **注入** します（インターポジングはメインアプリがロードされる前に行う必要があります）。明らかに、[**`DYLD_INSERT_LIBRARIES`** の使用に適用される **制限** はここにも適用されます](../macos-proces-abuse/macos-library-injection/#check-restrictions)。&#x20;
+次に、**`DYLD_INSERT_LIBRARIES`** を使用して dylib を **注入** します（インターポジングはメインアプリがロードされる前に行う必要があります）。明らかに、[**`DYLD_INSERT_LIBRARIES`** の使用に適用される **制限** はここでも適用されます](../macos-proces-abuse/macos-library-injection/index.html#check-restrictions)。&#x20;
 
 ### Interpose printf
 
@@ -88,11 +88,11 @@ ObjectiveCでは、メソッドは次のように呼び出されます: **`[myCl
 オブジェクト構造に従って、**メソッドの配列**にアクセスすることが可能で、そこには**名前**と**メソッドコードへのポインタ**が**格納されています**。
 
 > [!CAUTION]
-> メソッドとクラスは名前に基づいてアクセスされるため、この情報はバイナリに保存されます。したがって、`otool -ov </path/bin>`または[`class-dump </path/bin>`](https://github.com/nygard/class-dump)を使用して取得することが可能です。
+> メソッドとクラスはその名前に基づいてアクセスされるため、この情報はバイナリに保存されます。したがって、`otool -ov </path/bin>`または[`class-dump </path/bin>`](https://github.com/nygard/class-dump)を使用して取得することが可能です。
 
 ### 生のメソッドへのアクセス
 
-次の例のように、メソッドの名前、パラメータの数、アドレスなどの情報にアクセスすることが可能です:
+次の例のように、メソッドの情報（名前、パラメータの数、アドレスなど）にアクセスすることが可能です:
 ```objectivec
 // gcc -framework Foundation test.m -o test
 
@@ -158,12 +158,12 @@ NSLog(@"Uppercase string: %@", uppercaseString3);
 return 0;
 }
 ```
-### メソッドスワッピングと method_exchangeImplementations
+### Method Swizzling with method_exchangeImplementations
 
-関数 **`method_exchangeImplementations`** は **一つの関数の実装のアドレスを他の関数に変更する**ことを可能にします。
+関数 **`method_exchangeImplementations`** は **一つの関数の実装のアドレスを他の関数に変更する** ことを可能にします。
 
 > [!CAUTION]
-> したがって、関数が呼び出されると、**実行されるのは別の関数です**。
+> したがって、関数が呼び出されると **実行されるのは他の関数です**。
 ```objectivec
 //gcc -framework Foundation swizzle_str.m -o swizzle_str
 
@@ -208,13 +208,13 @@ return 0;
 }
 ```
 > [!WARNING]
-> この場合、**正当な**メソッドの**実装コード**が**メソッド**の**名前**を**検証**すると、このスウィズリングを**検出**し、実行を防ぐことができます。
+> この場合、**正当な**メソッドの**実装コード**が**メソッド名**を**検証**すると、このスウィズリングを**検出**し、実行を防ぐことができます。
 >
 > 次の技術にはこの制限はありません。
 
 ### method_setImplementationによるメソッドスウィズリング
 
-前の形式は奇妙です。なぜなら、2つのメソッドの実装を互いに変更しているからです。**`method_setImplementation`**関数を使用すると、**他のメソッドのためにメソッドの**実装を**変更**できます。
+前の形式は奇妙です。なぜなら、2つのメソッドの実装を互いに変更しているからです。**`method_setImplementation`**関数を使用すると、**あるメソッドの実装を別のメソッドに**変更できます。
 
 新しい実装から元の実装を呼び出す予定がある場合は、上書きする前に**元の実装のアドレスを保存する**ことを忘れないでください。後でそのアドレスを見つけるのは非常に複雑になります。
 ```objectivec
@@ -272,7 +272,7 @@ return 0;
 
 このページでは、関数をフックするさまざまな方法について説明しました。しかし、これらは**攻撃のためにプロセス内でコードを実行する**ことを含んでいました。
 
-そのために、最も簡単な技術は[環境変数を介してDyldを注入するか、ハイジャックすること](../macos-dyld-hijacking-and-dyld_insert_libraries.md)です。しかし、これは[ダイナミックライブラリプロセス注入](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port)を介しても行うことができると思います。
+それを行うための最も簡単な技術は、[環境変数を介してDyldを注入するか、ハイジャックすること](../macos-dyld-hijacking-and-dyld_insert_libraries.md)です。しかし、これも[Dylibプロセス注入](macos-ipc-inter-process-communication/index.html#dylib-process-injection-via-task-port)を介して行うことができると思います。
 
 ただし、両方のオプションは**保護されていない**バイナリ/プロセスに**制限**されています。各技術を確認して、制限について詳しく学んでください。
 
@@ -286,14 +286,14 @@ return 0;
 <string>/Applications/Application.app/Contents/malicious.dylib</string>
 </dict>
 ```
-そして、アプリケーションを**再登録**します：
+そして、**再登録**アプリケーションを行います：
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f /Applications/Application.app
 ```
-そのライブラリに情報を抽出するためのフックコードを追加します: パスワード、メッセージ...
+情報を抽出するためのフックコードをそのライブラリに追加します: パスワード、メッセージ...
 
 > [!CAUTION]
-> 新しいバージョンのmacOSでは、アプリケーションバイナリの**署名を削除**すると、以前に実行されていた場合、macOSは**アプリケーションを実行しなくなります**。
+> 新しいバージョンのmacOSでは、アプリケーションバイナリの**署名を削除**し、以前に実行されていた場合、macOSは**アプリケーションを実行しなくなります**。
 
 #### ライブラリの例
 ```objectivec

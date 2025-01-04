@@ -10,18 +10,18 @@ MIGは**Mach IPC**コード作成のプロセスを**簡素化するために作
 
 これらの定義には5つのセクションがあります：
 
-- **サブシステム宣言**：キーワードsubsystemは**名前**と**ID**を示すために使用されます。また、サーバーがカーネルで実行されるべき場合は**`KernelServer`**としてマークすることも可能です。
-- **インクルージョンとインポート**：MIGはCプリプロセッサを使用しているため、インポートを使用できます。さらに、ユーザーまたはサーバー生成コードのために`uimport`および`simport`を使用することも可能です。
+- **サブシステム宣言**：キーワードのsubsystemは、**名前**と**ID**を示すために使用されます。また、サーバーがカーネルで実行される必要がある場合は、**`KernelServer`**としてマークすることも可能です。
+- **インクルードとインポート**：MIGはCプリプロセッサを使用しているため、インポートを使用できます。さらに、ユーザーまたはサーバー生成コードのために`uimport`および`simport`を使用することも可能です。
 - **型宣言**：データ型を定義することが可能ですが、通常は`mach_types.defs`および`std_types.defs`をインポートします。カスタムのものにはいくつかの構文を使用できます：
-- \[i`n/out]tran`：受信メッセージまたは送信メッセージから翻訳する必要がある関数
+- \[i`n/out]tran：受信メッセージまたは送信メッセージから翻訳する必要がある関数
 - `c[user/server]type`：別のC型へのマッピング。
 - `destructor`：型が解放されるときにこの関数を呼び出します。
 - **操作**：これらはRPCメソッドの定義です。5つの異なるタイプがあります：
-- `routine`：応答を期待します
-- `simpleroutine`：応答を期待しません
-- `procedure`：応答を期待します
-- `simpleprocedure`：応答を期待しません
-- `function`：応答を期待します
+- `routine`：応答を期待
+- `simpleroutine`：応答を期待しない
+- `procedure`：応答を期待
+- `simpleprocedure`：応答を期待しない
+- `function`：応答を期待
 
 ### 例
 
@@ -40,9 +40,9 @@ server_port :  mach_port_t;
 n1          :  uint32_t;
 n2          :  uint32_t);
 ```
-最初の**引数はバインドするポート**であり、MIGは**自動的に返信ポートを処理します**（クライアントコードで`mig_get_reply_port()`を呼び出さない限り）。さらに、**操作のIDは**指定されたサブシステムIDから**連続的**に始まります（したがって、操作が非推奨の場合は削除され、`skip`が使用されてそのIDを引き続き使用します）。
+最初の**引数はバインドするポート**であり、MIGは**応答ポートを自動的に処理します**（クライアントコードで`mig_get_reply_port()`を呼び出さない限り）。さらに、**操作のIDは**指定されたサブシステムIDから**連続的**に始まります（したがって、操作が非推奨の場合は削除され、`skip`が使用されてそのIDを引き続き使用します）。
 
-次に、MIGを使用して、Subtract関数を呼び出すために相互に通信できるサーバーとクライアントコードを生成します：
+次に、MIGを使用して、Subtract関数を呼び出すために相互に通信できるサーバーおよびクライアントコードを生成します：
 ```bash
 mig -header myipcUser.h -sheader myipcServer.h myipc.defs
 ```
@@ -50,9 +50,9 @@ mig -header myipcUser.h -sheader myipcServer.h myipc.defs
 
 > [!TIP]
 > より複雑な例は、システムで `mdfind mach_port.defs` を使用して見つけることができます。\
-> また、ファイルと同じフォルダから `mig -DLIBSYSCALL_INTERFACE mach_ports.defs` を使用してコンパイルできます。
+> また、ファイルと同じフォルダーから `mig -DLIBSYSCALL_INTERFACE mach_ports.defs` を使用してコンパイルできます。
 
-ファイル **`myipcServer.c`** と **`myipcServer.h`** には、受信したメッセージIDに基づいて呼び出す関数を基本的に定義する構造体 **`SERVERPREFmyipc_subsystem`** の宣言と定義があります（開始番号として500を指定しました）。
+ファイル **`myipcServer.c`** と **`myipcServer.h`** には、受信したメッセージIDに基づいて呼び出す関数を定義する構造体 **`SERVERPREFmyipc_subsystem`** の宣言と定義があります（開始番号は500と指定しました）：
 
 {{#tabs}}
 {{#tab name="myipcServer.c"}}
@@ -89,7 +89,7 @@ routine[1];
 {{#endtab}}
 {{#endtabs}}
 
-前の構造に基づいて、関数 **`myipc_server_routine`** は **メッセージID** を取得し、呼び出すべき適切な関数を返します：
+前述の構造に基づいて、関数 **`myipc_server_routine`** は **メッセージID** を取得し、呼び出すべき適切な関数を返します：
 ```c
 mig_external mig_routine_t myipc_server_routine
 (mach_msg_header_t *InHeadP)
@@ -104,9 +104,9 @@ return 0;
 return SERVERPREFmyipc_subsystem.routine[msgh_id].stub_routine;
 }
 ```
-この例では、定義の中に1つの関数しか定義していませんが、もし他の関数を定義していた場合、それらは**`SERVERPREFmyipc_subsystem`**の配列の中にあり、最初のものはID **500**に、2番目のものはID **501**に割り当てられていました...
+この例では、定義の中で1つの関数のみを定義していますが、もし他の関数を定義していた場合、それらは**`SERVERPREFmyipc_subsystem`**の配列の中にあり、最初のものはID **500**に、2番目のものはID **501**に割り当てられていたでしょう...
 
-関数が**reply**を送信することが期待されている場合、関数`mig_internal kern_return_t __MIG_check__Reply__<name>`も存在します。
+関数が**返信**を送信することが期待されている場合、関数`mig_internal kern_return_t __MIG_check__Reply__<name>`も存在します。
 
 実際、この関係は**`myipcServer.h`**の構造体**`subsystem_to_name_map_myipc`**（他のファイルでは**`subsystem*to_name_map*\***`\*\*）で特定することが可能です：
 ```c
@@ -132,7 +132,7 @@ mig_routine_t routine;
 
 OutHeadP->msgh_bits = MACH_MSGH_BITS(MACH_MSGH_BITS_REPLY(InHeadP->msgh_bits), 0);
 OutHeadP->msgh_remote_port = InHeadP->msgh_reply_port;
-/* 最小サイズ: routine() が異なる場合は更新します */
+/* 最小サイズ: routine() は異なる場合に更新します */
 OutHeadP->msgh_size = (mach_msg_size_t)sizeof(mig_reply_error_t);
 OutHeadP->msgh_local_port = MACH_PORT_NULL;
 OutHeadP->msgh_id = InHeadP->msgh_id + 100;
@@ -217,25 +217,25 @@ USERPREFSubtract(port, 40, 2);
 
 ### NDR_record
 
-NDR_recordは`libsystem_kernel.dylib`によってエクスポートされる構造体で、MIGが**データを変換できるようにする**ためのもので、異なるシステム間で使用されることを想定しています（同じマシン内だけではなく）。
+NDR_recordは`libsystem_kernel.dylib`によってエクスポートされる構造体で、MIGが**システムに依存しないデータを変換する**ことを可能にします。MIGは異なるシステム間で使用されることを想定して設計されているため（同じマシン内だけではなく）。
 
 これは興味深いことで、バイナリ内に依存関係として`_NDR_record`が見つかると（`jtool2 -S <binary> | grep NDR`または`nm`）、そのバイナリがMIGクライアントまたはサーバーであることを意味します。
 
-さらに、**MIGサーバー**は`__DATA.__const`（macOSカーネルでは`__CONST.__constdata`、他の\*OSカーネルでは`__DATA_CONST.__const`）にディスパッチテーブルを持っています。これは**`jtool2`**でダンプできます。
+さらに、**MIGサーバー**は`__DATA.__const`（macOSカーネルでは`__CONST.__constdata`、他の\*OSカーネルでは`__DATA_CONST.__const`）にディスパッチテーブルを持っています。これは**`jtool2`**を使ってダンプできます。
 
-そして、**MIGクライアント**は`__mach_msg`を使用してサーバーに送信するために`__NDR_record`を使用します。
+そして、**MIGクライアント**は`__mach_msg`を使ってサーバーに送信するために`__NDR_record`を使用します。
 
 ## バイナリ分析
 
 ### jtool
 
-多くのバイナリがMIGを使用してマシンポートを公開しているため、**MIGが使用されたことを特定する方法**と、**各メッセージIDでMIGが実行する関数**を知ることは興味深いです。
+多くのバイナリが現在MIGを使用してmachポートを公開しているため、**MIGが使用されたことを特定する方法**と**各メッセージIDでMIGが実行する関数**を知ることは興味深いです。
 
-[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/#jtool2)は、Mach-OバイナリからMIG情報を解析し、メッセージIDを示し、実行する関数を特定できます：
+[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/index.html#jtool2)は、Mach-OバイナリからMIG情報を解析し、メッセージIDを示し、実行する関数を特定できます。
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
-さらに、MIG関数は実際に呼び出される関数のラッパーに過ぎないため、その逆アセンブルを取得し、BLをgrepすることで、実際に呼び出される関数を見つけることができるかもしれません。
+さらに、MIG関数は実際に呼び出される関数のラッパーに過ぎないため、その逆アセンブルを取得し、BLをgrepすることで、実際に呼び出される関数を見つけることができるかもしれません：
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep BL
 ```
@@ -259,7 +259,7 @@ var_18 = arg1;
 if (*(int32_t *)(var_10 + 0x14) &#x3C;= 0x1f4 &#x26;&#x26; *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
 rax = *(int32_t *)(var_10 + 0x14);
 // sign_extend_64への呼び出しはこの関数を特定するのに役立ちます
-// これにより、呼び出す必要がある呼び出しのポインタがraxに格納されます
+// これにより、呼び出す必要があるポインタがraxに格納されます
 // アドレス0x100004040（関数アドレス配列）の使用を確認します
 // 0x1f4 = 500（開始ID）
 <strong>            rax = *(sign_extend_64(rax - 0x1f4) * 0x28 + 0x100004040);
@@ -271,7 +271,7 @@ rax = *(int32_t *)(var_10 + 0x14);
 var_4 = 0x0;
 }
 else {
-// 2つの引数で正しい関数を呼び出す計算されたアドレス
+// 2つの引数で正しい関数を呼び出すために計算されたアドレス
 <strong>                    (var_20)(var_10, var_18);
 </strong>                    var_4 = 0x1;
 }
