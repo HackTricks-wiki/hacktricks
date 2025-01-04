@@ -5,7 +5,7 @@
 ​
 
 
-如果您需要一个可以自动化内存分析的工具，具有不同的扫描级别并可以并行运行多个Volatility3插件，您可以使用autoVolatility3:: [https://github.com/H3xKatana/autoVolatility3/](https://github.com/H3xKatana/autoVolatility3/)
+如果您需要一个可以自动化内存分析的工具，具有不同的扫描级别并能够并行运行多个Volatility3插件，您可以使用autoVolatility3:: [https://github.com/H3xKatana/autoVolatility3/](https://github.com/H3xKatana/autoVolatility3/)
 ```bash
 # Full scan (runs all plugins)
 python3 autovol3.py -f MEMFILE -o OUT_DIR -s full
@@ -17,7 +17,7 @@ python3 autovol3.py -f MEMFILE -o OUT_DIR -s minimal
 python3 autovol3.py -f MEMFILE -o OUT_DIR -s normal
 
 ```
-如果你想要一些**快速而疯狂**的东西，可以并行启动多个Volatility插件，你可以使用：[https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
+如果你想要一些 **快速而疯狂** 的东西，可以并行启动多个 Volatility 插件，你可以使用: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
 ```bash
 python autoVolatility.py -f MEMFILE -d OUT_DIRECTORY -e /home/user/tools/volatility/vol.py # It will use the most important plugins (could use a lot of space depending on the size of the memory)
 ```
@@ -39,7 +39,7 @@ Download the executable from https://www.volatilityfoundation.org/26
 ```
 {{#endtab}}
 
-{{#tab name="方法 2"}}
+{{#tab name="Method 2"}}
 ```bash
 git clone https://github.com/volatilityfoundation/volatility.git
 cd volatility
@@ -54,11 +54,11 @@ python setup.py install
 
 ### 关于“list”和“scan”插件的说明
 
-Volatility 有两种主要的插件方法，有时在其名称中反映出来。“list” 插件会尝试通过 Windows 内核结构导航，以检索诸如进程（定位并遍历内存中的 `_EPROCESS` 结构的链表）、操作系统句柄（定位并列出句柄表，取消引用找到的任何指针等）等信息。它们的行为或多或少类似于 Windows API，如果请求列出进程的话。
+Volatility 有两种主要的插件方法，有时在其名称中反映出来。“list” 插件会尝试通过 Windows 内核结构导航以检索信息，如进程（定位并遍历内存中的 `_EPROCESS` 结构的链表）、操作系统句柄（定位并列出句柄表，解引用找到的任何指针等）。它们的行为或多或少类似于 Windows API，如果请求列出进程的话。
 
-这使得“list”插件非常快速，但与 Windows API 一样容易受到恶意软件的操控。例如，如果恶意软件使用 DKOM 从 `_EPROCESS` 链表中取消链接一个进程，它将不会出现在任务管理器中，也不会出现在 pslist 中。
+这使得“list”插件非常快速，但与 Windows API 一样容易受到恶意软件的操控。例如，如果恶意软件使用 DKOM 从 `_EPROCESS` 链表中解除链接一个进程，它将不会出现在任务管理器中，也不会出现在 pslist 中。
 
-另一方面，“scan” 插件将采取类似于在内存中雕刻可能在取消引用为特定结构时有意义的内容的方法。例如，`psscan` 将读取内存并尝试从中创建 `_EPROCESS` 对象（它使用池标签扫描，搜索指示感兴趣结构存在的 4 字节字符串）。其优点是它可以挖掘已退出的进程，即使恶意软件篡改了 `_EPROCESS` 链表，插件仍然会找到在内存中存在的结构（因为它仍然需要存在以便进程运行）。缺点是“scan”插件比“list”插件稍慢，有时可能会产生误报（一个退出时间过长且其结构部分被其他操作覆盖的进程）。
+另一方面，“scan”插件将采取类似于在内存中雕刻可能在解引用为特定结构时有意义的东西的方法。例如，`psscan` 将读取内存并尝试从中创建 `_EPROCESS` 对象（它使用池标签扫描，搜索指示感兴趣结构存在的 4 字节字符串）。其优点在于它可以挖掘已退出的进程，即使恶意软件篡改了 `_EPROCESS` 链表，插件仍然会找到在内存中存在的结构（因为它仍然需要存在以便进程运行）。缺点是“scan”插件比“list”插件稍慢，有时可能会产生误报（一个退出时间过长且其结构部分被其他操作覆盖的进程）。
 
 来自: [http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
 
@@ -66,7 +66,7 @@ Volatility 有两种主要的插件方法，有时在其名称中反映出来。
 
 ### Volatility3
 
-如 readme 中所述，您需要将您想要支持的 **操作系统符号表** 放入 _volatility3/volatility/symbols_ 中。\
+如 readme 中所述，您需要将您想要支持的 **操作系统符号表** 放入 _volatility3/volatility/symbols_。\
 各种操作系统的符号表包可在 **下载** 中获取：
 
 - [https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip](https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip)
@@ -81,7 +81,7 @@ Volatility 有两种主要的插件方法，有时在其名称中反映出来。
 ```bash
 ./volatility_2.6_lin64_standalone --info | grep "Profile"
 ```
-如果您想使用**您下载的新配置文件**（例如 Linux 配置文件），您需要在某处创建以下文件夹结构：_plugins/overlays/linux_，并将包含配置文件的 zip 文件放入此文件夹中。然后，使用以下命令获取配置文件的编号：
+如果您想使用**您下载的新配置文件**（例如 Linux 配置文件），您需要在某个地方创建以下文件夹结构：_plugins/overlays/linux_，并将包含配置文件的 zip 文件放入此文件夹中。然后，使用以下命令获取配置文件的编号：
 ```bash
 ./vol --plugins=/home/kali/Desktop/ctfs/final/plugins --info
 Volatility Foundation Volatility Framework 2.6
@@ -93,9 +93,9 @@ LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64 - A Profile for Linux CentOS7_3.10
 VistaSP0x64                                   - A Profile for Windows Vista SP0 x64
 VistaSP0x86                                   - A Profile for Windows Vista SP0 x86
 ```
-您可以**从 [https://github.com/volatilityfoundation/profiles](https://github.com/volatilityfoundation/profiles) 下载 Linux 和 Mac 配置文件**。
+您可以**下载 Linux 和 Mac 配置文件**从 [https://github.com/volatilityfoundation/profiles](https://github.com/volatilityfoundation/profiles)
 
-在前面的部分中，您可以看到配置文件名为 `LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64`，您可以使用它来执行类似的操作：
+在前面的部分中，您可以看到配置文件被称为 `LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64`，您可以使用它来执行类似的操作：
 ```bash
 ./vol -f file.dmp --plugins=. --profile=LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64 linux_netscan
 ```
@@ -106,7 +106,7 @@ volatility kdbgscan -f file.dmp
 ```
 #### **imageinfo 和 kdbgscan 之间的区别**
 
-[**从这里**](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/): 与仅提供配置文件建议的 imageinfo 相比，**kdbgscan** 旨在准确识别正确的配置文件和正确的 KDBG 地址（如果存在多个）。该插件扫描与 Volatility 配置文件相关的 KDBGHeader 签名，并应用合理性检查以减少误报。输出的详细程度和可以执行的合理性检查数量取决于 Volatility 是否能够找到 DTB，因此如果您已经知道正确的配置文件（或者如果您有来自 imageinfo 的配置文件建议），请确保使用它。
+[**从这里**](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/): 与仅提供配置文件建议的 imageinfo 相比，**kdbgscan** 旨在准确识别正确的配置文件和正确的 KDBG 地址（如果存在多个）。该插件扫描与 Volatility 配置文件相关的 KDBGHeader 签名，并应用合理性检查以减少误报。输出的详细程度和可以执行的合理性检查数量取决于 Volatility 是否能够找到 DTB，因此如果您已经知道正确的配置文件（或者如果您从 imageinfo 获得了配置文件建议），请确保使用它。
 
 始终查看 **kdbgscan 找到的进程数量**。有时 imageinfo 和 kdbgscan 可以找到 **多个** 合适的 **配置文件**，但只有 **有效的一个会有一些相关的进程**（这是因为提取进程需要正确的 KDBG 地址）。
 ```bash
@@ -133,7 +133,7 @@ PsLoadedModuleList            : 0xfffff80001197ac0 (0 modules)
 
 ## 哈希/密码
 
-提取 SAM 哈希、[域缓存凭据](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) 和 [lsa 秘密](../../../windows-hardening/authentication-credentials-uac-and-efs/#lsa-secrets)。
+提取 SAM 哈希、[域缓存凭据](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) 和 [lsa 秘密](../../../windows-hardening/authentication-credentials-uac-and-efs/index.html#lsa-secrets)。
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -163,7 +163,7 @@ volatility -f file.dmp --profile=Win7SP1x86 memdump -p 2168 -D conhost/
 
 ### 列出进程
 
-尝试查找 **可疑** 进程（通过名称）或 **意外** 子 **进程**（例如 cmd.exe 作为 iexplorer.exe 的子进程）。\
+尝试查找 **可疑** 进程（按名称）或 **意外** 子 **进程**（例如 cmd.exe 作为 iexplorer.exe 的子进程）。\
 比较 pslist 的结果与 psscan 的结果，以识别隐藏进程可能会很有趣。
 
 {{#tabs}}
@@ -220,7 +220,7 @@ volatility --profile=PROFILE consoles -f file.dmp #command history by scanning f
 {{#endtab}}
 {{#endtabs}}
 
-在 `cmd.exe` 中执行的命令由 **`conhost.exe`**（或在 Windows 7 之前的系统上为 `csrss.exe`）管理。这意味着如果 **`cmd.exe`** 在获取内存转储之前被攻击者终止，仍然可以从 **`conhost.exe`** 的内存中恢复会话的命令历史记录。为此，如果在控制台的模块中检测到异常活动，则应转储相关 **`conhost.exe`** 进程的内存。然后，通过在此转储中搜索 **strings**，可以提取会话中使用的命令行。
+在 `cmd.exe` 中执行的命令由 **`conhost.exe`**（或在 Windows 7 之前的系统中为 `csrss.exe`）管理。这意味着如果攻击者在获取内存转储之前终止了 **`cmd.exe`**，仍然可以从 **`conhost.exe`** 的内存中恢复会话的命令历史记录。为此，如果在控制台的模块中检测到异常活动，则应转储相关 **`conhost.exe`** 进程的内存。然后，通过在此转储中搜索 **strings**，可以提取会话中使用的命令行。
 
 ### 环境
 
@@ -290,7 +290,7 @@ volatility --profile=Win7SP1x86_23418 getservicesids -f file.dmp #Get the SID of
 
 ### 句柄
 
-了解一个 **进程拥有的句柄**（已打开）指向哪些其他文件、密钥、线程、进程... 是很有用的
+了解一个 **进程拥有的句柄**（已打开的）对于其他文件、密钥、线程、进程等是很有用的。
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -536,9 +536,9 @@ volatility --profile=Win7SP1x86_23418 mftparser -f file.dmp
 {{#endtab}}
 {{#endtabs}}
 
-**NTFS 文件系统**使用一个关键组件，称为_主文件表_（MFT）。该表为卷上的每个文件至少包含一个条目，也包括 MFT 本身。关于每个文件的重要细节，如**大小、时间戳、权限和实际数据**，都封装在 MFT 条目中或在 MFT 外部但由这些条目引用的区域中。更多细节可以在[官方文档](https://docs.microsoft.com/en-us/windows/win32/fileio/master-file-table)中找到。
+**NTFS文件系统**使用一个关键组件，称为_主文件表_（MFT）。该表为卷上的每个文件至少包含一个条目，也包括MFT本身。关于每个文件的重要细节，如**大小、时间戳、权限和实际数据**，都封装在MFT条目中或在MFT外部但由这些条目引用的区域中。更多细节可以在[官方文档](https://docs.microsoft.com/en-us/windows/win32/fileio/master-file-table)中找到。
 
-### SSL 密钥/证书
+### SSL密钥/证书
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -645,11 +645,11 @@ volatilitye --plugins="/tmp/plugins/" [...]
 
 #### Autoruns
 
-从 [https://github.com/tomchop/volatility-autoruns](https://github.com/tomchop/volatility-autoruns) 下载
+从 [https://github.com/tomchop/volatility-autoruns](https://github.com/tomchop/volatility-autoruns) 下载它
 ```
 volatility --plugins=volatility-autoruns/ --profile=WinXPSP2x86 -f file.dmp autoruns
 ```
-### 互斥锁
+### Mutexes
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -684,7 +684,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp symlinkscan
 
 ### Bash
 
-可以**从内存中读取 bash 历史记录。** 你也可以转储 _.bash_history_ 文件，但它已被禁用，你会很高兴可以使用这个 volatility 模块。
+可以**从内存中读取 bash 历史记录。** 你也可以转储 _.bash_history_ 文件，但它已被禁用，你会很高兴可以使用这个 volatility 模块
 
 {{#tabs}}
 {{#tab name="vol3"}}

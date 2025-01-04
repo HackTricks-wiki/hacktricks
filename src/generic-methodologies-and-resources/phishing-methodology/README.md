@@ -1,15 +1,15 @@
-# 钓鱼方法论
+# Phishing Methodology
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## 方法论
+## Methodology
 
 1. 侦查受害者
 1. 选择 **受害者域名**。
 2. 执行一些基本的网络枚举 **搜索受害者使用的登录门户** 并 **决定** 你将 **冒充** 哪一个。
 3. 使用一些 **OSINT** 来 **查找电子邮件**。
 2. 准备环境
-1. **购买域名** 你将用于钓鱼评估
+1. **购买你将用于钓鱼评估的域名**
 2. **配置电子邮件服务** 相关记录 (SPF, DMARC, DKIM, rDNS)
 3. 使用 **gophish** 配置 VPS
 3. 准备活动
@@ -24,12 +24,12 @@
 - **关键词**: 域名 **包含** 原始域名的重要 **关键词** (例如，zelster.com-management.com)。
 - **带连字符的子域**: 将子域的 **点替换为连字符** (例如，www-zelster.com)。
 - **新 TLD**: 使用 **新 TLD** 的相同域名 (例如，zelster.org)
-- **同形异义字**: 它 **替换** 域名中的一个字母为 **看起来相似的字母** (例如，zelfser.com)。
+- **同形异义字**: 它 **用看起来相似的字母替换** 域名中的一个字母 (例如，zelfser.com)。
 - **置换**: 它 **交换域名中的两个字母** (例如，zelsetr.com)。
 - **单数/复数化**: 在域名末尾添加或删除 “s” (例如，zeltsers.com)。
 - **省略**: 它 **删除域名中的一个字母** (例如，zelser.com)。
 - **重复**: 它 **重复域名中的一个字母** (例如，zeltsser.com)。
-- **替换**: 类似同形异义字但不那么隐蔽。它替换域名中的一个字母，可能是与原字母在键盘上相邻的字母 (例如，zektser.com)。
+- **替换**: 类似于同形异义字，但不那么隐蔽。它替换域名中的一个字母，可能是与原字母在键盘上相邻的字母 (例如，zektser.com)。
 - **子域化**: 在域名中引入一个 **点** (例如，ze.lster.com)。
 - **插入**: 它 **在域名中插入一个字母** (例如，zerltser.com)。
 - **缺失点**: 将 TLD 附加到域名上。 (例如，zelstercom.com)
@@ -47,20 +47,20 @@
 
 ### 位翻转
 
-有 **可能性某些存储或通信中的位会因各种因素而自动翻转**，例如太阳耀斑、宇宙射线或硬件错误。
+由于太阳耀斑、宇宙射线或硬件错误等各种因素，**存储或通信中的某些位可能会自动翻转**。
 
 当这个概念 **应用于 DNS 请求** 时，**DNS 服务器接收到的域名** 可能与最初请求的域名不同。
 
 例如，域名 "windows.com" 中的单个位修改可以将其更改为 "windnws.com"。
 
-攻击者可能 **利用这一点注册多个位翻转域名**，这些域名与受害者的域名相似。他们的意图是将合法用户重定向到他们自己的基础设施。
+攻击者可能会 **利用这一点注册多个位翻转域名**，这些域名与受害者的域名相似。他们的目的是将合法用户重定向到他们自己的基础设施。
 
 有关更多信息，请阅读 [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
 
 ### 购买受信任的域名
 
 你可以在 [https://www.expireddomains.net/](https://www.expireddomains.net) 搜索可以使用的过期域名。\
-为了确保你要购买的过期域名 **已经有良好的 SEO**，你可以搜索它在以下网站的分类：
+为了确保你要购买的过期域名 **已经有良好的 SEO**，你可以搜索它在以下网站中的分类：
 
 - [http://www.fortiguard.com/webfilter](http://www.fortiguard.com/webfilter)
 - [https://urlfiltering.paloaltonetworks.com/query/](https://urlfiltering.paloaltonetworks.com/query/)
@@ -73,16 +73,16 @@
 - [https://hunter.io/](https://hunter.io)
 - [https://anymailfinder.com/](https://anymailfinder.com)
 
-为了 **发现更多** 有效的电子邮件地址或 **验证你已经发现的地址**，你可以检查是否可以对受害者的 smtp 服务器进行暴力破解。 [在这里学习如何验证/发现电子邮件地址](../../network-services-pentesting/pentesting-smtp/#username-bruteforce-enumeration)。\
+为了 **发现更多** 有效的电子邮件地址或 **验证你已经发现的地址**，你可以检查是否可以对受害者的 smtp 服务器进行暴力破解。 [在这里学习如何验证/发现电子邮件地址](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration)。\
 此外，不要忘记，如果用户使用 **任何网络门户访问他们的邮件**，你可以检查它是否容易受到 **用户名暴力破解**，并在可能的情况下利用该漏洞。
 
 ## 配置 GoPhish
 
 ### 安装
 
-你可以从 [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0) 下载它
+你可以从 [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0) 下载它。
 
-下载并解压到 `/opt/gophish` 中并执行 `/opt/gophish/gophish`\
+下载并解压到 `/opt/gophish` 中，并执行 `/opt/gophish/gophish`\
 你将在输出中获得端口 3333 的管理员用户密码。因此，访问该端口并使用这些凭据更改管理员密码。你可能需要将该端口隧道到本地：
 ```bash
 ssh -L 3333:127.0.0.1:3333 <user>@<ip>
@@ -124,7 +124,7 @@ cp "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" /opt/gophish/ssl_keys/key.crt�
 
 最后将文件 **`/etc/hostname`** 和 **`/etc/mailname`** 修改为您的域名并 **重启您的 VPS。**
 
-现在，创建一个指向 VPS 的 **ip 地址** 的 **DNS A 记录** `mail.<domain>` 和一个指向 `mail.<domain>` 的 **DNS MX** 记录
+现在，创建一个指向 VPS **ip 地址** 的 **DNS A 记录** `mail.<domain>` 和一个指向 `mail.<domain>` 的 **DNS MX** 记录
 
 现在让我们测试发送电子邮件:
 ```bash
@@ -133,7 +133,7 @@ echo "This is the body of the email" | mail -s "This is the subject line" test@e
 ```
 **Gophish 配置**
 
-停止 gophish 的执行，然后进行配置。\
+停止 gophish 的执行并进行配置。\
 将 `/opt/gophish/config.json` 修改为以下内容（注意使用 https）：
 ```bash
 {
@@ -208,7 +208,7 @@ case $1 in
 start|stop|status) "$1" ;;
 esac
 ```
-完成配置服务并检查它，方法是：
+完成配置服务并检查它的方法是：
 ```bash
 mkdir /var/log/gophish
 chmod +x /etc/init.d/gophish
@@ -233,9 +233,9 @@ service gophish stop
 
 ### 发件人策略框架 (SPF) 记录
 
-您必须**为新域配置SPF记录**。如果您不知道什么是SPF记录，请[**阅读此页面**](../../network-services-pentesting/pentesting-smtp/#spf)。
+您必须**为新域配置SPF记录**。如果您不知道什么是SPF记录，请[**阅读此页面**](../../network-services-pentesting/pentesting-smtp/index.html#spf)。
 
-您可以使用[https://www.spfwizard.net/](https://www.spfwizard.net)来生成您的SPF策略（使用VPS机器的IP）
+您可以使用[https://www.spfwizard.net/](https://www.spfwizard.net)来生成您的SPF策略（使用VPS机器的IP）。
 
 ![](<../../images/image (1037).png>)
 
@@ -245,7 +245,7 @@ v=spf1 mx a ip4:ip.ip.ip.ip ?all
 ```
 ### 基于域的消息认证、报告和一致性 (DMARC) 记录
 
-您必须**为新域配置 DMARC 记录**。如果您不知道什么是 DMARC 记录 [**请阅读此页面**](../../network-services-pentesting/pentesting-smtp/#dmarc)。
+您必须**为新域配置 DMARC 记录**。如果您不知道什么是 DMARC 记录 [**请阅读此页面**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc)。
 
 您需要创建一个新的 DNS TXT 记录，指向主机名 `_dmarc.<domain>`，内容如下：
 ```bash
@@ -253,7 +253,7 @@ v=DMARC1; p=none
 ```
 ### DomainKeys Identified Mail (DKIM)
 
-您必须**为新域配置DKIM**。如果您不知道什么是DMARC记录，请[**阅读此页面**](../../network-services-pentesting/pentesting-smtp/#dkim)。
+您必须**为新域配置DKIM**。如果您不知道什么是DMARC记录，请[**阅读此页面**](../../network-services-pentesting/pentesting-smtp/index.html#dkim)。
 
 本教程基于：[https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
 
@@ -266,7 +266,7 @@ v=DMARC1; p=none
 
 ### 测试您的电子邮件配置分数
 
-您可以使用[https://www.mail-tester.com/](https://www.mail-tester.com)来做到这一点\
+您可以使用[https://www.mail-tester.com/](https://www.mail-tester.com)\
 只需访问该页面并将电子邮件发送到他们提供的地址：
 ```bash
 echo "This is the body of the email" | mail -s "This is the subject line" test-iimosa79z@srv1.mail-tester.com
@@ -291,7 +291,7 @@ dkim=pass header.i=@example.com;
 ```
 ### ​从Spamhouse黑名单中移除
 
-页面 [www.mail-tester.com](https://www.mail-tester.com) 可以指示您的域名是否被spamhouse阻止。您可以在: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/) 请求移除您的域名/IP。
+页面 [www.mail-tester.com](https://www.mail-tester.com) 可以指示您的域名是否被spamhouse阻止。您可以在以下网址请求移除您的域名/IP: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
 
 ### 从Microsoft黑名单中移除
 
@@ -308,14 +308,14 @@ dkim=pass header.i=@example.com;
 ![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
 > [!NOTE]
-> 建议使用 "**发送测试邮件**" 功能来测试一切是否正常。\
-> 我建议将 **测试邮件发送到10分钟邮件地址** 以避免在测试中被列入黑名单。
+> 建议使用“**发送测试邮件**”功能来测试一切是否正常。\
+> 我建议将**测试邮件发送到10分钟邮件地址**以避免在测试中被列入黑名单。
 
 ### 邮件模板
 
 - 设置一些 **名称以识别** 模板
-- 然后写一个 **主题**（没有奇怪的内容，只是您在常规邮件中可能会看到的内容）
-- 确保您已勾选 "**添加跟踪图像**"
+- 然后写一个 **主题**（没有奇怪的内容，只是您在常规邮件中可以期待看到的内容）
+- 确保您已勾选“**添加跟踪图像**”
 - 编写 **邮件模板**（您可以使用变量，如以下示例所示）：
 ```markup
 <html>
@@ -357,15 +357,15 @@ WRITE HERE SOME SIGNATURE OF SOMEONE FROM THE COMPANY
 
 > [!NOTE]
 > 通常，您需要修改页面的 HTML 代码并在本地进行一些测试（可能使用某些 Apache 服务器）**直到您满意结果。** 然后，将该 HTML 代码写入框中。\
-> 请注意，如果您需要**使用一些静态资源**用于 HTML（可能是一些 CSS 和 JS 页面），您可以将它们保存在 _**/opt/gophish/static/endpoint**_ 中，然后从 _**/static/\<filename>**_ 访问它们。
+> 请注意，如果您需要**使用某些静态资源**用于 HTML（可能是一些 CSS 和 JS 页面），您可以将它们保存在 _**/opt/gophish/static/endpoint**_ 中，然后从 _**/static/\<filename>**_ 访问它们。
 
 > [!NOTE]
-> 对于重定向，您可以**将用户重定向到受害者的合法主网页**，或者将他们重定向到 _/static/migration.html_，例如，放置一些**旋转轮**（**[https://loading.io/](https://loading.io)**）5 秒钟，然后指示该过程成功。
+> 对于重定向，您可以**将用户重定向到受害者的合法主网页**，或者例如重定向到 _/static/migration.html_，放置一些**旋转轮**（**[https://loading.io/](https://loading.io)**）5 秒钟，然后指示该过程成功。
 
 ### 用户与组
 
 - 设置一个名称
-- **导入数据**（请注意，为了使用示例的模板，您需要每个用户的名字、姓氏和电子邮件地址）
+- **导入数据**（请注意，为了使用示例模板，您需要每个用户的名字、姓氏和电子邮件地址）
 
 ![](<../../images/image (163).png>)
 
@@ -392,7 +392,7 @@ clone-a-website.md
 
 ## 后门文档和文件
 
-在某些钓鱼评估中（主要针对红队），您还希望**发送包含某种后门的文件**（可能是 C2，或者只是一些会触发身份验证的东西）。\
+在某些钓鱼评估中（主要针对红队），您还可能想要**发送包含某种后门的文件**（可能是 C2，或者只是一些会触发身份验证的东西）。\
 查看以下页面以获取一些示例：
 
 {{#ref}}
@@ -428,11 +428,11 @@ phishing-documents.md
 detecting-phising.md
 {{#endref}}
 
-您可以**购买一个与受害者域名非常相似的域名**，**和/或为您控制的域的**子域**生成证书**，**包含**受害者域名的**关键字**。如果**受害者**与它们进行任何类型的**DNS 或 HTTP 交互**，您将知道**他在积极寻找**可疑域，您需要非常隐蔽。
+您可以**购买一个与受害者域名非常相似的域名**，**和/或为您控制的域的**一个**子域生成证书**，**包含**受害者域名的**关键字**。如果**受害者**与它们进行任何类型的**DNS 或 HTTP 交互**，您将知道**他在积极寻找**可疑域，您需要非常隐蔽。
 
 ### 评估钓鱼
 
-使用 [**Phishious**](https://github.com/Rices/Phishious) 评估您的电子邮件是否会进入垃圾邮件文件夹，或者是否会被阻止或成功。
+使用 [**Phishious**](https://github.com/Rices/Phishious) 来评估您的电子邮件是否会进入垃圾邮件文件夹，或者是否会被阻止或成功。
 
 ## 参考
 

@@ -4,7 +4,7 @@
 
 # 基本架构
 
-Docker Auth 插件是 **外部** **插件**，您可以使用它们来 **允许/拒绝** 请求到 Docker 守护进程的 **操作**，具体取决于请求的 **用户** 和 **请求的操作**。
+Docker Auth 插件是 **外部** **插件**，您可以用它们来 **允许/拒绝** 请求到 Docker 守护进程的 **操作**，这取决于请求的 **用户** 和 **请求的操作**。
 
 **[以下信息来自文档](https://docs.docker.com/engine/extend/plugins_authorization/#:~:text=If%20you%20require%20greater%20access,access%20to%20the%20Docker%20daemon)**
 
@@ -18,19 +18,19 @@ Docker Auth 插件是 **外部** **插件**，您可以使用它们来 **允许/
 
 每个发送到插件的请求 **包括经过身份验证的用户、HTTP 头和请求/响应体**。只有 **用户名** 和 **使用的身份验证方法** 被传递给插件。最重要的是，**不** 会传递用户 **凭据** 或令牌。最后，**并非所有请求/响应体都会发送** 到授权插件。只有那些 `Content-Type` 为 `text/*` 或 `application/json` 的请求/响应体会被发送。
 
-对于可能劫持 HTTP 连接的命令（`HTTP Upgrade`），如 `exec`，授权插件仅在初始 HTTP 请求时被调用。一旦插件批准命令，后续流程不再应用授权。具体来说，流数据不会传递给授权插件。对于返回分块 HTTP 响应的命令，如 `logs` 和 `events`，仅发送 HTTP 请求到授权插件。
+对于可能劫持 HTTP 连接的命令（`HTTP Upgrade`），如 `exec`，授权插件仅在初始 HTTP 请求时被调用。一旦插件批准命令，后续流程不再应用授权。具体来说，流数据不会传递给授权插件。对于返回分块 HTTP 响应的命令，如 `logs` 和 `events`，仅 HTTP 请求会发送到授权插件。
 
-在请求/响应处理期间，一些授权流程可能需要对 Docker 守护进程进行额外查询。为了完成这些流程，插件可以像普通用户一样调用守护进程 API。为了启用这些额外查询，插件必须提供管理员配置适当身份验证和安全策略的手段。
+在请求/响应处理过程中，一些授权流程可能需要对 Docker 守护进程进行额外查询。为了完成这些流程，插件可以像普通用户一样调用守护进程 API。为了启用这些额外查询，插件必须提供管理员配置适当身份验证和安全策略的手段。
 
 ## 多个插件
 
-您负责将 **插件** 注册为 Docker 守护进程 **启动** 的一部分。您可以安装 **多个插件并将它们链接在一起**。这个链可以是有序的。每个请求按顺序通过链传递。只有当 **所有插件都授予访问** 资源时，访问才会被授予。
+您负责将 **插件** 注册为 Docker 守护进程 **启动** 的一部分。您可以安装 **多个插件并将它们链接在一起**。这个链可以是有序的。每个对守护进程的请求按顺序通过链。只有当 **所有插件都授予访问** 资源时，访问才会被授予。
 
 # 插件示例
 
 ## Twistlock AuthZ Broker
 
-插件 [**authz**](https://github.com/twistlock/authz) 允许您创建一个简单的 **JSON** 文件，插件将 **读取** 该文件以授权请求。因此，它为您提供了非常简单的机会来控制哪些 API 端点可以到达每个用户。
+插件 [**authz**](https://github.com/twistlock/authz) 允许您创建一个简单的 **JSON** 文件，插件将 **读取** 该文件以授权请求。因此，它使您能够非常轻松地控制哪些 API 端点可以访问每个用户。
 
 这是一个示例，允许 Alice 和 Bob 创建新容器：`{"name":"policy_3","users":["alice","bob"],"actions":["container_create"]}`
 
@@ -46,7 +46,7 @@ Docker Auth 插件是 **外部** **插件**，您可以使用它们来 **允许/
 
 ## 枚举访问
 
-主要检查的内容是 **哪些端点被允许** 和 **哪些 HostConfig 值被允许**。
+主要检查的内容是 **哪些端点被允许** 和 **哪些 HostConfig 的值被允许**。
 
 要执行此枚举，您可以 **使用工具** [**https://github.com/carlospolop/docker_auth_profiler**](https://github.com/carlospolop/docker_auth_profiler)**.**
 
@@ -76,7 +76,7 @@ docker exec -it ---cap-add=ALL bb72293810b0f4ea65ee8fd200db418a48593c1a8a31407be
 # With --cap-add=SYS_ADMIN
 docker exec -it ---cap-add=SYS_ADMIN bb72293810b0f4ea65ee8fd200db418a48593c1a8a31407be6fee0f9f3e4 bash
 ```
-现在，用户可以使用任何[**之前讨论过的技术**](./#privileged-flag)从容器中逃逸并在主机内部**提升权限**。
+现在，用户可以使用任何[**之前讨论过的技术**](#privileged-flag)从容器中逃逸并在主机内部**提升权限**。
 
 ## 挂载可写文件夹
 
@@ -94,17 +94,17 @@ host> /tmp/bash
 >
 > **请注意，并非所有 Linux 机器上的目录都支持 suid 位！** 要检查哪些目录支持 suid 位，请运行 `mount | grep -v "nosuid"`。例如，通常 `/dev/shm`、`/run`、`/proc`、`/sys/fs/cgroup` 和 `/var/lib/lxcfs` 不支持 suid 位。
 >
-> 还要注意，如果您可以 **挂载 `/etc`** 或任何其他 **包含配置文件** 的文件夹，您可以作为 root 从 docker 容器中更改它们，以便在主机上 **滥用它们** 并提升权限（可能修改 `/etc/shadow`）
+> 还要注意，如果您可以 **挂载 `/etc`** 或任何其他 **包含配置文件** 的文件夹，您可以作为 root 从 docker 容器中更改它们，以便在主机上 **滥用它们** 并提升权限（可能修改 `/etc/shadow`）。
 
 ## 未检查的 API 端点
 
-配置此插件的系统管理员的责任是控制每个用户可以执行的操作及其权限。因此，如果管理员对端点和属性采取 **黑名单** 方法，他可能会 **忘记其中一些**，这可能允许攻击者 **提升权限**。
+配置此插件的系统管理员的责任是控制每个用户可以执行的操作及其权限。因此，如果管理员对端点和属性采取 **黑名单** 方法，他可能会 **忘记一些** 可能允许攻击者 **提升权限** 的端点。
 
-您可以在 [https://docs.docker.com/engine/api/v1.40/#](https://docs.docker.com/engine/api/v1.40/#) 检查 docker API
+您可以在 [https://docs.docker.com/engine/api/v1.40/#](https://docs.docker.com/engine/api/v1.40/#) 检查 docker API。
 
 ## 未检查的 JSON 结构
 
-### 根目录中的绑定
+### 在根目录中的绑定
 
 可能在系统管理员配置 docker 防火墙时，他 **忘记了一些重要参数**，例如 [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) 中的 "**Binds**"。\
 在以下示例中，可以利用此错误配置创建并运行一个挂载主机根目录（/）的容器：
@@ -122,7 +122,7 @@ docker exec -it f6932bc153ad chroot /host bash #Get a shell inside of it
 
 ### HostConfig 中的 Binds
 
-按照与 **根中的 Binds** 相同的指示，向 Docker API 发送此 **请求**：
+按照与 **根中的 Binds** 相同的指示，向 Docker API 执行此 **请求**：
 ```bash
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu", "HostConfig":{"Binds":["/:/host"]}}' http:/v1.40/containers/create
 ```
@@ -151,11 +151,11 @@ capsh --print
 #You can abuse the SYS_MODULE capability
 ```
 > [!NOTE]
-> **`HostConfig`** 通常是包含 **有趣的** **权限** 以逃离容器的关键。然而，正如我们之前讨论的，注意在外部使用 Binds 也有效，并可能允许您绕过限制。
+> **`HostConfig`** 通常是包含 **有趣的** **权限** 的关键，可以用来逃离容器。然而，正如我们之前讨论的，注意在外部使用 Binds 也有效，并可能允许你绕过限制。
 
 ## 禁用插件
 
-如果 **sysadmin** **忘记** **禁止** 禁用 **插件** 的能力，您可以利用这一点完全禁用它！
+如果 **sysadmin** **忘记** **禁止** 禁用 **插件** 的能力，你可以利用这一点来完全禁用它！
 ```bash
 docker plugin list #Enumerate plugins
 
@@ -169,7 +169,7 @@ docker plugin enable authobot
 ```
 记得在提升权限后**重新启用插件**，否则**重启docker服务将无效**！
 
-## Auth插件绕过写作
+## Auth Plugin Bypass 文章
 
 - [https://staaldraad.github.io/post/2019-07-11-bypass-docker-plugin-with-containerd/](https://staaldraad.github.io/post/2019-07-11-bypass-docker-plugin-with-containerd/)
 

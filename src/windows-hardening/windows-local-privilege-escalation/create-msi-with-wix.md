@@ -2,11 +2,11 @@
 
 # 创建恶意 MSI 并获取 Root
 
-MSI 安装程序的创建将使用 wixtools，具体来说，将利用 [wixtools](http://wixtoolset.org)。值得一提的是，尝试了其他 MSI 构建工具，但在这个特定案例中并未成功。
+MSI 安装程序的创建将使用 wixtools，具体来说，将利用 [wixtools](http://wixtoolset.org)。值得一提的是，尝试了其他 MSI 构建工具，但在这种情况下并未成功。
 
-为了全面理解 wix MSI 的使用示例，建议查阅 [此页面](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with)。在这里，您可以找到各种示例，演示 wix MSI 的用法。
+为了全面了解 wix MSI 的使用示例，建议查阅 [此页面](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with)。在这里，您可以找到各种示例，演示 wix MSI 的用法。
 
-目标是生成一个将执行 lnk 文件的 MSI。为了实现这一点，可以使用以下 XML 代码（[xml 来自这里](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)）：
+目标是生成一个将执行 lnk 文件的 MSI。为了实现这一点，可以使用以下 XML 代码（[xml 来自这里](https://0xrick.github.io/hack-the-box/ethereal/index.html#Creating-Malicious-msi-and-getting-root)）：
 ```markup
 <?xml version="1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
@@ -38,7 +38,7 @@ fail_here
 </Product>
 </Wix>
 ```
-重要的是要注意，Package 元素包含诸如 InstallerVersion 和 Compressed 等属性，分别指定安装程序的版本并指示包是否被压缩。
+重要的是要注意，Package 元素包含诸如 InstallerVersion 和 Compressed 的属性，分别指定安装程序的版本并指示包是否被压缩。
 
 创建过程涉及使用来自 wixtools 的 candle.exe 工具，从 msi.xml 生成 wixobject。应执行以下命令：
 ```

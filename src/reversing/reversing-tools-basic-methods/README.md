@@ -25,13 +25,13 @@
 
 ### [dotPeek](https://www.jetbrains.com/decompiler/)
 
-dotPeek 是一个反编译器，**反编译并检查多种格式**，包括 **库** (.dll)、**Windows 元数据文件** (.winmd) 和 **可执行文件** (.exe)。一旦反编译，程序集可以保存为 Visual Studio 项目 (.csproj)。
+dotPeek 是一个反编译器，**反编译并检查多种格式**，包括 **库** (.dll)、**Windows 元数据文件** (.winmd) 和 **可执行文件** (.exe)。反编译后，程序集可以保存为 Visual Studio 项目 (.csproj)。
 
 其优点在于，如果丢失的源代码需要从遗留程序集恢复，此操作可以节省时间。此外，dotPeek 提供了便捷的导航功能，使其成为 **Xamarin 算法分析** 的完美工具之一。
 
 ### [.NET Reflector](https://www.red-gate.com/products/reflector/)
 
-通过全面的插件模型和扩展工具以满足您确切需求的 API，.NET Reflector 节省时间并简化开发。让我们看看这个工具提供的众多逆向工程服务：
+通过全面的插件模型和扩展工具以满足您确切需求的 API，.NET Reflector 节省时间并简化开发。让我们看看这个工具提供的众多反向工程服务：
 
 - 提供对数据如何在库或组件中流动的洞察
 - 提供对 .NET 语言和框架的实现和使用的洞察
@@ -47,7 +47,7 @@ dotPeek 是一个反编译器，**反编译并检查多种格式**，包括 **�
 
 ### DNSpy 日志记录
 
-为了让 **DNSpy 将一些信息记录到文件中**，您可以使用以下代码片段：
+为了让 **DNSpy 记录一些信息到文件中**，您可以使用以下代码片段：
 ```cs
 using System.IO;
 path = "C:\\inetpub\\temp\\MyTest2.txt";
@@ -57,13 +57,13 @@ File.AppendAllText(path, "Password: " + password + "\n");
 
 要使用 DNSpy 调试代码，您需要：
 
-首先，修改与 **调试** 相关的 **程序集属性**：
+首先，改变与 **调试** 相关的 **程序集属性**：
 
 ![](<../../images/image (973).png>)
 ```aspnet
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints)]
 ```
-翻译内容缺失，请提供需要翻译的文本。
+请提供需要翻译的内容。
 ```
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.Default |
 DebuggableAttribute.DebuggingModes.DisableOptimizations |
@@ -134,7 +134,7 @@ iisreset /noforce
 - **加载 rundll32**（64位在 C:\Windows\System32\rundll32.exe，32位在 C:\Windows\SysWOW64\rundll32.exe）
 - **更改命令行**（ _File --> Change Command Line_ ）并设置 DLL 的路径和您想要调用的函数，例如："C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
 - 更改 _Options --> Settings_ 并选择 "**DLL Entry**"。
-- 然后 **开始执行**，调试器将在每个 DLL 主函数处停止，在某个时刻您将 **停在您的 DLL 的 DLL Entry**。从那里，只需搜索您想要放置断点的点。
+- 然后 **开始执行**，调试器将在每个 DLL 主函数处停止，在某个时刻您将 **停在您 DLL 的 DLL Entry**。从那里，只需搜索您想要设置断点的点。
 
 请注意，当执行因任何原因在 win64dbg 中停止时，您可以在 **win64dbg 窗口顶部** 查看 **您正在查看的代码**：
 
@@ -150,7 +150,7 @@ iisreset /noforce
 cheat-engine.md
 {{#endref}}
 
-[**PiNCE**](https://github.com/korcankaraokcu/PINCE) 是一个针对 GNU Project Debugger (GDB) 的前端/逆向工程工具，专注于游戏。然而，它可以用于任何与逆向工程相关的内容。
+[**PiNCE**](https://github.com/korcankaraokcu/PINCE) 是一个用于 GNU Project Debugger (GDB) 的前端/逆向工程工具，专注于游戏。然而，它可以用于任何与逆向工程相关的内容。
 
 [**Decompiler Explorer**](https://dogbolt.org/) 是多个反编译器的网页前端。该网络服务允许您比较不同反编译器在小型可执行文件上的输出。
 
@@ -165,7 +165,7 @@ https://github.com/nongiach/arm_now
 ### 使用 blobrunner 调试 shellcode
 
 [**Blobrunner**](https://github.com/OALabs/BlobRunner) 将 **分配** shellcode 到内存空间，将 **指示** 您 shellcode 被分配的 **内存地址** 并将 **停止** 执行。\
-然后，您需要 **附加调试器**（Ida 或 x64dbg）到该进程，并在 **指示的内存地址** 设置一个 **断点** 并 **恢复** 执行。这样您将调试 shellcode。
+然后，您需要 **附加调试器**（Ida 或 x64dbg）到该进程，并在 **指示的内存地址** 设置 **断点** 并 **恢复** 执行。这样您将调试 shellcode。
 
 发布的 GitHub 页面包含包含已编译版本的 zip 文件：[https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
 您可以在以下链接找到稍微修改过的 Blobrunner 版本。为了编译它，只需 **在 Visual Studio Code 中创建一个 C/C++ 项目，复制并粘贴代码并构建**。
@@ -184,13 +184,13 @@ blobrunner.md
 
 ### 使用 Cutter 调试 shellcode
 
-[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) 是 radare 的 GUI。使用 cutter，您可以模拟 shellcode 并动态检查它。
+[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) 是 radare 的 GUI。使用 Cutter，您可以模拟 shellcode 并动态检查它。
 
 请注意，Cutter 允许您 "Open File" 和 "Open Shellcode"。在我的情况下，当我将 shellcode 作为文件打开时，它正确反编译，但当我将其作为 shellcode 打开时却没有：
 
 ![](<../../images/image (562).png>)
 
-为了在您想要的地方开始模拟，请在那里设置一个 bp，显然 cutter 将自动从那里开始模拟：
+为了从您想要的地方开始模拟，请在那里设置一个 bp，显然 Cutter 将自动从那里开始模拟：
 
 ![](<../../images/image (589).png>)
 
@@ -216,11 +216,11 @@ scDbg 还配备了一个图形启动器，您可以选择所需的选项并执�
 
 ![](<../../images/image (258).png>)
 
-**创建转储** 选项将在内存中对 shellcode 进行动态更改时转储最终的 shellcode（用于下载解码后的 shellcode）。**起始偏移** 可以用于在特定偏移量处启动 shellcode。**调试 Shell** 选项对于使用 scDbg 终端调试 shellcode 很有用（然而，我发现之前解释的任何选项在这方面更好，因为您可以使用 Ida 或 x64dbg）。
+**Create Dump** 选项将在内存中对 shellcode 进行动态更改时转储最终的 shellcode（用于下载解码后的 shellcode）。**start offset** 可以用于在特定偏移量处启动 shellcode。**Debug Shell** 选项对于使用 scDbg 终端调试 shellcode 很有用（然而，我发现之前解释的任何选项在这方面更好，因为您可以使用 Ida 或 x64dbg）。
 
 ### 使用 CyberChef 反汇编
 
-将您的 shellcode 文件作为输入上传，并使用以下配方进行反编译：[https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
+将您的 shellcode 文件上传为输入，并使用以下配方进行反编译：[https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/index.html#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
 
 ## [Movfuscator](https://github.com/xoreaxeaxeax/movfuscator)
 
@@ -234,42 +234,42 @@ scDbg 还配备了一个图形启动器，您可以选择所需的选项并执�
 apt-get install libcapstone-dev
 apt-get install libz3-dev
 ```
-并且[安装keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md)（`apt-get install cmake; mkdir build; cd build; ../make-share.sh; make install`）
+并[安装 keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md)（`apt-get install cmake; mkdir build; cd build; ../make-share.sh; make install`）
 
 如果你在玩**CTF，这个找到标志的变通方法**可能会非常有用：[https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
 
 ## Rust
 
-要找到**入口点**，可以通过`::main`搜索函数，如下所示：
+要找到**入口点**，通过`::main`搜索函数，如下所示：
 
 ![](<../../images/image (1080).png>)
 
-在这种情况下，二进制文件被称为authenticator，所以很明显这是有趣的主函数。\
+在这种情况下，二进制文件被称为 authenticator，所以很明显这是有趣的主函数。\
 拥有被调用的**函数**的**名称**后，在**互联网上**搜索它们以了解它们的**输入**和**输出**。
 
 ## **Delphi**
 
-对于Delphi编译的二进制文件，你可以使用[https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
+对于 Delphi 编译的二进制文件，你可以使用[https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
 
-如果你需要反向工程一个Delphi二进制文件，我建议你使用IDA插件[https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
+如果你需要反向工程一个 Delphi 二进制文件，我建议你使用 IDA 插件[https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
 
-只需按**ATL+f7**（在IDA中导入python插件）并选择python插件。
+只需按**ATL+f7**（在 IDA 中导入 python 插件）并选择 python 插件。
 
-该插件将在调试开始时执行二进制文件并动态解析函数名称。启动调试后，再次按下开始按钮（绿色按钮或f9），断点将在真实代码的开头命中。
+此插件将在调试开始时执行二进制文件并动态解析函数名称。启动调试后，再次按下开始按钮（绿色按钮或 f9），断点将在真实代码的开头命中。
 
 这也非常有趣，因为如果你在图形应用程序中按下一个按钮，调试器将停止在该按钮执行的函数中。
 
 ## Golang
 
-如果你需要反向工程一个Golang二进制文件，我建议你使用IDA插件[https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
+如果你需要反向工程一个 Golang 二进制文件，我建议你使用 IDA 插件[https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
 
-只需按**ATL+f7**（在IDA中导入python插件）并选择python插件。
+只需按**ATL+f7**（在 IDA 中导入 python 插件）并选择 python 插件。
 
 这将解析函数的名称。
 
-## 编译的Python
+## 编译的 Python
 
-在此页面中，你可以找到如何从ELF/EXE Python编译的二进制文件中获取Python代码：
+在此页面中，你可以找到如何从 ELF/EXE python 编译的二进制文件中获取 python 代码：
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md
@@ -277,14 +277,14 @@ apt-get install libz3-dev
 
 ## GBA - Game Body Advance
 
-如果你获得了GBA游戏的**二进制文件**，你可以使用不同的工具来**模拟**和**调试**它：
+如果你获得了 GBA 游戏的**二进制文件**，你可以使用不同的工具来**模拟**和**调试**它：
 
 - [**no$gba**](https://problemkaputt.de/gba.htm)（_下载调试版本_）- 包含带界面的调试器
-- [**mgba**](https://mgba.io) - 包含CLI调试器
-- [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Ghidra插件
-- [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Ghidra插件
+- [**mgba**](https://mgba.io) - 包含 CLI 调试器
+- [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Ghidra 插件
+- [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Ghidra 插件
 
-在[**no$gba**](https://problemkaputt.de/gba.htm)中，_**选项 --> 模拟设置 --> 控制**_\*\* \*\*你可以看到如何按下Game Boy Advance的**按钮**
+在[**no$gba**](https://problemkaputt.de/gba.htm)中，_**选项 --> 模拟设置 --> 控制**_\*\* \*\*你可以看到如何按下 Game Boy Advance **按钮**
 
 ![](<../../images/image (581).png>)
 
@@ -301,7 +301,7 @@ DOWN = 128
 R = 256
 L = 256
 ```
-在这种程序中，令人感兴趣的部分将是**程序如何处理用户输入**。在地址**0x4000130**，你会找到常见的函数：**KEYINPUT**。
+在这种程序中，令人感兴趣的部分是**程序如何处理用户输入**。在地址**0x4000130**，你会找到常见的函数：**KEYINPUT**。
 
 ![](<../../images/image (447).png>)
 
@@ -368,15 +368,15 @@ FUN_08000864();
 if (uVar1 == 0x10) {
 DAT_030000d8 = DAT_030000d8 + 0x3a;
 ```
-在前面的代码中，您可以看到我们正在将 **uVar1**（按下按钮的 **值** 所在的位置）与一些值进行比较：
+在之前的代码中，你可以看到我们正在比较 **uVar1**（**按下按钮的值**所在的位置）与一些值：
 
-- 首先，它与 **值 4**（**SELECT** 按钮）进行比较：在这个挑战中，这个按钮清除屏幕
-- 然后，它与 **值 8**（**START** 按钮）进行比较：在这个挑战中，这检查代码是否有效以获取标志。
+- 首先，它与 **值 4**（**SELECT** 按钮）进行比较：在这个挑战中，这个按钮清除屏幕。
+- 然后，它与 **值 8**（**START** 按钮）进行比较：在这个挑战中，这个按钮检查代码是否有效以获取标志。
 - 在这种情况下，变量 **`DAT_030000d8`** 与 0xf3 进行比较，如果值相同，则执行某些代码。
-- 在其他情况下，检查某个 cont（`DAT_030000d4`）。这是一个 cont，因为在进入代码后立即加 1。\
-**如果** 小于 8，则执行涉及 **添加** 值到 **`DAT_030000d8`** 的操作（基本上是将按下的键的值添加到这个变量中，只要 cont 小于 8）。
+- 在其他情况下，检查某个计数（`DAT_030000d4`）。这是一个计数，因为在进入代码后会加 1。\
+**如果** 小于 8，则会进行一些涉及 **添加** 值到 **`DAT_030000d8`** 的操作（基本上是将按下的键的值添加到这个变量中，只要计数小于 8）。
 
-因此，在这个挑战中，知道按钮的值，您需要 **按下一个长度小于 8 的组合，使得结果的和为 0xf3。**
+因此，在这个挑战中，知道按钮的值后，你需要 **按下一个长度小于 8 的组合，使得结果的和为 0xf3。**
 
 **本教程的参考：** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)
 
@@ -386,9 +386,9 @@ DAT_030000d8 = DAT_030000d8 + 0x3a;
 https://www.youtube.com/watch?v=VVbRe7wr3G4
 {{#endref}}
 
-## 课程
+## Courses
 
 - [https://github.com/0xZ0F/Z0FCourse_ReverseEngineering](https://github.com/0xZ0F/Z0FCourse_ReverseEngineering)
-- [https://github.com/malrev/ABD](https://github.com/malrev/ABD) （二进制去混淆）
+- [https://github.com/malrev/ABD](https://github.com/malrev/ABD) (二进制去混淆)
 
 {{#include ../../banners/hacktricks-training.md}}

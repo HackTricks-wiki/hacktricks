@@ -41,32 +41,32 @@ security dump-keychain -d #Dump all the info, included secrets (the user will be
 
 ### Keychaindump 概述
 
-一个名为 **keychaindump** 的工具被开发出来以从 macOS 钥匙串中提取密码，但在像 Big Sur 这样的较新 macOS 版本上面临限制，如在 [讨论](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760) 中所述。使用 **keychaindump** 需要攻击者获得访问权限并提升到 **root** 权限。该工具利用了钥匙串在用户登录时默认解锁的事实，以方便应用程序访问，而无需用户重复输入密码。然而，如果用户选择在每次使用后锁定他们的钥匙串，**keychaindump** 将变得无效。
+一个名为 **keychaindump** 的工具被开发出来以从 macOS 钥匙串中提取密码，但在像 Big Sur 这样的较新 macOS 版本上面临限制，如 [讨论](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760) 所示。使用 **keychaindump** 需要攻击者获得访问权限并提升到 **root** 权限。该工具利用了钥匙串在用户登录时默认解锁的事实，以方便应用程序访问，而无需用户重复输入密码。然而，如果用户选择在每次使用后锁定他们的钥匙串，**keychaindump** 将变得无效。
 
 **Keychaindump** 通过针对一个特定的进程 **securityd** 来操作，Apple 将其描述为一个用于授权和加密操作的守护进程，对于访问钥匙串至关重要。提取过程涉及识别一个从用户登录密码派生的 **Master Key**。这个密钥对于读取钥匙串文件是必不可少的。为了找到 **Master Key**，**keychaindump** 使用 `vmmap` 命令扫描 **securityd** 的内存堆，寻找标记为 `MALLOC_TINY` 的区域中的潜在密钥。以下命令用于检查这些内存位置：
 ```bash
 sudo vmmap <securityd PID> | grep MALLOC_TINY
 ```
-在识别潜在的主密钥后，**keychaindump** 在堆中搜索特定模式 (`0x0000000000000018`)，这表明是主密钥的候选者。进一步的步骤，包括去混淆，都是利用此密钥所必需的，正如 **keychaindump** 的源代码中所述。专注于该领域的分析师应注意，解密钥匙串的关键数据存储在 **securityd** 进程的内存中。运行 **keychaindump** 的示例命令是：
+在识别潜在的主密钥后，**keychaindump** 在堆中搜索特定模式 (`0x0000000000000018`)，这表明一个主密钥的候选者。进一步的步骤，包括去混淆，都是利用这个密钥所必需的，正如 **keychaindump** 的源代码中所概述的。专注于这一领域的分析师应注意，解密钥匙串的关键数据存储在 **securityd** 进程的内存中。运行 **keychaindump** 的示例命令是：
 ```bash
 sudo ./keychaindump
 ```
 ### chainbreaker
 
-[**Chainbreaker**](https://github.com/n0fate/chainbreaker) 可用于以法医可靠的方式从OSX钥匙串中提取以下类型的信息：
+[**Chainbreaker**](https://github.com/n0fate/chainbreaker) 可用于以法医可靠的方式从 OSX 密钥链中提取以下类型的信息：
 
-- 哈希钥匙串密码，适合使用 [hashcat](https://hashcat.net/hashcat/) 或 [John the Ripper](https://www.openwall.com/john/) 破解
+- 哈希密钥链密码，适合使用 [hashcat](https://hashcat.net/hashcat/) 或 [John the Ripper](https://www.openwall.com/john/) 破解
 - 互联网密码
 - 通用密码
 - 私钥
 - 公钥
-- X509证书
+- X509 证书
 - 安全笔记
-- Appleshare密码
+- Appleshare 密码
 
-给定钥匙串解锁密码、使用 [volafox](https://github.com/n0fate/volafox) 或 [volatility](https://github.com/volatilityfoundation/volatility) 获得的主密钥，或如SystemKey的解锁文件，Chainbreaker还将提供明文密码。
+给定密钥链解锁密码、使用 [volafox](https://github.com/n0fate/volafox) 或 [volatility](https://github.com/volatilityfoundation/volatility) 获得的主密钥，或如 SystemKey 的解锁文件，Chainbreaker 还将提供明文密码。
 
-如果没有这些解锁钥匙串的方法，Chainbreaker将显示所有其他可用信息。
+如果没有这些解锁密钥链的方法，Chainbreaker 将显示所有其他可用信息。
 
 #### **Dump keychain keys**
 ```bash
@@ -92,7 +92,7 @@ python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d1
 ```
 #### **通过内存转储转储钥匙串密钥（带密码）**
 
-[按照这些步骤](../#dumping-memory-with-osxpmem) 执行 **内存转储**
+[按照这些步骤](../index.html#dumping-memory-with-osxpmem) 执行 **内存转储**
 ```bash
 #Use volafox (https://github.com/n0fate/volafox) to extract possible keychain passwords
 # Unformtunately volafox isn't working with the latest versions of MacOS
@@ -101,18 +101,18 @@ python vol.py -i ~/Desktop/show/macosxml.mem -o keychaindump
 #Try to extract the passwords using the extracted keychain passwords
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
-#### **使用用户密码转储钥匙串密钥（带密码）**
+#### **使用用户密码转储钥匙串密钥（包括密码）**
 
-如果您知道用户的密码，您可以使用它来**转储和解密属于用户的钥匙串**。
+如果您知道用户的密码，您可以使用它来**转储和解密属于该用户的钥匙串**。
 ```bash
 #Prompt to ask for the password
 python2.7 chainbreaker.py --dump-all --password-prompt /Users/<username>/Library/Keychains/login.keychain-db
 ```
 ### kcpassword
 
-**kcpassword** 文件是一个保存 **用户登录密码** 的文件，但仅在系统所有者 **启用自动登录** 的情况下。因此，用户将自动登录，而无需输入密码（这并不是很安全）。
+**kcpassword** 文件是一个保存 **用户登录密码** 的文件，但只有在系统所有者 **启用自动登录** 的情况下。 因此，用户将自动登录，而无需输入密码（这并不是很安全）。
 
-密码存储在文件 **`/etc/kcpassword`** 中，使用密钥 **`0x7D 0x89 0x52 0x23 0xD2 0xBC 0xDD 0xEA 0xA3 0xB9 0x1F`** 进行异或加密。如果用户的密码长度超过密钥，密钥将被重复使用。\
+密码存储在文件 **`/etc/kcpassword`** 中，使用密钥 **`0x7D 0x89 0x52 0x23 0xD2 0xBC 0xDD 0xEA 0xA3 0xB9 0x1F`** 进行异或加密。 如果用户的密码长度超过密钥，密钥将被重复使用。\
 这使得密码相对容易恢复，例如使用像 [**这个**](https://gist.github.com/opshope/32f65875d45215c3677d) 的脚本。
 
 ## Interesting Information in Databases
@@ -134,7 +134,7 @@ sqlite3 $HOME/Suggestions/snippets.db 'select * from emailSnippets'
 cd $(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/
 strings $(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/db2/db | grep -i -A4 slack
 ```
-### 备注
+### Notes
 
 用户的 **notes** 可以在 `~/Library/Group Containers/group.com.apple.notes/NoteStore.sqlite` 找到
 ```bash
@@ -191,9 +191,9 @@ for i in $(sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.s
 
 ### Darwin 通知
 
-主要的通知守护进程是 **`/usr/sbin/notifyd`**。为了接收通知，客户端必须通过 `com.apple.system.notification_center` Mach 端口注册（使用 `sudo lsmp -p <pid notifyd>` 检查它们）。该守护进程可以通过文件 `/etc/notify.conf` 进行配置。
+主要的通知守护进程是 **`/usr/sbin/notifyd`**。为了接收通知，客户端必须通过 `com.apple.system.notification_center` Mach 端口进行注册（使用 `sudo lsmp -p <pid notifyd>` 检查它们）。该守护进程可以通过文件 `/etc/notify.conf` 进行配置。
 
-用于通知的名称是唯一的反向 DNS 表示法，当发送通知到其中一个名称时，已指明可以处理该通知的客户端将接收到它。
+用于通知的名称是唯一的反向 DNS 表示法，当向其中一个名称发送通知时，已指明可以处理该通知的客户端将接收到它。
 
 可以通过向 notifyd 进程发送 SIGUSR2 信号并读取生成的文件 `/var/run/notifyd_<pid>.status` 来转储当前状态（并查看所有名称）：
 ```bash
@@ -222,7 +222,7 @@ common: com.apple.security.octagon.joined-with-bottle
 
 首选项位于`/Library/Preferences/com.apple.apsd.plist`。
 
-在macOS中，消息的本地数据库位于`/Library/Application\ Support/ApplePushService/aps.db`，在iOS中位于`/var/mobile/Library/ApplePushService`。它有3个表：`incoming_messages`，`outgoing_messages`和`channel`。
+在macOS中，消息的本地数据库位于`/Library/Application\ Support/ApplePushService/aps.db`，在iOS中位于`/var/mobile/Library/ApplePushService`。它有3个表：`incoming_messages`、`outgoing_messages`和`channel`。
 ```bash
 sudo sqlite3 /Library/Application\ Support/ApplePushService/aps.db
 ```
