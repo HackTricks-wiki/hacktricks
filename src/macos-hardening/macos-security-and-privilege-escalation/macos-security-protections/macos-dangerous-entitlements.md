@@ -17,11 +17,11 @@ El derecho **`com.apple.rootless.install`** permite **eludir SIP**. Consulte [es
 
 ### **`com.apple.system-task-ports` (anteriormente llamado `task_for_pid-allow`)**
 
-Este derecho permite obtener el **puerto de tarea para cualquier** proceso, excepto el núcleo. Consulte [**esto para más información**](../macos-proces-abuse/macos-ipc-inter-process-communication/).
+Este derecho permite obtener el **puerto de tarea para cualquier** proceso, excepto el núcleo. Consulte [**esto para más información**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
 
 ### `com.apple.security.get-task-allow`
 
-Este derecho permite a otros procesos con el derecho **`com.apple.security.cs.debugger`** obtener el puerto de tarea del proceso ejecutado por el binario con este derecho y **inyectar código en él**. Consulte [**esto para más información**](../macos-proces-abuse/macos-ipc-inter-process-communication/).
+Este derecho permite a otros procesos con el derecho **`com.apple.security.cs.debugger`** obtener el puerto de tarea del proceso ejecutado por el binario con este derecho y **inyectar código en él**. Consulte [**esto para más información**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
 
 ### `com.apple.security.cs.debugger`
 
@@ -33,7 +33,7 @@ Este derecho permite **cargar frameworks, plug-ins o bibliotecas sin estar firma
 
 ### `com.apple.private.security.clear-library-validation`
 
-Este derecho es muy similar a **`com.apple.security.cs.disable-library-validation`** pero **en lugar de** **deshabilitar directamente** la validación de bibliotecas, permite que el proceso **llame a una llamada al sistema `csops` para deshabilitarla**.\
+Este derecho es muy similar a **`com.apple.security.cs.disable-library-validation`** pero **en lugar de** **deshabilitar directamente** la validación de bibliotecas, permite al proceso **realizar una llamada al sistema `csops` para deshabilitarla**.\
 Consulte [**esto para más información**](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/).
 
 ### `com.apple.security.cs.allow-dyld-environment-variables`
@@ -117,7 +117,7 @@ Es posible verificar quién tiene este acceso en _Configuración del Sistema_ > 
 
 ### `kTCCServiceAccessibility`
 
-El proceso podrá **abusar de las características de accesibilidad de macOS**, lo que significa que, por ejemplo, podrá presionar combinaciones de teclas. Así que podría solicitar acceso para controlar una aplicación como Finder y aprobar el diálogo con este permiso.
+El proceso podrá **abusar de las funciones de accesibilidad de macOS**, lo que significa que, por ejemplo, podrá presionar combinaciones de teclas. Así que podría solicitar acceso para controlar una aplicación como Finder y aprobar el diálogo con este permiso.
 
 ## Medio
 
@@ -130,7 +130,7 @@ Este derecho permite **crear memoria que es escribible y ejecutable** al pasar l
 Este derecho permite **sobrescribir o parchear código C**, usar el obsoleto **`NSCreateObjectFileImageFromMemory`** (que es fundamentalmente inseguro), o usar el marco **DVDPlayback**. Consulta [**esto para más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
 
 > [!CAUTION]
-> Incluir este derecho expone tu aplicación a vulnerabilidades comunes en lenguajes de código inseguros en memoria. Considera cuidadosamente si tu aplicación necesita esta excepción.
+> Incluir este derecho expone tu aplicación a vulnerabilidades comunes en lenguajes de código inseguro en memoria. Considera cuidadosamente si tu aplicación necesita esta excepción.
 
 ### `com.apple.security.cs.disable-executable-page-protection`
 
@@ -156,7 +156,7 @@ Según esta publicación de blog, este permiso TCC generalmente se encuentra en 
 [Array]
 [String] kTCCServiceAll
 ```
-Permitir que el proceso **solicite todos los permisos de TCC**.
+Permitir que el proceso **pida todos los permisos de TCC**.
 
 ### **`kTCCServicePostEvent`**
 
