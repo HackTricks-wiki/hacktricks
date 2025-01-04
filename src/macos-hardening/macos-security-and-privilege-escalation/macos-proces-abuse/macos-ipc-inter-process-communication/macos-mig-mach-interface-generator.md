@@ -4,15 +4,15 @@
 
 ## Basiese Inligting
 
-MIG is geskep om die **proses van Mach IPC** kode skep te **vereenvoudig**. Dit genereer basies die **nodige kode** vir bediener en kliënt om met 'n gegewe definisie te kommunikeer. Alhoewel die gegenereerde kode lelik is, sal 'n ontwikkelaar net dit moet invoer en sy kode sal baie eenvoudiger wees as voorheen.
+MIG is geskep om die **proses van Mach IPC** kode skepping te **vereenvoudig**. Dit genereer basies die **nodige kode** vir bediener en kliënt om met 'n gegewe definisie te kommunikeer. Alhoewel die gegenereerde kode lelik is, sal 'n ontwikkelaar net dit moet invoer en sy kode sal baie eenvoudiger wees as voorheen.
 
 Die definisie word gespesifiseer in Interface Definition Language (IDL) met die `.defs` uitbreiding.
 
 Hierdie definisies het 5 afdelings:
 
-- **Subsystem verklaring**: Die sleutelwoord subsystem word gebruik om die **naam** en die **id** aan te dui. Dit is ook moontlik om dit as **`KernelServer`** te merk as die bediener in die kernel moet loop.
-- **Insluitings en invoer**: MIG gebruik die C-prepocessor, so dit kan invoer gebruik. Boonop is dit moontlik om `uimport` en `simport` te gebruik vir gebruiker of bediener gegenereerde kode.
-- **Tipe verklarings**: Dit is moontlik om datatipes te definieer alhoewel dit gewoonlik `mach_types.defs` en `std_types.defs` sal invoer. Vir persoonlike tipes kan 'n paar sintaksis gebruik word:
+- **Substelseld verklaring**: Die sleutelwoord subsystem word gebruik om die **naam** en die **id** aan te dui. Dit is ook moontlik om dit as **`KernelServer`** te merk as die bediener in die kernel moet loop.
+- **Insluitings en invoere**: MIG gebruik die C-prepocessor, so dit is in staat om invoere te gebruik. Boonop is dit moontlik om `uimport` en `simport` te gebruik vir gebruiker of bediener gegenereerde kode.
+- **Tipe verklarings**: Dit is moontlik om datatipes te definieer alhoewel dit gewoonlik `mach_types.defs` en `std_types.defs` sal invoer. Vir persoonlike tipes kan 'n sekere sintaksis gebruik word:
 - \[i`n/out]tran`: Funksie wat vertaal moet word van 'n inkomende of na 'n uitgaande boodskap
 - `c[user/server]type`: Kaart na 'n ander C tipe.
 - `destructor`: Roep hierdie funksie aan wanneer die tipe vrygestel word.
@@ -40,7 +40,7 @@ server_port :  mach_port_t;
 n1          :  uint32_t;
 n2          :  uint32_t);
 ```
-Let daarop dat die eerste **argument die poort is om te bind** en MIG sal **automaties die antwoordpoort hanteer** (tenzij `mig_get_reply_port()` in die kliëntkode aangeroep word). Boonop sal die **ID van die operasies** **sekwensieel** wees wat begin by die aangeduide subsysteem-ID (so as 'n operasie verouderd is, word dit verwyder en `skip` word gebruik om steeds sy ID te gebruik).
+Let wel dat die eerste **argument die poort is om te bind** en MIG sal **automaties die antwoordpoort hanteer** (tenzij `mig_get_reply_port()` in die kliëntkode aangeroep word). Boonop sal die **ID van die operasies** **sekwensieel** wees wat begin by die aangeduide subsysteem-ID (so as 'n operasie verouderd is, word dit verwyder en `skip` word gebruik om steeds sy ID te gebruik).
 
 Gebruik nou MIG om die bediener- en kliëntkode te genereer wat in staat sal wees om met mekaar te kommunikeer om die Subtract-funksie aan te roep:
 ```bash
@@ -115,7 +115,7 @@ Werklik is dit moontlik om hierdie verhouding in die struktuur **`subsystem_to_n
 { "Subtract", 500 }
 #endif
 ```
-Uiteindelik, 'n ander belangrike funksie om die bediener te laat werk sal **`myipc_server`** wees, wat die een is wat werklik die **funksie** sal aanroep wat verband hou met die ontvangde id:
+Uiteindelik, 'n ander belangrike funksie om die bediener te laat werk sal wees **`myipc_server`**, wat die een is wat werklik die **funksie** sal aanroep wat verband hou met die ontvangde id:
 
 <pre class="language-c"><code class="lang-c">mig_external boolean_t myipc_server
 (mach_msg_header_t *InHeadP, mach_msg_header_t *OutHeadP)
@@ -217,7 +217,7 @@ USERPREFSubtract(port, 40, 2);
 
 ### Die NDR_record
 
-Die NDR_record word uitgevoer deur `libsystem_kernel.dylib`, en dit is 'n struktuur wat MIG toelaat om **data te transformeer sodat dit nie afhanklik is van die stelsel** waarop dit gebruik word nie, aangesien MIG bedoel was om tussen verskillende stelsels gebruik te word (en nie net op dieselfde masjien nie).
+Die NDR_record word uitgevoer deur `libsystem_kernel.dylib`, en dit is 'n struktuur wat MIG toelaat om **data te transformeer sodat dit onpartydig is teenoor die stelsel** waarvoor dit gebruik word, aangesien MIG bedoel was om tussen verskillende stelsels gebruik te word (en nie net op dieselfde masjien nie).
 
 Dit is interessant omdat as `_NDR_record` in 'n binêre as 'n afhanklikheid gevind word (`jtool2 -S <binary> | grep NDR` of `nm`), dit beteken dat die binêre 'n MIG-kliënt of -bediener is.
 
@@ -229,19 +229,19 @@ En **MIG-kliënte** sal die `__NDR_record` gebruik om met `__mach_msg` na die be
 
 ### jtool
 
-Aangesien baie binêre nou MIG gebruik om mach-poorte bloot te stel, is dit interessant om te weet hoe om **te identifiseer dat MIG gebruik is** en die **funksies wat MIG uitvoer** met elke boodskap-ID.
+Aangesien baie binêre nou MIG gebruik om mach-poorte bloot te stel, is dit interessant om te weet hoe om **te identifiseer dat MIG gebruik is** en die **funksies wat MIG met elke boodskap-ID uitvoer**.
 
-[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/#jtool2) kan MIG-inligting uit 'n Mach-O binêre ontleed wat die boodskap-ID aandui en die funksie identifiseer wat uitgevoer moet word:
+[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/index.html#jtool2) kan MIG-inligting uit 'n Mach-O binêre ontleed wat die boodskap-ID aandui en die funksie identifiseer wat uitgevoer moet word:
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
-Boonop, MIG-funksies is net omhulsel van die werklike funksie wat aangeroep word, wat beteken dat jy deur die ontbinding daarvan te verkry en te soek vir BL dalk die werklike funksie wat aangeroep word, kan vind:
+Boonop, MIG-funksies is net omhulsel van die werklike funksie wat aangeroep word, wat beteken dat jy deur die ontbinding daarvan te kry en vir BL te soek, dalk die werklike funksie wat aangeroep word, kan vind:
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep BL
 ```
 ### Assembly
 
-Daar is voorheen genoem dat die funksie wat **die korrekte funksie sal aanroep afhangende van die ontvangde boodskap ID** `myipc_server` was. Dit is egter gewoonlik dat jy nie die simbole van die binêre (geen funksie name) sal hê nie, so dit is interessant om **te kyk hoe dit dekompilleer lyk** aangesien dit altyd baie soortgelyk sal wees (die kode van hierdie funksie is onafhanklik van die funksies wat blootgestel is):
+Daar is voorheen genoem dat die funksie wat **die korrekte funksie sal aanroep afhangende van die ontvangde boodskap ID** `myipc_server` was. Dit is egter gewoonlik dat jy nie die simbole van die binêre (geen funksie name) sal hê nie, so dit is interessant om **te kyk hoe dit dekompilleer lyk** aangesien dit altyd baie soortgelyk sal wees (die kode van hierdie funksie is onafhanklik van die funksies wat blootgestel word):
 
 {{#tabs}}
 {{#tab name="myipc_server decompiled 1"}}
@@ -249,7 +249,7 @@ Daar is voorheen genoem dat die funksie wat **die korrekte funksie sal aanroep a
 <pre class="language-c"><code class="lang-c">int _myipc_server(int arg0, int arg1) {
 var_10 = arg0;
 var_18 = arg1;
-// Begin instruksies om die regte funksie aanwysers te vind
+// Begininstruksies om die regte funksie aanwysers te vind
 *(int32_t *)var_18 = *(int32_t *)var_10 &#x26; 0x1f;
 *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
 *(int32_t *)(var_18 + 0x4) = 0x24;
@@ -297,7 +297,7 @@ saved_fp = r29;
 stack[-8] = r30;
 var_10 = arg0;
 var_18 = arg1;
-// Begin instruksies om die regte funksie aanwysers te vind
+// Begininstruksies om die regte funksie aanwysers te vind
 *(int32_t *)var_18 = *(int32_t *)var_10 &#x26; 0x1f | 0x0;
 *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
 *(int32_t *)(var_18 + 0x4) = 0x24;
@@ -365,7 +365,7 @@ return r0;
 {{#endtab}}
 {{#endtabs}}
 
-As jy eintlik na die funksie **`0x100004000`** gaan, sal jy die array van **`routine_descriptor`** strukture vind. Die eerste element van die struktuur is die **adres** waar die **funksie** geïmplementeer is, en die **struktuur neem 0x28 bytes**, so elke 0x28 bytes (begin vanaf byte 0) kan jy 8 bytes kry en dit sal die **adres van die funksie** wees wat aangeroep sal word:
+As jy eintlik na die funksie **`0x100004000`** gaan, sal jy die array van **`routine_descriptor`** strukture vind. Die eerste element van die struktuur is die **adres** waar die **funksie** geïmplementeer is, en die **struktuur neem 0x28 bytes**, so elke 0x28 bytes (begin vanaf byte 0) kan jy 8 bytes kry en dit sal die **adres van die funksie** wees wat aangeroep gaan word:
 
 <figure><img src="../../../../images/image (35).png" alt=""><figcaption></figcaption></figure>
 

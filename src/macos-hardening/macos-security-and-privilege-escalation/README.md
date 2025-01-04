@@ -4,7 +4,7 @@
 
 ## Basiese MacOS
 
-As jy nie bekend is met macOS nie, moet jy begin om die basiese beginsels van macOS te leer:
+As jy nie vertroud is met macOS nie, moet jy begin om die basiese beginsels van macOS te leer:
 
 - Spesiale macOS **lêers & toestemmings:**
 
@@ -30,7 +30,7 @@ macos-applefs.md
 mac-os-architecture/
 {{#endref}}
 
-- Algemene macOS n**etwerk dienste & protokolle**
+- Algemene macOS n**etwerkdienste & protokolle**
 
 {{#ref}}
 macos-protocols.md
@@ -41,7 +41,7 @@ macos-protocols.md
 
 ### MacOS MDM
 
-In maatskappye **macOS** stelsels gaan hoogs waarskynlik **bestuur word met 'n MDM**. Daarom is dit vanuit die perspektief van 'n aanvaller interessant om te weet **hoe dit werk**:
+In maatskappye **macOS** stelsels gaan hoogs waarskynlik **bestuur word met 'n MDM**. Daarom is dit vanuit 'n aanvaller se perspektief interessant om te weet **hoe dit werk**:
 
 {{#ref}}
 ../macos-red-teaming/macos-mdm/
@@ -67,9 +67,9 @@ As 'n **proses wat as root loop 'n lêer skryf** wat deur 'n gebruiker beheer ka
 Dit kan in die volgende situasies gebeur:
 
 - Lêer wat gebruik is, is reeds deur 'n gebruiker geskep (besit deur die gebruiker)
-- Lêer wat gebruik word, is skryfbaar deur die gebruiker weens 'n groep
-- Lêer wat gebruik word, is binne 'n gids besit deur die gebruiker (die gebruiker kan die lêer skep)
-- Lêer wat gebruik word, is binne 'n gids besit deur root, maar die gebruiker het skryftoegang daaroor weens 'n groep (die gebruiker kan die lêer skep)
+- Lêer wat gebruik is, is skryfbaar deur die gebruiker weens 'n groep
+- Lêer wat gebruik is, is binne 'n gids besit deur die gebruiker (die gebruiker kan die lêer skep)
+- Lêer wat gebruik is, is binne 'n gids besit deur root, maar die gebruiker het skryftoegang daaroor weens 'n groep (die gebruiker kan die lêer skep)
 
 In staat wees om 'n **lêer te skep** wat gaan **gebruik word deur root**, stel 'n gebruiker in staat om **voordeel te trek uit sy inhoud** of selfs **simboliese skakels/hardskakels** te skep om dit na 'n ander plek te wys.
 
@@ -89,17 +89,17 @@ macos-file-extension-apps.md
 
 ## macOS TCC / SIP Privilege Escalering
 
-In macOS **toepassings en binaries kan toestemmings hê** om toegang te verkry tot gidsen of instellings wat hulle meer bevoorregte maak as ander.
+In macOS **toepassings en lêers kan toestemmings hê** om toegang te verkry tot gidse of instellings wat hulle meer bevoorregte maak as ander.
 
-Daarom sal 'n aanvaller wat 'n macOS masjien suksesvol wil kompromitteer, moet **sy TCC privileges verhoog** (of selfs **SIP omseil**, afhangende van sy behoeftes).
+Daarom sal 'n aanvaller wat 'n macOS masjien suksesvol wil kompromitteer, moet **sy TCC-toestemmings verhoog** (of selfs **SIP omseil**, afhangende van sy behoeftes).
 
-Hierdie privileges word gewoonlik gegee in die vorm van **regte** waarmee die toepassing onderteken is, of die toepassing mag sekere toegang versoek het en nadat die **gebruiker dit goedgekeur het**, kan dit in die **TCC databasisse** gevind word. 'n Ander manier waarop 'n proses hierdie privileges kan verkry, is deur 'n **kind van 'n proses** met daardie **privileges** te wees, aangesien dit gewoonlik **geërf** word.
+Hierdie toestemmings word gewoonlik gegee in die vorm van **regte** waarmee die toepassing onderteken is, of die toepassing mag sekere toegang versoek het en nadat die **gebruiker dit goedgekeur het**, kan dit in die **TCC databasisse** gevind word. 'n Ander manier waarop 'n proses hierdie toestemmings kan verkry, is deur 'n **kind van 'n proses** met daardie **toestemmings** te wees, aangesien dit gewoonlik **geërf** word.
 
-Volg hierdie skakels om verskillende maniere te vind om [**privileges in TCC te verhoog**](macos-security-protections/macos-tcc/#tcc-privesc-and-bypasses), om [**TCC te omseil**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) en hoe in die verlede [**SIP omseil is**](macos-security-protections/macos-sip.md#sip-bypasses).
+Volg hierdie skakels om verskillende maniere te vind om [**privileges in TCC te verhoog**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), om [**TCC te omseil**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) en hoe in die verlede [**SIP omseil is**](macos-security-protections/macos-sip.md#sip-bypasses).
 
 ## macOS Tradisionele Privilege Escalering
 
-Natuurlik moet jy ook belangstel om na root te verhoog vanuit 'n rooi span perspektief. Kyk na die volgende pos vir 'n paar wenke:
+Natuurlik moet jy ook belangstel om na root te verhoog vanuit 'n rooi span se perspektief. Kyk na die volgende pos vir 'n paar wenke:
 
 {{#ref}}
 macos-privilege-escalation.md

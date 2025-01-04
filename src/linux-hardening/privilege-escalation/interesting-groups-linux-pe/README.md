@@ -6,7 +6,7 @@
 
 ### **PE - Metode 1**
 
-**Soms**, **per standaard (of omdat sommige sagteware dit benodig)** kan jy binne die **/etc/sudoers** lêer van hierdie lyne vind:
+**Soms**, **per standaard (of omdat sommige sagteware dit benodig)** binne die **/etc/sudoers** lêer kan jy sommige van hierdie lyne vind:
 ```bash
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
@@ -22,12 +22,12 @@ sudo su
 ```
 ### PE - Metode 2
 
-Vind alle suid binaire en kyk of daar die binaire **Pkexec** is:
+Vind alle suid binêre en kyk of daar die binêre **Pkexec** is:
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-As jy vind dat die binêre **pkexec is 'n SUID binêre** en jy behoort tot **sudo** of **admin**, kan jy waarskynlik binêre as sudo uitvoer met `pkexec`.\
-Dit is omdat dit tipies die groepe is binne die **polkit beleid**. Hierdie beleid identifiseer basies watter groepe `pkexec` kan gebruik. Kontroleer dit met:
+As jy vind dat die binêre **pkexec 'n SUID-binary is** en jy behoort tot **sudo** of **admin**, kan jy waarskynlik binêre as sudo uitvoer met `pkexec`.\
+Dit is omdat dit tipies die groepe is binne die **polkit-beleid**. Hierdie beleid identifiseer basies watter groepe `pkexec` kan gebruik. Kontroleer dit met:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
@@ -43,7 +43,7 @@ polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freed
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-**Dit is nie omdat jy nie toestemmings het nie, maar omdat jy nie sonder 'n GUI gekonnekteer is nie**. En daar is 'n oplossing vir hierdie probleem hier: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Jy het **2 verskillende ssh sessies** nodig:
+**Dit is nie omdat jy nie toestemmings het nie, maar omdat jy nie sonder 'n GUI gekonnekteer is nie**. En daar is 'n oplossing vir hierdie probleem hier: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Jy het **2 verskillende ssh-sessies** nodig:
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -66,7 +66,7 @@ As dit die geval is, om **root te word kan jy net uitvoer**:
 ```
 sudo su
 ```
-## Shadow Groep
+## Shadow Group
 
 Gebruikers van die **groep shadow** kan **lees** die **/etc/shadow** lêer:
 ```
@@ -128,11 +128,11 @@ $ ls -la /bin/bash
 # 0x5 root it
 $ /bin/bash -p
 ```
-## Disk Groep
+## Disk Group
 
-Hierdie voorreg is byna **gelyk aan worteltoegang** aangesien jy toegang het tot al die data binne die masjien.
+Hierdie voorreg is byna **gelyk aan worteltoegang** aangesien jy toegang tot al die data binne die masjien het.
 
-Lêers:`/dev/sd[a-z][1-9]`
+Files:`/dev/sd[a-z][1-9]`
 ```bash
 df -h #Find where "/" is mounted
 debugfs /dev/sda1
@@ -146,24 +146,24 @@ Let daarop dat jy met debugfs ook **lêers kan skryf**. Byvoorbeeld, om `/tmp/as
 debugfs -w /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
-As jy egter probeer om **lêers wat deur root besit word** (soos `/etc/shadow` of `/etc/passwd`) te **skryf**, sal jy 'n "**Toegang geweier**" fout hê.
+However, if you try to **write files owned by root** (like `/etc/shadow` or `/etc/passwd`) you will have a "**Permission denied**" error.
 
-## Video Groep
+## Video Group
 
-Met die opdrag `w` kan jy **uitvind wie op die stelsel aangemeld is** en dit sal 'n uitvoer soos die volgende een toon:
+Using the command `w` you can find **who is logged on the system** and it will show an output like the following one:
 ```bash
 USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
 yossi    tty1                      22:16    5:13m  0.05s  0.04s -bash
 moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
-Die **tty1** beteken dat die gebruiker **yossi fisies ingelog is** op 'n terminal op die masjien.
+Die **tty1** beteken dat die gebruiker **yossi fisies ingelogde** is op 'n terminal op die masjien.
 
-Die **video groep** het toegang om die skermuitset te sien. Basies kan jy die skerms observeer. Om dit te doen, moet jy die **huidige beeld op die skerm gryp** in rou data en die resolusie wat die skerm gebruik, kry. Die skermdata kan gestoor word in `/dev/fb0` en jy kan die resolusie van hierdie skerm vind op `/sys/class/graphics/fb0/virtual_size`
+Die **video groep** het toegang om die skermuitset te sien. Basies kan jy die skerms observeer. Om dit te doen, moet jy die **huidige beeld op die skerm** in rou data gryp en die resolusie wat die skerm gebruik, kry. Die skermdata kan gestoor word in `/dev/fb0` en jy kan die resolusie van hierdie skerm op `/sys/class/graphics/fb0/virtual_size` vind.
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-Om die **rauwe beeld** te **open**, kan jy **GIMP** gebruik, kies die \*\*`screen.raw` \*\* lêer en kies as lêertipe **Raw image data**:
+Om die **rauwe beeld** te **open**, kan jy **GIMP** gebruik, die \*\*`screen.raw` \*\* lêer te kies en as lêertipe **Raw image data** te kies:
 
 ![](<../../../images/image (463).png>)
 
@@ -193,13 +193,13 @@ echo 'toor:$1$.ZcF5ts0$i4k6rQYzeegUkacRCvfxC0:0:0:root:/root:/bin/sh' >> /etc/pa
 #Ifyou just want filesystem and network access you can startthe following container:
 docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chroot /mnt bashbash
 ```
-Laastens, as jy nie van enige van die voorstelle hou nie, of hulle werk om een of ander rede nie (docker api firewall?) kan jy altyd probeer om **'n bevoorregte houer te loop en daarvan te ontsnap** soos hier verduidelik:
+Uiteindelik, as jy nie van enige van die voorstelle hou nie, of hulle werk om een of ander rede nie (docker api firewall?) kan jy altyd probeer om **'n bevoorregte houer te loop en daaruit te ontsnap** soos hier verduidelik:
 
 {{#ref}}
 ../docker-security/
 {{#endref}}
 
-As jy skryfrechten oor die docker socket het, lees [**hierdie pos oor hoe om voorregte te verhoog deur die docker socket te misbruik**](../#writable-docker-socket)**.**
+As jy skrywe toestemmings oor die docker socket het, lees [**hierdie pos oor hoe om voorregte te verhoog deur die docker socket te misbruik**](../index.html#writable-docker-socket)**.**
 
 {{#ref}}
 https://github.com/KrustyHack/docker-privilege-escalation
@@ -223,6 +223,6 @@ Daarom, as jy 'n gebruiker binne hierdie groep gecompromitteer het, moet jy besl
 ## Auth groep
 
 Binne OpenBSD kan die **auth** groep gewoonlik in die vouers _**/etc/skey**_ en _**/var/db/yubikey**_ skryf as hulle gebruik word.\
-Hierdie toestemmings kan misbruik word met die volgende exploit om **voorregte** na root te verhoog: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
+Hierdie toestemmings kan misbruik word met die volgende eksploit om **voorregte** na root te verhoog: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
 
 {{#include ../../../banners/hacktricks-training.md}}

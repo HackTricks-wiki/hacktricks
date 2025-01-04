@@ -1,12 +1,12 @@
-# macOS Funksie Haak
+# macOS Funksie Hooking
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Funksie Interposisie
+## Funksie Interposering
 
 Skep 'n **dylib** met 'n **`__interpose`** afdeling (of 'n afdeling gemerk met **`S_INTERPOSING`**) wat tupels van **funksie wysers** bevat wat na die **oorspronklike** en die **vervanging** funksies verwys.
 
-Dan, **inspuit** die dylib met **`DYLD_INSERT_LIBRARIES`** (die interposisie moet plaasvind voordat die hoof toepassing laai). Dit is duidelik dat die [**beperkings** wat op die gebruik van **`DYLD_INSERT_LIBRARIES`** van toepassing is, hier ook van toepassing is](../macos-proces-abuse/macos-library-injection/#check-restrictions).&#x20;
+Dan, **inspuit** die dylib met **`DYLD_INSERT_LIBRARIES`** (die interposering moet plaasvind voordat die hoof toepassing laai). Dit is duidelik dat die [**beperkings** wat op die gebruik van **`DYLD_INSERT_LIBRARIES`** van toepassing is, hier ook van toepassing is](../macos-proces-abuse/macos-library-injection/index.html#check-restrictions).&#x20;
 
 ### Interpose printf
 
@@ -160,7 +160,7 @@ return 0;
 ```
 ### Metode Swizzling met method_exchangeImplementations
 
-Die funksie **`method_exchangeImplementations`** laat toe om die **adres** van die **implementering** van **een funksie vir die ander** te **verander**.
+Die funksie **`method_exchangeImplementations`** maak dit moontlik om die **adres** van die **implementering** van **een funksie vir die ander** te **verander**.
 
 > [!CAUTION]
 > So wanneer 'n funksie aangeroep word, wat **uitgevoer word is die ander een**.
@@ -216,7 +216,7 @@ return 0;
 
 Die vorige formaat is vreemd omdat jy die implementasie van 2 metodes een van die ander verander. Deur die funksie **`method_setImplementation`** te gebruik, kan jy die **implementasie** van 'n **metode vir die ander een** **verander**.
 
-Onthou net om die **adres van die implementasie van die oorspronklike een** te **stoor** as jy dit van die nuwe implementasie af gaan aanroep voordat jy dit oorskryf, want later sal dit baie moeilik wees om daardie adres te lokaliseer.
+Onthou net om die **adres van die implementasie van die oorspronklike een** te **stoor** as jy dit van die nuwe implementasie af gaan aanroep voordat jy dit oorskryf, want later sal dit baie moeiliker wees om daardie adres te lokaliseer.
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
@@ -270,15 +270,15 @@ return 0;
 ```
 ## Hooking Aanval Metodologie
 
-In hierdie bladsy is verskillende maniere om funksies te hook bespreek. Dit het egter behels **om kode binne die proses te loop om aan te val**.
+In hierdie bladsy is verskillende maniere om funksies te hook te bespreek. Dit het egter behels **om kode binne die proses te loop om aan te val**.
 
-Om dit te doen, is die maklikste tegniek om te gebruik om 'n [Dyld via omgewing veranderlikes of kaping](../macos-dyld-hijacking-and-dyld_insert_libraries.md) in te spuit. Ek vermoed dit kan ook gedoen word via [Dylib proses inspuiting](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port).
+Om dit te doen, is die maklikste tegniek om te gebruik om 'n [Dyld via omgewing veranderlikes of kaping](../macos-dyld-hijacking-and-dyld_insert_libraries.md) in te spuit. Ek vermoed egter dat dit ook gedoen kan word via [Dylib proses inspuiting](macos-ipc-inter-process-communication/index.html#dylib-process-injection-via-task-port).
 
-Albei opsies is egter **beperk** tot **onbeskermde** binêre/proses. Kyk na elke tegniek om meer oor die beperkings te leer.
+Albei opsies is egter **beperk** tot **onbeskermde** binêre/prosesse. Kyk na elke tegniek om meer oor die beperkings te leer.
 
-'n Funksie hooking aanval is egter baie spesifiek; 'n aanvaller sal dit doen om **sensitiewe inligting van binne 'n proses te steel** (as nie, sou jy net 'n proses inspuiting aanval doen). En hierdie sensitiewe inligting mag geleë wees in gebruiker afgelaaide toepassings soos MacPass.
+'n Funksie hooking aanval is egter baie spesifiek; 'n aanvaller sal dit doen om **sensitiewe inligting van binne 'n proses te steel** (as nie, sou jy net 'n proses inspuiting aanval doen nie). En hierdie sensitiewe inligting mag geleë wees in gebruiker afgelaaide toepassings soos MacPass.
 
-Die aanvallersvectoer sou wees om of 'n kwesbaarheid te vind of die handtekening van die toepassing te verwyder, en die **`DYLD_INSERT_LIBRARIES`** omgewing veranderlike deur die Info.plist van die toepassing in te spuit deur iets soos:
+Die aanvaller se vektor sou wees om of 'n kwesbaarheid te vind of die handtekening van die toepassing te verwyder, en die **`DYLD_INSERT_LIBRARIES`** omgewing veranderlike deur die Info.plist van die toepassing in te spuit deur iets soos:
 ```xml
 <key>LSEnvironment</key>
 <dict>
@@ -290,7 +290,7 @@ en dan **herregistreer** die toepassing:
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f /Applications/Application.app
 ```
-Voeg in daardie biblioteek die hooking kode in om die inligting te exfiltreer: Wagwoorde, boodskappe...
+Voeg in daardie biblioteek die hooking kode by om die inligting te exfiltreer: Wagwoorde, boodskappe...
 
 > [!CAUTION]
 > Let daarop dat in nuwer weergawes van macOS, as jy die **handtekening verwyder** van die toepassingsbinêre en dit voorheen uitgevoer is, macOS **nie die toepassing** meer sal uitvoer nie.

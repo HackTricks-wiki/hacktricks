@@ -4,13 +4,13 @@
 
 ## Basiese Inligting
 
-Die I/O Kit is 'n oopbron, objek-georiënteerde **toestuurder-raamwerk** in die XNU-kern, wat **dynamies gelaaide toestel bestuurders** hanteer. Dit laat modulaire kode toe om aan die kern bygevoeg te word terwyl dit loop, wat verskillende hardeware ondersteun.
+Die I/O Kit is 'n oopbron, objek-georiënteerde **toestuurder-raamwerk** in die XNU-kern, wat **dynamies gelaaide toestel bestuurders** hanteer. Dit laat modulaire kode toe om aan die kern bygevoeg te word terwyl dit loop, wat diverse hardeware ondersteun.
 
-IOKit bestuurders sal basies **funksies uit die kern** **eksporteer**. Hierdie funksieparameter **tipes** is **vooraf gedefinieer** en word geverifieer. Boonop, soortgelyk aan XPC, is IOKit net 'n ander laag op **bo van Mach-boodskappe**.
+IOKit bestuurders sal basies **funksies van die kern** **uitvoer**. Hierdie funksieparameter **tipes** is **vooraf gedefinieer** en word geverifieer. Boonop, soortgelyk aan XPC, is IOKit net 'n ander laag op **bo van Mach-boodskappe**.
 
 **IOKit XNU-kernkode** is oopbron gemaak deur Apple in [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit). Boonop is die gebruikersruimte IOKit-komponente ook oopbron [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
 
-Egter, **geen IOKit bestuurders** is oopbron. In elk geval, van tyd tot tyd kan 'n vrystelling van 'n bestuurder kom met simbole wat dit makliker maak om dit te debug. Kyk hoe om [**die bestuurder uitbreidings uit die firmware hier te kry**](./#ipsw)**.**
+Egter, **geen IOKit bestuurders** is oopbron. In elk geval, van tyd tot tyd kan 'n vrystelling van 'n bestuurder kom met simbole wat dit makliker maak om dit te debug. Kyk hoe om [**die bestuurder uitbreidings van die firmware hier te kry**](#ipsw)**.**
 
 Dit is geskryf in **C++**. Jy kan demangled C++ simbole kry met:
 ```bash
@@ -23,7 +23,7 @@ __ZN16IOUserClient202222dispatchExternalMethodEjP31IOExternalMethodArgumentsOpaq
 IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
 > [!CAUTION]
-> IOKit **blootgestelde funksies** kan **addisionele sekuriteitskontroles** uitvoer wanneer 'n kliënt probeer om 'n funksie aan te roep, maar let daarop dat die toepassings gewoonlik **beperk** is deur die **sandbox** waartoe IOKit-funksies hulle kan interaksie.
+> IOKit **blootgestelde funksies** kan **addisionele sekuriteitskontroles** uitvoer wanneer 'n kliënt probeer om 'n funksie aan te roep, maar let daarop dat die toepassings gewoonlik **beperk** is deur die **sandbox** waartoe IOKit-funksies hulle kan interaksie hê.
 
 ## Bestuurders
 
@@ -54,7 +54,7 @@ Index Refs Address            Size       Wired      Name (Version) UUID <Linked 
 9    2 0xffffff8003317000 0xe000     0xe000     com.apple.kec.Libm (1) 6C1342CC-1D74-3D0F-BC43-97D5AD38200A <5>
 10   12 0xffffff8003544000 0x92000    0x92000    com.apple.kec.corecrypto (11.1) F5F1255F-6552-3CF4-A9DB-D60EFDEB4A9A <8 7 6 5 3 1>
 ```
-Tot nommer 9 is die gelysde bestuurders **gelaai in die adres 0**. Dit beteken dat dit nie werklike bestuurders is nie, maar **deel van die kernel en hulle kan nie ontlaai word nie**.
+Tot en met die nommer 9 is die gelysde bestuurders **gelaai in die adres 0**. Dit beteken dat dit nie werklike bestuurders is nie, maar **deel van die kern is en hulle kan nie ontlaai word nie**.
 
 Om spesifieke uitbreidings te vind, kan jy gebruik maak van:
 ```bash
@@ -68,7 +68,7 @@ kextunload com.apple.iokit.IOReportFamily
 ```
 ## IORegistry
 
-Die **IORegistry** is 'n belangrike deel van die IOKit-raamwerk in macOS en iOS wat dien as 'n databasis om die stelsels se hardewarekonfigurasie en toestand voor te stel. Dit is 'n **hiërargiese versameling van voorwerpe wat al die hardeware en bestuurders** wat op die stelsel gelaai is, verteenwoordig, en hul verhoudings tot mekaar.
+Die **IORegistry** is 'n belangrike deel van die IOKit-raamwerk in macOS en iOS wat dien as 'n databasis vir die voorstelling van die stelsel se hardewarekonfigurasie en -toestand. Dit is 'n **hiërargiese versameling van objekke wat al die hardeware en bestuurders** wat op die stelsel gelaai is, voorstel, en hul verhoudings tot mekaar.
 
 Jy kan die IORegistry verkry met die cli **`ioreg`** om dit vanaf die konsole te inspekteer (spesifiek nuttig vir iOS).
 ```bash
@@ -80,13 +80,13 @@ U kan **`IORegistryExplorer`** aflaai van **Xcode Additional Tools** vanaf [**ht
 
 <figure><img src="../../../images/image (1167).png" alt="" width="563"><figcaption></figcaption></figure>
 
-In IORegistryExplorer word "vliegtuie" gebruik om die verhoudings tussen verskillende objekten in die IORegistry te organiseer en weer te gee. Elke vliegtuig verteenwoordig 'n spesifieke tipe verhouding of 'n bepaalde uitsig van die stelsel se hardeware en stuurprogramkonfigurasie. Hier is 'n paar van die algemene vliegtuie wat u in IORegistryExplorer mag teëkom:
+In IORegistryExplorer word "planes" gebruik om die verhoudings tussen verskillende objekten in die IORegistry te organiseer en te vertoon. Elke plane verteenwoordig 'n spesifieke tipe verhouding of 'n bepaalde weergawe van die stelsel se hardeware en stuurprogramkonfigurasie. Hier is 'n paar van die algemene planes wat u in IORegistryExplorer mag teëkom:
 
-1. **IOService Plane**: Dit is die mees algemene vliegtuig, wat die diensobjekte vertoon wat stuurprogramme en nubs (kommunikasiekanale tussen stuurprogramme) verteenwoordig. Dit toon die verskaffer-klant verhoudings tussen hierdie objekten.
-2. **IODeviceTree Plane**: Hierdie vliegtuig verteenwoordig die fisiese verbindings tussen toestelle soos hulle aan die stelsel gekoppel is. Dit word dikwels gebruik om die hiërargie van toestelle wat via busse soos USB of PCI gekoppel is, te visualiseer.
+1. **IOService Plane**: Dit is die mees algemene plane, wat die diensobjekte vertoon wat stuurprogramme en nubs (kommunikasiekanale tussen stuurprogramme) verteenwoordig. Dit toon die verskaffer-klant verhoudings tussen hierdie objekten.
+2. **IODeviceTree Plane**: Hierdie plane verteenwoordig die fisiese verbindings tussen toestelle soos hulle aan die stelsel gekoppel is. Dit word dikwels gebruik om die hiërargie van toestelle wat via busse soos USB of PCI gekoppel is, te visualiseer.
 3. **IOPower Plane**: Vertoon objekten en hul verhoudings in terme van kragbestuur. Dit kan wys watter objekten die kragtoestand van ander beïnvloed, nuttig vir die ontfouting van kragverwante probleme.
-4. **IOUSB Plane**: Spesifiek gefokus op USB-toestelle en hul verhoudings, wat die hiërargie van USB-hubs en gekonnekteerde toestelle toon.
-5. **IOAudio Plane**: Hierdie vliegtuig is vir die verteenwoordiging van klanktoestelle en hul verhoudings binne die stelsel.
+4. **IOUSB Plane**: Spesifiek gefokus op USB-toestelle en hul verhoudings, wat die hiërargie van USB-hubs en gekoppelde toestelle toon.
+5. **IOAudio Plane**: Hierdie plane is vir die verteenwoordiging van klanktoestelle en hul verhoudings binne die stelsel.
 6. ...
 
 ## Driver Comm Code Example
@@ -152,9 +152,9 @@ return 0;
 ```
 Daar is **ander** funksies wat gebruik kan word om IOKit funksies aan te roep behalwe **`IOConnectCallScalarMethod`** soos **`IOConnectCallMethod`**, **`IOConnectCallStructMethod`**...
 
-## Terugkeer van bestuurder se ingangspunt
+## Terugkeer van bestuurder se toegangspunt
 
-Jy kan hierdie byvoorbeeld verkry van 'n [**firmware beeld (ipsw)**](./#ipsw). Laai dit dan in jou gunsteling decompiler.
+Jy kan hierdie verkry byvoorbeeld van 'n [**firmware beeld (ipsw)**](#ipsw). Laai dit dan in jou gunsteling decompiler.
 
 Jy kan begin om die **`externalMethod`** funksie te dekompileer, aangesien dit die bestuurder funksie is wat die oproep sal ontvang en die korrekte funksie sal aanroep:
 
@@ -170,7 +170,7 @@ Let op hoe die **`self`** parameter in die vorige definisie gemis is, die goeie 
 ```cpp
 IOUserClient2022::dispatchExternalMethod(self, unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
-Tegelijkertijd kan jy die werklike definisie vind in [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/Kernel/IOUserClient.cpp#L6388](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/Kernel/IOUserClient.cpp#L6388):
+Werklik, jy kan die werklike definisie vind in [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/Kernel/IOUserClient.cpp#L6388](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/Kernel/IOUserClient.cpp#L6388):
 ```cpp
 IOUserClient2022::dispatchExternalMethod(uint32_t selector, IOExternalMethodArgumentsOpaque *arguments,
 const IOExternalMethodDispatch2022 dispatchArray[], size_t dispatchArrayCount,
@@ -180,7 +180,7 @@ Met hierdie inligting kan jy Ctrl+Regter -> `Wysig funksie handtekening` en die 
 
 <figure><img src="../../../images/image (1174).png" alt=""><figcaption></figcaption></figure>
 
-Die nuwe dekompileringskode sal soos volg lyk:
+Die nuwe dekompilerde kode sal soos volg lyk:
 
 <figure><img src="../../../images/image (1175).png" alt=""><figcaption></figcaption></figure>
 
@@ -200,7 +200,7 @@ na die verandering:
 
 <figure><img src="../../../images/image (1179).png" alt="" width="563"><figcaption></figcaption></figure>
 
-En soos ons nou daar is, het ons 'n **array van 7 elemente** (kyk die finale dekompileringskode), klik om 'n array van 7 elemente te skep:
+En soos ons nou daar is, het ons 'n **array van 7 elemente** (kyk die finale dekompilerde kode), klik om 'n array van 7 elemente te skep:
 
 <figure><img src="../../../images/image (1180).png" alt="" width="563"><figcaption></figcaption></figure>
 

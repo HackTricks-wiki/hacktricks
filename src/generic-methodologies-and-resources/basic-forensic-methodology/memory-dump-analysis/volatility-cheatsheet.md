@@ -58,7 +58,7 @@ Volatility het twee hoofbenaderings tot plugins, wat soms in hul name weerspieë
 
 Dit maak “list” plugins redelik vinnig, maar net so kwesbaar soos die Windows API vir manipulasie deur malware. Byvoorbeeld, as malware DKOM gebruik om 'n proses van die `_EPROCESS` gekoppelde lys te ontkoppel, sal dit nie in die Taakbestuurder verskyn nie en ook nie in die pslist nie.
 
-“scan” plugins, aan die ander kant, sal 'n benadering neem wat soortgelyk is aan die sny van die geheue vir dinge wat sinvol kan wees wanneer dit as spesifieke strukture gedereferensieer word. `psscan` byvoorbeeld sal die geheue lees en probeer om `_EPROCESS` objek te maak daaruit (dit gebruik pool-tag scanning, wat soek na 4-byte stringe wat die teenwoordigheid van 'n struktuur van belang aandui). Die voordeel is dat dit prosesse kan opgrawe wat verlaat het, en selfs as malware met die `_EPROCESS` gekoppelde lys mors, sal die plugin steeds die struktuur in die geheue vind (aangesien dit steeds moet bestaan vir die proses om te loop). Die nadeel is dat “scan” plugins 'n bietjie stadiger is as “list” plugins, en soms vals positiewe kan lewer (’n proses wat te lank gelede verlaat het en dele van sy struktuur deur ander operasies oorgeskryf is).
+“scan” plugins, aan die ander kant, sal 'n benadering neem wat soortgelyk is aan die karving van die geheue vir dinge wat sinvol kan wees wanneer dit as spesifieke strukture dereferensieer word. `psscan` byvoorbeeld sal die geheue lees en probeer om `_EPROCESS` objek te maak daarvan (dit gebruik pool-tag skandering, wat soek na 4-byte stringe wat die teenwoordigheid van 'n struktuur van belang aandui). Die voordeel is dat dit prosesse kan opgrawe wat verlaat het, en selfs al manipuleer malware met die `_EPROCESS` gekoppelde lys, sal die plugin steeds die struktuur in die geheue vind (aangesien dit steeds moet bestaan vir die proses om te loop). Die nadeel is dat “scan” plugins 'n bietjie stadiger is as “list” plugins, en soms vals positiewe kan lewer (’n proses wat te lank gelede verlaat het en dele van sy struktuur deur ander operasies oorgeskryf is).
 
 Van: [http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
 
@@ -81,7 +81,7 @@ Jy kan die lys van ondersteunde profiele kry deur:
 ```bash
 ./volatility_2.6_lin64_standalone --info | grep "Profile"
 ```
-As jy 'n **nuwe profiel wat jy afgelaai het** (byvoorbeeld 'n linux een) wil gebruik, moet jy  die volgende vouerstruktuur êrens skep: _plugins/overlays/linux_ en die zip-lêer wat die profiel bevat, binne hierdie vouer plaas. Kry dan die nommer van die profiele deur:
+As jy 'n **nuwe profiel wat jy afgelaai het** (byvoorbeeld 'n linux een) wil gebruik, moet jy êrens die volgende vouerstruktuur skep: _plugins/overlays/linux_ en die zip-lêer wat die profiel bevat, binne hierdie vouer plaas. Dan, kry die nommer van die profiele deur:
 ```bash
 ./vol --plugins=/home/kali/Desktop/ctfs/final/plugins --info
 Volatility Foundation Volatility Framework 2.6
@@ -93,9 +93,9 @@ LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64 - A Profile for Linux CentOS7_3.10
 VistaSP0x64                                   - A Profile for Windows Vista SP0 x64
 VistaSP0x86                                   - A Profile for Windows Vista SP0 x86
 ```
-Jy kan **Linux en Mac profiele aflaai** van [https://github.com/volatilityfoundation/profiles](https://github.com/volatilityfoundation/profiles)
+U kan **Linux en Mac profiele aflaai** van [https://github.com/volatilityfoundation/profiles](https://github.com/volatilityfoundation/profiles)
 
-In die vorige stuk kan jy sien dat die profiel `LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64` genoem word, en jy kan dit gebruik om iets soos uit te voer:
+In die vorige stuk kan u sien dat die profiel genoem word `LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64`, en u kan dit gebruik om iets soos uit te voer:
 ```bash
 ./vol -f file.dmp --plugins=. --profile=LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64 linux_netscan
 ```
@@ -106,9 +106,9 @@ volatility kdbgscan -f file.dmp
 ```
 #### **Verskille tussen imageinfo en kdbgscan**
 
-[**Van hier**](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/): In teenstelling tot imageinfo wat eenvoudig profielvoorstelle bied, is **kdbgscan** ontwerp om die korrekte profiel en die korrekte KDBG-adres (indien daar verskeie is) positief te identifiseer. Hierdie plugin skandeer vir die KDBGHeader-handtekeninge wat aan Volatility-profiele gekoppel is en pas sanity checks toe om vals positiewe te verminder. Die omvang van die uitvoer en die aantal sanity checks wat uitgevoer kan word, hang af van of Volatility 'n DTB kan vind, so as jy reeds die korrekte profiel ken (of as jy 'n profielvoorstel van imageinfo het), maak seker jy gebruik dit van .
+[**Van hier**](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/): In teenstelling tot imageinfo wat eenvoudig profielvoorstelle bied, is **kdbgscan** ontwerp om die korrekte profiel en die korrekte KDBG-adres (indien daar verskeie is) positief te identifiseer. Hierdie plugin skandeer vir die KDBGHeader-handtekeninge wat aan Volatility-profiele gekoppel is en pas sanity checks toe om vals positiewe te verminder. Die omvang van die uitvoer en die aantal sanity checks wat uitgevoer kan word, hang af van of Volatility 'n DTB kan vind, so as jy reeds die korrekte profiel ken (of as jy 'n profielvoorstel van imageinfo het), maak seker jy gebruik dit.
 
-Kyk altyd na die **aantal prosesse wat kdbgscan gevind het**. Soms kan imageinfo en kdbgscan **meer as een** geskikte **profiel** vind, maar slegs die **geldige een sal 'n paar prosesverwante** hê (Dit is omdat die korrekte KDBG-adres nodig is om prosesse te onttrek)
+Kyk altyd na die **aantal prosesse wat kdbgscan gevind het**. Soms kan imageinfo en kdbgscan **meer as een** geskikte **profiel** vind, maar slegs die **geldige een sal 'n paar prosesverwante** hê (Dit is omdat die korrekte KDBG-adres nodig is om prosesse te onttrek).
 ```bash
 # GOOD
 PsActiveProcessHead           : 0xfffff800011977f0 (37 processes)
@@ -129,11 +129,11 @@ Die **kernel debugger block**, bekend as **KDBG** deur Volatility, is van kardin
 #vol3 has a plugin to give OS information (note that imageinfo from vol2 will give you OS info)
 ./vol.py -f file.dmp windows.info.Info
 ```
-Die plugin `banners.Banners` kan in **vol3 gebruik word om te probeer om linux banners** in die dump te vind.
+Die plugin `banners.Banners` kan gebruik word in **vol3 om te probeer om linux banners** in die dump te vind.
 
 ## Hashes/Wagwoorde
 
-Onthul SAM hashes, [domein gekapte geloofsbriewe](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) en [lsa geheime](../../../windows-hardening/authentication-credentials-uac-and-efs/#lsa-secrets).
+Trek SAM hashes, [domein gekaapte geloofsbriewe](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) en [lsa geheime](../../../windows-hardening/authentication-credentials-uac-and-efs/index.html#lsa-secrets) uit.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -164,7 +164,7 @@ volatility -f file.dmp --profile=Win7SP1x86 memdump -p 2168 -D conhost/
 ### Lys prosesse
 
 Probeer om **verdagte** prosesse (volgens naam) of **onverwagte** kind **prosesse** te vind (byvoorbeeld 'n cmd.exe as 'n kind van iexplorer.exe).\
-Dit kan interessant wees om die resultaat van pslist te **vergelyk** met dié van psscan om verborge prosesse te identifiseer.
+Dit kan interessant wees om die resultaat van pslist met dié van psscan te **vergelyk** om verborge prosesse te identifiseer.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -270,7 +270,7 @@ volatility --profile=Win7SP1x86_23418 privs -f file.dmp | grep "SeImpersonatePri
 ### SIDs
 
 Kontroleer elke SSID wat deur 'n proses besit word.\
-Dit kan interessant wees om die prosesse wat 'n privilige SID gebruik (en die prosesse wat 'n diens SID gebruik) te lys.
+Dit kan interessant wees om die prosesse wat 'n privilige SID gebruik (en die prosesse wat 'n diens SID gebruik) op te lys.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -288,9 +288,9 @@ volatility --profile=Win7SP1x86_23418 getservicesids -f file.dmp #Get the SID of
 {{#endtab}}
 {{#endtabs}}
 
-### Handvats
+### Hanteer
 
-Nuttig om te weet na watter ander lêers, sleutels, drade, prosesse... 'n **proses 'n handvats het** (het geopen)
+Nuttig om te weet na watter ander lêers, sleutels, drade, prosesse... 'n **proses 'n hanteer** het (het geopen)
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -347,7 +347,7 @@ strings 3532.dmp > strings_file
 {{#endtab}}
 {{#endtabs}}
 
-Dit laat ook toe om na stringe binne 'n proses te soek met die yarascan module:
+Dit laat ook toe om na stringe binne 'n proses te soek met die yarascan-module:
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -520,7 +520,7 @@ volatility --profile=SomeLinux -f file.dmp linux_find_file -i 0xINODENUMBER -O /
 {{#endtab}}
 {{#endtabs}}
 
-### Meesterlêer Tabel
+### Meester Lêer Tabel
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -595,7 +595,7 @@ volatility --profile=SomeLinux -f file.dmp linux_keyboard_notifiers #Keyloggers
 ### Skandering met yara
 
 Gebruik hierdie skrip om al die yara malware reëls van github af te laai en te kombineer: [https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9](https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9)\
-Skep die _**rules**_ gids en voer dit uit. Dit sal 'n lêer genaamd _**malware_rules.yar**_ skep wat al die yara reëls vir malware bevat.
+Skep die _**reëls**_ gids en voer dit uit. Dit sal 'n lêer genaamd _**malware_rules.yar**_ skep wat al die yara reëls vir malware bevat.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -624,7 +624,7 @@ volatility --profile=Win7SP1x86_23418 yarascan -y malware_rules.yar -f ch2.dmp |
 
 ### Eksterne plugins
 
-As jy eksterne plugins wil gebruik, maak seker dat die vouers wat met die plugins verband hou, die eerste parameter is wat gebruik word.
+As jy eksterne plugins wil gebruik, maak seker dat die vouers wat met die plugins verband hou die eerste parameter is wat gebruik word.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -723,7 +723,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp driverscan
 {{#endtab}}
 {{#endtabs}}
 
-### Kry knipbord
+### Kry klembord
 ```bash
 #Just vol2
 volatility --profile=Win7SP1x86_23418 clipboard -f file.dmp

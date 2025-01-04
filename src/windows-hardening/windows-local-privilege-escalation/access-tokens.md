@@ -50,52 +50,52 @@ SeUndockPrivilege             Remove computer from docking station Disabled
 SeIncreaseWorkingSetPrivilege Increase a process working set       Disabled
 SeTimeZonePrivilege           Change the time zone                 Disabled
 ```
-of deur _Process Explorer_ van Sysinternals (kies proses en toegang "Sekuriteit" tab):
+or using _Process Explorer_ from Sysinternals (select process and access"Security" tab):
 
 ![](<../../images/image (772).png>)
 
 ### Plaaslike administrateur
 
-Wanneer 'n plaaslike administrateur aanmeld, **word twee toegangstokens geskep**: Een met administrateurregte en die ander een met normale regte. **Standaard**, wanneer hierdie gebruiker 'n proses uitvoer, word die een met **gereelde** (nie-administrateur) **regte gebruik**. Wanneer hierdie gebruiker probeer om **enige iets uit te voer** **as administrateur** ("Hardloop as Administrateur" byvoorbeeld) sal die **UAC** gebruik word om toestemming te vra.\
-As jy wil [**meer oor die UAC leer lees hierdie bladsy**](../authentication-credentials-uac-and-efs/#uac)**.**
+Wanneer 'n plaaslike administrateur aanmeld, **word twee toegangstokens geskep**: Een met administrateurregte en die ander een met normale regte. **Standaard**, wanneer hierdie gebruiker 'n proses uitvoer, word die een met **reguliere** (nie-administrateur) **regte gebruik**. Wanneer hierdie gebruiker probeer om **enige iets uit te voer** **as administrateur** ("Run as Administrator" byvoorbeeld) sal die **UAC** gebruik word om toestemming te vra.\
+As jy wil [**meer oor die UAC leer, lees hierdie bladsy**](../authentication-credentials-uac-and-efs/index.html#uac)**.**
 
 ### Kredensiële gebruiker impersonasie
 
-As jy **geldige kredensiale van enige ander gebruiker** het, kan jy 'n **nuwe aanmeldsessie** met daardie kredensiale **skep**:
+As jy **geldige kredensiale van enige ander gebruiker het**, kan jy 'n **nuwe aanmeldsessie** met daardie kredensiale **skep**:
 ```
 runas /user:domain\username cmd.exe
 ```
 Die **toegangsteken** het ook 'n **verwysing** na die aanmeldsessies binne die **LSASS**, dit is nuttig as die proses toegang tot sommige voorwerpe van die netwerk moet verkry.\
-Jy kan 'n proses begin wat **verskillende akrediteerbesonderhede vir toegang tot netwerkdienste gebruik** deur:
+Jy kan 'n proses begin wat **verskillende geloofsbriewe gebruik om toegang tot netwerkdienste te verkry** deur:
 ```
 runas /user:domain\username /netonly cmd.exe
 ```
-Dit is nuttig as jy nuttige akrediteerbare inligting het om toegang te verkry tot voorwerpe in die netwerk, maar daardie akrediteerbare inligting is nie geldig binne die huidige gasheer nie, aangesien dit slegs in die netwerk gebruik gaan word (in die huidige gasheer sal jou huidige gebruikersprivileges gebruik word).
+Dit is nuttig as jy nuttige akrediteerbare inligting het om toegang te verkry tot voorwerpe in die netwerk, maar daardie akrediteerbare inligting is nie geldig binne die huidige gasheer nie, aangesien dit slegs in die netwerk gebruik gaan word (in die huidige gasheer sal jou huidige gebruikersregte gebruik word).
 
-### Tipes tokens
+### Tipes van tokens
 
 Daar is twee tipes tokens beskikbaar:
 
-- **Primêre Token**: Dit dien as 'n voorstelling van 'n proses se sekuriteitsakrediteerbare inligting. Die skepping en assosiasie van primêre tokens met prosesse is aksies wat verhoogde privileges vereis, wat die beginsel van privilege-skeiding beklemtoon. Gewoonlik is 'n verifikasiediens verantwoordelik vir token-skepping, terwyl 'n aanmelddiens die assosiasie met die gebruiker se bedryfstelsel-skal hanteer. Dit is die moeite werd om op te let dat prosesse die primêre token van hul ouer proses by skepping erf.
-- **Impersonasie Token**: Bemagtig 'n bedienertoepassing om die kliënt se identiteit tydelik aan te neem om toegang tot veilige voorwerpe te verkry. Hierdie meganisme is gelaag in vier vlakke van werking:
+- **Primêre Token**: Dit dien as 'n voorstelling van 'n proses se sekuriteitsakrediteerbare inligting. Die skepping en assosiasie van primêre tokens met prosesse is aksies wat verhoogde regte vereis, wat die beginsel van regte skeiding beklemtoon. Gewoonlik is 'n verifikasiediens verantwoordelik vir token skepping, terwyl 'n aanmelddiens die assosiasie met die gebruiker se bedryfstelsel-skaal hanteer. Dit is die moeite werd om te noem dat prosesse die primêre token van hul ouer proses by skepping erf.
+- **Impersonasie Token**: Gee 'n bedienertoepassing die vermoë om die kliënt se identiteit tydelik aan te neem om toegang tot veilige voorwerpe te verkry. Hierdie meganisme is gelaag in vier vlakke van werking:
 - **Anoniem**: Gee bediener toegang soortgelyk aan dié van 'n onbekende gebruiker.
 - **Identifikasie**: Laat die bediener toe om die kliënt se identiteit te verifieer sonder om dit vir voorwerp toegang te gebruik.
 - **Impersonasie**: Stel die bediener in staat om onder die kliënt se identiteit te werk.
-- **Delegasie**: Soortgelyk aan Impersonasie, maar sluit die vermoë in om hierdie identiteit aanneming na afgeleë stelsels wat die bediener mee werk, uit te brei, wat akrediteerbare inligting se bewaring verseker.
+- **Delegasie**: Soortgelyk aan Impersonasie, maar sluit die vermoë in om hierdie identiteit aanneming na afgeleë stelsels wat die bediener mee werk, uit te brei, wat akrediteerbare inligting behou.
 
 #### Imiteer Tokens
 
-Deur die _**incognito**_ module van metasploit te gebruik, as jy genoeg privileges het, kan jy maklik **lys** en **imiteer** ander **tokens**. Dit kan nuttig wees om **aksies uit te voer asof jy die ander gebruiker was**. Jy kan ook **privileges verhoog** met hierdie tegniek.
+Deur die _**incognito**_ module van metasploit te gebruik, kan jy, as jy genoeg regte het, maklik ander **tokens** **lys** en **imiteer**. Dit kan nuttig wees om **aksies uit te voer asof jy die ander gebruiker was**. Jy kan ook **regte verhoog** met hierdie tegniek.
 
-### Token Privileges
+### Token Regte
 
-Leer watter **token privileges misbruik kan word om privileges te verhoog:**
+Leer watter **token regte misbruik kan word om regte te verhoog:**
 
 {{#ref}}
 privilege-escalation-abusing-tokens.md
 {{#endref}}
 
-Kyk na [**alle moontlike token privileges en 'n paar definisies op hierdie eksterne bladsy**](https://github.com/gtworek/Priv2Admin).
+Kyk na [**alle moontlike token regte en 'n paar definisies op hierdie eksterne bladsy**](https://github.com/gtworek/Priv2Admin).
 
 ## Verwysings
 
