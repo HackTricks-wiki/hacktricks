@@ -4,7 +4,7 @@
 
 ### Custom SSP
 
-[Saiba o que é um SSP (Security Support Provider) aqui.](../authentication-credentials-uac-and-efs/#security-support-provider-interface-sspi)\
+[Saiba o que é um SSP (Security Support Provider) aqui.](../authentication-credentials-uac-and-efs/index.html#security-support-provider-interface-sspi)\
 Você pode criar seu **próprio SSP** para **capturar** em **texto claro** as **credenciais** usadas para acessar a máquina.
 
 #### Mimilib
@@ -35,6 +35,6 @@ Isso não sobreviverá a reinicializações.
 
 #### Mitigação
 
-ID do Evento 4657 - Auditoria de criação/mudança de `HKLM:\System\CurrentControlSet\Control\Lsa\SecurityPackages`
+Event ID 4657 - Auditoria de criação/mudança de `HKLM:\System\CurrentControlSet\Control\Lsa\SecurityPackages`
 
 {{#include ../../banners/hacktricks-training.md}}

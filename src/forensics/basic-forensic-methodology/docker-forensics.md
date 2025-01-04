@@ -25,8 +25,8 @@ A /var/lib/mysql/mysql/time_zone_leap_second.MYI
 A /var/lib/mysql/mysql/general_log.CSV
 ...
 ```
-No comando anterior, **C** significa **Alterado** e **A** significa **Adicionado**.\
-Se você descobrir que algum arquivo interessante, como `/etc/shadow`, foi modificado, você pode baixá-lo do contêiner para verificar atividades maliciosas com:
+No comando anterior, **C** significa **Mudado** e **A** significa **Adicionado**.\
+Se você descobrir que um arquivo interessante como `/etc/shadow` foi modificado, você pode baixá-lo do contêiner para verificar atividades maliciosas com:
 ```bash
 docker cp wordpress:/etc/shadow.
 ```
@@ -91,6 +91,7 @@ for d in `find * -maxdepth 0 -type d`; do cd $d; tar -xf ./layer.tar; cd ..; don
 
 Note que quando você executa um contêiner docker dentro de um host **você pode ver os processos em execução no contêiner a partir do host** apenas executando `ps -ef`
 
-Portanto (como root) você pode **extrair a memória dos processos** a partir do host e procurar por **credenciais** apenas [**como no seguinte exemplo**](../../linux-hardening/privilege-escalation/#process-memory). 
+Portanto (como root) você pode **extrair a memória dos processos** a partir do host e procurar por **credenciais** apenas [**como no seguinte exemplo**](../../linux-hardening/privilege-escalation/index.html#process-memory).
+
 
 {{#include ../../banners/hacktricks-training.md}}

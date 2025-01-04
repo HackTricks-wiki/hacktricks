@@ -1,4 +1,4 @@
-# macOS Localizações Sensíveis & Daemons Interessantes
+# macOS Sensitive Locations & Interesting Daemons
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -41,13 +41,13 @@ security dump-keychain -d #Dump all the info, included secrets (the user will be
 
 ### Visão Geral do Keychaindump
 
-Uma ferramenta chamada **keychaindump** foi desenvolvida para extrair senhas dos keychains do macOS, mas enfrenta limitações em versões mais recentes do macOS, como o Big Sur, conforme indicado em uma [discussão](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760). O uso do **keychaindump** requer que o atacante ganhe acesso e eleve privilégios para **root**. A ferramenta explora o fato de que o keychain é desbloqueado por padrão ao fazer login do usuário, permitindo que aplicativos acessem sem exigir repetidamente a senha do usuário. No entanto, se um usuário optar por bloquear seu keychain após cada uso, o **keychaindump** se torna ineficaz.
+Uma ferramenta chamada **keychaindump** foi desenvolvida para extrair senhas dos keychains do macOS, mas enfrenta limitações em versões mais recentes do macOS, como o Big Sur, conforme indicado em uma [discussão](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760). O uso do **keychaindump** requer que o atacante ganhe acesso e eleve privilégios para **root**. A ferramenta explora o fato de que o keychain é desbloqueado por padrão ao fazer login do usuário, para conveniência, permitindo que aplicativos acessem sem exigir repetidamente a senha do usuário. No entanto, se um usuário optar por bloquear seu keychain após cada uso, o **keychaindump** se torna ineficaz.
 
 **Keychaindump** opera direcionando um processo específico chamado **securityd**, descrito pela Apple como um daemon para operações de autorização e criptografia, crucial para acessar o keychain. O processo de extração envolve identificar uma **Chave Mestra** derivada da senha de login do usuário. Esta chave é essencial para ler o arquivo do keychain. Para localizar a **Chave Mestra**, o **keychaindump** escaneia o heap de memória do **securityd** usando o comando `vmmap`, procurando por chaves potenciais em áreas sinalizadas como `MALLOC_TINY`. O seguinte comando é usado para inspecionar essas localizações de memória:
 ```bash
 sudo vmmap <securityd PID> | grep MALLOC_TINY
 ```
-Após identificar chaves mestres potenciais, **keychaindump** procura nos heaps por um padrão específico (`0x0000000000000018`) que indica um candidato para a chave mestre. Passos adicionais, incluindo desofuscação, são necessários para utilizar esta chave, conforme descrito no código-fonte do **keychaindump**. Analistas que se concentram nesta área devem observar que os dados cruciais para descriptografar o chaveiro estão armazenados na memória do processo **securityd**. Um comando de exemplo para executar o **keychaindump** é:
+Após identificar chaves mestres potenciais, **keychaindump** procura nos heaps por um padrão específico (`0x0000000000000018`) que indica um candidato para a chave mestre. Passos adicionais, incluindo desofuscação, são necessários para utilizar esta chave, conforme descrito no código-fonte do **keychaindump**. Analistas que se concentram nesta área devem observar que os dados cruciais para descriptografar o chaveiro estão armazenados na memória do processo **securityd**. Um exemplo de comando para executar o **keychaindump** é:
 ```bash
 sudo ./keychaindump
 ```
@@ -55,13 +55,13 @@ sudo ./keychaindump
 
 [**Chainbreaker**](https://github.com/n0fate/chainbreaker) pode ser usado para extrair os seguintes tipos de informações de um keychain do OSX de maneira forense:
 
-- Senha do keychain hashada, adequada para quebra com [hashcat](https://hashcat.net/hashcat/) ou [John the Ripper](https://www.openwall.com/john/)
+- Senha do Keychain hashada, adequada para quebra com [hashcat](https://hashcat.net/hashcat/) ou [John the Ripper](https://www.openwall.com/john/)
 - Senhas da Internet
-- Senhas genéricas
-- Chaves privadas
-- Chaves públicas
+- Senhas Genéricas
+- Chaves Privadas
+- Chaves Públicas
 - Certificados X509
-- Notas seguras
+- Notas Seguras
 - Senhas do Appleshare
 
 Dada a senha de desbloqueio do keychain, uma chave mestra obtida usando [volafox](https://github.com/n0fate/volafox) ou [volatility](https://github.com/volatilityfoundation/volatility), ou um arquivo de desbloqueio como SystemKey, o Chainbreaker também fornecerá senhas em texto claro.
@@ -81,7 +81,7 @@ hexdump -s 8 -n 24 -e '1/1 "%.2x"' /var/db/SystemKey && echo
 ## Use the previous key to decrypt the passwords
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
-#### **Extrair chaves do keychain (com senhas) quebrando o hash**
+#### **Despejar chaves do keychain (com senhas) quebrando o hash**
 ```bash
 # Get the keychain hash
 python2.7 chainbreaker.py --dump-keychain-password-hash /Library/Keychains/System.keychain
@@ -92,7 +92,7 @@ python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d1
 ```
 #### **Extrair chaves do keychain (com senhas) com despejo de memória**
 
-[Siga estes passos](../#dumping-memory-with-osxpmem) para realizar um **despejo de memória**
+[Siga estes passos](../index.html#dumping-memory-with-osxpmem) para realizar um **despejo de memória**
 ```bash
 #Use volafox (https://github.com/n0fate/volafox) to extract possible keychain passwords
 # Unformtunately volafox isn't working with the latest versions of MacOS
@@ -149,7 +149,7 @@ Em aplicativos macOS, as preferências estão localizadas em **`$HOME/Library/Pr
 
 No macOS, a ferramenta de linha de comando **`defaults`** pode ser usada para **modificar o arquivo de Preferências**.
 
-**`/usr/sbin/cfprefsd`** reivindica os serviços XPC `com.apple.cfprefsd.daemon` e `com.apple.cfprefsd.agent` e pode ser chamada para realizar ações como modificar preferências.
+**`/usr/sbin/cfprefsd`** reivindica os serviços XPC `com.apple.cfprefsd.daemon` e `com.apple.cfprefsd.agent` e pode ser chamado para realizar ações como modificar preferências.
 
 ## OpenDirectory permissions.plist
 

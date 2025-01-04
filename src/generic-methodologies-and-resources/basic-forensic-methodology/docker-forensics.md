@@ -25,7 +25,7 @@ A /var/lib/mysql/mysql/time_zone_leap_second.MYI
 A /var/lib/mysql/mysql/general_log.CSV
 ...
 ```
-No comando anterior, **C** significa **Changed** e **A** significa **Added**.\
+No comando anterior, **C** significa **Mudado** e **A** significa **Adicionado**.\
 Se você descobrir que algum arquivo interessante, como `/etc/shadow`, foi modificado, você pode baixá-lo do contêiner para verificar atividades maliciosas com:
 ```bash
 docker cp wordpress:/etc/shadow.
@@ -79,7 +79,7 @@ Loaded image: flask:latest
 #And then open it with dive:
 sudo dive flask:latest
 ```
-Isso permite que você **navegue pelos diferentes blobs de imagens docker** e verifique quais arquivos foram modificados/adicionados. **Vermelho** significa adicionado e **amarelo** significa modificado. Use **tab** para mover para a outra visualização e **space** para colapsar/abrir pastas.
+Isso permite que você **navegue pelos diferentes blobs de imagens docker** e verifique quais arquivos foram modificados/adicionados. **Vermelho** significa adicionado e **amarelo** significa modificado. Use **tab** para mover para a outra visualização e **espaço** para colapsar/abrir pastas.
 
 Com die você não poderá acessar o conteúdo dos diferentes estágios da imagem. Para fazer isso, você precisará **descomprimir cada camada e acessá-la**.\
 Você pode descomprimir todas as camadas de uma imagem a partir do diretório onde a imagem foi descomprimida executando:
@@ -91,7 +91,7 @@ for d in `find * -maxdepth 0 -type d`; do cd $d; tar -xf ./layer.tar; cd ..; don
 
 Note que quando você executa um contêiner docker dentro de um host **você pode ver os processos em execução no contêiner a partir do host** apenas executando `ps -ef`
 
-Portanto (como root) você pode **extrair a memória dos processos** a partir do host e procurar por **credenciais** apenas [**como no seguinte exemplo**](../../linux-hardening/privilege-escalation/#process-memory).
+Portanto (como root) você pode **extrair a memória dos processos** a partir do host e procurar por **credenciais** apenas [**como no seguinte exemplo**](../../linux-hardening/privilege-escalation/index.html#process-memory).
 
 
 {{#include ../../banners/hacktricks-training.md}}

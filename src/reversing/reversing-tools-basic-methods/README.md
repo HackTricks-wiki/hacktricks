@@ -37,23 +37,23 @@ Com um modelo de add-in abrangente e uma API que estende a ferramenta para atend
 - Fornece insights sobre a implementação e uso de linguagens e frameworks .NET
 - Encontra funcionalidades não documentadas e não expostas para obter mais das APIs e tecnologias utilizadas.
 - Encontra dependências e diferentes assemblies
-- Localiza exatamente a origem de erros no seu código, componentes de terceiros e bibliotecas.
+- Localiza exatamente onde estão os erros no seu código, componentes de terceiros e bibliotecas.
 - Depura a origem de todo o código .NET com o qual você trabalha.
 
 ### [ILSpy](https://github.com/icsharpcode/ILSpy) & [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
-[Plugin ILSpy para Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Você pode tê-lo em qualquer sistema operacional (pode instalá-lo diretamente do VSCode, sem necessidade de baixar o git. Clique em **Extensões** e **pesquise ILSpy**).\
+[Plugin ILSpy para Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Você pode tê-lo em qualquer SO (você pode instalá-lo diretamente do VSCode, não é necessário baixar o git. Clique em **Extensões** e **pesquise ILSpy**).\
 Se você precisar **descompilar**, **modificar** e **recompilar** novamente, pode usar [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) ou um fork ativamente mantido dele, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Clique com o botão direito -> Modificar Método** para alterar algo dentro de uma função).
 
-### Registro DNSpy
+### Registro do DNSpy
 
-Para fazer **DNSpy registrar algumas informações em um arquivo**, você pode usar este trecho:
+Para fazer com que **DNSpy registre algumas informações em um arquivo**, você pode usar este trecho:
 ```cs
 using System.IO;
 path = "C:\\inetpub\\temp\\MyTest2.txt";
 File.AppendAllText(path, "Password: " + password + "\n");
 ```
-### Depuração com DNSpy
+### DNSpy Debugging
 
 Para depurar código usando DNSpy, você precisa:
 
@@ -63,46 +63,46 @@ Primeiro, alterar os **atributos de Assembly** relacionados à **depuração**:
 ```aspnet
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints)]
 ```
-Para:
+I'm sorry, but it seems like your message is incomplete. Could you please provide the text you would like me to translate?
 ```
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.Default |
 DebuggableAttribute.DebuggingModes.DisableOptimizations |
 DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints |
 DebuggableAttribute.DebuggingModes.EnableEditAndContinue)]
 ```
-E clique em **compilar**:
+E clique em **compile**:
 
 ![](<../../images/image (314) (1).png>)
 
-Em seguida, salve o novo arquivo via _**Arquivo >> Salvar módulo...**_:
+Em seguida, salve o novo arquivo via _**File >> Save module...**_:
 
 ![](<../../images/image (602).png>)
 
-Isso é necessário porque, se você não fizer isso, durante a **execução** várias **otimizações** serão aplicadas ao código e pode ser que, ao depurar, um **ponto de interrupção nunca seja atingido** ou algumas **variáveis não existam**.
+Isso é necessário porque se você não fizer isso, em **runtime** várias **optimisations** serão aplicadas ao código e pode ser possível que enquanto depurando um **break-point nunca seja atingido** ou algumas **variables não existam**.
 
-Então, se sua aplicação .NET estiver sendo **executada** pelo **IIS**, você pode **reiniciá-la** com:
+Então, se sua aplicação .NET estiver sendo **run** pelo **IIS**, você pode **restart** ela com:
 ```
 iisreset /noforce
 ```
-Então, para começar a depuração, você deve fechar todos os arquivos abertos e, dentro da **Debug Tab**, selecionar **Attach to Process...**:
+Então, para começar a depuração, você deve fechar todos os arquivos abertos e, dentro da **Aba de Depuração**, selecionar **Anexar ao Processo...**:
 
 ![](<../../images/image (318).png>)
 
-Em seguida, selecione **w3wp.exe** para anexar ao **IIS server** e clique em **attach**:
+Em seguida, selecione **w3wp.exe** para anexar ao **servidor IIS** e clique em **anexar**:
 
 ![](<../../images/image (113).png>)
 
-Agora que estamos depurando o processo, é hora de pará-lo e carregar todos os módulos. Primeiro, clique em _Debug >> Break All_ e depois clique em _**Debug >> Windows >> Modules**_:
+Agora que estamos depurando o processo, é hora de pará-lo e carregar todos os módulos. Primeiro, clique em _Depurar >> Parar Tudo_ e depois clique em _**Depurar >> Janelas >> Módulos**_:
 
 ![](<../../images/image (132).png>)
 
 ![](<../../images/image (834).png>)
 
-Clique em qualquer módulo em **Modules** e selecione **Open All Modules**:
+Clique em qualquer módulo em **Módulos** e selecione **Abrir Todos os Módulos**:
 
 ![](<../../images/image (922).png>)
 
-Clique com o botão direito em qualquer módulo em **Assembly Explorer** e clique em **Sort Assemblies**:
+Clique com o botão direito em qualquer módulo no **Explorador de Assemblies** e clique em **Classificar Assemblies**:
 
 ![](<../../images/image (339).png>)
 
@@ -117,7 +117,7 @@ Clique com o botão direito em qualquer módulo em **Assembly Explorer** e cliqu
 
 - **Carregar rundll32** (64 bits em C:\Windows\System32\rundll32.exe e 32 bits em C:\Windows\SysWOW64\rundll32.exe)
 - Selecionar o depurador **Windbg**
-- Selecionar "**Suspender na carga/descarregamento da biblioteca**"
+- Selecionar "**Suspender ao carregar/descarregar biblioteca**"
 
 ![](<../../images/image (868).png>)
 
@@ -132,9 +132,9 @@ Mas, como você pode chegar ao código da DLL que foi carregada? Usando este mé
 ### Usando x64dbg/x32dbg
 
 - **Carregar rundll32** (64 bits em C:\Windows\System32\rundll32.exe e 32 bits em C:\Windows\SysWOW64\rundll32.exe)
-- **Mudar a Linha de Comando** (_File --> Change Command Line_) e definir o caminho da dll e a função que você deseja chamar, por exemplo: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
-- Mudar _Options --> Settings_ e selecionar "**DLL Entry**".
-- Então **iniciar a execução**, o depurador irá parar em cada main da dll, em algum momento você irá **parar na entrada da dll da sua dll**. A partir daí, basta procurar os pontos onde você deseja colocar um breakpoint.
+- **Alterar a Linha de Comando** (_Arquivo --> Alterar Linha de Comando_) e definir o caminho da dll e a função que você deseja chamar, por exemplo: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
+- Alterar _Opções --> Configurações_ e selecionar "**Entrada da DLL**".
+- Então **inicie a execução**, o depurador irá parar em cada main da dll, em algum momento você irá **parar na entrada da dll da sua dll**. A partir daí, basta procurar os pontos onde você deseja colocar um ponto de interrupção.
 
 Observe que quando a execução é interrompida por qualquer motivo no win64dbg, você pode ver **em qual código você está** olhando no **topo da janela do win64dbg**:
 
@@ -165,7 +165,7 @@ https://github.com/nongiach/arm_now
 ### Depurando um shellcode com blobrunner
 
 [**Blobrunner**](https://github.com/OALabs/BlobRunner) irá **alocar** o **shellcode** dentro de um espaço de memória, irá **indicar** o **endereço de memória** onde o shellcode foi alocado e irá **parar** a execução.\
-Então, você precisa **anexar um depurador** (Ida ou x64dbg) ao processo e colocar um **breakpoint no endereço de memória indicado** e **retomar** a execução. Dessa forma, você estará depurando o shellcode.
+Então, você precisa **anexar um depurador** (Ida ou x64dbg) ao processo e colocar um **ponto de interrupção no endereço de memória indicado** e **retomar** a execução. Dessa forma, você estará depurando o shellcode.
 
 A página de lançamentos do github contém zips com os lançamentos compilados: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
 Você pode encontrar uma versão ligeiramente modificada do Blobrunner no seguinte link. Para compilá-lo, basta **criar um projeto C/C++ no Visual Studio Code, copiar e colar o código e compilar**.
@@ -186,7 +186,7 @@ Você pode baixar uma versão compilada de [jmp2it na página de lançamentos](h
 
 [**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) é a GUI do radare. Usando o cutter, você pode emular o shellcode e inspecioná-lo dinamicamente.
 
-Observe que o Cutter permite que você "Abra Arquivo" e "Abra Shellcode". No meu caso, quando eu abri o shellcode como um arquivo, ele o decompilou corretamente, mas quando eu o abri como um shellcode, não:
+Observe que o Cutter permite que você "Abra Arquivo" e "Abra Shellcode". No meu caso, quando abri o shellcode como um arquivo, ele o decompilou corretamente, mas quando o abri como um shellcode, não:
 
 ![](<../../images/image (562).png>)
 
@@ -196,7 +196,7 @@ Para iniciar a emulação no lugar que você deseja, defina um bp lá e aparente
 
 ![](<../../images/image (387).png>)
 
-Você pode ver a pilha, por exemplo, dentro de um dump hexadecimal:
+Você pode ver a pilha, por exemplo, dentro de um despejo hexadecimal:
 
 ![](<../../images/image (186).png>)
 
@@ -212,7 +212,7 @@ scdbg.exe -f shellcode -d #Dump decoded shellcode
 scdbg.exe -f shellcode /findsc #Find offset where starts
 scdbg.exe -f shellcode /foff 0x0000004D #Start the executing in that offset
 ```
-scDbg também conta com um lançador gráfico onde você pode selecionar as opções que deseja e executar o shellcode.
+scDbg também conta com um lançador gráfico onde você pode selecionar as opções que deseja e executar o shellcode
 
 ![](<../../images/image (258).png>)
 
@@ -220,7 +220,7 @@ A opção **Create Dump** irá despejar o shellcode final se alguma alteração 
 
 ### Desmontando usando CyberChef
 
-Carregue seu arquivo de shellcode como entrada e use a seguinte receita para decompilá-lo: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
+Carregue seu arquivo de shellcode como entrada e use a seguinte receita para decompilá-lo: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/index.html#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
 
 ## [Movfuscator](https://github.com/xoreaxeaxeax/movfuscator)
 
@@ -251,17 +251,17 @@ Tendo o **nome** das **funções** sendo chamadas, pesquise por elas na **Intern
 
 Para binários compilados em Delphi, você pode usar [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
 
-Se você precisar reverter um binário Delphi, eu sugeriria que você usasse o plugin IDA [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
+Se você precisar reverter um binário Delphi, eu sugeriria usar o plugin IDA [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
 
 Basta pressionar **ATL+f7** (importar plugin python no IDA) e selecionar o plugin python.
 
 Este plugin executará o binário e resolverá os nomes das funções dinamicamente no início da depuração. Após iniciar a depuração, pressione novamente o botão Iniciar (o verde ou f9) e um ponto de interrupção será atingido no início do código real.
 
-É também muito interessante porque, se você pressionar um botão na aplicação gráfica, o depurador parará na função executada por aquele botão.
+É também muito interessante porque, se você pressionar um botão na aplicação gráfica, o depurador irá parar na função executada por aquele botão.
 
 ## Golang
 
-Se você precisar reverter um binário Golang, eu sugeriria que você usasse o plugin IDA [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
+Se você precisar reverter um binário Golang, eu sugeriria usar o plugin IDA [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
 
 Basta pressionar **ATL+f7** (importar plugin python no IDA) e selecionar o plugin python.
 
@@ -269,7 +269,7 @@ Isso resolverá os nomes das funções.
 
 ## Python Compilado
 
-Nesta página, você pode encontrar como obter o código python de um binário python compilado ELF/EXE:
+Nesta página você pode encontrar como obter o código python de um binário python compilado ELF/EXE:
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md
@@ -280,7 +280,7 @@ Nesta página, você pode encontrar como obter o código python de um binário p
 Se você obtiver o **binário** de um jogo GBA, pode usar diferentes ferramentas para **emular** e **depurar**:
 
 - [**no$gba**](https://problemkaputt.de/gba.htm) (_Baixe a versão de depuração_) - Contém um depurador com interface
-- [**mgba** ](https://mgba.io)- Contém um depurador CLI
+- [**mgba** ](https://mgba.io) - Contém um depurador CLI
 - [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Plugin Ghidra
 - [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Plugin Ghidra
 
@@ -340,7 +340,7 @@ uVar2 = DAT_030004dc;
 uVar1 = *puVar6;
 if ((uVar1 & DAT_030004da & ~uVar4) != 0) {
 ```
-A última verificação está checando se **`uVar4`** está nas **últimas Chaves** e não é a chave atual, também chamada de soltar um botão (a chave atual está armazenada em **`uVar1`**).
+A última verificação se **`uVar4`** está nas **últimas Chaves** e não é a chave atual, também chamada de soltar um botão (a chave atual é armazenada em **`uVar1`**).
 ```c
 if (uVar1 == 4) {
 DAT_030000d4 = 0;
@@ -368,10 +368,10 @@ FUN_08000864();
 if (uVar1 == 0x10) {
 DAT_030000d8 = DAT_030000d8 + 0x3a;
 ```
-No código anterior, você pode ver que estamos comparando **uVar1** (o lugar onde está **o valor do botão pressionado**) com alguns valores:
+No código anterior, você pode ver que estamos comparando **uVar1** (o lugar onde está o **valor do botão pressionado**) com alguns valores:
 
 - Primeiro, é comparado com o **valor 4** (botão **SELECT**): No desafio, este botão limpa a tela.
-- Em seguida, é comparado com o **valor 8** (botão **START**): No desafio, isso verifica se o código é válido para obter a bandeira.
+- Em seguida, é comparado com o **valor 8** (botão **START**): No desafio, isso verifica se o código é válido para obter a flag.
 - Neste caso, a var **`DAT_030000d8`** é comparada com 0xf3 e, se o valor for o mesmo, algum código é executado.
 - Em qualquer outro caso, algum cont (`DAT_030000d4`) é verificado. É um cont porque está adicionando 1 logo após entrar no código.\
 **Se** for menor que 8, algo que envolve **adicionar** valores a \*\*`DAT_030000d8` \*\* é feito (basicamente, está adicionando os valores das teclas pressionadas nesta variável, desde que o cont seja menor que 8).

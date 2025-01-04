@@ -40,7 +40,7 @@ server_port :  mach_port_t;
 n1          :  uint32_t;
 n2          :  uint32_t);
 ```
-Observe que o primeiro **argumento é a porta a ser vinculada** e o MIG **lidará automaticamente com a porta de resposta** (a menos que `mig_get_reply_port()` seja chamado no código do cliente). Além disso, o **ID das operações** será **sequenial** começando pelo ID do subsistema indicado (então, se uma operação for depreciada, ela é excluída e `skip` é usada para ainda usar seu ID).
+Observe que o primeiro **argumento é a porta a ser vinculada** e o MIG **lidará automaticamente com a porta de resposta** (a menos que `mig_get_reply_port()` seja chamado no código do cliente). Além disso, o **ID das operações** será **sequenial** começando pelo ID do subsistema indicado (então, se uma operação for depreciada, ela é excluída e `skip` é usado para ainda usar seu ID).
 
 Agora use o MIG para gerar o código do servidor e do cliente que será capaz de se comunicar entre si para chamar a função Subtract:
 ```bash
@@ -104,7 +104,7 @@ return 0;
 return SERVERPREFmyipc_subsystem.routine[msgh_id].stub_routine;
 }
 ```
-Neste exemplo, definimos apenas 1 função nas definições, mas se tivéssemos definido mais funções, elas estariam dentro do array de **`SERVERPREFmyipc_subsystem`** e a primeira seria atribuída ao ID **500**, a segunda ao ID **501**...
+Neste exemplo, definimos apenas 1 função nas definições, mas se tivéssemos definido mais funções, elas estariam dentro do array de **`SERVERPREFmyipc_subsystem`** e a primeira teria sido atribuída ao ID **500**, a segunda ao ID **501**...
 
 Se a função fosse esperada para enviar uma **reply**, a função `mig_internal kern_return_t __MIG_check__Reply__<name>` também existiria.
 
@@ -217,11 +217,11 @@ USERPREFSubtract(port, 40, 2);
 
 ### O NDR_record
 
-O NDR_record é exportado por `libsystem_kernel.dylib`, e é uma struct que permite que o MIG **transforme dados para que sejam agnósticos ao sistema** em que está sendo usado, já que o MIG foi pensado para ser usado entre diferentes sistemas (e não apenas na mesma máquina).
+O NDR_record é exportado por `libsystem_kernel.dylib`, e é uma struct que permite que o MIG **transforme dados para que sejam agnósticos ao sistema** em que está sendo usado, já que o MIG foi pensado para ser utilizado entre diferentes sistemas (e não apenas na mesma máquina).
 
 Isso é interessante porque se `_NDR_record` for encontrado em um binário como uma dependência (`jtool2 -S <binary> | grep NDR` ou `nm`), isso significa que o binário é um cliente ou servidor MIG.
 
-Além disso, **servidores MIG** têm a tabela de despacho em `__DATA.__const` (ou em `__CONST.__constdata` no kernel do macOS e `__DATA_CONST.__const` em outros kernels \*OS). Isso pode ser despejado com **`jtool2`**.
+Além disso, **servidores MIG** têm a tabela de despacho em `__DATA.__const` (ou em `__CONST.__constdata` no kernel do macOS e `__DATA_CONST.__const` em outros kernels \*OS). Isso pode ser extraído com **`jtool2`**.
 
 E **clientes MIG** usarão o `__NDR_record` para enviar com `__mach_msg` para os servidores.
 
@@ -231,7 +231,7 @@ E **clientes MIG** usarão o `__NDR_record` para enviar com `__mach_msg` para os
 
 Como muitos binários agora usam MIG para expor portas mach, é interessante saber como **identificar que o MIG foi usado** e as **funções que o MIG executa** com cada ID de mensagem.
 
-[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/#jtool2) pode analisar informações do MIG a partir de um binário Mach-O, indicando o ID da mensagem e identificando a função a ser executada:
+[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/index.html#jtool2) pode analisar informações do MIG a partir de um binário Mach-O, indicando o ID da mensagem e identificando a função a ser executada:
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
@@ -241,7 +241,7 @@ jtool2 -d __DATA.__const myipc_server | grep BL
 ```
 ### Assembly
 
-Foi mencionado anteriormente que a função que se encarregará de **chamar a função correta dependendo do ID da mensagem recebida** era `myipc_server`. No entanto, você geralmente não terá os símbolos do binário (sem nomes de funções), então é interessante **ver como ela se parece decompilada**, pois será sempre muito semelhante (o código desta função é independente das funções expostas):
+Foi mencionado anteriormente que a função que cuidará de **chamar a função correta dependendo do ID da mensagem recebida** era `myipc_server`. No entanto, você geralmente não terá os símbolos do binário (sem nomes de funções), então é interessante **ver como ela se parece decompilada**, pois será sempre muito semelhante (o código desta função é independente das funções expostas):
 
 {{#tabs}}
 {{#tab name="myipc_server decompiled 1"}}

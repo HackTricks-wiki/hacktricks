@@ -41,7 +41,7 @@ $newPath = "$envPath;$folderPath"
 ```
 - Inicie **`procmon`** e vá para **`Options`** --> **`Enable boot logging`** e pressione **`OK`** na mensagem.
 - Em seguida, **reinicie**. Quando o computador for reiniciado, **`procmon`** começará a **gravar** eventos imediatamente.
-- Assim que o **Windows** estiver **iniciado, execute `procmon`** novamente, ele informará que está em execução e **perguntará se você deseja armazenar** os eventos em um arquivo. Diga **sim** e **armazene os eventos em um arquivo**.
+- Assim que **Windows** estiver **iniciado, execute `procmon`** novamente, ele informará que está em execução e **perguntará se você deseja armazenar** os eventos em um arquivo. Diga **sim** e **armazene os eventos em um arquivo**.
 - **Após** o **arquivo** ser **gerado**, **feche** a janela **`procmon`** aberta e **abra o arquivo de eventos**.
 - Adicione esses **filtros** e você encontrará todos os Dlls que algum **processo tentou carregar** da pasta do System Path gravável:
 
@@ -61,19 +61,19 @@ Neste caso, os .exe são inúteis, então ignore-os, as DLLs perdidas eram de:
 | Serviço de Política de Diagnóstico (DPS) | Unknown.DLL        | `C:\Windows\System32\svchost.exe -k LocalServiceNoNetwork -p -s DPS` |
 | ???                             | SharedRes.dll      | `C:\Windows\system32\svchost.exe -k UnistackSvcGroup`                |
 
-Depois de encontrar isso, encontrei este post de blog interessante que também explica como [**abusar de WptsExtensions.dll para privesc**](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll). Que é o que **vamos fazer agora**.
+Depois de encontrar isso, encontrei este interessante post de blog que também explica como [**abusar de WptsExtensions.dll para privesc**](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll). Que é o que **vamos fazer agora**.
 
 ### Exploração
 
 Então, para **escalar privilégios**, vamos sequestrar a biblioteca **WptsExtensions.dll**. Tendo o **caminho** e o **nome**, só precisamos **gerar a dll maliciosa**.
 
-Você pode [**tentar usar qualquer um desses exemplos**](./#creating-and-compiling-dlls). Você poderia executar payloads como: obter um rev shell, adicionar um usuário, executar um beacon...
+Você pode [**tentar usar qualquer um desses exemplos**](#creating-and-compiling-dlls). Você poderia executar payloads como: obter um rev shell, adicionar um usuário, executar um beacon...
 
 > [!WARNING]
 > Note que **nem todos os serviços são executados** com **`NT AUTHORITY\SYSTEM`**, alguns também são executados com **`NT AUTHORITY\LOCAL SERVICE`**, que tem **menos privilégios** e você **não poderá criar um novo usuário** abusando de suas permissões.\
 > No entanto, esse usuário tem o privilégio **`seImpersonate`**, então você pode usar o [**potato suite para escalar privilégios**](../roguepotato-and-printspoofer.md). Portanto, neste caso, um rev shell é uma opção melhor do que tentar criar um usuário.
 
-No momento em que escrevo, o serviço **Agendador de Tarefas** está sendo executado com **Nt AUTHORITY\SYSTEM**.
+No momento da escrita, o serviço **Agendador de Tarefas** está sendo executado com **Nt AUTHORITY\SYSTEM**.
 
 Tendo **gerado a Dll maliciosa** (_no meu caso, usei um rev shell x64 e recebi um shell de volta, mas o defender o matou porque era do msfvenom_), salve-a no System Path gravável com o nome **WptsExtensions.dll** e **reinicie** o computador (ou reinicie o serviço ou faça o que for necessário para reiniciar o serviço/programa afetado).
 

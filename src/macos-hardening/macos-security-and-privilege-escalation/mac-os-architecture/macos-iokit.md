@@ -6,11 +6,11 @@
 
 O I/O Kit é um **framework de driver de dispositivo** orientado a objetos e de código aberto no kernel XNU, que lida com **drivers de dispositivo carregados dinamicamente**. Ele permite que código modular seja adicionado ao kernel em tempo real, suportando hardware diversificado.
 
-Os drivers do IOKit basicamente **exportam funções do kernel**. Os **tipos** de **parâmetros** dessas funções são **pré-definidos** e verificados. Além disso, semelhante ao XPC, o IOKit é apenas mais uma camada **sobre as mensagens Mach**.
+Os drivers do IOKit basicamente **exportam funções do kernel**. Os **tipos** de **parâmetros** dessas funções são **pré-definidos** e verificados. Além disso, semelhante ao XPC, o IOKit é apenas mais uma camada **sobre mensagens Mach**.
 
 O **código do kernel IOKit XNU** é de código aberto pela Apple em [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit). Além disso, os componentes do IOKit no espaço do usuário também são de código aberto [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
 
-No entanto, **nenhum driver IOKit** é de código aberto. De qualquer forma, de tempos em tempos, um lançamento de um driver pode vir com símbolos que facilitam a depuração. Confira como [**obter as extensões do driver do firmware aqui**](./#ipsw)**.**
+No entanto, **nenhum driver IOKit** é de código aberto. De qualquer forma, de tempos em tempos, um lançamento de um driver pode vir com símbolos que facilitam a depuração. Confira como [**obter as extensões do driver do firmware aqui**](#ipsw)**.**
 
 Está escrito em **C++**. Você pode obter símbolos C++ demangled com:
 ```bash
@@ -76,7 +76,7 @@ ioreg -l #List all
 ioreg -w 0 #Not cut lines
 ioreg -p <plane> #Check other plane
 ```
-Você pode baixar **`IORegistryExplorer`** das **Xcode Additional Tools** em [**https://developer.apple.com/download/all/**](https://developer.apple.com/download/all/) e inspecionar o **macOS IORegistry** através de uma interface **gráfica**.
+Você pode baixar **`IORegistryExplorer`** do **Xcode Additional Tools** em [**https://developer.apple.com/download/all/**](https://developer.apple.com/download/all/) e inspecionar o **macOS IORegistry** através de uma interface **gráfica**.
 
 <figure><img src="../../../images/image (1167).png" alt="" width="563"><figcaption></figcaption></figure>
 
@@ -154,7 +154,7 @@ Existem **outras** funções que podem ser usadas para chamar funções do IOKit
 
 ## Reversão do ponto de entrada do driver
 
-Você pode obter isso, por exemplo, de uma [**imagem de firmware (ipsw)**](./#ipsw). Em seguida, carregue-a em seu descompilador favorito.
+Você pode obter isso, por exemplo, de uma [**imagem de firmware (ipsw)**](#ipsw). Em seguida, carregue-a em seu descompilador favorito.
 
 Você pode começar a descompilar a função **`externalMethod`**, pois esta é a função do driver que receberá a chamada e chamará a função correta:
 
@@ -162,7 +162,7 @@ Você pode começar a descompilar a função **`externalMethod`**, pois esta é 
 
 <figure><img src="../../../images/image (1169).png" alt=""><figcaption></figcaption></figure>
 
-Aquela chamada horrível demanglada significa:
+Aquela chamada horrível demangled significa:
 ```cpp
 IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
@@ -192,11 +192,11 @@ Agora, seguindo o `(IOExternalMethodDispatch2022 *)&sIOExternalMethodArray`, voc
 
 <figure><img src="../../../images/image (1176).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Altere o Tipo de Dados para **`IOExternalMethodDispatch2022:`**
+Mude o Tipo de Dados para **`IOExternalMethodDispatch2022:`**
 
 <figure><img src="../../../images/image (1177).png" alt="" width="375"><figcaption></figcaption></figure>
 
-após a alteração:
+após a mudança:
 
 <figure><img src="../../../images/image (1179).png" alt="" width="563"><figcaption></figcaption></figure>
 
@@ -209,6 +209,6 @@ Após o array ser criado, você pode ver todas as funções exportadas:
 <figure><img src="../../../images/image (1181).png" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> Se você se lembra, para **chamar** uma função **exportada** do espaço do usuário, não precisamos chamar o nome da função, mas o **número do seletor**. Aqui você pode ver que o seletor **0** é a função **`initializeDecoder`**, o seletor **1** é **`startDecoder`**, o seletor **2** **`initializeEncoder`**...
+> Se você se lembrar, para **chamar** uma função **exportada** do espaço do usuário, não precisamos chamar o nome da função, mas o **número do seletor**. Aqui você pode ver que o seletor **0** é a função **`initializeDecoder`**, o seletor **1** é **`startDecoder`**, o seletor **2** **`initializeEncoder`**...
 
 {{#include ../../../banners/hacktricks-training.md}}

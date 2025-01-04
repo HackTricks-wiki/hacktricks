@@ -22,7 +22,7 @@ Por favor, note que **a maioria das técnicas de escalação de privilégios que
 
 ### Sequestro do Sudo
 
-Você pode encontrar a técnica original de [Sequestro do Sudo dentro do post de Escalação de Privilégios no Linux](../../linux-hardening/privilege-escalation/#sudo-hijacking).
+Você pode encontrar a técnica original de [Sequestro do Sudo dentro do post de Escalação de Privilégios no Linux](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
 
 No entanto, o macOS **mantém** o **`PATH`** do usuário quando ele executa **`sudo`**. O que significa que outra maneira de realizar esse ataque seria **sequestrar outros binários** que a vítima ainda executará ao **executar sudo:**
 ```bash
@@ -201,7 +201,7 @@ killall Dock
 {{#endtab}}
 {{#endtabs}}
 
-## TCC - Escalação de Privilégios Root
+## TCC - Escalação de Privilégios de Root
 
 ### CVE-2020-9771 - bypass do TCC do mount_apfs e escalonamento de privilégios
 

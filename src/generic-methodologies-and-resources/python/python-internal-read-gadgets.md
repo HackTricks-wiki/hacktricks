@@ -4,11 +4,11 @@
 
 ## Informações Básicas
 
-Diferentes vulnerabilidades, como [**Python Format Strings**](bypass-python-sandboxes/#python-format-string) ou [**Class Pollution**](class-pollution-pythons-prototype-pollution.md), podem permitir que você **leia dados internos do python, mas não permitirão que você execute código**. Portanto, um pentester precisará aproveitar ao máximo essas permissões de leitura para **obter privilégios sensíveis e escalar a vulnerabilidade**.
+Vulnerabilidades diferentes, como [**Python Format Strings**](bypass-python-sandboxes/index.html#python-format-string) ou [**Class Pollution**](class-pollution-pythons-prototype-pollution.md), podem permitir que você **leia dados internos do python, mas não permitirão que você execute código**. Portanto, um pentester precisará aproveitar ao máximo essas permissões de leitura para **obter privilégios sensíveis e escalar a vulnerabilidade**.
 
 ### Flask - Ler chave secreta
 
-A página principal de uma aplicação Flask provavelmente terá o **objeto global `app`** onde esta **chave secreta está configurada**.
+A página principal de uma aplicação Flask provavelmente terá o objeto global **`app`** onde esta **chave secreta está configurada**.
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
@@ -33,6 +33,6 @@ Use este payload para **mudar `app.secret_key`** (o nome no seu app pode ser dif
 > [!WARNING]
 > Note que você pode obter o **caminho local do servidor para o `app.py`** gerando algum **erro** na página da web que irá **te dar o caminho**.
 
-Se a vulnerabilidade estiver em um arquivo python diferente, verifique o truque anterior do Flask para acessar os objetos do arquivo python principal.
+Se a vulnerabilidade estiver em um arquivo python diferente, verifique o truque Flask anterior para acessar os objetos do arquivo python principal.
 
 {{#include ../../banners/hacktricks-training.md}}

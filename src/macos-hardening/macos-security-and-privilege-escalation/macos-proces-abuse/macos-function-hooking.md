@@ -6,7 +6,7 @@
 
 Crie um **dylib** com uma seção **`__interpose` (`__DATA___interpose`)** (ou uma seção marcada com **`S_INTERPOSING`**) contendo tuplas de **ponteiros de função** que se referem às funções **originais** e **substitutas**.
 
-Em seguida, **injete** o dylib com **`DYLD_INSERT_LIBRARIES`** (a interposição precisa ocorrer antes do carregamento do aplicativo principal). Obviamente, as [**restrições** aplicadas ao uso de **`DYLD_INSERT_LIBRARIES`** se aplicam aqui também](macos-library-injection/#check-restrictions).
+Em seguida, **injete** o dylib com **`DYLD_INSERT_LIBRARIES`** (a interposição precisa ocorrer antes do carregamento do aplicativo principal). Obviamente, as [**restrições** aplicadas ao uso de **`DYLD_INSERT_LIBRARIES`** se aplicam aqui também](macos-library-injection/index.html#check-restrictions).
 
 ### Interpor printf
 
@@ -80,7 +80,7 @@ Hello from interpose
 > [!WARNING]
 > A variável de ambiente **`DYLD_PRINT_INTERPOSTING`** pode ser usada para depurar a interposição e imprimirá o processo de interposição.
 
-Além disso, note que **a interposição ocorre entre o processo e as bibliotecas carregadas**, não funciona com o cache de bibliotecas compartilhadas.
+Também note que **a interposição ocorre entre o processo e as bibliotecas carregadas**, não funciona com o cache de bibliotecas compartilhadas.
 
 ### Interposição Dinâmica
 
@@ -226,11 +226,11 @@ return 0;
 }
 ```
 > [!WARNING]
-> Neste caso, se o **código de implementação do legit** método **verificar** o **nome** do **método**, ele pode **detectar** esse swizzling e impedir que ele seja executado.
+> Neste caso, se o **código de implementação do método legítimo** **verificar** o **nome do método**, ele pode **detectar** esse swizzling e impedi-lo de ser executado.
 >
 > A técnica a seguir não tem essa restrição.
 
-### Method Swizzling com method_setImplementation
+### Swizzling de Método com method_setImplementation
 
 O formato anterior é estranho porque você está trocando a implementação de 2 métodos um pelo outro. Usando a função **`method_setImplementation`**, você pode **mudar** a **implementação** de um **método para o outro**.
 
@@ -290,7 +290,7 @@ return 0;
 
 Nesta página, diferentes maneiras de hookear funções foram discutidas. No entanto, elas envolviam **executar código dentro do processo para atacar**.
 
-Para fazer isso, a técnica mais fácil de usar é injetar um [Dyld via variáveis de ambiente ou sequestro](macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md). No entanto, eu acho que isso também poderia ser feito via [injeção de processo Dylib](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port).
+Para fazer isso, a técnica mais fácil de usar é injetar um [Dyld via variáveis de ambiente ou sequestro](macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md). No entanto, eu acho que isso também poderia ser feito via [injeção de processo Dylib](macos-ipc-inter-process-communication/index.html#dylib-process-injection-via-task-port).
 
 No entanto, ambas as opções são **limitadas** a binários/processos **não protegidos**. Verifique cada técnica para aprender mais sobre as limitações.
 

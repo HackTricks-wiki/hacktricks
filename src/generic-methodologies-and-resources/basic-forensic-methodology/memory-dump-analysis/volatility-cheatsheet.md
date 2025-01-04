@@ -58,7 +58,7 @@ O Volatility tem duas abordagens principais para plugins, que às vezes são ref
 
 Isso torna os plugins “list” bastante rápidos, mas tão vulneráveis quanto a API do Windows a manipulações por malware. Por exemplo, se um malware usar DKOM para desvincular um processo da lista encadeada `_EPROCESS`, ele não aparecerá no Gerenciador de Tarefas e nem no pslist.
 
-Os plugins “scan”, por outro lado, adotarão uma abordagem semelhante à escultura da memória para coisas que podem fazer sentido quando desreferenciadas como estruturas específicas. O `psscan`, por exemplo, lerá a memória e tentará criar objetos `_EPROCESS` a partir dela (usa a varredura de pool-tag, que busca por strings de 4 bytes que indicam a presença de uma estrutura de interesse). A vantagem é que ele pode encontrar processos que já saíram, e mesmo que o malware interfira na lista encadeada `_EPROCESS`, o plugin ainda encontrará a estrutura presente na memória (já que ela ainda precisa existir para o processo ser executado). A desvantagem é que os plugins “scan” são um pouco mais lentos que os plugins “list” e podem, às vezes, gerar falsos positivos (um processo que saiu há muito tempo e teve partes de sua estrutura sobrescritas por outras operações).
+Os plugins “scan”, por outro lado, adotarão uma abordagem semelhante à escultura da memória para coisas que podem fazer sentido quando desreferenciadas como estruturas específicas. O `psscan`, por exemplo, lerá a memória e tentará criar objetos `_EPROCESS` a partir dela (usa a varredura de pool-tag, que busca por strings de 4 bytes que indicam a presença de uma estrutura de interesse). A vantagem é que ele pode encontrar processos que já saíram, e mesmo que o malware interfira na lista encadeada `_EPROCESS`, o plugin ainda encontrará a estrutura presente na memória (já que ela ainda precisa existir para que o processo seja executado). A desvantagem é que os plugins “scan” são um pouco mais lentos que os plugins “list” e podem, às vezes, gerar falsos positivos (um processo que saiu há muito tempo e teve partes de sua estrutura sobrescritas por outras operações).
 
 De: [http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
 
@@ -106,9 +106,9 @@ volatility kdbgscan -f file.dmp
 ```
 #### **Diferenças entre imageinfo e kdbgscan**
 
-[**Daqui**](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/): Ao contrário do imageinfo, que simplesmente fornece sugestões de perfil, **kdbgscan** é projetado para identificar positivamente o perfil correto e o endereço KDBG correto (se houver múltiplos). Este plugin escaneia as assinaturas KDBGHeader vinculadas aos perfis do Volatility e aplica verificações de sanidade para reduzir falsos positivos. A verbosidade da saída e o número de verificações de sanidade que podem ser realizadas dependem de o Volatility conseguir encontrar um DTB, então, se você já conhece o perfil correto (ou se você tem uma sugestão de perfil do imageinfo), certifique-se de usá-lo.
+[**A partir daqui**](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/): Ao contrário do imageinfo, que simplesmente fornece sugestões de perfil, **kdbgscan** é projetado para identificar positivamente o perfil correto e o endereço KDBG correto (se houver múltiplos). Este plugin escaneia as assinaturas KDBGHeader vinculadas aos perfis do Volatility e aplica verificações de sanidade para reduzir falsos positivos. A verbosidade da saída e o número de verificações de sanidade que podem ser realizadas dependem de o Volatility conseguir encontrar um DTB, então, se você já conhece o perfil correto (ou se você tem uma sugestão de perfil do imageinfo), então certifique-se de usá-lo.
 
-Sempre verifique o **número de processos que o kdbgscan encontrou**. Às vezes, imageinfo e kdbgscan podem encontrar **mais de um** **perfil** adequado, mas apenas o **válido terá algum processo relacionado** (Isso ocorre porque para extrair processos o endereço KDBG correto é necessário).
+Sempre dê uma olhada no **número de processos que o kdbgscan encontrou**. Às vezes, imageinfo e kdbgscan podem encontrar **mais de um** **perfil** adequado, mas apenas o **válido terá algum processo relacionado** (Isso ocorre porque para extrair processos é necessário o endereço KDBG correto).
 ```bash
 # GOOD
 PsActiveProcessHead           : 0xfffff800011977f0 (37 processes)
@@ -122,9 +122,9 @@ PsLoadedModuleList            : 0xfffff80001197ac0 (0 modules)
 ```
 #### KDBG
 
-O **bloco de depuração do kernel**, referido como **KDBG** pelo Volatility, é crucial para tarefas forenses realizadas pelo Volatility e vários depuradores. Identificado como `KdDebuggerDataBlock` e do tipo `_KDDEBUGGER_DATA64`, contém referências essenciais como `PsActiveProcessHead`. Esta referência específica aponta para o início da lista de processos, permitindo a listagem de todos os processos, o que é fundamental para uma análise completa da memória.
+O **kernel debugger block**, referido como **KDBG** pelo Volatility, é crucial para tarefas forenses realizadas pelo Volatility e vários depuradores. Identificado como `KdDebuggerDataBlock` e do tipo `_KDDEBUGGER_DATA64`, contém referências essenciais como `PsActiveProcessHead`. Esta referência específica aponta para o início da lista de processos, permitindo a listagem de todos os processos, o que é fundamental para uma análise completa da memória.
 
-## Informações do SO
+## OS Information
 ```bash
 #vol3 has a plugin to give OS information (note that imageinfo from vol2 will give you OS info)
 ./vol.py -f file.dmp windows.info.Info
@@ -133,7 +133,7 @@ O plugin `banners.Banners` pode ser usado no **vol3 para tentar encontrar banner
 
 ## Hashes/Senhas
 
-Extraia hashes SAM, [credenciais em cache de domínio](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) e [segredos lsa](../../../windows-hardening/authentication-credentials-uac-and-efs/#lsa-secrets).
+Extraia hashes SAM, [credenciais em cache de domínio](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) e [segredos lsa](../../../windows-hardening/authentication-credentials-uac-and-efs/index.html#lsa-secrets).
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -290,7 +290,7 @@ volatility --profile=Win7SP1x86_23418 getservicesids -f file.dmp #Get the SID of
 
 ### Handles
 
-Útil saber a quais outros arquivos, chaves, threads, processos... um **processo tem um handle** (aberto) 
+Útil saber a quais outros arquivos, chaves, threads, processos... um **processo tem um handle** (abriu) 
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -326,7 +326,7 @@ volatility --profile=Win7SP1x86_23418 dlldump --pid=3152 --dump-dir=. -f file.dm
 
 ### Strings por processos
 
-O Volatility nos permite verificar a qual processo uma string pertence.
+Volatility nos permite verificar a qual processo uma string pertence.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -661,9 +661,6 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp handles -p <PID> -t mutant
 {{#endtabs}}
 
 ### Symlinks
-
-{{#tabs}}
-{{#tab name="vol3"}}
 ```bash
 ./vol.py -f file.dmp windows.symlinkscan.SymlinkScan
 ```
@@ -711,6 +708,9 @@ volatility --profile=Win7SP1x86_23418 -f timeliner
 {{#endtabs}}
 
 ### Drivers
+
+{{#tabs}}
+{{#tab name="vol3"}}
 ```
 ./vol.py -f file.dmp windows.driverscan.DriverScan
 ```
@@ -738,7 +738,7 @@ volatility --profile=Win7SP1x86_23418 iehistory -f file.dmp
 #Just vol2
 volatility --profile=Win7SP1x86_23418 notepad -f file.dmp
 ```
-### Captura de tela
+### Captura de Tela
 ```bash
 #Just vol2
 volatility --profile=Win7SP1x86_23418 screenshot -f file.dmp

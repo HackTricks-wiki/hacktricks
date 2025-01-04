@@ -6,7 +6,7 @@
 
 1. Reconhecer a vítima
 1. Selecionar o **domínio da vítima**.
-2. Realizar uma enumeração web básica **procurando por portais de login** usados pela vítima e **decidir** qual você irá **impersonar**.
+2. Realizar uma enumeração web básica **procurando por portais de login** usados pela vítima e **decidir** qual você irá **imitar**.
 3. Usar algum **OSINT** para **encontrar e-mails**.
 2. Preparar o ambiente
 1. **Comprar o domínio** que você vai usar para a avaliação de phishing.
@@ -22,7 +22,7 @@
 ### Técnicas de Variação de Nome de Domínio
 
 - **Palavra-chave**: O nome do domínio **contém** uma **palavra-chave** importante do domínio original (por exemplo, zelster.com-management.com).
-- **subdomínio hifenizado**: Mudar o **ponto por um hífen** de um subdomínio (por exemplo, www-zelster.com).
+- **subdomínio hifenizado**: Trocar o **ponto por um hífen** de um subdomínio (por exemplo, www-zelster.com).
 - **Novo TLD**: Mesmo domínio usando um **novo TLD** (por exemplo, zelster.org).
 - **Homoglyph**: **Substitui** uma letra no nome do domínio por **letras que parecem semelhantes** (por exemplo, zelfser.com).
 - **Transposição:** **Troca duas letras** dentro do nome do domínio (por exemplo, zelsetr.com).
@@ -47,7 +47,7 @@
 
 ### Bitflipping
 
-Há uma **possibilidade de que um ou mais bits armazenados ou em comunicação possam ser automaticamente invertidos** devido a vários fatores, como flares solares, raios cósmicos ou erros de hardware.
+Há uma **possibilidade de que alguns bits armazenados ou em comunicação possam ser automaticamente invertidos** devido a vários fatores, como flares solares, raios cósmicos ou erros de hardware.
 
 Quando esse conceito é **aplicado a solicitações DNS**, é possível que o **domínio recebido pelo servidor DNS** não seja o mesmo que o domínio inicialmente solicitado.
 
@@ -73,7 +73,7 @@ Para garantir que o domínio expirado que você vai comprar **já tenha um bom S
 - [https://hunter.io/](https://hunter.io)
 - [https://anymailfinder.com/](https://anymailfinder.com)
 
-Para **descobrir mais** endereços de e-mail válidos ou **verificar os que você já descobriu**, você pode verificar se consegue forçar os servidores smtp da vítima. [Aprenda como verificar/descobrir endereços de e-mail aqui](../../network-services-pentesting/pentesting-smtp/#username-bruteforce-enumeration).\
+Para **descobrir mais** endereços de e-mail válidos ou **verificar os que você já descobriu**, você pode verificar se consegue forçar os servidores smtp da vítima. [Aprenda como verificar/descobrir endereços de e-mail aqui](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
 Além disso, não se esqueça de que se os usuários usarem **qualquer portal web para acessar seus e-mails**, você pode verificar se ele é vulnerável a **força bruta de nome de usuário** e explorar a vulnerabilidade, se possível.
 
 ## Configurando GoPhish
@@ -82,7 +82,7 @@ Além disso, não se esqueça de que se os usuários usarem **qualquer portal we
 
 Você pode baixá-lo em [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)
 
-Baixe e descompacte dentro de `/opt/gophish` e execute `/opt/gophish/gophish`\
+Baixe e descompacte-o dentro de `/opt/gophish` e execute `/opt/gophish/gophish`\
 Você receberá uma senha para o usuário admin na porta 3333 na saída. Portanto, acesse essa porta e use essas credenciais para alterar a senha do admin. Você pode precisar redirecionar essa porta para local:
 ```bash
 ssh -L 3333:127.0.0.1:3333 <user>@<ip>
@@ -91,7 +91,7 @@ ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 
 **Configuração do certificado TLS**
 
-Antes desta etapa, você deve **já ter comprado o domínio** que vai usar e ele deve estar **apontando** para o **IP do VPS** onde você está configurando **gophish**.
+Antes desta etapa, você deve **já ter comprado o domínio** que vai usar e ele deve **apontar** para o **IP do VPS** onde você está configurando **gophish**.
 ```bash
 DOMAIN="<domain>"
 wget https://dl.eff.org/certbot-auto
@@ -107,7 +107,7 @@ mkdir /opt/gophish/ssl_keys
 cp "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /opt/gophish/ssl_keys/key.pem
 cp "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" /opt/gophish/ssl_keys/key.crt​
 ```
-**Configuração de e-mail**
+**Configuração de Mail**
 
 Comece instalando: `apt-get install postfix`
 
@@ -124,9 +124,9 @@ Em seguida, adicione o domínio aos seguintes arquivos:
 
 Finalmente, modifique os arquivos **`/etc/hostname`** e **`/etc/mailname`** para o seu nome de domínio e **reinicie seu VPS.**
 
-Agora, crie um **registro A DNS** de `mail.<domain>` apontando para o **endereço IP** do VPS e um **registro MX DNS** apontando para `mail.<domain>`
+Agora, crie um **registro DNS A** de `mail.<domain>` apontando para o **endereço IP** do VPS e um **registro DNS MX** apontando para `mail.<domain>`
 
-Agora vamos testar o envio de um e-mail:
+Agora vamos testar o envio de um email:
 ```bash
 apt install mailutils
 echo "This is the body of the email" | mail -s "This is the subject line" test@email.com
@@ -233,7 +233,7 @@ Defina um registro rDNS (PTR) que resolva o endereço IP do VPS para o nome do d
 
 ### Registro de Sender Policy Framework (SPF)
 
-Você deve **configurar um registro SPF para o novo domínio**. Se você não sabe o que é um registro SPF [**leia esta página**](../../network-services-pentesting/pentesting-smtp/#spf).
+Você deve **configurar um registro SPF para o novo domínio**. Se você não sabe o que é um registro SPF [**leia esta página**](../../network-services-pentesting/pentesting-smtp/index.html#spf).
 
 Você pode usar [https://www.spfwizard.net/](https://www.spfwizard.net) para gerar sua política SPF (use o IP da máquina VPS)
 
@@ -245,7 +245,7 @@ v=spf1 mx a ip4:ip.ip.ip.ip ?all
 ```
 ### Registro de Autenticação, Relatório e Conformidade de Mensagens Baseado em Domínio (DMARC)
 
-Você deve **configurar um registro DMARC para o novo domínio**. Se você não sabe o que é um registro DMARC [**leia esta página**](../../network-services-pentesting/pentesting-smtp/#dmarc).
+Você deve **configurar um registro DMARC para o novo domínio**. Se você não sabe o que é um registro DMARC [**leia esta página**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc).
 
 Você deve criar um novo registro DNS TXT apontando para o nome do host `_dmarc.<domain>` com o seguinte conteúdo:
 ```bash
@@ -253,7 +253,7 @@ v=DMARC1; p=none
 ```
 ### DomainKeys Identified Mail (DKIM)
 
-Você deve **configurar um DKIM para o novo domínio**. Se você não sabe o que é um registro DMARC [**leia esta página**](../../network-services-pentesting/pentesting-smtp/#dkim).
+Você deve **configurar um DKIM para o novo domínio**. Se você não sabe o que é um registro DMARC [**leia esta página**](../../network-services-pentesting/pentesting-smtp/index.html#dkim).
 
 Este tutorial é baseado em: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
 
@@ -289,7 +289,7 @@ Authentication-Results: mx.google.com;
 spf=pass (google.com: domain of contact@example.com designates --- as permitted sender) smtp.mail=contact@example.com;
 dkim=pass header.i=@example.com;
 ```
-### Removendo da Lista Negra do Spamhouse
+### ​Removendo da Lista Negra do Spamhouse
 
 A página [www.mail-tester.com](https://www.mail-tester.com) pode indicar se seu domínio está sendo bloqueado pelo spamhouse. Você pode solicitar a remoção do seu domínio/IP em: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
 
@@ -305,7 +305,7 @@ A página [www.mail-tester.com](https://www.mail-tester.com) pode indicar se seu
 - Decida de qual conta você vai enviar os emails de phishing. Sugestões: _noreply, support, servicedesk, salesforce..._
 - Você pode deixar em branco o nome de usuário e a senha, mas certifique-se de marcar a opção Ignorar Erros de Certificado
 
-![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
+![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
 > [!NOTE]
 > É recomendado usar a funcionalidade "**Enviar Email de Teste**" para testar se tudo está funcionando.\
@@ -335,7 +335,7 @@ WRITE HERE SOME SIGNATURE OF SOMEONE FROM THE COMPANY
 </body>
 </html>
 ```
-Note que **para aumentar a credibilidade do e-mail**, é recomendado usar alguma assinatura de um e-mail do cliente. Sugestões:
+Note que **para aumentar a credibilidade do e-mail**, é recomendável usar alguma assinatura de um e-mail do cliente. Sugestões:
 
 - Envie um e-mail para um **endereço inexistente** e verifique se a resposta tem alguma assinatura.
 - Procure por **e-mails públicos** como info@ex.com ou press@ex.com ou public@ex.com e envie um e-mail para eles e aguarde a resposta.
@@ -378,7 +378,7 @@ Note que o **Perfil de Envio permite enviar um e-mail de teste para ver como ser
 ![](<../../images/image (192).png>)
 
 > [!NOTE]
-> Eu recomendaria **enviar os e-mails de teste para endereços de e-mail de 10min** para evitar ser colocado na lista negra durante os testes.
+> Eu recomendaria **enviar os e-mails de teste para endereços de 10min** a fim de evitar ser colocado na lista negra durante os testes.
 
 Uma vez que tudo esteja pronto, basta lançar a campanha!
 
@@ -403,32 +403,32 @@ phishing-documents.md
 
 ### Via Proxy MitM
 
-O ataque anterior é bastante inteligente, pois você está falsificando um site real e coletando as informações fornecidas pelo usuário. Infelizmente, se o usuário não inserir a senha correta ou se o aplicativo que você falsificou estiver configurado com 2FA, **essa informação não permitirá que você se passe pelo usuário enganado**.
+O ataque anterior é bastante inteligente, pois você está falsificando um site real e coletando as informações fornecidas pelo usuário. Infelizmente, se o usuário não inseriu a senha correta ou se o aplicativo que você falsificou está configurado com 2FA, **essa informação não permitirá que você se passe pelo usuário enganado**.
 
 É aqui que ferramentas como [**evilginx2**](https://github.com/kgretzky/evilginx2)**,** [**CredSniper**](https://github.com/ustayready/CredSniper) e [**muraena**](https://github.com/muraenateam/muraena) são úteis. Esta ferramenta permitirá que você gere um ataque do tipo MitM. Basicamente, os ataques funcionam da seguinte maneira:
 
-1. Você **falsifica o formulário de login** da página real.
-2. O usuário **envia** suas **credenciais** para sua página falsa e a ferramenta as envia para a página real, **verificando se as credenciais funcionam**.
-3. Se a conta estiver configurada com **2FA**, a página MitM pedirá isso e, uma vez que o **usuário o introduza**, a ferramenta o enviará para a página real.
+1. Você **falsifica o formulário de login** da página da web real.
+2. O usuário **envia** suas **credenciais** para sua página falsa e a ferramenta as envia para a página da web real, **verificando se as credenciais funcionam**.
+3. Se a conta estiver configurada com **2FA**, a página MitM pedirá isso e, uma vez que o **usuário o introduza**, a ferramenta o enviará para a página da web real.
 4. Uma vez que o usuário esteja autenticado, você (como atacante) terá **capturado as credenciais, o 2FA, o cookie e qualquer informação** de cada interação enquanto a ferramenta está realizando um MitM.
 
 ### Via VNC
 
-E se em vez de **enviar a vítima para uma página maliciosa** com a mesma aparência da original, você a enviar para uma **sessão VNC com um navegador conectado à página real**? Você poderá ver o que ele faz, roubar a senha, o MFA usado, os cookies...\
+E se em vez de **enviar a vítima para uma página maliciosa** com a mesma aparência da original, você a enviar para uma **sessão VNC com um navegador conectado à página da web real**? Você poderá ver o que ele faz, roubar a senha, o MFA usado, os cookies...\
 Você pode fazer isso com [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)
 
 ## Detectando a detecção
 
-Obviamente, uma das melhores maneiras de saber se você foi descoberto é **procurar seu domínio em listas negras**. Se ele aparecer listado, de alguma forma seu domínio foi detectado como suspeito.\
+Obviamente, uma das melhores maneiras de saber se você foi descoberto é **pesquisar seu domínio em listas negras**. Se ele aparecer listado, de alguma forma seu domínio foi detectado como suspeito.\
 Uma maneira fácil de verificar se seu domínio aparece em alguma lista negra é usar [https://malwareworld.com/](https://malwareworld.com)
 
-No entanto, existem outras maneiras de saber se a vítima está **procurando ativamente por atividades de phishing suspeitas na natureza**, conforme explicado em:
+No entanto, existem outras maneiras de saber se a vítima está **ativamente procurando por atividades de phishing suspeitas na web**, conforme explicado em:
 
 {{#ref}}
 detecting-phising.md
 {{#endref}}
 
-Você pode **comprar um domínio com um nome muito semelhante** ao domínio da vítima **e/ou gerar um certificado** para um **subdomínio** de um domínio controlado por você **contendo** a **palavra-chave** do domínio da vítima. Se a **vítima** realizar qualquer tipo de **interação DNS ou HTTP** com eles, você saberá que **ela está procurando ativamente** por domínios suspeitos e você precisará ser muito discreto.
+Você pode **comprar um domínio com um nome muito semelhante** ao domínio da vítima **e/ou gerar um certificado** para um **subdomínio** de um domínio controlado por você **contendo** a **palavra-chave** do domínio da vítima. Se a **vítima** realizar qualquer tipo de **interação DNS ou HTTP** com eles, você saberá que **ela está ativamente procurando** por domínios suspeitos e você precisará ser muito discreto.
 
 ### Avaliar o phishing
 

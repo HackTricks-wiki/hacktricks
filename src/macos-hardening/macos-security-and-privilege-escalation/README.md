@@ -67,9 +67,9 @@ Se um **processo executado como root escreve** um arquivo que pode ser controlad
 Isso pode ocorrer nas seguintes situações:
 
 - O arquivo usado já foi criado por um usuário (pertencente ao usuário)
-- O arquivo usado é gravável pelo usuário por causa de um grupo
+- O arquivo usado é gravável pelo usuário devido a um grupo
 - O arquivo usado está dentro de um diretório pertencente ao usuário (o usuário poderia criar o arquivo)
-- O arquivo usado está dentro de um diretório pertencente ao root, mas o usuário tem acesso de gravação sobre ele por causa de um grupo (o usuário poderia criar o arquivo)
+- O arquivo usado está dentro de um diretório pertencente ao root, mas o usuário tem acesso de gravação sobre ele devido a um grupo (o usuário poderia criar o arquivo)
 
 Ser capaz de **criar um arquivo** que será **usado pelo root** permite que um usuário **tire proveito de seu conteúdo** ou até mesmo crie **symlinks/hardlinks** para apontá-lo para outro lugar.
 
@@ -95,9 +95,9 @@ Portanto, um atacante que deseja comprometer com sucesso uma máquina macOS prec
 
 Esses privilégios geralmente são concedidos na forma de **direitos** com os quais o aplicativo é assinado, ou o aplicativo pode solicitar alguns acessos e, após o **usuário aprová-los**, eles podem ser encontrados nos **bancos de dados TCC**. Outra maneira de um processo obter esses privilégios é sendo um **filho de um processo** com esses **privilégios**, pois eles geralmente são **herdados**.
 
-Siga esses links para encontrar diferentes maneiras de [**escalar privilégios no TCC**](macos-security-protections/macos-tcc/#tcc-privesc-and-bypasses), para [**burlar o TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) e como no passado [**o SIP foi burlado**](macos-security-protections/macos-sip.md#sip-bypasses).
+Siga esses links para encontrar diferentes maneiras de [**escalar privilégios no TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), para [**burlar o TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) e como no passado [**o SIP foi burlado**](macos-security-protections/macos-sip.md#sip-bypasses).
 
-## Escalação de Privilégios Tradicional do macOS
+## Escalação Tradicional de Privilégios no macOS
 
 Claro, do ponto de vista de uma equipe vermelha, você também deve estar interessado em escalar para root. Confira o seguinte post para algumas dicas:
 

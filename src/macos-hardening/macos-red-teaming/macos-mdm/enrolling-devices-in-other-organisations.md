@@ -4,7 +4,7 @@
 
 ## Introdução
 
-Como [**comentado anteriormente**](./#what-is-mdm-mobile-device-management)**,** para tentar inscrever um dispositivo em uma organização **apenas um Número de Série pertencente a essa Organização é necessário**. Uma vez que o dispositivo está inscrito, várias organizações instalarão dados sensíveis no novo dispositivo: certificados, aplicativos, senhas de WiFi, configurações de VPN [e assim por diante](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
+Como [**comentado anteriormente**](#what-is-mdm-mobile-device-management)**,** para tentar inscrever um dispositivo em uma organização **apenas um Número de Série pertencente a essa Organização é necessário**. Uma vez que o dispositivo está inscrito, várias organizações instalarão dados sensíveis no novo dispositivo: certificados, aplicativos, senhas de WiFi, configurações de VPN [e assim por diante](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
 Portanto, isso pode ser um ponto de entrada perigoso para atacantes se o processo de inscrição não estiver corretamente protegido.
 
 **A seguir está um resumo da pesquisa [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe). Confira para mais detalhes técnicos!**
@@ -23,13 +23,13 @@ Os check-ins do DEP utilizam as funções `CPFetchActivationRecord` e `CPGetActi
 
 O check-in do DEP envolve `cloudconfigurationd` enviando um payload JSON assinado e criptografado para _iprofiles.apple.com/macProfile_. O payload inclui o número de série do dispositivo e a ação "RequestProfileConfiguration". O esquema de criptografia utilizado é referido internamente como "Absinthe". Desvendar esse esquema é complexo e envolve várias etapas, o que levou à exploração de métodos alternativos para inserir números de série arbitrários na solicitação do Registro de Ativação.
 
-## Interceptando Solicitações do DEP
+## Interceptação de Solicitações do DEP
 
 Tentativas de interceptar e modificar solicitações do DEP para _iprofiles.apple.com_ usando ferramentas como Charles Proxy foram dificultadas pela criptografia do payload e medidas de segurança SSL/TLS. No entanto, habilitar a configuração `MCCloudConfigAcceptAnyHTTPSCertificate` permite contornar a validação do certificado do servidor, embora a natureza criptografada do payload ainda impeça a modificação do número de série sem a chave de descriptografia.
 
-## Instrumentando Binários do Sistema que Interagem com o DEP
+## Instrumentação de Binários do Sistema que Interagem com o DEP
 
-Instrumentar binários do sistema como `cloudconfigurationd` requer desativar a Proteção de Integridade do Sistema (SIP) no macOS. Com o SIP desativado, ferramentas como LLDB podem ser usadas para anexar-se a processos do sistema e potencialmente modificar o número de série usado nas interações da API do DEP. Este método é preferível, pois evita as complexidades de direitos e assinatura de código.
+Instrumentar binários do sistema como `cloudconfigurationd` requer desativar a Proteção de Integridade do Sistema (SIP) no macOS. Com o SIP desativado, ferramentas como LLDB podem ser usadas para se anexar a processos do sistema e potencialmente modificar o número de série usado nas interações da API do DEP. Este método é preferível, pois evita as complexidades de direitos e assinatura de código.
 
 **Explorando a Instrumentação Binária:**
 Modificar o payload da solicitação do DEP antes da serialização JSON em `cloudconfigurationd` provou ser eficaz. O processo envolveu:

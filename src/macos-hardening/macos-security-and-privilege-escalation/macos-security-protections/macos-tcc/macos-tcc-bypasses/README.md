@@ -27,7 +27,7 @@ O **atributo estendido `com.apple.macl`** é adicionado ao novo **arquivo** para
 ### Solicitação TCC por nome arbitrário
 
 O atacante pode **criar aplicativos com qualquer nome** (por exemplo, Finder, Google Chrome...) no **`Info.plist`** e fazer com que ele solicite acesso a algum local protegido pelo TCC. O usuário pensará que o aplicativo legítimo é quem está solicitando esse acesso.\
-Além disso, é possível **remover o aplicativo legítimo do Dock e colocar o falso nele**, para que quando o usuário clicar no falso (que pode usar o mesmo ícone), ele possa chamar o legítimo, pedir permissões do TCC e executar um malware, fazendo o usuário acreditar que o aplicativo legítimo solicitou o acesso.
+Além disso, é possível **remover o aplicativo legítimo do Dock e colocar o falso nele**, para que quando o usuário clique no falso (que pode usar o mesmo ícone), ele possa chamar o legítimo, pedir permissões do TCC e executar um malware, fazendo o usuário acreditar que o aplicativo legítimo solicitou o acesso.
 
 <figure><img src="https://lh7-us.googleusercontent.com/Sh-Z9qekS_fgIqnhPVSvBRmGpCXCpyuVuTw0x5DLAIxc2MZsSlzBOP7QFeGo_fjMeCJJBNh82f7RnewW1aWo8r--JEx9Pp29S17zdDmiyGgps1hH9AGR8v240m5jJM8k0hovp7lm8ZOrbzv-RC8NwzbB8w=s2048" alt="" width="375"><figcaption></figcaption></figure>
 
@@ -66,7 +66,7 @@ Para mais **informações** sobre a exploração para **obter tokens do iCloud**
 
 ### kTCCServiceAppleEvents / Automação
 
-Um aplicativo com a permissão **`kTCCServiceAppleEvents`** poderá **controlar outros aplicativos**. Isso significa que ele poderá **abusar das permissões concedidas aos outros aplicativos**.
+Um aplicativo com a permissão **`kTCCServiceAppleEvents`** poderá **controlar outros aplicativos**. Isso significa que ele poderá **abusar das permissões concedidas a outros aplicativos**.
 
 Para mais informações sobre Apple Scripts, confira:
 
@@ -96,7 +96,7 @@ end tell
 ```bash
 osascript iterm.script
 ```
-#### Sobre o Finder
+#### Over Finder
 
 Ou se um aplicativo tiver acesso ao Finder, pode ser um script como este:
 ```applescript
@@ -112,7 +112,7 @@ do shell script "rm " & POSIX path of (copyFile as alias)
 
 ### CVE-2020–9934 - TCC <a href="#c19b" id="c19b"></a>
 
-O **daemon tccd** do userland estava usando a variável de ambiente **`HOME`** para acessar o banco de dados de usuários do TCC em: **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**
+O **daemon tccd** do espaço do usuário estava usando a variável de ambiente **`HOME`** para acessar o banco de dados de usuários do TCC em: **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**
 
 De acordo com [este post do Stack Exchange](https://stackoverflow.com/questions/135688/setting-environment-variables-on-os-x/3756686#3756686) e porque o daemon TCC está sendo executado via `launchd` dentro do domínio do usuário atual, é possível **controlar todas as variáveis de ambiente** passadas para ele.\
 Assim, um **atacante poderia definir a variável de ambiente `$HOME`** em **`launchctl`** para apontar para um **diretório controlado**, **reiniciar** o **daemon TCC**, e então **modificar diretamente o banco de dados TCC** para se conceder **todas as permissões TCC disponíveis** sem nunca solicitar ao usuário final.\
@@ -145,7 +145,7 @@ $> ls ~/Documents
 ```
 ### CVE-2021-30761 - Notas
 
-Notas tinha acesso a locais protegidos pelo TCC, mas quando uma nota é criada, ela é **criada em um local não protegido**. Assim, você poderia pedir para notas copiar um arquivo protegido em uma nota (então em um local não protegido) e depois acessar o arquivo:
+Notas tinham acesso a locais protegidos pelo TCC, mas quando uma nota é criada, ela é **criada em um local não protegido**. Assim, você poderia pedir para notas copiarem um arquivo protegido em uma nota (ou seja, em um local não protegido) e então acessar o arquivo:
 
 <figure><img src="../../../../../images/image (476).png" alt=""><figcaption></figcaption></figure>
 
@@ -157,12 +157,12 @@ Era possível adicionar o atributo de quarentena a "Library", chamar o serviço 
 
 ### CVE-2023-38571 - Música & TV <a href="#cve-2023-38571-a-macos-tcc-bypass-in-music-and-tv" id="cve-2023-38571-a-macos-tcc-bypass-in-music-and-tv"></a>
 
-**`Music`** tem um recurso interessante: Quando está em execução, ele **importa** os arquivos soltos para **`~/Music/Music/Media.localized/Automatically Add to Music.localized`** na "biblioteca de mídia" do usuário. Além disso, chama algo como: **`rename(a, b);`** onde `a` e `b` são:
+**`Music`** tem um recurso interessante: Quando está em execução, ele **importa** os arquivos arrastados para **`~/Music/Music/Media.localized/Automatically Add to Music.localized`** para a "biblioteca de mídia" do usuário. Além disso, chama algo como: **`rename(a, b);`** onde `a` e `b` são:
 
 - `a = "~/Music/Music/Media.localized/Automatically Add to Music.localized/myfile.mp3"`
 - `b = "~/Music/Music/Media.localized/Automatically Add to Music.localized/Not Added.localized/2023-09-25 11.06.28/myfile.mp3`
 
-Esse comportamento **`rename(a, b);`** é vulnerável a uma **Condição de Corrida**, pois é possível colocar dentro da pasta `Automatically Add to Music.localized` um arquivo **TCC.db** falso e então, quando a nova pasta (b) é criada para copiar o arquivo, deletá-lo e apontá-lo para **`~/Library/Application Support/com.apple.TCC`**/.
+Esse **`rename(a, b);`** comportamento é vulnerável a uma **Condição de Corrida**, pois é possível colocar dentro da pasta `Automatically Add to Music.localized` um arquivo **TCC.db** falso e então, quando a nova pasta (b) é criada para copiar o arquivo, deletá-lo e apontá-lo para **`~/Library/Application Support/com.apple.TCC`**/.
 
 ### SQLITE_SQLLOG_DIR - CVE-2023-32422
 
@@ -195,7 +195,7 @@ Não é seguro porque precisa **resolver os caminhos antigos e novos separadamen
 > [!CAUTION]
 > Então, basicamente, se um processo privilegiado estiver renomeando de uma pasta que você controla, você poderia ganhar um RCE e fazer com que ele acesse um arquivo diferente ou, como neste CVE, abrir o arquivo que o aplicativo privilegiado criou e armazenar um FD.
 >
-> Se o rename acessar uma pasta que você controla, enquanto você tiver modificado o arquivo de origem ou tiver um FD para ele, você muda o arquivo (ou pasta) de destino para apontar para um symlink, assim você pode escrever sempre que quiser.
+> Se o renomear acessar uma pasta que você controla, enquanto você tiver modificado o arquivo de origem ou tiver um FD para ele, você muda o arquivo (ou pasta) de destino para apontar para um symlink, assim você pode escrever sempre que quiser.
 
 Este foi o ataque no CVE: Por exemplo, para sobrescrever o `TCC.db` do usuário, podemos:
 
@@ -206,7 +206,7 @@ Este foi o ataque no CVE: Por exemplo, para sobrescrever o `TCC.db` do usuário,
 - capturar o `open()` de `/Users/hacker/tmp/.dat.nosyncXXXX.XXXXXX` (X é aleatório)
 - aqui também `open()` este arquivo para escrita e segurar o descritor de arquivo
 - trocar atomicamente `/Users/hacker/tmp` com `/Users/hacker/ourlink` **em um loop**
-- fazemos isso para maximizar nossas chances de sucesso, já que a janela de corrida é bem estreita, mas perder a corrida tem desvantagens negligenciáveis
+- fazemos isso para maximizar nossas chances de sucesso, já que a janela de corrida é bastante estreita, mas perder a corrida tem desvantagens negligenciáveis
 - esperar um pouco
 - testar se tivemos sorte
 - se não, executar novamente do início
@@ -228,9 +228,9 @@ Portanto, se o usuário conseguir reiniciar o TCC com uma variável de ambiente 
 > [!TIP]
 > Note que a Apple usa a configuração armazenada dentro do perfil do usuário no atributo **`NFSHomeDirectory`** para o **valor de `$HOME`**, então se você comprometer um aplicativo com permissões para modificar este valor (**`kTCCServiceSystemPolicySysAdminFiles`**), você pode **armazenar** esta opção com um bypass do TCC.
 
-### [CVE-2020–9934 - TCC](./#c19b) <a href="#c19b" id="c19b"></a>
+### [CVE-2020–9934 - TCC](#c19b) <a href="#c19b" id="c19b"></a>
 
-### [CVE-2020-27937 - Directory Utility](./#cve-2020-27937-directory-utility-1)
+### [CVE-2020-27937 - Directory Utility](#cve-2020-27937-directory-utility-1)
 
 ### CVE-2021-30970 - Powerdir
 
@@ -250,13 +250,13 @@ Para mais informações, confira o [**relatório original**](https://www.microso
 
 ## Por injeção de processo
 
-Existem diferentes técnicas para injetar código dentro de um processo e abusar de suas permissões TCC:
+Existem diferentes técnicas para injetar código dentro de um processo e abusar de seus privilégios TCC:
 
 {{#ref}}
 ../../../macos-proces-abuse/
 {{#endref}}
 
-Além disso, a injeção de processo mais comum para contornar o TCC encontrada é via **plugins (load library)**.\
+Além disso, a técnica de injeção de processo mais comum para contornar o TCC encontrada é via **plugins (load library)**.\
 Plugins são códigos extras geralmente na forma de bibliotecas ou plist, que serão **carregados pelo aplicativo principal** e serão executados sob seu contexto. Portanto, se o aplicativo principal tiver acesso a arquivos restritos pelo TCC (via permissões ou direitos concedidos), o **código personalizado também terá**.
 
 ### CVE-2020-27937 - Directory Utility
@@ -336,7 +336,7 @@ Executable=/Applications/Firefox.app/Contents/MacOS/firefox
 </dict>
 </plist>
 ```
-Para mais informações sobre como explorar isso facilmente [**verifique o relatório original**](https://wojciechregula.blog/post/how-to-rob-a-firefox/).
+Para mais informações sobre como explorar isso facilmente, [**verifique o relatório original**](https://wojciechregula.blog/post/how-to-rob-a-firefox/).
 
 ### CVE-2020-10006
 
@@ -344,9 +344,9 @@ O binário `/system/Library/Filesystems/acfs.fs/Contents/bin/xsanctl` tinha as p
 
 ### CVE-2023-26818 - Telegram
 
-O Telegram tinha as permissões **`com.apple.security.cs.allow-dyld-environment-variables`** e **`com.apple.security.cs.disable-library-validation`**, então era possível abusar disso para **obter acesso às suas permissões** como gravar com a câmera. Você pode [**encontrar o payload na descrição**](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/).
+O Telegram tinha as permissões **`com.apple.security.cs.allow-dyld-environment-variables`** e **`com.apple.security.cs.disable-library-validation`**, então era possível abusar disso para **obter acesso às suas permissões**, como gravar com a câmera. Você pode [**encontrar o payload na descrição**](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/).
 
-Note como usar a variável env para carregar uma biblioteca, um **plist personalizado** foi criado para injetar essa biblioteca e **`launchctl`** foi usado para lançá-la:
+Note como usar a variável env para carregar uma biblioteca; um **plist personalizado** foi criado para injetar essa biblioteca e **`launchctl`** foi usado para lançá-la:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -382,7 +382,7 @@ launchctl load com.telegram.launcher.plist
 
 ### Scripts de Terminal
 
-É bastante comum conceder **Acesso Completo ao Disco (FDA)**, pelo menos em computadores usados por pessoas da área de tecnologia. E é possível invocar scripts **`.terminal`** usando isso.
+É bastante comum conceder **Acesso Completo ao Disco (FDA)**, pelo menos em computadores usados por pessoas da tecnologia. E é possível invocar scripts **`.terminal`** usando isso.
 
 Scripts **`.terminal`** são arquivos plist como este com o comando a ser executado na chave **`CommandString`**:
 ```xml
@@ -402,7 +402,7 @@ Scripts **`.terminal`** são arquivos plist como este com o comando a ser execut
 </dict>
 </plist>
 ```
-Um aplicativo poderia escrever um script de terminal em um local como /tmp e lançá-lo com um comando como:
+Uma aplicação poderia escrever um script de terminal em um local como /tmp e lançá-lo com um comando como:
 ```objectivec
 // Write plist in /tmp/tcc.terminal
 [...]
@@ -413,11 +413,11 @@ task.arguments = @[@"-a", @"/System/Applications/Utilities/Terminal.app",
 exploit_location]; task.standardOutput = pipe;
 [task launch];
 ```
-## Montando
+## By mounting
 
-### CVE-2020-9771 - bypass do TCC do mount_apfs e escalonamento de privilégios
+### CVE-2020-9771 - mount_apfs TCC bypass and privilege escalation
 
-**Qualquer usuário** (mesmo os sem privilégios) pode criar e montar um snapshot do Time Machine e **acessar TODOS os arquivos** desse snapshot.\
+**Qualquer usuário** (mesmo os não privilegiados) pode criar e montar um snapshot do Time Machine e **acessar TODOS os arquivos** desse snapshot.\
 O **único privilégio** necessário é que o aplicativo usado (como `Terminal`) tenha acesso **Full Disk Access** (FDA) (`kTCCServiceSystemPolicyAllfiles`), que precisa ser concedido por um administrador.
 ```bash
 # Create snapshot
@@ -463,11 +463,11 @@ os.system("mkdir -p /tmp/mnt/Application\ Support/com.apple.TCC/")
 os.system("cp /tmp/TCC.db /tmp/mnt/Application\ Support/com.apple.TCC/TCC.db")
 os.system("hdiutil detach /tmp/mnt 1>/dev/null")
 ```
-Verifique o **exploit completo** na [**escrita original**](https://theevilbit.github.io/posts/cve-2021-30808/).
+Verifique a **exploração completa** na [**escrita original**](https://theevilbit.github.io/posts/cve-2021-30808/).
 
 ### CVE-2024-40855
 
-Como explicado na [escrita original](https://www.kandji.io/blog/macos-audit-story-part2), este CVE abusou do `diskarbitrationd`.
+Conforme explicado na [escrita original](https://www.kandji.io/blog/macos-audit-story-part2), este CVE abusou do `diskarbitrationd`.
 
 A função `DADiskMountWithArgumentsCommon` do framework público `DiskArbitration` realizava as verificações de segurança. No entanto, é possível contorná-la chamando diretamente o `diskarbitrationd` e, portanto, usar elementos `../` no caminho e symlinks.
 

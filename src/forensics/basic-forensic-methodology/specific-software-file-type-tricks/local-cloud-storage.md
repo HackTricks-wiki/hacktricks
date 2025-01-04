@@ -2,7 +2,6 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-
 ## OneDrive
 
 No Windows, você pode encontrar a pasta do OneDrive em `\Users\<username>\AppData\Local\Microsoft\OneDrive`. E dentro de `logs\Personal` é possível encontrar o arquivo `SyncDiagnostics.log` que contém alguns dados interessantes sobre os arquivos sincronizados:
@@ -65,9 +64,9 @@ Então você pode usar a ferramenta [**DataProtectionDecryptor**](https://nirsof
 
 ![](<../../../images/image (448).png>)
 
-Se tudo correr como esperado, a ferramenta indicará a **chave primária** que você precisa **usar para recuperar a original**. Para recuperar a original, basta usar esta [receita do cyber_chef](<https://gchq.github.io/CyberChef/#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) colocando a chave primária como a "senha" dentro da receita.
+Se tudo correr como esperado, a ferramenta indicará a **chave primária** que você precisa **usar para recuperar a original**. Para recuperar a original, basta usar esta [receita do cyber_chef](<https://gchq.github.io/CyberChef/index.html#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) colocando a chave primária como a "senha" dentro da receita.
 
-O hex resultante é a chave final usada para criptografar os bancos de dados que podem ser descriptografados com:
+O hex resultante é a chave final usada para criptografar os bancos de dados que pode ser descriptografada com:
 ```bash
 sqlite -k <Obtained Key> config.dbx ".backup config.db" #This decompress the config.dbx and creates a clear text backup in config.db
 ```
@@ -76,10 +75,10 @@ O **`config.dbx`** banco de dados contém:
 - **Email**: O email do usuário
 - **usernamedisplayname**: O nome do usuário
 - **dropbox_path**: Caminho onde a pasta do dropbox está localizada
-- **Host_id: Hash** usado para autenticar no cloud. Isso só pode ser revogado pela web.
+- **Host_id: Hash** usado para autenticar na nuvem. Isso só pode ser revogado pela web.
 - **Root_ns**: Identificador do usuário
 
-O **`filecache.db`** banco de dados contém informações sobre todos os arquivos e pastas sincronizados com Dropbox. A tabela `File_journal` é a que contém mais informações úteis:
+O **`filecache.db`** banco de dados contém informações sobre todos os arquivos e pastas sincronizados com o Dropbox. A tabela `File_journal` é a que contém mais informações úteis:
 
 - **Server_path**: Caminho onde o arquivo está localizado dentro do servidor (este caminho é precedido pelo `host_id` do cliente).
 - **local_sjid**: Versão do arquivo
