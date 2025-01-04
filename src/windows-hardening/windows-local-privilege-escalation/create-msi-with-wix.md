@@ -2,11 +2,11 @@
 
 # 악성 MSI 생성 및 루트 권한 획득
 
-MSI 설치 프로그램의 생성은 wixtools를 사용하여 수행되며, 특히 [wixtools](http://wixtoolset.org)가 활용됩니다. 대체 MSI 빌더가 시도되었지만, 이 특정 경우에는 성공하지 못했다는 점은 주목할 만합니다.
+MSI 설치 프로그램의 생성은 wixtools를 사용하여 수행되며, 특히 [wixtools](http://wixtoolset.org)가 활용됩니다. 대체 MSI 빌더가 시도되었으나, 이 특정 경우에는 성공하지 못했다는 점은 주목할 만합니다.
 
-wix MSI 사용 예에 대한 포괄적인 이해를 위해 [이 페이지](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with)를 참조하는 것이 좋습니다. 여기에서 wix MSI 사용을 보여주는 다양한 예를 찾을 수 있습니다.
+wix MSI 사용 예에 대한 포괄적인 이해를 위해 [이 페이지](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with)를 참조하는 것이 좋습니다. 여기에서는 wix MSI 사용을 보여주는 다양한 예를 찾을 수 있습니다.
 
-목표는 lnk 파일을 실행할 MSI를 생성하는 것입니다. 이를 달성하기 위해 다음 XML 코드를 사용할 수 있습니다 ([xml from here](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)):
+목표는 lnk 파일을 실행하는 MSI를 생성하는 것입니다. 이를 달성하기 위해 다음 XML 코드를 사용할 수 있습니다 ([xml from here](https://0xrick.github.io/hack-the-box/ethereal/index.html#Creating-Malicious-msi-and-getting-root)):
 ```markup
 <?xml version="1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
@@ -44,7 +44,7 @@ Package 요소에는 InstallerVersion 및 Compressed와 같은 속성이 포함�
 ```
 candle.exe -out C:\tem\wix C:\tmp\Ethereal\msi.xml
 ```
-추가로, 게시물에 명령과 그 출력이 포함된 이미지가 제공된다는 점을 언급할 가치가 있습니다. 시각적 안내를 위해 참조할 수 있습니다.
+추가적으로, 게시물에 명령과 그 출력이 포함된 이미지가 제공된다는 점을 언급할 가치가 있습니다. 시각적 안내를 위해 참조할 수 있습니다.
 
 또한, wixtools의 또 다른 도구인 light.exe가 wixobject에서 MSI 파일을 생성하는 데 사용될 것입니다. 실행할 명령은 다음과 같습니다:
 ```

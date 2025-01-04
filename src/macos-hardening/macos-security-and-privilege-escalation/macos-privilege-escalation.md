@@ -10,9 +10,9 @@ TCC 권한 상승을 찾고 계신다면 다음으로 가세요:
 macos-security-protections/macos-tcc/
 {{#endref}}
 
-## Linux Privesc
+## Linux 권한 상승
 
-**Linux/Unix에 영향을 미치는 권한 상승에 대한 대부분의 트릭은 MacOS에도 영향을 미친다는 점에 유의하세요.** 따라서 다음을 참조하세요:
+**Linux/Unix에 영향을 미치는 권한 상승에 대한 대부분의 트릭은 MacOS에도 영향을 미칩니다**. 따라서 다음을 참조하세요:
 
 {{#ref}}
 ../../linux-hardening/privilege-escalation/
@@ -22,7 +22,7 @@ macos-security-protections/macos-tcc/
 
 ### Sudo 하이재킹
 
-원래 [Sudo 하이재킹 기법은 Linux 권한 상승 게시물에서 찾을 수 있습니다](../../linux-hardening/privilege-escalation/#sudo-hijacking).
+원래의 [Sudo 하이재킹 기법은 Linux 권한 상승 게시물에서 찾을 수 있습니다](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
 
 그러나 macOS는 사용자가 **`sudo`**를 실행할 때 사용자의 **`PATH`**를 **유지**합니다. 즉, 이 공격을 달성하는 또 다른 방법은 피해자가 **sudo를 실행할 때** 여전히 실행할 **다른 바이너리**를 **하이재킹**하는 것입니다:
 ```bash
@@ -41,15 +41,15 @@ sudo ls
 ```
 사용자가 터미널을 사용하는 경우 **Homebrew가 설치되어 있을 가능성이 높습니다**. 따라서 **`/opt/homebrew/bin`**에서 바이너리를 탈취할 수 있습니다.
 
-### 독 사칭
+### Dock 사칭
 
-일부 **소셜 엔지니어링**을 사용하여 독에서 **예를 들어 Google Chrome**을 **사칭**하고 실제로 자신의 스크립트를 실행할 수 있습니다:
+일부 **소셜 엔지니어링**을 사용하여 Dock에서 **예를 들어 Google Chrome을 사칭**하고 실제로 자신의 스크립트를 실행할 수 있습니다:
 
 {{#tabs}}
 {{#tab name="Chrome Impersonation"}}
 몇 가지 제안:
 
-- 독에서 Chrome이 있는지 확인하고, 그런 경우 **해당 항목을 제거**하고 **동일한 위치에 가짜 Chrome 항목을 추가**하세요.&#x20;
+- Dock에서 Chrome이 있는지 확인하고, 그런 경우 **해당 항목을 제거**하고 **같은 위치에 가짜 Chrome 항목을 추가**하세요.&#x20;
 ```bash
 #!/bin/sh
 
@@ -124,11 +124,11 @@ killall Dock
 {{#tab name="Finder Impersonation"}}
 몇 가지 제안:
 
-- 당신은 **Finder를 Dock에서 제거할 수 없으므로**, Dock에 추가할 경우 가짜 Finder를 실제 Finder 바로 옆에 두는 것이 좋습니다. 이를 위해서는 **Dock 배열의 시작 부분에 가짜 Finder 항목을 추가해야 합니다**.
-- 또 다른 옵션은 Dock에 배치하지 않고 그냥 여는 것입니다. "Finder가 Finder를 제어하도록 요청하고 있습니다"는 그리 이상하지 않습니다.
-- 비밀번호를 묻는 끔찍한 상자 없이 **루트로 상승**하는 또 다른 옵션은 Finder가 실제로 권한 있는 작업을 수행하기 위해 비밀번호를 요청하도록 만드는 것입니다:
-- Finder에게 **`/etc/pam.d`**에 새로운 **`sudo`** 파일을 복사하도록 요청합니다 (비밀번호를 묻는 프롬프트는 "Finder가 sudo를 복사하려고 합니다"를 나타낼 것입니다).
-- Finder에게 새로운 **Authorization Plugin**을 복사하도록 요청합니다 (파일 이름을 제어할 수 있으므로 비밀번호를 묻는 프롬프트는 "Finder가 Finder.bundle을 복사하려고 합니다"를 나타낼 것입니다).
+- **Dock에서 Finder를 제거할 수 없으므로**, Dock에 추가할 경우 가짜 Finder를 실제 Finder 바로 옆에 두는 것이 좋습니다. 이를 위해 **Dock 배열의 시작 부분에 가짜 Finder 항목을 추가해야 합니다**.
+- 또 다른 옵션은 Dock에 배치하지 않고 그냥 열어두는 것입니다. "Finder가 Finder를 제어하도록 요청하고 있습니다"는 그리 이상하지 않습니다.
+- 비밀번호를 묻는 끔찍한 상자 없이 **루트로 상승**하는 또 다른 옵션은 Finder가 특권 작업을 수행하기 위해 실제로 비밀번호를 요청하도록 만드는 것입니다:
+- Finder에게 **`/etc/pam.d`**에 새로운 **`sudo`** 파일을 복사하도록 요청합니다 (비밀번호를 묻는 프롬프트는 "Finder가 sudo를 복사하려고 합니다"라고 표시됩니다).
+- Finder에게 새로운 **Authorization Plugin**을 복사하도록 요청합니다 (파일 이름을 제어할 수 있으므로 비밀번호를 묻는 프롬프트는 "Finder가 Finder.bundle을 복사하려고 합니다"라고 표시됩니다).
 ```bash
 #!/bin/sh
 
@@ -205,7 +205,7 @@ killall Dock
 
 ### CVE-2020-9771 - mount_apfs TCC 우회 및 권한 상승
 
-**모든 사용자** (특권이 없는 사용자 포함)는 타임 머신 스냅샷을 생성하고 마운트하여 **해당 스냅샷의 모든 파일에** 접근할 수 있습니다.\
+**모든 사용자** (특권이 없는 사용자 포함)는 타임 머신 스냅샷을 생성하고 마운트하여 **해당 스냅샷의 모든 파일에 접근**할 수 있습니다.\
 필요한 **유일한 특권**은 사용되는 애플리케이션(예: `Terminal`)이 **전체 디스크 접근** (FDA) 권한(`kTCCServiceSystemPolicyAllfiles`)을 가져야 하며, 이는 관리자가 부여해야 합니다.
 ```bash
 # Create snapshot

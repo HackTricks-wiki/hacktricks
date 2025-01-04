@@ -20,15 +20,15 @@ CID를 찾은 후에는 **이 ID를 포함하는 파일을 검색하는 것이 �
 ## Google Drive
 
 Windows에서 주요 Google Drive 폴더는 `\Users\<username>\AppData\Local\Google\Drive\user_default`에 있습니다.\
-이 폴더에는 계정의 이메일 주소, 파일 이름, 타임스탬프, 파일의 MD5 해시 등의 정보가 포함된 Sync_log.log라는 파일이 있습니다. 삭제된 파일도 해당 로그 파일에 MD5와 함께 나타납니다.
+이 폴더에는 계정의 이메일 주소, 파일 이름, 타임스탬프, 파일의 MD5 해시 등의 정보가 포함된 Sync_log.log라는 파일이 있습니다. 삭제된 파일도 해당 로그 파일에 해당 MD5와 함께 나타납니다.
 
-파일 **`Cloud_graph\Cloud_graph.db`**는 sqlite 데이터베이스로, **`cloud_graph_entry`** 테이블을 포함하고 있습니다. 이 테이블에서는 **동기화된** **파일**의 **이름**, 수정 시간, 크기 및 파일의 MD5 체크섬을 찾을 수 있습니다.
+**`Cloud_graph\Cloud_graph.db`** 파일은 sqlite 데이터베이스로, **`cloud_graph_entry`** 테이블을 포함하고 있습니다. 이 테이블에서는 **동기화된** **파일**의 **이름**, 수정 시간, 크기 및 파일의 MD5 체크섬을 찾을 수 있습니다.
 
 데이터베이스 **`Sync_config.db`**의 테이블 데이터에는 계정의 이메일 주소, 공유 폴더의 경로 및 Google Drive 버전이 포함되어 있습니다.
 
 ## Dropbox
 
-Dropbox는 **SQLite 데이터베이스**를 사용하여 파일을 관리합니다. 이\
+Dropbox는 파일 관리를 위해 **SQLite 데이터베이스**를 사용합니다. 이\
 데이터베이스는 다음 폴더에서 찾을 수 있습니다:
 
 - `\Users\<username>\AppData\Local\Dropbox`
@@ -42,9 +42,9 @@ Dropbox는 **SQLite 데이터베이스**를 사용하여 파일을 관리합니�
 - Deleted.dbx
 - Config.dbx
 
-".dbx" 확장자는 **데이터베이스**가 **암호화**되어 있음을 의미합니다. Dropbox는 **DPAPI**를 사용합니다 ([https://docs.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)?redirectedfrom=MSDN](<https://docs.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)?redirectedfrom=MSDN>))
+".dbx" 확장은 **데이터베이스**가 **암호화되어 있음을** 의미합니다. Dropbox는 **DPAPI**를 사용합니다 ([https://docs.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)?redirectedfrom=MSDN](<https://docs.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)?redirectedfrom=MSDN>))
 
-Dropbox가 사용하는 암호화에 대해 더 잘 이해하려면 [https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html](https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html)을 읽어보세요.
+Dropbox가 사용하는 암호화를 더 잘 이해하려면 [https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html](https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html)을 읽을 수 있습니다.
 
 그러나 주요 정보는 다음과 같습니다:
 
@@ -60,13 +60,13 @@ Dropbox가 사용하는 암호화에 대해 더 잘 이해하려면 [https://blo
 - **DPAPI 마스터 키**: `\Users\<username>\AppData\Roaming\Microsoft\Protect`에서 찾을 수 있습니다
 - Windows 사용자의 **사용자 이름** 및 **비밀번호**
 
-그런 다음 도구 [**DataProtectionDecryptor**](https://nirsoft.net/utils/dpapi_data_decryptor.html)**:**
+그런 다음 도구 [**DataProtectionDecryptor**](https://nirsoft.net/utils/dpapi_data_decryptor.html)**를 사용할 수 있습니다:**
 
 ![](<../../../images/image (443).png>)
 
-모든 것이 예상대로 진행되면, 도구는 원본을 복구하는 데 필요한 **기본 키**를 표시합니다. 원본을 복구하려면 이 [cyber_chef 레시피](<https://gchq.github.io/CyberChef/#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>)에서 기본 키를 "비밀번호"로 사용하면 됩니다.
+모든 것이 예상대로 진행되면, 도구는 원래 키를 복구하는 데 필요한 **기본 키**를 표시합니다. 원래 키를 복구하려면 이 [cyber_chef 레시피](<https://gchq.github.io/CyberChef/index.html#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>)를 사용하여 기본 키를 레시피의 "비밀번호"로 넣으면 됩니다.
 
-결과로 나온 헥스는 데이터베이스를 암호화하는 데 사용된 최종 키이며, 이를 복호화할 수 있습니다:
+결과로 나오는 헥스는 데이터베이스를 암호화하는 데 사용된 최종 키이며, 이를 복호화할 수 있습니다:
 ```bash
 sqlite -k <Obtained Key> config.dbx ".backup config.db" #This decompress the config.dbx and creates a clear text backup in config.db
 ```
@@ -80,7 +80,7 @@ sqlite -k <Obtained Key> config.dbx ".backup config.db" #This decompress the con
 
 **`filecache.db`** 데이터베이스에는 드롭박스와 동기화된 모든 파일 및 폴더에 대한 정보가 포함되어 있습니다. `File_journal` 테이블이 가장 유용한 정보를 포함하고 있습니다:
 
-- **Server_path**: 서버 내에서 파일이 위치한 경로 (이 경로는 클라이언트의 `host_id`로 선행됩니다).
+- **Server_path**: 서버 내에서 파일이 위치한 경로(이 경로는 클라이언트의 `host_id`로 선행됩니다).
 - **local_sjid**: 파일의 버전
 - **local_mtime**: 수정 날짜
 - **local_ctime**: 생성 날짜

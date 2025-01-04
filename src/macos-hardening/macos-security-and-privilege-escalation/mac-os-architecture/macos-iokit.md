@@ -2,15 +2,15 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## 기본 정보
+## Basic Information
 
-I/O Kit은 XNU 커널에서 **동적 로드된 장치 드라이버**를 처리하는 오픈 소스 객체 지향 **장치 드라이버 프레임워크**입니다. 이는 다양한 하드웨어를 지원하며, 커널에 모듈식 코드를 즉시 추가할 수 있게 해줍니다.
+I/O Kit은 XNU 커널에서 **동적 로드된 장치 드라이버**를 처리하는 오픈 소스, 객체 지향 **장치 드라이버 프레임워크**입니다. 이는 다양한 하드웨어를 지원하며, 커널에 모듈식 코드를 즉시 추가할 수 있게 해줍니다.
 
 IOKit 드라이버는 기본적으로 **커널에서 함수를 내보냅니다**. 이 함수 매개변수 **유형**은 **미리 정의되어** 있으며 검증됩니다. 또한, XPC와 유사하게, IOKit은 **Mach 메시지** 위에 또 다른 레이어입니다.
 
-**IOKit XNU 커널 코드**는 Apple에 의해 [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit)에서 오픈 소스화되었습니다. 또한, 사용자 공간 IOKit 구성 요소도 오픈 소스입니다 [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
+**IOKit XNU 커널 코드**는 Apple에 의해 [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit)에서 오픈 소스로 제공됩니다. 또한, 사용자 공간 IOKit 구성 요소도 오픈 소스입니다 [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
 
-그러나 **IOKit 드라이버**는 오픈 소스가 아닙니다. 어쨌든, 때때로 드라이버의 릴리스가 디버깅을 쉽게 해주는 기호와 함께 제공될 수 있습니다. [**펌웨어에서 드라이버 확장을 가져오는 방법을 확인하세요**](./#ipsw)**.**
+그러나 **IOKit 드라이버**는 오픈 소스가 아닙니다. 어쨌든, 때때로 드라이버의 릴리스가 디버깅을 쉽게 해주는 기호와 함께 제공될 수 있습니다. [**펌웨어에서 드라이버 확장을 얻는 방법은 여기에서 확인하세요**](#ipsw)**.**
 
 C++로 작성되었습니다. 다음을 사용하여 디망글된 C++ 기호를 얻을 수 있습니다:
 ```bash
@@ -68,9 +68,9 @@ kextunload com.apple.iokit.IOReportFamily
 ```
 ## IORegistry
 
-**IORegistry**는 macOS 및 iOS의 IOKit 프레임워크의 중요한 부분으로, 시스템의 하드웨어 구성 및 상태를 나타내는 데이터베이스 역할을 합니다. 이는 **시스템에 로드된 모든 하드웨어 및 드라이버를 나타내는 객체의 계층적 컬렉션**이며, 이들 간의 관계를 나타냅니다.
+**IORegistry**는 macOS 및 iOS의 IOKit 프레임워크에서 시스템의 하드웨어 구성 및 상태를 나타내는 데이터베이스의 중요한 부분입니다. 이는 **시스템에 로드된 모든 하드웨어 및 드라이버를 나타내는 객체의 계층적 컬렉션**이며, 이들 간의 관계를 나타냅니다.
 
-콘솔에서 IORegistry를 검사하기 위해 cli **`ioreg`**를 사용하여 얻을 수 있습니다(특히 iOS에 유용함).
+콘솔에서 IORegistry를 검사하기 위해 cli **`ioreg`**를 사용하여 얻을 수 있습니다(특히 iOS에 유용합니다).
 ```bash
 ioreg -l #List all
 ioreg -w 0 #Not cut lines
@@ -82,11 +82,11 @@ ioreg -p <plane> #Check other plane
 
 IORegistryExplorer에서 "planes"는 IORegistry의 다양한 객체 간의 관계를 조직하고 표시하는 데 사용됩니다. 각 plane은 특정 유형의 관계 또는 시스템의 하드웨어 및 드라이버 구성에 대한 특정 뷰를 나타냅니다. IORegistryExplorer에서 마주칠 수 있는 일반적인 planes는 다음과 같습니다:
 
-1. **IOService Plane**: 가장 일반적인 plane으로, 드라이버와 nubs(드라이버 간의 통신 채널)를 나타내는 서비스 객체를 표시합니다. 이 객체들 간의 제공자-클라이언트 관계를 보여줍니다.
-2. **IODeviceTree Plane**: 이 plane은 시스템에 연결된 장치 간의 물리적 연결을 나타냅니다. USB 또는 PCI와 같은 버스를 통해 연결된 장치의 계층 구조를 시각화하는 데 자주 사용됩니다.
+1. **IOService Plane**: 드라이버와 nubs(드라이버 간의 통신 채널)를 나타내는 서비스 객체를 표시하는 가장 일반적인 plane입니다. 이 객체들 간의 제공자-클라이언트 관계를 보여줍니다.
+2. **IODeviceTree Plane**: 시스템에 연결된 장치 간의 물리적 연결을 나타내는 plane입니다. USB 또는 PCI와 같은 버스를 통해 연결된 장치의 계층 구조를 시각화하는 데 자주 사용됩니다.
 3. **IOPower Plane**: 전원 관리 측면에서 객체와 그 관계를 표시합니다. 다른 객체의 전원 상태에 영향을 미치는 객체를 보여줄 수 있어 전원 관련 문제를 디버깅하는 데 유용합니다.
 4. **IOUSB Plane**: USB 장치와 그 관계에 특별히 초점을 맞추어 USB 허브와 연결된 장치의 계층 구조를 보여줍니다.
-5. **IOAudio Plane**: 이 plane은 시스템 내의 오디오 장치와 그 관계를 나타내는 데 사용됩니다.
+5. **IOAudio Plane**: 시스템 내에서 오디오 장치와 그 관계를 나타내는 plane입니다.
 6. ...
 
 ## Driver Comm Code Example
@@ -150,13 +150,13 @@ IOObjectRelease(iter);
 return 0;
 }
 ```
-다른 **`IOConnectCallScalarMethod`** 외에도 **`IOConnectCallMethod`**, **`IOConnectCallStructMethod`**와 같은 IOKit 함수를 호출하는 데 사용할 수 있는 **다른** 함수가 있습니다.
+다른 함수들이 **`IOConnectCallScalarMethod`** 외에도 **`IOConnectCallMethod`**, **`IOConnectCallStructMethod`**와 같은 IOKit 함수를 호출하는 데 사용될 수 있습니다...
 
 ## 드라이버 진입점 리버싱
 
-예를 들어 [**펌웨어 이미지(ipsw)**](./#ipsw)에서 이를 얻을 수 있습니다. 그런 다음 좋아하는 디컴파일러에 로드하세요.
+예를 들어 [**펌웨어 이미지(ipsw)**](#ipsw)에서 이를 얻을 수 있습니다. 그런 다음 좋아하는 디컴파일러에 로드하세요.
 
-이 호출을 수신하고 올바른 함수를 호출하는 드라이버 함수인 **`externalMethod`** 함수를 디컴파일하는 것으로 시작할 수 있습니다:
+**`externalMethod`** 함수를 디컴파일하기 시작할 수 있습니다. 이 함수는 호출을 받고 올바른 함수를 호출하는 드라이버 함수입니다:
 
 <figure><img src="../../../images/image (1168).png" alt="" width="315"><figcaption></figcaption></figure>
 
@@ -176,7 +176,7 @@ IOUserClient2022::dispatchExternalMethod(uint32_t selector, IOExternalMethodArgu
 const IOExternalMethodDispatch2022 dispatchArray[], size_t dispatchArrayCount,
 OSObject * target, void * reference)
 ```
-이 정보를 사용하여 Ctrl+Right -> `Edit function signature`를 다시 작성하고 알려진 유형을 설정할 수 있습니다:
+이 정보를 통해 Ctrl+Right -> `Edit function signature`를 다시 작성하고 알려진 유형을 설정할 수 있습니다:
 
 <figure><img src="../../../images/image (1174).png" alt=""><figcaption></figcaption></figure>
 
@@ -184,7 +184,7 @@ OSObject * target, void * reference)
 
 <figure><img src="../../../images/image (1175).png" alt=""><figcaption></figcaption></figure>
 
-다음 단계에서는 **`IOExternalMethodDispatch2022`** 구조체가 정의되어 있어야 합니다. 이는 [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176)에서 오픈 소스로 제공되며, 이를 정의할 수 있습니다:
+다음 단계에서는 **`IOExternalMethodDispatch2022`** 구조체를 정의해야 합니다. 이는 [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176)에서 오픈소스로 제공되며, 이를 정의할 수 있습니다:
 
 <figure><img src="../../../images/image (1170).png" alt=""><figcaption></figcaption></figure>
 
@@ -200,7 +200,7 @@ OSObject * target, void * reference)
 
 <figure><img src="../../../images/image (1179).png" alt="" width="563"><figcaption></figcaption></figure>
 
-이제 여기에는 **7개의 요소로 구성된 배열**이 있습니다(최종 디컴파일된 코드를 확인하세요). 7개의 요소로 구성된 배열을 생성하려면 클릭합니다:
+이제 여기에서 **7개의 요소로 구성된 배열**이 있다는 것을 알 수 있습니다(최종 디컴파일된 코드를 확인하세요). 7개의 요소로 구성된 배열을 생성하려면 클릭합니다:
 
 <figure><img src="../../../images/image (1180).png" alt="" width="563"><figcaption></figcaption></figure>
 
@@ -209,6 +209,6 @@ OSObject * target, void * reference)
 <figure><img src="../../../images/image (1181).png" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> 기억하신다면, 사용자 공간에서 **내보낸** 함수를 **호출**하려면 함수의 이름을 호출할 필요가 없고, **선택자 번호**를 호출해야 합니다. 여기에서 선택자 **0**은 함수 **`initializeDecoder`**이고, 선택자 **1**은 **`startDecoder`**, 선택자 **2**는 **`initializeEncoder`**입니다...
+> 기억하신다면, 사용자 공간에서 **내보낸** 함수를 **호출**하려면 함수의 이름을 호출할 필요가 없고, **선택자 번호**를 호출해야 합니다. 여기에서 선택자 **0**은 함수 **`initializeDecoder`**, 선택자 **1**은 **`startDecoder`**, 선택자 **2**는 **`initializeEncoder`**입니다...
 
 {{#include ../../../banners/hacktricks-training.md}}

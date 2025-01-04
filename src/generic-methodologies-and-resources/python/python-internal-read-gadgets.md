@@ -4,7 +4,7 @@
 
 ## 기본 정보
 
-[**Python Format Strings**](bypass-python-sandboxes/#python-format-string) 또는 [**Class Pollution**](class-pollution-pythons-prototype-pollution.md)와 같은 다양한 취약점은 **파이썬 내부 데이터를 읽을 수 있지만 코드를 실행할 수는 없습니다**. 따라서, 펜테스터는 이러한 읽기 권한을 최대한 활용하여 **민감한 권한을 얻고 취약점을 상승시켜야 합니다**.
+[**Python Format Strings**](bypass-python-sandboxes/index.html#python-format-string) 또는 [**Class Pollution**](class-pollution-pythons-prototype-pollution.md)와 같은 다양한 취약점은 **파이썬 내부 데이터를 읽을 수 있지만 코드를 실행할 수는 없습니다**. 따라서, 펜테스터는 이러한 읽기 권한을 최대한 활용하여 **민감한 권한을 얻고 취약점을 상승시켜야 합니다**.
 
 ### Flask - 비밀 키 읽기
 
@@ -25,13 +25,13 @@ __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.se
 
 ### Werkzeug - machine_id 및 node uuid
 
-[**이 작성물에서 이 페이로드를 사용하여**](https://vozec.fr/writeups/tweedle-dum-dee/) **machine_id** 및 **uuid** 노드에 접근할 수 있으며, 이는 [**Werkzeug 핀을 생성하는 데 필요한**](../../network-services-pentesting/pentesting-web/werkzeug.md) **주요 비밀**입니다. **디버그 모드가 활성화된 경우** `/console`에서 파이썬 콘솔에 접근하는 데 사용할 수 있습니다.
+[**이 작성물에서 제공된 페이로드를 사용하여**](https://vozec.fr/writeups/tweedle-dum-dee/) **machine_id** 및 **uuid** 노드에 접근할 수 있으며, 이는 [**Werkzeug 핀을 생성하는 데 필요한 주요 비밀**](../../network-services-pentesting/pentesting-web/werkzeug.md)입니다. **디버그 모드가 활성화된 경우** `/console`에서 파이썬 콘솔에 접근하는 데 사용할 수 있습니다.
 ```python
 {ua.__class__.__init__.__globals__[t].sys.modules[werkzeug.debug]._machine_id}
 {ua.__class__.__init__.__globals__[t].sys.modules[werkzeug.debug].uuid._node}
 ```
 > [!WARNING]
-> **app.py**의 **서버 로컬 경로**를 얻으려면 웹 페이지에서 **오류**를 생성해야 하며, 이로 인해 **경로**를 **얻을 수 있습니다**.
+> **app.py**의 **서버 로컬 경로**를 얻으려면 웹 페이지에서 **오류**를 생성해야 하며, 이는 **경로**를 **제공합니다**.
 
 취약점이 다른 파이썬 파일에 있는 경우, 메인 파이썬 파일에서 객체에 접근하기 위한 이전 Flask 트릭을 확인하세요.
 

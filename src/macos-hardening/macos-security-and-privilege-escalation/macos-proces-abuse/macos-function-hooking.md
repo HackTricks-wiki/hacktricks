@@ -6,7 +6,7 @@
 
 **`__interpose` (`__DATA___interpose`)** 섹션이 있는 **dylib**를 생성합니다 (또는 **`S_INTERPOSING`** 플래그가 있는 섹션). 이 섹션에는 **원본** 함수와 **대체** 함수를 참조하는 **함수 포인터**의 튜플이 포함되어야 합니다.
 
-그런 다음, **`DYLD_INSERT_LIBRARIES`**를 사용하여 dylib를 **주입**합니다 (인터포징은 메인 앱이 로드되기 전에 발생해야 합니다). 명백히 [**`DYLD_INSERT_LIBRARIES`** 사용에 적용되는 **제한 사항**이 여기에도 적용됩니다](macos-library-injection/#check-restrictions).
+그런 다음, **`DYLD_INSERT_LIBRARIES`**를 사용하여 dylib를 **주입**합니다 (인터포징은 메인 앱이 로드되기 전에 발생해야 합니다). 명백히 [**`DYLD_INSERT_LIBRARIES`** 사용에 적용되는 **제한 사항**이 여기에도 적용됩니다](macos-library-injection/index.html#check-restrictions).
 
 ### Interpose printf
 
@@ -78,13 +78,13 @@ DYLD_INSERT_LIBRARIES=./interpose2.dylib ./hello
 Hello from interpose
 ```
 > [!WARNING]
-> **`DYLD_PRINT_INTERPOSTING`** 환경 변수를 사용하여 인터포징을 디버깅할 수 있으며, 인터포즈 프로세스를 출력합니다.
+> **`DYLD_PRINT_INTERPOSTING`** 환경 변수를 사용하여 인터포징을 디버그할 수 있으며, 인터포즈 프로세스를 출력합니다.
 
 또한 **인터포징은 프로세스와 로드된 라이브러리 사이에서 발생하며**, 공유 라이브러리 캐시와는 작동하지 않습니다.
 
 ### 동적 인터포징
 
-이제 **`dyld_dynamic_interpose`** 함수를 사용하여 동적으로 함수를 인터포즈하는 것도 가능합니다. 이를 통해 시작할 때만 하는 것이 아니라 런타임에 프로그램적으로 함수를 인터포즈할 수 있습니다.
+이제 **`dyld_dynamic_interpose`** 함수를 사용하여 동적으로 함수를 인터포즈할 수 있습니다. 이를 통해 시작할 때만 하는 것이 아니라 런타임에 프로그램적으로 함수를 인터포즈할 수 있습니다.
 
 **대체할 함수와 대체 함수의 튜플**을 지정하기만 하면 됩니다.
 ```c
@@ -103,10 +103,10 @@ In ObjectiveC this is how a method is called like: **`[myClassInstance nameOfThe
 
 객체는 **`someObject`**, 메서드는 **`@selector(method1p1:p2:)`**이며, 인수는 **value1**, **value2**입니다.
 
-객체 구조를 따라가면 **메서드 배열**에 도달할 수 있으며, 여기에는 **이름**과 **메서드 코드에 대한 포인터**가 **위치**합니다.
+객체 구조를 따라가면 **메서드 배열**에 접근할 수 있으며, 여기에는 **이름**과 **메서드 코드에 대한 포인터**가 **위치**합니다.
 
 > [!CAUTION]
-> 메서드와 클래스가 이름을 기반으로 접근되기 때문에 이 정보는 바이너리에 저장됩니다. 따라서 `otool -ov </path/bin>` 또는 [`class-dump </path/bin>`](https://github.com/nygard/class-dump)로 검색할 수 있습니다.
+> 메서드와 클래스가 이름을 기반으로 접근되기 때문에 이 정보는 바이너리에 저장됩니다. 따라서 `otool -ov </path/bin>` 또는 [`class-dump </path/bin>`](https://github.com/nygard/class-dump)로 이를 검색할 수 있습니다.
 
 ### Accessing the raw methods
 
@@ -226,15 +226,15 @@ return 0;
 }
 ```
 > [!WARNING]
-> 이 경우 **정상** 메서드의 **구현 코드**가 **메서드** **이름**을 **검증**하면 이 스위즐링을 **감지**하고 실행을 방지할 수 있습니다.
+> 이 경우 **정상적인** 메서드의 **구현 코드**가 **메서드** **이름**을 **검증**하면 이 스위즐링을 **감지**하고 실행을 방지할 수 있습니다.
 >
 > 다음 기술은 이러한 제한이 없습니다.
 
 ### method_setImplementation을 이용한 메서드 스위즐링
 
-이전 형식은 서로 다른 두 메서드의 구현을 변경하기 때문에 이상합니다. **`method_setImplementation`** 함수를 사용하면 **다른 메서드의 구현**을 **변경**할 수 있습니다.
+이전 형식은 서로 다른 두 메서드의 구현을 변경하기 때문에 이상합니다. **`method_setImplementation`** 함수를 사용하면 **하나의 메서드의 구현을 다른 메서드로 변경**할 수 있습니다.
 
-새로운 구현에서 호출하기 전에 **원래 구현의 주소를 저장**하는 것을 잊지 마세요. 그렇지 않으면 나중에 그 주소를 찾기가 훨씬 복잡해질 것입니다.
+새로운 구현에서 호출하기 전에 **원래 구현의 주소를 저장**하는 것을 잊지 마세요. 나중에 그 주소를 찾는 것이 훨씬 복잡해질 것입니다.
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
@@ -286,17 +286,17 @@ return 0;
 }
 }
 ```
-## 후킹 공격 방법론
+## Hooking Attack Methodology
 
-이 페이지에서는 함수를 후킹하는 다양한 방법에 대해 논의했습니다. 그러나 이들은 **공격을 위해 프로세스 내에서 코드를 실행하는 것**을 포함했습니다.
+이 페이지에서는 함수를 후킹하는 다양한 방법에 대해 논의했습니다. 그러나 이 방법들은 **공격을 위해 프로세스 내에서 코드를 실행하는 것**을 포함합니다.
 
-이를 위해 가장 쉬운 기술은 [환경 변수를 통한 Dyld 주입 또는 하이재킹](macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md)입니다. 그러나 이것은 [Dylib 프로세스 주입](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port)을 통해서도 수행될 수 있다고 생각합니다.
+이를 위해 가장 쉬운 기술은 [환경 변수를 통한 Dyld 주입 또는 하이재킹](macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md)입니다. 그러나 이것은 [Dylib 프로세스 주입](macos-ipc-inter-process-communication/index.html#dylib-process-injection-via-task-port)을 통해서도 수행될 수 있다고 생각합니다.
 
 그러나 두 옵션 모두 **보호되지 않은** 바이너리/프로세스에 **제한적**입니다. 각 기술을 확인하여 제한 사항에 대해 더 알아보세요.
 
-그러나 함수 후킹 공격은 매우 구체적이며, 공격자는 **프로세스 내부에서 민감한 정보를 훔치기 위해** 이를 수행합니다(그렇지 않으면 프로세스 주입 공격을 수행할 것입니다). 이 민감한 정보는 MacPass와 같은 사용자 다운로드 앱에 위치할 수 있습니다.
+그러나 함수 후킹 공격은 매우 구체적이며, 공격자는 **프로세스 내부에서 민감한 정보를 훔치기 위해** 이를 수행합니다(그렇지 않으면 단순히 프로세스 주입 공격을 할 것입니다). 이 민감한 정보는 MacPass와 같은 사용자 다운로드 앱에 위치할 수 있습니다.
 
-따라서 공격자 벡터는 취약점을 찾거나 애플리케이션의 서명을 제거하고, 애플리케이션의 Info.plist를 통해 **`DYLD_INSERT_LIBRARIES`** 환경 변수를 주입하여 다음과 같은 내용을 추가하는 것입니다:
+따라서 공격자의 벡터는 취약점을 찾거나 애플리케이션의 서명을 제거하고, 애플리케이션의 Info.plist를 통해 **`DYLD_INSERT_LIBRARIES`** 환경 변수를 주입하여 다음과 같은 내용을 추가하는 것입니다:
 ```xml
 <key>LSEnvironment</key>
 <dict>
@@ -308,12 +308,12 @@ return 0;
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f /Applications/Application.app
 ```
-정보를 유출하기 위한 후킹 코드를 해당 라이브러리에 추가하세요: 비밀번호, 메시지...
+해당 라이브러리에 정보를 유출하는 후킹 코드를 추가하세요: 비밀번호, 메시지...
 
 > [!CAUTION]
-> 최신 버전의 macOS에서는 애플리케이션 바이너리의 **서명을 제거**하고 이전에 실행된 경우, macOS가 더 이상 **애플리케이션을 실행하지 않습니다**.
+> 최신 버전의 macOS에서는 애플리케이션 바이너리의 **서명을 제거**하고 이전에 실행된 경우, macOS는 **더 이상 애플리케이션을 실행하지 않습니다**.
 
-#### 라이브러리 예제
+#### Library example
 ```objectivec
 // gcc -dynamiclib -framework Foundation sniff.m -o sniff.dylib
 
@@ -349,7 +349,7 @@ IMP fake_IMP = (IMP)custom_setPassword;
 real_setPassword = method_setImplementation(real_Method, fake_IMP);
 }
 ```
-## 참고문헌
+## References
 
 - [https://nshipster.com/method-swizzling/](https://nshipster.com/method-swizzling/)
 

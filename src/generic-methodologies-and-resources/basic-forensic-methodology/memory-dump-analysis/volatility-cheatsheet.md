@@ -5,7 +5,7 @@
 ​
 
 
-메모리 분석을 자동화하고 다양한 스캔 레벨을 지원하며 여러 Volatility3 플러그인을 병렬로 실행하는 도구가 필요하다면, autoVolatility3를 사용할 수 있습니다:: [https://github.com/H3xKatana/autoVolatility3/](https://github.com/H3xKatana/autoVolatility3/)
+메모리 분석을 자동화하고 다양한 스캔 레벨로 여러 Volatility3 플러그인을 병렬로 실행하는 도구가 필요하다면, autoVolatility3를 사용할 수 있습니다: [https://github.com/H3xKatana/autoVolatility3/](https://github.com/H3xKatana/autoVolatility3/)
 ```bash
 # Full scan (runs all plugins)
 python3 autovol3.py -f MEMFILE -o OUT_DIR -s full
@@ -17,7 +17,7 @@ python3 autovol3.py -f MEMFILE -o OUT_DIR -s minimal
 python3 autovol3.py -f MEMFILE -o OUT_DIR -s normal
 
 ```
-빠르고 미친 듯한 여러 Volatility 플러그인을 병렬로 실행하고 싶다면 다음을 사용할 수 있습니다: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
+빠르고 미친 듯한 것을 원한다면 여러 Volatility 플러그인을 병렬로 실행할 수 있는 다음을 사용할 수 있습니다: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
 ```bash
 python autoVolatility.py -f MEMFILE -d OUT_DIRECTORY -e /home/user/tools/volatility/vol.py # It will use the most important plugins (could use a lot of space depending on the size of the memory)
 ```
@@ -50,15 +50,15 @@ python setup.py install
 
 ## Volatility 명령어
 
-공식 문서는 [Volatility command reference](https://github.com/volatilityfoundation/volatility/wiki/Command-Reference#kdbgscan)에서 확인하세요.
+공식 문서는 [Volatility 명령어 참조](https://github.com/volatilityfoundation/volatility/wiki/Command-Reference#kdbgscan)에서 확인할 수 있습니다.
 
 ### “list”와 “scan” 플러그인에 대한 주의사항
 
-Volatility는 플러그인에 대해 두 가지 주요 접근 방식을 가지고 있으며, 이는 때때로 이름에 반영됩니다. “list” 플러그인은 Windows Kernel 구조를 탐색하여 프로세스(메모리에서 `_EPROCESS` 구조의 연결 리스트를 찾고 탐색)와 OS 핸들(핸들 테이블을 찾고 나열하며, 발견된 포인터를 역참조 등)과 같은 정보를 검색하려고 합니다. 이들은 요청 시 Windows API가 프로세스를 나열하는 것처럼 행동합니다.
+Volatility는 플러그인에 대해 두 가지 주요 접근 방식을 가지고 있으며, 이는 때때로 이름에 반영됩니다. “list” 플러그인은 Windows 커널 구조를 탐색하여 프로세스(메모리에서 `_EPROCESS` 구조의 연결 리스트를 찾고 탐색)와 OS 핸들(핸들 테이블을 찾고 나열하며, 발견된 포인터를 역참조 등)과 같은 정보를 검색하려고 합니다. 이들은 요청 시 Windows API처럼 동작합니다. 예를 들어, 프로세스를 나열하는 경우입니다.
 
-이로 인해 “list” 플러그인은 꽤 빠르지만, 악성 소프트웨어에 의해 조작될 수 있는 Windows API와 마찬가지로 취약합니다. 예를 들어, 악성 소프트웨어가 DKOM을 사용하여 프로세스를 `_EPROCESS` 연결 리스트에서 분리하면, 이는 작업 관리자에 나타나지 않으며 pslist에서도 나타나지 않습니다.
+이로 인해 “list” 플러그인은 꽤 빠르지만, 악성 소프트웨어에 의해 조작될 수 있는 Windows API와 마찬가지로 취약합니다. 예를 들어, 악성 소프트웨어가 DKOM을 사용하여 프로세스를 `_EPROCESS` 연결 리스트에서 분리하면, 작업 관리자에 나타나지 않으며 pslist에서도 나타나지 않습니다.
 
-반면에 “scan” 플러그인은 특정 구조로 역참조될 때 의미가 있을 수 있는 것들을 메모리에서 조각내는 접근 방식을 취합니다. 예를 들어 `psscan`은 메모리를 읽고 이를 기반으로 `_EPROCESS` 객체를 만들려고 합니다(이는 관심 있는 구조의 존재를 나타내는 4바이트 문자열을 검색하는 풀 태그 스캐닝을 사용합니다). 장점은 종료된 프로세스를 찾아낼 수 있으며, 악성 소프트웨어가 `_EPROCESS` 연결 리스트를 조작하더라도 플러그인은 여전히 메모리에서 구조를 찾아낼 수 있습니다(프로세스가 실행되기 위해서는 여전히 존재해야 하므로). 단점은 “scan” 플러그인이 “list” 플러그인보다 약간 느리며, 때때로 잘못된 긍정 결과를 낼 수 있다는 것입니다(너무 오래 전에 종료된 프로세스와 그 구조의 일부가 다른 작업에 의해 덮어쓰여진 경우).
+반면 “scan” 플러그인은 특정 구조로 역참조될 때 의미가 있을 수 있는 것들을 메모리에서 조각내는 접근 방식을 취합니다. 예를 들어, `psscan`은 메모리를 읽고 `_EPROCESS` 객체를 만들려고 시도합니다(구조의 존재를 나타내는 4바이트 문자열을 검색하는 풀 태그 스캐닝을 사용합니다). 장점은 종료된 프로세스를 찾아낼 수 있으며, 악성 소프트웨어가 `_EPROCESS` 연결 리스트를 조작하더라도 플러그인은 여전히 메모리에서 구조를 찾아낼 수 있습니다(프로세스가 실행되기 위해서는 여전히 존재해야 하므로). 단점은 “scan” 플러그인이 “list” 플러그인보다 약간 느리며, 때때로 잘못된 긍정 결과를 초래할 수 있습니다(너무 오래 전에 종료된 프로세스와 그 구조의 일부가 다른 작업에 의해 덮어씌워진 경우).
 
 출처: [http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
 
@@ -66,8 +66,8 @@ Volatility는 플러그인에 대해 두 가지 주요 접근 방식을 가지�
 
 ### Volatility3
 
-readme에 설명된 대로 지원하려는 **OS의 심볼 테이블**을 _volatility3/volatility/symbols_에 넣어야 합니다.\
-다양한 운영 체제에 대한 심볼 테이블 팩은 **다운로드**를 위해 다음에서 제공됩니다:
+readme에 설명된 바와 같이 지원하려는 **OS의 심볼 테이블**을 _volatility3/volatility/symbols_에 넣어야 합니다.\
+다양한 운영 체제에 대한 심볼 테이블 팩은 **다운로드**할 수 있습니다:
 
 - [https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip](https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip)
 - [https://downloads.volatilityfoundation.org/volatility3/symbols/mac.zip](https://downloads.volatilityfoundation.org/volatility3/symbols/mac.zip)
@@ -77,11 +77,11 @@ readme에 설명된 대로 지원하려는 **OS의 심볼 테이블**을 _volati
 
 #### 외부 프로파일
 
-지원되는 프로파일 목록을 얻으려면 다음을 수행하세요:
+지원되는 프로파일 목록을 얻으려면 다음을 수행할 수 있습니다:
 ```bash
 ./volatility_2.6_lin64_standalone --info | grep "Profile"
 ```
-새로 다운로드한 **프로필을 사용하려면** (예: 리눅스 프로필) 다음 폴더 구조를 생성해야 합니다: _plugins/overlays/linux_ 이 폴더 안에 프로필이 포함된 zip 파일을 넣으세요. 그런 다음, 프로필의 번호를 가져오려면:
+새로 다운로드한 **프로필을 사용하려면** (예: 리눅스 프로필) 다음 폴더 구조를 생성해야 합니다: _plugins/overlays/linux_ 이 폴더 안에 프로필이 포함된 zip 파일을 넣습니다. 그런 다음, 프로필의 번호를 얻으려면 다음을 사용하세요:
 ```bash
 ./vol --plugins=/home/kali/Desktop/ctfs/final/plugins --info
 Volatility Foundation Volatility Framework 2.6
@@ -106,9 +106,9 @@ volatility kdbgscan -f file.dmp
 ```
 #### **imageinfo와 kdbgscan의 차이점**
 
-[**여기에서**](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/): profile 제안을 단순히 제공하는 imageinfo와 달리, **kdbgscan**은 올바른 프로필과 올바른 KDBG 주소(여러 개가 있을 경우)를 긍정적으로 식별하도록 설계되었습니다. 이 플러그인은 Volatility 프로필과 연결된 KDBGHeader 서명을 스캔하고 잘못된 긍정 결과를 줄이기 위해 정상성 검사를 적용합니다. 출력의 상세도와 수행할 수 있는 정상성 검사 수는 Volatility가 DTB를 찾을 수 있는지에 따라 달라지므로, 올바른 프로필을 이미 알고 있거나(imageinfo에서 프로필 제안을 받은 경우) 이를 사용해야 합니다.
+[**여기에서**](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/): profile 제안을 단순히 제공하는 imageinfo와 달리, **kdbgscan**은 올바른 프로필과 올바른 KDBG 주소(여러 개가 있을 경우)를 긍정적으로 식별하도록 설계되었습니다. 이 플러그인은 Volatility 프로필과 연결된 KDBGHeader 서명을 스캔하고 잘못된 긍정 결과를 줄이기 위해 정상성 검사를 적용합니다. 출력의 상세도와 수행할 수 있는 정상성 검사 수는 Volatility가 DTB를 찾을 수 있는지에 따라 달라지므로, 이미 올바른 프로필을 알고 있거나 imageinfo에서 프로필 제안을 받은 경우, 반드시 그것을 사용해야 합니다.
 
-항상 **kdbgscan이 찾은 프로세스 수**를 확인하세요. 때때로 imageinfo와 kdbgscan은 **하나 이상의** 적합한 **프로필**을 찾을 수 있지만, **유효한 프로필만이 일부 프로세스와 관련이 있습니다**(이는 프로세스를 추출하기 위해 올바른 KDBG 주소가 필요하기 때문입니다).
+항상 **kdbgscan이 찾은 프로세스 수**를 확인하세요. 때때로 imageinfo와 kdbgscan은 **하나 이상의** 적합한 **프로필**을 찾을 수 있지만, **유효한 프로필만 프로세스와 관련된** 정보를 가집니다(이는 프로세스를 추출하기 위해 올바른 KDBG 주소가 필요하기 때문입니다).
 ```bash
 # GOOD
 PsActiveProcessHead           : 0xfffff800011977f0 (37 processes)
@@ -122,18 +122,18 @@ PsLoadedModuleList            : 0xfffff80001197ac0 (0 modules)
 ```
 #### KDBG
 
-**커널 디버거 블록**은 Volatility에서 **KDBG**로 언급되며, Volatility와 다양한 디버거가 수행하는 포렌식 작업에 필수적입니다. `KdDebuggerDataBlock`으로 식별되며 `_KDDEBUGGER_DATA64` 유형으로, `PsActiveProcessHead`와 같은 필수 참조를 포함하고 있습니다. 이 특정 참조는 프로세스 목록의 헤드를 가리키며, 모든 프로세스를 나열할 수 있게 하여 철저한 메모리 분석에 기본적입니다.
+**커널 디버거 블록**은 Volatility에서 **KDBG**로 언급되며, Volatility와 다양한 디버거가 수행하는 포렌식 작업에 필수적입니다. `KdDebuggerDataBlock`으로 식별되며 `_KDDEBUGGER_DATA64` 유형을 가지며, `PsActiveProcessHead`와 같은 필수 참조를 포함합니다. 이 특정 참조는 프로세스 목록의 헤드를 가리키며, 모든 프로세스를 나열할 수 있게 하여 철저한 메모리 분석에 기본적입니다.
 
 ## OS 정보
 ```bash
 #vol3 has a plugin to give OS information (note that imageinfo from vol2 will give you OS info)
 ./vol.py -f file.dmp windows.info.Info
 ```
-플러그인 `banners.Banners`는 **vol3에서 덤프에서 리눅스 배너를 찾기 위해 사용할 수 있습니다**.
+플러그인 `banners.Banners`는 **vol3에서 덤프에서 리눅스 배너를 찾기 위해** 사용할 수 있습니다.
 
 ## 해시/비밀번호
 
-SAM 해시, [도메인 캐시 자격 증명](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) 및 [lsa 비밀](../../../windows-hardening/authentication-credentials-uac-and-efs/#lsa-secrets)을 추출합니다.
+SAM 해시, [도메인 캐시 자격 증명](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) 및 [lsa 비밀](../../../windows-hardening/authentication-credentials-uac-and-efs/index.html#lsa-secrets)을 추출합니다.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -164,7 +164,7 @@ volatility -f file.dmp --profile=Win7SP1x86 memdump -p 2168 -D conhost/
 ### 프로세스 목록
 
 **의심스러운** 프로세스(이름으로) 또는 **예상치 못한** 자식 **프로세스**(예: iexplorer.exe의 자식으로 cmd.exe)를 찾으려고 시도하십시오.\
-pslist의 결과와 psscan의 결과를 비교하여 숨겨진 프로세스를 식별하는 것이 흥미로울 수 있습니다.
+pslist의 결과를 psscan의 결과와 **비교**하여 숨겨진 프로세스를 식별하는 것이 흥미로울 수 있습니다.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -220,7 +220,7 @@ volatility --profile=PROFILE consoles -f file.dmp #command history by scanning f
 {{#endtab}}
 {{#endtabs}}
 
-`cmd.exe`에서 실행된 명령은 **`conhost.exe`** (또는 Windows 7 이전 시스템에서는 `csrss.exe`)에 의해 관리됩니다. 이는 **`cmd.exe`**가 메모리 덤프가 얻어지기 전에 공격자에 의해 종료되더라도, 여전히 **`conhost.exe`**의 메모리에서 세션의 명령 기록을 복구할 수 있음을 의미합니다. 이를 위해 콘솔의 모듈 내에서 비정상적인 활동이 감지되면, 관련된 **`conhost.exe`** 프로세스의 메모리를 덤프해야 합니다. 그런 다음 이 덤프 내에서 **strings**를 검색하여 세션에서 사용된 명령줄을 추출할 수 있습니다.
+`cmd.exe`에서 실행된 명령은 **`conhost.exe`** (또는 Windows 7 이전 시스템의 경우 `csrss.exe`)에 의해 관리됩니다. 이는 공격자가 메모리 덤프가 얻어지기 전에 **`cmd.exe`**를 종료하더라도 **`conhost.exe`**의 메모리에서 세션의 명령 기록을 복구할 수 있음을 의미합니다. 이를 위해 콘솔의 모듈 내에서 비정상적인 활동이 감지되면 관련된 **`conhost.exe`** 프로세스의 메모리를 덤프해야 합니다. 그런 다음 이 덤프 내에서 **strings**를 검색하여 세션에서 사용된 명령줄을 추출할 수 있습니다.
 
 ### 환경
 
@@ -347,7 +347,7 @@ strings 3532.dmp > strings_file
 {{#endtab}}
 {{#endtabs}}
 
-또한 yarascan 모듈을 사용하여 프로세스 내에서 문자열을 검색할 수 있습니다:
+이것은 또한 yarascan 모듈을 사용하여 프로세스 내에서 문자열을 검색할 수 있게 해줍니다:
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -366,7 +366,7 @@ volatility --profile=Win7SP1x86_23418 yarascan -Y "https://" -p 3692,3840,3976,3
 
 ### UserAssist
 
-**Windows**는 **UserAssist 키**라는 레지스트리의 기능을 사용하여 실행한 프로그램을 추적합니다. 이 키는 각 프로그램이 실행된 횟수와 마지막 실행 시간을 기록합니다.
+**Windows**는 **UserAssist keys**라는 레지스트리 기능을 사용하여 실행한 프로그램을 추적합니다. 이 키는 각 프로그램이 실행된 횟수와 마지막 실행 시간을 기록합니다.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -595,10 +595,10 @@ volatility --profile=SomeLinux -f file.dmp linux_keyboard_notifiers #Keyloggers
 {{#endtab}}
 {{#endtabs}}
 
-### yara로 스캔하기
+### Yara로 스캔하기
 
 이 스크립트를 사용하여 github에서 모든 yara 악성코드 규칙을 다운로드하고 병합하세요: [https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9](https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9)\
-_**rules**_ 디렉토리를 만들고 실행하세요. 그러면 모든 악성코드에 대한 yara 규칙이 포함된 _**malware_rules.yar**_라는 파일이 생성됩니다.
+_**rules**_ 디렉토리를 만들고 실행하세요. 이렇게 하면 모든 악성코드에 대한 yara 규칙이 포함된 _**malware_rules.yar**_라는 파일이 생성됩니다.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -627,7 +627,7 @@ volatility --profile=Win7SP1x86_23418 yarascan -y malware_rules.yar -f ch2.dmp |
 
 ### 외부 플러그인
 
-외부 플러그인을 사용하려면 플러그인과 관련된 폴더가 첫 번째 매개변수로 사용되도록 해야 합니다.
+외부 플러그인을 사용하려면 플러그인과 관련된 폴더가 사용되는 첫 번째 매개변수인지 확인하세요.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -684,7 +684,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp symlinkscan
 
 ### Bash
 
-**메모리에서 bash 기록을 읽는 것이 가능합니다.** _.bash_history_ 파일을 덤프할 수도 있지만, 비활성화되어 있으므로 이 volatility 모듈을 사용할 수 있어 기쁠 것입니다.
+**메모리에서 bash 히스토리를 읽는 것이 가능합니다.** _.bash_history_ 파일을 덤프할 수도 있지만, 비활성화되어 있으므로 이 volatility 모듈을 사용할 수 있어 기쁠 것입니다.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -756,9 +756,9 @@ volatility --profile=Win7SP1x86_23418 screenshot -f file.dmp
 ```bash
 volatility --profile=Win7SP1x86_23418 mbrparser -f file.dmp
 ```
-**마스터 부트 레코드 (MBR)**는 다양한 [파일 시스템](https://en.wikipedia.org/wiki/File_system)으로 구성된 저장 매체의 논리적 파티션을 관리하는 데 중요한 역할을 합니다. 이 레코드는 파티션 레이아웃 정보를 보유할 뿐만 아니라 부트 로더 역할을 하는 실행 가능한 코드를 포함하고 있습니다. 이 부트 로더는 OS의 2단계 로딩 프로세스를 직접 시작하거나 (자세한 내용은 [2단계 부트 로더](https://en.wikipedia.org/wiki/Second-stage_boot_loader) 참조) 각 파티션의 [볼륨 부트 레코드](https://en.wikipedia.org/wiki/Volume_boot_record) (VBR)와 조화를 이루어 작동합니다. 심층적인 지식은 [MBR 위키 페이지](https://en.wikipedia.org/wiki/Master_boot_record)를 참조하십시오.
+**마스터 부트 레코드 (MBR)**는 저장 매체의 논리적 파티션을 관리하는 데 중요한 역할을 하며, 이는 다양한 [파일 시스템](https://en.wikipedia.org/wiki/File_system)으로 구조화되어 있습니다. MBR은 파티션 레이아웃 정보를 보유할 뿐만 아니라 부트 로더로 작동하는 실행 가능한 코드도 포함하고 있습니다. 이 부트 로더는 OS의 2단계 로딩 프로세스를 직접 시작하거나 (자세한 내용은 [2단계 부트 로더](https://en.wikipedia.org/wiki/Second-stage_boot_loader) 참조) 각 파티션의 [볼륨 부트 레코드](https://en.wikipedia.org/wiki/Volume_boot_record) (VBR)와 조화를 이루어 작동합니다. 심층적인 지식은 [MBR 위키 페이지](https://en.wikipedia.org/wiki/Master_boot_record)를 참조하십시오.
 
-## 참고 문헌
+## References
 
 - [https://andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/](https://andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/)
 - [https://scudette.blogspot.com/2012/11/finding-kernel-debugger-block.html](https://scudette.blogspot.com/2012/11/finding-kernel-debugger-block.html)

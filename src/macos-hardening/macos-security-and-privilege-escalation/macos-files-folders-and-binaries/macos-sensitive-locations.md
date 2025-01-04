@@ -1,4 +1,4 @@
-# macOS 민감한 위치 및 흥미로운 데몬
+# macOS Sensitive Locations & Interesting Daemons
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -25,7 +25,7 @@ sudo bash -c 'for i in $(find /var/db/dslocal/nodes/Default/users -type f -regex
 
 ### Keychain Dump
 
-보안 바이너리를 사용하여 **복호화된 비밀번호를 덤프**할 때 여러 프롬프트가 사용자에게 이 작업을 허용하도록 요청할 것임을 유의하십시오.
+보안 바이너리를 사용하여 **복호화된 비밀번호를 덤프**할 때 여러 프롬프트가 사용자에게 이 작업을 허용하도록 요청할 것입니다.
 ```bash
 #security
 security dump-trust-settings [-s] [-d] #List certificates
@@ -37,13 +37,13 @@ security dump-keychain -d #Dump all the info, included secrets (the user will be
 ### [Keychaindump](https://github.com/juuso/keychaindump)
 
 > [!CAUTION]
-> 이 댓글 [juuso/keychaindump#10 (comment)](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760)에 따르면, 이 도구들은 Big Sur에서 더 이상 작동하지 않는 것 같습니다.
+> 이 댓글 [juuso/keychaindump#10 (comment)](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760)를 기반으로 할 때, 이 도구들은 Big Sur에서 더 이상 작동하지 않는 것 같습니다.
 
 ### Keychaindump 개요
 
-**keychaindump**라는 도구는 macOS 키체인에서 비밀번호를 추출하기 위해 개발되었지만, Big Sur와 같은 최신 macOS 버전에서는 제한이 있습니다. **keychaindump**를 사용하려면 공격자가 **root** 권한을 얻고 권한을 상승시켜야 합니다. 이 도구는 사용자 로그인 시 기본적으로 키체인이 잠금 해제된다는 사실을 이용하여, 애플리케이션이 사용자의 비밀번호를 반복적으로 요구하지 않고도 접근할 수 있도록 합니다. 그러나 사용자가 매번 사용 후 키체인을 잠그기로 선택하면 **keychaindump**는 효과가 없습니다.
+**keychaindump**라는 도구는 macOS 키체인에서 비밀번호를 추출하기 위해 개발되었지만, Big Sur와 같은 최신 macOS 버전에서는 제한이 있습니다. **keychaindump**를 사용하려면 공격자가 접근 권한을 얻고 **root** 권한을 상승시켜야 합니다. 이 도구는 사용자 로그인 시 기본적으로 키체인이 잠금 해제된다는 사실을 이용하여, 애플리케이션이 사용자의 비밀번호를 반복적으로 요구하지 않고도 접근할 수 있도록 합니다. 그러나 사용자가 매번 사용 후 키체인을 잠그기로 선택하면 **keychaindump**는 효과가 없습니다.
 
-**Keychaindump**는 Apple이 권한 부여 및 암호화 작업을 위한 데몬으로 설명하는 특정 프로세스인 **securityd**를 타겟으로 작동합니다. 추출 과정은 사용자의 로그인 비밀번호에서 파생된 **Master Key**를 식별하는 것을 포함합니다. 이 키는 키체인 파일을 읽는 데 필수적입니다. **Master Key**를 찾기 위해 **keychaindump**는 `vmmap` 명령을 사용하여 **securityd**의 메모리 힙을 스캔하며, `MALLOC_TINY`로 플래그가 지정된 영역 내에서 잠재적인 키를 찾습니다. 다음 명령은 이러한 메모리 위치를 검사하는 데 사용됩니다:
+**Keychaindump**는 **securityd**라는 특정 프로세스를 타겟으로 작동하며, Apple에 의해 권한 부여 및 암호화 작업을 위한 데몬으로 설명됩니다. 이는 키체인에 접근하는 데 필수적입니다. 추출 과정은 사용자의 로그인 비밀번호에서 파생된 **Master Key**를 식별하는 것을 포함합니다. 이 키는 키체인 파일을 읽는 데 필수적입니다. **Master Key**를 찾기 위해 **keychaindump**는 `vmmap` 명령을 사용하여 **securityd**의 메모리 힙을 스캔하며, `MALLOC_TINY`로 플래그가 지정된 영역 내에서 잠재적인 키를 찾습니다. 다음 명령은 이러한 메모리 위치를 검사하는 데 사용됩니다:
 ```bash
 sudo vmmap <securityd PID> | grep MALLOC_TINY
 ```
@@ -92,7 +92,7 @@ python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d1
 ```
 #### **메모리 덤프를 사용하여 키체인 키(비밀번호 포함) 덤프하기**
 
-[이 단계를 따르세요](../#dumping-memory-with-osxpmem) **메모리 덤프**를 수행하기 위해
+[이 단계를 따르세요](../index.html#dumping-memory-with-osxpmem) **메모리 덤프**를 수행하기 위해
 ```bash
 #Use volafox (https://github.com/n0fate/volafox) to extract possible keychain passwords
 # Unformtunately volafox isn't working with the latest versions of MacOS
@@ -103,7 +103,7 @@ python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d1
 ```
 #### **사용자의 비밀번호를 사용하여 키체인 키 덤프하기 (비밀번호 포함)**
 
-사용자의 비밀번호를 알고 있다면, 이를 사용하여 **사용자에게 속한 키체인을 덤프하고 복호화할 수 있습니다**.
+사용자의 비밀번호를 알고 있다면 이를 사용하여 **사용자에게 속한 키체인을 덤프하고 복호화할 수 있습니다**.
 ```bash
 #Prompt to ask for the password
 python2.7 chainbreaker.py --dump-all --password-prompt /Users/<username>/Library/Keychains/login.keychain-db
@@ -112,8 +112,8 @@ python2.7 chainbreaker.py --dump-all --password-prompt /Users/<username>/Library
 
 **kcpassword** 파일은 **사용자의 로그인 비밀번호**를 저장하는 파일이지만, 시스템 소유자가 **자동 로그인을 활성화**한 경우에만 해당됩니다. 따라서 사용자는 비밀번호를 입력하라는 요청 없이 자동으로 로그인됩니다(이는 그리 안전하지 않습니다).
 
-비밀번호는 **`/etc/kcpassword`** 파일에 **`0x7D 0x89 0x52 0x23 0xD2 0xBC 0xDD 0xEA 0xA3 0xB9 0x1F`** 키와 XOR되어 저장됩니다. 사용자의 비밀번호가 키보다 길 경우, 키는 재사용됩니다.\
-이로 인해 비밀번호를 복구하는 것이 꽤 쉬워지며, 예를 들어 [**이 스크립트**](https://gist.github.com/opshope/32f65875d45215c3677d)와 같은 스크립트를 사용할 수 있습니다.
+비밀번호는 **`/etc/kcpassword`** 파일에 **`0x7D 0x89 0x52 0x23 0xD2 0xBC 0xDD 0xEA 0xA3 0xB9 0x1F`** 키와 XOR되어 저장됩니다. 사용자의 비밀번호가 키보다 길면 키가 재사용됩니다.\
+이로 인해 비밀번호를 복구하는 것이 꽤 쉬워지며, 예를 들어 [**이 스크립트**](https://gist.github.com/opshope/32f65875d45215c3677d)를 사용할 수 있습니다.
 
 ## Interesting Information in Databases
 
@@ -125,18 +125,18 @@ sqlite3 $HOME/Library/Messages/chat.db 'select * from attachment'
 sqlite3 $HOME/Library/Messages/chat.db 'select * from deleted_messages'
 sqlite3 $HOME/Suggestions/snippets.db 'select * from emailSnippets'
 ```
-### 알림
+### Notifications
 
-알림 데이터는 `$(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/`에서 찾을 수 있습니다.
+You can find the Notifications data in `$(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/`
 
-가장 흥미로운 정보는 **blob**에 있을 것입니다. 따라서 해당 내용을 **추출**하고 **변환**하여 **사람이 읽을 수 있는** 형식으로 만들거나 **`strings`**를 사용할 필요가 있습니다. 접근하려면 다음과 같이 할 수 있습니다:
+Most of the interesting information is going to be in **blob**. So you will need to **extract** that content and **transform** it to **human** **readable** or use **`strings`**. To access it you can do:
 ```bash
 cd $(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/
 strings $(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/db2/db | grep -i -A4 slack
 ```
 ### Notes
 
-사용자의 **notes**는 `~/Library/Group Containers/group.com.apple.notes/NoteStore.sqlite`에서 찾을 수 있습니다.
+사용자의 **노트**는 `~/Library/Group Containers/group.com.apple.notes/NoteStore.sqlite`에서 찾을 수 있습니다.
 ```bash
 sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.sqlite .tables
 
@@ -147,7 +147,7 @@ for i in $(sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.s
 
 macOS 앱의 기본 설정은 **`$HOME/Library/Preferences`**에 위치하고, iOS에서는 `/var/mobile/Containers/Data/Application/<UUID>/Library/Preferences`에 있습니다.
 
-macOS에서는 CLI 도구 **`defaults`**를 사용하여 **Preferences 파일을 수정**할 수 있습니다.
+macOS에서는 cli 도구 **`defaults`**를 사용하여 **Preferences 파일을 수정**할 수 있습니다.
 
 **`/usr/sbin/cfprefsd`**는 XPC 서비스 `com.apple.cfprefsd.daemon`과 `com.apple.cfprefsd.agent`를 주장하며, 기본 설정을 수정하는 등의 작업을 수행하기 위해 호출될 수 있습니다.
 
@@ -191,11 +191,11 @@ macOS에서는 CLI 도구 **`defaults`**를 사용하여 **Preferences 파일을
 
 ### 다윈 알림
 
-알림을 위한 주요 데몬은 **`/usr/sbin/notifyd`**입니다. 알림을 받기 위해서는 클라이언트가 `com.apple.system.notification_center` Mach 포트를 통해 등록해야 합니다(이를 확인하려면 `sudo lsmp -p <pid notifyd>`를 사용하세요). 데몬은 `/etc/notify.conf` 파일로 구성할 수 있습니다.
+알림을 위한 주요 데몬은 **`/usr/sbin/notifyd`**입니다. 알림을 받기 위해 클라이언트는 `com.apple.system.notification_center` Mach 포트를 통해 등록해야 합니다(이를 확인하려면 `sudo lsmp -p <pid notifyd>`를 사용하세요). 데몬은 `/etc/notify.conf` 파일로 구성할 수 있습니다.
 
 알림에 사용되는 이름은 고유한 역 DNS 표기법이며, 알림이 그 중 하나로 전송되면 이를 처리할 수 있다고 표시한 클라이언트가 수신하게 됩니다.
 
-현재 상태를 덤프하고(모든 이름을 확인) notifyd 프로세스에 SIGUSR2 신호를 보내고 생성된 파일을 읽으면 가능합니다: `/var/run/notifyd_<pid>.status`:
+현재 상태를 덤프하고(모든 이름을 확인하려면) notifyd 프로세스에 SIGUSR2 신호를 보내고 생성된 파일을 읽으면 됩니다: `/var/run/notifyd_<pid>.status`:
 ```bash
 ps -ef | grep -i notifyd
 0   376     1   0 15Mar24 ??        27:40.97 /usr/sbin/notifyd
@@ -211,22 +211,22 @@ common: com.apple.CFPreferences._domainsChangedExternally
 common: com.apple.security.octagon.joined-with-bottle
 [...]
 ```
-### 분산 알림 센터
+### Distributed Notification Center
 
-**분산 알림 센터**의 주요 바이너리는 **`/usr/sbin/distnoted`**로, 알림을 보내는 또 다른 방법입니다. 일부 XPC 서비스를 노출하며 클라이언트를 확인하기 위한 몇 가지 검사를 수행합니다.
+**Distributed Notification Center**의 주요 바이너리는 **`/usr/sbin/distnoted`**로, 알림을 보내는 또 다른 방법입니다. 일부 XPC 서비스를 노출하며 클라이언트를 확인하기 위한 몇 가지 검사를 수행합니다.
 
-### Apple 푸시 알림 (APN)
+### Apple Push Notifications (APN)
 
-이 경우, 애플리케이션은 **주제**에 등록할 수 있습니다. 클라이언트는 **`apsd`**를 통해 Apple의 서버에 연락하여 토큰을 생성합니다.\
+이 경우, 애플리케이션은 **topics**에 등록할 수 있습니다. 클라이언트는 **`apsd`**를 통해 Apple의 서버에 연락하여 토큰을 생성합니다.\
 그런 다음, 제공자는 또한 토큰을 생성하고 Apple의 서버에 연결하여 클라이언트에게 메시지를 보낼 수 있습니다. 이러한 메시지는 **`apsd`**에 의해 로컬에서 수신되며, 이는 알림을 기다리고 있는 애플리케이션에 전달됩니다.
 
 환경 설정은 `/Library/Preferences/com.apple.apsd.plist`에 위치해 있습니다.
 
-macOS의 메시지 로컬 데이터베이스는 `/Library/Application\ Support/ApplePushService/aps.db`에 있으며, iOS에서는 `/var/mobile/Library/ApplePushService`에 있습니다. 이 데이터베이스에는 `incoming_messages`, `outgoing_messages` 및 `channel`의 3개 테이블이 있습니다.
+macOS의 메시지 로컬 데이터베이스는 `/Library/Application\ Support/ApplePushService/aps.db`에 위치하고, iOS에서는 `/var/mobile/Library/ApplePushService`에 있습니다. 이 데이터베이스는 `incoming_messages`, `outgoing_messages` 및 `channel`의 3개 테이블을 가지고 있습니다.
 ```bash
 sudo sqlite3 /Library/Application\ Support/ApplePushService/aps.db
 ```
-다음과 같은 방법으로 데몬 및 연결에 대한 정보를 얻을 수 있습니다:
+다음과 같은 방법으로 데몬 및 연결에 대한 정보를 얻는 것도 가능합니다:
 ```bash
 /System/Library/PrivateFrameworks/ApplePushService.framework/apsctl status
 ```
