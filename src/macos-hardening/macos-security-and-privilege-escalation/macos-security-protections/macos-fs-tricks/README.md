@@ -212,7 +212,7 @@ However, there are some files whose signature won't be checked, these have the k
 	</dict>
 	<key>rules2</key>
 ...
-		<key>^(.*/)?\.DS_Store$</key>
+		<key>^(.*/index.html)?\.DS_Store$</key>
 		<dict>
 			<key>omit</key>
 			<true/>
