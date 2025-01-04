@@ -23,7 +23,7 @@ binwalk --dd ".*" file #Displays and extracts all files from the given file
 ```
 ### Foremost
 
-Nog 'n algemene hulpmiddel om verborge lêers te vind, is **foremost**. Jy kan die konfigurasielêer van foremost in `/etc/foremost.conf` vind. As jy net vir 'n paar spesifieke lêers wil soek, ontkommentaar hulle. As jy niks ontkommentaar nie, sal foremost vir sy standaard geconfigureerde lêertipes soek.
+Nog 'n algemene hulpmiddel om verborge lêers te vind, is **foremost**. Jy kan die konfigurasielêer van foremost in `/etc/foremost.conf` vind. As jy net vir 'n paar spesifieke lêers wil soek, ontkommentarieer hulle. As jy niks ontkommentarieer nie, sal foremost vir sy standaard geconfigureerde lêertipes soek.
 ```bash
 sudo apt-get install foremost
 foremost -v -i file.img -o output
@@ -40,11 +40,11 @@ scalpel file.img -o output
 
 Hierdie hulpmiddel kom binne Kali, maar jy kan dit hier vind: [https://github.com/simsong/bulk_extractor](https://github.com/simsong/bulk_extractor)
 
-Hierdie hulpmiddel kan 'n beeld skandeer en sal **pcaps** daarin **onttrek**, **netwerk inligting (URL's, domeine, IP's, MAC's, e-posse)** en meer **lêers**. Jy hoef net te doen:
+Hierdie hulpmiddel kan 'n beeld skandeer en sal **pcaps** daarin **onttrek**, **netwerk inligting (URL's, domeine, IP's, MAC's, e-pos)** en meer **lêers**. Jy hoef net te doen:
 ```
 bulk_extractor memory.img -o out_folder
 ```
-Navigeer deur **alle inligting** wat die hulpmiddel versamel het (wagwoorde?), **analiseer** die **pakkette** (lees[ **Pcaps analise**](../pcap-inspection/)), soek na **vreemde domeine** (domeine wat verband hou met **malware** of **nie-bestaande**).
+Navigeer deur **alle inligting** wat die hulpmiddel versamel het (wagwoorde?), **analiseer** die **pakkette** (lees[ **Pcaps analise**](../pcap-inspection/index.html)), soek na **vreemde domeine** (domeine wat verband hou met **malware** of **nie-bestaande**).
 
 ### PhotoRec
 

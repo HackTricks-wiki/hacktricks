@@ -1,15 +1,14 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-# Carving gereedskap
+# Carving tools
 
 ## Autopsy
 
-Die mees algemene gereedskap wat in forensiese ondersoeke gebruik word om lêers uit beelde te onttrek, is [**Autopsy**](https://www.autopsy.com/download/). Laai dit af, installeer dit en laat dit die lêer verwerk om "versteekte" lêers te vind. Let daarop dat Autopsy gebou is om skyfbeelde en ander soorte beelde te ondersteun, maar nie eenvoudige lêers nie.
+Die mees algemene hulpmiddel wat in forensiese ondersoeke gebruik word om lêers uit beelde te onttrek, is [**Autopsy**](https://www.autopsy.com/download/). Laai dit af, installeer dit en laat dit die lêer verwerk om "versteekte" lêers te vind. Let daarop dat Autopsy gebou is om skyfbeelde en ander soorte beelde te ondersteun, maar nie eenvoudige lêers nie.
 
 ## Binwalk <a id="binwalk"></a>
 
-**Binwalk** is 'n gereedskap om binêre lêers soos beelde en klanklêers te soek vir ingebedde lêers en data.
-Dit kan geïnstalleer word met `apt`, maar die [bron](https://github.com/ReFirmLabs/binwalk) kan op github gevind word.
+**Binwalk** is 'n hulpmiddel om binêre lêers soos beelde en klanklêers te soek vir ingebedde lêers en data. Dit kan geïnstalleer word met `apt`, maar die [bron](https://github.com/ReFirmLabs/binwalk) kan op github gevind word.  
 **Nuttige opdragte**:
 ```bash
 sudo apt install binwalk #Insllation
@@ -27,7 +26,7 @@ foremost -v -i file.img -o output
 ```
 ## **Scalpel**
 
-**Scalpel** is 'n ander hulpmiddel wat gebruik kan word om **lêers wat in 'n lêer ingebed is** te vind en te onttrek. In hierdie geval sal jy die lêertipes wat jy wil hê dit moet onttrek, uit die konfigurasielêer \(_/etc/scalpel/scalpel.conf_\) moet ontkommentaar.
+**Scalpel** is 'n ander hulpmiddel wat gebruik kan word om **lêers wat in 'n lêer ingebed is** te vind en te onttrek. In hierdie geval sal jy die lêertipes wat jy wil hê dit moet onttrek, uit die konfigurasie-lêer \(_/etc/scalpel/scalpel.conf_\) moet ontkommentaar.
 ```bash
 sudo apt-get install scalpel
 scalpel file.img -o output
@@ -40,13 +39,13 @@ Hierdie hulpmiddel kan 'n beeld skandeer en sal **pcaps** daarin **onttrek**, **
 ```text
 bulk_extractor memory.img -o out_folder
 ```
-Navigeer deur **alle inligting** wat die hulpmiddel versamel het \(wagwoorde?\), **analiseer** die **pakkette** \(lees[ **Pcaps analise**](../pcap-inspection/)\), soek vir **vreemde domeine** \(domeine wat verband hou met **malware** of **nie-bestaande**\).
+Navigeer deur **alle inligting** wat die hulpmiddel versamel het \(wagwoorde?\), **analiseer** die **pakkette** \(lees[ **Pcaps analise**](../pcap-inspection/index.html)\), soek vir **vreemde domeine** \(domeine wat verband hou met **malware** of **nie-bestaande**\).
 
 ## PhotoRec
 
 Jy kan dit vind in [https://www.cgsecurity.org/wiki/TestDisk_Download](https://www.cgsecurity.org/wiki/TestDisk_Download)
 
-Dit kom met 'n GUI en CLI weergawe. Jy kan die **lêer-tipes** kies waarvoor jy wil hê PhotoRec moet soek.
+Dit kom met 'n GUI en CLI weergawe. Jy kan die **lêer-tipes** kies waarvoor PhotoRec moet soek.
 
 ![](../../../images/image%20%28524%29.png)
 

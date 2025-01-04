@@ -2,25 +2,25 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## POSIX toestemmings kombinasies
+## POSIX toestemmingskombinasies
 
 Toestemmings in 'n **gids**:
 
 - **lees** - jy kan die **gids** inskrywings **opnoem**
-- **skryf** - jy kan **lêers** in die gids **verwyder/skryf** en jy kan **leë vouers verwyder**.
-- Maar jy **kan nie nie-leë vouers verwyder/modifiseer** tensy jy skryftoestemmings daaroor het.
-- Jy **kan nie die naam van 'n vouer modifiseer** tensy jy dit besit.
-- **voer uit** - jy is **toegelaat om** die gids te **deursoek** - as jy nie hierdie reg het nie, kan jy nie enige lêers binne dit, of in enige subgidsen, toegang verkry nie.
+- **skryf** - jy kan **verwyder/skryf** **lêers** in die gids en jy kan **leë vouers verwyder**.
+- Maar jy **kan nie nie-leë vouers verwyder/wysig** tensy jy skryftoestemmings daaroor het.
+- Jy **kan nie die naam van 'n vouer wysig** tensy jy dit besit.
+- **voer uit** - jy is **toegelaat om** die gids te **deursoek** - as jy nie hierdie reg het nie, kan jy nie enige lêers binne dit, of in enige subgidsen, toegang nie.
 
 ### Gevaarlike Kombinasies
 
 **Hoe om 'n lêer/vouer wat deur root besit word te oorskryf**, maar:
 
 - Een ouer **gids eienaar** in die pad is die gebruiker
-- Een ouer **gids eienaar** in die pad is 'n **gebruikersgroep** met **skryf toegang**
+- Een ouer **gids eienaar** in die pad is 'n **gebruikersgroep** met **skryftoegang**
 - 'n Gebruikers **groep** het **skryf** toegang tot die **lêer**
 
-Met enige van die vorige kombinasies, kan 'n aanvaller 'n **sim/hard skakel** in die verwagte pad **injek** om 'n bevoorregte arbitrêre skryf te verkry.
+Met enige van die vorige kombinasies, kan 'n aanvaller 'n **sim/hard skakel** na die verwagte pad **injek** om 'n bevoorregte arbitrêre skryf te verkry.
 
 ### Vouer root R+X Spesiale geval
 
@@ -34,7 +34,7 @@ Voorbeeld in: [https://theevilbit.github.io/posts/exploiting_directory_permissio
 
 As 'n bevoorregte proses data in 'n **lêer** skryf wat **beheer** kan word deur 'n **laer bevoorregte gebruiker**, of wat **voorheen geskep** is deur 'n laer bevoorregte gebruiker. Die gebruiker kan net **na 'n ander lêer wys** via 'n Simboliese of Hard skakel, en die bevoorregte proses sal op daardie lêer skryf.
 
-Kyk in die ander afdelings waar 'n aanvaller 'n **arbitrêre skryf kan misbruik om bevoorregte te verhoog**.
+Kyk in die ander afdelings waar 'n aanvaller 'n **arbitrêre skryf kan misbruik om voorregte te verhoog**.
 
 ### Open `O_NOFOLLOW`
 
@@ -84,9 +84,9 @@ xattr: [Errno 1] Operation not permitted: '/tmp/asd'
 ls -lO /tmp/asd
 # check the "uchg" in the output
 ```
-### defvfs monteer
+### defvfs mount
 
-'n **devfs** monteer **ondersteun nie xattr nie**, meer inligting in [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)
+'n **devfs** mount **ondersteun nie xattr nie**, meer inligting in [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)
 ```bash
 mkdir /tmp/mnt
 mount_devfs -o noowners none "/tmp/mnt"
@@ -97,7 +97,7 @@ xattr: [Errno 1] Operation not permitted: '/tmp/mnt/lol'
 ```
 ### writeextattr ACL
 
-Hierdie ACL voorkom dat `xattrs` by die lêer gevoeg word
+Hierdie ACL verhoed dat `xattrs` by die lêer gevoeg word
 ```bash
 rm -rf /tmp/test*
 echo test >/tmp/test
@@ -122,7 +122,7 @@ ls -le /tmp/test
 
 **AppleDouble** lêerformaat kopieer 'n lêer insluitend sy ACEs.
 
-In die [**bronkode**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) is dit moontlik om te sien dat die ACL teksverteenwoordiging wat binne die xattr genaamd **`com.apple.acl.text`** gestoor is, as ACL in die gedecomprimeerde lêer gestel gaan word. So, as jy 'n toepassing in 'n zip-lêer met **AppleDouble** lêerformaat gekompresseer het met 'n ACL wat voorkom dat ander xattrs daarop geskryf kan word... die kwarantyn xattr is nie in die toepassing gestel nie:
+In die [**bronkode**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) is dit moontlik om te sien dat die ACL teksverteenwoordiging wat binne die xattr genaamd **`com.apple.acl.text`** gestoor is, as ACL in die gedecomprimeerde lêer gestel gaan word. So, as jy 'n toepassing in 'n zip-lêer met **AppleDouble** lêerformaat gekompresseer het met 'n ACL wat voorkom dat ander xattrs daarin geskryf word... was die kwarantyn xattr nie in die toepassing gestel nie:
 
 Kontroleer die [**oorspronklike verslag**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) vir meer inligting.
 
@@ -152,15 +152,15 @@ Nie regtig nodig nie, maar ek laat dit daar net ingeval:
 macos-xattr-acls-extra-stuff.md
 {{#endref}}
 
-## Oorskry handtekening kontroles
+## Bypass handtekening kontroles
 
-### Oorskry platform binêre kontroles
+### Bypass platform binêre kontroles
 
-Sommige sekuriteitskontroles kyk of die binêre 'n **platform binêre** is, byvoorbeeld om verbinding te maak met 'n XPC-diens. egter, soos blootgestel in 'n oorskry in https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/, is dit moontlik om hierdie kontrole te oorskry deur 'n platform binêre (soos /bin/ls) te verkry en die uitbuiting via dyld in te spuit met 'n omgewing veranderlike `DYLD_INSERT_LIBRARIES`.
+Sommige sekuriteitskontroles kyk of die binêre 'n **platform binêre** is, byvoorbeeld om verbinding te maak met 'n XPC-diens. Dit is egter moontlik om hierdie kontrole te omseil deur 'n platform binêre (soos /bin/ls) te verkry en die uitbuiting via dyld te inspuit met 'n omgewing veranderlike `DYLD_INSERT_LIBRARIES`.
 
-### Oorskry vlae `CS_REQUIRE_LV` en `CS_FORCED_LV`
+### Bypass vlae `CS_REQUIRE_LV` en `CS_FORCED_LV`
 
-Dit is moontlik vir 'n uitvoerende binêre om sy eie vlae te wysig om kontroles te oorskry met 'n kode soos:
+Dit is moontlik vir 'n uitvoerende binêre om sy eie vlae te wysig om kontroles te omseil met 'n kode soos:
 ```c
 // Code from https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/
 int pid = getpid();
@@ -175,7 +175,7 @@ NSLog(@"=====Inject successfully into %d(%@), csflags=0x%x", pid, exePath, statu
 ```
 ## Bypass Code Signatures
 
-Bundles bevat die lêer **`_CodeSignature/CodeResources`** wat die **hash** van elke enkele **lêer** in die **bundle** bevat. Let daarop dat die hash van CodeResources ook **ingebed is in die uitvoerbare**, so ons kan nie daarmee mors nie.
+Bundles bevat die lêer **`_CodeSignature/CodeResources`** wat die **hash** van elke enkele **lêer** in die **bundle** bevat. Let daarop dat die hash van CodeResources ook **ingebed** is in die uitvoerbare lêer, so ons kan nie daarmee mors nie.
 
 Daar is egter 'n paar lêers waarvan die handtekening nie nagegaan sal word nie, hierdie het die sleutel omit in die plist, soos:
 ```xml
@@ -195,7 +195,7 @@ Daar is egter 'n paar lêers waarvan die handtekening nie nagegaan sal word nie,
 </dict>
 <key>rules2</key>
 ...
-<key>^(.*/)?\.DS_Store$</key>
+<key>^(.*/index.html)?\.DS_Store$</key>
 <dict>
 <key>omit</key>
 <true/>
@@ -227,7 +227,7 @@ openssl dgst -binary -sha1 /System/Cryptexes/App/System/Applications/Safari.app/
 ```
 ## Mount dmgs
 
-'n Gebruiker kan 'n pasgemaakte dmg monteer wat selfs bo-op bestaande vouers geskep is. So kan jy 'n pasgemaakte dmg-pakket met pasgemaakte inhoud skep:
+'n Gebruiker kan 'n pasgemaakte dmg monteer wat selfs bo-op sommige bestaande vouers geskep is. So kan jy 'n pasgemaakte dmg-pakket met pasgemaakte inhoud skep:
 ```bash
 # Create the volume
 hdiutil create /private/tmp/tmp.dmg -size 2m -ov -volname CustomVolName -fs APFS 1>/dev/null
@@ -282,11 +282,11 @@ Genereer net die skrip `/Applications/Scripts/privesc.sh` met die **opdragte** w
 
 ### Sudoers Lêer
 
-As jy **arbitraire skrywe** het, kan jy 'n lêer binne die gids **`/etc/sudoers.d/`** skep wat jouself **sudo** regte gee.
+As jy **arbitraire skryf** het, kan jy 'n lêer binne die gids **`/etc/sudoers.d/`** skep wat jouself **sudo** regte gee.
 
 ### PAD lêers
 
-Die lêer **`/etc/paths`** is een van die hoof plekke wat die PATH omgewing veranderlike vul. Jy moet root wees om dit te oorskryf, maar as 'n skrip van **privilege proses** 'n **opdrag sonder die volle pad** uitvoer, mag jy dit dalk kan **hijack** deur hierdie lêer te wysig.
+Die lêer **`/etc/paths`** is een van die hoof plekke wat die PATH omgewing veranderlike vul. Jy moet root wees om dit te oorskryf, maar as 'n skrip van **privileged process** 'n **opdrag sonder die volle pad** uitvoer, mag jy in staat wees om dit te **hijack** deur hierdie lêer te wysig.
 
 Jy kan ook lêers in **`/etc/paths.d`** skryf om nuwe gidse in die `PATH` omgewing veranderlike te laai.
 
@@ -306,13 +306,13 @@ Skryf dan in `/etc/sudoers.d/lpe` die nodige konfigurasie om voorregte te verhoo
 
 Verander dan weer die lêer `/etc/cups/cups-files.conf` deur `LogFilePerm 700` aan te dui sodat die nuwe sudoers-lêer geldig word deur `cupsctl` aan te roep.
 
-### Sandbox Ontsnapping
+### Sandbox Escape
 
-Dit is moontlik om die macOS sandbox te ontsnap met 'n FS arbitrêre skrywe. Vir sommige voorbeelde, kyk na die bladsy [macOS Auto Start](../../../../macos-auto-start-locations.md), maar 'n algemene een is om 'n Terminal voorkeurlêer in `~/Library/Preferences/com.apple.Terminal.plist` te skryf wat 'n opdrag by opstart uitvoer en dit te noem met `open`.
+Dit is moontlik om die macOS sandbox te ontsnap met 'n FS arbitrêre skrywe. Vir sommige voorbeelde, kyk na die bladsy [macOS Auto Start](../../../../macos-auto-start-locations.md), maar 'n algemene een is om 'n Terminal voorkeurlêer in `~/Library/Preferences/com.apple.Terminal.plist` te skryf wat 'n opdrag by opstart uitvoer en dit aan te roep met `open`.
 
 ## Genereer skryfbare lêers as ander gebruikers
 
-Dit sal 'n lêer genereer wat aan root behoort en deur my geskryf kan word ([**kode van hier**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Dit mag ook as privesc werk.
+Dit sal 'n lêer genereer wat aan root behoort en deur my geskryf kan word ([**code from here**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Dit mag ook as privesc werk:
 ```bash
 DIRNAME=/usr/local/etc/periodic/daily
 
@@ -326,7 +326,7 @@ echo $FILENAME
 ```
 ## POSIX Gedeelde Geheue
 
-**POSIX gedeelde geheue** laat prosesse in POSIX-konforme bedryfstelsels toe om toegang te verkry tot 'n gemeenskaplike geheuegebied, wat vinniger kommunikasie vergemaklik in vergelyking met ander inter-proses kommunikasie metodes. Dit behels die skep of oopmaak van 'n gedeelde geheue objek met `shm_open()`, die instelling van sy grootte met `ftruncate()`, en die kartering daarvan in die proses se adresruimte met `mmap()`. Prosesse kan dan direk lees van en skryf na hierdie geheuegebied. Om gelyktydige toegang te bestuur en data-beskadiging te voorkom, word sinchronisasie meganismes soos mutexes of semafore dikwels gebruik. Laastens, prosesse ontkarter en sluit die gedeelde geheue met `munmap()` en `close()`, en verwyder opsioneel die geheue objek met `shm_unlink()`. Hierdie stelsel is veral effektief vir doeltreffende, vinnige IPC in omgewings waar verskeie prosesse vinnig toegang tot gedeelde data moet verkry.
+**POSIX gedeelde geheue** laat prosesse in POSIX-konforme bedryfstelsels toe om toegang te verkry tot 'n gemeenskaplike geheuegebied, wat vinniger kommunikasie vergemaklik in vergelyking met ander inter-proses kommunikasie metodes. Dit behels die skep of oopmaak van 'n gedeelde geheue objek met `shm_open()`, die instelling van sy grootte met `ftruncate()`, en die kartering daarvan in die proses se adresruimte met `mmap()`. Prosesse kan dan direk lees van en skryf na hierdie geheuegebied. Om gelyktydige toegang te bestuur en data-korrupsie te voorkom, word sinchronisasie-meganismes soos mutexes of semafore dikwels gebruik. Laastens, ontkoppel prosesse en sluit die gedeelde geheue met `munmap()` en `close()`, en verwyder opsioneel die geheue objek met `shm_unlink()`. Hierdie stelsel is veral effektief vir doeltreffende, vinnige IPC in omgewings waar verskeie prosesse vinnig toegang tot gedeelde data moet verkry.
 
 <details>
 
@@ -422,13 +422,13 @@ return 0;
 
 ## macOS Bewaakte Beskrywings
 
-**macOS bewaakte beskrywings** is 'n sekuriteitskenmerk wat in macOS bekendgestel is om die veiligheid en betroubaarheid van **lêer beskrywing operasies** in gebruikersaansoeke te verbeter. Hierdie bewaakte beskrywings bied 'n manier om spesifieke beperkings of "wagte" met lêer beskrywings te assosieer, wat deur die kern afgedwing word.
+**macOS bewaakte beskrywings** is 'n sekuriteitskenmerk wat in macOS bekendgestel is om die veiligheid en betroubaarheid van **lêer beskrywing operasies** in gebruikers toepassings te verbeter. Hierdie bewaakte beskrywings bied 'n manier om spesifieke beperkings of "wagters" met lêer beskrywings te assosieer, wat deur die kern afgedwing word.
 
-Hierdie kenmerk is veral nuttig om sekere klasse van sekuriteitskwesbaarhede soos **ongeoorloofde lêer toegang** of **wedloop toestande** te voorkom. Hierdie kwesbaarhede gebeur wanneer 'n draad byvoorbeeld 'n lêer beskrywing benader wat **'n ander kwesbare draad toegang gee** of wanneer 'n lêer beskrywing **geërf** word deur 'n kwesbare kind proses. Sommige funksies wat met hierdie funksionaliteit verband hou, is:
+Hierdie kenmerk is veral nuttig om sekere klasse van sekuriteitskwesbaarhede soos **ongemagtigde lêer toegang** of **wedloop toestande** te voorkom. Hierdie kwesbaarhede gebeur wanneer 'n draad byvoorbeeld 'n lêer beskrywing benader wat **'n ander kwesbare draad toegang gee** of wanneer 'n lêer beskrywing **geërf** word deur 'n kwesbare kind proses. Sommige funksies wat met hierdie funksionaliteit verband hou, is:
 
-- `guarded_open_np`: Maak 'n FD met 'n wag oop
+- `guarded_open_np`: Oop 'n FD met 'n wagter
 - `guarded_close_np`: Sluit dit
-- `change_fdguard_np`: Verander wagvlagte op 'n beskrywing (selfs om die wag beskerming te verwyder)
+- `change_fdguard_np`: Verander wagter vlae op 'n beskrywing (selfs om die wagter beskerming te verwyder)
 
 ## Verwysings
 

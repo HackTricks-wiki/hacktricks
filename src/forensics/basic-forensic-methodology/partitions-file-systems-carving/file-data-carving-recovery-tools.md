@@ -23,7 +23,7 @@ binwalk --dd ".*" file #Displays and extracts all files from the given file
 ```
 ### Foremost
 
-'n Ander algemene hulpmiddel om verborge lêers te vind is **foremost**. Jy kan die konfigurasielêer van foremost in `/etc/foremost.conf` vind. As jy net vir 'n paar spesifieke lêers wil soek, ontkommentarieer hulle. As jy niks ontkommentarieer nie, sal foremost vir sy standaard geconfigureerde lêertipes soek.
+Nog 'n algemene hulpmiddel om verborge lêers te vind, is **foremost**. Jy kan die konfigurasielêer van foremost in `/etc/foremost.conf` vind. As jy net vir 'n paar spesifieke lêers wil soek, ontkommentarieer hulle. As jy niks ontkommentarieer nie, sal foremost vir sy standaard geconfigureerde lêertipes soek.
 ```bash
 sudo apt-get install foremost
 foremost -v -i file.img -o output
@@ -44,7 +44,7 @@ Hierdie hulpmiddel kan 'n beeld skandeer en sal **pcaps** daarin **onttrek**, **
 ```
 bulk_extractor memory.img -o out_folder
 ```
-Navigeer deur **alle inligting** wat die hulpmiddel versamel het (wagwoorde?), **analiseer** die **pakkette** (lees[ **Pcaps analise**](../pcap-inspection/)), soek na **vreemde domeine** (domeine wat verband hou met **malware** of **nie-bestaande**).
+Navigeer deur **alle inligting** wat die hulpmiddel versamel het (wagwoorde?), **analiseer** die **pakkette** (lees[ **Pcaps analise**](../pcap-inspection/index.html)), soek na **vreemde domeine** (domeine wat verband hou met **malware** of **nie-bestaande**).
 
 ### PhotoRec
 

@@ -73,7 +73,7 @@ Dit kan in die volgende situasies gebeur:
 
 In staat wees om 'n **lêer te skep** wat gaan **gebruik word deur root**, stel 'n gebruiker in staat om **voordeel te trek uit sy inhoud** of selfs **simboliese skakels/hardskakels** te skep om dit na 'n ander plek te wys.
 
-Vir hierdie tipe kwesbaarhede, moenie vergeet om **kwesbare `.pkg` installeerders** te **kontroleer**:
+Vir hierdie soort kwesbaarhede, moenie vergeet om **kwesbare `.pkg` installeerders** te **kontroleer**:
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-installers-abuse.md
@@ -81,7 +81,7 @@ macos-files-folders-and-binaries/macos-installers-abuse.md
 
 ### Lêeruitbreiding & URL skema app hanteerders
 
-Vreemde apps wat deur lêeruitbreidings geregistreer is, kan misbruik word en verskillende toepassings kan geregistreer word om spesifieke protokolle te open
+Vreemde programme wat deur lêeruitbreidings geregistreer is, kan misbruik word en verskillende toepassings kan geregistreer word om spesifieke protokolle te open
 
 {{#ref}}
 macos-file-extension-apps.md
@@ -95,11 +95,11 @@ Daarom sal 'n aanvaller wat 'n macOS masjien suksesvol wil kompromitteer, moet *
 
 Hierdie toestemmings word gewoonlik gegee in die vorm van **regte** waarmee die toepassing onderteken is, of die toepassing mag sekere toegang versoek het en nadat die **gebruiker dit goedgekeur het**, kan dit in die **TCC databasisse** gevind word. 'n Ander manier waarop 'n proses hierdie toestemmings kan verkry, is deur 'n **kind van 'n proses** met daardie **toestemmings** te wees, aangesien dit gewoonlik **geërf** word.
 
-Volg hierdie skakels om verskillende maniere te vind om [**privileges in TCC te verhoog**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), om [**TCC te omseil**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) en hoe in die verlede [**SIP omseil is**](macos-security-protections/macos-sip.md#sip-bypasses).
+Volg hierdie skakels om verskillende maniere te vind om [**privileges in TCC te verhoog**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), om [**TCC te omseil**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) en hoe in die verlede [**SIP omseil is**](macos-security-protections/macos-sip.md#sip-bypasses).
 
 ## macOS Tradisionele Privilege Escalering
 
-Natuurlik moet jy ook belangstel om na root te verhoog vanuit 'n rooi span se perspektief. Kyk na die volgende pos vir 'n paar wenke:
+Natuurlik, vanuit 'n rooi span se perspektief, moet jy ook belangstel om na root te verhoog. Kyk na die volgende pos vir 'n paar wenke:
 
 {{#ref}}
 macos-privilege-escalation.md
@@ -111,7 +111,7 @@ macos-privilege-escalation.md
 
 ## Verwysings
 
-- [**OS X Voorval Respons: Scripting en Analise**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
+- [**OS X Voorval Respons: Skripting en Analise**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
 - [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
 - [**https://github.com/NicolasGrimonpont/Cheatsheet**](https://github.com/NicolasGrimonpont/Cheatsheet)
 - [**https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ**](https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ)

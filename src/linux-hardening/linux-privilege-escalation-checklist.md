@@ -33,14 +33,14 @@
 - [ ] Soek na **exploits van lopende prosesse** (veral die weergawe wat aan die gang is).
 - [ ] Kan jy die **binaire** van enige lopende proses **wysig**?
 - [ ] **Monitor prosesse** en kyk of enige interessante proses gereeld aan die gang is.
-- [ ] Kan jy **lees** van enige interessante **prosesgeheue** (waar wagwoorde gestoor kan word)?
+- [ ] Kan jy **lees** van sommige interessante **prosesgeheue** (waar wagwoorde gestoor kan word)?
 
 ### [Geplande/Cron werke?](privilege-escalation/index.html#scheduled-jobs)
 
 - [ ] Word die [**PATH**](privilege-escalation/index.html#cron-path) deur 'n cron gewysig en kan jy daarin **skryf**?
 - [ ] Enige [**wildcard**](privilege-escalation/index.html#cron-using-a-script-with-a-wildcard-wildcard-injection) in 'n cron werk?
-- [ ] Enige [**wysigbare skrip**](privilege-escalation/index.html#cron-script-overwriting-and-symlink) wat **uitgevoer** word of binne 'n **wysigbare gids** is?
-- [ ] Het jy opgemerk dat 'n **skrip** [**baie gereeld**](privilege-escalation/index.html#frequent-cron-jobs) kan of word [**uitgevoer**]? (elke 1, 2 of 5 minute)
+- [ ] Sommige [**wysigbare skrip**](privilege-escalation/index.html#cron-script-overwriting-and-symlink) word **uitgevoer** of is binne **wysigbare gids**?
+- [ ] Het jy opgemerk dat sommige **skrip** of [**uitgevoer** word **baie** **gereeld**](privilege-escalation/index.html#frequent-cron-jobs)? (elke 1, 2 of 5 minute)
 
 ### [Dienste](privilege-escalation/index.html#services)
 
@@ -72,10 +72,10 @@
 
 - [ ] Generiese gebruikers/groepe **inventarisering**
 - [ ] Het jy 'n **baie groot UID**? Is die **masjien** **kwesbaar**?
-- [ ] Kan jy [**privileges verhoog danksy 'n groep**](privilege-escalation/interesting-groups-linux-pe/) waartoe jy behoort?
+- [ ] Kan jy [**privileges verhoog danksy 'n groep**](privilege-escalation/interesting-groups-linux-pe/index.html) waartoe jy behoort?
 - [ ] **Klipbord** data?
 - [ ] Wagwoordbeleid?
-- [ ] Probeer om **elke bekende wagwoord** wat jy voorheen ontdek het te gebruik om in te log **met elke** moontlike **gebruiker**. Probeer ook om sonder 'n wagwoord in te log.
+- [ ] Probeer om **elke** **bekende wagwoord** wat jy voorheen ontdek het te gebruik om in te log **met elke** moontlike **gebruiker**. Probeer ook om sonder 'n wagwoord in te log.
 
 ### [Skryfbare PATH](privilege-escalation/index.html#writable-path-abuses)
 
@@ -83,7 +83,7 @@
 
 ### [SUDO en SUID opdragte](privilege-escalation/index.html#sudo-and-suid)
 
-- [ ] Kan jy **enige opdrag met sudo uitvoer**? Kan jy dit gebruik om IES, SKRYF of UITVOER enigiets as root? ([**GTFOBins**](https://gtfobins.github.io))
+- [ ] Kan jy **enige opdrag met sudo** uitvoer? Kan jy dit gebruik om IES, SKRYF of UITVOER enigiets as root? ([**GTFOBins**](https://gtfobins.github.io))
 - [ ] Is enige **exploitable SUID binaire**? ([**GTFOBins**](https://gtfobins.github.io))
 - [ ] Is [**sudo** opdragte **beperk** deur **pad**? kan jy die beperkings **omseil**](privilege-escalation/index.html#sudo-execution-bypassing-paths)?
 - [ ] [**Sudo/SUID binaire sonder pad aangedui**](privilege-escalation/index.html#sudo-command-suid-binary-without-command-path)?
@@ -115,8 +115,8 @@
 
 ### [Interessante Lêers](privilege-escalation/index.html#interesting-files)
 
-- [ ] **Profiel lêers** - Lees sensitiewe data? Skryf na privesc?
-- [ ] **passwd/shadow lêers** - Lees sensitiewe data? Skryf na privesc?
+- [ ] **Profiel lêers** - Lees sensitiewe data? Skryf na privesk?
+- [ ] **passwd/shadow lêers** - Lees sensitiewe data? Skryf na privesk?
 - [ ] **Kontroleer algemeen interessante gidsen** vir sensitiewe data
 - [ ] **Vreemde Ligging/Eienaars lêers,** jy mag toegang hê tot of uitvoerbare lêers verander
 - [ ] **Gewysig** in laaste minute

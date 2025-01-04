@@ -4,7 +4,7 @@
 
 ## Basiese Inligting
 
-Verskillende kwesbaarhede soos [**Python Formaat Strings**](bypass-python-sandboxes/index.html#python-format-string) of [**Klas Besoedeling**](class-pollution-pythons-prototype-pollution.md) mag jou toelaat om **python interne data te lees maar sal jou nie toelaat om kode uit te voer nie**. Daarom sal 'n pentester die meeste van hierdie lees toestemmings moet maak om **sensitiewe voorregte te verkry en die kwesbaarheid te eskaleer**.
+Verskillende kwesbaarhede soos [**Python Formaat Strings**](bypass-python-sandboxes/index.html#python-format-string) of [**Klas Besoedeling**](class-pollution-pythons-prototype-pollution.md) mag jou toelaat om **python interne data te lees maar sal jou nie toelaat om kode uit te voer nie**. Daarom sal 'n pentester die meeste van hierdie lees toestemmings moet benut om **sensitiewe voorregte te verkry en die kwesbaarheid te eskaleer**.
 
 ### Flask - Lees geheime sleutel
 
@@ -13,7 +13,7 @@ Die hoofblad van 'n Flask-toepassing sal waarskynlik die **`app`** globale objek
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-In hierdie geval is dit moontlik om toegang tot hierdie objek te verkry net deur enige gadget te gebruik om **globale objekte te bekom** van die [**Bypass Python sandboxes page**](bypass-python-sandboxes/).
+In hierdie geval is dit moontlik om toegang tot hierdie objek te verkry net deur enige gadget te gebruik om **globale objek te benader** vanaf die [**Bypass Python sandboxes page**](bypass-python-sandboxes/index.html).
 
 In die geval waar **die kwesbaarheid in 'n ander python-lêer is**, benodig jy 'n gadget om lêers te traverseer om by die hoof een te kom om **toegang tot die globale objek `app.secret_key`** te verkry om die Flask geheime sleutel te verander en in staat te wees om [**privileges te eskaleer** deur hierdie sleutel te ken](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
 
@@ -21,7 +21,7 @@ In die geval waar **die kwesbaarheid in 'n ander python-lêer is**, benodig jy '
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
-Gebruik hierdie payload om **`app.secret_key`** (die naam in jou app mag anders wees) te verander om nuwe en meer bevoegde flask koekies te kan teken.
+Gebruik hierdie payload om **`app.secret_key`** (die naam in jou app mag anders wees) te verander sodat jy nuwe en meer bevoegdheid flask koekies kan teken.
 
 ### Werkzeug - machine_id en node uuid
 

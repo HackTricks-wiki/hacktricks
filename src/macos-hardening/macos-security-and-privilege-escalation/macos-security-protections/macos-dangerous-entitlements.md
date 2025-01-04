@@ -17,15 +17,15 @@ Die toestemming **`com.apple.rootless.install`** maak dit moontlik om **SIP te o
 
 ### **`com.apple.system-task-ports` (voorheen genoem `task_for_pid-allow`)**
 
-Hierdie toestemming maak dit moontlik om die **taakpoort vir enige** proses te verkry, behalwe die kernel. Kyk [**hier vir meer inligting**](../macos-proces-abuse/macos-ipc-inter-process-communication/).
+Hierdie toestemming maak dit moontlik om die **taakpoort vir enige** proses te verkry, behalwe die kernel. Kyk [**hier vir meer inligting**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
 
 ### `com.apple.security.get-task-allow`
 
-Hierdie toestemming maak dit moontlik vir ander prosesse met die **`com.apple.security.cs.debugger`** toestemming om die taakpoort van die proses wat deur die binêre met hierdie toestemming uitgevoer word, te verkry en **kode daarop in te spuit**. Kyk [**hier vir meer inligting**](../macos-proces-abuse/macos-ipc-inter-process-communication/).
+Hierdie toestemming maak dit moontlik vir ander prosesse met die **`com.apple.security.cs.debugger`** toestemming om die taakpoort van die proses wat deur die binêre met hierdie toestemming uitgevoer word, te verkry en **kode daarop in te spuit**. Kyk [**hier vir meer inligting**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
 
 ### `com.apple.security.cs.debugger`
 
-Toepassings met die Debugging Tool Toestemming kan `task_for_pid()` aanroep om 'n geldige taakpoort vir ongetekende en derdeparty toepassings met die `Get Task Allow` toestemming wat op `true` gestel is, te verkry. Maar, selfs met die debugging tool toestemming, kan 'n debugger **nie die taakpoorte** van prosesse wat **nie die `Get Task Allow` toestemming het nie**, en wat dus deur Stelselintegriteitbeskerming beskerm word, verkry. Kyk [**hier vir meer inligting**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
+Toepassings met die Debugging Tool Toestemming kan `task_for_pid()` aanroep om 'n geldige taakpoort vir ongetekende en derdeparty toepassings met die `Get Task Allow` toestemming wat op `true` gestel is, te verkry. Tog, selfs met die debugging tool toestemming, kan 'n debugger **nie die taakpoorte** van prosesse wat **nie die `Get Task Allow` toestemming het nie**, en wat dus deur Stelselintegriteitsbeskerming beskerm word, verkry. Kyk [**hier vir meer inligting**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
 
 ### `com.apple.security.cs.disable-library-validation`
 
@@ -50,7 +50,7 @@ Hierdie toestemmings maak dit moontlik om **programmatuur te installeer sonder o
 
 ### `com.apple.private.security.kext-management`
 
-Toestemming wat benodig word om die **kernel te vra om 'n kernuitbreiding te laai**.
+Toestemming wat benodig word om die **kernel te vra om 'n kernel uitbreiding** te laai.
 
 ### **`com.apple.private.icloud-account-access`**
 
@@ -58,7 +58,7 @@ Die toestemming **`com.apple.private.icloud-account-access`** maak dit moontlik 
 
 **iMovie** en **Garageband** het hierdie toestemming gehad.
 
-Vir meer **inligting** oor die uitbuiting om **icloud tokens** van daardie toestemming te verkry, kyk die praatjie: [**#OBTS v5.0: "Wat op jou Mac gebeur, bly op Apple se iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+Vir meer **inligting** oor die uitbuiting om **icloud tokens** van daardie toestemming te verkry, kyk die praatjie: [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
 ### `com.apple.private.tcc.manager.check-by-audit-token`
 
@@ -87,7 +87,7 @@ Hierdie toestemming lys **keychain** groepe waartoe die toepassing toegang het:
 ```
 ### **`kTCCServiceSystemPolicyAllFiles`**
 
-Gee **Volledige Skyftoegang** regte, een van die hoogste TCC regte wat jy kan hê.
+Gee **Volle Skyf Toegang** regte, een van die TCC hoogste regte wat jy kan hê.
 
 ### **`kTCCServiceAppleEvents`**
 
@@ -101,7 +101,7 @@ Of om hulle **arbitraire aksies** te laat uitvoer.
 
 ### **`kTCCServiceEndpointSecurityClient`**
 
-Laat, onder andere toestemmings, toe om die **gebruikers TCC databasis** te **skryf**.
+Laat, onder andere toestemmings, toe om die **gebruikers TCC-databasis** te **skryf**.
 
 ### **`kTCCServiceSystemPolicySysAdminFiles`**
 
@@ -123,21 +123,21 @@ Die proses sal in staat wees om die **macOS toeganklikheidskenmerke** te **misbr
 
 ### `com.apple.security.cs.allow-jit`
 
-Hierdie regte laat toe om **geheue te skep wat skryfbaar en uitvoerbaar is** deur die `MAP_JIT` vlag aan die `mmap()` stelselfunksie te gee. Kyk [**hier vir meer inligting**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit).
+Hierdie reg laat toe om **geheue te skep wat skryfbaar en uitvoerbaar is** deur die `MAP_JIT` vlag aan die `mmap()` stelselfunksie deur te gee. Kyk [**hier vir meer inligting**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit).
 
 ### `com.apple.security.cs.allow-unsigned-executable-memory`
 
-Hierdie regte laat toe om **C-kode te oorskry of te patch**, gebruik die lank-deprecated **`NSCreateObjectFileImageFromMemory`** (wat fundamenteel onveilig is), of gebruik die **DVDPlayback** raamwerk. Kyk [**hier vir meer inligting**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
+Hierdie reg laat toe om **C-kode te oorskry of te patch**, gebruik die lank-gedepregeerde **`NSCreateObjectFileImageFromMemory`** (wat fundamenteel onveilig is), of gebruik die **DVDPlayback** raamwerk. Kyk [**hier vir meer inligting**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
 
 > [!CAUTION]
-> Om hierdie regte in te sluit stel jou toepassing bloot aan algemene kwesbaarhede in geheue-onveilige kode tale. Oorweeg sorgvuldig of jou toepassing hierdie uitsondering benodig.
+> Om hierdie reg in te sluit stel jou toepassing bloot aan algemene kwesbaarhede in geheue-onveilige kode tale. Oorweeg sorgvuldig of jou toepassing hierdie uitsondering benodig.
 
 ### `com.apple.security.cs.disable-executable-page-protection`
 
-Hierdie regte laat toe om **afdelings van sy eie uitvoerbare lêers** op skyf te **wysig** om gedwonge uitgang te dwing. Kyk [**hier vir meer inligting**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection).
+Hierdie reg laat toe om **afdelings van sy eie uitvoerbare lêers** op skyf te **wysig** om gedwonge uitgang te dwing. Kyk [**hier vir meer inligting**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection).
 
 > [!CAUTION]
-> Die Disable Executable Memory Protection Entitlement is 'n uiterste regte wat 'n fundamentele sekuriteitsbeskerming van jou toepassing verwyder, wat dit moontlik maak vir 'n aanvaller om jou toepassing se uitvoerbare kode sonder opsporing te herskryf. Verkies nouer regte indien moontlik.
+> Die Disable Executable Memory Protection Entitlement is 'n uiterste reg wat 'n fundamentele sekuriteitsbeskerming van jou toepassing verwyder, wat dit moontlik maak vir 'n aanvaller om jou toepassing se uitvoerbare kode sonder opsporing te herskryf. Verkies nouer regte indien moontlik.
 
 ### `com.apple.security.cs.allow-relative-library-loads`
 
@@ -145,7 +145,7 @@ TODO
 
 ### `com.apple.private.nullfs_allow`
 
-Hierdie regte laat toe om 'n nullfs lêerstelsel te monteer (verbied deur standaard). Gereedskap: [**mount_nullfs**](https://github.com/JamaicanMoose/mount_nullfs/tree/master).
+Hierdie reg laat toe om 'n nullfs lêerstelsel te monteer (verbied deur standaard). Gereedskap: [**mount_nullfs**](https://github.com/JamaicanMoose/mount_nullfs/tree/master).
 
 ### `kTCCServiceAll`
 
