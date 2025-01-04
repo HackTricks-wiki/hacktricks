@@ -6,21 +6,21 @@
 
 MIG iliumbwa ili **kurahisisha mchakato wa uundaji wa Mach IPC**. Kimsingi **inazalisha msimbo unaohitajika** kwa server na mteja kuwasiliana na ufafanuzi uliopewa. Hata kama msimbo uliozalishwa ni mbaya, mendelezi atahitaji tu kuingiza na msimbo wake utakuwa rahisi zaidi kuliko hapo awali.
 
-Ufafanuzi umeainishwa katika Lugha ya Ufafanuzi wa Kiolesura (IDL) kwa kutumia kiambishi cha `.defs`.
+Ufafanuzi umeainishwa katika Lugha ya Ufafanuzi wa Interface (IDL) kwa kutumia kiambishi cha `.defs`.
 
-Mfafanuzi hawa wana sehemu 5:
+Mafafanuzi haya yana sehemu 5:
 
-- **Tangazo la subsistem**: Neno muhimu subsistem linatumika kuashiria **jina** na **id**. Pia inawezekana kuashiria kama **`KernelServer`** ikiwa server inapaswa kukimbia katika kernel.
-- **Injilizi na uagizaji**: MIG inatumia C-preprocessor, hivyo ina uwezo wa kutumia uagizaji. Aidha, inawezekana kutumia `uimport` na `simport` kwa msimbo ulioandikwa na mtumiaji au server.
-- **Matangazo ya aina**: Inawezekana kufafanua aina za data ingawa kawaida itauagiza `mach_types.defs` na `std_types.defs`. Kwa aina za kawaida baadhi ya sintaks inaweza kutumika:
+- **Tangazo la subsystem**: Neno muhimu subsystem linatumika kuashiria **jina** na **id**. Pia inawezekana kuashiria kama **`KernelServer`** ikiwa server inapaswa kukimbia kwenye kernel.
+- **Inclusions and imports**: MIG inatumia C-preprocessor, hivyo ina uwezo wa kutumia imports. Aidha, inawezekana kutumia `uimport` na `simport` kwa msimbo ulioandikwa na mtumiaji au server.
+- **Matangazo ya aina**: Inawezekana kufafanua aina za data ingawa kwa kawaida itaunda `mach_types.defs` na `std_types.defs`. Kwa aina za kawaida baadhi ya sintaks inaweza kutumika:
 - \[i`n/out]tran`: Kazi inayohitaji kutafsiriwa kutoka ujumbe unaoingia au kwenda ujumbe unaotoka
-- `c[user/server]type`: Ramani kwa aina nyingine ya C.
+- `c[user/server]type`: Mchoro wa aina nyingine ya C.
 - `destructor`: Piga simu kazi hii wakati aina inachukuliwa.
 - **Operesheni**: Hizi ni ufafanuzi wa mbinu za RPC. Kuna aina 5 tofauti:
 - `routine`: Inatarajia jibu
-- `simpleroutine`: Haitarajii jibu
+- `simpleroutine`: Haitarajia jibu
 - `procedure`: Inatarajia jibu
-- `simpleprocedure`: Haitarajii jibu
+- `simpleprocedure`: Haitarajia jibu
 - `function`: Inatarajia jibu
 
 ### Example
@@ -40,7 +40,7 @@ server_port :  mach_port_t;
 n1          :  uint32_t;
 n2          :  uint32_t);
 ```
-Kumbuka kwamba **hoja ya kwanza ni bandari ya kuunganisha** na MIG itashughulikia **bandari ya majibu kiotomatiki** (isipokuwa unaita `mig_get_reply_port()` katika msimbo wa mteja). Aidha, **ID ya operesheni** itakuwa **mfuatano** ikianza na ID ya mfumo iliyoonyeshwa (hivyo ikiwa operesheni imeondolewa inafutwa na `skip` inatumika ili bado kutumia ID yake).
+Kumbuka kwamba **hoja ya kwanza ni bandari ya kuunganisha** na MIG itashughulikia **bandari ya majibu kiotomatiki** (isipokuwa unaita `mig_get_reply_port()` katika msimbo wa mteja). Aidha, **ID ya operesheni** itakuwa **mfuatano** ikianza na ID ya mfumo ulioonyeshwa (hivyo ikiwa operesheni imeondolewa, inafutwa na `skip` inatumika ili bado kutumia ID yake).
 
 Sasa tumia MIG kuunda msimbo wa seva na mteja ambao utaweza kuwasiliana kati yao ili kuita kazi ya Subtract:
 ```bash
@@ -104,7 +104,7 @@ return 0;
 return SERVERPREFmyipc_subsystem.routine[msgh_id].stub_routine;
 }
 ```
-Katika mfano huu tumefafanua tu kazi 1 katika ufafanuzi, lakini kama tungeweza kufafanua kazi zaidi, zingekuwa ndani ya array ya **`SERVERPREFmyipc_subsystem`** na ya kwanza ingekuwa imepewa ID **500**, ya pili ingekuwa na ID **501**...
+Katika mfano huu tumefafanua tu kazi 1 katika maelezo, lakini kama tungeweza kufafanua kazi zaidi, zingekuwa ndani ya array ya **`SERVERPREFmyipc_subsystem`** na ya kwanza ingekuwa imepewa ID **500**, ya pili ingekuwa na ID **501**...
 
 Ikiwa kazi ilitarajiwa kutuma **reply** kazi `mig_internal kern_return_t __MIG_check__Reply__<name>` pia ingekuwepo.
 
@@ -221,9 +221,9 @@ NDR_record inasafirishwa na `libsystem_kernel.dylib`, na ni struct inayoruhusu M
 
 Hii ni ya kuvutia kwa sababu ikiwa `_NDR_record` inapatikana katika binary kama utegemezi (`jtool2 -S <binary> | grep NDR` au `nm`), inamaanisha kwamba binary ni mteja au Server wa MIG.
 
-Zaidi ya hayo, **MIG servers** zina meza ya dispatch katika `__DATA.__const` (au katika `__CONST.__constdata` katika macOS kernel na `__DATA_CONST.__const` katika nyuzi nyingine za \*OS). Hii inaweza kutolewa kwa **`jtool2`**.
+Zaidi ya hayo, **server za MIG** zina meza ya dispatch katika `__DATA.__const` (au katika `__CONST.__constdata` katika kernel ya macOS na `__DATA_CONST.__const` katika kernel nyingine za \*OS). Hii inaweza kutolewa kwa **`jtool2`**.
 
-Na **MIG clients** zitatumia `__NDR_record` kutuma na `__mach_msg` kwa servers.
+Na **wateja wa MIG** watatumia `__NDR_record` kutuma na `__mach_msg` kwa server.
 
 ## Uchambuzi wa Binary
 
@@ -231,17 +231,17 @@ Na **MIG clients** zitatumia `__NDR_record` kutuma na `__mach_msg` kwa servers.
 
 Kama binaries nyingi sasa zinatumia MIG kufichua mach ports, ni ya kuvutia kujua jinsi ya **kutambua kwamba MIG ilitumika** na **kazi ambazo MIG inatekeleza** na kila kitambulisho cha ujumbe.
 
-[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/#jtool2) inaweza kuchambua taarifa za MIG kutoka kwa binary ya Mach-O ikionyesha kitambulisho cha ujumbe na kutambua kazi ya kutekeleza:
+[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/index.html#jtool2) inaweza kuchambua taarifa za MIG kutoka kwa binary ya Mach-O ikionyesha kitambulisho cha ujumbe na kutambua kazi ya kutekeleza:
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
-Zaidi ya hayo, kazi za MIG ni vifungashio vya kazi halisi inayoitwa, ambayo inamaanisha kwamba kupata usambazaji wake na kutafuta BL unaweza kukuwezesha kupata kazi halisi inayoitwa:
+Zaidi ya hayo, kazi za MIG ni vifungashio vya kazi halisi inayoitwa, ambayo inamaanisha kwamba kupata usambazaji wake na kutafuta BL unaweza kukusaidia kupata kazi halisi inayoitwa:
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep BL
 ```
 ### Assembly
 
-Ilielezwa awali kwamba kazi ambayo itashughulikia **kuita kazi sahihi kulingana na kitambulisho cha ujumbe kilichopokelewa** ilikuwa `myipc_server`. Hata hivyo, kwa kawaida hutakuwa na alama za binary (hakuna majina ya kazi), hivyo ni ya kuvutia **kuangalia jinsi inavyoonekana baada ya kutafsiriwa** kwani itakuwa karibu sana (kanuni ya kazi hii ni huru kutoka kwa kazi zilizowekwa):
+Ilielezwa awali kwamba kazi ambayo itashughulikia **kuita kazi sahihi kulingana na kitambulisho cha ujumbe kilichopokelewa** ilikuwa `myipc_server`. Hata hivyo, kwa kawaida hutakuwa na alama za binary (hakuna majina ya kazi), hivyo ni ya kuvutia **kuangalia jinsi inavyoonekana baada ya kutolewa** kwani itakuwa karibu sana (kanuni ya kazi hii ni huru kutoka kwa kazi zilizowekwa):
 
 {{#tabs}}
 {{#tab name="myipc_server decompiled 1"}}
@@ -259,7 +259,7 @@ var_18 = arg1;
 if (*(int32_t *)(var_10 + 0x14) &#x3C;= 0x1f4 &#x26;&#x26; *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
 rax = *(int32_t *)(var_10 + 0x14);
 // Kuitisha sign_extend_64 ambayo inaweza kusaidia kutambua kazi hii
-// Hii inahifadhi katika rax kiashiria cha simu ambacho kinahitaji kuitwa
+// Hii inahifadhi katika rax kiashiria cha wito ambacho kinahitaji kuitwa
 // Angalia matumizi ya anwani 0x100004040 (array ya anwani za kazi)
 // 0x1f4 = 500 (kitambulisho cha kuanzia)
 <strong>            rax = *(sign_extend_64(rax - 0x1f4) * 0x28 + 0x100004040);
@@ -289,7 +289,7 @@ return rax;
 {{#endtab}}
 
 {{#tab name="myipc_server decompiled 2"}}
-Hii ni kazi ile ile iliyotafsiriwa katika toleo tofauti la Hopper bure:
+Hii ni kazi ile ile iliyotolewa katika toleo tofauti la Hopper bure:
 
 <pre class="language-c"><code class="lang-c">int _myipc_server(int arg0, int arg1) {
 r31 = r31 - 0x40;
@@ -332,7 +332,7 @@ if (CPU_FLAGS &#x26; NE) {
 r8 = 0x1;
 }
 }
-// Vile vile ikiwa - vinginevyo kama katika toleo la awali
+// Vinginevyo kama katika toleo la awali
 // Angalia matumizi ya anwani 0x100004040 (array ya anwani za kazi)
 <strong>                    if ((r8 &#x26; 0x1) == 0x0) {
 </strong><strong>                            *(var_18 + 0x18) = **0x100004000;
@@ -365,7 +365,7 @@ return r0;
 {{#endtab}}
 {{#endtabs}}
 
-Kwa kweli ikiwa utaenda kwenye kazi **`0x100004000`** utapata array ya **`routine_descriptor`** structs. Kigezo cha kwanza cha struct ni **anwani** ambapo **kazi** imewekwa, na **struct inachukua 0x28 bytes**, hivyo kila byte 0x28 (kuanzia byte 0) unaweza kupata byte 8 na hiyo itakuwa **anwani ya kazi** ambayo itaitwa:
+Kwa kweli ikiwa utaenda kwenye kazi **`0x100004000`** utapata array ya **`routine_descriptor`** structs. Kigezo cha kwanza cha struct ni **anwani** ambapo **kazi** imeanzishwa, na **struct inachukua 0x28 bytes**, hivyo kila byte 0x28 (kuanzia byte 0) unaweza kupata byte 8 na hiyo itakuwa **anwani ya kazi** ambayo itaitwa:
 
 <figure><img src="../../../../images/image (35).png" alt=""><figcaption></figcaption></figure>
 

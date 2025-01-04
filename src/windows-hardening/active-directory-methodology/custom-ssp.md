@@ -4,7 +4,7 @@
 
 ### Custom SSP
 
-[Learn what is a SSP (Security Support Provider) here.](../authentication-credentials-uac-and-efs/#security-support-provider-interface-sspi)\
+[Learn what is a SSP (Security Support Provider) here.](../authentication-credentials-uac-and-efs/index.html#security-support-provider-interface-sspi)\
 Unaweza kuunda **SSP yako mwenyewe** ili **kukamata** katika **maandishi wazi** **akili** zinazotumika kufikia mashine.
 
 #### Mimilib
@@ -22,7 +22,7 @@ Ongeza `mimilib.dll` kwenye orodha ya Watoa Huduma za Usalama (Security Packages
 ```powershell
 reg add "hklm\system\currentcontrolset\control\lsa\" /v "Security Packages"
 ```
-Na baada ya kuanzisha upya, sifa zote zinaweza kupatikana kwa maandiko wazi katika `C:\Windows\System32\kiwissp.log`
+Na baada ya kuanzisha upya, akreditivu zote zinaweza kupatikana kwa maandiko wazi katika `C:\Windows\System32\kiwissp.log`
 
 #### Katika kumbukumbu
 
@@ -33,8 +33,8 @@ misc::memssp
 ```
 Hii haitadumu baada ya kuanzisha upya.
 
-#### Kupunguza
+#### Mitigation
 
-Event ID 4657 - Ukaguzi wa uundaji/mabadiliko ya `HKLM:\System\CurrentControlSet\Control\Lsa\SecurityPackages`
+Event ID 4657 - Audit creation/change of `HKLM:\System\CurrentControlSet\Control\Lsa\SecurityPackages`
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,4 +1,4 @@
-# Usalama wa macOS & Kuinua Privilege
+# macOS Usalama & Kuinua Privilege
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -30,7 +30,7 @@ macos-applefs.md
 mac-os-architecture/
 {{#endref}}
 
-- Huduma za kawaida za macOS n**etwork & protokali**
+- Huduma za kawaida za mtandao wa macOS **na protokali**
 
 {{#ref}}
 macos-protocols.md
@@ -71,7 +71,7 @@ Hii inaweza kutokea katika hali zifuatazo:
 - Faili iliyotumika iko ndani ya directory inayomilikiwa na mtumiaji (mtumiaji anaweza kuunda faili hiyo)
 - Faili iliyotumika iko ndani ya directory inayomilikiwa na root lakini mtumiaji ana ufaccess wa kuandika juu yake kwa sababu ya kundi (mtumiaji anaweza kuunda faili hiyo)
 
-Kuweza **kuunda faili** ambayo itatumika na **root**, inamruhusu mtumiaji **kunufaika na maudhui yake** au hata kuunda **symlinks/hardlinks** kuielekeza mahali pengine.
+Kuwa na uwezo wa **kuunda faili** ambayo itatumika na **root**, inamruhusu mtumiaji **kunufaika na maudhui yake** au hata kuunda **symlinks/hardlinks** kuielekeza mahali pengine.
 
 Kwa aina hii ya udhaifu usisahau **kuangalia waandishi wa `.pkg` walio hatarini**:
 
@@ -81,23 +81,23 @@ macos-files-folders-and-binaries/macos-installers-abuse.md
 
 ### Mipangilio ya Faili & Wakala wa mpango wa URL
 
-Programu za ajabu zilizosajiliwa na mipangilio ya faili zinaweza kutumiwa vibaya na programu tofauti zinaweza kusajiliwa kufungua protokali maalum
+Programu za ajabu zilizojisajiliwa na mipangilio ya faili zinaweza kutumiwa vibaya na programu tofauti zinaweza kujiandikisha kufungua protokali maalum
 
 {{#ref}}
 macos-file-extension-apps.md
 {{#endref}}
 
-## Kuinua Privilege ya macOS TCC / SIP
+## macOS TCC / SIP Kuinua Privilege
 
 Katika macOS **programu na binaries zinaweza kuwa na ruhusa** za kufikia folda au mipangilio ambayo inawafanya kuwa na nguvu zaidi kuliko wengine.
 
-Hivyo, mshambuliaji anayetaka kufanikiwa kuathiri mashine ya macOS atahitaji **kuinua ruhusa zake za TCC** (au hata **kupita SIP**, kulingana na mahitaji yake).
+Hivyo, mshambuliaji anayetaka kufanikiwa kuathiri mashine ya macOS atahitaji **kuinua ruhusa zake za TCC** (au hata **kuzidi SIP**, kulingana na mahitaji yake).
 
-Ruhusa hizi kwa kawaida hutolewa kwa njia ya **entitlements** ambayo programu imeandikwa nayo, au programu inaweza kuomba baadhi ya ufaccess na baada ya **mtumiaji kuidhinisha** zinaweza kupatikana katika **maktaba za TCC**. Njia nyingine mchakato unaweza kupata ruhusa hizi ni kwa kuwa **mtoto wa mchakato** wenye **ruhusa hizo** kwani kwa kawaida **zinarithiwa**.
+Ruhusa hizi kwa kawaida hutolewa kwa njia ya **entitlements** ambayo programu imeandikwa nayo, au programu inaweza kuomba baadhi ya ufaccess na baada ya **mtumiaji kuidhinisha** zinaweza kupatikana katika **maktaba za TCC**. Njia nyingine mchakato unaweza kupata ruhusa hizi ni kwa kuwa **mtoto wa mchakato** wenye hizo **ruhusa** kwani kwa kawaida **zinarithiwa**.
 
-Fuata viungo hivi kupata njia tofauti za [**kuinua ruhusa katika TCC**](macos-security-protections/macos-tcc/#tcc-privesc-and-bypasses), [**kupita TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) na jinsi katika siku za nyuma [**SIP imepita**](macos-security-protections/macos-sip.md#sip-bypasses).
+Fuata viungo hivi kupata njia tofauti za [**kuinua ruhusa katika TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), [**kuzidi TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) na jinsi katika siku za nyuma [**SIP imezidiwa**](macos-security-protections/macos-sip.md#sip-bypasses).
 
-## Kuinua Privilege ya Kawaida ya macOS
+## macOS Kuinua Privilege Kawaida
 
 Bila shaka kutoka mtazamo wa timu nyekundu unapaswa pia kuwa na hamu ya kuinua hadi root. Angalia chapisho lifuatalo kwa vidokezo vingine:
 

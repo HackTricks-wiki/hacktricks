@@ -4,11 +4,11 @@
 
 ## Unconstrained delegation
 
-Hii ni kipengele ambacho Msimamizi wa Kikoa anaweza kuweka kwa **Kompyuta** yoyote ndani ya kikoa. Kisha, wakati wowote **mtumiaji anapoingia** kwenye Kompyuta, **nakala ya TGT** ya mtumiaji huyo itakuwa **inatumwa ndani ya TGS** inayotolewa na DC **na kuhifadhiwa kwenye kumbukumbu katika LSASS**. Hivyo, ikiwa una mamlaka ya Msimamizi kwenye mashine, utaweza **kudondosha tiketi na kujifanya kuwa watumiaji** kwenye mashine yoyote.
+Hii ni kipengele ambacho Msimamizi wa Domain anaweza kuweka kwa **Kompyuta** yoyote ndani ya domain. Kisha, kila wakati **mtumiaji anapoingia** kwenye Kompyuta, **nakala ya TGT** ya mtumiaji huyo itakuwa **inatumwa ndani ya TGS** inayotolewa na DC **na kuhifadhiwa kwenye kumbukumbu katika LSASS**. Hivyo, ikiwa una mamlaka ya Msimamizi kwenye mashine, utaweza **kudondosha tiketi na kujifanya kuwa watumiaji** kwenye mashine yoyote.
 
-Hivyo ikiwa msimamizi wa kikoa anaingia ndani ya Kompyuta yenye kipengele cha "Unconstrained Delegation" kimewashwa, na una mamlaka ya msimamizi wa ndani kwenye mashine hiyo, utaweza kudondosha tiketi na kujifanya kuwa Msimamizi wa Kikoa popote (domain privesc).
+Hivyo ikiwa msimamizi wa domain anaingia ndani ya Kompyuta yenye kipengele cha "Unconstrained Delegation" kimewashwa, na una mamlaka ya msimamizi wa ndani kwenye mashine hiyo, utaweza kudondosha tiketi na kujifanya kuwa Msimamizi wa Domain popote (domain privesc).
 
-Unaweza **kupata vitu vya Kompyuta vyenye sifa hii** kwa kuangalia ikiwa sifa ya [userAccountControl](<https://msdn.microsoft.com/en-us/library/ms680832(v=vs.85).aspx>) ina [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>). Unaweza kufanya hivi kwa kutumia kichujio cha LDAP cha ‘(userAccountControl:1.2.840.113556.1.4.803:=524288)’, ambacho ndicho powerview hufanya:
+Unaweza **kupata vitu vya Kompyuta vyenye sifa hii** kwa kuangalia ikiwa sifa ya [userAccountControl](<https://msdn.microsoft.com/en-us/library/ms680832(v=vs.85).aspx>) ina [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>). Unaweza kufanya hivi kwa kutumia kichujio cha LDAP cha ‘(userAccountControl:1.2.840.113556.1.4.803:=524288)’, ambacho powerview inafanya:
 
 <pre class="language-bash"><code class="lang-bash"># List unconstrained computers
 ## Powerview
@@ -30,14 +30,14 @@ Maelezo zaidi: [https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/](https:
 ### **Force Authentication**
 
 Ikiwa mshambuliaji anaweza **kudhoofisha kompyuta iliyo ruhusiwa kwa "Unconstrained Delegation"**, anaweza **kudanganya** **Print server** ku **ingia kiotomatiki** dhidi yake **akihifadhi TGT** kwenye kumbukumbu ya seva.\
-Kisha, mshambuliaji anaweza kufanya **shambulio la Pass the Ticket kujifanya** kuwa akaunti ya mtumiaji wa kompyuta ya Print server.
+Kisha, mshambuliaji anaweza kufanya **shambulio la Pass the Ticket kujifanya** kuwa akaunti ya kompyuta ya mtumiaji wa Print server.
 
 Ili kufanya print server iingie dhidi ya mashine yoyote unaweza kutumia [**SpoolSample**](https://github.com/leechristensen/SpoolSample):
 ```bash
 .\SpoolSample.exe <printmachine> <unconstrinedmachine>
 ```
-Ikiwa TGT inatoka kwa mhamasishaji wa eneo, unaweza kufanya [**DCSync attack**](acl-persistence-abuse/#dcsync) na kupata hash zote kutoka kwa DC.\
-[**Maelezo zaidi kuhusu shambulio hili katika ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-dc-print-server-and-kerberos-delegation)
+Ikiwa TGT inatoka kwa mwelekeo wa kikoa, unaweza kufanya [**DCSync attack**](acl-persistence-abuse/index.html#dcsync) na kupata hash zote kutoka kwa DC.\
+[**Maelezo zaidi kuhusu shambulio hili kwenye ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-dc-print-server-and-kerberos-delegation)
 
 **Hapa kuna njia nyingine za kujaribu kulazimisha uthibitisho:**
 

@@ -17,11 +17,11 @@ python3 autovol3.py -f MEMFILE -o OUT_DIR -s minimal
 python3 autovol3.py -f MEMFILE -o OUT_DIR -s normal
 
 ```
-Ikiwa unataka kitu **haraka na cha ajabu** ambacho kitazindua nyongeza kadhaa za Volatility kwa pamoja unaweza kutumia: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
+Ikiwa unataka kitu **haraka na cha ajabu** ambacho kitazindua plugins kadhaa za Volatility kwa pamoja unaweza kutumia: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
 ```bash
 python autoVolatility.py -f MEMFILE -d OUT_DIRECTORY -e /home/user/tools/volatility/vol.py # It will use the most important plugins (could use a lot of space depending on the size of the memory)
 ```
-## Usanidi
+## Installation
 
 ### volatility3
 ```bash
@@ -52,13 +52,13 @@ python setup.py install
 
 Fikia hati rasmi katika [Volatility command reference](https://github.com/volatilityfoundation/volatility/wiki/Command-Reference#kdbgscan)
 
-### Kumbukumbu juu ya plugins “list” dhidi ya “scan”
+### Kumbukumbu kuhusu plugins “list” vs. “scan”
 
-Volatility ina mbinu mbili kuu za plugins, ambazo wakati mwingine zinaonyeshwa katika majina yao. Plugins “list” zitajaribu kuvinjari kupitia muundo wa Windows Kernel ili kupata taarifa kama vile michakato (kupata na kutembea kwenye orodha iliyounganishwa ya `_EPROCESS` katika kumbukumbu), kushughulikia OS (kupata na kuorodhesha jedwali la kushughulikia, kuondoa viashiria vyovyote vilivyopatikana, nk). Zinatenda kama API ya Windows ingekuwa ikiwa itaombwa, kwa mfano, kuorodhesha michakato.
+Volatility ina mbinu mbili kuu za plugins, ambazo wakati mwingine zinaonekana katika majina yao. Plugins “list” zitajaribu kuvinjari kupitia muundo wa Windows Kernel ili kupata taarifa kama vile michakato (kupata na kutembea kwenye orodha iliyounganishwa ya `_EPROCESS` katika kumbukumbu), kushughulikia OS (kupata na kuorodhesha jedwali la kushughulikia, kuondoa viashiria vyovyote vilivyopatikana, nk). Zinajitahidi kutenda kama API ya Windows ingekuwa ikiwa itaombwa, kwa mfano, kuorodhesha michakato.
 
 Hiyo inafanya plugins “list” kuwa za haraka, lakini pia zina hatari kama API ya Windows kwa ushawishi wa malware. Kwa mfano, ikiwa malware inatumia DKOM kuondoa mchakato kutoka kwenye orodha iliyounganishwa ya `_EPROCESS`, haitajitokeza katika Meneja wa Kazi wala katika pslist.
 
-Plugins “scan”, kwa upande mwingine, zitachukua mbinu inayofanana na kuchonga kumbukumbu kwa vitu ambavyo vinaweza kuwa na maana wakati vinapondolewa kama muundo maalum. `psscan` kwa mfano itasoma kumbukumbu na kujaribu kutengeneza vitu vya `_EPROCESS` kutoka kwake (inatumia skanning ya pool-tag, ambayo inatafuta nyuzi za byte 4 ambazo zinaonyesha uwepo wa muundo wa interest). Faida ni kwamba inaweza kupata michakato ambayo imeondoka, na hata kama malware inaharibu orodha iliyounganishwa ya `_EPROCESS`, plugin bado itapata muundo huo ukiwa katika kumbukumbu (kwa kuwa bado inahitaji kuwepo ili mchakato ufanye kazi). Hasara ni kwamba plugins “scan” ni polepole kidogo kuliko plugins “list”, na wakati mwingine zinaweza kutoa matokeo yasiyo sahihi (mchakato ambao umeondoka kwa muda mrefu sana na sehemu za muundo wake zimeandikwa upya na operesheni nyingine).
+Plugins “scan”, kwa upande mwingine, zitachukua mbinu inayofanana na kuchonga kumbukumbu kwa vitu ambavyo vinaweza kuwa na maana wakati vinapondolewa kama muundo maalum. `psscan` kwa mfano itasoma kumbukumbu na kujaribu kutengeneza vitu vya `_EPROCESS` kutoka kwake (inatumia skanning ya pool-tag, ambayo inatafuta nyuzi za 4-byte zinazonyesha uwepo wa muundo wa interest). Faida ni kwamba inaweza kupata michakato ambayo imeondoka, na hata kama malware inaharibu orodha iliyounganishwa ya `_EPROCESS`, plugin bado itapata muundo huo ukiwa katika kumbukumbu (kwa kuwa bado inahitaji kuwepo ili mchakato ufanye kazi). Hasara ni kwamba plugins “scan” ni polepole kidogo kuliko plugins “list”, na wakati mwingine zinaweza kutoa matokeo yasiyo sahihi (mchakato ambao umeondoka kwa muda mrefu sana na sehemu za muundo wake zimeandikwa upya na operesheni nyingine).
 
 Kutoka: [http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
 
@@ -81,7 +81,7 @@ Unaweza kupata orodha ya profaili zinazosaidiwa kwa kufanya:
 ```bash
 ./volatility_2.6_lin64_standalone --info | grep "Profile"
 ```
-Ikiwa unataka kutumia **wasifu mpya ulio pakuliwa** (kwa mfano wa linux) unahitaji kuunda mahali fulani muundo wa folda zifuatazo: _plugins/overlays/linux_ na kuweka ndani ya folda hii faili la zip linalo zawisha wasifu. Kisha, pata nambari ya wasifu kwa kutumia:
+Ikiwa unataka kutumia **wasifu mpya ulio pakuliwa** (kwa mfano wa linux) unahitaji kuunda mahali fulani muundo wa folda ufuatao: _plugins/overlays/linux_ na kuweka ndani ya folda hii faili ya zip inayoshikilia wasifu. Kisha, pata nambari ya wasifu kwa kutumia:
 ```bash
 ./vol --plugins=/home/kali/Desktop/ctfs/final/plugins --info
 Volatility Foundation Volatility Framework 2.6
@@ -108,7 +108,7 @@ volatility kdbgscan -f file.dmp
 
 [**Kutoka hapa**](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/): Kinyume na imageinfo ambayo inatoa tu mapendekezo ya wasifu, **kdbgscan** imeundwa kubaini kwa uhakika wasifu sahihi na anwani sahihi ya KDBG (ikiwa kuna nyingi). Plugin hii inatafuta saini za KDBGHeader zinazohusiana na wasifu wa Volatility na inatekeleza ukaguzi wa akili ili kupunguza matokeo yasiyo sahihi. Ufanisi wa matokeo na idadi ya ukaguzi wa akili wanaoweza kufanywa inategemea ikiwa Volatility inaweza kupata DTB, hivyo ikiwa tayari unajua wasifu sahihi (au ikiwa una pendekezo la wasifu kutoka imageinfo), basi hakikisha unalitumia kutoka .
 
-Daima angalia **idadi ya michakato ambayo kdbgscan imepata**. Wakati mwingine imageinfo na kdbgscan zinaweza kupata **zaidi ya moja** wasifu **unaofaa** lakini tu **moja halali itakuwa na michakato inayohusiana** (Hii ni kwa sababu ili kutoa michakato anwani sahihi ya KDBG inahitajika)
+Daima angalia **idadi ya michakato ambayo kdbgscan imepata**. Wakati mwingine imageinfo na kdbgscan zinaweza kupata **zaidi ya moja** wasifu **unaofaa** lakini tu **ule halali utakuwa na mchakato wowote unaohusiana** (Hii ni kwa sababu ili kutoa michakato anwani sahihi ya KDBG inahitajika)
 ```bash
 # GOOD
 PsActiveProcessHead           : 0xfffff800011977f0 (37 processes)
@@ -122,7 +122,7 @@ PsLoadedModuleList            : 0xfffff80001197ac0 (0 modules)
 ```
 #### KDBG
 
-**KDBG** inayoitwa **kernel debugger block**, ni muhimu kwa kazi za forensics zinazofanywa na Volatility na debuggers mbalimbali. Imejulikana kama `KdDebuggerDataBlock` na aina ya `_KDDEBUGGER_DATA64`, ina viungo muhimu kama `PsActiveProcessHead`. Kiungo hiki maalum kinaelekeza kwenye kichwa cha orodha ya michakato, kuruhusu orodha ya michakato yote, ambayo ni ya msingi kwa uchambuzi wa kina wa kumbukumbu.
+**KDBG** inaitwa **kernel debugger block**, ni muhimu kwa kazi za forensics zinazofanywa na Volatility na debuggers mbalimbali. Inatambulika kama `KdDebuggerDataBlock` na aina ya `_KDDEBUGGER_DATA64`, ina marejeleo muhimu kama `PsActiveProcessHead`. Marejeleo haya maalum yanaonyesha kichwa cha orodha ya michakato, kuruhusu orodha ya michakato yote, ambayo ni ya msingi kwa uchambuzi wa kina wa kumbukumbu.
 
 ## OS Information
 ```bash
@@ -133,7 +133,7 @@ Plugin `banners.Banners` inaweza kutumika katika **vol3 kujaribu kupata mabango 
 
 ## Hashes/Passwords
 
-Toa SAM hashes, [credentials za domain zilizohifadhiwa](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) na [siri za lsa](../../../windows-hardening/authentication-credentials-uac-and-efs/#lsa-secrets).
+Toa SAM hashes, [credentials za domain zilizohifadhiwa](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) na [siri za lsa](../../../windows-hardening/authentication-credentials-uac-and-efs/index.html#lsa-secrets).
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -155,7 +155,7 @@ volatility --profile=Win7SP1x86_23418 lsadump -f file.dmp #Grab lsa secrets
 
 ## Memory Dump
 
-Dump ya kumbukumbu ya mchakato itatoa **kila kitu** cha hali ya sasa ya mchakato. Moduli ya **procdump** itatoa tu **kanuni**.
+Memory dump ya mchakato itatoa **kila kitu** cha hali ya sasa ya mchakato. Moduli ya **procdump** itatoa tu **kanuni**.
 ```
 volatility -f file.dmp --profile=Win7SP1x86 memdump -p 2168 -D conhost/
 ```
@@ -203,7 +203,7 @@ volatility --profile=Win7SP1x86_23418 procdump --pid=3152 -n --dump-dir=. -f fil
 
 ### Command line
 
-Je, kuna kitu chochote cha kushangaza kilichotekelezwa?
+Je, kuna kitu chochote kinachoshuku kilitekelezwa?
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -220,11 +220,11 @@ volatility --profile=PROFILE consoles -f file.dmp #command history by scanning f
 {{#endtab}}
 {{#endtabs}}
 
-Amri zinazotekelezwa katika `cmd.exe` zinadhibitiwa na **`conhost.exe`** (au `csrss.exe` kwenye mifumo kabla ya Windows 7). Hii ina maana kwamba ikiwa **`cmd.exe`** itakatishwa kazi na mshambuliaji kabla ya kupata dump ya kumbukumbu, bado inawezekana kurejesha historia ya amri za kikao kutoka kwenye kumbukumbu ya **`conhost.exe`**. Ili kufanya hivyo, ikiwa shughuli zisizo za kawaida zinagundulika ndani ya moduli za console, kumbukumbu ya mchakato wa **`conhost.exe`** inayohusiana inapaswa kutolewa. Kisha, kwa kutafuta **strings** ndani ya dump hii, mistari ya amri zilizotumika katika kikao inaweza kutolewa.
+Amri zinazotekelezwa katika `cmd.exe` zinadhibitiwa na **`conhost.exe`** (au `csrss.exe` kwenye mifumo kabla ya Windows 7). Hii ina maana kwamba ikiwa **`cmd.exe`** itakatishwa na mshambuliaji kabla ya kupatikana kwa dump ya kumbukumbu, bado inawezekana kurejesha historia ya amri za kikao kutoka kwenye kumbukumbu ya **`conhost.exe`**. Ili kufanya hivyo, ikiwa shughuli zisizo za kawaida zinagundulika ndani ya moduli za console, kumbukumbu ya mchakato wa **`conhost.exe`** inayohusiana inapaswa kutolewa. Kisha, kwa kutafuta **strings** ndani ya dump hii, mistari ya amri zilizotumika katika kikao inaweza kutolewa.
 
 ### Mazingira
 
-Pata mabadiliko ya env ya kila mchakato unaotembea. Kunaweza kuwa na thamani za kuvutia. 
+Pata vigezo vya env vya kila mchakato unaotembea. Kunaweza kuwa na thamani za kuvutia. 
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -242,10 +242,10 @@ volatility --profile=PROFILE -f file.dmp linux_psenv [-p <pid>] #Get env of proc
 {{#endtab}}
 {{#endtabs}}
 
-### Haki za tokeni
+### Token privileges
 
-Angalia kwa tokeni za haki katika huduma zisizotarajiwa.\
-Inaweza kuwa ya kuvutia kuorodhesha michakato inayotumia tokeni fulani za haki.
+Angalia kwa token za mamlaka katika huduma zisizotarajiwa.\
+Inaweza kuwa ya kuvutia kuorodhesha michakato inayotumia token fulani za mamlaka.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -270,7 +270,7 @@ volatility --profile=Win7SP1x86_23418 privs -f file.dmp | grep "SeImpersonatePri
 ### SIDs
 
 Angalia kila SSID inayomilikiwa na mchakato.\
-Inaweza kuwa ya kuvutia kuorodhesha michakato inayotumia SID za ruhusa (na michakato inayotumia baadhi ya SID za huduma).
+Inaweza kuwa ya kuvutia kuorodhesha michakato inayotumia SID ya ruhusa (na michakato inayotumia SID ya huduma). 
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -290,7 +290,7 @@ volatility --profile=Win7SP1x86_23418 getservicesids -f file.dmp #Get the SID of
 
 ### Handles
 
-Ni muhimu kujua ni faili, funguo, nyuzi, michakato... zipi **mchakato una mkono** kwa (amefungua)
+Ni muhimu kujua ni faili, funguo, nyuzi, michakato... zipi **mchakato una mkono** kwa ajili ya (amefungua)
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -366,7 +366,7 @@ volatility --profile=Win7SP1x86_23418 yarascan -Y "https://" -p 3692,3840,3976,3
 
 ### UserAssist
 
-**Windows** inashughulikia programu unazotumia kwa kutumia kipengele katika rejista kinachoitwa **UserAssist keys**. Funguo hizi zinaandika ni mara ngapi kila programu imefanywa na wakati ilifanywa mara ya mwisho.
+**Windows** inashika rekodi ya programu unazotumia kwa kutumia kipengele katika rejista kinachoitwa **UserAssist keys**. Funguo hizi zinaandika ni mara ngapi kila programu imefanywa na wakati ilifanya mara ya mwisho. 
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -497,7 +497,7 @@ volatility --profile=SomeLinux -f file.dmp linux_recover_filesystem #Dump the en
 {{#endtab}}
 {{#endtabs}}
 
-### Skana/dump
+### Scan/dump
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -536,7 +536,7 @@ volatility --profile=Win7SP1x86_23418 mftparser -f file.dmp
 {{#endtab}}
 {{#endtabs}}
 
-Mfumo wa **NTFS** unatumia kipengele muhimu kinachojulikana kama _meza ya faili ya bwana_ (MFT). Meza hii ina angalau kiingilio kimoja kwa kila faili kwenye kiasi, ikijumuisha MFT yenyewe pia. Maelezo muhimu kuhusu kila faili, kama vile **ukubwa, alama za muda, ruhusa, na data halisi**, yanajumuishwa ndani ya viingilio vya MFT au katika maeneo ya nje ya MFT lakini yanarejelea na viingilio hivi. Maelezo zaidi yanaweza kupatikana katika [nyaraka rasmi](https://docs.microsoft.com/en-us/windows/win32/fileio/master-file-table).
+Mfumo wa **NTFS** unatumia kipengele muhimu kinachojulikana kama _meza ya faili ya bwana_ (MFT). Meza hii ina angalau kiingilio kimoja kwa kila faili kwenye volumu, ikijumuisha MFT yenyewe pia. Maelezo muhimu kuhusu kila faili, kama vile **ukubwa, alama za muda, ruhusa, na data halisi**, yanajumuishwa ndani ya viingilio vya MFT au katika maeneo ya nje ya MFT lakini yanarejelea na viingilio hivi. Maelezo zaidi yanaweza kupatikana katika [nyaraka rasmi](https://docs.microsoft.com/en-us/windows/win32/fileio/master-file-table).
 
 ### Funguo za SSL/Certs
 
@@ -558,9 +558,6 @@ volatility --profile=Win7SP1x86_23418 dumpcerts --dump-dir=. -f file.dmp
 {{#endtabs}}
 
 ## Malware
-
-{{#tabs}}
-{{#tab name="vol3"}}
 ```bash
 ./vol.py -f file.dmp windows.malfind.Malfind [--dump] #Find hidden and injected code, [dump each suspicious section]
 #Malfind will search for suspicious structures related to malware
@@ -625,9 +622,9 @@ volatility --profile=Win7SP1x86_23418 yarascan -y malware_rules.yar -f ch2.dmp |
 
 ## MISC
 
-### Plugins za nje
+### Vionge vya nje
 
-Ikiwa unataka kutumia plugins za nje hakikisha kwamba folda zinazohusiana na plugins ndizo parameta za kwanza zinazotumika.
+Ikiwa unataka kutumia vionge vya nje hakikisha kwamba folda zinazohusiana na vionge ni kipimo cha kwanza kinachotumika.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -667,6 +664,9 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp handles -p <PID> -t mutant
 {{#endtabs}}
 
 ### Symlinks
+
+{{#tabs}}
+{{#tab name="vol3"}}
 ```bash
 ./vol.py -f file.dmp windows.symlinkscan.SymlinkScan
 ```
@@ -746,11 +746,11 @@ volatility --profile=Win7SP1x86_23418 notepad -f file.dmp
 #Just vol2
 volatility --profile=Win7SP1x86_23418 screenshot -f file.dmp
 ```
-### Rekodi ya Kuanza Mwalimu (MBR)
+### Rekodi ya Kuanza ya Mwalimu (MBR)
 ```bash
 volatility --profile=Win7SP1x86_23418 mbrparser -f file.dmp
 ```
-**Master Boot Record (MBR)** ina jukumu muhimu katika kusimamia sehemu za mantiki za kifaa cha kuhifadhi, ambazo zimeundwa na mifumo tofauti ya [file systems](https://en.wikipedia.org/wiki/File_system). Haishikilii tu taarifa za mpangilio wa sehemu bali pia ina msimbo unaoweza kutekelezwa unaofanya kazi kama kipakiaji cha mfumo wa uendeshaji. Kipakiaji hiki kinanzisha moja kwa moja mchakato wa upakiaji wa hatua ya pili wa OS (tazama [second-stage boot loader](https://en.wikipedia.org/wiki/Second-stage_boot_loader)) au hufanya kazi kwa ushirikiano na [volume boot record](https://en.wikipedia.org/wiki/Volume_boot_record) (VBR) ya kila sehemu. Kwa maarifa ya kina, rejelea [MBR Wikipedia page](https://en.wikipedia.org/wiki/Master_boot_record).
+**Master Boot Record (MBR)** ina jukumu muhimu katika kusimamia sehemu za mantiki za kifaa cha kuhifadhi, ambazo zimeundwa na mifumo tofauti ya [file systems](https://en.wikipedia.org/wiki/File_system). Haishikilii tu taarifa za mpangilio wa sehemu bali pia ina msimbo unaoweza kutekelezwa ukifanya kazi kama kipakiaji cha boot. Kipakiaji hiki cha boot kinanzisha moja kwa moja mchakato wa upakiaji wa hatua ya pili wa OS (tazama [second-stage boot loader](https://en.wikipedia.org/wiki/Second-stage_boot_loader)) au hufanya kazi kwa ushirikiano na [volume boot record](https://en.wikipedia.org/wiki/Volume_boot_record) (VBR) ya kila sehemu. Kwa maarifa ya kina, rejelea [MBR Wikipedia page](https://en.wikipedia.org/wiki/Master_boot_record).
 
 ## References
 

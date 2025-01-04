@@ -6,7 +6,7 @@
 
 Kila **mtumiaji aliyeingia** kwenye mfumo **ana tokeni ya ufikiaji yenye taarifa za usalama** kwa ajili ya kikao hicho cha kuingia. Mfumo huunda tokeni ya ufikiaji wakati mtumiaji anapoingia. **Kila mchakato unaotekelezwa** kwa niaba ya mtumiaji **una nakala ya tokeni ya ufikiaji**. Tokeni inatambulisha mtumiaji, vikundi vya mtumiaji, na ruhusa za mtumiaji. Tokeni pia ina SID ya kuingia (Identifier ya Usalama) inayotambulisha kikao cha sasa cha kuingia.
 
-Unaweza kuona taarifa hii ukitekeleza `whoami /all`
+Unaweza kuona taarifa hii kwa kutekeleza `whoami /all`
 ```
 whoami /all
 
@@ -50,14 +50,14 @@ SeUndockPrivilege             Remove computer from docking station Disabled
 SeIncreaseWorkingSetPrivilege Increase a process working set       Disabled
 SeTimeZonePrivilege           Change the time zone                 Disabled
 ```
-au kutumia _Process Explorer_ kutoka Sysinternals (chagua mchakato na ufikia "Security" tab):
+or using _Process Explorer_ from Sysinternals (select process and access"Security" tab):
 
 ![](<../../images/image (772).png>)
 
 ### Msimamizi wa ndani
 
 Wakati msimamizi wa ndani anapoingia, **tokeni mbili za ufikiaji zinaundwa**: Moja ikiwa na haki za msimamizi na nyingine ikiwa na haki za kawaida. **Kwa default**, wakati mtumiaji huyu anatekeleza mchakato, ile yenye **haki za kawaida** (zisizo za msimamizi) **inatumika**. Wakati mtumiaji huyu anajaribu **kutekeleza** chochote **kama msimamizi** ("Run as Administrator" kwa mfano) **UAC** itatumika kuomba ruhusa.\
-Ikiwa unataka [**kujifunza zaidi kuhusu UAC soma ukurasa huu**](../authentication-credentials-uac-and-efs/#uac)**.**
+Ikiwa unataka [**kujifunza zaidi kuhusu UAC soma ukurasa huu**](../authentication-credentials-uac-and-efs/index.html#uac)**.**
 
 ### Ujanja wa utambulisho wa mtumiaji
 
@@ -76,20 +76,20 @@ Hii ni muhimu ikiwa una akreditif muhimu za kufikia vitu katika mtandao lakini a
 
 Kuna aina mbili za tokeni zinazopatikana:
 
-- **Primary Token**: Inatumika kama uwakilishi wa akreditif za usalama za mchakato. Uundaji na ushirikiano wa tokeni za msingi na michakato ni vitendo vinavyohitaji ruhusa za juu, ikisisitiza kanuni ya kutenganisha ruhusa. Kwa kawaida, huduma ya uthibitishaji inawajibika kwa uundaji wa tokeni, wakati huduma ya kuingia inashughulikia ushirikiano wake na shell ya mfumo wa uendeshaji wa mtumiaji. Inafaa kutajwa kwamba michakato inarithi tokeni ya msingi ya mchakato wao mzazi wakati wa uundaji.
-- **Impersonation Token**: Inamuwezesha programu ya seva kuchukua kitambulisho cha mteja kwa muda ili kufikia vitu salama. Mekanismu hii imegawanywa katika ngazi nne za uendeshaji:
-- **Anonymous**: Inatoa ufikiaji wa seva sawa na wa mtumiaji asiyejulikana.
-- **Identification**: Inaruhusu seva kuthibitisha kitambulisho cha mteja bila kukitumia kwa ufikiaji wa vitu.
-- **Impersonation**: Inamwezesha seva kufanya kazi chini ya kitambulisho cha mteja.
-- **Delegation**: Kama Impersonation lakini inajumuisha uwezo wa kupanua dhana hii ya kitambulisho kwa mifumo ya mbali ambayo seva inawasiliana nayo, kuhakikisha uhifadhi wa akreditif.
+- **Tokeni Kuu**: Inatumika kama uwakilishi wa akreditif za usalama za mchakato. Uundaji na ushirikiano wa tokeni kuu na michakato ni vitendo vinavyohitaji ruhusa za juu, ikisisitiza kanuni ya kutenganisha ruhusa. Kwa kawaida, huduma ya uthibitishaji inawajibika kwa uundaji wa tokeni, wakati huduma ya kuingia inashughulikia ushirikiano wake na shell ya mfumo wa uendeshaji wa mtumiaji. Inafaa kutajwa kwamba michakato inarithi tokeni kuu ya mchakato wao mzazi wakati wa uundaji.
+- **Tokeni ya Kuiga**: Inamuwezesha programu ya seva kuchukua kitambulisho cha mteja kwa muda ili kufikia vitu salama. Mekanismu hii imegawanywa katika ngazi nne za uendeshaji:
+- **Jina la Kijakazi**: Inatoa ufikiaji wa seva kama wa mtumiaji asiyejulikana.
+- **Utambulisho**: Inaruhusu seva kuthibitisha kitambulisho cha mteja bila kukitumia kwa ufikiaji wa vitu.
+- **Kuiga**: Inamwezesha seva kufanya kazi chini ya kitambulisho cha mteja.
+- **Delegation**: Kama Kuiga lakini inajumuisha uwezo wa kupanua dhana hii ya kitambulisho kwa mifumo ya mbali ambayo seva inawasiliana nayo, kuhakikisha uhifadhi wa akreditif.
 
-#### Impersonate Tokens
+#### Tokeni za Kuiga
 
-Kwa kutumia moduli ya _**incognito**_ ya metasploit ikiwa una ruhusa za kutosha unaweza kwa urahisi **orodhesha** na **kujifanya** tokeni nyingine. Hii inaweza kuwa muhimu kufanya **vitendo kana kwamba wewe ni mtumiaji mwingine**. Unaweza pia **kuinua ruhusa** kwa kutumia mbinu hii.
+Kwa kutumia moduli ya _**incognito**_ ya metasploit ikiwa una ruhusa za kutosha unaweza kwa urahisi **orodhesha** na **kuiga** tokeni nyingine **. Hii inaweza kuwa muhimu kufanya **vitendo kana kwamba wewe ni mtumiaji mwingine**. Unaweza pia **kuinua ruhusa** kwa kutumia mbinu hii.
 
-### Token Privileges
+### Ruhusa za Tokeni
 
-Jifunze ni zipi **ruhusa za tokeni zinazoweza kutumika vibaya ili kuinua ruhusa:**
+Jifunze ni zipi **ruhusa za tokeni zinaweza kutumika vibaya ili kuinua ruhusa:**
 
 {{#ref}}
 privilege-escalation-abusing-tokens.md
@@ -97,7 +97,7 @@ privilege-escalation-abusing-tokens.md
 
 Angalia [**ruhusa zote zinazowezekana za tokeni na baadhi ya maelezo kwenye ukurasa huu wa nje**](https://github.com/gtworek/Priv2Admin).
 
-## Marejeo
+## Marejeleo
 
 Jifunze zaidi kuhusu tokeni katika mafunzo haya: [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa) na [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
 

