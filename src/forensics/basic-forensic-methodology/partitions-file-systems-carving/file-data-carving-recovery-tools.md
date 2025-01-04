@@ -8,7 +8,7 @@
 
 ### Autopsy
 
-이미지에서 파일을 추출하는 데 가장 일반적으로 사용되는 포렌식 도구는 [**Autopsy**](https://www.autopsy.com/download/)입니다. 다운로드하여 설치한 후 파일을 추가하여 "숨겨진" 파일을 찾으세요. Autopsy는 디스크 이미지 및 기타 종류의 이미지를 지원하도록 설계되었지만 단순 파일은 지원하지 않습니다.
+이미지에서 파일을 추출하는 데 가장 일반적으로 사용되는 포렌식 도구는 [**Autopsy**](https://www.autopsy.com/download/)입니다. 다운로드하여 설치한 후 파일을 가져와 "숨겨진" 파일을 찾으세요. Autopsy는 디스크 이미지 및 기타 종류의 이미지를 지원하도록 설계되었지만 단순 파일은 지원하지 않습니다.
 
 ### Binwalk <a href="#binwalk" id="binwalk"></a>
 
@@ -40,11 +40,11 @@ scalpel file.img -o output
 
 이 도구는 칼리 안에 포함되어 있지만 여기에서 찾을 수 있습니다: [https://github.com/simsong/bulk_extractor](https://github.com/simsong/bulk_extractor)
 
-이 도구는 이미지를 스캔하고 그 안에서 **pcap**을 **추출**하며, **네트워크 정보 (URL, 도메인, IP, MAC, 메일)** 및 더 많은 **파일**을 추출할 수 있습니다. 당신이 해야 할 일은:
+이 도구는 이미지를 스캔하고 그 안에서 **pcaps**를 **추출**하며, **네트워크 정보 (URL, 도메인, IP, MAC, 메일)** 및 더 많은 **파일**을 추출할 수 있습니다. 당신이 해야 할 것은:
 ```
 bulk_extractor memory.img -o out_folder
 ```
-모든 정보를 탐색하세요(비밀번호?), 패킷을 분석하세요(읽기[ **Pcaps analysis**](../pcap-inspection/)), 이상한 도메인을 검색하세요(악성코드 또는 존재하지 않는 도메인과 관련된 도메인).
+모든 정보를 탐색하세요(비밀번호?), 패킷을 분석하세요(읽기[ **Pcaps analysis**](../pcap-inspection/index.html)), 이상한 도메인을 검색하세요(악성코드 또는 존재하지 않는 도메인과 관련된 도메인).
 
 ### PhotoRec
 
@@ -81,7 +81,7 @@ BinVis는 블랙박스 시나리오에서 알려지지 않은 대상을 익히�
 
 ## 보조 도구
 
-터미널에서 이미지를 보려면 [**viu** ](https://github.com/atanunq/viu)를 사용할 수 있습니다.\
-PDF를 텍스트로 변환하고 읽으려면 리눅스 명령줄 도구 **pdftotext**를 사용할 수 있습니다.
+[**viu**](https://github.com/atanunq/viu)를 사용하여 터미널에서 이미지를 볼 수 있습니다.\
+리눅스 명령줄 도구 **pdftotext**를 사용하여 PDF를 텍스트로 변환하고 읽을 수 있습니다.
 
 {{#include ../../../banners/hacktricks-training.md}}

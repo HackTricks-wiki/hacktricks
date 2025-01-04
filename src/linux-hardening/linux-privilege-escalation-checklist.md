@@ -28,7 +28,7 @@
 
 ### [프로세스](privilege-escalation/index.html#processes)
 
-- [ ] **알 수 없는 소프트웨어가 실행되고 있나요?**
+- [ ] **알 수 없는 소프트웨어가 실행되고** 있나요?
 - [ ] **더 많은 권한을 가진** 소프트웨어가 실행되고 있나요?
 - [ ] **실행 중인 프로세스의 익스플로잇** 검색 (특히 실행 중인 버전).
 - [ ] 실행 중인 프로세스의 **바이너리를 수정**할 수 있나요?
@@ -39,8 +39,8 @@
 
 - [ ] [**PATH**](privilege-escalation/index.html#cron-path)가 크론에 의해 수정되고 있으며, 그 안에 **쓰기**가 가능한가요?
 - [ ] 크론 작업에 [**와일드카드**](privilege-escalation/index.html#cron-using-a-script-with-a-wildcard-wildcard-injection)가 있나요?
-- [ ] **수정 가능한 스크립트**가 **실행**되거나 **수정 가능한 폴더** 안에 있나요?
-- [ ] 어떤 **스크립트**가 [**매우 자주 실행되고 있는지**](privilege-escalation/index.html#frequent-cron-jobs) 감지했나요? (매 1, 2 또는 5분마다)
+- [ ] **수정 가능한 스크립트**가 **실행되고** 있거나 **수정 가능한 폴더** 안에 있나요?
+- [ ] 어떤 **스크립트**가 [**매우 자주 실행되고**](privilege-escalation/index.html#frequent-cron-jobs) 있는지 감지했나요? (매 1, 2 또는 5분마다)
 
 ### [서비스](privilege-escalation/index.html#services)
 
@@ -55,12 +55,12 @@
 ### [소켓](privilege-escalation/index.html#sockets)
 
 - [ ] **쓰기 가능한 .socket** 파일이 있나요?
-- [ ] **어떤 소켓과 통신**할 수 있나요?
+- [ ] **어떤 소켓과 통신할 수** 있나요?
 - [ ] 흥미로운 정보가 있는 **HTTP 소켓**이 있나요?
 
 ### [D-Bus](privilege-escalation/index.html#d-bus)
 
-- [ ] **어떤 D-Bus와 통신**할 수 있나요?
+- [ ] **어떤 D-Bus와 통신할 수** 있나요?
 
 ### [네트워크](privilege-escalation/index.html#network)
 
@@ -72,10 +72,10 @@
 
 - [ ] 일반 사용자/그룹 **열거**
 - [ ] **매우 큰 UID**가 있나요? **기계**가 **취약한가요**?
-- [ ] 당신이 속한 [**그룹 덕분에 권한을 상승시킬 수**](privilege-escalation/interesting-groups-linux-pe/) 있나요?
+- [ ] 당신이 속한 [**그룹 덕분에 권한을 상승시킬 수**](privilege-escalation/interesting-groups-linux-pe/index.html) 있나요?
 - [ ] **클립보드** 데이터?
 - [ ] 비밀번호 정책?
-- [ ] 이전에 발견한 **모든 알려진 비밀번호**를 사용하여 **각 사용자**로 로그인 시도. 비밀번호 없이도 로그인 시도.
+- [ ] 이전에 발견한 **모든 알려진 비밀번호**를 사용하여 **각 가능한 사용자**로 로그인 시도하세요. 비밀번호 없이도 로그인 시도하세요.
 
 ### [쓰기 가능한 PATH](privilege-escalation/index.html#writable-path-abuses)
 
@@ -89,17 +89,17 @@
 - [ ] [**경로가 표시되지 않은 Sudo/SUID 바이너리**](privilege-escalation/index.html#sudo-command-suid-binary-without-command-path)?
 - [ ] [**경로를 지정한 SUID 바이너리**](privilege-escalation/index.html#suid-binary-with-command-path)? 우회
 - [ ] [**LD_PRELOAD 취약점**](privilege-escalation/index.html#ld_preload)
-- [ ] [**SUID 바이너리에서 .so 라이브러리 부족**](privilege-escalation/index.html#suid-binary-so-injection) 쓰기 가능한 폴더에서?
-- [ ] [**SUDO 토큰 사용 가능**](privilege-escalation/index.html#reusing-sudo-tokens)? [**SUDO 토큰을 생성할 수 있나요**](privilege-escalation/index.html#var-run-sudo-ts-less-than-username-greater-than)?
-- [ ] [**sudoers 파일을 읽거나 수정할 수 있나요**](privilege-escalation/index.html#etc-sudoers-etc-sudoers-d)?
-- [ ] [**/etc/ld.so.conf.d/**를 수정할 수 있나요](privilege-escalation/index.html#etc-ld-so-conf-d)?
+- [ ] **쓰기 가능한 폴더에서** [**SUID 바이너리에 .so 라이브러리 부족**](privilege-escalation/index.html#suid-binary-so-injection)?
+- [ ] [**SUDO 토큰 사용 가능**](privilege-escalation/index.html#reusing-sudo-tokens)? [**SUDO 토큰을 생성할 수**](privilege-escalation/index.html#var-run-sudo-ts-less-than-username-greater-than) 있나요?
+- [ ] [**sudoers 파일을 읽거나 수정할 수**](privilege-escalation/index.html#etc-sudoers-etc-sudoers-d) 있나요?
+- [ ] [**/etc/ld.so.conf.d/**를 수정할 수**](privilege-escalation/index.html#etc-ld-so-conf-d) 있나요?
 - [ ] [**OpenBSD DOAS**](privilege-escalation/index.html#doas) 명령
 
 ### [능력](privilege-escalation/index.html#capabilities)
 
 - [ ] 어떤 바이너리에 **예상치 못한 능력**이 있나요?
 
-### [ACL](privilege-escalation/index.html#acls)
+### [ACLs](privilege-escalation/index.html#acls)
 
 - [ ] 어떤 파일에 **예상치 못한 ACL**이 있나요?
 
@@ -115,10 +115,10 @@
 
 ### [흥미로운 파일](privilege-escalation/index.html#interesting-files)
 
-- [ ] **프로파일 파일** - 민감한 데이터 읽기? privesc에 쓰기?
-- [ ] **passwd/shadow 파일** - 민감한 데이터 읽기? privesc에 쓰기?
+- [ ] **프로파일 파일** - 민감한 데이터 읽기? 권한 상승을 위한 쓰기?
+- [ ] **passwd/shadow 파일** - 민감한 데이터 읽기? 권한 상승을 위한 쓰기?
 - [ ] 민감한 데이터를 위해 **일반적으로 흥미로운 폴더** 확인
-- [ ] **이상한 위치/소유 파일,** 접근하거나 실행 파일을 변경할 수 있습니다
+- [ ] **이상한 위치/소유 파일,** 접근하거나 실행 파일을 변경할 수 있는 파일
 - [ ] **최근 몇 분 내에 수정됨**
 - [ ] **Sqlite DB 파일**
 - [ ] **숨겨진 파일**
@@ -131,13 +131,13 @@
 ### [**쓰기 가능한 파일**](privilege-escalation/index.html#writable-files)
 
 - [ ] **임의의 명령을 실행하기 위해 파이썬 라이브러리 수정**?
-- [ ] **로그 파일을 수정할 수 있나요**? **Logtotten** 익스플로잇
+- [ ] **로그 파일을 수정할 수** 있나요? **Logtotten** 익스플로잇
 - [ ] **/etc/sysconfig/network-scripts/**를 수정할 수 있나요? Centos/Redhat 익스플로잇
-- [ ] [**ini, int.d, systemd 또는 rc.d 파일에 쓸 수 있나요**](privilege-escalation/index.html#init-init-d-systemd-and-rc-d)?
+- [ ] [**ini, int.d, systemd 또는 rc.d 파일에 쓸 수**](privilege-escalation/index.html#init-init-d-systemd-and-rc-d) 있나요?
 
 ### [**기타 트릭**](privilege-escalation/index.html#other-tricks)
 
-- [ ] [**NFS를 악용하여 권한을 상승시킬 수 있나요**](privilege-escalation/index.html#nfs-privilege-escalation)?
-- [ ] [**제한된 셸에서 탈출해야 하나요**](privilege-escalation/index.html#escaping-from-restricted-shells)?
+- [ ] [**NFS를 악용하여 권한을 상승시킬 수**](privilege-escalation/index.html#nfs-privilege-escalation) 있나요?
+- [ ] [**제한된 셸에서 탈출할 필요가 있나요**](privilege-escalation/index.html#escaping-from-restricted-shells)?
 
 {{#include ../banners/hacktricks-training.md}}

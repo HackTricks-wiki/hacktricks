@@ -18,7 +18,7 @@
 
 **Active Directory Domain Services (AD DS)**는 네트워크 내에서 중앙 집중식 관리 및 통신에 중요한 다양한 서비스를 포함합니다. 이러한 서비스는 다음과 같습니다:
 
-1. **도메인 서비스** – 데이터 저장소를 중앙 집중화하고 **사용자**와 **도메인** 간의 상호 작용을 관리하며, **인증** 및 **검색** 기능을 포함합니다.
+1. **도메인 서비스** – 데이터 저장소를 중앙 집중화하고 **사용자**와 **도메인** 간의 상호작용을 관리하며, **인증** 및 **검색** 기능을 포함합니다.
 2. **인증서 서비스** – 안전한 **디지털 인증서**의 생성, 배포 및 관리를 감독합니다.
 3. **경량 디렉토리 서비스** – **LDAP 프로토콜**을 통해 디렉토리 지원 애플리케이션을 지원합니다.
 4. **디렉토리 연합 서비스** – 여러 웹 애플리케이션에서 단일 세션으로 사용자를 인증할 수 있는 **싱글 사인온** 기능을 제공합니다.
@@ -41,7 +41,7 @@ AD를 열거하거나 **악용**하기 위해 실행할 수 있는 명령어를 
 AD 환경에 접근할 수 있지만 자격 증명/세션이 없는 경우 다음을 수행할 수 있습니다:
 
 - **네트워크 펜테스트:**
-- 네트워크를 스캔하고, 기계와 열린 포트를 찾아 **취약점을 악용**하거나 **자격 증명**을 추출하려고 시도합니다 (예: [프린터는 매우 흥미로운 대상이 될 수 있습니다](ad-information-in-printers.md)).
+- 네트워크를 스캔하고, 머신과 열린 포트를 찾아 **취약점을 악용**하거나 **자격 증명**을 추출하려고 시도합니다 (예: [프린터는 매우 흥미로운 대상이 될 수 있습니다](ad-information-in-printers.md)).
 - DNS를 열거하면 도메인 내의 주요 서버에 대한 정보(웹, 프린터, 공유, VPN, 미디어 등)를 얻을 수 있습니다.
 - `gobuster dns -d domain.local -t 25 -w /opt/Seclist/Discovery/DNS/subdomain-top2000.txt`
 - 이를 수행하는 방법에 대한 더 많은 정보를 찾으려면 일반 [**펜테스팅 방법론**](../../generic-methodologies-and-resources/pentesting-methodology.md)을 참조하세요.
@@ -76,7 +76,7 @@ AD 환경에 접근할 수 있지만 자격 증명/세션이 없는 경우 다�
 
 ### User enumeration
 
-- **익명 SMB/LDAP 열거:** [**펜테스팅 SMB**](../../network-services-pentesting/pentesting-smb/) 및 [**펜테스팅 LDAP**](../../network-services-pentesting/pentesting-ldap.md) 페이지를 확인하세요.
+- **익명 SMB/LDAP 열거:** [**펜테스팅 SMB**](../../network-services-pentesting/pentesting-smb/index.html) 및 [**펜테스팅 LDAP**](../../network-services-pentesting/pentesting-ldap.md) 페이지를 확인하세요.
 - **Kerbrute 열거**: **유효하지 않은 사용자 이름이 요청되면** 서버는 **Kerberos 오류** 코드 _KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN_를 사용하여 응답하며, 이를 통해 사용자 이름이 유효하지 않음을 확인할 수 있습니다. **유효한 사용자 이름**은 **AS-REP** 응답에서 **TGT**를 유도하거나 _KRB5KDC_ERR_PREAUTH_REQUIRED_ 오류를 나타내며, 이는 사용자가 사전 인증을 수행해야 함을 의미합니다.
 ```bash
 ./kerbrute_linux_amd64 userenum -d lab.ropnop.com --dc 10.10.10.10 usernames.txt #From https://github.com/ropnop/kerbrute/releases
@@ -111,7 +111,7 @@ Get-GlobalAddressList -ExchHostname [ip] -UserName [domain]\[username] -Password
 
 좋습니다, 이미 유효한 사용자 이름이 있지만 비밀번호가 없다면... 다음을 시도해 보세요:
 
-- [**ASREPRoast**](asreproast.md): 사용자가 _DONT_REQ_PREAUTH_ 속성이 **없다면**, 해당 사용자에 대한 **AS_REP 메시지 요청**을 할 수 있으며, 이 메시지는 사용자의 비밀번호 파생으로 암호화된 데이터를 포함합니다.
+- [**ASREPRoast**](asreproast.md): 사용자가 _DONT_REQ_PREAUTH_ 속성이 **없다면**, 해당 사용자에 대한 **AS_REP 메시지를 요청**할 수 있으며, 이 메시지는 사용자의 비밀번호 파생으로 암호화된 일부 데이터를 포함합니다.
 - [**Password Spraying**](password-spraying.md): 발견된 각 사용자에 대해 가장 **일반적인 비밀번호**를 시도해 보세요. 아마도 어떤 사용자가 나쁜 비밀번호를 사용하고 있을 것입니다 (비밀번호 정책을 염두에 두세요!).
 - OWA 서버를 **스프레이**하여 사용자 메일 서버에 접근을 시도할 수도 있습니다.
 
@@ -129,19 +129,19 @@ password-spraying.md
 
 ### NTML 릴레이
 
-액티브 디렉토리를 열거하는 데 성공했다면 **더 많은 이메일과 네트워크에 대한 더 나은 이해**를 갖게 될 것입니다. NTML [**릴레이 공격**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) \*\*\*\*을 강제로 수행하여 AD 환경에 접근할 수 있을지도 모릅니다.
+활성 디렉토리를 열거하는 데 성공했다면 **더 많은 이메일과 네트워크에 대한 더 나은 이해**를 갖게 될 것입니다. NTML [**릴레이 공격**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) \*\*\*\*을 강제로 수행하여 AD 환경에 접근할 수 있을지도 모릅니다.
 
-### NTLM 자격 증명 훔치기
+### NTLM 자격 증명 도용
 
-**null 또는 guest 사용자**로 다른 PC나 공유에 **접근**할 수 있다면, **파일을 배치**할 수 있습니다 (예: SCF 파일). 이 파일이 어떤 식으로든 접근되면 **당신에 대한 NTML 인증을 트리거**하여 **NTLM 챌린지**를 훔칠 수 있습니다:
+**null 또는 guest 사용자**로 다른 PC나 공유에 **접근**할 수 있다면, **파일을 배치**할 수 있습니다 (예: SCF 파일). 이 파일이 어떤 식으로든 접근되면 **당신에 대한 NTML 인증을 트리거**하여 **NTLM 챌린지를 도용**할 수 있습니다:
 
 {{#ref}}
 ../ntlm/places-to-steal-ntlm-creds.md
 {{#endref}}
 
-## 자격 증명/세션으로 액티브 디렉토리 열거하기
+## 자격 증명/세션으로 활성 디렉토리 열거하기
 
-이 단계에서는 **유효한 도메인 계정의 자격 증명이나 세션을 손상시켜야** 합니다. 유효한 자격 증명이나 도메인 사용자로서의 쉘이 있다면, **이전에 제시된 옵션들이 여전히 다른 사용자를 손상시키는 옵션임을 기억해야 합니다.**
+이 단계에서는 **유효한 도메인 계정의 자격 증명이나 세션을 손상시켜야** 합니다. 유효한 자격 증명이나 도메인 사용자로서의 쉘이 있다면, **이전에 제공된 옵션이 여전히 다른 사용자를 손상시키는 옵션임을 기억해야** 합니다.
 
 인증된 열거를 시작하기 전에 **Kerberos 더블 홉 문제**가 무엇인지 알아야 합니다.
 
@@ -151,31 +151,31 @@ kerberos-double-hop-problem.md
 
 ### 열거
 
-계정을 손상시키는 것은 **전체 도메인을 손상시키기 위한 큰 단계**입니다. 이제 **액티브 디렉토리 열거**를 시작할 수 있습니다:
+계정을 손상시키는 것은 **전체 도메인을 손상시키기 위한 큰 단계**입니다. 이제 **Active Directory 열거**를 시작할 수 있습니다:
 
-[**ASREPRoast**](asreproast.md)와 관련하여 이제 모든 가능한 취약한 사용자를 찾을 수 있으며, [**Password Spraying**](password-spraying.md)와 관련하여 손상된 계정의 비밀번호, 빈 비밀번호 및 새로운 유망한 비밀번호를 시도할 수 있습니다.
+[**ASREPRoast**](asreproast.md)와 관련하여 이제 가능한 모든 취약한 사용자를 찾을 수 있으며, [**Password Spraying**](password-spraying.md)와 관련하여 손상된 계정의 비밀번호, 빈 비밀번호 및 새로운 유망한 비밀번호를 시도할 수 있습니다.
 
 - [**CMD를 사용하여 기본 정찰 수행**](../basic-cmd-for-pentesters.md#domain-info)
-- [**powershell을 사용하여 정찰**](../basic-powershell-for-pentesters/)할 수도 있으며, 이는 더 은밀할 것입니다.
+- [**powershell을 사용하여 정찰**](../basic-powershell-for-pentesters/index.html)할 수도 있으며, 이는 더 은밀합니다.
 - [**powerview 사용**](../basic-powershell-for-pentesters/powerview.md)하여 더 자세한 정보를 추출할 수 있습니다.
-- 액티브 디렉토리에서 정찰을 위한 또 다른 훌륭한 도구는 [**BloodHound**](bloodhound.md)입니다. 이는 **그리 은밀하지는 않지만** (사용하는 수집 방법에 따라 다름), **그것에 대해 신경 쓰지 않는다면** 꼭 시도해 보아야 합니다. 사용자가 RDP할 수 있는 위치를 찾고, 다른 그룹으로 가는 경로를 찾는 등의 작업을 할 수 있습니다.
+- 활성 디렉토리에서 정찰을 위한 또 다른 훌륭한 도구는 [**BloodHound**](bloodhound.md)입니다. 이는 **그리 은밀하지는 않지만** (사용하는 수집 방법에 따라 다름), **그것에 대해 신경 쓰지 않는다면** 꼭 시도해 보아야 합니다. 사용자가 RDP할 수 있는 위치를 찾고, 다른 그룹으로 가는 경로를 찾는 등의 작업을 할 수 있습니다.
 - **기타 자동화된 AD 열거 도구는:** [**AD Explorer**](bloodhound.md#ad-explorer)**,** [**ADRecon**](bloodhound.md#adrecon)**,** [**Group3r**](bloodhound.md#group3r)**,** [**PingCastle**](bloodhound.md#pingcastle)**.**
 - [**AD의 DNS 레코드**](ad-dns-records.md)도 흥미로운 정보를 포함할 수 있습니다.
 - 디렉토리를 열거하는 데 사용할 수 있는 **GUI 도구**는 **SysInternal** Suite의 **AdExplorer.exe**입니다.
-- **ldapsearch**를 사용하여 LDAP 데이터베이스에서 _userPassword_ 및 _unixUserPassword_ 필드에서 자격 증명을 찾거나, 심지어 _Description_을 검색할 수 있습니다. cf. [PayloadsAllTheThings의 AD 사용자 주석에서 비밀번호](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#password-in-ad-user-comment)에서 다른 방법을 확인하세요.
-- **Linux**를 사용하는 경우, [**pywerview**](https://github.com/the-useless-one/pywerview)를 사용하여 도메인을 열거할 수 있습니다.
-- 자동화 도구로는 다음을 시도할 수 있습니다:
+- **ldapsearch**를 사용하여 LDAP 데이터베이스에서 _userPassword_ 및 _unixUserPassword_ 필드에서 자격 증명을 찾거나 _Description_을 검색할 수도 있습니다. cf. [PayloadsAllTheThings의 AD 사용자 주석에서 비밀번호](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#password-in-ad-user-comment)에서 다른 방법을 확인하세요.
+- **Linux**를 사용하는 경우 [**pywerview**](https://github.com/the-useless-one/pywerview)를 사용하여 도메인을 열거할 수도 있습니다.
+- 자동화 도구를 시도할 수도 있습니다:
 - [**tomcarver16/ADSearch**](https://github.com/tomcarver16/ADSearch)
 - [**61106960/adPEAS**](https://github.com/61106960/adPEAS)
 - **모든 도메인 사용자 추출하기**
 
-Windows에서 도메인 사용자 이름을 얻는 것은 매우 쉽습니다 (`net user /domain`, `Get-DomainUser` 또는 `wmic useraccount get name,sid`). Linux에서는 다음을 사용할 수 있습니다: `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username` 또는 `enum4linux -a -u "user" -p "password" <DC IP>`
+Windows에서 도메인 사용자 이름을 얻는 것은 매우 쉽습니다 (`net user /domain`, `Get-DomainUser` 또는 `wmic useraccount get name,sid`). Linux에서는 `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username` 또는 `enum4linux -a -u "user" -p "password" <DC IP>`를 사용할 수 있습니다.
 
-> 이 열거 섹션이 작아 보일지라도, 이는 모든 것 중에서 가장 중요한 부분입니다. 링크를 확인하세요 (주로 cmd, powershell, powerview 및 BloodHound 링크), 도메인을 열거하는 방법을 배우고 편안해질 때까지 연습하세요. 평가 중에는 DA로 가는 길을 찾거나 아무것도 할 수 없다고 결정하는 중요한 순간이 될 것입니다.
+> 이 열거 섹션이 작아 보일 수 있지만, 이는 모든 것 중에서 가장 중요한 부분입니다. 링크를 확인하세요 (주로 cmd, powershell, powerview 및 BloodHound 링크), 도메인을 열거하는 방법을 배우고 편안해질 때까지 연습하세요. 평가 중에는 DA로 가는 길을 찾거나 아무것도 할 수 없다고 결정하는 중요한 순간이 될 것입니다.
 
 ### Kerberoast
 
-Kerberoasting은 사용자 계정에 연결된 서비스에서 사용되는 **TGS 티켓**을 얻고, 그 암호화를 크랙하는 것을 포함합니다—이는 사용자 비밀번호를 기반으로 하며—**오프라인**에서 이루어집니다.
+Kerberoasting은 사용자 계정에 연결된 서비스에서 사용되는 **TGS 티켓**을 얻고, 그 암호화를 크랙하는 것입니다—이는 사용자 비밀번호를 기반으로 하며—**오프라인**에서 수행됩니다.
 
 자세한 내용은:
 
@@ -185,17 +185,17 @@ kerberoast.md
 
 ### 원격 연결 (RDP, SSH, FTP, Win-RM 등)
 
-자격 증명을 얻은 후, **어떤 머신**에 접근할 수 있는지 확인할 수 있습니다. 이를 위해 **CrackMapExec**를 사용하여 포트 스캔에 따라 여러 서버에 다양한 프로토콜로 연결을 시도할 수 있습니다.
+일단 자격 증명을 얻으면, 어떤 **기계**에 접근할 수 있는지 확인할 수 있습니다. 이를 위해 **CrackMapExec**를 사용하여 포트 스캔에 따라 여러 서버에 다양한 프로토콜로 연결을 시도할 수 있습니다.
 
 ### 로컬 권한 상승
 
-정상 도메인 사용자로서 자격 증명이나 세션을 손상시켰고, 이 사용자로 **도메인 내의 어떤 머신에 접근**할 수 있다면, **로컬에서 권한을 상승시키고 자격 증명을 찾는 방법을 찾아야** 합니다. 이는 로컬 관리자 권한이 있어야만 **다른 사용자의 해시를 메모리(LSASS)와 로컬(SAM)에서 덤프할 수 있기 때문입니다.**
+정상 도메인 사용자로서 자격 증명이나 세션을 손상시켰고, 이 사용자로 **도메인 내의 어떤 기계에 접근**할 수 있다면, **로컬에서 권한을 상승시키고 자격 증명을 찾는 방법을 찾아야** 합니다. 이는 로컬 관리자 권한이 있어야만 **다른 사용자의 해시를 메모리(LSASS)와 로컬(SAM)에서 덤프**할 수 있기 때문입니다.
 
-이 책에는 [**Windows에서의 로컬 권한 상승**](../windows-local-privilege-escalation/)에 대한 완전한 페이지와 [**체크리스트**](../checklist-windows-privilege-escalation.md)가 있습니다. 또한, [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite)를 사용하는 것을 잊지 마세요.
+이 책에는 [**Windows에서의 로컬 권한 상승**](../windows-local-privilege-escalation/index.html)에 대한 완전한 페이지와 [**체크리스트**](../checklist-windows-privilege-escalation.md)가 있습니다. 또한 [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite)를 사용하는 것을 잊지 마세요.
 
 ### 현재 세션 티켓
 
-예상치 못한 리소스에 접근할 수 있는 **티켓**을 현재 사용자에서 찾는 것은 매우 **가능성이 낮지만**, 확인해 볼 수 있습니다:
+예상치 못한 리소스에 접근할 수 있는 **티켓**을 현재 사용자에서 찾는 것은 매우 **가능성이 낮지만**, 확인할 수 있습니다:
 ```bash
 ## List all tickets (if not admin, only current user tickets)
 .\Rubeus.exe triage
@@ -215,7 +215,7 @@ kerberoast.md
 
 ### NTLM 자격 증명 훔치기
 
-다른 PC나 공유에 **접근할 수 있다면** (SCF 파일과 같은) **파일을 배치**할 수 있습니다. 이 파일이 접근되면 **NTML 인증을 트리거하여** **NTLM 챌린지를 훔칠 수 있습니다**:
+다른 PC나 공유에 **접근할 수 있다면**, **파일을 배치**할 수 있습니다(예: SCF 파일). 이 파일이 어떤 방식으로든 접근되면 **당신에 대한 NTML 인증을 트리거**하여 **NTLM 챌린지를 훔쳐서 크랙할 수 있습니다**:
 
 {{#ref}}
 ../ntlm/places-to-steal-ntlm-creds.md
@@ -231,17 +231,17 @@ printnightmare.md
 
 ## 권한 상승: 특권 자격 증명/세션을 통한 Active Directory
 
-**다음 기술을 수행하려면 일반 도메인 사용자로는 부족하며, 특별한 권한/자격 증명이 필요합니다.**
+**다음 기술을 수행하려면 일반 도메인 사용자로는 부족하며, 이러한 공격을 수행하기 위해 특별한 권한/자격 증명이 필요합니다.**
 
 ### 해시 추출
 
-운 좋게도 [AsRepRoast](asreproast.md), [Password Spraying](password-spraying.md), [Kerberoast](kerberoast.md), [Responder](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) 및 릴레이를 포함하여 [EvilSSDP](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md), [로컬 권한 상승](../windows-local-privilege-escalation/)을 통해 **로컬 관리자** 계정을 **손상시키는 데 성공했다면**\
+운 좋게도 [AsRepRoast](asreproast.md), [Password Spraying](password-spraying.md), [Kerberoast](kerberoast.md), [Responder](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) 포함하여 릴레이, [EvilSSDP](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md), [로컬 권한 상승](../windows-local-privilege-escalation/index.html) 등을 통해 **로컬 관리자** 계정을 **손상시키는 데 성공했다면**\
 이제 메모리와 로컬에서 모든 해시를 덤프할 시간입니다.\
-[**해시를 얻는 다양한 방법에 대해 이 페이지를 읽어보세요.**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
+[**해시를 얻는 다양한 방법에 대한 내용을 읽어보세요.**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
 
 ### 해시 전달
 
-**사용자의 해시를 확보했다면**, 이를 사용하여 **사용자를 가장할 수 있습니다.**\
+**사용자의 해시를 확보한 후**, 이를 사용하여 **사용자를 가장할 수 있습니다.**\
 해시를 사용하여 **NTLM 인증을 수행하는** **도구**를 사용해야 하며, **또는** 새로운 **sessionlogon**을 생성하고 **LSASS** 내부에 그 **해시를 주입**할 수 있습니다. 그러면 **NTLM 인증이 수행될 때** 그 **해시가 사용됩니다.** 마지막 옵션이 mimikatz가 하는 일입니다.\
 [**자세한 정보는 이 페이지를 읽어보세요.**](../ntlm/index.html#pass-the-hash)
 
@@ -274,8 +274,8 @@ crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9c
 
 ### MSSQL 남용 및 신뢰 링크
 
-사용자가 **MSSQL 인스턴스에 접근할 수 있는 권한**이 있다면, 그는 MSSQL 호스트에서 **명령을 실행**하거나 (SA로 실행 중인 경우) NetNTLM **해시**를 **탈취**하거나 심지어 **릴레이** **공격**을 수행할 수 있습니다.\
-또한, MSSQL 인스턴스가 다른 MSSQL 인스턴스에 의해 신뢰되는 경우(데이터베이스 링크). 사용자가 신뢰된 데이터베이스에 대한 권한을 가지고 있다면, 그는 **신뢰 관계를 사용하여 다른 인스턴스에서도 쿼리를 실행할 수 있습니다**. 이러한 신뢰는 연결될 수 있으며, 사용자는 명령을 실행할 수 있는 잘못 구성된 데이터베이스를 찾을 수 있습니다.\
+사용자가 **MSSQL 인스턴스에 접근할 수 있는 권한**이 있다면, 그는 MSSQL 호스트에서 **명령을 실행**하거나 (SA로 실행 중인 경우), NetNTLM **해시**를 **탈취**하거나 심지어 **릴레이** **공격**을 수행할 수 있습니다.\
+또한, MSSQL 인스턴스가 다른 MSSQL 인스턴스에 의해 신뢰되는 경우(데이터베이스 링크). 사용자가 신뢰된 데이터베이스에 대한 권한을 가지고 있다면, 그는 **신뢰 관계를 사용하여 다른 인스턴스에서도 쿼리를 실행할 수 있습니다**. 이러한 신뢰는 연결될 수 있으며, 어느 시점에서 사용자는 명령을 실행할 수 있는 잘못 구성된 데이터베이스를 찾을 수 있습니다.\
 **데이터베이스 간의 링크는 포리스트 신뢰를 넘어 작동합니다.**
 
 {{#ref}}
@@ -336,7 +336,7 @@ rdp-sessions-abuse.md
 
 ### LAPS
 
-**LAPS**는 도메인에 가입된 컴퓨터에서 **로컬 관리자 비밀번호**를 관리하는 시스템을 제공하여, 비밀번호가 **무작위화**, 고유하며 자주 **변경**되도록 보장합니다. 이러한 비밀번호는 Active Directory에 저장되며, ACL을 통해 권한이 있는 사용자만 접근할 수 있도록 제어됩니다. 이러한 비밀번호에 접근할 수 있는 충분한 권한이 있으면, 다른 컴퓨터로 피벗할 수 있습니다.
+**LAPS**는 도메인에 가입된 컴퓨터에서 **로컬 관리자 비밀번호**를 관리하는 시스템을 제공하여, 비밀번호가 **무작위화**, 고유하며 자주 **변경**되도록 보장합니다. 이러한 비밀번호는 Active Directory에 저장되며, ACL을 통해 권한이 있는 사용자만 접근할 수 있습니다. 이러한 비밀번호에 접근할 수 있는 충분한 권한이 있으면, 다른 컴퓨터로 피벗할 수 있습니다.
 
 {{#ref}}
 laps.md
@@ -362,13 +362,13 @@ ad-certificates/domain-escalation.md
 
 ### 도메인 자격 증명 덤프
 
-**도메인 관리자** 또는 더 나은 **엔터프라이즈 관리자** 권한을 얻으면, **도메인 데이터베이스**를 **덤프**할 수 있습니다: _ntds.dit_.
+**도메인 관리자** 또는 더 나아가 **엔터프라이즈 관리자** 권한을 얻으면, **도메인 데이터베이스**를 **덤프**할 수 있습니다: _ntds.dit_.
 
 [**DCSync 공격에 대한 더 많은 정보는 여기에서 찾을 수 있습니다**](dcsync.md).
 
 [**NTDS.dit를 훔치는 방법에 대한 더 많은 정보는 여기에서 찾을 수 있습니다**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
 
-### 권한 상승을 위한 지속성
+### 권한 상승을 통한 지속성
 
 앞서 논의된 몇 가지 기술은 지속성에 사용될 수 있습니다.\
 예를 들어, 다음과 같이 할 수 있습니다:
@@ -435,13 +435,13 @@ ad-certificates/domain-persistence.md
 
 ### AdminSDHolder 그룹
 
-Active Directory의 **AdminSDHolder** 객체는 **특권 그룹**(도메인 관리자 및 엔터프라이즈 관리자와 같은)의 보안을 보장하기 위해 이러한 그룹에 표준 **액세스 제어 목록(ACL)**을 적용하여 무단 변경을 방지합니다. 그러나 이 기능은 악용될 수 있습니다. 공격자가 AdminSDHolder의 ACL을 수정하여 일반 사용자에게 전체 액세스를 부여하면, 해당 사용자는 모든 특권 그룹에 대한 광범위한 제어를 얻게 됩니다. 이 보안 조치는 보호를 위한 것이지만, 면밀히 모니터링되지 않으면 불필요한 접근을 허용할 수 있습니다.
+Active Directory의 **AdminSDHolder** 객체는 **특권 그룹**(도메인 관리자 및 엔터프라이즈 관리자와 같은)의 보안을 보장하기 위해 이러한 그룹에 표준 **액세스 제어 목록(ACL)**을 적용하여 무단 변경을 방지합니다. 그러나 이 기능은 악용될 수 있습니다. 공격자가 AdminSDHolder의 ACL을 수정하여 일반 사용자에게 전체 액세스를 부여하면, 해당 사용자는 모든 특권 그룹에 대한 광범위한 제어를 얻게 됩니다. 이 보안 조치는 보호를 위해 설계되었지만, 면밀히 모니터링되지 않으면 불필요한 접근을 허용할 수 있습니다.
 
 [**AdminDSHolder 그룹에 대한 더 많은 정보는 여기에서 확인할 수 있습니다.**](privileged-groups-and-token-privileges.md#adminsdholder-group)
 
 ### DSRM 자격 증명
 
-모든 **도메인 컨트롤러(DC)** 내에는 **로컬 관리자** 계정이 존재합니다. 이러한 머신에서 관리자 권한을 얻으면 **mimikatz**를 사용하여 로컬 관리자 해시를 추출할 수 있습니다. 이후, 이 비밀번호를 **사용할 수 있도록 활성화**하기 위해 레지스트리 수정을 해야 하며, 이를 통해 로컬 관리자 계정에 원격으로 접근할 수 있습니다.
+모든 **도메인 컨트롤러(DC)** 내에는 **로컬 관리자** 계정이 존재합니다. 이러한 머신에서 관리자 권한을 얻으면, **mimikatz**를 사용하여 로컬 관리자 해시를 추출할 수 있습니다. 이후, 이 비밀번호를 **사용할 수 있도록 활성화**하기 위해 레지스트리 수정을 해야 하며, 이를 통해 로컬 관리자 계정에 원격으로 접근할 수 있습니다.
 
 {{#ref}}
 dsrm-credentials.md
@@ -457,7 +457,7 @@ acl-persistence-abuse/
 
 ### 보안 설명자
 
-**보안 설명자**는 **객체**가 **객체**에 대해 가진 **권한**을 **저장**하는 데 사용됩니다. 객체의 **보안 설명자**에 **조금만 변경**을 가하면, 특권 그룹의 구성원이 되지 않고도 해당 객체에 대한 매우 흥미로운 권한을 얻을 수 있습니다.
+**보안 설명자**는 **객체**가 **객체**에 대해 가진 **권한**을 **저장**하는 데 사용됩니다. 객체의 **보안 설명자**에 **조금만 변경**을 가하면, 특권 그룹의 구성원이 될 필요 없이 해당 객체에 대한 매우 흥미로운 권한을 얻을 수 있습니다.
 
 {{#ref}}
 security-descriptors.md
@@ -483,7 +483,7 @@ custom-ssp.md
 ### DCShadow
 
 AD에 **새 도메인 컨트롤러**를 등록하고 이를 사용하여 지정된 객체에 **속성**(SIDHistory, SPNs...)을 **푸시**합니다. 이 과정에서 **수정**에 대한 **로그**를 남기지 않습니다. **DA** 권한이 필요하며 **루트 도메인** 내에 있어야 합니다.\
-잘못된 데이터를 사용하면 매우 불쾌한 로그가 나타날 수 있습니다.
+잘못된 데이터를 사용하면, 매우 불쾌한 로그가 나타날 수 있습니다.
 
 {{#ref}}
 dcshadow.md
@@ -504,7 +504,7 @@ Microsoft는 **포리스트**를 보안 경계로 간주합니다. 이는 **단�
 
 ### 기본 정보
 
-[**도메인 신뢰**](<http://technet.microsoft.com/en-us/library/cc759554(v=ws.10).aspx>)는 한 **도메인**의 사용자가 다른 **도메인**의 리소스에 접근할 수 있도록 하는 보안 메커니즘입니다. 이는 두 도메인의 인증 시스템 간의 연결을 생성하여 인증 검증이 원활하게 흐를 수 있도록 합니다. 도메인이 신뢰를 설정하면, 그들은 특정 **키**를 **도메인 컨트롤러(DC)** 내에서 교환하고 유지하여 신뢰의 무결성을 보장합니다.
+[**도메인 신뢰**](<http://technet.microsoft.com/en-us/library/cc759554(v=ws.10).aspx>)는 한 **도메인**의 사용자가 다른 **도메인**의 리소스에 접근할 수 있도록 하는 보안 메커니즘입니다. 이는 본질적으로 두 도메인의 인증 시스템 간의 연결을 생성하여 인증 검증이 원활하게 흐를 수 있도록 합니다. 도메인이 신뢰를 설정하면, 그들은 특정 **키**를 **도메인 컨트롤러(DC)** 내에서 교환하고 유지하여 신뢰의 무결성을 보장합니다.
 
 일반적인 시나리오에서 사용자가 **신뢰된 도메인**의 서비스에 접근하려면, 먼저 자신의 도메인 DC로부터 **인터-렐름 TGT**라는 특별한 티켓을 요청해야 합니다. 이 TGT는 두 도메인이 합의한 공유 **키**로 암호화됩니다. 사용자는 이 TGT를 **신뢰된 도메인의 DC**에 제시하여 서비스 티켓(**TGS**)을 받습니다. 신뢰된 도메인의 DC가 인터-렐름 TGT를 성공적으로 검증하면, TGS를 발급하여 사용자가 서비스에 접근할 수 있도록 합니다.
 
@@ -528,20 +528,20 @@ Microsoft는 **포리스트**를 보안 경계로 간주합니다. 이는 **단�
 
 - **부모-자식 신뢰**: 이는 동일한 포리스트 내에서 일반적인 설정으로, 자식 도메인은 자동으로 부모 도메인과 양방향 전이 신뢰를 가집니다. 본질적으로 이는 인증 요청이 부모와 자식 간에 원활하게 흐를 수 있음을 의미합니다.
 - **교차 링크 신뢰**: "단축 신뢰"라고도 하며, 자식 도메인 간에 설정되어 참조 프로세스를 가속화합니다. 복잡한 포리스트에서는 인증 참조가 일반적으로 포리스트 루트까지 올라갔다가 목표 도메인으로 내려가야 합니다. 교차 링크를 생성함으로써 이 여정을 단축할 수 있으며, 이는 지리적으로 분산된 환경에서 특히 유용합니다.
-- **외부 신뢰**: 이는 서로 관련이 없는 도메인 간에 설정되며 본질적으로 비전이적입니다. [Microsoft의 문서에 따르면](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>), 외부 신뢰는 현재 포리스트와 연결되지 않은 도메인에서 리소스에 접근하는 데 유용합니다. 보안은 외부 신뢰와 함께 SID 필터링을 통해 강화됩니다.
+- **외부 신뢰**: 이는 서로 관련이 없는 도메인 간에 설정되며 본질적으로 비전이적입니다. [Microsoft의 문서에 따르면](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>), 외부 신뢰는 현재 포리스트와 연결되지 않은 도메인 내의 리소스에 접근하는 데 유용합니다. 보안은 외부 신뢰와 함께 SID 필터링을 통해 강화됩니다.
 - **트리 루트 신뢰**: 이러한 신뢰는 포리스트 루트 도메인과 새로 추가된 트리 루트 간에 자동으로 설정됩니다. 일반적으로 자주 발생하지 않지만, 트리 루트 신뢰는 포리스트에 새로운 도메인 트리를 추가하는 데 중요하며, 이를 통해 고유한 도메인 이름을 유지하고 양방향 전이성을 보장합니다. [Microsoft의 가이드에서 더 많은 정보를 찾을 수 있습니다.](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>).
-- **포리스트 신뢰**: 이 유형의 신뢰는 두 포리스트 루트 도메인 간의 양방향 전이 신뢰로, 보안 조치를 강화하기 위해 SID 필터링을 시행합니다.
-- **MIT 신뢰**: 이러한 신뢰는 비 Windows, [RFC4120 준수](https://tools.ietf.org/html/rfc4120) Kerberos 도메인과 설정됩니다. MIT 신뢰는 좀 더 전문화되어 있으며, Windows 생태계 외부의 Kerberos 기반 시스템과의 통합이 필요한 환경에 맞춰져 있습니다.
+- **포리스트 신뢰**: 이 유형의 신뢰는 두 포리스트 루트 도메인 간의 양방향 전이 신뢰로, SID 필터링을 통해 보안 조치를 강화합니다.
+- **MIT 신뢰**: 이러한 신뢰는 비 Windows, [RFC4120 준수](https://tools.ietf.org/html/rfc4120) Kerberos 도메인과 설정됩니다. MIT 신뢰는 좀 더 전문화되어 있으며, Windows 생태계 외부의 Kerberos 기반 시스템과의 통합이 필요한 환경을 위해 설계되었습니다.
 
 #### **신뢰 관계의 다른 차이점**
 
-- 신뢰 관계는 **전이적**일 수 있습니다(A가 B를 신뢰하고 B가 C를 신뢰하면, A가 C를 신뢰함) 또는 **비전이적**일 수 있습니다.
+- 신뢰 관계는 **전이적**일 수 있습니다(A가 B를 신뢰하고, B가 C를 신뢰하면, A가 C를 신뢰함) 또는 **비전이적**일 수 있습니다.
 - 신뢰 관계는 **양방향 신뢰**(서로를 신뢰함) 또는 **일방향 신뢰**(오직 한 쪽만 다른 쪽을 신뢰함)로 설정될 수 있습니다.
 
 ### 공격 경로
 
 1. **신뢰 관계를 열거**합니다.
-2. 어떤 **보안 주체**(사용자/그룹/컴퓨터)가 **다른 도메인의 리소스에 접근할 수 있는지** 확인합니다. ACE 항목이나 다른 도메인의 그룹에 속해 있을 수 있습니다. **도메인 간의 관계**를 찾아보세요(신뢰가 이 목적을 위해 생성되었을 가능성이 높습니다).
+2. 어떤 **보안 주체**(사용자/그룹/컴퓨터)가 **다른 도메인의 리소스에 접근**할 수 있는지 확인합니다. ACE 항목이나 다른 도메인의 그룹에 속해 있을 수 있습니다. **도메인 간의 관계**를 찾아보세요(신뢰가 이 목적을 위해 생성되었을 가능성이 높습니다).
 3. 이 경우 kerberoast가 또 다른 옵션이 될 수 있습니다.
 4. **계정을 손상시켜** 도메인 간에 **피벗**할 수 있습니다.
 
@@ -582,7 +582,7 @@ sid-history-injection.md
 
 #### 쓰기 가능한 Configuration NC 악용
 
-Configuration Naming Context (NC)를 악용하는 방법을 이해하는 것은 중요합니다. Configuration NC는 Active Directory (AD) 환경에서 구성 데이터의 중앙 저장소 역할을 합니다. 이 데이터는 포리스트 내 모든 도메인 컨트롤러(DC)에 복제되며, 쓰기 가능한 DC는 Configuration NC의 쓰기 가능한 복사본을 유지합니다. 이를 악용하려면 **DC에서 SYSTEM 권한**이 필요하며, 가능하면 자식 DC에서 수행해야 합니다.
+Configuration Naming Context (NC)를 악용하는 방법을 이해하는 것은 중요합니다. Configuration NC는 Active Directory (AD) 환경에서 포리스트 전반에 걸쳐 구성 데이터의 중앙 저장소 역할을 합니다. 이 데이터는 포리스트 내 모든 도메인 컨트롤러(DC)에 복제되며, 쓰기 가능한 DC는 Configuration NC의 쓰기 가능한 복사본을 유지합니다. 이를 악용하려면 **DC에서 SYSTEM 권한**이 필요하며, 가능하면 자식 DC에서 수행해야 합니다.
 
 **루트 DC 사이트에 GPO 연결**
 
@@ -592,7 +592,7 @@ Configuration NC의 Sites 컨테이너에는 AD 포리스트 내 모든 도메�
 
 **포리스트 내 모든 gMSA 손상**
 
-공격 벡터는 도메인 내 특권 gMSA를 대상으로 하는 것입니다. gMSA의 비밀번호를 계산하는 데 필수적인 KDS Root 키는 Configuration NC에 저장됩니다. 모든 DC에서 SYSTEM 권한을 사용하면 KDS Root 키에 접근하고 포리스트 내 모든 gMSA의 비밀번호를 계산할 수 있습니다.
+공격 벡터는 도메인 내 특권 gMSA를 대상으로 하는 것입니다. gMSA의 비밀번호를 계산하는 데 필수적인 KDS Root 키는 Configuration NC 내에 저장됩니다. 모든 DC에서 SYSTEM 권한을 사용하면 KDS Root 키에 접근하고 포리스트 전역의 모든 gMSA에 대한 비밀번호를 계산할 수 있습니다.
 
 자세한 분석은 [Golden gMSA Trust Attacks](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent)에 대한 논의에서 확인할 수 있습니다.
 
@@ -606,7 +606,7 @@ Configuration NC의 Sites 컨테이너에는 AD 포리스트 내 모든 도메�
 
 ADCS ESC5 취약점은 공인 키 인프라(PKI) 객체에 대한 제어를 목표로 하여 포리스트 내의 모든 사용자로 인증할 수 있는 인증서 템플릿을 생성합니다. PKI 객체는 Configuration NC에 위치하므로, 쓰기 가능한 자식 DC를 손상시키면 ESC5 공격을 실행할 수 있습니다.
 
-자세한 내용은 [DA에서 EA로 ESC5](https://posts.specterops.io/from-da-to-ea-with-esc5-f9f045aa105c)에서 읽을 수 있습니다. ADCS가 없는 시나리오에서는 공격자가 필요한 구성 요소를 설정할 수 있으며, 이는 [자식 도메인 관리자에서 엔터프라이즈 관리자까지 상승](https://www.pkisolutions.com/escalating-from-child-domains-admins-to-enterprise-admins-in-5-minutes-by-abusing-ad-cs-a-follow-up/)에서 논의됩니다.
+자세한 내용은 [ESC5를 통한 DA에서 EA로](https://posts.specterops.io/from-da-to-ea-with-esc5-f9f045aa105c)에서 읽을 수 있습니다. ADCS가 없는 시나리오에서는 공격자가 필요한 구성 요소를 설정할 수 있으며, 이는 [자식 도메인 관리자로부터 엔터프라이즈 관리자까지 상승](https://www.pkisolutions.com/escalating-from-child-domains-admins-to-enterprise-admins-in-5-minutes-by-abusing-ad-cs-a-follow-up/)에서 논의됩니다.
 
 ### 외부 포리스트 도메인 - 단방향(수신) 또는 양방향
 ```powershell
@@ -619,7 +619,7 @@ TrustDirection  : Inbound          --> Inboud trust
 WhenCreated     : 2/19/2021 10:50:56 PM
 WhenChanged     : 2/19/2021 10:50:56 PM
 ```
-이 시나리오에서 **귀하의 도메인은 외부 도메인에 의해 신뢰받고 있습니다**. 이는 귀하에게 **정확히 알 수 없는 권한**을 부여합니다. 귀하는 **귀하의 도메인에서 외부 도메인에 대해 어떤 주체가 어떤 접근 권한을 가지고 있는지** 찾아야 하며, 그 후 이를 악용하려고 시도해야 합니다:
+이 시나리오에서 **귀하의 도메인은 외부 도메인에 의해 신뢰받고 있습니다**. 이는 귀하에게 **정해지지 않은 권한**을 부여합니다. 귀하는 **귀하의 도메인에서 외부 도메인에 대한 접근 권한이 있는 주체가 누구인지** 찾아야 하며, 그 후 이를 악용하려고 시도해야 합니다:
 
 {{#ref}}
 external-forest-domain-oneway-inbound.md
