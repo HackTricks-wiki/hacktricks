@@ -4,7 +4,7 @@
 
 ## Combinazioni di permessi POSIX
 
-Permessi in una **directory**:
+I permessi in una **directory**:
 
 - **read** - puoi **enumerare** le voci della directory
 - **write** - puoi **eliminare/scrivere** **file** nella directory e puoi **eliminare cartelle vuote**.
@@ -12,13 +12,13 @@ Permessi in una **directory**:
 - Non puoi **modificare il nome di una cartella** a meno che tu non sia il proprietario.
 - **execute** - ti è **consentito di attraversare** la directory - se non hai questo diritto, non puoi accedere a nessun file al suo interno, né in alcuna sottodirectory.
 
-### Combinazioni Pericolose
+### Combinazioni pericolose
 
 **Come sovrascrivere un file/cartella di proprietà di root**, ma:
 
-- Un **proprietario della directory** genitore nel percorso è l'utente
-- Un **proprietario della directory** genitore nel percorso è un **gruppo di utenti** con **accesso in scrittura**
-- Un **gruppo di utenti** ha accesso **in scrittura** al **file**
+- Un **proprietario** della **directory** nel percorso è l'utente
+- Un **proprietario** della **directory** nel percorso è un **gruppo di utenti** con **accesso in scrittura**
+- Un **gruppo** di utenti ha **accesso in scrittura** al **file**
 
 Con una delle combinazioni precedenti, un attaccante potrebbe **iniettare** un **link simbolico/duro** nel percorso previsto per ottenere una scrittura arbitraria privilegiata.
 
@@ -86,7 +86,7 @@ ls -lO /tmp/asd
 ```
 ### defvfs mount
 
-Un **devfs** mount **non supporta xattr**, ulteriori informazioni in [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)
+Un **devfs** mount **non supporta xattr**, maggiori informazioni in [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)
 ```bash
 mkdir /tmp/mnt
 mount_devfs -o noowners none "/tmp/mnt"
@@ -124,7 +124,7 @@ Il formato di file **AppleDouble** copia un file inclusi i suoi ACE.
 
 Nel [**codice sorgente**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) è possibile vedere che la rappresentazione testuale dell'ACL memorizzata all'interno dell'xattr chiamato **`com.apple.acl.text`** verrà impostata come ACL nel file decompresso. Quindi, se hai compresso un'applicazione in un file zip con formato di file **AppleDouble** con un ACL che impedisce ad altri xattrs di essere scritti... l'xattr di quarantena non è stato impostato nell'applicazione:
 
-Controlla il [**report originale**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) per ulteriori informazioni.
+Controlla il [**rapporto originale**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) per ulteriori informazioni.
 
 Per replicare questo, dobbiamo prima ottenere la stringa acl corretta:
 ```bash
@@ -195,7 +195,7 @@ Tuttavia, ci sono alcuni file la cui firma non verrà controllata, questi hanno 
 </dict>
 <key>rules2</key>
 ...
-<key>^(.*/)?\.DS_Store$</key>
+<key>^(.*/index.html)?\.DS_Store$</key>
 <dict>
 <key>omit</key>
 <true/>
@@ -221,7 +221,7 @@ Tuttavia, ci sono alcuni file la cui firma non verrà controllata, questi hanno 
 ...
 </dict>
 ```
-È possibile calcolare la firma di una risorsa dalla cli con:
+È possibile calcolare la firma di una risorsa dalla riga di comando con:
 ```bash
 openssl dgst -binary -sha1 /System/Cryptexes/App/System/Applications/Safari.app/Contents/Resources/AppIcon.icns | openssl base64
 ```
@@ -312,7 +312,7 @@ Poi, modifica di nuovo il file `/etc/cups/cups-files.conf` indicando `LogFilePer
 
 ## Genera file scrivibili come altri utenti
 
-Questo genererà un file che appartiene a root e che è scrivibile da me ([**code from here**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Questo potrebbe funzionare anche come privesc:
+Questo genererà un file che appartiene a root e che è scrivibile da me ([**code from here**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Questo potrebbe anche funzionare come privesc:
 ```bash
 DIRNAME=/usr/local/etc/periodic/daily
 
@@ -324,13 +324,13 @@ MallocStackLogging=1 MallocStackLoggingDirectory=$DIRNAME MallocStackLoggingDont
 FILENAME=$(ls "$DIRNAME")
 echo $FILENAME
 ```
-## Memoria Condivisa POSIX
+## POSIX Shared Memory
 
 **La memoria condivisa POSIX** consente ai processi nei sistemi operativi conformi a POSIX di accedere a un'area di memoria comune, facilitando una comunicazione più rapida rispetto ad altri metodi di comunicazione inter-processo. Comporta la creazione o l'apertura di un oggetto di memoria condivisa con `shm_open()`, la definizione della sua dimensione con `ftruncate()`, e la mappatura nello spazio degli indirizzi del processo utilizzando `mmap()`. I processi possono quindi leggere e scrivere direttamente in quest'area di memoria. Per gestire l'accesso concorrente e prevenire la corruzione dei dati, vengono spesso utilizzati meccanismi di sincronizzazione come mutex o semafori. Infine, i processi smappano e chiudono la memoria condivisa con `munmap()` e `close()`, e opzionalmente rimuovono l'oggetto di memoria con `shm_unlink()`. Questo sistema è particolarmente efficace per un IPC efficiente e veloce in ambienti in cui più processi devono accedere rapidamente ai dati condivisi.
 
 <details>
 
-<summary>Esempio di Codice del Produttore</summary>
+<summary>Esempio di codice del produttore</summary>
 ```c
 // gcc producer.c -o producer -lrt
 #include <fcntl.h>
@@ -378,7 +378,7 @@ return 0;
 
 <details>
 
-<summary>Esempio di Codice per il Consumatore</summary>
+<summary>Esempio di Codice per Consumatori</summary>
 ```c
 // gcc consumer.c -o consumer -lrt
 #include <fcntl.h>
@@ -420,9 +420,9 @@ return 0;
 ```
 </details>
 
-## Descrittori Protetti di macOS
+## macOS Descrittori Protetti
 
-I **descrittori protetti di macOS** sono una funzionalità di sicurezza introdotta in macOS per migliorare la sicurezza e l'affidabilità delle **operazioni sui descrittori di file** nelle applicazioni utente. Questi descrittori protetti forniscono un modo per associare restrizioni specifiche o "guardie" ai descrittori di file, che sono applicate dal kernel.
+**macOS descrittori protetti** sono una funzionalità di sicurezza introdotta in macOS per migliorare la sicurezza e l'affidabilità delle **operazioni sui descrittori di file** nelle applicazioni utente. Questi descrittori protetti forniscono un modo per associare restrizioni specifiche o "guardie" ai descrittori di file, che sono applicate dal kernel.
 
 Questa funzionalità è particolarmente utile per prevenire determinate classi di vulnerabilità di sicurezza come **accesso non autorizzato ai file** o **condizioni di gara**. Queste vulnerabilità si verificano quando, ad esempio, un thread accede a una descrizione di file dando **accesso a un altro thread vulnerabile** o quando un descrittore di file è **ereditato** da un processo figlio vulnerabile. Alcune funzioni relative a questa funzionalità sono:
 

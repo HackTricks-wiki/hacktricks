@@ -95,7 +95,7 @@ Pertanto, un attaccante che desidera compromettere con successo una macchina mac
 
 Questi privilegi sono solitamente concessi sotto forma di **diritti** con cui l'applicazione è firmata, oppure l'applicazione potrebbe aver richiesto alcuni accessi e dopo che il **utente li approva** possono essere trovati nei **database TCC**. Un altro modo in cui un processo può ottenere questi privilegi è essendo un **figlio di un processo** con quei **privilegi**, poiché di solito sono **ereditati**.
 
-Segui questi link per trovare diversi modi per [**escalare i privilegi in TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), per [**bypassare TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) e come in passato [**SIP è stato bypassato**](macos-security-protections/macos-sip.md#sip-bypasses).
+Segui questi link per trovare diversi modi per [**escalare i privilegi in TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), per [**bypassare TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) e come in passato [**SIP è stato bypassato**](macos-security-protections/macos-sip.md#sip-bypasses).
 
 ## Escalation Tradizionale dei Privilegi di macOS
 

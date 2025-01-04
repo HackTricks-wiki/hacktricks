@@ -1,4 +1,4 @@
-# Checklist - Escalazione dei privilegi in Linux
+# Checklist - Linux Privilege Escalation
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -38,7 +38,7 @@
 ### [Lavori programmati/Cron?](privilege-escalation/index.html#scheduled-jobs)
 
 - [ ] Il [**PATH**](privilege-escalation/index.html#cron-path) viene modificato da qualche cron e puoi **scrivere** in esso?
-- [ ] Qualche [**carattere jolly**](privilege-escalation/index.html#cron-using-a-script-with-a-wildcard-wildcard-injection) in un lavoro cron?
+- [ ] Qualche [**wildcard**](privilege-escalation/index.html#cron-using-a-script-with-a-wildcard-wildcard-injection) in un lavoro cron?
 - [ ] Qualche [**script modificabile**](privilege-escalation/index.html#cron-script-overwriting-and-symlink) viene **eseguito** o si trova in una **cartella modificabile**?
 - [ ] Hai rilevato che qualche **script** potrebbe essere o viene [**eseguito** molto **frequentemente**](privilege-escalation/index.html#frequent-cron-jobs)? (ogni 1, 2 o 5 minuti)
 
@@ -72,10 +72,10 @@
 
 - [ ] Enumerazione di utenti/gruppi **generici**
 - [ ] Hai un **UID molto grande**? La **macchina** è **vulnerabile**?
-- [ ] Puoi [**escalare i privilegi grazie a un gruppo**](privilege-escalation/interesting-groups-linux-pe/) a cui appartieni?
-- [ ] Dati negli **appunti**?
+- [ ] Puoi [**escalare i privilegi grazie a un gruppo**](privilege-escalation/interesting-groups-linux-pe/index.html) a cui appartieni?
+- [ ] Dati **Clipboard**?
 - [ ] Politica delle password?
-- [ ] Prova a **usare** ogni **password conosciuta** che hai scoperto in precedenza per accedere **con ciascun** possibile **utente**. Prova a effettuare il login anche senza password.
+- [ ] Prova a **usare** ogni **password conosciuta** che hai scoperto in precedenza per accedere **con ciascun** possibile **utente**. Prova ad accedere anche senza password.
 
 ### [PATH scrivibile](privilege-escalation/index.html#writable-path-abuses)
 
@@ -137,7 +137,7 @@
 
 ### [**Altri trucchi**](privilege-escalation/index.html#other-tricks)
 
-- [ ] Puoi [**abusare di NFS per escalare i privilegi**](privilege-escalation/index.html#nfs-privilege-escalation)?
+- [ ] Puoi [**sfruttare NFS per escalare i privilegi**](privilege-escalation/index.html#nfs-privilege-escalation)?
 - [ ] Hai bisogno di [**uscire da una shell restrittiva**](privilege-escalation/index.html#escaping-from-restricted-shells)?
 
 {{#include ../banners/hacktricks-training.md}}

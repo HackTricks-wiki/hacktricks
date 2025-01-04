@@ -6,7 +6,7 @@
 
 - [**Trucchi di hacking Pyscript**](pyscript.md)
 - [**Deserializzazioni Python**](../../pentesting-web/deserialization/index.html#python)
-- [**Trucchi per bypassare le sandbox Python**](bypass-python-sandboxes/)
+- [**Trucchi per bypassare le sandbox Python**](bypass-python-sandboxes/index.html)
 - [**Sintassi di base delle richieste web in Python**](web-requests.md)
 - [**Sintassi e librerie di base di Python**](basic-python.md)
 

@@ -4,7 +4,7 @@
 
 ## Carving & Recovery tools
 
-Altri strumenti in [https://github.com/Claudio-C/awesome-datarecovery](https://github.com/Claudio-C/awesome-datarecovery)
+More tools in [https://github.com/Claudio-C/awesome-datarecovery](https://github.com/Claudio-C/awesome-datarecovery)
 
 ### Autopsy
 
@@ -14,7 +14,7 @@ Lo strumento più comune utilizzato in forense per estrarre file da immagini è 
 
 **Binwalk** è uno strumento per analizzare file binari per trovare contenuti incorporati. È installabile tramite `apt` e il suo sorgente è su [GitHub](https://github.com/ReFirmLabs/binwalk).
 
-**Comandi utili**:
+**Useful commands**:
 ```bash
 sudo apt install binwalk #Insllation
 binwalk file #Displays the embedded data in the given file
@@ -23,7 +23,7 @@ binwalk --dd ".*" file #Displays and extracts all files from the given file
 ```
 ### Foremost
 
-Un altro strumento comune per trovare file nascosti è **foremost**. Puoi trovare il file di configurazione di foremost in `/etc/foremost.conf`. Se vuoi solo cercare alcuni file specifici, decommentali. Se non decommenti nulla, foremost cercherà i suoi tipi di file configurati per impostazione predefinita.
+Un altro strumento comune per trovare file nascosti è **foremost**. Puoi trovare il file di configurazione di foremost in `/etc/foremost.conf`. Se desideri cercare alcuni file specifici, decommentali. Se non decommenti nulla, foremost cercherà i suoi tipi di file configurati per impostazione predefinita.
 ```bash
 sudo apt-get install foremost
 foremost -v -i file.img -o output
@@ -44,7 +44,7 @@ Questo strumento può scansionare un'immagine e **estrarre pcaps** al suo intern
 ```
 bulk_extractor memory.img -o out_folder
 ```
-Naviga attraverso **tutte le informazioni** che lo strumento ha raccolto (password?), **analizza** i **pacchetti** (leggi[ **Pcaps analysis**](../pcap-inspection/)), cerca **domini strani** (domini relativi a **malware** o **inesistenti**).
+Naviga attraverso **tutte le informazioni** che lo strumento ha raccolto (password?), **analizza** i **pacchetti** (leggi[ **Pcaps analysis**](../pcap-inspection/index.html)), cerca **domini strani** (domini relativi a **malware** o **inesistenti**).
 
 ### PhotoRec
 
@@ -64,14 +64,14 @@ Controlla il [codice](https://code.google.com/archive/p/binvis/) e la [pagina we
 - Plots multipli per diversi punti di interesse
 - Focalizzazione su porzioni di un campione
 - **Visualizzazione di stringhe e risorse**, in eseguibili PE o ELF, ad esempio
-- Ottenere **pattern** per crittanalisi su file
+- Ottenere **pattern** per la crittoanalisi su file
 - **Identificare** algoritmi di packer o encoder
 - **Identificare** la steganografia tramite pattern
-- **Differenziazione** visiva dei binari
+- **Differenziazione** binaria visiva
 
 BinVis è un ottimo **punto di partenza per familiarizzare con un obiettivo sconosciuto** in uno scenario di black-boxing.
 
-## Strumenti di Data Carving Specifici
+## Strumenti specifici per il Data Carving
 
 ### FindAES
 

@@ -4,7 +4,7 @@
 
 ## Informazioni di base
 
-Diverse vulnerabilità come [**Python Format Strings**](bypass-python-sandboxes/index.html#python-format-string) o [**Class Pollution**](class-pollution-pythons-prototype-pollution.md) potrebbero consentirti di **leggere i dati interni di python ma non ti permetteranno di eseguire codice**. Pertanto, un pentester dovrà sfruttare al massimo queste autorizzazioni di lettura per **ottenere privilegi sensibili e aumentare la vulnerabilità**.
+Diverse vulnerabilità come [**Python Format Strings**](bypass-python-sandboxes/index.html#python-format-string) o [**Class Pollution**](class-pollution-pythons-prototype-pollution.md) potrebbero consentirti di **leggere i dati interni di python ma non ti permetteranno di eseguire codice**. Pertanto, un pentester dovrà sfruttare al massimo questi permessi di lettura per **ottenere privilegi sensibili e aumentare la vulnerabilità**.
 
 ### Flask - Leggi la chiave segreta
 
@@ -13,7 +13,7 @@ La pagina principale di un'applicazione Flask avrà probabilmente l'oggetto glob
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-In questo caso è possibile accedere a questo oggetto semplicemente utilizzando qualsiasi gadget per **accedere agli oggetti globali** dalla [**pagina di Bypass Python sandboxes**](bypass-python-sandboxes/).
+In questo caso è possibile accedere a questo oggetto semplicemente utilizzando qualsiasi gadget per **accedere agli oggetti globali** dalla pagina [**Bypass Python sandboxes**](bypass-python-sandboxes/index.html).
 
 Nel caso in cui **la vulnerabilità si trovi in un file python diverso**, hai bisogno di un gadget per attraversare i file per arrivare a quello principale e **accedere all'oggetto globale `app.secret_key`** per cambiare la chiave segreta di Flask e poter [**escalare i privilegi** conoscendo questa chiave](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
 

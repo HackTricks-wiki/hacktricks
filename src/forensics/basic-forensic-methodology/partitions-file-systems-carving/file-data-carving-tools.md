@@ -1,14 +1,14 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-# Strumenti di carving
+# Strumenti di Carving
 
 ## Autopsy
 
-Lo strumento più comune utilizzato in forense per estrarre file dalle immagini è [**Autopsy**](https://www.autopsy.com/download/). Scaricalo, installalo e fallo elaborare il file per trovare file "nascosti". Nota che Autopsy è progettato per supportare immagini disco e altri tipi di immagini, ma non file semplici.
+Lo strumento più comune utilizzato nella forense per estrarre file dalle immagini è [**Autopsy**](https://www.autopsy.com/download/). Scaricalo, installalo e fallo elaborare il file per trovare file "nascosti". Nota che Autopsy è progettato per supportare immagini di disco e altri tipi di immagini, ma non file semplici.
 
 ## Binwalk <a id="binwalk"></a>
 
-**Binwalk** è uno strumento per cercare file binari come immagini e file audio per file e dati incorporati. Può essere installato con `apt`, tuttavia la [sorgente](https://github.com/ReFirmLabs/binwalk) può essere trovata su github.  
+**Binwalk** è uno strumento per cercare file binari come immagini e file audio per file e dati incorporati. Può essere installato con `apt`, tuttavia il [sorgente](https://github.com/ReFirmLabs/binwalk) può essere trovato su github.  
 **Comandi utili**:
 ```bash
 sudo apt install binwalk #Insllation
@@ -18,7 +18,7 @@ binwalk --dd ".*" file #Displays and extracts all files from the given file
 ```
 ## Foremost
 
-Un altro strumento comune per trovare file nascosti è **foremost**. Puoi trovare il file di configurazione di foremost in `/etc/foremost.conf`. Se vuoi cercare solo alcuni file specifici, decommentali. Se non decommenti nulla, foremost cercherà i suoi tipi di file configurati di default.
+Un altro strumento comune per trovare file nascosti è **foremost**. Puoi trovare il file di configurazione di foremost in `/etc/foremost.conf`. Se desideri cercare alcuni file specifici, decommentali. Se non decommenti nulla, foremost cercherà i suoi tipi di file configurati di default.
 ```bash
 sudo apt-get install foremost
 foremost -v -i file.img -o output
@@ -39,7 +39,7 @@ Questo strumento può scansionare un'immagine e **estrarre pcaps** al suo intern
 ```text
 bulk_extractor memory.img -o out_folder
 ```
-Naviga attraverso **tutte le informazioni** che lo strumento ha raccolto \(password?\), **analizza** i **pacchetti** \(leggi[ **analisi Pcaps**](../pcap-inspection/)\), cerca **domini strani** \(domini relativi a **malware** o **inesistenti**\).
+Naviga attraverso **tutte le informazioni** che lo strumento ha raccolto \(password?\), **analizza** i **pacchetti** \(leggi[ **analisi Pcaps**](../pcap-inspection/index.html)\), cerca **domini strani** \(domini relativi a **malware** o **inesistenti**\).
 
 ## PhotoRec
 
@@ -53,7 +53,7 @@ Puoi trovarlo in [https://www.cgsecurity.org/wiki/TestDisk_Download](https://www
 
 ## FindAES
 
-Cerca le chiavi AES esaminando i loro programmi di chiave. In grado di trovare chiavi a 128, 192 e 256 bit, come quelle utilizzate da TrueCrypt e BitLocker.
+Cerca le chiavi AES cercando i loro programmi di chiave. In grado di trovare chiavi a 128, 192 e 256 bit, come quelle utilizzate da TrueCrypt e BitLocker.
 
 Scarica [qui](https://sourceforge.net/projects/findaes/).
 

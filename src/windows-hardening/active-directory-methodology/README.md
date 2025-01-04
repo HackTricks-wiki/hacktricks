@@ -69,14 +69,14 @@ Se hai solo accesso a un ambiente AD ma non hai credenziali/sessioni, potresti:
 - Raccogli credenziali **esponendo** [**falsi servizi UPnP con evil-S**](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md)[**SDP**](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
 - [**OSINT**](https://book.hacktricks.xyz/external-recon-methodology):
 - Estrai nomi/utenti da documenti interni, social media, servizi (principalmente web) all'interno degli ambienti di dominio e anche da quelli pubblicamente disponibili.
-- Se trovi i nomi completi dei lavoratori dell'azienda, potresti provare diverse **convenzioni di nome utente AD** (**[leggi questo](https://activedirectorypro.com/active-directory-user-naming-convention/)**). Le convenzioni più comuni sono: _NomeCognome_, _Nome.Cognome_, _NamSur_ (3 lettere di ciascuno), _Nam.Sur_, _NSurname_, _N.Surname_, _SurnameName_, _Surname.Name_, _SurnameN_, _Surname.N_, 3 _lettere casuali e 3 numeri casuali_ (abc123).
+- Se trovi i nomi completi dei lavoratori dell'azienda, potresti provare diverse **convenzioni di nome utente AD** (**[leggi questo](https://activedirectorypro.com/active-directory-user-naming-convention/)**). Le convenzioni più comuni sono: _NomeCognome_, _Nome.Cognome_, _NamSur_ (3 lettere di ciascuno), _Nam.Sur_, _NSurname_, _N.Surname_, _CognomeNome_, _Cognome.Nome_, _CognomeN_, _Cognome.N_, 3 _lettere casuali e 3 numeri casuali_ (abc123).
 - Strumenti:
 - [w0Tx/generate-ad-username](https://github.com/w0Tx/generate-ad-username)
 - [urbanadventurer/username-anarchy](https://github.com/urbanadventurer/username-anarchy)
 
 ### Enumerazione utenti
 
-- **Enumerazione SMB/LDAP anonima:** Controlla le pagine [**pentesting SMB**](../../network-services-pentesting/pentesting-smb/) e [**pentesting LDAP**](../../network-services-pentesting/pentesting-ldap.md).
+- **Enumerazione SMB/LDAP anonima:** Controlla le pagine [**pentesting SMB**](../../network-services-pentesting/pentesting-smb/index.html) e [**pentesting LDAP**](../../network-services-pentesting/pentesting-ldap.md).
 - **Enumerazione Kerbrute**: Quando viene **richiesto un nome utente non valido**, il server risponderà utilizzando il codice di errore **Kerberos** _KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN_, permettendoci di determinare che il nome utente era non valido. I **nomi utente validi** genereranno o il **TGT in una risposta AS-REP** o l'errore _KRB5KDC_ERR_PREAUTH_REQUIRED_, indicando che l'utente deve eseguire la pre-autenticazione.
 ```bash
 ./kerbrute_linux_amd64 userenum -d lab.ropnop.com --dc 10.10.10.10 usernames.txt #From https://github.com/ropnop/kerbrute/releases
@@ -112,7 +112,7 @@ Get-GlobalAddressList -ExchHostname [ip] -UserName [domain]\[username] -Password
 Ok, quindi sai di avere già un nome utente valido ma nessuna password... Allora prova:
 
 - [**ASREPRoast**](asreproast.md): Se un utente **non ha** l'attributo _DONT_REQ_PREAUTH_ puoi **richiedere un messaggio AS_REP** per quell'utente che conterrà alcuni dati crittografati da una derivazione della password dell'utente.
-- [**Password Spraying**](password-spraying.md): Proviamo le **password più comuni** con ciascuno degli utenti scoperti, forse qualche utente sta usando una password debole (tieni presente la politica delle password!).
+- [**Password Spraying**](password-spraying.md): Proviamo le **password più comuni** con ciascuno degli utenti scoperti, magari qualche utente sta usando una password debole (tieni presente la politica delle password!).
 - Nota che puoi anche **spray i server OWA** per cercare di accedere ai server di posta degli utenti.
 
 {{#ref}}
@@ -141,7 +141,7 @@ Se puoi **accedere ad altri PC o condivisioni** con l'**utente null o guest** po
 
 ## Enumerare Active Directory CON credenziali/sessione
 
-Per questa fase devi avere **compromesso le credenziali o una sessione di un account di dominio valido.** Se hai alcune credenziali valide o una shell come utente di dominio, **dovresti ricordare che le opzioni fornite prima sono ancora opzioni per compromettere altri utenti**.
+Per questa fase devi aver **compromesso le credenziali o una sessione di un account di dominio valido.** Se hai alcune credenziali valide o una shell come utente di dominio, **dovresti ricordare che le opzioni fornite prima sono ancora opzioni per compromettere altri utenti**.
 
 Prima di iniziare l'enumerazione autenticata dovresti sapere qual è il **problema del doppio salto Kerberos.**
 
@@ -156,12 +156,12 @@ Aver compromesso un account è un **grande passo per iniziare a compromettere l'
 Per quanto riguarda [**ASREPRoast**](asreproast.md) ora puoi trovare ogni possibile utente vulnerabile, e per quanto riguarda [**Password Spraying**](password-spraying.md) puoi ottenere un **elenco di tutti i nomi utente** e provare la password dell'account compromesso, password vuote e nuove password promettenti.
 
 - Potresti usare il [**CMD per eseguire una ricognizione di base**](../basic-cmd-for-pentesters.md#domain-info)
-- Puoi anche usare [**powershell per la ricognizione**](../basic-powershell-for-pentesters/) che sarà più furtivo
+- Puoi anche usare [**powershell per la ricognizione**](../basic-powershell-for-pentesters/index.html) che sarà più furtivo
 - Puoi anche [**usare powerview**](../basic-powershell-for-pentesters/powerview.md) per estrarre informazioni più dettagliate
 - Un altro strumento fantastico per la ricognizione in un active directory è [**BloodHound**](bloodhound.md). Non è **molto furtivo** (a seconda dei metodi di raccolta che usi), ma **se non ti importa** di questo, dovresti assolutamente provarlo. Scopri dove gli utenti possono RDP, trova percorsi verso altri gruppi, ecc.
 - **Altri strumenti automatizzati per l'enumerazione AD sono:** [**AD Explorer**](bloodhound.md#ad-explorer)**,** [**ADRecon**](bloodhound.md#adrecon)**,** [**Group3r**](bloodhound.md#group3r)**,** [**PingCastle**](bloodhound.md#pingcastle)**.**
 - [**Record DNS dell'AD**](ad-dns-records.md) poiché potrebbero contenere informazioni interessanti.
-- Un **strumento con GUI** che puoi usare per enumerare la directory è **AdExplorer.exe** della **SysInternal** Suite.
+- Un **strumento con GUI** che puoi usare per enumerare la directory è **AdExplorer.exe** dal **SysInternal** Suite.
 - Puoi anche cercare nel database LDAP con **ldapsearch** per cercare credenziali nei campi _userPassword_ & _unixUserPassword_, o anche per _Description_. cf. [Password in AD User comment on PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#password-in-ad-user-comment) per altri metodi.
 - Se stai usando **Linux**, potresti anche enumerare il dominio usando [**pywerview**](https://github.com/the-useless-one/pywerview).
 - Potresti anche provare strumenti automatizzati come:
@@ -169,9 +169,9 @@ Per quanto riguarda [**ASREPRoast**](asreproast.md) ora puoi trovare ogni possib
 - [**61106960/adPEAS**](https://github.com/61106960/adPEAS)
 - **Estrazione di tutti gli utenti di dominio**
 
-È molto facile ottenere tutti i nomi utente del dominio da Windows (`net user /domain`, `Get-DomainUser` o `wmic useraccount get name,sid`). In Linux, puoi usare: `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username` o `enum4linux -a -u "user" -p "password" <DC IP>`
+È molto facile ottenere tutti i nomi utente del dominio da Windows (`net user /domain` ,`Get-DomainUser` o `wmic useraccount get name,sid`). In Linux, puoi usare: `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username` o `enum4linux -a -u "user" -p "password" <DC IP>`
 
-> Anche se questa sezione di Enumerazione sembra piccola, è la parte più importante di tutte. Accedi ai link (principalmente quello di cmd, powershell, powerview e BloodHound), impara come enumerare un dominio e pratica finché non ti senti a tuo agio. Durante una valutazione, questo sarà il momento chiave per trovare la tua strada verso DA o per decidere che non si può fare nulla.
+> Anche se questa sezione di Enumerazione sembra piccola, questa è la parte più importante di tutte. Accedi ai link (principalmente quello di cmd, powershell, powerview e BloodHound), impara come enumerare un dominio e pratica finché non ti senti a tuo agio. Durante una valutazione, questo sarà il momento chiave per trovare la tua strada verso DA o per decidere che non si può fare nulla.
 
 ### Kerberoast
 
@@ -191,7 +191,7 @@ Una volta ottenute alcune credenziali potresti controllare se hai accesso a qual
 
 Se hai compromesso credenziali o una sessione come utente di dominio regolare e hai **accesso** con questo utente a **qualsiasi macchina nel dominio** dovresti cercare di trovare il modo di **escalare i privilegi localmente e cercare credenziali**. Questo perché solo con privilegi di amministratore locale sarai in grado di **dumpare gli hash di altri utenti** in memoria (LSASS) e localmente (SAM).
 
-C'è una pagina completa in questo libro su [**escalation dei privilegi locali in Windows**](../windows-local-privilege-escalation/) e una [**checklist**](../checklist-windows-privilege-escalation.md). Inoltre, non dimenticare di usare [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite).
+C'è una pagina completa in questo libro su [**escalation dei privilegi locali in Windows**](../windows-local-privilege-escalation/index.html) e una [**checklist**](../checklist-windows-privilege-escalation.md). Inoltre, non dimenticare di usare [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite).
 
 ### Ticket di sessione attuali
 
@@ -205,7 +205,7 @@ C'è una pagina completa in questo libro su [**escalation dei privilegi locali i
 ```
 ### NTML Relay
 
-Se sei riuscito a enumerare l'active directory avrai **più email e una migliore comprensione della rete**. Potresti essere in grado di forzare attacchi [**relay NTML**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)**.**
+Se sei riuscito a enumerare l'active directory avrai **più email e una migliore comprensione della rete**. Potresti essere in grado di forzare attacchi di NTML [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)**.**
 
 ### **Cerca Credenziali nelle Condivisioni di Computer**
 
@@ -229,13 +229,13 @@ Questa vulnerabilità ha permesso a qualsiasi utente autenticato di **compromett
 printnightmare.md
 {{#endref}}
 
-## Escalation dei privilegi su Active Directory CON credenziali/sessioni privilegiate
+## Escalation dei privilegi su Active Directory CON credenziali/sessione privilegiate
 
 **Per le seguenti tecniche un normale utente di dominio non è sufficiente, hai bisogno di privilegi/credenziali speciali per eseguire questi attacchi.**
 
-### Estrazione degli Hash
+### Estrazione dell'hash
 
-Speriamo tu sia riuscito a **compromettere qualche account admin locale** utilizzando [AsRepRoast](asreproast.md), [Password Spraying](password-spraying.md), [Kerberoast](kerberoast.md), [Responder](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) inclusi i relay, [EvilSSDP](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md), [escalation dei privilegi localmente](../windows-local-privilege-escalation/).\
+Speriamo che tu sia riuscito a **compromettere qualche account admin locale** utilizzando [AsRepRoast](asreproast.md), [Password Spraying](password-spraying.md), [Kerberoast](kerberoast.md), [Responder](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) inclusi i relay, [EvilSSDP](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md), [escalating privileges locally](../windows-local-privilege-escalation/index.html).\
 Poi, è tempo di estrarre tutti gli hash in memoria e localmente.\
 [**Leggi questa pagina sui diversi modi per ottenere gli hash.**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
 
@@ -274,7 +274,7 @@ crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9c
 
 ### Abuso di MSSQL e Link Fidati
 
-Se un utente ha privilegi per **accedere alle istanze MSSQL**, potrebbe essere in grado di usarlo per **eseguire comandi** nell'host MSSQL (se in esecuzione come SA), **rubare** l'**hash** NetNTLM o persino eseguire un **attacco di relay**.\
+Se un utente ha privilegi per **accedere alle istanze MSSQL**, potrebbe essere in grado di usarlo per **eseguire comandi** nell'host MSSQL (se in esecuzione come SA), **rubare** l'**hash** NetNTLM o persino eseguire un **attacco** di **relay**.\
 Inoltre, se un'istanza MSSQL è fidata (link di database) da un'altra istanza MSSQL. Se l'utente ha privilegi sul database fidato, sarà in grado di **utilizzare la relazione di fiducia per eseguire query anche nell'altra istanza**. Queste fiducia possono essere concatenate e a un certo punto l'utente potrebbe essere in grado di trovare un database mal configurato dove può eseguire comandi.\
 **I link tra i database funzionano anche attraverso le fiducia tra foreste.**
 
@@ -294,8 +294,8 @@ unconstrained-delegation.md
 
 ### Delegazione Vincolata
 
-Se un utente o un computer è autorizzato per la "Delegazione Vincolata", sarà in grado di **impersonare qualsiasi utente per accedere ad alcuni servizi in un computer**.\
-Quindi, se **comprometti l'hash** di questo utente/computer sarai in grado di **impersonare qualsiasi utente** (anche gli amministratori di dominio) per accedere ad alcuni servizi.
+Se un utente o un computer è autorizzato per la "Delegazione Vincolata", sarà in grado di **impersonare qualsiasi utente per accedere a determinati servizi in un computer**.\
+Quindi, se **comprometti l'hash** di questo utente/computer sarai in grado di **impersonare qualsiasi utente** (anche gli amministratori di dominio) per accedere a determinati servizi.
 
 {{#ref}}
 constrained-delegation.md
@@ -362,7 +362,7 @@ ad-certificates/domain-escalation.md
 
 ### Dumping delle Credenziali di Dominio
 
-Una volta ottenuti i privilegi di **Domain Admin** o anche meglio di **Enterprise Admin**, puoi **dumpare** il **database di dominio**: _ntds.dit_.
+Una volta ottenuti i privilegi di **Domain Admin** o anche migliori **Enterprise Admin**, puoi **dumpare** il **database di dominio**: _ntds.dit_.
 
 [**Maggiori informazioni sull'attacco DCSync possono essere trovate qui**](dcsync.md).
 
@@ -427,7 +427,7 @@ ad-certificates/account-persistence.md
 
 ### **Persistenza dei Certificati nel Dominio**
 
-**Utilizzare i certificati è anche possibile per persistere con privilegi elevati all'interno del dominio:**
+**Utilizzare certificati è anche possibile per persistere con privilegi elevati all'interno del dominio:**
 
 {{#ref}}
 ad-certificates/domain-persistence.md
@@ -435,13 +435,13 @@ ad-certificates/domain-persistence.md
 
 ### Gruppo AdminSDHolder
 
-L'oggetto **AdminSDHolder** in Active Directory garantisce la sicurezza dei **gruppi privilegiati** (come Domain Admins e Enterprise Admins) applicando una standard **Access Control List (ACL)** su questi gruppi per prevenire modifiche non autorizzate. Tuttavia, questa funzionalità può essere sfruttata; se un attaccante modifica l'ACL di AdminSDHolder per dare accesso completo a un utente normale, quell'utente ottiene un controllo esteso su tutti i gruppi privilegiati. Questa misura di sicurezza, destinata a proteggere, può quindi ritorcersi contro, consentendo accessi non autorizzati a meno che non venga monitorata attentamente.
+L'oggetto **AdminSDHolder** in Active Directory garantisce la sicurezza dei **gruppi privilegiati** (come Domain Admins e Enterprise Admins) applicando una standard **Access Control List (ACL)** su questi gruppi per prevenire modifiche non autorizzate. Tuttavia, questa funzionalità può essere sfruttata; se un attaccante modifica l'ACL di AdminSDHolder per dare accesso completo a un utente normale, quell'utente guadagna un controllo esteso su tutti i gruppi privilegiati. Questa misura di sicurezza, destinata a proteggere, può quindi ritorcersi contro, consentendo accessi non autorizzati a meno che non venga monitorata attentamente.
 
 [**Maggiori informazioni sul Gruppo AdminDSHolder qui.**](privileged-groups-and-token-privileges.md#adminsdholder-group)
 
 ### Credenziali DSRM
 
-All'interno di ogni **Domain Controller (DC)**, esiste un account di **amministratore locale**. Ottenendo diritti di amministratore su una tale macchina, l'hash dell'Amministratore locale può essere estratto utilizzando **mimikatz**. Successivamente, è necessaria una modifica del registro per **abilitare l'uso di questa password**, consentendo l'accesso remoto all'account dell'Amministratore locale.
+All'interno di ogni **Domain Controller (DC)**, esiste un account **amministratore locale**. Ottenendo diritti di amministratore su una tale macchina, l'hash dell'Amministratore locale può essere estratto utilizzando **mimikatz**. Successivamente, è necessaria una modifica del registro per **abilitare l'uso di questa password**, consentendo l'accesso remoto all'account dell'Amministratore locale.
 
 {{#ref}}
 dsrm-credentials.md
@@ -457,7 +457,7 @@ acl-persistence-abuse/
 
 ### Descrittori di Sicurezza
 
-I **descrittori di sicurezza** vengono utilizzati per **memorizzare** i **privilegi** che un **oggetto** ha **su** un **oggetto**. Se riesci a **fare** un **piccolo cambiamento** nel **descrittore di sicurezza** di un oggetto, puoi ottenere privilegi molto interessanti su quell'oggetto senza dover essere membro di un gruppo privilegiato.
+I **descrittori di sicurezza** vengono utilizzati per **memorizzare** i **privilegi** che un **oggetto** ha **su** un **oggetto**. Se puoi solo **fare** un **piccolo cambiamento** nel **descrittore di sicurezza** di un oggetto, puoi ottenere privilegi molto interessanti su quell'oggetto senza dover essere membro di un gruppo privilegiato.
 
 {{#ref}}
 security-descriptors.md
@@ -506,7 +506,7 @@ Microsoft considera la **Foresta** come il confine di sicurezza. Ciò implica ch
 
 Una [**fiducia di dominio**](<http://technet.microsoft.com/en-us/library/cc759554(v=ws.10).aspx>) è un meccanismo di sicurezza che consente a un utente di un **dominio** di accedere alle risorse in un altro **dominio**. Crea essenzialmente un collegamento tra i sistemi di autenticazione dei due domini, consentendo che le verifiche di autenticazione fluiscano senza problemi. Quando i domini stabiliscono una fiducia, scambiano e mantengono specifiche **chiavi** all'interno dei loro **Domain Controllers (DC)**, che sono cruciali per l'integrità della fiducia.
 
-In uno scenario tipico, se un utente intende accedere a un servizio in un **dominio fidato**, deve prima richiedere un ticket speciale noto come **inter-realm TGT** dal DC del proprio dominio. Questo TGT è crittografato con una **chiave** condivisa su cui entrambi i domini hanno concordato. L'utente presenta quindi questo TGT al **DC del dominio fidato** per ottenere un ticket di servizio (**TGS**). Dopo la validazione riuscita dell'inter-realm TGT da parte del DC del dominio fidato, emette un TGS, concedendo all'utente accesso al servizio.
+In uno scenario tipico, se un utente intende accedere a un servizio in un **dominio fidato**, deve prima richiedere un ticket speciale noto come **inter-realm TGT** dal DC del proprio dominio. Questo TGT è crittografato con una **chiave** condivisa su cui entrambi i domini hanno concordato. L'utente presenta quindi questo TGT al **DC del dominio fidato** per ottenere un ticket di servizio (**TGS**). Dopo la validazione con successo dell'inter-realm TGT da parte del DC del dominio fidato, emette un TGS, concedendo all'utente accesso al servizio.
 
 **Passaggi**:
 
@@ -528,7 +528,7 @@ Se il Dominio A si fida del Dominio B, A è il dominio fiducioso e B è quello f
 
 - **Fiducia Genitore-Figlio**: Questa è una configurazione comune all'interno della stessa foresta, dove un dominio figlio ha automaticamente una fiducia bidirezionale transitiva con il suo dominio genitore. Essenzialmente, ciò significa che le richieste di autenticazione possono fluire senza problemi tra il genitore e il figlio.
 - **Fiducia Cross-link**: Riferita come "fiducia abbreviata", queste vengono stabilite tra domini figli per accelerare i processi di riferimento. In foreste complesse, i riferimenti di autenticazione devono generalmente viaggiare fino alla radice della foresta e poi giù fino al dominio target. Creando collegamenti incrociati, il viaggio viene accorciato, il che è particolarmente vantaggioso in ambienti geograficamente dispersi.
-- **Fiducia Esterna**: Queste vengono stabilite tra domini diversi e non correlati e sono di natura non transitiva. Secondo [la documentazione di Microsoft](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>), le fiducia esterne sono utili per accedere alle risorse in un dominio al di fuori della foresta attuale che non è connesso tramite una fiducia tra foreste. La sicurezza è rafforzata attraverso il filtraggio SID con fiducia esterne.
+- **Fiducia Esterna**: Queste vengono stabilite tra domini diversi e non correlati e sono di natura non transitiva. Secondo [la documentazione di Microsoft](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>), le fiducia esterne sono utili per accedere a risorse in un dominio al di fuori della foresta attuale che non è connesso tramite una fiducia tra foreste. La sicurezza è rafforzata attraverso il filtraggio SID con fiducia esterne.
 - **Fiducia Tree-root**: Queste fiducia vengono stabilite automaticamente tra il dominio radice della foresta e un nuovo albero radice aggiunto. Anche se non comunemente incontrate, le fiducia tree-root sono importanti per aggiungere nuovi alberi di dominio a una foresta, consentendo loro di mantenere un nome di dominio unico e garantendo una transitività bidirezionale. Maggiori informazioni possono essere trovate nella [guida di Microsoft](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>).
 - **Fiducia tra Foreste**: Questo tipo di fiducia è una fiducia bidirezionale transitiva tra due domini radice di foresta, imponendo anche il filtraggio SID per migliorare le misure di sicurezza.
 - **Fiducia MIT**: Queste fiducia vengono stabilite con domini Kerberos non Windows, [conformi a RFC4120](https://tools.ietf.org/html/rfc4120). Le fiducia MIT sono un po' più specializzate e si rivolgono a ambienti che richiedono integrazione con sistemi basati su Kerberos al di fuori dell'ecosistema Windows.
@@ -547,9 +547,9 @@ Se il Dominio A si fida del Dominio B, A è il dominio fiducioso e B è quello f
 
 Gli attaccanti potrebbero accedere alle risorse in un altro dominio attraverso tre meccanismi principali:
 
-- **Appartenenza a Gruppi Locali**: I principali potrebbero essere aggiunti a gruppi locali su macchine, come il gruppo “Amministratori” su un server, concedendo loro un controllo significativo su quella macchina.
-- **Appartenenza a Gruppi di Domini Esterni**: I principali possono anche essere membri di gruppi all'interno del dominio esterno. Tuttavia, l'efficacia di questo metodo dipende dalla natura della fiducia e dall'ambito del gruppo.
-- **Liste di Controllo degli Accessi (ACL)**: I principali potrebbero essere specificati in un **ACL**, in particolare come entità in **ACE** all'interno di un **DACL**, fornendo loro accesso a risorse specifiche. Per coloro che desiderano approfondire la meccanica delle ACL, DACL e ACE, il whitepaper intitolato “[An ACE Up The Sleeve](https://specterops.io/assets/resources/an_ace_up_the_sleeve.pdf)” è una risorsa preziosa.
+- **Appartenenza a Gruppi Locali**: I principi potrebbero essere aggiunti a gruppi locali su macchine, come il gruppo "Amministratori" su un server, concedendo loro un controllo significativo su quella macchina.
+- **Appartenenza a Gruppi di Domini Esterni**: I principi possono anche essere membri di gruppi all'interno del dominio esterno. Tuttavia, l'efficacia di questo metodo dipende dalla natura della fiducia e dall'ambito del gruppo.
+- **Liste di Controllo degli Accessi (ACL)**: I principi potrebbero essere specificati in un **ACL**, in particolare come entità in **ACE** all'interno di un **DACL**, fornendo loro accesso a risorse specifiche. Per coloro che desiderano approfondire la meccanica delle ACL, DACL e ACE, il whitepaper intitolato “[An ACE Up The Sleeve](https://specterops.io/assets/resources/an_ace_up_the_sleeve.pdf)” è una risorsa preziosa.
 
 ### Escalation dei privilegi da Figlio a Genitore nella foresta
 ```
@@ -582,7 +582,7 @@ sid-history-injection.md
 
 #### Sfruttare la Configurazione NC scrivibile
 
-Comprendere come la Configurazione Naming Context (NC) possa essere sfruttata è cruciale. La Configurazione NC funge da repository centrale per i dati di configurazione in ambienti Active Directory (AD) attraverso una foresta. Questi dati vengono replicati a ogni Domain Controller (DC) all'interno della foresta, con i DC scrivibili che mantengono una copia scrivibile della Configurazione NC. Per sfruttare questo, è necessario avere **privilegi SYSTEM su un DC**, preferibilmente un DC child.
+Comprendere come la Configurazione Naming Context (NC) possa essere sfruttata è cruciale. La Configurazione NC funge da repository centrale per i dati di configurazione in ambienti Active Directory (AD). Questi dati vengono replicati a ogni Domain Controller (DC) all'interno della foresta, con i DC scrivibili che mantengono una copia scrivibile della Configurazione NC. Per sfruttare questo, è necessario avere **privilegi SYSTEM su un DC**, preferibilmente un DC child.
 
 **Collegare GPO al sito root DC**
 
@@ -592,7 +592,7 @@ Per informazioni approfondite, si può esplorare la ricerca su [Bypassing SID Fi
 
 **Compromettere qualsiasi gMSA nella foresta**
 
-Un vettore d'attacco coinvolge il targeting di gMSA privilegiati all'interno del dominio. La chiave KDS Root, essenziale per calcolare le password delle gMSA, è memorizzata all'interno della Configurazione NC. Con privilegi SYSTEM su qualsiasi DC, è possibile accedere alla chiave KDS Root e calcolare le password per qualsiasi gMSA nella foresta.
+Un vettore d'attacco implica il targeting di gMSA privilegiati all'interno del dominio. La chiave KDS Root, essenziale per calcolare le password delle gMSA, è memorizzata all'interno della Configurazione NC. Con privilegi SYSTEM su qualsiasi DC, è possibile accedere alla chiave KDS Root e calcolare le password per qualsiasi gMSA nella foresta.
 
 Un'analisi dettagliata può essere trovata nella discussione su [Golden gMSA Trust Attacks](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent).
 
@@ -604,11 +604,11 @@ Ulteriori letture sono disponibili su [Schema Change Trust Attacks](https://impr
 
 **Da DA a EA con ADCS ESC5**
 
-La vulnerabilità ADCS ESC5 mira al controllo sugli oggetti della Public Key Infrastructure (PKI) per creare un modello di certificato che consente l'autenticazione come qualsiasi utente all'interno della foresta. Poiché gli oggetti PKI risiedono nella Configurazione NC, compromettere un DC child scrivibile consente l'esecuzione di attacchi ESC5.
+La vulnerabilità ADCS ESC5 mira al controllo sugli oggetti di Public Key Infrastructure (PKI) per creare un modello di certificato che consente l'autenticazione come qualsiasi utente all'interno della foresta. Poiché gli oggetti PKI risiedono nella Configurazione NC, compromettere un DC child scrivibile consente l'esecuzione di attacchi ESC5.
 
 Maggiori dettagli su questo possono essere letti in [From DA to EA with ESC5](https://posts.specterops.io/from-da-to-ea-with-esc5-f9f045aa105c). In scenari privi di ADCS, l'attaccante ha la capacità di impostare i componenti necessari, come discusso in [Escalating from Child Domain Admins to Enterprise Admins](https://www.pkisolutions.com/escalating-from-child-domains-admins-to-enterprise-admins-in-5-minutes-by-abusing-ad-cs-a-follow-up/).
 
-### Dominio Foresta Esterno - Unidirezionale (In entrata) o bidirezionale
+### Dominio Forestale Esterno - Unidirezionale (In entrata) o bidirezionale
 ```powershell
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
@@ -682,7 +682,7 @@ https://cloud.hacktricks.xyz/pentesting-cloud/azure-security/az-lateral-movement
 
 - **Restrizioni per gli Amministratori di Dominio**: Si raccomanda che gli Amministratori di Dominio possano accedere solo ai Controller di Dominio, evitando il loro utilizzo su altri host.
 - **Privilegi degli Account di Servizio**: I servizi non dovrebbero essere eseguiti con privilegi di Amministratore di Dominio (DA) per mantenere la sicurezza.
-- **Limitazione Temporale dei Privilegi**: Per i compiti che richiedono privilegi DA, la loro durata dovrebbe essere limitata. Questo può essere ottenuto con: `Add-ADGroupMember -Identity ‘Domain Admins’ -Members newDA -MemberTimeToLive (New-TimeSpan -Minutes 20)`
+- **Limitazione Temporale dei Privilegi**: Per compiti che richiedono privilegi DA, la loro durata dovrebbe essere limitata. Questo può essere ottenuto con: `Add-ADGroupMember -Identity ‘Domain Admins’ -Members newDA -MemberTimeToLive (New-TimeSpan -Minutes 20)`
 
 ### **Implementazione di Tecniche di Inganno**
 
