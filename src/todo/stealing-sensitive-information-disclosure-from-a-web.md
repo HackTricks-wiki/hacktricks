@@ -1,4 +1,4 @@
-# Викрадення розкриття чутливої інформації з веб-сторінки
+# Викрадення розкриття чутливої інформації з вебу
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -6,8 +6,8 @@
 Ось основні способи, які ви можете спробувати для досягнення цього:
 
 - [**CORS обход**](../pentesting-web/cors-bypass.md): Якщо ви зможете обійти заголовки CORS, ви зможете вкрасти інформацію, виконуючи Ajax-запит на шкідливу сторінку.
-- [**XSS**](../pentesting-web/xss-cross-site-scripting/): Якщо ви знайдете вразливість XSS на сторінці, ви зможете зловживати нею для викрадення інформації.
-- [**Завислий розмітка**](../pentesting-web/dangling-markup-html-scriptless-injection/): Якщо ви не можете ввести XSS-теги, ви все ще можете вкрасти інформацію, використовуючи інші звичайні HTML-теги.
+- [**XSS**](../pentesting-web/xss-cross-site-scripting/index.html): Якщо ви знайдете вразливість XSS на сторінці, ви зможете зловживати нею для викрадення інформації.
+- [**Залишковий розмітка**](../pentesting-web/dangling-markup-html-scriptless-injection/index.html): Якщо ви не можете ввести теги XSS, ви все ще можете вкрасти інформацію, використовуючи інші звичайні HTML-теги.
 - [**Clickjaking**](../pentesting-web/clickjacking.md): Якщо немає захисту від цієї атаки, ви можете обманути користувача, щоб він надіслав вам чутливі дані (приклад [тут](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)).
 
 {{#include ../banners/hacktricks-training.md}}

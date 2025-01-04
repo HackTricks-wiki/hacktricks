@@ -3,42 +3,42 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!WARNING]
-> Зверніть увагу, що права доступу, які починаються з **`com.apple`**, недоступні для третіх осіб, лише Apple може їх надати.
+> Зверніть увагу, що права доступу, які починаються з **`com.apple`**, недоступні для третіх сторін, лише Apple може їх надати.
 
 ## Високий
 
 ### `com.apple.rootless.install.heritable`
 
-Права доступу **`com.apple.rootless.install.heritable`** дозволяють **обійти SIP**. Перевірте [це для отримання додаткової інформації](macos-sip.md#com.apple.rootless.install.heritable).
+Право доступу **`com.apple.rootless.install.heritable`** дозволяє **обійти SIP**. Перевірте [це для отримання додаткової інформації](macos-sip.md#com.apple.rootless.install.heritable).
 
 ### **`com.apple.rootless.install`**
 
-Права доступу **`com.apple.rootless.install`** дозволяють **обійти SIP**. Перевірте [це для отримання додаткової інформації](macos-sip.md#com.apple.rootless.install).
+Право доступу **`com.apple.rootless.install`** дозволяє **обійти SIP**. Перевірте [це для отримання додаткової інформації](macos-sip.md#com.apple.rootless.install).
 
-### **`com.apple.system-task-ports` (раніше називався `task_for_pid-allow`)**
+### **`com.apple.system-task-ports` (раніше називалося `task_for_pid-allow`)**
 
-Ці права доступу дозволяють отримати **порт завдання для будь-якого** процесу, за винятком ядра. Перевірте [**це для отримання додаткової інформації**](../macos-proces-abuse/macos-ipc-inter-process-communication/).
+Це право доступу дозволяє отримати **порт завдання для будь-якого** процесу, за винятком ядра. Перевірте [**це для отримання додаткової інформації**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
 
 ### `com.apple.security.get-task-allow`
 
-Ці права доступу дозволяють іншим процесам з правами доступу **`com.apple.security.cs.debugger`** отримати порт завдання процесу, запущеного бінарним файлом з цими правами доступу, і **впроваджувати код у нього**. Перевірте [**це для отримання додаткової інформації**](../macos-proces-abuse/macos-ipc-inter-process-communication/).
+Це право доступу дозволяє іншим процесам з правом доступу **`com.apple.security.cs.debugger`** отримати порт завдання процесу, запущеного бінарним файлом з цим правом доступу, і **впроваджувати код у нього**. Перевірте [**це для отримання додаткової інформації**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
 
 ### `com.apple.security.cs.debugger`
 
-Додатки з правами доступу до інструментів налагодження можуть викликати `task_for_pid()`, щоб отримати дійсний порт завдання для незахищених і сторонніх додатків з правами доступу `Get Task Allow`, встановленими на `true`. Однак навіть з правами доступу до інструментів налагодження, налагоджувач **не може отримати порти завдання** процесів, які **не мають прав доступу `Get Task Allow`**, і які, отже, захищені захистом цілісності системи. Перевірте [**це для отримання додаткової інформації**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
+Додатки з правом доступу до інструментів налагодження можуть викликати `task_for_pid()`, щоб отримати дійсний порт завдання для незахищених і сторонніх додатків з правом доступу `Get Task Allow`, встановленим на `true`. Однак навіть з правом доступу до інструментів налагодження, налагоджувач **не може отримати порти завдання** процесів, які **не мають права доступу `Get Task Allow`**, і які, отже, захищені захистом цілісності системи. Перевірте [**це для отримання додаткової інформації**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
 
 ### `com.apple.security.cs.disable-library-validation`
 
-Ці права доступу дозволяють **завантажувати фреймворки, плагіни або бібліотеки без підпису Apple або підпису з тим же ідентифікатором команди**, як основний виконуваний файл, тому зловмисник може зловживати завантаженням деякої довільної бібліотеки для впровадження коду. Перевірте [**це для отримання додаткової інформації**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
+Це право доступу дозволяє **завантажувати фреймворки, плагіни або бібліотеки без підпису Apple або підпису з тим же ідентифікатором команди**, тому зловмисник може зловживати завантаженням довільної бібліотеки для впровадження коду. Перевірте [**це для отримання додаткової інформації**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
 
 ### `com.apple.private.security.clear-library-validation`
 
-Ці права доступу дуже схожі на **`com.apple.security.cs.disable-library-validation`**, але **замість** **прямого відключення** перевірки бібліотек, вони дозволяють процесу **викликати системний виклик `csops`, щоб відключити його**.\
+Це право доступу дуже схоже на **`com.apple.security.cs.disable-library-validation`**, але **замість** **прямого відключення** перевірки бібліотек, воно дозволяє процесу **викликати системний виклик `csops`, щоб відключити його**.\
 Перевірте [**це для отримання додаткової інформації**](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/).
 
 ### `com.apple.security.cs.allow-dyld-environment-variables`
 
-Ці права доступу дозволяють **використовувати змінні середовища DYLD**, які можуть бути використані для впровадження бібліотек і коду. Перевірте [**це для отримання додаткової інформації**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables).
+Це право доступу дозволяє **використовувати змінні середовища DYLD**, які можуть бути використані для впровадження бібліотек і коду. Перевірте [**це для отримання додаткової інформації**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables).
 
 ### `com.apple.private.tcc.manager` або `com.apple.rootless.storage`.`TCC`
 
@@ -50,15 +50,15 @@
 
 ### `com.apple.private.security.kext-management`
 
-Права доступу, необхідні для запиту **ядра на завантаження розширення ядра**.
+Право доступу, необхідне для запиту **ядра на завантаження розширення ядра**.
 
 ### **`com.apple.private.icloud-account-access`**
 
-Права доступу **`com.apple.private.icloud-account-access`** дозволяють спілкуватися з **`com.apple.iCloudHelper`** XPC сервісом, який надасть **токени iCloud**.
+Право доступу **`com.apple.private.icloud-account-access`** дозволяє спілкуватися з **`com.apple.iCloudHelper`** XPC сервісом, який **надасть токени iCloud**.
 
-**iMovie** та **Garageband** мали ці права доступу.
+**iMovie** та **Garageband** мали це право доступу.
 
-Для отримання більшої **інформації** про експлойт для **отримання токенів iCloud** з цих прав доступу перевірте доповідь: [**#OBTS v5.0: "Що відбувається на вашому Mac, залишається в iCloud Apple?!" - Войцех Регула**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+Для отримання більшої **інформації** про експлойт для **отримання токенів iCloud** з цього права доступу перевірте доповідь: [**#OBTS v5.0: "Що відбувається на вашому Mac, залишається в iCloud Apple?!" - Войцех Регула**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
 ### `com.apple.private.tcc.manager.check-by-audit-token`
 
@@ -74,7 +74,7 @@ TODO: У [**цьому звіті**](https://jhftss.github.io/The-Nightmare-of-A
 
 ### `keychain-access-groups`
 
-Ці права доступу перераховують **групи ключів**, до яких має доступ додаток:
+Це право доступу перераховує **групи ключів**, до яких має доступ додаток:
 ```xml
 <key>keychain-access-groups</key>
 <array>
@@ -87,11 +87,11 @@ TODO: У [**цьому звіті**](https://jhftss.github.io/The-Nightmare-of-A
 ```
 ### **`kTCCServiceSystemPolicyAllFiles`**
 
-Надає **Повний доступ до диска** дозволи, одне з найвищих дозволів TCC, які ви можете мати.
+Надає **Повний доступ до диска**, одне з найвищих дозволів TCC, які ви можете мати.
 
 ### **`kTCCServiceAppleEvents`**
 
-Дозволяє додатку надсилати події іншим додаткам, які зазвичай використовуються для **автоматизації завдань**. Контролюючи інші додатки, він може зловживати дозволами, наданими цими іншими додатками.
+Дозволяє додатку надсилати події іншим додаткам, які зазвичай використовуються для **автоматизації завдань**. Контролюючи інші додатки, він може зловживати дозволами, наданими цим іншим додаткам.
 
 Наприклад, змушуючи їх запитувати у користувача його пароль:
 ```bash
@@ -109,7 +109,7 @@ osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to acti
 
 ### **`kTCCServiceSystemPolicyAppBundles`**
 
-Дозволяє модифікувати файли всередині пакету додатків (всередині app.app), що **за замовчуванням заборонено**.
+Дозволяє модифікувати файли всередині пакету додатків (всередині app.app), що **заборонено за замовчуванням**.
 
 <figure><img src="../../../images/image (31).png" alt=""><figcaption></figcaption></figure>
 
@@ -161,3 +161,5 @@ TODO
 ### **`kTCCServicePostEvent`**
 
 {{#include ../../../banners/hacktricks-training.md}}
+
+</details>

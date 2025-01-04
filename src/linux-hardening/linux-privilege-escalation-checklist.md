@@ -13,7 +13,7 @@
 - [ ] **Перевірити**, чи [**версія sudo** вразлива](privilege-escalation/index.html#sudo-version)
 - [ ] [**Перевірка підпису Dmesg** не вдалася](privilege-escalation/index.html#dmesg-signature-verification-failed)
 - [ ] Більше системної енумерації ([дата, статистика системи, інформація про процесор, принтери](privilege-escalation/index.html#more-system-enumeration))
-- [ ] [**Перерахувати більше захистів**](privilege-escalation/index.html#enumerate-possible-defenses)
+- [ ] [Перерахувати більше захистів](privilege-escalation/index.html#enumerate-possible-defenses)
 
 ### [Диски](privilege-escalation/index.html#drives)
 
@@ -45,8 +45,8 @@
 ### [Служби](privilege-escalation/index.html#services)
 
 - [ ] Якийсь **записуваний .service** файл?
-- [ ] Якийсь **записуваний бінарний файл**, що виконується службою?
-- [ ] Якась **записувана папка в системному PATH**?
+- [ ] Якийсь **записуваний бінарник**, що виконується службою?
+- [ ] Якась **записувана папка в systemd PATH**?
 
 ### [Таймери](privilege-escalation/index.html#timers)
 
@@ -72,7 +72,7 @@
 
 - [ ] Загальна **перерахування користувачів/груп**
 - [ ] Чи маєте ви **дуже великий UID**? Чи **вразлива** **машина**?
-- [ ] Чи можете ви [**підвищити привілеї завдяки групі**](privilege-escalation/interesting-groups-linux-pe/), до якої належите?
+- [ ] Чи можете ви [**підвищити привілеї завдяки групі**](privilege-escalation/interesting-groups-linux-pe/index.html), до якої належите?
 - [ ] **Дані буфера обміну**?
 - [ ] Політика паролів?
 - [ ] Спробуйте **використати** кожен **відомий пароль**, який ви раніше виявили, щоб увійти **з кожним** можливим **користувачем**. Спробуйте також увійти без пароля.
@@ -84,20 +84,20 @@
 ### [Команди SUDO та SUID](privilege-escalation/index.html#sudo-and-suid)
 
 - [ ] Чи можете ви виконати **будь-яку команду з sudo**? Чи можете ви використовувати його для ЧИТАННЯ, ЗАПИСУ або ВИКОНАННЯ чогось як root? ([**GTFOBins**](https://gtfobins.github.io))
-- [ ] Чи є якийсь **експлуатований SUID бінарний файл**? ([**GTFOBins**](https://gtfobins.github.io))
+- [ ] Чи є якийсь **експлуатований SUID бінарник**? ([**GTFOBins**](https://gtfobins.github.io))
 - [ ] Чи [**обмежені** команди **sudo** **шляхом**? Чи можете ви **обійти** обмеження](privilege-escalation/index.html#sudo-execution-bypassing-paths)?
-- [ ] [**Sudo/SUID бінарний файл без вказаного шляху**](privilege-escalation/index.html#sudo-command-suid-binary-without-command-path)?
-- [ ] [**SUID бінарний файл з вказаним шляхом**](privilege-escalation/index.html#suid-binary-with-command-path)? Обійти
+- [ ] [**Sudo/SUID бінарник без вказаного шляху**](privilege-escalation/index.html#sudo-command-suid-binary-without-command-path)?
+- [ ] [**SUID бінарник з вказаним шляхом**](privilege-escalation/index.html#suid-binary-with-command-path)? Обійти
 - [ ] [**LD_PRELOAD вразливість**](privilege-escalation/index.html#ld_preload)
-- [ ] [**Відсутність .so бібліотеки в SUID бінарному файлі**](privilege-escalation/index.html#suid-binary-so-injection) з записуваної папки?
-- [ ] [**Доступні токени SUDO**](privilege-escalation/index.html#reusing-sudo-tokens)? [**Чи можете ви створити токен SUDO**](privilege-escalation/index.html#var-run-sudo-ts-less-than-username-greater-than)?
+- [ ] [**Відсутність .so бібліотеки в SUID бінарнику**](privilege-escalation/index.html#suid-binary-so-injection) з записуваної папки?
+- [ ] [**Токени SUDO доступні**](privilege-escalation/index.html#reusing-sudo-tokens)? [**Чи можете ви створити SUDO токен**](privilege-escalation/index.html#var-run-sudo-ts-less-than-username-greater-than)?
 - [ ] Чи можете ви [**читати або модифікувати файли sudoers**](privilege-escalation/index.html#etc-sudoers-etc-sudoers-d)?
 - [ ] Чи можете ви [**модифікувати /etc/ld.so.conf.d/**](privilege-escalation/index.html#etc-ld-so-conf-d)?
 - [ ] [**OpenBSD DOAS**](privilege-escalation/index.html#doas) команда
 
 ### [Можливості](privilege-escalation/index.html#capabilities)
 
-- [ ] Чи має якийсь бінарний файл **неочікувану можливість**?
+- [ ] Чи має якийсь бінарник **неочікувану можливість**?
 
 ### [ACL](privilege-escalation/index.html#acls)
 
@@ -115,12 +115,12 @@
 
 ### [Цікаві файли](privilege-escalation/index.html#interesting-files)
 
-- [ ] **Файли профілю** - Чи можна прочитати чутливі дані? Записати для підвищення привілеїв?
-- [ ] **Файли passwd/shadow** - Чи можна прочитати чутливі дані? Записати для підвищення привілеїв?
+- [ ] **Файли профілю** - Читати чутливі дані? Записувати для privesc?
+- [ ] **passwd/shadow файли** - Читати чутливі дані? Записувати для privesc?
 - [ ] **Перевірити загально цікаві папки** на наявність чутливих даних
 - [ ] **Дивні місця/власні файли**, до яких ви можете отримати доступ або змінити виконувані файли
-- [ ] **Змінені** за останні хвилини
-- [ ] **Файли Sqlite DB**
+- [ ] **Змінено** за останні хвилини
+- [ ] **Sqlite DB файли**
 - [ ] **Сховані файли**
 - [ ] **Скрипти/Бінарники в PATH**
 - [ ] **Веб файли** (паролі?)
