@@ -4,13 +4,13 @@
 
 ## Osnovne informacije
 
-I/O Kit je open-source, objektno orijentisani **framework za drajvere uređaja** u XNU kernelu, koji upravlja **dinamički učitanim drajverima uređaja**. Omogućava dodavanje modularnog koda u kernel u hodu, podržavajući raznovrsni hardver.
+I/O Kit je open-source, objektno orijentisan **framework za drajvere uređaja** u XNU kernelu, koji upravlja **dinamički učitanim drajverima uređaja**. Omogućava dodavanje modularnog koda u kernel u hodu, podržavajući raznovrsni hardver.
 
-IOKit drajveri će u osnovi **izvoziti funkcije iz kernela**. Ovi parametri funkcija **tipovi** su **preddefinisani** i verifikovani. Štaviše, slično XPC-u, IOKit je samo još jedan sloj **iznad Mach poruka**.
+IOKit drajveri će u osnovi **izvoziti funkcije iz kernela**. Ovi parametri funkcija su **preddefinisani** i verifikovani. Štaviše, slično XPC-u, IOKit je samo još jedan sloj **iznad Mach poruka**.
 
-**IOKit XNU kernel kod** je open-source od strane Apple-a na [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit). Takođe, IOKit komponente u korisničkom prostoru su takođe open-source [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
+**IOKit XNU kernel kod** je open-source od strane Apple-a na [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit). Takođe, komponente IOKit korisničkog prostora su takođe open-source [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
 
-Međutim, **nema IOKit drajvera** koji su open-source. U svakom slučaju, s vremena na vreme, objavljivanje drajvera može doći sa simbolima koji olakšavaju njegovo debagovanje. Proverite kako da [**dobijete ekstenzije drajvera iz firmvera ovde**](./#ipsw)**.**
+Međutim, **nema IOKit drajvera** koji su open-source. U svakom slučaju, s vremena na vreme, objavljivanje drajvera može doći sa simbolima koji olakšavaju njegovo debagovanje. Proverite kako da [**dobijete ekstenzije drajvera iz firmvera ovde**](#ipsw)**.**
 
 Napisano je u **C++**. Možete dobiti demanglovane C++ simbole sa:
 ```bash
@@ -23,18 +23,18 @@ __ZN16IOUserClient202222dispatchExternalMethodEjP31IOExternalMethodArgumentsOpaq
 IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
 > [!CAUTION]
-> IOKit **izložene funkcije** mogu izvršiti **dodatne provere bezbednosti** kada klijent pokuša da pozove funkciju, ali imajte na umu da su aplikacije obično **ograničene** od **sandbox-a** sa kojim IOKit funkcije mogu da interaguju.
+> IOKit **izložene funkcije** mogu izvršiti **dodatne bezbednosne provere** kada klijent pokuša da pozove funkciju, ali imajte na umu da su aplikacije obično **ograničene** od **sandbox-a** sa kojim IOKit funkcije mogu da interaguju.
 
 ## Drajveri
 
-U macOS se nalaze u:
+U macOS-u se nalaze u:
 
 - **`/System/Library/Extensions`**
 - KEXT datoteke ugrađene u OS X operativni sistem.
 - **`/Library/Extensions`**
 - KEXT datoteke instalirane od strane softvera trećih strana
 
-U iOS se nalaze u:
+U iOS-u se nalaze u:
 
 - **`/System/Library/Extensions`**
 ```bash
@@ -54,7 +54,7 @@ Index Refs Address            Size       Wired      Name (Version) UUID <Linked 
 9    2 0xffffff8003317000 0xe000     0xe000     com.apple.kec.Libm (1) 6C1342CC-1D74-3D0F-BC43-97D5AD38200A <5>
 10   12 0xffffff8003544000 0x92000    0x92000    com.apple.kec.corecrypto (11.1) F5F1255F-6552-3CF4-A9DB-D60EFDEB4A9A <8 7 6 5 3 1>
 ```
-Dok broj 9, navedeni drajveri su **učitani na adresi 0**. To znači da to nisu pravi drajveri već **deo kernela i ne mogu se ukloniti**.
+Do broja 9, navedeni drajveri su **učitani na adresi 0**. To znači da to nisu pravi drajveri već **deo kernela i ne mogu se ukloniti**.
 
 Da biste pronašli specifične ekstenzije, možete koristiti:
 ```bash
@@ -80,7 +80,7 @@ Možete preuzeti **`IORegistryExplorer`** iz **Xcode Additional Tools** sa [**ht
 
 <figure><img src="../../../images/image (1167).png" alt="" width="563"><figcaption></figcaption></figure>
 
-U IORegistryExplorer, "planovi" se koriste za organizovanje i prikazivanje odnosa između različitih objekata u IORegistry. Svaki plan predstavlja specifičnu vrstu odnosa ili poseban prikaz hardverske i drajverske konfiguracije sistema. Evo nekih od uobičajenih planova koje možete sresti u IORegistryExplorer:
+U IORegistryExplorer, "planovi" se koriste za organizovanje i prikazivanje odnosa između različitih objekata u IORegistry. Svaki plan predstavlja specifičnu vrstu odnosa ili poseban pogled na hardversku i drajversku konfiguraciju sistema. Evo nekih od uobičajenih planova koje možete sresti u IORegistryExplorer:
 
 1. **IOService Plane**: Ovo je najopštiji plan, koji prikazuje servisne objekte koji predstavljaju drajvere i nubs (kanale komunikacije između drajvera). Prikazuje odnose između provajdera i klijenata ovih objekata.
 2. **IODeviceTree Plane**: Ovaj plan predstavlja fizičke veze između uređaja dok su priključeni na sistem. Često se koristi za vizualizaciju hijerarhije uređaja povezanih putem magistrala kao što su USB ili PCI.
@@ -152,9 +152,9 @@ return 0;
 ```
 Postoje **druge** funkcije koje se mogu koristiti za pozivanje IOKit funkcija pored **`IOConnectCallScalarMethod`** kao što su **`IOConnectCallMethod`**, **`IOConnectCallStructMethod`**...
 
-## Reverzija ulazne tačke drajvera
+## Reverzno inženjerstvo ulazne tačke drajvera
 
-Možete ih dobiti, na primer, iz [**firmware slike (ipsw)**](./#ipsw). Zatim, učitajte je u svoj omiljeni dekompajler.
+Možete ih dobiti, na primer, iz [**firmware slike (ipsw)**](#ipsw). Zatim, učitajte je u svoj omiljeni dekompajler.
 
 Možete početi dekompilaciju funkcije **`externalMethod`** jer je to funkcija drajvera koja će primati poziv i pozivati odgovarajuću funkciju:
 
@@ -162,7 +162,7 @@ Možete početi dekompilaciju funkcije **`externalMethod`** jer je to funkcija d
 
 <figure><img src="../../../images/image (1169).png" alt=""><figcaption></figcaption></figure>
 
-Ta strašna pozivna demanglovana znači:
+Ta strašna pozivna funkcija demanglovana znači:
 ```cpp
 IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
@@ -209,6 +209,6 @@ Nakon što je niz kreiran, možete videti sve eksportovane funkcije:
 <figure><img src="../../../images/image (1181).png" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> Ako se sećate, da **pozovete** **eksportovanu** funkciju iz korisničkog prostora ne treba da pozivate ime funkcije, već **broj selektora**. Ovde možete videti da je selektor **0** funkcija **`initializeDecoder`**, selektor **1** je **`startDecoder`**, selektor **2** **`initializeEncoder`**...
+> Ako se sećate, da **pozovete** **eksportovanu** funkciju iz korisničkog prostora, ne treba da pozivate ime funkcije, već **broj selektora**. Ovde možete videti da je selektor **0** funkcija **`initializeDecoder`**, selektor **1** je **`startDecoder`**, selektor **2** **`initializeEncoder`**...
 
 {{#include ../../../banners/hacktricks-training.md}}

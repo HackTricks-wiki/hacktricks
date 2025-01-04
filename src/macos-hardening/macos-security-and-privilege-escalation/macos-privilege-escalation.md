@@ -1,10 +1,10 @@
-# macOS Eskalacija Privilegija
+# macOS Privilege Escalation
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## TCC Eskalacija Privilegija
+## TCC Privilege Escalation
 
-Ako ste došli ovde tražeći TCC eskalaciju privilegija, idite na:
+Ako ste došli ovde tražeći TCC privilegiju eskalaciju, idite na:
 
 {{#ref}}
 macos-security-protections/macos-tcc/
@@ -12,17 +12,17 @@ macos-security-protections/macos-tcc/
 
 ## Linux Privesc
 
-Molimo vas da imate na umu da **većina trikova o eskalaciji privilegija koji utiču na Linux/Unix će takođe uticati na MacOS** mašine. Tako da pogledajte:
+Imajte na umu da **većina trikova o eskalaciji privilegija koji utiču na Linux/Unix će takođe uticati na MacOS** mašine. Tako da pogledajte:
 
 {{#ref}}
 ../../linux-hardening/privilege-escalation/
 {{#endref}}
 
-## Interakcija Korisnika
+## User Interaction
 
-### Sudo Otmica
+### Sudo Hijacking
 
-Možete pronaći originalnu [Sudo Otmicu tehniku unutar posta o Eskalaciji Privilegija za Linux](../../linux-hardening/privilege-escalation/#sudo-hijacking).
+Možete pronaći originalnu [Sudo Hijacking tehniku unutar posta o Linux privilegiji eskalaciji](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
 
 Međutim, macOS **održava** korisnikov **`PATH`** kada izvršava **`sudo`**. Što znači da bi drugi način da se postigne ovaj napad bio da se **otmu drugi binarni fajlovi** koje žrtva još uvek izvršava kada **pokreće sudo:**
 ```bash
@@ -46,7 +46,7 @@ Napomena da korisnik koji koristi terminal verovatno ima **Homebrew instaliran**
 Korišćenjem nekih **socijalnih inženjeringa** mogli biste **impersonirati, na primer, Google Chrome** unutar dock-a i zapravo izvršiti svoj skript:
 
 {{#tabs}}
-{{#tab name="Impersonacija Chrome-a"}}
+{{#tab name="Chrome Impersonation"}}
 Neki predlozi:
 
 - Proverite u Dock-u da li postoji Chrome, i u tom slučaju **uklonite** tu stavku i **dodajte** **lažnu** **Chrome stavku na istu poziciju** u Dock nizu.&#x20;
@@ -205,8 +205,8 @@ killall Dock
 
 ### CVE-2020-9771 - mount_apfs TCC zaobilaženje i eskalacija privilegija
 
-**Bilo koji korisnik** (čak i oni bez privilegija) može da kreira i montira snapshot vremenske mašine i **pristupi SVIM datotekama** tog snapshot-a.\
-**Jedina privilegija** koja je potrebna je da aplikacija koja se koristi (kao što je `Terminal`) ima **Potpun pristup disku** (FDA) (`kTCCServiceSystemPolicyAllfiles`) koji mora biti odobren od strane administratora.
+**Bilo koji korisnik** (čak i oni bez privilegija) može da kreira i montira snapshot vremenske mašine i **pristupi SVI datotekama** tog snapshot-a.\
+**Jedina privilegija** koja je potrebna je da aplikacija koja se koristi (kao što je `Terminal`) ima **Pristup celom disku** (FDA) (`kTCCServiceSystemPolicyAllfiles`) koji mora da odobri administrator.
 ```bash
 # Create snapshot
 tmutil localsnapshot

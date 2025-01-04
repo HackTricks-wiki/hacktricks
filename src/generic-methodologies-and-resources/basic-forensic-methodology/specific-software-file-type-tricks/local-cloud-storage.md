@@ -2,7 +2,6 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-
 ## OneDrive
 
 U Windows-u, možete pronaći OneDrive folder u `\Users\<username>\AppData\Local\Microsoft\OneDrive`. I unutar `logs\Personal` moguće je pronaći datoteku `SyncDiagnostics.log` koja sadrži neke zanimljive podatke o sinhronizovanim datotekama:
@@ -21,7 +20,7 @@ Kada pronađete CID, preporučuje se da **pretražujete datoteke koje sadrže ov
 ## Google Drive
 
 U Windows-u, možete pronaći glavni Google Drive folder u `\Users\<username>\AppData\Local\Google\Drive\user_default`\
-Ovaj folder sadrži datoteku pod nazivom Sync_log.log sa informacijama kao što su email adresa naloga, imena datoteka, vremenski oznake, MD5 heševi datoteka, itd. Čak i obrisane datoteke se pojavljuju u toj log datoteci sa odgovarajućim MD5.
+Ovaj folder sadrži datoteku pod nazivom Sync_log.log sa informacijama kao što su email adresa naloga, imena datoteka, vremenski oznake, MD5 heševi datoteka, itd. Čak i obrisane datoteke se pojavljuju u toj log datoteci sa svojim odgovarajućim MD5.
 
 Datoteka **`Cloud_graph\Cloud_graph.db`** je sqlite baza podataka koja sadrži tabelu **`cloud_graph_entry`**. U ovoj tabeli možete pronaći **ime** **sinhronizovanih** **datoteka**, vreme modifikacije, veličinu i MD5 kontrolni zbir datoteka.
 
@@ -65,7 +64,7 @@ Zatim možete koristiti alat [**DataProtectionDecryptor**](https://nirsoft.net/u
 
 ![](<../../../images/image (443).png>)
 
-Ako sve prođe kako se očekuje, alat će označiti **primarni ključ** koji treba da **koristite za oporavak originalnog**. Da biste povratili originalni, jednostavno koristite ovaj [cyber_chef recept](<https://gchq.github.io/CyberChef/#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) stavljajući primarni ključ kao "lozinku" unutar recepta.
+Ako sve prođe kako se očekuje, alat će označiti **primarni ključ** koji trebate **koristiti za oporavak originalnog**. Da biste povratili originalni, jednostavno koristite ovaj [cyber_chef recept](<https://gchq.github.io/CyberChef/index.html#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) stavljajući primarni ključ kao "lozinku" unutar recepta.
 
 Rezultantni heksadecimalni broj je konačni ključ koji se koristi za enkripciju baza podataka koje se mogu dekriptovati sa:
 ```bash

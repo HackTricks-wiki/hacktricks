@@ -1,4 +1,4 @@
-# macOS Osetljive Lokacije & Zanimljivi Daemoni
+# macOS Sensitive Locations & Interesting Daemons
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -7,7 +7,7 @@
 ### Shadow Lozinke
 
 Shadow lozinka se čuva sa korisničkom konfiguracijom u plists koji se nalaze u **`/var/db/dslocal/nodes/Default/users/`**.\
-Sledeći oneliner može se koristiti za ispis **sve informacije o korisnicima** (uključujući informacije o hash-u):
+Sledeći oneliner se može koristiti za ispis **sve informacije o korisnicima** (uključujući informacije o hash-u):
 ```bash
 for l in /var/db/dslocal/nodes/Default/users/*; do if [ -r "$l" ];then echo "$l"; defaults read "$l"; fi; done
 ```
@@ -43,7 +43,7 @@ security dump-keychain -d #Dump all the info, included secrets (the user will be
 
 Alat pod nazivom **keychaindump** razvijen je za ekstrakciju lozinki iz macOS keychain-a, ali se suočava sa ograničenjima na novijim verzijama macOS-a kao što je Big Sur, kako je naznačeno u [diskusiji](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760). Korišćenje **keychaindump** zahteva od napadača da dobije pristup i eskalira privilegije na **root**. Alat koristi činjenicu da je keychain po defaultu otključan prilikom prijave korisnika radi pogodnosti, omogućavajući aplikacijama da mu pristupe bez ponovnog traženja lozinke korisnika. Međutim, ako korisnik odluči da zaključa svoj keychain nakon svake upotrebe, **keychaindump** postaje neefikasan.
 
-**Keychaindump** funkcioniše tako što cilja specifičan proces nazvan **securityd**, koji Apple opisuje kao demon za autorizaciju i kriptografske operacije, što je ključno za pristup keychain-u. Proces ekstrakcije uključuje identifikaciju **Master Key**-a izvedenog iz lozinke za prijavu korisnika. Ovaj ključ je neophodan za čitanje datoteke keychain-a. Da bi locirao **Master Key**, **keychaindump** skenira memorijski heap **securityd** koristeći komandu `vmmap`, tražeći potencijalne ključeve unutar oblasti označenih kao `MALLOC_TINY`. Sledeća komanda se koristi za inspekciju ovih memorijskih lokacija:
+**Keychaindump** funkcioniše tako što cilja specifičan proces nazvan **securityd**, koji Apple opisuje kao demon za autorizaciju i kriptografske operacije, ključan za pristup keychain-u. Proces ekstrakcije uključuje identifikaciju **Master Key**-a dobijenog iz lozinke za prijavu korisnika. Ovaj ključ je neophodan za čitanje datoteke keychain-a. Da bi locirao **Master Key**, **keychaindump** skenira memorijski heap **securityd** koristeći komandu `vmmap`, tražeći potencijalne ključeve unutar oblasti označenih kao `MALLOC_TINY`. Sledeća komanda se koristi za inspekciju ovih memorijskih lokacija:
 ```bash
 sudo vmmap <securityd PID> | grep MALLOC_TINY
 ```
@@ -92,7 +92,7 @@ python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d1
 ```
 #### **Izvuci ključeve iz keychain-a (sa lozinkama) pomoću dump-a memorije**
 
-[Pratite ove korake](../#dumping-memory-with-osxpmem) da izvršite **dump memorije**
+[Pratite ove korake](../index.html#dumping-memory-with-osxpmem) da izvršite **dump memorije**
 ```bash
 #Use volafox (https://github.com/n0fate/volafox) to extract possible keychain passwords
 # Unformtunately volafox isn't working with the latest versions of MacOS
@@ -101,23 +101,23 @@ python vol.py -i ~/Desktop/show/macosxml.mem -o keychaindump
 #Try to extract the passwords using the extracted keychain passwords
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
-#### **Izvuci ključeve iz keychain-a (sa lozinkama) koristeći korisničku lozinku**
+#### **Ispusti ključeve iz keychain-a (sa lozinkama) koristeći korisničku lozinku**
 
-Ako znate korisničku lozinku, možete je koristiti da **izvučete i dekriptujete keychain-e koji pripadaju korisniku**.
+Ako znate korisničku lozinku, možete je koristiti da **ispustite i dekriptujete keychain-e koji pripadaju korisniku**.
 ```bash
 #Prompt to ask for the password
 python2.7 chainbreaker.py --dump-all --password-prompt /Users/<username>/Library/Keychains/login.keychain-db
 ```
 ### kcpassword
 
-Datoteka **kcpassword** je datoteka koja sadrži **lozinku za prijavu korisnika**, ali samo ako je vlasnik sistema **omogućio automatsku prijavu**. Stoga, korisnik će biti automatski prijavljen bez traženja lozinke (što nije baš sigurno).
+Fajl **kcpassword** je fajl koji sadrži **lozinku za prijavu korisnika**, ali samo ako je vlasnik sistema **omogućio automatsku prijavu**. Stoga, korisnik će biti automatski prijavljen bez traženja lozinke (što nije baš sigurno).
 
-Lozinka se čuva u datoteci **`/etc/kcpassword`** xored sa ključem **`0x7D 0x89 0x52 0x23 0xD2 0xBC 0xDD 0xEA 0xA3 0xB9 0x1F`**. Ako je lozinka korisnika duža od ključa, ključ će se ponovo koristiti.\
+Lozinka se čuva u fajlu **`/etc/kcpassword`** xored sa ključem **`0x7D 0x89 0x52 0x23 0xD2 0xBC 0xDD 0xEA 0xA3 0xB9 0x1F`**. Ako je lozinka korisnika duža od ključa, ključ će se ponovo koristiti.\
 To čini lozinku prilično lakom za oporavak, na primer koristeći skripte kao [**ovu**](https://gist.github.com/opshope/32f65875d45215c3677d).
 
-## Zanimljive informacije u bazama podataka
+## Interesting Information in Databases
 
-### Poruke
+### Messages
 ```bash
 sqlite3 $HOME/Library/Messages/chat.db .tables
 sqlite3 $HOME/Library/Messages/chat.db 'select * from message'
@@ -145,16 +145,16 @@ for i in $(sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.s
 ```
 ## Preferences
 
-U macOS aplikacijama, podešavanja se nalaze u **`$HOME/Library/Preferences`** a u iOS-u su u `/var/mobile/Containers/Data/Application/<UUID>/Library/Preferences`.
+U macOS aplikacijama, podešavanja se nalaze u **`$HOME/Library/Preferences`**, a u iOS-u su u `/var/mobile/Containers/Data/Application/<UUID>/Library/Preferences`.
 
-U macOS-u, cli alat **`defaults`** može se koristiti za **modifikaciju Preferences datoteke**.
+U macOS-u, cli alat **`defaults`** može da se koristi za **modifikovanje Preferences datoteke**.
 
-**`/usr/sbin/cfprefsd`** preuzima XPC usluge `com.apple.cfprefsd.daemon` i `com.apple.cfprefsd.agent` i može se pozvati da izvrši radnje kao što je modifikacija podešavanja.
+**`/usr/sbin/cfprefsd`** zahteva XPC usluge `com.apple.cfprefsd.daemon` i `com.apple.cfprefsd.agent` i može se pozvati da izvrši radnje kao što su modifikovanje podešavanja.
 
 ## OpenDirectory permissions.plist
 
 Datoteka `/System/Library/OpenDirectory/permissions.plist` sadrži dozvole primenjene na atribute čvora i zaštićena je SIP-om.\
-Ova datoteka dodeljuje dozvole specifičnim korisnicima po UUID-u (a ne uid-u) kako bi mogli da pristupe specifičnim osetljivim informacijama kao što su `ShadowHashData`, `HeimdalSRPKey` i `KerberosKeys` među ostalima:
+Ova datoteka dodeljuje dozvole specifičnim korisnicima po UUID (a ne uid) kako bi mogli da pristupe specifičnim osetljivim informacijama kao što su `ShadowHashData`, `HeimdalSRPKey` i `KerberosKeys` među ostalima:
 ```xml
 [...]
 <key>dsRecTypeStandard:Computers</key>
@@ -187,13 +187,13 @@ Ova datoteka dodeljuje dozvole specifičnim korisnicima po UUID-u (a ne uid-u) k
 </array>
 [...]
 ```
-## Sistemske obaveštenja
+## Sistemske Notifikacije
 
-### Darwin obaveštenja
+### Darwin Notifikacije
 
-Glavni daemon za obaveštenja je **`/usr/sbin/notifyd`**. Da bi primali obaveštenja, klijenti moraju da se registruju putem `com.apple.system.notification_center` Mach porta (proverite ih sa `sudo lsmp -p <pid notifyd>`). Daemon se može konfigurisati datotekom `/etc/notify.conf`.
+Glavni daemon za notifikacije je **`/usr/sbin/notifyd`**. Da bi primali notifikacije, klijenti moraju da se registruju preko `com.apple.system.notification_center` Mach porta (proverite ih sa `sudo lsmp -p <pid notifyd>`). Daemon se može konfigurisati sa datotekom `/etc/notify.conf`.
 
-Imena koja se koriste za obaveštenja su jedinstvene obrnute DNS notacije i kada se obaveštenje pošalje jednom od njih, klijent(i) koji su naznačili da mogu da ga obrade će ga primiti.
+Imena koja se koriste za notifikacije su jedinstvene obrnute DNS notacije i kada se notifikacija pošalje jednom od njih, klijent(i) koji su naznačili da mogu da je obrade će je primiti.
 
 Moguće je dumpovati trenutni status (i videti sva imena) slanjem signala SIGUSR2 procesu notifyd i čitanjem generisane datoteke: `/var/run/notifyd_<pid>.status`:
 ```bash
@@ -217,7 +217,7 @@ common: com.apple.security.octagon.joined-with-bottle
 
 ### Apple Push Notifications (APN)
 
-U ovom slučaju, aplikacije mogu da se registruju za **topics**. Klijent će generisati token kontaktirajući Apple-ove servere putem **`apsd`**.\
+U ovom slučaju, aplikacije se mogu registrovati za **teme**. Klijent će generisati token kontaktirajući Apple-ove servere putem **`apsd`**.\
 Zatim, provajderi će takođe generisati token i moći će da se povežu sa Apple-ovim serverima kako bi slali poruke klijentima. Ove poruke će lokalno primiti **`apsd`** koji će proslediti obaveštenje aplikaciji koja ga čeka.
 
 Podešavanja se nalaze u `/Library/Preferences/com.apple.apsd.plist`.

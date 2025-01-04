@@ -4,10 +4,10 @@
 
 **Zanimljive stranice za proveru:**
 
-- [**Pyscript hacking trikovi**](pyscript.md)
-- [**Python deseralizacije**](../../pentesting-web/deserialization/#python)
-- [**Trikovi za zaobilaženje python sandboksova**](bypass-python-sandboxes/)
-- [**Osnovna sintaksa python web zahteva**](web-requests.md)
-- [**Osnovna sintaksa i biblioteke u pythonu**](basic-python.md)
+- [**Pyscript hacking tricks**](pyscript.md)
+- [**Python deserializations**](../../pentesting-web/deserialization/index.html#python)
+- [**Tricks to bypass python sandboxes**](bypass-python-sandboxes/)
+- [**Basic python web requests syntax**](web-requests.md)
+- [**Basic python syntax and libraries**](basic-python.md)
 
 {{#include ../../banners/hacktricks-training.md}}

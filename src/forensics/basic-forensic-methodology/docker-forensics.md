@@ -25,8 +25,8 @@ A /var/lib/mysql/mysql/time_zone_leap_second.MYI
 A /var/lib/mysql/mysql/general_log.CSV
 ...
 ```
-U prethodnoj komandi **C** znači **Promenjeno** a **A** znači **Dodato**.\
-Ako otkrijete da je neki zanimljiv fajl kao što je `/etc/shadow` izmenjen, možete ga preuzeti iz kontejnera da proverite za malicioznu aktivnost sa:
+U prethodnoj komandi **C** znači **Promenjeno** i **A,** **Dodato**.\
+Ako otkrijete da je neki zanimljiv fajl poput `/etc/shadow` izmenjen, možete ga preuzeti iz kontejnera da proverite za malicioznu aktivnost sa:
 ```bash
 docker cp wordpress:/etc/shadow.
 ```
@@ -36,7 +36,7 @@ docker run -d lamp-wordpress
 docker cp b5d53e8b468e:/etc/shadow original_shadow #Get the file from the newly created container
 diff original_shadow shadow
 ```
-Ako otkrijete da je **neki sumnjiv fajl dodat**, možete pristupiti kontejneru i proveriti ga:
+Ako otkrijete da je **neki sumnjiv fajl dodat** možete pristupiti kontejneru i proveriti ga:
 ```bash
 docker exec -it wordpress bash
 ```
@@ -70,7 +70,7 @@ dfimage -sV=1.36 madhuakula/k8s-goat-hidden-in-layers>
 ```
 ### Dive
 
-Da biste pronašli dodate/izmenjene datoteke u docker slikama, možete koristiti [**dive**](https://github.com/wagoodman/dive) (preuzmite ga sa [**releases**](https://github.com/wagoodman/dive/releases/tag/v0.10.0)) alata:
+Da biste pronašli dodate/izmene datoteke u docker slikama, možete koristiti [**dive**](https://github.com/wagoodman/dive) (preuzmite ga sa [**releases**](https://github.com/wagoodman/dive/releases/tag/v0.10.0)) alata:
 ```bash
 #First you need to load the image in your docker repo
 sudo docker load < image.tar                                                                                                                                                                                                         1 ⨯
@@ -91,7 +91,7 @@ for d in `find * -maxdepth 0 -type d`; do cd $d; tar -xf ./layer.tar; cd ..; don
 
 Napomena da kada pokrenete docker kontejner unutar hosta **možete videti procese koji se izvršavaju na kontejneru iz hosta** jednostavno pokretanjem `ps -ef`
 
-Stoga (kao root) možete **izvršiti dump memorije procesa** iz hosta i pretražiti za **kredencijalima** baš [**kao u sledećem primeru**](../../linux-hardening/privilege-escalation/#process-memory).
+Stoga (kao root) možete **izvršiti dump memorije procesa** iz hosta i pretraživati **kredencijale** jednostavno [**kao u sledećem primeru**](../../linux-hardening/privilege-escalation/index.html#process-memory).
 
 
 {{#include ../../banners/hacktricks-training.md}}

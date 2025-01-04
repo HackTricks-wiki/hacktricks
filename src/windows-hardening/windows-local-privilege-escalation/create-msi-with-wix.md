@@ -1,12 +1,12 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# Kreiranje zlonamernog MSI i dobijanje root privilegija
+# Kreiranje zlonamernog MSI i dobijanje root pristupa
 
 Kreiranje MSI instalatera će se obaviti korišćenjem wixtools, posebno će se koristiti [wixtools](http://wixtoolset.org). Vredno je napomenuti da su pokušani alternativni MSI builderi, ali nisu bili uspešni u ovom konkretnom slučaju.
 
 Za sveobuhvatno razumevanje primera korišćenja wix MSI, preporučuje se da se konsultuje [ova stranica](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with). Ovde možete pronaći razne primere koji demonstriraju korišćenje wix MSI.
 
-Cilj je generisati MSI koji će izvršiti lnk datoteku. Da bi se to postiglo, može se koristiti sledeći XML kod ([xml odavde](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)):
+Cilj je generisati MSI koji će izvršiti lnk datoteku. Da bi se to postiglo, može se koristiti sledeći XML kod ([xml odavde](https://0xrick.github.io/hack-the-box/ethereal/index.html#Creating-Malicious-msi-and-getting-root)):
 ```markup
 <?xml version="1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
@@ -38,9 +38,9 @@ fail_here
 </Product>
 </Wix>
 ```
-Važno je napomenuti da element Package sadrži atribute kao što su InstallerVersion i Compressed, koji specificiraju verziju instalatera i označavaju da li je paket komprimovan ili ne, redom.
+Važno je napomenuti da element Package sadrži atribute kao što su InstallerVersion i Compressed, koji specificiraju verziju instalatera i označavaju da li je paket komprimovan ili ne, respektivno.
 
-Proces kreiranja uključuje korišćenje candle.exe, alata iz wixtools, za generisanje wixobject-a iz msi.xml. Sledeća komanda treba da bude izvršena:
+Proces kreiranja uključuje korišćenje candle.exe, alata iz wixtools, za generisanje wixobject-a iz msi.xml. Sledeća komanda treba da se izvrši:
 ```
 candle.exe -out C:\tem\wix C:\tmp\Ethereal\msi.xml
 ```

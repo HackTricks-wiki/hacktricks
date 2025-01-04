@@ -2,7 +2,6 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-
 ## OneDrive
 
 U Windows-u, možete pronaći OneDrive folder u `\Users\<username>\AppData\Local\Microsoft\OneDrive`. I unutar `logs\Personal` moguće je pronaći datoteku `SyncDiagnostics.log` koja sadrži neke zanimljive podatke o sinhronizovanim datotekama:
@@ -16,7 +15,7 @@ U Windows-u, možete pronaći OneDrive folder u `\Users\<username>\AppData\Local
 - Vreme generisanja izveštaja
 - Veličina HD operativnog sistema
 
-Kada pronađete CID, preporučuje se da **pretražujete datoteke koje sadrže ovaj ID**. Možda ćete moći da pronađete datoteke sa imenom: _**\<CID>.ini**_ i _**\<CID>.dat**_ koje mogu sadržati zanimljive informacije kao što su imena datoteka sinhronizovanih sa OneDrive-om.
+Kada pronađete CID, preporučuje se da **pretražujete datoteke koje sadrže ovaj ID**. Možda ćete moći da pronađete datoteke sa imenom: _**\<CID>.ini**_ i _**\<CID>.dat**_ koje mogu sadržati zanimljive informacije kao što su imena datoteka sinhronizovanih sa OneDrive.
 
 ## Google Drive
 
@@ -54,9 +53,9 @@ Međutim, glavne informacije su:
 - **Algoritam**: PBKDF2
 - **Iteracije**: 1066
 
-Pored tih informacija, da biste dekriptovali baze podataka, još uvek vam je potrebna:
+Pored tih informacija, da biste dekriptovali baze podataka, još uvek vam je potrebno:
 
-- **enkriptovana DPAPI ključ**: Možete ga pronaći u registru unutar `NTUSER.DAT\Software\Dropbox\ks\client` (izvezite ove podatke kao binarne)
+- **enkriptovani DPAPI ključ**: Možete ga pronaći u registru unutar `NTUSER.DAT\Software\Dropbox\ks\client` (izvezite ove podatke kao binarne)
 - **`SYSTEM`** i **`SECURITY`** hives
 - **DPAPI master ključevi**: Koji se mogu pronaći u `\Users\<username>\AppData\Roaming\Microsoft\Protect`
 - **korisničko ime** i **lozinka** Windows korisnika
@@ -65,13 +64,13 @@ Zatim možete koristiti alat [**DataProtectionDecryptor**](https://nirsoft.net/u
 
 ![](<../../../images/image (448).png>)
 
-Ako sve prođe kako se očekuje, alat će označiti **primarni ključ** koji treba da **koristite za oporavak originalnog**. Da biste povratili originalni, jednostavno koristite ovaj [cyber_chef recept](<https://gchq.github.io/CyberChef/#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) stavljajući primarni ključ kao "lozinku" unutar recepta.
+Ako sve prođe kako se očekuje, alat će označiti **primarni ključ** koji trebate **koristiti za oporavak originalnog**. Da biste povratili originalni, jednostavno koristite ovaj [cyber_chef recept](<https://gchq.github.io/CyberChef/index.html#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) stavljajući primarni ključ kao "lozinku" unutar recepta.
 
 Rezultantni heksadecimalni broj je konačni ključ koji se koristi za enkripciju baza podataka koje se mogu dekriptovati sa:
 ```bash
 sqlite -k <Obtained Key> config.dbx ".backup config.db" #This decompress the config.dbx and creates a clear text backup in config.db
 ```
-Baza podataka **`config.dbx`** sadrži:
+**`config.dbx`** baza podataka sadrži:
 
 - **Email**: Email korisnika
 - **usernamedisplayname**: Ime korisnika
@@ -79,7 +78,7 @@ Baza podataka **`config.dbx`** sadrži:
 - **Host_id: Hash** korišćen za autentifikaciju u cloud. Ovo se može opozvati samo sa veba.
 - **Root_ns**: Identifikator korisnika
 
-Baza podataka **`filecache.db`** sadrži informacije o svim datotekama i folderima sinhronizovanim sa Dropbox-om. Tabela `File_journal` je ona sa više korisnih informacija:
+**`filecache.db`** baza podataka sadrži informacije o svim datotekama i folderima sinhronizovanim sa Dropbox-om. Tabela `File_journal` je ona sa više korisnih informacija:
 
 - **Server_path**: Putanja gde se datoteka nalazi unutar servera (ova putanja je prethodna sa `host_id` klijenta).
 - **local_sjid**: Verzija datoteke

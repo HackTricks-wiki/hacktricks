@@ -3,9 +3,9 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## Container modification
+## Izmena kontejnera
 
-Postoje sumnje da je neki docker kontejner bio kompromitovan:
+Postoje sumnje da je neki docker kontejner kompromitovan:
 ```bash
 docker ps
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
@@ -70,7 +70,7 @@ dfimage -sV=1.36 madhuakula/k8s-goat-hidden-in-layers>
 ```
 ### Dive
 
-Da biste pronašli dodate/izmenjene datoteke u docker slikama, možete koristiti [**dive**](https://github.com/wagoodman/dive) (preuzmite ga sa [**releases**](https://github.com/wagoodman/dive/releases/tag/v0.10.0)) alata:
+Da biste pronašli dodate/izmene datoteke u docker slikama, možete koristiti [**dive**](https://github.com/wagoodman/dive) (preuzmite ga sa [**releases**](https://github.com/wagoodman/dive/releases/tag/v0.10.0)) alata:
 ```bash
 #First you need to load the image in your docker repo
 sudo docker load < image.tar                                                                                                                                                                                                         1 ⨯
@@ -91,7 +91,7 @@ for d in `find * -maxdepth 0 -type d`; do cd $d; tar -xf ./layer.tar; cd ..; don
 
 Napomena da kada pokrenete docker kontejner unutar hosta **možete videti procese koji se izvršavaju na kontejneru iz hosta** jednostavno pokretanjem `ps -ef`
 
-Stoga (kao root) možete **izvršiti dump memorije procesa** sa hosta i pretražiti za **kredencijalima** baš [**kao u sledećem primeru**](../../linux-hardening/privilege-escalation/#process-memory).
+Stoga (kao root) možete **izvršiti dump memorije procesa** iz hosta i pretraživati **kredencijale** jednostavno [**kao u sledećem primeru**](../../linux-hardening/privilege-escalation/index.html#process-memory).
 
 
 {{#include ../../banners/hacktricks-training.md}}

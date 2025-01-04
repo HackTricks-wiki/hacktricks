@@ -4,13 +4,13 @@
 
 ## Osnovne informacije
 
-MIG je kreiran da **pojednostavi proces kreiranja Mach IPC** koda. U suštini, **generiše potrebni kod** za komunikaciju servera i klijenta prema datoj definiciji. Čak i ako je generisani kod ružan, programer će samo morati da ga uveze i njegov kod će biti mnogo jednostavniji nego pre.
+MIG je kreiran da ** pojednostavi proces kreiranja Mach IPC** koda. U suštini, **generiše potrebni kod** za komunikaciju servera i klijenta prema datoj definiciji. Čak i ako je generisani kod ružan, programer će samo trebati da ga uveze i njegov kod će biti mnogo jednostavniji nego pre.
 
 Definicija se specificira u jeziku za definiciju interfejsa (IDL) koristeći ekstenziju `.defs`.
 
 Ove definicije imaju 5 sekcija:
 
-- **Deklaracija pod sistema**: Ključna reč subsystem se koristi da označi **ime** i **id**. Takođe je moguće označiti ga kao **`KernelServer`** ako server treba da se izvršava u kernelu.
+- **Deklaracija podsistema**: Ključna reč subsystem se koristi da označi **ime** i **id**. Takođe je moguće označiti ga kao **`KernelServer`** ako server treba da radi u kernelu.
 - **Uključivanja i uvozi**: MIG koristi C-preprocesor, tako da može da koristi uvoze. Štaviše, moguće je koristiti `uimport` i `simport` za kod generisan od strane korisnika ili servera.
 - **Deklaracije tipova**: Moguće je definisati tipove podataka, iako obično uvozi `mach_types.defs` i `std_types.defs`. Za prilagođene tipove može se koristiti neka sintaksa:
 - \[i`n/out]tran`: Funkcija koja treba da se prevede iz dolazne ili u odlaznu poruku
@@ -40,19 +40,19 @@ server_port :  mach_port_t;
 n1          :  uint32_t;
 n2          :  uint32_t);
 ```
-Napomena da je prvi **argument port koji se vezuje** i MIG će **automatski obraditi port za odgovor** (osim ako se ne poziva `mig_get_reply_port()` u klijentskom kodu). Štaviše, **ID operacija** će biti **sekvencijalni** počinjući od naznačenog ID-a podsistema (tako da ako je neka operacija zastarela, ona se briše i `skip` se koristi da bi se i dalje koristio njen ID).
+Napomena da je prvi **argument port koji se vezuje** i MIG će **automatski obraditi port za odgovor** (osim ako se poziva `mig_get_reply_port()` u klijentskom kodu). Štaviše, **ID operacija** će biti **sekvencijalni** počinjući od naznačenog ID-a podsistema (tako da ako je neka operacija zastarela, ona se briše i `skip` se koristi da bi se i dalje koristio njen ID).
 
 Sada koristite MIG da generišete server i klijentski kod koji će moći da komuniciraju jedni s drugima kako bi pozvali funkciju Subtract:
 ```bash
 mig -header myipcUser.h -sheader myipcServer.h myipc.defs
 ```
-U trenutnom direktorijumu biće kreirano nekoliko novih fajlova.
+Nekoliko novih fajlova biće kreirano u trenutnom direktorijumu.
 
 > [!TIP]
 > Možete pronaći složeniji primer na vašem sistemu sa: `mdfind mach_port.defs`\
-> A možete ga kompajlirati iz iste fascikle kao i fajl sa: `mig -DLIBSYSCALL_INTERFACE mach_ports.defs`
+> I možete ga kompajlirati iz iste fascikle kao i fajl sa: `mig -DLIBSYSCALL_INTERFACE mach_ports.defs`
 
-U fajlovima **`myipcServer.c`** i **`myipcServer.h`** možete pronaći deklaraciju i definiciju strukture **`SERVERPREFmyipc_subsystem`**, koja u suštini definiše funkciju koja se poziva na osnovu primljenog ID-a poruke (naveli smo početni broj 500):
+U fajlovima **`myipcServer.c`** i **`myipcServer.h`** možete pronaći deklaraciju i definiciju strukture **`SERVERPREFmyipc_subsystem`**, koja u osnovi definiše funkciju koja se poziva na osnovu primljenog ID-a poruke (naveli smo početni broj 500):
 
 {{#tabs}}
 {{#tab name="myipcServer.c"}}
@@ -108,7 +108,7 @@ U ovom primeru smo definisali samo 1 funkciju u definicijama, ali da smo definis
 
 Ako se očekivalo da funkcija pošalje **odgovor**, funkcija `mig_internal kern_return_t __MIG_check__Reply__<name>` bi takođe postojala.
 
-U stvari, moguće je identifikovati ovu vezu u strukturi **`subsystem_to_name_map_myipc`** iz **`myipcServer.h`** (**`subsystem*to_name_map*\***`\*\* u drugim datotekama):
+Zapravo, moguće je identifikovati ovu vezu u strukturi **`subsystem_to_name_map_myipc`** iz **`myipcServer.h`** (**`subsystem*to_name_map*\***`\*\* u drugim datotekama):
 ```c
 #ifndef subsystem_to_name_map_myipc
 #define subsystem_to_name_map_myipc \
@@ -149,7 +149,7 @@ return FALSE;
 }
 </code></pre>
 
-Proverite prethodno istaknute linije koje pristupaju funkciji za pozivanje po ID-u.
+Proverite prethodno istaknute linije koje pristupaju funkciji koja se poziva po ID-u.
 
 Sledeći je kod za kreiranje jednostavnog **servera** i **klijenta** gde klijent može pozvati funkcije Oduzimanje sa servera:
 
@@ -231,17 +231,17 @@ A **MIG klijenti** će koristiti `__NDR_record` da pošalju sa `__mach_msg` serv
 
 Kako mnogi binarni fajlovi sada koriste MIG za izlaganje mach portova, zanimljivo je znati kako **identifikovati da je MIG korišćen** i **funkcije koje MIG izvršava** sa svakim ID-om poruke.
 
-[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/#jtool2) može da parsira MIG informacije iz Mach-O binarnog fajla, ukazujući na ID poruke i identifikujući funkciju koja treba da se izvrši:
+[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/index.html#jtool2) može da analizira MIG informacije iz Mach-O binarnog fajla, ukazujući na ID poruke i identifikujući funkciju koja treba da se izvrši:
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
-Pored toga, MIG funkcije su samo omotači stvarne funkcije koja se poziva, što znači da dobijanjem njenog disasembly-a i pretraživanjem za BL možda ćete moći da pronađete stvarnu funkciju koja se poziva:
+Pored toga, MIG funkcije su samo omotači stvarne funkcije koja se poziva, što znači da dobijanjem njenog disasembly-a i pretraživanjem za BL možda možete pronaći stvarnu funkciju koja se poziva:
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep BL
 ```
 ### Assembly
 
-Prethodno je pomenuto da će funkcija koja će se **pozvati u zavisnosti od primljenog ID-a poruke** biti `myipc_server`. Međutim, obično nećete imati simbole binarnog fajla (nema imena funkcija), pa je zanimljivo **proveriti kako izgleda dekompilirana** jer će uvek biti vrlo slična (kod ove funkcije je nezavistan od izloženih funkcija):
+Prethodno je pomenuto da će funkcija koja se bavi **pozivanjem ispravne funkcije u zavisnosti od primljenog ID-a poruke** biti `myipc_server`. Međutim, obično nećete imati simbole binarnog fajla (nema imena funkcija), pa je zanimljivo **proveriti kako izgleda dekompilirana** jer će uvek biti vrlo slična (kod ove funkcije je nezavistan od izloženih funkcija):
 
 {{#tabs}}
 {{#tab name="myipc_server decompiled 1"}}
@@ -249,7 +249,7 @@ Prethodno je pomenuto da će funkcija koja će se **pozvati u zavisnosti od prim
 <pre class="language-c"><code class="lang-c">int _myipc_server(int arg0, int arg1) {
 var_10 = arg0;
 var_18 = arg1;
-// Početne instrukcije za pronalaženje pravih pokazivača funkcija
+// Početne instrukcije za pronalaženje ispravnih pokazivača funkcija
 *(int32_t *)var_18 = *(int32_t *)var_10 &#x26; 0x1f;
 *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
 *(int32_t *)(var_18 + 0x4) = 0x24;
@@ -259,19 +259,19 @@ var_18 = arg1;
 if (*(int32_t *)(var_10 + 0x14) &#x3C;= 0x1f4 &#x26;&#x26; *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
 rax = *(int32_t *)(var_10 + 0x14);
 // Poziv sign_extend_64 koji može pomoći u identifikaciji ove funkcije
-// Ovo čuva u rax pokazivač na poziv koji treba da se izvrši
+// Ovo čuva u rax pokazivač na poziv koji treba da se pozove
 // Proverite korišćenje adrese 0x100004040 (niz adresa funkcija)
 // 0x1f4 = 500 (početni ID)
 <strong>            rax = *(sign_extend_64(rax - 0x1f4) * 0x28 + 0x100004040);
 </strong>            var_20 = rax;
-// Ako - else, if vraća false, dok else poziva pravu funkciju i vraća true
+// Ako - else, if vraća false, dok else poziva ispravnu funkciju i vraća true
 <strong>            if (rax == 0x0) {
 </strong>                    *(var_18 + 0x18) = **_NDR_record;
 *(int32_t *)(var_18 + 0x20) = 0xfffffffffffffed1;
 var_4 = 0x0;
 }
 else {
-// Izračunata adresa koja poziva pravu funkciju sa 2 argumenta
+// Izračunata adresa koja poziva ispravnu funkciju sa 2 argumenta
 <strong>                    (var_20)(var_10, var_18);
 </strong>                    var_4 = 0x1;
 }
@@ -297,7 +297,7 @@ saved_fp = r29;
 stack[-8] = r30;
 var_10 = arg0;
 var_18 = arg1;
-// Početne instrukcije za pronalaženje pravih pokazivača funkcija
+// Početne instrukcije za pronalaženje ispravnih pokazivača funkcija
 *(int32_t *)var_18 = *(int32_t *)var_10 &#x26; 0x1f | 0x0;
 *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
 *(int32_t *)(var_18 + 0x4) = 0x24;
@@ -340,7 +340,7 @@ r8 = 0x1;
 var_4 = 0x0;
 }
 else {
-// Poziv na izračunatu adresu gde funkcija treba da bude
+// Poziv na izračunatu adresu gde bi funkcija trebala biti
 <strong>                            (var_20)(var_10, var_18);
 </strong>                            var_4 = 0x1;
 }
@@ -365,13 +365,13 @@ return r0;
 {{#endtab}}
 {{#endtabs}}
 
-U stvari, ako odete na funkciju **`0x100004000`** naći ćete niz **`routine_descriptor`** struktura. Prvi element strukture je **adresa** gde je **funkcija** implementirana, a **struktura zauzima 0x28 bajtova**, tako da svakih 0x28 bajtova (počinjajući od bajta 0) možete dobiti 8 bajtova i to će biti **adresa funkcije** koja će biti pozvana:
+U stvari, ako odete na funkciju **`0x100004000`** pronaći ćete niz **`routine_descriptor`** struktura. Prvi element strukture je **adresa** gde je **funkcija** implementirana, a **struktura zauzima 0x28 bajtova**, tako da svaka 0x28 bajtova (počevši od bajta 0) možete dobiti 8 bajtova i to će biti **adresa funkcije** koja će biti pozvana:
 
 <figure><img src="../../../../images/image (35).png" alt=""><figcaption></figcaption></figure>
 
 <figure><img src="../../../../images/image (36).png" alt=""><figcaption></figcaption></figure>
 
-Ove podatke možete izvući [**koristeći ovaj Hopper skript**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py).
+Ovi podaci se mogu izvući [**koristeći ovaj Hopper skript**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py).
 
 ### Debug
 
