@@ -8,9 +8,9 @@ El I/O Kit es un **framework de controladores de dispositivos** de código abier
 
 Los controladores de IOKit básicamente **exportan funciones del núcleo**. Estos parámetros de función son **predefinidos** y son verificados. Además, similar a XPC, IOKit es solo otra capa sobre **los mensajes de Mach**.
 
-El **código del núcleo XNU de IOKit** es de código abierto por Apple en [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit). Además, los componentes de IOKit en el espacio de usuario también son de código abierto [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
+El **código del núcleo IOKit XNU** es de código abierto por Apple en [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit). Además, los componentes de IOKit en el espacio de usuario también son de código abierto [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
 
-Sin embargo, **ningún controlador de IOKit** es de código abierto. De todos modos, de vez en cuando, un lanzamiento de un controlador puede venir con símbolos que facilitan su depuración. Consulta cómo [**obtener las extensiones del controlador del firmware aquí**](./#ipsw)**.**
+Sin embargo, **ningún controlador de IOKit** es de código abierto. De todos modos, de vez en cuando, un lanzamiento de un controlador puede venir con símbolos que facilitan su depuración. Consulta cómo [**obtener las extensiones del controlador del firmware aquí**](#ipsw)**.**
 
 Está escrito en **C++**. Puedes obtener símbolos C++ demangled con:
 ```bash
@@ -23,7 +23,7 @@ __ZN16IOUserClient202222dispatchExternalMethodEjP31IOExternalMethodArgumentsOpaq
 IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
 > [!CAUTION]
-> IOKit **funciones expuestas** podrían realizar **verificaciones de seguridad adicionales** cuando un cliente intenta llamar a una función, pero ten en cuenta que las aplicaciones suelen estar **limitadas** por el **sandbox** con el que pueden interactuar las funciones de IOKit.
+> Las **funciones expuestas** de IOKit podrían realizar **verificaciones de seguridad adicionales** cuando un cliente intenta llamar a una función, pero ten en cuenta que las aplicaciones suelen estar **limitadas** por el **sandbox** con el que pueden interactuar las funciones de IOKit.
 
 ## Controladores
 
@@ -61,7 +61,7 @@ Para encontrar extensiones específicas, puedes usar:
 kextfind -bundle-id com.apple.iokit.IOReportFamily #Search by full bundle-id
 kextfind -bundle-id -substring IOR #Search by substring in bundle-id
 ```
-Para cargar y descargar extensiones del kernel, haz lo siguiente:
+Para cargar y descargar extensiones del kernel, haz:
 ```bash
 kextload com.apple.iokit.IOReportFamily
 kextunload com.apple.iokit.IOReportFamily
@@ -70,13 +70,13 @@ kextunload com.apple.iokit.IOReportFamily
 
 El **IORegistry** es una parte crucial del marco IOKit en macOS e iOS que sirve como una base de datos para representar la configuración y el estado del hardware del sistema. Es una **colección jerárquica de objetos que representan todo el hardware y los controladores** cargados en el sistema, y sus relaciones entre sí.
 
-Puedes obtener el IORegistry usando la cli **`ioreg`** para inspeccionarlo desde la consola (especialmente útil para iOS).
+Puedes obtener el IORegistry usando el cli **`ioreg`** para inspeccionarlo desde la consola (especialmente útil para iOS).
 ```bash
 ioreg -l #List all
 ioreg -w 0 #Not cut lines
 ioreg -p <plane> #Check other plane
 ```
-Puedes descargar **`IORegistryExplorer`** de **Xcode Additional Tools** desde [**https://developer.apple.com/download/all/**](https://developer.apple.com/download/all/) e inspeccionar el **macOS IORegistry** a través de una interfaz **gráfica**.
+Podrías descargar **`IORegistryExplorer`** de **Xcode Additional Tools** desde [**https://developer.apple.com/download/all/**](https://developer.apple.com/download/all/) e inspeccionar el **macOS IORegistry** a través de una interfaz **gráfica**.
 
 <figure><img src="../../../images/image (1167).png" alt="" width="563"><figcaption></figcaption></figure>
 
@@ -150,11 +150,11 @@ IOObjectRelease(iter);
 return 0;
 }
 ```
-Hay **otras** funciones que se pueden usar para llamar a las funciones de IOKit además de **`IOConnectCallScalarMethod`** como **`IOConnectCallMethod`**, **`IOConnectCallStructMethod`**...
+Hay **otras** funciones que se pueden usar para llamar a funciones de IOKit además de **`IOConnectCallScalarMethod`** como **`IOConnectCallMethod`**, **`IOConnectCallStructMethod`**...
 
 ## Invirtiendo el punto de entrada del controlador
 
-Podrías obtener estos, por ejemplo, de una [**imagen de firmware (ipsw)**](./#ipsw). Luego, cárgalo en tu descompilador favorito.
+Podrías obtener estos, por ejemplo, de una [**imagen de firmware (ipsw)**](#ipsw). Luego, cárgalo en tu descompilador favorito.
 
 Podrías comenzar a descompilar la función **`externalMethod`** ya que esta es la función del controlador que recibirá la llamada y llamará a la función correcta:
 
@@ -188,7 +188,7 @@ Para el siguiente paso, necesitamos tener definida la estructura **`IOExternalMe
 
 <figure><img src="../../../images/image (1170).png" alt=""><figcaption></figcaption></figure>
 
-Ahora, siguiendo el `(IOExternalMethodDispatch2022 *)&sIOExternalMethodArray` puedes ver muchos datos:
+Ahora, siguiendo el `(IOExternalMethodDispatch2022 *)&sIOExternalMethodArray`, puedes ver muchos datos:
 
 <figure><img src="../../../images/image (1176).png" alt="" width="563"><figcaption></figcaption></figure>
 

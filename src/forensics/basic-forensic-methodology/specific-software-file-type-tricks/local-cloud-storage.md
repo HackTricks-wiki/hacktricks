@@ -65,7 +65,7 @@ Luego puedes usar la herramienta [**DataProtectionDecryptor**](https://nirsoft.n
 
 ![](<../../../images/image (448).png>)
 
-Si todo va como se espera, la herramienta indicará la **clave primaria** que necesitas **usar para recuperar la original**. Para recuperar la original, simplemente usa esta [receta de cyber_chef](<https://gchq.github.io/CyberChef/#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) poniendo la clave primaria como la "frase de paso" dentro de la receta.
+Si todo sale como se espera, la herramienta indicará la **clave primaria** que necesitas **usar para recuperar la original**. Para recuperar la original, simplemente usa esta [receta de cyber_chef](<https://gchq.github.io/CyberChef/index.html#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) poniendo la clave primaria como la "frase de paso" dentro de la receta.
 
 El hex resultante es la clave final utilizada para encriptar las bases de datos que se puede descifrar con:
 ```bash
@@ -89,7 +89,7 @@ La base de datos **`filecache.db`** contiene información sobre todos los archiv
 Otras tablas dentro de esta base de datos contienen información más interesante:
 
 - **block_cache**: hash de todos los archivos y carpetas de Dropbox
-- **block_ref**: Relaciona el ID de hash de la tabla `block_cache` con el ID de archivo en la tabla `file_journal`
+- **block_ref**: Relaciona el ID de hash de la tabla `block_cache` con el ID del archivo en la tabla `file_journal`
 - **mount_table**: Carpetas compartidas de Dropbox
 - **deleted_fields**: Archivos eliminados de Dropbox
 - **date_added**

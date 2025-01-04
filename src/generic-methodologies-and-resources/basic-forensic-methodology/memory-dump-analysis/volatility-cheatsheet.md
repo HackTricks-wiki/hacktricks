@@ -58,7 +58,7 @@ Volatility tiene dos enfoques principales para los plugins, que a veces se refle
 
 Eso hace que los plugins “list” sean bastante rápidos, pero igual de vulnerables a la manipulación por malware que la API de Windows. Por ejemplo, si el malware utiliza DKOM para desvincular un proceso de la lista enlazada `_EPROCESS`, no aparecerá en el Administrador de Tareas ni en el pslist.
 
-Los plugins “scan”, por otro lado, adoptarán un enfoque similar a la extracción de memoria para cosas que podrían tener sentido cuando se desreferencian como estructuras específicas. `psscan`, por ejemplo, leerá la memoria e intentará crear objetos `_EPROCESS` a partir de ella (utiliza escaneo de etiquetas de pool, que busca cadenas de 4 bytes que indican la presencia de una estructura de interés). La ventaja es que puede recuperar procesos que han salido, e incluso si el malware manipula la lista enlazada `_EPROCESS`, el plugin aún encontrará la estructura en memoria (ya que aún necesita existir para que el proceso se ejecute). La desventaja es que los plugins “scan” son un poco más lentos que los plugins “list”, y a veces pueden generar falsos positivos (un proceso que salió hace demasiado tiempo y tuvo partes de su estructura sobrescritas por otras operaciones).
+Los plugins “scan”, por otro lado, adoptarán un enfoque similar al carving de la memoria para cosas que podrían tener sentido cuando se desreferencian como estructuras específicas. `psscan`, por ejemplo, leerá la memoria e intentará crear objetos `_EPROCESS` a partir de ella (utiliza escaneo de etiquetas de pool, que busca cadenas de 4 bytes que indican la presencia de una estructura de interés). La ventaja es que puede encontrar procesos que han salido, e incluso si el malware manipula la lista enlazada `_EPROCESS`, el plugin aún encontrará la estructura en la memoria (ya que aún necesita existir para que el proceso se ejecute). La desventaja es que los plugins “scan” son un poco más lentos que los plugins “list”, y a veces pueden dar falsos positivos (un proceso que salió hace demasiado tiempo y tuvo partes de su estructura sobrescritas por otras operaciones).
 
 De: [http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
 
@@ -81,7 +81,7 @@ Puedes obtener la lista de perfiles soportados haciendo:
 ```bash
 ./volatility_2.6_lin64_standalone --info | grep "Profile"
 ```
-Si deseas usar un **nuevo perfil que has descargado** (por ejemplo, uno de linux) necesitas crear en algún lugar la siguiente estructura de carpetas: _plugins/overlays/linux_ y poner dentro de esta carpeta el archivo zip que contiene el perfil. Luego, obtén el número de los perfiles usando:
+Si deseas usar un **nuevo perfil que has descargado** (por ejemplo, uno de linux), necesitas crear en algún lugar la siguiente estructura de carpetas: _plugins/overlays/linux_ y poner dentro de esta carpeta el archivo zip que contiene el perfil. Luego, obtén el número de los perfiles usando:
 ```bash
 ./vol --plugins=/home/kali/Desktop/ctfs/final/plugins --info
 Volatility Foundation Volatility Framework 2.6
@@ -106,7 +106,7 @@ volatility kdbgscan -f file.dmp
 ```
 #### **Diferencias entre imageinfo y kdbgscan**
 
-[**Desde aquí**](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/): A diferencia de imageinfo, que simplemente proporciona sugerencias de perfil, **kdbgscan** está diseñado para identificar positivamente el perfil correcto y la dirección KDBG correcta (si es que hay múltiples). Este plugin escanea las firmas KDBGHeader vinculadas a los perfiles de Volatility y aplica verificaciones de sensatez para reducir los falsos positivos. La verbosidad de la salida y el número de verificaciones de sensatez que se pueden realizar dependen de si Volatility puede encontrar un DTB, así que si ya conoces el perfil correcto (o si tienes una sugerencia de perfil de imageinfo), asegúrate de usarlo desde .
+[**Desde aquí**](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/): A diferencia de imageinfo, que simplemente proporciona sugerencias de perfil, **kdbgscan** está diseñado para identificar positivamente el perfil correcto y la dirección KDBG correcta (si es que hay múltiples). Este plugin escanea las firmas KDBGHeader vinculadas a los perfiles de Volatility y aplica verificaciones de sanidad para reducir los falsos positivos. La verbosidad de la salida y el número de verificaciones de sanidad que se pueden realizar dependen de si Volatility puede encontrar un DTB, así que si ya conoces el perfil correcto (o si tienes una sugerencia de perfil de imageinfo), asegúrate de usarlo desde .
 
 Siempre revisa el **número de procesos que kdbgscan ha encontrado**. A veces, imageinfo y kdbgscan pueden encontrar **más de uno** **perfil** adecuado, pero solo el **válido tendrá algún proceso relacionado** (Esto se debe a que para extraer procesos se necesita la dirección KDBG correcta).
 ```bash
@@ -122,9 +122,9 @@ PsLoadedModuleList            : 0xfffff80001197ac0 (0 modules)
 ```
 #### KDBG
 
-El **bloque de depuración del kernel**, conocido como **KDBG** por Volatility, es crucial para las tareas forenses realizadas por Volatility y varios depuradores. Identificado como `KdDebuggerDataBlock` y del tipo `_KDDEBUGGER_DATA64`, contiene referencias esenciales como `PsActiveProcessHead`. Esta referencia específica apunta a la cabeza de la lista de procesos, lo que permite listar todos los procesos, lo cual es fundamental para un análisis exhaustivo de la memoria.
+El **bloque de depuración del núcleo**, conocido como **KDBG** por Volatility, es crucial para las tareas forenses realizadas por Volatility y varios depuradores. Identificado como `KdDebuggerDataBlock` y del tipo `_KDDEBUGGER_DATA64`, contiene referencias esenciales como `PsActiveProcessHead`. Esta referencia específica apunta a la cabeza de la lista de procesos, lo que permite listar todos los procesos, lo cual es fundamental para un análisis exhaustivo de la memoria.
 
-## Información del SO
+## OS Information
 ```bash
 #vol3 has a plugin to give OS information (note that imageinfo from vol2 will give you OS info)
 ./vol.py -f file.dmp windows.info.Info
@@ -133,7 +133,7 @@ El plugin `banners.Banners` se puede usar en **vol3 para intentar encontrar bann
 
 ## Hashes/Contraseñas
 
-Extraer hashes SAM, [credenciales en caché de dominio](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) y [secretos lsa](../../../windows-hardening/authentication-credentials-uac-and-efs/#lsa-secrets).
+Extraer hashes SAM, [credenciales en caché de dominio](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) y [secretos lsa](../../../windows-hardening/authentication-credentials-uac-and-efs/index.html#lsa-secrets).
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -520,7 +520,10 @@ volatility --profile=SomeLinux -f file.dmp linux_find_file -i 0xINODENUMBER -O /
 {{#endtab}}
 {{#endtabs}}
 
-### Tabla Maestra de Archivos
+### Tabla de Archivos Maestra
+
+{{#tabs}}
+{{#tab name="vol3"}}
 ```bash
 # I couldn't find any plugin to extract this information in volatility3
 ```
@@ -533,7 +536,7 @@ volatility --profile=Win7SP1x86_23418 mftparser -f file.dmp
 {{#endtab}}
 {{#endtabs}}
 
-El **sistema de archivos NTFS** utiliza un componente crítico conocido como la _tabla maestra de archivos_ (MFT). Esta tabla incluye al menos una entrada para cada archivo en un volumen, cubriendo también la MFT. Detalles vitales sobre cada archivo, como **tamaño, marcas de tiempo, permisos y datos reales**, están encapsulados dentro de las entradas de la MFT o en áreas externas a la MFT pero referenciadas por estas entradas. Se pueden encontrar más detalles en la [documentación oficial](https://docs.microsoft.com/en-us/windows/win32/fileio/master-file-table).
+El **sistema de archivos NTFS** utiliza un componente crítico conocido como la _tabla maestra de archivos_ (MFT). Esta tabla incluye al menos una entrada para cada archivo en un volumen, cubriendo también la MFT. Detalles vitales sobre cada archivo, como **tamaño, marcas de tiempo, permisos y datos reales**, están encapsulados dentro de las entradas de la MFT o en áreas externas a la MFT pero referenciadas por estas entradas. Más detalles se pueden encontrar en la [documentación oficial](https://docs.microsoft.com/en-us/windows/win32/fileio/master-file-table).
 
 ### Claves/Certificados SSL
 
@@ -661,6 +664,9 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp handles -p <PID> -t mutant
 {{#endtabs}}
 
 ### Symlinks
+
+{{#tabs}}
+{{#tab name="vol3"}}
 ```bash
 ./vol.py -f file.dmp windows.symlinkscan.SymlinkScan
 ```
@@ -675,7 +681,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp symlinkscan
 
 ### Bash
 
-Es posible **leer de la memoria el historial de bash.** También podrías volcar el archivo _.bash_history_, pero fue deshabilitado, estarás contento de poder usar este módulo de volatilidad.
+Es posible **leer la historia de bash desde la memoria.** También podrías volcar el archivo _.bash_history_, pero fue deshabilitado, estarás contento de poder usar este módulo de volatilidad.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -749,7 +755,7 @@ volatility --profile=Win7SP1x86_23418 mbrparser -f file.dmp
 ```
 El **Master Boot Record (MBR)** juega un papel crucial en la gestión de las particiones lógicas de un medio de almacenamiento, que están estructuradas con diferentes [file systems](https://en.wikipedia.org/wiki/File_system). No solo contiene información sobre el diseño de las particiones, sino que también incluye código ejecutable que actúa como un cargador de arranque. Este cargador de arranque inicia directamente el proceso de carga de segunda etapa del sistema operativo (ver [second-stage boot loader](https://en.wikipedia.org/wiki/Second-stage_boot_loader)) o trabaja en armonía con el [volume boot record](https://en.wikipedia.org/wiki/Volume_boot_record) (VBR) de cada partición. Para un conocimiento más profundo, consulta la [MBR Wikipedia page](https://en.wikipedia.org/wiki/Master_boot_record).
 
-## Referencias
+## References
 
 - [https://andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/](https://andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/)
 - [https://scudette.blogspot.com/2012/11/finding-kernel-debugger-block.html](https://scudette.blogspot.com/2012/11/finding-kernel-debugger-block.html)

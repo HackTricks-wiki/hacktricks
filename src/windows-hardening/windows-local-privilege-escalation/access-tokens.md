@@ -4,7 +4,7 @@
 
 ## Access Tokens
 
-Cada **usuario conectado** al sistema **tiene un token de acceso con información de seguridad** para esa sesión de inicio. El sistema crea un token de acceso cuando el usuario inicia sesión. **Cada proceso ejecutado** en nombre del usuario **tiene una copia del token de acceso**. El token identifica al usuario, los grupos del usuario y los privilegios del usuario. Un token también contiene un SID de inicio de sesión (Identificador de Seguridad) que identifica la sesión de inicio actual.
+Cada **usuario conectado** al sistema **tiene un token de acceso con información de seguridad** para esa sesión de inicio de sesión. El sistema crea un token de acceso cuando el usuario inicia sesión. **Cada proceso ejecutado** en nombre del usuario **tiene una copia del token de acceso**. El token identifica al usuario, los grupos del usuario y los privilegios del usuario. Un token también contiene un SID de inicio de sesión (Identificador de Seguridad) que identifica la sesión de inicio de sesión actual.
 
 Puedes ver esta información ejecutando `whoami /all`
 ```
@@ -57,7 +57,7 @@ o usando _Process Explorer_ de Sysinternals (seleccionar proceso y acceder a la 
 ### Administrador local
 
 Cuando un administrador local inicia sesión, **se crean dos tokens de acceso**: uno con derechos de administrador y otro con derechos normales. **Por defecto**, cuando este usuario ejecuta un proceso, se utiliza el que tiene **derechos regulares** (no de administrador). Cuando este usuario intenta **ejecutar** algo **como administrador** ("Ejecutar como administrador", por ejemplo), se utilizará el **UAC** para pedir permiso.\
-Si quieres [**aprender más sobre el UAC, lee esta página**](../authentication-credentials-uac-and-efs/#uac)**.**
+Si quieres [**aprender más sobre el UAC, lee esta página**](../authentication-credentials-uac-and-efs/index.html#uac)**.**
 
 ### Suplantación de credenciales de usuario
 

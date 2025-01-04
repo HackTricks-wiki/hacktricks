@@ -4,7 +4,7 @@
 
 ## Información Básica
 
-Diferentes vulnerabilidades como [**Python Format Strings**](bypass-python-sandboxes/#python-format-string) o [**Class Pollution**](class-pollution-pythons-prototype-pollution.md) podrían permitirte **leer datos internos de python pero no te permitirán ejecutar código**. Por lo tanto, un pentester necesitará aprovechar al máximo estos permisos de lectura para **obtener privilegios sensibles y escalar la vulnerabilidad**.
+Diferentes vulnerabilidades como [**Python Format Strings**](bypass-python-sandboxes/index.html#python-format-string) o [**Class Pollution**](class-pollution-pythons-prototype-pollution.md) podrían permitirte **leer datos internos de python pero no te permitirán ejecutar código**. Por lo tanto, un pentester necesitará aprovechar al máximo estos permisos de lectura para **obtener privilegios sensibles y escalar la vulnerabilidad**.
 
 ### Flask - Leer clave secreta
 

@@ -4,7 +4,7 @@
 
 ## Introducción
 
-Como [**se comentó anteriormente**](./#what-is-mdm-mobile-device-management)**,** para intentar inscribir un dispositivo en una organización **solo se necesita un Número de Serie que pertenezca a esa Organización**. Una vez que el dispositivo está inscrito, varias organizaciones instalarán datos sensibles en el nuevo dispositivo: certificados, aplicaciones, contraseñas de WiFi, configuraciones de VPN [y así sucesivamente](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
+Como [**se comentó anteriormente**](#what-is-mdm-mobile-device-management)**,** para intentar inscribir un dispositivo en una organización **solo se necesita un Número de Serie que pertenezca a esa Organización**. Una vez que el dispositivo está inscrito, varias organizaciones instalarán datos sensibles en el nuevo dispositivo: certificados, aplicaciones, contraseñas de WiFi, configuraciones de VPN [y así sucesivamente](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
 Por lo tanto, este podría ser un punto de entrada peligroso para los atacantes si el proceso de inscripción no está correctamente protegido.
 
 **A continuación se presenta un resumen de la investigación [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe). ¡Consúltalo para más detalles técnicos!**
@@ -17,7 +17,7 @@ Esta investigación profundiza en los binarios asociados con el Programa de Insc
 - **`profiles`**: Gestiona los Perfiles de Configuración y activa los registros de DEP en versiones de macOS 10.13.4 y posteriores.
 - **`cloudconfigurationd`**: Gestiona las comunicaciones de la API de DEP y recupera los perfiles de Inscripción de Dispositivos.
 
-Los registros de DEP utilizan las funciones `CPFetchActivationRecord` y `CPGetActivationRecord` del marco privado de Perfiles de Configuración para obtener el Registro de Activación, con `CPFetchActivationRecord` coordinándose con `cloudconfigurationd` a través de XPC.
+Los registros de DEP utilizan las funciones `CPFetchActivationRecord` y `CPGetActivationRecord` del marco privado de Perfiles de Configuración para obtener el Registro de Activación, siendo `CPFetchActivationRecord` el que coordina con `cloudconfigurationd` a través de XPC.
 
 ## Ingeniería Inversa del Protocolo Tesla y Esquema Absinthe
 

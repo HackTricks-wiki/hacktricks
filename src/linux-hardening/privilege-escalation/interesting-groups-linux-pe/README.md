@@ -1,4 +1,4 @@
-# Grupos Interesantes - Linux Privesc
+# Grupos Interesantes - Privesc en Linux
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -6,7 +6,7 @@
 
 ### **PE - Método 1**
 
-**A veces**, **por defecto (o porque algún software lo necesita)** dentro del **/etc/sudoers** puedes encontrar algunas de estas líneas:
+**A veces**, **por defecto (o porque algún software lo necesita)** dentro del **/etc/sudoers** archivo puedes encontrar algunas de estas líneas:
 ```bash
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
@@ -54,7 +54,7 @@ pkexec "/bin/bash" #Step 3, execute pkexec
 pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 #Step 4, you will be asked in this session to authenticate to pkexec
 ```
-## Grupo Wheel
+## Wheel Group
 
 **A veces**, **por defecto** dentro del **/etc/sudoers** archivo puedes encontrar esta línea:
 ```
@@ -72,7 +72,7 @@ Los usuarios del **grupo shadow** pueden **leer** el **/etc/shadow** archivo:
 ```
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
-Así que, lee el archivo e intenta **crackear algunos hashes**.
+So, lee el archivo y trata de **crackear algunos hashes**.
 
 ## Grupo de Personal
 
@@ -163,11 +163,11 @@ El **grupo de video** tiene acceso para ver la salida de la pantalla. Básicamen
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-Para **abrir** la **imagen en bruto** puedes usar **GIMP**, seleccionar el \*\*`screen.raw`\*\* y seleccionar como tipo de archivo **Datos de imagen en bruto**:
+Para **abrir** la **imagen en bruto**, puedes usar **GIMP**, seleccionar el archivo **`screen.raw`** y seleccionar como tipo de archivo **Datos de imagen en bruto**:
 
 ![](<../../../images/image (463).png>)
 
-Luego modifica el Ancho y Alto a los que se usan en la pantalla y verifica diferentes Tipos de Imagen (y selecciona el que muestre mejor la pantalla):
+Luego modifica el Ancho y la Altura a los que se usan en la pantalla y verifica diferentes Tipos de Imagen (y selecciona el que muestre mejor la pantalla):
 
 ![](<../../../images/image (317).png>)
 
@@ -199,7 +199,7 @@ Finalmente, si no te gustan ninguna de las sugerencias anteriores, o no están f
 ../docker-security/
 {{#endref}}
 
-Si tienes permisos de escritura sobre el socket de docker, lee [**esta publicación sobre cómo escalar privilegios abusando del socket de docker**](../#writable-docker-socket)**.**
+Si tienes permisos de escritura sobre el socket de docker, lee [**esta publicación sobre cómo escalar privilegios abusando del socket de docker**](../index.html#writable-docker-socket)**.**
 
 {{#ref}}
 https://github.com/KrustyHack/docker-privilege-escalation
@@ -218,7 +218,7 @@ https://fosterelli.co/privilege-escalation-via-docker.html
 ## Grupo Adm
 
 Por lo general, los **miembros** del grupo **`adm`** tienen permisos para **leer archivos de registro** ubicados dentro de _/var/log/_.\
-Por lo tanto, si has comprometido a un usuario dentro de este grupo, definitivamente deberías **mirar los registros**.
+Por lo tanto, si has comprometido a un usuario dentro de este grupo, definitivamente deberías **echar un vistazo a los registros**.
 
 ## Grupo Auth
 

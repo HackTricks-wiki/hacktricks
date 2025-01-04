@@ -9,7 +9,7 @@
 ## Abuso del Servicio de Spooler
 
 Si el servicio _**Print Spooler**_ está **habilitado**, puedes usar algunas credenciales de AD ya conocidas para **solicitar** al servidor de impresión del Controlador de Dominio una **actualización** sobre nuevos trabajos de impresión y simplemente indicarle que **envíe la notificación a algún sistema**.\
-Ten en cuenta que cuando la impresora envía la notificación a sistemas arbitrarios, necesita **autenticarse contra** ese **sistema**. Por lo tanto, un atacante puede hacer que el servicio _**Print Spooler**_ se autentique contra un sistema arbitrario, y el servicio **utilizará la cuenta de computadora** en esta autenticación.
+Ten en cuenta que cuando la impresora envía la notificación a sistemas arbitrarios, necesita **autenticarse contra** ese **sistema**. Por lo tanto, un atacante puede hacer que el servicio _**Print Spooler**_ se autentique contra un sistema arbitrario, y el servicio **usará la cuenta de computadora** en esta autenticación.
 
 ### Encontrar Servidores Windows en el dominio
 
@@ -51,9 +51,9 @@ https://github.com/p0dalirius/Coercer
 
 ## PrivExchange
 
-El ataque `PrivExchange` es el resultado de un defecto encontrado en la **función `PushSubscription` del Exchange Server**. Esta función permite que el servidor de Exchange sea forzado por cualquier usuario de dominio con un buzón para autenticarse en cualquier host proporcionado por el cliente a través de HTTP.
+El ataque `PrivExchange` es el resultado de un defecto encontrado en la **función `PushSubscription` del Exchange Server**. Esta función permite que cualquier usuario de dominio con un buzón fuerce al servidor de Exchange a autenticarse con cualquier host proporcionado por el cliente a través de HTTP.
 
-Por defecto, el **servicio de Exchange se ejecuta como SYSTEM** y se le otorgan privilegios excesivos (específicamente, tiene **privilegios WriteDacl en el dominio antes de la Actualización Acumulativa de 2019**). Este defecto puede ser explotado para habilitar el **reenvío de información a LDAP y posteriormente extraer la base de datos NTDS del dominio**. En casos donde el reenvío a LDAP no es posible, este defecto aún puede ser utilizado para reenviar y autenticar a otros hosts dentro del dominio. La explotación exitosa de este ataque otorga acceso inmediato al Administrador de Dominio con cualquier cuenta de usuario de dominio autenticada.
+Por defecto, el **servicio de Exchange se ejecuta como SYSTEM** y se le otorgan privilegios excesivos (específicamente, tiene **privilegios WriteDacl en el dominio antes de la Actualización Acumulativa de 2019**). Este defecto puede ser explotado para habilitar el **reenvío de información a LDAP y posteriormente extraer la base de datos NTDS del dominio**. En casos donde el reenvío a LDAP no es posible, este defecto aún puede ser utilizado para reenviar y autenticarse en otros hosts dentro del dominio. La explotación exitosa de este ataque otorga acceso inmediato al Administrador de Dominio con cualquier cuenta de usuario de dominio autenticada.
 
 ## Dentro de Windows
 
@@ -104,7 +104,7 @@ Si puedes realizar un ataque MitM a una computadora e inyectar HTML en una pági
 ```
 ## Cracking NTLMv1
 
-Si puedes capturar [los desafíos de NTLMv1 lee aquí cómo crackearlos](../ntlm/#ntlmv1-attack).\
-&#xNAN;_&#x52;ecuerda que para crackear NTLMv1 necesitas establecer el desafío de Responder a "1122334455667788"_
+Si puedes capturar [desafíos NTLMv1 lee aquí cómo crackearlos](../ntlm/index.html#ntlmv1-attack).\
+&#xNAN;_&#x52;ecuerda que para crackear NTLMv1 necesitas establecer el desafío de Responder en "1122334455667788"_
 
 {{#include ../../banners/hacktricks-training.md}}

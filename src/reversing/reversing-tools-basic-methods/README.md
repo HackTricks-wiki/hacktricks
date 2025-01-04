@@ -21,7 +21,7 @@ Software:
 - [https://www.pnfsoftware.com/jeb/demo](https://www.pnfsoftware.com/jeb/demo)
 - [https://github.com/wwwg/wasmdec](https://github.com/wwwg/wasmdec)
 
-## Descompilador .NET
+## Descompilador de .NET
 
 ### [dotPeek](https://www.jetbrains.com/decompiler/)
 
@@ -34,20 +34,20 @@ El mérito aquí es que si un código fuente perdido requiere restauración desd
 Con un modelo de complemento integral y una API que extiende la herramienta para adaptarse a tus necesidades exactas, .NET Reflector ahorra tiempo y simplifica el desarrollo. Echemos un vistazo a la plétora de servicios de ingeniería inversa que esta herramienta proporciona:
 
 - Proporciona una visión de cómo fluyen los datos a través de una biblioteca o componente
-- Proporciona información sobre la implementación y uso de lenguajes y marcos .NET
+- Proporciona información sobre la implementación y uso de lenguajes y marcos de .NET
 - Encuentra funcionalidades no documentadas y no expuestas para obtener más de las APIs y tecnologías utilizadas.
 - Encuentra dependencias y diferentes ensamblajes
-- Localiza la ubicación exacta de errores en tu código, componentes de terceros y bibliotecas.
+- Localiza exactamente la ubicación de errores en tu código, componentes de terceros y bibliotecas.
 - Depura en la fuente de todo el código .NET con el que trabajas.
 
 ### [ILSpy](https://github.com/icsharpcode/ILSpy) & [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
-[Plugin ILSpy para Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Puedes tenerlo en cualquier sistema operativo (puedes instalarlo directamente desde VSCode, no es necesario descargar el git. Haz clic en **Extensiones** y **busca ILSpy**).\
-Si necesitas **descompilar**, **modificar** y **recompilar** de nuevo, puedes usar [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) o un fork mantenido activamente de él, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Clic derecho -> Modificar Método** para cambiar algo dentro de una función).
+[Complemento ILSpy para Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Puedes tenerlo en cualquier sistema operativo (puedes instalarlo directamente desde VSCode, no es necesario descargar el git. Haz clic en **Extensiones** y **busca ILSpy**).\
+Si necesitas **descompilar**, **modificar** y **recompilar** nuevamente, puedes usar [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) o un fork mantenido activamente de él, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Clic derecho -> Modificar método** para cambiar algo dentro de una función).
 
 ### Registro de DNSpy
 
-Para hacer que **DNSpy registre alguna información en un archivo**, podrías usar este fragmento:
+Para hacer que **DNSpy registre información en un archivo**, podrías usar este fragmento:
 ```cs
 using System.IO;
 path = "C:\\inetpub\\temp\\MyTest2.txt";
@@ -57,7 +57,7 @@ File.AppendAllText(path, "Password: " + password + "\n");
 
 Para depurar código usando DNSpy, necesitas:
 
-Primero, cambiar los **atributos de la Asamblea** relacionados con la **depuración**:
+Primero, cambia los **atributos de ensamblado** relacionados con la **depuración**:
 
 ![](<../../images/image (973).png>)
 ```aspnet
@@ -78,7 +78,7 @@ Luego guarda el nuevo archivo a través de _**Archivo >> Guardar módulo...**_:
 
 ![](<../../images/image (602).png>)
 
-Esto es necesario porque si no lo haces, en **tiempo de ejecución** se aplicarán varias **optimizaciones** al código y podría ser posible que mientras depuras un **punto de interrupción nunca se active** o algunas **variables no existan**.
+Esto es necesario porque si no lo haces, en **tiempo de ejecución** se aplicarán varias **optimizaciones** al código y podría ser posible que mientras depuras un **punto de interrupción nunca se active** o que algunas **variables no existan**.
 
 Luego, si tu aplicación .NET está siendo **ejecutada** por **IIS**, puedes **reiniciarla** con:
 ```
@@ -125,7 +125,7 @@ Haz clic derecho en cualquier módulo en **Assembly Explorer** y haz clic en **S
 
 ![](<../../images/image (704).png>)
 
-Luego, cuando comiences a depurar **la ejecución se detendrá cuando se cargue cada DLL**, luego, cuando rundll32 cargue tu DLL, la ejecución se detendrá.
+Luego, cuando comiences a depurar, **la ejecución se detendrá cuando se cargue cada DLL**, luego, cuando rundll32 cargue tu DLL, la ejecución se detendrá.
 
 Pero, ¿cómo puedes llegar al código de la DLL que fue cargada? Usando este método, no sé cómo.
 
@@ -134,13 +134,13 @@ Pero, ¿cómo puedes llegar al código de la DLL que fue cargada? Usando este m�
 - **Cargar rundll32** (64 bits en C:\Windows\System32\rundll32.exe y 32 bits en C:\Windows\SysWOW64\rundll32.exe)
 - **Cambiar la Línea de Comando** (_File --> Change Command Line_) y establecer la ruta de la dll y la función que deseas llamar, por ejemplo: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
 - Cambiar _Options --> Settings_ y seleccionar "**DLL Entry**".
-- Luego **iniciar la ejecución**, el depurador se detendrá en cada main de dll, en algún momento te **detendrás en la entrada de dll de tu dll**. Desde allí, solo busca los puntos donde deseas poner un punto de interrupción.
+- Luego **iniciar la ejecución**, el depurador se detendrá en cada main de dll, en algún momento te **detendrás en la entrada de la dll**. Desde allí, solo busca los puntos donde deseas poner un punto de interrupción.
 
-Ten en cuenta que cuando la ejecución se detiene por cualquier razón en win64dbg puedes ver **en qué código estás** mirando en **la parte superior de la ventana de win64dbg**:
+Ten en cuenta que cuando la ejecución se detiene por cualquier razón en win64dbg, puedes ver **en qué código estás** mirando en **la parte superior de la ventana de win64dbg**:
 
 ![](<../../images/image (842).png>)
 
-Luego, mirando esto puedes ver cuándo se detuvo la ejecución en la dll que deseas depurar.
+Luego, mirando esto, puedes ver cuándo se detuvo la ejecución en la dll que deseas depurar.
 
 ## Aplicaciones GUI / Videojuegos
 
@@ -150,9 +150,9 @@ Luego, mirando esto puedes ver cuándo se detuvo la ejecución en la dll que des
 cheat-engine.md
 {{#endref}}
 
-[**PiNCE**](https://github.com/korcankaraokcu/PINCE) es una herramienta de interfaz/reverse engineering para el Depurador del Proyecto GNU (GDB), enfocada en juegos. Sin embargo, se puede usar para cualquier cosa relacionada con la ingeniería inversa.
+[**PiNCE**](https://github.com/korcankaraokcu/PINCE) es una herramienta de front-end/reverse engineering para el Depurador del Proyecto GNU (GDB), enfocada en juegos. Sin embargo, se puede usar para cualquier cosa relacionada con la ingeniería inversa.
 
-[**Decompiler Explorer**](https://dogbolt.org/) es una interfaz web para varios descompiladores. Este servicio web te permite comparar la salida de diferentes descompiladores en pequeños ejecutables.
+[**Decompiler Explorer**](https://dogbolt.org/) es un front-end web para varios descompiladores. Este servicio web te permite comparar la salida de diferentes descompiladores en pequeños ejecutables.
 
 ## ARM & MIPS
 
@@ -168,7 +168,7 @@ https://github.com/nongiach/arm_now
 Luego, necesitas **adjuntar un depurador** (Ida o x64dbg) al proceso y poner un **punto de interrupción en la dirección de memoria indicada** y **reanudar** la ejecución. De esta manera estarás depurando el shellcode.
 
 La página de lanzamientos de github contiene zips con los lanzamientos compilados: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
-Puedes encontrar una versión ligeramente modificada de Blobrunner en el siguiente enlace. Para compilarlo, simplemente **crea un proyecto C/C++ en Visual Studio Code, copia y pega el código y compílalo**.
+Puedes encontrar una versión ligeramente modificada de Blobrunner en el siguiente enlace. Para compilarlo, simplemente **crea un proyecto en C/C++ en Visual Studio Code, copia y pega el código y compílalo**.
 
 {{#ref}}
 blobrunner.md
@@ -220,7 +220,7 @@ La opción **Create Dump** volcará el shellcode final si se realiza algún camb
 
 ### Desensamblando usando CyberChef
 
-Sube tu archivo de shellcode como entrada y usa la siguiente receta para descompilarlo: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
+Sube tu archivo de shellcode como entrada y utiliza la siguiente receta para decompilarlo: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/index.html#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
 
 ## [Movfuscator](https://github.com/xoreaxeaxeax/movfuscator)
 
@@ -251,7 +251,7 @@ Teniendo el **nombre** de las **funciones** que se están llamando, búscalas en
 
 Para binarios compilados en Delphi puedes usar [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
 
-Si tienes que revertir un binario de Delphi, te sugeriría usar el plugin de IDA [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
+Si tienes que hacer ingeniería inversa a un binario de Delphi, te sugeriría usar el plugin de IDA [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
 
 Solo presiona **ATL+f7** (importar plugin de python en IDA) y selecciona el plugin de python.
 
@@ -261,7 +261,7 @@ También es muy interesante porque si presionas un botón en la aplicación grá
 
 ## Golang
 
-Si tienes que revertir un binario de Golang, te sugeriría usar el plugin de IDA [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
+Si tienes que hacer ingeniería inversa a un binario de Golang, te sugeriría usar el plugin de IDA [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
 
 Solo presiona **ATL+f7** (importar plugin de python en IDA) y selecciona el plugin de python.
 
@@ -340,7 +340,7 @@ uVar2 = DAT_030004dc;
 uVar1 = *puVar6;
 if ((uVar1 & DAT_030004da & ~uVar4) != 0) {
 ```
-La última condición verifica si **`uVar4`** está en las **últimas teclas** y no es la tecla actual, también llamada soltar un botón (la tecla actual se almacena en **`uVar1`**).
+La última condición if verifica que **`uVar4`** esté en las **últimas teclas** y no sea la tecla actual, también llamada soltar un botón (la tecla actual se almacena en **`uVar1`**).
 ```c
 if (uVar1 == 4) {
 DAT_030000d4 = 0;

@@ -6,7 +6,7 @@
 
 Si descubres que puedes **escribir en una carpeta de System Path** (ten en cuenta que esto no funcionará si puedes escribir en una carpeta de User Path), es posible que puedas **escalar privilegios** en el sistema.
 
-Para hacer esto, puedes abusar de un **Dll Hijacking** donde vas a **secuestrar una biblioteca que está siendo cargada** por un servicio o proceso con **más privilegios** que los tuyos, y debido a que ese servicio está cargando un Dll que probablemente ni siquiera existe en todo el sistema, intentará cargarlo desde el System Path donde puedes escribir.
+Para hacer esto, puedes abusar de un **Dll Hijacking** donde vas a **secuestrar una biblioteca que está siendo cargada** por un servicio o proceso con **más privilegios** que los tuyos, y debido a que ese servicio está cargando una Dll que probablemente ni siquiera existe en todo el sistema, intentará cargarla desde el System Path donde puedes escribir.
 
 Para más información sobre **qué es Dll Hijacking**, consulta:
 
@@ -16,11 +16,11 @@ Para más información sobre **qué es Dll Hijacking**, consulta:
 
 ## Privesc con Dll Hijacking
 
-### Encontrar un Dll faltante
+### Encontrando una Dll faltante
 
-Lo primero que necesitas es **identificar un proceso** que se esté ejecutando con **más privilegios** que tú y que esté intentando **cargar un Dll desde el System Path** en el que puedes escribir.
+Lo primero que necesitas es **identificar un proceso** que se esté ejecutando con **más privilegios** que tú y que esté intentando **cargar una Dll desde el System Path** en el que puedes escribir.
 
-El problema en estos casos es que probablemente esos procesos ya estén en ejecución. Para encontrar qué Dlls faltan en los servicios, necesitas lanzar procmon lo antes posible (antes de que se carguen los procesos). Así que, para encontrar Dlls faltantes, haz lo siguiente:
+El problema en estos casos es que probablemente esos procesos ya estén en ejecución. Para encontrar qué Dlls faltan, necesitas lanzar procmon lo antes posible (antes de que se carguen los procesos). Así que, para encontrar Dlls faltantes, haz lo siguiente:
 
 - **Crea** la carpeta `C:\privesc_hijacking` y agrega la ruta `C:\privesc_hijacking` a la **variable de entorno System Path**. Puedes hacer esto **manualmente** o con **PS**:
 ```powershell
@@ -47,7 +47,7 @@ $newPath = "$envPath;$folderPath"
 
 <figure><img src="../../../images/image (945).png" alt=""><figcaption></figcaption></figure>
 
-### Dlls Perdidos
+### Dlls Perdidas
 
 Ejecutando esto en una **máquina virtual (vmware) Windows 11** gratuita, obtuve estos resultados:
 
@@ -55,11 +55,11 @@ Ejecutando esto en una **máquina virtual (vmware) Windows 11** gratuita, obtuve
 
 En este caso, los .exe son inútiles, así que ignórelos, los DLLs perdidos eran de:
 
-| Servicio                         | Dll                | Línea de CMD                                                         |
-| ------------------------------- | ------------------ | -------------------------------------------------------------------- |
-| Programador de tareas (Schedule) | WptsExtensions.dll | `C:\Windows\system32\svchost.exe -k netsvcs -p -s Schedule`          |
+| Servicio                         | Dll                | Línea de CMD                                                        |
+| ------------------------------- | ------------------ | ------------------------------------------------------------------ |
+| Programador de tareas (Schedule) | WptsExtensions.dll | `C:\Windows\system32\svchost.exe -k netsvcs -p -s Schedule`       |
 | Servicio de política de diagnóstico (DPS) | Unknown.DLL        | `C:\Windows\System32\svchost.exe -k LocalServiceNoNetwork -p -s DPS` |
-| ???                             | SharedRes.dll      | `C:\Windows\system32\svchost.exe -k UnistackSvcGroup`                |
+| ???                             | SharedRes.dll      | `C:\Windows\system32\svchost.exe -k UnistackSvcGroup`             |
 
 Después de encontrar esto, encontré esta interesante publicación de blog que también explica cómo [**abusar de WptsExtensions.dll para privesc**](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll). Que es lo que **vamos a hacer ahora**.
 
@@ -67,7 +67,7 @@ Después de encontrar esto, encontré esta interesante publicación de blog que 
 
 Entonces, para **escalar privilegios**, vamos a secuestrar la biblioteca **WptsExtensions.dll**. Teniendo la **ruta** y el **nombre**, solo necesitamos **generar el dll malicioso**.
 
-Puede [**intentar usar cualquiera de estos ejemplos**](./#creating-and-compiling-dlls). Podría ejecutar cargas útiles como: obtener un rev shell, agregar un usuario, ejecutar un beacon...
+Puede [**intentar usar cualquiera de estos ejemplos**](#creating-and-compiling-dlls). Podría ejecutar cargas útiles como: obtener un rev shell, agregar un usuario, ejecutar un beacon...
 
 > [!WARNING]
 > Tenga en cuenta que **no todos los servicios se ejecutan** con **`NT AUTHORITY\SYSTEM`**, algunos también se ejecutan con **`NT AUTHORITY\LOCAL SERVICE`**, que tiene **menos privilegios** y **no podrá crear un nuevo usuario** abusando de sus permisos.\

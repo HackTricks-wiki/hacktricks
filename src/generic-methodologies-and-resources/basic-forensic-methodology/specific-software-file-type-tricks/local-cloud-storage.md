@@ -2,7 +2,6 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-
 ## OneDrive
 
 En Windows, puedes encontrar la carpeta de OneDrive en `\Users\<username>\AppData\Local\Microsoft\OneDrive`. Y dentro de `logs\Personal` es posible encontrar el archivo `SyncDiagnostics.log` que contiene algunos datos interesantes sobre los archivos sincronizados:
@@ -23,7 +22,7 @@ Una vez que hayas encontrado el CID, se recomienda **buscar archivos que conteng
 En Windows, puedes encontrar la carpeta principal de Google Drive en `\Users\<username>\AppData\Local\Google\Drive\user_default`\
 Esta carpeta contiene un archivo llamado Sync_log.log con información como la dirección de correo electrónico de la cuenta, nombres de archivos, marcas de tiempo, hashes MD5 de los archivos, etc. Incluso los archivos eliminados aparecen en ese archivo de registro con su correspondiente MD5.
 
-El archivo **`Cloud_graph\Cloud_graph.db`** es una base de datos sqlite que contiene la tabla **`cloud_graph_entry`**. En esta tabla puedes encontrar el **nombre** de los **archivos** **sincronizados**, tiempo de modificación, tamaño y el checksum MD5 de los archivos.
+El archivo **`Cloud_graph\Cloud_graph.db`** es una base de datos sqlite que contiene la tabla **`cloud_graph_entry`**. En esta tabla puedes encontrar el **nombre** de los **archivos sincronizados**, tiempo de modificación, tamaño y el checksum MD5 de los archivos.
 
 Los datos de la tabla de la base de datos **`Sync_config.db`** contienen la dirección de correo electrónico de la cuenta, la ruta de las carpetas compartidas y la versión de Google Drive.
 
@@ -65,7 +64,7 @@ Luego puedes usar la herramienta [**DataProtectionDecryptor**](https://nirsoft.n
 
 ![](<../../../images/image (443).png>)
 
-Si todo sale como se espera, la herramienta indicará la **clave principal** que necesitas **usar para recuperar la original**. Para recuperar la original, simplemente usa esta [receta de cyber_chef](<https://gchq.github.io/CyberChef/#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) poniendo la clave principal como la "frase de paso" dentro de la receta.
+Si todo sale como se espera, la herramienta indicará la **clave principal** que necesitas **usar para recuperar la original**. Para recuperar la original, simplemente usa esta [receta de cyber_chef](<https://gchq.github.io/CyberChef/index.html#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) poniendo la clave principal como la "frase de paso" dentro de la receta.
 
 El hex resultante es la clave final utilizada para encriptar las bases de datos que se puede descifrar con:
 ```bash
@@ -89,7 +88,7 @@ La base de datos **`filecache.db`** contiene información sobre todos los archiv
 Otras tablas dentro de esta base de datos contienen información más interesante:
 
 - **block_cache**: hash de todos los archivos y carpetas de Dropbox
-- **block_ref**: Relaciona el ID de hash de la tabla `block_cache` con el ID de archivo en la tabla `file_journal`
+- **block_ref**: Relaciona el ID de hash de la tabla `block_cache` con el ID del archivo en la tabla `file_journal`
 - **mount_table**: Carpetas compartidas de Dropbox
 - **deleted_fields**: Archivos eliminados de Dropbox
 - **date_added**

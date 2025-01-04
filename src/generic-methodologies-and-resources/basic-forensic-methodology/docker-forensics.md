@@ -5,7 +5,7 @@
 
 ## Modificación de contenedores
 
-Existen sospechas de que algún contenedor de docker fue comprometido:
+Hay sospechas de que algún contenedor de docker fue comprometido:
 ```bash
 docker ps
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
@@ -25,7 +25,7 @@ A /var/lib/mysql/mysql/time_zone_leap_second.MYI
 A /var/lib/mysql/mysql/general_log.CSV
 ...
 ```
-En el comando anterior, **C** significa **Cambiado** y **A,** **Agregado**.\
+En el comando anterior, **C** significa **Cambiado** y **A,** **Añadido**.\
 Si encuentras que algún archivo interesante como `/etc/shadow` fue modificado, puedes descargarlo del contenedor para verificar actividad maliciosa con:
 ```bash
 docker cp wordpress:/etc/shadow.
@@ -59,7 +59,7 @@ Puedes obtener **información básica** de la imagen ejecutando:
 ```bash
 docker inspect <image>
 ```
-También puedes obtener un resumen **historia de cambios** con:
+También puedes obtener un resumen **histórico de cambios** con:
 ```bash
 docker history --no-trunc <image>
 ```
@@ -70,7 +70,7 @@ dfimage -sV=1.36 madhuakula/k8s-goat-hidden-in-layers>
 ```
 ### Dive
 
-Para encontrar archivos añadidos/modificados en imágenes de docker, también puedes usar la [**dive**](https://github.com/wagoodman/dive) (descárgalo de [**releases**](https://github.com/wagoodman/dive/releases/tag/v0.10.0)):
+Para encontrar archivos añadidos/modificados en imágenes de docker, también puedes usar la [**dive**](https://github.com/wagoodman/dive) (descárgalo de [**releases**](https://github.com/wagoodman/dive/releases/tag/v0.10.0)) utilidad:
 ```bash
 #First you need to load the image in your docker repo
 sudo docker load < image.tar                                                                                                                                                                                                         1 ⨯
@@ -89,9 +89,9 @@ for d in `find * -maxdepth 0 -type d`; do cd $d; tar -xf ./layer.tar; cd ..; don
 ```
 ## Credenciales de la memoria
 
-Ten en cuenta que cuando ejecutas un contenedor de docker dentro de un host **puedes ver los procesos que se están ejecutando en el contenedor desde el host** simplemente ejecutando `ps -ef`
+Note que cuando ejecuta un contenedor de docker dentro de un host **puede ver los procesos que se están ejecutando en el contenedor desde el host** simplemente ejecutando `ps -ef`
 
-Por lo tanto (como root) puedes **volcar la memoria de los procesos** desde el host y buscar **credenciales** [**como en el siguiente ejemplo**](../../linux-hardening/privilege-escalation/#process-memory).
+Por lo tanto (como root) puede **volcar la memoria de los procesos** desde el host y buscar **credenciales** justo [**como en el siguiente ejemplo**](../../linux-hardening/privilege-escalation/index.html#process-memory).
 
 
 {{#include ../../banners/hacktricks-training.md}}

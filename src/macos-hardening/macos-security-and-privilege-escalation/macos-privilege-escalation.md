@@ -22,7 +22,7 @@ Ten en cuenta que **la mayoría de los trucos sobre escalación de privilegios q
 
 ### Secuestro de Sudo
 
-Puedes encontrar la técnica original de [Secuestro de Sudo dentro de la publicación de Escalación de Privilegios en Linux](../../linux-hardening/privilege-escalation/#sudo-hijacking).
+Puedes encontrar la técnica original de [Secuestro de Sudo dentro de la publicación de Escalación de Privilegios en Linux](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
 
 Sin embargo, macOS **mantiene** el **`PATH`** del usuario cuando ejecuta **`sudo`**. Lo que significa que otra forma de lograr este ataque sería **secuestro de otros binarios** que la víctima aún ejecutará al **usar sudo:**
 ```bash
@@ -124,7 +124,7 @@ killall Dock
 {{#tab name="Imitación de Finder"}}
 Algunas sugerencias:
 
-- No **puedes eliminar Finder del Dock**, así que si vas a añadirlo al Dock, podrías poner el Finder falso justo al lado del real. Para esto necesitas **añadir la entrada del Finder falso al principio del array del Dock**.
+- No **puedes quitar Finder del Dock**, así que si vas a añadirlo al Dock, podrías poner el Finder falso justo al lado del real. Para esto necesitas **agregar la entrada del Finder falso al principio del array del Dock**.
 - Otra opción es no colocarlo en el Dock y simplemente abrirlo, "Finder pidiendo controlar Finder" no es tan raro.
 - Otra opción para **escalar a root sin pedir** la contraseña con una horrible ventana, es hacer que Finder realmente pida la contraseña para realizar una acción privilegiada:
 - Pedir a Finder que copie a **`/etc/pam.d`** un nuevo archivo **`sudo`** (El aviso pidiendo la contraseña indicará que "Finder quiere copiar sudo")
@@ -201,9 +201,9 @@ killall Dock
 {{#endtab}}
 {{#endtabs}}
 
-## TCC - Escalación de Privilegios de Root
+## TCC - Escalación de privilegios de root
 
-### CVE-2020-9771 - bypass de TCC en mount_apfs y escalación de privilegios
+### CVE-2020-9771 - bypass de TCC de mount_apfs y escalación de privilegios
 
 **Cualquier usuario** (incluso los que no tienen privilegios) puede crear y montar un snapshot de Time Machine y **acceder a TODOS los archivos** de ese snapshot.\
 El **único privilegio** necesario es que la aplicación utilizada (como `Terminal`) tenga acceso **Full Disk Access** (FDA) (`kTCCServiceSystemPolicyAllfiles`), lo cual debe ser concedido por un administrador.

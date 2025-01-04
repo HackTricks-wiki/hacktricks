@@ -13,7 +13,7 @@ for l in /var/db/dslocal/nodes/Default/users/*; do if [ -r "$l" ];then echo "$l"
 ```
 [**Scripts como este**](https://gist.github.com/teddziuba/3ff08bdda120d1f7822f3baf52e606c2) o [**este**](https://github.com/octomagon/davegrohl.git) se pueden usar para transformar el hash a **formato** **hashcat**.
 
-Una línea alternativa que volcará las credenciales de todas las cuentas que no son de servicio en formato hashcat `-m 7100` (macOS PBKDF2-SHA512):
+Una alternativa de una sola línea que volcará las credenciales de todas las cuentas que no son de servicio en formato hashcat `-m 7100` (macOS PBKDF2-SHA512):
 ```bash
 sudo bash -c 'for i in $(find /var/db/dslocal/nodes/Default/users -type f -regex "[^_]*"); do plutil -extract name.0 raw $i | awk "{printf \$0\":\$ml\$\"}"; for j in {iterations,salt,entropy}; do l=$(k=$(plutil -extract ShadowHashData.0 raw $i) && base64 -d <<< $k | plutil -extract SALTED-SHA512-PBKDF2.$j raw -); if [[ $j == iterations ]]; then echo -n $l; else base64 -d <<< $l | xxd -p -c 0 | awk "{printf \"$\"\$0}"; fi; done; echo ""; done'
 ```
@@ -21,7 +21,7 @@ Otra forma de obtener el `ShadowHashData` de un usuario es usando `dscl`: `` sud
 
 ### /etc/master.passwd
 
-Este archivo se **utiliza únicamente** cuando el sistema está funcionando en **modo de un solo usuario** (por lo que no es muy frecuente).
+Este archivo se **utiliza únicamente** cuando el sistema está funcionando en **modo de usuario único** (por lo que no es muy frecuente).
 
 ### Keychain Dump
 
@@ -43,11 +43,11 @@ security dump-keychain -d #Dump all the info, included secrets (the user will be
 
 Una herramienta llamada **keychaindump** ha sido desarrollada para extraer contraseñas de los llaveros de macOS, pero enfrenta limitaciones en versiones más nuevas de macOS como Big Sur, como se indica en una [discusión](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760). El uso de **keychaindump** requiere que el atacante obtenga acceso y escale privilegios a **root**. La herramienta explota el hecho de que el llavero está desbloqueado por defecto al iniciar sesión del usuario por conveniencia, permitiendo que las aplicaciones accedan a él sin requerir repetidamente la contraseña del usuario. Sin embargo, si un usuario opta por bloquear su llavero después de cada uso, **keychaindump** se vuelve ineficaz.
 
-**Keychaindump** opera apuntando a un proceso específico llamado **securityd**, descrito por Apple como un demonio para operaciones de autorización y criptografía, crucial para acceder al llavero. El proceso de extracción implica identificar una **Master Key** derivada de la contraseña de inicio de sesión del usuario. Esta clave es esencial para leer el archivo del llavero. Para localizar la **Master Key**, **keychaindump** escanea el heap de memoria de **securityd** utilizando el comando `vmmap`, buscando posibles claves dentro de áreas marcadas como `MALLOC_TINY`. El siguiente comando se utiliza para inspeccionar estas ubicaciones de memoria:
+**Keychaindump** opera apuntando a un proceso específico llamado **securityd**, descrito por Apple como un demonio para operaciones de autorización y criptografía, crucial para acceder al llavero. El proceso de extracción implica identificar una **Clave Maestra** derivada de la contraseña de inicio de sesión del usuario. Esta clave es esencial para leer el archivo del llavero. Para localizar la **Clave Maestra**, **keychaindump** escanea el montón de memoria de **securityd** utilizando el comando `vmmap`, buscando posibles claves dentro de áreas marcadas como `MALLOC_TINY`. El siguiente comando se utiliza para inspeccionar estas ubicaciones de memoria:
 ```bash
 sudo vmmap <securityd PID> | grep MALLOC_TINY
 ```
-Después de identificar posibles claves maestras, **keychaindump** busca a través de los montones un patrón específico (`0x0000000000000018`) que indica un candidato para la clave maestra. Se requieren pasos adicionales, incluida la desofuscación, para utilizar esta clave, como se detalla en el código fuente de **keychaindump**. Los analistas que se centran en esta área deben tener en cuenta que los datos cruciales para descifrar el llavero se almacenan dentro de la memoria del proceso **securityd**. Un comando de ejemplo para ejecutar **keychaindump** es:
+Después de identificar posibles claves maestras, **keychaindump** busca a través de los montones un patrón específico (`0x0000000000000018`) que indica un candidato para la clave maestra. Se requieren pasos adicionales, incluida la deofuscación, para utilizar esta clave, como se detalla en el código fuente de **keychaindump**. Los analistas que se centran en esta área deben tener en cuenta que los datos cruciales para descifrar el llavero se almacenan dentro de la memoria del proceso **securityd**. Un comando de ejemplo para ejecutar **keychaindump** es:
 ```bash
 sudo ./keychaindump
 ```
@@ -64,7 +64,7 @@ sudo ./keychaindump
 - Notas seguras
 - Contraseñas de Appleshare
 
-Dada la contraseña de desbloqueo del llavero, una clave maestra obtenida usando [volafox](https://github.com/n0fate/volafox) o [volatility](https://github.com/volatilityfoundation/volatility), o un archivo de desbloqueo como SystemKey, Chainbreaker también proporcionará contraseñas en texto claro.
+Dada la contraseña de desbloqueo del llavero, una clave maestra obtenida usando [volafox](https://github.com/n0fate/volafox) o [volatility](https://github.com/volatilityfoundation/volatility), o un archivo de desbloqueo como SystemKey, Chainbreaker también proporcionará contraseñas en texto plano.
 
 Sin uno de estos métodos para desbloquear el llavero, Chainbreaker mostrará toda la otra información disponible.
 
@@ -90,9 +90,9 @@ hashcat.exe -m 23100 --keep-guessing hashes.txt dictionary.txt
 # Use the key to decrypt the passwords
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
-#### **Volcar claves del llavero (con contraseñas) con un volcado de memoria**
+#### **Volcar claves del llavero (con contraseñas) con volcado de memoria**
 
-[Sigue estos pasos](../#dumping-memory-with-osxpmem) para realizar un **volcado de memoria**
+[Sigue estos pasos](../index.html#dumping-memory-with-osxpmem) para realizar un **volcado de memoria**
 ```bash
 #Use volafox (https://github.com/n0fate/volafox) to extract possible keychain passwords
 # Unformtunately volafox isn't working with the latest versions of MacOS
@@ -110,7 +110,7 @@ python2.7 chainbreaker.py --dump-all --password-prompt /Users/<username>/Library
 ```
 ### kcpassword
 
-El archivo **kcpassword** es un archivo que contiene la **contraseña de inicio de sesión del usuario**, pero solo si el propietario del sistema ha **activado el inicio de sesión automático**. Por lo tanto, el usuario iniciará sesión automáticamente sin que se le pida una contraseña (lo cual no es muy seguro).
+El archivo **kcpassword** es un archivo que contiene la **contraseña de inicio de sesión del usuario**, pero solo si el propietario del sistema ha **activado el inicio de sesión automático**. Por lo tanto, el usuario se iniciará sesión automáticamente sin que se le pida una contraseña (lo cual no es muy seguro).
 
 La contraseña se almacena en el archivo **`/etc/kcpassword`** xored con la clave **`0x7D 0x89 0x52 0x23 0xD2 0xBC 0xDD 0xEA 0xA3 0xB9 0x1F`**. Si la contraseña del usuario es más larga que la clave, la clave se reutilizará.\
 Esto hace que la contraseña sea bastante fácil de recuperar, por ejemplo, utilizando scripts como [**este**](https://gist.github.com/opshope/32f65875d45215c3677d).
@@ -129,7 +129,7 @@ sqlite3 $HOME/Suggestions/snippets.db 'select * from emailSnippets'
 
 Puedes encontrar los datos de Notificaciones en `$(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/`
 
-La mayor parte de la información interesante estará en **blob**. Así que necesitarás **extraer** ese contenido y **transformarlo** a **legible** **por humanos** o usar **`strings`**. Para acceder a ello, puedes hacer:
+La mayor parte de la información interesante estará en **blob**. Así que necesitarás **extraer** ese contenido y **transformarlo** a un formato **legible** por **humanos** o usar **`strings`**. Para acceder a ello, puedes hacer:
 ```bash
 cd $(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/
 strings $(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/db2/db | grep -i -A4 slack
@@ -151,7 +151,7 @@ En macOS, la herramienta de línea de comandos **`defaults`** se puede usar para
 
 **`/usr/sbin/cfprefsd`** reclama los servicios XPC `com.apple.cfprefsd.daemon` y `com.apple.cfprefsd.agent` y se puede llamar para realizar acciones como modificar preferencias.
 
-## OpenDirectory permissions.plist
+## permisos.plist de OpenDirectory
 
 El archivo `/System/Library/OpenDirectory/permissions.plist` contiene permisos aplicados a los atributos de nodo y está protegido por SIP.\
 Este archivo otorga permisos a usuarios específicos por UUID (y no por uid) para que puedan acceder a información sensible específica como `ShadowHashData`, `HeimdalSRPKey` y `KerberosKeys`, entre otros:
@@ -217,7 +217,7 @@ El **Distributed Notification Center** cuyo binario principal es **`/usr/sbin/di
 
 ### Apple Push Notifications (APN)
 
-En este caso, las aplicaciones pueden registrarse para **temas**. El cliente generará un token contactando los servidores de Apple a través de **`apsd`**.\
+En este caso, las aplicaciones pueden registrarse para **temas**. El cliente generará un token contactando a los servidores de Apple a través de **`apsd`**.\
 Luego, los proveedores también habrán generado un token y podrán conectarse a los servidores de Apple para enviar mensajes a los clientes. Estos mensajes serán recibidos localmente por **`apsd`** que retransmitirá la notificación a la aplicación que la espera.
 
 Las preferencias se encuentran en `/Library/Preferences/com.apple.apsd.plist`.

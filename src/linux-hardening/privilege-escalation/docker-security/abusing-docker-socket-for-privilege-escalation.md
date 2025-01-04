@@ -25,7 +25,7 @@ También podrías **abusar de un mount para escalar privilegios** dentro del con
 - **`-v /tmp:/host`** -> Si por alguna razón solo puedes **montar algún directorio** del host y tienes acceso dentro del host. Móntalo y crea un **`/bin/bash`** con **suid** en el directorio montado para que puedas **ejecutarlo desde el host y escalar a root**.
 
 > [!NOTE]
-> Ten en cuenta que tal vez no puedas montar la carpeta `/tmp` pero puedes montar una **carpeta diferente escribible**. Puedes encontrar directorios escribibles usando: `find / -writable -type d 2>/dev/null`
+> Ten en cuenta que tal vez no puedas montar la carpeta `/tmp` pero puedes montar una **carpeta escribible diferente**. Puedes encontrar directorios escribibles usando: `find / -writable -type d 2>/dev/null`
 >
 > **¡Ten en cuenta que no todos los directorios en una máquina linux soportarán el bit suid!** Para verificar qué directorios soportan el bit suid ejecuta `mount | grep -v "nosuid"` Por ejemplo, generalmente `/dev/shm`, `/run`, `/proc`, `/sys/fs/cgroup` y `/var/lib/lxcfs` no soportan el bit suid.
 >
@@ -33,7 +33,7 @@ También podrías **abusar de un mount para escalar privilegios** dentro del con
 
 ### Escaping from the container
 
-- **`--privileged`** -> Con este flag [eliminamos toda la aislamiento del contenedor](docker-privileged.md#what-affects). Consulta técnicas para [escapar de contenedores privilegiados como root](docker-breakout-privilege-escalation/#automatic-enumeration-and-escape).
+- **`--privileged`** -> Con este flag [eliminamos toda la aislamiento del contenedor](docker-privileged.md#what-affects). Consulta técnicas para [escapar de contenedores privilegiados como root](docker-breakout-privilege-escalation/index.html#automatic-enumeration-and-escape).
 - **`--cap-add=<CAPABILITY/ALL> [--security-opt apparmor=unconfined] [--security-opt seccomp=unconfined] [-security-opt label:disable]`** -> Para [escalar abusando de capacidades](../linux-capabilities.md), **concede esa capacidad al contenedor** y desactiva otros métodos de protección que puedan impedir que el exploit funcione.
 
 ### Curl

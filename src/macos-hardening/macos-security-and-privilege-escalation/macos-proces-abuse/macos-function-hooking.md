@@ -6,7 +6,7 @@
 
 Crea un **dylib** con una sección **`__interpose` (`__DATA___interpose`)** (o una sección marcada con **`S_INTERPOSING`**) que contenga tuplas de **punteros de función** que se refieran a las funciones **original** y **reemplazo**.
 
-Luego, **inyecta** el dylib con **`DYLD_INSERT_LIBRARIES`** (la interposición debe ocurrir antes de que se cargue la aplicación principal). Obviamente, las [**restricciones** aplicadas al uso de **`DYLD_INSERT_LIBRARIES`** también se aplican aquí](macos-library-injection/#check-restrictions).
+Luego, **inyecta** el dylib con **`DYLD_INSERT_LIBRARIES`** (la interposición debe ocurrir antes de que se cargue la aplicación principal). Obviamente, las [**restricciones** aplicadas al uso de **`DYLD_INSERT_LIBRARIES`** también se aplican aquí](macos-library-injection/index.html#check-restrictions).
 
 ### Interponer printf
 
@@ -106,7 +106,7 @@ El objeto es **`someObject`**, el método es **`@selector(method1p1:p2:)`** y lo
 Siguiendo las estructuras de objetos, es posible acceder a un **array de métodos** donde se **ubican** los **nombres** y **punteros** al código del método.
 
 > [!CAUTION]
-> Tenga en cuenta que, dado que los métodos y clases se acceden en función de sus nombres, esta información se almacena en el binario, por lo que es posible recuperarla con `otool -ov </path/bin>` o [`class-dump </path/bin>`](https://github.com/nygard/class-dump)
+> Tenga en cuenta que, dado que los métodos y las clases se acceden en función de sus nombres, esta información se almacena en el binario, por lo que es posible recuperarla con `otool -ov </path/bin>` o [`class-dump </path/bin>`](https://github.com/nygard/class-dump)
 
 ### Accessing the raw methods
 
@@ -226,7 +226,7 @@ return 0;
 }
 ```
 > [!WARNING]
-> En este caso, si el **código de implementación del método legítimo** **verifica** el **nombre del método**, podría **detectar** este swizzling y evitar que se ejecute.
+> En este caso, si el **código de implementación del método legítimo** **verifica** el **nombre del método**, podría **detectar** este swizzling y prevenir que se ejecute.
 >
 > La siguiente técnica no tiene esta restricción.
 
@@ -288,13 +288,13 @@ return 0;
 ```
 ## Metodología de Ataque por Hooking
 
-En esta página se discutieron diferentes formas de enganchar funciones. Sin embargo, involucraron **ejecutar código dentro del proceso para atacar**.
+En esta página se discutieron diferentes formas de enganchar funciones. Sin embargo, implicaron **ejecutar código dentro del proceso para atacar**.
 
-Para hacer eso, la técnica más fácil de usar es inyectar un [Dyld a través de variables de entorno o secuestro](macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md). Sin embargo, supongo que esto también podría hacerse a través de [inyección de proceso Dylib](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port).
+Para hacer eso, la técnica más fácil de usar es inyectar un [Dyld a través de variables de entorno o secuestro](macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md). Sin embargo, supongo que esto también podría hacerse a través de [inyección de procesos Dylib](macos-ipc-inter-process-communication/index.html#dylib-process-injection-via-task-port).
 
-Sin embargo, ambas opciones están **limitadas** a binarios/procesos **no protegidos**. Revisa cada técnica para aprender más sobre las limitaciones.
+Sin embargo, ambas opciones están **limitadas** a binarios/procesos **no protegidos**. Consulta cada técnica para aprender más sobre las limitaciones.
 
-Sin embargo, un ataque de hooking de funciones es muy específico, un atacante hará esto para **robar información sensible desde dentro de un proceso** (si no, simplemente harías un ataque de inyección de proceso). Y esta información sensible podría estar ubicada en aplicaciones descargadas por el usuario, como MacPass.
+Sin embargo, un ataque de hooking de funciones es muy específico, un atacante hará esto para **robar información sensible desde dentro de un proceso** (si no, simplemente harías un ataque de inyección de procesos). Y esta información sensible podría estar ubicada en aplicaciones descargadas por el usuario, como MacPass.
 
 Así que el vector del atacante sería encontrar una vulnerabilidad o eliminar la firma de la aplicación, inyectar la variable de entorno **`DYLD_INSERT_LIBRARIES`** a través del Info.plist de la aplicación añadiendo algo como:
 ```xml
@@ -304,14 +304,14 @@ Así que el vector del atacante sería encontrar una vulnerabilidad o eliminar l
 <string>/Applications/Application.app/Contents/malicious.dylib</string>
 </dict>
 ```
-y luego **volver a registrar** la aplicación:
+y luego **re-registrar** la aplicación:
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f /Applications/Application.app
 ```
 Agrega en esa biblioteca el código de hooking para exfiltrar la información: Contraseñas, mensajes...
 
 > [!CAUTION]
-> Ten en cuenta que en versiones más recientes de macOS, si **eliminaste la firma** del binario de la aplicación y se ejecutó previamente, macOS **no ejecutará la aplicación** más.
+> Ten en cuenta que en versiones más recientes de macOS si **eliminaste la firma** del binario de la aplicación y se ejecutó previamente, macOS **ya no ejecutará la aplicación**.
 
 #### Ejemplo de biblioteca
 ```objectivec

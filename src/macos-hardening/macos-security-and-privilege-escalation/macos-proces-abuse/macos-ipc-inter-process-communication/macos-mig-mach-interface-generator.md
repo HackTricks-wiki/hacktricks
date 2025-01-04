@@ -40,7 +40,7 @@ server_port :  mach_port_t;
 n1          :  uint32_t;
 n2          :  uint32_t);
 ```
-Tenga en cuenta que el primer **argumento es el puerto a enlazar** y MIG **manejará automáticamente el puerto de respuesta** (a menos que se llame a `mig_get_reply_port()` en el código del cliente). Además, el **ID de las operaciones** será **secuencial** comenzando por el ID del subsistema indicado (así que si una operación está obsoleta, se elimina y se usa `skip` para seguir utilizando su ID).
+Tenga en cuenta que el primer **argumento es el puerto a enlazar** y MIG **manejará automáticamente el puerto de respuesta** (a menos que se llame a `mig_get_reply_port()` en el código del cliente). Además, el **ID de las operaciones** será **secuencial** comenzando por el ID del subsistema indicado (por lo que si una operación está obsoleta, se elimina y se utiliza `skip` para seguir usando su ID).
 
 Ahora use MIG para generar el código del servidor y del cliente que podrá comunicarse entre sí para llamar a la función Subtract:
 ```bash
@@ -149,9 +149,9 @@ return FALSE;
 }
 </code></pre>
 
-Verifique las líneas resaltadas anteriormente que acceden a la función para llamar por ID.
+Verifica las líneas resaltadas anteriormente que acceden a la función para llamar por ID.
 
-El siguiente es el código para crear un **servidor** y un **cliente** simples donde el cliente puede llamar a las funciones Subtract del servidor:
+El siguiente es el código para crear un **servidor** y **cliente** simples donde el cliente puede llamar a las funciones Subtract del servidor:
 
 {{#tabs}}
 {{#tab name="myipc_server.c"}}
@@ -217,13 +217,13 @@ USERPREFSubtract(port, 40, 2);
 
 ### El NDR_record
 
-El NDR_record es exportado por `libsystem_kernel.dylib`, y es una estructura que permite a MIG **transformar datos para que sea agnóstico del sistema** en el que se está utilizando, ya que se pensó que MIG se usaría entre diferentes sistemas (y no solo en la misma máquina).
+El NDR_record es exportado por `libsystem_kernel.dylib`, y es una estructura que permite a MIG **transformar datos para que sea agnóstico del sistema** en el que se está utilizando, ya que MIG fue pensado para ser utilizado entre diferentes sistemas (y no solo en la misma máquina).
 
-Esto es interesante porque si se encuentra `_NDR_record` en un binario como una dependencia (`jtool2 -S <binary> | grep NDR` o `nm`), significa que el binario es un cliente o servidor de MIG.
+Esto es interesante porque si se encuentra `_NDR_record` en un binario como una dependencia (`jtool2 -S <binary> | grep NDR` o `nm`), significa que el binario es un cliente o servidor MIG.
 
-Además, los **servidores de MIG** tienen la tabla de despacho en `__DATA.__const` (o en `__CONST.__constdata` en el núcleo de macOS y `__DATA_CONST.__const` en otros núcleos \*OS). Esto se puede volcar con **`jtool2`**.
+Además, los **servidores MIG** tienen la tabla de despacho en `__DATA.__const` (o en `__CONST.__constdata` en el núcleo de macOS y `__DATA_CONST.__const` en otros núcleos \*OS). Esto se puede volcar con **`jtool2`**.
 
-Y los **clientes de MIG** usarán el `__NDR_record` para enviar con `__mach_msg` a los servidores.
+Y los **clientes MIG** utilizarán el `__NDR_record` para enviar con `__mach_msg` a los servidores.
 
 ## Análisis de Binarios
 
@@ -231,7 +231,7 @@ Y los **clientes de MIG** usarán el `__NDR_record` para enviar con `__mach_msg`
 
 Como muchos binarios ahora utilizan MIG para exponer puertos mach, es interesante saber cómo **identificar que se utilizó MIG** y las **funciones que MIG ejecuta** con cada ID de mensaje.
 
-[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/#jtool2) puede analizar información de MIG de un binario Mach-O indicando el ID de mensaje e identificando la función a ejecutar:
+[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/index.html#jtool2) puede analizar información de MIG de un binario Mach-O indicando el ID de mensaje e identificando la función a ejecutar:
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```

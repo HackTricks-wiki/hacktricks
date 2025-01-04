@@ -6,7 +6,7 @@
 
 Crea un **dylib** con una sección **`__interpose`** (o una sección marcada con **`S_INTERPOSING`**) que contenga tuplas de **punteros de función** que se refieran a las funciones **original** y **reemplazo**.
 
-Luego, **inyecta** el dylib con **`DYLD_INSERT_LIBRARIES`** (la interposición debe ocurrir antes de que se cargue la aplicación principal). Obviamente, las [**restricciones** aplicadas al uso de **`DYLD_INSERT_LIBRARIES`** también se aplican aquí](../macos-proces-abuse/macos-library-injection/#check-restrictions).&#x20;
+Luego, **inyecta** el dylib con **`DYLD_INSERT_LIBRARIES`** (la interposición debe ocurrir antes de que se cargue la aplicación principal). Obviamente, las [**restricciones** aplicadas al uso de **`DYLD_INSERT_LIBRARIES`** también se aplican aquí](../macos-proces-abuse/macos-library-injection/index.html#check-restrictions).&#x20;
 
 ### Interponer printf
 
@@ -272,7 +272,7 @@ return 0;
 
 En esta página se discutieron diferentes formas de enganchar funciones. Sin embargo, implicaron **ejecutar código dentro del proceso para atacar**.
 
-Para hacer eso, la técnica más fácil de usar es inyectar un [Dyld a través de variables de entorno o secuestrando](../macos-dyld-hijacking-and-dyld_insert_libraries.md). Sin embargo, supongo que esto también podría hacerse a través de [inyección de procesos Dylib](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port).
+Para hacer eso, la técnica más fácil de usar es inyectar un [Dyld a través de variables de entorno o secuestrando](../macos-dyld-hijacking-and-dyld_insert_libraries.md). Sin embargo, supongo que esto también podría hacerse a través de [inyección de procesos Dylib](macos-ipc-inter-process-communication/index.html#dylib-process-injection-via-task-port).
 
 Sin embargo, ambas opciones están **limitadas** a binarios/procesos **no protegidos**. Consulta cada técnica para aprender más sobre las limitaciones.
 
@@ -286,14 +286,14 @@ Así que el vector del atacante sería encontrar una vulnerabilidad o eliminar l
 <string>/Applications/Application.app/Contents/malicious.dylib</string>
 </dict>
 ```
-y luego **volver a registrar** la aplicación:
+y luego **re-registrar** la aplicación:
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f /Applications/Application.app
 ```
 Agrega en esa biblioteca el código de hooking para exfiltrar la información: Contraseñas, mensajes...
 
 > [!CAUTION]
-> Ten en cuenta que en versiones más recientes de macOS, si **eliminaste la firma** del binario de la aplicación y se ejecutó previamente, macOS **ya no ejecutará la aplicación**.
+> Ten en cuenta que en versiones más recientes de macOS, si **eliminaste la firma** del binario de la aplicación y se ejecutó previamente, macOS **ya no ejecutará la aplicación**. 
 
 #### Ejemplo de biblioteca
 ```objectivec
