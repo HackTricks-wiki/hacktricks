@@ -37,7 +37,7 @@ macos-protocols.md
 {{#endref}}
 
 - **开源** macOS: [https://opensource.apple.com/](https://opensource.apple.com/)
-- 要下载 `tar.gz`，将 URL 更改为 [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) 到 [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
+- 要下载 `tar.gz`，将 URL 更改为 [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
 
 ### MacOS MDM
 
@@ -63,15 +63,15 @@ macos-security-protections/
 
 ### 文件权限
 
-如果 **以 root 身份运行的进程写入** 一个可以被用户控制的文件，用户可能会利用此文件来 **提升权限**。\
+如果 **以 root 身份运行的进程写入** 一个可以被用户控制的文件，用户可能会利用这一点来 **提升权限**。\
 这可能发生在以下情况下：
 
-- 使用的文件已由用户创建（属于用户）
+- 使用的文件已经由用户创建（属于用户）
 - 使用的文件因组而可被用户写入
 - 使用的文件位于用户拥有的目录中（用户可以创建该文件）
-- 使用的文件位于 root 拥有的目录中，但用户因组而具有写入权限（用户可以创建该文件）
+- 使用的文件位于 root 拥有的目录中，但用户因组而对其具有写入权限（用户可以创建该文件）
 
-能够 **创建一个将被 root 使用的文件**，允许用户 **利用其内容**，甚至创建 **符号链接/硬链接** 指向其他位置。
+能够 **创建一个将被 root 使用的文件**，允许用户 **利用其内容**，甚至创建 **符号链接/硬链接** 指向另一个位置。
 
 对于这种漏洞，不要忘记 **检查易受攻击的 `.pkg` 安装程序**：
 
@@ -93,9 +93,9 @@ macos-file-extension-apps.md
 
 因此，想要成功攻陷 macOS 机器的攻击者需要 **提升其 TCC 权限**（甚至 **绕过 SIP**，具体取决于其需求）。
 
-这些权限通常以 **授权** 的形式授予，应用程序是用此签名的，或者应用程序可能请求某些访问权限，在 **用户批准后**，它们可以在 **TCC 数据库** 中找到。进程获取这些权限的另一种方式是成为具有这些 **权限** 的进程的 **子进程**，因为它们通常是 **继承的**。
+这些权限通常以 **应用程序签名的授权** 形式授予，或者应用程序可能请求某些访问权限，在 **用户批准后**，它们可以在 **TCC 数据库** 中找到。进程获得这些权限的另一种方式是成为具有这些 **权限** 的进程的 **子进程**，因为它们通常是 **继承的**。
 
-请访问这些链接以找到不同的方式 [**提升 TCC 中的权限**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses)，以 [**绕过 TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) 和过去 [**如何绕过 SIP**](macos-security-protections/macos-sip.md#sip-bypasses)。
+请访问这些链接以找到不同的方式 [**提升 TCC 中的权限**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses)，以 [**绕过 TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) 以及过去 [**如何绕过 SIP**](macos-security-protections/macos-sip.md#sip-bypasses)。
 
 ## macOS 传统权限提升
 

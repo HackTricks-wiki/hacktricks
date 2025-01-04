@@ -6,7 +6,7 @@
 
 - [**Pyscript 黑客技巧**](pyscript.md)
 - [**Python 反序列化**](../../pentesting-web/deserialization/index.html#python)
-- [**绕过 Python 沙箱的技巧**](bypass-python-sandboxes/)
+- [**绕过 Python 沙箱的技巧**](bypass-python-sandboxes/index.html)
 - [**基本的 Python 网络请求语法**](web-requests.md)
 - [**基本的 Python 语法和库**](basic-python.md)
 

