@@ -4,7 +4,7 @@
 
 ## Autopsy
 
-Najczęściej używane narzędzie w kryminalistyce do ekstrakcji plików z obrazów to [**Autopsy**](https://www.autopsy.com/download/). Pobierz je, zainstaluj i spraw, aby przetworzyło plik w celu znalezienia "ukrytych" plików. Zauważ, że Autopsy jest zaprojektowane do obsługi obrazów dysków i innych rodzajów obrazów, ale nie prostych plików.
+Najczęściej używane narzędzie w forensyce do ekstrakcji plików z obrazów to [**Autopsy**](https://www.autopsy.com/download/). Pobierz je, zainstaluj i spraw, aby przetworzyło plik w celu znalezienia "ukrytych" plików. Zauważ, że Autopsy jest zaprojektowane do obsługi obrazów dysków i innych rodzajów obrazów, ale nie prostych plików.
 
 ## Binwalk <a id="binwalk"></a>
 
@@ -18,7 +18,7 @@ binwalk --dd ".*" file #Displays and extracts all files from the given file
 ```
 ## Foremost
 
-Innym powszechnym narzędziem do znajdowania ukrytych plików jest **foremost**. Możesz znaleźć plik konfiguracyjny foremost w `/etc/foremost.conf`. Jeśli chcesz wyszukać tylko niektóre konkretne pliki, odkomentuj je. Jeśli nic nie odkomentujesz, foremost będzie szukać domyślnie skonfigurowanych typów plików.
+Innym powszechnym narzędziem do znajdowania ukrytych plików jest **foremost**. Możesz znaleźć plik konfiguracyjny foremost w `/etc/foremost.conf`. Jeśli chcesz wyszukać konkretne pliki, odkomentuj je. Jeśli nic nie odkomentujesz, foremost będzie szukać domyślnie skonfigurowanych typów plików.
 ```bash
 sudo apt-get install foremost
 foremost -v -i file.img -o output
@@ -26,7 +26,7 @@ foremost -v -i file.img -o output
 ```
 ## **Scalpel**
 
-**Scalpel** to kolejne narzędzie, które można wykorzystać do znajdowania i wyodrębniania **plików osadzonych w pliku**. W tym przypadku musisz odkomentować w pliku konfiguracyjnym \(_/etc/scalpel/scalpel.conf_\) typy plików, które chcesz, aby zostały wyodrębnione.
+**Scalpel** to kolejne narzędzie, które można wykorzystać do znajdowania i wyodrębniania **plików osadzonych w pliku**. W tym przypadku będziesz musiał odkomentować w pliku konfiguracyjnym \(_/etc/scalpel/scalpel.conf_\) typy plików, które chcesz, aby zostały wyodrębnione.
 ```bash
 sudo apt-get install scalpel
 scalpel file.img -o output
@@ -35,17 +35,17 @@ scalpel file.img -o output
 
 To narzędzie znajduje się w Kali, ale możesz je znaleźć tutaj: [https://github.com/simsong/bulk_extractor](https://github.com/simsong/bulk_extractor)
 
-To narzędzie może skanować obraz i **wyodrębnić pcaps** w nim, **informacje o sieci (URL, domeny, IP, MAC, maile)** i więcej **plików**. Musisz tylko zrobić:
+To narzędzie może skanować obraz i **wyodrębniać pcaps** w nim, **informacje o sieci (URL, domeny, IP, MAC, maile)** i więcej **plików**. Musisz tylko zrobić:
 ```text
 bulk_extractor memory.img -o out_folder
 ```
-Przejdź przez **wszystkie informacje**, które narzędzie zebrało \(hasła?\), **analizuj** **pakiety** \(przeczytaj [ **analizę Pcaps**](../pcap-inspection/)\), wyszukaj **dziwne domeny** \(domeny związane z **złośliwym oprogramowaniem** lub **nieistniejącymi**\).
+Przejdź przez **wszystkie informacje**, które narzędzie zgromadziło \(hasła?\), **analizuj** **pakiety** \(przeczytaj [**analizę Pcaps**](../pcap-inspection/index.html)\), wyszukaj **dziwne domeny** \(domeny związane z **złośliwym oprogramowaniem** lub **nieistniejącymi**\).
 
 ## PhotoRec
 
-Możesz go znaleźć w [https://www.cgsecurity.org/wiki/TestDisk_Download](https://www.cgsecurity.org/wiki/TestDisk_Download)
+Możesz go znaleźć pod adresem [https://www.cgsecurity.org/wiki/TestDisk_Download](https://www.cgsecurity.org/wiki/TestDisk_Download)
 
-Dostępna jest wersja z interfejsem graficznym i wiersza poleceń. Możesz wybrać **typy plików**, które PhotoRec ma wyszukiwać.
+Dostępna jest wersja z interfejsem graficznym i wersja wiersza poleceń. Możesz wybrać **typy plików**, które PhotoRec ma wyszukiwać.
 
 ![](../../../images/image%20%28524%29.png)
 
@@ -59,7 +59,6 @@ Pobierz [tutaj](https://sourceforge.net/projects/findaes/).
 
 # Narzędzia uzupełniające
 
-Możesz użyć [**viu** ](https://github.com/atanunq/viu), aby zobaczyć obrazy z terminala. 
-Możesz użyć narzędzia wiersza poleceń Linux **pdftotext**, aby przekształcić plik pdf w tekst i go przeczytać.
+Możesz użyć [**viu** ](https://github.com/atanunq/viu), aby zobaczyć obrazy z terminala. Możesz użyć narzędzia wiersza poleceń Linux **pdftotext**, aby przekształcić plik pdf w tekst i go przeczytać.
 
 {{#include ../../../banners/hacktricks-training.md}}

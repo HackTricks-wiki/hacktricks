@@ -5,7 +5,7 @@
 > [!WARNING]
 > Zauważ, że uprawnienia zaczynające się od **`com.apple`** nie są dostępne dla osób trzecich, tylko Apple może je przyznać.
 
-## Wysokie
+## Wysoki
 
 ### `com.apple.rootless.install.heritable`
 
@@ -17,19 +17,19 @@ Uprawnienie **`com.apple.rootless.install`** pozwala na **obejście SIP**. Spraw
 
 ### **`com.apple.system-task-ports` (wcześniej nazywane `task_for_pid-allow`)**
 
-To uprawnienie pozwala uzyskać **port zadania dla dowolnego** procesu, z wyjątkiem jądra. Sprawdź [**to dla więcej informacji**](../macos-proces-abuse/macos-ipc-inter-process-communication/).
+To uprawnienie pozwala uzyskać **port zadania dla dowolnego** procesu, z wyjątkiem jądra. Sprawdź [**to dla więcej informacji**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
 
 ### `com.apple.security.get-task-allow`
 
-To uprawnienie pozwala innym procesom z uprawnieniem **`com.apple.security.cs.debugger`** uzyskać port zadania procesu uruchomionego przez binarny plik z tym uprawnieniem i **wstrzyknąć kod**. Sprawdź [**to dla więcej informacji**](../macos-proces-abuse/macos-ipc-inter-process-communication/).
+To uprawnienie pozwala innym procesom z uprawnieniem **`com.apple.security.cs.debugger`** uzyskać port zadania procesu uruchomionego przez binarny plik z tym uprawnieniem i **wstrzyknąć kod**. Sprawdź [**to dla więcej informacji**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
 
 ### `com.apple.security.cs.debugger`
 
-Aplikacje z uprawnieniem narzędzia debugowania mogą wywołać `task_for_pid()`, aby uzyskać ważny port zadania dla aplikacji niesigned i aplikacji osób trzecich z uprawnieniem `Get Task Allow` ustawionym na `true`. Jednak nawet z uprawnieniem narzędzia debugowania, debugger **nie może uzyskać portów zadań** procesów, które **nie mają uprawnienia `Get Task Allow`**, a które są zatem chronione przez System Integrity Protection. Sprawdź [**to dla więcej informacji**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
+Aplikacje z uprawnieniem narzędzia debugowania mogą wywołać `task_for_pid()`, aby uzyskać ważny port zadania dla niepodpisanych i aplikacji osób trzecich z uprawnieniem `Get Task Allow` ustawionym na `true`. Jednak nawet z uprawnieniem narzędzia debugowania, debugger **nie może uzyskać portów zadań** procesów, które **nie mają uprawnienia `Get Task Allow`**, a które są zatem chronione przez System Integrity Protection. Sprawdź [**to dla więcej informacji**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
 
 ### `com.apple.security.cs.disable-library-validation`
 
-To uprawnienie pozwala na **ładowanie frameworków, wtyczek lub bibliotek bez bycia podpisanym przez Apple lub podpisanym tym samym identyfikatorem zespołu** co główny plik wykonywalny, więc atakujący mógłby nadużyć ładowania dowolnej biblioteki, aby wstrzyknąć kod. Sprawdź [**to dla więcej informacji**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
+To uprawnienie pozwala na **ładowanie frameworków, wtyczek lub bibliotek bez bycia podpisanym przez Apple lub podpisanym tym samym identyfikatorem zespołu** co główny plik wykonywalny, więc atakujący mógłby wykorzystać ładowanie dowolnej biblioteki do wstrzyknięcia kodu. Sprawdź [**to dla więcej informacji**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
 
 ### `com.apple.private.security.clear-library-validation`
 
@@ -58,7 +58,7 @@ Uprawnienie **`com.apple.private.icloud-account-access`** umożliwia komunikacj�
 
 **iMovie** i **Garageband** miały to uprawnienie.
 
-Aby uzyskać więcej **informacji** na temat exploita do **uzyskania tokenów icloud** z tego uprawnienia, sprawdź wykład: [**#OBTS v5.0: "Co się dzieje na twoim Macu, zostaje na iCloud Apple?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+Aby uzyskać więcej **informacji** na temat exploita do **uzyskania tokenów icloud** z tego uprawnienia, sprawdź wykład: [**#OBTS v5.0: "Co się dzieje na twoim Macu, zostaje w iCloud Apple?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
 ### `com.apple.private.tcc.manager.check-by-audit-token`
 
@@ -74,7 +74,7 @@ TODO: W [**tym raporcie**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-U
 
 ### `keychain-access-groups`
 
-To uprawnienie listuje **grupy keychain**, do których aplikacja ma dostęp:
+To uprawnienie wymienia grupy **keychain**, do których aplikacja ma dostęp:
 ```xml
 <key>keychain-access-groups</key>
 <array>
@@ -87,7 +87,7 @@ To uprawnienie listuje **grupy keychain**, do których aplikacja ma dostęp:
 ```
 ### **`kTCCServiceSystemPolicyAllFiles`**
 
-Daje **Pełny dostęp do dysku**, jedno z najwyższych uprawnień TCC, jakie można mieć.
+Daje **pełny dostęp do dysku**, jedno z najwyższych uprawnień TCC, jakie można mieć.
 
 ### **`kTCCServiceAppleEvents`**
 
@@ -97,7 +97,7 @@ Na przykład, zmuszając je do proszenia użytkownika o hasło:
 ```bash
 osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to activate' -e 'tell app "App Store" to display dialog "App Store requires your password to continue." & return & return default answer "" with icon 1 with hidden answer with title "App Store Alert"'
 ```
-Lub sprawić, by wykonywały **dowolne działania**.
+Or making them perform **arbitrary actions**.
 
 ### **`kTCCServiceEndpointSecurityClient`**
 
@@ -109,17 +109,17 @@ Pozwala na **zmianę** atrybutu **`NFSHomeDirectory`** użytkownika, co zmienia 
 
 ### **`kTCCServiceSystemPolicyAppBundles`**
 
-Pozwala na modyfikację plików wewnątrz pakietu aplikacji (wewnątrz app.app), co jest **domyślnie zabronione**.
+Pozwala na modyfikację plików wewnątrz pakietów aplikacji (wewnątrz app.app), co jest **domyślnie zabronione**.
 
 <figure><img src="../../../images/image (31).png" alt=""><figcaption></figcaption></figure>
 
-Można sprawdzić, kto ma ten dostęp w _Ustawieniach systemowych_ > _Prywatność i bezpieczeństwo_ > _Zarządzanie aplikacjami._
+Można sprawdzić, kto ma ten dostęp w _Ustawienia systemowe_ > _Prywatność i bezpieczeństwo_ > _Zarządzanie aplikacjami._
 
 ### `kTCCServiceAccessibility`
 
 Proces będzie mógł **nadużywać funkcji dostępności macOS**, co oznacza, że na przykład będzie mógł naciskać klawisze. MOŻE poprosić o dostęp do kontrolowania aplikacji, takiej jak Finder, i zatwierdzić okno dialogowe z tym uprawnieniem.
 
-## Średni
+## Medium
 
 ### `com.apple.security.cs.allow-jit`
 
@@ -127,7 +127,7 @@ To uprawnienie pozwala na **tworzenie pamięci, która jest zapisywalna i wykony
 
 ### `com.apple.security.cs.allow-unsigned-executable-memory`
 
-To uprawnienie pozwala na **nadpisywanie lub patchowanie kodu C**, używanie długo przestarzałej **`NSCreateObjectFileImageFromMemory`** (co jest zasadniczo niebezpieczne) lub korzystanie z frameworka **DVDPlayback**. Sprawdź [**to dla więcej informacji**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
+To uprawnienie pozwala na **nadpisywanie lub patchowanie kodu C**, użycie długo nieaktualizowanej **`NSCreateObjectFileImageFromMemory`** (co jest zasadniczo niebezpieczne), lub użycie frameworka **DVDPlayback**. Sprawdź [**to dla więcej informacji**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
 
 > [!CAUTION]
 > Włączenie tego uprawnienia naraża Twoją aplikację na powszechne luki w kodzie języków, które nie są bezpieczne w pamięci. Starannie rozważ, czy Twoja aplikacja potrzebuje tego wyjątku.
@@ -161,3 +161,5 @@ Zezwól procesowi na **poproszenie o wszystkie uprawnienia TCC**.
 ### **`kTCCServicePostEvent`**
 
 {{#include ../../../banners/hacktricks-training.md}}
+
+</details>

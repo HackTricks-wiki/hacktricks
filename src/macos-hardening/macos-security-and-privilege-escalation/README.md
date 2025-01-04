@@ -6,13 +6,13 @@
 
 Jeśli nie znasz macOS, powinieneś zacząć od nauki podstaw macOS:
 
-- Specjalne **pliki i uprawnienia** macOS:
+- Specjalne pliki i **uprawnienia macOS:**
 
 {{#ref}}
 macos-files-folders-and-binaries/
 {{#endref}}
 
-- Powszechni **użytkownicy** macOS
+- Typowi **użytkownicy macOS**
 
 {{#ref}}
 macos-users.md
@@ -30,14 +30,14 @@ macos-applefs.md
 mac-os-architecture/
 {{#endref}}
 
-- Powszechne **usługi i protokoły sieciowe** macOS
+- Typowe usługi i **protokoły sieciowe macOS**
 
 {{#ref}}
 macos-protocols.md
 {{#endref}}
 
-- **Oprogramowanie open source** macOS: [https://opensource.apple.com/](https://opensource.apple.com/)
-- Aby pobrać `tar.gz`, zmień adres URL, na przykład [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) na [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
+- **Opensource** macOS: [https://opensource.apple.com/](https://opensource.apple.com/)
+- Aby pobrać `tar.gz`, zmień URL, taki jak [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) na [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
 
 ### MacOS MDM
 
@@ -71,7 +71,7 @@ Może to wystąpić w następujących sytuacjach:
 - Plik użyty znajduje się w katalogu należącym do użytkownika (użytkownik mógłby utworzyć plik)
 - Plik użyty znajduje się w katalogu należącym do roota, ale użytkownik ma do niego dostęp do zapisu z powodu grupy (użytkownik mógłby utworzyć plik)
 
-Możliwość **utworzenia pliku**, który będzie **używany przez roota**, pozwala użytkownikowi **wykorzystać jego zawartość** lub nawet utworzyć **symlinki/twarde linki**, aby wskazać go w inne miejsce.
+Możliwość **utworzenia pliku**, który będzie **używany przez roota**, pozwala użytkownikowi **wykorzystać jego zawartość** lub nawet utworzyć **symlinki/hardlinki**, aby wskazać go w inne miejsce.
 
 W przypadku tego rodzaju luk nie zapomnij **sprawdzić podatnych instalatorów `.pkg`**:
 
@@ -81,7 +81,7 @@ macos-files-folders-and-binaries/macos-installers-abuse.md
 
 ### Obsługa rozszerzeń plików i schematów URL
 
-Dziwne aplikacje zarejestrowane przez rozszerzenia plików mogą być wykorzystywane, a różne aplikacje mogą być zarejestrowane do otwierania określonych protokołów
+Dziwne aplikacje zarejestrowane przez rozszerzenia plików mogą być nadużywane, a różne aplikacje mogą być zarejestrowane do otwierania konkretnych protokołów
 
 {{#ref}}
 macos-file-extension-apps.md
@@ -93,13 +93,13 @@ W macOS **aplikacje i pliki binarne mogą mieć uprawnienia** do dostępu do fol
 
 Dlatego atakujący, który chce skutecznie skompromitować maszynę macOS, będzie musiał **eskalować swoje uprawnienia TCC** (lub nawet **obejść SIP**, w zależności od jego potrzeb).
 
-Te uprawnienia są zazwyczaj nadawane w formie **uprawnień**, z którymi aplikacja jest podpisana, lub aplikacja może poprosić o pewne dostępy, a po **zatwierdzeniu ich przez użytkownika** mogą być one znalezione w **bazach danych TCC**. Innym sposobem, w jaki proces może uzyskać te uprawnienia, jest bycie **dzieckiem procesu** z tymi **uprawnieniami**, ponieważ są one zazwyczaj **dziedziczone**.
+Te uprawnienia są zazwyczaj przyznawane w formie **uprawnień**, z którymi aplikacja jest podpisana, lub aplikacja może poprosić o pewne dostępy, a po **zatwierdzeniu ich przez użytkownika** mogą być one znalezione w **bazach danych TCC**. Innym sposobem, w jaki proces może uzyskać te uprawnienia, jest bycie **dzieckiem procesu** z tymi **uprawnieniami**, ponieważ są one zazwyczaj **dziedziczone**.
 
-Śledź te linki, aby znaleźć różne sposoby [**eskalacji uprawnień w TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), aby [**obejść TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) i jak w przeszłości [**SIP został obejrzany**](macos-security-protections/macos-sip.md#sip-bypasses).
+Śledź te linki, aby znaleźć różne sposoby [**eskalacji uprawnień w TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), aby [**obejść TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) i jak w przeszłości [**SIP został obejrzany**](macos-security-protections/macos-sip.md#sip-bypasses).
 
 ## macOS Traditional Privilege Escalation
 
-Oczywiście z perspektywy zespołu red team również powinieneś być zainteresowany eskalacją do roota. Sprawdź następujący post, aby uzyskać kilka wskazówek:
+Oczywiście z perspektywy red teamu powinieneś być również zainteresowany eskalacją do roota. Sprawdź następujący post, aby uzyskać kilka wskazówek:
 
 {{#ref}}
 macos-privilege-escalation.md

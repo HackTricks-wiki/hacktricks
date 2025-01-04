@@ -13,7 +13,7 @@ Główna strona aplikacji Flask prawdopodobnie będzie miała globalny obiekt **
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-W tym przypadku możliwe jest uzyskanie dostępu do tego obiektu, używając dowolnego gadżetu do **uzyskania dostępu do obiektów globalnych** z [**strony Bypass Python sandboxes**](bypass-python-sandboxes/).
+W tym przypadku możliwe jest uzyskanie dostępu do tego obiektu, używając dowolnego gadżetu do **uzyskiwania dostępu do obiektów globalnych** z [**strony Bypass Python sandboxes**](bypass-python-sandboxes/index.html).
 
 W przypadku, gdy **vulnerability znajduje się w innym pliku python**, potrzebujesz gadżetu do przeszukiwania plików, aby dotrzeć do głównego, aby **uzyskać dostęp do obiektu globalnego `app.secret_key`**, aby zmienić klucz tajny Flask i móc [**eskalować uprawnienia** znając ten klucz](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
 
@@ -25,7 +25,7 @@ Użyj tego ładunku, aby **zmienić `app.secret_key`** (nazwa w twojej aplikacji
 
 ### Werkzeug - machine_id i node uuid
 
-[**Używając tych ładunków z tego opisu**](https://vozec.fr/writeups/tweedle-dum-dee/) będziesz mógł uzyskać dostęp do **machine_id** i **uuid** węzła, które są **głównymi sekretami**, których potrzebujesz, aby [**wygenerować pin Werkzeug**](../../network-services-pentesting/pentesting-web/werkzeug.md), którego możesz użyć do uzyskania dostępu do konsoli python w `/console`, jeśli **tryb debugowania jest włączony:**
+[**Używając tych ładunków z tego opisu**](https://vozec.fr/writeups/tweedle-dum-dee/) będziesz mógł uzyskać dostęp do **machine_id** i **uuid** węzła, które są **głównymi sekretami**, których potrzebujesz, aby [**wygenerować pin Werkzeug**](../../network-services-pentesting/pentesting-web/werkzeug.md), którego możesz użyć do uzyskania dostępu do konsoli pythona w `/console`, jeśli **tryb debugowania jest włączony:**
 ```python
 {ua.__class__.__init__.__globals__[t].sys.modules[werkzeug.debug]._machine_id}
 {ua.__class__.__init__.__globals__[t].sys.modules[werkzeug.debug].uuid._node}

@@ -2,19 +2,19 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Narzędzia do Carvingu i Odzyskiwania
+## Carving & Recovery tools
 
 Więcej narzędzi w [https://github.com/Claudio-C/awesome-datarecovery](https://github.com/Claudio-C/awesome-datarecovery)
 
 ### Autopsy
 
-Najczęściej używane narzędzie w kryminalistyce do ekstrakcji plików z obrazów to [**Autopsy**](https://www.autopsy.com/download/). Pobierz je, zainstaluj i spraw, aby przetworzyło plik w celu znalezienia "ukrytych" plików. Zauważ, że Autopsy jest zaprojektowane do obsługi obrazów dysków i innych rodzajów obrazów, ale nie prostych plików.
+Najczęściej używane narzędzie w forensyce do ekstrakcji plików z obrazów to [**Autopsy**](https://www.autopsy.com/download/). Pobierz je, zainstaluj i spraw, aby przetworzyło plik w celu znalezienia "ukrytych" plików. Zauważ, że Autopsy jest zaprojektowane do obsługi obrazów dysków i innych rodzajów obrazów, ale nie prostych plików.
 
 ### Binwalk <a href="#binwalk" id="binwalk"></a>
 
 **Binwalk** to narzędzie do analizy plików binarnych w celu znalezienia osadzonych treści. Można je zainstalować za pomocą `apt`, a jego źródło znajduje się na [GitHub](https://github.com/ReFirmLabs/binwalk).
 
-**Przydatne komendy**:
+**Przydatne polecenia**:
 ```bash
 sudo apt install binwalk #Insllation
 binwalk file #Displays the embedded data in the given file
@@ -44,13 +44,13 @@ To narzędzie może skanować obraz i **wyodrębniać pcaps** w nim, **informacj
 ```
 bulk_extractor memory.img -o out_folder
 ```
-Przejdź przez **wszystkie informacje**, które narzędzie zebrało (hasła?), **analizuj** **pakiety** (przeczytaj [**analizę Pcaps**](../pcap-inspection/)), wyszukaj **dziwne domeny** (domeny związane z **złośliwym oprogramowaniem** lub **nieistniejącymi**).
+Przejrzyj **wszystkie informacje**, które narzędzie zgromadziło (hasła?), **analizuj** **pakiety** (przeczytaj [**analizę Pcaps**](../pcap-inspection/index.html)), wyszukaj **dziwne domeny** (domeny związane z **złośliwym oprogramowaniem** lub **nieistniejącymi**).
 
 ### PhotoRec
 
 Możesz go znaleźć pod adresem [https://www.cgsecurity.org/wiki/TestDisk_Download](https://www.cgsecurity.org/wiki/TestDisk_Download)
 
-Dostępne są wersje z interfejsem graficznym i wiersza poleceń. Możesz wybrać **typy plików**, które PhotoRec ma wyszukiwać.
+Dostępna jest wersja z interfejsem graficznym i wiersza poleceń. Możesz wybrać **typy plików**, które PhotoRec ma wyszukiwać.
 
 ![](<../../../images/image (242).png>)
 
@@ -67,7 +67,7 @@ Sprawdź [kod](https://code.google.com/archive/p/binvis/) oraz [stronę narzędz
 - Uzyskiwanie **wzorców** do kryptanalizy plików
 - **Wykrywanie** algorytmów pakujących lub kodujących
 - **Identyfikacja** steganografii na podstawie wzorców
-- **Wizualna** różnica binarna
+- **Wizualne** porównywanie binarne
 
 BinVis to świetny **punkt wyjścia, aby zapoznać się z nieznanym celem** w scenariuszu black-boxing.
 

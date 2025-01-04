@@ -16,15 +16,15 @@ Uprawnienia w **katalogu**:
 
 **Jak nadpisać plik/folder należący do roota**, ale:
 
-- Jeden rodzic **właściciel katalogu** w ścieżce to użytkownik
-- Jeden rodzic **właściciel katalogu** w ścieżce to **grupa użytkowników** z **dostępem do zapisu**
+- Jeden właściciel **katalogu nadrzędnego** w ścieżce to użytkownik
+- Jeden właściciel **katalogu nadrzędnego** w ścieżce to **grupa użytkowników** z **dostępem do zapisu**
 - Grupa użytkowników ma **dostęp do zapisu** do **pliku**
 
-Przy dowolnej z powyższych kombinacji, atakujący mógłby **wstrzyknąć** **link symboliczny/twardy** do oczekiwanej ścieżki, aby uzyskać uprzywilejowany, dowolny zapis.
+Przy dowolnej z powyższych kombinacji, atakujący mógłby **wstrzyknąć** **link symboliczny/twardy** w oczekiwanej ścieżce, aby uzyskać uprzywilejowany, dowolny zapis.
 
 ### Folder root R+X Specjalny przypadek
 
-Jeśli w **katalogu** znajdują się pliki, do których **tylko root ma dostęp R+X**, to **nie są one dostępne dla nikogo innego**. Tak więc luka pozwalająca na **przeniesienie pliku czytanego przez użytkownika**, który nie może być odczytany z powodu tej **ograniczenia**, z tego folderu **do innego**, mogłaby być wykorzystana do odczytu tych plików.
+Jeśli w **katalogu** znajdują się pliki, do których **tylko root ma dostęp R+X**, to **nie są one dostępne dla nikogo innego**. Tak więc luka pozwalająca na **przeniesienie pliku, który jest czytelny dla użytkownika**, który nie może być odczytany z powodu tej **ograniczenia**, z tego folderu **do innego**, mogłaby być wykorzystana do odczytu tych plików.
 
 Przykład w: [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions)
 
@@ -32,13 +32,13 @@ Przykład w: [https://theevilbit.github.io/posts/exploiting_directory_permission
 
 ### Umożliwiony plik/folder
 
-Jeśli uprzywilejowany proces zapisuje dane w **pliku**, który mógłby być **kontrolowany** przez **użytkownika o niższych uprawnieniach**, lub który mógłby być **wcześniej utworzony** przez użytkownika o niższych uprawnieniach. Użytkownik mógłby po prostu **wskazać go na inny plik** za pomocą linku symbolicznego lub twardego, a uprzywilejowany proces zapisze w tym pliku.
+Jeśli uprzywilejowany proces zapisuje dane w **pliku**, który może być **kontrolowany** przez **użytkownika o niższych uprawnieniach**, lub który mógł być **wcześniej utworzony** przez użytkownika o niższych uprawnieniach. Użytkownik mógłby po prostu **wskazać go na inny plik** za pomocą linku symbolicznego lub twardego, a uprzywilejowany proces zapisze w tym pliku.
 
 Sprawdź w innych sekcjach, gdzie atakujący mógłby **wykorzystać dowolny zapis do eskalacji uprawnień**.
 
 ### Otwórz `O_NOFOLLOW`
 
-Flaga `O_NOFOLLOW` używana przez funkcję `open` nie będzie podążać za linkiem symbolicznym w ostatnim komponencie ścieżki, ale będzie podążać za resztą ścieżki. Prawidłowy sposób na zapobieganie podążaniu za linkami symbolicznymi w ścieżce to użycie flagi `O_NOFOLLOW_ANY`.
+Flaga `O_NOFOLLOW` używana przez funkcję `open` nie będzie podążać za linkiem symbolicznym w ostatnim komponencie ścieżki, ale podąży za resztą ścieżki. Prawidłowy sposób zapobiegania podążaniu za linkami symbolicznymi w ścieżce to użycie flagi `O_NOFOLLOW_ANY`.
 
 ## .fileloc
 
@@ -60,9 +60,9 @@ Przykład:
 
 ### Wycieki FD (bez `O_CLOEXEC`)
 
-Jeśli wywołanie `open` nie ma flagi `O_CLOEXEC`, deskryptor pliku zostanie odziedziczony przez proces potomny. Tak więc, jeśli proces z uprawnieniami otworzy plik z uprawnieniami i wykona proces kontrolowany przez atakującego, atakujący **odziedziczy FD do uprzywilejowanego pliku**.
+Jeśli wywołanie `open` nie ma flagi `O_CLOEXEC`, deskryptor pliku zostanie odziedziczony przez proces potomny. Tak więc, jeśli proces z uprawnieniami otworzy plik z uprawnieniami i wykona proces kontrolowany przez atakującego, atakujący **odziedziczy FD nad plikiem z uprawnieniami**.
 
-Jeśli możesz sprawić, aby **proces otworzył plik lub folder z wysokimi uprawnieniami**, możesz nadużyć **`crontab`**, aby otworzyć plik w `/etc/sudoers.d` z **`EDITOR=exploit.py`**, dzięki czemu `exploit.py` uzyska FD do pliku w `/etc/sudoers` i go nadużyje.
+Jeśli możesz sprawić, by **proces otworzył plik lub folder z wysokimi uprawnieniami**, możesz nadużyć **`crontab`**, aby otworzyć plik w `/etc/sudoers.d` z **`EDITOR=exploit.py`**, tak aby `exploit.py` uzyskał FD do pliku wewnątrz `/etc/sudoers` i go nadużył.
 
 Na przykład: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098), kod: https://github.com/gergelykalman/CVE-2023-32428-a-macOS-LPE-via-MallocStackLogging
 
@@ -156,7 +156,7 @@ macos-xattr-acls-extra-stuff.md
 
 ### Ominięcie kontroli binarnych platform
 
-Niektóre kontrole bezpieczeństwa sprawdzają, czy binarny plik jest **binarnym plikiem platformy**, na przykład, aby umożliwić połączenie z usługą XPC. Jednak, jak pokazano w omijaniu w https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/, możliwe jest ominięcie tej kontroli poprzez uzyskanie binarnego pliku platformy (takiego jak /bin/ls) i wstrzyknięcie exploita za pomocą dyld, używając zmiennej środowiskowej `DYLD_INSERT_LIBRARIES`.
+Niektóre kontrole bezpieczeństwa sprawdzają, czy binarny plik jest **binarnym plikiem platformy**, na przykład, aby umożliwić połączenie z usługą XPC. Jednak, jak pokazano w omijaniu w https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/, możliwe jest ominięcie tej kontroli, uzyskując binarny plik platformy (tak jak /bin/ls) i wstrzykując exploit za pomocą dyld, używając zmiennej środowiskowej `DYLD_INSERT_LIBRARIES`.
 
 ### Ominięcie flag `CS_REQUIRE_LV` i `CS_FORCED_LV`
 
@@ -173,9 +173,9 @@ csops(pid, 9, &status, 4); // CS_OPS_SET_STATUS
 status = SecTaskGetCodeSignStatus(SecTaskCreateFromSelf(0));
 NSLog(@"=====Inject successfully into %d(%@), csflags=0x%x", pid, exePath, status);
 ```
-## Ominięcie podpisów kodu
+## Bypass Code Signatures
 
-Bundles zawierają plik **`_CodeSignature/CodeResources`**, który zawiera **hash** każdego pojedynczego **pliku** w **bundle**. Należy zauważyć, że hash CodeResources jest również **osadzony w wykonywalnym**, więc nie możemy tego zepsuć.
+Bundles zawierają plik **`_CodeSignature/CodeResources`**, który zawiera **hash** każdego pojedynczego **pliku** w **bundlu**. Należy zauważyć, że hash CodeResources jest również **osadzony w pliku wykonywalnym**, więc nie możemy tego zepsuć.
 
 Jednak istnieją pewne pliki, których podpis nie będzie sprawdzany, mają one klucz omit w plist, takie jak:
 ```xml
@@ -195,7 +195,7 @@ Jednak istnieją pewne pliki, których podpis nie będzie sprawdzany, mają one 
 </dict>
 <key>rules2</key>
 ...
-<key>^(.*/)?\.DS_Store$</key>
+<key>^(.*/index.html)?\.DS_Store$</key>
 <dict>
 <key>omit</key>
 <true/>
@@ -227,7 +227,7 @@ openssl dgst -binary -sha1 /System/Cryptexes/App/System/Applications/Safari.app/
 ```
 ## Montowanie dmg
 
-Użytkownik może zamontować niestandardowy dmg utworzony nawet na istniejących folderach. W ten sposób można stworzyć niestandardowy pakiet dmg z niestandardową zawartością:
+Użytkownik może zamontować niestandardowy dmg utworzony nawet na istniejących folderach. W ten sposób można utworzyć niestandardowy pakiet dmg z niestandardową zawartością:
 ```bash
 # Create the volume
 hdiutil create /private/tmp/tmp.dmg -size 2m -ov -volname CustomVolName -fs APFS 1>/dev/null
@@ -248,7 +248,7 @@ hdiutil detach /private/tmp/mnt 1>/dev/null
 # You can also create a dmg from an app using:
 hdiutil create -srcfolder justsome.app justsome.dmg
 ```
-Zwykle macOS montuje dysk, komunikując się z usługą Mach `com.apple.DiskArbitration.diskarbitrationd` (dostarczaną przez `/usr/libexec/diskarbitrationd`). Jeśli dodasz parametr `-d` do pliku plist LaunchDaemons i uruchomisz ponownie, będzie przechowywać logi w `/var/log/diskarbitrationd.log`.\
+Zwykle macOS montuje dysk, komunikując się z usługą Mach `com.apple.DiskArbitrarion.diskarbitrariond` (dostarczaną przez `/usr/libexec/diskarbitrationd`). Jeśli dodasz parametr `-d` do pliku plist LaunchDaemons i uruchomisz ponownie, będzie przechowywać logi w `/var/log/diskarbitrationd.log`.\
 Jednak możliwe jest użycie narzędzi takich jak `hdik` i `hdiutil`, aby komunikować się bezpośrednio z kextem `com.apple.driver.DiskImages`.
 
 ## Dowolne zapisy
@@ -261,7 +261,7 @@ Możesz **sfałszować** wykonanie tego skryptu za pomocą: **`sudo periodic dai
 
 ### Demony
 
-Napisz dowolny **LaunchDaemon** jak **`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`** z plist wykonującym dowolny skrypt, taki jak:
+Napisz dowolny **LaunchDaemon** jak **`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`** z plikiem plist wykonującym dowolny skrypt jak:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -278,15 +278,15 @@ Napisz dowolny **LaunchDaemon** jak **`/Library/LaunchDaemons/xyz.hacktricks.pri
 </dict>
 </plist>
 ```
-Just generate the script `/Applications/Scripts/privesc.sh` with the **komendy** you would like to run as root.
+Just generate the script `/Applications/Scripts/privesc.sh` with the **commands** you would like to run as root.
 
 ### Sudoers File
 
-If you have **dowolny zapis**, you could create a file inside the folder **`/etc/sudoers.d/`** granting yourself **sudo** privileges.
+If you have **arbitrary write**, you could create a file inside the folder **`/etc/sudoers.d/`** granting yourself **sudo** privileges.
 
 ### PATH files
 
-The file **`/etc/paths`** is one of the main places that populates the PATH env variable. You must be root to overwrite it, but if a script from **privileged process** is executing some **komenda without the full path**, you might be able to **przejąć** it modifying this file.
+The file **`/etc/paths`** is one of the main places that populates the PATH env variable. You must be root to overwrite it, but if a script from **privileged process** is executing some **command without the full path**, you might be able to **hijack** it modifying this file.
 
 You can also write files in **`/etc/paths.d`** to load new folders into the `PATH` env variable.
 
@@ -308,11 +308,11 @@ Następnie, zmodyfikuj plik `/etc/cups/cups-files.conf`, ponownie wskazując `Lo
 
 ### Sandbox Escape
 
-Możliwe jest ucieczka z sandboxa macOS za pomocą FS arbitrary write. Dla niektórych przykładów sprawdź stronę [macOS Auto Start](../../../../macos-auto-start-locations.md), ale powszechnym przypadkiem jest zapisanie pliku preferencji Terminala w `~/Library/Preferences/com.apple.Terminal.plist`, który wykonuje polecenie przy starcie i wywołuje je za pomocą `open`.
+Możliwe jest wydostanie się z sandboxa macOS za pomocą FS arbitrary write. Dla niektórych przykładów sprawdź stronę [macOS Auto Start](../../../../macos-auto-start-locations.md), ale powszechnym przypadkiem jest zapisanie pliku preferencji Terminala w `~/Library/Preferences/com.apple.Terminal.plist`, który wykonuje polecenie przy starcie i wywołuje je za pomocą `open`.
 
-## Generowanie plików do zapisu jako inni użytkownicy
+## Generate writable files as other users
 
-To wygeneruje plik, który należy do roota, a który jest zapisywalny przeze mnie ([**code from here**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). To może również działać jako privesc:
+To wygeneruje plik, który należy do roota, a który jest zapisywalny przez mnie ([**code from here**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). To może również działać jako privesc:
 ```bash
 DIRNAME=/usr/local/etc/periodic/daily
 
@@ -324,9 +324,9 @@ MallocStackLogging=1 MallocStackLoggingDirectory=$DIRNAME MallocStackLoggingDont
 FILENAME=$(ls "$DIRNAME")
 echo $FILENAME
 ```
-## Pamięć współdzielona POSIX
+## POSIX Shared Memory
 
-**Pamięć współdzielona POSIX** pozwala procesom w systemach operacyjnych zgodnych z POSIX na dostęp do wspólnej przestrzeni pamięci, co ułatwia szybszą komunikację w porównaniu do innych metod komunikacji międzyprocesowej. Polega to na tworzeniu lub otwieraniu obiektu pamięci współdzielonej za pomocą `shm_open()`, ustawianiu jego rozmiaru za pomocą `ftruncate()` oraz mapowaniu go do przestrzeni adresowej procesu za pomocą `mmap()`. Procesy mogą następnie bezpośrednio odczytywać i zapisywać do tej przestrzeni pamięci. Aby zarządzać równoczesnym dostępem i zapobiegać uszkodzeniu danych, często stosuje się mechanizmy synchronizacji, takie jak mutexy lub semafory. Na koniec procesy odmapowują i zamykają pamięć współdzieloną za pomocą `munmap()` i `close()`, a opcjonalnie usuwają obiekt pamięci za pomocą `shm_unlink()`. Ten system jest szczególnie skuteczny w przypadku efektywnej, szybkiej IPC w środowiskach, w których wiele procesów musi szybko uzyskiwać dostęp do wspólnych danych.
+**Pamięć współdzielona POSIX** pozwala procesom w systemach operacyjnych zgodnych z POSIX na dostęp do wspólnego obszaru pamięci, co ułatwia szybszą komunikację w porównaniu do innych metod komunikacji międzyprocesowej. Polega to na tworzeniu lub otwieraniu obiektu pamięci współdzielonej za pomocą `shm_open()`, ustawianiu jego rozmiaru za pomocą `ftruncate()`, a następnie mapowaniu go do przestrzeni adresowej procesu za pomocą `mmap()`. Procesy mogą następnie bezpośrednio odczytywać i zapisywać do tego obszaru pamięci. Aby zarządzać równoczesnym dostępem i zapobiegać uszkodzeniu danych, często stosuje się mechanizmy synchronizacji, takie jak mutexy lub semafory. Na koniec procesy odmapowują i zamykają pamięć współdzieloną za pomocą `munmap()` i `close()`, a opcjonalnie usuwają obiekt pamięci za pomocą `shm_unlink()`. Ten system jest szczególnie skuteczny w przypadku efektywnej, szybkiej IPC w środowiskach, w których wiele procesów musi szybko uzyskiwać dostęp do wspólnych danych.
 
 <details>
 
@@ -422,13 +422,13 @@ return 0;
 
 ## macOS Guarded Descriptors
 
-**macOSCguarded descriptors** to funkcja zabezpieczeń wprowadzona w macOS, mająca na celu zwiększenie bezpieczeństwa i niezawodności **operacji na deskryptorach plików** w aplikacjach użytkownika. Te zabezpieczone deskryptory umożliwiają powiązanie określonych ograniczeń lub "zabezpieczeń" z deskryptorami plików, które są egzekwowane przez jądro.
+**macOSCguarded descriptors** to funkcja zabezpieczeń wprowadzona w macOS, mająca na celu zwiększenie bezpieczeństwa i niezawodności **operacji na deskryptorach plików** w aplikacjach użytkownika. Te zabezpieczone deskryptory umożliwiają przypisanie określonych ograniczeń lub "strażników" do deskryptorów plików, które są egzekwowane przez jądro.
 
 Funkcja ta jest szczególnie przydatna w zapobieganiu pewnym klasom luk w zabezpieczeniach, takim jak **nieautoryzowany dostęp do plików** lub **warunki wyścigu**. Te luki występują, gdy na przykład wątek uzyskuje dostęp do opisu pliku, dając **innemu podatnemu wątkowi dostęp do niego** lub gdy deskryptor pliku jest **dziedziczony** przez podatny proces potomny. Niektóre funkcje związane z tą funkcjonalnością to:
 
-- `guarded_open_np`: Otwiera FD z zabezpieczeniem
+- `guarded_open_np`: Otwiera FD z ochroną
 - `guarded_close_np`: Zamyka go
-- `change_fdguard_np`: Zmienia flagi zabezpieczeń na deskryptorze (nawet usuwając ochronę)
+- `change_fdguard_np`: Zmienia flagi ochrony na deskryptorze (nawet usuwając ochronę)
 
 ## References
 
