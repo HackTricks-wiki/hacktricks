@@ -6,8 +6,8 @@
 Εδώ σας παρουσιάζω τους κύριους τρόπους που μπορείτε να προσπαθήσετε να το πετύχετε:
 
 - [**CORS bypass**](pentesting-web/cors-bypass.md): Αν μπορείτε να παρακάμψετε τα headers CORS, θα είστε σε θέση να κλέψετε τις πληροφορίες εκτελώντας Ajax αίτημα για μια κακόβουλη σελίδα.
-- [**XSS**](pentesting-web/xss-cross-site-scripting/): Αν βρείτε μια ευπάθεια XSS στη σελίδα, μπορεί να είστε σε θέση να την εκμεταλλευτείτε για να κλέψετε τις πληροφορίες.
-- [**Danging Markup**](pentesting-web/dangling-markup-html-scriptless-injection/): Αν δεν μπορείτε να εισάγετε XSS tags, μπορεί ακόμα να είστε σε θέση να κλέψετε τις πληροφορίες χρησιμοποιώντας άλλες κανονικές HTML tags.
-- [**Clickjaking**](pentesting-web/clickjacking.md): Αν δεν υπάρχει προστασία κατά αυτής της επίθεσης, μπορεί να είστε σε θέση να παραπλανήσετε τον χρήστη να σας στείλει τις ευαίσθητες πληροφορίες (ένα παράδειγμα [εδώ](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)).
+- [**XSS**](pentesting-web/xss-cross-site-scripting/index.html): Αν βρείτε μια ευπάθεια XSS στη σελίδα, μπορεί να είστε σε θέση να την εκμεταλλευτείτε για να κλέψετε τις πληροφορίες.
+- [**Danging Markup**](pentesting-web/dangling-markup-html-scriptless-injection/index.html): Αν δεν μπορείτε να εισάγετε XSS tags, μπορεί ακόμα να είστε σε θέση να κλέψετε τις πληροφορίες χρησιμοποιώντας άλλες κανονικές HTML tags.
+- [**Clickjaking**](pentesting-web/clickjacking.md): Αν δεν υπάρχει προστασία κατά αυτής της επίθεσης, μπορεί να είστε σε θέση να παραπλανήσετε τον χρήστη να σας στείλει τις ευαίσθητες δεδομένες (ένα παράδειγμα [εδώ](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)).
 
 {{#include ./banners/hacktricks-training.md}}
