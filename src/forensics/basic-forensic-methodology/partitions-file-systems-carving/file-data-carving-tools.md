@@ -1,15 +1,15 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-# कार्विंग उपकरण
+# Carving tools
 
-## ऑटोप्सी
+## Autopsy
 
-फोरेंसिक्स में छवियों से फ़ाइलें निकालने के लिए सबसे सामान्य उपकरण [**ऑटोप्सी**](https://www.autopsy.com/download/) है। इसे डाउनलोड करें, इंस्टॉल करें और "छिपी" फ़ाइलें खोजने के लिए फ़ाइल को इनजेस्ट करें। ध्यान दें कि ऑटोप्सी डिस्क इमेज और अन्य प्रकार की इमेज का समर्थन करने के लिए बनाई गई है, लेकिन साधारण फ़ाइलों के लिए नहीं।
+फोरेंसिक्स में इमेज से फाइल निकालने के लिए सबसे सामान्य उपकरण [**Autopsy**](https://www.autopsy.com/download/) है। इसे डाउनलोड करें, इंस्टॉल करें और "छिपी" फाइलें खोजने के लिए इसे फाइल को इनजेस्ट करने दें। ध्यान दें कि Autopsy डिस्क इमेज और अन्य प्रकार की इमेज का समर्थन करने के लिए बनाया गया है, लेकिन साधारण फाइलों के लिए नहीं।
 
-## बिनवॉक <a id="binwalk"></a>
+## Binwalk <a id="binwalk"></a>
 
-**बिनवॉक** एक उपकरण है जो बाइनरी फ़ाइलों जैसे छवियों और ऑडियो फ़ाइलों में एम्बेडेड फ़ाइलों और डेटा की खोज के लिए है। इसे `apt` के साथ इंस्टॉल किया जा सकता है, हालाँकि [स्रोत](https://github.com/ReFirmLabs/binwalk) github पर पाया जा सकता है।  
-**उपयोगी कमांड**:
+**Binwalk** एक उपकरण है जो बाइनरी फाइलों जैसे इमेज और ऑडियो फाइलों में एम्बेडेड फाइलों और डेटा की खोज करता है। इसे `apt` के साथ इंस्टॉल किया जा सकता है, हालांकि [source](https://github.com/ReFirmLabs/binwalk) github पर पाया जा सकता है।  
+**Useful commands**:
 ```bash
 sudo apt install binwalk #Insllation
 binwalk file #Displays the embedded data in the given file
@@ -39,11 +39,11 @@ scalpel file.img -o output
 ```text
 bulk_extractor memory.img -o out_folder
 ```
-**सभी जानकारी** के माध्यम से नेविगेट करें जो उपकरण ने एकत्र की है \(पासवर्ड?\), **विश्लेषण** करें **पैकेट्स** का \(पढ़ें [ **Pcaps विश्लेषण**](../pcap-inspection/)\), **अजीब डोमेन** की खोज करें \(डोमेन जो **मैलवेयर** या **अवास्तविक** से संबंधित हैं\).
+**सभी जानकारी** के माध्यम से नेविगेट करें जो उपकरण ने एकत्र की है \(पासवर्ड?\), **विश्लेषण** करें **पैकेट्स** का \(पढ़ें[ **Pcaps विश्लेषण**](../pcap-inspection/index.html)\), **अजीब डोमेन** की खोज करें \(डोमेन जो **मैलवेयर** या **गैर-मौजूद** से संबंधित हैं\).
 
 ## PhotoRec
 
-आप इसे [https://www.cgsecurity.org/wiki/TestDisk_Download](https://www.cgsecurity.org/wiki/TestDisk_Download) पर पा सकते हैं।
+आप इसे [https://www.cgsecurity.org/wiki/TestDisk_Download](https://www.cgsecurity.org/wiki/TestDisk_Download) पर पा सकते हैं
 
 यह GUI और CLI संस्करण के साथ आता है। आप उन **फाइल-प्रकारों** का चयन कर सकते हैं जिन्हें आप PhotoRec से खोजने के लिए चाहते हैं।
 
@@ -55,7 +55,7 @@ bulk_extractor memory.img -o out_folder
 
 AES कुंजियों की खोज उनके कुंजी कार्यक्रमों की खोज करके करता है। 128, 192, और 256 बिट कुंजियों को खोजने में सक्षम, जैसे कि TrueCrypt और BitLocker द्वारा उपयोग की जाने वाली।
 
-[यहाँ डाउनलोड करें](https://sourceforge.net/projects/findaes/)।
+[यहाँ डाउनलोड करें](https://sourceforge.net/projects/findaes/).
 
 # पूरक उपकरण
 
