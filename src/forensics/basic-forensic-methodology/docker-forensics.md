@@ -87,10 +87,10 @@ Vous pouvez décompresser toutes les couches d'une image depuis le répertoire o
 tar -xf image.tar
 for d in `find * -maxdepth 0 -type d`; do cd $d; tar -xf ./layer.tar; cd ..; done
 ```
-## Informations d'identification depuis la mémoire
+## Identifiants depuis la mémoire
 
-Notez que lorsque vous exécutez un conteneur docker à l'intérieur d'un hôte, **vous pouvez voir les processus en cours d'exécution sur le conteneur depuis l'hôte** simplement en exécutant `ps -ef`.
+Notez que lorsque vous exécutez un conteneur docker à l'intérieur d'un hôte **vous pouvez voir les processus en cours d'exécution sur le conteneur depuis l'hôte** simplement en exécutant `ps -ef`
 
-Par conséquent (en tant que root), vous pouvez **extraire la mémoire des processus** depuis l'hôte et rechercher des **informations d'identification** juste [**comme dans l'exemple suivant**](../../linux-hardening/privilege-escalation/#process-memory).
+Par conséquent (en tant que root) vous pouvez **extraire la mémoire des processus** depuis l'hôte et rechercher des **identifiants** juste [**comme dans l'exemple suivant**](../../linux-hardening/privilege-escalation/index.html#process-memory).
 
 {{#include ../../banners/hacktricks-training.md}}

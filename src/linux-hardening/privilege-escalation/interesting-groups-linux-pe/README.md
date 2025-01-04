@@ -6,7 +6,7 @@
 
 ### **PE - Méthode 1**
 
-**Parfois**, **par défaut (ou parce que certains logiciels en ont besoin)**, à l'intérieur du fichier **/etc/sudoers**, vous pouvez trouver certaines de ces lignes :
+**Parfois**, **par défaut (ou parce que certains logiciels en ont besoin)**, à l'intérieur du **/etc/sudoers** fichier, vous pouvez trouver certaines de ces lignes :
 ```bash
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
@@ -27,7 +27,7 @@ Trouvez tous les binaires suid et vérifiez s'il y a le binaire **Pkexec** :
 find / -perm -4000 2>/dev/null
 ```
 Si vous constatez que le binaire **pkexec est un binaire SUID** et que vous appartenez à **sudo** ou **admin**, vous pourriez probablement exécuter des binaires en tant que sudo en utilisant `pkexec`.\
-Ceci est dû au fait que typiquement, ce sont les groupes à l'intérieur de la **politique polkit**. Cette politique identifie essentiellement quels groupes peuvent utiliser `pkexec`. Vérifiez-le avec :
+C'est parce que typiquement, ce sont les groupes à l'intérieur de la **politique polkit**. Cette politique identifie essentiellement quels groupes peuvent utiliser `pkexec`. Vérifiez-le avec :
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
@@ -43,7 +43,7 @@ polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freed
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-**Ce n'est pas parce que vous n'avez pas les autorisations, mais parce que vous n'êtes pas connecté sans interface graphique**. Et il existe une solution à ce problème ici : [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Vous avez besoin de **2 sessions ssh différentes** :
+**Ce n'est pas parce que vous n'avez pas les permissions mais parce que vous n'êtes pas connecté sans une interface graphique**. Et il y a une solution à ce problème ici : [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Vous avez besoin de **2 sessions ssh différentes** :
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -62,7 +62,7 @@ pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 ```
 Cela signifie que **tout utilisateur appartenant au groupe wheel peut exécuter n'importe quoi en tant que sudo**.
 
-Si c'est le cas, pour **devenir root, vous pouvez simplement exécuter** :
+Si c'est le cas, pour **devenir root, vous pouvez simplement exécuter**:
 ```
 sudo su
 ```
@@ -109,7 +109,7 @@ $ pspy64
 2024/02/01 22:02:14 CMD: UID=0     PID=17890  | sshd: mane [priv]
 2024/02/01 22:02:15 CMD: UID=0     PID=17891  | -bash
 ```
-**Exploitation**
+**Exploiter**
 ```bash
 # 0x1 Add a run-parts script in /usr/local/bin/
 $ vi /usr/local/bin/run-parts
@@ -146,9 +146,9 @@ Notez qu'en utilisant debugfs, vous pouvez également **écrire des fichiers**. 
 debugfs -w /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
-Cependant, si vous essayez de **écrire des fichiers appartenant à root** (comme `/etc/shadow` ou `/etc/passwd`), vous obtiendrez une erreur "**Permission denied**".
+Cependant, si vous essayez de **modifier des fichiers appartenant à root** (comme `/etc/shadow` ou `/etc/passwd`), vous obtiendrez une erreur "**Permission denied**".
 
-## Video Group
+## Groupe Vidéo
 
 En utilisant la commande `w`, vous pouvez trouver **qui est connecté au système** et cela affichera une sortie comme celle-ci :
 ```bash
@@ -163,11 +163,11 @@ Le **groupe vidéo** a accès à l'affichage de la sortie écran. En gros, vous 
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-Pour **ouvrir** l'**image brute**, vous pouvez utiliser **GIMP**, sélectionner le fichier **`screen.raw`** et choisir comme type de fichier **Données d'image brute** :
+Pour **ouvrir** l'**image brute**, vous pouvez utiliser **GIMP**, sélectionner le fichier \*\*`screen.raw` \*\* et choisir comme type de fichier **Données d'image brute** :
 
 ![](<../../../images/image (463).png>)
 
-Ensuite, modifiez la largeur et la hauteur pour celles utilisées sur l'écran et vérifiez différents types d'image (et sélectionnez celui qui montre le mieux l'écran) :
+Ensuite, modifiez la largeur et la hauteur pour celles utilisées sur l'écran et vérifiez différents types d'images (et sélectionnez celui qui montre mieux l'écran) :
 
 ![](<../../../images/image (317).png>)
 
@@ -199,7 +199,7 @@ Enfin, si vous n'aimez aucune des suggestions précédentes, ou si elles ne fonc
 ../docker-security/
 {{#endref}}
 
-Si vous avez des permissions d'écriture sur le socket docker, lisez [**ce post sur la façon d'escalader les privilèges en abusant du socket docker**](../#writable-docker-socket)**.**
+Si vous avez des permissions d'écriture sur le socket docker, lisez [**ce post sur la façon d'escalader les privilèges en abusant du socket docker**](../index.html#writable-docker-socket)**.**
 
 {{#ref}}
 https://github.com/KrustyHack/docker-privilege-escalation
@@ -218,7 +218,7 @@ https://fosterelli.co/privilege-escalation-via-docker.html
 ## Groupe Adm
 
 En général, les **membres** du groupe **`adm`** ont des permissions pour **lire les fichiers de log** situés dans _/var/log/_.\
-Par conséquent, si vous avez compromis un utilisateur de ce groupe, vous devriez absolument **regarder les logs**.
+Par conséquent, si vous avez compromis un utilisateur de ce groupe, vous devriez absolument **jeter un œil aux logs**.
 
 ## Groupe Auth
 

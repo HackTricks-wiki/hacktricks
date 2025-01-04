@@ -65,7 +65,7 @@ Ensuite, vous pouvez utiliser l'outil [**DataProtectionDecryptor**](https://nirs
 
 ![](<../../../images/image (448).png>)
 
-Si tout se passe comme prévu, l'outil indiquera la **clé primaire** que vous devez **utiliser pour récupérer l'originale**. Pour récupérer l'originale, utilisez simplement cette [recette cyber_chef](<https://gchq.github.io/CyberChef/#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) en mettant la clé primaire comme "phrase de passe" dans la recette.
+Si tout se passe comme prévu, l'outil indiquera la **clé primaire** que vous devez **utiliser pour récupérer l'originale**. Pour récupérer l'originale, utilisez simplement cette [recette cyber_chef](<https://gchq.github.io/CyberChef/index.html#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) en mettant la clé primaire comme "phrase de passe" dans la recette.
 
 Le hex résultant est la clé finale utilisée pour chiffrer les bases de données qui peut être déchiffrée avec :
 ```bash

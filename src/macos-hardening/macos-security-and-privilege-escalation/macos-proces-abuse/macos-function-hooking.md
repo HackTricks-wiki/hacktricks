@@ -6,7 +6,7 @@
 
 Créez un **dylib** avec une section **`__interpose` (`__DATA___interpose`)** (ou une section marquée avec **`S_INTERPOSING`**) contenant des tuples de **pointeurs de fonction** qui se réfèrent aux fonctions **originales** et **de remplacement**.
 
-Ensuite, **injectez** le dylib avec **`DYLD_INSERT_LIBRARIES`** (l'interposition doit se produire avant le chargement de l'application principale). Évidemment, les [**restrictions** appliquées à l'utilisation de **`DYLD_INSERT_LIBRARIES`** s'appliquent également ici](macos-library-injection/#check-restrictions).
+Ensuite, **injectez** le dylib avec **`DYLD_INSERT_LIBRARIES`** (l'interposition doit se produire avant le chargement de l'application principale). Évidemment, les [**restrictions** appliquées à l'utilisation de **`DYLD_INSERT_LIBRARIES`** s'appliquent également ici](macos-library-injection/index.html#check-restrictions).
 
 ### Interposer printf
 
@@ -84,7 +84,7 @@ Notez également que **l'interposition se produit entre le processus et les bibl
 
 ### Interposition Dynamique
 
-Il est maintenant également possible d'interposer une fonction dynamiquement en utilisant la fonction **`dyld_dynamic_interpose`**. Cela permet d'interposer programatiquement une fonction à l'exécution au lieu de le faire uniquement depuis le début.
+Il est maintenant également possible d'interposer une fonction dynamiquement en utilisant la fonction **`dyld_dynamic_interpose`**. Cela permet d'interposer programmatique une fonction à l'exécution au lieu de le faire uniquement depuis le début.
 
 Il suffit d'indiquer les **tuples** de la **fonction à remplacer et de la fonction de remplacement**.
 ```c
@@ -95,9 +95,9 @@ const void* replacee;
 extern void dyld_dynamic_interpose(const struct mach_header* mh,
 const struct dyld_interpose_tuple array[], size_t count);
 ```
-## Méthode Swizzling
+## Method Swizzling
 
-En ObjectiveC, c'est ainsi qu'une méthode est appelée : **`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
+En ObjectiveC, un méthode est appelée comme suit : **`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
 
 Il faut l'**objet**, la **méthode** et les **params**. Et lorsqu'une méthode est appelée, un **msg est envoyé** en utilisant la fonction **`objc_msgSend`** : `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
 
@@ -181,7 +181,7 @@ return 0;
 La fonction **`method_exchangeImplementations`** permet de **changer** l'**adresse** de l'**implémentation** d'**une fonction pour l'autre**.
 
 > [!CAUTION]
-> Ainsi, lorsque une fonction est appelée, ce qui est **exécuté est l'autre**.
+> Donc, lorsque une fonction est appelée, ce qui est **exécuté est l'autre**.
 ```objectivec
 //gcc -framework Foundation swizzle_str.m -o swizzle_str
 
@@ -226,13 +226,13 @@ return 0;
 }
 ```
 > [!WARNING]
-> Dans ce cas, si le **code d'implémentation de la méthode légitime** **vérifie** le **nom de la méthode**, il pourrait **détecter** ce swizzling et empêcher son exécution.
+> Dans ce cas, si le **code d'implémentation de la méthode légitime** **vérifie** le **nom de la méthode**, il pourrait **détecter** ce swizzling et l'empêcher de s'exécuter.
 >
 > La technique suivante n'a pas cette restriction.
 
 ### Swizzling de méthode avec method_setImplementation
 
-Le format précédent est étrange car vous changez l'implémentation de 2 méthodes l'une pour l'autre. En utilisant la fonction **`method_setImplementation`**, vous pouvez **changer** l'**implémentation** d'une **méthode pour l'autre**.
+Le format précédent est étrange car vous changez l'implémentation de 2 méthodes l'une par rapport à l'autre. En utilisant la fonction **`method_setImplementation`**, vous pouvez **changer** l'**implémentation** d'une **méthode pour l'autre**.
 
 N'oubliez pas de **stocker l'adresse de l'implémentation de l'originale** si vous prévoyez de l'appeler depuis la nouvelle implémentation avant de l'écraser, car il sera ensuite beaucoup plus compliqué de localiser cette adresse.
 ```objectivec
@@ -290,7 +290,7 @@ return 0;
 
 Dans cette page, différentes manières de hooker des fonctions ont été discutées. Cependant, elles impliquaient **l'exécution de code à l'intérieur du processus pour attaquer**.
 
-Pour ce faire, la technique la plus simple à utiliser est d'injecter un [Dyld via des variables d'environnement ou un détournement](macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md). Cependant, je suppose que cela pourrait également être fait via [l'injection de processus Dylib](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port).
+Pour ce faire, la technique la plus simple à utiliser est d'injecter un [Dyld via des variables d'environnement ou un détournement](macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md). Cependant, je suppose que cela pourrait également être fait via [l'injection de processus Dylib](macos-ipc-inter-process-communication/index.html#dylib-process-injection-via-task-port).
 
 Cependant, les deux options sont **limitées** aux binaires/processus **non protégés**. Vérifiez chaque technique pour en savoir plus sur les limitations.
 

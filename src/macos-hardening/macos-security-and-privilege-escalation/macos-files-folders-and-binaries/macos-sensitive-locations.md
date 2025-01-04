@@ -41,7 +41,7 @@ security dump-keychain -d #Dump all the info, included secrets (the user will be
 
 ### Aperçu de Keychaindump
 
-Un outil nommé **keychaindump** a été développé pour extraire des mots de passe des porte-clés macOS, mais il rencontre des limitations sur les versions macOS plus récentes comme Big Sur, comme indiqué dans une [discussion](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760). L'utilisation de **keychaindump** nécessite que l'attaquant accède et élève ses privilèges à **root**. L'outil exploite le fait que le porte-clé est déverrouillé par défaut lors de la connexion de l'utilisateur pour plus de commodité, permettant aux applications d'y accéder sans nécessiter le mot de passe de l'utilisateur à plusieurs reprises. Cependant, si un utilisateur choisit de verrouiller son porte-clé après chaque utilisation, **keychaindump** devient inefficace.
+Un outil nommé **keychaindump** a été développé pour extraire des mots de passe des porte-clés macOS, mais il rencontre des limitations sur les versions macOS plus récentes comme Big Sur, comme indiqué dans une [discussion](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760). L'utilisation de **keychaindump** nécessite que l'attaquant obtienne un accès et élève ses privilèges à **root**. L'outil exploite le fait que le porte-clé est déverrouillé par défaut lors de la connexion de l'utilisateur pour des raisons de commodité, permettant aux applications d'y accéder sans nécessiter le mot de passe de l'utilisateur à plusieurs reprises. Cependant, si un utilisateur choisit de verrouiller son porte-clé après chaque utilisation, **keychaindump** devient inefficace.
 
 **Keychaindump** fonctionne en ciblant un processus spécifique appelé **securityd**, décrit par Apple comme un démon pour les opérations d'autorisation et cryptographiques, crucial pour accéder au porte-clé. Le processus d'extraction implique l'identification d'une **Master Key** dérivée du mot de passe de connexion de l'utilisateur. Cette clé est essentielle pour lire le fichier du porte-clé. Pour localiser la **Master Key**, **keychaindump** scanne le tas de mémoire de **securityd** en utilisant la commande `vmmap`, à la recherche de clés potentielles dans des zones marquées comme `MALLOC_TINY`. La commande suivante est utilisée pour inspecter ces emplacements mémoire :
 ```bash
@@ -55,7 +55,7 @@ sudo ./keychaindump
 
 [**Chainbreaker**](https://github.com/n0fate/chainbreaker) peut être utilisé pour extraire les types d'informations suivants d'un trousseau OSX de manière forensiquement valide :
 
-- Mot de passe de trousseau haché, adapté pour le craquage avec [hashcat](https://hashcat.net/hashcat/) ou [John the Ripper](https://www.openwall.com/john/)
+- Mot de passe du trousseau haché, adapté pour le craquage avec [hashcat](https://hashcat.net/hashcat/) ou [John the Ripper](https://www.openwall.com/john/)
 - Mots de passe Internet
 - Mots de passe génériques
 - Clés privées
@@ -90,9 +90,9 @@ hashcat.exe -m 23100 --keep-guessing hashes.txt dictionary.txt
 # Use the key to decrypt the passwords
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
-#### **Extraire les clés du trousseau (avec mots de passe) avec un dump mémoire**
+#### **Dump des clés de trousseau (avec mots de passe) avec un dump mémoire**
 
-[Suivez ces étapes](../#dumping-memory-with-osxpmem) pour effectuer un **dump mémoire**
+[Suivez ces étapes](../index.html#dumping-memory-with-osxpmem) pour effectuer un **dump mémoire**
 ```bash
 #Use volafox (https://github.com/n0fate/volafox) to extract possible keychain passwords
 # Unformtunately volafox isn't working with the latest versions of MacOS
@@ -101,9 +101,9 @@ python vol.py -i ~/Desktop/show/macosxml.mem -o keychaindump
 #Try to extract the passwords using the extracted keychain passwords
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
-#### **Dump des clés de trousseau (avec mots de passe) en utilisant le mot de passe de l'utilisateur**
+#### **Extraire les clés du trousseau (avec mots de passe) en utilisant le mot de passe de l'utilisateur**
 
-Si vous connaissez le mot de passe de l'utilisateur, vous pouvez l'utiliser pour **dump et déchiffrer les trousseaux qui appartiennent à l'utilisateur**.
+Si vous connaissez le mot de passe de l'utilisateur, vous pouvez l'utiliser pour **extraire et déchiffrer les trousseaux qui appartiennent à l'utilisateur**.
 ```bash
 #Prompt to ask for the password
 python2.7 chainbreaker.py --dump-all --password-prompt /Users/<username>/Library/Keychains/login.keychain-db
@@ -112,7 +112,7 @@ python2.7 chainbreaker.py --dump-all --password-prompt /Users/<username>/Library
 
 Le fichier **kcpassword** est un fichier qui contient le **mot de passe de connexion de l'utilisateur**, mais seulement si le propriétaire du système a **activé la connexion automatique**. Par conséquent, l'utilisateur sera automatiquement connecté sans qu'on lui demande un mot de passe (ce qui n'est pas très sécurisé).
 
-Le mot de passe est stocké dans le fichier **`/etc/kcpassword`** xored avec la clé **`0x7D 0x89 0x52 0x23 0xD2 0xBC 0xDD 0xEA 0xA3 0xB9 0x1F`**. Si le mot de passe des utilisateurs est plus long que la clé, la clé sera réutilisée.\
+Le mot de passe est stocké dans le fichier **`/etc/kcpassword`** xored avec la clé **`0x7D 0x89 0x52 0x23 0xD2 0xBC 0xDD 0xEA 0xA3 0xB9 0x1F`**. Si le mot de passe de l'utilisateur est plus long que la clé, la clé sera réutilisée.\
 Cela rend le mot de passe assez facile à récupérer, par exemple en utilisant des scripts comme [**celui-ci**](https://gist.github.com/opshope/32f65875d45215c3677d).
 
 ## Informations intéressantes dans les bases de données
@@ -129,7 +129,7 @@ sqlite3 $HOME/Suggestions/snippets.db 'select * from emailSnippets'
 
 Vous pouvez trouver les données de Notifications dans `$(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/`
 
-La plupart des informations intéressantes se trouveront dans **blob**. Vous devrez donc **extraire** ce contenu et le **transformer** en **lisible** **par** **humain** ou utiliser **`strings`**. Pour y accéder, vous pouvez faire :
+La plupart des informations intéressantes se trouvent dans **blob**. Vous devrez donc **extraire** ce contenu et le **transformer** en **lisible** **par** **un** **humain** ou utiliser **`strings`**. Pour y accéder, vous pouvez faire :
 ```bash
 cd $(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/
 strings $(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/db2/db | grep -i -A4 slack
@@ -191,7 +191,7 @@ Ce fichier accorde des permissions à des utilisateurs spécifiques par UUID (et
 
 ### Notifications Darwin
 
-Le démon principal pour les notifications est **`/usr/sbin/notifyd`**. Afin de recevoir des notifications, les clients doivent s'enregistrer via le port Mach `com.apple.system.notification_center` (vérifiez-les avec `sudo lsmp -p <pid notifyd>`). Le démon est configurable avec le fichier `/etc/notify.conf`.
+Le principal démon pour les notifications est **`/usr/sbin/notifyd`**. Afin de recevoir des notifications, les clients doivent s'enregistrer via le port Mach `com.apple.system.notification_center` (vérifiez-les avec `sudo lsmp -p <pid notifyd>`). Le démon est configurable avec le fichier `/etc/notify.conf`.
 
 Les noms utilisés pour les notifications sont des notations DNS inversées uniques et lorsqu'une notification est envoyée à l'un d'eux, le(s) client(s) qui ont indiqué qu'ils peuvent la gérer la recevront.
 

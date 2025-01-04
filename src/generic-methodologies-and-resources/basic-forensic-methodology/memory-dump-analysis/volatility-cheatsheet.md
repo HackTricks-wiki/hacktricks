@@ -54,11 +54,11 @@ Accédez à la documentation officielle dans [Volatility command reference](http
 
 ### Une note sur les plugins “list” vs. “scan”
 
-Volatility a deux approches principales pour les plugins, qui se reflètent parfois dans leurs noms. Les plugins “list” essaieront de naviguer à travers les structures du noyau Windows pour récupérer des informations comme les processus (localiser et parcourir la liste chaînée des structures `_EPROCESS` en mémoire), les handles du système d'exploitation (localiser et lister la table des handles, déréférencer les pointeurs trouvés, etc.). Ils se comportent plus ou moins comme l'API Windows le ferait si on lui demandait, par exemple, de lister les processus.
+Volatility a deux approches principales pour les plugins, qui se reflètent parfois dans leurs noms. Les plugins “list” essaieront de naviguer à travers les structures du noyau Windows pour récupérer des informations comme les processus (localiser et parcourir la liste chaînée des structures `_EPROCESS` en mémoire), les handles du système d'exploitation (localiser et lister la table des handles, désérférencer les pointeurs trouvés, etc.). Ils se comportent plus ou moins comme l'API Windows le ferait si on lui demandait, par exemple, de lister les processus.
 
 Cela rend les plugins “list” assez rapides, mais tout aussi vulnérables que l'API Windows à la manipulation par des malwares. Par exemple, si un malware utilise DKOM pour dissocier un processus de la liste chaînée `_EPROCESS`, il n'apparaîtra pas dans le Gestionnaire des tâches et ne sera pas non plus dans le pslist.
 
-Les plugins “scan”, en revanche, adopteront une approche similaire à l'extraction de la mémoire pour des éléments qui pourraient avoir du sens lorsqu'ils sont déréférencés en tant que structures spécifiques. `psscan`, par exemple, lira la mémoire et essaiera de créer des objets `_EPROCESS` à partir de celle-ci (il utilise le scan de pool-tag, qui recherche des chaînes de 4 octets indiquant la présence d'une structure d'intérêt). L'avantage est qu'il peut déterrer des processus qui ont quitté, et même si un malware altère la liste chaînée `_EPROCESS`, le plugin trouvera toujours la structure laissée en mémoire (puisqu'elle doit encore exister pour que le processus fonctionne). Le désavantage est que les plugins “scan” sont un peu plus lents que les plugins “list”, et peuvent parfois donner des faux positifs (un processus qui a quitté il y a trop longtemps et dont des parties de la structure ont été écrasées par d'autres opérations).
+Les plugins “scan”, en revanche, adopteront une approche similaire à celle du carving de la mémoire pour des éléments qui pourraient avoir du sens lorsqu'ils sont désérférencés en tant que structures spécifiques. `psscan`, par exemple, lira la mémoire et essaiera de créer des objets `_EPROCESS` à partir de celle-ci (il utilise le scanning par pool-tag, qui recherche des chaînes de 4 octets indiquant la présence d'une structure d'intérêt). L'avantage est qu'il peut déterrer des processus qui ont quitté, et même si un malware altère la liste chaînée `_EPROCESS`, le plugin trouvera toujours la structure traînant en mémoire (puisqu'elle doit encore exister pour que le processus fonctionne). Le inconvénient est que les plugins “scan” sont un peu plus lents que les plugins “list”, et peuvent parfois donner des faux positifs (un processus qui a quitté il y a trop longtemps et dont des parties de la structure ont été écrasées par d'autres opérations).
 
 De : [http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
 
@@ -93,7 +93,7 @@ LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64 - A Profile for Linux CentOS7_3.10
 VistaSP0x64                                   - A Profile for Windows Vista SP0 x64
 VistaSP0x86                                   - A Profile for Windows Vista SP0 x86
 ```
-Vous pouvez **télécharger des profils Linux et Mac** depuis [https://github.com/volatilityfoundation/profiles](https://github.com/volatilityfoundation/profiles)
+Vous pouvez **télécharger les profils Linux et Mac** depuis [https://github.com/volatilityfoundation/profiles](https://github.com/volatilityfoundation/profiles)
 
 Dans le morceau précédent, vous pouvez voir que le profil s'appelle `LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64`, et vous pouvez l'utiliser pour exécuter quelque chose comme :
 ```bash
@@ -106,9 +106,9 @@ volatility kdbgscan -f file.dmp
 ```
 #### **Différences entre imageinfo et kdbgscan**
 
-[**D'ici**](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/): Contrairement à imageinfo qui fournit simplement des suggestions de profil, **kdbgscan** est conçu pour identifier positivement le bon profil et la bonne adresse KDBG (s'il y en a plusieurs). Ce plugin recherche les signatures KDBGHeader liées aux profils Volatility et applique des vérifications de validité pour réduire les faux positifs. La verbosité de la sortie et le nombre de vérifications de validité qui peuvent être effectuées dépendent de la capacité de Volatility à trouver un DTB, donc si vous connaissez déjà le bon profil (ou si vous avez une suggestion de profil d'imageinfo), assurez-vous de l'utiliser.
+[**À partir d'ici**](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/) : Contrairement à imageinfo qui fournit simplement des suggestions de profil, **kdbgscan** est conçu pour identifier positivement le bon profil et la bonne adresse KDBG (s'il y en a plusieurs). Ce plugin recherche les signatures KDBGHeader liées aux profils Volatility et applique des vérifications de validité pour réduire les faux positifs. La verbosité de la sortie et le nombre de vérifications de validité qui peuvent être effectuées dépendent de la capacité de Volatility à trouver un DTB, donc si vous connaissez déjà le bon profil (ou si vous avez une suggestion de profil d'imageinfo), assurez-vous de l'utiliser.
 
-Prenez toujours en compte le **nombre de processus que kdbgscan a trouvés**. Parfois, imageinfo et kdbgscan peuvent trouver **plus d'un** **profil** approprié mais seul le **valide aura des processus associés** (C'est parce que pour extraire des processus, la bonne adresse KDBG est nécessaire)
+Prenez toujours en compte le **nombre de processus que kdbgscan a trouvés**. Parfois, imageinfo et kdbgscan peuvent trouver **plus d'un** **profil** approprié, mais seul le **valide aura des processus associés** (C'est parce que pour extraire des processus, la bonne adresse KDBG est nécessaire).
 ```bash
 # GOOD
 PsActiveProcessHead           : 0xfffff800011977f0 (37 processes)
@@ -133,7 +133,7 @@ Le plugin `banners.Banners` peut être utilisé dans **vol3 pour essayer de trou
 
 ## Hashes/Mots de passe
 
-Extraire les hashes SAM, [les identifiants mis en cache du domaine](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) et [les secrets lsa](../../../windows-hardening/authentication-credentials-uac-and-efs/#lsa-secrets).
+Extraire les hashes SAM, [les identifiants mis en cache du domaine](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) et [les secrets lsa](../../../windows-hardening/authentication-credentials-uac-and-efs/index.html#lsa-secrets).
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -242,7 +242,7 @@ volatility --profile=PROFILE -f file.dmp linux_psenv [-p <pid>] #Get env of proc
 {{#endtab}}
 {{#endtabs}}
 
-### Privilèges des jetons
+### Privilèges de jeton
 
 Vérifiez les jetons de privilèges dans des services inattendus.\
 Il pourrait être intéressant de lister les processus utilisant un jeton privilégié.
@@ -366,7 +366,7 @@ volatility --profile=Win7SP1x86_23418 yarascan -Y "https://" -p 3692,3840,3976,3
 
 ### UserAssist
 
-**Windows** garde une trace des programmes que vous exécutez grâce à une fonctionnalité dans le registre appelée **UserAssist keys**. Ces clés enregistrent combien de fois chaque programme est exécuté et quand il a été exécuté pour la dernière fois.
+**Windows** suit un suivi des programmes que vous exécutez grâce à une fonctionnalité dans le registre appelée **UserAssist keys**. Ces clés enregistrent combien de fois chaque programme est exécuté et quand il a été exécuté pour la dernière fois.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -681,7 +681,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp symlinkscan
 
 ### Bash
 
-Il est possible de **lire l'historique bash à partir de la mémoire.** Vous pourriez également extraire le fichier _.bash_history_, mais il a été désactivé, vous serez heureux de pouvoir utiliser ce module de volatilité.
+Il est possible de **lire l'historique bash depuis la mémoire.** Vous pourriez également extraire le fichier _.bash_history_, mais il a été désactivé, vous serez heureux de pouvoir utiliser ce module de volatilité.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -753,7 +753,7 @@ volatility --profile=Win7SP1x86_23418 screenshot -f file.dmp
 ```bash
 volatility --profile=Win7SP1x86_23418 mbrparser -f file.dmp
 ```
-Le **Master Boot Record (MBR)** joue un rôle crucial dans la gestion des partitions logiques d'un support de stockage, qui sont structurées avec différents [file systems](https://en.wikipedia.org/wiki/File_system). Il contient non seulement des informations sur la disposition des partitions, mais également du code exécutable agissant comme un chargeur de démarrage. Ce chargeur de démarrage initie soit directement le processus de chargement de deuxième étape de l'OS (voir [second-stage boot loader](https://en.wikipedia.org/wiki/Second-stage_boot_loader)), soit fonctionne en harmonie avec le [volume boot record](https://en.wikipedia.org/wiki/Volume_boot_record) (VBR) de chaque partition. Pour des connaissances approfondies, consultez la [page Wikipedia sur le MBR](https://en.wikipedia.org/wiki/Master_boot_record).
+Le **Master Boot Record (MBR)** joue un rôle crucial dans la gestion des partitions logiques d'un support de stockage, qui sont structurées avec différents [systèmes de fichiers](https://en.wikipedia.org/wiki/File_system). Il contient non seulement des informations sur la disposition des partitions, mais également du code exécutable agissant comme un chargeur de démarrage. Ce chargeur de démarrage initie soit directement le processus de chargement de deuxième étape du système d'exploitation (voir [chargeur de démarrage de deuxième étape](https://en.wikipedia.org/wiki/Second-stage_boot_loader)), soit fonctionne en harmonie avec le [volume boot record](https://en.wikipedia.org/wiki/Volume_boot_record) (VBR) de chaque partition. Pour des connaissances approfondies, consultez la [page Wikipedia du MBR](https://en.wikipedia.org/wiki/Master_boot_record).
 
 ## Références
 

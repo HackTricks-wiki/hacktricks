@@ -27,7 +27,7 @@ Logiciel :
 
 dotPeek est un décompilateur qui **décompile et examine plusieurs formats**, y compris **bibliothèques** (.dll), **fichiers de métadonnées Windows** (.winmd), et **exécutables** (.exe). Une fois décompilé, un assembly peut être enregistré en tant que projet Visual Studio (.csproj).
 
-L'avantage ici est que si un code source perdu nécessite une restauration à partir d'un assembly hérité, cette action peut faire gagner du temps. De plus, dotPeek fournit une navigation pratique à travers le code décompilé, en faisant l'un des outils parfaits pour **l'analyse d'algorithmes Xamarin.**
+L'avantage ici est que si un code source perdu nécessite une restauration à partir d'un assembly hérité, cette action peut faire gagner du temps. De plus, dotPeek fournit une navigation pratique à travers le code décompilé, ce qui en fait l'un des outils parfaits pour **l'analyse d'algorithmes Xamarin.**
 
 ### [.NET Reflector](https://www.red-gate.com/products/reflector/)
 
@@ -63,7 +63,7 @@ Tout d'abord, changer les **attributs d'assemblage** liés au **débogage** :
 ```aspnet
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints)]
 ```
-À :
+Pour :
 ```
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.Default |
 DebuggableAttribute.DebuggingModes.DisableOptimizations |
@@ -92,7 +92,7 @@ Ensuite, sélectionnez **w3wp.exe** pour vous attacher au **serveur IIS** et cli
 
 ![](<../../images/image (113).png>)
 
-Maintenant que nous déboguons le processus, il est temps de l'arrêter et de charger tous les modules. Cliquez d'abord sur _Déboguer >> Tout interrompre_ puis cliquez sur _**Déboguer >> Fenêtres >> Modules**_ :
+Maintenant que nous déboguons le processus, il est temps de l'arrêter et de charger tous les modules. Cliquez d'abord sur _Déboguer >> Tout arrêter_ puis cliquez sur _**Déboguer >> Fenêtres >> Modules**_ :
 
 ![](<../../images/image (132).png>)
 
@@ -150,9 +150,9 @@ Ensuite, en regardant cela, vous pouvez voir quand l'exécution a été arrêté
 cheat-engine.md
 {{#endref}}
 
-[**PiNCE**](https://github.com/korcankaraokcu/PINCE) est un outil de front-end/reverse engineering pour le débogueur GNU Project (GDB), axé sur les jeux. Cependant, il peut être utilisé pour tout ce qui est lié au reverse engineering.
+[**PiNCE**](https://github.com/korcankaraokcu/PINCE) est un outil de front-end/reverse engineering pour le débogueur du projet GNU (GDB), axé sur les jeux. Cependant, il peut être utilisé pour toute tâche liée à l'ingénierie inverse.
 
-[**Decompiler Explorer**](https://dogbolt.org/) est un front-end web pour un certain nombre de décompilateurs. Ce service web vous permet de comparer la sortie de différents décompilateurs sur de petits exécutables.
+[**Decompiler Explorer**](https://dogbolt.org/) est un front-end web pour plusieurs décompilateurs. Ce service web vous permet de comparer la sortie de différents décompilateurs sur de petits exécutables.
 
 ## ARM & MIPS
 
@@ -164,8 +164,8 @@ https://github.com/nongiach/arm_now
 
 ### Débogage d'un shellcode avec blobrunner
 
-[**Blobrunner**](https://github.com/OALabs/BlobRunner) va **allouer** le **shellcode** dans un espace de mémoire, vous **indiquer** l'**adresse mémoire** où le shellcode a été alloué et va **arrêter** l'exécution.\
-Ensuite, vous devez **attacher un débogueur** (Ida ou x64dbg) au processus et mettre un **point d'arrêt à l'adresse mémoire indiquée** et **reprendre** l'exécution. De cette façon, vous déboguerez le shellcode.
+[**Blobrunner**](https://github.com/OALabs/BlobRunner) va **allouer** le **shellcode** dans un espace de mémoire, va **vous indiquer** l'**adresse mémoire** où le shellcode a été alloué et va **arrêter** l'exécution.\
+Ensuite, vous devez **attacher un débogueur** (Ida ou x64dbg) au processus et mettre un **point d'arrêt à l'adresse mémoire indiquée** et **reprendre** l'exécution. De cette manière, vous déboguerez le shellcode.
 
 La page des versions github contient des zips contenant les versions compilées : [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
 Vous pouvez trouver une version légèrement modifiée de Blobrunner dans le lien suivant. Pour le compiler, il suffit de **créer un projet C/C++ dans Visual Studio Code, de copier et coller le code et de le construire**.
@@ -186,7 +186,7 @@ Vous pouvez télécharger une version compilée de [jmp2it sur la page des versi
 
 [**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) est l'interface graphique de radare. En utilisant Cutter, vous pouvez émuler le shellcode et l'inspecter dynamiquement.
 
-Notez que Cutter vous permet d'"Ouvrir un fichier" et "Ouvrir un shellcode". Dans mon cas, lorsque j'ai ouvert le shellcode en tant que fichier, il l'a décompilé correctement, mais quand je l'ai ouvert en tant que shellcode, ce n'était pas le cas :
+Notez que Cutter vous permet d'"Ouvrir un fichier" et "Ouvrir un shellcode". Dans mon cas, lorsque j'ai ouvert le shellcode en tant que fichier, il l'a décompilé correctement, mais quand je l'ai ouvert en tant que shellcode, il ne l'a pas fait :
 
 ![](<../../images/image (562).png>)
 
@@ -220,7 +220,7 @@ L'option **Create Dump** va dumper le shellcode final si des modifications sont 
 
 ### Désassemblage avec CyberChef
 
-Téléchargez votre fichier shellcode en tant qu'entrée et utilisez la recette suivante pour le décompiler : [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
+Téléchargez votre fichier shellcode en entrée et utilisez la recette suivante pour le décompiler : [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/index.html#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
 
 ## [Movfuscator](https://github.com/xoreaxeaxeax/movfuscator)
 
@@ -245,7 +245,7 @@ Pour trouver le **point d'entrée**, recherchez les fonctions par `::main` comme
 ![](<../../images/image (1080).png>)
 
 Dans ce cas, le binaire s'appelait authenticator, donc il est assez évident que c'est la fonction principale intéressante.\
-Ayant le **nom** des **fonctions** appelées, recherchez-les sur **Internet** pour en savoir plus sur leurs **entrées** et **sorties**.
+Ayant le **nom** des **fonctions** appelées, recherchez-les sur **Internet** pour en apprendre davantage sur leurs **entrées** et **sorties**.
 
 ## **Delphi**
 
@@ -288,7 +288,7 @@ Dans [**no$gba**](https://problemkaputt.de/gba.htm), dans _**Options --> Configu
 
 ![](<../../images/image (581).png>)
 
-Lorsqu'il est pressé, chaque **touche a une valeur** pour l'identifier :
+Lorsqu'ils sont pressés, chaque **touche a une valeur** pour l'identifier :
 ```
 A = 1
 B = 2
@@ -370,11 +370,11 @@ DAT_030000d8 = DAT_030000d8 + 0x3a;
 ```
 Dans le code précédent, vous pouvez voir que nous comparons **uVar1** (l'endroit où se trouve **la valeur du bouton pressé**) avec certaines valeurs :
 
-- D'abord, il est comparé avec la **valeur 4** (**bouton SELECT**) : Dans le défi, ce bouton efface l'écran.
-- Ensuite, il est comparé avec la **valeur 8** (**bouton START**) : Dans le défi, cela vérifie si le code est valide pour obtenir le drapeau.
+- D'abord, il est comparé avec la **valeur 4** (bouton **SELECT**) : Dans le défi, ce bouton efface l'écran.
+- Ensuite, il est comparé avec la **valeur 8** (bouton **START**) : Dans le défi, cela vérifie si le code est valide pour obtenir le drapeau.
 - Dans ce cas, la var **`DAT_030000d8`** est comparée avec 0xf3 et si la valeur est la même, un certain code est exécuté.
 - Dans tous les autres cas, un cont (`DAT_030000d4`) est vérifié. C'est un cont car il ajoute 1 juste après être entré dans le code.\
-**Si** moins de 8, quelque chose qui implique **d'ajouter** des valeurs à \*\*`DAT_030000d8` \*\* est fait (en gros, cela ajoute les valeurs des touches pressées dans cette variable tant que le cont est inférieur à 8).
+**Si** moins de 8, quelque chose qui implique **d'ajouter** des valeurs à **`DAT_030000d8`** est fait (en gros, cela ajoute les valeurs des touches pressées dans cette variable tant que le cont est inférieur à 8).
 
 Donc, dans ce défi, en connaissant les valeurs des boutons, vous deviez **appuyer sur une combinaison d'une longueur inférieure à 8 dont l'addition résultante est 0xf3.**
 

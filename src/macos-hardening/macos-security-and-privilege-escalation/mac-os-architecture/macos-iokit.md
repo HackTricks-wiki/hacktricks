@@ -6,11 +6,11 @@
 
 Le I/O Kit est un **framework de pilote de périphérique** open-source et orienté objet dans le noyau XNU, gérant les **pilotes de périphérique chargés dynamiquement**. Il permet d'ajouter du code modulaire au noyau à la volée, prenant en charge un matériel diversifié.
 
-Les pilotes IOKit vont essentiellement **exporter des fonctions du noyau**. Ces types de **paramètres de fonction** sont **prédéfinis** et sont vérifiés. De plus, similaire à XPC, IOKit est juste une autre couche **au-dessus des messages Mach**.
+Les pilotes IOKit vont essentiellement **exporter des fonctions du noyau**. Ces paramètres de fonction **types** sont **prédéfinis** et sont vérifiés. De plus, similaire à XPC, IOKit est juste une autre couche au **dessus des messages Mach**.
 
 Le **code IOKit du noyau XNU** est open-source par Apple sur [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit). De plus, les composants IOKit de l'espace utilisateur sont également open-source [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
 
-Cependant, **aucun pilote IOKit** n'est open-source. Quoi qu'il en soit, de temps en temps, une version d'un pilote peut venir avec des symboles qui facilitent son débogage. Vérifiez comment [**obtenir les extensions de pilote à partir du firmware ici**](./#ipsw)**.**
+Cependant, **aucun pilote IOKit** n'est open-source. Quoi qu'il en soit, de temps en temps, une version d'un pilote peut venir avec des symboles qui facilitent son débogage. Vérifiez comment [**obtenir les extensions de pilote à partir du firmware ici**](#ipsw)**.**
 
 Il est écrit en **C++**. Vous pouvez obtenir des symboles C++ démanglés avec :
 ```bash
@@ -23,7 +23,7 @@ __ZN16IOUserClient202222dispatchExternalMethodEjP31IOExternalMethodArgumentsOpaq
 IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
 > [!CAUTION]
-> Les **fonctions exposées** d'IOKit pourraient effectuer des **vérifications de sécurité supplémentaires** lorsqu'un client essaie d'appeler une fonction, mais notez que les applications sont généralement **limitées** par le **sandbox** avec lequel elles peuvent interagir.
+> Les fonctions **exposées** d'IOKit pourraient effectuer des **vérifications de sécurité supplémentaires** lorsqu'un client essaie d'appeler une fonction, mais notez que les applications sont généralement **limitées** par le **sandbox** avec lequel elles peuvent interagir avec les fonctions d'IOKit.
 
 ## Pilotes
 
@@ -68,7 +68,7 @@ kextunload com.apple.iokit.IOReportFamily
 ```
 ## IORegistry
 
-Le **IORegistry** est une partie cruciale du framework IOKit dans macOS et iOS qui sert de base de données pour représenter la configuration matérielle et l'état du système. C'est une **collection hiérarchique d'objets qui représente tout le matériel et les pilotes** chargés sur le système, et leurs relations entre eux.
+Le **IORegistry** est une partie cruciale du framework IOKit dans macOS et iOS qui sert de base de données pour représenter la configuration matérielle et l'état du système. C'est une **collection hiérarchique d'objets qui représentent tout le matériel et les pilotes** chargés sur le système, et leurs relations entre eux.
 
 Vous pouvez obtenir l'IORegistry en utilisant le cli **`ioreg`** pour l'inspecter depuis la console (particulièrement utile pour iOS).
 ```bash
@@ -95,7 +95,7 @@ Le code suivant se connecte au service IOKit `"YourServiceNameHere"` et appelle 
 
 - il appelle d'abord **`IOServiceMatching`** et **`IOServiceGetMatchingServices`** pour obtenir le service.
 - Il établit ensuite une connexion en appelant **`IOServiceOpen`**.
-- Et enfin, il appelle une fonction avec **`IOConnectCallScalarMethod`** en indiquant le sélecteur 0 (le sélecteur est le numéro que la fonction que vous souhaitez appeler a attribué).
+- Et enfin, il appelle une fonction avec **`IOConnectCallScalarMethod`** en indiquant le sélecteur 0 (le sélecteur est le numéro que la fonction que vous souhaitez appeler a assigné).
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <IOKit/IOKitLib.h>
@@ -154,7 +154,7 @@ Il existe d'autres fonctions qui peuvent être utilisées pour appeler des fonct
 
 ## Inversion du point d'entrée du pilote
 
-Vous pourriez les obtenir par exemple à partir d'une [**image de firmware (ipsw)**](./#ipsw). Ensuite, chargez-la dans votre décompilateur préféré.
+Vous pourriez les obtenir par exemple à partir d'une [**image de firmware (ipsw)**](#ipsw). Ensuite, chargez-la dans votre décompilateur préféré.
 
 Vous pourriez commencer à décompiler la fonction **`externalMethod`** car c'est la fonction du pilote qui recevra l'appel et appellera la fonction correcte :
 

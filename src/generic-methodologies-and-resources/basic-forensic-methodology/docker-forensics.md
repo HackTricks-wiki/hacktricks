@@ -36,7 +36,7 @@ docker run -d lamp-wordpress
 docker cp b5d53e8b468e:/etc/shadow original_shadow #Get the file from the newly created container
 diff original_shadow shadow
 ```
-Si vous constatez que **certains fichiers suspects ont été ajoutés**, vous pouvez accéder au conteneur et les vérifier :
+Si vous constatez que **un fichier suspect a été ajouté**, vous pouvez accéder au conteneur et le vérifier :
 ```bash
 docker exec -it wordpress bash
 ```
@@ -55,7 +55,7 @@ tar -xf image.tar
 ```
 ### Analyse de base
 
-Vous pouvez obtenir des **informations de base** à partir de l'image en exécutant :
+Vous pouvez obtenir **des informations de base** à partir de l'image en exécutant :
 ```bash
 docker inspect <image>
 ```
@@ -70,7 +70,7 @@ dfimage -sV=1.36 madhuakula/k8s-goat-hidden-in-layers>
 ```
 ### Dive
 
-Pour trouver des fichiers ajoutés/modifiés dans les images docker, vous pouvez également utiliser le [**dive**](https://github.com/wagoodman/dive) (téléchargez-le depuis [**releases**](https://github.com/wagoodman/dive/releases/tag/v0.10.0)) utilitaire :
+Pour trouver des fichiers ajoutés/modifiés dans les images docker, vous pouvez également utiliser l'outil [**dive**](https://github.com/wagoodman/dive) (téléchargez-le depuis [**releases**](https://github.com/wagoodman/dive/releases/tag/v0.10.0)) :
 ```bash
 #First you need to load the image in your docker repo
 sudo docker load < image.tar                                                                                                                                                                                                         1 ⨯
@@ -87,10 +87,10 @@ Vous pouvez décompresser toutes les couches d'une image depuis le répertoire o
 tar -xf image.tar
 for d in `find * -maxdepth 0 -type d`; do cd $d; tar -xf ./layer.tar; cd ..; done
 ```
-## Informations d'identification depuis la mémoire
+## Identifiants depuis la mémoire
 
-Notez que lorsque vous exécutez un conteneur docker à l'intérieur d'un hôte, **vous pouvez voir les processus en cours d'exécution sur le conteneur depuis l'hôte** en exécutant simplement `ps -ef`.
+Notez que lorsque vous exécutez un conteneur docker à l'intérieur d'un hôte **vous pouvez voir les processus en cours d'exécution sur le conteneur depuis l'hôte** simplement en exécutant `ps -ef`
 
-Par conséquent (en tant que root), vous pouvez **extraire la mémoire des processus** depuis l'hôte et rechercher des **informations d'identification** juste [**comme dans l'exemple suivant**](../../linux-hardening/privilege-escalation/#process-memory).
+Par conséquent (en tant que root) vous pouvez **extraire la mémoire des processus** depuis l'hôte et rechercher des **identifiants** juste [**comme dans l'exemple suivant**](../../linux-hardening/privilege-escalation/index.html#process-memory).
 
 {{#include ../../banners/hacktricks-training.md}}

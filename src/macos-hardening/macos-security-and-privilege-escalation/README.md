@@ -4,15 +4,15 @@
 
 ## MacOS de Base
 
-Si vous n'êtes pas familier avec macOS, vous devriez commencer à apprendre les bases de macOS :
+Si vous n'êtes pas familier avec macOS, vous devriez commencer par apprendre les bases de macOS :
 
-- Fichiers et **permissions** spéciales macOS :
+- Fichiers et **permissions** macOS spéciaux :
 
 {{#ref}}
 macos-files-folders-and-binaries/
 {{#endref}}
 
-- **Utilisateurs** macOS courants
+- Utilisateurs **communs** de macOS
 
 {{#ref}}
 macos-users.md
@@ -30,14 +30,14 @@ macos-applefs.md
 mac-os-architecture/
 {{#endref}}
 
-- Services et **protocoles** réseau macOS courants
+- Services & **protocoles** réseau macOS communs
 
 {{#ref}}
 macos-protocols.md
 {{#endref}}
 
 - macOS **Open Source** : [https://opensource.apple.com/](https://opensource.apple.com/)
-- Pour télécharger un `tar.gz`, changez une URL comme [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) en [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
+- Pour télécharger un `tar.gz`, changez une URL telle que [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) en [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
 
 ### MDM MacOS
 
@@ -79,7 +79,7 @@ Pour ce type de vulnérabilités, n'oubliez pas de **vérifier les installateurs
 macos-files-folders-and-binaries/macos-installers-abuse.md
 {{#endref}}
 
-### Gestion des Extensions de Fichier & des URL
+### Gestion des Extensions de Fichier & des Handlers d'URL
 
 Des applications étranges enregistrées par des extensions de fichier pourraient être abusées et différentes applications peuvent être enregistrées pour ouvrir des protocoles spécifiques
 
@@ -93,9 +93,9 @@ Dans macOS, les **applications et binaires peuvent avoir des permissions** pour 
 
 Par conséquent, un attaquant qui souhaite compromettre avec succès une machine macOS devra **escalader ses privilèges TCC** (ou même **contourner SIP**, selon ses besoins).
 
-Ces privilèges sont généralement accordés sous forme de **droits** avec lesquels l'application est signée, ou l'application peut demander certains accès et après que **l'utilisateur les approuve**, ils peuvent être trouvés dans les **bases de données TCC**. Une autre façon pour un processus d'obtenir ces privilèges est d'être un **enfant d'un processus** ayant ces **privilèges** car ils sont généralement **hérités**.
+Ces privilèges sont généralement accordés sous forme de **droits** avec lesquels l'application est signée, ou l'application peut avoir demandé certains accès et après que **l'utilisateur les ait approuvés**, ils peuvent être trouvés dans les **bases de données TCC**. Une autre façon pour un processus d'obtenir ces privilèges est d'être un **enfant d'un processus** ayant ces **privilèges**, car ils sont généralement **hérités**.
 
-Suivez ces liens pour trouver différentes façons de [**escalader les privilèges dans TCC**](macos-security-protections/macos-tcc/#tcc-privesc-and-bypasses), pour [**contourner TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) et comment dans le passé [**SIP a été contourné**](macos-security-protections/macos-sip.md#sip-bypasses).
+Suivez ces liens pour trouver différentes façons de [**escalader les privilèges dans TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), pour [**contourner TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) et comment dans le passé [**SIP a été contourné**](macos-security-protections/macos-sip.md#sip-bypasses).
 
 ## Escalade de Privilèges Traditionnelle macOS
 

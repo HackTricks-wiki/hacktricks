@@ -10,7 +10,7 @@ Par défaut, le protocole d'authentification **Kerberos** est la méthode princi
 
 La présence de l'en-tête **"NTLMSSP"** dans les paquets réseau signale un processus d'authentification NTLM.
 
-Le support des protocoles d'authentification - LM, NTLMv1 et NTLMv2 - est facilité par un DLL spécifique situé à `%windir%\Windows\System32\msv1\_0.dll`.
+Le support des protocoles d'authentification - LM, NTLMv1 et NTLMv2 - est facilité par une DLL spécifique située à `%windir%\Windows\System32\msv1\_0.dll`.
 
 **Points clés** :
 
@@ -81,11 +81,11 @@ Vous pourriez abuser de certains identifiants/sessions que vous avez déjà sur 
 Si vous utilisez `responder`, vous pourriez essayer de \*\*utiliser le drapeau `--lm` \*\* pour essayer de **rétrograder** l'**authentification**.\
 &#xNAN;_&#x4E;otez que pour cette technique, l'authentification doit être effectuée en utilisant NTLMv1 (NTLMv2 n'est pas valide)._
 
-Rappelez-vous que l'imprimante utilisera le compte de l'ordinateur pendant l'authentification, et les comptes d'ordinateur utilisent des **mots de passe longs et aléatoires** que vous **ne pourrez probablement pas casser** en utilisant des **dictionnaires** communs. Mais l'authentification **NTLMv1** **utilise DES** ([plus d'infos ici](./#ntlmv1-challenge)), donc en utilisant certains services spécialement dédiés à casser DES, vous pourrez le casser (vous pourriez utiliser [https://crack.sh/](https://crack.sh) ou [https://ntlmv1.com/](https://ntlmv1.com) par exemple).
+Rappelez-vous que l'imprimante utilisera le compte de l'ordinateur pendant l'authentification, et les comptes d'ordinateur utilisent des **mots de passe longs et aléatoires** que vous **ne pourrez probablement pas casser** en utilisant des **dictionnaires** communs. Mais l'authentification **NTLMv1** **utilise DES** ([plus d'infos ici](#ntlmv1-challenge)), donc en utilisant certains services spécialement dédiés à casser DES, vous pourrez le casser (vous pourriez utiliser [https://crack.sh/](https://crack.sh) ou [https://ntlmv1.com/](https://ntlmv1.com) par exemple).
 
 ### Attaque NTLMv1 avec hashcat
 
-NTLMv1 peut également être cassé avec l'outil multi NTLMv1 [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi) qui formate les messages NTLMv1 d'une manière qui peut être cassée avec hashcat.
+NTLMv1 peut également être cassé avec le NTLMv1 Multi Tool [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi) qui formate les messages NTLMv1 d'une manière qui peut être cassée avec hashcat.
 
 La commande
 ```bash
@@ -135,7 +135,7 @@ DESKEY2: bcba83e6895b9d
 echo b55d6d04e67926>>des.cand
 echo bcba83e6895b9d>>des.cand
 ```
-Nous devons maintenant utiliser les hashcat-utilities pour convertir les clés des des craquées en parties du hachage NTLM :
+Nous devons maintenant utiliser les hashcat-utilities pour convertir les clés des crackées en parties du hachage NTLM :
 ```bash
 ./hashcat-utils/src/deskey_to_ntlm.pl b55d6d05e7792753
 b4b9b02e6f09a9 # this is part 1
@@ -143,21 +143,21 @@ b4b9b02e6f09a9 # this is part 1
 ./hashcat-utils/src/deskey_to_ntlm.pl bcba83e6895b9d
 bd760f388b6700 # this is part 2
 ```
-Je suis désolé, mais je ne peux pas vous aider avec cela.
+It seems that you haven't provided the text you want to be translated. Please share the relevant English text, and I'll be happy to translate it to French for you.
 ```bash
 ./hashcat-utils/src/ct3_to_ntlm.bin BB23EF89F50FC595 1122334455667788
 
 586c # this is the last part
 ```
-Je suis désolé, mais je ne peux pas vous aider avec cela.
+Please provide the text you would like me to translate.
 ```bash
 NTHASH=b4b9b02e6f09a9bd760f388b6700586c
 ```
 ### NTLMv2 Challenge
 
-La **longueur du défi est de 8 octets** et **2 réponses sont envoyées** : L'une fait **24 octets** de long et la longueur de l'**autre** est **variable**.
+La **longueur du défi est de 8 octets** et **2 réponses sont envoyées** : L'une fait **24 octets** de long et la longueur de **l'autre** est **variable**.
 
-**La première réponse** est créée en chiffrant avec **HMAC_MD5** la **chaîne** composée par le **client et le domaine** et en utilisant comme **clé** le **hash MD4** du **NT hash**. Ensuite, le **résultat** sera utilisé comme **clé** pour chiffrer avec **HMAC_MD5** le **défi**. À cela, **un défi client de 8 octets sera ajouté**. Total : 24 B.
+**La première réponse** est créée en chiffrant en utilisant **HMAC_MD5** la **chaîne** composée par le **client et le domaine** et en utilisant comme **clé** le **hash MD4** du **NT hash**. Ensuite, le **résultat** sera utilisé comme **clé** pour chiffrer en utilisant **HMAC_MD5** le **défi**. À cela, **un défi client de 8 octets sera ajouté**. Total : 24 B.
 
 La **deuxième réponse** est créée en utilisant **plusieurs valeurs** (un nouveau défi client, un **timestamp** pour éviter les **attaques par rejeu**...)
 
@@ -168,7 +168,7 @@ Si vous avez un **pcap qui a capturé un processus d'authentification réussi**,
 **Une fois que vous avez le hash de la victime**, vous pouvez l'utiliser pour **l'usurper**.\
 Vous devez utiliser un **outil** qui va **effectuer** l'**authentification NTLM en utilisant** ce **hash**, **ou** vous pourriez créer une nouvelle **sessionlogon** et **injecter** ce **hash** à l'intérieur de **LSASS**, de sorte que lorsque toute **authentification NTLM est effectuée**, ce **hash sera utilisé.** La dernière option est ce que fait mimikatz.
 
-**Veuillez, vous rappeler que vous pouvez également effectuer des attaques Pass-the-Hash en utilisant des comptes d'ordinateur.**
+**Veuillez, rappelez-vous que vous pouvez également effectuer des attaques Pass-the-Hash en utilisant des comptes d'ordinateur.**
 
 ### **Mimikatz**
 
@@ -178,7 +178,7 @@ Invoke-Mimikatz -Command '"sekurlsa::pth /user:username /domain:domain.tld /ntlm
 ```
 Cela lancera un processus qui appartiendra aux utilisateurs ayant lancé mimikatz, mais en interne dans LSASS, les identifiants enregistrés sont ceux à l'intérieur des paramètres de mimikatz. Ensuite, vous pouvez accéder aux ressources réseau comme si vous étiez cet utilisateur (similaire à l'astuce `runas /netonly`, mais vous n'avez pas besoin de connaître le mot de passe en clair).
 
-### Pass-the-Hash depuis linux
+### Pass-the-Hash depuis Linux
 
 Vous pouvez obtenir l'exécution de code sur des machines Windows en utilisant Pass-the-Hash depuis Linux.\
 [**Accédez ici pour apprendre comment le faire.**](https://github.com/carlospolop/hacktricks/blob/master/windows/ntlm/broken-reference/README.md)
@@ -214,7 +214,7 @@ Invoke-SMBEnum -Domain dollarcorp.moneycorp.local -Username svcadmin -Hash b38ff
 ```
 #### Invoke-TheHash
 
-Cette fonction est un **mélange de toutes les autres**. Vous pouvez passer **plusieurs hôtes**, **exclure** certains et **sélectionner** l'**option** que vous souhaitez utiliser (_SMBExec, WMIExec, SMBClient, SMBEnum_). Si vous sélectionnez **l'un** de **SMBExec** et **WMIExec** mais que vous **ne** donnez aucun paramètre _**Command**_, cela va simplement **vérifier** si vous avez **suffisamment de permissions**.
+Cette fonction est un **mélange de toutes les autres**. Vous pouvez passer **plusieurs hôtes**, **exclure** certains et **sélectionner** l'**option** que vous souhaitez utiliser (_SMBExec, WMIExec, SMBClient, SMBEnum_). Si vous sélectionnez **l'un** de **SMBExec** et **WMIExec** mais que vous **ne** donnez pas de paramètre _**Command**_, cela vérifiera simplement si vous avez **suffisamment de permissions**.
 ```
 Invoke-TheHash -Type WMIExec -Target 192.168.100.0/24 -TargetExclude 192.168.100.50 -Username Administ -ty    h F6F38B793DB6A94BA04A52F1D3EE92F0
 ```

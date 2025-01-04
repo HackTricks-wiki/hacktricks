@@ -57,7 +57,7 @@ ou en utilisant _Process Explorer_ de Sysinternals (sélectionnez le processus e
 ### Administrateur local
 
 Lorsqu'un administrateur local se connecte, **deux jetons d'accès sont créés** : un avec des droits d'administrateur et un autre avec des droits normaux. **Par défaut**, lorsque cet utilisateur exécute un processus, celui avec des **droits réguliers** (non administrateur) **est utilisé**. Lorsque cet utilisateur essaie d'**exécuter** quoi que ce soit **en tant qu'administrateur** ("Exécuter en tant qu'administrateur" par exemple), le **UAC** sera utilisé pour demander la permission.\
-Si vous souhaitez [**en savoir plus sur le UAC, lisez cette page**](../authentication-credentials-uac-and-efs/#uac)**.**
+Si vous souhaitez [**en savoir plus sur le UAC, lisez cette page**](../authentication-credentials-uac-and-efs/index.html#uac)**.**
 
 ### Usurpation d'identité des utilisateurs avec des identifiants
 
@@ -76,12 +76,12 @@ Ceci est utile si vous avez des identifiants utiles pour accéder à des objets 
 
 Il existe deux types de jetons disponibles :
 
-- **Jeton principal** : Il sert de représentation des identifiants de sécurité d'un processus. La création et l'association de jetons principaux avec des processus sont des actions qui nécessitent des privilèges élevés, soulignant le principe de séparation des privilèges. En général, un service d'authentification est responsable de la création de jetons, tandis qu'un service de connexion gère son association avec le shell du système d'exploitation de l'utilisateur. Il convient de noter que les processus héritent du jeton principal de leur processus parent lors de leur création.
+- **Jeton principal** : Il sert de représentation des informations d'identification de sécurité d'un processus. La création et l'association de jetons principaux avec des processus sont des actions qui nécessitent des privilèges élevés, soulignant le principe de séparation des privilèges. En général, un service d'authentification est responsable de la création de jetons, tandis qu'un service de connexion gère son association avec le shell du système d'exploitation de l'utilisateur. Il convient de noter que les processus héritent du jeton principal de leur processus parent lors de leur création.
 - **Jeton d'imitation** : Permet à une application serveur d'adopter temporairement l'identité du client pour accéder à des objets sécurisés. Ce mécanisme est stratifié en quatre niveaux de fonctionnement :
-- **Anonyme** : Accorde l'accès au serveur similaire à celui d'un utilisateur non identifié.
+- **Anonyme** : Accorde un accès au serveur similaire à celui d'un utilisateur non identifié.
 - **Identification** : Permet au serveur de vérifier l'identité du client sans l'utiliser pour l'accès aux objets.
 - **Imitation** : Permet au serveur d'opérer sous l'identité du client.
-- **Délégation** : Semblable à l'imitation mais inclut la capacité d'étendre cette hypothèse d'identité à des systèmes distants avec lesquels le serveur interagit, garantissant la préservation des identifiants.
+- **Délégation** : Semblable à l'imitation, mais inclut la capacité d'étendre cette hypothèse d'identité aux systèmes distants avec lesquels le serveur interagit, garantissant la préservation des informations d'identification.
 
 #### Jetons d'imitation
 

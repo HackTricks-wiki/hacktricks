@@ -4,12 +4,12 @@
 
 ## Intro
 
-Comme [**mentionné précédemment**](./#what-is-mdm-mobile-device-management)**,** pour essayer d'enrôler un appareil dans une organisation, **il suffit d'un numéro de série appartenant à cette organisation**. Une fois l'appareil enrôlé, plusieurs organisations installeront des données sensibles sur le nouvel appareil : certificats, applications, mots de passe WiFi, configurations VPN [et ainsi de suite](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
+Comme [**précédemment commenté**](#what-is-mdm-mobile-device-management)**,** pour essayer d'enrôler un appareil dans une organisation, **il suffit d'un numéro de série appartenant à cette organisation**. Une fois l'appareil enrôlé, plusieurs organisations installeront des données sensibles sur le nouvel appareil : certificats, applications, mots de passe WiFi, configurations VPN [et ainsi de suite](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
 Par conséquent, cela pourrait être un point d'entrée dangereux pour les attaquants si le processus d'enrôlement n'est pas correctement protégé.
 
 **Ce qui suit est un résumé de la recherche [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe). Consultez-le pour plus de détails techniques !**
 
-## Aperçu de l'analyse binaire DEP et MDM
+## Aperçu de l'analyse binaire de DEP et MDM
 
 Cette recherche se penche sur les binaires associés au Programme d'Enrôlement des Appareils (DEP) et à la Gestion des Appareils Mobiles (MDM) sur macOS. Les composants clés incluent :
 
@@ -29,7 +29,7 @@ Les tentatives d'interception et de modification des demandes DEP à _iprofiles.
 
 ## Instrumentation des binaires système interagissant avec DEP
 
-L'instrumentation des binaires système comme `cloudconfigurationd` nécessite de désactiver la Protection de l'Intégrité du Système (SIP) sur macOS. Avec le SIP désactivé, des outils comme LLDB peuvent être utilisés pour s'attacher aux processus système et potentiellement modifier le numéro de série utilisé dans les interactions API DEP. Cette méthode est préférable car elle évite les complexités des droits et de la signature de code.
+L'instrumentation des binaires système comme `cloudconfigurationd` nécessite de désactiver la Protection de l'Intégrité du Système (SIP) sur macOS. Avec le SIP désactivé, des outils comme LLDB peuvent être utilisés pour se connecter aux processus système et potentiellement modifier le numéro de série utilisé dans les interactions API DEP. Cette méthode est préférable car elle évite les complexités des droits et de la signature de code.
 
 **Exploitation de l'instrumentation binaire :**
 Modifier la charge utile de la demande DEP avant la sérialisation JSON dans `cloudconfigurationd` s'est avéré efficace. Le processus impliquait :

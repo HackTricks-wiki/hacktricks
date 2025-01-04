@@ -2,7 +2,6 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-
 ## OneDrive
 
 Dans Windows, vous pouvez trouver le dossier OneDrive dans `\Users\<username>\AppData\Local\Microsoft\OneDrive`. Et à l'intérieur de `logs\Personal`, il est possible de trouver le fichier `SyncDiagnostics.log` qui contient des données intéressantes concernant les fichiers synchronisés :
@@ -23,7 +22,7 @@ Une fois que vous avez trouvé le CID, il est recommandé de **chercher des fich
 Dans Windows, vous pouvez trouver le dossier principal de Google Drive dans `\Users\<username>\AppData\Local\Google\Drive\user_default`\
 Ce dossier contient un fichier appelé Sync_log.log avec des informations comme l'adresse e-mail du compte, les noms de fichiers, les horodatages, les hachages MD5 des fichiers, etc. Même les fichiers supprimés apparaissent dans ce fichier journal avec leur MD5 correspondant.
 
-Le fichier **`Cloud_graph\Cloud_graph.db`** est une base de données sqlite qui contient la table **`cloud_graph_entry`**. Dans cette table, vous pouvez trouver le **nom** des **fichiers synchronisés**, l'heure de modification, la taille et le hachage MD5 des fichiers.
+Le fichier **`Cloud_graph\Cloud_graph.db`** est une base de données sqlite qui contient la table **`cloud_graph_entry`**. Dans cette table, vous pouvez trouver le **nom** des **fichiers** **synchronisés**, l'heure de modification, la taille et le hachage MD5 des fichiers.
 
 Les données de la table de la base de données **`Sync_config.db`** contiennent l'adresse e-mail du compte, le chemin des dossiers partagés et la version de Google Drive.
 
@@ -65,7 +64,7 @@ Ensuite, vous pouvez utiliser l'outil [**DataProtectionDecryptor**](https://nirs
 
 ![](<../../../images/image (443).png>)
 
-Si tout se passe comme prévu, l'outil indiquera la **clé primaire** que vous devez **utiliser pour récupérer l'originale**. Pour récupérer l'originale, utilisez simplement cette [recette cyber_chef](<https://gchq.github.io/CyberChef/#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) en mettant la clé primaire comme "phrase secrète" à l'intérieur de la recette.
+Si tout se passe comme prévu, l'outil indiquera la **clé primaire** que vous devez **utiliser pour récupérer l'originale**. Pour récupérer l'originale, utilisez simplement cette [recette cyber_chef](<https://gchq.github.io/CyberChef/index.html#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) en mettant la clé primaire comme "phrase de passe" à l'intérieur de la recette.
 
 Le hex résultant est la clé finale utilisée pour chiffrer les bases de données qui peut être déchiffrée avec :
 ```bash
@@ -79,7 +78,7 @@ La base de données **`config.dbx`** contient :
 - **Host_id : Hash** utilisé pour s'authentifier dans le cloud. Cela ne peut être révoqué que depuis le web.
 - **Root_ns** : Identifiant de l'utilisateur
 
-La base de données **`filecache.db`** contient des informations sur tous les fichiers et dossiers synchronisés avec Dropbox. La table `File_journal` est celle avec les informations les plus utiles :
+La base de données **`filecache.db`** contient des informations sur tous les fichiers et dossiers synchronisés avec Dropbox. La table `File_journal` est celle avec le plus d'informations utiles :
 
 - **Server_path** : Chemin où le fichier est situé à l'intérieur du serveur (ce chemin est précédé par le `host_id` du client).
 - **local_sjid** : Version du fichier

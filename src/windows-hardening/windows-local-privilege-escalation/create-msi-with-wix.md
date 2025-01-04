@@ -6,7 +6,7 @@ La création de l'installateur MSI se fera en utilisant wixtools, spécifiquemen
 
 Pour une compréhension complète des exemples d'utilisation de wix MSI, il est conseillé de consulter [cette page](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with). Ici, vous pouvez trouver divers exemples qui démontrent l'utilisation de wix MSI.
 
-L'objectif est de générer un MSI qui exécutera le fichier lnk. Afin d'y parvenir, le code XML suivant pourrait être utilisé ([xml from here](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)):
+L'objectif est de générer un MSI qui exécutera le fichier lnk. Afin d'y parvenir, le code XML suivant pourrait être utilisé ([xml from here](https://0xrick.github.io/hack-the-box/ethereal/index.html#Creating-Malicious-msi-and-getting-root)):
 ```markup
 <?xml version="1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
@@ -40,7 +40,7 @@ fail_here
 ```
 Il est important de noter que l'élément Package contient des attributs tels que InstallerVersion et Compressed, spécifiant la version de l'installateur et indiquant si le package est compressé ou non, respectivement.
 
-Le processus de création implique d'utiliser candle.exe, un outil de wixtools, pour générer un wixobject à partir de msi.xml. La commande suivante doit être exécutée :
+Le processus de création implique l'utilisation de candle.exe, un outil de wixtools, pour générer un wixobject à partir de msi.xml. La commande suivante doit être exécutée :
 ```
 candle.exe -out C:\tem\wix C:\tmp\Ethereal\msi.xml
 ```

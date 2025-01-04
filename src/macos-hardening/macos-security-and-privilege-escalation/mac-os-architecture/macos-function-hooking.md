@@ -6,9 +6,9 @@
 
 Créez un **dylib** avec une section **`__interpose`** (ou une section marquée avec **`S_INTERPOSING`**) contenant des tuples de **pointeurs de fonction** qui se réfèrent aux fonctions **originales** et **de remplacement**.
 
-Ensuite, **injectez** le dylib avec **`DYLD_INSERT_LIBRARIES`** (l'interposition doit se produire avant le chargement de l'application principale). Évidemment, les [**restrictions** appliquées à l'utilisation de **`DYLD_INSERT_LIBRARIES`** s'appliquent également ici](../macos-proces-abuse/macos-library-injection/#check-restrictions).&#x20;
+Ensuite, **injectez** le dylib avec **`DYLD_INSERT_LIBRARIES`** (l'interposition doit se produire avant le chargement de l'application principale). Évidemment, les [**restrictions** appliquées à l'utilisation de **`DYLD_INSERT_LIBRARIES`** s'appliquent également ici](../macos-proces-abuse/macos-library-injection/index.html#check-restrictions).&#x20;
 
-### Interpose printf
+### Interposer printf
 
 {{#tabs}}
 {{#tab name="interpose.c"}}
@@ -77,7 +77,7 @@ Hello from interpose
 DYLD_INSERT_LIBRARIES=./interpose2.dylib ./hello
 Hello from interpose
 ```
-## Swizzling de méthode
+## Method Swizzling
 
 En ObjectiveC, un méthode est appelée comme suit : **`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
 
@@ -88,7 +88,7 @@ L'objet est **`someObject`**, la méthode est **`@selector(method1p1:p2:)`** et 
 En suivant les structures d'objet, il est possible d'atteindre un **tableau de méthodes** où les **noms** et les **pointeurs** vers le code de la méthode sont **situés**.
 
 > [!CAUTION]
-> Notez qu'en raison du fait que les méthodes et les classes sont accessibles en fonction de leurs noms, cette information est stockée dans le binaire, il est donc possible de la récupérer avec `otool -ov </path/bin>` ou [`class-dump </path/bin>`](https://github.com/nygard/class-dump)
+> Notez qu'en raison du fait que les méthodes et les classes sont accessibles en fonction de leurs noms, ces informations sont stockées dans le binaire, il est donc possible de les récupérer avec `otool -ov </path/bin>` ou [`class-dump </path/bin>`](https://github.com/nygard/class-dump)
 
 ### Accéder aux méthodes brutes
 
@@ -163,7 +163,7 @@ return 0;
 La fonction **`method_exchangeImplementations`** permet de **changer** l'**adresse** de l'**implémentation** d'**une fonction pour l'autre**.
 
 > [!CAUTION]
-> Ainsi, lorsque une fonction est appelée, ce qui est **exécuté est l'autre**.
+> Donc, lorsque une fonction est appelée, ce qui est **exécuté est l'autre**.
 ```objectivec
 //gcc -framework Foundation swizzle_str.m -o swizzle_str
 
@@ -208,7 +208,7 @@ return 0;
 }
 ```
 > [!WARNING]
-> Dans ce cas, si le **code d'implémentation de la méthode légitime** **vérifie** le **nom de la méthode**, il pourrait **détecter** ce swizzling et empêcher son exécution.
+> Dans ce cas, si le **code d'implémentation de la méthode légitime** **vérifie** le **nom de la méthode**, il pourrait **détecter** ce swizzling et l'empêcher de s'exécuter.
 >
 > La technique suivante n'a pas cette restriction.
 
@@ -272,7 +272,7 @@ return 0;
 
 Dans cette page, différentes manières de hooker des fonctions ont été discutées. Cependant, elles impliquaient **l'exécution de code à l'intérieur du processus pour attaquer**.
 
-Pour ce faire, la technique la plus simple à utiliser est d'injecter un [Dyld via des variables d'environnement ou un détournement](../macos-dyld-hijacking-and-dyld_insert_libraries.md). Cependant, je suppose que cela pourrait également être fait via [l'injection de processus Dylib](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port).
+Pour ce faire, la technique la plus simple à utiliser est d'injecter un [Dyld via des variables d'environnement ou un détournement](../macos-dyld-hijacking-and-dyld_insert_libraries.md). Cependant, je suppose que cela pourrait également être fait via [l'injection de processus Dylib](macos-ipc-inter-process-communication/index.html#dylib-process-injection-via-task-port).
 
 Cependant, les deux options sont **limitées** aux binaires/processus **non protégés**. Vérifiez chaque technique pour en savoir plus sur les limitations.
 
@@ -290,7 +290,7 @@ et ensuite **réenregistrer** l'application :
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f /Applications/Application.app
 ```
-Ajoutez dans cette bibliothèque le code de hooking pour exfiltrer les informations : mots de passe, messages...
+Ajoutez dans cette bibliothèque le code de hooking pour exfiltrer les informations : Mots de passe, messages...
 
 > [!CAUTION]
 > Notez que dans les versions plus récentes de macOS, si vous **supprimez la signature** du binaire de l'application et qu'il a été exécuté précédemment, macOS **n'exécutera plus l'application**.

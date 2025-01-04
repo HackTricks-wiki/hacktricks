@@ -9,12 +9,12 @@
 2. Effectuer une énumération web de base **à la recherche de portails de connexion** utilisés par la victime et **décider** lequel vous allez **imiter**.
 3. Utiliser des **OSINT** pour **trouver des emails**.
 2. Préparer l'environnement
-1. **Acheter le domaine** que vous allez utiliser pour l'évaluation de phishing
-2. **Configurer le service email** et les enregistrements associés (SPF, DMARC, DKIM, rDNS)
-3. Configurer le VPS avec **gophish**
+1. **Acheter le domaine** que vous allez utiliser pour l'évaluation de phishing.
+2. **Configurer le service email** et les enregistrements associés (SPF, DMARC, DKIM, rDNS).
+3. Configurer le VPS avec **gophish**.
 3. Préparer la campagne
-1. Préparer le **modèle d'email**
-2. Préparer la **page web** pour voler les identifiants
+1. Préparer le **modèle d'email**.
+2. Préparer la **page web** pour voler les identifiants.
 4. Lancer la campagne !
 
 ## Générer des noms de domaine similaires ou acheter un domaine de confiance
@@ -22,13 +22,13 @@
 ### Techniques de Variation de Noms de Domaine
 
 - **Mot-clé** : Le nom de domaine **contient** un **mot-clé** important du domaine original (par exemple, zelster.com-management.com).
-- **sous-domaine hyphéné** : Remplacer le **point par un tiret** d'un sous-domaine (par exemple, www-zelster.com).
-- **Nouveau TLD** : Même domaine utilisant un **nouveau TLD** (par exemple, zelster.org)
+- **sous-domaine hyphéné** : Remplacer le **point par un tiret** dans un sous-domaine (par exemple, www-zelster.com).
+- **Nouveau TLD** : Même domaine utilisant un **nouveau TLD** (par exemple, zelster.org).
 - **Homoglyph** : Il **remplace** une lettre dans le nom de domaine par des **lettres qui se ressemblent** (par exemple, zelfser.com).
-- **Transposition :** Il **échange deux lettres** dans le nom de domaine (par exemple, zelsetr.com).
+- **Transposition** : Il **échange deux lettres** dans le nom de domaine (par exemple, zelsetr.com).
 - **Singularisation/Pluralisation** : Ajoute ou enlève un “s” à la fin du nom de domaine (par exemple, zeltsers.com).
 - **Omission** : Il **supprime une** des lettres du nom de domaine (par exemple, zelser.com).
-- **Répétition :** Il **répète une** des lettres dans le nom de domaine (par exemple, zeltsser.com).
+- **Répétition** : Il **répète une** des lettres dans le nom de domaine (par exemple, zeltsser.com).
 - **Remplacement** : Comme homoglyph mais moins furtif. Il remplace une des lettres dans le nom de domaine, peut-être par une lettre proche de la lettre originale sur le clavier (par exemple, zektser.com).
 - **Sous-domaine** : Introduire un **point** à l'intérieur du nom de domaine (par exemple, ze.lster.com).
 - **Insertion** : Il **insère une lettre** dans le nom de domaine (par exemple, zerltser.com).
@@ -51,7 +51,7 @@ Il y a une **possibilité qu'un des bits stockés ou en communication puisse êt
 
 Lorsque ce concept est **appliqué aux requêtes DNS**, il est possible que le **domaine reçu par le serveur DNS** ne soit pas le même que le domaine initialement demandé.
 
-Par exemple, une seule modification de bit dans le domaine "windows.com" peut le changer en "windnws.com."
+Par exemple, une seule modification de bit dans le domaine "windows.com" peut le changer en "windnws.com".
 
 Les attaquants peuvent **profiter de cela en enregistrant plusieurs domaines à inversion de bits** qui sont similaires au domaine de la victime. Leur intention est de rediriger les utilisateurs légitimes vers leur propre infrastructure.
 
@@ -73,7 +73,7 @@ Pour vous assurer que le domaine expiré que vous allez acheter **a déjà un bo
 - [https://hunter.io/](https://hunter.io)
 - [https://anymailfinder.com/](https://anymailfinder.com)
 
-Pour **découvrir plus** d'adresses email valides ou **vérifier celles** que vous avez déjà découvertes, vous pouvez vérifier si vous pouvez forcer les serveurs smtp de la victime. [Apprenez à vérifier/découvrir une adresse email ici](../../network-services-pentesting/pentesting-smtp/#username-bruteforce-enumeration).\
+Pour **découvrir plus** d'adresses email valides ou **vérifier celles** que vous avez déjà découvertes, vous pouvez vérifier si vous pouvez forcer les serveurs smtp de la victime. [Apprenez à vérifier/découvrir une adresse email ici](../../network-services-pentesting/pentesting-smtp/index.html#username-bruteforce-enumeration).\
 De plus, n'oubliez pas que si les utilisateurs utilisent **un portail web pour accéder à leurs mails**, vous pouvez vérifier s'il est vulnérable à **la force brute sur le nom d'utilisateur**, et exploiter la vulnérabilité si possible.
 
 ## Configuration de GoPhish
@@ -161,7 +161,7 @@ Modifiez `/opt/gophish/config.json` comme suit (notez l'utilisation de https) :
 ```
 **Configurer le service gophish**
 
-Pour créer le service gophish afin qu'il puisse démarrer automatiquement et être géré comme un service, vous pouvez créer le fichier `/etc/init.d/gophish` avec le contenu suivant :
+Pour créer le service gophish afin qu'il puisse être démarré automatiquement et géré comme un service, vous pouvez créer le fichier `/etc/init.d/gophish` avec le contenu suivant :
 ```bash
 #!/bin/bash
 # /etc/init.d/gophish
@@ -219,7 +219,7 @@ service gophish status
 ss -l | grep "3333\|443"
 service gophish stop
 ```
-## Configuration du serveur de messagerie et du domaine
+## Configurer le serveur de messagerie et le domaine
 
 ### Attendre et être légitime
 
@@ -233,7 +233,7 @@ Définissez un enregistrement rDNS (PTR) qui résout l'adresse IP du VPS au nom 
 
 ### Enregistrement Sender Policy Framework (SPF)
 
-Vous devez **configurer un enregistrement SPF pour le nouveau domaine**. Si vous ne savez pas ce qu'est un enregistrement SPF [**lisez cette page**](../../network-services-pentesting/pentesting-smtp/#spf).
+Vous devez **configurer un enregistrement SPF pour le nouveau domaine**. Si vous ne savez pas ce qu'est un enregistrement SPF [**lisez cette page**](../../network-services-pentesting/pentesting-smtp/index.html#spf).
 
 Vous pouvez utiliser [https://www.spfwizard.net/](https://www.spfwizard.net) pour générer votre politique SPF (utilisez l'IP de la machine VPS)
 
@@ -243,9 +243,9 @@ Voici le contenu qui doit être défini à l'intérieur d'un enregistrement TXT 
 ```bash
 v=spf1 mx a ip4:ip.ip.ip.ip ?all
 ```
-### Enregistrement DMARC basé sur le domaine
+### Enregistrement DMARC (Domain-based Message Authentication, Reporting & Conformance)
 
-Vous devez **configurer un enregistrement DMARC pour le nouveau domaine**. Si vous ne savez pas ce qu'est un enregistrement DMARC [**lisez cette page**](../../network-services-pentesting/pentesting-smtp/#dmarc).
+Vous devez **configurer un enregistrement DMARC pour le nouveau domaine**. Si vous ne savez pas ce qu'est un enregistrement DMARC [**lisez cette page**](../../network-services-pentesting/pentesting-smtp/index.html#dmarc).
 
 Vous devez créer un nouvel enregistrement DNS TXT pointant vers le nom d'hôte `_dmarc.<domain>` avec le contenu suivant :
 ```bash
@@ -253,7 +253,7 @@ v=DMARC1; p=none
 ```
 ### DomainKeys Identified Mail (DKIM)
 
-Vous devez **configurer un DKIM pour le nouveau domaine**. Si vous ne savez pas ce qu'est un enregistrement DMARC [**lisez cette page**](../../network-services-pentesting/pentesting-smtp/#dkim).
+Vous devez **configurer un DKIM pour le nouveau domaine**. Si vous ne savez pas ce qu'est un enregistrement DMARC [**lisez cette page**](../../network-services-pentesting/pentesting-smtp/index.html#dkim).
 
 Ce tutoriel est basé sur : [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
 
@@ -378,7 +378,7 @@ Notez que le **profil d'envoi permet d'envoyer un email de test pour voir à quo
 ![](<../../images/image (192).png>)
 
 > [!NOTE]
-> Je vous recommande d'**envoyer les emails de test à des adresses de 10min mails** afin d'éviter d'être blacklisté lors des tests.
+> Je recommanderais d'**envoyer les emails de test à des adresses de 10min mails** afin d'éviter d'être blacklisté lors des tests.
 
 Une fois que tout est prêt, lancez simplement la campagne !
 
@@ -422,7 +422,7 @@ Vous pouvez faire cela avec [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVN
 Évidemment, l'un des meilleurs moyens de savoir si vous avez été démasqué est de **chercher votre domaine dans les listes noires**. S'il apparaît, d'une manière ou d'une autre, votre domaine a été détecté comme suspect.\
 Un moyen facile de vérifier si votre domaine apparaît dans une liste noire est d'utiliser [https://malwareworld.com/](https://malwareworld.com)
 
-Cependant, il existe d'autres moyens de savoir si la victime **cherche activement des activités de phishing suspectes dans la nature**, comme expliqué dans :
+Cependant, il existe d'autres moyens de savoir si la victime **cherche activement des activités de phishing suspectes dans la nature** comme expliqué dans :
 
 {{#ref}}
 detecting-phising.md

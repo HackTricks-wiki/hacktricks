@@ -4,7 +4,7 @@
 
 ## Escalade de privilèges TCC
 
-Si vous êtes ici à la recherche de l'escalade de privilèges TCC, allez à :
+Si vous êtes venu ici à la recherche d'une escalade de privilèges TCC, allez à :
 
 {{#ref}}
 macos-security-protections/macos-tcc/
@@ -12,7 +12,7 @@ macos-security-protections/macos-tcc/
 
 ## Privesc Linux
 
-Veuillez noter que **la plupart des astuces concernant l'escalade de privilèges affectant Linux/Unix affecteront également les machines MacOS**. Donc, voyez :
+Veuillez noter que **la plupart des astuces concernant l'escalade de privilèges affectant Linux/Unix affecteront également les machines MacOS**. Donc, consultez :
 
 {{#ref}}
 ../../linux-hardening/privilege-escalation/
@@ -22,7 +22,7 @@ Veuillez noter que **la plupart des astuces concernant l'escalade de privilèges
 
 ### Détournement de Sudo
 
-Vous pouvez trouver la technique originale de [Détournement de Sudo dans le post sur l'escalade de privilèges Linux](../../linux-hardening/privilege-escalation/#sudo-hijacking).
+Vous pouvez trouver la technique originale de [Détournement de Sudo dans le post sur l'escalade de privilèges Linux](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
 
 Cependant, macOS **maintient** le **`PATH`** de l'utilisateur lorsqu'il exécute **`sudo`**. Ce qui signifie qu'une autre façon d'atteindre cette attaque serait de **détourner d'autres binaires** que la victime exécutera lorsqu'elle **utilise sudo :**
 ```bash
@@ -41,15 +41,15 @@ sudo ls
 ```
 Notez qu'un utilisateur qui utilise le terminal aura très probablement **Homebrew installé**. Il est donc possible de détourner des binaires dans **`/opt/homebrew/bin`**.
 
-### Usurpation du Dock
+### Usurpation de Dock
 
 En utilisant un peu de **ingénierie sociale**, vous pourriez **usurper par exemple Google Chrome** dans le dock et exécuter en réalité votre propre script :
 
 {{#tabs}}
-{{#tab name="Usurpation de Chrome"}}
+{{#tab name="Chrome Impersonation"}}
 Quelques suggestions :
 
-- Vérifiez dans le Dock s'il y a un Chrome, et dans ce cas, **supprimez** cette entrée et **ajoutez** l'**entrée Chrome** **fausse** à la **même position** dans le tableau du Dock.&#x20;
+- Vérifiez dans le Dock s'il y a un Chrome, et dans ce cas **supprimez** cette entrée et **ajoutez** l'**entrée Chrome** **fausse** à la **même position** dans le tableau Dock.&#x20;
 ```bash
 #!/bin/sh
 
@@ -121,14 +121,14 @@ killall Dock
 ```
 {{#endtab}}
 
-{{#tab name="Impersonation de Finder"}}
+{{#tab name="Impersonation du Finder"}}
 Quelques suggestions :
 
-- Vous **ne pouvez pas retirer Finder du Dock**, donc si vous allez l'ajouter au Dock, vous pourriez mettre le faux Finder juste à côté du vrai. Pour cela, vous devez **ajouter l'entrée du faux Finder au début du tableau Dock**.
+- Vous **ne pouvez pas retirer le Finder du Dock**, donc si vous allez l'ajouter au Dock, vous pourriez mettre le faux Finder juste à côté du vrai. Pour cela, vous devez **ajouter l'entrée du faux Finder au début du tableau Dock**.
 - Une autre option est de ne pas le placer dans le Dock et de simplement l'ouvrir, "Finder demandant à contrôler Finder" n'est pas si étrange.
-- Une autre option pour **escalader vers root sans demander** le mot de passe avec une horrible boîte, est de faire en sorte que Finder demande vraiment le mot de passe pour effectuer une action privilégiée :
-- Demandez à Finder de copier dans **`/etc/pam.d`** un nouveau fichier **`sudo`** (L'invite demandant le mot de passe indiquera que "Finder veut copier sudo")
-- Demandez à Finder de copier un nouveau **Plugin d'Autorisation** (Vous pourriez contrôler le nom du fichier afin que l'invite demandant le mot de passe indique que "Finder veut copier Finder.bundle")
+- Une autre option pour **escalader vers root sans demander** le mot de passe avec une horrible boîte, est de faire en sorte que le Finder demande vraiment le mot de passe pour effectuer une action privilégiée :
+- Demandez au Finder de copier dans **`/etc/pam.d`** un nouveau fichier **`sudo`** (L'invite demandant le mot de passe indiquera que "Finder veut copier sudo")
+- Demandez au Finder de copier un nouveau **Plugin d'Autorisation** (Vous pourriez contrôler le nom du fichier afin que l'invite demandant le mot de passe indique que "Finder veut copier Finder.bundle")
 ```bash
 #!/bin/sh
 
