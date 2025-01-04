@@ -2,12 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**Цікаві сторінки для перегляду:**
+**Цікаві сторінки для перевірки:**
 
-- [**Pyscript hacking tricks**](pyscript.md)
-- [**Python deserializations**](../../pentesting-web/deserialization/#python)
-- [**Tricks to bypass python sandboxes**](bypass-python-sandboxes/)
-- [**Basic python web requests syntax**](web-requests.md)
-- [**Basic python syntax and libraries**](basic-python.md)
+- [**Pyscript хакерські трюки**](pyscript.md)
+- [**Python десеріалізації**](../../pentesting-web/deserialization/index.html#python)
+- [**Трюки для обходу python пісочниць**](bypass-python-sandboxes/)
+- [**Основний синтаксис веб-запитів на python**](web-requests.md)
+- [**Основний синтаксис python та бібліотеки**](basic-python.md)
 
 {{#include ../../banners/hacktricks-training.md}}
