@@ -34,13 +34,13 @@ scalpel file.img -o output
 ```
 ## Bulk Extractor
 
-Esta ferramenta vem incluída no kali, mas você pode encontrá-la aqui: [https://github.com/simsong/bulk_extractor](https://github.com/simsong/bulk_extractor)
+Esta ferramenta vem dentro do kali, mas você pode encontrá-la aqui: [https://github.com/simsong/bulk_extractor](https://github.com/simsong/bulk_extractor)
 
 Esta ferramenta pode escanear uma imagem e **extrair pcaps** dentro dela, **informações de rede (URLs, domínios, IPs, MACs, e-mails)** e mais **arquivos**. Você só precisa fazer:
 ```text
 bulk_extractor memory.img -o out_folder
 ```
-Navegue por **todas as informações** que a ferramenta coletou \(senhas?\), **analise** os **pacotes** \(leia[ **análise de Pcaps**](../pcap-inspection/)\), procure por **domínios estranhos** \(domínios relacionados a **malware** ou **inexistentes**\).
+Navegue por **todas as informações** que a ferramenta coletou \(senhas?\), **analise** os **pacotes** \(leia[ **análise de Pcaps**](../pcap-inspection/index.html)\), procure por **domínios estranhos** \(domínios relacionados a **malware** ou **inexistentes**\).
 
 ## PhotoRec
 

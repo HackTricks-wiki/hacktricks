@@ -10,7 +10,7 @@ Permissões em um **diretório**:
 - **escrita** - você pode **deletar/escrever** **arquivos** no diretório e pode **deletar pastas vazias**.
 - Mas você **não pode deletar/modificar pastas não vazias** a menos que tenha permissões de escrita sobre elas.
 - Você **não pode modificar o nome de uma pasta** a menos que a possua.
-- **execução** - você está **autorizado a percorrer** o diretório - se você não tiver esse direito, não pode acessar nenhum arquivo dentro dele, ou em quaisquer subdiretórios.
+- **execução** - você está **autorizado a percorrer** o diretório - se você não tiver esse direito, não pode acessar nenhum arquivo dentro dele, ou em subdiretórios.
 
 ### Combinações Perigosas
 
@@ -24,7 +24,7 @@ Com qualquer uma das combinações anteriores, um atacante poderia **injetar** u
 
 ### Caso especial de pasta root R+X
 
-Se houver arquivos em um **diretório** onde **apenas o root tem acesso R+X**, esses **não são acessíveis a mais ninguém**. Portanto, uma vulnerabilidade que permita **mover um arquivo legível por um usuário**, que não pode ser lido devido a essa **restrição**, deste diretório **para outro diferente**, poderia ser abusada para ler esses arquivos.
+Se houver arquivos em um **diretório** onde **apenas o root tem acesso R+X**, esses **não são acessíveis a mais ninguém**. Portanto, uma vulnerabilidade que permita **mover um arquivo legível por um usuário**, que não pode ser lido por causa dessa **restrição**, deste diretório **para outro diferente**, poderia ser abusada para ler esses arquivos.
 
 Exemplo em: [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions)
 
@@ -32,7 +32,7 @@ Exemplo em: [https://theevilbit.github.io/posts/exploiting_directory_permissions
 
 ### Arquivo/Pasta permissiva
 
-Se um processo privilegiado estiver escrevendo dados em um **arquivo** que poderia ser **controlado** por um **usuário de menor privilégio**, ou que poderia ter sido **anteriormente criado** por um usuário de menor privilégio. O usuário poderia simplesmente **apontá-lo para outro arquivo** via um link simbólico ou duro, e o processo privilegiado escreverá nesse arquivo.
+Se um processo privilegiado estiver escrevendo dados em um **arquivo** que poderia ser **controlado** por um **usuário de menor privilégio**, ou que poderia ter sido **criado anteriormente** por um usuário de menor privilégio. O usuário poderia simplesmente **apontá-lo para outro arquivo** via um link simbólico ou duro, e o processo privilegiado escreverá nesse arquivo.
 
 Verifique nas outras seções onde um atacante poderia **abusar de uma escrita arbitrária para escalar privilégios**.
 
@@ -86,7 +86,7 @@ ls -lO /tmp/asd
 ```
 ### defvfs mount
 
-Um **devfs** mount **não suporta xattr**, mais informações em [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)
+Uma montagem **devfs** **não suporta xattr**, mais informações em [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)
 ```bash
 mkdir /tmp/mnt
 mount_devfs -o noowners none "/tmp/mnt"
@@ -97,7 +97,7 @@ xattr: [Errno 1] Operation not permitted: '/tmp/mnt/lol'
 ```
 ### writeextattr ACL
 
-Este ACL impede a adição de `xattrs` ao arquivo
+Este ACL impede a adição de `xattrs` ao arquivo.
 ```bash
 rm -rf /tmp/test*
 echo test >/tmp/test
@@ -195,7 +195,7 @@ No entanto, existem alguns arquivos cuja assinatura não será verificada, estes
 </dict>
 <key>rules2</key>
 ...
-<key>^(.*/)?\.DS_Store$</key>
+<key>^(.*/index.html)?\.DS_Store$</key>
 <dict>
 <key>omit</key>
 <true/>
@@ -248,14 +248,14 @@ hdiutil detach /private/tmp/mnt 1>/dev/null
 # You can also create a dmg from an app using:
 hdiutil create -srcfolder justsome.app justsome.dmg
 ```
-Normalmente, o macOS monta discos conversando com o serviço Mach `com.apple.DiskArbitrarion.diskarbitrariond` (fornecido por `/usr/libexec/diskarbitrationd`). Se você adicionar o parâmetro `-d` ao arquivo plist do LaunchDaemons e reiniciar, ele armazenará logs em `/var/log/diskarbitrationd.log`.\
+Normalmente, o macOS monta discos conversando com o serviço Mach `com.apple.DiskArbitration.diskarbitrationd` (fornecido por `/usr/libexec/diskarbitrationd`). Se você adicionar o parâmetro `-d` ao arquivo plist do LaunchDaemons e reiniciar, ele armazenará logs em `/var/log/diskarbitrationd.log`.\
 No entanto, é possível usar ferramentas como `hdik` e `hdiutil` para se comunicar diretamente com o kext `com.apple.driver.DiskImages`.
 
 ## Escritas Arbitrárias
 
 ### Scripts sh periódicos
 
-Se o seu script puder ser interpretado como um **shell script**, você poderá sobrescrever o **`/etc/periodic/daily/999.local`** shell script que será acionado todos os dias.
+Se seu script puder ser interpretado como um **shell script**, você poderá sobrescrever o **`/etc/periodic/daily/999.local`** shell script que será acionado todos os dias.
 
 Você pode **fingir** uma execução deste script com: **`sudo periodic daily`**
 
@@ -278,21 +278,21 @@ Escreva um **LaunchDaemon** arbitrário como **`/Library/LaunchDaemons/xyz.hackt
 </dict>
 </plist>
 ```
-Gere o script `/Applications/Scripts/privesc.sh` com os **comandos** que você gostaria de executar como root.
+Just generate the script `/Applications/Scripts/privesc.sh` com os **comandos** que você gostaria de executar como root.
 
 ### Sudoers File
 
-Se você tiver **escrita arbitrária**, pode criar um arquivo dentro da pasta **`/etc/sudoers.d/`** concedendo a si mesmo privilégios de **sudo**.
+Se você tiver **escrita arbitrária**, você poderia criar um arquivo dentro da pasta **`/etc/sudoers.d/`** concedendo a si mesmo privilégios de **sudo**.
 
 ### PATH files
 
-O arquivo **`/etc/paths`** é um dos principais locais que preenche a variável de ambiente PATH. Você deve ser root para sobrescrevê-lo, mas se um script de **processo privilegiado** estiver executando algum **comando sem o caminho completo**, você pode ser capaz de **sequestar** isso modificando este arquivo.
+O arquivo **`/etc/paths`** é um dos principais lugares que preenche a variável de ambiente PATH. Você deve ser root para sobrescrevê-lo, mas se um script de **processo privilegiado** estiver executando algum **comando sem o caminho completo**, você pode ser capaz de **sequestrá-lo** modificando este arquivo.
 
 Você também pode escrever arquivos em **`/etc/paths.d`** para carregar novas pastas na variável de ambiente `PATH`.
 
 ### cups-files.conf
 
-Esta técnica foi usada em [este artigo](https://www.kandji.io/blog/macos-audit-story-part1).
+Esta técnica foi usada em [this writeup](https://www.kandji.io/blog/macos-audit-story-part1).
 
 Crie o arquivo `/etc/cups/cups-files.conf` com o seguinte conteúdo:
 ```
@@ -300,7 +300,7 @@ ErrorLog /etc/sudoers.d/lpe
 LogFilePerm 777
 <some junk>
 ```
-Isso criará o arquivo `/etc/sudoers.d/lpe` com permissões 777. O lixo extra no final é para acionar a criação do log de erros.
+Isto criará o arquivo `/etc/sudoers.d/lpe` com permissões 777. O lixo extra no final é para acionar a criação do log de erros.
 
 Em seguida, escreva em `/etc/sudoers.d/lpe` a configuração necessária para escalar privilégios como `%staff ALL=(ALL) NOPASSWD:ALL`.
 
@@ -308,11 +308,11 @@ Depois, modifique o arquivo `/etc/cups/cups-files.conf` novamente indicando `Log
 
 ### Sandbox Escape
 
-É possível escapar do sandbox do macOS com uma gravação arbitrária de FS. Para alguns exemplos, consulte a página [macOS Auto Start](../../../../macos-auto-start-locations.md), mas um comum é escrever um arquivo de preferências do Terminal em `~/Library/Preferences/com.apple.Terminal.plist` que executa um comando na inicialização e chamá-lo usando `open`.
+É possível escapar do sandbox do macOS com uma gravação arbitrária de FS. Para alguns exemplos, verifique a página [macOS Auto Start](../../../../macos-auto-start-locations.md), mas um comum é escrever um arquivo de preferências do Terminal em `~/Library/Preferences/com.apple.Terminal.plist` que executa um comando na inicialização e chamá-lo usando `open`.
 
 ## Gerar arquivos graváveis como outros usuários
 
-Isso gerará um arquivo que pertence ao root e que é gravável por mim ([**código daqui**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Isso também pode funcionar como privesc:
+Isto gerará um arquivo que pertence ao root e que é gravável por mim ([**código daqui**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Isso também pode funcionar como privesc:
 ```bash
 DIRNAME=/usr/local/etc/periodic/daily
 
@@ -330,7 +330,7 @@ echo $FILENAME
 
 <details>
 
-<summary>Código de Exemplo do Produtor</summary>
+<summary>Exemplo de Código do Produtor</summary>
 ```c
 // gcc producer.c -o producer -lrt
 #include <fcntl.h>
@@ -424,11 +424,11 @@ return 0;
 
 **Descritores protegidos do macOS** são um recurso de segurança introduzido no macOS para aumentar a segurança e a confiabilidade das **operações de descritores de arquivo** em aplicativos de usuário. Esses descritores protegidos fornecem uma maneira de associar restrições específicas ou "guardas" com descritores de arquivo, que são aplicadas pelo kernel.
 
-Esse recurso é particularmente útil para prevenir certas classes de vulnerabilidades de segurança, como **acesso não autorizado a arquivos** ou **condições de corrida**. Essas vulnerabilidades ocorrem quando, por exemplo, uma thread está acessando uma descrição de arquivo, dando **acesso a outra thread vulnerável sobre ela** ou quando um descritor de arquivo é **herdado** por um processo filho vulnerável. Algumas funções relacionadas a essa funcionalidade são:
+Esse recurso é particularmente útil para prevenir certas classes de vulnerabilidades de segurança, como **acesso não autorizado a arquivos** ou **condições de corrida**. Essas vulnerabilidades ocorrem quando, por exemplo, uma thread está acessando uma descrição de arquivo, dando **acesso a outra thread vulnerável** ou quando um descritor de arquivo é **herdado** por um processo filho vulnerável. Algumas funções relacionadas a essa funcionalidade são:
 
 - `guarded_open_np`: Abre um FD com uma guarda
 - `guarded_close_np`: Fecha-o
-- `change_fdguard_np`: Altera as flags de guarda em um descritor (até removendo a proteção da guarda)
+- `change_fdguard_np`: Altera as flags de guarda em um descritor (até removendo a proteção de guarda)
 
 ## Referências
 

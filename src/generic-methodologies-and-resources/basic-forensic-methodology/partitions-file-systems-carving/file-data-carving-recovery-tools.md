@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Ferramentas de Carving & Recuperação
+## Carving & Recovery tools
 
 Mais ferramentas em [https://github.com/Claudio-C/awesome-datarecovery](https://github.com/Claudio-C/awesome-datarecovery)
 
@@ -44,7 +44,7 @@ Esta ferramenta pode escanear uma imagem e **extrair pcaps** dentro dela, **info
 ```
 bulk_extractor memory.img -o out_folder
 ```
-Navegue por **todas as informações** que a ferramenta coletou (senhas?), **analise** os **pacotes** (leia[ **análise de Pcaps**](../pcap-inspection/)), procure por **domínios estranhos** (domínios relacionados a **malware** ou **inexistentes**).
+Navegue por **todas as informações** que a ferramenta coletou (senhas?), **analise** os **pacotes** (leia[ **análise de Pcaps**](../pcap-inspection/index.html)), procure por **domínios estranhos** (domínios relacionados a **malware** ou **inexistentes**).
 
 ### PhotoRec
 
@@ -60,28 +60,28 @@ Verifique o [código](https://code.google.com/archive/p/binvis/) e a [página da
 
 #### Recursos do BinVis
 
-- Visual e ativo **visualizador de estrutura**
+- Visualizador de **estrutura** visual e ativa
 - Múltiplos gráficos para diferentes pontos de foco
 - Foco em porções de uma amostra
-- **Visualizando strings e recursos**, em executáveis PE ou ELF, por exemplo.
+- **Visualizando strings e recursos**, em executáveis PE ou ELF, por exemplo
 - Obtendo **padrões** para criptoanálise em arquivos
 - **Identificando** algoritmos de empacotamento ou codificação
 - **Identificar** Esteganografia por padrões
-- **Diferença** visual binária
+- **Diferença** visual de binários
 
-BinVis é um ótimo **ponto de partida para se familiarizar com um alvo desconhecido** em um cenário de black-boxing.
+BinVis é um ótimo **ponto de partida para se familiarizar com um alvo desconhecido** em um cenário de caixa-preta.
 
 ## Ferramentas Específicas de Carving de Dados
 
 ### FindAES
 
-Procura por chaves AES pesquisando por seus cronogramas de chaves. Capaz de encontrar chaves de 128, 192 e 256 bits, como as usadas pelo TrueCrypt e BitLocker.
+Procura por chaves AES buscando por seus cronogramas de chaves. Capaz de encontrar chaves de 128, 192 e 256 bits, como as usadas pelo TrueCrypt e BitLocker.
 
 Baixe [aqui](https://sourceforge.net/projects/findaes/).
 
 ## Ferramentas Complementares
 
 Você pode usar [**viu** ](https://github.com/atanunq/viu) para ver imagens a partir do terminal.\
-Você pode usar a ferramenta de linha de comando linux **pdftotext** para transformar um pdf em texto e lê-lo.
+Você pode usar a ferramenta de linha de comando do linux **pdftotext** para transformar um pdf em texto e lê-lo.
 
 {{#include ../../../banners/hacktricks-training.md}}

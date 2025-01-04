@@ -4,10 +4,10 @@
 
 **Páginas interessantes para conferir:**
 
-- [**Truques de hacking com Pyscript**](pyscript.md)
+- [**Truques de hacking do Pyscript**](pyscript.md)
 - [**Deserializações em Python**](../../pentesting-web/deserialization/index.html#python)
-- [**Truques para contornar sandboxes em Python**](bypass-python-sandboxes/)
+- [**Truques para contornar sandboxes do Python**](bypass-python-sandboxes/index.html)
 - [**Sintaxe básica de requisições web em Python**](web-requests.md)
-- [**Sintaxe e bibliotecas básicas de Python**](basic-python.md)
+- [**Sintaxe e bibliotecas básicas do Python**](basic-python.md)
 
 {{#include ../../banners/hacktricks-training.md}}

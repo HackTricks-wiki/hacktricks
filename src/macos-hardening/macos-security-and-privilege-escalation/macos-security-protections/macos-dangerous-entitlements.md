@@ -3,66 +3,66 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!WARNING]
-> Note que os direitos que começam com **`com.apple`** não estão disponíveis para terceiros, apenas a Apple pode concedê-los.
+> Note que as permissões que começam com **`com.apple`** não estão disponíveis para terceiros, apenas a Apple pode concedê-las.
 
 ## Alto
 
 ### `com.apple.rootless.install.heritable`
 
-O direito **`com.apple.rootless.install.heritable`** permite **burlar o SIP**. Confira [isso para mais informações](macos-sip.md#com.apple.rootless.install.heritable).
+A permissão **`com.apple.rootless.install.heritable`** permite **contornar o SIP**. Confira [isso para mais informações](macos-sip.md#com.apple.rootless.install.heritable).
 
 ### **`com.apple.rootless.install`**
 
-O direito **`com.apple.rootless.install`** permite **burlar o SIP**. Confira [isso para mais informações](macos-sip.md#com.apple.rootless.install).
+A permissão **`com.apple.rootless.install`** permite **contornar o SIP**. Confira [isso para mais informações](macos-sip.md#com.apple.rootless.install).
 
-### **`com.apple.system-task-ports` (anteriormente chamado `task_for_pid-allow`)**
+### **`com.apple.system-task-ports` (anteriormente chamada `task_for_pid-allow`)**
 
-Este direito permite obter o **port de tarefa para qualquer** processo, exceto o kernel. Confira [**isso para mais informações**](../macos-proces-abuse/macos-ipc-inter-process-communication/).
+Essa permissão permite obter o **port de tarefa para qualquer** processo, exceto o kernel. Confira [**isso para mais informações**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
 
 ### `com.apple.security.get-task-allow`
 
-Este direito permite que outros processos com o direito **`com.apple.security.cs.debugger`** obtenham o port de tarefa do processo executado pelo binário com este direito e **injete código nele**. Confira [**isso para mais informações**](../macos-proces-abuse/macos-ipc-inter-process-communication/).
+Essa permissão permite que outros processos com a permissão **`com.apple.security.cs.debugger`** obtenham o port de tarefa do processo executado pelo binário com essa permissão e **injete código nele**. Confira [**isso para mais informações**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
 
 ### `com.apple.security.cs.debugger`
 
-Aplicativos com o Direito de Ferramenta de Depuração podem chamar `task_for_pid()` para recuperar um port de tarefa válido para aplicativos não assinados e de terceiros com o direito `Get Task Allow` definido como `true`. No entanto, mesmo com o direito da ferramenta de depuração, um depurador **não pode obter os ports de tarefa** de processos que **não têm o direito `Get Task Allow`**, e que, portanto, estão protegidos pela Proteção de Integridade do Sistema. Confira [**isso para mais informações**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
+Aplicativos com a Permissão de Ferramenta de Depuração podem chamar `task_for_pid()` para recuperar um port de tarefa válido para aplicativos não assinados e de terceiros com a permissão `Get Task Allow` definida como `true`. No entanto, mesmo com a permissão da ferramenta de depuração, um depurador **não pode obter os ports de tarefa** de processos que **não têm a permissão `Get Task Allow`**, e que, portanto, estão protegidos pela Proteção de Integridade do Sistema. Confira [**isso para mais informações**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
 
 ### `com.apple.security.cs.disable-library-validation`
 
-Este direito permite **carregar frameworks, plug-ins ou bibliotecas sem serem assinados pela Apple ou assinados com o mesmo ID de Equipe** que o executável principal, então um atacante poderia abusar de algum carregamento arbitrário de biblioteca para injetar código. Confira [**isso para mais informações**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
+Essa permissão permite **carregar frameworks, plug-ins ou bibliotecas sem serem assinados pela Apple ou assinados com o mesmo ID de Equipe** que o executável principal, então um atacante poderia abusar de algum carregamento arbitrário de biblioteca para injetar código. Confira [**isso para mais informações**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
 
 ### `com.apple.private.security.clear-library-validation`
 
-Este direito é muito semelhante ao **`com.apple.security.cs.disable-library-validation`**, mas **em vez** de **desabilitar diretamente** a validação de biblioteca, permite que o processo **chame uma chamada de sistema `csops` para desabilitá-la**.\
+Essa permissão é muito semelhante à **`com.apple.security.cs.disable-library-validation`**, mas **em vez de** **desabilitar diretamente** a validação de bibliotecas, permite que o processo **chame uma chamada de sistema `csops` para desabilitá-la**.\
 Confira [**isso para mais informações**](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/).
 
 ### `com.apple.security.cs.allow-dyld-environment-variables`
 
-Este direito permite **usar variáveis de ambiente DYLD** que poderiam ser usadas para injetar bibliotecas e código. Confira [**isso para mais informações**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables).
+Essa permissão permite **usar variáveis de ambiente DYLD** que poderiam ser usadas para injetar bibliotecas e código. Confira [**isso para mais informações**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables).
 
 ### `com.apple.private.tcc.manager` ou `com.apple.rootless.storage`.`TCC`
 
-[**De acordo com este blog**](https://objective-see.org/blog/blog_0x4C.html) **e** [**este blog**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/), esses direitos permitem **modificar** o banco de dados **TCC**.
+[**De acordo com este blog**](https://objective-see.org/blog/blog_0x4C.html) **e** [**este blog**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/), essas permissões permitem **modificar** o banco de dados **TCC**.
 
 ### **`system.install.apple-software`** e **`system.install.apple-software.standar-user`**
 
-Esses direitos permitem **instalar software sem pedir permissões** ao usuário, o que pode ser útil para uma **elevação de privilégio**.
+Essas permissões permitem **instalar software sem pedir permissões** ao usuário, o que pode ser útil para uma **elevação de privilégio**.
 
 ### `com.apple.private.security.kext-management`
 
-Direito necessário para solicitar ao **kernel que carregue uma extensão de kernel**.
+Permissão necessária para solicitar ao **kernel que carregue uma extensão de kernel**.
 
 ### **`com.apple.private.icloud-account-access`**
 
-O direito **`com.apple.private.icloud-account-access`** permite comunicar-se com o serviço XPC **`com.apple.iCloudHelper`**, que fornecerá **tokens do iCloud**.
+A permissão **`com.apple.private.icloud-account-access`** permite comunicar-se com o serviço XPC **`com.apple.iCloudHelper`**, que fornecerá **tokens do iCloud**.
 
-**iMovie** e **Garageband** tinham esse direito.
+**iMovie** e **Garageband** tinham essa permissão.
 
-Para mais **informações** sobre a exploração para **obter tokens do iCloud** desse direito, confira a palestra: [**#OBTS v5.0: "O que acontece no seu Mac, fica no iCloud da Apple?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+Para mais **informações** sobre a exploração para **obter tokens do iCloud** dessa permissão, confira a palestra: [**#OBTS v5.0: "O que acontece no seu Mac, fica no iCloud da Apple?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
 ### `com.apple.private.tcc.manager.check-by-audit-token`
 
-TODO: Não sei o que isso permite fazer
+TODO: Eu não sei o que isso permite fazer
 
 ### `com.apple.private.apfs.revert-to-snapshot`
 
@@ -74,7 +74,7 @@ TODO: No [**este relatório**](https://jhftss.github.io/The-Nightmare-of-Apple-O
 
 ### `keychain-access-groups`
 
-Este direito lista os grupos de **keychain** aos quais o aplicativo tem acesso:
+Essa permissão lista os grupos de **keychain** aos quais o aplicativo tem acesso:
 ```xml
 <key>keychain-access-groups</key>
 <array>
@@ -91,7 +91,7 @@ Concede permissões de **Acesso Completo ao Disco**, uma das permissões mais al
 
 ### **`kTCCServiceAppleEvents`**
 
-Permite que o aplicativo envie eventos para outros aplicativos que são comumente usados para **automatizar tarefas**. Controlando outros aplicativos, pode abusar das permissões concedidas a esses outros aplicativos.
+Permite que o aplicativo envie eventos para outros aplicativos que são comumente usados para **automatizar tarefas**. Controlando outros aplicativos, ele pode abusar das permissões concedidas a esses outros aplicativos.
 
 Como fazê-los pedir a senha do usuário:
 ```bash
@@ -161,3 +161,5 @@ Permitir que o processo **peça todas as permissões do TCC**.
 ### **`kTCCServicePostEvent`**
 
 {{#include ../../../banners/hacktricks-training.md}}
+
+</details>

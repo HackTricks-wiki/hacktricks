@@ -13,9 +13,9 @@ A página principal de uma aplicação Flask provavelmente terá o objeto global
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-Neste caso, é possível acessar este objeto apenas usando qualquer gadget para **acessar objetos globais** da [**página de Bypass Python sandboxes**](bypass-python-sandboxes/).
+Neste caso, é possível acessar este objeto apenas usando qualquer gadget para **acessar objetos globais** da [**página de Bypass Python sandboxes**](bypass-python-sandboxes/index.html).
 
-No caso em que **a vulnerabilidade está em um arquivo python diferente**, você precisa de um gadget para percorrer arquivos para chegar ao principal e **acessar o objeto global `app.secret_key`** para mudar a chave secreta do Flask e poder [**escalar privilégios** conhecendo esta chave](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
+No caso em que **a vulnerabilidade está em um arquivo python diferente**, você precisa de um gadget para percorrer arquivos até chegar ao principal para **acessar o objeto global `app.secret_key`** para mudar a chave secreta do Flask e poder [**escalar privilégios** conhecendo esta chave](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
 
 Um payload como este [deste writeup](https://ctftime.org/writeup/36082):
 ```python
@@ -31,7 +31,7 @@ Use este payload para **mudar `app.secret_key`** (o nome no seu app pode ser dif
 {ua.__class__.__init__.__globals__[t].sys.modules[werkzeug.debug].uuid._node}
 ```
 > [!WARNING]
-> Note que você pode obter o **caminho local do servidor para o `app.py`** gerando algum **erro** na página da web que irá **te dar o caminho**.
+> Note que você pode obter o **caminho local do servidor para o `app.py`** gerando algum **erro** na página da web que **te dará o caminho**.
 
 Se a vulnerabilidade estiver em um arquivo python diferente, verifique o truque Flask anterior para acessar os objetos do arquivo python principal.
 

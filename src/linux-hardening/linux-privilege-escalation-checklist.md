@@ -15,10 +15,10 @@
 - [ ] Mais enumeração do sistema ([data, estatísticas do sistema, informações da CPU, impressoras](privilege-escalation/index.html#more-system-enumeration))
 - [ ] [Enumerar mais defesas](privilege-escalation/index.html#enumerate-possible-defenses)
 
-### [Unidades](privilege-escalation/index.html#drives)
+### [Discos](privilege-escalation/index.html#drives)
 
-- [ ] **Listar unidades** montadas
-- [ ] **Alguma unidade não montada?**
+- [ ] **Listar discos montados**
+- [ ] **Algum disco não montado?**
 - [ ] **Algumas credenciais no fstab?**
 
 ### [**Software Instalado**](privilege-escalation/index.html#installed-software)
@@ -28,8 +28,8 @@
 
 ### [Processos](privilege-escalation/index.html#processes)
 
-- [ ] Algum **software desconhecido está em execução**?
-- [ ] Algum software está em execução com **mais privilégios do que deveria ter**?
+- [ ] Algum **software desconhecido em execução**?
+- [ ] Algum software em execução com **mais privilégios do que deveria ter**?
 - [ ] Procurar por **explorações de processos em execução** (especialmente a versão em execução).
 - [ ] Você pode **modificar o binário** de algum processo em execução?
 - [ ] **Monitorar processos** e verificar se algum processo interessante está sendo executado com frequência.
@@ -50,7 +50,7 @@
 
 ### [Tempos](privilege-escalation/index.html#timers)
 
-- [ ] Algum **timer gravável**?
+- [ ] Algum **temporizador gravável**?
 
 ### [Sockets](privilege-escalation/index.html#sockets)
 
@@ -72,7 +72,7 @@
 
 - [ ] Enumeração de usuários/grupos **genéricos**
 - [ ] Você tem um **UID muito grande**? A **máquina** é **vulnerável**?
-- [ ] Você pode [**escalar privilégios graças a um grupo**](privilege-escalation/interesting-groups-linux-pe/) ao qual pertence?
+- [ ] Você pode [**escalar privilégios graças a um grupo**](privilege-escalation/interesting-groups-linux-pe/index.html) ao qual pertence?
 - [ ] Dados da **Área de Transferência**?
 - [ ] Política de Senhas?
 - [ ] Tente **usar** cada **senha conhecida** que você descobriu anteriormente para fazer login **com cada** possível **usuário**. Tente fazer login também sem uma senha.
@@ -86,14 +86,14 @@
 - [ ] Você pode executar **qualquer comando com sudo**? Você pode usá-lo para LER, ESCREVER ou EXECUTAR algo como root? ([**GTFOBins**](https://gtfobins.github.io))
 - [ ] Algum **binário SUID explorável**? ([**GTFOBins**](https://gtfobins.github.io))
 - [ ] Os [**comandos sudo** são **limitados** por **path**? você pode **contornar** as restrições](privilege-escalation/index.html#sudo-execution-bypassing-paths)?
-- [ ] [**Binário Sudo/SUID sem path indicado**](privilege-escalation/index.html#sudo-command-suid-binary-without-command-path)?
-- [ ] [**Binário SUID especificando path**](privilege-escalation/index.html#suid-binary-with-command-path)? Contornar
-- [ ] [**Vuln LD_PRELOAD**](privilege-escalation/index.html#ld_preload)
+- [ ] [**Binário Sudo/SUID sem caminho indicado**](privilege-escalation/index.html#sudo-command-suid-binary-without-command-path)?
+- [ ] [**Binário SUID especificando caminho**](privilege-escalation/index.html#suid-binary-with-command-path)? Contornar
+- [ ] [**Vulnerabilidade LD_PRELOAD**](privilege-escalation/index.html#ld_preload)
 - [ ] [**Falta de biblioteca .so em binário SUID**](privilege-escalation/index.html#suid-binary-so-injection) de uma pasta gravável?
 - [ ] [**Tokens SUDO disponíveis**](privilege-escalation/index.html#reusing-sudo-tokens)? [**Você pode criar um token SUDO**](privilege-escalation/index.html#var-run-sudo-ts-less-than-username-greater-than)?
 - [ ] Você pode [**ler ou modificar arquivos sudoers**](privilege-escalation/index.html#etc-sudoers-etc-sudoers-d)?
 - [ ] Você pode [**modificar /etc/ld.so.conf.d/**](privilege-escalation/index.html#etc-ld-so-conf-d)?
-- [ ] Comando [**OpenBSD DOAS**](privilege-escalation/index.html#doas)
+- [ ] [**Comando OpenBSD DOAS**](privilege-escalation/index.html#doas)
 
 ### [Capacidades](privilege-escalation/index.html#capabilities)
 
@@ -121,9 +121,9 @@
 - [ ] **Localização Estranha/Arquivos de Propriedade,** você pode ter acesso ou alterar arquivos executáveis
 - [ ] **Modificado** nos últimos minutos
 - [ ] **Arquivos de DB Sqlite**
-- [ ] **Arquivos Ocultos**
+- [ ] **Arquivos ocultos**
 - [ ] **Scripts/Binários no PATH**
-- [ ] **Arquivos Web** (senhas?)
+- [ ] **Arquivos da Web** (senhas?)
 - [ ] **Backups**?
 - [ ] **Arquivos conhecidos que contêm senhas**: Use **Linpeas** e **LaZagne**
 - [ ] **Busca genérica**

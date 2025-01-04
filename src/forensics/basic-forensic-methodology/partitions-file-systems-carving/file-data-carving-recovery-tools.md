@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Ferramentas de Carving & Recuperação
+## Carving & Recovery tools
 
 Mais ferramentas em [https://github.com/Claudio-C/awesome-datarecovery](https://github.com/Claudio-C/awesome-datarecovery)
 
@@ -44,7 +44,7 @@ Esta ferramenta pode escanear uma imagem e **extrair pcaps** dentro dela, **info
 ```
 bulk_extractor memory.img -o out_folder
 ```
-Navegue por **todas as informações** que a ferramenta coletou (senhas?), **analise** os **pacotes** (leia[ **análise de Pcaps**](../pcap-inspection/)), procure por **domínios estranhos** (domínios relacionados a **malware** ou **inexistentes**).
+Navegue por **todas as informações** que a ferramenta coletou (senhas?), **analise** os **pacotes** (leia[ **análise de Pcaps**](../pcap-inspection/index.html)), procure por **domínios estranhos** (domínios relacionados a **malware** ou **inexistentes**).
 
 ### PhotoRec
 
@@ -60,7 +60,7 @@ Verifique o [código](https://code.google.com/archive/p/binvis/) e a [página da
 
 #### Recursos do BinVis
 
-- Visual e ativo **visualizador de estrutura**
+- Visualizador de **estrutura** visual e ativa
 - Múltiplos gráficos para diferentes pontos de foco
 - Foco em porções de uma amostra
 - **Visualizando strings e recursos**, em executáveis PE ou ELF, por exemplo
@@ -81,7 +81,7 @@ Baixe [aqui](https://sourceforge.net/projects/findaes/).
 
 ## Ferramentas Complementares
 
-Você pode usar [**viu**](https://github.com/atanunq/viu) para ver imagens a partir do terminal.\
-Você pode usar a ferramenta de linha de comando linux **pdftotext** para transformar um pdf em texto e lê-lo.
+Você pode usar [**viu** ](https://github.com/atanunq/viu) para ver imagens a partir do terminal.\
+Você pode usar a ferramenta de linha de comando do linux **pdftotext** para transformar um pdf em texto e lê-lo.
 
 {{#include ../../../banners/hacktricks-training.md}}
