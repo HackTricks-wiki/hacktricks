@@ -36,7 +36,7 @@ mac-os-architecture/
 macos-protocols.md
 {{#endref}}
 
-- **Opensource** macOS: [https://opensource.apple.com/](https://opensource.apple.com/)
+- **Otvoreni izvor** macOS: [https://opensource.apple.com/](https://opensource.apple.com/)
 - Da preuzmete `tar.gz`, promenite URL kao što je [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) u [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
 
 ### MacOS MDM
@@ -93,9 +93,9 @@ U macOS-u **aplikacije i binarni fajlovi mogu imati dozvole** za pristup folderi
 
 Stoga, napadač koji želi uspešno da kompromituje macOS mašinu moraće da **eskalira svoje TCC privilegije** (ili čak **obiđe SIP**, u zavisnosti od njegovih potreba).
 
-Ove privilegije se obično daju u obliku **entiteta** sa kojima je aplikacija potpisana, ili aplikacija može zatražiti neke pristupe i nakon što **korisnik odobri** može ih naći u **TCC bazama podataka**. Drugi način na koji proces može dobiti ove privilegije je da bude **dete procesa** sa tim **privilegijama**, jer se obično **nasleđuju**.
+Ove privilegije se obično daju u obliku **entiteta** sa kojima je aplikacija potpisana, ili aplikacija može zatražiti neke pristupe i nakon što **korisnik odobri** može ih pronaći u **TCC bazama podataka**. Drugi način na koji proces može dobiti ove privilegije je da bude **dete procesa** sa tim **privilegijama**, jer se obično **nasleđuju**.
 
-Pratite ove linkove da pronađete različite načine za [**eskalaciju privilegija u TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), da [**obiđete TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) i kako je u prošlosti [**SIP bio oboren**](macos-security-protections/macos-sip.md#sip-bypasses).
+Pratite ove linkove da pronađete različite načine za [**eskalaciju privilegija u TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), da [**obiđete TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) i kako je u prošlosti [**SIP bio oboren**](macos-security-protections/macos-sip.md#sip-bypasses).
 
 ## macOS Tradicionalna Eskalacija Privilegija
 

@@ -12,7 +12,7 @@ Najčešće korišćen alat u forenzici za ekstrakciju fajlova iz slika je [**Au
 
 ### Binwalk <a href="#binwalk" id="binwalk"></a>
 
-**Binwalk** je alat za analizu binarnih fajlova radi pronalaženja ugrađenog sadržaja. Može se instalirati putem `apt`, a njegov izvor je na [GitHub](https://github.com/ReFirmLabs/binwalk).
+**Binwalk** je alat za analizu binarnih fajlova kako bi se pronašao ugrađeni sadržaj. Može se instalirati putem `apt`, a njegov izvor je na [GitHub](https://github.com/ReFirmLabs/binwalk).
 
 **Korisne komande**:
 ```bash
@@ -31,7 +31,7 @@ foremost -v -i file.img -o output
 ```
 ### **Scalpel**
 
-**Scalpel** je još jedan alat koji se može koristiti za pronalaženje i ekstrakciju **datoteka ugrađenih u datoteku**. U ovom slučaju, potrebno je da odkomentarišete tipove datoteka iz konfiguracione datoteke (_/etc/scalpel/scalpel.conf_) koje želite da ekstraktujete.
+**Scalpel** je još jedan alat koji se može koristiti za pronalaženje i ekstrakciju **datoteka ugrađenih u datoteku**. U ovom slučaju, potrebno je da otkomentarišete tipove datoteka iz konfiguracione datoteke (_/etc/scalpel/scalpel.conf_) koje želite da ekstraktujete.
 ```bash
 sudo apt-get install scalpel
 scalpel file.img -o output
@@ -44,7 +44,7 @@ Ovaj alat može skenirati sliku i **izvući pcaps** unutar nje, **mrežne inform
 ```
 bulk_extractor memory.img -o out_folder
 ```
-Navigirajte kroz **sve informacije** koje je alat prikupio (lozinke?), **analizirajte** **pakete** (pročitajte [**analizu Pcaps**](../pcap-inspection/)), pretražujte **čudne domene** (domene povezane sa **malverom** ili **nepostojećim**).
+Navigirajte kroz **sve informacije** koje je alat prikupio (lozinke?), **analizirajte** **pakete** (pročitajte [**Pcaps analiza**](../pcap-inspection/index.html)), pretražujte **čudne domene** (domene povezane sa **malverom** ili **nepostojećim**).
 
 ### PhotoRec
 
@@ -61,13 +61,13 @@ Proverite [kod](https://code.google.com/archive/p/binvis/) i [web stranicu alata
 #### Karakteristike BinVis
 
 - Vizuelni i aktivni **pregledač strukture**
-- Više grafika za različite tačke fokusa
+- Više grafova za različite tačke fokusa
 - Fokusiranje na delove uzorka
 - **Prikazivanje stringova i resursa**, u PE ili ELF izvršnim datotekama npr.
-- Dobijanje **šablona** za kriptoanalizu na fajlovima
+- Dobijanje **šablona** za kriptoanalizu fajlova
 - **Prepoznavanje** pakera ili enkodera
 - **Identifikacija** steganografije po šablonima
-- **Vizuelno** binarno upoređivanje
+- **Vizuelno** binarno poređenje
 
 BinVis je odlična **polazna tačka za upoznavanje sa nepoznatim ciljem** u scenariju crne kutije.
 

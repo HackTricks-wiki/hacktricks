@@ -18,7 +18,7 @@
 ### [Diskovi](privilege-escalation/index.html#drives)
 
 - [ ] **Lista montiranih** diskova
-- [ ] **Da li postoji neki nemontirani disk?**
+- [ ] **Da li postoji nemontirani disk?**
 - [ ] **Da li postoje kredencijali u fstab?**
 
 ### [**Instalirani softver**](privilege-escalation/index.html#installed-software)
@@ -37,24 +37,24 @@
 
 ### [Zakazani/Cron poslovi?](privilege-escalation/index.html#scheduled-jobs)
 
-- [ ] Da li se [**PATH**](privilege-escalation/index.html#cron-path) menja od strane nekog crona i možete li u njega **pisati**?
-- [ ] Da li postoji neki [**wildcard**](privilege-escalation/index.html#cron-using-a-script-with-a-wildcard-wildcard-injection) u cron poslu?
+- [ ] Da li se [**PATH**](privilege-escalation/index.html#cron-path) menja od strane nekog crona i možete li **pisati** u njega?
+- [ ] Da li postoji [**wildcard**](privilege-escalation/index.html#cron-using-a-script-with-a-wildcard-wildcard-injection) u cron poslu?
 - [ ] Da li se neki [**modifikovani skript**](privilege-escalation/index.html#cron-script-overwriting-and-symlink) **izvršava** ili se nalazi u **modifikovanoj fascikli**?
 - [ ] Da li ste otkrili da se neki **skript** može ili se **izvršava vrlo često**](privilege-escalation/index.html#frequent-cron-jobs)? (svakih 1, 2 ili 5 minuta)
 
 ### [Servisi](privilege-escalation/index.html#services)
 
-- [ ] Da li postoji neki **pisivi .service** fajl?
-- [ ] Da li postoji neki **pisivi binarni** fajl koji izvršava **servis**?
-- [ ] Da li postoji neka **pisiva fascikla u systemd PATH**?
+- [ ] Da li postoji **pisiv .service** fajl?
+- [ ] Da li postoji **pisivi binarni** fajl koji izvršava **servis**?
+- [ ] Da li postoji **pisiva fascikla u systemd PATH**?
 
 ### [Tajmeri](privilege-escalation/index.html#timers)
 
-- [ ] Da li postoji neki **pisivi tajmer**?
+- [ ] Da li postoji **pisivi tajmer**?
 
 ### [Soketi](privilege-escalation/index.html#sockets)
 
-- [ ] Da li postoji neki **pisivi .socket** fajl?
+- [ ] Da li postoji **pisivi .socket** fajl?
 - [ ] Možete li **komunicirati sa nekim soketom**?
 - [ ] **HTTP soketi** sa zanimljivim informacijama?
 
@@ -72,19 +72,19 @@
 
 - [ ] Generička enumeracija korisnika/grupa
 - [ ] Da li imate **veoma veliki UID**? Da li je **mašina** **ranjiva**?
-- [ ] Možete li [**escalirati privilegije zahvaljujući grupi**](privilege-escalation/interesting-groups-linux-pe/) kojoj pripadate?
-- [ ] **Clipboard** podaci?
+- [ ] Možete li [**escalirati privilegije zahvaljujući grupi**](privilege-escalation/interesting-groups-linux-pe/index.html) kojoj pripadate?
+- [ ] **Podaci iz clipboard-a**?
 - [ ] Politika lozinki?
 - [ ] Pokušajte da **koristite** svaku **poznatu lozinku** koju ste prethodno otkrili da se prijavite **sa svakim** mogućim **korisnikom**. Pokušajte da se prijavite i bez lozinke.
 
 ### [Pisivi PATH](privilege-escalation/index.html#writable-path-abuses)
 
-- [ ] Ako imate **privilegije pisanja nad nekom fasciklom u PATH** možda ćete moći da eskalirate privilegije
+- [ ] Ako imate **privilegije pisanja nad nekom fasciklom u PATH-u** možda ćete moći da eskalirate privilegije
 
 ### [SUDO i SUID komande](privilege-escalation/index.html#sudo-and-suid)
 
 - [ ] Možete li izvršiti **bilo koju komandu sa sudo**? Možete li ga koristiti da ČITATE, PIŠETE ili IZVRŠAVATE bilo šta kao root? ([**GTFOBins**](https://gtfobins.github.io))
-- [ ] Da li postoji neki **exploitable SUID binarni**? ([**GTFOBins**](https://gtfobins.github.io))
+- [ ] Da li postoji **exploitable SUID binarni**? ([**GTFOBins**](https://gtfobins.github.io))
 - [ ] Da li su [**sudo** komande **ograničene** po **putanji**? Možete li **obići** ograničenja](privilege-escalation/index.html#sudo-execution-bypassing-paths)?
 - [ ] [**Sudo/SUID binarni bez naznačene putanje**](privilege-escalation/index.html#sudo-command-suid-binary-without-command-path)?
 - [ ] [**SUID binarni koji naznačava putanju**](privilege-escalation/index.html#suid-binary-with-command-path)? Obilaženje
@@ -97,11 +97,11 @@
 
 ### [Kapaciteti](privilege-escalation/index.html#capabilities)
 
-- [ ] Da li neki binarni ima neku **neočekivanu sposobnost**?
+- [ ] Da li neki binarni fajl ima neku **neočekivanu sposobnost**?
 
 ### [ACL-ovi](privilege-escalation/index.html#acls)
 
-- [ ] Da li neki fajl ima neki **neočekivani ACL**?
+- [ ] Da li neki fajl ima neku **neočekivanu ACL**?
 
 ### [Otvorene Shell sesije](privilege-escalation/index.html#open-shell-sessions)
 
@@ -122,7 +122,7 @@
 - [ ] **Izmenjeni** u poslednjih minuta
 - [ ] **Sqlite DB fajlovi**
 - [ ] **Skriveni fajlovi**
-- [ ] **Skripte/Binarni u PATH**
+- [ ] **Skripte/Binari u PATH-u**
 - [ ] **Web fajlovi** (lozinke?)
 - [ ] **Backup-i**?
 - [ ] **Poznati fajlovi koji sadrže lozinke**: Koristite **Linpeas** i **LaZagne**

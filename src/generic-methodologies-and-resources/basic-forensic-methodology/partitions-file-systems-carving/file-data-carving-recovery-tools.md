@@ -2,13 +2,13 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Alati za carving i oporavak
+## Carving & Recovery tools
 
 Više alata na [https://github.com/Claudio-C/awesome-datarecovery](https://github.com/Claudio-C/awesome-datarecovery)
 
 ### Autopsy
 
-Najčešće korišćen alat u forenzici za ekstrakciju fajlova iz slika je [**Autopsy**](https://www.autopsy.com/download/). Preuzmite ga, instalirajte i omogućite mu da unese fajl kako bi pronašao "sakrivene" fajlove. Imajte na umu da je Autopsy napravljen da podržava disk slike i druge vrste slika, ali ne i jednostavne fajlove.
+Najčešći alat korišćen u forenzici za ekstrakciju fajlova iz slika je [**Autopsy**](https://www.autopsy.com/download/). Preuzmite ga, instalirajte i omogućite mu da obradi fajl kako bi pronašao "sakrivene" fajlove. Imajte na umu da je Autopsy napravljen da podržava disk slike i druge vrste slika, ali ne i obične fajlove.
 
 ### Binwalk <a href="#binwalk" id="binwalk"></a>
 
@@ -31,7 +31,7 @@ foremost -v -i file.img -o output
 ```
 ### **Scalpel**
 
-**Scalpel** je još jedan alat koji se može koristiti za pronalaženje i ekstrakciju **datoteka ugrađenih u datoteku**. U ovom slučaju, potrebno je da odkomentarišete tipove datoteka iz konfiguracione datoteke (_/etc/scalpel/scalpel.conf_) koje želite da ekstraktujete.
+**Scalpel** je još jedan alat koji se može koristiti za pronalaženje i vađenje **datoteka ugrađenih u datoteku**. U ovom slučaju, potrebno je da otkomentarišete tipove datoteka iz konfiguracione datoteke (_/etc/scalpel/scalpel.conf_) koje želite da izvučete.
 ```bash
 sudo apt-get install scalpel
 scalpel file.img -o output
@@ -44,7 +44,7 @@ Ovaj alat može skenirati sliku i **izvući pcaps** unutar nje, **mrežne inform
 ```
 bulk_extractor memory.img -o out_folder
 ```
-Navigirajte kroz **sve informacije** koje je alat prikupio (lozinke?), **analizirajte** **pakete** (pročitajte [**analizu Pcaps**](../pcap-inspection/)), pretražujte **čudne domene** (domene povezane sa **malverom** ili **nepostojećim**).
+Navigirajte kroz **sve informacije** koje je alat prikupio (lozinke?), **analizirajte** **pakete** (pročitajte [**Pcaps analiza**](../pcap-inspection/index.html)), pretražujte **čudne domene** (domene povezane sa **malverom** ili **nepostojećim**).
 
 ### PhotoRec
 
@@ -63,11 +63,11 @@ Proverite [kod](https://code.google.com/archive/p/binvis/) i [web stranicu alata
 - Vizuelni i aktivni **pregledač strukture**
 - Više grafova za različite tačke fokusa
 - Fokusiranje na delove uzorka
-- **Prikazivanje stringova i resursa**, u PE ili ELF izvršnim datotekama npr.
+- **Videti stringove i resurse**, u PE ili ELF izvršnim datotekama npr.
 - Dobijanje **šablona** za kriptoanalizu na fajlovima
-- **Prepoznavanje** pakera ili enkodera
+- **Uočavanje** pakera ili enkoder algoritama
 - **Identifikacija** steganografije po šablonima
-- **Vizuelno** binarno upoređivanje
+- **Vizuelno** binarno poređenje
 
 BinVis je odlična **polazna tačka za upoznavanje sa nepoznatim ciljem** u scenariju crne kutije.
 
@@ -75,13 +75,13 @@ BinVis je odlična **polazna tačka za upoznavanje sa nepoznatim ciljem** u scen
 
 ### FindAES
 
-Pretražuje AES ključeve tražeći njihove rasporede ključeva. Sposoban je da pronađe 128, 192 i 256 bitne ključeve, kao što su oni koje koriste TrueCrypt i BitLocker.
+Pretražuje AES ključeve tražeći njihove rasporede ključeva. Sposoban je da pronađe 128, 192 i 256-bitne ključeve, kao što su oni koje koriste TrueCrypt i BitLocker.
 
 Preuzmite [ovde](https://sourceforge.net/projects/findaes/).
 
 ## Komplementarni alati
 
 Možete koristiti [**viu**](https://github.com/atanunq/viu) da vidite slike iz terminala.\
-Možete koristiti linux komandnu liniju **pdftotext** da transformišete pdf u tekst i pročitate ga.
+Možete koristiti linux komandnu liniju alat **pdftotext** da transformišete pdf u tekst i pročitate ga.
 
 {{#include ../../../banners/hacktricks-training.md}}
