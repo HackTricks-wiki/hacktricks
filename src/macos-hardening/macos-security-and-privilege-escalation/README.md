@@ -73,7 +73,7 @@ Dies könnte in den folgenden Situationen auftreten:
 
 In der Lage zu sein, eine **Datei zu erstellen**, die von **root verwendet wird**, ermöglicht es einem Benutzer, **von ihrem Inhalt zu profitieren** oder sogar **Symlinks/Hardlinks** zu erstellen, um sie an einen anderen Ort zu verweisen.
 
-Für diese Art von Schwachstellen vergessen Sie nicht, **anfällige `.pkg` Installer** zu überprüfen:
+Für diese Art von Schwachstellen vergessen Sie nicht, **anfällige `.pkg`-Installer** zu überprüfen:
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-installers-abuse.md
@@ -93,28 +93,4 @@ In macOS **können Anwendungen und Binärdateien Berechtigungen** haben, um auf 
 
 Daher muss ein Angreifer, der eine macOS-Maschine erfolgreich kompromittieren möchte, seine **TCC-Berechtigungen eskalieren** (oder sogar **SIP umgehen**, je nach seinen Bedürfnissen).
 
-Diese Berechtigungen werden normalerweise in Form von **Entitlements** vergeben, mit denen die Anwendung signiert ist, oder die Anwendung könnte einige Zugriffe angefordert haben, und nachdem der **Benutzer diese genehmigt hat**, können sie in den **TCC-Datenbanken** gefunden werden. Eine andere Möglichkeit, wie ein Prozess diese Berechtigungen erhalten kann, besteht darin, ein **Kind eines Prozesses** mit diesen **Berechtigungen** zu sein, da sie normalerweise **vererbt** werden.
-
-Folgen Sie diesen Links, um verschiedene Möglichkeiten zu finden, [**Berechtigungen in TCC zu eskalieren**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), um [**TCC zu umgehen**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) und wie in der Vergangenheit [**SIP umgangen wurde**](macos-security-protections/macos-sip.md#sip-bypasses).
-
-## macOS Traditionelle Privilegieneskalation
-
-Natürlich sollten Sie aus der Perspektive der Red Teams auch daran interessiert sein, zu root zu eskalieren. Überprüfen Sie den folgenden Beitrag für einige Hinweise:
-
-{{#ref}}
-macos-privilege-escalation.md
-{{#endref}}
-
-## macOS Compliance
-
-- [https://github.com/usnistgov/macos_security](https://github.com/usnistgov/macos_security)
-
-## Referenzen
-
-- [**OS X Incident Response: Scripting and Analysis**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
-- [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
-- [**https://github.com/NicolasGrimonpont/Cheatsheet**](https://github.com/NicolasGrimonpont/Cheatsheet)
-- [**https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ**](https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ)
-- [**https://www.youtube.com/watch?v=vMGiplQtjTY**](https://www.youtube.com/watch?v=vMGiplQtjTY)
-
-{{#include ../../banners/hacktricks-training.md}}
+Diese Berechtigungen werden normalerweise in Form von **Entitlements** vergeben, mit denen die Anwendung signiert ist, oder die Anwendung könnte einige Zugriffe angefordert haben, und nachdem der **Benutzer diese genehmigt hat**, können sie in den **TCC-Datenbanken** gefunden werden. Eine andere Möglichkeit, wie ein Prozess diese Berechtigungen erhalten kann, besteht darin, ein **Kind eines Prozesses**

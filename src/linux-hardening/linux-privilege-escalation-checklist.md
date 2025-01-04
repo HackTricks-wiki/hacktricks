@@ -6,7 +6,7 @@
 
 ### [Systeminformationen](privilege-escalation/index.html#system-information)
 
-- [ ] **OS-Informationen** abrufen
+- [ ] **Betriebssysteminformationen** abrufen
 - [ ] Überprüfen Sie den [**PATH**](privilege-escalation/index.html#path), gibt es einen **beschreibbaren Ordner**?
 - [ ] Überprüfen Sie die [**Umgebungsvariablen**](privilege-escalation/index.html#env-info), gibt es sensible Details?
 - [ ] Suchen Sie nach [**Kernel-Exploits**](privilege-escalation/index.html#kernel-exploits) **unter Verwendung von Skripten** (DirtyCow?)
@@ -72,7 +72,7 @@
 
 - [ ] Generische Benutzer-/Gruppenumeration
 - [ ] Haben Sie eine **sehr große UID**? Ist die **Maschine** **anfällig**?
-- [ ] Können Sie [**Privilegien dank einer Gruppe**](privilege-escalation/interesting-groups-linux-pe/) erhöhen, zu der Sie gehören?
+- [ ] Können Sie [**Privilegien dank einer Gruppe**](privilege-escalation/interesting-groups-linux-pe/index.html) erhöhen, zu der Sie gehören?
 - [ ] **Zwischenablage**-Daten?
 - [ ] Passwort-Richtlinie?
 - [ ] Versuchen Sie, **jedes bekannte Passwort**, das Sie zuvor entdeckt haben, zu verwenden, um sich **mit jedem** möglichen **Benutzer** anzumelden. Versuchen Sie auch, sich ohne Passwort anzumelden.
@@ -83,11 +83,11 @@
 
 ### [SUDO- und SUID-Befehle](privilege-escalation/index.html#sudo-and-suid)
 
-- [ ] Können Sie **irgendeinen Befehl mit sudo ausführen**? Können Sie es verwenden, um als root zu LESEN, ZU SCHREIBEN oder ETWAS AUSZUFÜHREN? ([**GTFOBins**](https://gtfobins.github.io))
+- [ ] Können Sie **irgendeinen Befehl mit sudo ausführen**? Können Sie es verwenden, um als root zu LESEN, ZU SCHREIBEN oder AUSZUFÜHREN? ([**GTFOBins**](https://gtfobins.github.io))
 - [ ] Gibt es eine **ausnutzbare SUID-Binärdatei**? ([**GTFOBins**](https://gtfobins.github.io))
 - [ ] Sind [**sudo**-Befehle **durch den** **Pfad** **eingeschränkt**? Können Sie die Einschränkungen **umgehen**](privilege-escalation/index.html#sudo-execution-bypassing-paths)?
 - [ ] [**Sudo/SUID-Binärdatei ohne angegebenen Pfad**](privilege-escalation/index.html#sudo-command-suid-binary-without-command-path)?
-- [ ] [**SUID-Binärdatei mit angegebenem Pfad**](privilege-escalation/index.html#suid-binary-with-command-path)? Umgehen
+- [ ] [**SUID-Binärdatei mit Pfadangabe**](privilege-escalation/index.html#suid-binary-with-command-path)? Umgehen
 - [ ] [**LD_PRELOAD-Schwachstelle**](privilege-escalation/index.html#ld_preload)
 - [ ] [**Fehlende .so-Bibliothek in SUID-Binärdatei**](privilege-escalation/index.html#suid-binary-so-injection) aus einem beschreibbaren Ordner?
 - [ ] [**SUDO-Token verfügbar**](privilege-escalation/index.html#reusing-sudo-tokens)? [**Können Sie ein SUDO-Token erstellen**](privilege-escalation/index.html#var-run-sudo-ts-less-than-username-greater-than)?
@@ -118,7 +118,7 @@
 - [ ] **Profil-Dateien** - Sensible Daten lesen? In privesc schreiben?
 - [ ] **passwd/shadow-Dateien** - Sensible Daten lesen? In privesc schreiben?
 - [ ] **Überprüfen Sie häufig interessante Ordner** auf sensible Daten
-- [ ] **Seltsame Standort/besitzte Dateien,** auf die Sie möglicherweise Zugriff haben oder ausführbare Dateien ändern können
+- [ ] **Seltsame Standort/besitzende Dateien,** auf die Sie möglicherweise Zugriff haben oder ausführbare Dateien ändern können
 - [ ] **In den letzten Minuten geändert**
 - [ ] **Sqlite DB-Dateien**
 - [ ] **Versteckte Dateien**

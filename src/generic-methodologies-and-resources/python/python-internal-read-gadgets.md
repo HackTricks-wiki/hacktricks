@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Grundlegende Informationen
+## Grundinformationen
 
 Verschiedene Schwachstellen wie [**Python Format Strings**](bypass-python-sandboxes/index.html#python-format-string) oder [**Class Pollution**](class-pollution-pythons-prototype-pollution.md) könnten es Ihnen ermöglichen, **interne Python-Daten zu lesen, aber nicht, Code auszuführen**. Daher muss ein Pentester das Beste aus diesen Leseberechtigungen machen, um **sensible Berechtigungen zu erlangen und die Schwachstelle auszunutzen**.
 
@@ -13,15 +13,15 @@ Die Hauptseite einer Flask-Anwendung wird wahrscheinlich das **`app`** globale O
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-In diesem Fall ist es möglich, auf dieses Objekt zuzugreifen, indem man einfach ein beliebiges Gadget verwendet, um **auf globale Objekte** von der [**Seite zum Umgehen von Python-Sandboxen**](bypass-python-sandboxes/) zuzugreifen.
+In diesem Fall ist es möglich, auf dieses Objekt zuzugreifen, indem man einfach ein Gadget verwendet, um **auf globale Objekte** von der [**Seite zum Umgehen von Python-Sandboxen**](bypass-python-sandboxes/index.html) zuzugreifen.
 
-Im Fall, dass **die Schwachstelle in einer anderen Python-Datei** liegt, benötigt man ein Gadget, um Dateien zu durchlaufen, um zur Hauptdatei zu gelangen, um **auf das globale Objekt `app.secret_key`** zuzugreifen, um den Flask-Geheimschlüssel zu ändern und in der Lage zu sein, [**die Berechtigungen zu eskalieren** mit diesem Schlüssel](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
+Im Fall, dass **die Schwachstelle in einer anderen Python-Datei** liegt, benötigt man ein Gadget, um Dateien zu durchlaufen, um zur Hauptdatei zu gelangen, um **auf das globale Objekt `app.secret_key`** zuzugreifen, um den Flask-Geheimschlüssel zu ändern und in der Lage zu sein, [**Privilegien zu eskalieren** mit diesem Schlüssel](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
 
 Ein Payload wie dieser [aus diesem Bericht](https://ctftime.org/writeup/36082):
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
-Verwenden Sie diese Payload, um **`app.secret_key`** zu ändern (der Name in Ihrer App könnte anders sein), um neue und privilegierte Flask-Cookies signieren zu können.
+Verwenden Sie diese Payload, um **`app.secret_key`** zu ändern (der Name in Ihrer App könnte anders sein), um neue und privilegiertere Flask-Cookies signieren zu können.
 
 ### Werkzeug - machine_id und node uuid
 

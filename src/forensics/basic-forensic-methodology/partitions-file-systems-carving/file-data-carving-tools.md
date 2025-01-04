@@ -18,7 +18,7 @@ binwalk --dd ".*" file #Displays and extracts all files from the given file
 ```
 ## Foremost
 
-Ein weiteres gängiges Tool, um versteckte Dateien zu finden, ist **foremost**. Die Konfigurationsdatei von foremost finden Sie unter `/etc/foremost.conf`. Wenn Sie nur nach bestimmten Dateien suchen möchten, kommentieren Sie diese aus. Wenn Sie nichts auskommentieren, sucht foremost nach den standardmäßig konfigurierten Dateitypen.
+Ein weiteres gängiges Tool, um versteckte Dateien zu finden, ist **foremost**. Die Konfigurationsdatei von foremost befindet sich in `/etc/foremost.conf`. Wenn Sie nur nach bestimmten Dateien suchen möchten, kommentieren Sie diese aus. Wenn Sie nichts auskommentieren, sucht foremost nach den standardmäßig konfigurierten Dateitypen.
 ```bash
 sudo apt-get install foremost
 foremost -v -i file.img -o output
@@ -33,13 +33,13 @@ scalpel file.img -o output
 ```
 ## Bulk Extractor
 
-Dieses Tool ist in Kali enthalten, kann aber hier gefunden werden: [https://github.com/simsong/bulk_extractor](https://github.com/simsong/bulk_extractor)
+Dieses Tool ist in Kali enthalten, aber Sie können es hier finden: [https://github.com/simsong/bulk_extractor](https://github.com/simsong/bulk_extractor)
 
-Dieses Tool kann ein Image scannen und wird **pcaps** darin **extrahieren**, **Netzwerkinformationen (URLs, Domains, IPs, MACs, Mails)** und weitere **Dateien**. Sie müssen nur Folgendes tun:
+Dieses Tool kann ein Image scannen und wird **pcaps** darin **extrahieren**, **Netzwerkinformationen (URLs, Domains, IPs, MACs, Mails)** und weitere **Dateien**. Sie müssen nur folgendes tun:
 ```text
 bulk_extractor memory.img -o out_folder
 ```
-Navigieren Sie durch **alle Informationen**, die das Tool gesammelt hat \(Passwörter?\), **analysieren** Sie die **Pakete** \(lesen[ **Pcaps-Analyse**](../pcap-inspection/)\), suchen Sie nach **seltsamen Domains** \(Domains, die mit **Malware** oder **nicht existierenden** in Verbindung stehen\).
+Navigieren Sie durch **alle Informationen**, die das Tool gesammelt hat \(Passwörter?\), **analysieren** Sie die **Pakete** \(lesen[ **Pcaps-Analyse**](../pcap-inspection/index.html)\), suchen Sie nach **seltsamen Domains** \(Domains, die mit **Malware** oder **nicht existierenden**\) in Verbindung stehen.
 
 ## PhotoRec
 

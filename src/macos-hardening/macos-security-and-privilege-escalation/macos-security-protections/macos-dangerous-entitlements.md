@@ -17,11 +17,11 @@ Die Berechtigung **`com.apple.rootless.install`** ermöglicht es, **SIP zu umgeh
 
 ### **`com.apple.system-task-ports` (früher `task_for_pid-allow` genannt)**
 
-Diese Berechtigung ermöglicht es, den **Task-Port für jeden** Prozess, außer dem Kernel, zu erhalten. Überprüfen Sie [**dies für weitere Informationen**](../macos-proces-abuse/macos-ipc-inter-process-communication/).
+Diese Berechtigung ermöglicht es, den **Task-Port für jeden** Prozess, außer dem Kernel, zu erhalten. Überprüfen Sie [**dies für weitere Informationen**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
 
 ### `com.apple.security.get-task-allow`
 
-Diese Berechtigung ermöglicht es anderen Prozessen mit der Berechtigung **`com.apple.security.cs.debugger**, den Task-Port des Prozesses zu erhalten, der von der Binärdatei mit dieser Berechtigung ausgeführt wird, und **Code darauf zu injizieren**. Überprüfen Sie [**dies für weitere Informationen**](../macos-proces-abuse/macos-ipc-inter-process-communication/).
+Diese Berechtigung ermöglicht es anderen Prozessen mit der Berechtigung **`com.apple.security.cs.debugger**, den Task-Port des Prozesses zu erhalten, der von der Binärdatei mit dieser Berechtigung ausgeführt wird, und **Code darauf zu injizieren**. Überprüfen Sie [**dies für weitere Informationen**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
 
 ### `com.apple.security.cs.debugger`
 
@@ -29,11 +29,11 @@ Apps mit der Debugging-Tool-Berechtigung können `task_for_pid()` aufrufen, um e
 
 ### `com.apple.security.cs.disable-library-validation`
 
-Diese Berechtigung ermöglicht es, **Frameworks, Plug-ins oder Bibliotheken zu laden, ohne entweder von Apple signiert zu sein oder mit derselben Team-ID** wie die Hauptausführbare signiert zu sein, sodass ein Angreifer einige beliebige Bibliotheksladungen missbrauchen könnte, um Code zu injizieren. Überprüfen Sie [**dies für weitere Informationen**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
+Diese Berechtigung ermöglicht es, **Frameworks, Plug-ins oder Bibliotheken zu laden, ohne entweder von Apple signiert zu sein oder mit derselben Team-ID** wie die Hauptanwendung signiert zu sein, sodass ein Angreifer einige beliebige Bibliotheksladungen missbrauchen könnte, um Code zu injizieren. Überprüfen Sie [**dies für weitere Informationen**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
 
 ### `com.apple.private.security.clear-library-validation`
 
-Diese Berechtigung ist sehr ähnlich zu **`com.apple.security.cs.disable-library-validation`**, aber **anstatt** die Bibliotheksvalidierung **direkt zu deaktivieren**, ermöglicht sie dem Prozess, **einen `csops`-Systemaufruf zu tätigen, um sie zu deaktivieren**.\
+Diese Berechtigung ist sehr ähnlich zu **`com.apple.security.cs.disable-library-validation`**, aber **anstatt** die Bibliotheksvalidierung **direkt zu deaktivieren**, ermöglicht sie dem Prozess, einen **`csops`-Systemaufruf zu tätigen, um sie zu deaktivieren**.\
 Überprüfen Sie [**dies für weitere Informationen**](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/).
 
 ### `com.apple.security.cs.allow-dyld-environment-variables`
@@ -101,11 +101,11 @@ Oder sie dazu bringen, **willkürliche Aktionen** auszuführen.
 
 ### **`kTCCServiceEndpointSecurityClient`**
 
-Erlaubt unter anderem, die **TCC-Datenbank der Benutzer zu schreiben**.
+Erlaubt unter anderem, die **TCC-Datenbank der Benutzer** zu **schreiben**.
 
 ### **`kTCCServiceSystemPolicySysAdminFiles`**
 
-Erlaubt es, das **`NFSHomeDirectory`**-Attribut eines Benutzers zu **ändern**, was seinen Home-Ordner-Pfad ändert und somit ermöglicht, **TCC zu umgehen**.
+Erlaubt es, das **`NFSHomeDirectory`**-Attribut eines Benutzers zu **ändern**, was seinen Home-Ordner-Pfad ändert und somit das **Umgehen von TCC** ermöglicht.
 
 ### **`kTCCServiceSystemPolicyAppBundles`**
 
@@ -117,27 +117,27 @@ Es ist möglich zu überprüfen, wer diesen Zugriff hat in _Systemeinstellungen_
 
 ### `kTCCServiceAccessibility`
 
-Der Prozess wird in der Lage sein, die **Zugänglichkeitsfunktionen von macOS auszunutzen**, was bedeutet, dass er beispielsweise Tastenanschläge drücken kann. Er könnte also Zugriff anfordern, um eine App wie Finder zu steuern und den Dialog mit dieser Berechtigung zu genehmigen.
+Der Prozess wird in der Lage sein, die **Zugänglichkeitsfunktionen von macOS** zu **missbrauchen**, was bedeutet, dass er beispielsweise Tastenanschläge drücken kann. Er könnte also Zugriff anfordern, um eine App wie Finder zu steuern und den Dialog mit dieser Berechtigung zu genehmigen.
 
 ## Mittel
 
 ### `com.apple.security.cs.allow-jit`
 
-Diese Berechtigung erlaubt es, **speicher zu erstellen, der beschreibbar und ausführbar ist**, indem das `MAP_JIT`-Flag an die `mmap()`-Systemfunktion übergeben wird. Überprüfen Sie [**dies für weitere Informationen**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit).
+Diese Berechtigung erlaubt es, **speicher zu erstellen, der beschreibbar und ausführbar ist**, indem das `MAP_JIT`-Flag an die `mmap()`-Systemfunktion übergeben wird. Weitere Informationen finden Sie [**hier**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit).
 
 ### `com.apple.security.cs.allow-unsigned-executable-memory`
 
-Diese Berechtigung erlaubt es, **C-Code zu überschreiben oder zu patchen**, die lange veraltete **`NSCreateObjectFileImageFromMemory`** (die grundsätzlich unsicher ist) zu verwenden oder das **DVDPlayback**-Framework zu nutzen. Überprüfen Sie [**dies für weitere Informationen**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
+Diese Berechtigung erlaubt es, **C-Code zu überschreiben oder zu patchen**, die lange veraltete **`NSCreateObjectFileImageFromMemory`** (die grundsätzlich unsicher ist) zu verwenden oder das **DVDPlayback**-Framework zu nutzen. Weitere Informationen finden Sie [**hier**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
 
 > [!CAUTION]
-> Das Einbeziehen dieser Berechtigung setzt Ihre App gängigen Schwachstellen in speicherunsicheren Programmiersprachen aus. Überlegen Sie sorgfältig, ob Ihre App diese Ausnahme benötigt.
+> Das Einfügen dieser Berechtigung setzt Ihre App gängigen Sicherheitsanfälligkeiten in speicherunsicheren Programmiersprachen aus. Überlegen Sie sorgfältig, ob Ihre App diese Ausnahme benötigt.
 
 ### `com.apple.security.cs.disable-executable-page-protection`
 
-Diese Berechtigung erlaubt es, **Abschnitte seiner eigenen ausführbaren Dateien** auf der Festplatte zu ändern, um gewaltsam zu beenden. Überprüfen Sie [**dies für weitere Informationen**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection).
+Diese Berechtigung erlaubt es, **Abschnitte seiner eigenen ausführbaren Dateien** auf der Festplatte zu **modifizieren**, um gewaltsam zu beenden. Weitere Informationen finden Sie [**hier**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection).
 
 > [!CAUTION]
-> Die Berechtigung zum Deaktivieren des ausführbaren Speicherschutzes ist eine extreme Berechtigung, die einen grundlegenden Sicherheitschutz Ihrer App entfernt, wodurch es einem Angreifer möglich wird, den ausführbaren Code Ihrer App unbemerkt umzuschreiben. Bevorzugen Sie engere Berechtigungen, wenn möglich.
+> Die Berechtigung zum Deaktivieren des Schutzes für ausführbaren Speicher ist eine extreme Berechtigung, die einen grundlegenden Sicherheitschutz Ihrer App entfernt, wodurch es einem Angreifer möglich wird, den ausführbaren Code Ihrer App unbemerkt umzuschreiben. Bevorzugen Sie, wenn möglich, engere Berechtigungen.
 
 ### `com.apple.security.cs.allow-relative-library-loads`
 
@@ -161,3 +161,5 @@ Erlaube dem Prozess, **nach allen TCC-Berechtigungen zu fragen**.
 ### **`kTCCServicePostEvent`**
 
 {{#include ../../../banners/hacktricks-training.md}}
+
+</details>
