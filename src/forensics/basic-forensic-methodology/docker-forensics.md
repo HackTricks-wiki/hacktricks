@@ -25,7 +25,7 @@ A /var/lib/mysql/mysql/time_zone_leap_second.MYI
 A /var/lib/mysql/mysql/general_log.CSV
 ...
 ```
-W poprzednim poleceniu **C** oznacza **Zmienione**, a **A** oznacza **Dodane**.\
+W poprzedniej komendzie **C** oznacza **Zmieniony**, a **A** oznacza **Dodany**.\
 Jeśli znajdziesz, że jakiś interesujący plik, taki jak `/etc/shadow`, został zmodyfikowany, możesz go pobrać z kontenera, aby sprawdzić aktywność złośliwą za pomocą:
 ```bash
 docker cp wordpress:/etc/shadow.
@@ -36,7 +36,7 @@ docker run -d lamp-wordpress
 docker cp b5d53e8b468e:/etc/shadow original_shadow #Get the file from the newly created container
 diff original_shadow shadow
 ```
-Jeśli odkryjesz, że **dodano jakiś podejrzany plik**, możesz uzyskać dostęp do kontenera i go sprawdzić:
+Jeśli stwierdzisz, że **dodano jakiś podejrzany plik**, możesz uzyskać dostęp do kontenera i go sprawdzić:
 ```bash
 docker exec -it wordpress bash
 ```
@@ -82,15 +82,15 @@ sudo dive flask:latest
 To pozwala na **nawigację przez różne bloby obrazów dockera** i sprawdzenie, które pliki zostały zmodyfikowane/dodane. **Czerwony** oznacza dodane, a **żółty** oznacza zmodyfikowane. Użyj **tab** aby przejść do innego widoku i **spacji** aby zwinąć/otworzyć foldery.
 
 Z die nie będziesz w stanie uzyskać dostępu do zawartości różnych etapów obrazu. Aby to zrobić, musisz **dekompresować każdą warstwę i uzyskać do niej dostęp**.\
-Możesz zdekompresować wszystkie warstwy z obrazu z katalogu, w którym obraz został zdekompresowany, wykonując:
+Możesz dekompresować wszystkie warstwy z obrazu z katalogu, w którym obraz został dekompresowany, wykonując:
 ```bash
 tar -xf image.tar
 for d in `find * -maxdepth 0 -type d`; do cd $d; tar -xf ./layer.tar; cd ..; done
 ```
 ## Poświadczenia z pamięci
 
-Zauważ, że gdy uruchamiasz kontener docker na hoście **możesz zobaczyć procesy działające w kontenerze z hosta** po prostu uruchamiając `ps -ef`
+Zauważ, że gdy uruchamiasz kontener docker na hoście **możesz zobaczyć procesy działające w kontenerze z poziomu hosta** uruchamiając po prostu `ps -ef`
 
-Dlatego (jako root) możesz **zrzucić pamięć procesów** z hosta i wyszukać **poświadczenia** po prostu [**jak w następującym przykładzie**](../../linux-hardening/privilege-escalation/#process-memory).
+Dlatego (jako root) możesz **zrzucić pamięć procesów** z hosta i wyszukać **poświadczenia** tak [**jak w następującym przykładzie**](../../linux-hardening/privilege-escalation/index.html#process-memory).
 
 {{#include ../../banners/hacktricks-training.md}}

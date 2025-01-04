@@ -16,7 +16,7 @@ W systemie Windows folder OneDrive można znaleźć w `\Users\<username>\AppData
 - Czas generowania raportu
 - Rozmiar dysku twardego systemu operacyjnego
 
-Gdy znajdziesz CID, zaleca się **wyszukiwanie plików zawierających ten identyfikator**. Możesz znaleźć pliki o nazwach: _**\<CID>.ini**_ i _**\<CID>.dat**_, które mogą zawierać interesujące informacje, takie jak nazwy plików zsynchronizowanych z OneDrive.
+Po znalezieniu CID zaleca się **wyszukiwanie plików zawierających ten identyfikator**. Możesz znaleźć pliki o nazwach: _**\<CID>.ini**_ i _**\<CID>.dat**_, które mogą zawierać interesujące informacje, takie jak nazwy plików zsynchronizowanych z OneDrive.
 
 ## Google Drive
 
@@ -65,9 +65,9 @@ Następnie możesz użyć narzędzia [**DataProtectionDecryptor**](https://nirso
 
 ![](<../../../images/image (448).png>)
 
-Jeśli wszystko pójdzie zgodnie z oczekiwaniami, narzędzie wskaże **klucz główny**, który musisz **użyć do odzyskania oryginalnego**. Aby odzyskać oryginalny klucz, wystarczy użyć tego [przepisu cyber_chef](<https://gchq.github.io/CyberChef/#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) wstawiając klucz główny jako "hasło" w przepisie.
+Jeśli wszystko pójdzie zgodnie z oczekiwaniami, narzędzie wskaże **klucz główny**, który musisz **użyć, aby odzyskać oryginalny**. Aby odzyskać oryginalny klucz, wystarczy użyć tego [przepisu cyber_chef](<https://gchq.github.io/CyberChef/index.html#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) wstawiając klucz główny jako "hasło" w przepisie.
 
-Ostateczny hex to klucz końcowy użyty do szyfrowania baz danych, który można odszyfrować za pomocą:
+Ostateczny hex to klucz użyty do szyfrowania baz danych, który można odszyfrować za pomocą:
 ```bash
 sqlite -k <Obtained Key> config.dbx ".backup config.db" #This decompress the config.dbx and creates a clear text backup in config.db
 ```
@@ -81,7 +81,7 @@ Baza danych **`config.dbx`** zawiera:
 
 Baza danych **`filecache.db`** zawiera informacje o wszystkich plikach i folderach zsynchronizowanych z Dropbox. Tabela `File_journal` zawiera najwięcej przydatnych informacji:
 
-- **Server_path**: Ścieżka, w której znajduje się plik na serwerze (ta ścieżka jest poprzedzona `host_id` klienta).
+- **Server_path**: Ścieżka, w której plik znajduje się na serwerze (ta ścieżka jest poprzedzona `host_id` klienta).
 - **local_sjid**: Wersja pliku
 - **local_mtime**: Data modyfikacji
 - **local_ctime**: Data utworzenia

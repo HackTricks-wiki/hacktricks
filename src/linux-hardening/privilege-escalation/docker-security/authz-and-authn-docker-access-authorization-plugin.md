@@ -1,6 +1,6 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Model** **autoryzacji** **Docker** jest **wszystko albo nic**. Każdy użytkownik z uprawnieniami do uzyskania dostępu do demona Docker może **wykonać dowolne** polecenie klienta Docker. To samo dotyczy wywołań korzystających z API silnika Docker do kontaktu z demonem. Jeśli potrzebujesz **większej kontroli dostępu**, możesz stworzyć **wtyczki autoryzacji** i dodać je do konfiguracji demona Docker. Korzystając z wtyczki autoryzacji, administrator Docker może **konfigurować szczegółowe** polityki dostępu do zarządzania dostępem do demona Docker.
+**Model** **autoryzacji** **Docker** jest **wszystko albo nic**. Każdy użytkownik z uprawnieniami do uzyskania dostępu do demona Docker może **wykonać dowolne** polecenie klienta Docker. To samo dotyczy wywołań korzystających z API silnika Docker do kontaktu z demonem. Jeśli potrzebujesz **większej kontroli dostępu**, możesz stworzyć **wtyczki autoryzacji** i dodać je do konfiguracji demona Docker. Korzystając z wtyczki autoryzacji, administrator Docker może **konfigurować szczegółowe polityki dostępu** do zarządzania dostępem do demona Docker.
 
 # Podstawowa architektura
 
@@ -8,7 +8,7 @@ Wtyczki autoryzacji Docker to **zewnętrzne** **wtyczki**, które możesz wykorz
 
 **[Poniższe informacje pochodzą z dokumentacji](https://docs.docker.com/engine/extend/plugins_authorization/#:~:text=If%20you%20require%20greater%20access,access%20to%20the%20Docker%20daemon)**
 
-Gdy **żądanie HTTP** jest wysyłane do demona Docker przez CLI lub za pośrednictwem API silnika, **podsystem** **uwierzytelniania** **przekazuje** żądanie do zainstalowanej **wtyczki** **uwierzytelniania**. Żądanie zawiera użytkownika (wywołującego) i kontekst polecenia. **Wtyczka** jest odpowiedzialna za podjęcie decyzji, czy **zezwolić** czy **odmówić** żądanie.
+Gdy **żądanie HTTP** jest wysyłane do demona Docker przez CLI lub za pośrednictwem API silnika, **podsystem** **uwierzytelniania** **przekazuje** żądanie do zainstalowanej **wtyczki uwierzytelniania**. Żądanie zawiera użytkownika (wywołującego) i kontekst polecenia. **Wtyczka** jest odpowiedzialna za podjęcie decyzji, czy **zezwolić** czy **odmówić** żądanie.
 
 Poniższe diagramy sekwencji przedstawiają przepływ autoryzacji zezwalającej i odmawiającej:
 
@@ -18,9 +18,9 @@ Poniższe diagramy sekwencji przedstawiają przepływ autoryzacji zezwalającej 
 
 Każde żądanie wysyłane do wtyczki **zawiera uwierzytelnionego użytkownika, nagłówki HTTP oraz ciało żądania/odpowiedzi**. Tylko **nazwa użytkownika** i **metoda uwierzytelniania** są przekazywane do wtyczki. Co najważniejsze, **żadne** dane **uwierzytelniające** użytkownika ani tokeny nie są przekazywane. Na koniec, **nie wszystkie ciała żądań/odpowiedzi są wysyłane** do wtyczki autoryzacji. Tylko te ciała żądań/odpowiedzi, w których `Content-Type` to `text/*` lub `application/json`, są wysyłane.
 
-Dla poleceń, które mogą potencjalnie przejąć połączenie HTTP (`HTTP Upgrade`), takich jak `exec`, wtyczka autoryzacji jest wywoływana tylko dla początkowych żądań HTTP. Gdy wtyczka zatwierdzi polecenie, autoryzacja nie jest stosowana do reszty przepływu. W szczególności, dane strumieniowe nie są przekazywane do wtyczek autoryzacji. Dla poleceń, które zwracają odpowiedzi HTTP w kawałkach, takich jak `logs` i `events`, tylko żądanie HTTP jest wysyłane do wtyczek autoryzacji.
+Dla poleceń, które mogą potencjalnie przejąć połączenie HTTP (`HTTP Upgrade`), takich jak `exec`, wtyczka autoryzacji jest wywoływana tylko dla początkowych żądań HTTP. Gdy wtyczka zatwierdzi polecenie, autoryzacja nie jest stosowana do reszty przepływu. W szczególności dane strumieniowe nie są przekazywane do wtyczek autoryzacji. Dla poleceń, które zwracają podzieloną odpowiedź HTTP, takich jak `logs` i `events`, tylko żądanie HTTP jest wysyłane do wtyczek autoryzacji.
 
-Podczas przetwarzania żądań/odpowiedzi, niektóre przepływy autoryzacji mogą wymagać dodatkowych zapytań do demona Docker. Aby zakończyć takie przepływy, wtyczki mogą wywoływać API demona podobnie jak zwykły użytkownik. Aby umożliwić te dodatkowe zapytania, wtyczka musi zapewnić środki dla administratora do skonfigurowania odpowiednich polityk uwierzytelniania i bezpieczeństwa.
+Podczas przetwarzania żądań/odpowiedzi, niektóre przepływy autoryzacji mogą wymagać dodatkowych zapytań do demona Docker. Aby zakończyć takie przepływy, wtyczki mogą wywoływać API demona podobnie jak zwykły użytkownik. Aby umożliwić te dodatkowe zapytania, wtyczka musi zapewnić administratorowi środki do skonfigurowania odpowiednich polityk uwierzytelniania i bezpieczeństwa.
 
 ## Kilka wtyczek
 
@@ -30,7 +30,7 @@ Jesteś odpowiedzialny za **rejestrowanie** swojej **wtyczki** jako część **u
 
 ## Twistlock AuthZ Broker
 
-Wtyczka [**authz**](https://github.com/twistlock/authz) pozwala na stworzenie prostego pliku **JSON**, który **wtyczka** będzie **czytać**, aby autoryzować żądania. Dzięki temu masz możliwość bardzo łatwego kontrolowania, które punkty końcowe API mogą osiągnąć każdego użytkownika.
+Wtyczka [**authz**](https://github.com/twistlock/authz) pozwala na stworzenie prostego pliku **JSON**, który wtyczka będzie **odczytywać**, aby autoryzować żądania. Dzięki temu masz możliwość bardzo łatwego kontrolowania, które punkty końcowe API mogą osiągnąć każdego użytkownika.
 
 To jest przykład, który pozwoli Alicji i Bobowi na tworzenie nowych kontenerów: `{"name":"policy_3","users":["alice","bob"],"actions":["container_create"]}`
 
@@ -56,7 +56,7 @@ Aby przeprowadzić tę enumerację, możesz **użyć narzędzia** [**https://git
 ```bash
 docker run --rm -it --cap-add=SYS_ADMIN --security-opt apparmor=unconfined ubuntu bash
 ```
-### Uruchamianie kontenera, a następnie uzyskiwanie sesji z uprawnieniami
+### Uruchamianie kontenera i uzyskiwanie sesji z uprawnieniami
 
 W tym przypadku administrator systemu **zabronił użytkownikom montowania wolumenów i uruchamiania kontenerów z flagą `--privileged`** lub nadawania jakichkolwiek dodatkowych uprawnień kontenerowi:
 ```bash
@@ -76,7 +76,7 @@ docker exec -it ---cap-add=ALL bb72293810b0f4ea65ee8fd200db418a48593c1a8a31407be
 # With --cap-add=SYS_ADMIN
 docker exec -it ---cap-add=SYS_ADMIN bb72293810b0f4ea65ee8fd200db418a48593c1a8a31407be6fee0f9f3e4 bash
 ```
-Teraz użytkownik może uciec z kontenera, używając dowolnej z [**wcześniej omówionych technik**](./#privileged-flag) i **eskalować uprawnienia** wewnątrz hosta.
+Teraz użytkownik może uciec z kontenera, używając dowolnej z [**wcześniej omówionych technik**](#privileged-flag) i **eskalować uprawnienia** wewnątrz hosta.
 
 ## Montowanie zapisywalnego folderu
 
@@ -94,11 +94,11 @@ host> /tmp/bash
 >
 > **Zauważ, że nie wszystkie katalogi w maszynie linux wspierają bit suid!** Aby sprawdzić, które katalogi wspierają bit suid, uruchom `mount | grep -v "nosuid"` Na przykład zazwyczaj `/dev/shm`, `/run`, `/proc`, `/sys/fs/cgroup` i `/var/lib/lxcfs` nie wspierają bitu suid.
 >
-> Zauważ również, że jeśli możesz **zamontować `/etc`** lub jakikolwiek inny folder **zawierający pliki konfiguracyjne**, możesz je zmienić z kontenera docker jako root, aby **nadużyć ich w hoście** i eskalować uprawnienia (może modyfikując `/etc/shadow`)
+> Zauważ również, że jeśli możesz **zamontować `/etc`** lub jakikolwiek inny folder **zawierający pliki konfiguracyjne**, możesz je zmienić z kontenera docker jako root, aby **nadużyć ich na hoście** i eskalować uprawnienia (może modyfikując `/etc/shadow`)
 
 ## Niezweryfikowany punkt końcowy API
 
-Odpowiedzialnością sysadmina konfigurowania tej wtyczki byłoby kontrolowanie, które akcje i z jakimi uprawnieniami każdy użytkownik może wykonywać. Dlatego, jeśli administrator przyjmie podejście **czarnej listy** z punktami końcowymi i atrybutami, może **zapomnieć o niektórych z nich**, które mogłyby pozwolić atakującemu na **eskalację uprawnień.**
+Odpowiedzialnością administratora systemu konfigurowania tej wtyczki byłoby kontrolowanie, które akcje i z jakimi uprawnieniami każdy użytkownik może wykonywać. Dlatego, jeśli administrator przyjmie podejście **czarnej listy** z punktami końcowymi i atrybutami, może **zapomnieć o niektórych z nich**, które mogłyby pozwolić atakującemu na **eskalację uprawnień.**
 
 Możesz sprawdzić API dockera w [https://docs.docker.com/engine/api/v1.40/#](https://docs.docker.com/engine/api/v1.40/#)
 
@@ -106,7 +106,7 @@ Możesz sprawdzić API dockera w [https://docs.docker.com/engine/api/v1.40/#](ht
 
 ### Binds w root
 
-Możliwe, że gdy sysadmin konfigurował zaporę docker, **zapomniał o niektórym ważnym parametrze** [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) takim jak "**Binds**".\
+Możliwe, że gdy administrator systemu konfigurował zaporę docker, **zapomniał o niektórym ważnym parametrze** [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) takim jak "**Binds**".\
 W poniższym przykładzie możliwe jest nadużycie tej błędnej konfiguracji, aby utworzyć i uruchomić kontener, który montuje folder root (/) hosta:
 ```bash
 docker version #First, find the API version of docker, 1.40 in this example
@@ -118,17 +118,17 @@ docker exec -it f6932bc153ad chroot /host bash #Get a shell inside of it
 #You can access the host filesystem
 ```
 > [!WARNING]
-> Zauważ, że w tym przykładzie używamy parametru **`Binds`** jako klucza na poziomie root w JSON, ale w API pojawia się pod kluczem **`HostConfig`**
+> Zauważ, że w tym przykładzie używamy parametru **`Binds`** jako klucza na poziomie root w JSON, ale w API pojawia się on pod kluczem **`HostConfig`**
 
 ### Binds w HostConfig
 
-Postępuj zgodnie z tymi samymi instrukcjami jak w przypadku **Binds w root**, wykonując to **żądanie** do API Dockera:
+Postępuj zgodnie z tymi samymi instrukcjami co w **Binds w root**, wykonując tę **prośbę** do API Dockera:
 ```bash
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu", "HostConfig":{"Binds":["/:/host"]}}' http:/v1.40/containers/create
 ```
-### Mounts w root
+### Mounts in root
 
-Postępuj zgodnie z tymi samymi instrukcjami co w **Binds w root**, wykonując to **żądanie** do API Dockera:
+Postępuj zgodnie z tymi samymi instrukcjami co w przypadku **Binds in root**, wykonując to **request** do API Dockera:
 ```bash
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu-sleep", "Mounts": [{"Name": "fac36212380535", "Source": "/", "Destination": "/host", "Driver": "local", "Mode": "rw,Z", "RW": true, "Propagation": "", "Type": "bind", "Target": "/host"}]}' http:/v1.40/containers/create
 ```
@@ -140,7 +140,7 @@ curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '
 ```
 ## Niezweryfikowany atrybut JSON
 
-Możliwe, że gdy administrator systemu konfigurował zaporę docker, **zapomniał o niektórym ważnym atrybucie parametru** [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) takim jak "**Capabilities**" wewnątrz "**HostConfig**". W poniższym przykładzie można wykorzystać tę niewłaściwą konfigurację do stworzenia i uruchomienia kontenera z uprawnieniem **SYS_MODULE**:
+Możliwe, że gdy administrator systemu konfigurował zaporę docker, **zapomniał o niektórym ważnym atrybucie parametru** [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) takim jak "**Capabilities**" w "**HostConfig**". W poniższym przykładzie można wykorzystać tę niewłaściwą konfigurację do stworzenia i uruchomienia kontenera z uprawnieniem **SYS_MODULE**:
 ```bash
 docker version
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu", "HostConfig":{"Capabilities":["CAP_SYS_MODULE"]}}' http:/v1.40/containers/create
@@ -151,7 +151,7 @@ capsh --print
 #You can abuse the SYS_MODULE capability
 ```
 > [!NOTE]
-> **`HostConfig`** jest kluczem, który zazwyczaj zawiera **interesujące** **uprawnienia** do ucieczki z kontenera. Jednak, jak wcześniej omówiliśmy, zauważ, że użycie Binds poza nim również działa i może pozwolić na ominięcie ograniczeń.
+> **`HostConfig`** jest kluczem, który zazwyczaj zawiera **interesujące** **uprawnienia** do ucieczki z kontenera. Jednak, jak wcześniej omówiliśmy, zauważ, że użycie Binds poza nim również działa i może pozwolić na obejście ograniczeń.
 
 ## Wyłączanie wtyczki
 

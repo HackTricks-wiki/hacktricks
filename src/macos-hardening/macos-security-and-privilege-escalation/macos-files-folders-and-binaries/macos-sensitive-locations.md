@@ -1,4 +1,4 @@
-# macOS Wrażliwe lokalizacje i interesujące demony
+# macOS Sensitive Locations & Interesting Daemons
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -37,17 +37,17 @@ security dump-keychain -d #Dump all the info, included secrets (the user will be
 ### [Keychaindump](https://github.com/juuso/keychaindump)
 
 > [!OSTRZEŻENIE]
-> Na podstawie tego komentarza [juuso/keychaindump#10 (komentarz)](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760) wygląda na to, że te narzędzia już nie działają w Big Sur.
+> Na podstawie tego komentarza [juuso/keychaindump#10 (komentarz)](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760) wygląda na to, że te narzędzia nie działają już w Big Sur.
 
 ### Przegląd Keychaindump
 
-Narzędzie o nazwie **keychaindump** zostało opracowane w celu wydobywania haseł z kluczy macOS, ale napotyka ograniczenia w nowszych wersjach macOS, takich jak Big Sur, co zostało wskazane w [dyskusji](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760). Użycie **keychaindump** wymaga, aby atakujący uzyskał dostęp i podniósł uprawnienia do **root**. Narzędzie wykorzystuje fakt, że klucz jest domyślnie odblokowany po zalogowaniu użytkownika dla wygody, co pozwala aplikacjom na dostęp do niego bez konieczności wielokrotnego wprowadzania hasła użytkownika. Jednak jeśli użytkownik zdecyduje się zablokować swój klucz po każdym użyciu, **keychaindump** staje się nieskuteczne.
+Narzędzie o nazwie **keychaindump** zostało opracowane w celu wydobywania haseł z keychainów macOS, ale napotyka ograniczenia w nowszych wersjach macOS, takich jak Big Sur, co zostało wskazane w [dyskusji](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760). Użycie **keychaindump** wymaga, aby atakujący uzyskał dostęp i podniósł uprawnienia do **root**. Narzędzie wykorzystuje fakt, że keychain jest domyślnie odblokowany po zalogowaniu użytkownika dla wygody, co pozwala aplikacjom na dostęp do niego bez konieczności wielokrotnego wprowadzania hasła użytkownika. Jednak jeśli użytkownik zdecyduje się zablokować swój keychain po każdym użyciu, **keychaindump** staje się nieskuteczne.
 
-**Keychaindump** działa, celując w konkretny proces zwany **securityd**, opisany przez Apple jako demon do autoryzacji i operacji kryptograficznych, kluczowy do uzyskania dostępu do klucza. Proces wydobywania polega na zidentyfikowaniu **Master Key** pochodzącego z hasła logowania użytkownika. Ten klucz jest niezbędny do odczytu pliku klucza. Aby zlokalizować **Master Key**, **keychaindump** skanuje stos pamięci **securityd** za pomocą polecenia `vmmap`, szukając potencjalnych kluczy w obszarach oznaczonych jako `MALLOC_TINY`. Następujące polecenie jest używane do sprawdzenia tych lokalizacji pamięci:
+**Keychaindump** działa, celując w konkretny proces zwany **securityd**, opisany przez Apple jako demon do autoryzacji i operacji kryptograficznych, kluczowy do uzyskania dostępu do keychaina. Proces wydobywania polega na zidentyfikowaniu **Master Key** pochodzącego z hasła logowania użytkownika. Klucz ten jest niezbędny do odczytu pliku keychain. Aby zlokalizować **Master Key**, **keychaindump** skanuje stos pamięci **securityd** za pomocą polecenia `vmmap`, szukając potencjalnych kluczy w obszarach oznaczonych jako `MALLOC_TINY`. Następujące polecenie jest używane do inspekcji tych lokalizacji pamięci:
 ```bash
 sudo vmmap <securityd PID> | grep MALLOC_TINY
 ```
-Po zidentyfikowaniu potencjalnych kluczy głównych, **keychaindump** przeszukuje sterty w poszukiwaniu konkretnego wzoru (`0x0000000000000018`), który wskazuje na kandydata na klucz główny. Dalsze kroki, w tym deobfuskacja, są wymagane do wykorzystania tego klucza, jak opisano w kodzie źródłowym **keychaindump**. Analitycy koncentrujący się na tym obszarze powinni zauważyć, że kluczowe dane do odszyfrowania pęku kluczy są przechowywane w pamięci procesu **securityd**. Przykładowa komenda do uruchomienia **keychaindump** to:
+Po zidentyfikowaniu potencjalnych kluczy głównych, **keychaindump** przeszukuje sterty w poszukiwaniu konkretnego wzorca (`0x0000000000000018`), który wskazuje na kandydata na klucz główny. Dalsze kroki, w tym deobfuskacja, są wymagane do wykorzystania tego klucza, jak opisano w kodzie źródłowym **keychaindump**. Analitycy koncentrujący się na tym obszarze powinni zauważyć, że kluczowe dane do odszyfrowania pęku kluczy są przechowywane w pamięci procesu **securityd**. Przykładowa komenda do uruchomienia **keychaindump** to:
 ```bash
 sudo ./keychaindump
 ```
@@ -64,7 +64,7 @@ sudo ./keychaindump
 - Bezpieczne notatki
 - Hasła Appleshare
 
-Dając hasło do odblokowania keychain, klucz główny uzyskany za pomocą [volafox](https://github.com/n0fate/volafox) lub [volatility](https://github.com/volatilityfoundation/volatility), lub plik odblokowujący taki jak SystemKey, Chainbreaker również dostarczy hasła w postaci tekstu jawnego.
+Podając hasło do odblokowania keychain, klucz główny uzyskany za pomocą [volafox](https://github.com/n0fate/volafox) lub [volatility](https://github.com/volatilityfoundation/volatility), lub plik odblokowujący, taki jak SystemKey, Chainbreaker również dostarczy hasła w postaci tekstu jawnego.
 
 Bez jednej z tych metod odblokowywania Keychain, Chainbreaker wyświetli wszystkie inne dostępne informacje.
 
@@ -81,7 +81,7 @@ hexdump -s 8 -n 24 -e '1/1 "%.2x"' /var/db/SystemKey && echo
 ## Use the previous key to decrypt the passwords
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
-#### **Zrzut kluczy z pęku (z hasłami) łamanie hasha**
+#### **Zrzut kluczy z pęku kluczy (z hasłami) łamanie hasha**
 ```bash
 # Get the keychain hash
 python2.7 chainbreaker.py --dump-keychain-password-hash /Library/Keychains/System.keychain
@@ -92,7 +92,7 @@ python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d1
 ```
 #### **Zrzut kluczy z pęku kluczy (z hasłami) za pomocą zrzutu pamięci**
 
-[Postępuj zgodnie z tymi krokami](../#dumping-memory-with-osxpmem), aby wykonać **zrzut pamięci**
+[Postępuj zgodnie z tymi krokami](../index.html#dumping-memory-with-osxpmem), aby wykonać **zrzut pamięci**
 ```bash
 #Use volafox (https://github.com/n0fate/volafox) to extract possible keychain passwords
 # Unformtunately volafox isn't working with the latest versions of MacOS
@@ -129,7 +129,7 @@ sqlite3 $HOME/Suggestions/snippets.db 'select * from emailSnippets'
 
 Możesz znaleźć dane Powiadomień w `$(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/`
 
-Większość interesujących informacji będzie w **blob**. Więc będziesz musiał **wyodrębnić** tę zawartość i **przekształcić** ją na **czytelną** **dla ludzi** lub użyć **`strings`**. Aby uzyskać do niej dostęp, możesz to zrobić:
+Większość interesujących informacji będzie w **blob**. Więc będziesz musiał **wyodrębnić** tę zawartość i **przekształcić** ją na **czytelną** **ludzką** lub użyć **`strings`**. Aby uzyskać do niej dostęp, możesz to zrobić:
 ```bash
 cd $(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/
 strings $(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/db2/db | grep -i -A4 slack
@@ -147,13 +147,13 @@ for i in $(sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.s
 
 W aplikacjach macOS preferencje znajdują się w **`$HOME/Library/Preferences`**, a w iOS są w `/var/mobile/Containers/Data/Application/<UUID>/Library/Preferences`.
 
-W macOS narzędzie cli **`defaults`** może być używane do **modyfikacji pliku preferencji**.
+W macOS narzędzie cli **`defaults`** może być używane do **modyfikacji pliku Preferencji**.
 
 **`/usr/sbin/cfprefsd`** obsługuje usługi XPC `com.apple.cfprefsd.daemon` i `com.apple.cfprefsd.agent` i może być wywoływane w celu wykonania działań, takich jak modyfikacja preferencji.
 
 ## OpenDirectory permissions.plist
 
-Plik `/System/Library/OpenDirectory/permissions.plist` zawiera uprawnienia stosowane do atrybutów węzłów i jest chroniony przez SIP.\
+Plik `/System/Library/OpenDirectory/permissions.plist` zawiera uprawnienia stosowane do atrybutów węzła i jest chroniony przez SIP.\
 Plik ten przyznaje uprawnienia określonym użytkownikom na podstawie UUID (a nie uid), aby mogli uzyskać dostęp do określonych wrażliwych informacji, takich jak `ShadowHashData`, `HeimdalSRPKey` i `KerberosKeys`, między innymi:
 ```xml
 [...]
@@ -234,7 +234,7 @@ Możliwe jest również uzyskanie informacji o demonie i połączeniach za pomoc
 
 To są powiadomienia, które użytkownik powinien zobaczyć na ekranie:
 
-- **`CFUserNotification`**: To API zapewnia sposób na wyświetlenie na ekranie okna pop-up z wiadomością.
+- **`CFUserNotification`**: Te API zapewniają sposób na wyświetlenie na ekranie okna pop-up z wiadomością.
 - **Tablica Ogłoszeń**: To wyświetla w iOS baner, który znika i będzie przechowywany w Centrum Powiadomień.
 - **`NSUserNotificationCenter`**: To jest tablica ogłoszeń iOS w MacOS. Baza danych z powiadomieniami znajduje się w `/var/folders/<user temp>/0/com.apple.notificationcenter/db2/db`
 

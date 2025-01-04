@@ -4,8 +4,8 @@
 
 ## Wprowadzenie
 
-Jak [**wcześniej wspomniano**](./#what-is-mdm-mobile-device-management)**,** aby spróbować zarejestrować urządzenie w organizacji **wystarczy tylko numer seryjny należący do tej organizacji**. Po zarejestrowaniu urządzenia, kilka organizacji zainstaluje wrażliwe dane na nowym urządzeniu: certyfikaty, aplikacje, hasła WiFi, konfiguracje VPN [i tak dalej](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
-Dlatego może to być niebezpieczny punkt wejścia dla atakujących, jeśli proces rejestracji nie jest odpowiednio chroniony.
+Jak [**wcześniej wspomniano**](#what-is-mdm-mobile-device-management)**,** aby spróbować zarejestrować urządzenie w organizacji **wystarczy tylko numer seryjny należący do tej organizacji**. Po zarejestrowaniu urządzenia, kilka organizacji zainstaluje wrażliwe dane na nowym urządzeniu: certyfikaty, aplikacje, hasła WiFi, konfiguracje VPN [i tak dalej](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
+Dlatego może to być niebezpieczny punkt wejścia dla atakujących, jeśli proces rejestracji nie jest odpowiednio zabezpieczony.
 
 **Poniżej znajduje się podsumowanie badań [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe). Sprawdź to, aby uzyskać dalsze szczegóły techniczne!**
 
@@ -14,10 +14,10 @@ Dlatego może to być niebezpieczny punkt wejścia dla atakujących, jeśli proc
 Badania te zagłębiają się w binaria związane z Programem Rejestracji Urządzeń (DEP) i Zarządzaniem Urządzeniami Mobilnymi (MDM) na macOS. Kluczowe komponenty to:
 
 - **`mdmclient`**: Komunikuje się z serwerami MDM i wyzwala rejestracje DEP w wersjach macOS przed 10.13.4.
-- **`profiles`**: Zarządza profilami konfiguracyjnymi i wyzwala rejestracje DEP w wersjach macOS 10.13.4 i nowszych.
+- **`profiles`**: Zarządza profilami konfiguracji i wyzwala rejestracje DEP w wersjach macOS 10.13.4 i nowszych.
 - **`cloudconfigurationd`**: Zarządza komunikacją z API DEP i pobiera profile rejestracji urządzeń.
 
-Rejestracje DEP wykorzystują funkcje `CPFetchActivationRecord` i `CPGetActivationRecord` z prywatnej ramy profili konfiguracyjnych do pobierania rekordu aktywacji, przy czym `CPFetchActivationRecord` współpracuje z `cloudconfigurationd` przez XPC.
+Rejestracje DEP wykorzystują funkcje `CPFetchActivationRecord` i `CPGetActivationRecord` z prywatnej ramy profili konfiguracji do pobierania rekordu aktywacji, przy czym `CPFetchActivationRecord` współpracuje z `cloudconfigurationd` przez XPC.
 
 ## Inżynieria odwrotna protokołu Tesla i schematu Absinthe
 
@@ -25,7 +25,7 @@ Rejestracja DEP polega na tym, że `cloudconfigurationd` wysyła zaszyfrowany, p
 
 ## Proxying żądań DEP
 
-Próby przechwycenia i modyfikacji żądań DEP do _iprofiles.apple.com_ przy użyciu narzędzi takich jak Charles Proxy były utrudnione przez szyfrowanie ładunku i środki bezpieczeństwa SSL/TLS. Jednak włączenie konfiguracji `MCCloudConfigAcceptAnyHTTPSCertificate` pozwala na ominięcie walidacji certyfikatu serwera, chociaż zaszyfrowana natura ładunku nadal uniemożliwia modyfikację numeru seryjnego bez klucza deszyfrującego.
+Próby przechwycenia i modyfikacji żądań DEP do _iprofiles.apple.com_ za pomocą narzędzi takich jak Charles Proxy były utrudnione przez szyfrowanie ładunku i środki bezpieczeństwa SSL/TLS. Jednak włączenie konfiguracji `MCCloudConfigAcceptAnyHTTPSCertificate` pozwala na ominięcie walidacji certyfikatu serwera, chociaż zaszyfrowana natura ładunku nadal uniemożliwia modyfikację numeru seryjnego bez klucza deszyfrującego.
 
 ## Instrumentacja binariów systemowych współpracujących z DEP
 
@@ -42,7 +42,7 @@ Ta metoda pozwoliła na pobranie pełnych profili DEP dla dowolnych numerów ser
 
 ### Automatyzacja instrumentacji za pomocą Pythona
 
-Proces eksploatacji został zautomatyzowany przy użyciu Pythona z API LLDB, co umożliwiło programowe wstrzykiwanie dowolnych numerów seryjnych i pobieranie odpowiadających im profili DEP.
+Proces eksploatacji został zautomatyzowany za pomocą Pythona z użyciem API LLDB, co umożliwiło programowe wstrzykiwanie dowolnych numerów seryjnych i pobieranie odpowiadających im profili DEP.
 
 ### Potencjalne skutki luk w DEP i MDM
 

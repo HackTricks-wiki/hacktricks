@@ -4,12 +4,12 @@
 
 ### Custom SSP
 
-[Dowiedz się, czym jest SSP (Security Support Provider) tutaj.](../authentication-credentials-uac-and-efs/#security-support-provider-interface-sspi)\
+[Dowiedz się, czym jest SSP (Security Support Provider) tutaj.](../authentication-credentials-uac-and-efs/index.html#security-support-provider-interface-sspi)\
 Możesz stworzyć **własny SSP**, aby **przechwycić** w **czystym tekście** **poświadczenia** używane do uzyskania dostępu do maszyny.
 
 #### Mimilib
 
-Możesz użyć binarnego pliku `mimilib.dll` dostarczonego przez Mimikatz. **To zapisze wszystkie poświadczenia w czystym tekście do pliku.**\
+Możesz użyć binarnego pliku `mimilib.dll` dostarczonego przez Mimikatz. **To zapisze w pliku wszystkie poświadczenia w czystym tekście.**\
 Umieść dll w `C:\Windows\System32\`\
 Uzyskaj listę istniejących pakietów zabezpieczeń LSA:
 ```bash:attacker@target

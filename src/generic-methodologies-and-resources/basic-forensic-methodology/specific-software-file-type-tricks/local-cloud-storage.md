@@ -2,7 +2,6 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-
 ## OneDrive
 
 W systemie Windows folder OneDrive można znaleźć w `\Users\<username>\AppData\Local\Microsoft\OneDrive`. A wewnątrz `logs\Personal` można znaleźć plik `SyncDiagnostics.log`, który zawiera interesujące dane dotyczące zsynchronizowanych plików:
@@ -57,17 +56,17 @@ Jednak główne informacje to:
 Oprócz tych informacji, aby odszyfrować bazy danych, potrzebujesz jeszcze:
 
 - **szyfrowanego klucza DPAPI**: Można go znaleźć w rejestrze w `NTUSER.DAT\Software\Dropbox\ks\client` (wyeksportuj te dane jako binarne)
-- **hive'ów `SYSTEM`** i **`SECURITY`**
-- **kluczy głównych DPAPI**: Które można znaleźć w `\Users\<username>\AppData\Roaming\Microsoft\Protect`
+- **hivów `SYSTEM`** i **`SECURITY`**
+- **głównych kluczy DPAPI**: Które można znaleźć w `\Users\<username>\AppData\Roaming\Microsoft\Protect`
 - **nazwa użytkownika** i **hasło** użytkownika systemu Windows
 
 Następnie możesz użyć narzędzia [**DataProtectionDecryptor**](https://nirsoft.net/utils/dpapi_data_decryptor.html)**:**
 
 ![](<../../../images/image (443).png>)
 
-Jeśli wszystko pójdzie zgodnie z planem, narzędzie wskaże **klucz główny**, który musisz **użyć do odzyskania oryginalnego**. Aby odzyskać oryginalny, wystarczy użyć tego [przepisu cyber_chef](<https://gchq.github.io/CyberChef/#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) wstawiając klucz główny jako "hasło" w przepisie.
+Jeśli wszystko pójdzie zgodnie z oczekiwaniami, narzędzie wskaże **klucz główny**, który musisz **użyć, aby odzyskać oryginalny**. Aby odzyskać oryginalny klucz, wystarczy użyć tego [przepisu cyber_chef](<https://gchq.github.io/CyberChef/index.html#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) wstawiając klucz główny jako "hasło" w przepisie.
 
-Otrzymany hex to końcowy klucz używany do szyfrowania baz danych, który można odszyfrować za pomocą:
+Ostateczny hex to klucz końcowy użyty do szyfrowania baz danych, który można odszyfrować za pomocą:
 ```bash
 sqlite -k <Obtained Key> config.dbx ".backup config.db" #This decompress the config.dbx and creates a clear text backup in config.db
 ```
@@ -76,12 +75,12 @@ Baza danych **`config.dbx`** zawiera:
 - **Email**: Email użytkownika
 - **usernamedisplayname**: Nazwa użytkownika
 - **dropbox_path**: Ścieżka, w której znajduje się folder dropbox
-- **Host_id: Hash** używany do uwierzytelniania w chmurze. Może być odwołany tylko z poziomu sieci.
+- **Host_id: Hash** używany do uwierzytelniania w chmurze. Może być cofnięty tylko z poziomu sieci.
 - **Root_ns**: Identyfikator użytkownika
 
 Baza danych **`filecache.db`** zawiera informacje o wszystkich plikach i folderach zsynchronizowanych z Dropbox. Tabela `File_journal` zawiera najwięcej przydatnych informacji:
 
-- **Server_path**: Ścieżka, w której znajduje się plik na serwerze (ta ścieżka jest poprzedzona `host_id` klienta).
+- **Server_path**: Ścieżka, w której plik znajduje się na serwerze (ta ścieżka jest poprzedzona `host_id` klienta).
 - **local_sjid**: Wersja pliku
 - **local_mtime**: Data modyfikacji
 - **local_ctime**: Data utworzenia

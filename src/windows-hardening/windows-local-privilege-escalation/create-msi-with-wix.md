@@ -2,11 +2,11 @@
 
 # Tworzenie złośliwego MSI i uzyskiwanie uprawnień administratora
 
-Tworzenie instalatora MSI zostanie przeprowadzone przy użyciu wixtools, a konkretnie zostaną wykorzystane [wixtools](http://wixtoolset.org). Warto wspomnieć, że próbowano alternatywnych budowniczych MSI, ale nie były one skuteczne w tym przypadku.
+Tworzenie instalatora MSI będzie realizowane za pomocą wixtools, a konkretnie zostaną wykorzystane [wixtools](http://wixtoolset.org). Warto wspomnieć, że próbowano alternatywnych budowniczych MSI, ale nie były one skuteczne w tym przypadku.
 
-Aby uzyskać pełne zrozumienie przykładów użycia wix MSI, zaleca się zapoznanie się z [tą stroną](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with). Tutaj można znaleźć różne przykłady ilustrujące użycie wix MSI.
+Aby uzyskać pełne zrozumienie przykładów użycia wix MSI, zaleca się zapoznanie się z [tą stroną](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with). Znajdziesz tam różne przykłady ilustrujące użycie wix MSI.
 
-Celem jest wygenerowanie MSI, które uruchomi plik lnk. Aby to osiągnąć, można wykorzystać następujący kod XML ([xml stąd](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)):
+Celem jest wygenerowanie MSI, które uruchomi plik lnk. Aby to osiągnąć, można wykorzystać następujący kod XML ([xml stąd](https://0xrick.github.io/hack-the-box/ethereal/index.html#Creating-Malicious-msi-and-getting-root)):
 ```markup
 <?xml version="1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
@@ -50,7 +50,7 @@ Ponadto, light.exe, kolejne narzędzie z wixtools, zostanie użyte do stworzenia
 ```
 light.exe -out C:\tm\Ethereal\rick.msi C:\tmp\wix
 ```
-Podobnie jak w poprzednim poleceniu, w poście znajduje się obraz ilustrujący polecenie i jego wynik.
+Podobnie jak w poprzednim poleceniu, w poście znajduje się obrazek ilustrujący polecenie i jego wynik.
 
 Należy zauważyć, że chociaż ten podsumowanie ma na celu dostarczenie cennych informacji, zaleca się odwołanie do oryginalnego posta w celu uzyskania bardziej szczegółowych informacji i dokładnych instrukcji.
 

@@ -39,7 +39,7 @@ Download the executable from https://www.volatilityfoundation.org/26
 ```
 {{#endtab}}
 
-{{#tab name="Metoda 2"}}
+{{#tab name="Method 2"}}
 ```bash
 git clone https://github.com/volatilityfoundation/volatility.git
 cd volatility
@@ -52,13 +52,13 @@ python setup.py install
 
 Uzyskaj dostęp do oficjalnej dokumentacji w [Volatility command reference](https://github.com/volatilityfoundation/volatility/wiki/Command-Reference#kdbgscan)
 
-### Uwaga na temat wtyczek „list” vs. „scan”
+### Uwaga na temat wtyczek “list” vs. “scan”
 
-Volatility ma dwa główne podejścia do wtyczek, które czasami są odzwierciedlone w ich nazwach. Wtyczki „list” będą próbować nawigować przez struktury jądra Windows, aby uzyskać informacje takie jak procesy (lokalizowanie i przechodzenie przez powiązaną listę struktur `_EPROCESS` w pamięci), uchwyty systemu operacyjnego (lokalizowanie i wyświetlanie tabeli uchwytów, dereferencjonowanie wszelkich znalezionych wskaźników itp.). Zachowują się mniej więcej tak, jakby to zrobiło API Windows, gdyby poproszono je na przykład o wylistowanie procesów.
+Volatility ma dwa główne podejścia do wtyczek, które czasami są odzwierciedlone w ich nazwach. Wtyczki “list” będą próbować nawigować przez struktury jądra Windows, aby uzyskać informacje takie jak procesy (lokalizowanie i przechodzenie przez powiązaną listę struktur `_EPROCESS` w pamięci), uchwyty systemu operacyjnego (lokalizowanie i wyświetlanie tabeli uchwytów, dereferencjonowanie wszelkich znalezionych wskaźników itp.). Zachowują się one mniej więcej tak, jakby to robiło API Windows, gdyby na przykład poprosić o wylistowanie procesów.
 
-To sprawia, że wtyczki „list” są dość szybkie, ale równie podatne na manipulacje przez złośliwe oprogramowanie, jak API Windows. Na przykład, jeśli złośliwe oprogramowanie użyje DKOM, aby odłączyć proces od powiązanej listy `_EPROCESS`, nie pojawi się on w Menedżerze zadań, ani w pslist.
+To sprawia, że wtyczki “list” są dość szybkie, ale równie podatne na manipulacje przez złośliwe oprogramowanie, jak API Windows. Na przykład, jeśli złośliwe oprogramowanie użyje DKOM, aby odłączyć proces od powiązanej listy `_EPROCESS`, nie pojawi się on w Menedżerze zadań, ani w pslist.
 
-Z drugiej strony, wtyczki „scan” przyjmą podejście podobne do wydobywania pamięci w poszukiwaniu rzeczy, które mogą mieć sens, gdy są dereferencjonowane jako konkretne struktury. `psscan` na przykład odczyta pamięć i spróbuje stworzyć obiekty `_EPROCESS` z niej (używa skanowania tagów puli, które polega na wyszukiwaniu 4-bajtowych ciągów wskazujących na obecność interesującej struktury). Zaletą jest to, że może wykopać procesy, które zakończyły działanie, a nawet jeśli złośliwe oprogramowanie manipuluje powiązaną listą `_EPROCESS`, wtyczka nadal znajdzie strukturę leżącą w pamięci (ponieważ nadal musi istnieć, aby proces mógł działać). Wadą jest to, że wtyczki „scan” są nieco wolniejsze niż wtyczki „list” i czasami mogą dawać fałszywe pozytywy (proces, który zakończył działanie zbyt dawno i miał części swojej struktury nadpisane przez inne operacje).
+Wtyczki “scan”, z drugiej strony, przyjmą podejście podobne do wydobywania pamięci w poszukiwaniu rzeczy, które mogą mieć sens, gdy zostaną dereferencjonowane jako konkretne struktury. `psscan` na przykład odczyta pamięć i spróbuje stworzyć obiekty `_EPROCESS` z niej (używa skanowania tagów puli, które polega na wyszukiwaniu 4-bajtowych ciągów wskazujących na obecność interesującej struktury). Zaletą jest to, że może wykryć procesy, które zakończyły działanie, a nawet jeśli złośliwe oprogramowanie manipuluje powiązaną listą `_EPROCESS`, wtyczka nadal znajdzie strukturę leżącą w pamięci (ponieważ nadal musi istnieć, aby proces mógł działać). Wadą jest to, że wtyczki “scan” są nieco wolniejsze niż wtyczki “list” i czasami mogą dawać fałszywe pozytywy (proces, który zakończył działanie zbyt dawno i miał części swojej struktury nadpisane przez inne operacje).
 
 Z: [http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
 
@@ -108,7 +108,7 @@ volatility kdbgscan -f file.dmp
 
 [**Stąd**](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/): W przeciwieństwie do imageinfo, które po prostu dostarcza sugestie dotyczące profilu, **kdbgscan** jest zaprojektowane do pozytywnej identyfikacji poprawnego profilu i poprawnego adresu KDBG (jeśli występuje ich wiele). Ten plugin skanuje sygnatury KDBGHeader powiązane z profilami Volatility i stosuje kontrole sanity, aby zredukować fałszywe pozytywy. Szczegółowość wyjścia i liczba kontroli sanity, które można przeprowadzić, zależy od tego, czy Volatility może znaleźć DTB, więc jeśli już znasz poprawny profil (lub jeśli masz sugestię profilu z imageinfo), upewnij się, że go używasz.
 
-Zawsze zwracaj uwagę na **liczbę procesów, które znalazł kdbgscan**. Czasami imageinfo i kdbgscan mogą znaleźć **więcej niż jeden** odpowiedni **profil**, ale tylko **ważny będzie miał jakieś powiązane procesy** (To dlatego, że do wyodrębnienia procesów potrzebny jest poprawny adres KDBG).
+Zawsze zwracaj uwagę na **liczbę procesów, które znalazł kdbgscan**. Czasami imageinfo i kdbgscan mogą znaleźć **więcej niż jeden** odpowiedni **profil**, ale tylko **ważny będzie miał jakieś powiązane procesy** (Dzieje się tak, ponieważ do wyodrębnienia procesów potrzebny jest poprawny adres KDBG).
 ```bash
 # GOOD
 PsActiveProcessHead           : 0xfffff800011977f0 (37 processes)
@@ -131,9 +131,9 @@ PsLoadedModuleList            : 0xfffff80001197ac0 (0 modules)
 ```
 Plugin `banners.Banners` może być użyty w **vol3, aby spróbować znaleźć bannery linuxowe** w zrzucie.
 
-## Hashes/Hasła
+## Hashe/Hasła
 
-Wyodrębnij hashe SAM, [pamiętane poświadczenia domeny](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) i [sekrety lsa](../../../windows-hardening/authentication-credentials-uac-and-efs/#lsa-secrets).
+Wyodrębnij hashe SAM, [pamiętane poświadczenia domeny](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) oraz [sekrety lsa](../../../windows-hardening/authentication-credentials-uac-and-efs/index.html#lsa-secrets).
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -163,7 +163,7 @@ volatility -f file.dmp --profile=Win7SP1x86 memdump -p 2168 -D conhost/
 
 ### Lista procesów
 
-Spróbuj znaleźć **podejrzane** procesy (po nazwie) lub **nieoczekiwane** procesy potomne (na przykład cmd.exe jako proces potomny iexplorer.exe).\
+Spróbuj znaleźć **podejrzane** procesy (po nazwie) lub **nieoczekiwane** procesy **dzieci** (na przykład cmd.exe jako dziecko iexplorer.exe).\
 Może być interesujące, aby **porównać** wynik pslist z wynikiem psscan, aby zidentyfikować ukryte procesy.
 
 {{#tabs}}
@@ -201,9 +201,9 @@ volatility --profile=Win7SP1x86_23418 procdump --pid=3152 -n --dump-dir=. -f fil
 {{#endtab}}
 {{#endtabs}}
 
-### Linia poleceń
+### Wiersz poleceń
 
-Czy coś podejrzanego zostało wykonane?
+Czy wykonano coś podejrzanego?
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -220,11 +220,11 @@ volatility --profile=PROFILE consoles -f file.dmp #command history by scanning f
 {{#endtab}}
 {{#endtabs}}
 
-Polecenia wykonywane w `cmd.exe` są zarządzane przez **`conhost.exe`** (lub `csrss.exe` w systemach przed Windows 7). Oznacza to, że jeśli **`cmd.exe`** zostanie zakończone przez atakującego przed uzyskaniem zrzutu pamięci, nadal możliwe jest odzyskanie historii poleceń sesji z pamięci **`conhost.exe`**. Aby to zrobić, jeśli w modułach konsoli wykryto nietypową aktywność, pamięć powiązanego procesu **`conhost.exe`** powinna zostać zrzutowana. Następnie, przeszukując **strings** w tym zrzucie, można potencjalnie wyodrębnić linie poleceń używane w sesji.
+Polecenia wykonywane w `cmd.exe` są zarządzane przez **`conhost.exe`** (lub `csrss.exe` w systemach przed Windows 7). Oznacza to, że jeśli **`cmd.exe`** zostanie zakończone przez atakującego przed uzyskaniem zrzutu pamięci, nadal możliwe jest odzyskanie historii poleceń sesji z pamięci **`conhost.exe`**. Aby to zrobić, jeśli w modułach konsoli wykryto nietypową aktywność, pamięć powiązanego procesu **`conhost.exe`** powinna zostać zrzutowana. Następnie, przeszukując **ciągi** w tym zrzucie, można potencjalnie wyodrębnić linie poleceń używane w sesji.
 
 ### Środowisko
 
-Uzyskaj zmienne env każdego uruchomionego procesu. Mogą istnieć interesujące wartości.
+Uzyskaj zmienne środowiskowe każdego uruchomionego procesu. Mogą istnieć interesujące wartości.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -270,7 +270,7 @@ volatility --profile=Win7SP1x86_23418 privs -f file.dmp | grep "SeImpersonatePri
 ### SIDs
 
 Sprawdź każdy SSID posiadany przez proces.\
-Może być interesujące, aby wymienić procesy używające SID z uprawnieniami (oraz procesy używające SID usługi).
+Może być interesujące, aby wymienić procesy używające SID z uprawnieniami (oraz procesy używające SID usługi). 
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -366,7 +366,7 @@ volatility --profile=Win7SP1x86_23418 yarascan -Y "https://" -p 3692,3840,3976,3
 
 ### UserAssist
 
-**Windows** śledzi programy, które uruchamiasz, za pomocą funkcji w rejestrze zwanej **kluczami UserAssist**. Te klucze rejestrują, ile razy każdy program został uruchomiony i kiedy był ostatnio uruchamiany.
+**Windows** śledzi programy, które uruchamiasz, za pomocą funkcji w rejestrze zwanej **UserAssist keys**. Te klucze rejestrują, ile razy każdy program został uruchomiony i kiedy był ostatnio uruchamiany.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -595,7 +595,7 @@ volatility --profile=SomeLinux -f file.dmp linux_keyboard_notifiers #Keyloggers
 ### Skanowanie z yara
 
 Użyj tego skryptu, aby pobrać i połączyć wszystkie zasady malware yara z github: [https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9](https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9)\
-Utwórz katalog _**rules**_ i uruchom go. To stworzy plik _**malware_rules.yar**_, który zawiera wszystkie zasady yara dla malware.
+Utwórz katalog _**rules**_ i uruchom go. To stworzy plik o nazwie _**malware_rules.yar**_, który zawiera wszystkie zasady yara dla malware.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -624,7 +624,7 @@ volatility --profile=Win7SP1x86_23418 yarascan -y malware_rules.yar -f ch2.dmp |
 
 ### Zewnętrzne wtyczki
 
-Jeśli chcesz używać zewnętrznych wtyczek, upewnij się, że foldery związane z wtyczkami są pierwszym parametrem używanym.
+Jeśli chcesz używać zewnętrznych wtyczek, upewnij się, że foldery związane z wtyczkami są pierwszym parametrem użytym.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -694,7 +694,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp linux_bash
 {{#endtab}}
 {{#endtabs}}
 
-### Oś czasu
+### Oś Czasu
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -746,11 +746,11 @@ volatility --profile=Win7SP1x86_23418 notepad -f file.dmp
 #Just vol2
 volatility --profile=Win7SP1x86_23418 screenshot -f file.dmp
 ```
-### Master Boot Record (MBR)
+### Mistrzowski Rekord Rozruchowy (MBR)
 ```bash
 volatility --profile=Win7SP1x86_23418 mbrparser -f file.dmp
 ```
-**Master Boot Record (MBR)** odgrywa kluczową rolę w zarządzaniu logicznymi partycjami nośnika, które są strukturalnie zorganizowane w różne [systemy plików](https://en.wikipedia.org/wiki/File_system). Nie tylko przechowuje informacje o układzie partycji, ale także zawiera kod wykonywalny działający jako program rozruchowy. Ten program rozruchowy albo bezpośrednio inicjuje proces ładowania drugiego etapu systemu operacyjnego (zobacz [second-stage boot loader](https://en.wikipedia.org/wiki/Second-stage_boot_loader)), albo współpracuje z [volume boot record](https://en.wikipedia.org/wiki/Volume_boot_record) (VBR) każdej partycji. Aby uzyskać szczegółowe informacje, zapoznaj się z [stroną Wikipedii o MBR](https://en.wikipedia.org/wiki/Master_boot_record).
+**Master Boot Record (MBR)** odgrywa kluczową rolę w zarządzaniu logicznymi partycjami nośnika, które są strukturalnie zorganizowane w różne [file systems](https://en.wikipedia.org/wiki/File_system). Nie tylko przechowuje informacje o układzie partycji, ale także zawiera kod wykonywalny działający jako boot loader. Ten boot loader albo bezpośrednio inicjuje proces ładowania drugiego etapu systemu operacyjnego (zobacz [second-stage boot loader](https://en.wikipedia.org/wiki/Second-stage_boot_loader)), albo współpracuje z [volume boot record](https://en.wikipedia.org/wiki/Volume_boot_record) (VBR) każdej partycji. Aby uzyskać szczegółowe informacje, zapoznaj się z [MBR Wikipedia page](https://en.wikipedia.org/wiki/Master_boot_record).
 
 ## References
 

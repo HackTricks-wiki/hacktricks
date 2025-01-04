@@ -6,13 +6,13 @@
 
 Jeśli nie znasz macOS, powinieneś zacząć od nauki podstaw macOS:
 
-- Specjalne pliki i **uprawnienia macOS:**
+- Specjalne **pliki i uprawnienia** macOS:
 
 {{#ref}}
 macos-files-folders-and-binaries/
 {{#endref}}
 
-- Typowi **użytkownicy macOS**
+- Powszechni **użytkownicy** macOS
 
 {{#ref}}
 macos-users.md
@@ -30,13 +30,13 @@ macos-applefs.md
 mac-os-architecture/
 {{#endref}}
 
-- Typowe **usługi i protokoły sieciowe macOS**
+- Powszechne **usługi i protokoły sieciowe** macOS
 
 {{#ref}}
 macos-protocols.md
 {{#endref}}
 
-- **Opensource** macOS: [https://opensource.apple.com/](https://opensource.apple.com/)
+- **Oprogramowanie open source** macOS: [https://opensource.apple.com/](https://opensource.apple.com/)
 - Aby pobrać `tar.gz`, zmień adres URL, na przykład [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) na [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
 
 ### MacOS MDM
@@ -53,15 +53,15 @@ W firmach systemy **macOS** będą prawdopodobnie **zarządzane przez MDM**. Dla
 macos-apps-inspecting-debugging-and-fuzzing/
 {{#endref}}
 
-## MacOS Ochrony Bezpieczeństwa
+## MacOS Security Protections
 
 {{#ref}}
 macos-security-protections/
 {{#endref}}
 
-## Powierzchnia Ataku
+## Attack Surface
 
-### Uprawnienia Plików
+### Uprawnienia plików
 
 Jeśli **proces działający jako root zapisuje** plik, który może być kontrolowany przez użytkownika, użytkownik może to wykorzystać do **eskalacji uprawnień**.\
 Może to wystąpić w następujących sytuacjach:
@@ -79,7 +79,7 @@ W przypadku tego rodzaju luk nie zapomnij **sprawdzić podatnych instalatorów `
 macos-files-folders-and-binaries/macos-installers-abuse.md
 {{#endref}}
 
-### Obsługa aplikacji według rozszerzenia pliku i schematu URL
+### Obsługa rozszerzeń plików i schematów URL
 
 Dziwne aplikacje zarejestrowane przez rozszerzenia plików mogą być wykorzystywane, a różne aplikacje mogą być zarejestrowane do otwierania określonych protokołów
 
@@ -87,29 +87,29 @@ Dziwne aplikacje zarejestrowane przez rozszerzenia plików mogą być wykorzysty
 macos-file-extension-apps.md
 {{#endref}}
 
-## macOS TCC / SIP Eskalacja Uprawnień
+## macOS TCC / SIP Privilege Escalation
 
 W macOS **aplikacje i pliki binarne mogą mieć uprawnienia** do dostępu do folderów lub ustawień, które czynią je bardziej uprzywilejowanymi niż inne.
 
 Dlatego atakujący, który chce skutecznie skompromitować maszynę macOS, będzie musiał **eskalować swoje uprawnienia TCC** (lub nawet **obejść SIP**, w zależności od jego potrzeb).
 
-Te uprawnienia są zazwyczaj przyznawane w formie **uprawnień**, z którymi aplikacja jest podpisana, lub aplikacja może poprosić o dostęp, a po **zatwierdzeniu ich przez użytkownika** mogą być znalezione w **bazach danych TCC**. Innym sposobem, w jaki proces może uzyskać te uprawnienia, jest bycie **dzieckiem procesu** z tymi **uprawnieniami**, ponieważ są one zazwyczaj **dziedziczone**.
+Te uprawnienia są zazwyczaj nadawane w formie **uprawnień**, z którymi aplikacja jest podpisana, lub aplikacja może poprosić o pewne dostępy, a po **zatwierdzeniu ich przez użytkownika** mogą być one znalezione w **bazach danych TCC**. Innym sposobem, w jaki proces może uzyskać te uprawnienia, jest bycie **dzieckiem procesu** z tymi **uprawnieniami**, ponieważ są one zazwyczaj **dziedziczone**.
 
-Śledź te linki, aby znaleźć różne sposoby [**eskalacji uprawnień w TCC**](macos-security-protections/macos-tcc/#tcc-privesc-and-bypasses), aby [**obejść TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) i jak w przeszłości [**SIP został ominięty**](macos-security-protections/macos-sip.md#sip-bypasses).
+Śledź te linki, aby znaleźć różne sposoby [**eskalacji uprawnień w TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), aby [**obejść TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) i jak w przeszłości [**SIP został obejrzany**](macos-security-protections/macos-sip.md#sip-bypasses).
 
-## macOS Tradycyjna Eskalacja Uprawnień
+## macOS Traditional Privilege Escalation
 
-Oczywiście z perspektywy zespołu red, powinieneś być również zainteresowany eskalacją do roota. Sprawdź następujący post, aby uzyskać kilka wskazówek:
+Oczywiście z perspektywy zespołu red team również powinieneś być zainteresowany eskalacją do roota. Sprawdź następujący post, aby uzyskać kilka wskazówek:
 
 {{#ref}}
 macos-privilege-escalation.md
 {{#endref}}
 
-## Zgodność macOS
+## macOS Compliance
 
 - [https://github.com/usnistgov/macos_security](https://github.com/usnistgov/macos_security)
 
-## Odniesienia
+## References
 
 - [**OS X Incident Response: Scripting and Analysis**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
 - [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)

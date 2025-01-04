@@ -4,7 +4,7 @@
 
 ## Podstawowe informacje
 
-Różne luki, takie jak [**Python Format Strings**](bypass-python-sandboxes/#python-format-string) lub [**Class Pollution**](class-pollution-pythons-prototype-pollution.md), mogą pozwolić na **odczyt danych wewnętrznych Pythona, ale nie pozwolą na wykonanie kodu**. Dlatego pentester musi maksymalnie wykorzystać te uprawnienia do odczytu, aby **uzyskać wrażliwe uprawnienia i eskalować lukę**.
+Różne luki, takie jak [**Python Format Strings**](bypass-python-sandboxes/index.html#python-format-string) lub [**Class Pollution**](class-pollution-pythons-prototype-pollution.md), mogą pozwolić na **odczyt danych wewnętrznych Pythona, ale nie pozwolą na wykonanie kodu**. Dlatego pentester musi maksymalnie wykorzystać te uprawnienia do odczytu, aby **uzyskać wrażliwe uprawnienia i eskalować lukę**.
 
 ### Flask - Odczyt klucza tajnego
 
@@ -13,7 +13,7 @@ Główna strona aplikacji Flask prawdopodobnie będzie miała globalny obiekt **
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-W tym przypadku możliwe jest uzyskanie dostępu do tego obiektu, używając dowolnego gadżetu do **uzyskiwania dostępu do obiektów globalnych** z [**strony Bypass Python sandboxes**](bypass-python-sandboxes/).
+W tym przypadku możliwe jest uzyskanie dostępu do tego obiektu, używając dowolnego gadżetu do **uzyskania dostępu do obiektów globalnych** z [**strony Bypass Python sandboxes**](bypass-python-sandboxes/).
 
 W przypadku, gdy **vulnerability znajduje się w innym pliku python**, potrzebujesz gadżetu do przeszukiwania plików, aby dotrzeć do głównego, aby **uzyskać dostęp do obiektu globalnego `app.secret_key`**, aby zmienić klucz tajny Flask i móc [**eskalować uprawnienia** znając ten klucz](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
 

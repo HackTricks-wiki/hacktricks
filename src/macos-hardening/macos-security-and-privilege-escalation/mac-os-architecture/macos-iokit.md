@@ -4,13 +4,13 @@
 
 ## Podstawowe informacje
 
-I/O Kit to otwartoźródłowy, obiektowy **framework sterowników urządzeń** w jądrze XNU, obsługujący **dynamicznie ładowane sterowniki urządzeń**. Umożliwia dodawanie modularnego kodu do jądra w locie, wspierając różnorodny sprzęt.
+I/O Kit to otwartoźródłowy, obiektowy **framework sterowników urządzeń** w jądrze XNU, obsługujący **dynamicznie ładowane sterowniki urządzeń**. Umożliwia dodawanie modułowego kodu do jądra w locie, wspierając różnorodny sprzęt.
 
 Sterowniki IOKit zasadniczo **eksportują funkcje z jądra**. Typy **parametrów** tych funkcji są **zdefiniowane z góry** i są weryfikowane. Ponadto, podobnie jak XPC, IOKit jest po prostu kolejną warstwą **na Mach messages**.
 
 **Kod jądra IOKit XNU** jest otwartoźródłowy i udostępniony przez Apple w [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit). Ponadto, komponenty IOKit w przestrzeni użytkownika są również otwartoźródłowe [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
 
-Jednakże, **żadne sterowniki IOKit** nie są otwartoźródłowe. Tak czy inaczej, od czasu do czasu wydanie sterownika może zawierać symbole, które ułatwiają jego debugowanie. Sprawdź, jak [**uzyskać rozszerzenia sterownika z oprogramowania układowego tutaj**](./#ipsw)**.**
+Jednakże, **żadne sterowniki IOKit** nie są otwartoźródłowe. Tak czy inaczej, od czasu do czasu wydanie sterownika może zawierać symbole, które ułatwiają jego debugowanie. Sprawdź, jak [**uzyskać rozszerzenia sterownika z oprogramowania układowego tutaj**](#ipsw)**.**
 
 Jest napisany w **C++**. Możesz uzyskać zdemanglowane symbole C++ za pomocą:
 ```bash
@@ -23,7 +23,7 @@ __ZN16IOUserClient202222dispatchExternalMethodEjP31IOExternalMethodArgumentsOpaq
 IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
 > [!CAUTION]
-> Funkcje **exposed** IOKit mogą wykonywać **dodatkowe kontrole bezpieczeństwa**, gdy klient próbuje wywołać funkcję, ale należy zauważyć, że aplikacje są zazwyczaj **ograniczone** przez **sandbox**, z którymi funkcje IOKit mogą wchodzić w interakcje.
+> Funkcje **exponowane przez IOKit** mogą wykonywać **dodatkowe kontrole bezpieczeństwa**, gdy klient próbuje wywołać funkcję, ale należy zauważyć, że aplikacje są zazwyczaj **ograniczone** przez **piaskownicę**, z którymi funkcje IOKit mogą wchodzić w interakcje.
 
 ## Sterowniki
 
@@ -68,9 +68,9 @@ kextunload com.apple.iokit.IOReportFamily
 ```
 ## IORegistry
 
-**IORegistry** jest kluczową częścią frameworka IOKit w macOS i iOS, który służy jako baza danych do reprezentowania konfiguracji sprzętowej i stanu systemu. To **hierarchiczna kolekcja obiektów, które reprezentują cały sprzęt i sterowniki** załadowane w systemie oraz ich wzajemne relacje.
+**IORegistry** jest kluczową częścią frameworka IOKit w macOS i iOS, który służy jako baza danych do reprezentowania konfiguracji i stanu sprzętu systemu. To **hierarchiczna kolekcja obiektów, które reprezentują cały sprzęt i sterowniki** załadowane w systemie oraz ich wzajemne relacje.
 
-Możesz uzyskać IORegistry za pomocą cli **`ioreg`**, aby go zbadać z konsoli (szczególnie przydatne dla iOS).
+Możesz uzyskać dostęp do IORegistry za pomocą cli **`ioreg`**, aby go zbadać z konsoli (szczególnie przydatne dla iOS).
 ```bash
 ioreg -l #List all
 ioreg -w 0 #Not cut lines
@@ -84,12 +84,12 @@ W IORegistryExplorer "płaszczyzny" są używane do organizowania i wyświetlani
 
 1. **IOService Plane**: To najbardziej ogólna płaszczyzna, wyświetlająca obiekty usług, które reprezentują sterowniki i nuby (kanały komunikacyjne między sterownikami). Pokazuje relacje dostawca-klient między tymi obiektami.
 2. **IODeviceTree Plane**: Ta płaszczyzna reprezentuje fizyczne połączenia między urządzeniami, gdy są podłączone do systemu. Często jest używana do wizualizacji hierarchii urządzeń podłączonych przez magistrale, takie jak USB lub PCI.
-3. **IOPower Plane**: Wyświetla obiekty i ich relacje w kontekście zarządzania energią. Może pokazać, które obiekty wpływają na stan zasilania innych, co jest przydatne do debugowania problemów związanych z zasilaniem.
+3. **IOPower Plane**: Wyświetla obiekty i ich relacje w kontekście zarządzania energią. Może pokazywać, które obiekty wpływają na stan zasilania innych, co jest przydatne do debugowania problemów związanych z zasilaniem.
 4. **IOUSB Plane**: Skoncentrowana na urządzeniach USB i ich relacjach, pokazując hierarchię hubów USB i podłączonych urządzeń.
 5. **IOAudio Plane**: Ta płaszczyzna jest przeznaczona do reprezentowania urządzeń audio i ich relacji w systemie.
 6. ...
 
-## Przykład kodu Comm Driver
+## Przykład kodu komunikacji sterownika
 
 Poniższy kod łączy się z usługą IOKit `"YourServiceNameHere"` i wywołuje funkcję wewnątrz selektora 0. W tym celu:
 
@@ -154,7 +154,7 @@ Są **inne** funkcje, które można wykorzystać do wywoływania funkcji IOKit o
 
 ## Odwracanie punktu wejścia sterownika
 
-Możesz je uzyskać na przykład z [**obrazu oprogramowania układowego (ipsw)**](./#ipsw). Następnie załaduj go do swojego ulubionego dekompilatora.
+Możesz je uzyskać na przykład z [**obrazu oprogramowania układowego (ipsw)**](#ipsw). Następnie załaduj go do swojego ulubionego dekompilatora.
 
 Możesz zacząć dekompilować funkcję **`externalMethod`**, ponieważ jest to funkcja sterownika, która będzie odbierać wywołanie i wywoływać odpowiednią funkcję:
 
@@ -184,11 +184,11 @@ Nowy dekompilowany kod będzie wyglądać następująco:
 
 <figure><img src="../../../images/image (1175).png" alt=""><figcaption></figcaption></figure>
 
-Na następnym kroku musimy zdefiniować strukturę **`IOExternalMethodDispatch2022`**. Jest to open source w [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176), możesz ją zdefiniować:
+Na następnym etapie musimy zdefiniować strukturę **`IOExternalMethodDispatch2022`**. Jest ona open source w [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176), możesz ją zdefiniować:
 
 <figure><img src="../../../images/image (1170).png" alt=""><figcaption></figcaption></figure>
 
-Teraz, podążając za `(IOExternalMethodDispatch2022 *)&sIOExternalMethodArray` możesz zobaczyć wiele danych:
+Teraz, podążając za `(IOExternalMethodDispatch2022 *)&sIOExternalMethodArray`, możesz zobaczyć wiele danych:
 
 <figure><img src="../../../images/image (1176).png" alt="" width="563"><figcaption></figcaption></figure>
 
@@ -200,7 +200,7 @@ po zmianie:
 
 <figure><img src="../../../images/image (1179).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Jak teraz widzimy, mamy **tablicę 7 elementów** (sprawdź końcowy dekompilowany kod), kliknij, aby utworzyć tablicę 7 elementów:
+Jak widzimy, mamy tam **tablicę 7 elementów** (sprawdź końcowy dekompilowany kod), kliknij, aby utworzyć tablicę 7 elementów:
 
 <figure><img src="../../../images/image (1180).png" alt="" width="563"><figcaption></figcaption></figure>
 
@@ -209,6 +209,6 @@ Po utworzeniu tablicy możesz zobaczyć wszystkie eksportowane funkcje:
 <figure><img src="../../../images/image (1181).png" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> Jeśli pamiętasz, aby **wywołać** funkcję **eksportowaną** z przestrzeni użytkownika, nie musimy wywoływać nazwy funkcji, ale **numer selektora**. Tutaj możesz zobaczyć, że selektor **0** to funkcja **`initializeDecoder`**, selektor **1** to **`startDecoder`**, selektor **2** **`initializeEncoder`**...
+> Jeśli pamiętasz, aby **wywołać** **eksportowaną** funkcję z przestrzeni użytkownika, nie musimy wywoływać nazwy funkcji, ale **numer selektora**. Tutaj możesz zobaczyć, że selektor **0** to funkcja **`initializeDecoder`**, selektor **1** to **`startDecoder`**, selektor **2** **`initializeEncoder`**...
 
 {{#include ../../../banners/hacktricks-training.md}}

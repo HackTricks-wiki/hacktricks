@@ -12,17 +12,17 @@ macos-security-protections/macos-tcc/
 
 ## Linux Privesc
 
-Proszę zauważyć, że **większość sztuczek dotyczących eskalacji uprawnień wpływających na Linux/Unix wpłynie również na maszyny MacOS**. Zobacz więc:
+Proszę zauważyć, że **większość sztuczek dotyczących eskalacji uprawnień wpływających na Linux/Unix będzie miała również wpływ na maszyny MacOS**. Zobacz więc:
 
 {{#ref}}
 ../../linux-hardening/privilege-escalation/
 {{#endref}}
 
-## Interakcja z użytkownikiem
+## User Interaction
 
 ### Sudo Hijacking
 
-Możesz znaleźć oryginalną [technikę Sudo Hijacking w poście o eskalacji uprawnień Linux](../../linux-hardening/privilege-escalation/#sudo-hijacking).
+Możesz znaleźć oryginalną [technikę Sudo Hijacking w poście o eskalacji uprawnień Linux](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
 
 Jednak macOS **zachowuje** **`PATH`** użytkownika, gdy wykonuje **`sudo`**. Co oznacza, że innym sposobem na przeprowadzenie tego ataku byłoby **przejęcie innych binarek**, które ofiara nadal wykona podczas **uruchamiania sudo:**
 ```bash
@@ -39,11 +39,11 @@ chmod +x /opt/homebrew/bin/ls
 # victim
 sudo ls
 ```
-Zauważ, że użytkownik korzystający z terminala prawdopodobnie ma **zainstalowany Homebrew**. Możliwe jest więc przejęcie binarek w **`/opt/homebrew/bin`**.
+Zauważ, że użytkownik korzystający z terminala prawdopodobnie ma **zainstalowane Homebrew**. Możliwe jest więc przejęcie binarek w **`/opt/homebrew/bin`**.
 
 ### Podszywanie się pod Dock
 
-Używając pewnych **techniki społecznego inżynierii**, możesz **podszyć się na przykład pod Google Chrome** w docku i faktycznie wykonać swój własny skrypt:
+Używając pewnych **techniki inżynierii społecznej**, możesz **podszyć się na przykład pod Google Chrome** w docku i faktycznie wykonać swój własny skrypt:
 
 {{#tabs}}
 {{#tab name="Chrome Impersonation"}}
@@ -205,7 +205,7 @@ killall Dock
 
 ### CVE-2020-9771 - obejście TCC mount_apfs i eskalacja uprawnień
 
-**Każdy użytkownik** (nawet nieuprzywilejowany) może utworzyć i zamontować migawkę Time Machine oraz **uzyskać dostęp do WSZYSTKICH plików** tej migawki.\
+**Każdy użytkownik** (nawet bez uprawnień) może utworzyć i zamontować migawkę Time Machine oraz **uzyskać dostęp do WSZYSTKICH plików** tej migawki.\
 **Jedynym wymaganym uprawnieniem** jest to, aby aplikacja używana (jak `Terminal`) miała dostęp **Full Disk Access** (FDA) (`kTCCServiceSystemPolicyAllfiles`), co musi być przyznane przez administratora.
 ```bash
 # Create snapshot

@@ -13,7 +13,7 @@ Oprogramowanie:
 Online:
 
 - Użyj [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html), aby **dekompilować** z wasm (binarnego) do wat (czystego tekstu)
-- Użyj [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/), aby **kompilować** z wat do wasm
+- Użyj [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/), aby **skompilować** z wat do wasm
 - możesz także spróbować użyć [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/), aby dekompilować
 
 Oprogramowanie:
@@ -27,7 +27,7 @@ Oprogramowanie:
 
 dotPeek to dekompilator, który **dekompiluje i bada wiele formatów**, w tym **biblioteki** (.dll), **pliki metadanych Windows** (.winmd) oraz **wykonywalne** (.exe). Po dekompilacji, zestaw można zapisać jako projekt Visual Studio (.csproj).
 
-Zaletą jest to, że jeśli utracony kod źródłowy wymaga przywrócenia z przestarzałego zestawu, ta akcja może zaoszczędzić czas. Ponadto, dotPeek zapewnia wygodną nawigację po zdekompilowanym kodzie, co czyni go jednym z idealnych narzędzi do **analizy algorytmów Xamarin.**
+Zaletą jest to, że jeśli utracony kod źródłowy wymaga przywrócenia z przestarzałego zestawu, ta akcja może zaoszczędzić czas. Ponadto, dotPeek zapewnia wygodną nawigację po dekompilowanym kodzie, co czyni go jednym z idealnych narzędzi do **analizy algorytmów Xamarin.**
 
 ### [.NET Reflector](https://www.red-gate.com/products/reflector/)
 
@@ -37,13 +37,13 @@ Dzięki kompleksowemu modelowi dodatków i API, które rozszerza narzędzie, aby
 - Zapewnia wgląd w implementację i użycie języków i frameworków .NET
 - Znajduje nieudokumentowane i nieujawnione funkcjonalności, aby uzyskać więcej z używanych API i technologii.
 - Znajduje zależności i różne zestawy
-- Śledzi dokładne miejsce błędów w Twoim kodzie, komponentach i bibliotekach firm trzecich.
+- Śledzi dokładne miejsce błędów w Twoim kodzie, komponentach i bibliotekach stron trzecich.
 - Debuguje źródło całego kodu .NET, z którym pracujesz.
 
 ### [ILSpy](https://github.com/icsharpcode/ILSpy) i [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
 [Plugin ILSpy dla Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Możesz go mieć w każdym systemie operacyjnym (możesz zainstalować go bezpośrednio z VSCode, nie ma potrzeby pobierania gita. Kliknij na **Rozszerzenia** i **wyszukaj ILSpy**).\
-Jeśli potrzebujesz **dekompilować**, **modyfikować** i **ponownie kompilować**, możesz użyć [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) lub aktywnie utrzymywanego forka, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Kliknij prawym przyciskiem -> Modyfikuj metodę**, aby zmienić coś wewnątrz funkcji).
+Jeśli potrzebujesz **dekompilować**, **modyfikować** i **ponownie kompilować**, możesz użyć [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) lub aktywnie utrzymywanego forka, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Kliknij prawym przyciskiem -> Modyfikuj metodę**, aby zmienić coś w funkcji).
 
 ### Logowanie DNSpy
 
@@ -53,7 +53,7 @@ using System.IO;
 path = "C:\\inetpub\\temp\\MyTest2.txt";
 File.AppendAllText(path, "Password: " + password + "\n");
 ```
-### Debugowanie DNSpy
+### DNSpy Debugging
 
 Aby debugować kod za pomocą DNSpy, musisz:
 
@@ -63,28 +63,28 @@ Najpierw zmienić **atrybuty Assembly** związane z **debugowaniem**:
 ```aspnet
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints)]
 ```
-Nie rozumiem, co chcesz, żebym przetłumaczył. Proszę podaj tekst do tłumaczenia.
+I'm sorry, but it seems that there is no content provided for translation. Please provide the text you would like me to translate.
 ```
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.Default |
 DebuggableAttribute.DebuggingModes.DisableOptimizations |
 DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints |
 DebuggableAttribute.DebuggingModes.EnableEditAndContinue)]
 ```
-A następnie kliknij na **compile**:
+I kliknij na **kompiluj**:
 
 ![](<../../images/image (314) (1).png>)
 
-Następnie zapisz nowy plik za pomocą _**File >> Save module...**_:
+Następnie zapisz nowy plik za pomocą _**Plik >> Zapisz moduł...**_:
 
 ![](<../../images/image (602).png>)
 
 Jest to konieczne, ponieważ jeśli tego nie zrobisz, w **czasie wykonywania** kilka **optymalizacji** zostanie zastosowanych do kodu i może się zdarzyć, że podczas debugowania **punkt przerwania nigdy nie zostanie osiągnięty** lub niektóre **zmienne nie istnieją**.
 
-Następnie, jeśli Twoja aplikacja .NET jest **uruchamiana** przez **IIS**, możesz ją **zrestartować** za pomocą:
+Następnie, jeśli twoja aplikacja .NET jest **uruchamiana** przez **IIS**, możesz ją **zrestartować** za pomocą:
 ```
 iisreset /noforce
 ```
-Aby rozpocząć debugowanie, powinieneś zamknąć wszystkie otwarte pliki, a w **Debug Tab** wybrać **Attach to Process...**:
+Aby rozpocząć debugowanie, powinieneś zamknąć wszystkie otwarte pliki, a następnie w **Debug Tab** wybrać **Attach to Process...**:
 
 ![](<../../images/image (318).png>)
 
@@ -121,7 +121,7 @@ Kliknij prawym przyciskiem myszy dowolny moduł w **Assembly Explorer** i klikni
 
 ![](<../../images/image (868).png>)
 
-- Skonfiguruj **parametry** wykonania, podając **ścieżkę do DLL** i funkcję, którą chcesz wywołać:
+- Skonfiguruj **parametry** wykonania, podając **ścieżkę do DLL** oraz funkcję, którą chcesz wywołać:
 
 ![](<../../images/image (704).png>)
 
@@ -134,27 +134,27 @@ Ale jak możesz dotrzeć do kodu DLL, która została załadowana? Używając te
 - **Załaduj rundll32** (64 bity w C:\Windows\System32\rundll32.exe i 32 bity w C:\Windows\SysWOW64\rundll32.exe)
 - **Zmień linię poleceń** (_File --> Change Command Line_) i ustaw ścieżkę do dll oraz funkcję, którą chcesz wywołać, na przykład: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
 - Zmień _Options --> Settings_ i wybierz "**DLL Entry**".
-- Następnie **rozpocznij wykonanie**, debugger zatrzyma się w każdej głównej dll, w pewnym momencie **zatrzymasz się w wejściu dll twojej dll**. Stamtąd po prostu poszukaj punktów, w których chcesz ustawić punkt przerwania.
+- Następnie **rozpocznij wykonanie**, debugger zatrzyma się w każdej głównej DLL, w pewnym momencie **zatrzymasz się w wejściu DLL twojej DLL**. Stamtąd po prostu poszukaj punktów, w których chcesz ustawić punkt przerwania.
 
 Zauważ, że gdy wykonanie zostanie zatrzymane z jakiegokolwiek powodu w win64dbg, możesz zobaczyć **w którym kodzie jesteś**, patrząc na **górę okna win64dbg**:
 
 ![](<../../images/image (842).png>)
 
-Następnie, patrząc na to, możesz zobaczyć, kiedy wykonanie zostało zatrzymane w dll, którą chcesz debugować.
+Następnie, patrząc na to, możesz zobaczyć, kiedy wykonanie zostało zatrzymane w DLL, którą chcesz debugować.
 
 ## Aplikacje GUI / Gry wideo
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) to przydatny program do znajdowania, gdzie ważne wartości są zapisywane w pamięci działającej gry i ich zmieniania. Więcej informacji w:
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php) to przydatny program do znajdowania, gdzie ważne wartości są zapisywane w pamięci działającej gry i ich zmiany. Więcej informacji w:
 
 {{#ref}}
 cheat-engine.md
 {{#endref}}
 
-[**PiNCE**](https://github.com/korcankaraokcu/PINCE) to narzędzie front-end/odwróconego inżynierii dla GNU Project Debugger (GDB), skoncentrowane na grach. Może być jednak używane do wszelkich związanych z odwróconą inżynierią rzeczy.
+[**PiNCE**](https://github.com/korcankaraokcu/PINCE) to narzędzie front-end/odwróconego inżynierii dla GNU Project Debugger (GDB), skoncentrowane na grach. Może być jednak używane do wszelkich związanych z odwróconym inżynierią rzeczy.
 
 [**Decompiler Explorer**](https://dogbolt.org/) to internetowy front-end dla wielu dekompilatorów. Ta usługa internetowa pozwala porównywać wyniki różnych dekompilatorów na małych plikach wykonywalnych.
 
-## ARM i MIPS
+## ARM & MIPS
 
 {{#ref}}
 https://github.com/nongiach/arm_now
@@ -167,7 +167,7 @@ https://github.com/nongiach/arm_now
 [**Blobrunner**](https://github.com/OALabs/BlobRunner) **alokuje** **shellcode** w przestrzeni pamięci, **wskaże** ci **adres pamięci**, w którym shellcode został alokowany i **zatrzyma** wykonanie.\
 Następnie musisz **dołączyć debugger** (Ida lub x64dbg) do procesu i ustawić **punkt przerwania w wskazanym adresie pamięci** oraz **wznowić** wykonanie. W ten sposób będziesz debugować shellcode.
 
-Strona z wydaniami na github zawiera zips z skompilowanymi wydaniami: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
+Strona z wydaniami na githubie zawiera zips z skompilowanymi wydaniami: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
 Możesz znaleźć nieco zmodyfikowaną wersję Blobrunner w następującym linku. Aby ją skompilować, po prostu **stwórz projekt C/C++ w Visual Studio Code, skopiuj i wklej kod i zbuduj go**.
 
 {{#ref}}
@@ -190,7 +190,7 @@ Zauważ, że Cutter pozwala na "Otwórz plik" i "Otwórz shellcode". W moim przy
 
 ![](<../../images/image (562).png>)
 
-Aby rozpocząć emulację w miejscu, w którym chcesz, ustaw tam bp, a Cutter automatycznie rozpocznie emulację stamtąd:
+Aby rozpocząć emulację w miejscu, w którym chcesz, ustaw tam punkt przerwania, a Cutter automatycznie rozpocznie emulację stamtąd:
 
 ![](<../../images/image (589).png>)
 
@@ -200,7 +200,7 @@ Możesz zobaczyć stos na przykład w zrzucie heksadecymalnym:
 
 ![](<../../images/image (186).png>)
 
-### Deobfuskacja shellcode i uzyskiwanie wywoływanych funkcji
+### Deobfuskacja shellcode i uzyskiwanie wykonywanych funkcji
 
 Powinieneś spróbować [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152).\
 Powie ci rzeczy takie jak **które funkcje** używa shellcode i czy shellcode **dekoduje** się w pamięci.
@@ -220,7 +220,7 @@ Opcja **Create Dump** zrzuci końcowy shellcode, jeśli jakiekolwiek zmiany zost
 
 ### Disassembling using CyberChef
 
-Prześlij swój plik shellcode jako wejście i użyj następującego przepisu, aby go dekompilować: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
+Prześlij swój plik shellcode jako wejście i użyj następującego przepisu, aby go dekompilować: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/index.html#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
 
 ## [Movfuscator](https://github.com/xoreaxeaxeax/movfuscator)
 
@@ -236,7 +236,7 @@ apt-get install libz3-dev
 ```
 I [zainstaluj keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md) (`apt-get install cmake; mkdir build; cd build; ../make-share.sh; make install`)
 
-Jeśli grasz w **CTF, to obejście w celu znalezienia flagi** może być bardzo przydatne: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
+Jeśli bierzesz udział w **CTF, to obejście w celu znalezienia flagi** może być bardzo przydatne: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
 
 ## Rust
 
@@ -280,7 +280,7 @@ Na tej stronie możesz znaleźć, jak uzyskać kod python z binarki ELF/EXE skom
 Jeśli zdobędziesz **binarkę** gry GBA, możesz użyć różnych narzędzi do **emulacji** i **debugowania**:
 
 - [**no$gba**](https://problemkaputt.de/gba.htm) (_Pobierz wersję debugującą_) - Zawiera debugger z interfejsem
-- [**mgba** ](https://mgba.io)- Zawiera debugger CLI
+- [**mgba** ](https://mgba.io) - Zawiera debugger CLI
 - [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Wtyczka Ghidra
 - [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Wtyczka Ghidra
 
@@ -305,7 +305,7 @@ W takim programie interesującą częścią będzie **jak program traktuje dane 
 
 ![](<../../images/image (447).png>)
 
-Na poprzednim obrazie możesz zobaczyć, że funkcja jest wywoływana z **FUN_080015a8** (adresy: _0x080015fa_ i _0x080017ac_).
+Na poprzednim obrazku możesz zobaczyć, że funkcja jest wywoływana z **FUN_080015a8** (adresy: _0x080015fa_ i _0x080017ac_).
 
 W tej funkcji, po kilku operacjach inicjalizacyjnych (bez większego znaczenia):
 ```c
@@ -370,13 +370,13 @@ DAT_030000d8 = DAT_030000d8 + 0x3a;
 ```
 W poprzednim kodzie widać, że porównujemy **uVar1** (miejsce, w którym znajduje się **wartość naciśniętego przycisku**) z pewnymi wartościami:
 
-- Najpierw porównuje się z **wartością 4** (**przycisk SELECT**): W wyzwaniu ten przycisk czyści ekran.
-- Następnie porównuje się z **wartością 8** (**przycisk START**): W wyzwaniu to sprawdza, czy kod jest ważny, aby uzyskać flagę.
+- Najpierw porównywana jest z **wartością 4** (**przycisk SELECT**): W wyzwaniu ten przycisk czyści ekran.
+- Następnie porównywana jest z **wartością 8** (**przycisk START**): W wyzwaniu sprawdza, czy kod jest ważny, aby uzyskać flagę.
 - W tym przypadku zmienna **`DAT_030000d8`** jest porównywana z 0xf3, a jeśli wartość jest taka sama, wykonywany jest pewien kod.
 - W innych przypadkach sprawdzana jest zmienna cont (`DAT_030000d4`). To jest cont, ponieważ dodaje 1 zaraz po wejściu w kod.\
-**Jeśli** mniej niż 8, wykonywane jest coś, co polega na **dodawaniu** wartości do \*\*`DAT_030000d8` \*\* (w zasadzie dodaje wartości naciśniętych klawiszy do tej zmiennej, o ile cont jest mniejszy niż 8).
+**Jeśli** jest mniejsza niż 8, wykonywane jest coś, co polega na **dodawaniu** wartości do \*\*`DAT_030000d8` \*\* (w zasadzie dodaje wartości naciśniętych klawiszy do tej zmiennej, o ile cont jest mniejszy niż 8).
 
-Tak więc, w tym wyzwaniu, znając wartości przycisków, musiałeś **nacisnąć kombinację o długości mniejszej niż 8, której wynikowa suma to 0xf3.**
+Tak więc, w tym wyzwaniu, znając wartości przycisków, musiałeś **nacisnąć kombinację o długości mniejszej niż 8, której suma wynosi 0xf3.**
 
 **Referencja do tego samouczka:** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)
 

@@ -2,13 +2,13 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Function Interposing
+## Interpozycja Funkcji
 
 Utwórz **dylib** z sekcją **`__interpose`** (lub sekcją oznaczoną jako **`S_INTERPOSING`**) zawierającą krotki **wskaźników funkcji**, które odnoszą się do **oryginalnych** i **zamiennych** funkcji.
 
-Następnie **wstrzyknij** dylib za pomocą **`DYLD_INSERT_LIBRARIES`** (interpozycja musi nastąpić przed załadowaniem głównej aplikacji). Oczywiście [**ograniczenia** dotyczące użycia **`DYLD_INSERT_LIBRARIES`** mają tu również zastosowanie](../macos-proces-abuse/macos-library-injection/#check-restrictions).&#x20;
+Następnie **wstrzyknij** dylib za pomocą **`DYLD_INSERT_LIBRARIES`** (interpozycja musi nastąpić przed załadowaniem głównej aplikacji). Oczywiście [**ograniczenia** stosowane do użycia **`DYLD_INSERT_LIBRARIES`** mają tu również zastosowanie](../macos-proces-abuse/macos-library-injection/index.html#check-restrictions).&#x20;
 
-### Interpose printf
+### Interpozycja printf
 
 {{#tabs}}
 {{#tab name="interpose.c"}}
@@ -85,7 +85,7 @@ Potrzebny jest **obiekt**, **metoda** i **parametry**. A gdy metoda jest wywoły
 
 Obiekt to **`someObject`**, metoda to **`@selector(method1p1:p2:)`**, a argumenty to **value1**, **value2**.
 
-Śledząc struktury obiektów, możliwe jest dotarcie do **tablicy metod**, w której **nazwy** i **wskaźniki** do kodu metod są **zlokalizowane**.
+Śledząc struktury obiektów, możliwe jest dotarcie do **tablicy metod**, w której **nazwy** i **wskaźniki** do kodu metody są **zlokalizowane**.
 
 > [!CAUTION]
 > Zauważ, że ponieważ metody i klasy są dostępne na podstawie ich nazw, te informacje są przechowywane w binarnym pliku, więc można je odzyskać za pomocą `otool -ov </path/bin>` lub [`class-dump </path/bin>`](https://github.com/nygard/class-dump)
@@ -272,11 +272,11 @@ return 0;
 
 Na tej stronie omówiono różne sposoby hookowania funkcji. Jednak polegały one na **uruchamianiu kodu wewnątrz procesu w celu ataku**.
 
-Aby to zrobić, najłatwiejszą techniką do użycia jest wstrzyknięcie [Dyld za pomocą zmiennych środowiskowych lub przejęcia](../macos-dyld-hijacking-and-dyld_insert_libraries.md). Jednak przypuszczam, że można to również zrobić za pomocą [wstrzykiwania procesu Dylib](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port).
+Aby to zrobić, najłatwiejszą techniką do użycia jest wstrzyknięcie [Dyld za pomocą zmiennych środowiskowych lub przejęcia](../macos-dyld-hijacking-and-dyld_insert_libraries.md). Jednak przypuszczam, że można to również zrobić za pomocą [wstrzykiwania procesu Dylib](macos-ipc-inter-process-communication/index.html#dylib-process-injection-via-task-port).
 
 Jednak obie opcje są **ograniczone** do **niechronionych** binarek/procesów. Sprawdź każdą technikę, aby dowiedzieć się więcej o ograniczeniach.
 
-Jednak atak hookowania funkcji jest bardzo specyficzny, atakujący zrobi to, aby **ukraść wrażliwe informacje z wnętrza procesu** (w przeciwnym razie po prostu przeprowadziłby atak wstrzykiwania procesu). A te wrażliwe informacje mogą znajdować się w aplikacjach pobranych przez użytkownika, takich jak MacPass.
+Jednak atak hookowania funkcji jest bardzo specyficzny, atakujący zrobi to, aby **ukraść wrażliwe informacje z wnętrza procesu** (gdyby nie, po prostu przeprowadziłby atak wstrzykiwania procesu). A te wrażliwe informacje mogą znajdować się w aplikacjach pobranych przez użytkownika, takich jak MacPass.
 
 Zatem wektorem ataku byłoby znalezienie luki lub usunięcie podpisu aplikacji, wstrzyknięcie zmiennej środowiskowej **`DYLD_INSERT_LIBRARIES`** przez Info.plist aplikacji, dodając coś takiego:
 ```xml
@@ -286,11 +286,11 @@ Zatem wektorem ataku byłoby znalezienie luki lub usunięcie podpisu aplikacji, 
 <string>/Applications/Application.app/Contents/malicious.dylib</string>
 </dict>
 ```
-a następnie **ponownie zarejestrować** aplikację:
+a następnie **ponownie zarejestruj** aplikację:
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f /Applications/Application.app
 ```
-Dodaj do tej biblioteki kod hookujący do eksfiltracji informacji: Hasła, wiadomości...
+Dodaj do tej biblioteki kod hookujący, aby wyeksportować informacje: Hasła, wiadomości...
 
 > [!CAUTION]
 > Zauważ, że w nowszych wersjach macOS, jeśli **usunięto podpis** binarnego pliku aplikacji i był on wcześniej uruchamiany, macOS **nie będzie już uruchamiać aplikacji**.

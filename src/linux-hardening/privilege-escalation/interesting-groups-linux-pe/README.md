@@ -26,7 +26,7 @@ Znajdź wszystkie binarki suid i sprawdź, czy istnieje binarka **Pkexec**:
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-Jeśli odkryjesz, że binarny plik **pkexec jest binarnym plikiem SUID** i należysz do **sudo** lub **admin**, prawdopodobnie będziesz mógł wykonywać binaria jako sudo za pomocą `pkexec`.\
+Jeśli odkryjesz, że binarny **pkexec jest binarnym SUID** i należysz do **sudo** lub **admin**, prawdopodobnie będziesz mógł wykonywać binaria jako sudo za pomocą `pkexec`.\
 Dzieje się tak, ponieważ zazwyczaj są to grupy w ramach **polkit policy**. Ta polityka zasadniczo identyfikuje, które grupy mogą używać `pkexec`. Sprawdź to za pomocą:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
@@ -43,7 +43,7 @@ polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freed
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-**To nie dlatego, że nie masz uprawnień, ale dlatego, że nie jesteś połączony bez GUI**. A tutaj jest obejście tego problemu: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Potrzebujesz **2 różnych sesji ssh**:
+**To nie dlatego, że nie masz uprawnień, ale dlatego, że nie jesteś połączony bez GUI**. Istnieje obejście tego problemu tutaj: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Potrzebujesz **2 różnych sesji ssh**:
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -66,19 +66,19 @@ Jeśli tak jest, aby **stać się rootem, wystarczy wykonać**:
 ```
 sudo su
 ```
-## Shadow Group
+## Grupa Shadow
 
 Użytkownicy z **grupy shadow** mogą **czytać** plik **/etc/shadow**:
 ```
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
-So, przeczytaj plik i spróbuj **złamać niektóre hashe**.
+So, read the file and try to **crack some hashes**.
 
 ## Grupa Pracowników
 
-**staff**: Pozwala użytkownikom na dodawanie lokalnych modyfikacji do systemu (`/usr/local`) bez potrzeby posiadania uprawnień roota (zauważ, że pliki wykonywalne w `/usr/local/bin` są w zmiennej PATH każdego użytkownika i mogą "nadpisywać" pliki wykonywalne w `/bin` i `/usr/bin` o tej samej nazwie). Porównaj z grupą "adm", która jest bardziej związana z monitorowaniem/bezpieczeństwem. [\[source\]](https://wiki.debian.org/SystemGroups)
+**staff**: Umożliwia użytkownikom dodawanie lokalnych modyfikacji do systemu (`/usr/local`) bez potrzeby posiadania uprawnień roota (zauważ, że pliki wykonywalne w `/usr/local/bin` są w zmiennej PATH każdego użytkownika i mogą "nadpisywać" pliki wykonywalne w `/bin` i `/usr/bin` o tej samej nazwie). Porównaj z grupą "adm", która jest bardziej związana z monitorowaniem/bezpieczeństwem. [\[source\]](https://wiki.debian.org/SystemGroups)
 
-W dystrybucjach debiana, zmienna `$PATH` pokazuje, że `/usr/local/` będzie uruchamiana z najwyższym priorytetem, niezależnie od tego, czy jesteś użytkownikiem z uprawnieniami, czy nie.
+W dystrybucjach debiana zmienna `$PATH` pokazuje, że `/usr/local/` będzie uruchamiana z najwyższym priorytetem, niezależnie od tego, czy jesteś użytkownikiem z uprawnieniami, czy nie.
 ```bash
 $ echo $PATH
 /usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
@@ -150,7 +150,7 @@ Jednakże, jeśli spróbujesz **zapisać pliki należące do roota** (takie jak 
 
 ## Grupa Wideo
 
-Używając polecenia `w`, możesz znaleźć **kto jest zalogowany w systemie** i wyświetli ono wynik podobny do poniższego:
+Używając polecenia `w`, możesz znaleźć **kto jest zalogowany w systemie** i wyświetli to wynik podobny do poniższego:
 ```bash
 USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
 yossi    tty1                      22:16    5:13m  0.05s  0.04s -bash
@@ -163,7 +163,7 @@ Grupa **video** ma dostęp do wyświetlania wyjścia ekranu. W zasadzie możesz 
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-Aby **otworzyć** **surowy obraz**, możesz użyć **GIMP**, wybrać plik **`screen.raw`** i wybrać jako typ pliku **Dane surowego obrazu**:
+Aby **otworzyć** **surowy obraz**, możesz użyć **GIMP**, wybrać plik **`screen.raw`** i jako typ pliku wybrać **Surowe dane obrazu**:
 
 ![](<../../../images/image (463).png>)
 
@@ -175,7 +175,7 @@ Następnie zmodyfikuj Szerokość i Wysokość na te używane na ekranie i spraw
 
 Wygląda na to, że domyślnie **członkowie grupy root** mogą mieć dostęp do **modyfikacji** niektórych plików konfiguracyjnych **usług** lub niektórych plików **bibliotek** lub **innych interesujących rzeczy**, które mogą być użyte do eskalacji uprawnień...
 
-**Sprawdź, które pliki członkowie root mogą modyfikować**:
+**Sprawdź, które pliki członkowie roota mogą modyfikować**:
 ```bash
 find / -group root -perm -g=w 2>/dev/null
 ```
@@ -193,13 +193,13 @@ echo 'toor:$1$.ZcF5ts0$i4k6rQYzeegUkacRCvfxC0:0:0:root:/root:/bin/sh' >> /etc/pa
 #Ifyou just want filesystem and network access you can startthe following container:
 docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chroot /mnt bashbash
 ```
-Na koniec, jeśli nie podoba Ci się żadna z wcześniejszych sugestii lub z jakiegoś powodu nie działają (firewall API dockera?), zawsze możesz spróbować **uruchomić kontener z uprawnieniami i uciec z niego**, jak wyjaśniono tutaj:
+Na koniec, jeśli nie podoba Ci się żadna z wcześniejszych sugestii lub z jakiegoś powodu nie działają (firewall API dockera?), zawsze możesz spróbować **uruchomić kontener z uprawnieniami i wydostać się z niego**, jak wyjaśniono tutaj:
 
 {{#ref}}
 ../docker-security/
 {{#endref}}
 
-Jeśli masz uprawnienia do zapisu w gnieździe dockera, przeczytaj [**ten post o tym, jak eskalować uprawnienia, nadużywając gniazda dockera**](../#writable-docker-socket)**.**
+Jeśli masz uprawnienia do zapisu w gnieździe dockera, przeczytaj [**ten post o tym, jak eskalować uprawnienia, nadużywając gniazda dockera**](../index.html#writable-docker-socket)**.**
 
 {{#ref}}
 https://github.com/KrustyHack/docker-privilege-escalation
@@ -217,7 +217,7 @@ https://fosterelli.co/privilege-escalation-via-docker.html
 
 ## Grupa Adm
 
-Zazwyczaj **członkowie** grupy **`adm`** mają uprawnienia do **odczytu plików dziennika** znajdujących się w _/var/log/_.\
+Zazwyczaj **członkowie** grupy **`adm`** mają uprawnienia do **odczytu plików** dziennika znajdujących się w _/var/log/_.\
 Dlatego, jeśli skompromitowałeś użytkownika w tej grupie, zdecydowanie powinieneś **sprawdzić logi**.
 
 ## Grupa Auth

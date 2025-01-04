@@ -22,7 +22,7 @@ Możesz również **wykorzystać montowanie do eskalacji uprawnień** wewnątrz 
 - `--cgroupns=host`
 - \*\*`--device=/dev/sda1 --cap-add=SYS_ADMIN --security-opt apparmor=unconfined` \*\* -> To jest podobne do poprzedniej metody, ale tutaj **montujemy dysk urządzenia**. Następnie, wewnątrz kontenera uruchom `mount /dev/sda1 /mnt` i możesz **uzyskać dostęp** do **systemu plików hosta** w `/mnt`
 - Uruchom `fdisk -l` na hoście, aby znaleźć urządzenie `</dev/sda1>` do zamontowania
-- **`-v /tmp:/host`** -> Jeśli z jakiegoś powodu możesz **zamontować tylko niektóre katalogi** z hosta i masz dostęp wewnątrz hosta. Zamontuj go i stwórz **`/bin/bash`** z **suid** w zamontowanym katalogu, aby móc **wykonać go z hosta i eskalować do roota**.
+- **`-v /tmp:/host`** -> Jeśli z jakiegoś powodu możesz **zamontować tylko niektóre katalogi** z hosta i masz dostęp wewnątrz hosta. Zamontuj go i utwórz **`/bin/bash`** z **suid** w zamontowanym katalogu, aby móc **wykonać go z hosta i eskalować do roota**.
 
 > [!NOTE]
 > Zauważ, że być może nie możesz zamontować folderu `/tmp`, ale możesz zamontować **inny zapisywalny folder**. Możesz znaleźć zapisywalne katalogi, używając: `find / -writable -type d 2>/dev/null`
@@ -33,11 +33,11 @@ Możesz również **wykorzystać montowanie do eskalacji uprawnień** wewnątrz 
 
 ### Ucieczka z kontenera
 
-- **`--privileged`** -> Z tą flagą [usuwasz całe izolowanie z kontenera](docker-privileged.md#what-affects). Sprawdź techniki, aby [uciec z uprzywilejowanych kontenerów jako root](docker-breakout-privilege-escalation/#automatic-enumeration-and-escape).
+- **`--privileged`** -> Z tą flagą [usuwasz całe izolowanie z kontenera](docker-privileged.md#what-affects). Sprawdź techniki, aby [uciec z uprzywilejowanych kontenerów jako root](docker-breakout-privilege-escalation/index.html#automatic-enumeration-and-escape).
 - **`--cap-add=<CAPABILITY/ALL> [--security-opt apparmor=unconfined] [--security-opt seccomp=unconfined] [-security-opt label:disable]`** -> Aby [eskalować, wykorzystując możliwości](../linux-capabilities.md), **przyznaj tę możliwość kontenerowi** i wyłącz inne metody ochrony, które mogą uniemożliwić działanie exploita.
 
 ### Curl
 
-Na tej stronie omówiliśmy sposoby eskalacji uprawnień za pomocą flag docker, możesz znaleźć **sposoby na wykorzystanie tych metod za pomocą polecenia curl** na stronie:
+Na tej stronie omówiliśmy sposoby eskalacji uprawnień przy użyciu flag docker, możesz znaleźć **sposoby na wykorzystanie tych metod za pomocą polecenia curl** na stronie:
 
 {{#include ../../../banners/hacktricks-training.md}}

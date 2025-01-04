@@ -6,7 +6,7 @@
 
 Utwórz **dylib** z sekcją **`__interpose` (`__DATA___interpose`)** (lub sekcją oznaczoną jako **`S_INTERPOSING`**) zawierającą krotki **wskaźników funkcji**, które odnoszą się do **oryginalnych** i **zamiennych** funkcji.
 
-Następnie **wstrzyknij** dylib za pomocą **`DYLD_INSERT_LIBRARIES`** (interpozycja musi nastąpić przed załadowaniem głównej aplikacji). Oczywiście [**ograniczenia** dotyczące użycia **`DYLD_INSERT_LIBRARIES`** mają tu również zastosowanie](macos-library-injection/#check-restrictions).
+Następnie **wstrzyknij** dylib za pomocą **`DYLD_INSERT_LIBRARIES`** (interpozycja musi nastąpić przed załadowaniem głównej aplikacji). Oczywiście [**ograniczenia** dotyczące użycia **`DYLD_INSERT_LIBRARIES`** mają tu również zastosowanie](macos-library-injection/index.html#check-restrictions).
 
 ### Interpozycja printf
 
@@ -103,7 +103,7 @@ Potrzebny jest **obiekt**, **metoda** i **parametry**. A gdy metoda jest wywoły
 
 Obiekt to **`someObject`**, metoda to **`@selector(method1p1:p2:)`**, a argumenty to **value1**, **value2**.
 
-Zgodnie z strukturami obiektów, możliwe jest dotarcie do **tablicy metod**, w której **nazwy** i **wskaźniki** do kodu metody są **zlokalizowane**.
+Śledząc struktury obiektów, możliwe jest dotarcie do **tablicy metod**, w której **nazwy** i **wskaźniki** do kodu metody są **zlokalizowane**.
 
 > [!CAUTION]
 > Zauważ, że ponieważ metody i klasy są dostępne na podstawie ich nazw, te informacje są przechowywane w binarnym pliku, więc można je odzyskać za pomocą `otool -ov </path/bin>` lub [`class-dump </path/bin>`](https://github.com/nygard/class-dump)
@@ -226,7 +226,7 @@ return 0;
 }
 ```
 > [!WARNING]
-> W tym przypadku, jeśli **kod implementacji** legalnej **metody** **weryfikuje** **nazwę** **metody**, może **wykryć** to swizzling i zapobiec jego uruchomieniu.
+> W tym przypadku, jeśli **kod implementacji legit** metody **weryfikuje** **nazwę** **metody**, może **wykryć** to swizzling i zapobiec jego uruchomieniu.
 >
 > Następująca technika nie ma tego ograniczenia.
 
@@ -234,7 +234,7 @@ return 0;
 
 Poprzedni format jest dziwny, ponieważ zmieniasz implementację 2 metod jedna na drugą. Używając funkcji **`method_setImplementation`**, możesz **zmienić** **implementację** **metody na inną**.
 
-Pamiętaj tylko, aby **zachować adres implementacji oryginalnej** metody, jeśli zamierzasz ją wywołać z nowej implementacji przed nadpisaniem, ponieważ później będzie znacznie trudniej zlokalizować ten adres.
+Pamiętaj tylko, aby **zachować adres implementacji oryginalnej** metody, jeśli zamierzasz ją wywołać z nowej implementacji przed jej nadpisaniem, ponieważ później będzie znacznie trudniej zlokalizować ten adres.
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
@@ -288,9 +288,9 @@ return 0;
 ```
 ## Metodologia Ataku Hooking
 
-Na tej stronie omówiono różne sposoby hookowania funkcji. Jednak polegały one na **uruchamianiu kodu wewnątrz procesu w celu ataku**.
+Na tej stronie omówiono różne sposoby hookowania funkcji. Jednak wiązało się to z **uruchamianiem kodu wewnątrz procesu w celu ataku**.
 
-Aby to zrobić, najłatwiejszą techniką do użycia jest wstrzyknięcie [Dyld za pomocą zmiennych środowiskowych lub przejęcia](macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md). Jednak przypuszczam, że można to również zrobić za pomocą [wstrzykiwania procesu Dylib](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port).
+Aby to zrobić, najłatwiejszą techniką do użycia jest wstrzyknięcie [Dyld za pomocą zmiennych środowiskowych lub przejęcia](macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md). Jednak przypuszczam, że można to również zrobić za pomocą [wstrzykiwania Dylib do procesu](macos-ipc-inter-process-communication/index.html#dylib-process-injection-via-task-port).
 
 Jednak obie opcje są **ograniczone** do **niechronionych** binarek/procesów. Sprawdź każdą technikę, aby dowiedzieć się więcej o ograniczeniach.
 
@@ -308,7 +308,7 @@ a następnie **ponownie zarejestruj** aplikację:
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f /Applications/Application.app
 ```
-Dodaj do tej biblioteki kod hookujący do eksfiltracji informacji: Hasła, wiadomości...
+Dodaj do tej biblioteki kod hookujący, aby wyeksportować informacje: Hasła, wiadomości...
 
 > [!CAUTION]
 > Zauważ, że w nowszych wersjach macOS, jeśli **usunięto podpis** binarnego pliku aplikacji i był on wcześniej uruchamiany, macOS **nie będzie już uruchamiać aplikacji**.

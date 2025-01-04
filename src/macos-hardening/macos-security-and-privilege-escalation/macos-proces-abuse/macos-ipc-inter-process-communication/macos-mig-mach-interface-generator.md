@@ -4,7 +4,7 @@
 
 ## Podstawowe informacje
 
-MIG został stworzony, aby **uprościć proces tworzenia kodu Mach IPC**. W zasadzie **generuje potrzebny kod** dla serwera i klienta do komunikacji z daną definicją. Nawet jeśli wygenerowany kod jest brzydki, programista będzie musiał tylko go zaimportować, a jego kod będzie znacznie prostszy niż wcześniej.
+MIG został stworzony, aby **uprościć proces tworzenia kodu Mach IPC**. W zasadzie **generuje potrzebny kod** dla serwera i klienta do komunikacji zgodnie z daną definicją. Nawet jeśli wygenerowany kod jest brzydki, programista będzie musiał go tylko zaimportować, a jego kod będzie znacznie prostszy niż wcześniej.
 
 Definicja jest określona w języku definicji interfejsu (IDL) z użyciem rozszerzenia `.defs`.
 
@@ -40,7 +40,7 @@ server_port :  mach_port_t;
 n1          :  uint32_t;
 n2          :  uint32_t);
 ```
-Zauważ, że pierwszy **argument to port do powiązania** a MIG **automatycznie obsłuży port odpowiedzi** (chyba że wywołasz `mig_get_reply_port()` w kodzie klienta). Ponadto, **ID operacji** będzie **sekwencyjne**, zaczynając od wskazanego ID podsystemu (więc jeśli operacja jest przestarzała, jest usuwana, a `skip` jest używane, aby nadal używać jej ID).
+Zauważ, że pierwszy **argument to port do powiązania** a MIG **automatycznie obsłuży port odpowiedzi** (chyba że wywołasz `mig_get_reply_port()` w kodzie klienta). Ponadto, **ID operacji** będą **sekwencyjne**, zaczynając od wskazanego ID podsystemu (więc jeśli operacja jest przestarzała, jest usuwana, a `skip` jest używane, aby nadal używać jej ID).
 
 Teraz użyj MIG, aby wygenerować kod serwera i klienta, który będzie w stanie komunikować się ze sobą, aby wywołać funkcję Subtract:
 ```bash
@@ -149,7 +149,7 @@ return FALSE;
 }
 </code></pre>
 
-Sprawdź wcześniej podkreślone linie uzyskujące dostęp do funkcji, aby wywołać ją według identyfikatora.
+Sprawdź wcześniej podświetlone linie uzyskujące dostęp do funkcji, aby wywołać ją według identyfikatora.
 
 Poniższy kod tworzy prosty **serwer** i **klienta**, gdzie klient może wywołać funkcje Odejmij z serwera:
 
@@ -219,7 +219,7 @@ USERPREFSubtract(port, 40, 2);
 
 NDR_record jest eksportowany przez `libsystem_kernel.dylib` i jest to struktura, która pozwala MIG na **transformację danych, aby były niezależne od systemu**, w którym są używane, ponieważ MIG miał być używany między różnymi systemami (a nie tylko na tej samej maszynie).
 
-To jest interesujące, ponieważ jeśli `_NDR_record` zostanie znaleziony w binarnym pliku jako zależność (`jtool2 -S <binary> | grep NDR` lub `nm`), oznacza to, że plik binarny jest klientem lub serwerem MIG.
+To jest interesujące, ponieważ jeśli `_NDR_record` zostanie znaleziony w binarnym pliku jako zależność (`jtool2 -S <binary> | grep NDR` lub `nm`), oznacza to, że binarny plik jest klientem lub serwerem MIG.
 
 Ponadto **serwery MIG** mają tabelę dyspozycyjną w `__DATA.__const` (lub w `__CONST.__constdata` w jądrze macOS i `__DATA_CONST.__const` w innych jądrze \*OS). Można to zrzucić za pomocą **`jtool2`**.
 
@@ -231,7 +231,7 @@ A **klienci MIG** będą używać `__NDR_record`, aby wysłać z `__mach_msg` do
 
 Ponieważ wiele binarnych plików teraz używa MIG do udostępniania portów mach, interesujące jest wiedzieć, jak **zidentyfikować, że MIG był używany** oraz **funkcje, które MIG wykonuje** z każdym identyfikatorem wiadomości.
 
-[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/#jtool2) może analizować informacje MIG z binarnego pliku Mach-O, wskazując identyfikator wiadomości i identyfikując funkcję do wykonania:
+[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/index.html#jtool2) może analizować informacje MIG z binarnego pliku Mach-O, wskazując identyfikator wiadomości i identyfikując funkcję do wykonania:
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
@@ -332,7 +332,7 @@ if (CPU_FLAGS &#x26; NE) {
 r8 = 0x1;
 }
 }
-// To samo if - else jak w poprzedniej wersji
+// To samo if else jak w poprzedniej wersji
 // Sprawdź użycie adresu 0x100004040 (tablica adresów funkcji)
 <strong>                    if ((r8 &#x26; 0x1) == 0x0) {
 </strong><strong>                            *(var_18 + 0x18) = **0x100004000;
@@ -365,7 +365,7 @@ return r0;
 {{#endtab}}
 {{#endtabs}}
 
-W rzeczywistości, jeśli przejdziesz do funkcji **`0x100004000`**, znajdziesz tablicę struktur **`routine_descriptor`**. Pierwszym elementem struktury jest **adres**, w którym **funkcja** jest zaimplementowana, a **struktura zajmuje 0x28 bajtów**, więc co 0x28 bajtów (zaczynając od bajtu 0) możesz uzyskać 8 bajtów, a to będzie **adres funkcji**, która ma być wywołana:
+W rzeczywistości, jeśli przejdziesz do funkcji **`0x100004000`**, znajdziesz tablicę struktur **`routine_descriptor`**. Pierwszym elementem struktury jest **adres**, w którym **funkcja** jest zaimplementowana, a **struktura zajmuje 0x28 bajtów**, więc co 0x28 bajtów (zaczynając od bajtu 0) możesz uzyskać 8 bajtów, a to będzie **adres funkcji**, która zostanie wywołana:
 
 <figure><img src="../../../../images/image (35).png" alt=""><figcaption></figcaption></figure>
 
