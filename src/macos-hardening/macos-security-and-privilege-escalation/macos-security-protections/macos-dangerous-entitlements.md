@@ -17,15 +17,15 @@
 
 ### **`com.apple.system-task-ports` (以前は `task_for_pid-allow` と呼ばれていました)**
 
-この権限は、カーネルを除く **任意の** プロセスの **タスクポートを取得** することを許可します。詳細は [**こちらを確認してください**](../macos-proces-abuse/macos-ipc-inter-process-communication/)。
+この権限は、カーネルを除く **任意の** プロセスの **タスクポートを取得** することを許可します。詳細は [**こちらを確認してください**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html)。
 
 ### `com.apple.security.get-task-allow`
 
-この権限は、**`com.apple.security.cs.debugger`** 権限を持つ他のプロセスが、この権限を持つバイナリによって実行されるプロセスのタスクポートを取得し、**コードを注入する** ことを許可します。詳細は [**こちらを確認してください**](../macos-proces-abuse/macos-ipc-inter-process-communication/)。
+この権限は、**`com.apple.security.cs.debugger`** 権限を持つ他のプロセスが、この権限を持つバイナリによって実行されるプロセスのタスクポートを取得し、**コードを注入する** ことを許可します。詳細は [**こちらを確認してください**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html)。
 
 ### `com.apple.security.cs.debugger`
 
-デバッグツール権限を持つアプリは、`task_for_pid()` を呼び出して、`Get Task Allow` 権限が `true` に設定された署名されていないアプリや第三者アプリの有効なタスクポートを取得できます。しかし、デバッグツール権限があっても、デバッガは **`Get Task Allow` 権限を持たない** プロセスのタスクポートを取得できず、それらはシステム整合性保護によって保護されています。詳細は [**こちらを確認してください**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger)。
+デバッグツール権限を持つアプリは、`task_for_pid()` を呼び出して、`Get Task Allow` 権限が `true` に設定された署名されていないおよび第三者のアプリの有効なタスクポートを取得できます。しかし、デバッグツール権限があっても、デバッガは **`Get Task Allow` 権限を持たない** プロセスのタスクポートを取得できず、それらはシステム整合性保護によって保護されています。詳細は [**こちらを確認してください**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger)。
 
 ### `com.apple.security.cs.disable-library-validation`
 
@@ -33,20 +33,20 @@
 
 ### `com.apple.private.security.clear-library-validation`
 
-この権限は **`com.apple.security.cs.disable-library-validation`** と非常に似ていますが、**ライブラリ検証を直接無効にするのではなく**、プロセスが **`csops` システムコールを呼び出して無効にする** ことを許可します。\
+この権限は **`com.apple.security.cs.disable-library-validation`** と非常に似ていますが、**ライブラリ検証を直接無効にするのではなく、プロセスが `csops` システムコールを呼び出して無効にすることを許可します**。\
 詳細は [**こちらを確認してください**](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/)。
 
 ### `com.apple.security.cs.allow-dyld-environment-variables`
 
-この権限は、**DYLD環境変数を使用する** ことを許可し、これによりライブラリやコードを注入することができます。詳細は [**こちらを確認してください**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables)。
+この権限は、**ライブラリやコードを注入するために使用される可能性のあるDYLD環境変数を使用する** ことを許可します。詳細は [**こちらを確認してください**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables)。
 
 ### `com.apple.private.tcc.manager` または `com.apple.rootless.storage`.`TCC`
 
-[**このブログによると**](https://objective-see.org/blog/blog_0x4C.html) **および** [**このブログによると**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/)、これらの権限は **TCC** データベースを **変更** することを許可します。
+[**このブログによると**](https://objective-see.org/blog/blog_0x4C.html) **および** [**このブログによると**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/)、これらの権限は **TCC** データベースを **変更する** ことを許可します。
 
 ### **`system.install.apple-software`** および **`system.install.apple-software.standar-user`**
 
-これらの権限は、ユーザーに許可を求めることなく **ソフトウェアをインストールする** ことを許可し、**特権昇格** に役立つ可能性があります。
+これらの権限は、ユーザーに許可を求めることなく **ソフトウェアをインストールする** ことを許可します。これは **特権昇格** に役立つ可能性があります。
 
 ### `com.apple.private.security.kext-management`
 
@@ -62,7 +62,7 @@
 
 ### `com.apple.private.tcc.manager.check-by-audit-token`
 
-TODO: これが何を許可するのかはわかりません
+TODO: これが何を許可するのかはわかりません。
 
 ### `com.apple.private.apfs.revert-to-snapshot`
 
@@ -87,21 +87,21 @@ TODO: [**このレポート**](https://jhftss.github.io/The-Nightmare-of-Apple-O
 ```
 ### **`kTCCServiceSystemPolicyAllFiles`**
 
-**フルディスクアクセス** 権限を付与します。これは、持つことができる TCC の最高権限の一つです。
+**フルディスクアクセス**権限を付与します。これは、TCCの中で最も高い権限の一つです。
 
 ### **`kTCCServiceAppleEvents`**
 
-アプリが一般的に **タスクを自動化** するために他のアプリケーションにイベントを送信することを許可します。他のアプリを制御することで、これらの他のアプリに付与された権限を悪用することができます。
+アプリが一般的に**タスクを自動化**するために他のアプリケーションにイベントを送信することを許可します。他のアプリを制御することで、これらの他のアプリに付与された権限を悪用することができます。
 
 例えば、ユーザーにパスワードを要求させることができます：
 ```bash
 osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to activate' -e 'tell app "App Store" to display dialog "App Store requires your password to continue." & return & return default answer "" with icon 1 with hidden answer with title "App Store Alert"'
 ```
-または、**任意のアクション**を実行させること。
+Or making them perform **任意のアクション**。
 
 ### **`kTCCServiceEndpointSecurityClient`**
 
-他の権限の中で、**ユーザーのTCCデータベースに書き込む**ことを許可します。
+ユーザーのTCCデータベースを**書き込む**ことを含む、他の権限を許可します。
 
 ### **`kTCCServiceSystemPolicySysAdminFiles`**
 
@@ -113,11 +113,11 @@ osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to acti
 
 <figure><img src="../../../images/image (31).png" alt=""><figcaption></figcaption></figure>
 
-このアクセス権を持つユーザーを確認するには、_システム設定_ > _プライバシーとセキュリティ_ > _アプリ管理_に移動します。
+このアクセス権を持つユーザーを確認するには、_システム設定_ > _プライバシーとセキュリティ_ > _アプリ管理_を確認してください。
 
 ### `kTCCServiceAccessibility`
 
-プロセスは**macOSのアクセシビリティ機能を悪用する**ことができ、例えばキー入力を押すことができるようになります。したがって、Finderのようなアプリを制御するためのアクセスを要求し、この権限でダイアログを承認することができます。
+プロセスは**macOSのアクセシビリティ機能を悪用する**ことができ、例えばキーストロークを押すことができるようになります。したがって、Finderのようなアプリを制御するためのアクセスを要求し、この権限でダイアログを承認することができます。
 
 ## 中程度
 
@@ -156,8 +156,10 @@ TODO
 [Array]
 [String] kTCCServiceAll
 ```
-プロセスに**すべてのTCC権限を要求させる**。
+プロセスに**すべてのTCC権限を要求させる**ことを許可します。
 
 ### **`kTCCServicePostEvent`**
 
 {{#include ../../../banners/hacktricks-training.md}}
+
+</details>

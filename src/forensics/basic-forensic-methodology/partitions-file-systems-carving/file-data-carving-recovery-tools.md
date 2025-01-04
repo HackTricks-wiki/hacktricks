@@ -8,7 +8,7 @@ More tools in [https://github.com/Claudio-C/awesome-datarecovery](https://github
 
 ### Autopsy
 
-フォレンジックで画像からファイルを抽出するために最も一般的に使用されるツールは [**Autopsy**](https://www.autopsy.com/download/) です。ダウンロードしてインストールし、ファイルを取り込んで「隠れた」ファイルを見つけます。Autopsyはディスクイメージや他の種類のイメージをサポートするように構築されていますが、単純なファイルには対応していないことに注意してください。
+フォレンジックで画像からファイルを抽出するために最も一般的に使用されるツールは [**Autopsy**](https://www.autopsy.com/download/) です。ダウンロードしてインストールし、ファイルを取り込んで「隠れた」ファイルを見つけます。Autopsyはディスクイメージやその他の種類のイメージをサポートするように構築されていますが、単純なファイルには対応していないことに注意してください。
 
 ### Binwalk <a href="#binwalk" id="binwalk"></a>
 
@@ -29,28 +29,28 @@ sudo apt-get install foremost
 foremost -v -i file.img -o output
 #Discovered files will appear inside the folder "output"
 ```
-### **スカルペル**
+### **Scalpel**
 
-**スカルペル**は、**ファイルに埋め込まれたファイル**を見つけて抽出するために使用できる別のツールです。この場合、抽出したいファイルタイプを設定ファイル (_/etc/scalpel/scalpel.conf_) からコメント解除する必要があります。
+**Scalpel**は、**ファイルに埋め込まれたファイル**を見つけて抽出するために使用できる別のツールです。この場合、抽出したいファイルタイプを設定ファイル(_/etc/scalpel/scalpel.conf_)からコメント解除する必要があります。
 ```bash
 sudo apt-get install scalpel
 scalpel file.img -o output
 ```
 ### Bulk Extractor
 
-このツールはKaliに含まれていますが、ここでも見つけることができます: [https://github.com/simsong/bulk_extractor](https://github.com/simsong/bulk_extractor)
+このツールはkaliに含まれていますが、ここで見つけることができます: [https://github.com/simsong/bulk_extractor](https://github.com/simsong/bulk_extractor)
 
-このツールはイメージをスキャンし、その中にある**pcaps**を**抽出**し、**ネットワーク情報（URL、ドメイン、IP、MAC、メール）**やその他の**ファイル**を取得します。あなたがする必要があるのは:
+このツールはイメージをスキャンし、その中にある**pcaps**、**ネットワーク情報（URL、ドメイン、IP、MAC、メール）**、およびその他の**ファイル**を**抽出**します。あなたがする必要があるのは:
 ```
 bulk_extractor memory.img -o out_folder
 ```
-すべての情報（パスワードなど）をツールが収集したものをナビゲートし、パケットを分析し（[**Pcaps分析**](../pcap-inspection/)を読む）、奇妙なドメイン（マルウェアや存在しないドメインに関連する）を検索します。
+すべての情報（パスワード？）をツールが収集した中からナビゲートし、パケットを分析します（**Pcaps analysis**を参照）。奇妙なドメイン（**マルウェア**や**存在しない**ドメインに関連する）を検索します。
 
 ### PhotoRec
 
 [https://www.cgsecurity.org/wiki/TestDisk_Download](https://www.cgsecurity.org/wiki/TestDisk_Download)で見つけることができます。
 
-GUIとCLIのバージョンがあります。PhotoRecが検索するファイルタイプを選択できます。
+GUIとCLIのバージョンが付属しています。PhotoRecが検索する**ファイルタイプ**を選択できます。
 
 ![](<../../../images/image (524).png>)
 
@@ -60,16 +60,16 @@ GUIとCLIのバージョンがあります。PhotoRecが検索するファイル
 
 #### BinVisの特徴
 
-- 視覚的でアクティブな構造ビューア
+- 視覚的でアクティブな**構造ビューワー**
 - 異なる焦点のための複数のプロット
 - サンプルの一部に焦点を当てる
-- PEまたはELF実行可能ファイルの文字列やリソースを見る
-- ファイルの暗号解析のためのパターンを取得
-- パッカーやエンコーダアルゴリズムを特定
-- パターンによるステガノグラフィの識別
-- 視覚的なバイナリ差分
+- PEまたはELF実行可能ファイルの**文字列とリソース**を見る
+- ファイルの暗号解析のための**パターン**を取得
+- パッカーまたはエンコーダアルゴリズムを**特定**
+- パターンによるステガノグラフィの**識別**
+- **視覚的**なバイナリ差分
 
-BinVisは、ブラックボックスシナリオで未知のターゲットに慣れるための素晴らしい出発点です。
+BinVisは、ブラックボックスシナリオで未知のターゲットに慣れるための素晴らしい**出発点**です。
 
 ## 特定のデータカービングツール
 

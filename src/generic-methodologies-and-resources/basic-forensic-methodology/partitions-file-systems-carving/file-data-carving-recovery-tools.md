@@ -8,11 +8,11 @@ More tools in [https://github.com/Claudio-C/awesome-datarecovery](https://github
 
 ### Autopsy
 
-フォレンジックで画像からファイルを抽出するために最も一般的に使用されるツールは [**Autopsy**](https://www.autopsy.com/download/) です。ダウンロードしてインストールし、ファイルを取り込んで「隠れた」ファイルを見つけます。Autopsyはディスクイメージや他の種類のイメージをサポートするように構築されていますが、単純なファイルには対応していないことに注意してください。
+フォレンジックで画像からファイルを抽出するために最も一般的に使用されるツールは[**Autopsy**](https://www.autopsy.com/download/)です。ダウンロードしてインストールし、ファイルを取り込んで「隠れた」ファイルを見つけます。Autopsyはディスクイメージやその他の種類のイメージをサポートするように構築されていますが、単純なファイルには対応していないことに注意してください。
 
 ### Binwalk <a href="#binwalk" id="binwalk"></a>
 
-**Binwalk** は、埋め込まれたコンテンツを見つけるためにバイナリファイルを分析するツールです。`apt`を介してインストール可能で、そのソースは [GitHub](https://github.com/ReFirmLabs/binwalk) にあります。
+**Binwalk**は、埋め込まれたコンテンツを見つけるためにバイナリファイルを分析するツールです。`apt`を介してインストール可能で、そのソースは[GitHub](https://github.com/ReFirmLabs/binwalk)にあります。
 
 **Useful commands**:
 ```bash
@@ -23,7 +23,7 @@ binwalk --dd ".*" file #Displays and extracts all files from the given file
 ```
 ### Foremost
 
-もう一つの一般的な隠しファイルを見つけるためのツールは**foremost**です。foremostの設定ファイルは`/etc/foremost.conf`にあります。特定のファイルを検索したい場合は、それらのコメントを外してください。何もコメントを外さなければ、foremostはデフォルトで設定されたファイルタイプを検索します。
+もう一つの一般的なツールは**foremost**です。foremostの設定ファイルは`/etc/foremost.conf`にあります。特定のファイルを検索したい場合は、それらのコメントを外してください。何もコメントを外さない場合、foremostはデフォルトで設定されたファイルタイプを検索します。
 ```bash
 sudo apt-get install foremost
 foremost -v -i file.img -o output
@@ -38,13 +38,13 @@ scalpel file.img -o output
 ```
 ### Bulk Extractor
 
-このツールはkaliに含まれていますが、ここでも見つけることができます: [https://github.com/simsong/bulk_extractor](https://github.com/simsong/bulk_extractor)
+このツールはkaliに含まれていますが、ここで見つけることができます: [https://github.com/simsong/bulk_extractor](https://github.com/simsong/bulk_extractor)
 
-このツールはイメージをスキャンし、その中にある**pcaps**、**ネットワーク情報（URL、ドメイン、IP、MAC、メール）**、およびその他の**ファイル**を**抽出**します。あなたがする必要があるのは:
+このツールはイメージをスキャンし、**pcaps**を抽出し、**ネットワーク情報（URL、ドメイン、IP、MAC、メール）**やその他の**ファイル**を取得します。あなたがする必要があるのは:
 ```
 bulk_extractor memory.img -o out_folder
 ```
-すべての情報（パスワードなど）をツールが収集したものをナビゲートし、パケットを分析し（[**Pcaps分析**](../pcap-inspection/)を読む）、奇妙なドメイン（**マルウェア**や**存在しない**ドメインに関連する）を検索します。
+すべての情報（パスワード？）をツールが収集した中からナビゲートし、パケットを分析します（**Pcaps analysis**を参照してください）。奇妙なドメイン（**マルウェア**や**存在しない**ドメインに関連する）を検索します。
 
 ### PhotoRec
 
@@ -82,6 +82,6 @@ AESキーのスケジュールを検索することでAESキーを検索しま�
 ## 補完ツール
 
 ターミナルから画像を見るために[**viu**](https://github.com/atanunq/viu)を使用できます。\
-PDFをテキストに変換して読むためにLinuxコマンドラインツール**pdftotext**を使用できます。
+PDFをテキストに変換して読むために、Linuxコマンドラインツール**pdftotext**を使用できます。
 
 {{#include ../../../banners/hacktricks-training.md}}

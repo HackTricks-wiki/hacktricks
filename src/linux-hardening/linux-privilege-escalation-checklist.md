@@ -17,7 +17,7 @@
 
 ### [ドライブ](privilege-escalation/index.html#drives)
 
-- [ ] **マウントされた**ドライブを**リスト**
+- [ ] **マウントされた**ドライブをリスト
 - [ ] **アンマウントされたドライブはあるか？**
 - [ ] **fstabにクレデンシャルはあるか？**
 
@@ -33,14 +33,14 @@
 - [ ] **実行中のプロセスのエクスプロイトを検索**（特に実行中のバージョン）。
 - [ ] **実行中のプロセスのバイナリを変更**できるか？
 - [ ] **プロセスを監視**し、興味深いプロセスが頻繁に実行されているか確認。
-- [ ] **興味深いプロセスメモリを**（パスワードが保存されている可能性がある場所）**読み取る**ことができるか？
+- [ ] **興味深いプロセスメモリを**（パスワードが保存されている可能性がある場所）**読み取ることができるか？**
 
 ### [スケジュールされた/cronジョブ？](privilege-escalation/index.html#scheduled-jobs)
 
 - [ ] [**PATH**](privilege-escalation/index.html#cron-path)がcronによって変更されており、**書き込み**できるか？
 - [ ] cronジョブに[**ワイルドカード**](privilege-escalation/index.html#cron-using-a-script-with-a-wildcard-wildcard-injection)はあるか？
-- [ ] **変更可能なスクリプト**が**実行されている**か、**変更可能なフォルダ**内にあるか？
-- [ ] **スクリプトが非常に頻繁に実行されている**ことを検出したか？（1、2、または5分ごと）
+- [ ] **実行中の**[**変更可能なスクリプト**](privilege-escalation/index.html#cron-script-overwriting-and-symlink)があるか、または**変更可能なフォルダ**内にあるか？
+- [ ] 何らかの**スクリプトが非常に頻繁に実行されている**ことを検出したか？（1、2、または5分ごと）
 
 ### [サービス](privilege-escalation/index.html#services)
 
@@ -64,7 +64,7 @@
 
 ### [ネットワーク](privilege-escalation/index.html#network)
 
-- [ ] ネットワークを列挙して自分の位置を知る
+- [ ] ネットワークを列挙して自分の位置を把握
 - [ ] **シェルを取得する前にアクセスできなかったオープンポート**はあるか？
 - [ ] `tcpdump`を使用して**トラフィックをスニッフィング**できるか？
 
@@ -72,26 +72,26 @@
 
 - [ ] 一般的なユーザー/グループの**列挙**
 - [ ] **非常に大きなUID**を持っているか？**マシンは脆弱か？**
-- [ ] **所属するグループ**のおかげで[**特権を昇格**](privilege-escalation/interesting-groups-linux-pe/)できるか？
-- [ ] **クリップボード**データは？
+- [ ] 所属する[**グループのおかげで特権を昇格**](privilege-escalation/interesting-groups-linux-pe/index.html)できるか？
+- [ ] **クリップボード**データはあるか？
 - [ ] パスワードポリシーは？
-- [ ] **以前に発見したすべての既知のパスワードを使用して、各**可能な**ユーザー**でログインを試みる。パスワードなしでのログインも試みる。
+- [ ] 以前に発見した**すべての既知のパスワードを使用して、各**可能な**ユーザーでログインを試みる。パスワードなしでもログインを試みる。
 
 ### [書き込み可能なPATH](privilege-escalation/index.html#writable-path-abuses)
 
-- [ ] **PATH内のいくつかのフォルダに書き込み権限がある場合、特権を昇格できる可能性がある**
+- [ ] **PATH内のいくつかのフォルダに書き込み権限がある場合**、特権を昇格できる可能性がある
 
 ### [SUDOおよびSUIDコマンド](privilege-escalation/index.html#sudo-and-suid)
 
 - [ ] **sudoで任意のコマンドを実行**できるか？それを使用して、rootとして何かを**読み取り、書き込み、または実行**できるか？ ([**GTFOBins**](https://gtfobins.github.io))
 - [ ] **エクスプロイト可能なSUIDバイナリ**はあるか？ ([**GTFOBins**](https://gtfobins.github.io))
-- [ ] [**sudoコマンドが**パスによって**制限されている**か？制限を**バイパス**できるか](privilege-escalation/index.html#sudo-execution-bypassing-paths)?
+- [ ] [**sudo**コマンドが**パスによって制限されている**か？制限を**バイパス**できるか](privilege-escalation/index.html#sudo-execution-bypassing-paths)?
 - [ ] [**パスが示されていないSudo/SUIDバイナリ**](privilege-escalation/index.html#sudo-command-suid-binary-without-command-path)はあるか？
-- [ ] [**パスを指定したSUIDバイナリ**](privilege-escalation/index.html#suid-binary-with-command-path)は？バイパス
+- [ ] [**パスを指定したSUIDバイナリ**](privilege-escalation/index.html#suid-binary-with-command-path)は？ バイパス
 - [ ] [**LD_PRELOAD脆弱性**](privilege-escalation/index.html#ld_preload)
-- [ ] **書き込み可能なフォルダからのSUIDバイナリにおける**[**.soライブラリの欠如**](privilege-escalation/index.html#suid-binary-so-injection)は？
-- [ ] [**利用可能なSUDOトークン**](privilege-escalation/index.html#reusing-sudo-tokens)は？ [**SUDOトークンを作成できるか**](privilege-escalation/index.html#var-run-sudo-ts-less-than-username-greater-than)?
-- [ ] [**sudoersファイルを読み取るまたは変更する**](privilege-escalation/index.html#etc-sudoers-etc-sudoers-d)ことができるか？
+- [ ] **書き込み可能なフォルダからのSUIDバイナリにおける.soライブラリの欠如**はあるか？](privilege-escalation/index.html#suid-binary-so-injection)
+- [ ] [**利用可能なSUDOトークン**](privilege-escalation/index.html#reusing-sudo-tokens)はあるか？ [**SUDOトークンを作成できるか**](privilege-escalation/index.html#var-run-sudo-ts-less-than-username-greater-than)?
+- [ ] [**sudoersファイルを読み取るまたは変更することができるか**](privilege-escalation/index.html#etc-sudoers-etc-sudoers-d)?
 - [ ] [**/etc/ld.so.conf.d/**を**変更できるか**](privilege-escalation/index.html#etc-ld-so-conf-d)?
 - [ ] [**OpenBSD DOAS**](privilege-escalation/index.html#doas)コマンド
 
@@ -117,7 +117,7 @@
 
 - [ ] **プロファイルファイル** - 機密データを読み取る？特権昇格のために書き込む？
 - [ ] **passwd/shadowファイル** - 機密データを読み取る？特権昇格のために書き込む？
-- [ ] 機密データのために**一般的に興味深いフォルダ**を確認
+- [ ] 機密データのために**一般的に興味深いフォルダを確認**
 - [ ] **奇妙な場所/所有ファイル、**アクセスまたは実行可能ファイルを変更できるかもしれない
 - [ ] **最近数分で変更された**
 - [ ] **Sqlite DBファイル**
@@ -131,13 +131,13 @@
 ### [**書き込み可能なファイル**](privilege-escalation/index.html#writable-files)
 
 - [ ] **任意のコマンドを実行するためにpythonライブラリを変更**できるか？
-- [ ] **ログファイルを変更**できるか？ **Logtotten**エクスプロイト
-- [ ] **/etc/sysconfig/network-scripts/**を**変更**できるか？ Centos/Redhatエクスプロイト
-- [ ] [**ini、int.d、systemdまたはrc.dファイルに書き込む**](privilege-escalation/index.html#init-init-d-systemd-and-rc-d)ことができるか？
+- [ ] **ログファイルを変更できるか？** **Logtotten**エクスプロイト
+- [ ] **/etc/sysconfig/network-scripts/**を**変更できるか？** Centos/Redhatエクスプロイト
+- [ ] [**ini、int.d、systemdまたはrc.dファイルに書き込むことができるか**](privilege-escalation/index.html#init-init-d-systemd-and-rc-d)?
 
 ### [**その他のトリック**](privilege-escalation/index.html#other-tricks)
 
-- [ ] [**NFSを悪用して特権を昇格**](privilege-escalation/index.html#nfs-privilege-escalation)できるか？
-- [ ] **制限されたシェルから脱出する必要があるか**？ 
+- [ ] [**NFSを悪用して特権を昇格できるか**](privilege-escalation/index.html#nfs-privilege-escalation)?
+- [ ] **制限されたシェルから脱出する必要があるか**](privilege-escalation/index.html#escaping-from-restricted-shells)?
 
 {{#include ../banners/hacktricks-training.md}}

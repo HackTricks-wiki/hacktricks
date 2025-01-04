@@ -93,13 +93,13 @@ macOSでは、**アプリケーションやバイナリが**フォルダや設�
 
 したがって、macOSマシンを成功裏に侵害したい攻撃者は、**TCC権限を昇格させる**必要があります（または、ニーズに応じて**SIPをバイパスする**必要があります）。
 
-これらの権限は通常、アプリケーションが署名されている**権利**の形で与えられるか、アプリケーションがいくつかのアクセスを要求し、**ユーザーがそれらを承認した後**に**TCCデータベース**に見つけることができます。プロセスがこれらの権限を取得する別の方法は、**その権限を持つプロセスの子**であることです。これらの権限は通常**継承されます**。
+これらの権限は通常、アプリケーションが署名されている**権利**の形で与えられるか、アプリケーションがいくつかのアクセスを要求し、**ユーザーがそれらを承認した後**に**TCCデータベース**に見つけることができます。プロセスがこれらの権限を取得する別の方法は、**その権限を持つプロセスの子プロセス**であることです。これらの権限は通常**継承されます**。
 
-これらのリンクをたどって、TCCでの[**権限昇格の異なる方法**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses)、[**TCCをバイパスする方法**](macos-security-protections/macos-tcc/macos-tcc-bypasses/)や、過去に[**SIPがバイパスされた方法**](macos-security-protections/macos-sip.md#sip-bypasses)を見つけてください。
+これらのリンクをたどって、TCCでの[**権限昇格の異なる方法**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses)、[**TCCをバイパスする方法**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html)、および過去に[**SIPがバイパスされた方法**](macos-security-protections/macos-sip.md#sip-bypasses)を見つけてください。
 
 ## macOS 伝統的権限昇格
 
-もちろん、レッドチームの視点からは、rootに昇格することにも興味があるはずです。以下の投稿をチェックして、いくつかのヒントを得てください：
+もちろん、レッドチームの視点からは、rootに昇格することにも興味があるべきです。以下の投稿をチェックして、いくつかのヒントを得てください：
 
 {{#ref}}
 macos-privilege-escalation.md

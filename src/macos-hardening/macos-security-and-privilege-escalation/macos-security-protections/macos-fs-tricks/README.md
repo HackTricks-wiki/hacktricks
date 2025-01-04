@@ -2,19 +2,19 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## POSIX 権限の組み合わせ
+## POSIX permissions combinations
 
-**ディレクトリ**の権限：
+**ディレクトリ**の権限:
 
-- **読み取り** - ディレクトリエントリを**列挙**できます
-- **書き込み** - ディレクトリ内の**ファイル**を**削除/作成**でき、**空のフォルダ**を**削除**できます。
-- しかし、**書き込み権限**がない限り、**非空のフォルダ**を削除/変更することはできません。
-- フォルダの名前を**変更**することは、そのフォルダを所有していない限りできません。
-- **実行** - ディレクトリを**横断**することが許可されています。この権利がないと、その中のファイルやサブディレクトリにアクセスできません。
+- **read** - ディレクトリエントリを**列挙**できます
+- **write** - ディレクトリ内の**ファイル**を**削除/作成**でき、**空のフォルダ**を**削除**できます。
+- ただし、**書き込み権限**がない限り、**非空のフォルダ**を削除/変更することはできません。
+- **フォルダの名前を変更**することは、そのフォルダを所有していない限りできません。
+- **execute** - ディレクトリを**横断することが許可**されています。この権利がないと、その中のファイルやサブディレクトリにアクセスできません。
 
-### 危険な組み合わせ
+### Dangerous Combinations
 
-**rootが所有するファイル/フォルダを上書きする方法**ですが：
+**rootが所有するファイル/フォルダを上書きする方法**ですが:
 
 - パス内の親**ディレクトリの所有者**がユーザーである
 - パス内の親**ディレクトリの所有者**が**書き込みアクセス**を持つ**ユーザーグループ**である
@@ -22,23 +22,23 @@
 
 これらの組み合わせのいずれかを使用すると、攻撃者は**特権のある任意の書き込み**を取得するために、期待されるパスに**シンボリック/ハードリンク**を**注入**することができます。
 
-### フォルダのルート R+X 特殊ケース
+### Folder root R+X Special case
 
-**ディレクトリ**内に**rootのみがR+Xアクセス**を持つファイルがある場合、それらは**他の誰にもアクセスできません**。したがって、**制限**のためにユーザーが読み取れない**ファイルを**このフォルダから**別のフォルダに移動**できる脆弱性は、これらのファイルを読み取るために悪用される可能性があります。
+**rootのみがR+Xアクセスを持つ**ディレクトリ内にファイルがある場合、それらは**他の誰にもアクセスできません**。したがって、**制限**のためにユーザーが読み取れない**ファイルを**このフォルダから**別のフォルダに移動**できる脆弱性は、これらのファイルを読むために悪用される可能性があります。
 
 例: [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions)
 
-## シンボリックリンク / ハードリンク
+## Symbolic Link / Hard Link
 
-### 寛容なファイル/フォルダ
+### Permissive file/folder
 
-特権プロセスが**低特権ユーザー**によって**制御される**可能性のある**ファイル**にデータを書き込んでいる場合、または低特権ユーザーによって**以前に作成された**可能性がある場合、そのユーザーはシンボリックまたはハードリンクを介して**別のファイル**を**指し示す**ことができ、特権プロセスはそのファイルに書き込みます。
+特権プロセスが**低特権ユーザー**によって**制御される**可能性のある**ファイル**にデータを書き込んでいる場合、または低特権ユーザーによって**以前に作成された**可能性がある場合、そのユーザーはシンボリックまたはハードリンクを介して**別のファイルを指す**ことができ、特権プロセスはそのファイルに書き込みます。
 
 攻撃者が**特権を昇格させるために任意の書き込みを悪用できる**他のセクションを確認してください。
 
-### オープン `O_NOFOLLOW`
+### Open `O_NOFOLLOW`
 
-`open`関数で使用されるフラグ`O_NOFOLLOW`は、最後のパスコンポーネントでシンボリックリンクを追跡しませんが、パスの残りの部分は追跡します。パス内のシンボリックリンクを追跡しないようにする正しい方法は、フラグ`O_NOFOLLOW_ANY`を使用することです。
+関数`open`で使用されるフラグ`O_NOFOLLOW`は、最後のパスコンポーネントでシンボリックリンクを追跡しませんが、パスの残りの部分は追跡します。パス内のシンボリックリンクを追跡しない正しい方法は、フラグ`O_NOFOLLOW_ANY`を使用することです。
 
 ## .fileloc
 
@@ -58,17 +58,17 @@
 ```
 ## ファイルディスクリプタ
 
-### リークFD（`O_CLOEXEC`なし）
+### FDの漏洩（`O_CLOEXEC`なし）
 
-`open`への呼び出しにフラグ`O_CLOEXEC`がない場合、ファイルディスクリプタは子プロセスによって継承されます。したがって、特権プロセスが特権ファイルを開き、攻撃者が制御するプロセスを実行すると、攻撃者は**特権ファイルに対するFDを継承します**。
+`open`への呼び出しに`O_CLOEXEC`フラグがない場合、ファイルディスクリプタは子プロセスによって継承されます。したがって、特権プロセスが特権ファイルを開き、攻撃者が制御するプロセスを実行すると、攻撃者は**特権ファイルに対するFDを継承します**。
 
-**高い特権でファイルまたはフォルダを開くプロセスを作成できる場合**、**`crontab`**を悪用して、`EDITOR=exploit.py`で`/etc/sudoers.d`内のファイルを開くことができます。これにより、`exploit.py`は`/etc/sudoers`内のファイルへのFDを取得し、それを悪用します。
+**高い特権でファイルまたはフォルダを開くプロセスを作成できる場合**、**`crontab`**を悪用して、**`EDITOR=exploit.py`**で`/etc/sudoers.d`内のファイルを開くことができます。これにより、`exploit.py`は`/etc/sudoers`内のファイルへのFDを取得し、それを悪用します。
 
 例えば: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098)、コード: https://github.com/gergelykalman/CVE-2023-32428-a-macOS-LPE-via-MallocStackLogging
 
 ## 検疫xattrsトリックを避ける
 
-### 削除する
+### それを削除する
 ```bash
 xattr -d com.apple.quarantine /path/to/file_or_app
 ```
@@ -120,11 +120,11 @@ ls -le /tmp/test
 ```
 ### **com.apple.acl.text xattr + AppleDouble**
 
-**AppleDouble**ファイル形式は、ファイルとそのACEをコピーします。
+**AppleDouble**ファイル形式は、ファイルとそのACEを含むコピーを作成します。
 
-[**ソースコード**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html)を見ると、xattrの中に保存されているACLのテキスト表現である**`com.apple.acl.text`**が、解凍されたファイルのACLとして設定されることがわかります。したがって、ACLが他のxattrsの書き込みを防ぐように設定されたアプリケーションを**AppleDouble**ファイル形式のzipファイルに圧縮した場合... クアランティンxattrはアプリケーションに設定されませんでした。
+[**ソースコード**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html)を見ると、xattrの中に保存されているACLのテキスト表現である**`com.apple.acl.text`**が、解凍されたファイルのACLとして設定されることがわかります。したがって、ACLが他のxattrsの書き込みを防ぐように設定されたアプリケーションを**AppleDouble**ファイル形式のzipファイルに圧縮した場合... クアランティンxattrはアプリケーションに設定されませんでした：
 
-詳細については、[**元の報告**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)を確認してください。
+詳細については[**元の報告**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)を確認してください。
 
 これを再現するには、まず正しいacl文字列を取得する必要があります：
 ```bash
@@ -156,11 +156,11 @@ macos-xattr-acls-extra-stuff.md
 
 ### プラットフォームバイナリチェックのバイパス
 
-一部のセキュリティチェックは、バイナリが**プラットフォームバイナリ**であるかどうかを確認します。たとえば、XPCサービスに接続することを許可するためです。しかし、https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/で示されているように、プラットフォームバイナリ（/bin/lsなど）を取得し、環境変数`DYLD_INSERT_LIBRARIES`を使用してdyld経由でエクスプロイトを注入することで、このチェックをバイパスすることが可能です。
+一部のセキュリティチェックは、バイナリが**プラットフォームバイナリ**であるかどうかを確認します。たとえば、XPCサービスに接続を許可するためです。しかし、https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/で示されているように、プラットフォームバイナリ（例：/bin/ls）を取得し、環境変数`DYLD_INSERT_LIBRARIES`を使用してdyld経由でエクスプロイトを注入することで、このチェックをバイパスすることが可能です。
 
 ### フラグ`CS_REQUIRE_LV`と`CS_FORCED_LV`のバイパス
 
-実行中のバイナリが自分のフラグを変更して、次のようなコードでチェックをバイパスすることが可能です：
+実行中のバイナリが自分自身のフラグを変更してチェックをバイパスすることが可能です。コードは次のようになります：
 ```c
 // Code from https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/
 int pid = getpid();
@@ -173,7 +173,7 @@ csops(pid, 9, &status, 4); // CS_OPS_SET_STATUS
 status = SecTaskGetCodeSignStatus(SecTaskCreateFromSelf(0));
 NSLog(@"=====Inject successfully into %d(%@), csflags=0x%x", pid, exePath, status);
 ```
-## コード署名のバイパス
+## バイパスコード署名
 
 バンドルには、**`_CodeSignature/CodeResources`** というファイルが含まれており、これは **バンドル** 内のすべての **ファイル** の **ハッシュ** を含んでいます。CodeResources のハッシュは **実行可能ファイル** にも **埋め込まれている** ため、それをいじることはできません。
 
@@ -195,7 +195,7 @@ NSLog(@"=====Inject successfully into %d(%@), csflags=0x%x", pid, exePath, statu
 </dict>
 <key>rules2</key>
 ...
-<key>^(.*/)?\.DS_Store$</key>
+<key>^(.*/index.html)?\.DS_Store$</key>
 <dict>
 <key>omit</key>
 <true/>
@@ -221,13 +221,13 @@ NSLog(@"=====Inject successfully into %d(%@), csflags=0x%x", pid, exePath, statu
 ...
 </dict>
 ```
-CLIからリソースの署名を計算することができます:
+リソースの署名をCLIから計算することが可能です:
 ```bash
 openssl dgst -binary -sha1 /System/Cryptexes/App/System/Applications/Safari.app/Contents/Resources/AppIcon.icns | openssl base64
 ```
-## DMGをマウントする
+## Mount dmgs
 
-ユーザーは、既存のフォルダーの上に作成されたカスタムDMGをマウントできます。これが、カスタムコンテンツを含むカスタムDMGパッケージを作成する方法です：
+ユーザーは、既存のフォルダーの上に作成されたカスタムdmgをマウントできます。これが、カスタムコンテンツを含むカスタムdmgパッケージを作成する方法です：
 ```bash
 # Create the volume
 hdiutil create /private/tmp/tmp.dmg -size 2m -ov -volname CustomVolName -fs APFS 1>/dev/null
@@ -257,7 +257,7 @@ hdiutil create -srcfolder justsome.app justsome.dmg
 
 あなたのスクリプトが**シェルスクリプト**として解釈される場合、毎日トリガーされる**`/etc/periodic/daily/999.local`**シェルスクリプトを上書きすることができます。
 
-このスクリプトの実行を**偽装**することができます：**`sudo periodic daily`**
+このスクリプトの実行を**偽装**するには、**`sudo periodic daily`**を使用できます。
 
 ### デーモン
 
@@ -278,37 +278,37 @@ hdiutil create -srcfolder justsome.app justsome.dmg
 </dict>
 </plist>
 ```
-`/Applications/Scripts/privesc.sh`を生成し、**root**として実行したい**コマンド**を記述します。
+Just generate the script `/Applications/Scripts/privesc.sh` with the **commands** you would like to run as root.
 
-### Sudoersファイル
+### Sudoers File
 
-**任意の書き込み**が可能であれば、**`/etc/sudoers.d/`**フォルダ内にファイルを作成し、**sudo**権限を自分に付与することができます。
+If you have **arbitrary write**, you could create a file inside the folder **`/etc/sudoers.d/`** granting yourself **sudo** privileges.
 
-### PATHファイル
+### PATH files
 
-**`/etc/paths`**ファイルは、PATH環境変数を設定する主な場所の一つです。上書きするにはrootである必要がありますが、**特権プロセス**からスクリプトが**フルパスなしでコマンド**を実行している場合、このファイルを変更することで**ハイジャック**できるかもしれません。
+The file **`/etc/paths`** is one of the main places that populates the PATH env variable. You must be root to overwrite it, but if a script from **privileged process** is executing some **command without the full path**, you might be able to **hijack** it modifying this file.
 
-また、**`/etc/paths.d`**にファイルを書き込むことで、`PATH`環境変数に新しいフォルダを追加することもできます。
+You can also write files in **`/etc/paths.d`** to load new folders into the `PATH` env variable.
 
 ### cups-files.conf
 
 この技術は[この書き込み](https://www.kandji.io/blog/macos-audit-story-part1)で使用されました。
 
-次の内容で`/etc/cups/cups-files.conf`ファイルを作成します：
+Create the file `/etc/cups/cups-files.conf` with the following content:
 ```
 ErrorLog /etc/sudoers.d/lpe
 LogFilePerm 777
 <some junk>
 ```
-このコマンドは、パーミッションが777の`/etc/sudoers.d/lpe`ファイルを作成します。最後の余分なゴミは、エラーログの作成をトリガーするためのものです。
+この操作により、パーミッションが777のファイル`/etc/sudoers.d/lpe`が作成されます。最後の余分なゴミはエラーログの作成をトリガーするためのものです。
 
-次に、`/etc/sudoers.d/lpe`に、特権を昇格させるために必要な設定を記述します。例えば、`%staff ALL=(ALL) NOPASSWD:ALL`のようにします。
+次に、`/etc/sudoers.d/lpe`に特権を昇格させるために必要な設定を記述します。例えば、`%staff ALL=(ALL) NOPASSWD:ALL`のようにします。
 
 その後、再度`/etc/cups/cups-files.conf`ファイルを修正し、`LogFilePerm 700`を指定して、新しいsudoersファイルが`cupsctl`を呼び出すことで有効になるようにします。
 
 ### サンドボックスエスケープ
 
-macOSのサンドボックスをFSの任意の書き込みでエスケープすることが可能です。いくつかの例については、[macOS Auto Start](../../../../macos-auto-start-locations.md)のページを確認してください。ただし、一般的な方法は、`~/Library/Preferences/com.apple.Terminal.plist`にターミナルの設定ファイルを書き込み、起動時にコマンドを実行するようにし、`open`を使用して呼び出すことです。
+FSの任意の書き込みを使用してmacOSサンドボックスをエスケープすることが可能です。いくつかの例については、ページ[macOS Auto Start](../../../../macos-auto-start-locations.md)を確認してください。ただし、一般的な方法は、`~/Library/Preferences/com.apple.Terminal.plist`にターミナルの設定ファイルを書き込み、起動時にコマンドを実行するようにして`open`を使用して呼び出すことです。
 
 ## 他のユーザーとして書き込み可能なファイルを生成する
 
@@ -326,7 +326,7 @@ echo $FILENAME
 ```
 ## POSIX共有メモリ
 
-**POSIX共有メモリ**は、POSIX準拠のオペレーティングシステムにおいて、プロセスが共通のメモリ領域にアクセスできるようにし、他のプロセス間通信方法と比較してより迅速な通信を促進します。これは、`shm_open()`を使用して共有メモリオブジェクトを作成または開き、`ftruncate()`でそのサイズを設定し、`mmap()`を使用してプロセスのアドレス空間にマッピングすることを含みます。プロセスはこのメモリ領域から直接読み書きできます。並行アクセスを管理し、データの破損を防ぐために、ミューテックスやセマフォなどの同期メカニズムがよく使用されます。最後に、プロセスは`munmap()`と`close()`で共有メモリをアンマップおよび閉じ、オプションで`shm_unlink()`でメモリオブジェクトを削除します。このシステムは、複数のプロセスが迅速に共有データにアクセスする必要がある環境で、効率的で迅速なIPCに特に効果的です。
+**POSIX共有メモリ**は、POSIX準拠のオペレーティングシステムにおいてプロセスが共通のメモリ領域にアクセスできるようにし、他のプロセス間通信方法と比較してより迅速な通信を促進します。これは、`shm_open()`を使用して共有メモリオブジェクトを作成または開き、`ftruncate()`でそのサイズを設定し、`mmap()`を使用してプロセスのアドレス空間にマッピングすることを含みます。プロセスはこのメモリ領域から直接読み書きできます。並行アクセスを管理し、データの破損を防ぐために、ミューテックスやセマフォなどの同期メカニズムがよく使用されます。最後に、プロセスは`munmap()`と`close()`で共有メモリをアンマップおよび閉じ、オプションで`shm_unlink()`でメモリオブジェクトを削除します。このシステムは、複数のプロセスが迅速に共有データにアクセスする必要がある環境で、効率的で迅速なIPCに特に効果的です。
 
 <details>
 
@@ -422,9 +422,9 @@ return 0;
 
 ## macOS ガード付きディスクリプタ
 
-**macOS ガード付きディスクリプタ**は、ユーザーアプリケーションにおける**ファイルディスクリプタ操作**の安全性と信頼性を向上させるためにmacOSに導入されたセキュリティ機能です。これらのガード付きディスクリプタは、ファイルディスクリプタに特定の制限や「ガード」を関連付ける方法を提供し、これらはカーネルによって強制されます。
+**macOS ガード付きディスクリプタ**は、ユーザーアプリケーションにおける**ファイルディスクリプタ操作**の安全性と信頼性を向上させるためにmacOSに導入されたセキュリティ機能です。これらのガード付きディスクリプタは、ファイルディスクリプタに特定の制限や「ガード」を関連付ける方法を提供し、カーネルによって強制されます。
 
-この機能は、**不正なファイルアクセス**や**レースコンディション**などの特定のクラスのセキュリティ脆弱性を防ぐのに特に役立ちます。これらの脆弱性は、例えばスレッドがファイルディスクリプタにアクセスして**別の脆弱なスレッドにアクセスを許可する**場合や、ファイルディスクリプタが**脆弱な子プロセスに継承される**場合に発生します。この機能に関連するいくつかの関数は次のとおりです：
+この機能は、**不正なファイルアクセス**や**レースコンディション**などの特定のクラスのセキュリティ脆弱性を防ぐのに特に役立ちます。これらの脆弱性は、例えばスレッドがファイルディスクリプタにアクセスしているときに**別の脆弱なスレッドがそれにアクセスできる**場合や、ファイルディスクリプタが**脆弱な子プロセスに継承される**場合に発生します。この機能に関連するいくつかの関数は次のとおりです：
 
 - `guarded_open_np`: ガード付きでFDをオープン
 - `guarded_close_np`: 閉じる
