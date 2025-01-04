@@ -63,13 +63,13 @@ macos-security-protections/
 
 ### Dosya İzinleri
 
-Eğer bir **root olarak çalışan bir süreç** bir dosya yazıyorsa ve bu dosya bir kullanıcı tarafından kontrol edilebiliyorsa, kullanıcı bunu **yetki yükseltmek için** kötüye kullanabilir.\
+Eğer bir **root olarak çalışan bir süreç** bir dosya yazıyorsa ve bu dosya bir kullanıcı tarafından kontrol edilebiliyorsa, kullanıcı bunu **yetkileri yükseltmek için** kötüye kullanabilir.\
 Bu aşağıdaki durumlarda gerçekleşebilir:
 
 - Kullanılan dosya zaten bir kullanıcı tarafından oluşturulmuş (kullanıcıya ait)
 - Kullanılan dosya, bir grup nedeniyle kullanıcı tarafından yazılabilir
-- Kullanılan dosya, kullanıcıya ait bir dizin içindedir (kullanıcı dosyayı oluşturabilir)
-- Kullanılan dosya, root'a ait bir dizin içindedir ancak kullanıcı bir grup nedeniyle üzerinde yazma erişimine sahiptir (kullanıcı dosyayı oluşturabilir)
+- Kullanılan dosya, kullanıcıya ait bir dizin içinde (kullanıcı dosyayı oluşturabilir)
+- Kullanılan dosya, root'a ait bir dizin içinde ancak kullanıcı bir grup nedeniyle üzerinde yazma erişimine sahip (kullanıcı dosyayı oluşturabilir)
 
 **root** tarafından **kullanılacak bir dosya** oluşturabilmek, bir kullanıcının **içeriğinden faydalanmasına** veya hatta başka bir yere işaret etmek için **sembolik/sert bağlantılar** oluşturmasına olanak tanır.
 
@@ -95,7 +95,7 @@ Bu nedenle, bir macOS makinesini başarılı bir şekilde ele geçirmek isteyen 
 
 Bu ayrıcalıklar genellikle uygulamanın imzalandığı **haklar** şeklinde verilir veya uygulama bazı erişimler talep edebilir ve **kullanıcı onayladıktan** sonra **TCC veritabanlarında** bulunabilir. Bir sürecin bu ayrıcalıkları elde etmenin bir diğer yolu, bu **ayrıcalıklara** sahip bir sürecin **çocuğu** olmaktır, çünkü genellikle **miras alınırlar**.
 
-Farklı yolları bulmak için bu bağlantılara göz atın [**TCC'de yetki yükseltme**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), [**TCC'yi atlamak**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) ve geçmişte [**SIP'nin nasıl atlandığı**](macos-security-protections/macos-sip.md#sip-bypasses).
+Farklı yolları bulmak için bu bağlantılara göz atın [**TCC'de yetki yükseltme**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), [**TCC'yi atlamak**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) ve geçmişte [**SIP'nin nasıl aşıldığı**](macos-security-protections/macos-sip.md#sip-bypasses).
 
 ## macOS Geleneksel Yetki Yükseltme
 

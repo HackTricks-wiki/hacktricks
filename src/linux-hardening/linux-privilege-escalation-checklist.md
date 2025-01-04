@@ -35,12 +35,12 @@
 - [ ] **Süreçleri izle** ve ilginç bir sürecin sıkça çalışıp çalışmadığını kontrol et.
 - [ ] Bazı ilginç **süreç belleğini** (şifrelerin kaydedilebileceği yer) **okuyabilir misin**?
 
-### [Planlı/Cron görevleri?](privilege-escalation/index.html#scheduled-jobs)
+### [Zamanlanmış/Cron görevleri?](privilege-escalation/index.html#scheduled-jobs)
 
-- [ ] [**PATH**](privilege-escalation/index.html#cron-path) bazı cron tarafından **değiştiriliyor mu** ve sen **yazabilir misin**?
+- [ ] [**PATH**](privilege-escalation/index.html#cron-path) bazı cron tarafından değiştiriliyor mu ve sen **yazabilir misin**?
 - [ ] Bir cron görevinde herhangi bir [**wildcard**](privilege-escalation/index.html#cron-using-a-script-with-a-wildcard-wildcard-injection) var mı?
-- [ ] **Çalıştırılan** veya **değiştirilebilir klasörde** bulunan bazı [**değiştirilebilir scriptler**](privilege-escalation/index.html#cron-script-overwriting-and-symlink) var mı?
-- [ ] Bazı **scriptlerin** [**çok sık**](privilege-escalation/index.html#frequent-cron-jobs) [**çalıştırıldığını**](privilege-escalation/index.html#frequent-cron-jobs) tespit ettin mi? (her 1, 2 veya 5 dakikada bir)
+- [ ] **Değiştirilebilir bir script** (privilege-escalation/index.html#cron-script-overwriting-and-symlink) **çalıştırılıyor mu** veya **değiştirilebilir klasör** içinde mi?
+- [ ] Bazı **scriptlerin** [**çok sık**](privilege-escalation/index.html#frequent-cron-jobs) **çalıştırıldığını** tespit ettin mi? (her 1, 2 veya 5 dakikada bir)
 
 ### [Hizmetler](privilege-escalation/index.html#services)
 
@@ -72,10 +72,10 @@
 
 - [ ] Genel kullanıcılar/gruplar **enumlemesi**
 - [ ] **Çok büyük bir UID**'ye sahip misin? **Makine** **güvenli mi**?
-- [ ] **Ait olduğun bir grup sayesinde yetki yükseltebilir misin**? [**escalate privileges thanks to a group**](privilege-escalation/interesting-groups-linux-pe/)
+- [ ] **Ait olduğun bir grup sayesinde yetki yükseltebilir misin**? [**escalate privileges thanks to a group**](privilege-escalation/interesting-groups-linux-pe/index.html)
 - [ ] **Pano** verileri?
 - [ ] Şifre Politikası?
-- [ ] Daha önce keşfettiğin her **bilinen şifreyi** kullanarak **her bir kullanıcıyla** giriş yapmayı dene. Şifre olmadan da giriş yapmayı dene.
+- [ ] Daha önce keşfettiğin her **bilinen şifreyi** kullanarak **herhangi bir kullanıcıyla** giriş yapmayı dene. Şifresiz giriş yapmayı da dene.
 
 ### [Yazılabilir PATH](privilege-escalation/index.html#writable-path-abuses)
 
@@ -85,12 +85,12 @@
 
 - [ ] **Herhangi bir komutu sudo ile çalıştırabilir misin**? Root olarak herhangi bir şeyi OKUMAK, YAZMAK veya ÇALIŞTIRMAK için kullanabilir misin? ([**GTFOBins**](https://gtfobins.github.io))
 - [ ] Herhangi bir **istismar edilebilir SUID ikilisi** var mı? ([**GTFOBins**](https://gtfobins.github.io))
-- [ ] [**sudo** komutları **path** ile **sınırlı mı**? kısıtlamaları **bypass** edebilir misin](privilege-escalation/index.html#sudo-execution-bypassing-paths)?
+- [ ] [**sudo** komutları **path** ile **sınırlı mı**? kısıtlamaları **aşabilir misin**](privilege-escalation/index.html#sudo-execution-bypassing-paths)?
 - [ ] [**Path belirtilmeden Sudo/SUID ikilisi**](privilege-escalation/index.html#sudo-command-suid-binary-without-command-path)?
 - [ ] [**Komut yolu belirten SUID ikilisi**](privilege-escalation/index.html#suid-binary-with-command-path)? Bypass
 - [ ] [**LD_PRELOAD açığı**](privilege-escalation/index.html#ld_preload)
-- [ ] Yazılabilir bir klasörden [**SUID ikilisinde .so kütüphanesinin eksikliği**](privilege-escalation/index.html#suid-binary-so-injection)?
-- [ ] [**SUDO token'leri mevcut**](privilege-escalation/index.html#reusing-sudo-tokens)? [**Bir SUDO token'i oluşturabilir misin**](privilege-escalation/index.html#var-run-sudo-ts-less-than-username-greater-than)?
+- [ ] Yazılabilir bir klasörden gelen [**SUID ikilisinde .so kütüphanesi eksikliği**](privilege-escalation/index.html#suid-binary-so-injection)?
+- [ ] [**SUDO jetonları mevcut**](privilege-escalation/index.html#reusing-sudo-tokens)? [**Bir SUDO jetonu oluşturabilir misin**](privilege-escalation/index.html#var-run-sudo-ts-less-than-username-greater-than)?
 - [ ] [**sudoers dosyalarını okuyabilir veya değiştirebilir misin**](privilege-escalation/index.html#etc-sudoers-etc-sudoers-d)?
 - [ ] [**/etc/ld.so.conf.d/**'yi değiştirebilir misin](privilege-escalation/index.html#etc-ld-so-conf-d)?
 - [ ] [**OpenBSD DOAS**](privilege-escalation/index.html#doas) komutu
@@ -138,6 +138,6 @@
 ### [**Diğer numaralar**](privilege-escalation/index.html#other-tricks)
 
 - [ ] [**NFS'i yetki yükseltmek için kötüye kullanabilir misin**](privilege-escalation/index.html#nfs-privilege-escalation)?
-- [ ] [**kısıtlayıcı bir shell'den kaçmak için**](privilege-escalation/index.html#escaping-from-restricted-shells) ihtiyacın var mı?
+- [ ] [**kısıtlayıcı bir shell'den kaçmak**](privilege-escalation/index.html#escaping-from-restricted-shells) için ihtiyacın var mı?
 
 {{#include ../banners/hacktricks-training.md}}

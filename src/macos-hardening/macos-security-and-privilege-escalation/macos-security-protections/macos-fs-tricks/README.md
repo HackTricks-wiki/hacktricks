@@ -6,11 +6,11 @@
 
 Bir **dizindeki** izinler:
 
-- **okuma** - dizin girişlerini **sıralayabilirsiniz**
+- **okuma** - dizin girişlerini **listeleyebilirsiniz**
 - **yazma** - dizindeki **dosyaları silip/yazabilirsiniz** ve **boş klasörleri** silebilirsiniz.
 - Ancak **boş olmayan klasörleri** silip/değiştiremezsiniz, eğer üzerinde yazma izniniz yoksa.
-- Bir klasörün adını **değiştiremezsiniz** eğer ona sahip değilseniz.
-- **çalıştırma** - dizinde **gezinmenize izin verilir** - bu hakka sahip değilseniz, içindeki dosyalara veya alt dizinlere erişemezsiniz.
+- Bir klasörün adını **değiştiremezsiniz**, eğer ona sahip değilseniz.
+- **çalıştırma** - dizinde **geçiş yapmanıza izin verilir** - bu hakka sahip değilseniz, içindeki dosyalara veya alt dizinlere erişemezsiniz.
 
 ### Tehlikeli Kombinasyonlar
 
@@ -24,7 +24,7 @@ Bir **dizindeki** izinler:
 
 ### Klasör root R+X Özel durumu
 
-Eğer **yalnızca root'un R+X erişimine sahip olduğu** bir **dizide** dosyalar varsa, bu dosyalar **başka kimseye erişilebilir değildir**. Bu nedenle, bir kullanıcının okuyabileceği bir dosyayı, bu **kısıtlama** nedeniyle okunamayan bir klasörden **farklı birine** **taşıma** izni veren bir güvenlik açığı, bu dosyaları okumak için kötüye kullanılabilir.
+Eğer **yalnızca root'un R+X erişimine sahip olduğu** bir **dizide** dosyalar varsa, bunlar **başka kimseye erişilebilir değildir**. Bu nedenle, bir kullanıcının okuyabileceği bir dosyayı, bu **kısıtlama** nedeniyle okunamayan bir dosyayı bu klasörden **farklı birine** **taşımasına** izin veren bir güvenlik açığı, bu dosyaları okumak için kötüye kullanılabilir.
 
 Örnek: [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions)
 
@@ -32,13 +32,13 @@ Eğer **yalnızca root'un R+X erişimine sahip olduğu** bir **dizide** dosyalar
 
 ### İzinli dosya/klasör
 
-Eğer ayrıcalıklı bir işlem, **daha düşük ayrıcalıklı bir kullanıcı** tarafından **kontrol edilebilecek** veya daha düşük ayrıcalıklı bir kullanıcı tarafından **önceden oluşturulmuş** bir **dosyaya** veri yazıyorsa. Kullanıcı, sadece bir Sembolik veya Sert bağlantı aracılığıyla onu başka bir dosyaya **işaret edebilir** ve ayrıcalıklı işlem o dosyaya yazacaktır.
+Eğer ayrıcalıklı bir işlem, **daha düşük ayrıcalıklı bir kullanıcı** tarafından **kontrol edilebilecek** bir **dosyaya** veri yazıyorsa veya daha düşük ayrıcalıklı bir kullanıcı tarafından **önceden oluşturulmuş** bir dosyaya yazıyorsa. Kullanıcı, sadece bir Sembolik veya Sert bağlantı aracılığıyla **başka bir dosyaya** **işaret edebilir** ve ayrıcalıklı işlem o dosyaya yazacaktır.
 
 Bir saldırganın **ayrıcalıkları artırmak için keyfi bir yazmayı nasıl kötüye kullanabileceğini** kontrol edin.
 
 ### Açık `O_NOFOLLOW`
 
-`open` fonksiyonu tarafından kullanıldığında `O_NOFOLLOW` bayrağı, son yol bileşenindeki bir sembolik bağlantıyı takip etmeyecek, ancak yolun geri kalanını takip edecektir. Yolda sembolik bağlantıları takip etmeyi önlemenin doğru yolu `O_NOFOLLOW_ANY` bayrağını kullanmaktır.
+`open` fonksiyonu tarafından kullanılan `O_NOFOLLOW` bayrağı, son yol bileşenindeki bir sembolik bağlantıyı takip etmeyecek, ancak yolun geri kalanını takip edecektir. Yolda sembolik bağlantıları takip etmeyi önlemenin doğru yolu `O_NOFOLLOW_ANY` bayrağını kullanmaktır.
 
 ## .fileloc
 
@@ -86,7 +86,7 @@ ls -lO /tmp/asd
 ```
 ### defvfs mount
 
-Bir **devfs** montajı **xattr** desteklemez, daha fazla bilgi için [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)
+Bir **devfs** montajı **xattr**'ı desteklemez, daha fazla bilgi için [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)
 ```bash
 mkdir /tmp/mnt
 mount_devfs -o noowners none "/tmp/mnt"
@@ -122,7 +122,7 @@ ls -le /tmp/test
 
 **AppleDouble** dosya formatı, bir dosyayı ACE'leri ile birlikte kopyalar.
 
-[**kaynak kodda**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) görülebilir ki, xattr içinde saklanan ACL metin temsili **`com.apple.acl.text`** olarak adlandırılır ve bu, sıkıştırılmamış dosyada ACL olarak ayarlanacaktır. Yani, bir uygulamayı ACL'nin diğer xattr'lerin yazılmasını engellediği bir zip dosyasına **AppleDouble** dosya formatı ile sıkıştırdıysanız... karantina xattr uygulamaya ayarlanmamıştı:
+[**kaynak kodda**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) görülebilir ki, xattr içinde saklanan ACL metin temsili **`com.apple.acl.text`** olarak adlandırılır ve bu, sıkıştırılmamış dosyada ACL olarak ayarlanacaktır. Yani, bir uygulamayı ACL'nin diğer xattr'ların yazılmasını engellediği bir zip dosyasına **AppleDouble** dosya formatı ile sıkıştırdıysanız... karantina xattr uygulamaya ayarlanmamıştı:
 
 Daha fazla bilgi için [**orijinal raporu**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) kontrol edin.
 
@@ -144,7 +144,9 @@ ditto -c -k del test.zip
 ditto -x -k --rsrc test.zip .
 ls -le test
 ```
-(Not edinmesi gerekmez ama yine de burada bırakıyorum, her ihtimale karşı:)
+(Note that even if this works the sandbox write the quarantine xattr before)
+
+Not really needed but I leave it there just in case:
 
 {{#ref}}
 macos-xattr-acls-extra-stuff.md
@@ -154,11 +156,11 @@ macos-xattr-acls-extra-stuff.md
 
 ### Platform ikili dosyası kontrollerini atlama
 
-Bazı güvenlik kontrolleri, ikilinin bir **platform ikili dosyası** olup olmadığını kontrol eder, örneğin bir XPC hizmetine bağlanmaya izin vermek için. Ancak, https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/ adresinde açıklandığı gibi, bu kontrolü atlamak mümkündür; bir platform ikili dosyası (örneğin /bin/ls) alarak ve istismarı dyld aracılığıyla `DYLD_INSERT_LIBRARIES` ortam değişkenini kullanarak enjekte ederek.
+Bazı güvenlik kontrolleri, ikilinin bir **platform ikili dosyası** olup olmadığını kontrol eder; örneğin, bir XPC hizmetine bağlanmaya izin vermek için. Ancak, https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/ adresinde açıklandığı gibi, bu kontrolü atlamak mümkündür; bir platform ikili dosyası (örneğin /bin/ls) alarak ve istismarı dyld aracılığıyla bir ortam değişkeni `DYLD_INSERT_LIBRARIES` kullanarak enjekte ederek.
 
 ### `CS_REQUIRE_LV` ve `CS_FORCED_LV` bayraklarını atlama
 
-Bir yürütme halindeki ikilinin, bir kod ile kendi bayraklarını değiştirmesi mümkündür:
+Bir yürütülen ikilinin, kontrolleri atlamak için kendi bayraklarını değiştirmesi mümkündür; böyle bir kod ile:
 ```c
 // Code from https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/
 int pid = getpid();
@@ -173,9 +175,9 @@ NSLog(@"=====Inject successfully into %d(%@), csflags=0x%x", pid, exePath, statu
 ```
 ## Bypass Code Signatures
 
-Bundles, **`_CodeSignature/CodeResources`** dosyasını içerir ve bu dosya **bundle** içindeki her bir **dosya**nın **hash**'ini barındırır. CodeResources'ın hash'inin de **çalıştırılabilir dosya**ya **gömülü** olduğunu unutmayın, bu yüzden bununla da oynayamayız.
+Bundles, **`_CodeSignature/CodeResources`** dosyasını içerir ve bu dosya **bundle** içindeki her bir **dosyanın** **hash**'ini barındırır. CodeResources'ın hash'inin de **çalıştırılabilir dosya** içinde **gömülü** olduğunu unutmayın, bu yüzden bununla da oynayamayız.
 
-Ancak, imzası kontrol edilmeyecek bazı dosyalar vardır, bunlar plist'te omit anahtarına sahip olanlardır, örneğin:
+Ancak, imzası kontrol edilmeyecek bazı dosyalar vardır, bunlar plist'te omit anahtarına sahiptir, örneğin:
 ```xml
 <dict>
 ...
@@ -193,7 +195,7 @@ Ancak, imzası kontrol edilmeyecek bazı dosyalar vardır, bunlar plist'te omit 
 </dict>
 <key>rules2</key>
 ...
-<key>^(.*/)?\.DS_Store$</key>
+<key>^(.*/index.html)?\.DS_Store$</key>
 <dict>
 <key>omit</key>
 <true/>
@@ -276,41 +278,41 @@ Keyfi bir **LaunchDaemon** yazın, örneğin **`/Library/LaunchDaemons/xyz.hackt
 </dict>
 </plist>
 ```
-Sadece kök olarak çalıştırmak istediğiniz **komutları** içeren `/Applications/Scripts/privesc.sh` dosyasını oluşturun.
+Just generate the script `/Applications/Scripts/privesc.sh` with the **commands** you would like to run as root.
 
 ### Sudoers Dosyası
 
-Eğer **keyfi yazma** erişiminiz varsa, kendinize **sudo** ayrıcalıkları veren bir dosya oluşturabilirsiniz **`/etc/sudoers.d/`** klasörü içinde.
+Eğer **keyfi yazma** yetkiniz varsa, kendinize **sudo** ayrıcalıkları veren bir dosya oluşturabilirsiniz **`/etc/sudoers.d/`** klasörü içinde.
 
 ### PATH dosyaları
 
-**`/etc/paths`** dosyası, PATH env değişkenini dolduran ana yerlerden biridir. Üzerine yazmak için kök olmalısınız, ancak eğer **ayrıca ayrıcalıklı bir işlem** bir **komutu tam yol olmadan** çalıştırıyorsa, bu dosyayı değiştirerek **ele geçirme** şansınız olabilir.
+**`/etc/paths`** dosyası, PATH env değişkenini dolduran ana yerlerden biridir. Üzerine yazmak için root olmalısınız, ancak eğer **yetkili bir işlem** bir **komutu tam yol olmadan** çalıştırıyorsa, bu dosyayı değiştirerek onu **ele geçirme** şansınız olabilir.
 
-Ayrıca `PATH` env değişkenine yeni klasörler yüklemek için **`/etc/paths.d`** içinde dosyalar yazabilirsiniz.
+Ayrıca, `PATH` env değişkenine yeni klasörler yüklemek için **`/etc/paths.d`** içinde dosyalar yazabilirsiniz.
 
 ### cups-files.conf
 
 Bu teknik [bu yazıda](https://www.kandji.io/blog/macos-audit-story-part1) kullanılmıştır.
 
-Aşağıdaki içeriği içeren `/etc/cups/cups-files.conf` dosyasını oluşturun:
+Aşağıdaki içeriğe sahip `/etc/cups/cups-files.conf` dosyasını oluşturun:
 ```
 ErrorLog /etc/sudoers.d/lpe
 LogFilePerm 777
 <some junk>
 ```
-Bu, `/etc/sudoers.d/lpe` dosyasını 777 izinleriyle oluşturacaktır. Sonundaki ekstra gereksiz kısım, hata günlüğü oluşturulmasını tetiklemek içindir.
+Bu, izinleri 777 olan `/etc/sudoers.d/lpe` dosyasını oluşturacaktır. Sonundaki ekstra gereksizlik, hata günlüğü oluşturmayı tetiklemek içindir.
 
-Ardından, `/etc/sudoers.d/lpe` dosyasına, ayrıcalıkları artırmak için gereken yapılandırmayı yazın, örneğin `%staff ALL=(ALL) NOPASSWD:ALL`.
+Ardından, `/etc/sudoers.d/lpe` dosyasına `%staff ALL=(ALL) NOPASSWD:ALL` gibi ayrıcalıkları artırmak için gerekli yapılandırmayı yazın.
 
-Daha sonra, `/etc/cups/cups-files.conf` dosyasını tekrar değiştirin ve `LogFilePerm 700` belirterek yeni sudoers dosyasının geçerli olmasını sağlayın ve `cupsctl` çağrısını yapın.
+Daha sonra, yeni sudoers dosyasının geçerli olmasını sağlamak için `/etc/cups/cups-files.conf` dosyasını tekrar değiştirin ve `LogFilePerm 700` belirtin, böylece `cupsctl` çağrıldığında geçerli olur.
 
 ### Sandbox Kaçışı
 
-macOS sandbox'ından FS rastgele yazma ile kaçmak mümkündür. Bazı örnekler için [macOS Auto Start](../../../../macos-auto-start-locations.md) sayfasına bakın, ancak yaygın bir örnek, başlangıçta bir komut çalıştıran `~/Library/Preferences/com.apple.Terminal.plist` dosyasına bir Terminal tercih dosyası yazmaktır ve bunu `open` kullanarak çağırmaktır.
+macOS sandbox'ından FS rastgele yazma ile kaçmak mümkündür. Bazı örnekler için [macOS Auto Start](../../../../macos-auto-start-locations.md) sayfasına bakın, ancak yaygın bir örnek, başlangıçta bir komut çalıştıran `~/Library/Preferences/com.apple.Terminal.plist` içinde bir Terminal tercih dosyası yazmaktır ve bunu `open` kullanarak çağırmaktır.
 
 ## Diğer kullanıcılar olarak yazılabilir dosyalar oluşturma
 
-Bu, benim yazabileceğim bir dosya oluşturacaktır ve bu dosya root'a aittir ([**buradan kod**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Bu aynı zamanda ayrıcalık artırma olarak da çalışabilir:
+Bu, benim yazabileceğim bir dosya oluşturacaktır ve bu dosya root'a aittir ([**buradan kod**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Bu ayrıca ayrıcalık artırma olarak da çalışabilir:
 ```bash
 DIRNAME=/usr/local/etc/periodic/daily
 
@@ -422,11 +424,11 @@ return 0;
 
 **macOS korunan tanımlayıcılar**, kullanıcı uygulamalarındaki **dosya tanımlayıcı işlemlerinin** güvenliğini ve güvenilirliğini artırmak için macOS'ta tanıtılan bir güvenlik özelliğidir. Bu korunan tanımlayıcılar, dosya tanımlayıcılarıyla belirli kısıtlamalar veya "korumalar" ilişkilendirme yolu sağlar ve bu kısıtlamalar çekirdek tarafından uygulanır.
 
-Bu özellik, **yetkisiz dosya erişimi** veya **yarış koşulları** gibi belirli güvenlik açıklarının önlenmesi için özellikle yararlıdır. Bu güvenlik açıkları, örneğin bir iş parçacığı bir dosya tanımına erişirken **başka bir savunmasız iş parçacığına erişim vermesi** veya bir dosya tanımlayıcısının savunmasız bir çocuk süreç tarafından **devralınması** durumunda ortaya çıkar. Bu işlevsellik ile ilgili bazı fonksiyonlar şunlardır:
+Bu özellik, **yetkisiz dosya erişimi** veya **yarış koşulları** gibi belirli güvenlik açıklarını önlemek için özellikle yararlıdır. Bu güvenlik açıkları, örneğin bir iş parçacığı bir dosya tanımına eriştiğinde **başka bir savunmasız iş parçacığına erişim vermesi** veya bir dosya tanımlayıcısının savunmasız bir çocuk süreç tarafından **devralınması** durumunda ortaya çıkar. Bu işlevselliğe ilişkin bazı fonksiyonlar şunlardır:
 
 - `guarded_open_np`: Bir koruma ile FD açar
 - `guarded_close_np`: Kapatır
-- `change_fdguard_np`: Bir tanımlayıcı üzerindeki koruma bayraklarını değiştirir (hatta koruma kaldırılabilir)
+- `change_fdguard_np`: Bir tanımlayıcı üzerindeki koruma bayraklarını değiştirir (koruma kaldırma dahil)
 
 ## Referanslar
 
