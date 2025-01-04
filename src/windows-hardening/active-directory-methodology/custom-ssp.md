@@ -4,8 +4,8 @@
 
 ### Custom SSP
 
-[यहाँ जानें कि SSP (सिक्योरिटी सपोर्ट प्रोवाइडर) क्या है।](../authentication-credentials-uac-and-efs/#security-support-provider-interface-sspi)\
-आप **अपना खुद का SSP** बना सकते हैं ताकि मशीन तक पहुँचने के लिए उपयोग किए गए **क्रेडेंशियल्स** को **स्पष्ट पाठ** में **कैप्चर** किया जा सके।
+[यहाँ जानें कि SSP (सिक्योरिटी सपोर्ट प्रोवाइडर) क्या है।](../authentication-credentials-uac-and-efs/index.html#security-support-provider-interface-sspi)\
+आप **अपना खुद का SSP** बना सकते हैं ताकि मशीन तक पहुँचने के लिए उपयोग किए गए **क्रेडेंशियल्स** को **स्पष्ट पाठ** में **कैप्चर** कर सकें।
 
 #### Mimilib
 

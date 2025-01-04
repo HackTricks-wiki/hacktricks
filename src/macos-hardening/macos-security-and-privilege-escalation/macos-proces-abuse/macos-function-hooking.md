@@ -4,9 +4,9 @@
 
 ## Function Interposing
 
-एक **dylib** बनाएं जिसमें **`__interpose` (`__DATA___interpose`)** सेक्शन (या **`S_INTERPOSING`** के साथ फ्लैग किया गया सेक्शन) हो जिसमें **function pointers** के ट्यूपल हों जो **original** और **replacement** functions को संदर्भित करते हैं।
+एक **dylib** बनाएं जिसमें **`__interpose` (`__DATA___interpose`)** सेक्शन (या **`S_INTERPOSING`** के साथ फ्लैग किया गया सेक्शन) हो जिसमें **function pointers** के ट्यूपल्स हों जो **original** और **replacement** फंक्शंस को संदर्भित करते हैं।
 
-फिर, **`DYLD_INSERT_LIBRARIES`** के साथ dylib को **inject** करें (interposing मुख्य ऐप लोड होने से पहले होनी चाहिए)। स्पष्ट रूप से [**`DYLD_INSERT_LIBRARIES`** के उपयोग पर लागू **restrictions** यहाँ भी लागू होते हैं](macos-library-injection/#check-restrictions).
+फिर, **`DYLD_INSERT_LIBRARIES`** के साथ dylib को **inject** करें (interposing मुख्य ऐप लोड होने से पहले होनी चाहिए)। स्पष्ट रूप से [**`DYLD_INSERT_LIBRARIES`** के उपयोग पर लागू **restrictions** यहाँ भी लागू होते हैं](macos-library-injection/index.html#check-restrictions)।
 
 ### Interpose printf
 
@@ -84,9 +84,9 @@ Hello from interpose
 
 ### डायनामिक इंटरपोज़िंग
 
-अब यह भी संभव है कि एक फ़ंक्शन को डायनामिक रूप से इंटरपोज़ किया जाए, फ़ंक्शन **`dyld_dynamic_interpose`** का उपयोग करके। यह रन टाइम में प्रोग्रामेटिक रूप से एक फ़ंक्शन को इंटरपोज़ करने की अनुमति देता है, बजाय इसके कि इसे केवल शुरुआत से किया जाए।
+अब यह भी संभव है कि एक फ़ंक्शन को डायनामिक रूप से **`dyld_dynamic_interpose`** फ़ंक्शन का उपयोग करके इंटरपोज़ किया जाए। यह रन टाइम में प्रोग्रामेटिक रूप से एक फ़ंक्शन को इंटरपोज़ करने की अनुमति देता है, बजाय इसके कि इसे केवल शुरुआत से किया जाए।
 
-बस **बदलने के लिए फ़ंक्शन के ट्यूपल्स** और **बदलने वाले** फ़ंक्शन को इंगित करना आवश्यक है।
+बस **बदलने के लिए फ़ंक्शन के ट्यूपल्स और प्रतिस्थापन** फ़ंक्शन को इंगित करना आवश्यक है।
 ```c
 struct dyld_interpose_tuple {
 const void* replacement;
@@ -99,11 +99,11 @@ const struct dyld_interpose_tuple array[], size_t count);
 
 In ObjectiveC यह एक विधि को इस तरह से कॉल किया जाता है: **`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
 
-यह आवश्यक है **object**, **method** और **params**। और जब एक विधि को कॉल किया जाता है, तो एक **msg भेजा जाता है** जो फ़ंक्शन **`objc_msgSend`** का उपयोग करता है: `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
+यह आवश्यक है **object**, **method** और **params**। और जब एक विधि को कॉल किया जाता है, तो एक **msg भेजा जाता है** फ़ंक्शन **`objc_msgSend`** का उपयोग करके: `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
 
 ऑब्जेक्ट है **`someObject`**, विधि है **`@selector(method1p1:p2:)`** और तर्क हैं **value1**, **value2**।
 
-ऑब्जेक्ट संरचनाओं के अनुसार, एक **विधियों की सूची** तक पहुँचना संभव है जहाँ **नाम** और **विधि कोड के लिए पॉइंटर्स** **स्थित** होते हैं।
+ऑब्जेक्ट संरचनाओं का पालन करते हुए, एक **विधियों की सूची** तक पहुँचना संभव है जहाँ **नाम** और **विधि कोड के लिए पॉइंटर्स** **स्थित** होते हैं।
 
 > [!CAUTION]
 > ध्यान दें कि चूंकि विधियों और कक्षाओं को उनके नामों के आधार पर एक्सेस किया जाता है, यह जानकारी बाइनरी में संग्रहीत होती है, इसलिए इसे `otool -ov </path/bin>` या [`class-dump </path/bin>`](https://github.com/nygard/class-dump) के साथ पुनः प्राप्त करना संभव है।
@@ -178,10 +178,10 @@ return 0;
 ```
 ### Method Swizzling with method_exchangeImplementations
 
-फंक्शन **`method_exchangeImplementations`** **एक फंक्शन के कार्यान्वयन के पते को दूसरे के लिए बदलने** की अनुमति देता है।
+The function **`method_exchangeImplementations`** allows to **change** the **address** of the **implementation** of **one function for the other**.
 
 > [!CAUTION]
-> इसलिए जब एक फंक्शन को कॉल किया जाता है, तो **जो कार्यान्वित होता है वह दूसरा होता है**।
+> So when a function is called what is **executed is the other one**.
 ```objectivec
 //gcc -framework Foundation swizzle_str.m -o swizzle_str
 
@@ -226,15 +226,15 @@ return 0;
 }
 ```
 > [!WARNING]
-> इस मामले में यदि **वैध** विधि का **क्रियान्वयन कोड** **विधि** **नाम** की **पुष्टि** करता है, तो यह इस स्विज़लिंग का **पता** लगा सकता है और इसे चलने से रोक सकता है।
+> इस मामले में यदि **वैध** विधि का **कार्यान्वयन कोड** **विधि** **नाम** की **पुष्टि** करता है, तो यह इस स्विज़लिंग का **पता** लगा सकता है और इसे चलने से रोक सकता है।
 >
 > निम्नलिखित तकनीक में यह प्रतिबंध नहीं है।
 
 ### Method Swizzling with method_setImplementation
 
-पिछला प्रारूप अजीब है क्योंकि आप एक विधि के क्रियान्वयन को दूसरी से बदल रहे हैं। फ़ंक्शन **`method_setImplementation`** का उपयोग करके आप **एक विधि के क्रियान्वयन** को **दूसरी के लिए बदल** सकते हैं।
+पिछला प्रारूप अजीब है क्योंकि आप एक विधि के कार्यान्वयन को दूसरी से बदल रहे हैं। **`method_setImplementation`** फ़ंक्शन का उपयोग करके आप **एक विधि के कार्यान्वयन को दूसरी के लिए बदल** सकते हैं।
 
-बस याद रखें कि यदि आप इसे नए क्रियान्वयन से कॉल करने जा रहे हैं तो **मूल वाले के क्रियान्वयन के पते** को **स्टोर** करें, क्योंकि इसे ओवरराइट करने से पहले इसे ढूंढना बाद में बहुत जटिल होगा।
+बस याद रखें कि यदि आप इसे नए कार्यान्वयन से कॉल करने जा रहे हैं तो **मूल वाले कार्यान्वयन के पते को स्टोर करें** इससे पहले कि आप इसे ओवरराइट करें क्योंकि बाद में उस पते को ढूंढना बहुत जटिल होगा।
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
@@ -290,9 +290,9 @@ return 0;
 
 इस पृष्ठ पर फ़ंक्शनों को हुक करने के विभिन्न तरीकों पर चर्चा की गई। हालाँकि, इसमें **हमले के लिए प्रक्रिया के अंदर कोड चलाना** शामिल था।
 
-यह करने के लिए सबसे आसान तकनीक है [Dyld को पर्यावरण चर के माध्यम से या हाइजैकिंग के माध्यम से](macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md) इंजेक्ट करना। हालाँकि, मुझे लगता है कि यह [Dylib प्रक्रिया इंजेक्शन](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port) के माध्यम से भी किया जा सकता है।
+यह करने के लिए सबसे आसान तकनीक है [Dyld को पर्यावरण चर के माध्यम से इंजेक्ट करना या हाइजैकिंग](macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md)। हालाँकि, मुझे लगता है कि यह [Dylib प्रक्रिया इंजेक्शन](macos-ipc-inter-process-communication/index.html#dylib-process-injection-via-task-port) के माध्यम से भी किया जा सकता है।
 
-हालाँकि, दोनों विकल्प **असुरक्षित** बाइनरी/प्रक्रियाओं तक **सीमित** हैं। सीमाओं के बारे में अधिक जानने के लिए प्रत्येक तकनीक की जाँच करें।
+हालाँकि, दोनों विकल्प **असुरक्षित** बाइनरी/प्रक्रियाओं तक **सीमित** हैं। सीमाओं के बारे में अधिक जानने के लिए प्रत्येक तकनीक की जांच करें।
 
 हालाँकि, एक फ़ंक्शन हुकिंग हमला बहुत विशिष्ट है, एक हमलावर यह करेगा **प्रक्रिया के अंदर से संवेदनशील जानकारी चुराने के लिए** (यदि नहीं, तो आप बस एक प्रक्रिया इंजेक्शन हमला करेंगे)। और यह संवेदनशील जानकारी उपयोगकर्ता द्वारा डाउनलोड किए गए ऐप्स में स्थित हो सकती है जैसे कि MacPass।
 
@@ -308,12 +308,12 @@ return 0;
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f /Applications/Application.app
 ```
-उस पुस्तकालय में hooking कोड जोड़ें ताकि जानकारी को exfiltrate किया जा सके: पासवर्ड, संदेश...
+उस पुस्तकालय में हुकिंग कोड जोड़ें ताकि जानकारी को एक्सफिल्ट्रेट किया जा सके: पासवर्ड, संदेश...
 
 > [!CAUTION]
 > ध्यान दें कि macOS के नए संस्करणों में यदि आप एप्लिकेशन बाइनरी का **हस्ताक्षर हटा देते हैं** और इसे पहले निष्पादित किया गया था, तो macOS **अब एप्लिकेशन को निष्पादित नहीं करेगा**।
 
-#### पुस्तकालय उदाहरण
+#### Library example
 ```objectivec
 // gcc -dynamiclib -framework Foundation sniff.m -o sniff.dylib
 
