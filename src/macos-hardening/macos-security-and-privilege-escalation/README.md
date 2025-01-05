@@ -79,7 +79,7 @@ Para este tipo de vulnerabilidades, no olvides **verificar instaladores `.pkg` v
 macos-files-folders-and-binaries/macos-installers-abuse.md
 {{#endref}}
 
-### Controladores de Aplicaciones de Extensión de Archivo y Esquema de URL
+### Manejadores de Extensiones de Archivos y Esquemas de URL
 
 Aplicaciones extrañas registradas por extensiones de archivo podrían ser abusadas y diferentes aplicaciones pueden registrarse para abrir protocolos específicos.
 
@@ -95,7 +95,7 @@ Por lo tanto, un atacante que quiera comprometer con éxito una máquina macOS n
 
 Estos privilegios generalmente se otorgan en forma de **derechos** con los que la aplicación está firmada, o la aplicación podría solicitar algunos accesos y después de que el **usuario los apruebe**, pueden encontrarse en las **bases de datos TCC**. Otra forma en que un proceso puede obtener estos privilegios es siendo un **hijo de un proceso** con esos **privilegios**, ya que generalmente son **heredados**.
 
-Sigue estos enlaces para encontrar diferentes formas de [**escalar privilegios en TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), para [**eludir TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) y cómo en el pasado [**se ha eludido SIP**](macos-security-protections/macos-sip.md#sip-bypasses).
+Sigue estos enlaces para encontrar diferentes formas de [**escalar privilegios en TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), para [**eludir TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) y cómo en el pasado [**se ha eludido SIP**](macos-security-protections/macos-sip.md#sip-bypasses).
 
 ## Escalación de Privilegios Tradicional en macOS
 

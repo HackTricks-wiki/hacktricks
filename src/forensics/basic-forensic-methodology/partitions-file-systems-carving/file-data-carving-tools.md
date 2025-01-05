@@ -4,12 +4,12 @@
 
 ## Autopsy
 
-La herramienta más común utilizada en forense para extraer archivos de imágenes es [**Autopsy**](https://www.autopsy.com/download/). Descárgala, instálala y haz que ingiera el archivo para encontrar archivos "ocultos". Ten en cuenta que Autopsy está diseñado para soportar imágenes de disco y otros tipos de imágenes, pero no archivos simples.
+La herramienta más común utilizada en forense para extraer archivos de imágenes es [**Autopsy**](https://www.autopsy.com/download/). Descárgala, instálala y haz que ingiera el archivo para encontrar archivos "ocultos". Ten en cuenta que Autopsy está diseñada para soportar imágenes de disco y otros tipos de imágenes, pero no archivos simples.
 
 ## Binwalk <a id="binwalk"></a>
 
-**Binwalk** es una herramienta para buscar archivos binarios como imágenes y archivos de audio en busca de archivos y datos incrustados. 
-Se puede instalar con `apt`, sin embargo, la [fuente](https://github.com/ReFirmLabs/binwalk) se puede encontrar en github. 
+**Binwalk** es una herramienta para buscar archivos binarios como imágenes y archivos de audio en busca de archivos y datos incrustados.  
+Se puede instalar con `apt`, sin embargo, la [fuente](https://github.com/ReFirmLabs/binwalk) se puede encontrar en github.  
 **Comandos útiles**:
 ```bash
 sudo apt install binwalk #Insllation
@@ -19,7 +19,7 @@ binwalk --dd ".*" file #Displays and extracts all files from the given file
 ```
 ## Foremost
 
-Otra herramienta común para encontrar archivos ocultos es **foremost**. Puedes encontrar el archivo de configuración de foremost en `/etc/foremost.conf`. Si solo deseas buscar algunos archivos específicos, descoméntalos. Si no descomentas nada, foremost buscará los tipos de archivos configurados por defecto.
+Otra herramienta común para encontrar archivos ocultos es **foremost**. Puedes encontrar el archivo de configuración de foremost en `/etc/foremost.conf`. Si solo deseas buscar algunos archivos específicos, descomenta esos. Si no descomentas nada, foremost buscará los tipos de archivos configurados por defecto.
 ```bash
 sudo apt-get install foremost
 foremost -v -i file.img -o output
@@ -40,7 +40,7 @@ Esta herramienta puede escanear una imagen y **extraer pcaps** dentro de ella, *
 ```text
 bulk_extractor memory.img -o out_folder
 ```
-Navega a través de **toda la información** que la herramienta ha recopilado \(¿contraseñas?\), **analiza** los **paquetes** \(lee [**análisis de Pcaps**](../pcap-inspection/)\), busca **dominios extraños** \(dominios relacionados con **malware** o **inexistentes**\).
+Navega a través de **toda la información** que la herramienta ha recopilado \(¿contraseñas?\), **analiza** los **paquetes** \(lee [**análisis de Pcaps**](../pcap-inspection/index.html)\), busca **dominios extraños** \(dominios relacionados con **malware** o **inexistentes**\).
 
 ## PhotoRec
 

@@ -13,7 +13,7 @@ La página principal de una aplicación Flask probablemente tendrá el **objeto 
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-En este caso, es posible acceder a este objeto utilizando cualquier gadget para **acceder a objetos globales** de la [**página de Bypass Python sandboxes**](bypass-python-sandboxes/).
+En este caso, es posible acceder a este objeto utilizando cualquier gadget para **acceder a objetos globales** de la [**página de Bypass Python sandboxes**](bypass-python-sandboxes/index.html).
 
 En el caso de que **la vulnerabilidad esté en un archivo python diferente**, necesitas un gadget para recorrer archivos y llegar al principal para **acceder al objeto global `app.secret_key`** para cambiar la clave secreta de Flask y poder [**escalar privilegios** conociendo esta clave](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
 

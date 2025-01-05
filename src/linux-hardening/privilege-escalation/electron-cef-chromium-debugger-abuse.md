@@ -1,15 +1,15 @@
-# Abuso del depurador de Node/CEF
+# Abuso del depurador Node inspector/CEF
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Información Básica
 
-[De la documentación](https://origin.nodejs.org/ru/docs/guides/debugging-getting-started): Cuando se inicia con el interruptor `--inspect`, un proceso de Node.js escucha a un cliente de depuración. Por **defecto**, escuchará en el host y puerto **`127.0.0.1:9229`**. Cada proceso también se asigna un **UUID** **único**.
+[Desde la documentación](https://origin.nodejs.org/ru/docs/guides/debugging-getting-started): Cuando se inicia con el interruptor `--inspect`, un proceso de Node.js escucha a un cliente de depuración. Por **defecto**, escuchará en el host y puerto **`127.0.0.1:9229`**. Cada proceso también se asigna un **UUID** **único**.
 
 Los clientes del inspector deben conocer y especificar la dirección del host, el puerto y el UUID para conectarse. Una URL completa se verá algo así como `ws://127.0.0.1:9229/0f2c936f-b1cd-4ac9-aab3-f63b0f33d55e`.
 
 > [!WARNING]
-> Dado que el **depurador tiene acceso completo al entorno de ejecución de Node.js**, un actor malicioso que pueda conectarse a este puerto puede ser capaz de ejecutar código arbitrario en nombre del proceso de Node.js (**posible escalada de privilegios**).
+> Dado que el **depurador tiene acceso completo al entorno de ejecución de Node.js**, un actor malicioso capaz de conectarse a este puerto puede ser capaz de ejecutar código arbitrario en nombre del proceso de Node.js (**posible escalada de privilegios**).
 
 Hay varias formas de iniciar un inspector:
 ```bash
@@ -48,7 +48,7 @@ kill -s SIGUSR1 <nodejs-ps>
 # After an URL to access the debugger will appear. e.g. ws://127.0.0.1:9229/45ea962a-29dd-4cdd-be08-a6827840553d
 ```
 > [!NOTE]
-> Esto es útil en contenedores porque **cerrar el proceso y comenzar uno nuevo** con `--inspect` **no es una opción** porque el **contenedor** será **eliminado** junto con el proceso.
+> Esto es útil en contenedores porque **detener el proceso y comenzar uno nuevo** con `--inspect` **no es una opción** porque el **contenedor** será **eliminado** junto con el proceso.
 
 ### Conectar al inspector/debugger
 
@@ -78,7 +78,7 @@ La herramienta [**https://github.com/taviso/cefdebug**](https://github.com/tavis
 ## RCE en el Depurador/Inspector de NodeJS
 
 > [!NOTE]
-> Si llegó aquí buscando cómo obtener [**RCE de un XSS en Electron, consulte esta página.**](../../network-services-pentesting/pentesting-web/electron-desktop-apps/)
+> Si llegó aquí buscando cómo obtener [**RCE a partir de un XSS en Electron, consulte esta página.**](../../network-services-pentesting/pentesting-web/electron-desktop-apps/index.html)
 
 Algunas formas comunes de obtener **RCE** cuando puede **conectarse** a un **inspector** de Node son usar algo como (parece que esto **no funcionará en una conexión al protocolo de Chrome DevTools**):
 ```javascript
@@ -92,9 +92,9 @@ Browser.open(JSON.stringify({ url: "c:\\windows\\system32\\calc.exe" }))
 Puedes consultar la API aquí: [https://chromedevtools.github.io/devtools-protocol/](https://chromedevtools.github.io/devtools-protocol/)\
 En esta sección solo listaré cosas interesantes que he encontrado que la gente ha utilizado para explotar este protocolo.
 
-### Inyección de Parámetros a través de Enlaces Profundos
+### Inyección de Parámetros a través de Deep Links
 
-En el [**CVE-2021-38112**](https://rhinosecuritylabs.com/aws/cve-2021-38112-aws-workspaces-rce/) Rhino security descubrió que una aplicación basada en CEF **registró un URI personalizado** en el sistema (workspaces://) que recibía el URI completo y luego **lanzaba la aplicación basada en CEF** con una configuración que se construía parcialmente a partir de ese URI.
+En el [**CVE-2021-38112**](https://rhinosecuritylabs.com/aws/cve-2021-38112-aws-workspaces-rce/) Rhino security descubrió que una aplicación basada en CEF **registró un URI personalizado** en el sistema (workspaces://index.html) que recibía el URI completo y luego **lanzaba la aplicación basada en CEF** con una configuración que se construía parcialmente a partir de ese URI.
 
 Se descubrió que los parámetros del URI eran decodificados y utilizados para lanzar la aplicación básica de CEF, permitiendo a un usuario **inyectar** la bandera **`--gpu-launcher`** en la **línea de comandos** y ejecutar cosas arbitrarias.
 
@@ -106,7 +106,7 @@ Ejecutará un calc.exe.
 
 ### Sobrescribir Archivos
 
-Cambia la carpeta donde **se van a guardar los archivos descargados** y descarga un archivo para **sobrescribir** el **código fuente** de la aplicación que se utiliza con frecuencia con tu **código malicioso**.
+Cambia la carpeta donde **se van a guardar los archivos descargados** y descarga un archivo para **sobrescribir** el **código fuente** de la aplicación que se usa con frecuencia con tu **código malicioso**.
 ```javascript
 ws = new WebSocket(url) //URL of the chrome devtools service
 ws.send(
@@ -128,7 +128,7 @@ Según esta publicación: [https://medium.com/@knownsec404team/counter-webdriver
 
 En un entorno real y **después de comprometer** una PC de usuario que utiliza un navegador basado en Chrome/Chromium, podrías lanzar un proceso de Chrome con **la depuración activada y redirigir el puerto de depuración** para que puedas acceder a él. De esta manera, podrás **inspeccionar todo lo que la víctima hace con Chrome y robar información sensible**.
 
-La forma sigilosa es **terminar todos los procesos de Chrome** y luego llamar a algo como
+La forma sigilosa es **terminar cada proceso de Chrome** y luego llamar a algo como
 ```bash
 Start-Process "Chrome" "--remote-debugging-port=9222 --restore-last-session"
 ```

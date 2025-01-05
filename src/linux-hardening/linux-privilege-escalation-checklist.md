@@ -72,24 +72,24 @@
 
 - [ ] Enumeración de usuarios/grupos **genéricos**
 - [ ] ¿Tienes un **UID muy grande**? ¿Es la **máquina** **vulnerable**?
-- [ ] ¿Puedes [**escalar privilegios gracias a un grupo**](privilege-escalation/interesting-groups-linux-pe/) al que perteneces?
+- [ ] ¿Puedes [**escalar privilegios gracias a un grupo**](privilege-escalation/interesting-groups-linux-pe/index.html) al que perteneces?
 - [ ] ¿Datos del **portapapeles**?
 - [ ] ¿Política de contraseñas?
 - [ ] Intenta **usar** cada **contraseña conocida** que hayas descubierto previamente para iniciar sesión **con cada** posible **usuario**. Intenta iniciar sesión también sin una contraseña.
 
 ### [PATH escribible](privilege-escalation/index.html#writable-path-abuses)
 
-- [ ] Si tienes **privilegios de escritura sobre alguna carpeta en PATH** podrías ser capaz de escalar privilegios
+- [ ] Si tienes **privilegios de escritura sobre alguna carpeta en PATH**, podrías ser capaz de escalar privilegios
 
 ### [Comandos SUDO y SUID](privilege-escalation/index.html#sudo-and-suid)
 
 - [ ] ¿Puedes ejecutar **cualquier comando con sudo**? ¿Puedes usarlo para LEER, ESCRIBIR o EJECUTAR algo como root? ([**GTFOBins**](https://gtfobins.github.io))
 - [ ] ¿Hay algún **binario SUID explotable**? ([**GTFOBins**](https://gtfobins.github.io))
-- [ ] ¿Los [**comandos sudo** están **limitados** por **path**? ¿Puedes **eludir** las restricciones](privilege-escalation/index.html#sudo-execution-bypassing-paths)?
-- [ ] [**Binario Sudo/SUID sin path indicado**](privilege-escalation/index.html#sudo-command-suid-binary-without-command-path)?
-- [ ] [**Binario SUID especificando path**](privilege-escalation/index.html#suid-binary-with-command-path)? Eludir
+- [ ] ¿Los [**comandos sudo** están **limitados** por **ruta**? ¿Puedes **eludir** las restricciones](privilege-escalation/index.html#sudo-execution-bypassing-paths)?
+- [ ] [**Binario Sudo/SUID sin ruta indicada**](privilege-escalation/index.html#sudo-command-suid-binary-without-command-path)?
+- [ ] [**Binario SUID especificando ruta**](privilege-escalation/index.html#suid-binary-with-command-path)? Eludir
 - [ ] [**Vuln de LD_PRELOAD**](privilege-escalation/index.html#ld_preload)
-- [ ] [**Falta de .so en binario SUID**](privilege-escalation/index.html#suid-binary-so-injection) desde una carpeta escribible?
+- [ ] [**Falta de .so en binario SUID**](privilege-escalation/index.html#suid-binary-so-injection) de una carpeta escribible?
 - [ ] [**Tokens SUDO disponibles**](privilege-escalation/index.html#reusing-sudo-tokens)? [**¿Puedes crear un token SUDO**](privilege-escalation/index.html#var-run-sudo-ts-less-than-username-greater-than)?
 - [ ] ¿Puedes [**leer o modificar archivos sudoers**](privilege-escalation/index.html#etc-sudoers-etc-sudoers-d)?
 - [ ] ¿Puedes [**modificar /etc/ld.so.conf.d/**](privilege-escalation/index.html#etc-ld-so-conf-d)?
@@ -118,11 +118,11 @@
 - [ ] **Archivos de perfil** - ¿Leer datos sensibles? ¿Escribir para privesc?
 - [ ] **Archivos passwd/shadow** - ¿Leer datos sensibles? ¿Escribir para privesc?
 - [ ] **Verificar carpetas comúnmente interesantes** en busca de datos sensibles
-- [ ] **Ubicación extraña/Archivos propiedad,** a los que podrías tener acceso o alterar archivos ejecutables
+- [ ] **Ubicación/Archivos extraños,** a los que podrías tener acceso o alterar archivos ejecutables
 - [ ] **Modificados** en los últimos minutos
 - [ ] **Archivos de base de datos Sqlite**
 - [ ] **Archivos ocultos**
-- [ ] **Script/Binarios en PATH**
+- [ ] **Scripts/Binarios en PATH**
 - [ ] **Archivos web** (¿contraseñas?)
 - [ ] **¿Copias de seguridad?**
 - [ ] **Archivos conocidos que contienen contraseñas**: Usa **Linpeas** y **LaZagne**

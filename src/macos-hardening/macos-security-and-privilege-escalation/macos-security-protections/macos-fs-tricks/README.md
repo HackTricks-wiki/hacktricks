@@ -10,15 +10,15 @@ Permisos en un **directorio**:
 - **escribir** - puedes **eliminar/escribir** **archivos** en el directorio y puedes **eliminar carpetas vacías**.
 - Pero **no puedes eliminar/modificar carpetas no vacías** a menos que tengas permisos de escritura sobre ellas.
 - **No puedes modificar el nombre de una carpeta** a menos que seas el propietario.
-- **ejecutar** - se te **permite recorrer** el directorio - si no tienes este derecho, no puedes acceder a ningún archivo dentro de él, ni en subdirectorios.
+- **ejecutar** - se te **permite atravesar** el directorio - si no tienes este derecho, no puedes acceder a ningún archivo dentro de él, ni en ningún subdirectorio.
 
-### Combinaciones Peligrosas
+### Combinaciones peligrosas
 
 **Cómo sobrescribir un archivo/carpeta propiedad de root**, pero:
 
 - Un **propietario de directorio** padre en la ruta es el usuario
 - Un **propietario de directorio** padre en la ruta es un **grupo de usuarios** con **acceso de escritura**
-- Un **grupo** de usuarios tiene acceso de **escritura** al **archivo**
+- Un **grupo** de usuarios tiene **acceso de escritura** al **archivo**
 
 Con cualquiera de las combinaciones anteriores, un atacante podría **inyectar** un **enlace simbólico/duro** en la ruta esperada para obtener una escritura arbitraria privilegiada.
 
@@ -30,7 +30,7 @@ Ejemplo en: [https://theevilbit.github.io/posts/exploiting_directory_permissions
 
 ## Enlace simbólico / Enlace duro
 
-### Archivo/carpeta permisiva
+### Archivo/carpeta permisivo
 
 Si un proceso privilegiado está escribiendo datos en un **archivo** que podría ser **controlado** por un **usuario de menor privilegio**, o que podría haber sido **creado previamente** por un usuario de menor privilegio. El usuario podría simplemente **apuntarlo a otro archivo** a través de un enlace simbólico o duro, y el proceso privilegiado escribirá en ese archivo.
 
@@ -38,7 +38,7 @@ Consulta en las otras secciones donde un atacante podría **abusar de una escrit
 
 ### Abrir `O_NOFOLLOW`
 
-La bandera `O_NOFOLLOW` cuando es utilizada por la función `open` no seguirá un symlink en el último componente de la ruta, pero seguirá el resto de la ruta. La forma correcta de prevenir seguir symlinks en la ruta es utilizando la bandera `O_NOFOLLOW_ANY`.
+La bandera `O_NOFOLLOW` cuando se usa en la función `open` no seguirá un symlink en el último componente de la ruta, pero seguirá el resto de la ruta. La forma correcta de prevenir el seguimiento de symlinks en la ruta es utilizando la bandera `O_NOFOLLOW_ANY`.
 
 ## .fileloc
 
@@ -58,7 +58,7 @@ Ejemplo:
 ```
 ## Descriptores de Archivo
 
-### Fuga de FD (sin `O_CLOEXEC`)
+### Filtración de FD (sin `O_CLOEXEC`)
 
 Si una llamada a `open` no tiene la bandera `O_CLOEXEC`, el descriptor de archivo será heredado por el proceso hijo. Así que, si un proceso privilegiado abre un archivo privilegiado y ejecuta un proceso controlado por el atacante, el atacante **heredará el FD sobre el archivo privilegiado**.
 
@@ -195,7 +195,7 @@ Sin embargo, hay algunos archivos cuya firma no será verificada, estos tienen l
 </dict>
 <key>rules2</key>
 ...
-<key>^(.*/)?\.DS_Store$</key>
+<key>^(.*/index.html)?\.DS_Store$</key>
 <dict>
 <key>omit</key>
 <true/>
@@ -248,12 +248,12 @@ hdiutil detach /private/tmp/mnt 1>/dev/null
 # You can also create a dmg from an app using:
 hdiutil create -srcfolder justsome.app justsome.dmg
 ```
-Usualmente, macOS monta discos hablando con el servicio Mach `com.apple.DiskArbitrarion.diskarbitrariond` (proporcionado por `/usr/libexec/diskarbitrationd`). Si se agrega el parámetro `-d` al archivo plist de LaunchDaemons y se reinicia, almacenará registros en `/var/log/diskarbitrationd.log`.\
+Usualmente, macOS monta discos hablando con el servicio Mach `com.apple.DiskArbitration.diskarbitrationd` (proporcionado por `/usr/libexec/diskarbitrationd`). Si se agrega el parámetro `-d` al archivo plist de LaunchDaemons y se reinicia, almacenará registros en `/var/log/diskarbitrationd.log`.\
 Sin embargo, es posible usar herramientas como `hdik` y `hdiutil` para comunicarse directamente con el kext `com.apple.driver.DiskImages`.
 
 ## Escrituras Arbitrarias
 
-### Scripts sh periódicos
+### Scripts sh Periódicos
 
 Si tu script pudiera ser interpretado como un **script de shell**, podrías sobrescribir el **`/etc/periodic/daily/999.local`** script de shell que se activará todos los días.
 
@@ -312,7 +312,7 @@ Es posible escapar del sandbox de macOS con una escritura arbitraria en el siste
 
 ## Generar archivos escribibles como otros usuarios
 
-Esto generará un archivo que pertenece a root que es escribible por mí ([**código de aquí**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Esto también podría funcionar como privesc:
+Esto generará un archivo que pertenece a root y que es escribible por mí ([**código de aquí**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Esto también podría funcionar como privesc:
 ```bash
 DIRNAME=/usr/local/etc/periodic/daily
 
@@ -424,7 +424,7 @@ return 0;
 
 **Descriptores protegidos de macOS** son una característica de seguridad introducida en macOS para mejorar la seguridad y fiabilidad de las **operaciones de descriptores de archivo** en aplicaciones de usuario. Estos descriptores protegidos proporcionan una forma de asociar restricciones específicas o "guardias" con descriptores de archivo, que son aplicadas por el kernel.
 
-Esta característica es particularmente útil para prevenir ciertas clases de vulnerabilidades de seguridad, como **acceso no autorizado a archivos** o **condiciones de carrera**. Estas vulnerabilidades ocurren cuando, por ejemplo, un hilo está accediendo a una descripción de archivo dando **acceso a otro hilo vulnerable sobre ella** o cuando un descriptor de archivo es **heredado** por un proceso hijo vulnerable. Algunas funciones relacionadas con esta funcionalidad son:
+Esta característica es particularmente útil para prevenir ciertas clases de vulnerabilidades de seguridad, como **acceso no autorizado a archivos** o **condiciones de carrera**. Estas vulnerabilidades ocurren cuando, por ejemplo, un hilo está accediendo a una descripción de archivo dando **acceso a otro hilo vulnerable** o cuando un descriptor de archivo es **heredado** por un proceso hijo vulnerable. Algunas funciones relacionadas con esta funcionalidad son:
 
 - `guarded_open_np`: Abre un FD con una guardia
 - `guarded_close_np`: Ciérralo
