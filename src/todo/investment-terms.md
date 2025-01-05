@@ -14,7 +14,7 @@ Ein Future ist ein Vertrag, bei dem 2 Parteien eine Vereinbarung treffen, um **e
 
 Offensichtlich verliert die Verkäuferseite Geld, wenn der Bitcoin-Wert in 6 Monaten 80.000$ beträgt, und die Käuferseite verdient. Wenn der Bitcoin-Wert in 6 Monaten 60.000$ beträgt, passiert das Gegenteil.
 
-Dies ist jedoch interessant für Unternehmen, die ein Produkt herstellen und die Sicherheit benötigen, dass sie es zu einem Preis verkaufen können, um die Kosten zu decken. Oder Unternehmen, die feste Preise in der Zukunft für etwas sichern möchten, selbst wenn diese höher sind.
+Dies ist jedoch interessant für Unternehmen, die ein Produkt herstellen und die Sicherheit haben müssen, dass sie es zu einem Preis verkaufen können, um die Kosten zu decken. Oder Unternehmen, die feste Preise in der Zukunft für etwas sichern möchten, selbst wenn diese höher sind.
 
 Obwohl dies an Börsen normalerweise verwendet wird, um einen Gewinn zu erzielen.
 
@@ -23,22 +23,22 @@ Obwohl dies an Börsen normalerweise verwendet wird, um einen Gewinn zu erzielen
 
 ### Hedging With Futures <a href="#mntl-sc-block_7-0" id="mntl-sc-block_7-0"></a>
 
-Wenn ein Fondsmanager befürchtet, dass einige Aktien fallen werden, könnte er eine Short-Position über einige Vermögenswerte wie Bitcoins oder S&P 500-Futures-Kontrakte eingehen. Dies wäre ähnlich wie der Kauf oder das Halten von Vermögenswerten und das Erstellen eines Vertrags, um diese zu einem späteren Zeitpunkt zu einem höheren Preis zu verkaufen.&#x20;
+Wenn ein Fondsmanager befürchtet, dass einige Aktien fallen werden, könnte er eine Short-Position über einige Vermögenswerte wie Bitcoins oder S&P 500-Futures-Kontrakte eingehen. Dies wäre ähnlich wie der Kauf oder das Halten von Vermögenswerten und das Erstellen eines Vertrags, um diese zu einem späteren Zeitpunkt zu einem höheren Preis zu verkaufen.
 
 Falls der Preis fällt, wird der Fondsmanager Gewinne erzielen, weil er die Vermögenswerte zu einem höheren Preis verkauft. Wenn der Preis der Vermögenswerte steigt, wird der Manager diesen Vorteil nicht erzielen, aber er wird seine Vermögenswerte dennoch behalten.
 
 ### Perpetual Futures
 
-**Dies sind "Futures", die unbegrenzt dauern** (ohne ein Enddatum des Vertrags). Es ist sehr üblich, sie beispielsweise in Krypto-Börsen zu finden, wo Sie basierend auf dem Preis von Kryptos in Futures ein- und aussteigen können.
+**Dies sind "Futures", die unbegrenzt dauern** (ohne ein Enddatum des Vertrags). Es ist sehr üblich, sie beispielsweise in Krypto-Börsen zu finden, wo Sie basierend auf dem Preis von Kryptos in und aus Futures gehen können.
 
-Beachten Sie, dass in diesen Fällen die Gewinne und Verluste in Echtzeit erfolgen können. Wenn der Preis um 1% steigt, gewinnen Sie 1%, wenn der Preis um 1% sinkt, verlieren Sie es.
+Beachten Sie, dass in diesen Fällen die Gewinne und Verluste in Echtzeit erfolgen können. Wenn der Preis um 1% steigt, gewinnen Sie 1%, wenn der Preis um 1% fällt, verlieren Sie es.
 
 ### Futures with Leverage
 
-**Leverage** ermöglicht es Ihnen, eine größere Position auf dem Markt mit einem kleineren Geldbetrag zu kontrollieren. Es ermöglicht Ihnen im Grunde, "viel mehr Geld" zu setzen, als Sie haben, und dabei nur das Geld zu riskieren, das Sie tatsächlich haben.
+**Leverage** ermöglicht es Ihnen, eine größere Position auf dem Markt mit einem kleineren Geldbetrag zu kontrollieren. Es ermöglicht Ihnen im Grunde, "viel mehr Geld zu setzen, als Sie haben", wobei Sie nur das Geld riskieren, das Sie tatsächlich haben.
 
 Wenn Sie beispielsweise eine Future-Position im BTC/USDT mit 100$ und einem 50-fachen Hebel eröffnen, bedeutet dies, dass Sie, wenn der Preis um 1% steigt, 1x50 = 50% Ihrer ursprünglichen Investition (50$) gewinnen würden. Und daher hätten Sie 150$.\
-Wenn der Preis jedoch um 1% sinkt, verlieren Sie 50% Ihres Kapitals (59$ in diesem Fall). Und wenn der Preis um 2% sinkt, verlieren Sie Ihre gesamte Wette (2x50 = 100%).
+Wenn der Preis jedoch um 1% fällt, verlieren Sie 50% Ihrer Mittel (59$ in diesem Fall). Und wenn der Preis um 2% fällt, verlieren Sie Ihre gesamte Wette (2x50 = 100%).
 
 Daher ermöglicht es das Leverage, die Höhe des Geldes, das Sie setzen, zu kontrollieren, während die Gewinne und Verluste erhöht werden.
 
@@ -59,10 +59,10 @@ Der Käufer zahlt jedoch eine Gebühr an den Verkäufer für die Eröffnung der 
 
 ### 3. **Kosten:**
 
-* **Futures:** Es gibt keine Vorauszahlung über die Margin hinaus, die erforderlich ist, um die Position zu halten, da sowohl der Käufer als auch der Verkäufer verpflichtet sind, den Handel abzuschließen.
+* **Futures:** Es gibt keine Vorauszahlung über die Margin, die erforderlich ist, um die Position zu halten, da sowohl der Käufer als auch der Verkäufer verpflichtet sind, den Handel abzuschließen.
 * **Optionen:** Der Käufer muss eine **Optionsprämie** im Voraus zahlen, um das Recht zur Ausübung der Option zu erhalten. Diese Prämie ist im Wesentlichen die Kosten der Option.
 
 ### 4. **Gewinnpotenzial:**
 
-* **Futures:** Der Gewinn oder Verlust basiert auf der Differenz zwischen dem Marktpreis bei Fälligkeit und dem vereinbarten Preis im Vertrag.
+* **Futures:** Der Gewinn oder Verlust basiert auf der Differenz zwischen dem Marktpreis bei Fälligkeit und dem im Vertrag vereinbarten Preis.
 * **Optionen:** Der Käufer profitiert, wenn sich der Markt über den Ausübungspreis hinaus günstig bewegt, mehr als die gezahlte Prämie. Der Verkäufer profitiert, indem er die Prämie behält, wenn die Option nicht ausgeübt wird.

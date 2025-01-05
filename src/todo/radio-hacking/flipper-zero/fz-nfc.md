@@ -13,7 +13,7 @@ Für Informationen über RFID und NFC siehe die folgende Seite:
 ## Unterstützte NFC-Karten <a href="#id-9wrzi" id="id-9wrzi"></a>
 
 > [!CAUTION]
-> Abgesehen von NFC-Karten unterstützt Flipper Zero **andere Arten von Hochfrequenzkarten** wie mehrere **Mifare** Classic und Ultralight sowie **NTAG**.
+> Abgesehen von NFC-Karten unterstützt Flipper Zero **andere Arten von Hochfrequenzkarten**, wie mehrere **Mifare** Classic und Ultralight sowie **NTAG**.
 
 Neue Arten von NFC-Karten werden zur Liste der unterstützten Karten hinzugefügt. Flipper Zero unterstützt die folgenden **NFC-Karten Typ A** (ISO 14443A):
 
@@ -28,9 +28,9 @@ Für **NFC-Karten Typ B, Typ F und Typ V** kann Flipper Zero eine UID lesen, ohn
 
 Flipper Zero kann nur eine UID, SAK, ATQA und gespeicherte Daten auf Bankkarten **ohne Speicherung** lesen.
 
-Bankkarten-LesebildFür Bankkarten kann Flipper Zero Daten nur **ohne Speicherung und Emulation** lesen.
+Bankkarten-LesebildFür Bankkarten kann Flipper Zero Daten **ohne Speicherung und Emulation** lesen.
 
-<figure><img src="https://cdn.flipperzero.one/Monosnap_Miro_2022-08-17_12-26-31.png?auto=format&#x26;ixlib=react-9.1.1&#x26;h=916&#x26;w=2662" alt=""><figcaption></figcaption></figure>
+<figure><img src="https://cdn.flipperzero.one/Monosnap_Miro_2022-08-17_12-26-31.png?auto=format&ixlib=react-9.1.1&h=916&w=2662" alt=""><figcaption></figcaption></figure>
 
 #### Unbekannte Karten <a href="#id-37eo8" id="id-37eo8"></a>
 
@@ -38,13 +38,13 @@ Wenn Flipper Zero **nicht in der Lage ist, den Typ der NFC-Karte zu bestimmen**,
 
 Unbekannte Karten-LesebildFür unbekannte NFC-Karten kann Flipper Zero nur eine UID emulieren.
 
-<figure><img src="https://cdn.flipperzero.one/Monosnap_Miro_2022-08-17_12-27-53.png?auto=format&#x26;ixlib=react-9.1.1&#x26;h=932&#x26;w=2634" alt=""><figcaption></figcaption></figure>
+<figure><img src="https://cdn.flipperzero.one/Monosnap_Miro_2022-08-17_12-27-53.png?auto=format&ixlib=react-9.1.1&h=932&w=2634" alt=""><figcaption></figcaption></figure>
 
 ### NFC-Karten Typen B, F und V <a href="#wyg51" id="wyg51"></a>
 
 Für **NFC-Karten Typen B, F und V** kann Flipper Zero nur **eine UID lesen und anzeigen**, ohne sie zu speichern.
 
-<figure><img src="https://archbee.imgix.net/3StCFqarJkJQZV-7N79yY/zBU55Fyj50TFO4U7S-OXH_screenshot-2022-08-12-at-182540.png?auto=format&#x26;ixlib=react-9.1.1&#x26;h=1080&#x26;w=2704" alt=""><figcaption></figcaption></figure>
+<figure><img src="https://archbee.imgix.net/3StCFqarJkJQZV-7N79yY/zBU55Fyj50TFO4U7S-OXH_screenshot-2022-08-12-at-182540.png?auto=format&ixlib=react-9.1.1&h=1080&w=2704" alt=""><figcaption></figcaption></figure>
 
 ## Aktionen
 
@@ -67,10 +67,10 @@ Im Flipper kann das Lesen von 13,56 MHz-Tags in zwei Teile unterteilt werden:
 
 Falls Flipper Zero nicht in der Lage ist, den Typ der Karte aus den Low-Level-Daten zu finden, können Sie in `Extra Actions` `Spezifischen Kartentyp lesen` auswählen und **manuell** **den Typ der Karte angeben, die Sie lesen möchten**.
 
-#### EMV-Bankkarten (PayPass, payWave, Apple Pay, Google Pay) <a href="#emv-bank-cards-paypass-paywave-apple-pay-google-pay" id="emv-bank-cards-paypass-paywave-apple-pay-google-pay"></a>
+#### EMV Bankkarten (PayPass, payWave, Apple Pay, Google Pay) <a href="#emv-bank-cards-paypass-paywave-apple-pay-google-pay" id="emv-bank-cards-paypass-paywave-apple-pay-google-pay"></a>
 
-Neben dem einfachen Lesen der UID können Sie viel mehr Daten von einer Bankkarte extrahieren. Es ist möglich, **die vollständige Kartennummer** (die 16 Ziffern auf der Vorderseite der Karte), **Gültigkeitsdatum** und in einigen Fällen sogar den **Namen des Eigentümers** zusammen mit einer Liste der **neueste Transaktionen** zu erhalten.\
-Allerdings können Sie **den CVV auf diese Weise nicht lesen** (die 3 Ziffern auf der Rückseite der Karte). Außerdem sind **Bankkarten vor Replay-Angriffen geschützt**, sodass das Kopieren mit Flipper und der anschließende Versuch, sie zu emulieren, um für etwas zu bezahlen, nicht funktionieren wird.
+Neben dem einfachen Lesen der UID können Sie viel mehr Daten von einer Bankkarte extrahieren. Es ist möglich, **die vollständige Kartennummer** (die 16 Ziffern auf der Vorderseite der Karte), **Gültigkeitsdatum** und in einigen Fällen sogar den **Namen des Eigentümers** zusammen mit einer Liste der **letzten Transaktionen** zu erhalten.\
+Allerdings können Sie **den CVV auf diese Weise nicht lesen** (die 3 Ziffern auf der Rückseite der Karte). Außerdem **sind Bankkarten vor Replay-Angriffen geschützt**, sodass das Kopieren mit Flipper und der anschließende Versuch, es zu emulieren, um etwas zu bezahlen, nicht funktionieren wird.
 
 ## Referenzen
 

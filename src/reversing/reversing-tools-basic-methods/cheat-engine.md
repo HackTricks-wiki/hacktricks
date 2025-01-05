@@ -28,19 +28,19 @@ In _**Bearbeiten --> Einstellungen --> Hotkeys**_ können Sie verschiedene **Hot
 
 ![](<../../images/image (864).png>)
 
-## Den Wert ändern
+## Wert ändern
 
 Sobald Sie **gefunden** haben, wo der **Wert** ist, den Sie **suchen** (mehr dazu in den folgenden Schritten), können Sie ihn **ändern**, indem Sie doppelt darauf klicken und dann erneut auf seinen Wert doppelt klicken:
 
 ![](<../../images/image (563).png>)
 
-Und schließlich **das Kästchen markieren**, um die Änderung im Speicher vorzunehmen:
+Und schließlich **das Häkchen setzen**, um die Änderung im Speicher vorzunehmen:
 
 ![](<../../images/image (385).png>)
 
 Die **Änderung** im **Speicher** wird sofort **angewendet** (beachten Sie, dass der Wert **nicht im Spiel aktualisiert wird**, bis das Spiel diesen Wert nicht erneut verwendet).
 
-## Den Wert suchen
+## Wert suchen
 
 Angenommen, es gibt einen wichtigen Wert (wie das Leben Ihres Benutzers), den Sie verbessern möchten, und Sie suchen nach diesem Wert im Speicher.
 
@@ -54,8 +54,8 @@ Dann tun Sie etwas, damit sich der **Wert ändert**, und Sie **stoppen** das Spi
 
 ![](<../../images/image (684).png>)
 
-Cheat Engine wird nach den **Werten** suchen, die **von 100 auf den neuen Wert** gewechselt sind. Glückwunsch, Sie **haben** die **Adresse** des Wertes gefunden, den Sie gesucht haben, und können ihn jetzt ändern.\
-_&#x49;f Sie immer noch mehrere Werte haben, tun Sie etwas, um diesen Wert erneut zu ändern, und führen Sie einen weiteren "nächsten Scan" durch, um die Adressen zu filtern._
+Cheat Engine sucht nach den **Werten**, die **von 100 auf den neuen Wert** gewechselt sind. Glückwunsch, Sie **haben** die **Adresse** des Wertes gefunden, den Sie gesucht haben, und können ihn jetzt ändern.\
+_Wenn Sie immer noch mehrere Werte haben, ändern Sie diesen Wert erneut und führen Sie einen weiteren "nächsten Scan" durch, um die Adressen zu filtern._
 
 ### Unbekannter Wert, bekannte Änderung
 
@@ -90,7 +90,7 @@ Verwenden Sie einige der erwähnten Tricks, um die Adresse zu finden, an der Ihr
 Die **erste Option** ist nützlich, um zu wissen, welche **Teile** des **Codes** diese **Adresse** **verwenden** (was für mehr Dinge nützlich ist, wie z.B. **zu wissen, wo Sie den Code** des Spiels **ändern können**).\
 Die **zweite Option** ist spezifischer und wird in diesem Fall hilfreicher sein, da wir daran interessiert sind, **von wo dieser Wert geschrieben wird**.
 
-Sobald Sie eine dieser Optionen ausgewählt haben, wird der **Debugger** an das Programm **angehängt** und ein neues **leeres Fenster** erscheint. Jetzt **spielen** Sie das **Spiel** und **ändern** Sie diesen **Wert** (ohne das Spiel neu zu starten). Das **Fenster** sollte mit den **Adressen** gefüllt sein, die den **Wert ändern**:
+Sobald Sie eine dieser Optionen ausgewählt haben, wird der **Debugger** an das Programm **angehängt** und ein neues **leeres Fenster** erscheint. Jetzt **spielen** Sie das **Spiel** und **ändern** Sie diesen **Wert** (ohne das Spiel neu zu starten). Das **Fenster** sollte mit den **Adressen** **gefüllt** sein, die den **Wert** **ändern**:
 
 ![](<../../images/image (91).png>)
 
@@ -106,7 +106,7 @@ Befolgen Sie die vorherigen Schritte, um herauszufinden, wo sich der Wert befind
 
 ![](<../../images/image (1039).png>)
 
-Führen Sie dann einen neuen Scan durch, **um den Hex-Wert zwischen "\[]"** zu suchen (den Wert von $edx in diesem Fall):
+Führen Sie dann einen neuen Scan durch, **um den hexadezimalen Wert zwischen "\[]"** zu suchen (den Wert von $edx in diesem Fall):
 
 ![](<../../images/image (994).png>)
 
@@ -117,7 +117,7 @@ Klicken Sie auf "**Adresse manuell hinzufügen**":
 
 ![](<../../images/image (990).png>)
 
-Klicken Sie jetzt auf das Kontrollkästchen "Zeiger" und fügen Sie die gefundene Adresse in das Textfeld ein (in diesem Szenario war die gefundene Adresse im vorherigen Bild "Tutorial-i386.exe"+2426B0):
+Klicken Sie nun auf das Kontrollkästchen "Zeiger" und fügen Sie die gefundene Adresse in das Textfeld ein (in diesem Szenario war die gefundene Adresse im vorherigen Bild "Tutorial-i386.exe"+2426B0):
 
 ![](<../../images/image (392).png>)
 
@@ -133,7 +133,7 @@ Jetzt, jedes Mal, wenn Sie diesen Wert ändern, ändern Sie **den wichtigen Wert
 
 Code-Injektion ist eine Technik, bei der Sie ein Stück Code in den Zielprozess injizieren und dann die Ausführung des Codes so umleiten, dass sie durch Ihren eigenen geschriebenen Code geht (zum Beispiel, um Ihnen Punkte zu geben, anstatt sie abzuziehen).
 
-Stellen Sie sich also vor, Sie haben die Adresse gefunden, die 1 vom Leben Ihres Spielers abzieht:
+Stellen Sie sich vor, Sie haben die Adresse gefunden, die 1 vom Leben Ihres Spielers abzieht:
 
 ![](<../../images/image (203).png>)
 
@@ -142,7 +142,7 @@ Klicken Sie dann auf **CTRL+a**, um das Auto-Assembly-Fenster aufzurufen, und w�
 
 ![](<../../images/image (902).png>)
 
-Füllen Sie die **Adresse der Anweisung, die Sie ändern möchten** (dies wird normalerweise automatisch ausgefüllt):
+Füllen Sie die **Adresse der Anweisung aus, die Sie ändern möchten** (dies wird normalerweise automatisch ausgefüllt):
 
 ![](<../../images/image (744).png>)
 

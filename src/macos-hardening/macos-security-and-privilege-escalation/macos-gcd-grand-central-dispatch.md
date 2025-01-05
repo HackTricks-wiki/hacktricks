@@ -6,19 +6,19 @@
 
 **Grand Central Dispatch (GCD),** auch bekannt als **libdispatch** (`libdispatch.dyld`), ist sowohl in macOS als auch in iOS verfügbar. Es ist eine von Apple entwickelte Technologie zur Optimierung der Anwendungsunterstützung für parallele (multithreaded) Ausführung auf Multicore-Hardware.
 
-**GCD** stellt **FIFO-Warteschlangen** bereit und verwaltet diese, in die Ihre Anwendung **Aufgaben** in Form von **Blockobjekten** einreichen kann. Blöcke, die an Dispatch-Warteschlangen übergeben werden, werden **auf einem Pool von Threads** ausgeführt, der vollständig vom System verwaltet wird. GCD erstellt automatisch Threads zur Ausführung der Aufgaben in den Dispatch-Warteschlangen und plant diese Aufgaben zur Ausführung auf den verfügbaren Kernen.
+**GCD** stellt **FIFO-Warteschlangen** bereit und verwaltet diese, in die Ihre Anwendung **Aufgaben** in Form von **Blockobjekten** **einreichen** kann. Blöcke, die an Dispatch-Warteschlangen übergeben werden, werden **auf einem Pool von Threads** ausgeführt, der vollständig vom System verwaltet wird. GCD erstellt automatisch Threads zur Ausführung der Aufgaben in den Dispatch-Warteschlangen und plant diese Aufgaben zur Ausführung auf den verfügbaren Kernen.
 
 > [!TIP]
-> Zusammenfassend lässt sich sagen, dass Prozesse **Code parallel ausführen** können, indem sie **Codeblöcke an GCD senden**, das sich um deren Ausführung kümmert. Daher erstellen Prozesse keine neuen Threads; **GCD führt den gegebenen Code mit seinem eigenen Pool von Threads aus** (der je nach Bedarf erhöht oder verringert werden kann).
+> Zusammenfassend lässt sich sagen, dass Prozesse **Code parallel ausführen** können, indem sie **Codeblöcke an GCD senden**, das sich um deren Ausführung kümmert. Daher erstellen Prozesse keine neuen Threads; **GCD führt den gegebenen Code mit seinem eigenen Pool von Threads aus** (der nach Bedarf erhöht oder verringert werden kann).
 
 Dies ist sehr hilfreich, um die parallele Ausführung erfolgreich zu verwalten, da die Anzahl der Threads, die Prozesse erstellen, erheblich reduziert und die parallele Ausführung optimiert wird. Dies ist ideal für Aufgaben, die **große Parallelität** erfordern (Brute-Forcing?) oder für Aufgaben, die den Hauptthread nicht blockieren sollten: Zum Beispiel verarbeitet der Hauptthread in iOS UI-Interaktionen, sodass jede andere Funktionalität, die die App zum Hängen bringen könnte (Suchen, Zugriff auf das Web, Lesen einer Datei...), auf diese Weise verwaltet wird.
 
 ### Blöcke
 
-Ein Block ist ein **selbstständiger Abschnitt von Code** (wie eine Funktion mit Argumenten, die einen Wert zurückgibt) und kann auch gebundene Variablen angeben.\
-Auf Compiler-Ebene existieren Blöcke jedoch nicht, sie sind `os_object`s. Jedes dieser Objekte besteht aus zwei Strukturen:
+Ein Block ist ein **selbstenthaltener Abschnitt von Code** (wie eine Funktion mit Argumenten, die einen Wert zurückgibt) und kann auch gebundene Variablen angeben.\
+Allerdings existieren Blöcke auf Compiler-Ebene nicht, sie sind `os_object`s. Jedes dieser Objekte besteht aus zwei Strukturen:
 
-- **Blockliteral**:&#x20;
+- **Blockliteral**:
 - Es beginnt mit dem **`isa`**-Feld, das auf die Klasse des Blocks zeigt:
 - `NSConcreteGlobalBlock` (Blöcke aus `__DATA.__const`)
 - `NSConcreteMallocBlock` (Blöcke im Heap)
@@ -57,7 +57,7 @@ Standardwarteschlangen:
 - `.root.user-interactive-qos`: Höchste Priorität
 - `.root.background-qos.overcommit`
 
-Beachten Sie, dass das System entscheiden wird, **welche Threads zu welchem Zeitpunkt welche Warteschlangen bearbeiten** (mehrere Threads können in derselben Warteschlange arbeiten oder derselbe Thread kann zu einem bestimmten Zeitpunkt in verschiedenen Warteschlangen arbeiten).
+Beachten Sie, dass das System entscheidet, **welche Threads zu welchem Zeitpunkt welche Warteschlangen bearbeiten** (mehrere Threads können in derselben Warteschlange arbeiten oder derselbe Thread kann zu einem bestimmten Zeitpunkt in verschiedenen Warteschlangen arbeiten).
 
 #### Attribute
 
@@ -100,7 +100,7 @@ struct BlockDescriptor *descriptor;
 // captured variables go here
 };
 ```
-Und dies ist ein Beispiel, um **Parallelismus** mit **`dispatch_async`** zu verwenden:
+Und dies ist ein Beispiel für die Verwendung von **Parallelismus** mit **`dispatch_async`**:
 ```objectivec
 #import <Foundation/Foundation.h>
 
@@ -133,7 +133,7 @@ return 0;
 ## Swift
 
 **`libswiftDispatch`** ist eine Bibliothek, die **Swift-Bindings** für das Grand Central Dispatch (GCD) Framework bereitstellt, das ursprünglich in C geschrieben wurde.\
-Die **`libswiftDispatch`** Bibliothek umschließt die C GCD APIs in einer benutzerfreundlicheren Swift-Schnittstelle, was es für Swift-Entwickler einfacher und intuitiver macht, mit GCD zu arbeiten.
+Die **`libswiftDispatch`** Bibliothek umschließt die C GCD APIs in einer für Swift freundlicheren Schnittstelle, was es für Swift-Entwickler einfacher und intuitiver macht, mit GCD zu arbeiten.
 
 - **`DispatchQueue.global().sync{ ... }`**
 - **`DispatchQueue.global().async{ ... }`**
@@ -170,7 +170,7 @@ sleep(1)  // Simulate a long-running task
 ```
 ## Frida
 
-Das folgende Frida-Skript kann verwendet werden, um **in mehrere `dispatch`** Funktionen einzuhaken und den Warteschafennamen, den Backtrace und den Block zu extrahieren: [**https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js**](https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js)
+Das folgende Frida-Skript kann verwendet werden, um **in mehrere `dispatch`** Funktionen einzugreifen und den Warteschafennamen, den Backtrace und den Block zu extrahieren: [**https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js**](https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js)
 ```bash
 frida -U <prog_name> -l libdispatch.js
 

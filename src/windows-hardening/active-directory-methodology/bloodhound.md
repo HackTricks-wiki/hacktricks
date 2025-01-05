@@ -6,7 +6,7 @@
 
 [AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) ist aus der Sysinternal Suite:
 
-> Ein fortschrittlicher Active Directory (AD) Viewer und Editor. Sie können AD Explorer verwenden, um einfach durch eine AD-Datenbank zu navigieren, bevorzugte Standorte zu definieren, Objektattribute und -eigenschaften ohne Öffnen von Dialogfeldern anzuzeigen, Berechtigungen zu bearbeiten, das Schema eines Objekts anzuzeigen und anspruchsvolle Suchen auszuführen, die Sie speichern und erneut ausführen können.
+> Ein fortschrittlicher Active Directory (AD) Viewer und Editor. Sie können AD Explorer verwenden, um einfach durch eine AD-Datenbank zu navigieren, bevorzugte Standorte zu definieren, Objektattribute und -eigenschaften ohne Öffnen von Dialogfeldern anzuzeigen, Berechtigungen zu bearbeiten, das Schema eines Objekts anzuzeigen und komplexe Suchen auszuführen, die Sie speichern und erneut ausführen können.
 
 ### Snapshots
 
@@ -26,17 +26,17 @@ Um einen Snapshot von AD zu erstellen, gehen Sie zu `Datei` --> `Snapshot erstel
 ```
 ## BloodHound
 
-Von [https://github.com/BloodHoundAD/BloodHound](https://github.com/BloodHoundAD/BloodHound)
+From [https://github.com/BloodHoundAD/BloodHound](https://github.com/BloodHoundAD/BloodHound)
 
 > BloodHound ist eine einseitige Javascript-Webanwendung, die auf [Linkurious](http://linkurio.us/) basiert, mit [Electron](http://electron.atom.io/) kompiliert wurde und eine [Neo4j](https://neo4j.com/) Datenbank verwendet, die von einem C# Datenkollektor gespeist wird.
 
-BloodHound verwendet Graphentheorie, um die verborgenen und oft unbeabsichtigten Beziehungen innerhalb einer Active Directory- oder Azure-Umgebung offenzulegen. Angreifer können BloodHound verwenden, um hochkomplexe Angriffswege leicht zu identifizieren, die sonst nur schwer schnell zu erkennen wären. Verteidiger können BloodHound nutzen, um dieselben Angriffswege zu identifizieren und zu beseitigen. Sowohl Blue- als auch Red-Teams können BloodHound verwenden, um ein tieferes Verständnis der Berechtigungsbeziehungen in einer Active Directory- oder Azure-Umgebung zu erlangen.
+BloodHound nutzt die Graphentheorie, um die verborgenen und oft unbeabsichtigten Beziehungen innerhalb einer Active Directory- oder Azure-Umgebung offenzulegen. Angreifer können BloodHound verwenden, um hochkomplexe Angriffswege leicht zu identifizieren, die sonst nur schwer schnell zu erkennen wären. Verteidiger können BloodHound nutzen, um dieselben Angriffswege zu identifizieren und zu beseitigen. Sowohl Blue- als auch Red-Teams können BloodHound verwenden, um ein tieferes Verständnis der Berechtigungsbeziehungen in einer Active Directory- oder Azure-Umgebung zu erlangen.
 
-Also, [Bloodhound ](https://github.com/BloodHoundAD/BloodHound) ist ein erstaunliches Tool, das automatisch eine Domäne auflisten, alle Informationen speichern, mögliche Privilegieneskalationspfade finden und alle Informationen mithilfe von Grafiken anzeigen kann.
+Also, [Bloodhound ](https://github.com/BloodHoundAD/BloodHound) ist ein erstaunliches Tool, das eine Domäne automatisch auflisten, alle Informationen speichern, mögliche Privilegieneskalationspfade finden und alle Informationen mithilfe von Grafiken anzeigen kann.
 
 BloodHound besteht aus 2 Hauptteilen: **Ingestoren** und der **Visualisierungsanwendung**.
 
-Die **Ingestoren** werden verwendet, um **die Domäne aufzulisten und alle Informationen** in einem Format zu extrahieren, das die Visualisierungsanwendung versteht.
+Die **Ingestoren** werden verwendet, um **die Domäne aufzulisten und alle Informationen** in einem Format zu extrahieren, das die Visualisierungsanwendung verstehen kann.
 
 Die **Visualisierungsanwendung verwendet Neo4j**, um zu zeigen, wie alle Informationen miteinander verbunden sind und um verschiedene Möglichkeiten zur Eskalation von Berechtigungen in der Domäne anzuzeigen.
 
@@ -44,7 +44,7 @@ Die **Visualisierungsanwendung verwendet Neo4j**, um zu zeigen, wie alle Informa
 
 Nach der Erstellung von BloodHound CE wurde das gesamte Projekt zur Benutzerfreundlichkeit mit Docker aktualisiert. Der einfachste Weg, um zu beginnen, ist die Verwendung der vorkonfigurierten Docker Compose-Konfiguration.
 
-1. Installieren Sie Docker Compose. Dies sollte mit der Installation von [Docker Desktop](https://www.docker.com/products/docker-desktop/) enthalten sein.
+1. Installieren Sie Docker Compose. Dies sollte mit der [Docker Desktop](https://www.docker.com/products/docker-desktop/) Installation enthalten sein.
 2. Führen Sie aus:
 ```
 curl -L https://ghst.ly/getbhce | docker compose -f - up
@@ -56,7 +56,7 @@ Nachdem Sie dies getan haben, müssen Sie das zufällig generierte Passwort änd
 
 ### SharpHound
 
-Sie haben mehrere Optionen, aber wenn Sie SharpHound von einem PC ausführen möchten, der der Domäne beigetreten ist, und Ihr aktueller Benutzer ist, und alle Informationen extrahieren möchten, können Sie:
+Sie haben mehrere Optionen, aber wenn Sie SharpHound von einem PC ausführen möchten, der der Domäne beigetreten ist, und Ihren aktuellen Benutzer verwenden und alle Informationen extrahieren möchten, können Sie:
 ```
 ./SharpHound.exe --CollectionMethods All
 Invoke-BloodHound -CollectionMethod All
@@ -82,6 +82,6 @@ group3r.exe -f <filepath-name.log>
 
 [**PingCastle**](https://www.pingcastle.com/documentation/) **bewertet die Sicherheitslage einer AD-Umgebung** und bietet einen schönen **Bericht** mit Grafiken.
 
-Um es auszuführen, kann die Binary `PingCastle.exe` ausgeführt werden, und es wird eine **interaktive Sitzung** gestartet, die ein Menü mit Optionen präsentiert. Die Standardoption, die verwendet werden soll, ist **`healthcheck`**, die eine Basislinie **Übersicht** über die **Domäne** erstellt und **Fehlkonfigurationen** sowie **Schwachstellen** findet.&#x20;
+Um es auszuführen, kann die Binary `PingCastle.exe` ausgeführt werden, und es wird eine **interaktive Sitzung** gestartet, die ein Menü mit Optionen präsentiert. Die Standardoption, die verwendet werden soll, ist **`healthcheck`**, die eine Basislinie **Übersicht** über die **Domäne** erstellt und **Fehlkonfigurationen** und **Schwachstellen** findet.
 
 {{#include ../../banners/hacktricks-training.md}}

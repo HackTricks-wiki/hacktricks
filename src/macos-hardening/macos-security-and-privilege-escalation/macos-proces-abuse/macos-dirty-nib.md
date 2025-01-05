@@ -52,7 +52,7 @@ display dialog theDialogText
 
 ### Anderes Beispiel
 
-Im Beitrag [https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) finden Sie ein Tutorial, wie man einen Dirty Nib erstellt.&#x20;
+Im Beitrag [https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) finden Sie ein Tutorial, wie man einen Dirty Nib erstellt.
 
 ### Umgang mit Startbeschränkungen
 

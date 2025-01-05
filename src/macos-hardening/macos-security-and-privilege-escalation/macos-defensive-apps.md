@@ -9,11 +9,11 @@
 
 ## Persistence detection
 
-- [**KnockKnock**](https://objective-see.org/products/knockknock.html): Objective-See-Anwendung, die an mehreren Orten sucht, wo **Malware persistieren könnte** (es ist ein Einmal-Tool, kein Überwachungsdienst).
-- [**BlockBlock**](https://objective-see.org/products/blockblock.html): Wie KnockKnock, indem es Prozesse überwacht, die Persistenz erzeugen.
+- [**KnockKnock**](https://objective-see.org/products/knockknock.html): Objective-See Anwendung, die an mehreren Orten sucht, wo **Malware persistieren könnte** (es ist ein Einmal-Tool, kein Überwachungsdienst).
+- [**BlockBlock**](https://objective-see.org/products/blockblock.html): Wie KnockKnock, indem Prozesse überwacht werden, die Persistenz erzeugen.
 
 ## Keyloggers detection
 
-- [**ReiKey**](https://objective-see.org/products/reikey.html): Objective-See-Anwendung zur Auffindung von **Keyloggern**, die "Event Taps" für die Tastatur installieren. 
+- [**ReiKey**](https://objective-see.org/products/reikey.html): Objective-See Anwendung zur Auffindung von **Keyloggern**, die "Event Taps" für die Tastatur installieren.
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -4,7 +4,7 @@
 
 ## Grundlegende Informationen
 
-Der Zeit-Namespace in Linux ermöglicht offsets pro Namespace zu den systemeigenen monotonen und Boot-Zeit-Uhren. Er wird häufig in Linux-Containern verwendet, um das Datum/Zeit innerhalb eines Containers zu ändern und Uhren nach der Wiederherstellung von einem Checkpoint oder Snapshot anzupassen.
+Der Zeit-Namespace in Linux ermöglicht offsets pro Namespace zu den systemeigenen monotonen und Boot-Zeit-Uhren. Er wird häufig in Linux-Containern verwendet, um das Datum/die Uhrzeit innerhalb eines Containers zu ändern und Uhren nach der Wiederherstellung von einem Checkpoint oder Snapshot anzupassen.
 
 ## Labor:
 
@@ -14,7 +14,7 @@ Der Zeit-Namespace in Linux ermöglicht offsets pro Namespace zu den systemeigen
 ```bash
 sudo unshare -T [--mount-proc] /bin/bash
 ```
-Durch das Einhängen einer neuen Instanz des `/proc`-Dateisystems, wenn Sie den Parameter `--mount-proc` verwenden, stellen Sie sicher, dass der neue Mount-Namespace eine **genaue und isolierte Sicht auf die prozessspezifischen Informationen hat, die für diesen Namespace spezifisch sind**.
+Durch das Einhängen einer neuen Instanz des `/proc`-Dateisystems, wenn Sie den Parameter `--mount-proc` verwenden, stellen Sie sicher, dass der neue Mount-Namespace eine **genaue und isolierte Sicht auf die Prozessinformationen hat, die spezifisch für diesen Namespace sind**.
 
 <details>
 
@@ -30,7 +30,7 @@ Wenn `unshare` ohne die Option `-f` ausgeführt wird, tritt ein Fehler auf, der 
 
 2. **Folge**:
 
-- Das Beenden von PID 1 in einem neuen Namespace führt zur Bereinigung des `PIDNS_HASH_ADDING`-Flags. Dies führt dazu, dass die Funktion `alloc_pid` fehlschlägt, um eine neue PID zuzuweisen, wenn ein neuer Prozess erstellt wird, was den Fehler "Kann Speicher nicht zuweisen" erzeugt.
+- Das Beenden von PID 1 in einem neuen Namespace führt zur Bereinigung des `PIDNS_HASH_ADDING`-Flags. Dies führt dazu, dass die Funktion `alloc_pid` fehlschlägt, wenn versucht wird, eine neue PID zuzuweisen, was den Fehler "Kann Speicher nicht zuweisen" erzeugt.
 
 3. **Lösung**:
 - Das Problem kann gelöst werden, indem die Option `-f` mit `unshare` verwendet wird. Diese Option bewirkt, dass `unshare` einen neuen Prozess nach der Erstellung des neuen PID-Namespace forked.
@@ -44,7 +44,7 @@ Durch die Sicherstellung, dass `unshare` mit dem `-f`-Flag ausgeführt wird, wir
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-### &#x20;Überprüfen, in welchem Namespace sich Ihr Prozess befindet
+### Überprüfen, in welchem Namespace sich Ihr Prozess befindet
 ```bash
 ls -l /proc/self/ns/time
 lrwxrwxrwx 1 root root 0 Apr  4 21:16 /proc/self/ns/time -> 'time:[4026531834]'

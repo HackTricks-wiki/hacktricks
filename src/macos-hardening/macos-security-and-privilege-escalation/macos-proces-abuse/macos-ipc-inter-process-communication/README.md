@@ -6,66 +6,66 @@
 
 ### Grundlegende Informationen
 
-Mach verwendet **Aufgaben** als die **kleinste Einheit** zum Teilen von Ressourcen, und jede Aufgabe kann **mehrere Threads** enthalten. Diese **Aufgaben und Threads sind 1:1 auf POSIX-Prozesse und -Threads abgebildet**.
+Mach verwendet **Tasks** als die **kleinste Einheit** zum Teilen von Ressourcen, und jede Task kann **mehrere Threads** enthalten. Diese **Tasks und Threads sind 1:1 auf POSIX-Prozesse und -Threads abgebildet**.
 
-Die Kommunikation zwischen Aufgaben erfolgt über Mach Inter-Process Communication (IPC) und nutzt einseitige Kommunikationskanäle. **Nachrichten werden zwischen Ports übertragen**, die eine Art **Nachrichtenwarteschlangen** sind, die vom Kernel verwaltet werden.
+Die Kommunikation zwischen Tasks erfolgt über Mach Inter-Process Communication (IPC) und nutzt einseitige Kommunikationskanäle. **Nachrichten werden zwischen Ports übertragen**, die eine Art **Nachrichtenwarteschlangen** sind, die vom Kernel verwaltet werden.
 
 Ein **Port** ist das **grundlegende** Element von Mach IPC. Er kann verwendet werden, um **Nachrichten zu senden und zu empfangen**.
 
-Jeder Prozess hat eine **IPC-Tabelle**, in der die **Mach-Ports des Prozesses** gefunden werden können. Der Name eines Mach-Ports ist tatsächlich eine Nummer (ein Zeiger auf das Kernel-Objekt).
+Jeder Prozess hat eine **IPC-Tabelle**, in der die **Mach-Ports des Prozesses** zu finden sind. Der Name eines Mach-Ports ist tatsächlich eine Nummer (ein Zeiger auf das Kernel-Objekt).
 
-Ein Prozess kann auch einen Portnamen mit bestimmten Rechten **an eine andere Aufgabe** senden, und der Kernel wird diesen Eintrag in der **IPC-Tabelle der anderen Aufgabe** erscheinen lassen.
+Ein Prozess kann auch einen Portnamen mit bestimmten Rechten **an eine andere Task** senden, und der Kernel wird diesen Eintrag in der **IPC-Tabelle der anderen Task** erscheinen lassen.
 
 ### Portrechte
 
-Portrechte, die definieren, welche Operationen eine Aufgabe ausführen kann, sind entscheidend für diese Kommunikation. Die möglichen **Portrechte** sind ([Definitionen hier](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)):
+Portrechte, die definieren, welche Operationen eine Task ausführen kann, sind entscheidend für diese Kommunikation. Die möglichen **Portrechte** sind ([Definitionen hier](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)):
 
-- **Empfangsrecht**, das das Empfangen von Nachrichten, die an den Port gesendet werden, erlaubt. Mach-Ports sind MPSC (multiple-producer, single-consumer) Warteschlangen, was bedeutet, dass es im gesamten System **nur ein Empfangsrecht für jeden Port** geben kann (im Gegensatz zu Pipes, bei denen mehrere Prozesse alle Dateideskriptoren zum Leseende einer Pipe halten können).
-- Eine **Aufgabe mit dem Empfangsrecht** kann Nachrichten empfangen und **Sende-Rechte erstellen**, die es ihr ermöglichen, Nachrichten zu senden. Ursprünglich hat nur die **eigene Aufgabe das Empfangsrecht über ihren Port**.
+- **Empfangsrecht**, das das Empfangen von an den Port gesendeten Nachrichten erlaubt. Mach-Ports sind MPSC (multiple-producer, single-consumer) Warteschlangen, was bedeutet, dass es im gesamten System **nur ein Empfangsrecht für jeden Port** geben kann (im Gegensatz zu Pipes, bei denen mehrere Prozesse alle Dateideskriptoren zum Leseende einer Pipe halten können).
+- Eine **Task mit dem Empfangsrecht** kann Nachrichten empfangen und **Sende-Rechte erstellen**, die es ihr ermöglichen, Nachrichten zu senden. Ursprünglich hat nur die **eigene Task das Empfangsrecht über ihren Port**.
 - Wenn der Besitzer des Empfangsrechts **stirbt** oder es tötet, wird das **Sende-Recht nutzlos (toter Name)**.
 - **Sende-Recht**, das das Senden von Nachrichten an den Port erlaubt.
-- Das Sende-Recht kann **kloniert** werden, sodass eine Aufgabe, die ein Sende-Recht besitzt, das Recht klonen und **einer dritten Aufgabe gewähren** kann.
-- Beachten Sie, dass **Portrechte** auch über Mach-Nachrichten **übertragen** werden können.
+- Das Sende-Recht kann **kloniert** werden, sodass eine Task, die ein Sende-Recht besitzt, das Recht klonen und **einer dritten Task gewähren** kann.
+- Beachten Sie, dass **Portrechte** auch durch Mach-Nachrichten **übertragen** werden können.
 - **Send-once-Recht**, das das Senden einer Nachricht an den Port erlaubt und dann verschwindet.
 - Dieses Recht **kann nicht** **kloniert** werden, aber es kann **verschoben** werden.
-- **Portset-Recht**, das ein _Portset_ anstelle eines einzelnen Ports bezeichnet. Das Dequeuen einer Nachricht aus einem Portset dequeuet eine Nachricht von einem der enthaltenen Ports. Portsets können verwendet werden, um gleichzeitig auf mehreren Ports zu hören, ähnlich wie `select`/`poll`/`epoll`/`kqueue` in Unix.
+- **Portset-Recht**, das ein _Portset_ anstelle eines einzelnen Ports bezeichnet. Das Dequeuen einer Nachricht aus einem Portset dequeuert eine Nachricht aus einem der enthaltenen Ports. Portsets können verwendet werden, um gleichzeitig auf mehreren Ports zu hören, ähnlich wie `select`/`poll`/`epoll`/`kqueue` in Unix.
 - **Toter Name**, der kein tatsächliches Portrecht ist, sondern lediglich ein Platzhalter. Wenn ein Port zerstört wird, verwandeln sich alle bestehenden Portrechte für den Port in tote Namen.
 
-**Aufgaben können SEND-Rechte an andere übertragen**, die es ihnen ermöglichen, Nachrichten zurückzusenden. **SEND-Rechte können auch geklont werden, sodass eine Aufgabe das Recht duplizieren und einer dritten Aufgabe geben kann**. Dies, kombiniert mit einem Zwischenprozess, der als **Bootstrap-Server** bekannt ist, ermöglicht eine effektive Kommunikation zwischen Aufgaben.
+**Tasks können SEND-Rechte an andere übertragen**, wodurch diese in der Lage sind, Nachrichten zurückzusenden. **SEND-Rechte können auch kloniert werden, sodass eine Task das Recht duplizieren und einer dritten Task geben kann**. Dies, kombiniert mit einem Zwischenprozess, der als **Bootstrap-Server** bekannt ist, ermöglicht eine effektive Kommunikation zwischen Tasks.
 
 ### Datei-Ports
 
-Datei-Ports ermöglichen es, Dateideskriptoren in Mac-Ports zu kapseln (unter Verwendung von Mach-Port-Rechten). Es ist möglich, einen `fileport` aus einem gegebenen FD mit `fileport_makeport` zu erstellen und einen FD aus einem fileport mit `fileport_makefd` zu erstellen.
+Datei-Ports ermöglichen es, Dateideskriptoren in Mach-Ports zu kapseln (unter Verwendung von Mach-Port-Rechten). Es ist möglich, einen `fileport` aus einem gegebenen FD mit `fileport_makeport` zu erstellen und einen FD aus einem fileport mit `fileport_makefd` zu erstellen.
 
 ### Eine Kommunikation herstellen
 
-Wie bereits erwähnt, ist es möglich, Rechte über Mach-Nachrichten zu senden, jedoch **kann man kein Recht senden, ohne bereits ein Recht zu haben**, um eine Mach-Nachricht zu senden. Wie wird also die erste Kommunikation hergestellt?
+Wie bereits erwähnt, ist es möglich, Rechte mit Mach-Nachrichten zu senden, jedoch **kann man kein Recht senden, ohne bereits ein Recht zu haben**, um eine Mach-Nachricht zu senden. Wie wird also die erste Kommunikation hergestellt?
 
 Dafür ist der **Bootstrap-Server** (**launchd** in mac) beteiligt, da **jeder ein SEND-Recht zum Bootstrap-Server erhalten kann**, ist es möglich, ihn um ein Recht zu bitten, um eine Nachricht an einen anderen Prozess zu senden:
 
-1. Aufgabe **A** erstellt einen **neuen Port** und erhält das **EMPFANGSRECHT** dafür.
-2. Aufgabe **A**, die Inhaberin des Empfangsrechts, **generiert ein SEND-Recht für den Port**.
-3. Aufgabe **A** stellt eine **Verbindung** mit dem **Bootstrap-Server** her und **sendet ihm das SEND-Recht** für den Port, den sie zu Beginn generiert hat.
+1. Task **A** erstellt einen **neuen Port** und erhält das **EMPFANGSRECHT** dafür.
+2. Task **A**, als Inhaber des Empfangsrechts, **generiert ein SEND-Recht für den Port**.
+3. Task **A** stellt eine **Verbindung** mit dem **Bootstrap-Server** her und **sendet ihm das SEND-Recht** für den Port, den sie zu Beginn generiert hat.
 - Denken Sie daran, dass jeder ein SEND-Recht zum Bootstrap-Server erhalten kann.
-4. Aufgabe A sendet eine `bootstrap_register`-Nachricht an den Bootstrap-Server, um **den gegebenen Port mit einem Namen** wie `com.apple.taska` zu verknüpfen.
-5. Aufgabe **B** interagiert mit dem **Bootstrap-Server**, um eine Bootstrap-**Suche nach dem Dienstnamen** (`bootstrap_lookup`) durchzuführen. Damit der Bootstrap-Server antworten kann, sendet Aufgabe B ihm ein **SEND-Recht zu einem Port, den sie zuvor erstellt hat**, innerhalb der Suchnachricht. Wenn die Suche erfolgreich ist, **dupliziert der Server das SEND-Recht**, das von Aufgabe A empfangen wurde, und **überträgt es an Aufgabe B**.
+4. Task A sendet eine `bootstrap_register`-Nachricht an den Bootstrap-Server, um **den gegebenen Port mit einem Namen** wie `com.apple.taska` zu verknüpfen.
+5. Task **B** interagiert mit dem **Bootstrap-Server**, um eine Bootstrap-**Suche nach dem Dienstnamen** (`bootstrap_lookup`) durchzuführen. Damit der Bootstrap-Server antworten kann, sendet Task B ihm ein **SEND-Recht zu einem Port, den es zuvor erstellt hat**, innerhalb der Suchnachricht. Wenn die Suche erfolgreich ist, **dupliziert der Server das SEND-Recht**, das von Task A empfangen wurde, und **überträgt es an Task B**.
 - Denken Sie daran, dass jeder ein SEND-Recht zum Bootstrap-Server erhalten kann.
-6. Mit diesem SEND-Recht ist **Aufgabe B** in der Lage, eine **Nachricht** **an Aufgabe A** zu **senden**.
-7. Für eine bidirektionale Kommunikation generiert normalerweise Aufgabe **B** einen neuen Port mit einem **EMPFANGS**-Recht und einem **SEND**-Recht und gibt das **SEND-Recht an Aufgabe A**, damit sie Nachrichten an Aufgabe B senden kann (bidirektionale Kommunikation).
+6. Mit diesem SEND-Recht ist **Task B** in der Lage, eine **Nachricht** **an Task A** zu **senden**.
+7. Für eine bidirektionale Kommunikation generiert normalerweise Task **B** einen neuen Port mit einem **EMPFANGS**-Recht und einem **SEND**-Recht und gibt das **SEND-Recht an Task A**, damit es Nachrichten an TASK B senden kann (bidirektionale Kommunikation).
 
-Der Bootstrap-Server **kann den Dienstnamen**, der von einer Aufgabe beansprucht wird, **nicht authentifizieren**. Das bedeutet, dass eine **Aufgabe** potenziell **jede Systemaufgabe impersonieren** könnte, indem sie fälschlicherweise **einen Autorisierungsdienstnamen beansprucht** und dann jede Anfrage genehmigt.
+Der Bootstrap-Server **kann den Dienstnamen, der von einer Task beansprucht wird, nicht authentifizieren**. Das bedeutet, dass eine **Task** potenziell **jede System-Task impersonieren** könnte, indem sie fälschlicherweise **einen Autorisierungsdienstnamen beansprucht** und dann jede Anfrage genehmigt.
 
-Dann speichert Apple die **Namen der systemeigenen Dienste** in sicheren Konfigurationsdateien, die sich in **SIP-geschützten** Verzeichnissen befinden: `/System/Library/LaunchDaemons` und `/System/Library/LaunchAgents`. Neben jedem Dienstnamen wird auch die **assoziierte Binärdatei gespeichert**. Der Bootstrap-Server erstellt und hält ein **EMPFANGSRECHT für jeden dieser Dienstnamen**.
+Dann speichert Apple die **Namen der systemeigenen Dienste** in sicheren Konfigurationsdateien, die sich in **SIP-geschützten** Verzeichnissen befinden: `/System/Library/LaunchDaemons` und `/System/Library/LaunchAgents`. Neben jedem Dienstnamen wird auch die **assoziierte Binärdatei gespeichert**. Der Bootstrap-Server wird ein **EMPFANGSRECHT für jeden dieser Dienstnamen** erstellen und halten.
 
 Für diese vordefinierten Dienste unterscheidet sich der **Suchprozess leicht**. Wenn ein Dienstname gesucht wird, startet launchd den Dienst dynamisch. Der neue Workflow ist wie folgt:
 
-- Aufgabe **B** initiiert eine Bootstrap-**Suche** nach einem Dienstnamen.
-- **launchd** überprüft, ob die Aufgabe läuft, und wenn nicht, **startet** sie sie.
-- Aufgabe **A** (der Dienst) führt eine **Bootstrap-Check-in**-Operation (`bootstrap_check_in()`) durch. Hier erstellt der **Bootstrap**-Server ein SEND-Recht, behält es und **überträgt das EMPFANGSRECHT an Aufgabe A**.
-- launchd dupliziert das **SEND-Recht und sendet es an Aufgabe B**.
-- Aufgabe **B** generiert einen neuen Port mit einem **EMPFANGS**-Recht und einem **SEND**-Recht und gibt das **SEND-Recht an Aufgabe A** (den Dienst) weiter, damit sie Nachrichten an Aufgabe B senden kann (bidirektionale Kommunikation).
+- Task **B** initiiert eine Bootstrap-**Suche** nach einem Dienstnamen.
+- **launchd** überprüft, ob die Task läuft, und wenn nicht, **startet** sie.
+- Task **A** (der Dienst) führt eine **Bootstrap-Check-in** (`bootstrap_check_in()`) durch. Hier erstellt der **Bootstrap**-Server ein SEND-Recht, behält es und **überträgt das EMPFANGSRECHT an Task A**.
+- launchd dupliziert das **SEND-Recht und sendet es an Task B**.
+- Task **B** generiert einen neuen Port mit einem **EMPFANGS**-Recht und einem **SEND**-Recht und gibt das **SEND-Recht an Task A** (den Dienst) weiter, damit es Nachrichten an TASK B senden kann (bidirektionale Kommunikation).
 
-Dieser Prozess gilt jedoch nur für vordefinierte Systemaufgaben. Nicht-Systemaufgaben funktionieren weiterhin wie ursprünglich beschrieben, was potenziell eine Impersonation ermöglichen könnte.
+Dieser Prozess gilt jedoch nur für vordefinierte System-Tasks. Nicht-System-Tasks funktionieren weiterhin wie ursprünglich beschrieben, was potenziell eine Imitation ermöglichen könnte.
 
 > [!CAUTION]
 > Daher sollte launchd niemals abstürzen, sonst stürzt das gesamte System ab.
@@ -85,17 +85,17 @@ mach_port_name_t              msgh_voucher_port;
 mach_msg_id_t                 msgh_id;
 } mach_msg_header_t;
 ```
-Prozesse, die über ein _**receive right**_ verfügen, können Nachrichten über einen Mach-Port empfangen. Im Gegensatz dazu wird den **Sendenden** ein _**send**_ oder ein _**send-once right**_ gewährt. Das send-once right ist ausschließlich zum Senden einer einzelnen Nachricht gedacht, nach der es ungültig wird.
+Prozesse, die über ein _**Empfangsrecht**_ verfügen, können Nachrichten über einen Mach-Port empfangen. Im Gegensatz dazu wird den **Sendern** ein _**Senderecht**_ oder ein _**Send-einmal-Recht**_ gewährt. Das Send-einmal-Recht ist ausschließlich zum Senden einer einzelnen Nachricht gedacht, nach der es ungültig wird.
 
 Das anfängliche Feld **`msgh_bits`** ist ein Bitmap:
 
 - Das erste Bit (am signifikantesten) wird verwendet, um anzuzeigen, dass eine Nachricht komplex ist (mehr dazu weiter unten)
 - Das 3. und 4. Bit werden vom Kernel verwendet
-- Die **5 am wenigsten signifikanten Bits des 2. Bytes** können für **voucher** verwendet werden: ein anderer Typ von Port, um Schlüssel/Wert-Kombinationen zu senden.
-- Die **5 am wenigsten signifikanten Bits des 3. Bytes** können für **local port** verwendet werden
-- Die **5 am wenigsten signifikanten Bits des 4. Bytes** können für **remote port** verwendet werden
+- Die **5 am wenigsten signifikanten Bits des 2. Bytes** können für **Voucher** verwendet werden: ein anderer Typ von Port, um Schlüssel/Wert-Kombinationen zu senden.
+- Die **5 am wenigsten signifikanten Bits des 3. Bytes** können für **lokalen Port** verwendet werden
+- Die **5 am wenigsten signifikanten Bits des 4. Bytes** können für **remote Port** verwendet werden
 
-Die Typen, die im Voucher, lokalen und entfernten Ports angegeben werden können, sind (aus [**mach/message.h**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)):
+Die Typen, die im Voucher, lokalen und remote Ports angegeben werden können, sind (aus [**mach/message.h**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)):
 ```c
 #define MACH_MSG_TYPE_MOVE_RECEIVE      16      /* Must hold receive right */
 #define MACH_MSG_TYPE_MOVE_SEND         17      /* Must hold send right(s) */
@@ -108,30 +108,30 @@ Die Typen, die im Voucher, lokalen und entfernten Ports angegeben werden können
 #define MACH_MSG_TYPE_DISPOSE_SEND      25      /* must hold send right(s) */
 #define MACH_MSG_TYPE_DISPOSE_SEND_ONCE 26      /* must hold sendonce right */
 ```
-Zum Beispiel kann `MACH_MSG_TYPE_MAKE_SEND_ONCE` verwendet werden, um anzuzeigen, dass ein **send-once** **Recht** für diesen Port abgeleitet und übertragen werden sollte. Es kann auch `MACH_PORT_NULL` angegeben werden, um zu verhindern, dass der Empfänger antworten kann.
+Für example, `MACH_MSG_TYPE_MAKE_SEND_ONCE` kann verwendet werden, um anzuzeigen, dass ein **send-once** **Recht** abgeleitet und für diesen Port übertragen werden sollte. Es kann auch `MACH_PORT_NULL` angegeben werden, um zu verhindern, dass der Empfänger antworten kann.
 
 Um eine einfache **zweiseitige Kommunikation** zu erreichen, kann ein Prozess einen **mach port** im mach **Nachrichtenkopf** angeben, der als _Antwortport_ (**`msgh_local_port`**) bezeichnet wird, wo der **Empfänger** der Nachricht eine **Antwort** auf diese Nachricht senden kann.
 
 > [!TIP]
 > Beachten Sie, dass diese Art der zweiseitigen Kommunikation in XPC-Nachrichten verwendet wird, die eine Antwort erwarten (`xpc_connection_send_message_with_reply` und `xpc_connection_send_message_with_reply_sync`). Aber **normalerweise werden verschiedene Ports erstellt**, wie zuvor erklärt, um die zweiseitige Kommunikation zu ermöglichen.
 
-Die anderen Felder des Nachrichtenkopfs sind:
+Die anderen Felder des Nachrichtenkopfes sind:
 
 - `msgh_size`: die Größe des gesamten Pakets.
-- `msgh_remote_port`: der Port, an den diese Nachricht gesendet wird.
+- `msgh_remote_port`: der Port, über den diese Nachricht gesendet wird.
 - `msgh_voucher_port`: [mach vouchers](https://robert.sesek.com/2023/6/mach_vouchers.html).
 - `msgh_id`: die ID dieser Nachricht, die vom Empfänger interpretiert wird.
 
 > [!CAUTION]
-> Beachten Sie, dass **mach-Nachrichten über einen `mach port` gesendet werden**, der einen **einzelnen Empfänger** und einen **mehreren Sender** Kommunikationskanal darstellt, der im mach-Kernel integriert ist. **Mehrere Prozesse** können **Nachrichten** an einen mach-Port senden, aber zu jedem Zeitpunkt kann nur **ein einzelner Prozess** von ihm lesen.
+> Beachten Sie, dass **mach-Nachrichten über einen `mach port` gesendet werden**, der ein **einzelner Empfänger**, **mehrere Sender** Kommunikationskanal ist, der im mach-Kernel integriert ist. **Mehrere Prozesse** können **Nachrichten** an einen mach-Port senden, aber zu jedem Zeitpunkt kann nur **ein einzelner Prozess** davon lesen.
 
-Nachrichten werden dann durch den **`mach_msg_header_t`**-Header gebildet, gefolgt vom **Inhalt** und dem **Trailer** (falls vorhanden), und sie können die Erlaubnis zur Antwort darauf gewähren. In diesen Fällen muss der Kernel die Nachricht nur von einer Aufgabe zur anderen weiterleiten.
+Nachrichten werden dann durch den **`mach_msg_header_t`** Kopf gebildet, gefolgt vom **Inhalt** und vom **Trailer** (falls vorhanden), und es kann die Erlaubnis erteilt werden, darauf zu antworten. In diesen Fällen muss der Kernel die Nachricht nur von einer Aufgabe zur anderen weiterleiten.
 
 Ein **Trailer** ist **Informationen, die vom Kernel zur Nachricht hinzugefügt werden** (kann nicht vom Benutzer festgelegt werden), die beim Empfang der Nachricht mit den Flags `MACH_RCV_TRAILER_<trailer_opt>` angefordert werden können (es gibt verschiedene Informationen, die angefordert werden können).
 
 #### Komplexe Nachrichten
 
-Es gibt jedoch auch andere, **komplexere** Nachrichten, wie solche, die zusätzliche Portrechte übergeben oder Speicher teilen, bei denen der Kernel auch diese Objekte an den Empfänger senden muss. In diesen Fällen wird das bedeutendste Bit des Headers `msgh_bits` gesetzt.
+Es gibt jedoch auch andere, **komplexere** Nachrichten, wie solche, die zusätzliche Portrechte übergeben oder Speicher teilen, bei denen der Kernel auch diese Objekte an den Empfänger senden muss. In diesen Fällen wird das signifikanteste Bit des Kopfes `msgh_bits` gesetzt.
 
 Die möglichen Deskriptoren, die übergeben werden können, sind in [**`mach/message.h`**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html) definiert:
 ```c
@@ -150,7 +150,7 @@ unsigned int                  pad3 : 24;
 mach_msg_descriptor_type_t    type : 8;
 } mach_msg_type_descriptor_t;
 ```
-In 32-Bit-Systemen sind alle Deskriptoren 12B groß, und der Deskriptortyp befindet sich im 11. Deskriptor. In 64-Bit-Systemen variieren die Größen.
+In 32-Bit sind alle Deskriptoren 12B und der Deskriptortyp befindet sich im 11. Deskriptor. In 64-Bit variieren die Größen.
 
 > [!CAUTION]
 > Der Kernel kopiert die Deskriptoren von einer Aufgabe zur anderen, erstellt jedoch zuerst **eine Kopie im Kernel-Speicher**. Diese Technik, bekannt als "Feng Shui", wurde in mehreren Exploits missbraucht, um den **Kernel dazu zu bringen, Daten in seinem Speicher zu kopieren**, wodurch ein Prozess Deskriptoren an sich selbst sendet. Dann kann der Prozess die Nachrichten empfangen (der Kernel wird sie freigeben).
@@ -170,11 +170,11 @@ Beachten Sie, dass Ports mit dem Aufgabennamespace verknüpft sind. Um einen Por
 - `mach_port_allocate`: Weisen Sie einen neuen RECEIVE, PORT_SET oder DEAD_NAME zu
 - `mach_port_insert_right`: Erstellen Sie ein neues Recht in einem Port, in dem Sie RECEIVE haben
 - `mach_port_...`
-- **`mach_msg`** | **`mach_msg_overwrite`**: Funktionen, die verwendet werden, um **Mach-Nachrichten zu senden und zu empfangen**. Die Überschreibungsversion ermöglicht es, einen anderen Puffer für den Nachrichteneingang anzugeben (die andere Version verwendet einfach denselben).
+- **`mach_msg`** | **`mach_msg_overwrite`**: Funktionen, die verwendet werden, um **Mach-Nachrichten zu senden und zu empfangen**. Die Überschreibversion ermöglicht es, einen anderen Puffer für den Nachrichteneingang anzugeben (die andere Version verwendet einfach denselben).
 
 ### Debug mach_msg
 
-Da die Funktionen **`mach_msg`** und **`mach_msg_overwrite`** verwendet werden, um Nachrichten zu senden und zu empfangen, würde das Setzen eines Haltepunkts auf ihnen ermöglichen, die gesendeten und empfangenen Nachrichten zu inspizieren.
+Da die Funktionen **`mach_msg`** und **`mach_msg_overwrite`** die sind, die verwendet werden, um Nachrichten zu senden und zu empfangen, würde das Setzen eines Haltepunkts auf ihnen ermöglichen, die gesendeten und empfangenen Nachrichten zu inspizieren.
 
 Zum Beispiel starten Sie das Debuggen einer beliebigen Anwendung, die Sie debuggen können, da sie **`libSystem.B` laden wird, die diese Funktion verwendet**.
 
@@ -186,10 +186,10 @@ Prozess 71019 gestoppt
 * thread #1, queue = 'com.apple.main-thread', stop reason = breakpoint 1.1
 frame #0: 0x0000000181d3ac20 libsystem_kernel.dylib`mach_msg
 libsystem_kernel.dylib`mach_msg:
-->  0x181d3ac20 &#x3C;+0>:  pacibsp
-0x181d3ac24 &#x3C;+4>:  sub    sp, sp, #0x20
-0x181d3ac28 &#x3C;+8>:  stp    x29, x30, [sp, #0x10]
-0x181d3ac2c &#x3C;+12>: add    x29, sp, #0x10
+->  0x181d3ac20 <+0>:  pacibsp
+0x181d3ac24 <+4>:  sub    sp, sp, #0x20
+0x181d3ac28 <+8>:  stp    x29, x30, [sp, #0x10]
+0x181d3ac2c <+12>: add    x29, sp, #0x10
 Ziel 0: (SandboxedShellApp) gestoppt.
 <strong>(lldb) bt
 </strong>* thread #1, queue = 'com.apple.main-thread', stop reason = breakpoint 1.1
@@ -202,7 +202,7 @@ frame #5: 0x0000000181abb398 libxpc.dylib`_xpc_uncork_pid_domain_locked + 76
 frame #6: 0x0000000181abbbfc libxpc.dylib`_xpc_early_init + 92
 frame #7: 0x0000000181a9583c libxpc.dylib`_libxpc_initializer + 1104
 frame #8: 0x000000018e59e6ac libSystem.B.dylib`libSystem_initializer + 236
-frame #9: 0x0000000181a1d5c8 dyld`invocation function for block in dyld4::Loader::findAndRunAllInitializers(dyld4::RuntimeState&#x26;) const::$_0::operator()() const + 168
+frame #9: 0x0000000181a1d5c8 dyld`invocation function for block in dyld4::Loader::findAndRunAllInitializers(dyld4::RuntimeState&) const::$_0::operator()() const + 168
 </code></pre>
 
 Um die Argumente von **`mach_msg`** zu erhalten, überprüfen Sie die Register. Dies sind die Argumente (aus [mach/message.h](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)):
@@ -407,7 +407,7 @@ printf("Sent a message\n");
 
 ## Privilegierte Ports
 
-Es gibt einige spezielle Ports, die es ermöglichen, **bestimmte sensible Aktionen durchzuführen oder auf bestimmte sensible Daten zuzugreifen**, falls eine Aufgabe die **SEND**-Berechtigungen über sie hat. Dies macht diese Ports aus der Sicht eines Angreifers sehr interessant, nicht nur wegen der Möglichkeiten, sondern auch weil es möglich ist, **SEND-Berechtigungen über Aufgaben hinweg zu teilen**.
+Es gibt einige spezielle Ports, die es ermöglichen, **bestimmte sensible Aktionen auszuführen oder auf bestimmte sensible Daten zuzugreifen**, falls eine Aufgabe die **SEND**-Berechtigungen über sie hat. Dies macht diese Ports aus der Perspektive eines Angreifers sehr interessant, nicht nur wegen der Möglichkeiten, sondern auch weil es möglich ist, **SEND-Berechtigungen über Aufgaben hinweg zu teilen**.
 
 ### Host-Spezialports
 
@@ -418,29 +418,29 @@ Diese Ports werden durch eine Nummer dargestellt.
 Diese sind in 2 Gruppen unterteilt: Die **ersten 7 Ports gehören dem Kernel**, wobei der 1 `HOST_PORT`, der 2 `HOST_PRIV_PORT`, der 3 `HOST_IO_MASTER_PORT` und der 7 `HOST_MAX_SPECIAL_KERNEL_PORT` ist.\
 Die Ports, die **ab** der Nummer **8** beginnen, sind **im Besitz von System-Daemons** und können in [**`host_special_ports.h`**](https://opensource.apple.com/source/xnu/xnu-4570.1.46/osfmk/mach/host_special_ports.h.auto.html) gefunden werden.
 
-- **Host-Port**: Wenn ein Prozess **SEND**-Berechtigung über diesen Port hat, kann er **Informationen** über das **System** abrufen, indem er seine Routinen aufruft wie:
+- **Host-Port**: Wenn ein Prozess über dieses Port **SEND**-Privilegien hat, kann er **Informationen** über das **System** abrufen, indem er seine Routinen aufruft wie:
 - `host_processor_info`: Prozessorinformationen abrufen
 - `host_info`: Hostinformationen abrufen
 - `host_virtual_physical_table_info`: Virtuelle/Physische Seitentabelle (erfordert MACH_VMDEBUG)
 - `host_statistics`: Hoststatistiken abrufen
 - `mach_memory_info`: Kernel-Speicherlayout abrufen
-- **Host Priv-Port**: Ein Prozess mit **SEND**-Recht über diesen Port kann **privilegierte Aktionen** durchführen, wie Bootdaten anzeigen oder versuchen, eine Kernel-Erweiterung zu laden. Der **Prozess muss Root sein**, um diese Berechtigung zu erhalten.
+- **Host Priv-Port**: Ein Prozess mit **SEND**-Rechten über diesen Port kann **privilegierte Aktionen** ausführen, wie das Anzeigen von Bootdaten oder den Versuch, eine Kernel-Erweiterung zu laden. Der **Prozess muss Root sein**, um diese Berechtigung zu erhalten.
 - Darüber hinaus ist es erforderlich, um die **`kext_request`**-API aufzurufen, andere Berechtigungen **`com.apple.private.kext*`** zu haben, die nur Apple-Binärdateien gewährt werden.
 - Andere Routinen, die aufgerufen werden können, sind:
 - `host_get_boot_info`: `machine_boot_info()` abrufen
 - `host_priv_statistics`: Privilegierte Statistiken abrufen
-- `vm_allocate_cpm`: Kontinuierlichen physischen Speicher zuweisen
-- `host_processors`: Senderecht an Host-Prozessoren
+- `vm_allocate_cpm`: Zusammenhängenden physischen Speicher zuweisen
+- `host_processors`: Senderechte an Host-Prozessoren
 - `mach_vm_wire`: Speicher resident machen
 - Da **Root** auf diese Berechtigung zugreifen kann, könnte er `host_set_[special/exception]_port[s]` aufrufen, um **Host-Spezial- oder Ausnahmeports zu übernehmen**.
 
-Es ist möglich, **alle Host-Spezialports zu sehen**, indem man Folgendes ausführt:
+Es ist möglich, **alle Host-Spezialports** durch Ausführen von zu sehen:
 ```bash
 procexp all ports | grep "HSP"
 ```
 ### Task Special Ports
 
-Dies sind Ports, die für bekannte Dienste reserviert sind. Es ist möglich, sie mit `task_[get/set]_special_port` abzurufen/zu setzen. Sie sind in `task_special_ports.h` zu finden:
+Diese Ports sind für bekannte Dienste reserviert. Es ist möglich, sie mit `task_[get/set]_special_port` abzurufen/einzustellen. Sie sind in `task_special_ports.h` zu finden:
 ```c
 typedef	int	task_special_port_t;
 
@@ -463,10 +463,10 @@ Ursprünglich hatte Mach keine "Prozesse", sondern "Aufgaben", die eher als Cont
 
 Es gibt zwei sehr interessante Funktionen, die damit zusammenhängen:
 
-- `task_for_pid(target_task_port, pid, &task_port_of_pid)`: Erhalte ein SEND-Recht für den Task-Port der Aufgabe, die mit dem durch die `pid` angegebenen verbunden ist, und gib es an den angegebenen `target_task_port` weiter (der normalerweise die aufrufende Aufgabe ist, die `mach_task_self()` verwendet hat, aber auch ein SEND-Port über eine andere Aufgabe sein könnte).
-- `pid_for_task(task, &pid)`: Gegeben ein SEND-Recht zu einer Aufgabe, finde heraus, zu welcher PID diese Aufgabe gehört.
+- `task_for_pid(target_task_port, pid, &task_port_of_pid)`: Erhalte ein SEND-Recht für den Task-Port der Aufgabe, die mit der durch die `pid` angegebenen verbunden ist, und gib es an den angegebenen `target_task_port` weiter (der normalerweise die aufrufende Aufgabe ist, die `mach_task_self()` verwendet hat, aber auch ein SEND-Port über eine andere Aufgabe sein könnte).
+- `pid_for_task(task, &pid)`: Finde, zu welcher PID diese Aufgabe gehört, wenn ein SEND-Recht für eine Aufgabe gegeben ist.
 
-Um Aktionen innerhalb der Aufgabe auszuführen, benötigte die Aufgabe ein `SEND`-Recht zu sich selbst, indem sie `mach_task_self()` aufruft (was den `task_self_trap` (28) verwendet). Mit dieser Berechtigung kann eine Aufgabe mehrere Aktionen ausführen, wie:
+Um Aktionen innerhalb der Aufgabe auszuführen, benötigte die Aufgabe ein `SEND`-Recht für sich selbst, indem sie `mach_task_self()` aufruft (was den `task_self_trap` (28) verwendet). Mit dieser Berechtigung kann eine Aufgabe mehrere Aktionen ausführen, wie:
 
 - `task_threads`: Erhalte SEND-Recht über alle Task-Ports der Threads der Aufgabe
 - `task_info`: Erhalte Informationen über eine Aufgabe
@@ -479,17 +479,17 @@ Um Aktionen innerhalb der Aufgabe auszuführen, benötigte die Aufgabe ein `SEND
 > [!CAUTION]
 > Beachte, dass es mit einem SEND-Recht über einen Task-Port einer **anderen Aufgabe** möglich ist, solche Aktionen über eine andere Aufgabe auszuführen.
 
-Darüber hinaus ist der task_port auch der **`vm_map`**-Port, der es ermöglicht, **Speicher innerhalb einer Aufgabe zu lesen und zu manipulieren** mit Funktionen wie `vm_read()` und `vm_write()`. Das bedeutet im Grunde, dass eine Aufgabe mit SEND-Rechten über den task_port einer anderen Aufgabe in der Lage sein wird, **Code in diese Aufgabe zu injizieren**.
+Darüber hinaus ist der task_port auch der **`vm_map`**-Port, der es ermöglicht, **Speicher innerhalb einer Aufgabe zu lesen und zu manipulieren** mit Funktionen wie `vm_read()` und `vm_write()`. Das bedeutet im Wesentlichen, dass eine Aufgabe mit SEND-Rechten über den task_port einer anderen Aufgabe in der Lage sein wird, **Code in diese Aufgabe zu injizieren**.
 
 Denke daran, dass, weil der **Kernel auch eine Aufgabe ist**, wenn es jemandem gelingt, **SEND-Berechtigungen** über die **`kernel_task`** zu erhalten, er in der Lage sein wird, den Kernel alles ausführen zu lassen (Jailbreaks).
 
-- Rufe `mach_task_self()` auf, um **den Namen** für diesen Port für die aufrufende Aufgabe zu erhalten. Dieser Port wird nur **vererbt** über **`exec()`**; eine neue Aufgabe, die mit `fork()` erstellt wird, erhält einen neuen Task-Port (als Sonderfall erhält eine Aufgabe auch einen neuen Task-Port nach `exec()` in einem suid-Binary). Der einzige Weg, eine Aufgabe zu starten und ihren Port zu erhalten, besteht darin, den ["port swap dance"](https://robert.sesek.com/2014/1/changes_to_xnu_mach_ipc.html) während eines `fork()` durchzuführen.
-- Dies sind die Einschränkungen für den Zugriff auf den Port (aus `macos_task_policy` aus dem Binary `AppleMobileFileIntegrity`):
+- Rufe `mach_task_self()` auf, um **den Namen** für diesen Port für die aufrufende Aufgabe zu erhalten. Dieser Port wird nur **vererbt** über **`exec()`**; eine neue Aufgabe, die mit `fork()` erstellt wird, erhält einen neuen Task-Port (als Sonderfall erhält eine Aufgabe auch einen neuen Task-Port nach `exec()` in einer suid-Binärdatei). Der einzige Weg, eine Aufgabe zu starten und ihren Port zu erhalten, besteht darin, den ["port swap dance"](https://robert.sesek.com/2014/1/changes_to_xnu_mach_ipc.html) während eines `fork()` durchzuführen.
+- Dies sind die Einschränkungen für den Zugriff auf den Port (aus `macos_task_policy` aus der Binärdatei `AppleMobileFileIntegrity`):
 - Wenn die App die **`com.apple.security.get-task-allow`-Berechtigung** hat, können Prozesse vom **gleichen Benutzer auf den Task-Port zugreifen** (häufig von Xcode zum Debuggen hinzugefügt). Der **Notarisierungs**-Prozess erlaubt dies nicht für Produktionsversionen.
 - Apps mit der **`com.apple.system-task-ports`**-Berechtigung können den **Task-Port für jeden** Prozess erhalten, außer für den Kernel. In älteren Versionen wurde es **`task_for_pid-allow`** genannt. Dies wird nur Apple-Anwendungen gewährt.
 - **Root kann auf Task-Ports** von Anwendungen **nicht** zugreifen, die mit einer **hardened** Runtime (und nicht von Apple) kompiliert wurden.
 
-**Der Task-Name-Port:** Eine unprivilegierte Version des _Task-Ports_. Er verweist auf die Aufgabe, erlaubt jedoch nicht, sie zu steuern. Das einzige, was anscheinend darüber verfügbar ist, ist `task_info()`.
+**Der Task-Name-Port:** Eine unprivilegierte Version des _Task-Ports_. Er verweist auf die Aufgabe, erlaubt jedoch keine Kontrolle darüber. Das einzige, was anscheinend darüber verfügbar ist, ist `task_info()`.
 
 ### Thread Ports
 
@@ -768,15 +768,15 @@ gcc -framework Foundation -framework Appkit sc_inject.m -o sc_inject
 ./inject <pi or string>
 ```
 > [!TIP]
-> Damit dies auf iOS funktioniert, benötigen Sie die Berechtigung `dynamic-codesigning`, um einen beschreibbaren Speicher ausführbar zu machen.
+> Damit dies auf iOS funktioniert, benötigen Sie die Berechtigung `dynamic-codesigning`, um ausführbaren Speicher beschreibbar zu machen.
 
 ### Dylib-Injektion in den Thread über Task-Port
 
-In macOS können **Threads** über **Mach** oder die **posix `pthread` API** manipuliert werden. Der Thread, den wir bei der vorherigen Injektion erzeugt haben, wurde mit der Mach-API erzeugt, daher ist er **nicht posix-konform**.
+In macOS können **Threads** über **Mach** oder die **posix `pthread` API** manipuliert werden. Der Thread, den wir in der vorherigen Injektion erzeugt haben, wurde mit der Mach-API erstellt, daher ist er **nicht posix-konform**.
 
 Es war möglich, **einen einfachen Shellcode** zu injizieren, um einen Befehl auszuführen, da er **nicht mit posix** konformen APIs arbeiten musste, sondern nur mit Mach. **Komplexere Injektionen** würden erfordern, dass der **Thread** ebenfalls **posix-konform** ist.
 
-Daher sollte zur **Verbesserung des Threads** **`pthread_create_from_mach_thread`** aufgerufen werden, um **einen gültigen pthread** zu erstellen. Dann könnte dieser neue pthread **dlopen** aufrufen, um eine **dylib** aus dem System zu laden, sodass anstelle von neuem Shellcode, um verschiedene Aktionen auszuführen, benutzerdefinierte Bibliotheken geladen werden können.
+Daher sollte zur **Verbesserung des Threads** **`pthread_create_from_mach_thread`** aufgerufen werden, was **einen gültigen pthread** erstellt. Dann könnte dieser neue pthread **dlopen** aufrufen, um eine **dylib** aus dem System zu laden, sodass anstelle von neuem Shellcode, um verschiedene Aktionen auszuführen, benutzerdefinierte Bibliotheken geladen werden können.
 
 Sie finden **Beispiel-dylibs** in (zum Beispiel die, die ein Protokoll generiert und dann können Sie es abhören):
 
@@ -1078,7 +1078,7 @@ Beim Aufruf von `task_for_pid` oder `thread_create_*` wird ein Zähler in der St
 
 Wenn eine Ausnahme in einem Thread auftritt, wird diese Ausnahme an den vorgesehenen Ausnahmeport des Threads gesendet. Wenn der Thread sie nicht behandelt, wird sie an die Ausnahmeports des Tasks gesendet. Wenn der Task sie nicht behandelt, wird sie an den Hostport gesendet, der von launchd verwaltet wird (wo sie anerkannt wird). Dies wird als Ausnahme-Triage bezeichnet.
 
-Beachten Sie, dass am Ende, wenn sie nicht ordnungsgemäß behandelt wird, der Bericht normalerweise vom ReportCrash-Daemon behandelt wird. Es ist jedoch möglich, dass ein anderer Thread im selben Task die Ausnahme verwaltet, was Tools zur Absturzberichterstattung wie `PLCreashReporter` tun.
+Beachten Sie, dass am Ende, wenn sie nicht ordnungsgemäß behandelt wird, der Bericht normalerweise vom ReportCrash-Daemon behandelt wird. Es ist jedoch möglich, dass ein anderer Thread im selben Task die Ausnahme verwaltet, was Crash-Reporting-Tools wie `PLCreashReporter` tun.
 
 ## Other Objects
 
