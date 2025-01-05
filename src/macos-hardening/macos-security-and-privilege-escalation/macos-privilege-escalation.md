@@ -39,17 +39,17 @@ chmod +x /opt/homebrew/bin/ls
 # victim
 sudo ls
 ```
-Kumbuka kwamba mtumiaji anayetumia terminal atakuwa na uwezekano mkubwa wa kuwa na **Homebrew installed**. Hivyo inawezekana kuiba binaries katika **`/opt/homebrew/bin`**.
+Kumbuka kwamba mtumiaji anayetumia terminal atakuwa na uwezekano mkubwa wa kuwa na **Homebrew installed**. Hivyo inawezekana kuingilia binaries katika **`/opt/homebrew/bin`**.
 
 ### Dock Impersonation
 
-Kwa kutumia **social engineering** unaweza **kujifanya mfano Google Chrome** ndani ya dock na kwa kweli kutekeleza script yako mwenyewe:
+Kwa kutumia **social engineering** unaweza **kujifanya kwa mfano Google Chrome** ndani ya dock na kwa kweli kutekeleza script yako mwenyewe:
 
 {{#tabs}}
 {{#tab name="Chrome Impersonation"}}
 Mapendekezo kadhaa:
 
-- Angalia katika Dock kama kuna Chrome, na katika hali hiyo **ondoa** ile entry na **ongeza** ile **fake** **Chrome entry katika nafasi ile ile** katika Dock array.&#x20;
+- Angalia katika Dock kama kuna Chrome, na katika hali hiyo **ondoa** ile entry na **ongeza** ile **fake** **Chrome entry katika nafasi ile ile** katika Dock array.
 ```bash
 #!/bin/sh
 
@@ -126,9 +126,9 @@ Baadhi ya mapendekezo:
 
 - Huwezi kuondoa Finder kutoka kwenye Dock, hivyo ikiwa unataka kuiongeza kwenye Dock, unaweza kuweka Finder bandia karibu na ile halisi. Kwa hili unahitaji ku **ongeza kipengee cha Finder bandia mwanzoni mwa orodha ya Dock**.
 - Chaguo lingine ni kutokuweka kwenye Dock na kufungua tu, "Finder inahitaji kudhibiti Finder" si ajabu sana.
-- Chaguo lingine ili **kuinua hadhi hadi root bila kuomba** nenosiri kwa sanduku mbaya, ni kumfanya Finder kweli aombe nenosiri ili kutekeleza kitendo chenye mamlaka:
-- Muulize Finder nakala kwenye **`/etc/pam.d`** faili mpya ya **`sudo`** (Kichocheo kinachoomba nenosiri kitaonyesha kwamba "Finder anataka kunakili sudo")
-- Muulize Finder nakala ya **Authorization Plugin** mpya (Unaweza kudhibiti jina la faili ili kichocheo kinachoomba nenosiri kitaonyesha kwamba "Finder anataka kunakili Finder.bundle")
+- Chaguo lingine ili **kuinua hadi root bila kuomba** nenosiri kwa sanduku mbaya, ni kufanya Finder kweli kuomba nenosiri ili kutekeleza kitendo chenye mamlaka:
+- Omba Finder nakala kwa **`/etc/pam.d`** faili mpya ya **`sudo`** (Kichocheo kinachoomba nenosiri kitaonyesha kwamba "Finder inataka kunakili sudo")
+- Omba Finder nakala faili mpya ya **Authorization Plugin** (Unaweza kudhibiti jina la faili ili kichocheo kinachoomba nenosiri kitaonyesha kwamba "Finder inataka kunakili Finder.bundle")
 ```bash
 #!/bin/sh
 
@@ -201,12 +201,12 @@ killall Dock
 {{#endtab}}
 {{#endtabs}}
 
-## TCC - Kuinua Haki za Msingi
+## TCC - Kuinua Privilege ya Root
 
-### CVE-2020-9771 - mount_apfs TCC bypass na kuinua haki
+### CVE-2020-9771 - mount_apfs TCC bypass na kuinua privilege
 
-**Mtumiaji yeyote** (hata wasio na haki) anaweza kuunda na kuunganisha picha ya mashine ya wakati na **kufikia FAILI ZOTE** za picha hiyo.\
-Haki **pekee** inayohitajika ni kwa programu inayotumika (kama `Terminal`) kuwa na **Upatikanaji wa Diski Kamili** (FDA) (`kTCCServiceSystemPolicyAllfiles`) ambayo inahitaji kupewa na admin.
+**Mtumiaji yeyote** (hata wasio na mamlaka) anaweza kuunda na kuunganisha picha ya mashine ya wakati na **kufikia FAILI ZOTE** za picha hiyo.\
+**Mamlaka pekee** inayohitajika ni kwa programu inayotumika (kama `Terminal`) kuwa na **Upatikanaji wa Diski Kamili** (FDA) (`kTCCServiceSystemPolicyAllfiles`) ambayo inahitaji kupewa na admin.
 ```bash
 # Create snapshot
 tmutil localsnapshot
@@ -226,7 +226,7 @@ mkdir /tmp/snap
 # Access it
 ls /tmp/snap/Users/admin_user # This will work
 ```
-Maelezo ya kina zaidi yanaweza [**kupatikana katika ripoti ya asili**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
+A more detailed explanation can be [**found in the original report**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
 
 ## Taarifa Nyeti
 

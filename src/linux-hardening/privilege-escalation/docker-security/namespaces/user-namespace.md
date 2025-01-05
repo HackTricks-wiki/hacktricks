@@ -11,8 +11,8 @@ User namespaces ni muhimu sana katika uundaji wa kontena, ambapo kila kontena li
 ### How it works:
 
 1. Wakati user namespace mpya inaundwa, **inaanza na seti tupu ya ramani za ID za mtumiaji na kundi**. Hii inamaanisha kwamba mchakato wowote unaofanya kazi katika user namespace mpya utakuwa **na mamlaka hakuna nje ya namespace**.
-2. Ramani za ID zinaweza kuanzishwa kati ya ID za mtumiaji na kundi katika namespace mpya na zile katika namespace ya mzazi (au mwenyeji). Hii **inaruhusu michakato katika namespace mpya kuwa na mamlaka na umiliki yanayolingana na ID za mtumiaji na kundi katika namespace ya mzazi**. Hata hivyo, ramani za ID zinaweza kuwekewa mipaka kwa anuwai maalum na sehemu za IDs, kuruhusu udhibiti wa kina juu ya mamlaka zinazotolewa kwa michakato katika namespace mpya.
-3. Ndani ya user namespace, **michakato inaweza kuwa na mamlaka kamili ya root (UID 0) kwa shughuli ndani ya namespace**, wakati bado ikiwa na mamlaka zilizopunguzwa nje ya namespace. Hii inaruhusu **kontena kuendesha kwa uwezo kama root ndani ya namespace yao bila kuwa na mamlaka kamili ya root kwenye mfumo wa mwenyeji**.
+2. Ramani za ID zinaweza kuanzishwa kati ya ID za mtumiaji na kundi katika namespace mpya na zile katika namespace ya mzazi (au mwenyeji). Hii **inaruhusu michakato katika namespace mpya kuwa na mamlaka na umiliki yanayolingana na ID za mtumiaji na kundi katika namespace ya mzazi**. Hata hivyo, ramani za ID zinaweza kuwekewa mipaka kwa anuwai maalum na subsets za IDs, kuruhusu udhibiti wa kina juu ya mamlaka yanayotolewa kwa michakato katika namespace mpya.
+3. Ndani ya user namespace, **michakato inaweza kuwa na mamlaka kamili ya root (UID 0) kwa shughuli ndani ya namespace**, wakati bado ikiwa na mamlaka zilizopunguzika nje ya namespace. Hii inaruhusu **kontena kuendesha kwa uwezo kama root ndani ya namespace yao bila kuwa na mamlaka kamili ya root kwenye mfumo wa mwenyeji**.
 4. Michakato inaweza kuhamia kati ya namespaces kwa kutumia wito wa mfumo wa `setns()` au kuunda namespaces mpya kwa kutumia wito wa mfumo wa `unshare()` au `clone()` na bendera ya `CLONE_NEWUSER`. Wakati mchakato unahamia kwenye namespace mpya au kuunda moja, utaanza kutumia ramani za ID za mtumiaji na kundi zinazohusiana na namespace hiyo.
 
 ## Lab:
@@ -33,9 +33,9 @@ Wakati `unshare` inatekelezwa bila chaguo la `-f`, hitilafu inakutana kutokana n
 
 1. **Maelezo ya Tatizo**:
 
-- Kernel ya Linux inaruhusu mchakato kuunda namespaces mpya kwa kutumia wito wa mfumo wa `unshare`. Hata hivyo, mchakato unaoanzisha uundaji wa namespace mpya ya PID (inayojulikana kama mchakato wa "unshare") hauingii kwenye namespace mpya; ni watoto wake tu wanaingia.
+- Kernel ya Linux inaruhusu mchakato kuunda namespaces mpya kwa kutumia wito wa mfumo wa `unshare`. Hata hivyo, mchakato unaoanzisha uundaji wa namespace mpya ya PID (inayojulikana kama mchakato wa "unshare") hauingii kwenye namespace mpya; ni watoto wake tu wanajumuishwa.
 - Kuendesha `%unshare -p /bin/bash%` kunaanzisha `/bin/bash` katika mchakato sawa na `unshare`. Kwa hivyo, `/bin/bash` na watoto wake wako katika namespace ya awali ya PID.
-- Mchakato wa kwanza wa mtoto wa `/bin/bash` katika namespace mpya unakuwa PID 1. Wakati mchakato huu unapoondoka, unachochea usafishaji wa namespace ikiwa hakuna michakato mingine, kwani PID 1 ina jukumu maalum la kupokea michakato ya yatima. Kernel ya Linux itazima ugawaji wa PID katika namespace hiyo.
+- Mchakato wa kwanza wa mtoto wa `/bin/bash` katika namespace mpya unakuwa PID 1. Wakati mchakato huu unapoondoka, unachochea usafishaji wa namespace ikiwa hakuna mchakato mwingine, kwani PID 1 ina jukumu maalum la kupokea mchakato yatima. Kernel ya Linux itazima kuteua PID katika namespace hiyo.
 
 2. **Matokeo**:
 
@@ -43,9 +43,9 @@ Wakati `unshare` inatekelezwa bila chaguo la `-f`, hitilafu inakutana kutokana n
 
 3. **Suluhisho**:
 - Tatizo linaweza kutatuliwa kwa kutumia chaguo la `-f` pamoja na `unshare`. Chaguo hili linafanya `unshare` kuunda mchakato mpya baada ya kuunda namespace mpya ya PID.
-- Kutekeleza `%unshare -fp /bin/bash%` kunahakikisha kwamba amri ya `unshare` yenyewe inakuwa PID 1 katika namespace mpya. `/bin/bash` na watoto wake wanakuwa salama ndani ya namespace hii mpya, kuzuia kuondoka mapema kwa PID 1 na kuruhusu ugawaji wa PID wa kawaida.
+- Kutekeleza `%unshare -fp /bin/bash%` kunahakikisha kwamba amri ya `unshare` yenyewe inakuwa PID 1 katika namespace mpya. `/bin/bash` na watoto wake wanajumuishwa salama ndani ya namespace hii mpya, kuzuia kuondoka mapema kwa PID 1 na kuruhusu kuteua PID kwa kawaida.
 
-Kwa kuhakikisha kwamba `unshare` inatekelezwa na bendera ya `-f`, namespace mpya ya PID inatunzwa ipasavyo, ikiruhusu `/bin/bash` na michakato yake ya chini kufanya kazi bila kukutana na hitilafu ya kugawa kumbukumbu.
+Kwa kuhakikisha kwamba `unshare` inatekelezwa na bendera ya `-f`, namespace mpya ya PID inatunzwa kwa usahihi, ikiruhusu `/bin/bash` na mchakato wake wa chini kufanya kazi bila kukutana na hitilafu ya kugawa kumbukumbu.
 
 </details>
 
@@ -55,7 +55,7 @@ docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
 Ili kutumia user namespace, Docker daemon inahitaji kuanzishwa na **`--userns-remap=default`**(Katika ubuntu 14.04, hii inaweza kufanywa kwa kubadilisha `/etc/default/docker` na kisha kutekeleza `sudo service docker restart`)
 
-### &#x20;Angalia ni namespace ipi mchakato wako uko ndani
+### Angalia ni namespace ipi mchakato wako uko ndani
 ```bash
 ls -l /proc/self/ns/user
 lrwxrwxrwx 1 root root 0 Apr  4 20:57 /proc/self/ns/user -> 'user:[4026531837]'
@@ -70,7 +70,7 @@ Au kutoka kwa mwenyeji na:
 ```bash
 cat /proc/<pid>/uid_map
 ```
-### Pata majina yote ya Mtumiaji
+### Pata majina yote ya User namespaces
 ```bash
 sudo find /proc -maxdepth 3 -type l -name user -exec readlink {} \; 2>/dev/null | sort -u
 # Find the processes with an specific namespace
@@ -80,9 +80,9 @@ sudo find /proc -maxdepth 3 -type l -name user -exec ls -l  {} \; 2>/dev/null | 
 ```bash
 nsenter -U TARGET_PID --pid /bin/bash
 ```
-Pia, unaweza tu **kuingia katika namespace nyingine ya mchakato ikiwa wewe ni root**. Na huwezi **kuingia** katika namespace nyingine **bila deskteta** inayorejelea hiyo (kama `/proc/self/ns/user`).
+Pia, unaweza tu **kuingia katika nafasi nyingine ya mchakato ikiwa wewe ni root**. Na huwezi **kuingia** katika nafasi nyingine **bila desktopa** inayorejelea hiyo (kama `/proc/self/ns/user`).
 
-### Unda namespace Mpya ya Mtumiaji (ikiwa na ramani)
+### Unda nafasi mpya ya Mtumiaji (ikiwa na ramani)
 ```bash
 unshare -U [--map-user=<uid>|<name>] [--map-group=<gid>|<name>] [--map-root-user] [--map-current-user]
 ```
@@ -96,14 +96,14 @@ nobody@ip-172-31-28-169:/home/ubuntu$ #Check how the user is nobody
 ps -ef | grep bash # The user inside the host is still root, not nobody
 root       27756   27755  0 21:11 pts/10   00:00:00 /bin/bash
 ```
-### Kupona Uwezo
+### Kupata Uwezo
 
-Katika kesi ya majina ya watumiaji, **wakati jina jipya la mtumiaji linaundwa, mchakato unaoingia kwenye jina hilo unapata seti kamili ya uwezo ndani ya jina hilo**. Uwezo huu unaruhusu mchakato kufanya operesheni zenye mamlaka kama vile **kuunganisha** **safu za faili**, kuunda vifaa, au kubadilisha umiliki wa faili, lakini **tu ndani ya muktadha wa jina lake la mtumiaji**.
+Katika kesi ya majina ya watumiaji, **wakati jina jipya la mtumiaji linaundwa, mchakato unaoingia kwenye jina hilo unapata seti kamili ya uwezo ndani ya jina hilo**. Uwezo huu unaruhusu mchakato kufanya operesheni zenye mamlaka kama vile **kuweka** **faili za mfumo**, kuunda vifaa, au kubadilisha umiliki wa faili, lakini **tu ndani ya muktadha wa jina lake la mtumiaji**.
 
-Kwa mfano, unapokuwa na uwezo wa `CAP_SYS_ADMIN` ndani ya jina la mtumiaji, unaweza kufanya operesheni ambazo kawaida zinahitaji uwezo huu, kama kuunganisha safu za faili, lakini tu ndani ya muktadha wa jina lako la mtumiaji. Operesheni zozote unazofanya kwa uwezo huu hazitaathiri mfumo wa mwenyeji au majina mengine.
+Kwa mfano, unapokuwa na uwezo wa `CAP_SYS_ADMIN` ndani ya jina la mtumiaji, unaweza kufanya operesheni ambazo kawaida zinahitaji uwezo huu, kama kuwekeza faili za mfumo, lakini tu ndani ya muktadha wa jina lako la mtumiaji. Operesheni zozote unazofanya kwa uwezo huu hazitaathiri mfumo wa mwenyeji au majina mengine.
 
 > [!WARNING]
-> Hivyo, hata kama kupata mchakato mpya ndani ya jina jipya la Mtumiaji **kutakupa uwezo wote tena** (CapEff: 000001ffffffffff), kwa kweli unaweza **tu kutumia zile zinazohusiana na jina hilo** (kuunganisha kwa mfano) lakini si kila mmoja. Hivyo, hii peke yake haitoshi kutoroka kutoka kwa kontena la Docker.
+> Hivyo, hata kama kupata mchakato mpya ndani ya jina jipya la Mtumiaji **kutakupa uwezo wote tena** (CapEff: 000001ffffffffff), kwa kweli unaweza **kutumia tu zile zinazohusiana na jina hilo** (kuweka kwa mfano) lakini si kila mmoja. Hivyo, hii peke yake haitoshi kutoroka kutoka kwa kontena la Docker.
 ```bash
 # There are the syscalls that are filtered after changing User namespace with:
 unshare -UmCpf  bash

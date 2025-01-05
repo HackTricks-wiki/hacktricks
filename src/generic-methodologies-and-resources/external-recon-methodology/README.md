@@ -4,9 +4,9 @@
 
 ## Ugunduzi wa Mali
 
-> Kwa hivyo ulisema kwamba kila kitu kinachomilikiwa na kampuni fulani kiko ndani ya upeo, na unataka kubaini ni nini kampuni hii inamiliki kwa kweli.
+> Kwa hivyo ulisema kwamba kila kitu kinachomilikiwa na kampuni fulani kiko ndani ya upeo, na unataka kujua kampuni hii inamiliki nini hasa.
 
-Lengo la awamu hii ni kupata **makampuni yanayomilikiwa na kampuni kuu** na kisha **mali** za makampuni haya. Ili kufanya hivyo, tutafanya yafuatayo:
+Lengo la awamu hii ni kupata **makampuni yanayomilikiwa na kampuni kuu** na kisha **mali** za makampuni haya. Ili kufanya hivyo, tutafanya:
 
 1. Kupata ununuzi wa kampuni kuu, hii itatupa makampuni ndani ya upeo.
 2. Kupata ASN (ikiwa ipo) ya kila kampuni, hii itatupa anuwai za IP zinazomilikiwa na kila kampuni.
@@ -23,10 +23,10 @@ Chaguo lingine ni kutembelea ukurasa wa **Wikipedia** wa kampuni kuu na kutafuta
 
 ### **ASNs**
 
-Nambari ya mfumo huru (**ASN**) ni **nambari ya kipekee** inayotolewa kwa **mfumo huru** (AS) na **Mamlaka ya Nambari za Mtandao (IANA)**.\
+Nambari ya mfumo huru (**ASN**) ni **nambari ya kipekee** iliyotolewa kwa **mfumo huru** (AS) na **Mamlaka ya Nambari za Mtandao (IANA)**.\
 **AS** inajumuisha **vizuizi** vya **anwani za IP** ambazo zina sera iliyofafanuliwa wazi kwa kufikia mitandao ya nje na zinatawaliwa na shirika moja lakini zinaweza kuwa na waendeshaji kadhaa.
 
-Ni ya kuvutia kubaini ikiwa **kampuni ina ASN yoyote iliyotolewa** ili kupata **anuwai zake za IP.** Itakuwa ya kuvutia kufanya **mtihani wa udhaifu** dhidi ya **mashine** zote ndani ya **upeo** na **kutafuta domaini** ndani ya anuwai hizi za IP.\
+Ni ya kuvutia kupata ikiwa **kampuni ina ASN yoyote iliyotolewa** ili kupata **anuwai zake za IP.** Itakuwa ya kuvutia kufanya **mtihani wa udhaifu** dhidi ya **michakato** yote ndani ya **upeo** na **kutafuta domaini** ndani ya anuwai hizi za IP.\
 Unaweza **kutafuta** kwa jina la kampuni, kwa **IP** au kwa **domain** katika [**https://bgp.he.net/**](https://bgp.he.net)**.**\
 **Kulingana na eneo la kampuni, viungo hivi vinaweza kuwa na manufaa kukusanya data zaidi:** [**AFRINIC**](https://www.afrinic.net) **(Afrika),** [**Arin**](https://www.arin.net/about/welcome/region/)**(Amerika Kaskazini),** [**APNIC**](https://www.apnic.net) **(Asia),** [**LACNIC**](https://www.lacnic.net) **(Amerika ya Kusini),** [**RIPE NCC**](https://www.ripe.net) **(Ulaya). Hata hivyo, labda taarifa zote** muhimu **(anuwai za IP na Whois)** tayari zinaonekana katika kiungo cha kwanza.
 ```bash
@@ -34,7 +34,7 @@ Unaweza **kutafuta** kwa jina la kampuni, kwa **IP** au kwa **domain** katika [*
 amass intel -org tesla
 amass intel -asn 8911,50313,394161
 ```
-Pia, [**BBOT**](https://github.com/blacklanternsecurity/bbot)**'s** uchambuzi wa subdomain unakusanya na kujumlisha ASNs moja kwa moja mwishoni mwa skana.
+Pia, [**BBOT**](https://github.com/blacklanternsecurity/bbot)**'s** uchambuzi wa subdomain unakusanya na kujumlisha ASNs kiotomatiki mwishoni mwa skana.
 ```bash
 bbot -t tesla.com -f subdomain-enum
 ...
@@ -56,7 +56,7 @@ You can find the IP and ASN of a domain using [http://ipv4info.com/](http://ipv4
 
 ### **Kutafuta udhaifu**
 
-Katika hatua hii tunajua **rasilimali zote ndani ya upeo**, hivyo ikiwa unaruhusiwa unaweza kuzindua **scanner ya udhaifu** (Nessus, OpenVAS) juu ya mwenyeji wote.\
+Katika hatua hii tunajua **rasilimali zote ndani ya upeo**, hivyo ikiwa umepewa ruhusa unaweza kuzindua **scanner ya udhaifu** (Nessus, OpenVAS) juu ya mwenyeji wote.\
 Pia, unaweza kuzindua baadhi ya [**skana za bandari**](../pentesting-network/index.html#discovering-hosts-from-the-outside) **au kutumia huduma kama** shodan **kupata** bandari wazi **na kulingana na kile unachokipata unapaswa** kuangalia katika kitabu hiki jinsi ya pentest huduma kadhaa zinazoweza kukimbia.\
 **Pia, inaweza kuwa na faida kutaja kwamba unaweza pia kuandaa baadhi ya** orodha za majina ya mtumiaji ya kawaida **na** nywila **na kujaribu** bruteforce huduma na [https://github.com/x90skysn3k/brutespray](https://github.com/x90skysn3k/brutespray).
 
@@ -77,12 +77,12 @@ dnsrecon -d facebook.com -r 157.240.221.35/24 #Using facebooks dns
 dnsrecon -r 157.240.221.35/24 -n 1.1.1.1 #Using cloudflares dns
 dnsrecon -r 157.240.221.35/24 -n 8.8.8.8 #Using google dns
 ```
-Ili hii ifanye kazi, msimamizi lazima aweke kwa mikono PTR.\
+Kwa hili kufanyika, msimamizi lazima aweke kwa mikono PTR.\
 Unaweza pia kutumia chombo cha mtandaoni kwa habari hii: [http://ptrarchive.com/](http://ptrarchive.com)
 
 ### **Reverse Whois (loop)**
 
-Ndani ya **whois** unaweza kupata habari nyingi za kuvutia kama **jina la shirika**, **anwani**, **barua pepe**, nambari za simu... Lakini kinachovutia zaidi ni kwamba unaweza kupata **mali zaidi zinazohusiana na kampuni** ikiwa utatekeleza **reverse whois lookups kwa yoyote ya hizo** (kwa mfano, rejista nyingine za whois ambapo barua pepe hiyo inaonekana).\
+Ndani ya **whois** unaweza kupata habari nyingi za kuvutia kama **jina la shirika**, **anwani**, **barua pepe**, nambari za simu... Lakini kinachovutia zaidi ni kwamba unaweza kupata **mali zaidi zinazohusiana na kampuni** ikiwa utatekeleza **reverse whois lookups kwa yoyote ya maeneo hayo** (kwa mfano, rejista nyingine za whois ambapo barua pepe hiyo inaonekana).\
 Unaweza kutumia zana za mtandaoni kama:
 
 - [https://viewdns.info/reversewhois/](https://viewdns.info/reversewhois/) - **Bila malipo**
@@ -94,13 +94,13 @@ Unaweza kutumia zana za mtandaoni kama:
 - [https://www.domainiq.com/](https://www.domainiq.com) - Si Bure
 
 Unaweza kuendesha kazi hii kwa kutumia [**DomLink** ](https://github.com/vysecurity/DomLink)(inahitaji funguo ya API ya whoxy).\
-Unaweza pia kutekeleza ugunduzi wa moja kwa moja wa reverse whois kwa kutumia [amass](https://github.com/OWASP/Amass): `amass intel -d tesla.com -whois`
+Unaweza pia kufanya ugunduzi wa moja kwa moja wa reverse whois kwa kutumia [amass](https://github.com/OWASP/Amass): `amass intel -d tesla.com -whois`
 
 **Kumbuka kwamba unaweza kutumia mbinu hii kugundua majina zaidi ya kikoa kila wakati unapata kikoa kipya.**
 
 ### **Trackers**
 
-Ikiwa unapata **ID sawa ya tracker sawa** katika kurasa 2 tofauti unaweza kudhani kwamba **kurasa zote mbili** zinasimamiwa na **timu moja**.\
+Ikiwa unapata **ID sawa ya tracker sawa** katika kurasa 2 tofauti unaweza kudhani kwamba **kurasa zote mbili** zinadhibitiwa na **timu moja**.\
 Kwa mfano, ikiwa unaona **Google Analytics ID** sawa au **Adsense ID** sawa kwenye kurasa kadhaa.
 
 Kuna kurasa na zana ambazo zinakuwezesha kutafuta kwa trackers hizi na zaidi:
@@ -113,14 +113,14 @@ Kuna kurasa na zana ambazo zinakuwezesha kutafuta kwa trackers hizi na zaidi:
 
 ### **Favicon**
 
-Je, unajua kwamba tunaweza kupata majina yanayohusiana na kikoa na sub domains kwa kutafuta hash ya ikoni sawa ya favicon? Hii ndiyo hasa inayo fanywa na chombo [favihash.py](https://github.com/m4ll0k/Bug-Bounty-Toolz/blob/master/favihash.py) kilichotengenezwa na [@m4ll0k2](https://twitter.com/m4ll0k2). Hapa kuna jinsi ya kuitumia:
+Je, unajua kwamba tunaweza kupata maeneo yanayohusiana na sub domains kwa lengo letu kwa kutafuta hash ya ikoni ya favicon sawa? Hii ndiyo hasa inayo fanywa na chombo [favihash.py](https://github.com/m4ll0k/Bug-Bounty-Toolz/blob/master/favihash.py) kilichotengenezwa na [@m4ll0k2](https://twitter.com/m4ll0k2). Hapa kuna jinsi ya kuitumia:
 ```bash
 cat my_targets.txt | xargs -I %% bash -c 'echo "http://%%/favicon.ico"' > targets.txt
 python3 favihash.py -f https://target/favicon.ico -t targets.txt -s
 ```
 ![favihash - gundua maeneo yenye hash sawa ya favicon icon](https://www.infosecmatter.com/wp-content/uploads/2020/07/favihash.jpg)
 
-Kwa kifupi, favihash itaturuhusu kugundua maeneo ambayo yana hash sawa ya favicon icon kama lengo letu.
+Kwa ufupi, favihash itaturuhusu kugundua maeneo ambayo yana hash sawa ya favicon icon kama lengo letu.
 
 Zaidi ya hayo, unaweza pia kutafuta teknolojia ukitumia hash ya favicon kama ilivyoelezwa katika [**hiki kipande cha blog**](https://medium.com/@Asm0d3us/weaponizing-favicon-ico-for-bugbounties-osint-and-what-not-ace3c214e139). Hii inamaanisha kwamba ikiwa unajua **hash ya favicon ya toleo lenye udhaifu la teknolojia ya wavuti** unaweza kutafuta katika shodan na **kupata maeneo mengine yenye udhaifu**:
 ```bash
@@ -150,58 +150,58 @@ Ni kawaida kuwa na kazi ya cron kama
 # /etc/crontab
 37 13 */10 * * certbot renew --post-hook "systemctl reload nginx"
 ```
-to renew the all the domain certificates on the server. This means that even if the CA used for this doesn't set the time it was generated in the Validity time, it's possible to **find domains belonging to the same company in the certificate transparency logs**.\
-Check out this [**writeup for more information**](https://swarm.ptsecurity.com/discovering-domains-via-a-time-correlation-attack/).
+kuongeza upya vyeti vyote vya kikoa kwenye seva. Hii inamaanisha kwamba hata kama CA iliyotumika kwa hili haipangi wakati ilizalishwa katika Wakati wa Uhalali, inawezekana **kupata maeneo yanayomilikiwa na kampuni moja katika kumbukumbu za uwazi wa vyeti**.\
+Angalia hii [**andika kwa maelezo zaidi**](https://swarm.ptsecurity.com/discovering-domains-via-a-time-correlation-attack/).
 
-### Mail DMARC information
+### Taarifa za Barua DMARC
 
-You can use a web such as [https://dmarc.live/info/google.com](https://dmarc.live/info/google.com) or a tool such as [https://github.com/Tedixx/dmarc-subdomains](https://github.com/Tedixx/dmarc-subdomains) to find **domains and subdomain sharing the same dmarc information**.
+Unaweza kutumia wavuti kama [https://dmarc.live/info/google.com](https://dmarc.live/info/google.com) au chombo kama [https://github.com/Tedixx/dmarc-subdomains](https://github.com/Tedixx/dmarc-subdomains) kupata **maeneo na subdomain zinazoshiriki taarifa sawa za dmarc**.
 
-### **Passive Takeover**
+### **Kuchukua kwa Pasifiki**
 
-Kwa kweli ni kawaida kwa watu kupeana subdomains kwa IPs ambazo zinamilikiwa na watoa huduma wa wingu na kwa wakati fulani **kupoteza anwani hiyo ya IP lakini kusahau kuondoa rekodi ya DNS**. Hivyo, tu **kuanzisha VM** katika wingu (kama Digital Ocean) utakuwa kweli **ukichukua baadhi ya subdomains**.
+Inaonekana ni kawaida kwa watu kupeana subdomains kwa IP ambazo zinamilikiwa na watoa huduma wa wingu na kwa wakati fulani **kupoteza anwani hiyo ya IP lakini kusahau kuondoa rekodi ya DNS**. Hivyo, tu **kuanzisha VM** katika wingu (kama Digital Ocean) utakuwa kweli **ukichukua baadhi ya subdomains**.
 
-[**This post**](https://kmsec.uk/blog/passive-takeover/) explains a store about it and propose a script that **spawns a VM in DigitalOcean**, **gets** the **IPv4** of the new machine, and **searches in Virustotal for subdomain records** pointing to it.
+[**Post hii**](https://kmsec.uk/blog/passive-takeover/) inaelezea hadithi kuhusu hilo na inapendekeza skripti ambayo **inaanzisha VM katika DigitalOcean**, **inapata** **IPv4** ya mashine mpya, na **inatafuta katika Virustotal kwa rekodi za subdomain** zinazopointia kwake.
 
-### **Other ways**
+### **Njia Nyingine**
 
-**Note that you can use this technique to discover more domain names every time you find a new domain.**
+**Kumbuka kwamba unaweza kutumia mbinu hii kugundua majina zaidi ya kikoa kila wakati unapata kikoa kipya.**
 
 **Shodan**
 
-Kama unavyojua jina la shirika linalomiliki nafasi ya IP. Unaweza kutafuta kwa data hiyo katika shodan ukitumia: `org:"Tesla, Inc."` Angalia mwenyeji waliopatikana kwa majina mapya yasiyotarajiwa katika cheti cha TLS.
+Kama unavyojua jina la shirika linalomiliki nafasi ya IP. Unaweza kutafuta kwa data hiyo katika shodan ukitumia: `org:"Tesla, Inc."` Angalia mwenyeji waliopatikana kwa maeneo mapya yasiyotarajiwa katika cheti cha TLS.
 
 Unaweza kufikia **cheti cha TLS** cha ukurasa mkuu, kupata **jina la Shirika** na kisha kutafuta jina hilo ndani ya **vyeti vya TLS** vya kurasa zote za wavuti zinazojulikana na **shodan** kwa kichujio: `ssl:"Tesla Motors"` au tumia chombo kama [**sslsearch**](https://github.com/HarshVaragiya/sslsearch).
 
 **Assetfinder**
 
-[**Assetfinder** ](https://github.com/tomnomnom/assetfinder)ni chombo kinachotafuta **domains related** na domain kuu na **subdomains** zake, ni ya kushangaza sana.
+[**Assetfinder**](https://github.com/tomnomnom/assetfinder) ni chombo kinachotafuta **maeneo yanayohusiana** na kikoa kikuu na **subdomains** zake, ni ya kushangaza sana.
 
-### **Looking for vulnerabilities**
+### **Kutafuta udhaifu**
 
-Check for some [domain takeover](../../pentesting-web/domain-subdomain-takeover.md#domain-takeover). Maybe some company is **using some a domain** but they **lost the ownership**. Just register it (if cheap enough) and let know the company.
+Angalia kwa baadhi ya [kuchukua kikoa](../../pentesting-web/domain-subdomain-takeover.md#domain-takeover). Labda kampuni fulani inatumia **kikoa fulani** lakini wame **poteza umiliki**. Jisajili (ikiwa ni ya bei nafuu) na uwajulishe kampuni hiyo.
 
-If you find any **domain with an IP different** from the ones you already found in the assets discovery, you should perform a **basic vulnerability scan** (using Nessus or OpenVAS) and some [**port scan**](../pentesting-network/index.html#discovering-hosts-from-the-outside) with **nmap/masscan/shodan**. Depending on which services are running you can find in **this book some tricks to "attack" them**.\
-_&#x4E;ote that sometimes the domain is hosted inside an IP that is not controlled by the client, so it's not in the scope, be careful._
+Ikiwa utapata **kikoa chochote chenye IP tofauti** na zile ulizozipata tayari katika ugunduzi wa mali, unapaswa kufanya **skani ya msingi ya udhaifu** (ukitumia Nessus au OpenVAS) na baadhi ya [**skani ya bandari**](../pentesting-network/index.html#discovering-hosts-from-the-outside) kwa **nmap/masscan/shodan**. Kulingana na huduma zipi zinazoendesha unaweza kupata katika **kitabu hiki hila za "kuvamia" hizo**.\
+_Kumbuka kwamba wakati mwingine kikoa kinahostiwa ndani ya IP ambayo haidhibitiwi na mteja, hivyo si katika upeo, kuwa makini._
 
 ## Subdomains
 
-> We know all the companies inside the scope, all the assets of each company and all the domains related to the companies.
+> Tunajua kampuni zote ndani ya upeo, mali zote za kila kampuni na maeneo yote yanayohusiana na kampuni hizo.
 
-It's time to find all the possible subdomains of each found domain.
+Ni wakati wa kutafuta subdomains zote zinazowezekana za kila kikoa kilichopatikana.
 
 > [!TIP]
-> Note that some of the tools and techniques to find domains can also help to find subdomains
+> Kumbuka kwamba baadhi ya zana na mbinu za kutafuta maeneo zinaweza pia kusaidia kutafuta subdomains
 
 ### **DNS**
 
-Let's try to get **subdomains** from the **DNS** records. We should also try for **Zone Transfer** (If vulnerable, you should report it).
+Hebu jaribu kupata **subdomains** kutoka kwa **rekodi za DNS**. Tunapaswa pia kujaribu kwa **Transfer ya Zone** (Ikiwa inahatarisha, unapaswa kuiripoti).
 ```bash
 dnsrecon -a -d tesla.com
 ```
 ### **OSINT**
 
-Njia ya haraka ya kupata subdomains nyingi ni kutafuta katika vyanzo vya nje. Zana zinazotumika zaidi ni zifuatazo (kwa matokeo bora, weka funguo za API):
+Njia ya haraka zaidi ya kupata subdomains nyingi ni kutafuta katika vyanzo vya nje. Zana zinazotumika zaidi ni zifuatazo (kwa matokeo bora, weka funguo za API):
 
 - [**BBOT**](https://github.com/blacklanternsecurity/bbot)
 ```bash
@@ -282,12 +282,12 @@ curl -s "https://crt.sh/?q=%25.$1" \
 }
 crt tesla.com
 ```
-- [**gau**](https://github.com/lc/gau)**:** inapata URLs zinazojulikana kutoka kwa AlienVault's Open Threat Exchange, Wayback Machine, na Common Crawl kwa kikoa chochote kilichotolewa.
+- [**gau**](https://github.com/lc/gau)**:** inapata URLs zinazojulikana kutoka kwa Open Threat Exchange ya AlienVault, Wayback Machine, na Common Crawl kwa ajili ya kikoa chochote kilichotolewa.
 ```bash
 # Get subdomains from GAUs found URLs
 gau --subs tesla.com | cut -d "/" -f 3 | sort -u
 ```
-- [**SubDomainizer**](https://github.com/nsonaniya2010/SubDomainizer) **&** [**subscraper**](https://github.com/Cillian-Collins/subscraper): Wanachambua mtandao wakitafuta faili za JS na kutoa subdomains kutoka hapo.
+- [**SubDomainizer**](https://github.com/nsonaniya2010/SubDomainizer) **&** [**subscraper**](https://github.com/Cillian-Collins/subscraper): Wanakusanya data kutoka mtandao wakitafuta faili za JS na kutoa subdomains kutoka hapo.
 ```bash
 # Get only subdomains from SubDomainizer
 python3 SubDomainizer.py -u https://tesla.com | grep tesla.com
@@ -321,9 +321,9 @@ Unaweza kupata **kulinganisha** ya zana nyingi hizi hapa: [https://blog.blacklan
 
 ### **DNS Brute force**
 
-Hebu jaribu kupata **subdomains** mpya kwa kulazimisha seva za DNS kwa kutumia majina ya subdomain yanayowezekana.
+Hebu jaribu kutafuta **subdomains** mpya kwa kuburuza DNS servers kwa kutumia majina ya subdomain yanayowezekana.
 
-Kwa hatua hii utahitaji baadhi ya **orodha za maneno ya subdomains kama**:
+Kwa hatua hii utahitaji baadhi ya **orodha za maneno ya subdomains za kawaida kama**:
 
 - [https://gist.github.com/jhaddix/86a06c5dc309d08580a018c66354a056](https://gist.github.com/jhaddix/86a06c5dc309d08580a018c66354a056)
 - [https://wordlists-cdn.assetnote.io/data/manual/best-dns-wordlist.txt](https://wordlists-cdn.assetnote.io/data/manual/best-dns-wordlist.txt)
@@ -331,7 +331,7 @@ Kwa hatua hii utahitaji baadhi ya **orodha za maneno ya subdomains kama**:
 - [https://github.com/pentester-io/commonspeak](https://github.com/pentester-io/commonspeak)
 - [https://github.com/danielmiessler/SecLists/tree/master/Discovery/DNS](https://github.com/danielmiessler/SecLists/tree/master/Discovery/DNS)
 
-Na pia IP za waamuzi wazuri wa DNS. Ili kuunda orodha ya waamuzi wa DNS wanaoaminika unaweza kupakua waamuzi kutoka [https://public-dns.info/nameservers-all.txt](https://public-dns.info/nameservers-all.txt) na kutumia [**dnsvalidator**](https://github.com/vortexau/dnsvalidator) kuwasafisha. Au unaweza kutumia: [https://raw.githubusercontent.com/trickest/resolvers/main/resolvers-trusted.txt](https://raw.githubusercontent.com/trickest/resolvers/main/resolvers-trusted.txt)
+Na pia IPs za resolvers nzuri za DNS. Ili kuunda orodha ya resolvers wa DNS wanaoaminika unaweza kupakua resolvers kutoka [https://public-dns.info/nameservers-all.txt](https://public-dns.info/nameservers-all.txt) na kutumia [**dnsvalidator**](https://github.com/vortexau/dnsvalidator) kuwasafisha. Au unaweza kutumia: [https://raw.githubusercontent.com/trickest/resolvers/main/resolvers-trusted.txt](https://raw.githubusercontent.com/trickest/resolvers/main/resolvers-trusted.txt)
 
 Zana zinazopendekezwa zaidi kwa DNS brute-force ni:
 
@@ -341,11 +341,11 @@ sed 's/$/.domain.com/' subdomains.txt > bf-subdomains.txt
 ./massdns -r resolvers.txt -w /tmp/results.txt bf-subdomains.txt
 grep -E "tesla.com. [0-9]+ IN A .+" /tmp/results.txt
 ```
-- [**gobuster**](https://github.com/OJ/gobuster): Hii nadhani inatumia resolver 1 tu
+- [**gobuster**](https://github.com/OJ/gobuster): Hii nadhani inatumia resolver 1 tu.
 ```
 gobuster dns -d mysite.com -t 50 -w subdomains.txt
 ```
-- [**shuffledns**](https://github.com/projectdiscovery/shuffledns) ni kifuniko cha `massdns`, kilichoandikwa kwa go, kinachokuruhusu kuorodhesha subdomains halali kwa kutumia bruteforce ya moja kwa moja, pamoja na kutatua subdomains kwa kushughulikia wildcard na msaada rahisi wa ingizo-tofauti.
+- [**shuffledns**](https://github.com/projectdiscovery/shuffledns) ni kifungashio cha `massdns`, kilichoandikwa kwa go, kinachokuruhusu kuorodhesha subdomains halali kwa kutumia bruteforce ya moja kwa moja, pamoja na kutatua subdomains kwa kushughulikia wildcard na msaada rahisi wa ingizo-tofauti.
 ```
 shuffledns -d example.com -list example-subdomains.txt -r resolvers.txt
 ```
@@ -375,7 +375,7 @@ goaltdns -l subdomains.txt -w /tmp/words-permutations.txt -o /tmp/final-words-s3
 gotator -sub subdomains.txt -silent [-perm /tmp/words-permutations.txt]
 ```
 - [**altdns**](https://github.com/infosec-au/altdns): Mbali na kuzalisha permutations za subdomains, inaweza pia kujaribu kuzitatua (lakini ni bora kutumia zana zilizotajwa hapo awali).
-- Unaweza kupata permutations za altdns **wordlist** [**hapa**](https://github.com/infosec-au/altdns/blob/master/words.txt).
+- Unaweza kupata permutations za altdns **wordlist** katika [**hapa**](https://github.com/infosec-au/altdns/blob/master/words.txt).
 ```
 altdns -i subdomains.txt -w /tmp/words-permutations.txt -o /tmp/asd3
 ```
@@ -385,7 +385,7 @@ altdns -i subdomains.txt -w /tmp/words-permutations.txt -o /tmp/asd3
 cat subdomains.txt | dmut -d /tmp/words-permutations.txt -w 100 \
 --dns-errorLimit 10 --use-pb --verbose -s /tmp/resolvers-trusted.txt
 ```
-- [**alterx**](https://github.com/projectdiscovery/alterx)**:** Kulingana na domain, in **zalisha majina mapya ya subdomain** kulingana na mifumo iliyoonyeshwa ili kujaribu kugundua subdomain zaidi.
+- [**alterx**](https://github.com/projectdiscovery/alterx)**:** Kulingana na kikoa, in **zalisha majina mapya ya subdomain** kulingana na mifumo iliyoonyeshwa ili kujaribu kugundua subdomain zaidi.
 
 #### Uzalishaji wa permutations smart
 
@@ -395,13 +395,13 @@ python3 main.py adobe.com adobe adobe.rules
 make_brute_list.sh adobe.rules adobe.brute
 puredns resolve adobe.brute --write adobe.valid
 ```
-- [**subzuf**](https://github.com/elceef/subzuf)**:** _subzuf_ ni fuzzer ya brute-force ya subdomain iliyoandaliwa na algorithm rahisi lakini yenye ufanisi inayotegemea majibu ya DNS. Inatumia seti ya data za pembejeo zilizotolewa, kama vile orodha ya maneno iliyoundwa maalum au rekodi za kihistoria za DNS/TLS, ili kuunda kwa usahihi majina zaidi yanayohusiana ya domain na kuyapanua zaidi katika mzunguko kulingana na taarifa zilizokusanywa wakati wa skana ya DNS.
+- [**subzuf**](https://github.com/elceef/subzuf)**:** _subzuf_ ni fuzzer ya brute-force ya subdomain iliyoandaliwa na algorithm rahisi lakini yenye ufanisi inayotegemea majibu ya DNS. Inatumia seti ya data za pembejeo zilizotolewa, kama vile orodha ya maneno iliyoundwa maalum au rekodi za kihistoria za DNS/TLS, ili kuunda kwa usahihi majina zaidi ya domain yanayohusiana na kupanua zaidi katika mzunguko kulingana na taarifa zilizokusanywa wakati wa skana ya DNS.
 ```
 echo www | subzuf facebook.com
 ```
 ### **Mchakato wa Kugundua Subdomain**
 
-Angalia chapisho hili la blogu nililoandika kuhusu jinsi ya **kujiandaa kugundua subdomain** kutoka kwa domain kwa kutumia **michakato ya Trickest** ili nisiwe na haja ya kuzindua zana nyingi kwa mkono kwenye kompyuta yangu:
+Angalia chapisho la blogu nililoandika kuhusu jinsi ya **kujiandaa kugundua subdomain** kutoka kwa domain kwa kutumia **michakato ya Trickest** ili nisiwe na haja ya kuzindua zana nyingi kwa mkono kwenye kompyuta yangu:
 
 {{#ref}}
 https://trickest.com/blog/full-subdomain-discovery-using-workflow/
@@ -440,7 +440,7 @@ VHostScan -t example.com
 
 ### **CORS Brute Force**
 
-Wakati mwingine utaona kurasa ambazo hurudisha tu kichwa _**Access-Control-Allow-Origin**_ wakati jina halali la kikoa/subdomain limewekwa katika kichwa _**Origin**_. Katika hali hizi, unaweza kutumia tabia hii kubaini **subdomains** mpya.
+Wakati mwingine utaona kurasa ambazo hurudisha tu kichwa _**Access-Control-Allow-Origin**_ wakati jina halali la kikoa/subdomain limewekwa katika kichwa _**Origin**_. Katika hali hizi, unaweza kutumia tabia hii **kuvumbua** **subdomains** mpya.
 ```bash
 ffuf -w subdomains-top1million-5000.txt -u http://10.10.10.208 -H 'Origin: http://FUZZ.crossfit.htb' -mr "Access-Control-Allow-Origin" -ignore-body
 ```
@@ -451,22 +451,22 @@ Pia, kwa kuwa katika hatua hii utajua majina yote ya domain ndani ya upeo, jarib
 
 ### **Monitorization**
 
-Unaweza **kufuatilia** ikiwa **subdomains mpya** za domain zinaundwa kwa kufuatilia **Maktaba ya Uwazi wa Cheti** [**sublert** ](https://github.com/yassineaboukir/sublert/blob/master/sublert.py)inafanya.
+Unaweza **kufuatilia** kama **subdomains mpya** za domain zinaundwa kwa kufuatilia **Certificate Transparency** Logs [**sublert** ](https://github.com/yassineaboukir/sublert/blob/master/sublert.py)inafanya.
 
 ### **Looking for vulnerabilities**
 
 Angalia uwezekano wa [**subdomain takeovers**](../../pentesting-web/domain-subdomain-takeover.md#subdomain-takeover).\
 Ikiwa **subdomain** inaelekeza kwenye **S3 bucket**, [**angalia ruhusa**](../../network-services-pentesting/pentesting-web/buckets/index.html).
 
-Ikiwa utapata **subdomain yenye IP tofauti** na zile ulizozipata tayari katika ugunduzi wa mali, unapaswa kufanya **skani ya msingi ya udhaifu** (ukitumia Nessus au OpenVAS) na baadhi ya [**skani ya bandari**](../pentesting-network/index.html#discovering-hosts-from-the-outside) kwa kutumia **nmap/masscan/shodan**. Kulingana na huduma zipi zinazoendesha unaweza kupata katika **kitabu hiki hila za "kushambulia" hizo**.\
-_&#x4E;ote kwamba wakati mwingine subdomain inahostiwa ndani ya IP ambayo haidhibitiwi na mteja, hivyo si katika upeo, kuwa makini._
+Ikiwa utapata **subdomain yenye IP tofauti** na zile ulizozipata tayari katika ugunduzi wa mali, unapaswa kufanya **skani ya msingi ya udhaifu** (ukitumia Nessus au OpenVAS) na baadhi ya [**skani za bandari**](../pentesting-network/index.html#discovering-hosts-from-the-outside) kwa kutumia **nmap/masscan/shodan**. Kulingana na huduma zinazotumika unaweza kupata katika **kitabu hiki hila za "kuvamia" hizo**.\
+_Kumbuka kwamba wakati mwingine subdomain inahostiwa ndani ya IP ambayo haidhibitiwi na mteja, hivyo si katika upeo, kuwa makini._
 
 ## IPs
 
 Katika hatua za awali huenda umekuwa **ukipata baadhi ya anuwai za IP, majina ya domain na subdomains**.\
 Ni wakati wa **kukusanya IP zote kutoka kwa anuwai hizo** na kwa **majina ya domain/subdomains (maswali ya DNS).**
 
-Kwa kutumia huduma kutoka **apis za bure** zifuatazo unaweza pia kupata **IPs za awali zilizotumiwa na majina ya domain na subdomains**. IP hizi zinaweza bado kumilikiwa na mteja (na zinaweza kukuruhusu kupata [**CloudFlare bypasses**](../../network-services-pentesting/pentesting-web/uncovering-cloudflare.md))
+Kwa kutumia huduma kutoka **apis za bure** zifuatazo unaweza pia kupata **IPs za awali zilizotumika na majina ya domain na subdomains**. IP hizi zinaweza bado kumilikiwa na mteja (na zinaweza kukuruhusu kupata [**CloudFlare bypasses**](../../network-services-pentesting/pentesting-web/uncovering-cloudflare.md))
 
 - [**https://securitytrails.com/**](https://securitytrails.com/)
 
@@ -474,7 +474,7 @@ Unaweza pia kuangalia majina ya domain yanayoelekeza kwenye anwani maalum ya IP 
 
 ### **Looking for vulnerabilities**
 
-**Skani bandari zote za IP ambazo hazihusiani na CDNs** (kwa kuwa huenda usipate kitu chochote cha kuvutia huko). Katika huduma zinazokimbia zilizogunduliwa unaweza kuwa **na uwezo wa kupata udhaifu**.
+**Skani bandari zote za IP ambazo hazihusiani na CDNs** (kwa kuwa huenda usipate kitu chochote cha kuvutia huko). Katika huduma zinazotumika zilizogunduliwa unaweza kuwa **na uwezo wa kupata udhaifu**.
 
 **Pata** [**mwongozo**](../pentesting-network/index.html) **kuhusu jinsi ya skani wenyeji.**
 
@@ -482,9 +482,9 @@ Unaweza pia kuangalia majina ya domain yanayoelekeza kwenye anwani maalum ya IP 
 
 > Tumegundua kampuni zote na mali zao na tunajua anuwai za IP, majina ya domain na subdomains ndani ya upeo. Ni wakati wa kutafuta seva za wavuti.
 
-Katika hatua za awali huenda tayari umekuwa ukifanya baadhi ya **recon ya IPs na majina ya domain yaliyogunduliwa**, hivyo huenda umekuwa **umepata seva zote zinazowezekana za wavuti**. Hata hivyo, ikiwa hujapata tutakuwa sasa tunaona baadhi ya **hila za haraka za kutafuta seva za wavuti** ndani ya upeo.
+Katika hatua za awali huenda tayari umekuwa umefanya baadhi ya **recon ya IPs na majina ya domain yaliyogunduliwa**, hivyo huenda umekuwa **umepata seva zote zinazowezekana za wavuti**. Hata hivyo, ikiwa hujapata tutakuwa sasa tunaona baadhi ya **hila za haraka za kutafuta seva za wavuti** ndani ya upeo.
 
-Tafadhali, kumbuka kwamba hii itakuwa **imeelekezwa kwa ugunduzi wa programu za wavuti**, hivyo unapaswa **kufanya udhaifu** na **skani ya bandari** pia (**ikiwa inaruhusiwa** na upeo).
+Tafadhali, kumbuka kwamba hii itakuwa **imeelekezwa kwa ugunduzi wa programu za wavuti**, hivyo unapaswa **kufanya udhaifu** na **skani za bandari** pia (**ikiwa inaruhusiwa** na upeo).
 
 Njia **ya haraka** ya kugundua **bandari wazi** zinazohusiana na **seva** za wavuti kwa kutumia [**masscan** inaweza kupatikana hapa](../pentesting-network/index.html#http-port-discovery).\
 Chombo kingine rafiki cha kutafuta seva za wavuti ni [**httprobe**](https://github.com/tomnomnom/httprobe)**,** [**fprobe**](https://github.com/theblackturtle/fprobe) na [**httpx**](https://github.com/projectdiscovery/httpx). Unapita tu orodha ya majina ya domain na itajaribu kuungana na bandari 80 (http) na 443 (https). Zaidi ya hayo, unaweza kuonyesha kujaribu bandari nyingine:
@@ -504,7 +504,7 @@ Zaidi ya hayo, unaweza kutumia [**eyeballer**](https://github.com/BishopFox/eyeb
 
 Ili kupata mali za wingu zinazoweza kuwa za kampuni unapaswa **kuanza na orodha ya maneno muhimu yanayofafanua kampuni hiyo**. Kwa mfano, kwa kampuni ya crypto unaweza kutumia maneno kama: `"crypto", "wallet", "dao", "<domain_name>", <"subdomain_names">`.
 
-Utahitaji pia orodha za maneno za **maneno ya kawaida yanayotumika katika ndoo**:
+Utahitaji pia orodha za maneno za **maneno ya kawaida yanayotumiwa katika makundi**:
 
 - [https://raw.githubusercontent.com/cujanovic/goaltdns/master/words.txt](https://raw.githubusercontent.com/cujanovic/goaltdns/master/words.txt)
 - [https://raw.githubusercontent.com/infosec-au/altdns/master/words.txt](https://raw.githubusercontent.com/infosec-au/altdns/master/words.txt)
@@ -514,11 +514,11 @@ Kisha, kwa maneno hayo unapaswa kuunda **mabadiliko** (angalia [**Second Round D
 
 Kwa orodha za maneno zilizopatikana unaweza kutumia zana kama [**cloud_enum**](https://github.com/initstring/cloud_enum)**,** [**CloudScraper**](https://github.com/jordanpotti/CloudScraper)**,** [**cloudlist**](https://github.com/projectdiscovery/cloudlist) **au** [**S3Scanner**](https://github.com/sa7mon/S3Scanner)**.**
 
-Kumbuka kwamba unapoitafuta Mali za Wingu unapaswa **kuangalia zaidi ya ndoo tu katika AWS**.
+Kumbuka kwamba unapoitafuta Mali za Wingu unapaswa **kuangalia zaidi ya makundi tu katika AWS**.
 
 ### **Kuangalia hatari**
 
-Ikiwa unapata vitu kama **ndoo wazi au kazi za wingu zilizofichuliwa** unapaswa **kuziingilia** na kujaribu kuona kile wanachokupa na ikiwa unaweza kuzitumia vibaya.
+Ikiwa unapata vitu kama **makundi ya wazi au kazi za wingu zilizofichuliwa** unapaswa **kuziingilia** na kujaribu kuona kile wanachokupa na ikiwa unaweza kuzitumia vibaya.
 
 ## Barua pepe
 
@@ -535,7 +535,7 @@ Barua pepe zitakuwa na manufaa baadaye kwa **kujaribu kuingia kwenye wavuti na h
 
 ## Mvuvi wa Akida
 
-Pamoja na **domeni,** **subdomeni**, na **barua pepe** unaweza kuanza kutafuta akida zilizovuja katika siku za nyuma zinazomilikiwa na barua pepe hizo:
+Pamoja na **domeni,** **subdomeni**, na **barua pepe** unaweza kuanza kutafuta akida zilizovuja katika siku za nyuma zinazohusiana na hizo barua pepe:
 
 - [https://leak-lookup.com](https://leak-lookup.com/account/login)
 - [https://www.dehashed.com/](https://www.dehashed.com/)
@@ -592,11 +592,11 @@ Pia kuna huduma za bure zinazokuruhusu **kuchunguza hifadhi za umma**, kama:
 
 - [**Snyk**](https://app.snyk.io/)
 
-## [**Mbinu ya Pentesting ya Wavuti**](../../network-services-pentesting/pentesting-web/index.html)
+## [**Mbinu ya Pentesting Wavuti**](../../network-services-pentesting/pentesting-web/index.html)
 
 **Wingi wa hatari** zinazopatikana na wawindaji wa makosa ziko ndani ya **maombi ya wavuti**, hivyo katika hatua hii ningependa kuzungumzia **mbinu ya kupima maombi ya wavuti**, na unaweza [**kupata habari hii hapa**](../../network-services-pentesting/pentesting-web/index.html).
 
-Ningependa pia kutoa kumbukumbu maalum kwa sehemu [**Zana za Skana za Kiotomatiki za Wavuti**](../../network-services-pentesting/pentesting-web/index.html#automatic-scanners), kwani, usitarajie zipate hatari nyeti sana, zinakuja kwa manufaa kutekeleza kwenye **mchakato wa kazi ili kupata habari za awali za wavuti.**
+Ningependa pia kutoa kumbukumbu maalum kwa sehemu [**Zana za Skana za Kiotomatiki za Wavuti**](../../network-services-pentesting/pentesting-web/index.html#automatic-scanners), kwani, usitarajie zipate hatari nyeti sana, zinakuwa na manufaa kutekeleza kwenye **mchakato wa kupata habari za awali za wavuti.**
 
 ## Muhtasari
 
@@ -604,17 +604,17 @@ Ningependa pia kutoa kumbukumbu maalum kwa sehemu [**Zana za Skana za Kiotomatik
 
 Hivyo tayari umepata:
 
-1. Kupata **makampuni** yote ndani ya upeo
-2. Kupata **mali** zote zinazomilikiwa na makampuni (na kufanya skana za hatari ikiwa ziko ndani ya upeo)
-3. Kupata **domeni** zote zinazomilikiwa na makampuni
-4. Kupata **subdomeni** zote za domeni (je, kuna kuchukuliwa kwa subdomeni?)
+1. Kupata **kampuni zote** ndani ya upeo
+2. Kupata **mali zote** zinazomilikiwa na kampuni (na kufanya skana za hatari ikiwa ziko ndani ya upeo)
+3. Kupata **domeni zote** zinazomilikiwa na kampuni
+4. Kupata **subdomeni zote** za domeni (je, kuna kuchukuliwa kwa subdomeni?)
 5. Kupata **IPs** zote (kutoka na **sio kutoka CDNs**) ndani ya upeo.
-6. Kupata **seva zote za wavuti** na kuchukua **mifano ya skrini** zao (je, kuna kitu chochote cha ajabu kinachostahili kuangaliwa kwa kina?)
+6. Kupata **seva zote za wavuti** na kuchukua **mifano ya skrini** zao (je, kuna kitu chochote cha ajabu kinachostahili kuangaliwa kwa undani?)
 7. Kupata **mali zote za umma za wingu** zinazomilikiwa na kampuni.
 8. **Barua pepe**, **mvuvi wa akida**, na **mvuvi wa siri** ambazo zinaweza kukupa **ushindi mkubwa kwa urahisi sana**.
 9. **Pentesting wavuti zote ulizozipata**
 
-## **Zana za Ufuatiliaji wa Moja kwa Moja**
+## **Zana za Kiotomatiki za Upelelezi Kamili**
 
 Kuna zana kadhaa huko nje ambazo zitatekeleza sehemu ya vitendo vilivyopendekezwa dhidi ya upeo fulani.
 
@@ -625,6 +625,6 @@ Kuna zana kadhaa huko nje ambazo zitatekeleza sehemu ya vitendo vilivyopendekezw
 
 ## **Marejeleo**
 
-- Kozi zote za bure za [**@Jhaddix**](https://twitter.com/Jhaddix) kama [**Mbinu ya Mwindaji wa Makosa v4.0 - Toleo la Ufuatiliaji**](https://www.youtube.com/watch?v=p4JgIu1mceI)
+- Kozi zote za bure za [**@Jhaddix**](https://twitter.com/Jhaddix) kama [**Mbinu ya Wawindaji wa Makosa v4.0 - Toleo la Upelelezi**](https://www.youtube.com/watch?v=p4JgIu1mceI)
 
 {{#include ../../banners/hacktricks-training.md}}

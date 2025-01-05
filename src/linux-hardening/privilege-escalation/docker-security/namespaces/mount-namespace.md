@@ -4,16 +4,16 @@
 
 ## Basic Information
 
-Mount namespace ni kipengele cha kernel ya Linux kinachotoa kutengwa kwa maeneo ya mfumo wa faili yanayoonekana na kundi la michakato. Kila mount namespace ina seti yake ya maeneo ya mfumo wa faili, na **mabadiliko kwenye maeneo ya mount katika namespace moja hayaathiri namespaces nyingine**. Hii inamaanisha kwamba michakato inayofanya kazi katika namespaces tofauti za mount inaweza kuwa na maoni tofauti ya muundo wa mfumo wa faili.
+Mount namespace ni kipengele cha kernel ya Linux kinachotoa kutengwa kwa maeneo ya mfumo wa faili yanayoonekana na kundi la michakato. Kila mount namespace ina seti yake ya maeneo ya mfumo wa faili, na **mabadiliko kwenye maeneo ya mount katika namespace moja hayaathiri namespaces nyingine**. Hii inamaanisha kwamba michakato inayofanya kazi katika namespaces tofauti za mount inaweza kuwa na maoni tofauti ya hierarchi ya mfumo wa faili.
 
 Mount namespaces ni muhimu sana katika uundaji wa kontena, ambapo kila kontena inapaswa kuwa na mfumo wake wa faili na usanidi, uliojitenga na kontena nyingine na mfumo wa mwenyeji.
 
 ### How it works:
 
-1. Wakati mount namespace mpya inaundwa, inaanzishwa na **nakala ya maeneo ya mount kutoka namespace yake ya mzazi**. Hii inamaanisha kwamba, wakati wa uundaji, namespace mpya inashiriki maoni sawa ya mfumo wa faili kama mzazi wake. Hata hivyo, mabadiliko yoyote yanayofuata kwenye maeneo ya mount ndani ya namespace hayataathiri mzazi au namespaces nyingine.
-2. Wakati mchakato unabadilisha eneo la mount ndani ya namespace yake, kama vile kuunganisha au kutenganisha mfumo wa faili, **mabadiliko ni ya ndani kwa namespace hiyo** na hayaathiri namespaces nyingine. Hii inaruhusu kila namespace kuwa na muundo wake wa mfumo wa faili huru.
+1. Wakati mount namespace mpya inaundwa, inaanzishwa na **nakala ya maeneo ya mount kutoka namespace yake ya mzazi**. Hii inamaanisha kwamba, wakati wa uundaji, namespace mpya inashiriki maoni sawa ya mfumo wa faili kama mzazi wake. Hata hivyo, mabadiliko yoyote yanayofuata kwenye maeneo ya mount ndani ya namespace hayatamathiri mzazi au namespaces nyingine.
+2. Wakati mchakato unabadilisha eneo la mount ndani ya namespace yake, kama vile kuunganisha au kuondoa mfumo wa faili, **mabadiliko ni ya ndani kwa namespace hiyo** na hayaathiri namespaces nyingine. Hii inaruhusu kila namespace kuwa na hierarchi yake ya mfumo wa faili isiyoegemea.
 3. Michakato inaweza kuhamia kati ya namespaces kwa kutumia wito wa mfumo wa `setns()`, au kuunda namespaces mpya kwa kutumia wito wa mfumo wa `unshare()` au `clone()` na bendera ya `CLONE_NEWNS`. Wakati mchakato unahamia kwenye namespace mpya au kuunda moja, utaanza kutumia maeneo ya mount yanayohusiana na namespace hiyo.
-4. **Vifunguo vya faili na inodes vinashirikiwa kati ya namespaces**, ikimaanisha kwamba ikiwa mchakato katika namespace moja una funguo la faili lililo wazi linaloelekeza kwenye faili, linaweza **kupitisha funguo hilo la faili** kwa mchakato katika namespace nyingine, na **michakato yote itapata faili hiyo hiyo**. Hata hivyo, njia ya faili inaweza isiwe sawa katika namespaces zote mbili kutokana na tofauti katika maeneo ya mount.
+4. **Vifaa vya faili na inodes vinashirikiwa kati ya namespaces**, ikimaanisha kwamba ikiwa mchakato katika namespace moja una kifaa cha faili kilichofunguliwa kinachoelekeza kwenye faili, kinaweza **kupitisha kifaa hicho cha faili** kwa mchakato katika namespace nyingine, na **michakato yote itapata faili hiyo hiyo**. Hata hivyo, njia ya faili inaweza isiwe sawa katika namespaces zote mbili kutokana na tofauti katika maeneo ya mount.
 
 ## Lab:
 
@@ -27,25 +27,25 @@ Kwa kuunganisha mfano mpya wa mfumo wa `/proc` ikiwa unatumia param `--mount-pro
 
 <details>
 
-<summary>Hitilafu: bash: fork: Haiwezekani kugawa kumbukumbu</summary>
+<summary>Kosa: bash: fork: Haiwezekani kugawa kumbukumbu</summary>
 
-Wakati `unshare` inatekelezwa bila chaguo la `-f`, hitilafu inakutana kutokana na jinsi Linux inavyoshughulikia namespaces mpya za PID (Kitambulisho cha Mchakato). Maelezo muhimu na suluhisho yameelezwa hapa chini:
+Wakati `unshare` inatekelezwa bila chaguo la `-f`, kosa linakutana kutokana na jinsi Linux inavyoshughulikia namespaces mpya za PID (Process ID). Maelezo muhimu na suluhisho yameelezwa hapa chini:
 
 1. **Maelezo ya Tatizo**:
 
 - Kernel ya Linux inaruhusu mchakato kuunda namespaces mpya kwa kutumia wito wa mfumo wa `unshare`. Hata hivyo, mchakato unaoanzisha uundaji wa namespace mpya ya PID (inayojulikana kama mchakato wa "unshare") hauingii kwenye namespace mpya; ni watoto wake tu wanajumuishwa.
-- Kuendesha `%unshare -p /bin/bash%` kunaanzisha `/bin/bash` katika mchakato sawa na `unshare`. Kwa hivyo, `/bin/bash` na watoto wake wako katika namespace ya awali ya PID.
+- Kukimbia `%unshare -p /bin/bash%` kunaanzisha `/bin/bash` katika mchakato sawa na `unshare`. Kwa hivyo, `/bin/bash` na watoto wake wako katika namespace ya awali ya PID.
 - Mchakato wa kwanza wa mtoto wa `/bin/bash` katika namespace mpya unakuwa PID 1. Wakati mchakato huu unapoondoka, unachochea usafishaji wa namespace ikiwa hakuna mchakato mwingine, kwani PID 1 ina jukumu maalum la kupokea mchakato wa yatima. Kernel ya Linux itazima ugawaji wa PID katika namespace hiyo.
 
 2. **Matokeo**:
 
-- Kuondoka kwa PID 1 katika namespace mpya kunasababisha usafishaji wa bendera ya `PIDNS_HASH_ADDING`. Hii inasababisha kazi ya `alloc_pid` kushindwa kugawa PID mpya wakati wa kuunda mchakato mpya, ikitoa hitilafu ya "Haiwezekani kugawa kumbukumbu".
+- Kuondoka kwa PID 1 katika namespace mpya kunasababisha usafishaji wa bendera ya `PIDNS_HASH_ADDING`. Hii inasababisha kazi ya `alloc_pid` kushindwa kugawa PID mpya wakati wa kuunda mchakato mpya, ikitoa kosa la "Haiwezekani kugawa kumbukumbu".
 
 3. **Suluhisho**:
 - Tatizo linaweza kutatuliwa kwa kutumia chaguo la `-f` pamoja na `unshare`. Chaguo hili linafanya `unshare` kuunda mchakato mpya baada ya kuunda namespace mpya ya PID.
-- Kuendesha `%unshare -fp /bin/bash%` kunahakikisha kwamba amri ya `unshare` yenyewe inakuwa PID 1 katika namespace mpya. `/bin/bash` na watoto wake wanajumuishwa salama ndani ya namespace hii mpya, kuzuia kuondoka mapema kwa PID 1 na kuruhusu ugawaji wa kawaida wa PID.
+- Kutekeleza `%unshare -fp /bin/bash%` kunahakikisha kwamba amri ya `unshare` yenyewe inakuwa PID 1 katika namespace mpya. `/bin/bash` na watoto wake wanakuwa salama ndani ya namespace hii mpya, kuzuia kuondoka mapema kwa PID 1 na kuruhusu ugawaji wa kawaida wa PID.
 
-Kwa kuhakikisha kwamba `unshare` inatekelezwa na bendera ya `-f`, namespace mpya ya PID inatunzwa kwa usahihi, ikiruhusu `/bin/bash` na mchakato wake wa chini kufanya kazi bila kukutana na hitilafu ya ugawaji wa kumbukumbu.
+Kwa kuhakikisha kwamba `unshare` inakimbia na bendera ya `-f`, namespace mpya ya PID inatunzwa kwa usahihi, ikiruhusu `/bin/bash` na mchakato wake wa chini kufanya kazi bila kukutana na kosa la ugawaji wa kumbukumbu.
 
 </details>
 
@@ -53,7 +53,7 @@ Kwa kuhakikisha kwamba `unshare` inatekelezwa na bendera ya `-f`, namespace mpya
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-### &#x20;Angalia ni namespace ipi mchakato wako uko ndani
+### Angalia ni namespace ipi mchakato wako uko ndani
 ```bash
 ls -l /proc/self/ns/mnt
 lrwxrwxrwx 1 root root 0 Apr  4 20:30 /proc/self/ns/mnt -> 'mnt:[4026531841]'
@@ -72,7 +72,7 @@ findmnt
 ```bash
 nsenter -m TARGET_PID --pid /bin/bash
 ```
-Pia, unaweza tu **kuingia katika namespace ya mchakato mwingine ikiwa wewe ni root**. Na huwezi **kuingia** katika namespace nyingine **bila desktopa** inayorejelea hiyo (kama `/proc/self/ns/mnt`).
+Pia, unaweza tu **kuingia katika namespace ya mchakato mwingine ikiwa wewe ni root**. Na huwezi **kuingia** katika namespace nyingine **bila deskteta** inayorejelea hiyo (kama `/proc/self/ns/mnt`).
 
 Kwa sababu milima mipya inapatikana tu ndani ya namespace, inawezekana kwamba namespace ina taarifa nyeti ambazo zinaweza kupatikana tu kutoka ndani yake.
 

@@ -12,11 +12,11 @@ Angalia [**ripoti ya asili hapa**](https://www.mdsec.co.uk/2018/08/escaping-the-
 
 ### Word Sandbox bypass via Login Items and zip
 
-Kumbuka kwamba kutoka kwa kutoroka kwanza, Word inaweza kuandika faili za kawaida ambazo jina lake linaanza na `~$` ingawa baada ya patch ya udhaifu wa awali haikuwezekana kuandika katika `/Library/Application Scripts` au katika `/Library/LaunchAgents`.
+Kumbuka kwamba kutoka kwa kutoroka kwanza, Word inaweza kuandika faili za kawaida ambazo jina lake linaanza na `~$` ingawa baada ya patch ya vuln iliyopita haikuwezekana kuandika katika `/Library/Application Scripts` au katika `/Library/LaunchAgents`.
 
 Iligundulika kwamba kutoka ndani ya sandbox inawezekana kuunda **Login Item** (programu ambazo zitatekelezwa wakati mtumiaji anapoingia). Hata hivyo, programu hizi **hazitaweza kutekelezwa isipokuwa** zime **notarized** na **haiwezekani kuongeza args** (hivyo huwezi tu kuendesha shell ya kinyume kwa kutumia **`bash`**).
 
-Kutoka kwa kutoroka kwa Sandbox ya awali, Microsoft ilizima chaguo la kuandika faili katika `~/Library/LaunchAgents`. Hata hivyo, iligundulika kwamba ikiwa utaweka **faili ya zip kama Login Item** `Archive Utility` itachambua tu **zip** katika eneo lake la sasa. Hivyo, kwa sababu kwa kawaida folda `LaunchAgents` kutoka `~/Library` haijaundwa, ilikuwa inawezekana **kuzipa plist katika `LaunchAgents/~$escape.plist`** na **kuiweka** faili ya zip katika **`~/Library`** ili wakati wa kufungua itafikia mahali pa kudumu.
+Kutoka kwa kutoroka kwa Sandbox iliyopita, Microsoft ilizima chaguo la kuandika faili katika `~/Library/LaunchAgents`. Hata hivyo, iligundulika kwamba ikiwa utaweka **faili ya zip kama Login Item** `Archive Utility` itachambua tu **zip** hiyo katika eneo lake la sasa. Hivyo, kwa sababu kwa kawaida folda `LaunchAgents` kutoka `~/Library` haijaundwa, ilikuwa inawezekana **kuzipa plist katika `LaunchAgents/~$escape.plist`** na **kuiweka** faili ya zip katika **`~/Library`** ili wakati wa kufungua itafikia mahali pa kudumu.
 
 Angalia [**ripoti ya asili hapa**](https://objective-see.org/blog/blog_0x4B.html).
 
@@ -24,7 +24,7 @@ Angalia [**ripoti ya asili hapa**](https://objective-see.org/blog/blog_0x4B.html
 
 (Kumbuka kwamba kutoka kwa kutoroka kwanza, Word inaweza kuandika faili za kawaida ambazo jina lake linaanza na `~$`).
 
-Hata hivyo, mbinu ya awali ilikuwa na kikomo, ikiwa folda **`~/Library/LaunchAgents`** ipo kwa sababu programu nyingine iliiunda, ingekuwa na shida. Hivyo, mnyororo tofauti wa Login Items uligundulika kwa hili.
+Hata hivyo, mbinu iliyopita ilikuwa na kikomo, ikiwa folda **`~/Library/LaunchAgents`** ipo kwa sababu programu nyingine iliiunda, ingekuwa na matatizo. Hivyo, mnyororo tofauti wa Login Items uligundulika kwa hili.
 
 Mshambuliaji angeweza kuunda faili **`.bash_profile`** na **`.zshenv`** zikiwa na payload ya kutekeleza na kisha kuzipa na **kuandika zip katika** folda ya mtumiaji wa wahanga: **`~/~$escape.zip`**.
 
@@ -34,7 +34,7 @@ Angalia [**ripoti ya asili hapa**](https://desi-jarvis.medium.com/office365-maco
 
 ### Word Sandbox Bypass with Open and env variables
 
-Kutoka kwa michakato ya sandboxed bado inawezekana kuita michakato mingine kwa kutumia **`open`** utility. Zaidi ya hayo, michakato hii itakimbia **ndani ya sandbox yao wenyewe**.
+Kutoka kwa michakato iliyowekwa sandbox bado inawezekana kuita michakato mingine kwa kutumia **`open`** utility. Zaidi ya hayo, michakato hii itakimbia **ndani ya sandbox yao wenyewe**.
 
 Iligundulika kwamba utility ya open ina chaguo la **`--env`** kuendesha programu na **mabadiliko maalum**. Hivyo, ilikuwa inawezekana kuunda **faili ya `.zshenv`** ndani ya folda **ndani** ya **sandbox** na kutumia `open` na `--env` kuweka **`HOME` variable** kwa folda hiyo ikifungua programu hiyo ya `Terminal`, ambayo itatekeleza faili ya `.zshenv` (kwa sababu fulani ilikuwa pia inahitajika kuweka variable `__OSINSTALL_ENVIROMENT`).
 
@@ -42,11 +42,11 @@ Angalia [**ripoti ya asili hapa**](https://perception-point.io/blog/technical-an
 
 ### Word Sandbox Bypass with Open and stdin
 
-Utility ya **`open`** pia ilisaidia param ya **`--stdin`** (na baada ya kutoroka kwa awali haikuwezekana tena kutumia `--env`).
+Utility ya **`open`** pia ilisaidia param **`--stdin`** (na baada ya kutoroka kwa awali haikuwezekana tena kutumia `--env`).
 
-Jambo ni kwamba hata kama **`python`** ilitiwa saini na Apple, haitatekeleza **script** yenye sifa ya **`quarantine`**. Hata hivyo, ilikuwa inawezekana kuipatia script kutoka stdin hivyo haitakagua ikiwa ilikuwa imewekwa karantini au la:&#x20;
+Jambo ni kwamba hata kama **`python`** ilitiwa saini na Apple, **haitatekeleza** script yenye **`quarantine`** attribute. Hata hivyo, ilikuwa inawezekana kupitisha script kutoka stdin hivyo haitakagua ikiwa ilikuwa imewekwa karantini au la:
 
-1. Angusha faili ya **`~$exploit.py`** yenye amri za Python za kawaida.
-2. Kimbia _open_ **`–stdin='~$exploit.py' -a Python`**, ambayo inakimbia programu ya Python na faili yetu iliyotupwa ikihudumu kama ingizo lake la kawaida. Python kwa furaha inakimbia msimbo wetu, na kwa kuwa ni mchakato wa mtoto wa _launchd_, haifungwi na sheria za sandbox za Word.
+1. Angalia faili **`~$exploit.py`** yenye amri za Python za kawaida.
+2. Kimbia _open_ **`–stdin='~$exploit.py' -a Python`**, ambayo inakimbia programu ya Python na faili yetu iliyotolewa ikihudumu kama ingizo lake la kawaida. Python kwa furaha inakimbia msimbo wetu, na kwa kuwa ni mchakato wa mtoto wa _launchd_, haifungwi na sheria za sandbox za Word.
 
 {{#include ../../../../../banners/hacktricks-training.md}}

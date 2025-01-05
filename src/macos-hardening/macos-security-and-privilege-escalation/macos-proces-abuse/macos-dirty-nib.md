@@ -6,20 +6,20 @@
 
 ### Nini Nib files
 
-Nib (fupi kwa NeXT Interface Builder) files, sehemu ya mfumo wa maendeleo wa Apple, zinakusudia kufafanua **vipengele vya UI** na mwingiliano wao katika programu. Zinajumuisha vitu vilivyopangwa kama vile madirisha na vifungo, na hupakiwa wakati wa utendaji. Licha ya matumizi yao yaendelea, Apple sasa inapendekeza Storyboards kwa ajili ya uonyeshaji wa mtiririko wa UI wa kina zaidi.
+Nib (fupi kwa NeXT Interface Builder) files, sehemu ya mfumo wa maendeleo wa Apple, zinakusudia kufafanua **vipengele vya UI** na mwingiliano wao katika programu. Zinajumuisha vitu vilivyopangwa kama vile madirisha na vifungo, na hupakiwa wakati wa wakati wa utekelezaji. Licha ya matumizi yao yaendelea, Apple sasa inapendekeza Storyboards kwa ajili ya uonyeshaji wa mtiririko wa UI wa kina zaidi.
 
-Faili kuu ya Nib inarejelea katika thamani **`NSMainNibFile`** ndani ya faili ya `Info.plist` ya programu na hupakiwa na kazi **`NSApplicationMain`** inayotekelezwa katika kazi ya `main` ya programu.
+Faili kuu ya Nib inarejelewa katika thamani **`NSMainNibFile`** ndani ya faili ya `Info.plist` ya programu na hupakiwa na kazi **`NSApplicationMain`** inayotekelezwa katika kazi ya `main` ya programu.
 
 ### Mchakato wa Uingizaji wa Dirty Nib
 
-#### Kuunda na Kuweka NIB File
+#### Kuunda na Kuweka Faili ya NIB
 
 1. **Mipangilio ya Awali**:
 - Unda faili mpya ya NIB kwa kutumia XCode.
 - Ongeza Kitu kwenye interface, ukipanga darasa lake kuwa `NSAppleScript`.
-- Sanidi mali ya awali ya `source` kupitia Sifa za Runtime Zilizofafanuliwa na Mtumiaji.
+- Sanidi mali ya awali ya `source` kupitia Sifa za Wakati wa Uendeshaji Zilizofanywa na Mtumiaji.
 2. **Gadget ya Utekelezaji wa Kanuni**:
-- Mipangilio inarahisisha kuendesha AppleScript kwa mahitaji.
+- Mipangilio hii inarahisisha kuendesha AppleScript kwa mahitaji.
 - Jumuisha kifungo ili kuamsha kitu cha `Apple Script`, hasa kuanzisha mteule wa `executeAndReturnError:`.
 3. **Kujaribu**:
 
@@ -46,22 +46,22 @@ display dialog theDialogText
 
 - Badilisha AppleScript ili kufikia na kutoa takwimu za mtumiaji, kama picha, bila idhini ya mtumiaji.
 
-### Mfano wa Kanuni: Faili ya .xib Mbaya
+### Mfano wa Kanuni: Faili Mbaya ya .xib
 
-- Fikia na kagua [**mfano wa faili ya .xib mbaya**](https://gist.github.com/xpn/16bfbe5a3f64fedfcc1822d0562636b4) inayodhihirisha utekelezaji wa kanuni zisizo na mipaka.
+- Fikia na kagua [**mfano wa faili mbaya ya .xib**](https://gist.github.com/xpn/16bfbe5a3f64fedfcc1822d0562636b4) inayodhihirisha utekelezaji wa kanuni zisizo na mipaka.
 
 ### Mfano Mwingine
 
-Katika chapisho [https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) unaweza kupata mafunzo juu ya jinsi ya kuunda nib mbaya.&#x20;
+Katika chapisho [https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) unaweza kupata mafunzo juu ya jinsi ya kuunda nib chafu.
 
-### Kukabiliana na Vikwazo vya Uzinduzi
+### Kushughulikia Vikwazo vya Uzinduzi
 
 - Vikwazo vya Uzinduzi vinakwamisha utekelezaji wa programu kutoka maeneo yasiyotarajiwa (mfano, `/tmp`).
 - Inawezekana kubaini programu ambazo hazijalindwa na Vikwazo vya Uzinduzi na kuzilenga kwa ajili ya uingizaji wa faili ya NIB.
 
 ### Ulinzi Mwingine wa macOS
 
-Kuanzia macOS Sonoma kuendelea, mabadiliko ndani ya vifurushi vya Programu yamezuiliwa. Hata hivyo, mbinu za awali zilihusisha:
+Kuanzia macOS Sonoma kuendelea, mabadiliko ndani ya vifurushi vya Programu yanakabiliwa. Hata hivyo, mbinu za awali zilihusisha:
 
 1. Nakala ya programu kwenye eneo tofauti (mfano, `/tmp/`).
 2. Kubadilisha majina ya directories ndani ya kifurushi cha programu ili kupita ulinzi wa awali.
