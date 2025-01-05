@@ -4,13 +4,13 @@
 
 ## 基本情報
 
-カーネル拡張（Kexts）は、**`.kext`** 拡張子を持つ **パッケージ** であり、**macOS カーネル空間に直接ロードされる**ことで、主要なオペレーティングシステムに追加機能を提供します。
+Kernel extensions (Kexts) は **パッケージ** で、**`.kext`** 拡張子を持ち、**macOS カーネル空間に直接ロードされる**ことで、主要なオペレーティングシステムに追加機能を提供します。
 
 ### 要件
 
-明らかに、これは非常に強力であるため、**カーネル拡張をロードするのは複雑です**。カーネル拡張がロードされるために満たすべき **要件** は次のとおりです：
+明らかに、これは非常に強力であるため、**カーネル拡張をロードするのは複雑です**。カーネル拡張がロードされるために満たすべき **要件** は以下の通りです：
 
-- **リカバリモードに入るとき**、カーネル **拡張がロードされることを許可する必要があります**：
+- **リカバリーモードに入るとき**、カーネル **拡張がロードされることを許可する必要があります**：
 
 <figure><img src="../../../images/image (327).png" alt=""><figcaption></figcaption></figure>
 
@@ -22,19 +22,19 @@
 
 ### ロードプロセス
 
-カタリナでは次のようでした：**検証** プロセスは **ユーザーランド** で行われることに注目することが興味深いです。しかし、**`com.apple.private.security.kext-management`** の付与を持つアプリケーションのみが **カーネルに拡張をロードするよう要求できます**：`kextcache`、`kextload`、`kextutil`、`kextd`、`syspolicyd`
+カタリナでは次のようでした：**検証** プロセスは **ユーザーランド** で行われることに注目するのは興味深いです。しかし、**`com.apple.private.security.kext-management`** の付与を持つアプリケーションのみが **カーネルに拡張をロードするよう要求できます**：`kextcache`、`kextload`、`kextutil`、`kextd`、`syspolicyd`
 
 1. **`kextutil`** cli **が** 拡張のロードのための **検証** プロセスを **開始します**
-- **Machサービス** を使用して **`kextd`** に話しかけます。
-2. **`kextd`** は、**署名** などのいくつかのことをチェックします
-- 拡張が **ロードできるかどうかを確認するために** **`syspolicyd`** に話しかけます。
+- **`kextd`** に **Machサービス** を使用して送信します。
+2. **`kextd`** は **署名** などのいくつかのことをチェックします
+- 拡張が **ロードできるかどうかを確認するために** **`syspolicyd`** に話します。
 3. **`syspolicyd`** は、拡張が以前にロードされていない場合、**ユーザーにプロンプトを表示します**。
 - **`syspolicyd`** は結果を **`kextd`** に報告します。
-4. **`kextd`** は最終的に **カーネルに拡張をロードするよう指示できる**ようになります。
+4. **`kextd`** は最終的に **カーネルに拡張をロードするよう指示できます**
 
 もし **`kextd`** が利用できない場合、**`kextutil`** は同じチェックを実行できます。
 
-### 列挙（ロードされたkexts）
+### 列挙 (ロードされた kexts)
 ```bash
 # Get loaded kernel extensions
 kextstat
@@ -45,35 +45,35 @@ kextstat | grep " 22 " | cut -c2-5,50- | cut -d '(' -f1
 ## Kernelcache
 
 > [!CAUTION]
-> カーネル拡張は `/System/Library/Extensions/` にあると予想されていますが、このフォルダーに行っても **バイナリは見つかりません**。これは **kernelcache** のためであり、`.kext` を逆コンパイルするには、それを取得する方法を見つける必要があります。
+> カーネル拡張は `/System/Library/Extensions/` にあることが期待されていますが、このフォルダーに行っても **バイナリは見つかりません**。これは **kernelcache** のためであり、`.kext` を逆コンパイルするには、それを取得する方法を見つける必要があります。
 
-**kernelcache** は **XNUカーネルの事前コンパイルおよび事前リンクされたバージョン**であり、重要なデバイス **ドライバー** と **カーネル拡張** が含まれています。これは **圧縮** 形式で保存され、起動プロセス中にメモリに展開されます。kernelcache は、カーネルと重要なドライバーの実行準備が整ったバージョンを利用することで **起動時間を短縮** し、起動時にこれらのコンポーネントを動的に読み込んでリンクするのにかかる時間とリソースを削減します。
+**kernelcache** は **XNUカーネルの事前コンパイルおよび事前リンクされたバージョン**であり、重要なデバイス **ドライバー** と **カーネル拡張** が含まれています。これは **圧縮** 形式で保存され、起動プロセス中にメモリに展開されます。kernelcache は、カーネルと重要なドライバーの実行準備が整ったバージョンを利用することで **起動時間を短縮** し、起動時にこれらのコンポーネントを動的に読み込みおよびリンクするのにかかる時間とリソースを削減します。
 
-### Local Kerlnelcache
+### Local Kernelcache
 
 iOS では **`/System/Library/Caches/com.apple.kernelcaches/kernelcache`** にあり、macOS では次のコマンドで見つけることができます: **`find / -name "kernelcache" 2>/dev/null`** \
-私の場合、macOS では次の場所で見つけました:
+私のmacOSのケースでは、次の場所で見つけました:
 
 - `/System/Volumes/Preboot/1BAEB4B5-180B-4C46-BD53-51152B7D92DA/boot/DAD35E7BC0CDA79634C20BD1BD80678DFB510B2AAD3D25C1228BB34BCD0A711529D3D571C93E29E1D0C1264750FA043F/System/Library/Caches/com.apple.kernelcaches/kernelcache`
 
 #### IMG4
 
-IMG4 ファイル形式は、Apple が iOS および macOS デバイスで **ファームウェア** コンポーネント（**kernelcache** など）を安全に **保存および検証** するために使用するコンテナ形式です。IMG4 形式にはヘッダーと、実際のペイロード（カーネルやブートローダーなど）、署名、および一連のマニフェストプロパティをカプセル化するいくつかのタグが含まれています。この形式は暗号的検証をサポートしており、デバイスがファームウェアコンポーネントを実行する前にその真正性と整合性を確認できるようにします。
+IMG4ファイル形式は、AppleがiOSおよびmacOSデバイスでファームウェアコンポーネント（**kernelcache** など）を安全に **保存および検証** するために使用するコンテナ形式です。IMG4形式にはヘッダーと、実際のペイロード（カーネルやブートローダーなど）、署名、および一連のマニフェストプロパティをカプセル化するいくつかのタグが含まれています。この形式は暗号的検証をサポートしており、デバイスがファームウェアコンポーネントを実行する前にその真正性と整合性を確認できるようにします。
 
 通常、以下のコンポーネントで構成されています:
 
-- **Payload (IM4P)**:
+- **ペイロード (IM4P)**:
 - よく圧縮されている (LZFSE4, LZSS, …)
 - オプションで暗号化されている
-- **Manifest (IM4M)**:
+- **マニフェスト (IM4M)**:
 - 署名を含む
-- 追加のキー/値辞書
-- **Restore Info (IM4R)**:
+- 追加のキー/バリューディクショナリ
+- **復元情報 (IM4R)**:
 - APNonce としても知られる
 - 一部の更新の再生を防ぐ
 - OPTIONAL: 通常は見つからない
 
-Kernelcache を解凍する:
+Kernelcacheを解凍する:
 ```bash
 # img4tool (https://github.com/tihmstar/img4tool
 img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
@@ -107,13 +107,13 @@ pyimg4 im4p extract -i kernelcache.release.iphone14 -o kernelcache.release.iphon
 ```bash
 img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 ```
-### カーネルキャッシュの検査
+### Inspecting kernelcache
 
 カーネルキャッシュにシンボルがあるか確認します。
 ```bash
 nm -a kernelcache.release.iphone14.e | wc -l
 ```
-これで、**すべての拡張機能**または**あなたが興味のあるもの**を**抽出**できます：
+これで、**すべての拡張機能**または**興味のある拡張機能**を**抽出**できます。
 ```bash
 # List all extensions
 kextex -l kernelcache.release.iphone14.e

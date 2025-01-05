@@ -10,7 +10,7 @@ Nib（NeXT Interface Builderの略）ファイルは、Appleの開発エコシ�
 
 主要なNibファイルは、アプリケーションの`Info.plist`ファイル内の**`NSMainNibFile`**の値で参照され、アプリケーションの`main`関数で実行される**`NSApplicationMain`**関数によって読み込まれます。
 
-### ダーティNibインジェクションプロセス
+### Dirty Nib注入プロセス
 
 #### NIBファイルの作成と設定
 
@@ -52,12 +52,12 @@ display dialog theDialogText
 
 ### その他の例
 
-投稿[https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)では、ダーティNibの作成方法に関するチュートリアルを見つけることができます。&#x20;
+投稿[https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)では、ダーティニブの作成方法に関するチュートリアルを見つけることができます。
 
 ### 起動制約への対処
 
 - 起動制約は、予期しない場所（例：`/tmp`）からのアプリの実行を妨げます。
-- 起動制約によって保護されていないアプリを特定し、NIBファイルのインジェクションをターゲットにすることが可能です。
+- 起動制約によって保護されていないアプリを特定し、NIBファイル注入のターゲットにすることが可能です。
 
 ### 追加のmacOS保護
 
@@ -66,8 +66,8 @@ macOS Sonoma以降、アプリバンドル内の変更が制限されていま�
 1. アプリを別の場所（例：`/tmp/`）にコピーします。
 2. 初期の保護を回避するためにアプリバンドル内のディレクトリの名前を変更します。
 3. Gatekeeperに登録するためにアプリを実行した後、アプリバンドルを変更します（例：MainMenu.nibをDirty.nibに置き換えます）。
-4. ディレクトリの名前を元に戻し、アプリを再実行してインジェクトされたNIBファイルを実行します。
+4. ディレクトリの名前を元に戻し、アプリを再実行して注入されたNIBファイルを実行します。
 
-**注意**: 最近のmacOSのアップデートにより、Gatekeeperキャッシュ後にアプリバンドル内のファイルの変更が防止され、この脆弱性が無効化されました。
+**注意**: 最近のmacOSのアップデートにより、Gatekeeperキャッシュ後にアプリバンドル内のファイル変更が防止され、この脆弱性は無効化されました。
 
 {{#include ../../../banners/hacktricks-training.md}}

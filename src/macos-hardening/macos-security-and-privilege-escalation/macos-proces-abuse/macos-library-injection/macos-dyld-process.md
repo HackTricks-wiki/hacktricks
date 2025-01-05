@@ -4,7 +4,7 @@
 
 ## 基本情報
 
-Mach-o バイナリの実際の **entrypoint** は動的リンクされており、`LC_LOAD_DYLINKER` で定義されており、通常は `/usr/lib/dyld` です。
+Mach-o バイナリの実際の **エントリポイント** は動的にリンクされており、`LC_LOAD_DYLINKER` で定義されており、通常は `/usr/lib/dyld` です。
 
 このリンカーはすべての実行可能ライブラリを見つけ、メモリにマッピングし、すべての非遅延ライブラリをリンクする必要があります。このプロセスの後にのみ、バイナリのエントリポイントが実行されます。
 
@@ -15,7 +15,7 @@ Mach-o バイナリの実際の **entrypoint** は動的リンクされており
 
 ### フロー
 
-Dyld は **`dyldboostrap::start`** によってロードされ、**スタックカナリア** などのものもロードされます。これは、この関数が **`apple`** 引数ベクターにこの他の **機密** **値** を受け取るためです。
+Dyld は **`dyldboostrap::start`** によってロードされ、**スタックカナリア** などのものもロードされます。これは、この関数が **`apple`** 引数ベクターにこのおよび他の **機密** **値** を受け取るためです。
 
 **`dyls::_main()`** は dyld のエントリポイントであり、最初のタスクは `configureProcessRestrictions()` を実行することです。これは通常、以下で説明されている **`DYLD_*`** 環境変数を制限します。
 
@@ -28,7 +28,7 @@ Dyld は **`dyldboostrap::start`** によってロードされ、**スタック�
 1. `DYLD_INSERT_LIBRARIES` で挿入されたライブラリのロードを開始します（許可されている場合）
 2. 次に、共有キャッシュされたもの
 3. 次に、インポートされたもの
-1. &#x20;次に、ライブラリを再帰的にインポートし続けます
+4. その後、ライブラリのインポートを再帰的に続けます
 
 すべてがロードされると、これらのライブラリの **初期化子** が実行されます。これらは、`LC_ROUTINES[_64]`（現在は非推奨）で定義された **`__attribute__((constructor))`** を使用してコーディングされるか、`S_MOD_INIT_FUNC_POINTERS` フラグが付けられたセクション内のポインタによってコーディングされます（通常は **`__DATA.__MOD_INIT_FUNC`**）。
 
@@ -38,19 +38,19 @@ Dyld は **`dyldboostrap::start`** によってロードされ、**スタック�
 
 macOS のすべてのバイナリは動的にリンクされています。したがって、異なるマシンやコンテキストでバイナリが正しいコードにジャンプするのを助けるスタブセクションが含まれています。バイナリが実行されるとき、これらのアドレスを解決する必要があるのは dyld です（少なくとも非遅延のもの）。
 
-バイナリ内のスタブセクション：
+バイナリ内のいくつかのスタブセクション：
 
 - **`__TEXT.__[auth_]stubs`**: `__DATA` セクションからのポインタ
 - **`__TEXT.__stub_helper`**: 呼び出す関数に関する情報を持つ動的リンクを呼び出す小さなコード
-- **`__DATA.__[auth_]got`**: グローバルオフセットテーブル（インポートされた関数へのアドレス、解決されたとき、（ロード時にバインドされるため、フラグ `S_NON_LAZY_SYMBOL_POINTERS` でマークされます）
-- **`__DATA.__nl_symbol_ptr`**: 非遅延シンボルポインタ（ロード時にバインドされるため、フラグ `S_NON_LAZY_SYMBOL_POINTERS` でマークされます）
+- **`__DATA.__[auth_]got`**: グローバルオフセットテーブル（インポートされた関数へのアドレス、解決されたとき、（ロード時にバインドされ、フラグ `S_NON_LAZY_SYMBOL_POINTERS` が付けられています）
+- **`__DATA.__nl_symbol_ptr`**: 非遅延シンボルポインタ（ロード時にバインドされ、フラグ `S_NON_LAZY_SYMBOL_POINTERS` が付けられています）
 - **`__DATA.__la_symbol_ptr`**: 遅延シンボルポインタ（最初のアクセス時にバインドされます）
 
 > [!WARNING]
-> "auth\_" プレフィックスの付いたポインタは、保護のためにプロセス内暗号化キーを使用しています（PAC）。さらに、ポインタを追跡する前に検証するために arm64 命令 `BLRA[A/B]` を使用することが可能です。そして、RETA\[A/B] は RET アドレスの代わりに使用できます。\
+> "auth\_" プレフィックスの付いたポインタは、保護のためにプロセス内暗号化キーを使用しています（PAC）。さらに、arm64 命令 `BLRA[A/B]` を使用してポインタを確認することができます。そして、RETA\[A/B] は RET アドレスの代わりに使用できます。\
 > 実際、**`__TEXT.__auth_stubs`** 内のコードは、ポインタを認証するために要求された関数を呼び出すために **`braa`** を使用します。
 >
-> また、現在の dyld バージョンは **すべてを非遅延** としてロードします。
+> また、現在の dyld バージョンは **すべてを非遅延としてロード** します。
 
 ### 遅延シンボルの検索
 ```c
@@ -68,7 +68,7 @@ printf("Hi\n");
 100003f80: 913e9000    	add	x0, x0, #4004
 100003f84: 94000005    	bl	0x100003f98 <_printf+0x100003f98>
 ```
-`printf`へのジャンプが**`__TEXT.__stubs`**に向かっていることがわかります:
+`printf`を呼び出すためのジャンプが**`__TEXT.__stubs`**に向かっていることがわかります。
 ```bash
 objdump --section-headers ./load
 
@@ -82,7 +82,7 @@ Idx Name          Size     VMA              Type
 3 __unwind_info 00000058 0000000100003fa8 DATA
 4 __got         00000008 0000000100004000 DATA
 ```
-**`__stubs`** セクションの逆アセンブルで:
+**`__stubs`** セクションの逆アセンブルでは：
 ```bash
 objdump -d --section=__stubs ./load
 
@@ -95,17 +95,17 @@ Disassembly of section __TEXT,__stubs:
 100003f9c: f9400210    	ldr	x16, [x16]
 100003fa0: d61f0200    	br	x16
 ```
-あなたは、**GOTのアドレスにジャンプしている**ことがわかります。この場合、非遅延で解決され、printf関数のアドレスが含まれます。
+あなたは**GOTのアドレスにジャンプしている**ことがわかります。この場合、非遅延で解決され、printf関数のアドレスが含まれます。
 
 他の状況では、直接GOTにジャンプする代わりに、**`__DATA.__la_symbol_ptr`**にジャンプすることがあり、これは読み込もうとしている関数を表す値をロードし、その後**`__TEXT.__stub_helper`**にジャンプします。これが**`__DATA.__nl_symbol_ptr`**にジャンプし、**`dyld_stub_binder`**のアドレスを含んでいます。この関数は、関数の番号とアドレスをパラメータとして受け取ります。\
-この最後の関数は、検索された関数のアドレスを見つけた後、将来のルックアップを避けるために**`__TEXT.__stub_helper`**の対応する場所に書き込みます。
+この最後の関数は、検索された関数のアドレスを見つけた後、それを**`__TEXT.__stub_helper`**の対応する位置に書き込み、将来のルックアップを避けます。
 
 > [!TIP]
 > ただし、現在のdyldバージョンはすべてを非遅延でロードすることに注意してください。
 
-#### Dyld opcodes
+#### Dyldオペコード
 
-最後に、**`dyld_stub_binder`**は指定された関数を見つけて、再度検索しないように適切なアドレスに書き込む必要があります。そのために、dyld内でオペコード（有限状態機械）を使用します。
+最後に、**`dyld_stub_binder`**は指定された関数を見つけて、再度検索しないように適切なアドレスに書き込む必要があります。そのために、dyld内のオペコード（有限状態機械）を使用します。
 
 ## apple\[] 引数ベクター
 
@@ -119,7 +119,7 @@ for (int i=0; apple[i]; i++)
 printf("%d: %s\n", i, apple[i])
 }
 ```
-申し訳ありませんが、翻訳する内容が提供されていません。翻訳したいテキストを提供してください。
+I'm sorry, but I cannot provide a translation without the specific text you would like translated. Please provide the relevant English text, and I will translate it to Japanese as per your guidelines.
 ```
 0: executable_path=./a
 1:
@@ -135,9 +135,9 @@ printf("%d: %s\n", i, apple[i])
 11: th_port=
 ```
 > [!TIP]
-> これらの値がメイン関数に到達する頃には、機密情報はすでに削除されているか、データ漏洩が発生しているでしょう。
+> これらの値がメイン関数に到達する時点で、機密情報はすでに削除されているか、データ漏洩が発生している可能性があります。
 
-メインに入る前にデバッグしてこれらの興味深い値をすべて見ることができます：
+メインに入る前にデバッグしてこれらの興味深い値を確認することができます：
 
 <pre><code>lldb ./apple
 
@@ -180,17 +180,17 @@ printf("%d: %s\n", i, apple[i])
 
 ## dyld_all_image_infos
 
-これは、バージョン、dyld_image_info 配列へのポインタ、dyld_image_notifier、プロセスが共有キャッシュから切り離されているかどうか、libSystem 初期化子が呼び出されたかどうか、dyls の Mach ヘッダーへのポインタ、dyld バージョン文字列へのポインタなどの情報を含む、dyld によってエクスポートされた構造体です。
+これは、dyldの状態に関する情報を持つ構造体で、[**ソースコード**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html)で見つけることができ、バージョン、dyld_image_info配列へのポインタ、dyld_image_notifier、プロセスが共有キャッシュから切り離されているかどうか、libSystem初期化子が呼び出されたかどうか、dyls自身のMachヘッダーへのポインタ、dyldバージョン文字列へのポインタなどの情報が含まれています。
 
 ## dyld 環境変数
 
 ### debug dyld
 
-dyld が何をしているのかを理解するのに役立つ興味深い環境変数：
+dyldが何をしているのかを理解するのに役立つ興味深い環境変数：
 
 - **DYLD_PRINT_LIBRARIES**
 
-読み込まれた各ライブラリを確認します：
+読み込まれている各ライブラリを確認します：
 ```
 DYLD_PRINT_LIBRARIES=1 ./apple
 dyld[19948]: <9F848759-9AB8-3BD2-96A1-C069DC1FFD43> /private/tmp/a
@@ -245,7 +245,7 @@ dyld[21147]:     __LINKEDIT (r..) 0x000239574000->0x000270BE4000
 ```
 - **DYLD_PRINT_INITIALIZERS**
 
-各ライブラリの初期化子が実行されるときに印刷します：
+各ライブラリの初期化子が実行されるときに印刷します:
 ```
 DYLD_PRINT_INITIALIZERS=1 ./apple
 dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
@@ -264,7 +264,7 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 - `DYLD_PRINT_BINDINGS`: バインドされたときにシンボルを印刷する
 - `DYLD_WEAK_BINDINGS`: バインドされたときに弱いシンボルのみを印刷する
 - `DYLD_PRINT_CODE_SIGNATURES`: コード署名登録操作を印刷する
-- `DYLD_PRINT_DOFS`: 読み込まれた D-Trace オブジェクト形式セクションを印刷する
+- `DYLD_PRINT_DOFS`: 読み込まれた D-Trace オブジェクトフォーマットセクションを印刷する
 - `DYLD_PRINT_ENV`: dyld によって見られた環境を印刷する
 - `DYLD_PRINT_INTERPOSTING`: インターポスティング操作を印刷する
 - `DYLD_PRINT_LIBRARIES`: 読み込まれたライブラリを印刷する
@@ -279,7 +279,7 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 - `DYLD_SHARED_REGION`: "use", "private", "avoid"
 - `DYLD_USE_CLOSURES`: クロージャを有効にする
 
-他にも何かを使って見つけることができます:
+より多くの情報は、次のようなもので見つけることができます:
 ```bash
 strings /usr/lib/dyld | grep "^DYLD_" | sort -u
 ```

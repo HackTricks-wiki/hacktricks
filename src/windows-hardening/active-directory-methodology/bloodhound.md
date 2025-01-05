@@ -13,13 +13,13 @@
 AD Explorer は AD のスナップショットを作成できるため、オフラインで確認できます。\
 オフラインで脆弱性を発見したり、時間の経過に伴う AD DB の異なる状態を比較するために使用できます。
 
-接続するためには、ユーザー名、パスワード、および接続先のディレクションが必要です（任意の AD ユーザーが必要です）。
+接続するためには、ユーザー名、パスワード、および方向が必要です（任意の AD ユーザーが必要です）。
 
 AD のスナップショットを取得するには、`File` --> `Create Snapshot` に移動し、スナップショットの名前を入力します。
 
 ## ADRecon
 
-[**ADRecon**](https://github.com/adrecon/ADRecon) は、AD 環境からさまざまなアーティファクトを抽出して結合するツールです。この情報は、分析を容易にし、ターゲット AD 環境の現在の状態の全体像を提供するためのメトリックを含む要約ビューを含む **特別にフォーマットされた** Microsoft Excel **レポート** で提示できます。
+[**ADRecon**](https://github.com/adrecon/ADRecon) は、AD 環境からさまざまなアーティファクトを抽出して統合するツールです。この情報は、分析を容易にし、ターゲット AD 環境の現在の状態の全体像を提供するためのメトリックを含む要約ビューを含む **特別にフォーマットされた** Microsoft Excel **レポート** で提示できます。
 ```bash
 # Run it
 .\ADRecon.ps1
@@ -30,7 +30,7 @@ From [https://github.com/BloodHoundAD/BloodHound](https://github.com/BloodHoundA
 
 > BloodHoundは、[Linkurious](http://linkurio.us/)の上に構築された単一ページのJavascriptウェブアプリケーションで、[Electron](http://electron.atom.io/)でコンパイルされ、C#データコレクターによって供給される[Neo4j](https://neo4j.com/)データベースを持っています。
 
-BloodHoundは、グラフ理論を使用して、Active DirectoryまたはAzure環境内の隠れた、しばしば意図しない関係を明らかにします。攻撃者はBloodHoundを使用して、迅速に特定することが不可能な非常に複雑な攻撃経路を簡単に特定できます。防御者はBloodHoundを使用して、同じ攻撃経路を特定し排除することができます。ブルーチームとレッドチームの両方が、Active DirectoryまたはAzure環境内の特権関係をより深く理解するためにBloodHoundを簡単に使用できます。
+BloodHoundは、グラフ理論を使用して、Active DirectoryまたはAzure環境内の隠れた、しばしば意図しない関係を明らかにします。攻撃者はBloodHoundを使用して、迅速に特定することが不可能な非常に複雑な攻撃経路を簡単に特定できます。防御者はBloodHoundを使用して、同じ攻撃経路を特定し排除することができます。ブルーチームとレッドチームの両方が、Active DirectoryまたはAzure環境内の特権関係を深く理解するためにBloodHoundを簡単に使用できます。
 
 したがって、[Bloodhound](https://github.com/BloodHoundAD/BloodHound)は、ドメインを自動的に列挙し、すべての情報を保存し、可能な特権昇格経路を見つけ、グラフを使用してすべての情報を表示する素晴らしいツールです。
 
@@ -42,10 +42,10 @@ BloodHoundは、**ingestors**と**visualisation application**の2つの主要な
 
 ### Installation
 
-BloodHound CEの作成後、プロジェクト全体がDockerを使用しやすくするために更新されました。始める最も簡単な方法は、事前に構成されたDocker Compose構成を使用することです。
+BloodHound CEの作成後、プロジェクト全体がDockerを使用しやすく更新されました。始める最も簡単な方法は、事前に構成されたDocker Compose構成を使用することです。
 
 1. Docker Composeをインストールします。これは[Docker Desktop](https://www.docker.com/products/docker-desktop/)のインストールに含まれているはずです。
-2. 実行:
+2. 実行します:
 ```
 curl -L https://ghst.ly/getbhce | docker compose -f - up
 ```
@@ -71,7 +71,7 @@ runas /netonly /user:domain\user "powershell.exe -exec bypass"
 
 ## Group3r
 
-[**Group3r**](https://github.com/Group3r/Group3r)は、**グループポリシー**に関連するActive Directoryの**脆弱性**を見つけるためのツールです。 \
+[**Group3r**](https://github.com/Group3r/Group3r) は、**グループポリシー**に関連するActive Directoryの**脆弱性**を見つけるためのツールです。 \
 **任意のドメインユーザー**を使用して、ドメイン内のホストから**group3rを実行する**必要があります。
 ```bash
 group3r.exe -f <filepath-name.log>
@@ -82,6 +82,6 @@ group3r.exe -f <filepath-name.log>
 
 [**PingCastle**](https://www.pingcastle.com/documentation/) **はAD環境のセキュリティ姿勢を評価**し、グラフ付きの素晴らしい**レポート**を提供します。
 
-実行するには、バイナリ`PingCastle.exe`を実行すると、オプションのメニューを表示する**インタラクティブセッション**が開始されます。使用するデフォルトオプションは**`healthcheck`**で、**ドメイン**の**概要**を確立し、**誤設定**や**脆弱性**を見つけます。&#x20;
+実行するには、バイナリ`PingCastle.exe`を実行すると、オプションのメニューを表示する**インタラクティブセッション**が開始されます。使用するデフォルトオプションは**`healthcheck`**で、**ドメイン**の**概要**を確立し、**誤設定**や**脆弱性**を見つけます。
 
 {{#include ../../banners/hacktricks-training.md}}

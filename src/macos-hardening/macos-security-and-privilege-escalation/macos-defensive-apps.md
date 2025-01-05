@@ -4,8 +4,8 @@
 
 ## Firewalls
 
-- [**Little Snitch**](https://www.obdev.at/products/littlesnitch/index.html): 各プロセスによって行われるすべての接続を監視します。モード（接続を静かに許可、接続を静かに拒否し警告）に応じて、新しい接続が確立されるたびに**警告を表示**します。また、すべての情報を確認するための非常に良いGUIがあります。
-- [**LuLu**](https://objective-see.org/products/lulu.html): Objective-Seeのファイアウォール。これは、疑わしい接続に対して警告を出す基本的なファイアウォールです（GUIはありますが、Little Snitchのものほど豪華ではありません）。
+- [**Little Snitch**](https://www.obdev.at/products/littlesnitch/index.html): 各プロセスによって行われるすべての接続を監視します。モード（サイレント許可接続、サイレント拒否接続およびアラート）に応じて、新しい接続が確立されるたびに**アラートを表示**します。また、すべての情報を確認するための非常に良いGUIがあります。
+- [**LuLu**](https://objective-see.org/products/lulu.html): Objective-Seeのファイアウォール。これは、疑わしい接続に対してアラートを出す基本的なファイアウォールです（GUIはありますが、Little Snitchのものほど豪華ではありません）。
 
 ## Persistence detection
 
@@ -14,6 +14,6 @@
 
 ## Keyloggers detection
 
-- [**ReiKey**](https://objective-see.org/products/reikey.html): キーボードの「イベントタップ」をインストールする**キーロガー**を見つけるためのObjective-Seeのアプリケーションです。&#x20;
+- [**ReiKey**](https://objective-see.org/products/reikey.html): キーボードの「イベントタップ」をインストールする**キーロガー**を見つけるためのObjective-Seeのアプリケーションです。
 
 {{#include ../../banners/hacktricks-training.md}}

