@@ -6,7 +6,7 @@
 
 **MACF**는 **Mandatory Access Control Framework**의 약자로, 컴퓨터를 보호하기 위해 운영 체제에 내장된 보안 시스템입니다. 이는 **특정 시스템의 일부에 접근할 수 있는 사람이나 사물에 대한 엄격한 규칙을 설정**하여 작동합니다. 이러한 규칙을 자동으로 시행함으로써, MACF는 권한이 있는 사용자와 프로세스만 특정 작업을 수행할 수 있도록 보장하여 무단 접근이나 악의적인 활동의 위험을 줄입니다.
 
-MACF는 실제로 결정을 내리지 않고 **작업을 가로채기**만 하며, 결정을 내리는 것은 `AppleMobileFileIntegrity.kext`, `Quarantine.kext`, `Sandbox.kext`, `TMSafetyNet.kext` 및 `mcxalr.kext`와 같은 **정책 모듈**(커널 확장)에 맡깁니다.
+MACF는 실제로 결정을 내리지 않고 **작업을 가로채기**만 하며, `AppleMobileFileIntegrity.kext`, `Quarantine.kext`, `Sandbox.kext`, `TMSafetyNet.kext` 및 `mcxalr.kext`와 같은 **정책 모듈**(커널 확장)에 결정을 맡깁니다.
 
 ### 흐름
 
@@ -22,11 +22,11 @@ MACF는 실제로 결정을 내리지 않고 **작업을 가로채기**만 하�
 
 ### 레이블
 
-MACF는 **레이블**을 사용하며, 이후 정책이 접근을 허용할지 여부를 확인하는 데 사용됩니다. 레이블 구조 선언의 코드는 [여기](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/_label.h)에서 찾을 수 있으며, 이는 **`struct ucred`** 내의 [**여기**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ucred.h#L86)에서 **`cr_label`** 부분에 사용됩니다. 레이블은 플래그와 **MACF 정책이 포인터를 할당하는 데 사용할 수 있는 슬롯**의 수를 포함합니다. 예를 들어, Sandbox는 컨테이너 프로필을 가리킵니다.
+MACF는 **레이블**을 사용하며, 이후 정책이 접근을 허용할지 여부를 확인하는 데 사용됩니다. 레이블 구조 선언의 코드는 [여기](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/_label.h)에서 찾을 수 있으며, 이는 **`struct ucred`** 내에서 [**여기**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ucred.h#L86) **`cr_label`** 부분에 사용됩니다. 레이블은 플래그와 **MACF 정책이 포인터를 할당하는 데 사용할 수 있는 슬롯**의 수를 포함합니다. 예를 들어, Sandbox는 컨테이너 프로필을 가리킵니다.
 
 ## MACF 정책
 
-MACF 정책은 **특정 커널 작업에 적용될 규칙과 조건을 정의**합니다.&#x20;
+MACF 정책은 **특정 커널 작업에 적용될 규칙과 조건을 정의**합니다.
 
 커널 확장은 `mac_policy_conf` 구조를 구성한 다음 `mac_policy_register`를 호출하여 등록할 수 있습니다. [여기서](https://opensource.apple.com/source/xnu/xnu-2050.18.24/security/mac_policy.h.auto.html):
 ```c
@@ -65,11 +65,11 @@ mpc_t			 mpc_list;		/** List reference */
 void			*mpc_data;		/** module data */
 };
 ```
-이 정책을 구성하는 커널 확장을 식별하는 것은 `mac_policy_register` 호출을 확인함으로써 쉽습니다. 또한, 확장의 디스어셈블을 확인하면 사용된 `mac_policy_conf` 구조체를 찾을 수 있습니다.
+커널 확장을 통해 이러한 정책을 구성하는 것을 식별하는 것은 `mac_policy_register` 호출을 확인함으로써 쉽습니다. 또한, 확장의 디스어셈블을 확인하면 사용된 `mac_policy_conf` 구조체를 찾는 것도 가능합니다.
 
 MACF 정책은 **동적으로** 등록 및 등록 해제될 수 있습니다.
 
-`mac_policy_conf`의 주요 필드 중 하나는 **`mpc_ops`**입니다. 이 필드는 정책이 관심 있는 작업을 지정합니다. 수백 개가 있으므로 모든 작업을 0으로 설정한 다음 정책이 관심 있는 작업만 선택할 수 있습니다. [여기](https://opensource.apple.com/source/xnu/xnu-2050.18.24/security/mac_policy.h.auto.html)에서:
+`mac_policy_conf`의 주요 필드 중 하나는 **`mpc_ops`**입니다. 이 필드는 정책이 관심 있는 작업을 지정합니다. 수백 개가 있으므로 모든 작업을 0으로 설정한 다음 정책이 관심 있는 작업만 선택할 수 있습니다. [여기서](https://opensource.apple.com/source/xnu/xnu-2050.18.24/security/mac_policy.h.auto.html):
 ```c
 struct mac_policy_ops {
 mpo_audit_check_postselect_t		*mpo_audit_check_postselect;
@@ -84,25 +84,25 @@ mpo_cred_check_label_update_t		*mpo_cred_check_label_update;
 ```
 거의 모든 훅은 이러한 작업이 가로채어질 때 MACF에 의해 호출됩니다. 그러나 **`mpo_policy_*`** 훅은 예외입니다. `mpo_hook_policy_init()`은 등록 시 호출되는 콜백이며(즉, `mac_policy_register()` 이후) `mpo_hook_policy_initbsd()`는 BSD 서브시스템이 제대로 초기화된 후 늦은 등록 중에 호출됩니다.
 
-게다가, **`mpo_policy_syscall`** 훅은 모든 kext에 의해 등록될 수 있으며, 이를 통해 개인 **ioctl** 스타일 호출 **인터페이스**를 노출할 수 있습니다. 그러면 사용자 클라이언트는 **정책 이름**과 정수 **코드**, 선택적 **인수**를 매개변수로 지정하여 `mac_syscall` (#381)을 호출할 수 있습니다.\
+또한, **`mpo_policy_syscall`** 훅은 모든 kext에 의해 등록될 수 있으며, 이를 통해 개인 **ioctl** 스타일 호출 **인터페이스**를 노출할 수 있습니다. 그러면 사용자 클라이언트는 **정책 이름**과 정수 **코드**, 선택적 **인수**를 매개변수로 지정하여 `mac_syscall` (#381)을 호출할 수 있습니다.\
 예를 들어, **`Sandbox.kext`**는 이를 많이 사용합니다.
 
-kext의 **`__DATA.__const*`**를 확인하면 정책 등록 시 사용되는 `mac_policy_ops` 구조체를 식별할 수 있습니다. 이는 `mpo_policy_conf` 내부의 오프셋에 포인터가 있기 때문에 찾을 수 있으며, 해당 영역에 NULL 포인터가 많이 존재하기 때문입니다.
+kext의 **`__DATA.__const*`**를 확인하면 정책 등록 시 사용되는 `mac_policy_ops` 구조체를 식별할 수 있습니다. 그 포인터는 `mpo_policy_conf` 내부의 오프셋에 있기 때문에 찾을 수 있으며, 해당 영역에 있는 NULL 포인터의 수로도 찾을 수 있습니다.
 
-또한, 등록된 각 정책과 함께 업데이트되는 구조체 **`_mac_policy_list`**에서 메모리 덤프를 통해 정책을 구성한 kext 목록을 얻는 것도 가능합니다.
+또한, 메모리에서 구조체 **`_mac_policy_list`**를 덤프하여 정책을 구성한 kext의 목록을 얻는 것도 가능합니다. 이 구조체는 등록된 각 정책으로 업데이트됩니다.
 
 ## MACF 초기화
 
-MACF는 매우 빨리 초기화됩니다. XNU의 `bootstrap_thread`에서 설정됩니다: `ipc_bootstrap` 이후 `mac_policy_init()` 호출이 이루어지며, 이는 `mac_policy_list`를 초기화하고 잠시 후 `mac_policy_initmach()`가 호출됩니다. 이 함수는 `ALF.kext`, `AppleMobileFileIntegrity.kext`, `Quarantine.kext`, `Sandbox.kext`, `TMSafetyNet.kext`와 같은 Info.plist에 `AppleSecurityExtension` 키가 있는 모든 Apple kext를 가져와서 로드합니다.
+MACF는 매우 빨리 초기화됩니다. XNU의 `bootstrap_thread`에서 설정됩니다: `ipc_bootstrap` 후 `mac_policy_init()` 호출이 이루어지며, 이는 `mac_policy_list`를 초기화하고 잠시 후 `mac_policy_initmach()`가 호출됩니다. 이 함수는 `ALF.kext`, `AppleMobileFileIntegrity.kext`, `Quarantine.kext`, `Sandbox.kext`, `TMSafetyNet.kext`와 같은 Info.plist에 `AppleSecurityExtension` 키가 있는 모든 Apple kext를 가져와서 로드합니다.
 
 ## MACF 호출
 
-코드에서 **`#if CONFIG_MAC`** 조건부 블록과 같이 MACF에 대한 호출을 찾는 것은 일반적입니다. 또한, 이러한 블록 내부에서 특정 작업을 수행하기 위한 권한을 **확인하기 위해** MACF를 호출하는 `mac_proc_check*` 호출을 찾을 수 있습니다. MACF 호출의 형식은 **`mac_<object>_<opType>_opName`**입니다.
+코드에서 **`#if CONFIG_MAC`** 조건부 블록과 같이 MACF에 대한 호출을 찾는 것은 일반적입니다. 또한 이러한 블록 내에서 특정 작업을 수행하기 위한 권한을 **확인하기 위해** MACF를 호출하는 `mac_proc_check*` 호출을 찾을 수 있습니다. MACF 호출의 형식은 **`mac_<object>_<opType>_opName`**입니다.
 
 객체는 다음 중 하나입니다: `bpfdesc`, `cred`, `file`, `proc`, `vnode`, `mount`, `devfs`, `ifnet`, `inpcb`, `mbuf`, `ipq`, `pipe`, `sysv[msg/msq/shm/sem]`, `posix[shm/sem]`, `socket`, `kext`.\
 `opType`은 일반적으로 작업을 허용하거나 거부하는 데 사용되는 check입니다. 그러나 kext가 주어진 작업에 반응할 수 있도록 하는 notify를 찾는 것도 가능합니다.
 
-다음은 [https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_mman.c#L621](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_mman.c#L621)에서 예를 찾을 수 있습니다:
+다음에서 예제를 찾을 수 있습니다: [https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_mman.c#L621](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_mman.c#L621):
 
 <pre class="language-c"><code class="lang-c">int
 mmap(proc_t p, struct mmap_args *uap, user_addr_t *retval)
@@ -111,7 +111,7 @@ mmap(proc_t p, struct mmap_args *uap, user_addr_t *retval)
 #if CONFIG_MACF
 <strong>			error = mac_file_check_mmap(vfs_context_ucred(ctx),
 </strong>			    fp->fp_glob, prot, flags, file_pos + pageoff,
-&#x26;maxprot);
+&maxprot);
 if (error) {
 (void)vnode_put(vp);
 goto bad;
@@ -120,7 +120,7 @@ goto bad;
 [...]
 </code></pre>
 
-그런 다음, [https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_file.c#L174](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_file.c#L174)에서 `mac_file_check_mmap`의 코드를 찾을 수 있습니다.
+그런 다음 [https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_file.c#L174](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_file.c#L174)에서 `mac_file_check_mmap`의 코드를 찾을 수 있습니다.
 ```c
 mac_file_check_mmap(struct ucred *cred, struct fileglob *fg, int prot,
 int flags, uint64_t offset, int *maxprot)
@@ -157,10 +157,10 @@ error = mac_error_select(__step_err, error);         \
 });                                                             \
 } while (0)
 ```
-모든 등록된 mac 정책을 호출하고 그 함수의 출력을 error 변수에 저장하는 과정을 거치며, 이 변수는 성공 코드에 의해 `mac_error_select`로만 재정의될 수 있습니다. 따라서 어떤 체크가 실패하면 전체 체크가 실패하고 해당 작업이 허용되지 않습니다.
+어떤 등록된 mac 정책을 호출하고 그 함수의 출력을 error 변수에 저장하는데, 이 변수는 성공 코드에 의해 `mac_error_select`로만 재정의될 수 있습니다. 따라서 어떤 체크가 실패하면 전체 체크가 실패하고 액션이 허용되지 않습니다.
 
 > [!TIP]
-> 그러나 모든 MACF 호출이 행동을 거부하는 데만 사용되는 것은 아니라는 점을 기억하세요. 예를 들어, `mac_priv_grant`는 매크로 [**MAC_GRANT**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_internal.h#L274)를 호출하며, 이는 어떤 정책이 0으로 응답하면 요청된 권한을 부여합니다:
+> 그러나 모든 MACF 호출이 단지 액션을 거부하기 위해 사용되는 것은 아니라는 점을 기억하세요. 예를 들어, `mac_priv_grant`는 매크로 [**MAC_GRANT**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_internal.h#L274)를 호출하며, 이는 어떤 정책이 0으로 응답하면 요청된 권한을 부여합니다:
 >
 > ```c
 > /*
@@ -187,12 +187,12 @@ error = mac_error_select(__step_err, error);         \
 
 ### priv_check & priv_grant
 
-이 호출들은 [**bsd/sys/priv.h**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/priv.h)에서 정의된 (수십 개의) **권한**을 확인하고 제공하기 위한 것입니다.\
+이 호출은 [**bsd/sys/priv.h**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/priv.h)에서 정의된 (수십 개의) **권한**을 확인하고 제공하기 위해 설계되었습니다.\
 일부 커널 코드는 프로세스의 KAuth 자격 증명과 함께 `priv_check_cred()`를 [**bsd/kern/kern_priv.c**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_priv.c)에서 호출하며, 권한을 부여하는 정책이 있는지 확인하기 위해 `mac_priv_check`를 호출한 후, `mac_priv_grant`를 호출하여 어떤 정책이 `privilege`를 부여하는지 확인합니다.
 
 ### proc_check_syscall_unix
 
-이 후크는 모든 시스템 호출을 가로챌 수 있게 해줍니다. `bsd/dev/[i386|arm]/systemcalls.c`에서 선언된 함수 [`unix_syscall`](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/dev/arm/systemcalls.c#L160C1-L167C25)를 확인할 수 있으며, 이 코드가 포함되어 있습니다:
+이 훅은 모든 시스템 호출을 가로챌 수 있게 해줍니다. `bsd/dev/[i386|arm]/systemcalls.c`에서 선언된 함수 [`unix_syscall`](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/dev/arm/systemcalls.c#L160C1-L167C25)를 확인할 수 있으며, 이 코드가 포함되어 있습니다:
 ```c
 #if CONFIG_MACF
 if (__improbable(proc_syscall_filter_mask(proc) != NULL && !bitstr_test(proc_syscall_filter_mask(proc), syscode))) {
@@ -203,9 +203,9 @@ goto skip_syscall;
 }
 #endif /* CONFIG_MACF */
 ```
-호출 프로세스의 **비트마스크**를 확인하여 현재 시스템 호출이 `mac_proc_check_syscall_unix`를 호출해야 하는지 여부를 판단합니다. 이는 시스템 호출이 매우 자주 호출되기 때문에 매번 `mac_proc_check_syscall_unix`를 호출하는 것을 피하는 것이 흥미롭기 때문입니다.
+호출 프로세스의 **비트마스크**를 확인하여 현재 시스템 호출이 `mac_proc_check_syscall_unix`를 호출해야 하는지 판단합니다. 이는 시스템 호출이 매우 자주 호출되기 때문에 매번 `mac_proc_check_syscall_unix`를 호출하는 것을 피하는 것이 흥미롭기 때문입니다.
 
-`proc_set_syscall_filter_mask()` 함수는 프로세스의 비트마스크 시스템 호출을 설정하며, 이는 샌드박스가 샌드박스화된 프로세스에 마스크를 설정하기 위해 호출됩니다.
+`proc_set_syscall_filter_mask()` 함수는 프로세스의 비트마스크 시스템 호출을 설정하며, 이는 Sandbox에 의해 샌드박스화된 프로세스의 마스크를 설정하기 위해 호출됩니다.
 
 ## 노출된 MACF 시스템 호출
 

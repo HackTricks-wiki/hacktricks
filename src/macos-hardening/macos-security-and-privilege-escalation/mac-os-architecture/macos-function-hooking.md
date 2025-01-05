@@ -6,7 +6,7 @@
 
 **`__interpose`** 섹션(또는 **`S_INTERPOSING`** 플래그가 있는 섹션)을 포함하는 **dylib**를 생성하여 **원본** 및 **대체** 함수에 대한 **함수 포인터**의 튜플을 포함합니다.
 
-그런 다음 **`DYLD_INSERT_LIBRARIES`**로 dylib를 **주입**합니다(인터포징은 메인 앱이 로드되기 전에 발생해야 합니다). 명백히 [**`DYLD_INSERT_LIBRARIES`** 사용에 적용되는 **제한**이 여기에도 적용됩니다](../macos-proces-abuse/macos-library-injection/index.html#check-restrictions).&#x20;
+그런 다음 **`DYLD_INSERT_LIBRARIES`**로 dylib를 **주입**합니다(인터포징은 메인 앱이 로드되기 전에 발생해야 합니다). 명백히 [**`DYLD_INSERT_LIBRARIES`** 사용에 적용되는 **제한**이 여기에도 적용됩니다](../macos-proces-abuse/macos-library-injection/index.html#check-restrictions).
 
 ### Interpose printf
 
@@ -81,7 +81,7 @@ Hello from interpose
 
 In ObjectiveC this is how a method is called like: **`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
 
-필요한 것은 **객체**, **메서드** 및 **매개변수**입니다. 메서드가 호출될 때 **msg가 전송**되며, 함수 **`objc_msgSend`**를 사용합니다: `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
+필요한 것은 **객체**, **메서드** 및 **매개변수**입니다. 메서드가 호출될 때 **msg가 전송**되며, 이는 **`objc_msgSend`** 함수를 사용합니다: `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
 
 객체는 **`someObject`**, 메서드는 **`@selector(method1p1:p2:)`**이며, 인수는 **value1**, **value2**입니다.
 
@@ -92,7 +92,7 @@ In ObjectiveC this is how a method is called like: **`[myClassInstance nameOfThe
 
 ### Accessing the raw methods
 
-정보에 접근하는 것이 가능합니다. 메서드의 이름, 매개변수 수 또는 주소와 같은 정보는 다음 예와 같이 접근할 수 있습니다:
+메서드의 이름, 매개변수 수 또는 주소와 같은 정보를 다음 예와 같이 접근할 수 있습니다:
 ```objectivec
 // gcc -framework Foundation test.m -o test
 
@@ -160,10 +160,10 @@ return 0;
 ```
 ### Method Swizzling with method_exchangeImplementations
 
-The function **`method_exchangeImplementations`** allows to **change** the **address** of the **implementation** of **one function for the other**.
+함수 **`method_exchangeImplementations`**는 **하나의 함수의 구현 주소를 다른 함수로 변경**할 수 있게 해줍니다.
 
 > [!CAUTION]
-> So when a function is called what is **executed is the other one**.
+> 따라서 함수가 호출될 때 **실행되는 것은 다른 함수**입니다.
 ```objectivec
 //gcc -framework Foundation swizzle_str.m -o swizzle_str
 
@@ -214,9 +214,9 @@ return 0;
 
 ### method_setImplementation을 이용한 메서드 스위즐링
 
-이전 형식은 두 메서드의 구현을 서로 변경하기 때문에 이상합니다. **`method_setImplementation`** 함수를 사용하면 **하나의 메서드의 구현을 다른 메서드로 변경**할 수 있습니다.
+이전 형식은 서로 다른 두 메서드의 구현을 변경하기 때문에 이상합니다. **`method_setImplementation`** 함수를 사용하면 **하나의 메서드의 구현을 다른 메서드로 변경**할 수 있습니다.
 
-새로운 구현에서 호출하기 전에 **원래 구현의 주소를 저장**하는 것을 잊지 마세요. 나중에 그 주소를 찾는 것이 훨씬 복잡해질 것입니다.
+새로운 구현에서 호출하기 전에 **원래 구현의 주소를 저장**하는 것을 잊지 마세요. 그렇지 않으면 나중에 그 주소를 찾기가 훨씬 복잡해질 것입니다.
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
@@ -270,13 +270,13 @@ return 0;
 ```
 ## Hooking Attack Methodology
 
-이 페이지에서는 함수를 후킹하는 다양한 방법에 대해 논의했습니다. 그러나 이 방법들은 **공격을 위해 프로세스 내에서 코드를 실행하는 것**을 포함했습니다.
+이 페이지에서는 함수를 후킹하는 다양한 방법에 대해 논의했습니다. 그러나 이 방법들은 **공격을 위해 프로세스 내에서 코드를 실행하는 것**을 포함합니다.
 
-이를 위해 가장 쉬운 기술은 [환경 변수를 통한 Dyld 주입 또는 하이재킹](../macos-dyld-hijacking-and-dyld_insert_libraries.md)입니다. 그러나 이것은 [Dylib 프로세스 주입](macos-ipc-inter-process-communication/index.html#dylib-process-injection-via-task-port)을 통해서도 수행될 수 있다고 생각합니다.
+이를 위해 가장 쉬운 기술은 [환경 변수를 통한 Dyld 주입 또는 하이재킹](../macos-dyld-hijacking-and-dyld_insert_libraries.md)입니다. 그러나 이 또한 [Dylib 프로세스 주입](macos-ipc-inter-process-communication/index.html#dylib-process-injection-via-task-port)을 통해 수행될 수 있다고 생각합니다.
 
 그러나 두 옵션 모두 **보호되지 않은** 바이너리/프로세스에 **제한적**입니다. 각 기술을 확인하여 제한 사항에 대해 더 알아보세요.
 
-그러나 함수 후킹 공격은 매우 구체적이며, 공격자는 **프로세스 내부에서 민감한 정보를 훔치기 위해** 이를 수행합니다(그렇지 않으면 프로세스 주입 공격을 수행할 것입니다). 이 민감한 정보는 MacPass와 같은 사용자 다운로드 앱에 위치할 수 있습니다.
+그러나 함수 후킹 공격은 매우 구체적이며, 공격자는 **프로세스 내부에서 민감한 정보를 훔치기 위해** 이를 수행합니다(그렇지 않으면 단순히 프로세스 주입 공격을 수행할 것입니다). 이 민감한 정보는 MacPass와 같은 사용자 다운로드 앱에 위치할 수 있습니다.
 
 따라서 공격자의 벡터는 취약점을 찾거나 애플리케이션의 서명을 제거하고, 애플리케이션의 Info.plist를 통해 **`DYLD_INSERT_LIBRARIES`** 환경 변수를 주입하여 다음과 같은 내용을 추가하는 것입니다:
 ```xml
@@ -293,7 +293,7 @@ return 0;
 해당 라이브러리에 정보를 유출하는 후킹 코드를 추가하세요: 비밀번호, 메시지...
 
 > [!CAUTION]
-> 최신 버전의 macOS에서는 애플리케이션 바이너리의 **서명을 제거**하고 이전에 실행된 경우, macOS가 **더 이상 애플리케이션을 실행하지 않습니다**.
+> 최신 버전의 macOS에서는 애플리케이션 바이너리의 **서명을 제거**하고 이전에 실행된 경우, macOS가 더 이상 **애플리케이션을 실행하지 않습니다**.
 
 #### Library example
 ```objectivec

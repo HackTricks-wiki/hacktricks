@@ -4,7 +4,7 @@
 
 ## Basic Information
 
-UTS (UNIX Time-Sharing System) 네임스페이스는 두 개의 시스템 식별자, 즉 **호스트 이름**과 **NIS** (Network Information Service) 도메인 이름의 **격리를 제공하는** 리눅스 커널 기능입니다. 이 격리는 각 UTS 네임스페이스가 **자신만의 독립적인 호스트 이름과 NIS 도메인 이름**을 가질 수 있게 하며, 이는 각 컨테이너가 자신의 호스트 이름을 가진 별도의 시스템처럼 보이도록 해야 하는 컨테이너화 시나리오에서 특히 유용합니다.
+UTS (UNIX Time-Sharing System) 네임스페이스는 두 개의 시스템 식별자, 즉 **호스트 이름**과 **NIS** (Network Information Service) 도메인 이름의 **격리를 제공하는** 리눅스 커널 기능입니다. 이 격리는 각 UTS 네임스페이스가 **자신의 독립적인 호스트 이름과 NIS 도메인 이름**을 가질 수 있게 하며, 이는 각 컨테이너가 자신의 호스트 이름을 가진 별도의 시스템처럼 보이도록 해야 하는 컨테이너화 시나리오에서 특히 유용합니다.
 
 ### How it works:
 
@@ -50,7 +50,7 @@ sudo unshare -u [--mount-proc] /bin/bash
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-### &#x20;프로세스가 어떤 네임스페이스에 있는지 확인하기
+### 프로세스가 어떤 네임스페이스에 있는지 확인하기
 ```bash
 ls -l /proc/self/ns/uts
 lrwxrwxrwx 1 root root 0 Apr  4 20:49 /proc/self/ns/uts -> 'uts:[4026531838]'

