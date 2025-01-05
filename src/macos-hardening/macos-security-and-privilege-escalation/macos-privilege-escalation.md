@@ -4,7 +4,7 @@
 
 ## TCC Yetki Yükseltme
 
-Eğer buraya TCC yetki yükseltme arayışıyla geldiyseniz, şu adrese gidin:
+Eğer buraya TCC yetki yükseltmesi aramak için geldiyseniz, şu adrese gidin:
 
 {{#ref}}
 macos-security-protections/macos-tcc/
@@ -12,7 +12,7 @@ macos-security-protections/macos-tcc/
 
 ## Linux Privesc
 
-Lütfen unutmayın ki **Linux/Unix üzerinde yetki yükseltme ile ilgili olan çoğu hile, MacOS** makinelerini de etkileyecektir. Bu yüzden bakın:
+Lütfen **yetki yükseltme ile ilgili çoğu numaranın Linux/Unix'i etkilediği gibi MacOS** makinelerini de etkileyeceğini unutmayın. Bu yüzden bakın:
 
 {{#ref}}
 ../../linux-hardening/privilege-escalation/
@@ -24,7 +24,7 @@ Lütfen unutmayın ki **Linux/Unix üzerinde yetki yükseltme ile ilgili olan ç
 
 Orijinal [Sudo Ele Geçirme tekniğini Linux Yetki Yükseltme yazısında bulabilirsiniz](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
 
-Ancak, macOS **kullanıcının** **`PATH`**'ini **`sudo`** komutunu çalıştırdığında **korur**. Bu da, bu saldırıyı gerçekleştirmenin başka bir yolunun, mağdurun **sudo** ile çalıştırdığı **diğer ikili dosyaları ele geçirmek** olacağı anlamına gelir:
+Ancak, macOS **kullanıcının** **`PATH`**'ini **`sudo`** komutunu çalıştırdığında **korur**. Bu da, bu saldırıyı gerçekleştirmenin başka bir yolunun, mağdurun **sudo** çalıştırırken **başka ikili dosyaları ele geçirmek** olabileceği anlamına gelir:
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
 cat > /opt/homebrew/bin/ls <<EOF
@@ -39,17 +39,17 @@ chmod +x /opt/homebrew/bin/ls
 # victim
 sudo ls
 ```
-Not edin ki terminal kullanan bir kullanıcının **Homebrew yüklü olma olasılığı** yüksektir. Bu nedenle **`/opt/homebrew/bin`** içindeki ikili dosyaları ele geçirmek mümkündür.
+Not edin ki terminal kullanan bir kullanıcının **Homebrew yüklü olma olasılığı yüksektir**. Bu nedenle **`/opt/homebrew/bin`** içindeki ikili dosyaları ele geçirmek mümkündür.
 
 ### Dock Taklidi
 
-Bazı **sosyal mühendislik** yöntemleri kullanarak dock içinde **örneğin Google Chrome'u taklit edebilir** ve aslında kendi scriptinizi çalıştırabilirsiniz:
+Bazı **sosyal mühendislik** teknikleri kullanarak dock içinde **örneğin Google Chrome'u taklit edebilir** ve aslında kendi scriptinizi çalıştırabilirsiniz:
 
 {{#tabs}}
-{{#tab name="Chrome Taklidi"}}
+{{#tab name="Chrome Impersonation"}}
 Bazı öneriler:
 
-- Dock'ta bir Chrome olup olmadığını kontrol edin, bu durumda o girişi **kaldırın** ve Dock dizisinde **aynı konuma** **sahte** **Chrome girişini ekleyin.**&#x20;
+- Dock'ta bir Chrome olup olmadığını kontrol edin, eğer varsa o girişi **kaldırın** ve Dock dizisinde **aynı konuma** **sahte** **Chrome girişini ekleyin**.
 ```bash
 #!/bin/sh
 
@@ -124,9 +124,9 @@ killall Dock
 {{#tab name="Finder Impersonation"}}
 Bazı öneriler:
 
-- **Finder'ı Dock'tan kaldıramazsınız**, bu yüzden eğer Dock'a ekleyecekseniz, sahte Finder'ı gerçek Finder'ın hemen yanına koyabilirsiniz. Bunun için **sahte Finder girişini Dock dizisinin başına eklemeniz** gerekiyor.
-- Diğer bir seçenek, onu Dock'a yerleştirmemek ve sadece açmaktır; "Finder, Finder'ı kontrol etmek için izin istiyor" o kadar da garip değil.
-- **Şifre sormadan root'a yükselmek** için başka bir seçenek, Finder'ın gerçekten bir ayrıcalıklı işlem gerçekleştirmek için şifre sormasını sağlamaktır:
+- **Finder'ı Dock'tan kaldıramazsınız**, bu yüzden eğer Dock'a ekleyecekseniz, sahte Finder'ı gerçek Finder'ın hemen yanına koyabilirsiniz. Bunun için **sahte Finder girişini Dock dizisinin başına eklemeniz gerekir**.
+- Diğer bir seçenek, onu Dock'a yerleştirmemek ve sadece açmaktır; "Finder'ın Finder'ı kontrol etmesi için izin istemesi" o kadar da garip değil.
+- Şifreyi korkunç bir kutu ile sormadan **root'a yükselmek** için başka bir seçenek, Finder'ın gerçekten bir ayrıcalıklı işlem gerçekleştirmek için şifre istemesini sağlamaktır:
 - Finder'dan **`/etc/pam.d`** dizinine yeni bir **`sudo`** dosyası kopyalamasını isteyin (Şifre isteyen istem, "Finder sudo'yu kopyalamak istiyor" diye belirtecektir)
 - Finder'dan yeni bir **Authorization Plugin** kopyalamasını isteyin (Dosya adını kontrol edebilirsiniz, böylece şifre isteyen istem "Finder Finder.bundle'ı kopyalamak istiyor" diye belirtecektir)
 ```bash
@@ -226,7 +226,7 @@ mkdir /tmp/snap
 # Access it
 ls /tmp/snap/Users/admin_user # This will work
 ```
-Daha ayrıntılı bir açıklama [**orijinal raporda bulunabilir**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
+Daha ayrıntılı bir açıklama [**orijinal raporda**](https://theevilbit.github.io/posts/cve_2020_9771/)** bulunabilir.**
 
 ## Hassas Bilgiler
 

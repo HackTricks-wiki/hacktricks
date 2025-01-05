@@ -4,9 +4,9 @@
 
 ## Function Interposing
 
-Bir **dylib** oluşturun ve **`__interpose`** bölümüne (veya **`S_INTERPOSING`** ile işaretlenmiş bir bölüme) **orijinal** ve **yerine geçen** fonksiyonları referans alan **fonksiyon işaretçileri** içeren demetler ekleyin.
+Bir **dylib** oluşturun ve içinde **`__interpose`** bölümü (veya **`S_INTERPOSING`** ile işaretlenmiş bir bölüm) bulunan, **orijinal** ve **değiştirilmiş** fonksiyonlara atıfta bulunan **fonksiyon işaretçileri** çiftleri içersin.
 
-Ardından, **`DYLD_INSERT_LIBRARIES`** ile dylib'i **enjekte** edin (interposing, ana uygulama yüklenmeden önce gerçekleşmelidir). Açıkça, [**`DYLD_INSERT_LIBRARIES`** kullanımına uygulanan **kısıtlamalar** burada da geçerlidir](../macos-proces-abuse/macos-library-injection/index.html#check-restrictions).&#x20;
+Sonra, **`DYLD_INSERT_LIBRARIES`** ile dylib'i **enjekte** edin (interposing, ana uygulama yüklenmeden önce gerçekleşmelidir). Açıkça, [**`DYLD_INSERT_LIBRARIES`** kullanımına uygulanan **kısıtlamalar** burada da geçerlidir](../macos-proces-abuse/macos-library-injection/index.html#check-restrictions).
 
 ### Interpose printf
 
@@ -81,14 +81,14 @@ Hello from interpose
 
 ObjectiveC'de bir metod şu şekilde çağrılır: **`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
 
-Gerekli olan **nesne**, **metod** ve **parametrelerdir**. Ve bir metod çağrıldığında bir **msg gönderilir** `objc_msgSend` fonksiyonu kullanılarak: `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
+Gerekli olan **nesne**, **metod** ve **parametrelerdir**. Ve bir metod çağrıldığında bir **msg gönderilir** ve bu işlem **`objc_msgSend`** fonksiyonu kullanılarak yapılır: `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
 
 Nesne **`someObject`**, metod **`@selector(method1p1:p2:)`** ve argümanlar **value1**, **value2**'dir.
 
 Nesne yapıları takip edilerek, **metodların** **isimlerinin** ve **metod koduna** işaretçilerin **bulunduğu** bir **metodlar dizisine** ulaşmak mümkündür.
 
 > [!CAUTION]
-> Metodlar ve sınıflar isimlerine göre erişildiğinden, bu bilginin ikili dosyada saklandığını unutmayın, bu nedenle `otool -ov </path/bin>` veya [`class-dump </path/bin>`](https://github.com/nygard/class-dump) ile geri almak mümkündür.
+> Metodlar ve sınıflar isimlerine göre erişildiğinden, bu bilginin ikili dosyada saklandığını unutmayın, bu nedenle `otool -ov </path/bin>` veya [`class-dump </path/bin>`](https://github.com/nygard/class-dump) ile geri alınması mümkündür.
 
 ### Ham metodlara erişim
 
@@ -208,7 +208,7 @@ return 0;
 }
 ```
 > [!WARNING]
-> Bu durumda, eğer **meşru** yöntemin **uygulama kodu** **yöntem** **adını** **doğruluyorsa**, bu swizzling'i **tespit edebilir** ve çalışmasını engelleyebilir.
+> Bu durumda, eğer **meşru** yöntemin **uygulama kodu** **yöntem** **adını** **doğruluyorsa**, bu swizzling'i **tespit** edebilir ve çalışmasını engelleyebilir.
 >
 > Aşağıdaki teknik bu kısıtlamaya sahip değildir.
 
@@ -276,9 +276,9 @@ Bunu yapmak için en kolay teknik, bir [Dyld'yi ortam değişkenleri aracılığ
 
 Ancak, her iki seçenek de **korumasız** ikili/durumlarla **sınırlıdır**. Sınırlamalar hakkında daha fazla bilgi edinmek için her tekniği kontrol edin.
 
-Ancak, bir fonksiyon hooklama saldırısı çok spesifiktir, bir saldırgan bunu **bir süreçten hassas bilgileri çalmak için** yapar (aksi takdirde sadece bir süreç enjeksiyonu saldırısı yapardınız). Ve bu hassas bilgiler, MacPass gibi kullanıcı tarafından indirilen uygulamalarda bulunabilir.
+Ancak, bir fonksiyon hooking saldırısı çok spesifiktir, bir saldırgan bunu **bir süreçten hassas bilgileri çalmak için** yapar (aksi takdirde sadece bir süreç enjeksiyonu saldırısı yapardınız). Ve bu hassas bilgiler, MacPass gibi kullanıcı tarafından indirilen uygulamalarda bulunabilir.
 
-Bu nedenle, saldırgan vektörü ya bir zafiyet bulmak ya da uygulamanın imzasını kaldırmak, uygulamanın Info.plist dosyasına **`DYLD_INSERT_LIBRARIES`** env değişkenini eklemek gibi bir şey enjekte etmek olacaktır:
+Bu nedenle, saldırgan vektörü ya bir zafiyet bulmak ya da uygulamanın imzasını kaldırmak, uygulamanın Info.plist dosyasına **`DYLD_INSERT_LIBRARIES`** env değişkenini eklemek olacaktır.
 ```xml
 <key>LSEnvironment</key>
 <dict>
@@ -290,7 +290,7 @@ ve ardından uygulamayı **yeniden kaydet**:
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f /Applications/Application.app
 ```
-Bu kütüphaneye bilgileri dışa aktarmak için hooking kodunu ekleyin: Parolalar, mesajlar...
+Kütüphaneye bilgileri dışa aktarmak için hooking kodunu ekleyin: Parolalar, mesajlar...
 
 > [!CAUTION]
 > Daha yeni macOS sürümlerinde, eğer uygulama ikili dosyasının **imzasını kaldırırsanız** ve daha önce çalıştırılmışsa, macOS **uygulamayı bir daha çalıştırmayacaktır**.

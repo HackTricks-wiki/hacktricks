@@ -10,7 +10,7 @@
 
 ### Anlık Görüntüler
 
-AD Explorer, bir AD'nin anlık görüntülerini oluşturabilir, böylece çevrimdışı kontrol edebilirsiniz.\
+AD Explorer, AD'nin anlık görüntülerini oluşturabilir, böylece çevrimdışı kontrol edebilirsiniz.\
 Çevrimdışı zafiyetleri keşfetmek veya AD DB'nin farklı durumlarını zaman içinde karşılaştırmak için kullanılabilir.
 
 Bağlanmak için kullanıcı adı, şifre ve yön gerekecektir (herhangi bir AD kullanıcısı gereklidir).
@@ -32,19 +32,19 @@ From [https://github.com/BloodHoundAD/BloodHound](https://github.com/BloodHoundA
 
 BloodHound, bir Active Directory veya Azure ortamındaki gizli ve genellikle istenmeyen ilişkileri ortaya çıkarmak için grafik teorisini kullanır. Saldırganlar, BloodHound'u kullanarak, aksi takdirde hızlı bir şekilde tanımlanması imkansız olan son derece karmaşık saldırı yollarını kolayca belirleyebilirler. Savunucular, BloodHound'u kullanarak aynı saldırı yollarını tanımlayıp ortadan kaldırabilirler. Hem mavi hem de kırmızı takımlar, BloodHound'u kullanarak bir Active Directory veya Azure ortamındaki ayrıcalık ilişkilerini daha derinlemesine anlamak için kolayca faydalanabilirler.
 
-Bu nedenle, [Bloodhound ](https://github.com/BloodHoundAD/BloodHound) otomatik olarak bir alanı listeleyebilen, tüm bilgileri kaydedebilen, olası ayrıcalık yükseltme yollarını bulabilen ve tüm bilgileri grafikler kullanarak gösteren harika bir araçtır.
+Bu nedenle, [Bloodhound ](https://github.com/BloodHoundAD/BloodHound) otomatik olarak bir alanı listeleyebilen, tüm bilgileri kaydedebilen, olası ayrıcalık yükseltme yollarını bulabilen ve tüm bilgileri grafikler kullanarak gösterebilen harika bir araçtır.
 
 BloodHound, 2 ana bölümden oluşur: **ingestors** ve **görselleştirme uygulaması**.
 
 **Ingestors**, **alanı listelemek ve tüm bilgileri** görselleştirme uygulamasının anlayacağı bir formatta çıkarmak için kullanılır.
 
-**Görselleştirme uygulaması, tüm bilgilerin nasıl ilişkili olduğunu göstermek ve alandaki ayrıcalıkları yükseltmenin farklı yollarını göstermek için neo4j kullanır.**
+**Görselleştirme uygulaması, neo4j kullanarak** tüm bilgilerin nasıl ilişkili olduğunu gösterir ve alandaki ayrıcalıkları yükseltmenin farklı yollarını sergiler.
 
 ### Kurulum
 
 BloodHound CE'nin oluşturulmasından sonra, tüm proje Docker ile kullanım kolaylığı için güncellendi. Başlamak için en kolay yol, önceden yapılandırılmış Docker Compose yapılandırmasını kullanmaktır.
 
-1. Docker Compose'u kurun. Bu, [Docker Desktop](https://www.docker.com/products/docker-desktop/) kurulumuyla birlikte gelmelidir.
+1. Docker Compose'u kurun. Bu, [Docker Desktop](https://www.docker.com/products/docker-desktop/) kurulumu ile birlikte gelmelidir.
 2. Çalıştırın:
 ```
 curl -L https://ghst.ly/getbhce | docker compose -f - up
@@ -56,7 +56,7 @@ Bundan sonra rastgele oluşturulmuş şifreyi değiştirmeniz gerekecek ve inges
 
 ### SharpHound  
 
-Birçok seçeneği var ama eğer alan adına katılmış bir PC'den SharpHound'u çalıştırmak ve mevcut kullanıcıyı kullanarak tüm bilgileri çıkarmak istiyorsanız:
+Birçok seçeneği var, ancak eğer alan adına katılmış bir PC'den SharpHound'u çalıştırmak ve mevcut kullanıcıyı kullanarak tüm bilgileri çıkarmak istiyorsanız, şunları yapabilirsiniz:
 ```
 ./SharpHound.exe --CollectionMethods All
 Invoke-BloodHound -CollectionMethod All
@@ -71,7 +71,7 @@ runas /netonly /user:domain\user "powershell.exe -exec bypass"
 
 ## Group3r
 
-[**Group3r**](https://github.com/Group3r/Group3r) Active Directory ile ilişkili **Grup Politikası** içindeki **açıkları** bulmak için bir araçtır. \
+[**Group3r**](https://github.com/Group3r/Group3r), **Group Policy** ile ilişkili Active Directory'deki **vulnerabilities** bulmak için bir araçtır. \
 **group3r'ı** alan içindeki bir hosttan **herhangi bir alan kullanıcısı** ile çalıştırmalısınız.
 ```bash
 group3r.exe -f <filepath-name.log>
@@ -82,6 +82,6 @@ group3r.exe -f <filepath-name.log>
 
 [**PingCastle**](https://www.pingcastle.com/documentation/) **AD ortamının güvenlik durumunu değerlendirir** ve grafiklerle güzel bir **rapor** sunar.
 
-Çalıştırmak için, `PingCastle.exe` ikili dosyasını çalıştırabilir ve seçeneklerin bulunduğu bir **etkileşimli oturum** başlatır. Kullanılacak varsayılan seçenek **`healthcheck`** olup, **alan** hakkında bir temel **genel bakış** oluşturacak ve **yanlış yapılandırmaları** ve **zayıflıkları** bulacaktır.&#x20;
+Çalıştırmak için, `PingCastle.exe` ikili dosyasını çalıştırabilir ve seçeneklerin bulunduğu bir **etkileşimli oturum** başlatır. Kullanılacak varsayılan seçenek **`healthcheck`** olup, **alan** hakkında bir temel **genel bakış** oluşturacak ve **yanlış yapılandırmaları** ve **zayıflıkları** bulacaktır.
 
 {{#include ../../banners/hacktricks-training.md}}

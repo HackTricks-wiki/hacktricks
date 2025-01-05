@@ -15,7 +15,7 @@ Açıkça, bu kadar güçlü olduğu için **bir kernel uzantısını yüklemek 
 <figure><img src="../../../images/image (327).png" alt=""><figcaption></figcaption></figure>
 
 - Kernel uzantısı, yalnızca **Apple tarafından verilebilen** bir kernel kod imzalama sertifikası ile **imzalanmış olmalıdır**. Şirketin detaylı bir şekilde inceleneceği ve neden gerektiği.
-- Kernel uzantısı ayrıca **notarize edilmelidir**, Apple bunu kötü amaçlı yazılımlar için kontrol edebilecektir.
+- Kernel uzantısı ayrıca **notarize** edilmelidir, Apple bunu kötü amaçlı yazılım için kontrol edebilecektir.
 - Ardından, **root** kullanıcısı kernel uzantısını **yükleyebilen** kişidir ve paket içindeki dosyalar **root'a ait olmalıdır**.
 - Yükleme sürecinde, paket **korumalı bir kök olmayan konumda** hazırlanmalıdır: `/Library/StagedExtensions` (bu, `com.apple.rootless.storage.KernelExtensionManagement` iznini gerektirir).
 - Son olarak, yüklemeye çalışırken, kullanıcı [**bir onay isteği alacaktır**](https://developer.apple.com/library/archive/technotes/tn2459/_index.html) ve kabul edilirse, bilgisayar **yeniden başlatılmalıdır**.
@@ -24,13 +24,13 @@ Açıkça, bu kadar güçlü olduğu için **bir kernel uzantısını yüklemek 
 
 Catalina'da böyleydi: **Doğrulama** sürecinin **kullanıcı alanında** gerçekleştiğini belirtmek ilginçtir. Ancak, yalnızca **`com.apple.private.security.kext-management`** iznine sahip uygulamalar **çekirdekten bir uzantıyı yüklemesini isteyebilir**: `kextcache`, `kextload`, `kextutil`, `kextd`, `syspolicyd`
 
-1. **`kextutil`** cli **bir uzantıyı yüklemek için** **doğrulama** sürecini **başlatır**
-- **`kextd`** ile bir **Mach servisi** kullanarak iletişim kuracaktır.
-2. **`kextd`** birkaç şeyi kontrol edecektir, örneğin **imzayı**
-- Uzantının **yüklenip yüklenemeyeceğini kontrol etmek için** **`syspolicyd`** ile iletişim kuracaktır.
-3. **`syspolicyd`**, uzantı daha önce yüklenmemişse **kullanıcıya** **soracaktır**.
-- **`syspolicyd`**, sonucu **`kextd`**'ye bildirecektir.
-4. **`kextd`** nihayetinde **çekirdeğe uzantıyı yüklemesini söyleyebilecektir**.
+1. **`kextutil`** cli **bir uzantının yüklenmesi için doğrulama** sürecini **başlatır**
+- **`kextd`** ile **Mach servisi** kullanarak iletişim kurar.
+2. **`kextd`** birkaç şeyi kontrol eder, örneğin **imzayı**
+- Uzantının **yüklenip yüklenemeyeceğini kontrol etmek için** **`syspolicyd`** ile iletişim kurar.
+3. **`syspolicyd`**, uzantı daha önce yüklenmemişse **kullanıcıya** **sorular sorar**.
+- **`syspolicyd`**, sonucu **`kextd`**'ye rapor eder.
+4. **`kextd`**, nihayetinde **çekirdeğe uzantıyı yüklemesini söyleyebilir**.
 
 Eğer **`kextd`** mevcut değilse, **`kextutil`** aynı kontrolleri gerçekleştirebilir.
 
@@ -45,20 +45,20 @@ kextstat | grep " 22 " | cut -c2-5,50- | cut -d '(' -f1
 ## Kernelcache
 
 > [!CAUTION]
-> `/System/Library/Extensions/` içinde kernel uzantılarının bulunması beklenmesine rağmen, bu klasöre giderseniz **hiçbir ikili dosya bulamayacaksınız**. Bunun nedeni **kernelcache**'dir ve bir `.kext`'i tersine mühendislik yapmak için onu elde etmenin bir yolunu bulmanız gerekir.
+> `/System/Library/Extensions/` içinde kernel uzantılarının bulunması beklenmesine rağmen, bu klasöre giderseniz **hiçbir ikili dosya bulamayacaksınız**. Bunun nedeni **kernelcache**'dir ve bir `.kext` dosyasını tersine mühendislik yapmak için onu elde etmenin bir yolunu bulmanız gerekir.
 
-**Kernelcache**, **XNU çekirdeğinin önceden derlenmiş ve önceden bağlantılı bir versiyonu** ile birlikte temel cihaz **sürücüleri** ve **kernel uzantıları** içerir. **Sıkıştırılmış** bir formatta depolanır ve önyükleme süreci sırasında belleğe açılır. Kernelcache, çekirdeğin ve kritik sürücülerin çalışmaya hazır bir versiyonunu bulundurarak **daha hızlı bir önyükleme süresi** sağlar; bu, bu bileşenlerin dinamik olarak yüklenmesi ve bağlanması için harcanacak zaman ve kaynakları azaltır.
+**Kernelcache**, **XNU çekirdeğinin** önceden derlenmiş ve önceden bağlantılı bir versiyonudur; ayrıca temel cihaz **sürücüleri** ve **kernel uzantıları** ile birlikte gelir. **Sıkıştırılmış** bir formatta depolanır ve önyükleme süreci sırasında belleğe açılır. Kernelcache, çekirdeğin ve kritik sürücülerin çalışmaya hazır bir versiyonunu bulundurarak **daha hızlı bir önyükleme süresi** sağlar; bu, bu bileşenlerin dinamik olarak yüklenmesi ve bağlantı kurulması için harcanacak zaman ve kaynakları azaltır.
 
 ### Yerel Kernelcache
 
-iOS'ta **`/System/Library/Caches/com.apple.kernelcaches/kernelcache`** içinde bulunur, macOS'ta ise şunlarla bulabilirsiniz: **`find / -name "kernelcache" 2>/dev/null`** \
-Benim durumumda macOS'ta şunu buldum:
+iOS'ta **`/System/Library/Caches/com.apple.kernelcaches/kernelcache`** içinde bulunur, macOS'ta ise şu komutla bulabilirsiniz: **`find / -name "kernelcache" 2>/dev/null`** \
+Benim durumumda macOS'ta şurada buldum:
 
 - `/System/Volumes/Preboot/1BAEB4B5-180B-4C46-BD53-51152B7D92DA/boot/DAD35E7BC0CDA79634C20BD1BD80678DFB510B2AAD3D25C1228BB34BCD0A711529D3D571C93E29E1D0C1264750FA043F/System/Library/Caches/com.apple.kernelcaches/kernelcache`
 
 #### IMG4
 
-IMG4 dosya formatı, Apple tarafından iOS ve macOS cihazlarında **firmware** bileşenlerini güvenli bir şekilde **saklamak ve doğrulamak** için kullanılan bir konteyner formatıdır (örneğin **kernelcache**). IMG4 formatı, gerçek yük (örneğin bir çekirdek veya önyükleyici), bir imza ve bir dizi manifest özelliklerini kapsayan bir başlık ve birkaç etiket içerir. Format, cihazın firmware bileşeninin özgünlüğünü ve bütünlüğünü doğrulamasına olanak tanıyan kriptografik doğrulamayı destekler.
+IMG4 dosya formatı, Apple tarafından iOS ve macOS cihazlarında **firmware** bileşenlerini güvenli bir şekilde **saklamak ve doğrulamak** için kullanılan bir konteyner formatıdır (örneğin **kernelcache**). IMG4 formatı, gerçek yük (örneğin bir çekirdek veya önyükleyici), bir imza ve bir dizi manifest özelliklerini kapsayan başlık ve birkaç etiket içerir. Format, cihazın firmware bileşeninin özgünlüğünü ve bütünlüğünü doğrulamasına olanak tanıyan kriptografik doğrulamayı destekler.
 
 Genellikle aşağıdaki bileşenlerden oluşur:
 
@@ -70,7 +70,7 @@ Genellikle aşağıdaki bileşenlerden oluşur:
 - Ek Anahtar/Değer sözlüğü
 - **Restore Info (IM4R)**:
 - APNonce olarak da bilinir
-- Bazı güncellemelerin tekrar oynatılmasını engeller
+- Bazı güncellemelerin tekrar oynatılmasını önler
 - İSTEĞE BAĞLI: Genellikle bulunmaz
 
 Kernelcache'i açın:
@@ -85,7 +85,7 @@ pyimg4 im4p extract -i kernelcache.release.iphone14 -o kernelcache.release.iphon
 
 - [**KernelDebugKit Github**](https://github.com/dortania/KdkSupportPkg/releases)
 
-[https://github.com/dortania/KdkSupportPkg/releases](https://github.com/dortania/KdkSupportPkg/releases) adresinde tüm kernel hata ayıklama kitlerini bulmak mümkündür. Bunu indirebilir, monte edebilir, [Suspicious Package](https://www.mothersruin.com/software/SuspiciousPackage/get.html) aracıyla açabilir, **`.kext`** klasörüne erişebilir ve **çıkarabilirsiniz**.
+[https://github.com/dortania/KdkSupportPkg/releases](https://github.com/dortania/KdkSupportPkg/releases) adresinde tüm kernel hata ayıklama kitlerini bulmak mümkündür. Bunu indirebilir, bağlayabilir, [Suspicious Package](https://www.mothersruin.com/software/SuspiciousPackage/get.html) aracıyla açabilir, **`.kext`** klasörüne erişebilir ve **çıkarabilirsiniz**.
 
 Semboller için kontrol edin:
 ```bash
@@ -93,11 +93,11 @@ nm -a ~/Downloads/Sandbox.kext/Contents/MacOS/Sandbox | wc -l
 ```
 - [**theapplewiki.com**](https://theapplewiki.com/wiki/Firmware/Mac/14.x)**,** [**ipsw.me**](https://ipsw.me/)**,** [**theiphonewiki.com**](https://www.theiphonewiki.com/)
 
-Bazen Apple **kernelcache** ile **semboller** yayınlar. Bu sayfalardaki bağlantıları takip ederek sembollerle bazı firmware'leri indirebilirsiniz. Firmware'ler diğer dosyaların yanı sıra **kernelcache** içerecektir.
+Bazen Apple **kernelcache** ile **semboller** yayınlar. Bu sayfalardaki bağlantıları takip ederek sembollü bazı firmware'leri indirebilirsiniz. Firmware'ler diğer dosyaların yanı sıra **kernelcache** içerecektir.
 
 Dosyaları **çıkarmak** için uzantıyı `.ipsw`'den `.zip`'e değiştirin ve **açın**.
 
-Firmware'i çıkardıktan sonra **`kernelcache.release.iphone14`** gibi bir dosya elde edeceksiniz. Bu **IMG4** formatındadır, ilginç bilgileri çıkarmak için:
+Firmware'i çıkardıktan sonra **`kernelcache.release.iphone14`** gibi bir dosya alacaksınız. Bu **IMG4** formatındadır, ilginç bilgileri çıkarmak için:
 
 [**pyimg4**](https://github.com/m1stadev/PyIMG4)**:**
 ```bash
@@ -109,7 +109,7 @@ img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 ```
 ### Kernelcache'i İnceleme
 
-Kernelcache'in sembollere sahip olup olmadığını kontrol et
+Kernelcache'in sembollere sahip olup olmadığını kontrol edin
 ```bash
 nm -a kernelcache.release.iphone14.e | wc -l
 ```

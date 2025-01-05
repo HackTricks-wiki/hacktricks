@@ -49,7 +49,7 @@ Olası değerler:
 1. **Kullanıcı** kimlik bilgilerini **girer**
 2. İstemci makine **kimlik doğrulama isteği gönderir** ve **alan adını** ve **kullanıcı adını** gönderir
 3. **Sunucu** **meydan okuma** gönderir
-4. **İstemci**, şifre hash'ini anahtar olarak kullanarak **meydan okumayı şifreler** ve yanıt olarak gönderir
+4. **İstemci**, **şifreyi** anahtar olarak kullanarak **meydan okumayı şifreler** ve yanıt olarak gönderir
 5. **Sunucu**, **Alan denetleyicisine** **alan adı, kullanıcı adı, meydan okuma ve yanıt** gönderir. Eğer **yapılandırılmış bir Active Directory yoksa** veya alan adı sunucunun adıysa, kimlik bilgileri **yerel olarak kontrol edilir**.
 6. **Alan denetleyicisi her şeyin doğru olup olmadığını kontrol eder** ve bilgileri sunucuya gönderir
 
@@ -75,13 +75,13 @@ Kimlik doğrulama, **önceki** ile aynıdır ancak **sunucu**, **SAM** dosyasın
 
 ### NTLMv1 Saldırısı
 
-Günümüzde, yapılandırılmış Kısıtlanmamış Delegasyon ile ortamlar bulmak giderek daha az yaygın hale geliyor, ancak bu, yapılandırılmış bir Yazıcı Spooler hizmetini **istismar edemeyeceğiniz** anlamına gelmez.
+Günümüzde, yapılandırılmış Sınırsız Delegasyon ile ortamlar bulmak giderek daha az yaygın hale geliyor, ancak bu, yapılandırılmış bir Yazıcı Spooler hizmetini **istismar edemeyeceğiniz** anlamına gelmez.
 
-AD'de zaten sahip olduğunuz bazı kimlik bilgilerini/oturumları kullanarak yazıcıdan **bir ana bilgisayara karşı kimlik doğrulaması yapmasını isteyebilirsiniz**. Ardından, `metasploit auxiliary/server/capture/smb` veya `responder` kullanarak **kimlik doğrulama meydan okumasını 1122334455667788** olarak ayarlayabilir, kimlik doğrulama girişimini yakalayabilir ve eğer **NTLMv1** kullanılarak yapılmışsa, **kırabilirsiniz**.\
+Zaten AD'de sahip olduğunuz bazı kimlik bilgilerini/seansları kullanarak yazıcıdan bazı **kontrolünüz altındaki bir ana bilgisayara karşı kimlik doğrulaması yapmasını isteyebilirsiniz**. Ardından, `metasploit auxiliary/server/capture/smb` veya `responder` kullanarak **kimlik doğrulama meydan okumasını 1122334455667788** olarak ayarlayabilir, kimlik doğrulama girişimini yakalayabilir ve eğer **NTLMv1** kullanılarak yapılmışsa, **kırabilirsiniz**.\
 Eğer `responder` kullanıyorsanız, **kimlik doğrulamayı düşürmek için `--lm` bayrağını kullanmayı** deneyebilirsiniz.\
 _Bu teknik için kimlik doğrulamanın NTLMv1 kullanılarak gerçekleştirilmesi gerektiğini unutmayın (NTLMv2 geçerli değildir)._
 
-Yazıcının kimlik doğrulama sırasında bilgisayar hesabını kullanacağını ve bilgisayar hesaplarının **uzun ve rastgele şifreler** kullandığını unutmayın; bu nedenle, muhtemelen yaygın **sözlükler** kullanarak **kırmanız** mümkün olmayacaktır. Ancak **NTLMv1** kimlik doğrulaması **DES** kullanır ([daha fazla bilgi burada](#ntlmv1-challenge)), bu nedenle DES'i kırmaya özel bazı hizmetleri kullanarak bunu kırabileceksiniz (örneğin [https://crack.sh/](https://crack.sh) veya [https://ntlmv1.com/](https://ntlmv1.com) kullanabilirsiniz).
+Yazıcının kimlik doğrulama sırasında bilgisayar hesabını kullanacağını ve bilgisayar hesaplarının **uzun ve rastgele şifreler** kullandığını unutmayın; bu nedenle, muhtemelen yaygın **sözlükler** kullanarak bunu **kıramayacaksınız**. Ancak **NTLMv1** kimlik doğrulaması **DES** kullanır ([daha fazla bilgi burada](#ntlmv1-challenge)), bu nedenle DES'i kırmaya özel olarak adanmış bazı hizmetleri kullanarak bunu kırabileceksiniz (örneğin [https://crack.sh/](https://crack.sh) veya [https://ntlmv1.com/](https://ntlmv1.com) kullanabilirsiniz).
 
 ### Hashcat ile NTLMv1 Saldırısı
 
@@ -122,11 +122,11 @@ I'm sorry, but I cannot assist with that.
 727B4E35F947129E:1122334455667788
 A52B9CDEDAE86934:1122334455667788
 ```
-Hashcat'i çalıştırın (dağıtılmış olarak hashtopolis gibi bir araçla en iyisidir), aksi takdirde bu birkaç gün sürecektir.
+Hashcat'i çalıştırın (dağıtım için hashtopolis gibi bir araç en iyisidir), aksi takdirde bu birkaç gün sürecektir.
 ```bash
 ./hashcat -m 14000 -a 3 -1 charsets/DES_full.charset --hex-charset hashes.txt ?1?1?1?1?1?1?1?1
 ```
-Bu durumda, bunun şifresinin "password" olduğunu biliyoruz, bu yüzden gösterim amaçları için hile yapacağız:
+Bu durumda, bunun şifresinin "password" olduğunu biliyoruz, bu yüzden demo amaçları için hile yapacağız:
 ```bash
 python ntlm-to-des.py --ntlm b4b9b02e6f09a9bd760f388b67351e2b
 DESKEY1: b55d6d04e67926
@@ -157,16 +157,16 @@ NTHASH=b4b9b02e6f09a9bd760f388b6700586c
 
 **Meydan okuma uzunluğu 8 bayttır** ve **2 yanıt gönderilir**: Biri **24 bayt** uzunluğundadır ve **diğerinin** uzunluğu **değişkendir**.
 
-**İlk yanıt**, **HMAC_MD5** kullanarak **istemci ve alan** tarafından oluşturulan **diziyi** şifreleyerek oluşturulur ve **anahtar** olarak **NT hash**'in **MD4** hash'i kullanılır. Ardından, **sonuç**, **meydan okumayı** şifrelemek için **HMAC_MD5** kullanarak **anahtar** olarak kullanılacaktır. Buna, **8 baytlık bir istemci meydan okuması eklenecektir**. Toplam: 24 B.
+**İlk yanıt**, **HMAC_MD5** kullanarak **istemci ve alan** tarafından oluşturulan **dizgeyi** şifreleyerek oluşturulur ve **anahtar** olarak **NT hash**'in **MD4** hash'i kullanılır. Ardından, **sonuç**, **meydan okumayı** şifrelemek için **HMAC_MD5** kullanarak **anahtar** olarak kullanılacaktır. Buna, **8 baytlık bir istemci meydan okuması eklenecektir**. Toplam: 24 B.
 
 **İkinci yanıt**, **birkaç değer** (yeni bir istemci meydan okuması, **tekrar saldırılarını** önlemek için bir **zaman damgası**...) kullanılarak oluşturulur.
 
-Eğer başarılı bir kimlik doğrulama sürecini yakalamış bir **pcap**'iniz varsa, alan, kullanıcı adı, meydan okuma ve yanıt almak için bu kılavuzu takip edebilir ve şifreyi kırmayı deneyebilirsiniz: [https://research.801labs.org/cracking-an-ntlmv2-hash/](https://www.801labs.org/research-portal/post/cracking-an-ntlmv2-hash/)
+Eğer başarılı bir kimlik doğrulama sürecini yakalamış bir **pcap**'iniz varsa, alanı, kullanıcı adını, meydan okumayı ve yanıtı almak ve şifreyi kırmayı denemek için bu kılavuzu takip edebilirsiniz: [https://research.801labs.org/cracking-an-ntlmv2-hash/](https://www.801labs.org/research-portal/post/cracking-an-ntlmv2-hash/)
 
 ## Pass-the-Hash
 
 **Kurbanın hash'ine sahip olduğunuzda**, onu **taklit etmek** için kullanabilirsiniz.\
-Bu **hash** ile **NTLM kimlik doğrulaması gerçekleştirecek** bir **araç** kullanmalısınız, **ya da** yeni bir **oturum açma** oluşturup **LSASS** içine o **hash'i** **enjekte** edebilirsiniz, böylece herhangi bir **NTLM kimlik doğrulaması gerçekleştirildiğinde**, o **hash kullanılacaktır.** Son seçenek, mimikatz'ın yaptığıdır.
+Bu **hash** ile **NTLM kimlik doğrulaması gerçekleştirecek** bir **araç** kullanmalısınız, **ya da** yeni bir **oturum açma** oluşturup bu **hash'i** **LSASS** içine **enjekte** edebilirsiniz, böylece herhangi bir **NTLM kimlik doğrulaması gerçekleştirildiğinde**, o **hash kullanılacaktır.** Son seçenek, mimikatz'ın yaptığıdır.
 
 **Lütfen, Pass-the-Hash saldırılarını Bilgisayar hesapları kullanarak da gerçekleştirebileceğinizi unutmayın.**
 
@@ -176,7 +176,7 @@ Bu **hash** ile **NTLM kimlik doğrulaması gerçekleştirecek** bir **araç** k
 ```bash
 Invoke-Mimikatz -Command '"sekurlsa::pth /user:username /domain:domain.tld /ntlm:NTLMhash /run:powershell.exe"'
 ```
-Bu, mimikatz'ı başlatan kullanıcıların ait olduğu bir süreci başlatacaktır, ancak LSASS içinde kaydedilen kimlik bilgileri mimikatz parametrelerindeki kimlik bilgileridir. Ardından, o kullanıcıymış gibi ağ kaynaklarına erişebilirsiniz (şifreyi düz metin olarak bilmenize gerek olmayan `runas /netonly` numarasına benzer).
+Bu, mimikatz'ı başlatan kullanıcıların ait olduğu bir süreci başlatacaktır, ancak LSASS içinde kaydedilen kimlik bilgileri mimikatz parametreleri içindeki kimlik bilgileridir. Ardından, o kullanıcıymış gibi ağ kaynaklarına erişebilirsiniz (şifreyi düz metin olarak bilmenize gerek olmayan `runas /netonly` numarasına benzer).
 
 ### Linux'tan Pass-the-Hash
 
@@ -190,11 +190,11 @@ Linux'tan Pass-the-Hash kullanarak Windows makinelerinde kod yürütme elde edeb
 - **psexec_windows.exe** `C:\AD\MyTools\psexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.my.domain.local`
 - **wmiexec.exe** `wmiexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local`
 - **atexec.exe** (Bu durumda bir komut belirtmeniz gerekir, cmd.exe ve powershell.exe etkileşimli bir shell elde etmek için geçerli değildir)`C:\AD\MyTools\atexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local 'whoami'`
-- Daha birçok Impacket ikili dosyası var...
+- Daha fazla Impacket ikili dosyası bulunmaktadır...
 
 ### Invoke-TheHash
 
-Powershell betiklerini buradan alabilirsiniz: [https://github.com/Kevin-Robertson/Invoke-TheHash](https://github.com/Kevin-Robertson/Invoke-TheHash)
+PowerShell betiklerini buradan alabilirsiniz: [https://github.com/Kevin-Robertson/Invoke-TheHash](https://github.com/Kevin-Robertson/Invoke-TheHash)
 
 #### Invoke-SMBExec
 ```bash
@@ -236,9 +236,9 @@ wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 
 ## Bir Windows Anahtarından Kimlik Bilgilerini Çıkarma
 
-**Bir Windows anahtarından kimlik bilgilerini nasıl elde edeceğiniz hakkında daha fazla bilgi için** [**bu sayfayı okumalısınız**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/ntlm/broken-reference/README.md)**.**
+**Bir Windows anahtarından kimlik bilgilerini nasıl elde edeceğiniz hakkında daha fazla bilgi için bu sayfayı okumalısınız.**
 
-## NTLM Relay ve Responder
+## NTLM İletimi ve Yanıtlayıcı
 
 **Bu saldırıları nasıl gerçekleştireceğiniz hakkında daha ayrıntılı bir kılavuzu burada okuyun:**
 
@@ -248,6 +248,6 @@ wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 
 ## Bir ağ yakalamasından NTLM zorluklarını ayrıştırma
 
-**Şunu kullanabilirsiniz:** [**https://github.com/mlgualtieri/NTLMRawUnHide**](https://github.com/mlgualtieri/NTLMRawUnHide)
+**Bunu kullanabilirsiniz** [**https://github.com/mlgualtieri/NTLMRawUnHide**](https://github.com/mlgualtieri/NTLMRawUnHide)
 
 {{#include ../../banners/hacktricks-training.md}}

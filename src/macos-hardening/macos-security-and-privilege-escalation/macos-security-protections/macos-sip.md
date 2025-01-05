@@ -4,7 +4,7 @@
 
 ## **Temel Bilgiler**
 
-**Sistem Bütünlüğü Koruması (SIP)**, macOS'ta ana sistem klasörlerinde yetkisiz değişiklikler yapılmasını önlemek için tasarlanmış bir mekanizmadır. Bu özellik, korunan alanlarda dosya ekleme, değiştirme veya silme gibi eylemleri kısıtlayarak sistemin bütünlüğünü korumada kritik bir rol oynar. SIP tarafından korunan ana klasörler şunlardır:
+**Sistem Bütünlüğü Koruması (SIP)**, macOS'ta ana sistem klasörlerinde yetkisiz değişiklikler yapılmasını önlemek için tasarlanmış bir mekanizmadır. Bu özellik, korunan alanlarda dosya ekleme, değiştirme veya silme gibi eylemleri kısıtlayarak sistemin bütünlüğünü korumada önemli bir rol oynar. SIP tarafından korunan ana klasörler şunlardır:
 
 - **/System**
 - **/bin**
@@ -13,21 +13,21 @@
 
 SIP'nin davranışını yöneten kurallar, **`/System/Library/Sandbox/rootless.conf`** konumundaki yapılandırma dosyasında tanımlanmıştır. Bu dosyada, bir yıldız işareti (\*) ile başlayan yollar, aksi takdirde katı olan SIP kısıtlamalarına istisna olarak belirtilmiştir.
 
-Aşağıdaki örneği dikkate alın:
+Aşağıdaki örneği düşünün:
 ```javascript
 /usr
 * /usr/libexec/cups
 * /usr/local
 * /usr/share/man
 ```
-Bu kesit, SIP'in genel olarak **`/usr`** dizinini güvence altına aldığını, ancak asterisk (\*) ile belirtilen yollarında değişikliklerin izin verildiği belirli alt dizinler (`/usr/libexec/cups`, `/usr/local` ve `/usr/share/man`) olduğunu ima etmektedir.
+Bu kesit, SIP'nin genel olarak **`/usr`** dizinini güvence altına aldığını, ancak asterisk (\*) ile belirtilen belirli alt dizinlerin (`/usr/libexec/cups`, `/usr/local` ve `/usr/share/man`) değişikliklere izin verdiğini ima etmektedir.
 
 Bir dizinin veya dosyanın SIP tarafından korunup korunmadığını doğrulamak için, **`ls -lOd`** komutunu kullanarak **`restricted`** veya **`sunlnk`** bayrağının varlığını kontrol edebilirsiniz. Örneğin:
 ```bash
 ls -lOd /usr/libexec/cups
 drwxr-xr-x  11 root  wheel  sunlnk 352 May 13 00:29 /usr/libexec/cups
 ```
-Bu durumda, **`sunlnk`** bayrağı, `/usr/libexec/cups` dizininin **silinemez** olduğunu belirtir, ancak içindeki dosyalar oluşturulabilir, değiştirilebilir veya silinebilir.
+Bu durumda, **`sunlnk`** bayrağı, `/usr/libexec/cups` dizininin kendisinin **silinemez** olduğunu, ancak içindeki dosyaların oluşturulabileceğini, değiştirilebileceğini veya silinebileceğini belirtir.
 
 Diğer taraftan:
 ```bash
@@ -39,7 +39,7 @@ Burada, **`restricted`** bayrağı, `/usr/libexec` dizininin SIP tarafından kor
 Ayrıca, bir dosya **`com.apple.rootless`** genişletilmiş **özelliğini** içeriyorsa, o dosya da **SIP tarafından korunacaktır**.
 
 > [!TIP]
-> **Sandbox** kancası **`hook_vnode_check_setextattr`**, **`com.apple.rootless`** genişletilmiş özelliğini değiştirme girişimlerini engeller.
+> **Sandbox** kancası **`hook_vnode_check_setextattr`**, genişletilmiş özellik **`com.apple.rootless`**'ı değiştirme girişimlerini engeller.
 
 **SIP ayrıca diğer kök eylemlerini de sınırlar**:
 
@@ -58,7 +58,7 @@ SIP'in sisteminizde etkin olup olmadığını aşağıdaki komutla kontrol edebi
 ```bash
 csrutil status
 ```
-Eğer SIP'yi devre dışı bırakmanız gerekiyorsa, bilgisayarınızı kurtarma modunda yeniden başlatmalısınız (başlangıç sırasında Command+R tuşuna basarak), ardından aşağıdaki komutu çalıştırmalısınız:
+Eğer SIP'i devre dışı bırakmanız gerekiyorsa, bilgisayarınızı kurtarma modunda yeniden başlatmalısınız (başlangıçta Command+R tuşlarına basarak), ardından aşağıdaki komutu çalıştırmalısınız:
 ```bash
 csrutil disable
 ```
@@ -93,13 +93,13 @@ csrutil enable --without debug
 SIP'yi aşmak, bir saldırgana şunları sağlar:
 
 - **Kullanıcı Verilerine Erişim**: Tüm kullanıcı hesaplarından hassas kullanıcı verilerini, örneğin e-posta, mesajlar ve Safari geçmişini okuma.
-- **TCC Aşması**: TCC (Şeffaflık, Onay ve Kontrol) veritabanını doğrudan manipüle ederek, web kamerası, mikrofon ve diğer kaynaklara yetkisiz erişim sağlama.
-- **Kalıcılık Sağlama**: SIP korumalı alanlara kötü amaçlı yazılım yerleştirme, bu da kök ayrıcalıkları tarafından bile kaldırılmasına karşı dirençli hale getirir. Bu, Kötü Amaçlı Yazılım Kaldırma Aracı'nın (MRT) değiştirilmesi potansiyelini de içerir.
+- **TCC Aşma**: TCC (Şeffaflık, Onay ve Kontrol) veritabanını doğrudan manipüle ederek, yetkisiz erişim sağlama webcam, mikrofon ve diğer kaynaklara.
+- **Kalıcılık Sağlama**: SIP ile korunan alanlara kötü amaçlı yazılım yerleştirme, bu da kaldırılmasına karşı dirençli hale getirir, hatta root ayrıcalıklarıyla bile. Bu, Kötü Amaçlı Yazılım Kaldırma Aracı (MRT) ile oynama potansiyelini de içerir.
 - **Çekirdek Uzantılarını Yükleme**: Ek korumalara rağmen, SIP'yi aşmak, imzalanmamış çekirdek uzantılarını yükleme sürecini basitleştirir.
 
 ### Yükleyici Paketleri
 
-**Apple'ın sertifikasıyla imzalanmış yükleyici paketleri**, korumalarını aşabilir. Bu, standart geliştiriciler tarafından imzalanmış paketlerin bile, SIP korumalı dizinleri değiştirmeye çalıştıklarında engelleneceği anlamına gelir.
+**Apple'ın sertifikasıyla imzalanmış yükleyici paketleri**, korumalarını aşabilir. Bu, standart geliştiriciler tarafından imzalanmış paketlerin bile, SIP ile korunan dizinleri değiştirmeye çalıştıklarında engelleneceği anlamına gelir.
 
 ### Mevcut Olmayan SIP Dosyası
 
@@ -116,25 +116,25 @@ Sistem, kod imzasını doğruladıktan sonra **yükleyici paketini değiştirme*
 
 #### [CVE-2020–9854](https://objective-see.org/blog/blog_0x4D.html) <a href="#cve-unauthd-chain" id="cve-unauthd-chain"></a>
 
-Bir paket, bir monte edilmiş görüntüden veya harici bir sürücüden yüklendiğinde, **yükleyici** **o dosya sisteminden** ikili dosyayı **çalıştırır** (SIP korumalı bir konumdan değil), bu da **`system_installd`**'nin rastgele bir ikili dosyayı çalıştırmasına neden olur.
+Bir paket, bir montajlı görüntüden veya harici bir sürücüden yüklendiğinde, **yükleyici** **o dosya sisteminden** ikili dosyayı **çalıştırır** (SIP korumalı bir konumdan değil), bu da **`system_installd`**'nin rastgele bir ikili dosyayı çalıştırmasına neden olur.
 
 #### CVE-2021-30892 - Shrootless
 
-[**Bu blog yazısından araştırmacılar**](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/) macOS'un Sistem Bütünlüğü Koruma (SIP) mekanizmasında, 'Shrootless' olarak adlandırılan bir güvenlik açığı keşfettiler. Bu güvenlik açığı, **`system_installd`** daemon'u etrafında döner ve bu daemon'un, SIP'nin dosya sistemi kısıtlamalarını aşmasına izin veren bir yetkisi vardır, **`com.apple.rootless.install.heritable`**.
+[**Bu blog yazısından araştırmacılar**](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/) macOS'un Sistem Bütünlüğü Koruma (SIP) mekanizmasında, 'Shrootless' olarak adlandırılan bir güvenlik açığı keşfettiler. Bu güvenlik açığı, **`system_installd`** daemon'u etrafında döner ve bu daemon'un, SIP'nin dosya sistemi kısıtlamalarını aşmasına izin veren **`com.apple.rootless.install.heritable`** yetkisi vardır.
 
 **`system_installd`** daemon'u, **Apple** tarafından imzalanmış paketleri yükleyecektir.
 
 Araştırmacılar, Apple imzalı bir paket (.pkg dosyası) yüklenirken, **`system_installd`** paket içindeki herhangi bir **kurulum sonrası** betiği **çalıştırdığını** buldular. Bu betikler, varsayılan kabuk olan **`zsh`** tarafından çalıştırılır ve eğer mevcutsa, **`/etc/zshenv`** dosyasından komutları otomatik olarak **çalıştırır**, hatta etkileşimli modda bile. Bu davranış, saldırganlar tarafından kötüye kullanılabilir: kötü niyetli bir `/etc/zshenv` dosyası oluşturarak ve **`system_installd`'nin `zsh`'yi çağırmasını** bekleyerek, cihazda rastgele işlemler gerçekleştirebilirler.
 
-Ayrıca, **`/etc/zshenv`** dosyasının yalnızca SIP aşması için değil, genel bir saldırı tekniği olarak da kullanılabileceği keşfedildi. Her kullanıcı profili, `/etc/zshenv` ile aynı şekilde davranan bir `~/.zshenv` dosyasına sahiptir, ancak kök izinleri gerektirmez. Bu dosya, `zsh` her başladığında tetiklenecek şekilde bir kalıcılık mekanizması olarak veya ayrıcalık yükseltme mekanizması olarak kullanılabilir. Bir yönetici kullanıcı, `sudo -s` veya `sudo <komut>` kullanarak kök yetkilerine yükselirse, `~/.zshenv` dosyası tetiklenecek ve etkili bir şekilde kök yetkilerine yükselecektir.
+Ayrıca, **`/etc/zshenv`** dosyasının yalnızca SIP aşmak için değil, genel bir saldırı tekniği olarak kullanılabileceği keşfedildi. Her kullanıcı profili, `~/.zshenv` dosyasına sahiptir ve bu dosya, `/etc/zshenv` ile aynı şekilde davranır ancak root izinleri gerektirmez. Bu dosya, `zsh` her başladığında tetiklenecek şekilde bir kalıcılık mekanizması olarak veya ayrıcalık yükseltme mekanizması olarak kullanılabilir. Eğer bir yönetici kullanıcı, `sudo -s` veya `sudo <komut>` kullanarak root'a yükselirse, `~/.zshenv` dosyası tetiklenecek ve etkili bir şekilde root'a yükselecektir.
 
 #### [**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-2022-22583/)
 
-[**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-2022-22583/) dosyası, aynı **`system_installd`** sürecinin hala kötüye kullanılabileceği keşfedildi çünkü **kurulum sonrası betiği SIP tarafından korunan rastgele adlandırılmış bir klasörün içine koyuyordu** ve **`/tmp`** dizini SIP tarafından korunmamaktadır, bu nedenle **`/tmp`** üzerinde bir **sanallaştırılmış görüntü monte etmek** mümkündü, ardından **yükleyici** oraya **kurulum sonrası betiği** koyacak, **sanallaştırılmış görüntüyü** kaldıracak, tüm **klasörleri** yeniden oluşturacak ve **yüklemek için** **yükleme sonrası** betiği ile **yük yükleyecekti**.
+[**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-2022-22583/) içinde, aynı **`system_installd`** sürecinin hala kötüye kullanılabileceği keşfedildi çünkü **kurulum sonrası betiği SIP tarafından korunan rastgele adlandırılmış bir klasörün içine koyuyordu** ve bu klasör `/tmp` içindeydi. Sorun şu ki, **`/tmp`** kendisi SIP tarafından korunmamaktadır, bu nedenle **sanallaştırılmış bir görüntü** üzerinde **montaj** yapmak mümkündü, ardından **yükleyici** oraya **kurulum sonrası betiği** koyacak, **sanallaştırılmış görüntüyü** kaldıracak, tüm **klasörleri** yeniden oluşturacak ve **yükleme sonrası** betiği **yüklemek için** **payload** ile ekleyecekti.
 
 #### [fsck_cs aracı](https://www.theregister.com/2016/03/30/apple_os_x_rootless/)
 
-**`fsck_cs`** aracının, **sembolik bağlantıları** takip etme yeteneği nedeniyle kritik bir dosyayı bozduğu bir güvenlik açığı tespit edildi. Özellikle, saldırganlar _`/dev/diskX`_ dosyasından `/System/Library/Extensions/AppleKextExcludeList.kext/Contents/Info.plist` dosyasına bir bağlantı oluşturdu. _`/dev/diskX`_ üzerinde **`fsck_cs`** çalıştırmak, `Info.plist` dosyasının bozulmasına yol açtı. Bu dosyanın bütünlüğü, çekirdek uzantılarının yüklenmesini kontrol eden işletim sisteminin SIP (Sistem Bütünlüğü Koruma) için hayati öneme sahiptir. Bozulduğunda, SIP'nin çekirdek hariç tutmalarını yönetme yeteneği tehlikeye girer.
+**`fsck_cs`** aracının, **sembolik bağlantıları** takip etme yeteneği nedeniyle kritik bir dosyayı bozduğu bir güvenlik açığı tespit edildi. Özellikle, saldırganlar _`/dev/diskX`_ dosyasından `/System/Library/Extensions/AppleKextExcludeList.kext/Contents/Info.plist` dosyasına bir bağlantı oluşturdu. **`fsck_cs`**'yi _`/dev/diskX`_ üzerinde çalıştırmak, `Info.plist` dosyasının bozulmasına yol açtı. Bu dosyanın bütünlüğü, işletim sisteminin SIP'si (Sistem Bütünlüğü Koruma) için hayati öneme sahiptir ve çekirdek uzantılarının yüklenmesini kontrol eder. Bozulduğunda, SIP'nin çekirdek hariç tutmalarını yönetme yeteneği tehlikeye girer.
 
 Bu güvenlik açığını istismar etmek için gereken komutlar:
 ```bash
@@ -143,7 +143,7 @@ fsck_cs /dev/diskX 1>&-
 touch /Library/Extensions/
 reboot
 ```
-Bu güvenlik açığının istismarı ciddi sonuçlar doğurmaktadır. `Info.plist` dosyası, normalde çekirdek uzantıları için izinleri yönetmekle sorumlu olan dosya, etkisiz hale gelir. Bu, `AppleHWAccess.kext` gibi belirli uzantıları kara listeye alma yeteneğini içerir. Sonuç olarak, SIP'nin kontrol mekanizması bozulduğunda, bu uzantı yüklenebilir ve sistemin RAM'ine yetkisiz okuma ve yazma erişimi sağlar.
+Bu güvenlik açığının istismarı ciddi sonuçlar doğurmaktadır. `Info.plist` dosyası, normalde çekirdek uzantıları için izinleri yönetmekten sorumlu olan, etkisiz hale gelir. Bu, `AppleHWAccess.kext` gibi belirli uzantıları kara listeye alma yeteneğini içerir. Sonuç olarak, SIP'nin kontrol mekanizması bozulduğunda, bu uzantı yüklenebilir ve sistemin RAM'ine yetkisiz okuma ve yazma erişimi sağlar.
 
 #### [SIP korumalı klasörlerin üzerine bağlanma](https://www.slideshare.net/i0n1c/syscan360-stefan-esser-os-x-el-capitan-sinking-the-ship)
 
@@ -160,7 +160,7 @@ Sistem, OS'u yükseltmek için `Install macOS Sierra.app` içindeki gömülü bi
 ```bash
 /usr/sbin/bless -setBoot -folder /Volumes/Macintosh HD/macOS Install Data -bootefi /Volumes/Macintosh HD/macOS Install Data/boot.efi -options config="\macOS Install Data\com.apple.Boot" -label macOS Installer
 ```
-Bu sürecin güvenliği, bir saldırganın yükseltme görüntüsünü (`InstallESD.dmg`) başlatmadan önce değiştirmesi durumunda tehlikeye girebilir. Strateji, dinamik bir yükleyiciyi (dyld) kötü niyetli bir sürümle (`libBaseIA.dylib`) değiştirmeyi içerir. Bu değişim, yükleyici başlatıldığında saldırganın kodunun çalıştırılmasına neden olur.
+Bu sürecin güvenliği, bir saldırganın yükseltme görüntüsünü (`InstallESD.dmg`) önyüklemeden önce değiştirmesi durumunda tehlikeye girebilir. Strateji, dinamik bir yükleyiciyi (dyld) kötü niyetli bir sürümle (`libBaseIA.dylib`) değiştirmeyi içerir. Bu değişiklik, yükleyici başlatıldığında saldırganın kodunun çalıştırılmasına neden olur.
 
 Saldırganın kodu, yükseltme süreci sırasında kontrolü ele geçirir ve sistemin yükleyiciye olan güvenini istismar eder. Saldırı, `InstallESD.dmg` görüntüsünü yöntem değiştirme (method swizzling) ile değiştirerek, özellikle `extractBootBits` yöntemini hedef alarak devam eder. Bu, disk görüntüsü kullanılmadan önce kötü niyetli kodun enjekte edilmesine olanak tanır.
 
@@ -168,15 +168,15 @@ Ayrıca, `InstallESD.dmg` içinde, yükseltme kodunun kök dosya sistemi olarak 
 
 #### [systemmigrationd (2023)](https://www.youtube.com/watch?v=zxZesAN-TEk)
 
-[**DEF CON 31**](https://www.youtube.com/watch?v=zxZesAN-TEk) konuşmasında, **`systemmigrationd`** (SIP'yi atlayabilen) bir **bash** ve bir **perl** betiği çalıştırdığı gösterilmektedir; bu betikler **`BASH_ENV`** ve **`PERL5OPT`** ortam değişkenleri aracılığıyla kötüye kullanılabilir.
+[**DEF CON 31**](https://www.youtube.com/watch?v=zxZesAN-TEk) konuşmasında, **`systemmigrationd`** (SIP'yi atlayabilen) bir **bash** ve bir **perl** betiği çalıştırdığı ve bunun **`BASH_ENV`** ve **`PERL5OPT`** ortam değişkenleri aracılığıyla kötüye kullanılabileceği gösterilmektedir.
 
 #### CVE-2023-42860 <a href="#cve-a-detailed-look" id="cve-a-detailed-look"></a>
 
-[**bu blog yazısında detaylı olarak açıklandığı gibi**](https://blog.kandji.io/apple-mitigates-vulnerabilities-installer-scripts), `InstallAssistant.pkg` paketlerinden bir `postinstall` betiği çalıştırılabiliyordu:
+[**bu blog yazısında detaylı olarak açıklandığı gibi**](https://blog.kandji.io/apple-mitigates-vulnerabilities-installer-scripts), `InstallAssistant.pkg` paketlerinden bir `postinstall` betiği çalıştırılıyordu:
 ```bash
 /usr/bin/chflags -h norestricted "${SHARED_SUPPORT_PATH}/SharedSupport.dmg"
 ```
-ve `${SHARED_SUPPORT_PATH}/SharedSupport.dmg` içinde bir symlink oluşturmak mümkündü, bu da bir kullanıcının **herhangi bir dosyayı kısıtlamadan geçmesini sağlar, SIP korumasını atlar**.
+ve `${SHARED_SUPPORT_PATH}/SharedSupport.dmg` içinde bir symlink oluşturmak mümkündü, bu da bir kullanıcının **herhangi bir dosyayı kısıtlamadan geçmesini, SIP korumasını atlamasını** sağlıyordu.
 
 ### **com.apple.rootless.install**
 
@@ -189,19 +189,19 @@ Bu özel durumda, `/System/Library/PrivateFrameworks/ShoveService.framework/Vers
 
 ## Mühürlü Sistem Anlık Görüntüleri
 
-Mühürlü Sistem Anlık Görüntüleri, Apple tarafından **macOS Big Sur (macOS 11)** ile tanıtılan bir özelliktir ve **Sistem Bütünlüğü Koruması (SIP)** mekanizmasının bir parçası olarak ek bir güvenlik ve sistem istikrarı katmanı sağlar. Temelde sistem hacminin salt okunur sürümleridir.
+Mühürlü Sistem Anlık Görüntüleri, Apple tarafından **macOS Big Sur (macOS 11)** ile tanıtılan bir özelliktir ve **Sistem Bütünlüğü Koruması (SIP)** mekanizmasının bir parçası olarak ek bir güvenlik ve sistem istikrarı katmanı sağlamak için tasarlanmıştır. Temelde sistem hacminin salt okunur sürümleridir.
 
 Daha ayrıntılı bir bakış:
 
-1. **Değiştirilemez Sistem**: Mühürlü Sistem Anlık Görüntüleri, macOS sistem hacmini "değiştirilemez" hale getirir, yani değiştirilemez. Bu, güvenliği veya sistem istikrarını tehlikeye atabilecek yetkisiz veya kazara değişiklikleri önler.
-2. **Sistem Yazılımı Güncellemeleri**: macOS güncellemeleri veya yükseltmeleri yüklediğinizde, macOS yeni bir sistem anlık görüntüsü oluşturur. macOS başlangıç hacmi, bu yeni anlık görüntüye geçmek için **APFS (Apple Dosya Sistemi)** kullanır. Güncellemeleri uygulama süreci daha güvenli ve daha güvenilir hale gelir, çünkü sistem güncelleme sırasında bir şeyler ters giderse her zaman önceki anlık görüntüye geri dönebilir.
+1. **Değiştirilemez Sistem**: Mühürlü Sistem Anlık Görüntüleri, macOS sistem hacmini "değiştirilemez" hale getirir, bu da onun değiştirilmesini engeller. Bu, güvenliği veya sistem istikrarını tehlikeye atabilecek yetkisiz veya kazara değişiklikleri önler.
+2. **Sistem Yazılım Güncellemeleri**: macOS güncellemeleri veya yükseltmeleri yüklediğinizde, macOS yeni bir sistem anlık görüntüsü oluşturur. macOS başlangıç hacmi, bu yeni anlık görüntüye geçmek için **APFS (Apple Dosya Sistemi)** kullanır. Güncellemeleri uygulama süreci daha güvenli ve daha güvenilir hale gelir, çünkü sistem güncelleme sırasında bir şeyler ters giderse her zaman önceki anlık görüntüye geri dönebilir.
 3. **Veri Ayrımı**: macOS Catalina'da tanıtılan Veri ve Sistem hacmi ayrımı kavramıyla birlikte, Mühürlü Sistem Anlık Görüntüsü özelliği, tüm verilerinizin ve ayarlarınızın ayrı bir "**Veri**" hacminde saklandığından emin olur. Bu ayrım, verilerinizi sistemden bağımsız hale getirir, bu da sistem güncellemeleri sürecini basitleştirir ve sistem güvenliğini artırır.
 
 Bu anlık görüntülerin macOS tarafından otomatik olarak yönetildiğini ve APFS'nin alan paylaşım yetenekleri sayesinde diskinizde ek alan kaplamadığını unutmayın. Ayrıca, bu anlık görüntülerin, tüm sistemin kullanıcı erişimine açık yedekleri olan **Time Machine anlık görüntülerinden** farklı olduğunu belirtmek önemlidir.
 
 ### Anlık Görüntüleri Kontrol Et
 
-**`diskutil apfs list`** komutu, **APFS hacimlerinin** ve düzenlerinin **detaylarını** listeler:
+**`diskutil apfs list`** komutu, **APFS hacimlerinin** detaylarını ve düzenini listeler:
 
 <pre><code>+-- Container disk3 966B902E-EDBA-4775-B743-CF97A0556A13
 |   ====================================================
@@ -210,7 +210,7 @@ Bu anlık görüntülerin macOS tarafından otomatik olarak yönetildiğini ve A
 |   Capacity In Use By Volumes:   219214536704 B (219.2 GB) (44.3% used)
 |   Capacity Not Allocated:       275170258944 B (275.2 GB) (55.7% free)
 |   |
-|   +-&#x3C; Physical Store disk0s2 86D4B7EC-6FA5-4042-93A7-D3766A222EBE
+|   +-< Physical Store disk0s2 86D4B7EC-6FA5-4042-93A7-D3766A222EBE
 |   |   -----------------------------------------------------------
 |   |   APFS Physical Store Disk:   disk0s2
 |   |   Size:                       494384795648 B (494.4 GB)

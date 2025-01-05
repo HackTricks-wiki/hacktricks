@@ -10,12 +10,12 @@ Tanım, `.defs` uzantısını kullanarak Arayüz Tanım Dili (IDL) ile belirtili
 
 Bu tanımlar 5 bölümden oluşur:
 
-- **Alt sistem bildirimi**: Alt sistem anahtar kelimesi, **isim** ve **kimlik** belirtmek için kullanılır. Sunucunun çekirdek içinde çalışması gerekiyorsa **`KernelServer`** olarak işaretlemek de mümkündür.
+- **Alt sistem bildirimi**: Alt sistem anahtar kelimesi, **isim** ve **kimlik** belirtmek için kullanılır. Ayrıca, sunucunun çekirdekte çalışması gerekiyorsa **`KernelServer`** olarak işaretlemek de mümkündür.
 - **Dahil etme ve içe aktarma**: MIG, C ön işleyicisini kullandığı için içe aktarmaları kullanabilir. Ayrıca, kullanıcı veya sunucu tarafından üretilen kodlar için `uimport` ve `simport` kullanmak da mümkündür.
 - **Tür bildirimleri**: Veri türlerini tanımlamak mümkündür, ancak genellikle `mach_types.defs` ve `std_types.defs` dosyalarını içe aktarır. Özel türler için bazı sözdizimleri kullanılabilir:
-- \[i`n/out]tran`: Gelen veya giden bir mesajdan çevrilmesi gereken fonksiyon
+- \[i`n/out]tran`: Gelen veya giden bir mesajdan çevrilmesi gereken işlev
 - `c[user/server]type`: Başka bir C türüne eşleme.
-- `destructor`: Tür serbest bırakıldığında bu fonksiyonu çağır.
+- `destructor`: Tür serbest bırakıldığında bu işlevi çağırın.
 - **İşlemler**: Bunlar RPC yöntemlerinin tanımlarıdır. 5 farklı tür vardır:
 - `routine`: Yanıt bekler
 - `simpleroutine`: Yanıt beklemez
@@ -25,7 +25,7 @@ Bu tanımlar 5 bölümden oluşur:
 
 ### Örnek
 
-Çok basit bir fonksiyon ile bir tanım dosyası oluşturun:
+Bu durumda çok basit bir işlev ile bir tanım dosyası oluşturun:
 ```cpp:myipc.defs
 subsystem myipc 500; // Arbitrary name and id
 
@@ -106,7 +106,7 @@ return SERVERPREFmyipc_subsystem.routine[msgh_id].stub_routine;
 ```
 Bu örnekte tanımlarda yalnızca 1 fonksiyon tanımlamışız, ancak daha fazla fonksiyon tanımlasaydık, bunlar **`SERVERPREFmyipc_subsystem`** dizisi içinde yer alırdı ve ilki ID **500**'e, ikincisi ID **501**'e atanırdı...
 
-Eğer fonksiyonun bir **cevap** göndermesi bekleniyorsa, `mig_internal kern_return_t __MIG_check__Reply__<name>` fonksiyonu da mevcut olurdu.
+Fonksiyonun bir **reply** göndermesi bekleniyorsa, `mig_internal kern_return_t __MIG_check__Reply__<name>` fonksiyonu da mevcut olurdu.
 
 Aslında, bu ilişkiyi **`myipcServer.h`** içindeki **`subsystem_to_name_map_myipc`** yapısında tanımlamak mümkündür (**`subsystem*to_name_map*\***`\*\* diğer dosyalarda):
 ```c
@@ -115,7 +115,7 @@ Aslında, bu ilişkiyi **`myipcServer.h`** içindeki **`subsystem_to_name_map_my
 { "Subtract", 500 }
 #endif
 ```
-Son olarak, sunucunun çalışmasını sağlamak için önemli bir başka işlev **`myipc_server`** olacaktır; bu, alınan id ile ilgili **işlevi çağıracak** olanıdır:
+Son olarak, sunucunun çalışmasını sağlamak için önemli bir başka işlev **`myipc_server`** olacaktır; bu, alınan kimlikle ilgili **işlevi çağıracak** olanıdır:
 
 <pre class="language-c"><code class="lang-c">mig_external boolean_t myipc_server
 (mach_msg_header_t *InHeadP, mach_msg_header_t *OutHeadP)
@@ -132,13 +132,13 @@ mig_routine_t routine;
 
 OutHeadP->msgh_bits = MACH_MSGH_BITS(MACH_MSGH_BITS_REPLY(InHeadP->msgh_bits), 0);
 OutHeadP->msgh_remote_port = InHeadP->msgh_reply_port;
-/* Minimal boyut: routine() farklıysa bunu güncelleyecek */
+/* Minimal boyut: routine() farklıysa güncelleyecektir */
 OutHeadP->msgh_size = (mach_msg_size_t)sizeof(mig_reply_error_t);
 OutHeadP->msgh_local_port = MACH_PORT_NULL;
 OutHeadP->msgh_id = InHeadP->msgh_id + 100;
 OutHeadP->msgh_reserved = 0;
 
-if ((InHeadP->msgh_id > 500) || (InHeadP->msgh_id &#x3C; 500) ||
+if ((InHeadP->msgh_id > 500) || (InHeadP->msgh_id < 500) ||
 <strong>	    ((routine = SERVERPREFmyipc_subsystem.routine[InHeadP->msgh_id - 500].stub_routine) == 0)) {
 </strong>		((mig_reply_error_t *)OutHeadP)->NDR = NDR_record;
 ((mig_reply_error_t *)OutHeadP)->RetCode = MIG_BAD_ID;
@@ -229,19 +229,19 @@ Ve **MIG istemcileri**, sunuculara `__mach_msg` ile göndermek için `__NDR_reco
 
 ### jtool
 
-Birçok ikili dosya artık mach portlarını açmak için MIG kullanıyorsa, **MIG'in nasıl kullanıldığını tanımlamak** ve her mesaj kimliği ile **MIG'in yürüttüğü işlevleri** bilmek ilginçtir.
+Birçok ikili dosya artık mach portlarını açmak için MIG kullanıyorsa, **MIG'in nasıl kullanıldığını** ve her mesaj kimliği ile **MIG'in hangi işlevleri yürüttüğünü** bilmek ilginçtir.
 
 [**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/index.html#jtool2), bir Mach-O ikili dosyasından MIG bilgilerini ayrıştırabilir, mesaj kimliğini belirtebilir ve yürütülecek işlevi tanımlayabilir:
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
-Ayrıca, MIG fonksiyonları, çağrılan gerçek fonksiyonların sadece sarmalayıcılarıdır, bu da demektir ki, onun ayrıştırmasını alıp BL için arama yaparsanız, çağrılan gerçek fonksiyonu bulabilirsiniz:
+Ayrıca, MIG fonksiyonları çağrılan gerçek fonksiyonların sadece sarmalayıcılarıdır, bu da demektir ki, onun ayrıştırmasını alıp BL için arama yaparsanız, çağrılan gerçek fonksiyonu bulabilirsiniz:
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep BL
 ```
 ### Assembly
 
-Daha önce, **gelen mesaj ID'sine bağlı olarak doğru fonksiyonu çağıracak olan fonksiyonun** `myipc_server` olduğu belirtilmişti. Ancak, genellikle ikili dosyanın sembollerine (fonksiyon isimlerine) sahip olmayacaksınız, bu nedenle **dekompile edilmiş halinin nasıl göründüğünü kontrol etmek ilginçtir** çünkü bu fonksiyonun kodu, sergilenen fonksiyonlardan bağımsız olarak her zaman çok benzer olacaktır:
+Daha önce, **gelen mesaj ID'sine bağlı olarak doğru fonksiyonu çağıracak olan** fonksiyonun `myipc_server` olduğu belirtilmişti. Ancak, genellikle ikili dosyanın sembollerine (fonksiyon isimlerine) sahip olmayacaksınız, bu yüzden **dekompile edilmiş halinin nasıl göründüğünü kontrol etmek ilginçtir** çünkü bu fonksiyonun kodu, sergilenen fonksiyonlardan bağımsızdır:
 
 {{#tabs}}
 {{#tab name="myipc_server decompiled 1"}}
@@ -250,21 +250,21 @@ Daha önce, **gelen mesaj ID'sine bağlı olarak doğru fonksiyonu çağıracak 
 var_10 = arg0;
 var_18 = arg1;
 // Uygun fonksiyon işaretçilerini bulmak için başlangıç talimatları
-*(int32_t *)var_18 = *(int32_t *)var_10 &#x26; 0x1f;
+*(int32_t *)var_18 = *(int32_t *)var_10 & 0x1f;
 *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
 *(int32_t *)(var_18 + 0x4) = 0x24;
 *(int32_t *)(var_18 + 0xc) = 0x0;
 *(int32_t *)(var_18 + 0x14) = *(int32_t *)(var_10 + 0x14) + 0x64;
 *(int32_t *)(var_18 + 0x10) = 0x0;
-if (*(int32_t *)(var_10 + 0x14) &#x3C;= 0x1f4 &#x26;&#x26; *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
+if (*(int32_t *)(var_10 + 0x14) <= 0x1f4 && *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
 rax = *(int32_t *)(var_10 + 0x14);
 // sign_extend_64 çağrısı, bu fonksiyonu tanımlamaya yardımcı olabilir
-// Bu, rax'ta çağrılması gereken işlevin işaretçisini saklar
-// 0x100004040 adresinin kullanımı kontrol ediliyor (fonksiyon adresleri dizisi)
+// Bu, rax'ta çağrılması gereken işaretçiyi saklar
+// 0x100004040 adresinin kullanımı kontrol edilir (fonksiyon adresleri dizisi)
 // 0x1f4 = 500 (başlangıç ID'si)
 <strong>            rax = *(sign_extend_64(rax - 0x1f4) * 0x28 + 0x100004040);
 </strong>            var_20 = rax;
-// If - else, if yanlış dönerken, else doğru fonksiyonu çağırır ve true döner
+// If - else, if false dönerken, else doğru fonksiyonu çağırır ve true döner
 <strong>            if (rax == 0x0) {
 </strong>                    *(var_18 + 0x18) = **_NDR_record;
 *(int32_t *)(var_18 + 0x20) = 0xfffffffffffffed1;
@@ -289,7 +289,7 @@ return rax;
 {{#endtab}}
 
 {{#tab name="myipc_server decompiled 2"}}
-Bu, farklı bir Hopper ücretsiz sürümünde dekompile edilmiş aynı fonksiyondur:
+Bu, farklı bir Hopper ücretsiz versiyonunda dekompile edilmiş aynı fonksiyondur:
 
 <pre class="language-c"><code class="lang-c">int _myipc_server(int arg0, int arg1) {
 r31 = r31 - 0x40;
@@ -298,7 +298,7 @@ stack[-8] = r30;
 var_10 = arg0;
 var_18 = arg1;
 // Uygun fonksiyon işaretçilerini bulmak için başlangıç talimatları
-*(int32_t *)var_18 = *(int32_t *)var_10 &#x26; 0x1f | 0x0;
+*(int32_t *)var_18 = *(int32_t *)var_10 & 0x1f | 0x0;
 *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
 *(int32_t *)(var_18 + 0x4) = 0x24;
 *(int32_t *)(var_18 + 0xc) = 0x0;
@@ -307,19 +307,19 @@ var_18 = arg1;
 r8 = *(int32_t *)(var_10 + 0x14);
 r8 = r8 - 0x1f4;
 if (r8 > 0x0) {
-if (CPU_FLAGS &#x26; G) {
+if (CPU_FLAGS & G) {
 r8 = 0x1;
 }
 }
-if ((r8 &#x26; 0x1) == 0x0) {
+if ((r8 & 0x1) == 0x0) {
 r8 = *(int32_t *)(var_10 + 0x14);
 r8 = r8 - 0x1f4;
-if (r8 &#x3C; 0x0) {
-if (CPU_FLAGS &#x26; L) {
+if (r8 < 0x0) {
+if (CPU_FLAGS & L) {
 r8 = 0x1;
 }
 }
-if ((r8 &#x26; 0x1) == 0x0) {
+if ((r8 & 0x1) == 0x0) {
 r8 = *(int32_t *)(var_10 + 0x14);
 // 0x1f4 = 500 (başlangıç ID'si)
 <strong>                    r8 = r8 - 0x1f4;
@@ -328,13 +328,13 @@ r8 = *(r8 + 0x8);
 var_20 = r8;
 r8 = r8 - 0x0;
 if (r8 != 0x0) {
-if (CPU_FLAGS &#x26; NE) {
+if (CPU_FLAGS & NE) {
 r8 = 0x1;
 }
 }
-// Önceki sürümdekiyle aynı if else
-// 0x100004040 adresinin kullanımı kontrol ediliyor (fonksiyon adresleri dizisi)
-<strong>                    if ((r8 &#x26; 0x1) == 0x0) {
+// Önceki versiyondakiyle aynı if else
+// 0x100004040 adresinin kullanımı kontrol edilir (fonksiyon adresleri dizisi)
+<strong>                    if ((r8 & 0x1) == 0x0) {
 </strong><strong>                            *(var_18 + 0x18) = **0x100004000;
 </strong>                            *(int32_t *)(var_18 + 0x20) = 0xfffffed1;
 var_4 = 0x0;
@@ -365,17 +365,17 @@ return r0;
 {{#endtab}}
 {{#endtabs}}
 
-Aslında, **`0x100004000`** fonksiyonuna giderseniz, **`routine_descriptor`** yapıların dizisini bulacaksınız. Yapının ilk elemanı, **fonksiyonun** uygulandığı **adres** ve **yapı 0x28 bayt** alır, bu nedenle her 0x28 bayttan (0'dan başlayarak) 8 bayt alabilir ve bu, çağrılacak **fonksiyonun adresi** olacaktır:
+Aslında, **`0x100004000`** fonksiyonuna giderseniz, **`routine_descriptor`** yapıların dizisini bulacaksınız. Yapının ilk elemanı, **fonksiyonun** uygulandığı **adres** ve **yapı 0x28 byte** alır, bu yüzden her 0x28 byte'tan (byte 0'dan başlayarak) 8 byte alarak, çağrılacak **fonksiyonun adresini** elde edebilirsiniz:
 
 <figure><img src="../../../../images/image (35).png" alt=""><figcaption></figcaption></figure>
 
 <figure><img src="../../../../images/image (36).png" alt=""><figcaption></figcaption></figure>
 
-Bu veriler, [**bu Hopper scripti kullanılarak**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py) çıkarılabilir.
+Bu veriler, [**bu Hopper script'i kullanılarak**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py) çıkarılabilir.
 
 ### Debug
 
-MIG tarafından üretilen kod ayrıca giriş ve çıkış işlemleri hakkında günlükler oluşturmak için `kernel_debug` çağrısını da yapar. Bunları **`trace`** veya **`kdv`** kullanarak kontrol etmek mümkündür: `kdv all | grep MIG`
+MIG tarafından üretilen kod ayrıca giriş ve çıkış işlemleri hakkında günlükler oluşturmak için `kernel_debug` çağrısını yapar. Bunları **`trace`** veya **`kdv`** kullanarak kontrol etmek mümkündür: `kdv all | grep MIG`
 
 ## References
 
