@@ -42,7 +42,7 @@ integrity-levels.md
 
 ### Καταμέτρηση πληροφοριών έκδοσης
 
-Ελέγξτε αν η έκδοση των Windows έχει κάποια γνωστή ευπάθεια (ελέγξτε επίσης τα patches που έχουν εφαρμοστεί).
+Ελέγξτε αν η έκδοση των Windows έχει κάποια γνωστή ευπάθεια (ελέγξτε επίσης τις εφαρμοσμένες ενημερώσεις).
 ```bash
 systeminfo
 systeminfo | findstr /B /C:"OS Name" /C:"OS Version" #Get only that information
@@ -127,14 +127,14 @@ Get-WinEvent -LogName "windows Powershell" | select -First 15 | Out-GridView
 ```
 ### PowerShell **Script Block Logging**
 
-Ένα πλήρες αρχείο δραστηριότητας και περιεχομένου της εκτέλεσης του script καταγράφεται, διασφαλίζοντας ότι κάθε μπλοκ κώδικα τεκμηριώνεται καθώς εκτελείται. Αυτή η διαδικασία διατηρεί ένα εκτενές ίχνος ελέγχου κάθε δραστηριότητας, πολύτιμο για τη forensic ανάλυση και την ανάλυση κακόβουλης συμπεριφοράς. Με την τεκμηρίωση όλων των δραστηριοτήτων τη στιγμή της εκτέλεσης, παρέχονται λεπτομερείς πληροφορίες για τη διαδικασία.
+Ένα πλήρες αρχείο δραστηριότητας και περιεχομένου της εκτέλεσης του script καταγράφεται, διασφαλίζοντας ότι κάθε μπλοκ κώδικα τεκμηριώνεται καθώς εκτελείται. Αυτή η διαδικασία διατηρεί ένα εκτενές ίχνος ελέγχου κάθε δραστηριότητας, πολύτιμο για τη forensic ανάλυση και την ανάλυση κακόβουλης συμπεριφοράς. Με την τεκμηρίωση όλων των δραστηριοτήτων κατά τη διάρκεια της εκτέλεσης, παρέχονται λεπτομερείς πληροφορίες για τη διαδικασία.
 ```bash
 reg query HKCU\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
 reg query HKLM\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
 reg query HKCU\Wow6432Node\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
 reg query HKLM\Wow6432Node\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
 ```
-Η καταγραφή γεγονότων για το Script Block μπορεί να εντοπιστεί μέσα στον Windows Event Viewer στη διαδρομή: **Application and Services Logs > Microsoft > Windows > PowerShell > Operational**.\
+Τα γεγονότα καταγραφής για το Script Block μπορούν να εντοπιστούν μέσα στον Windows Event Viewer στη διαδρομή: **Application and Services Logs > Microsoft > Windows > PowerShell > Operational**.\
 Για να δείτε τα τελευταία 20 γεγονότα μπορείτε να χρησιμοποιήσετε:
 ```bash
 Get-WinEvent -LogName "Microsoft-Windows-Powershell/Operational" | select -first 20 | Out-Gridview
@@ -154,7 +154,7 @@ Get-PSDrive | where {$_.Provider -like "Microsoft.PowerShell.Core\FileSystem"}| 
 
 Μπορείτε να παραβιάσετε το σύστημα αν οι ενημερώσεις δεν ζητούνται χρησιμοποιώντας http**S** αλλά http.
 
-Ξεκινάτε ελέγχοντας αν το δίκτυο χρησιμοποιεί μια μη-SSL ενημέρωση WSUS εκτελώντας το εξής:
+Ξεκινάτε ελέγχοντας αν το δίκτυο χρησιμοποιεί μια μη SSL ενημέρωση WSUS εκτελώντας το εξής:
 ```
 reg query HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate /v WUServer
 ```
@@ -167,11 +167,13 @@ WUServer    REG_SZ    http://xxxx-updxx.corp.internal.com:8535
 
 Τότε, **είναι εκμεταλλεύσιμο.** Αν η τελευταία καταχώρηση μητρώου είναι ίση με 0, τότε, η καταχώρηση WSUS θα αγνοηθεί.
 
-Για να εκμεταλλευτείτε αυτές τις ευπάθειες μπορείτε να χρησιμοποιήσετε εργαλεία όπως: [Wsuxploit](https://github.com/pimps/wsuxploit), [pyWSUS ](https://github.com/GoSecure/pywsus)- Αυτά είναι όπλα MiTM που έχουν μετατραπεί σε εκμεταλλεύσεις για να εισάγουν 'ψευδείς' ενημερώσεις σε μη SSL WSUS κυκλοφορία.
+Για να εκμεταλλευτείτε αυτές τις ευπάθειες μπορείτε να χρησιμοποιήσετε εργαλεία όπως: [Wsuxploit](https://github.com/pimps/wsuxploit), [pyWSUS ](https://github.com/GoSecure/pywsus) - Αυτά είναι όπλα MiTM που έχουν μετατραπεί σε εκμεταλλεύσεις για να εισάγουν 'ψευδείς' ενημερώσεις σε μη SSL WSUS κυκλοφορία.
 
 Διαβάστε την έρευνα εδώ:
 
-{% file src="../../images/CTX_WSUSpect_White_Paper (1).pdf" %}
+{{#file}}
+CTX_WSUSpect_White_Paper (1).pdf
+{{#endfile}}
 
 **WSUS CVE-2020-1013**
 
@@ -216,7 +218,7 @@ Write-UserAddMSI
 
 ### MSI Wrapper
 
-Διαβάστε αυτό το tutorial για να μάθετε πώς να δημιουργήσετε ένα MSI wrapper χρησιμοποιώντας αυτά τα εργαλεία. Σημειώστε ότι μπορείτε να τυλίξετε ένα "**.bat**" αρχείο αν θέλετε **μόνο** να **εκτελέσετε** **γραμμές εντολών**.
+Διαβάστε αυτό το εγχειρίδιο για να μάθετε πώς να δημιουργήσετε ένα MSI wrapper χρησιμοποιώντας αυτά τα εργαλεία. Σημειώστε ότι μπορείτε να τυλίξετε ένα "**.bat**" αρχείο αν θέλετε **μόνο** να **εκτελέσετε** **γραμμές εντολών**.
 
 {{#ref}}
 msi-wrapper.md
@@ -238,7 +240,7 @@ create-msi-with-wix.md
 - Υπάρχουν άλλες ιδιότητες που μπορείτε να αλλάξετε, όπως ο **Συγγραφέας** και ο **Κατασκευαστής** που μπορούν να κάνουν την εγκατεστημένη εφαρμογή να φαίνεται πιο νόμιμη.
 - Κάντε δεξί κλικ στο έργο και επιλέξτε **Προβολή > Προσαρμοσμένες Ενέργειες**.
 - Κάντε δεξί κλικ στο **Εγκατάσταση** και επιλέξτε **Προσθήκη Προσαρμοσμένης Ενέργειας**.
-- Κάντε διπλό κλικ στο **Φάκελο Εφαρμογής**, επιλέξτε το αρχείο **beacon.exe** σας και κάντε κλικ στο **OK**. Αυτό θα διασφαλίσει ότι το beacon payload θα εκτελείται μόλις εκτελείται ο εγκαταστάτης.
+- Κάντε διπλό κλικ στον **Φάκελο Εφαρμογής**, επιλέξτε το αρχείο **beacon.exe** σας και κάντε κλικ στο **OK**. Αυτό θα διασφαλίσει ότι το beacon payload θα εκτελείται μόλις εκτελείται ο εγκαταστάτης.
 - Κάτω από τις **Ιδιότητες Προσαρμοσμένης Ενέργειας**, αλλάξτε το **Run64Bit** σε **True**.
 - Τέλος, **κατασκευάστε το**.
 - Αν εμφανιστεί η προειδοποίηση `File 'beacon-tcp.exe' targeting 'x64' is not compatible with the project's target platform 'x86'`, βεβαιωθείτε ότι έχετε ρυθμίσει την πλατφόρμα σε x64.
@@ -261,13 +263,13 @@ reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\System\Audit
 ```
 ### WEF
 
-Το Windows Event Forwarding είναι ενδιαφέρον να γνωρίζουμε πού αποστέλλονται τα logs.
+Η προώθηση συμβάντων των Windows είναι ενδιαφέρον να γνωρίζουμε πού αποστέλλονται τα αρχεία καταγραφής.
 ```bash
 reg query HKLM\Software\Policies\Microsoft\Windows\EventLog\EventForwarding\SubscriptionManager
 ```
 ### LAPS
 
-**LAPS** έχει σχεδιαστεί για τη **διαχείριση των τοπικών κωδικών πρόσβασης διαχειριστή**, διασφαλίζοντας ότι κάθε κωδικός πρόσβασης είναι **μοναδικός, τυχαίος και ενημερώνεται τακτικά** σε υπολογιστές που είναι συνδεδεμένοι σε τομέα. Αυτοί οι κωδικοί πρόσβασης αποθηκεύονται με ασφάλεια μέσα στο Active Directory και μπορούν να προσπελαστούν μόνο από χρήστες που έχουν λάβει επαρκείς άδειες μέσω ACLs, επιτρέποντάς τους να δουν τους τοπικούς κωδικούς πρόσβασης διαχειριστή αν είναι εξουσιοδοτημένοι.
+**LAPS** έχει σχεδιαστεί για τη **διαχείριση των τοπικών κωδικών πρόσβασης διαχειριστή**, διασφαλίζοντας ότι κάθε κωδικός είναι **μοναδικός, τυχαίος και ενημερώνεται τακτικά** σε υπολογιστές που είναι συνδεδεμένοι σε τομέα. Αυτοί οι κωδικοί αποθηκεύονται με ασφάλεια μέσα στο Active Directory και μπορούν να προσπελαστούν μόνο από χρήστες που έχουν λάβει επαρκείς άδειες μέσω ACLs, επιτρέποντάς τους να δουν τους τοπικούς κωδικούς πρόσβασης διαχειριστή αν είναι εξουσιοδοτημένοι.
 
 {{#ref}}
 ../active-directory-methodology/laps.md
@@ -289,7 +291,7 @@ reg query 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA' /v RunAsPPL
 ```
 ### Credentials Guard
 
-**Credential Guard** εισήχθη στα **Windows 10**. Σκοπός του είναι να προστατεύει τα διαπιστευτήρια που αποθηκεύονται σε μια συσκευή από απειλές όπως οι επιθέσεις pass-the-hash.| [**More info about Credentials Guard here.**](../stealing-credentials/credentials-protections.md#credential-guard)
+**Credential Guard** εισήχθη στα **Windows 10**. Σκοπός του είναι να προστατεύει τα διαπιστευτήρια που είναι αποθηκευμένα σε μια συσκευή από απειλές όπως οι επιθέσεις pass-the-hash.| [**More info about Credentials Guard here.**](../stealing-credentials/credentials-protections.md#credential-guard)
 ```bash
 reg query 'HKLM\System\CurrentControlSet\Control\LSA' /v LsaCfgFlags
 ```
@@ -304,7 +306,7 @@ reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLO
 
 ### Καταμέτρηση Χρηστών & Ομάδων
 
-Πρέπει να ελέγξετε αν κάποια από τις ομάδες στις οποίες ανήκετε έχουν ενδιαφέροντα δικαιώματα
+Πρέπει να ελέγξετε αν κάποιες από τις ομάδες στις οποίες ανήκετε έχουν ενδιαφέροντα δικαιώματα
 ```bash
 # CMD
 net users %username% #Me
@@ -359,7 +361,7 @@ powershell -command "Get-Clipboard"
 ### Άδειες Αρχείων και Φακέλων
 
 Πρώτα απ' όλα, καταγράψτε τις διαδικασίες **ελέγξτε για κωδικούς πρόσβασης μέσα στη γραμμή εντολών της διαδικασίας**.\
-Ελέγξτε αν μπορείτε να **επικαλύψετε κάποιο εκτελέσιμο που τρέχει** ή αν έχετε άδειες εγγραφής στον φάκελο του εκτελέσιμου για να εκμεταλλευτείτε πιθανές [**επιθέσεις DLL Hijacking**](dll-hijacking/index.html):
+Ελέγξτε αν μπορείτε να **επικαλύψετε κάποιο εκτελέσιμο που τρέχει** ή αν έχετε άδειες εγγραφής στον φάκελο εκτελέσιμων για να εκμεταλλευτείτε πιθανές [**επιθέσεις DLL Hijacking**](dll-hijacking/index.html):
 ```bash
 Tasklist /SVC #List processes running and services
 tasklist /v /fi "username eq system" #Filter "system" processes
@@ -370,9 +372,9 @@ Get-WmiObject -Query "Select * from Win32_Process" | where {$_.Name -notlike "sv
 #Without usernames
 Get-Process | where {$_.ProcessName -notlike "svchost*"} | ft ProcessName, Id
 ```
-Πάντα ελέγξτε για πιθανές [**electron/cef/chromium debuggers** που εκτελούνται, μπορείτε να το εκμεταλλευτείτε για να κερδίσετε δικαιώματα**](../../linux-hardening/privilege-escalation/electron-cef-chromium-debugger-abuse.md).
+Πάντα ελέγξτε για πιθανές [**electron/cef/chromium debuggers** που εκτελούνται, μπορείτε να το εκμεταλλευτείτε για να κλιμακώσετε τα δικαιώματα](../../linux-hardening/privilege-escalation/electron-cef-chromium-debugger-abuse.md).
 
-**Έλεγχος δικαιωμάτων των δυαδικών αρχείων των διαδικασιών**
+**Έλεγχος δικαιωμάτων των δυαδικών αρχείων των διεργασιών**
 ```bash
 for /f "tokens=2 delims='='" %%x in ('wmic process list full^|find /i "executablepath"^|find /i /v "system32"^|find ":"') do (
 for /f eol^=^"^ delims^=^" %%z in ('echo %%x') do (
@@ -399,7 +401,7 @@ procdump.exe -accepteula -ma <proc_name_tasklist>
 
 **Εφαρμογές που εκτελούνται ως SYSTEM μπορεί να επιτρέπουν σε έναν χρήστη να εκκινήσει ένα CMD ή να περιηγηθεί σε καταλόγους.**
 
-Example: "Windows Help and Support" (Windows + F1), search for "command prompt", click on "Click to open Command Prompt"
+Παράδειγμα: "Windows Help and Support" (Windows + F1), αναζητήστε "command prompt", κάντε κλικ στο "Click to open Command Prompt"
 
 ## Services
 
@@ -490,7 +492,7 @@ FOR /F %i in (C:\Temp\services.txt) DO @sc qc %i | findstr "BINARY_PATH_NAME" >>
 ### Υπηρεσίες μητρώου τροποποίηση δικαιωμάτων
 
 Πρέπει να ελέγξετε αν μπορείτε να τροποποιήσετε οποιοδήποτε μητρώο υπηρεσίας.\
-Μπορείτε να **ελέγξετε** τα **δικαιώματά** σας πάνω σε ένα **μητρώο** υπηρεσίας κάνοντας:
+Μπορείτε να **ελέγξετε** τα **δικαιώματά** σας σε ένα **μητρώο** υπηρεσίας κάνοντας:
 ```bash
 reg query hklm\System\CurrentControlSet\Services /s /v imagepath #Get the binary paths of the services
 
@@ -523,7 +525,7 @@ C:\Program.exe
 C:\Program Files\Some.exe
 C:\Program Files\Some Folder\Service.exe
 ```
-Καταγράψτε όλα τα μη παρατεταμένα μονοπάτια υπηρεσιών, εξαιρώντας αυτά που ανήκουν σε ενσωματωμένες υπηρεσίες των Windows:
+Καταγράψτε όλα τα μη παρατεθέντα μονοπάτια υπηρεσιών, εξαιρώντας αυτά που ανήκουν σε ενσωματωμένες υπηρεσίες των Windows:
 ```powershell
 wmic service get name,pathname,displayname,startmode | findstr /i auto | findstr /i /v "C:\Windows\\" | findstr /i /v '\"'
 wmic service get name,displayname,pathname,startmode | findstr /i /v "C:\\Windows\\system32\\" |findstr /i /v '\"'  # Not only auto services
@@ -610,7 +612,7 @@ driverquery /SI
 ```
 ## PATH DLL Hijacking
 
-Αν έχετε **δικαιώματα εγγραφής μέσα σε έναν φάκελο που είναι παρών στο PATH** θα μπορούσατε να είστε σε θέση να υποκλέψετε μια DLL που φορτώνεται από μια διαδικασία και **να κλιμακώσετε τα δικαιώματα**.
+Αν έχετε **δικαιώματα εγγραφής μέσα σε έναν φάκελο που είναι παρών στο PATH** θα μπορούσατε να είστε σε θέση να υποκλέψετε μια DLL που φορτώνεται από μια διαδικασία και να **κλιμακώσετε τα δικαιώματα**.
 
 Ελέγξτε τα δικαιώματα όλων των φακέλων μέσα στο PATH:
 ```bash
@@ -646,7 +648,7 @@ Get-DnsClientServerAddress -AddressFamily IPv4 | ft
 ```
 ### Ανοιχτές Θύρες
 
-Ελέγξτε για **περιορισμένες υπηρεσίες** από το εξωτερικό
+Ελέγξτε για **περιορισμένες υπηρεσίες** από έξω
 ```bash
 netstat -ano #Opened ports?
 ```
@@ -664,7 +666,7 @@ Get-NetNeighbor -AddressFamily IPv4 | ft ifIndex,IPAddress,L
 
 [**Ελέγξτε αυτή τη σελίδα για εντολές σχετικές με το Τείχος Προστασίας**](../basic-cmd-for-pentesters.md#firewall) **(λίστα κανόνων, δημιουργία κανόνων, απενεργοποίηση, απενεργοποίηση...)**
 
-Περισσότερες[ εντολές για αναγνώριση δικτύου εδώ](../basic-cmd-for-pentesters.md#network)
+Περισσότερες [εντολές για αναγνώριση δικτύου εδώ](../basic-cmd-for-pentesters.md#network)
 
 ### Windows Subsystem for Linux (wsl)
 ```bash
@@ -701,11 +703,11 @@ reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AltDef
 ### Credentials manager / Windows vault
 
 From [https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault](https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault)\
-Η Windows Vault αποθηκεύει τα διαπιστευτήρια χρηστών για διακομιστές, ιστοσελίδες και άλλα προγράμματα που **Windows** μπορεί να **συνδέσει τους χρήστες αυτόματα**. Στην πρώτη περίπτωση, αυτό μπορεί να φαίνεται ότι οι χρήστες μπορούν να αποθηκεύσουν τα διαπιστευτήρια τους για το Facebook, τα διαπιστευτήρια Twitter, τα διαπιστευτήρια Gmail κ.λπ., ώστε να συνδέονται αυτόματα μέσω των προγραμμάτων περιήγησης. Αλλά δεν είναι έτσι.
+Η Windows Vault αποθηκεύει τα διαπιστευτήρια χρηστών για διακομιστές, ιστότοπους και άλλα προγράμματα που **Windows** μπορεί να **συνδέσει τους χρήστες αυτόματα**. Στην πρώτη περίπτωση, αυτό μπορεί να φαίνεται ότι οι χρήστες μπορούν να αποθηκεύσουν τα διαπιστευτήρια τους για το Facebook, τα διαπιστευτήρια του Twitter, τα διαπιστευτήρια του Gmail κ.λπ., ώστε να συνδέονται αυτόματα μέσω των προγραμμάτων περιήγησης. Αλλά δεν είναι έτσι.
 
-Η Windows Vault αποθηκεύει διαπιστευτήρια που το Windows μπορεί να συνδέσει τους χρήστες αυτόματα, που σημαίνει ότι οποιαδήποτε **εφαρμογή Windows που χρειάζεται διαπιστευτήρια για να αποκτήσει πρόσβαση σε μια πηγή** (διακομιστής ή ιστοσελίδα) **μπορεί να χρησιμοποιήσει αυτόν τον Credential Manager** & Windows Vault και να χρησιμοποιήσει τα διαπιστευτήρια που παρέχονται αντί να εισάγουν οι χρήστες το όνομα χρήστη και τον κωδικό πρόσβασης συνεχώς.
+Η Windows Vault αποθηκεύει διαπιστευτήρια που μπορεί να συνδέσει αυτόματα τους χρήστες, που σημαίνει ότι οποιαδήποτε **εφαρμογή Windows που χρειάζεται διαπιστευτήρια για να αποκτήσει πρόσβαση σε μια πηγή** (διακομιστής ή ιστότοπος) **μπορεί να χρησιμοποιήσει αυτόν τον Credential Manager** & Windows Vault και να χρησιμοποιήσει τα διαπιστευτήρια που παρέχονται αντί να εισάγουν οι χρήστες το όνομα χρήστη και τον κωδικό πρόσβασης συνεχώς.
 
-Εκτός αν οι εφαρμογές αλληλεπιδρούν με τον Credential Manager, δεν νομίζω ότι είναι δυνατόν να χρησιμοποιήσουν τα διαπιστευτήρια για μια δεδομένη πηγή. Έτσι, αν η εφαρμογή σας θέλει να χρησιμοποιήσει την vault, θα πρέπει κάπως **να επικοινωνήσει με τον credential manager και να ζητήσει τα διαπιστευτήρια για αυτή την πηγή** από την προεπιλεγμένη αποθήκη.
+Εκτός αν οι εφαρμογές αλληλεπιδρούν με τον Credential Manager, δεν νομίζω ότι είναι δυνατόν να χρησιμοποιήσουν τα διαπιστευτήρια για μια δεδομένη πηγή. Έτσι, αν η εφαρμογή σας θέλει να χρησιμοποιήσει τη vault, θα πρέπει κάπως **να επικοινωνήσει με τον credential manager και να ζητήσει τα διαπιστευτήρια για αυτήν την πηγή** από την προεπιλεγμένη αποθήκη.
 
 Χρησιμοποιήστε το `cmdkey` για να καταγράψετε τα αποθηκευμένα διαπιστευτήρια στη μηχανή.
 ```bash
@@ -756,7 +758,7 @@ dpapi-extracting-passwords.md
 
 Οι **PowerShell credentials** χρησιμοποιούνται συχνά για **σενάρια** και αυτοματοποιημένες εργασίες ως τρόπος αποθήκευσης κρυπτογραφημένων διαπιστευτηρίων με ευκολία. Τα διαπιστευτήρια προστατεύονται χρησιμοποιώντας **DPAPI**, που σημαίνει συνήθως ότι μπορούν να αποκρυπτογραφηθούν μόνο από τον ίδιο χρήστη στον ίδιο υπολογιστή στον οποίο δημιουργήθηκαν.
 
-Για να **αποκρυπτογραφήσετε** μια PS credentials από το αρχείο που την περιέχει μπορείτε να κάνετε:
+Για να **αποκρυπτογραφήσετε** ένα PS credentials από το αρχείο που το περιέχει, μπορείτε να κάνετε:
 ```powershell
 PS C:\> $credential = Import-Clixml -Path 'C:\pass.xml'
 PS C:\> $credential.GetNetworkCredential().username
@@ -914,7 +916,7 @@ reg query 'HKEY_CURRENT_USER\Software\OpenSSH\Agent\Keys'
 Get-Service ssh-agent | Set-Service -StartupType Automatic -PassThru | Start-Service
 ```
 > [!NOTE]
-> Φαίνεται ότι αυτή η τεχνική δεν είναι πλέον έγκυρη. Προσπάθησα να δημιουργήσω κάποια ssh κλειδιά, να τα προσθέσω με `ssh-add` και να συνδεθώ μέσω ssh σε μια μηχανή. Η καταχώρηση HKCU\Software\OpenSSH\Agent\Keys δεν υπάρχει και το procmon δεν εντόπισε τη χρήση του `dpapi.dll` κατά τη διάρκεια της ασύμμετρης αυθεντικοποίησης κλειδιού.
+> Φαίνεται ότι αυτή η τεχνική δεν είναι πλέον έγκυρη. Προσπάθησα να δημιουργήσω μερικά ssh keys, να τα προσθέσω με το `ssh-add` και να συνδεθώ μέσω ssh σε μια μηχανή. Η καταχώρηση HKCU\Software\OpenSSH\Agent\Keys δεν υπάρχει και το procmon δεν εντόπισε τη χρήση του `dpapi.dll` κατά τη διάρκεια της ασύμμετρης αυθεντικοποίησης κλειδιού.
 
 ### Unattended files
 ```
@@ -960,7 +962,7 @@ dir /s *sysprep.inf *sysprep.xml *unattended.xml *unattend.xml *unattend.txt 2>n
 %SYSTEMROOT%\System32\config\SYSTEM
 %SYSTEMROOT%\System32\config\RegBack\system
 ```
-### Πιστοποιητικά Cloud
+### Πιστοποιήσεις Cloud
 ```bash
 #From user home
 .aws\credentials
@@ -978,7 +980,7 @@ AppData\Roaming\gcloud\access_tokens.db
 
 Μια δυνατότητα ήταν προηγουμένως διαθέσιμη που επέτρεπε την ανάπτυξη προσαρμοσμένων τοπικών λογαριασμών διαχειριστή σε μια ομάδα μηχανημάτων μέσω των Προτιμήσεων Πολιτικής Ομάδας (GPP). Ωστόσο, αυτή η μέθοδος είχε σημαντικά κενά ασφαλείας. Πρώτον, τα Αντικείμενα Πολιτικής Ομάδας (GPOs), που αποθηκεύονται ως αρχεία XML στο SYSVOL, μπορούσαν να προσπελαστούν από οποιονδήποτε χρήστη τομέα. Δεύτερον, οι κωδικοί πρόσβασης μέσα σε αυτά τα GPPs, κρυπτογραφημένοι με AES256 χρησιμοποιώντας ένα δημόσια τεκμηριωμένο προεπιλεγμένο κλειδί, μπορούσαν να αποκρυπτογραφηθούν από οποιονδήποτε πιστοποιημένο χρήστη. Αυτό συνιστούσε σοβαρό κίνδυνο, καθώς θα μπορούσε να επιτρέψει στους χρήστες να αποκτήσουν ανυψωμένα δικαιώματα.
 
-Για να μετριαστεί αυτός ο κίνδυνος, αναπτύχθηκε μια λειτουργία για να σαρώσει τα τοπικά κρυπτογραφημένα αρχεία GPP που περιέχουν ένα πεδίο "cpassword" που δεν είναι κενό. Όταν βρεθεί ένα τέτοιο αρχείο, η λειτουργία αποκρυπτογραφεί τον κωδικό πρόσβασης και επιστρέφει ένα προσαρμοσμένο αντικείμενο PowerShell. Αυτό το αντικείμενο περιλαμβάνει λεπτομέρειες σχετικά με το GPP και την τοποθεσία του αρχείου, βοηθώντας στην αναγνώριση και αποκατάσταση αυτής της ευπάθειας ασφαλείας.
+Για να μετριαστεί αυτός ο κίνδυνος, αναπτύχθηκε μια λειτουργία για να σαρώσει τα τοπικά κρυπτογραφημένα αρχεία GPP που περιέχουν ένα πεδίο "cpassword" που δεν είναι κενό. Μόλις βρεθεί ένα τέτοιο αρχείο, η λειτουργία αποκρυπτογραφεί τον κωδικό πρόσβασης και επιστρέφει ένα προσαρμοσμένο αντικείμενο PowerShell. Αυτό το αντικείμενο περιλαμβάνει λεπτομέρειες σχετικά με το GPP και την τοποθεσία του αρχείου, βοηθώντας στην αναγνώριση και αποκατάσταση αυτής της ευπάθειας ασφαλείας.
 
 Αναζητήστε σε `C:\ProgramData\Microsoft\Group Policy\history` ή σε _**C:\Documents and Settings\All Users\Application Data\Microsoft\Group Policy\history** (προτού το W Vista)_ για αυτά τα αρχεία:
 
@@ -1022,7 +1024,7 @@ Get-Childitem –Path C:\xampp\ -Include web.config -File -Recurse -ErrorAction 
 </forms>
 </authentication>
 ```
-### Πιστοποιητικά OpenVPN
+### OpenVPN διαπιστευτήρια
 ```csharp
 Add-Type -AssemblyName System.Security
 $keys = Get-ChildItem "HKCU:\Software\OpenVPN-GUI\configs"
@@ -1052,7 +1054,7 @@ Get-Childitem –Path C:\ -Include access.log,error.log -File -Recurse -ErrorAct
 ```
 ### Ζητήστε διαπιστευτήρια
 
-Μπορείτε πάντα να **ζητήσετε από τον χρήστη να εισάγει τα διαπιστευτήριά του ή ακόμη και τα διαπιστευτήρια ενός διαφορετικού χρήστη** αν νομίζετε ότι μπορεί να τα γνωρίζει (σημειώστε ότι το **να ζητάτε** απευθείας από τον πελάτη τα **διαπιστευτήρια** είναι πραγματικά **επικίνδυνο**):
+Μπορείτε πάντα να **ζητήσετε από τον χρήστη να εισάγει τα διαπιστευτήριά του ή ακόμη και τα διαπιστευτήρια ενός διαφορετικού χρήστη** αν νομίζετε ότι μπορεί να τα γνωρίζει (σημειώστε ότι **η απευθείας ζήτηση** από τον πελάτη για τα **διαπιστευτήρια** είναι πραγματικά **επικίνδυνη**):
 ```bash
 $cred = $host.ui.promptforcredential('Failed Authentication','',[Environment]::UserDomainName+'\'+[Environment]::UserName,[Environment]::UserDomainName); $cred.getnetworkcredential().password
 $cred = $host.ui.promptforcredential('Failed Authentication','',[Environment]::UserDomainName+'\'+'anotherusername',[Environment]::UserDomainName); $cred.getnetworkcredential().password
@@ -1155,7 +1157,7 @@ reg query "HKCU\Software\OpenSSH\Agent\Key"
 ### Ιστορικό Περιηγητών
 
 Πρέπει να ελέγξετε για βάσεις δεδομένων όπου αποθηκεύονται οι κωδικοί πρόσβασης από **Chrome ή Firefox**.\
-Επίσης, ελέγξτε την ιστορία, τα σελιδοδείκτες και τα αγαπημένα των περιηγητών ώστε ίσως να υπάρχουν αποθηκευμένοι **κωδικοί πρόσβασης** εκεί.
+Επίσης, ελέγξτε την ιστορία, τα σελιδοδείκτες και τα αγαπημένα των περιηγητών ώστε ίσως να υπάρχουν αποθηκευμένοι κάποιοι **κωδικοί πρόσβασης** εκεί.
 
 Εργαλεία για την εξαγωγή κωδικών πρόσβασης από περιηγητές:
 
@@ -1166,7 +1168,7 @@ reg query "HKCU\Software\OpenSSH\Agent\Key"
 
 ### **Επικαλύψεις COM DLL**
 
-**Component Object Model (COM)** είναι μια τεχνολογία που έχει ενσωματωθεί στο λειτουργικό σύστημα Windows και επιτρέπει την **διασύνδεση** μεταξύ λογισμικών συστατικών διαφορετικών γλωσσών. Κάθε συστατικό COM **αναγνωρίζεται μέσω ενός ID κλάσης (CLSID)** και κάθε συστατικό εκθέτει λειτουργικότητα μέσω ενός ή περισσότερων διεπαφών, που αναγνωρίζονται μέσω ID διεπαφών (IIDs).
+**Το Component Object Model (COM)** είναι μια τεχνολογία που έχει ενσωματωθεί στο λειτουργικό σύστημα Windows και επιτρέπει την **διασύνδεση** μεταξύ λογισμικών συστατικών διαφορετικών γλωσσών. Κάθε συστατικό COM **ταυτοποιείται μέσω ενός ID κλάσης (CLSID)** και κάθε συστατικό εκθέτει λειτουργικότητα μέσω ενός ή περισσότερων διεπαφών, που ταυτοποιούνται μέσω ID διεπαφών (IIDs).
 
 Οι κλάσεις και οι διεπαφές COM ορίζονται στο μητρώο κάτω από **HKEY\_**_**CLASSES\_**_**ROOT\CLSID** και **HKEY\_**_**CLASSES\_**_**ROOT\Interface** αντίστοιχα. Αυτό το μητρώο δημιουργείται συγχωνεύοντας το **HKEY\_**_**LOCAL\_**_**MACHINE\Software\Classes** + **HKEY\_**_**CURRENT\_**_**USER\Software\Classes** = **HKEY\_**_**CLASSES\_**_**ROOT.**
 
@@ -1219,19 +1221,19 @@ Invoke-SessionGopher -AllDomain -u domain.com\adm-arvanaghi -p s3cr3tP@ss
 ## Leaked Handlers
 
 Φανταστείτε ότι **μια διαδικασία που εκτελείται ως SYSTEM ανοίγει μια νέα διαδικασία** (`OpenProcess()`) με **πλήρη πρόσβαση**. Η ίδια διαδικασία **δημιουργεί επίσης μια νέα διαδικασία** (`CreateProcess()`) **με χαμηλά δικαιώματα αλλά κληρονομεί όλα τα ανοιχτά handles της κύριας διαδικασίας**.\
-Έτσι, αν έχετε **πλήρη πρόσβαση στη διαδικασία με χαμηλά δικαιώματα**, μπορείτε να πιάσετε το **ανοιχτό handle της διαδικασίας με δικαιώματα που δημιουργήθηκε** με `OpenProcess()` και **να εισάγετε ένα shellcode**.\
+Έτσι, αν έχετε **πλήρη πρόσβαση στη διαδικασία με χαμηλά δικαιώματα**, μπορείτε να αποκτήσετε το **ανοιχτό handle της διαδικασίας με δικαιώματα** που δημιουργήθηκε με `OpenProcess()` και **να εισάγετε ένα shellcode**.\
 [Read this example for more information about **how to detect and exploit this vulnerability**.](leaked-handle-exploitation.md)\
 [Read this **other post for a more complete explanation on how to test and abuse more open handlers of processes and threads inherited with different levels of permissions (not only full access)**](http://dronesec.pw/blog/2019/08/22/exploiting-leaked-process-and-thread-handles/).
 
 ## Named Pipe Client Impersonation
 
-Τα κοινά τμήματα μνήμης, που αναφέρονται ως **pipes**, επιτρέπουν την επικοινωνία και τη μεταφορά δεδομένων μεταξύ διαδικασιών.
+Τα τμήματα κοινής μνήμης, που αναφέρονται ως **pipes**, επιτρέπουν την επικοινωνία και τη μεταφορά δεδομένων μεταξύ διαδικασιών.
 
 Τα Windows παρέχουν μια δυνατότητα που ονομάζεται **Named Pipes**, επιτρέποντας σε άσχετες διαδικασίες να μοιράζονται δεδομένα, ακόμη και μέσω διαφορετικών δικτύων. Αυτό μοιάζει με μια αρχιτεκτονική πελάτη/διακομιστή, με ρόλους που ορίζονται ως **named pipe server** και **named pipe client**.
 
 Όταν δεδομένα αποστέλλονται μέσω ενός pipe από έναν **πελάτη**, ο **διακομιστής** που έχει ρυθμίσει το pipe έχει τη δυνατότητα να **αναλάβει την ταυτότητα** του **πελάτη**, εφόσον έχει τα απαραίτητα δικαιώματα **SeImpersonate**. Η αναγνώριση μιας **προνομιούχου διαδικασίας** που επικοινωνεί μέσω ενός pipe που μπορείτε να μιμηθείτε παρέχει μια ευκαιρία να **κερδίσετε υψηλότερα δικαιώματα** υιοθετώντας την ταυτότητα αυτής της διαδικασίας μόλις αλληλεπιδράσει με το pipe που έχετε δημιουργήσει. Για οδηγίες σχετικά με την εκτέλεση μιας τέτοιας επίθεσης, μπορείτε να βρείτε χρήσιμες οδηγίες [**here**](named-pipe-client-impersonation.md) και [**here**](#from-high-integrity-to-system).
 
-Επίσης, το παρακάτω εργαλείο επιτρέπει να **παρεμβάλλετε μια επικοινωνία named pipe με ένα εργαλείο όπως το burp:** [**https://github.com/gabriel-sztejnworcel/pipe-intercept**](https://github.com/gabriel-sztejnworcel/pipe-intercept) **και αυτό το εργαλείο επιτρέπει να καταγράφετε και να βλέπετε όλα τα pipes για να βρείτε privescs** [**https://github.com/cyberark/PipeViewer**](https://github.com/cyberark/PipeViewer)
+Επίσης, το παρακάτω εργαλείο επιτρέπει να **παρακολουθείτε μια επικοινωνία named pipe με ένα εργαλείο όπως το burp:** [**https://github.com/gabriel-sztejnworcel/pipe-intercept**](https://github.com/gabriel-sztejnworcel/pipe-intercept) **και αυτό το εργαλείο επιτρέπει να καταγράφετε και να βλέπετε όλα τα pipes για να βρείτε privescs** [**https://github.com/cyberark/PipeViewer**](https://github.com/cyberark/PipeViewer)
 
 ## Misc
 
@@ -1251,9 +1253,9 @@ Compare-Object -ReferenceObject $process -DifferenceObject $process2
 
 ## Από Χαμηλό Προνομιακό Χρήστη σε NT\AUTHORITY SYSTEM (CVE-2019-1388) / Παράκαμψη UAC
 
-Εάν έχετε πρόσβαση στη γραφική διεπαφή (μέσω κονσόλας ή RDP) και η UAC είναι ενεργοποιημένη, σε ορισμένες εκδόσεις των Microsoft Windows είναι δυνατόν να εκτελέσετε ένα τερματικό ή οποιαδήποτε άλλη διεργασία όπως "NT\AUTHORITY SYSTEM" από έναν μη προνομιούχο χρήστη.
+Εάν έχετε πρόσβαση στη γραφική διεπαφή (μέσω κονσόλας ή RDP) και η UAC είναι ενεργοποιημένη, σε ορισμένες εκδόσεις των Microsoft Windows είναι δυνατή η εκτέλεση ενός τερματικού ή οποιασδήποτε άλλης διεργασίας όπως "NT\AUTHORITY SYSTEM" από έναν μη προνομιακό χρήστη.
 
-Αυτό καθιστά δυνατή την κλιμάκωση προνομίων και την παράκαμψη της UAC ταυτόχρονα με την ίδια ευπάθεια. Επιπλέον, δεν υπάρχει ανάγκη να εγκαταστήσετε οτιδήποτε και το δυαδικό αρχείο που χρησιμοποιείται κατά τη διάρκεια της διαδικασίας είναι υπογεγραμμένο και εκδοθέν από τη Microsoft.
+Αυτό καθιστά δυνατή την κλιμάκωση προνομίων και την παράκαμψη της UAC ταυτόχρονα με την ίδια ευπάθεια. Επιπλέον, δεν υπάρχει ανάγκη εγκατάστασης οτιδήποτε και το δυαδικό αρχείο που χρησιμοποιείται κατά τη διάρκεια της διαδικασίας είναι υπογεγραμμένο και εκδοθέν από τη Microsoft.
 
 Ορισμένα από τα επηρεαζόμενα συστήματα είναι τα εξής:
 ```
@@ -1299,32 +1301,32 @@ Windows 10 1709	16299	link NOT opened
 
 https://github.com/jas502n/CVE-2019-1388
 
-## Από το Medium επίπεδο Ακεραιότητας σε Υψηλό / Παράκαμψη UAC
+## Από Administrator Medium σε High Integrity Level / UAC Bypass
 
-Διαβάστε αυτό για να **μάθετε για τα Επίπεδα Ακεραιότητας**:
+Διαβάστε αυτό για να **μάθετε για τα Integrity Levels**:
 
 {{#ref}}
 integrity-levels.md
 {{#endref}}
 
-Στη συνέχεια, **διαβάστε αυτό για να μάθετε για το UAC και τις παρακάμψεις UAC:**
+Στη συνέχεια, **διαβάστε αυτό για να μάθετε για το UAC και τα UAC bypasses:**
 
 {{#ref}}
 ../authentication-credentials-uac-and-efs/uac-user-account-control.md
 {{#endref}}
 
-## **Από Υψηλό επίπεδο Ακεραιότητας σε Σύστημα**
+## **Από High Integrity σε System**
 
 ### **Νέα υπηρεσία**
 
-Εάν ήδη εκτελείτε μια διαδικασία Υψηλής Ακεραιότητας, η **μετάβαση σε SYSTEM** μπορεί να είναι εύκολη απλά **δημιουργώντας και εκτελώντας μια νέα υπηρεσία**:
+Εάν ήδη εκτελείτε μια διαδικασία High Integrity, η **μετάβαση σε SYSTEM** μπορεί να είναι εύκολη απλά **δημιουργώντας και εκτελώντας μια νέα υπηρεσία**:
 ```
 sc create newservicename binPath= "C:\windows\system32\notepad.exe"
 sc start newservicename
 ```
 ### AlwaysInstallElevated
 
-Από μια διαδικασία Υψηλής Ακεραιότητας, μπορείτε να **ενεργοποιήσετε τις καταχωρίσεις μητρώου AlwaysInstallElevated** και να **εγκαταστήσετε** ένα reverse shell χρησιμοποιώντας ένα _**.msi**_ wrapper.\
+Από μια διαδικασία Υψηλής Ακεραιότητας, μπορείτε να προσπαθήσετε να **ενεργοποιήσετε τις καταχωρίσεις μητρώου AlwaysInstallElevated** και να **εγκαταστήσετε** ένα reverse shell χρησιμοποιώντας ένα _**.msi**_ wrapper.\
 [Περισσότερες πληροφορίες σχετικά με τα κλειδιά μητρώου που εμπλέκονται και πώς να εγκαταστήσετε ένα _.msi_ πακέτο εδώ.](#alwaysinstallelevated)
 
 ### High + SeImpersonate privilege to System
@@ -1333,19 +1335,19 @@ sc start newservicename
 
 ### From SeDebug + SeImpersonate to Full Token privileges
 
-Εάν έχετε αυτές τις προνομιακές δυνατότητες token (πιθανώς θα το βρείτε σε μια ήδη Υψηλής Ακεραιότητας διαδικασία), θα μπορείτε να **ανοίξετε σχεδόν οποιαδήποτε διαδικασία** (όχι προστατευμένες διαδικασίες) με το προνόμιο SeDebug, **να αντιγράψετε το token** της διαδικασίας και να δημιουργήσετε μια **τυχαία διαδικασία με αυτό το token**.\
+Εάν έχετε αυτές τις προνόμια token (πιθανώς θα το βρείτε σε μια ήδη Υψηλής Ακεραιότητας διαδικασία), θα μπορείτε να **ανοίξετε σχεδόν οποιαδήποτε διαδικασία** (όχι προστατευμένες διαδικασίες) με το προνόμιο SeDebug, **να αντιγράψετε το token** της διαδικασίας και να δημιουργήσετε μια **τυχαία διαδικασία με αυτό το token**.\
 Η χρήση αυτής της τεχνικής συνήθως **επιλέγει οποιαδήποτε διαδικασία που εκτελείται ως SYSTEM με όλα τα προνόμια token** (_ναι, μπορείτε να βρείτε διαδικασίες SYSTEM χωρίς όλα τα προνόμια token_).\
 **Μπορείτε να βρείτε ένα** [**παράδειγμα κώδικα που εκτελεί την προτεινόμενη τεχνική εδώ**](sedebug-+-seimpersonate-copy-token.md)**.**
 
 ### **Named Pipes**
 
-Αυτή η τεχνική χρησιμοποιείται από το meterpreter για να κλιμακώσει στο `getsystem`. Η τεχνική συνίσταται στο **να δημιουργήσετε έναν σωλήνα και στη συνέχεια να δημιουργήσετε/καταχραστείτε μια υπηρεσία για να γράψετε σε αυτόν τον σωλήνα**. Στη συνέχεια, ο **διακομιστής** που δημιούργησε τον σωλήνα χρησιμοποιώντας το προνόμιο **`SeImpersonate`** θα μπορεί να **υποδυθεί το token** του πελάτη του σωλήνα (της υπηρεσίας) αποκτώντας προνόμια SYSTEM.\
+Αυτή η τεχνική χρησιμοποιείται από το meterpreter για να κλιμακώσει στο `getsystem`. Η τεχνική συνίσταται στο **να δημιουργήσετε έναν σωλήνα και στη συνέχεια να δημιουργήσετε/καταχραστείτε μια υπηρεσία για να γράψετε σε αυτόν τον σωλήνα**. Στη συνέχεια, ο **διακομιστής** που δημιούργησε τον σωλήνα χρησιμοποιώντας το προνόμιο **`SeImpersonate`** θα μπορεί να **παριστάνει το token** του πελάτη του σωλήνα (της υπηρεσίας) αποκτώντας προνόμια SYSTEM.\
 Εάν θέλετε να [**μάθετε περισσότερα σχετικά με τους ονομαστικούς σωλήνες, θα πρέπει να διαβάσετε αυτό**](#named-pipe-client-impersonation).\
-Εάν θέλετε να διαβάσετε ένα παράδειγμα [**πώς να πάτε από την υψηλή ακεραιότητα στο System χρησιμοποιώντας ονομαστικούς σωλήνες, θα πρέπει να διαβάσετε αυτό**](from-high-integrity-to-system-with-name-pipes.md).
+Εάν θέλετε να διαβάσετε ένα παράδειγμα [**πώς να πάτε από υψηλή ακεραιότητα σε System χρησιμοποιώντας ονομαστικούς σωλήνες, θα πρέπει να διαβάσετε αυτό**](from-high-integrity-to-system-with-name-pipes.md).
 
 ### Dll Hijacking
 
-Εάν καταφέρετε να **καταχραστείτε μια dll** που **φορτώνεται** από μια **διαδικασία** που εκτελείται ως **SYSTEM**, θα μπορείτε να εκτελέσετε τυχαίο κώδικα με αυτές τις άδειες. Επομένως, η Dll Hijacking είναι επίσης χρήσιμη για αυτό το είδος κλιμάκωσης προνομίων και, επιπλέον, είναι **πολύ πιο εύκολη στην επίτευξη από μια διαδικασία υψηλής ακεραιότητας** καθώς θα έχει **δικαιώματα εγγραφής** στους φακέλους που χρησιμοποιούνται για τη φόρτωση dlls.\
+Εάν καταφέρετε να **καταχραστείτε μια dll** που **φορτώνεται** από μια **διαδικασία** που εκτελείται ως **SYSTEM**, θα μπορείτε να εκτελέσετε τυχαίο κώδικα με αυτές τις άδειες. Επομένως, η Dll Hijacking είναι επίσης χρήσιμη για αυτό το είδος κλιμάκωσης προνομίων και, επιπλέον, είναι **πολύ πιο εύκολη να επιτευχθεί από μια διαδικασία υψηλής ακεραιότητας** καθώς θα έχει **δικαιώματα εγγραφής** στους φακέλους που χρησιμοποιούνται για τη φόρτωση dlls.\
 **Μπορείτε** [**να μάθετε περισσότερα σχετικά με την Dll hijacking εδώ**](dll-hijacking/index.html)**.**
 
 ### **From Administrator or Network Service to System**
@@ -1364,7 +1366,7 @@ https://github.com/sailay1996/RpcSsImpersonator
 
 ## Useful tools
 
-**Καλύτερο εργαλείο για αναζήτηση παραγόντων κλιμάκωσης τοπικών προνομίων Windows:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
+**Καλύτερο εργαλείο για αναζήτηση διαδρομών κλιμάκωσης τοπικών προνομίων Windows:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
 
 **PS**
 
@@ -1376,14 +1378,14 @@ https://github.com/sailay1996/RpcSsImpersonator
 [**Invoke-WCMDump**](https://github.com/peewpw/Invoke-WCMDump) **-- Εξάγει διαπιστευτήρια από τον Διαχειριστή Διαπιστευτηρίων. Ανιχνεύθηκε.**\
 [**DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray) **-- Ψεκάστε συγκεντρωμένους κωδικούς πρόσβασης σε τομέα**\
 [**Inveigh**](https://github.com/Kevin-Robertson/Inveigh) **-- Το Inveigh είναι ένα εργαλείο spoofing ADIDNS/LLMNR/mDNS/NBNS και man-in-the-middle PowerShell.**\
-[**WindowsEnum**](https://github.com/absolomb/WindowsEnum/blob/master/WindowsEnum.ps1) **-- Βασική αναγνώριση privesc Windows**\
-[~~**Sherlock**~~](https://github.com/rasta-mouse/Sherlock) **\~\~**\~\~ -- Αναζητήστε γνωστές ευπάθειες privesc (ΑΠΟΡΡΙΦΘΗΚΕ για Watson)\
-[~~**WINspect**~~](https://github.com/A-mIn3/WINspect) -- Τοπικοί έλεγχοι **(Απαιτούν δικαιώματα διαχειριστή)**
+[**WindowsEnum**](https://github.com/absolomb/WindowsEnum/blob/master/WindowsEnum.ps1) **-- Βασική καταμέτρηση privesc Windows**\
+[~~**Sherlock**~~](https://github.com/rasta-mouse/Sherlock) **\~\~**\~\~ -- Αναζητήστε γνωστές ευπάθειες privesc (ΑΠΟΡΡΙΦΘΕΙΣΑ για Watson)\
+[~~**WINspect**~~](https://github.com/A-mIn3/WINspect) -- Τοπικοί έλεγχοι **(Απαιτούνται δικαιώματα διαχειριστή)**
 
 **Exe**
 
 [**Watson**](https://github.com/rasta-mouse/Watson) -- Αναζητήστε γνωστές ευπάθειες privesc (χρειάζεται να γίνει μεταγλώττιση χρησιμοποιώντας το VisualStudio) ([**προμεταγλωττισμένο**](https://github.com/carlospolop/winPE/tree/master/binaries/watson))\
-[**SeatBelt**](https://github.com/GhostPack/Seatbelt) -- Αναγνωρίζει τον υπολογιστή αναζητώντας κακές διαμορφώσεις (περισσότερο εργαλείο συγκέντρωσης πληροφοριών παρά privesc) (χρειάζεται να γίνει μεταγλώττιση) **(**[**προμεταγλωττισμένο**](https://github.com/carlospolop/winPE/tree/master/binaries/seatbelt)**)**\
+[**SeatBelt**](https://github.com/GhostPack/Seatbelt) -- Καταμετρά τον υπολογιστή αναζητώντας κακές διαμορφώσεις (περισσότερο εργαλείο συγκέντρωσης πληροφοριών παρά privesc) (χρειάζεται να γίνει μεταγλώττιση) **(**[**προμεταγλωττισμένο**](https://github.com/carlospolop/winPE/tree/master/binaries/seatbelt)**)**\
 [**LaZagne**](https://github.com/AlessandroZ/LaZagne) **-- Εξάγει διαπιστευτήρια από πολλά λογισμικά (προμεταγλωττισμένο exe στο github)**\
 [**SharpUP**](https://github.com/GhostPack/SharpUp) **-- Port του PowerUp σε C#**\
 [~~**Beroot**~~](https://github.com/AlessandroZ/BeRoot) **\~\~**\~\~ -- Ελέγξτε για κακή διαμόρφωση (εκτελέσιμο προμεταγλωττισμένο στο github). Δεν συνιστάται. Δεν λειτουργεί καλά σε Win10.\
@@ -1391,7 +1393,7 @@ https://github.com/sailay1996/RpcSsImpersonator
 
 **Bat**
 
-[**winPEASbat** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)-- Εργαλείο που δημιουργήθηκε με βάση αυτήν την ανάρτηση (δεν χρειάζεται accesschk για να λειτουργήσει σωστά αλλά μπορεί να το χρησιμοποιήσει).
+[**winPEASbat** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)-- Εργαλείο που δημιουργήθηκε με βάση αυτή την ανάρτηση (δεν χρειάζεται accesschk για να λειτουργήσει σωστά αλλά μπορεί να το χρησιμοποιήσει).
 
 **Local**
 
