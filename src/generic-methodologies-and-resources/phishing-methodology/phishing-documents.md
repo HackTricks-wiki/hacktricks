@@ -6,7 +6,7 @@
 
 Microsoft Word, bir dosyayı açmadan önce dosya veri doğrulaması yapar. Veri doğrulaması, OfficeOpenXML standardına karşı veri yapısı tanımlaması şeklinde gerçekleştirilir. Veri yapısı tanımlaması sırasında herhangi bir hata oluşursa, analiz edilen dosya açılmayacaktır.
 
-Genellikle, makrolar içeren Word dosyaları `.docm` uzantısını kullanır. Ancak, dosya uzantısını değiştirerek dosyanın adını değiştirmek ve makro çalıştırma yeteneklerini korumak mümkündür.\
+Genellikle, makrolar içeren Word dosyaları `.docm` uzantısını kullanır. Ancak, dosya uzantısını değiştirerek dosyayı yeniden adlandırmak ve makro çalıştırma yeteneklerini korumak mümkündür.\
 Örneğin, bir RTF dosyası tasarımı gereği makroları desteklemez, ancak RTF olarak yeniden adlandırılan bir DOCM dosyası Microsoft Word tarafından işlenecek ve makro çalıştırma yeteneğine sahip olacaktır.\
 Aynı iç yapılar ve mekanizmalar Microsoft Office Suite'in (Excel, PowerPoint vb.) tüm yazılımlarına uygulanır.
 
@@ -14,12 +14,12 @@ Aşağıdaki komutu kullanarak bazı Ofis programları tarafından hangi uzantı
 ```bash
 assoc | findstr /i "word excel powerp"
 ```
-DOCX dosyaları, makroları içeren uzak bir şablona atıfta bulunuyorsa (Dosya – Seçenekler – Eklentiler – Yönet: Şablonlar – Git) makroları “çalıştırabilir”.
+DOCX dosyaları, makroları içeren uzak bir şablona atıfta bulunuyorsa (Dosya – Seçenekler – Eklentiler – Yönet: Şablonlar – Git) makroları "çalıştırabilir".
 
 ### Harici Görüntü Yükleme
 
 Git: _Ekle --> Hızlı Parçalar --> Alan_\
-&#xNAN;_**Kategoriler**: Bağlantılar ve Referanslar, **Alan adları**: includePicture, ve **Dosya adı veya URL**:_ http://\<ip>/whatever
+_**Kategoriler**: Bağlantılar ve Referanslar, **Alan adları**: includePicture, ve **Dosya adı veya URL**:_ http://\<ip>/whatever
 
 ![](<../../images/image (155).png>)
 
@@ -64,22 +64,22 @@ Dim proc As Object
 Set proc = GetObject("winmgmts:\\.\root\cimv2:Win32_Process")
 proc.Create "powershell <beacon line generated>
 ```
-#### Manuel olarak meta verileri kaldırma
+#### Manually remove metadata
 
-**Dosya > Bilgi > Belgeyi Denetle > Belgeyi Denetle** yolunu izleyin, bu Belge Denetleyicisini açacaktır. **Denetle** butonuna tıklayın ve ardından **Belge Özellikleri ve Kişisel Bilgileri Kaldır** kısmının yanındaki **Tümünü Kaldır** butonuna tıklayın.
+**Dosya > Bilgi > Belgeyi Denetle > Belgeyi Denetle** yolunu izleyin, bu Belge Denetleyicisini açacaktır. **Denetle** butonuna tıklayın ve ardından **Belge Özellikleri ve Kişisel Bilgileri Kaldır** kısmının yanındaki **Tümünü Kaldır** seçeneğine tıklayın.
 
-#### Doc Uzantısı
+#### Doc Extension
 
 İşlem tamamlandığında, **Farklı Kaydet** türü açılır menüsünden, formatı **`.docx`**'den **Word 97-2003 `.doc`**'ye değiştirin.\
-Bunu yapın çünkü **`.docx`** içinde makroları kaydedemezsiniz ve makro etkin **`.docm`** uzantısı etrafında bir **stigma** vardır (örneğin, küçük resim simgesi büyük bir `!` içerir ve bazı web/e-posta geçitleri bunları tamamen engeller). Bu nedenle, bu **eski `.doc` uzantısı en iyi uzlaşmadır**.
+Bunu yapın çünkü **`.docx`** içinde makroları kaydedemezsiniz ve **`.docm`** uzantısı etrafında bir **stigma** vardır (örneğin, küçük resim simgesi büyük bir `!` içerir ve bazı web/e-posta geçitleri bunları tamamen engeller). Bu nedenle, bu **eski `.doc` uzantısı en iyi uzlaşmadır**.
 
-#### Kötü Amaçlı Makro Üreticileri
+#### Malicious Macros Generators
 
 - MacOS
 - [**macphish**](https://github.com/cldrn/macphish)
 - [**Mythic Macro Generator**](https://github.com/cedowens/Mythic-Macro-Generator)
 
-## HTA Dosyaları
+## HTA Files
 
 HTA, **HTML ve betik dilleri (VBScript ve JScript gibi)** birleştiren bir Windows programıdır. Kullanıcı arayüzünü oluşturur ve bir "tamamen güvenilir" uygulama olarak çalışır, bir tarayıcının güvenlik modelinin kısıtlamaları olmadan.
 
@@ -140,7 +140,7 @@ self.close
 ```
 ## NTLM Kimlik Doğrulamasını Zorlamak
 
-Kullanıcıların erişeceği e-postalara veya HTML'ye **görünmez resimler** ekleyerek (hatta HTTP MitM?) gibi çeşitli yollarla **uzaktan NTLM kimlik doğrulamasını zorlamak** mümkündür. Ya da kurbanı, **klasörü açmak için** sadece **kimlik doğrulamasını tetikleyecek dosyaların adresiyle** gönderebilirsiniz.
+**NTLM kimlik doğrulamasını "uzaktan" zorlamanın** birkaç yolu vardır, örneğin, kullanıcının erişeceği e-postalara veya HTML'ye **görünmez resimler** ekleyebilirsiniz (hatta HTTP MitM?). Ya da kurbanı, **klasörü açmak için** sadece **kimlik doğrulamasını tetikleyecek dosyaların adresiyle** gönderebilirsiniz.
 
 **Bu fikirleri ve daha fazlasını aşağıdaki sayfalarda kontrol edin:**
 
@@ -154,7 +154,7 @@ Kullanıcıların erişeceği e-postalara veya HTML'ye **görünmez resimler** e
 
 ### NTLM İletimi
 
-Sadece hash veya kimlik doğrulamasını çalamayacağınızı, aynı zamanda **NTLM iletim saldırıları gerçekleştirebileceğinizi** unutmayın:
+Sadece hash veya kimlik doğrulamasını çalamayacağınızı, aynı zamanda **NTLM iletim saldırıları** da gerçekleştirebileceğinizi unutmayın:
 
 - [**NTLM İletim saldırıları**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
 - [**AD CS ESC8 (NTLM iletimi ile sertifikalar)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)

