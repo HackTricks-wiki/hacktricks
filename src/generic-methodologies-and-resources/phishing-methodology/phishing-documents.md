@@ -21,7 +21,7 @@ DOCX files referencing a remote template (File –Options –Add-ins –Manage: 
 ### External Image Load
 
 Go to: _Insert --> Quick Parts --> Field_\
-&#xNAN;_**Categories**: Links and References, **Filed names**: includePicture, and **Filename or URL**:_ http://\<ip>/whatever
+_**Categories**: Links and References, **Filed names**: includePicture, and **Filename or URL**:_ http://\<ip>/whatever
 
 ![](<../../images/image (155).png>)
 
