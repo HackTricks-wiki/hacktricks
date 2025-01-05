@@ -1,10 +1,10 @@
-# Zwingen der NTLM-privilegierten Authentifizierung
+# Zwingen von NTLM-Privilegierten Authentifizierungen
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## SharpSystemTriggers
 
-[**SharpSystemTriggers**](https://github.com/cube0x0/SharpSystemTriggers) ist eine **Sammlung** von **Remote-Authentifizierungs-Triggern**, die in C# unter Verwendung des MIDL-Compilers codiert sind, um 3rd-Party-Abhängigkeiten zu vermeiden.
+[**SharpSystemTriggers**](https://github.com/cube0x0/SharpSystemTriggers) ist eine **Sammlung** von **Remote-Authentifizierungs-Triggern**, die in C# unter Verwendung des MIDL-Compilers codiert sind, um Abhängigkeiten von Drittanbietern zu vermeiden.
 
 ## Missbrauch des Spooler-Dienstes
 
@@ -41,7 +41,7 @@ printerbug.py 'domain/username:password'@<Printer IP> <RESPONDERIP>
 ```
 ### Kombination mit Unbeschränkter Delegation
 
-Wenn ein Angreifer bereits einen Computer mit [Unbeschränkter Delegation](unconstrained-delegation.md) kompromittiert hat, könnte der Angreifer **den Drucker zwingen, sich bei diesem Computer zu authentifizieren**. Aufgrund der unbeschränkten Delegation wird das **TGT** des **Computerkontos des Druckers** im **Speicher** des Computers mit unbeschränkter Delegation **gespeichert**. Da der Angreifer diesen Host bereits kompromittiert hat, wird er in der Lage sein, **dieses Ticket abzurufen** und es auszunutzen ([Pass the Ticket](pass-the-ticket.md)).
+Wenn ein Angreifer bereits einen Computer mit [Unbeschränkter Delegation](unconstrained-delegation.md) kompromittiert hat, könnte der Angreifer **den Drucker zwingen, sich bei diesem Computer zu authentifizieren**. Aufgrund der unbeschränkten Delegation wird das **TGT** des **Computerkontos des Druckers** im **Speicher** des Computers mit unbeschränkter Delegation **gespeichert**. Da der Angreifer bereits diesen Host kompromittiert hat, wird er in der Lage sein, **dieses Ticket abzurufen** und es auszunutzen ([Pass the Ticket](pass-the-ticket.md)).
 
 ## RCP Zwangs-Authentifizierung
 
@@ -105,6 +105,6 @@ Wenn Sie einen MitM-Angriff auf einen Computer durchführen und HTML in eine Sei
 ## NTLMv1 knacken
 
 Wenn Sie [NTLMv1-Herausforderungen erfassen können, lesen Sie hier, wie Sie sie knacken](../ntlm/index.html#ntlmv1-attack).\
-&#xNAN;_&#x52;emember, dass Sie, um NTLMv1 zu knacken, die Responder-Herausforderung auf "1122334455667788" setzen müssen._
+_&#x52;emember, dass Sie, um NTLMv1 zu knacken, die Responder-Herausforderung auf "1122334455667788" setzen müssen._
 
 {{#include ../../banners/hacktricks-training.md}}

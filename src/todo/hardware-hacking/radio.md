@@ -8,8 +8,8 @@
 
 ### Grundkonfiguration
 
-Nach der Installation gibt es einige Dinge, die Sie in Betracht ziehen könnten zu konfigurieren.\
-In den Einstellungen (der zweite Tab-Button) können Sie das **SDR-Gerät** auswählen oder **eine Datei auswählen**, um zu lesen, welche Frequenz syntonisiert werden soll und die Abtastrate (empfohlen bis zu 2,56 Msps, wenn Ihr PC dies unterstützt)\\
+Nach der Installation gibt es einige Dinge, die Sie in Betracht ziehen könnten, zu konfigurieren.\
+In den Einstellungen (der zweite Tab-Button) können Sie das **SDR-Gerät** auswählen oder **eine Datei** zum Lesen auswählen und die Frequenz, auf die Sie syntonisieren möchten, sowie die Abtastrate (empfohlen bis zu 2,56 Msps, wenn Ihr PC dies unterstützt).
 
 ![](<../../images/image (245).png>)
 
@@ -51,7 +51,7 @@ Mit [**SigDigger** ](https://github.com/BatchDrake/SigDigger) synchronisieren Si
 ### Aufdecken des Modulationstyps mit IQ
 
 Es gibt 3 Möglichkeiten, Informationen in Signalen zu speichern: Modulation der **Amplitude**, **Frequenz** oder **Phase**.\
-Wenn Sie ein Signal überprüfen, gibt es verschiedene Möglichkeiten, um herauszufinden, was verwendet wird, um Informationen zu speichern (finden Sie mehr Möglichkeiten unten), aber eine gute Möglichkeit ist, das IQ-Diagramm zu überprüfen.
+Wenn Sie ein Signal überprüfen, gibt es verschiedene Möglichkeiten, um herauszufinden, was verwendet wird, um Informationen zu speichern (finden Sie weitere Möglichkeiten unten), aber eine gute Möglichkeit ist, das IQ-Diagramm zu überprüfen.
 
 ![](<../../images/image (788).png>)
 
@@ -60,7 +60,7 @@ Wenn Sie ein Signal überprüfen, gibt es verschiedene Möglichkeiten, um heraus
 - Beachten Sie, dass, wenn die Informationen im Faktum verborgen sind, dass eine Phase geändert wird und nicht in der Phase selbst, Sie keine klar differenzierten Phasen sehen werden.
 - **FM erkennen**: IQ hat kein Feld zur Identifizierung von Frequenzen (Abstand zum Zentrum ist Amplitude und Winkel ist Phase).\
 Daher sollten Sie zur Identifizierung von FM **grundsätzlich nur einen Kreis** in diesem Diagramm sehen.\
-Darüber hinaus wird eine andere Frequenz im IQ-Diagramm durch eine **Geschwindigkeitsbeschleunigung über den Kreis** "dargestellt" (wenn Sie in SysDigger das Signal auswählen, wird das IQ-Diagramm gefüllt; wenn Sie eine Beschleunigung oder Richtungsänderung im erzeugten Kreis finden, könnte das bedeuten, dass es sich um FM handelt):
+Darüber hinaus wird eine andere Frequenz im IQ-Diagramm durch eine **Geschwindigkeitsbeschleunigung über den Kreis** "dargestellt" (wenn Sie in SysDigger das Signal auswählen, wird das IQ-Diagramm gefüllt; wenn Sie eine Beschleunigung oder Richtungsänderung im erzeugten Kreis finden, könnte das bedeuten, dass dies FM ist):
 
 ## AM-Beispiel
 
@@ -68,7 +68,7 @@ Darüber hinaus wird eine andere Frequenz im IQ-Diagramm durch eine **Geschwindi
 sigdigger_20220308_165547Z_2560000_433500000_float32_iq.raw
 {{#endfile}}
 
-### AM aufdecken
+### Aufdecken von AM
 
 #### Überprüfung der Hüllkurve
 
@@ -82,7 +82,7 @@ Und so sieht ein Teil des Symbols mit der Wellenform aus:
 
 #### Überprüfung des Histogramms
 
-Sie können **das gesamte Signal auswählen**, in dem sich die Informationen befinden, den **Amplitude**-Modus und **Auswahl** auswählen und auf **Histogramm** klicken. Sie können beobachten, dass nur 2 klare Ebenen gefunden werden.
+Sie können **das gesamte Signal auswählen**, wo sich die Informationen befinden, den **Amplitude**-Modus und **Auswahl** auswählen und auf **Histogramm** klicken. Sie können beobachten, dass nur 2 klare Ebenen gefunden werden.
 
 ![](<../../images/image (264).png>)
 
@@ -98,7 +98,7 @@ In diesem Beispiel sehen Sie, wie es einen **großen Kreis** gibt, aber auch **v
 
 ![](<../../images/image (222).png>)
 
-### Symbolrate erhalten
+### Symbolrate ermitteln
 
 #### Mit einem Symbol
 
@@ -114,7 +114,7 @@ Sie können auch die Anzahl der Symbole angeben, die Sie auswählen möchten, un
 
 ### Bits erhalten
 
-Nachdem Sie festgestellt haben, dass es sich um ein **AM-moduliertes** Signal handelt und die **Symbolrate** (und wissend, dass in diesem Fall etwas up 1 und etwas down 0 bedeutet), ist es sehr einfach, die **Bits** zu **erhalten**, die im Signal codiert sind. Wählen Sie also das Signal mit Informationen aus und konfigurieren Sie die Abtastung und Entscheidung und drücken Sie auf Abtasten (stellen Sie sicher, dass **Amplitude** ausgewählt ist, die entdeckte **Symbolrate** konfiguriert ist und die **Gadner-Uhrensynchronisation** ausgewählt ist):
+Nachdem Sie festgestellt haben, dass es sich um ein **AM-moduliertes** Signal handelt und die **Symbolrate** (und wissend, dass in diesem Fall etwas up eine 1 und etwas down eine 0 bedeutet), ist es sehr einfach, die **Bits** zu erhalten, die im Signal codiert sind. Wählen Sie also das Signal mit Informationen aus und konfigurieren Sie die Abtastung und Entscheidung und drücken Sie auf Abtasten (stellen Sie sicher, dass **Amplitude** ausgewählt ist, die entdeckte **Symbolrate** konfiguriert ist und die **Gadner-Uhrensynchronisation** ausgewählt ist):
 
 ![](<../../images/image (965).png>)
 
@@ -131,15 +131,15 @@ Jetzt, um SigDigger zu verstehen, **wo der Bereich** des Niveaus liegt, das Info
 
 ![](<../../images/image (439).png>)
 
-Wenn es beispielsweise **4 verschiedene Amplitudenebenen** gegeben hätte, müssten Sie die **Bits pro Symbol auf 2** konfigurieren und von der kleinsten bis zur größten auswählen.
+Wenn es beispielsweise **4 verschiedene Amplituden** gegeben hätte, müssten Sie die **Bits pro Symbol auf 2** konfigurieren und von der kleinsten bis zur größten auswählen.
 
 Schließlich können Sie durch **Erhöhen** des **Zooms** und **Ändern der Zeilenhöhe** die Bits sehen (und Sie können alles auswählen und kopieren, um alle Bits zu erhalten):
 
 ![](<../../images/image (276).png>)
 
-Wenn das Signal mehr als 1 Bit pro Symbol hat (zum Beispiel 2), hat SigDigger **keine Möglichkeit zu wissen, welches Symbol 00, 01, 10, 11 ist**, sodass es verschiedene **Graustufen** verwendet, um jedes darzustellen (und wenn Sie die Bits kopieren, verwendet es **Zahlen von 0 bis 3**, die Sie behandeln müssen).
+Wenn das Signal mehr als 1 Bit pro Symbol hat (zum Beispiel 2), hat SigDigger **keine Möglichkeit zu wissen, welches Symbol** 00, 01, 10, 11 ist, sodass es verschiedene **Graustufen** verwendet, um jedes darzustellen (und wenn Sie die Bits kopieren, verwendet es **Zahlen von 0 bis 3**, die Sie behandeln müssen).
 
-Verwenden Sie auch **Codierungen** wie **Manchester**, und **up+down** kann **1 oder 0** sein und ein down+up kann eine 1 oder 0 sein. In diesen Fällen müssen Sie die erhaltenen ups (1) und downs (0) behandeln, um die Paare von 01 oder 10 als 0s oder 1s zu ersetzen.
+Verwenden Sie auch **Codierungen** wie **Manchester**, und **up+down** kann **1 oder 0** sein und ein down+up kann eine 1 oder 0 sein. In diesen Fällen müssen Sie die **erhaltenen Ups (1) und Downs (0)** behandeln, um die Paare von 01 oder 10 als 0s oder 1s zu ersetzen.
 
 ## FM-Beispiel
 
@@ -147,7 +147,7 @@ Verwenden Sie auch **Codierungen** wie **Manchester**, und **up+down** kann **1 
 sigdigger_20220308_170858Z_2560000_433500000_float32_iq.raw
 {{#endfile}}
 
-### FM aufdecken
+### Aufdecken von FM
 
 #### Überprüfung der Frequenzen und Wellenform
 
@@ -159,7 +159,7 @@ Im vorherigen Bild können Sie ziemlich gut beobachten, dass **2 Frequenzen verw
 
 ![](<../../images/image (717).png>)
 
-Das liegt daran, dass ich das Signal in beiden Frequenzen erfasst habe, daher ist eine ungefähr die andere negativ:
+Das liegt daran, dass ich das Signal in beiden Frequenzen erfasst habe, daher ist eine ungefähr die andere in negativ:
 
 ![](<../../images/image (942).png>)
 
@@ -175,7 +175,7 @@ Wenn die synchronisierte Frequenz **näher an einer Frequenz als an der anderen*
 
 ![](<../../images/image (871).png>)
 
-In diesem Fall, wenn Sie das **Amplitude-Histogramm** überprüfen, finden Sie **nur eine Amplitude**, sodass es **nicht AM sein kann** (wenn Sie viele Amplituden finden, könnte es daran liegen, dass das Signal entlang des Kanals an Leistung verloren hat):
+In diesem Fall, wenn Sie das **Amplitude-Histogramm** überprüfen, werden Sie **nur eine Amplitude** finden, sodass es **nicht AM sein kann** (wenn Sie viele Amplituden finden, könnte es daran liegen, dass das Signal entlang des Kanals an Leistung verloren hat):
 
 ![](<../../images/image (817).png>)
 
@@ -187,16 +187,16 @@ Und dies wäre das Phasenhistogramm (was sehr klar macht, dass das Signal nicht 
 
 IQ hat kein Feld zur Identifizierung von Frequenzen (Abstand zum Zentrum ist Amplitude und Winkel ist Phase).\
 Daher sollten Sie zur Identifizierung von FM **grundsätzlich nur einen Kreis** in diesem Diagramm sehen.\
-Darüber hinaus wird eine andere Frequenz im IQ-Diagramm durch eine **Geschwindigkeitsbeschleunigung über den Kreis** "dargestellt" (wenn Sie in SysDigger das Signal auswählen, wird das IQ-Diagramm gefüllt; wenn Sie eine Beschleunigung oder Richtungsänderung im erzeugten Kreis finden, könnte das bedeuten, dass es sich um FM handelt):
+Darüber hinaus wird eine andere Frequenz im IQ-Diagramm durch eine **Geschwindigkeitsbeschleunigung über den Kreis** "dargestellt" (wenn Sie in SysDigger das Signal auswählen, wird das IQ-Diagramm gefüllt; wenn Sie eine Beschleunigung oder Richtungsänderung im erzeugten Kreis finden, könnte das bedeuten, dass dies FM ist):
 
 ![](<../../images/image (81).png>)
 
-### Symbolrate erhalten
+### Symbolrate ermitteln
 
-Sie können die **gleiche Technik wie im AM-Beispiel** verwenden, um die Symbolrate zu erhalten, sobald Sie die Frequenzen gefunden haben, die Symbole tragen.
+Sie können die **gleiche Technik wie im AM-Beispiel verwenden**, um die Symbolrate zu ermitteln, sobald Sie die Frequenzen gefunden haben, die Symbole tragen.
 
 ### Bits erhalten
 
-Sie können die **gleiche Technik wie im AM-Beispiel** verwenden, um die Bits zu erhalten, sobald Sie **festgestellt haben, dass das Signal in Frequenz moduliert ist** und die **Symbolrate**.
+Sie können die **gleiche Technik wie im AM-Beispiel verwenden**, um die Bits zu erhalten, sobald Sie **festgestellt haben, dass das Signal in Frequenz moduliert ist** und die **Symbolrate**.
 
 {{#include ../../banners/hacktricks-training.md}}

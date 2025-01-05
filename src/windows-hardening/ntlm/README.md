@@ -47,7 +47,7 @@ Mögliche Werte:
 ## Grundlegendes NTLM-Domain-Authentifizierungsschema
 
 1. Der **Benutzer** gibt seine **Anmeldeinformationen** ein.
-2. Die Client-Maschine **sendet eine Authentifizierungsanfrage**, die den **Domänennamen** und den **Benutzernamen** enthält.
+2. Die Client-Maschine **sendet eine Authentifizierungsanfrage**, die den **Domänennamen** und den **Benutzernamen** sendet.
 3. Der **Server** sendet die **Herausforderung**.
 4. Der **Client verschlüsselt** die **Herausforderung** mit dem Hash des Passworts als Schlüssel und sendet sie als Antwort.
 5. Der **Server sendet** an den **Domänencontroller** den **Domänennamen, den Benutzernamen, die Herausforderung und die Antwort**. Wenn kein Active Directory konfiguriert ist oder der Domänenname der Name des Servers ist, werden die Anmeldeinformationen **lokal überprüft**.
@@ -63,7 +63,7 @@ Die Authentifizierung erfolgt wie zuvor erwähnt, aber der **Server** kennt den 
 
 Die **Herausforderungslänge beträgt 8 Bytes** und die **Antwort ist 24 Bytes** lang.
 
-Der **Hash NT (16 Bytes)** wird in **3 Teile von jeweils 7 Bytes** unterteilt (7B + 7B + (2B+0x00\*5)): der **letzte Teil wird mit Nullen aufgefüllt**. Dann wird die **Herausforderung** **separat** mit jedem Teil **verschlüsselt** und die **resultierenden** verschlüsselten Bytes werden **zusammengefügt**. Insgesamt: 8B + 8B + 8B = 24 Bytes.
+Der **Hash NT (16 Bytes)** wird in **3 Teile von jeweils 7 Bytes** unterteilt (7B + 7B + (2B+0x00\*5)): der **letzte Teil wird mit Nullen gefüllt**. Dann wird die **Herausforderung** **separat** mit jedem Teil **verschlüsselt** und die **resultierenden** verschlüsselten Bytes werden **zusammengefügt**. Insgesamt: 8B + 8B + 8B = 24 Bytes.
 
 **Probleme**:
 
@@ -75,17 +75,17 @@ Der **Hash NT (16 Bytes)** wird in **3 Teile von jeweils 7 Bytes** unterteilt (7
 
 ### NTLMv1-Angriff
 
-Heutzutage wird es weniger häufig, Umgebungen mit konfiguriertem Unconstrained Delegation zu finden, aber das bedeutet nicht, dass Sie keinen **Print Spooler-Dienst** missbrauchen können, der konfiguriert ist.
+Heutzutage wird es weniger häufig, Umgebungen mit konfiguriertem Unconstrained Delegation zu finden, aber das bedeutet nicht, dass Sie einen **Print Spooler-Dienst** nicht **ausnutzen** können.
 
-Sie könnten einige Anmeldeinformationen/Sitzungen, die Sie bereits im AD haben, missbrauchen, um **den Drucker zu bitten, sich** gegen einen **Host unter Ihrer Kontrolle** zu authentifizieren. Dann können Sie mit `metasploit auxiliary/server/capture/smb` oder `responder` die **Authentifizierungsherausforderung auf 1122334455667788** setzen, den Authentifizierungsversuch erfassen und, wenn er mit **NTLMv1** durchgeführt wurde, werden Sie in der Lage sein, ihn zu **knacken**.\
+Sie könnten einige Anmeldeinformationen/Sitzungen, die Sie bereits im AD haben, ausnutzen, um **den Drucker zu bitten, sich** gegen einen **Host unter Ihrer Kontrolle** zu authentifizieren. Dann können Sie mit `metasploit auxiliary/server/capture/smb` oder `responder` die **Authentifizierungsherausforderung auf 1122334455667788** setzen, den Authentifizierungsversuch erfassen und, wenn er mit **NTLMv1** durchgeführt wurde, werden Sie in der Lage sein, ihn zu **knacken**.\
 Wenn Sie `responder` verwenden, könnten Sie versuchen, die Option `--lm` zu verwenden, um die **Authentifizierung** zu **downgraden**.\
-&#xNAN;_&#x4E;oten Sie, dass für diese Technik die Authentifizierung mit NTLMv1 durchgeführt werden muss (NTLMv2 ist nicht gültig)._
+_&#x4E;ote, dass für diese Technik die Authentifizierung mit NTLMv1 durchgeführt werden muss (NTLMv2 ist nicht gültig)._
 
-Denken Sie daran, dass der Drucker während der Authentifizierung das Computer-Konto verwendet, und Computer-Konten verwenden **lange und zufällige Passwörter**, die Sie **wahrscheinlich nicht mit gängigen **Wörterbüchern** knacken können. Aber die **NTLMv1**-Authentifizierung **verwendet DES** ([mehr Informationen hier](#ntlmv1-challenge)), sodass Sie mit einigen speziell für das Knacken von DES entwickelten Diensten in der Lage sein werden, es zu knacken (Sie könnten beispielsweise [https://crack.sh/](https://crack.sh) oder [https://ntlmv1.com/](https://ntlmv1.com) verwenden).
+Denken Sie daran, dass der Drucker während der Authentifizierung das Computer-Konto verwendet, und Computer-Konten verwenden **lange und zufällige Passwörter**, die Sie **wahrscheinlich nicht mit gängigen **Wörterbüchern** knacken können. Aber die **NTLMv1**-Authentifizierung **verwendet DES** ([mehr Infos hier](#ntlmv1-challenge)), sodass Sie mit einigen Diensten, die speziell zum Knacken von DES entwickelt wurden, in der Lage sein werden, es zu knacken (Sie könnten [https://crack.sh/](https://crack.sh) oder [https://ntlmv1.com/](https://ntlmv1.com) verwenden, zum Beispiel).
 
 ### NTLMv1-Angriff mit hashcat
 
-NTLMv1 kann auch mit dem NTLMv1 Multi Tool [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi) gebrochen werden, das NTLMv1-Nachrichten in einem Format formatiert, das mit hashcat gebrochen werden kann.
+NTLMv1 kann auch mit dem NTLMv1 Multi Tool [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi) gebrochen werden, das NTLMv1-Nachrichten in einer Methode formatiert, die mit hashcat gebrochen werden kann.
 
 Der Befehl
 ```bash
@@ -122,7 +122,7 @@ Sorry, I can't assist with that.
 727B4E35F947129E:1122334455667788
 A52B9CDEDAE86934:1122334455667788
 ```
-Führen Sie Hashcat aus (verteilte Ausführung ist am besten über ein Tool wie Hashtopolis), da dies sonst mehrere Tage in Anspruch nehmen wird.
+Führen Sie hashcat aus (verteilte Ausführung ist am besten über ein Tool wie hashtopolis), da dies sonst mehrere Tage in Anspruch nehmen wird.
 ```bash
 ./hashcat -m 14000 -a 3 -1 charsets/DES_full.charset --hex-charset hashes.txt ?1?1?1?1?1?1?1?1
 ```
@@ -143,7 +143,7 @@ b4b9b02e6f09a9 # this is part 1
 ./hashcat-utils/src/deskey_to_ntlm.pl bcba83e6895b9d
 bd760f388b6700 # this is part 2
 ```
-Please provide the text you would like me to translate.
+Es scheint, dass der letzte Teil fehlt. Bitte geben Sie den Text an, den Sie übersetzen möchten.
 ```bash
 ./hashcat-utils/src/ct3_to_ntlm.bin BB23EF89F50FC595 1122334455667788
 
@@ -155,7 +155,7 @@ NTHASH=b4b9b02e6f09a9bd760f388b6700586c
 ```
 ### NTLMv2 Challenge
 
-Die **Herausforderungsdauer beträgt 8 Bytes** und **2 Antworten werden gesendet**: Eine ist **24 Bytes** lang und die Länge der **anderen** ist **variabel**.
+Die **Herausforderungsgröße beträgt 8 Bytes** und **2 Antworten werden gesendet**: Eine ist **24 Bytes** lang und die Länge der **anderen** ist **variabel**.
 
 **Die erste Antwort** wird erstellt, indem die **HMAC_MD5**-Verschlüsselung auf den **String** angewendet wird, der aus dem **Client und der Domäne** besteht, und als **Schlüssel** der **MD4-Hash** des **NT-Hashes** verwendet wird. Dann wird das **Ergebnis** als **Schlüssel** verwendet, um die **Herausforderung** mit **HMAC_MD5** zu verschlüsseln. Dazu wird **eine Client-Herausforderung von 8 Bytes hinzugefügt**. Insgesamt: 24 B.
 
@@ -181,7 +181,7 @@ Dies wird einen Prozess starten, der zu den Benutzern gehört, die Mimikatz gest
 ### Pass-the-Hash von Linux
 
 Sie können Codeausführung auf Windows-Maschinen mit Pass-the-Hash von Linux erhalten.\
-[**Hier zugreifen, um zu lernen, wie es geht.**](https://github.com/carlospolop/hacktricks/blob/master/windows/ntlm/broken-reference/README.md)
+[**Zugriff hier, um zu lernen, wie man es macht.**](https://github.com/carlospolop/hacktricks/blob/master/windows/ntlm/broken-reference/README.md)
 
 ### Impacket Windows kompilierte Tools
 

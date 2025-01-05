@@ -1,4 +1,4 @@
-# Escaping from KIOSKs
+# Ausbrechen aus KIOSKs
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -7,17 +7,17 @@
 ## Überprüfen des physischen Geräts
 
 | Komponente    | Aktion                                                             |
-| --------------| ------------------------------------------------------------------ |
+| ------------- | ------------------------------------------------------------------ |
 | Netzschalter  | Das Gerät aus- und wieder einschalten kann den Startbildschirm anzeigen |
 | Netzkabel     | Überprüfen, ob das Gerät neu startet, wenn die Stromversorgung kurz unterbrochen wird |
-| USB-Ports     | Physikalische Tastatur mit mehr Tastenkombinationen anschließen    |
+| USB-Ports     | Physikalische Tastatur mit mehr Tastenkombinationen anschließen     |
 | Ethernet      | Netzwerk-Scan oder Sniffing kann weitere Ausnutzung ermöglichen     |
 
 ## Überprüfen möglicher Aktionen innerhalb der GUI-Anwendung
 
 **Gemeinsame Dialoge** sind Optionen wie **Datei speichern**, **Datei öffnen**, Schriftart auswählen, Farbe... Die meisten von ihnen bieten **vollständige Explorer-Funktionalität**. Das bedeutet, dass Sie auf Explorer-Funktionalitäten zugreifen können, wenn Sie auf diese Optionen zugreifen können:
 
-- Schließen/Schließen als
+- Schließen/Als schließen
 - Öffnen/Öffnen mit
 - Drucken
 - Exportieren/Importieren
@@ -26,7 +26,7 @@
 
 Sie sollten überprüfen, ob Sie:
 
-- Dateien ändern oder neue Dateien erstellen können
+- Dateien ändern oder neue erstellen können
 - Symbolische Links erstellen können
 - Zugriff auf eingeschränkte Bereiche erhalten können
 - Andere Apps ausführen können
@@ -113,8 +113,8 @@ Registrierungseditor: [https://sourceforge.net/projects/uberregedit/](https://so
 
 ### Wischgesten
 
-- Wischen Sie von der linken Seite nach rechts, um alle offenen Fenster zu sehen, die KIOSK-App zu minimieren und direkt auf das gesamte Betriebssystem zuzugreifen;
-- Wischen Sie von der rechten Seite nach links, um das Aktionscenter zu öffnen, die KIOSK-App zu minimieren und direkt auf das gesamte Betriebssystem zuzugreifen;
+- Wischen Sie von der linken Seite nach rechts, um alle offenen Fenster zu sehen, minimieren Sie die KIOSK-App und greifen Sie direkt auf das gesamte Betriebssystem zu;
+- Wischen Sie von der rechten Seite nach links, um das Aktionscenter zu öffnen, minimieren Sie die KIOSK-App und greifen Sie direkt auf das gesamte Betriebssystem zu;
 - Wischen Sie von der oberen Kante, um die Titelleiste für eine im Vollbildmodus geöffnete App sichtbar zu machen;
 - Wischen Sie von unten nach oben, um die Taskleiste in einer Vollbild-App anzuzeigen.
 
@@ -159,7 +159,7 @@ Geben Sie diese URLs ein, um eine Explorer-Ansicht zu erhalten:
 Backup iKat-Versionen:
 
 [http://swin.es/k/](http://swin.es/k/)\
-[http://www.ikat.kronicd.net/](http://www.ikat.kronicd.net)\\
+[http://www.ikat.kronicd.net/](http://www.ikat.kronicd.net)
 
 Erstellen Sie einen gemeinsamen Dialog mit JavaScript und greifen Sie auf den Datei-Explorer zu: `document.write('<input/type=file>')`\
 Quelle: https://medium.com/@Rend\_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
@@ -169,48 +169,48 @@ Quelle: https://medium.com/@Rend\_/give-me-a-browser-ill-give-you-a-shell-de1981
 ### Gesten und Tasten
 
 - Wischen Sie mit vier (oder fünf) Fingern nach oben / Doppeltippen auf die Home-Taste: Um die Multitasking-Ansicht anzuzeigen und die App zu wechseln
-- Wischen Sie in eine oder andere Richtung mit vier oder fünf Fingern: Um zur nächsten/vorherigen App zu wechseln
-- Kneifen Sie den Bildschirm mit fünf Fingern / Berühren Sie die Home-Taste / Wischen Sie mit 1 Finger schnell von unten nach oben: Um auf die Startseite zuzugreifen
-- Wischen Sie mit einem Finger 1-2 Zoll (langsam) von unten am Bildschirm: Das Dock wird angezeigt
-- Wischen Sie mit 1 Finger von oben auf dem Display: Um Ihre Benachrichtigungen anzuzeigen
+- Wischen Sie in eine Richtung mit vier oder fünf Fingern: Um zur nächsten/vorherigen App zu wechseln
+- Kneifen Sie den Bildschirm mit fünf Fingern / Berühren Sie die Home-Taste / Wischen Sie schnell mit 1 Finger von unten nach oben: Um auf die Startseite zuzugreifen
+- Wischen Sie mit 1 Finger von unten des Bildschirms nur 1-2 Zoll (langsam): Das Dock wird angezeigt
+- Wischen Sie mit 1 Finger von der oberen Kante des Displays nach unten: Um Ihre Benachrichtigungen anzuzeigen
 - Wischen Sie mit 1 Finger in die obere rechte Ecke des Bildschirms: Um das Kontrollzentrum des iPad Pro zu sehen
-- Wischen Sie mit 1 Finger 1-2 Zoll von der linken Seite des Bildschirms: Um die Heute-Ansicht zu sehen
+- Wischen Sie mit 1 Finger von der linken Seite des Bildschirms 1-2 Zoll: Um die Heute-Ansicht zu sehen
 - Wischen Sie schnell mit 1 Finger von der Mitte des Bildschirms nach rechts oder links: Um zur nächsten/vorherigen App zu wechseln
-- Drücken und halten Sie die Ein-/**Aus**-/Ruhe-Taste in der oberen rechten Ecke des **iPad +** Bewegen Sie den Schieberegler **ausschalten** ganz nach rechts: Um auszuschalten
-- Drücken Sie die Ein-/**Aus**-/Ruhe-Taste in der oberen rechten Ecke des **iPad und die Home-Taste für einige Sekunden**: Um einen harten Ausschaltvorgang zu erzwingen
-- Drücken Sie die Ein-/**Aus**-/Ruhe-Taste in der oberen rechten Ecke des **iPad und die Home-Taste schnell**: Um einen Screenshot zu machen, der in der unteren linken Ecke des Displays angezeigt wird. Drücken Sie beide Tasten gleichzeitig sehr kurz, da bei längerem Halten ein harter Ausschaltvorgang durchgeführt wird.
+- Drücken und halten Sie die Ein-/**Aus**-/Sleep-Taste in der oberen rechten Ecke des **iPad +** Bewegen Sie den Schieberegler **ausschalten** ganz nach rechts: Um auszuschalten
+- Drücken Sie die Ein-/**Aus**-/Sleep-Taste in der oberen rechten Ecke des **iPad und die Home-Taste für einige Sekunden**: Um einen harten Ausschaltvorgang zu erzwingen
+- Drücken Sie die Ein-/**Aus**-/Sleep-Taste in der oberen rechten Ecke des **iPad und die Home-Taste schnell**: Um einen Screenshot zu machen, der in der unteren linken Ecke des Displays angezeigt wird. Drücken Sie beide Tasten gleichzeitig sehr kurz, da bei längerem Halten ein harter Ausschaltvorgang durchgeführt wird.
 
 ### Tastenkombinationen
 
-Sie sollten eine iPad-Tastatur oder einen USB-Tastaturadapter haben. Nur Tastenkombinationen, die beim Verlassen der Anwendung helfen könnten, werden hier angezeigt.
+Sie sollten eine iPad-Tastatur oder einen USB-Tastaturadapter haben. Nur Tastenkombinationen, die beim Ausbrechen aus der Anwendung helfen könnten, werden hier angezeigt.
 
 | Taste | Name         |
 | ----- | ------------ |
-| ⌘   | Befehl      |
-| ⌥   | Option (Alt) |
-| ⇧   | Shift        |
-| ↩   | Eingabe       |
-| ⇥   | Tab          |
-| ^   | Steuerung      |
-| ←   | Linker Pfeil   |
-| →   | Rechter Pfeil  |
-| ↑   | Aufwärtspfeil     |
-| ↓   | Abwärtspfeil     |
+| ⌘     | Befehl      |
+| ⌥     | Option (Alt) |
+| ⇧     | Shift        |
+| ↩     | Eingabe      |
+| ⇥     | Tab          |
+| ^     | Steuerung    |
+| ←     | Linker Pfeil |
+| →     | Rechter Pfeil|
+| ↑     | Oberer Pfeil |
+| ↓     | Unterer Pfeil|
 
 #### System-Tastenkombinationen
 
 Diese Tastenkombinationen sind für die visuellen Einstellungen und Toneinstellungen, abhängig von der Verwendung des iPads.
 
 | Tastenkombination | Aktion                                                                         |
-| ------------------| ------------------------------------------------------------------------------ |
-| F1                | Bildschirm dimmen                                                                |
-| F2                | Bildschirm aufhellen                                                            |
-| F7                | Einen Song zurück                                                              |
-| F8                | Abspielen/Pause                                                                 |
+| ----------------- | ------------------------------------------------------------------------------ |
+| F1                | Bildschirm dimmen                                                              |
+| F2                | Bildschirm aufhellen                                                           |
+| F7                | Einen Song zurückspringen                                                      |
+| F8                | Abspielen/Pause                                                                |
 | F9                | Song überspringen                                                              |
 | F10               | Stummschalten                                                                  |
 | F11               | Lautstärke verringern                                                          |
-| F12               | Lautstärke erhöhen                                                              |
+| F12               | Lautstärke erhöhen                                                             |
 | ⌘ Leertaste       | Eine Liste verfügbarer Sprachen anzeigen; um eine auszuwählen, drücken Sie die Leertaste erneut. |
 
 #### iPad-Navigation
@@ -223,50 +223,50 @@ Diese Tastenkombinationen sind für die visuellen Einstellungen und Toneinstellu
 | ⌘⇥ (Befehl-Tab)                                   | Liste der letzten zehn verwendeten Apps                 |
 | ⌘\~                                                | Gehe zur letzten App                                    |
 | ⌘⇧3 (Befehl-Shift-3)                              | Screenshot (schwebt unten links, um zu speichern oder zu handeln) |
-| ⌘⇧4                                                | Screenshot und im Editor öffnen                         |
-| Drücken und Halten von ⌘                           | Liste der verfügbaren Tastenkombinationen für die App   |
+| ⌘⇧4                                                | Screenshot und öffne ihn im Editor                      |
+| Halten Sie ⌘ gedrückt                              | Liste der verfügbaren Tastenkombinationen für die App   |
 | ⌘⌥D (Befehl-Option/Alt-D)                         | Dock anzeigen                                           |
 | ^⌥H (Steuerung-Option-H)                           | Home-Taste                                             |
-| ^⌥H H (Steuerung-Option-H-H)                       | Multitasking-Leiste anzeigen                            |
-| ^⌥I (Steuerung-Option-i)                           | Elementauswahl                                         |
+| ^⌥H H (Steuerung-Option-H-H)                       | Multitasking-Leiste anzeigen                             |
+| ^⌥I (Steuerung-Option-i)                           | Elementauswahl                                          |
 | Escape                                             | Zurück-Taste                                           |
-| → (Rechter Pfeil)                                  | Nächstes Element                                       |
-| ← (Linker Pfeil)                                   | Vorheriges Element                                     |
-| ↑↓ (Aufwärtspfeil, Abwärtspfeil)                   | Ausgewähltes Element gleichzeitig antippen             |
-| ⌥ ↓ (Option-Abwärtspfeil)                          | Nach unten scrollen                                    |
-| ⌥↑ (Option-Aufwärtspfeil)                          | Nach oben scrollen                                     |
-| ⌥← oder ⌥→ (Option-Linker Pfeil oder Option-Rechter Pfeil) | Nach links oder rechts scrollen                        |
-| ^⌥S (Steuerung-Option-S)                           | VoiceOver-Sprachausgabe ein- oder ausschalten         |
-| ⌘⇧⇥ (Befehl-Shift-Tab)                            | Zum vorherigen App wechseln                            |
-| ⌘⇥ (Befehl-Tab)                                   | Zur ursprünglichen App zurückwechseln                  |
-| ←+→, dann Option + ← oder Option+→                 | Durch das Dock navigieren                              |
+| → (Rechter Pfeil)                                  | Nächstes Element                                        |
+| ← (Linker Pfeil)                                   | Vorheriges Element                                      |
+| ↑↓ (Oben Pfeil, Unten Pfeil)                       | Ausgewähltes Element gleichzeitig antippen              |
+| ⌥ ↓ (Option-Unten Pfeil)                           | Nach unten scrollen                                     |
+| ⌥↑ (Option-Oben Pfeil)                            | Nach oben scrollen                                      |
+| ⌥← oder ⌥→ (Option-Linker Pfeil oder Option-Rechter Pfeil) | Nach links oder rechts scrollen                          |
+| ^⌥S (Steuerung-Option-S)                           | VoiceOver-Sprachausgabe ein- oder ausschalten          |
+| ⌘⇧⇥ (Befehl-Shift-Tab)                            | Zum vorherigen App wechseln                             |
+| ⌘⇥ (Befehl-Tab)                                   | Zur ursprünglichen App zurückwechseln                   |
+| ←+→, dann Option + ← oder Option+→                 | Durch das Dock navigieren                               |
 
 #### Safari-Tastenkombinationen
 
-| Tastenkombination          | Aktion                                           |
-| -------------------------- | ------------------------------------------------ |
-| ⌘L (Befehl-L)             | Standort öffnen                                  |
-| ⌘T                        | Neuen Tab öffnen                                 |
-| ⌘W                        | Aktuellen Tab schließen                          |
-| ⌘R                        | Aktuellen Tab aktualisieren                      |
-| ⌘.                        | Laden des aktuellen Tabs stoppen                 |
-| ^⇥                        | Zum nächsten Tab wechseln                        |
+| Tastenkombination         | Aktion                                           |
+| ------------------------- | ------------------------------------------------ |
+| ⌘L (Befehl-L)            | Standort öffnen                                  |
+| ⌘T                       | Neuen Tab öffnen                                 |
+| ⌘W                       | Den aktuellen Tab schließen                      |
+| ⌘R                       | Den aktuellen Tab aktualisieren                  |
+| ⌘.                       | Laden des aktuellen Tabs stoppen                 |
+| ^⇥                       | Zum nächsten Tab wechseln                        |
 | ^⇧⇥ (Steuerung-Shift-Tab) | Zum vorherigen Tab wechseln                      |
-| ⌘L                        | Textfeld/URL-Feld auswählen, um es zu ändern    |
-| ⌘⇧T (Befehl-Shift-T)     | Letzten geschlossenen Tab öffnen (kann mehrmals verwendet werden) |
-| ⌘\[                       | Gehe eine Seite in deinem Browserverlauf zurück |
-| ⌘]                        | Gehe eine Seite in deinem Browserverlauf vor    |
-| ⌘⇧R                       | Reader-Modus aktivieren                          |
+| ⌘L                       | Textfeld/URL-Feld auswählen, um es zu ändern    |
+| ⌘⇧T (Befehl-Shift-T)    | Letzten geschlossenen Tab öffnen (kann mehrmals verwendet werden) |
+| ⌘\[                      | Gehe eine Seite in deinem Browserverlauf zurück |
+| ⌘]                       | Gehe eine Seite in deinem Browserverlauf vor    |
+| ⌘⇧R                     | Reader-Modus aktivieren                          |
 
 #### Mail-Tastenkombinationen
 
-| Tastenkombination          | Aktion                       |
-| -------------------------- | ---------------------------- |
-| ⌘L                         | Standort öffnen              |
-| ⌘T                         | Neuen Tab öffnen             |
-| ⌘W                         | Aktuellen Tab schließen      |
-| ⌘R                         | Aktuellen Tab aktualisieren  |
-| ⌘.                         | Laden des aktuellen Tabs stoppen |
+| Tastenkombination         | Aktion                       |
+| ------------------------- | ---------------------------- |
+| ⌘L                       | Standort öffnen              |
+| ⌘T                       | Neuen Tab öffnen             |
+| ⌘W                       | Den aktuellen Tab schließen   |
+| ⌘R                       | Den aktuellen Tab aktualisieren|
+| ⌘.                       | Laden des aktuellen Tabs stoppen |
 | ⌘⌥F (Befehl-Option/Alt-F) | In deinem Postfach suchen    |
 
 ## Referenzen

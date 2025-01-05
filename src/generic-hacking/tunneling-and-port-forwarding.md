@@ -78,7 +78,7 @@ ifconfig tun0 up #Activate the client side network interface
 ip addr add 1.1.1.1/32 peer 1.1.1.2 dev tun0 #Server side VPN IP
 ifconfig tun0 up #Activate the server side network interface
 ```
-Aktivieren Sie das Forwarding auf der Server-Seite
+Aktivieren Sie das Forwarding auf der Serverseite
 ```bash
 echo 1 > /proc/sys/net/ipv4/ip_forward
 iptables -t nat -A POSTROUTING -s 1.1.1.2 -o eth0 -j MASQUERADE
@@ -152,9 +152,9 @@ rportfwd stop [bind port]
 ```
 Zu beachten:
 
-- Beacons Reverse-Port-Forward ist dafür ausgelegt, **Verkehr zum Team-Server zu tunneln, nicht um zwischen einzelnen Maschinen weiterzuleiten**.
+- Beacons Reverse-Port-Forwarding ist dafür ausgelegt, **Verkehr zum Team-Server zu tunneln, nicht um zwischen einzelnen Maschinen weiterzuleiten**.
 - Der Verkehr wird **innerhalb des C2-Verkehrs von Beacon getunnelt**, einschließlich P2P-Links.
-- **Admin-Rechte sind nicht erforderlich**, um Reverse-Port-Forwards auf hohen Ports zu erstellen.
+- **Admin-Rechte sind nicht erforderlich**, um Reverse-Port-Forwarding auf hohen Ports zu erstellen.
 
 ### rPort2Port lokal
 
@@ -174,7 +174,7 @@ python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/t
 ```
 ## Chisel
 
-Sie können es von der Release-Seite von [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel) herunterladen.\
+Sie können es von der Veröffentlichungsseite von [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel) herunterladen.\
 Sie müssen die **gleiche Version für Client und Server** verwenden.
 
 ### socks
@@ -246,7 +246,7 @@ attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999
 ```
-Pivotieren durch **NTLM-Proxy**
+Durch **NTLM-Proxy** pivotieren
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntlm-proxy-ip <proxy_ip> --ntlm-proxy-port 8080 --domain CONTOSO.COM --username Alice --password P@ssw0rd
 ```
@@ -320,9 +320,9 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 ```
 ## Plink.exe
 
-Es ist wie eine Konsolen-PuTTY-Version (die Optionen sind sehr ähnlich zu einem ssh-Client).
+Es ist wie eine Konsolenversion von PuTTY (die Optionen sind sehr ähnlich zu einem ssh-Client).
 
-Da dieses Binary auf dem Opfer ausgeführt wird und es sich um einen ssh-Client handelt, müssen wir unseren ssh-Dienst und -Port öffnen, damit wir eine umgekehrte Verbindung herstellen können. Um dann nur einen lokal zugänglichen Port auf einen Port in unserer Maschine weiterzuleiten:
+Da dieses Binary auf dem Opfer ausgeführt wird und es sich um einen ssh-Client handelt, müssen wir unseren ssh-Dienst und Port öffnen, damit wir eine umgekehrte Verbindung haben können. Dann, um nur einen lokal zugänglichen Port auf einen Port in unserer Maschine weiterzuleiten:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -343,13 +343,13 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 ```
 ## SocksOverRDP & Proxifier
 
-Sie müssen **RDP-Zugriff über das System** haben.\
+Sie müssen **RDP-Zugriff auf das System** haben.\
 Herunterladen:
 
 1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Dieses Tool verwendet `Dynamic Virtual Channels` (`DVC`) aus der Remote Desktop Service-Funktion von Windows. DVC ist verantwortlich für **das Tunneln von Paketen über die RDP-Verbindung**.
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
-Laden Sie in Ihrem Client-Computer **`SocksOverRDP-Plugin.dll`** so:
+Laden Sie in Ihrem Client-Computer **`SocksOverRDP-Plugin.dll`** wie folgt:
 ```bash
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
@@ -384,7 +384,7 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
 Es authentifiziert sich gegen einen Proxy und bindet einen Port lokal, der an den externen Dienst weitergeleitet wird, den Sie angeben. Dann können Sie das Tool Ihrer Wahl über diesen Port verwenden.\
-Zum Beispiel den weitergeleiteten Port 443
+Zum Beispiel, um den Port 443 weiterzuleiten.
 ```
 Username Alice
 Password P@ssw0rd
@@ -392,8 +392,8 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Jetzt, wenn Sie beispielsweise den **SSH**-Dienst beim Opfer auf Port 443 einstellen, können Sie sich über den Angreifer-Port 2222 damit verbinden.\
-Sie könnten auch einen **meterpreter** verwenden, der sich mit localhost:443 verbindet und der Angreifer hört auf Port 2222.
+Jetzt, wenn Sie beispielsweise den **SSH**-Dienst auf dem Opfer auf Port 443 einstellen, können Sie über den Angreifer-Port 2222 eine Verbindung herstellen.\
+Sie könnten auch einen **meterpreter** verwenden, der sich mit localhost:443 verbindet, während der Angreifer auf Port 2222 lauscht.
 
 ## YARP
 
@@ -417,7 +417,7 @@ ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 ```
 ### DNSCat2
 
-[**Laden Sie es hier herunter**](https://github.com/iagox86/dnscat2)**.**
+[**Lade es hier herunter**](https://github.com/iagox86/dnscat2)**.**
 
 Stellt einen C\&C-Kanal über DNS her. Es benötigt keine Root-Rechte.
 ```bash
@@ -442,7 +442,7 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 ```
 #### Ändern Sie den DNS von proxychains
 
-Proxychains intercepts `gethostbyname` libc call und tunnelt TCP-DNS-Anfragen durch den Socks-Proxy. Standardmäßig ist der DNS-Server, den proxychains verwendet, **4.2.2.2** (fest codiert). Um ihn zu ändern, bearbeiten Sie die Datei: _/usr/lib/proxychains3/proxyresolv_ und ändern Sie die IP. Wenn Sie sich in einer **Windows-Umgebung** befinden, können Sie die IP des **Domänencontrollers** festlegen.
+Proxychains intercepts `gethostbyname` libc call und tunnelt TCP-DNS-Anfragen durch den SOCKS-Proxy. Standardmäßig ist der DNS-Server, den proxychains verwendet, **4.2.2.2** (fest codiert). Um ihn zu ändern, bearbeiten Sie die Datei: _/usr/lib/proxychains3/proxyresolv_ und ändern Sie die IP. Wenn Sie sich in einer **Windows-Umgebung** befinden, können Sie die IP des **Domänencontrollers** festlegen.
 
 ## Tunnel in Go
 
@@ -480,7 +480,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **ist ein Tool, um Lösungen mit einem einzigen Befehl ins Internet zu exponieren.**\
-&#xNAN;_&#x45;xposition URI sind wie:_ **UID.ngrok.io**
+_&#x45;xposition URI sind wie:_ **UID.ngrok.io**
 
 ### Installation
 
@@ -511,12 +511,12 @@ _Es ist auch möglich, Authentifizierung und TLS hinzuzufügen, falls erforderli
 ./ngrok http file:///tmp/httpbin/
 # Example of resulting link: https://abcd-1-2-3-4.ngrok.io/
 ```
-#### Sniffing von HTTP-Anfragen
+#### Sniffing HTTP calls
 
 _Nützlich für XSS, SSRF, SSTI ..._\
 Direkt von stdout oder in der HTTP-Schnittstelle [http://127.0.0.1:4040](http://127.0.0.1:4000).
 
-#### Tunneln interner HTTP-Dienste
+#### Tunneling internal HTTP service
 ```bash
 ./ngrok http localhost:8080 --host-header=rewrite
 # Example of resulting link: https://abcd-1-2-3-4.ngrok.io/

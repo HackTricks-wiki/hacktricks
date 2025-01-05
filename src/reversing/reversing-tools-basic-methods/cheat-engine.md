@@ -18,13 +18,13 @@ Außerdem können Sie **verschiedene** Arten von **Suchen** angeben:
 
 ![](<../../images/image (311).png>)
 
-Sie können auch das Kästchen ankreuzen, um **das Spiel während des Scannens des Speichers zu stoppen**:
+Sie können auch das Kästchen aktivieren, um **das Spiel während des Scannens des Speichers zu stoppen**:
 
 ![](<../../images/image (1052).png>)
 
 ### Hotkeys
 
-In _**Edit --> Settings --> Hotkeys**_ können Sie verschiedene **Hotkeys** für verschiedene Zwecke festlegen, wie z.B. **das Spiel zu stoppen** (was sehr nützlich ist, wenn Sie zu einem bestimmten Zeitpunkt den Speicher scannen möchten). Weitere Optionen sind verfügbar:
+In _**Bearbeiten --> Einstellungen --> Hotkeys**_ können Sie verschiedene **Hotkeys** für verschiedene Zwecke festlegen, wie z.B. **das Spiel zu stoppen** (was sehr nützlich ist, wenn Sie zu einem bestimmten Zeitpunkt den Speicher scannen möchten). Weitere Optionen sind verfügbar:
 
 ![](<../../images/image (864).png>)
 
@@ -42,11 +42,11 @@ Die **Änderung** im **Speicher** wird sofort **angewendet** (beachten Sie, dass
 
 ## Den Wert suchen
 
-Angenommen, es gibt einen wichtigen Wert (wie das Leben Ihres Benutzers), den Sie verbessern möchten, und Sie suchen diesen Wert im Speicher.
+Angenommen, es gibt einen wichtigen Wert (wie das Leben Ihres Benutzers), den Sie verbessern möchten, und Sie suchen nach diesem Wert im Speicher.
 
 ### Durch eine bekannte Änderung
 
-Angenommen, Sie suchen den Wert 100, Sie **führen einen Scan** durch, um nach diesem Wert zu suchen, und finden viele Übereinstimmungen:
+Angenommen, Sie suchen nach dem Wert 100, Sie **führen einen Scan** durch, um nach diesem Wert zu suchen, und Sie finden viele Übereinstimmungen:
 
 ![](<../../images/image (108).png>)
 
@@ -55,7 +55,7 @@ Dann tun Sie etwas, damit sich der **Wert ändert**, und Sie **stoppen** das Spi
 ![](<../../images/image (684).png>)
 
 Cheat Engine wird nach den **Werten** suchen, die **von 100 auf den neuen Wert** gewechselt sind. Glückwunsch, Sie **haben** die **Adresse** des Wertes gefunden, den Sie gesucht haben, und können ihn jetzt ändern.\
-&#xNAN;_Wenn Sie immer noch mehrere Werte haben, tun Sie etwas, um diesen Wert erneut zu ändern, und führen Sie einen weiteren "nächsten Scan" durch, um die Adressen zu filtern._
+_&#x49;f Sie immer noch mehrere Werte haben, tun Sie etwas, um diesen Wert erneut zu ändern, und führen Sie einen weiteren "nächsten Scan" durch, um die Adressen zu filtern._
 
 ### Unbekannter Wert, bekannte Änderung
 
@@ -69,7 +69,7 @@ Beginnen Sie also mit einem Scan vom Typ "**Unbekannter Anfangswert**":
 
 ![](<../../images/image (371).png>)
 
-Sie werden **alle Werte sehen, die auf die ausgewählte Weise geändert wurden**:
+Ihnen werden **alle Werte angezeigt, die auf die ausgewählte Weise geändert wurden**:
 
 ![](<../../images/image (569).png>)
 
@@ -87,7 +87,7 @@ Verwenden Sie einige der erwähnten Tricks, um die Adresse zu finden, an der Ihr
 
 ![](<../../images/image (1067).png>)
 
-Die **erste Option** ist nützlich, um zu wissen, welche **Teile** des **Codes** diese **Adresse verwenden** (was für mehr Dinge nützlich ist, wie z.B. **zu wissen, wo Sie den Code** des Spiels **ändern können**).\
+Die **erste Option** ist nützlich, um zu wissen, welche **Teile** des **Codes** diese **Adresse** **verwenden** (was für mehr Dinge nützlich ist, wie z.B. **zu wissen, wo Sie den Code** des Spiels **ändern können**).\
 Die **zweite Option** ist spezifischer und wird in diesem Fall hilfreicher sein, da wir daran interessiert sind, **von wo dieser Wert geschrieben wird**.
 
 Sobald Sie eine dieser Optionen ausgewählt haben, wird der **Debugger** an das Programm **angehängt** und ein neues **leeres Fenster** erscheint. Jetzt **spielen** Sie das **Spiel** und **ändern** Sie diesen **Wert** (ohne das Spiel neu zu starten). Das **Fenster** sollte mit den **Adressen** gefüllt sein, die den **Wert ändern**:
@@ -117,11 +117,11 @@ Klicken Sie auf "**Adresse manuell hinzufügen**":
 
 ![](<../../images/image (990).png>)
 
-Klicken Sie nun auf das Kontrollkästchen "Zeiger" und fügen Sie die gefundene Adresse in das Textfeld ein (in diesem Szenario war die gefundene Adresse im vorherigen Bild "Tutorial-i386.exe"+2426B0):
+Klicken Sie jetzt auf das Kontrollkästchen "Zeiger" und fügen Sie die gefundene Adresse in das Textfeld ein (in diesem Szenario war die gefundene Adresse im vorherigen Bild "Tutorial-i386.exe"+2426B0):
 
 ![](<../../images/image (392).png>)
 
-(Beachten Sie, dass die erste "Adresse" automatisch aus der Zeigeradresse ausgefüllt wird, die Sie eingeben)
+(Beachten Sie, dass die erste "Adresse" automatisch mit der Zeigeradresse ausgefüllt wird, die Sie eingeben)
 
 Klicken Sie auf OK und ein neuer Zeiger wird erstellt:
 
@@ -138,15 +138,15 @@ Stellen Sie sich also vor, Sie haben die Adresse gefunden, die 1 vom Leben Ihres
 ![](<../../images/image (203).png>)
 
 Klicken Sie auf "Disassembler anzeigen", um den **disassemblierten Code** zu erhalten.\
-Klicken Sie dann auf **CTRL+a**, um das Auto-Assembly-Fenster aufzurufen, und wählen Sie _**Template --> Code Injection**_
+Klicken Sie dann auf **CTRL+a**, um das Auto-Assembly-Fenster aufzurufen, und wählen Sie _**Vorlage --> Code-Injektion**_
 
 ![](<../../images/image (902).png>)
 
-Füllen Sie die **Adresse der Anweisung aus, die Sie ändern möchten** (dies wird normalerweise automatisch ausgefüllt):
+Füllen Sie die **Adresse der Anweisung, die Sie ändern möchten** (dies wird normalerweise automatisch ausgefüllt):
 
 ![](<../../images/image (744).png>)
 
-Ein Template wird generiert:
+Eine Vorlage wird generiert:
 
 ![](<../../images/image (944).png>)
 
