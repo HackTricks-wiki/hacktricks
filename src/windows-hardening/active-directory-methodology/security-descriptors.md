@@ -1,8 +1,8 @@
-# Descriptores de Seguridad
+# Security Descriptors
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Descriptores de Seguridad
+## Security Descriptors
 
 [From the docs](https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language): El Lenguaje de Definición de Descriptores de Seguridad (SDDL) define el formato que se utiliza para describir un descriptor de seguridad. SDDL utiliza cadenas ACE para DACL y SACL: `ace_type;ace_flags;rights;object_guid;inherit_object_guid;account_sid;`
 
@@ -10,7 +10,7 @@ Los **descriptores de seguridad** se utilizan para **almacenar** los **permisos*
 
 Entonces, esta técnica de persistencia se basa en la capacidad de obtener cada privilegio necesario contra ciertos objetos, para poder realizar una tarea que normalmente requiere privilegios de administrador pero sin necesidad de ser administrador.
 
-### Acceso a WMI
+### Access to WMI
 
 Puedes dar a un usuario acceso para **ejecutar WMI de forma remota** [**usando esto**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1):
 ```bash
@@ -26,7 +26,7 @@ Set-RemotePSRemoting -UserName student1 -ComputerName <remotehost> -Remove #Remo
 ```
 ### Acceso remoto a hashes
 
-Accede al **registro** y **volcar hashes** creando una **puerta trasera de Reg usando** [**DAMP**](https://github.com/HarmJ0y/DAMP)**,** para que puedas en cualquier momento recuperar el **hash de la computadora**, el **SAM** y cualquier **credencial AD** en caché en la computadora. Por lo tanto, es muy útil otorgar este permiso a un **usuario regular contra una computadora de Controlador de Dominio**:
+Accede al **registro** y **volcar hashes** creando una **puerta trasera de registro usando** [**DAMP**](https://github.com/HarmJ0y/DAMP)**,** para que puedas en cualquier momento recuperar el **hash de la computadora**, el **SAM** y cualquier **credencial AD** en caché en la computadora. Por lo tanto, es muy útil otorgar este permiso a un **usuario regular contra una computadora de Controlador de Dominio**:
 ```bash
 # allows for the remote retrieval of a system's machine and local account hashes, as well as its domain cached credentials.
 Add-RemoteRegBackdoor -ComputerName <remotehost> -Trustee student1 -Verbose

@@ -2,6 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+
 ## Cómo Funciona
 
 **Smbexec** es una herramienta utilizada para la ejecución remota de comandos en sistemas Windows, similar a **Psexec**, pero evita colocar archivos maliciosos en el sistema objetivo.
@@ -22,7 +23,7 @@ smbexec.py WORKGROUP/genericuser:genericpassword@10.10.10.10
 
 ### Ejemplo de Comandos
 
-Crear y comenzar el servicio se puede lograr con los siguientes comandos:
+Crear e iniciar el servicio se puede lograr con los siguientes comandos:
 ```bash
 sc create [ServiceName] binPath= "cmd.exe /c [PayloadCommand]"
 sc start [ServiceName]

@@ -18,7 +18,7 @@ Para ejecutar **Kerberoasting**, es esencial una cuenta de dominio capaz de soli
 ### **Ataque**
 
 > [!WARNING]
-> Las **herramientas de Kerberoasting** normalmente solicitan **`RC4 encryption`** al realizar el ataque e iniciar solicitudes TGS-REQ. Esto se debe a que **RC4 es** [**más débil**](https://www.stigviewer.com/stig/windows_10/2017-04-28/finding/V-63795) y más fácil de crackear offline utilizando herramientas como Hashcat que otros algoritmos de encriptación como AES-128 y AES-256.\
+> Las **herramientas de Kerberoasting** típicamente solicitan **`RC4 encryption`** al realizar el ataque e iniciar solicitudes TGS-REQ. Esto se debe a que **RC4 es** [**más débil**](https://www.stigviewer.com/stig/windows_10/2017-04-28/finding/V-63795) y más fácil de crackear offline utilizando herramientas como Hashcat que otros algoritmos de encriptación como AES-128 y AES-256.\
 > Los hashes de RC4 (tipo 23) comienzan con **`$krb5tgs$23$*`** mientras que los de AES-256 (tipo 18) comienzan con **`$krb5tgs$18$*`**.`
 
 #### **Linux**
@@ -99,7 +99,7 @@ Set-DomainObject -Identity <username> -Set @{serviceprincipalname='just/whatever
 ```
 Puedes encontrar **herramientas** útiles para ataques de **kerberoast** aquí: [https://github.com/nidem/kerberoast](https://github.com/nidem/kerberoast)
 
-Si encuentras este **error** de Linux: **`Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)`** es debido a tu hora local, necesitas sincronizar el host con el DC. Hay algunas opciones:
+Si encuentras este **error** de Linux: **`Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)`** es por tu hora local, necesitas sincronizar el host con el DC. Hay algunas opciones:
 
 - `ntpdate <IP del DC>` - Obsoleto a partir de Ubuntu 16.04
 - `rdate -n <IP del DC>`
@@ -125,7 +125,7 @@ Al implementar estas medidas, las organizaciones pueden reducir significativamen
 
 ## Kerberoast sin cuenta de dominio
 
-En **septiembre de 2022**, un nuevo método para explotar un sistema fue revelado por un investigador llamado Charlie Clark, compartido a través de su plataforma [exploit.ph](https://exploit.ph/). Este método permite la adquisición de **Tickets de Servicio (ST)** a través de una solicitud **KRB_AS_REQ**, que notablemente no requiere control sobre ninguna cuenta de Active Directory. Esencialmente, si un principal está configurado de tal manera que no requiere pre-autenticación—un escenario similar a lo que se conoce en el ámbito de la ciberseguridad como un ataque de **AS-REP Roasting**—esta característica puede ser aprovechada para manipular el proceso de solicitud. Específicamente, al alterar el atributo **sname** dentro del cuerpo de la solicitud, el sistema es engañado para emitir un **ST** en lugar del estándar Ticket Granting Ticket (TGT) encriptado.
+En **septiembre de 2022**, un nuevo método para explotar un sistema fue revelado por un investigador llamado Charlie Clark, compartido a través de su plataforma [exploit.ph](https://exploit.ph/). Este método permite la adquisición de **Tickets de Servicio (ST)** a través de una solicitud **KRB_AS_REQ**, que notablemente no requiere control sobre ninguna cuenta de Active Directory. Esencialmente, si un principal está configurado de tal manera que no requiere pre-autenticación—un escenario similar a lo que se conoce en el ámbito de la ciberseguridad como un **ataque AS-REP Roasting**—esta característica puede ser aprovechada para manipular el proceso de solicitud. Específicamente, al alterar el atributo **sname** dentro del cuerpo de la solicitud, el sistema es engañado para emitir un **ST** en lugar del estándar Ticket Granting Ticket (TGT) encriptado.
 
 La técnica se explica completamente en este artículo: [Semperis blog post](https://www.semperis.com/blog/new-attack-paths-as-requested-sts/).
 
@@ -140,7 +140,7 @@ GetUserSPNs.py -no-preauth "NO_PREAUTH_USER" -usersfile "LIST_USERS" -dc-host "d
 ```
 #### Windows
 
-- [GhostPack/Rubeus de PR #139](https://github.com/GhostPack/Rubeus/pull/139):
+- [GhostPack/Rubeus from PR #139](https://github.com/GhostPack/Rubeus/pull/139):
 ```bash
 Rubeus.exe kerberoast /outfile:kerberoastables.txt /domain:"domain.local" /dc:"dc.domain.local" /nopreauth:"NO_PREAUTH_USER" /spn:"TARGET_SERVICE"
 ```

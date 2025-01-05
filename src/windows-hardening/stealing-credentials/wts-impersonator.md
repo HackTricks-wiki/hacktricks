@@ -21,9 +21,9 @@ WTSEnumerateSessionsA → WTSQuerySessionInformationA → WTSQueryUserToken → 
 .\WTSImpersonator.exe -m enum -s 192.168.40.131
 ```
 
-- **Ejecutando Comandos**: Los módulos `exec` y `exec-remote` requieren un contexto de **Servicio** para funcionar. La ejecución local simplemente necesita el ejecutable de WTSImpersonator y un comando:
+- **Ejecutando Comandos**: Los módulos `exec` y `exec-remote` requieren un contexto de **Servicio** para funcionar. La ejecución local simplemente necesita el ejecutable WTSImpersonator y un comando:
 
-- Ejemplo para la ejecución de comandos local:
+- Ejemplo de ejecución de comando local:
 ```powershell
 .\WTSImpersonator.exe -m exec -s 3 -c C:\Windows\System32\cmd.exe
 ```

@@ -23,13 +23,13 @@ Puedes encontrar estas instrucciones cuando uses una herramienta como el JTAGula
 
 Los escaneos de límites incluyen pruebas del **Test Access Port (TAP)** de cuatro hilos, un puerto de propósito general que proporciona **acceso a las funciones de soporte de prueba JTAG** integradas en un componente. TAP utiliza las siguientes cinco señales:
 
-- Entrada de reloj de prueba (**TCK**) El TCK es el **reloj** que define con qué frecuencia el controlador TAP realizará una acción única (en otras palabras, saltar al siguiente estado en la máquina de estados).
+- Entrada de reloj de prueba (**TCK**) El TCK es el **reloj** que define con qué frecuencia el controlador TAP tomará una acción única (en otras palabras, saltar al siguiente estado en la máquina de estados).
 - Entrada de selección de modo de prueba (**TMS**) TMS controla la **máquina de estados finita**. En cada pulso del reloj, el controlador TAP JTAG del dispositivo verifica el voltaje en el pin TMS. Si el voltaje está por debajo de un cierto umbral, la señal se considera baja e interpretada como 0, mientras que si el voltaje está por encima de un cierto umbral, la señal se considera alta e interpretada como 1.
 - Entrada de datos de prueba (**TDI**) TDI es el pin que envía **datos al chip a través de las celdas de escaneo**. Cada proveedor es responsable de definir el protocolo de comunicación a través de este pin, porque JTAG no lo define.
 - Salida de datos de prueba (**TDO**) TDO es el pin que envía **datos fuera del chip**.
 - Entrada de reinicio de prueba (**TRST**) La TRST opcional reinicia la máquina de estados finita **a un estado conocido bueno**. Alternativamente, si el TMS se mantiene en 1 durante cinco ciclos de reloj consecutivos, invoca un reinicio, de la misma manera que lo haría el pin TRST, por lo que TRST es opcional.
 
-A veces podrás encontrar esos pines marcados en el PCB. En otras ocasiones, podrías necesitar **encontrarlos**.
+A veces podrás encontrar esos pines marcados en el PCB. En otras ocasiones, puede que necesites **encontrarlos**.
 
 ### Identifying JTAG pins
 

@@ -6,7 +6,7 @@
 
 **La luz infrarroja es invisible para los humanos**. La longitud de onda IR va de **0.7 a 1000 micrones**. Los controles remotos domésticos utilizan una señal IR para la transmisión de datos y operan en el rango de longitud de onda de 0.75..1.4 micrones. Un microcontrolador en el control remoto hace que un LED infrarrojo parpadee con una frecuencia específica, convirtiendo la señal digital en una señal IR.
 
-Para recibir señales IR se utiliza un **fotoreceptor**. Este **convierte la luz IR en pulsos de voltaje**, que ya son **señales digitales**. Por lo general, hay un **filtro de luz oscura dentro del receptor**, que deja **pasar solo la longitud de onda deseada** y elimina el ruido.
+Para recibir señales IR se utiliza un **fotoreceptor**. Este **convierte la luz IR en pulsos de voltaje**, que ya son **señales digitales**. Por lo general, hay un **filtro de luz oscura dentro del receptor**, que deja pasar **solo la longitud de onda deseada** y elimina el ruido.
 
 ### Variedad de Protocolos IR <a href="#variety-of-ir-protocols" id="variety-of-ir-protocols"></a>
 
@@ -26,20 +26,20 @@ Los bits se codifican modulando la duración del espacio entre pulsos. El ancho 
 
 **2. Codificación por Ancho de Pulso**
 
-Los bits se codifican mediante la modulación del ancho del pulso. El ancho del espacio después de la ráfaga de pulso es constante.
+Los bits se codifican mediante la modulación del ancho del pulso. El ancho del espacio después de la ráfaga de pulsos es constante.
 
 <figure><img src="../../images/image (282).png" alt=""><figcaption></figcaption></figure>
 
 **3. Codificación por Fase**
 
-También se conoce como codificación Manchester. El valor lógico se define por la polaridad de la transición entre la ráfaga de pulso y el espacio. "Espacio a ráfaga de pulso" denota lógica "0", "ráfaga de pulso a espacio" denota lógica "1".
+También se conoce como codificación Manchester. El valor lógico se define por la polaridad de la transición entre la ráfaga de pulsos y el espacio. "Espacio a ráfaga de pulso" denota lógica "0", "ráfaga de pulso a espacio" denota lógica "1".
 
 <figure><img src="../../images/image (634).png" alt=""><figcaption></figcaption></figure>
 
 **4. Combinación de las anteriores y otras exóticas**
 
 > [!NOTE]
-> Hay protocolos IR que están **intentando volverse universales** para varios tipos de dispositivos. Los más famosos son RC5 y NEC. Desafortunadamente, lo más famoso **no significa lo más común**. En mi entorno, solo encontré dos controles remotos NEC y ninguno RC5.
+> Existen protocolos IR que **intentan volverse universales** para varios tipos de dispositivos. Los más famosos son RC5 y NEC. Desafortunadamente, lo más famoso **no significa lo más común**. En mi entorno, solo encontré dos controles remotos NEC y ninguno RC5.
 >
 > A los fabricantes les encanta usar sus propios protocolos IR únicos, incluso dentro de la misma gama de dispositivos (por ejemplo, cajas de TV). Por lo tanto, los controles remotos de diferentes empresas y a veces de diferentes modelos de la misma empresa, no pueden trabajar con otros dispositivos del mismo tipo.
 
@@ -55,16 +55,16 @@ Luego se transmiten los datos. La estructura, el preámbulo y el método de codi
 
 El **protocolo IR NEC** contiene un comando corto y un código de repetición, que se envía mientras se presiona el botón. Tanto el comando como el código de repetición tienen el mismo preámbulo al principio.
 
-El **comando NEC**, además del preámbulo, consiste en un byte de dirección y un byte de número de comando, por el cual el dispositivo entiende qué debe realizarse. Los bytes de dirección y número de comando se duplican con valores inversos, para verificar la integridad de la transmisión. Hay un bit de parada adicional al final del comando.
+El **comando NEC**, además del preámbulo, consiste en un byte de dirección y un byte de número de comando, por el cual el dispositivo entiende qué debe realizar. Los bytes de dirección y número de comando se duplican con valores inversos, para verificar la integridad de la transmisión. Hay un bit de parada adicional al final del comando.
 
 El **código de repetición** tiene un "1" después del preámbulo, que es un bit de parada.
 
-Para **lógica "0" y "1"** NEC utiliza Codificación por Distancia de Pulso: primero, se transmite una ráfaga de pulso después de la cual hay una pausa, cuya longitud establece el valor del bit.
+Para **lógica "0" y "1"** NEC utiliza Codificación por Distancia de Pulso: primero, se transmite una ráfaga de pulsos después de la cual hay una pausa, cuya longitud establece el valor del bit.
 
 ### Aires Acondicionados
 
 A diferencia de otros controles remotos, **los aires acondicionados no transmiten solo el código del botón presionado**. También **transmiten toda la información** cuando se presiona un botón para asegurar que la **máquina de aire acondicionado y el control remoto estén sincronizados**.\
-Esto evitará que una máquina configurada a 20ºC se aumente a 21ºC con un control remoto, y luego, cuando se use otro control remoto, que aún tiene la temperatura en 20ºC, para aumentar más la temperatura, se "aumente" a 21ºC (y no a 22ºC pensando que está en 21ºC).
+Esto evitará que una máquina configurada a 20ºC se aumente a 21ºC con un control remoto, y luego, cuando se use otro control remoto, que aún tiene la temperatura en 20ºC, se aumente más la temperatura, se "aumente" a 21ºC (y no a 22ºC pensando que está en 21ºC).
 
 ### Ataques
 

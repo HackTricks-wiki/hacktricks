@@ -38,12 +38,12 @@ certipy auth -pfx administrator_forged.pfx -dc-ip 172.16.126.128
 > [!WARNING]
 > El usuario objetivo para la falsificación de certificados debe estar activo y ser capaz de autenticarse en Active Directory para que el proceso tenga éxito. Falsificar un certificado para cuentas especiales como krbtgt es ineficaz.
 
-Este certificado falsificado será **válido** hasta la fecha de finalización especificada y **mientras el certificado CA raíz sea válido** (generalmente de 5 a **10+ años**). También es válido para **máquinas**, por lo que combinado con **S4U2Self**, un atacante puede **mantener persistencia en cualquier máquina del dominio** mientras el certificado CA sea válido.\
+Este certificado falsificado será **válido** hasta la fecha de finalización especificada y **mientras el certificado CA raíz sea válido** (generalmente de 5 a **10+ años**). También es válido para **máquinas**, por lo que, combinado con **S4U2Self**, un atacante puede **mantener persistencia en cualquier máquina del dominio** mientras el certificado CA sea válido.\
 Además, los **certificados generados** con este método **no pueden ser revocados** ya que la CA no tiene conocimiento de ellos.
 
 ## Confianza en Certificados CA Maliciosos - DPERSIST2
 
-El objeto `NTAuthCertificates` está definido para contener uno o más **certificados CA** dentro de su atributo `cacertificate`, que utiliza Active Directory (AD). El proceso de verificación por parte del **controlador de dominio** implica comprobar el objeto `NTAuthCertificates` en busca de una entrada que coincida con la **CA especificada** en el campo Emisor del **certificado** que se está autenticando. La autenticación continúa si se encuentra una coincidencia.
+El objeto `NTAuthCertificates` está definido para contener uno o más **certificados CA** dentro de su atributo `cacertificate`, que utiliza Active Directory (AD). El proceso de verificación por parte del **controlador de dominio** implica comprobar el objeto `NTAuthCertificates` en busca de una entrada que coincida con la **CA especificada** en el campo Emisor del **certificado** autenticador. La autenticación continúa si se encuentra una coincidencia.
 
 Un certificado CA autofirmado puede ser agregado al objeto `NTAuthCertificates` por un atacante, siempre que tenga control sobre este objeto de AD. Normalmente, solo se otorgan permisos para modificar este objeto a los miembros del grupo **Enterprise Admin**, junto con **Domain Admins** o **Administrators** en el **dominio raíz del bosque**. Pueden editar el objeto `NTAuthCertificates` usando `certutil.exe` con el comando `certutil.exe -dspublish -f C:\Temp\CERT.crt NTAuthCA126`, o empleando la [**PKI Health Tool**](https://docs.microsoft.com/en-us/troubleshoot/windows-server/windows-security/import-third-party-ca-to-enterprise-ntauth-store#method-1---import-a-certificate-by-using-the-pki-health-tool).
 
@@ -55,8 +55,8 @@ Las oportunidades para la **persistencia** a través de **modificaciones del des
 
 - El objeto de computadora AD del **servidor CA**
 - El **servidor RPC/DCOM del servidor CA**
-- Cualquier **objeto o contenedor AD descendiente** en **`CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>`** (por ejemplo, el contenedor de Plantillas de Certificado, contenedor de Autoridades de Certificación, el objeto NTAuthCertificates, etc.)
-- **Grupos AD a los que se les delegaron derechos para controlar AD CS** por defecto o por la organización (como el grupo incorporado Cert Publishers y cualquiera de sus miembros)
+- Cualquier **objeto o contenedor AD descendiente** en **`CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>`** (por ejemplo, el contenedor de Plantillas de Certificado, el contenedor de Autoridades de Certificación, el objeto NTAuthCertificates, etc.)
+- **Grupos AD con derechos delegados para controlar AD CS** por defecto o por la organización (como el grupo incorporado Cert Publishers y cualquiera de sus miembros)
 
 Un ejemplo de implementación maliciosa implicaría a un atacante, que tiene **permisos elevados** en el dominio, agregando el permiso **`WriteOwner`** a la plantilla de certificado **`User`** por defecto, siendo el atacante el principal para el derecho. Para explotar esto, el atacante primero cambiaría la propiedad de la plantilla **`User`** a sí mismo. Después de esto, el **`mspki-certificate-name-flag`** se establecería en **1** en la plantilla para habilitar **`ENROLLEE_SUPPLIES_SUBJECT`**, permitiendo a un usuario proporcionar un Nombre Alternativo de Sujeto en la solicitud. Posteriormente, el atacante podría **inscribirse** usando la **plantilla**, eligiendo un nombre de **administrador de dominio** como nombre alternativo, y utilizar el certificado adquirido para autenticarse como el DA.
 

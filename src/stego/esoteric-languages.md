@@ -48,9 +48,7 @@ Take it to the top
 
 Whisper my world
 ```
-{{#ref}}
-https://codewithrockstar.com/
-{{#endref}}
+{% embed url="https://codewithrockstar.com/" %}
 
 ## PETOOH
 ```

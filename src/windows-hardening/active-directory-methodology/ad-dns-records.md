@@ -1,8 +1,8 @@
-# Registros DNS de AD
+# AD DNS Records
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Por defecto, **cualquier usuario** en Active Directory puede **enumerar todos los registros DNS** en las zonas DNS del Dominio o del Bosque, similar a una transferencia de zona (los usuarios pueden listar los objetos secundarios de una zona DNS en un entorno de AD).
+Por defecto, **cualquier usuario** en Active Directory puede **enumerar todos los registros DNS** en las zonas DNS del Dominio o del Bosque, similar a una transferencia de zona (los usuarios pueden listar los objetos secundarios de una zona DNS en un entorno AD).
 
 La herramienta [**adidnsdump**](https://github.com/dirkjanm/adidnsdump) permite la **enumeración** y **exportación** de **todos los registros DNS** en la zona para fines de reconocimiento de redes internas.
 ```bash

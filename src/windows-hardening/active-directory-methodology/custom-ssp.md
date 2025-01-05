@@ -4,7 +4,7 @@
 
 ### Custom SSP
 
-[Aprende qué es un SSP (Proveedor de Soporte de Seguridad) aquí.](../authentication-credentials-uac-and-efs/index.html#security-support-provider-interface-sspi)\
+[Aprende qué es un SSP (Proveedor de Soporte de Seguridad) aquí.](../authentication-credentials-uac-and-efs/#security-support-provider-interface-sspi)\
 Puedes crear tu **propio SSP** para **capturar** en **texto claro** las **credenciales** utilizadas para acceder a la máquina.
 
 #### Mimilib

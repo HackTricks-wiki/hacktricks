@@ -1,8 +1,8 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# Verifique las posibles acciones dentro de la aplicación GUI
+# Verificar posibles acciones dentro de la aplicación GUI
 
-**Diálogos Comunes** son esas opciones de **guardar un archivo**, **abrir un archivo**, seleccionar una fuente, un color... La mayoría de ellos **ofrecerán una funcionalidad completa de Explorador**. Esto significa que podrás acceder a las funcionalidades del Explorador si puedes acceder a estas opciones:
+**Diálogos Comunes** son aquellas opciones de **guardar un archivo**, **abrir un archivo**, seleccionar una fuente, un color... La mayoría de ellos **ofrecerán una funcionalidad completa de Explorador**. Esto significa que podrás acceder a las funcionalidades del Explorador si puedes acceder a estas opciones:
 
 - Cerrar/Cerrar como
 - Abrir/Abrir con
@@ -59,7 +59,7 @@ _bash, sh, zsh..._ Más aquí: [https://gtfobins.github.io/](https://gtfobins.gi
 
 Consola: [https://sourceforge.net/projects/console/](https://sourceforge.net/projects/console/)\
 Explorador: [https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/](https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/)\
-Editor de registro: [https://sourceforge.net/projects/uberregedit/](https://sourceforge.net/projects/uberregedit/)
+Editor del registro: [https://sourceforge.net/projects/uberregedit/](https://sourceforge.net/projects/uberregedit/)
 
 ## Accediendo al sistema de archivos desde el navegador
 
@@ -88,7 +88,7 @@ Editor de registro: [https://sourceforge.net/projects/uberregedit/](https://sour
 - WINDOWS+F – Buscar
 - SHIFT+F10 – Menú contextual
 - CTRL+SHIFT+ESC – Administrador de tareas
-- CTRL+ALT+DEL – Pantalla de inicio en versiones más nuevas de Windows
+- CTRL+ALT+DEL – Pantalla de inicio en versiones más recientes de Windows
 - F1 – Ayuda F3 – Buscar
 - F6 – Barra de direcciones
 - F11 – Alternar pantalla completa dentro de Internet Explorer
@@ -113,7 +113,7 @@ Es una barra de herramientas que aparece en la parte superior izquierda de la im
 
 ### Protocolo Shell
 
-Escribe estas URL para obtener una vista de Explorador:
+Escribe estas URLs para obtener una vista de Explorador:
 
 - `shell:Administrative Tools`
 - `shell:DocumentsLibrary`
@@ -159,7 +159,7 @@ Fuente: https://medium.com/@Rend_/give-me-a-browser-ill-give-you-a-shell-de19811
 
 - Desliza de un lado a otro con cuatro o cinco dedos: Para cambiar a la siguiente/última aplicación
 
-- Pellizca la pantalla con cinco dedos / Toca el botón de inicio / Desliza hacia arriba con 1 dedo desde la parte inferior de la pantalla en un movimiento rápido hacia arriba: Para acceder a la pantalla de inicio
+- Pellizca la pantalla con cinco dedos / Toca el botón de inicio / Desliza hacia arriba con 1 dedo desde la parte inferior de la pantalla en un movimiento rápido hacia arriba: Para acceder a Inicio
 
 - Desliza un dedo desde la parte inferior de la pantalla solo 1-2 pulgadas (lento): La base aparecerá
 
@@ -200,8 +200,8 @@ Estos atajos son para la configuración visual y de sonido, dependiendo del uso 
 
 | Atajo | Acción                                                                         |
 | -------- | ------------------------------------------------------------------------------ |
-| F1       | Disminuir brillo de pantalla                                                                    |
-| F2       | Aumentar brillo de pantalla                                                                |
+| F1       | Atenuar pantalla                                                                    |
+| F2       | Aumentar brillo                                                                |
 | F7       | Retroceder una canción                                                                  |
 | F8       | Reproducir/pausar                                                                     |
 | F9       | Saltar canción                                                                      |
@@ -232,7 +232,7 @@ Estos atajos son para la configuración visual y de sonido, dependiendo del uso 
 | ↑↓ (Flecha arriba, Flecha abajo)                          | Toca simultáneamente el ítem seleccionado                        |
 | ⌥ ↓ (Flecha hacia abajo)                            | Desplazarse hacia abajo                                             |
 | ⌥↑ (Flecha hacia arriba)                               | Desplazarse hacia arriba                                               |
-| ⌥← o ⌥→ (Flecha hacia la izquierda o Flecha hacia la derecha) | Desplazarse a la izquierda o a la derecha                                    |
+| ⌥← o ⌥→ (Flecha izquierda o flecha derecha) | Desplazarse a la izquierda o a la derecha                                    |
 | ^⌥S (Control-Opción-S)                             | Activar o desactivar el habla de VoiceOver                         |
 | ⌘⇧⇥ (Comando-Shift-Tab)                            | Cambiar a la aplicación anterior                              |
 | ⌘⇥ (Comando-Tab)                                   | Volver a la aplicación original                         |
@@ -248,11 +248,11 @@ Estos atajos son para la configuración visual y de sonido, dependiendo del uso 
 | ⌘R                      | Actualizar la pestaña actual                          |
 | ⌘.                      | Detener la carga de la pestaña actual                     |
 | ^⇥                      | Cambiar a la siguiente pestaña                           |
-| ^⇧⇥ (Control-Shift-Tab) | Moverse a la pestaña anterior                         |
+| ^⇧⇥ (Control-Shift-Tab) | Mover a la pestaña anterior                         |
 | ⌘L                      | Seleccionar el campo de entrada de texto/URL para modificarlo     |
 | ⌘⇧T (Comando-Shift-T)   | Abrir la última pestaña cerrada (se puede usar varias veces) |
-| ⌘\[                     | Regresar una página en tu historial de navegación      |
-| ⌘]                      | Avanzar una página en tu historial de navegación   |
+| ⌘\[                     | Retrocede una página en tu historial de navegación      |
+| ⌘]                      | Avanza una página en tu historial de navegación   |
 | ⌘⇧R                     | Activar Modo Lector                             |
 
 ### Atajos de Mail

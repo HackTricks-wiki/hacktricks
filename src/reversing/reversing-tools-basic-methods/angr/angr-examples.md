@@ -386,7 +386,7 @@ main(sys.argv)
 > ```python
 >   # Hola mundo, mi nombre es John.
 >   # ^                       ^
->   # ^ dirección 0             ^ dirección 24 (cuente el número de caracteres)
+>   # ^ dirección 0           ^ dirección 24 (cuente el número de caracteres)
 >   # Para representar esto en memoria, querríamos escribir la cadena al
 >   # principio del archivo:
 >   #
@@ -395,7 +395,7 @@ main(sys.argv)
 >   # Quizás, entonces, querríamos reemplazar John con una
 >   # variable simbólica. Llamaríamos a:
 >   #
->   # name_bitvector = claripy.BVS('nombre_simbólico', 4*8)
+>   # name_bitvector = claripy.BVS('symbolic_name', 4*8)
 >   #
 >   # Luego, después de que el programa llame a fopen('hello.txt', 'r') y luego
 >   # fread(buffer, sizeof(char), 30, hello_txt_file), el buffer contendría
@@ -407,8 +407,8 @@ main(sys.argv)
 ### Aplicando Restricciones
 
 > [!NOTE]
-> A veces, operaciones humanas simples como comparar 2 palabras de longitud 16 **carácter por carácter** (bucle), **cuestan** mucho a **angr** porque necesita generar ramas **exponencialmente** ya que genera 1 rama por cada if: `2^16`\
-> Por lo tanto, es más fácil **pedir a angr que regrese a un punto anterior** (donde la parte realmente difícil ya fue hecha) y **establecer esas restricciones manualmente**.
+> A veces, operaciones humanas simples como comparar 2 palabras de longitud 16 **carácter por carácter** (bucle), **cuestan** mucho a **angr** porque necesita generar ramas **exponencialmente** porque genera 1 rama por cada if: `2^16`\
+> Por lo tanto, es más fácil **pedir a angr que regrese a un punto anterior** (donde la parte realmente difícil ya se había hecho) y **establecer esas restricciones manualmente**.
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -485,10 +485,10 @@ main(sys.argv)
 > [!NOTE]
 > Otra cosa que puedes hacer en estos escenarios es **enganchar la función dándole a angr algo que pueda entender** más fácilmente.
 
-### Simuladores de Gestión
+### Simulation Managers
 
-Algunos simuladores de gestión pueden ser más útiles que otros. En el ejemplo anterior había un problema ya que se crearon muchas ramas útiles. Aquí, la técnica de **veritesting** fusionará esas y encontrará una solución.\
-Este simulador de gestión también se puede activar con: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+Algunos gerentes de simulación pueden ser más útiles que otros. En el ejemplo anterior hubo un problema ya que se crearon muchas ramas útiles. Aquí, la técnica de **veritesting** fusionará esas y encontrará una solución.\
+Este gerente de simulación también se puede activar con: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
 import claripy

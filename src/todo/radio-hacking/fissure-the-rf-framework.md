@@ -4,7 +4,7 @@
 
 FISSURE es un marco de RF y ingeniería inversa de código abierto diseñado para todos los niveles de habilidad, con ganchos para la detección y clasificación de señales, descubrimiento de protocolos, ejecución de ataques, manipulación de IQ, análisis de vulnerabilidades, automatización y AI/ML. El marco fue construido para promover la integración rápida de módulos de software, radios, protocolos, datos de señales, scripts, gráficos de flujo, material de referencia y herramientas de terceros. FISSURE es un facilitador de flujo de trabajo que mantiene el software en un solo lugar y permite a los equipos ponerse al día sin esfuerzo mientras comparten la misma configuración base probada para distribuciones específicas de Linux.
 
-El marco y las herramientas incluidas con FISSURE están diseñadas para detectar la presencia de energía RF, entender las características de una señal, recolectar y analizar muestras, desarrollar técnicas de transmisión y/o inyección, y crear cargas útiles o mensajes personalizados. FISSURE contiene una biblioteca en crecimiento de información sobre protocolos y señales para ayudar en la identificación, creación de paquetes y fuzzing. Existen capacidades de archivo en línea para descargar archivos de señales y construir listas de reproducción para simular tráfico y probar sistemas.
+El marco y las herramientas incluidas con FISSURE están diseñadas para detectar la presencia de energía RF, comprender las características de una señal, recolectar y analizar muestras, desarrollar técnicas de transmisión y/o inyección, y crear cargas útiles o mensajes personalizados. FISSURE contiene una biblioteca en crecimiento de información sobre protocolos y señales para ayudar en la identificación, creación de paquetes y fuzzing. Existen capacidades de archivo en línea para descargar archivos de señales y construir listas de reproducción para simular tráfico y probar sistemas.
 
 La amigable base de código en Python y la interfaz de usuario permiten a los principiantes aprender rápidamente sobre herramientas y técnicas populares relacionadas con RF y la ingeniería inversa. Los educadores en ciberseguridad e ingeniería pueden aprovechar el material incorporado o utilizar el marco para demostrar sus propias aplicaciones del mundo real. Los desarrolladores e investigadores pueden usar FISSURE para sus tareas diarias o para exponer sus soluciones de vanguardia a una audiencia más amplia. A medida que la conciencia y el uso de FISSURE crecen en la comunidad, también lo hará la extensión de sus capacidades y la amplitud de la tecnología que abarca.
 
@@ -122,12 +122,12 @@ FISSURE viene con varias guías útiles para familiarizarse con diferentes tecno
 
 * [ ] Agregar más tipos de hardware, protocolos RF, parámetros de señal, herramientas de análisis
 * [ ] Soportar más sistemas operativos
-* [ ] Desarrollar material de clase en torno a FISSURE (Ataques RF, Wi-Fi, GNU Radio, PyQt, etc.)
-* [ ] Crear un acondicionador de señal, extractor de características y clasificador de señales con técnicas AI/ML seleccionables
+* [ ] Desarrollar material de clase alrededor de FISSURE (Ataques RF, Wi-Fi, GNU Radio, PyQt, etc.)
+* [ ] Crear un acondicionador de señal, extractor de características y clasificador de señal con técnicas AI/ML seleccionables
 * [ ] Implementar mecanismos de demodulación recursiva para producir un flujo de bits a partir de señales desconocidas
-* [ ] Transicionar los componentes principales de FISSURE a un esquema de implementación de nodo sensor genérico
+* [ ] Transicionar los componentes principales de FISSURE a un esquema de despliegue de nodo sensor genérico
 
-## Contribuciones
+## Contribuyendo
 
 Se alientan fuertemente las sugerencias para mejorar FISSURE. Deje un comentario en la página de [Discusiones](https://github.com/ainfosec/FISSURE/discussions) o en el Servidor de Discord si tiene alguna idea sobre lo siguiente:
 
@@ -149,7 +149,7 @@ Las contribuciones para mejorar FISSURE son cruciales para acelerar su desarroll
 
 Crear [Issues](https://github.com/ainfosec/FISSURE/issues) para llamar la atención sobre errores también es bienvenido.
 
-## Colaboración
+## Colaborando
 
 Contacte a Assured Information Security, Inc. (AIS) Desarrollo de Negocios para proponer y formalizar cualquier oportunidad de colaboración con FISSURE, ya sea dedicando tiempo a integrar su software, teniendo a las personas talentosas de AIS desarrollando soluciones para sus desafíos técnicos, o integrando FISSURE en otras plataformas/aplicaciones.
 

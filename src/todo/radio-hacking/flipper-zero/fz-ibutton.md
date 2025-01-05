@@ -20,7 +20,7 @@ La parte **azul** de la siguiente imagen es cómo necesitarías **colocar el iBu
 
 ### Read
 
-En Modo de Lectura, el Flipper está esperando a que el iButton toque y es capaz de procesar cualquiera de los tres tipos de llaves: **Dallas, Cyfral y Metakom**. El Flipper **determinará el tipo de llave por sí mismo**. El nombre del protocolo de la llave se mostrará en la pantalla sobre el número de ID.
+En Modo de Lectura, el Flipper está esperando a que la llave iButton toque y es capaz de digerir cualquiera de los tres tipos de llaves: **Dallas, Cyfral y Metakom**. El Flipper **determinará el tipo de llave por sí mismo**. El nombre del protocolo de la llave se mostrará en la pantalla sobre el número de ID.
 
 ### Add manually
 

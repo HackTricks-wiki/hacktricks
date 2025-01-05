@@ -2,7 +2,8 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-> [!WARNING] > **JuicyPotato no funciona** en Windows Server 2019 y Windows 10 build 1809 en adelante. Sin embargo, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato) se pueden usar para **aprovechar los mismos privilegios y obtener acceso a nivel `NT AUTHORITY\SYSTEM`**. _**Verifique:**_
+> [!WARNING]
+> **JuicyPotato no funciona** en Windows Server 2019 y Windows 10 build 1809 en adelante. Sin embargo, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato) se pueden usar para **aprovechar los mismos privilegios y obtener acceso a nivel `NT AUTHORITY\SYSTEM`**. _**Verifique:**_
 
 {{#ref}}
 roguepotato-and-printspoofer.md
@@ -39,13 +40,13 @@ JuicyPotato te permite:
 - **CLSID objetivo** _elige cualquier CLSID que desees._ [_Aquí_](http://ohpe.it/juicy-potato/CLSID/) _puedes encontrar la lista organizada por SO._
 - **Puerto de escucha COM** _define el puerto de escucha COM que prefieras (en lugar del 6666 codificado en duro)_
 - **Dirección IP de escucha COM** _vincula el servidor a cualquier IP_
-- **Modo de creación de procesos** _dependiendo de los privilegios del usuario suplantado, puedes elegir entre:_
+- **Modo de creación de procesos** _dependiendo de los privilegios del usuario suplantado puedes elegir entre:_
 - `CreateProcessWithToken` (necesita `SeImpersonate`)
 - `CreateProcessAsUser` (necesita `SeAssignPrimaryToken`)
 - `ambos`
 - **Proceso a lanzar** _lanzar un ejecutable o script si la explotación tiene éxito_
 - **Argumento del proceso** _personaliza los argumentos del proceso lanzado_
-- **Dirección del servidor RPC** _para un enfoque sigiloso, puedes autenticarte en un servidor RPC externo_
+- **Dirección del servidor RPC** _para un enfoque sigiloso puedes autenticarte en un servidor RPC externo_
 - **Puerto del servidor RPC** _útil si deseas autenticarte en un servidor externo y el firewall está bloqueando el puerto `135`…_
 - **MODO DE PRUEBA** _principalmente para fines de prueba, es decir, probando CLSIDs. Crea el DCOM e imprime el usuario del token. Ver_ [_aquí para pruebas_](http://ohpe.it/juicy-potato/Test/)
 
@@ -107,9 +108,7 @@ c:\Users\Public>
 
 A menudo, el CLSID predeterminado que utiliza JuicyPotato **no funciona** y el exploit falla. Por lo general, se requieren múltiples intentos para encontrar un **CLSID funcional**. Para obtener una lista de CLSIDs para probar en un sistema operativo específico, debes visitar esta página:
 
-{{#ref}}
-https://ohpe.it/juicy-potato/CLSID/
-{{#endref}}
+{% embed url="https://ohpe.it/juicy-potato/CLSID/" %}
 
 ### **Verificando CLSIDs**
 

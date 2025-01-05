@@ -1,6 +1,6 @@
 {{#include ../banners/hacktricks-training.md}}
 
-# Encabezados y política de referencia
+# Encabezados y políticas de referencia
 
 Referrer es el encabezado utilizado por los navegadores para indicar cuál fue la página anterior visitada.
 

@@ -1,11 +1,11 @@
-# SeImpersonate de Alto a Sistema
+# SeImpersonate from High To System
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ### Código
 
 El siguiente código de [aquí](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962). Permite **indicar un ID de Proceso como argumento** y un CMD **ejecutándose como el usuario** del proceso indicado se ejecutará.\
-Ejecutándose en un proceso de Alta Integridad, puedes **indicar el PID de un proceso que se ejecute como Sistema** (como winlogon, wininit) y ejecutar un cmd.exe como sistema.
+Ejecutándose en un proceso de Alta Integridad, puedes **indicar el PID de un proceso que se ejecute como System** (como winlogon, wininit) y ejecutar un cmd.exe como system.
 ```cpp
 impersonateuser.exe 1234
 ```
@@ -142,7 +142,7 @@ return 0;
 ```
 ### Error
 
-En algunas ocasiones, puedes intentar suplantar a System y no funcionará, mostrando una salida como la siguiente:
+En algunas ocasiones, puede que intentes suplantar a System y no funcione, mostrando una salida como la siguiente:
 ```cpp
 [+] OpenProcess() success!
 [+] OpenProcessToken() success!
@@ -165,9 +165,9 @@ Verifiquemos los permisos actuales de Administrador sobre los procesos de `svcho
 
 ![](<../../images/image (437).png>)
 
-La imagen anterior contiene todos los privilegios que tienen los "Administradores" sobre el proceso seleccionado (como puedes ver en el caso de `svchost.exe`, solo tienen privilegios de "Consulta")
+La imagen anterior contiene todos los privilegios que tienen los "Administradores" sobre el proceso seleccionado (como puedes ver, en el caso de `svchost.exe` solo tienen privilegios de "Consulta")
 
-Ve los privilegios que tienen los "Administradores" sobre `winlogon.exe`:
+Veamos los privilegios que tienen los "Administradores" sobre `winlogon.exe`:
 
 ![](<../../images/image (1102).png>)
 

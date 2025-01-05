@@ -5,7 +5,7 @@
 
 ## Información Básica
 
-Local Administrator Password Solution (LAPS) es una herramienta utilizada para gestionar un sistema donde las **contraseñas de administrador**, que son **únicas, aleatorias y cambiadas con frecuencia**, se aplican a computadoras unidas al dominio. Estas contraseñas se almacenan de forma segura dentro de Active Directory y solo son accesibles para los usuarios que han recibido permiso a través de Listas de Control de Acceso (ACLs). La seguridad de las transmisiones de contraseñas del cliente al servidor se asegura mediante el uso de **Kerberos versión 5** y **Estándar de Cifrado Avanzado (AES)**.
+Local Administrator Password Solution (LAPS) es una herramienta utilizada para gestionar un sistema donde las **contraseñas de administrador**, que son **únicas, aleatorias y cambiadas con frecuencia**, se aplican a computadoras unidas al dominio. Estas contraseñas se almacenan de forma segura dentro de Active Directory y solo son accesibles para los usuarios que han recibido permiso a través de Listas de Control de Acceso (ACLs). La seguridad de las transmisiones de contraseñas del cliente al servidor se asegura mediante el uso de **Kerberos versión 5** y **Advanced Encryption Standard (AES)**.
 
 En los objetos de computadora del dominio, la implementación de LAPS resulta en la adición de dos nuevos atributos: **`ms-mcs-AdmPwd`** y **`ms-mcs-AdmPwdExpirationTime`**. Estos atributos almacenan la **contraseña de administrador en texto claro** y **su tiempo de expiración**, respectivamente.
 
@@ -26,7 +26,7 @@ Get-DomainObject -SearchBase "LDAP://DC=sub,DC=domain,DC=local" | ? { $_."ms-mcs
 
 Puedes **descargar la política LAPS en bruto** desde `\\dc\SysVol\domain\Policies\{4A8A4E8E-929F-401A-95BD-A7D40E0976C8}\Machine\Registry.pol` y luego usar **`Parse-PolFile`** del paquete [**GPRegistryPolicyParser**](https://github.com/PowerShell/GPRegistryPolicyParser) para convertir este archivo en un formato legible por humanos.
 
-Además, los **cmdlets nativos de PowerShell de LAPS** se pueden usar si están instalados en una máquina a la que tenemos acceso:
+Además, se pueden usar los **cmdlets de PowerShell nativos de LAPS** si están instalados en una máquina a la que tenemos acceso:
 ```powershell
 Get-Command *AdmPwd*
 
@@ -47,7 +47,7 @@ Find-AdmPwdExtendedRights -Identity Workstations | fl
 # Read the password
 Get-AdmPwdPassword -ComputerName wkstn-2 | fl
 ```
-**PowerView** también se puede utilizar para averiguar **quién puede leer la contraseña y leerla**:
+**PowerView** también se puede usar para averiguar **quién puede leer la contraseña y leerla**:
 ```powershell
 # Find the principals that have ReadPropery on ms-Mcs-AdmPwd
 Get-AdmPwdPassword -ComputerName wkstn-2 | fl

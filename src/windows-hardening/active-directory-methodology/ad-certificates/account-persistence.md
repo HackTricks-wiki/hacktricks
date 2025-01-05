@@ -4,7 +4,7 @@
 
 **Este es un pequeño resumen de los capítulos de persistencia de máquina de la increíble investigación de [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)**
 
-## **Entendiendo el robo de credenciales de usuario activas con certificados – PERSIST1**
+## **Comprendiendo el robo de credenciales de usuario activas con certificados – PERSIST1**
 
 En un escenario donde un usuario puede solicitar un certificado que permite la autenticación de dominio, un atacante tiene la oportunidad de **solicitar** y **robar** este certificado para **mantener persistencia** en una red. Por defecto, la plantilla `User` en Active Directory permite tales solicitudes, aunque a veces puede estar deshabilitada.
 
@@ -26,11 +26,11 @@ El archivo `.pfx` puede ser subido a un sistema objetivo y utilizado con una her
 ```bash
 Rubeus.exe asktgt /user:harmj0y /certificate:C:\Temp\cert.pfx /password:CertPass!
 ```
-Una advertencia importante se comparte sobre cómo esta técnica, combinada con otro método descrito en la sección **THEFT5**, permite a un atacante obtener de manera persistente el **NTLM hash** de una cuenta sin interactuar con el Local Security Authority Subsystem Service (LSASS), y desde un contexto no elevado, proporcionando un método más sigiloso para el robo de credenciales a largo plazo.
+Una advertencia importante se comparte sobre cómo esta técnica, combinada con otro método descrito en la sección **THEFT5**, permite a un atacante obtener de manera persistente el **hash NTLM** de una cuenta sin interactuar con el Local Security Authority Subsystem Service (LSASS), y desde un contexto no elevado, proporcionando un método más sigiloso para el robo de credenciales a largo plazo.
 
-## **Ganar Persistencia en la Máquina con Certificados - PERSIST2**
+## **Gaining Machine Persistence with Certificates - PERSIST2**
 
-Otro método implica inscribir la cuenta de máquina de un sistema comprometido para un certificado, utilizando la plantilla `Machine` predeterminada que permite tales acciones. Si un atacante obtiene privilegios elevados en un sistema, puede usar la cuenta **SYSTEM** para solicitar certificados, proporcionando una forma de **persistencia**:
+Otro método implica inscribir la cuenta de máquina de un sistema comprometido para un certificado, utilizando la plantilla predeterminada `Machine` que permite tales acciones. Si un atacante obtiene privilegios elevados en un sistema, puede usar la cuenta **SYSTEM** para solicitar certificados, proporcionando una forma de **persistence**:
 ```bash
 Certify.exe request /ca:dc.theshire.local/theshire-DC-CA /template:Machine /machine
 ```

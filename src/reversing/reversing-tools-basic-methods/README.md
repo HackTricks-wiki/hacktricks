@@ -21,29 +21,29 @@ Software:
 - [https://www.pnfsoftware.com/jeb/demo](https://www.pnfsoftware.com/jeb/demo)
 - [https://github.com/wwwg/wasmdec](https://github.com/wwwg/wasmdec)
 
-## Descompilador de .NET
+## Descompilador .NET
 
 ### [dotPeek](https://www.jetbrains.com/decompiler/)
 
 dotPeek es un descompilador que **descompila y examina múltiples formatos**, incluyendo **bibliotecas** (.dll), **archivos de metadatos de Windows** (.winmd) y **ejecutables** (.exe). Una vez descompilado, un ensamblaje puede ser guardado como un proyecto de Visual Studio (.csproj).
 
-El mérito aquí es que si un código fuente perdido requiere restauración desde un ensamblaje legado, esta acción puede ahorrar tiempo. Además, dotPeek proporciona una navegación útil a través del código descompilado, convirtiéndolo en una de las herramientas perfectas para **análisis de algoritmos de Xamarin.**
+El mérito aquí es que si un código fuente perdido requiere restauración desde un ensamblaje legado, esta acción puede ahorrar tiempo. Además, dotPeek proporciona una navegación útil a través del código descompilado, convirtiéndolo en una de las herramientas perfectas para el **análisis de algoritmos de Xamarin.**
 
 ### [.NET Reflector](https://www.red-gate.com/products/reflector/)
 
 Con un modelo de complemento integral y una API que extiende la herramienta para adaptarse a tus necesidades exactas, .NET Reflector ahorra tiempo y simplifica el desarrollo. Echemos un vistazo a la plétora de servicios de ingeniería inversa que esta herramienta proporciona:
 
 - Proporciona una visión de cómo fluyen los datos a través de una biblioteca o componente
-- Proporciona información sobre la implementación y uso de lenguajes y marcos de .NET
+- Proporciona información sobre la implementación y uso de lenguajes y marcos .NET
 - Encuentra funcionalidades no documentadas y no expuestas para obtener más de las APIs y tecnologías utilizadas.
 - Encuentra dependencias y diferentes ensamblajes
-- Localiza exactamente la ubicación de errores en tu código, componentes de terceros y bibliotecas.
+- Localiza exactamente los errores en tu código, componentes de terceros y bibliotecas.
 - Depura en la fuente de todo el código .NET con el que trabajas.
 
 ### [ILSpy](https://github.com/icsharpcode/ILSpy) & [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
-[Complemento ILSpy para Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Puedes tenerlo en cualquier sistema operativo (puedes instalarlo directamente desde VSCode, no es necesario descargar el git. Haz clic en **Extensiones** y **busca ILSpy**).\
-Si necesitas **descompilar**, **modificar** y **recompilar** nuevamente, puedes usar [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) o un fork mantenido activamente de él, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Clic derecho -> Modificar método** para cambiar algo dentro de una función).
+[Plugin ILSpy para Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Puedes tenerlo en cualquier sistema operativo (puedes instalarlo directamente desde VSCode, no es necesario descargar el git. Haz clic en **Extensiones** y **busca ILSpy**).\
+Si necesitas **descompilar**, **modificar** y **recompilar** de nuevo, puedes usar [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) o un fork mantenido activamente de él, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Clic derecho -> Modificar Método** para cambiar algo dentro de una función).
 
 ### Registro de DNSpy
 
@@ -78,7 +78,7 @@ Luego guarda el nuevo archivo a través de _**Archivo >> Guardar módulo...**_:
 
 ![](<../../images/image (602).png>)
 
-Esto es necesario porque si no lo haces, en **tiempo de ejecución** se aplicarán varias **optimizaciones** al código y podría ser posible que mientras depuras un **punto de interrupción nunca se active** o que algunas **variables no existan**.
+Esto es necesario porque si no lo haces, en **tiempo de ejecución** se aplicarán varias **optimizaciones** al código y podría ser posible que mientras depuras un **punto de interrupción nunca se active** o algunas **variables no existan**.
 
 Luego, si tu aplicación .NET está siendo **ejecutada** por **IIS**, puedes **reiniciarla** con:
 ```
@@ -134,7 +134,7 @@ Pero, ¿cómo puedes llegar al código de la DLL que fue cargada? Usando este m�
 - **Cargar rundll32** (64 bits en C:\Windows\System32\rundll32.exe y 32 bits en C:\Windows\SysWOW64\rundll32.exe)
 - **Cambiar la Línea de Comando** (_File --> Change Command Line_) y establecer la ruta de la dll y la función que deseas llamar, por ejemplo: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
 - Cambiar _Options --> Settings_ y seleccionar "**DLL Entry**".
-- Luego **iniciar la ejecución**, el depurador se detendrá en cada main de dll, en algún momento te **detendrás en la entrada de la dll**. Desde allí, solo busca los puntos donde deseas poner un punto de interrupción.
+- Luego **iniciar la ejecución**, el depurador se detendrá en cada main de dll, en algún momento te **detendrás en la entrada de dll de tu dll**. Desde allí, solo busca los puntos donde deseas poner un punto de interrupción.
 
 Ten en cuenta que cuando la ejecución se detiene por cualquier razón en win64dbg, puedes ver **en qué código estás** mirando en **la parte superior de la ventana de win64dbg**:
 
@@ -156,9 +156,7 @@ cheat-engine.md
 
 ## ARM & MIPS
 
-{{#ref}}
-https://github.com/nongiach/arm_now
-{{#endref}}
+{% embed url="https://github.com/nongiach/arm_now" %}
 
 ## Shellcodes
 
@@ -168,7 +166,7 @@ https://github.com/nongiach/arm_now
 Luego, necesitas **adjuntar un depurador** (Ida o x64dbg) al proceso y poner un **punto de interrupción en la dirección de memoria indicada** y **reanudar** la ejecución. De esta manera estarás depurando el shellcode.
 
 La página de lanzamientos de github contiene zips con los lanzamientos compilados: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
-Puedes encontrar una versión ligeramente modificada de Blobrunner en el siguiente enlace. Para compilarlo, simplemente **crea un proyecto en C/C++ en Visual Studio Code, copia y pega el código y compílalo**.
+Puedes encontrar una versión ligeramente modificada de Blobrunner en el siguiente enlace. Para compilarlo, simplemente **crea un proyecto C/C++ en Visual Studio Code, copia y pega el código y compílalo**.
 
 {{#ref}}
 blobrunner.md
@@ -220,7 +218,7 @@ La opción **Create Dump** volcará el shellcode final si se realiza algún camb
 
 ### Desensamblando usando CyberChef
 
-Sube tu archivo de shellcode como entrada y utiliza la siguiente receta para decompilarlo: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/index.html#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
+Sube tu archivo de shellcode como entrada y utiliza la siguiente receta para decompilarlo: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
 
 ## [Movfuscator](https://github.com/xoreaxeaxeax/movfuscator)
 
@@ -368,10 +366,10 @@ FUN_08000864();
 if (uVar1 == 0x10) {
 DAT_030000d8 = DAT_030000d8 + 0x3a;
 ```
-En el código anterior, puedes ver que estamos comparando **uVar1** (el lugar donde está el **valor del botón presionado**) con algunos valores:
+En el código anterior, puedes ver que estamos comparando **uVar1** (el lugar donde se encuentra **el valor del botón presionado**) con algunos valores:
 
-- Primero, se compara con el **valor 4** (**botón SELECT**): En el desafío, este botón borra la pantalla.
-- Luego, se compara con el **valor 8** (**botón START**): En el desafío, esto verifica si el código es válido para obtener la bandera.
+- Primero, se compara con el **valor 4** (botón **SELECT**): En el desafío, este botón borra la pantalla.
+- Luego, se compara con el **valor 8** (botón **START**): En el desafío, esto verifica si el código es válido para obtener la bandera.
 - En este caso, la var **`DAT_030000d8`** se compara con 0xf3 y si el valor es el mismo, se ejecuta algún código.
 - En cualquier otro caso, se verifica algún cont (`DAT_030000d4`). Es un cont porque se suma 1 justo después de entrar en el código.\
 **Si** es menor que 8, se realiza algo que involucra **sumar** valores a \*\*`DAT_030000d8` \*\* (básicamente, se suman los valores de las teclas presionadas en esta variable siempre que el cont sea menor que 8).
@@ -382,9 +380,7 @@ Así que, en este desafío, conociendo los valores de los botones, necesitabas *
 
 ## Game Boy
 
-{{#ref}}
-https://www.youtube.com/watch?v=VVbRe7wr3G4
-{{#endref}}
+{% embed url="https://www.youtube.com/watch?v=VVbRe7wr3G4" %}
 
 ## Cursos
 

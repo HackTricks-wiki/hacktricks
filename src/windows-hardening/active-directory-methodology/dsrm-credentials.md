@@ -2,7 +2,7 @@
 
 # Credenciales DSRM
 
-Hay una cuenta de **administrador local** dentro de cada **DC**. Teniendo privilegios de administrador en esta máquina, puedes usar mimikatz para **extraer el hash del Administrador local**. Luego, modificando un registro para **activar esta contraseña** para que puedas acceder de forma remota a este usuario Administrador local.\
+Hay una cuenta de **administrador local** dentro de cada **DC**. Teniendo privilegios de administrador en esta máquina, puedes usar mimikatz para **extraer el hash del Administrador local**. Luego, modificando un registro para **activar esta contraseña** para que puedas acceder remotamente a este usuario Administrador local.\
 Primero necesitamos **extraer** el **hash** del usuario **Administrador local** dentro del DC:
 ```bash
 Invoke-Mimikatz -Command '"token::elevate" "lsadump::sam"'
@@ -23,6 +23,6 @@ Más información sobre esto en: [https://adsecurity.org/?p=1714](https://adsecu
 
 ## Mitigación
 
-- ID de evento 4657 - Auditoría de creación/cambio de `HKLM:\System\CurrentControlSet\Control\Lsa DsrmAdminLogonBehavior`
+- Event ID 4657 - Auditoría de creación/cambio de `HKLM:\System\CurrentControlSet\Control\Lsa DsrmAdminLogonBehavior`
 
 {{#include ../../banners/hacktricks-training.md}}

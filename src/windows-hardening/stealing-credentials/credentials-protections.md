@@ -1,6 +1,6 @@
-# Protecciones de Credenciales de Windows
+# Windows Credentials Protections
 
-## Protecciones de Credenciales
+## Credentials Protections
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -28,7 +28,7 @@ Es posible eludir esta protección utilizando el controlador de Mimikatz mimidrv
 
 ## Credential Guard
 
-**Credential Guard**, una característica exclusiva de **Windows 10 (ediciones Enterprise y Education)**, mejora la seguridad de las credenciales de la máquina utilizando **Virtual Secure Mode (VSM)** y **Virtualization Based Security (VBS)**. Aprovecha las extensiones de virtualización de la CPU para aislar procesos clave dentro de un espacio de memoria protegido, lejos del alcance del sistema operativo principal. Este aislamiento asegura que incluso el kernel no pueda acceder a la memoria en VSM, protegiendo efectivamente las credenciales de ataques como **pass-the-hash**. La **Local Security Authority (LSA)** opera dentro de este entorno seguro como un trustlet, mientras que el proceso **LSASS** en el sistema operativo principal actúa simplemente como un comunicador con la LSA de VSM.
+**Credential Guard**, una característica exclusiva de **Windows 10 (ediciones Enterprise y Education)**, mejora la seguridad de las credenciales de la máquina utilizando **Virtual Secure Mode (VSM)** y **Virtualization Based Security (VBS)**. Aprovecha las extensiones de virtualización de la CPU para aislar procesos clave dentro de un espacio de memoria protegido, lejos del alcance del sistema operativo principal. Este aislamiento asegura que incluso el kernel no pueda acceder a la memoria en VSM, protegiendo efectivamente las credenciales de ataques como **pass-the-hash**. La **Local Security Authority (LSA)** opera dentro de este entorno seguro como un trustlet, mientras que el proceso **LSASS** en el sistema operativo principal actúa meramente como un comunicador con la LSA de VSM.
 
 Por defecto, **Credential Guard** no está activo y requiere activación manual dentro de una organización. Es fundamental para mejorar la seguridad contra herramientas como **Mimikatz**, que se ven obstaculizadas en su capacidad para extraer credenciales. Sin embargo, las vulnerabilidades aún pueden ser explotadas mediante la adición de **Security Support Providers (SSP)** personalizados para capturar credenciales en texto claro durante los intentos de inicio de sesión.
 
@@ -38,7 +38,7 @@ reg query HKLM\System\CurrentControlSet\Control\LSA /v LsaCfgFlags
 ```
 Para una comprensión completa e instrucciones sobre cómo habilitar **Credential Guard** en Windows 10 y su activación automática en sistemas compatibles de **Windows 11 Enterprise y Education (versión 22H2)**, visita [la documentación de Microsoft](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage).
 
-Más detalles sobre la implementación de SSPs personalizados para la captura de credenciales se proporcionan en [esta guía](../active-directory-methodology/custom-ssp.md).
+Se proporcionan más detalles sobre la implementación de SSPs personalizados para la captura de credenciales en [esta guía](../active-directory-methodology/custom-ssp.md).
 
 ## Modo RestrictedAdmin de RDP
 
@@ -54,7 +54,7 @@ Esta característica marca un avance significativo en la seguridad de las conexi
 
 ![](../../images/RAM.png)
 
-Para obtener más información detallada, visita [este recurso](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).
+Para obtener información más detallada, visita [este recurso](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).
 
 ## Credenciales en caché
 
@@ -76,15 +76,15 @@ La membresía en el **grupo de Usuarios Protegidos** introduce varias mejoras de
 
 - **Delegación de Credenciales (CredSSP)**: Incluso si la configuración de Directiva de Grupo para **Permitir delegar credenciales predeterminadas** está habilitada, las credenciales en texto plano de los Usuarios Protegidos no se almacenarán en caché.
 - **Windows Digest**: A partir de **Windows 8.1 y Windows Server 2012 R2**, el sistema no almacenará en caché las credenciales en texto plano de los Usuarios Protegidos, independientemente del estado de Windows Digest.
-- **NTLM**: El sistema no almacenará en caché las credenciales en texto plano de los Usuarios Protegidos ni funciones unidireccionales NT (NTOWF).
+- **NTLM**: El sistema no almacenará en caché las credenciales en texto plano de los Usuarios Protegidos ni las funciones unidireccionales NT (NTOWF).
 - **Kerberos**: Para los Usuarios Protegidos, la autenticación Kerberos no generará **claves DES** o **RC4**, ni almacenará en caché credenciales en texto plano o claves a largo plazo más allá de la adquisición inicial del Ticket-Granting Ticket (TGT).
-- **Inicio de Sesión Offline**: Los Usuarios Protegidos no tendrán un verificador en caché creado al iniciar sesión o desbloquear, lo que significa que el inicio de sesión offline no es compatible con estas cuentas.
+- **Inicio de Sesión Offline**: No se creará un verificador en caché para los Usuarios Protegidos al iniciar sesión o desbloquear, lo que significa que el inicio de sesión offline no es compatible con estas cuentas.
 
 Estas protecciones se activan en el momento en que un usuario, que es miembro del **grupo de Usuarios Protegidos**, inicia sesión en el dispositivo. Esto asegura que se implementen medidas de seguridad críticas para proteger contra varios métodos de compromiso de credenciales.
 
 Para obtener información más detallada, consulte la [documentación](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group) oficial.
 
-**Tabla de** [**los docs**](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)**.**
+**Tabla de** [**la documentación**](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)**.**
 
 | Windows Server 2003 RTM | Windows Server 2003 SP1+ | <p>Windows Server 2012,<br>Windows Server 2008 R2,<br>Windows Server 2008</p> | Windows Server 2016          |
 | ----------------------- | ------------------------ | ----------------------------------------------------------------------------- | ---------------------------- |

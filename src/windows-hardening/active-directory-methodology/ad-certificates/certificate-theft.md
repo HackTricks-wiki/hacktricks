@@ -6,7 +6,7 @@
 
 ## ¿Qué puedo hacer con un certificado?
 
-Antes de verificar cómo robar los certificados, aquí tienes información sobre cómo encontrar para qué es útil el certificado:
+Antes de revisar cómo robar los certificados, aquí tienes información sobre cómo encontrar para qué es útil el certificado:
 ```powershell
 # Powershell
 $CertPath = "C:\path\to\cert.pfx"
@@ -22,7 +22,7 @@ certutil.exe -dump -v cert.pfx
 
 En una **sesión de escritorio interactiva**, extraer un certificado de usuario o de máquina, junto con la clave privada, se puede hacer fácilmente, particularmente si la **clave privada es exportable**. Esto se puede lograr navegando al certificado en `certmgr.msc`, haciendo clic derecho sobre él y seleccionando `All Tasks → Export` para generar un archivo .pfx protegido por contraseña.
 
-Para un **enfoque programático**, hay herramientas como el cmdlet de PowerShell `ExportPfxCertificate` o proyectos como [TheWover’s CertStealer C# project](https://github.com/TheWover/CertStealer). Estas utilizan la **Microsoft CryptoAPI** (CAPI) o la Cryptography API: Next Generation (CNG) para interactuar con el almacén de certificados. Estas APIs proporcionan una gama de servicios criptográficos, incluidos los necesarios para el almacenamiento y la autenticación de certificados.
+Para un **enfoque programático**, están disponibles herramientas como el cmdlet `ExportPfxCertificate` de PowerShell o proyectos como [TheWover’s CertStealer C# project](https://github.com/TheWover/CertStealer). Estas utilizan la **Microsoft CryptoAPI** (CAPI) o la Cryptography API: Next Generation (CNG) para interactuar con el almacén de certificados. Estas APIs proporcionan una gama de servicios criptográficos, incluidos los necesarios para el almacenamiento y la autenticación de certificados.
 
 Sin embargo, si una clave privada está configurada como no exportable, tanto CAPI como CNG normalmente bloquearán la extracción de tales certificados. Para eludir esta restricción, se pueden emplear herramientas como **Mimikatz**. Mimikatz ofrece comandos `crypto::capi` y `crypto::cng` para parchear las respectivas APIs, permitiendo la exportación de claves privadas. Específicamente, `crypto::capi` parchea el CAPI dentro del proceso actual, mientras que `crypto::cng` apunta a la memoria de **lsass.exe** para el parcheo.
 
@@ -34,7 +34,7 @@ Más información sobre DPAPI en:
 ../../windows-local-privilege-escalation/dpapi-extracting-passwords.md
 {{#endref}}
 
-En Windows, **las claves privadas de los certificados están protegidas por DPAPI**. Es crucial reconocer que las **ubicaciones de almacenamiento para las claves privadas de usuario y máquina** son distintas, y las estructuras de archivos varían dependiendo de la API criptográfica utilizada por el sistema operativo. **SharpDPAPI** es una herramienta que puede navegar automáticamente estas diferencias al descifrar los blobs de DPAPI.
+En Windows, **las claves privadas de los certificados están protegidas por DPAPI**. Es crucial reconocer que las **ubicaciones de almacenamiento para las claves privadas de usuario y máquina** son distintas, y las estructuras de archivos varían dependiendo de la API criptográfica utilizada por el sistema operativo. **SharpDPAPI** es una herramienta que puede navegar estas diferencias automáticamente al descifrar los blobs de DPAPI.
 
 **Los certificados de usuario** se encuentran predominantemente en el registro bajo `HKEY_CURRENT_USER\SOFTWARE\Microsoft\SystemCertificates`, pero algunos también se pueden encontrar en el directorio `%APPDATA%\Microsoft\SystemCertificates\My\Certificates`. Las correspondientes **claves privadas** para estos certificados se almacenan típicamente en `%APPDATA%\Microsoft\Crypto\RSA\User SID\` para claves **CAPI** y `%APPDATA%\Microsoft\Crypto\Keys\` para claves **CNG**.
 
@@ -66,20 +66,20 @@ Los certificados de máquina almacenados por Windows en el registro en `HKEY_LOC
 
 La desencriptación manual se puede lograr ejecutando el comando `lsadump::secrets` en **Mimikatz** para extraer el secreto LSA DPAPI_SYSTEM, y posteriormente utilizando esta clave para desencriptar las claves maestras de la máquina. Alternativamente, se puede usar el comando `crypto::certificates /export /systemstore:LOCAL_MACHINE` de Mimikatz después de parchear CAPI/CNG como se describió anteriormente.
 
-**SharpDPAPI** ofrece un enfoque más automatizado con su comando de certificados. Cuando se utiliza la bandera `/machine` con permisos elevados, se eleva a SYSTEM, extrae el secreto LSA DPAPI_SYSTEM, lo utiliza para desencriptar las claves maestras DPAPI de la máquina y luego emplea estas claves en texto plano como una tabla de búsqueda para desencriptar cualquier clave privada de certificado de máquina.
+**SharpDPAPI** ofrece un enfoque más automatizado con su comando de certificados. Cuando se utiliza la bandera `/machine` con permisos elevados, se eleva a SYSTEM, se vuelca el secreto LSA DPAPI_SYSTEM, se utiliza para desencriptar las claves maestras DPAPI de la máquina y luego emplea estas claves en texto plano como una tabla de búsqueda para desencriptar cualquier clave privada de certificado de máquina.
 
 ## Encontrando Archivos de Certificados – THEFT4
 
 Los certificados a veces se encuentran directamente dentro del sistema de archivos, como en recursos compartidos de archivos o en la carpeta de Descargas. Los tipos de archivos de certificados más comúnmente encontrados dirigidos a entornos de Windows son los archivos `.pfx` y `.p12`. Aunque con menos frecuencia, también aparecen archivos con extensiones `.pkcs12` y `.pem`. Otras extensiones de archivo relacionadas con certificados que son dignas de mención incluyen:
 
 - `.key` para claves privadas,
-- `.crt`/`.cer` para certificados solamente,
+- `.crt`/`.cer` solo para certificados,
 - `.csr` para Solicitudes de Firma de Certificado, que no contienen certificados ni claves privadas,
 - `.jks`/`.keystore`/`.keys` para Almacenes de Claves de Java, que pueden contener certificados junto con claves privadas utilizadas por aplicaciones Java.
 
 Estos archivos se pueden buscar utilizando PowerShell o el símbolo del sistema buscando las extensiones mencionadas.
 
-En casos donde se encuentra un archivo de certificado PKCS#12 y está protegido por una contraseña, la extracción de un hash es posible a través del uso de `pfx2john.py`, disponible en [fossies.org](https://fossies.org/dox/john-1.9.0-jumbo-1/pfx2john_8py_source.html). Posteriormente, se puede emplear JohnTheRipper para intentar descifrar la contraseña.
+En casos donde se encuentra un archivo de certificado PKCS#12 y está protegido por una contraseña, la extracción de un hash es posible mediante el uso de `pfx2john.py`, disponible en [fossies.org](https://fossies.org/dox/john-1.9.0-jumbo-1/pfx2john_8py_source.html). Posteriormente, se puede emplear JohnTheRipper para intentar descifrar la contraseña.
 ```powershell
 # Example command to search for certificate files in PowerShell
 Get-ChildItem -Recurse -Path C:\Users\ -Include *.pfx, *.p12, *.pkcs12, *.pem, *.key, *.crt, *.cer, *.csr, *.jks, *.keystore, *.keys

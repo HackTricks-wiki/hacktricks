@@ -18,7 +18,7 @@ A pesar de estas protecciones, herramientas como Mimikatz pueden eludir la Prote
 
 ### Contrarrestar la eliminación de SeDebugPrivilege
 
-Los administradores suelen tener SeDebugPrivilege, lo que les permite depurar programas. Este privilegio puede ser restringido para prevenir volcado de memoria no autorizado, una técnica común utilizada por los atacantes para extraer credenciales de la memoria. Sin embargo, incluso con este privilegio eliminado, la cuenta TrustedInstaller aún puede realizar volcado de memoria utilizando una configuración de servicio personalizada:
+Los administradores suelen tener SeDebugPrivilege, lo que les permite depurar programas. Este privilegio puede ser restringido para evitar volcado de memoria no autorizado, una técnica común utilizada por los atacantes para extraer credenciales de la memoria. Sin embargo, incluso con este privilegio eliminado, la cuenta TrustedInstaller aún puede realizar volcado de memoria utilizando una configuración de servicio personalizada:
 ```bash
 sc config TrustedInstaller binPath= "C:\\Users\\Public\\procdump64.exe -accepteula -ma lsass.exe C:\\Users\\Public\\lsass.dmp"
 sc start TrustedInstaller
@@ -36,7 +36,7 @@ La manipulación de registros de eventos en Mimikatz implica dos acciones princi
 #### Borrado de Registros de Eventos
 
 - **Comando**: Esta acción tiene como objetivo eliminar los registros de eventos, dificultando el seguimiento de actividades maliciosas.
-- Mimikatz no proporciona un comando directo en su documentación estándar para borrar registros de eventos directamente a través de su línea de comandos. Sin embargo, la manipulación de registros de eventos generalmente implica el uso de herramientas del sistema o scripts fuera de Mimikatz para borrar registros específicos (por ejemplo, usando PowerShell o el Visor de Eventos de Windows).
+- Mimikatz no proporciona un comando directo en su documentación estándar para borrar registros de eventos directamente a través de su línea de comandos. Sin embargo, la manipulación de registros de eventos generalmente implica el uso de herramientas del sistema o scripts fuera de Mimikatz para borrar registros específicos (por ejemplo, utilizando PowerShell o el Visor de Eventos de Windows).
 
 #### Función Experimental: Parcheo del Servicio de Eventos
 
@@ -72,7 +72,7 @@ Los Silver Tickets otorgan acceso a servicios específicos. Comando clave y par�
 
 - Comando: Similar al Golden Ticket pero se dirige a servicios específicos.
 - Parámetros:
-- `/service`: El servicio a dirigir (por ejemplo, cifs, http).
+- `/service`: El servicio a atacar (por ejemplo, cifs, http).
 - Otros parámetros similares al Golden Ticket.
 
 Ejemplo:

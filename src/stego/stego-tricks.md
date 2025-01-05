@@ -20,7 +20,7 @@ foremost -i file # Extracts data
 ```
 ### **Exiftool**
 
-Ayuda a ver los metadatos del archivo, disponible [aquí](https://www.sno.phy.queensu.ca/~phil/exiftool/).
+Ayuda a ver los metadatos de los archivos, disponible [aquí](https://www.sno.phy.queensu.ca/~phil/exiftool/).
 ```bash
 exiftool file # Shows the metadata
 ```

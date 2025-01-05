@@ -7,7 +7,7 @@
 Varias veces el back-end confía en el **encabezado Host** para realizar algunas acciones. Por ejemplo, podría usar su valor como el **dominio para enviar un restablecimiento de contraseña**. Así que cuando recibes un correo electrónico con un enlace para restablecer tu contraseña, el dominio que se utiliza es el que pusiste en el encabezado Host. Luego, puedes solicitar el restablecimiento de contraseña de otros usuarios y cambiar el dominio a uno controlado por ti para robar sus códigos de restablecimiento de contraseña. [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).
 
 > [!WARNING]
-> Ten en cuenta que es posible que ni siquiera necesites esperar a que el usuario haga clic en el enlace de restablecimiento de contraseña para obtener el token, ya que tal vez incluso **los filtros de spam u otros dispositivos/bots intermedios harán clic en él para analizarlo**.
+> Ten en cuenta que es posible que ni siquiera necesites esperar a que el usuario haga clic en el enlace de restablecimiento de contraseña para obtener el token, ya que incluso **los filtros de spam u otros dispositivos/bots intermedios pueden hacer clic en él para analizarlo**.
 
 ### Booleanos de sesión
 
@@ -24,9 +24,7 @@ Registra un correo electrónico, antes de confirmarlo cambia el correo, luego, s
 
 ### Acceso al servicio interno de atención al cliente de empresas usando Atlassian
 
-{{#ref}}
-https://yourcompanyname.atlassian.net/servicedesk/customer/user/login
-{{#endref}}
+{% embed url="https://yourcompanyname.atlassian.net/servicedesk/customer/user/login" %}
 
 ### Método TRACE
 

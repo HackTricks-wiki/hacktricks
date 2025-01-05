@@ -9,7 +9,7 @@
 ### Configuración básica
 
 Después de instalar, hay algunas cosas que podrías considerar configurar.\
-En la configuración (el segundo botón de pestaña) puedes seleccionar el **dispositivo SDR** o **seleccionar un archivo** para leer y qué frecuencia sintonizar y la tasa de muestreo (se recomienda hasta 2.56Msps si tu PC lo soporta)\\
+En la configuración (el segundo botón de pestaña) puedes seleccionar el **dispositivo SDR** o **seleccionar un archivo** para leer y qué frecuencia sintonizar y la tasa de muestreo (recomendado hasta 2.56Msps si tu PC lo soporta)\\
 
 ![](<../../images/image (245).png>)
 
@@ -22,7 +22,7 @@ En el comportamiento de la GUI, se recomienda habilitar algunas cosas si tu PC l
 
 ### Usos
 
-- Solo para **capturar algún tiempo de una señal y analizarla**, mantén presionado el botón "Push to capture" tanto tiempo como necesites.
+- Solo para **capturar algún tiempo de una señal y analizarla**, solo mantén presionado el botón "Push to capture" tanto tiempo como necesites.
 
 ![](<../../images/image (960).png>)
 
@@ -32,30 +32,30 @@ En el comportamiento de la GUI, se recomienda habilitar algunas cosas si tu PC l
 
 ### Sincronizar con el canal de radio
 
-Con [**SigDigger** ](https://github.com/BatchDrake/SigDigger)sincroniza con el canal que deseas escuchar, configura la opción "Baseband audio preview", configura el ancho de banda para obtener toda la información que se envía y luego ajusta el sintonizador al nivel antes de que el ruido comience a aumentar realmente:
+Con [**SigDigger** ](https://github.com/BatchDrake/SigDigger)sincroniza con el canal que deseas escuchar, configura la opción "Vista previa de audio de banda base", configura el ancho de banda para obtener toda la información que se envía y luego ajusta el sintonizador al nivel antes de que el ruido comience a aumentar realmente:
 
 ![](<../../images/image (585).png>)
 
 ## Trucos interesantes
 
 - Cuando un dispositivo está enviando ráfagas de información, generalmente la **primera parte será un preámbulo**, así que **no** necesitas **preocuparte** si **no encuentras información** allí **o si hay algunos errores**.
-- En los tramos de información, generalmente deberías **encontrar diferentes tramos bien alineados entre sí**:
+- En los marcos de información, generalmente deberías **encontrar diferentes marcos bien alineados entre sí**:
 
 ![](<../../images/image (1076).png>)
 
 ![](<../../images/image (597).png>)
 
 - **Después de recuperar los bits, es posible que necesites procesarlos de alguna manera**. Por ejemplo, en la codificación Manchester, un up+down será un 1 o 0 y un down+up será el otro. Así que pares de 1s y 0s (ups y downs) serán un 1 real o un 0 real.
-- Incluso si una señal está usando codificación Manchester (es imposible encontrar más de dos 0s o 1s en fila), ¡podrías **encontrar varios 1s o 0s juntos en el preámbulo**!
+- Incluso si una señal está utilizando codificación Manchester (es imposible encontrar más de dos 0s o 1s en fila), ¡podrías **encontrar varios 1s o 0s juntos en el preámbulo**!
 
 ### Descubriendo el tipo de modulación con IQ
 
-Hay 3 formas de almacenar información en señales: modulando la **amplitud**, **frecuencia** o **fase**.\
+Hay 3 formas de almacenar información en señales: Modulando la **amplitud**, **frecuencia** o **fase**.\
 Si estás revisando una señal, hay diferentes formas de intentar averiguar qué se está utilizando para almacenar información (encuentra más formas a continuación), pero una buena es revisar el gráfico IQ.
 
 ![](<../../images/image (788).png>)
 
-- **Detectando AM**: Si en el gráfico IQ aparecen, por ejemplo, **2 círculos** (probablemente uno en 0 y otro en una amplitud diferente), podría significar que esta es una señal AM. Esto se debe a que en el gráfico IQ la distancia entre el 0 y el círculo es la amplitud de la señal, por lo que es fácil visualizar diferentes amplitudes siendo utilizadas.
+- **Detectando AM**: Si en el gráfico IQ aparecen, por ejemplo, **2 círculos** (probablemente uno en 0 y otro en una amplitud diferente), podría significar que esta es una señal AM. Esto se debe a que en el gráfico IQ la distancia entre el 0 y el círculo es la amplitud de la señal, por lo que es fácil visualizar diferentes amplitudes que se están utilizando.
 - **Detectando PM**: Al igual que en la imagen anterior, si encuentras pequeños círculos no relacionados entre sí, probablemente significa que se está utilizando una modulación de fase. Esto se debe a que en el gráfico IQ, el ángulo entre el punto y el 0,0 es la fase de la señal, lo que significa que se están utilizando 4 fases diferentes.
 - Ten en cuenta que si la información está oculta en el hecho de que se cambia una fase y no en la fase misma, no verás diferentes fases claramente diferenciadas.
 - **Detectando FM**: IQ no tiene un campo para identificar frecuencias (la distancia al centro es amplitud y el ángulo es fase).\
@@ -78,7 +78,7 @@ Y así es como se ve parte del símbolo con la forma de onda:
 
 ![](<../../images/image (734).png>)
 
-#### Revisando el histograma
+#### Revisando el Histograma
 
 Puedes **seleccionar toda la señal** donde se encuentra la información, seleccionar el modo **Amplitud** y **Selección** y hacer clic en **Histograma**. Puedes observar que solo se encuentran 2 niveles claros.
 
@@ -88,7 +88,7 @@ Por ejemplo, si seleccionas Frecuencia en lugar de Amplitud en esta señal AM, s
 
 ![](<../../images/image (732).png>)
 
-Si encuentras muchas frecuencias, potencialmente esto no será un FM; probablemente la frecuencia de la señal solo se modificó debido al canal.
+Si encuentras muchas frecuencias, potencialmente esto no será un FM, probablemente la frecuencia de la señal fue solo modificada debido al canal.
 
 #### Con IQ
 
@@ -96,11 +96,11 @@ En este ejemplo puedes ver cómo hay un **gran círculo** pero también **muchos
 
 ![](<../../images/image (222).png>)
 
-### Obtener la tasa de símbolos
+### Obtener la Tasa de Símbolos
 
 #### Con un símbolo
 
-Selecciona el símbolo más pequeño que puedas encontrar (así te aseguras de que sea solo 1) y revisa la "Frecuencia de selección". En este caso sería 1.013kHz (así que 1kHz).
+Selecciona el símbolo más pequeño que puedas encontrar (así te aseguras de que es solo 1) y revisa la "Frecuencia de selección". En este caso sería 1.013kHz (así que 1kHz).
 
 ![](<../../images/image (78).png>)
 
@@ -110,16 +110,16 @@ También puedes indicar el número de símbolos que vas a seleccionar y SigDigge
 
 ![](<../../images/image (1008).png>)
 
-### Obtener bits
+### Obtener Bits
 
-Habiendo encontrado que esta es una señal **modulada en AM** y la **tasa de símbolos** (y sabiendo que en este caso algo up significa 1 y algo down significa 0), es muy fácil **obtener los bits** codificados en la señal. Así que, selecciona la señal con información y configura el muestreo y la decisión y presiona muestrear (verifica que **Amplitud** esté seleccionada, que la **Tasa de símbolos** descubierta esté configurada y que la **recuperación de reloj de Gardner** esté seleccionada):
+Habiendo encontrado que esta es una señal **modulada en AM** y la **tasa de símbolos** (y sabiendo que en este caso algo up significa 1 y algo down significa 0), es muy fácil **obtener los bits** codificados en la señal. Así que, selecciona la señal con información y configura el muestreo y la decisión y presiona muestrear (verifica que **Amplitud** esté seleccionada, la **Tasa de símbolos** descubierta esté configurada y la **recuperación de reloj de Gadner** esté seleccionada):
 
 ![](<../../images/image (965).png>)
 
 - **Sincronizar a intervalos de selección** significa que si previamente seleccionaste intervalos para encontrar la tasa de símbolos, esa tasa de símbolos se utilizará.
-- **Manual** significa que se utilizará la tasa de símbolos indicada.
+- **Manual** significa que la tasa de símbolos indicada se utilizará.
 - En **Selección de intervalo fijo** indicas el número de intervalos que deben seleccionarse y calcula la tasa de símbolos a partir de ello.
-- **Recuperación de reloj de Gardner** suele ser la mejor opción, pero aún necesitas indicar alguna tasa de símbolos aproximada.
+- **Recuperación de reloj de Gadner** es generalmente la mejor opción, pero aún necesitas indicar alguna tasa de símbolos aproximada.
 
 Al presionar muestrear, esto aparece:
 
@@ -131,13 +131,13 @@ Ahora, para hacer que SigDigger entienda **dónde está el rango** del nivel que
 
 Si hubiera habido, por ejemplo, **4 niveles diferentes de amplitud**, deberías haber configurado los **Bits por símbolo a 2** y seleccionar desde el más pequeño hasta el más grande.
 
-Finalmente, **aumentando** el **Zoom** y **cambiando el tamaño de fila**, puedes ver los bits (y puedes seleccionar todo y copiar para obtener todos los bits):
+Finalmente, **aumentando** el **Zoom** y **cambiando el tamaño de la fila**, puedes ver los bits (y puedes seleccionar todo y copiar para obtener todos los bits):
 
 ![](<../../images/image (276).png>)
 
 Si la señal tiene más de 1 bit por símbolo (por ejemplo, 2), SigDigger **no tiene forma de saber qué símbolo es** 00, 01, 10, 11, así que usará diferentes **escalas de grises** para representar cada uno (y si copias los bits, usará **números del 0 al 3**, necesitarás tratarlos).
 
-Además, usa **codificaciones** como **Manchester**, y **up+down** puede ser **1 o 0** y un down+up puede ser un 1 o 0. En esos casos, necesitas **tratar los ups (1) y downs (0) obtenidos** para sustituir los pares de 01 o 10 como 0s o 1s.
+Además, usa **codificaciones** como **Manchester**, y **up+down** puede ser **1 o 0** y un down+up puede ser un 1 o 0. En esos casos necesitas **tratar los ups obtenidos (1) y downs (0)** para sustituir los pares de 01 o 10 como 0s o 1s.
 
 ## Ejemplo de FM
 
@@ -151,7 +151,7 @@ Ejemplo de señal enviando información modulada en FM:
 
 ![](<../../images/image (725).png>)
 
-En la imagen anterior puedes observar bastante bien que **se utilizan 2 frecuencias**, pero si **observas** la **forma de onda**, es posible que **no puedas identificar correctamente las 2 frecuencias diferentes**:
+En la imagen anterior puedes observar bastante bien que **se utilizan 2 frecuencias**, pero si **observas** la **forma de onda**, puede que **no seas capaz de identificar correctamente las 2 frecuencias diferentes**:
 
 ![](<../../images/image (717).png>)
 
@@ -175,7 +175,7 @@ En este caso, si revisas el **histograma de Amplitud**, encontrarás **solo una 
 
 ![](<../../images/image (817).png>)
 
-Y este sería el histograma de fase (que deja muy claro que la señal no está modulada en fase):
+Y este sería el histograma de fase (lo que deja muy claro que la señal no está modulada en fase):
 
 ![](<../../images/image (996).png>)
 
@@ -187,11 +187,11 @@ Además, una frecuencia diferente es "representada" por el gráfico IQ mediante 
 
 ![](<../../images/image (81).png>)
 
-### Obtener la tasa de símbolos
+### Obtener la Tasa de Símbolos
 
 Puedes usar la **misma técnica que la utilizada en el ejemplo de AM** para obtener la tasa de símbolos una vez que hayas encontrado las frecuencias que llevan símbolos.
 
-### Obtener bits
+### Obtener Bits
 
 Puedes usar la **misma técnica que la utilizada en el ejemplo de AM** para obtener los bits una vez que hayas **encontrado que la señal está modulada en frecuencia** y la **tasa de símbolos**.
 

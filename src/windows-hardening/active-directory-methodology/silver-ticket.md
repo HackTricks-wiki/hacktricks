@@ -32,16 +32,16 @@ El servicio CIFS se destaca como un objetivo común para acceder al sistema de a
 
 ## Servicios Disponibles
 
-| Tipo de Servicio                           | Servicios Silver Tickets                                                  |
+| Tipo de Servicio                           | Tickets de Servicio Silver                                                |
 | ------------------------------------------ | ------------------------------------------------------------------------- |
 | WMI                                        | <p>HOST</p><p>RPCSS</p>                                                 |
 | PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Dependiendo del SO también:</p><p>WSMAN</p><p>RPCSS</p> |
-| WinRM                                      | <p>HOST</p><p>HTTP</p><p>En algunas ocasiones solo puedes pedir: WINRM</p> |
+| WinRM                                      | <p>HOST</p><p>HTTP</p><p>En algunas ocasiones puedes simplemente pedir: WINRM</p> |
 | Tareas Programadas                         | HOST                                                                    |
 | Compartición de Archivos de Windows, también psexec | CIFS                                                                    |
 | Operaciones LDAP, incluido DCSync         | LDAP                                                                    |
 | Herramientas de Administración de Servidores Remotos de Windows | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                      |
-| Golden Tickets                             | krbtgt                                                                |
+| Tickets Dorados                            | krbtgt                                                                |
 
 Usando **Rubeus** puedes **pedir todos** estos tickets usando el parámetro:
 
@@ -105,7 +105,7 @@ Encuentra **más información sobre wmiexec** en la siguiente página:
 
 ### HOST + WSMAN (WINRM)
 
-Con acceso winrm a una computadora, puedes **acceder a ella** e incluso obtener un PowerShell:
+Con acceso winrm a una computadora puedes **acceder a ella** e incluso obtener un PowerShell:
 ```bash
 New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```

@@ -2,17 +2,17 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Atacando sistemas RFID con Proxmark3
+## Ataques a sistemas RFID con Proxmark3
 
-Lo primero que necesitas hacer es tener un [**Proxmark3**](https://proxmark.com) y [**instalar el software y sus dependencias**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)[**s**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux).
+Lo primero que necesitas es tener un [**Proxmark3**](https://proxmark.com) y [**instalar el software y sus dependencias**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)[**s**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux).
 
-### Atacando MIFARE Classic 1KB
+### Ataques a MIFARE Classic 1KB
 
 Tiene **16 sectores**, cada uno de ellos tiene **4 bloques** y cada bloque contiene **16B**. El UID está en el sector 0 bloque 0 (y no se puede alterar).\
 Para acceder a cada sector necesitas **2 claves** (**A** y **B**) que están almacenadas en **el bloque 3 de cada sector** (trailer del sector). El trailer del sector también almacena los **bits de acceso** que otorgan los permisos de **lectura y escritura** en **cada bloque** utilizando las 2 claves.\
 2 claves son útiles para otorgar permisos de lectura si conoces la primera y de escritura si conoces la segunda (por ejemplo).
 
-Se pueden realizar varios ataques.
+Se pueden realizar varios ataques
 ```bash
 proxmark3> hf mf #List attacks
 
@@ -31,7 +31,7 @@ proxmark3> hf mf eset 01 000102030405060708090a0b0c0d0e0f # Write those bytes to
 proxmark3> hf mf eget 01 # Read block 1
 proxmark3> hf mf wrbl 01 B FFFFFFFFFFFF 000102030405060708090a0b0c0d0e0f # Write to the card
 ```
-El Proxmark3 permite realizar otras acciones como **interceptar** una **comunicación de Tag a Reader** para intentar encontrar datos sensibles. En esta tarjeta, podrías simplemente esnifar la comunicación y calcular la clave utilizada porque las **operaciones criptográficas utilizadas son débiles** y conociendo el texto plano y el texto cifrado puedes calcularla (herramienta `mfkey64`).
+El Proxmark3 permite realizar otras acciones como **escuchar** una **comunicación de Etiqueta a Lector** para intentar encontrar datos sensibles. En esta tarjeta, podrías simplemente espiar la comunicación y calcular la clave utilizada porque las **operaciones criptográficas utilizadas son débiles** y conociendo el texto plano y el texto cifrado puedes calcularla (herramienta `mfkey64`).
 
 ### Comandos en Crudo
 
@@ -53,6 +53,6 @@ El software Proxmark3 viene con una lista precargada de **scripts de automatizac
 ```
 proxmark3> script run mfkeys
 ```
-Puedes crear un script para **fuzz tag readers**, así que copiando los datos de una **tarjeta válida** solo escribe un **script Lua** que **randomice** uno o más **bytes** aleatorios y verifica si el **lector se bloquea** con alguna iteración.
+Puedes crear un script para **fuzz tag readers**, así que copiando los datos de una **tarjeta válida** solo escribe un **script de Lua** que **randomice** uno o más **bytes** aleatorios y verifique si el **lector se bloquea** con alguna iteración.
 
 {{#include ../../banners/hacktricks-training.md}}

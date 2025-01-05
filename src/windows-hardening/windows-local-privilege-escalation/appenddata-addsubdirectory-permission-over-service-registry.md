@@ -21,7 +21,7 @@ Se consultó documentación sobre la subclave **Performance** y su utilización 
 
 El objetivo era forzar al **servicio de Mapeo de Puntos de Finalización RPC** a cargar la DLL de rendimiento creada. Las observaciones revelaron que la ejecución de consultas de clase WMI relacionadas con Datos de Rendimiento a través de PowerShell resultó en la creación de un archivo de registro, lo que permitió la ejecución de código arbitrario bajo el contexto de **SISTEMA LOCAL**, otorgando así privilegios elevados.
 
-Se subrayó la persistencia y las posibles implicaciones de esta vulnerabilidad, destacando su relevancia para estrategias de post-explotación, movimiento lateral y evasión de sistemas antivirus/EDR.
+Se subrayaron la persistencia y las posibles implicaciones de esta vulnerabilidad, destacando su relevancia para estrategias de post-explotación, movimiento lateral y evasión de sistemas antivirus/EDR.
 
 Aunque la vulnerabilidad se divulgó inicialmente de manera no intencionada a través del script, se enfatizó que su explotación está restringida a versiones antiguas de Windows (por ejemplo, **Windows 7 / Server 2008 R2**) y requiere acceso local.
 

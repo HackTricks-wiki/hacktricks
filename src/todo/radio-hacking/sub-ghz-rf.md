@@ -25,7 +25,7 @@ Además, al usar la Secuencia de De Bruijn (una forma de reducir el número de b
 
 <figure><img src="../../images/image (583).png" alt=""><figcaption></figcaption></figure>
 
-Un ejemplo de este ataque se implementó en [https://github.com/samyk/opensesame](https://github.com/samyk/opensesame)
+Un ejemplo de este ataque fue implementado en [https://github.com/samyk/opensesame](https://github.com/samyk/opensesame)
 
 Requerir **un preámbulo evitará la optimización de la Secuencia de De Bruijn** y **los códigos rodantes evitarán este ataque** (suponiendo que el código sea lo suficientemente largo como para no ser susceptible a la fuerza bruta).
 
@@ -41,7 +41,7 @@ flipper-zero/fz-sub-ghz.md
 
 Los abridores automáticos de puertas de garaje suelen utilizar un control remoto inalámbrico para abrir y cerrar la puerta del garaje. El control remoto **envía una señal de frecuencia de radio (RF)** al abridor de la puerta del garaje, que activa el motor para abrir o cerrar la puerta.
 
-Es posible que alguien use un dispositivo conocido como capturador de códigos para interceptar la señal RF y grabarla para su uso posterior. Esto se conoce como un **ataque de repetición**. Para prevenir este tipo de ataque, muchos abridores de puertas de garaje modernos utilizan un método de cifrado más seguro conocido como un sistema de **código rodante**.
+Es posible que alguien use un dispositivo conocido como un code grabber para interceptar la señal RF y grabarla para su uso posterior. Esto se conoce como un **ataque de repetición**. Para prevenir este tipo de ataque, muchos abridores de puertas de garaje modernos utilizan un método de cifrado más seguro conocido como un sistema de **código rodante**.
 
 La **señal RF se transmite típicamente utilizando un código rodante**, lo que significa que el código cambia con cada uso. Esto hace que sea **difícil** para alguien **interceptar** la señal y **utilizarla** para obtener acceso **no autorizado** al garaje.
 
@@ -51,29 +51,29 @@ En un sistema de código rodante, el control remoto y el abridor de la puerta de
 
 Básicamente, escuchas el botón y **capturas la señal mientras el control remoto está fuera del alcance** del dispositivo (digamos el automóvil o el garaje). Luego te mueves hacia el dispositivo y **utilizas el código capturado para abrirlo**.
 
-### Ataque de Jamming de Enlace Completo
+### Ataque de Bloqueo de Enlace Completo
 
-Un atacante podría **interferir la señal cerca del vehículo o receptor** para que el **receptor no pueda realmente 'escuchar' el código**, y una vez que eso esté sucediendo, puedes simplemente **capturar y reproducir** el código cuando hayas dejado de interferir.
+Un atacante podría **bloquear la señal cerca del vehículo o receptor** para que el **receptor no pueda realmente 'escuchar' el código**, y una vez que eso esté sucediendo, puedes simplemente **capturar y reproducir** el código cuando hayas dejado de bloquear.
 
-La víctima en algún momento usará las **llaves para cerrar el automóvil**, pero luego el ataque habrá **grabado suficientes códigos de "cerrar puerta"** que, con suerte, podrían ser reenviados para abrir la puerta (puede ser **necesario un cambio de frecuencia** ya que hay automóviles que utilizan los mismos códigos para abrir y cerrar, pero escuchan ambos comandos en diferentes frecuencias).
+La víctima en algún momento usará las **llaves para cerrar el automóvil**, pero luego el ataque habrá **grabado suficientes "códigos de cerrar puerta"** que, con suerte, podrían ser reenviados para abrir la puerta (puede ser **necesario un cambio de frecuencia** ya que hay automóviles que utilizan los mismos códigos para abrir y cerrar, pero escuchan ambos comandos en diferentes frecuencias).
 
 > [!WARNING]
-> **La interferencia funciona**, pero es notable, ya que si la **persona que cierra el automóvil simplemente prueba las puertas** para asegurarse de que están cerradas, notaría que el automóvil está desbloqueado. Además, si estuvieran al tanto de tales ataques, incluso podrían escuchar el hecho de que las puertas nunca hicieron el **sonido** de bloqueo o que las **luces** del automóvil nunca parpadearon cuando presionaron el botón de 'bloquear'.
+> **El bloqueo funciona**, pero es notable, ya que si la **persona que cierra el automóvil simplemente prueba las puertas** para asegurarse de que estén cerradas, notaría que el automóvil está desbloqueado. Además, si estuvieran al tanto de tales ataques, incluso podrían escuchar el hecho de que las puertas nunca hicieron el **sonido** de bloqueo o que las **luces** del automóvil nunca parpadearon cuando presionaron el botón de 'bloquear'.
 
 ### **Ataque de Captura de Código (también conocido como 'RollJam')**
 
-Esta es una técnica de **interferencia más sigilosa**. El atacante interferirá la señal, de modo que cuando la víctima intente cerrar la puerta, no funcionará, pero el atacante **grabará este código**. Luego, la víctima **intenta cerrar el automóvil nuevamente** presionando el botón y el automóvil **grabará este segundo código**.\
-Instantáneamente después de esto, el **atacante puede enviar el primer código** y el **automóvil se cerrará** (la víctima pensará que la segunda presión lo cerró). Luego, el atacante podrá **enviar el segundo código robado para abrir** el automóvil (suponiendo que un **código de "cerrar automóvil" también se puede usar para abrirlo**). Puede ser necesario un cambio de frecuencia (ya que hay automóviles que utilizan los mismos códigos para abrir y cerrar, pero escuchan ambos comandos en diferentes frecuencias).
+Esta es una técnica de **bloqueo más sigilosa**. El atacante bloqueará la señal, de modo que cuando la víctima intente cerrar la puerta, no funcione, pero el atacante **grabará este código**. Luego, la víctima **intenta cerrar el automóvil nuevamente** presionando el botón y el automóvil **grabará este segundo código**.\
+Instantáneamente después de esto, el **atacante puede enviar el primer código** y el **automóvil se cerrará** (la víctima pensará que la segunda presión lo cerró). Luego, el atacante podrá **enviar el segundo código robado para abrir** el automóvil (suponiendo que un **código de "cerrar automóvil" también se pueda usar para abrirlo**). Puede ser necesario un cambio de frecuencia (ya que hay automóviles que utilizan los mismos códigos para abrir y cerrar, pero escuchan ambos comandos en diferentes frecuencias).
 
-El atacante puede **interferir el receptor del automóvil y no su receptor** porque si el receptor del automóvil está escuchando, por ejemplo, en un ancho de banda de 1MHz, el atacante no **interferirá** la frecuencia exacta utilizada por el control remoto, sino **una cercana en ese espectro**, mientras que el **receptor del atacante estará escuchando en un rango más pequeño** donde puede escuchar la señal del control remoto **sin la señal de interferencia**.
+El atacante puede **bloquear el receptor del automóvil y no su receptor** porque si el receptor del automóvil está escuchando, por ejemplo, en un ancho de banda de 1MHz, el atacante no **bloqueará** la frecuencia exacta utilizada por el control remoto, sino **una cercana en ese espectro**, mientras que el **receptor del atacante estará escuchando en un rango más pequeño** donde puede escuchar la señal del control remoto **sin la señal de bloqueo**.
 
 > [!WARNING]
-> Otras implementaciones vistas en especificaciones muestran que el **código rodante es una porción** del código total enviado. Es decir, el código enviado es una **clave de 24 bits** donde los primeros **12 son el código rodante**, los **8 segundos son el comando** (como bloquear o desbloquear) y los últimos 4 son el **checksum**. Los vehículos que implementan este tipo también son naturalmente susceptibles, ya que el atacante solo necesita reemplazar el segmento del código rodante para poder **usar cualquier código rodante en ambas frecuencias**.
+> Otras implementaciones vistas en especificaciones muestran que el **código rodante es una porción** del código total enviado. Es decir, el código enviado es una **clave de 24 bits** donde los primeros **12 son el código rodante**, los **8 segundos son el comando** (como bloquear o desbloquear) y los últimos 4 son el **checksum**. Los vehículos que implementan este tipo son también naturalmente susceptibles, ya que el atacante solo necesita reemplazar el segmento del código rodante para poder **usar cualquier código rodante en ambas frecuencias**.
 
 > [!CAUTION]
 > Tenga en cuenta que si la víctima envía un tercer código mientras el atacante está enviando el primero, el primer y segundo código serán invalidados.
 
-### Ataque de Jamming de Sonido de Alarma
+### Ataque de Bloqueo de Sonido de Alarma
 
 Al probar un sistema de código rodante de posventa instalado en un automóvil, **enviar el mismo código dos veces** inmediatamente **activó la alarma** y el inmovilizador, proporcionando una única oportunidad de **denegación de servicio**. Irónicamente, el medio para **desactivar la alarma** y el inmovilizador era **presionar** el **control remoto**, proporcionando al atacante la capacidad de **realizar continuamente un ataque de DoS**. O mezclar este ataque con el **anterior para obtener más códigos**, ya que la víctima querría detener el ataque lo antes posible.
 

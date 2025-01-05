@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Explorador de AD
+## AD Explorer
 
 [AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) es parte de Sysinternal Suite:
 
@@ -30,7 +30,7 @@ From [https://github.com/BloodHoundAD/BloodHound](https://github.com/BloodHoundA
 
 > BloodHound es una aplicación web de Javascript de una sola página, construida sobre [Linkurious](http://linkurio.us/), compilada con [Electron](http://electron.atom.io/), con una base de datos [Neo4j](https://neo4j.com/) alimentada por un recolector de datos en C#.
 
-BloodHound utiliza la teoría de grafos para revelar las relaciones ocultas y a menudo no intencionadas dentro de un entorno de Active Directory o Azure. Los atacantes pueden usar BloodHound para identificar fácilmente rutas de ataque altamente complejas que de otro modo serían imposibles de identificar rápidamente. Los defensores pueden usar BloodHound para identificar y eliminar esas mismas rutas de ataque. Tanto los equipos azules como los rojos pueden usar BloodHound para obtener fácilmente una comprensión más profunda de las relaciones de privilegio en un entorno de Active Directory o Azure.
+BloodHound utiliza la teoría de grafos para revelar las relaciones ocultas y a menudo no intencionadas dentro de un entorno de Active Directory o Azure. Los atacantes pueden usar BloodHound para identificar fácilmente rutas de ataque altamente complejas que de otro modo serían imposibles de identificar rápidamente. Los defensores pueden usar BloodHound para identificar y eliminar esas mismas rutas de ataque. Tanto los equipos azules como los rojos pueden usar BloodHound para obtener una comprensión más profunda de las relaciones de privilegio en un entorno de Active Directory o Azure.
 
 Así que, [Bloodhound ](https://github.com/BloodHoundAD/BloodHound) es una herramienta increíble que puede enumerar un dominio automáticamente, guardar toda la información, encontrar posibles rutas de escalada de privilegios y mostrar toda la información utilizando gráficos.
 

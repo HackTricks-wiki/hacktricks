@@ -6,7 +6,7 @@
 
 Esta es una característica que un Administrador de Dominio puede establecer en cualquier **Computadora** dentro del dominio. Luego, cada vez que un **usuario inicia sesión** en la Computadora, una **copia del TGT** de ese usuario será **enviada dentro del TGS** proporcionado por el DC **y guardada en memoria en LSASS**. Así que, si tienes privilegios de Administrador en la máquina, podrás **extraer los tickets e impersonar a los usuarios** en cualquier máquina.
 
-Así que si un administrador de dominio inicia sesión en una Computadora con la característica de "Delegación No Restringida" activada, y tú tienes privilegios de administrador local en esa máquina, podrás extraer el ticket e impersonar al Administrador de Dominio en cualquier lugar (privesc de dominio).
+Entonces, si un administrador de dominio inicia sesión en una Computadora con la característica de "Delegación No Restringida" activada, y tú tienes privilegios de administrador local en esa máquina, podrás extraer el ticket e impersonar al Administrador de Dominio en cualquier lugar (privesc de dominio).
 
 Puedes **encontrar objetos de Computadora con este atributo** verificando si el atributo [userAccountControl](<https://msdn.microsoft.com/en-us/library/ms680832(v=vs.85).aspx>) contiene [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>). Puedes hacer esto con un filtro LDAP de ‘(userAccountControl:1.2.840.113556.1.4.803:=524288)’, que es lo que hace powerview:
 
@@ -36,7 +36,7 @@ Para hacer que un servidor de impresión inicie sesión contra cualquier máquin
 ```bash
 .\SpoolSample.exe <printmachine> <unconstrinedmachine>
 ```
-Si el TGT proviene de un controlador de dominio, podrías realizar un [**ataque DCSync**](acl-persistence-abuse/index.html#dcsync) y obtener todos los hashes del DC.\
+Si el TGT proviene de un controlador de dominio, podrías realizar un [**ataque DCSync**](acl-persistence-abuse/#dcsync) y obtener todos los hashes del DC.\
 [**Más información sobre este ataque en ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-dc-print-server-and-kerberos-delegation)
 
 **Aquí hay otras formas de intentar forzar una autenticación:**

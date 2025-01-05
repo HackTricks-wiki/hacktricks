@@ -10,7 +10,7 @@ Flipper Zero puede **recibir y transmitir frecuencias de radio en el rango de 30
 
 ## Hardware Sub-GHz <a href="#kfpn7" id="kfpn7"></a>
 
-Flipper Zero tiene un módulo sub-1 GHz integrado basado en un [﻿](https://www.st.com/en/nfc/st25r3916.html#overview)﻿[chip CC1101](https://www.ti.com/lit/ds/symlink/cc1101.pdf) y una antena de radio (el rango máximo es de 50 metros). Tanto el chip CC1101 como la antena están diseñados para operar en frecuencias en las bandas de 300-348 MHz, 387-464 MHz y 779-928 MHz.
+Flipper Zero tiene un módulo sub-1 GHz integrado basado en un [﻿](https://www.st.com/en/nfc/st25r3916.html#overview)﻿[chip CC1101](https://www.ti.com/lit/ds/symlink/cc1101.pdf) y una antena de radio (el rango máximo es de 50 metros). Tanto el chip CC1101 como la antena están diseñados para operar en las bandas de frecuencias de 300-348 MHz, 387-464 MHz y 779-928 MHz.
 
 <figure><img src="../../../images/image (923).png" alt=""><figcaption></figcaption></figure>
 

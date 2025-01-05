@@ -34,9 +34,9 @@ Check **otras formas de robar sesiones con otras herramientas** [**en esta pági
 
 ## RDPInception
 
-Si un usuario accede a través de **RDP a una máquina** donde un **atacante** está **esperándolo**, el atacante podrá **inyectar un beacon en la sesión RDP del usuario** y si la **víctima montó su unidad** al acceder a través de RDP, el **atacante podría acceder a ella**.
+Si un usuario accede a través de **RDP a una máquina** donde un **atacante** está **esperándolo**, el atacante podrá **inyectar un beacon en la sesión RDP del usuario** y si la **víctima montó su unidad** al acceder por RDP, el **atacante podría acceder a ella**.
 
-En este caso, podrías simplemente **comprometer** el **computador original** de la **víctima** escribiendo un **backdoor** en la **carpeta de inicio**.
+En este caso, podrías simplemente **comprometer** el **ordenador original** de la **víctima** escribiendo un **backdoor** en la **carpeta de inicio**.
 ```powershell
 # Wait til someone logs in:
 net logons

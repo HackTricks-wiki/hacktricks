@@ -52,16 +52,16 @@ Para una introducción sobre NFC [**lee esta página**](../pentesting-rfid.md#hi
 
 ### Leer
 
-Flipper Zero puede **leer tarjetas NFC**, sin embargo, **no entiende todos los protocolos** que se basan en ISO 14443. Sin embargo, dado que **UID es un atributo de bajo nivel**, podrías encontrarte en una situación en la que **el UID ya está leído, pero el protocolo de transferencia de datos de alto nivel sigue siendo desconocido**. Puedes leer, emular e ingresar manualmente el UID usando Flipper para los lectores primitivos que utilizan UID para autorización.
+Flipper Zero puede **leer tarjetas NFC**, sin embargo, **no entiende todos los protocolos** que se basan en ISO 14443. Sin embargo, dado que **UID es un atributo de bajo nivel**, podrías encontrarte en una situación en la que **el UID ya ha sido leído, pero el protocolo de transferencia de datos de alto nivel sigue siendo desconocido**. Puedes leer, emular e ingresar manualmente el UID usando Flipper para los lectores primitivos que utilizan UID para autorización.
 
-#### Leer el UID VS Leer los Datos Internos <a href="#reading-the-uid-vs-reading-the-data-inside" id="reading-the-uid-vs-reading-the-data-inside"></a>
+#### Lectura del UID VS Lectura de los Datos Internos <a href="#reading-the-uid-vs-reading-the-data-inside" id="reading-the-uid-vs-reading-the-data-inside"></a>
 
 <figure><img src="../../../images/image (217).png" alt=""><figcaption></figcaption></figure>
 
 En Flipper, la lectura de etiquetas de 13.56 MHz se puede dividir en dos partes:
 
-- **Lectura de bajo nivel** — solo lee el UID, SAK y ATQA. Flipper intenta adivinar el protocolo de alto nivel basado en estos datos leídos de la tarjeta. No puedes estar 100% seguro de esto, ya que es solo una suposición basada en ciertos factores.
-- **Lectura de alto nivel** — lee los datos de la memoria de la tarjeta utilizando un protocolo de alto nivel específico. Eso sería leer los datos en un Mifare Ultralight, leer los sectores de un Mifare Classic o leer los atributos de la tarjeta de PayPass/Apple Pay.
+- **Lectura de bajo nivel** — lee solo el UID, SAK y ATQA. Flipper intenta adivinar el protocolo de alto nivel basado en estos datos leídos de la tarjeta. No puedes estar 100% seguro de esto, ya que es solo una suposición basada en ciertos factores.
+- **Lectura de alto nivel** — lee los datos de la memoria de la tarjeta utilizando un protocolo de alto nivel específico. Eso sería leer los datos en un Mifare Ultralight, leer los sectores de un Mifare Classic, o leer los atributos de la tarjeta de PayPass/Apple Pay.
 
 ### Leer Específico
 

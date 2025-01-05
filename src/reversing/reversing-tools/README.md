@@ -6,8 +6,8 @@ En el ámbito de **WebAssembly**, las herramientas para **decompilar** y **compi
 
 ## Herramientas en Línea
 
-- Para **decompilar** Wasm a Wat, la herramienta disponible en [la demo wasm2wat de Wabt](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) es útil.
-- Para **compilar** Wat de vuelta a Wasm, [la demo wat2wasm de Wabt](https://webassembly.github.io/wabt/demo/wat2wasm/) cumple con el propósito.
+- Para **decompilar** Wasm a Wat, la herramienta disponible en [la demo wasm2wat de Wabt](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) es muy útil.
+- Para **compilar** Wat de vuelta a Wasm, la [demo wat2wasm de Wabt](https://webassembly.github.io/wabt/demo/wat2wasm/) cumple con el propósito.
 - Otra opción de decompilación se puede encontrar en [web-wasmdec](https://wwwg.github.io/web-wasmdec/).
 
 ## Soluciones de Software
@@ -23,7 +23,7 @@ Decompilar ensamblados de .Net se puede lograr con herramientas como:
 - Para tareas que involucran **decompilación**, **modificación** y **recompilación**, se recomienda encarecidamente [dnSpy](https://github.com/0xd4d/dnSpy/releases). **Hacer clic derecho** en un método y elegir **Modificar Método** permite cambios en el código.
 - [dotPeek de JetBrains](https://www.jetbrains.com/es-es/decompiler/) es otra alternativa para decompilar ensamblados de .Net.
 
-## Mejorando la Depuración y el Registro con DNSpy
+## Mejorando la Depuración y Registro con DNSpy
 
 ### Registro de DNSpy
 
@@ -41,7 +41,7 @@ Para una depuración efectiva con DNSpy, se recomienda una secuencia de pasos pa
 
 Además, para depurar una aplicación .Net ejecutada por **IIS**, ejecutar `iisreset /noforce` reinicia IIS. Para adjuntar DNSpy al proceso de IIS para depuración, la guía instruye sobre seleccionar el proceso **w3wp.exe** dentro de DNSpy y comenzar la sesión de depuración.
 
-Para una vista completa de los módulos cargados durante la depuración, se aconseja acceder a la ventana de **Módulos** en DNSpy, seguida de abrir todos los módulos y ordenar los ensamblados para una navegación y depuración más fácil.
+Para una vista completa de los módulos cargados durante la depuración, se aconseja acceder a la ventana de **Módulos** en DNSpy, seguida de abrir todos los módulos y ordenar los ensamblados para facilitar la navegación y depuración.
 
 Esta guía encapsula la esencia de la decompilación de WebAssembly y .Net, ofreciendo un camino para que los desarrolladores naveguen estas tareas con facilidad.
 
@@ -63,7 +63,7 @@ Para decompilar bytecode de Java, estas herramientas pueden ser muy útiles:
 ### Usando x64dbg/x32dbg
 
 - Similar a IDA, **rundll32** se carga con modificaciones en la línea de comandos para especificar la DLL y la función.
-- Se ajustan las configuraciones para romper en la entrada de la DLL, permitiendo establecer puntos de interrupción en el punto de entrada deseado de la DLL.
+- Se ajustan las configuraciones para romper en la entrada de la DLL, permitiendo establecer un punto de interrupción en el punto de entrada deseado de la DLL.
 
 ### Imágenes
 
@@ -91,7 +91,7 @@ scdbg.exe -f shellcode -r # Informe de análisis
 scdbg.exe -f shellcode -i -r # Hooks interactivos
 scdbg.exe -f shellcode -d # Volcar shellcode decodificado
 scdbg.exe -f shellcode /findsc # Encontrar desplazamiento de inicio
-scdbg.exe -f shellcode /foff 0x0000004D # Ejecutar desde desplazamiento
+scdbg.exe -f shellcode /foff 0x0000004D # Ejecutar desde el desplazamiento
 %%%
 
 - **CyberChef** para desensamblar shellcode: [receta de CyberChef](https://gchq.github.io/CyberChef/#recipe=To_Hex%28'Space',0%29Disassemble_x86%28'32','Full%20x86%20architecture',16,0,true,true%29)

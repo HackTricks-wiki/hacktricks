@@ -1,6 +1,6 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-Básicamente, esta herramienta nos ayudará a encontrar valores para variables que necesitan satisfacer algunas condiciones y calcularlos a mano será muy molesto. Por lo tanto, puedes indicar a Z3 las condiciones que las variables deben satisfacer y encontrará algunos valores (si es posible).
+Básicamente, esta herramienta nos ayudará a encontrar valores para variables que necesitan satisfacer algunas condiciones y calcularlos a mano sería muy molesto. Por lo tanto, puedes indicar a Z3 las condiciones que las variables deben satisfacer y encontrará algunos valores (si es posible).
 
 **Algunos textos y ejemplos son extraídos de [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)**
 

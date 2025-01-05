@@ -119,7 +119,7 @@ simgr.active[0].regs.rip #Get RIP from the last state
 ```
 ## Llamando funciones
 
-- Puedes pasar una lista de argumentos a través de `args` y un diccionario de variables de entorno a través de `env` en `entry_state` y `full_init_state`. Los valores en estas estructuras pueden ser cadenas o bitvectors, y se serializarán en el estado como los argumentos y el entorno para la ejecución simulada. El `args` por defecto es una lista vacía, así que si el programa que estás analizando espera encontrar al menos un `argv[0]`, ¡siempre debes proporcionar eso!
+- Puedes pasar una lista de argumentos a través de `args` y un diccionario de variables de entorno a través de `env` en `entry_state` y `full_init_state`. Los valores en estas estructuras pueden ser cadenas o bitvectors, y se serializarán en el estado como los argumentos y el entorno para la ejecución simulada. El `args` predeterminado es una lista vacía, así que si el programa que estás analizando espera encontrar al menos un `argv[0]`, ¡siempre debes proporcionar eso!
 - Si deseas que `argc` sea simbólico, puedes pasar un bitvector simbólico como `argc` a los constructores de `entry_state` y `full_init_state`. Ten cuidado, sin embargo: si haces esto, también debes agregar una restricción al estado resultante de que tu valor para argc no puede ser mayor que el número de args que pasaste a `args`.
 - Para usar el estado de llamada, debes llamarlo con `.call_state(addr, arg1, arg2, ...)`, donde `addr` es la dirección de la función que deseas llamar y `argN` es el N-ésimo argumento para esa función, ya sea como un entero de python, cadena o arreglo, o un bitvector. Si deseas que se asigne memoria y realmente pasar un puntero a un objeto, debes envolverlo en un PointerWrapper, es decir, `angr.PointerWrapper("point to me!")`. Los resultados de esta API pueden ser un poco impredecibles, pero estamos trabajando en ello.
 
@@ -132,7 +132,7 @@ state.solver.eval(bv) #Convert BV to python int
 bv.zero_extend(30) #Will add 30 zeros on the left of the bitvector
 bv.sign_extend(30) #Will add 30 zeros or ones on the left of the BV extending the sign
 ```
-## BitVectors Simbólicos y Restricciones
+## BitVectores Simbólicos y Restricciones
 ```python
 x = state.solver.BVS("x", 64) #Symbolic variable BV of length 64
 y = state.solver.BVS("y", 64)

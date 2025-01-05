@@ -2,9 +2,9 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Recuperación de Contraseña del BIOS y Seguridad del Sistema
+## Recuperación de Contraseña de BIOS y Seguridad del Sistema
 
-**Restablecer el BIOS** se puede lograr de varias maneras. La mayoría de las placas base incluyen una **batería** que, al ser retirada durante aproximadamente **30 minutos**, restablecerá la configuración del BIOS, incluida la contraseña. Alternativamente, se puede ajustar un **puente en la placa base** para restablecer estas configuraciones conectando pines específicos.
+**Restablecer el BIOS** se puede lograr de varias maneras. La mayoría de las placas base incluyen una **batería** que, al ser retirada durante aproximadamente **30 minutos**, restablecerá la configuración del BIOS, incluida la contraseña. Alternativamente, se puede ajustar un **jumper en la placa base** para restablecer estas configuraciones conectando pines específicos.
 
 Para situaciones donde los ajustes de hardware no son posibles o prácticos, las **herramientas de software** ofrecen una solución. Ejecutar un sistema desde un **Live CD/USB** con distribuciones como **Kali Linux** proporciona acceso a herramientas como **_killCmos_** y **_CmosPWD_**, que pueden ayudar en la recuperación de la contraseña del BIOS.
 
@@ -18,7 +18,7 @@ Para sistemas modernos que utilizan **UEFI** en lugar del BIOS tradicional, se p
 
 ### Análisis de RAM y Ataques de Arranque en Frío
 
-La RAM retiene datos brevemente después de que se corta la energía, generalmente durante **1 a 2 minutos**. Esta persistencia se puede extender a **10 minutos** aplicando sustancias frías, como nitrógeno líquido. Durante este período extendido, se puede crear un **volcado de memoria** utilizando herramientas como **dd.exe** y **volatility** para su análisis.
+La RAM retiene datos brevemente después de cortar la energía, generalmente durante **1 a 2 minutos**. Esta persistencia se puede extender a **10 minutos** aplicando sustancias frías, como nitrógeno líquido. Durante este período extendido, se puede crear un **volcado de memoria** utilizando herramientas como **dd.exe** y **volatility** para su análisis.
 
 ### Ataques de Acceso Directo a la Memoria (DMA)
 
@@ -46,9 +46,9 @@ Dispositivos como **Rubber Ducky** y **Teensyduino** sirven como plataformas par
 
 Los privilegios de administrador permiten la creación de copias de archivos sensibles, incluido el archivo **SAM**, a través de PowerShell.
 
-### Eludir la Encriptación de BitLocker
+### Eludir la Encriptación BitLocker
 
-La encriptación de BitLocker puede potencialmente ser eludida si se encuentra la **contraseña de recuperación** dentro de un archivo de volcado de memoria (**MEMORY.DMP**). Herramientas como **Elcomsoft Forensic Disk Decryptor** o **Passware Kit Forensic** se pueden utilizar para este propósito.
+La encriptación BitLocker puede potencialmente ser eludida si se encuentra la **contraseña de recuperación** dentro de un archivo de volcado de memoria (**MEMORY.DMP**). Herramientas como **Elcomsoft Forensic Disk Decryptor** o **Passware Kit Forensic** se pueden utilizar para este propósito.
 
 ### Ingeniería Social para Adición de Clave de Recuperación
 

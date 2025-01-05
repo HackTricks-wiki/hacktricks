@@ -47,7 +47,7 @@ $newPath = "$envPath;$folderPath"
 
 <figure><img src="../../../images/image (945).png" alt=""><figcaption></figcaption></figure>
 
-### Dlls Perdidas
+### Dlls Perdidos
 
 Ejecutando esto en una **máquina virtual (vmware) Windows 11** gratuita, obtuve estos resultados:
 
@@ -67,11 +67,11 @@ Después de encontrar esto, encontré esta interesante publicación de blog que 
 
 Entonces, para **escalar privilegios**, vamos a secuestrar la biblioteca **WptsExtensions.dll**. Teniendo la **ruta** y el **nombre**, solo necesitamos **generar el dll malicioso**.
 
-Puede [**intentar usar cualquiera de estos ejemplos**](#creating-and-compiling-dlls). Podría ejecutar cargas útiles como: obtener un rev shell, agregar un usuario, ejecutar un beacon...
+Puede [**intentar usar cualquiera de estos ejemplos**](./#creating-and-compiling-dlls). Podría ejecutar cargas útiles como: obtener un rev shell, agregar un usuario, ejecutar un beacon...
 
 > [!WARNING]
 > Tenga en cuenta que **no todos los servicios se ejecutan** con **`NT AUTHORITY\SYSTEM`**, algunos también se ejecutan con **`NT AUTHORITY\LOCAL SERVICE`**, que tiene **menos privilegios** y **no podrá crear un nuevo usuario** abusando de sus permisos.\
-> Sin embargo, ese usuario tiene el privilegio **`seImpersonate`**, por lo que puede usar la [**potato suite para escalar privilegios**](../roguepotato-and-printspoofer.md). Así que, en este caso, un rev shell es una mejor opción que intentar crear un usuario.
+> Sin embargo, ese usuario tiene el privilegio **`seImpersonate`**, por lo que puede usar el [**potato suite para escalar privilegios**](../roguepotato-and-printspoofer.md). Así que, en este caso, un rev shell es una mejor opción que intentar crear un usuario.
 
 En el momento de escribir, el servicio de **Programador de tareas** se ejecuta con **Nt AUTHORITY\SYSTEM**.
 

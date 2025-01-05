@@ -194,7 +194,7 @@ _ => "Hello",
 }
 }
 ```
-#### si deja
+#### if let
 ```rust
 let optional_word = Some(String::from("rustlings"));
 if let word = optional_word {

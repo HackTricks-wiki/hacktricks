@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Grupos bien conocidos con privilegios de administración
+## Grupos Bien Conocidos con Privilegios de Administración
 
 - **Administradores**
 - **Administradores de Dominio**
@@ -34,7 +34,7 @@ Un script está disponible para acelerar el proceso de restauración: [Invoke-AD
 
 Para más detalles, visita [ired.team](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/how-to-abuse-and-backdoor-adminsdholder-to-obtain-domain-admin-persistence).
 
-## Papelera de reciclaje de AD
+## AD Recycle Bin
 
 La membresía en este grupo permite la lectura de objetos de Active Directory eliminados, lo que puede revelar información sensible:
 ```bash
@@ -44,9 +44,9 @@ Get-ADObject -filter 'isDeleted -eq $true' -includeDeletedObjects -Properties *
 
 El acceso a los archivos en el DC está restringido a menos que el usuario sea parte del grupo `Server Operators`, lo que cambia el nivel de acceso.
 
-### Escalamiento de Privilegios
+### Escalación de Privilegios
 
-Usando `PsService` o `sc` de Sysinternals, se puede inspeccionar y modificar los permisos de los servicios. El grupo `Server Operators`, por ejemplo, tiene control total sobre ciertos servicios, lo que permite la ejecución de comandos arbitrarios y el escalamiento de privilegios:
+Usando `PsService` o `sc` de Sysinternals, se puede inspeccionar y modificar los permisos de los servicios. El grupo `Server Operators`, por ejemplo, tiene control total sobre ciertos servicios, lo que permite la ejecución de comandos arbitrarios y la escalación de privilegios:
 ```cmd
 C:\> .\PsService.exe security AppReadiness
 ```
@@ -56,7 +56,7 @@ Este comando revela que `Server Operators` tienen acceso completo, lo que permit
 
 La membresía en el grupo `Backup Operators` proporciona acceso al sistema de archivos `DC01` debido a los privilegios `SeBackup` y `SeRestore`. Estos privilegios permiten la navegación por carpetas, la enumeración y la capacidad de copiar archivos, incluso sin permisos explícitos, utilizando la bandera `FILE_FLAG_BACKUP_SEMANTICS`. Es necesario utilizar scripts específicos para este proceso.
 
-Para listar los miembros del grupo, ejecute:
+Para listar los miembros del grupo, ejecuta:
 ```powershell
 Get-NetGroupMember -Identity "Backup Operators" -Recurse
 ```
@@ -98,11 +98,11 @@ expose %cdrive% F:
 end backup
 exit
 ```
-2. Copia `NTDS.dit` de la copia de sombra:
+2. Copiar `NTDS.dit` de la copia de sombra:
 ```cmd
 Copy-FileSeBackupPrivilege E:\Windows\NTDS\ntds.dit C:\Tools\ntds.dit
 ```
-Alternativamente, usa `robocopy` para copiar archivos:
+Alternativamente, utiliza `robocopy` para copiar archivos:
 ```cmd
 robocopy /B F:\Windows\NTDS .\ntds ntds.dit
 ```
@@ -130,7 +130,7 @@ Para una demostración práctica, consulta [DEMO VIDEO WITH IPPSEC](https://www.
 
 ## DnsAdmins
 
-Los miembros del grupo **DnsAdmins** pueden explotar sus privilegios para cargar un DLL arbitrario con privilegios de SYSTEM en un servidor DNS, a menudo alojado en Controladores de Dominio. Esta capacidad permite un potencial de explotación significativo.
+Los miembros del grupo **DnsAdmins** pueden explotar sus privilegios para cargar una DLL arbitraria con privilegios de SYSTEM en un servidor DNS, a menudo alojado en Controladores de Dominio. Esta capacidad permite un potencial de explotación significativo.
 
 Para listar los miembros del grupo DnsAdmins, usa:
 ```powershell
@@ -180,7 +180,7 @@ Los miembros pueden acceder a los registros de eventos, encontrando potencialmen
 Get-NetGroupMember -Identity "Event Log Readers" -Recurse
 Get-WinEvent -LogName security | where { $_.ID -eq 4688 -and $_.Properties[8].Value -like '*/user*'}
 ```
-## Permisos de Windows de Exchange
+## Exchange Windows Permissions
 
 Este grupo puede modificar DACLs en el objeto de dominio, lo que podría otorgar privilegios de DCSync. Las técnicas para la escalada de privilegios que explotan este grupo se detallan en el repositorio de GitHub Exchange-AD-Privesc.
 ```powershell
@@ -193,7 +193,7 @@ Los Administradores de Hyper-V tienen acceso completo a Hyper-V, lo que puede se
 
 ### Ejemplo de Explotación
 
-El Servicio de Mantenimiento de Mozilla Firefox puede ser explotado por los Administradores de Hyper-V para ejecutar comandos como SYSTEM. Esto implica crear un enlace duro a un archivo protegido de SYSTEM y reemplazarlo con un ejecutable malicioso:
+El Servicio de Mantenimiento de Mozilla Firefox puede ser explotado por los Administradores de Hyper-V para ejecutar comandos como SYSTEM. Esto implica crear un enlace duro a un archivo protegido del SYSTEM y reemplazarlo con un ejecutable malicioso:
 ```bash
 # Take ownership and start the service
 takeown /F C:\Program Files (x86)\Mozilla Maintenance Service\maintenanceservice.exe
@@ -203,7 +203,7 @@ Nota: La explotación de enlaces duros ha sido mitigada en las actualizaciones r
 
 ## Organización de la Gestión
 
-En entornos donde se despliega **Microsoft Exchange**, un grupo especial conocido como **Organización de Gestión** posee capacidades significativas. Este grupo tiene privilegios para **acceder a los buzones de todos los usuarios del dominio** y mantiene **control total sobre la Unidad Organizativa (OU) 'Grupos de Seguridad de Microsoft Exchange'**. Este control incluye el grupo **`Exchange Windows Permissions`**, que puede ser explotado para la escalación de privilegios.
+En entornos donde se despliega **Microsoft Exchange**, un grupo especial conocido como **Organización de Gestión** tiene capacidades significativas. Este grupo tiene privilegios para **acceder a los buzones de todos los usuarios del dominio** y mantiene **control total sobre la Unidad Organizativa (OU) 'Grupos de Seguridad de Microsoft Exchange'**. Este control incluye el grupo **`Exchange Windows Permissions`**, que puede ser explotado para la escalación de privilegios.
 
 ### Explotación de Privilegios y Comandos
 
@@ -233,11 +233,11 @@ Los miembros pueden acceder a PCs a través de **Windows Remote Management (WinR
 Get-NetGroupMember -Identity "Remote Management Users" -Recurse
 Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Management Users"
 ```
-Para las técnicas de explotación relacionadas con **WinRM**, se debe consultar la documentación específica.
+Para técnicas de explotación relacionadas con **WinRM**, se debe consultar la documentación específica.
 
 #### Operadores de Servidor
 
-Este grupo tiene permisos para realizar varias configuraciones en los Controladores de Dominio, incluyendo privilegios de copia de seguridad y restauración, cambio de hora del sistema y apagado del sistema. Para enumerar los miembros, el comando proporcionado es:
+Este grupo tiene permisos para realizar varias configuraciones en Controladores de Dominio, incluyendo privilegios de copia de seguridad y restauración, cambio de hora del sistema y apagado del sistema. Para enumerar los miembros, el comando proporcionado es:
 ```powershell
 Get-NetGroupMember -Identity "Server Operators" -Recurse
 ```

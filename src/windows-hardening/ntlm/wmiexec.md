@@ -6,7 +6,7 @@
 
 Los procesos pueden abrirse en hosts donde se conocen el nombre de usuario y la contraseña o hash a través del uso de WMI. Los comandos se ejecutan utilizando WMI mediante Wmiexec, proporcionando una experiencia de shell semi-interactiva.
 
-**dcomexec.py:** Utilizando diferentes puntos finales de DCOM, este script ofrece un shell semi-interactivo similar a wmiexec.py, aprovechando específicamente el objeto DCOM ShellBrowserWindow. Actualmente es compatible con los objetos de Aplicación MMC20, Ventanas de Shell y Ventana del Navegador de Shell. (source: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
+**dcomexec.py:** Utilizando diferentes puntos finales de DCOM, este script ofrece un shell semi-interactivo similar a wmiexec.py, aprovechando específicamente el objeto DCOM ShellBrowserWindow. Actualmente es compatible con MMC20. Objetos de Aplicación, Ventanas de Shell y Ventana del Navegador de Shell. (source: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
 
 ## Fundamentos de WMI
 
@@ -76,7 +76,7 @@ Recopilación de información del sistema y del proceso a través de WMI:
 Get-WmiObject -ClassName win32_operatingsystem | select * | more
 Get-WmiObject win32_process | Select Name, Processid
 ```
-Para los atacantes, WMI es una herramienta poderosa para enumerar datos sensibles sobre sistemas o dominios.
+Para los atacantes, WMI es una herramienta potente para enumerar datos sensibles sobre sistemas o dominios.
 ```bash
 wmic computerystem list full /format:list
 wmic process list /format:list
@@ -87,7 +87,7 @@ wmic sysaccount list /format:list
 ```
 La consulta remota de WMI para información específica, como administradores locales o usuarios conectados, es factible con una construcción cuidadosa de comandos.
 
-### **Consulta Remota WMI Manual**
+### **Consulta WMI Remota Manual**
 
 La identificación sigilosa de administradores locales en una máquina remota y usuarios conectados se puede lograr a través de consultas WMI específicas. `wmic` también admite la lectura de un archivo de texto para ejecutar comandos en múltiples nodos simultáneamente.
 

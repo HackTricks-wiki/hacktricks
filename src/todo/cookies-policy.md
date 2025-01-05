@@ -1,4 +1,4 @@
-# Política de Cookies
+# Cookies Policy
 
 Última actualización: 02/04/2023
 
@@ -17,9 +17,9 @@ Al utilizar cualquiera de estos sitios web, aceptas el uso de cookies de acuerdo
 
 Las cookies son pequeños archivos de texto que se almacenan en tu computadora o dispositivo móvil cuando visitas un sitio web. Se utilizan ampliamente para hacer que los sitios web funcionen, mejorar su funcionalidad y proporcionar una experiencia de usuario más personalizada.
 
-### Cómo utilizamos las cookies
+### Cómo usamos las cookies
 
-Utilizamos cookies en nuestros sitios web para los siguientes propósitos:
+Usamos cookies en nuestros sitios web para los siguientes propósitos:
 
 1. Cookies esenciales: Estas cookies son necesarias para la funcionalidad básica de nuestros sitios web, como habilitar la autenticación de usuarios, mantener la seguridad y recordar tus preferencias.
 2. Cookies de rendimiento: Estas cookies nos ayudan a entender cómo los visitantes interactúan con nuestros sitios web, al recopilar y reportar información de forma anónima. Esto nos permite mejorar el rendimiento de nuestro sitio web y la experiencia del usuario.
@@ -32,7 +32,7 @@ Además, las páginas book.hacktricks.xyz y cloud.hacktricks.xyz están alojadas
 
 Además de nuestras propias cookies, también podemos utilizar cookies de terceros para reportar estadísticas de uso del sitio web, entregar anuncios y habilitar botones de compartir en redes sociales. El uso de cookies de terceros está sujeto a sus respectivas políticas de privacidad.
 
-Gestión de cookies
+Gestionando cookies
 
 La mayoría de los navegadores web te permiten gestionar las cookies a través de sus configuraciones. Puedes elegir bloquear, eliminar o limitar el uso de cookies en tu dispositivo. Sin embargo, ten en cuenta que desactivar las cookies puede afectar la funcionalidad y el rendimiento de nuestros sitios web.
 

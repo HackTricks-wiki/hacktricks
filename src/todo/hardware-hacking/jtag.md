@@ -4,9 +4,9 @@
 
 ## JTAGenum
 
-[**JTAGenum** ](https://github.com/cyphunk/JTAGenum) es una herramienta que se puede usar con un Raspberry PI o un Arduino para intentar encontrar los pines JTAG de un chip desconocido.\
+[**JTAGenum** ](https://github.com/cyphunk/JTAGenum) es una herramienta que se puede usar con un Raspberry PI o un Arduino para intentar encontrar pines JTAG de un chip desconocido.\
 En el **Arduino**, conecta los **pines del 2 al 11 a 10 pines que potencialmente pertenecen a un JTAG**. Carga el programa en el Arduino y intentará hacer un ataque de fuerza bruta a todos los pines para encontrar si alguno pertenece a JTAG y cuál es cada uno.\
-En el **Raspberry PI** solo puedes usar **pines del 1 al 6** (6 pines, por lo que irás más lento probando cada pin JTAG potencial).
+En el **Raspberry PI** solo puedes usar **pines del 1 al 6** (6 pines, por lo que irás más lento probando cada pin potencial de JTAG).
 
 ### Arduino
 

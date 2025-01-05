@@ -4,15 +4,15 @@
 
 ## Ataque de Inyección de SID History
 
-El enfoque del **Ataque de Inyección de SID History** es ayudar en la **migración de usuarios entre dominios** mientras se asegura el acceso continuo a los recursos del dominio anterior. Esto se logra **incorporando el Identificador de Seguridad (SID) anterior del usuario en el SID History** de su nueva cuenta. Notablemente, este proceso puede ser manipulado para otorgar acceso no autorizado al agregar el SID de un grupo de alto privilegio (como Administradores de Empresa o Administradores de Dominio) del dominio padre al SID History. Esta explotación confiere acceso a todos los recursos dentro del dominio padre.
+El enfoque del **Ataque de Inyección de SID History** es ayudar en la **migración de usuarios entre dominios** mientras se asegura el acceso continuo a los recursos del dominio anterior. Esto se logra **incorporando el Identificador de Seguridad (SID) anterior del usuario en el SID History** de su nueva cuenta. Notablemente, este proceso puede ser manipulado para otorgar acceso no autorizado al agregar el SID de un grupo de alto privilegio (como Enterprise Admins o Domain Admins) del dominio padre al SID History. Esta explotación confiere acceso a todos los recursos dentro del dominio padre.
 
 Existen dos métodos para ejecutar este ataque: a través de la creación de un **Golden Ticket** o un **Diamond Ticket**.
 
-Para identificar el SID del grupo **"Administradores de Empresa"**, primero se debe localizar el SID del dominio raíz. Tras la identificación, el SID del grupo de Administradores de Empresa se puede construir agregando `-519` al SID del dominio raíz. Por ejemplo, si el SID del dominio raíz es `S-1-5-21-280534878-1496970234-700767426`, el SID resultante para el grupo "Administradores de Empresa" sería `S-1-5-21-280534878-1496970234-700767426-519`.
+Para identificar el SID del grupo **"Enterprise Admins"**, primero se debe localizar el SID del dominio raíz. Tras la identificación, el SID del grupo Enterprise Admins se puede construir agregando `-519` al SID del dominio raíz. Por ejemplo, si el SID del dominio raíz es `S-1-5-21-280534878-1496970234-700767426`, el SID resultante para el grupo "Enterprise Admins" sería `S-1-5-21-280534878-1496970234-700767426-519`.
 
-También se podría usar el SID de los grupos **Administradores de Dominio**, que termina en **512**.
+También se podría usar el SID de los grupos **Domain Admins**, que termina en **512**.
 
-Otra forma de encontrar el SID de un grupo del otro dominio (por ejemplo "Administradores de Dominio") es con:
+Otra forma de encontrar el SID de un grupo del otro dominio (por ejemplo "Domain Admins") es con:
 ```powershell
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
 ```

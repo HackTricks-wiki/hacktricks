@@ -64,7 +64,7 @@
 - [https://gist.github.com/netbiosX/ee35fcd3722e401a38136cff7b751d79](https://gist.github.com/netbiosX/ee35fcd3722e401a38136cff7b751d79) ([https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/](https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/)): Persistencia
 - [https://github.com/odzhan/injection](https://github.com/odzhan/injection) : Técnicas de inyección de procesos de Windows
 - [https://github.com/BankSecurity/Red_Team](https://github.com/BankSecurity/Red_Team) : Scripts de Red Team
-- [https://github.com/l0ss/Grouper2](https://github.com/l0ss/Grouper2) : encontrar configuraciones incorrectas relacionadas con la seguridad en Active Directory Group Policy.
+- [https://github.com/l0ss/Grouper2](https://github.com/l0ss/Grouper2) : encontrar configuraciones incorrectas relacionadas con la seguridad en la Política de Grupo de Active Directory.
 - [https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring](https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring) : Ofuscación de Securestring
 - [https://pentestlab.blog/2020/02/24/parent-pid-spoofing/](https://pentestlab.blog/2020/02/24/parent-pid-spoofing/) : Suplantación de PID padre
 - [https://github.com/the-xentropy/xencrypt](https://github.com/the-xentropy/xencrypt) : Encriptar cargas útiles de Powershell
@@ -111,7 +111,7 @@ Emulación de firmware: FIRMADYNE (https://github.com/firmadyne/firmadyne/) es u
 - [https://github.com/nahamsec/Resources-for-Beginner-Bug-Bounty-Hunters/](https://github.com/nahamsec/Resources-for-Beginner-Bug-Bounty-Hunters/) : Recursos para comenzar en BugBounties
 - [https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab](https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab) : Herramientas de pentesting para IOS
 - [https://github.com/random-robbie/keywords/blob/master/keywords.txt](https://github.com/random-robbie/keywords/blob/master/keywords.txt) : Palabras clave
-- [https://github.com/ElevenPaths/HomePWN](https://github.com/ElevenPaths/HomePWN) : Hacking IoT (Wifi, BLE, SSDP, MDNS)
+- [https://github.com/ElevenPaths/HomePWN](https://github.com/ElevenPaths/HomePWN) : Hackeo de IoT (Wifi, BLE, SSDP, MDNS)
 - [https://github.com/rackerlabs/scantron](https://github.com/rackerlabs/scantron) : automatización de escaneo
 - [https://github.com/doyensec/awesome-electronjs-hacking](https://github.com/doyensec/awesome-electronjs-hacking) : Esta lista tiene como objetivo cubrir temas relacionados con la seguridad de Electron.js.
 - [https://github.com/serain/bbrecon](https://github.com/serain/bbrecon) : Información sobre programas de BB

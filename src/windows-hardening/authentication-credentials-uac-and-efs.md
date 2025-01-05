@@ -34,10 +34,10 @@ C:\Windows\Tasks
 C:\windows\tracing
 ```
 - Los binarios comúnmente **confiables** [**"LOLBAS's"**](https://lolbas-project.github.io/) también pueden ser útiles para eludir AppLocker.
-- **Las reglas mal escritas también podrían ser eludidas**
+- **Reglas mal escritas también podrían ser eludidas**
 - Por ejemplo, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, puedes crear una **carpeta llamada `allowed`** en cualquier lugar y será permitida.
 - Las organizaciones también suelen centrarse en **bloquear el ejecutable `%System32%\WindowsPowerShell\v1.0\powershell.exe`**, pero se olvidan de las **otras** [**ubicaciones de ejecutables de PowerShell**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) como `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` o `PowerShell_ISE.exe`.
-- **La aplicación de DLL rara vez está habilitada** debido a la carga adicional que puede poner en un sistema y la cantidad de pruebas requeridas para asegurar que nada se rompa. Así que usar **DLLs como puertas traseras ayudará a eludir AppLocker**.
+- **La imposición de DLL rara vez está habilitada** debido a la carga adicional que puede poner en un sistema y la cantidad de pruebas requeridas para asegurar que nada se rompa. Así que usar **DLLs como puertas traseras ayudará a eludir AppLocker**.
 - Puedes usar [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) o [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) para **ejecutar código de Powershell** en cualquier proceso y eludir AppLocker. Para más información consulta: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
 ## Almacenamiento de Credenciales
@@ -103,7 +103,7 @@ sc query windefend
 ```
 ## Encrypted File System (EFS)
 
-EFS asegura archivos a través de la encriptación, utilizando una **clave simétrica** conocida como la **Clave de Encriptación de Archivos (FEK)**. Esta clave se encripta con la **clave pública** del usuario y se almacena dentro del $EFS **flujo de datos alternativo** del archivo encriptado. Cuando se necesita la desencriptación, se utiliza la **clave privada** correspondiente del certificado digital del usuario para desencriptar la FEK del flujo $EFS. Más detalles se pueden encontrar [aquí](https://en.wikipedia.org/wiki/Encrypting_File_System).
+EFS asegura archivos a través de la encriptación, utilizando una **clave simétrica** conocida como la **Clave de Encriptación de Archivos (FEK)**. Esta clave se encripta con la **clave pública** del usuario y se almacena dentro del **flujo de datos alternativo** $EFS del archivo encriptado. Cuando se necesita la desencriptación, se utiliza la **clave privada** correspondiente del certificado digital del usuario para desencriptar la FEK del flujo $EFS. Más detalles se pueden encontrar [aquí](https://en.wikipedia.org/wiki/Encrypting_File_System).
 
 **Escenarios de desencriptación sin iniciación del usuario** incluyen:
 
@@ -121,22 +121,20 @@ Este método de encriptación permite **acceso transparente** a archivos encript
 
 ### Verificar información de EFS
 
-Verifica si un **usuario** ha **utilizado** este **servicio** comprobando si existe esta ruta: `C:\users\<username>\appdata\roaming\Microsoft\Protect`
+Verifique si un **usuario** ha **utilizado** este **servicio** comprobando si existe esta ruta: `C:\users\<username>\appdata\roaming\Microsoft\Protect`
 
-Verifica **quién** tiene **acceso** al archivo usando cipher /c \<file>\
-También puedes usar `cipher /e` y `cipher /d` dentro de una carpeta para **encriptar** y **desencriptar** todos los archivos
+Verifique **quién** tiene **acceso** al archivo usando cipher /c \<file>\
+También puede usar `cipher /e` y `cipher /d` dentro de una carpeta para **encriptar** y **desencriptar** todos los archivos
 
 ### Desencriptando archivos EFS
 
 #### Siendo Autoridad del Sistema
 
-Este método requiere que el **usuario víctima** esté **ejecutando** un **proceso** dentro del host. Si ese es el caso, usando sesiones de `meterpreter` puedes suplantar el token del proceso del usuario (`impersonate_token` de `incognito`). O simplemente podrías `migrar` al proceso del usuario.
+Este método requiere que el **usuario víctima** esté **ejecutando** un **proceso** dentro del host. Si ese es el caso, usando sesiones de `meterpreter` puedes suplantar el token del proceso del usuario (`impersonate_token` de `incognito`). O simplemente podrías `migrate` al proceso del usuario.
 
 #### Conociendo la contraseña del usuario
 
-{{#ref}}
-https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
-{{#endref}}
+{% embed url="https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files" %}
 
 ## Group Managed Service Accounts (gMSA)
 
@@ -145,7 +143,7 @@ Microsoft desarrolló **Group Managed Service Accounts (gMSA)** para simplificar
 - **Gestión Automática de Contraseñas**: los gMSA utilizan una contraseña compleja de 240 caracteres que cambia automáticamente de acuerdo con la política de dominio o computadora. Este proceso es manejado por el Servicio de Distribución de Claves (KDC) de Microsoft, eliminando la necesidad de actualizaciones manuales de contraseñas.
 - **Seguridad Mejorada**: estas cuentas son inmunes a bloqueos y no pueden ser utilizadas para inicios de sesión interactivos, mejorando su seguridad.
 - **Soporte para Múltiples Hosts**: los gMSA pueden ser compartidos entre múltiples hosts, lo que los hace ideales para servicios que se ejecutan en múltiples servidores.
-- **Capacidad de Tareas Programadas**: a diferencia de las cuentas de servicio administradas, los gMSA soportan la ejecución de tareas programadas.
+- **Capacidad de Tareas Programadas**: a diferencia de las cuentas de servicio administradas, los gMSA admiten la ejecución de tareas programadas.
 - **Gestión Simplificada de SPN**: el sistema actualiza automáticamente el Nombre Principal del Servicio (SPN) cuando hay cambios en los detalles de sAMaccount de la computadora o en el nombre DNS, simplificando la gestión de SPN.
 
 Las contraseñas para los gMSA se almacenan en la propiedad LDAP _**msDS-ManagedPassword**_ y se restablecen automáticamente cada 30 días por los Controladores de Dominio (DC). Esta contraseña, un blob de datos encriptados conocido como [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e), solo puede ser recuperada por administradores autorizados y los servidores en los que están instalados los gMSA, asegurando un entorno seguro. Para acceder a esta información, se requiere una conexión segura como LDAPS, o la conexión debe estar autenticada con 'Sealing & Secure'.
@@ -162,7 +160,7 @@ Además, consulta esta [página web](https://cube0x0.github.io/Relaying-for-gMSA
 
 ## LAPS
 
-La **Solución de Contraseña de Administrador Local (LAPS)**, disponible para descargar desde [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), permite la gestión de contraseñas de Administrador local. Estas contraseñas, que son **aleatorias**, únicas y **cambiadas regularmente**, se almacenan de forma centralizada en Active Directory. El acceso a estas contraseñas está restringido a través de ACLs a usuarios autorizados. Con los permisos suficientes otorgados, se proporciona la capacidad de leer las contraseñas de administrador local.
+La **Solución de Contraseña de Administrador Local (LAPS)**, disponible para descargar desde [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), permite la gestión de contraseñas de administradores locales. Estas contraseñas, que son **aleatorias**, únicas y **cambiadas regularmente**, se almacenan de forma central en Active Directory. El acceso a estas contraseñas está restringido a través de ACLs a usuarios autorizados. Con los permisos suficientes otorgados, se proporciona la capacidad de leer las contraseñas de administrador local.
 
 {{#ref}}
 active-directory-methodology/laps.md
@@ -170,7 +168,7 @@ active-directory-methodology/laps.md
 
 ## Modo de Lenguaje Restringido de PowerShell
 
-PowerShell [**Modo de Lenguaje Restringido**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **bloquea muchas de las características** necesarias para usar PowerShell de manera efectiva, como bloquear objetos COM, permitiendo solo tipos .NET aprobados, flujos de trabajo basados en XAML, clases de PowerShell, y más.
+PowerShell [**Modo de Lenguaje Restringido**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **bloquea muchas de las características** necesarias para usar PowerShell de manera efectiva, como bloquear objetos COM, permitir solo tipos .NET aprobados, flujos de trabajo basados en XAML, clases de PowerShell y más.
 
 ### **Verificar**
 ```powershell
@@ -182,10 +180,10 @@ $ExecutionContext.SessionState.LanguageMode
 #Easy bypass
 Powershell -version 2
 ```
-En Windows actual, ese bypass no funcionará, pero puedes usar [**PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM).\
-**Para compilarlo, es posible que necesites** **_Agregar una Referencia_** -> _Explorar_ -> _Explorar_ -> agregar `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` y **cambiar el proyecto a .Net4.5**.
+En Windows actual, esa elusión no funcionará, pero puedes usar [**PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM).\
+**Para compilarlo, es posible que necesites** **_Agregar una Referencia_** -> _Examinar_ -> _Examinar_ -> agregar `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` y **cambiar el proyecto a .Net4.5**.
 
-#### Bypass directo:
+#### Elusión directa:
 ```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogToConsole=true /U c:\temp\psby.exe
 ```
@@ -247,5 +245,6 @@ El SSPI se encargará de encontrar el protocolo adecuado para dos máquinas que 
 {{#ref}}
 windows-security-controls/uac-user-account-control.md
 {{#endref}}
+
 
 {{#include ../banners/hacktricks-training.md}}

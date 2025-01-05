@@ -1,32 +1,33 @@
-# Problema de Doble Salto de Kerberos
+# Kerberos Double Hop Problem
 
 {{#include ../../banners/hacktricks-training.md}}
 
+
 ## Introducción
 
-El problema de "Doble Salto" de Kerberos aparece cuando un atacante intenta usar **la autenticación Kerberos a través de dos** **saltos**, por ejemplo usando **PowerShell**/**WinRM**.
+El problema de "Double Hop" de Kerberos aparece cuando un atacante intenta usar **Kerberos authentication across two** **hops**, por ejemplo usando **PowerShell**/**WinRM**.
 
-Cuando ocurre una **autenticación** a través de **Kerberos**, las **credenciales** **no están** almacenadas en **memoria.** Por lo tanto, si ejecutas mimikatz **no encontrarás credenciales** del usuario en la máquina, incluso si está ejecutando procesos.
+Cuando ocurre una **authentication** a través de **Kerberos**, las **credentials** **no están** almacenadas en **memoria.** Por lo tanto, si ejecutas mimikatz **no encontrarás credentials** del usuario en la máquina incluso si está ejecutando procesos.
 
-Esto se debe a que al conectarse con Kerberos, estos son los pasos:
+Esto se debe a que al conectarse con Kerberos estos son los pasos:
 
-1. User1 proporciona credenciales y el **controlador de dominio** devuelve un **TGT** de Kerberos a User1.
-2. User1 usa el **TGT** para solicitar un **ticket de servicio** para **conectarse** a Server1.
-3. User1 **se conecta** a **Server1** y proporciona el **ticket de servicio**.
-4. **Server1** **no tiene** las **credenciales** de User1 almacenadas o el **TGT** de User1. Por lo tanto, cuando User1 desde Server1 intenta iniciar sesión en un segundo servidor, **no puede autenticarse**.
+1. User1 proporciona credentials y el **domain controller** devuelve un **TGT** de Kerberos a User1.
+2. User1 usa el **TGT** para solicitar un **service ticket** para **connect** a Server1.
+3. User1 **connects** a **Server1** y proporciona el **service ticket**.
+4. **Server1** **no tiene** las **credentials** de User1 almacenadas o el **TGT** de User1. Por lo tanto, cuando User1 desde Server1 intenta iniciar sesión en un segundo servidor, **no puede autenticarse**.
 
 ### Delegación No Restringida
 
-Si la **delegación no restringida** está habilitada en la PC, esto no sucederá ya que el **Servidor** **obtendrá** un **TGT** de cada usuario que acceda a él. Además, si se utiliza la delegación no restringida, probablemente puedas **comprometer el Controlador de Dominio** desde él.\
+Si la **unconstrained delegation** está habilitada en la PC, esto no sucederá ya que el **Server** **obtendrá** un **TGT** de cada usuario que acceda a él. Además, si se utiliza la delegación no restringida, probablemente puedas **comprometer el Domain Controller** desde él.\
 [**Más información en la página de delegación no restringida**](unconstrained-delegation.md).
 
 ### CredSSP
 
-Otra forma de evitar este problema que es [**notablemente insegura**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) es el **Proveedor de Soporte de Seguridad de Credenciales**. De Microsoft:
+Otra forma de evitar este problema que es [**notablemente insegura**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) es **Credential Security Support Provider**. De Microsoft:
 
-> La autenticación CredSSP delega las credenciales del usuario desde la computadora local a una computadora remota. Esta práctica aumenta el riesgo de seguridad de la operación remota. Si la computadora remota es comprometida, cuando se pasan las credenciales a ella, las credenciales pueden ser utilizadas para controlar la sesión de red.
+> La autenticación CredSSP delega las credentials del usuario desde la computadora local a una computadora remota. Esta práctica aumenta el riesgo de seguridad de la operación remota. Si la computadora remota es comprometida, cuando se pasan las credentials a ella, las credentials pueden ser utilizadas para controlar la sesión de red.
 
-Se recomienda encarecidamente que **CredSSP** esté deshabilitado en sistemas de producción, redes sensibles y entornos similares debido a preocupaciones de seguridad. Para determinar si **CredSSP** está habilitado, se puede ejecutar el comando `Get-WSManCredSSP`. Este comando permite **verificar el estado de CredSSP** y puede incluso ejecutarse de forma remota, siempre que **WinRM** esté habilitado.
+Se recomienda encarecidamente que **CredSSP** esté deshabilitado en sistemas de producción, redes sensibles y entornos similares debido a preocupaciones de seguridad. Para determinar si **CredSSP** está habilitado, se puede ejecutar el comando `Get-WSManCredSSP`. Este comando permite la **verificación del estado de CredSSP** e incluso puede ser ejecutado de forma remota, siempre que **WinRM** esté habilitado.
 ```powershell
 Invoke-Command -ComputerName bizintel -Credential ta\redsuit -ScriptBlock {
 Get-WSManCredSSP
@@ -63,7 +64,7 @@ netsh advfirewall firewall add rule name=fwd dir=in action=allow protocol=TCP lo
 ```
 #### winrs.exe
 
-`winrs.exe` se puede utilizar para reenviar solicitudes de WinRM, potencialmente como una opción menos detectable si la monitorización de PowerShell es una preocupación. El comando a continuación demuestra su uso:
+`winrs.exe` se puede utilizar para reenviar solicitudes de WinRM, potencialmente como una opción menos detectable si la supervisión de PowerShell es una preocupación. El comando a continuación demuestra su uso:
 ```bash
 winrs -r:http://bizintel:5446 -u:ta\redsuit -p:2600leet hostname
 ```

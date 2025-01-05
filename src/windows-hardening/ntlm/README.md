@@ -79,9 +79,9 @@ Hoy en día es cada vez menos común encontrar entornos con Delegación No Restr
 
 Podrías abusar de algunas credenciales/sesiones que ya tienes en el AD para **pedir a la impresora que se autentique** contra algún **host bajo tu control**. Luego, usando `metasploit auxiliary/server/capture/smb` o `responder` puedes **establecer el reto de autenticación a 1122334455667788**, capturar el intento de autenticación, y si se realizó usando **NTLMv1** podrás **crackearlo**.\
 Si estás usando `responder` podrías intentar \*\*usar la bandera `--lm` \*\* para intentar **reducir** la **autenticación**.\
-&#xNAN;_&#x4E;ote que para esta técnica la autenticación debe realizarse usando NTLMv1 (NTLMv2 no es válido)._
+&#xNAN;_&#x4E;ota que para esta técnica la autenticación debe realizarse usando NTLMv1 (NTLMv2 no es válido)._
 
-Recuerda que la impresora utilizará la cuenta de computadora durante la autenticación, y las cuentas de computadora utilizan **contraseñas largas y aleatorias** que **probablemente no podrás crackear** usando diccionarios comunes. Pero la **autenticación NTLMv1** **usa DES** ([más información aquí](#ntlmv1-challenge)), así que usando algunos servicios especialmente dedicados a crackear DES podrás crackearlo (podrías usar [https://crack.sh/](https://crack.sh) o [https://ntlmv1.com/](https://ntlmv1.com) por ejemplo).
+Recuerda que la impresora utilizará la cuenta de computadora durante la autenticación, y las cuentas de computadora utilizan **contraseñas largas y aleatorias** que **probablemente no podrás crackear** usando diccionarios comunes. Pero la autenticación **NTLMv1** **usa DES** ([más información aquí](./#ntlmv1-challenge)), así que usando algunos servicios especialmente dedicados a crackear DES podrás crackearlo (podrías usar [https://crack.sh/](https://crack.sh) o [https://ntlmv1.com/](https://ntlmv1.com) por ejemplo).
 
 ### Ataque NTLMv1 con hashcat
 
@@ -166,7 +166,7 @@ Si tienes un **pcap que ha capturado un proceso de autenticación exitoso**, pue
 ## Pass-the-Hash
 
 **Una vez que tengas el hash de la víctima**, puedes usarlo para **suplantarla**.\
-Necesitas usar una **herramienta** que **realice** la **autenticación NTLM usando** ese **hash**, **o** podrías crear un nuevo **sessionlogon** e **inyectar** ese **hash** dentro del **LSASS**, de modo que cuando se realice cualquier **autenticación NTLM**, ese **hash será utilizado.** La última opción es lo que hace mimikatz.
+Necesitas usar una **herramienta** que **realice** la **autenticación NTLM usando** ese **hash**, **o** podrías crear un nuevo **sessionlogon** e **inyectar** ese **hash** dentro de **LSASS**, de modo que cuando se realice cualquier **autenticación NTLM**, ese **hash será utilizado.** La última opción es lo que hace mimikatz.
 
 **Por favor, recuerda que también puedes realizar ataques Pass-the-Hash usando cuentas de computadora.**
 
@@ -176,7 +176,7 @@ Necesitas usar una **herramienta** que **realice** la **autenticación NTLM usan
 ```bash
 Invoke-Mimikatz -Command '"sekurlsa::pth /user:username /domain:domain.tld /ntlm:NTLMhash /run:powershell.exe"'
 ```
-Esto lanzará un proceso que pertenecerá a los usuarios que han lanzado mimikatz, pero internamente en LSASS las credenciales guardadas son las que están dentro de los parámetros de mimikatz. Luego, puedes acceder a recursos de red como si fueras ese usuario (similar al truco `runas /netonly`, pero no necesitas conocer la contraseña en texto plano).
+Esto lanzará un proceso que pertenecerá a los usuarios que han lanzado mimikatz, pero internamente en LSASS las credenciales guardadas son las que están dentro de los parámetros de mimikatz. Luego, puedes acceder a recursos de red como si fueras ese usuario (similar al truco de `runas /netonly`, pero no necesitas conocer la contraseña en texto plano).
 
 ### Pass-the-Hash desde linux
 

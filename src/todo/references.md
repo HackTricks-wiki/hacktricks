@@ -1,95 +1,49 @@
 {{#include ../banners/hacktricks-training.md}}
 
-{{#ref}}
-https://highon.coffee/blog/penetration-testing-tools-cheat-sheet/#python-tty-shell-trick
-{{#endref}}
+{% embed url="https://highon.coffee/blog/penetration-testing-tools-cheat-sheet/#python-tty-shell-trick" %}
 
-{{#ref}}
-https://hausec.com/pentesting-cheatsheet/#_Toc475368982
-{{#endref}}
+{% embed url="https://hausec.com/pentesting-cheatsheet/#_Toc475368982" %}
 
-{{#ref}}
-https://anhtai.me/pentesting-cheatsheet/
-{{#endref}}
+{% embed url="https://anhtai.me/pentesting-cheatsheet/" %}
 
-{{#ref}}
-https://bitvijays.github.io/LFF-IPS-P2-VulnerabilityAnalysis.html
-{{#endref}}
+{% embed url="https://bitvijays.github.io/LFF-IPS-P2-VulnerabilityAnalysis.html" %}
 
-{{#ref}}
-https://ired.team/offensive-security-experiments/offensive-security-cheetsheets
-{{#endref}}
+{% embed url="https://ired.team/offensive-security-experiments/offensive-security-cheetsheets" %}
 
-{{#ref}}
-https://chryzsh.gitbooks.io/pentestbook/basics_of_windows.html
-{{#endref}}
+{% embed url="https://chryzsh.gitbooks.io/pentestbook/basics_of_windows.html" %}
 
-{{#ref}}
-https://github.com/wwong99/pentest-notes/blob/master/oscp_resources/OSCP-Survival-Guide.md
-{{#endref}}
+{% embed url="https://github.com/wwong99/pentest-notes/blob/master/oscp_resources/OSCP-Survival-Guide.md" %}
 
-{{#ref}}
-https://anhtai.me/oscp-fun-guide/
-{{#endref}}
+{% embed url="https://anhtai.me/oscp-fun-guide/" %}
 
-{{#ref}}
-https://www.thehacker.recipes/
-{{#endref}}
+{% embed url="https://www.thehacker.recipes/" %}
 
-{{#ref}}
-https://github.com/swisskyrepo/PayloadsAllTheThings
-{{#endref}}
+{% embed url="https://github.com/swisskyrepo/PayloadsAllTheThings" %}
 
-{{#ref}}
-https://gtfobins.github.io/
-{{#endref}}
+{% embed url="https://gtfobins.github.io/" %}
 
-{{#ref}}
-https://github.com/RistBS/Awesome-RedTeam-Cheatsheet
-{{#endref}}
+{% embed url="https://github.com/RistBS/Awesome-RedTeam-Cheatsheet" %}
 
-{{#ref}}
-https://github.com/S1ckB0y1337/Active-Directory-Exploitation-Cheat-Sheet
-{{#endref}}
+{% embed url="https://github.com/S1ckB0y1337/Active-Directory-Exploitation-Cheat-Sheet" %}
 
-{{#ref}}
-https://hideandsec.sh/
-{{#endref}}
+{% embed url="https://hideandsec.sh/" %}
 
-{{#ref}}
-https://cheatsheet.haax.fr/
-{{#endref}}
+{% embed url="https://cheatsheet.haax.fr/" %}
 
-{{#ref}}
-https://infosecwriteups.com/
-{{#endref}}
+{% embed url="https://infosecwriteups.com/" %}
 
-{{#ref}}
-https://www.exploit-db.com/
-{{#endref}}
+{% embed url="https://www.exploit-db.com/" %}
 
-{{#ref}}
-https://wadcoms.github.io/
-{{#endref}}
+{% embed url="https://wadcoms.github.io/" %}
 
-{{#ref}}
-https://lolbas-project.github.io
-{{#endref}}
+{% embed url="https://lolbas-project.github.io" %}
 
-{{#ref}}
-https://pentestbook.six2dez.com/
-{{#endref}}
+{% embed url="https://pentestbook.six2dez.com/" %}
 
-{{#ref}}
-https://www.hackingarticles.in/
-{{#endref}}
+{% embed url="https://www.hackingarticles.in/" %}
 
-{{#ref}}
-https://pentestlab.blog/
-{{#endref}}
+{% embed url="https://pentestlab.blog/" %}
 
-{{#ref}}
-https://ippsec.rocks/
-{{#endref}}
+{% embed url="https://ippsec.rocks/" %}
 
 {{#include ../banners/hacktricks-training.md}}

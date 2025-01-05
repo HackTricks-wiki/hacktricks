@@ -28,7 +28,7 @@ De [la documentación](https://learn.microsoft.com/en-us/windows/win32/api/wincr
 
 **CryptCreateHash**
 
-Inicia el hash de un flujo de datos. Si se utiliza esta función, puedes encontrar qué **algoritmo se está utilizando** verificando el valor del segundo parámetro:
+Inicia el hashing de un flujo de datos. Si se utiliza esta función, puedes encontrar qué **algoritmo se está utilizando** verificando el valor del segundo parámetro:
 
 ![](<../../images/image (376).png>)
 
@@ -64,17 +64,17 @@ En este caso, si buscas **0xA56363C6** puedes encontrar que está relacionado co
 Está compuesto por 3 partes principales:
 
 - **Etapa de inicialización/**: Crea una **tabla de valores de 0x00 a 0xFF** (256 bytes en total, 0x100). Esta tabla se llama comúnmente **Caja de Sustitución** (o SBox).
-- **Etapa de mezcla**: **Recorrerá la tabla** creada anteriormente (bucle de 0x100 iteraciones, nuevamente) modificando cada valor con bytes **semi-aleatorios**. Para crear estos bytes semi-aleatorios, se utiliza la **clave RC4**. Las **claves RC4** pueden tener **entre 1 y 256 bytes de longitud**, sin embargo, generalmente se recomienda que sea superior a 5 bytes. Comúnmente, las claves RC4 tienen 16 bytes de longitud.
+- **Etapa de desordenamiento**: **Recorrerá la tabla** creada antes (bucle de 0x100 iteraciones, nuevamente) modificando cada valor con bytes **semi-aleatorios**. Para crear estos bytes semi-aleatorios, se utiliza la **clave RC4**. Las **claves RC4** pueden tener **entre 1 y 256 bytes de longitud**, sin embargo, generalmente se recomienda que sea superior a 5 bytes. Comúnmente, las claves RC4 tienen 16 bytes de longitud.
 - **Etapa XOR**: Finalmente, el texto plano o el texto cifrado se **XORea con los valores creados anteriormente**. La función para cifrar y descifrar es la misma. Para esto, se realizará un **bucle a través de los 256 bytes creados** tantas veces como sea necesario. Esto generalmente se reconoce en un código decompilado con un **%256 (mod 256)**.
 
 > [!NOTE]
 > **Para identificar un RC4 en un código desensamblado/decompilado, puedes buscar 2 bucles de tamaño 0x100 (con el uso de una clave) y luego un XOR de los datos de entrada con los 256 valores creados anteriormente en los 2 bucles, probablemente usando un %256 (mod 256)**
 
-### **Etapa de Inicialización/Caja de Sustitución:** (Nota el número 256 utilizado como contador y cómo se escribe un 0 en cada lugar de los 256 caracteres)
+### **Etapa de Inicialización/Caja de Sustitución:** (Nota el número 256 usado como contador y cómo se escribe un 0 en cada lugar de los 256 caracteres)
 
 ![](<../../images/image (377).png>)
 
-### **Etapa de Mezcla:**
+### **Etapa de Desordenamiento:**
 
 ![](<../../images/image (378).png>)
 
@@ -108,7 +108,7 @@ También nota el **tamaño del bucle** (**132**) y el **número de operaciones X
 
 ![](<../../images/image (381).png>)
 
-Como se mencionó anteriormente, este código puede visualizarse dentro de cualquier decompilador como una **función muy larga** ya que **no hay saltos** dentro de ella. El código decompilado puede verse como el siguiente:
+Como se mencionó antes, este código puede visualizarse dentro de cualquier decompilador como una **función muy larga** ya que **no hay saltos** dentro de ella. El código decompilado puede verse como el siguiente:
 
 ![](<../../images/image (382).png>)
 
@@ -120,7 +120,7 @@ Por lo tanto, es posible identificar este algoritmo verificando el **número má
 
 - Más complejo que los algoritmos simétricos
 - ¡No hay constantes! (las implementaciones personalizadas son difíciles de determinar)
-- KANAL (un analizador criptográfico) no muestra pistas sobre RSA ya que se basa en constantes.
+- KANAL (un analizador criptográfico) no logra mostrar pistas sobre RSA ya que se basa en constantes.
 
 ### Identificación por comparaciones
 
@@ -157,11 +157,11 @@ Nota el uso de más constantes
 
 ### Identificar
 
-Verifica **constantes de tablas de búsqueda**:
+Consulta **constantes de tablas de búsqueda**:
 
 ![](<../../images/image (387).png>)
 
-Un algoritmo de hash CRC se ve como:
+Un algoritmo hash CRC se ve como:
 
 ![](<../../images/image (386).png>)
 
@@ -178,7 +178,7 @@ El gráfico es bastante grande:
 
 ![](<../../images/image (207) (2) (1).png>)
 
-Verifica **3 comparaciones para reconocerlo**:
+Consulta **3 comparaciones para reconocerlo**:
 
 ![](<../../images/image (384).png>)
 

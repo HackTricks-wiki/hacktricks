@@ -183,13 +183,6 @@ body.sidebar-visible #menu-bar {
 }
 
 /* Languages Menu Popup */
-
-@media only screen and (max-width:799px) {
-    #menubar-languages-toggle span {
-        display: none !important;
-    }
-}
-
 #menubar-languages-toggle {
     position: relative;
 }
@@ -250,11 +243,6 @@ html:not(.js) .left-buttons button {
     text-overflow: ellipsis;
     cursor: pointer;
     color: var(--fg);
-}
-@media only screen and (max-width:799px) {
-    .menu-title {
-        font-size: 1.4rem;
-    }
 }
 
 .menu-bar,
@@ -645,11 +633,6 @@ ul#searchresults li a span.teaser em {
         color: var(--sidebar-fg);
     }
 }
-@media only screen and (min-width:1440px) {
-    #sidebar-toggle{
-        display: none !important;
-    }
-}
 @media only screen and (max-width:549px) {
     .sidebar {
         position: fixed;
@@ -852,7 +835,7 @@ html:not(.sidebar-resizing) .sidebar {
     border-top: 1px solid var(--table-border-color);
     margin-top: 1rem;
     align-content: center;
-    z-index: 106;
+    z-index: 101;
 }
 .footer .theme-wrapper {
     max-width: var(--container-max-width);

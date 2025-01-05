@@ -343,8 +343,8 @@
     --warning-border: #ff8e00;
 
     --table-border-color: #2f2f2f;
-    --table-header-bg: #2f2f2f;
-    --table-alternate-bg: #222222;
+    --table-header-bg: hsl(226, 23%, 31%);
+    --table-alternate-bg: hsl(226, 23%, 14%);
 
     --searchbar-border-color: #2f2f2f;
     --searchbar-bg: hsl(0, 0%, 11%);
@@ -429,7 +429,7 @@
     --warning-border: #ff8e00;
 
     --table-border-color: hsl(0, 0%, 95%);
-    --table-header-bg: hsl(0, 0%, 95%);
+    --table-header-bg: hsl(0, 0%, 80%);
     --table-alternate-bg: hsl(0, 0%, 97%);
 
     --searchbar-border-color: #aaa;

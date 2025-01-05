@@ -9,9 +9,9 @@
 Hay dos técnicas comunes para detectar el uso de billetes dorados:
 
 - Buscar TGS-REQs que no tengan un AS-REQ correspondiente.
-- Buscar TGTs que tengan valores absurdos, como la vida útil predeterminada de 10 años de Mimikatz.
+- Buscar TGTs que tengan valores absurdos, como la duración predeterminada de 10 años de Mimikatz.
 
-Un **billete de diamante** se crea al **modificar los campos de un TGT legítimo que fue emitido por un DC**. Esto se logra al **solicitar** un **TGT**, **descifrarlo** con el hash krbtgt del dominio, **modificar** los campos deseados del billete y luego **vuelve a cifrarlo**. Esto **supera las dos deficiencias mencionadas anteriormente** de un billete dorado porque:
+Un **billete de diamante** se crea **modificando los campos de un TGT legítimo que fue emitido por un DC**. Esto se logra **solicitando** un **TGT**, **descifrándolo** con el hash krbtgt del dominio, **modificando** los campos deseados del billete y luego **volviéndolo a cifrar**. Esto **supera las dos desventajas mencionadas anteriormente** de un billete dorado porque:
 
 - Los TGS-REQs tendrán un AS-REQ anterior.
 - El TGT fue emitido por un DC, lo que significa que tendrá todos los detalles correctos de la política Kerberos del dominio. Aunque estos pueden ser forjados con precisión en un billete dorado, es más complejo y propenso a errores.

@@ -12,7 +12,7 @@ El permiso **DCSync** implica tener estos permisos sobre el dominio: **DS-Replic
 - Por defecto, solo los grupos **Domain Admins, Enterprise Admins, Administrators y Domain Controllers** tienen los privilegios requeridos.
 - Si alguna contraseña de cuenta se almacena con cifrado reversible, hay una opción disponible en Mimikatz para devolver la contraseña en texto claro.
 
-### Enumeración
+### Enumeration
 
 Verifica quién tiene estos permisos usando `powerview`:
 ```powershell

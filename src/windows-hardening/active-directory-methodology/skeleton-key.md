@@ -4,9 +4,9 @@
 
 ## Ataque de Skeleton Key
 
-El **ataque de Skeleton Key** es una técnica sofisticada que permite a los atacantes **eludir la autenticación de Active Directory** al **inyectar una contraseña maestra** en el controlador de dominio. Esto permite al atacante **autenticarse como cualquier usuario** sin su contraseña, otorgándoles **acceso sin restricciones** al dominio.
+El **ataque de Skeleton Key** es una técnica sofisticada que permite a los atacantes **eludir la autenticación de Active Directory** al **inyectar una contraseña maestra** en el controlador de dominio. Esto permite al atacante **autenticarse como cualquier usuario** sin su contraseña, otorgándole **acceso sin restricciones** al dominio.
 
-Se puede realizar utilizando [Mimikatz](https://github.com/gentilkiwi/mimikatz). Para llevar a cabo este ataque, **se requieren derechos de Administrador de Dominio**, y el atacante debe dirigirse a cada controlador de dominio para asegurar una violación completa. Sin embargo, el efecto del ataque es temporal, ya que **reiniciar el controlador de dominio erradica el malware**, lo que requiere una reimplementación para un acceso sostenido.
+Se puede realizar utilizando [Mimikatz](https://github.com/gentilkiwi/mimikatz). Para llevar a cabo este ataque, **se requieren derechos de Administrador de Dominio**, y el atacante debe dirigirse a cada controlador de dominio para asegurar una violación completa. Sin embargo, el efecto del ataque es temporal, ya que **reiniciar el controlador de dominio erradica el malware**, lo que requiere una reimplementación para mantener el acceso.
 
 **Ejecutar el ataque** requiere un solo comando: `misc::skeleton`.
 

@@ -117,7 +117,7 @@ Una vez que se obtiene el firmware, es esencial diseccionarlo para entender su e
 
 ### Herramientas de Análisis Inicial
 
-Se proporciona un conjunto de comandos para la inspección inicial del archivo binario (denominado `<bin>`). Estos comandos ayudan a identificar tipos de archivos, extraer cadenas, analizar datos binarios y comprender los detalles de partición y sistema de archivos:
+Se proporciona un conjunto de comandos para la inspección inicial del archivo binario (denominado `<bin>`). Estos comandos ayudan a identificar tipos de archivos, extraer cadenas, analizar datos binarios y entender los detalles de partición y sistema de archivos:
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -164,11 +164,11 @@ Tanto el código fuente como los binarios compilados encontrados en el sistema d
 
 ## Emulando Firmware para Análisis Dinámico
 
-El proceso de emular firmware permite un **análisis dinámico** ya sea de la operación de un dispositivo o de un programa individual. Este enfoque puede encontrar desafíos con dependencias de hardware o arquitectura, pero transferir el sistema de archivos raíz o binarios específicos a un dispositivo con arquitectura y endianness coincidentes, como una Raspberry Pi, o a una máquina virtual preconstruida, puede facilitar pruebas adicionales.
+El proceso de emular firmware permite un **análisis dinámico** ya sea del funcionamiento de un dispositivo o de un programa individual. Este enfoque puede encontrar desafíos con dependencias de hardware o arquitectura, pero transferir el sistema de archivos raíz o binarios específicos a un dispositivo con arquitectura y endianness coincidentes, como una Raspberry Pi, o a una máquina virtual preconstruida, puede facilitar pruebas adicionales.
 
 ### Emulando Binarios Individuales
 
-Para examinar programas individuales, es crucial identificar el endianness y la arquitectura de CPU del programa.
+Para examinar programas individuales, identificar el endianness y la arquitectura de CPU del programa es crucial.
 
 #### Ejemplo con Arquitectura MIPS
 
@@ -192,7 +192,7 @@ Herramientas como [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware
 
 ## Análisis Dinámico en Práctica
 
-En esta etapa, se utiliza un entorno de dispositivo real o emulado para el análisis. Es esencial mantener acceso a la shell del sistema operativo y al sistema de archivos. La emulación puede no imitar perfectamente las interacciones de hardware, lo que requiere reinicios ocasionales de la emulación. El análisis debe revisar el sistema de archivos, explotar páginas web y servicios de red expuestos, y explorar vulnerabilidades del bootloader. Las pruebas de integridad del firmware son críticas para identificar posibles vulnerabilidades de puerta trasera.
+En esta etapa, se utiliza un entorno de dispositivo real o emulado para el análisis. Es esencial mantener acceso a la shell del sistema operativo y al sistema de archivos. La emulación puede no imitar perfectamente las interacciones de hardware, lo que requiere reinicios ocasionales de la emulación. El análisis debe revisar el sistema de archivos, explotar páginas web expuestas y servicios de red, y explorar vulnerabilidades del bootloader. Las pruebas de integridad del firmware son críticas para identificar posibles vulnerabilidades de puerta trasera.
 
 ## Técnicas de Análisis en Tiempo de Ejecución
 
@@ -208,7 +208,7 @@ Sistemas operativos como [AttifyOS](https://github.com/adi0x90/attifyos) y [Embe
 
 ## Sistemas Operativos Preparados para Analizar Firmware
 
-- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS es una distribución destinada a ayudar a realizar evaluaciones de seguridad y pruebas de penetración de dispositivos de Internet de las Cosas (IoT). Te ahorra mucho tiempo al proporcionar un entorno preconfigurado con todas las herramientas necesarias cargadas.
+- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS es una distribución destinada a ayudarte a realizar evaluaciones de seguridad y pruebas de penetración de dispositivos de Internet de las Cosas (IoT). Te ahorra mucho tiempo al proporcionar un entorno preconfigurado con todas las herramientas necesarias cargadas.
 - [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Sistema operativo de pruebas de seguridad embebido basado en Ubuntu 18.04 precargado con herramientas de pruebas de seguridad de firmware.
 
 ## Firmware Vulnerable para Practicar
@@ -217,15 +217,15 @@ Para practicar el descubrimiento de vulnerabilidades en firmware, utiliza los si
 
 - OWASP IoTGoat
 - [https://github.com/OWASP/IoTGoat](https://github.com/OWASP/IoTGoat)
-- El Proyecto de Firmware de Router Damn Vulnerable
+- The Damn Vulnerable Router Firmware Project
 - [https://github.com/praetorian-code/DVRF](https://github.com/praetorian-code/DVRF)
-- Router ARM Damn Vulnerable (DVAR)
+- Damn Vulnerable ARM Router (DVAR)
 - [https://blog.exploitlab.net/2018/01/dvar-damn-vulnerable-arm-router.html](https://blog.exploitlab.net/2018/01/dvar-damn-vulnerable-arm-router.html)
 - ARM-X
 - [https://github.com/therealsaumil/armx#downloads](https://github.com/therealsaumil/armx#downloads)
 - Azeria Labs VM 2.0
 - [https://azeria-labs.com/lab-vm-2-0/](https://azeria-labs.com/lab-vm-2-0/)
-- Dispositivo IoT Damn Vulnerable (DVID)
+- Damn Vulnerable IoT Device (DVID)
 - [https://github.com/Vulcainreo/DVID](https://github.com/Vulcainreo/DVID)
 
 ## Referencias

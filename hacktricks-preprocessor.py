@@ -69,12 +69,6 @@ def ref(matchobj):
     return result
 
 
-def add_read_time(content):
-    regex = r'(<\/style>\n# .*(?=\n))'
-    new_content = re.sub(regex, lambda x: x.group(0) + "\n\nReading time: {{ #reading_time }}", content)
-    return new_content
-
-
 def iterate_chapters(sections):
     if isinstance(sections, dict) and "PartTitle" in sections: # Not a chapter section
         return
@@ -105,7 +99,6 @@ if __name__ == '__main__':
         current_chapter = chapter
         regex = r'{{[\s]*#ref[\s]*}}(?:\n)?([^\\\n]*)(?:\n)?{{[\s]*#endref[\s]*}}'
         new_content = re.sub(regex, ref, chapter['content'])
-        new_content = add_read_time(new_content)
         chapter['content'] = new_content
 
     content = json.dumps(book)

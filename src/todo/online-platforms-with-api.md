@@ -118,7 +118,7 @@ Busca por dominio y correo electrónico y verifica si ha sido comprometido y con
 
 Detecta la geolocalización de IP, centro de datos, ASN e incluso información de VPN. Ofrece 30K consultas gratuitas por mes.
 
-[https://dnsdumpster.com/](https://dnsdumpster.com/) (¿en una herramienta comercial?)
+[https://dnsdumpster.com/](https://dnsdumpster.com/)(¿en una herramienta comercial?)
 
 [https://www.netcraft.com/](https://www.netcraft.com/) (¿en una herramienta comercial?)
 

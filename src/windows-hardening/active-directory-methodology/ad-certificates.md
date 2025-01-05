@@ -26,18 +26,18 @@
 AD CS reconoce los certificados de CA en un bosque de AD a través de contenedores designados, cada uno con roles únicos:
 
 - El contenedor de **Autoridades de Certificación** contiene certificados de CA raíz de confianza.
-- El contenedor de **Servicios de Inscripción** detalla las CAs Empresariales y sus plantillas de certificados.
+- El contenedor de **Servicios de Inscripción** detalla las CAs empresariales y sus plantillas de certificados.
 - El objeto **NTAuthCertificates** incluye certificados de CA autorizados para la autenticación de AD.
 - El contenedor de **AIA (Acceso a Información de Autoridad)** facilita la validación de la cadena de certificados con certificados de CA intermedios y cruzados.
 
 ### Adquisición de Certificados: Flujo de Solicitud de Certificado del Cliente
 
-1. El proceso de solicitud comienza con los clientes encontrando una CA Empresarial.
+1. El proceso de solicitud comienza con los clientes encontrando una CA empresarial.
 2. Se crea un CSR, que contiene una clave pública y otros detalles, después de generar un par de claves pública-privada.
-3. La CA evalúa el CSR en función de las plantillas de certificados disponibles, emitiendo el certificado según los permisos de la plantilla.
+3. La CA evalúa el CSR contra las plantillas de certificados disponibles, emitiendo el certificado basado en los permisos de la plantilla.
 4. Tras la aprobación, la CA firma el certificado con su clave privada y se lo devuelve al cliente.
 
-### Plantillas de Certificado
+### Plantillas de Certificados
 
 Definidas dentro de AD, estas plantillas describen la configuración y permisos para emitir certificados, incluyendo EKUs permitidos y derechos de inscripción o modificación, críticos para gestionar el acceso a los servicios de certificados.
 
@@ -45,7 +45,7 @@ Definidas dentro de AD, estas plantillas describen la configuración y permisos 
 
 El proceso de inscripción para certificados es iniciado por un administrador que **crea una plantilla de certificado**, que luego es **publicada** por una Autoridad de Certificación Empresarial (CA). Esto hace que la plantilla esté disponible para la inscripción del cliente, un paso logrado al agregar el nombre de la plantilla al campo `certificatetemplates` de un objeto de Active Directory.
 
-Para que un cliente solicite un certificado, deben otorgarse **derechos de inscripción**. Estos derechos están definidos por descriptores de seguridad en la plantilla de certificado y en la CA Empresarial misma. Los permisos deben otorgarse en ambos lugares para que una solicitud sea exitosa.
+Para que un cliente solicite un certificado, deben otorgarse **derechos de inscripción**. Estos derechos están definidos por descriptores de seguridad en la plantilla de certificado y en la CA empresarial misma. Los permisos deben otorgarse en ambas ubicaciones para que una solicitud sea exitosa.
 
 ### Derechos de Inscripción de Plantilla
 
@@ -59,9 +59,9 @@ Estos derechos se especifican a través de Entradas de Control de Acceso (ACEs),
 
 Los derechos de la CA están delineados en su descriptor de seguridad, accesible a través de la consola de gestión de la Autoridad de Certificación. Algunas configuraciones incluso permiten a usuarios con bajos privilegios acceso remoto, lo que podría ser una preocupación de seguridad.
 
-### Controles de Emisión Adicionales
+### Controles Adicionales de Emisión
 
-Ciertos controles pueden aplicarse, como:
+Ciertos controles pueden aplicarse, tales como:
 
 - **Aprobación del Gerente**: Coloca las solicitudes en un estado pendiente hasta que sean aprobadas por un gerente de certificados.
 - **Agentes de Inscripción y Firmas Autorizadas**: Especifican el número de firmas requeridas en un CSR y los OIDs de Política de Aplicación necesarios.
@@ -71,7 +71,7 @@ Ciertos controles pueden aplicarse, como:
 Los certificados se pueden solicitar a través de:
 
 1. **Protocolo de Inscripción de Certificados de Cliente de Windows** (MS-WCCE), utilizando interfaces DCOM.
-2. **Protocolo Remoto ICertPassage** (MS-ICPR), a través de pipes nombrados o TCP/IP.
+2. **Protocolo Remoto ICertPassage** (MS-ICPR), a través de tuberías nombradas o TCP/IP.
 3. La **interfaz web de inscripción de certificados**, con el rol de Inscripción Web de la Autoridad de Certificación instalado.
 4. El **Servicio de Inscripción de Certificados** (CES), en conjunto con el servicio de Política de Inscripción de Certificados (CEP).
 5. El **Servicio de Inscripción de Dispositivos de Red** (NDES) para dispositivos de red, utilizando el Protocolo Simple de Inscripción de Certificados (SCEP).
@@ -87,7 +87,7 @@ Active Directory (AD) admite la autenticación de certificados, utilizando princ
 
 ### Proceso de Autenticación Kerberos
 
-En el proceso de autenticación Kerberos, la solicitud de un usuario para un Ticket Granting Ticket (TGT) se firma utilizando la **clave privada** del certificado del usuario. Esta solicitud pasa por varias validaciones por parte del controlador de dominio, incluyendo la **validez**, **ruta** y **estado de revocación** del certificado. Las validaciones también incluyen verificar que el certificado provenga de una fuente confiable y confirmar la presencia del emisor en el **almacén de certificados NTAUTH**. Las validaciones exitosas resultan en la emisión de un TGT. El objeto **`NTAuthCertificates`** en AD, se encuentra en:
+En el proceso de autenticación Kerberos, la solicitud de un usuario para un Ticket Granting Ticket (TGT) se firma utilizando la **clave privada** del certificado del usuario. Esta solicitud pasa por varias validaciones por parte del controlador de dominio, incluyendo la **validez**, **ruta** y **estado de revocación** del certificado. Las validaciones también incluyen verificar que el certificado provenga de una fuente confiable y confirmar la presencia del emisor en el **almacén de certificados NTAUTH**. Las validaciones exitosas resultan en la emisión de un TGT. El objeto **`NTAuthCertificates`** en AD, encontrado en:
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```

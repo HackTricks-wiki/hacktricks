@@ -57,7 +57,7 @@ o usando _Process Explorer_ de Sysinternals (seleccionar proceso y acceder a la 
 ### Administrador local
 
 Cuando un administrador local inicia sesión, **se crean dos tokens de acceso**: uno con derechos de administrador y otro con derechos normales. **Por defecto**, cuando este usuario ejecuta un proceso, se utiliza el que tiene **derechos regulares** (no de administrador). Cuando este usuario intenta **ejecutar** algo **como administrador** ("Ejecutar como administrador", por ejemplo), se utilizará el **UAC** para pedir permiso.\
-Si quieres [**aprender más sobre el UAC, lee esta página**](../authentication-credentials-uac-and-efs/index.html#uac)**.**
+Si quieres [**aprender más sobre el UAC, lee esta página**](../authentication-credentials-uac-and-efs/#uac)**.**
 
 ### Suplantación de credenciales de usuario
 
@@ -80,12 +80,12 @@ Hay dos tipos de tokens disponibles:
 - **Token de Suplantación**: Permite a una aplicación de servidor adoptar temporalmente la identidad del cliente para acceder a objetos seguros. Este mecanismo se estratifica en cuatro niveles de operación:
 - **Anónimo**: Otorga acceso al servidor similar al de un usuario no identificado.
 - **Identificación**: Permite al servidor verificar la identidad del cliente sin utilizarla para el acceso a objetos.
-- **Suplantación**: Habilita al servidor para operar bajo la identidad del cliente.
+- **Suplantación**: Permite al servidor operar bajo la identidad del cliente.
 - **Delegación**: Similar a la Suplantación, pero incluye la capacidad de extender esta asunción de identidad a sistemas remotos con los que el servidor interactúa, asegurando la preservación de credenciales.
 
 #### Tokens de Suplantación
 
-Usando el módulo _**incognito**_ de metasploit, si tienes suficientes privilegios, puedes fácilmente **listar** y **suplantar** otros **tokens**. Esto podría ser útil para realizar **acciones como si fueras el otro usuario**. También podrías **escalar privilegios** con esta técnica.
+Usando el módulo _**incognito**_ de metasploit, si tienes suficientes privilegios, puedes **listar** y **suplantar** otros **tokens** fácilmente. Esto podría ser útil para realizar **acciones como si fueras el otro usuario**. También podrías **escalar privilegios** con esta técnica.
 
 ### Privilegios de Token
 
