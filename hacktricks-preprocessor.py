@@ -1,4 +1,5 @@
 import json
+import os
 import sys
 import re
 import logging
@@ -68,6 +69,33 @@ def ref(matchobj):
 
     return result
 
+def files(matchobj):
+    logger.debug(f'Files match: {matchobj.groups(0)[0].strip()}')
+    href =  matchobj.groups(0)[0].strip()
+    title = ""
+
+    try:
+        for root, dirs, files in os.walk(os.getcwd()+'/src/files'):
+            if href in files:
+                title = href
+                logger.debug(f'File search result: {os.path.join(root, href)}')
+        
+    except Exception as e:
+        logger.debug(e)
+        logger.debug(f'Error searching file: {href}')
+        print(f'Error searching file: {href}')
+        sys.exit(1)
+
+        if title=="":
+            logger.debug(f'Error searching file: {href}')
+            print(f'Error searching file: {href}')
+            sys.exit(1)
+
+    template = f"""<a class="content_ref" href="/files/{href}"><span class="content_ref_label">{title}</span></a>"""
+
+    result = template
+
+    return result
 
 def add_read_time(content):
     regex = r'(<\/style>\n# .*(?=\n))'
@@ -105,6 +133,8 @@ if __name__ == '__main__':
         current_chapter = chapter
         regex = r'{{[\s]*#ref[\s]*}}(?:\n)?([^\\\n]*)(?:\n)?{{[\s]*#endref[\s]*}}'
         new_content = re.sub(regex, ref, chapter['content'])
+        regex = r'{{[\s]*#file[\s]*}}(?:\n)?([^\\\n]*)(?:\n)?{{[\s]*#endfile[\s]*}}'
+        new_content = re.sub(regex, files, chapter['content'])
         new_content = add_read_time(new_content)
         chapter['content'] = new_content
 
