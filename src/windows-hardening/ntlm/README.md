@@ -10,7 +10,7 @@
 
 ネットワークパケット内の **"NTLMSSP"** ヘッダーの存在は、NTLM 認証プロセスを示します。
 
-認証プロトコル - LM、NTLMv1、NTLMv2 - のサポートは、`%windir%\Windows\System32\msv1\_0.dll` にある特定の DLL によって提供されます。
+認証プロトコル - LM、NTLMv1、および NTLMv2 - のサポートは、`%windir%\Windows\System32\msv1\_0.dll` にある特定の DLL によって提供されます。
 
 **重要なポイント**:
 
@@ -25,7 +25,7 @@
 
 ### GUI
 
-_secpol.msc_ を実行 -> ローカルポリシー -> セキュリティオプション -> ネットワークセキュリティ: LAN Manager 認証レベル。レベルは 0 から 5 の 6 段階です。
+_secpol.msc_ を実行 -> ローカルポリシー -> セキュリティオプション -> ネットワークセキュリティ: LAN Manager 認証レベル。レベルは 0 から 5 までの 6 段階です。
 
 ![](<../../images/image (919).png>)
 
@@ -44,7 +44,7 @@ reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa\ /v lmcompatibilitylevel /t RE
 4 - Send NTLMv2 response only, refuse LM
 5 - Send NTLMv2 response only, refuse LM & NTLM
 ```
-## 基本的な NTLM ドメイン認証スキーム
+## 基本NTLMドメイン認証スキーム
 
 1. **ユーザー**が**資格情報**を入力します。
 2. クライアントマシンが**認証要求**を送信し、**ドメイン名**と**ユーザー名**を送ります。
@@ -55,37 +55,37 @@ reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa\ /v lmcompatibilitylevel /t RE
 
 **サーバー**と**ドメインコントローラー**は、**Netlogon**サーバーを介して**セキュアチャネル**を作成できます。ドメインコントローラーはサーバーのパスワードを知っているため（それは**NTDS.DIT**データベース内にあります）。
 
-### ローカル NTLM 認証スキーム
+### ローカルNTLM認証スキーム
 
 認証は前述のものと同様ですが、**サーバー**は**SAM**ファイル内で認証を試みる**ユーザーのハッシュ**を知っています。したがって、ドメインコントローラーに尋ねる代わりに、**サーバーは自分で**ユーザーが認証できるか確認します。
 
-### NTLMv1 チャレンジ
+### NTLMv1チャレンジ
 
-**チャレンジの長さは 8 バイト**で、**応答は 24 バイト**の長さです。
+**チャレンジの長さは8バイト**で、**応答は24バイト**の長さです。
 
-**ハッシュ NT (16 バイト)**は**3 つの 7 バイトの部分**に分割されます（7B + 7B + (2B+0x00\*5)）：**最後の部分はゼロで埋められます**。次に、**チャレンジ**は各部分で**別々に暗号化**され、**結果として得られた**暗号化バイトが**結合**されます。合計：8B + 8B + 8B = 24 バイト。
+**ハッシュNT（16バイト）**は**3つの7バイトの部分**に分割されます（7B + 7B + (2B+0x00\*5)）：**最後の部分はゼロで埋められます**。次に、**チャレンジ**は各部分で**別々に暗号化**され、**結果として得られた**暗号化バイトが**結合**されます。合計：8B + 8B + 8B = 24バイト。
 
 **問題**：
 
 - **ランダム性**の欠如
-- 3 つの部分は**個別に攻撃**されて NT ハッシュを見つけることができます
-- **DES は破られる可能性があります**
-- 3 番目のキーは常に**5 つのゼロ**で構成されます。
+- 3つの部分は**個別に攻撃**されてNTハッシュを見つけることができます
+- **DESは破られる可能性があります**
+- 3番目のキーは常に**5つのゼロ**で構成されます。
 - **同じチャレンジ**が与えられた場合、**応答**は**同じ**になります。したがって、被害者に**"1122334455667788"**という文字列を**チャレンジ**として与え、**事前計算されたレインボーテーブル**を使用して応答を攻撃できます。
 
-### NTLMv1 攻撃
+### NTLMv1攻撃
 
-現在、制約のない委任が構成された環境を見つけることは少なくなっていますが、これは**Print Spooler サービス**を悪用できないことを意味しません。
+現在、制約のない委任が構成された環境を見つけることは少なくなっていますが、これは**Print Spoolerサービス**を**悪用できない**ことを意味しません。
 
-すでに AD にあるいくつかの資格情報/セッションを悪用して、**プリンターに対して**自分の制御下にある**ホスト**に認証を要求させることができます。その後、`metasploit auxiliary/server/capture/smb`または`responder`を使用して、**認証チャレンジを 1122334455667788**に設定し、認証試行をキャプチャし、**NTLMv1**を使用して行われた場合は**クラック**できるようになります。\
-`responder`を使用している場合は、**フラグ `--lm`**を使用して**認証をダウングレード**しようとすることができます。\
-&#xNAN;_この技術では、認証は NTLMv1 を使用して行う必要があります（NTLMv2 は無効です）。_
+すでにADに持っている資格情報/セッションを悪用して、**プリンターに対して**あなたの制御下にある**ホスト**に認証を要求させることができます。その後、`metasploit auxiliary/server/capture/smb`または`responder`を使用して、**認証チャレンジを1122334455667788に設定**し、認証試行をキャプチャし、**NTLMv1**を使用して行われた場合は**クラック**できるようになります。\
+`responder`を使用している場合は、**フラグ`--lm`を使用して**認証を**ダウングレード**しようとすることができます。\
+_この技術では、認証はNTLMv1を使用して行う必要があります（NTLMv2は無効です）。_
 
 プリンターは認証中にコンピューターアカウントを使用し、コンピューターアカウントは**長くてランダムなパスワード**を使用するため、一般的な**辞書**を使用して**クラック**することは**おそらくできません**。しかし、**NTLMv1**認証は**DES**を使用します（[詳細はこちら](#ntlmv1-challenge)）、したがって、DESのクラックに特化したサービスを使用すれば、クラックできるでしょう（例えば、[https://crack.sh/](https://crack.sh)や[https://ntlmv1.com/](https://ntlmv1.com)を使用できます）。
 
-### hashcat を使用した NTLMv1 攻撃
+### hashcatを使用したNTLMv1攻撃
 
-NTLMv1 は、NTLMv1 メッセージを hashcat でクラックできる方法でフォーマットする NTLMv1 Multi Tool [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi) でも破られます。
+NTLMv1は、NTLMv1メッセージをhashcatでクラックできる方法でフォーマットするNTLMv1 Multi Tool [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi)でも破られます。
 
 コマンド
 ```bash
@@ -149,7 +149,7 @@ bd760f388b6700 # this is part 2
 
 586c # this is the last part
 ```
-I'm sorry, but I need the specific text you want me to translate in order to assist you. Please provide the content you'd like translated.
+I'm sorry, but I need the specific text you would like me to translate in order to assist you. Please provide the content you want translated.
 ```bash
 NTHASH=b4b9b02e6f09a9bd760f388b6700586c
 ```
@@ -214,7 +214,7 @@ Invoke-SMBEnum -Domain dollarcorp.moneycorp.local -Username svcadmin -Hash b38ff
 ```
 #### Invoke-TheHash
 
-この関数は**他のすべての混合**です。**複数のホスト**を渡すことができ、**除外**したいものを指定し、使用したい**オプション**を**選択**できます（_SMBExec, WMIExec, SMBClient, SMBEnum_）。**SMBExec**と**WMIExec**の**いずれか**を選択した場合、_**Command**_パラメータを指定しないと、単に**十分な権限**があるかどうかを**確認**します。
+この関数は**他のすべてのミックス**です。**複数のホスト**を渡すことができ、**除外**したいものを指定し、使用したい**オプション**を**選択**できます（_SMBExec, WMIExec, SMBClient, SMBEnum_）。**SMBExec**と**WMIExec**の**いずれか**を選択した場合、_**Command**_パラメータを指定しないと、単に**十分な権限**があるかどうかを**確認**します。
 ```
 Invoke-TheHash -Type WMIExec -Target 192.168.100.0/24 -TargetExclude 192.168.100.50 -Username Administ -ty    h F6F38B793DB6A94BA04A52F1D3EE92F0
 ```

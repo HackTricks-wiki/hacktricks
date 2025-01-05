@@ -4,9 +4,9 @@
 
 ## Officeドキュメント
 
-Microsoft Wordはファイルを開く前にファイルデータの検証を行います。データ検証は、OfficeOpenXML標準に対するデータ構造の識別の形で行われます。データ構造の識別中にエラーが発生した場合、分析中のファイルは開かれません。
+Microsoft Wordはファイルを開く前にファイルデータの検証を行います。データ検証は、OfficeOpenXML標準に対してデータ構造の識別という形で行われます。データ構造の識別中にエラーが発生した場合、分析中のファイルは開かれません。
 
-通常、マクロを含むWordファイルは`.docm`拡張子を使用します。しかし、ファイル拡張子を変更することでファイルの名前を変更し、マクロ実行機能を保持することが可能です。\
+通常、マクロを含むWordファイルは`.docm`拡張子を使用します。しかし、ファイル拡張子を変更することでファイル名を変更し、マクロの実行機能を保持することが可能です。\
 例えば、RTFファイルは設計上マクロをサポートしていませんが、DOCMファイルをRTFに名前を変更すると、Microsoft Wordによって処理され、マクロの実行が可能になります。\
 同じ内部構造とメカニズムは、Microsoft Office Suiteのすべてのソフトウェア（Excel、PowerPointなど）に適用されます。
 
@@ -14,12 +14,12 @@ Microsoft Wordはファイルを開く前にファイルデータの検証を行
 ```bash
 assoc | findstr /i "word excel powerp"
 ```
-DOCXファイルは、マクロを含むリモートテンプレートを参照することができ（ファイル – オプション – アドイン – 管理: テンプレート – 移動）、マクロを「実行」することもできます。
+DOCXファイルは、マクロを含むリモートテンプレートを参照することができ（ファイル – オプション – アドイン – 管理: テンプレート – 移動）、マクロを「実行」することができます。
 
 ### 外部画像の読み込み
 
 次に進む: _挿入 --> クイックパーツ --> フィールド_\
-&#xNAN;_**カテゴリ**: リンクと参照, **フィールド名**: includePicture, **ファイル名またはURL**:_ http://\<ip>/whatever
+_**カテゴリ**: リンクと参照, **フィールド名**: includePicture, **ファイル名またはURL**:_ http://\<ip>/whatever
 
 ![](<../../images/image (155).png>)
 
@@ -66,7 +66,7 @@ proc.Create "powershell <beacon line generated>
 ```
 #### メタデータを手動で削除する
 
-**ファイル > 情報 > ドキュメントの検査 > ドキュメントの検査**に移動すると、ドキュメントインスペクターが表示されます。**検査**をクリックし、次に**ドキュメントのプロパティと個人情報**の横にある**すべて削除**をクリックします。
+**ファイル > 情報 > ドキュメントの検査 > ドキュメントの検査**に移動すると、ドキュメントインスペクターが表示されます。**検査**をクリックし、次に**ドキュメントのプロパティと個人情報の隣にあるすべてを削除**をクリックします。
 
 #### ドキュメント拡張子
 
@@ -140,9 +140,9 @@ self.close
 ```
 ## NTLM認証の強制
 
-**リモートでNTLM認証を強制する**方法はいくつかあります。たとえば、ユーザーがアクセスするメールやHTMLに**見えない画像**を追加することができます（HTTP MitMでも？）。または、被害者に**フォルダを開くだけで**認証を**トリガー**する**ファイルのアドレス**を送信することもできます。
+**リモートでNTLM認証を強制する**方法はいくつかあります。たとえば、ユーザーがアクセスするメールやHTMLに**見えない画像**を追加することができます（HTTP MitMでも？）。または、被害者に**フォルダを開くだけで認証をトリガーするファイルのアドレス**を送信することもできます。
 
-**次のページでこれらのアイデアやその他を確認してください：**
+**以下のページでこれらのアイデアやその他を確認してください：**
 
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/printers-spooler-service-abuse.md
@@ -157,6 +157,6 @@ self.close
 ハッシュや認証を盗むだけでなく、**NTLMリレー攻撃を実行する**こともできることを忘れないでください：
 
 - [**NTLMリレー攻撃**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
-- [**AD CS ESC8 (NTLMリレーから証明書へ)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
+- [**AD CS ESC8 (証明書へのNTLMリレー)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
 
 {{#include ../../banners/hacktricks-training.md}}

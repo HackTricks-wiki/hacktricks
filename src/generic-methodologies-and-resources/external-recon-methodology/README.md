@@ -1,4 +1,4 @@
-# 外部リコンメソッド
+# 外部リコンメソドロジー
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -9,26 +9,26 @@
 このフェーズの目標は、**主要な会社が所有するすべての会社**と、これらの会社の**資産**を取得することです。そのために、以下のことを行います：
 
 1. 主要な会社の買収を見つけます。これにより、スコープ内の会社がわかります。
-2. 各会社のASN（あれば）を見つけます。これにより、各会社が所有するIP範囲がわかります。
+2. 各会社のASN（もしあれば）を見つけます。これにより、各会社が所有するIP範囲がわかります。
 3. 逆whois検索を使用して、最初の会社に関連する他のエントリ（組織名、ドメインなど）を検索します（これは再帰的に行うことができます）。
 4. shodanの`org`および`ssl`フィルターなどの他の技術を使用して、他の資産を検索します（`ssl`トリックは再帰的に行うことができます）。
 
 ### **買収**
 
 まず最初に、**主要な会社が所有する他の会社**を知る必要があります。\
-一つのオプションは、[https://www.crunchbase.com/](https://www.crunchbase.com)を訪れ、**主要な会社**を**検索**し、**「買収」**を**クリック**することです。そこで、主要な会社によって買収された他の会社を見ることができます。\
-もう一つのオプションは、主要な会社の**Wikipedia**ページを訪れ、**買収**を検索することです。
+1つのオプションは、[https://www.crunchbase.com/](https://www.crunchbase.com)を訪れ、**主要な会社**を**検索**し、**「買収」**を**クリック**することです。そこで、主要な会社によって買収された他の会社を見ることができます。\
+もう1つのオプションは、主要な会社の**Wikipedia**ページを訪れ、**買収**を検索することです。
 
 > さて、この時点でスコープ内のすべての会社を把握しているはずです。彼らの資産を見つける方法を考えましょう。
 
 ### **ASNs**
 
 自律システム番号（**ASN**）は、**インターネット割り当て番号機関（IANA）**によって**自律システム**（AS）に割り当てられた**ユニークな番号**です。\
-**AS**は、外部ネットワークへのアクセスに対して明確に定義されたポリシーを持つ**IPアドレスのブロック**で構成され、単一の組織によって管理されますが、複数のオペレーターで構成されることがあります。
+**AS**は、外部ネットワークへのアクセスに対して明確に定義されたポリシーを持つ**IPアドレスのブロック**で構成され、単一の組織によって管理されますが、複数のオペレーターで構成される場合があります。
 
 **会社が割り当てたASN**を見つけて、その**IP範囲**を特定することは興味深いです。**スコープ内のすべてのホスト**に対して**脆弱性テスト**を実施し、これらのIP内の**ドメイン**を探すことが興味深いでしょう。\
 [**https://bgp.he.net/**](https://bgp.he.net)で会社の**名前**、**IP**、または**ドメイン**で**検索**できます。\
-**会社の地域によっては、これらのリンクがより多くのデータを収集するのに役立つかもしれません：** [**AFRINIC**](https://www.afrinic.net) **（アフリカ）、** [**Arin**](https://www.arin.net/about/welcome/region/) **（北アメリカ）、** [**APNIC**](https://www.apnic.net) **（アジア）、** [**LACNIC**](https://www.lacnic.net) **（ラテンアメリカ）、** [**RIPE NCC**](https://www.ripe.net) **（ヨーロッパ）。とにかく、おそらくすべての**有用な情報**（IP範囲とWhois）は最初のリンクにすでに表示されています。
+**会社の地域によっては、これらのリンクがより多くのデータを収集するのに役立つかもしれません：** [**AFRINIC**](https://www.afrinic.net) **（アフリカ）、** [**Arin**](https://www.arin.net/about/welcome/region/) **（北アメリカ）、** [**APNIC**](https://www.apnic.net) **（アジア）、** [**LACNIC**](https://www.lacnic.net) **（ラテンアメリカ）、** [**RIPE NCC**](https://www.ripe.net) **（ヨーロッパ）。とにかく、おそらくすべての**有用な情報**（IP範囲とWhois）は、最初のリンクにすでに表示されています。
 ```bash
 #You can try "automate" this with amass, but it's not very recommended
 amass intel -org tesla
@@ -51,7 +51,7 @@ bbot -t tesla.com -f subdomain-enum
 [INFO] bbot.modules.asn: +----------+---------------------+--------------+----------------+----------------------------+-----------+
 
 ```
-あなたは、[http://asnlookup.com/](http://asnlookup.com)を使用して、組織のIP範囲を見つけることができます（無料のAPIがあります）。\
+あなたは、[http://asnlookup.com/](http://asnlookup.com)を使用して、組織のIP範囲を見つけることができます（無料APIがあります）。\
 ドメインのIPとASNを見つけるには、[http://ipv4info.com/](http://ipv4info.com)を使用できます。
 
 ### **脆弱性の探索**
@@ -62,11 +62,11 @@ bbot -t tesla.com -f subdomain-enum
 
 ## ドメイン
 
-> スコープ内のすべての企業とその資産を把握しているので、スコープ内のドメインを見つける時が来ました。
+> スコープ内のすべての企業とその資産を把握しているので、スコープ内のドメインを見つける時です。
 
 _以下の提案された技術では、サブドメインも見つけることができ、その情報は過小評価すべきではありません。_
 
-まず、各企業の**主要ドメイン**を探すべきです。たとえば、_Tesla Inc._の主要ドメインは_tesla.com_になります。
+まず、各企業の**主要ドメイン**を探すべきです。例えば、_Tesla Inc._の主要ドメインは_tesla.com_になります。
 
 ### **逆引きDNS**
 
@@ -80,9 +80,9 @@ dnsrecon -r 157.240.221.35/24 -n 8.8.8.8 #Using google dns
 この機能を利用するには、管理者が手動でPTRを有効にする必要があります。\
 この情報のためにオンラインツールを使用することもできます: [http://ptrarchive.com/](http://ptrarchive.com)
 
-### **逆Whois（ループ）**
+### **リバースWhois（ループ）**
 
-**whois**の中には、**組織名**、**住所**、**メール**、電話番号などの多くの興味深い**情報**が含まれています... しかし、さらに興味深いのは、これらのフィールドのいずれかで**逆whois検索を行う**ことで、**会社に関連する他の資産**を見つけることができることです（例えば、同じメールが表示される他のwhoisレジストリ）。\
+**whois**の中には、**組織名**、**住所**、**メール**、電話番号などの多くの興味深い**情報**が含まれています... しかし、さらに興味深いのは、これらのフィールドのいずれかで**リバースWhois検索**を行うと、**会社に関連する他の資産**を見つけることができることです（例えば、同じメールが表示される他のwhoisレジストリ）。\
 次のようなオンラインツールを使用できます:
 
 - [https://viewdns.info/reversewhois/](https://viewdns.info/reversewhois/) - **無料**
@@ -94,7 +94,7 @@ dnsrecon -r 157.240.221.35/24 -n 8.8.8.8 #Using google dns
 - [https://www.domainiq.com/](https://www.domainiq.com) - 無料ではありません
 
 [**DomLink** ](https://github.com/vysecurity/DomLink)を使用してこのタスクを自動化できます（whoxy APIキーが必要です）。\
-また、[amass](https://github.com/OWASP/Amass)を使用して自動逆whois発見を行うこともできます: `amass intel -d tesla.com -whois`
+また、[amass](https://github.com/OWASP/Amass)を使用して自動リバースWhois発見を行うこともできます: `amass intel -d tesla.com -whois`
 
 **新しいドメインを見つけるたびに、この技術を使用してさらに多くのドメイン名を発見できることに注意してください。**
 
@@ -113,7 +113,7 @@ dnsrecon -r 157.240.221.35/24 -n 8.8.8.8 #Using google dns
 
 ### **ファビコン**
 
-同じファビコンアイコンのハッシュを探すことで、ターゲットに関連するドメインやサブドメインを見つけることができることをご存知でしたか？これは、[@m4ll0k2](https://twitter.com/m4ll0k2)によって作成された[favihash.py](https://github.com/m4ll0k/Bug-Bounty-Toolz/blob/master/favihash.py)ツールが行うことです。使用方法は次のとおりです:
+同じファビコンアイコンのハッシュを探すことで、ターゲットに関連するドメインやサブドメインを見つけることができることをご存知でしたか？これは、[@m4ll0k2](https://twitter.com/m4ll0k2)によって作成されたツール[favihash.py](https://github.com/m4ll0k/Bug-Bounty-Toolz/blob/master/favihash.py)が行うことです。使用方法は次のとおりです:
 ```bash
 cat my_targets.txt | xargs -I %% bash -c 'echo "http://%%/favicon.ico"' > targets.txt
 python3 favihash.py -f https://target/favicon.ico -t targets.txt -s
@@ -181,8 +181,8 @@ IPスペースを所有する組織の名前がわかっているので、その
 
 いくつかの[ドメインテイクオーバー](../../pentesting-web/domain-subdomain-takeover.md#domain-takeover)を確認してください。ある会社が**ドメインを使用しているが、所有権を失った**可能性があります。十分に安価であれば、それを登録し、会社に知らせてください。
 
-もし、資産発見で見つけたものとは異なるIPを持つ**ドメイン**を見つけた場合、**基本的な脆弱性スキャン**（NessusまたはOpenVASを使用）と、**nmap/masscan/shodan**を使用したいくつかの[**ポートスキャン**](../pentesting-network/index.html#discovering-hosts-from-the-outside)を実行するべきです。どのサービスが実行されているかに応じて、**この本で「攻撃」するためのいくつかのトリックを見つけることができます**。\
-&#xNAN;_&#x4E;ote that sometimes the domain is hosted inside an IP that is not controlled by the client, so it's not in the scope, be careful._
+もし、資産発見で既に見つけたものとは異なるIPを持つ**ドメイン**を見つけた場合、**基本的な脆弱性スキャン**（NessusまたはOpenVASを使用）と、**nmap/masscan/shodan**を使用したいくつかの[**ポートスキャン**](../pentesting-network/index.html#discovering-hosts-from-the-outside)を実行するべきです。どのサービスが実行されているかに応じて、**この本で「攻撃」するためのいくつかのトリックを見つけることができます**。\
+_&#x4E;oteは、時々ドメインがクライアントによって制御されていないIP内にホストされているため、スコープに含まれないことがあるので注意してください。_
 
 ## サブドメイン
 
@@ -250,7 +250,7 @@ vita -d tesla.com
 ```bash
 theHarvester -d tesla.com -b "anubis, baidu, bing, binaryedge, bingapi, bufferoverun, censys, certspotter, crtsh, dnsdumpster, duckduckgo, fullhunt, github-code, google, hackertarget, hunter, intelx, linkedin, linkedin_links, n45ht, omnisint, otx, pentesttools, projectdiscovery, qwant, rapiddns, rocketreach, securityTrails, spyse, sublist3r, threatcrowd, threatminer, trello, twitter, urlscan, virustotal, yahoo, zoomeye"
 ```
-他にも**興味深いツール/API**があり、サブドメインの発見に特化していなくてもサブドメインを見つけるのに役立つかもしれません。例えば：
+他にも**興味深いツール/API**があり、サブドメインの発見に特化していなくてもサブドメインを見つけるのに役立つことがあります。例えば：
 
 - [**Crobat**](https://github.com/cgboal/sonarsearch)**:** API [https://sonar.omnisint.io](https://sonar.omnisint.io)を使用してサブドメインを取得します。
 ```bash
@@ -258,7 +258,7 @@ theHarvester -d tesla.com -b "anubis, baidu, bing, binaryedge, bingapi, bufferov
 ## This is the API the crobat tool will use
 curl https://sonar.omnisint.io/subdomains/tesla.com | jq -r ".[]"
 ```
-- [**JLDC無料API**](https://jldc.me/anubis/subdomains/google.com)
+- [**JLDC free API**](https://jldc.me/anubis/subdomains/google.com)
 ```bash
 curl https://jldc.me/anubis/subdomains/tesla.com | jq -r ".[]"
 ```
@@ -341,7 +341,7 @@ sed 's/$/.domain.com/' subdomains.txt > bf-subdomains.txt
 ./massdns -r resolvers.txt -w /tmp/results.txt bf-subdomains.txt
 grep -E "tesla.com. [0-9]+ IN A .+" /tmp/results.txt
 ```
-- [**gobuster**](https://github.com/OJ/gobuster): これはおそらく1つのリゾルバを使用していると思います。
+- [**gobuster**](https://github.com/OJ/gobuster): これは1つのリゾルバを使用していると思います。
 ```
 gobuster dns -d mysite.com -t 50 -w subdomains.txt
 ```
@@ -353,7 +353,7 @@ shuffledns -d example.com -list example-subdomains.txt -r resolvers.txt
 ```
 puredns bruteforce all.txt domain.com
 ```
-- [**aiodnsbrute**](https://github.com/blark/aiodnsbrute) は、asyncioを使用してドメイン名を非同期にブルートフォースします。
+- [**aiodnsbrute**](https://github.com/blark/aiodnsbrute) は、非同期にドメイン名をブルートフォースするために asyncio を使用します。
 ```
 aiodnsbrute -r resolvers -w wordlist.txt -vv -t 1024 domain.com
 ```
@@ -389,13 +389,13 @@ cat subdomains.txt | dmut -d /tmp/words-permutations.txt -w 100 \
 
 #### スマートな順列生成
 
-- [**regulator**](https://github.com/cramppet/regulator): 詳細についてはこの[**投稿**](https://cramppet.github.io/regulator/index.html)を読んでくださいが、基本的には**発見されたサブドメイン**の**主要部分**を取得し、それらを混ぜてより多くのサブドメインを見つけます。
+- [**regulator**](https://github.com/cramppet/regulator): 詳細についてはこの[**投稿**](https://cramppet.github.io/regulator/index.html)を読んでくださいが、基本的には**発見されたサブドメイン**から**主要な部分**を取得し、それらを混ぜてより多くのサブドメインを見つけます。
 ```bash
 python3 main.py adobe.com adobe adobe.rules
 make_brute_list.sh adobe.rules adobe.brute
 puredns resolve adobe.brute --write adobe.valid
 ```
-- [**subzuf**](https://github.com/elceef/subzuf)**:** _subzuf_ は、非常にシンプルで効果的なDNS応答ガイドアルゴリズムと組み合わされたサブドメインブルートフォースファッザーです。提供された入力データセット（カスタマイズされた単語リストや過去のDNS/TLSレコードなど）を利用して、より対応するドメイン名を正確に合成し、DNSスキャン中に収集した情報に基づいてさらにループで拡張します。
+- [**subzuf**](https://github.com/elceef/subzuf)**:** _subzuf_ は、非常にシンプルで効果的なDNS応答ガイドアルゴリズムと組み合わされたサブドメインブルートフォースファズァです。提供された入力データセット（カスタマイズされた単語リストや過去のDNS/TLSレコードなど）を利用して、より対応するドメイン名を正確に合成し、DNSスキャン中に収集された情報に基づいてさらにループで拡張します。
 ```
 echo www | subzuf facebook.com
 ```
@@ -440,7 +440,7 @@ VHostScan -t example.com
 
 ### **CORSブルートフォース**
 
-時々、_**Origin**_ ヘッダーに有効なドメイン/サブドメインが設定されている場合にのみ、_**Access-Control-Allow-Origin**_ ヘッダーを返すページを見つけることがあります。このようなシナリオでは、この動作を悪用して新しい **サブドメイン** を **発見** することができます。
+時々、_**Origin**_ ヘッダーに有効なドメイン/サブドメインが設定されているときにのみ、_**Access-Control-Allow-Origin**_ ヘッダーを返すページを見つけることがあります。このようなシナリオでは、この動作を悪用して新しい**サブドメイン**を**発見**することができます。
 ```bash
 ffuf -w subdomains-top1million-5000.txt -u http://10.10.10.208 -H 'Origin: http://FUZZ.crossfit.htb' -mr "Access-Control-Allow-Origin" -ignore-body
 ```
@@ -451,22 +451,22 @@ ffuf -w subdomains-top1million-5000.txt -u http://10.10.10.208 -H 'Origin: http:
 
 ### **モニタリング**
 
-**新しいサブドメイン**が作成されたかどうかを監視するには、**Certificate Transparency**ログを監視することができます。[**sublert**](https://github.com/yassineaboukir/sublert/blob/master/sublert.py)がそれを行います。
+**新しいサブドメイン**が作成されたかどうかを**モニタリング**するには、**Certificate Transparency**ログを監視することができます。[**sublert**](https://github.com/yassineaboukir/sublert/blob/master/sublert.py)がそれを行います。
 
 ### **脆弱性の検索**
 
 可能な[**サブドメインテイクオーバー**](../../pentesting-web/domain-subdomain-takeover.md#subdomain-takeover)を確認してください。\
 もし**サブドメイン**が**S3バケット**に**ポイント**している場合は、[**権限を確認**](../../network-services-pentesting/pentesting-web/buckets/index.html)してください。
 
-もし**異なるIPを持つサブドメイン**を見つけた場合は、**基本的な脆弱性スキャン**（NessusまたはOpenVASを使用）と、**nmap/masscan/shodan**を使用した[**ポートスキャン**](../pentesting-network/index.html#discovering-hosts-from-the-outside)を実行する必要があります。実行中のサービスによっては、**この本の中で「攻撃」するためのいくつかのトリックを見つけることができます**。\
-&#xNAN;_&#x4E;oteとして、サブドメインがクライアントによって制御されていないIP内にホストされている場合があるため、スコープ外であることに注意してください。_
+もし**資産発見**で見つけたものとは異なるIPを持つ**サブドメイン**を見つけた場合は、**基本的な脆弱性スキャン**（NessusやOpenVASを使用）と、**nmap/masscan/shodan**を使った[**ポートスキャン**](../pentesting-network/index.html#discovering-hosts-from-the-outside)を実行するべきです。実行中のサービスによっては、**この本の中でそれらを「攻撃」するためのいくつかのトリックを見つけることができます。**\
+_&#x4E;oteとして、時にはサブドメインがクライアントによって制御されていないIP内にホストされていることがあるため、スコープ外であることに注意してください。_
 
 ## IPs
 
-初期のステップで**いくつかのIP範囲、ドメイン、サブドメイン**を**見つけたかもしれません**。\
+初期のステップで**いくつかのIP範囲、ドメイン、サブドメイン**を**見つけたかもしれません。**\
 これらの範囲から**すべてのIPを収集する**時です。また、**ドメイン/サブドメイン（DNSクエリ）**のために。
 
-以下の**無料API**のサービスを使用すると、**ドメインとサブドメインによって使用された以前のIP**も見つけることができます。これらのIPはまだクライアントによって所有されている可能性があり、[**CloudFlareのバイパス**](../../network-services-pentesting/pentesting-web/uncovering-cloudflare.md)を見つける手助けになるかもしれません。
+以下の**無料API**のサービスを使用すると、**ドメインやサブドメインによって使用された以前のIP**も見つけることができます。これらのIPはまだクライアントに所有されている可能性があり、[**CloudFlareバイパス**](../../network-services-pentesting/pentesting-web/uncovering-cloudflare.md)を見つける手助けになるかもしれません。
 
 - [**https://securitytrails.com/**](https://securitytrails.com/)
 
@@ -474,7 +474,7 @@ ffuf -w subdomains-top1million-5000.txt -u http://10.10.10.208 -H 'Origin: http:
 
 ### **脆弱性の検索**
 
-**CDNに属さないすべてのIPをポートスキャン**してください（そこでは興味深いものは見つからない可能性が高いです）。発見された実行中のサービスでは、**脆弱性を見つけることができるかもしれません**。
+**CDNに属さないすべてのIPをポートスキャン**してください（そこでは興味深いものは見つからない可能性が高いです）。発見された実行中のサービスでは、**脆弱性を見つけることができるかもしれません。**
 
 **ホストをスキャンする方法に関する**[**ガイド**](../pentesting-network/index.html)を見つけてください。
 
@@ -482,11 +482,11 @@ ffuf -w subdomains-top1million-5000.txt -u http://10.10.10.208 -H 'Origin: http:
 
 > すべての企業とその資産を見つけ、スコープ内のIP範囲、ドメイン、サブドメインを知っています。ウェブサーバーを探す時です。
 
-前のステップで、**発見されたIPとドメインのリコン**をすでに実行している可能性があるため、**すべての可能なウェブサーバーをすでに見つけているかもしれません**。しかし、見つけていない場合は、スコープ内のウェブサーバーを検索するための**迅速なトリック**を見ていきます。
+前のステップで、**発見されたIPやドメインのリコン**をすでに実行している可能性があるため、**すべての可能なウェブサーバーをすでに見つけているかもしれません。**しかし、見つけていない場合は、スコープ内のウェブサーバーを探すための**迅速なトリック**を見ていきます。
 
-これは**ウェブアプリの発見**に**特化**しているため、**脆弱性**と**ポートスキャン**も実行する必要があります（**スコープによって許可されている場合**）。
+これは**ウェブアプリの発見**に向けられているため、**脆弱性**と**ポートスキャン**も実行するべきです（**スコープによって許可されている場合**）。
 
-**ウェブ**サーバーに関連する**オープンポート**を発見するための**迅速な方法**は、[**masscan**を使用することができます](../pentesting-network/index.html#http-port-discovery)。\
+**ウェブ**サーバーに関連する**オープンポート**を発見するための**迅速な方法**は、[**masscan**を使用することができます。](../pentesting-network/index.html#http-port-discovery)\
 ウェブサーバーを探すためのもう一つの便利なツールは、[**httprobe**](https://github.com/tomnomnom/httprobe)**、**[**fprobe**](https://github.com/theblackturtle/fprobe)および[**httpx**](https://github.com/projectdiscovery/httpx)です。ドメインのリストを渡すだけで、ポート80（http）と443（https）に接続しようとします。さらに、他のポートを試すように指示することもできます：
 ```bash
 cat /tmp/domains.txt | httprobe #Test all domains inside the file for port 80 and 443
@@ -494,11 +494,11 @@ cat /tmp/domains.txt | httprobe -p http:8080 -p https:8443 #Check port 80, 443 a
 ```
 ### **スクリーンショット**
 
-すべての**ウェブサーバー**を発見したので、どこから始めればよいかわからないかもしれません。そこで、シンプルにすべてのスクリーンショットを撮ることから始めましょう。**メインページ**を**見るだけ**で、**脆弱性**がある可能性の高い**奇妙な**エンドポイントを見つけることができます。
+すべての**ウェブサーバー**を発見したので、どこから始めるべきか**わからない**かもしれません。そこで、シンプルにすべてのスクリーンショットを撮ることから始めましょう。**メインページ**を**見る**だけで、**脆弱性**が**ありそうな**奇妙なエンドポイントを見つけることができます。
 
 提案されたアイデアを実行するには、[**EyeWitness**](https://github.com/FortyNorthSecurity/EyeWitness)、[**HttpScreenshot**](https://github.com/breenmachine/httpscreenshot)、[**Aquatone**](https://github.com/michenriksen/aquatone)、[**Shutter**](https://shutter-project.org/downloads/third-party-packages/)、[**Gowitness**](https://github.com/sensepost/gowitness)または[**webscreenshot**](https://github.com/maaaaz/webscreenshot)**を使用できます。**
 
-さらに、[**eyeballer**](https://github.com/BishopFox/eyeballer)を使用して、すべての**スクリーンショット**を確認し、**脆弱性を含む可能性が高いもの**とそうでないものを教えてもらうことができます。
+さらに、[**eyeballer**](https://github.com/BishopFox/eyeballer)を使用して、すべての**スクリーンショット**を確認し、**脆弱性を含む可能性が高い**ものとそうでないものを教えてもらうことができます。
 
 ## パブリッククラウド資産
 
@@ -514,11 +514,11 @@ cat /tmp/domains.txt | httprobe -p http:8080 -p https:8443 #Check port 80, 443 a
 
 得られたワードリストを使用して、[**cloud_enum**](https://github.com/initstring/cloud_enum)**、** [**CloudScraper**](https://github.com/jordanpotti/CloudScraper)**、** [**cloudlist**](https://github.com/projectdiscovery/cloudlist) **または** [**S3Scanner**](https://github.com/sa7mon/S3Scanner)**を使用できます。**
 
-クラウド資産を探す際には、**AWSのバケットだけでなく、他のものも探す**必要があることを忘れないでください。
+クラウド資産を探す際には、**AWSのバケットだけでなく、他のものも探す**べきです。
 
 ### **脆弱性の検索**
 
-**オープンバケットや公開されたクラウド機能**などを見つけた場合は、それに**アクセスして**、何を提供しているのか、どのように悪用できるかを確認する必要があります。
+**オープンバケットや公開されたクラウド機能**などを見つけた場合は、それに**アクセス**して、何を提供しているのか、そしてそれを悪用できるかどうかを確認するべきです。
 
 ## メール
 
@@ -531,7 +531,7 @@ cat /tmp/domains.txt | httprobe -p http:8080 -p https:8443 #Check port 80, 443 a
 
 ### **脆弱性の検索**
 
-メールは、**ウェブログインや認証サービス**（SSHなど）を**ブルートフォース**する際に役立ちます。また、**フィッシング**にも必要です。さらに、これらのAPIは、フィッシングキャンペーンに役立つ**メールの背後にいる人物**に関するさらなる**情報**を提供します。
+メールは、**ウェブログインや認証サービス**（SSHなど）を**ブルートフォース**する際に役立ちます。また、**フィッシング**にも必要です。さらに、これらのAPIは、フィッシングキャンペーンに役立つ、メールの背後にいる**人物に関する情報**を提供します。
 
 ## 資格情報の漏洩
 
@@ -546,7 +546,7 @@ cat /tmp/domains.txt | httprobe -p http:8080 -p https:8443 #Check port 80, 443 a
 
 ## 秘密の漏洩
 
-資格情報の漏洩は、**機密情報が漏洩して販売された**企業のハッキングに関連しています。ただし、企業は、これらのデータベースに情報がない**他の漏洩**の影響を受ける可能性があります：
+資格情報の漏洩は、**機密情報が漏洩し販売された**企業のハッキングに関連しています。ただし、企業は、これらのデータベースに情報がない**他の漏洩**の影響を受ける可能性があります：
 
 ### Githubの漏洩
 
@@ -565,20 +565,20 @@ github-leaked-secrets.md
 
 ### Pasteの漏洩
 
-時には、攻撃者や単なる従業員が**会社のコンテンツをペーストサイトに公開**します。これには**機密情報**が含まれている場合もあれば、含まれていない場合もありますが、検索するのは非常に興味深いです。\
+時には攻撃者や単なる従業員が**会社のコンテンツをペーストサイトに公開**します。これには**機密情報**が含まれている場合もあれば、含まれていない場合もありますが、検索するのは非常に興味深いです。\
 [**Pastos**](https://github.com/carlospolop/Pastos)というツールを使用して、80以上のペーストサイトを同時に検索できます。
 
 ### Google Dorks
 
-古くても金の価値があるGoogle Dorksは、**そこにあるべきでない情報を見つける**のに常に役立ちます。唯一の問題は、[**google-hacking-database**](https://www.exploit-db.com/google-hacking-database)に手動で実行できない**数千**の可能なクエリが含まれていることです。したがって、お気に入りの10個を取得するか、[**Gorks**](https://github.com/carlospolop/Gorks)のような**ツールを使用してすべてを実行**することができます。
+古くても金の価値があるGoogle Dorksは、**そこにあるべきでない情報を見つける**のに常に役立ちます。唯一の問題は、[**google-hacking-database**](https://www.exploit-db.com/google-hacking-database)に、手動で実行できない**数千**の可能なクエリが含まれていることです。したがって、お気に入りの10個を取得するか、**[**Gorks**](https://github.com/carlospolop/Gorks)**のようなツールを使用してすべてを実行することができます。**
 
-_すべてのデータベースを通常のGoogleブラウザを使用して実行しようとするツールは、非常に早くGoogleにブロックされるため、決して終わらないことに注意してください。_
+_すべてのデータベースを通常のGoogleブラウザを使用して実行しようとするツールは、非常に早くGoogleにブロックされるため、決して終わりません。_
 
 ### **脆弱性の検索**
 
 **有効な漏洩した**資格情報やAPIトークンを見つけた場合、これは非常に簡単な勝利です。
 
-## 公開コードの脆弱性
+## パブリックコードの脆弱性
 
 企業が**オープンソースコード**を持っていることがわかった場合、それを**分析**して**脆弱性**を探すことができます。
 
@@ -602,16 +602,16 @@ _すべてのデータベースを通常のGoogleブラウザを使用して実�
 
 > おめでとうございます！この時点で、**すべての基本的な列挙**をすでに実行しています。はい、これは基本的なものであり、さらに多くの列挙が可能です（後でさらにトリックを見ていきます）。
 
-したがって、すでに次のことを行っています：
+したがって、すでに以下のことを行っています：
 
 1. スコープ内のすべての**企業**を見つけた
 2. 企業に属するすべての**資産**を見つけた（スコープ内で脆弱性スキャンを実行）
 3. 企業に属するすべての**ドメイン**を見つけた
-4. ドメインのすべての**サブドメイン**を見つけた（サブドメインの乗っ取りはありますか？）
+4. ドメインのすべての**サブドメイン**を見つけた（サブドメインの乗っ取りは？）
 5. スコープ内のすべての**IP**（CDNからのものとそうでないもの）を見つけた
-6. すべての**ウェブサーバー**を見つけ、**スクリーンショット**を撮った（深く見る価値のある奇妙なものはありますか？）
+6. すべての**ウェブサーバー**を見つけ、それらの**スクリーンショット**を撮った（深く見る価値のある奇妙なものは？）
 7. 企業に属するすべての**潜在的なパブリッククラウド資産**を見つけた
-8. **メール**、**資格情報の漏洩**、および**秘密の漏洩**があり、**非常に簡単に大きな勝利を得ることができる**
+8. **メール**、**資格情報の漏洩**、および**秘密の漏洩**があり、**非常に簡単に大きな勝利**を得ることができる
 9. 見つけたすべてのウェブを**ペンテスト**
 
 ## **フルリコン自動ツール**
@@ -621,7 +621,7 @@ _すべてのデータベースを通常のGoogleブラウザを使用して実�
 - [**https://github.com/yogeshojha/rengine**](https://github.com/yogeshojha/rengine)
 - [**https://github.com/j3ssie/Osmedeus**](https://github.com/j3ssie/Osmedeus)
 - [**https://github.com/six2dez/reconftw**](https://github.com/six2dez/reconftw)
-- [**https://github.com/hackerspider1/EchoPwn**](https://github.com/hackerspider1/EchoPwn) - 少し古く、更新されていません
+- [**https://github.com/hackerspider1/EchoPwn**](https://github.com/hackerspider1/EchoPwn) - 少し古く、更新されていない
 
 ## **参考文献**
 

