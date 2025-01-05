@@ -2,11 +2,11 @@
 
 ## Spot
 
-C'est le moyen le plus basique de faire du trading. Vous pouvez **indiquer le montant de l'actif et le prix** auquel vous souhaitez acheter ou vendre, et chaque fois que ce prix est atteint, l'opération est effectuée.
+C'est le moyen le plus basique de faire du trading. Vous pouvez **indiquer le montant de l'actif et le prix** que vous souhaitez acheter ou vendre, et dès que ce prix est atteint, l'opération est effectuée.
 
 En général, vous pouvez également utiliser le **prix du marché actuel** afin d'effectuer la transaction aussi rapidement que possible au prix actuel.
 
-**Stop Loss - Limite** : Vous pouvez également indiquer le montant et le prix des actifs à acheter ou à vendre tout en indiquant un prix inférieur pour acheter ou vendre au cas où il serait atteint (pour arrêter les pertes).
+**Stop Loss - Limit** : Vous pouvez également indiquer le montant et le prix des actifs à acheter ou à vendre tout en indiquant un prix inférieur pour acheter ou vendre au cas où il serait atteint (pour stopper les pertes).
 
 ## Futures
 
@@ -18,20 +18,20 @@ Cependant, cela est intéressant par exemple pour les entreprises qui génèrent
 
 Bien que dans les échanges, cela soit généralement utilisé pour essayer de réaliser un profit.
 
-* Remarque qu'une "position longue" signifie que quelqu'un parie qu'un prix va augmenter
-* Alors qu'une "position courte" signifie que quelqu'un parie qu'un prix va baisser
+* Remarquez qu'une "position longue" signifie que quelqu'un parie qu'un prix va augmenter.
+* Alors qu'une "position courte" signifie que quelqu'un parie qu'un prix va baisser.
 
 ### Couverture avec des Futures <a href="#mntl-sc-block_7-0" id="mntl-sc-block_7-0"></a>
 
-Si un gestionnaire de fonds craint que certaines actions vont baisser, il pourrait prendre une position courte sur certains actifs comme des bitcoins ou des contrats à terme S\&P 500. Cela serait similaire à acheter ou à avoir certains actifs et créer un contrat pour les vendre à un moment futur à un prix plus élevé.&#x20;
+Si un gestionnaire de fonds craint que certaines actions vont baisser, il pourrait prendre une position courte sur certains actifs comme des bitcoins ou des contrats à terme S\&P 500. Cela serait similaire à acheter ou à posséder certains actifs et créer un contrat pour les vendre à un moment futur à un prix plus élevé.
 
-Dans le cas où le prix baisse, le gestionnaire de fonds réalisera des bénéfices car il vendra les actifs à un prix plus élevé. Si le prix des actifs augmente, le gestionnaire ne réalisera pas ce bénéfice mais il conservera ses actifs.
+Dans le cas où le prix baisse, le gestionnaire de fonds gagnera des bénéfices car il vendra les actifs à un prix plus élevé. Si le prix des actifs augmente, le gestionnaire ne gagnera pas ce bénéfice mais il conservera toujours ses actifs.
 
 ### Futures Perpétuels
 
 **Ce sont des "futures" qui dureront indéfiniment** (sans date de contrat de fin). Il est très courant de les trouver par exemple dans les échanges de crypto où vous pouvez entrer et sortir des futures en fonction du prix des cryptos.
 
-Remarque qu dans ces cas, les bénéfices et les pertes peuvent être en temps réel, si le prix augmente de 1%, vous gagnez 1%, si le prix diminue de 1%, vous le perdrez.
+Remarquez que dans ces cas, les bénéfices et les pertes peuvent être en temps réel, si le prix augmente de 1%, vous gagnez 1%, si le prix diminue de 1%, vous le perdrez.
 
 ### Futures avec Effet de Levier
 
@@ -44,7 +44,7 @@ Par conséquent, l'effet de levier permet de contrôler le montant d'argent que 
 
 ## Différences entre Futures et Options
 
-La principale différence entre les futures et les options est que le contrat est optionnel pour l'acheteur : il peut décider de l'exécuter ou non (en général, il ne le fera que s'il en tirera un bénéfice). Le vendeur doit vendre si l'acheteur souhaite utiliser l'option.\
+La principale différence entre les futures et les options est que le contrat est optionnel pour l'acheteur : il peut décider de l'exécuter ou non (généralement il ne le fera que s'il en tirera un bénéfice). Le vendeur doit vendre si l'acheteur souhaite utiliser l'option.\
 Cependant, l'acheteur paiera des frais au vendeur pour ouvrir l'option (de sorte que le vendeur, qui prend apparemment plus de risques, commence à gagner de l'argent).
 
 ### 1. **Obligation vs. Droit :**
@@ -55,7 +55,7 @@ Cependant, l'acheteur paiera des frais au vendeur pour ouvrir l'option (de sorte
 ### 2. **Risque :**
 
 * **Futures :** L'acheteur et le vendeur prennent un **risque illimité** car ils sont obligés de compléter le contrat. Le risque est la différence entre le prix convenu et le prix du marché à la date d'expiration.
-* **Options :** Le risque de l'acheteur est limité à la **prime** payée pour acheter l'option. Si le marché ne se déplace pas en faveur du titulaire de l'option, il peut simplement laisser l'option expirer. Cependant, le **vendeur** (émetteur) de l'option a un risque illimité si le marché se déplace considérablement contre lui.
+* **Options :** Le risque de l'acheteur est limité à la **prime** payée pour acheter l'option. Si le marché ne bouge pas en faveur du titulaire de l'option, il peut simplement laisser l'option expirer. Cependant, le **vendeur** (émetteur) de l'option a un risque illimité si le marché évolue de manière significative contre lui.
 
 ### 3. **Coût :**
 
@@ -65,4 +65,4 @@ Cependant, l'acheteur paiera des frais au vendeur pour ouvrir l'option (de sorte
 ### 4. **Potentiel de Profit :**
 
 * **Futures :** Le profit ou la perte est basé sur la différence entre le prix du marché à l'expiration et le prix convenu dans le contrat.
-* **Options :** L'acheteur réalise un profit lorsque le marché se déplace favorablement au-delà du prix d'exercice de plus que la prime payée. Le vendeur réalise un profit en conservant la prime si l'option n'est pas exercée.
+* **Options :** L'acheteur réalise un profit lorsque le marché évolue favorablement au-delà du prix d'exercice de plus que la prime payée. Le vendeur réalise un profit en conservant la prime si l'option n'est pas exercée.

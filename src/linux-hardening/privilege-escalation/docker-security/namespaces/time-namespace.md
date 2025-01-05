@@ -1,26 +1,26 @@
-# Espace de Temps
+# Time Namespace
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Informations de Base
+## Informations de base
 
-L'espace de temps dans Linux permet des décalages par espace de noms pour les horloges monotoniques et de démarrage du système. Il est couramment utilisé dans les conteneurs Linux pour changer la date/heure à l'intérieur d'un conteneur et ajuster les horloges après la restauration d'un point de contrôle ou d'un instantané.
+Le namespace de temps dans Linux permet des décalages par namespace aux horloges monotoniques et de démarrage du système. Il est couramment utilisé dans les conteneurs Linux pour changer la date/heure à l'intérieur d'un conteneur et ajuster les horloges après la restauration d'un point de contrôle ou d'un instantané.
 
 ## Laboratoire :
 
-### Créer différents Espaces de Noms
+### Créer différents Namespaces
 
 #### CLI
 ```bash
 sudo unshare -T [--mount-proc] /bin/bash
 ```
-En montant une nouvelle instance du système de fichiers `/proc` si vous utilisez le paramètre `--mount-proc`, vous vous assurez que le nouveau namespace de montage a une **vue précise et isolée des informations de processus spécifiques à ce namespace**.
+En montant une nouvelle instance du système de fichiers `/proc` si vous utilisez le paramètre `--mount-proc`, vous vous assurez que le nouveau namespace de montage a une **vue précise et isolée des informations sur les processus spécifiques à ce namespace**.
 
 <details>
 
 <summary>Erreur : bash : fork : Impossible d'allouer de la mémoire</summary>
 
-Lorsque `unshare` est exécuté sans l'option `-f`, une erreur se produit en raison de la façon dont Linux gère les nouveaux namespaces PID (Process ID). Les détails clés et la solution sont décrits ci-dessous :
+Lorsque `unshare` est exécuté sans l'option `-f`, une erreur est rencontrée en raison de la façon dont Linux gère les nouveaux namespaces PID (Process ID). Les détails clés et la solution sont décrits ci-dessous :
 
 1. **Explication du problème** :
 
@@ -44,7 +44,7 @@ En veillant à ce que `unshare` s'exécute avec le drapeau `-f`, le nouveau name
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-### &#x20;Vérifiez dans quel espace de noms se trouve votre processus
+### Vérifiez dans quel espace de noms se trouve votre processus
 ```bash
 ls -l /proc/self/ns/time
 lrwxrwxrwx 1 root root 0 Apr  4 21:16 /proc/self/ns/time -> 'time:[4026531834]'
@@ -55,7 +55,7 @@ sudo find /proc -maxdepth 3 -type l -name time -exec readlink {} \; 2>/dev/null 
 # Find the processes with an specific namespace
 sudo find /proc -maxdepth 3 -type l -name time -exec ls -l  {} \; 2>/dev/null | grep <ns-number>
 ```
-### Entrez dans un espace de noms temporel
+### Entrer dans un espace de noms temporel
 ```bash
 nsenter -T TARGET_PID --pid /bin/bash
 ```

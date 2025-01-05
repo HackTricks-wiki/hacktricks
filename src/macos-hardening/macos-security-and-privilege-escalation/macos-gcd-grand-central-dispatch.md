@@ -11,14 +11,14 @@
 > [!TIP]
 > En résumé, pour exécuter du code en **parallèle**, les processus peuvent envoyer des **blocs de code à GCD**, qui se chargera de leur exécution. Par conséquent, les processus ne créent pas de nouveaux threads ; **GCD exécute le code donné avec son propre pool de threads** (qui peut augmenter ou diminuer si nécessaire).
 
-Cela est très utile pour gérer l'exécution parallèle avec succès, réduisant considérablement le nombre de threads que les processus créent et optimisant l'exécution parallèle. Cela est idéal pour les tâches qui nécessitent un **grand parallélisme** (brute-forcing ?) ou pour les tâches qui ne devraient pas bloquer le thread principal : Par exemple, le thread principal sur iOS gère les interactions UI, donc toute autre fonctionnalité qui pourrait faire planter l'application (recherche, accès à un web, lecture d'un fichier...) est gérée de cette manière.
+Cela est très utile pour gérer l'exécution parallèle avec succès, réduisant considérablement le nombre de threads que les processus créent et optimisant l'exécution parallèle. C'est idéal pour les tâches qui nécessitent un **grand parallélisme** (brute-forcing ?) ou pour les tâches qui ne devraient pas bloquer le thread principal : Par exemple, le thread principal sur iOS gère les interactions UI, donc toute autre fonctionnalité qui pourrait faire planter l'application (recherche, accès à un web, lecture d'un fichier...) est gérée de cette manière.
 
 ### Blocs
 
 Un bloc est une **section de code autonome** (comme une fonction avec des arguments retournant une valeur) et peut également spécifier des variables liées.\
 Cependant, au niveau du compilateur, les blocs n'existent pas, ce sont des `os_object`s. Chacun de ces objets est formé par deux structures :
 
-- **littéral de bloc** :&#x20;
+- **littéral de bloc** :
 - Il commence par le champ **`isa`**, pointant vers la classe du bloc :
 - `NSConcreteGlobalBlock` (blocs de `__DATA.__const`)
 - `NSConcreteMallocBlock` (blocs dans le tas)
@@ -37,7 +37,7 @@ Cependant, au niveau du compilateur, les blocs n'existent pas, ce sont des `os_o
 
 Une queue de dispatch est un objet nommé fournissant un ordre FIFO des blocs pour les exécutions.
 
-Les blocs sont mis dans des queues à exécuter, et celles-ci supportent 2 modes : `DISPATCH_QUEUE_SERIAL` et `DISPATCH_QUEUE_CONCURRENT`. Bien sûr, la **série** ne **présentera pas de problèmes de conditions de course** car un bloc ne sera pas exécuté tant que le précédent n'a pas terminé. Mais **l'autre type de queue pourrait en avoir**.
+Les blocs sont mis dans des queues à exécuter, et celles-ci supportent 2 modes : `DISPATCH_QUEUE_SERIAL` et `DISPATCH_QUEUE_CONCURRENT`. Bien sûr, la **série** n'aura pas de problèmes de condition de course car un bloc ne sera pas exécuté tant que le précédent n'est pas terminé. Mais **l'autre type de queue pourrait en avoir**.
 
 Queues par défaut :
 
@@ -57,11 +57,11 @@ Queues par défaut :
 - `.root.user-interactive-qos`: Priorité la plus élevée
 - `.root.background-qos.overcommit`
 
-Remarquez que c'est le système qui décidera **quels threads gèrent quelles queues à chaque instant** (plusieurs threads peuvent travailler dans la même queue ou le même thread peut travailler dans différentes queues à un moment donné)
+Remarquez que c'est le système qui décide **quels threads gèrent quelles queues à chaque instant** (plusieurs threads peuvent travailler dans la même queue ou le même thread peut travailler dans différentes queues à un moment donné)
 
 #### Attributs
 
-Lors de la création d'une queue avec **`dispatch_queue_create`**, le troisième argument est un `dispatch_queue_attr_t`, qui est généralement soit `DISPATCH_QUEUE_SERIAL` (qui est en fait NULL) soit `DISPATCH_QUEUE_CONCURRENT`, qui est un pointeur vers une structure `dispatch_queue_attr_t` permettant de contrôler certains paramètres de la queue.
+Lors de la création d'une queue avec **`dispatch_queue_create`**, le troisième argument est un `dispatch_queue_attr_t`, qui est généralement soit `DISPATCH_QUEUE_SERIAL` (qui est en fait NULL) ou `DISPATCH_QUEUE_CONCURRENT`, qui est un pointeur vers une structure `dispatch_queue_attr_t` permettant de contrôler certains paramètres de la queue.
 
 ### Objets de dispatch
 
@@ -100,7 +100,7 @@ struct BlockDescriptor *descriptor;
 // captured variables go here
 };
 ```
-Et voici un exemple d'utilisation du **parallélisme** avec **`dispatch_async`** :
+Et voici un exemple d'utilisation du **parallelism** avec **`dispatch_async`** :
 ```objectivec
 #import <Foundation/Foundation.h>
 
@@ -170,7 +170,7 @@ sleep(1)  // Simulate a long-running task
 ```
 ## Frida
 
-Le script Frida suivant peut être utilisé pour **intercepter plusieurs fonctions `dispatch`** et extraire le nom de la file d'attente, la trace de retour et le bloc : [**https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js**](https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js)
+Le script Frida suivant peut être utilisé pour **s'accrocher à plusieurs fonctions `dispatch`** et extraire le nom de la file d'attente, la trace de pile et le bloc : [**https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js**](https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js)
 ```bash
 frida -U <prog_name> -l libdispatch.js
 
@@ -210,8 +210,8 @@ Ghidra réécrira automatiquement tout :
 
 <figure><img src="../../images/image (1166).png" alt="" width="563"><figcaption></figcaption></figure>
 
-## Références
+## References
 
-- [**\*OS Internals, Volume I: User Mode. Par Jonathan Levin**](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
+- [**\*OS Internals, Volume I: User Mode. By Jonathan Levin**](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
 
 {{#include ../../banners/hacktricks-training.md}}

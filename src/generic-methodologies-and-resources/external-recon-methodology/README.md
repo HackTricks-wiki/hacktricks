@@ -27,8 +27,8 @@ Un numéro de système autonome (**ASN**) est un **numéro unique** attribué à
 Un **AS** se compose de **blocs** d'**adresses IP** qui ont une politique clairement définie pour accéder aux réseaux externes et sont administrés par une seule organisation mais peuvent être composés de plusieurs opérateurs.
 
 Il est intéressant de trouver si la **société a attribué un ASN** pour trouver ses **plages IP.** Il sera intéressant de réaliser un **test de vulnérabilité** contre tous les **hôtes** dans le **champ d'application** et de **chercher des domaines** à l'intérieur de ces IP.\
-Vous pouvez **chercher** par nom de société, par **IP** ou par **domaine** dans [**https://bgp.he.net/**](https://bgp.he.net)**.**\
-**Selon la région de la société, ces liens pourraient être utiles pour rassembler plus de données :** [**AFRINIC**](https://www.afrinic.net) **(Afrique),** [**Arin**](https://www.arin.net/about/welcome/region/)**(Amérique du Nord),** [**APNIC**](https://www.apnic.net) **(Asie),** [**LACNIC**](https://www.lacnic.net) **(Amérique Latine),** [**RIPE NCC**](https://www.ripe.net) **(Europe). Quoi qu'il en soit, probablement toutes les** informations utiles **(plages IP et Whois)** apparaissent déjà dans le premier lien.
+Vous pouvez **chercher** par **nom** d'entreprise, par **IP** ou par **domaine** dans [**https://bgp.he.net/**](https://bgp.he.net)**.**\
+**Selon la région de l'entreprise, ces liens pourraient être utiles pour rassembler plus de données :** [**AFRINIC**](https://www.afrinic.net) **(Afrique),** [**Arin**](https://www.arin.net/about/welcome/region/)**(Amérique du Nord),** [**APNIC**](https://www.apnic.net) **(Asie),** [**LACNIC**](https://www.lacnic.net) **(Amérique Latine),** [**RIPE NCC**](https://www.ripe.net) **(Europe). Quoi qu'il en soit, probablement toutes les** informations utiles **(plages IP et Whois)** apparaissent déjà dans le premier lien.
 ```bash
 #You can try "automate" this with amass, but it's not very recommended
 amass intel -org tesla
@@ -58,7 +58,7 @@ Vous pouvez trouver l'IP et l'ASN d'un domaine en utilisant [http://ipv4info.com
 
 À ce stade, nous connaissons **tous les actifs à l'intérieur du périmètre**, donc si vous y êtes autorisé, vous pourriez lancer un **scanner de vulnérabilités** (Nessus, OpenVAS) sur tous les hôtes.\
 De plus, vous pourriez lancer des [**scans de ports**](../pentesting-network/index.html#discovering-hosts-from-the-outside) **ou utiliser des services comme** shodan **pour trouver** des ports ouverts **et selon ce que vous trouvez, vous devriez** consulter ce livre pour savoir comment effectuer un pentesting sur plusieurs services possibles en cours d'exécution.\
-**De plus, il pourrait être utile de mentionner que vous pouvez également préparer des** listes de noms d'utilisateur **et** de mots de passe **par défaut et essayer de** brute-forcer des services avec [https://github.com/x90skysn3k/brutespray](https://github.com/x90skysn3k/brutespray).
+**Il pourrait également être utile de mentionner que vous pouvez également préparer des** listes de noms d'utilisateur **et de** mots de passe **par défaut et essayer de** bruteforcer des services avec [https://github.com/x90skysn3k/brutespray](https://github.com/x90skysn3k/brutespray).
 
 ## Domaines
 
@@ -139,11 +139,11 @@ fhash = mmh3.hash(favicon)
 print(f"{url} : {fhash}")
 return fhash
 ```
-### **Droits d'auteur / Chaîne unique**
+### **Copyright / Chaîne Uniq**
 
-Recherchez dans les pages web **des chaînes qui pourraient être partagées entre différents sites de la même organisation**. La **chaîne de droits d'auteur** pourrait être un bon exemple. Ensuite, recherchez cette chaîne dans **google**, dans d'autres **navigateurs** ou même dans **shodan** : `shodan search http.html:"Copyright string"`
+Recherchez dans les pages web **des chaînes qui pourraient être partagées entre différents sites de la même organisation**. La **chaîne de copyright** pourrait être un bon exemple. Ensuite, recherchez cette chaîne dans **google**, dans d'autres **navigateurs** ou même dans **shodan** : `shodan search http.html:"Copyright string"`
 
-### **Temps CRT**
+### **CRT Time**
 
 Il est courant d'avoir un travail cron tel que
 ```bash
@@ -163,15 +163,15 @@ Apparemment, il est courant que des personnes assignent des sous-domaines à des
 
 [**Ce post**](https://kmsec.uk/blog/passive-takeover/) explique une histoire à ce sujet et propose un script qui **crée une VM dans DigitalOcean**, **obtient** l'**IPv4** de la nouvelle machine, et **cherche dans Virustotal des enregistrements de sous-domaines** pointant vers elle.
 
-### **Autres moyens**
+### **Autres méthodes**
 
 **Notez que vous pouvez utiliser cette technique pour découvrir plus de noms de domaine chaque fois que vous trouvez un nouveau domaine.**
 
 **Shodan**
 
-Comme vous connaissez déjà le nom de l'organisation propriétaire de l'espace IP. Vous pouvez rechercher ces données dans shodan en utilisant : `org:"Tesla, Inc."` Vérifiez les hôtes trouvés pour de nouveaux domaines inattendus dans le certificat TLS.
+Comme vous connaissez déjà le nom de l'organisation propriétaire de l'espace IP. Vous pouvez rechercher ces données dans Shodan en utilisant : `org:"Tesla, Inc."` Vérifiez les hôtes trouvés pour de nouveaux domaines inattendus dans le certificat TLS.
 
-Vous pourriez accéder au **certificat TLS** de la page web principale, obtenir le **nom de l'organisation** et ensuite rechercher ce nom dans les **certificats TLS** de toutes les pages web connues par **shodan** avec le filtre : `ssl:"Tesla Motors"` ou utiliser un outil comme [**sslsearch**](https://github.com/HarshVaragiya/sslsearch).
+Vous pourriez accéder au **certificat TLS** de la page web principale, obtenir le **nom de l'organisation** et ensuite rechercher ce nom dans les **certificats TLS** de toutes les pages web connues par **Shodan** avec le filtre : `ssl:"Tesla Motors"` ou utiliser un outil comme [**sslsearch**](https://github.com/HarshVaragiya/sslsearch).
 
 **Assetfinder**
 
@@ -181,8 +181,8 @@ Vous pourriez accéder au **certificat TLS** de la page web principale, obtenir 
 
 Vérifiez pour une [prise de contrôle de domaine](../../pentesting-web/domain-subdomain-takeover.md#domain-takeover). Peut-être qu'une entreprise **utilise un domaine** mais qu'elle **a perdu la propriété**. Il suffit de l'enregistrer (si assez bon marché) et d'informer l'entreprise.
 
-Si vous trouvez un **domaine avec une IP différente** de celles que vous avez déjà trouvées dans la découverte d'actifs, vous devriez effectuer un **scan de vulnérabilités de base** (en utilisant Nessus ou OpenVAS) et un [**scan de ports**](../pentesting-network/index.html#discovering-hosts-from-the-outside) avec **nmap/masscan/shodan**. Selon les services en cours d'exécution, vous pouvez trouver dans **ce livre quelques astuces pour "les attaquer"**.\
-_&#x4E;otez que parfois le domaine est hébergé à l'intérieur d'une IP qui n'est pas contrôlée par le client, donc ce n'est pas dans le périmètre, soyez prudent._
+Si vous trouvez un **domaine avec une IP différente** de celles que vous avez déjà trouvées dans la découverte d'actifs, vous devriez effectuer un **scan de vulnérabilités de base** (en utilisant Nessus ou OpenVAS) et un [**scan de ports**](../pentesting-network/index.html#discovering-hosts-from-the-outside) avec **nmap/masscan/shodan**. Selon les services en cours d'exécution, vous pouvez trouver dans **ce livre quelques astuces pour les "attaquer"**.\
+_Notez que parfois le domaine est hébergé sur une IP qui n'est pas contrôlée par le client, donc ce n'est pas dans le périmètre, soyez prudent._
 
 ## Sous-domaines
 
@@ -250,7 +250,7 @@ vita -d tesla.com
 ```bash
 theHarvester -d tesla.com -b "anubis, baidu, bing, binaryedge, bingapi, bufferoverun, censys, certspotter, crtsh, dnsdumpster, duckduckgo, fullhunt, github-code, google, hackertarget, hunter, intelx, linkedin, linkedin_links, n45ht, omnisint, otx, pentesttools, projectdiscovery, qwant, rapiddns, rocketreach, securityTrails, spyse, sublist3r, threatcrowd, threatminer, trello, twitter, urlscan, virustotal, yahoo, zoomeye"
 ```
-Il existe **d'autres outils/APIs intéressants** qui, même s'ils ne sont pas directement spécialisés dans la recherche de sous-domaines, pourraient être utiles pour trouver des sous-domaines, comme :
+Il existe **d'autres outils/API intéressants** qui, même s'ils ne sont pas directement spécialisés dans la recherche de sous-domaines, pourraient être utiles pour trouver des sous-domaines, comme :
 
 - [**Crobat**](https://github.com/cgboal/sonarsearch)**:** Utilise l'API [https://sonar.omnisint.io](https://sonar.omnisint.io) pour obtenir des sous-domaines
 ```bash
@@ -282,7 +282,7 @@ curl -s "https://crt.sh/?q=%25.$1" \
 }
 crt tesla.com
 ```
-- [**gau**](https://github.com/lc/gau)**:** récupère les URL connues d'Open Threat Exchange d'AlienVault, de la Wayback Machine et de Common Crawl pour un domaine donné.
+- [**gau**](https://github.com/lc/gau)**:** récupère les URL connues de l'Open Threat Exchange d'AlienVault, de la Wayback Machine et de Common Crawl pour un domaine donné.
 ```bash
 # Get subdomains from GAUs found URLs
 gau --subs tesla.com | cut -d "/" -f 3 | sort -u
@@ -395,7 +395,7 @@ python3 main.py adobe.com adobe adobe.rules
 make_brute_list.sh adobe.rules adobe.brute
 puredns resolve adobe.brute --write adobe.valid
 ```
-- [**subzuf**](https://github.com/elceef/subzuf)**:** _subzuf_ est un fuzzer de brute-force de sous-domaines associé à un algorithme guidé par la réponse DNS extrêmement simple mais efficace. Il utilise un ensemble de données d'entrée fournies, comme une liste de mots sur mesure ou des enregistrements DNS/TLS historiques, pour synthétiser avec précision des noms de domaine correspondants et les étendre encore plus dans une boucle basée sur les informations recueillies lors de l'analyse DNS.
+- [**subzuf**](https://github.com/elceef/subzuf)**:** _subzuf_ est un fuzzer de brute-force de sous-domaines associé à un algorithme guidé par les réponses DNS, extrêmement simple mais efficace. Il utilise un ensemble de données d'entrée fournies, comme une liste de mots sur mesure ou des enregistrements DNS/TLS historiques, pour synthétiser avec précision des noms de domaine correspondants et les étendre encore plus dans une boucle basée sur les informations recueillies lors de l'analyse DNS.
 ```
 echo www | subzuf facebook.com
 ```
@@ -413,7 +413,7 @@ https://trickest.com/blog/full-subdomain-brute-force-discovery-using-workflow/
 
 ### **VHosts / Hôtes virtuels**
 
-Si vous avez trouvé une adresse IP contenant **une ou plusieurs pages web** appartenant à des sous-domaines, vous pourriez essayer de **trouver d'autres sous-domaines avec des sites sur cette IP** en recherchant dans **des sources OSINT** des domaines sur une IP ou en **brute-forçant les noms de domaine VHost sur cette IP**.
+Si vous avez trouvé une adresse IP contenant **une ou plusieurs pages web** appartenant à des sous-domaines, vous pourriez essayer de **trouver d'autres sous-domaines avec des sites sur cette IP** en recherchant dans **des sources OSINT** des domaines sur une IP ou en **bruteforçant les noms de domaine VHost sur cette IP**.
 
 #### OSINT
 
@@ -421,7 +421,7 @@ Vous pouvez trouver quelques **VHosts dans des IPs en utilisant** [**HostHunter*
 
 **Brute Force**
 
-Si vous soupçonnez qu'un sous-domaine peut être caché sur un serveur web, vous pourriez essayer de le brute-forcer :
+Si vous soupçonnez qu'un sous-domaine peut être caché sur un serveur web, vous pourriez essayer de le brute forcer :
 ```bash
 ffuf -c -w /path/to/wordlist -u http://victim.com -H "Host: FUZZ.victim.com"
 
@@ -447,7 +447,7 @@ ffuf -w subdomains-top1million-5000.txt -u http://10.10.10.208 -H 'Origin: http:
 ### **Brute Force des Buckets**
 
 En recherchant des **sous-domaines**, gardez un œil pour voir s'ils **pointent** vers un type de **bucket**, et dans ce cas, [**vérifiez les permissions**](../../network-services-pentesting/pentesting-web/buckets/index.html)**.**\
-De plus, comme à ce stade vous connaîtrez tous les domaines dans le périmètre, essayez de [**brute forcer les noms de buckets possibles et de vérifier les permissions**](../../network-services-pentesting/pentesting-web/buckets/index.html).
+De plus, à ce stade, vous connaîtrez tous les domaines dans le périmètre, essayez de [**brute forcer les noms de buckets possibles et de vérifier les permissions**](../../network-services-pentesting/pentesting-web/buckets/index.html).
 
 ### **Surveillance**
 
@@ -458,15 +458,15 @@ Vous pouvez **surveiller** si de **nouveaux sous-domaines** d'un domaine sont cr
 Vérifiez les possibles [**prises de contrôle de sous-domaines**](../../pentesting-web/domain-subdomain-takeover.md#subdomain-takeover).\
 Si le **sous-domaine** pointe vers un **bucket S3**, [**vérifiez les permissions**](../../network-services-pentesting/pentesting-web/buckets/index.html).
 
-Si vous trouvez un **sous-domaine avec une IP différente** de celles que vous avez déjà trouvées lors de la découverte des actifs, vous devriez effectuer un **scan de vulnérabilités de base** (en utilisant Nessus ou OpenVAS) et un [**scan de ports**](../pentesting-network/index.html#discovering-hosts-from-the-outside) avec **nmap/masscan/shodan**. Selon les services qui fonctionnent, vous pouvez trouver dans **ce livre quelques astuces pour les "attaquer"**.\
-_&#x4E;otez que parfois le sous-domaine est hébergé sur une IP qui n'est pas contrôlée par le client, donc ce n'est pas dans le périmètre, soyez prudent._
+Si vous trouvez un **sous-domaine avec une IP différente** de celles que vous avez déjà trouvées lors de la découverte des actifs, vous devriez effectuer un **scan de vulnérabilités de base** (en utilisant Nessus ou OpenVAS) et un [**scan de ports**](../pentesting-network/index.html#discovering-hosts-from-the-outside) avec **nmap/masscan/shodan**. Selon les services en cours d'exécution, vous pouvez trouver dans **ce livre quelques astuces pour les "attaquer"**.\
+_Remarque : parfois, le sous-domaine est hébergé sur une IP qui n'est pas contrôlée par le client, donc ce n'est pas dans le périmètre, soyez prudent._
 
 ## IPs
 
 Dans les étapes initiales, vous avez peut-être **trouvé des plages d'IP, des domaines et des sous-domaines**.\
-Il est temps de **rassembler toutes les IPs de ces plages** et pour les **domaines/sous-domaines (requêtes DNS).**
+Il est temps de **rassembler toutes les IP de ces plages** et pour les **domaines/sous-domaines (requêtes DNS).**
 
-En utilisant des services des **API gratuites** suivantes, vous pouvez également trouver des **IPs précédemment utilisées par des domaines et sous-domaines**. Ces IPs peuvent encore appartenir au client (et peuvent vous permettre de trouver [**des contournements CloudFlare**](../../network-services-pentesting/pentesting-web/uncovering-cloudflare.md))
+En utilisant des services des **API gratuites** suivantes, vous pouvez également trouver des **IP précédemment utilisées par des domaines et sous-domaines**. Ces IP peuvent encore appartenir au client (et peuvent vous permettre de trouver [**des contournements CloudFlare**](../../network-services-pentesting/pentesting-web/uncovering-cloudflare.md))
 
 - [**https://securitytrails.com/**](https://securitytrails.com/)
 
@@ -474,7 +474,7 @@ Vous pouvez également vérifier les domaines pointant vers une adresse IP spéc
 
 ### **Recherche de vulnérabilités**
 
-**Scannez tous les ports des IPs qui n'appartiennent pas aux CDN** (car vous ne trouverez probablement rien d'intéressant là-bas). Dans les services en cours d'exécution découverts, vous pourriez être **capable de trouver des vulnérabilités**.
+**Scannez tous les ports des IP qui n'appartiennent pas aux CDN** (car vous ne trouverez probablement rien d'intéressant là-bas). Dans les services en cours d'exécution découverts, vous pourriez être **capable de trouver des vulnérabilités**.
 
 **Trouvez un** [**guide**](../pentesting-network/index.html) **sur la façon de scanner les hôtes.**
 
@@ -482,7 +482,7 @@ Vous pouvez également vérifier les domaines pointant vers une adresse IP spéc
 
 > Nous avons trouvé toutes les entreprises et leurs actifs et nous connaissons les plages d'IP, les domaines et les sous-domaines dans le périmètre. Il est temps de rechercher des serveurs web.
 
-Dans les étapes précédentes, vous avez probablement déjà effectué une **reconnaissance des IPs et des domaines découverts**, donc vous avez peut-être **déjà trouvé tous les serveurs web possibles**. Cependant, si ce n'est pas le cas, nous allons maintenant voir quelques **astuces rapides pour rechercher des serveurs web** dans le périmètre.
+Dans les étapes précédentes, vous avez probablement déjà effectué une **reconnaissance des IP et des domaines découverts**, donc vous avez peut-être **déjà trouvé tous les serveurs web possibles**. Cependant, si ce n'est pas le cas, nous allons maintenant voir quelques **astuces rapides pour rechercher des serveurs web** dans le périmètre.
 
 Veuillez noter que cela sera **orienté vers la découverte d'applications web**, donc vous devriez également **effectuer le scan de vulnérabilités** et **le scan de ports** (**si autorisé** par le périmètre).
 
@@ -498,7 +498,7 @@ Maintenant que vous avez découvert **tous les serveurs web** présents dans le 
 
 Pour réaliser l'idée proposée, vous pouvez utiliser [**EyeWitness**](https://github.com/FortyNorthSecurity/EyeWitness), [**HttpScreenshot**](https://github.com/breenmachine/httpscreenshot), [**Aquatone**](https://github.com/michenriksen/aquatone), [**Shutter**](https://shutter-project.org/downloads/third-party-packages/), [**Gowitness**](https://github.com/sensepost/gowitness) ou [**webscreenshot**](https://github.com/maaaaz/webscreenshot)**.**
 
-De plus, vous pourriez ensuite utiliser [**eyeballer**](https://github.com/BishopFox/eyeballer) pour passer en revue toutes les **captures d'écran** afin de vous dire **ce qui est susceptible de contenir des vulnérabilités**, et ce qui ne l'est pas.
+De plus, vous pourriez ensuite utiliser [**eyeballer**](https://github.com/BishopFox/eyeballer) pour passer en revue toutes les **captures d'écran** afin de vous indiquer **ce qui est susceptible de contenir des vulnérabilités**, et ce qui ne l'est pas.
 
 ## Actifs Cloud Publics
 
@@ -510,11 +510,11 @@ Vous aurez également besoin de listes de mots de **mots courants utilisés dans
 - [https://raw.githubusercontent.com/infosec-au/altdns/master/words.txt](https://raw.githubusercontent.com/infosec-au/altdns/master/words.txt)
 - [https://raw.githubusercontent.com/jordanpotti/AWSBucketDump/master/BucketNames.txt](https://raw.githubusercontent.com/jordanpotti/AWSBucketDump/master/BucketNames.txt)
 
-Ensuite, avec ces mots, vous devriez générer des **permutations** (voir le [**Deuxième Tour DNS Brute-Force**](#second-dns-bruteforce-round) pour plus d'infos).
+Ensuite, avec ces mots, vous devriez générer des **permutations** (voir le [**Deuxième Tour de Brute-Force DNS**](#second-dns-bruteforce-round) pour plus d'infos).
 
 Avec les listes de mots résultantes, vous pourriez utiliser des outils tels que [**cloud_enum**](https://github.com/initstring/cloud_enum)**,** [**CloudScraper**](https://github.com/jordanpotti/CloudScraper)**,** [**cloudlist**](https://github.com/projectdiscovery/cloudlist) **ou** [**S3Scanner**](https://github.com/sa7mon/S3Scanner)**.**
 
-N'oubliez pas que lorsque vous recherchez des actifs Cloud, vous devez **chercher plus que de simples buckets dans AWS**.
+N'oubliez pas que lorsque vous recherchez des actifs Cloud, vous devriez **chercher plus que de simples buckets dans AWS**.
 
 ### **Recherche de vulnérabilités**
 
@@ -535,7 +535,7 @@ Les emails seront utiles plus tard pour **brute-forcer les connexions web et les
 
 ## Fuites de Credentials
 
-Avec les **domaines,** **sous-domaines**, et **emails**, vous pouvez commencer à rechercher des credentials fuités dans le passé appartenant à ces emails :
+Avec les **domaines**, **sous-domaines** et **emails**, vous pouvez commencer à rechercher des credentials fuités dans le passé appartenant à ces emails :
 
 - [https://leak-lookup.com](https://leak-lookup.com/account/login)
 - [https://www.dehashed.com/](https://www.dehashed.com/)
@@ -546,12 +546,12 @@ Si vous trouvez des credentials **fuités valides**, c'est une victoire très fa
 
 ## Fuites de Secrets
 
-Les fuites de credentials sont liées aux hacks d'entreprises où des **informations sensibles ont été divulguées et vendues**. Cependant, les entreprises peuvent être affectées par **d'autres fuites** dont les informations ne figurent pas dans ces bases de données :
+Les fuites de credentials sont liées aux hacks d'entreprises où **des informations sensibles ont été divulguées et vendues**. Cependant, les entreprises peuvent être affectées par **d'autres fuites** dont les informations ne figurent pas dans ces bases de données :
 
 ### Fuites Github
 
 Les credentials et les API peuvent être divulgués dans les **dépôts publics** de l'**entreprise** ou des **utilisateurs** travaillant pour cette entreprise github.\
-Vous pouvez utiliser l'**outil** [**Leakos**](https://github.com/carlospolop/Leakos) pour **télécharger** tous les **dépôts publics** d'une **organisation** et de ses **développeurs** et exécuter [**gitleaks**](https://github.com/zricethezav/gitleaks) sur eux automatiquement.
+Vous pouvez utiliser l'**outil** [**Leakos**](https://github.com/carlospolop/Leakos) pour **télécharger** tous les **dépôts publics** d'une **organisation** et de ses **développeurs** et exécuter [**gitleaks**](https://github.com/zricethezav/gitleaks) automatiquement sur eux.
 
 **Leakos** peut également être utilisé pour exécuter **gitleaks** contre tout le **texte** fourni par les **URLs passées** à celui-ci, car parfois **les pages web contiennent également des secrets**.
 
@@ -607,7 +607,7 @@ Donc, vous avez déjà :
 1. Trouvé toutes les **entreprises** dans le périmètre
 2. Trouvé tous les **actifs** appartenant aux entreprises (et effectué quelques scans de vulnérabilités si dans le périmètre)
 3. Trouvé tous les **domaines** appartenant aux entreprises
-4. Trouvé tous les **sous-domaines** des domaines (y a-t-il une prise de contrôle de sous-domaine ?)
+4. Trouvé tous les **sous-domaines** des domaines (y a-t-il eu des prises de contrôle de sous-domaines ?)
 5. Trouvé toutes les **IPs** (provenant et **non provenant des CDN**) dans le périmètre.
 6. Trouvé tous les **serveurs web** et pris une **capture d'écran** d'eux (y a-t-il quelque chose de bizarre qui mérite un examen plus approfondi ?)
 7. Trouvé tous les **actifs cloud publics potentiels** appartenant à l'entreprise.

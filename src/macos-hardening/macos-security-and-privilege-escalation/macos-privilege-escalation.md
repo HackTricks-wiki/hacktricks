@@ -4,7 +4,7 @@
 
 ## Escalade de privilèges TCC
 
-Si vous êtes venu ici à la recherche d'une escalade de privilèges TCC, allez à :
+Si vous êtes venu ici à la recherche de l'escalade de privilèges TCC, allez à :
 
 {{#ref}}
 macos-security-protections/macos-tcc/
@@ -12,7 +12,7 @@ macos-security-protections/macos-tcc/
 
 ## Privesc Linux
 
-Veuillez noter que **la plupart des astuces concernant l'escalade de privilèges affectant Linux/Unix affecteront également les machines MacOS**. Donc, consultez :
+Veuillez noter que **la plupart des astuces concernant l'escalade de privilèges affectant Linux/Unix affecteront également les machines MacOS**. Donc, voyez :
 
 {{#ref}}
 ../../linux-hardening/privilege-escalation/
@@ -41,15 +41,15 @@ sudo ls
 ```
 Notez qu'un utilisateur qui utilise le terminal aura très probablement **Homebrew installé**. Il est donc possible de détourner des binaires dans **`/opt/homebrew/bin`**.
 
-### Usurpation de Dock
+### Usurpation du Dock
 
 En utilisant un peu de **ingénierie sociale**, vous pourriez **usurper par exemple Google Chrome** dans le dock et exécuter en réalité votre propre script :
 
 {{#tabs}}
-{{#tab name="Chrome Impersonation"}}
+{{#tab name="Usurpation de Chrome"}}
 Quelques suggestions :
 
-- Vérifiez dans le Dock s'il y a un Chrome, et dans ce cas **supprimez** cette entrée et **ajoutez** l'**entrée Chrome** **fausse** à la **même position** dans le tableau Dock.&#x20;
+- Vérifiez dans le Dock s'il y a un Chrome, et dans ce cas, **supprimez** cette entrée et **ajoutez** l'**entrée Chrome** **fausse** à la **même position** dans le tableau du Dock.
 ```bash
 #!/bin/sh
 
@@ -121,14 +121,14 @@ killall Dock
 ```
 {{#endtab}}
 
-{{#tab name="Impersonation du Finder"}}
+{{#tab name="Impersonation de Finder"}}
 Quelques suggestions :
 
-- Vous **ne pouvez pas retirer le Finder du Dock**, donc si vous allez l'ajouter au Dock, vous pourriez mettre le faux Finder juste à côté du vrai. Pour cela, vous devez **ajouter l'entrée du faux Finder au début du tableau Dock**.
+- Vous **ne pouvez pas retirer Finder du Dock**, donc si vous allez l'ajouter au Dock, vous pourriez mettre le faux Finder juste à côté du vrai. Pour cela, vous devez **ajouter l'entrée du faux Finder au début du tableau Dock**.
 - Une autre option est de ne pas le placer dans le Dock et de simplement l'ouvrir, "Finder demandant à contrôler Finder" n'est pas si étrange.
-- Une autre option pour **escalader vers root sans demander** le mot de passe avec une horrible boîte, est de faire en sorte que le Finder demande vraiment le mot de passe pour effectuer une action privilégiée :
-- Demandez au Finder de copier dans **`/etc/pam.d`** un nouveau fichier **`sudo`** (L'invite demandant le mot de passe indiquera que "Finder veut copier sudo")
-- Demandez au Finder de copier un nouveau **Plugin d'Autorisation** (Vous pourriez contrôler le nom du fichier afin que l'invite demandant le mot de passe indique que "Finder veut copier Finder.bundle")
+- Une autre option pour **escalader vers root sans demander** le mot de passe avec une horrible boîte, est de faire en sorte que Finder demande vraiment le mot de passe pour effectuer une action privilégiée :
+- Demandez à Finder de copier dans **`/etc/pam.d`** un nouveau fichier **`sudo`** (L'invite demandant le mot de passe indiquera que "Finder veut copier sudo")
+- Demandez à Finder de copier un nouveau **Plugin d'Autorisation** (Vous pourriez contrôler le nom du fichier afin que l'invite demandant le mot de passe indique que "Finder veut copier Finder.bundle")
 ```bash
 #!/bin/sh
 
@@ -206,7 +206,7 @@ killall Dock
 ### CVE-2020-9771 - contournement TCC de mount_apfs et élévation de privilèges
 
 **Tout utilisateur** (même ceux sans privilèges) peut créer et monter un instantané de Time Machine et **accéder à TOUS les fichiers** de cet instantané.\
-Le **seul privilège** nécessaire est que l'application utilisée (comme `Terminal`) ait accès à **Full Disk Access** (FDA) (`kTCCServiceSystemPolicyAllfiles`), ce qui doit être accordé par un administrateur.
+Le **seul privilège** requis est que l'application utilisée (comme `Terminal`) ait accès à **Full Disk Access** (FDA) (`kTCCServiceSystemPolicyAllfiles`), ce qui doit être accordé par un administrateur.
 ```bash
 # Create snapshot
 tmutil localsnapshot

@@ -12,7 +12,7 @@ Bien que les cgroup namespaces ne soient pas un type de namespace séparé comme
 
 1. Lorsqu'un nouveau cgroup namespace est créé, **il commence avec une vue de la hiérarchie cgroup basée sur le cgroup du processus créateur**. Cela signifie que les processus s'exécutant dans le nouveau cgroup namespace ne verront qu'un sous-ensemble de l'ensemble de la hiérarchie cgroup, limité à l'arborescence cgroup enracinée au cgroup du processus créateur.
 2. Les processus au sein d'un cgroup namespace **verront leur propre cgroup comme la racine de la hiérarchie**. Cela signifie que, du point de vue des processus à l'intérieur du namespace, leur propre cgroup apparaît comme la racine, et ils ne peuvent pas voir ou accéder aux cgroups en dehors de leur propre sous-arborescence.
-3. Les cgroup namespaces ne fournissent pas directement l'isolation des ressources ; **ils ne fournissent que l'isolation de la vue de la hiérarchie cgroup**. **Le contrôle et l'isolation des ressources sont toujours appliqués par les** sous-systèmes cgroup (par exemple, cpu, mémoire, etc.) eux-mêmes.
+3. Les cgroup namespaces ne fournissent pas directement l'isolation des ressources ; **ils ne fournissent que l'isolation de la vue de la hiérarchie cgroup**. **Le contrôle et l'isolation des ressources sont toujours appliqués par les sous-systèmes cgroup** (par exemple, cpu, mémoire, etc.) eux-mêmes.
 
 Pour plus d'informations sur les CGroups, consultez :
 
@@ -28,13 +28,13 @@ Pour plus d'informations sur les CGroups, consultez :
 ```bash
 sudo unshare -C [--mount-proc] /bin/bash
 ```
-En montant une nouvelle instance du système de fichiers `/proc` si vous utilisez le paramètre `--mount-proc`, vous vous assurez que le nouveau namespace de montage a une **vue précise et isolée des informations de processus spécifiques à ce namespace**.
+En montant une nouvelle instance du système de fichiers `/proc` si vous utilisez le paramètre `--mount-proc`, vous vous assurez que le nouveau namespace de montage a une **vue précise et isolée des informations sur les processus spécifiques à ce namespace**.
 
 <details>
 
 <summary>Erreur : bash : fork : Impossible d'allouer de la mémoire</summary>
 
-Lorsque `unshare` est exécuté sans l'option `-f`, une erreur est rencontrée en raison de la façon dont Linux gère les nouveaux namespaces PID (identifiant de processus). Les détails clés et la solution sont décrits ci-dessous :
+Lorsque `unshare` est exécuté sans l'option `-f`, une erreur se produit en raison de la façon dont Linux gère les nouveaux namespaces PID (Process ID). Les détails clés et la solution sont décrits ci-dessous :
 
 1. **Explication du problème** :
 
@@ -58,7 +58,7 @@ En veillant à ce que `unshare` s'exécute avec le drapeau `-f`, le nouveau name
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-### &#x20;Vérifiez dans quel espace de noms se trouve votre processus
+### Vérifiez dans quel espace de noms se trouve votre processus
 ```bash
 ls -l /proc/self/ns/cgroup
 lrwxrwxrwx 1 root root 0 Apr  4 21:19 /proc/self/ns/cgroup -> 'cgroup:[4026531835]'
@@ -69,7 +69,7 @@ sudo find /proc -maxdepth 3 -type l -name cgroup -exec readlink {} \; 2>/dev/nul
 # Find the processes with an specific namespace
 sudo find /proc -maxdepth 3 -type l -name cgroup -exec ls -l  {} \; 2>/dev/null | grep <ns-number>
 ```
-### Entrez dans un espace de noms CGroup
+### Entrer dans un espace de noms CGroup
 ```bash
 nsenter -C TARGET_PID --pid /bin/bash
 ```

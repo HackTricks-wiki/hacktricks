@@ -14,7 +14,7 @@ Ces définitions ont 5 sections :
 - **Inclusions et imports** : MIG utilise le préprocesseur C, donc il est capable d'utiliser des imports. De plus, il est possible d'utiliser `uimport` et `simport` pour le code généré par l'utilisateur ou le serveur.
 - **Déclarations de types** : Il est possible de définir des types de données bien que généralement il importera `mach_types.defs` et `std_types.defs`. Pour des types personnalisés, une certaine syntaxe peut être utilisée :
 - \[i`n/out]tran : Fonction qui doit être traduite d'un message entrant ou vers un message sortant
-- `c[user/server]type` : Mappage vers un autre type C.
+- `c[user/server]type` : Mapping vers un autre type C.
 - `destructor` : Appelez cette fonction lorsque le type est libéré.
 - **Opérations** : Ce sont les définitions des méthodes RPC. Il existe 5 types différents :
 - `routine` : S'attend à une réponse
@@ -138,7 +138,7 @@ OutHeadP->msgh_local_port = MACH_PORT_NULL;
 OutHeadP->msgh_id = InHeadP->msgh_id + 100;
 OutHeadP->msgh_reserved = 0;
 
-if ((InHeadP->msgh_id > 500) || (InHeadP->msgh_id &#x3C; 500) ||
+if ((InHeadP->msgh_id > 500) || (InHeadP->msgh_id < 500) ||
 <strong>	    ((routine = SERVERPREFmyipc_subsystem.routine[InHeadP->msgh_id - 500].stub_routine) == 0)) {
 </strong>		((mig_reply_error_t *)OutHeadP)->NDR = NDR_record;
 ((mig_reply_error_t *)OutHeadP)->RetCode = MIG_BAD_ID;
@@ -235,7 +235,7 @@ Comme de nombreux binaires utilisent maintenant MIG pour exposer des ports mach,
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
-De plus, les fonctions MIG ne sont que des enveloppes de la fonction réelle qui est appelée, ce qui signifie qu'en obtenant sa désassemblage et en recherchant BL, vous pourriez être en mesure de trouver la fonction réelle qui est appelée :
+De plus, les fonctions MIG ne sont que des wrappers de la fonction réelle qui est appelée, ce qui signifie qu'en obtenant sa désassemblage et en recherchant BL, vous pourriez être en mesure de trouver la fonction réelle qui est appelée :
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep BL
 ```
@@ -250,13 +250,13 @@ Il a été précédemment mentionné que la fonction qui s'occupera de **appeler
 var_10 = arg0;
 var_18 = arg1;
 // Instructions initiales pour trouver les pointeurs de fonction appropriés
-*(int32_t *)var_18 = *(int32_t *)var_10 &#x26; 0x1f;
+*(int32_t *)var_18 = *(int32_t *)var_10 & 0x1f;
 *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
 *(int32_t *)(var_18 + 0x4) = 0x24;
 *(int32_t *)(var_18 + 0xc) = 0x0;
 *(int32_t *)(var_18 + 0x14) = *(int32_t *)(var_10 + 0x14) + 0x64;
 *(int32_t *)(var_18 + 0x10) = 0x0;
-if (*(int32_t *)(var_10 + 0x14) &#x3C;= 0x1f4 &#x26;&#x26; *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
+if (*(int32_t *)(var_10 + 0x14) <= 0x1f4 && *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
 rax = *(int32_t *)(var_10 + 0x14);
 // Appel à sign_extend_64 qui peut aider à identifier cette fonction
 // Cela stocke dans rax le pointeur vers l'appel qui doit être appelé
@@ -289,7 +289,7 @@ return rax;
 {{#endtab}}
 
 {{#tab name="myipc_server décompilé 2"}}
-C'est la même fonction décompilée dans une version différente de Hopper gratuite :
+Ceci est la même fonction décompilée dans une version différente de Hopper free :
 
 <pre class="language-c"><code class="lang-c">int _myipc_server(int arg0, int arg1) {
 r31 = r31 - 0x40;
@@ -298,7 +298,7 @@ stack[-8] = r30;
 var_10 = arg0;
 var_18 = arg1;
 // Instructions initiales pour trouver les pointeurs de fonction appropriés
-*(int32_t *)var_18 = *(int32_t *)var_10 &#x26; 0x1f | 0x0;
+*(int32_t *)var_18 = *(int32_t *)var_10 & 0x1f | 0x0;
 *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
 *(int32_t *)(var_18 + 0x4) = 0x24;
 *(int32_t *)(var_18 + 0xc) = 0x0;
@@ -307,19 +307,19 @@ var_18 = arg1;
 r8 = *(int32_t *)(var_10 + 0x14);
 r8 = r8 - 0x1f4;
 if (r8 > 0x0) {
-if (CPU_FLAGS &#x26; G) {
+if (CPU_FLAGS & G) {
 r8 = 0x1;
 }
 }
-if ((r8 &#x26; 0x1) == 0x0) {
+if ((r8 & 0x1) == 0x0) {
 r8 = *(int32_t *)(var_10 + 0x14);
 r8 = r8 - 0x1f4;
-if (r8 &#x3C; 0x0) {
-if (CPU_FLAGS &#x26; L) {
+if (r8 < 0x0) {
+if (CPU_FLAGS & L) {
 r8 = 0x1;
 }
 }
-if ((r8 &#x26; 0x1) == 0x0) {
+if ((r8 & 0x1) == 0x0) {
 r8 = *(int32_t *)(var_10 + 0x14);
 // 0x1f4 = 500 (l'ID de départ)
 <strong>                    r8 = r8 - 0x1f4;
@@ -328,13 +328,13 @@ r8 = *(r8 + 0x8);
 var_20 = r8;
 r8 = r8 - 0x0;
 if (r8 != 0x0) {
-if (CPU_FLAGS &#x26; NE) {
+if (CPU_FLAGS & NE) {
 r8 = 0x1;
 }
 }
 // Même si - sinon que dans la version précédente
 // Vérifiez l'utilisation de l'adresse 0x100004040 (tableau d'adresses de fonctions)
-<strong>                    if ((r8 &#x26; 0x1) == 0x0) {
+<strong>                    if ((r8 & 0x1) == 0x0) {
 </strong><strong>                            *(var_18 + 0x18) = **0x100004000;
 </strong>                            *(int32_t *)(var_18 + 0x20) = 0xfffffed1;
 var_4 = 0x0;

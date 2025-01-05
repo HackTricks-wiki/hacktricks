@@ -8,12 +8,12 @@ Le namespace PID (Process IDentifier) est une fonctionnalité du noyau Linux qui
 
 Lorsqu'un nouveau namespace PID est créé, le premier processus dans ce namespace se voit attribuer le PID 1. Ce processus devient le processus "init" du nouveau namespace et est responsable de la gestion des autres processus au sein du namespace. Chaque processus subséquent créé dans le namespace aura un PID unique dans ce namespace, et ces PIDs seront indépendants des PIDs dans d'autres namespaces.
 
-Du point de vue d'un processus au sein d'un namespace PID, il ne peut voir que les autres processus dans le même namespace. Il n'est pas conscient des processus dans d'autres namespaces, et il ne peut pas interagir avec eux en utilisant des outils de gestion de processus traditionnels (par exemple, `kill`, `wait`, etc.). Cela fournit un niveau d'isolation qui aide à empêcher les processus de s'interférer les uns avec les autres.
+Du point de vue d'un processus au sein d'un namespace PID, il ne peut voir que les autres processus dans le même namespace. Il n'est pas conscient des processus dans d'autres namespaces et ne peut pas interagir avec eux en utilisant des outils de gestion de processus traditionnels (par exemple, `kill`, `wait`, etc.). Cela fournit un niveau d'isolation qui aide à prévenir les interférences entre les processus.
 
 ### Comment ça fonctionne :
 
 1. Lorsqu'un nouveau processus est créé (par exemple, en utilisant l'appel système `clone()`), le processus peut être assigné à un nouveau namespace PID ou à un namespace existant. **Si un nouveau namespace est créé, le processus devient le processus "init" de ce namespace**.
-2. Le **noyau** maintient une **correspondance entre les PIDs dans le nouveau namespace et les PIDs correspondants** dans le namespace parent (c'est-à-dire, le namespace à partir duquel le nouveau namespace a été créé). Cette correspondance **permet au noyau de traduire les PIDs lorsque cela est nécessaire**, par exemple lors de l'envoi de signaux entre des processus dans différents namespaces.
+2. Le **noyau** maintient une **correspondance entre les PIDs dans le nouveau namespace et les PIDs correspondants** dans le namespace parent (c'est-à-dire le namespace à partir duquel le nouveau namespace a été créé). Cette correspondance **permet au noyau de traduire les PIDs lorsque cela est nécessaire**, par exemple lors de l'envoi de signaux entre des processus dans différents namespaces.
 3. **Les processus au sein d'un namespace PID ne peuvent voir et interagir qu'avec d'autres processus dans le même namespace**. Ils ne sont pas conscients des processus dans d'autres namespaces, et leurs PIDs sont uniques dans leur namespace.
 4. Lorsqu'un **namespace PID est détruit** (par exemple, lorsque le processus "init" du namespace se termine), **tous les processus au sein de ce namespace sont terminés**. Cela garantit que toutes les ressources associées au namespace sont correctement nettoyées.
 
@@ -29,7 +29,7 @@ sudo unshare -pf --mount-proc /bin/bash
 
 <summary>Erreur : bash : fork : Impossible d'allouer de la mémoire</summary>
 
-Lorsque `unshare` est exécuté sans l'option `-f`, une erreur est rencontrée en raison de la façon dont Linux gère les nouveaux espaces de noms PID (Process ID). Les détails clés et la solution sont décrits ci-dessous :
+Lorsque `unshare` est exécuté sans l'option `-f`, une erreur se produit en raison de la façon dont Linux gère les nouveaux espaces de noms PID (Process ID). Les détails clés et la solution sont décrits ci-dessous :
 
 1. **Explication du problème** :
 
@@ -42,10 +42,10 @@ Lorsque `unshare` est exécuté sans l'option `-f`, une erreur est rencontrée e
 - La sortie de PID 1 dans un nouvel espace de noms entraîne le nettoyage du drapeau `PIDNS_HASH_ADDING`. Cela entraîne l'échec de la fonction `alloc_pid` à allouer un nouveau PID lors de la création d'un nouveau processus, produisant l'erreur "Impossible d'allouer de la mémoire".
 
 3. **Solution** :
-- Le problème peut être résolu en utilisant l'option `-f` avec `unshare`. Cette option permet à `unshare` de forker un nouveau processus après avoir créé le nouvel espace de noms PID.
+- Le problème peut être résolu en utilisant l'option `-f` avec `unshare`. Cette option permet à `unshare` de créer un nouveau processus après avoir créé le nouvel espace de noms PID.
 - L'exécution de `%unshare -fp /bin/bash%` garantit que la commande `unshare` elle-même devient PID 1 dans le nouvel espace de noms. `/bin/bash` et ses processus enfants sont alors en toute sécurité contenus dans ce nouvel espace de noms, empêchant la sortie prématurée de PID 1 et permettant une allocation normale de PID.
 
-En s'assurant que `unshare` s'exécute avec le drapeau `-f`, le nouvel espace de noms PID est correctement maintenu, permettant à `/bin/bash` et à ses sous-processus de fonctionner sans rencontrer l'erreur d'allocation de mémoire.
+En veillant à ce que `unshare` s'exécute avec le drapeau `-f`, le nouvel espace de noms PID est correctement maintenu, permettant à `/bin/bash` et à ses sous-processus de fonctionner sans rencontrer l'erreur d'allocation de mémoire.
 
 </details>
 
@@ -55,7 +55,7 @@ En montant une nouvelle instance du système de fichiers `/proc` si vous utilise
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-### &#x20;Vérifiez dans quel espace de noms se trouve votre processus
+### Vérifiez dans quel espace de noms se trouve votre processus
 ```bash
 ls -l /proc/self/ns/pid
 lrwxrwxrwx 1 root root 0 Apr  3 18:45 /proc/self/ns/pid -> 'pid:[4026532412]'

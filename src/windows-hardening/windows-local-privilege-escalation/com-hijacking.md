@@ -72,6 +72,6 @@ Name                                   Property
 PS C:\> Get-Item -Path "HKCU:Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}"
 Get-Item : Cannot find path 'HKCU:\Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}' because it does not exist.
 ```
-Ensuite, vous pouvez simplement créer l'entrée HKCU et chaque fois que l'utilisateur se connecte, votre porte dérobée sera activée.
+Ensuite, vous pouvez simplement créer l'entrée HKCU et chaque fois que l'utilisateur se connecte, votre backdoor sera activée.
 
 {{#include ../../banners/hacktricks-training.md}}

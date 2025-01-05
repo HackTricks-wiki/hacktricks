@@ -4,17 +4,17 @@
 
 ## Informations de base
 
-Un espace de noms IPC (Inter-Process Communication) est une fonctionnalité du noyau Linux qui fournit **l'isolement** des objets IPC de System V, tels que les files de messages, les segments de mémoire partagée et les sémaphores. Cet isolement garantit que les processus dans **différents espaces de noms IPC ne peuvent pas accéder directement ou modifier les objets IPC des autres**, offrant une couche supplémentaire de sécurité et de confidentialité entre les groupes de processus.
+Un namespace IPC (Inter-Process Communication) est une fonctionnalité du noyau Linux qui fournit **l'isolation** des objets IPC de System V, tels que les files de messages, les segments de mémoire partagée et les sémaphores. Cette isolation garantit que les processus dans **différents namespaces IPC ne peuvent pas accéder directement ou modifier les objets IPC des autres**, offrant une couche supplémentaire de sécurité et de confidentialité entre les groupes de processus.
 
 ### Comment ça fonctionne :
 
-1. Lorsqu'un nouvel espace de noms IPC est créé, il commence avec un **ensemble complètement isolé d'objets IPC de System V**. Cela signifie que les processus s'exécutant dans le nouvel espace de noms IPC ne peuvent pas accéder ou interférer avec les objets IPC dans d'autres espaces de noms ou le système hôte par défaut.
-2. Les objets IPC créés au sein d'un espace de noms ne sont visibles et **accessibles que par les processus de cet espace de noms**. Chaque objet IPC est identifié par une clé unique au sein de son espace de noms. Bien que la clé puisse être identique dans différents espaces de noms, les objets eux-mêmes sont isolés et ne peuvent pas être accédés à travers les espaces de noms.
-3. Les processus peuvent se déplacer entre les espaces de noms en utilisant l'appel système `setns()` ou créer de nouveaux espaces de noms en utilisant les appels système `unshare()` ou `clone()` avec le drapeau `CLONE_NEWIPC`. Lorsqu'un processus se déplace vers un nouvel espace de noms ou en crée un, il commencera à utiliser les objets IPC associés à cet espace de noms.
+1. Lorsqu'un nouveau namespace IPC est créé, il commence avec un **ensemble complètement isolé d'objets IPC de System V**. Cela signifie que les processus s'exécutant dans le nouveau namespace IPC ne peuvent pas accéder ou interférer avec les objets IPC dans d'autres namespaces ou le système hôte par défaut.
+2. Les objets IPC créés dans un namespace ne sont visibles et **accessibles que par les processus de ce namespace**. Chaque objet IPC est identifié par une clé unique au sein de son namespace. Bien que la clé puisse être identique dans différents namespaces, les objets eux-mêmes sont isolés et ne peuvent pas être accédés à travers les namespaces.
+3. Les processus peuvent se déplacer entre les namespaces en utilisant l'appel système `setns()` ou créer de nouveaux namespaces en utilisant les appels système `unshare()` ou `clone()` avec le drapeau `CLONE_NEWIPC`. Lorsqu'un processus se déplace vers un nouveau namespace ou en crée un, il commencera à utiliser les objets IPC associés à ce namespace.
 
 ## Laboratoire :
 
-### Créer différents espaces de noms
+### Créer différents Namespaces
 
 #### CLI
 ```bash
@@ -26,12 +26,12 @@ En montant une nouvelle instance du système de fichiers `/proc` si vous utilise
 
 <summary>Erreur : bash : fork : Impossible d'allouer de la mémoire</summary>
 
-Lorsque `unshare` est exécuté sans l'option `-f`, une erreur est rencontrée en raison de la façon dont Linux gère les nouveaux namespaces PID (identifiant de processus). Les détails clés et la solution sont décrits ci-dessous :
+Lorsque `unshare` est exécuté sans l'option `-f`, une erreur se produit en raison de la façon dont Linux gère les nouveaux namespaces PID (identifiant de processus). Les détails clés et la solution sont décrits ci-dessous :
 
 1. **Explication du problème** :
 
 - Le noyau Linux permet à un processus de créer de nouveaux namespaces en utilisant l'appel système `unshare`. Cependant, le processus qui initie la création d'un nouveau namespace PID (appelé le processus "unshare") n'entre pas dans le nouveau namespace ; seuls ses processus enfants le font.
-- L'exécution de `%unshare -p /bin/bash%` démarre `/bin/bash` dans le même processus que `unshare`. Par conséquent, `/bin/bash` et ses processus enfants se trouvent dans l'namespace PID d'origine.
+- L'exécution de `%unshare -p /bin/bash%` démarre `/bin/bash` dans le même processus que `unshare`. Par conséquent, `/bin/bash` et ses processus enfants se trouvent dans le namespace PID d'origine.
 - Le premier processus enfant de `/bin/bash` dans le nouveau namespace devient PID 1. Lorsque ce processus se termine, il déclenche le nettoyage du namespace s'il n'y a pas d'autres processus, car PID 1 a le rôle spécial d'adopter les processus orphelins. Le noyau Linux désactivera alors l'allocation de PID dans ce namespace.
 
 2. **Conséquence** :
@@ -50,7 +50,7 @@ En veillant à ce que `unshare` s'exécute avec le drapeau `-f`, le nouveau name
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-### &#x20;Vérifiez dans quel espace de noms se trouve votre processus
+### Vérifiez dans quel espace de noms se trouve votre processus
 ```bash
 ls -l /proc/self/ns/ipc
 lrwxrwxrwx 1 root root 0 Apr  4 20:37 /proc/self/ns/ipc -> 'ipc:[4026531839]'

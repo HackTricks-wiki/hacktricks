@@ -6,7 +6,7 @@
 
 Créez un **dylib** avec une section **`__interpose`** (ou une section marquée avec **`S_INTERPOSING`**) contenant des tuples de **pointeurs de fonction** qui se réfèrent aux fonctions **originales** et **de remplacement**.
 
-Ensuite, **injectez** le dylib avec **`DYLD_INSERT_LIBRARIES`** (l'interposition doit se produire avant le chargement de l'application principale). Évidemment, les [**restrictions** appliquées à l'utilisation de **`DYLD_INSERT_LIBRARIES`** s'appliquent également ici](../macos-proces-abuse/macos-library-injection/index.html#check-restrictions).&#x20;
+Ensuite, **injectez** le dylib avec **`DYLD_INSERT_LIBRARIES`** (l'interposition doit se produire avant le chargement de l'application principale). Évidemment, les [**restrictions** appliquées à l'utilisation de **`DYLD_INSERT_LIBRARIES`** s'appliquent également ici](../macos-proces-abuse/macos-library-injection/index.html#check-restrictions).
 
 ### Interposer printf
 
@@ -290,7 +290,7 @@ et ensuite **réenregistrer** l'application :
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f /Applications/Application.app
 ```
-Ajoutez dans cette bibliothèque le code de hooking pour exfiltrer les informations : Mots de passe, messages...
+Ajoutez dans cette bibliothèque le code de hooking pour exfiltrer les informations : mots de passe, messages...
 
 > [!CAUTION]
 > Notez que dans les versions plus récentes de macOS, si vous **supprimez la signature** du binaire de l'application et qu'il a été exécuté précédemment, macOS **n'exécutera plus l'application**.

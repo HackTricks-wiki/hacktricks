@@ -55,7 +55,7 @@ Ensuite, vous faites quelque chose pour que **la valeur change**, et vous **arr�
 ![](<../../images/image (684).png>)
 
 Cheat Engine recherchera les **valeurs** qui **sont passées de 100 à la nouvelle valeur**. Félicitations, vous **avez trouvé** l'**adresse** de la valeur que vous cherchiez, vous pouvez maintenant la modifier.\
-_&#x49;f vous avez encore plusieurs valeurs, faites quelque chose pour modifier à nouveau cette valeur, et effectuez un autre "scan suivant" pour filtrer les adresses._
+_Si vous avez encore plusieurs valeurs, faites quelque chose pour modifier à nouveau cette valeur, et effectuez un autre "scan suivant" pour filtrer les adresses._
 
 ### Valeur inconnue, changement connu
 
@@ -69,25 +69,25 @@ Ensuite, faites changer la valeur, indiquez **comment** la **valeur** **a chang�
 
 ![](<../../images/image (371).png>)
 
-Vous serez présenté **toutes les valeurs qui ont été modifiées de la manière sélectionnée** :
+Vous serez présenté avec **toutes les valeurs qui ont été modifiées de la manière sélectionnée** :
 
 ![](<../../images/image (569).png>)
 
 Une fois que vous avez trouvé votre valeur, vous pouvez la modifier.
 
-Notez qu'il y a un **grand nombre de changements possibles** et vous pouvez faire ces **étapes autant de fois que vous le souhaitez** pour filtrer les résultats :
+Notez qu'il y a un **grand nombre de changements possibles** et vous pouvez effectuer ces **étapes autant de fois que vous le souhaitez** pour filtrer les résultats :
 
 ![](<../../images/image (574).png>)
 
 ### Adresse mémoire aléatoire - Trouver le code
 
-Jusqu'à présent, nous avons appris à trouver une adresse stockant une valeur, mais il est très probable que dans **différentes exécutions du jeu, cette adresse se trouve à différents endroits de la mémoire**. Alors découvrons comment toujours trouver cette adresse.
+Jusqu'à présent, nous avons appris à trouver une adresse stockant une valeur, mais il est très probable que lors de **différentes exécutions du jeu, cette adresse se trouve à différents endroits de la mémoire**. Alors découvrons comment toujours trouver cette adresse.
 
 En utilisant certains des trucs mentionnés, trouvez l'adresse où votre jeu actuel stocke la valeur importante. Ensuite (en arrêtant le jeu si vous le souhaitez), faites un **clic droit** sur l'**adresse** trouvée et sélectionnez "**Découvrir ce qui accède à cette adresse**" ou "**Découvrir ce qui écrit à cette adresse**" :
 
 ![](<../../images/image (1067).png>)
 
-La **première option** est utile pour savoir quelles **parties** du **code** utilisent cette **adresse** (ce qui est utile pour d'autres choses comme **savoir où vous pouvez modifier le code** du jeu).\
+La **première option** est utile pour savoir quelles **parties** du **code** **utilisent** cette **adresse** (ce qui est utile pour d'autres choses comme **savoir où vous pouvez modifier le code** du jeu).\
 La **deuxième option** est plus **spécifique**, et sera plus utile dans ce cas car nous sommes intéressés à savoir **d'où cette valeur est écrite**.
 
 Une fois que vous avez sélectionné l'une de ces options, le **débogueur** sera **attaché** au programme et une nouvelle **fenêtre vide** apparaîtra. Maintenant, **jouez** au **jeu** et **modifiez** cette **valeur** (sans redémarrer le jeu). La **fenêtre** devrait être **remplie** avec les **adresses** qui **modifient** la **valeur** :
@@ -110,7 +110,7 @@ Ensuite, effectuez un nouveau scan **à la recherche de la valeur hexadécimale 
 
 ![](<../../images/image (994).png>)
 
-(_Si plusieurs apparaissent, vous avez généralement besoin de l'adresse la plus petite_)\
+(_Si plusieurs apparaissent, vous avez généralement besoin de la plus petite adresse_)\
 Maintenant, nous avons **trouvé le pointeur qui modifiera la valeur qui nous intéresse**.
 
 Cliquez sur "**Ajouter l'adresse manuellement**" :
@@ -142,7 +142,7 @@ Ensuite, cliquez sur **CTRL+a** pour invoquer la fenêtre d'assemblage automatiq
 
 ![](<../../images/image (902).png>)
 
-Remplissez l'**adresse de l'instruction que vous souhaitez modifier** (cela est généralement pré-rempli) :
+Remplissez l'**adresse de l'instruction que vous souhaitez modifier** (cela est généralement rempli automatiquement) :
 
 ![](<../../images/image (744).png>)
 

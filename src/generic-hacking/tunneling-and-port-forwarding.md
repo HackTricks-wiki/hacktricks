@@ -145,7 +145,7 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 ### rPort2Port
 
 > [!WARNING]
-> Dans ce cas, le **port est ouvert sur l'hôte beacon**, pas sur le Team Server, et le trafic est envoyé au Team Server et de là à l'hôte:port indiqué.
+> Dans ce cas, le **port est ouvert dans l'hôte beacon**, pas dans le Team Server et le trafic est envoyé au Team Server et de là à l'hôte:port indiqué.
 ```bash
 rportfwd [bind port] [forward host] [forward port]
 rportfwd stop [bind port]
@@ -246,7 +246,7 @@ attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999
 ```
-Pivot through **NTLM proxy**
+Pivoter à travers **NTLM proxy**
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntlm-proxy-ip <proxy_ip> --ntlm-proxy-port 8080 --domain CONTOSO.COM --username Alice --password P@ssw0rd
 ```
@@ -346,7 +346,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 Vous devez avoir **un accès RDP sur le système**.\
 Téléchargez :
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Cet outil utilise les `Dynamic Virtual Channels` (`DVC`) de la fonctionnalité Remote Desktop Service de Windows. DVC est responsable de **l'acheminement des paquets sur la connexion RDP**.
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Cet outil utilise `Dynamic Virtual Channels` (`DVC`) de la fonctionnalité Remote Desktop Service de Windows. DVC est responsable de **l'acheminement des paquets sur la connexion RDP**.
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
 Dans votre ordinateur client, chargez **`SocksOverRDP-Plugin.dll`** comme ceci :
@@ -364,13 +364,13 @@ Maintenant, confirmez sur votre machine (attaquant) que le port 1080 est à l'é
 ```
 netstat -antb | findstr 1080
 ```
-Maintenant, vous pouvez utiliser [**Proxifier**](https://www.proxifier.com/) **pour proxyfier le trafic à travers ce port.**
+Maintenant, vous pouvez utiliser [**Proxifier**](https://www.proxifier.com/) **pour proxy le trafic à travers ce port.**
 
-## Proxyfier les applications GUI Windows
+## Proxifier les applications GUI Windows
 
 Vous pouvez faire naviguer les applications GUI Windows à travers un proxy en utilisant [**Proxifier**](https://www.proxifier.com/).\
 Dans **Profile -> Proxy Servers**, ajoutez l'IP et le port du serveur SOCKS.\
-Dans **Profile -> Proxification Rules**, ajoutez le nom du programme à proxyfier et les connexions aux IP que vous souhaitez proxyfier.
+Dans **Profile -> Proxification Rules**, ajoutez le nom du programme à proxifier et les connexions aux IP que vous souhaitez proxifier.
 
 ## Contournement du proxy NTLM
 
@@ -480,7 +480,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **est un outil pour exposer des solutions à Internet en une ligne de commande.**\
-_&#x45;xposition URI sont comme:_ **UID.ngrok.io**
+_Les URI d'exposition sont comme :_ **UID.ngrok.io**
 
 ### Installation
 

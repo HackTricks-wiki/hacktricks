@@ -1,35 +1,35 @@
-# Espace Utilisateur
+# User Namespace
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Informations de Base
+## Basic Information
 
-Un espace utilisateur est une fonctionnalité du noyau Linux qui **fournit une isolation des mappages d'ID utilisateur et de groupe**, permettant à chaque espace utilisateur d'avoir son **propre ensemble d'ID utilisateur et de groupe**. Cette isolation permet aux processus s'exécutant dans différents espaces utilisateurs d'**avoir des privilèges et une propriété différents**, même s'ils partagent les mêmes ID utilisateur et de groupe numériquement.
+Un espace de noms utilisateur est une fonctionnalité du noyau Linux qui **fournit une isolation des mappages d'ID utilisateur et de groupe**, permettant à chaque espace de noms utilisateur d'avoir son **propre ensemble d'ID utilisateur et de groupe**. Cette isolation permet aux processus s'exécutant dans différents espaces de noms utilisateurs d'**avoir des privilèges et une propriété différents**, même s'ils partagent les mêmes ID utilisateur et de groupe numériquement.
 
-Les espaces utilisateurs sont particulièrement utiles dans la conteneurisation, où chaque conteneur doit avoir son propre ensemble indépendant d'ID utilisateur et de groupe, permettant une meilleure sécurité et isolation entre les conteneurs et le système hôte.
+Les espaces de noms utilisateurs sont particulièrement utiles dans la conteneurisation, où chaque conteneur doit avoir son propre ensemble indépendant d'ID utilisateur et de groupe, permettant une meilleure sécurité et isolation entre les conteneurs et le système hôte.
 
-### Comment ça fonctionne :
+### How it works:
 
-1. Lorsqu'un nouvel espace utilisateur est créé, il **commence avec un ensemble vide de mappages d'ID utilisateur et de groupe**. Cela signifie que tout processus s'exécutant dans le nouvel espace utilisateur **n'a initialement aucun privilège en dehors de l'espace**.
-2. Des mappages d'ID peuvent être établis entre les ID utilisateur et de groupe dans le nouvel espace et ceux dans l'espace parent (ou hôte). Cela **permet aux processus dans le nouvel espace d'avoir des privilèges et une propriété correspondant aux ID utilisateur et de groupe dans l'espace parent**. Cependant, les mappages d'ID peuvent être restreints à des plages et sous-ensembles spécifiques d'ID, permettant un contrôle précis sur les privilèges accordés aux processus dans le nouvel espace.
-3. Dans un espace utilisateur, **les processus peuvent avoir des privilèges root complets (UID 0) pour les opérations à l'intérieur de l'espace**, tout en ayant des privilèges limités en dehors de l'espace. Cela permet **aux conteneurs de fonctionner avec des capacités similaires à celles de root dans leur propre espace sans avoir de privilèges root complets sur le système hôte**.
-4. Les processus peuvent se déplacer entre les espaces en utilisant l'appel système `setns()` ou créer de nouveaux espaces en utilisant les appels système `unshare()` ou `clone()` avec le drapeau `CLONE_NEWUSER`. Lorsqu'un processus se déplace vers un nouvel espace ou en crée un, il commencera à utiliser les mappages d'ID utilisateur et de groupe associés à cet espace.
+1. Lorsqu'un nouvel espace de noms utilisateur est créé, il **commence avec un ensemble vide de mappages d'ID utilisateur et de groupe**. Cela signifie que tout processus s'exécutant dans le nouvel espace de noms utilisateur **n'a initialement aucun privilège en dehors de l'espace de noms**.
+2. Des mappages d'ID peuvent être établis entre les ID utilisateur et de groupe dans le nouvel espace de noms et ceux dans l'espace de noms parent (ou hôte). Cela **permet aux processus dans le nouvel espace de noms d'avoir des privilèges et une propriété correspondant aux ID utilisateur et de groupe dans l'espace de noms parent**. Cependant, les mappages d'ID peuvent être restreints à des plages et sous-ensembles spécifiques d'ID, permettant un contrôle précis sur les privilèges accordés aux processus dans le nouvel espace de noms.
+3. Dans un espace de noms utilisateur, **les processus peuvent avoir des privilèges root complets (UID 0) pour les opérations à l'intérieur de l'espace de noms**, tout en ayant des privilèges limités en dehors de l'espace de noms. Cela permet **aux conteneurs de fonctionner avec des capacités similaires à celles de root dans leur propre espace de noms sans avoir de privilèges root complets sur le système hôte**.
+4. Les processus peuvent se déplacer entre les espaces de noms en utilisant l'appel système `setns()` ou créer de nouveaux espaces de noms en utilisant les appels système `unshare()` ou `clone()` avec le drapeau `CLONE_NEWUSER`. Lorsqu'un processus se déplace vers un nouvel espace de noms ou en crée un, il commencera à utiliser les mappages d'ID utilisateur et de groupe associés à cet espace de noms.
 
-## Laboratoire :
+## Lab:
 
-### Créer différents Espaces
+### Create different Namespaces
 
 #### CLI
 ```bash
 sudo unshare -U [--mount-proc] /bin/bash
 ```
-En montant une nouvelle instance du système de fichiers `/proc` si vous utilisez le paramètre `--mount-proc`, vous vous assurez que le nouveau namespace de montage a une **vue précise et isolée des informations de processus spécifiques à ce namespace**.
+En montant une nouvelle instance du système de fichiers `/proc` si vous utilisez le paramètre `--mount-proc`, vous vous assurez que le nouveau namespace de montage a une **vue précise et isolée des informations sur les processus spécifiques à ce namespace**.
 
 <details>
 
 <summary>Erreur : bash : fork : Impossible d'allouer de la mémoire</summary>
 
-Lorsque `unshare` est exécuté sans l'option `-f`, une erreur est rencontrée en raison de la façon dont Linux gère les nouveaux namespaces PID (identifiant de processus). Les détails clés et la solution sont décrits ci-dessous :
+Lorsque `unshare` est exécuté sans l'option `-f`, une erreur se produit en raison de la façon dont Linux gère les nouveaux namespaces PID (identifiant de processus). Les détails clés et la solution sont décrits ci-dessous :
 
 1. **Explication du problème** :
 
@@ -55,7 +55,7 @@ docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
 Pour utiliser l'espace de noms utilisateur, le démon Docker doit être démarré avec **`--userns-remap=default`** (Dans Ubuntu 14.04, cela peut être fait en modifiant `/etc/default/docker` puis en exécutant `sudo service docker restart`)
 
-### &#x20;Vérifiez dans quel espace de noms se trouve votre processus
+### Vérifiez dans quel espace de noms se trouve votre processus
 ```bash
 ls -l /proc/self/ns/user
 lrwxrwxrwx 1 root root 0 Apr  4 20:57 /proc/self/ns/user -> 'user:[4026531837]'
@@ -103,7 +103,7 @@ Dans le cas des espaces de noms utilisateurs, **lorsqu'un nouvel espace de noms 
 Par exemple, lorsque vous avez la capacité `CAP_SYS_ADMIN` au sein d'un espace de noms utilisateur, vous pouvez effectuer des opérations qui nécessitent généralement cette capacité, comme le montage de systèmes de fichiers, mais uniquement dans le contexte de votre espace de noms utilisateur. Toute opération que vous effectuez avec cette capacité n'affectera pas le système hôte ou d'autres espaces de noms.
 
 > [!WARNING]
-> Par conséquent, même si obtenir un nouveau processus à l'intérieur d'un nouvel espace de noms utilisateur **vous donnera toutes les capacités de retour** (CapEff: 000001ffffffffff), vous pouvez en fait **uniquement utiliser celles liées à l'espace de noms** (montage par exemple) mais pas toutes. Donc, cela en soi n'est pas suffisant pour échapper à un conteneur Docker.
+> Par conséquent, même si obtenir un nouveau processus à l'intérieur d'un nouvel espace de noms utilisateur **vous donnera toutes les capacités de retour** (CapEff: 000001ffffffffff), vous ne pouvez en réalité **utiliser que celles liées à l'espace de noms** (montage par exemple) mais pas toutes. Donc, cela en soi n'est pas suffisant pour échapper à un conteneur Docker.
 ```bash
 # There are the syscalls that are filtered after changing User namespace with:
 unshare -UmCpf  bash

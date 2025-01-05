@@ -15,7 +15,7 @@ Le fichier Nib principal est référencé dans la valeur **`NSMainNibFile`** à 
 #### Création et configuration d'un fichier NIB
 
 1. **Configuration initiale** :
-- Créez un nouveau fichier NIB à l'aide de XCode.
+- Créez un nouveau fichier NIB en utilisant XCode.
 - Ajoutez un objet à l'interface, en définissant sa classe sur `NSAppleScript`.
 - Configurez la propriété `source` initiale via les attributs d'exécution définis par l'utilisateur.
 2. **Gadget d'exécution de code** :
@@ -52,7 +52,7 @@ display dialog theDialogText
 
 ### Autre exemple
 
-Dans le post [https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) vous pouvez trouver un tutoriel sur la façon de créer un dirty nib.&#x20;
+Dans le post [https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) vous pouvez trouver un tutoriel sur la façon de créer un dirty nib.
 
 ### Aborder les contraintes de lancement
 
@@ -64,7 +64,7 @@ Dans le post [https://sector7.computest.nl/post/2024-04-bringing-process-injecti
 Depuis macOS Sonoma, les modifications à l'intérieur des bundles d'applications sont restreintes. Cependant, les méthodes antérieures impliquaient :
 
 1. Copier l'application dans un autre emplacement (par exemple, `/tmp/`).
-2. Renommer les répertoires au sein du bundle de l'application pour contourner les protections initiales.
+2. Renommer des répertoires au sein du bundle de l'application pour contourner les protections initiales.
 3. Après avoir exécuté l'application pour s'enregistrer auprès de Gatekeeper, modifier le bundle de l'application (par exemple, remplacer MainMenu.nib par Dirty.nib).
 4. Renommer les répertoires et relancer l'application pour exécuter le fichier NIB injecté.
 
