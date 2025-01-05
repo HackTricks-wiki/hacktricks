@@ -6,7 +6,7 @@
 
 > Powiedziano ci, że wszystko, co należy do jakiejś firmy, jest w zakresie, a ty chcesz dowiedzieć się, co ta firma faktycznie posiada.
 
-Celem tej fazy jest uzyskanie wszystkich **firm należących do głównej firmy** oraz wszystkich **zasobów** tych firm. Aby to zrobić, zamierzamy:
+Celem tej fazy jest uzyskanie wszystkich **firm należących do głównej firmy** oraz następnie wszystkich **zasobów** tych firm. Aby to zrobić, zamierzamy:
 
 1. Znaleźć przejęcia głównej firmy, co da nam firmy w zakresie.
 2. Znaleźć ASN (jeśli istnieje) każdej firmy, co da nam zakresy IP należące do każdej firmy.
@@ -16,7 +16,7 @@ Celem tej fazy jest uzyskanie wszystkich **firm należących do głównej firmy*
 ### **Przejęcia**
 
 Przede wszystkim musimy wiedzieć, które **inne firmy są własnością głównej firmy**.\
-Jedną z opcji jest odwiedzenie [https://www.crunchbase.com/](https://www.crunchbase.com), **wyszukiwanie** **głównej firmy** i **kliknięcie** na "**przejęcia**". Tam zobaczysz inne firmy nabyte przez główną.\
+Jedną z opcji jest odwiedzenie [https://www.crunchbase.com/](https://www.crunchbase.com), **wyszukiwanie** głównej firmy i **kliknięcie** na "**przejęcia**". Tam zobaczysz inne firmy przejęte przez główną.\
 Inną opcją jest odwiedzenie strony **Wikipedia** głównej firmy i wyszukiwanie **przejęć**.
 
 > Ok, w tym momencie powinieneś znać wszystkie firmy w zakresie. Dowiedzmy się, jak znaleźć ich zasoby.
@@ -26,8 +26,8 @@ Inną opcją jest odwiedzenie strony **Wikipedia** głównej firmy i wyszukiwani
 Numer systemu autonomicznego (**ASN**) to **unikalny numer** przypisany do **systemu autonomicznego** (AS) przez **Internet Assigned Numbers Authority (IANA)**.\
 **AS** składa się z **bloków** **adresów IP**, które mają wyraźnie zdefiniowaną politykę dostępu do zewnętrznych sieci i są zarządzane przez jedną organizację, ale mogą składać się z kilku operatorów.
 
-Interesujące jest sprawdzenie, czy **firma przypisała jakikolwiek ASN**, aby znaleźć jej **zakresy IP.** Warto przeprowadzić **test podatności** na wszystkie **hosty** w **zakresie** i **szukać domen** w tych IP.\
-Możesz **wyszukiwać** według **nazwa firmy**, według **IP** lub według **domeny** w [**https://bgp.he.net/**](https://bgp.he.net)**.**\
+Interesujące jest sprawdzenie, czy **firma przypisała jakikolwiek ASN**, aby znaleźć jej **zakresy IP.** Warto przeprowadzić **test podatności** na wszystkich **hostach** w **zakresie** i **szukać domen** w tych IP.\
+Możesz **wyszukiwać** według nazwy firmy, według **IP** lub według **domeny** w [**https://bgp.he.net/**](https://bgp.he.net)**.**\
 **W zależności od regionu firmy, te linki mogą być przydatne do zebrania dodatkowych danych:** [**AFRINIC**](https://www.afrinic.net) **(Afryka),** [**Arin**](https://www.arin.net/about/welcome/region/)**(Ameryka Północna),** [**APNIC**](https://www.apnic.net) **(Azja),** [**LACNIC**](https://www.lacnic.net) **(Ameryka Łacińska),** [**RIPE NCC**](https://www.ripe.net) **(Europa). W każdym razie, prawdopodobnie wszystkie** przydatne informacje **(zakresy IP i Whois)** pojawiają się już w pierwszym linku.
 ```bash
 #You can try "automate" this with amass, but it's not very recommended
@@ -56,9 +56,9 @@ Możesz znaleźć IP i ASN domeny używając [http://ipv4info.com/](http://ipv4i
 
 ### **Szukając luk w zabezpieczeniach**
 
-Na tym etapie znamy **wszystkie zasoby w zakresie**, więc jeśli masz pozwolenie, możesz uruchomić jakiś **skaner luk** (Nessus, OpenVAS) na wszystkich hostach.\
+Na tym etapie znamy **wszystkie zasoby w zakresie**, więc jeśli masz na to pozwolenie, możesz uruchomić jakiś **skaner luk** (Nessus, OpenVAS) na wszystkich hostach.\
 Możesz również przeprowadzić [**skanowanie portów**](../pentesting-network/index.html#discovering-hosts-from-the-outside) **lub użyć usług takich jak** shodan **aby znaleźć** otwarte porty **i w zależności od tego, co znajdziesz, powinieneś** zajrzeć do tej książki, aby dowiedzieć się, jak przeprowadzić pentesting różnych możliwych usług.\
-**Warto również wspomnieć, że możesz przygotować kilka** domyślnych nazw użytkowników **i** haseł **i spróbować** brute-force'ować usługi za pomocą [https://github.com/x90skysn3k/brutespray](https://github.com/x90skysn3k/brutespray).
+**Warto również wspomnieć, że możesz przygotować kilka** domyślnych nazw użytkowników **i** haseł **i spróbować** brute force'ować usługi za pomocą [https://github.com/x90skysn3k/brutespray](https://github.com/x90skysn3k/brutespray).
 
 ## Domeny
 
@@ -145,7 +145,7 @@ Szukaj na stronach internetowych **ciągów, które mogą być dzielone między 
 
 ### **CRT Time**
 
-Często występuje zadanie cron, takie jak
+To powszechne, aby mieć zadanie cron, takie jak
 ```bash
 # /etc/crontab
 37 13 */10 * * certbot renew --post-hook "systemctl reload nginx"
@@ -155,7 +155,7 @@ Sprawdź ten [**artykuł, aby uzyskać więcej informacji**](https://swarm.ptsec
 
 ### Informacje o DMARC w mailach
 
-Możesz użyć strony internetowej takiej jak [https://dmarc.live/info/google.com](https://dmarc.live/info/google.com) lub narzędzia takiego jak [https://github.com/Tedixx/dmarc-subdomains](https://github.com/Tedixx/dmarc-subdomains), aby znaleźć **domeny i subdomeny dzielące te same informacje DMARC**.
+Możesz użyć strony takiej jak [https://dmarc.live/info/google.com](https://dmarc.live/info/google.com) lub narzędzia takiego jak [https://github.com/Tedixx/dmarc-subdomains](https://github.com/Tedixx/dmarc-subdomains), aby znaleźć **domeny i subdomeny dzielące te same informacje DMARC**.
 
 ### **Pasywne przejęcie**
 
@@ -179,10 +179,10 @@ Możesz uzyskać dostęp do **certyfikatu TLS** głównej strony internetowej, u
 
 ### **Szukając luk w zabezpieczeniach**
 
-Sprawdź niektóre [przejęcia domen](../../pentesting-web/domain-subdomain-takeover.md#domain-takeover). Może jakaś firma **używa jakiejś domeny**, ale **straciła jej własność**. Po prostu zarejestruj ją (jeśli wystarczająco tania) i daj znać firmie.
+Sprawdź niektóre [przejęcia domen](../../pentesting-web/domain-subdomain-takeover.md#domain-takeover). Może jakaś firma **używa jakiejś domeny**, ale **straciła jej własność**. Po prostu zarejestruj ją (jeśli jest wystarczająco tania) i daj znać firmie.
 
 Jeśli znajdziesz jakąkolwiek **domenę z adresem IP różnym** od tych, które już znalazłeś w odkrywaniu zasobów, powinieneś przeprowadzić **podstawowe skanowanie luk** (używając Nessus lub OpenVAS) oraz jakieś [**skanowanie portów**](../pentesting-network/index.html#discovering-hosts-from-the-outside) za pomocą **nmap/masscan/shodan**. W zależności od tego, jakie usługi są uruchomione, możesz znaleźć w **tej książce kilka sztuczek, aby je "zaatakować"**.\
-_&#x4E;ote, że czasami domena jest hostowana w IP, które nie jest kontrolowane przez klienta, więc nie jest w zakresie, bądź ostrożny._
+_Uwaga, że czasami domena jest hostowana w IP, które nie jest kontrolowane przez klienta, więc nie jest w zakresie, bądź ostrożny._
 
 ## Subdomeny
 
@@ -195,7 +195,7 @@ Czas znaleźć wszystkie możliwe subdomeny każdej znalezionej domeny.
 
 ### **DNS**
 
-Spróbujmy uzyskać **subdomeny** z rekordów **DNS**. Powinniśmy również spróbować **Transferu Strefy** (jeśli jest podatny, powinieneś to zgłosić).
+Spróbujmy uzyskać **subdomeny** z rekordów **DNS**. Powinniśmy również spróbować **transferu strefy** (jeśli jest podatny, powinieneś to zgłosić).
 ```bash
 dnsrecon -a -d tesla.com
 ```
@@ -331,7 +331,7 @@ Do tej akcji będziesz potrzebować kilku **popularnych list słów subdomen**:
 - [https://github.com/pentester-io/commonspeak](https://github.com/pentester-io/commonspeak)
 - [https://github.com/danielmiessler/SecLists/tree/master/Discovery/DNS](https://github.com/danielmiessler/SecLists/tree/master/Discovery/DNS)
 
-A także IP dobrych resolverów DNS. Aby wygenerować listę zaufanych resolverów DNS, możesz pobrać resolvery z [https://public-dns.info/nameservers-all.txt](https://public-dns.info/nameservers-all.txt) i użyć [**dnsvalidator**](https://github.com/vortexau/dnsvalidator) do ich filtrowania. Lub możesz użyć: [https://raw.githubusercontent.com/trickest/resolvers/main/resolvers-trusted.txt](https://raw.githubusercontent.com/trickest/resolvers/main/resolvers-trusted.txt)
+A także IP dobrych resolverów DNS. Aby wygenerować listę zaufanych resolverów DNS, możesz pobrać resolverów z [https://public-dns.info/nameservers-all.txt](https://public-dns.info/nameservers-all.txt) i użyć [**dnsvalidator**](https://github.com/vortexau/dnsvalidator) do ich filtrowania. Lub możesz użyć: [https://raw.githubusercontent.com/trickest/resolvers/main/resolvers-trusted.txt](https://raw.githubusercontent.com/trickest/resolvers/main/resolvers-trusted.txt)
 
 Najbardziej polecane narzędzia do brute-force DNS to:
 
@@ -345,7 +345,7 @@ grep -E "tesla.com. [0-9]+ IN A .+" /tmp/results.txt
 ```
 gobuster dns -d mysite.com -t 50 -w subdomains.txt
 ```
-- [**shuffledns**](https://github.com/projectdiscovery/shuffledns) to wrapper wokół `massdns`, napisany w go, który pozwala na enumerację ważnych subdomen za pomocą aktywnego bruteforce, a także na rozwiązywanie subdomen z obsługą wildcard i łatwym wsparciem dla wejścia-wyjścia.
+- [**shuffledns**](https://github.com/projectdiscovery/shuffledns) to wrapper wokół `massdns`, napisany w go, który pozwala na enumerację ważnych subdomen za pomocą aktywnego bruteforce, a także rozwiązywanie subdomen z obsługą wildcard i łatwym wsparciem dla wejścia-wyjścia.
 ```
 shuffledns -d example.com -list example-subdomains.txt -r resolvers.txt
 ```
@@ -440,11 +440,11 @@ VHostScan -t example.com
 
 ### **CORS Brute Force**
 
-Czasami znajdziesz strony, które zwracają tylko nagłówek _**Access-Control-Allow-Origin**_, gdy w nagłówku _**Origin**_ ustawiona jest prawidłowa domena/poddomena. W tych scenariuszach możesz wykorzystać to zachowanie, aby **odkryć** nowe **poddomeny**.
+Czasami znajdziesz strony, które zwracają tylko nagłówek _**Access-Control-Allow-Origin**_, gdy w nagłówku _**Origin**_ ustawiona jest ważna domena/poddomena. W tych scenariuszach możesz wykorzystać to zachowanie, aby **odkryć** nowe **poddomeny**.
 ```bash
 ffuf -w subdomains-top1million-5000.txt -u http://10.10.10.208 -H 'Origin: http://FUZZ.crossfit.htb' -mr "Access-Control-Allow-Origin" -ignore-body
 ```
-### **Brute Force Buckets**
+### **Buckets Brute Force**
 
 Podczas poszukiwania **subdomen** zwróć uwagę, czy wskazują one na jakikolwiek typ **bucket**, a w takim przypadku [**sprawdź uprawnienia**](../../network-services-pentesting/pentesting-web/buckets/index.html)**.**\
 Również, w tym momencie, gdy będziesz znać wszystkie domeny w zakresie, spróbuj [**brute force'ować możliwe nazwy bucketów i sprawdzić uprawnienia**](../../network-services-pentesting/pentesting-web/buckets/index.html).
@@ -459,7 +459,7 @@ Sprawdź możliwe [**przejęcia subdomen**](../../pentesting-web/domain-subdomai
 Jeśli **subdomena** wskazuje na jakiś **bucket S3**, [**sprawdź uprawnienia**](../../network-services-pentesting/pentesting-web/buckets/index.html).
 
 Jeśli znajdziesz jakąkolwiek **subdomenę z adresem IP różnym** od tych, które już znalazłeś w odkrywaniu zasobów, powinieneś przeprowadzić **podstawowe skanowanie luk** (używając Nessus lub OpenVAS) oraz jakieś [**skanowanie portów**](../pentesting-network/index.html#discovering-hosts-from-the-outside) za pomocą **nmap/masscan/shodan**. W zależności od uruchomionych usług możesz znaleźć w **tej książce kilka sztuczek, aby je "zaatakować"**.\
-_&#x4E;ote, że czasami subdomena jest hostowana w IP, które nie jest kontrolowane przez klienta, więc nie jest w zakresie, bądź ostrożny._
+_Uwaga, czasami subdomena jest hostowana w IP, które nie jest kontrolowane przez klienta, więc nie jest w zakresie, bądź ostrożny._
 
 ## IPs
 
@@ -482,19 +482,19 @@ Możesz również sprawdzić, które domeny wskazują na konkretny adres IP, uż
 
 > Znaleźliśmy wszystkie firmy i ich zasoby oraz znamy zakresy IP, domeny i subdomeny w zakresie. Czas na poszukiwanie serwerów WWW.
 
-W poprzednich krokach prawdopodobnie już przeprowadziłeś jakieś **recon dotyczące odkrytych IP i domen**, więc mogłeś **już znaleźć wszystkie możliwe serwery WWW**. Jednak jeśli tego nie zrobiłeś, teraz zobaczymy kilka **szybkich sztuczek do wyszukiwania serwerów WWW** w zakresie.
+W poprzednich krokach prawdopodobnie już przeprowadziłeś jakieś **recon IP i odkrytych domen**, więc mogłeś **już znaleźć wszystkie możliwe serwery WWW**. Jednak jeśli tego nie zrobiłeś, teraz zobaczymy kilka **szybkich sztuczek do wyszukiwania serwerów WWW** w zakresie.
 
 Proszę zauważyć, że to będzie **ukierunkowane na odkrywanie aplikacji webowych**, więc powinieneś **przeprowadzić skanowanie luk** i **skanowanie portów** również (**jeśli dozwolone** przez zakres).
 
 **Szybka metoda** na odkrycie **otwartych portów** związanych z **serwerami** WWW za pomocą [**masscan** można znaleźć tutaj](../pentesting-network/index.html#http-port-discovery).\
-Innym przyjaznym narzędziem do wyszukiwania serwerów WWW jest [**httprobe**](https://github.com/tomnomnom/httprobe)**,** [**fprobe**](https://github.com/theblackturtle/fprobe) oraz [**httpx**](https://github.com/projectdiscovery/httpx). Wystarczy przekazać listę domen, a narzędzie spróbuje połączyć się z portem 80 (http) i 443 (https). Dodatkowo możesz wskazać, aby spróbować innych portów:
+Innym przyjaznym narzędziem do wyszukiwania serwerów WWW jest [**httprobe**](https://github.com/tomnomnom/httprobe)**,** [**fprobe**](https://github.com/theblackturtle/fprobe) i [**httpx**](https://github.com/projectdiscovery/httpx). Wystarczy, że przekażesz listę domen, a narzędzie spróbuje połączyć się z portem 80 (http) i 443 (https). Dodatkowo możesz wskazać, aby spróbować innych portów:
 ```bash
 cat /tmp/domains.txt | httprobe #Test all domains inside the file for port 80 and 443
 cat /tmp/domains.txt | httprobe -p http:8080 -p https:8443 #Check port 80, 443 and 8080 and 8443
 ```
 ### **Zrzuty ekranu**
 
-Teraz, gdy odkryłeś **wszystkie serwery internetowe** znajdujące się w zakresie (wśród **adresów IP** firmy oraz wszystkich **domen** i **subdomen**) prawdopodobnie **nie wiesz, od czego zacząć**. Zróbmy to prosto i zacznijmy od robienia zrzutów ekranu wszystkich z nich. Już po **rzuceniu okiem** na **stronę główną** możesz znaleźć **dziwne** punkty końcowe, które są bardziej **podatne** na bycie **wrażliwymi**.
+Teraz, gdy odkryłeś **wszystkie serwery internetowe** znajdujące się w zakresie (wśród **adresów IP** firmy oraz wszystkich **domen** i **subdomen**) prawdopodobnie **nie wiesz, od czego zacząć**. Uprośćmy to i zacznijmy od robienia zrzutów ekranu wszystkich z nich. Już po **rzuceniu okiem** na **stronę główną** możesz znaleźć **dziwne** punkty końcowe, które są bardziej **podatne** na **luki**.
 
 Aby zrealizować zaproponowany pomysł, możesz użyć [**EyeWitness**](https://github.com/FortyNorthSecurity/EyeWitness), [**HttpScreenshot**](https://github.com/breenmachine/httpscreenshot), [**Aquatone**](https://github.com/michenriksen/aquatone), [**Shutter**](https://shutter-project.org/downloads/third-party-packages/), [**Gowitness**](https://github.com/sensepost/gowitness) lub [**webscreenshot**](https://github.com/maaaaz/webscreenshot)**.**
 
@@ -510,7 +510,7 @@ Będziesz również potrzebować list słów **powszechnie używanych w bucketac
 - [https://raw.githubusercontent.com/infosec-au/altdns/master/words.txt](https://raw.githubusercontent.com/infosec-au/altdns/master/words.txt)
 - [https://raw.githubusercontent.com/jordanpotti/AWSBucketDump/master/BucketNames.txt](https://raw.githubusercontent.com/jordanpotti/AWSBucketDump/master/BucketNames.txt)
 
-Następnie, z tymi słowami powinieneś wygenerować **permutacje** (sprawdź [**Drugą Rundę DNS Brute-Force**](#second-dns-bruteforce-round) po więcej informacji).
+Następnie, z tymi słowami powinieneś wygenerować **permutacje** (sprawdź [**Druga runda DNS Brute-Force**](#second-dns-bruteforce-round) po więcej informacji).
 
 Z uzyskanymi listami słów możesz użyć narzędzi takich jak [**cloud_enum**](https://github.com/initstring/cloud_enum)**,** [**CloudScraper**](https://github.com/jordanpotti/CloudScraper)**,** [**cloudlist**](https://github.com/projectdiscovery/cloudlist) **lub** [**S3Scanner**](https://github.com/sa7mon/S3Scanner)**.**
 
@@ -522,7 +522,7 @@ Jeśli znajdziesz takie rzeczy jak **otwarte buckety lub wystawione funkcje chmu
 
 ## E-maile
 
-Z **domenami** i **subdomenami** w zakresie masz zasadniczo wszystko, co **potrzebujesz, aby zacząć szukać e-maili**. Oto **API** i **narzędzia**, które najlepiej działały dla mnie w znajdowaniu e-maili firmy:
+Mając **domeny** i **subdomeny** w zakresie, masz zasadniczo wszystko, co **potrzebujesz, aby zacząć szukać e-maili**. Oto **API** i **narzędzia**, które najlepiej działały dla mnie w znajdowaniu e-maili firmy:
 
 - [**theHarvester**](https://github.com/laramies/theHarvester) - z API
 - API [**https://hunter.io/**](https://hunter.io/) (wersja darmowa)
@@ -531,18 +531,18 @@ Z **domenami** i **subdomenami** w zakresie masz zasadniczo wszystko, co **potrz
 
 ### **Szukając luk**
 
-E-maile będą przydatne później do **brute-force'owania logowania do stron internetowych i usług autoryzacyjnych** (takich jak SSH). Ponadto są potrzebne do **phishingu**. Co więcej, te API dadzą ci jeszcze więcej **informacji o osobie** stojącej za e-mailem, co jest przydatne w kampanii phishingowej.
+E-maile będą przydatne później do **brute-force'owania logowania do stron internetowych i usług autoryzacyjnych** (takich jak SSH). Ponadto są potrzebne do **phishingu**. Co więcej, te API dostarczą ci jeszcze więcej **informacji o osobie** stojącej za e-mailem, co jest przydatne w kampanii phishingowej.
 
 ## Wycieki danych uwierzytelniających
 
-Z **domenami,** **subdomenami** i **e-mailami** możesz zacząć szukać danych uwierzytelniających, które wyciekły w przeszłości i należą do tych e-maili:
+Mając **domeny**, **subdomeny** i **e-maile**, możesz zacząć szukać danych uwierzytelniających, które wyciekły w przeszłości i należą do tych e-maili:
 
 - [https://leak-lookup.com](https://leak-lookup.com/account/login)
 - [https://www.dehashed.com/](https://www.dehashed.com/)
 
 ### **Szukając luk**
 
-Jeśli znajdziesz **ważne wyciekłe** dane uwierzytelniające, to jest to bardzo łatwe zwycięstwo.
+Jeśli znajdziesz **ważne wyciekłe** dane uwierzytelniające, to bardzo łatwe zwycięstwo.
 
 ## Wyciek tajemnic
 
@@ -551,9 +551,9 @@ Wyciek danych uwierzytelniających jest związany z hackami firm, w których **w
 ### Wyciek z GitHub
 
 Dane uwierzytelniające i API mogą być wycieknięte w **publicznych repozytoriach** firmy lub użytkowników pracujących dla tej firmy na GitHubie.\
-Możesz użyć **narzędzia** [**Leakos**](https://github.com/carlospolop/Leakos), aby **pobrać** wszystkie **publiczne repozytoria** organizacji i jej **deweloperów** oraz automatycznie uruchomić [**gitleaks**](https://github.com/zricethezav/gitleaks) na nich.
+Możesz użyć **narzędzia** [**Leakos**](https://github.com/carlospolop/Leakos), aby **pobrać** wszystkie **publiczne repozytoria** organizacji i jej **deweloperów** oraz uruchomić [**gitleaks**](https://github.com/zricethezav/gitleaks) automatycznie.
 
-**Leakos** może być również używane do uruchamiania **gitleaks** przeciwko wszystkim **tekstom** dostarczonym **URL-om**, które mu przekazano, ponieważ czasami **strony internetowe również zawierają tajemnice**.
+**Leakos** może być również używane do uruchamiania **gitleaks** przeciwko całemu **tekstowi** dostarczonemu **URL-om**, które mu przekazano, ponieważ czasami **strony internetowe również zawierają tajemnice**.
 
 #### Dorki GitHub
 
@@ -572,11 +572,11 @@ Możesz użyć narzędzia [**Pastos**](https://github.com/carlospolop/Pastos), a
 
 Stare, ale złote dorki Google są zawsze przydatne do znajdowania **ujawnionych informacji, które nie powinny tam być**. Jedynym problemem jest to, że [**google-hacking-database**](https://www.exploit-db.com/google-hacking-database) zawiera kilka **tysięcy** możliwych zapytań, których nie możesz uruchomić ręcznie. Możesz więc wziąć swoje ulubione 10 lub możesz użyć **narzędzia takiego jak** [**Gorks**](https://github.com/carlospolop/Gorks) **do ich uruchomienia**.
 
-_Uwaga, że narzędzia, które oczekują uruchomienia całej bazy danych za pomocą standardowej przeglądarki Google, nigdy się nie skończą, ponieważ Google zablokuje cię bardzo, bardzo szybko._
+_Uwaga, że narzędzia, które mają na celu uruchomienie całej bazy danych za pomocą standardowej przeglądarki Google, nigdy się nie zakończą, ponieważ Google zablokuje cię bardzo, bardzo szybko._
 
 ### **Szukając luk**
 
-Jeśli znajdziesz **ważne wyciekłe** dane uwierzytelniające lub tokeny API, to jest to bardzo łatwe zwycięstwo.
+Jeśli znajdziesz **ważne wyciekłe** dane uwierzytelniające lub tokeny API, to bardzo łatwe zwycięstwo.
 
 ## Publiczne luki w kodzie
 
@@ -588,7 +588,7 @@ Jeśli odkryjesz, że firma ma **kod open-source**, możesz go **analizować** i
 ../../network-services-pentesting/pentesting-web/code-review-tools.md
 {{#endref}}
 
-Istnieją również darmowe usługi, które pozwalają na **skanowanie publicznych repozytoriów**, takie jak:
+Są również darmowe usługi, które pozwalają ci **skanować publiczne repozytoria**, takie jak:
 
 - [**Snyk**](https://app.snyk.io/)
 
@@ -596,11 +596,11 @@ Istnieją również darmowe usługi, które pozwalają na **skanowanie publiczny
 
 **Większość luk** znalezionych przez łowców błędów znajduje się w **aplikacjach internetowych**, więc w tym momencie chciałbym porozmawiać o **metodologii testowania aplikacji internetowych**, a możesz [**znaleźć te informacje tutaj**](../../network-services-pentesting/pentesting-web/index.html).
 
-Chcę również szczególnie wspomnieć o sekcji [**Narzędzia do automatycznego skanowania open source**](../../network-services-pentesting/pentesting-web/index.html#automatic-scanners), ponieważ, jeśli nie powinieneś oczekiwać, że znajdą ci bardzo wrażliwe luki, są przydatne do wdrażania ich w **workflow, aby uzyskać pewne początkowe informacje o sieci.**
+Chcę również szczególnie wspomnieć o sekcji [**Narzędzia do automatycznego skanowania aplikacji webowych open source**](../../network-services-pentesting/pentesting-web/index.html#automatic-scanners), ponieważ, jeśli nie powinieneś oczekiwać, że znajdą bardzo wrażliwe luki, są przydatne do wdrażania ich w **workflow, aby uzyskać pewne początkowe informacje o sieci.**
 
-## Reasumpcja
+## Rekapitulacja
 
-> Gratulacje! Na tym etapie już wykonałeś **wszystkie podstawowe enumeracje**. Tak, to podstawowe, ponieważ można wykonać znacznie więcej enumeracji (zobaczymy więcej sztuczek później).
+> Gratulacje! Na tym etapie wykonałeś już **wszystkie podstawowe enumeracje**. Tak, to podstawowe, ponieważ można wykonać znacznie więcej enumeracji (zobaczymy więcej sztuczek później).
 
 Więc już:
 
@@ -614,7 +614,7 @@ Więc już:
 8. **E-maile**, **wycieki danych uwierzytelniających** i **wycieki tajemnic**, które mogą dać ci **duże zwycięstwo bardzo łatwo**.
 9. **Pentesting wszystkich stron, które znalazłeś**
 
-## **Pełne automatyczne narzędzia rekonesansowe**
+## **Pełne narzędzia automatycznego rekonesansu**
 
 Istnieje kilka narzędzi, które wykonają część zaproponowanych działań przeciwko danemu zakresowi.
 

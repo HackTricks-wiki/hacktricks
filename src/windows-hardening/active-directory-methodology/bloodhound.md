@@ -1,4 +1,4 @@
-# BloodHound & Inne narzędzia do enumeracji AD
+# BloodHound & Other AD Enum Tools
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -8,7 +8,7 @@
 
 > Zaawansowany przeglądarka i edytor Active Directory (AD). Możesz użyć AD Explorer, aby łatwo nawigować po bazie danych AD, definiować ulubione lokalizacje, przeglądać właściwości obiektów i atrybuty bez otwierania okien dialogowych, edytować uprawnienia, przeglądać schemat obiektu i wykonywać zaawansowane wyszukiwania, które możesz zapisać i ponownie wykonać.
 
-### Migawki
+### Snapshots
 
 AD Explorer może tworzyć migawki AD, abyś mógł je sprawdzić offline.\
 Może być używany do odkrywania luk offline lub do porównywania różnych stanów bazy danych AD w czasie.
@@ -19,7 +19,7 @@ Aby zrobić migawkę AD, przejdź do `File` --> `Create Snapshot` i wprowadź na
 
 ## ADRecon
 
-[**ADRecon**](https://github.com/adrecon/ADRecon) to narzędzie, które wyodrębnia i łączy różne artefakty z środowiska AD. Informacje mogą być przedstawione w **specjalnie sformatowanym** raporcie Microsoft Excel **raporcie**, który zawiera podsumowania z metrykami, aby ułatwić analizę i zapewnić całościowy obraz aktualnego stanu docelowego środowiska AD.
+[**ADRecon**](https://github.com/adrecon/ADRecon) to narzędzie, które wydobywa i łączy różne artefakty z środowiska AD. Informacje mogą być przedstawione w **specjalnie sformatowanym** raporcie Microsoft Excel **raporcie**, który zawiera widoki podsumowujące z metrykami, aby ułatwić analizę i zapewnić całościowy obraz aktualnego stanu docelowego środowiska AD.
 ```bash
 # Run it
 .\ADRecon.ps1
@@ -28,17 +28,17 @@ Aby zrobić migawkę AD, przejdź do `File` --> `Create Snapshot` i wprowadź na
 
 From [https://github.com/BloodHoundAD/BloodHound](https://github.com/BloodHoundAD/BloodHound)
 
-> BloodHound to aplikacja webowa w JavaScript na jednej stronie, zbudowana na bazie [Linkurious](http://linkurio.us/), skompilowana z [Electron](http://electron.atom.io/), z bazą danych [Neo4j](https://neo4j.com/) zasilaną przez zbieracz danych C#.
+> BloodHound to aplikacja webowa w JavaScript na jednej stronie, zbudowana na bazie [Linkurious](http://linkurio.us/), skompilowana z [Electron](http://electron.atom.io/), z bazą danych [Neo4j](https://neo4j.com/) zasilaną przez zbieracz danych w C#.
 
 BloodHound wykorzystuje teorię grafów do ujawnienia ukrytych i często niezamierzonych relacji w środowisku Active Directory lub Azure. Atakujący mogą używać BloodHound do łatwego identyfikowania bardzo złożonych ścieżek ataku, które w przeciwnym razie byłyby niemożliwe do szybkiego zidentyfikowania. Obrońcy mogą używać BloodHound do identyfikacji i eliminacji tych samych ścieżek ataku. Zarówno zespoły niebieskie, jak i czerwone mogą używać BloodHound do łatwego uzyskania głębszego zrozumienia relacji uprawnień w środowisku Active Directory lub Azure.
 
 Tak więc, [Bloodhound ](https://github.com/BloodHoundAD/BloodHound)to niesamowite narzędzie, które może automatycznie enumerować domenę, zapisywać wszystkie informacje, znajdować możliwe ścieżki eskalacji uprawnień i przedstawiać wszystkie informacje za pomocą grafów.
 
-BloodHound składa się z 2 głównych części: **ingestorów** i **aplikacji wizualizacyjnej**.
+BloodHound składa się z 2 głównych części: **ingestors** i **aplikacji wizualizacyjnej**.
 
 **Ingestory** są używane do **enumeracji domeny i ekstrakcji wszystkich informacji** w formacie, który zrozumie aplikacja wizualizacyjna.
 
-**Aplikacja wizualizacyjna używa neo4j** do pokazania, jak wszystkie informacje są ze sobą powiązane oraz do pokazania różnych sposobów eskalacji uprawnień w domenie.
+**Aplikacja wizualizacyjna wykorzystuje neo4j** do pokazania, jak wszystkie informacje są ze sobą powiązane oraz do pokazania różnych sposobów eskalacji uprawnień w domenie.
 
 ### Instalacja
 
@@ -50,7 +50,7 @@ Po utworzeniu BloodHound CE, cały projekt został zaktualizowany w celu ułatwi
 curl -L https://ghst.ly/getbhce | docker compose -f - up
 ```
 3. Zlokalizuj losowo wygenerowane hasło w wyjściu terminala Docker Compose.  
-4. W przeglądarce przejdź do http://localhost:8080/ui/login. Zaloguj się jako admin i użyj losowo wygenerowanego hasła z logów.
+4. W przeglądarce przejdź do http://localhost:8080/ui/login. Zaloguj się jako admin, używając losowo wygenerowanego hasła z logów.
 
 Po tym musisz zmienić losowo wygenerowane hasło, a nowy interfejs będzie gotowy, z którego możesz bezpośrednio pobrać ingestry.
 
@@ -82,6 +82,6 @@ group3r.exe -f <filepath-name.log>
 
 [**PingCastle**](https://www.pingcastle.com/documentation/) **ocenia bezpieczeństwo środowiska AD** i dostarcza ładny **raport** z wykresami.
 
-Aby go uruchomić, można wykonać plik binarny `PingCastle.exe`, a rozpocznie on **interaktywną sesję** prezentującą menu opcji. Domyślną opcją do użycia jest **`healthcheck`**, która ustali podstawowy **przegląd** **domeny** oraz znajdzie **błędne konfiguracje** i **luki**.&#x20;
+Aby go uruchomić, można wykonać plik binarny `PingCastle.exe`, a rozpocznie on **interaktywną sesję** prezentującą menu opcji. Domyślną opcją do użycia jest **`healthcheck`**, która ustali podstawowy **przegląd** **domeny** oraz znajdzie **błędne konfiguracje** i **luki w zabezpieczeniach**.
 
 {{#include ../../banners/hacktricks-training.md}}

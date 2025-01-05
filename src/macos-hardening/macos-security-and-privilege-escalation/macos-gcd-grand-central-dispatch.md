@@ -18,7 +18,7 @@ To jest bardzo pomocne w skutecznym zarządzaniu równoległym wykonywaniem, zna
 Blok to **samodzielna sekcja kodu** (jak funkcja z argumentami zwracająca wartość) i może również określać zmienne powiązane.\
 Jednak na poziomie kompilatora bloki nie istnieją, są `os_object`s. Każdy z tych obiektów składa się z dwóch struktur:
 
-- **literal bloku**:&#x20;
+- **literal bloku**:
 - Zaczyna się od pola **`isa`**, wskazującego na klasę bloku:
 - `NSConcreteGlobalBlock` (bloki z `__DATA.__const`)
 - `NSConcreteMallocBlock` (bloki w stercie)
@@ -57,7 +57,7 @@ Domyślne kolejki:
 - `.root.user-interactive-qos`: Najwyższy priorytet
 - `.root.background-qos.overcommit`
 
-Zauważ, że to system zdecyduje **które wątki obsługują które kolejki w danym czasie** (wiele wątków może pracować w tej samej kolejce lub ten sam wątek może pracować w różnych kolejkach w pewnym momencie)
+Zauważ, że to system zdecyduje **które wątki obsługują które kolejki w danym momencie** (wiele wątków może pracować w tej samej kolejce lub ten sam wątek może pracować w różnych kolejkach w pewnym momencie)
 
 #### Atrybuty
 
@@ -85,7 +85,7 @@ W Objective-C istnieją różne funkcje do wysyłania bloku do wykonania w równ
 - [**dispatch_async**](https://developer.apple.com/documentation/dispatch/1453057-dispatch_async): Przesyła blok do asynchronicznego wykonania w kolejce dispatch i natychmiast zwraca.
 - [**dispatch_sync**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync): Przesyła obiekt bloku do wykonania i zwraca po zakończeniu jego wykonania.
 - [**dispatch_once**](https://developer.apple.com/documentation/dispatch/1447169-dispatch_once): Wykonuje obiekt bloku tylko raz w czasie życia aplikacji.
-- [**dispatch_async_and_wait**](https://developer.apple.com/documentation/dispatch/3191901-dispatch_async_and_wait): Przesyła element roboczy do wykonania i zwraca tylko po zakończeniu jego wykonania. W przeciwieństwie do [**`dispatch_sync`**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync), ta funkcja respektuje wszystkie atrybuty kolejki podczas wykonywania bloku.
+- [**dispatch_async_and_wait**](https://developer.apple.com/documentation/dispatch/3191901-dispatch_async_and_wait): Przesyła element roboczy do wykonania i zwraca tylko po jego zakończeniu. W przeciwieństwie do [**`dispatch_sync`**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync), ta funkcja respektuje wszystkie atrybuty kolejki podczas wykonywania bloku.
 
 Te funkcje oczekują tych parametrów: [**`dispatch_queue_t`**](https://developer.apple.com/documentation/dispatch/dispatch_queue_t) **`queue,`** [**`dispatch_block_t`**](https://developer.apple.com/documentation/dispatch/dispatch_block_t) **`block`**
 
@@ -170,7 +170,7 @@ sleep(1)  // Simulate a long-running task
 ```
 ## Frida
 
-Poniższy skrypt Frida może być użyty do **podłączenia się do kilku funkcji `dispatch`** i wyodrębnienia nazwy kolejki, śladu stosu oraz bloku: [**https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js**](https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js)
+Poniższy skrypt Frida może być użyty do **przechwycenia kilku funkcji `dispatch`** i wyodrębnienia nazwy kolejki, śladu stosu oraz bloku: [**https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js**](https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js)
 ```bash
 frida -U <prog_name> -l libdispatch.js
 

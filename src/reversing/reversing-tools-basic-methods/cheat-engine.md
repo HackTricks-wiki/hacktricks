@@ -10,7 +10,7 @@ Po pobraniu i uruchomieniu, **zostaniesz** **przedstawiony** z **samouczkiem** j
 ![](<../../images/image (762).png>)
 
 To narzędzie jest bardzo przydatne do znalezienia **gdzie jakaś wartość** (zwykle liczba) **jest przechowywana w pamięci** programu.\
-**Zwykle liczby** są przechowywane w formie **4 bajtów**, ale możesz je również znaleźć w formatach **double** lub **float**, lub możesz chcieć szukać czegoś **innego niż liczba**. Z tego powodu musisz upewnić się, że **wybierasz**, co chcesz **wyszukiwać**:
+**Zwykle liczby** są przechowywane w formie **4 bajtów**, ale możesz je również znaleźć w formatach **double** lub **float**, lub możesz chcieć szukać czegoś **innego niż liczba**. Z tego powodu musisz upewnić się, że **wybierasz**, czego chcesz **szukać**:
 
 ![](<../../images/image (324).png>)
 
@@ -24,7 +24,7 @@ Możesz także zaznaczyć pole, aby **zatrzymać grę podczas skanowania pamięc
 
 ### Skróty klawiszowe
 
-W _**Edit --> Settings --> Hotkeys**_ możesz ustawić różne **skróty klawiszowe** do różnych celów, takich jak **zatrzymywanie** **gry** (co jest dość przydatne, jeśli w pewnym momencie chcesz zeskanować pamięć). Inne opcje są dostępne:
+W _**Edit --> Settings --> Hotkeys**_ możesz ustawić różne **skróty klawiszowe** do różnych celów, takich jak **zatrzymanie** **gry** (co jest dość przydatne, jeśli w pewnym momencie chcesz zeskanować pamięć). Inne opcje są dostępne:
 
 ![](<../../images/image (864).png>)
 
@@ -94,7 +94,7 @@ Gdy wybierzesz jedną z tych opcji, **debugger** zostanie **przyłączony** do p
 
 ![](<../../images/image (91).png>)
 
-Teraz, gdy znalazłeś adres, który zmienia wartość, możesz **zmodyfikować kod według własnego uznania** (Cheat Engine pozwala na szybkie modyfikowanie go na NOPs):
+Teraz, gdy znalazłeś adres, który zmienia wartość, możesz **zmodyfikować kod według własnego uznania** (Cheat Engine pozwala na szybkie modyfikowanie go na NOP):
 
 ![](<../../images/image (1057).png>)
 
@@ -111,13 +111,13 @@ Następnie przeprowadź nowe skanowanie **szukając wartości hex między "\[]"*
 ![](<../../images/image (994).png>)
 
 (_Jeśli pojawi się kilka, zazwyczaj potrzebujesz najmniejszego adresu_)\
-Teraz, **znaleźliśmy wskaźnik, który będzie modyfikował wartość, która nas interesuje**.
+Teraz, znaleźliśmy **wskaźnik, który będzie modyfikował wartość, która nas interesuje**.
 
 Kliknij na "**Dodaj adres ręcznie**":
 
 ![](<../../images/image (990).png>)
 
-Teraz zaznacz pole "Wskaźnik" i dodaj znaleziony adres w polu tekstowym (w tym scenariuszu, znaleziony adres na poprzednim obrazie to "Tutorial-i386.exe"+2426B0):
+Teraz kliknij na pole "Wskaźnik" i dodaj znaleziony adres w polu tekstowym (w tym scenariuszu, znaleziony adres na poprzednim obrazie to "Tutorial-i386.exe"+2426B0):
 
 ![](<../../images/image (392).png>)
 
@@ -150,11 +150,11 @@ Zostanie wygenerowany szablon:
 
 ![](<../../images/image (944).png>)
 
-Wstaw swój nowy kod asemblera w sekcji "**newmem**" i usuń oryginalny kod z "**originalcode**", jeśli nie chcesz, aby był wykonywany\*\*.\*\* W tym przykładzie wstrzyknięty kod doda 2 punkty zamiast odejmować 1:
+Wstaw swój nowy kod asemblera w sekcji "**newmem**" i usuń oryginalny kod z sekcji "**originalcode**", jeśli nie chcesz, aby był wykonywany\*\*.\*\* W tym przykładzie wstrzyknięty kod doda 2 punkty zamiast odejmować 1:
 
 ![](<../../images/image (521).png>)
 
-**Kliknij na wykonaj i tak dalej, a twój kod powinien zostać wstrzyknięty do programu, zmieniając zachowanie funkcjonalności!**
+**Kliknij na wykonaj i tak dalej, a twój kod powinien być wstrzyknięty do programu, zmieniając zachowanie funkcjonalności!**
 
 ## **Referencje**
 

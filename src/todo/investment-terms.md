@@ -1,4 +1,4 @@
-# Warunki inwestycyjne
+# Warunki Inwestycyjne
 
 ## Spot
 
@@ -18,14 +18,14 @@ Jednak to jest interesujące na przykład dla firm, które generują produkt i m
 
 Chociaż na giełdach zazwyczaj używa się tego, aby spróbować osiągnąć zysk.
 
-* Zauważ, że "pozycja długa" oznacza, że ktoś stawia na to, że cena wzrośnie
-* Podczas gdy "pozycja krótka" oznacza, że ktoś stawia na to, że cena spadnie
+* Zauważ, że "pozycja długa" oznacza, że ktoś stawia na to, że cena wzrośnie.
+* Natomiast "pozycja krótka" oznacza, że ktoś stawia na to, że cena spadnie.
 
-### Hedging z użyciem Futures <a href="#mntl-sc-block_7-0" id="mntl-sc-block_7-0"></a>
+### Hedging z Futures <a href="#mntl-sc-block_7-0" id="mntl-sc-block_7-0"></a>
 
-Jeśli menedżer funduszu obawia się, że niektóre akcje spadną, może zająć pozycję krótką na niektórych aktywach, takich jak bitcoiny lub kontrakty futures na S\&P 500. To byłoby podobne do kupowania lub posiadania niektórych aktywów i stworzenia kontraktu na sprzedaż ich w przyszłości po wyższej cenie.&#x20;
+Jeśli menedżer funduszu obawia się, że niektóre akcje spadną, może zająć pozycję krótką na niektórych aktywach, takich jak bitcoiny lub kontrakty futures na S\&P 500. To byłoby podobne do kupowania lub posiadania niektórych aktywów i stworzenia kontraktu na sprzedaż ich w przyszłości po wyższej cenie.
 
-W przypadku spadku ceny menedżer funduszu zyska, ponieważ sprzeda aktywa po wyższej cenie. Jeśli cena aktywów wzrośnie, menedżer nie zyska tej korzyści, ale nadal będzie posiadał swoje aktywa.
+W przypadku spadku ceny menedżer funduszu zyska, ponieważ sprzeda aktywa po wyższej cenie. Jeśli cena aktywów wzrośnie, menedżer nie zyska tej korzyści, ale nadal będzie miał swoje aktywa.
 
 ### Perpetual Futures
 
@@ -33,19 +33,19 @@ W przypadku spadku ceny menedżer funduszu zyska, ponieważ sprzeda aktywa po wy
 
 Zauważ, że w tych przypadkach zyski i straty mogą być w czasie rzeczywistym, jeśli cena wzrośnie o 1%, wygrywasz 1%, jeśli cena spadnie o 1%, stracisz to.
 
-### Futures z dźwignią
+### Futures z Dźwignią
 
-**Dźwignia** pozwala kontrolować większą pozycję na rynku przy mniejszej kwocie pieniędzy. W zasadzie pozwala "stawiać" znacznie więcej pieniędzy, niż się ma, ryzykując tylko pieniądze, które faktycznie się posiada.
+**Dźwignia** pozwala Ci kontrolować większą pozycję na rynku przy mniejszej kwocie pieniędzy. W zasadzie pozwala Ci "stawiać" znacznie więcej pieniędzy, niż posiadasz, ryzykując tylko pieniądze, które faktycznie masz.
 
 Na przykład, jeśli otworzysz pozycję futures w BTC/USDT z 100$ przy dźwigni 50x, oznacza to, że jeśli cena wzrośnie o 1%, wtedy zyskujesz 1x50 = 50% swojego początkowego inwestycji (50$). I w ten sposób będziesz miał 150$.\
-Jednak jeśli cena spadnie o 1%, stracisz 50% swoich funduszy (59$ w tym przypadku). A jeśli cena spadnie o 2%, stracisz całą swoją stawkę (2x50 = 100%).
+Jednak jeśli cena spadnie o 1%, stracisz 50% swoich funduszy (59$ w tym przypadku). A jeśli cena spadnie o 2%, stracisz całe swoje zakłady (2x50 = 100%).
 
-Dlatego dźwignia pozwala kontrolować kwotę pieniędzy, którą stawiasz, jednocześnie zwiększając zyski i straty.
+Dlatego dźwignia pozwala kontrolować kwotę pieniędzy, które stawiasz, jednocześnie zwiększając zyski i straty.
 
 ## Różnice między Futures a Opcjami
 
-Główna różnica między futures a opcjami polega na tym, że kontrakt jest opcjonalny dla kupującego: Może zdecydować, czy go zrealizować, czy nie (zazwyczaj zrobi to tylko wtedy, gdy odniesie z tego korzyść). Sprzedający musi sprzedać, jeśli kupujący chce skorzystać z opcji.\
-Jednak kupujący będzie płacił pewną opłatę sprzedającemu za otwarcie opcji (więc sprzedający, który wydaje się podejmować większe ryzyko, zaczyna zarabiać pieniądze).
+Główna różnica między futures a opcjami polega na tym, że kontrakt jest opcjonalny dla kupującego: Może zdecydować, czy go zrealizować, czy nie (zazwyczaj zrobi to tylko wtedy, gdy odniesie z tego korzyść). Sprzedawca musi sprzedać, jeśli kupujący chce skorzystać z opcji.\
+Jednak kupujący będzie płacił pewną opłatę sprzedawcy za otwarcie opcji (więc sprzedawca, który wydaje się podejmować większe ryzyko, zaczyna zarabiać pieniądze).
 
 ### 1. **Obowiązek vs. Prawo:**
 
@@ -55,14 +55,14 @@ Jednak kupujący będzie płacił pewną opłatę sprzedającemu za otwarcie opc
 ### 2. **Ryzyko:**
 
 * **Futures:** Zarówno kupujący, jak i sprzedający ponoszą **nieograniczone ryzyko**, ponieważ są zobowiązani do zrealizowania kontraktu. Ryzyko to różnica między uzgodnioną ceną a ceną rynkową w dniu wygaśnięcia.
-* **Opcje:** Ryzyko kupującego jest ograniczone do **premii** zapłaconej za zakup opcji. Jeśli rynek nie poruszy się na korzyść posiadacza opcji, może po prostu pozwolić opcji wygasnąć. Jednak **sprzedający** (wystawca) opcji ma nieograniczone ryzyko, jeśli rynek poruszy się znacząco przeciwko niemu.
+* **Opcje:** Ryzyko kupującego jest ograniczone do **premii** zapłaconej za zakup opcji. Jeśli rynek nie poruszy się na korzyść posiadacza opcji, może po prostu pozwolić opcji wygasnąć. Jednak **sprzedający** (wystawca) opcji ma nieograniczone ryzyko, jeśli rynek poruszy się znacząco przeciwko nim.
 
 ### 3. **Koszt:**
 
 * **Futures:** Nie ma kosztu początkowego poza marżą wymaganą do utrzymania pozycji, ponieważ zarówno kupujący, jak i sprzedający są zobowiązani do zrealizowania transakcji.
 * **Opcje:** Kupujący musi zapłacić **premię opcyjną** z góry za prawo do wykonania opcji. Ta premia jest zasadniczo kosztem opcji.
 
-### 4. **Potencjał zysku:**
+### 4. **Potencjał Zysku:**
 
 * **Futures:** Zysk lub strata opiera się na różnicy między ceną rynkową w dniu wygaśnięcia a uzgodnioną ceną w kontrakcie.
-* **Opcje:** Kupujący zyskuje, gdy rynek porusza się korzystnie ponad cenę wykonania o więcej niż zapłacona premia. Sprzedający zyskuje, zatrzymując premię, jeśli opcja nie zostanie zrealizowana.
+* **Opcje:** Kupujący zyskuje, gdy rynek porusza się korzystnie ponad cenę wykonania o więcej niż zapłacona premia. Sprzedający zyskuje, zatrzymując premię, jeśli opcja nie zostanie wykonana.

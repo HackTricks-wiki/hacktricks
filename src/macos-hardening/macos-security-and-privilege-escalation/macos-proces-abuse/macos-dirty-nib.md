@@ -6,7 +6,7 @@
 
 ### Czym są pliki Nib
 
-Pliki Nib (skrót od NeXT Interface Builder), część ekosystemu deweloperskiego Apple, są przeznaczone do definiowania **elementów UI** i ich interakcji w aplikacjach. Zawierają zserializowane obiekty, takie jak okna i przyciski, i są ładowane w czasie wykonywania. Mimo ich ciągłego użycia, Apple obecnie zaleca korzystanie z Storyboards dla bardziej kompleksowej wizualizacji przepływu UI.
+Pliki Nib (skrót od NeXT Interface Builder), część ekosystemu deweloperskiego Apple, są przeznaczone do definiowania **elementów UI** i ich interakcji w aplikacjach. Zawierają zserializowane obiekty, takie jak okna i przyciski, i są ładowane w czasie wykonywania. Mimo ich ciągłego użycia, Apple obecnie promuje Storyboards dla bardziej kompleksowej wizualizacji przepływu UI.
 
 Główny plik Nib jest odniesiony w wartości **`NSMainNibFile`** wewnątrz pliku `Info.plist` aplikacji i jest ładowany przez funkcję **`NSApplicationMain`** wykonywaną w funkcji `main` aplikacji.
 
@@ -35,8 +35,8 @@ display dialog theDialogText
 #### Celowanie w aplikację (przykład: Pages)
 
 1. **Przygotowanie**:
-- Skopiuj docelową aplikację (np. Pages) do oddzielnego katalogu (np. `/tmp/`).
-- Uruchom aplikację, aby obejść problemy z Gatekeeperem i ją zbuforować.
+- Skopiuj docelową aplikację (np. Pages) do osobnego katalogu (np. `/tmp/`).
+- Uruchom aplikację, aby obejść problemy z Gatekeeperem i zbuforować ją.
 2. **Nadpisywanie pliku NIB**:
 - Zastąp istniejący plik NIB (np. NIB panelu "O programie") stworzonym plikiem DirtyNIB.
 3. **Wykonanie**:
@@ -52,22 +52,22 @@ display dialog theDialogText
 
 ### Inny przykład
 
-W poście [https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) możesz znaleźć samouczek na temat tworzenia dirty nib.&#x20;
+W poście [https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) możesz znaleźć samouczek na temat tworzenia dirty nib.
 
 ### Rozwiązywanie ograniczeń uruchamiania
 
 - Ograniczenia uruchamiania utrudniają wykonywanie aplikacji z nieoczekiwanych lokalizacji (np. `/tmp`).
-- Możliwe jest zidentyfikowanie aplikacji, które nie są chronione przez ograniczenia uruchamiania i celowanie w nie w celu wstrzykiwania pliku NIB.
+- Możliwe jest zidentyfikowanie aplikacji, które nie są chronione przez ograniczenia uruchamiania i celowanie w nie w celu wstrzykiwania plików NIB.
 
 ### Dodatkowe zabezpieczenia macOS
 
-Od macOS Sonoma w górę, modyfikacje wewnątrz pakietów aplikacji są ograniczone. Jednak wcześniejsze metody obejmowały:
+Od macOS Sonoma wprowadzone zostały ograniczenia dotyczące modyfikacji wewnątrz pakietów aplikacji. Jednak wcześniejsze metody obejmowały:
 
 1. Skopiowanie aplikacji do innej lokalizacji (np. `/tmp/`).
 2. Zmiana nazw katalogów w pakiecie aplikacji, aby obejść początkowe zabezpieczenia.
-3. Po uruchomieniu aplikacji, aby zarejestrować się w Gatekeeperze, modyfikacja pakietu aplikacji (np. zastąpienie MainMenu.nib plikiem Dirty.nib).
-4. Przywrócenie nazw katalogów i ponowne uruchomienie aplikacji, aby wykonać wstrzyknięty plik NIB.
+3. Po uruchomieniu aplikacji w celu zarejestrowania się w Gatekeeperze, modyfikacja pakietu aplikacji (np. zastąpienie MainMenu.nib plikiem Dirty.nib).
+4. Przywrócenie nazw katalogów i ponowne uruchomienie aplikacji w celu wykonania wstrzykniętego pliku NIB.
 
-**Uwaga**: Ostatnie aktualizacje macOS złagodziły ten exploit, uniemożliwiając modyfikacje plików w pakietach aplikacji po buforowaniu Gatekeepera, co czyni exploit nieskutecznym.
+**Uwaga**: Ostatnie aktualizacje macOS złagodziły ten exploit, uniemożliwiając modyfikacje plików w pakietach aplikacji po buforowaniu przez Gatekeeper, co czyni exploit nieskutecznym.
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -4,7 +4,7 @@
 
 ## Podstawowe informacje
 
-MIG został stworzony, aby **uprościć proces tworzenia kodu Mach IPC**. W zasadzie **generuje potrzebny kod** dla serwera i klienta do komunikacji zgodnie z daną definicją. Nawet jeśli wygenerowany kod jest brzydki, programista będzie musiał go tylko zaimportować, a jego kod będzie znacznie prostszy niż wcześniej.
+MIG został stworzony, aby **uprościć proces tworzenia kodu Mach IPC**. W zasadzie **generuje potrzebny kod** dla serwera i klienta do komunikacji na podstawie podanej definicji. Nawet jeśli wygenerowany kod jest brzydki, programista będzie musiał tylko go zaimportować, a jego kod będzie znacznie prostszy niż wcześniej.
 
 Definicja jest określona w języku definicji interfejsu (IDL) z użyciem rozszerzenia `.defs`.
 
@@ -12,7 +12,7 @@ Te definicje mają 5 sekcji:
 
 - **Deklaracja podsystemu**: Słowo kluczowe subsystem jest używane do wskazania **nazwa** i **id**. Możliwe jest również oznaczenie go jako **`KernelServer`**, jeśli serwer ma działać w jądrze.
 - **Inkluzje i importy**: MIG używa preprocesora C, więc może korzystać z importów. Ponadto możliwe jest użycie `uimport` i `simport` dla kodu generowanego przez użytkownika lub serwer.
-- **Deklaracje typów**: Możliwe jest definiowanie typów danych, chociaż zazwyczaj zaimportuje `mach_types.defs` i `std_types.defs`. Dla niestandardowych można użyć pewnej składni:
+- **Deklaracje typów**: Możliwe jest definiowanie typów danych, chociaż zazwyczaj zaimportuje `mach_types.defs` i `std_types.defs`. Dla niestandardowych można użyć następującej składni:
 - \[i`n/out]tran`: Funkcja, która musi być przetłumaczona z wiadomości przychodzącej lub do wiadomości wychodzącej
 - `c[user/server]type`: Mapowanie na inny typ C.
 - `destructor`: Wywołaj tę funkcję, gdy typ jest zwalniany.
@@ -40,7 +40,7 @@ server_port :  mach_port_t;
 n1          :  uint32_t;
 n2          :  uint32_t);
 ```
-Zauważ, że pierwszy **argument to port do powiązania** a MIG **automatycznie obsłuży port odpowiedzi** (chyba że wywołasz `mig_get_reply_port()` w kodzie klienta). Ponadto, **ID operacji** będą **sekwencyjne**, zaczynając od wskazanego ID podsystemu (więc jeśli operacja jest przestarzała, jest usuwana, a `skip` jest używane, aby nadal używać jej ID).
+Zauważ, że pierwszy **argument to port do powiązania** a MIG **automatycznie obsłuży port odpowiedzi** (chyba że wywołasz `mig_get_reply_port()` w kodzie klienta). Ponadto, **ID operacji** będzie **sekwencyjne**, zaczynając od wskazanego ID podsystemu (więc jeśli operacja jest przestarzała, jest usuwana, a `skip` jest używane, aby nadal używać jej ID).
 
 Teraz użyj MIG, aby wygenerować kod serwera i klienta, który będzie w stanie komunikować się ze sobą, aby wywołać funkcję Subtract:
 ```bash
@@ -106,7 +106,7 @@ return SERVERPREFmyipc_subsystem.routine[msgh_id].stub_routine;
 ```
 W tym przykładzie zdefiniowaliśmy tylko 1 funkcję w definicjach, ale gdybyśmy zdefiniowali więcej funkcji, byłyby one wewnątrz tablicy **`SERVERPREFmyipc_subsystem`**, a pierwsza zostałaby przypisana do ID **500**, druga do ID **501**...
 
-Jeśli oczekiwano, że funkcja wyśle **odpowiedź**, funkcja `mig_internal kern_return_t __MIG_check__Reply__<name>` również by istniała.
+Jeśli oczekiwano, że funkcja wyśle **reply**, funkcja `mig_internal kern_return_t __MIG_check__Reply__<name>` również by istniała.
 
 W rzeczywistości możliwe jest zidentyfikowanie tej relacji w strukturze **`subsystem_to_name_map_myipc`** z **`myipcServer.h`** (**`subsystem*to_name_map*\***`\*\* w innych plikach):
 ```c
@@ -138,7 +138,7 @@ OutHeadP->msgh_local_port = MACH_PORT_NULL;
 OutHeadP->msgh_id = InHeadP->msgh_id + 100;
 OutHeadP->msgh_reserved = 0;
 
-if ((InHeadP->msgh_id > 500) || (InHeadP->msgh_id &#x3C; 500) ||
+if ((InHeadP->msgh_id > 500) || (InHeadP->msgh_id < 500) ||
 <strong>	    ((routine = SERVERPREFmyipc_subsystem.routine[InHeadP->msgh_id - 500].stub_routine) == 0)) {
 </strong>		((mig_reply_error_t *)OutHeadP)->NDR = NDR_record;
 ((mig_reply_error_t *)OutHeadP)->RetCode = MIG_BAD_ID;
@@ -149,7 +149,7 @@ return FALSE;
 }
 </code></pre>
 
-Sprawdź wcześniej podświetlone linie uzyskujące dostęp do funkcji, aby wywołać ją według identyfikatora.
+Sprawdź wcześniej wyróżnione linie uzyskujące dostęp do funkcji, aby wywołać ją według identyfikatora.
 
 Poniższy kod tworzy prosty **serwer** i **klienta**, gdzie klient może wywołać funkcje Odejmij z serwera:
 
@@ -250,13 +250,13 @@ Wcześniej wspomniano, że funkcja, która zajmie się **wywoływaniem odpowiedn
 var_10 = arg0;
 var_18 = arg1;
 // Wstępne instrukcje do znalezienia odpowiednich wskaźników funkcji
-*(int32_t *)var_18 = *(int32_t *)var_10 &#x26; 0x1f;
+*(int32_t *)var_18 = *(int32_t *)var_10 & 0x1f;
 *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
 *(int32_t *)(var_18 + 0x4) = 0x24;
 *(int32_t *)(var_18 + 0xc) = 0x0;
 *(int32_t *)(var_18 + 0x14) = *(int32_t *)(var_10 + 0x14) + 0x64;
 *(int32_t *)(var_18 + 0x10) = 0x0;
-if (*(int32_t *)(var_10 + 0x14) &#x3C;= 0x1f4 &#x26;&#x26; *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
+if (*(int32_t *)(var_10 + 0x14) <= 0x1f4 && *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
 rax = *(int32_t *)(var_10 + 0x14);
 // Wywołanie sign_extend_64, które może pomóc w identyfikacji tej funkcji
 // To przechowuje w rax wskaźnik do wywołania, które musi być wywołane
@@ -298,7 +298,7 @@ stack[-8] = r30;
 var_10 = arg0;
 var_18 = arg1;
 // Wstępne instrukcje do znalezienia odpowiednich wskaźników funkcji
-*(int32_t *)var_18 = *(int32_t *)var_10 &#x26; 0x1f | 0x0;
+*(int32_t *)var_18 = *(int32_t *)var_10 & 0x1f | 0x0;
 *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
 *(int32_t *)(var_18 + 0x4) = 0x24;
 *(int32_t *)(var_18 + 0xc) = 0x0;
@@ -307,19 +307,19 @@ var_18 = arg1;
 r8 = *(int32_t *)(var_10 + 0x14);
 r8 = r8 - 0x1f4;
 if (r8 > 0x0) {
-if (CPU_FLAGS &#x26; G) {
+if (CPU_FLAGS & G) {
 r8 = 0x1;
 }
 }
-if ((r8 &#x26; 0x1) == 0x0) {
+if ((r8 & 0x1) == 0x0) {
 r8 = *(int32_t *)(var_10 + 0x14);
 r8 = r8 - 0x1f4;
-if (r8 &#x3C; 0x0) {
-if (CPU_FLAGS &#x26; L) {
+if (r8 < 0x0) {
+if (CPU_FLAGS & L) {
 r8 = 0x1;
 }
 }
-if ((r8 &#x26; 0x1) == 0x0) {
+if ((r8 & 0x1) == 0x0) {
 r8 = *(int32_t *)(var_10 + 0x14);
 // 0x1f4 = 500 (początkowy ID)
 <strong>                    r8 = r8 - 0x1f4;
@@ -328,19 +328,19 @@ r8 = *(r8 + 0x8);
 var_20 = r8;
 r8 = r8 - 0x0;
 if (r8 != 0x0) {
-if (CPU_FLAGS &#x26; NE) {
+if (CPU_FLAGS & NE) {
 r8 = 0x1;
 }
 }
-// To samo if else jak w poprzedniej wersji
+// To samo if - else jak w poprzedniej wersji
 // Sprawdź użycie adresu 0x100004040 (tablica adresów funkcji)
-<strong>                    if ((r8 &#x26; 0x1) == 0x0) {
+<strong>                    if ((r8 & 0x1) == 0x0) {
 </strong><strong>                            *(var_18 + 0x18) = **0x100004000;
 </strong>                            *(int32_t *)(var_18 + 0x20) = 0xfffffed1;
 var_4 = 0x0;
 }
 else {
-// Wywołanie obliczonego adresu, gdzie powinna być funkcja
+// Wywołanie do obliczonego adresu, gdzie powinna być funkcja
 <strong>                            (var_20)(var_10, var_18);
 </strong>                            var_4 = 0x1;
 }
@@ -365,7 +365,7 @@ return r0;
 {{#endtab}}
 {{#endtabs}}
 
-W rzeczywistości, jeśli przejdziesz do funkcji **`0x100004000`**, znajdziesz tablicę struktur **`routine_descriptor`**. Pierwszym elementem struktury jest **adres**, w którym **funkcja** jest zaimplementowana, a **struktura zajmuje 0x28 bajtów**, więc co 0x28 bajtów (zaczynając od bajtu 0) możesz uzyskać 8 bajtów, a to będzie **adres funkcji**, która zostanie wywołana:
+W rzeczywistości, jeśli przejdziesz do funkcji **`0x100004000`**, znajdziesz tablicę struktur **`routine_descriptor`**. Pierwszym elementem struktury jest **adres**, w którym **funkcja** jest zaimplementowana, a **struktura zajmuje 0x28 bajtów**, więc co 0x28 bajtów (zaczynając od bajtu 0) możesz uzyskać 8 bajtów, a to będzie **adres funkcji**, która ma być wywołana:
 
 <figure><img src="../../../../images/image (35).png" alt=""><figcaption></figcaption></figure>
 

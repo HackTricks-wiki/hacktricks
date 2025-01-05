@@ -48,28 +48,28 @@ Ponadto, jeśli plik zawiera atrybut **`com.apple.rootless`** jako rozszerzony *
 - Modyfikowanie zmiennych NVRAM
 - Umożliwianie debugowania jądra
 
-Opcje są przechowywane w zmiennej nvram jako bitflag (`csr-active-config` na Intel i `lp-sip0` jest odczytywane z uruchomionego drzewa urządzeń dla ARM). Flagi można znaleźć w kodzie źródłowym XNU w `csr.sh`:
+Opcje są przechowywane w zmiennej nvram jako bitflag (`csr-active-config` na Intel i `lp-sip0` jest odczytywane z uruchomionego drzewa urządzeń dla ARM). Możesz znaleźć flagi w kodzie źródłowym XNU w `csr.sh`:
 
 <figure><img src="../../../images/image (1192).png" alt=""><figcaption></figcaption></figure>
 
 ### Status SIP
 
-Możesz sprawdzić, czy SIP jest włączony w swoim systemie, używając następującego polecenia:
+Możesz sprawdzić, czy SIP jest włączony w swoim systemie za pomocą następującego polecenia:
 ```bash
 csrutil status
 ```
-Jeśli musisz wyłączyć SIP, musisz uruchomić komputer w trybie odzyskiwania (naciskając Command+R podczas uruchamiania), a następnie wykonać następujące polecenie:
+Jeśli musisz wyłączyć SIP, musisz zrestartować komputer w trybie odzyskiwania (naciskając Command+R podczas uruchamiania), a następnie wykonać następujące polecenie:
 ```bash
 csrutil disable
 ```
-Jeśli chcesz zachować włączoną SIP, ale usunąć zabezpieczenia debugowania, możesz to zrobić za pomocą:
+Jeśli chcesz zachować włączone SIP, ale usunąć zabezpieczenia debugowania, możesz to zrobić za pomocą:
 ```bash
 csrutil enable --without debug
 ```
 ### Inne Ograniczenia
 
 - **Zabrania ładowania niepodpisanych rozszerzeń jądra** (kexts), zapewniając, że tylko zweryfikowane rozszerzenia wchodzą w interakcję z jądrem systemu.
-- **Zapobiega debugowaniu** procesów systemowych macOS, chroniąc kluczowe komponenty systemu przed nieautoryzowanym dostępem i modyfikacją.
+- **Zapobiega debugowaniu** procesów systemowych macOS, chroniąc podstawowe komponenty systemu przed nieautoryzowanym dostępem i modyfikacją.
 - **Hamuje narzędzia** takie jak dtrace przed inspekcją procesów systemowych, dodatkowo chroniąc integralność działania systemu.
 
 [**Dowiedz się więcej o informacji SIP w tej prezentacji**](https://www.slideshare.net/i0n1c/syscan360-stefan-esser-os-x-el-capitan-sinking-the-ship)**.**
@@ -94,16 +94,16 @@ Obejście SIP umożliwia atakującemu:
 
 - **Dostęp do danych użytkownika**: Odczyt wrażliwych danych użytkownika, takich jak poczta, wiadomości i historia Safari ze wszystkich kont użytkowników.
 - **Obejście TCC**: Bezpośrednia manipulacja bazą danych TCC (Transparentność, Zgoda i Kontrola) w celu przyznania nieautoryzowanego dostępu do kamery internetowej, mikrofonu i innych zasobów.
-- **Ustanowienie trwałości**: Umieszczenie złośliwego oprogramowania w lokalizacjach chronionych przez SIP, co czyni je odpornym na usunięcie, nawet przez uprawnienia root. Obejmuje to również możliwość manipulacji Narzędziem Usuwania Złośliwego Oprogramowania (MRT).
+- **Ustanowienie trwałości**: Umieszczenie złośliwego oprogramowania w lokalizacjach chronionych przez SIP, co czyni je odpornym na usunięcie, nawet przez uprawnienia roota. Obejmuje to również możliwość manipulacji Narzędziem Usuwania Złośliwego Oprogramowania (MRT).
 - **Ładowanie rozszerzeń jądra**: Chociaż istnieją dodatkowe zabezpieczenia, obejście SIP upraszcza proces ładowania niepodpisanych rozszerzeń jądra.
 
 ### Pakiety instalacyjne
 
-**Pakiety instalacyjne podpisane certyfikatem Apple** mogą omijać jego zabezpieczenia. Oznacza to, że nawet pakiety podpisane przez standardowych deweloperów będą blokowane, jeśli spróbują modyfikować katalogi chronione przez SIP.
+**Pakiety instalacyjne podpisane certyfikatem Apple** mogą omijać jego zabezpieczenia. Oznacza to, że nawet pakiety podpisane przez standardowych deweloperów będą blokowane, jeśli będą próbowały modyfikować katalogi chronione przez SIP.
 
 ### Nieistniejący plik SIP
 
-Jednym z potencjalnych luk jest to, że jeśli plik jest określony w **`rootless.conf`, ale obecnie nie istnieje**, może zostać utworzony. Złośliwe oprogramowanie mogłoby to wykorzystać do **ustanowienia trwałości** w systemie. Na przykład, złośliwy program mógłby utworzyć plik .plist w `/System/Library/LaunchDaemons`, jeśli jest wymieniony w `rootless.conf`, ale nieobecny.
+Jednym z potencjalnych luk jest to, że jeśli plik jest określony w **`rootless.conf`, ale obecnie nie istnieje**, może zostać utworzony. Złośliwe oprogramowanie mogłoby to wykorzystać do **ustanowienia trwałości** w systemie. Na przykład złośliwy program mógłby utworzyć plik .plist w `/System/Library/LaunchDaemons`, jeśli jest wymieniony w `rootless.conf`, ale nieobecny.
 
 ### com.apple.rootless.install.heritable
 
@@ -112,7 +112,7 @@ Jednym z potencjalnych luk jest to, że jeśli plik jest określony w **`rootles
 
 #### [CVE-2019-8561](https://objective-see.org/blog/blog_0x42.html) <a href="#cve" id="cve"></a>
 
-Odkryto, że możliwe było **zamienienie pakietu instalacyjnego po tym, jak system zweryfikował jego podpis** i wtedy system zainstalowałby złośliwy pakiet zamiast oryginalnego. Ponieważ te działania były wykonywane przez **`system_installd`**, pozwalałoby to na obejście SIP.
+Odkryto, że możliwe było **zamienienie pakietu instalacyjnego po tym, jak system zweryfikował jego podpis** kodu, a następnie system zainstalowałby złośliwy pakiet zamiast oryginalnego. Ponieważ te działania były wykonywane przez **`system_installd`**, pozwalałoby to na obejście SIP.
 
 #### [CVE-2020–9854](https://objective-see.org/blog/blog_0x4D.html) <a href="#cve-unauthd-chain" id="cve-unauthd-chain"></a>
 
@@ -120,21 +120,21 @@ Jeśli pakiet był instalowany z zamontowanego obrazu lub zewnętrznego dysku, *
 
 #### CVE-2021-30892 - Shrootless
 
-[**Badacze z tego wpisu na blogu**](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/) odkryli lukę w mechanizmie Ochrony Integralności Systemu (SIP) macOS, nazwaną luką 'Shrootless'. Ta luka koncentruje się na demonie **`system_installd`**, który ma uprawnienie **`com.apple.rootless.install.heritable`**, co pozwala dowolnym jego procesom potomnym na obejście ograniczeń systemu plików SIP.
+[**Badacze z tego wpisu na blogu**](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/) odkryli lukę w mechanizmie Ochrony Integralności Systemu (SIP) macOS, nazwaną luką 'Shrootless'. Ta luka koncentruje się na demonie **`system_installd`**, który ma uprawnienie **`com.apple.rootless.install.heritable`**, które pozwala dowolnym jego procesom potomnym na obejście ograniczeń systemu plików SIP.
 
 Demon **`system_installd`** zainstaluje pakiety, które zostały podpisane przez **Apple**.
 
 Badacze odkryli, że podczas instalacji pakietu podpisanego przez Apple (.pkg), **`system_installd`** **uruchamia** wszelkie **skrypty po instalacji** zawarte w pakiecie. Te skrypty są wykonywane przez domyślną powłokę, **`zsh`**, która automatycznie **uruchamia** polecenia z pliku **`/etc/zshenv`**, jeśli istnieje, nawet w trybie nieinteraktywnym. To zachowanie mogłoby być wykorzystane przez atakujących: tworząc złośliwy plik `/etc/zshenv` i czekając na **`system_installd`, aby wywołać `zsh`**, mogliby przeprowadzać dowolne operacje na urządzeniu.
 
-Ponadto odkryto, że **`/etc/zshenv`** mogłoby być używane jako ogólna technika ataku, nie tylko do obejścia SIP. Każdy profil użytkownika ma plik `~/.zshenv`, który zachowuje się tak samo jak `/etc/zshenv`, ale nie wymaga uprawnień root. Plik ten mógłby być używany jako mechanizm trwałości, uruchamiając się za każdym razem, gdy `zsh` się uruchamia, lub jako mechanizm podwyższenia uprawnień. Jeśli użytkownik administracyjny podniesie uprawnienia do roota za pomocą `sudo -s` lub `sudo <polecenie>`, plik `~/.zshenv` zostanie uruchomiony, skutecznie podnosząc uprawnienia do roota.
+Ponadto odkryto, że **`/etc/zshenv`** mogłoby być używane jako ogólna technika ataku, nie tylko do obejścia SIP. Każdy profil użytkownika ma plik `~/.zshenv`, który zachowuje się tak samo jak `/etc/zshenv`, ale nie wymaga uprawnień roota. Plik ten mógłby być używany jako mechanizm trwałości, uruchamiając się za każdym razem, gdy `zsh` się uruchamia, lub jako mechanizm podwyższania uprawnień. Jeśli użytkownik administracyjny podniesie uprawnienia do roota, używając `sudo -s` lub `sudo <polecenie>`, plik `~/.zshenv` zostanie uruchomiony, skutecznie podnosząc uprawnienia do roota.
 
 #### [**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-2022-22583/)
 
-W [**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-2022-22583/) odkryto, że ten sam proces **`system_installd`** mógł być nadal nadużywany, ponieważ umieszczał **skrypt po instalacji w losowo nazwanym folderze chronionym przez SIP w `/tmp`**. Problem polega na tym, że **`/tmp` sam w sobie nie jest chroniony przez SIP**, więc możliwe było **zamontowanie** **obrazu wirtualnego na nim**, a następnie **instalator** umieściłby tam **skrypt po instalacji**, **odmontował** obraz wirtualny, **odtworzył** wszystkie **foldery** i **dodał** **skrypt po instalacji** z **ładunkiem** do wykonania.
+W [**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-2022-22583/) odkryto, że ten sam proces **`system_installd`** mógł być nadal nadużywany, ponieważ umieszczał **skrypt po instalacji w losowo nazwanym folderze chronionym przez SIP w `/tmp`**. Problem polega na tym, że **`/tmp`** sam w sobie nie jest chroniony przez SIP, więc możliwe było **zamontowanie** **obrazu wirtualnego na nim**, a następnie **instalator** umieściłby tam **skrypt po instalacji**, **odmontował** obraz wirtualny, **odtworzył** wszystkie **foldery** i **dodał** **skrypt po instalacji** z **ładunkiem** do wykonania.
 
 #### [fsck_cs utility](https://www.theregister.com/2016/03/30/apple_os_x_rootless/)
 
-Zidentyfikowano lukę, w której **`fsck_cs`** został wprowadzony w błąd do uszkodzenia kluczowego pliku, z powodu jego zdolności do śledzenia **linków symbolicznych**. Konkretnie, atakujący stworzyli link z _`/dev/diskX`_ do pliku `/System/Library/Extensions/AppleKextExcludeList.kext/Contents/Info.plist`. Wykonanie **`fsck_cs`** na _`/dev/diskX`_ doprowadziło do uszkodzenia `Info.plist`. Integralność tego pliku jest kluczowa dla SIP (Ochrony Integralności Systemu) systemu operacyjnego, który kontroluje ładowanie rozszerzeń jądra. Po uszkodzeniu zdolność SIP do zarządzania wykluczeniami jądra jest zagrożona.
+Zidentyfikowano lukę, w której **`fsck_cs`** został wprowadzony w błąd do uszkodzenia kluczowego pliku, z powodu jego zdolności do podążania za **linkami symbolicznymi**. Konkretnie, atakujący stworzyli link z _`/dev/diskX`_ do pliku `/System/Library/Extensions/AppleKextExcludeList.kext/Contents/Info.plist`. Wykonanie **`fsck_cs`** na _`/dev/diskX`_ doprowadziło do uszkodzenia `Info.plist`. Integralność tego pliku jest kluczowa dla SIP (Ochrony Integralności Systemu) systemu operacyjnego, która kontroluje ładowanie rozszerzeń jądra. Po uszkodzeniu, zdolność SIP do zarządzania wykluczeniami jądra jest zagrożona.
 
 Polecenia do wykorzystania tej luki to:
 ```bash
@@ -154,13 +154,13 @@ mkdir evil
 hdiutil create -srcfolder evil evil.dmg
 hdiutil attach -mountpoint /System/Library/Snadbox/ evil.dmg
 ```
-#### [Obejście upgradera (2016)](https://objective-see.org/blog/blog_0x14.html)
+#### [Upgrader bypass (2016)](https://objective-see.org/blog/blog_0x14.html)
 
 System jest ustawiony na uruchamianie z wbudowanego obrazu dysku instalacyjnego w `Install macOS Sierra.app`, aby zaktualizować system operacyjny, wykorzystując narzędzie `bless`. Używana komenda jest następująca:
 ```bash
 /usr/sbin/bless -setBoot -folder /Volumes/Macintosh HD/macOS Install Data -bootefi /Volumes/Macintosh HD/macOS Install Data/boot.efi -options config="\macOS Install Data\com.apple.Boot" -label macOS Installer
 ```
-Bezpieczeństwo tego procesu może być zagrożone, jeśli atakujący zmieni obraz aktualizacji (`InstallESD.dmg`) przed uruchomieniem. Strategia polega na zastąpieniu dynamicznego loadera (dyld) złośliwą wersją (`libBaseIA.dylib`). To zastąpienie skutkuje wykonaniem kodu atakującego, gdy instalator zostaje uruchomiony.
+Bezpieczeństwo tego procesu może zostać naruszone, jeśli atakujący zmieni obraz aktualizacji (`InstallESD.dmg`) przed uruchomieniem. Strategia polega na zastąpieniu dynamicznego loadera (dyld) złośliwą wersją (`libBaseIA.dylib`). To zastąpienie skutkuje wykonaniem kodu atakującego, gdy instalator zostaje uruchomiony.
 
 Kod atakującego przejmuje kontrolę podczas procesu aktualizacji, wykorzystując zaufanie systemu do instalatora. Atak postępuje poprzez modyfikację obrazu `InstallESD.dmg` za pomocą metody swizzling, szczególnie celując w metodę `extractBootBits`. Umożliwia to wstrzyknięcie złośliwego kodu przed użyciem obrazu dysku.
 
@@ -168,7 +168,7 @@ Ponadto, w `InstallESD.dmg` znajduje się `BaseSystem.dmg`, który służy jako 
 
 #### [systemmigrationd (2023)](https://www.youtube.com/watch?v=zxZesAN-TEk)
 
-W tym wystąpieniu z [**DEF CON 31**](https://www.youtube.com/watch?v=zxZesAN-TEk) pokazano, jak **`systemmigrationd`** (który może omijać SIP) wykonuje skrypt **bash** i **perl**, które mogą być nadużywane za pomocą zmiennych środowiskowych **`BASH_ENV`** i **`PERL5OPT`**.
+W tym wystąpieniu z [**DEF CON 31**](https://www.youtube.com/watch?v=zxZesAN-TEk) pokazano, jak **`systemmigrationd`** (które może omijać SIP) wykonuje skrypt **bash** i **perl**, które mogą być nadużywane za pomocą zmiennych środowiskowych **`BASH_ENV`** i **`PERL5OPT`**.
 
 #### CVE-2023-42860 <a href="#cve-a-detailed-look" id="cve-a-detailed-look"></a>
 
@@ -195,7 +195,7 @@ Oto bardziej szczegółowy opis:
 
 1. **Niemodyfikowalny System**: Zatwierdzone Zrzuty Systemu sprawiają, że wolumen systemowy macOS jest "niemodyfikowalny", co oznacza, że nie może być zmieniany. Zapobiega to wszelkim nieautoryzowanym lub przypadkowym zmianom w systemie, które mogłyby zagrozić bezpieczeństwu lub stabilności systemu.
 2. **Aktualizacje Oprogramowania Systemowego**: Gdy instalujesz aktualizacje lub ulepszenia macOS, macOS tworzy nowy zrzut systemu. Wolumen startowy macOS następnie używa **APFS (Apple File System)** do przełączenia się na ten nowy zrzut. Cały proces stosowania aktualizacji staje się bezpieczniejszy i bardziej niezawodny, ponieważ system zawsze może wrócić do poprzedniego zrzutu, jeśli coś pójdzie nie tak podczas aktualizacji.
-3. **Separacja Danych**: W połączeniu z koncepcją separacji Danych i wolumenu Systemowego wprowadzoną w macOS Catalina, funkcja Zatwierdzonego Zrzutu Systemu zapewnia, że wszystkie twoje dane i ustawienia są przechowywane na oddzielnym wolumenie "**Dane**". Ta separacja sprawia, że twoje dane są niezależne od systemu, co upraszcza proces aktualizacji systemu i zwiększa bezpieczeństwo systemu.
+3. **Separacja Danych**: W połączeniu z koncepcją separacji danych i wolumenu systemowego wprowadzoną w macOS Catalina, funkcja Zatwierdzonego Zrzutu Systemu zapewnia, że wszystkie twoje dane i ustawienia są przechowywane na oddzielnym wolumenie "**Dane**". Ta separacja sprawia, że twoje dane są niezależne od systemu, co upraszcza proces aktualizacji systemu i zwiększa bezpieczeństwo systemu.
 
 Pamiętaj, że te zrzuty są automatycznie zarządzane przez macOS i nie zajmują dodatkowego miejsca na twoim dysku, dzięki możliwościom współdzielenia przestrzeni APFS. Ważne jest również, aby zauważyć, że te zrzuty różnią się od **zrzutów Time Machine**, które są kopią zapasową całego systemu dostępną dla użytkownika.
 
@@ -210,7 +210,7 @@ Polecenie **`diskutil apfs list`** wyświetla **szczegóły wolumenów APFS** i 
 |   Capacity In Use By Volumes:   219214536704 B (219.2 GB) (44.3% used)
 |   Capacity Not Allocated:       275170258944 B (275.2 GB) (55.7% free)
 |   |
-|   +-&#x3C; Physical Store disk0s2 86D4B7EC-6FA5-4042-93A7-D3766A222EBE
+|   +-< Physical Store disk0s2 86D4B7EC-6FA5-4042-93A7-D3766A222EBE
 |   |   -----------------------------------------------------------
 |   |   APFS Physical Store Disk:   disk0s2
 |   |   Size:                       494384795648 B (494.4 GB)
@@ -242,9 +242,9 @@ Polecenie **`diskutil apfs list`** wyświetla **szczegóły wolumenów APFS** i 
 
 W poprzednim wyjściu można zobaczyć, że **lokacje dostępne dla użytkownika** są zamontowane pod `/System/Volumes/Data`.
 
-Ponadto, **zrzut wolumenu systemowego macOS** jest zamontowany w `/` i jest **zatwierdzony** (podpisany kryptograficznie przez system operacyjny). Więc, jeśli SIP zostanie ominięty i zmodyfikowany, **system operacyjny nie uruchomi się więcej**.
+Ponadto, **zrzut wolumenu systemowego macOS** jest zamontowany w `/` i jest **zatwierdzony** (podpisany kryptograficznie przez system operacyjny). Tak więc, jeśli SIP zostanie ominięty i zmodyfikowany, **system operacyjny nie uruchomi się więcej**.
 
-Można również **zweryfikować, że pieczęć jest włączona**, uruchamiając:
+Możliwe jest również **zweryfikowanie, że pieczęć jest włączona**, uruchamiając:
 ```bash
 csrutil authenticated-root status
 Authenticated Root status: enabled

@@ -8,7 +8,7 @@ Namespace UTS (UNIX Time-Sharing System) to funkcja jądra Linux, która zapewni
 
 ### Jak to działa:
 
-1. Gdy nowy namespace UTS jest tworzony, zaczyna od **kopii nazwy hosta i nazwy domeny NIS z jego rodzicielskiego namespace**. Oznacza to, że przy tworzeniu nowy namespace **dzieli te same identyfikatory co jego rodzic**. Jednak wszelkie późniejsze zmiany w nazwie hosta lub nazwie domeny NIS w obrębie namespace nie wpłyną na inne namespace.
+1. Gdy nowy namespace UTS jest tworzony, zaczyna od **kopii nazwy hosta i nazwy domeny NIS z jego rodzicielskiego namespace**. Oznacza to, że w momencie utworzenia nowy namespace **dzieli te same identyfikatory co jego rodzic**. Jednak wszelkie późniejsze zmiany w nazwie hosta lub nazwie domeny NIS w obrębie namespace nie wpłyną na inne namespace.
 2. Procesy w obrębie namespace UTS **mogą zmieniać nazwę hosta i nazwę domeny NIS** za pomocą wywołań systemowych `sethostname()` i `setdomainname()`, odpowiednio. Te zmiany są lokalne dla namespace i nie wpływają na inne namespace ani na system gospodarza.
 3. Procesy mogą przemieszczać się między namespace za pomocą wywołania systemowego `setns()` lub tworzyć nowe namespace za pomocą wywołań systemowych `unshare()` lub `clone()` z flagą `CLONE_NEWUTS`. Gdy proces przemieszcza się do nowego namespace lub tworzy jeden, zacznie używać nazwy hosta i nazwy domeny NIS związanej z tym namespace.
 
@@ -36,7 +36,7 @@ Gdy `unshare` jest wykonywane bez opcji `-f`, napotykany jest błąd z powodu sp
 
 2. **Konsekwencja**:
 
-- Zakończenie PID 1 w nowej przestrzeni nazw prowadzi do usunięcia flagi `PIDNS_HASH_ADDING`. Skutkuje to niepowodzeniem funkcji `alloc_pid` w przydzieleniu nowego PID podczas tworzenia nowego procesu, co skutkuje błędem "Nie można przydzielić pamięci".
+- Zakończenie PID 1 w nowej przestrzeni nazw prowadzi do wyczyszczenia flagi `PIDNS_HASH_ADDING`. Skutkuje to niepowodzeniem funkcji `alloc_pid` w przydzielaniu nowego PID podczas tworzenia nowego procesu, co skutkuje błędem "Nie można przydzielić pamięci".
 
 3. **Rozwiązanie**:
 - Problem można rozwiązać, używając opcji `-f` z `unshare`. Ta opcja sprawia, że `unshare` fork'uje nowy proces po utworzeniu nowej przestrzeni nazw PID.
@@ -50,7 +50,7 @@ Zapewniając, że `unshare` działa z flagą `-f`, nowa przestrzeń nazw PID jes
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-### &#x20;Sprawdź, w którym namespace znajduje się twój proces
+### Sprawdź, w której przestrzeni nazw znajduje się twój proces
 ```bash
 ls -l /proc/self/ns/uts
 lrwxrwxrwx 1 root root 0 Apr  4 20:49 /proc/self/ns/uts -> 'uts:[4026531838]'

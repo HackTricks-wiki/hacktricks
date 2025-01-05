@@ -12,7 +12,7 @@ macos-security-protections/macos-tcc/
 
 ## Linux Privesc
 
-Proszę zauważyć, że **większość sztuczek dotyczących eskalacji uprawnień wpływających na Linux/Unix będzie miała również wpływ na maszyny MacOS**. Zobacz więc:
+Należy zauważyć, że **większość sztuczek dotyczących eskalacji uprawnień wpływających na Linux/Unix wpłynie również na maszyny MacOS**. Zobacz więc:
 
 {{#ref}}
 ../../linux-hardening/privilege-escalation/
@@ -22,7 +22,7 @@ Proszę zauważyć, że **większość sztuczek dotyczących eskalacji uprawnie�
 
 ### Sudo Hijacking
 
-Możesz znaleźć oryginalną [technikę Sudo Hijacking w poście o eskalacji uprawnień Linux](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
+Możesz znaleźć oryginalną [technikę Sudo Hijacking w poście o eskalacji uprawnień w Linuxie](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
 
 Jednak macOS **zachowuje** **`PATH`** użytkownika, gdy wykonuje **`sudo`**. Co oznacza, że innym sposobem na przeprowadzenie tego ataku byłoby **przejęcie innych binarek**, które ofiara nadal wykona podczas **uruchamiania sudo:**
 ```bash
@@ -39,17 +39,17 @@ chmod +x /opt/homebrew/bin/ls
 # victim
 sudo ls
 ```
-Zauważ, że użytkownik korzystający z terminala prawdopodobnie ma **zainstalowane Homebrew**. Możliwe jest więc przejęcie binarek w **`/opt/homebrew/bin`**.
+Zauważ, że użytkownik korzystający z terminala prawdopodobnie ma **zainstalowany Homebrew**. Możliwe jest więc przejęcie binarek w **`/opt/homebrew/bin`**.
 
 ### Podszywanie się pod Dock
 
 Używając pewnych **techniki inżynierii społecznej**, możesz **podszyć się na przykład pod Google Chrome** w docku i faktycznie wykonać swój własny skrypt:
 
 {{#tabs}}
-{{#tab name="Chrome Impersonation"}}
+{{#tab name="Podszywanie się pod Chrome"}}
 Kilka sugestii:
 
-- Sprawdź w Docku, czy jest Chrome, a w takim przypadku **usuń** ten wpis i **dodaj** **fałszywy** **wpis Chrome w tej samej pozycji** w tablicy Dock.&#x20;
+- Sprawdź w Docku, czy jest Chrome, a w takim przypadku **usuń** ten wpis i **dodaj** **fałszywy** **wpis Chrome w tej samej pozycji** w tablicy Dock.
 ```bash
 #!/bin/sh
 
@@ -126,9 +126,9 @@ Kilka sugestii:
 
 - Nie **możesz usunąć Findera z Docka**, więc jeśli zamierzasz dodać go do Docka, możesz umieścić fałszywego Findera tuż obok prawdziwego. W tym celu musisz **dodać fałszywy wpis Findera na początku tablicy Docka**.
 - Inną opcją jest nie umieszczanie go w Docku i po prostu otwarcie go, "Finder prosi o kontrolę Findera" nie jest takie dziwne.
-- Inną opcją na **eskalację do roota bez pytania** o hasło z oknem dialogowym, jest sprawienie, by Finder naprawdę poprosił o hasło do wykonania uprzywilejowanej akcji:
-- Poproś Findera o skopiowanie do **`/etc/pam.d`** nowego pliku **`sudo`** (Okno dialogowe pytające o hasło wskaże, że "Finder chce skopiować sudo")
-- Poproś Findera o skopiowanie nowego **Pluginu Autoryzacji** (Możesz kontrolować nazwę pliku, aby okno dialogowe pytające o hasło wskazywało, że "Finder chce skopiować Finder.bundle")
+- Inną opcją na **eskalację do roota bez pytania** o hasło za pomocą okna, jest sprawienie, by Finder naprawdę poprosił o hasło do wykonania uprzywilejowanej akcji:
+- Poproś Findera o skopiowanie do **`/etc/pam.d`** nowego pliku **`sudo`** (Okno pytające o hasło wskaże, że "Finder chce skopiować sudo")
+- Poproś Findera o skopiowanie nowego **Pluginu Autoryzacji** (Możesz kontrolować nazwę pliku, aby okno pytające o hasło wskazywało, że "Finder chce skopiować Finder.bundle")
 ```bash
 #!/bin/sh
 

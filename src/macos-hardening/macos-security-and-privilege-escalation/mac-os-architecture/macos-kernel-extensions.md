@@ -8,14 +8,14 @@ Rozszerzenia jądra (Kexts) to **pakiety** z rozszerzeniem **`.kext`**, które s
 
 ### Wymagania
 
-Oczywiście, jest to tak potężne, że **załadowanie rozszerzenia jądra** jest **skomplikowane**. Oto **wymagania**, które musi spełnić rozszerzenie jądra, aby mogło być załadowane:
+Oczywiście, jest to na tyle potężne, że **załadowanie rozszerzenia jądra** jest **skomplikowane**. Oto **wymagania**, które musi spełniać rozszerzenie jądra, aby mogło być załadowane:
 
 - Podczas **wejścia w tryb odzyskiwania**, rozszerzenia jądra **muszą być dozwolone** do załadowania:
 
 <figure><img src="../../../images/image (327).png" alt=""><figcaption></figcaption></figure>
 
-- Rozszerzenie jądra musi być **podpisane certyfikatem podpisu kodu jądra**, który może być **przyznany tylko przez Apple**. Kto dokładnie przeanalizuje firmę i powody, dla których jest to potrzebne.
-- Rozszerzenie jądra musi być również **notaryzowane**, Apple będzie mogło je sprawdzić pod kątem złośliwego oprogramowania.
+- Rozszerzenie jądra musi być **podpisane certyfikatem podpisywania kodu jądra**, który może być **przyznany tylko przez Apple**. Kto dokładnie przeanalizuje firmę i powody, dla których jest to potrzebne.
+- Rozszerzenie jądra musi być również **notarized**, Apple będzie mogło sprawdzić je pod kątem złośliwego oprogramowania.
 - Następnie, użytkownik **root** jest tym, który może **załadować rozszerzenie jądra**, a pliki wewnątrz pakietu muszą **należeć do roota**.
 - Podczas procesu ładowania, pakiet musi być przygotowany w **chronionej lokalizacji nie-root**: `/Library/StagedExtensions` (wymaga przyznania `com.apple.rootless.storage.KernelExtensionManagement`).
 - Na koniec, podczas próby załadowania, użytkownik [**otrzyma prośbę o potwierdzenie**](https://developer.apple.com/library/archive/technotes/tn2459/_index.html) i, jeśli zostanie zaakceptowana, komputer musi być **uruchomiony ponownie**, aby go załadować.
@@ -25,9 +25,9 @@ Oczywiście, jest to tak potężne, że **załadowanie rozszerzenia jądra** jes
 W Catalina wyglądało to tak: Interesujące jest to, że proces **weryfikacji** odbywa się w **userland**. Jednak tylko aplikacje z przyznaniem **`com.apple.private.security.kext-management`** mogą **zażądać od jądra załadowania rozszerzenia**: `kextcache`, `kextload`, `kextutil`, `kextd`, `syspolicyd`
 
 1. **`kextutil`** cli **rozpoczyna** proces **weryfikacji** ładowania rozszerzenia
-- Będzie rozmawiać z **`kextd`**, wysyłając za pomocą **usługi Mach**.
+- Będzie komunikować się z **`kextd`** za pomocą **usługi Mach**.
 2. **`kextd`** sprawdzi kilka rzeczy, takich jak **podpis**
-- Będzie rozmawiać z **`syspolicyd`**, aby **sprawdzić**, czy rozszerzenie może być **załadowane**.
+- Będzie komunikować się z **`syspolicyd`**, aby **sprawdzić**, czy rozszerzenie może być **załadowane**.
 3. **`syspolicyd`** **poprosi** **użytkownika**, jeśli rozszerzenie nie zostało wcześniej załadowane.
 - **`syspolicyd`** przekaże wynik do **`kextd`**
 4. **`kextd`** w końcu będzie mógł **powiedzieć jądru, aby załadowało** rozszerzenie
@@ -45,7 +45,7 @@ kextstat | grep " 22 " | cut -c2-5,50- | cut -d '(' -f1
 ## Kernelcache
 
 > [!CAUTION]
-> Mimo że rozszerzenia jądra powinny znajdować się w `/System/Library/Extensions/`, jeśli przejdziesz do tego folderu, **nie znajdziesz żadnego pliku binarnego**. Dzieje się tak z powodu **kernelcache** i aby odwrócić jedno `.kext`, musisz znaleźć sposób na jego uzyskanie.
+> Mimo że rozszerzenia jądra powinny znajdować się w `/System/Library/Extensions/`, jeśli przejdziesz do tego folderu, **nie znajdziesz żadnego pliku binarnego**. Dzieje się tak z powodu **kernelcache**, a aby odwrócić jeden `.kext`, musisz znaleźć sposób na jego uzyskanie.
 
 **Kernelcache** to **wstępnie skompilowana i wstępnie połączona wersja jądra XNU**, wraz z niezbędnymi **sterownikami** i **rozszerzeniami jądra**. Jest przechowywana w formacie **skompresowanym** i dekompresowana do pamięci podczas procesu uruchamiania. Kernelcache ułatwia **szybszy czas uruchamiania**, mając gotową do uruchomienia wersję jądra i kluczowych sterowników, co zmniejsza czas i zasoby, które w przeciwnym razie byłyby wydawane na dynamiczne ładowanie i łączenie tych komponentów w czasie uruchamiania.
 
@@ -58,7 +58,7 @@ W moim przypadku w macOS znalazłem go w:
 
 #### IMG4
 
-Format pliku IMG4 to format kontenerowy używany przez Apple w jego urządzeniach iOS i macOS do bezpiecznego **przechowywania i weryfikowania komponentów oprogramowania układowego** (takich jak **kernelcache**). Format IMG4 zawiera nagłówek i kilka tagów, które kapsułkują różne fragmenty danych, w tym rzeczywisty ładunek (tak jak jądro lub bootloader), podpis oraz zestaw właściwości manifestu. Format wspiera weryfikację kryptograficzną, pozwalając urządzeniu potwierdzić autentyczność i integralność komponentu oprogramowania układowego przed jego wykonaniem.
+Format pliku IMG4 to format kontenera używany przez Apple w urządzeniach iOS i macOS do bezpiecznego **przechowywania i weryfikowania komponentów oprogramowania układowego** (takich jak **kernelcache**). Format IMG4 zawiera nagłówek i kilka tagów, które kapsułkują różne fragmenty danych, w tym rzeczywisty ładunek (tak jak jądro lub bootloader), podpis oraz zestaw właściwości manifestu. Format wspiera weryfikację kryptograficzną, pozwalając urządzeniu potwierdzić autentyczność i integralność komponentu oprogramowania układowego przed jego wykonaniem.
 
 Zwykle składa się z następujących komponentów:
 
@@ -71,9 +71,9 @@ Zwykle składa się z następujących komponentów:
 - **Restore Info (IM4R)**:
 - Znany również jako APNonce
 - Zapobiega powtarzaniu niektórych aktualizacji
-- OPCJONALNE: Zwykle to nie jest znalezione
+- OPCJONALNE: Zwykle nie jest to znalezione
 
-Dekomprymuj Kernelcache:
+Rozpakuj Kernelcache:
 ```bash
 # img4tool (https://github.com/tihmstar/img4tool
 img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
@@ -81,13 +81,13 @@ img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 # pyimg4 (https://github.com/m1stadev/PyIMG4)
 pyimg4 im4p extract -i kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 ```
-### Pobierz&#x20;
+### Pobierz
 
 - [**KernelDebugKit Github**](https://github.com/dortania/KdkSupportPkg/releases)
 
 W [https://github.com/dortania/KdkSupportPkg/releases](https://github.com/dortania/KdkSupportPkg/releases) można znaleźć wszystkie zestawy debugowania jądra. Możesz je pobrać, zamontować, otworzyć za pomocą narzędzia [Suspicious Package](https://www.mothersruin.com/software/SuspiciousPackage/get.html), uzyskać dostęp do folderu **`.kext`** i **wyodrębnić go**.
 
-Sprawdź go pod kątem symboli za pomocą:
+Sprawdź to pod kątem symboli za pomocą:
 ```bash
 nm -a ~/Downloads/Sandbox.kext/Contents/MacOS/Sandbox | wc -l
 ```

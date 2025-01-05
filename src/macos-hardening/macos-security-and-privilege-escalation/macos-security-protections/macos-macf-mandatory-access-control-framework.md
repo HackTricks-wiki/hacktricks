@@ -4,7 +4,7 @@
 
 ## Podstawowe informacje
 
-**MACF** oznacza **Framework Obowiązkowej Kontroli Dostępu**, który jest systemem zabezpieczeń wbudowanym w system operacyjny, aby pomóc chronić komputer. Działa poprzez ustalanie **ścisłych zasad dotyczących tego, kto lub co może uzyskać dostęp do określonych części systemu**, takich jak pliki, aplikacje i zasoby systemowe. Dzięki automatycznemu egzekwowaniu tych zasad, MACF zapewnia, że tylko autoryzowani użytkownicy i procesy mogą wykonywać określone działania, co zmniejsza ryzyko nieautoryzowanego dostępu lub złośliwych działań.
+**MACF** oznacza **Mandatory Access Control Framework**, który jest systemem zabezpieczeń wbudowanym w system operacyjny, aby pomóc chronić komputer. Działa poprzez ustalanie **ścisłych zasad dotyczących tego, kto lub co może uzyskać dostęp do określonych części systemu**, takich jak pliki, aplikacje i zasoby systemowe. Dzięki automatycznemu egzekwowaniu tych zasad, MACF zapewnia, że tylko autoryzowani użytkownicy i procesy mogą wykonywać określone działania, co zmniejsza ryzyko nieautoryzowanego dostępu lub złośliwych działań.
 
 Należy zauważyć, że MACF nie podejmuje rzeczywistych decyzji, ponieważ po prostu **przechwytuje** działania, pozostawiając decyzje modułom **polityki** (rozszerzenia jądra), które wywołuje, takim jak `AppleMobileFileIntegrity.kext`, `Quarantine.kext`, `Sandbox.kext`, `TMSafetyNet.kext` i `mcxalr.kext`.
 
@@ -17,7 +17,7 @@ Należy zauważyć, że MACF nie podejmuje rzeczywistych decyzji, ponieważ po p
 5. MACF wywołuje odpowiednie polityki
 6. Polityki wskazują, czy zezwalają na działanie, czy je odrzucają
 
-> [!OSTRZEŻENIE]
+> [!CAUTION]
 > Apple jest jedyną firmą, która może korzystać z KPI Framework MAC.
 
 ### Etykiety
@@ -26,7 +26,7 @@ MACF używa **etykiet**, które następnie polityki sprawdzają, czy powinny prz
 
 ## Polityki MACF
 
-Polityka MACF definiuje **zasady i warunki, które mają być stosowane w określonych operacjach jądra**.&#x20;
+Polityka MACF definiuje **zasady i warunki, które mają być stosowane w określonych operacjach jądra**.
 
 Rozszerzenie jądra może skonfigurować strukturę `mac_policy_conf`, a następnie zarejestrować ją, wywołując `mac_policy_register`. Z [tutaj](https://opensource.apple.com/source/xnu/xnu-2050.18.24/security/mac_policy.h.auto.html):
 ```c
@@ -69,7 +69,7 @@ void			*mpc_data;		/** module data */
 
 Należy zauważyć, że polityki MACF mogą być rejestrowane i deregisterowane również **dynamicznie**.
 
-Jednym z głównych pól `mac_policy_conf` jest **`mpc_ops`**. To pole określa, które operacje interesują politykę. Należy zauważyć, że jest ich setki, więc możliwe jest wyzerowanie wszystkich z nich, a następnie wybranie tylko tych, którymi polityka jest zainteresowana. Stąd: [here](https://opensource.apple.com/source/xnu/xnu-2050.18.24/security/mac_policy.h.auto.html):
+Jednym z głównych pól `mac_policy_conf` jest **`mpc_ops`**. To pole określa, które operacje interesują politykę. Należy zauważyć, że jest ich setki, więc możliwe jest wyzerowanie wszystkich z nich, a następnie wybranie tylko tych, którymi polityka jest zainteresowana. Z [tutaj](https://opensource.apple.com/source/xnu/xnu-2050.18.24/security/mac_policy.h.auto.html):
 ```c
 struct mac_policy_ops {
 mpo_audit_check_postselect_t		*mpo_audit_check_postselect;
@@ -111,7 +111,7 @@ mmap(proc_t p, struct mmap_args *uap, user_addr_t *retval)
 #if CONFIG_MACF
 <strong>			error = mac_file_check_mmap(vfs_context_ucred(ctx),
 </strong>			    fp->fp_glob, prot, flags, file_pos + pageoff,
-&#x26;maxprot);
+&maxprot);
 if (error) {
 (void)vnode_put(vp);
 goto bad;
@@ -160,7 +160,7 @@ error = mac_error_select(__step_err, error);         \
 Który przejdzie przez wszystkie zarejestrowane polityki mac, wywołując ich funkcje i przechowując wynik w zmiennej error, która będzie mogła być nadpisana tylko przez `mac_error_select` za pomocą kodów sukcesu, więc jeśli jakiekolwiek sprawdzenie nie powiedzie się, całe sprawdzenie nie powiedzie się, a akcja nie będzie dozwolona.
 
 > [!TIP]
-> Jednak pamiętaj, że nie wszystkie wywołania MACF są używane tylko do odrzucania działań. Na przykład `mac_priv_grant` wywołuje makro [**MAC_GRANT**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_internal.h#L274), które przyzna żądane uprawnienie, jeśli jakakolwiek polityka odpowie 0:
+> Jednak pamiętaj, że nie wszystkie wywołania MACF są używane tylko do odrzucania akcji. Na przykład `mac_priv_grant` wywołuje makro [**MAC_GRANT**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_internal.h#L274), które przyzna żądane uprawnienie, jeśli jakakolwiek polityka odpowie 0:
 >
 > ```c
 > /*
@@ -203,13 +203,13 @@ goto skip_syscall;
 }
 #endif /* CONFIG_MACF */
 ```
-Który sprawdzi w wywołującym procesie **bitmaskę**, czy bieżące wywołanie syscalls powinno wywołać `mac_proc_check_syscall_unix`. Dzieje się tak, ponieważ wywołania syscalls są wywoływane tak często, że warto unikać wywoływania `mac_proc_check_syscall_unix` za każdym razem.
+Który sprawdzi w wywołującym procesie **bitmaskę**, czy bieżące wywołanie systemowe powinno wywołać `mac_proc_check_syscall_unix`. Dzieje się tak, ponieważ wywołania systemowe są wywoływane tak często, że warto unikać wywoływania `mac_proc_check_syscall_unix` za każdym razem.
 
-Zauważ, że funkcja `proc_set_syscall_filter_mask()`, która ustawia bitmaskę wywołań syscalls w procesie, jest wywoływana przez Sandbox w celu ustawienia masek na procesach w piaskownicy.
+Należy zauważyć, że funkcja `proc_set_syscall_filter_mask()`, która ustawia bitmaskę wywołań systemowych w procesie, jest wywoływana przez Sandbox w celu ustawienia masek na procesach w piaskownicy.
 
-## Ekspozycja syscalls MACF
+## Ekspozycja wywołań systemowych MACF
 
-Możliwe jest interakcja z MACF za pomocą niektórych wywołań syscalls zdefiniowanych w [security/mac.h](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac.h#L151):
+Możliwe jest interakcja z MACF za pomocą niektórych wywołań systemowych zdefiniowanych w [security/mac.h](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac.h#L151):
 ```c
 /*
 * Extended non-POSIX.1e interfaces that offer additional services
