@@ -4,14 +4,14 @@
 
 ## Osnovne informacije
 
-Mount namespace je funkcija Linux kernela koja pruža izolaciju tačaka montiranja fajl sistema koje vide grupa procesa. Svaki mount namespace ima svoj set tačaka montiranja fajl sistema, i **promene na tačkama montiranja u jednom namespace-u ne utiču na druge namespace-e**. To znači da procesi koji se izvršavaju u različitim mount namespace-ima mogu imati različite poglede na hijerarhiju fajl sistema.
+Mount namespace je funkcija Linux jezgra koja obezbeđuje izolaciju tačaka montiranja fajl sistema koje vide grupa procesa. Svaki mount namespace ima svoj set tačaka montiranja fajl sistema, i **promene na tačkama montiranja u jednom namespace-u ne utiču na druge namespace-e**. To znači da procesi koji se izvršavaju u različitim mount namespace-ima mogu imati različite poglede na hijerarhiju fajl sistema.
 
 Mount namespace-i su posebno korisni u kontejnerizaciji, gde svaki kontejner treba da ima svoj fajl sistem i konfiguraciju, izolovanu od drugih kontejnera i host sistema.
 
 ### Kako to funkcioniše:
 
 1. Kada se kreira novi mount namespace, on se inicijalizuje sa **kopijom tačaka montiranja iz svog roditeljskog namespace-a**. To znači da, prilikom kreiranja, novi namespace deli isti pogled na fajl sistem kao njegov roditelj. Međutim, sve kasnije promene na tačkama montiranja unutar namespace-a neće uticati na roditelja ili druge namespace-e.
-2. Kada proces modifikuje tačku montiranja unutar svog namespace-a, kao što je montiranje ili odmontiranje fajl sistema, **promena je lokalna za taj namespace** i ne utiče na druge namespace-e. Ovo omogućava svakom namespace-u da ima svoju nezavisnu hijerarhiju fajl sistema.
+2. Kada proces modifikuje tačku montiranja unutar svog namespace-a, kao što je montiranje ili odmontiranje fajl sistema, **promena je lokalna za taj namespace** i ne utiče na druge namespace-e. To omogućava svakom namespace-u da ima svoju nezavisnu hijerarhiju fajl sistema.
 3. Procesi mogu prelaziti između namespace-a koristeći `setns()` sistemski poziv, ili kreirati nove namespace-e koristeći `unshare()` ili `clone()` sistemske pozive sa `CLONE_NEWNS` flagom. Kada proces pređe u novi namespace ili ga kreira, počinje da koristi tačke montiranja povezane sa tim namespace-om.
 4. **Fajl deskriptori i inodi se dele između namespace-a**, što znači da ako proces u jednom namespace-u ima otvoren fajl deskriptor koji pokazuje na fajl, može **proslediti taj fajl deskriptor** procesu u drugom namespace-u, i **oba procesa će pristupiti istom fajlu**. Međutim, putanja fajla možda neće biti ista u oba namespace-a zbog razlika u tačkama montiranja.
 
@@ -27,25 +27,25 @@ Montiranjem nove instance `/proc` datotečnog sistema ako koristite parametar `-
 
 <details>
 
-<summary>Greška: bash: fork: Ne može da dodeli memoriju</summary>
+<summary>Greška: bash: fork: Ne može da alocira memoriju</summary>
 
-Kada se `unshare` izvrši bez opcije `-f`, dolazi do greške zbog načina na koji Linux upravlja novim PID (Process ID) namespace-ima. Ključni detalji i rešenje su navedeni u nastavku:
+Kada se `unshare` izvrši bez `-f` opcije, dolazi do greške zbog načina na koji Linux upravlja novim PID (Process ID) namespace-ima. Ključni detalji i rešenje su navedeni u nastavku:
 
 1. **Objašnjenje problema**:
 
 - Linux kernel omogućava procesu da kreira nove namespace-e koristeći `unshare` sistemski poziv. Međutim, proces koji inicira kreiranje novog PID namespace-a (poznat kao "unshare" proces) ne ulazi u novi namespace; samo njegovi podprocesi to čine.
 - Pokretanjem `%unshare -p /bin/bash%` pokreće se `/bin/bash` u istom procesu kao `unshare`. Kao rezultat, `/bin/bash` i njegovi podprocesi su u originalnom PID namespace-u.
-- Prvi podproces `/bin/bash` u novom namespace-u postaje PID 1. Kada ovaj proces izađe, pokreće čišćenje namespace-a ako nema drugih procesa, jer PID 1 ima posebnu ulogu usvajanja siročadi procesa. Linux kernel će tada onemogućiti dodelu PID-a u tom namespace-u.
+- Prvi podproces `/bin/bash` u novom namespace-u postaje PID 1. Kada ovaj proces izađe, pokreće čišćenje namespace-a ako nema drugih procesa, jer PID 1 ima posebnu ulogu usvajanja siročadi. Linux kernel će tada onemogućiti alokaciju PID-a u tom namespace-u.
 
 2. **Posledica**:
 
-- Izlazak PID 1 u novom namespace-u dovodi do čišćenja `PIDNS_HASH_ADDING` oznake. To rezultira neuspehom funkcije `alloc_pid` da dodeli novi PID prilikom kreiranja novog procesa, što proizvodi grešku "Ne može da dodeli memoriju".
+- Izlazak PID 1 u novom namespace-u dovodi do čišćenja `PIDNS_HASH_ADDING` oznake. To rezultira neuspehom funkcije `alloc_pid` da alocira novi PID prilikom kreiranja novog procesa, što proizvodi grešku "Ne može da alocira memoriju".
 
 3. **Rešenje**:
-- Problem se može rešiti korišćenjem opcije `-f` sa `unshare`. Ova opcija čini da `unshare` fork-uje novi proces nakon kreiranja novog PID namespace-a.
-- Izvršavanje `%unshare -fp /bin/bash%` osigurava da `unshare` komanda sama postane PID 1 u novom namespace-u. `/bin/bash` i njegovi podprocesi su tada sigurno sadržani unutar ovog novog namespace-a, sprečavajući prevremeni izlazak PID 1 i omogućavajući normalnu dodelu PID-a.
+- Problem se može rešiti korišćenjem `-f` opcije sa `unshare`. Ova opcija čini da `unshare` fork-uje novi proces nakon kreiranja novog PID namespace-a.
+- Izvršavanje `%unshare -fp /bin/bash%` osigurava da `unshare` komanda sama postane PID 1 u novom namespace-u. `/bin/bash` i njegovi podprocesi su tada sigurno sadržani unutar ovog novog namespace-a, sprečavajući prevremeni izlazak PID 1 i omogućavajući normalnu alokaciju PID-a.
 
-Osiguravanjem da `unshare` radi sa `-f` oznakom, novi PID namespace se ispravno održava, omogućavajući `/bin/bash` i njegovim podprocesima da funkcionišu bez susretanja greške u dodeli memorije.
+Osiguravanjem da `unshare` radi sa `-f` oznakom, novi PID namespace se ispravno održava, omogućavajući `/bin/bash` i njegovim podprocesima da funkcionišu bez susretanja greške u alokaciji memorije.
 
 </details>
 
@@ -53,7 +53,7 @@ Osiguravanjem da `unshare` radi sa `-f` oznakom, novi PID namespace se ispravno 
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-### &#x20;Proverite u kojem je namespace vaš proces
+### Proverite u kojem je namespace vaš proces
 ```bash
 ls -l /proc/self/ns/mnt
 lrwxrwxrwx 1 root root 0 Apr  4 20:30 /proc/self/ns/mnt -> 'mnt:[4026531841]'

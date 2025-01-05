@@ -3,14 +3,14 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 [**Cheat Engine**](https://www.cheatengine.org/downloads.php) je koristan program za pronalaženje gde su važni podaci sačuvani unutar memorije pokrenute igre i njihovu promenu.\
-Kada ga preuzmete i pokrenete, **dobijate** **tutorijal** o tome kako koristiti alat. Ako želite da naučite kako da koristite alat, toplo se preporučuje da ga završite.
+Kada ga preuzmete i pokrenete, **prikazuje** vam se **tutorijal** o tome kako koristiti alat. Ako želite da naučite kako da koristite alat, toplo se preporučuje da ga završite.
 
 ## Šta tražite?
 
 ![](<../../images/image (762).png>)
 
 Ovaj alat je veoma koristan za pronalaženje **gde je neki podatak** (obično broj) **sačuvan u memoriji** programa.\
-**Obično se brojevi** čuvaju u **4bajta** formatu, ali ih možete pronaći i u **double** ili **float** formatima, ili možda želite da tražite nešto **drugačije od broja**. Iz tog razloga, morate biti sigurni da **izaberete** ono što želite da **tražite**:
+**Obično se brojevi** čuvaju u **4bajt** formatu, ali ih možete pronaći i u **double** ili **float** formatima, ili možda želite da tražite nešto **drugačije od broja**. Iz tog razloga, morate biti sigurni da **izaberete** ono što želite da **tražite**:
 
 ![](<../../images/image (324).png>)
 
@@ -30,7 +30,7 @@ U _**Edit --> Settings --> Hotkeys**_ možete postaviti različite **prečice** 
 
 ## Modifikovanje vrednosti
 
-Kada **pronađete** gde je **vrednost** koju tražite (više o ovome u sledećim koracima), možete je **modifikovati** dvostrukim klikom na nju, a zatim dvostrukim klikom na njenu vrednost:
+Kada **pronađete** gde je **vrednost** koju tražite (više o tome u sledećim koracima), možete je **modifikovati** dvostrukim klikom na nju, a zatim dvostrukim klikom na njenu vrednost:
 
 ![](<../../images/image (563).png>)
 
@@ -38,7 +38,7 @@ I konačno **označite kvačicu** da biste izvršili modifikaciju u memoriji:
 
 ![](<../../images/image (385).png>)
 
-**Promena** u **memoriji** će odmah biti **primenjena** (napomena: dok igra ne koristi ovu vrednost ponovo, vrednost **neće biti ažurirana u igri**).
+**Promena** u **memoriji** će odmah biti **primenjena** (imajte na umu da dok igra ne koristi ovu vrednost ponovo, vrednost **neće biti ažurirana u igri**).
 
 ## Traženje vrednosti
 
@@ -55,7 +55,7 @@ Zatim, uradite nešto tako da **vrednost promeni**, i **zaustavite** igru i **iz
 ![](<../../images/image (684).png>)
 
 Cheat Engine će tražiti **vrednosti** koje su **prešle sa 100 na novu vrednost**. Čestitam, **pronašli ste** **adresu** vrednosti koju ste tražili, sada je možete modifikovati.\
-_&#x49;f imate još nekoliko vrednosti, uradite nešto da ponovo modifikujete tu vrednost, i izvršite još jedno "sledeće skeniranje" da filtrirate adrese._
+_Ako još uvek imate nekoliko vrednosti, uradite nešto da ponovo modifikujete tu vrednost, i izvršite još jedno "sledeće skeniranje" da filtrirate adrese._
 
 ### Nepoznata vrednost, poznata promena
 
@@ -65,17 +65,17 @@ Dakle, počnite tako što ćete izvršiti skeniranje tipa "**Nepoznata početna 
 
 ![](<../../images/image (890).png>)
 
-Zatim, promenite vrednost, navedite **kako** se **vrednost** **promenila** (u mom slučaju je smanjena za 1) i izvršite **sledeće skeniranje**:
+Zatim, promenite vrednost, navedite **kako** se **vrednost** **promenila** (u mom slučaju smanjena je za 1) i izvršite **sledeće skeniranje**:
 
 ![](<../../images/image (371).png>)
 
-Bićete predstavljeni **svim vrednostima koje su modifikovane na odabrani način**:
+Bićete prikazani **sve vrednosti koje su modifikovane na odabrani način**:
 
 ![](<../../images/image (569).png>)
 
 Kada pronađete svoju vrednost, možete je modifikovati.
 
-Napomena da postoji **mnogo mogućih promena** i možete ponavljati ove **korake koliko god želite** da filtrirate rezultate:
+Imajte na umu da postoji **mnogo mogućih promena** i možete ponavljati ove **korake koliko god želite** da filtrirate rezultate:
 
 ![](<../../images/image (574).png>)
 
@@ -94,7 +94,7 @@ Kada odaberete jednu od tih opcija, **debugger** će biti **priključen** na pro
 
 ![](<../../images/image (91).png>)
 
-Sada kada ste pronašli adresu koja modifikuje vrednost, možete **modifikovati kod po vašoj želji** (Cheat Engine vam omogućava da ga brzo modifikujete za NOPs):
+Sada kada ste pronašli adresu koja modifikuje vrednost, možete **modifikovati kod po svojoj želji** (Cheat Engine vam omogućava da ga brzo modifikujete za NOPs):
 
 ![](<../../images/image (1057).png>)
 
@@ -110,7 +110,7 @@ Zatim, izvršite novo skeniranje **tražeći heksadecimalnu vrednost između "\[
 
 ![](<../../images/image (994).png>)
 
-(_Ako se pojavi više njih, obično vam je potrebna ona sa najmanjom adresom_)\
+(_Ako se pojavi više njih, obično vam je potrebna najmanja adresa_)\
 Sada smo **pronašli pokazivač koji će modifikovati vrednost koja nas zanima**.
 
 Kliknite na "**Dodaj adresu ručno**":
@@ -121,7 +121,7 @@ Sada, kliknite na kvačicu "Pokazivač" i dodajte pronađenu adresu u tekstualno
 
 ![](<../../images/image (392).png>)
 
-(Napomena kako je prva "Adresa" automatski popunjena iz adrese pokazivača koju ste uneli)
+(Imajte na umu kako je prva "Adresa" automatski popunjena iz adrese pokazivača koju ste uneli)
 
 Kliknite na OK i biće kreiran novi pokazivač:
 
@@ -150,7 +150,7 @@ Generisaće se šablon:
 
 ![](<../../images/image (944).png>)
 
-Dakle, umetnite svoj novi assembly kod u sekciju "**newmem**" i uklonite originalni kod iz sekcije "**originalcode**" ako ne želite da se izvršava\*\*.\*\* U ovom primeru, injektovani kod će dodati 2 poena umesto oduzimanja 1:
+Dakle, umetnite svoj novi assembly kod u sekciju "**newmem**" i uklonite originalni kod iz "**originalcode**" ako ne želite da se izvršava\*\*.\*\* U ovom primeru, injektovani kod će dodati 2 poena umesto oduzimanja 1:
 
 ![](<../../images/image (521).png>)
 
@@ -158,6 +158,6 @@ Dakle, umetnite svoj novi assembly kod u sekciju "**newmem**" i uklonite origina
 
 ## **Reference**
 
-- **Cheat Engine tutorijal, završite ga da biste naučili kako da započnete sa Cheat Engine**
+- **Cheat Engine tutorijal, završite ga da biste naučili kako da počnete sa Cheat Engine**
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -4,13 +4,13 @@
 
 ## Osnovne informacije
 
-Kernel ekstenzije (Kexts) su **paketi** sa **`.kext`** ekstenzijom koji se **direktno učitavaju u macOS kernel prostor**, pružajući dodatnu funkcionalnost glavnom operativnom sistemu.
+Kernel ekstenzije (Kexts) su **paketi** sa **`.kext`** ekstenzijom koji se **učitavaju direktno u macOS kernel prostor**, pružajući dodatnu funkcionalnost glavnom operativnom sistemu.
 
 ### Zahtevi
 
 Očigledno, ovo je toliko moćno da je **komplikovano učitati kernel ekstenziju**. Ovo su **zahtevi** koje kernel ekstenzija mora ispuniti da bi bila učitana:
 
-- Kada se **ulazi u režim oporavka**, kernel **ekstenzije moraju biti dozvoljene** za učitavanje:
+- Kada **uđete u režim oporavka**, kernel **ekstenzije moraju biti dozvoljene** za učitavanje:
 
 <figure><img src="../../../images/image (327).png" alt=""><figcaption></figcaption></figure>
 
@@ -18,18 +18,18 @@ Očigledno, ovo je toliko moćno da je **komplikovano učitati kernel ekstenziju
 - Kernel ekstenzija takođe mora biti **notarizovana**, Apple će moći da je proveri na malver.
 - Zatim, **root** korisnik je taj koji može **učitati kernel ekstenziju** i datoteke unutar paketa moraju **pripadati root-u**.
 - Tokom procesa učitavanja, paket mora biti pripremljen na **zaštićenoj lokaciji koja nije root**: `/Library/StagedExtensions` (zahteva `com.apple.rootless.storage.KernelExtensionManagement` dozvolu).
-- Na kraju, kada se pokuša učitati, korisnik će [**dobiti zahtev za potvrdu**](https://developer.apple.com/library/archive/technotes/tn2459/_index.html) i, ako bude prihvaćen, računar mora biti **ponovo pokrenut** da bi se učitao.
+- Na kraju, kada pokušate da je učitate, korisnik će [**dobiti zahtev za potvrdu**](https://developer.apple.com/library/archive/technotes/tn2459/_index.html) i, ako bude prihvaćen, računar mora biti **ponovo pokrenut** da bi se učitala.
 
 ### Proces učitavanja
 
-U Catalini je to izgledalo ovako: Zanimljivo je napomenuti da se **proverava** proces odvija u **userland-u**. Međutim, samo aplikacije sa **`com.apple.private.security.kext-management`** dozvolom mogu **zatražiti od kernela da učita ekstenziju**: `kextcache`, `kextload`, `kextutil`, `kextd`, `syspolicyd`
+U Catalini je to izgledalo ovako: Zanimljivo je napomenuti da se **proverava** proces dešava u **userland-u**. Međutim, samo aplikacije sa **`com.apple.private.security.kext-management`** dozvolom mogu **zatražiti od kernela da učita ekstenziju**: `kextcache`, `kextload`, `kextutil`, `kextd`, `syspolicyd`
 
-1. **`kextutil`** cli **pokreće** **proveru** procesa za učitavanje ekstenzije
+1. **`kextutil`** cli **pokreće** **proveru** za učitavanje ekstenzije
 - Razgovaraće sa **`kextd`** slanjem putem **Mach servisa**.
 2. **`kextd`** će proveriti nekoliko stvari, kao što je **potpis**
 - Razgovaraće sa **`syspolicyd`** da **proveri** da li se ekstenzija može **učitati**.
 3. **`syspolicyd`** će **pitati** **korisnika** ako ekstenzija nije prethodno učitana.
-- **`syspolicyd`** će prijaviti rezultat **`kextd`**
+- **`syspolicyd`** će izvestiti rezultat **`kextd`**
 4. **`kextd`** će konačno moći da **kaže kernelu da učita** ekstenziju
 
 Ako **`kextd`** nije dostupan, **`kextutil`** može izvršiti iste provere.
@@ -45,9 +45,9 @@ kextstat | grep " 22 " | cut -c2-5,50- | cut -d '(' -f1
 ## Kernelcache
 
 > [!CAUTION]
-> Iako se očekuje da su kernel ekstenzije u `/System/Library/Extensions/`, ako odete u ovu fasciklu **nećete pronaći nijedan binarni fajl**. To je zbog **kernelcache** i da biste obrnuli jedan `.kext` potrebno je da pronađete način da ga dobijete.
+> Iako se očekuje da su kernel ekstenzije u `/System/Library/Extensions/`, ako odete u ovu fasciklu **nećete pronaći nijedan binarni** fajl. To je zbog **kernelcache** i da biste obrnuli jedan `.kext` morate pronaći način da ga dobijete.
 
-**Kernelcache** je **prekompajlirana i prelinkovana verzija XNU kernela**, zajedno sa esencijalnim uređajskim **drajverima** i **kernel ekstenzijama**. Čuva se u **kompresovanom** formatu i dekompresuje se u memoriju tokom procesa pokretanja. Kernelcache olakšava **brže vreme pokretanja** tako što ima verziju kernela i ključnih drajvera spremnu za rad, smanjujući vreme i resurse koji bi inače bili potrošeni na dinamičko učitavanje i linkovanje ovih komponenti prilikom pokretanja.
+**Kernelcache** je **prekompajlirana i prelinkovana verzija XNU kernela**, zajedno sa esencijalnim uređajnim **drajverima** i **kernel ekstenzijama**. Čuva se u **kompresovanom** formatu i dekompresuje se u memoriju tokom procesa pokretanja. Kernelcache olakšava **brže vreme pokretanja** tako što ima verziju kernela i ključnih drajvera spremnu za rad, smanjujući vreme i resurse koji bi inače bili potrošeni na dinamičko učitavanje i linkovanje ovih komponenti prilikom pokretanja.
 
 ### Lokalni Kernelcache
 
@@ -58,7 +58,7 @@ U mom slučaju u macOS-u pronašao sam ga u:
 
 #### IMG4
 
-IMG4 format fajla je kontejnerski format koji koristi Apple u svojim iOS i macOS uređajima za sigurno **čuvanje i verifikaciju firmware** komponenti (kao što je **kernelcache**). IMG4 format uključuje zaglavlje i nekoliko oznaka koje obuhvataju različite delove podataka uključujući stvarni payload (kao što su kernel ili bootloader), potpis i skup manifest svojstava. Format podržava kriptografsku verifikaciju, omogućavajući uređaju da potvrdi autentičnost i integritet firmware komponente pre nego što je izvrši.
+IMG4 format fajla je kontejnerski format koji koristi Apple u svojim iOS i macOS uređajima za sigurno **čuvanje i verifikaciju firmware** komponenti (kao što je **kernelcache**). IMG4 format uključuje zaglavlje i nekoliko oznaka koje enkapsuliraju različite delove podataka uključujući stvarni payload (kao što je kernel ili bootloader), potpis i skup manifest svojstava. Format podržava kriptografsku verifikaciju, omogućavajući uređaju da potvrdi autentičnost i integritet firmware komponente pre nego što je izvrši.
 
 Obično se sastoji od sledećih komponenti:
 
@@ -81,7 +81,7 @@ img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 # pyimg4 (https://github.com/m1stadev/PyIMG4)
 pyimg4 im4p extract -i kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 ```
-### Preuzimanje&#x20;
+### Preuzimanje
 
 - [**KernelDebugKit Github**](https://github.com/dortania/KdkSupportPkg/releases)
 
@@ -107,7 +107,7 @@ pyimg4 im4p extract -i kernelcache.release.iphone14 -o kernelcache.release.iphon
 ```bash
 img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 ```
-### Inspekcija kernelcache-a
+### Inspecting kernelcache
 
 Proverite da li kernelcache ima simbole sa
 ```bash
@@ -126,9 +126,9 @@ kextex_all kernelcache.release.iphone14.e
 # Check the extension for symbols
 nm -a binaries/com.apple.security.sandbox | wc -l
 ```
-## Debagovanje
+## Debugging
 
-## Reference
+## Referencije
 
 - [https://www.makeuseof.com/how-to-enable-third-party-kernel-extensions-apple-silicon-mac/](https://www.makeuseof.com/how-to-enable-third-party-kernel-extensions-apple-silicon-mac/)
 - [https://www.youtube.com/watch?v=hGKOskSiaQo](https://www.youtube.com/watch?v=hGKOskSiaQo)

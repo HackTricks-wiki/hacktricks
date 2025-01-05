@@ -13,7 +13,7 @@ Napomena da MACF zapravo ne donosi nikakve odluke jer samo **presreće** radnje,
 1. Proces izvršava syscall/mach trap
 2. Relevantna funkcija se poziva unutar kernela
 3. Funkcija poziva MACF
-4. MACF proverava module politike koji su zatražili da se povežu sa tom funkcijom u svojoj politici
+4. MACF proverava module politike koji su zatražili da se ta funkcija poveže u njihovoj politici
 5. MACF poziva relevantne politike
 6. Politike označavaju da li dozvoljavaju ili odbacuju radnju
 
@@ -22,11 +22,11 @@ Napomena da MACF zapravo ne donosi nikakve odluke jer samo **presreće** radnje,
 
 ### Oznake
 
-MACF koristi **oznake** koje zatim politike koriste da provere da li treba da odobre neki pristup ili ne. Kod deklaracije strukture oznaka može se [pronaći ovde](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/_label.h), koja se zatim koristi unutar **`struct ucred`** u [**ovde**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ucred.h#L86) u delu **`cr_label`**. Oznaka sadrži zastavice i broj **slotova** koji se mogu koristiti od strane **MACF politika za dodeljivanje pokazivača**. Na primer, Sanbox će ukazivati na profil kontejnera.
+MACF koristi **oznake** koje zatim politike koriste da provere da li treba da odobre neki pristup ili ne. Kod deklaracije strukture oznaka može se [pronaći ovde](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/_label.h), koja se zatim koristi unutar **`struct ucred`** u [**ovde**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ucred.h#L86) u delu **`cr_label`**. Oznaka sadrži zastavice i broj **slotova** koji se mogu koristiti od strane **MACF politika za dodeljivanje pokazivača**. Na primer, Sanbox će se povezati sa profilom kontejnera.
 
-## MACF Politike
+## MACF politike
 
-MACF politika definiše **pravila i uslove koji se primenjuju u određenim operacijama kernela**.&#x20;
+MACF politika definiše **pravila i uslove koji se primenjuju u određenim kernel operacijama**.
 
 Kernel ekstenzija može konfigurisati `mac_policy_conf` strukturu i zatim je registrovati pozivajući `mac_policy_register`. Od [ovde](https://opensource.apple.com/source/xnu/xnu-2050.18.24/security/mac_policy.h.auto.html):
 ```c
@@ -69,7 +69,7 @@ Lako je identifikovati kernel ekstenzije koje konfigurišu ove politike proverom
 
 Napomena da se MACF politike mogu registrovati i deregistrovati takođe **dinamički**.
 
-Jedno od glavnih polja `mac_policy_conf` je **`mpc_ops`**. Ovo polje specificira koje operacije politika zanima. Napomena da ih ima stotine, tako da je moguće postaviti sve na nulu, a zatim odabrati samo one koje politiku zanimaju. Od [ovde](https://opensource.apple.com/source/xnu/xnu-2050.18.24/security/mac_policy.h.auto.html):
+Jedno od glavnih polja `mac_policy_conf` je **`mpc_ops`**. Ovo polje specificira koje operacije politika zanima. Napomena da ih ima stotine, tako da je moguće postaviti sve na nulu, a zatim izabrati samo one koje politiku zanimaju. Od [ovde](https://opensource.apple.com/source/xnu/xnu-2050.18.24/security/mac_policy.h.auto.html):
 ```c
 struct mac_policy_ops {
 mpo_audit_check_postselect_t		*mpo_audit_check_postselect;
@@ -87,7 +87,7 @@ Skoro svi hook-ovi će biti pozvani od strane MACF kada se jedna od tih operacij
 Štaviše, **`mpo_policy_syscall`** hook može biti registrovan od strane bilo kog kext-a da izloži privatni **ioctl** stil poziva **interface**. Tada će korisnički klijent moći da pozove `mac_syscall` (#381) navodeći kao parametre **ime politike** sa celobrojnim **kodom** i opcionim **argumentima**.\
 Na primer, **`Sandbox.kext`** to često koristi.
 
-Proverom **`__DATA.__const*`** kext-a moguće je identifikovati `mac_policy_ops` strukturu koja se koristi prilikom registracije politike. Moguće je pronaći je jer je njen pokazivač na offset-u unutar `mpo_policy_conf` i takođe zbog broja NULL pokazivača koji će biti u toj oblasti.
+Proverom **`__DATA.__const*`** kext-a moguće je identifikovati `mac_policy_ops` strukturu koja se koristi prilikom registracije politike. Moguće je pronaći jer je njen pokazivač na offset-u unutar `mpo_policy_conf` i takođe zbog broja NULL pokazivača koji će biti u toj oblasti.
 
 Štaviše, takođe je moguće dobiti listu kext-ova koji su konfigurisali politiku dump-ovanjem iz memorije strukture **`_mac_policy_list`** koja se ažurira sa svakom registrovanom politikom.
 
@@ -111,7 +111,7 @@ mmap(proc_t p, struct mmap_args *uap, user_addr_t *retval)
 #if CONFIG_MACF
 <strong>			error = mac_file_check_mmap(vfs_context_ucred(ctx),
 </strong>			    fp->fp_glob, prot, flags, file_pos + pageoff,
-&#x26;maxprot);
+&maxprot);
 if (error) {
 (void)vnode_put(vp);
 goto bad;
@@ -164,10 +164,10 @@ Koji će proći kroz sve registrovane mac politike pozivajući njihove funkcije 
 >
 > ```c
 > /*
->  * MAC_GRANT vrši određenu proveru prolazeći kroz listu politika
->  * i proveravajući svaku kako se oseća u vezi sa
->  * zahtevom. Za razliku od MAC_CHECK, odobrava ako bilo koja politika vrati '0',
->  * a inače vraća EPERM. Imajte na umu da vraća svoju vrednost putem
+>  * MAC_GRANT vrši određenu proveru prolazeći kroz listu
+>  * modula politika i proveravajući sa svakim kako se oseća u vezi
+>  * sa zahtevom.  Za razliku od MAC_CHECK, odobrava ako bilo koja politika vrati '0',
+>  * a inače vraća EPERM.  Napomena: vraća svoju vrednost putem
 >  * 'error' u opsegu pozivaoca.
 >  */
 > #define MAC_GRANT(check, args...) do {                              \

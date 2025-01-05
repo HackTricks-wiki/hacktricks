@@ -6,7 +6,7 @@
 
 Kreirajte **dylib** sa **`__interpose`** sekcijom (ili sekcijom označenom sa **`S_INTERPOSING`**) koja sadrži parove **pokazivača na funkcije** koji se odnose na **originalne** i **zamenske** funkcije.
 
-Zatim, **ubacite** dylib sa **`DYLD_INSERT_LIBRARIES`** (interpozicija treba da se desi pre nego što se glavna aplikacija učita). Očigledno, [**ograničenja** koja se primenjuju na korišćenje **`DYLD_INSERT_LIBRARIES`** važe i ovde](../macos-proces-abuse/macos-library-injection/index.html#check-restrictions).&#x20;
+Zatim, **ubacite** dylib sa **`DYLD_INSERT_LIBRARIES`** (interpozicija treba da se desi pre nego što se glavna aplikacija učita). Očigledno, [**ograničenja** koja se primenjuju na korišćenje **`DYLD_INSERT_LIBRARIES`** važe i ovde](../macos-proces-abuse/macos-library-injection/index.html#check-restrictions).
 
 ### Interpozicija printf
 
@@ -163,7 +163,7 @@ return 0;
 Funkcija **`method_exchangeImplementations`** omogućava da se **promeni** **adresa** **implementacije** **jedne funkcije za drugu**.
 
 > [!CAUTION]
-> Tako da kada se funkcija pozove, ono što se **izvršava je druga**.
+> Tako da kada se funkcija pozove, ono što je **izvršeno je drugo**.
 ```objectivec
 //gcc -framework Foundation swizzle_str.m -o swizzle_str
 
@@ -293,7 +293,7 @@ i zatim **ponovo registrujte** aplikaciju:
 Dodajte u tu biblioteku kod za hooking kako biste eksfiltrirali informacije: Lozinke, poruke...
 
 > [!CAUTION]
-> Imajte na umu da u novijim verzijama macOS-a, ako **uklonite potpis** aplikacionog binarnog fajla i ako je prethodno izvršen, macOS **neće više izvršavati aplikaciju**.
+> Imajte na umu da u novijim verzijama macOS-a, ako **uklonite potpis** aplikacionog binarnog fajla i ako je prethodno bio izvršen, macOS **neće više izvršavati aplikaciju**.
 
 #### Primer biblioteke
 ```objectivec

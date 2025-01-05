@@ -4,7 +4,7 @@
 
 ## TCC Privilege Escalation
 
-Ako ste došli ovde tražeći TCC privilegiju eskalaciju, idite na:
+Ako ste došli ovde tražeći TCC eskalaciju privilegija, idite na:
 
 {{#ref}}
 macos-security-protections/macos-tcc/
@@ -22,9 +22,9 @@ Imajte na umu da **većina trikova o eskalaciji privilegija koji utiču na Linux
 
 ### Sudo Hijacking
 
-Možete pronaći originalnu [Sudo Hijacking tehniku unutar posta o Linux privilegiji eskalaciji](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
+Možete pronaći originalnu [Sudo Hijacking tehniku unutar posta o eskalaciji privilegija za Linux](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
 
-Međutim, macOS **održava** korisnikov **`PATH`** kada izvršava **`sudo`**. Što znači da bi drugi način da se postigne ovaj napad bio da se **otmu drugi binarni fajlovi** koje žrtva još uvek izvršava kada **pokreće sudo:**
+Međutim, macOS **održava** korisnikov **`PATH`** kada izvršava **`sudo`**. Što znači da bi drugi način za postizanje ovog napada bio da **otmete druge binarne datoteke** koje žrtva još uvek izvršava kada **pokreće sudo:**
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
 cat > /opt/homebrew/bin/ls <<EOF
@@ -43,13 +43,13 @@ Napomena da korisnik koji koristi terminal verovatno ima **Homebrew instaliran**
 
 ### Impersonacija Dock-a
 
-Korišćenjem nekih **socijalnih inženjeringa** mogli biste **impersonirati, na primer, Google Chrome** unutar dock-a i zapravo izvršiti svoj skript:
+Korišćenjem nekih **socijalnih inženjeringa** mogli biste **impersonirati na primer Google Chrome** unutar dock-a i zapravo izvršiti svoj skript:
 
 {{#tabs}}
 {{#tab name="Chrome Impersonation"}}
 Neki predlozi:
 
-- Proverite u Dock-u da li postoji Chrome, i u tom slučaju **uklonite** tu stavku i **dodajte** **lažnu** **Chrome stavku na istu poziciju** u Dock nizu.&#x20;
+- Proverite u Dock-u da li postoji Chrome, i u tom slučaju **uklonite** tu stavku i **dodajte** **lažnu** **Chrome stavku na istu poziciju** u Dock nizu.
 ```bash
 #!/bin/sh
 
@@ -205,8 +205,8 @@ killall Dock
 
 ### CVE-2020-9771 - mount_apfs TCC zaobilaženje i eskalacija privilegija
 
-**Bilo koji korisnik** (čak i oni bez privilegija) može da kreira i montira snapshot vremenske mašine i **pristupi SVI datotekama** tog snapshot-a.\
-**Jedina privilegija** koja je potrebna je da aplikacija koja se koristi (kao što je `Terminal`) ima **Pristup celom disku** (FDA) (`kTCCServiceSystemPolicyAllfiles`) koji mora da odobri administrator.
+**Bilo koji korisnik** (čak i oni bez privilegija) može kreirati i montirati snapshot vremenske mašine i **pristupiti SVIM datotekama** tog snapshot-a.\
+**Jedina privilegija** koja je potrebna je da aplikacija koja se koristi (kao što je `Terminal`) ima **Pristup celom disku** (FDA) (`kTCCServiceSystemPolicyAllfiles`) koji mora odobriti administrator.
 ```bash
 # Create snapshot
 tmutil localsnapshot

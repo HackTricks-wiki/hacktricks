@@ -14,7 +14,7 @@ Podrška za autentifikacione protokole - LM, NTLMv1 i NTLMv2 - omogućena je spe
 
 **Ključne tačke**:
 
-- LM hešovi su ranjivi i prazan LM heš (`AAD3B435B51404EEAAD3B435B51404EE`) označava njegovo ne korišćenje.
+- LM hešovi su ranjivi, a prazan LM heš (`AAD3B435B51404EEAAD3B435B51404EE`) označava njegovo ne korišćenje.
 - Kerberos je podrazumevana autentifikaciona metoda, dok se NTLM koristi samo pod određenim uslovima.
 - NTLM autentifikacioni paketi su prepoznatljivi po "NTLMSSP" header-u.
 - LM, NTLMv1 i NTLMv2 protokoli su podržani od strane sistemske datoteke `msv1\_0.dll`.
@@ -25,7 +25,7 @@ Možete proveriti i konfigurisati koji protokol će se koristiti:
 
 ### GUI
 
-Izvršite _secpol.msc_ -> Lokalne politike -> Bezbednosne opcije -> Mrežna bezbednost: LAN Manager nivo autentifikacije. Postoji 6 nivoa (od 0 do 5).
+Izvršite _secpol.msc_ -> Lokalna pravila -> Opcije bezbednosti -> Mrežna bezbednost: LAN Manager nivo autentifikacije. Postoji 6 nivoa (od 0 do 5).
 
 ![](<../../images/image (919).png>)
 
@@ -49,39 +49,39 @@ Moguće vrednosti:
 1. **korisnik** unosi svoje **akreditive**
 2. Klijentska mašina **šalje zahtev za autentifikaciju** šaljući **ime domena** i **korisničko ime**
 3. **server** šalje **izazov**
-4. **klijent enkriptuje** **izazov** koristeći heš lozinke kao ključ i šalje ga kao odgovor
-5. **server šalje** **kontroloru domena** **ime domena, korisničko ime, izazov i odgovor**. Ako **nije** konfigurisana Active Directory ili je ime domena ime servera, akreditive se **proveravaju lokalno**.
+4. **klijent enkriptuje** **izazov** koristeći hash lozinke kao ključ i šalje ga kao odgovor
+5. **server šalje** **kontroloru domena** **ime domena, korisničko ime, izazov i odgovor**. Ako **nije** konfigurisan Active Directory ili je ime domena ime servera, akreditivi se **proveravaju lokalno**.
 6. **kontrolor domena proverava da li je sve ispravno** i šalje informacije serveru
 
 **server** i **kontrolor domena** mogu da kreiraju **sigurni kanal** putem **Netlogon** servera jer kontrolor domena zna lozinku servera (ona je unutar **NTDS.DIT** baze).
 
 ### Lokalna NTLM autentifikacija
 
-Autentifikacija je kao ona pomenuta **pre, ali** **server** zna **heš korisnika** koji pokušava da se autentifikuje unutar **SAM** fajla. Tako, umesto da pita kontrolora domena, **server će sam proveriti** da li korisnik može da se autentifikuje.
+Autentifikacija je kao ona pomenuta **pre, ali** **server** zna **hash korisnika** koji pokušava da se autentifikuje unutar **SAM** fajla. Tako da, umesto da pita kontrolora domena, **server će sam proveriti** da li korisnik može da se autentifikuje.
 
 ### NTLMv1 izazov
 
 **dužina izazova je 8 bajtova** i **odgovor je dug 24 bajta**.
 
-**heš NT (16 bajtova)** je podeljen u **3 dela od po 7 bajtova** (7B + 7B + (2B+0x00\*5)): **poslednji deo je popunjen nulama**. Zatim, **izazov** se **šifruje odvojeno** sa svakim delom i **rezultantni** šifrovani bajtovi se **spajaju**. Ukupno: 8B + 8B + 8B = 24B.
+**hash NT (16 bajtova)** je podeljen u **3 dela od po 7 bajtova** (7B + 7B + (2B+0x00\*5)): **poslednji deo je popunjen nulama**. Zatim, **izazov** se **šifruje odvojeno** sa svakim delom i **rezultantni** šifrovani bajtovi se **spajaju**. Ukupno: 8B + 8B + 8B = 24B.
 
 **Problemi**:
 
 - Nedostatak **slučajnosti**
-- 3 dela se mogu **napasti odvojeno** da bi se pronašao NT heš
+- 3 dela mogu biti **napadnuta odvojeno** da bi se pronašao NT hash
 - **DES se može probiti**
 - 3. ključ se uvek sastoji od **5 nula**.
-- Dajući **isti izazov**, **odgovor** će biti **isti**. Tako, možete dati kao **izazov** žicu "**1122334455667788**" i napasti odgovor koristeći **prekomponovane rainbow tabele**.
+- Dajući **isti izazov**, **odgovor** će biti **isti**. Tako da možete dati kao **izazov** žicu "**1122334455667788**" i napasti odgovor koristeći **prekomponovane rainbow tabele**.
 
 ### NTLMv1 napad
 
-Danas postaje sve ređe nalaziti okruženja sa konfigurisanim Unconstrained Delegation, ali to ne znači da ne možete **zloupotrebiti Print Spooler servis** koji je konfiguran.
+Danas postaje sve ređe nalaziti okruženja sa konfigurisanom Unconstrained Delegation, ali to ne znači da ne možete **zloupotrebiti Print Spooler servis** koji je konfigurisan.
 
 Možete zloupotrebiti neke akreditive/sesije koje već imate na AD da **tražite od štampača da se autentifikuje** protiv nekog **hosta pod vašom kontrolom**. Zatim, koristeći `metasploit auxiliary/server/capture/smb` ili `responder`, možete **postaviti izazov za autentifikaciju na 1122334455667788**, uhvatiti pokušaj autentifikacije, i ako je izvršen koristeći **NTLMv1**, moći ćete da ga **probijete**.\
 Ako koristite `responder`, možete pokušati da \*\*koristite flag `--lm` \*\* da pokušate da **smanjite** **autentifikaciju**.\
-_&#x4E;ote da za ovu tehniku autentifikacija mora biti izvršena koristeći NTLMv1 (NTLMv2 nije validan)._
+_Napomena da za ovu tehniku autentifikacija mora biti izvršena koristeći NTLMv1 (NTLMv2 nije validan)._
 
-Zapamtite da će štampač koristiti račun računara tokom autentifikacije, a računi računara koriste **duge i slučajne lozinke** koje **verovatno nećete moći da probijete** koristeći uobičajene **rečnike**. Ali **NTLMv1** autentifikacija **koristi DES** ([više informacija ovde](#ntlmv1-challenge)), tako da koristeći neke usluge posebno posvećene probijanju DES-a, moći ćete da ga probijete (možete koristiti [https://crack.sh/](https://crack.sh) ili [https://ntlmv1.com/](https://ntlmv1.com) na primer).
+Zapamtite da će štampač koristiti račun računara tokom autentifikacije, a računi računara koriste **duge i slučajne lozinke** koje verovatno nećete moći da probijete koristeći uobičajene **rečnike**. Ali **NTLMv1** autentifikacija **koristi DES** ([više informacija ovde](#ntlmv1-challenge)), tako da koristeći neke usluge posebno posvećene probijanju DES-a, moći ćete da ga probijete (možete koristiti [https://crack.sh/](https://crack.sh) ili [https://ntlmv1.com/](https://ntlmv1.com) na primer).
 
 ### NTLMv1 napad sa hashcat
 
@@ -143,32 +143,32 @@ b4b9b02e6f09a9 # this is part 1
 ./hashcat-utils/src/deskey_to_ntlm.pl bcba83e6895b9d
 bd760f388b6700 # this is part 2
 ```
-I'm sorry, but it seems that you haven't provided the text you want translated. Please provide the relevant English text, and I'll be happy to assist you with the translation to Serbian.
+Please provide the text you would like translated.
 ```bash
 ./hashcat-utils/src/ct3_to_ntlm.bin BB23EF89F50FC595 1122334455667788
 
 586c # this is the last part
 ```
-I'm sorry, but I need the specific text you would like me to translate in order to assist you. Please provide the content you want translated.
+I'm sorry, but I need the specific text you want translated in order to assist you. Please provide the content you would like me to translate to Serbian.
 ```bash
 NTHASH=b4b9b02e6f09a9bd760f388b6700586c
 ```
 ### NTLMv2 Challenge
 
-Dužina **izazova je 8 bajtova** i **2 odgovora se šalju**: Jedan je **24 bajta** dug i dužina **drugog** je **varijabilna**.
+Dužina **izazova je 8 bajtova** i **2 odgovora se šalju**: Jedan je **24 bajta** dug, a dužina **drugog** je **varijabilna**.
 
-**Prvi odgovor** se kreira šifrovanjem koristeći **HMAC_MD5** **niz** sastavljen od **klijenta i domena** i koristeći kao **ključ** **MD4** heš **NT heša**. Zatim, **rezultat** će se koristiti kao **ključ** za šifrovanje koristeći **HMAC_MD5** **izazov**. Tome će se **dodati klijentski izazov od 8 bajtova**. Ukupno: 24 B.
+**Prvi odgovor** se kreira šifrovanjem koristeći **HMAC_MD5** **niz** sastavljen od **klijenta i domena** i koristeći kao **ključ** **MD4** heš **NT heša**. Zatim, **rezultat** će se koristiti kao **ključ** za šifrovanje koristeći **HMAC_MD5** **izazov**. Tome će se **dodati izazov klijenta od 8 bajtova**. Ukupno: 24 B.
 
-**Drugi odgovor** se kreira koristeći **nekoliko vrednosti** (novi klijentski izazov, **vremensku oznaku** da bi se izbegli **ponovno korišćeni napadi**...)
+**Drugi odgovor** se kreira koristeći **nekoliko vrednosti** (novi izazov klijenta, **vremensku oznaku** da bi se izbegli **ponovno korišćeni napadi**...)
 
 Ako imate **pcap koji je uhvatio uspešan proces autentifikacije**, možete pratiti ovaj vodič da dobijete domen, korisničko ime, izazov i odgovor i pokušate da provalite lozinku: [https://research.801labs.org/cracking-an-ntlmv2-hash/](https://www.801labs.org/research-portal/post/cracking-an-ntlmv2-hash/)
 
 ## Pass-the-Hash
 
-**Kada imate heš žrtve**, možete ga koristiti da **imituje**.\
-Treba da koristite **alat** koji će **izvršiti** **NTLM autentifikaciju koristeći** taj **heš**, **ili** možete kreirati novu **sessionlogon** i **ubaciti** taj **heš** unutar **LSASS**, tako da kada se izvrši bilo koja **NTLM autentifikacija**, taj **heš će biti korišćen.** Poslednja opcija je ono što radi mimikatz.
+**Kada imate heš žrtve**, možete ga koristiti da je **imituјete**.\
+Trebalo bi da koristite **alat** koji će **izvršiti** **NTLM autentifikaciju koristeći** taj **heš**, **ili** možete kreirati novu **sessionlogon** i **ubaciti** taj **heš** unutar **LSASS**, tako da kada se izvrši bilo koja **NTLM autentifikacija**, taj **heš će biti korišćen.** Poslednja opcija je ono što radi mimikatz.
 
-**Molimo vas, zapamtite da možete izvršiti Pass-the-Hash napade takođe koristeći račune računara.**
+**Molim vas, zapamtite da možete izvršiti Pass-the-Hash napade takođe koristeći račune računara.**
 
 ### **Mimikatz**
 
@@ -180,7 +180,7 @@ Ovo će pokrenuti proces koji će pripadati korisnicima koji su pokrenuli mimika
 
 ### Pass-the-Hash sa linux-a
 
-Možete dobiti izvršavanje koda na Windows mašinama koristeći Pass-the-Hash sa Linux-a.\
+Možete dobiti izvršenje koda na Windows mašinama koristeći Pass-the-Hash sa Linux-a.\
 [**Pristupite ovde da naučite kako to uraditi.**](https://github.com/carlospolop/hacktricks/blob/master/windows/ntlm/broken-reference/README.md)
 
 ### Impacket Windows kompajlirani alati
@@ -224,7 +224,7 @@ Invoke-TheHash -Type WMIExec -Target 192.168.100.0/24 -TargetExclude 192.168.100
 
 **Mora se pokrenuti kao administrator**
 
-Ovaj alat će uraditi istu stvar kao mimikatz (modifikovati LSASS memoriju).
+Ovaj alat će raditi istu stvar kao mimikatz (modifikovati LSASS memoriju).
 ```
 wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 ```

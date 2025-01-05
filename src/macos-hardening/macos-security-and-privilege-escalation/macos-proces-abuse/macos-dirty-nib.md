@@ -42,7 +42,7 @@ display dialog theDialogText
 3. **Izvršavanje**:
 - Pokrenite izvršavanje interakcijom sa aplikacijom (npr. odabirom `About` menija).
 
-#### Dokaz Koncepta: Pristup Korisničkim Podacima
+#### Dokaz Koncepta: Pristupanje Korisničkim Podacima
 
 - Izmenite AppleScript da pristupi i izvuče korisničke podatke, kao što su fotografije, bez pristanka korisnika.
 
@@ -52,7 +52,7 @@ display dialog theDialogText
 
 ### Drugi Primer
 
-U postu [https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) možete pronaći tutorijal o tome kako kreirati prljavi nib.&#x20;
+U postu [https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) možete pronaći tutorijal o tome kako kreirati prljavi nib.
 
 ### Rešavanje Ograničenja Pokretanja
 
@@ -66,7 +66,7 @@ Od macOS Sonoma nadalje, modifikacije unutar App bundle-a su ograničene. Međut
 1. Kopiranje aplikacije na drugo mesto (npr. `/tmp/`).
 2. Preimenovanje direktorijuma unutar app bundle-a kako bi se zaobišle početne zaštite.
 3. Nakon pokretanja aplikacije da se registruje sa Gatekeeper-om, modifikovanje app bundle-a (npr. zamenjivanje MainMenu.nib sa Dirty.nib).
-4. Ponovno preimenovanje direktorijuma i ponovo pokretanje aplikacije da izvrši injektovanu NIB datoteku.
+4. Ponovno preimenovanje direktorijuma i ponovo pokretanje aplikacije da bi se izvršila injektovana NIB datoteka.
 
 **Napomena**: Nedavne macOS nadogradnje su ublažile ovu eksploataciju sprečavanjem modifikacija datoteka unutar app bundle-a nakon keširanja Gatekeeper-a, čineći eksploataciju neefikasnom.
 

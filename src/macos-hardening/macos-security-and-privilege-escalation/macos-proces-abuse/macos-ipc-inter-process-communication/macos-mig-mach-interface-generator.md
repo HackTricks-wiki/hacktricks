@@ -4,7 +4,7 @@
 
 ## Osnovne informacije
 
-MIG je kreiran da ** pojednostavi proces kreiranja Mach IPC** koda. U suštini, **generiše potrebni kod** za komunikaciju servera i klijenta prema datoj definiciji. Čak i ako je generisani kod ružan, programer će samo trebati da ga uveze i njegov kod će biti mnogo jednostavniji nego pre.
+MIG je kreiran da **pojednostavi proces kreiranja Mach IPC** koda. U suštini, **generiše potrebni kod** za komunikaciju servera i klijenta prema datoj definiciji. Čak i ako je generisani kod ružan, programer će samo morati da ga uveze i njegov kod će biti mnogo jednostavniji nego pre.
 
 Definicija se specificira u jeziku za definiciju interfejsa (IDL) koristeći ekstenziju `.defs`.
 
@@ -13,9 +13,9 @@ Ove definicije imaju 5 sekcija:
 - **Deklaracija podsistema**: Ključna reč subsystem se koristi da označi **ime** i **id**. Takođe je moguće označiti ga kao **`KernelServer`** ako server treba da radi u kernelu.
 - **Uključivanja i uvozi**: MIG koristi C-preprocesor, tako da može da koristi uvoze. Štaviše, moguće je koristiti `uimport` i `simport` za kod generisan od strane korisnika ili servera.
 - **Deklaracije tipova**: Moguće je definisati tipove podataka, iako obično uvozi `mach_types.defs` i `std_types.defs`. Za prilagođene tipove može se koristiti neka sintaksa:
-- \[i`n/out]tran`: Funkcija koja treba da se prevede iz dolazne ili u odlaznu poruku
+- \[i`n/out]tran`: Funkcija koja treba da bude prevedena iz dolazne ili u odlaznu poruku
 - `c[user/server]type`: Mapiranje na drugi C tip.
-- `destructor`: Pozovite ovu funkciju kada se tip oslobodi.
+- `destructor`: Pozvati ovu funkciju kada se tip oslobodi.
 - **Operacije**: Ovo su definicije RPC metoda. Postoji 5 različitih tipova:
 - `routine`: Očekuje odgovor
 - `simpleroutine`: Ne očekuje odgovor
@@ -40,7 +40,7 @@ server_port :  mach_port_t;
 n1          :  uint32_t;
 n2          :  uint32_t);
 ```
-Napomena da je prvi **argument port koji se vezuje** i MIG će **automatski obraditi port za odgovor** (osim ako se poziva `mig_get_reply_port()` u klijentskom kodu). Štaviše, **ID operacija** će biti **sekvencijalni** počinjući od naznačenog ID-a podsistema (tako da ako je neka operacija zastarela, ona se briše i `skip` se koristi da bi se i dalje koristio njen ID).
+Napomena da je prvi **argument port koji se vezuje** i MIG će **automatski obraditi port za odgovor** (osim ako se ne poziva `mig_get_reply_port()` u klijentskom kodu). Štaviše, **ID operacija** će biti **sekvencijalni** počinjući od naznačenog ID-a podsistema (tako da ako je neka operacija zastarela, ona se briše i `skip` se koristi da se i dalje koristi njen ID).
 
 Sada koristite MIG da generišete server i klijentski kod koji će moći da komuniciraju jedni s drugima kako bi pozvali funkciju Subtract:
 ```bash
@@ -115,7 +115,7 @@ Zapravo, moguće je identifikovati ovu vezu u strukturi **`subsystem_to_name_map
 { "Subtract", 500 }
 #endif
 ```
-Na kraju, još jedna važna funkcija za rad servera biće **`myipc_server`**, koja će zapravo **pozvati funkciju** vezanu za primljeni id:
+Na kraju, još jedna važna funkcija koja će omogućiti radu servera biće **`myipc_server`**, koja će zapravo **pozvati funkciju** vezanu za primljeni id:
 
 <pre class="language-c"><code class="lang-c">mig_external boolean_t myipc_server
 (mach_msg_header_t *InHeadP, mach_msg_header_t *OutHeadP)
@@ -138,7 +138,7 @@ OutHeadP->msgh_local_port = MACH_PORT_NULL;
 OutHeadP->msgh_id = InHeadP->msgh_id + 100;
 OutHeadP->msgh_reserved = 0;
 
-if ((InHeadP->msgh_id > 500) || (InHeadP->msgh_id &#x3C; 500) ||
+if ((InHeadP->msgh_id > 500) || (InHeadP->msgh_id < 500) ||
 <strong>	    ((routine = SERVERPREFmyipc_subsystem.routine[InHeadP->msgh_id - 500].stub_routine) == 0)) {
 </strong>		((mig_reply_error_t *)OutHeadP)->NDR = NDR_record;
 ((mig_reply_error_t *)OutHeadP)->RetCode = MIG_BAD_ID;
@@ -223,7 +223,7 @@ To je zanimljivo jer ako se `_NDR_record` pronađe u binarnom fajlu kao zavisnos
 
 Štaviše, **MIG serveri** imaju tabelu raspodele u `__DATA.__const` (ili u `__CONST.__constdata` u macOS kernelu i `__DATA_CONST.__const` u drugim \*OS kernelima). Ovo se može izdumpovati pomoću **`jtool2`**.
 
-A **MIG klijenti** će koristiti `__NDR_record` da pošalju sa `__mach_msg` serverima.
+A **MIG klijenti** će koristiti `__NDR_record` za slanje sa `__mach_msg` ka serverima.
 
 ## Analiza binarnih fajlova
 
@@ -241,7 +241,7 @@ jtool2 -d __DATA.__const myipc_server | grep BL
 ```
 ### Assembly
 
-Prethodno je pomenuto da će funkcija koja se bavi **pozivanjem ispravne funkcije u zavisnosti od primljenog ID-a poruke** biti `myipc_server`. Međutim, obično nećete imati simbole binarnog fajla (nema imena funkcija), pa je zanimljivo **proveriti kako izgleda dekompilirana** jer će uvek biti vrlo slična (kod ove funkcije je nezavistan od izloženih funkcija):
+Prethodno je pomenuto da će funkcija koja će se pobrinuti za **pozivanje ispravne funkcije u zavisnosti od primljenog ID-a poruke** biti `myipc_server`. Međutim, obično nećete imati simbole binarnog fajla (nema imena funkcija), pa je zanimljivo **proveriti kako izgleda dekompilirana** jer će uvek biti vrlo slična (kod ove funkcije je nezavistan od izloženih funkcija):
 
 {{#tabs}}
 {{#tab name="myipc_server decompiled 1"}}
@@ -250,16 +250,16 @@ Prethodno je pomenuto da će funkcija koja se bavi **pozivanjem ispravne funkcij
 var_10 = arg0;
 var_18 = arg1;
 // Početne instrukcije za pronalaženje ispravnih pokazivača funkcija
-*(int32_t *)var_18 = *(int32_t *)var_10 &#x26; 0x1f;
+*(int32_t *)var_18 = *(int32_t *)var_10 & 0x1f;
 *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
 *(int32_t *)(var_18 + 0x4) = 0x24;
 *(int32_t *)(var_18 + 0xc) = 0x0;
 *(int32_t *)(var_18 + 0x14) = *(int32_t *)(var_10 + 0x14) + 0x64;
 *(int32_t *)(var_18 + 0x10) = 0x0;
-if (*(int32_t *)(var_10 + 0x14) &#x3C;= 0x1f4 &#x26;&#x26; *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
+if (*(int32_t *)(var_10 + 0x14) <= 0x1f4 && *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
 rax = *(int32_t *)(var_10 + 0x14);
 // Poziv sign_extend_64 koji može pomoći u identifikaciji ove funkcije
-// Ovo čuva u rax pokazivač na poziv koji treba da se pozove
+// Ovo čuva u rax pokazivač na poziv koji treba da se izvrši
 // Proverite korišćenje adrese 0x100004040 (niz adresa funkcija)
 // 0x1f4 = 500 (početni ID)
 <strong>            rax = *(sign_extend_64(rax - 0x1f4) * 0x28 + 0x100004040);
@@ -298,7 +298,7 @@ stack[-8] = r30;
 var_10 = arg0;
 var_18 = arg1;
 // Početne instrukcije za pronalaženje ispravnih pokazivača funkcija
-*(int32_t *)var_18 = *(int32_t *)var_10 &#x26; 0x1f | 0x0;
+*(int32_t *)var_18 = *(int32_t *)var_10 & 0x1f | 0x0;
 *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
 *(int32_t *)(var_18 + 0x4) = 0x24;
 *(int32_t *)(var_18 + 0xc) = 0x0;
@@ -307,19 +307,19 @@ var_18 = arg1;
 r8 = *(int32_t *)(var_10 + 0x14);
 r8 = r8 - 0x1f4;
 if (r8 > 0x0) {
-if (CPU_FLAGS &#x26; G) {
+if (CPU_FLAGS & G) {
 r8 = 0x1;
 }
 }
-if ((r8 &#x26; 0x1) == 0x0) {
+if ((r8 & 0x1) == 0x0) {
 r8 = *(int32_t *)(var_10 + 0x14);
 r8 = r8 - 0x1f4;
-if (r8 &#x3C; 0x0) {
-if (CPU_FLAGS &#x26; L) {
+if (r8 < 0x0) {
+if (CPU_FLAGS & L) {
 r8 = 0x1;
 }
 }
-if ((r8 &#x26; 0x1) == 0x0) {
+if ((r8 & 0x1) == 0x0) {
 r8 = *(int32_t *)(var_10 + 0x14);
 // 0x1f4 = 500 (početni ID)
 <strong>                    r8 = r8 - 0x1f4;
@@ -328,19 +328,19 @@ r8 = *(r8 + 0x8);
 var_20 = r8;
 r8 = r8 - 0x0;
 if (r8 != 0x0) {
-if (CPU_FLAGS &#x26; NE) {
+if (CPU_FLAGS & NE) {
 r8 = 0x1;
 }
 }
 // Ista if else kao u prethodnoj verziji
 // Proverite korišćenje adrese 0x100004040 (niz adresa funkcija)
-<strong>                    if ((r8 &#x26; 0x1) == 0x0) {
+<strong>                    if ((r8 & 0x1) == 0x0) {
 </strong><strong>                            *(var_18 + 0x18) = **0x100004000;
 </strong>                            *(int32_t *)(var_18 + 0x20) = 0xfffffed1;
 var_4 = 0x0;
 }
 else {
-// Poziv na izračunatu adresu gde bi funkcija trebala biti
+// Poziv na izračunatu adresu gde funkcija treba da bude
 <strong>                            (var_20)(var_10, var_18);
 </strong>                            var_4 = 0x1;
 }
@@ -365,7 +365,7 @@ return r0;
 {{#endtab}}
 {{#endtabs}}
 
-U stvari, ako odete na funkciju **`0x100004000`** pronaći ćete niz **`routine_descriptor`** struktura. Prvi element strukture je **adresa** gde je **funkcija** implementirana, a **struktura zauzima 0x28 bajtova**, tako da svaka 0x28 bajtova (počevši od bajta 0) možete dobiti 8 bajtova i to će biti **adresa funkcije** koja će biti pozvana:
+U stvari, ako odete na funkciju **`0x100004000`** pronaći ćete niz **`routine_descriptor`** struktura. Prvi element strukture je **adresa** gde je **funkcija** implementirana, a **struktura zauzima 0x28 bajtova**, tako da svakih 0x28 bajtova (počinjajući od bajta 0) možete dobiti 8 bajtova i to će biti **adresa funkcije** koja će biti pozvana:
 
 <figure><img src="../../../../images/image (35).png" alt=""><figcaption></figcaption></figure>
 

