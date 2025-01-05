@@ -9,7 +9,7 @@
 ### Podstawowa konfiguracja
 
 Po zainstalowaniu jest kilka rzeczy, które warto skonfigurować.\
-W ustawieniach (drugi przycisk zakładki) możesz wybrać **urządzenie SDR** lub **wybrać plik** do odczytu oraz częstotliwość do syntonizacji i częstotliwość próbkowania (zalecane do 2,56 Msps, jeśli twój komputer to obsługuje)\\
+W ustawieniach (drugi przycisk zakładki) możesz wybrać **urządzenie SDR** lub **wybrać plik** do odczytu oraz częstotliwość do syntonizacji i częstotliwość próbkowania (zalecane do 2,56 Msps, jeśli twój komputer to obsługuje).
 
 ![](<../../images/image (245).png>)
 
@@ -26,13 +26,13 @@ W zachowaniu GUI zaleca się włączenie kilku opcji, jeśli twój komputer to o
 
 ![](<../../images/image (960).png>)
 
-- **Tuner** w SigDigger pomaga w **lepszym przechwytywaniu sygnałów** (ale może je również pogorszyć). Idealnie zacznij od 0 i **zwiększaj**, aż znajdziesz, że **szum** wprowadzony jest **większy** niż **poprawa sygnału**, której potrzebujesz.
+- **Tuner** w SigDigger pomaga w **lepszym przechwytywaniu sygnałów** (ale może je również pogorszyć). Idealnie zacznij od 0 i **powiększaj**, aż znajdziesz **szum**, który jest **większy** niż **poprawa sygnału**, której potrzebujesz.
 
 ![](<../../images/image (1099).png>)
 
 ### Synchronizacja z kanałem radiowym
 
-Z [**SigDigger** ](https://github.com/BatchDrake/SigDigger)zsynchronizuj się z kanałem, który chcesz słyszeć, skonfiguruj opcję "Podgląd audio w paśmie podstawowym", skonfiguruj szerokość pasma, aby uzyskać wszystkie przesyłane informacje, a następnie ustaw Tuner na poziom przed rozpoczęciem rzeczywistego wzrostu szumu:
+Z [**SigDigger** ](https://github.com/BatchDrake/SigDigger)zsynchronizuj się z kanałem, który chcesz słyszeć, skonfiguruj opcję "Podgląd audio w paśmie podstawowym", skonfiguruj szerokość pasma, aby uzyskać wszystkie przesyłane informacje, a następnie ustaw Tuner na poziom przed rozpoczęciem wzrostu szumu:
 
 ![](<../../images/image (585).png>)
 
@@ -57,8 +57,8 @@ Jeśli sprawdzasz sygnał, istnieją różne sposoby, aby spróbować ustalić, 
 
 - **Wykrywanie AM**: Jeśli na wykresie IQ pojawiają się na przykład **2 okręgi** (prawdopodobnie jeden w 0, a drugi w innej amplitudzie), może to oznaczać, że jest to sygnał AM. Dzieje się tak, ponieważ na wykresie IQ odległość między 0 a okręgiem to amplituda sygnału, więc łatwo jest wizualizować różne amplitudy.
 - **Wykrywanie PM**: Jak na poprzednim obrazie, jeśli znajdziesz małe okręgi, które nie są ze sobą powiązane, prawdopodobnie oznacza to, że używana jest modulacja fazy. Dzieje się tak, ponieważ na wykresie IQ kąt między punktem a 0,0 to faza sygnału, co oznacza, że używane są 4 różne fazy.
-- Zauważ, że jeśli informacja jest ukryta w tym, że faza jest zmieniana, a nie w samej fazie, nie zobaczysz wyraźnie różniących się faz.
-- **Wykrywanie FM**: IQ nie ma pola do identyfikacji częstotliwości (odległość do centrum to amplituda, a kąt to faza).\
+- Zauważ, że jeśli informacja jest ukryta w fakcie, że faza jest zmieniana, a nie w samej fazie, nie zobaczysz wyraźnie różniących się faz.
+- **Wykrywanie FM**: IQ nie ma pola do identyfikacji częstotliwości (odległość od środka to amplituda, a kąt to faza).\
 Dlatego, aby zidentyfikować FM, powinieneś **widzieć zasadniczo tylko okrąg** na tym wykresie.\
 Ponadto, inna częstotliwość jest "reprezentowana" przez wykres IQ przez **przyspieszenie prędkości wzdłuż okręgu** (więc w SysDigger wybierając sygnał, wykres IQ jest zapełniany, jeśli znajdziesz przyspieszenie lub zmianę kierunku w utworzonym okręgu, może to oznaczać, że jest to FM):
 
@@ -82,7 +82,7 @@ A tak wygląda część symbolu z falą:
 
 #### Sprawdzanie histogramu
 
-Możesz **wybrać cały sygnał**, w którym znajduje się informacja, wybrać tryb **Amplituda** i **Wybór**, a następnie kliknąć na **Histogram**. Możesz zaobserwować, że znajdują się tylko 2 wyraźne poziomy
+Możesz **wybrać cały sygnał**, w którym znajduje się informacja, wybrać tryb **Amplituda** i **Wybór**, a następnie kliknąć na **Histogram**. Możesz zaobserwować, że znajdują się tylko 2 wyraźne poziomy.
 
 ![](<../../images/image (264).png>)
 
@@ -94,7 +94,7 @@ Jeśli znajdziesz wiele częstotliwości, prawdopodobnie nie będzie to FM, praw
 
 #### Z IQ
 
-W tym przykładzie możesz zobaczyć, jak jest **duże koło**, ale także **wiele punktów w centrum.**
+W tym przykładzie możesz zobaczyć, jak istnieje **duże koło**, ale także **wiele punktów w centrum**.
 
 ![](<../../images/image (222).png>)
 
@@ -108,30 +108,30 @@ Wybierz najmniejszy symbol, jaki możesz znaleźć (aby mieć pewność, że to 
 
 #### Z grupą symboli
 
-Możesz również wskazać liczbę symboli, które zamierzasz wybrać, a SigDigger obliczy częstotliwość 1 symbolu (im więcej symboli wybranych, tym lepiej prawdopodobnie). W tym scenariuszu wybrałem 10 symboli, a "Częstotliwość wyboru" wynosi 1,004 kHz:
+Możesz również wskazać liczbę symboli, które zamierzasz wybrać, a SigDigger obliczy częstotliwość 1 symbolu (im więcej symboli wybranych, tym lepiej). W tym scenariuszu wybrałem 10 symboli, a "Częstotliwość wyboru" wynosi 1,004 kHz:
 
 ![](<../../images/image (1008).png>)
 
 ### Uzyskiwanie bitów
 
-Po stwierdzeniu, że jest to sygnał **modulowany AM** i **częstotliwość symbolu** (i wiedząc, że w tym przypadku coś w górę oznacza 1, a coś w dół oznacza 0), bardzo łatwo jest **uzyskać bity** zakodowane w sygnale. Więc wybierz sygnał z informacjami i skonfiguruj próbkowanie oraz decyzję i naciśnij próbkę (sprawdź, czy **Amplituda** jest wybrana, odkryta **Częstotliwość symbolu** jest skonfigurowana, a **odzyskiwanie zegara Gadnera** jest wybrane):
+Po stwierdzeniu, że jest to sygnał **modulowany AM** i **częstotliwość symbolu** (i wiedząc, że w tym przypadku coś w górę oznacza 1, a coś w dół oznacza 0), bardzo łatwo jest **uzyskać bity** zakodowane w sygnale. Wybierz więc sygnał z informacjami, skonfiguruj próbkowanie i decyzję, a następnie naciśnij próbkę (upewnij się, że **Amplituda** jest wybrana, odkryta **Częstotliwość symbolu** jest skonfigurowana, a **odzyskiwanie zegara Gadnera** jest wybrane):
 
 ![](<../../images/image (965).png>)
 
 - **Synchronizacja z interwałami wyboru** oznacza, że jeśli wcześniej wybrałeś interwały, aby znaleźć częstotliwość symbolu, ta częstotliwość symbolu będzie używana.
-- **Ręcznie** oznacza, że wskazana częstotliwość symbolu będzie używana
-- W **Wybór o stałym interwale** wskazujesz liczbę interwałów, które powinny być wybrane, a on oblicza częstotliwość symbolu na ich podstawie
-- **Odzyskiwanie zegara Gadnera** jest zazwyczaj najlepszą opcją, ale nadal musisz wskazać jakąś przybliżoną częstotliwość symbolu.
+- **Ręcznie** oznacza, że wskazana częstotliwość symbolu będzie używana.
+- W **Wybór o stałym interwale** wskazujesz liczbę interwałów, które powinny być wybrane, a on oblicza częstotliwość symbolu na ich podstawie.
+- **Odzyskiwanie zegara Gadnera** jest zazwyczaj najlepszą opcją, ale nadal musisz wskazać przybliżoną częstotliwość symbolu.
 
 Naciskając próbkę, pojawia się to:
 
 ![](<../../images/image (644).png>)
 
-Teraz, aby sprawić, by SigDigger zrozumiał **gdzie jest zakres** poziomu niosącego informacje, musisz kliknąć na **niższy poziom** i przytrzymać kliknięte, aż do największego poziomu:
+Teraz, aby sprawić, by SigDigger zrozumiał **gdzie jest zakres** poziomu przenoszącego informacje, musisz kliknąć na **niższy poziom** i przytrzymać kliknięte, aż do największego poziomu:
 
 ![](<../../images/image (439).png>)
 
-Gdyby na przykład istniały **4 różne poziomy amplitudy**, musiałbyś skonfigurować **Bity na symbol na 2** i wybrać od najmniejszego do największego.
+Gdyby na przykład istniały **4 różne poziomy amplitudy**, powinieneś skonfigurować **Bity na symbol do 2** i wybrać od najmniejszego do największego.
 
 Na koniec **zwiększając** **Zoom** i **zmieniając rozmiar wiersza**, możesz zobaczyć bity (i możesz wszystko zaznaczyć i skopiować, aby uzyskać wszystkie bity):
 
@@ -171,7 +171,7 @@ Jeśli zsynchronizowana częstotliwość jest **bliżej jednej częstotliwości 
 
 #### Sprawdzanie histogramu
 
-Sprawdzając histogram częstotliwości sygnału z informacjami, możesz łatwo zobaczyć 2 różne sygnały:
+Sprawdzając histogram częstotliwości sygnału z informacjami, łatwo możesz zobaczyć 2 różne sygnały:
 
 ![](<../../images/image (871).png>)
 
@@ -185,7 +185,7 @@ A to byłby histogram fazy (co jasno pokazuje, że sygnał nie jest modulowany w
 
 #### Z IQ
 
-IQ nie ma pola do identyfikacji częstotliwości (odległość do centrum to amplituda, a kąt to faza).\
+IQ nie ma pola do identyfikacji częstotliwości (odległość od środka to amplituda, a kąt to faza).\
 Dlatego, aby zidentyfikować FM, powinieneś **widzieć zasadniczo tylko okrąg** na tym wykresie.\
 Ponadto, inna częstotliwość jest "reprezentowana" przez wykres IQ przez **przyspieszenie prędkości wzdłuż okręgu** (więc w SysDigger wybierając sygnał, wykres IQ jest zapełniany, jeśli znajdziesz przyspieszenie lub zmianę kierunku w utworzonym okręgu, może to oznaczać, że jest to FM):
 
@@ -193,7 +193,7 @@ Ponadto, inna częstotliwość jest "reprezentowana" przez wykres IQ przez **prz
 
 ### Uzyskiwanie częstotliwości symbolu
 
-Możesz użyć **tej samej techniki, co w przykładzie AM**, aby uzyskać częstotliwość symbolu, gdy znajdziesz częstotliwości niosące symbole.
+Możesz użyć **tej samej techniki, co w przykładzie AM**, aby uzyskać częstotliwość symbolu, gdy znajdziesz częstotliwości przenoszące symbole.
 
 ### Uzyskiwanie bitów
 

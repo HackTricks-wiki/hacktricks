@@ -3,14 +3,14 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 [**Cheat Engine**](https://www.cheatengine.org/downloads.php) to przydatny program do znajdowania, gdzie ważne wartości są zapisywane w pamięci działającej gry i ich zmieniania.\
-Po pobraniu i uruchomieniu programu, **zostaniesz** **przedstawiony** z **samouczkiem** jak używać narzędzia. Jeśli chcesz nauczyć się, jak korzystać z narzędzia, zdecydowanie zaleca się jego ukończenie.
+Po pobraniu i uruchomieniu, **zostaniesz** **przedstawiony** z **samouczkiem** jak używać narzędzia. Jeśli chcesz nauczyć się, jak używać tego narzędzia, zdecydowanie zaleca się jego ukończenie.
 
 ## Czego szukasz?
 
 ![](<../../images/image (762).png>)
 
 To narzędzie jest bardzo przydatne do znalezienia **gdzie jakaś wartość** (zwykle liczba) **jest przechowywana w pamięci** programu.\
-**Zwykle liczby** są przechowywane w formacie **4bytes**, ale możesz je również znaleźć w formatach **double** lub **float**, lub możesz chcieć szukać czegoś **innego niż liczba**. Z tego powodu musisz upewnić się, że **wybierasz** to, co chcesz **wyszukać**:
+**Zwykle liczby** są przechowywane w formie **4 bajtów**, ale możesz je również znaleźć w formatach **double** lub **float**, lub możesz chcieć szukać czegoś **innego niż liczba**. Z tego powodu musisz upewnić się, że **wybierasz**, co chcesz **wyszukiwać**:
 
 ![](<../../images/image (324).png>)
 
@@ -24,13 +24,13 @@ Możesz także zaznaczyć pole, aby **zatrzymać grę podczas skanowania pamięc
 
 ### Skróty klawiszowe
 
-W _**Edit --> Settings --> Hotkeys**_ możesz ustawić różne **skróty klawiszowe** do różnych celów, takich jak **zatrzymanie** **gry** (co jest dość przydatne, jeśli w pewnym momencie chcesz zeskanować pamięć). Inne opcje są dostępne:
+W _**Edit --> Settings --> Hotkeys**_ możesz ustawić różne **skróty klawiszowe** do różnych celów, takich jak **zatrzymywanie** **gry** (co jest dość przydatne, jeśli w pewnym momencie chcesz zeskanować pamięć). Inne opcje są dostępne:
 
 ![](<../../images/image (864).png>)
 
 ## Modyfikowanie wartości
 
-Gdy **znajdziesz**, gdzie jest **wartość**, której **szukasz** (więcej na ten temat w kolejnych krokach), możesz **zmodyfikować ją**, klikając dwukrotnie, a następnie dwukrotnie klikając jej wartość:
+Gdy **znajdziesz**, gdzie jest **wartość**, której **szukasz** (więcej na ten temat w kolejnych krokach), możesz **zmodyfikować ją**, klikając dwukrotnie, a następnie klikając dwukrotnie jej wartość:
 
 ![](<../../images/image (563).png>)
 
@@ -55,21 +55,21 @@ Następnie robisz coś, aby **wartość się zmieniła**, a następnie **zatrzym
 ![](<../../images/image (684).png>)
 
 Cheat Engine będzie szukać **wartości**, które **zmieniły się z 100 na nową wartość**. Gratulacje, **znalazłeś** **adres** wartości, której szukałeś, teraz możesz ją zmodyfikować.\
-&#xNAN;_Jeśli nadal masz kilka wartości, zrób coś, aby ponownie zmodyfikować tę wartość i przeprowadź kolejne "następne skanowanie", aby przefiltrować adresy._
+_Jeśli nadal masz kilka wartości, zrób coś, aby ponownie zmodyfikować tę wartość i przeprowadź kolejne "następne skanowanie", aby przefiltrować adresy._
 
 ### Nieznana wartość, znana zmiana
 
 W scenariuszu, w którym **nie znasz wartości**, ale wiesz **jak ją zmienić** (a nawet wartość zmiany), możesz szukać swojej liczby.
 
-Zacznij od przeprowadzenia skanowania typu "**Nieznana początkowa wartość**":
+Zacznij od przeprowadzenia skanowania typu "**Nieznana wartość początkowa**":
 
 ![](<../../images/image (890).png>)
 
-Następnie, zmień wartość, wskaż **jak** **wartość** **się zmieniła** (w moim przypadku zmniejszyła się o 1) i przeprowadź **następne skanowanie**:
+Następnie zmień wartość, wskaź **jak** **wartość** **się zmieniła** (w moim przypadku zmniejszyła się o 1) i przeprowadź **następne skanowanie**:
 
 ![](<../../images/image (371).png>)
 
-Zostaną przedstawione **wszystkie wartości, które zostały zmodyfikowane w wybrany sposób**:
+Zostaniesz przedstawiony **wszystkimi wartościami, które zostały zmodyfikowane w wybrany sposób**:
 
 ![](<../../images/image (569).png>)
 
@@ -94,7 +94,7 @@ Gdy wybierzesz jedną z tych opcji, **debugger** zostanie **przyłączony** do p
 
 ![](<../../images/image (91).png>)
 
-Teraz, gdy znalazłeś adres, który zmienia wartość, możesz **zmodyfikować kod według własnego uznania** (Cheat Engine pozwala na szybkie modyfikowanie go na NOP):
+Teraz, gdy znalazłeś adres, który zmienia wartość, możesz **zmodyfikować kod według własnego uznania** (Cheat Engine pozwala na szybkie modyfikowanie go na NOPs):
 
 ![](<../../images/image (1057).png>)
 
@@ -127,7 +127,7 @@ Kliknij OK, a nowy wskaźnik zostanie utworzony:
 
 ![](<../../images/image (308).png>)
 
-Teraz, za każdym razem, gdy modyfikujesz tę wartość, **modyfikujesz ważną wartość, nawet jeśli adres pamięci, w którym ta wartość się znajduje, jest inny.**
+Teraz, za każdym razem, gdy modyfikujesz tę wartość, **modyfikujesz ważną wartość, nawet jeśli adres pamięci, w którym znajduje się wartość, jest inny.**
 
 ### Wstrzykiwanie kodu
 
@@ -150,7 +150,7 @@ Zostanie wygenerowany szablon:
 
 ![](<../../images/image (944).png>)
 
-Wstaw swój nowy kod asemblera w sekcji "**newmem**" i usuń oryginalny kod z sekcji "**originalcode**", jeśli nie chcesz, aby był wykonywany\*\*.\*\* W tym przykładzie wstrzyknięty kod doda 2 punkty zamiast odejmować 1:
+Wstaw swój nowy kod asemblera w sekcji "**newmem**" i usuń oryginalny kod z "**originalcode**", jeśli nie chcesz, aby był wykonywany\*\*.\*\* W tym przykładzie wstrzyknięty kod doda 2 punkty zamiast odejmować 1:
 
 ![](<../../images/image (521).png>)
 

