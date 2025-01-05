@@ -49,7 +49,7 @@ Usando algo de **ingeniería social**, podrías **suplantar, por ejemplo, Google
 {{#tab name="Chrome Impersonation"}}
 Algunas sugerencias:
 
-- Verifica en el Dock si hay un Chrome, y en ese caso **elimina** esa entrada y **agrega** la **entrada falsa** de **Chrome en la misma posición** en el array del Dock.&#x20;
+- Verifica en el Dock si hay un Chrome, y en ese caso **elimina** esa entrada y **agrega** la **entrada falsa** de **Chrome en la misma posición** en el array del Dock.
 ```bash
 #!/bin/sh
 
@@ -124,7 +124,7 @@ killall Dock
 {{#tab name="Imitación de Finder"}}
 Algunas sugerencias:
 
-- No **puedes quitar Finder del Dock**, así que si vas a añadirlo al Dock, podrías poner el Finder falso justo al lado del real. Para esto necesitas **agregar la entrada del Finder falso al principio del array del Dock**.
+- No **puedes eliminar Finder del Dock**, así que si vas a añadirlo al Dock, podrías poner el Finder falso justo al lado del real. Para esto necesitas **añadir la entrada del Finder falso al principio del array del Dock**.
 - Otra opción es no colocarlo en el Dock y simplemente abrirlo, "Finder pidiendo controlar Finder" no es tan raro.
 - Otra opción para **escalar a root sin pedir** la contraseña con una horrible ventana, es hacer que Finder realmente pida la contraseña para realizar una acción privilegiada:
 - Pedir a Finder que copie a **`/etc/pam.d`** un nuevo archivo **`sudo`** (El aviso pidiendo la contraseña indicará que "Finder quiere copiar sudo")

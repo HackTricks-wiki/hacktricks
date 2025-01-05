@@ -1,10 +1,10 @@
-# Espacio de Nombres de Tiempo
+# Time Namespace
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
 ## Información Básica
 
-El espacio de nombres de tiempo en Linux permite desplazamientos por espacio de nombres a los relojes monótonos del sistema y al tiempo de arranque. Se utiliza comúnmente en contenedores de Linux para cambiar la fecha/hora dentro de un contenedor y ajustar los relojes después de restaurar desde un punto de control o una instantánea.
+El espacio de nombres de tiempo en Linux permite desplazamientos por espacio de nombres a los relojes de sistema monótono y de tiempo de arranque. Se utiliza comúnmente en contenedores de Linux para cambiar la fecha/hora dentro de un contenedor y ajustar los relojes después de restaurar desde un punto de control o instantánea.
 
 ## Laboratorio:
 
@@ -34,7 +34,7 @@ Cuando se ejecuta `unshare` sin la opción `-f`, se encuentra un error debido a 
 
 3. **Solución**:
 - El problema se puede resolver utilizando la opción `-f` con `unshare`. Esta opción hace que `unshare` cree un nuevo proceso después de crear el nuevo espacio de nombres de PID.
-- Ejecutar `%unshare -fp /bin/bash%` asegura que el comando `unshare` mismo se convierta en PID 1 en el nuevo espacio de nombres. `/bin/bash` y sus procesos hijos están entonces contenidos de manera segura dentro de este nuevo espacio de nombres, previniendo la salida prematura de PID 1 y permitiendo la asignación normal de PID.
+- Ejecutar `%unshare -fp /bin/bash%` asegura que el comando `unshare` se convierta en PID 1 en el nuevo espacio de nombres. `/bin/bash` y sus procesos hijos están entonces contenidos de manera segura dentro de este nuevo espacio de nombres, previniendo la salida prematura de PID 1 y permitiendo la asignación normal de PID.
 
 Al asegurarte de que `unshare` se ejecute con la bandera `-f`, el nuevo espacio de nombres de PID se mantiene correctamente, permitiendo que `/bin/bash` y sus subprocesos operen sin encontrar el error de asignación de memoria.
 
@@ -44,7 +44,7 @@ Al asegurarte de que `unshare` se ejecute con la bandera `-f`, el nuevo espacio 
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-### &#x20;Verifica en qué namespace está tu proceso
+### Verifica en qué namespace está tu proceso
 ```bash
 ls -l /proc/self/ns/time
 lrwxrwxrwx 1 root root 0 Apr  4 21:16 /proc/self/ns/time -> 'time:[4026531834]'

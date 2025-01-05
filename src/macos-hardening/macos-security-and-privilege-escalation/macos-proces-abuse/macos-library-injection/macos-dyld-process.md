@@ -15,7 +15,7 @@ Por supuesto, **`dyld`** no tiene dependencias (utiliza syscalls y extractos de 
 
 ### Flujo
 
-Dyld será cargado por **`dyldboostrap::start`**, que también cargará cosas como el **stack canary**. Esto se debe a que esta función recibirá en su vector de argumentos **`apple`** este y otros **valores** **sensibles**.
+Dyld será cargado por **`dyldboostrap::start`**, que también cargará cosas como el **canario de pila**. Esto se debe a que esta función recibirá en su vector de argumentos **`apple`** estos y otros **valores** **sensibles**.
 
 **`dyls::_main()`** es el punto de entrada de dyld y su primera tarea es ejecutar `configureProcessRestrictions()`, que generalmente restringe las variables de entorno **`DYLD_*`** explicadas en:
 
@@ -28,7 +28,7 @@ Luego, mapea la caché compartida de dyld que preenlaza todas las bibliotecas de
 1. comienza a cargar bibliotecas insertadas con `DYLD_INSERT_LIBRARIES` (si se permite)
 2. Luego las compartidas en caché
 3. Luego las importadas
-1. &#x20;Luego continúa importando bibliotecas recursivamente
+1. Luego continúa importando bibliotecas recursivamente
 
 Una vez que todas están cargadas, se ejecutan los **inicializadores** de estas bibliotecas. Estos están codificados usando **`__attribute__((constructor))`** definidos en el `LC_ROUTINES[_64]` (ahora en desuso) o por puntero en una sección marcada con `S_MOD_INIT_FUNC_POINTERS` (generalmente: **`__DATA.__MOD_INIT_FUNC`**).
 
@@ -47,7 +47,7 @@ Algunas secciones de stubs en el binario:
 - **`__DATA.__la_symbol_ptr`**: Punteros de símbolos perezosos (vinculados en el primer acceso)
 
 > [!WARNING]
-> Tenga en cuenta que los punteros con el prefijo "auth\_" están utilizando una clave de cifrado en proceso para protegerlo (PAC). Además, es posible usar la instrucción arm64 `BLRA[A/B]` para verificar el puntero antes de seguirlo. Y el RETA\[A/B] se puede usar en lugar de una dirección RET.\
+> Tenga en cuenta que los punteros con el prefijo "auth\_" están utilizando una clave de cifrado en proceso para protegerlo (PAC). Además, es posible utilizar la instrucción arm64 `BLRA[A/B]` para verificar el puntero antes de seguirlo. Y el RETA\[A/B] se puede usar en lugar de una dirección RET.\
 > De hecho, el código en **`__TEXT.__auth_stubs`** utilizará **`braa`** en lugar de **`bl`** para llamar a la función solicitada para autenticar el puntero.
 >
 > También tenga en cuenta que las versiones actuales de dyld cargan **todo como no perezoso**.
@@ -61,14 +61,14 @@ int main (int argc, char **argv, char **envp, char **apple)
 printf("Hi\n");
 }
 ```
-Interesante parte de desensamblado:
+Interesante parte de desensamblaje:
 ```armasm
 ; objdump -d ./load
 100003f7c: 90000000    	adrp	x0, 0x100003000 <_main+0x1c>
 100003f80: 913e9000    	add	x0, x0, #4004
 100003f84: 94000005    	bl	0x100003f98 <_printf+0x100003f98>
 ```
-Es posible ver que el salto a llamar a printf va a **`__TEXT.__stubs`**:
+Es posible ver que el salto a la llamada a printf va a **`__TEXT.__stubs`**:
 ```bash
 objdump --section-headers ./load
 
@@ -97,7 +97,7 @@ Disassembly of section __TEXT,__stubs:
 ```
 puedes ver que estamos **saltando a la dirección del GOT**, que en este caso se resuelve de manera no perezosa y contendrá la dirección de la función printf.
 
-En otras situaciones, en lugar de saltar directamente al GOT, podría saltar a **`__DATA.__la_symbol_ptr`** que cargará un valor que representa la función que está intentando cargar, luego saltar a **`__TEXT.__stub_helper`** que salta a **`__DATA.__nl_symbol_ptr`** que contiene la dirección de **`dyld_stub_binder`** que toma como parámetros el número de la función y una dirección.\
+En otras situaciones, en lugar de saltar directamente al GOT, podría saltar a **`__DATA.__la_symbol_ptr`** que cargará un valor que representa la función que está intentando cargar, luego saltar a **`__TEXT.__stub_helper`** que salta al **`__DATA.__nl_symbol_ptr`** que contiene la dirección de **`dyld_stub_binder`** que toma como parámetros el número de la función y una dirección.\
 Esta última función, después de encontrar la dirección de la función buscada, la escribe en la ubicación correspondiente en **`__TEXT.__stub_helper`** para evitar hacer búsquedas en el futuro.
 
 > [!TIP]
@@ -142,7 +142,7 @@ es posible ver todos estos valores interesantes depurando antes de entrar en mai
 <pre><code>lldb ./apple
 
 <strong>(lldb) target create "./a"
-</strong>El ejecutable actual se ha establecido en '/tmp/a' (arm64).
+</strong>Ejecutable actual establecido en '/tmp/a' (arm64).
 (lldb) process launch -s
 [..]
 
@@ -275,7 +275,7 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 - `DYLD_PRINT_STATISTICS`: Imprimir estadísticas de tiempo
 - `DYLD_PRINT_STATISTICS_DETAILS`: Imprimir estadísticas de tiempo detalladas
 - `DYLD_PRINT_WARNINGS`: Imprimir mensajes de advertencia
-- `DYLD_SHARED_CACHE_DIR`: Ruta a utilizar para la caché de bibliotecas compartidas
+- `DYLD_SHARED_CACHE_DIR`: Ruta a usar para la caché de bibliotecas compartidas
 - `DYLD_SHARED_REGION`: "usar", "privado", "evitar"
 - `DYLD_USE_CLOSURES`: Habilitar cierres
 

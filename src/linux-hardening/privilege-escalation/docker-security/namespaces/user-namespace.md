@@ -1,4 +1,4 @@
-# Espacio de Nombres
+# User Namespace
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
@@ -23,23 +23,23 @@ Los espacios de nombres de usuario son particularmente útiles en la contenedori
 ```bash
 sudo unshare -U [--mount-proc] /bin/bash
 ```
-Al montar una nueva instancia del sistema de archivos `/proc` si usas el parámetro `--mount-proc`, aseguras que el nuevo espacio de montaje tenga una **vista precisa y aislada de la información del proceso específica de ese espacio de nombres**.
+Al montar una nueva instancia del sistema de archivos `/proc` si usas el parámetro `--mount-proc`, aseguras que el nuevo espacio de montaje tenga una **vista precisa y aislada de la información del proceso específica para ese espacio de nombres**.
 
 <details>
 
 <summary>Error: bash: fork: Cannot allocate memory</summary>
 
-Cuando se ejecuta `unshare` sin la opción `-f`, se encuentra un error debido a la forma en que Linux maneja los nuevos espacios de nombres de PID (Identificación de Proceso). Los detalles clave y la solución se describen a continuación:
+Cuando se ejecuta `unshare` sin la opción `-f`, se encuentra un error debido a la forma en que Linux maneja los nuevos espacios de nombres de PID (ID de Proceso). Los detalles clave y la solución se describen a continuación:
 
 1. **Explicación del Problema**:
 
-- El núcleo de Linux permite a un proceso crear nuevos espacios de nombres utilizando la llamada al sistema `unshare`. Sin embargo, el proceso que inicia la creación de un nuevo espacio de nombres de PID (denominado "proceso unshare") no entra en el nuevo espacio de nombres; solo lo hacen sus procesos hijos.
+- El núcleo de Linux permite a un proceso crear nuevos espacios de nombres utilizando la llamada al sistema `unshare`. Sin embargo, el proceso que inicia la creación de un nuevo espacio de nombres de PID (denominado el proceso "unshare") no entra en el nuevo espacio de nombres; solo lo hacen sus procesos hijos.
 - Ejecutar `%unshare -p /bin/bash%` inicia `/bin/bash` en el mismo proceso que `unshare`. En consecuencia, `/bin/bash` y sus procesos hijos están en el espacio de nombres de PID original.
 - El primer proceso hijo de `/bin/bash` en el nuevo espacio de nombres se convierte en PID 1. Cuando este proceso sale, desencadena la limpieza del espacio de nombres si no hay otros procesos, ya que PID 1 tiene el papel especial de adoptar procesos huérfanos. El núcleo de Linux deshabilitará entonces la asignación de PID en ese espacio de nombres.
 
 2. **Consecuencia**:
 
-- La salida de PID 1 en un nuevo espacio de nombres lleva a la limpieza de la bandera `PIDNS_HASH_ADDING`. Esto resulta en que la función `alloc_pid` falla al intentar asignar un nuevo PID al crear un nuevo proceso, produciendo el error "Cannot allocate memory".
+- La salida de PID 1 en un nuevo espacio de nombres lleva a la limpieza de la bandera `PIDNS_HASH_ADDING`. Esto resulta en que la función `alloc_pid` falle al intentar asignar un nuevo PID al crear un nuevo proceso, produciendo el error "Cannot allocate memory".
 
 3. **Solución**:
 - El problema se puede resolver utilizando la opción `-f` con `unshare`. Esta opción hace que `unshare` cree un nuevo proceso después de crear el nuevo espacio de nombres de PID.
@@ -55,7 +55,7 @@ docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
 Para usar el espacio de nombres de usuario, el daemon de Docker debe iniciarse con **`--userns-remap=default`** (En ubuntu 14.04, esto se puede hacer modificando `/etc/default/docker` y luego ejecutando `sudo service docker restart`)
 
-### &#x20;Verifica en qué espacio de nombres está tu proceso
+### Verifica en qué espacio de nombres está tu proceso
 ```bash
 ls -l /proc/self/ns/user
 lrwxrwxrwx 1 root root 0 Apr  4 20:57 /proc/self/ns/user -> 'user:[4026531837]'
@@ -76,7 +76,7 @@ sudo find /proc -maxdepth 3 -type l -name user -exec readlink {} \; 2>/dev/null 
 # Find the processes with an specific namespace
 sudo find /proc -maxdepth 3 -type l -name user -exec ls -l  {} \; 2>/dev/null | grep <ns-number>
 ```
-### Entrar en un espacio de nombres de usuario
+### Entrar dentro de un espacio de nombres de usuario
 ```bash
 nsenter -U TARGET_PID --pid /bin/bash
 ```

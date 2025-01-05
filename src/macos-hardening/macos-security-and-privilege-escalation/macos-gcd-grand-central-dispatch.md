@@ -18,7 +18,7 @@ Esto es muy útil para gestionar la ejecución paralela con éxito, reduciendo e
 Un bloque es una **sección de código autocontenida** (como una función con argumentos que devuelve un valor) y también puede especificar variables vinculadas.\
 Sin embargo, a nivel de compilador, los bloques no existen, son `os_object`s. Cada uno de estos objetos está formado por dos estructuras:
 
-- **literal de bloque**:&#x20;
+- **literal de bloque**:
 - Comienza por el campo **`isa`**, que apunta a la clase del bloque:
 - `NSConcreteGlobalBlock` (bloques de `__DATA.__const`)
 - `NSConcreteMallocBlock` (bloques en el heap)
@@ -80,7 +80,7 @@ Hay varios objetos que libdispatch utiliza y las colas y bloques son solo 2 de e
 
 ## Objective-C
 
-En Objective-C hay diferentes funciones para enviar un bloque para ser ejecutado en paralelo:
+En Objective-C hay diferentes funciones para enviar un bloque para que se ejecute en paralelo:
 
 - [**dispatch_async**](https://developer.apple.com/documentation/dispatch/1453057-dispatch_async): Envía un bloque para ejecución asíncrona en una cola de despacho y devuelve inmediatamente.
 - [**dispatch_sync**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync): Envía un objeto de bloque para ejecución y devuelve después de que ese bloque termine de ejecutarse.
@@ -100,7 +100,7 @@ struct BlockDescriptor *descriptor;
 // captured variables go here
 };
 ```
-Y este es un ejemplo de usar **parallelism** con **`dispatch_async`**:
+Y este es un ejemplo de uso de **parallelism** con **`dispatch_async`**:
 ```objectivec
 #import <Foundation/Foundation.h>
 
@@ -132,7 +132,7 @@ return 0;
 ```
 ## Swift
 
-**`libswiftDispatch`** es una biblioteca que proporciona **enlaces de Swift** al marco Grand Central Dispatch (GCD) que fue escrito originalmente en C.\
+**`libswiftDispatch`** es una biblioteca que proporciona **enlaces de Swift** al marco Grand Central Dispatch (GCD) que originalmente está escrito en C.\
 La biblioteca **`libswiftDispatch`** envuelve las API de C GCD en una interfaz más amigable para Swift, facilitando y haciendo más intuitivo para los desarrolladores de Swift trabajar con GCD.
 
 - **`DispatchQueue.global().sync{ ... }`**
@@ -170,7 +170,7 @@ sleep(1)  // Simulate a long-running task
 ```
 ## Frida
 
-El siguiente script de Frida se puede utilizar para **interceptar varias funciones `dispatch`** y extraer el nombre de la cola, el backtrace y el bloque: [**https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js**](https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js)
+El siguiente script de Frida se puede utilizar para **interceptar varias funciones de `dispatch`** y extraer el nombre de la cola, la traza de la pila y el bloque: [**https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js**](https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js)
 ```bash
 frida -U <prog_name> -l libdispatch.js
 
@@ -198,7 +198,7 @@ Así que si quieres que las entienda, podrías **declararlas**:
 Luego, encuentra un lugar en el código donde se **utilicen**:
 
 > [!TIP]
-> Toma nota de todas las referencias hechas a "block" para entender cómo podrías deducir que se está utilizando la estructura.
+> Nota todas las referencias hechas a "block" para entender cómo podrías deducir que se está utilizando la estructura.
 
 <figure><img src="../../images/image (1164).png" alt="" width="563"><figcaption></figcaption></figure>
 

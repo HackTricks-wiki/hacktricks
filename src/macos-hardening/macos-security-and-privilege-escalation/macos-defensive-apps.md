@@ -1,11 +1,11 @@
-# Aplicaciones Defensivas de macOS
+# macOS Defensive Apps
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Firewalls
 
 - [**Little Snitch**](https://www.obdev.at/products/littlesnitch/index.html): Monitoreará cada conexión realizada por cada proceso. Dependiendo del modo (permitir conexiones en silencio, denegar conexión en silencio y alertar) te **mostrará una alerta** cada vez que se establezca una nueva conexión. También tiene una interfaz gráfica muy agradable para ver toda esta información.
-- [**LuLu**](https://objective-see.org/products/lulu.html): Firewall de Objective-See. Este es un firewall básico que te alertará sobre conexiones sospechosas (tiene una interfaz gráfica, pero no es tan elegante como la de Little Snitch).
+- [**LuLu**](https://objective-see.org/products/lulu.html): Cortafuegos de Objective-See. Este es un cortafuegos básico que te alertará sobre conexiones sospechosas (tiene una interfaz gráfica, pero no es tan elegante como la de Little Snitch).
 
 ## Detección de persistencia
 
@@ -14,6 +14,6 @@
 
 ## Detección de keyloggers
 
-- [**ReiKey**](https://objective-see.org/products/reikey.html): Aplicación de Objective-See para encontrar **keyloggers** que instalan "event taps" de teclado&#x20;
+- [**ReiKey**](https://objective-see.org/products/reikey.html): Aplicación de Objective-See para encontrar **keyloggers** que instalan "event taps" de teclado.
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -4,11 +4,11 @@
 
 ## Información Básica
 
-Un namespace de red es una característica del núcleo de Linux que proporciona aislamiento de la pila de red, permitiendo que **cada namespace de red tenga su propia configuración de red independiente**, interfaces, direcciones IP, tablas de enrutamiento y reglas de firewall. Este aislamiento es útil en varios escenarios, como la contenedorización, donde cada contenedor debe tener su propia configuración de red, independiente de otros contenedores y del sistema host.
+Un namespace de red es una característica del kernel de Linux que proporciona aislamiento de la pila de red, permitiendo que **cada namespace de red tenga su propia configuración de red independiente**, interfaces, direcciones IP, tablas de enrutamiento y reglas de firewall. Este aislamiento es útil en varios escenarios, como la contenedorización, donde cada contenedor debe tener su propia configuración de red, independiente de otros contenedores y del sistema host.
 
 ### Cómo funciona:
 
-1. Cuando se crea un nuevo namespace de red, comienza con una **pila de red completamente aislada**, con **ninguna interfaz de red** excepto por la interfaz de loopback (lo). Esto significa que los procesos que se ejecutan en el nuevo namespace de red no pueden comunicarse con procesos en otros namespaces o con el sistema host por defecto.
+1. Cuando se crea un nuevo namespace de red, comienza con una **pila de red completamente aislada**, sin **interfaces de red** excepto por la interfaz de loopback (lo). Esto significa que los procesos que se ejecutan en el nuevo namespace de red no pueden comunicarse con procesos en otros namespaces o con el sistema host por defecto.
 2. **Interfaces de red virtuales**, como pares veth, pueden ser creadas y movidas entre namespaces de red. Esto permite establecer conectividad de red entre namespaces o entre un namespace y el sistema host. Por ejemplo, un extremo de un par veth puede ser colocado en el namespace de red de un contenedor, y el otro extremo puede ser conectado a un **puente** u otra interfaz de red en el namespace del host, proporcionando conectividad de red al contenedor.
 3. Las interfaces de red dentro de un namespace pueden tener sus **propias direcciones IP, tablas de enrutamiento y reglas de firewall**, independientes de otros namespaces. Esto permite que los procesos en diferentes namespaces de red tengan diferentes configuraciones de red y operen como si estuvieran ejecutándose en sistemas de red separados.
 4. Los procesos pueden moverse entre namespaces utilizando la llamada al sistema `setns()`, o crear nuevos namespaces utilizando las llamadas al sistema `unshare()` o `clone()` con la bandera `CLONE_NEWNET`. Cuando un proceso se mueve a un nuevo namespace o crea uno, comenzará a utilizar la configuración de red y las interfaces asociadas con ese namespace.
@@ -22,7 +22,7 @@ Un namespace de red es una característica del núcleo de Linux que proporciona 
 sudo unshare -n [--mount-proc] /bin/bash
 # Run ifconfig or ip -a
 ```
-Al montar una nueva instancia del sistema de archivos `/proc` si usas el parámetro `--mount-proc`, aseguras que el nuevo espacio de montaje tenga una **vista precisa y aislada de la información del proceso específica para ese espacio de nombres**.
+Al montar una nueva instancia del sistema de archivos `/proc` si usas el parámetro `--mount-proc`, aseguras que el nuevo espacio de montaje tenga una **vista precisa y aislada de la información del proceso específica de ese espacio de nombres**.
 
 <details>
 
@@ -53,7 +53,7 @@ Al asegurarte de que `unshare` se ejecute con la bandera `-f`, el nuevo espacio 
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 # Run ifconfig or ip -a
 ```
-### &#x20;Ver en qué namespace está tu proceso
+### Verifica en qué namespace está tu proceso
 ```bash
 ls -l /proc/self/ns/net
 lrwxrwxrwx 1 root root 0 Apr  4 20:30 /proc/self/ns/net -> 'net:[4026531840]'
@@ -68,7 +68,7 @@ sudo find /proc -maxdepth 3 -type l -name net -exec ls -l  {} \; 2>/dev/null | g
 ```bash
 nsenter -n TARGET_PID --pid /bin/bash
 ```
-Además, solo puedes **entrar en otro espacio de nombres de proceso si eres root**. Y **no puedes** **entrar** en otro espacio de nombres **sin un descriptor** que apunte a él (como `/proc/self/ns/net`).
+También, solo puedes **entrar en otro espacio de nombres de proceso si eres root**. Y **no puedes** **entrar** en otro espacio de nombres **sin un descriptor** que apunte a él (como `/proc/self/ns/net`).
 
 ## Referencias
 

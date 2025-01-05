@@ -30,7 +30,7 @@ Flipper Zero solo puede leer un UID, SAK, ATQA y datos almacenados en tarjetas b
 
 Pantalla de lectura de tarjeta bancaria. Para tarjetas bancarias, Flipper Zero solo puede leer datos **sin guardar ni emularlos**.
 
-<figure><img src="https://cdn.flipperzero.one/Monosnap_Miro_2022-08-17_12-26-31.png?auto=format&#x26;ixlib=react-9.1.1&#x26;h=916&#x26;w=2662" alt=""><figcaption></figcaption></figure>
+<figure><img src="https://cdn.flipperzero.one/Monosnap_Miro_2022-08-17_12-26-31.png?auto=format&ixlib=react-9.1.1&h=916&w=2662" alt=""><figcaption></figcaption></figure>
 
 #### Tarjetas desconocidas <a href="#id-37eo8" id="id-37eo8"></a>
 
@@ -38,13 +38,13 @@ Cuando Flipper Zero es **incapaz de determinar el tipo de tarjeta NFC**, solo se
 
 Pantalla de lectura de tarjeta desconocida. Para tarjetas NFC desconocidas, Flipper Zero solo puede emular un UID.
 
-<figure><img src="https://cdn.flipperzero.one/Monosnap_Miro_2022-08-17_12-27-53.png?auto=format&#x26;ixlib=react-9.1.1&#x26;h=932&#x26;w=2634" alt=""><figcaption></figcaption></figure>
+<figure><img src="https://cdn.flipperzero.one/Monosnap_Miro_2022-08-17_12-27-53.png?auto=format&ixlib=react-9.1.1&h=932&w=2634" alt=""><figcaption></figcaption></figure>
 
 ### Tarjetas NFC tipos B, F y V <a href="#wyg51" id="wyg51"></a>
 
 Para **tarjetas NFC tipos B, F y V**, Flipper Zero solo puede **leer y mostrar un UID** sin guardarlo.
 
-<figure><img src="https://archbee.imgix.net/3StCFqarJkJQZV-7N79yY/zBU55Fyj50TFO4U7S-OXH_screenshot-2022-08-12-at-182540.png?auto=format&#x26;ixlib=react-9.1.1&#x26;h=1080&#x26;w=2704" alt=""><figcaption></figcaption></figure>
+<figure><img src="https://archbee.imgix.net/3StCFqarJkJQZV-7N79yY/zBU55Fyj50TFO4U7S-OXH_screenshot-2022-08-12-at-182540.png?auto=format&ixlib=react-9.1.1&h=1080&w=2704" alt=""><figcaption></figcaption></figure>
 
 ## Acciones
 

@@ -23,7 +23,7 @@ Estas son algunas de las políticas de MACF que registra:
 - **`cred_label_destroy`**: Elimina el slot de etiqueta mac de AMFI
 - **`cred_label_init`**: Mueve 0 en el slot de etiqueta mac de AMFI
 - **`cred_label_update_execve`:** Verifica los derechos del proceso para ver si se le debe permitir modificar las etiquetas.
-- **`file_check_mmap`:** Verifica si mmap está adquiriendo memoria y configurándola como ejecutable. En ese caso, verifica si se necesita validación de biblioteca y, de ser así, llama a la función de validación de biblioteca.
+- **`file_check_mmap`:** Verifica si mmap está adquiriendo memoria y configurándola como ejecutable. En ese caso, verifica si se necesita validación de biblioteca y, si es así, llama a la función de validación de biblioteca.
 - **`file_check_library_validation`**: Llama a la función de validación de biblioteca que verifica, entre otras cosas, si un binario de plataforma está cargando otro binario de plataforma o si el proceso y el nuevo archivo cargado tienen el mismo TeamID. Ciertos derechos también permitirán cargar cualquier biblioteca.
 - **`policy_initbsd`**: Configura claves NVRAM de confianza
 - **`policy_syscall`**: Verifica políticas DYLD como si el binario tiene segmentos sin restricciones, si debe permitir variables de entorno... esto también se llama cuando un proceso se inicia a través de `amfi_check_dyld_policy_self()`.
@@ -32,13 +32,13 @@ Estas son algunas de las políticas de MACF que registra:
 - **`amfi_exc_action_check_exception_send`**: Se envía un mensaje de excepción al depurador
 - **`amfi_exc_action_label_associate & amfi_exc_action_label_copy/populate & amfi_exc_action_label_destroy & amfi_exc_action_label_init & amfi_exc_action_label_update`**: Ciclo de vida de la etiqueta durante el manejo de excepciones (depuración)
 - **`proc_check_get_task`**: Verifica derechos como `get-task-allow` que permite a otros procesos obtener el puerto de tareas y `task_for_pid-allow`, que permite al proceso obtener los puertos de tareas de otros procesos. Si ninguno de esos, llama a `amfid permitunrestricteddebugging` para verificar si está permitido.
-- **`proc_check_mprotect`**: Niega si se llama a `mprotect` con la bandera `VM_PROT_TRUSTED`, que indica que la región debe ser tratada como si tuviera una firma de código válida.
+- **`proc_check_mprotect`**: Niega si `mprotect` se llama con la bandera `VM_PROT_TRUSTED`, que indica que la región debe ser tratada como si tuviera una firma de código válida.
 - **`vnode_check_exec`**: Se llama cuando se cargan archivos ejecutables en memoria y establece `cs_hard | cs_kill`, lo que matará el proceso si alguna de las páginas se vuelve inválida
 - **`vnode_check_getextattr`**: MacOS: Verifica `com.apple.root.installed` y `isVnodeQuarantined()`
 - **`vnode_check_setextattr`**: Como obtener + com.apple.private.allow-bless y derecho equivalente de instalador interno
-- &#x20;**`vnode_check_signature`**: Código que llama a XNU para verificar la firma de código utilizando derechos, caché de confianza y `amfid`
-- &#x20;**`proc_check_run_cs_invalid`**: Intercepta llamadas a `ptrace()` (`PT_ATTACH` y `PT_TRACE_ME`). Verifica si alguno de los derechos `get-task-allow`, `run-invalid-allow` y `run-unsigned-code` y si ninguno, verifica si se permite la depuración.
-- **`proc_check_map_anon`**: Si se llama a mmap con la bandera **`MAP_JIT`**, AMFI verificará el derecho `dynamic-codesigning`.
+- **`vnode_check_signature`**: Código que llama a XNU para verificar la firma de código utilizando derechos, caché de confianza y `amfid`
+- **`proc_check_run_cs_invalid`**: Intercepta llamadas a `ptrace()` (`PT_ATTACH` y `PT_TRACE_ME`). Verifica si alguno de los derechos `get-task-allow`, `run-invalid-allow` y `run-unsigned-code` y si ninguno, verifica si se permite la depuración.
+- **`proc_check_map_anon`**: Si mmap se llama con la bandera **`MAP_JIT`**, AMFI verificará el derecho `dynamic-codesigning`.
 
 `AMFI.kext` también expone una API para otras extensiones del kernel, y es posible encontrar sus dependencias con:
 ```bash
@@ -76,7 +76,7 @@ Una vez que se recibe un mensaje a través del puerto especial, **MIG** se utili
 
 ## Provisioning Profiles
 
-Un perfil de aprovisionamiento se puede utilizar para firmar código. Hay perfiles de **Desarrollador** que se pueden utilizar para firmar código y probarlo, y perfiles de **Empresa** que se pueden utilizar en todos los dispositivos.
+Un perfil de aprovisionamiento se puede utilizar para firmar código. Hay perfiles de **Desarrollador** que se pueden utilizar para firmar código y probarlo, y perfiles **Empresariales** que se pueden utilizar en todos los dispositivos.
 
 Después de que una aplicación se envía a la Apple Store, si es aprobada, es firmada por Apple y el perfil de aprovisionamiento ya no es necesario.
 
@@ -98,7 +98,7 @@ Aunque a veces se les llama certificados, estos perfiles de aprovisionamiento ti
 - **Entitlements**: Los derechos permitidos con derechos para este perfil
 - **ExpirationDate**: Fecha de expiración en formato `YYYY-MM-DDTHH:mm:ssZ`
 - **Name**: El Nombre de la Aplicación, el mismo que AppIDName
-- **ProvisionedDevices**: Un array (para certificados de desarrollador) de UDIDs para los cuales este perfil es válido
+- **ProvisionedDevices**: Un array (para certificados de desarrollador) de UDIDs para los que este perfil es válido
 - **ProvisionsAllDevices**: Un booleano (verdadero para certificados empresariales)
 - **TeamIdentifier**: Un array de (usualmente uno) cadena(s) alfanumérica(s) utilizadas para identificar al desarrollador para propósitos de interacción entre aplicaciones
 - **TeamName**: Un nombre legible por humanos utilizado para identificar al desarrollador
@@ -106,9 +106,9 @@ Aunque a veces se les llama certificados, estos perfiles de aprovisionamiento ti
 - **UUID**: Un Identificador Único Universal para este perfil
 - **Version**: Actualmente establecido en 1
 
-Nota que la entrada de derechos contendrá un conjunto restringido de derechos y el perfil de aprovisionamiento solo podrá otorgar esos derechos específicos para evitar otorgar derechos privados de Apple.
+Tenga en cuenta que la entrada de derechos contendrá un conjunto restringido de derechos y el perfil de aprovisionamiento solo podrá otorgar esos derechos específicos para evitar otorgar derechos privados de Apple.
 
-Nota que los perfiles generalmente se encuentran en `/var/MobileDeviceProvisioningProfiles` y es posible verificarlos con **`security cms -D -i /path/to/profile`**
+Tenga en cuenta que los perfiles generalmente se encuentran en `/var/MobileDeviceProvisioningProfiles` y es posible verificarlos con **`security cms -D -i /path/to/profile`**
 
 ## **libmis.dyld**
 
@@ -118,7 +118,7 @@ En macOS esto está dentro de `MobileDevice.framework`.
 
 ## AMFI Trust Caches
 
-iOS AMFI mantiene una lista de hashes conocidos que están firmados ad-hoc, llamada **Trust Cache** y se encuentra en la sección `__TEXT.__const` del kext. Nota que en operaciones muy específicas y sensibles es posible extender este Trust Cache con un archivo externo.
+iOS AMFI mantiene una lista de hashes conocidos que están firmados ad-hoc, llamada **Trust Cache** y se encuentra en la sección `__TEXT.__const` del kext. Tenga en cuenta que en operaciones muy específicas y sensibles es posible extender este Trust Cache con un archivo externo.
 
 ## References
 

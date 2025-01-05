@@ -6,7 +6,7 @@
 
 Crea un **dylib** con una sección **`__interpose`** (o una sección marcada con **`S_INTERPOSING`**) que contenga tuplas de **punteros de función** que se refieran a las funciones **original** y **reemplazo**.
 
-Luego, **inyecta** el dylib con **`DYLD_INSERT_LIBRARIES`** (la interposición debe ocurrir antes de que se cargue la aplicación principal). Obviamente, las [**restricciones** aplicadas al uso de **`DYLD_INSERT_LIBRARIES`** también se aplican aquí](../macos-proces-abuse/macos-library-injection/index.html#check-restrictions).&#x20;
+Luego, **inyecta** el dylib con **`DYLD_INSERT_LIBRARIES`** (la interposición debe ocurrir antes de que se cargue la aplicación principal). Obviamente, las [**restricciones** aplicadas al uso de **`DYLD_INSERT_LIBRARIES`** también se aplican aquí](../macos-proces-abuse/macos-library-injection/index.html#check-restrictions).
 
 ### Interponer printf
 
@@ -81,7 +81,7 @@ Hello from interpose
 
 En ObjectiveC, así es como se llama a un método: **`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
 
-Se necesita el **objeto**, el **método** y los **params**. Y cuando se llama a un método, se envía un **msg** utilizando la función **`objc_msgSend`**: `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
+Se necesita el **objeto**, el **método** y los **params**. Y cuando se llama a un método, se **envía un msg** utilizando la función **`objc_msgSend`**: `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
 
 El objeto es **`someObject`**, el método es **`@selector(method1p1:p2:)`** y los argumentos son **value1**, **value2**.
 
@@ -268,15 +268,15 @@ return 0;
 }
 }
 ```
-## Metodología de Ataque por Hooking
+## Metodología de Ataque de Hooking
 
 En esta página se discutieron diferentes formas de enganchar funciones. Sin embargo, implicaron **ejecutar código dentro del proceso para atacar**.
 
-Para hacer eso, la técnica más fácil de usar es inyectar un [Dyld a través de variables de entorno o secuestrando](../macos-dyld-hijacking-and-dyld_insert_libraries.md). Sin embargo, supongo que esto también podría hacerse a través de [inyección de procesos Dylib](macos-ipc-inter-process-communication/index.html#dylib-process-injection-via-task-port).
+Para hacer eso, la técnica más fácil de usar es inyectar un [Dyld a través de variables de entorno o secuestrando](../macos-dyld-hijacking-and-dyld_insert_libraries.md). Sin embargo, supongo que esto también podría hacerse a través de [inyección de proceso Dylib](macos-ipc-inter-process-communication/index.html#dylib-process-injection-via-task-port).
 
 Sin embargo, ambas opciones están **limitadas** a binarios/procesos **no protegidos**. Consulta cada técnica para aprender más sobre las limitaciones.
 
-Sin embargo, un ataque de hooking de funciones es muy específico, un atacante hará esto para **robar información sensible desde dentro de un proceso** (si no, simplemente harías un ataque de inyección de procesos). Y esta información sensible podría estar ubicada en aplicaciones descargadas por el usuario, como MacPass.
+Sin embargo, un ataque de hooking de función es muy específico, un atacante hará esto para **robar información sensible desde dentro de un proceso** (si no, simplemente harías un ataque de inyección de proceso). Y esta información sensible podría estar ubicada en aplicaciones descargadas por el usuario, como MacPass.
 
 Así que el vector del atacante sería encontrar una vulnerabilidad o eliminar la firma de la aplicación, inyectar la variable de entorno **`DYLD_INSERT_LIBRARIES`** a través del Info.plist de la aplicación añadiendo algo como:
 ```xml
@@ -293,7 +293,7 @@ y luego **re-registrar** la aplicación:
 Agrega en esa biblioteca el código de hooking para exfiltrar la información: Contraseñas, mensajes...
 
 > [!CAUTION]
-> Ten en cuenta que en versiones más recientes de macOS, si **eliminaste la firma** del binario de la aplicación y se ejecutó previamente, macOS **ya no ejecutará la aplicación**. 
+> Ten en cuenta que en versiones más recientes de macOS, si **eliminaste la firma** del binario de la aplicación y se había ejecutado previamente, macOS **ya no ejecutará la aplicación**.
 
 #### Ejemplo de biblioteca
 ```objectivec

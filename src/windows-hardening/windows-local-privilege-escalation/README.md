@@ -114,7 +114,7 @@ Stop-Transcript
 
 Los detalles de las ejecuciones de la tubería de PowerShell se registran, abarcando comandos ejecutados, invocaciones de comandos y partes de scripts. Sin embargo, los detalles completos de ejecución y los resultados de salida pueden no ser capturados.
 
-Para habilitar esto, sigue las instrucciones en la sección "Transcript files" de la documentación, eligiendo **"Module Logging"** en lugar de **"Powershell Transcription"**.
+Para habilitar esto, sigue las instrucciones en la sección "Archivos de transcripción" de la documentación, eligiendo **"Module Logging"** en lugar de **"Powershell Transcription"**.
 ```bash
 reg query HKCU\Software\Policies\Microsoft\Windows\PowerShell\ModuleLogging
 reg query HKLM\Software\Policies\Microsoft\Windows\PowerShell\ModuleLogging
@@ -127,7 +127,7 @@ Get-WinEvent -LogName "windows Powershell" | select -First 15 | Out-GridView
 ```
 ### PowerShell **Script Block Logging**
 
-Se captura un registro completo de la actividad y el contenido total de la ejecución del script, asegurando que cada bloque de código esté documentado a medida que se ejecuta. Este proceso preserva un rastro de auditoría integral de cada actividad, valioso para la forensía y el análisis de comportamientos maliciosos. Al documentar toda la actividad en el momento de la ejecución, se proporcionan información detallada sobre el proceso.
+Se captura un registro completo de la actividad y el contenido total de la ejecución del script, asegurando que cada bloque de código esté documentado a medida que se ejecuta. Este proceso preserva un rastro de auditoría integral de cada actividad, valioso para la forensía y el análisis de comportamientos maliciosos. Al documentar toda la actividad en el momento de la ejecución, se proporcionan detalles sobre el proceso.
 ```bash
 reg query HKCU\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
 reg query HKLM\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
@@ -184,7 +184,7 @@ Básicamente, este es el defecto que explota este error:
 >
 > Además, dado que el servicio WSUS utiliza la configuración del usuario actual, también utilizará su almacén de certificados. Si generamos un certificado autofirmado para el nombre de host de WSUS y añadimos este certificado al almacén de certificados del usuario actual, podremos interceptar tanto el tráfico WSUS HTTP como HTTPS. WSUS no utiliza mecanismos similares a HSTS para implementar una validación de tipo confianza en el primer uso en el certificado. Si el certificado presentado es confiable por el usuario y tiene el nombre de host correcto, será aceptado por el servicio.
 
-Puedes explotar esta vulnerabilidad utilizando la herramienta [**WSUSpicious**](https://github.com/GoSecure/wsuspicious) (una vez que esté liberada).
+Puedes explotar esta vulnerabilidad usando la herramienta [**WSUSpicious**](https://github.com/GoSecure/wsuspicious) (una vez que esté liberada).
 
 ## KrbRelayUp
 
@@ -210,7 +210,7 @@ Si tienes una sesión de meterpreter, puedes automatizar esta técnica utilizand
 
 ### PowerUP
 
-Usa el comando `Write-UserAddMSI` de power-up para crear dentro del directorio actual un binario MSI de Windows para escalar privilegios. Este script genera un instalador MSI precompilado que solicita la adición de un usuario/grupo (por lo que necesitarás acceso GUI):
+Usa el comando `Write-UserAddMSI` de power-up para crear dentro del directorio actual un binario MSI de Windows para escalar privilegios. Este script genera un instalador MSI precompilado que solicita la adición de un usuario/grupo (por lo que necesitarás acceso GIU):
 ```
 Write-UserAddMSI
 ```
@@ -243,7 +243,7 @@ create-msi-with-wix.md
 - Haz doble clic en **Carpeta de Aplicación**, selecciona tu archivo **beacon.exe** y haz clic en **Aceptar**. Esto asegurará que el payload beacon se ejecute tan pronto como se ejecute el instalador.
 - En las **Propiedades de Acción Personalizada**, cambia **Run64Bit** a **True**.
 - Finalmente, **compílalo**.
-- Si aparece la advertencia `File 'beacon-tcp.exe' targeting 'x64' is not compatible with the project's target platform 'x86'`, asegúrate de establecer la plataforma en x64.
+- Si aparece la advertencia `File 'beacon-tcp.exe' targeting 'x64' is not compatible with the project's target platform 'x86'`, asegúrate de haber configurado la plataforma a x64.
 
 ### Instalación de MSI
 
@@ -291,7 +291,7 @@ reg query 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA' /v RunAsPPL
 ```
 ### Credentials Guard
 
-**Credential Guard** se introdujo en **Windows 10**. Su propósito es proteger las credenciales almacenadas en un dispositivo contra amenazas como los ataques de pass-the-hash.| [**Más información sobre Credentials Guard aquí.**](../stealing-credentials/credentials-protections.md#credential-guard)
+**Credential Guard** se introdujo en **Windows 10**. Su propósito es proteger las credenciales almacenadas en un dispositivo contra amenazas como ataques de pass-the-hash.| [**Más información sobre Credentials Guard aquí.**](../stealing-credentials/credentials-protections.md#credential-guard)
 ```bash
 reg query 'HKLM\System\CurrentControlSet\Control\LSA' /v LsaCfgFlags
 ```
@@ -422,7 +422,7 @@ Se recomienda tener el binario **accesschk** de _Sysinternals_ para verificar el
 ```bash
 accesschk.exe -ucqv <Service_Name> #Check rights for different groups
 ```
-Se recomienda verificar si "Usuarios autenticados" pueden modificar algún servicio:
+Se recomienda verificar si "Authenticated Users" puede modificar algún servicio:
 ```bash
 accesschk.exe -uwcqv "Authenticated Users" * /accepteula
 accesschk.exe -uwcqv %USERNAME% * /accepteula
@@ -557,7 +557,7 @@ Windows permite a los usuarios especificar acciones a tomar si un servicio falla
 
 ### Aplicaciones Instaladas
 
-Verifica **los permisos de los binarios** (quizás puedas sobrescribir uno y escalar privilegios) y de las **carpetas** ([DLL Hijacking](dll-hijacking/index.html)).
+Verifique **los permisos de los binarios** (quizás pueda sobrescribir uno y escalar privilegios) y de las **carpetas** ([DLL Hijacking](dll-hijacking/index.html)).
 ```bash
 dir /a "C:\Program Files"
 dir /a "C:\Program Files (x86)"
@@ -604,7 +604,7 @@ privilege-escalation-with-autorun-binaries.md
 
 ### Controladores
 
-Busca posibles controladores **raros/vulnerables de terceros**.
+Busca posibles **controladores extraños/vulnerables de terceros**.
 ```bash
 driverquery
 driverquery.exe /fo table
@@ -675,7 +675,7 @@ C:\Windows\System32\wsl.exe
 ```
 El binario `bash.exe` también se puede encontrar en `C:\Windows\WinSxS\amd64_microsoft-windows-lxssbash_[...]\bash.exe`
 
-Si obtienes el usuario root, puedes escuchar en cualquier puerto (la primera vez que uses `nc.exe` para escuchar en un puerto, te preguntará a través de la GUI si se debe permitir `nc` por el firewall).
+Si obtienes el usuario root, puedes escuchar en cualquier puerto (la primera vez que uses `nc.exe` para escuchar en un puerto, te preguntará a través de la GUI si `nc` debe ser permitido por el firewall).
 ```bash
 wsl whoami
 ./ubuntun1604.exe config --default-user root
@@ -733,7 +733,7 @@ La **API de Protección de Datos (DPAPI)** proporciona un método para la encrip
 
 **DPAPI permite la encriptación de claves a través de una clave simétrica que se deriva de los secretos de inicio de sesión del usuario**. En escenarios que involucran encriptación del sistema, utiliza los secretos de autenticación del dominio del sistema.
 
-Las claves RSA de usuario encriptadas, al usar DPAPI, se almacenan en el directorio `%APPDATA%\Microsoft\Protect\{SID}`, donde `{SID}` representa el [Identificador de Seguridad](https://en.wikipedia.org/wiki/Security_Identifier) del usuario. **La clave DPAPI, ubicada junto a la clave maestra que protege las claves privadas del usuario en el mismo archivo**, típicamente consiste en 64 bytes de datos aleatorios. (Es importante notar que el acceso a este directorio está restringido, impidiendo listar su contenido a través del comando `dir` en CMD, aunque se puede listar a través de PowerShell).
+Las claves RSA de usuario encriptadas, mediante DPAPI, se almacenan en el directorio `%APPDATA%\Microsoft\Protect\{SID}`, donde `{SID}` representa el [Identificador de Seguridad](https://en.wikipedia.org/wiki/Security_Identifier) del usuario. **La clave DPAPI, ubicada junto a la clave maestra que protege las claves privadas del usuario en el mismo archivo**, típicamente consiste en 64 bytes de datos aleatorios. (Es importante notar que el acceso a este directorio está restringido, impidiendo listar su contenido a través del comando `dir` en CMD, aunque se puede listar a través de PowerShell).
 ```powershell
 Get-ChildItem  C:\Users\USER\AppData\Roaming\Microsoft\Protect\
 Get-ChildItem  C:\Users\USER\AppData\Local\Microsoft\Protect\
@@ -756,7 +756,7 @@ dpapi-extracting-passwords.md
 
 ### Credenciales de PowerShell
 
-Las **credenciales de PowerShell** se utilizan a menudo para **scripting** y tareas de automatización como una forma de almacenar credenciales encriptadas de manera conveniente. Las credenciales están protegidas usando **DPAPI**, lo que típicamente significa que solo pueden ser desencriptadas por el mismo usuario en la misma computadora en la que fueron creadas.
+Las **credenciales de PowerShell** se utilizan a menudo para **scripting** y tareas de automatización como una forma de almacenar credenciales encriptadas de manera conveniente. Las credenciales están protegidas usando **DPAPI**, lo que generalmente significa que solo pueden ser desencriptadas por el mismo usuario en la misma computadora en la que fueron creadas.
 
 Para **desencriptar** unas credenciales de PS del archivo que las contiene, puedes hacer:
 ```powershell
@@ -793,7 +793,7 @@ HKCU\<SID>\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RunMRU
 %localappdata%\Microsoft\Remote Desktop Connection Manager\RDCMan.settings
 ```
 Usa el módulo `dpapi::rdg` de **Mimikatz** con el `/masterkey` apropiado para **desencriptar cualquier archivo .rdg**\
-Puedes **extraer muchas claves maestras DPAPI** de la memoria con el módulo `sekurlsa::dpapi` de Mimikatz
+Puedes **extraer muchas claves maestras de DPAPI** de la memoria con el módulo `sekurlsa::dpapi` de Mimikatz
 
 ### Sticky Notes
 
@@ -974,15 +974,15 @@ AppData\Roaming\gcloud\access_tokens.db
 ```
 ### McAfee SiteList.xml
 
-Busque un archivo llamado **SiteList.xml**
+Busca un archivo llamado **SiteList.xml**
 
 ### Cached GPP Pasword
 
-Una función estaba disponible anteriormente que permitía el despliegue de cuentas de administrador local personalizadas en un grupo de máquinas a través de las Preferencias de Directiva de Grupo (GPP). Sin embargo, este método tenía fallas de seguridad significativas. En primer lugar, los Objetos de Directiva de Grupo (GPO), almacenados como archivos XML en SYSVOL, podían ser accedidos por cualquier usuario del dominio. En segundo lugar, las contraseñas dentro de estos GPP, encriptadas con AES256 utilizando una clave predeterminada documentada públicamente, podían ser desencriptadas por cualquier usuario autenticado. Esto representaba un riesgo serio, ya que podría permitir a los usuarios obtener privilegios elevados.
+Una función estaba disponible anteriormente que permitía el despliegue de cuentas de administrador local personalizadas en un grupo de máquinas a través de las Preferencias de Directiva de Grupo (GPP). Sin embargo, este método tenía fallos de seguridad significativos. En primer lugar, los Objetos de Directiva de Grupo (GPO), almacenados como archivos XML en SYSVOL, podían ser accedidos por cualquier usuario del dominio. En segundo lugar, las contraseñas dentro de estos GPP, cifradas con AES256 utilizando una clave predeterminada documentada públicamente, podían ser descifradas por cualquier usuario autenticado. Esto representaba un riesgo serio, ya que podría permitir a los usuarios obtener privilegios elevados.
 
-Para mitigar este riesgo, se desarrolló una función para escanear archivos GPP almacenados localmente que contengan un campo "cpassword" que no esté vacío. Al encontrar dicho archivo, la función desencripta la contraseña y devuelve un objeto PowerShell personalizado. Este objeto incluye detalles sobre el GPP y la ubicación del archivo, ayudando en la identificación y remediación de esta vulnerabilidad de seguridad.
+Para mitigar este riesgo, se desarrolló una función para escanear archivos GPP almacenados localmente que contengan un campo "cpassword" que no esté vacío. Al encontrar tal archivo, la función descifra la contraseña y devuelve un objeto PowerShell personalizado. Este objeto incluye detalles sobre el GPP y la ubicación del archivo, ayudando en la identificación y remediación de esta vulnerabilidad de seguridad.
 
-Busque en `C:\ProgramData\Microsoft\Group Policy\history` o en _**C:\Documents and Settings\All Users\Application Data\Microsoft\Group Policy\history** (anterior a W Vista)_ para estos archivos:
+Busca en `C:\ProgramData\Microsoft\Group Policy\history` o en _**C:\Documents and Settings\All Users\Application Data\Microsoft\Group Policy\history** (anterior a W Vista)_ estos archivos:
 
 - Groups.xml
 - Services.xml
@@ -991,7 +991,7 @@ Busque en `C:\ProgramData\Microsoft\Group Policy\history` o en _**C:\Documents a
 - Printers.xml
 - Drives.xml
 
-**Para desencriptar el cPassword:**
+**Para descifrar la cPassword:**
 ```bash
 #To decrypt these passwords you can decrypt it using
 gpp-decrypt j1Uyj3Vx8TY9LtLZil2uAuZkFQA/4latT76ZwgdHdhw
@@ -1000,7 +1000,7 @@ Usando crackmapexec para obtener las contraseñas:
 ```bash
 crackmapexec smb 10.10.10.10 -u username -p pwd -M gpp_autologin
 ```
-### IIS Web Config
+### Configuración de IIS Web
 ```powershell
 Get-Childitem –Path C:\inetpub\ -Include web.config -File -Recurse -ErrorAction SilentlyContinue
 ```
@@ -1172,7 +1172,7 @@ Herramientas para extraer contraseñas de navegadores:
 
 Las clases e interfaces COM se definen en el registro bajo **HKEY\_**_**CLASSES\_**_**ROOT\CLSID** y **HKEY\_**_**CLASSES\_**_**ROOT\Interface** respectivamente. Este registro se crea fusionando **HKEY\_**_**LOCAL\_**_**MACHINE\Software\Classes** + **HKEY\_**_**CURRENT\_**_**USER\Software\Classes** = **HKEY\_**_**CLASSES\_**_**ROOT.**
 
-Dentro de los CLSIDs de este registro puedes encontrar el registro hijo **InProcServer32** que contiene un **valor predeterminado** que apunta a una **DLL** y un valor llamado **ThreadingModel** que puede ser **Apartment** (Unico Hilo), **Free** (Multi-Hilo), **Both** (Único o Multi) o **Neutral** (Hilo Neutral).
+Dentro de los CLSIDs de este registro puedes encontrar el registro hijo **InProcServer32** que contiene un **valor predeterminado** que apunta a una **DLL** y un valor llamado **ThreadingModel** que puede ser **Apartment** (Un hilo), **Free** (Múltiples hilos), **Both** (Un hilo o múltiples) o **Neutral** (Hilo neutral).
 
 ![](<../../images/image (729).png>)
 
@@ -1221,7 +1221,7 @@ Invoke-SessionGopher -AllDomain -u domain.com\adm-arvanaghi -p s3cr3tP@ss
 ## Leaked Handlers
 
 Imagina que **un proceso que se ejecuta como SYSTEM abre un nuevo proceso** (`OpenProcess()`) con **acceso total**. El mismo proceso **también crea un nuevo proceso** (`CreateProcess()`) **con bajos privilegios pero heredando todos los manejadores abiertos del proceso principal**.\
-Entonces, si tienes **acceso total al proceso de bajos privilegios**, puedes obtener el **manejador abierto al proceso privilegiado creado** con `OpenProcess()` e **inyectar un shellcode**.\
+Entonces, si tienes **acceso total al proceso de bajos privilegios**, puedes obtener el **manejador abierto al proceso privilegiado creado** con `OpenProcess()` y **inyectar un shellcode**.\
 [Read this example for more information about **how to detect and exploit this vulnerability**.](leaked-handle-exploitation.md)\
 [Read this **other post for a more complete explanation on how to test and abuse more open handlers of processes and threads inherited with different levels of permissions (not only full access)**](http://dronesec.pw/blog/2019/08/22/exploiting-leaked-process-and-thread-handles/).
 
@@ -1239,7 +1239,7 @@ Además, la siguiente herramienta permite **interceptar una comunicación de nam
 
 ### **Monitoring Command Lines for passwords**
 
-Al obtener un shell como usuario, puede haber tareas programadas u otros procesos que se están ejecutando que **pasan credenciales en la línea de comandos**. El script a continuación captura las líneas de comandos de los procesos cada dos segundos y compara el estado actual con el estado anterior, mostrando cualquier diferencia.
+Al obtener un shell como usuario, puede haber tareas programadas u otros procesos que se ejecutan y **pasan credenciales en la línea de comandos**. El script a continuación captura las líneas de comandos de los procesos cada dos segundos y compara el estado actual con el estado anterior, mostrando cualquier diferencia.
 ```powershell
 while($true)
 {
@@ -1253,7 +1253,7 @@ Compare-Object -ReferenceObject $process -DifferenceObject $process2
 
 ## De usuario de bajo privilegio a NT\AUTHORITY SYSTEM (CVE-2019-1388) / Bypass de UAC
 
-Si tienes acceso a la interfaz gráfica (a través de consola o RDP) y UAC está habilitado, en algunas versiones de Microsoft Windows es posible ejecutar un terminal o cualquier otro proceso como "NT\AUTHORITY SYSTEM" desde un usuario no privilegiado.
+Si tienes acceso a la interfaz gráfica (a través de consola o RDP) y UAC está habilitado, en algunas versiones de Microsoft Windows es posible ejecutar un terminal o cualquier otro proceso como "NT\AUTHORITY SYSTEM" desde un usuario sin privilegios.
 
 Esto hace posible escalar privilegios y eludir UAC al mismo tiempo con la misma vulnerabilidad. Además, no es necesario instalar nada y el binario utilizado durante el proceso está firmado y emitido por Microsoft.
 
@@ -1301,32 +1301,32 @@ Tienes todos los archivos e información necesarios en el siguiente repositorio 
 
 https://github.com/jas502n/CVE-2019-1388
 
-## De nivel de integridad medio de Administrador a alto / Bypass de UAC
+## De Nivel de Integridad Medio a Alto / Bypass de UAC
 
-Lee esto para **aprender sobre los niveles de integridad**:
+Lee esto para **aprender sobre Niveles de Integridad**:
 
 {{#ref}}
 integrity-levels.md
 {{#endref}}
 
-Luego **lee esto para aprender sobre UAC y los bypass de UAC:**
+Luego **lee esto para aprender sobre UAC y bypasses de UAC:**
 
 {{#ref}}
 ../authentication-credentials-uac-and-efs/uac-user-account-control.md
 {{#endref}}
 
-## **De alta integridad a sistema**
+## **De Alta Integridad a Sistema**
 
 ### **Nuevo servicio**
 
-Si ya estás ejecutando un proceso de alta integridad, el **paso a SYSTEM** puede ser fácil simplemente **creando y ejecutando un nuevo servicio**:
+Si ya estás ejecutando un proceso de Alta Integridad, el **paso a SYSTEM** puede ser fácil simplemente **creando y ejecutando un nuevo servicio**:
 ```
 sc create newservicename binPath= "C:\windows\system32\notepad.exe"
 sc start newservicename
 ```
 ### AlwaysInstallElevated
 
-Desde un proceso de alta integridad, podrías intentar **habilitar las entradas del registro AlwaysInstallElevated** y **instalar** un shell reverso utilizando un _**.msi**_ wrapper.\
+Desde un proceso de alta integridad, podrías intentar **habilitar las entradas del registro AlwaysInstallElevated** y **instalar** un shell reverso usando un _**.msi**_ wrapper.\
 [Más información sobre las claves del registro involucradas y cómo instalar un paquete _.msi_ aquí.](#alwaysinstallelevated)
 
 ### High + SeImpersonate privilege to System
@@ -1341,7 +1341,7 @@ Usar esta técnica generalmente **implica seleccionar cualquier proceso que se e
 
 ### **Named Pipes**
 
-Esta técnica es utilizada por meterpreter para escalar en `getsystem`. La técnica consiste en **crear un pipe y luego crear/abusar un servicio para escribir en ese pipe**. Luego, el **servidor** que creó el pipe utilizando el privilegio **`SeImpersonate`** podrá **suplantar el token** del cliente del pipe (el servicio) obteniendo privilegios SYSTEM.\
+Esta técnica es utilizada por meterpreter para escalar en `getsystem`. La técnica consiste en **crear un pipe y luego crear/abusar un servicio para escribir en ese pipe**. Luego, el **servidor** que creó el pipe usando el privilegio **`SeImpersonate`** podrá **suplantar el token** del cliente del pipe (el servicio) obteniendo privilegios de SYSTEM.\
 Si quieres [**aprender más sobre pipes nombrados, deberías leer esto**](#named-pipe-client-impersonation).\
 Si quieres leer un ejemplo de [**cómo pasar de alta integridad a System usando pipes nombrados, deberías leer esto**](from-high-integrity-to-system-with-name-pipes.md).
 

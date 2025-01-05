@@ -82,6 +82,6 @@ group3r.exe -f <filepath-name.log>
 
 [**PingCastle**](https://www.pingcastle.com/documentation/) **evalúa la postura de seguridad de un entorno AD** y proporciona un bonito **informe** con gráficos.
 
-Para ejecutarlo, se puede ejecutar el binario `PingCastle.exe` y comenzará una **sesión interactiva** presentando un menú de opciones. La opción predeterminada a utilizar es **`healthcheck`** que establecerá una **visión general** de el **dominio**, y encontrará **mala configuración** y **vulnerabilidades**.&#x20;
+Para ejecutarlo, se puede ejecutar el binario `PingCastle.exe` y comenzará una **sesión interactiva** presentando un menú de opciones. La opción predeterminada a utilizar es **`healthcheck`** que establecerá una **visión general** de el **dominio**, y encontrará **mala configuración** y **vulnerabilidades**.
 
 {{#include ../../banners/hacktricks-training.md}}

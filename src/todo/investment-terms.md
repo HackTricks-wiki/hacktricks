@@ -23,7 +23,7 @@ Aunque en los intercambios, esto se utiliza generalmente para intentar obtener g
 
 ### Cobertura con Futuros <a href="#mntl-sc-block_7-0" id="mntl-sc-block_7-0"></a>
 
-Si un gestor de fondos teme que algunas acciones vayan a bajar, podría tomar una posición corta sobre algunos activos como bitcoins o contratos de futuros del S\&P 500. Esto sería similar a comprar o tener algunos activos y crear un contrato para venderlos en un futuro a un precio mayor.&#x20;
+Si un gestor de fondos teme que algunas acciones vayan a bajar, podría tomar una posición corta sobre algunos activos como bitcoins o contratos de futuros del S\&P 500. Esto sería similar a comprar o tener algunos activos y crear un contrato para venderlos en un futuro a un precio mayor.
 
 En caso de que el precio baje, el gestor de fondos obtendrá beneficios porque venderá los activos a un precio mayor. Si el precio de los activos sube, el gestor no obtendrá ese beneficio, pero aún mantendrá sus activos.
 
@@ -50,12 +50,12 @@ Sin embargo, el comprador pagará una tarifa al vendedor por abrir la opción (a
 ### 1. **Obligación vs. Derecho:**
 
 * **Futuros:** Cuando compras o vendes un contrato de futuros, estás entrando en un **acuerdo vinculante** para comprar o vender un activo a un precio específico en una fecha futura. Tanto el comprador como el vendedor están **obligados** a cumplir el contrato al vencimiento (a menos que el contrato se cierre antes).
-* **Opciones:** Con las opciones, tienes el **derecho, pero no la obligación**, de comprar (en el caso de una **opción de compra**) o vender (en el caso de una **opción de venta**) un activo a un precio específico antes o en una cierta fecha de vencimiento. El **comprador** tiene la opción de ejecutar, mientras que el **vendedor** está obligado a cumplir la operación si el comprador decide ejercer la opción.
+* **Opciones:** Con las opciones, tienes el **derecho, pero no la obligación**, de comprar (en el caso de una **opción de compra**) o vender (en el caso de una **opción de venta**) un activo a un precio específico antes o en una fecha de vencimiento determinada. El **comprador** tiene la opción de ejecutar, mientras que el **vendedor** está obligado a cumplir la operación si el comprador decide ejercer la opción.
 
 ### 2. **Riesgo:**
 
-* **Futuros:** Tanto el comprador como el vendedor asumen **riesgo ilimitado** porque están obligados a completar el contrato. El riesgo es la diferencia entre el precio acordado y el precio de mercado en la fecha de vencimiento.
-* **Opciones:** El riesgo del comprador está limitado a la **prima** pagada para adquirir la opción. Si el mercado no se mueve a favor del titular de la opción, simplemente puede dejar que la opción expire. Sin embargo, el **vendedor** (escritor) de la opción tiene riesgo ilimitado si el mercado se mueve significativamente en su contra.
+* **Futuros:** Tanto el comprador como el vendedor asumen un **riesgo ilimitado** porque están obligados a completar el contrato. El riesgo es la diferencia entre el precio acordado y el precio de mercado en la fecha de vencimiento.
+* **Opciones:** El riesgo del comprador está limitado a la **prima** pagada para adquirir la opción. Si el mercado no se mueve a favor del titular de la opción, simplemente puede dejar que la opción expire. Sin embargo, el **vendedor** (escritor) de la opción tiene un riesgo ilimitado si el mercado se mueve significativamente en su contra.
 
 ### 3. **Costo:**
 

@@ -33,9 +33,9 @@ Cuando se ejecuta `unshare` sin la opción `-f`, se encuentra un error debido a 
 
 1. **Explicación del Problema**:
 
-- El núcleo de Linux permite que un proceso cree nuevos namespaces utilizando la llamada al sistema `unshare`. Sin embargo, el proceso que inicia la creación de un nuevo namespace de PID (denominado el proceso "unshare") no entra en el nuevo namespace; solo lo hacen sus procesos hijos.
+- El núcleo de Linux permite que un proceso cree nuevos namespaces utilizando la llamada al sistema `unshare`. Sin embargo, el proceso que inicia la creación de un nuevo namespace de PID (denominado "proceso unshare") no entra en el nuevo namespace; solo lo hacen sus procesos hijos.
 - Ejecutar `%unshare -p /bin/bash%` inicia `/bin/bash` en el mismo proceso que `unshare`. En consecuencia, `/bin/bash` y sus procesos hijos están en el namespace de PID original.
-- El primer proceso hijo de `/bin/bash` en el nuevo namespace se convierte en PID 1. Cuando este proceso sale, desencadena la limpieza del namespace si no hay otros procesos, ya que PID 1 tiene el papel especial de adoptar procesos huérfanos. El núcleo de Linux deshabilitará entonces la asignación de PID en ese namespace.
+- El primer proceso hijo de `/bin/bash` en el nuevo namespace se convierte en PID 1. Cuando este proceso sale, activa la limpieza del namespace si no hay otros procesos, ya que PID 1 tiene el papel especial de adoptar procesos huérfanos. El núcleo de Linux deshabilitará entonces la asignación de PID en ese namespace.
 
 2. **Consecuencia**:
 
@@ -55,7 +55,7 @@ Al montar una nueva instancia del sistema de archivos `/proc` si usas el paráme
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-### &#x20;Ver en qué namespace está tu proceso
+### Verifica en qué namespace se encuentra tu proceso
 ```bash
 ls -l /proc/self/ns/pid
 lrwxrwxrwx 1 root root 0 Apr  3 18:45 /proc/self/ns/pid -> 'pid:[4026532412]'

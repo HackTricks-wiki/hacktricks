@@ -40,7 +40,7 @@ server_port :  mach_port_t;
 n1          :  uint32_t;
 n2          :  uint32_t);
 ```
-Tenga en cuenta que el primer **argumento es el puerto a enlazar** y MIG **manejará automáticamente el puerto de respuesta** (a menos que se llame a `mig_get_reply_port()` en el código del cliente). Además, el **ID de las operaciones** será **secuencial** comenzando por el ID del subsistema indicado (por lo que si una operación está obsoleta, se elimina y se utiliza `skip` para seguir usando su ID).
+Tenga en cuenta que el primer **argumento es el puerto a enlazar** y MIG **manejará automáticamente el puerto de respuesta** (a menos que se llame a `mig_get_reply_port()` en el código del cliente). Además, el **ID de las operaciones** será **secuencial** comenzando por el ID del subsistema indicado (así que si una operación está obsoleta, se elimina y se usa `skip` para seguir utilizando su ID).
 
 Ahora use MIG para generar el código del servidor y del cliente que podrá comunicarse entre sí para llamar a la función Subtract:
 ```bash
@@ -138,7 +138,7 @@ OutHeadP->msgh_local_port = MACH_PORT_NULL;
 OutHeadP->msgh_id = InHeadP->msgh_id + 100;
 OutHeadP->msgh_reserved = 0;
 
-if ((InHeadP->msgh_id > 500) || (InHeadP->msgh_id &#x3C; 500) ||
+if ((InHeadP->msgh_id > 500) || (InHeadP->msgh_id < 500) ||
 <strong>	    ((routine = SERVERPREFmyipc_subsystem.routine[InHeadP->msgh_id - 500].stub_routine) == 0)) {
 </strong>		((mig_reply_error_t *)OutHeadP)->NDR = NDR_record;
 ((mig_reply_error_t *)OutHeadP)->RetCode = MIG_BAD_ID;
@@ -149,9 +149,9 @@ return FALSE;
 }
 </code></pre>
 
-Verifica las líneas resaltadas anteriormente que acceden a la función para llamar por ID.
+Verifique las líneas resaltadas anteriormente que acceden a la función para llamar por ID.
 
-El siguiente es el código para crear un **servidor** y **cliente** simples donde el cliente puede llamar a las funciones Subtract del servidor:
+El siguiente es el código para crear un **servidor** y un **cliente** simples donde el cliente puede llamar a las funciones Subtract del servidor:
 
 {{#tabs}}
 {{#tab name="myipc_server.c"}}
@@ -217,13 +217,13 @@ USERPREFSubtract(port, 40, 2);
 
 ### El NDR_record
 
-El NDR_record es exportado por `libsystem_kernel.dylib`, y es una estructura que permite a MIG **transformar datos para que sea agnóstico del sistema** en el que se está utilizando, ya que MIG fue pensado para ser utilizado entre diferentes sistemas (y no solo en la misma máquina).
+El NDR_record es exportado por `libsystem_kernel.dylib`, y es una estructura que permite a MIG **transformar datos para que sea agnóstico del sistema** en el que se está utilizando, ya que se pensó que MIG se usaría entre diferentes sistemas (y no solo en la misma máquina).
 
 Esto es interesante porque si se encuentra `_NDR_record` en un binario como una dependencia (`jtool2 -S <binary> | grep NDR` o `nm`), significa que el binario es un cliente o servidor MIG.
 
 Además, los **servidores MIG** tienen la tabla de despacho en `__DATA.__const` (o en `__CONST.__constdata` en el núcleo de macOS y `__DATA_CONST.__const` en otros núcleos \*OS). Esto se puede volcar con **`jtool2`**.
 
-Y los **clientes MIG** utilizarán el `__NDR_record` para enviar con `__mach_msg` a los servidores.
+Y los **clientes MIG** usarán el `__NDR_record` para enviar con `__mach_msg` a los servidores.
 
 ## Análisis de Binarios
 
@@ -250,13 +250,13 @@ Se mencionó anteriormente que la función que se encargará de **llamar a la fu
 var_10 = arg0;
 var_18 = arg1;
 // Instrucciones iniciales para encontrar los punteros de función adecuados
-*(int32_t *)var_18 = *(int32_t *)var_10 &#x26; 0x1f;
+*(int32_t *)var_18 = *(int32_t *)var_10 & 0x1f;
 *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
 *(int32_t *)(var_18 + 0x4) = 0x24;
 *(int32_t *)(var_18 + 0xc) = 0x0;
 *(int32_t *)(var_18 + 0x14) = *(int32_t *)(var_10 + 0x14) + 0x64;
 *(int32_t *)(var_18 + 0x10) = 0x0;
-if (*(int32_t *)(var_10 + 0x14) &#x3C;= 0x1f4 &#x26;&#x26; *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
+if (*(int32_t *)(var_10 + 0x14) <= 0x1f4 && *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
 rax = *(int32_t *)(var_10 + 0x14);
 // Llamada a sign_extend_64 que puede ayudar a identificar esta función
 // Esto almacena en rax el puntero a la llamada que necesita ser llamada
@@ -298,7 +298,7 @@ stack[-8] = r30;
 var_10 = arg0;
 var_18 = arg1;
 // Instrucciones iniciales para encontrar los punteros de función adecuados
-*(int32_t *)var_18 = *(int32_t *)var_10 &#x26; 0x1f | 0x0;
+*(int32_t *)var_18 = *(int32_t *)var_10 & 0x1f | 0x0;
 *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
 *(int32_t *)(var_18 + 0x4) = 0x24;
 *(int32_t *)(var_18 + 0xc) = 0x0;
@@ -307,19 +307,19 @@ var_18 = arg1;
 r8 = *(int32_t *)(var_10 + 0x14);
 r8 = r8 - 0x1f4;
 if (r8 > 0x0) {
-if (CPU_FLAGS &#x26; G) {
+if (CPU_FLAGS & G) {
 r8 = 0x1;
 }
 }
-if ((r8 &#x26; 0x1) == 0x0) {
+if ((r8 & 0x1) == 0x0) {
 r8 = *(int32_t *)(var_10 + 0x14);
 r8 = r8 - 0x1f4;
-if (r8 &#x3C; 0x0) {
-if (CPU_FLAGS &#x26; L) {
+if (r8 < 0x0) {
+if (CPU_FLAGS & L) {
 r8 = 0x1;
 }
 }
-if ((r8 &#x26; 0x1) == 0x0) {
+if ((r8 & 0x1) == 0x0) {
 r8 = *(int32_t *)(var_10 + 0x14);
 // 0x1f4 = 500 (el ID de inicio)
 <strong>                    r8 = r8 - 0x1f4;
@@ -328,13 +328,13 @@ r8 = *(r8 + 0x8);
 var_20 = r8;
 r8 = r8 - 0x0;
 if (r8 != 0x0) {
-if (CPU_FLAGS &#x26; NE) {
+if (CPU_FLAGS & NE) {
 r8 = 0x1;
 }
 }
 // Mismo if else que en la versión anterior
 // Ver el uso de la dirección 0x100004040 (array de direcciones de funciones)
-<strong>                    if ((r8 &#x26; 0x1) == 0x0) {
+<strong>                    if ((r8 & 0x1) == 0x0) {
 </strong><strong>                            *(var_18 + 0x18) = **0x100004000;
 </strong>                            *(int32_t *)(var_18 + 0x20) = 0xfffffed1;
 var_4 = 0x0;
