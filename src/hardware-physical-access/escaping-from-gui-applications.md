@@ -9,13 +9,13 @@
 | 구성 요소    | 작업                                                             |
 | ------------ | ------------------------------------------------------------------ |
 | 전원 버튼    | 장치를 껐다가 다시 켜면 시작 화면이 노출될 수 있습니다            |
-| 전원 케이블  | 전원이 잠시 차단될 때 장치가 재부팅되는지 확인                     |
-| USB 포트     | 더 많은 단축키가 있는 물리적 키보드 연결                          |
-| 이더넷      | 네트워크 스캔 또는 스니핑을 통해 추가적인 악용 가능성 확인       |
+| 전원 케이블  | 전원이 잠시 차단될 때 장치가 재부팅되는지 확인하세요              |
+| USB 포트     | 더 많은 단축키가 있는 물리적 키보드를 연결하세요                 |
+| 이더넷      | 네트워크 스캔 또는 스니핑을 통해 추가적인 악용이 가능할 수 있습니다 |
 
 ## GUI 애플리케이션 내에서 가능한 작업 확인
 
-**일반 대화상자**는 **파일 저장**, **파일 열기**, 글꼴 선택, 색상 선택 등의 옵션입니다... 대부분은 **전체 탐색기 기능을 제공합니다**. 이는 이러한 옵션에 접근할 수 있다면 탐색기 기능에 접근할 수 있음을 의미합니다:
+**일반 대화상자**는 **파일 저장**, **파일 열기**, 글꼴 선택, 색상 선택 등의 옵션입니다. 이들 대부분은 **전체 탐색기 기능을 제공합니다**. 이는 이러한 옵션에 접근할 수 있다면 탐색기 기능에 접근할 수 있음을 의미합니다:
 
 - 닫기/다른 이름으로 닫기
 - 열기/다른 프로그램으로 열기
@@ -24,7 +24,7 @@
 - 검색
 - 스캔
 
-다음 사항을 확인해야 합니다:
+다음 작업을 수행할 수 있는지 확인해야 합니다:
 
 - 파일 수정 또는 새 파일 생성
 - 심볼릭 링크 생성
@@ -37,23 +37,23 @@
 
 #### Windows
 
-예를 들어 _cmd.exe, command.com, Powershell/Powershell ISE, mmc.exe, at.exe, taskschd.msc..._ 명령을 실행하는 데 사용할 수 있는 더 많은 바이너리를 여기에서 찾으세요: [https://lolbas-project.github.io/](https://lolbas-project.github.io)
+예를 들어 _cmd.exe, command.com, Powershell/Powershell ISE, mmc.exe, at.exe, taskschd.msc..._ 명령을 실행하는 데 사용할 수 있는 더 많은 바이너리를 찾으려면 여기에서 확인하세요: [https://lolbas-project.github.io/](https://lolbas-project.github.io)
 
 #### \*NIX \_\_
 
-_bash, sh, zsh..._ 더 많은 정보는 여기에서: [https://gtfobins.github.io/](https://gtfobins.github.io)
+_bash, sh, zsh..._ 더 많은 정보는 여기에서 확인하세요: [https://gtfobins.github.io/](https://gtfobins.github.io)
 
 ## Windows
 
 ### 경로 제한 우회
 
-- **환경 변수**: 일부 경로를 가리키는 많은 환경 변수가 있습니다
-- **다른 프로토콜**: _about:, data:, ftp:, file:, mailto:, news:, res:, telnet:, view-source:_
+- **환경 변수**: 특정 경로를 가리키는 많은 환경 변수가 있습니다.
+- **기타 프로토콜**: _about:, data:, ftp:, file:, mailto:, news:, res:, telnet:, view-source:_
 - **심볼릭 링크**
 - **바로 가기**: CTRL+N (새 세션 열기), CTRL+R (명령 실행), CTRL+SHIFT+ESC (작업 관리자), Windows+E (탐색기 열기), CTRL-B, CTRL-I (즐겨찾기), CTRL-H (기록), CTRL-L, CTRL-O (파일/열기 대화상자), CTRL-P (인쇄 대화상자), CTRL-S (다른 이름으로 저장)
 - 숨겨진 관리 메뉴: CTRL-ALT-F8, CTRL-ESC-F9
 - **셸 URI**: _shell:Administrative Tools, shell:DocumentsLibrary, shell:Librariesshell:UserProfiles, shell:Personal, shell:SearchHomeFolder, shell:Systemshell:NetworkPlacesFolder, shell:SendTo, shell:UsersProfiles, shell:Common Administrative Tools, shell:MyComputerFolder, shell:InternetFolder_
-- **UNC 경로**: 공유 폴더에 연결하는 경로. 로컬 머신의 C$에 연결해 보세요 ("\\\127.0.0.1\c$\Windows\System32")
+- **UNC 경로**: 공유 폴더에 연결하는 경로입니다. 로컬 머신의 C$에 연결해 보세요 ("\\\127.0.0.1\c$\Windows\System32")
 - **더 많은 UNC 경로:**
 
 | UNC                       | UNC            | UNC                  |
@@ -101,7 +101,7 @@ _bash, sh, zsh..._ 더 많은 정보는 여기에서: [https://gtfobins.github.i
 - WINDOWS+F – 검색
 - SHIFT+F10 – 컨텍스트 메뉴
 - CTRL+SHIFT+ESC – 작업 관리자
-- CTRL+ALT+DEL – 최신 Windows 버전의 스플래시 화면
+- CTRL+ALT+DEL – 최신 Windows 버전에서 스플래시 화면
 - F1 – 도움말 F3 – 검색
 - F6 – 주소 표시줄
 - F11 – Internet Explorer에서 전체 화면 전환
@@ -115,14 +115,14 @@ _bash, sh, zsh..._ 더 많은 정보는 여기에서: [https://gtfobins.github.i
 
 - 왼쪽에서 오른쪽으로 스와이프하여 모든 열린 Windows를 보고 KIOSK 앱을 최소화하고 전체 OS에 직접 접근합니다;
 - 오른쪽에서 왼쪽으로 스와이프하여 작업 센터를 열고 KIOSK 앱을 최소화하고 전체 OS에 직접 접근합니다;
-- 상단 가장자리에서 아래로 스와이프하여 전체 화면 모드에서 열린 앱의 제목 표시줄을 표시합니다;
+- 상단 가장자리에서 아래로 스와이프하여 전체 화면 모드로 열린 앱의 제목 표시줄을 표시합니다;
 - 아래에서 위로 스와이프하여 전체 화면 앱에서 작업 표시줄을 표시합니다.
 
 ### Internet Explorer 팁
 
 #### '이미지 도구 모음'
 
-이미지를 클릭하면 왼쪽 상단에 나타나는 도구 모음입니다. 저장, 인쇄, 메일 보내기, 탐색기에서 "내 사진" 열기를 할 수 있습니다. Kiosk는 Internet Explorer를 사용해야 합니다.
+클릭할 때 이미지의 왼쪽 상단에 나타나는 도구 모음입니다. 저장, 인쇄, 메일, 탐색기에서 "내 사진" 열기를 할 수 있습니다. Kiosk는 Internet Explorer를 사용해야 합니다.
 
 #### 셸 프로토콜
 
@@ -152,50 +152,50 @@ _bash, sh, zsh..._ 더 많은 정보는 여기에서: [https://gtfobins.github.i
 
 ### 파일 확장자 표시
 
-자세한 정보는 이 페이지를 확인하세요: [https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)
+더 많은 정보는 이 페이지를 확인하세요: [https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)
 
 ## 브라우저 팁
 
 iKat 버전 백업:
 
 [http://swin.es/k/](http://swin.es/k/)\
-[http://www.ikat.kronicd.net/](http://www.ikat.kronicd.net)\\
+[http://www.ikat.kronicd.net/](http://www.ikat.kronicd.net)
 
-JavaScript를 사용하여 일반 대화상자를 만들고 파일 탐색기에 접근: `document.write('<input/type=file>')`\
+JavaScript를 사용하여 일반 대화상자를 만들고 파일 탐색기에 접근하세요: `document.write('<input/type=file>')`\
 출처: https://medium.com/@Rend\_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
 
 ## iPad
 
 ### 제스처 및 버튼
 
-- 네 손가락(또는 다섯 손가락)으로 위로 스와이프 / 홈 버튼 두 번 탭: 멀티태스킹 보기 및 앱 변경
-- 네 손가락 또는 다섯 손가락으로 한쪽 방향으로 스와이프: 다음/이전 앱으로 변경
-- 다섯 손가락으로 화면을 집게 / 홈 버튼 터치 / 화면 하단에서 1손가락으로 빠르게 위로 스와이프: 홈에 접근
-- 화면 하단에서 1-2인치만큼 한 손가락으로 스와이프(느리게): 도크가 나타납니다
-- 화면 상단에서 1손가락으로 아래로 스와이프: 알림 보기
-- 화면 오른쪽 상단 모서리에서 1손가락으로 아래로 스와이프: iPad Pro의 제어 센터 보기
-- 화면 왼쪽에서 1-2인치만큼 한 손가락으로 스와이프: 오늘 보기 보기
-- 화면 중앙에서 오른쪽 또는 왼쪽으로 빠르게 1손가락으로 스와이프: 다음/이전 앱으로 변경
-- 오른쪽 상단 모서리의 전원/**끄기**/슬립 버튼을 누르고 **전원 끄기** 슬라이더를 오른쪽으로 끝까지 이동: 전원 끄기
-- 오른쪽 상단 모서리의 전원/**끄기**/슬립 버튼과 홈 버튼을 몇 초 동안 누르기: 강제로 전원 끄기
-- 오른쪽 상단 모서리의 전원/**끄기**/슬립 버튼과 홈 버튼을 빠르게 누르기: 화면 왼쪽 하단에 팝업되는 스크린샷을 찍습니다. 두 버튼을 동시에 아주 짧게 누르세요. 몇 초 동안 누르면 강제로 전원 꺼짐이 수행됩니다.
+- 네 손가락(또는 다섯 손가락)으로 위로 스와이프 / 홈 버튼 두 번 탭: 멀티태스킹 뷰를 보고 앱을 변경합니다.
+- 네 손가락 또는 다섯 손가락으로 한쪽 방향으로 스와이프: 다음/이전 앱으로 변경합니다.
+- 다섯 손가락으로 화면을 집게 / 홈 버튼 터치 / 화면 하단에서 한 손가락으로 빠르게 위로 스와이프: 홈에 접근합니다.
+- 화면 하단에서 한 손가락으로 1-2인치 스와이프(느리게): 도크가 나타납니다.
+- 화면 상단에서 한 손가락으로 아래로 스와이프: 알림을 봅니다.
+- 화면 오른쪽 상단 모서리에서 한 손가락으로 아래로 스와이프: iPad Pro의 제어 센터를 봅니다.
+- 화면 왼쪽에서 한 손가락으로 1-2인치 스와이프: 오늘 보기 확인.
+- 화면 중앙에서 한 손가락으로 빠르게 오른쪽 또는 왼쪽으로 스와이프: 다음/이전 앱으로 변경합니다.
+- 오른쪽 상단 모서리의 전원/**오프**/슬립 버튼을 누르고 **전원 끄기** 슬라이더를 오른쪽으로 끝까지 이동: 전원 끄기.
+- 오른쪽 상단 모서리의 전원/**오프**/슬립 버튼과 홈 버튼을 몇 초 동안 누르기: 강제로 하드 전원 끄기.
+- 오른쪽 상단 모서리의 전원/**오프**/슬립 버튼과 홈 버튼을 빠르게 누르기: 화면 왼쪽 하단에 팝업되는 스크린샷을 찍습니다. 두 버튼을 동시에 아주 짧게 누르세요. 몇 초 동안 누르면 하드 전원 끄기가 수행됩니다.
 
 ### 단축키
 
-iPad 키보드 또는 USB 키보드 어댑터가 있어야 합니다. 애플리케이션에서 탈출하는 데 도움이 될 수 있는 단축키만 여기에 표시됩니다.
+iPad 키보드 또는 USB 키보드 어댑터가 필요합니다. 애플리케이션에서 탈출하는 데 도움이 될 수 있는 단축키만 표시됩니다.
 
 | 키 | 이름         |
 | --- | ------------ |
 | ⌘   | 명령        |
-| ⌥   | 옵션 (Alt)  |
+| ⌥   | 옵션 (Alt) |
 | ⇧   | Shift        |
 | ↩   | Return       |
 | ⇥   | Tab          |
 | ^   | Control      |
-| ←   | 왼쪽 화살표 |
-| →   | 오른쪽 화살표|
-| ↑   | 위쪽 화살표 |
-| ↓   | 아래쪽 화살표|
+| ←   | 왼쪽 화살표   |
+| →   | 오른쪽 화살표  |
+| ↑   | 위쪽 화살표     |
+| ↓   | 아래쪽 화살표   |
 
 #### 시스템 단축키
 
@@ -209,7 +209,7 @@ iPad 키보드 또는 USB 키보드 어댑터가 있어야 합니다. 애플리�
 | F8       | 재생/일시 정지                                                               |
 | F9       | 곡 건너뛰기                                                                  |
 | F10      | 음소거                                                                         |
-| F11      | 볼륨 줄이기                                                                  |
+| F11      | 볼륨 낮추기                                                                  |
 | F12      | 볼륨 높이기                                                                  |
 | ⌘ Space  | 사용 가능한 언어 목록 표시; 하나를 선택하려면 스페이스 바를 다시 누르세요. |
 
@@ -222,24 +222,24 @@ iPad 키보드 또는 USB 키보드 어댑터가 있어야 합니다. 애플리�
 | ⌘ (Space)                                          | Spotlight 열기                                        |
 | ⌘⇥ (Command-Tab)                                   | 최근 사용한 앱 목록 나열                               |
 | ⌘\~                                                | 마지막 앱으로 이동                                     |
-| ⌘⇧3 (Command-Shift-3)                              | 스크린샷 (저장하거나 작업하기 위해 왼쪽 하단에 떠 있습니다) |
+| ⌘⇧3 (Command-Shift-3)                              | 스크린샷 (저장 또는 작업을 위해 왼쪽 하단에 떠 있습니다) |
 | ⌘⇧4                                                | 스크린샷을 찍고 편집기로 열기                          |
 | ⌘을 누르고 유지                                   | 앱에 대한 사용 가능한 단축키 목록 표시                 |
 | ⌘⌥D (Command-Option/Alt-D)                         | 도크 표시                                              |
 | ^⌥H (Control-Option-H)                             | 홈 버튼                                               |
 | ^⌥H H (Control-Option-H-H)                         | 멀티태스킹 바 표시                                     |
 | ^⌥I (Control-Option-i)                             | 항목 선택기                                            |
-| Escape                                             | 뒤로 가기 버튼                                         |
-| → (오른쪽 화살표)                                    | 다음 항목                                              |
-| ← (왼쪽 화살표)                                     | 이전 항목                                              |
-| ↑↓ (위쪽 화살표, 아래쪽 화살표)                          | 선택한 항목을 동시에 탭                                 |
+| Escape                                             | 뒤로 버튼                                             |
+| → (오른쪽 화살표)                                    | 다음 항목                                               |
+| ← (왼쪽 화살표)                                     | 이전 항목                                             |
+| ↑↓ (위쪽 화살표, 아래쪽 화살표)                          | 선택한 항목을 동시에 탭합니다                          |
 | ⌥ ↓ (Option-Down arrow)                            | 아래로 스크롤                                          |
 | ⌥↑ (Option-Up arrow)                               | 위로 스크롤                                            |
 | ⌥← 또는 ⌥→ (Option-Left arrow 또는 Option-Right arrow) | 왼쪽 또는 오른쪽으로 스크롤                            |
-| ^⌥S (Control-Option-S)                             | VoiceOver 음성 켜기 또는 끄기                           |
-| ⌘⇧⇥ (Command-Shift-Tab)                            | 이전 앱으로 전환                                       |
-| ⌘⇥ (Command-Tab)                                   | 원래 앱으로 돌아가기                                   |
-| ←+→, 그런 다음 Option + ← 또는 Option+→                   | 도크를 통해 탐색                                       |
+| ^⌥S (Control-Option-S)                             | VoiceOver 음성을 켜거나 끕니다                          |
+| ⌘⇧⇥ (Command-Shift-Tab)                            | 이전 앱으로 전환                                      |
+| ⌘⇥ (Command-Tab)                                   | 원래 앱으로 다시 전환                                  |
+| ←+→, 그 다음 Option + ← 또는 Option+→                   | 도크를 탐색합니다                                      |
 
 #### Safari 단축키
 
@@ -252,10 +252,10 @@ iPad 키보드 또는 USB 키보드 어댑터가 있어야 합니다. 애플리�
 | ⌘.                      | 현재 탭 로딩 중지                          |
 | ^⇥                      | 다음 탭으로 전환                           |
 | ^⇧⇥ (Control-Shift-Tab) | 이전 탭으로 이동                           |
-| ⌘L                      | 텍스트 입력/URL 필드를 선택하여 수정하기     |
+| ⌘L                      | 수정할 텍스트 입력/URL 필드 선택            |
 | ⌘⇧T (Command-Shift-T)   | 마지막으로 닫은 탭 열기 (여러 번 사용할 수 있음) |
 | ⌘\[                     | 탐색 기록에서 한 페이지 뒤로 가기          |
-| ⌘]                      | 탐색 기록에서 한 페이지 앞으로 가기        |
+| ⌘]                      | 탐색 기록에서 한 페이지 앞으로 가기       |
 | ⌘⇧R                     | 리더 모드 활성화                             |
 
 #### 메일 단축키
@@ -266,8 +266,8 @@ iPad 키보드 또는 USB 키보드 어댑터가 있어야 합니다. 애플리�
 | ⌘T                         | 새 탭 열기               |
 | ⌘W                         | 현재 탭 닫기            |
 | ⌘R                         | 현재 탭 새로 고침      |
-| ⌘.                         | 현재 탭 로딩 중지     |
-| ⌘⌥F (Command-Option/Alt-F) | 메일박스에서 검색       |
+| ⌘.                         | 현재 탭 로딩 중지 |
+| ⌘⌥F (Command-Option/Alt-F) | 메일함에서 검색       |
 
 ## 참고 문헌
 

