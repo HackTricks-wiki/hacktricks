@@ -8,7 +8,7 @@
 
 | Componente    | Azione                                                             |
 | ------------- | ------------------------------------------------------------------ |
-| Pulsante di accensione | Spegnere e riaccendere il dispositivo potrebbe esporre la schermata di avvio    |
+| Pulsante di accensione | Spegnere e riaccendere il dispositivo può esporre la schermata di avvio    |
 | Cavo di alimentazione  | Controlla se il dispositivo si riavvia quando l'alimentazione viene interrotta brevemente |
 | Porte USB    | Collega una tastiera fisica con più scorciatoie                      |
 | Ethernet     | La scansione della rete o il sniffing possono abilitare ulteriori sfruttamenti           |
@@ -94,7 +94,7 @@ Editor del registro: [https://sourceforge.net/projects/uberregedit/](https://sou
 - Toggle Keys – Tieni premuto NUMLOCK per 5 secondi
 - Filter Keys – Tieni premuto SHIFT destro per 12 secondi
 - WINDOWS+F1 – Ricerca di Windows
-- WINDOWS+D – Mostra desktop
+- WINDOWS+D – Mostra Desktop
 - WINDOWS+E – Avvia Windows Explorer
 - WINDOWS+R – Esegui
 - WINDOWS+U – Centro accessibilità
@@ -113,8 +113,8 @@ Editor del registro: [https://sourceforge.net/projects/uberregedit/](https://sou
 
 ### Swipe
 
-- Scorri dal lato sinistro verso destra per vedere tutte le finestre aperte, minimizzando l'app KIOSK e accedendo direttamente all'intero sistema operativo;
-- Scorri dal lato destro verso sinistra per aprire il Centro operativo, minimizzando l'app KIOSK e accedendo direttamente all'intero sistema operativo;
+- Scorri da sinistra a destra per vedere tutte le finestre aperte, minimizzando l'app KIOSK e accedendo direttamente all'intero sistema operativo;
+- Scorri da destra a sinistra per aprire il Centro operativo, minimizzando l'app KIOSK e accedendo direttamente all'intero sistema operativo;
 - Scorri dal bordo superiore per rendere visibile la barra del titolo per un'app aperta in modalità schermo intero;
 - Scorri verso l'alto dal basso per mostrare la barra delle applicazioni in un'app a schermo intero.
 
@@ -147,7 +147,7 @@ Digita questi URL per ottenere una vista di Explorer:
 - `Shell:Windows`
 - `shell:::{21EC2020-3AEA-1069-A2DD-08002B30309D}` --> Pannello di controllo
 - `shell:::{20D04FE0-3AEA-1069-A2D8-08002B30309D}` --> Il mio computer
-- `shell:::{{208D2C60-3AEA-1069-A2D7-08002B30309D}}` --> I miei luoghi di rete
+- `shell:::{{208D2C60-3AEA-1069-A2D7-08002B30309D}}` --> Le mie posizioni di rete
 - `shell:::{871C5380-42A0-1069-A2EA-08002B30309D}` --> Internet Explorer
 
 ### Mostra le estensioni dei file
@@ -159,7 +159,7 @@ Controlla questa pagina per ulteriori informazioni: [https://www.howtohaven.com/
 Backup delle versioni iKat:
 
 [http://swin.es/k/](http://swin.es/k/)\
-[http://www.ikat.kronicd.net/](http://www.ikat.kronicd.net)\\
+[http://www.ikat.kronicd.net/](http://www.ikat.kronicd.net)
 
 Crea un dialogo comune utilizzando JavaScript e accedi all'esplora file: `document.write('<input/type=file>')`\
 Fonte: https://medium.com/@Rend\_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
@@ -176,26 +176,26 @@ Fonte: https://medium.com/@Rend\_/give-me-a-browser-ill-give-you-a-shell-de19811
 - Scorri verso il basso con 1 dito nell'angolo in alto a destra dello schermo: Per vedere il centro di controllo dell'iPad Pro
 - Scorri 1 dito dal lato sinistro dello schermo per 1-2 pollici: Per vedere la vista Oggi
 - Scorri rapidamente 1 dito dal centro dello schermo verso destra o sinistra: Per cambiare all'app successiva/precedente
-- Tieni premuto il pulsante On/**Off**/Sleep nell'angolo in alto a destra dell'**iPad +** Sposta il cursore di **spegnimento** tutto a destra: Per spegnere
+- Tieni premuto il pulsante On/**Off**/Sleep nell'angolo in alto a destra dell'**iPad +** Sposta il cursore per **spegnere** tutto a destra: Per spegnere
 - Tieni premuto il pulsante On/**Off**/Sleep nell'angolo in alto a destra dell'**iPad e il pulsante Home per alcuni secondi**: Per forzare uno spegnimento completo
 - Tieni premuto il pulsante On/**Off**/Sleep nell'angolo in alto a destra dell'**iPad e il pulsante Home rapidamente**: Per fare uno screenshot che apparirà in basso a sinistra del display. Premi entrambi i pulsanti contemporaneamente molto brevemente, poiché se li tieni premuti per alcuni secondi verrà eseguito uno spegnimento completo.
 
 ### Scorciatoie
 
-Dovresti avere una tastiera per iPad o un adattatore per tastiera USB. Solo le scorciatoie che potrebbero aiutare a uscire dall'applicazione saranno mostrate qui.
+Dovresti avere una tastiera per iPad o un adattatore per tastiera USB. Solo le scorciatoie che potrebbero aiutare a uscire dall'app saranno mostrate qui.
 
 | Tasto | Nome         |
 | ----- | ------------ |
 | ⌘   | Comando      |
 | ⌥   | Opzione (Alt) |
 | ⇧   | Shift        |
-| ↩   | Ritorno      |
+| ↩   | Ritorna      |
 | ⇥   | Tab          |
 | ^   | Controllo    |
 | ←   | Freccia sinistra   |
 | →   | Freccia destra  |
 | ↑   | Freccia su     |
-| ↓   | Freccia giù    |
+| ↓   | Freccia giù     |
 
 #### Scorciatoie di sistema
 
@@ -215,31 +215,31 @@ Queste scorciatoie sono per le impostazioni visive e sonore, a seconda dell'uso 
 
 #### Navigazione su iPad
 
-| Scorciatoia                                           | Azione                                                  |
-| ----------------------------------------------------- | ------------------------------------------------------- |
-| ⌘H                                                  | Vai alla Home                                           |
-| ⌘⇧H (Comando-Shift-H)                               | Vai alla Home                                           |
-| ⌘ (Spazio)                                          | Apri Spotlight                                          |
+| Scorciatoia                                         | Azione                                                  |
+| --------------------------------------------------- | ------------------------------------------------------- |
+| ⌘H                                                 | Vai alla Home                                          |
+| ⌘⇧H (Comando-Shift-H)                              | Vai alla Home                                          |
+| ⌘ (Spazio)                                         | Apri Spotlight                                          |
 | ⌘⇥ (Comando-Tab)                                   | Elenca le ultime dieci app utilizzate                   |
 | ⌘\~                                                | Vai all'ultima app                                      |
 | ⌘⇧3 (Comando-Shift-3)                              | Screenshot (si ferma in basso a sinistra per salvare o agire su di esso) |
-| ⌘⇧4                                                | Screenshot e aprilo nell'editor                         |
-| Tieni premuto ⌘                                   | Elenco delle scorciatoie disponibili per l'app          |
+| ⌘⇧4                                                | Screenshot e aprilo nell'editor                        |
+| Tieni premuto ⌘                                   | Elenco delle scorciatoie disponibili per l'app         |
 | ⌘⌥D (Comando-Opzione/Alt-D)                         | Mostra il dock                                          |
-| ^⌥H (Controllo-Opzione-H)                             | Pulsante Home                                           |
-| ^⌥H H (Controllo-Opzione-H-H)                         | Mostra la barra multitasking                             |
-| ^⌥I (Controllo-Opzione-i)                             | Selettore di elementi                                    |
+| ^⌥H (Controllo-Opzione-H)                           | Pulsante Home                                           |
+| ^⌥H H (Controllo-Opzione-H-H)                       | Mostra la barra multitasking                            |
+| ^⌥I (Controllo-Opzione-i)                           | Selettore di elementi                                    |
 | Escape                                             | Pulsante Indietro                                       |
-| → (Freccia destra)                                    | Prossimo elemento                                        |
-| ← (Freccia sinistra)                                   | Elemento precedente                                      |
-| ↑↓ (Freccia su, Freccia giù)                          | Tocca simultaneamente l'elemento selezionato            |
-| ⌥ ↓ (Opzione-Freccia giù)                            | Scorri verso il basso                                   |
-| ⌥↑ (Opzione-Freccia su)                               | Scorri verso l'alto                                     |
-| ⌥← o ⌥→ (Opzione-Freccia sinistra o Opzione-Freccia destra) | Scorri a sinistra o a destra                           |
-| ^⌥S (Controllo-Opzione-S)                             | Attiva o disattiva la sintesi vocale                   |
-| ⌘⇧⇥ (Comando-Shift-Tab)                            | Passa all'app precedente                                 |
-| ⌘⇥ (Comando-Tab)                                   | Torna all'app originale                                  |
-| ←+→, poi Opzione + ← o Opzione+→                   | Naviga attraverso il Dock                                |
+| → (Freccia destra)                                 | Prossimo elemento                                       |
+| ← (Freccia sinistra)                               | Elemento precedente                                     |
+| ↑↓ (Freccia su, Freccia giù)                      | Tocca simultaneamente l'elemento selezionato           |
+| ⌥ ↓ (Opzione-Freccia giù)                          | Scorri verso il basso                                   |
+| ⌥↑ (Opzione-Freccia su)                           | Scorri verso l'alto                                     |
+| ⌥← o ⌥→ (Opzione-Freccia sinistra o Opzione-Freccia destra) | Scorri a sinistra o a destra                          |
+| ^⌥S (Controllo-Opzione-S)                           | Attiva o disattiva la sintesi vocale                   |
+| ⌘⇧⇥ (Comando-Shift-Tab)                            | Passa all'app precedente                                |
+| ⌘⇥ (Comando-Tab)                                   | Torna all'app originale                                 |
+| ←+→, poi Opzione + ← o Opzione+→                   | Naviga attraverso il Dock                               |
 
 #### Scorciatoie di Safari
 
@@ -251,7 +251,7 @@ Queste scorciatoie sono per le impostazioni visive e sonore, a seconda dell'uso 
 | ⌘R                        | Aggiorna la scheda corrente                      |
 | ⌘.                        | Ferma il caricamento della scheda corrente       |
 | ^⇥                        | Passa alla scheda successiva                     |
-| ^⇧⇥ (Controllo-Shift-Tab) | Passa alla scheda precedente                      |
+| ^⇧⇥ (Controllo-Shift-Tab) | Passa alla scheda precedente                     |
 | ⌘L                        | Seleziona il campo di input/testo URL per modificarlo |
 | ⌘⇧T (Comando-Shift-T)    | Apri l'ultima scheda chiusa (può essere usata più volte) |
 | ⌘\[                       | Torna indietro di una pagina nella cronologia di navigazione |

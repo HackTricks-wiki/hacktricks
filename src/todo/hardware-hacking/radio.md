@@ -9,7 +9,7 @@
 ### Configurazione di base
 
 Dopo l'installazione ci sono alcune cose che potresti considerare di configurare.\
-Nelle impostazioni (il secondo pulsante della scheda) puoi selezionare il **dispositivo SDR** o **selezionare un file** da leggere e quale frequenza sintonizzare e il tasso di campionamento (consigliato fino a 2.56Msps se il tuo PC lo supporta)\\
+Nelle impostazioni (il secondo pulsante della scheda) puoi selezionare il **dispositivo SDR** o **selezionare un file** da leggere e quale frequenza sintonizzare e il tasso di campionamento (consigliato fino a 2.56Msps se il tuo PC lo supporta)
 
 ![](<../../images/image (245).png>)
 
@@ -26,7 +26,7 @@ Nel comportamento della GUI è consigliato abilitare alcune cose se il tuo PC lo
 
 ![](<../../images/image (960).png>)
 
-- Il **Tuner** di SigDigger aiuta a **catturare segnali migliori** (ma può anche degradarli). Idealmente inizia da 0 e continua a **aumentarlo fino a** trovare il **rumore** introdotto che è **maggiore** del **miglioramento del segnale** di cui hai bisogno).
+- Il **Tuner** di SigDigger aiuta a **catturare segnali migliori** (ma può anche degradarli). Idealmente inizia da 0 e continua a **aumentarlo fino a** trovare che il **rumore** introdotto è **maggiore** del **miglioramento del segnale** di cui hai bisogno.
 
 ![](<../../images/image (1099).png>)
 
@@ -38,8 +38,8 @@ Con [**SigDigger** ](https://github.com/BatchDrake/SigDigger)sincronizza con il 
 
 ## Trucchi interessanti
 
-- Quando un dispositivo sta inviando burst di informazioni, di solito la **prima parte sarà un preambolo** quindi **non** devi **preoccuparti** se **non trovi informazioni** lì **o se ci sono alcuni errori**.
-- Nei frame di informazioni di solito dovresti **trovare diversi frame ben allineati tra loro**:
+- Quando un dispositivo sta inviando burst di informazioni, di solito la **prima parte sarà un preambolo**, quindi **non** devi **preoccuparti** se **non trovi informazioni** lì **o se ci sono alcuni errori**.
+- Nei frame di informazioni dovresti di solito **trovare diversi frame ben allineati tra loro**:
 
 ![](<../../images/image (1076).png>)
 
@@ -55,12 +55,12 @@ Se stai controllando un segnale ci sono diversi modi per cercare di capire cosa 
 
 ![](<../../images/image (788).png>)
 
-- **Rilevamento AM**: Se nel grafico IQ appare ad esempio **2 cerchi** (probabilmente uno in 0 e l'altro in un'ampiezza diversa), potrebbe significare che questo è un segnale AM. Questo perché nel grafico IQ la distanza tra lo 0 e il cerchio è l'ampiezza del segnale, quindi è facile visualizzare diverse ampiezze utilizzate.
-- **Rilevamento PM**: Come nell'immagine precedente, se trovi piccoli cerchi non correlati tra loro probabilmente significa che viene utilizzata una modulazione di fase. Questo perché nel grafico IQ, l'angolo tra il punto e lo 0,0 è la fase del segnale, quindi significa che vengono utilizzate 4 fasi diverse.
+- **Rilevamento AM**: Se nel grafico IQ appare ad esempio **2 cerchi** (probabilmente uno in 0 e l'altro in un'ampiezza diversa), potrebbe significare che questo è un segnale AM. Questo perché nel grafico IQ la distanza tra 0 e il cerchio è l'ampiezza del segnale, quindi è facile visualizzare diverse ampiezze utilizzate.
+- **Rilevamento PM**: Come nell'immagine precedente, se trovi piccoli cerchi non correlati tra loro probabilmente significa che viene utilizzata una modulazione di fase. Questo perché nel grafico IQ, l'angolo tra il punto e il 0,0 è la fase del segnale, quindi significa che vengono utilizzate 4 fasi diverse.
 - Nota che se le informazioni sono nascoste nel fatto che una fase è cambiata e non nella fase stessa, non vedrai fasi diverse chiaramente differenziate.
 - **Rilevamento FM**: IQ non ha un campo per identificare le frequenze (la distanza dal centro è l'ampiezza e l'angolo è la fase).\
 Pertanto, per identificare FM, dovresti **vedere solo fondamentalmente un cerchio** in questo grafico.\
-Inoltre, una frequenza diversa è "rappresentata" dal grafico IQ da una **accelerazione della velocità attraverso il cerchio** (quindi in SysDigger selezionando il segnale il grafico IQ si popola, se trovi un'accelerazione o un cambiamento di direzione nel cerchio creato potrebbe significare che questo è FM):
+Inoltre, una frequenza diversa è "rappresentata" dal grafico IQ da una **accelerazione di velocità attraverso il cerchio** (quindi in SysDigger selezionando il segnale il grafico IQ si popola, se trovi un'accelerazione o un cambiamento di direzione nel cerchio creato potrebbe significare che questo è FM):
 
 ## Esempio AM
 
@@ -70,9 +70,9 @@ sigdigger_20220308_165547Z_2560000_433500000_float32_iq.raw
 
 ### Scoprire AM
 
-#### Controllare l'inviluppo
+#### Controllare l'involucro
 
-Controllando le informazioni AM con [**SigDigger** ](https://github.com/BatchDrake/SigDigger) e semplicemente guardando l'**inviluppo** puoi vedere diversi livelli di ampiezza chiari. Il segnale utilizzato sta inviando impulsi con informazioni in AM, ecco come appare un impulso:
+Controllando le informazioni AM con [**SigDigger** ](https://github.com/BatchDrake/SigDigger) e semplicemente guardando l'**involucro** puoi vedere diversi livelli di ampiezza chiari. Il segnale utilizzato sta inviando impulsi con informazioni in AM, ecco come appare un impulso:
 
 ![](<../../images/image (590).png>)
 
@@ -127,19 +127,19 @@ Premendo campione appare questo:
 
 ![](<../../images/image (644).png>)
 
-Ora, per far capire a SigDigger **dove si trova l'intervallo** del livello che trasporta informazioni devi cliccare sul **livello più basso** e mantenere premuto fino al livello più alto:
+Ora, per far capire a SigDigger **dove si trova l'intervallo** del livello che trasporta informazioni, devi cliccare sul **livello più basso** e mantenere premuto fino al livello più alto:
 
 ![](<../../images/image (439).png>)
 
-Se ci fossero stati ad esempio **4 livelli di ampiezza diversi**, dovresti configurare i **Bit per simbolo a 2** e selezionare dal più piccolo al più grande.
+Se ci fossero stati ad esempio **4 livelli di ampiezza diversi**, avresti dovuto configurare i **Bit per simbolo a 2** e selezionare dal più piccolo al più grande.
 
 Infine **aumentando** lo **Zoom** e **cambiando la dimensione della riga** puoi vedere i bit (e puoi selezionare tutto e copiare per ottenere tutti i bit):
 
 ![](<../../images/image (276).png>)
 
-Se il segnale ha più di 1 bit per simbolo (ad esempio 2), SigDigger **non ha modo di sapere quale simbolo è** 00, 01, 10, 11, quindi utilizzerà diverse **scale di grigio** per rappresentare ciascuno (e se copi i bit utilizzerà **numeri da 0 a 3**, dovrai trattarli).
+Se il segnale ha più di 1 bit per simbolo (ad esempio 2), SigDigger non ha **modo di sapere quale simbolo è** 00, 01, 10, 11, quindi utilizzerà diverse **scale di grigio** per rappresentare ciascuno (e se copi i bit utilizzerà **numeri da 0 a 3**, dovrai trattarli).
 
-Inoltre, usa **codificazioni** come **Manchester**, e **up+down** può essere **1 o 0** e un down+up può essere un 1 o 0. In quei casi devi **trattare gli up (1) e down (0) ottenuti** per sostituire le coppie di 01 o 10 come 0 o 1.
+Inoltre, usa **codificazioni** come **Manchester**, e **up+down** può essere **1 o 0** e un down+up può essere un 1 o 0. In questi casi devi **trattare gli up (1) e down (0) ottenuti** per sostituire le coppie di 01 o 10 come 0 o 1.
 
 ## Esempio FM
 
@@ -187,7 +187,7 @@ E questo sarebbe l'istogramma di fase (che rende molto chiaro che il segnale non
 
 IQ non ha un campo per identificare le frequenze (la distanza dal centro è ampiezza e l'angolo è fase).\
 Pertanto, per identificare FM, dovresti **vedere solo fondamentalmente un cerchio** in questo grafico.\
-Inoltre, una frequenza diversa è "rappresentata" dal grafico IQ da una **accelerazione della velocità attraverso il cerchio** (quindi in SysDigger selezionando il segnale il grafico IQ si popola, se trovi un'accelerazione o un cambiamento di direzione nel cerchio creato potrebbe significare che questo è FM):
+Inoltre, una frequenza diversa è "rappresentata" dal grafico IQ da una **accelerazione di velocità attraverso il cerchio** (quindi in SysDigger selezionando il segnale il grafico IQ si popola, se trovi un'accelerazione o un cambiamento di direzione nel cerchio creato potrebbe significare che questo è FM):
 
 ![](<../../images/image (81).png>)
 

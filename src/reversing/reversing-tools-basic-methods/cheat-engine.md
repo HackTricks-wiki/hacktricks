@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) è un programma utile per trovare dove vengono salvati valori importanti all'interno della memoria di un gioco in esecuzione e modificarli.\
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php) è un programma utile per trovare dove vengono salvati valori importanti nella memoria di un gioco in esecuzione e modificarli.\
 Quando lo scarichi e lo esegui, ti viene **presentato** un **tutorial** su come utilizzare lo strumento. Se vuoi imparare a usare lo strumento, è altamente consigliato completarlo.
 
 ## Cosa stai cercando?
@@ -10,7 +10,7 @@ Quando lo scarichi e lo esegui, ti viene **presentato** un **tutorial** su come 
 ![](<../../images/image (762).png>)
 
 Questo strumento è molto utile per trovare **dove alcuni valori** (di solito un numero) **sono memorizzati nella memoria** di un programma.\
-**Di solito i numeri** sono memorizzati in forma di **4byte**, ma potresti anche trovarli in formati **double** o **float**, o potresti voler cercare qualcosa **di diverso da un numero**. Per questo motivo devi essere sicuro di **selezionare** ciò che vuoi **cercare**:
+**Di solito i numeri** sono memorizzati in forma di **4byte**, ma potresti anche trovarli in formati **double** o **float**, o potresti voler cercare qualcosa di **diverso da un numero**. Per questo motivo, devi essere sicuro di **selezionare** ciò che vuoi **cercare**:
 
 ![](<../../images/image (324).png>)
 
@@ -30,7 +30,7 @@ In _**Modifica --> Impostazioni --> Tasti di scelta rapida**_ puoi impostare div
 
 ## Modificare il valore
 
-Una volta che hai **trovato** dove si trova il **valore** che stai **cercando** (di più su questo nei passaggi successivi), puoi **modificarlo** facendo doppio clic su di esso, quindi facendo doppio clic sul suo valore:
+Una volta che hai **trovato** dove si trova il **valore** che stai **cercando** (maggiore informazione su questo nei passaggi successivi), puoi **modificarlo** facendo doppio clic su di esso, quindi facendo doppio clic sul suo valore:
 
 ![](<../../images/image (563).png>)
 
@@ -55,7 +55,7 @@ Poi, fai qualcosa affinché **il valore cambi**, e **ferma** il gioco e **esegui
 ![](<../../images/image (684).png>)
 
 Cheat Engine cercherà i **valori** che **sono passati da 100 al nuovo valore**. Congratulazioni, hai **trovato** l'**indirizzo** del valore che stavi cercando, ora puoi modificarlo.\
-&#xNAN;_Se hai ancora diversi valori, fai qualcosa per modificare di nuovo quel valore e esegui un'altra "scansione successiva" per filtrare gli indirizzi._
+_Se hai ancora diversi valori, fai qualcosa per modificare di nuovo quel valore e esegui un'altra "scansione successiva" per filtrare gli indirizzi._
 
 ### Valore sconosciuto, cambiamento noto
 
@@ -65,7 +65,7 @@ Quindi, inizia eseguendo una scansione di tipo "**Valore iniziale sconosciuto**"
 
 ![](<../../images/image (890).png>)
 
-Poi, fai cambiare il valore, indica **come** il **valore** **è cambiato** (nel mio caso è diminuito di 1) e esegui una **scansione successiva**:
+Poi, fai cambiare il valore, indica **come** il **valore** **è cambiato** (nel mio caso è diminuito di 1) ed esegui una **scansione successiva**:
 
 ![](<../../images/image (371).png>)
 
@@ -75,13 +75,13 @@ Ti verranno presentati **tutti i valori che sono stati modificati nel modo selez
 
 Una volta trovato il tuo valore, puoi modificarlo.
 
-Nota che ci sono **molti possibili cambiamenti** e puoi fare questi **passaggi quante più volte vuoi** per filtrare i risultati:
+Nota che ci sono **molti cambiamenti possibili** e puoi fare questi **passaggi quante più volte vuoi** per filtrare i risultati:
 
 ![](<../../images/image (574).png>)
 
 ### Indirizzo di memoria casuale - Trovare il codice
 
-Fino ad ora abbiamo imparato come trovare un indirizzo che memorizza un valore, ma è altamente probabile che in **diverse esecuzioni del gioco quell'indirizzo si trovi in posti diversi della memoria**. Quindi scopriamo come trovare sempre quell'indirizzo.
+Fino ad ora abbiamo imparato come trovare un indirizzo che memorizza un valore, ma è altamente probabile che in **diverse esecuzioni del gioco quell'indirizzo si trovi in posti diversi della memoria**. Quindi vediamo come trovare sempre quell'indirizzo.
 
 Utilizzando alcuni dei trucchi menzionati, trova l'indirizzo dove il tuo gioco attuale sta memorizzando il valore importante. Poi (ferma il gioco se lo desideri) fai **clic destro** sull'**indirizzo** trovato e seleziona "**Scopri cosa accede a questo indirizzo**" o "**Scopri cosa scrive a questo indirizzo**":
 

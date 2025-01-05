@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Informazioni di base
+## Informazioni di Base
 
 Negli ambienti in cui sono in funzione **Windows XP e Server 2003**, vengono utilizzati gli hash LM (Lan Manager), sebbene sia ampiamente riconosciuto che questi possano essere facilmente compromessi. Un particolare hash LM, `AAD3B435B51404EEAAD3B435B51404EE`, indica uno scenario in cui LM non è impiegato, rappresentando l'hash per una stringa vuota.
 
@@ -12,9 +12,9 @@ La presenza dell'intestazione **"NTLMSSP"** nei pacchetti di rete segnala un pro
 
 Il supporto per i protocolli di autenticazione - LM, NTLMv1 e NTLMv2 - è facilitato da un DLL specifico situato in `%windir%\Windows\System32\msv1\_0.dll`.
 
-**Punti chiave**:
+**Punti Chiave**:
 
-- Gli hash LM sono vulnerabili e un hash LM vuoto (`AAD3B435B51404EEAAD3B435B51404EE`) ne segnala la non utilizzazione.
+- Gli hash LM sono vulnerabili e un hash LM vuoto (`AAD3B435B51404EEAAD3B435B51404EE`) segnala il suo non utilizzo.
 - Kerberos è il metodo di autenticazione predefinito, con NTLM utilizzato solo in determinate condizioni.
 - I pacchetti di autenticazione NTLM sono identificabili dall'intestazione "NTLMSSP".
 - I protocolli LM, NTLMv1 e NTLMv2 sono supportati dal file di sistema `msv1\_0.dll`.
@@ -44,12 +44,12 @@ Valori possibili:
 4 - Send NTLMv2 response only, refuse LM
 5 - Send NTLMv2 response only, refuse LM & NTLM
 ```
-## Schema di autenticazione di base NTLM
+## Schema di autenticazione di base NTLM Domain
 
 1. L'**utente** introduce le sue **credenziali**
 2. La macchina client **invia una richiesta di autenticazione** inviando il **nome del dominio** e il **nome utente**
 3. Il **server** invia la **sfida**
-4. Il **client** cripta la **sfida** utilizzando l'hash della password come chiave e la invia come risposta
+4. Il **client cripta** la **sfida** utilizzando l'hash della password come chiave e la invia come risposta
 5. Il **server invia** al **Domain controller** il **nome del dominio, il nome utente, la sfida e la risposta**. Se non **c'è** un Active Directory configurato o il nome del dominio è il nome del server, le credenziali vengono **verificate localmente**.
 6. Il **domain controller verifica se tutto è corretto** e invia le informazioni al server
 
@@ -63,7 +63,7 @@ L'autenticazione è come quella menzionata **prima ma** il **server** conosce l'
 
 La **lunghezza della sfida è di 8 byte** e la **risposta è lunga 24 byte**.
 
-L'**hash NT (16byte)** è diviso in **3 parti di 7byte ciascuna** (7B + 7B + (2B+0x00\*5)): l'**ultima parte è riempita di zeri**. Poi, la **sfida** è **cifrata separatamente** con ciascuna parte e i **byte cifrati risultanti** sono **uniti**. Totale: 8B + 8B + 8B = 24Bytes.
+L'**hash NT (16byte)** è diviso in **3 parti di 7byte ciascuna** (7B + 7B + (2B+0x00\*5)): l'**ultima parte è riempita di zeri**. Poi, la **sfida** è **criptata separatamente** con ciascuna parte e i **byte criptati risultanti sono uniti**. Totale: 8B + 8B + 8B = 24Bytes.
 
 **Problemi**:
 
@@ -75,17 +75,17 @@ L'**hash NT (16byte)** è diviso in **3 parti di 7byte ciascuna** (7B + 7B + (2B
 
 ### Attacco NTLMv1
 
-Al giorno d'oggi sta diventando meno comune trovare ambienti con Delegazione Non Vincolata configurata, ma questo non significa che non puoi **abuse un servizio Print Spooler** configurato.
+Al giorno d'oggi sta diventando meno comune trovare ambienti con Delegazione Non Vincolata configurata, ma questo non significa che non puoi **abusare di un servizio Print Spooler** configurato.
 
 Potresti abusare di alcune credenziali/sessioni che hai già sull'AD per **chiedere alla stampante di autenticarsi** contro qualche **host sotto il tuo controllo**. Poi, utilizzando `metasploit auxiliary/server/capture/smb` o `responder` puoi **impostare la sfida di autenticazione a 1122334455667788**, catturare il tentativo di autenticazione, e se è stato fatto utilizzando **NTLMv1** sarai in grado di **crackarlo**.\
-Se stai usando `responder` potresti provare a \*\*usare il flag `--lm` \*\* per cercare di **downgrade** l'**autenticazione**.\
-&#xNAN;_&#x4E;ota che per questa tecnica l'autenticazione deve essere eseguita utilizzando NTLMv1 (NTLMv2 non è valido)._
+Se stai usando `responder` potresti provare a \*\*usare il flag `--lm` \*\* per cercare di **downgradare** l'**autenticazione**.\
+_&#x4E;ote che per questa tecnica l'autenticazione deve essere eseguita utilizzando NTLMv1 (NTLMv2 non è valido)._
 
 Ricorda che la stampante utilizzerà l'account del computer durante l'autenticazione, e gli account dei computer usano **password lunghe e casuali** che probabilmente non sarai in grado di crackare utilizzando dizionari comuni. Ma l'autenticazione **NTLMv1** **usa DES** ([maggiori informazioni qui](#ntlmv1-challenge)), quindi utilizzando alcuni servizi specialmente dedicati a crackare DES sarai in grado di crackarlo (potresti usare [https://crack.sh/](https://crack.sh) o [https://ntlmv1.com/](https://ntlmv1.com) per esempio).
 
 ### Attacco NTLMv1 con hashcat
 
-NTLMv1 può essere anche rotto con il NTLMv1 Multi Tool [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi) che formatta i messaggi NTLMv1 in un metodo che può essere rotto con hashcat.
+NTLMv1 può anche essere rotto con il NTLMv1 Multi Tool [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi) che formatta i messaggi NTLMv1 in un metodo che può essere rotto con hashcat.
 
 Il comando
 ```bash
@@ -149,7 +149,7 @@ It seems that you haven't provided the text you want to be translated. Please sh
 
 586c # this is the last part
 ```
-I'm sorry, but I need the specific text you want translated in order to assist you. Please provide the content you'd like me to translate to Italian.
+Sure, please provide the text you would like me to translate to Italian.
 ```bash
 NTHASH=b4b9b02e6f09a9bd760f388b6700586c
 ```
@@ -214,7 +214,7 @@ Invoke-SMBEnum -Domain dollarcorp.moneycorp.local -Username svcadmin -Hash b38ff
 ```
 #### Invoke-TheHash
 
-Questa funzione è un **mix di tutte le altre**. Puoi passare **diversi host**, **escludere** alcuni e **selezionare** l'**opzione** che desideri utilizzare (_SMBExec, WMIExec, SMBClient, SMBEnum_). Se selezioni **uno** tra **SMBExec** e **WMIExec** ma non fornisci alcun parametro _**Command**_, controllerà semplicemente se hai **sufficienti permessi**.
+Questa funzione è un **mix di tutte le altre**. Puoi passare **diversi host**, **escludere** alcuni e **selezionare** l'**opzione** che desideri utilizzare (_SMBExec, WMIExec, SMBClient, SMBEnum_). Se selezioni **uno** di **SMBExec** e **WMIExec** ma non fornisci alcun parametro _**Command**_, controllerà semplicemente se hai **sufficienti permessi**.
 ```
 Invoke-TheHash -Type WMIExec -Target 192.168.100.0/24 -TargetExclude 192.168.100.50 -Username Administ -ty    h F6F38B793DB6A94BA04A52F1D3EE92F0
 ```
