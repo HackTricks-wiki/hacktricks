@@ -48,7 +48,7 @@ By ensuring that `unshare` runs with the `-f` flag, the new PID namespace is cor
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
 
-### &#x20;Check which namespace is your process in
+### Check which namespace is your process in
 
 ```bash
 ls -l /proc/self/ns/time

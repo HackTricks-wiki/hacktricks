@@ -230,7 +230,7 @@ The command **`diskutil apfs list`** lists the **details of the APFS volumes** a
 |   Capacity In Use By Volumes:   219214536704 B (219.2 GB) (44.3% used)
 |   Capacity Not Allocated:       275170258944 B (275.2 GB) (55.7% free)
 |   |
-|   +-&#x3C; Physical Store disk0s2 86D4B7EC-6FA5-4042-93A7-D3766A222EBE
+|   +-< Physical Store disk0s2 86D4B7EC-6FA5-4042-93A7-D3766A222EBE
 |   |   -----------------------------------------------------------
 |   |   APFS Physical Store Disk:   disk0s2
 |   |   Size:                       494384795648 B (494.4 GB)

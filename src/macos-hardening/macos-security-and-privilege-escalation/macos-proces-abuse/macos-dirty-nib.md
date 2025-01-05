@@ -52,7 +52,7 @@ The main Nib file is referenced in the value **`NSMainNibFile`** inside the `Inf
 
 ### Other Example
 
-In the post [https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) you can find tutorial on how to create a dirty nib.&#x20;
+In the post [https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) you can find tutorial on how to create a dirty nib.
 
 ### Addressing Launch Constraints
 

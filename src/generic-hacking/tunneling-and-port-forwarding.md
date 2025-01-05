@@ -574,7 +574,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **is a tool to expose solutions to Internet in one command line.**\
-_&#x45;xposition URI are like:_ **UID.ngrok.io**
+_Exposition URI are like:_ **UID.ngrok.io**
 
 ### Installation
 

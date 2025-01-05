@@ -28,7 +28,7 @@ Then, it maps the dyld shared cache which prelinks all the important system libr
 1. it start loading inserted libraries with `DYLD_INSERT_LIBRARIES` (if allowed)
 2. Then the shared cached ones
 3. Then the imported ones
-   1. &#x20;Then continue importing libraries recursively
+   1. Then continue importing libraries recursively
 
 Once all are loaded the **initialisers** of these libraries are run. These are coded using **`__attribute__((constructor))`** defined in the `LC_ROUTINES[_64]` (now deprecated) or by pointer in a section flagged with `S_MOD_INIT_FUNC_POINTERS` (usually: **`__DATA.__MOD_INIT_FUNC`**).
 

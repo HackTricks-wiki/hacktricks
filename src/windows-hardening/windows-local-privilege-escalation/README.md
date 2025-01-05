@@ -506,7 +506,7 @@ accesschk.exe -uwcqv "Todos" * /accepteula ::Spanish version
 If you are having this error (for example with SSDPSRV):
 
 _System error 1058 has occurred._\
-_&#x54;he service cannot be started, either because it is disabled or because it has no enabled devices associated with it._
+_The service cannot be started, either because it is disabled or because it has no enabled devices associated with it._
 
 You can enable it using
 

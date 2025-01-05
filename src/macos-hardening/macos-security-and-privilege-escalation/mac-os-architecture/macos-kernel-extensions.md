@@ -85,7 +85,7 @@ img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 pyimg4 im4p extract -i kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 ```
 
-### Download&#x20;
+### Download
 
 - [**KernelDebugKit Github**](https://github.com/dortania/KdkSupportPkg/releases)
 

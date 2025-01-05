@@ -59,7 +59,7 @@ docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 
 To use user namespace, Docker daemon needs to be started with **`--userns-remap=default`**(In ubuntu 14.04, this can be done by modifying `/etc/default/docker` and then executing `sudo service docker restart`)
 
-### &#x20;Check which namespace is your process in
+### Check which namespace is your process in
 
 ```bash
 ls -l /proc/self/ns/user

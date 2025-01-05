@@ -83,7 +83,7 @@ Nowadays is becoming less common to find environments with Unconstrained Delegat
 
 You could abuse some credentials/sessions you already have on the AD to **ask the printer to authenticate** against some **host under your control**. Then, using `metasploit auxiliary/server/capture/smb` or `responder` you can **set the authentication challenge to 1122334455667788**, capture the authentication attempt, and if it was done using **NTLMv1** you will be able to **crack it**.\
 If you are using `responder` you could try to \*\*use the flag `--lm` \*\* to try to **downgrade** the **authentication**.\
-_&#x4E;ote that for this technique the authentication must be performed using NTLMv1 (NTLMv2 is not valid)._
+_Note that for this technique the authentication must be performed using NTLMv1 (NTLMv2 is not valid)._
 
 Remember that the printer will use the computer account during the authentication, and computer accounts use **long and random passwords** that you **probably won't be able to crack** using common **dictionaries**. But the **NTLMv1** authentication **uses DES** ([more info here](#ntlmv1-challenge)), so using some services specially dedicated to cracking DES you will be able to crack it (you could use [https://crack.sh/](https://crack.sh) or [https://ntlmv1.com/](https://ntlmv1.com) for example).
 

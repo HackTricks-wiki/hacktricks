@@ -150,7 +150,7 @@ Finally, another important function to make the server work will be **`myipc_ser
 	OutHeadP->msgh_id = InHeadP->msgh_id + 100;
 	OutHeadP->msgh_reserved = 0;
 
-	if ((InHeadP->msgh_id > 500) || (InHeadP->msgh_id &#x3C; 500) ||
+	if ((InHeadP->msgh_id > 500) || (InHeadP->msgh_id < 500) ||
 <strong>	    ((routine = SERVERPREFmyipc_subsystem.routine[InHeadP->msgh_id - 500].stub_routine) == 0)) {
 </strong>		((mig_reply_error_t *)OutHeadP)->NDR = NDR_record;
 		((mig_reply_error_t *)OutHeadP)->RetCode = MIG_BAD_ID;
@@ -270,13 +270,13 @@ It was previously mentioned that the function that will take care of **calling t
     var_10 = arg0;
     var_18 = arg1;
     // Initial instructions to find the proper function ponters
-    *(int32_t *)var_18 = *(int32_t *)var_10 &#x26; 0x1f;
+    *(int32_t *)var_18 = *(int32_t *)var_10 & 0x1f;
     *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
     *(int32_t *)(var_18 + 0x4) = 0x24;
     *(int32_t *)(var_18 + 0xc) = 0x0;
     *(int32_t *)(var_18 + 0x14) = *(int32_t *)(var_10 + 0x14) + 0x64;
     *(int32_t *)(var_18 + 0x10) = 0x0;
-    if (*(int32_t *)(var_10 + 0x14) &#x3C;= 0x1f4 &#x26;&#x26; *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
+    if (*(int32_t *)(var_10 + 0x14) <= 0x1f4 && *(int32_t *)(var_10 + 0x14) >= 0x1f4) {
             rax = *(int32_t *)(var_10 + 0x14);
             // Call to sign_extend_64 that can help to identifyf this function
             // This stores in rax the pointer to the call that needs to be called
@@ -318,7 +318,7 @@ This is the same function decompiled in a difefrent Hopper free version:
     var_10 = arg0;
     var_18 = arg1;
     // Initial instructions to find the proper function ponters
-    *(int32_t *)var_18 = *(int32_t *)var_10 &#x26; 0x1f | 0x0;
+    *(int32_t *)var_18 = *(int32_t *)var_10 & 0x1f | 0x0;
     *(int32_t *)(var_18 + 0x8) = *(int32_t *)(var_10 + 0x8);
     *(int32_t *)(var_18 + 0x4) = 0x24;
     *(int32_t *)(var_18 + 0xc) = 0x0;
@@ -327,19 +327,19 @@ This is the same function decompiled in a difefrent Hopper free version:
     r8 = *(int32_t *)(var_10 + 0x14);
     r8 = r8 - 0x1f4;
     if (r8 > 0x0) {
-            if (CPU_FLAGS &#x26; G) {
+            if (CPU_FLAGS & G) {
                     r8 = 0x1;
             }
     }
-    if ((r8 &#x26; 0x1) == 0x0) {
+    if ((r8 & 0x1) == 0x0) {
             r8 = *(int32_t *)(var_10 + 0x14);
             r8 = r8 - 0x1f4;
-            if (r8 &#x3C; 0x0) {
-                    if (CPU_FLAGS &#x26; L) {
+            if (r8 < 0x0) {
+                    if (CPU_FLAGS & L) {
                             r8 = 0x1;
                     }
             }
-            if ((r8 &#x26; 0x1) == 0x0) {
+            if ((r8 & 0x1) == 0x0) {
                     r8 = *(int32_t *)(var_10 + 0x14);
                     // 0x1f4 = 500 (the strating ID)
 <strong>                    r8 = r8 - 0x1f4;
@@ -348,13 +348,13 @@ This is the same function decompiled in a difefrent Hopper free version:
                     var_20 = r8;
                     r8 = r8 - 0x0;
                     if (r8 != 0x0) {
-                            if (CPU_FLAGS &#x26; NE) {
+                            if (CPU_FLAGS & NE) {
                                     r8 = 0x1;
                             }
                     }
                     // Same if else as in the previous version
                     // Check the used of the address 0x100004040 (functions addresses array)
-<strong>                    if ((r8 &#x26; 0x1) == 0x0) {
+<strong>                    if ((r8 & 0x1) == 0x0) {
 </strong><strong>                            *(var_18 + 0x18) = **0x100004000;
 </strong>                            *(int32_t *)(var_18 + 0x20) = 0xfffffed1;
                             var_4 = 0x0;
