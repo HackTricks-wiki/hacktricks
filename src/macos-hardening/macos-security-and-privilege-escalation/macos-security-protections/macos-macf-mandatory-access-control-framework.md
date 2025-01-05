@@ -26,7 +26,7 @@
 
 ## MACF Policies
 
-Μια πολιτική MACF καθορίζει **κανόνες και συνθήκες που θα εφαρμοστούν σε ορισμένες λειτουργίες του πυρήνα**.&#x20;
+Μια πολιτική MACF καθορίζει **κανόνες και συνθήκες που θα εφαρμοστούν σε ορισμένες λειτουργίες του πυρήνα**.
 
 Μια επέκταση πυρήνα θα μπορούσε να διαμορφώσει μια δομή `mac_policy_conf` και στη συνέχεια να την καταχωρίσει καλώντας `mac_policy_register`. Από [εδώ](https://opensource.apple.com/source/xnu/xnu-2050.18.24/security/mac_policy.h.auto.html):
 ```c
@@ -69,7 +69,7 @@ void			*mpc_data;		/** module data */
 
 Σημειώστε ότι οι πολιτικές MACF μπορούν να καταχωρηθούν και να αποσυρθούν επίσης **δυναμικά**.
 
-Ένα από τα κύρια πεδία της `mac_policy_conf` είναι το **`mpc_ops`**. Αυτό το πεδίο καθορίζει ποιες λειτουργίες ενδιαφέρει η πολιτική. Σημειώστε ότι υπάρχουν εκατοντάδες από αυτές, οπότε είναι δυνατό να μηδενιστούν όλες και στη συνέχεια να επιλεγούν μόνο αυτές που ενδιαφέρουν την πολιτική. Από [εδώ](https://opensource.apple.com/source/xnu/xnu-2050.18.24/security/mac_policy.h.auto.html):
+Ένα από τα κύρια πεδία της `mac_policy_conf` είναι το **`mpc_ops`**. Αυτό το πεδίο καθορίζει ποιες λειτουργίες ενδιαφέρει η πολιτική. Σημειώστε ότι υπάρχουν εκατοντάδες από αυτές, οπότε είναι δυνατό να μηδενιστούν όλες και στη συνέχεια να επιλεγούν μόνο αυτές που ενδιαφέρει η πολιτική. Από [εδώ](https://opensource.apple.com/source/xnu/xnu-2050.18.24/security/mac_policy.h.auto.html):
 ```c
 struct mac_policy_ops {
 mpo_audit_check_postselect_t		*mpo_audit_check_postselect;
@@ -82,22 +82,22 @@ mpo_cred_check_label_update_execve_t	*mpo_cred_check_label_update_execve;
 mpo_cred_check_label_update_t		*mpo_cred_check_label_update;
 [...]
 ```
-Σχεδόν όλοι οι hooks θα καλούνται από το MACF όταν μία από αυτές τις λειτουργίες παρεμποδίζεται. Ωστόσο, οι **`mpo_policy_*`** hooks είναι μια εξαίρεση επειδή το `mpo_hook_policy_init()` είναι ένα callback που καλείται κατά την εγγραφή (δηλαδή μετά το `mac_policy_register()`) και το `mpo_hook_policy_initbsd()` καλείται κατά την καθυστερημένη εγγραφή μόλις το BSD υποσύστημα έχει αρχικοποιηθεί σωστά.
+Σχεδόν όλοι οι hooks θα καλούνται από το MACF όταν μία από αυτές τις λειτουργίες παρεμποδίζεται. Ωστόσο, οι **`mpo_policy_*`** hooks είναι μια εξαίρεση επειδή το `mpo_hook_policy_init()` είναι μια callback που καλείται κατά την εγγραφή (δηλαδή μετά το `mac_policy_register()`) και το `mpo_hook_policy_initbsd()` καλείται κατά την καθυστερημένη εγγραφή μόλις το BSD υποσύστημα έχει αρχικοποιηθεί σωστά.
 
-Επιπλέον, το **`mpo_policy_syscall`** hook μπορεί να εγγραφεί από οποιοδήποτε kext για να εκθέσει μια ιδιωτική **ioctl** στυλ κλήση **interface**. Στη συνέχεια, ένας πελάτης χρήστη θα μπορεί να καλέσει το `mac_syscall` (#381) καθορίζοντας ως παραμέτρους το **όνομα πολιτικής** με έναν ακέραιο **κωδικό** και προαιρετικά **ορίσματα**.\
+Επιπλέον, ο **`mpo_policy_syscall`** hook μπορεί να εγγραφεί από οποιοδήποτε kext για να εκθέσει μια ιδιωτική **ioctl** στυλ κλήση **interface**. Στη συνέχεια, ένας πελάτης χρήστη θα μπορεί να καλέσει το `mac_syscall` (#381) καθορίζοντας ως παραμέτρους το **όνομα πολιτικής** με έναν ακέραιο **κωδικό** και προαιρετικά **ορίσματα**.\
 Για παράδειγμα, το **`Sandbox.kext`** το χρησιμοποιεί πολύ.
 
 Ελέγχοντας το **`__DATA.__const*`** του kext είναι δυνατό να προσδιοριστεί η δομή `mac_policy_ops` που χρησιμοποιείται κατά την εγγραφή της πολιτικής. Είναι δυνατό να την βρείτε επειδή ο δείκτης της είναι σε μια απόσταση μέσα στο `mpo_policy_conf` και επίσης λόγω του αριθμού των NULL δεικτών που θα υπάρχουν σε αυτήν την περιοχή.
 
 Επιπλέον, είναι επίσης δυνατό να αποκτήσετε τη λίστα των kexts που έχουν ρυθμίσει μια πολιτική εκ dumping από τη μνήμη της δομής **`_mac_policy_list`** που ενημερώνεται με κάθε πολιτική που εγγράφεται.
 
-## MACF Αρχικοποίηση
+## MACF Initialization
 
 Το MACF αρχικοποιείται πολύ νωρίς. Ρυθμίζεται στο `bootstrap_thread` του XNU: μετά το `ipc_bootstrap` καλείται το `mac_policy_init()` που αρχικοποιεί τη λίστα `mac_policy_list` και λίγο αργότερα καλείται το `mac_policy_initmach()`. Μεταξύ άλλων, αυτή η συνάρτηση θα αποκτήσει όλα τα Apple kexts με το κλειδί `AppleSecurityExtension` στο Info.plist τους όπως το `ALF.kext`, `AppleMobileFileIntegrity.kext`, `Quarantine.kext`, `Sandbox.kext` και `TMSafetyNet.kext` και τα φορτώνει.
 
-## MACF Κλήσεις
+## MACF Callouts
 
-Είναι κοινό να βρείτε κλήσεις στο MACF που ορίζονται στον κώδικα όπως: **`#if CONFIG_MAC`** μπλοκ συνθηκών. Επιπλέον, μέσα σε αυτά τα μπλοκ είναι δυνατό να βρείτε κλήσεις σε `mac_proc_check*` που καλούν το MACF για **έλεγχο δικαιωμάτων** για την εκτέλεση ορισμένων ενεργειών. Επιπλέον, η μορφή των κλήσεων MACF είναι: **`mac_<object>_<opType>_opName`**.
+Είναι κοινό να βρείτε callouts στο MACF που ορίζονται σε κώδικα όπως: **`#if CONFIG_MAC`** μπλοκ συνθηκών. Επιπλέον, μέσα σε αυτά τα μπλοκ είναι δυνατό να βρείτε κλήσεις σε `mac_proc_check*` που καλούν το MACF για **έλεγχο δικαιωμάτων** για την εκτέλεση ορισμένων ενεργειών. Επιπλέον, η μορφή των callouts του MACF είναι: **`mac_<object>_<opType>_opName`**.
 
 Το αντικείμενο είναι ένα από τα εξής: `bpfdesc`, `cred`, `file`, `proc`, `vnode`, `mount`, `devfs`, `ifnet`, `inpcb`, `mbuf`, `ipq`, `pipe`, `sysv[msg/msq/shm/sem]`, `posix[shm/sem]`, `socket`, `kext`.\
 Ο `opType` είναι συνήθως check που θα χρησιμοποιηθεί για να επιτρέψει ή να αρνηθεί την ενέργεια. Ωστόσο, είναι επίσης δυνατό να βρείτε `notify`, που θα επιτρέψει στο kext να αντιδράσει στην δεδομένη ενέργεια.
@@ -111,7 +111,7 @@ mmap(proc_t p, struct mmap_args *uap, user_addr_t *retval)
 #if CONFIG_MACF
 <strong>			error = mac_file_check_mmap(vfs_context_ucred(ctx),
 </strong>			    fp->fp_glob, prot, flags, file_pos + pageoff,
-&#x26;maxprot);
+&maxprot);
 if (error) {
 (void)vnode_put(vp);
 goto bad;
@@ -137,7 +137,7 @@ panic("file_check_mmap increased max protections");
 return error;
 }
 ```
-Ποιος καλεί το μακροεντολή `MAC_CHECK`, του οποίου ο κώδικας μπορεί να βρεθεί στο [https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_internal.h#L261](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_internal.h#L261)
+Ποιο καλεί το μακροεντολή `MAC_CHECK`, του οποίου ο κώδικας μπορεί να βρεθεί στο [https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_internal.h#L261](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_internal.h#L261)
 ```c
 /*
 * MAC_CHECK performs the designated check by walking the policy
@@ -160,16 +160,15 @@ error = mac_error_select(__step_err, error);         \
 Ποια θα περάσει από όλες τις καταχωρημένες πολιτικές mac καλώντας τις συναρτήσεις τους και αποθηκεύοντας την έξοδο μέσα στη μεταβλητή error, η οποία θα μπορεί να παρακαμφθεί μόνο από το `mac_error_select` με κωδικούς επιτυχίας, έτσι ώστε αν οποιαδήποτε έλεγχος αποτύχει, ο συνολικός έλεγχος θα αποτύχει και η ενέργεια δεν θα επιτρέπεται.
 
 > [!TIP]
-> Ωστόσο, θυμηθείτε ότι δεν καλούνται όλες οι κλήσεις MACF μόνο για να αρνηθούν ενέργειες. Για παράδειγμα, η `mac_priv_grant` καλεί το μακροεντολή [**MAC_GRANT**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_internal.h#L274), η οποία θα παραχωρήσει το ζητούμενο προνόμιο αν οποιαδήποτε πολιτική απαντήσει με 0:
+> Ωστόσο, θυμηθείτε ότι δεν χρησιμοποιούνται όλες οι κλήσεις MACF μόνο για να αρνηθούν ενέργειες. Για παράδειγμα, η `mac_priv_grant` καλεί το μακρο [**MAC_GRANT**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_internal.h#L274), το οποίο θα παραχωρήσει το ζητούμενο προνόμιο αν οποιαδήποτε πολιτική απαντήσει με 0:
 >
 > ```c
 > /*
->  * MAC_GRANT εκτελεί τον καθορισμένο έλεγχο περπατώντας τη λίστα
->  * των πολιτικών και ελέγχοντας με κάθε μία σχετικά με το πώς
->  * αισθάνεται για το αίτημα. Σε αντίθεση με το MAC_CHECK, παραχωρεί
->  * αν οποιεσδήποτε πολιτικές επιστρέψουν '0', και αλλιώς επιστρέφει EPERM.
->  * Σημειώστε ότι επιστρέφει την τιμή του μέσω του
->  * 'error' στο πεδίο του καλούντος.
+>  * MAC_GRANT performs the designated check by walking the policy
+>  * module list and checking with each as to how it feels about the
+>  * request.  Unlike MAC_CHECK, it grants if any policies return '0',
+>  * and otherwise returns EPERM.  Note that it returns its value via
+>  * 'error' in the scope of the caller.
 >  */
 > #define MAC_GRANT(check, args...) do {                              \
 >     error = EPERM;                                                  \
@@ -189,11 +188,11 @@ error = mac_error_select(__step_err, error);         \
 ### priv_check & priv_grant
 
 Αυτές οι κλήσεις προορίζονται να ελέγξουν και να παρέχουν (δεκάδες) **προνόμια** που ορίζονται στο [**bsd/sys/priv.h**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/priv.h).\
-Ορισμένος κώδικας πυρήνα θα καλούσε το `priv_check_cred()` από [**bsd/kern/kern_priv.c**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_priv.c) με τα διαπιστευτήρια KAuth της διαδικασίας και έναν από τους κωδικούς προνομίων που θα καλούσε το `mac_priv_check` για να δει αν οποιαδήποτε πολιτική **αρνείται** να δώσει το προνόμιο και στη συνέχεια καλεί το `mac_priv_grant` για να δει αν οποιαδήποτε πολιτική παραχωρεί το `privilege`.
+Ορισμένος κωδικός πυρήνα θα καλούσε το `priv_check_cred()` από [**bsd/kern/kern_priv.c**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_priv.c) με τα διαπιστευτήρια KAuth της διαδικασίας και έναν από τους κωδικούς προνομίων που θα καλούσε το `mac_priv_check` για να δει αν οποιαδήποτε πολιτική **αρνείται** να δώσει το προνόμιο και στη συνέχεια καλεί το `mac_priv_grant` για να δει αν οποιαδήποτε πολιτική παραχωρεί το `privilege`.
 
 ### proc_check_syscall_unix
 
-Αυτή η κλήση επιτρέπει την παρεμβολή σε όλες τις κλήσεις συστήματος. Στο `bsd/dev/[i386|arm]/systemcalls.c` είναι δυνατόν να δει κανείς τη δηλωμένη συνάρτηση [`unix_syscall`](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/dev/arm/systemcalls.c#L160C1-L167C25), η οποία περιέχει αυτόν τον κώδικα:
+Αυτή η κλήση επιτρέπει την παρεμβολή σε όλες τις κλήσεις συστήματος. Στο `bsd/dev/[i386|arm]/systemcalls.c` είναι δυνατόν να δει κανείς τη δηλωμένη συνάρτηση [`unix_syscall`](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/dev/arm/systemcalls.c#L160C1-L167C25), η οποία περιέχει αυτόν τον κωδικό:
 ```c
 #if CONFIG_MACF
 if (__improbable(proc_syscall_filter_mask(proc) != NULL && !bitstr_test(proc_syscall_filter_mask(proc), syscode))) {

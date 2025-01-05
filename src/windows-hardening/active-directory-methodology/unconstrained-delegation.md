@@ -4,9 +4,9 @@
 
 ## Unconstrained delegation
 
-Αυτή είναι μια δυνατότητα που μπορεί να ρυθμίσει ένας Διαχειριστής Τομέα σε οποιονδήποτε **Υπολογιστή** μέσα στον τομέα. Έτσι, κάθε φορά που ένας **χρήστης συνδέεται** στον Υπολογιστή, ένα **αντίγραφο του TGT** αυτού του χρήστη θα **σταλεί μέσα στο TGS** που παρέχεται από τον DC **και θα αποθηκευτεί στη μνήμη στο LSASS**. Έτσι, αν έχετε δικαιώματα Διαχειριστή στη μηχανή, θα μπορείτε να **dump the tickets και να προσποιηθείτε τους χρήστες** σε οποιαδήποτε μηχανή.
+Αυτή είναι μια δυνατότητα που μπορεί να ρυθμίσει ένας Διαχειριστής Τομέα σε οποιονδήποτε **Υπολογιστή** μέσα στον τομέα. Έτσι, κάθε φορά που ένας **χρήστης συνδέεται** στον Υπολογιστή, ένα **αντίγραφο του TGT** αυτού του χρήστη θα **σταλεί μέσα στο TGS** που παρέχεται από τον DC **και θα αποθηκευτεί στη μνήμη στο LSASS**. Έτσι, αν έχετε δικαιώματα Διαχειριστή στη μηχανή, θα μπορείτε να **dump τα εισιτήρια και να προσποιηθείτε τους χρήστες** σε οποιαδήποτε μηχανή.
 
-Έτσι, αν ένας διαχειριστής τομέα συνδεθεί σε έναν Υπολογιστή με ενεργοποιημένη τη δυνατότητα "Unconstrained Delegation", και έχετε τοπικά δικαιώματα διαχειριστή σε αυτή τη μηχανή, θα μπορείτε να dump the ticket και να προσποιηθείτε τον Διαχειριστή Τομέα οπουδήποτε (domain privesc).
+Έτσι, αν ένας διαχειριστής τομέα συνδεθεί σε έναν Υπολογιστή με ενεργοποιημένη τη δυνατότητα "Unconstrained Delegation", και έχετε τοπικά δικαιώματα διαχειριστή σε αυτή τη μηχανή, θα μπορείτε να dump το εισιτήριο και να προσποιηθείτε τον Διαχειριστή Τομέα οπουδήποτε (domain privesc).
 
 Μπορείτε να **βρείτε αντικείμενα Υπολογιστή με αυτό το χαρακτηριστικό** ελέγχοντας αν το [userAccountControl](<https://msdn.microsoft.com/en-us/library/ms680832(v=vs.85).aspx>) χαρακτηριστικό περιέχει [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>). Μπορείτε να το κάνετε αυτό με ένα φίλτρο LDAP του ‘(userAccountControl:1.2.840.113556.1.4.803:=524288)’, το οποίο είναι αυτό που κάνει το powerview:
 
@@ -14,25 +14,25 @@
 ## Powerview
 Get-NetComputer -Unconstrained #DCs always appear but aren't useful for privesc
 <strong>## ADSearch
-</strong>ADSearch.exe --search "(&#x26;(objectCategory=computer)(userAccountControl:1.2.840.113556.1.4.803:=524288))" --attributes samaccountname,dnshostname,operatingsystem
+</strong>ADSearch.exe --search "(&(objectCategory=computer)(userAccountControl:1.2.840.113556.1.4.803:=524288))" --attributes samaccountname,dnshostname,operatingsystem
 <strong># Export tickets with Mimikatz
 </strong>privilege::debug
 sekurlsa::tickets /export #Recommended way
 kerberos::list /export #Another way
 
 # Monitor logins and export new tickets
-.\Rubeus.exe monitor /targetuser:&#x3C;username> /interval:10 #Check every 10s for new TGTs</code></pre>
+.\Rubeus.exe monitor /targetuser:<username> /interval:10 #Check every 10s for new TGTs</code></pre>
 
-Φορτώστε το ticket του Διαχειριστή (ή του θύματος χρήστη) στη μνήμη με **Mimikatz** ή **Rubeus για ένα** [**Pass the Ticket**](pass-the-ticket.md)**.**\
+Φορτώστε το εισιτήριο του Διαχειριστή (ή του θύματος χρήστη) στη μνήμη με **Mimikatz** ή **Rubeus για ένα** [**Pass the Ticket**](pass-the-ticket.md)**.**\
 Περισσότερες πληροφορίες: [https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/](https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/)\
 [**Περισσότερες πληροφορίες σχετικά με την Unconstrained delegation στο ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-unrestricted-kerberos-delegation)
 
 ### **Force Authentication**
 
-Αν ένας επιτιθέμενος είναι σε θέση να **συμβιβάσει έναν υπολογιστή που επιτρέπεται για "Unconstrained Delegation"**, θα μπορούσε να **παραπλανήσει** έναν **Print server** να **συνδεθεί αυτόματα** σε αυτόν **αποθηκεύοντας ένα TGT** στη μνήμη του διακομιστή.\
-Στη συνέχεια, ο επιτιθέμενος θα μπορούσε να εκτελέσει μια **Pass the Ticket επίθεση για να προσποιηθεί** τον λογαριασμό υπολογιστή του χρήστη Print server.
+Εάν ένας επιτιθέμενος είναι σε θέση να **συμβιβάσει έναν υπολογιστή που επιτρέπεται για "Unconstrained Delegation"**, θα μπορούσε να **παγιδεύσει** έναν **Print server** να **συνδεθεί αυτόματα** σε αυτόν **αποθηκεύοντας ένα TGT** στη μνήμη του διακομιστή.\
+Στη συνέχεια, ο επιτιθέμενος θα μπορούσε να εκτελέσει μια **επίθεση Pass the Ticket για να προσποιηθεί** τον λογαριασμό υπολογιστή του Print server.
 
-Για να κάνετε έναν print server να συνδεθεί σε οποιαδήποτε μηχανή μπορείτε να χρησιμοποιήσετε [**SpoolSample**](https://github.com/leechristensen/SpoolSample):
+Για να κάνετε έναν εκτυπωτή server να συνδεθεί σε οποιαδήποτε μηχανή μπορείτε να χρησιμοποιήσετε [**SpoolSample**](https://github.com/leechristensen/SpoolSample):
 ```bash
 .\SpoolSample.exe <printmachine> <unconstrinedmachine>
 ```

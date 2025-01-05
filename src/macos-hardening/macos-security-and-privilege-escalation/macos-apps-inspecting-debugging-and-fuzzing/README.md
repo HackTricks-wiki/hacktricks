@@ -54,7 +54,7 @@ jtool2 -d __DATA.__const myipc_server | grep MIG
 
 ### Codesign / ldid
 
-> [!TIP] > **`Codesign`** μπορεί να βρεθεί στο **macOS** ενώ το **`ldid`** μπορεί να βρεθεί στο **iOS**
+> [!TIP] > **`Codesign`** μπορεί να βρεθεί στο **macOS** ενώ **`ldid`** μπορεί να βρεθεί στο **iOS**
 ```bash
 # Get signer
 codesign -vv -d /bin/ls 2>&1 | grep -E "Authority|TeamIdentifier"
@@ -83,12 +83,12 @@ ldid -S/tmp/entl.xml <binary>
 ```
 ### SuspiciousPackage
 
-[**SuspiciousPackage**](https://mothersruin.com/software/SuspiciousPackage/get.html) είναι ένα εργαλείο χρήσιμο για να επιθεωρείτε τα **.pkg** αρχεία (εγκαταστάτες) και να δείτε τι περιέχουν πριν τα εγκαταστήσετε.\
+[**SuspiciousPackage**](https://mothersruin.com/software/SuspiciousPackage/get.html) είναι ένα εργαλείο χρήσιμο για να επιθεωρείτε τα **.pkg** αρχεία (εγκαταστάτες) και να δείτε τι περιέχουν πριν την εγκατάσταση.\
 Αυτοί οι εγκαταστάτες έχουν `preinstall` και `postinstall` bash scripts που οι συγγραφείς κακόβουλου λογισμικού συνήθως εκμεταλλεύονται για να **persist** **the** **malware**.
 
 ### hdiutil
 
-Αυτό το εργαλείο επιτρέπει να **mount** τις εικόνες δίσκων της Apple (**.dmg**) για να τις επιθεωρήσετε πριν εκτελέσετε οτιδήποτε:
+Αυτό το εργαλείο επιτρέπει να **mount** τις εικόνες δίσκων της Apple (**.dmg**) για να τις επιθεωρήσετε πριν τρέξετε οτιδήποτε:
 ```bash
 hdiutil attach ~/Downloads/Firefox\ 58.0.2.dmg
 ```
@@ -96,8 +96,8 @@ hdiutil attach ~/Downloads/Firefox\ 58.0.2.dmg
 
 ### Συμπιεσμένα δυαδικά
 
-- Έλεγχος για υψηλή εντροπία
-- Έλεγχος των συμβολοσειρών (αν δεν υπάρχει σχεδόν καμία κατανοητή συμβολοσειρά, είναι συμπιεσμένο)
+- Ελέγξτε για υψηλή εντροπία
+- Ελέγξτε τις συμβολοσειρές (αν δεν υπάρχει σχεδόν καμία κατανοητή συμβολοσειρά, συμπιεσμένο)
 - Ο συμπιεστής UPX για MacOS δημιουργεί μια ενότητα που ονομάζεται "\_\_XHDR"
 
 ## Στατική ανάλυση Objective-C
@@ -107,10 +107,10 @@ hdiutil attach ~/Downloads/Firefox\ 58.0.2.dmg
 > [!CAUTION]
 > Σημειώστε ότι τα προγράμματα που έχουν γραφτεί σε Objective-C **διατηρούν** τις δηλώσεις κλάσης τους **όταν** **μεταγλωττίζονται** σε [Mach-O binaries](../macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md). Τέτοιες δηλώσεις κλάσης **περιλαμβάνουν** το όνομα και τον τύπο των:
 
-- Των διεπαφών που έχουν οριστεί
+- Των διεπαφών που ορίζονται
 - Των μεθόδων διεπαφής
 - Των μεταβλητών στιγμής διεπαφής
-- Των πρωτοκόλλων που έχουν οριστεί
+- Των πρωτοκόλλων που ορίζονται
 
 Σημειώστε ότι αυτά τα ονόματα θα μπορούσαν να είναι κρυπτογραφημένα για να καταστήσουν την αναστροφή του δυαδικού πιο δύσκολη.
 
@@ -122,7 +122,7 @@ hdiutil attach ~/Downloads/Firefox\ 58.0.2.dmg
 
 Οι παράμετροι που αναμένει αυτή η συνάρτηση είναι:
 
-- Η πρώτη παράμετρος (**self**) είναι "ένα δείκτη που δείχνει στην **περίπτωση της κλάσης που θα λάβει το μήνυμα**". Ή πιο απλά, είναι το αντικείμενο πάνω στο οποίο καλείται η μέθοδος. Αν η μέθοδος είναι μέθοδος κλάσης, αυτό θα είναι μια περίπτωση του αντικειμένου κλάσης (ως σύνολο), ενώ για μια μέθοδο στιγμής, το self θα δείχνει σε μια δημιουργημένη περίπτωση της κλάσης ως αντικείμενο.
+- Η πρώτη παράμετρος (**self**) είναι "ένας δείκτης που δείχνει στην **περίπτωση της κλάσης που θα λάβει το μήνυμα**". Ή πιο απλά, είναι το αντικείμενο πάνω στο οποίο καλείται η μέθοδος. Αν η μέθοδος είναι μέθοδος κλάσης, αυτό θα είναι μια περίπτωση του αντικειμένου κλάσης (ως σύνολο), ενώ για μια μέθοδο στιγμής, το self θα δείχνει σε μια instantiated περίπτωση της κλάσης ως αντικείμενο.
 - Η δεύτερη παράμετρος, (**op**), είναι "ο επιλεγέας της μεθόδου που χειρίζεται το μήνυμα". Και πάλι, πιο απλά, αυτό είναι απλώς το **όνομα της μεθόδου.**
 - Οι υπόλοιπες παράμετροι είναι οποιεσδήποτε **τιμές απαιτούνται από τη μέθοδο** (op).
 
@@ -152,7 +152,7 @@ x64:
 ```bash
 ./dynadump dump /path/to/bin
 ```
-Αυτή τη στιγμή, αυτό είναι **αυτό που λειτουργεί καλύτερα**.
+Κατά τη διάρκεια της συγγραφής, αυτό είναι **αυτή τη στιγμή η καλύτερη επιλογή**.
 
 #### Κανονικά εργαλεία
 ```bash
@@ -162,7 +162,7 @@ objdump --macho --objc-meta-data /path/to/bin
 ```
 #### class-dump
 
-[**class-dump**](https://github.com/nygard/class-dump/) είναι το αρχικό εργαλείο που δημιουργεί δηλώσεις για τις κλάσεις, τις κατηγορίες και τα πρωτόκολλα σε κώδικα μορφής ObjectiveC.
+[**class-dump**](https://github.com/nygard/class-dump/) είναι το αρχικό εργαλείο που δημιουργεί δηλώσεις για τις κλάσεις, τις κατηγορίες και τα πρωτόκολλα σε κώδικα μορφής ObjetiveC.
 
 Είναι παλιό και δεν συντηρείται, οπότε πιθανότατα δεν θα λειτουργήσει σωστά.
 
@@ -193,7 +193,7 @@ Mem: 0x1000274cc-0x100027608        __TEXT.__swift5_capture
 ```
 Μπορείτε να βρείτε περισσότερες πληροφορίες σχετικά με το [**πληροφορίες που αποθηκεύονται σε αυτήν την ενότητα σε αυτήν την ανάρτηση ιστολογίου**](https://knight.sc/reverse%20engineering/2019/07/17/swift-metadata.html).
 
-Επιπλέον, **τα Swift binaries μπορεί να έχουν σύμβολα** (για παράδειγμα, οι βιβλιοθήκες χρειάζονται να αποθηκεύουν σύμβολα ώστε οι συναρτήσεις τους να μπορούν να καλούνται). Τα **σύμβολα συνήθως έχουν πληροφορίες σχετικά με το όνομα της συνάρτησης** και τα attr με άσχημο τρόπο, οπότε είναι πολύ χρήσιμα και υπάρχουν "**demanglers"** που μπορούν να πάρουν το αρχικό όνομα:
+Επιπλέον, **τα Swift binaries μπορεί να έχουν σύμβολα** (για παράδειγμα, οι βιβλιοθήκες χρειάζεται να αποθηκεύουν σύμβολα ώστε οι συναρτήσεις τους να μπορούν να καλούνται). Τα **σύμβολα συνήθως έχουν πληροφορίες σχετικά με το όνομα της συνάρτησης** και τα attr με άσχημο τρόπο, οπότε είναι πολύ χρήσιμα και υπάρχουν "**demanglers"** που μπορούν να πάρουν το αρχικό όνομα:
 ```bash
 # Ghidra plugin
 https://github.com/ghidraninja/ghidra_scripts/blob/master/swift_demangler.py
@@ -211,26 +211,26 @@ swift demangle
 
 ### APIs
 
-Το macOS εκθέτει μερικά ενδιαφέροντα APIs που παρέχουν πληροφορίες σχετικά με τις διαδικασίες:
+Το macOS εκθέτει μερικά ενδιαφέροντα APIs που παρέχουν πληροφορίες σχετικά με τις διεργασίες:
 
-- `proc_info`: Αυτό είναι το κύριο που παρέχει πολλές πληροφορίες για κάθε διαδικασία. Πρέπει να είστε root για να αποκτήσετε πληροφορίες για άλλες διαδικασίες, αλλά δεν χρειάζεστε ειδικά δικαιώματα ή mach ports.
-- `libsysmon.dylib`: Επιτρέπει την απόκτηση πληροφοριών σχετικά με διαδικασίες μέσω εκτεθειμένων συναρτήσεων XPC, ωστόσο, απαιτείται να έχετε το δικαίωμα `com.apple.sysmond.client`.
+- `proc_info`: Αυτό είναι το κύριο που παρέχει πολλές πληροφορίες για κάθε διεργασία. Πρέπει να είστε root για να αποκτήσετε πληροφορίες για άλλες διεργασίες, αλλά δεν χρειάζεστε ειδικά δικαιώματα ή mach ports.
+- `libsysmon.dylib`: Επιτρέπει την απόκτηση πληροφοριών σχετικά με τις διεργασίες μέσω εκτεθειμένων συναρτήσεων XPC, ωστόσο, απαιτείται να έχετε το δικαίωμα `com.apple.sysmond.client`.
 
 ### Stackshot & microstackshots
 
-**Stackshotting** είναι μια τεχνική που χρησιμοποιείται για την καταγραφή της κατάστασης των διαδικασιών, συμπεριλαμβανομένων των στοίβων κλήσεων όλων των εκτελούμενων νημάτων. Αυτό είναι ιδιαίτερα χρήσιμο για αποσφαλμάτωση, ανάλυση απόδοσης και κατανόηση της συμπεριφοράς του συστήματος σε μια συγκεκριμένη χρονική στιγμή. Στο iOS και το macOS, το stackshotting μπορεί να πραγματοποιηθεί χρησιμοποιώντας διάφορα εργαλεία και μεθόδους όπως τα εργαλεία **`sample`** και **`spindump`**.
+**Stackshotting** είναι μια τεχνική που χρησιμοποιείται για την καταγραφή της κατάστασης των διεργασιών, συμπεριλαμβανομένων των στοίβων κλήσεων όλων των εκτελούμενων νημάτων. Αυτό είναι ιδιαίτερα χρήσιμο για αποσφαλμάτωση, ανάλυση απόδοσης και κατανόηση της συμπεριφοράς του συστήματος σε μια συγκεκριμένη χρονική στιγμή. Στο iOS και το macOS, το stackshotting μπορεί να πραγματοποιηθεί χρησιμοποιώντας διάφορα εργαλεία και μεθόδους όπως τα εργαλεία **`sample`** και **`spindump`**.
 
 ### Sysdiagnose
 
 Αυτό το εργαλείο (`/usr/bini/ysdiagnose`) συλλέγει βασικά πολλές πληροφορίες από τον υπολογιστή σας εκτελώντας δεκάδες διαφορετικές εντολές όπως `ps`, `zprint`...
 
-Πρέπει να εκτελείται ως **root** και η διεργασία `/usr/libexec/sysdiagnosed` έχει πολύ ενδιαφέροντα δικαιώματα όπως `com.apple.system-task-ports` και `get-task-allow`.
+Πρέπει να εκτελείται ως **root** και ο δαίμονας `/usr/libexec/sysdiagnosed` έχει πολύ ενδιαφέροντα δικαιώματα όπως `com.apple.system-task-ports` και `get-task-allow`.
 
 Η plist του βρίσκεται στο `/System/Library/LaunchDaemons/com.apple.sysdiagnose.plist` που δηλώνει 3 MachServices:
 
 - `com.apple.sysdiagnose.CacheDelete`: Διαγράφει παλιές αρχειοθετήσεις στο /var/rmp
 - `com.apple.sysdiagnose.kernel.ipc`: Ειδική θύρα 23 (kernel)
-- `com.apple.sysdiagnose.service.xpc`: Διεπαφή λειτουργίας χρήστη μέσω της κλάσης `Libsysdiagnose` Obj-C. Τρία επιχειρήματα σε ένα dict μπορούν να περαστούν (`compress`, `display`, `run`)
+- `com.apple.sysdiagnose.service.xpc`: Διεπαφή λειτουργικού χρήστη μέσω της κλάσης `Libsysdiagnose` Obj-C. Τρία επιχειρήματα σε ένα dict μπορούν να περαστούν (`compress`, `display`, `run`)
 
 ### Ενοποιημένα Καταγραφικά
 
@@ -250,7 +250,7 @@ swift demangle
 
 <figure><img src="../../../images/image (343).png" alt=""><figcaption></figcaption></figure>
 
-Κάνοντας δεξί κλικ σε ένα αντικείμενο κώδικα μπορείτε να δείτε **αναφορές προς/από αυτό το αντικείμενο** ή ακόμη και να αλλάξετε το όνομά του (αυτό δεν λειτουργεί σε αποκωδικοποιημένο ψευδοκώδικα):
+Κάνοντας δεξί κλικ σε ένα αντικείμενο κώδικα μπορείτε να δείτε **αναφορές προς/από αυτό το αντικείμενο** ή ακόμα και να αλλάξετε το όνομά του (αυτό δεν λειτουργεί σε αποκωδικοποιημένο ψευδοκώδικα):
 
 <figure><img src="../../../images/image (1117).png" alt=""><figcaption></figcaption></figure>
 
@@ -343,7 +343,7 @@ dtruss -c -p 1000 #get syscalls of PID 1000
 
 Εργαλεία όπως το `latency`, `sc_usage`, `fs_usage` και `trace` το χρησιμοποιούν εσωτερικά.
 
-Για να αλληλεπιδράσετε με το `kdebug`, χρησιμοποιείται το `sysctl` πάνω από το namespace `kern.kdebug` και οι MIBs που πρέπει να χρησιμοποιηθούν μπορούν να βρεθούν στο `sys/sysctl.h`, με τις συναρτήσεις να είναι υλοποιημένες στο `bsd/kern/kdebug.c`.
+Για να αλληλεπιδράσετε με το `kdebug`, χρησιμοποιείται το `sysctl` μέσω του ονόσματος χώρου `kern.kdebug` και οι MIBs που πρέπει να χρησιμοποιηθούν μπορούν να βρεθούν στο `sys/sysctl.h`, με τις συναρτήσεις να είναι υλοποιημένες στο `bsd/kern/kdebug.c`.
 
 Για να αλληλεπιδράσετε με το kdebug με έναν προσαρμοσμένο πελάτη, αυτά είναι συνήθως τα βήματα:
 
@@ -363,7 +363,7 @@ dtruss -c -p 1000 #get syscalls of PID 1000
 
 Οι APIs `ktrace_*` προέρχονται από το `libktrace.dylib`, το οποίο περιτυλίγει αυτά του `Kdebug`. Στη συνέχεια, ένας πελάτης μπορεί απλά να καλέσει `ktrace_session_create` και `ktrace_events_[single/class]` για να ορίσει callbacks σε συγκεκριμένους κωδικούς και στη συνέχεια να το ξεκινήσει με `ktrace_start`.
 
-Μπορείτε να το χρησιμοποιήσετε ακόμη και με **SIP ενεργοποιημένο**
+Μπορείτε να το χρησιμοποιήσετε ακόμη και με **SIP ενεργοποιημένο**.
 
 Μπορείτε να χρησιμοποιήσετε ως πελάτες το εργαλείο `ktrace`:
 ```bash
@@ -373,7 +373,7 @@ Or `tailspin`.
 
 ### kperf
 
-Αυτό χρησιμοποιείται για την εκτέλεση προφίλ σε επίπεδο πυρήνα και είναι κατασκευασμένο χρησιμοποιώντας κλήσεις `Kdebug`.
+Αυτό χρησιμοποιείται για προφίλ σε επίπεδο πυρήνα και είναι κατασκευασμένο χρησιμοποιώντας κλήσεις `Kdebug`.
 
 Βασικά, ελέγχεται η παγκόσμια μεταβλητή `kernel_debug_active` και αν είναι ενεργοποιημένη καλεί τον `kperf_kdebug_handler` με τον κωδικό `Kdebug` και τη διεύθυνση του πλαισίου πυρήνα που καλεί. Αν ο κωδικός `Kdebug` ταιριάζει με έναν επιλεγμένο, αποκτά τις "ενέργειες" που έχουν ρυθμιστεί ως bitmap (ελέγξτε το `osfmk/kperf/action.h` για τις επιλογές).
 
@@ -388,7 +388,7 @@ Or `tailspin`.
 ### SpriteTree
 
 [**SpriteTree**](https://themittenmac.com/tools/) είναι ένα εργαλείο που εκτυπώνει τις σχέσεις μεταξύ διαδικασιών.\
-Πρέπει να παρακολουθήσετε το mac σας με μια εντολή όπως **`sudo eslogger fork exec rename create > cap.json`** (ο τερματικός που εκκινεί αυτό απαιτεί FDA). Και στη συνέχεια μπορείτε να φορτώσετε το json σε αυτό το εργαλείο για να δείτε όλες τις σχέσεις:
+Πρέπει να παρακολουθήσετε το mac σας με μια εντολή όπως **`sudo eslogger fork exec rename create > cap.json`** (ο τερματικός σταθμός που εκκινεί αυτό απαιτεί FDA). Και στη συνέχεια μπορείτε να φορτώσετε το json σε αυτό το εργαλείο για να δείτε όλες τις σχέσεις:
 
 <figure><img src="../../../images/image (1182).png" alt="" width="375"><figcaption></figcaption></figure>
 
@@ -398,11 +398,11 @@ Or `tailspin`.
 
 ### Crescendo
 
-[**Crescendo**](https://github.com/SuprHackerSteve/Crescendo) είναι ένα εργαλείο GUI με την εμφάνιση και την αίσθηση που μπορεί να γνωρίζουν οι χρήστες Windows από το Microsoft Sysinternal’s _Procmon_. Αυτό το εργαλείο επιτρέπει την καταγραφή διαφόρων τύπων γεγονότων να ξεκινά και να σταματά, επιτρέπει τη φιλτράρισή τους κατά κατηγορίες όπως αρχείο, διαδικασία, δίκτυο, κ.λπ., και παρέχει τη δυνατότητα αποθήκευσης των καταγεγραμμένων γεγονότων σε μορφή json.
+[**Crescendo**](https://github.com/SuprHackerSteve/Crescendo) είναι ένα εργαλείο GUI με την εμφάνιση και την αίσθηση που μπορεί να γνωρίζουν οι χρήστες Windows από το _Procmon_ της Microsoft Sysinternal. Αυτό το εργαλείο επιτρέπει την καταγραφή διαφόρων τύπων γεγονότων να ξεκινά και να σταματά, επιτρέπει τη φιλτράρισή τους κατά κατηγορίες όπως αρχείο, διαδικασία, δίκτυο κ.λπ., και παρέχει τη δυνατότητα αποθήκευσης των καταγεγραμμένων γεγονότων σε μορφή json.
 
 ### Apple Instruments
 
-[**Apple Instruments**](https://developer.apple.com/library/archive/documentation/Performance/Conceptual/CellularBestPractices/Appendix/Appendix.html) είναι μέρος των εργαλείων προγραμματιστών του Xcode – χρησιμοποιούνται για την παρακολούθηση της απόδοσης εφαρμογών, την αναγνώριση διαρροών μνήμης και την παρακολούθηση της δραστηριότητας του συστήματος αρχείων.
+[**Apple Instruments**](https://developer.apple.com/library/archive/documentation/Performance/Conceptual/CellularBestPractices/Appendix/Appendix.html) είναι μέρος των εργαλείων προγραμματιστών του Xcode – χρησιμοποιούνται για την παρακολούθηση της απόδοσης εφαρμογών, την αναγνώριση διαρροών μνήμης και την παρακολούθηση δραστηριότητας του συστήματος αρχείων.
 
 ![](<../../../images/image (1138).png>)
 
@@ -431,17 +431,17 @@ lldb -p 1122
 lldb -n malware.bin
 lldb -n malware.bin --waitfor
 ```
-Μπορείτε να ορίσετε τη γεύση intel όταν χρησιμοποιείτε lldb δημιουργώντας ένα αρχείο με το όνομα **`.lldbinit`** στον φάκελο του σπιτιού σας με την εξής γραμμή:
+Μπορείτε να ορίσετε την γεύση intel όταν χρησιμοποιείτε lldb δημιουργώντας ένα αρχείο με όνομα **`.lldbinit`** στον φάκελο του σπιτιού σας με την εξής γραμμή:
 ```bash
 settings set target.x86-disassembly-flavor intel
 ```
 > [!WARNING]
 > Μέσα στο lldb, εκτελέστε μια διαδικασία με `process save-core`
 
-<table data-header-hidden><thead><tr><th width="225"></th><th></th></tr></thead><tbody><tr><td><strong>(lldb) Εντολή</strong></td><td><strong>Περιγραφή</strong></td></tr><tr><td><strong>run (r)</strong></td><td>Ξεκινά την εκτέλεση, η οποία θα συνεχιστεί αδιάκοπα μέχρι να χτυπήσει ένα breakpoint ή να τερματιστεί η διαδικασία.</td></tr><tr><td><strong>process launch --stop-at-entry</strong></td><td>Ξεκινά την εκτέλεση σταματώντας στο σημείο εισόδου</td></tr><tr><td><strong>continue (c)</strong></td><td>Συνεχίζει την εκτέλεση της διαδικασίας που αποσφαλματώνεται.</td></tr><tr><td><strong>nexti (n / ni)</strong></td><td>Εκτελεί την επόμενη εντολή. Αυτή η εντολή θα παραλείψει τις κλήσεις συναρτήσεων.</td></tr><tr><td><strong>stepi (s / si)</strong></td><td>Εκτελεί την επόμενη εντολή. Σε αντίθεση με την εντολή nexti, αυτή η εντολή θα εισέλθει στις κλήσεις συναρτήσεων.</td></tr><tr><td><strong>finish (f)</strong></td><td>Εκτελεί τις υπόλοιπες εντολές στην τρέχουσα συνάρτηση (“frame”) και επιστρέφει και σταματά.</td></tr><tr><td><strong>control + c</strong></td><td>Παύει την εκτέλεση. Εάν η διαδικασία έχει εκτελεστεί (r) ή συνεχιστεί (c), αυτό θα προκαλέσει την παύση της διαδικασίας ...όπου κι αν εκτελείται αυτή τη στιγμή.</td></tr><tr><td><strong>breakpoint (b)</strong></td><td><p><code>b main</code> #Οποιαδήποτε συνάρτηση ονομάζεται main</p><p><code>b &#x3C;binname>`main</code> #Κύρια συνάρτηση του bin</p><p><code>b set -n main --shlib &#x3C;lib_name></code> #Κύρια συνάρτηση του υποδεικνυόμενου bin</p><p><code>breakpoint set -r '\[NSFileManager .*\]$'</code> #Οποιαδήποτε μέθοδος NSFileManager</p><p><code>breakpoint set -r '\[NSFileManager contentsOfDirectoryAtPath:.*\]$'</code></p><p><code>break set -r . -s libobjc.A.dylib</code> # Σπάσιμο σε όλες τις συναρτήσεις αυτής της βιβλιοθήκης</p><p><code>b -a 0x0000000100004bd9</code></p><p><code>br l</code> #Λίστα breakpoint</p><p><code>br e/dis &#x3C;num></code> #Ενεργοποίηση/Απενεργοποίηση breakpoint</p><p>breakpoint delete &#x3C;num></p></td></tr><tr><td><strong>help</strong></td><td><p>help breakpoint #Λάβετε βοήθεια για την εντολή breakpoint</p><p>help memory write #Λάβετε βοήθεια για να γράψετε στη μνήμη</p></td></tr><tr><td><strong>reg</strong></td><td><p>reg read</p><p>reg read $rax</p><p>reg read $rax --format &#x3C;<a href="https://lldb.llvm.org/use/variable.html#type-format">format</a>></p><p>reg write $rip 0x100035cc0</p></td></tr><tr><td><strong>x/s &#x3C;reg/memory address></strong></td><td>Εμφανίζει τη μνήμη ως μια null-terminated συμβολοσειρά.</td></tr><tr><td><strong>x/i &#x3C;reg/memory address></strong></td><td>Εμφανίζει τη μνήμη ως εντολή assembly.</td></tr><tr><td><strong>x/b &#x3C;reg/memory address></strong></td><td>Εμφανίζει τη μνήμη ως byte.</td></tr><tr><td><strong>print object (po)</strong></td><td><p>Αυτό θα εκτυπώσει το αντικείμενο που αναφέρεται από την παράμετρο</p><p>po $raw</p><p><code>{</code></p><p><code>dnsChanger = {</code></p><p><code>"affiliate" = "";</code></p><p><code>"blacklist_dns" = ();</code></p><p>Σημειώστε ότι οι περισσότερες από τις APIs ή μεθόδους Objective-C της Apple επιστρέφουν αντικείμενα, και επομένως θα πρέπει να εμφανίζονται μέσω της εντολής “print object” (po). Εάν το po δεν παράγει μια ουσιαστική έξοδο, χρησιμοποιήστε <code>x/b</code></p></td></tr><tr><td><strong>memory</strong></td><td>memory read 0x000....<br>memory read $x0+0xf2a<br>memory write 0x100600000 -s 4 0x41414141 #Γράψτε AAAA σε αυτή τη διεύθυνση<br>memory write -f s $rip+0x11f+7 "AAAA" #Γράψτε AAAA στη διεύθυνση</td></tr><tr><td><strong>disassembly</strong></td><td><p>dis #Διαχωρισμός της τρέχουσας συνάρτησης</p><p>dis -n &#x3C;funcname> #Διαχωρισμός της συνάρτησης</p><p>dis -n &#x3C;funcname> -b &#x3C;basename> #Διαχωρισμός της συνάρτησης<br>dis -c 6 #Διαχωρισμός 6 γραμμών<br>dis -c 0x100003764 -e 0x100003768 # Από μία προσθήκη μέχρι την άλλη<br>dis -p -c 4 # Ξεκινήστε στη τρέχουσα διεύθυνση διαχωρίζοντας</p></td></tr><tr><td><strong>parray</strong></td><td>parray 3 (char **)$x1 # Ελέγξτε τον πίνακα 3 στοιχείων στο x1 reg</td></tr><tr><td><strong>image dump sections</strong></td><td>Εκτυπώνει το χάρτη της μνήμης της τρέχουσας διαδικασίας</td></tr><tr><td><strong>image dump symtab &#x3C;library></strong></td><td><code>image dump symtab CoreNLP</code> #Λάβετε τη διεύθυνση όλων των συμβόλων από το CoreNLP</td></tr></tbody></table>
+<table data-header-hidden><thead><tr><th width="225"></th><th></th></tr></thead><tbody><tr><td><strong>(lldb) Εντολή</strong></td><td><strong>Περιγραφή</strong></td></tr><tr><td><strong>run (r)</strong></td><td>Ξεκινά την εκτέλεση, η οποία θα συνεχιστεί αδιάκοπα μέχρι να χτυπήσει ένα breakpoint ή να τερματιστεί η διαδικασία.</td></tr><tr><td><strong>process launch --stop-at-entry</strong></td><td>Ξεκινά την εκτέλεση σταματώντας στο σημείο εισόδου</td></tr><tr><td><strong>continue (c)</strong></td><td>Συνεχίζει την εκτέλεση της διαδικασίας που αποσφαλματώνεται.</td></tr><tr><td><strong>nexti (n / ni)</strong></td><td>Εκτελεί την επόμενη εντολή. Αυτή η εντολή θα παραλείψει τις κλήσεις συναρτήσεων.</td></tr><tr><td><strong>stepi (s / si)</strong></td><td>Εκτελεί την επόμενη εντολή. Σε αντίθεση με την εντολή nexti, αυτή η εντολή θα εισέλθει στις κλήσεις συναρτήσεων.</td></tr><tr><td><strong>finish (f)</strong></td><td>Εκτελεί τις υπόλοιπες εντολές στην τρέχουσα συνάρτηση (“frame”) και επιστρέφει και σταματά.</td></tr><tr><td><strong>control + c</strong></td><td>Παύει την εκτέλεση. Εάν η διαδικασία έχει εκτελεστεί (r) ή συνεχιστεί (c), αυτό θα προκαλέσει την παύση της διαδικασίας ...όπου κι αν εκτελείται αυτή τη στιγμή.</td></tr><tr><td><strong>breakpoint (b)</strong></td><td><p><code>b main</code> #Οποιαδήποτε συνάρτηση ονομάζεται main</p><p><code>b <binname>`main</code> #Κύρια συνάρτηση του bin</p><p><code>b set -n main --shlib <lib_name></code> #Κύρια συνάρτηση του υποδεικνυόμενου bin</p><p><code>breakpoint set -r '\[NSFileManager .*\]$'</code> #Οποιαδήποτε μέθοδος NSFileManager</p><p><code>breakpoint set -r '\[NSFileManager contentsOfDirectoryAtPath:.*\]$'</code></p><p><code>break set -r . -s libobjc.A.dylib</code> # Σπάσιμο σε όλες τις συναρτήσεις αυτής της βιβλιοθήκης</p><p><code>b -a 0x0000000100004bd9</code></p><p><code>br l</code> #Λίστα breakpoint</p><p><code>br e/dis <num></code> #Ενεργοποίηση/Απενεργοποίηση breakpoint</p><p>breakpoint delete <num></p></td></tr><tr><td><strong>help</strong></td><td><p>help breakpoint #Λάβετε βοήθεια για την εντολή breakpoint</p><p>help memory write #Λάβετε βοήθεια για να γράψετε στη μνήμη</p></td></tr><tr><td><strong>reg</strong></td><td><p>reg read</p><p>reg read $rax</p><p>reg read $rax --format <<a href="https://lldb.llvm.org/use/variable.html#type-format">format</a>></p><p>reg write $rip 0x100035cc0</p></td></tr><tr><td><strong>x/s <reg/memory address></strong></td><td>Εμφανίζει τη μνήμη ως μια null-terminated συμβολοσειρά.</td></tr><tr><td><strong>x/i <reg/memory address></strong></td><td>Εμφανίζει τη μνήμη ως εντολή assembly.</td></tr><tr><td><strong>x/b <reg/memory address></strong></td><td>Εμφανίζει τη μνήμη ως byte.</td></tr><tr><td><strong>print object (po)</strong></td><td><p>Αυτό θα εκτυπώσει το αντικείμενο που αναφέρεται από την παράμετρο</p><p>po $raw</p><p><code>{</code></p><p><code>dnsChanger = {</code></p><p><code>"affiliate" = "";</code></p><p><code>"blacklist_dns" = ();</code></p><p>Σημειώστε ότι οι περισσότερες από τις APIs ή μεθόδους Objective-C της Apple επιστρέφουν αντικείμενα, και επομένως θα πρέπει να εμφανίζονται μέσω της εντολής “print object” (po). Εάν το po δεν παράγει μια ουσιαστική έξοδο, χρησιμοποιήστε <code>x/b</code></p></td></tr><tr><td><strong>memory</strong></td><td>memory read 0x000....<br>memory read $x0+0xf2a<br>memory write 0x100600000 -s 4 0x41414141 #Γράψτε AAAA σε αυτή τη διεύθυνση<br>memory write -f s $rip+0x11f+7 "AAAA" #Γράψτε AAAA στη διεύθυνση</td></tr><tr><td><strong>disassembly</strong></td><td><p>dis #Αποσυναρμολόγηση της τρέχουσας συνάρτησης</p><p>dis -n <funcname> #Αποσυναρμολόγηση της συνάρτησης</p><p>dis -n <funcname> -b <basename> #Αποσυναρμολόγηση της συνάρτησης<br>dis -c 6 #Αποσυναρμολόγηση 6 γραμμών<br>dis -c 0x100003764 -e 0x100003768 # Από μία προσθήκη μέχρι την άλλη<br>dis -p -c 4 # Ξεκινήστε στην τρέχουσα διεύθυνση αποσυναρμολόγησης</p></td></tr><tr><td><strong>parray</strong></td><td>parray 3 (char **)$x1 # Ελέγξτε τον πίνακα 3 στοιχείων στο x1 reg</td></tr><tr><td><strong>image dump sections</strong></td><td>Εκτυπώνει το χάρτη της μνήμης της τρέχουσας διαδικασίας</td></tr><tr><td><strong>image dump symtab <library></strong></td><td><code>image dump symtab CoreNLP</code> #Λάβετε τη διεύθυνση όλων των συμβόλων από το CoreNLP</td></tr></tbody></table>
 
 > [!NOTE]
-> Όταν καλείτε τη συνάρτηση **`objc_sendMsg`**, το **rsi** register περιέχει το **όνομα της μεθόδου** ως μια null-terminated (“C”) συμβολοσειρά. Για να εκτυπώσετε το όνομα μέσω lldb κάντε:
+> Όταν καλείτε τη συνάρτηση **`objc_sendMsg`**, το **rsi** register περιέχει το **όνομα της μεθόδου** ως μια null-terminated (“C”) συμβολοσειρά. Για να εκτυπώσετε το όνομα μέσω του lldb κάντε:
 >
 > `(lldb) x/s $rsi: 0x1000f1576: "startMiningWithPort:password:coreCount:slowMemory:currency:"`
 >
@@ -459,9 +459,9 @@ settings set target.x86-disassembly-flavor intel
 - Ορισμένα κακόβουλα λογισμικά μπορούν επίσης να **ανιχνεύσουν** αν η μηχανή είναι **VMware** με βάση τη διεύθυνση MAC (00:50:56).
 - Είναι επίσης δυνατό να βρείτε **αν μια διαδικασία αποσφαλματώνεται** με έναν απλό κώδικα όπως:
 - `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //η διαδικασία αποσφαλματώνεται }`
-- Μπορεί επίσης να καλέσει την κλήση συστήματος **`ptrace`** με την σημαία **`PT_DENY_ATTACH`**. Αυτό **αποτρέπει** έναν αποσφαλματωτή από το να συνδεθεί και να παρακολουθήσει.
+- Μπορεί επίσης να καλέσει την κλήση συστήματος **`ptrace`** με τη σημαία **`PT_DENY_ATTACH`**. Αυτό **αποτρέπει** έναν αποσφαλματωτή από το να συνδεθεί και να παρακολουθήσει.
 - Μπορείτε να ελέγξετε αν η λειτουργία **`sysctl`** ή **`ptrace`** εισάγεται (αλλά το κακόβουλο λογισμικό θα μπορούσε να την εισάγει δυναμικά)
-- Όπως σημειώνεται σε αυτή τη γραφή, “[Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)” :\
+- Όπως σημειώνεται σε αυτή την αναφορά, “[Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)” :\
 “_Το μήνυμα Process # exited with **status = 45 (0x0000002d)** είναι συνήθως ένα προειδοποιητικό σημάδι ότι ο στόχος αποσφαλμάτωσης χρησιμοποιεί **PT_DENY_ATTACH**_”
 
 ## Core Dumps
@@ -469,7 +469,7 @@ settings set target.x86-disassembly-flavor intel
 Οι core dumps δημιουργούνται αν:
 
 - `kern.coredump` sysctl είναι ρυθμισμένο σε 1 (κατά προεπιλογή)
-- Αν η διαδικασία δεν ήταν suid/sgid ή `kern.sugid_coredump` είναι 1 (κατά προεπιλογή είναι 0)
+- Εάν η διαδικασία δεν ήταν suid/sgid ή `kern.sugid_coredump` είναι 1 (κατά προεπιλογή είναι 0)
 - Ο περιορισμός `AS_CORE` επιτρέπει τη λειτουργία. Είναι δυνατό να καταστείλετε τη δημιουργία core dumps καλώντας `ulimit -c 0` και να τις επανενεργοποιήσετε με `ulimit -c unlimited`.
 
 Σε αυτές τις περιπτώσεις, οι core dumps δημιουργούνται σύμφωνα με το `kern.corefile` sysctl και αποθηκεύονται συνήθως στο `/cores/core/.%P`.
@@ -478,11 +478,11 @@ settings set target.x86-disassembly-flavor intel
 
 ### [ReportCrash](https://ss64.com/osx/reportcrash.html)
 
-Το ReportCrash **αναλύει τις διαδικασίες που καταρρέουν και αποθηκεύει μια αναφορά σφάλματος στο δίσκο**. Μια αναφορά σφάλματος περιέχει πληροφορίες που μπορούν να **βοηθήσουν έναν προγραμματιστή να διαγνώσει** την αιτία ενός σφάλματος.\
+Το ReportCrash **αναλύει τις διαδικασίες που καταρρέουν και αποθηκεύει μια αναφορά σφάλματος στο δίσκο**. Μια αναφορά σφάλματος περιέχει πληροφορίες που μπορούν να **βοηθήσουν έναν προγραμματιστή να διαγνώσει** την αιτία μιας κατάρρευσης.\
 Για εφαρμογές και άλλες διαδικασίες **που εκτελούνται στο πλαίσιο launchd ανά χρήστη**, το ReportCrash εκτελείται ως LaunchAgent και αποθηκεύει τις αναφορές σφαλμάτων στους `~/Library/Logs/DiagnosticReports/` του χρήστη.\
-Για δαίμονες, άλλες διαδικασίες **που εκτελούνται στο πλαίσιο launchd του συστήματος** και άλλες προνομιακές διαδικασίες, το ReportCrash εκτελείται ως LaunchDaemon και αποθηκεύει τις αναφορές σφαλμάτων στα `/Library/Logs/DiagnosticReports` του συστήματος.
+Για δαίμονες, άλλες διαδικασίες **που εκτελούνται στο πλαίσιο launchd του συστήματος** και άλλες προνομιούχες διαδικασίες, το ReportCrash εκτελείται ως LaunchDaemon και αποθηκεύει τις αναφορές σφαλμάτων στα `/Library/Logs/DiagnosticReports` του συστήματος.
 
-Εάν ανησυχείτε για τις αναφορές σφαλματος **που αποστέλλονται στην Apple**, μπορείτε να τις απενεργοποιήσετε. Αν όχι, οι αναφορές σφαλματος μπορεί να είναι χρήσιμες για **να καταλάβετε πώς κατέρρευσε ένας διακομιστής**.
+Εάν ανησυχείτε για τις αναφορές σφαλμάτων **που αποστέλλονται στην Apple**, μπορείτε να τις απενεργοποιήσετε. Αν όχι, οι αναφορές σφαλμάτων μπορεί να είναι χρήσιμες για **να καταλάβετε πώς κατέρρευσε ένας διακομιστής**.
 ```bash
 #To disable crash reporting:
 launchctl unload -w /System/Library/LaunchAgents/com.apple.ReportCrash.plist
@@ -494,7 +494,7 @@ sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.ReportCrash.Root.
 ```
 ### Ύπνος
 
-Κατά τη διάρκεια του fuzzing σε MacOS, είναι σημαντικό να μην επιτρέψετε στον Mac να κοιμηθεί:
+Κατά τη διάρκεια του fuzzing σε MacOS, είναι σημαντικό να μην επιτρέπετε στον Mac να κοιμηθεί:
 
 - systemsetup -setsleep Never
 - pmset, System Preferences
@@ -511,7 +511,7 @@ sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.ReportCrash.Root.
 sudo launchctl unload /System/Library/LaunchDaemons/ssh.plist
 sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist
 ```
-### Εσωτερικοί Διαχειριστές
+### Internal Handlers
 
 **Δείτε την παρακάτω σελίδα** για να μάθετε πώς μπορείτε να βρείτε ποια εφαρμογή είναι υπεύθυνη για **τη διαχείριση του καθορισμένου σχήματος ή πρωτοκόλλου:**
 
@@ -519,7 +519,7 @@ sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist
 ../macos-file-extension-apps.md
 {{#endref}}
 
-### Αριθμητική Δικτυακών Διαδικασιών
+### Enumerating Network Processes
 
 Αυτό είναι ενδιαφέρον για να βρείτε διαδικασίες που διαχειρίζονται δεδομένα δικτύου:
 ```bash

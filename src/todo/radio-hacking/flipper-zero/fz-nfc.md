@@ -30,21 +30,21 @@
 
 Οθόνη ανάγνωσης κάρτας τραπέζηςΓια τις κάρτες τραπέζης, το Flipper Zero μπορεί να διαβάσει μόνο δεδομένα **χωρίς αποθήκευση και προσομοίωση**.
 
-<figure><img src="https://cdn.flipperzero.one/Monosnap_Miro_2022-08-17_12-26-31.png?auto=format&#x26;ixlib=react-9.1.1&#x26;h=916&#x26;w=2662" alt=""><figcaption></figcaption></figure>
+<figure><img src="https://cdn.flipperzero.one/Monosnap_Miro_2022-08-17_12-26-31.png?auto=format&ixlib=react-9.1.1&h=916&w=2662" alt=""><figcaption></figcaption></figure>
 
 #### Unknown cards <a href="#id-37eo8" id="id-37eo8"></a>
 
-Όταν το Flipper Zero είναι **ανίκανο να προσδιορίσει τον τύπο της κάρτας NFC**, τότε μόνο ένα **UID, SAK και ATQA** μπορεί να **διαβαστεί και να αποθηκευτεί**.
+Όταν το Flipper Zero είναι **ανίκανο να προσδιορίσει τον τύπο της κάρτας NFC**, τότε μόνο ένα **UID, SAK και ATQA** μπορούν να **διαβαστούν και να αποθηκευτούν**.
 
 Οθόνη ανάγνωσης άγνωστης κάρταςΓια άγνωστες κάρτες NFC, το Flipper Zero μπορεί να προσομοιώσει μόνο ένα UID.
 
-<figure><img src="https://cdn.flipperzero.one/Monosnap_Miro_2022-08-17_12-27-53.png?auto=format&#x26;ixlib=react-9.1.1&#x26;h=932&#x26;w=2634" alt=""><figcaption></figcaption></figure>
+<figure><img src="https://cdn.flipperzero.one/Monosnap_Miro_2022-08-17_12-27-53.png?auto=format&ixlib=react-9.1.1&h=932&w=2634" alt=""><figcaption></figcaption></figure>
 
 ### NFC cards types B, F, and V <a href="#wyg51" id="wyg51"></a>
 
 Για **τύπους καρτών NFC B, F και V**, το Flipper Zero μπορεί μόνο να **διαβάσει και να εμφανίσει ένα UID** χωρίς αποθήκευση.
 
-<figure><img src="https://archbee.imgix.net/3StCFqarJkJQZV-7N79yY/zBU55Fyj50TFO4U7S-OXH_screenshot-2022-08-12-at-182540.png?auto=format&#x26;ixlib=react-9.1.1&#x26;h=1080&#x26;w=2704" alt=""><figcaption></figcaption></figure>
+<figure><img src="https://archbee.imgix.net/3StCFqarJkJQZV-7N79yY/zBU55Fyj50TFO4U7S-OXH_screenshot-2022-08-12-at-182540.png?auto=format&ixlib=react-9.1.1&h=1080&w=2704" alt=""><figcaption></figcaption></figure>
 
 ## Actions
 
@@ -61,7 +61,7 @@
 Στο Flipper, η ανάγνωση ετικετών 13.56 MHz μπορεί να χωριστεί σε δύο μέρη:
 
 - **Χαμηλού επιπέδου ανάγνωση** — διαβάζει μόνο το UID, SAK και ATQA. Το Flipper προσπαθεί να μαντέψει το πρωτόκολλο υψηλού επιπέδου με βάση αυτά τα δεδομένα που διαβάστηκαν από την κάρτα. Δεν μπορείτε να είστε 100% σίγουροι με αυτό, καθώς είναι απλώς μια υπόθεση βασισμένη σε ορισμένους παράγοντες.
-- **Υψηλού επιπέδου ανάγνωση** — διαβάζει τα δεδομένα από τη μνήμη της κάρτας χρησιμοποιώντας ένα συγκεκριμένο πρωτόκολλο υψηλού επιπέδου. Αυτό θα ήταν η ανάγνωση των δεδομένων σε μια Mifare Ultralight, η ανάγνωση των τομέων από μια Mifare Classic ή η ανάγνωση των χαρακτηριστικών της κάρτας από PayPass/Apple Pay.
+- **Υψηλού επιπέδου ανάγνωση** — διαβάζει τα δεδομένα από τη μνήμη της κάρτας χρησιμοποιώντας ένα συγκεκριμένο πρωτόκολλο υψηλού επιπέδου. Αυτό θα ήταν η ανάγνωση των δεδομένων σε μια Mifare Ultralight, η ανάγνωση των τομέων από μια Mifare Classic ή η ανάγνωση των χαρακτηριστικών της κάρτας από το PayPass/Apple Pay.
 
 ### Read Specific
 
