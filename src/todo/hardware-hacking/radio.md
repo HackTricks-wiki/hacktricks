@@ -51,26 +51,28 @@ Con [**SigDigger** ](https://github.com/BatchDrake/SigDigger)sincroniza con el c
 ### Descubriendo el tipo de modulación con IQ
 
 Hay 3 formas de almacenar información en señales: Modulando la **amplitud**, **frecuencia** o **fase**.\
-Si estás revisando una señal, hay diferentes formas de intentar averiguar qué se está utilizando para almacenar información (encuentra más formas a continuación), pero una buena es revisar el gráfico IQ.
+Si estás revisando una señal, hay diferentes maneras de intentar averiguar qué se está utilizando para almacenar información (encuentra más formas a continuación), pero una buena es revisar el gráfico IQ.
 
 ![](<../../images/image (788).png>)
 
 - **Detectando AM**: Si en el gráfico IQ aparecen, por ejemplo, **2 círculos** (probablemente uno en 0 y otro en una amplitud diferente), podría significar que esta es una señal AM. Esto se debe a que en el gráfico IQ la distancia entre el 0 y el círculo es la amplitud de la señal, por lo que es fácil visualizar diferentes amplitudes que se están utilizando.
 - **Detectando PM**: Al igual que en la imagen anterior, si encuentras pequeños círculos no relacionados entre sí, probablemente significa que se está utilizando una modulación de fase. Esto se debe a que en el gráfico IQ, el ángulo entre el punto y el 0,0 es la fase de la señal, lo que significa que se están utilizando 4 fases diferentes.
-- Ten en cuenta que si la información está oculta en el hecho de que se cambia una fase y no en la fase misma, no verás diferentes fases claramente diferenciadas.
+- Ten en cuenta que si la información está oculta en el hecho de que se cambia una fase y no en la fase misma, no verás fases diferentes claramente diferenciadas.
 - **Detectando FM**: IQ no tiene un campo para identificar frecuencias (la distancia al centro es amplitud y el ángulo es fase).\
 Por lo tanto, para identificar FM, deberías **ver básicamente un círculo** en este gráfico.\
 Además, una frecuencia diferente es "representada" por el gráfico IQ mediante una **aceleración de velocidad a través del círculo** (así que en SysDigger, al seleccionar la señal, el gráfico IQ se llena; si encuentras una aceleración o cambio de dirección en el círculo creado, podría significar que esto es FM):
 
 ## Ejemplo de AM
 
-{% file src="../../images/sigdigger_20220308_165547Z_2560000_433500000_float32_iq.raw" %}
+{{#file}}
+sigdigger_20220308_165547Z_2560000_433500000_float32_iq.raw
+{{#endfile}}
 
 ### Descubriendo AM
 
 #### Revisando la envoltura
 
-Revisando la información AM con [**SigDigger** ](https://github.com/BatchDrake/SigDigger)y solo mirando la **envoltura**, puedes ver diferentes niveles de amplitud claros. La señal utilizada está enviando pulsos con información en AM, así es como se ve un pulso:
+Revisando la información AM con [**SigDigger** ](https://github.com/BatchDrake/SigDigger) y solo mirando la **envoltura**, puedes ver diferentes niveles de amplitud claros. La señal utilizada está enviando pulsos con información en AM, así es como se ve un pulso:
 
 ![](<../../images/image (590).png>)
 
@@ -88,7 +90,7 @@ Por ejemplo, si seleccionas Frecuencia en lugar de Amplitud en esta señal AM, s
 
 ![](<../../images/image (732).png>)
 
-Si encuentras muchas frecuencias, potencialmente esto no será un FM, probablemente la frecuencia de la señal fue solo modificada debido al canal.
+Si encuentras muchas frecuencias, potencialmente esto no será un FM, probablemente la frecuencia de la señal solo se modificó debido al canal.
 
 #### Con IQ
 
@@ -131,17 +133,19 @@ Ahora, para hacer que SigDigger entienda **dónde está el rango** del nivel que
 
 Si hubiera habido, por ejemplo, **4 niveles diferentes de amplitud**, deberías haber configurado los **Bits por símbolo a 2** y seleccionar desde el más pequeño hasta el más grande.
 
-Finalmente, **aumentando** el **Zoom** y **cambiando el tamaño de la fila**, puedes ver los bits (y puedes seleccionar todo y copiar para obtener todos los bits):
+Finalmente, **aumentando** el **Zoom** y **cambiando el tamaño de fila**, puedes ver los bits (y puedes seleccionar todo y copiar para obtener todos los bits):
 
 ![](<../../images/image (276).png>)
 
 Si la señal tiene más de 1 bit por símbolo (por ejemplo, 2), SigDigger **no tiene forma de saber qué símbolo es** 00, 01, 10, 11, así que usará diferentes **escalas de grises** para representar cada uno (y si copias los bits, usará **números del 0 al 3**, necesitarás tratarlos).
 
-Además, usa **codificaciones** como **Manchester**, y **up+down** puede ser **1 o 0** y un down+up puede ser un 1 o 0. En esos casos necesitas **tratar los ups obtenidos (1) y downs (0)** para sustituir los pares de 01 o 10 como 0s o 1s.
+Además, usa **codificaciones** como **Manchester**, y **up+down** puede ser **1 o 0** y un down+up puede ser un 1 o 0. En esos casos necesitas **tratar los ups (1) y downs (0) obtenidos** para sustituir los pares de 01 o 10 como 0s o 1s.
 
 ## Ejemplo de FM
 
-{% file src="../../images/sigdigger_20220308_170858Z_2560000_433500000_float32_iq.raw" %}
+{{#file}}
+sigdigger_20220308_170858Z_2560000_433500000_float32_iq.raw
+{{#endfile}}
 
 ### Descubriendo FM
 
@@ -151,7 +155,7 @@ Ejemplo de señal enviando información modulada en FM:
 
 ![](<../../images/image (725).png>)
 
-En la imagen anterior puedes observar bastante bien que **se utilizan 2 frecuencias**, pero si **observas** la **forma de onda**, puede que **no seas capaz de identificar correctamente las 2 frecuencias diferentes**:
+En la imagen anterior puedes observar bastante bien que **se utilizan 2 frecuencias**, pero si **observas** la **forma de onda** podrías **no ser capaz de identificar correctamente las 2 frecuencias diferentes**:
 
 ![](<../../images/image (717).png>)
 
@@ -175,7 +179,7 @@ En este caso, si revisas el **histograma de Amplitud**, encontrarás **solo una 
 
 ![](<../../images/image (817).png>)
 
-Y este sería el histograma de fase (lo que deja muy claro que la señal no está modulada en fase):
+Y este sería el histograma de fase (que deja muy claro que la señal no está modulada en fase):
 
 ![](<../../images/image (996).png>)
 

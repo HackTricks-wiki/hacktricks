@@ -72,7 +72,7 @@
     .sidetoc-wrapper {
         position: fixed;
         width: 250px;
-        height: calc(100vh - var(--menu-bar-height)  - 25px * 2);
+        height: calc(100vh - var(--menu-bar-height)  - 50px * 2);
         overflow: auto;
         display: flex;
         flex-direction: column;
