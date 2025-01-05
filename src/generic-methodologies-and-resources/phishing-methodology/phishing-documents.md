@@ -6,7 +6,7 @@
 
 Microsoft Word effectue une validation des données de fichier avant d'ouvrir un fichier. La validation des données est effectuée sous la forme d'identification de la structure des données, conformément à la norme OfficeOpenXML. Si une erreur se produit lors de l'identification de la structure des données, le fichier analysé ne sera pas ouvert.
 
-En général, les fichiers Word contenant des macros utilisent l'extension `.docm`. Cependant, il est possible de renommer le fichier en changeant l'extension de fichier tout en conservant ses capacités d'exécution de macro.\
+En général, les fichiers Word contenant des macros utilisent l'extension `.docm`. Cependant, il est possible de renommer le fichier en changeant l'extension du fichier tout en conservant ses capacités d'exécution de macro.\
 Par exemple, un fichier RTF ne prend pas en charge les macros, par conception, mais un fichier DOCM renommé en RTF sera traité par Microsoft Word et sera capable d'exécuter des macros.\
 Les mêmes mécanismes internes s'appliquent à tous les logiciels de la suite Microsoft Office (Excel, PowerPoint, etc.).
 
@@ -19,7 +19,7 @@ Fichiers DOCX faisant référence à un modèle distant (Fichier – Options –
 ### Chargement d'image externe
 
 Allez à : _Insérer --> Éléments rapides --> Champ_\
-&#xNAN;_**Catégories** : Liens et références, **Noms de champ** : includePicture, et **Nom de fichier ou URL** :_ http://\<ip>/whatever
+_**Catégories** : Liens et références, **Noms de champ** : includePicture, et **Nom de fichier ou URL** :_ http://\<ip>/whatever
 
 ![](<../../images/image (155).png>)
 
@@ -83,7 +83,7 @@ Faites cela parce que vous **ne pouvez pas enregistrer de macros dans un `.docx`
 
 Un HTA est un programme Windows qui **combine HTML et langages de script (comme VBScript et JScript)**. Il génère l'interface utilisateur et s'exécute en tant qu'application "entièrement fiable", sans les contraintes du modèle de sécurité d'un navigateur.
 
-Un HTA est exécuté en utilisant **`mshta.exe`**, qui est généralement **installé** avec **Internet Explorer**, rendant **`mshta` dépendant d'IE**. Donc, s'il a été désinstallé, les HTA ne pourront pas s'exécuter.
+Un HTA est exécuté à l'aide de **`mshta.exe`**, qui est généralement **installé** avec **Internet Explorer**, rendant **`mshta` dépendant d'IE**. Donc, s'il a été désinstallé, les HTA ne pourront pas s'exécuter.
 ```html
 <--! Basic HTA Execution -->
 <html>
@@ -140,7 +140,7 @@ self.close
 ```
 ## Forcer l'authentification NTLM
 
-Il existe plusieurs façons de **forcer l'authentification NTLM "à distance"**, par exemple, vous pourriez ajouter des **images invisibles** dans des e-mails ou du HTML que l'utilisateur accédera (même HTTP MitM ?). Ou envoyer à la victime l'**adresse des fichiers** qui **déclencheront** une **authentification** juste pour **ouvrir le dossier.**
+Il existe plusieurs façons de **forcer l'authentification NTLM "à distance"**, par exemple, vous pourriez ajouter des **images invisibles** dans des e-mails ou du HTML que l'utilisateur va accéder (même HTTP MitM ?). Ou envoyer à la victime l'**adresse des fichiers** qui vont **déclencher** une **authentification** juste pour **ouvrir le dossier.**
 
 **Vérifiez ces idées et plus dans les pages suivantes :**
 

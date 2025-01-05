@@ -30,11 +30,11 @@ Dans _**Édition --> Paramètres --> Raccourcis**_, vous pouvez définir différ
 
 ## Modifier la valeur
 
-Une fois que vous **avez trouvé** où se trouve la **valeur** que vous **cherchez** (plus à ce sujet dans les étapes suivantes), vous pouvez **la modifier** en double-cliquant dessus, puis en double-cliquant sur sa valeur :
+Une fois que vous **avez trouvé** où se trouve la **valeur** que vous **cherchez** (plus d'informations à ce sujet dans les étapes suivantes), vous pouvez **la modifier** en double-cliquant dessus, puis en double-cliquant sur sa valeur :
 
 ![](<../../images/image (563).png>)
 
-Et enfin, **en cochant la case** pour effectuer la modification dans la mémoire :
+Et enfin, **cochez la case** pour effectuer la modification dans la mémoire :
 
 ![](<../../images/image (385).png>)
 
@@ -44,7 +44,7 @@ Le **changement** dans la **mémoire** sera immédiatement **appliqué** (notez 
 
 Donc, nous allons supposer qu'il y a une valeur importante (comme la vie de votre utilisateur) que vous souhaitez améliorer, et vous cherchez cette valeur dans la mémoire.
 
-### À travers un changement connu
+### Par un changement connu
 
 Supposons que vous cherchez la valeur 100, vous **effectuez un scan** à la recherche de cette valeur et vous trouvez beaucoup de coïncidences :
 
@@ -55,7 +55,7 @@ Ensuite, vous faites quelque chose pour que **la valeur change**, et vous **arr�
 ![](<../../images/image (684).png>)
 
 Cheat Engine recherchera les **valeurs** qui **sont passées de 100 à la nouvelle valeur**. Félicitations, vous **avez trouvé** l'**adresse** de la valeur que vous cherchiez, vous pouvez maintenant la modifier.\
-&#xNAN;_&#x49;f vous avez encore plusieurs valeurs, faites quelque chose pour modifier à nouveau cette valeur, et effectuez un autre "scan suivant" pour filtrer les adresses._
+_&#x49;f vous avez encore plusieurs valeurs, faites quelque chose pour modifier à nouveau cette valeur, et effectuez un autre "scan suivant" pour filtrer les adresses._
 
 ### Valeur inconnue, changement connu
 
@@ -87,7 +87,7 @@ En utilisant certains des trucs mentionnés, trouvez l'adresse où votre jeu act
 
 ![](<../../images/image (1067).png>)
 
-La **première option** est utile pour savoir quelles **parties** du **code** **utilisent** cette **adresse** (ce qui est utile pour d'autres choses comme **savoir où vous pouvez modifier le code** du jeu).\
+La **première option** est utile pour savoir quelles **parties** du **code** utilisent cette **adresse** (ce qui est utile pour d'autres choses comme **savoir où vous pouvez modifier le code** du jeu).\
 La **deuxième option** est plus **spécifique**, et sera plus utile dans ce cas car nous sommes intéressés à savoir **d'où cette valeur est écrite**.
 
 Une fois que vous avez sélectionné l'une de ces options, le **débogueur** sera **attaché** au programme et une nouvelle **fenêtre vide** apparaîtra. Maintenant, **jouez** au **jeu** et **modifiez** cette **valeur** (sans redémarrer le jeu). La **fenêtre** devrait être **remplie** avec les **adresses** qui **modifient** la **valeur** :
@@ -117,7 +117,7 @@ Cliquez sur "**Ajouter l'adresse manuellement**" :
 
 ![](<../../images/image (990).png>)
 
-Maintenant, cliquez sur la case à cocher "Pointeur" et ajoutez l'adresse trouvée dans la zone de texte (dans ce scénario, l'adresse trouvée dans l'image précédente était "Tutorial-i386.exe"+2426B0) :
+Maintenant, cliquez sur la case "Pointeur" et ajoutez l'adresse trouvée dans la zone de texte (dans ce scénario, l'adresse trouvée dans l'image précédente était "Tutorial-i386.exe"+2426B0) :
 
 ![](<../../images/image (392).png>)
 
@@ -142,7 +142,7 @@ Ensuite, cliquez sur **CTRL+a** pour invoquer la fenêtre d'assemblage automatiq
 
 ![](<../../images/image (902).png>)
 
-Remplissez l'**adresse de l'instruction que vous souhaitez modifier** (cela est généralement rempli automatiquement) :
+Remplissez l'**adresse de l'instruction que vous souhaitez modifier** (cela est généralement pré-rempli) :
 
 ![](<../../images/image (744).png>)
 
@@ -154,7 +154,7 @@ Ainsi, insérez votre nouveau code d'assemblage dans la section "**newmem**" et 
 
 ![](<../../images/image (521).png>)
 
-**Cliquez sur exécuter et ainsi de suite, votre code devrait être injecté dans le programme changeant le comportement de la fonctionnalité !**
+**Cliquez sur exécuter et ainsi de suite et votre code devrait être injecté dans le programme, changeant le comportement de la fonctionnalité !**
 
 ## **Références**
 
