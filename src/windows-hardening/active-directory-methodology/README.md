@@ -482,7 +482,7 @@ skeleton-key.md
 ### Custom SSP
 
 [Learn what is a SSP (Security Support Provider) here.](../authentication-credentials-uac-and-efs/index.html#security-support-provider-interface-sspi)\
-You can create you **own SSP** to **capture** in **clear text** the **credentials** used to access the machine.\\
+You can create you **own SSP** to **capture** in **clear text** the **credentials** used to access the machine.
 
 {{#ref}}
 custom-ssp.md
@@ -690,7 +690,7 @@ https://cloud.hacktricks.xyz/pentesting-cloud/azure-security/az-lateral-movement
 
 ## Some General Defenses
 
-[**Learn more about how to protect credentials here.**](../stealing-credentials/credentials-protections.md)\\
+[**Learn more about how to protect credentials here.**](../stealing-credentials/credentials-protections.md)
 
 ### **Defensive Measures for Credential Protection**
 
