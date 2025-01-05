@@ -22,7 +22,7 @@ macos-security-protections/macos-tcc/
 
 ### Sudo 劫持
 
-你可以在 [Linux 提权文章中找到原始的 Sudo 劫持技巧](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking)。
+你可以在 [Linux 提权帖子中找到原始的 Sudo 劫持技术](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking)。
 
 然而，macOS **保持** 用户的 **`PATH`** 当他执行 **`sudo`** 时。这意味着实现此攻击的另一种方法是 **劫持其他二进制文件**，这些文件受害者在 **运行 sudo** 时仍会执行：
 ```bash
@@ -49,7 +49,7 @@ sudo ls
 {{#tab name="Chrome Impersonation"}}
 一些建议：
 
-- 在 Dock 中检查是否有 Chrome，如果有，**移除**该条目并在 Dock 数组的**相同位置****添加****假冒**的**Chrome条目**。&#x20;
+- 在 Dock 中检查是否有 Chrome，如果有，**删除**该条目，并在 Dock 数组的**相同位置****添加****假**的**Chrome条目**。
 ```bash
 #!/bin/sh
 
@@ -125,7 +125,7 @@ killall Dock
 一些建议：
 
 - 你**无法从 Dock 中移除 Finder**，所以如果你要将其添加到 Dock 中，可以将假 Finder 放在真实 Finder 旁边。为此，你需要**将假 Finder 条目添加到 Dock 数组的开头**。
-- 另一个选项是不要将其放在 Dock 中，只需打开它，“Finder 请求控制 Finder”并不奇怪。
+- 另一个选项是不要将其放在 Dock 中，而是直接打开它，“Finder 请求控制 Finder”并不奇怪。
 - 另一个选项是**在不询问**密码的情况下提升到 root 权限，方法是让 Finder 确实要求输入密码以执行特权操作：
 - 请求 Finder 将一个新的 **`sudo`** 文件复制到 **`/etc/pam.d`**（提示要求输入密码将指示“Finder 想要复制 sudo”）
 - 请求 Finder 复制一个新的 **Authorization Plugin**（你可以控制文件名，以便提示要求输入密码将指示“Finder 想要复制 Finder.bundle”）
@@ -201,12 +201,12 @@ killall Dock
 {{#endtab}}
 {{#endtabs}}
 
-## TCC - Root 权限提升
+## TCC - 根权限提升
 
 ### CVE-2020-9771 - mount_apfs TCC 绕过和权限提升
 
-**任何用户**（甚至是无权限的用户）都可以创建和挂载时间机器快照并**访问该快照的所有文件**。\
-所需的**唯一权限**是用于访问的应用程序（如 `Terminal`）需要具有**完全磁盘访问**（FDA）权限（`kTCCServiceSystemPolicyAllfiles`），该权限需要由管理员授予。
+**任何用户**（甚至是无特权用户）都可以创建和挂载时间机器快照并**访问该快照的所有文件**。\
+所需的**唯一特权**是用于访问的应用程序（如 `Terminal`）必须具有**完全磁盘访问**（FDA）权限（`kTCCServiceSystemPolicyAllfiles`），该权限需要由管理员授予。
 ```bash
 # Create snapshot
 tmutil localsnapshot

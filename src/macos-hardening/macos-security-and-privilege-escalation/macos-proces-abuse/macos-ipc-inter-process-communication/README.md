@@ -2,7 +2,7 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Mach 消息通过端口
+## Mach 通过端口进行消息传递
 
 ### 基本信息
 
@@ -21,11 +21,11 @@ Mach 使用 **任务** 作为共享资源的 **最小单位**，每个任务可�
 端口权限定义了任务可以执行的操作，是这种通信的关键。可能的 **端口权限** 是（[定义来自这里](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)）：
 
 - **接收权限**，允许接收发送到端口的消息。Mach 端口是 MPSC（多个生产者，单个消费者）队列，这意味着在整个系统中每个端口只能有 **一个接收权限**（与管道不同，多个进程可以持有一个管道的读端文件描述符）。
-- 拥有 **接收权限** 的任务可以接收消息并 **创建发送权限**，允许其发送消息。最初只有 **自己的任务对其端口拥有接收权限**。
+- 拥有 **接收权限** 的 **任务** 可以接收消息并 **创建发送权限**，允许其发送消息。最初只有 **自己的任务对其端口拥有接收权限**。
 - 如果接收权限的拥有者 **死亡** 或被杀死，**发送权限变得无用（死名）**。
 - **发送权限**，允许向端口发送消息。
 - 发送权限可以被 **克隆**，因此拥有发送权限的任务可以克隆该权限并 **授予给第三个任务**。
-- 注意 **端口权限** 也可以通过 Mac 消息 **传递**。
+- 请注意，**端口权限** 也可以通过 Mac 消息 **传递**。
 - **一次性发送权限**，允许向端口发送一条消息，然后消失。
 - 该权限 **不能** 被 **克隆**，但可以被 **移动**。
 - **端口集权限**，表示一个 _端口集_ 而不是单个端口。从端口集中出队一条消息会从其包含的一个端口中出队一条消息。端口集可以用于同时监听多个端口，类似于 Unix 中的 `select`/`poll`/`epoll`/`kqueue`。
@@ -41,14 +41,14 @@ Mach 使用 **任务** 作为共享资源的 **最小单位**，每个任务可�
 
 如前所述，可以使用 Mach 消息发送权限，然而，您 **不能在没有发送 Mach 消息的权限的情况下发送权限**。那么，如何建立第一次通信呢？
 
-为此，**引导服务器**（在 mac 中为 **launchd**）参与其中，因为 **任何人都可以获得引导服务器的发送权限**，可以请求它授予发送消息到另一个进程的权限：
+为此，**引导服务器**（在 mac 中为 **launchd**）参与其中，因为 **任何人都可以获得引导服务器的发送权限**，可以请求它发送消息到另一个进程的权限：
 
 1. 任务 **A** 创建一个 **新端口**，获得该端口的 **接收权限**。
 2. 任务 **A**，作为接收权限的持有者，**为该端口生成一个发送权限**。
-3. 任务 **A** 与 **引导服务器** 建立 **连接**，并 **将其生成的端口的发送权限发送给它**。
+3. 任务 **A** 与 **引导服务器** 建立 **连接**，并 **将其发送权限** 发送给它，用于最初生成的端口。
 - 请记住，任何人都可以获得引导服务器的发送权限。
-4. 任务 A 向引导服务器发送 `bootstrap_register` 消息，以 **将给定端口与名称关联**，如 `com.apple.taska`。
-5. 任务 **B** 与 **引导服务器** 交互以执行服务名称的引导 **查找**（`bootstrap_lookup`）。因此，引导服务器可以响应，任务 B 将在查找消息中发送 **先前创建的端口的发送权限**。如果查找成功，**服务器复制从任务 A 接收到的发送权限**并 **将其传输给任务 B**。
+4. 任务 A 向引导服务器发送 `bootstrap_register` 消息，以 **将给定端口与名称** 关联，如 `com.apple.taska`。
+5. 任务 **B** 与 **引导服务器** 交互以执行服务名称的引导 **查找**（`bootstrap_lookup`）。因此，引导服务器可以响应，任务 B 将在查找消息中发送 **发送权限到它之前创建的端口**。如果查找成功，**服务器复制从任务 A 接收到的发送权限** 并 **将其传输给任务 B**。
 - 请记住，任何人都可以获得引导服务器的发送权限。
 6. 通过这个发送权限，**任务 B** 能够 **发送** 一条 **消息** **给任务 A**。
 7. 对于双向通信，通常任务 **B** 会生成一个带有 **接收** 权限和 **发送** 权限的新端口，并将 **发送权限授予任务 A**，以便它可以向任务 B 发送消息（双向通信）。
@@ -57,7 +57,7 @@ Mach 使用 **任务** 作为共享资源的 **最小单位**，每个任务可�
 
 然后，Apple 将 **系统提供的服务名称** 存储在安全配置文件中，位于 **SIP 保护** 目录：`/System/Library/LaunchDaemons` 和 `/System/Library/LaunchAgents`。每个服务名称旁边，**相关的二进制文件也被存储**。引导服务器将为每个这些服务名称创建并持有 **接收权限**。
 
-对于这些预定义服务，**查找过程略有不同**。当查找服务名称时，launchd 动态启动该服务。新的工作流程如下：
+对于这些预定义的服务，**查找过程略有不同**。当查找服务名称时，launchd 动态启动该服务。新的工作流程如下：
 
 - 任务 **B** 启动对服务名称的引导 **查找**。
 - **launchd** 检查任务是否正在运行，如果没有，则 **启动** 它。
@@ -65,16 +65,16 @@ Mach 使用 **任务** 作为共享资源的 **最小单位**，每个任务可�
 - launchd 复制 **发送权限并将其发送给任务 B**。
 - 任务 **B** 生成一个带有 **接收** 权限和 **发送** 权限的新端口，并将 **发送权限授予任务 A**（svc），以便它可以向任务 B 发送消息（双向通信）。
 
-然而，这个过程仅适用于预定义的系统任务。非系统任务仍然按照最初描述的方式操作，这可能会导致冒充。
+然而，这个过程仅适用于预定义的系统任务。非系统任务仍然按照最初描述的方式操作，这可能会允许冒充。
 
 > [!CAUTION]
-> 因此，launchd 绝不能崩溃，否则整个系统将崩溃。
+> 因此，launchd 永远不应崩溃，否则整个系统将崩溃。
 
 ### 一个 Mach 消息
 
 [在这里找到更多信息](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
 
-`mach_msg` 函数，基本上是一个系统调用，用于发送和接收 Mach 消息。该函数要求将要发送的消息作为初始参数。此消息必须以 `mach_msg_header_t` 结构开始，后面跟着实际的消息内容。该结构定义如下：
+`mach_msg` 函数，基本上是一个系统调用，用于发送和接收 Mach 消息。该函数要求将要发送的消息作为初始参数。此消息必须以 `mach_msg_header_t` 结构开始，后面是实际的消息内容。该结构定义如下：
 ```c
 typedef struct {
 mach_msg_bits_t               msgh_bits;
@@ -89,11 +89,11 @@ mach_msg_id_t                 msgh_id;
 
 初始字段 **`msgh_bits`** 是一个位图：
 
-- 第一个位（最重要的位）用于指示消息是否复杂（下面会详细说明）
+- 第一个位（最重要的位）用于指示消息是否复杂（更多内容见下文）
 - 第 3 位和第 4 位由内核使用
-- **第二个字节的 5 个最低有效位** 可用于 **凭证**：另一种发送键/值组合的端口类型。
-- **第三个字节的 5 个最低有效位** 可用于 **本地端口**
-- **第四个字节的 5 个最低有效位** 可用于 **远程端口**
+- 第 2 字节的 **5 个最低有效位** 可用于 **凭证**：另一种发送键/值组合的端口类型。
+- 第 3 字节的 **5 个最低有效位** 可用于 **本地端口**
+- 第 4 字节的 **5 个最低有效位** 可用于 **远程端口**
 
 可以在凭证、本地和远程端口中指定的类型是（来自 [**mach/message.h**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)）：
 ```c
@@ -108,22 +108,22 @@ mach_msg_id_t                 msgh_id;
 #define MACH_MSG_TYPE_DISPOSE_SEND      25      /* must hold send right(s) */
 #define MACH_MSG_TYPE_DISPOSE_SEND_ONCE 26      /* must hold sendonce right */
 ```
-例如，`MACH_MSG_TYPE_MAKE_SEND_ONCE` 可用于 **指示** 应该为此端口派生并转移一个 **一次性发送权**。也可以指定 `MACH_PORT_NULL` 以防止接收者能够回复。
+例如，`MACH_MSG_TYPE_MAKE_SEND_ONCE` 可用于 **指示** 应该为此端口派生并转移一个 **一次性发送** **权利**。也可以指定 `MACH_PORT_NULL` 以防止接收者能够回复。
 
 为了实现简单的 **双向通信**，进程可以在 mach **消息头** 中指定一个 **mach 端口**，称为 _回复端口_ (**`msgh_local_port`**)，接收该消息的 **接收者** 可以 **发送回复**。
 
 > [!TIP]
-> 请注意，这种双向通信用于期望重播的 XPC 消息中（`xpc_connection_send_message_with_reply` 和 `xpc_connection_send_message_with_reply_sync`）。但 **通常会创建不同的端口**，如前所述，以创建双向通信。
+> 请注意，这种双向通信用于期望回复的 XPC 消息中（`xpc_connection_send_message_with_reply` 和 `xpc_connection_send_message_with_reply_sync`）。但 **通常会创建不同的端口**，如前所述，以创建双向通信。
 
 消息头的其他字段包括：
 
-- `msgh_size`：整个数据包的大小。
-- `msgh_remote_port`：发送此消息的端口。
-- `msgh_voucher_port`：[mach 代金券](https://robert.sesek.com/2023/6/mach_vouchers.html)。
-- `msgh_id`：此消息的 ID，由接收者解释。
+- `msgh_size`: 整个数据包的大小。
+- `msgh_remote_port`: 发送此消息的端口。
+- `msgh_voucher_port`: [mach 代金券](https://robert.sesek.com/2023/6/mach_vouchers.html)。
+- `msgh_id`: 此消息的 ID，由接收者解释。
 
 > [!CAUTION]
-> 请注意，**mach 消息是通过 `mach port` 发送的**，这是一种 **单接收者**、**多发送者** 的通信通道，内置于 mach 内核中。**多个进程**可以 **向 mach 端口发送消息**，但在任何时候只有 **一个进程可以从中读取**。
+> 请注意，**mach 消息是通过 `mach port` 发送的**，这是一个内置于 mach 内核的 **单接收者**、**多个发送者** 通信通道。**多个进程**可以 **向 mach 端口发送消息**，但在任何时候只有 **一个进程可以从中读取**。
 
 消息由 **`mach_msg_header_t`** 头部、**主体**和 **尾部**（如果有的话）组成，并且可以授予回复的权限。在这些情况下，内核只需将消息从一个任务传递到另一个任务。
 
@@ -131,7 +131,7 @@ mach_msg_id_t                 msgh_id;
 
 #### 复杂消息
 
-然而，还有其他更 **复杂** 的消息，例如传递额外端口权或共享内存的消息，在这些情况下，内核还需要将这些对象发送给接收者。在这种情况下，头部的最显著位 `msgh_bits` 被设置。
+然而，还有其他更 **复杂** 的消息，例如传递额外端口权利或共享内存的消息，在这些情况下，内核还需要将这些对象发送给接收者。在这种情况下，头部的最显著位 `msgh_bits` 被设置。
 
 可以传递的可能描述符在 [**`mach/message.h`**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html) 中定义：
 ```c
@@ -159,7 +159,7 @@ mach_msg_descriptor_type_t    type : 8;
 
 ### Mac Ports APIs
 
-请注意，端口与任务命名空间相关，因此要创建或搜索端口时，也会查询任务命名空间（更多内容见`mach/mach_port.h`）：
+请注意，端口与任务命名空间相关联，因此要创建或搜索端口时，也会查询任务命名空间（更多内容见`mach/mach_port.h`）：
 
 - **`mach_port_allocate` | `mach_port_construct`**: **创建**一个端口。
 - `mach_port_allocate` 还可以创建一个**端口集**：对一组端口的接收权限。每当接收到消息时，会指明消息来自哪个端口。
@@ -168,7 +168,7 @@ mach_msg_descriptor_type_t    type : 8;
 - `mach_port_type`: 获取任务对名称的权限
 - `mach_port_rename`: 重命名端口（类似于FD的dup2）
 - `mach_port_allocate`: 分配一个新的RECEIVE、PORT_SET或DEAD_NAME
-- `mach_port_insert_right`: 在你拥有RECEIVE的端口中创建一个新权限
+- `mach_port_insert_right`: 在你拥有RECEIVE的端口中创建一个新的权限
 - `mach_port_...`
 - **`mach_msg`** | **`mach_msg_overwrite`**: 用于**发送和接收mach消息**的函数。覆盖版本允许为消息接收指定不同的缓冲区（另一个版本将仅重用它）。
 
@@ -186,10 +186,10 @@ Process 71019 stopped
 * thread #1, queue = 'com.apple.main-thread', stop reason = breakpoint 1.1
 frame #0: 0x0000000181d3ac20 libsystem_kernel.dylib`mach_msg
 libsystem_kernel.dylib`mach_msg:
-->  0x181d3ac20 &#x3C;+0>:  pacibsp
-0x181d3ac24 &#x3C;+4>:  sub    sp, sp, #0x20
-0x181d3ac28 &#x3C;+8>:  stp    x29, x30, [sp, #0x10]
-0x181d3ac2c &#x3C;+12>: add    x29, sp, #0x10
+->  0x181d3ac20 <+0>:  pacibsp
+0x181d3ac24 <+4>:  sub    sp, sp, #0x20
+0x181d3ac28 <+8>:  stp    x29, x30, [sp, #0x10]
+0x181d3ac2c <+12>: add    x29, sp, #0x10
 Target 0: (SandboxedShellApp) stopped.
 <strong>(lldb) bt
 </strong>* thread #1, queue = 'com.apple.main-thread', stop reason = breakpoint 1.1
@@ -202,7 +202,7 @@ frame #5: 0x0000000181abb398 libxpc.dylib`_xpc_uncork_pid_domain_locked + 76
 frame #6: 0x0000000181abbbfc libxpc.dylib`_xpc_early_init + 92
 frame #7: 0x0000000181a9583c libxpc.dylib`_libxpc_initializer + 1104
 frame #8: 0x000000018e59e6ac libSystem.B.dylib`libSystem_initializer + 236
-frame #9: 0x0000000181a1d5c8 dyld`invocation function for block in dyld4::Loader::findAndRunAllInitializers(dyld4::RuntimeState&#x26;) const::$_0::operator()() const + 168
+frame #9: 0x0000000181a1d5c8 dyld`invocation function for block in dyld4::Loader::findAndRunAllInitializers(dyld4::RuntimeState&) const::$_0::operator()() const + 168
 </code></pre>
 
 要获取**`mach_msg`**的参数，请检查寄存器。这些是参数（来自[mach/message.h](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)）：
@@ -271,7 +271,7 @@ name      ipc-object    rights     flags   boost  reqs  recv  send sonce oref  q
 还要注意，只有**`send`**权限的端口是**识别其所有者**的（端口名称 + pid）。\
 还要注意使用**`+`**来表示**连接到同一端口的其他任务**。
 
-还可以使用 [**procesxp**](https://www.newosxbook.com/tools/procexp.html) 来查看**注册的服务名称**（由于需要`com.apple.system-task-port`，因此禁用了SIP）：
+还可以使用[**procesxp**](https://www.newosxbook.com/tools/procexp.html)查看**注册的服务名称**（由于需要`com.apple.system-task-port`，因此禁用SIP）：
 ```
 procesp 1 ports
 ```
@@ -407,38 +407,38 @@ printf("Sent a message\n");
 
 ## 特权端口
 
-有一些特殊端口允许**执行某些敏感操作或访问某些敏感数据**，前提是任务对它们具有**发送**权限。这使得这些端口从攻击者的角度来看非常有趣，不仅因为其能力，还因为可以**在任务之间共享发送权限**。
+有一些特殊端口允许在任务对其具有 **SEND** 权限的情况下 **执行某些敏感操作或访问某些敏感数据**。这使得这些端口从攻击者的角度来看非常有趣，不仅因为其能力，还因为可以 **在任务之间共享 SEND 权限**。
 
 ### 主机特殊端口
 
 这些端口由一个数字表示。
 
-**发送**权限可以通过调用**`host_get_special_port`**获得，而**接收**权限则通过调用**`host_set_special_port`**获得。然而，这两个调用都需要**`host_priv`**端口，只有root可以访问。此外，在过去，root能够调用**`host_set_special_port`**并劫持任意端口，例如通过劫持`HOST_KEXTD_PORT`来绕过代码签名（SIP现在防止了这一点）。
+**SEND** 权限可以通过调用 **`host_get_special_port`** 获得，而 **RECEIVE** 权限则通过调用 **`host_set_special_port`** 获得。然而，这两个调用都需要 **`host_priv`** 端口，只有 root 可以访问。此外，在过去，root 能够调用 **`host_set_special_port`** 并劫持任意端口，例如通过劫持 `HOST_KEXTD_PORT` 来绕过代码签名（SIP 现在防止了这一点）。
 
-这些端口分为两组：**前7个端口由内核拥有**，分别是1 `HOST_PORT`，2 `HOST_PRIV_PORT`，3 `HOST_IO_MASTER_PORT`，7是`HOST_MAX_SPECIAL_KERNEL_PORT`。\
-从数字**8**开始的端口是**由系统守护进程拥有**，可以在[**`host_special_ports.h`**](https://opensource.apple.com/source/xnu/xnu-4570.1.46/osfmk/mach/host_special_ports.h.auto.html)中找到声明。
+这些端口分为两组：**前 7 个端口由内核拥有**，分别是 1 `HOST_PORT`、2 `HOST_PRIV_PORT`、3 `HOST_IO_MASTER_PORT`，第 7 个是 `HOST_MAX_SPECIAL_KERNEL_PORT`。\
+从数字 **8** 开始的端口是 **由系统守护进程拥有**，可以在 [**`host_special_ports.h`**](https://opensource.apple.com/source/xnu/xnu-4570.1.46/osfmk/mach/host_special_ports.h.auto.html) 中找到声明。
 
-- **主机端口**：如果一个进程对这个端口具有**发送**权限，它可以通过调用其例程获取**系统**信息，例如：
-  - `host_processor_info`：获取处理器信息
-  - `host_info`：获取主机信息
-  - `host_virtual_physical_table_info`：虚拟/物理页表（需要MACH_VMDEBUG）
-  - `host_statistics`：获取主机统计信息
-  - `mach_memory_info`：获取内核内存布局
-- **主机特权端口**：对这个端口具有**发送**权限的进程可以执行**特权操作**，例如显示启动数据或尝试加载内核扩展。**进程需要是root**才能获得此权限。
-- 此外，为了调用**`kext_request`** API，需要拥有其他权限**`com.apple.private.kext*`**，这些权限仅授予Apple二进制文件。
+- **主机端口**：如果一个进程对这个端口具有 **SEND** 权限，它可以通过调用其例程获取 **系统** 的 **信息**，例如：
+  - `host_processor_info`: 获取处理器信息
+  - `host_info`: 获取主机信息
+  - `host_virtual_physical_table_info`: 虚拟/物理页表（需要 MACH_VMDEBUG）
+  - `host_statistics`: 获取主机统计信息
+  - `mach_memory_info`: 获取内核内存布局
+- **主机特权端口**：对这个端口具有 **SEND** 权限的进程可以执行 **特权操作**，例如显示启动数据或尝试加载内核扩展。**进程需要是 root** 才能获得此权限。
+- 此外，为了调用 **`kext_request`** API，需要拥有其他权限 **`com.apple.private.kext*`**，这些权限仅授予 Apple 二进制文件。
 - 可以调用的其他例程包括：
-  - `host_get_boot_info`：获取`machine_boot_info()`
-  - `host_priv_statistics`：获取特权统计信息
-  - `vm_allocate_cpm`：分配连续物理内存
-  - `host_processors`：发送权限到主机处理器
-  - `mach_vm_wire`：使内存常驻
-- 由于**root**可以访问此权限，它可以调用`host_set_[special/exception]_port[s]`来**劫持主机特殊或异常端口**。
+  - `host_get_boot_info`: 获取 `machine_boot_info()`
+  - `host_priv_statistics`: 获取特权统计信息
+  - `vm_allocate_cpm`: 分配连续物理内存
+  - `host_processors`: 发送权限到主机处理器
+  - `mach_vm_wire`: 使内存常驻
+- 由于 **root** 可以访问此权限，它可以调用 `host_set_[special/exception]_port[s]` 来 **劫持主机特殊或异常端口**。
 
-可以通过运行以下命令**查看所有主机特殊端口**：
+可以通过运行以下命令 **查看所有主机特殊端口**：
 ```bash
 procexp all ports | grep "HSP"
 ```
-### 任务特殊端口
+### Task Special Ports
 
 这些端口是为知名服务保留的。可以通过调用 `task_[get/set]_special_port` 来获取/设置它们。它们可以在 `task_special_ports.h` 中找到：
 ```c
@@ -461,41 +461,41 @@ world.*/
 
 ### 任务端口
 
-最初，Mach没有“进程”，它有“任务”，这被认为更像是线程的容器。当Mach与BSD合并时，**每个任务都与一个BSD进程相关联**。因此，每个BSD进程都有成为进程所需的详细信息，每个Mach任务也有其内部工作（除了不存在的pid 0，即`kernel_task`）。
+最初，Mach没有“进程”，它有“任务”，这被认为更像是线程的容器。当Mach与BSD合并时，**每个任务都与一个BSD进程相关联**。因此，每个BSD进程都有其作为进程所需的详细信息，每个Mach任务也有其内部工作（除了不存在的pid 0，即 `kernel_task`）。
 
-有两个与此相关的非常有趣的函数：
+与此相关的有两个非常有趣的函数：
 
-- `task_for_pid(target_task_port, pid, &task_port_of_pid)`: 获取与指定的`pid`相关的任务的任务端口的SEND权限，并将其授予指定的`target_task_port`（通常是使用`mach_task_self()`的调用任务，但也可以是不同任务上的SEND端口。）
-- `pid_for_task(task, &pid)`: 给定一个任务的SEND权限，查找该任务相关的PID。
+- `task_for_pid(target_task_port, pid, &task_port_of_pid)`: 获取与指定的 `pid` 相关的任务的发送权限，并将其授予指定的 `target_task_port`（通常是使用 `mach_task_self()` 的调用任务，但也可以是不同任务上的发送端口。）
+- `pid_for_task(task, &pid)`: 给定一个任务的发送权限，查找该任务相关的PID。
 
-为了在任务内执行操作，任务需要对自己调用`mach_task_self()`的`SEND`权限（使用`task_self_trap` (28)）。有了这个权限，任务可以执行多个操作，例如：
+为了在任务内执行操作，任务需要调用 `mach_task_self()` 来获取对自身的 `SEND` 权限（这使用 `task_self_trap` (28)）。有了这个权限，任务可以执行多个操作，例如：
 
-- `task_threads`: 获取任务线程的所有任务端口的SEND权限
+- `task_threads`: 获取对任务线程的所有任务端口的发送权限
 - `task_info`: 获取有关任务的信息
 - `task_suspend/resume`: 暂停或恢复任务
 - `task_[get/set]_special_port`
-- `thread_create`: 创建线程
+- `thread_create`: 创建一个线程
 - `task_[get/set]_state`: 控制任务状态
 - 更多内容可以在 [**mach/task.h**](https://github.com/phracker/MacOSX-SDKs/blob/master/MacOSX11.3.sdk/System/Library/Frameworks/Kernel.framework/Versions/A/Headers/mach/task.h) 中找到
 
 > [!CAUTION]
-> 请注意，拥有对**不同任务**的任务端口的SEND权限，可以对不同任务执行此类操作。
+> 请注意，拥有对 **不同任务** 的任务端口的发送权限，可以对不同任务执行此类操作。
 
-此外，task_port也是**`vm_map`**端口，允许使用`vm_read()`和`vm_write()`等函数**读取和操作任务内的内存**。这基本上意味着，拥有对不同任务的task_port的SEND权限的任务将能够**注入代码到该任务中**。
+此外，task_port 也是 **`vm_map`** 端口，允许使用 `vm_read()` 和 `vm_write()` 等函数 **读取和操作任务内的内存**。这基本上意味着，拥有对不同任务的 task_port 的发送权限的任务将能够 **注入代码到该任务中**。
 
-请记住，因为**内核也是一个任务**，如果有人设法获得对**`kernel_task`**的**SEND权限**，它将能够使内核执行任何操作（越狱）。
+请记住，因为 **内核也是一个任务**，如果有人设法获得对 **`kernel_task`** 的 **SEND 权限**，它将能够使内核执行任何操作（越狱）。
 
-- 调用`mach_task_self()`以**获取此端口的名称**，用于调用任务。此端口仅在**`exec()`**中**继承**；使用`fork()`创建的新任务会获得一个新的任务端口（作为特例，任务在suid二进制文件中的`exec()`后也会获得一个新的任务端口）。生成任务并获取其端口的唯一方法是在执行`fork()`时进行["端口交换舞蹈"](https://robert.sesek.com/2014/1/changes_to_xnu_mach_ipc.html)。
-- 访问端口的限制（来自二进制文件`AppleMobileFileIntegrity`的`macos_task_policy`）：
-- 如果应用程序具有**`com.apple.security.get-task-allow` 权限**，则来自**同一用户的进程可以访问任务端口**（通常由Xcode添加以进行调试）。**公证**过程不允许其用于生产版本。
-- 具有**`com.apple.system-task-ports`**权限的应用程序可以获取**任何**进程的任务端口，除了内核。在旧版本中称为**`task_for_pid-allow`**。这仅授予Apple应用程序。
-- **Root可以访问未**使用**强化**运行时编译的应用程序的任务端口（并且不是来自Apple的）。
+- 调用 `mach_task_self()` 来 **获取此端口的名称**，用于调用任务。此端口仅在 **`exec()`** 之间 **继承**；使用 `fork()` 创建的新任务会获得一个新的任务端口（作为特例，任务在 `exec()` 在 suid 二进制文件后也会获得一个新的任务端口）。生成任务并获取其端口的唯一方法是在执行 `fork()` 时进行 ["port swap dance"](https://robert.sesek.com/2014/1/changes_to_xnu_mach_ipc.html)。
+- 访问端口的限制（来自二进制文件 `AppleMobileFileIntegrity` 的 `macos_task_policy`）：
+- 如果应用具有 **`com.apple.security.get-task-allow` 权限**，则来自 **同一用户的进程可以访问任务端口**（通常由 Xcode 为调试添加）。**公证** 过程不会允许其用于生产版本。
+- 具有 **`com.apple.system-task-ports`** 权限的应用可以获取 **任何** 进程的任务端口，除了内核。在旧版本中称为 **`task_for_pid-allow`**。这仅授予 Apple 应用。
+- **Root 可以访问未使用 **hardened** 运行时编译的应用程序的任务端口（且不是来自 Apple 的）。**
 
-**任务名称端口：** 一个未特权版本的_task port_。它引用任务，但不允许控制它。通过它似乎唯一可用的功能是`task_info()`。
+**任务名称端口：** 一个非特权版本的 _任务端口_。它引用任务，但不允许控制它。通过它似乎唯一可用的功能是 `task_info()`。
 
 ### 线程端口
 
-线程也有相关的端口，可以从调用**`task_threads`**的任务和使用`processor_set_threads`的处理器中看到。对线程端口的SEND权限允许使用`thread_act`子系统中的函数，例如：
+线程也有相关的端口，可以从调用 **`task_threads`** 的任务和使用 `processor_set_threads` 的处理器中看到。对线程端口的发送权限允许使用 `thread_act` 子系统中的函数，例如：
 
 - `thread_terminate`
 - `thread_[get/set]_state`
@@ -504,11 +504,11 @@ world.*/
 - `thread_info`
 - ...
 
-任何线程都可以通过调用**`mach_thread_sef`**来获取此端口。
+任何线程都可以通过调用 **`mach_thread_sef`** 来获取此端口。
 
-### 通过任务端口在线程中注入Shellcode
+### 通过任务端口在线程中注入 Shellcode
 
-您可以从以下位置获取shellcode：
+您可以从以下位置获取 shellcode：
 
 {{#ref}}
 ../../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md
@@ -560,7 +560,7 @@ return 0;
 {{#endtab}}
 {{#endtabs}}
 
-**编译**之前的程序并添加**权限**以便能够以相同用户注入代码（如果不这样做，您将需要使用**sudo**）。
+**编译**之前的程序并添加**权限**以便能够以相同用户注入代码（如果没有，您将需要使用**sudo**）。
 
 <details>
 
@@ -776,9 +776,9 @@ gcc -framework Foundation -framework Appkit sc_inject.m -o sc_inject
 
 在 macOS 中，**线程** 可以通过 **Mach** 或使用 **posix `pthread` api** 进行操作。我们在之前的注入中生成的线程是使用 Mach api 生成的，因此 **它不符合 posix 标准**。
 
-能够 **注入一个简单的 shellcode** 来执行命令是因为它 **不需要与 posix** 兼容的 api 进行工作，只需与 Mach 进行工作。**更复杂的注入** 将需要 **线程** 也 **符合 posix 标准**。
+能够 **注入一个简单的 shellcode** 来执行命令是因为它 **不需要与 posix** 兼容的 api，只需与 Mach 兼容即可。**更复杂的注入** 将需要 **线程** 也 **符合 posix 标准**。
 
-因此，为了 **改进线程**，它应该调用 **`pthread_create_from_mach_thread`**，这将 **创建一个有效的 pthread**。然后，这个新的 pthread 可以 **调用 dlopen** 从系统中 **加载一个 dylib**，因此，代替编写新的 shellcode 来执行不同的操作，可以加载自定义库。
+因此，为了 **改进线程**，它应该调用 **`pthread_create_from_mach_thread`**，这将 **创建一个有效的 pthread**。然后，这个新的 pthread 可以 **调用 dlopen** 从系统中 **加载一个 dylib**，因此，除了编写新的 shellcode 来执行不同的操作外，还可以加载自定义库。
 
 您可以在以下位置找到 **示例 dylibs**（例如，生成日志的那个，然后您可以监听它）：
 
@@ -1074,13 +1074,13 @@ macos-thread-injection-via-task-port.md
 
 ### 任务端口注入检测
 
-当调用 `task_for_pid` 或 `thread_create_*` 时，会在内核的任务结构中递增一个计数器，该结构可以通过用户模式调用 task_info(task, TASK_EXTMOD_INFO, ...)
+当调用 `task_for_pid` 或 `thread_create_*` 时，会在内核的任务结构中递增一个计数器，该计数器可以通过用户模式调用 task_info(task, TASK_EXTMOD_INFO, ...)
 
 ## 异常端口
 
-当线程中发生异常时，该异常会发送到线程的指定异常端口。如果线程不处理它，则会发送到任务异常端口。如果任务不处理它，则会发送到由 launchd 管理的主机端口（在这里会被确认）。这被称为异常分类。
+当线程中发生异常时，该异常会发送到线程的指定异常端口。如果线程不处理它，则会发送到任务异常端口。如果任务不处理它，则会发送到由 launchd 管理的主机端口（在那里会被确认）。这称为异常分类。
 
-请注意，通常如果未正确处理，报告最终会由 ReportCrash 守护进程处理。然而，任务中的另一个线程可以管理该异常，这就是崩溃报告工具如 `PLCreashReporter` 所做的。
+请注意，通常如果没有正确处理，报告最终会由 ReportCrash 守护进程处理。然而，任务中的另一个线程可以管理该异常，这就是崩溃报告工具如 `PLCreashReporter` 所做的。
 
 ## 其他对象
 
@@ -1104,8 +1104,8 @@ macos-thread-injection-via-task-port.md
 - `processor_set_stack_usage`
 - `processor_set_info`
 
-正如在 [**这篇文章**](https://reverse.put.as/2014/05/05/about-the-processor_set_tasks-access-to-kernel-memory-vulnerability/) 中提到的，过去这允许绕过之前提到的保护，以获取其他进程中的任务端口，通过调用 **`processor_set_tasks`** 并在每个进程中获取主机端口来控制它们。\
-如今，您需要 root 权限才能使用该功能，并且这受到保护，因此您只能在未受保护的进程上获取这些端口。
+正如在 [**这篇文章**](https://reverse.put.as/2014/05/05/about-the-processor_set_tasks-access-to-kernel-memory-vulnerability/) 中提到的，过去这允许绕过之前提到的保护，以通过调用 **`processor_set_tasks`** 获取其他进程中的任务端口并控制它们，并在每个进程中获取主机端口。\
+如今，您需要 root 才能使用该功能，并且这受到保护，因此您只能在未受保护的进程上获取这些端口。
 
 您可以尝试以下代码：
 

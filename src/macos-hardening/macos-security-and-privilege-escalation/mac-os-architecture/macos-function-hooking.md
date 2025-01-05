@@ -6,7 +6,7 @@
 
 创建一个带有 **`__interpose`** 部分（或标记为 **`S_INTERPOSING`** 的部分）的 **dylib**，其中包含指向 **原始** 和 **替代** 函数的 **函数指针** 元组。
 
-然后，使用 **`DYLD_INSERT_LIBRARIES`** 注入 dylib（插入需要在主应用程序加载之前发生）。显然，适用于 **`DYLD_INSERT_LIBRARIES`** 使用的 [**限制** 在这里也适用](../macos-proces-abuse/macos-library-injection/index.html#check-restrictions)。&#x20;
+然后，使用 **`DYLD_INSERT_LIBRARIES`** 注入 dylib（插入需要在主应用加载之前发生）。显然，适用于 **`DYLD_INSERT_LIBRARIES`** 使用的 [**限制** 在这里也适用](../macos-proces-abuse/macos-library-injection/index.html#check-restrictions)。
 
 ### Interpose printf
 
@@ -81,14 +81,14 @@ Hello from interpose
 
 在 ObjectiveC 中，方法调用的方式是：**`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
 
-需要 **对象**、**方法**和 **参数**。当调用一个方法时，会使用函数 **`objc_msgSend`** 发送 **消息**：`int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
+需要 **对象**、**方法**和 **参数**。当调用一个方法时，会使用函数 **`objc_msgSend`** 发送 **msg**：`int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
 
 对象是 **`someObject`**，方法是 **`@selector(method1p1:p2:)`**，参数是 **value1**，**value2**。
 
 根据对象结构，可以访问一个 **方法数组**，其中 **名称** 和 **方法代码的指针** 被 **存放**。
 
 > [!CAUTION]
-> 请注意，由于方法和类是基于其名称访问的，因此这些信息存储在二进制文件中，因此可以使用 `otool -ov </path/bin>` 或 [`class-dump </path/bin>`](https://github.com/nygard/class-dump) 来检索。
+> 请注意，由于方法和类是基于其名称访问的，因此这些信息存储在二进制文件中，因此可以使用 `otool -ov </path/bin>` 或 [`class-dump </path/bin>`](https://github.com/nygard/class-dump) 检索它。
 
 ### 访问原始方法
 
@@ -208,13 +208,13 @@ return 0;
 }
 ```
 > [!WARNING]
-> 在这种情况下，如果**合法**方法的**实现代码**对**方法**的**名称**进行**验证**，它可能会**检测**到这种交换并阻止其运行。
+> 在这种情况下，如果**合法**方法的**实现代码**对**方法**的**名称**进行**验证**，它可能会**检测到**这种方法交换并阻止其运行。
 >
 > 以下技术没有这个限制。
 
 ### 使用 method_setImplementation 进行方法交换
 
-之前的格式很奇怪，因为你在相互之间更改两个方法的实现。使用函数**`method_setImplementation`**，你可以**更改**一个**方法的实现为另一个**。
+之前的格式很奇怪，因为你正在将两个方法的实现互相更改。使用函数**`method_setImplementation`**，你可以**更改**一个**方法的实现为另一个**。
 
 只需记住，如果你打算在覆盖之前从新实现中调用原始实现，请**存储原始实现的地址**，因为稍后定位该地址会更加复杂。
 ```objectivec
@@ -293,7 +293,7 @@ return 0;
 在该库中添加钩子代码以提取信息：密码、消息...
 
 > [!CAUTION]
-> 请注意，在较新版本的 macOS 中，如果您 **去除应用程序二进制文件的签名**，并且它之前已被执行，macOS **将不再执行该应用程序**。
+> 请注意，在较新版本的 macOS 中，如果您 **去除应用程序二进制文件的签名** 并且它之前已被执行，macOS **将不再执行该应用程序**。
 
 #### 库示例
 ```objectivec

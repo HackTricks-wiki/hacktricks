@@ -1,10 +1,10 @@
-# macOS 内核扩展与调试
+# macOS Kernel Extensions & Debugging
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## 基本信息
 
-内核扩展（Kexts）是 **以 `.kext`** 扩展名的 **包**，它们 **直接加载到 macOS 内核空间**，为主操作系统提供额外功能。
+内核扩展（Kexts）是 **以 `.kext`** 扩展名的 **包**，它们被 **直接加载到 macOS 内核空间**，为主操作系统提供额外的功能。
 
 ### 要求
 
@@ -26,7 +26,7 @@
 
 1. **`kextutil`** cli **启动** 加载扩展的 **验证** 过程
 - 它将通过发送 **Mach 服务** 与 **`kextd`** 进行通信。
-2. **`kextd`** 将检查多个事项，例如 **签名**
+2. **`kextd`** 将检查几个事项，例如 **签名**
 - 它将与 **`syspolicyd`** 进行通信以 **检查** 扩展是否可以 **加载**。
 3. **`syspolicyd`** 将 **提示** **用户** 如果扩展尚未被加载。
 - **`syspolicyd`** 将结果报告给 **`kextd`**
@@ -45,9 +45,9 @@ kextstat | grep " 22 " | cut -c2-5,50- | cut -d '(' -f1
 ## Kernelcache
 
 > [!CAUTION]
-> 尽管内核扩展预计位于 `/System/Library/Extensions/` 中，但如果你去这个文件夹，你 **找不到任何二进制文件**。这是因为 **kernelcache**，为了反向工程一个 `.kext`，你需要找到获取它的方法。
+> 尽管内核扩展预计位于 `/System/Library/Extensions/` 中，但如果你去这个文件夹，你 **不会找到任何二进制文件**。这是因为 **kernelcache**，为了反向工程一个 `.kext`，你需要找到获取它的方法。
 
-**kernelcache** 是 **XNU 内核的预编译和预链接版本**，以及必要的设备 **驱动程序** 和 **内核扩展**。它以 **压缩** 格式存储，并在启动过程中解压到内存中。kernelcache 通过提供一个准备就绪的内核和关键驱动程序的版本，促进了 **更快的启动时间**，减少了在启动时动态加载和链接这些组件所需的时间和资源。
+**kernelcache** 是 **XNU 内核的预编译和预链接版本**，以及基本的设备 **驱动程序** 和 **内核扩展**。它以 **压缩** 格式存储，并在启动过程中解压到内存中。kernelcache 通过提供一个随时可运行的内核和关键驱动程序的版本，促进了 **更快的启动时间**，减少了在启动时动态加载和链接这些组件所需的时间和资源。
 
 ### Local Kerlnelcache
 
@@ -58,7 +58,7 @@ kextstat | grep " 22 " | cut -c2-5,50- | cut -d '(' -f1
 
 #### IMG4
 
-IMG4 文件格式是苹果在其 iOS 和 macOS 设备中用于安全 **存储和验证固件** 组件（如 **kernelcache**）的容器格式。IMG4 格式包括一个头部和几个标签，这些标签封装了不同的数据片段，包括实际的有效载荷（如内核或引导加载程序）、签名和一组清单属性。该格式支持加密验证，允许设备在执行固件组件之前确认其真实性和完整性。
+IMG4 文件格式是 Apple 在其 iOS 和 macOS 设备中用于安全 **存储和验证固件** 组件（如 **kernelcache**）的容器格式。IMG4 格式包括一个头部和几个标签，这些标签封装了不同的数据片段，包括实际的有效载荷（如内核或引导加载程序）、签名和一组清单属性。该格式支持加密验证，允许设备在执行固件组件之前确认其真实性和完整性。
 
 它通常由以下组件组成：
 
@@ -107,9 +107,9 @@ pyimg4 im4p extract -i kernelcache.release.iphone14 -o kernelcache.release.iphon
 ```bash
 img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 ```
-### 检查 kernelcache
+### Inspecting kernelcache
 
-检查 kernelcache 是否具有符号。
+检查 kernelcache 是否具有符号
 ```bash
 nm -a kernelcache.release.iphone14.e | wc -l
 ```
@@ -128,7 +128,7 @@ nm -a binaries/com.apple.security.sandbox | wc -l
 ```
 ## 调试
 
-## 参考文献
+## 参考
 
 - [https://www.makeuseof.com/how-to-enable-third-party-kernel-extensions-apple-silicon-mac/](https://www.makeuseof.com/how-to-enable-third-party-kernel-extensions-apple-silicon-mac/)
 - [https://www.youtube.com/watch?v=hGKOskSiaQo](https://www.youtube.com/watch?v=hGKOskSiaQo)
