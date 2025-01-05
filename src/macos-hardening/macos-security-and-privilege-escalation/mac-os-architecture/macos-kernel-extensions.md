@@ -8,7 +8,7 @@ Le estensioni del kernel (Kexts) sono **pacchetti** con un'estensione **`.kext`*
 
 ### Requisiti
 
-Ovviamente, questo è così potente che è **complicato caricare un'estensione del kernel**. Questi sono i **requisiti** che un'estensione del kernel deve soddisfare per essere caricata:
+Ovviamente, è così potente che è **complicato caricare un'estensione del kernel**. Questi sono i **requisiti** che un'estensione del kernel deve soddisfare per essere caricata:
 
 - Quando si **entra in modalità di recupero**, le **estensioni del kernel devono essere autorizzate** a essere caricate:
 
@@ -28,7 +28,7 @@ In Catalina era così: È interessante notare che il processo di **verifica** av
 - Parlerà con **`kextd`** inviando utilizzando un **servizio Mach**.
 2. **`kextd`** controllerà diverse cose, come la **firma**
 - Parlerà con **`syspolicyd`** per **verificare** se l'estensione può essere **caricata**.
-3. **`syspolicyd`** **chiederà** all'**utente** se l'estensione non è stata caricata in precedenza.
+3. **`syspolicyd`** **chiederà** all'**utente** se l'estensione non è stata precedentemente caricata.
 - **`syspolicyd`** riporterà il risultato a **`kextd`**
 4. **`kextd`** sarà infine in grado di **dire al kernel di caricare** l'estensione
 
@@ -45,9 +45,9 @@ kextstat | grep " 22 " | cut -c2-5,50- | cut -d '(' -f1
 ## Kernelcache
 
 > [!CAUTION]
-> Anche se ci si aspetta che le estensioni del kernel siano in `/System/Library/Extensions/`, se si va in questa cartella **non si troverà alcun binario**. Questo è dovuto al **kernelcache** e per fare il reverse di un `.kext` è necessario trovare un modo per ottenerlo.
+> Anche se ci si aspetta che le estensioni del kernel siano in `/System/Library/Extensions/`, se si va in questa cartella **non si troverà alcun binario**. Questo è dovuto al **kernelcache** e per invertire un `.kext` è necessario trovare un modo per ottenerlo.
 
-Il **kernelcache** è una **versione pre-compilata e pre-collegata del kernel XNU**, insieme a **driver** e **estensioni del kernel** essenziali. È memorizzato in un formato **compresso** e viene decompresso in memoria durante il processo di avvio. Il kernelcache facilita un **tempo di avvio più veloce** avendo una versione pronta all'uso del kernel e dei driver cruciali disponibili, riducendo il tempo e le risorse che altrimenti verrebbero spese per caricare e collegare dinamicamente questi componenti all'avvio.
+Il **kernelcache** è una **versione pre-compilata e pre-collegata del kernel XNU**, insieme a **driver** e **estensioni del kernel** essenziali. È memorizzato in un formato **compresso** e viene decompresso in memoria durante il processo di avvio. Il kernelcache facilita un **tempo di avvio più veloce** avendo una versione pronta all'uso del kernel e dei driver cruciali disponibili, riducendo il tempo e le risorse che altrimenti verrebbero spesi per caricare e collegare dinamicamente questi componenti all'avvio.
 
 ### Local Kerlnelcache
 
@@ -58,7 +58,7 @@ Nel mio caso in macOS l'ho trovato in:
 
 #### IMG4
 
-Il formato di file IMG4 è un formato contenitore utilizzato da Apple nei suoi dispositivi iOS e macOS per **memorizzare e verificare in modo sicuro i componenti del firmware** (come il **kernelcache**). Il formato IMG4 include un'intestazione e diversi tag che racchiudono diversi pezzi di dati, inclusi il payload effettivo (come un kernel o un bootloader), una firma e un insieme di proprietà del manifesto. Il formato supporta la verifica crittografica, consentendo al dispositivo di confermare l'autenticità e l'integrità del componente del firmware prima di eseguirlo.
+Il formato di file IMG4 è un formato contenitore utilizzato da Apple nei suoi dispositivi iOS e macOS per **memorizzare e verificare in modo sicuro** i componenti del firmware (come il **kernelcache**). Il formato IMG4 include un'intestazione e diversi tag che racchiudono diversi pezzi di dati, inclusi il payload effettivo (come un kernel o un bootloader), una firma e un insieme di proprietà del manifesto. Il formato supporta la verifica crittografica, consentendo al dispositivo di confermare l'autenticità e l'integrità del componente firmware prima di eseguirlo.
 
 È solitamente composto dai seguenti componenti:
 
@@ -71,7 +71,7 @@ Il formato di file IMG4 è un formato contenitore utilizzato da Apple nei suoi d
 - **Restore Info (IM4R)**:
 - Conosciuto anche come APNonce
 - Previene la ripetizione di alcuni aggiornamenti
-- OPZIONALE: Di solito questo non viene trovato
+- OPZIONALE: Di solito non si trova
 
 Decomprimere il Kernelcache:
 ```bash
@@ -81,7 +81,7 @@ img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 # pyimg4 (https://github.com/m1stadev/PyIMG4)
 pyimg4 im4p extract -i kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 ```
-### Download&#x20;
+### Download
 
 - [**KernelDebugKit Github**](https://github.com/dortania/KdkSupportPkg/releases)
 
@@ -107,7 +107,7 @@ pyimg4 im4p extract -i kernelcache.release.iphone14 -o kernelcache.release.iphon
 ```bash
 img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 ```
-### Ispezionare kernelcache
+### Ispezionare il kernelcache
 
 Controlla se il kernelcache ha simboli con
 ```bash

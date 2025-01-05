@@ -1,8 +1,8 @@
-# Tunneling and Port Forwarding
+# Tunneling e Port Forwarding
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Nmap tip
+## Suggerimento Nmap
 
 > [!WARNING]
 > **ICMP** e **SYN** scans non possono essere tunnelizzati attraverso proxy socks, quindi dobbiamo **disabilitare la scoperta ping** (`-Pn`) e specificare **scansioni TCP** (`-sT`) affinché questo funzioni.
@@ -134,7 +134,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ### SOCKS proxy
 
-Apri una porta nel teamserver in ascolto su tutte le interfacce che può essere utilizzata per **instradare il traffico attraverso il beacon**.
+Apri una porta nel teamserver in ascolto su tutte le interfacce che possono essere utilizzate per **instradare il traffico attraverso il beacon**.
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -175,7 +175,7 @@ python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/t
 ## Chisel
 
 Puoi scaricarlo dalla pagina delle release di [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)\
-Devi usare la **stessa versione per client e server**
+Devi utilizzare la **stessa versione per client e server**
 
 ### socks
 ```bash
@@ -341,7 +341,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 ```
 ## SocksOverRDP & Proxifier
 
-È necessario avere **accesso RDP sul sistema**.\
+È necessario avere **accesso RDP al sistema**.\
 Scarica:
 
 1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Questo strumento utilizza `Dynamic Virtual Channels` (`DVC`) dalla funzione Remote Desktop Service di Windows. DVC è responsabile per **il tunneling dei pacchetti sulla connessione RDP**.
@@ -354,7 +354,7 @@ C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
 Ora possiamo **connetterci** alla **vittima** tramite **RDP** utilizzando **`mstsc.exe`**, e dovremmo ricevere un **messaggio** che dice che il **plugin SocksOverRDP è abilitato**, e ascolterà su **127.0.0.1:1080**.
 
-**Connetti** tramite **RDP** e carica ed esegui nel computer della vittima il binario `SocksOverRDP-Server.exe`:
+**Connettersi** tramite **RDP** e caricare ed eseguire nella macchina della vittima il binario `SocksOverRDP-Server.exe`:
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
@@ -362,13 +362,13 @@ Ora, conferma nella tua macchina (attaccante) che la porta 1080 è in ascolto:
 ```
 netstat -antb | findstr 1080
 ```
-Ora puoi utilizzare [**Proxifier**](https://www.proxifier.com/) **per proxyare il traffico attraverso quella porta.**
+Ora puoi utilizzare [**Proxifier**](https://www.proxifier.com/) **per proxy il traffico attraverso quella porta.**
 
 ## Proxifica le app GUI di Windows
 
-Puoi fare in modo che le app GUI di Windows navigano attraverso un proxy utilizzando [**Proxifier**](https://www.proxifier.com/).\
+Puoi far navigare le app GUI di Windows attraverso un proxy utilizzando [**Proxifier**](https://www.proxifier.com/).\
 In **Profile -> Proxy Servers** aggiungi l'IP e la porta del server SOCKS.\
-In **Profile -> Proxification Rules** aggiungi il nome del programma da proxyare e le connessioni agli IP che desideri proxyare.
+In **Profile -> Proxification Rules** aggiungi il nome del programma da proxificare e le connessioni agli IP che desideri proxificare.
 
 ## Bypass del proxy NTLM
 
@@ -403,7 +403,7 @@ Un reverse proxy creato da Microsoft. Puoi trovarlo qui: [https://github.com/mic
 
 [https://code.kryo.se/iodine/](https://code.kryo.se/iodine/)
 
-È necessario avere i privilegi di root in entrambi i sistemi per creare adattatori tun e tunnelare dati tra di essi utilizzando query DNS.
+È necessario avere i privilegi di root in entrambi i sistemi per creare adattatori tun e tunnelare i dati tra di essi utilizzando query DNS.
 ```
 attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
@@ -478,7 +478,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **è uno strumento per esporre soluzioni a Internet con un'unica riga di comando.**\
-_&#x45;xposition URI sono come:_ **UID.ngrok.io**
+_Le URI di esposizione sono simili a:_ **UID.ngrok.io**
 
 ### Installazione
 
@@ -490,7 +490,7 @@ chmod a+x ./ngrok
 # Init configuration, with your token
 ./ngrok config edit
 ```
-### Usages di base
+### Usi di base
 
 **Documentazione:** [https://ngrok.com/docs/getting-started/](https://ngrok.com/docs/getting-started/).
 

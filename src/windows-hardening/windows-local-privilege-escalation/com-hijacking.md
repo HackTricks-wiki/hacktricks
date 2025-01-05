@@ -4,7 +4,7 @@
 
 ### Ricerca di componenti COM inesistenti
 
-Poiché i valori di HKCU possono essere modificati dagli utenti, **COM Hijacking** potrebbe essere utilizzato come un **meccanismo persistente**. Utilizzando `procmon` è facile trovare registri COM cercati che non esistono e che un attaccante potrebbe creare per persistere. Filtri:
+Poiché i valori di HKCU possono essere modificati dagli utenti, **COM Hijacking** potrebbe essere utilizzato come un **meccanismo persistente**. Utilizzando `procmon`, è facile trovare registri COM cercati che non esistono e che un attaccante potrebbe creare per persistere. Filtri:
 
 - Operazioni **RegOpenKey**.
 - dove il _Risultato_ è **NOME NON TROVATO**.
@@ -47,7 +47,7 @@ Write-Host
 <strong># Nome Task:  Esempio
 </strong># Percorso Task:  \Microsoft\Windows\Esempio\
 # CLSID:  {1936ED8A-BD93-3213-E325-F38D112938E1}
-# [più simile a quello precedente...]</code></pre>
+# [più simile al precedente...]</code></pre>
 
 Controllando l'output puoi selezionare uno che verrà eseguito **ogni volta che un utente accede** ad esempio.
 

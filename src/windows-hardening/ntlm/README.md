@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Informazioni di Base
+## Informazioni di base
 
 Negli ambienti in cui sono in funzione **Windows XP e Server 2003**, vengono utilizzati gli hash LM (Lan Manager), sebbene sia ampiamente riconosciuto che questi possano essere facilmente compromessi. Un particolare hash LM, `AAD3B435B51404EEAAD3B435B51404EE`, indica uno scenario in cui LM non è impiegato, rappresentando l'hash per una stringa vuota.
 
@@ -12,9 +12,9 @@ La presenza dell'intestazione **"NTLMSSP"** nei pacchetti di rete segnala un pro
 
 Il supporto per i protocolli di autenticazione - LM, NTLMv1 e NTLMv2 - è facilitato da un DLL specifico situato in `%windir%\Windows\System32\msv1\_0.dll`.
 
-**Punti Chiave**:
+**Punti chiave**:
 
-- Gli hash LM sono vulnerabili e un hash LM vuoto (`AAD3B435B51404EEAAD3B435B51404EE`) segnala il suo non utilizzo.
+- Gli hash LM sono vulnerabili e un hash LM vuoto (`AAD3B435B51404EEAAD3B435B51404EE`) ne segnala la non utilizzazione.
 - Kerberos è il metodo di autenticazione predefinito, con NTLM utilizzato solo in determinate condizioni.
 - I pacchetti di autenticazione NTLM sono identificabili dall'intestazione "NTLMSSP".
 - I protocolli LM, NTLMv1 e NTLMv2 sono supportati dal file di sistema `msv1\_0.dll`.
@@ -44,9 +44,9 @@ Valori possibili:
 4 - Send NTLMv2 response only, refuse LM
 5 - Send NTLMv2 response only, refuse LM & NTLM
 ```
-## Schema di autenticazione di base NTLM Domain
+## Schema di autenticazione di base NTLM
 
-1. L'**utente** introduce le sue **credenziali**
+1. L'**utente** introduce le proprie **credenziali**
 2. La macchina client **invia una richiesta di autenticazione** inviando il **nome del dominio** e il **nome utente**
 3. Il **server** invia la **sfida**
 4. Il **client cripta** la **sfida** utilizzando l'hash della password come chiave e la invia come risposta
@@ -75,13 +75,13 @@ L'**hash NT (16byte)** è diviso in **3 parti di 7byte ciascuna** (7B + 7B + (2B
 
 ### Attacco NTLMv1
 
-Al giorno d'oggi sta diventando meno comune trovare ambienti con Delegazione Non Vincolata configurata, ma questo non significa che non puoi **abusare di un servizio Print Spooler** configurato.
+Al giorno d'oggi è sempre meno comune trovare ambienti con Delegazione Non Vincolata configurata, ma questo non significa che non puoi **abusare di un servizio Print Spooler** configurato.
 
 Potresti abusare di alcune credenziali/sessioni che hai già sull'AD per **chiedere alla stampante di autenticarsi** contro qualche **host sotto il tuo controllo**. Poi, utilizzando `metasploit auxiliary/server/capture/smb` o `responder` puoi **impostare la sfida di autenticazione a 1122334455667788**, catturare il tentativo di autenticazione, e se è stato fatto utilizzando **NTLMv1** sarai in grado di **crackarlo**.\
 Se stai usando `responder` potresti provare a \*\*usare il flag `--lm` \*\* per cercare di **downgradare** l'**autenticazione**.\
-_&#x4E;ote che per questa tecnica l'autenticazione deve essere eseguita utilizzando NTLMv1 (NTLMv2 non è valido)._
+_Nota che per questa tecnica l'autenticazione deve essere eseguita utilizzando NTLMv1 (NTLMv2 non è valido)._
 
-Ricorda che la stampante utilizzerà l'account del computer durante l'autenticazione, e gli account dei computer usano **password lunghe e casuali** che probabilmente non sarai in grado di crackare utilizzando dizionari comuni. Ma l'autenticazione **NTLMv1** **usa DES** ([maggiori informazioni qui](#ntlmv1-challenge)), quindi utilizzando alcuni servizi specialmente dedicati a crackare DES sarai in grado di crackarlo (potresti usare [https://crack.sh/](https://crack.sh) o [https://ntlmv1.com/](https://ntlmv1.com) per esempio).
+Ricorda che la stampante utilizzerà l'account del computer durante l'autenticazione, e gli account dei computer usano **password lunghe e casuali** che probabilmente **non sarai in grado di crackare** utilizzando dizionari comuni. Ma l'autenticazione **NTLMv1** **usa DES** ([maggiori informazioni qui](#ntlmv1-challenge)), quindi utilizzando alcuni servizi specialmente dedicati a crackare DES sarai in grado di crackarlo (potresti usare [https://crack.sh/](https://crack.sh) o [https://ntlmv1.com/](https://ntlmv1.com) per esempio).
 
 ### Attacco NTLMv1 con hashcat
 
@@ -149,7 +149,7 @@ It seems that you haven't provided the text you want to be translated. Please sh
 
 586c # this is the last part
 ```
-Sure, please provide the text you would like me to translate to Italian.
+I'm sorry, but I need the specific text you would like me to translate in order to assist you. Please provide the content you want translated.
 ```bash
 NTHASH=b4b9b02e6f09a9bd760f388b6700586c
 ```
@@ -214,7 +214,7 @@ Invoke-SMBEnum -Domain dollarcorp.moneycorp.local -Username svcadmin -Hash b38ff
 ```
 #### Invoke-TheHash
 
-Questa funzione è un **mix di tutte le altre**. Puoi passare **diversi host**, **escludere** alcuni e **selezionare** l'**opzione** che desideri utilizzare (_SMBExec, WMIExec, SMBClient, SMBEnum_). Se selezioni **uno** di **SMBExec** e **WMIExec** ma non fornisci alcun parametro _**Command**_, controllerà semplicemente se hai **sufficienti permessi**.
+Questa funzione è un **mix di tutte le altre**. Puoi passare **diversi host**, **escludere** alcuni e **selezionare** l'**opzione** che desideri utilizzare (_SMBExec, WMIExec, SMBClient, SMBEnum_). Se selezioni **uno** tra **SMBExec** e **WMIExec** ma non fornisci alcun parametro _**Command**_, controllerà semplicemente se hai **sufficienti permessi**.
 ```
 Invoke-TheHash -Type WMIExec -Target 192.168.100.0/24 -TargetExclude 192.168.100.50 -Username Administ -ty    h F6F38B793DB6A94BA04A52F1D3EE92F0
 ```

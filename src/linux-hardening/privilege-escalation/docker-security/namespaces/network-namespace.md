@@ -4,13 +4,13 @@
 
 ## Informazioni di base
 
-Un network namespace è una funzionalità del kernel Linux che fornisce isolamento dello stack di rete, consentendo **a ciascun network namespace di avere la propria configurazione di rete indipendente**, interfacce, indirizzi IP, tabelle di routing e regole del firewall. Questo isolamento è utile in vari scenari, come la containerizzazione, dove ciascun container dovrebbe avere la propria configurazione di rete, indipendente dagli altri container e dal sistema host.
+Un network namespace è una funzionalità del kernel Linux che fornisce isolamento dello stack di rete, consentendo **a ciascun network namespace di avere la propria configurazione di rete indipendente**, interfacce, indirizzi IP, tabelle di routing e regole del firewall. Questo isolamento è utile in vari scenari, come la containerizzazione, dove ogni container dovrebbe avere la propria configurazione di rete, indipendente dagli altri container e dal sistema host.
 
 ### Come funziona:
 
 1. Quando viene creato un nuovo network namespace, inizia con uno **stack di rete completamente isolato**, con **nessuna interfaccia di rete** tranne l'interfaccia di loopback (lo). Ciò significa che i processi in esecuzione nel nuovo network namespace non possono comunicare con i processi in altri namespace o con il sistema host per impostazione predefinita.
 2. **Interfacce di rete virtuali**, come le coppie veth, possono essere create e spostate tra i network namespaces. Questo consente di stabilire connettività di rete tra i namespace o tra un namespace e il sistema host. Ad esempio, un'estremità di una coppia veth può essere posizionata nel network namespace di un container, e l'altra estremità può essere collegata a un **bridge** o a un'altra interfaccia di rete nel namespace host, fornendo connettività di rete al container.
-3. Le interfacce di rete all'interno di un namespace possono avere i **propri indirizzi IP, tabelle di routing e regole del firewall**, indipendenti dagli altri namespace. Questo consente ai processi in diversi network namespaces di avere configurazioni di rete diverse e operare come se stessero funzionando su sistemi di rete separati.
+3. Le interfacce di rete all'interno di un namespace possono avere i propri **indirizzi IP, tabelle di routing e regole del firewall**, indipendenti dagli altri namespace. Questo consente ai processi in diversi network namespaces di avere configurazioni di rete diverse e operare come se stessero funzionando su sistemi di rete separati.
 4. I processi possono spostarsi tra i namespace utilizzando la chiamata di sistema `setns()`, o creare nuovi namespace utilizzando le chiamate di sistema `unshare()` o `clone()` con il flag `CLONE_NEWNET`. Quando un processo si sposta in un nuovo namespace o ne crea uno, inizierà a utilizzare la configurazione di rete e le interfacce associate a quel namespace.
 
 ## Lab:
@@ -32,7 +32,7 @@ Quando `unshare` viene eseguito senza l'opzione `-f`, si incontra un errore a ca
 
 1. **Spiegazione del Problema**:
 
-- Il kernel Linux consente a un processo di creare nuovi namespace utilizzando la chiamata di sistema `unshare`. Tuttavia, il processo che avvia la creazione di un nuovo namespace PID (denominato processo "unshare") non entra nel nuovo namespace; solo i suoi processi figli lo fanno.
+- Il kernel Linux consente a un processo di creare nuovi namespace utilizzando la chiamata di sistema `unshare`. Tuttavia, il processo che avvia la creazione di un nuovo namespace PID (chiamato "processo unshare") non entra nel nuovo namespace; solo i suoi processi figli lo fanno.
 - Eseguire `%unshare -p /bin/bash%` avvia `/bin/bash` nello stesso processo di `unshare`. Di conseguenza, `/bin/bash` e i suoi processi figli si trovano nel namespace PID originale.
 - Il primo processo figlio di `/bin/bash` nel nuovo namespace diventa PID 1. Quando questo processo termina, attiva la pulizia del namespace se non ci sono altri processi, poiché PID 1 ha il ruolo speciale di adottare processi orfani. Il kernel Linux disabiliterà quindi l'allocazione PID in quel namespace.
 
@@ -53,7 +53,7 @@ Assicurandoti che `unshare` venga eseguito con il flag `-f`, il nuovo namespace 
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 # Run ifconfig or ip -a
 ```
-### &#x20;Controlla in quale namespace si trova il tuo processo
+### Controlla in quale namespace si trova il tuo processo
 ```bash
 ls -l /proc/self/ns/net
 lrwxrwxrwx 1 root root 0 Apr  4 20:30 /proc/self/ns/net -> 'net:[4026531840]'
@@ -68,7 +68,7 @@ sudo find /proc -maxdepth 3 -type l -name net -exec ls -l  {} \; 2>/dev/null | g
 ```bash
 nsenter -n TARGET_PID --pid /bin/bash
 ```
-Inoltre, puoi **entrare in un altro namespace di processo solo se sei root**. E **non puoi** **entrare** in un altro namespace **senza un descrittore** che punti ad esso (come `/proc/self/ns/net`).
+Puoi **entrare in un altro namespace di processo solo se sei root**. E **non puoi** **entrare** in un altro namespace **senza un descrittore** che punti ad esso (come `/proc/self/ns/net`).
 
 ## Riferimenti
 

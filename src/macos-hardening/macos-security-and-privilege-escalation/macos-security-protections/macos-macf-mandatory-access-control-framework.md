@@ -18,15 +18,15 @@ Si noti che MACF non prende realmente decisioni, poiché **intercetta** solo le 
 6. Le policy indicano se consentono o negano l'azione
 
 > [!CAUTION]
-> Apple è l'unica in grado di utilizzare il KPI del MAC Framework.
+> Apple è l'unica che può utilizzare il KPI del MAC Framework.
 
 ### Etichette
 
-MACF utilizza **etichette** che poi le policy controllano per decidere se concedere o meno l'accesso. Il codice della dichiarazione della struttura delle etichette può essere [trovato qui](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/_label.h), che viene poi utilizzato all'interno della **`struct ucred`** in [**qui**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ucred.h#L86) nella parte **`cr_label`**. L'etichetta contiene flag e un numero di **slot** che possono essere utilizzati dalle **policy MACF per allocare puntatori**. Ad esempio, Sanbox punterà al profilo del contenitore.
+MACF utilizza **etichette** che poi le policy controllano se devono concedere o meno l'accesso. Il codice della dichiarazione della struttura delle etichette può essere [trovato qui](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/_label.h), che viene poi utilizzato all'interno della **`struct ucred`** in [**qui**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ucred.h#L86) nella parte **`cr_label`**. L'etichetta contiene flag e un numero di **slot** che possono essere utilizzati dalle **policy MACF per allocare puntatori**. Ad esempio, Sanbox punterà al profilo del contenitore.
 
 ## Policy MACF
 
-Una policy MACF definisce **regole e condizioni da applicare in determinate operazioni del kernel**.&#x20;
+Una policy MACF definisce **regole e condizioni da applicare in determinate operazioni del kernel**.
 
 Un'estensione del kernel potrebbe configurare una struttura `mac_policy_conf` e poi registrarla chiamando `mac_policy_register`. Da [qui](https://opensource.apple.com/source/xnu/xnu-2050.18.24/security/mac_policy.h.auto.html):
 ```c
@@ -67,9 +67,9 @@ void			*mpc_data;		/** module data */
 ```
 È facile identificare le estensioni del kernel che configurano queste politiche controllando le chiamate a `mac_policy_register`. Inoltre, controllando il disassemblaggio dell'estensione è anche possibile trovare la struct `mac_policy_conf` utilizzata.
 
-Nota che le politiche MACF possono essere registrate e deregistrate anche **dinamicamente**.
+Si noti che le politiche MACF possono essere registrate e deregistrate anche **dinamicamente**.
 
-Uno dei principali campi della `mac_policy_conf` è **`mpc_ops`**. Questo campo specifica quali operazioni interessano la politica. Nota che ce ne sono centinaia, quindi è possibile azzerarle tutte e poi selezionare solo quelle di interesse per la politica. Da [qui](https://opensource.apple.com/source/xnu/xnu-2050.18.24/security/mac_policy.h.auto.html):
+Uno dei principali campi della `mac_policy_conf` è **`mpc_ops`**. Questo campo specifica quali operazioni interessano la politica. Si noti che ce ne sono centinaia, quindi è possibile azzerarle tutte e poi selezionare solo quelle di interesse per la politica. Da [qui](https://opensource.apple.com/source/xnu/xnu-2050.18.24/security/mac_policy.h.auto.html):
 ```c
 struct mac_policy_ops {
 mpo_audit_check_postselect_t		*mpo_audit_check_postselect;
@@ -111,7 +111,7 @@ mmap(proc_t p, struct mmap_args *uap, user_addr_t *retval)
 #if CONFIG_MACF
 <strong>			error = mac_file_check_mmap(vfs_context_ucred(ctx),
 </strong>			    fp->fp_glob, prot, flags, file_pos + pageoff,
-&#x26;maxprot);
+&maxprot);
 if (error) {
 (void)vnode_put(vp);
 goto bad;
@@ -205,7 +205,7 @@ goto skip_syscall;
 ```
 Quale controllerà nel processo chiamante **bitmask** se la syscall corrente dovrebbe chiamare `mac_proc_check_syscall_unix`. Questo perché le syscall vengono chiamate così frequentemente che è interessante evitare di chiamare `mac_proc_check_syscall_unix` ogni volta.
 
-Nota che la funzione `proc_set_syscall_filter_mask()`, che imposta il bitmask delle syscall in un processo, è chiamata da Sandbox per impostare i filtri sui processi in sandbox.
+Nota che la funzione `proc_set_syscall_filter_mask()`, che imposta il bitmask delle syscall in un processo, è chiamata da Sandbox per impostare le maschere sui processi in sandbox.
 
 ## Syscall MACF esposte
 

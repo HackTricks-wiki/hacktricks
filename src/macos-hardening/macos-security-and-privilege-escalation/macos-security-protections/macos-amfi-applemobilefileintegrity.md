@@ -4,11 +4,11 @@
 
 ## AppleMobileFileIntegrity.kext e amfid
 
-Si concentra sull'applicazione dell'integrità del codice in esecuzione sul sistema fornendo la logica dietro la verifica della firma del codice di XNU. È anche in grado di controllare i diritti e gestire altre operazioni sensibili come consentire il debug o ottenere porte di task.
+Si concentra sull'applicazione dell'integrità del codice in esecuzione sul sistema fornendo la logica dietro la verifica della firma del codice di XNU. È anche in grado di controllare i diritti e gestire altre attività sensibili come consentire il debug o ottenere porte di task.
 
 Inoltre, per alcune operazioni, il kext preferisce contattare lo spazio utente in esecuzione del demone `/usr/libexec/amfid`. Questa relazione di fiducia è stata abusata in diversi jailbreak.
 
-AMFI utilizza le politiche **MACF** e registra i suoi hook nel momento in cui viene avviato. Inoltre, impedire il suo caricamento o scaricamento potrebbe attivare un kernel panic. Tuttavia, ci sono alcuni argomenti di avvio che consentono di indebolire AMFI:
+AMFI utilizza politiche **MACF** e registra i suoi hook nel momento in cui viene avviato. Inoltre, prevenire il suo caricamento o scaricamento potrebbe innescare un kernel panic. Tuttavia, ci sono alcuni argomenti di avvio che consentono di indebolire AMFI:
 
 - `amfi_unrestricted_task_for_pid`: Consente a task_for_pid di essere autorizzato senza diritti richiesti
 - `amfi_allow_any_signature`: Consente qualsiasi firma del codice
@@ -36,8 +36,8 @@ Queste sono alcune delle politiche MACF che registra:
 - **`vnode_check_exec`**: Viene chiamato quando i file eseguibili vengono caricati in memoria e imposta `cs_hard | cs_kill` che ucciderà il processo se una delle pagine diventa non valida
 - **`vnode_check_getextattr`**: MacOS: Controlla `com.apple.root.installed` e `isVnodeQuarantined()`
 - **`vnode_check_setextattr`**: Come get + com.apple.private.allow-bless e diritto equivalente di internal-installer
-- &#x20;**`vnode_check_signature`**: Codice che chiama XNU per controllare la firma del codice utilizzando diritti, cache di fiducia e `amfid`
-- &#x20;**`proc_check_run_cs_invalid`**: Intercetta le chiamate `ptrace()` (`PT_ATTACH` e `PT_TRACE_ME`). Controlla per eventuali diritti `get-task-allow`, `run-invalid-allow` e `run-unsigned-code` e se nessuno, verifica se il debug è consentito.
+- **`vnode_check_signature`**: Codice che chiama XNU per controllare la firma del codice utilizzando diritti, cache di fiducia e `amfid`
+- **`proc_check_run_cs_invalid`**: Intercetta le chiamate `ptrace()` (`PT_ATTACH` e `PT_TRACE_ME`). Controlla per eventuali diritti `get-task-allow`, `run-invalid-allow` e `run-unsigned-code` e se nessuno, verifica se il debug è consentito.
 - **`proc_check_map_anon`**: Se mmap viene chiamato con il flag **`MAP_JIT`**, AMFI controllerà il diritto `dynamic-codesigning`.
 
 `AMFI.kext` espone anche un'API per altre estensioni del kernel, ed è possibile trovare le sue dipendenze con:
@@ -66,11 +66,11 @@ No variant specified, falling back to release
 ## amfid
 
 Questo è il demone in modalità utente che `AMFI.kext` utilizzerà per controllare le firme del codice in modalità utente.\
-Per comunicare con il demone, `AMFI.kext` utilizza messaggi mach attraverso la porta `HOST_AMFID_PORT`, che è la porta speciale `18`.
+Per consentire a `AMFI.kext` di comunicare con il demone, utilizza messaggi mach attraverso la porta `HOST_AMFID_PORT`, che è la porta speciale `18`.
 
-Nota che in macOS non è più possibile per i processi root di dirottare porte speciali poiché sono protette da `SIP` e solo launchd può accedervi. In iOS viene verificato che il processo che invia la risposta abbia il CDHash hardcoded di `amfid`.
+Si noti che in macOS non è più possibile per i processi root di dirottare porte speciali poiché sono protette da `SIP` e solo launchd può accedervi. In iOS viene verificato che il processo che invia la risposta abbia il CDHash hardcoded di `amfid`.
 
-È possibile vedere quando `amfid` viene richiesto di controllare un binario e la sua risposta debuggandolo e impostando un breakpoint in `mach_msg`.
+È possibile vedere quando `amfid` viene richiesto di controllare un binario e la sua risposta eseguendo il debug e impostando un breakpoint in `mach_msg`.
 
 Una volta ricevuto un messaggio tramite la porta speciale, **MIG** viene utilizzato per inviare ogni funzione alla funzione che sta chiamando. Le funzioni principali sono state invertite e spiegate all'interno del libro.
 
@@ -116,11 +116,11 @@ Questa è la libreria esterna che `amfid` chiama per chiedere se dovrebbe consen
 
 In macOS questo si trova all'interno di `MobileDevice.framework`.
 
-## AMFI Trust Caches
+## Cache di Fiducia AMFI
 
-iOS AMFI mantiene un elenco di hash noti che sono firmati ad-hoc, chiamato **Trust Cache** e trovato nella sezione `__TEXT.__const` del kext. Nota che in operazioni molto specifiche e sensibili è possibile estendere questo Trust Cache con un file esterno.
+iOS AMFI mantiene un elenco di hash noti che sono firmati ad-hoc, chiamato **Trust Cache** e trovato nella sezione `__TEXT.__const` del kext. Nota che in operazioni molto specifiche e sensibili è possibile estendere questa Trust Cache con un file esterno.
 
-## References
+## Riferimenti
 
 - [**\*OS Internals Volume III**](https://newosxbook.com/home.html)
 

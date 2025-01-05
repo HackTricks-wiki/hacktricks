@@ -4,7 +4,7 @@
 
 ### Bypass del Sandbox di Word tramite Launch Agents
 
-L'applicazione utilizza un **Sandbox personalizzato** usando il diritto **`com.apple.security.temporary-exception.sbpl`** e questo sandbox personalizzato consente di scrivere file ovunque purché il nome del file inizi con `~$`: `(require-any (require-all (vnode-type REGULAR-FILE) (regex #"(^|/)~$[^/]+$")))`
+L'applicazione utilizza un **Sandbox personalizzato** usando l'entitlement **`com.apple.security.temporary-exception.sbpl`** e questo sandbox personalizzato consente di scrivere file ovunque purché il nome del file inizi con `~$`: `(require-any (require-all (vnode-type REGULAR-FILE) (regex #"(^|/)~$[^/]+$")))`
 
 Pertanto, l'escape è stato facile come **scrivere un `plist`** LaunchAgent in `~/Library/LaunchAgents/~$escape.plist`.
 
@@ -16,7 +16,7 @@ Ricorda che dal primo escape, Word può scrivere file arbitrari il cui nome iniz
 
 È stato scoperto che dall'interno del sandbox è possibile creare un **Login Item** (app che verranno eseguite quando l'utente accede). Tuttavia, queste app **non verranno eseguite a meno che** non siano **notarizzate** e **non è possibile aggiungere argomenti** (quindi non puoi semplicemente eseguire una reverse shell usando **`bash`**).
 
-Dalla precedente bypass del Sandbox, Microsoft ha disabilitato l'opzione di scrivere file in `~/Library/LaunchAgents`. Tuttavia, è stato scoperto che se metti un **file zip come Login Item**, l'`Archive Utility` semplicemente **decomprimerà** il file nella sua posizione attuale. Quindi, poiché per impostazione predefinita la cartella `LaunchAgents` di `~/Library` non viene creata, è stato possibile **zipare un plist in `LaunchAgents/~$escape.plist`** e **posizionare** il file zip in **`~/Library`** in modo che, quando viene decompresso, raggiunga la destinazione di persistenza.
+Dalla precedente bypass del Sandbox, Microsoft ha disabilitato l'opzione di scrivere file in `~/Library/LaunchAgents`. Tuttavia, è stato scoperto che se metti un **file zip come Login Item** l'`Archive Utility` semplicemente **decomprimerà** il file nella sua posizione attuale. Quindi, poiché per impostazione predefinita la cartella `LaunchAgents` di `~/Library` non viene creata, è stato possibile **zipare un plist in `LaunchAgents/~$escape.plist`** e **posizionare** il file zip in **`~/Library`** in modo che, quando viene decompresso, raggiunga la destinazione di persistenza.
 
 Controlla il [**report originale qui**](https://objective-see.org/blog/blog_0x4B.html).
 
@@ -44,9 +44,9 @@ Controlla il [**report originale qui**](https://perception-point.io/blog/technic
 
 L'utility **`open`** supportava anche il parametro **`--stdin`** (e dopo il bypass precedente non era più possibile utilizzare `--env`).
 
-Il fatto è che anche se **`python`** era firmato da Apple, **non eseguirà** uno script con l'attributo **`quarantine`**. Tuttavia, era possibile passargli uno script da stdin in modo che non controllasse se fosse stato quarantinato o meno:&#x20;
+Il fatto è che anche se **`python`** era firmato da Apple, **non eseguirà** uno script con l'attributo **`quarantine`**. Tuttavia, era possibile passargli uno script da stdin in modo che non controllasse se fosse stato quarantinato o meno:
 
 1. Rilascia un file **`~$exploit.py`** con comandi Python arbitrari.
-2. Esegui _open_ **`–stdin='~$exploit.py' -a Python`**, che esegue l'app Python con il nostro file rilasciato che funge da input standard. Python esegue felicemente il nostro codice e, poiché è un processo figlio di _launchd_, non è vincolato alle regole del sandbox di Word.
+2. Esegui _open_ **`–stdin='~$exploit.py' -a Python`**, che esegue l'app Python con il nostro file rilasciato che funge da input standard. Python esegue felicemente il nostro codice, e poiché è un processo figlio di _launchd_, non è vincolato alle regole del sandbox di Word.
 
 {{#include ../../../../../banners/hacktricks-training.md}}

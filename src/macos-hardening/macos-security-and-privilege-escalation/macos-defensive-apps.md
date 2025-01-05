@@ -14,6 +14,6 @@
 
 ## Rilevamento dei keylogger
 
-- [**ReiKey**](https://objective-see.org/products/reikey.html): Applicazione di Objective-See per trovare **keylogger** che installano "event taps" della tastiera&#x20;
+- [**ReiKey**](https://objective-see.org/products/reikey.html): Applicazione di Objective-See per trovare **keylogger** che installano "event taps" della tastiera.
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -30,7 +30,7 @@ In _**Modifica --> Impostazioni --> Tasti di scelta rapida**_ puoi impostare div
 
 ## Modificare il valore
 
-Una volta che hai **trovato** dove si trova il **valore** che stai **cercando** (maggiore informazione su questo nei passaggi successivi), puoi **modificarlo** facendo doppio clic su di esso, quindi facendo doppio clic sul suo valore:
+Una volta che hai **trovato** dove si trova il **valore** che stai **cercando** (maggiore informazioni su questo nei passaggi successivi), puoi **modificarlo** facendo doppio clic su di esso, quindi facendo doppio clic sul suo valore:
 
 ![](<../../images/image (563).png>)
 
@@ -38,7 +38,7 @@ E infine **spuntando la casella** per applicare la modifica nella memoria:
 
 ![](<../../images/image (385).png>)
 
-La **modifica** alla **memoria** sarà immediatamente **applicata** (nota che finché il gioco non utilizza di nuovo questo valore, il valore **non verrà aggiornato nel gioco**).
+La **modifica** alla **memoria** sarà immediatamente **applicata** (nota che fino a quando il gioco non utilizza di nuovo questo valore, il valore **non verrà aggiornato nel gioco**).
 
 ## Cercare il valore
 
@@ -98,7 +98,7 @@ Ora che hai trovato l'indirizzo che modifica il valore, puoi **modificare il cod
 
 ![](<../../images/image (1057).png>)
 
-Quindi, ora puoi modificarlo in modo che il codice non influisca sul tuo numero, o influisca sempre in modo positivo.
+Quindi, ora puoi modificarlo affinché il codice non influisca sul tuo numero, o influisca sempre in modo positivo.
 
 ### Indirizzo di memoria casuale - Trovare il puntatore
 
@@ -138,7 +138,7 @@ Quindi, immagina di aver trovato l'indirizzo che sta sottraendo 1 dalla vita del
 ![](<../../images/image (203).png>)
 
 Fai clic su Mostra disassemblatore per ottenere il **codice disassemblato**.\
-Poi, fai clic su **CTRL+a** per invocare la finestra di Auto assemble e seleziona _**Template --> Iniezione di codice**_
+Poi, fai clic su **CTRL+a** per invocare la finestra di Auto assemblaggio e seleziona _**Modello --> Iniezione di codice**_
 
 ![](<../../images/image (902).png>)
 
@@ -146,7 +146,7 @@ Compila l'**indirizzo dell'istruzione che vuoi modificare** (questo di solito vi
 
 ![](<../../images/image (744).png>)
 
-Verrà generato un template:
+Verrà generato un modello:
 
 ![](<../../images/image (944).png>)
 

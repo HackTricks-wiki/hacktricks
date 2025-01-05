@@ -4,7 +4,7 @@
 
 ## TCC Privilege Escalation
 
-Se sei arrivato qui cercando l'escalation dei privilegi TCC vai a:
+Se sei venuto qui cercando l'escalation dei privilegi TCC vai a:
 
 {{#ref}}
 macos-security-protections/macos-tcc/
@@ -12,7 +12,7 @@ macos-security-protections/macos-tcc/
 
 ## Linux Privesc
 
-Si prega di notare che **la maggior parte dei trucchi riguardanti l'escalation dei privilegi che influenzano Linux/Unix influenzeranno anche le macchine MacOS**. Quindi vedi:
+Si prega di notare che **la maggior parte dei trucchi sull'escalation dei privilegi che riguardano Linux/Unix influenzeranno anche le macchine MacOS**. Quindi vedi:
 
 {{#ref}}
 ../../linux-hardening/privilege-escalation/
@@ -46,10 +46,10 @@ Nota che un utente che utilizza il terminale avrà molto probabilmente **Homebre
 Utilizzando un po' di **ingegneria sociale** potresti **impersonare ad esempio Google Chrome** all'interno del dock ed eseguire effettivamente il tuo script:
 
 {{#tabs}}
-{{#tab name="Impersonificazione di Chrome"}}
+{{#tab name="Chrome Impersonation"}}
 Alcuni suggerimenti:
 
-- Controlla nel Dock se c'è un Chrome, e in tal caso **rimuovi** quella voce e **aggiungi** la **voce falsa** **Chrome nella stessa posizione** nell'array del Dock.&#x20;
+- Controlla nel Dock se c'è un Chrome, e in tal caso **rimuovi** quella voce e **aggiungi** la **voce falsa** **Chrome nella stessa posizione** nell'array del Dock.
 ```bash
 #!/bin/sh
 

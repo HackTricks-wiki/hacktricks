@@ -4,7 +4,7 @@
 
 ## Informazioni di base
 
-Un namespace UTS (UNIX Time-Sharing System) è una funzionalità del kernel Linux che fornisce **isolamento di due identificatori di sistema**: il **nome host** e il **nome di dominio NIS** (Network Information Service). Questo isolamento consente a ciascun namespace UTS di avere il **proprio nome host e nome di dominio NIS** indipendenti, il che è particolarmente utile negli scenari di containerizzazione in cui ogni container dovrebbe apparire come un sistema separato con il proprio nome host.
+Un namespace UTS (UNIX Time-Sharing System) è una funzionalità del kernel Linux che fornisce **isolamento di due identificatori di sistema**: il **nome host** e il **nome di dominio NIS** (Network Information Service). Questo isolamento consente a ciascun namespace UTS di avere il **proprio nome host e nome di dominio NIS indipendenti**, il che è particolarmente utile negli scenari di containerizzazione in cui ogni container dovrebbe apparire come un sistema separato con il proprio nome host.
 
 ### Come funziona:
 
@@ -26,7 +26,7 @@ Montando una nuova istanza del filesystem `/proc` se utilizzi il parametro `--mo
 
 <summary>Errore: bash: fork: Impossibile allocare memoria</summary>
 
-Quando `unshare` viene eseguito senza l'opzione `-f`, si incontra un errore a causa del modo in cui Linux gestisce i nuovi namespace PID (Process ID). I dettagli chiave e la soluzione sono delineati di seguito:
+Quando `unshare` viene eseguito senza l'opzione `-f`, si verifica un errore a causa del modo in cui Linux gestisce i nuovi namespace PID (Process ID). I dettagli chiave e la soluzione sono delineati di seguito:
 
 1. **Spiegazione del Problema**:
 
@@ -50,7 +50,7 @@ Assicurandoti che `unshare` venga eseguito con il flag `-f`, il nuovo namespace 
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-### &#x20;Controlla in quale namespace si trova il tuo processo
+### Controlla in quale namespace si trova il tuo processo
 ```bash
 ls -l /proc/self/ns/uts
 lrwxrwxrwx 1 root root 0 Apr  4 20:49 /proc/self/ns/uts -> 'uts:[4026531838]'
@@ -61,7 +61,7 @@ sudo find /proc -maxdepth 3 -type l -name uts -exec readlink {} \; 2>/dev/null |
 # Find the processes with an specific namespace
 sudo find /proc -maxdepth 3 -type l -name uts -exec ls -l  {} \; 2>/dev/null | grep <ns-number>
 ```
-### Entra in un namespace UTS
+### Entra all'interno di un namespace UTS
 ```bash
 nsenter -u TARGET_PID --pid /bin/bash
 ```

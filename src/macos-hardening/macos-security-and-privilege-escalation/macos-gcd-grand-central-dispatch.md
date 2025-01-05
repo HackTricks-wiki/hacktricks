@@ -11,14 +11,14 @@
 > [!TIP]
 > In sintesi, per eseguire codice in **parallelo**, i processi possono inviare **blocchi di codice a GCD**, che si occuperà della loro esecuzione. Pertanto, i processi non creano nuovi thread; **GCD esegue il codice fornito con il proprio pool di thread** (che potrebbe aumentare o diminuire secondo necessità).
 
-Questo è molto utile per gestire con successo l'esecuzione parallela, riducendo notevolmente il numero di thread creati dai processi e ottimizzando l'esecuzione parallela. Questo è ideale per compiti che richiedono **grande parallelismo** (brute-forcing?) o per compiti che non dovrebbero bloccare il thread principale: ad esempio, il thread principale su iOS gestisce le interazioni UI, quindi qualsiasi altra funzionalità che potrebbe far bloccarsi l'app (ricerca, accesso a un web, lettura di un file...) è gestita in questo modo.
+Questo è molto utile per gestire con successo l'esecuzione parallela, riducendo notevolmente il numero di thread creati dai processi e ottimizzando l'esecuzione parallela. Questo è ideale per compiti che richiedono **grande parallelismo** (brute-forcing?) o per compiti che non dovrebbero bloccare il thread principale: ad esempio, il thread principale su iOS gestisce le interazioni dell'interfaccia utente, quindi qualsiasi altra funzionalità che potrebbe far bloccarsi l'app (ricerca, accesso a un web, lettura di un file...) è gestita in questo modo.
 
 ### Blocchi
 
 Un blocco è una **sezione di codice autonoma** (come una funzione con argomenti che restituisce un valore) e può anche specificare variabili vincolate.\
-Tuttavia, a livello di compilatore i blocchi non esistono, sono `os_object`. Ognuno di questi oggetti è formato da due strutture:
+Tuttavia, a livello di compilatore, i blocchi non esistono, sono `os_object`. Ognuno di questi oggetti è formato da due strutture:
 
-- **letterale di blocco**:&#x20;
+- **letterale di blocco**:
 - Inizia con il campo **`isa`**, che punta alla classe del blocco:
 - `NSConcreteGlobalBlock` (blocchi da `__DATA.__const`)
 - `NSConcreteMallocBlock` (blocchi nell'heap)
@@ -37,7 +37,7 @@ Tuttavia, a livello di compilatore i blocchi non esistono, sono `os_object`. Ogn
 
 Una coda di dispatch è un oggetto nominato che fornisce un ordinamento FIFO dei blocchi per le esecuzioni.
 
-I blocchi sono impostati in code da eseguire, e queste supportano 2 modalità: `DISPATCH_QUEUE_SERIAL` e `DISPATCH_QUEUE_CONCURRENT`. Naturalmente, la **seriale** non avrà problemi di condizioni di gara poiché un blocco non verrà eseguito fino a quando il precedente non è terminato. Ma **l'altro tipo di coda potrebbe averli**.
+I blocchi sono impostati in code da eseguire, e queste supportano 2 modalità: `DISPATCH_QUEUE_SERIAL` e `DISPATCH_QUEUE_CONCURRENT`. Ovviamente, la **seriale** non avrà problemi di condizioni di gara poiché un blocco non verrà eseguito fino a quando il precedente non è terminato. Ma **l'altro tipo di coda potrebbe averli**.
 
 Code predefinite:
 
@@ -57,7 +57,7 @@ Code predefinite:
 - `.root.user-interactive-qos`: Massima priorità
 - `.root.background-qos.overcommit`
 
-Nota che sarà il sistema a decidere **quali thread gestiscono quali code in ogni momento** (più thread potrebbero lavorare nella stessa coda o lo stesso thread potrebbe lavorare in code diverse in un certo momento)
+Nota che sarà il sistema a decidere **quali thread gestiscono quali code in ogni momento** (più thread potrebbero lavorare nella stessa coda o lo stesso thread potrebbe lavorare in diverse code in un certo momento)
 
 #### Attributi
 
@@ -208,10 +208,4 @@ Fai clic destro sulla variabile -> Ridenomina variabile e seleziona in questo ca
 
 Ghidra riscriverà automaticamente tutto:
 
-<figure><img src="../../images/image (1166).png" alt="" width="563"><figcaption></figcaption></figure>
-
-## Riferimenti
-
-- [**\*OS Internals, Volume I: User Mode. By Jonathan Levin**](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
-
-{{#include ../../banners/hacktricks-training.md}}
+<figure

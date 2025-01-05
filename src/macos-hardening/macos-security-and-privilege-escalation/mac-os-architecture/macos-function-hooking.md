@@ -4,9 +4,9 @@
 
 ## Interposizione delle Funzioni
 
-Crea un **dylib** con una sezione **`__interpose`** (o una sezione contrassegnata con **`S_INTERPOSING`**) contenente tuple di **puntatori a funzioni** che si riferiscono alle funzioni **originali** e di **sostituzione**.
+Crea un **dylib** con una sezione **`__interpose`** (o una sezione contrassegnata con **`S_INTERPOSING`**) contenente tuple di **puntatori a funzioni** che si riferiscono alle funzioni **originali** e **sostitutive**.
 
-Poi, **inietta** il dylib con **`DYLD_INSERT_LIBRARIES`** (l'interposizione deve avvenire prima che l'app principale venga caricata). Ovviamente, le [**restrizioni** applicate all'uso di **`DYLD_INSERT_LIBRARIES`** si applicano anche qui](../macos-proces-abuse/macos-library-injection/index.html#check-restrictions).&#x20;
+Poi, **inietta** il dylib con **`DYLD_INSERT_LIBRARIES`** (l'interposizione deve avvenire prima che l'app principale venga caricata). Ovviamente, le [**restrizioni** applicate all'uso di **`DYLD_INSERT_LIBRARIES`** si applicano anche qui](../macos-proces-abuse/macos-library-injection/index.html#check-restrictions).
 
 ### Interponi printf
 
@@ -214,7 +214,7 @@ return 0;
 
 ### Method Swizzling con method_setImplementation
 
-Il formato precedente è strano perché stai cambiando l'implementazione di 2 metodi l'uno con l'altro. Utilizzando la funzione **`method_setImplementation`**, puoi **cambiare** l'**implementazione** di un **metodo con l'altro**.
+Il formato precedente è strano perché stai cambiando l'implementazione di 2 metodi l'uno dall'altro. Utilizzando la funzione **`method_setImplementation`**, puoi **cambiare** l'**implementazione** di un **metodo per l'altro**.
 
 Ricorda solo di **memorizzare l'indirizzo dell'implementazione di quello originale** se intendi chiamarlo dalla nuova implementazione prima di sovrascriverlo, perché in seguito sarà molto più complicato localizzare quell'indirizzo.
 ```objectivec
@@ -276,7 +276,7 @@ Per fare ciò, la tecnica più semplice da utilizzare è iniettare un [Dyld tram
 
 Tuttavia, entrambe le opzioni sono **limitate** a binari/processi **non protetti**. Controlla ciascuna tecnica per saperne di più sulle limitazioni.
 
-Tuttavia, un attacco di hooking di funzione è molto specifico, un attaccante lo farà per **rubare informazioni sensibili dall'interno di un processo** (se no, faresti semplicemente un attacco di iniezione di processo). E queste informazioni sensibili potrebbero trovarsi in app scaricate dall'utente come MacPass.
+Tuttavia, un attacco di hooking di funzione è molto specifico, un attaccante lo farà per **rubare informazioni sensibili dall'interno di un processo** (se no faresti semplicemente un attacco di iniezione di processo). E queste informazioni sensibili potrebbero trovarsi in app scaricate dall'utente come MacPass.
 
 Quindi il vettore dell'attaccante sarebbe quello di trovare una vulnerabilità o rimuovere la firma dell'applicazione, iniettare la variabile di ambiente **`DYLD_INSERT_LIBRARIES`** attraverso l'Info.plist dell'applicazione aggiungendo qualcosa come:
 ```xml

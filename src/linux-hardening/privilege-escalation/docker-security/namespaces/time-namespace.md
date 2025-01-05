@@ -4,7 +4,7 @@
 
 ## Informazioni di base
 
-Il time namespace in Linux consente offset per namespace sugli orologi monotoni e di avvio del sistema. È comunemente usato nei contenitori Linux per modificare la data/ora all'interno di un contenitore e regolare gli orologi dopo il ripristino da un checkpoint o snapshot.
+Il time namespace in Linux consente offset per namespace sugli orologi monotoni e di avvio del sistema. È comunemente usato nei container Linux per modificare la data/ora all'interno di un container e regolare gli orologi dopo il ripristino da un checkpoint o snapshot.
 
 ## Lab:
 
@@ -20,9 +20,9 @@ Montando una nuova istanza del filesystem `/proc` se utilizzi il parametro `--mo
 
 <summary>Errore: bash: fork: Impossibile allocare memoria</summary>
 
-Quando `unshare` viene eseguito senza l'opzione `-f`, si verifica un errore a causa del modo in cui Linux gestisce i nuovi namespace PID (Process ID). I dettagli chiave e la soluzione sono delineati di seguito:
+Quando `unshare` viene eseguito senza l'opzione `-f`, si incontra un errore a causa del modo in cui Linux gestisce i nuovi namespace PID (Process ID). I dettagli chiave e la soluzione sono delineati di seguito:
 
-1. **Spiegazione del problema**:
+1. **Spiegazione del Problema**:
 
 - Il kernel Linux consente a un processo di creare nuovi namespace utilizzando la chiamata di sistema `unshare`. Tuttavia, il processo che avvia la creazione di un nuovo namespace PID (denominato processo "unshare") non entra nel nuovo namespace; solo i suoi processi figli lo fanno.
 - Eseguire `%unshare -p /bin/bash%` avvia `/bin/bash` nello stesso processo di `unshare`. Di conseguenza, `/bin/bash` e i suoi processi figli si trovano nel namespace PID originale.
@@ -34,7 +34,7 @@ Quando `unshare` viene eseguito senza l'opzione `-f`, si verifica un errore a ca
 
 3. **Soluzione**:
 - Il problema può essere risolto utilizzando l'opzione `-f` con `unshare`. Questa opzione fa sì che `unshare` fork un nuovo processo dopo aver creato il nuovo namespace PID.
-- Eseguire `%unshare -fp /bin/bash%` garantisce che il comando `unshare` stesso diventi PID 1 nel nuovo namespace. `/bin/bash` e i suoi processi figli sono quindi contenuti in modo sicuro all'interno di questo nuovo namespace, prevenendo l'uscita prematura di PID 1 e consentendo l'allocazione normale dei PID.
+- Eseguire `%unshare -fp /bin/bash%` garantisce che il comando `unshare` stesso diventi PID 1 nel nuovo namespace. `/bin/bash` e i suoi processi figli sono quindi contenuti in modo sicuro all'interno di questo nuovo namespace, prevenendo l'uscita prematura di PID 1 e consentendo una normale allocazione PID.
 
 Assicurandoti che `unshare` venga eseguito con il flag `-f`, il nuovo namespace PID viene mantenuto correttamente, consentendo a `/bin/bash` e ai suoi subprocessi di operare senza incontrare l'errore di allocazione della memoria.
 
@@ -44,7 +44,7 @@ Assicurandoti che `unshare` venga eseguito con il flag `-f`, il nuovo namespace 
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-### &#x20;Controlla in quale namespace si trova il tuo processo
+### Controlla in quale namespace si trova il tuo processo
 ```bash
 ls -l /proc/self/ns/time
 lrwxrwxrwx 1 root root 0 Apr  4 21:16 /proc/self/ns/time -> 'time:[4026531834]'
