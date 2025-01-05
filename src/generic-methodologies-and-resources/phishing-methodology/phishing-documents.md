@@ -1,16 +1,16 @@
-# Phishing Lêers & Dokumente
+# Phishing Files & Documents
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Kantoor Dokumente
+## Office Documents
 
-Microsoft Word voer lêerdata validasie uit voordat 'n lêer geopen word. Data validasie word uitgevoer in die vorm van data struktuur identifikasie, teen die OfficeOpenXML standaard. As enige fout voorkom tydens die data struktuur identifikasie, sal die lêer wat geanaliseer word nie geopen word nie.
+Microsoft Word voer lêerdata-validasie uit voordat 'n lêer geopen word. Data-validasie word uitgevoer in die vorm van data-struktuuridentifikasie, teen die OfficeOpenXML-standaard. As daar enige fout voorkom tydens die data-struktuuridentifikasie, sal die lêer wat geanaliseer word nie geopen word nie.
 
-Gewoonlik gebruik Word-lêers wat makros bevat die `.docm` uitbreiding. Dit is egter moontlik om die lêer te hernoem deur die lêer uitbreiding te verander en steeds hul makro uitvoeringsvermoëns te behou.\
-Byvoorbeeld, 'n RTF-lêer ondersteun nie makros nie, volgens ontwerp, maar 'n DOCM-lêer wat na RTF hernoem is, sal deur Microsoft Word hanteer word en sal in staat wees om makro-uitvoering te doen.\
-Die dieselfde interne en meganismes geld vir alle sagteware van die Microsoft Office Suite (Excel, PowerPoint ens.).
+Gewoonlik gebruik Word-lêers wat makros bevat die `.docm` uitbreiding. Dit is egter moontlik om die lêer te hernoem deur die lêeruitbreiding te verander en steeds hul makro-uitvoeringsvermoëns te behou.\
+Byvoorbeeld, 'n RTF-lêer ondersteun nie makros nie, volgens ontwerp, maar 'n DOCM-lêer wat na RTF hernoem is, sal deur Microsoft Word hanteer word en sal in staat wees om makros uit te voer.\
+Die dieselfde interne meganismes geld vir alle sagteware van die Microsoft Office Suite (Excel, PowerPoint, ens.).
 
-Jy kan die volgende opdrag gebruik om te kyk watter uitbreidings deur sommige Kantoorprogramme uitgevoer gaan word:
+Jy kan die volgende opdrag gebruik om te kyk watter uitbreidings deur sommige Office-programme uitgevoer gaan word:
 ```bash
 assoc | findstr /i "word excel powerp"
 ```
@@ -18,8 +18,8 @@ DOCX-lêers wat 'n afstandsjabloon verwys (Lêer – Opsies – Byvoegings – B
 
 ### Eksterne Beeld Laai
 
-Gaan na: _Voeg in --> Vinne Teile --> Veld_\
-&#xNAN;_**Kategoriene**: Skakels en Verwysings, **Veldname**: includePicture, en **Lêernaam of URL**:_ http://\<ip>/whatever
+Gaan na: _Invoeg --> Vinne Teile --> Veld_\
+_**Kategoriene**: Skakels en Verwysings, **Veldname**: includePicture, en **Lêernaam of URL**:_ http://\<ip>/whatever
 
 ![](<../../images/image (155).png>)
 
@@ -81,7 +81,7 @@ Doen dit omdat jy **nie makro's binne 'n `.docx` kan stoor nie** en daar is 'n *
 
 ## HTA Lêers
 
-'n HTA is 'n Windows-program wat **HTML en skriptaal (soos VBScript en JScript)** kombineer. Dit genereer die gebruikerskoppelvlak en voer uit as 'n "volledig vertroude" toepassing, sonder die beperkings van 'n blaaiert se sekuriteitsmodel.
+'n HTA is 'n Windows-program wat **HTML en skripting tale (soos VBScript en JScript)** kombineer. Dit genereer die gebruikerskoppelvlak en voer uit as 'n "volledig vertroude" toepassing, sonder die beperkings van 'n blaaiers sekuriteitsmodel.
 
 'n HTA word uitgevoer met **`mshta.exe`**, wat tipies **geïnstalleer** word saam met **Internet Explorer**, wat **`mshta` afhanklik maak van IE**. So as dit verwyder is, sal HTA's nie in staat wees om uit te voer nie.
 ```html
@@ -140,7 +140,7 @@ self.close
 ```
 ## Dwing NTLM-outekenning
 
-Daar is verskeie maniere om **NTLM-outekenning "op afstand" te dwing**, byvoorbeeld, jy kan **on sigbare beelde** by e-posse of HTML voeg wat die gebruiker sal toegang hê tot (selfs HTTP MitM?). Of stuur die slagoffer die **adres van lêers** wat 'n **outekenning** net vir **die opening van die gids** sal **aktiveer**.
+Daar is verskeie maniere om **NTLM-outekenning "afgeleë"** te **dwing**, byvoorbeeld, jy kan **on sigbare beelde** by e-posse of HTML voeg wat die gebruiker sal toegang hê tot (selfs HTTP MitM?). Of stuur die slagoffer die **adres van lêers** wat 'n **outekenning** net vir **die oopmaak van die gids** sal **aktiveer**.
 
 **Kyk na hierdie idees en meer op die volgende bladsye:**
 
