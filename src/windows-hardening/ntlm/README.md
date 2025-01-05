@@ -6,13 +6,13 @@
 
 在运行 **Windows XP 和 Server 2003** 的环境中，使用 LM (Lan Manager) 哈希，尽管广泛认为这些哈希容易被攻破。特定的 LM 哈希 `AAD3B435B51404EEAAD3B435B51404EE` 表示未使用 LM，代表一个空字符串的哈希。
 
-默认情况下，**Kerberos** 认证协议是主要使用的方法。NTLM (NT LAN Manager) 在特定情况下介入：缺少 Active Directory、域不存在、由于配置不当导致 Kerberos 故障，或当尝试使用 IP 地址而不是有效主机名进行连接时。
+默认情况下，**Kerberos** 认证协议是主要使用的方法。NTLM (NT LAN Manager) 在特定情况下介入：缺少 Active Directory、域不存在、由于配置不当导致 Kerberos 故障，或在尝试使用 IP 地址而非有效主机名进行连接时。
 
 网络数据包中存在 **"NTLMSSP"** 头部信号表示 NTLM 认证过程。
 
 对认证协议 - LM、NTLMv1 和 NTLMv2 - 的支持由位于 `%windir%\Windows\System32\msv1\_0.dll` 的特定 DLL 提供。
 
-**要点**：
+**关键点**：
 
 - LM 哈希易受攻击，空 LM 哈希 (`AAD3B435B51404EEAAD3B435B51404EE`) 表示未使用。
 - Kerberos 是默认认证方法，NTLM 仅在特定条件下使用。
@@ -75,17 +75,17 @@ reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa\ /v lmcompatibilitylevel /t RE
 
 ### NTLMv1 攻击
 
-如今，发现配置了不受约束委派的环境变得越来越少，但这并不意味着您不能 **滥用配置的打印后台处理程序服务**。
+如今，发现配置了不受限制委派的环境变得越来越少，但这并不意味着您不能 **滥用配置的打印后台处理程序服务**。
 
-您可以滥用您在 AD 上已经拥有的一些凭据/会话，**请求打印机对某个您控制的主机进行身份验证**。然后，使用 `metasploit auxiliary/server/capture/smb` 或 `responder`，您可以 **将身份验证挑战设置为 1122334455667788**，捕获身份验证尝试，如果使用 **NTLMv1** 进行身份验证，您将能够 **破解它**。\
-如果您使用 `responder`，您可以尝试 \*\*使用标志 `--lm` \*\* 来尝试 **降级** **身份验证**。\
-&#xNAN;_&#x4E;注意，对于此技术，身份验证必须使用 NTLMv1 进行（NTLMv2 无效）。_
+您可以滥用您在 AD 上已经拥有的一些凭据/会话，**请求打印机对某个您控制的主机进行身份验证**。然后，使用 `metasploit auxiliary/server/capture/smb` 或 `responder`，您可以 **将认证挑战设置为 1122334455667788**，捕获认证尝试，如果使用 **NTLMv1** 进行，您将能够 **破解它**。\
+如果您使用 `responder`，您可以尝试 **使用标志 `--lm`** 来尝试 **降级** **认证**。\
+_请注意，对于此技术，认证必须使用 NTLMv1 进行（NTLMv2 无效）。_
 
-请记住，打印机在身份验证期间将使用计算机帐户，而计算机帐户使用 **长且随机的密码**，您 **可能无法使用常见的字典破解**。但是 **NTLMv1** 身份验证 **使用 DES** ([更多信息在这里](#ntlmv1-challenge))，因此使用一些专门用于破解 DES 的服务，您将能够破解它（例如，您可以使用 [https://crack.sh/](https://crack.sh) 或 [https://ntlmv1.com/](https://ntlmv1.com)）。
+请记住，打印机在认证期间将使用计算机帐户，而计算机帐户使用 **长且随机的密码**，您 **可能无法使用常见的字典破解**。但是 **NTLMv1** 认证 **使用 DES**（[更多信息在这里](#ntlmv1-challenge)），因此使用一些专门用于破解 DES 的服务，您将能够破解它（例如，您可以使用 [https://crack.sh/](https://crack.sh) 或 [https://ntlmv1.com/](https://ntlmv1.com)）。
 
 ### 使用 hashcat 的 NTLMv1 攻击
 
-NTLMv1 也可以通过 NTLMv1 Multi Tool [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi) 破解，该工具以可以通过 hashcat 破解的方式格式化 NTLMv1 消息。
+NTLMv1 也可以通过 NTLMv1 多工具 [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi) 破解，该工具以可以被 hashcat 破解的方式格式化 NTLMv1 消息。
 
 命令
 ```bash
@@ -155,7 +155,7 @@ NTHASH=b4b9b02e6f09a9bd760f388b6700586c
 ```
 ### NTLMv2 挑战
 
-**挑战长度为 8 字节**，并且**发送 2 个响应**：一个是**24 字节**长，**另一个**的长度是**可变**的。
+**挑战长度为 8 字节**，并且**发送 2 个响应**：一个是**24 字节**长，另一个的长度是**可变**的。
 
 **第一个响应**是通过使用**HMAC_MD5**对由**客户端和域**组成的**字符串**进行加密，并使用**NT hash**的**MD4 哈希**作为**密钥**来创建的。然后，**结果**将用作**密钥**，通过**HMAC_MD5**对**挑战**进行加密。为此，将**添加一个 8 字节的客户端挑战**。总计：24 B。
 
@@ -180,7 +180,7 @@ Invoke-Mimikatz -Command '"sekurlsa::pth /user:username /domain:domain.tld /ntlm
 
 ### 从 Linux 进行 Pass-the-Hash
 
-您可以使用 Linux 从 Windows 机器中获得代码执行。\
+您可以使用 Linux 从 Windows 机器上获得代码执行。\
 [**访问此处了解如何操作。**](https://github.com/carlospolop/hacktricks/blob/master/windows/ntlm/broken-reference/README.md)
 
 ### Impacket Windows 编译工具
@@ -214,7 +214,7 @@ Invoke-SMBEnum -Domain dollarcorp.moneycorp.local -Username svcadmin -Hash b38ff
 ```
 #### Invoke-TheHash
 
-这个功能是**所有其他功能的混合**。您可以传递**多个主机**，**排除**某些主机，并**选择**您想要使用的**选项**（_SMBExec, WMIExec, SMBClient, SMBEnum_）。如果您选择**任何**的**SMBExec**和**WMIExec**但您**没有**提供任何_**Command**_参数，它将仅仅**检查**您是否拥有**足够的权限**。
+这个函数是**所有其他函数的混合**。您可以传递**多个主机**，**排除**某些主机，并**选择**您想要使用的**选项**（_SMBExec, WMIExec, SMBClient, SMBEnum_）。如果您选择**任何**的**SMBExec**和**WMIExec**但**不**提供任何_**Command**_参数，它将仅仅**检查**您是否拥有**足够的权限**。
 ```
 Invoke-TheHash -Type WMIExec -Target 192.168.100.0/24 -TargetExclude 192.168.100.50 -Username Administ -ty    h F6F38B793DB6A94BA04A52F1D3EE92F0
 ```

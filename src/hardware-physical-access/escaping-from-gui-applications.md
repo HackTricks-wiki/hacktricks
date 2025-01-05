@@ -8,7 +8,7 @@
 
 | 组件         | 操作                                                               |
 | ------------ | ------------------------------------------------------------------ |
-| 电源按钮     | 关闭并重新打开设备可能会显示启动屏幕                               |
+| 电源按钮     | 关闭设备并重新打开可能会显示启动屏幕                               |
 | 电源线       | 检查设备在短暂断电时是否重新启动                                   |
 | USB端口      | 连接物理键盘以使用更多快捷键                                       |
 | 以太网       | 网络扫描或嗅探可能会启用进一步的利用                                 |
@@ -18,7 +18,7 @@
 **常见对话框**是那些**保存文件**、**打开文件**、选择字体、颜色等选项。大多数情况下，它们将**提供完整的资源管理器功能**。这意味着如果您可以访问这些选项，您将能够访问资源管理器功能：
 
 - 关闭/另存为
-- 打开/用...打开
+- 打开/使用打开
 - 打印
 - 导出/导入
 - 搜索
@@ -33,7 +33,7 @@
 
 ### 命令执行
 
-也许**使用`用...打开`**选项，您可以打开/执行某种shell。
+也许**使用`Open with`选项**您可以打开/执行某种shell。
 
 #### Windows
 
@@ -48,11 +48,11 @@ _bash, sh, zsh..._ 更多信息请见：[https://gtfobins.github.io/](https://gt
 ### 绕过路径限制
 
 - **环境变量**：有很多环境变量指向某个路径
-- **其他协议**： _about:, data:, ftp:, file:, mailto:, news:, res:, telnet:, view-source:_
+- **其他协议**：_about:, data:, ftp:, file:, mailto:, news:, res:, telnet:, view-source:_
 - **符号链接**
-- **快捷方式**： CTRL+N（打开新会话），CTRL+R（执行命令），CTRL+SHIFT+ESC（任务管理器），Windows+E（打开资源管理器），CTRL-B，CTRL-I（收藏夹），CTRL-H（历史记录），CTRL-L，CTRL-O（文件/打开对话框），CTRL-P（打印对话框），CTRL-S（另存为）
+- **快捷方式**：CTRL+N（打开新会话），CTRL+R（执行命令），CTRL+SHIFT+ESC（任务管理器），Windows+E（打开资源管理器），CTRL-B，CTRL-I（收藏夹），CTRL-H（历史记录），CTRL-L，CTRL-O（文件/打开对话框），CTRL-P（打印对话框），CTRL-S（另存为）
 - 隐藏的管理菜单：CTRL-ALT-F8，CTRL-ESC-F9
-- **Shell URI**： _shell:Administrative Tools, shell:DocumentsLibrary, shell:Librariesshell:UserProfiles, shell:Personal, shell:SearchHomeFolder, shell:Systemshell:NetworkPlacesFolder, shell:SendTo, shell:UsersProfiles, shell:Common Administrative Tools, shell:MyComputerFolder, shell:InternetFolder_
+- **Shell URIs**：_shell:Administrative Tools, shell:DocumentsLibrary, shell:Librariesshell:UserProfiles, shell:Personal, shell:SearchHomeFolder, shell:Systemshell:NetworkPlacesFolder, shell:SendTo, shell:UsersProfiles, shell:Common Administrative Tools, shell:MyComputerFolder, shell:InternetFolder_
 - **UNC路径**：连接到共享文件夹的路径。您应该尝试连接到本地计算机的C$（"\\\127.0.0.1\c$\Windows\System32"）
 - **更多UNC路径：**
 
@@ -111,18 +111,18 @@ _bash, sh, zsh..._ 更多信息请见：[https://gtfobins.github.io/](https://gt
 - CTRL+O – 打开文件
 - CTRL+S – 保存 CTRL+N – 新RDP / Citrix
 
-### 滑动
+### 滑动操作
 
 - 从左侧向右滑动以查看所有打开的窗口，最小化KIOSK应用程序并直接访问整个操作系统；
 - 从右侧向左滑动以打开操作中心，最小化KIOSK应用程序并直接访问整个操作系统；
-- 从顶部边缘向下滑动以使全屏模式下的应用程序的标题栏可见；
+- 从顶部边缘向下滑动以使全屏模式下的应用程序标题栏可见；
 - 从底部向上滑动以在全屏应用程序中显示任务栏。
 
 ### Internet Explorer技巧
 
 #### '图像工具栏'
 
-这是一个在图像左上角点击时出现的工具栏。您将能够保存、打印、发送邮件、在资源管理器中打开“我的图片”。Kiosk需要使用Internet Explorer。
+这是一个在点击图像时出现在左上角的工具栏。您将能够保存、打印、发送邮件、在资源管理器中打开“我的图片”。Kiosk需要使用Internet Explorer。
 
 #### Shell协议
 
@@ -159,7 +159,7 @@ _bash, sh, zsh..._ 更多信息请见：[https://gtfobins.github.io/](https://gt
 备份iKat版本：
 
 [http://swin.es/k/](http://swin.es/k/)\
-[http://www.ikat.kronicd.net/](http://www.ikat.kronicd.net)\\
+[http://www.ikat.kronicd.net/](http://www.ikat.kronicd.net)
 
 使用JavaScript创建一个通用对话框并访问文件资源管理器：`document.write('<input/type=file>')`\
 来源：https://medium.com/@Rend\_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
@@ -168,17 +168,17 @@ _bash, sh, zsh..._ 更多信息请见：[https://gtfobins.github.io/](https://gt
 
 ### 手势和按钮
 
-- 用四（或五）个手指向上滑动 / 双击Home按钮：查看多任务视图并切换应用
-- 用四（或五）个手指向一侧滑动：以切换到下一个/上一个应用
-- 用五个手指捏合屏幕 / 按下Home按钮 / 用1个手指快速从屏幕底部向上滑动：访问主屏幕
+- 用四个（或五个）手指向上滑动 / 双击Home按钮：查看多任务视图并切换应用
+- 用四个或五个手指向一侧滑动：以切换到下一个/上一个应用
+- 用五个手指捏合屏幕 / 按下Home按钮 / 用1个手指从屏幕底部快速向上滑动：访问主屏幕
 - 用1个手指从屏幕底部滑动1-2英寸（慢）：停靠栏将出现
 - 用1个手指从显示器顶部向下滑动：查看通知
 - 用1个手指从屏幕右上角向下滑动：查看iPad Pro的控制中心
 - 用1个手指从屏幕左侧滑动1-2英寸：查看今日视图
 - 用1个手指从屏幕中心快速向右或向左滑动：切换到下一个/上一个应用
-- 按住右上角的开/关/睡眠按钮 + 将滑块移动到右侧以**关闭电源**：关闭电源
-- 按住右上角的开/关/睡眠按钮和Home按钮几秒钟：强制硬关机
-- 快速按下右上角的开/关/睡眠按钮和Home按钮：截屏，截屏将出现在显示器左下角。按下两个按钮非常短暂地同时按下，如果按住几秒钟将执行硬关机。
+- 按住**iPad +**右上角的开/关/睡眠按钮，向右滑动**关机**滑块：关机
+- 按住**iPad**右上角的开/关/睡眠按钮和Home按钮几秒钟：强制硬关机
+- 快速按下**iPad**右上角的开/关/睡眠按钮和Home按钮：截屏，截屏将弹出在显示器左下角。按下两个按钮非常短暂地同时按下，如果按住几秒钟将执行硬关机。
 
 ### 快捷键
 
@@ -205,13 +205,13 @@ _bash, sh, zsh..._ 更多信息请见：[https://gtfobins.github.io/](https://gt
 | -------- | ------------------------------------------------------------------------------ |
 | F1       | 调暗屏幕                                                                    |
 | F2       | 提亮屏幕                                                                    |
-| F7       | 返回一首歌曲                                                                  |
+| F7       | 回到上一首歌曲                                                              |
 | F8       | 播放/暂停                                                                     |
-| F9       | 跳过歌曲                                                                      |
-| F10      | 静音                                                                           |
-| F11      | 降低音量                                                                      |
-| F12      | 增加音量                                                                      |
-| ⌘ 空格  | 显示可用语言列表；要选择一种，请再次按空格键。                             |
+| F9       | 跳过歌曲                                                                    |
+| F10      | 静音                                                                         |
+| F11      | 降低音量                                                                    |
+| F12      | 增加音量                                                                    |
+| ⌘ Space  | 显示可用语言列表；要选择一种，请再次按空格键。                             |
 
 #### iPad导航
 
@@ -219,14 +219,14 @@ _bash, sh, zsh..._ 更多信息请见：[https://gtfobins.github.io/](https://gt
 | -------------------------------------------------- | ------------------------------------------------------- |
 | ⌘H                                                 | 返回主屏幕                                            |
 | ⌘⇧H (Command-Shift-H)                              | 返回主屏幕                                            |
-| ⌘ (空格)                                          | 打开Spotlight                                          |
+| ⌘ (Space)                                          | 打开Spotlight                                          |
 | ⌘⇥ (Command-Tab)                                   | 列出最近使用的十个应用                                 |
-| ⌘\~                                                | 返回上一个应用                                       |
+| ⌘\~                                                | 返回上一个应用                                        |
 | ⌘⇧3 (Command-Shift-3)                              | 截屏（悬停在左下角以保存或操作）                      |
-| ⌘⇧4                                                | 截屏并在编辑器中打开                                   |
+| ⌘⇧4                                                | 截屏并在编辑器中打开                                  |
 | 按住⌘                                             | 列出可用于该应用的快捷键                             |
-| ⌘⌥D (Command-Option/Alt-D)                         | 打开停靠栏                                          |
-| ^⌥H (Control-Option-H)                             | 主屏幕按钮                                             |
+| ⌘⌥D (Command-Option/Alt-D)                         | 打开停靠栏                                            |
+| ^⌥H (Control-Option-H)                             | 主按钮                                               |
 | ^⌥H H (Control-Option-H-H)                         | 显示多任务栏                                          |
 | ^⌥I (Control-Option-i)                             | 项目选择器                                            |
 | Escape                                             | 返回按钮                                             |
@@ -239,7 +239,7 @@ _bash, sh, zsh..._ 更多信息请见：[https://gtfobins.github.io/](https://gt
 | ^⌥S (Control-Option-S)                             | 开启或关闭VoiceOver语音                             |
 | ⌘⇧⇥ (Command-Shift-Tab)                            | 切换到上一个应用                                     |
 | ⌘⇥ (Command-Tab)                                   | 切换回原始应用                                       |
-| ←+→，然后Option + ←或Option+→                     | 在Dock中导航                                        |
+| ←+→，然后Option + ←或Option+→                     | 在Dock中导航                                         |
 
 #### Safari快捷键
 
@@ -266,8 +266,8 @@ _bash, sh, zsh..._ 更多信息请见：[https://gtfobins.github.io/](https://gt
 | ⌘T                       | 打开新标签                |
 | ⌘W                       | 关闭当前标签              |
 | ⌘R                       | 刷新当前标签              |
-| ⌘.                       | 停止加载当前标签         |
-| ⌘⌥F (Command-Option/Alt-F) | 在邮箱中搜索            |
+| ⌘.                       | 停止加载当前标签          |
+| ⌘⌥F (Command-Option/Alt-F) | 在您的邮箱中搜索        |
 
 ## 参考文献
 
